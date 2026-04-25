@@ -107,13 +107,9 @@ export function Toolbar({ onOpen, onSave, onNew, onCommandPalette, onPasteText }
 
   return (
     <header className="titlebar">
-      {/* ─── Left: Logo + Settings ─── */}
-      <button
-        className="icon-btn"
-        onClick={onCommandPalette}
-        title={`${t("toolbar.settings")} (⌘K)`}
-        aria-label={t("toolbar.settings")}
-        style={{ gap: 6, padding: "0 10px", width: "auto" }}
+      {/* ─── Left: Logo (brand only) ─── */}
+      <div
+        style={{ display: "flex", alignItems: "center", gap: 6, padding: "0 10px", flexShrink: 0 }}
       >
         <div
           aria-hidden
@@ -134,10 +130,10 @@ export function Toolbar({ onOpen, onSave, onNew, onCommandPalette, onPasteText }
         >
           L
         </div>
-        <span style={{ fontSize: 11, color: "hsl(var(--fg-muted))", whiteSpace: "nowrap" }}>
-          {t("toolbar.settings")}
+        <span style={{ fontSize: 12, fontWeight: 600, color: "hsl(var(--fg))", whiteSpace: "nowrap" }}>
+          Lumen
         </span>
-      </button>
+      </div>
 
       <div className="w-px h-5 bg-[hsl(var(--border))] mx-1" />
 
