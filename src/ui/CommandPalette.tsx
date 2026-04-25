@@ -47,16 +47,26 @@ interface Props {
 export function CommandPalette({ open, onClose, commands }: Props) {
   const [query, setQuery] = useState("");
   const [active, setActive] = useState(0);
+  const [tab, setTab] = useState<"main" | "advanced" | "all">("main");
   const inputRef = useRef<HTMLInputElement | null>(null);
   const listRef = useRef<HTMLDivElement | null>(null);
   const dialogRef = useRef<HTMLDivElement | null>(null);
   const previousFocusRef = useRef<Element | null>(null);
+
+  // Groups that belong to the "Main" tab
+  const MAIN_GROUPS = new Set([
+    t("group.file"), "File", "file",
+    t("group.view"), "View", "view",
+    t("group.edit"), "Edit", "edit",
+    undefined, // commands with no group
+  ]);
 
   useEffect(() => {
     if (open) {
       previousFocusRef.current = document.activeElement;
       setQuery("");
       setActive(0);
+      setTab("main");
       // focus next tick so React renders the input first
       setTimeout(() => inputRef.current?.focus(), 0);
     } else {
@@ -90,13 +100,27 @@ export function CommandPalette({ open, onClose, commands }: Props) {
   }, [open]);
 
   const filtered = useMemo(() => {
+    let list = commands;
     const q = query.trim().toLowerCase();
-    if (!q) return commands;
-    return commands.filter((c) => {
-      const haystack = `${c.label} ${c.hint ?? ""} ${c.group ?? ""}`.toLowerCase();
-      return haystack.includes(q);
-    });
-  }, [query, commands]);
+
+    // If searching, search across ALL commands
+    if (q) {
+      return list.filter((c) => {
+        const haystack = `${c.label} ${c.hint ?? ""} ${c.group ?? ""}`.toLowerCase();
+        return haystack.includes(q);
+      });
+    }
+
+    // Otherwise filter by tab
+    if (tab === "main") {
+      list = list.filter((c) => MAIN_GROUPS.has(c.group));
+    } else if (tab === "advanced") {
+      list = list.filter((c) => !MAIN_GROUPS.has(c.group));
+    }
+    // "all" shows everything
+
+    return list;
+  }, [query, commands, tab]);
 
   useEffect(() => {
     if (active >= filtered.length) setActive(0);
@@ -134,6 +158,12 @@ export function CommandPalette({ open, onClose, commands }: Props) {
 
   if (!open) return null;
 
+  const TABS: { key: "main" | "advanced" | "all"; label: string; emoji: string }[] = [
+    { key: "main", label: "Main", emoji: "📁" },
+    { key: "advanced", label: "Advanced", emoji: "⚡" },
+    { key: "all", label: "All", emoji: "🔍" },
+  ];
+
   return (
     <div
       className="cmd-palette-backdrop"
@@ -161,6 +191,38 @@ export function CommandPalette({ open, onClose, commands }: Props) {
             spellCheck={false}
           />
         </div>
+
+        {/* ─── Category Tabs ─── */}
+        {!query.trim() && (
+          <div style={{
+            display: "flex",
+            gap: 2,
+            padding: "4px 8px",
+            borderBottom: "1px solid hsl(var(--border))",
+          }}>
+            {TABS.map((t) => (
+              <button
+                key={t.key}
+                onClick={() => { setTab(t.key); setActive(0); }}
+                style={{
+                  flex: 1,
+                  padding: "5px 8px",
+                  borderRadius: 6,
+                  border: "none",
+                  cursor: "pointer",
+                  fontSize: 11,
+                  fontWeight: tab === t.key ? 600 : 400,
+                  background: tab === t.key ? "hsl(var(--accent) / 0.15)" : "transparent",
+                  color: tab === t.key ? "hsl(var(--accent))" : "hsl(var(--fg-muted))",
+                  transition: "all 150ms ease",
+                }}
+              >
+                {t.emoji} {t.label}
+              </button>
+            ))}
+          </div>
+        )}
+
         <div className="cmd-palette-list" ref={listRef} id="cmd-listbox" role="listbox">
           {filtered.length === 0 && (
             <div className="cmd-palette-empty">{t("palette.noMatch")}</div>
