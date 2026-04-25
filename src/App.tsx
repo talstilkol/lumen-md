@@ -12,6 +12,7 @@ import { SearchReplace } from "./ui/SearchReplace";
 import { GraphView } from "./ui/GraphView";
 import { VersionHistory, saveSnapshot } from "./ui/VersionHistory";
 import { MarkdownTableEditor } from "./ui/MarkdownTableEditor";
+import { TEMPLATES } from "./editor/templates";
 import { CommandPalette, cmdIcons } from "./ui/CommandPalette";
 import type { Command } from "./ui/CommandPalette";
 import { FileTree } from "./ui/FileTree";
@@ -735,21 +736,17 @@ export default function App() {
         group: t("group.view"),
         action: toggleAutoSave,
       },
-      ...(() => {
-        // Lazy import templates
-        const { TEMPLATES } = require("./editor/templates");
-        return (TEMPLATES as { id: string; name: string; description: string; category: string; content: string }[]).map((tpl) => ({
-          id: `template.${tpl.id}`,
-          label: `Template: ${tpl.name}`,
-          hint: tpl.category,
-          icon: cmdIcons.FileText,
-          group: "Templates",
-          action: () => {
-            setContent(tpl.content);
-            setDoc({ name: `${tpl.name}.md`, dirty: true });
-          },
-        }));
-      })(),
+      ...TEMPLATES.map((tpl) => ({
+        id: `template.${tpl.id}`,
+        label: `Template: ${tpl.name}`,
+        hint: tpl.category,
+        icon: cmdIcons.FileText,
+        group: "Templates",
+        action: () => {
+          setContent(tpl.content);
+          setDoc({ name: `${tpl.name}.md`, dirty: true });
+        },
+      })),
       // ── AI Capabilities ──────────────────────────────────────────────────
       buildAiSettingsCommand(),
       // ── Git ─────────────────────────────────────────────────────────────
