@@ -1,37 +1,49 @@
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Preview } from "../renderer/Preview";
 
 /**
  * Word-style paginated page view with page numbers and navigation.
- * Wraps the Preview component's rendered content into A4-like pages.
+ * Renders markdown as A4-like pages with page numbers.
  */
 
 const PAGE_HEIGHT = 1056; // A4 at 96dpi ~ 1056px
 const PAGE_WIDTH = 816; // A4 width at 96dpi
+const PAGE_PADDING = 72; // 1-inch margins
+const CONTENT_HEIGHT = PAGE_HEIGHT - PAGE_PADDING * 2; // = 912px
 
 interface Props {
-  children: React.ReactNode;
-  totalContentHeight: number;
-  onPageChange?: (page: number, total: number) => void;
+  markdownText: string;
 }
 
-export function PageView({ children, totalContentHeight, onPageChange }: Props) {
-  const totalPages = Math.max(1, Math.ceil(totalContentHeight / PAGE_HEIGHT));
+export function PageView({ markdownText }: Props) {
   const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   const containerRef = useRef<HTMLDivElement>(null);
+  const measuringRef = useRef<HTMLDivElement>(null);
+
+  // Measure content height to determine page count
+  useEffect(() => {
+    if (!measuringRef.current) return;
+    const observer = new ResizeObserver(() => {
+      const height = measuringRef.current?.scrollHeight ?? 0;
+      setTotalPages(Math.max(1, Math.ceil(height / CONTENT_HEIGHT)));
+    });
+    observer.observe(measuringRef.current);
+    return () => observer.disconnect();
+  }, [markdownText]);
 
   const goToPage = useCallback(
     (page: number) => {
       const clamped = Math.max(1, Math.min(totalPages, page));
       setCurrentPage(clamped);
-      onPageChange?.(clamped, totalPages);
       if (containerRef.current) {
         containerRef.current.scrollTo({
-          top: (clamped - 1) * (PAGE_HEIGHT + 40), // 40px gap between pages
+          top: (clamped - 1) * (PAGE_HEIGHT + 40),
           behavior: "smooth",
         });
       }
     },
-    [totalPages, onPageChange],
+    [totalPages],
   );
 
   const pageNumbers = useMemo(() => {
@@ -102,6 +114,19 @@ export function PageView({ children, totalContentHeight, onPageChange }: Props) 
         </button>
       </div>
 
+      {/* Hidden measuring div */}
+      <div
+        ref={measuringRef}
+        style={{
+          position: "absolute",
+          visibility: "hidden",
+          width: PAGE_WIDTH - PAGE_PADDING * 2,
+          pointerEvents: "none",
+        }}
+      >
+        <Preview markdownText={markdownText} />
+      </div>
+
       {/* Page container */}
       <div
         ref={containerRef}
@@ -112,7 +137,6 @@ export function PageView({ children, totalContentHeight, onPageChange }: Props) 
           const clamped = Math.max(1, Math.min(totalPages, page));
           if (clamped !== currentPage) {
             setCurrentPage(clamped);
-            onPageChange?.(clamped, totalPages);
           }
         }}
         style={{
@@ -133,7 +157,7 @@ export function PageView({ children, totalContentHeight, onPageChange }: Props) 
               background: "hsl(var(--bg))",
               boxShadow: "0 2px 12px hsl(0 0% 0% / 0.15), 0 0 0 1px hsl(var(--border) / 0.3)",
               borderRadius: 2,
-              padding: "72px 72px 72px 72px",
+              padding: PAGE_PADDING,
               position: "relative",
               overflow: "hidden",
             }}
@@ -142,19 +166,19 @@ export function PageView({ children, totalContentHeight, onPageChange }: Props) 
             <div
               style={{
                 position: "absolute",
-                top: 72,
-                left: 72,
-                right: 72,
-                bottom: 72,
+                top: PAGE_PADDING,
+                left: PAGE_PADDING,
+                right: PAGE_PADDING,
+                bottom: PAGE_PADDING,
                 overflow: "hidden",
               }}
             >
               <div
                 style={{
-                  transform: `translateY(-${(pageNum - 1) * (PAGE_HEIGHT - 144)}px)`,
+                  transform: `translateY(-${(pageNum - 1) * CONTENT_HEIGHT}px)`,
                 }}
               >
-                {children}
+                <Preview markdownText={markdownText} />
               </div>
             </div>
 

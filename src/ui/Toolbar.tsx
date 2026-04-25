@@ -83,6 +83,8 @@ export function Toolbar({ onOpen, onSave, onNew, onCommandPalette, onPasteText }
   const toggleRtl = useAppStore((s) => s.toggleRtl);
   const syncScroll = useAppStore((s) => s.syncScroll);
   const toggleSyncScroll = useAppStore((s) => s.toggleSyncScroll);
+  const pageView = useAppStore((s) => s.pageView);
+  const togglePageView = useAppStore((s) => s.togglePageView);
 
   const isDark = document.documentElement.classList.contains("dark");
 
@@ -242,6 +244,11 @@ export function Toolbar({ onOpen, onSave, onNew, onCommandPalette, onPasteText }
                 icon={<Columns2 size={13} />}
                 label={syncScroll === "all" ? "Scroll: Linked (all panes)" : "Scroll: Independent"}
                 onClick={() => { toggleSyncScroll(); }}
+              />
+              <MenuItem
+                icon={<Eye size={13} />}
+                label={pageView ? "📄 Page View: ON" : "📄 Page View: OFF"}
+                onClick={() => { togglePageView(); setViewOpen(false); }}
               />
             </div>
           )}

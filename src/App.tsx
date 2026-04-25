@@ -12,6 +12,7 @@ import { SearchReplace } from "./ui/SearchReplace";
 import { GraphView } from "./ui/GraphView";
 import { CanvasWhiteboard } from "./ui/CanvasWhiteboard";
 import { PluginGallery } from "./ui/PluginGallery";
+import { PageView } from "./ui/PageView";
 import { VersionHistory, saveSnapshot } from "./ui/VersionHistory";
 import { MarkdownTableEditor } from "./ui/MarkdownTableEditor";
 import { TEMPLATES } from "./editor/templates";
@@ -481,6 +482,7 @@ export default function App() {
 
   const showEditor = mode === "source" || mode === "split";
   const showPreview = mode === "preview" || mode === "split";
+  const pageView = useAppStore((s) => s.pageView);
 
   // Sync-scroll: link editor and preview scrolling in split mode
   const editorSectionRef = useRef<HTMLElement | null>(null);
@@ -1265,10 +1267,14 @@ export default function App() {
         onNew={handleNew}
         onCommandPalette={() => setPaletteOpen(true)}
         onPasteText={async () => {
-          const text = await uiPrompt({ message: "Paste HTML or text:", placeholder: "<h1>Hello</h1>" });
+          const text = await uiPrompt({
+            message: "Paste HTML or rich text below:",
+            placeholder: "<h1>Hello</h1>\n<p>Paste your HTML here...</p>",
+          });
           if (!text) return;
           const md = text.trim().startsWith("<") ? htmlToMarkdown(text) : text;
           setContent(doc.content + "\n\n" + md);
+          showAiToast("✅ Text pasted and converted", "info");
         }}
       />
       <main id="main" className="flex-1 flex min-h-0 relative">
@@ -1318,7 +1324,11 @@ export default function App() {
                 : "w-full min-w-0 bg-bg-subtle"
             }
           >
-            <Preview markdownText={doc.content} />
+            {pageView ? (
+              <PageView markdownText={doc.content} />
+            ) : (
+              <Preview markdownText={doc.content} />
+            )}
           </section>
         )}
         {showWysiwyg && (

@@ -30,6 +30,7 @@ interface AppState {
   autoSave: boolean;
   autoSaveInterval: number;
   syncScroll: SyncScrollMode;
+  pageView: boolean;
   aiKey: string | null;
   setMode: (m: ViewMode) => void;
   setTheme: (t: Theme) => void;
@@ -46,6 +47,7 @@ interface AppState {
   markSaved: () => void;
   setAiKey: (key: string | null) => void;
   toggleSyncScroll: () => void;
+  togglePageView: () => void;
 }
 
 const DEFAULT_DOC: DocFile = {
@@ -69,6 +71,7 @@ export const useAppStore = create<AppState>()(
       autoSave: true,
       autoSaveInterval: 30000,
       syncScroll: "all" as SyncScrollMode,
+      pageView: false,
       aiKey: null,
       setMode: (m) => set({ mode: m }),
       setTheme: (t) => {
@@ -102,6 +105,7 @@ export const useAppStore = create<AppState>()(
         set((state) => ({ doc: { ...state.doc, dirty: false } })),
       setAiKey: (key) => set({ aiKey: key }),
       toggleSyncScroll: () => set((s) => ({ syncScroll: s.syncScroll === "all" ? "single" : "all" })),
+      togglePageView: () => set((s) => ({ pageView: !s.pageView })),
     }),
     {
       name: "lumen-md",
@@ -117,6 +121,7 @@ export const useAppStore = create<AppState>()(
         autoSave: s.autoSave,
         autoSaveInterval: s.autoSaveInterval,
         syncScroll: s.syncScroll,
+        pageView: s.pageView,
         aiKey: s.aiKey,
         doc: {
           name: s.doc.name,
