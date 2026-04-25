@@ -13,6 +13,7 @@ import { GraphView } from "./ui/GraphView";
 import { VersionHistory, saveSnapshot } from "./ui/VersionHistory";
 import { MarkdownTableEditor } from "./ui/MarkdownTableEditor";
 import { TEMPLATES } from "./editor/templates";
+import { htmlToMarkdown } from "./storage/fileFormats";
 import { CommandPalette, cmdIcons } from "./ui/CommandPalette";
 import type { Command } from "./ui/CommandPalette";
 import { FileTree } from "./ui/FileTree";
@@ -471,8 +472,11 @@ export default function App() {
   useEffect(() => {
     if (mode !== "split") return;
 
+    const syncScrollMode = useAppStore.getState().syncScroll;
+
     // Wait for DOM elements to be mounted
     const timer = setTimeout(() => {
+      if (syncScrollMode === "single") return; // No sync when "single"
       const editorEl = editorSectionRef.current?.querySelector(".cm-scroller") as HTMLElement | null;
       const previewEl = previewSectionRef.current?.querySelector("[data-preview-root]") as HTMLElement | null;
       if (!editorEl || !previewEl) return;
@@ -1123,6 +1127,12 @@ export default function App() {
         onSave={handleSave}
         onNew={handleNew}
         onCommandPalette={() => setPaletteOpen(true)}
+        onPasteText={async () => {
+          const text = await uiPrompt({ message: "Paste HTML or text:", placeholder: "<h1>Hello</h1>" });
+          if (!text) return;
+          const md = text.trim().startsWith("<") ? htmlToMarkdown(text) : text;
+          setContent(doc.content + "\n\n" + md);
+        }}
       />
       <main id="main" className="flex-1 flex min-h-0 relative">
         <SearchReplace

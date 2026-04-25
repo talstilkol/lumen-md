@@ -315,9 +315,13 @@ export default function WysiwygEditor({ value, onChange }: Props) {
   const viewRef = useRef<EditorView | null>(null);
   const getView = () => viewRef.current;
 
+  const mountedRef = useRef(false);
+
   useEffect(() => {
     if (!hostRef.current) return;
-    if (lastEmittedRef.current === value) return;
+    // Always build on first mount; skip subsequent if content unchanged
+    if (mountedRef.current && lastEmittedRef.current === value) return;
+    mountedRef.current = true;
     let cancelled = false;
     const host = hostRef.current;
 

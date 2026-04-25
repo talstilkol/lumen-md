@@ -3,6 +3,7 @@
  * Uses the File System Access API where supported, with a graceful fallback to
  * a hidden <input type="file"> + download trick for Save As.
  */
+import { rtfToMarkdown, htmlToMarkdown, xmlToMarkdown } from "./fileFormats";
 
 declare global {
   interface Window {
@@ -35,9 +36,13 @@ const DATA_TYPES = [
     description: "Markdown / data",
     accept: {
       "text/markdown": [".md", ".markdown"] as string[],
-      "text/plain": [".txt"] as string[],
+      "text/plain": [".txt", ".rtf"] as string[],
       "text/csv": [".csv", ".tsv"] as string[],
+      "text/html": [".html", ".htm"] as string[],
+      "text/xml": [".xml"] as string[],
       "application/json": [".json"] as string[],
+      "application/msword": [".doc"] as string[],
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document": [".docx"] as string[],
     },
   },
 ];
@@ -73,7 +78,7 @@ export async function openFileDialog(): Promise<OpenedFile | null> {
   return new Promise((resolve) => {
     const input = document.createElement("input");
     input.type = "file";
-    input.accept = ".md,.markdown,.txt,.csv,.tsv,.json";
+    input.accept = ".md,.markdown,.txt,.csv,.tsv,.json,.rtf,.doc,.docx,.html,.htm,.xml";
     input.onchange = async () => {
       const f = input.files?.[0];
       if (!f) return resolve(null);
@@ -155,6 +160,15 @@ function convertImported(name: string, raw: string): string {
       return `# ${name}\n\n\`\`\`json-table title="${name}"\n${trimmed}\n\`\`\`\n`;
     }
     return `# ${name}\n\n\`\`\`json\n${trimmed}\n\`\`\`\n`;
+  }
+  if (lower.endsWith(".rtf")) {
+    return `# ${name}\n\n${rtfToMarkdown(raw)}`;
+  }
+  if (lower.endsWith(".html") || lower.endsWith(".htm")) {
+    return htmlToMarkdown(raw);
+  }
+  if (lower.endsWith(".xml")) {
+    return `# ${name}\n\n${xmlToMarkdown(raw)}`;
   }
   return raw;
 }

@@ -26,6 +26,7 @@ interface Props {
   onSave: (saveAs?: boolean) => void;
   onNew: () => void;
   onCommandPalette: () => void;
+  onPasteText?: () => void;
 }
 
 const MODES: { value: ViewMode; icon: typeof Pencil; labelKey: string; shortcut: string }[] = [
@@ -69,7 +70,7 @@ function LabeledBtn({
   );
 }
 
-export function Toolbar({ onOpen, onSave, onNew, onCommandPalette }: Props) {
+export function Toolbar({ onOpen, onSave, onNew, onCommandPalette, onPasteText }: Props) {
   const mode = useAppStore((s) => s.mode);
   const setMode = useAppStore((s) => s.setMode);
   const setTheme = useAppStore((s) => s.setTheme);
@@ -80,6 +81,8 @@ export function Toolbar({ onOpen, onSave, onNew, onCommandPalette }: Props) {
   const doc = useAppStore((s) => s.doc);
   const rtl = useAppStore((s) => s.rtl);
   const toggleRtl = useAppStore((s) => s.toggleRtl);
+  const syncScroll = useAppStore((s) => s.syncScroll);
+  const toggleSyncScroll = useAppStore((s) => s.toggleSyncScroll);
 
   const isDark = document.documentElement.classList.contains("dark");
 
@@ -156,6 +159,14 @@ export function Toolbar({ onOpen, onSave, onNew, onCommandPalette }: Props) {
         title={`${t("toolbar.open")} (⌘O)`}
         onClick={onOpen}
       />
+      {onPasteText && (
+        <LabeledBtn
+          icon={Type}
+          label={t("toolbar.paste") ?? "Paste"}
+          title="Paste HTML / text"
+          onClick={onPasteText}
+        />
+      )}
       <LabeledBtn
         icon={Save}
         label={t("toolbar.save")}
@@ -226,6 +237,11 @@ export function Toolbar({ onOpen, onSave, onNew, onCommandPalette }: Props) {
                 icon={showOutline ? <PanelRightClose size={13} /> : <PanelRightOpen size={13} />}
                 label={showOutline ? t("toolbar.outline.hide") : t("toolbar.outline.show")}
                 onClick={() => { toggleOutline(); setViewOpen(false); }}
+              />
+              <MenuItem
+                icon={<Columns2 size={13} />}
+                label={syncScroll === "all" ? "Scroll: Linked (all panes)" : "Scroll: Independent"}
+                onClick={() => { toggleSyncScroll(); }}
               />
             </div>
           )}

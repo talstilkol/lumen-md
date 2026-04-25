@@ -3,6 +3,32 @@ import type { Processor } from "unified";
 import type { ReactElement } from "react";
 import remarkParse from "remark-parse";
 import remarkGfm from "remark-gfm";
+
+// Inline remark-breaks plugin: converts single newlines in paragraphs to <br>.
+function remarkBreaks() {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return (tree: any) => {
+    const visit = (node: any) => {
+      if (node.children) {
+        const next: any[] = [];
+        for (const child of node.children) {
+          if (child.type === "text" && child.value.includes("\n")) {
+            const parts = child.value.split("\n");
+            parts.forEach((part: string, i: number) => {
+              if (part) next.push({ type: "text", value: part });
+              if (i < parts.length - 1) next.push({ type: "break" });
+            });
+          } else {
+            visit(child);
+            next.push(child);
+          }
+        }
+        node.children = next;
+      }
+    };
+    visit(tree);
+  };
+}
 import remarkMath from "remark-math";
 import remarkFrontmatter from "remark-frontmatter";
 import remarkDirective from "remark-directive";
@@ -196,6 +222,7 @@ function getProcessor(isDark: () => boolean) {
       .use(remarkFrontmatter, ["yaml"])
       .use(remarkStripFrontmatter)
       .use(remarkGfm)
+      .use(remarkBreaks)
       .use(remarkMath)
       .use(remarkDirective)
       .use(remarkAdmonitions)

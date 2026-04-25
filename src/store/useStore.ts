@@ -5,6 +5,7 @@ import { applyLocale } from "../i18n";
 
 export type ViewMode = "source" | "split" | "preview" | "wysiwyg";
 export type Theme = "light" | "dark" | "system";
+export type SyncScrollMode = "single" | "all";
 
 interface DocFile {
   name: string;
@@ -28,6 +29,7 @@ interface AppState {
   rtl: boolean;
   autoSave: boolean;
   autoSaveInterval: number;
+  syncScroll: SyncScrollMode;
   aiKey: string | null;
   setMode: (m: ViewMode) => void;
   setTheme: (t: Theme) => void;
@@ -43,6 +45,7 @@ interface AppState {
   setAutoSaveInterval: (ms: number) => void;
   markSaved: () => void;
   setAiKey: (key: string | null) => void;
+  toggleSyncScroll: () => void;
 }
 
 const DEFAULT_DOC: DocFile = {
@@ -65,6 +68,7 @@ export const useAppStore = create<AppState>()(
       rtl: false,
       autoSave: true,
       autoSaveInterval: 30000,
+      syncScroll: "all" as SyncScrollMode,
       aiKey: null,
       setMode: (m) => set({ mode: m }),
       setTheme: (t) => {
@@ -97,6 +101,7 @@ export const useAppStore = create<AppState>()(
       markSaved: () =>
         set((state) => ({ doc: { ...state.doc, dirty: false } })),
       setAiKey: (key) => set({ aiKey: key }),
+      toggleSyncScroll: () => set((s) => ({ syncScroll: s.syncScroll === "all" ? "single" : "all" })),
     }),
     {
       name: "lumen-md",
@@ -111,6 +116,7 @@ export const useAppStore = create<AppState>()(
         rtl: s.rtl,
         autoSave: s.autoSave,
         autoSaveInterval: s.autoSaveInterval,
+        syncScroll: s.syncScroll,
         aiKey: s.aiKey,
         doc: {
           name: s.doc.name,
