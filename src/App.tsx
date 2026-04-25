@@ -11,6 +11,7 @@ import { ScrollProgress } from "./ui/ScrollProgress";
 import { SearchReplace } from "./ui/SearchReplace";
 import { GraphView } from "./ui/GraphView";
 import { CanvasWhiteboard } from "./ui/CanvasWhiteboard";
+import { PluginGallery } from "./ui/PluginGallery";
 import { VersionHistory, saveSnapshot } from "./ui/VersionHistory";
 import { MarkdownTableEditor } from "./ui/MarkdownTableEditor";
 import { TEMPLATES } from "./editor/templates";
@@ -100,6 +101,7 @@ export default function App() {
   const [historyOpen, setHistoryOpen] = useState(false);
   const [tableEditorOpen, setTableEditorOpen] = useState(false);
   const [canvasOpen, setCanvasOpen] = useState(false);
+  const [galleryOpen, setGalleryOpen] = useState(false);
   const toggleAutoSave = useAppStore((s) => s.toggleAutoSave);
   const [recents, setRecents] = useState<RecentFile[]>([]);
   const [collab, setCollab] = useState<CollabSession | null>(null);
@@ -763,6 +765,14 @@ export default function App() {
         icon: cmdIcons.Sparkles,
         group: t("group.view"),
         action: () => setCanvasOpen(true),
+      },
+      {
+        id: "view.plugins",
+        label: "🔌 Plugin Gallery",
+        hint: "Browse & install plugins",
+        icon: cmdIcons.Sparkles,
+        group: t("group.view"),
+        action: () => setGalleryOpen(true),
       },
       ...TEMPLATES.map((tpl) => ({
         id: `template.${tpl.id}`,
@@ -1432,6 +1442,7 @@ export default function App() {
 
       {/* Canvas Whiteboard overlay */}
       <CanvasWhiteboard open={canvasOpen} onClose={() => setCanvasOpen(false)} />
+      <PluginGallery open={galleryOpen} onClose={() => setGalleryOpen(false)} />
 
       {/* Version History overlay */}
       {historyOpen && (
