@@ -1315,6 +1315,14 @@ export default function App() {
       <a href="#main" className="skip-link">
         {t("a11y.skipToContent")}
       </a>
+      {/* Screen reader announcements */}
+      <div
+        role="status"
+        aria-live="polite"
+        aria-atomic="true"
+        className="aria-live-region"
+        id="lumen-sr-announcer"
+      />
       <Toolbar
         onOpen={handleOpen}
         onSave={handleSave}

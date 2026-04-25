@@ -1318,6 +1318,58 @@
     top: 0;
     outline: none;
   }
+
+  /* Screen-reader-only utility (visually hidden but accessible) */
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  /* ARIA live region (announcements for screen readers) */
+  .aria-live-region {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+    pointer-events: none;
+  }
+
+  /* Enhanced contrast for fg-muted text (WCAG AA requires 4.5:1) */
+  .high-contrast .icon-btn,
+  .high-contrast .seg-btn {
+    color: hsl(var(--fg));
+  }
+}
+
+/* ─── Touch Targets (Mobile) ─── */
+@media (pointer: coarse) {
+  .icon-btn,
+  .seg-btn,
+  button,
+  [role="option"],
+  [role="menuitem"] {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  .cmd-palette-item {
+    min-height: 48px;
+    padding: 10px 14px;
+  }
+  .titlebar {
+    min-height: 48px;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
