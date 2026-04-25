@@ -14,6 +14,7 @@ import { VersionHistory, saveSnapshot } from "./ui/VersionHistory";
 import { MarkdownTableEditor } from "./ui/MarkdownTableEditor";
 import { TEMPLATES } from "./editor/templates";
 import { htmlToMarkdown } from "./storage/fileFormats";
+import { wirePluginAPI, registerPlugin, getPluginCommands, wordCountPlugin, notifyContentChange, notifySave } from "./plugins/pluginSystem";
 import { CommandPalette, cmdIcons } from "./ui/CommandPalette";
 import type { Command } from "./ui/CommandPalette";
 import { FileTree } from "./ui/FileTree";
@@ -21,7 +22,7 @@ import { SidebarResizer } from "./ui/SidebarResizer";
 import { uiAlert, uiConfirm, uiPrompt } from "./ui/PromptDialog";
 import { BacklinksPanel } from "./ui/BacklinksPanel";
 import { SearchDialog } from "./ui/SearchDialog";
-import { AiToastContainer } from "./ui/AiToast";
+import { AiToastContainer, showAiToast } from "./ui/AiToast";
 import { AiInlinePromptOverlay } from "./ui/AiInlinePrompt";
 import { buildAiSettingsCommand, generateAiCommitMessage } from "./ai/commands";
 import { useAppStore, applyTheme } from "./store/useStore";
@@ -109,6 +110,17 @@ export default function App() {
   useEffect(() => {
     applyTheme(theme);
   }, [theme]);
+
+  // Plugin system init
+  useEffect(() => {
+    wirePluginAPI({
+      getContent: () => useAppStore.getState().doc.content,
+      setContent: (s: string) => useAppStore.getState().setContent(s),
+      getFileName: () => useAppStore.getState().doc.name,
+      showToast: (msg: string) => showAiToast(msg, "info"),
+    });
+    registerPlugin(wordCountPlugin);
+  }, []);
 
   // Apply locale (sets <html lang dir>) on mount and on change.
   useEffect(() => {
@@ -750,6 +762,53 @@ export default function App() {
           setContent(tpl.content);
           setDoc({ name: `${tpl.name}.md`, dirty: true });
         },
+      })),
+      // ── Voice-to-Markdown ─────────────────────────────────────────────────
+      {
+        id: "voice.dictate",
+        label: "🎙 Voice to Markdown",
+        hint: "Speech recognition → text",
+        icon: cmdIcons.Sparkles,
+        group: "Tools",
+        action: () => {
+          const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+          if (!SpeechRecognition) {
+            showAiToast("Speech recognition not supported in this browser", "error");
+            return;
+          }
+          const recognition = new SpeechRecognition();
+          recognition.lang = useAppStore.getState().locale === "he" ? "he-IL" : "en-US";
+          recognition.interimResults = false;
+          recognition.continuous = true;
+          showAiToast("🎙 Listening... speak now (click anywhere to stop)", "info");
+          recognition.onresult = (event: any) => {
+            let transcript = "";
+            for (let i = event.resultIndex; i < event.results.length; i++) {
+              if (event.results[i].isFinal) {
+                transcript += event.results[i][0].transcript + " ";
+              }
+            }
+            if (transcript.trim()) {
+              const current = useAppStore.getState().doc.content;
+              useAppStore.getState().setContent(current + "\n\n" + transcript.trim());
+              showAiToast(`✅ Added ${transcript.trim().split(/\s+/).length} words`, "info");
+            }
+          };
+          recognition.onerror = () => showAiToast("Speech recognition error", "error");
+          recognition.start();
+          // Stop on next click
+          const stop = () => { recognition.stop(); document.removeEventListener("click", stop); };
+          setTimeout(() => document.addEventListener("click", stop), 500);
+        },
+      },
+      // ── Plugin Commands ──────────────────────────────────────────────────
+      ...getPluginCommands().map((cmd) => ({
+        id: cmd.id,
+        label: cmd.label,
+        hint: cmd.hint ?? "Plugin",
+        icon: cmdIcons.Sparkles,
+        group: "Plugins",
+        action: cmd.action,
       })),
       // ── AI Capabilities ──────────────────────────────────────────────────
       buildAiSettingsCommand(),

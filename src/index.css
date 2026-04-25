@@ -105,23 +105,27 @@
   }
   .cm-editor .cm-gutters {
     background: hsl(var(--bg));
-    border-right: 1px solid hsl(var(--border));
-    color: hsl(var(--fg-muted) / 0.4);
-    font-size: 12px;
-    min-width: 42px;
-    padding-right: 4px;
+    border-right: 1px solid hsl(var(--border) / 0.5);
+    color: hsl(var(--fg-muted) / 0.3);
+    font-size: 11px;
+    min-width: 48px;
+    padding-right: 6px;
+    user-select: none;
   }
   .cm-editor .cm-gutter.cm-lineNumbers .cm-gutterElement {
-    padding: 0 8px 0 12px;
-    min-width: 32px;
+    padding: 0 10px 0 16px;
+    min-width: 36px;
     text-align: right;
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+    letter-spacing: -0.02em;
   }
   .cm-editor .cm-activeLine {
     background-color: hsl(var(--bg-subtle));
   }
   .cm-editor .cm-activeLineGutter {
     background-color: hsl(var(--bg-subtle));
-    color: hsl(var(--fg-muted) / 0.7);
+    color: hsl(var(--accent) / 0.6);
+    transition: color 200ms ease;
   }
 
   /* Markdown syntax accents */
