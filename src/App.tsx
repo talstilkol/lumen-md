@@ -10,6 +10,7 @@ import { StatusBar } from "./ui/StatusBar";
 import { ScrollProgress } from "./ui/ScrollProgress";
 import { SearchReplace } from "./ui/SearchReplace";
 import { GraphView } from "./ui/GraphView";
+import { CanvasWhiteboard } from "./ui/CanvasWhiteboard";
 import { VersionHistory, saveSnapshot } from "./ui/VersionHistory";
 import { MarkdownTableEditor } from "./ui/MarkdownTableEditor";
 import { TEMPLATES } from "./editor/templates";
@@ -98,6 +99,7 @@ export default function App() {
   const [graphOpen, setGraphOpen] = useState(false);
   const [historyOpen, setHistoryOpen] = useState(false);
   const [tableEditorOpen, setTableEditorOpen] = useState(false);
+  const [canvasOpen, setCanvasOpen] = useState(false);
   const toggleAutoSave = useAppStore((s) => s.toggleAutoSave);
   const [recents, setRecents] = useState<RecentFile[]>([]);
   const [collab, setCollab] = useState<CollabSession | null>(null);
@@ -753,6 +755,14 @@ export default function App() {
         icon: cmdIcons.Pencil,
         group: t("group.view"),
         action: toggleAutoSave,
+      },
+      {
+        id: "view.canvas",
+        label: "🎨 Canvas / Whiteboard",
+        hint: "Infinite canvas for visual notes",
+        icon: cmdIcons.Sparkles,
+        group: t("group.view"),
+        action: () => setCanvasOpen(true),
       },
       ...TEMPLATES.map((tpl) => ({
         id: `template.${tpl.id}`,
@@ -1419,6 +1429,9 @@ export default function App() {
           </div>
         </div>
       )}
+
+      {/* Canvas Whiteboard overlay */}
+      <CanvasWhiteboard open={canvasOpen} onClose={() => setCanvasOpen(false)} />
 
       {/* Version History overlay */}
       {historyOpen && (

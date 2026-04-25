@@ -1,0 +1,612 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Lumen — Markdown, illuminated ✨</title>
+    <meta
+      name="description"
+      content="The world's most powerful browser-based markdown editor. Free, open-source, zero-install. AI-powered, encrypted, with 15+ render blocks, real-time collaboration, and plugin system."
+    />
+    <meta
+      name="keywords"
+      content="markdown editor, WYSIWYG, AI writer, Hebrew editor, RTL, open source, free, browser based"
+    />
+    <meta property="og:title" content="Lumen — Markdown, illuminated" />
+    <meta
+      property="og:description"
+      content="Free, browser-native markdown editor with AI, encryption, plugins, and 15+ render blocks."
+    />
+    <meta property="og:type" content="website" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      *,
+      *::before,
+      *::after {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      :root {
+        --bg: #0a0a12;
+        --bg-card: #12121e;
+        --border: rgba(255, 255, 255, 0.06);
+        --fg: #e8e8f0;
+        --fg-muted: #8888a8;
+        --accent: #7c5cfc;
+        --accent-glow: rgba(124, 92, 252, 0.3);
+        --gradient: linear-gradient(
+          135deg,
+          #7c5cfc 0%,
+          #c084fc 50%,
+          #f97316 100%
+        );
+      }
+
+      html {
+        scroll-behavior: smooth;
+      }
+      body {
+        font-family:
+          "Inter",
+          -apple-system,
+          sans-serif;
+        background: var(--bg);
+        color: var(--fg);
+        line-height: 1.6;
+        overflow-x: hidden;
+      }
+
+      /* Hero */
+      .hero {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: 2rem;
+        position: relative;
+        overflow: hidden;
+      }
+      .hero::before {
+        content: "";
+        position: absolute;
+        width: 800px;
+        height: 800px;
+        border-radius: 50%;
+        background: radial-gradient(
+          circle,
+          var(--accent-glow) 0%,
+          transparent 70%
+        );
+        top: -200px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 0;
+        animation: pulse 8s ease-in-out infinite;
+      }
+      @keyframes pulse {
+        0%,
+        100% {
+          opacity: 0.4;
+          transform: translateX(-50%) scale(1);
+        }
+        50% {
+          opacity: 0.7;
+          transform: translateX(-50%) scale(1.1);
+        }
+      }
+      .hero > * {
+        position: relative;
+        z-index: 1;
+      }
+
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 16px;
+        border-radius: 99px;
+        border: 1px solid var(--border);
+        background: rgba(124, 92, 252, 0.08);
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--fg-muted);
+        margin-bottom: 1.5rem;
+      }
+      .badge span {
+        color: var(--accent);
+      }
+
+      h1 {
+        font-size: clamp(3rem, 8vw, 5.5rem);
+        font-weight: 900;
+        letter-spacing: -0.03em;
+        line-height: 1.1;
+        margin-bottom: 1.5rem;
+      }
+      h1 .gradient {
+        background: var(--gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+
+      .subtitle {
+        font-size: clamp(1.1rem, 2.5vw, 1.4rem);
+        color: var(--fg-muted);
+        max-width: 640px;
+        margin-bottom: 2.5rem;
+        font-weight: 400;
+      }
+
+      .cta-row {
+        display: flex;
+        gap: 16px;
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 14px 32px;
+        border-radius: 12px;
+        font-size: 15px;
+        font-weight: 600;
+        text-decoration: none;
+        cursor: pointer;
+        border: none;
+        transition: all 200ms ease;
+      }
+      .btn-primary {
+        background: var(--gradient);
+        color: white;
+        box-shadow: 0 4px 24px var(--accent-glow);
+      }
+      .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 32px var(--accent-glow);
+      }
+      .btn-secondary {
+        background: var(--bg-card);
+        color: var(--fg);
+        border: 1px solid var(--border);
+      }
+      .btn-secondary:hover {
+        background: rgba(255, 255, 255, 0.05);
+        border-color: var(--accent);
+      }
+
+      /* Features */
+      .features {
+        padding: 6rem 2rem;
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+      .features h2 {
+        text-align: center;
+        font-size: 2.5rem;
+        font-weight: 800;
+        margin-bottom: 1rem;
+      }
+      .features .desc {
+        text-align: center;
+        color: var(--fg-muted);
+        font-size: 1.1rem;
+        max-width: 600px;
+        margin: 0 auto 3rem;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        gap: 20px;
+      }
+      .card {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 28px;
+        transition: all 300ms ease;
+      }
+      .card:hover {
+        border-color: rgba(124, 92, 252, 0.3);
+        transform: translateY(-4px);
+        box-shadow: 0 12px 40px rgba(124, 92, 252, 0.08);
+      }
+      .card-icon {
+        font-size: 1.8rem;
+        margin-bottom: 12px;
+      }
+      .card h3 {
+        font-size: 1.15rem;
+        font-weight: 700;
+        margin-bottom: 8px;
+      }
+      .card p {
+        color: var(--fg-muted);
+        font-size: 14px;
+        line-height: 1.6;
+      }
+
+      /* Comparison */
+      .comparison {
+        padding: 6rem 2rem;
+        max-width: 900px;
+        margin: 0 auto;
+      }
+      .comparison h2 {
+        text-align: center;
+        font-size: 2.5rem;
+        font-weight: 800;
+        margin-bottom: 3rem;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 14px;
+      }
+      th,
+      td {
+        padding: 12px 16px;
+        text-align: center;
+        border-bottom: 1px solid var(--border);
+      }
+      th {
+        font-weight: 700;
+        color: var(--fg);
+        background: var(--bg-card);
+      }
+      th:first-child,
+      td:first-child {
+        text-align: left;
+      }
+      td {
+        color: var(--fg-muted);
+      }
+      tr:hover td {
+        background: rgba(124, 92, 252, 0.03);
+      }
+      .check {
+        color: #22c55e;
+        font-weight: 700;
+      }
+      .cross {
+        color: #ef4444;
+        opacity: 0.5;
+      }
+      .warn {
+        color: #f59e0b;
+      }
+
+      /* CTA */
+      .cta-section {
+        padding: 6rem 2rem;
+        text-align: center;
+      }
+      .cta-section h2 {
+        font-size: 2.5rem;
+        font-weight: 800;
+        margin-bottom: 1rem;
+      }
+      .cta-section p {
+        color: var(--fg-muted);
+        font-size: 1.1rem;
+        margin-bottom: 2rem;
+      }
+
+      /* Footer */
+      footer {
+        padding: 3rem 2rem;
+        text-align: center;
+        color: var(--fg-muted);
+        font-size: 13px;
+        border-top: 1px solid var(--border);
+      }
+      footer a {
+        color: var(--accent);
+        text-decoration: none;
+      }
+
+      /* Stats */
+      .stats {
+        display: flex;
+        gap: 48px;
+        justify-content: center;
+        margin: 3rem 0;
+        flex-wrap: wrap;
+      }
+      .stat {
+        text-align: center;
+      }
+      .stat-value {
+        font-size: 2.5rem;
+        font-weight: 900;
+        background: var(--gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+      .stat-label {
+        font-size: 13px;
+        color: var(--fg-muted);
+        margin-top: 4px;
+      }
+
+      @media (max-width: 768px) {
+        .grid {
+          grid-template-columns: 1fr;
+        }
+        .stats {
+          gap: 24px;
+        }
+        .cta-row {
+          flex-direction: column;
+          align-items: center;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Hero -->
+    <section class="hero">
+      <div class="badge"><span>✨</span> Open Source & Free Forever</div>
+      <h1>
+        Markdown,<br />
+        <span class="gradient">illuminated.</span>
+      </h1>
+      <p class="subtitle">
+        The world's most powerful browser-based markdown editor. AI-powered
+        writing, vault encryption, 15+ render blocks, real-time collaboration,
+        and a plugin system — all zero-install.
+      </p>
+      <div class="cta-row">
+        <a href="/" class="btn btn-primary"> ✨ Open Editor </a>
+        <a
+          href="https://github.com/talstilkol/lumen-md"
+          class="btn btn-secondary"
+        >
+          ⭐ Star on GitHub
+        </a>
+      </div>
+
+      <div class="stats">
+        <div class="stat">
+          <div class="stat-value">15+</div>
+          <div class="stat-label">Render Blocks</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value">18</div>
+          <div class="stat-label">AI Templates</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value">11</div>
+          <div class="stat-label">File Formats</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value">0</div>
+          <div class="stat-label">Install Required</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Features -->
+    <section class="features">
+      <h2>Everything you need to write</h2>
+      <p class="desc">
+        From quick notes to encrypted research vaults — Lumen handles it all in
+        your browser.
+      </p>
+
+      <div class="grid">
+        <div class="card">
+          <div class="card-icon">✍️</div>
+          <h3>4 Writing Modes</h3>
+          <p>
+            Source, Split, Preview, and WYSIWYG. Switch instantly with ⌘1-4.
+            Each mode is optimized for different workflows.
+          </p>
+        </div>
+        <div class="card">
+          <div class="card-icon">🧠</div>
+          <h3>AI-Powered Writing</h3>
+          <p>
+            18 prompt templates in Hebrew, Arabic, Russian & English. Summarize,
+            improve, translate, and code review — all from ⌘K.
+          </p>
+        </div>
+        <div class="card">
+          <div class="card-icon">🔒</div>
+          <h3>Vault Encryption</h3>
+          <p>
+            AES-256-GCM encryption with PBKDF2 key derivation. Your documents
+            stay private, even from us.
+          </p>
+        </div>
+        <div class="card">
+          <div class="card-icon">📊</div>
+          <h3>Data → Tables</h3>
+          <p>
+            Import CSV, TSV, JSON, XML and see them instantly rendered as
+            beautiful, interactive tables. Also supports RTF, DOC, DOCX.
+          </p>
+        </div>
+        <div class="card">
+          <div class="card-icon">🔌</div>
+          <h3>Plugin System</h3>
+          <p>
+            Extend Lumen with custom plugins. Full API for commands, lifecycle
+            hooks, and content manipulation.
+          </p>
+        </div>
+        <div class="card">
+          <div class="card-icon">🎙️</div>
+          <h3>Voice to Markdown</h3>
+          <p>
+            Dictate in any language using the Web Speech API. Your words are
+            transcribed directly into markdown.
+          </p>
+        </div>
+        <div class="card">
+          <div class="card-icon">🌐</div>
+          <h3>Real-time Collaboration</h3>
+          <p>
+            P2P editing over WebRTC. No server needed. Share a link and co-edit
+            with anyone in real time.
+          </p>
+        </div>
+        <div class="card">
+          <div class="card-icon">🗺️</div>
+          <h3>Knowledge Graph</h3>
+          <p>
+            Visualize connections between documents with an interactive
+            force-directed graph. See your knowledge structure emerge.
+          </p>
+        </div>
+        <div class="card">
+          <div class="card-icon">📄</div>
+          <h3>Page View</h3>
+          <p>
+            A4 paginated preview with page numbers and smooth navigation. Your
+            documents look exactly like they'll print.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Comparison -->
+    <section class="comparison">
+      <h2>How Lumen compares</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Feature</th>
+            <th>Lumen</th>
+            <th>Obsidian</th>
+            <th>Notion</th>
+            <th>Typora</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Free & open source</td>
+            <td class="check">✓</td>
+            <td class="cross">✗</td>
+            <td class="cross">✗</td>
+            <td class="cross">✗</td>
+          </tr>
+          <tr>
+            <td>Zero install (browser)</td>
+            <td class="check">✓</td>
+            <td class="cross">✗</td>
+            <td class="check">✓</td>
+            <td class="cross">✗</td>
+          </tr>
+          <tr>
+            <td>AI writing assistant</td>
+            <td class="check">✓</td>
+            <td class="warn">⚠</td>
+            <td class="check">✓</td>
+            <td class="cross">✗</td>
+          </tr>
+          <tr>
+            <td>Vault encryption</td>
+            <td class="check">✓</td>
+            <td class="check">✓</td>
+            <td class="cross">✗</td>
+            <td class="cross">✗</td>
+          </tr>
+          <tr>
+            <td>Plugin system</td>
+            <td class="check">✓</td>
+            <td class="check">✓</td>
+            <td class="cross">✗</td>
+            <td class="cross">✗</td>
+          </tr>
+          <tr>
+            <td>Knowledge graph</td>
+            <td class="check">✓</td>
+            <td class="check">✓</td>
+            <td class="cross">✗</td>
+            <td class="cross">✗</td>
+          </tr>
+          <tr>
+            <td>P2P collaboration</td>
+            <td class="check">✓</td>
+            <td class="cross">✗</td>
+            <td class="check">✓</td>
+            <td class="cross">✗</td>
+          </tr>
+          <tr>
+            <td>RTL/Hebrew native</td>
+            <td class="check">✓</td>
+            <td class="warn">⚠</td>
+            <td class="warn">⚠</td>
+            <td class="warn">⚠</td>
+          </tr>
+          <tr>
+            <td>Voice-to-markdown</td>
+            <td class="check">✓</td>
+            <td class="cross">✗</td>
+            <td class="cross">✗</td>
+            <td class="cross">✗</td>
+          </tr>
+          <tr>
+            <td>Multi-lang AI (HE/AR/RU)</td>
+            <td class="check">✓</td>
+            <td class="cross">✗</td>
+            <td class="cross">✗</td>
+            <td class="cross">✗</td>
+          </tr>
+          <tr>
+            <td>Data tables (CSV/JSON/XML)</td>
+            <td class="check">✓</td>
+            <td class="cross">✗</td>
+            <td class="cross">✗</td>
+            <td class="cross">✗</td>
+          </tr>
+          <tr>
+            <td><strong>Price</strong></td>
+            <td class="check"><strong>Free</strong></td>
+            <td>$50/yr</td>
+            <td>$8+/mo</td>
+            <td>$15</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- CTA -->
+    <section class="cta-section">
+      <h2>
+        Start writing,
+        <span
+          style="
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+          "
+          >beautifully.</span
+        >
+      </h2>
+      <p>No sign-up. No install. Just open and write.</p>
+      <a href="/" class="btn btn-primary"> ✨ Open Lumen Editor </a>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+      <p>
+        Built with ❤️ by
+        <a href="https://github.com/talstilkol">Tal Stilkol</a> ·
+        <a href="https://github.com/talstilkol/lumen-md">GitHub</a> · MIT
+        License · 2026
+      </p>
+    </footer>
+  </body>
+</html>
