@@ -15,6 +15,8 @@ import { MarkdownTableEditor } from "./ui/MarkdownTableEditor";
 import { TEMPLATES } from "./editor/templates";
 import { htmlToMarkdown } from "./storage/fileFormats";
 import { wirePluginAPI, registerPlugin, getPluginCommands, wordCountPlugin, notifyContentChange, notifySave } from "./plugins/pluginSystem";
+import { encryptDocument, decryptDocument, isEncrypted } from "./storage/encryption";
+import { AI_PROMPT_TEMPLATES, applyTemplate } from "./ai/multiLangPrompts";
 import { CommandPalette, cmdIcons } from "./ui/CommandPalette";
 import type { Command } from "./ui/CommandPalette";
 import { FileTree } from "./ui/FileTree";
@@ -809,6 +811,62 @@ export default function App() {
         icon: cmdIcons.Sparkles,
         group: "Plugins",
         action: cmd.action,
+      })),
+      // ── Encryption ────────────────────────────────────────────────────────
+      {
+        id: "vault.encrypt",
+        label: "🔒 Encrypt Document",
+        hint: "AES-256-GCM",
+        icon: cmdIcons.Save,
+        group: "Security",
+        action: async () => {
+          const password = await uiPrompt({ message: "Enter encryption password:" });
+          if (!password) return;
+          const encrypted = await encryptDocument(doc.content, password);
+          setContent(encrypted);
+          showAiToast("🔒 Document encrypted", "info");
+        },
+      },
+      {
+        id: "vault.decrypt",
+        label: "🔓 Decrypt Document",
+        hint: "Enter password to decrypt",
+        icon: cmdIcons.Save,
+        group: "Security",
+        action: async () => {
+          if (!isEncrypted(doc.content)) {
+            showAiToast("Document is not encrypted", "error");
+            return;
+          }
+          const password = await uiPrompt({ message: "Enter decryption password:" });
+          if (!password) return;
+          try {
+            const decrypted = await decryptDocument(doc.content, password);
+            setContent(decrypted);
+            showAiToast("🔓 Document decrypted", "info");
+          } catch {
+            showAiToast("❌ Wrong password", "error");
+          }
+        },
+      },
+      // ── Multi-Language AI Prompts ─────────────────────────────────────────
+      ...AI_PROMPT_TEMPLATES.map((tpl) => ({
+        id: `ai.prompt.${tpl.id}`,
+        label: tpl.label,
+        hint: tpl.category,
+        icon: cmdIcons.Sparkles,
+        group: "AI Prompts",
+        action: async () => {
+          const prompt = applyTemplate(tpl, doc.content);
+          try {
+            const { chat } = await import("./ai/llm");
+            const result = await chat([{ role: "user", content: prompt }]);
+            setContent(doc.content + "\n\n---\n\n" + result);
+            showAiToast(`✅ ${tpl.label} completed`, "info");
+          } catch (e) {
+            showAiToast(`AI error: ${(e as Error).message}`, "error");
+          }
+        },
       })),
       // ── AI Capabilities ──────────────────────────────────────────────────
       buildAiSettingsCommand(),
