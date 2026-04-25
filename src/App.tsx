@@ -8,6 +8,10 @@ import { Toolbar } from "./ui/Toolbar";
 import { Outline } from "./ui/Outline";
 import { StatusBar } from "./ui/StatusBar";
 import { ScrollProgress } from "./ui/ScrollProgress";
+import { SearchReplace } from "./ui/SearchReplace";
+import { GraphView } from "./ui/GraphView";
+import { VersionHistory, saveSnapshot } from "./ui/VersionHistory";
+import { MarkdownTableEditor } from "./ui/MarkdownTableEditor";
 import { CommandPalette, cmdIcons } from "./ui/CommandPalette";
 import type { Command } from "./ui/CommandPalette";
 import { FileTree } from "./ui/FileTree";
@@ -85,6 +89,11 @@ export default function App() {
   const editorRef = useRef<EditorHandle | null>(null);
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [findReplaceOpen, setFindReplaceOpen] = useState(false);
+  const [graphOpen, setGraphOpen] = useState(false);
+  const [historyOpen, setHistoryOpen] = useState(false);
+  const [tableEditorOpen, setTableEditorOpen] = useState(false);
+  const toggleAutoSave = useAppStore((s) => s.toggleAutoSave);
   const [recents, setRecents] = useState<RecentFile[]>([]);
   const [collab, setCollab] = useState<CollabSession | null>(null);
   const [collabPeers, setCollabPeers] = useState<CollabPeer[]>([]);
@@ -359,6 +368,9 @@ export default function App() {
       } else if (e.key === "s" || e.key === "S") {
         e.preventDefault();
         handleSave(e.shiftKey);
+      } else if (e.key === "h" && (e.metaKey || e.ctrlKey)) {
+        e.preventDefault();
+        setFindReplaceOpen((v) => !v);
       } else if (e.key === "o" || e.key === "O") {
         e.preventDefault();
         handleOpen();
@@ -382,6 +394,23 @@ export default function App() {
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [handleOpen, handleSave, handleNew]);
+
+  // Auto-save: save dirty documents on interval
+  const autoSave = useAppStore((s) => s.autoSave);
+  const autoSaveInterval = useAppStore((s) => s.autoSaveInterval);
+  useEffect(() => {
+    if (!autoSave || !doc.dirty) return;
+    const timer = setInterval(() => {
+      if (useAppStore.getState().doc.dirty) {
+        // Only auto-save if the file has a handle or workspace name
+        const d = useAppStore.getState().doc;
+        if (d.handle || d.workspaceName) {
+          handleSave(false);
+        }
+      }
+    }, autoSaveInterval);
+    return () => clearInterval(timer);
+  }, [autoSave, autoSaveInterval, doc.dirty, handleSave]);
 
   // Drag & drop file open
   const [dragHover, setDragHover] = useState(false);
@@ -663,6 +692,64 @@ export default function App() {
         group: t("group.view"),
         action: () => setLocale(l.code),
       })),
+      // ── New Features ──────────────────────────────────────────────────────
+      {
+        id: "view.findReplace",
+        label: "Find & Replace",
+        shortcut: "⌘H",
+        icon: cmdIcons.PanelRightOpen,
+        group: t("group.view"),
+        action: () => setFindReplaceOpen(true),
+      },
+      {
+        id: "view.graphView",
+        label: "Knowledge Graph",
+        hint: "visual map of file connections",
+        icon: cmdIcons.PanelRightOpen,
+        group: t("group.view"),
+        action: () => {
+          setGraphOpen(true);
+        },
+      },
+      {
+        id: "view.versionHistory",
+        label: "Version History",
+        hint: "restore previous versions",
+        icon: cmdIcons.PanelRightOpen,
+        group: t("group.view"),
+        action: () => setHistoryOpen(true),
+      },
+      {
+        id: "insert.table",
+        label: "Insert Table (Editor)",
+        hint: "visual table builder",
+        icon: cmdIcons.Pencil,
+        group: t("group.insert"),
+        action: () => setTableEditorOpen(true),
+      },
+      {
+        id: "view.autoSave",
+        label: autoSave ? "Disable Auto-Save" : "Enable Auto-Save",
+        hint: autoSave ? `every ${autoSaveInterval / 1000}s` : "off",
+        icon: cmdIcons.Pencil,
+        group: t("group.view"),
+        action: toggleAutoSave,
+      },
+      ...(() => {
+        // Lazy import templates
+        const { TEMPLATES } = require("./editor/templates");
+        return (TEMPLATES as { id: string; name: string; description: string; category: string; content: string }[]).map((tpl) => ({
+          id: `template.${tpl.id}`,
+          label: `Template: ${tpl.name}`,
+          hint: tpl.category,
+          icon: cmdIcons.FileText,
+          group: "Templates",
+          action: () => {
+            setContent(tpl.content);
+            setDoc({ name: `${tpl.name}.md`, dirty: true });
+          },
+        }));
+      })(),
       // ── AI Capabilities ──────────────────────────────────────────────────
       buildAiSettingsCommand(),
       // ── Git ─────────────────────────────────────────────────────────────
@@ -1041,6 +1128,12 @@ export default function App() {
         onCommandPalette={() => setPaletteOpen(true)}
       />
       <main id="main" className="flex-1 flex min-h-0 relative">
+        <SearchReplace
+          open={findReplaceOpen}
+          onClose={() => setFindReplaceOpen(false)}
+          content={doc.content}
+          onChange={setContent}
+        />
         {showWorkspace && (
           <>
             <FileTree
@@ -1186,6 +1279,43 @@ export default function App() {
       />
       <AiToastContainer />
       <AiInlinePromptOverlay />
+
+      {/* Graph View overlay */}
+      {graphOpen && (
+        <div style={{ position: "fixed", inset: 0, zIndex: 9999, background: "hsl(var(--bg))" }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "8px 16px", borderBottom: "1px solid hsl(var(--border))" }}>
+            <h3 style={{ margin: 0, fontSize: 14, color: "hsl(var(--fg))" }}>Knowledge Graph</h3>
+            <button className="icon-btn" onClick={() => setGraphOpen(false)} style={{ width: "auto", padding: "4px 12px", fontSize: 12 }}>Close</button>
+          </div>
+          <div style={{ height: "calc(100vh - 42px)" }}>
+            <GraphView onOpenFile={(path, content) => {
+              setDoc({ name: path.split("/").pop() ?? path, content, handle: undefined, workspaceName: path, dirty: false });
+              setGraphOpen(false);
+            }} />
+          </div>
+        </div>
+      )}
+
+      {/* Version History overlay */}
+      {historyOpen && (
+        <VersionHistory
+          fileName={doc.name}
+          currentContent={doc.content}
+          onRestore={(content) => setContent(content)}
+          onClose={() => setHistoryOpen(false)}
+        />
+      )}
+
+      {/* Table Editor overlay */}
+      {tableEditorOpen && (
+        <MarkdownTableEditor
+          onUpdate={(md) => {
+            const current = doc.content;
+            setContent(current + "\n\n" + md + "\n");
+          }}
+          onClose={() => setTableEditorOpen(false)}
+        />
+      )}
     </div>
   );
 }

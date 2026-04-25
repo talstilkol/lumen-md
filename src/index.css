@@ -1468,6 +1468,22 @@
   .prose-lumen {
     padding-inline: 0.75rem;
   }
+  /* Touch-friendly icon buttons */
+  .icon-btn {
+    min-width: 44px;
+    min-height: 44px;
+  }
+}
+
+/* Tablet breakpoint */
+@media (min-width: 761px) and (max-width: 1024px) {
+  .titlebar {
+    padding-inline: 8px;
+    gap: 4px;
+  }
+  .icon-btn span {
+    font-size: 8px;
+  }
 }
 
 /* ─── Print / PDF ─── */

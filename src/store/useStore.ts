@@ -26,6 +26,8 @@ interface AppState {
   showBacklinks: boolean;
   vimEnabled: boolean;
   rtl: boolean;
+  autoSave: boolean;
+  autoSaveInterval: number;
   aiKey: string | null;
   setMode: (m: ViewMode) => void;
   setTheme: (t: Theme) => void;
@@ -37,6 +39,8 @@ interface AppState {
   toggleBacklinks: () => void;
   toggleVim: () => void;
   toggleRtl: () => void;
+  toggleAutoSave: () => void;
+  setAutoSaveInterval: (ms: number) => void;
   markSaved: () => void;
   setAiKey: (key: string | null) => void;
 }
@@ -59,6 +63,8 @@ export const useAppStore = create<AppState>()(
       showBacklinks: false,
       vimEnabled: false,
       rtl: false,
+      autoSave: true,
+      autoSaveInterval: 30000,
       aiKey: null,
       setMode: (m) => set({ mode: m }),
       setTheme: (t) => {
@@ -86,6 +92,8 @@ export const useAppStore = create<AppState>()(
         applyDirection(next);
         return { rtl: next };
       }),
+      toggleAutoSave: () => set((s) => ({ autoSave: !s.autoSave })),
+      setAutoSaveInterval: (ms) => set({ autoSaveInterval: ms }),
       markSaved: () =>
         set((state) => ({ doc: { ...state.doc, dirty: false } })),
       setAiKey: (key) => set({ aiKey: key }),
@@ -101,6 +109,8 @@ export const useAppStore = create<AppState>()(
         showBacklinks: s.showBacklinks,
         vimEnabled: s.vimEnabled,
         rtl: s.rtl,
+        autoSave: s.autoSave,
+        autoSaveInterval: s.autoSaveInterval,
         aiKey: s.aiKey,
         doc: {
           name: s.doc.name,
