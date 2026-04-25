@@ -104,15 +104,24 @@
     background-color: hsl(var(--accent) / 0.25) !important;
   }
   .cm-editor .cm-gutters {
-    background: transparent;
+    background: hsl(var(--bg));
     border-right: 1px solid hsl(var(--border));
-    color: hsl(var(--fg-muted));
+    color: hsl(var(--fg-muted) / 0.4);
+    font-size: 12px;
+    min-width: 42px;
+    padding-right: 4px;
+  }
+  .cm-editor .cm-gutter.cm-lineNumbers .cm-gutterElement {
+    padding: 0 8px 0 12px;
+    min-width: 32px;
+    text-align: right;
   }
   .cm-editor .cm-activeLine {
     background-color: hsl(var(--bg-subtle));
   }
   .cm-editor .cm-activeLineGutter {
     background-color: hsl(var(--bg-subtle));
+    color: hsl(var(--fg-muted) / 0.7);
   }
 
   /* Markdown syntax accents */

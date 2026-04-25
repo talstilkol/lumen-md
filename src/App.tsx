@@ -7,6 +7,7 @@ const WysiwygEditor = lazy(() => import("./editor/WysiwygEditor"));
 import { Toolbar } from "./ui/Toolbar";
 import { Outline } from "./ui/Outline";
 import { StatusBar } from "./ui/StatusBar";
+import { ScrollProgress } from "./ui/ScrollProgress";
 import { CommandPalette, cmdIcons } from "./ui/CommandPalette";
 import type { Command } from "./ui/CommandPalette";
 import { FileTree } from "./ui/FileTree";
@@ -1163,6 +1164,7 @@ export default function App() {
             : null
         }
       />
+      <ScrollProgress />
       <CommandPalette
         open={paletteOpen}
         onClose={() => setPaletteOpen(false)}
