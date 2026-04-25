@@ -1,4 +1,4 @@
-import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { lazy, Suspense, useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 import { Editor } from "./editor/Editor";
 import type { EditorHandle } from "./editor/Editor";
 import { Preview } from "./renderer/Preview";
@@ -9,12 +9,13 @@ import { Outline } from "./ui/Outline";
 import { StatusBar } from "./ui/StatusBar";
 import { ScrollProgress } from "./ui/ScrollProgress";
 import { SearchReplace } from "./ui/SearchReplace";
-import { GraphView } from "./ui/GraphView";
-import { CanvasWhiteboard } from "./ui/CanvasWhiteboard";
-import { PluginGallery } from "./ui/PluginGallery";
-import { PageView } from "./ui/PageView";
-import { VersionHistory, saveSnapshot } from "./ui/VersionHistory";
-import { MarkdownTableEditor } from "./ui/MarkdownTableEditor";
+const GraphView = lazy(() => import("./ui/GraphView").then(m => ({ default: m.GraphView })));
+const CanvasWhiteboard = lazy(() => import("./ui/CanvasWhiteboard").then(m => ({ default: m.CanvasWhiteboard })));
+const PluginGallery = lazy(() => import("./ui/PluginGallery").then(m => ({ default: m.PluginGallery })));
+const PageView = lazy(() => import("./ui/PageView").then(m => ({ default: m.PageView })));
+const VersionHistory = lazy(() => import("./ui/VersionHistory").then(m => ({ default: m.VersionHistory })));
+import { saveSnapshot } from "./ui/VersionHistory";
+const MarkdownTableEditor = lazy(() => import("./ui/MarkdownTableEditor").then(m => ({ default: m.MarkdownTableEditor })));
 import { TEMPLATES } from "./editor/templates";
 import { htmlToMarkdown } from "./storage/fileFormats";
 import { wirePluginAPI, registerPlugin, getPluginCommands, wordCountPlugin, notifyContentChange, notifySave } from "./plugins/pluginSystem";
@@ -484,6 +485,9 @@ export default function App() {
   const showPreview = mode === "preview" || mode === "split";
   const pageView = useAppStore((s) => s.pageView);
 
+  // Debounce preview rendering — keeps typing smooth for large docs
+  const deferredContent = useDeferredValue(doc.content);
+
   // Sync-scroll: link editor and preview scrolling in split mode
   const editorSectionRef = useRef<HTMLElement | null>(null);
   const previewSectionRef = useRef<HTMLElement | null>(null);
@@ -794,17 +798,46 @@ export default function App() {
         hint: "Speech recognition → text",
         icon: cmdIcons.Sparkles,
         group: "Tools",
-        action: () => {
+        action: async () => {
           const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
           if (!SpeechRecognition) {
             showAiToast("Speech recognition not supported in this browser", "error");
             return;
           }
+
+          // Language selector
+          const langMap: Record<string, string> = {
+            "English": "en-US", "Hebrew (עברית)": "he-IL", "Arabic (العربية)": "ar-SA",
+            "Russian (Русский)": "ru-RU", "Spanish": "es-ES", "French": "fr-FR",
+            "German": "de-DE", "Chinese (中文)": "zh-CN", "Japanese (日本語)": "ja-JP",
+          };
+          const langChoice = await uiPrompt({
+            message: "Select language for voice recognition:",
+            placeholder: "English",
+          });
+          const lang = langMap[langChoice ?? ""] ?? (useAppStore.getState().locale === "he" ? "he-IL" : "en-US");
+
           const recognition = new SpeechRecognition();
-          recognition.lang = useAppStore.getState().locale === "he" ? "he-IL" : "en-US";
+          recognition.lang = lang;
           recognition.interimResults = false;
           recognition.continuous = true;
-          showAiToast("🎙 Listening... speak now (click anywhere to stop)", "info");
+
+          // Create recording indicator
+          const indicator = document.createElement("div");
+          indicator.id = "voice-recording-indicator";
+          indicator.innerHTML = `
+            <div style="position:fixed;bottom:20px;right:20px;z-index:9999;display:flex;align-items:center;gap:8px;
+              background:hsl(var(--bg));border:1px solid hsl(var(--border-strong));border-radius:12px;
+              padding:10px 16px;box-shadow:0 8px 32px hsl(0 0% 0%/0.3);font-size:13px;color:hsl(var(--fg));">
+              <div style="width:10px;height:10px;border-radius:50%;background:#ef4444;animation:pulse 1s infinite;"></div>
+              <span>Recording... (${lang})</span>
+              <button id="voice-stop-btn" style="background:#ef4444;color:white;border:none;border-radius:6px;
+                padding:4px 12px;cursor:pointer;font-size:11px;font-weight:600;">⏹ Stop</button>
+            </div>
+            <style>@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}</style>
+          `;
+          document.body.appendChild(indicator);
+
           recognition.onresult = (event: any) => {
             let transcript = "";
             for (let i = event.resultIndex; i < event.results.length; i++) {
@@ -818,11 +851,24 @@ export default function App() {
               showAiToast(`✅ Added ${transcript.trim().split(/\s+/).length} words`, "info");
             }
           };
-          recognition.onerror = () => showAiToast("Speech recognition error", "error");
+
+          const stopRecording = () => {
+            recognition.stop();
+            indicator.remove();
+            showAiToast("🎙 Recording stopped", "info");
+          };
+
+          recognition.onerror = () => {
+            indicator.remove();
+            showAiToast("Speech recognition error — check microphone permissions", "error");
+          };
+          recognition.onend = () => indicator.remove();
+
           recognition.start();
-          // Stop on next click
-          const stop = () => { recognition.stop(); document.removeEventListener("click", stop); };
-          setTimeout(() => document.addEventListener("click", stop), 500);
+          // Wire stop button
+          setTimeout(() => {
+            document.getElementById("voice-stop-btn")?.addEventListener("click", stopRecording);
+          }, 100);
         },
       },
       // ── Plugin Commands ──────────────────────────────────────────────────
@@ -1325,9 +1371,11 @@ export default function App() {
             }
           >
             {pageView ? (
-              <PageView markdownText={doc.content} />
+              <Suspense fallback={<div style={{padding:'2rem',color:'hsl(var(--fg-muted))'}}>Loading page view…</div>}>
+                <PageView markdownText={deferredContent} />
+              </Suspense>
             ) : (
-              <Preview markdownText={doc.content} />
+              <Preview markdownText={deferredContent} />
             )}
           </section>
         )}
@@ -1442,37 +1490,45 @@ export default function App() {
             <button className="icon-btn" onClick={() => setGraphOpen(false)} style={{ width: "auto", padding: "4px 12px", fontSize: 12 }}>Close</button>
           </div>
           <div style={{ height: "calc(100vh - 42px)" }}>
-            <GraphView onOpenFile={(path, content) => {
-              setDoc({ name: path.split("/").pop() ?? path, content, handle: undefined, workspaceName: path, dirty: false });
-              setGraphOpen(false);
-            }} />
+            <Suspense fallback={<div style={{padding:'2rem',color:'hsl(var(--fg-muted))'}}>Loading graph…</div>}>
+              <GraphView onOpenFile={(path, content) => {
+                setDoc({ name: path.split("/").pop() ?? path, content, handle: undefined, workspaceName: path, dirty: false });
+                setGraphOpen(false);
+              }} />
+            </Suspense>
           </div>
         </div>
       )}
 
       {/* Canvas Whiteboard overlay */}
-      <CanvasWhiteboard open={canvasOpen} onClose={() => setCanvasOpen(false)} />
-      <PluginGallery open={galleryOpen} onClose={() => setGalleryOpen(false)} />
+      <Suspense fallback={null}>
+        <CanvasWhiteboard open={canvasOpen} onClose={() => setCanvasOpen(false)} />
+        <PluginGallery open={galleryOpen} onClose={() => setGalleryOpen(false)} />
+      </Suspense>
 
       {/* Version History overlay */}
       {historyOpen && (
-        <VersionHistory
-          fileName={doc.name}
-          currentContent={doc.content}
-          onRestore={(content) => setContent(content)}
-          onClose={() => setHistoryOpen(false)}
-        />
+        <Suspense fallback={<div style={{padding:'2rem',color:'hsl(var(--fg-muted))'}}>Loading history…</div>}>
+          <VersionHistory
+            fileName={doc.name}
+            currentContent={doc.content}
+            onRestore={(content) => setContent(content)}
+            onClose={() => setHistoryOpen(false)}
+          />
+        </Suspense>
       )}
 
       {/* Table Editor overlay */}
       {tableEditorOpen && (
-        <MarkdownTableEditor
-          onUpdate={(md) => {
-            const current = doc.content;
-            setContent(current + "\n\n" + md + "\n");
-          }}
-          onClose={() => setTableEditorOpen(false)}
-        />
+        <Suspense fallback={null}>
+          <MarkdownTableEditor
+            onUpdate={(md) => {
+              const current = doc.content;
+              setContent(current + "\n\n" + md + "\n");
+            }}
+            onClose={() => setTableEditorOpen(false)}
+          />
+        </Suspense>
       )}
     </div>
   );

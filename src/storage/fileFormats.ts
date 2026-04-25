@@ -268,15 +268,17 @@ export async function fileToMarkdown(file: File): Promise<{ name: string; conten
       return { name: `${baseName}.md`, content: xmlToMarkdown(text) };
     }
     case "doc": {
-      // Legacy .doc — best-effort text extraction
+      // Legacy .doc — best-effort text extraction with warning
       const text = await file.text();
       const readable = text.replace(/[^\x20-\x7E\n\r\t\u0590-\u05FF\u0600-\u06FF]/g, "");
-      return { name: `${baseName}.md`, content: readable.trim() };
+      const warning = "> ⚠️ **Note:** DOC files use a legacy binary format. Complex formatting, tables, and images may be lost.\n> For best results, save as DOCX or export as HTML from Word.\n\n---\n\n";
+      return { name: `${baseName}.md`, content: warning + readable.trim() };
     }
     case "docx": {
-      // DOCX is a ZIP archive — basic text extraction from XML
+      // DOCX is a ZIP — basic text extraction with warning
       const text = await extractDocxText(file);
-      return { name: `${baseName}.md`, content: text };
+      const warning = "> ⚠️ **Note:** DOCX text extraction is basic. Tables, images, and rich formatting may not convert perfectly.\n> For full fidelity, export as HTML from Word and use the Paste Text button.\n\n---\n\n";
+      return { name: `${baseName}.md`, content: warning + text };
     }
     default:
       return { name: file.name, content: await file.text() };
