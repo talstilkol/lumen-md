@@ -672,6 +672,14 @@ export default function App() {
         action: toggleOutline,
       },
       {
+        id: "view.pageView",
+        label: "📄 Page View (A4)",
+        hint: pageView ? "Currently ON" : "Currently OFF",
+        icon: cmdIcons.FileText,
+        group: t("group.view"),
+        action: () => useAppStore.getState().togglePageView(),
+      },
+      {
         id: "view.workspace",
         label: t("cmd.view.workspace"),
         hint: t("cmd.view.workspace.hint"),

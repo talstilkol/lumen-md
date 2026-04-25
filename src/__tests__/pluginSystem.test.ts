@@ -5,19 +5,28 @@
  */
 
 import { describe, it, expect, beforeEach } from "vitest";
-import { registerPlugin, unregisterPlugin, getPluginCommands, emitHook, listPlugins } from "../plugins/pluginSystem";
+import {
+  registerPlugin,
+  unregisterPlugin,
+  getPluginCommands,
+  getRegisteredPlugins,
+  type LumenPlugin,
+} from "../plugins/pluginSystem";
 
 describe("Plugin System", () => {
-  const testPlugin = {
+  const testPlugin: LumenPlugin = {
     id: "test-plugin",
     name: "Test Plugin",
     version: "1.0.0",
     description: "A test plugin",
-    commands: [
-      { id: "test.hello", label: "Hello", action: () => {} },
-    ],
-    onActivate: () => {},
-    onDeactivate: () => {},
+    activate: (api) => {
+      api.registerCommand({
+        id: "test.hello",
+        label: "Hello",
+        action: () => {},
+      });
+    },
+    deactivate: () => {},
   };
 
   beforeEach(() => {
@@ -25,29 +34,44 @@ describe("Plugin System", () => {
     try { unregisterPlugin("test-plugin"); } catch { /* ok */ }
   });
 
-  it("registers a plugin", () => {
-    registerPlugin(testPlugin);
-    const list = listPlugins();
+  it("registers a plugin", async () => {
+    await registerPlugin(testPlugin);
+    const list = getRegisteredPlugins();
     expect(list.some((p) => p.id === "test-plugin")).toBe(true);
   });
 
-  it("adds plugin commands to the palette", () => {
-    registerPlugin(testPlugin);
+  it("marks plugin as active after registration", async () => {
+    await registerPlugin(testPlugin);
+    const list = getRegisteredPlugins();
+    const entry = list.find((p) => p.id === "test-plugin");
+    expect(entry?.active).toBe(true);
+  });
+
+  it("adds plugin commands to the palette", async () => {
+    await registerPlugin(testPlugin);
     const cmds = getPluginCommands();
     expect(cmds.some((c) => c.id === "test.hello")).toBe(true);
   });
 
-  it("unregisters a plugin", () => {
-    registerPlugin(testPlugin);
+  it("unregisters a plugin", async () => {
+    await registerPlugin(testPlugin);
     unregisterPlugin("test-plugin");
-    const list = listPlugins();
+    const list = getRegisteredPlugins();
     expect(list.some((p) => p.id === "test-plugin")).toBe(false);
   });
 
-  it("removes commands after unregistration", () => {
-    registerPlugin(testPlugin);
+  it("removes commands after unregistration", async () => {
+    await registerPlugin(testPlugin);
     unregisterPlugin("test-plugin");
     const cmds = getPluginCommands();
     expect(cmds.some((c) => c.id === "test.hello")).toBe(false);
+  });
+
+  it("does not duplicate plugins on re-register", async () => {
+    await registerPlugin(testPlugin);
+    await registerPlugin(testPlugin); // second call should be ignored
+    const list = getRegisteredPlugins();
+    const count = list.filter((p) => p.id === "test-plugin").length;
+    expect(count).toBe(1);
   });
 });

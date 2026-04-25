@@ -1,3 +1,4 @@
+/// <reference types="vitest" />
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import { VitePWA } from "vite-plugin-pwa";
@@ -77,5 +78,18 @@ export default defineConfig({
   build: {
     target: "es2022",
     sourcemap: true,
+    rollupOptions: {
+      input: {
+        main: path.resolve(__dirname, "index.html"),
+        landing: path.resolve(__dirname, "public/landing.html"),
+      },
+    },
+  },
+  // ── Vitest ──────────────────────────────────────────────────────────
+  test: {
+    environment: "jsdom",
+    include: ["src/__tests__/**/*.test.ts"],
+    globals: true,
   },
 });
+

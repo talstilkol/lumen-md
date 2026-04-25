@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   Search,
   FileText,
@@ -227,33 +227,56 @@ export function CommandPalette({ open, onClose, commands }: Props) {
           {filtered.length === 0 && (
             <div className="cmd-palette-empty">{t("palette.noMatch")}</div>
           )}
-          {filtered.map((cmd, i) => {
-            const Icon = cmd.icon ?? Sparkles;
-            return (
-              <div
-                key={cmd.id}
-                id={`cmd-item-${i}`}
-                data-cmd-index={i}
-                className={`cmd-palette-item ${i === active ? "active" : ""}`}
-                role="option"
-                aria-selected={i === active}
-                onMouseEnter={() => setActive(i)}
-                onClick={() => {
-                  onClose();
-                  setTimeout(() => cmd.action(), 0);
-                }}
-              >
-                <Icon size={15} style={{ opacity: 0.75, flexShrink: 0 }} />
-                <span className="cmd-palette-label">{cmd.label}</span>
-                {cmd.hint && (
-                  <span className="cmd-palette-hint">{cmd.hint}</span>
-                )}
-                {cmd.shortcut && (
-                  <span className="cmd-palette-shortcut">{cmd.shortcut}</span>
-                )}
-              </div>
-            );
-          })}
+          {(() => {
+            let lastGroup = "";
+            return filtered.map((cmd, i) => {
+              const Icon = cmd.icon ?? Sparkles;
+              const showHeader = cmd.group && cmd.group !== lastGroup;
+              if (cmd.group) lastGroup = cmd.group;
+              return (
+                <React.Fragment key={cmd.id}>
+                  {showHeader && (
+                    <div
+                      style={{
+                        padding: "8px 14px 4px",
+                        fontSize: 10,
+                        fontWeight: 700,
+                        textTransform: "uppercase",
+                        letterSpacing: "0.08em",
+                        color: "hsl(var(--accent) / 0.7)",
+                        borderTop: i > 0 ? "1px solid hsl(var(--border) / 0.4)" : "none",
+                        marginTop: i > 0 ? 4 : 0,
+                        userSelect: "none",
+                      }}
+                    >
+                      {cmd.group}
+                    </div>
+                  )}
+                  <div
+                    id={`cmd-item-${i}`}
+                    data-cmd-index={i}
+                    className={`cmd-palette-item ${i === active ? "active" : ""}`}
+                    role="option"
+                    aria-selected={i === active}
+                    onMouseEnter={() => setActive(i)}
+                    onClick={() => {
+                      onClose();
+                      setTimeout(() => cmd.action(), 0);
+                    }}
+                  >
+                    <Icon size={15} style={{ opacity: 0.75, flexShrink: 0 }} />
+                    <span className="cmd-palette-label">{cmd.label}</span>
+                    {cmd.hint && (
+                      <span className="cmd-palette-hint">{cmd.hint}</span>
+                    )}
+                    {cmd.shortcut && (
+                      <span className="cmd-palette-shortcut">{cmd.shortcut}</span>
+                    )}
+                  </div>
+                </React.Fragment>
+              );
+            });
+          })()}
         </div>
         <div className="cmd-palette-footer">
           <span>
