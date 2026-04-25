@@ -19,9 +19,9 @@ import { languages } from "@codemirror/language-data";
 import { tags as t } from "@lezer/highlight";
 import { StateField, StateEffect } from "@codemirror/state";
 import type { Extension } from "@codemirror/state";
-import type { CollabSession } from "../collab/yjs";
 import { chat } from "../ai/llm";
 import { PROMPTS } from "../ai/prompts";
+import { createInsert, createDelete } from "../storage/crdt";
 
 const mdHighlight = HighlightStyle.define([
   { tag: t.heading1, class: "tok-heading tok-heading1" },
@@ -53,11 +53,10 @@ interface EditorProps {
   /** Toggle Vim keybindings. */
   vimEnabled?: boolean;
   /**
-   * Active collaboration session. When provided, the editor binds its text
-   * source to the Yjs `Y.Text`; the `value` prop is ignored. Toggling collab
-   * on/off should be done via React `key` to force a fresh editor.
+   * Active CRDT collaboration path. When provided, the editor intercepts text
+   * updates and sends them atomically to the local Conflict-Free Replicated Data Type queue.
    */
-  collab?: CollabSession | null;
+  crdtPath?: string | null;
 }
 
 export interface EditorHandle {
@@ -259,17 +258,8 @@ export const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
       },
     });
 
-    // Build the extension list, optionally binding Yjs collaboration.
-    // We dynamic-import y-codemirror.next so it stays out of the main bundle.
-    const collabExtensionsPromise = collab
-      ? import("y-codemirror.next").then((m) => {
-          // Pass awareness for cursor sharing; let the binding create its own
-          // UndoManager (default behavior).
-          return [m.yCollab(collab.ytext, collab.awareness)];
-        })
-      : Promise.resolve([] as unknown[]);
-
-    const initialDoc = collab ? collab.ytext.toString() : value;
+    // Local storage acts as truth for the document.
+    const initialDoc = value;
 
     const baseExtensions = [
       vimCompartment.of([]),
@@ -300,6 +290,20 @@ export const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
       EditorView.updateListener.of((u) => {
         if (u.docChanged && !syncingRef.current) {
           onChangeRef.current(u.state.doc.toString());
+
+          // Dispatch atomic ops to CRDT queue
+          if (crdtPath) {
+            u.changes.iterChanges((fromA, toA, fromB, toB, inserted) => {
+              // Deletions
+              if (fromA < toA) {
+                createDelete(crdtPath, fromA, toA - fromA);
+              }
+              // Insertions
+              if (inserted.length) {
+                createInsert(crdtPath, fromA, inserted.toString());
+              }
+            });
+          }
         }
       }),
     ];
@@ -344,23 +348,7 @@ export const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
     const view = new EditorView({ state: startState, parent: hostRef.current });
     viewRef.current = view;
 
-    // Attach the collab extension once it's loaded.
-    let cancelled = false;
-    void collabExtensionsPromise.then((extras) => {
-      if (cancelled || !viewRef.current || extras.length === 0) return;
-      // Append the collab extension via a fresh state with all extensions.
-      const newState = EditorState.create({
-        doc: viewRef.current.state.doc,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        extensions: [...baseExtensions, ...(extras as any)],
-      });
-      syncingRef.current = true;
-      try {
-        viewRef.current.setState(newState);
-      } finally {
-        syncingRef.current = false;
-      }
-    });
+
 
     return () => {
       cancelled = true;

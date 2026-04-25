@@ -1373,7 +1373,7 @@ export default function App() {
               onChange={setContent}
               onAddAsset={handleAddAsset}
               vimEnabled={vimEnabled}
-              collab={collab}
+              crdtPath={activeFile}
             />
           </section>
         )}

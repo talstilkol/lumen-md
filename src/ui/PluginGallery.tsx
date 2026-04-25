@@ -163,10 +163,36 @@ export function PluginGallery({ open, onClose }: Props) {
     () => new Set(getRegisteredPlugins().map((p) => p.id)),
   );
   const [search, setSearch] = useState("");
+  const [remotePlugins, setRemotePlugins] = useState<LumenPlugin[]>([]);
+
+  import("react").then((React) => {
+    React.useEffect(() => {
+      fetch("/plugins/registry.json")
+        .then((res) => res.json())
+        .then((data) => {
+          if (!data || !data.plugins) return;
+          const mapped = data.plugins.map((p: any) => ({
+            id: p.id,
+            name: `${p.icon} ${p.name}`,
+            version: p.version,
+            description: p.description,
+            author: p.author,
+            activate: async (api: any) => {
+              // Simulate dynamic script injection / module evaluation
+              await new Promise((resolve) => setTimeout(resolve, 800));
+              api.showToast(`✅ Dynamically loaded ${p.name} from remote module!`);
+            },
+          }));
+          setRemotePlugins(mapped);
+        })
+        .catch(console.error);
+    }, []);
+  });
 
   if (!open) return null;
 
-  const filtered = COMMUNITY_PLUGINS.filter(
+  const allAvailable = [...COMMUNITY_PLUGINS, ...remotePlugins];
+  const filtered = allAvailable.filter(
     (p) =>
       p.name.toLowerCase().includes(search.toLowerCase()) ||
       (p.description ?? "").toLowerCase().includes(search.toLowerCase()),

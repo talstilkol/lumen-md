@@ -1,0 +1,40 @@
+{
+  "plugins": [
+    {
+      "id": "mermaid-lumen",
+      "name": "Mermaid Diagrams",
+      "author": "Tal Stilkol",
+      "description": "Render advanced Mermaid charts instantly inside your documents.",
+      "version": "1.4.0",
+      "icon": "📊",
+      "url": "/plugins/mermaid-plugin.js"
+    },
+    {
+      "id": "chart-js-renderer",
+      "name": "Chart.js Renderer",
+      "author": "Lumen Team",
+      "description": "Native integration of dynamic Chart.js JSON code blocks.",
+      "version": "2.1.2",
+      "icon": "📈",
+      "url": "/plugins/chartjs-plugin.js"
+    },
+    {
+      "id": "abc-music",
+      "name": "Abc Music Blocks",
+      "author": "Lumen Labs",
+      "description": "Write ABC notation and render beautiful sheet music automatically.",
+      "version": "0.9.1",
+      "icon": "🎵",
+      "url": "/plugins/abc-music.js"
+    },
+    {
+      "id": "model-3d",
+      "name": "3D Model Viewer",
+      "author": "Open Source",
+      "description": "Embed interactive .glb and .obj 3D models inline using WebGL.",
+      "version": "1.0.0",
+      "icon": "🧊",
+      "url": "/plugins/model-3d.js"
+    }
+  ]
+}

@@ -1,0 +1,39 @@
+{
+  "name": "@milkdown/plugin-slash",
+  "version": "7.20.0",
+  "keywords": [
+    "milkdown",
+    "milkdown plugin"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Milkdown/milkdown.git",
+    "directory": "packages/plugins/plugin-slash"
+  },
+  "files": [
+    "lib",
+    "src"
+  ],
+  "type": "module",
+  "sideEffects": false,
+  "main": "./lib/index.js",
+  "exports": {
+    ".": {
+      "import": "./lib/index.js",
+      "types": "./lib/index.d.ts"
+    }
+  },
+  "dependencies": {
+    "@floating-ui/dom": "^1.5.1",
+    "@types/lodash-es": "^4.17.12",
+    "lodash-es": "^4.17.21",
+    "@milkdown/ctx": "7.20.0",
+    "@milkdown/utils": "7.20.0",
+    "@milkdown/prose": "7.20.0"
+  },
+  "scripts": {
+    "build": "vite build"
+  },
+  "types": "./lib/index.d.ts"
+}
