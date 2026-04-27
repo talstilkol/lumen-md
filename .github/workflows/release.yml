@@ -33,7 +33,7 @@ jobs:
       - run: npm run budget
       - name: Tar the dist folder
         run: tar -czf lumen-web-${{ github.ref_name }}.tgz -C dist .
-      - uses: softprops/action-gh-release@v2
+      - uses: softprops/action-gh-release@v3
         with:
           files: lumen-web-${{ github.ref_name }}.tgz
           fail_on_unmatched_files: true
@@ -87,7 +87,7 @@ jobs:
           APPLE_PASSWORD:          ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
           APPLE_TEAM_ID:           ${{ secrets.APPLE_TEAM_ID }}
           APPLE_SIGNING_IDENTITY:  ${{ secrets.APPLE_SIGNING_IDENTITY }}
-      - uses: softprops/action-gh-release@v2
+      - uses: softprops/action-gh-release@v3
         with:
           files: ${{ matrix.artifact }}
           fail_on_unmatched_files: false
