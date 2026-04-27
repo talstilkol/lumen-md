@@ -11,7 +11,7 @@
   },
   "optionalDependencies": {
     "y-websocket": "^2.0.4",
-    "y-leveldb": "^0.1.2",
+    "y-leveldb": "^0.2.0",
     "level": "^8.0.1",
     "yjs": "^13.6.10"
   }
