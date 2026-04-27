@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { extractToc } from "../renderer/pipeline";
 import { t } from "../i18n";
 
@@ -6,7 +6,7 @@ interface Props {
   markdownText: string;
 }
 
-export function Outline({ markdownText }: Props) {
+export const Outline = React.memo(function Outline({ markdownText }: Props) {
   // Debounce expensive TOC extraction.
   const [debounced, setDebounced] = useState(markdownText);
   useEffect(() => {
@@ -64,7 +64,13 @@ export function Outline({ markdownText }: Props) {
   }, [toc]);
 
   return (
-    <aside className="h-full overflow-y-auto py-3 px-1 bg-bg-subtle border-l border-border w-[260px] flex-shrink-0">
+    <aside
+      className="
+        outline-aside h-full overflow-y-auto py-3 px-1 bg-bg-subtle border-l border-border
+        w-[260px] flex-shrink-0
+        max-md:hidden md:block
+      "
+    >
       <div className="px-2 mb-2 text-[11px] uppercase tracking-wider text-fg-muted font-semibold">
         {t("outline.title")}
       </div>
@@ -93,4 +99,4 @@ export function Outline({ markdownText }: Props) {
       )}
     </aside>
   );
-}
+});

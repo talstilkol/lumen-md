@@ -1,0 +1,109 @@
+/* ─── File tree ─── */
+.file-tree {
+  width: var(--sidebar-width, 240px);
+  min-width: 160px;
+  max-width: 480px;
+  flex-shrink: 0;
+  background: hsl(var(--bg-subtle));
+  border-right: 1px solid hsl(var(--border));
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.sidebar-resizer {
+  width: 4px;
+  cursor: col-resize;
+  background: transparent;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 5;
+}
+.sidebar-resizer:hover,
+.sidebar-resizer.dragging {
+  background: hsl(var(--accent) / 0.4);
+}
+.file-tree-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.55rem 0.6rem 0.55rem 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: 11px;
+  color: hsl(var(--fg-muted));
+  font-weight: 600;
+  border-bottom: 1px solid hsl(var(--border));
+}
+.file-tree-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 4px 0;
+  margin: 0;
+  list-style: none;
+}
+.file-tree-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  color: hsl(var(--fg-subtle));
+  font-size: 13px;
+  cursor: default;
+  border-left: 2px solid transparent;
+}
+.file-tree-item:hover {
+  background: hsl(var(--bg-muted));
+  color: hsl(var(--fg));
+}
+.file-tree-item:hover .file-tree-action {
+  opacity: 1;
+}
+.file-tree-item.active {
+  background: hsl(var(--accent) / 0.1);
+  color: hsl(var(--fg));
+  border-left-color: hsl(var(--accent));
+}
+.file-tree-name {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: left;
+  background: transparent;
+  border: 0;
+  color: inherit;
+  font: inherit;
+  padding: 0;
+  cursor: pointer;
+}
+.file-tree-input {
+  flex: 1;
+  background: hsl(var(--bg));
+  color: hsl(var(--fg));
+  border: 1px solid hsl(var(--accent) / 0.5);
+  border-radius: 3px;
+  padding: 1px 4px;
+  font: inherit;
+  outline: none;
+}
+.file-tree-action {
+  width: 18px;
+  height: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 0;
+  color: hsl(var(--fg-muted));
+  border-radius: 3px;
+  opacity: 0;
+  transition:
+    opacity 80ms ease,
+    background 80ms ease;
+  cursor: pointer;
+}
+.file-tree-action:hover {
+  background: hsl(var(--bg-inset));
+  color: hsl(var(--fg));
+  opacity: 1;
+}

@@ -1,6 +1,8 @@
 import { useMemo } from "react";
 import YAML from "yaml";
+import { RefreshCw } from "lucide-react";
 import { EChart } from "./EChart";
+import { useFetchSource } from "./useFetchSource";
 
 interface Props {
   source: string;
@@ -31,9 +33,23 @@ function parseSpec(source: string): {
 }
 
 export default function ChartBlock({ source, meta }: Props) {
-  const { option, error } = useMemo(() => parseSpec(source), [source]);
+  const { effectiveSource, loading, error: fetchError, url, remote, refetch } =
+    useFetchSource(source, meta);
+  const { option, error } = useMemo(
+    () => parseSpec(effectiveSource),
+    [effectiveSource],
+  );
   const heightMatch = meta?.match(/height=(\d+)/);
   const height = heightMatch ? Number(heightMatch[1]) : 360;
+  if (fetchError) {
+    return (
+      <div className="chart-block" style={{ padding: "1rem" }}>
+        <div style={{ color: "hsl(0 80% 60%)", fontSize: 13 }}>
+          ⚠︎ Chart fetch failed: {fetchError}
+        </div>
+      </div>
+    );
+  }
   if (!option) {
     return (
       <div className="chart-block" style={{ padding: "1rem" }}>
@@ -46,7 +62,30 @@ export default function ChartBlock({ source, meta }: Props) {
   return (
     <div className="chart-block">
       <div className="chart-block-header">
-        <span>Chart</span>
+        <span>Chart{remote && url ? " · live" : ""}</span>
+        {url && (
+          <button
+            type="button"
+            onClick={refetch}
+            title={`Refetch ${url}`}
+            style={{
+              marginInlineStart: "auto",
+              border: "none",
+              background: "transparent",
+              color: "hsl(var(--fg-muted))",
+              cursor: loading ? "wait" : "pointer",
+              padding: 4,
+              borderRadius: 6,
+            }}
+            disabled={loading}
+            aria-label="Refetch chart data"
+          >
+            <RefreshCw
+              size={13}
+              style={{ animation: loading ? "spin 1s linear infinite" : "none" }}
+            />
+          </button>
+        )}
       </div>
       <div style={{ padding: "0.5rem" }}>
         <EChart option={option} height={height} />

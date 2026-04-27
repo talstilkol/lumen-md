@@ -4,10 +4,12 @@ import type { DataSet } from "../data/csv";
 import { suggestCharts, type ChartSuggestion } from "../data/suggest";
 import { DataTable } from "./DataTable";
 import { EChart } from "./EChart";
-import { chat, parseJsonResponse, AiError } from "../ai/llm";
+import { chat, parseJsonResponse } from "../ai/llm";
 import { PROMPTS } from "../ai/prompts";
 import { showAiToast } from "../ui/AiToast";
-import { Table2, BarChart3, Sparkles } from "lucide-react";
+import { Table2, BarChart3, Sparkles, RefreshCw } from "lucide-react";
+import { log } from "../lib/logger";
+import { useFetchSource } from "./useFetchSource";
 
 interface Props {
   source: string;
@@ -18,13 +20,15 @@ interface Props {
 type View = "table" | "chart" | "ai-chart";
 
 export default function CsvBlock({ source, lang, meta }: Props) {
+  const { effectiveSource, loading: fetching, error: fetchError, url, remote, refetch } =
+    useFetchSource(source, meta);
   const data = useMemo<DataSet | null>(() => {
     try {
-      return parseCSV(source, lang === "tsv" ? "\t" : undefined);
+      return parseCSV(effectiveSource, lang === "tsv" ? "\t" : undefined);
     } catch {
       return null;
     }
-  }, [source, lang]);
+  }, [effectiveSource, lang]);
 
   const suggestions = useMemo<ChartSuggestion[]>(
     () => (data ? suggestCharts(data) : []),
@@ -40,6 +44,15 @@ export default function CsvBlock({ source, lang, meta }: Props) {
   const [aiLoading, setAiLoading] = useState(false);
   const [aiOption, setAiOption] = useState<any>(null);
 
+  if (fetchError) {
+    return (
+      <div className="chart-block" style={{ padding: "1rem" }}>
+        <div style={{ color: "hsl(0 80% 60%)", fontSize: 13 }}>
+          ⚠︎ {lang.toUpperCase()} fetch failed: {fetchError}
+        </div>
+      </div>
+    );
+  }
   if (!data) {
     return (
       <div className="chart-block" style={{ padding: "1rem" }}>
@@ -59,6 +72,34 @@ export default function CsvBlock({ source, lang, meta }: Props) {
         <span style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
           <Sparkles size={13} style={{ opacity: 0.7 }} />
           {titleMatch?.[1] ?? `${lang.toUpperCase()} • ${data.rows.length} rows × ${data.columns.length} cols`}
+          {remote && (
+            <span style={{ fontSize: 10, color: "hsl(var(--accent))", marginInlineStart: 4 }}>
+              · live
+            </span>
+          )}
+          {url && (
+            <button
+              type="button"
+              onClick={refetch}
+              title={`Refetch ${url}`}
+              style={{
+                marginInlineStart: 4,
+                border: "none",
+                background: "transparent",
+                color: "hsl(var(--fg-muted))",
+                cursor: fetching ? "wait" : "pointer",
+                padding: 2,
+                borderRadius: 6,
+              }}
+              disabled={fetching}
+              aria-label="Refetch CSV data"
+            >
+              <RefreshCw
+                size={11}
+                style={{ animation: fetching ? "spin 1s linear infinite" : "none" }}
+              />
+            </button>
+          )}
         </span>
         <div className="chart-block-tabs">
           <button
@@ -90,7 +131,7 @@ export default function CsvBlock({ source, lang, meta }: Props) {
                 ]);
                 setAiOption(parseJsonResponse(response));
               } catch (e) {
-                console.error(e);
+                log.error("AI chart generation failed", e);
                 showAiToast("AI chart generation failed", "error");
                 setAiOption(null);
               } finally {

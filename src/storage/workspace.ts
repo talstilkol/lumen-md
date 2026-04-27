@@ -5,6 +5,8 @@
  * directories on demand for write paths).
  */
 
+import { randomId } from "../lib/cryptoRandom";
+
 export interface WorkspaceEntry {
   /** File path relative to the workspace root. */
   path: string;
@@ -85,10 +87,7 @@ async function readDirInto(
   opts: { includeAssets: boolean },
 ): Promise<WorkspaceNode[]> {
   const out: WorkspaceNode[] = [];
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  for await (const [name, handle] of (dir as any).entries() as AsyncIterable<
-    [string, FileSystemHandle]
-  >) {
+  for await (const [name, handle] of dir.entries()) {
     const path = prefix ? `${prefix}/${name}` : name;
     if (handle.kind === "directory") {
       const children = await readDirInto(
@@ -169,8 +168,7 @@ export async function writeWorkspaceFile(
   content: string,
 ): Promise<void> {
   const handle = await getFileHandleAt(path, { create: true });
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const writable = await (handle as any).createWritable();
+  const writable = await handle.createWritable();
   await writable.write(content);
   await writable.close();
 }
@@ -181,9 +179,8 @@ export async function writeWorkspaceBlob(
   data: Blob | ArrayBuffer | Uint8Array,
 ): Promise<void> {
   const handle = await getFileHandleAt(path, { create: true });
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const writable = await (handle as any).createWritable();
-  await writable.write(data);
+  const writable = await handle.createWritable();
+  await writable.write(data as FileSystemWriteChunkType);
   await writable.close();
 }
 
@@ -202,10 +199,8 @@ export function isAssetName(name: string): boolean {
 export function makeAssetName(originalName: string): string {
   const ext =
     originalName.match(/\.[A-Za-z0-9]+$/)?.[0]?.toLowerCase() ?? ".png";
-  // Tiny random suffix prevents accidental collisions if two pastes occur in the same ms.
-  const stamp = `${Date.now().toString(36)}-${Math.random()
-    .toString(36)
-    .slice(2, 7)}`;
+  // Cryptographically-strong suffix avoids collisions even with rapid pastes.
+  const stamp = `${Date.now().toString(36)}-${randomId(3)}`;
   return `${ASSET_PREFIX}${stamp}${ext}`;
 }
 
@@ -215,8 +210,7 @@ export async function deleteWorkspaceFile(path: string): Promise<void> {
   const last = parts.pop();
   if (!last) throw new Error("Cannot delete the workspace root");
   const parent = await walkDir(parts);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  await (parent as any).removeEntry(last, { recursive: true });
+  await parent.removeEntry(last, { recursive: true });
 }
 
 export async function renameWorkspaceFile(

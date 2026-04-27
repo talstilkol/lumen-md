@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useState, type ComponentType } from "react";
+import { Component, lazy, Suspense, useEffect, useState, type ComponentType } from "react";
 import type { JSX } from "react";
 import { isAssetName, readWorkspaceBlob } from "../storage/workspace";
 
@@ -14,6 +14,12 @@ const PlantUMLBlock = lazy(() => import("../plugins/PlantUMLBlock"));
 const EmbedBlock = lazy(() => import("../plugins/EmbedBlock"));
 const HtmlPreviewBlock = lazy(() => import("../plugins/HtmlPreviewBlock"));
 const BibtexBlock = lazy(() => import("../plugins/BibtexBlock"));
+const DataBlock = lazy(() => import("../plugins/DataBlock"));
+const DatabaseBlock = lazy(() => import("../views/DatabaseBlock"));
+const LiveCssBlock = lazy(() => import("../plugins/LiveCssBlock"));
+const LiveJsBlock = lazy(() => import("../plugins/LiveJsBlock"));
+const LiveSvgBlock = lazy(() => import("../plugins/LiveSvgBlock"));
+const LiveGlslBlock = lazy(() => import("../plugins/LiveGlslBlock"));
 
 function getText(children: React.ReactNode): string {
   if (typeof children === "string") return children;
@@ -44,15 +50,62 @@ function PluginFallback({ label }: { label: string }) {
   );
 }
 
+/**
+ * Per-block error boundary so a single broken Mermaid / Graphviz / EChart
+ * spec doesn't crash the entire preview pipeline. The fallback renders a
+ * compact error card with the message — the rest of the document keeps
+ * rendering as if nothing happened.
+ */
+class BlockErrorBoundary extends Component<
+  { label: string; children: React.ReactNode },
+  { error: Error | null }
+> {
+  state: { error: Error | null } = { error: null };
+  static getDerivedStateFromError(error: Error) {
+    return { error };
+  }
+  componentDidCatch(error: Error) {
+    // Log so the issue surfaces in dev tools / Sentry; don't toast — the
+    // visible error card already conveys the problem to the reader.
+    // eslint-disable-next-line no-console
+    console.error(`[lumen-block:${this.props.label}]`, error);
+  }
+  render() {
+    if (this.state.error) {
+      return (
+        <div
+          role="alert"
+          style={{
+            margin: "12px 0",
+            padding: "10px 14px",
+            border: "1px solid hsl(0 80% 60% / 0.4)",
+            borderRadius: 8,
+            background: "hsl(0 80% 60% / 0.08)",
+            color: "hsl(0 80% 70%)",
+            fontFamily: "ui-monospace, monospace",
+            fontSize: 12,
+            whiteSpace: "pre-wrap",
+          }}
+        >
+          ⚠︎ {this.props.label} render failed: {this.state.error.message}
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
 function withSuspense<P extends object>(
   Component: ComponentType<P>,
   label: string,
 ): ComponentType<P> {
   return function Wrapped(props: P) {
     return (
-      <Suspense fallback={<PluginFallback label={label} />}>
-        <Component {...props} />
-      </Suspense>
+      <BlockErrorBoundary label={label}>
+        <Suspense fallback={<PluginFallback label={label} />}>
+          <Component {...props} />
+        </Suspense>
+      </BlockErrorBoundary>
     );
   };
 }
@@ -136,6 +189,44 @@ const Bibtex = withSuspense<BlockProps>(
   "bibliography",
 );
 
+// `lumen-data` covers the SQL / Pandas / JS-object / auto-detect family.
+// The fence language flows through as `props.lang` so DataBlock can pick
+// the right parser. All four use the same DataTable + chart-suggestion UI.
+const DataBlockComp = withSuspense<BlockProps>(
+  (props) => (
+    <DataBlock
+      source={getText(props.children)}
+      meta={props.meta}
+      lang={(props.lang as "sql" | "pandas" | "object" | "data") ?? "data"}
+    />
+  ),
+  "data",
+);
+
+const Database = withSuspense<BlockProps>(
+  (props) => (
+    <DatabaseBlock source={getText(props.children)} meta={props.meta} />
+  ),
+  "database",
+);
+
+const LiveCss = withSuspense<BlockProps>(
+  (props) => <LiveCssBlock source={getText(props.children)} meta={props.meta} />,
+  "live-css",
+);
+const LiveJs = withSuspense<BlockProps>(
+  (props) => <LiveJsBlock source={getText(props.children)} meta={props.meta} />,
+  "live-js",
+);
+const LiveSvg = withSuspense<BlockProps>(
+  (props) => <LiveSvgBlock source={getText(props.children)} meta={props.meta} />,
+  "live-svg",
+);
+const LiveGlsl = withSuspense<BlockProps>(
+  (props) => <LiveGlslBlock source={getText(props.children)} meta={props.meta} />,
+  "live-glsl",
+);
+
 /**
  * Asset-aware <img> wrapper. If `src` looks like an OPFS asset (`lumen-asset-*`
  * or `./lumen-asset-*`), resolve it to a blob URL on first render. Cached blob
@@ -187,12 +278,28 @@ function LumenImg(props: ImgProps) {
       cancelled = true;
     };
   }, [src]);
-  // eslint-disable-next-line jsx-a11y/alt-text
-  return <img {...rest} src={resolved} />;
+  // The author-supplied `alt` is forwarded via {...rest}. We default to
+  // the basename of the src when nothing is provided so screen-readers
+  // get something descriptive instead of "image".
+  const fallbackAlt = !rest.alt
+    ? (src ?? "").split("/").pop()?.replace(/\.[^.]+$/, "") ?? "image"
+    : undefined;
+  return <img alt={fallbackAlt} {...rest} src={resolved} />;
 }
 
 function normalize(src: string): string {
   return src.replace(/^\.\//, "").replace(/^\//, "");
+}
+
+/**
+ * GFM task-list checkbox override — adds aria-label so screen readers can
+ * announce the task text instead of an unlabeled "checkbox".
+ */
+function LumenInput(props: React.InputHTMLAttributes<HTMLInputElement>) {
+  if (props.type === "checkbox") {
+    return <input {...props} aria-label={props["aria-label"] ?? "task"} />;
+  }
+  return <input {...props} />;
 }
 
 /**
@@ -223,36 +330,33 @@ export function CopyButtonHandler() {
 
 // rehype-react expects a record of lowercase tag names → React components.
 // Custom tag names use kebab-case so they pass through unchanged.
-export const components: Record<string, ComponentType<JSX.IntrinsicAttributes & BlockProps>> = {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  "lumen-chart": Chart as any,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  "lumen-mermaid": Mermaid as any,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  "lumen-csv": Csv as any,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  "lumen-tsv": Csv as any,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  "lumen-jsontable": JsonTable as any,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  "lumen-map": MapView as any,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  "lumen-geojson": MapView as any,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  "lumen-dot": Graphviz as any,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  "lumen-abc": Abc as any,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  "lumen-model": Model as any,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  "lumen-plantuml": PlantUML as any,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  "lumen-embed": Embed as any,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  "lumen-htmlpreview": HtmlPreview as any,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  "lumen-bibtex": Bibtex as any,
+// Each plugin component reads only the props it needs; the cast widens its
+// signature to the shared block-props shape so the registry types check.
+type LumenBlock = ComponentType<JSX.IntrinsicAttributes & BlockProps>;
+
+export const components: Record<string, LumenBlock> = {
+  "lumen-chart": Chart as unknown as LumenBlock,
+  "lumen-mermaid": Mermaid as unknown as LumenBlock,
+  "lumen-csv": Csv as unknown as LumenBlock,
+  "lumen-tsv": Csv as unknown as LumenBlock,
+  "lumen-jsontable": JsonTable as unknown as LumenBlock,
+  "lumen-map": MapView as unknown as LumenBlock,
+  "lumen-geojson": MapView as unknown as LumenBlock,
+  "lumen-dot": Graphviz as unknown as LumenBlock,
+  "lumen-abc": Abc as unknown as LumenBlock,
+  "lumen-model": Model as unknown as LumenBlock,
+  "lumen-plantuml": PlantUML as unknown as LumenBlock,
+  "lumen-embed": Embed as unknown as LumenBlock,
+  "lumen-htmlpreview": HtmlPreview as unknown as LumenBlock,
+  "lumen-bibtex": Bibtex as unknown as LumenBlock,
+  "lumen-data": DataBlockComp as unknown as LumenBlock,
+  "lumen-database": Database as unknown as LumenBlock,
+  "lumen-livecss": LiveCss as unknown as LumenBlock,
+  "lumen-livejs": LiveJs as unknown as LumenBlock,
+  "lumen-livesvg": LiveSvg as unknown as LumenBlock,
+  "lumen-liveglsl": LiveGlsl as unknown as LumenBlock,
   // Asset-resolving <img> override.
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  img: LumenImg as any,
+  img: LumenImg as unknown as LumenBlock,
+  // GFM task-list checkboxes get an aria-label so they aren't announced bare.
+  input: LumenInput as unknown as LumenBlock,
 };

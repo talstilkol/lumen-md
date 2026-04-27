@@ -17,6 +17,13 @@
     --border-strong: 220 13% 78%;
     --accent: 252 92% 66%;
     --accent-fg: 0 0% 100%;
+
+    /* z-index layer strategy */
+    --z-dropdown: 100;
+    --z-sticky: 200;
+    --z-modal: 500;
+    --z-overlay: 9999;
+    --z-toast: 10000;
   }
 
   .dark {
@@ -37,6 +44,11 @@
   body,
   #root {
     height: 100%;
+    /* The app sizes itself to the viewport — never let horizontal overflow
+       leak out and produce a page-level scrollbar. Inner panes that need to
+       scroll do so vertically. */
+    overflow-x: hidden;
+    max-width: 100vw;
   }
 
   body {
@@ -72,10 +84,123 @@
   }
 }
 
+/* Force the CodeMirror editor to fill its host. CodeMirror v6 sets a height
+   that matches content when its parent has no resolved height; pinning it via
+   absolute positioning guarantees a definite height that `.cm-scroller` can
+   scroll inside. Lives outside `@layer components` so its `!important` beats
+   CodeMirror's own theme rules. */
+.cm-editor {
+  position: absolute !important;
+  inset: 0 !important;
+  height: auto !important;
+}
+
+/* Wrap long lines instead of producing a horizontal scrollbar. Code blocks
+   and URLs were hard to read when the editor scrolled sideways; soft-wrap
+   keeps everything inside the visible area regardless of viewport width. */
+.cm-editor .cm-scroller {
+  overflow-x: hidden !important;
+}
+.cm-editor .cm-content {
+  white-space: pre-wrap !important;
+  word-break: break-word;
+}
+.cm-editor .cm-line {
+  overflow-wrap: anywhere;
+}
+
+/* Slash insert menu — opens at the cursor when the user types `/` on an
+   empty line or hits ⌘/. Lists every supported language and embed. */
+.lumen-slash-menu {
+  position: fixed;
+  z-index: 9999;
+  min-width: 280px;
+  max-width: 360px;
+  max-height: 50vh;
+  overflow-y: auto;
+  background: hsl(var(--bg));
+  color: hsl(var(--fg));
+  border: 1px solid hsl(var(--border-strong));
+  border-radius: 10px;
+  box-shadow: 0 12px 40px -8px hsl(0 0% 0% / 0.45);
+  padding: 6px 0;
+  font-family: Inter, ui-sans-serif, system-ui;
+  animation: slashSlideIn 110ms ease;
+}
+@keyframes slashSlideIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.lumen-slash-group {
+  padding: 6px 12px 2px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: hsl(var(--fg-muted));
+}
+.lumen-slash-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  padding: 7px 14px;
+  border: none;
+  background: transparent;
+  color: hsl(var(--fg));
+  font-size: 13px;
+  cursor: pointer;
+  text-align: start;
+}
+.lumen-slash-item.active,
+.lumen-slash-item:hover {
+  background: hsl(var(--accent) / 0.10);
+  color: hsl(var(--accent));
+}
+.lumen-slash-label { font-weight: 500; }
+.lumen-slash-hint {
+  font-size: 11px;
+  color: hsl(var(--fg-muted));
+  flex-shrink: 0;
+}
+.lumen-slash-empty {
+  padding: 10px 14px;
+  font-size: 12px;
+  color: hsl(var(--fg-muted));
+}
+
+/* Preview pane: long URLs, code blocks, and pre/img elements should wrap or
+   shrink instead of pushing the layout sideways. */
+[data-preview-root] {
+  overflow-x: hidden;
+  word-wrap: break-word;
+  overflow-wrap: anywhere;
+}
+[data-preview-root] pre,
+[data-preview-root] code {
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-width: 100%;
+}
+[data-preview-root] img,
+[data-preview-root] svg,
+[data-preview-root] table,
+[data-preview-root] video,
+[data-preview-root] iframe {
+  max-width: 100%;
+  height: auto;
+}
+/* Render tables in their own scroll container so wide tables don't push the
+   whole preview sideways — keeps the page-level scroll vertical-only. */
+[data-preview-root] table {
+  display: block;
+  overflow-x: auto;
+}
+
 @layer components {
   /* === Editor (CodeMirror) === */
   .cm-editor {
-    height: 100%;
     background: transparent !important;
     font-family: theme(fontFamily.mono);
     font-size: 14px;
@@ -88,8 +213,16 @@
     font-family: inherit;
     padding: 1.5rem 1rem 30vh 1rem;
   }
+  /* Centered measure — match the preview's prose width so the source view
+     reads at the same comfortable line length, regardless of viewport.
+     `min()` keeps a comfortable narrow column on big screens but lets it
+     shrink on phones. CodeMirror's `.cm-content` is the actual line-list
+     container, so constraining it (rather than the scroller) keeps caret
+     math and selection painting correct. */
   .cm-editor .cm-content {
     caret-color: hsl(var(--accent));
+    max-width: min(80ch, 100%);
+    margin-inline: auto;
   }
   .cm-editor .cm-line {
     padding: 0 0.5rem;
@@ -103,29 +236,19 @@
   .cm-editor ::selection {
     background-color: hsl(var(--accent) / 0.25) !important;
   }
+  /* Line-number gutter is intentionally hidden — the editor relies on the
+     floating "Line X" pill rendered by the React component for cursor
+     position feedback. CodeMirror still draws a (now empty) gutter for fold
+     indicators / future widgets, so we collapse it visually. */
   .cm-editor .cm-gutters {
-    background: hsl(var(--bg));
-    border-right: 1px solid hsl(var(--border) / 0.5);
-    color: hsl(var(--fg-muted) / 0.3);
-    font-size: 11px;
-    min-width: 56px;
-    padding-right: 12px;
-    margin-right: 8px;
-    user-select: none;
-  }
-  .cm-editor .cm-gutter.cm-lineNumbers .cm-gutterElement {
-    padding: 0 14px 0 20px;
-    min-width: 44px;
-    text-align: right;
-    font-family: "JetBrains Mono", ui-monospace, monospace;
-    letter-spacing: -0.02em;
+    display: none;
   }
   .cm-editor .cm-activeLine {
     background-color: hsl(var(--bg-subtle));
   }
   .cm-editor .cm-activeLineGutter {
-    background-color: hsl(var(--bg-subtle));
-    color: hsl(var(--accent) / 0.6);
+    background-color: hsl(var(--accent) / 0.08);
+    color: hsl(var(--accent));
     transition: color 200ms ease;
   }
 
@@ -658,136 +781,7 @@
     color: hsl(var(--fg-muted));
   }
 
-  /* ─── Command palette ─── */
-  .cmd-palette-backdrop {
-    position: fixed;
-    inset: 0;
-    z-index: 200;
-    background: hsl(var(--bg) / 0.6);
-    backdrop-filter: blur(6px);
-    display: flex;
-    align-items: flex-start;
-    justify-content: center;
-    padding-top: 14vh;
-    animation: cmdFadeIn 120ms ease;
-  }
-  .cmd-palette {
-    width: min(620px, 92vw);
-    max-height: 70vh;
-    background: hsl(var(--bg));
-    border: 1px solid hsl(var(--border-strong));
-    border-radius: 12px;
-    box-shadow:
-      0 20px 60px -10px hsl(0 0% 0% / 0.4),
-      0 8px 20px -4px hsl(0 0% 0% / 0.2);
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    animation: cmdSlideIn 160ms cubic-bezier(0.2, 0.9, 0.3, 1.2);
-  }
-  .cmd-palette-search {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 14px 16px;
-    border-bottom: 1px solid hsl(var(--border));
-  }
-  .cmd-palette-search input {
-    flex: 1;
-    border: none;
-    outline: none;
-    background: transparent;
-    color: hsl(var(--fg));
-    font-size: 15px;
-    font-family: inherit;
-  }
-  .cmd-palette-search input::placeholder {
-    color: hsl(var(--fg-muted));
-  }
-  .cmd-palette-list {
-    flex: 1;
-    overflow-y: auto;
-    padding: 6px;
-    min-height: 80px;
-  }
-  .cmd-palette-empty {
-    padding: 2rem 1rem;
-    text-align: center;
-    color: hsl(var(--fg-muted));
-    font-size: 13px;
-  }
-  .cmd-palette-item {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 8px 12px;
-    border-radius: 6px;
-    color: hsl(var(--fg));
-    font-size: 13.5px;
-    cursor: pointer;
-    user-select: none;
-  }
-  .cmd-palette-item.active {
-    background: hsl(var(--accent) / 0.1);
-    color: hsl(var(--fg));
-  }
-  .cmd-palette-item.active .cmd-palette-label {
-    color: hsl(var(--accent));
-  }
-  .cmd-palette-label {
-    flex: 1;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-  .cmd-palette-hint {
-    color: hsl(var(--fg-muted));
-    font-size: 12px;
-  }
-  .cmd-palette-shortcut {
-    color: hsl(var(--fg-muted));
-    font-family: "JetBrains Mono", ui-monospace, monospace;
-    font-size: 11px;
-    background: hsl(var(--bg-muted));
-    padding: 2px 6px;
-    border-radius: 4px;
-    border: 1px solid hsl(var(--border));
-  }
-  .cmd-palette-footer {
-    display: flex;
-    gap: 16px;
-    padding: 8px 14px;
-    border-top: 1px solid hsl(var(--border));
-    background: hsl(var(--bg-subtle));
-    color: hsl(var(--fg-muted));
-    font-size: 11px;
-  }
-  .cmd-palette-footer kbd {
-    background: hsl(var(--bg));
-    border: 1px solid hsl(var(--border));
-    border-radius: 3px;
-    padding: 1px 5px;
-    font-family: "JetBrains Mono", ui-monospace, monospace;
-    font-size: 10px;
-  }
-  @keyframes cmdFadeIn {
-    from {
-      opacity: 0;
-    }
-    to {
-      opacity: 1;
-    }
-  }
-  @keyframes cmdSlideIn {
-    from {
-      opacity: 0;
-      transform: translateY(-12px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
+
   @keyframes toast-slide-in {
     from {
       opacity: 0;
@@ -835,114 +829,7 @@
   }
 
   /* ─── File tree ─── */
-  .file-tree {
-    width: var(--sidebar-width, 240px);
-    min-width: 160px;
-    max-width: 480px;
-    flex-shrink: 0;
-    background: hsl(var(--bg-subtle));
-    border-right: 1px solid hsl(var(--border));
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-  }
-  .sidebar-resizer {
-    width: 4px;
-    cursor: col-resize;
-    background: transparent;
-    flex-shrink: 0;
-    position: relative;
-    z-index: 5;
-  }
-  .sidebar-resizer:hover,
-  .sidebar-resizer.dragging {
-    background: hsl(var(--accent) / 0.4);
-  }
-  .file-tree-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0.55rem 0.6rem 0.55rem 0.85rem;
-    text-transform: uppercase;
-    letter-spacing: 0.12em;
-    font-size: 11px;
-    color: hsl(var(--fg-muted));
-    font-weight: 600;
-    border-bottom: 1px solid hsl(var(--border));
-  }
-  .file-tree-list {
-    flex: 1;
-    overflow-y: auto;
-    padding: 4px 0;
-    margin: 0;
-    list-style: none;
-  }
-  .file-tree-item {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    padding: 4px 10px;
-    color: hsl(var(--fg-subtle));
-    font-size: 13px;
-    cursor: default;
-    border-left: 2px solid transparent;
-  }
-  .file-tree-item:hover {
-    background: hsl(var(--bg-muted));
-    color: hsl(var(--fg));
-  }
-  .file-tree-item:hover .file-tree-action {
-    opacity: 1;
-  }
-  .file-tree-item.active {
-    background: hsl(var(--accent) / 0.1);
-    color: hsl(var(--fg));
-    border-left-color: hsl(var(--accent));
-  }
-  .file-tree-name {
-    flex: 1;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    text-align: left;
-    background: transparent;
-    border: 0;
-    color: inherit;
-    font: inherit;
-    padding: 0;
-    cursor: pointer;
-  }
-  .file-tree-input {
-    flex: 1;
-    background: hsl(var(--bg));
-    color: hsl(var(--fg));
-    border: 1px solid hsl(var(--accent) / 0.5);
-    border-radius: 3px;
-    padding: 1px 4px;
-    font: inherit;
-    outline: none;
-  }
-  .file-tree-action {
-    width: 18px;
-    height: 18px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    background: transparent;
-    border: 0;
-    color: hsl(var(--fg-muted));
-    border-radius: 3px;
-    opacity: 0;
-    transition:
-      opacity 80ms ease,
-      background 80ms ease;
-    cursor: pointer;
-  }
-  .file-tree-action:hover {
-    background: hsl(var(--bg-inset));
-    color: hsl(var(--fg));
-    opacity: 1;
-  }
+
 
   /* ─── Bibliography ─── */
   .prose-lumen .bibliography {
@@ -1021,7 +908,7 @@
   .milkdown-slash-menu,
   .milkdown-tooltip {
     position: absolute;
-    z-index: 100;
+    z-index: var(--z-dropdown);
     display: none;
     background: hsl(var(--bg));
     border: 1px solid hsl(var(--border-strong));
@@ -1090,89 +977,7 @@
   }
 
   /* ─── Prompt / Confirm / Alert dialog ─── */
-  .prompt-backdrop {
-    position: fixed;
-    inset: 0;
-    z-index: 200;
-    background: hsl(0 0% 0% / 0.45);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    backdrop-filter: blur(2px);
-  }
-  .prompt-dialog {
-    background: hsl(var(--bg));
-    border: 1px solid hsl(var(--border-strong));
-    border-radius: 10px;
-    box-shadow: 0 30px 80px -20px hsl(0 0% 0% / 0.5);
-    padding: 18px;
-    min-width: 320px;
-    max-width: 480px;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-  }
-  .prompt-title {
-    font-size: 14px;
-    font-weight: 600;
-    color: hsl(var(--fg));
-    line-height: 1.4;
-  }
-  .prompt-message {
-    font-size: 13px;
-    color: hsl(var(--fg-muted));
-    line-height: 1.5;
-  }
-  .prompt-input {
-    width: 100%;
-    padding: 8px 10px;
-    border: 1px solid hsl(var(--border-strong));
-    border-radius: 6px;
-    background: hsl(var(--bg-subtle));
-    color: hsl(var(--fg));
-    font-size: 13px;
-    outline: none;
-  }
-  .prompt-input:focus {
-    border-color: hsl(var(--accent));
-    box-shadow: 0 0 0 3px hsl(var(--accent) / 0.18);
-  }
-  .prompt-actions {
-    display: flex;
-    gap: 8px;
-    justify-content: flex-end;
-    margin-top: 4px;
-  }
-  [dir="rtl"] .prompt-actions {
-    justify-content: flex-start;
-  }
-  .prompt-btn {
-    padding: 6px 14px;
-    border-radius: 6px;
-    font-size: 13px;
-    font-weight: 500;
-    border: 1px solid transparent;
-    cursor: pointer;
-  }
-  .prompt-btn:focus-visible {
-    outline: 2px solid hsl(var(--accent));
-    outline-offset: 2px;
-  }
-  .prompt-btn-cancel {
-    background: transparent;
-    color: hsl(var(--fg));
-    border-color: hsl(var(--border-strong));
-  }
-  .prompt-btn-cancel:hover {
-    background: hsl(var(--bg-subtle));
-  }
-  .prompt-btn-ok {
-    background: hsl(var(--accent));
-    color: white;
-  }
-  .prompt-btn-ok:hover {
-    filter: brightness(1.08);
-  }
+
 
   /* ─── PWA update banner ─── */
   .pwa-update-banner {
@@ -1180,7 +985,7 @@
     bottom: 18px;
     left: 50%;
     transform: translateX(-50%);
-    z-index: 1000;
+    z-index: var(--z-modal);
     display: flex;
     align-items: center;
     gap: 12px;
@@ -1310,7 +1115,7 @@
     color: white;
     padding: 6px 14px;
     border-radius: 0 0 8px 8px;
-    z-index: 1000;
+    z-index: var(--z-modal);
     font-size: 13px;
     transition: top 120ms ease;
   }
@@ -1484,7 +1289,7 @@
   .backlinks-panel {
     position: absolute;
     inset-block: 0;
-    z-index: 50;
+    z-index: var(--z-dropdown);
     width: min(280px, 80vw);
     box-shadow: 0 0 20px hsl(0 0% 0% / 0.25);
   }
@@ -1499,7 +1304,7 @@
     position: absolute;
     inset-block: 0;
     inset-inline-end: 0;
-    z-index: 50;
+    z-index: var(--z-dropdown);
     width: min(280px, 80vw);
     box-shadow: 0 0 20px hsl(0 0% 0% / 0.25);
   }
@@ -1544,82 +1349,90 @@
 }
 
 /* ─── Print / PDF ─── */
+/* Print output: faithful, colorful PDF that looks like the on-screen preview.
+   We force color-adjust: exact globally so Chrome/Safari preserve the
+   accents, syntax highlighting, mermaid SVGs and admonition tints instead
+   of stripping them down to black & white. The "Background graphics" option
+   in the print dialog should be on by default thanks to this hint. */
 @media print {
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color-adjust: exact !important;
+  }
   html,
   body {
-    background: white !important;
-    color: black !important;
+    /* Match the on-screen theme so the printout actually looks like the app
+       in either light or dark mode. */
+    background: hsl(var(--bg)) !important;
+    color: hsl(var(--fg)) !important;
     font-size: 11pt;
   }
-  /* Hide everything except the preview body */
+  /* Hide chrome — toolbar, status bar, sidebars, floating buttons. The
+       editor pane is hidden so only the rendered preview prints, regardless
+       of what view-mode the user is in. */
   .titlebar,
   .status-bar,
   .cmd-palette-backdrop,
-  .editor-host,
-  [data-preview-root] > .Frontmatter > div:first-child,
   aside,
+  aside.outline-aside,
   .seg-group,
-  .icon-btn {
+  .icon-btn,
+  .ai-fab,
+  .insert-fab,
+  [role="dialog"],
+  [aria-label="Notifications"] {
     display: none !important;
   }
+  /* Editor section (CodeMirror) stays hidden; preview gets the full page. */
+  main > section:first-child:not(:last-child) {
+    display: none !important;
+  }
+  main,
+  main > section,
   [data-preview-root] {
-    overflow: visible !important;
+    display: block !important;
+    width: 100% !important;
     height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+    background: transparent !important;
   }
   .prose-lumen {
     max-width: none !important;
     margin: 0 auto !important;
     padding: 0 !important;
-    color: black !important;
   }
+  /* Preserve heading and link colors from the active theme. */
   .prose-lumen h1,
   .prose-lumen h2,
   .prose-lumen h3,
   .prose-lumen h4,
   .prose-lumen h5,
   .prose-lumen h6 {
-    color: black !important;
     page-break-after: avoid;
+    break-after: avoid-page;
   }
-  .prose-lumen pre,
-  .prose-lumen code {
-    background: #f5f5f5 !important;
-    color: black !important;
-    border: 1px solid #ddd !important;
-  }
+  /* Avoid splitting blocks across pages where possible. */
   .code-block,
   .chart-block,
   .mermaid-block,
   table,
   pre,
   blockquote,
-  .admonition {
+  .admonition,
+  img,
+  svg {
     page-break-inside: avoid;
+    break-inside: avoid;
   }
-  a {
-    color: #0066cc !important;
-    text-decoration: underline;
-  }
-  .code-block-header,
-  .chart-block-header {
-    background: #eee !important;
-    color: #333 !important;
-  }
-  .admonition {
-    border: 1px solid #888 !important;
-    background: #fafafa !important;
-    color: black !important;
-  }
-  /* Show preview area at full width even if app was in source mode */
-  main,
-  main > section {
-    display: block !important;
-    width: 100% !important;
-  }
-  main > section:first-child:not(:last-child) {
-    display: none !important;
+  /* Make sure SVGs (Mermaid, Graphviz, ECharts) print in colour. */
+  svg {
+    max-width: 100%;
+    height: auto;
   }
   @page {
-    margin: 18mm 16mm;
+    margin: 16mm 14mm;
+    /* size: A4; — leave default so the user's printer dialog picks. */
   }
 }

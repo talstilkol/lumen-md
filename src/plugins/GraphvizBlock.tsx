@@ -10,10 +10,10 @@ async function getGraphviz() {
   if (!graphvizPromise) {
     graphvizPromise = (async () => {
       // Import the focused subpath so we don't pull in DuckDB / Expat / zstd.
-      const mod = await import("@hpcc-js/wasm/graphviz");
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const Graphviz = (mod as any).Graphviz;
-      return (await Graphviz.load()) as GraphvizInstance;
+      const mod = (await import("@hpcc-js/wasm/graphviz")) as {
+        Graphviz: { load: () => Promise<GraphvizInstance> };
+      };
+      return await mod.Graphviz.load();
     })();
   }
   return graphvizPromise;

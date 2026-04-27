@@ -1,6 +1,22 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { Search, Download, Trash2, ExternalLink, BadgeCheck } from "lucide-react";
 import { getRegisteredPlugins, registerPlugin, unregisterPlugin } from "../plugins/pluginSystem";
 import type { LumenPlugin } from "../plugins/pluginSystem";
+import { log } from "../lib/logger";
+
+interface RemotePluginEntry {
+  id: string;
+  name: string;
+  author: string;
+  description: string;
+  version: string;
+  icon?: string;
+  url?: string;
+  category?: string;
+  homepage?: string;
+  /** When true, the plugin is verified by the Lumen team. */
+  verified?: boolean;
+}
 
 /**
  * Community Plugin Gallery — browse, install, and manage plugins.
@@ -163,40 +179,87 @@ export function PluginGallery({ open, onClose }: Props) {
     () => new Set(getRegisteredPlugins().map((p) => p.id)),
   );
   const [search, setSearch] = useState("");
+  const [activeCategory, setActiveCategory] = useState<string>("all");
   const [remotePlugins, setRemotePlugins] = useState<LumenPlugin[]>([]);
+  const [remoteRaw, setRemoteRaw] = useState<RemotePluginEntry[]>([]);
 
-  import("react").then((React) => {
-    React.useEffect(() => {
-      fetch("/plugins/registry.json")
-        .then((res) => res.json())
-        .then((data) => {
-          if (!data || !data.plugins) return;
-          const mapped = data.plugins.map((p: any) => ({
-            id: p.id,
-            name: `${p.icon} ${p.name}`,
-            version: p.version,
-            description: p.description,
-            author: p.author,
-            activate: async (api: any) => {
-              // Simulate dynamic script injection / module evaluation
-              await new Promise((resolve) => setTimeout(resolve, 800));
-              api.showToast(`✅ Dynamically loaded ${p.name} from remote module!`);
-            },
-          }));
-          setRemotePlugins(mapped);
-        })
-        .catch(console.error);
-    }, []);
-  });
+  // Lazy-load the registry.json once when the gallery first opens. Hooks must
+  // live at the top level — the previous `import("react").then(useEffect)`
+  // call was a runtime trap that React tolerated by accident.
+  useEffect(() => {
+    if (!open) return;
+    // AbortController + cancelled guard — closing the gallery mid-fetch
+    // both stops the network request and short-circuits the .then chain
+    // so we never `setState` on an unmounted component.
+    const ac = new AbortController();
+    let cancelled = false;
+    fetch("/plugins/registry.json", { signal: ac.signal })
+      .then((res) => res.json())
+      .then((data) => {
+        if (cancelled || !data?.plugins) return;
+        const entries = data.plugins as RemotePluginEntry[];
+        setRemoteRaw(entries);
+        const mapped: LumenPlugin[] = entries.map((p) => ({
+          id: p.id,
+          name: `${p.icon ?? "🔌"} ${p.name}`,
+          version: p.version,
+          description: p.description,
+          author: p.author,
+          activate: async (api) => {
+            // Sandbox + script injection comes in a follow-up — for now we
+            // simulate the install/activation flow so the UX exists.
+            await new Promise((resolve) => setTimeout(resolve, 400));
+            api.showToast(`✅ Loaded ${p.name} from remote module`);
+          },
+        }));
+        setRemotePlugins(mapped);
+      })
+      .catch((err: Error) => {
+        if (err.name === "AbortError") return;
+        log.warn("plugin remote load failed", err);
+      });
+    return () => {
+      cancelled = true;
+      ac.abort();
+    };
+  }, [open]);
 
   if (!open) return null;
 
   const allAvailable = [...COMMUNITY_PLUGINS, ...remotePlugins];
-  const filtered = allAvailable.filter(
-    (p) =>
-      p.name.toLowerCase().includes(search.toLowerCase()) ||
-      (p.description ?? "").toLowerCase().includes(search.toLowerCase()),
-  );
+
+  // Index categories for the side rail. Built-ins live in "Community";
+  // remote-registry plugins surface their declared category (or "Featured").
+  const categoryIndex = useMemo(() => {
+    const map = new Map<string, number>();
+    map.set("all", allAvailable.length);
+    map.set("community", COMMUNITY_PLUGINS.length);
+    for (const r of remoteRaw) {
+      const c = r.category ?? "featured";
+      map.set(c, (map.get(c) ?? 0) + 1);
+    }
+    return map;
+  }, [allAvailable.length, remoteRaw]);
+
+  const matchesCategory = (id: string): boolean => {
+    if (activeCategory === "all") return true;
+    if (activeCategory === "community") return id.startsWith("community.");
+    const remote = remoteRaw.find((r) => r.id === id);
+    return (remote?.category ?? "featured") === activeCategory;
+  };
+
+  const verifiedById = new Map(remoteRaw.map((r) => [r.id, r.verified ?? true]));
+
+  const filtered = allAvailable.filter((p) => {
+    if (!matchesCategory(p.id)) return false;
+    if (!search) return true;
+    const q = search.toLowerCase();
+    return (
+      p.name.toLowerCase().includes(q) ||
+      (p.description ?? "").toLowerCase().includes(q) ||
+      (p.author ?? "").toLowerCase().includes(q)
+    );
+  });
 
   const handleInstall = async (plugin: LumenPlugin) => {
     await registerPlugin(plugin);
@@ -210,137 +273,347 @@ export function PluginGallery({ open, onClose }: Props) {
     setInstalled(next);
   };
 
+  const categories: { id: string; label: string }[] = [
+    { id: "all", label: "All plugins" },
+    { id: "community", label: "Community" },
+    { id: "featured", label: "Featured" },
+    ...Array.from(categoryIndex.keys())
+      .filter((c) => c !== "all" && c !== "community" && c !== "featured")
+      .map((id) => ({ id, label: id.charAt(0).toUpperCase() + id.slice(1) })),
+  ];
+
   return (
-    <div style={{
-      position: "fixed", inset: 0, zIndex: 200,
-      background: "rgba(0,0,0,0.7)",
-      display: "flex", alignItems: "center", justifyContent: "center",
-      backdropFilter: "blur(8px)",
-    }} onClick={onClose}>
-      <div onClick={(e) => e.stopPropagation()} style={{
-        background: "hsl(var(--bg))",
-        border: "1px solid hsl(var(--border))",
-        borderRadius: 16,
-        width: 640,
-        maxHeight: "80vh",
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="plugin-gallery-title"
+      style={{
+        position: "fixed",
+        inset: 0,
+        zIndex: 200,
+        background: "rgba(0,0,0,0.7)",
         display: "flex",
-        flexDirection: "column",
-        overflow: "hidden",
-      }}>
-        {/* Header */}
-        <div style={{
-          padding: "16px 20px",
-          borderBottom: "1px solid hsl(var(--border))",
+        alignItems: "center",
+        justifyContent: "center",
+        backdropFilter: "blur(8px)",
+      }}
+      onClick={onClose}
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        style={{
+          background: "hsl(var(--bg))",
+          border: "1px solid hsl(var(--border))",
+          borderRadius: 16,
+          width: 880,
+          maxWidth: "calc(100vw - 32px)",
+          maxHeight: "min(820px, calc(100vh - 32px))",
           display: "flex",
-          alignItems: "center",
-          gap: 12,
-        }}>
-          <span style={{ fontSize: 20 }}>🔌</span>
+          flexDirection: "column",
+          overflow: "hidden",
+        }}
+      >
+        {/* Header */}
+        <div
+          style={{
+            padding: "16px 20px",
+            borderBottom: "1px solid hsl(var(--border))",
+            display: "flex",
+            alignItems: "center",
+            gap: 12,
+          }}
+        >
+          <span style={{ fontSize: 22 }} aria-hidden>🔌</span>
           <div>
-            <div style={{ fontWeight: 700, fontSize: 15 }}>Plugin Gallery</div>
+            <div id="plugin-gallery-title" style={{ fontWeight: 700, fontSize: 16 }}>
+              Plugin Gallery
+            </div>
             <div style={{ fontSize: 12, color: "hsl(var(--fg-muted))" }}>
-              {installed.size} installed · {COMMUNITY_PLUGINS.length} available
+              {installed.size} installed · {allAvailable.length} available
             </div>
           </div>
           <div style={{ flex: 1 }} />
-          <input
-            type="text"
-            placeholder="Search plugins..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
+          <div style={{ position: "relative" }}>
+            <Search
+              size={14}
+              aria-hidden
+              style={{
+                position: "absolute",
+                left: 10,
+                top: "50%",
+                transform: "translateY(-50%)",
+                color: "hsl(var(--fg-muted))",
+              }}
+            />
+            <input
+              type="text"
+              placeholder="Search plugins..."
+              aria-label="Search plugins"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              style={{
+                background: "hsl(var(--bg-subtle))",
+                border: "1px solid hsl(var(--border))",
+                borderRadius: 8,
+                padding: "7px 12px 7px 30px",
+                fontSize: 13,
+                color: "hsl(var(--fg))",
+                width: 240,
+                outline: "none",
+              }}
+            />
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Close plugin gallery"
             style={{
-              background: "hsl(var(--bg-subtle))",
+              background: "transparent",
               border: "1px solid hsl(var(--border))",
-              borderRadius: 8,
-              padding: "6px 12px",
-              fontSize: 13,
+              borderRadius: 6,
               color: "hsl(var(--fg))",
-              width: 200,
-              outline: "none",
+              padding: "5px 10px",
+              fontSize: 12,
+              cursor: "pointer",
             }}
-          />
+          >
+            Esc
+          </button>
         </div>
 
-        {/* Plugin list */}
-        <div style={{
-          flex: 1,
-          overflow: "auto",
-          padding: "12px 16px",
-        }}>
-          {filtered.map((plugin) => (
-            <div key={plugin.id} style={{
-              display: "flex",
-              alignItems: "center",
+        {/* Body */}
+        <div style={{ flex: 1, display: "flex", minHeight: 0 }}>
+          {/* Side rail — categories */}
+          <nav
+            aria-label="Plugin categories"
+            style={{
+              width: 200,
+              borderInlineEnd: "1px solid hsl(var(--border))",
+              padding: "12px 8px",
+              overflow: "auto",
+              flexShrink: 0,
+            }}
+          >
+            <div
+              style={{
+                fontSize: 10,
+                fontWeight: 700,
+                textTransform: "uppercase",
+                letterSpacing: "0.06em",
+                color: "hsl(var(--fg-muted))",
+                padding: "4px 10px 6px",
+              }}
+            >
+              Categories
+            </div>
+            {categories.map((c) => {
+              const isActive = activeCategory === c.id;
+              const count = categoryIndex.get(c.id) ?? 0;
+              return (
+                <button
+                  key={c.id}
+                  type="button"
+                  onClick={() => setActiveCategory(c.id)}
+                  aria-pressed={isActive}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    width: "100%",
+                    padding: "7px 10px",
+                    borderRadius: 6,
+                    border: "none",
+                    background: isActive ? "hsl(var(--accent) / 0.12)" : "transparent",
+                    color: isActive ? "hsl(var(--accent))" : "hsl(var(--fg))",
+                    fontSize: 13,
+                    cursor: "pointer",
+                    textAlign: "start",
+                    marginBottom: 2,
+                  }}
+                >
+                  <span>{c.label}</span>
+                  <span style={{ fontSize: 11, color: "hsl(var(--fg-muted))" }}>{count}</span>
+                </button>
+              );
+            })}
+          </nav>
+
+          {/* Plugin grid */}
+          <div
+            style={{
+              flex: 1,
+              overflow: "auto",
+              padding: 16,
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
               gap: 12,
-              padding: "12px 16px",
-              borderRadius: 10,
-              background: "hsl(var(--bg-subtle) / 0.5)",
-              border: "1px solid hsl(var(--border))",
-              marginBottom: 8,
-              transition: "all 200ms ease",
-            }}>
-              <div style={{
-                width: 36, height: 36,
-                borderRadius: 8,
-                background: "linear-gradient(135deg, #7c5cfc, #c084fc)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                fontSize: 18,
-                flexShrink: 0,
-              }}>
-                🔌
-              </div>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontWeight: 600, fontSize: 14 }}>{plugin.name}</div>
-                <div style={{
-                  fontSize: 12,
-                  color: "hsl(var(--fg-muted))",
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                  whiteSpace: "nowrap",
-                }}>
-                  {plugin.description}
-                </div>
-                <div style={{ fontSize: 11, color: "hsl(var(--fg-muted) / 0.6)", marginTop: 2 }}>
-                  v{plugin.version} · by {plugin.author}
-                </div>
-              </div>
-              <button
-                onClick={() =>
-                  installed.has(plugin.id)
-                    ? handleUninstall(plugin.id)
-                    : handleInstall(plugin)
-                }
+              alignContent: "start",
+            }}
+          >
+            {filtered.length === 0 ? (
+              <div
                 style={{
-                  padding: "6px 16px",
-                  borderRadius: 8,
-                  border: "none",
-                  cursor: "pointer",
-                  fontSize: 12,
-                  fontWeight: 600,
-                  background: installed.has(plugin.id)
-                    ? "hsl(var(--border))"
-                    : "linear-gradient(135deg, #7c5cfc, #c084fc)",
-                  color: "white",
-                  transition: "all 150ms ease",
+                  gridColumn: "1 / -1",
+                  textAlign: "center",
+                  padding: "40px 20px",
+                  color: "hsl(var(--fg-muted))",
+                  fontSize: 13,
                 }}
               >
-                {installed.has(plugin.id) ? "Uninstall" : "Install"}
-              </button>
-            </div>
-          ))}
+                No plugins matched your search.
+              </div>
+            ) : (
+              filtered.map((plugin) => {
+                const isInstalled = installed.has(plugin.id);
+                const verified = verifiedById.get(plugin.id) ?? plugin.id.startsWith("community.");
+                return (
+                  <div
+                    key={plugin.id}
+                    style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: 8,
+                      padding: 14,
+                      borderRadius: 12,
+                      background: "hsl(var(--bg-subtle) / 0.5)",
+                      border: "1px solid hsl(var(--border))",
+                      transition: "all 150ms ease",
+                    }}
+                  >
+                    <div style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
+                      <div
+                        aria-hidden
+                        style={{
+                          width: 38,
+                          height: 38,
+                          borderRadius: 8,
+                          background: "linear-gradient(135deg, #7c5cfc, #c084fc)",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          fontSize: 18,
+                          flexShrink: 0,
+                        }}
+                      >
+                        🔌
+                      </div>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 6,
+                            fontWeight: 600,
+                            fontSize: 14,
+                          }}
+                        >
+                          <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                            {plugin.name}
+                          </span>
+                          {verified && (
+                            <BadgeCheck
+                              size={14}
+                              aria-label="Verified by Lumen"
+                              style={{ color: "hsl(var(--accent))", flexShrink: 0 }}
+                            />
+                          )}
+                        </div>
+                        <div style={{ fontSize: 11, color: "hsl(var(--fg-muted))" }}>
+                          v{plugin.version} · {plugin.author}
+                        </div>
+                      </div>
+                    </div>
+                    <div
+                      style={{
+                        fontSize: 12,
+                        color: "hsl(var(--fg-muted))",
+                        lineHeight: 1.45,
+                        minHeight: 32,
+                      }}
+                    >
+                      {plugin.description}
+                    </div>
+                    <div style={{ display: "flex", gap: 8, marginTop: 4 }}>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          isInstalled ? handleUninstall(plugin.id) : handleInstall(plugin)
+                        }
+                        style={{
+                          flex: 1,
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          gap: 6,
+                          padding: "7px 10px",
+                          borderRadius: 8,
+                          border: "none",
+                          cursor: "pointer",
+                          fontSize: 12,
+                          fontWeight: 600,
+                          background: isInstalled
+                            ? "hsl(var(--border))"
+                            : "linear-gradient(135deg, #7c5cfc, #c084fc)",
+                          color: isInstalled ? "hsl(var(--fg))" : "white",
+                          transition: "all 150ms ease",
+                        }}
+                      >
+                        {isInstalled ? <Trash2 size={12} /> : <Download size={12} />}
+                        {isInstalled ? "Uninstall" : "Install"}
+                      </button>
+                      {(() => {
+                        const remote = remoteRaw.find((r) => r.id === plugin.id);
+                        const homepage = remote?.homepage;
+                        if (!homepage) return null;
+                        return (
+                          <a
+                            href={homepage}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            aria-label={`${plugin.name} homepage`}
+                            style={{
+                              display: "inline-flex",
+                              alignItems: "center",
+                              gap: 4,
+                              padding: "7px 10px",
+                              borderRadius: 8,
+                              border: "1px solid hsl(var(--border))",
+                              color: "hsl(var(--fg))",
+                              fontSize: 12,
+                              textDecoration: "none",
+                            }}
+                          >
+                            <ExternalLink size={12} />
+                          </a>
+                        );
+                      })()}
+                    </div>
+                  </div>
+                );
+              })
+            )}
+          </div>
         </div>
 
         {/* Footer */}
-        <div style={{
-          padding: "10px 20px",
-          borderTop: "1px solid hsl(var(--border))",
-          textAlign: "center",
-          fontSize: 11,
-          color: "hsl(var(--fg-muted) / 0.5)",
-        }}>
-          More plugins coming soon • <a href="https://github.com/talstilkol/lumen-md" style={{ color: "hsl(var(--accent))" }}>Submit a plugin</a>
+        <div
+          style={{
+            padding: "10px 20px",
+            borderTop: "1px solid hsl(var(--border))",
+            textAlign: "center",
+            fontSize: 12,
+            color: "hsl(var(--fg-muted))",
+          }}
+        >
+          More plugins coming soon ·{" "}
+          <a
+            href="https://github.com/talstilkol/lumen-md"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ color: "hsl(var(--accent))" }}
+          >
+            Submit a plugin
+          </a>
         </div>
       </div>
     </div>

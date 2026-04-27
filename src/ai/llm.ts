@@ -4,6 +4,47 @@
  */
 
 import { useAppStore } from "../store/useStore";
+import { toast } from "../store/useToastStore";
+
+// ── Rate limiting ───────────────────────────────────────────────────────
+// Token bucket — protects the user's API key against runaway loops.
+const RATE_LIMIT_PER_MIN = 60;
+const MAX_CONCURRENT = 5;
+const requestTimestamps: number[] = [];
+let inflight = 0;
+
+class RateLimitError extends Error {
+  constructor(public retryAfterMs: number) {
+    super(`Rate limit exceeded. Retry in ${Math.ceil(retryAfterMs / 1000)}s.`);
+    this.name = "RateLimitError";
+  }
+}
+
+function checkRateLimit(): void {
+  const now = Date.now();
+  const oneMinuteAgo = now - 60_000;
+  // Drop timestamps older than 1 minute.
+  while (requestTimestamps.length && requestTimestamps[0] < oneMinuteAgo) {
+    requestTimestamps.shift();
+  }
+  if (requestTimestamps.length >= RATE_LIMIT_PER_MIN) {
+    const oldest = requestTimestamps[0];
+    const retryAfterMs = 60_000 - (now - oldest);
+    toast.warn(
+      "AI rate limit reached",
+      `Wait ${Math.ceil(retryAfterMs / 1000)}s before sending another prompt.`,
+    );
+    throw new RateLimitError(retryAfterMs);
+  }
+  if (inflight >= MAX_CONCURRENT) {
+    toast.warn(
+      "AI requests at capacity",
+      "Wait for the current prompts to finish before sending more.",
+    );
+    throw new RateLimitError(1_000);
+  }
+  requestTimestamps.push(now);
+}
 
 export interface ChatMessage {
   role: "system" | "user" | "assistant";
@@ -46,15 +87,49 @@ export class AiError extends Error {
 
 /**
  * Send a chat completion request. Returns the full text response.
+ *
+ * When the user has flipped `useLocalAi` in the store and WebGPU is
+ * available, the call is routed to `chatLocal()` instead of OpenAI.
+ * This keeps prompts on-device for privacy / offline scenarios.
  */
 export async function chat(
   messages: ChatMessage[],
   opts: ChatOptions = {},
 ): Promise<string> {
+  if (useAppStore.getState().useLocalAi) {
+    const { chatLocal, localLlmAvailable, onLocalLlmProgress } = await import(
+      "./localLlm"
+    );
+    if (localLlmAvailable().available) {
+      // Surface model-download progress as a lightweight toast so the user
+      // knows the first prompt may take a while (Llama-3-8B is ≈ 4 GB).
+      let lastPct = -1;
+      const off = onLocalLlmProgress(({ progress, text }) => {
+        const pct = Math.round(progress * 100);
+        if (pct >= lastPct + 5 || pct === 100) {
+          lastPct = pct;
+          toast.info("Local AI loading", `${pct}% — ${text || "preparing model"}`);
+        }
+      });
+      try {
+        return await chatLocal(messages, { model: opts.model, maxTokens: opts.maxTokens });
+      } finally {
+        off();
+      }
+    }
+    // WebGPU unavailable — fall through to the cloud path with a warning.
+    toast.warn(
+      "Local AI unavailable",
+      "WebGPU isn't supported here — falling back to your OpenAI key.",
+    );
+  }
   const key = getAiKey();
+  checkRateLimit();
+  inflight++;
   const model = opts.model ?? DEFAULT_MODEL;
   let lastError: Error | null = null;
 
+  try {
   for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
     try {
       const res = await fetch(API_URL, {
@@ -82,7 +157,8 @@ export async function chat(
       return text;
     } catch (e) {
       if (e instanceof AiError && e.code === "NO_KEY") throw e;
-      if (opts.signal?.aborted) throw new AiError("ABORTED", "Request cancelled.");
+      if (e instanceof RateLimitError) throw e;
+      if (opts.signal?.aborted || (e as DOMException).name === "AbortError") return "";
       lastError = e as Error;
       if (attempt < MAX_RETRIES) {
         await new Promise((r) => setTimeout(r, 500 * (attempt + 1)));
@@ -91,6 +167,9 @@ export async function chat(
   }
 
   throw lastError ?? new AiError("API_ERROR", "Unknown error.");
+  } finally {
+    inflight--;
+  }
 }
 
 /**
@@ -101,54 +180,60 @@ export async function* chatStream(
   opts: ChatOptions = {},
 ): AsyncGenerator<string, void, undefined> {
   const key = getAiKey();
+  checkRateLimit();
+  inflight++;
   const model = opts.model ?? DEFAULT_MODEL;
 
-  const res = await fetch(API_URL, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${key}`,
-    },
-    body: JSON.stringify({
-      model,
-      messages,
-      stream: true,
-      ...(opts.maxTokens ? { max_tokens: opts.maxTokens } : {}),
-    }),
-    signal: opts.signal,
-  });
+  try {
+    const res = await fetch(API_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${key}`,
+      },
+      body: JSON.stringify({
+        model,
+        messages,
+        stream: true,
+        ...(opts.maxTokens ? { max_tokens: opts.maxTokens } : {}),
+      }),
+      signal: opts.signal,
+    });
 
-  if (!res.ok) {
-    const body = await res.text().catch(() => "");
-    throw new AiError("API_ERROR", `API ${res.status}: ${body.slice(0, 200)}`);
-  }
+    if (!res.ok) {
+      const body = await res.text().catch(() => "");
+      throw new AiError("API_ERROR", `API ${res.status}: ${body.slice(0, 200)}`);
+    }
 
-  const reader = res.body?.getReader();
-  if (!reader) throw new AiError("API_ERROR", "No response body.");
+    const reader = res.body?.getReader();
+    if (!reader) throw new AiError("API_ERROR", "No response body.");
 
-  const decoder = new TextDecoder();
-  let buffer = "";
+    const decoder = new TextDecoder();
+    let buffer = "";
 
-  while (true) {
-    const { done, value } = await reader.read();
-    if (done) break;
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
 
-    buffer += decoder.decode(value, { stream: true });
-    const lines = buffer.split("\n");
-    buffer = lines.pop() ?? "";
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split("\n");
+      buffer = lines.pop() ?? "";
 
-    for (const line of lines) {
-      const trimmed = line.trim();
-      if (!trimmed || trimmed === "data: [DONE]") continue;
-      if (!trimmed.startsWith("data: ")) continue;
-      try {
-        const json = JSON.parse(trimmed.slice(6));
-        const delta = json.choices?.[0]?.delta?.content;
-        if (delta) yield delta;
-      } catch {
-        // skip malformed SSE lines
+      for (const line of lines) {
+        const trimmed = line.trim();
+        if (!trimmed || trimmed === "data: [DONE]") continue;
+        if (!trimmed.startsWith("data: ")) continue;
+        try {
+          const json = JSON.parse(trimmed.slice(6));
+          const delta = json.choices?.[0]?.delta?.content;
+          if (delta) yield delta;
+        } catch {
+          // skip malformed SSE lines
+        }
       }
     }
+  } finally {
+    inflight--;
   }
 }
 

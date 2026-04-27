@@ -6,8 +6,15 @@ import { applyLocale } from "../i18n";
 export type ViewMode = "source" | "split" | "preview" | "wysiwyg";
 export type Theme = "light" | "dark" | "system";
 export type SyncScrollMode = "single" | "all";
+/**
+ * Split orientation:
+ *   "auto"       – follow the viewport (horizontal on desktop, vertical on phone).
+ *   "horizontal" – editor left, preview right. Locked.
+ *   "vertical"   – editor top, preview bottom. Locked.
+ */
+export type SplitAxis = "auto" | "horizontal" | "vertical";
 
-interface DocFile {
+export interface DocFile {
   name: string;
   content: string;
   /** File System Access API handle, if the doc came from disk */
@@ -30,8 +37,17 @@ interface AppState {
   autoSave: boolean;
   autoSaveInterval: number;
   syncScroll: SyncScrollMode;
+  splitAxis: SplitAxis;
   pageView: boolean;
   aiKey: string | null;
+  /** Toggle browser-native red squiggle spell-check inside the editor. */
+  spellCheck: boolean;
+  /** Run AI locally via web-llm + WebGPU instead of OpenAI. */
+  useLocalAi: boolean;
+  /** Typewriter scroll mode — keep the active line vertically centred. */
+  typewriterMode: boolean;
+  /** Daily writing goal (words). 0 disables the banner. */
+  writingGoalWords: number;
   setMode: (m: ViewMode) => void;
   setTheme: (t: Theme) => void;
   setLocale: (l: Locale) => void;
@@ -48,6 +64,11 @@ interface AppState {
   setAiKey: (key: string | null) => void;
   toggleSyncScroll: () => void;
   togglePageView: () => void;
+  setSplitAxis: (axis: SplitAxis) => void;
+  toggleSpellCheck: () => void;
+  toggleLocalAi: () => void;
+  toggleTypewriter: () => void;
+  setWritingGoal: (words: number) => void;
 }
 
 const DEFAULT_DOC: DocFile = {
@@ -71,8 +92,13 @@ export const useAppStore = create<AppState>()(
       autoSave: true,
       autoSaveInterval: 30000,
       syncScroll: "all" as SyncScrollMode,
+      splitAxis: "auto" as SplitAxis,
       pageView: false,
       aiKey: null,
+      spellCheck: true,
+      useLocalAi: false,
+      typewriterMode: false,
+      writingGoalWords: 0,
       setMode: (m) => set({ mode: m }),
       setTheme: (t) => {
         set({ theme: t });
@@ -88,7 +114,7 @@ export const useAppStore = create<AppState>()(
         })),
       setDoc: (d) =>
         set((state) => ({
-          doc: { ...state.doc, ...d, dirty: d.dirty ?? false },
+          doc: { ...state.doc, ...d, dirty: d.dirty ?? state.doc.dirty },
         })),
       toggleOutline: () => set((s) => ({ showOutline: !s.showOutline })),
       toggleWorkspace: () => set((s) => ({ showWorkspace: !s.showWorkspace })),
@@ -106,6 +132,11 @@ export const useAppStore = create<AppState>()(
       setAiKey: (key) => set({ aiKey: key }),
       toggleSyncScroll: () => set((s) => ({ syncScroll: s.syncScroll === "all" ? "single" : "all" })),
       togglePageView: () => set((s) => ({ pageView: !s.pageView })),
+      setSplitAxis: (axis) => set({ splitAxis: axis }),
+      toggleSpellCheck: () => set((s) => ({ spellCheck: !s.spellCheck })),
+      toggleLocalAi: () => set((s) => ({ useLocalAi: !s.useLocalAi })),
+      toggleTypewriter: () => set((s) => ({ typewriterMode: !s.typewriterMode })),
+      setWritingGoal: (words) => set({ writingGoalWords: Math.max(0, Math.floor(words)) }),
     }),
     {
       name: "lumen-md",
@@ -121,8 +152,13 @@ export const useAppStore = create<AppState>()(
         autoSave: s.autoSave,
         autoSaveInterval: s.autoSaveInterval,
         syncScroll: s.syncScroll,
+        splitAxis: s.splitAxis,
         pageView: s.pageView,
-        aiKey: s.aiKey,
+        spellCheck: s.spellCheck,
+        useLocalAi: s.useLocalAi,
+        typewriterMode: s.typewriterMode,
+        writingGoalWords: s.writingGoalWords,
+        // aiKey intentionally excluded — session-only for security
         doc: {
           name: s.doc.name,
           content: s.doc.content,

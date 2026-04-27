@@ -130,6 +130,42 @@ All icons required by `src-tauri/tauri.conf.json` are committed, so `tauri build
 - Git: clone an HTTPS repo → edit → `⌘K → Commit & push` → `⌘K → Pull` → `⌘K → Status`.
 - Deploy a new build → refresh a previously-opened tab → update banner appears → click Reload.
 
+## Lumen Cloud (optional)
+
+Lumen is fully local-first: nothing leaves your browser by default. To unlock
+account features — persistent collab rooms, cloud sync, Smart search — opt in
+to Lumen Cloud:
+
+1. Create a free [Supabase](https://supabase.com) project.
+2. Copy `Project Settings → API → URL` and `anon key` into `.env.local`:
+   ```
+   VITE_SUPABASE_URL=https://YOUR-PROJECT.supabase.co
+   VITE_SUPABASE_ANON_KEY=eyJ...
+   ```
+3. `npm install @supabase/supabase-js` (the SDK is dynamically imported, so
+   builds without it skip the dependency).
+4. Restart `npm run dev`. The toolbar's `Sign in` pill becomes active.
+
+The auth surface lives in [`src/auth/`](src/auth/) and exposes a small
+`AuthProvider` interface — swap Supabase for Clerk / Firebase / a homegrown
+backend by writing a new provider module.
+
+## Smart search (P2-11)
+
+`⌘K → Smart search` (or the **Smart** tab inside `⇧⌘F`) runs a hybrid
+retrieval over your workspace:
+
+1. `indexWorkspace()` chunks every `.md` / `.markdown` / `.txt` file at heading
+   boundaries and embeds each chunk via OpenAI `text-embedding-3-small`.
+2. Vectors land in IndexedDB so subsequent runs only re-embed chunks whose
+   content hash changed — keeping the OpenAI bill bounded.
+3. Searches fuse the BM25 keyword index with cosine-similarity over the
+   embeddings using Reciprocal-Rank Fusion (RRF, k = 60) with a 1.2× semantic
+   boost. So a query like "deep learning" finds a doc titled "Neural networks"
+   even when no surface words match.
+
+Smart search needs an OpenAI key (`⌘K → AI Settings`) but no account.
+
 ## Roadmap (deferred)
 
 - **Server-backed collaboration** with persistent rooms (the WebRTC build is peer-to-peer only — sessions evaporate when all peers leave).

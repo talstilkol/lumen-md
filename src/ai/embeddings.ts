@@ -1,13 +1,13 @@
 /**
  * Workspace RAG engine — BM25+ with bigram phrase matching.
  *
- * Upgraded from TF-IDF to BM25+ for better ranking of long documents.
- * Includes EN+HE stopword filtering and bigram phrase support.
+ * Upgraded to Web Worker architecture for zero UI blocking during indexing/search.
  *
- * The index is stored in-memory and refreshed every 60s.
+ * The index is constructed in the worker and refreshed every 60s.
  */
 
 import { get, set } from "idb-keyval";
+import { log } from "../lib/logger";
 import {
   ensureIndex,
 } from "../storage/workspaceIndex";
@@ -17,11 +17,6 @@ import {
   readWorkspaceFile,
   isAssetName,
 } from "../storage/workspace";
-import {
-  buildBM25Index,
-  bm25Search,
-  type BM25Index,
-} from "./neuralSearch";
 
 /* ─── Types ─────────────────────────────────────────────────────── */
 
@@ -35,15 +30,67 @@ export interface RagResult {
 const IDB_KEY = "lumen-rag-bm25";
 const STALE_MS = 60_000; // rebuild if >60s old
 
-let currentIndex: BM25Index | null = null;
+// Single active worker instance
+let searchWorker: Worker | null = null;
+let lastBuildTime = 0;
+let currentDocCount = 0;
+let isBuilding = false;
+let buildQueueResolver: (() => void) | null = null;
+
+// Search request sequence id
+let searchSeq = 0;
+// Map of seq -> Promise resolver
+const searchResolvers = new Map<number, { resolve: (r: any[]) => void, reject: (e: any) => void }>();
+
+function initWorker() {
+  if (searchWorker) return searchWorker;
+  searchWorker = new Worker(new URL("./search.worker.ts", import.meta.url), { type: "module" });
+  
+  searchWorker.onmessage = (e) => {
+    const { type, docCount, results, seq, success, error } = e.data;
+    
+    if (type === "BUILT") {
+      isBuilding = false;
+      if (success) {
+        lastBuildTime = Date.now();
+        currentDocCount = docCount;
+        set(IDB_KEY, { builtAt: lastBuildTime, docCount }).catch(() => {});
+      } else {
+        log.error("BM25 build failed in worker", error);
+      }
+      if (buildQueueResolver) {
+        buildQueueResolver();
+        buildQueueResolver = null;
+      }
+    } else if (type === "SEARCH_RESULTS") {
+      const resolver = searchResolvers.get(seq);
+      if (resolver) {
+        searchResolvers.delete(seq);
+        if (error) resolver.reject(new Error(error));
+        else resolver.resolve(results || []);
+      }
+    }
+  };
+  return searchWorker;
+}
 
 /* ─── Public API ────────────────────────────────────────────────── */
 
 /**
- * Build or refresh the BM25+ index from the workspace.
+ * Build or refresh the BM25+ index from the workspace via WebWorker.
  */
 export async function buildRagIndex(): Promise<void> {
-  if (!isOPFSAvailable()) return;
+  if (!isOPFSAvailable() || isBuilding) {
+    if (isBuilding) {
+      return new Promise<void>((r) => { 
+        const old = buildQueueResolver;
+        buildQueueResolver = () => { if (old) old(); r(); };
+      });
+    }
+    return;
+  }
+  
+  const worker = initWorker();
   await ensureIndex();
 
   const list = await listWorkspace({ includeAssets: false });
@@ -66,18 +113,15 @@ export async function buildRagIndex(): Promise<void> {
 
   if (docs.length < 2) return; // Not enough docs for meaningful search
 
-  currentIndex = buildBM25Index(docs);
-
-  // Persist build stats
-  await set(IDB_KEY, {
-    builtAt: currentIndex.builtAt,
-    docCount: docs.length,
-  }).catch(() => {});
+  isBuilding = true;
+  return new Promise<void>((resolve) => {
+    buildQueueResolver = resolve;
+    worker.postMessage({ type: "BUILD", docs });
+  });
 }
 
 /**
- * Search the workspace using BM25+ ranking.
- * Returns ranked results with full content for context stuffing.
+ * Search the workspace using BM25+ ranking via WebWorker.
  */
 export async function semanticSearch(
   query: string,
@@ -87,13 +131,27 @@ export async function semanticSearch(
   const maxChars = opts.maxContentChars ?? 6000;
 
   // Rebuild if stale or missing
-  if (!currentIndex || Date.now() - currentIndex.builtAt > STALE_MS) {
-    await buildRagIndex();
+  if (lastBuildTime === 0) {
+    const cached = await get<{ builtAt: number; docCount: number }>(IDB_KEY);
+    if (cached) {
+      lastBuildTime = cached.builtAt;
+      currentDocCount = cached.docCount;
+    }
   }
 
-  if (!currentIndex || currentIndex.docs.length === 0) return [];
+  if (lastBuildTime === 0 || Date.now() - lastBuildTime > STALE_MS) {
+    await buildRagIndex();
+  }
+  
+  if (currentDocCount === 0) return [];
 
-  const scored = bm25Search(query, currentIndex, topK);
+  const worker = initWorker();
+  
+  const seq = ++searchSeq;
+  const scored = await new Promise<any[]>((resolve, reject) => {
+    searchResolvers.set(seq, { resolve, reject });
+    worker.postMessage({ type: "SEARCH", query, topK, seq });
+  });
 
   // Load full content for top results
   const results: RagResult[] = [];
@@ -118,10 +176,10 @@ export async function semanticSearch(
  * Get the current index stats.
  */
 export function getRagStats(): { docCount: number; vocabSize: number } | null {
-  if (!currentIndex) return null;
+  if (lastBuildTime === 0) return null;
   return {
-    docCount: currentIndex.docs.length,
-    vocabSize: currentIndex.df.size,
+    docCount: currentDocCount,
+    vocabSize: 0, // Vocab size is tracked inside the worker now
   };
 }
 

@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import React, { useMemo } from "react";
 import { Sparkles } from "lucide-react";
 import type { CollabPeer } from "../collab/yjs";
 import { t } from "../i18n";
@@ -20,7 +20,7 @@ interface Props {
   collab?: CollabInfo | null;
 }
 
-export function StatusBar({ text, dirty, filename, collab }: Props) {
+export const StatusBar = React.memo(function StatusBar({ text, dirty, filename, collab }: Props) {
   const stats = useMemo(() => computeStats(text), [text]);
   const aiKey = useAppStore((s) => s.aiKey);
   return (
@@ -95,7 +95,7 @@ export function StatusBar({ text, dirty, filename, collab }: Props) {
       <span className="sb-item sb-accent">Lumen</span>
     </footer>
   );
-}
+});
 
 interface Stats {
   words: number;

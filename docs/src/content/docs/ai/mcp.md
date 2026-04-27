@@ -1,0 +1,71 @@
+---
+title: MCP integration (Claude Desktop, Cursor, …)
+description: Expose your Lumen workspace as a Model Context Protocol server so any AI agent can read, write, and search your notes.
+---
+
+Lumen ships an [MCP](https://modelcontextprotocol.io/) server out of the
+box. Configure it once and Claude Desktop / Cursor / any MCP-aware
+client can read your workspace, write new notes, and run substring
+searches — from inside the chat, with no extra UI.
+
+## Install
+
+```bash
+# No install at all — the server runs via npx:
+npx @lumen-md/mcp-server
+```
+
+## Configure Claude Desktop
+
+Edit `~/Library/Application Support/Claude/claude_desktop_config.json`:
+
+```json
+{
+  "mcpServers": {
+    "lumen": {
+      "command": "npx",
+      "args": ["-y", "@lumen-md/mcp-server"],
+      "env": {
+        "LUMEN_WORKSPACE": "/Users/you/Documents/Lumen"
+      }
+    }
+  }
+}
+```
+
+Restart Claude Desktop. A 🔌 icon appears in the chat input — your
+Lumen workspace is now part of Claude's context.
+
+## Tools the agent gets
+
+| Tool | Args | Returns |
+| --- | --- | --- |
+| `read_note` | `path` | The full markdown body |
+| `write_note` | `path`, `content` | Confirmation string |
+| `list_notes` | — | Newline-separated list of every `.md` / `.txt` |
+| `search_workspace` | `query`, `limit?` | Substring matches with line numbers |
+
+## Examples
+
+> *Read my note about deep learning and summarise the open questions.*
+
+Claude calls `search_workspace("deep learning")` → top hits → `read_note`
+on each → composes a summary with citations linking back to your notes.
+
+> *Capture my last 5 messages as a new note titled "Meeting prep — Q3".*
+
+Claude calls `write_note("meetings/2026-q3-prep.md", "...")` — your note
+appears in OPFS instantly (after the next `cap sync` or Git pull).
+
+## Security boundary
+
+The server **refuses any path containing `..` or absolute paths**. An
+agent can only see files under `LUMEN_WORKSPACE`. Run the server only
+against directories you'd be comfortable showing the agent.
+
+## Sync with the web app
+
+The MCP server is a Node process — it can't reach OPFS in your browser
+directly. The standard pattern: bind your Lumen workspace to a Git repo
+(`⌘K → Git: Clone`), clone the same repo to the path you set in
+`LUMEN_WORKSPACE`, and use `git pull` / push to keep both sides in sync.

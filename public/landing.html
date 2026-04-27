@@ -18,10 +18,33 @@
       content="Free, browser-native markdown editor with AI, encryption, plugins, and 15+ render blocks."
     />
     <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://lumen.app/" />
+    <meta property="og:image" content="https://lumen.app/og-card.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Lumen markdown editor — split view with a Mermaid diagram and a CSV chart." />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:locale:alternate" content="he_IL" />
+    <meta property="og:site_name" content="Lumen" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Lumen — Markdown, illuminated" />
+    <meta
+      name="twitter:description"
+      content="Free, browser-native markdown editor with AI, encryption, plugins, and 15+ render blocks."
+    />
+    <meta name="twitter:image" content="https://lumen.app/og-card.png" />
+    <meta name="theme-color" content="#0c0f17" />
+    <link rel="canonical" href="https://lumen.app/" />
+    <link rel="alternate" hreflang="en" href="https://lumen.app/" />
+    <link rel="alternate" hreflang="he" href="https://lumen.app/he/" />
+    <link rel="alternate" hreflang="x-default" href="https://lumen.app/" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap"
       rel="stylesheet"
+      media="print"
+      onload="this.media='all'"
     />
     <style>
       *,
@@ -604,9 +627,39 @@
       <p>
         Built with ❤️ by
         <a href="https://github.com/talstilkol">Tal Stilkol</a> ·
-        <a href="https://github.com/talstilkol/lumen-md">GitHub</a> · MIT
-        License · 2026
+        <a href="https://github.com/talstilkol/lumen-md">GitHub</a> ·
+        <a href="/roadmap.html">Roadmap</a> · MIT License · 2026
       </p>
     </footer>
+    <!--
+      JSON-LD — helps Google show rich snippets ("Software application", price,
+      rating, screenshot) in the SERP. Update price/rating when you actually
+      have aggregated reviews.
+    -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "Lumen",
+        "applicationCategory": "ProductivityApplication",
+        "applicationSubCategory": "MarkdownEditor",
+        "operatingSystem": "Web, macOS, Windows, Linux, iOS, Android",
+        "url": "https://lumen.app/",
+        "image": "https://lumen.app/og-card.png",
+        "description": "Free, browser-native markdown editor with AI, encryption, plugins, and 15+ render blocks.",
+        "softwareVersion": "0.1.0",
+        "license": "https://opensource.org/license/mit",
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "USD"
+        },
+        "author": {
+          "@type": "Person",
+          "name": "Tal Stilkol",
+          "url": "https://github.com/talstilkol"
+        }
+      }
+    </script>
   </body>
 </html>

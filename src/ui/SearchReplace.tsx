@@ -86,6 +86,7 @@ export function SearchReplace({ open, onClose, content, onChange }: Props) {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder={t("search.placeholder")}
+          aria-label={t("findReplace.searchInput")}
           onKeyDown={(e) => {
             if (e.key === "Escape") onClose();
             if (e.key === "Enter") goNext();
@@ -101,25 +102,25 @@ export function SearchReplace({ open, onClose, content, onChange }: Props) {
             outline: "none",
           }}
         />
-        <button onClick={() => setIsRegex(!isRegex)} title="Regex" className="icon-btn"
+        <button onClick={() => setIsRegex(!isRegex)} title={t("findReplace.regex")} aria-label={t("findReplace.regex")} aria-pressed={isRegex} className="icon-btn"
           style={{ background: isRegex ? "hsl(var(--accent) / 0.15)" : "transparent", width: 28, height: 28 }}>
           <span style={{ fontSize: 11, fontFamily: "monospace", fontWeight: 700 }}>.*</span>
         </button>
-        <button onClick={() => setCaseSensitive(!caseSensitive)} title="Case Sensitive" className="icon-btn"
+        <button onClick={() => setCaseSensitive(!caseSensitive)} title={t("findReplace.caseSensitive")} aria-label={t("findReplace.caseSensitive")} aria-pressed={caseSensitive} className="icon-btn"
           style={{ background: caseSensitive ? "hsl(var(--accent) / 0.15)" : "transparent", width: 28, height: 28 }}>
           <CaseSensitive size={13} />
         </button>
-        <span style={{ fontSize: 11, color: "hsl(var(--fg-muted))", minWidth: 40, textAlign: "center" }}>
+        <span aria-live="polite" style={{ fontSize: 11, color: "hsl(var(--fg-muted))", minWidth: 40, textAlign: "center" }}>
           {total > 0 ? `${currentIndex + 1}/${total}` : "0"}
         </span>
-        <button onClick={goPrev} className="icon-btn" style={{ width: 24, height: 24 }}><ChevronUp size={13} /></button>
-        <button onClick={goNext} className="icon-btn" style={{ width: 24, height: 24 }}><ChevronDown size={13} /></button>
-        <button onClick={onClose} className="icon-btn" style={{ width: 24, height: 24 }}><X size={13} /></button>
+        <button onClick={goPrev} title={t("findReplace.prev")} aria-label={t("findReplace.prev")} className="icon-btn" style={{ width: 24, height: 24 }}><ChevronUp size={13} /></button>
+        <button onClick={goNext} title={t("findReplace.next")} aria-label={t("findReplace.next")} className="icon-btn" style={{ width: 24, height: 24 }}><ChevronDown size={13} /></button>
+        <button onClick={onClose} title={t("findReplace.close")} aria-label={t("findReplace.close")} className="icon-btn" style={{ width: 24, height: 24 }}><X size={13} /></button>
       </div>
 
       {/* Replace row */}
       <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-        <button onClick={() => setShowReplace(!showReplace)} className="icon-btn" style={{ width: 20, height: 20 }} title="Toggle Replace">
+        <button onClick={() => setShowReplace(!showReplace)} className="icon-btn" style={{ width: 20, height: 20 }} title={t("findReplace.toggleReplace")} aria-label={t("findReplace.toggleReplace")} aria-pressed={showReplace}>
           <Replace size={13} />
         </button>
         {showReplace && (
@@ -127,7 +128,8 @@ export function SearchReplace({ open, onClose, content, onChange }: Props) {
             <input
               value={replacement}
               onChange={(e) => setReplacement(e.target.value)}
-              placeholder="Replace with…"
+              placeholder={t("findReplace.replacePlaceholder")}
+              aria-label={t("findReplace.replaceInput")}
               onKeyDown={(e) => { if (e.key === "Enter") replaceOne(); }}
               style={{
                 flex: 1,

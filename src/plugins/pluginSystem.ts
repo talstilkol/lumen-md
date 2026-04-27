@@ -1,12 +1,14 @@
 /**
  * Plugin System — minimal extensibility API for Lumen IDE.
- * 
+ *
  * Plugins register via `registerPlugin()` and can:
  * - Add commands to the command palette
  * - Add toolbar buttons
  * - Hook into document lifecycle events (open, save, change)
  * - Register custom markdown block renderers
  */
+
+import { log } from "../lib/logger";
 
 export interface LumenCommand {
   id: string;
@@ -113,7 +115,7 @@ function createAPI(pluginId: string): LumenPluginAPI {
 /** Register and activate a plugin */
 export async function registerPlugin(plugin: LumenPlugin): Promise<void> {
   if (plugins.has(plugin.id)) {
-    console.warn(`Plugin "${plugin.id}" already registered`);
+    log.warn(`plugin "${plugin.id}" already registered`);
     return;
   }
   plugins.set(plugin.id, { plugin, active: false });

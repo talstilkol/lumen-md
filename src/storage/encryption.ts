@@ -14,7 +14,7 @@ async function deriveKey(password: string, salt: Uint8Array): Promise<CryptoKey>
   const encoder = new TextEncoder();
   const keyMaterial = await crypto.subtle.importKey(
     "raw",
-    encoder.encode(password),
+    encoder.encode(password) as BufferSource,
     "PBKDF2",
     false,
     ["deriveKey"],
@@ -22,7 +22,7 @@ async function deriveKey(password: string, salt: Uint8Array): Promise<CryptoKey>
   return crypto.subtle.deriveKey(
     {
       name: "PBKDF2",
-      salt,
+      salt: salt as BufferSource,
       iterations: PBKDF2_ITERATIONS,
       hash: "SHA-256",
     },
@@ -52,12 +52,21 @@ export async function encryptText(plaintext: string, password: string): Promise<
   packed.set(iv, SALT_LENGTH);
   packed.set(new Uint8Array(encrypted), SALT_LENGTH + IV_LENGTH);
 
-  return btoa(String.fromCharCode(...packed));
+  const chunkSize = 0x8000;
+  const chars: string[] = [];
+  for (let i = 0; i < packed.length; i += chunkSize) {
+    chars.push(String.fromCharCode.apply(null, packed.subarray(i, i + chunkSize) as unknown as number[]));
+  }
+  return btoa(chars.join(""));
 }
 
 /** Decrypt base64-encoded ciphertext with a password. */
 export async function decryptText(cipherBase64: string, password: string): Promise<string> {
-  const packed = Uint8Array.from(atob(cipherBase64), (c) => c.charCodeAt(0));
+  const binStr = atob(cipherBase64);
+  const packed = new Uint8Array(binStr.length);
+  for (let i = 0; i < binStr.length; i++) {
+    packed[i] = binStr.charCodeAt(i);
+  }
 
   const salt = packed.slice(0, SALT_LENGTH);
   const iv = packed.slice(SALT_LENGTH, SALT_LENGTH + IV_LENGTH);

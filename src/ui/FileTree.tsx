@@ -27,6 +27,7 @@ import {
 import type { WorkspaceNode } from "../storage/workspace";
 import { t } from "../i18n";
 import { uiAlert, uiConfirm, uiPrompt } from "./PromptDialog";
+import { FileContextMenu, buildFileActions } from "./FileContextMenu";
 
 interface Props {
   /** Currently active workspace path (if any). */
@@ -49,7 +50,70 @@ export function FileTree({
   const [editingPath, setEditingPath] = useState<string | null>(null);
   const [editValue, setEditValue] = useState("");
   const [collapsed, setCollapsed] = useState<Set<string>>(new Set());
+  const [selectedPaths, setSelectedPaths] = useState<Set<string>>(new Set());
+  const [contextMenu, setContextMenu] = useState<{
+    x: number;
+    y: number;
+    node: WorkspaceNode;
+  } | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
+
+  function toggleSelect(path: string): void {
+    setSelectedPaths((prev) => {
+      const next = new Set(prev);
+      if (next.has(path)) next.delete(path);
+      else next.add(path);
+      return next;
+    });
+  }
+  function clearSelection(): void {
+    setSelectedPaths(new Set());
+  }
+
+  /** Bulk delete every selected path. Confirms once for the whole set. */
+  async function bulkDelete(): Promise<void> {
+    if (selectedPaths.size === 0) return;
+    const paths = [...selectedPaths];
+    const ok = await uiConfirm({
+      message: t("tree.confirm.bulkDelete", { count: String(paths.length) }),
+    });
+    if (!ok) return;
+    for (const p of paths) {
+      try {
+        await deleteWorkspaceFile(p);
+        if (activePath && (activePath === p || activePath.startsWith(p + "/"))) {
+          onActiveDeleted();
+        }
+      } catch {
+        /* missing — ignore */
+      }
+    }
+    clearSelection();
+    await refresh();
+  }
+
+  /** Bulk move every selected file into a new parent folder. */
+  async function bulkMove(): Promise<void> {
+    if (selectedPaths.size === 0) return;
+    const target = await uiPrompt({
+      message: t("tree.prompt.bulkMoveTarget"),
+      defaultValue: "",
+    });
+    if (target === null) return;
+    const dir = target.trim().replace(/^\/+|\/+$/g, "");
+    for (const p of selectedPaths) {
+      const name = basename(p);
+      const newPath = dir ? `${dir}/${name}` : name;
+      try {
+        await renameWorkspaceFile(p, newPath);
+        if (activePath === p) onActiveRenamed(newPath);
+      } catch {
+        /* skip on conflict */
+      }
+    }
+    clearSelection();
+    await refresh();
+  }
 
   const available = isOPFSAvailable();
 
@@ -172,6 +236,33 @@ export function FileTree({
     }
   }
 
+  /** Duplicate a single file as `<name> copy.<ext>` (folders skipped). */
+  async function duplicate(node: WorkspaceNode): Promise<void> {
+    if (node.kind !== "file") return;
+    try {
+      const body = await readWorkspaceFile(node.path);
+      const dotIdx = node.name.lastIndexOf(".");
+      const stem = dotIdx >= 0 ? node.name.slice(0, dotIdx) : node.name;
+      const ext = dotIdx >= 0 ? node.name.slice(dotIdx) : "";
+      const dirPart = dirname(node.path);
+      const candidate = joinPath(dirPart, `${stem} copy${ext}`);
+      const newPath = await uniqueWorkspaceName(candidate);
+      await writeWorkspaceFile(newPath, body);
+      await refresh();
+    } catch (e) {
+      await uiAlert({ message: (e as Error).message });
+    }
+  }
+
+  /** Copy a path string to the clipboard. */
+  async function copyPath(node: WorkspaceNode): Promise<void> {
+    try {
+      await navigator.clipboard.writeText(node.path);
+    } catch {
+      /* clipboard denied — silently ignore */
+    }
+  }
+
   async function remove(node: WorkspaceNode) {
     const msg =
       node.kind === "directory"
@@ -214,34 +305,61 @@ export function FileTree({
   return (
     <aside className="file-tree" aria-label={t("tree.title")}>
       <div className="file-tree-header">
-        <span>{t("tree.title")}</span>
-        <div style={{ display: "flex", gap: 4 }}>
+        <span style={{ fontWeight: 600 }}>{t("tree.title")}</span>
+        <div style={{ display: "flex", gap: 6 }}>
           <button
             className="icon-btn"
             title={t("tree.newFileRoot")}
             aria-label={t("tree.newFileRoot")}
             onClick={() => newFile("")}
-            style={{ width: 22, height: 22 }}
+            style={{
+              width: "auto",
+              height: 32,
+              padding: "4px 8px",
+              display: "flex",
+              alignItems: "center",
+              gap: 4,
+              borderRadius: 6,
+              fontSize: 11,
+            }}
           >
-            <FilePlus2 size={13} />
+            <FilePlus2 size={16} />
+            <span>{t("toolbar.new")}</span>
           </button>
           <button
             className="icon-btn"
             title={t("tree.newFolderRoot")}
             aria-label={t("tree.newFolderRoot")}
             onClick={() => newFolder("")}
-            style={{ width: 22, height: 22 }}
+            style={{
+              width: "auto",
+              height: 32,
+              padding: "4px 8px",
+              display: "flex",
+              alignItems: "center",
+              gap: 4,
+              borderRadius: 6,
+              fontSize: 11,
+            }}
           >
-            <FolderPlus size={13} />
+            <FolderPlus size={16} />
+            <span>{t("tree.newFolderRoot")}</span>
           </button>
           <button
             className="icon-btn"
             title={t("tree.refresh")}
             aria-label={t("tree.refresh")}
             onClick={refresh}
-            style={{ width: 22, height: 22 }}
+            style={{
+              width: 32,
+              height: 32,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              borderRadius: 6,
+            }}
           >
-            <RefreshCcw size={12} />
+            <RefreshCcw size={16} />
           </button>
         </div>
       </div>
@@ -256,25 +374,122 @@ export function FileTree({
           {t("tree.emptyHint")}
         </div>
       ) : (
-        <ul className="file-tree-list" role="tree">
-          {tree.map((node) =>
-            renderNode(node, 0, {
-              activePath,
-              collapsed,
-              editingPath,
-              editValue,
-              setEditValue,
-              setEditingPath,
-              inputRef,
-              toggle,
-              open,
-              commitRename,
-              remove,
-              newFile,
-              newFolder,
-            }),
+        <>
+          {selectedPaths.size > 0 && (
+            <div
+              role="toolbar"
+              aria-label={t("tree.bulkToolbar")}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 6,
+                padding: "6px 10px",
+                background: "hsl(var(--accent) / 0.10)",
+                borderBottom: "1px solid hsl(var(--accent) / 0.30)",
+                fontSize: 11,
+              }}
+            >
+              <span style={{ color: "hsl(var(--accent))", fontWeight: 600 }}>
+                {t("tree.selectedCount", { count: String(selectedPaths.size) })}
+              </span>
+              <button
+                type="button"
+                onClick={bulkMove}
+                style={{
+                  marginInlineStart: "auto",
+                  padding: "3px 9px",
+                  fontSize: 11,
+                  border: "1px solid hsl(var(--border))",
+                  borderRadius: 6,
+                  background: "hsl(var(--bg))",
+                  color: "hsl(var(--fg))",
+                  cursor: "pointer",
+                }}
+              >
+                {t("tree.bulkMove")}
+              </button>
+              <button
+                type="button"
+                onClick={bulkDelete}
+                style={{
+                  padding: "3px 9px",
+                  fontSize: 11,
+                  border: "1px solid hsl(0 80% 60% / 0.5)",
+                  borderRadius: 6,
+                  background: "hsl(0 80% 60% / 0.10)",
+                  color: "hsl(0 80% 70%)",
+                  cursor: "pointer",
+                }}
+              >
+                {t("tree.bulkDelete")}
+              </button>
+              <button
+                type="button"
+                onClick={clearSelection}
+                aria-label={t("tree.clearSelection")}
+                title={t("tree.clearSelection")}
+                style={{
+                  padding: "3px 7px",
+                  fontSize: 11,
+                  border: "none",
+                  borderRadius: 6,
+                  background: "transparent",
+                  color: "hsl(var(--fg-muted))",
+                  cursor: "pointer",
+                }}
+              >
+                ×
+              </button>
+            </div>
           )}
-        </ul>
+          <ul className="file-tree-list" role="tree">
+            {tree.map((node) =>
+              renderNode(node, 0, {
+                activePath,
+                collapsed,
+                editingPath,
+                editValue,
+                setEditValue,
+                setEditingPath,
+                inputRef,
+                toggle,
+                open,
+                commitRename,
+                remove,
+                newFile,
+                newFolder,
+                selectedPaths,
+                toggleSelect,
+                openContextMenu: (x, y, n) => setContextMenu({ x, y, node: n }),
+              }),
+            )}
+          </ul>
+        </>
+      )}
+      {contextMenu && (
+        <FileContextMenu
+          x={contextMenu.x}
+          y={contextMenu.y}
+          onClose={() => setContextMenu(null)}
+          actions={buildFileActions({
+            isFolder: contextMenu.node.kind === "directory",
+            onRename: () => {
+              setEditingPath(contextMenu.node.path);
+              setEditValue(contextMenu.node.name);
+            },
+            onDuplicate: () => duplicate(contextMenu.node),
+            onDelete: () => remove(contextMenu.node),
+            onCopyPath: () => copyPath(contextMenu.node),
+            onNewFile:
+              contextMenu.node.kind === "directory"
+                ? () => newFile(contextMenu.node.path)
+                : undefined,
+            onNewFolder:
+              contextMenu.node.kind === "directory"
+                ? () => newFolder(contextMenu.node.path)
+                : undefined,
+          })}
+        />
       )}
     </aside>
   );
@@ -294,6 +509,9 @@ interface RenderCtx {
   remove: (node: WorkspaceNode) => void;
   newFile: (parent: string) => void;
   newFolder: (parent: string) => void;
+  selectedPaths: Set<string>;
+  toggleSelect: (path: string) => void;
+  openContextMenu: (x: number, y: number, node: WorkspaceNode) => void;
 }
 
 function renderNode(
@@ -305,6 +523,7 @@ function renderNode(
   const isOpen = !ctx.collapsed.has(node.path);
   const isActive = node.path === ctx.activePath;
   const isEditing = ctx.editingPath === node.path;
+  const isSelected = ctx.selectedPaths.has(node.path);
 
   return (
     <li
@@ -314,8 +533,17 @@ function renderNode(
       aria-selected={isActive}
     >
       <div
-        className={`file-tree-item ${isActive ? "active" : ""}`}
-        style={{ paddingInlineStart: 6 + depth * 12 }}
+        className={`file-tree-item ${isActive ? "active" : ""}${isSelected ? " selected" : ""}`}
+        onContextMenu={(e) => {
+          e.preventDefault();
+          ctx.openContextMenu(e.clientX, e.clientY, node);
+        }}
+        style={{
+          paddingInlineStart: 6 + depth * 12,
+          background: isSelected
+            ? "hsl(var(--accent) / 0.18)"
+            : undefined,
+        }}
       >
         {isFolder ? (
           <button
@@ -325,7 +553,7 @@ function renderNode(
             title={isOpen ? t("tree.collapse") : t("tree.expand")}
             aria-label={isOpen ? t("tree.collapse") : t("tree.expand")}
           >
-            {isOpen ? <ChevronDown size={11} /> : <ChevronRight size={11} />}
+            {isOpen ? <ChevronDown size={13} /> : <ChevronRight size={13} />}
           </button>
         ) : (
           <span style={{ width: 14, display: "inline-block" }} />
@@ -333,18 +561,19 @@ function renderNode(
 
         {isFolder ? (
           isOpen ? (
-            <FolderOpen size={12} style={{ flexShrink: 0, opacity: 0.8 }} />
+            <FolderOpen size={14} style={{ flexShrink: 0, opacity: 0.8 }} />
           ) : (
-            <FolderIcon size={12} style={{ flexShrink: 0, opacity: 0.8 }} />
+            <FolderIcon size={14} style={{ flexShrink: 0, opacity: 0.8 }} />
           )
         ) : (
-          <FileText size={12} style={{ flexShrink: 0, opacity: 0.7 }} />
+          <FileText size={14} style={{ flexShrink: 0, opacity: 0.7 }} />
         )}
 
         {isEditing ? (
           <input
             ref={ctx.inputRef as React.RefObject<HTMLInputElement>}
             className="file-tree-input"
+            aria-label={`Rename ${node.name}`}
             value={ctx.editValue}
             onChange={(ev) => ctx.setEditValue(ev.target.value)}
             onBlur={() => ctx.commitRename(node.path)}
@@ -357,12 +586,24 @@ function renderNode(
           <button
             type="button"
             className="file-tree-name"
-            onClick={() => (isFolder ? ctx.toggle(node.path) : ctx.open(node))}
+            onClick={(e) => {
+              // ⌘-click / Ctrl-click → toggle multi-selection rather than
+              // opening the file. This lets users build up a set for bulk
+              // delete / move without leaving the keyboard.
+              if (e.metaKey || e.ctrlKey) {
+                e.preventDefault();
+                ctx.toggleSelect(node.path);
+                return;
+              }
+              if (isFolder) ctx.toggle(node.path);
+              else ctx.open(node);
+            }}
             onDoubleClick={() => {
               ctx.setEditingPath(node.path);
               ctx.setEditValue(node.name);
             }}
             title={node.path}
+            aria-checked={isSelected ? true : undefined}
           >
             {node.name}
           </button>
@@ -380,7 +621,7 @@ function renderNode(
                 ctx.newFile(node.path);
               }}
             >
-              <FilePlus2 size={11} />
+              <FilePlus2 size={13} />
             </button>
             <button
               type="button"
@@ -392,7 +633,7 @@ function renderNode(
                 ctx.newFolder(node.path);
               }}
             >
-              <FolderPlus size={11} />
+              <FolderPlus size={13} />
             </button>
           </>
         )}
@@ -408,7 +649,7 @@ function renderNode(
               ctx.setEditValue(node.name);
             }}
           >
-            <Pencil size={11} />
+            <Pencil size={13} />
           </button>
         )}
         <button
@@ -421,7 +662,7 @@ function renderNode(
             ctx.remove(node);
           }}
         >
-          <Trash2 size={11} />
+          <Trash2 size={13} />
         </button>
       </div>
 

@@ -11,7 +11,6 @@ import { Sparkles, X } from "lucide-react";
 
 /** Pending prompt resolve function stored in module scope. */
 let pendingResolve: ((value: string | null) => void) | null = null;
-let pendingQuestion: string = "";
 
 const listeners = new Set<(question: string) => void>();
 
@@ -22,7 +21,6 @@ const listeners = new Set<(question: string) => void>();
 export function openAiPrompt(question: string): Promise<string | null> {
   return new Promise<string | null>((resolve) => {
     pendingResolve = resolve;
-    pendingQuestion = question;
     listeners.forEach((fn) => fn(question));
   });
 }

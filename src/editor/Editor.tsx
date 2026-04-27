@@ -1,6 +1,6 @@
-import { useEffect, useImperativeHandle, useRef, forwardRef } from "react";
+import { useEffect, useImperativeHandle, useRef, useState, forwardRef } from "react";
 import { Compartment, EditorState } from "@codemirror/state";
-import { EditorView, keymap, lineNumbers, highlightActiveLine, Decoration, WidgetType } from "@codemirror/view";
+import { EditorView, keymap, highlightActiveLine, Decoration, WidgetType } from "@codemirror/view";
 import type { DecorationSet } from "@codemirror/view";
 import { defaultKeymap, history, historyKeymap, indentWithTab } from "@codemirror/commands";
 import { searchKeymap, search } from "@codemirror/search";
@@ -22,6 +22,12 @@ import type { Extension } from "@codemirror/state";
 import { chat } from "../ai/llm";
 import { PROMPTS } from "../ai/prompts";
 import { createInsert, createDelete } from "../storage/crdt";
+import { embedHintExtension } from "./embedHintExtension";
+import { insertSlashMenuExtension } from "./insertMenu";
+import { collabAwarenessExtension } from "./collabAwareness";
+import { typewriterModeExtension } from "./typewriterMode";
+import { markdownLintExtension } from "./lintExtension";
+import type { CollabSession } from "../collab/yjs";
 
 const mdHighlight = HighlightStyle.define([
   { tag: t.heading1, class: "tok-heading tok-heading1" },
@@ -52,20 +58,31 @@ interface EditorProps {
   onAddAsset?: (file: File) => Promise<string | null>;
   /** Toggle Vim keybindings. */
   vimEnabled?: boolean;
+  /** Toggle browser-native spell-check (red squiggle underlines). */
+  spellCheck?: boolean;
+  /** Centre the active line vertically (typewriter scroll mode). */
+  typewriterMode?: boolean;
   /**
    * Active CRDT collaboration path. When provided, the editor intercepts text
    * updates and sends them atomically to the local Conflict-Free Replicated Data Type queue.
    */
   crdtPath?: string | null;
+  /** Active collaboration session — when set, peer cursors render live. */
+  collab?: CollabSession | null;
 }
 
 export interface EditorHandle {
   /** Insert text at the current selection and focus the editor. */
   insertText: (text: string) => void;
   focus: () => void;
+  /** Return the underlying CodeMirror view (or null before mount). */
+  getView: () => EditorView | null;
 }
 
 const vimCompartment = new Compartment();
+const spellCheckCompartment = new Compartment();
+const collabCompartment = new Compartment();
+const typewriterCompartment = new Compartment();
 
 let vimExtensionPromise: Promise<unknown> | null = null;
 async function loadVimExtension() {
@@ -192,7 +209,16 @@ function ghostTextExtension(): Extension {
 }
 
 export const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
-  { value, onChange, onAddAsset, vimEnabled = false, collab = null },
+  {
+    value,
+    onChange,
+    onAddAsset,
+    vimEnabled = false,
+    spellCheck = true,
+    typewriterMode = false,
+    collab = null,
+    crdtPath = null,
+  },
   ref,
 ) {
   const hostRef = useRef<HTMLDivElement | null>(null);
@@ -204,6 +230,23 @@ export const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
   // When the parent pushes a new value into the editor (file open),
   // we want to suppress the resulting onChange notification.
   const syncingRef = useRef(false);
+  // The line gutter was removed — instead, the current cursor line is shown
+  // in a small overlay pill that fades in next to the scrollbar on hover or
+  // while the user is actively editing.
+  const [currentLine, setCurrentLine] = useState(1);
+  const [showLineBadge, setShowLineBadge] = useState(false);
+  const lineBadgeHideTimer = useRef<number | null>(null);
+
+  const flashLineBadge = () => {
+    setShowLineBadge(true);
+    if (lineBadgeHideTimer.current != null) {
+      window.clearTimeout(lineBadgeHideTimer.current);
+    }
+    lineBadgeHideTimer.current = window.setTimeout(() => {
+      setShowLineBadge(false);
+      lineBadgeHideTimer.current = null;
+    }, 1200);
+  };
 
   useImperativeHandle(
     ref,
@@ -220,6 +263,9 @@ export const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
       },
       focus() {
         viewRef.current?.focus();
+      },
+      getView() {
+        return viewRef.current;
       },
     }),
     [],
@@ -263,7 +309,8 @@ export const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
 
     const baseExtensions = [
       vimCompartment.of([]),
-      lineNumbers(),
+      embedHintExtension(),
+      insertSlashMenuExtension(),
       history(),
       bracketMatching(),
       indentOnInput(),
@@ -278,7 +325,17 @@ export const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
         addKeymap: true,
       }),
       EditorView.lineWrapping,
-      EditorView.contentAttributes.of({ spellcheck: "true" }),
+      spellCheckCompartment.of(
+        EditorView.contentAttributes.of({ spellcheck: spellCheck ? "true" : "false" }),
+      ),
+      collabCompartment.of(
+        collab?.awareness ? collabAwarenessExtension(collab.awareness) : [],
+      ),
+      typewriterCompartment.of(typewriterMode ? typewriterModeExtension() : []),
+      // Live markdown lint — wavy underlines for trailing whitespace,
+      // mixed-indent, heading-skip, broken wiki-links. Runs every 250 ms
+      // after the user stops typing.
+      markdownLintExtension(),
       imageDropPasteHandlers,
       keymap.of([
         ...closeBracketsKeymap,
@@ -293,7 +350,7 @@ export const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
 
           // Dispatch atomic ops to CRDT queue
           if (crdtPath) {
-            u.changes.iterChanges((fromA, toA, fromB, toB, inserted) => {
+            u.changes.iterChanges((fromA, toA, _fromB, _toB, inserted) => {
               // Deletions
               if (fromA < toA) {
                 createDelete(crdtPath, fromA, toA - fromA);
@@ -304,6 +361,13 @@ export const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
               }
             });
           }
+        }
+        // Track the current line for the floating line-number badge.
+        if (u.docChanged || u.selectionSet) {
+          const head = u.state.selection.main.head;
+          const line = u.state.doc.lineAt(head).number;
+          setCurrentLine(line);
+          flashLineBadge();
         }
       }),
     ];
@@ -351,7 +415,6 @@ export const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
 
 
     return () => {
-      cancelled = true;
       view.destroy();
       viewRef.current = null;
     };
@@ -393,5 +456,90 @@ export const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
     };
   }, [vimEnabled]);
 
-  return <div ref={hostRef} className="h-full overflow-hidden" />;
+  // Toggle browser-native spellcheck without recreating the editor.
+  useEffect(() => {
+    const view = viewRef.current;
+    if (!view) return;
+    view.dispatch({
+      effects: spellCheckCompartment.reconfigure(
+        EditorView.contentAttributes.of({ spellcheck: spellCheck ? "true" : "false" }),
+      ),
+    });
+  }, [spellCheck]);
+
+  // When the user starts / stops a collab session, swap the awareness
+  // extension in or out without recreating the whole editor.
+  useEffect(() => {
+    const view = viewRef.current;
+    if (!view) return;
+    view.dispatch({
+      effects: collabCompartment.reconfigure(
+        collab?.awareness ? collabAwarenessExtension(collab.awareness) : [],
+      ),
+    });
+  }, [collab]);
+
+  // Toggle typewriter mode without recreating the editor.
+  useEffect(() => {
+    const view = viewRef.current;
+    if (!view) return;
+    view.dispatch({
+      effects: typewriterCompartment.reconfigure(
+        typewriterMode ? typewriterModeExtension() : [],
+      ),
+    });
+  }, [typewriterMode]);
+
+  // Mobile shortcut bar dispatches `lumen-mobile-insert` events. Listen at
+  // window level so we receive them regardless of which surface dispatched.
+  useEffect(() => {
+    function onInsert(e: Event) {
+      const view = viewRef.current;
+      if (!view) return;
+      const detail = (e as CustomEvent<{ insert: string; cursorOffset: number }>).detail;
+      if (!detail?.insert) return;
+      const { from, to } = view.state.selection.main;
+      view.dispatch({
+        changes: { from, to, insert: detail.insert },
+        selection: { anchor: from + detail.insert.length + (detail.cursorOffset ?? 0) },
+      });
+      view.focus();
+    }
+    window.addEventListener("lumen-mobile-insert", onInsert);
+    return () => window.removeEventListener("lumen-mobile-insert", onInsert);
+  }, []);
+
+  return (
+    <div
+      className="flex-1 min-h-0 relative overflow-hidden"
+      onMouseEnter={flashLineBadge}
+      onMouseMove={flashLineBadge}
+    >
+      <div ref={hostRef} className="absolute inset-0" />
+      {/* Line indicator pill — replaces the gutter. Sits next to the
+          scrollbar in the top-right of the editor host so it's visible while
+          the user scrolls or hovers, and fades after a brief idle. */}
+      <div
+        aria-hidden
+        style={{
+          position: "absolute",
+          top: 8,
+          insetInlineEnd: 12,
+          padding: "3px 8px",
+          fontSize: 11,
+          fontFamily: "JetBrains Mono, ui-monospace, monospace",
+          color: "hsl(var(--fg-muted))",
+          background: "hsl(var(--bg-subtle))",
+          border: "1px solid hsl(var(--border))",
+          borderRadius: 999,
+          opacity: showLineBadge ? 0.95 : 0,
+          transition: "opacity 200ms ease",
+          pointerEvents: "none",
+          zIndex: 5,
+        }}
+      >
+        Line {currentLine}
+      </div>
+    </div>
+  );
 });

@@ -1,29 +1,30 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  autoSaveCanvas,
+  flushCanvas,
+  listCanvases,
+  loadCanvas,
+  type CanvasNode,
+  type CanvasEdge,
+} from "./canvasStorage";
+import { uiPrompt } from "./PromptDialog";
+import { randomId } from "../lib/cryptoRandom";
+import { t } from "../i18n";
 
 /**
  * Canvas / Whiteboard mode — an infinite canvas for visual note-taking.
- * 
+ *
+ * Each canvas is persisted to OPFS at `canvases/<name>.canvas.json` and
+ * auto-saved 250ms after the user stops dragging / typing. The toolbar
+ * surfaces the current canvas name and lets the user pick / rename / new.
+ *
  * Supports:
  * - Drag to create sticky notes with markdown content
  * - Pan and zoom the canvas
  * - Connect notes with arrows
  * - Color picker for notes
+ * - Persistent canvases via OPFS
  */
-
-interface CanvasNode {
-  id: string;
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-  content: string;
-  color: string;
-}
-
-interface CanvasEdge {
-  from: string;
-  to: string;
-}
 
 interface Props {
   open: boolean;
@@ -35,23 +36,102 @@ const COLORS = [
   "#eab308", "#ec4899", "#14b8a6", "#8b5cf6",
 ];
 
+const DEFAULT_CANVAS_NAME = "untitled";
+
+const SEED_NODES: CanvasNode[] = [
+  { id: "1", x: 200, y: 200, width: 200, height: 120, content: "# Welcome\n\nDrag to move notes.", color: "#7c5cfc" },
+  { id: "2", x: 500, y: 150, width: 200, height: 120, content: "## Ideas\n\n- Note 1\n- Note 2", color: "#22c55e" },
+  { id: "3", x: 350, y: 400, width: 200, height: 120, content: "Click **+ Add** to create more notes", color: "#f97316" },
+];
+const SEED_EDGES: CanvasEdge[] = [
+  { from: "1", to: "2" },
+  { from: "1", to: "3" },
+];
+
 export function CanvasWhiteboard({ open, onClose }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [nodes, setNodes] = useState<CanvasNode[]>([
-    { id: "1", x: 200, y: 200, width: 200, height: 120, content: "# Welcome\n\nDrag to move notes.", color: "#7c5cfc" },
-    { id: "2", x: 500, y: 150, width: 200, height: 120, content: "## Ideas\n\n- Note 1\n- Note 2", color: "#22c55e" },
-    { id: "3", x: 350, y: 400, width: 200, height: 120, content: "Click **+ Add** to create more notes", color: "#f97316" },
-  ]);
-  const [edges, setEdges] = useState<CanvasEdge[]>([
-    { from: "1", to: "2" },
-    { from: "1", to: "3" },
-  ]);
+  const [canvasName, setCanvasName] = useState<string>(DEFAULT_CANVAS_NAME);
+  const [savedList, setSavedList] = useState<string[]>([]);
+  const [hasLoaded, setHasLoaded] = useState(false);
+  const [nodes, setNodes] = useState<CanvasNode[]>(SEED_NODES);
+  const [edges, setEdges] = useState<CanvasEdge[]>(SEED_EDGES);
   const [dragging, setDragging] = useState<string | null>(null);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
   const [selectedColor, setSelectedColor] = useState(COLORS[0]);
   const [editingId, setEditingId] = useState<string | null>(null);
+
+  // On open: refresh the canvas list and load whichever was active last.
+  useEffect(() => {
+    if (!open) return;
+    let cancelled = false;
+    (async () => {
+      const list = await listCanvases();
+      if (cancelled) return;
+      setSavedList(list);
+      const last = localStorage.getItem("lumen.canvas.last") || DEFAULT_CANVAS_NAME;
+      const target = list.includes(last) ? last : list[0] ?? DEFAULT_CANVAS_NAME;
+      setCanvasName(target);
+      const doc = await loadCanvas(target);
+      if (cancelled) return;
+      if (doc) {
+        setNodes(doc.nodes);
+        setEdges(doc.edges);
+        setPan(doc.viewport.pan);
+        setZoom(doc.viewport.zoom);
+      } else {
+        setNodes(SEED_NODES);
+        setEdges(SEED_EDGES);
+        setPan({ x: 0, y: 0 });
+        setZoom(1);
+      }
+      setHasLoaded(true);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [open]);
+
+  // Auto-save after every meaningful change (debounced inside the helper).
+  // We skip the very first render after load so we don't write the seed
+  // doc back to a freshly-loaded canvas.
+  useEffect(() => {
+    if (!open || !hasLoaded) return;
+    autoSaveCanvas(canvasName, { nodes, edges, viewport: { pan, zoom } });
+    localStorage.setItem("lumen.canvas.last", canvasName);
+  }, [open, hasLoaded, canvasName, nodes, edges, pan, zoom]);
+
+  // Flush on close so a quick edit-then-close doesn't lose the last 250ms.
+  useEffect(() => {
+    if (open) return;
+    void flushCanvas();
+  }, [open]);
+
+  async function switchCanvas(name: string) {
+    await flushCanvas(canvasName);
+    const doc = await loadCanvas(name);
+    setCanvasName(name);
+    setNodes(doc?.nodes ?? SEED_NODES);
+    setEdges(doc?.edges ?? SEED_EDGES);
+    setPan(doc?.viewport.pan ?? { x: 0, y: 0 });
+    setZoom(doc?.viewport.zoom ?? 1);
+    setSavedList(await listCanvases());
+  }
+
+  async function newCanvas() {
+    const name = await uiPrompt({ message: "Name for the new canvas:", placeholder: "ideas" });
+    if (!name?.trim()) return;
+    await flushCanvas(canvasName);
+    setCanvasName(name.trim());
+    setNodes([]);
+    setEdges([]);
+    setPan({ x: 0, y: 0 });
+    setZoom(1);
+    // Force a save so it shows up in the list.
+    await autoSaveCanvas(name.trim(), { nodes: [], edges: [], viewport: { pan: { x: 0, y: 0 }, zoom: 1 } }, 0);
+    setSavedList(await listCanvases());
+  }
 
   // Draw canvas
   const draw = useCallback(() => {
@@ -166,7 +246,7 @@ export function CanvasWhiteboard({ open, onClose }: Props) {
   useEffect(() => { draw(); }, [draw]);
 
   const addNode = () => {
-    const id = String(Date.now());
+    const id = randomId(6);
     setNodes([...nodes, {
       id,
       x: (-pan.x + 300) / zoom,
@@ -194,7 +274,10 @@ export function CanvasWhiteboard({ open, onClose }: Props) {
         background: "#12121e",
       }}>
         <button
-          onClick={onClose}
+          onClick={async () => {
+            await flushCanvas();
+            onClose();
+          }}
           style={{
             background: "none", border: "1px solid rgba(255,255,255,0.1)",
             color: "#e8e8f0", borderRadius: 6, padding: "4px 12px",
@@ -203,8 +286,46 @@ export function CanvasWhiteboard({ open, onClose }: Props) {
         >
           ← Back to Editor
         </button>
+        <select
+          value={canvasName}
+          onChange={(e) => void switchCanvas(e.target.value)}
+          aria-label={t("canvas.switch")}
+          style={{
+            background: "#12121e",
+            color: "#e8e8f0",
+            border: "1px solid rgba(255,255,255,0.1)",
+            borderRadius: 6,
+            padding: "4px 8px",
+            fontSize: 12,
+            cursor: "pointer",
+          }}
+        >
+          {!savedList.includes(canvasName) && (
+            <option value={canvasName}>{canvasName} (unsaved)</option>
+          )}
+          {savedList.map((n) => (
+            <option key={n} value={n}>
+              {n}
+            </option>
+          ))}
+        </select>
+        <button
+          onClick={() => void newCanvas()}
+          style={{
+            background: "none",
+            border: "1px solid rgba(255,255,255,0.1)",
+            color: "#e8e8f0",
+            borderRadius: 6,
+            padding: "4px 10px",
+            cursor: "pointer",
+            fontSize: 12,
+          }}
+          title="Create a new canvas"
+        >
+          + New
+        </button>
         <div style={{ flex: 1 }} />
-        <span style={{ fontSize: 12, color: "#8888a8" }}>Canvas Mode</span>
+        <span style={{ fontSize: 12, color: "#8888a8" }}>Canvas · auto-saved</span>
         <div style={{ display: "flex", gap: 4 }}>
           {COLORS.map((c) => (
             <button

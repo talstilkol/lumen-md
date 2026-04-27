@@ -45,18 +45,10 @@ export async function reopenRecent(
   if (!entry.handle) return null;
   // We need to ask the user for permission again on each session.
   const handle = entry.handle;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const queryFn = (handle as any).queryPermission as
-    | ((opts: { mode: "read" | "readwrite" }) => Promise<PermissionState>)
-    | undefined;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const requestFn = (handle as any).requestPermission as
-    | ((opts: { mode: "read" | "readwrite" }) => Promise<PermissionState>)
-    | undefined;
-  if (queryFn) {
-    let state = await queryFn.call(handle, { mode: "readwrite" });
-    if (state !== "granted" && requestFn) {
-      state = await requestFn.call(handle, { mode: "readwrite" });
+  if (handle.queryPermission) {
+    let state = await handle.queryPermission({ mode: "readwrite" });
+    if (state !== "granted" && handle.requestPermission) {
+      state = await handle.requestPermission({ mode: "readwrite" });
     }
     if (state !== "granted") return null;
   }

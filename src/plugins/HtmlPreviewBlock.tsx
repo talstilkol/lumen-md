@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Maximize2, Code2 } from "lucide-react";
+import { t } from "../i18n";
 
 interface Props {
   source: string;
@@ -54,26 +55,26 @@ export default function HtmlPreviewBlock({ source, meta }: Props) {
   return (
     <div className="chart-block" ref={containerRef}>
       <div className="chart-block-header">
-        <span>{titleMatch?.[1] ?? "HTML preview"}</span>
+        <span>{titleMatch?.[1] ?? t("block.htmlPreview.title")}</span>
         <div className="chart-block-tabs">
           <button
             type="button"
             className={`chart-block-tab ${showSource ? "active" : ""}`}
             onClick={() => setShowSource((v) => !v)}
-            title="Toggle source view"
+            title={t("block.htmlPreview.toggleSource")}
             aria-pressed={showSource}
           >
             <Code2 size={11} style={{ display: "inline", marginInlineEnd: 4 }} />
-            Source
+            {t("block.htmlPreview.source")}
           </button>
           <button
             type="button"
             className="chart-block-tab"
             onClick={toggleFullscreen}
-            title={fullScreen ? "Exit fullscreen" : "Fullscreen preview"}
+            title={fullScreen ? t("block.htmlPreview.exitFullscreen") : t("block.htmlPreview.openFullscreen")}
           >
             <Maximize2 size={11} style={{ display: "inline", marginInlineEnd: 4 }} />
-            Fullscreen
+            {t("block.htmlPreview.fullscreen")}
           </button>
         </div>
       </div>

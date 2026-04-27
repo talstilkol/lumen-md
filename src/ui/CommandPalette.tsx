@@ -27,6 +27,7 @@ import {
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { t } from "../i18n";
+import "./CommandPalette.css";
 
 export interface Command {
   id: string;
@@ -36,6 +37,8 @@ export interface Command {
   icon?: LucideIcon;
   group?: string;
   action: () => void;
+  /** Sub-commands — renders as expandable group in palette */
+  children?: Command[];
 }
 
 interface Props {
@@ -48,18 +51,102 @@ export function CommandPalette({ open, onClose, commands }: Props) {
   const [query, setQuery] = useState("");
   const [active, setActive] = useState(0);
   const [tab, setTab] = useState<"main" | "advanced" | "all">("main");
+  const [expanded, setExpanded] = useState<Set<string>>(new Set());
   const inputRef = useRef<HTMLInputElement | null>(null);
   const listRef = useRef<HTMLDivElement | null>(null);
   const dialogRef = useRef<HTMLDivElement | null>(null);
   const previousFocusRef = useRef<Element | null>(null);
 
-  // Groups that belong to the "Main" tab
-  const MAIN_GROUPS = new Set([
-    t("group.file"), "File", "file",
-    t("group.view"), "View", "view",
-    t("group.edit"), "Edit", "edit",
-    undefined, // commands with no group
+  // Items the toolbar menus already expose. The palette de-duplicates those
+  // away from the default browse list — when the user starts typing we still
+  // search across them, so they remain discoverable. This keeps each action
+  // reachable from exactly one visible surface (toolbar) plus the palette
+  // search, instead of every command appearing in both.
+  const TOOLBAR_DUPLICATE_IDS = new Set([
+    "file.new",
+    "file.open",
+    "file.save",
+    "file.saveAs",
+    "file.exportHtml",
+    "file.exportPdf",
+    "file.print",
+    "file.insertText",
+    "edit.undo",
+    "edit.redo",
+    "edit.cut",
+    "edit.copy",
+    "edit.paste",
+    "edit.selectAll",
+    "edit.delete",
+    "view.source",
+    "view.split",
+    "view.preview",
+    "view.wysiwyg",
+    "view.outline",
+    "view.workspace",
+    "view.pageView",
+    "view.rtl",
+    "view.theme",
+    "view.scroll",
+    "view.scrollSync",
+    "help.focusMode",
+    "help.shortcuts",
+    "help.tour",
+    "help.commandPalette",
   ]);
+
+  const RECENT_GROUPS = new Set([t("group.recent"), "Recent", "recent"]);
+
+  // The hand-curated "Essentials" — Main tab shows only these by default,
+  // so the palette opens to a short list of the most-used flows. Everything
+  // else is reachable via the Advanced tab or by typing a search query.
+  const MAIN_ESSENTIAL_IDS = new Set([
+    "view.search",          // Search workspace ⇧⌘F
+    "view.smartSearch",     // Smart (semantic + BM25) search
+    "view.findReplace",     // Find & Replace ⌘H
+    "view.graphView",       // Knowledge Graph
+    "view.versionHistory",  // Version History
+    "view.canvas",          // Canvas / Whiteboard
+    "view.plugins",         // Plugin Gallery
+    "ai.settings",          // AI: Configure Connection
+    "ai.localToggle",       // 🧠 Local AI (web-llm) on/off
+    "tools.autoTag",        // 🏷️ Auto-tag this note
+    "tools.suggestLinks",   // 🔗 Suggest wiki-links
+    "tools.checkGrammar",   // 📝 Check grammar (LanguageTool)
+    "voice.start",          // 🎙 Voice to Markdown
+    "voice.dictate",
+    "encrypt.document",     // 🔒 Encrypt Document
+    "decrypt.document",     // 🔓 Decrypt Document
+    "vault.encrypt",
+    "vault.decrypt",
+    "template.meetingNotes",
+    "template.dailyJournal",
+    "template.weeklyReview",
+    "git.clone",
+    "git.commitPush",
+    "git.commit",
+    "git.pull",
+    "collab.start",
+    "collab.stop",
+    "collab.copy",
+    "collab.leave",
+  ]);
+
+  function isToolbarDuplicate(c: Command): boolean {
+    if (TOOLBAR_DUPLICATE_IDS.has(c.id)) return true;
+    // AI prompts and Insert blocks are reachable from their own floating
+    // buttons in the document — drop them from the default browse view, but
+    // keep them searchable when the user types a query.
+    if (c.id.startsWith("ai.prompt.")) return true;
+    if (c.id.startsWith("insert.")) return true;
+    return false;
+  }
+
+  function isMainEssential(c: Command): boolean {
+    if (RECENT_GROUPS.has(c.group ?? "")) return true;
+    if (MAIN_ESSENTIAL_IDS.has(c.id)) return true;
+    return false;
+  }
 
   useEffect(() => {
     if (open) {
@@ -76,10 +163,17 @@ export function CommandPalette({ open, onClose, commands }: Props) {
     }
   }, [open]);
 
-  // Focus trap while open.
+  // Focus trap + global Escape while open. Listening at document level lets
+  // Escape close the palette even when focus drifted out of the input (e.g.
+  // after a child sub-menu expansion).
   useEffect(() => {
     if (!open) return;
     function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape") {
+        e.preventDefault();
+        onClose();
+        return;
+      }
       if (e.key !== "Tab" || !dialogRef.current) return;
       const focusables = dialogRef.current.querySelectorAll<HTMLElement>(
         'button, input, [tabindex]:not([tabindex="-1"])',
@@ -97,30 +191,54 @@ export function CommandPalette({ open, onClose, commands }: Props) {
     }
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
-  }, [open]);
+  }, [open, onClose]);
+
+  // Flatten commands with children for searching
+  const flatAll = useMemo(() => {
+    const out: Command[] = [];
+    for (const cmd of commands) {
+      out.push(cmd);
+      if (cmd.children) out.push(...cmd.children);
+    }
+    return out;
+  }, [commands]);
 
   const filtered = useMemo(() => {
-    let list = commands;
     const q = query.trim().toLowerCase();
 
-    // If searching, search across ALL commands
+    // If searching, search across ALL commands (including children)
     if (q) {
-      return list.filter((c) => {
+      return flatAll.filter((c) => {
         const haystack = `${c.label} ${c.hint ?? ""} ${c.group ?? ""}`.toLowerCase();
         return haystack.includes(q);
       });
     }
 
-    // Otherwise filter by tab
+    // Otherwise filter top-level by tab. The palette deliberately suppresses
+    // commands that already live in the toolbar (File / Edit / View / Help)
+    // so the default browse list highlights the *additional* power-user
+    // actions (insert blocks, AI templates, Git, plugins, recents). Searching
+    // re-enables the full list above.
+    let list = commands.filter((c) => !isToolbarDuplicate(c));
     if (tab === "main") {
-      list = list.filter((c) => MAIN_GROUPS.has(c.group));
+      // Default browse: a tight curated list of the truly central flows
+      // (search, knowledge graph, history, encryption, voice, key templates,
+      // git/collab) plus recent files. Everything else is one tab away.
+      list = list.filter(isMainEssential);
     } else if (tab === "advanced") {
-      list = list.filter((c) => !MAIN_GROUPS.has(c.group));
+      list = list.filter((c) => !isMainEssential(c));
     }
-    // "all" shows everything
 
-    return list;
-  }, [query, commands, tab]);
+    // Expand children of expanded parents
+    const out: Command[] = [];
+    for (const cmd of list) {
+      out.push(cmd);
+      if (cmd.children && expanded.has(cmd.id)) {
+        out.push(...cmd.children);
+      }
+    }
+    return out;
+  }, [query, commands, flatAll, tab, expanded]);
 
   useEffect(() => {
     if (active >= filtered.length) setActive(0);
@@ -146,13 +264,30 @@ export function CommandPalette({ open, onClose, commands }: Props) {
       e.preventDefault();
       const cmd = filtered[active];
       if (cmd) {
+        // If the command has children, expand/collapse instead of executing
+        if (cmd.children) {
+          setExpanded((prev) => {
+            const next = new Set(prev);
+            next.has(cmd.id) ? next.delete(cmd.id) : next.add(cmd.id);
+            return next;
+          });
+          return;
+        }
         onClose();
         // Defer slightly so the palette unmounts before the action (e.g. file dialog) runs.
         setTimeout(() => cmd.action(), 0);
       }
-    } else if (e.key === "Escape") {
-      e.preventDefault();
-      onClose();
+    } else if (e.key === "Backspace" && !query) {
+      // When query is empty, Backspace collapses the last expanded sub-menu
+      if (expanded.size > 0) {
+        e.preventDefault();
+        setExpanded((prev) => {
+          const next = new Set(prev);
+          const last = [...next].pop();
+          if (last) next.delete(last);
+          return next;
+        });
+      }
     }
   }
 
@@ -260,6 +395,14 @@ export function CommandPalette({ open, onClose, commands }: Props) {
                     aria-selected={i === active}
                     onMouseEnter={() => setActive(i)}
                     onClick={() => {
+                      if (cmd.children) {
+                        setExpanded((prev) => {
+                          const next = new Set(prev);
+                          next.has(cmd.id) ? next.delete(cmd.id) : next.add(cmd.id);
+                          return next;
+                        });
+                        return;
+                      }
                       onClose();
                       setTimeout(() => cmd.action(), 0);
                     }}
@@ -271,6 +414,11 @@ export function CommandPalette({ open, onClose, commands }: Props) {
                     )}
                     {cmd.shortcut && (
                       <span className="cmd-palette-shortcut">{cmd.shortcut}</span>
+                    )}
+                    {cmd.children && (
+                      <span style={{ fontSize: 10, opacity: 0.5, marginLeft: 4 }}>
+                        {expanded.has(cmd.id) ? "▼" : "▶"}
+                      </span>
                     )}
                   </div>
                 </React.Fragment>

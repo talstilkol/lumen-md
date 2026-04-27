@@ -10,7 +10,6 @@ import {
   createInsert,
   createDelete,
   createSet,
-  mergeOperations,
   resolveDocument,
   getPendingOps,
   markSynced,

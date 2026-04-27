@@ -1,6 +1,7 @@
-import { useEffect, useRef, useState, useMemo } from "react";
-import { useAppStore } from "../store/useStore";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { listWorkspace, readWorkspaceFile } from "../storage/workspace";
+import { log } from "../lib/logger";
+import { louvain, communityPalette } from "../views/louvain";
 
 interface Node {
   id: string;
@@ -8,6 +9,8 @@ interface Node {
   x: number;
   y: number;
   links: string[];
+  /** Louvain community label (0-indexed). */
+  community?: number;
 }
 
 export function GraphView({ onOpenFile }: { onOpenFile: (path: string, content: string) => void }) {
@@ -113,12 +116,32 @@ export function GraphView({ onOpenFile }: { onOpenFile: (path: string, content: 
         }
       }
 
+      // Louvain community detection — colour related notes together so the
+      // graph shows topic clusters at a glance.
+      try {
+        const edges: { source: string; target: string }[] = [];
+        for (const n of arr) {
+          for (const link of n.links) edges.push({ source: n.id, target: link });
+        }
+        const { communities } = louvain({ nodes: arr.map((n) => n.id), edges });
+        for (const n of arr) n.community = communities.get(n.id) ?? 0;
+      } catch (err) {
+        log.warn("louvain clustering failed", err);
+      }
+
       setNodes(arr);
     } catch {
       // Workspace unavailable
       setNodes([]);
     }
   }
+
+  // Per-community colour palette derived once whenever the cluster set
+  // changes. Falls back to the accent when no community data is set.
+  const palette = useMemo(() => {
+    const max = nodes.reduce((m, n) => Math.max(m, n.community ?? 0), 0);
+    return communityPalette(max + 1);
+  }, [nodes]);
 
   // Draw canvas
   useEffect(() => {
@@ -136,13 +159,21 @@ export function GraphView({ onOpenFile }: { onOpenFile: (path: string, content: 
     ctx.fillStyle = bg;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // Draw edges
-    ctx.strokeStyle = edge;
-    ctx.lineWidth = 1;
+    // Draw edges — same-cluster edges are drawn in the community colour at
+    // 35% alpha so clusters visually "cohere" while cross-cluster links
+    // stay subtle.
     for (const node of nodes) {
       for (const linkId of node.links) {
         const target = nodes.find((n) => n.id === linkId);
         if (!target) continue;
+        const sameCluster =
+          node.community !== undefined && node.community === target.community;
+        ctx.strokeStyle = sameCluster
+          ? palette[node.community ?? 0]
+              .replace("hsl(", "hsla(")
+              .replace(")", " / 0.35)")
+          : edge;
+        ctx.lineWidth = sameCluster ? 1.4 : 1;
         ctx.beginPath();
         ctx.moveTo(node.x, node.y);
         ctx.lineTo(target.x, target.y);
@@ -150,14 +181,21 @@ export function GraphView({ onOpenFile }: { onOpenFile: (path: string, content: 
       }
     }
 
-    // Draw nodes
+    // Draw nodes — fill colour comes from the community palette so the
+    // graph is readable as a topic map at a glance.
     for (const node of nodes) {
       const isHovered = hoveredNode === node.id;
-      const r = isHovered ? 8 : 5;
+      const r = isHovered ? 8 : Math.min(10, 4 + node.links.length * 0.6);
+      const colour =
+        node.community !== undefined
+          ? palette[node.community]
+          : node.links.length > 0
+            ? accent
+            : fg;
 
       ctx.beginPath();
       ctx.arc(node.x, node.y, r, 0, Math.PI * 2);
-      ctx.fillStyle = node.links.length > 0 ? accent : fg;
+      ctx.fillStyle = colour;
       ctx.fill();
 
       // Label
@@ -166,7 +204,7 @@ export function GraphView({ onOpenFile }: { onOpenFile: (path: string, content: 
       ctx.textAlign = "center";
       ctx.fillText(node.label, node.x, node.y - r - 4);
     }
-  }, [nodes, hoveredNode]);
+  }, [nodes, hoveredNode, palette]);
 
   // Mouse hover detection
   function handleMouseMove(e: React.MouseEvent<HTMLCanvasElement>) {
@@ -183,12 +221,14 @@ export function GraphView({ onOpenFile }: { onOpenFile: (path: string, content: 
   }
 
   // Click to open file
-  async function handleClick(e: React.MouseEvent<HTMLCanvasElement>) {
+  async function handleClick(_e: React.MouseEvent<HTMLCanvasElement>) {
     if (!hoveredNode) return;
     try {
       const content = await readWorkspaceFile(hoveredNode);
       onOpenFile(hoveredNode, content);
-    } catch { /* ignore */ }
+    } catch (err) {
+      log.warn("graph view: failed to open file", hoveredNode, err);
+    }
   }
 
   useEffect(() => {

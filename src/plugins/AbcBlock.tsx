@@ -21,10 +21,15 @@ export default function AbcBlock({ source }: Props) {
     setError(null);
     (async () => {
       try {
-        const abc = await getAbc();
+        const abc = (await getAbc()) as {
+          renderAbc: (
+            host: HTMLElement,
+            src: string,
+            opts: Record<string, unknown>,
+          ) => void;
+        };
         if (cancelled || !ref.current) return;
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (abc as any).renderAbc(ref.current, source, {
+        abc.renderAbc(ref.current, source, {
           responsive: "resize",
           add_classes: true,
           paddingleft: 10,

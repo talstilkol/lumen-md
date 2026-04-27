@@ -118,16 +118,29 @@ export function htmlToMarkdown(html: string): string {
 
 export function rtfToMarkdown(rtfText: string): string {
   let text = rtfText;
-  text = text.replace(/\{\\[^{}]*\}/g, "");
+  // Strip the RTF header group: {\rtf1\ansi ... up to the first space before content
+  text = text.replace(/^\{\\rtf\d[^}]*?\s/, "");
+  // Remove nested groups like {\fonttbl...} {\colortbl...} etc
+  // Repeatedly remove innermost groups until none left
+  let prev = "";
+  while (prev !== text) {
+    prev = text;
+    text = text.replace(/\{[^{}]*\}/g, "");
+  }
+  // Convert paragraph/line breaks before stripping control words
   text = text.replace(/\\par\b/g, "\n");
   text = text.replace(/\\line\b/g, "\n");
   text = text.replace(/\\tab\b/g, "\t");
+  // Bold/italic markers
   text = text.replace(/\\b\b/g, "**");
   text = text.replace(/\\b0\b/g, "**");
   text = text.replace(/\\i\b/g, "*");
   text = text.replace(/\\i0\b/g, "*");
+  // Strip remaining control words
   text = text.replace(/\\[a-z]+[\d-]*/g, "");
+  // Remove leftover braces
   text = text.replace(/[{}]/g, "");
+  // Collapse excessive newlines
   text = text.replace(/\n{3,}/g, "\n\n");
   return text.trim();
 }
@@ -135,9 +148,9 @@ export function rtfToMarkdown(rtfText: string): string {
 /* ─── CSV / TSV → Markdown table ─── */
 
 export function csvToMarkdown(csvText: string, delimiter = ","): string {
-  const lines = csvText.trim().split("\n");
-  if (lines.length === 0) return "";
-
+  const trimmed = csvText.trim();
+  if (!trimmed) return "";
+  const lines = trimmed.split("\n");
   const parse = (line: string) => {
     const cells: string[] = [];
     let current = "";
@@ -280,6 +293,64 @@ export async function fileToMarkdown(file: File): Promise<{ name: string; conten
       const warning = "> ⚠️ **Note:** DOCX text extraction is basic. Tables, images, and rich formatting may not convert perfectly.\n> For full fidelity, export as HTML from Word and use the Paste Text button.\n\n---\n\n";
       return { name: `${baseName}.md`, content: warning + text };
     }
+    case "odt": {
+      // ODT is a ZIP with content.xml — same regex-strip strategy as DOCX.
+      const buf = await file.arrayBuffer();
+      const raw = new TextDecoder().decode(buf);
+      const matches = raw.match(/<text:[ph][^>]*>[\s\S]*?<\/text:[ph]>/g) ?? [];
+      const body = matches
+        .map((m) => m.replace(/<[^>]+>/g, ""))
+        .join("\n\n")
+        .trim();
+      const warning = "> ⚠️ **Note:** ODT text extraction is basic. For full fidelity export as HTML from LibreOffice.\n\n---\n\n";
+      return { name: `${baseName}.md`, content: warning + body };
+    }
+    case "mhtml":
+    case "mht":
+    case "eml": {
+      const text = await file.text();
+      return { name: `${baseName}.md`, content: mhtmlToMarkdown(text) };
+    }
+    case "pdf": {
+      const content = await pdfToMarkdown(file);
+      return { name: `${baseName}.md`, content };
+    }
+    case "epub": {
+      const content = await epubToMarkdown(file);
+      return { name: `${baseName}.md`, content };
+    }
+    case "opml": {
+      const text = await file.text();
+      return { name: `${baseName}.md`, content: opmlToMarkdown(text) };
+    }
+    case "tex":
+    case "ltx": {
+      const text = await file.text();
+      return { name: `${baseName}.md`, content: latexToMarkdown(text) };
+    }
+    case "rst": {
+      const text = await file.text();
+      return { name: `${baseName}.md`, content: rstToMarkdown(text) };
+    }
+    case "adoc":
+    case "asciidoc": {
+      const text = await file.text();
+      return { name: `${baseName}.md`, content: adocToMarkdown(text) };
+    }
+    case "org": {
+      const text = await file.text();
+      return { name: `${baseName}.md`, content: orgToMarkdown(text) };
+    }
+    case "yaml":
+    case "yml":
+    case "toml":
+    case "text":
+    case "markdown":
+    case "mdown":
+    case "mkd":
+    case "md":
+    case "txt":
+      return { name: file.name, content: await file.text() };
     default:
       return { name: file.name, content: await file.text() };
   }
@@ -310,11 +381,210 @@ async function extractDocxText(file: File): Promise<string> {
   }
 }
 
+/* ─── EPUB → Markdown (zero-dep regex over packaged XHTML) ────────── */
+
+/**
+ * EPUB is a ZIP of XHTML chapters. Native browsers don't ship a ZIP
+ * reader, so we sniff `<body>` blocks out of the raw bytes — works for
+ * the majority of e-books that store text reasonably plainly. For
+ * tightly compressed or DRM'd files use Calibre / Pandoc.
+ */
+export async function epubToMarkdown(file: File): Promise<string> {
+  const buf = await file.arrayBuffer();
+  const text = new TextDecoder().decode(buf);
+  const chapters: string[] = [];
+  const bodyRe = /<body[^>]*>([\s\S]*?)<\/body>/gi;
+  let m: RegExpExecArray | null;
+  while ((m = bodyRe.exec(text)) !== null) {
+    const md = htmlToMarkdown(`<div>${m[1]}</div>`).trim();
+    if (md.length > 50) chapters.push(md);
+  }
+  if (chapters.length === 0) {
+    return "> ⚠️ EPUB: no text bodies recognised. Use Calibre's CLI for a clean conversion.";
+  }
+  return chapters.join("\n\n---\n\n");
+}
+
+/* ─── PDF → Markdown (lazy-loads pdfjs-dist) ──────────────────────── */
+
+/**
+ * Dynamic-imports `pdfjs-dist` so the dependency is paid only when the
+ * user drops a PDF. Falls back to a friendly message if the package
+ * isn't installed (it's optional — heavy).
+ */
+export async function pdfToMarkdown(file: File): Promise<string> {
+  try {
+    const pkg = "pdfjs-dist/legacy/build/pdf.mjs";
+    type PdfJs = {
+      getDocument: (src: { data: ArrayBuffer }) => {
+        promise: Promise<{
+          numPages: number;
+          getPage: (n: number) => Promise<{
+            getTextContent: () => Promise<{ items: Array<{ str: string }> }>;
+          }>;
+        }>;
+      };
+      GlobalWorkerOptions: { workerSrc: string };
+    };
+    const mod = (await import(/* @vite-ignore */ pkg)) as PdfJs;
+    mod.GlobalWorkerOptions.workerSrc =
+      "https://unpkg.com/pdfjs-dist@latest/legacy/build/pdf.worker.mjs";
+    const buf = await file.arrayBuffer();
+    const pdf = await mod.getDocument({ data: buf }).promise;
+    const out: string[] = [];
+    for (let i = 1; i <= pdf.numPages; i++) {
+      const page = await pdf.getPage(i);
+      const content = await page.getTextContent();
+      const text = content.items.map((it) => it.str).join(" ").trim();
+      if (text) out.push(text);
+    }
+    if (out.length === 0)
+      return "> ⚠️ PDF appears to be a scanned image. OCR is not built in.";
+    return out.join("\n\n---\n\n");
+  } catch (err) {
+    return `> ⚠️ PDF import requires \`pdfjs-dist\`. Install with \`npm install pdfjs-dist\`.\n>\n> ${(err as Error).message}`;
+  }
+}
+
+/* ─── MHTML / .mht / .eml → Markdown ──────────────────────────────── */
+
+/**
+ * Pull the `text/html` part out of a MIME multipart envelope (saved
+ * web pages, .eml mail), decode quoted-printable, run through HTML →
+ * Markdown. Falls through to plain HTML when no boundary header found.
+ */
+export function mhtmlToMarkdown(text: string): string {
+  const boundaryMatch =
+    text.match(/Content-Type:[^\n]*boundary="?([^";\s]+)"?/i) ??
+    text.match(/boundary=([^\s;]+)/i);
+  if (!boundaryMatch) return htmlToMarkdown(text);
+  const parts = text.split(`--${boundaryMatch[1]}`);
+  const html = parts.find((p) => /Content-Type:\s*text\/html/i.test(p));
+  if (html) {
+    const body = html.split(/\r?\n\r?\n/).slice(1).join("\n\n").trim();
+    const decoded = body
+      .replace(/=\r?\n/g, "")
+      .replace(/=([0-9A-F]{2})/gi, (_, h) => String.fromCharCode(parseInt(h, 16)));
+    return htmlToMarkdown(decoded);
+  }
+  const plain = parts.find((p) => /Content-Type:\s*text\/plain/i.test(p));
+  if (plain) return plain.split(/\r?\n\r?\n/).slice(1).join("\n\n").trim();
+  return "> ⚠️ MHTML envelope had no recognisable text part.";
+}
+
+/* ─── OPML → Markdown (outlines, RSS reader feeds, mind maps) ──── */
+
+export function opmlToMarkdown(text: string): string {
+  try {
+    const doc = new DOMParser().parseFromString(text, "application/xml");
+    const title = doc.querySelector("head > title")?.textContent?.trim() ?? "Outline";
+    const lines: string[] = [`# ${title}`, ""];
+    function walk(el: Element, depth: number): void {
+      for (const child of Array.from(el.children).filter((c) => c.tagName.toLowerCase() === "outline")) {
+        const text = child.getAttribute("text") ?? child.getAttribute("title") ?? "";
+        const url = child.getAttribute("xmlUrl") ?? child.getAttribute("url");
+        const indent = "  ".repeat(depth);
+        const body = url ? `[${text}](${url})` : text;
+        lines.push(`${indent}- ${body}`);
+        walk(child, depth + 1);
+      }
+    }
+    const body = doc.querySelector("body");
+    if (body) walk(body, 0);
+    return lines.join("\n");
+  } catch {
+    return "> ⚠️ Could not parse OPML.";
+  }
+}
+
+/* ─── LaTeX / .tex → Markdown ──────────────────────────────────────── */
+
+export function latexToMarkdown(text: string): string {
+  let out = text;
+  out = out.replace(/^[\s\S]*?\\begin\{document\}\s*/, "");
+  out = out.replace(/\s*\\end\{document\}[\s\S]*$/, "");
+  out = out.replace(/\\chapter\*?\{([^}]+)\}/g, "# $1");
+  out = out.replace(/\\section\*?\{([^}]+)\}/g, "## $1");
+  out = out.replace(/\\subsection\*?\{([^}]+)\}/g, "### $1");
+  out = out.replace(/\\subsubsection\*?\{([^}]+)\}/g, "#### $1");
+  out = out.replace(/\\textbf\{([^}]+)\}/g, "**$1**");
+  out = out.replace(/\\textit\{([^}]+)\}/g, "*$1*");
+  out = out.replace(/\\emph\{([^}]+)\}/g, "*$1*");
+  out = out.replace(/\\texttt\{([^}]+)\}/g, "`$1`");
+  out = out.replace(/\\begin\{itemize\}|\\begin\{enumerate\}/g, "");
+  out = out.replace(/\\end\{itemize\}|\\end\{enumerate\}/g, "");
+  out = out.replace(/\\item\s+/g, "- ");
+  out = out.replace(/\\\[([\s\S]*?)\\\]/g, "$$\n$1\n$$");
+  out = out.replace(/\\\(([^)]+)\\\)/g, "$$$1$");
+  out = out.replace(/\\&/g, "&").replace(/\\%/g, "%").replace(/\\\$/g, "$");
+  out = out.replace(/\\\\/g, "  \n");
+  return out.trim();
+}
+
+/* ─── reStructuredText → Markdown ──────────────────────────────────── */
+
+export function rstToMarkdown(text: string): string {
+  const lines = text.split("\n");
+  const out: string[] = [];
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    const next = lines[i + 1] ?? "";
+    if (
+      /^[=\-~`'"^*+#<>]{3,}$/.test(next.trim()) &&
+      line.trim() &&
+      next.trim().length >= line.trim().length
+    ) {
+      const c = next.trim()[0];
+      const level = c === "=" ? 1 : c === "-" ? 2 : c === "~" ? 3 : 4;
+      out.push(`${"#".repeat(level)} ${line.trim()}`);
+      i++;
+      continue;
+    }
+    out.push(line.replace(/^\*\s/, "- "));
+  }
+  return out
+    .join("\n")
+    .replace(/``([^`]+)``/g, "`$1`");
+}
+
+/* ─── AsciiDoc → Markdown ──────────────────────────────────────────── */
+
+export function adocToMarkdown(text: string): string {
+  return text
+    .replace(/^(={1,6})\s+(.+)$/gm, (_m, eq: string, t: string) => `${"#".repeat(eq.length)} ${t}`)
+    .replace(/^\.([^\n]+)$/gm, "**$1**")
+    .replace(/^\*\s/gm, "- ")
+    .replace(/`{2}([^`]+?)`{2}/g, "`$1`")
+    .replace(/_([^_\n]+?)_/g, "*$1*");
+}
+
+/* ─── Org-mode → Markdown ──────────────────────────────────────────── */
+
+export function orgToMarkdown(text: string): string {
+  return text
+    .replace(/^(\*+)\s+(.+)$/gm, (_m: string, stars: string, t: string) => `${"#".repeat(stars.length)} ${t}`)
+    .replace(/\*([^*\n]+)\*/g, "**$1**")
+    .replace(/\/([^/\n]+)\//g, "*$1*")
+    .replace(/=([^=\n]+)=/g, "`$1`")
+    .replace(/^#\+BEGIN_SRC.*$/gm, "```")
+    .replace(/^#\+END_SRC$/gm, "```");
+}
+
 export const SUPPORTED_IMPORT_EXTENSIONS = [
-  "md", "markdown", "txt",
-  "csv", "tsv", "json", "xml",
-  "rtf", "doc", "docx",
-  "html", "htm",
+  // Plain text + markdown family
+  "md", "markdown", "mdown", "mkd", "txt", "text",
+  // Tabular
+  "csv", "tsv", "json", "xml", "yaml", "yml", "toml",
+  // Office
+  "rtf", "doc", "docx", "odt",
+  // Web
+  "html", "htm", "mhtml", "mht", "eml",
+  // Documents
+  "pdf", "epub",
+  // Outlines
+  "opml",
+  // Other markup
+  "tex", "ltx", "rst", "adoc", "asciidoc", "org",
 ];
 
 export function isSupportedFormat(filename: string): boolean {

@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import { Plus, Minus, GripVertical } from "lucide-react";
+import { Plus, Minus } from "lucide-react";
 
 interface Props {
   /** Initial markdown table text, or empty for a new table */
@@ -113,6 +113,7 @@ export function MarkdownTableEditor({ initialMarkdown, onUpdate, onClose }: Prop
                 <th key={i} style={{ padding: 0, borderBottom: "2px solid hsl(var(--border-strong))" }}>
                   <input
                     value={h}
+                    aria-label={`Column ${i + 1} header`}
                     onChange={(e) => updateHeader(i, e.target.value)}
                     style={{
                       width: "100%",
@@ -128,6 +129,7 @@ export function MarkdownTableEditor({ initialMarkdown, onUpdate, onClose }: Prop
                   />
                   <button
                     onClick={() => cycleAlignment(i)}
+                    aria-label={`Cycle alignment for column ${i + 1}`}
                     style={{
                       display: "block",
                       width: "100%",
@@ -152,6 +154,7 @@ export function MarkdownTableEditor({ initialMarkdown, onUpdate, onClose }: Prop
                   <td key={ci} style={{ padding: 0 }}>
                     <input
                       value={cell}
+                      aria-label={`Row ${ri + 1} column ${ci + 1}`}
                       onChange={(e) => updateCell(ri, ci, e.target.value)}
                       style={{
                         width: "100%",

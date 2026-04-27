@@ -128,6 +128,29 @@ https://www.youtube.com/watch?v=dQw4w9WgXcQ
 }
 \`\`\`
 `,
+  database: `
+\`\`\`database
+source: ""              # folder under workspace root (empty = whole vault)
+type: book              # frontmatter "type:" filter
+view: kanban            # table | kanban | gallery | calendar
+groupBy: status         # required for kanban
+sortBy: -rating         # prefix '-' for descending
+fields: [title, author, rating, status]
+# cover: cover          # for gallery view
+# dateField: due        # for calendar view
+\`\`\`
+
+> Tip: add YAML frontmatter to other notes:
+>
+> \`\`\`yaml
+> ---
+> type: book
+> author: Italo Calvino
+> rating: 5
+> status: reading
+> ---
+> \`\`\`
+`,
   htmlpreview: `
 \`\`\`htmlpreview height=320 title="Live HTML"
 <style>

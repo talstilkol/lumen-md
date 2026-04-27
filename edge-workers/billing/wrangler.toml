@@ -1,0 +1,20 @@
+name = "lumen-billing"
+main = "worker.ts"
+compatibility_date = "2026-04-01"
+account_id = "REPLACE_WITH_CLOUDFLARE_ACCOUNT_ID"
+
+# Routes — set your custom domain or use the default workers.dev:
+# routes = [
+#   { pattern = "billing.lumen.app/*", zone_name = "lumen.app" }
+# ]
+
+[vars]
+# Public, non-secret values can live here. Stripe keys + Supabase service
+# role go through `wrangler secret put` so they never land in source.
+ALLOWED_ORIGIN = "https://lumen.app"
+
+# Required secrets (set via `wrangler secret put <NAME>`):
+#   STRIPE_SECRET_KEY        — sk_live_… (or sk_test_… for staging)
+#   STRIPE_WEBHOOK_SECRET    — whsec_… from the Stripe webhook config
+#   SUPABASE_URL             — https://<your-project>.supabase.co
+#   SUPABASE_SERVICE_ROLE    — service-role JWT

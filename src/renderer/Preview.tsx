@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { renderMarkdown, extractFrontmatter } from "./pipeline";
 import { CopyButtonHandler } from "./components";
 import { Frontmatter } from "../ui/Frontmatter";
+import { ErrorBoundary } from "../ui/ErrorBoundary";
 
 interface Props {
   markdownText: string;
@@ -9,7 +10,7 @@ interface Props {
   debounceMs?: number;
 }
 
-export function Preview({ markdownText, debounceMs = 120 }: Props) {
+export function Preview({ markdownText }: Props) {
   const [tree, setTree] = useState<React.ReactElement | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [themeVersion, setThemeVersion] = useState(0);
@@ -17,21 +18,18 @@ export function Preview({ markdownText, debounceMs = 120 }: Props) {
 
   useEffect(() => {
     const seq = ++seqRef.current;
-    const timer = setTimeout(() => {
-      const isDark = () => document.documentElement.classList.contains("dark");
-      renderMarkdown(markdownText, isDark)
-        .then((el) => {
-          if (seq !== seqRef.current) return;
-          setTree(el);
-          setError(null);
-        })
-        .catch((e: Error) => {
-          if (seq !== seqRef.current) return;
-          setError(e.message);
-        });
-    }, debounceMs);
-    return () => clearTimeout(timer);
-  }, [markdownText, debounceMs, themeVersion]);
+    const isDark = () => document.documentElement.classList.contains("dark");
+    renderMarkdown(markdownText, isDark)
+      .then((el) => {
+        if (seq !== seqRef.current) return;
+        setTree(el);
+        setError(null);
+      })
+      .catch((e: Error) => {
+        if (seq !== seqRef.current) return;
+        setError(e.message);
+      });
+  }, [markdownText, themeVersion]);
 
   // Re-process when theme changes so Shiki picks up the right theme tokens.
   useEffect(() => {
@@ -49,7 +47,7 @@ export function Preview({ markdownText, debounceMs = 120 }: Props) {
   );
 
   return (
-    <div className="h-full overflow-y-auto" data-preview-root>
+    <div className="flex-1 min-h-0 overflow-y-auto" data-preview-root>
       <CopyButtonHandler />
       {error && (
         <div
@@ -70,7 +68,14 @@ export function Preview({ markdownText, debounceMs = 120 }: Props) {
       )}
       <div className="prose-lumen">
         <Frontmatter data={frontmatter} />
-        {tree}
+        <ErrorBoundary fallback={
+          <div style={{ padding: "16px", color: "hsl(0 80% 60%)", border: "1px solid currentColor", borderRadius: "8px", margin: "16px" }}>
+            <strong>Component Render Failed</strong>
+            <p style={{ marginTop: "4px", fontSize: "12px", opacity: 0.8 }}>One of the embedded visualizations crashed during render. The rest of the editor is kept safe.</p>
+          </div>
+        }>
+          {tree}
+        </ErrorBoundary>
       </div>
     </div>
   );

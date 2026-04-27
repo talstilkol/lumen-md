@@ -81,13 +81,16 @@ export function PageView({ markdownText }: Props) {
           className="icon-btn"
           onClick={() => goToPage(currentPage - 1)}
           disabled={currentPage <= 1}
+          aria-label="Previous page"
+          title="Previous page"
           style={{ padding: "2px 8px", fontSize: 11 }}
         >
-          ◀
+          <span aria-hidden>◀</span>
         </button>
         <select
           value={currentPage}
           onChange={(e) => goToPage(Number(e.target.value))}
+          aria-label="Jump to page"
           style={{
             background: "hsl(var(--bg-subtle))",
             color: "hsl(var(--fg))",
@@ -108,9 +111,11 @@ export function PageView({ markdownText }: Props) {
           className="icon-btn"
           onClick={() => goToPage(currentPage + 1)}
           disabled={currentPage >= totalPages}
+          aria-label="Next page"
+          title="Next page"
           style={{ padding: "2px 8px", fontSize: 11 }}
         >
-          ▶
+          <span aria-hidden>▶</span>
         </button>
       </div>
 

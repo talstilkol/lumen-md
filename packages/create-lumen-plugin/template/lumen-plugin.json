@@ -1,0 +1,15 @@
+{
+  "id": "__PLUGIN_NAME__",
+  "name": "__PLUGIN_TITLE__",
+  "version": "0.1.0",
+  "author": "Your Name <you@example.com>",
+  "description": "A Lumen plugin.",
+  "icon": "✨",
+  "homepage": "https://example.com/",
+  "minLumenVersion": "0.1.0",
+  "main": "dist/__PLUGIN_NAME__.js",
+  "permissions": [
+    "register-block",
+    "register-command"
+  ]
+}

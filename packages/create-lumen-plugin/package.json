@@ -1,0 +1,13 @@
+{
+  "name": "create-lumen-plugin",
+  "version": "0.1.0",
+  "description": "Scaffold a new Lumen plugin in seconds. Run `npx create-lumen-plugin <name>`.",
+  "license": "MIT",
+  "type": "module",
+  "bin": {
+    "create-lumen-plugin": "./bin.js"
+  },
+  "files": ["bin.js", "template"],
+  "engines": { "node": ">=18" },
+  "keywords": ["lumen", "markdown", "plugin", "scaffold"]
+}

@@ -70,9 +70,34 @@ interface Props {
 export default function MermaidBlock({ source }: Props) {
   const ref = useRef<HTMLDivElement | null>(null);
   const [error, setError] = useState<string | null>(null);
+  // Defer the 2.7 MB Mermaid runtime download until the diagram is actually
+  // about to enter the viewport. Long docs with mermaid blocks below the
+  // fold no longer pay the cost up-front.
+  const [inView, setInView] = useState(false);
   const themeKey = useThemeKey();
 
   useEffect(() => {
+    if (!ref.current || inView) return;
+    if (typeof IntersectionObserver === "undefined") {
+      // SSR / very old browsers — render eagerly so the doc still works.
+      setInView(true);
+      return;
+    }
+    const io = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((e) => e.isIntersecting)) {
+          setInView(true);
+          io.disconnect();
+        }
+      },
+      { rootMargin: "300px 0px" }, // start fetching 300px before scroll arrives
+    );
+    io.observe(ref.current);
+    return () => io.disconnect();
+  }, [inView]);
+
+  useEffect(() => {
+    if (!inView) return;
     let cancelled = false;
     setError(null);
     (async () => {
@@ -90,7 +115,7 @@ export default function MermaidBlock({ source }: Props) {
     return () => {
       cancelled = true;
     };
-  }, [source, themeKey]);
+  }, [source, themeKey, inView]);
 
   if (error) {
     return (
@@ -99,5 +124,21 @@ export default function MermaidBlock({ source }: Props) {
       </div>
     );
   }
-  return <div className="mermaid-block" ref={ref} />;
+  return (
+    <div className="mermaid-block" ref={ref}>
+      {!inView && (
+        <div
+          aria-busy="true"
+          style={{
+            padding: 18,
+            color: "hsl(var(--fg-muted))",
+            fontSize: 12,
+            textAlign: "center",
+          }}
+        >
+          Mermaid diagram (scroll to render)
+        </div>
+      )}
+    </div>
+  );
 }

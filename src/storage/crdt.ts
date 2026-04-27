@@ -12,6 +12,7 @@
  */
 
 import { get, set } from "idb-keyval";
+import { randomId } from "../lib/cryptoRandom";
 
 // ── Types ───────────────────────────────────────────────────────────────
 
@@ -41,6 +42,20 @@ export interface CRDTState {
 const IDB_KEY = "lumen-crdt-state";
 let state: CRDTState | null = null;
 
+/** Lazily ensure CRDT state exists (synchronous fallback). */
+function ensureState(): CRDTState {
+  if (!state) {
+    state = {
+      peerId: generatePeerId(),
+      lamportClock: 0,
+      vectorClock: {},
+      operations: [],
+      pendingSync: [],
+    };
+  }
+  return state;
+}
+
 /** Initialize the CRDT state */
 export async function initCRDT(): Promise<CRDTState> {
   const saved = await get(IDB_KEY).catch(() => null);
@@ -65,24 +80,24 @@ export function createInsert(
   position: number,
   content: string,
 ): CRDTOperation {
-  if (!state) throw new Error("CRDT not initialized");
+  const s = ensureState();
 
-  state.lamportClock++;
-  state.vectorClock[state.peerId] = state.lamportClock;
+  s.lamportClock++;
+  s.vectorClock[s.peerId] = s.lamportClock;
 
   const op: CRDTOperation = {
-    id: `${state.peerId}-${state.lamportClock}`,
+    id: `${s.peerId}-${s.lamportClock}`,
     type: "insert",
     path,
     position,
     content,
-    timestamp: state.lamportClock,
-    peerId: state.peerId,
-    vectorClock: { ...state.vectorClock },
+    timestamp: s.lamportClock,
+    peerId: s.peerId,
+    vectorClock: { ...s.vectorClock },
   };
 
-  state.operations.push(op);
-  state.pendingSync.push(op);
+  s.operations.push(op);
+  s.pendingSync.push(op);
   saveCRDTState();
   return op;
 }
@@ -93,24 +108,24 @@ export function createDelete(
   position: number,
   length: number,
 ): CRDTOperation {
-  if (!state) throw new Error("CRDT not initialized");
+  const s = ensureState();
 
-  state.lamportClock++;
-  state.vectorClock[state.peerId] = state.lamportClock;
+  s.lamportClock++;
+  s.vectorClock[s.peerId] = s.lamportClock;
 
   const op: CRDTOperation = {
-    id: `${state.peerId}-${state.lamportClock}`,
+    id: `${s.peerId}-${s.lamportClock}`,
     type: "delete",
     path,
     position,
     length,
-    timestamp: state.lamportClock,
-    peerId: state.peerId,
-    vectorClock: { ...state.vectorClock },
+    timestamp: s.lamportClock,
+    peerId: s.peerId,
+    vectorClock: { ...s.vectorClock },
   };
 
-  state.operations.push(op);
-  state.pendingSync.push(op);
+  s.operations.push(op);
+  s.pendingSync.push(op);
   saveCRDTState();
   return op;
 }
@@ -120,24 +135,24 @@ export function createSet(
   path: string,
   value: string,
 ): CRDTOperation {
-  if (!state) throw new Error("CRDT not initialized");
+  const s = ensureState();
 
-  state.lamportClock++;
-  state.vectorClock[state.peerId] = state.lamportClock;
+  s.lamportClock++;
+  s.vectorClock[s.peerId] = s.lamportClock;
 
   const op: CRDTOperation = {
-    id: `${state.peerId}-${state.lamportClock}`,
+    id: `${s.peerId}-${s.lamportClock}`,
     type: "set",
     path,
     position: 0,
     value,
-    timestamp: state.lamportClock,
-    peerId: state.peerId,
-    vectorClock: { ...state.vectorClock },
+    timestamp: s.lamportClock,
+    peerId: s.peerId,
+    vectorClock: { ...s.vectorClock },
   };
 
-  state.operations.push(op);
-  state.pendingSync.push(op);
+  s.operations.push(op);
+  s.pendingSync.push(op);
   saveCRDTState();
   return op;
 }
@@ -146,25 +161,25 @@ export function createSet(
 
 /** Merge remote operations into local state */
 export function mergeOperations(remoteOps: CRDTOperation[]): void {
-  if (!state) throw new Error("CRDT not initialized");
+  const s = ensureState();
 
   for (const remoteOp of remoteOps) {
     // Skip if already seen
-    if (state.operations.some((op) => op.id === remoteOp.id)) continue;
+    if (s.operations.some((op) => op.id === remoteOp.id)) continue;
 
     // Update lamport clock
-    state.lamportClock = Math.max(state.lamportClock, remoteOp.timestamp) + 1;
+    s.lamportClock = Math.max(s.lamportClock, remoteOp.timestamp) + 1;
 
     // Merge vector clock
     for (const [peer, clock] of Object.entries(remoteOp.vectorClock)) {
-      state.vectorClock[peer] = Math.max(state.vectorClock[peer] ?? 0, clock);
+      s.vectorClock[peer] = Math.max(s.vectorClock[peer] ?? 0, clock);
     }
 
-    state.operations.push(remoteOp);
+    s.operations.push(remoteOp);
   }
 
   // Sort by lamport timestamp, then peer ID for deterministic ordering
-  state.operations.sort((a, b) =>
+  s.operations.sort((a, b) =>
     a.timestamp !== b.timestamp
       ? a.timestamp - b.timestamp
       : a.peerId.localeCompare(b.peerId),
@@ -245,7 +260,7 @@ export function getCRDTStats(): {
 // ── Helpers ─────────────────────────────────────────────────────────────
 
 function generatePeerId(): string {
-  return `peer-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
+  return `peer-${Date.now().toString(36)}-${randomId(4)}`;
 }
 
 async function saveCRDTState(): Promise<void> {

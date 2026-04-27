@@ -2,49 +2,70 @@ import type { Root, Element } from "hast";
 import { visit } from "unist-util-visit";
 
 let highlighterPromise: Promise<unknown> | null = null;
+const loadedLangs = new Set<string>();
+const inFlightLoads = new Map<string, Promise<void>>();
 
+/**
+ * Pre-bundle only the six commonly-encountered languages. Anything else
+ * loads lazily on first appearance via `highlighter.loadLanguage(lang)`.
+ *
+ * Why six and not zero: the renderer pipeline hits a code block on
+ * almost every doc, and the inline-import roundtrip for the very first
+ * highlight adds visible latency. JS/TS/JSON/Markdown/Bash/Python cover
+ * ≈ 80% of real-world docs; the rest pay a one-time ~120 KB extra fetch
+ * the first time their language is seen.
+ */
 const PRELOADED_LANGS = [
   "javascript",
   "typescript",
-  "jsx",
-  "tsx",
   "json",
-  "yaml",
-  "toml",
-  "bash",
-  "shell",
-  "python",
-  "rust",
-  "go",
-  "java",
-  "c",
-  "cpp",
-  "csharp",
-  "css",
-  "scss",
-  "html",
-  "xml",
-  "sql",
-  "diff",
   "markdown",
-  "ruby",
-  "php",
-  "kotlin",
-  "swift",
+  "bash",
+  "python",
 ];
 
 async function getHighlighter() {
   if (!highlighterPromise) {
     highlighterPromise = (async () => {
       const { createHighlighter } = await import("shiki");
-      return createHighlighter({
+      const hl = await createHighlighter({
         themes: ["github-dark-default", "github-light-default"],
         langs: PRELOADED_LANGS,
       });
+      for (const l of PRELOADED_LANGS) loadedLangs.add(l);
+      return hl;
     })();
   }
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return highlighterPromise as Promise<any>;
+}
+
+/**
+ * On-demand loader. Returns the resolved language tag once it's loaded
+ * — falls back to `"text"` when the bundle doesn't ship the language at
+ * all (so we never throw and the renderer always produces something).
+ */
+async function ensureLang(lang: string): Promise<string> {
+  if (!lang || lang === "text") return "text";
+  if (loadedLangs.has(lang)) return lang;
+  // De-dupe concurrent loads for the same language.
+  let inFlight = inFlightLoads.get(lang);
+  if (!inFlight) {
+    inFlight = (async () => {
+      try {
+        const hl = (await getHighlighter()) as {
+          loadLanguage: (l: string) => Promise<void>;
+        };
+        await hl.loadLanguage(lang);
+        loadedLangs.add(lang);
+      } catch {
+        /* unsupported lang — leave it unloaded; we'll fall back to text */
+      }
+    })();
+    inFlightLoads.set(lang, inFlight);
+  }
+  await inFlight;
+  return loadedLangs.has(lang) ? lang : "text";
 }
 
 interface ShikiOpts {
@@ -82,7 +103,9 @@ export function rehypeShiki(opts: ShikiOpts) {
       tasks.push(async () => {
         try {
           const hl = await getHighlighter();
-          const safeLang = hl.getLoadedLanguages().includes(lang) ? lang : "text";
+          // Lazy-load the language the first time it's encountered.
+          // Falls back to "text" when the language isn't bundled.
+          const safeLang = await ensureLang(lang);
           const themed = hl.codeToHast(source, {
             lang: safeLang,
             themes: {

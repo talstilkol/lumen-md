@@ -1,0 +1,58 @@
+---
+title: Lumen — Markdown, illuminated
+description: A local-first markdown editor with first-class data visualisation, RTL, AI, and collab.
+template: splash
+hero:
+  tagline: Notes, notebooks, dashboards, knowledge bases — all in plain markdown.
+  actions:
+    - text: Quickstart
+      link: /getting-started/quickstart/
+      icon: right-arrow
+      variant: primary
+    - text: Open Lumen
+      link: https://lumen.app
+      icon: external
+---
+
+import { Card, CardGrid } from "@astrojs/starlight/components";
+
+## What makes Lumen different
+
+<CardGrid>
+  <Card title="Local-first" icon="laptop">
+    Your notes live in your browser's OPFS. Sync with Git, Dropbox, or your own
+    server. Or don't sync at all — Lumen works fully offline.
+  </Card>
+  <Card title="Data → tables and charts, automatically" icon="bars">
+    Drop a CSV, JSON, or SQL block and Lumen suggests the right chart with one
+    click. Live data via `src=` URLs that auto-refresh.
+  </Card>
+  <Card title="Diagrams, math, music, 3D" icon="puzzle">
+    Mermaid · Graphviz · PlantUML · KaTeX · ABC notation · model-viewer ·
+    Leaflet maps · ECharts. All first-class.
+  </Card>
+  <Card title="RTL native" icon="translate">
+    Hebrew and Arabic flow right-to-left throughout the UI. Code blocks, math,
+    and the editor stay LTR.
+  </Card>
+  <Card title="AI you control" icon="rocket">
+    Smart search, auto-tagging, link suggestions. Bring your OpenAI key, or
+    flip to local LLM (web-llm + WebGPU) — your prompts never leave your
+    machine.
+  </Card>
+  <Card title="MCP for agents" icon="setting">
+    Lumen ships an MCP server so Claude Desktop / Cursor can read, write, and
+    search your workspace through `npx @lumen-md/mcp-server`.
+  </Card>
+</CardGrid>
+
+## Three lines to get going
+
+```bash
+git clone https://github.com/your-org/lumen
+cd lumen && npm install && npm run dev
+# open http://localhost:5173
+```
+
+Or just visit [lumen.app](https://lumen.app) and start typing — there's
+nothing to install.

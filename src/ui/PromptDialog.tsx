@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { t } from "../i18n";
+import "./PromptDialog.css";
 
 /**
  * Lightweight, themed replacement for native window.prompt / confirm / alert.
@@ -118,6 +119,7 @@ function PromptDialogImpl({
           <input
             ref={inputRef}
             className="prompt-input"
+            aria-label={title ?? message}
             value={value}
             placeholder={placeholder}
             onChange={(e) => setValue(e.target.value)}

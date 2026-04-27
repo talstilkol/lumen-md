@@ -53,6 +53,11 @@ const SPECIAL_LANGS = new Set([
   "csv",
   "tsv",
   "json-table",
+  // Tabular conversions — share the DataBlock renderer.
+  "sql",
+  "pandas",
+  "object",
+  "data",
   "map",
   "geojson",
   "dot",
@@ -66,6 +71,20 @@ const SPECIAL_LANGS = new Set([
   "html-preview",
   "bibtex",
   "bib",
+  "database",
+  // Single-language live previews — render the snippet inside a tiny
+  // sandboxed iframe so users can experiment with HTML/CSS/JS/GLSL/SVG
+  // without writing the full boilerplate of an `htmlpreview` block.
+  "live-css",
+  "css-live",
+  "live-js",
+  "js-live",
+  "live-svg",
+  "svg-live",
+  "live-glsl",
+  "glsl-live",
+  "glsl",
+  "shader",
 ]);
 
 /**
@@ -85,6 +104,18 @@ function remarkLumenBlocks() {
       else if (lang === "html-preview" || lang === "htmlpreview")
         tag = "lumen-htmlpreview";
       else if (lang === "bib") tag = "lumen-bibtex";
+      // Tabular conversions all share the DataBlock component, with `lang`
+      // forwarded as a prop so it picks the right parser.
+      else if (lang === "sql" || lang === "pandas" || lang === "object" || lang === "data")
+        tag = "lumen-data";
+      // Live web-language blocks — fold short / long names into a
+      // single tag so React mounts the right component regardless of
+      // which spelling the user picked.
+      else if (lang === "live-css" || lang === "css-live") tag = "lumen-livecss";
+      else if (lang === "live-js" || lang === "js-live") tag = "lumen-livejs";
+      else if (lang === "live-svg" || lang === "svg-live") tag = "lumen-livesvg";
+      else if (lang === "live-glsl" || lang === "glsl-live" || lang === "glsl" || lang === "shader")
+        tag = "lumen-liveglsl";
       else tag = `lumen-${lang}`;
       const data = (node.data ?? (node.data = {})) as Record<string, unknown>;
       data.hName = tag;
@@ -170,10 +201,17 @@ function splitWikiText(value: string): MdastTextLike[] {
  */
 function remarkAdmonitions() {
   const known = new Set(["note", "tip", "info", "warning", "danger"]);
+  // remark-directive nodes don't ship type defs in mdast — narrow locally.
+  interface DirectiveNode {
+    type: string;
+    name: string;
+    attributes?: Record<string, string | undefined> & { title?: string };
+    data?: Record<string, unknown>;
+    children?: unknown[];
+  }
   return (tree: MdastRoot) => {
     visit(tree, (node) => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const n = node as any;
+      const n = node as unknown as DirectiveNode;
       if (
         n.type !== "containerDirective" &&
         n.type !== "leafDirective" &&
@@ -274,9 +312,16 @@ export function extractToc(
   markdownText: string,
 ): Array<{ depth: number; text: string; id: string }> {
   const out: Array<{ depth: number; text: string; id: string }> = [];
-  const tree = unified().use(remarkParse).parse(markdownText) as MdastRoot;
+  // Strip YAML / TOML frontmatter before parsing so it never appears in the
+  // heading list (a top-level `---title:…---` block parses as a setext h2
+  // when the frontmatter plugin isn't applied).
+  const stripped = markdownText
+    .replace(/^---\r?\n[\s\S]*?\r?\n---\r?\n?/m, "")
+    .replace(/^\+\+\+\r?\n[\s\S]*?\r?\n\+\+\+\r?\n?/m, "");
+  const tree = unified().use(remarkParse).parse(stripped) as MdastRoot;
   visit(tree, "heading", (node) => {
     const text = mdToString(node);
+    if (!text.trim()) return;
     const id = slug(text);
     out.push({ depth: node.depth, text, id });
   });

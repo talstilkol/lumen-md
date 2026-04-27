@@ -3,6 +3,7 @@
   "private": true,
   "version": "0.1.0",
   "type": "module",
+  "license": "MIT",
   "description": "Lumen — a hybrid markdown editor focused on world-class rendering and turning data into beautiful tables and charts.",
   "scripts": {
     "dev": "vite",
@@ -13,10 +14,26 @@
     "tauri:dev": "tauri dev",
     "tauri:build": "tauri build",
     "tauri:icons": "tauri icon public/favicon.svg",
+    "ios:sync": "npm run build && npx cap sync ios",
+    "ios:open": "npm run ios:sync && npx cap open ios",
+    "ios:run": "npm run ios:sync && npx cap run ios",
+    "android:sync": "npm run build && npx cap sync android",
+    "android:open": "npm run android:sync && npx cap open android",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:coverage": "vitest run --coverage",
+    "test:watch": "vitest",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "budget": "node scripts/bundle-budget.mjs",
+    "lighthouse": "lhci autorun --config=./lighthouserc.json"
   },
   "dependencies": {
+    "@capacitor/cli": "^8.3.1",
+    "@capacitor/core": "^8.3.1",
+    "@capacitor/ios": "^8.3.1",
+    "@capacitor/keyboard": "^8.0.3",
+    "@capacitor/splash-screen": "^8.0.1",
+    "@capacitor/status-bar": "^8.0.2",
     "@codemirror/autocomplete": "^6.20.1",
     "@codemirror/commands": "^6.6.2",
     "@codemirror/lang-markdown": "^6.3.1",
@@ -44,6 +61,7 @@
     "@milkdown/utils": "^7.20.0",
     "@mlc-ai/web-llm": "^0.2.82",
     "@replit/codemirror-vim": "^6.3.0",
+    "@tauri-apps/api": "^2.10.1",
     "abcjs": "^6.6.3",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
@@ -81,17 +99,27 @@
     "zustand": "^5.0.2"
   },
   "devDependencies": {
+    "@playwright/test": "^1.59.1",
     "@tauri-apps/cli": "^2.10.1",
+    "@testing-library/dom": "^10.4.0",
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/react": "^16.1.0",
+    "@testing-library/user-event": "^14.5.2",
     "@types/leaflet": "^1.9.21",
     "@types/papaparse": "^5.3.15",
     "@types/react": "^18.3.18",
     "@types/react-dom": "^18.3.5",
     "@vitejs/plugin-react": "^4.3.4",
+    "@vitest/coverage-v8": "^2.1.8",
     "autoprefixer": "^10.4.20",
+    "axe-core": "^4.11.3",
+    "fake-indexeddb": "^6.2.5",
+    "jsdom": "^25.0.1",
     "postcss": "^8.4.49",
     "tailwindcss": "^3.4.17",
     "typescript": "^5.7.2",
     "vite": "^6.0.5",
-    "vite-plugin-pwa": "^1.2.0"
+    "vite-plugin-pwa": "^1.2.0",
+    "vitest": "^2.1.8"
   }
 }

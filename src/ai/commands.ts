@@ -8,6 +8,7 @@ import { cmdIcons } from "../ui/CommandPalette";
 import { useAppStore } from "../store/useStore";
 import { uiPrompt, uiAlert } from "../ui/PromptDialog";
 import { t } from "../i18n";
+import { log } from "../lib/logger";
 import { gitStatusSummary } from "../sync/git";
 import { showAiToast } from "../ui/AiToast";
 
@@ -68,7 +69,7 @@ export async function generateAiCommitMessage(
       { maxTokens: 30 },
     );
   } catch (e) {
-    console.error("AI commit generation skipped:", e);
+    log.warn("AI commit generation skipped", e);
     showAiToast("AI commit suggestion unavailable", "info");
     return "";
   }

@@ -1,9 +1,7 @@
-import { lazy, Suspense, useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
-import { Editor } from "./editor/Editor";
+import { useCommands } from "./commands/useCommands";
+import { lazy, Suspense, useCallback, useDeferredValue, useEffect, useRef, useState } from "react";
 import type { EditorHandle } from "./editor/Editor";
-import { Preview } from "./renderer/Preview";
 
-const WysiwygEditor = lazy(() => import("./editor/WysiwygEditor"));
 import { Toolbar } from "./ui/Toolbar";
 import { Outline } from "./ui/Outline";
 import { StatusBar } from "./ui/StatusBar";
@@ -12,30 +10,32 @@ import { SearchReplace } from "./ui/SearchReplace";
 const GraphView = lazy(() => import("./ui/GraphView").then(m => ({ default: m.GraphView })));
 const CanvasWhiteboard = lazy(() => import("./ui/CanvasWhiteboard").then(m => ({ default: m.CanvasWhiteboard })));
 const PluginGallery = lazy(() => import("./ui/PluginGallery").then(m => ({ default: m.PluginGallery })));
-const PageView = lazy(() => import("./ui/PageView").then(m => ({ default: m.PageView })));
 const VersionHistory = lazy(() => import("./ui/VersionHistory").then(m => ({ default: m.VersionHistory })));
-import { saveSnapshot } from "./ui/VersionHistory";
 const MarkdownTableEditor = lazy(() => import("./ui/MarkdownTableEditor").then(m => ({ default: m.MarkdownTableEditor })));
-import { TEMPLATES } from "./editor/templates";
 import { htmlToMarkdown } from "./storage/fileFormats";
-import { wirePluginAPI, registerPlugin, getPluginCommands, wordCountPlugin, notifyContentChange, notifySave } from "./plugins/pluginSystem";
-import { encryptDocument, decryptDocument, isEncrypted } from "./storage/encryption";
-import { AI_PROMPT_TEMPLATES, applyTemplate } from "./ai/multiLangPrompts";
-import { CommandPalette, cmdIcons } from "./ui/CommandPalette";
-import type { Command } from "./ui/CommandPalette";
+import { wirePluginAPI, registerPlugin, unregisterPlugin, wordCountPlugin } from "./plugins/pluginSystem";
+import { CommandPalette } from "./ui/CommandPalette";
+import { AiFab } from "./ui/AiFab";
 import { FileTree } from "./ui/FileTree";
 import { SidebarResizer } from "./ui/SidebarResizer";
 import { uiAlert, uiConfirm, uiPrompt } from "./ui/PromptDialog";
+import { openInsertTextDialog } from "./ui/InsertTextDialog";
 import { BacklinksPanel } from "./ui/BacklinksPanel";
 import { SearchDialog } from "./ui/SearchDialog";
 import { AiToastContainer, showAiToast } from "./ui/AiToast";
+import { MobileKeyboardBar } from "./ui/MobileKeyboardBar";
+import { TagsPanel } from "./ui/TagsPanel";
+import { CommentsPanel, addCommentFromSelection } from "./ui/CommentsPanel";
 import { AiInlinePromptOverlay } from "./ui/AiInlinePrompt";
-import { buildAiSettingsCommand, generateAiCommitMessage } from "./ai/commands";
+import { useFileDragDrop } from "./hooks/useFileDragDrop";
+import { useCollab } from "./hooks/useCollab";
+import { useTauriMenu } from "./hooks/useTauriMenu";
+import { EditorLayout } from "./layouts/EditorLayout";
 import { useAppStore, applyTheme } from "./store/useStore";
-import { SUPPORTED_LOCALES, applyLocale, t } from "./i18n";
+import { applyLocale, t } from "./i18n";
 import { openFileDialog, saveFile } from "./storage/fs";
 import { exportToHtml } from "./storage/exportHtml";
-import { getRecents, pushRecent, removeRecent, reopenRecent } from "./storage/recent";
+import { getRecents, pushRecent, reopenRecent } from "./storage/recent";
 import type { RecentFile } from "./storage/recent";
 import {
   isOPFSAvailable,
@@ -45,27 +45,13 @@ import {
   writeWorkspaceBlob,
   writeWorkspaceFile,
 } from "./storage/workspace";
-import { BLOCK_SNIPPETS } from "./snippets";
 import { WELCOME_DOC } from "./welcome";
-import {
-  connectCollab,
-  makeRoomName,
-  readRoomFromHash,
-  setRoomInHash,
-  snapshotPeers,
-} from "./collab/yjs";
-import type { CollabPeer, CollabSession } from "./collab/yjs";
-import {
-  cloneRepo,
-  commitAndPush,
-  getGitIdentity,
-  gitStatusSummary,
-  pullRepo,
-  setGitIdentity,
-  setGitToken,
-} from "./sync/git";
+import { ErrorBoundary } from "./ui/ErrorBoundary";
+import { KeyboardShortcuts } from "./ui/KeyboardShortcuts";
+import { FocusMode } from "./ui/FocusMode";
+import { OnboardingTour } from "./ui/OnboardingTour";
 
-function relativeTime(ts: number): string {
+export function relativeTime(ts: number): string {
   const diff = Date.now() - ts;
   const mins = Math.round(diff / 60_000);
   if (mins < 1) return "just now";
@@ -87,14 +73,11 @@ export default function App() {
   const showOutline = useAppStore((s) => s.showOutline);
   const showWorkspace = useAppStore((s) => s.showWorkspace);
   const locale = useAppStore((s) => s.locale);
-  const setLocale = useAppStore((s) => s.setLocale);
   const toggleWorkspace = useAppStore((s) => s.toggleWorkspace);
   const showBacklinks = useAppStore((s) => s.showBacklinks);
-  const toggleBacklinks = useAppStore((s) => s.toggleBacklinks);
   const vimEnabled = useAppStore((s) => s.vimEnabled);
-  const toggleVim = useAppStore((s) => s.toggleVim);
-  const rtl = useAppStore((s) => s.rtl);
-  const toggleRtl = useAppStore((s) => s.toggleRtl);
+  const spellCheck = useAppStore((s) => s.spellCheck);
+  const typewriterMode = useAppStore((s) => s.typewriterMode);
   const editorRef = useRef<EditorHandle | null>(null);
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
@@ -104,10 +87,15 @@ export default function App() {
   const [tableEditorOpen, setTableEditorOpen] = useState(false);
   const [canvasOpen, setCanvasOpen] = useState(false);
   const [galleryOpen, setGalleryOpen] = useState(false);
-  const toggleAutoSave = useAppStore((s) => s.toggleAutoSave);
+  const [tagsPanelOpen, setTagsPanelOpen] = useState(false);
+  const [commentsPanelOpen, setCommentsPanelOpen] = useState(false);
+  const [shortcutsOpen, setShortcutsOpen] = useState(false);
+  const [focusMode, setFocusMode] = useState(false);
+  const [tourOpen, setTourOpen] = useState(false);
   const [recents, setRecents] = useState<RecentFile[]>([]);
-  const [collab, setCollab] = useState<CollabSession | null>(null);
-  const [collabPeers, setCollabPeers] = useState<CollabPeer[]>([]);
+
+  // ── Collaboration (extracted hook) ─────────────────────────────
+  const { collab, collabPeers, handleStartCollab, handleStopCollab } = useCollab(doc.content);
 
   // Load recents on mount.
   useEffect(() => {
@@ -128,6 +116,9 @@ export default function App() {
       showToast: (msg: string) => showAiToast(msg, "info"),
     });
     registerPlugin(wordCountPlugin);
+    return () => {
+      unregisterPlugin(wordCountPlugin.id);
+    };
   }, []);
 
   // Apply locale (sets <html lang dir>) on mount and on change.
@@ -139,6 +130,14 @@ export default function App() {
   useEffect(() => {
     if (!doc.content) {
       setDoc({ name: "Welcome.md", content: WELCOME_DOC, dirty: false });
+    }
+    // Show onboarding tour on first launch
+    try {
+      if (!localStorage.getItem("lumen-tour-done")) {
+        setTimeout(() => setTourOpen(true), 1200);
+      }
+    } catch {
+      /* storage may be denied in private browsing — onboarding silently skips */
     }
     // run once
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -192,27 +191,39 @@ export default function App() {
 
   const handleSave = useCallback(
     async (saveAs = false) => {
-      const next = await saveFile(
-        { name: doc.name, content: doc.content, handle: doc.handle },
-        { saveAs },
-      );
-      setDoc({
-        name: next.name,
-        content: next.content,
-        handle: next.handle,
-        dirty: false,
-      });
-      markSaved();
+      try {
+        const next = await saveFile(
+          { name: doc.name, content: doc.content, handle: doc.handle },
+          { saveAs },
+        );
+        setDoc({
+          name: next.name,
+          content: next.content,
+          handle: next.handle,
+          dirty: false,
+        });
+        markSaved();
+      } catch (err) {
+        // User cancelled Save-As dialog or filesystem error
+        if ((err as DOMException)?.name !== "AbortError") {
+          await uiAlert({ message: t("doc.alert.saveFailed", { error: (err as Error).message }) });
+        }
+      }
     },
     [doc.name, doc.content, doc.handle, setDoc, markSaved],
   );
 
   const handleNew = useCallback(async () => {
     if (doc.dirty && !(await uiConfirm({ message: t("doc.confirm.discardUnsaved") }))) return;
-    const untitled = t("doc.untitled");
+    
+    let baseName = `${t("doc.untitled")}.md`;
+    if (await isOPFSAvailable()) {
+      baseName = await uniqueWorkspaceName(baseName);
+    }
+    
     setDoc({
-      name: `${untitled}.md`,
-      content: `# ${untitled}\n\n`,
+      name: baseName,
+      content: `# ${baseName.replace(/\.md$/, "")}\n\n`,
       handle: undefined,
       dirty: false,
     });
@@ -230,65 +241,7 @@ export default function App() {
     editorRef.current?.insertText(snippet);
   }, []);
 
-  // ── Real-time collaboration ────────────────────────────────────────────
-  const handleStartCollab = useCallback(
-    (joinName?: string) => {
-      if (collab) return;
-      const name = joinName ?? makeRoomName();
-      const session = connectCollab(name, doc.content);
-      setCollab(session);
-      setRoomInHash(name);
-      // Mirror Yjs text changes back into the doc store so the preview pane
-      // stays current. We push, but the doc is already syncing through the
-      // editor → setContent pipeline; the observer is a safety net for when
-      // the editor isn't visible.
-      const observer = () => {
-        const text = session.ytext.toString();
-        useAppStore.getState().setContent(text);
-        useAppStore.getState().markSaved();
-      };
-      session.ytext.observe(observer);
-      const awarenessTick = () => setCollabPeers(snapshotPeers(session));
-      session.awareness.on("change", awarenessTick);
-      awarenessTick();
-      // Stash cleanup on the session for `handleStopCollab` to use.
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (session as any).__cleanup = () => {
-        session.ytext.unobserve(observer);
-        session.awareness.off("change", awarenessTick);
-      };
-      if (!joinName) {
-        const link = `${location.origin}${location.pathname}#room=${name}`;
-        navigator.clipboard?.writeText(link).catch(() => {});
-      }
-    },
-    [collab, doc.content],
-  );
-
-  const handleStopCollab = useCallback(() => {
-    if (!collab) return;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (collab as any).__cleanup?.();
-    collab.destroy();
-    setCollab(null);
-    setCollabPeers([]);
-    setRoomInHash(null);
-  }, [collab]);
-
-  // On first load, if the URL contains #room=, offer to join.
-  useEffect(() => {
-    const hashRoom = readRoomFromHash();
-    if (hashRoom && !collab) {
-      // Defer slightly so the welcome doc is seeded first.
-      const timer = setTimeout(async () => {
-        const ok = await uiConfirm({ message: t("collab.prompt.join", { room: hashRoom }) });
-        if (ok) handleStartCollab(hashRoom);
-      }, 600);
-      return () => clearTimeout(timer);
-    }
-    // run once
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  // ── Real-time collaboration (managed by useCollab hook) ──────────────
 
   /**
    * When the user pastes/drops an image into the editor, persist it under
@@ -321,6 +274,25 @@ export default function App() {
     },
     [setDoc],
   );
+
+  // Listen for `lumen-open-file` events fired by Database views, backlinks,
+  // graph view, and any other component that knows a workspace path. Single
+  // hub keeps the open path consistent (recents, dirty handling, etc).
+  useEffect(() => {
+    async function onOpen(e: Event) {
+      const detail = (e as CustomEvent<{ path: string }>).detail;
+      if (!detail?.path) return;
+      try {
+        const { readWorkspaceFile } = await import("./storage/workspace");
+        const content = await readWorkspaceFile(detail.path);
+        handleOpenFromWorkspace(detail.path, content);
+      } catch {
+        /* file moved/deleted — silently ignore */
+      }
+    }
+    window.addEventListener("lumen-open-file", onOpen);
+    return () => window.removeEventListener("lumen-open-file", onOpen);
+  }, [handleOpenFromWorkspace]);
 
   // Workspace: when active file is renamed (in the tree), keep doc.name in sync.
   const handleActiveRenamed = useCallback(
@@ -378,10 +350,14 @@ export default function App() {
     function onKey(e: KeyboardEvent) {
       const meta = e.metaKey || e.ctrlKey;
       if (!meta) return;
-      // ⇧⌘F → workspace search (only when shift is held; raw ⌘F is editor search).
+      // ⇧⌘F → focus mode toggle (or workspace search if already in focus mode)
       if (e.shiftKey && (e.key === "f" || e.key === "F")) {
         e.preventDefault();
-        setSearchOpen(true);
+        if (focusMode) {
+          setFocusMode(false);
+        } else {
+          setFocusMode(true);
+        }
         return;
       }
       if (e.key === "k" || e.key === "K") {
@@ -411,11 +387,30 @@ export default function App() {
       } else if (e.key === "4") {
         e.preventDefault();
         useAppStore.getState().setMode("wysiwyg");
+      } else if (e.key === "/") {
+        e.preventDefault();
+        setShortcutsOpen((v) => !v);
+      } else if (e.shiftKey && (e.key === "v" || e.key === "V")) {
+        // ⌘⇧V — Smart Insert (paste anything → auto-detect → wrap).
+        e.preventDefault();
+        (async () => {
+          const result = await openInsertTextDialog();
+          if (!result) return;
+          const cur = useAppStore.getState().doc.content;
+          const setter = useAppStore.getState().setContent;
+          if (result.mode === "replace") setter(result.markdown);
+          else if (result.mode === "atCursor" && editorRef.current) {
+            editorRef.current.insertText(result.markdown);
+          } else {
+            const trimmed = cur.endsWith("\n") ? cur : cur + "\n";
+            setter(trimmed + (result.mode === "append" ? "\n" : "") + result.markdown);
+          }
+        })();
       }
     }
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [handleOpen, handleSave, handleNew]);
+  }, [handleOpen, handleSave, handleNew, focusMode]);
 
   // Auto-save: save dirty documents on interval
   const autoSave = useAppStore((s) => s.autoSave);
@@ -434,881 +429,74 @@ export default function App() {
     return () => clearInterval(timer);
   }, [autoSave, autoSaveInterval, doc.dirty, handleSave]);
 
-  // Drag & drop file open
-  const [dragHover, setDragHover] = useState(false);
-  useEffect(() => {
-    function onDragOver(e: DragEvent) {
-      if (e.dataTransfer?.types?.includes("Files")) {
-        e.preventDefault();
-        setDragHover(true);
-      }
-    }
-    function onDragLeave(e: DragEvent) {
-      if (e.target === document.body) setDragHover(false);
-    }
-    async function onDrop(e: DragEvent) {
-      e.preventDefault();
-      setDragHover(false);
-      const f = e.dataTransfer?.files?.[0];
-      if (!f) return;
-      const raw = await f.text();
-      const lower = f.name.toLowerCase();
-      let content = raw;
-      if (lower.endsWith(".csv") || lower.endsWith(".tsv")) {
-        const lang = lower.endsWith(".tsv") ? "tsv" : "csv";
-        content = `# ${f.name}\n\n\`\`\`${lang} title="${f.name}"\n${raw.trim()}\n\`\`\`\n`;
-      } else if (lower.endsWith(".json")) {
-        const trimmed = raw.trim();
-        let isArray = false;
-        try {
-          isArray = Array.isArray(JSON.parse(trimmed));
-        } catch {
-          /* */
-        }
-        content = isArray
-          ? `# ${f.name}\n\n\`\`\`json-table title="${f.name}"\n${trimmed}\n\`\`\`\n`
-          : `# ${f.name}\n\n\`\`\`json\n${trimmed}\n\`\`\`\n`;
-      }
-      setDoc({ name: f.name, content, handle: undefined, dirty: false });
-    }
-    window.addEventListener("dragover", onDragOver);
-    window.addEventListener("dragleave", onDragLeave);
-    window.addEventListener("drop", onDrop);
-    return () => {
-      window.removeEventListener("dragover", onDragOver);
-      window.removeEventListener("dragleave", onDragLeave);
-      window.removeEventListener("drop", onDrop);
-    };
-  }, [setDoc]);
+  const { dragHover } = useFileDragDrop(setDoc);
 
-  const showEditor = mode === "source" || mode === "split";
-  const showPreview = mode === "preview" || mode === "split";
   const pageView = useAppStore((s) => s.pageView);
 
   // Debounce preview rendering — keeps typing smooth for large docs
   const deferredContent = useDeferredValue(doc.content);
 
-  // Sync-scroll: link editor and preview scrolling in split mode
-  const editorSectionRef = useRef<HTMLElement | null>(null);
-  const previewSectionRef = useRef<HTMLElement | null>(null);
-  const syncingScroll = useRef(false);
+  const activeFile = doc.name;
 
-  useEffect(() => {
-    if (mode !== "split") return;
-
-    const syncScrollMode = useAppStore.getState().syncScroll;
-
-    // Wait for DOM elements to be mounted
-    const timer = setTimeout(() => {
-      if (syncScrollMode === "single") return; // No sync when "single"
-      const editorEl = editorSectionRef.current?.querySelector(".cm-scroller") as HTMLElement | null;
-      const previewEl = previewSectionRef.current?.querySelector("[data-preview-root]") as HTMLElement | null;
-      if (!editorEl || !previewEl) return;
-
-      function syncFrom(source: HTMLElement, target: HTMLElement) {
-        return () => {
-          if (syncingScroll.current) return;
-          syncingScroll.current = true;
-          const ratio = source.scrollTop / (source.scrollHeight - source.clientHeight || 1);
-          target.scrollTop = ratio * (target.scrollHeight - target.clientHeight || 1);
-          requestAnimationFrame(() => { syncingScroll.current = false; });
-        };
-      }
-
-      const handleEditorScroll = syncFrom(editorEl, previewEl);
-      const handlePreviewScroll = syncFrom(previewEl, editorEl);
-      editorEl.addEventListener("scroll", handleEditorScroll, { passive: true });
-      previewEl.addEventListener("scroll", handlePreviewScroll, { passive: true });
-
-      // Store cleanup ref
-      (editorSectionRef as any)._scrollCleanup = () => {
-        editorEl.removeEventListener("scroll", handleEditorScroll);
-        previewEl.removeEventListener("scroll", handlePreviewScroll);
-      };
-    }, 200);
-
-    return () => {
-      clearTimeout(timer);
-      (editorSectionRef as any)._scrollCleanup?.();
-    };
-  }, [mode, showEditor, showPreview]);
-  const showWysiwyg = mode === "wysiwyg";
-
-  // Memoize the editor's value prop to avoid resetting CM6 on every keystroke.
-  const editorInitial = useMemo(() => doc.content, [doc.name]);
-  // ^ keyed on doc.name so opening a new file re-syncs the editor, but typing doesn't.
-
-  const commands = useMemo<Command[]>(() => {
-    const setMode = useAppStore.getState().setMode;
-    const setTheme = useAppStore.getState().setTheme;
-    const toggleOutline = useAppStore.getState().toggleOutline;
-    const isDark = document.documentElement.classList.contains("dark");
-
-    const recentCmds: Command[] = recents.slice(0, 8).flatMap((r) => [
-      {
-        id: `recent.${r.id}`,
-        label: t("cmd.file.openRecent", { name: r.name }),
-        hint: relativeTime(r.openedAt),
-        icon: cmdIcons.FolderOpen,
-        group: t("group.recent"),
-        action: () => handleReopenRecent(r),
-      },
-      {
-        id: `recent.remove.${r.id}`,
-        label: t("cmd.file.removeRecent", { name: r.name }),
-        icon: cmdIcons.FolderOpen,
-        group: t("group.recent"),
-        action: async () => {
-          await removeRecent(r.id);
-          setRecents(await getRecents());
-        },
-      },
-    ]);
-
-    return [
-      ...recentCmds,
-      {
-        id: "file.new",
-        label: t("cmd.file.new"),
-        shortcut: "⌘N",
-        icon: cmdIcons.FileText,
-        group: t("group.file"),
-        action: handleNew,
-      },
-      {
-        id: "file.open",
-        label: t("cmd.file.open"),
-        shortcut: "⌘O",
-        icon: cmdIcons.FolderOpen,
-        group: t("group.file"),
-        action: handleOpen,
-      },
-      {
-        id: "file.save",
-        label: t("cmd.file.save"),
-        shortcut: "⌘S",
-        icon: cmdIcons.Save,
-        group: t("group.file"),
-        action: () => handleSave(false),
-      },
-      {
-        id: "file.saveAs",
-        label: t("cmd.file.saveAs"),
-        shortcut: "⇧⌘S",
-        icon: cmdIcons.Save,
-        group: t("group.file"),
-        action: () => handleSave(true),
-      },
-      {
-        id: "file.exportHtml",
-        label: t("cmd.file.exportHtml"),
-        hint: t("cmd.file.exportHtml.hint"),
-        icon: cmdIcons.Download,
-        group: t("group.file"),
-        action: handleExportHtml,
-      },
-      {
-        id: "file.exportPdf",
-        label: t("cmd.file.exportPdf"),
-        hint: t("cmd.file.exportPdf.hint"),
-        icon: cmdIcons.Download,
-        group: t("group.file"),
-        action: async () => {
-          const { printDocument } = await import("./ui/PrintExport");
-          await printDocument(doc.content, doc.name);
-        },
-      },
-      {
-        id: "file.print",
-        label: t("cmd.file.print"),
-        hint: t("cmd.file.print.hint"),
-        shortcut: "⌘P",
-        icon: cmdIcons.Printer,
-        group: t("group.file"),
-        action: () => {
-          // Make sure preview is visible before printing.
-          useAppStore.getState().setMode("preview");
-          setTimeout(() => window.print(), 50);
-        },
-      },
-      {
-        id: "view.source",
-        label: t("cmd.view.source"),
-        shortcut: "⌘1",
-        icon: cmdIcons.Pencil,
-        group: t("group.view"),
-        action: () => setMode("source"),
-      },
-      {
-        id: "view.split",
-        label: t("cmd.view.split"),
-        shortcut: "⌘2",
-        icon: cmdIcons.Columns2,
-        group: t("group.view"),
-        action: () => setMode("split"),
-      },
-      {
-        id: "view.preview",
-        label: t("cmd.view.preview"),
-        shortcut: "⌘3",
-        icon: cmdIcons.Eye,
-        group: t("group.view"),
-        action: () => setMode("preview"),
-      },
-      {
-        id: "view.wysiwyg",
-        label: t("cmd.view.wysiwyg"),
-        hint: t("cmd.view.wysiwyg.hint"),
-        shortcut: "⌘4",
-        icon: cmdIcons.Sparkles,
-        group: t("group.view"),
-        action: () => setMode("wysiwyg"),
-      },
-      {
-        id: "view.outline",
-        label: t("cmd.view.outline"),
-        icon: cmdIcons.PanelRightOpen,
-        group: t("group.view"),
-        action: toggleOutline,
-      },
-      {
-        id: "view.pageView",
-        label: "📄 Page View (A4)",
-        hint: pageView ? "Currently ON" : "Currently OFF",
-        icon: cmdIcons.FileText,
-        group: t("group.view"),
-        action: () => useAppStore.getState().togglePageView(),
-      },
-      {
-        id: "view.workspace",
-        label: t("cmd.view.workspace"),
-        hint: t("cmd.view.workspace.hint"),
-        icon: cmdIcons.FolderOpen,
-        group: t("group.view"),
-        action: toggleWorkspace,
-      },
-      {
-        id: "view.backlinks",
-        label: t("cmd.view.backlinks"),
-        hint: t("cmd.view.backlinks.hint"),
-        icon: cmdIcons.Link,
-        group: t("group.view"),
-        action: toggleBacklinks,
-      },
-      {
-        id: "view.search",
-        label: t("cmd.view.search"),
-        shortcut: "⇧⌘F",
-        icon: cmdIcons.PanelRightOpen,
-        group: t("group.view"),
-        action: () => setSearchOpen(true),
-      },
-      {
-        id: "view.vim",
-        label: vimEnabled ? t("cmd.view.vim.off") : t("cmd.view.vim.on"),
-        icon: cmdIcons.Pencil,
-        group: t("group.view"),
-        action: toggleVim,
-      },
-      {
-        id: "view.rtl",
-        label: rtl ? t("cmd.view.rtl.off") : t("cmd.view.rtl.on"),
-        hint: rtl ? "← LTR" : "→ RTL",
-        icon: cmdIcons.Pencil,
-        group: t("group.view"),
-        action: toggleRtl,
-      },
-      ...SUPPORTED_LOCALES.map((l) => ({
-        id: `lang.${l.code}`,
-        label: t("cmd.view.language", { label: l.label }),
-        hint:
-          l.dir === "rtl"
-            ? t("cmd.view.language.rtl")
-            : t("cmd.view.language.ltr"),
-        icon: cmdIcons.PanelRightOpen,
-        group: t("group.view"),
-        action: () => setLocale(l.code),
-      })),
-      // ── New Features ──────────────────────────────────────────────────────
-      {
-        id: "view.findReplace",
-        label: "Find & Replace",
-        shortcut: "⌘H",
-        icon: cmdIcons.PanelRightOpen,
-        group: t("group.view"),
-        action: () => setFindReplaceOpen(true),
-      },
-      {
-        id: "view.graphView",
-        label: "Knowledge Graph",
-        hint: "visual map of file connections",
-        icon: cmdIcons.PanelRightOpen,
-        group: t("group.view"),
-        action: () => {
-          setGraphOpen(true);
-        },
-      },
-      {
-        id: "view.versionHistory",
-        label: "Version History",
-        hint: "restore previous versions",
-        icon: cmdIcons.PanelRightOpen,
-        group: t("group.view"),
-        action: () => setHistoryOpen(true),
-      },
-      {
-        id: "insert.table",
-        label: "Insert Table (Editor)",
-        hint: "visual table builder",
-        icon: cmdIcons.Pencil,
-        group: t("group.insert"),
-        action: () => setTableEditorOpen(true),
-      },
-      {
-        id: "view.autoSave",
-        label: autoSave ? "Disable Auto-Save" : "Enable Auto-Save",
-        hint: autoSave ? `every ${autoSaveInterval / 1000}s` : "off",
-        icon: cmdIcons.Pencil,
-        group: t("group.view"),
-        action: toggleAutoSave,
-      },
-      {
-        id: "view.canvas",
-        label: "🎨 Canvas / Whiteboard",
-        hint: "Infinite canvas for visual notes",
-        icon: cmdIcons.Sparkles,
-        group: t("group.view"),
-        action: () => setCanvasOpen(true),
-      },
-      {
-        id: "view.plugins",
-        label: "🔌 Plugin Gallery",
-        hint: "Browse & install plugins",
-        icon: cmdIcons.Sparkles,
-        group: t("group.view"),
-        action: () => setGalleryOpen(true),
-      },
-      ...TEMPLATES.map((tpl) => ({
-        id: `template.${tpl.id}`,
-        label: `Template: ${tpl.name}`,
-        hint: tpl.category,
-        icon: cmdIcons.FileText,
-        group: "Templates",
-        action: () => {
-          setContent(tpl.content);
-          setDoc({ name: `${tpl.name}.md`, dirty: true });
-        },
-      })),
-      // ── Voice-to-Markdown ─────────────────────────────────────────────────
-      {
-        id: "voice.dictate",
-        label: "🎙 Voice to Markdown",
-        hint: "Speech recognition → text",
-        icon: cmdIcons.Sparkles,
-        group: "Tools",
-        action: async () => {
-          const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-          if (!SpeechRecognition) {
-            showAiToast("Speech recognition not supported in this browser", "error");
+  const commands = useCommands({
+    handleNew, handleOpen, handleSave, handleExportHtml, handleSaveToWorkspace,
+    insertSnippet, recents, setRecents, handleReopenRecent, collab,
+    handleStartCollab, handleStopCollab,
+    setSearchOpen, setFindReplaceOpen, setGraphOpen,
+    setHistoryOpen, setTableEditorOpen, setCanvasOpen, setGalleryOpen,
+    setTagsPanelOpen,
+    setCommentsPanelOpen,
+    onAddComment: collab
+      ? async () => {
+          const view = editorRef.current?.getView();
+          if (!view) return;
+          const { from, to } = view.state.selection.main;
+          if (from === to) {
+            await uiAlert({ message: "Select some text first to anchor the comment." });
             return;
           }
+          const body = await uiPrompt({ message: "Comment:" });
+          if (!body?.trim()) return;
+          addCommentFromSelection(collab, body, from, to);
+          setCommentsPanelOpen(true);
+        }
+      : undefined,
+  });
 
-          // Language selector
-          const langMap: Record<string, string> = {
-            "English": "en-US", "Hebrew (עברית)": "he-IL", "Arabic (العربية)": "ar-SA",
-            "Russian (Русский)": "ru-RU", "Spanish": "es-ES", "French": "fr-FR",
-            "German": "de-DE", "Chinese (中文)": "zh-CN", "Japanese (日本語)": "ja-JP",
-          };
-          const langChoice = await uiPrompt({
-            message: "Select language for voice recognition:",
-            placeholder: "English",
-          });
-          const lang = langMap[langChoice ?? ""] ?? (useAppStore.getState().locale === "he" ? "he-IL" : "en-US");
-
-          const recognition = new SpeechRecognition();
-          recognition.lang = lang;
-          recognition.interimResults = false;
-          recognition.continuous = true;
-
-          // Create recording indicator
-          const indicator = document.createElement("div");
-          indicator.id = "voice-recording-indicator";
-          indicator.innerHTML = `
-            <div style="position:fixed;bottom:20px;right:20px;z-index:9999;display:flex;align-items:center;gap:8px;
-              background:hsl(var(--bg));border:1px solid hsl(var(--border-strong));border-radius:12px;
-              padding:10px 16px;box-shadow:0 8px 32px hsl(0 0% 0%/0.3);font-size:13px;color:hsl(var(--fg));">
-              <div style="width:10px;height:10px;border-radius:50%;background:#ef4444;animation:pulse 1s infinite;"></div>
-              <span>Recording... (${lang})</span>
-              <button id="voice-stop-btn" style="background:#ef4444;color:white;border:none;border-radius:6px;
-                padding:4px 12px;cursor:pointer;font-size:11px;font-weight:600;">⏹ Stop</button>
-            </div>
-            <style>@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}</style>
-          `;
-          document.body.appendChild(indicator);
-
-          recognition.onresult = (event: any) => {
-            let transcript = "";
-            for (let i = event.resultIndex; i < event.results.length; i++) {
-              if (event.results[i].isFinal) {
-                transcript += event.results[i][0].transcript + " ";
-              }
-            }
-            if (transcript.trim()) {
-              const current = useAppStore.getState().doc.content;
-              useAppStore.getState().setContent(current + "\n\n" + transcript.trim());
-              showAiToast(`✅ Added ${transcript.trim().split(/\s+/).length} words`, "info");
-            }
-          };
-
-          const stopRecording = () => {
-            recognition.stop();
-            indicator.remove();
-            showAiToast("🎙 Recording stopped", "info");
-          };
-
-          recognition.onerror = () => {
-            indicator.remove();
-            showAiToast("Speech recognition error — check microphone permissions", "error");
-          };
-          recognition.onend = () => indicator.remove();
-
-          recognition.start();
-          // Wire stop button
-          setTimeout(() => {
-            document.getElementById("voice-stop-btn")?.addEventListener("click", stopRecording);
-          }, 100);
-        },
-      },
-      // ── Plugin Commands ──────────────────────────────────────────────────
-      ...getPluginCommands().map((cmd) => ({
-        id: cmd.id,
-        label: cmd.label,
-        hint: cmd.hint ?? "Plugin",
-        icon: cmdIcons.Sparkles,
-        group: "Plugins",
-        action: cmd.action,
-      })),
-      // ── Encryption ────────────────────────────────────────────────────────
-      {
-        id: "vault.encrypt",
-        label: "🔒 Encrypt Document",
-        hint: "AES-256-GCM",
-        icon: cmdIcons.Save,
-        group: "Security",
-        action: async () => {
-          const password = await uiPrompt({ message: "Enter encryption password:" });
-          if (!password) return;
-          const encrypted = await encryptDocument(doc.content, password);
-          setContent(encrypted);
-          showAiToast("🔒 Document encrypted", "info");
-        },
-      },
-      {
-        id: "vault.decrypt",
-        label: "🔓 Decrypt Document",
-        hint: "Enter password to decrypt",
-        icon: cmdIcons.Save,
-        group: "Security",
-        action: async () => {
-          if (!isEncrypted(doc.content)) {
-            showAiToast("Document is not encrypted", "error");
-            return;
-          }
-          const password = await uiPrompt({ message: "Enter decryption password:" });
-          if (!password) return;
-          try {
-            const decrypted = await decryptDocument(doc.content, password);
-            setContent(decrypted);
-            showAiToast("🔓 Document decrypted", "info");
-          } catch {
-            showAiToast("❌ Wrong password", "error");
-          }
-        },
-      },
-      // ── Multi-Language AI Prompts ─────────────────────────────────────────
-      ...AI_PROMPT_TEMPLATES.map((tpl) => ({
-        id: `ai.prompt.${tpl.id}`,
-        label: tpl.label,
-        hint: tpl.category,
-        icon: cmdIcons.Sparkles,
-        group: "AI Prompts",
-        action: async () => {
-          const prompt = applyTemplate(tpl, doc.content);
-          try {
-            const { chat } = await import("./ai/llm");
-            const result = await chat([{ role: "user", content: prompt }]);
-            setContent(doc.content + "\n\n---\n\n" + result);
-            showAiToast(`✅ ${tpl.label} completed`, "info");
-          } catch (e) {
-            showAiToast(`AI error: ${(e as Error).message}`, "error");
-          }
-        },
-      })),
-      // ── AI Capabilities ──────────────────────────────────────────────────
-      buildAiSettingsCommand(),
-      // ── Git ─────────────────────────────────────────────────────────────
-      {
-        id: "git.clone",
-        label: t("cmd.git.clone"),
-        hint: t("cmd.git.clone.hint"),
-        icon: cmdIcons.Download,
-        group: t("group.git"),
-        action: async () => {
-          const url = await uiPrompt({ message: t("git.prompt.url"), placeholder: "https://github.com/..." });
-          if (!url) return;
-          if (!showWorkspace) toggleWorkspace();
-          try {
-            const result = await cloneRepo(url.trim());
-            window.dispatchEvent(new Event("lumen-workspace-changed"));
-            await uiAlert({
-              message: t("git.alert.cloned", {
-                folder: result.workspaceFolder,
-                count: result.fileCount,
-              }),
-            });
-          } catch (e) {
-            await uiAlert({
-              message: t("git.alert.cloneFailed", { error: (e as Error).message }),
-            });
-          }
-        },
-      },
-      {
-        id: "git.commit",
-        label: t("cmd.git.commit", { defaultValue: "Commit & Push" }),
-        hint: t("cmd.git.commit.hint", { defaultValue: "AI Auto-Pilot Enabled" }),
-        icon: cmdIcons.Save,
-        group: t("group.git"),
-        action: async () => {
-          if (!doc.workspaceName) {
-            await uiAlert({ message: t("git.prompt.openFileFirst") });
-            return;
-          }
-          const repoFolder = doc.workspaceName.split("/")[0];
-          
-          let aiSuggestion = "";
-          
-          try {
-            aiSuggestion = await generateAiCommitMessage(repoFolder);
-          } catch (e) {
-            console.error("AI commit generation skipped:", e);
-          }
-
-          const message = (await uiPrompt({ 
-            message: "Commit Message" + (aiSuggestion ? " (AI Suggested):" : ":"),
-             defaultValue: aiSuggestion 
-          }))?.trim();
-          if (!message) return;
-          const identity = await getGitIdentity();
-          try {
-            await commitAndPush(repoFolder, message, identity);
-            await uiAlert({ message: t("git.alert.pushed") });
-          } catch (e) {
-            await uiAlert({
-              message: t("git.alert.commitFailed", { error: (e as Error).message }),
-            });
-          }
-        },
-      },
-      {
-        id: "git.pull",
-        label: t("cmd.git.pull"),
-        hint: t("cmd.git.pull.hint"),
-        icon: cmdIcons.Download,
-        group: t("group.git"),
-        action: async () => {
-          if (!doc.workspaceName) {
-            await uiAlert({ message: t("git.prompt.openFileFirst") });
-            return;
-          }
-          const repoFolder = doc.workspaceName.split("/")[0];
-          try {
-            const result = await pullRepo(repoFolder);
-            window.dispatchEvent(new Event("lumen-workspace-changed"));
-            await uiAlert({
-              message: t("git.alert.pulled", { changed: result.changedFiles }),
-            });
-            // If the active file's content changed on disk, reload it.
-            if (doc.workspaceName) {
-              try {
-                const fresh = await readWorkspaceFile(doc.workspaceName);
-                if (fresh !== doc.content) {
-                  setDoc({ content: fresh, dirty: false });
-                }
-              } catch {
-                /* file may have been deleted upstream; ignore */
-              }
-            }
-          } catch (e) {
-            await uiAlert({
-              message: t("git.alert.pullFailed", { error: (e as Error).message }),
-            });
-          }
-        },
-      },
-      {
-        id: "git.status",
-        label: t("cmd.git.status"),
-        icon: cmdIcons.Link,
-        group: t("group.git"),
-        action: async () => {
-          if (!doc.workspaceName) {
-            await uiAlert({ message: t("git.prompt.openFileFirst") });
-            return;
-          }
-          const repoFolder = doc.workspaceName.split("/")[0];
-          try {
-            const summary = await gitStatusSummary(repoFolder);
-            const total = summary.added + summary.modified + summary.deleted;
-            await uiAlert({
-              message: total === 0
-                ? t("git.status.clean")
-                : t("git.status.summary", {
-                    added: summary.added,
-                    modified: summary.modified,
-                    deleted: summary.deleted,
-                  }),
-            });
-          } catch (e) {
-            await uiAlert({ message: (e as Error).message });
-          }
-        },
-      },
-      {
-        id: "git.token",
-        label: t("cmd.git.token"),
-        hint: t("cmd.git.token.hint"),
-        icon: cmdIcons.Link,
-        group: t("group.git"),
-        action: async () => {
-          const token = await uiPrompt({ message: t("git.prompt.token") });
-          if (token === null) return;
-          await setGitToken(token.trim() || null);
-          await uiAlert({
-            message: token.trim()
-              ? t("git.alert.tokenSaved")
-              : t("git.alert.tokenCleared"),
-          });
-        },
-      },
-      {
-        id: "git.identity",
-        label: t("cmd.git.identity"),
-        icon: cmdIcons.Link,
-        group: t("group.git"),
-        action: async () => {
-          const current = await getGitIdentity();
-          const name = (await uiPrompt({
-            message: t("git.prompt.identityName"),
-            defaultValue: current.name,
-          }))?.trim();
-          if (!name) return;
-          const email = (await uiPrompt({
-            message: t("git.prompt.identityEmail"),
-            defaultValue: current.email,
-          }))?.trim();
-          if (!email) return;
-          await setGitIdentity({ name, email });
-          await uiAlert({ message: t("git.alert.identitySaved") });
-        },
-      },
-      ...(collab
-        ? [
-            {
-              id: "collab.copy",
-              label: t("cmd.collab.copy"),
-              hint: collab.roomName,
-              icon: cmdIcons.Link,
-              group: t("group.collab"),
-              action: () => {
-                const link = `${location.origin}${location.pathname}#room=${collab.roomName}`;
-                navigator.clipboard?.writeText(link).catch(() => {});
-              },
-            },
-            {
-              id: "collab.leave",
-              label: t("cmd.collab.leave"),
-              hint: collab.roomName,
-              icon: cmdIcons.Link,
-              group: t("group.collab"),
-              action: handleStopCollab,
-            },
-          ]
-        : [
-            {
-              id: "collab.start",
-              label: t("cmd.collab.start"),
-              hint: t("cmd.collab.start.hint"),
-              icon: cmdIcons.Link,
-              group: t("group.collab"),
-              action: () => handleStartCollab(),
-            },
-            {
-              id: "collab.join",
-              label: t("cmd.collab.join"),
-              hint: t("cmd.collab.join.hint"),
-              icon: cmdIcons.Link,
-              group: t("group.collab"),
-              action: async () => {
-                const name = await uiPrompt({ message: t("collab.prompt.room") });
-                if (name) handleStartCollab(name.trim());
-              },
-            },
-          ]),
-      {
-        id: "file.saveToWorkspace",
-        label: t("cmd.file.saveToWorkspace"),
-        hint: t("cmd.file.saveToWorkspace.hint"),
-        icon: cmdIcons.Save,
-        group: t("group.file"),
-        action: handleSaveToWorkspace,
-      },
-      {
-        id: "theme.toggle",
-        label: isDark ? t("cmd.view.theme.toLight") : t("cmd.view.theme.toDark"),
-        icon: isDark ? cmdIcons.Sun : cmdIcons.Moon,
-        group: t("group.view"),
-        action: () => setTheme(isDark ? "light" : "dark"),
-      },
-      {
-        id: "insert.chart",
-        label: t("cmd.insert.chart"),
-        hint: t("cmd.insert.chart.hint"),
-        icon: cmdIcons.BarChart3,
-        group: t("group.insert"),
-        action: () => insertSnippet(BLOCK_SNIPPETS.chart),
-      },
-      {
-        id: "insert.csv",
-        label: t("cmd.insert.csv"),
-        hint: t("cmd.insert.csv.hint"),
-        icon: cmdIcons.Table,
-        group: t("group.insert"),
-        action: () => insertSnippet(BLOCK_SNIPPETS.csv),
-      },
-      {
-        id: "insert.json",
-        label: t("cmd.insert.json"),
-        hint: t("cmd.insert.csv.hint"),
-        icon: cmdIcons.Table,
-        group: t("group.insert"),
-        action: () => insertSnippet(BLOCK_SNIPPETS.jsonTable),
-      },
-      {
-        id: "insert.mermaid",
-        label: t("cmd.insert.mermaid"),
-        icon: cmdIcons.Network,
-        group: t("group.insert"),
-        action: () => insertSnippet(BLOCK_SNIPPETS.mermaid),
-      },
-      {
-        id: "insert.map",
-        label: t("cmd.insert.map"),
-        icon: cmdIcons.Map,
-        group: t("group.insert"),
-        action: () => insertSnippet(BLOCK_SNIPPETS.map),
-      },
-      {
-        id: "insert.math",
-        label: t("cmd.insert.math"),
-        icon: cmdIcons.Calculator,
-        group: t("group.insert"),
-        action: () => insertSnippet(BLOCK_SNIPPETS.math),
-      },
-      {
-        id: "insert.callout",
-        label: t("cmd.insert.callout"),
-        hint: t("cmd.insert.callout.hint"),
-        icon: cmdIcons.Quote,
-        group: t("group.insert"),
-        action: () => insertSnippet(BLOCK_SNIPPETS.note),
-      },
-      {
-        id: "insert.graphviz",
-        label: t("cmd.insert.graphviz"),
-        icon: cmdIcons.Workflow,
-        group: t("group.insert"),
-        action: () => insertSnippet(BLOCK_SNIPPETS.graphviz),
-      },
-      {
-        id: "insert.plantuml",
-        label: t("cmd.insert.plantuml"),
-        hint: t("cmd.insert.plantuml.hint"),
-        icon: cmdIcons.Workflow,
-        group: t("group.insert"),
-        action: () => insertSnippet(BLOCK_SNIPPETS.plantuml),
-      },
-      {
-        id: "insert.abc",
-        label: t("cmd.insert.abc"),
-        icon: cmdIcons.Music2,
-        group: t("group.insert"),
-        action: () => insertSnippet(BLOCK_SNIPPETS.abc),
-      },
-      {
-        id: "insert.model",
-        label: t("cmd.insert.model"),
-        hint: t("cmd.insert.model.hint"),
-        icon: cmdIcons.Box,
-        group: t("group.insert"),
-        action: () => insertSnippet(BLOCK_SNIPPETS.model),
-      },
-      {
-        id: "insert.embed",
-        label: t("cmd.insert.embed"),
-        hint: t("cmd.insert.embed.hint"),
-        icon: cmdIcons.Youtube,
-        group: t("group.insert"),
-        action: () => insertSnippet(BLOCK_SNIPPETS.embed),
-      },
-      {
-        id: "insert.htmlpreview",
-        label: t("cmd.insert.htmlpreview"),
-        hint: t("cmd.insert.htmlpreview.hint"),
-        icon: cmdIcons.Box,
-        group: t("group.insert"),
-        action: () => insertSnippet(BLOCK_SNIPPETS.htmlpreview),
-      },
-      {
-        id: "insert.bibtex",
-        label: t("cmd.insert.bibtex"),
-        hint: t("cmd.insert.bibtex.hint"),
-        icon: cmdIcons.Quote,
-        group: t("group.insert"),
-        action: () => insertSnippet(BLOCK_SNIPPETS.bibtex),
-      },
-      {
-        id: "insert.wikilink",
-        label: t("cmd.insert.wikilink"),
-        hint: "[[Page|label]]",
-        icon: cmdIcons.Link,
-        group: t("group.insert"),
-        action: () => insertSnippet(BLOCK_SNIPPETS.wikilink),
-      },
-    ];
-  }, [
-    handleNew,
-    handleOpen,
-    handleSave,
-    handleExportHtml,
-    handleSaveToWorkspace,
-    insertSnippet,
-    recents,
-    handleReopenRecent,
-    toggleBacklinks,
-    toggleVim,
-    vimEnabled,
-    collab,
-    handleStartCollab,
-    handleStopCollab,
-    setLocale,
-    locale,
-    showWorkspace,
-    toggleWorkspace,
-    setDoc,
-    doc.workspaceName,
-    doc.content,
-  ]);
+  // Native Tauri menu wiring — no-op when running in a regular browser.
+  useTauriMenu({
+    onNew: handleNew,
+    onOpen: handleOpen,
+    onSave: handleSave,
+    onInsertText: async () => {
+      const result = await openInsertTextDialog();
+      if (!result) return;
+      const current = doc.content;
+      if (result.mode === "replace") setContent(result.markdown);
+      else if (result.mode === "atCursor" && editorRef.current) {
+        editorRef.current.insertText(result.markdown);
+      } else if (result.mode === "atCursor") {
+        const trimmed = current.endsWith("\n") ? current : current + "\n";
+        setContent(trimmed + result.markdown);
+      } else setContent(current + (current.endsWith("\n") ? "" : "\n") + "\n" + result.markdown);
+    },
+    onCommandPalette: () => setPaletteOpen(true),
+    onFocusMode: () => setFocusMode(true),
+    onShortcuts: () => setShortcutsOpen(true),
+    onTour: () => setTourOpen(true),
+    onWorkspaceSearch: () => setSearchOpen(true),
+    onFindReplace: () => setFindReplaceOpen(true),
+    onToggleWorkspace: () => useAppStore.getState().toggleWorkspace(),
+    onToggleOutline: () => useAppStore.getState().toggleOutline(),
+    onToggleTheme: () => {
+      const cur = useAppStore.getState().theme;
+      useAppStore.getState().setTheme(cur === "dark" ? "light" : "dark");
+    },
+    onSetMode: (mode) => useAppStore.getState().setMode(mode),
+    onExportHtml: () => commands.find((c) => c.id === "file.exportHtml")?.action(),
+    onExportPdf: () => commands.find((c) => c.id === "file.exportPdf")?.action(),
+    onPrint: () => commands.find((c) => c.id === "file.print")?.action(),
+  });
 
   return (
     <div className="h-screen flex flex-col">
@@ -1328,15 +516,48 @@ export default function App() {
         onSave={handleSave}
         onNew={handleNew}
         onCommandPalette={() => setPaletteOpen(true)}
+        onFocusMode={() => setFocusMode(true)}
+        onShortcuts={() => setShortcutsOpen(true)}
+        onTour={() => setTourOpen(true)}
+        onShowWelcome={() => {
+          // Restore the bundled welcome document — handy when the user wants
+          // to revisit the feature tour without scrubbing recents for it.
+          setDoc({
+            name: "Welcome.md",
+            content: WELCOME_DOC,
+            handle: undefined,
+            workspaceName: undefined,
+            dirty: false,
+          });
+        }}
+        commands={commands}
+        onInsertText={async () => {
+          const result = await openInsertTextDialog();
+          if (!result) return;
+          const current = doc.content;
+          if (result.mode === "replace") {
+            setContent(result.markdown);
+          } else if (result.mode === "atCursor" && editorRef.current) {
+            // Real cursor-aware insert via the Editor's exposed handle.
+            editorRef.current.insertText(result.markdown);
+          } else if (result.mode === "atCursor") {
+            // Fallback when the editor isn't mounted (e.g. preview-only mode).
+            const trimmed = current.endsWith("\n") ? current : current + "\n";
+            setContent(trimmed + result.markdown);
+          } else {
+            setContent(current + (current.endsWith("\n") ? "" : "\n") + "\n" + result.markdown);
+          }
+          showAiToast(`✅ ${t("toast.insertText.success")}`, "info");
+        }}
         onPasteText={async () => {
           const text = await uiPrompt({
-            message: "Paste HTML or rich text below:",
+            message: t("toast.pasteText.prompt"),
             placeholder: "<h1>Hello</h1>\n<p>Paste your HTML here...</p>",
           });
           if (!text) return;
           const md = text.trim().startsWith("<") ? htmlToMarkdown(text) : text;
           setContent(doc.content + "\n\n" + md);
-          showAiToast("✅ Text pasted and converted", "info");
+          showAiToast(`✅ ${t("toast.pasteText.success")}`, "info");
         }}
       />
       <main id="main" className="flex-1 flex min-h-0 relative">
@@ -1357,63 +578,21 @@ export default function App() {
             <SidebarResizer />
           </>
         )}
-        {showEditor && (
-          <section
-            ref={editorSectionRef}
-            className={
-              mode === "split"
-                ? "w-1/2 min-w-0 border-r border-border bg-bg"
-                : "w-full min-w-0 bg-bg"
-            }
-          >
-            <Editor
-              key={collab ? `collab:${collab.roomName}` : "local"}
-              ref={editorRef}
-              value={editorInitial}
-              onChange={setContent}
-              onAddAsset={handleAddAsset}
-              vimEnabled={vimEnabled}
-              crdtPath={activeFile}
-            />
-          </section>
-        )}
-        {showPreview && (
-          <section
-            ref={previewSectionRef}
-            className={
-              mode === "split"
-                ? "w-1/2 min-w-0 bg-bg-subtle"
-                : "w-full min-w-0 bg-bg-subtle"
-            }
-          >
-            {pageView ? (
-              <Suspense fallback={<div style={{padding:'2rem',color:'hsl(var(--fg-muted))'}}>Loading page view…</div>}>
-                <PageView markdownText={deferredContent} />
-              </Suspense>
-            ) : (
-              <Preview markdownText={deferredContent} />
-            )}
-          </section>
-        )}
-        {showWysiwyg && (
-          <section className="w-full min-w-0 bg-bg">
-            <Suspense
-              fallback={
-                <div
-                  style={{
-                    padding: "2rem",
-                    color: "hsl(var(--fg-muted))",
-                    fontSize: 13,
-                  }}
-                >
-                  Loading WYSIWYG editor…
-                </div>
-              }
-            >
-              <WysiwygEditor value={doc.content} onChange={setContent} />
-            </Suspense>
-          </section>
-        )}
+        <EditorLayout
+          mode={mode}
+          docContent={doc.content}
+          docName={doc.name}
+          deferredContent={deferredContent}
+          editorRef={editorRef}
+          vimEnabled={vimEnabled}
+          spellCheck={spellCheck}
+          typewriterMode={typewriterMode}
+          activeFile={activeFile}
+          pageView={pageView}
+          collab={collab}
+          setContent={setContent}
+          handleAddAsset={handleAddAsset}
+        />
         {showOutline && <Outline markdownText={doc.content} />}
         {showBacklinks && (
           <BacklinksPanel
@@ -1497,6 +676,25 @@ export default function App() {
       />
       <AiToastContainer />
       <AiInlinePromptOverlay />
+      <MobileKeyboardBar />
+      <TagsPanel open={tagsPanelOpen} onClose={() => setTagsPanelOpen(false)} />
+      {collab && (
+        <CommentsPanel
+          open={commentsPanelOpen}
+          onClose={() => setCommentsPanelOpen(false)}
+          collab={collab}
+          onJump={(from, to) => {
+            const view = editorRef.current?.getView();
+            if (!view) return;
+            view.focus();
+            view.dispatch({
+              selection: { anchor: from, head: to },
+              effects: [],
+              scrollIntoView: true,
+            });
+          }}
+        />
+      )}
 
       {/* Graph View overlay */}
       {graphOpen && (
@@ -1507,10 +705,17 @@ export default function App() {
           </div>
           <div style={{ height: "calc(100vh - 42px)" }}>
             <Suspense fallback={<div style={{padding:'2rem',color:'hsl(var(--fg-muted))'}}>Loading graph…</div>}>
-              <GraphView onOpenFile={(path, content) => {
-                setDoc({ name: path.split("/").pop() ?? path, content, handle: undefined, workspaceName: path, dirty: false });
-                setGraphOpen(false);
-              }} />
+              <ErrorBoundary fallback={
+                <div style={{ padding: "3rem", textAlign: "center", color: "hsl(0 80% 60%)" }}>
+                  <strong>Graph Render Failed</strong>
+                  <p>The workspace data resulted in an invalid node structure that crashed the renderer.</p>
+                </div>
+              }>
+                <GraphView onOpenFile={(path, content) => {
+                  setDoc({ name: path.split("/").pop() ?? path, content, handle: undefined, workspaceName: path, dirty: false });
+                  setGraphOpen(false);
+                }} />
+              </ErrorBoundary>
             </Suspense>
           </div>
         </div>
@@ -1518,33 +723,74 @@ export default function App() {
 
       {/* Canvas Whiteboard overlay */}
       <Suspense fallback={null}>
-        <CanvasWhiteboard open={canvasOpen} onClose={() => setCanvasOpen(false)} />
-        <PluginGallery open={galleryOpen} onClose={() => setGalleryOpen(false)} />
+        <ErrorBoundary fallback={<div style={{ padding: '2rem', color: 'hsl(0 80% 60%)' }}>Component failed to load.</div>}>
+          <CanvasWhiteboard open={canvasOpen} onClose={() => setCanvasOpen(false)} />
+          <PluginGallery open={galleryOpen} onClose={() => setGalleryOpen(false)} />
+        </ErrorBoundary>
       </Suspense>
 
       {/* Version History overlay */}
       {historyOpen && (
         <Suspense fallback={<div style={{padding:'2rem',color:'hsl(var(--fg-muted))'}}>Loading history…</div>}>
-          <VersionHistory
-            fileName={doc.name}
-            currentContent={doc.content}
-            onRestore={(content) => setContent(content)}
-            onClose={() => setHistoryOpen(false)}
-          />
+          <ErrorBoundary fallback={<div style={{ padding: '2rem', color: 'hsl(0 80% 60%)' }}>Version history failed to load.</div>}>
+            <VersionHistory
+              fileName={doc.name}
+              currentContent={doc.content}
+              onRestore={(content) => setContent(content)}
+              onClose={() => setHistoryOpen(false)}
+            />
+          </ErrorBoundary>
         </Suspense>
       )}
 
       {/* Table Editor overlay */}
       {tableEditorOpen && (
         <Suspense fallback={null}>
-          <MarkdownTableEditor
-            onUpdate={(md) => {
-              const current = doc.content;
-              setContent(current + "\n\n" + md + "\n");
-            }}
-            onClose={() => setTableEditorOpen(false)}
-          />
+          <ErrorBoundary fallback={<div style={{ padding: '2rem', color: 'hsl(0 80% 60%)' }}>Table editor failed to load.</div>}>
+            <MarkdownTableEditor
+              onUpdate={(md) => {
+                const current = doc.content;
+                setContent(current + "\n\n" + md + "\n");
+              }}
+              onClose={() => setTableEditorOpen(false)}
+            />
+          </ErrorBoundary>
         </Suspense>
+      )}
+
+      {/* Floating AI Prompts button — anchored next to the document body. */}
+      <AiFab commands={commands} />
+
+      {/* Keyboard Shortcuts Overlay */}
+      <KeyboardShortcuts open={shortcutsOpen} onClose={() => setShortcutsOpen(false)} />
+
+      {/* Onboarding Tour */}
+      <OnboardingTour open={tourOpen} onClose={() => {
+        setTourOpen(false);
+        try { localStorage.setItem("lumen-tour-done", "1"); } catch {
+          /* storage denied — tour will simply replay next session */
+        }
+      }} />
+
+      {/* Focus Mode overlay */}
+      {focusMode && (
+        <FocusMode active={focusMode} onExit={() => setFocusMode(false)}>
+          <EditorLayout
+            mode={mode}
+            docContent={doc.content}
+            docName={doc.name}
+            deferredContent={deferredContent}
+            editorRef={editorRef}
+            vimEnabled={vimEnabled}
+          spellCheck={spellCheck}
+          typewriterMode={typewriterMode}
+            activeFile={activeFile}
+            pageView={pageView}
+            collab={collab}
+            setContent={setContent}
+            handleAddAsset={handleAddAsset}
+          />
+        </FocusMode>
       )}
     </div>
   );

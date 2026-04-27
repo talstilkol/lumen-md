@@ -20,6 +20,7 @@ import { chat, chatStream, AiError } from "../ai/llm";
 import { PROMPTS } from "../ai/prompts";
 import { showAiToast } from "../ui/AiToast";
 import { openAiPrompt } from "../ui/AiInlinePrompt";
+import { log } from "../lib/logger";
 
 interface Props {
   value: string;
@@ -132,7 +133,7 @@ function buildSlashItems(): SlashItem[] {
             v.dispatch(tr);
           }
         } catch (e) {
-          console.error(e);
+          log.error("WYSIWYG AI stream failed", e);
           // If placeholder is still there, replace it
           const docText = v.state.doc.textBetween(insertPos, Math.min(insertPos + placeholder.length, v.state.doc.content.size));
           if (docText === placeholder) {
@@ -270,7 +271,7 @@ function buildTooltip(getView: () => EditorView | null): HTMLDivElement {
           );
           dispatch(state.tr.replaceWith(from, to, state.schema.text(rewritten)));
         } catch (e) {
-          console.error(e);
+          log.error("WYSIWYG AI rewrite failed", e);
           showAiToast("AI Rewrite failed", "error");
         }
       },

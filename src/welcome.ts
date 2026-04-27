@@ -337,5 +337,174 @@ With the workspace enabled (\`⌘K → Toggle workspace\`), they'll cross files 
 
 > *"The best way to predict the future is to invent it."* — Alan Kay
 
+---
+
+## 12. Tabular conversions
+
+Lumen turns SQL, Pandas, JSON and JS-object literals into the same sortable
+DataTable + chart-suggestion UI. The fence language picks the parser; use
+\`data\` to auto-detect.
+
+A SQL dump:
+
+\`\`\`sql
+CREATE TABLE sales (date TEXT, region TEXT, revenue REAL);
+INSERT INTO sales (date, region, revenue) VALUES
+  ('2026-01-01', 'North', 1240.50),
+  ('2026-01-02', 'South',  980.00),
+  ('2026-01-03', 'East',  1670.25),
+  ('2026-01-04', 'West',  1120.75);
+\`\`\`
+
+The textual repr of a Pandas DataFrame:
+
+\`\`\`pandas
+    date        region   revenue
+0   2026-01-01  North     1240.5
+1   2026-01-02  South      980.0
+2   2026-01-03  East      1670.25
+3   2026-01-04  West      1120.75
+\`\`\`
+
+A JS / JSON5-style object array (unquoted keys, single quotes, comments
+all welcome):
+
+\`\`\`object
+[
+  // Q1 launch metrics
+  { product: 'Lumen Pro', signups: 1240, revenue: 18600 },
+  { product: 'Lumen Team', signups:  480, revenue: 14400 },
+  { product: 'Enterprise', signups:   38, revenue:  9500 },
+]
+\`\`\`
+
+---
+
+## 11. Social networks
+
+Drop a public URL inside an \`embed\` fence and Lumen renders the platform's
+own embed widget. Below: an iconic post from each supported platform —
+the URLs are real, you can copy them anywhere.
+
+**Video & audio**
+
+🎵 **YouTube** — Rick Astley, *"Never Gonna Give You Up"* (1.6 B views, the rickroll)
+
+\`\`\`embed
+https://www.youtube.com/watch?v=dQw4w9WgXcQ
+\`\`\`
+
+🎬 **Vimeo** — *"Move"*, Rick Mereki's iconic 44-day, 11-country travel film
+
+\`\`\`embed
+https://vimeo.com/22439234
+\`\`\`
+
+🎙️ **Loom** — Loom's own product walkthrough
+
+\`\`\`embed
+https://www.loom.com/share/c43a642f815f4378b6f80a889bb73d8d
+\`\`\`
+
+🎶 **Spotify** — Queen, *"Bohemian Rhapsody"* (one of the most-streamed 20th-century songs)
+
+\`\`\`embed
+https://open.spotify.com/track/3z8h0TU7ReDPLIbEnYhWZb
+\`\`\`
+
+🎧 **SoundCloud** — Forss, *"Flickermood"* (10 M plays)
+
+\`\`\`embed
+https://soundcloud.com/forss/flickermood
+\`\`\`
+
+**Code & design**
+
+🖌️ **CodePen** — Hakim El Hattab's interactive shader demo
+
+\`\`\`embed
+https://codepen.io/hakimel/pen/BKyJpM
+\`\`\`
+
+🧪 **CodeSandbox** — fresh React quickstart sandbox
+
+\`\`\`embed
+https://codesandbox.io/s/new
+\`\`\`
+
+🎨 **Figma Community** — official iOS 18 UI Kit
+
+\`\`\`embed
+https://www.figma.com/community/file/1394965242715869180
+\`\`\`
+
+🐙 **GitHub Gist** — the Octocat sample gist (rendered with syntax highlighting)
+
+\`\`\`embed
+https://gist.github.com/octocat/6cad326836d38bd3a7ae
+\`\`\`
+
+**Maps**
+
+🗼 **Google Maps** — the Eiffel Tower, Paris
+
+\`\`\`embed
+https://www.google.com/maps/place/Eiffel+Tower
+\`\`\`
+
+📍 **OpenStreetMap** — Times Square, NYC (privacy-friendly alternative)
+
+\`\`\`embed
+https://www.openstreetmap.org/#map=18/40.7580/-73.9855
+\`\`\`
+
+**Conversations**
+
+🐦 **X / Twitter** — Elon Musk, *"the bird is freed"* (Oct 28 2022, the Twitter takeover)
+
+\`\`\`embed
+https://twitter.com/elonmusk/status/1585841080431321088
+\`\`\`
+
+🐣 **X / Twitter** — Jack Dorsey's first tweet ever, *"just setting up my twttr"* (Mar 21 2006)
+
+\`\`\`embed
+https://twitter.com/jack/status/20
+\`\`\`
+
+📘 **Facebook** — NASA milestone post
+
+\`\`\`embed
+https://www.facebook.com/NASA/posts/10168891891030772
+\`\`\`
+
+📷 **Instagram** — \`@world_record_egg\` (the egg that broke Instagram's like record)
+
+\`\`\`embed
+https://www.instagram.com/p/BsOGulcndj-/
+\`\`\`
+
+🎵 **TikTok** — Bella Poarch, *"M to the B"* (most-liked TikTok ever, 65 M+ likes)
+
+\`\`\`embed
+https://www.tiktok.com/@bellapoarch/video/6862153058223197445
+\`\`\`
+
+👽 **Reddit** — Bill Gates' famous IAmA, *"I am Bill Gates, co-chair of the Bill & Melinda Gates Foundation"*
+
+\`\`\`embed
+https://www.reddit.com/r/IAmA/comments/6byns4/i_am_bill_gates_cochair_of_the_bill_melinda_gates/
+\`\`\`
+
+💼 **LinkedIn** — Reid Hoffman on the future of work
+
+\`\`\`embed
+https://www.linkedin.com/posts/reidhoffman_the-future-of-work-activity-7050231856721895424-Cf2T
+\`\`\`
+
+> **Tip** — paste any of these URLs on a blank line in the source pane and
+> Lumen offers a one-click "wrap as embed" pill. Try it.
+
 Happy writing. ✦
 `;
+

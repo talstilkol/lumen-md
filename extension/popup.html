@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Save to Lumen</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 16px;
+        width: 280px;
+        font-family: -apple-system, system-ui, sans-serif;
+        background: #0d0d18;
+        color: #e8e8f0;
+      }
+      h1 {
+        margin: 0 0 4px;
+        font-size: 14px;
+        font-weight: 600;
+      }
+      p {
+        margin: 0 0 12px;
+        font-size: 12px;
+        color: #8888a8;
+      }
+      button {
+        display: block;
+        width: 100%;
+        padding: 10px 14px;
+        margin-top: 8px;
+        border: none;
+        border-radius: 6px;
+        background: linear-gradient(135deg, #7c5cff, #22d3ee);
+        color: white;
+        font-weight: 600;
+        font-size: 13px;
+        cursor: pointer;
+      }
+      button.secondary {
+        background: rgba(255, 255, 255, 0.1);
+        font-weight: 500;
+      }
+      a.options {
+        display: block;
+        text-align: center;
+        margin-top: 12px;
+        color: #c4b5fd;
+        font-size: 11px;
+        text-decoration: none;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Save this page to Lumen</h1>
+    <p>
+      Captures the article (or your text selection) as clean markdown and sends
+      it to your Lumen instance.
+    </p>
+    <button id="clip-page">Save full page</button>
+    <button id="clip-selection" class="secondary">Save selection only</button>
+    <a class="options" href="options.html" target="_blank">Settings</a>
+
+    <script>
+      async function run(payload) {
+        const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+        if (!tab?.id) return;
+        await chrome.scripting.executeScript({
+          target: { tabId: tab.id },
+          files: ["contentScript.js"],
+        });
+        await chrome.tabs.sendMessage(tab.id, { type: "lumen-clip-page", ...payload });
+        window.close();
+      }
+      document.getElementById("clip-page").addEventListener("click", () => run({}));
+      document
+        .getElementById("clip-selection")
+        .addEventListener("click", () => run({ selectionOnly: true }));
+    </script>
+  </body>
+</html>

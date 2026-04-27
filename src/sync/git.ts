@@ -64,7 +64,6 @@ async function load() {
 }
 
 const TOKEN_KEY = "lumen.git.token.v1";
-const CORS_PROXY = "https://cors.isomorphic-git.org";
 
 export async function setGitToken(token: string | null): Promise<void> {
   await set(TOKEN_KEY, token ?? "");
@@ -133,6 +132,11 @@ export async function cloneRepo(
   }
 
   const token = opts.token ?? (await getGitToken()) ?? "";
+  if (!token) {
+    throw new Error(
+      "A GitHub token is required for cloning. Set one via: Git → Set Token in the command palette.",
+    );
+  }
   await git.clone({
     fs,
     http,
@@ -141,11 +145,7 @@ export async function cloneRepo(
     ref: opts.branch,
     depth: opts.depth ?? 1,
     singleBranch: true,
-    corsProxy: CORS_PROXY,
-    onAuth: () =>
-      token
-        ? { username: token, password: "x-oauth-basic" }
-        : ({} as never),
+    onAuth: () => ({ username: token, password: "x-oauth-basic" }),
   });
 
   const fileCount = await mirrorRepoToOPFS(dir, fs);
@@ -208,7 +208,6 @@ export async function commitAndPush(
     http,
     dir,
     ref: opts.branch,
-    corsProxy: CORS_PROXY,
     onAuth: () => ({ username: token, password: "x-oauth-basic" }),
   });
 }
@@ -300,7 +299,6 @@ export async function pullRepo(
     ref: opts.branch,
     singleBranch: true,
     fastForwardOnly: true,
-    corsProxy: CORS_PROXY,
     author: { name: author.name, email: author.email },
     onAuth: () =>
       token

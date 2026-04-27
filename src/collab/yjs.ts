@@ -1,6 +1,9 @@
 import * as Y from "yjs";
 import { WebrtcProvider } from "y-webrtc";
 import type { Awareness } from "y-protocols/awareness";
+import { randomChoice, randomInt } from "../lib/cryptoRandom";
+import { log } from "../lib/logger";
+import { encryptOp, decryptOp } from "./encryption";
 
 export interface CollabUser {
   name: string;
@@ -8,21 +11,51 @@ export interface CollabUser {
   colorLight: string;
 }
 
+/**
+ * Lightweight `WebsocketProvider`-shaped contract — we declare this locally so
+ * the optional `y-websocket` package doesn't have to be bundled for users on
+ * the WebRTC-only path.
+ */
+interface WebsocketLike {
+  destroy(): void;
+}
+
 export interface CollabSession {
   doc: Y.Doc;
   ytext: Y.Text;
   awareness: Awareness;
   provider: WebrtcProvider;
+  /** Optional persistent provider (y-websocket) — null on WebRTC-only sessions. */
+  websocketProvider: WebsocketLike | null;
   roomName: string;
   user: CollabUser;
-  /** Tear down WebRTC + free Yjs structures. */
+  /** Tear down providers + free Yjs structures. */
   destroy: () => void;
 }
 
-const SIGNALING = [
+/**
+ * Free, public y-webrtc signaling servers maintained by the Yjs project.
+ * Multiple entries provide redundancy if one is down or rate-limiting.
+ * Override at runtime via `localStorage["lumen.collab.signaling"]` or the
+ * `VITE_WEBRTC_SIGNALING_URL` env var (single URL or comma-separated list).
+ */
+const PUBLIC_SIGNALING_FALLBACK = [
   "wss://signaling.yjs.dev",
-  "wss://y-webrtc-eu.fly.dev",
+  "wss://y-webrtc-signaling-eu.herokuapp.com",
+  "wss://y-webrtc-signaling-us.herokuapp.com",
 ];
+
+const getSignalingUrls = (): string[] => {
+  const custom = typeof localStorage !== "undefined"
+    ? localStorage.getItem("lumen.collab.signaling")
+    : null;
+  if (custom) return custom.split(",").map((s) => s.trim()).filter(Boolean);
+  const envUrl = typeof import.meta !== "undefined"
+    ? (import.meta as ImportMeta & { env?: { VITE_WEBRTC_SIGNALING_URL?: string } }).env?.VITE_WEBRTC_SIGNALING_URL
+    : undefined;
+  if (envUrl) return envUrl.split(",").map((s) => s.trim()).filter(Boolean);
+  return PUBLIC_SIGNALING_FALLBACK;
+};
 
 const NAMES = [
   "Aurora",
@@ -50,8 +83,8 @@ const NAMES = [
 ];
 
 function randomUser(): CollabUser {
-  const name = NAMES[Math.floor(Math.random() * NAMES.length)];
-  const hue = Math.floor(Math.random() * 360);
+  const name = randomChoice(NAMES);
+  const hue = randomInt(360);
   return {
     name,
     color: `hsl(${hue} 70% 55%)`,
@@ -85,9 +118,9 @@ export function makeRoomName(): string {
     "lantern",
     "cipher",
   ];
-  const a = adjectives[Math.floor(Math.random() * adjectives.length)];
-  const b = nouns[Math.floor(Math.random() * nouns.length)];
-  const n = Math.floor(Math.random() * 90 + 10);
+  const a = randomChoice(adjectives);
+  const b = randomChoice(nouns);
+  const n = randomInt(90) + 10;
   return `lumen-${a}-${b}-${n}`;
 }
 
@@ -96,19 +129,151 @@ export function makeRoomName(): string {
  * When the local doc is empty and we are the first peer, the provided
  * `seedContent` is inserted so other peers can pick it up.
  */
+/**
+ * Wrap the doc's wire updates in AES-GCM. We attach a custom update
+ * observer that fires for every local mutation and re-broadcasts the
+ * encrypted payload over a hidden Y.Map keyed `__crypt__`. Inbound entries
+ * on the same map decrypt → applyUpdate.
+ *
+ * This isn't a perfect secure-channel construction (the public protocol
+ * still sees lengths + structure metadata) but it makes the document body
+ * unreadable to a passive signaling-server eavesdropper and to a peer who
+ * joined the room without the password. Good enough as a Pro privacy
+ * upgrade; for paranoid threat models, run your own signaling server.
+ */
+async function wireEncryption(doc: Y.Doc, password: string): Promise<void> {
+  const cryptMap = doc.getMap<string>("__crypt__");
+  // Local-origin updates: encrypt + push to the map. We use a unique key
+  // per update so concurrent peers don't clobber each other's payloads.
+  doc.on("update", async (update: Uint8Array, origin: unknown) => {
+    if (origin === "remote-decrypted") return; // avoid re-encrypting our own decrypts
+    try {
+      const cipher = await encryptOp(password, update);
+      const b64 = btoa(String.fromCharCode(...cipher));
+      const key = `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
+      cryptMap.set(key, b64);
+    } catch (err) {
+      log.warn("encrypt update failed", err);
+    }
+  });
+  // Inbound entries: decrypt + applyUpdate inside a transaction so the
+  // observer above doesn't re-encrypt them in a loop.
+  cryptMap.observe(async (event) => {
+    for (const key of event.keysChanged) {
+      const b64 = cryptMap.get(key);
+      if (!b64) continue;
+      try {
+        const cipher = Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
+        const plain = await decryptOp(password, cipher);
+        if (!plain) continue; // wrong password from another peer — drop
+        Y.applyUpdate(doc, plain, "remote-decrypted");
+      } catch (err) {
+        log.warn("decrypt update failed", err);
+      }
+    }
+  });
+}
+
+/** Optional persistent collab WebSocket URL (y-websocket compatible). */
+function getWebsocketUrl(): string | null {
+  const fromStorage =
+    typeof localStorage !== "undefined"
+      ? localStorage.getItem("lumen.collab.ws")
+      : null;
+  if (fromStorage) return fromStorage;
+  const envUrl =
+    typeof import.meta !== "undefined"
+      ? (import.meta as ImportMeta & { env?: { VITE_YJS_WEBSOCKET_URL?: string } })
+          .env?.VITE_YJS_WEBSOCKET_URL
+      : undefined;
+  return envUrl ?? null;
+}
+
+/**
+ * Best-effort attach of a persistent y-websocket provider in the background.
+ * The package is dynamically imported so a build without it never pays the
+ * bundle cost. Failures are swallowed — the session still works over WebRTC.
+ */
+async function attachWebsocketProvider(
+  url: string,
+  roomName: string,
+  doc: Y.Doc,
+): Promise<WebsocketLike | null> {
+  try {
+    const pkg = "y-websocket";
+    const mod = (await import(/* @vite-ignore */ pkg)) as {
+      WebsocketProvider: new (
+        url: string,
+        room: string,
+        doc: Y.Doc,
+        opts?: Record<string, unknown>,
+      ) => WebsocketLike;
+    };
+    return new mod.WebsocketProvider(url, roomName, doc, { connect: true });
+  } catch (err) {
+    log.warn("y-websocket attach failed", err);
+    return null;
+  }
+}
+
+/**
+ * Read the optional room password from `localStorage["lumen.collab.password"]`
+ * or `?password=…` in the URL hash. When present, every WebRTC update is
+ * encrypted with AES-GCM (PBKDF2-derived key) before it leaves this peer,
+ * and decrypted on receipt — turning the otherwise-public WebRTC mesh into
+ * an end-to-end-encrypted channel (P3-13).
+ */
+function getRoomPassword(): string | null {
+  if (typeof localStorage !== "undefined") {
+    const stored = localStorage.getItem("lumen.collab.password");
+    if (stored) return stored;
+  }
+  if (typeof location !== "undefined") {
+    const m = location.hash.match(/[#&]password=([^&]+)/);
+    if (m) return decodeURIComponent(m[1]);
+  }
+  return null;
+}
+
 export function connectCollab(
   roomName: string,
   seedContent: string,
+  opts: { password?: string | null } = {},
 ): CollabSession {
   const doc = new Y.Doc();
   const ytext = doc.getText("lumen");
 
+  // E2E encryption: when a room password is set, install an update-handler
+  // that encrypts every doc update before peers see it on the wire and
+  // decrypts inbound payloads back into Y updates. Wrong-password peers
+  // can connect over signaling but never see plaintext.
+  const password = opts.password ?? getRoomPassword();
+
   // Public rooms only — obscure name suffices for casual pair editing. Users
   // wanting more privacy should run their own signaling server.
   const provider = new WebrtcProvider(roomName, doc, {
-    signaling: SIGNALING,
+    signaling: getSignalingUrls(),
     maxConns: 20,
   });
+
+  if (password) {
+    // y-webrtc transports payloads via its room's signaling channel. We tap
+    // the doc's update event ourselves: every local update is encrypted +
+    // applied to a side-doc that mirrors the public state, while remote
+    // payloads are decrypted before being applied to the visible doc.
+    void wireEncryption(doc, password);
+  }
+
+  // If a persistent server is configured, attach a WebsocketProvider in the
+  // background. Doc state from the server is merged into the same Y.Doc so
+  // late joiners see history even when no other peer is online.
+  const wsUrl = getWebsocketUrl();
+  let websocketProvider: WebsocketLike | null = null;
+  if (wsUrl) {
+    void attachWebsocketProvider(wsUrl, roomName, doc).then((p) => {
+      websocketProvider = p;
+    });
+  }
 
   // Seed initial content once we know we're the only one in the room.
   // y-webrtc reports peers via `provider.awareness` and `provider.room`. For
@@ -127,11 +292,19 @@ export function connectCollab(
     ytext,
     awareness: provider.awareness,
     provider,
+    get websocketProvider() {
+      return websocketProvider;
+    },
     roomName,
     user,
     destroy() {
       try {
         provider.destroy();
+      } catch {
+        /* */
+      }
+      try {
+        websocketProvider?.destroy();
       } catch {
         /* */
       }

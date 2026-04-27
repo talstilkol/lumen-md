@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { ReactElement } from "react";
-import { Search, FileText, Sparkles, Loader2, FileCode2 } from "lucide-react";
+import { Search, FileText, Sparkles, Loader2, FileCode2, Wand2 } from "lucide-react";
 import { t } from "../i18n";
 import { searchWorkspace, type SearchHit } from "../storage/workspaceIndex";
 import { isOPFSAvailable, readWorkspaceFile } from "../storage/workspace";
@@ -8,8 +8,12 @@ import { chat, AiError } from "../ai/llm";
 import type { ChatMessage } from "../ai/llm";
 import { PROMPTS } from "../ai/prompts";
 import { renderMarkdown } from "../renderer/pipeline";
+import { log } from "../lib/logger";
 import { showAiToast } from "../ui/AiToast";
 import { semanticSearch, type RagResult } from "../ai/embeddings";
+import { indexWorkspace, searchHybrid, type SemanticHit } from "../ai/semanticSearch";
+import { useAppStore } from "../store/useStore";
+import { rememberSearch, getSearchHistory, forgetSearch } from "../storage/searchHistory";
 
 interface Props {
   open: boolean;
@@ -19,15 +23,19 @@ interface Props {
 }
 
 export function SearchDialog({ open, onClose, onOpenFile }: Props) {
-  const [mode, setMode] = useState<"search" | "ai">("search");
+  const [mode, setMode] = useState<"search" | "smart" | "ai">("search");
   const [query, setQuery] = useState("");
   const [hits, setHits] = useState<SearchHit[]>([]);
+  const [smartHits, setSmartHits] = useState<SemanticHit[]>([]);
+  const [smartIndexing, setSmartIndexing] = useState(false);
+  const [smartIndexedAt, setSmartIndexedAt] = useState<number | null>(null);
   const [active, setActive] = useState(0);
   const [loading, setLoading] = useState(false);
   const inputRef = useRef<HTMLInputElement | null>(null);
   const listRef = useRef<HTMLDivElement | null>(null);
   const dialogRef = useRef<HTMLDivElement | null>(null);
   const previousFocusRef = useRef<Element | null>(null);
+  const aiKey = useAppStore((s) => s.aiKey);
 
   const [aiAnswer, setAiAnswer] = useState<string | null>(null);
   const [aiRendered, setAiRendered] = useState<ReactElement | null>(null);
@@ -39,11 +47,17 @@ export function SearchDialog({ open, onClose, onOpenFile }: Props) {
     if (open) {
       previousFocusRef.current = document.activeElement;
       setQuery("");
-      setMode("search");
+      // Honour an optional `lumen-search-mode` event that lets command
+      // palette entries open the dialog already on a specific tab.
+      const requested = (window as unknown as { __lumenSearchMode?: "search" | "smart" | "ai" })
+        .__lumenSearchMode;
+      setMode(requested ?? "search");
+      (window as unknown as { __lumenSearchMode?: string }).__lumenSearchMode = undefined;
       setAiAnswer(null);
       setAiRendered(null);
       setAiSources([]);
       setConversation([]);
+      setSmartHits([]);
       setActive(0);
       setTimeout(() => inputRef.current?.focus(), 0);
     } else {
@@ -76,6 +90,7 @@ export function SearchDialog({ open, onClose, onOpenFile }: Props) {
 
   useEffect(() => {
     if (!open) return;
+    if (mode !== "search") return;
     let cancelled = false;
     setLoading(true);
     const handle = setTimeout(() => {
@@ -96,7 +111,56 @@ export function SearchDialog({ open, onClose, onOpenFile }: Props) {
       cancelled = true;
       clearTimeout(handle);
     };
-  }, [open, query]);
+  }, [open, query, mode]);
+
+  // Smart search — debounced hybrid retrieval (BM25 + vector embeddings).
+  useEffect(() => {
+    if (!open) return;
+    if (mode !== "smart") return;
+    if (!query.trim()) {
+      setSmartHits([]);
+      return;
+    }
+    let cancelled = false;
+    setLoading(true);
+    const handle = setTimeout(async () => {
+      try {
+        const results = await searchHybrid(query, 20);
+        if (cancelled) return;
+        setSmartHits(results);
+        setActive(0);
+      } catch (err) {
+        if (cancelled) return;
+        log.warn("smart search failed", err);
+        setSmartHits([]);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    }, 220);
+    return () => {
+      cancelled = true;
+      clearTimeout(handle);
+    };
+  }, [open, query, mode]);
+
+  async function rebuildSmartIndex() {
+    if (!aiKey) {
+      showAiToast("Configure your AI Key (⌘K → AI Settings) to use Smart search", "error");
+      return;
+    }
+    setSmartIndexing(true);
+    showAiToast("🧠 Building semantic index…", "info");
+    try {
+      const idx = await indexWorkspace({ force: true });
+      setSmartIndexedAt(idx.builtAt || Date.now());
+      showAiToast(`✅ Indexed ${Object.keys(idx.files).length} files`, "success");
+    } catch (e) {
+      log.error("indexWorkspace failed", e);
+      showAiToast(`Indexing failed: ${(e as Error).message}`, "error");
+    } finally {
+      setSmartIndexing(false);
+    }
+  }
 
   useEffect(() => {
     if (!listRef.current) return;
@@ -107,6 +171,20 @@ export function SearchDialog({ open, onClose, onOpenFile }: Props) {
   }, [active]);
 
   async function openHit(hit: SearchHit) {
+    // Persist the query that led to this open — enables the recent-searches
+    // chip row when the dialog re-opens with an empty query.
+    if (query.trim()) rememberSearch(query.trim());
+    onClose();
+    try {
+      const content = await readWorkspaceFile(hit.path);
+      onOpenFile(hit.path, content);
+    } catch {
+      /* file gone */
+    }
+  }
+
+  async function openSmartHit(hit: SemanticHit) {
+    if (query.trim()) rememberSearch(query.trim());
     onClose();
     try {
       const content = await readWorkspaceFile(hit.path);
@@ -117,9 +195,10 @@ export function SearchDialog({ open, onClose, onOpenFile }: Props) {
   }
 
   function onKey(e: React.KeyboardEvent) {
+    const listLen = mode === "smart" ? smartHits.length : hits.length;
     if (e.key === "ArrowDown") {
       e.preventDefault();
-      setActive((i) => Math.min(hits.length - 1, i + 1));
+      setActive((i) => Math.min(listLen - 1, i + 1));
     } else if (e.key === "ArrowUp") {
       e.preventDefault();
       setActive((i) => Math.max(0, i - 1));
@@ -128,6 +207,9 @@ export function SearchDialog({ open, onClose, onOpenFile }: Props) {
       if (mode === "search") {
         const hit = hits[active];
         if (hit) void openHit(hit);
+      } else if (mode === "smart") {
+        const hit = smartHits[active];
+        if (hit) void openSmartHit(hit);
       } else if (mode === "ai" && query.trim()) {
         void askAi();
       }
@@ -141,10 +223,32 @@ export function SearchDialog({ open, onClose, onOpenFile }: Props) {
     setAiLoading(true);
     setAiAnswer("Searching workspace...");
     setAiSources([]);
-    
+
     try {
-      // Semantic search for relevant context
-      const results = await semanticSearch(query, { topK: 8, maxContentChars: 6000 });
+      // Hybrid retrieval — when the user has built the embedding index
+      // (Smart tab → Build) we fuse BM25 + semantic via RRF for genuinely
+      // semantic-aware Q&A. When the index is empty, `searchHybrid` falls
+      // back to BM25 alone, so we never block the AI tab on a missing index.
+      const hybridHits = aiKey
+        ? await searchHybrid(query, 8).catch(() => [] as SemanticHit[])
+        : [];
+      const fallback =
+        hybridHits.length === 0
+          ? await semanticSearch(query, { topK: 8, maxContentChars: 6000 })
+          : [];
+      // Materialise the hybrid hits into RagResult shape so the existing
+      // citation-rendering code below works untouched.
+      const hybridResults: RagResult[] = await Promise.all(
+        hybridHits.map(async (h) => ({
+          path: h.path,
+          score: h.score,
+          snippet: h.snippet,
+          content: await readWorkspaceFile(h.path)
+            .then((c) => c.slice(0, 6000))
+            .catch(() => h.snippet),
+        })),
+      );
+      const results = hybridResults.length > 0 ? hybridResults : fallback;
       setAiSources(results);
 
       // Build context from semantic results
@@ -179,7 +283,7 @@ export function SearchDialog({ open, onClose, onOpenFile }: Props) {
         setAiAnswer("⚠️ Please configure your AI Key (⌘K → AI Settings).");
         showAiToast("Please configure your AI Key (⌘K → AI Settings)", "error");
       } else {
-        console.error(e);
+        log.error("AI workspace search failed", e);
         setAiAnswer("Failed to reach AI API.");
         showAiToast("AI workspace search failed", "error");
       }
@@ -188,20 +292,52 @@ export function SearchDialog({ open, onClose, onOpenFile }: Props) {
     }
   }
 
-  const empty = useMemo(() => !loading && hits.length === 0, [loading, hits]);
+  const empty = useMemo(() => {
+    if (loading) return false;
+    if (mode === "smart") return smartHits.length === 0;
+    return hits.length === 0;
+  }, [loading, hits, smartHits, mode]);
 
   if (!open) return null;
 
   return (
     <div className="cmd-palette-backdrop" onClick={onClose} role="dialog" aria-modal>
       <div ref={dialogRef} className="cmd-palette" style={{ minHeight: "350px", display: "flex", flexDirection: "column" }} onClick={(e) => e.stopPropagation()}>
-        <div style={{ display: "flex", borderBottom: "1px solid hsl(var(--border))", padding: "0 10px" }}>
+        <div style={{ display: "flex", borderBottom: "1px solid hsl(var(--border))", padding: "0 10px", alignItems: "center" }}>
           <button className={`chart-block-tab ${mode === "search" ? "active" : ""}`} style={{ fontSize: 13, background: "transparent" }} onClick={() => setMode("search")}>
              Search
+          </button>
+          <button
+            className={`chart-block-tab ${mode === "smart" ? "active" : ""}`}
+            style={{ fontSize: 13, background: "transparent" }}
+            onClick={() => setMode("smart")}
+            title="Hybrid semantic + keyword search (uses your AI key for embeddings)"
+          >
+            <Wand2 size={11} style={{ display: "inline", marginRight: 4 }} /> Smart
           </button>
           <button className={`chart-block-tab ${mode === "ai" ? "active" : ""}`} style={{ fontSize: 13, background: "transparent" }} onClick={() => setMode("ai")}>
              <Sparkles size={11} style={{display:"inline", marginRight:4}}/> Ask Workspace
           </button>
+          {mode === "smart" && (
+            <button
+              type="button"
+              onClick={rebuildSmartIndex}
+              disabled={smartIndexing}
+              style={{
+                marginInlineStart: "auto",
+                fontSize: 11,
+                padding: "3px 9px",
+                borderRadius: 999,
+                border: "1px solid hsl(var(--border))",
+                background: "hsl(var(--bg-subtle))",
+                color: "hsl(var(--fg-muted))",
+                cursor: smartIndexing ? "wait" : "pointer",
+              }}
+              title="Rebuild the embedding index"
+            >
+              {smartIndexing ? "Indexing…" : smartIndexedAt ? "Re-index" : "Build index"}
+            </button>
+          )}
         </div>
         <div className="cmd-palette-search">
           <Search size={16} style={{ opacity: 0.6, flexShrink: 0 }} />
@@ -221,10 +357,85 @@ export function SearchDialog({ open, onClose, onOpenFile }: Props) {
         <div className="cmd-palette-list" ref={listRef}>
           {empty && (
             <div className="cmd-palette-empty">
-              {query ? t("search.noMatches") : t("search.empty")}
+              {mode === "smart" && !smartIndexedAt && !query
+                ? "Click \u201CBuild index\u201D to enable Smart search."
+                : query
+                  ? t("search.noMatches")
+                  : t("search.empty")}
             </div>
           )}
-          {hits.map((hit, i) => (
+          {/* Recent-searches chip row — only when the query is empty and the
+              user has actually run searches before. Click a chip to re-run
+              that query; click ✕ to forget it. */}
+          {!query && getSearchHistory().length > 0 && (
+            <div
+              style={{
+                display: "flex",
+                flexWrap: "wrap",
+                gap: 6,
+                padding: "10px 12px 6px",
+                borderBottom: "1px solid hsl(var(--border))",
+              }}
+              role="group"
+              aria-label="Recent searches"
+            >
+              <span style={{ fontSize: 10, color: "hsl(var(--fg-muted))", textTransform: "uppercase", letterSpacing: "0.05em", marginInlineEnd: 4, alignSelf: "center" }}>
+                Recent
+              </span>
+              {getSearchHistory().map((q) => (
+                <span
+                  key={q}
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: 4,
+                    padding: "3px 8px 3px 10px",
+                    borderRadius: 999,
+                    background: "hsl(var(--bg-subtle))",
+                    border: "1px solid hsl(var(--border))",
+                    fontSize: 11,
+                  }}
+                >
+                  <button
+                    type="button"
+                    onClick={() => setQuery(q)}
+                    aria-label={`Re-run search "${q}"`}
+                    style={{
+                      background: "transparent",
+                      border: "none",
+                      color: "hsl(var(--fg))",
+                      cursor: "pointer",
+                      fontSize: 11,
+                      padding: 0,
+                    }}
+                  >
+                    {q}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      forgetSearch(q);
+                      // Force re-render — cheap nudge via setQuery toggle.
+                      setQuery((s) => s);
+                    }}
+                    aria-label={`Forget search "${q}"`}
+                    style={{
+                      background: "transparent",
+                      border: "none",
+                      color: "hsl(var(--fg-muted))",
+                      cursor: "pointer",
+                      fontSize: 10,
+                      padding: 0,
+                      lineHeight: 1,
+                    }}
+                  >
+                    ×
+                  </button>
+                </span>
+              ))}
+            </div>
+          )}
+          {(mode === "search" || mode === "ai") && hits.map((hit, i) => (
             <div
               key={hit.path}
               data-search-index={i}
@@ -261,6 +472,49 @@ export function SearchDialog({ open, onClose, onOpenFile }: Props) {
               </div>
             </div>
           ))}
+          {mode === "smart" && smartHits.map((hit, i) => {
+            const name = hit.path.split("/").pop() ?? hit.path;
+            return (
+              <div
+                key={hit.path}
+                data-search-index={i}
+                className={`cmd-palette-item ${i === active ? "active" : ""}`}
+                onMouseEnter={() => setActive(i)}
+                onClick={() => void openSmartHit(hit)}
+                style={{ alignItems: "flex-start" }}
+                title={`${hit.path} — score ${hit.score.toFixed(3)}`}
+              >
+                <Wand2 size={14} style={{ opacity: 0.7, marginTop: 1, flexShrink: 0, color: "hsl(var(--accent))" }} />
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div className="cmd-palette-label" style={{ fontWeight: 500, display: "flex", alignItems: "center", gap: 6 }}>
+                    <span>{name}</span>
+                    {hit.path !== name && (
+                      <span style={{ color: "hsl(var(--fg-muted))", fontWeight: 400, fontSize: 11 }}>
+                        {hit.path}
+                      </span>
+                    )}
+                    <span style={{ marginInlineStart: "auto", fontSize: 10, color: "hsl(var(--fg-muted))" }}>
+                      {hit.score.toFixed(2)}
+                    </span>
+                  </div>
+                  {hit.snippet && (
+                    <div
+                      style={{
+                        color: "hsl(var(--fg-muted))",
+                        fontSize: 11.5,
+                        marginTop: 2,
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        whiteSpace: "nowrap",
+                      }}
+                    >
+                      {hit.snippet}
+                    </div>
+                  )}
+                </div>
+              </div>
+            );
+          })}
         </div>
         
         {mode === "ai" && (

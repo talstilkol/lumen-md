@@ -119,7 +119,7 @@ export async function saveFile(
       await writable.close();
       return { ...file, handle, name: handle.name ?? file.name };
     } catch (e) {
-      if ((e as Error).name === "AbortError") return file;
+      if ((e as Error).name === "AbortError") throw e;
       throw e;
     }
   }
