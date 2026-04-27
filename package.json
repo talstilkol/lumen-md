@@ -65,7 +65,7 @@
     "abcjs": "^6.6.3",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
-    "echarts": "^5.5.1",
+    "echarts": "^6.0.0",
     "idb-keyval": "^6.2.2",
     "isomorphic-git": "^1.37.5",
     "katex": "^0.16.11",
