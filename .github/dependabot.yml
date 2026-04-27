@@ -1,0 +1,144 @@
+version: 2
+
+# Dependabot — automatic security updates + version bumps.
+# https://docs.github.com/en/code-security/dependabot
+#
+# Strategy:
+#   • Daily security checks for npm + Cargo (Tauri) + GitHub Actions.
+#   • Weekly version-bump PRs grouped by ecosystem so we don't get a
+#     flood of tiny PRs. Patch + minor are auto-mergeable in our review
+#     flow; major bumps stay manual.
+#   • Heavy lazy-loaded vendor chunks (Mermaid, Shiki, ECharts) are
+#     called out in their own group so the reviewer can verify the
+#     bundle-size budget after each upgrade.
+
+updates:
+  # ── npm (root) ──────────────────────────────────────────────────────
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "daily"
+      time: "06:00"
+      timezone: "UTC"
+    open-pull-requests-limit: 10
+    labels: ["dependencies", "javascript"]
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+    groups:
+      # Renderer-pipeline heavies — verify bundle-size after merge.
+      renderer-vendors:
+        patterns:
+          - "mermaid"
+          - "shiki"
+          - "echarts"
+          - "@hpcc-js/wasm"
+          - "katex"
+          - "leaflet"
+          - "abcjs"
+        update-types:
+          - "minor"
+          - "patch"
+      # CodeMirror is split across 8 packages — group them.
+      codemirror:
+        patterns:
+          - "@codemirror/*"
+          - "@lezer/*"
+          - "@replit/codemirror-vim"
+        update-types:
+          - "minor"
+          - "patch"
+      # Milkdown ships ≥ 13 packages on the same SemVer cadence.
+      milkdown:
+        patterns:
+          - "@milkdown/*"
+        update-types:
+          - "minor"
+          - "patch"
+      # Yjs + collab providers.
+      yjs:
+        patterns:
+          - "yjs"
+          - "y-*"
+        update-types:
+          - "minor"
+          - "patch"
+      # Test + lint dev deps.
+      dev-tools:
+        dependency-type: "development"
+        patterns:
+          - "vitest"
+          - "@vitest/*"
+          - "@playwright/*"
+          - "@testing-library/*"
+          - "axe-core"
+          - "jsdom"
+          - "fake-indexeddb"
+          - "typescript"
+        update-types:
+          - "minor"
+          - "patch"
+      # React stays on its own track because major bumps need manual review.
+      react:
+        patterns:
+          - "react"
+          - "react-dom"
+          - "@types/react"
+          - "@types/react-dom"
+        update-types:
+          - "minor"
+          - "patch"
+
+  # ── Cargo (Tauri shell) ─────────────────────────────────────────────
+  - package-ecosystem: "cargo"
+    directory: "/src-tauri"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+    labels: ["dependencies", "rust", "tauri"]
+    commit-message:
+      prefix: "chore(tauri)"
+
+  # ── GitHub Actions ──────────────────────────────────────────────────
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+    labels: ["dependencies", "ci"]
+    commit-message:
+      prefix: "chore(ci)"
+
+  # ── Cloudflare Workers (edge backends) ──────────────────────────────
+  - package-ecosystem: "npm"
+    directory: "/edge-workers/billing"
+    schedule:
+      interval: "weekly"
+    labels: ["dependencies", "edge"]
+
+  - package-ecosystem: "npm"
+    directory: "/edge-workers/publish"
+    schedule:
+      interval: "weekly"
+    labels: ["dependencies", "edge"]
+
+  # ── MCP server ──────────────────────────────────────────────────────
+  - package-ecosystem: "npm"
+    directory: "/mcp-server"
+    schedule:
+      interval: "weekly"
+    labels: ["dependencies", "mcp"]
+
+  # ── Sync server ─────────────────────────────────────────────────────
+  - package-ecosystem: "npm"
+    directory: "/sync-server"
+    schedule:
+      interval: "weekly"
+    labels: ["dependencies", "sync"]
+
+  # ── Docs site (Astro Starlight) ─────────────────────────────────────
+  - package-ecosystem: "npm"
+    directory: "/docs"
+    schedule:
+      interval: "weekly"
+    labels: ["dependencies", "docs"]
