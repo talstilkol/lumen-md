@@ -1,0 +1,33 @@
+# Lumen i18n locales
+
+This directory holds lazy-loaded locale bundles. Each file is a flat
+`{ "key": "translated value" }` JSON map mirroring the keys in the
+parent `index.ts` `en` bundle.
+
+## Add a locale
+
+1. Run `node scripts/extract-i18n-keys.mjs` from the repo root —
+   produces `i18n/keys.json` with every English source string and the
+   `{var}` placeholders each one carries.
+
+2. Translate the values. The recommended pipeline:
+
+   ```
+   node scripts/translate-locale.mjs --locale=ar --in=i18n/keys.json --out=src/i18n/locales/ar.json
+   ```
+
+   The script POSTs each batch to OpenAI / Anthropic with a system
+   prompt that locks `{var}` placeholders, keyboard shortcuts (⌘K, Esc),
+   and inline markdown.
+
+3. Native-speaker review — usually 4 hours per locale. The reviewer
+   only needs to read the JSON, not re-author it.
+
+4. Drop the resulting `<code>.json` next to this README. The locale
+   becomes selectable on the next page load.
+
+## Why JSON, not TS
+
+JSON files are static assets — Vite splits them into their own chunks
+so `en + he` stays the only synchronous load. TS bundles would
+inflate the main JS chunk by ~80 KB per locale.

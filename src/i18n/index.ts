@@ -4,12 +4,54 @@
  * itself, so the UI never goes blank).
  */
 
-export type Locale = "en" | "he";
+// β.4 — `Locale` includes the 6 deferred locales so the type is stable
+// across the rest of the codebase. Bundles for ar / ru / fr / de / ja /
+// zh-CN are lazy-loaded from `src/i18n/locales/<code>.json` when one is
+// selected; until those JSON files exist the locale entries are filtered
+// out of the picker via `isLocaleAvailable`.
+export type Locale =
+  | "en"
+  | "he"
+  | "ar"
+  | "ru"
+  | "fr"
+  | "de"
+  | "ja"
+  | "zh-CN";
 
 export const SUPPORTED_LOCALES: { code: Locale; label: string; dir: "ltr" | "rtl" }[] = [
   { code: "en", label: "English", dir: "ltr" },
   { code: "he", label: "עברית", dir: "rtl" },
+  { code: "ar", label: "العربية", dir: "rtl" },
+  { code: "ru", label: "Русский", dir: "ltr" },
+  { code: "fr", label: "Français", dir: "ltr" },
+  { code: "de", label: "Deutsch", dir: "ltr" },
+  { code: "ja", label: "日本語", dir: "ltr" },
+  { code: "zh-CN", label: "简体中文", dir: "ltr" },
 ];
+
+/**
+ * Locales whose bundle ships synchronously in the main JS chunk. The
+ * other six are loaded on demand via `loadLocale()`.
+ */
+const SYNCHRONOUS_LOCALES = new Set<Locale>(["en", "he"]);
+
+/**
+ * Returns true when the locale's bundle is currently usable. Synchronous
+ * locales (en + he) are always available. Lazy locales count as available
+ * only when the bundle is loaded AND has at least one key — this keeps
+ * empty placeholder stubs (`{}`) from being mistakenly treated as
+ * complete locales (a translator's PR-in-flight shouldn't silently flip
+ * the locale "on" for users).
+ */
+export function isLocaleAvailable(locale: Locale): boolean {
+  if (SYNCHRONOUS_LOCALES.has(locale)) return true;
+  const bundle = BUNDLES[locale];
+  if (!bundle) return false;
+  // Ignore underscore-prefixed metadata keys (e.g. _placeholder, _note)
+  const realKeys = Object.keys(bundle).filter((k) => !k.startsWith("_"));
+  return realKeys.length > 0;
+}
 
 type Strings = Record<string, string>;
 
@@ -254,6 +296,7 @@ const en: Strings = {
   "desc.openWelcome": "Open the bundled tour with every feature demoed",
   "canvas.switch": "Switch canvas",
   "docTabs.close": "Close tab",
+  "docTabs.label": "Open documents",
   "findReplace.searchInput": "Search query",
   "findReplace.replaceInput": "Replacement text",
   "findReplace.replacePlaceholder": "Replace with…",
@@ -383,6 +426,131 @@ const en: Strings = {
   "tree.expand": "Expand",
   "tree.opfsUnavailable": "OPFS isn't available in this browser. Use the file open / save commands instead.",
   "tree.emptyHint": "No files yet. Click + to create one.",
+  "tree.tagFilter": "# {tag} · {count} note(s)",
+  "tree.tagFilter.clear": "Clear tag filter",
+  "tree.tagFilter.empty": "No notes match this tag.",
+  "status.privacyMode": "PRIVATE",
+  "status.privacyMode.tooltip": "Privacy Mode — AI runs entirely on this device via WebGPU. No prompts leave your browser.",
+  "status.roadmap": "Roadmap",
+  "status.roadmap.tooltip": "View Lumen's public roadmap",
+  "status.grammar.on": "Grammar",
+  "status.grammar.off": "Grammar",
+  "status.grammar.tooltip.on": "Grammar check is ON. Click to disable.",
+  "status.grammar.tooltip.off": "Grammar check is OFF. Click to enable LanguageTool checking.",
+  "status.telemetry.on": "Telemetry",
+  "status.telemetry.off": "Telemetry",
+  "status.telemetry.tooltip.on": "Error telemetry is ON. Crash reports are sent to help improve Lumen. Click to opt out.",
+  "status.telemetry.tooltip.off": "Error telemetry is OFF. Click to enable anonymous crash reports.",
+  "templates.title": "Template gallery",
+  "templates.close": "Close gallery",
+  "templates.searchPlaceholder": "Search templates by name, description, or tag…",
+  "templates.allCategories": "All",
+  "templates.sort": "Sort",
+  "templates.sort.rating": "Rating",
+  "templates.sort.downloads": "Most installed",
+  "templates.loading": "Loading templates…",
+  "templates.empty": "No templates match your filter.",
+  "templates.error": "Failed to load registry: {error}",
+  "templates.byAuthor": "by {author}",
+  "templates.rating": "{rating} stars",
+  "templates.downloads": "{count} installs",
+  "templates.install": "Install",
+  "templates.installing": "Installing…",
+  "templates.installed.button": "Installed",
+  "templates.installed": "✅ Installed {name} → {path}",
+  "templates.installFailed": "Install failed: {error}",
+  "templates.contribute": "Contribute a template:",
+  "templates.contributeLink": "lumen-templates-contrib →",
+  "cmd.templates.open": "Browse template gallery",
+  "cmd.templates.open.hint": "Browse + install community templates",
+  // ── Audit log admin (ε.2) ──────────────────────────────────────────────
+  "audit.title": "Audit log",
+  "audit.rows": "rows",
+  "audit.refresh": "Refresh",
+  "audit.export": "Export CSV",
+  "audit.close": "Close",
+  "audit.filter.action": "Filter by action…",
+  "audit.filter.user": "Filter by user id…",
+  "audit.empty": "No events match the current filter.",
+  "audit.col.ts": "Time",
+  "audit.col.user": "User",
+  "audit.col.action": "Action",
+  "audit.col.payload": "Payload",
+  "audit.fetchFailed": "Audit fetch failed: {error}",
+  "audit.exportDone": "✅ Exported {count} rows to CSV",
+  "cmd.audit.open": "Audit log…",
+  "cmd.audit.open.hint": "Inspect every recorded mutation; export CSV for compliance",
+  "cmd.fineTune.open": "AI fine-tune settings…",
+  "cmd.fineTune.open.hint": "Train a personal model on your writing style (Pro)",
+  "fineTune.title": "Train AI on my style",
+  "fineTune.intro": "Fine-tune a personal copy of GPT-4o-mini on the last 90 days of your writing. The model learns your tone + vocabulary so completions feel like you wrote them.",
+  "fineTune.status": "Status",
+  "fineTune.modelReady": "Personal model ready",
+  "fineTune.training": "Training… ({status})",
+  "fineTune.statsLine": "{chunks} chunks · ≈ {tokens} tokens",
+  "fineTune.notTrained": "No personal model yet. Click \"Train\" below to upload your last 90 days of writing.",
+  "fineTune.useToggle": "Route AI requests through my voice",
+  "fineTune.useToggleHint": "Off by default. Toggle on to make every AI completion use your fine-tuned model.",
+  "fineTune.train": "Train",
+  "fineTune.retrain": "Re-train",
+  "fineTune.forget": "Forget local model id",
+  "fineTune.close": "Close",
+  "fineTune.confirm": "Upload your last 90 days of writing to OpenAI to train a personal model? Training usually finishes in under an hour.",
+  "fineTune.forgetConfirm": "Forget the locally-stored fine-tune model id? You'll need to delete the model from your OpenAI dashboard separately for full removal.",
+  "fineTune.needKey": "Configure your AI Key first (⌘K → AI Settings).",
+  "fineTune.toast.queued": "Fine-tune started — {chunks} chunks (~{tokens} tokens) uploaded.",
+  "fineTune.toast.succeeded": "✅ Fine-tune ready: {model}",
+  "fineTune.toast.failed": "Fine-tune {status}. See OpenAI dashboard.",
+  "fineTune.toast.error": "Fine-tune failed: {error}",
+  "fineTune.toast.forgot": "Local fine-tune id removed.",
+  "fineTune.privacy": "Note: training uploads ~5 MB of your writing to OpenAI. The resulting model is only accessible from your account. Click \"Forget\" to drop the id from this device — to fully remove the trained model, delete it in your OpenAI dashboard too.",
+  // ── Missing key cleanup (α.6.9) ────────────────────────────────────────
+  "ai.prompt.key": "Enter your OpenAI API key (sk-…):",
+  "ai.alert.keySaved": "AI key saved.",
+  "canvas.close": "Close",
+  "canvas.dialogLabel": "Whiteboard",
+  "canvas.new": "New",
+  "canvas.new.prompt": "Canvas name:",
+  "canvas.picker": "Pick canvas",
+  "canvas.title": "Canvas",
+  "cmd.ai.settings": "AI Settings…",
+  "cmd.ai.settings.hint": "Configure your OpenAI API key + per-doc options",
+  "cmd.cmdPalette": "Command palette",
+  "cmd.focusMode": "Focus mode",
+  "cmd.new": "New document",
+  "cmd.open": "Open file…",
+  "cmd.preview": "Preview only",
+  "cmd.save": "Save",
+  "cmd.saveAs": "Save as…",
+  "cmd.search": "Search workspace…",
+  "cmd.shortcuts": "Keyboard shortcuts",
+  "cmd.source": "Source only",
+  "cmd.split": "Split editor + preview",
+  "git.alert.noRepo": "This workspace isn't a Git repo. Run `git clone` first or use `Init repository`.",
+  "git.prompt.cloneUrl": "Repository URL (https://… or git@…):",
+  "git.prompt.commitMessage": "Commit message:",
+  "group.edit": "Edit",
+  "canvas.autoSaved": "Canvas · auto-saved",
+  "canvas.legacy.found": "{count} legacy canvas(es) found",
+  "canvas.legacy.convert": "Convert {name} → tldraw",
+  "canvas.legacy.converting": "Converting {name}…",
+  "canvas.legacy.converted": "✅ Converted {name} ({count} shapes)",
+  "canvas.legacy.convertFailed": "Convert failed: {error}",
+  "versionHistory.title": "Version History",
+  "versionHistory.savedCount": "{count} versions saved",
+  "mdTable.title": "Table Editor",
+  "searchDialog.sources": "Sources",
+  "searchDialog.askPlaceholder": "Type a question and press Enter to ask the AI workspace.",
+  "voice.recording": "Recording... ({lang})",
+  "voice.memo.recording": "Recording memo…",
+  "voice.memo.stop": "⏹ Stop & insert",
+  "errorBoundary.heading": "Rendering Error",
+  "cmd.view.grammarCheck.on": "Enable grammar check (LanguageTool)",
+  "cmd.view.grammarCheck.off": "Disable grammar check",
+  "cmd.view.grammarCheck.hint": "Underlines grammar / style / typo issues. Set VITE_LANGUAGETOOL_URL to self-host.",
+  "cmd.ai.privacy.on": "Privacy Mode: run AI on this device (WebGPU)",
+  "cmd.ai.privacy.off": "Privacy Mode: turn off (use cloud AI)",
+  "cmd.ai.privacy.hint": "When ON, every AI prompt runs locally via @mlc-ai/web-llm. No data leaves your browser.",
   "tree.prompt.folderName": "New folder name:",
   "tree.alert.noSlashes": "Folder names can't contain slashes.",
   "tree.alert.renameNoSlashes": "Use the rename field for the basename only — no slashes.",
@@ -703,6 +871,7 @@ const he: Strings = {
   "desc.openWelcome": "פתח את מסמך הסיור המובנה עם כל הפיצ'רים",
   "canvas.switch": "החלפת קנבס",
   "docTabs.close": "סגור טאב",
+  "docTabs.label": "מסמכים פתוחים",
   "findReplace.searchInput": "שאילתת חיפוש",
   "findReplace.replaceInput": "טקסט החלפה",
   "findReplace.replacePlaceholder": "החלף ב…",
@@ -831,6 +1000,131 @@ const he: Strings = {
   "tree.expand": "הרחבה",
   "tree.opfsUnavailable": "OPFS אינו זמין בדפדפן זה. השתמש בפעולות פתיחה/שמירה רגילות.",
   "tree.emptyHint": "אין עדיין קבצים. לחץ + ליצירה.",
+  "tree.tagFilter": "# {tag} · {count} פתקים",
+  "tree.tagFilter.clear": "ניקוי סינון תגית",
+  "tree.tagFilter.empty": "אין פתקים מתאימים לתגית.",
+  "status.privacyMode": "פרטי",
+  "status.privacyMode.tooltip": "מצב פרטי — ה-AI רץ במלואו במכשיר הזה דרך WebGPU. שום הודעה לא יוצאת מהדפדפן.",
+  "status.roadmap": "מפת דרכים",
+  "status.roadmap.tooltip": "צפה במפת הדרכים הציבורית של Lumen",
+  "status.grammar.on": "דקדוק",
+  "status.grammar.off": "דקדוק",
+  "status.grammar.tooltip.on": "בדיקת דקדוק פעילה. לחץ לכיבוי.",
+  "status.grammar.tooltip.off": "בדיקת דקדוק כבויה. לחץ להפעלת LanguageTool.",
+  "status.telemetry.on": "טלמטריה",
+  "status.telemetry.off": "טלמטריה",
+  "status.telemetry.tooltip.on": "טלמטריית שגיאות פעילה. דוחות קריסה נשלחים לשיפור Lumen. לחץ לביטול.",
+  "status.telemetry.tooltip.off": "טלמטריית שגיאות כבויה. לחץ להפעלת דוחות קריסה אנונימיים.",
+  "templates.title": "גלריית תבניות",
+  "templates.close": "סגור גלריה",
+  "templates.searchPlaceholder": "חפש תבניות לפי שם, תיאור או תגית…",
+  "templates.allCategories": "הכל",
+  "templates.sort": "מיון",
+  "templates.sort.rating": "דירוג",
+  "templates.sort.downloads": "הכי מותקנים",
+  "templates.loading": "טוען תבניות…",
+  "templates.empty": "אין תבניות שתואמות לסינון.",
+  "templates.error": "שגיאה בטעינת מאגר: {error}",
+  "templates.byAuthor": "מאת {author}",
+  "templates.rating": "{rating} כוכבים",
+  "templates.downloads": "{count} התקנות",
+  "templates.install": "התקן",
+  "templates.installing": "מתקין…",
+  "templates.installed.button": "הותקן",
+  "templates.installed": "✅ הותקן {name} → {path}",
+  "templates.installFailed": "ההתקנה נכשלה: {error}",
+  "templates.contribute": "תרום תבנית:",
+  "templates.contributeLink": "lumen-templates-contrib →",
+  "cmd.templates.open": "פתח גלריית תבניות",
+  "cmd.templates.open.hint": "עיון והתקנה של תבניות קהילתיות",
+  // ── Audit log admin (ε.2) ──────────────────────────────────────────────
+  "audit.title": "יומן ביקורת",
+  "audit.rows": "שורות",
+  "audit.refresh": "רענן",
+  "audit.export": "ייצוא CSV",
+  "audit.close": "סגור",
+  "audit.filter.action": "סנן לפי פעולה…",
+  "audit.filter.user": "סנן לפי מזהה משתמש…",
+  "audit.empty": "אין אירועים שתואמים לסינון הנוכחי.",
+  "audit.col.ts": "זמן",
+  "audit.col.user": "משתמש",
+  "audit.col.action": "פעולה",
+  "audit.col.payload": "נתונים",
+  "audit.fetchFailed": "טעינת יומן הביקורת נכשלה: {error}",
+  "audit.exportDone": "✅ {count} שורות יוצאו ל-CSV",
+  "cmd.audit.open": "יומן ביקורת…",
+  "cmd.audit.open.hint": "בדוק כל פעולה שנרשמה; ייצא CSV לדרישות תאימות",
+  "cmd.fineTune.open": "הגדרות אימון AI…",
+  "cmd.fineTune.open.hint": "אמן מודל פרטי על סגנון הכתיבה שלך (Pro)",
+  "fineTune.title": "אמן AI על הסגנון שלי",
+  "fineTune.intro": "אימון מודל פרטי של GPT-4o-mini על 90 הימים האחרונים של הכתיבה שלך. המודל לומד את הטון ואוצר המילים שלך כך שההשלמות מרגישות כאילו אתה כתבת אותן.",
+  "fineTune.status": "סטטוס",
+  "fineTune.modelReady": "מודל אישי מוכן",
+  "fineTune.training": "מתאמן… ({status})",
+  "fineTune.statsLine": "{chunks} מקטעים · ≈ {tokens} טוקנים",
+  "fineTune.notTrained": "אין עדיין מודל אישי. לחץ על \"אמן\" כדי להעלות את הכתיבה שלך מ-90 הימים האחרונים.",
+  "fineTune.useToggle": "נתב בקשות AI דרך הסגנון שלי",
+  "fineTune.useToggleHint": "כבוי כברירת מחדל. הפעל כדי להשתמש במודל המאומן בכל בקשת AI.",
+  "fineTune.train": "אמן",
+  "fineTune.retrain": "אמן מחדש",
+  "fineTune.forget": "שכח מזהה מודל מקומי",
+  "fineTune.close": "סגור",
+  "fineTune.confirm": "להעלות את 90 הימים האחרונים של הכתיבה שלך ל-OpenAI כדי לאמן מודל פרטי? אימון לרוב מסתיים בתוך שעה.",
+  "fineTune.forgetConfirm": "לשכוח את מזהה המודל המאומן השמור מקומית? תצטרך למחוק את המודל מלוח המחוונים של OpenAI בנפרד להסרה מלאה.",
+  "fineTune.needKey": "הגדר את מפתח ה-AI שלך תחילה (⌘K → הגדרות AI).",
+  "fineTune.toast.queued": "אימון התחיל — {chunks} מקטעים (~{tokens} טוקנים) הועלו.",
+  "fineTune.toast.succeeded": "✅ המודל המאומן מוכן: {model}",
+  "fineTune.toast.failed": "האימון {status}. ראה לוח מחוונים של OpenAI.",
+  "fineTune.toast.error": "האימון נכשל: {error}",
+  "fineTune.toast.forgot": "מזהה המודל המאומן הוסר מקומית.",
+  "fineTune.privacy": "הערה: האימון מעלה ~5MB מהכתיבה שלך ל-OpenAI. המודל המתקבל נגיש רק מהחשבון שלך. לחץ \"שכח\" להסיר את המזהה ממכשיר זה — להסרה מלאה, מחק את המודל גם בלוח המחוונים של OpenAI.",
+  // ── Missing key cleanup (α.6.9) ────────────────────────────────────────
+  "ai.prompt.key": "הזן מפתח OpenAI API (sk-…):",
+  "ai.alert.keySaved": "מפתח ה-AI נשמר.",
+  "canvas.close": "סגור",
+  "canvas.dialogLabel": "לוח לבן",
+  "canvas.new": "חדש",
+  "canvas.new.prompt": "שם הקנבס:",
+  "canvas.picker": "בחר קנבס",
+  "canvas.title": "קנבס",
+  "cmd.ai.settings": "הגדרות AI…",
+  "cmd.ai.settings.hint": "הגדרת מפתח OpenAI ואפשרויות פר-מסמך",
+  "cmd.cmdPalette": "פלטת פקודות",
+  "cmd.focusMode": "מצב פוקוס",
+  "cmd.new": "מסמך חדש",
+  "cmd.open": "פתח קובץ…",
+  "cmd.preview": "תצוגה מקדימה בלבד",
+  "cmd.save": "שמירה",
+  "cmd.saveAs": "שמירה בשם…",
+  "cmd.search": "חיפוש במרחב העבודה…",
+  "cmd.shortcuts": "קיצורי מקלדת",
+  "cmd.source": "קוד בלבד",
+  "cmd.split": "עורך + תצוגה מקדימה",
+  "git.alert.noRepo": "מרחב העבודה הזה אינו ריפו של Git. הרץ `git clone` או השתמש ב-`Init repository`.",
+  "git.prompt.cloneUrl": "כתובת ריפו (https://… או git@…):",
+  "git.prompt.commitMessage": "הודעת commit:",
+  "group.edit": "עריכה",
+  "canvas.autoSaved": "קנבס · נשמר אוטומטית",
+  "canvas.legacy.found": "נמצאו {count} קנבסים ישנים",
+  "canvas.legacy.convert": "המר {name} ל-tldraw",
+  "canvas.legacy.converting": "ממיר {name}…",
+  "canvas.legacy.converted": "✅ הומר {name} ({count} צורות)",
+  "canvas.legacy.convertFailed": "ההמרה נכשלה: {error}",
+  "versionHistory.title": "היסטוריית גרסאות",
+  "versionHistory.savedCount": "{count} גרסאות שמורות",
+  "mdTable.title": "עורך טבלאות",
+  "searchDialog.sources": "מקורות",
+  "searchDialog.askPlaceholder": "הקלד שאלה ולחץ Enter כדי לשאול את ה-AI על המסמכים שלך.",
+  "voice.recording": "מקליט... ({lang})",
+  "voice.memo.recording": "מקליט הקלטה…",
+  "voice.memo.stop": "⏹ עצור והוסף",
+  "errorBoundary.heading": "שגיאת רינדור",
+  "cmd.view.grammarCheck.on": "הפעל בדיקת דקדוק (LanguageTool)",
+  "cmd.view.grammarCheck.off": "כבה בדיקת דקדוק",
+  "cmd.view.grammarCheck.hint": "מסמן בעיות דקדוק / סגנון / שגיאות הקלדה. הגדר VITE_LANGUAGETOOL_URL לאחסון עצמאי.",
+  "cmd.ai.privacy.on": "מצב פרטיות: הרץ AI במכשיר הזה (WebGPU)",
+  "cmd.ai.privacy.off": "מצב פרטיות: כבה (השתמש ב-AI בענן)",
+  "cmd.ai.privacy.hint": "כאשר מופעל, כל בקשת AI רצה מקומית דרך @mlc-ai/web-llm. שום נתון לא עוזב את הדפדפן.",
   "tree.prompt.folderName": "שם תיקייה חדשה:",
   "tree.alert.noSlashes": "שמות תיקיות לא יכולים להכיל סלאשים.",
   "tree.alert.renameNoSlashes": "השתמש בשדה השינוי לבסיס הקובץ בלבד — בלי סלאשים.",
@@ -924,7 +1218,12 @@ const he: Strings = {
 };
 
 
-const BUNDLES: Record<Locale, Strings> = { en, he };
+/**
+ * Locale → bundle map. en + he are bundled synchronously (always
+ * present in the main JS chunk). The other 6 supported locales are
+ * lazy-imported by `loadLocale()` on first use and cached here.
+ */
+const BUNDLES: Partial<Record<Locale, Strings>> = { en, he };
 
 let activeLocale: Locale = "en";
 
@@ -932,13 +1231,56 @@ export function getLocale(): Locale {
   return activeLocale;
 }
 
-/** Apply the locale globally and update the document direction. */
-export function applyLocale(locale: Locale) {
+/**
+ * Lazy-load a locale's translations. Returns the loaded bundle or
+ * falls back to `en` when the locale isn't available (e.g. a JSON
+ * file hasn't been authored yet). Subsequent calls hit the cache.
+ */
+export async function loadLocale(locale: Locale): Promise<Strings> {
+  const cached = BUNDLES[locale];
+  if (cached) return cached;
+  try {
+    // Vite resolves the dynamic import at build time using a glob; any
+    // unauthored locale will fail to import and we fall back to `en`.
+    // Vite returns `{ default: T }` for JSON imports; some bundlers
+    // return the JSON object directly. Detect via the presence of a
+    // recognised i18n key (we know `toolbar.tagline` always exists).
+    const mod = (await import(`./locales/${locale}.json`)) as unknown;
+    let bundle: Strings;
+    if (
+      mod &&
+      typeof mod === "object" &&
+      "default" in mod &&
+      typeof (mod as { default: unknown }).default === "object"
+    ) {
+      bundle = (mod as { default: Strings }).default;
+    } else {
+      bundle = mod as Strings;
+    }
+    BUNDLES[locale] = bundle;
+    return bundle;
+  } catch {
+    return en;
+  }
+}
+
+/**
+ * Apply the locale globally and update the document direction. For
+ * non-bundled locales, the bundle is fetched in the background and
+ * the page re-renders once it lands.
+ */
+export function applyLocale(locale: Locale): void {
   activeLocale = locale;
   if (typeof document !== "undefined") {
     const meta = SUPPORTED_LOCALES.find((l) => l.code === locale);
     document.documentElement.lang = locale;
     document.documentElement.dir = meta?.dir ?? "ltr";
+  }
+  // Kick off an async fetch for non-synchronous locales so subsequent
+  // `t()` calls find the bundle. We don't await — `t()` falls back to
+  // `en` while the bundle is in flight, then upgrades on next render.
+  if (!SYNCHRONOUS_LOCALES.has(locale) && !(locale in BUNDLES)) {
+    void loadLocale(locale);
   }
 }
 

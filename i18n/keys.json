@@ -1,0 +1,2708 @@
+{
+  "version": 1,
+  "generated_at": "2026-04-28T16:44:32.547Z",
+  "source": "src/i18n/index.ts (en bundle)",
+  "count": 519,
+  "entries": [
+    {
+      "key": "toolbar.tagline",
+      "en": "Markdown, illuminated",
+      "vars": []
+    },
+    {
+      "key": "toolbar.new",
+      "en": "New",
+      "vars": []
+    },
+    {
+      "key": "toolbar.open",
+      "en": "Open file",
+      "vars": []
+    },
+    {
+      "key": "toolbar.save",
+      "en": "Save",
+      "vars": []
+    },
+    {
+      "key": "toolbar.paste",
+      "en": "Paste",
+      "vars": []
+    },
+    {
+      "key": "toolbar.commandPalette",
+      "en": "Command palette",
+      "vars": []
+    },
+    {
+      "key": "toolbar.workspace",
+      "en": "Toggle workspace",
+      "vars": []
+    },
+    {
+      "key": "toolbar.outline",
+      "en": "Outline",
+      "vars": []
+    },
+    {
+      "key": "toolbar.outline.show",
+      "en": "Show outline",
+      "vars": []
+    },
+    {
+      "key": "toolbar.outline.hide",
+      "en": "Hide outline",
+      "vars": []
+    },
+    {
+      "key": "toolbar.theme",
+      "en": "Toggle theme",
+      "vars": []
+    },
+    {
+      "key": "toolbar.menu",
+      "en": "Menu",
+      "vars": []
+    },
+    {
+      "key": "toolbar.fileMenu",
+      "en": "File",
+      "vars": []
+    },
+    {
+      "key": "toolbar.editMenu",
+      "en": "Edit",
+      "vars": []
+    },
+    {
+      "key": "toolbar.copy",
+      "en": "Copy",
+      "vars": []
+    },
+    {
+      "key": "toolbar.cut",
+      "en": "Cut",
+      "vars": []
+    },
+    {
+      "key": "toolbar.delete",
+      "en": "Delete",
+      "vars": []
+    },
+    {
+      "key": "toolbar.selectAll",
+      "en": "Select all",
+      "vars": []
+    },
+    {
+      "key": "toolbar.undo",
+      "en": "Undo",
+      "vars": []
+    },
+    {
+      "key": "toolbar.redo",
+      "en": "Redo",
+      "vars": []
+    },
+    {
+      "key": "toolbar.saveAs",
+      "en": "Save as…",
+      "vars": []
+    },
+    {
+      "key": "toolbar.insertMenu",
+      "en": "Insert",
+      "vars": []
+    },
+    {
+      "key": "toolbar.shareMenu",
+      "en": "Share",
+      "vars": []
+    },
+    {
+      "key": "toolbar.exportHtml",
+      "en": "Export to HTML…",
+      "vars": []
+    },
+    {
+      "key": "toolbar.exportPdf",
+      "en": "Export to PDF",
+      "vars": []
+    },
+    {
+      "key": "toolbar.print",
+      "en": "Print",
+      "vars": []
+    },
+    {
+      "key": "toolbar.focusMode",
+      "en": "Focus mode",
+      "vars": []
+    },
+    {
+      "key": "toolbar.shortcuts",
+      "en": "Keyboard shortcuts",
+      "vars": []
+    },
+    {
+      "key": "toolbar.tour",
+      "en": "Guided tour",
+      "vars": []
+    },
+    {
+      "key": "toolbar.ltr",
+      "en": "LTR ←",
+      "vars": []
+    },
+    {
+      "key": "toolbar.rtl",
+      "en": "RTL →",
+      "vars": []
+    },
+    {
+      "key": "toolbar.scrollLinked",
+      "en": "Scroll: Linked",
+      "vars": []
+    },
+    {
+      "key": "toolbar.scrollIndependent",
+      "en": "Scroll: Independent",
+      "vars": []
+    },
+    {
+      "key": "toolbar.pageView.on",
+      "en": "📄 Page View: ON",
+      "vars": []
+    },
+    {
+      "key": "toolbar.pageView.off",
+      "en": "📄 Page View: OFF",
+      "vars": []
+    },
+    {
+      "key": "doc.alert.saveFailed",
+      "en": "Save failed: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "mode.source",
+      "en": "Source",
+      "vars": []
+    },
+    {
+      "key": "mode.split",
+      "en": "Split",
+      "vars": []
+    },
+    {
+      "key": "mode.preview",
+      "en": "Preview",
+      "vars": []
+    },
+    {
+      "key": "mode.wysiwyg",
+      "en": "WYSIWYG",
+      "vars": []
+    },
+    {
+      "key": "status.words",
+      "en": "{n} words",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "status.chars",
+      "en": "{n} chars",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "status.reading",
+      "en": "~{n} min read",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "status.live",
+      "en": "● live",
+      "vars": []
+    },
+    {
+      "key": "status.leave",
+      "en": "leave",
+      "vars": []
+    },
+    {
+      "key": "outline.title",
+      "en": "Outline",
+      "vars": []
+    },
+    {
+      "key": "outline.empty",
+      "en": "No headings yet. Start typing # to add one.",
+      "vars": []
+    },
+    {
+      "key": "tree.title",
+      "en": "Workspace",
+      "vars": []
+    },
+    {
+      "key": "tree.newFile",
+      "en": "New file",
+      "vars": []
+    },
+    {
+      "key": "tree.newFolder",
+      "en": "New folder",
+      "vars": []
+    },
+    {
+      "key": "tree.refresh",
+      "en": "Refresh",
+      "vars": []
+    },
+    {
+      "key": "tree.empty",
+      "en": "No files yet.",
+      "vars": []
+    },
+    {
+      "key": "backlinks.title",
+      "en": "Backlinks",
+      "vars": []
+    },
+    {
+      "key": "backlinks.empty",
+      "en": "No other file links here yet.",
+      "vars": []
+    },
+    {
+      "key": "backlinks.scanning",
+      "en": "Scanning workspace…",
+      "vars": []
+    },
+    {
+      "key": "backlinks.selectFile",
+      "en": "Select a workspace file to see backlinks.",
+      "vars": []
+    },
+    {
+      "key": "search.placeholder",
+      "en": "Search workspace files & content…",
+      "vars": []
+    },
+    {
+      "key": "search.unavailable",
+      "en": "Workspace storage isn't available in this browser.",
+      "vars": []
+    },
+    {
+      "key": "search.empty",
+      "en": "Workspace is empty.",
+      "vars": []
+    },
+    {
+      "key": "search.noMatches",
+      "en": "No matches.",
+      "vars": []
+    },
+    {
+      "key": "dialog.ok",
+      "en": "OK",
+      "vars": []
+    },
+    {
+      "key": "dialog.cancel",
+      "en": "Cancel",
+      "vars": []
+    },
+    {
+      "key": "bibtex.noEntries",
+      "en": "No BibTeX entries detected.",
+      "vars": []
+    },
+    {
+      "key": "bibtex.references",
+      "en": "References ({n})",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "bibtex.link",
+      "en": "link",
+      "vars": []
+    },
+    {
+      "key": "update.available",
+      "en": "A new version of Lumen is available.",
+      "vars": []
+    },
+    {
+      "key": "update.reload",
+      "en": "Reload",
+      "vars": []
+    },
+    {
+      "key": "update.dismiss",
+      "en": "Dismiss",
+      "vars": []
+    },
+    {
+      "key": "palette.placeholder",
+      "en": "Type a command, or search…",
+      "vars": []
+    },
+    {
+      "key": "palette.noMatch",
+      "en": "No matching commands",
+      "vars": []
+    },
+    {
+      "key": "palette.navigate",
+      "en": "navigate",
+      "vars": []
+    },
+    {
+      "key": "palette.select",
+      "en": "select",
+      "vars": []
+    },
+    {
+      "key": "palette.close",
+      "en": "close",
+      "vars": []
+    },
+    {
+      "key": "group.recent",
+      "en": "Recent",
+      "vars": []
+    },
+    {
+      "key": "group.file",
+      "en": "File",
+      "vars": []
+    },
+    {
+      "key": "group.view",
+      "en": "View",
+      "vars": []
+    },
+    {
+      "key": "group.insert",
+      "en": "Insert",
+      "vars": []
+    },
+    {
+      "key": "group.git",
+      "en": "Git",
+      "vars": []
+    },
+    {
+      "key": "group.collab",
+      "en": "Collab",
+      "vars": []
+    },
+    {
+      "key": "cmd.file.new",
+      "en": "New document",
+      "vars": []
+    },
+    {
+      "key": "cmd.file.open",
+      "en": "Open file…",
+      "vars": []
+    },
+    {
+      "key": "cmd.file.save",
+      "en": "Save",
+      "vars": []
+    },
+    {
+      "key": "cmd.file.saveAs",
+      "en": "Save as…",
+      "vars": []
+    },
+    {
+      "key": "cmd.file.exportHtml",
+      "en": "Export to HTML…",
+      "vars": []
+    },
+    {
+      "key": "cmd.file.exportHtml.hint",
+      "en": "self-contained .html",
+      "vars": []
+    },
+    {
+      "key": "cmd.file.exportDocx",
+      "en": "Export to Word (.doc)",
+      "vars": []
+    },
+    {
+      "key": "cmd.file.exportDocx.hint",
+      "en": "Download as Word document",
+      "vars": []
+    },
+    {
+      "key": "cmd.file.exportRtf",
+      "en": "Export to RTF",
+      "vars": []
+    },
+    {
+      "key": "cmd.file.exportRtf.hint",
+      "en": "Rich Text Format — opens in Pages, Word, TextEdit",
+      "vars": []
+    },
+    {
+      "key": "cmd.file.exportLatex",
+      "en": "Export to LaTeX (.tex)",
+      "vars": []
+    },
+    {
+      "key": "cmd.file.exportLatex.hint",
+      "en": "Article-class LaTeX with hyperref + listings",
+      "vars": []
+    },
+    {
+      "key": "cmd.file.exportRst",
+      "en": "Export to reStructuredText",
+      "vars": []
+    },
+    {
+      "key": "cmd.file.exportRst.hint",
+      "en": "Sphinx / Read-the-Docs friendly",
+      "vars": []
+    },
+    {
+      "key": "cmd.file.exportAdoc",
+      "en": "Export to AsciiDoc",
+      "vars": []
+    },
+    {
+      "key": "cmd.file.exportAdoc.hint",
+      "en": "Asciidoctor-compatible source",
+      "vars": []
+    },
+    {
+      "key": "cmd.file.exportOrg",
+      "en": "Export to Org-mode",
+      "vars": []
+    },
+    {
+      "key": "cmd.file.exportOrg.hint",
+      "en": "Emacs Org-mode source",
+      "vars": []
+    },
+    {
+      "key": "cmd.file.exportOpml",
+      "en": "Export to OPML",
+      "vars": []
+    },
+    {
+      "key": "cmd.file.exportOpml.hint",
+      "en": "Outline interchange format (RSS readers, mind-maps)",
+      "vars": []
+    },
+    {
+      "key": "template.blank",
+      "en": "Blank document",
+      "vars": []
+    },
+    {
+      "key": "template.blank.desc",
+      "en": "Start with a clean slate",
+      "vars": []
+    },
+    {
+      "key": "template.meeting",
+      "en": "Meeting notes",
+      "vars": []
+    },
+    {
+      "key": "template.meeting.desc",
+      "en": "Date, attendees, agenda, action items",
+      "vars": []
+    },
+    {
+      "key": "template.journal",
+      "en": "Daily journal",
+      "vars": []
+    },
+    {
+      "key": "template.journal.desc",
+      "en": "Gratitude, goals, reflections",
+      "vars": []
+    },
+    {
+      "key": "template.blog",
+      "en": "Blog post",
+      "vars": []
+    },
+    {
+      "key": "template.blog.desc",
+      "en": "Title, intro, sections, conclusion",
+      "vars": []
+    },
+    {
+      "key": "template.readme",
+      "en": "Project README",
+      "vars": []
+    },
+    {
+      "key": "template.readme.desc",
+      "en": "Standard open-source README structure",
+      "vars": []
+    },
+    {
+      "key": "template.letter",
+      "en": "Formal letter",
+      "vars": []
+    },
+    {
+      "key": "template.letter.desc",
+      "en": "Professional letter format",
+      "vars": []
+    },
+    {
+      "key": "cmd.file.print",
+      "en": "Print / Save as PDF…",
+      "vars": []
+    },
+    {
+      "key": "cmd.file.print.hint",
+      "en": "browser print dialog",
+      "vars": []
+    },
+    {
+      "key": "cmd.file.exportPdf",
+      "en": "Export to PDF / Print",
+      "vars": []
+    },
+    {
+      "key": "cmd.file.exportPdf.hint",
+      "en": "colorful, exactly as shown",
+      "vars": []
+    },
+    {
+      "key": "cmd.file.saveToWorkspace",
+      "en": "Save to workspace",
+      "vars": []
+    },
+    {
+      "key": "cmd.file.saveToWorkspace.hint",
+      "en": "store this doc in OPFS",
+      "vars": []
+    },
+    {
+      "key": "cmd.file.openRecent",
+      "en": "Open: {name}",
+      "vars": [
+        "name"
+      ]
+    },
+    {
+      "key": "cmd.file.removeRecent",
+      "en": "Remove from recents: {name}",
+      "vars": [
+        "name"
+      ]
+    },
+    {
+      "key": "cmd.view.source",
+      "en": "Source view",
+      "vars": []
+    },
+    {
+      "key": "cmd.view.split",
+      "en": "Split view",
+      "vars": []
+    },
+    {
+      "key": "cmd.view.preview",
+      "en": "Preview only",
+      "vars": []
+    },
+    {
+      "key": "cmd.view.wysiwyg",
+      "en": "WYSIWYG",
+      "vars": []
+    },
+    {
+      "key": "cmd.view.wysiwyg.hint",
+      "en": "rich-text editing",
+      "vars": []
+    },
+    {
+      "key": "cmd.view.outline",
+      "en": "Toggle outline",
+      "vars": []
+    },
+    {
+      "key": "cmd.view.workspace",
+      "en": "Toggle workspace",
+      "vars": []
+    },
+    {
+      "key": "cmd.view.workspace.hint",
+      "en": "in-browser file storage (OPFS)",
+      "vars": []
+    },
+    {
+      "key": "cmd.view.backlinks",
+      "en": "Toggle backlinks",
+      "vars": []
+    },
+    {
+      "key": "cmd.view.backlinks.hint",
+      "en": "files linking here via [[wiki]]",
+      "vars": []
+    },
+    {
+      "key": "cmd.view.search",
+      "en": "Search workspace…",
+      "vars": []
+    },
+    {
+      "key": "cmd.view.smartSearch",
+      "en": "Smart search (semantic + keyword)",
+      "vars": []
+    },
+    {
+      "key": "cmd.view.smartSearch.hint",
+      "en": "Hybrid retrieval over your notes",
+      "vars": []
+    },
+    {
+      "key": "cmd.view.vim.on",
+      "en": "Enable Vim mode",
+      "vars": []
+    },
+    {
+      "key": "cmd.view.vim.off",
+      "en": "Disable Vim mode",
+      "vars": []
+    },
+    {
+      "key": "cmd.view.spellCheck.on",
+      "en": "Enable spell-check",
+      "vars": []
+    },
+    {
+      "key": "cmd.view.spellCheck.off",
+      "en": "Disable spell-check",
+      "vars": []
+    },
+    {
+      "key": "cmd.view.spellCheck.hint",
+      "en": "Browser-native red squiggle underlines",
+      "vars": []
+    },
+    {
+      "key": "cmd.view.typewriter.on",
+      "en": "Enable typewriter mode",
+      "vars": []
+    },
+    {
+      "key": "cmd.view.typewriter.off",
+      "en": "Disable typewriter mode",
+      "vars": []
+    },
+    {
+      "key": "cmd.view.typewriter.hint",
+      "en": "Keep the active line vertically centred",
+      "vars": []
+    },
+    {
+      "key": "cmd.tools.writingGoal.set",
+      "en": "✍️ Writing goal: {{words}} words/day",
+      "vars": [
+        "words"
+      ]
+    },
+    {
+      "key": "cmd.tools.writingGoal.unset",
+      "en": "✍️ Set a daily writing goal",
+      "vars": []
+    },
+    {
+      "key": "cmd.tools.writingGoal.hint",
+      "en": "A subtle progress banner above the editor",
+      "vars": []
+    },
+    {
+      "key": "writingGoal.progress",
+      "en": "{{words}} / {{goal}} words · {{pct}}%",
+      "vars": [
+        "words",
+        "goal",
+        "pct"
+      ]
+    },
+    {
+      "key": "writingGoal.done",
+      "en": "🎉 Daily goal reached — {{words}} / {{goal}}",
+      "vars": [
+        "words",
+        "goal"
+      ]
+    },
+    {
+      "key": "cmd.tools.grammar",
+      "en": "Check grammar (LanguageTool)",
+      "vars": []
+    },
+    {
+      "key": "cmd.tools.grammar.hint",
+      "en": "Free public LanguageTool service",
+      "vars": []
+    },
+    {
+      "key": "cmd.tools.autoTag",
+      "en": "🏷️ Auto-tag this note",
+      "vars": []
+    },
+    {
+      "key": "cmd.tools.autoTag.hint",
+      "en": "AI proposes tags from your existing vocabulary",
+      "vars": []
+    },
+    {
+      "key": "cmd.tools.suggestLinks",
+      "en": "🔗 Suggest wiki-links",
+      "vars": []
+    },
+    {
+      "key": "cmd.tools.suggestLinks.hint",
+      "en": "AI scans your workspace for relevant cross-links",
+      "vars": []
+    },
+    {
+      "key": "cmd.ai.local.on",
+      "en": "Switch to local AI (WebGPU)",
+      "vars": []
+    },
+    {
+      "key": "cmd.ai.local.off",
+      "en": "Switch to cloud AI (OpenAI)",
+      "vars": []
+    },
+    {
+      "key": "cmd.ai.local.hint",
+      "en": "Run prompts on-device — private, offline",
+      "vars": []
+    },
+    {
+      "key": "cmd.view.rtl.on",
+      "en": "Text Direction: RTL (Right to Left)",
+      "vars": []
+    },
+    {
+      "key": "cmd.view.rtl.off",
+      "en": "Text Direction: LTR (Left to Right)",
+      "vars": []
+    },
+    {
+      "key": "cmd.view.theme.toLight",
+      "en": "Switch to light theme",
+      "vars": []
+    },
+    {
+      "key": "cmd.view.theme.toDark",
+      "en": "Switch to dark theme",
+      "vars": []
+    },
+    {
+      "key": "cmd.view.language",
+      "en": "Language: {label}",
+      "vars": [
+        "label"
+      ]
+    },
+    {
+      "key": "cmd.view.language.ltr",
+      "en": "left-to-right",
+      "vars": []
+    },
+    {
+      "key": "cmd.view.language.rtl",
+      "en": "right-to-left",
+      "vars": []
+    },
+    {
+      "key": "toolbar.settings",
+      "en": "Settings",
+      "vars": []
+    },
+    {
+      "key": "toolbar.files",
+      "en": "Files",
+      "vars": []
+    },
+    {
+      "key": "toolbar.viewMode",
+      "en": "View Mode",
+      "vars": []
+    },
+    {
+      "key": "toolbar.appearance",
+      "en": "Appearance",
+      "vars": []
+    },
+    {
+      "key": "toolbar.panels",
+      "en": "Panels",
+      "vars": []
+    },
+    {
+      "key": "toolbar.lightMode",
+      "en": "Light Mode",
+      "vars": []
+    },
+    {
+      "key": "toolbar.darkMode",
+      "en": "Dark Mode",
+      "vars": []
+    },
+    {
+      "key": "toolbar.helpMenu",
+      "en": "Help",
+      "vars": []
+    },
+    {
+      "key": "toolbar.menuTooltip.file",
+      "en": "Document operations: new, open, save, export",
+      "vars": []
+    },
+    {
+      "key": "toolbar.menuTooltip.edit",
+      "en": "Editing actions: undo, redo, copy, paste",
+      "vars": []
+    },
+    {
+      "key": "toolbar.menuTooltip.insert",
+      "en": "Insert charts, diagrams, media, math, references",
+      "vars": []
+    },
+    {
+      "key": "toolbar.menuTooltip.view",
+      "en": "View modes, appearance, panels",
+      "vars": []
+    },
+    {
+      "key": "toolbar.menuTooltip.help",
+      "en": "Focus mode, shortcuts, tour, command palette",
+      "vars": []
+    },
+    {
+      "key": "toolbar.section.documents",
+      "en": "Documents",
+      "vars": []
+    },
+    {
+      "key": "toolbar.section.export",
+      "en": "Export",
+      "vars": []
+    },
+    {
+      "key": "toolbar.section.workspace",
+      "en": "Workspace",
+      "vars": []
+    },
+    {
+      "key": "toolbar.section.history",
+      "en": "History",
+      "vars": []
+    },
+    {
+      "key": "toolbar.section.clipboard",
+      "en": "Clipboard",
+      "vars": []
+    },
+    {
+      "key": "toolbar.section.selection",
+      "en": "Selection",
+      "vars": []
+    },
+    {
+      "key": "toolbar.section.tablesCharts",
+      "en": "Tables & Charts",
+      "vars": []
+    },
+    {
+      "key": "toolbar.section.diagrams",
+      "en": "Diagrams",
+      "vars": []
+    },
+    {
+      "key": "toolbar.section.media",
+      "en": "Media",
+      "vars": []
+    },
+    {
+      "key": "toolbar.section.mathRefs",
+      "en": "Math & References",
+      "vars": []
+    },
+    {
+      "key": "toolbar.section.tools",
+      "en": "Tools",
+      "vars": []
+    },
+    {
+      "key": "toolbar.section.specific",
+      "en": "Or pick a specific block",
+      "vars": []
+    },
+    {
+      "key": "desc.new",
+      "en": "Start a blank markdown document",
+      "vars": []
+    },
+    {
+      "key": "desc.open",
+      "en": "Open a markdown file from disk",
+      "vars": []
+    },
+    {
+      "key": "desc.save",
+      "en": "Save the current document",
+      "vars": []
+    },
+    {
+      "key": "desc.saveAs",
+      "en": "Save under a new file name",
+      "vars": []
+    },
+    {
+      "key": "desc.workspace",
+      "en": "Toggle the file tree sidebar",
+      "vars": []
+    },
+    {
+      "key": "desc.exportHtml",
+      "en": "Bundle preview as a standalone .html file",
+      "vars": []
+    },
+    {
+      "key": "desc.exportPdf",
+      "en": "Render document to a PDF file",
+      "vars": []
+    },
+    {
+      "key": "desc.print",
+      "en": "Open browser print dialog",
+      "vars": []
+    },
+    {
+      "key": "desc.undo",
+      "en": "Revert the last action",
+      "vars": []
+    },
+    {
+      "key": "desc.redo",
+      "en": "Re-apply a reverted action",
+      "vars": []
+    },
+    {
+      "key": "desc.cut",
+      "en": "Cut selection to clipboard",
+      "vars": []
+    },
+    {
+      "key": "desc.copy",
+      "en": "Copy selection to clipboard",
+      "vars": []
+    },
+    {
+      "key": "desc.paste",
+      "en": "Paste from clipboard (auto-converts HTML to markdown)",
+      "vars": []
+    },
+    {
+      "key": "desc.selectAll",
+      "en": "Select all text in the editor",
+      "vars": []
+    },
+    {
+      "key": "desc.delete",
+      "en": "Delete the current selection",
+      "vars": []
+    },
+    {
+      "key": "desc.viewSource",
+      "en": "Raw markdown editor",
+      "vars": []
+    },
+    {
+      "key": "desc.viewSplit",
+      "en": "Editor on the left, preview on the right",
+      "vars": []
+    },
+    {
+      "key": "desc.viewPreview",
+      "en": "Rendered output only",
+      "vars": []
+    },
+    {
+      "key": "desc.viewWysiwyg",
+      "en": "Rich-text editor with live formatting",
+      "vars": []
+    },
+    {
+      "key": "desc.lightMode",
+      "en": "Switch to light theme",
+      "vars": []
+    },
+    {
+      "key": "desc.darkMode",
+      "en": "Switch to dark theme",
+      "vars": []
+    },
+    {
+      "key": "desc.toggleRtl",
+      "en": "Flip layout direction (right-to-left ↔ left-to-right)",
+      "vars": []
+    },
+    {
+      "key": "desc.outline",
+      "en": "Show or hide the table-of-contents panel",
+      "vars": []
+    },
+    {
+      "key": "desc.syncScroll",
+      "en": "Keep editor and preview scroll positions linked",
+      "vars": []
+    },
+    {
+      "key": "desc.pageView",
+      "en": "Show document as a printed page",
+      "vars": []
+    },
+    {
+      "key": "desc.focusMode",
+      "en": "Hide all chrome and write distraction-free",
+      "vars": []
+    },
+    {
+      "key": "desc.shortcuts",
+      "en": "Browse all keyboard shortcuts",
+      "vars": []
+    },
+    {
+      "key": "desc.tour",
+      "en": "Replay the welcome tour",
+      "vars": []
+    },
+    {
+      "key": "desc.commandPalette",
+      "en": "Search and run any command",
+      "vars": []
+    },
+    {
+      "key": "toolbar.insertText",
+      "en": "Insert text…",
+      "vars": []
+    },
+    {
+      "key": "desc.insertText",
+      "en": "Paste markdown, HTML, or code and convert to preview",
+      "vars": []
+    },
+    {
+      "key": "toolbar.insertSmart",
+      "en": "Insert anything…",
+      "vars": []
+    },
+    {
+      "key": "desc.insertSmart",
+      "en": "Paste a URL, CSV, JSON, SQL, Mermaid… auto-detected",
+      "vars": []
+    },
+    {
+      "key": "toolbar.openWelcome",
+      "en": "Show Welcome.md",
+      "vars": []
+    },
+    {
+      "key": "desc.openWelcome",
+      "en": "Open the bundled tour with every feature demoed",
+      "vars": []
+    },
+    {
+      "key": "canvas.switch",
+      "en": "Switch canvas",
+      "vars": []
+    },
+    {
+      "key": "docTabs.close",
+      "en": "Close tab",
+      "vars": []
+    },
+    {
+      "key": "docTabs.label",
+      "en": "Open documents",
+      "vars": []
+    },
+    {
+      "key": "findReplace.searchInput",
+      "en": "Search query",
+      "vars": []
+    },
+    {
+      "key": "findReplace.replaceInput",
+      "en": "Replacement text",
+      "vars": []
+    },
+    {
+      "key": "findReplace.replacePlaceholder",
+      "en": "Replace with…",
+      "vars": []
+    },
+    {
+      "key": "findReplace.regex",
+      "en": "Regular expression",
+      "vars": []
+    },
+    {
+      "key": "findReplace.caseSensitive",
+      "en": "Case sensitive",
+      "vars": []
+    },
+    {
+      "key": "findReplace.prev",
+      "en": "Previous match",
+      "vars": []
+    },
+    {
+      "key": "findReplace.next",
+      "en": "Next match",
+      "vars": []
+    },
+    {
+      "key": "findReplace.close",
+      "en": "Close find & replace",
+      "vars": []
+    },
+    {
+      "key": "findReplace.toggleReplace",
+      "en": "Toggle replace row",
+      "vars": []
+    },
+    {
+      "key": "insertText.title",
+      "en": "Insert anything",
+      "vars": []
+    },
+    {
+      "key": "insertText.help",
+      "en": "Paste any markdown, HTML, or code. The detected type is shown below — switch manually if needed.",
+      "vars": []
+    },
+    {
+      "key": "insertText.smartHelp",
+      "en": "Paste a URL, CSV, JSON, SQL, Mermaid, GeoJSON, math, code — anything. Lumen detects the type and wraps it in the right block.",
+      "vars": []
+    },
+    {
+      "key": "insertText.placeholder",
+      "en": "Paste here. Try HTML like <h1>Hi</h1> or code like function() { … }",
+      "vars": []
+    },
+    {
+      "key": "insertText.smartPlaceholder",
+      "en": "Paste anything: a YouTube link, CSV rows, SQL query, Mermaid diagram, GeoJSON, code, math…",
+      "vars": []
+    },
+    {
+      "key": "insertText.detectedAs",
+      "en": "Detected as",
+      "vars": []
+    },
+    {
+      "key": "insertText.detect",
+      "en": "Detect as",
+      "vars": []
+    },
+    {
+      "key": "insertText.auto",
+      "en": "Auto",
+      "vars": []
+    },
+    {
+      "key": "insertText.kind.markdown",
+      "en": "Markdown",
+      "vars": []
+    },
+    {
+      "key": "insertText.kind.html",
+      "en": "HTML → markdown",
+      "vars": []
+    },
+    {
+      "key": "insertText.kind.code",
+      "en": "Code block",
+      "vars": []
+    },
+    {
+      "key": "insertText.codeLang",
+      "en": "Language",
+      "vars": []
+    },
+    {
+      "key": "insertText.mode",
+      "en": "Insert as",
+      "vars": []
+    },
+    {
+      "key": "insertText.mode.append",
+      "en": "Append to document",
+      "vars": []
+    },
+    {
+      "key": "insertText.mode.atCursor",
+      "en": "At cursor position",
+      "vars": []
+    },
+    {
+      "key": "insertText.mode.replace",
+      "en": "Replace document",
+      "vars": []
+    },
+    {
+      "key": "insertText.preview",
+      "en": "Markdown preview",
+      "vars": []
+    },
+    {
+      "key": "insertText.previewEmpty",
+      "en": "(nothing yet — start typing)",
+      "vars": []
+    },
+    {
+      "key": "insertText.cancel",
+      "en": "Cancel",
+      "vars": []
+    },
+    {
+      "key": "insertText.confirm",
+      "en": "Insert",
+      "vars": []
+    },
+    {
+      "key": "block.htmlPreview.title",
+      "en": "HTML preview",
+      "vars": []
+    },
+    {
+      "key": "block.htmlPreview.source",
+      "en": "Source",
+      "vars": []
+    },
+    {
+      "key": "block.htmlPreview.fullscreen",
+      "en": "Fullscreen",
+      "vars": []
+    },
+    {
+      "key": "block.htmlPreview.toggleSource",
+      "en": "Toggle source view",
+      "vars": []
+    },
+    {
+      "key": "block.htmlPreview.exitFullscreen",
+      "en": "Exit fullscreen",
+      "vars": []
+    },
+    {
+      "key": "block.htmlPreview.openFullscreen",
+      "en": "Fullscreen preview",
+      "vars": []
+    },
+    {
+      "key": "block.liveCss.title",
+      "en": "Live CSS",
+      "vars": []
+    },
+    {
+      "key": "block.liveJs.title",
+      "en": "Live JavaScript",
+      "vars": []
+    },
+    {
+      "key": "block.liveJs.run",
+      "en": "Run",
+      "vars": []
+    },
+    {
+      "key": "block.liveJs.clear",
+      "en": "Clear console",
+      "vars": []
+    },
+    {
+      "key": "block.liveJs.noOutput",
+      "en": "(no output yet)",
+      "vars": []
+    },
+    {
+      "key": "toast.insertText.success",
+      "en": "Text inserted and converted",
+      "vars": []
+    },
+    {
+      "key": "toast.pasteText.success",
+      "en": "Text pasted and converted",
+      "vars": []
+    },
+    {
+      "key": "toast.pasteText.prompt",
+      "en": "Paste HTML or rich text below:",
+      "vars": []
+    },
+    {
+      "key": "toolbar.splitAxis",
+      "en": "Scroll orientation",
+      "vars": []
+    },
+    {
+      "key": "toolbar.splitAxis.auto",
+      "en": "Auto (responsive)",
+      "vars": []
+    },
+    {
+      "key": "toolbar.splitAxis.horizontal",
+      "en": "Side by side ↔",
+      "vars": []
+    },
+    {
+      "key": "toolbar.splitAxis.vertical",
+      "en": "Stacked ↕",
+      "vars": []
+    },
+    {
+      "key": "desc.splitAxis.auto",
+      "en": "Follow viewport — vertical on phones, horizontal on desktops",
+      "vars": []
+    },
+    {
+      "key": "desc.splitAxis.horizontal",
+      "en": "Editor on the left, preview on the right",
+      "vars": []
+    },
+    {
+      "key": "desc.splitAxis.vertical",
+      "en": "Editor on top, preview below",
+      "vars": []
+    },
+    {
+      "key": "cmd.insert.chart",
+      "en": "Insert chart",
+      "vars": []
+    },
+    {
+      "key": "cmd.insert.chart.hint",
+      "en": "ECharts spec",
+      "vars": []
+    },
+    {
+      "key": "cmd.insert.csv",
+      "en": "Insert CSV data",
+      "vars": []
+    },
+    {
+      "key": "cmd.insert.csv.hint",
+      "en": "auto-table + chart",
+      "vars": []
+    },
+    {
+      "key": "cmd.insert.json",
+      "en": "Insert JSON table",
+      "vars": []
+    },
+    {
+      "key": "cmd.insert.mermaid",
+      "en": "Insert diagram (Mermaid)",
+      "vars": []
+    },
+    {
+      "key": "cmd.insert.map",
+      "en": "Insert map",
+      "vars": []
+    },
+    {
+      "key": "cmd.insert.math",
+      "en": "Insert math block",
+      "vars": []
+    },
+    {
+      "key": "cmd.insert.callout",
+      "en": "Insert callout",
+      "vars": []
+    },
+    {
+      "key": "cmd.insert.callout.hint",
+      "en": ":::note / :::tip / …",
+      "vars": []
+    },
+    {
+      "key": "cmd.insert.graphviz",
+      "en": "Insert Graphviz / DOT",
+      "vars": []
+    },
+    {
+      "key": "cmd.insert.plantuml",
+      "en": "Insert PlantUML",
+      "vars": []
+    },
+    {
+      "key": "cmd.insert.plantuml.hint",
+      "en": "rendered via kroki.io",
+      "vars": []
+    },
+    {
+      "key": "cmd.insert.abc",
+      "en": "Insert music notation (ABC)",
+      "vars": []
+    },
+    {
+      "key": "cmd.insert.model",
+      "en": "Insert 3D model",
+      "vars": []
+    },
+    {
+      "key": "cmd.insert.model.hint",
+      "en": ".glb / .gltf",
+      "vars": []
+    },
+    {
+      "key": "cmd.insert.embed",
+      "en": "Insert embed",
+      "vars": []
+    },
+    {
+      "key": "cmd.insert.embed.hint",
+      "en": "YouTube · Vimeo · Figma · CodePen…",
+      "vars": []
+    },
+    {
+      "key": "cmd.insert.htmlpreview",
+      "en": "Insert live HTML preview",
+      "vars": []
+    },
+    {
+      "key": "cmd.insert.htmlpreview.hint",
+      "en": "sandboxed HTML/CSS/JS in an iframe",
+      "vars": []
+    },
+    {
+      "key": "cmd.insert.bibtex",
+      "en": "Insert BibTeX bibliography",
+      "vars": []
+    },
+    {
+      "key": "cmd.insert.bibtex.hint",
+      "en": "renders as a numbered references list",
+      "vars": []
+    },
+    {
+      "key": "cmd.insert.wikilink",
+      "en": "Insert wiki-link",
+      "vars": []
+    },
+    {
+      "key": "cmd.git.clone",
+      "en": "Git: clone repository…",
+      "vars": []
+    },
+    {
+      "key": "cmd.git.clone.hint",
+      "en": "imports text files into the workspace",
+      "vars": []
+    },
+    {
+      "key": "cmd.git.commit",
+      "en": "Git: commit & push current repo…",
+      "vars": []
+    },
+    {
+      "key": "cmd.git.commit.hint",
+      "en": "uses the saved token + identity",
+      "vars": []
+    },
+    {
+      "key": "cmd.git.pull",
+      "en": "Git: pull current repo",
+      "vars": []
+    },
+    {
+      "key": "cmd.git.pull.hint",
+      "en": "fetches and merges remote changes",
+      "vars": []
+    },
+    {
+      "key": "cmd.git.watch",
+      "en": "Git: toggle watch-mode auto-pull",
+      "vars": []
+    },
+    {
+      "key": "cmd.git.watch.hint",
+      "en": "Polls the remote every 5 min and pulls on change",
+      "vars": []
+    },
+    {
+      "key": "cmd.git.token",
+      "en": "Git: set access token…",
+      "vars": []
+    },
+    {
+      "key": "cmd.git.token.hint",
+      "en": "stored locally (IndexedDB)",
+      "vars": []
+    },
+    {
+      "key": "cmd.git.identity",
+      "en": "Git: set commit identity…",
+      "vars": []
+    },
+    {
+      "key": "cmd.git.status",
+      "en": "Git: status (current repo)",
+      "vars": []
+    },
+    {
+      "key": "git.prompt.url",
+      "en": "Repo URL (HTTPS):",
+      "vars": []
+    },
+    {
+      "key": "git.prompt.message",
+      "en": "Commit message:",
+      "vars": []
+    },
+    {
+      "key": "git.prompt.token",
+      "en": "GitHub personal access token (leave blank to clear):",
+      "vars": []
+    },
+    {
+      "key": "git.prompt.identityName",
+      "en": "Name:",
+      "vars": []
+    },
+    {
+      "key": "git.prompt.identityEmail",
+      "en": "Email:",
+      "vars": []
+    },
+    {
+      "key": "git.prompt.openFileFirst",
+      "en": "Open a file inside a cloned repo first.",
+      "vars": []
+    },
+    {
+      "key": "git.alert.cloned",
+      "en": "Cloned into \"{folder}/\" — {count} files.",
+      "vars": [
+        "folder",
+        "count"
+      ]
+    },
+    {
+      "key": "git.alert.pushed",
+      "en": "Pushed.",
+      "vars": []
+    },
+    {
+      "key": "git.alert.pulled",
+      "en": "Pulled — {changed} files updated.",
+      "vars": [
+        "changed"
+      ]
+    },
+    {
+      "key": "git.alert.tokenSaved",
+      "en": "Token saved.",
+      "vars": []
+    },
+    {
+      "key": "git.alert.tokenCleared",
+      "en": "Token cleared.",
+      "vars": []
+    },
+    {
+      "key": "git.alert.identitySaved",
+      "en": "Identity saved.",
+      "vars": []
+    },
+    {
+      "key": "git.alert.cloneFailed",
+      "en": "Clone failed: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "git.alert.commitFailed",
+      "en": "Commit/push failed: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "git.alert.pullFailed",
+      "en": "Pull failed: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "git.status.clean",
+      "en": "Working tree clean.",
+      "vars": []
+    },
+    {
+      "key": "git.status.summary",
+      "en": "{added} added · {modified} modified · {deleted} deleted",
+      "vars": [
+        "added",
+        "modified",
+        "deleted"
+      ]
+    },
+    {
+      "key": "cmd.collab.start",
+      "en": "Start collaboration…",
+      "vars": []
+    },
+    {
+      "key": "cmd.collab.start.hint",
+      "en": "share a live editing room (P2P over WebRTC)",
+      "vars": []
+    },
+    {
+      "key": "cmd.collab.join",
+      "en": "Join collaboration room…",
+      "vars": []
+    },
+    {
+      "key": "cmd.collab.join.hint",
+      "en": "paste a room name",
+      "vars": []
+    },
+    {
+      "key": "cmd.collab.copy",
+      "en": "Copy collab share link",
+      "vars": []
+    },
+    {
+      "key": "cmd.collab.leave",
+      "en": "Leave collaboration",
+      "vars": []
+    },
+    {
+      "key": "collab.prompt.room",
+      "en": "Room name:",
+      "vars": []
+    },
+    {
+      "key": "collab.prompt.join",
+      "en": "Join collaborative session \"{room}\"? Your current document will be replaced if other peers are present.",
+      "vars": [
+        "room"
+      ]
+    },
+    {
+      "key": "tree.newFileRoot",
+      "en": "New file at root",
+      "vars": []
+    },
+    {
+      "key": "tree.newFolderRoot",
+      "en": "New folder at root",
+      "vars": []
+    },
+    {
+      "key": "tree.newFileHere",
+      "en": "New file in this folder",
+      "vars": []
+    },
+    {
+      "key": "tree.newSubfolder",
+      "en": "New subfolder",
+      "vars": []
+    },
+    {
+      "key": "tree.rename",
+      "en": "Rename",
+      "vars": []
+    },
+    {
+      "key": "tree.delete",
+      "en": "Delete",
+      "vars": []
+    },
+    {
+      "key": "tree.collapse",
+      "en": "Collapse",
+      "vars": []
+    },
+    {
+      "key": "tree.expand",
+      "en": "Expand",
+      "vars": []
+    },
+    {
+      "key": "tree.opfsUnavailable",
+      "en": "OPFS isn't available in this browser. Use the file open / save commands instead.",
+      "vars": []
+    },
+    {
+      "key": "tree.emptyHint",
+      "en": "No files yet. Click + to create one.",
+      "vars": []
+    },
+    {
+      "key": "tree.tagFilter",
+      "en": "# {tag} · {count} note(s)",
+      "vars": [
+        "tag",
+        "count"
+      ]
+    },
+    {
+      "key": "tree.tagFilter.clear",
+      "en": "Clear tag filter",
+      "vars": []
+    },
+    {
+      "key": "tree.tagFilter.empty",
+      "en": "No notes match this tag.",
+      "vars": []
+    },
+    {
+      "key": "status.privacyMode",
+      "en": "PRIVATE",
+      "vars": []
+    },
+    {
+      "key": "status.privacyMode.tooltip",
+      "en": "Privacy Mode — AI runs entirely on this device via WebGPU. No prompts leave your browser.",
+      "vars": []
+    },
+    {
+      "key": "status.roadmap",
+      "en": "Roadmap",
+      "vars": []
+    },
+    {
+      "key": "status.roadmap.tooltip",
+      "en": "View Lumen's public roadmap",
+      "vars": []
+    },
+    {
+      "key": "templates.title",
+      "en": "Template gallery",
+      "vars": []
+    },
+    {
+      "key": "templates.close",
+      "en": "Close gallery",
+      "vars": []
+    },
+    {
+      "key": "templates.searchPlaceholder",
+      "en": "Search templates by name, description, or tag…",
+      "vars": []
+    },
+    {
+      "key": "templates.allCategories",
+      "en": "All",
+      "vars": []
+    },
+    {
+      "key": "templates.sort",
+      "en": "Sort",
+      "vars": []
+    },
+    {
+      "key": "templates.sort.rating",
+      "en": "Rating",
+      "vars": []
+    },
+    {
+      "key": "templates.sort.downloads",
+      "en": "Most installed",
+      "vars": []
+    },
+    {
+      "key": "templates.loading",
+      "en": "Loading templates…",
+      "vars": []
+    },
+    {
+      "key": "templates.empty",
+      "en": "No templates match your filter.",
+      "vars": []
+    },
+    {
+      "key": "templates.error",
+      "en": "Failed to load registry: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "templates.byAuthor",
+      "en": "by {author}",
+      "vars": [
+        "author"
+      ]
+    },
+    {
+      "key": "templates.rating",
+      "en": "{rating} stars",
+      "vars": [
+        "rating"
+      ]
+    },
+    {
+      "key": "templates.downloads",
+      "en": "{count} installs",
+      "vars": [
+        "count"
+      ]
+    },
+    {
+      "key": "templates.install",
+      "en": "Install",
+      "vars": []
+    },
+    {
+      "key": "templates.installing",
+      "en": "Installing…",
+      "vars": []
+    },
+    {
+      "key": "templates.installed.button",
+      "en": "Installed",
+      "vars": []
+    },
+    {
+      "key": "templates.installed",
+      "en": "✅ Installed {name} → {path}",
+      "vars": [
+        "name",
+        "path"
+      ]
+    },
+    {
+      "key": "templates.installFailed",
+      "en": "Install failed: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "templates.contribute",
+      "en": "Contribute a template:",
+      "vars": []
+    },
+    {
+      "key": "templates.contributeLink",
+      "en": "lumen-templates-contrib →",
+      "vars": []
+    },
+    {
+      "key": "cmd.templates.open",
+      "en": "Browse template gallery",
+      "vars": []
+    },
+    {
+      "key": "cmd.templates.open.hint",
+      "en": "Browse + install community templates",
+      "vars": []
+    },
+    {
+      "key": "audit.title",
+      "en": "Audit log",
+      "vars": []
+    },
+    {
+      "key": "audit.rows",
+      "en": "rows",
+      "vars": []
+    },
+    {
+      "key": "audit.refresh",
+      "en": "Refresh",
+      "vars": []
+    },
+    {
+      "key": "audit.export",
+      "en": "Export CSV",
+      "vars": []
+    },
+    {
+      "key": "audit.close",
+      "en": "Close",
+      "vars": []
+    },
+    {
+      "key": "audit.filter.action",
+      "en": "Filter by action…",
+      "vars": []
+    },
+    {
+      "key": "audit.filter.user",
+      "en": "Filter by user id…",
+      "vars": []
+    },
+    {
+      "key": "audit.empty",
+      "en": "No events match the current filter.",
+      "vars": []
+    },
+    {
+      "key": "audit.col.ts",
+      "en": "Time",
+      "vars": []
+    },
+    {
+      "key": "audit.col.user",
+      "en": "User",
+      "vars": []
+    },
+    {
+      "key": "audit.col.action",
+      "en": "Action",
+      "vars": []
+    },
+    {
+      "key": "audit.col.payload",
+      "en": "Payload",
+      "vars": []
+    },
+    {
+      "key": "audit.fetchFailed",
+      "en": "Audit fetch failed: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "audit.exportDone",
+      "en": "✅ Exported {count} rows to CSV",
+      "vars": [
+        "count"
+      ]
+    },
+    {
+      "key": "ai.prompt.key",
+      "en": "Enter your OpenAI API key (sk-…):",
+      "vars": []
+    },
+    {
+      "key": "ai.alert.keySaved",
+      "en": "AI key saved.",
+      "vars": []
+    },
+    {
+      "key": "canvas.close",
+      "en": "Close",
+      "vars": []
+    },
+    {
+      "key": "canvas.dialogLabel",
+      "en": "Whiteboard",
+      "vars": []
+    },
+    {
+      "key": "canvas.new",
+      "en": "New",
+      "vars": []
+    },
+    {
+      "key": "canvas.new.prompt",
+      "en": "Canvas name:",
+      "vars": []
+    },
+    {
+      "key": "canvas.picker",
+      "en": "Pick canvas",
+      "vars": []
+    },
+    {
+      "key": "canvas.title",
+      "en": "Canvas",
+      "vars": []
+    },
+    {
+      "key": "cmd.ai.settings",
+      "en": "AI Settings…",
+      "vars": []
+    },
+    {
+      "key": "cmd.ai.settings.hint",
+      "en": "Configure your OpenAI API key + per-doc options",
+      "vars": []
+    },
+    {
+      "key": "cmd.cmdPalette",
+      "en": "Command palette",
+      "vars": []
+    },
+    {
+      "key": "cmd.focusMode",
+      "en": "Focus mode",
+      "vars": []
+    },
+    {
+      "key": "cmd.new",
+      "en": "New document",
+      "vars": []
+    },
+    {
+      "key": "cmd.open",
+      "en": "Open file…",
+      "vars": []
+    },
+    {
+      "key": "cmd.preview",
+      "en": "Preview only",
+      "vars": []
+    },
+    {
+      "key": "cmd.save",
+      "en": "Save",
+      "vars": []
+    },
+    {
+      "key": "cmd.saveAs",
+      "en": "Save as…",
+      "vars": []
+    },
+    {
+      "key": "cmd.search",
+      "en": "Search workspace…",
+      "vars": []
+    },
+    {
+      "key": "cmd.shortcuts",
+      "en": "Keyboard shortcuts",
+      "vars": []
+    },
+    {
+      "key": "cmd.source",
+      "en": "Source only",
+      "vars": []
+    },
+    {
+      "key": "cmd.split",
+      "en": "Split editor + preview",
+      "vars": []
+    },
+    {
+      "key": "git.alert.noRepo",
+      "en": "This workspace isn't a Git repo. Run `git clone` first or use `Init repository`.",
+      "vars": []
+    },
+    {
+      "key": "git.prompt.cloneUrl",
+      "en": "Repository URL (https://… or git@…):",
+      "vars": []
+    },
+    {
+      "key": "git.prompt.commitMessage",
+      "en": "Commit message:",
+      "vars": []
+    },
+    {
+      "key": "group.edit",
+      "en": "Edit",
+      "vars": []
+    },
+    {
+      "key": "canvas.autoSaved",
+      "en": "Canvas · auto-saved",
+      "vars": []
+    },
+    {
+      "key": "canvas.legacy.found",
+      "en": "{count} legacy canvas(es) found",
+      "vars": [
+        "count"
+      ]
+    },
+    {
+      "key": "canvas.legacy.convert",
+      "en": "Convert {name} → tldraw",
+      "vars": [
+        "name"
+      ]
+    },
+    {
+      "key": "canvas.legacy.converting",
+      "en": "Converting {name}…",
+      "vars": [
+        "name"
+      ]
+    },
+    {
+      "key": "canvas.legacy.converted",
+      "en": "✅ Converted {name} ({count} shapes)",
+      "vars": [
+        "name",
+        "count"
+      ]
+    },
+    {
+      "key": "canvas.legacy.convertFailed",
+      "en": "Convert failed: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "versionHistory.title",
+      "en": "Version History",
+      "vars": []
+    },
+    {
+      "key": "versionHistory.savedCount",
+      "en": "{count} versions saved",
+      "vars": [
+        "count"
+      ]
+    },
+    {
+      "key": "mdTable.title",
+      "en": "Table Editor",
+      "vars": []
+    },
+    {
+      "key": "searchDialog.sources",
+      "en": "Sources",
+      "vars": []
+    },
+    {
+      "key": "searchDialog.askPlaceholder",
+      "en": "Type a question and press Enter to ask the AI workspace.",
+      "vars": []
+    },
+    {
+      "key": "voice.recording",
+      "en": "Recording... ({lang})",
+      "vars": [
+        "lang"
+      ]
+    },
+    {
+      "key": "errorBoundary.heading",
+      "en": "Rendering Error",
+      "vars": []
+    },
+    {
+      "key": "cmd.view.grammarCheck.on",
+      "en": "Enable grammar check (LanguageTool)",
+      "vars": []
+    },
+    {
+      "key": "cmd.view.grammarCheck.off",
+      "en": "Disable grammar check",
+      "vars": []
+    },
+    {
+      "key": "cmd.view.grammarCheck.hint",
+      "en": "Underlines grammar / style / typo issues. Set VITE_LANGUAGETOOL_URL to self-host.",
+      "vars": []
+    },
+    {
+      "key": "cmd.ai.privacy.on",
+      "en": "Privacy Mode: run AI on this device (WebGPU)",
+      "vars": []
+    },
+    {
+      "key": "cmd.ai.privacy.off",
+      "en": "Privacy Mode: turn off (use cloud AI)",
+      "vars": []
+    },
+    {
+      "key": "cmd.ai.privacy.hint",
+      "en": "When ON, every AI prompt runs locally via @mlc-ai/web-llm. No data leaves your browser.",
+      "vars": []
+    },
+    {
+      "key": "tree.prompt.folderName",
+      "en": "New folder name:",
+      "vars": []
+    },
+    {
+      "key": "tree.alert.noSlashes",
+      "en": "Folder names can't contain slashes.",
+      "vars": []
+    },
+    {
+      "key": "tree.alert.renameNoSlashes",
+      "en": "Use the rename field for the basename only — no slashes.",
+      "vars": []
+    },
+    {
+      "key": "tree.confirm.deleteFolder",
+      "en": "Delete folder (recursively) \"{path}\"? This cannot be undone.",
+      "vars": [
+        "path"
+      ]
+    },
+    {
+      "key": "tree.confirm.deleteFile",
+      "en": "Delete file \"{path}\"? This cannot be undone.",
+      "vars": [
+        "path"
+      ]
+    },
+    {
+      "key": "tree.confirm.bulkDelete",
+      "en": "Delete {{count}} selected items? This cannot be undone.",
+      "vars": [
+        "count"
+      ]
+    },
+    {
+      "key": "tree.prompt.bulkMoveTarget",
+      "en": "Move all selected files into folder (relative path, blank = workspace root):",
+      "vars": []
+    },
+    {
+      "key": "tree.bulkToolbar",
+      "en": "Bulk file actions",
+      "vars": []
+    },
+    {
+      "key": "tree.selectedCount",
+      "en": "{{count}} selected",
+      "vars": [
+        "count"
+      ]
+    },
+    {
+      "key": "tree.bulkMove",
+      "en": "Move…",
+      "vars": []
+    },
+    {
+      "key": "tree.bulkDelete",
+      "en": "Delete",
+      "vars": []
+    },
+    {
+      "key": "tree.clearSelection",
+      "en": "Clear selection",
+      "vars": []
+    },
+    {
+      "key": "tagsPanel.title",
+      "en": "Tags",
+      "vars": []
+    },
+    {
+      "key": "tagsPanel.summary",
+      "en": "{{tags}} tags · {{total}} notes",
+      "vars": [
+        "tags",
+        "total"
+      ]
+    },
+    {
+      "key": "tagsPanel.close",
+      "en": "Close tags panel",
+      "vars": []
+    },
+    {
+      "key": "tagsPanel.loading",
+      "en": "Indexing your tags…",
+      "vars": []
+    },
+    {
+      "key": "tagsPanel.emptyHint",
+      "en": "Add `tags: [foo, bar]` to a note's YAML frontmatter and it shows up here.",
+      "vars": []
+    },
+    {
+      "key": "tagsPanel.untaggedCount",
+      "en": "{{count}} untagged note(s)",
+      "vars": [
+        "count"
+      ]
+    },
+    {
+      "key": "cmd.view.tags",
+      "en": "View tags",
+      "vars": []
+    },
+    {
+      "key": "cmd.view.tags.hint",
+      "en": "Browse the workspace by frontmatter tag",
+      "vars": []
+    },
+    {
+      "key": "commentsPanel.title",
+      "en": "Comments",
+      "vars": []
+    },
+    {
+      "key": "commentsPanel.summary",
+      "en": "{{unresolved}} open · {{total}} total",
+      "vars": [
+        "unresolved",
+        "total"
+      ]
+    },
+    {
+      "key": "commentsPanel.empty",
+      "en": "No comments yet. Select text in the editor and run \\u201cAdd comment\\u201d from the command palette.",
+      "vars": []
+    },
+    {
+      "key": "commentsPanel.resolve",
+      "en": "Resolve",
+      "vars": []
+    },
+    {
+      "key": "commentsPanel.reopen",
+      "en": "Re-open",
+      "vars": []
+    },
+    {
+      "key": "commentsPanel.delete",
+      "en": "Delete comment",
+      "vars": []
+    },
+    {
+      "key": "commentsPanel.reply",
+      "en": "Reply",
+      "vars": []
+    },
+    {
+      "key": "commentsPanel.replyPlaceholder",
+      "en": "Write a reply\\u2026",
+      "vars": []
+    },
+    {
+      "key": "commentsPanel.jump",
+      "en": "Scroll to anchored text",
+      "vars": []
+    },
+    {
+      "key": "commentsPanel.viewAll",
+      "en": "All",
+      "vars": []
+    },
+    {
+      "key": "commentsPanel.viewOpen",
+      "en": "Open only",
+      "vars": []
+    },
+    {
+      "key": "commentsPanel.showResolved",
+      "en": "Show resolved comments",
+      "vars": []
+    },
+    {
+      "key": "commentsPanel.hideResolved",
+      "en": "Hide resolved comments",
+      "vars": []
+    },
+    {
+      "key": "commentsPanel.close",
+      "en": "Close comments panel",
+      "vars": []
+    },
+    {
+      "key": "cmd.collab.addComment",
+      "en": "\\ud83d\\udcac Add comment on selection",
+      "vars": []
+    },
+    {
+      "key": "cmd.collab.addComment.hint",
+      "en": "Anchor a thread to the highlighted text",
+      "vars": []
+    },
+    {
+      "key": "cmd.collab.viewComments",
+      "en": "\\ud83d\\udcac View comments panel",
+      "vars": []
+    },
+    {
+      "key": "contextMenu.title",
+      "en": "File actions",
+      "vars": []
+    },
+    {
+      "key": "contextMenu.rename",
+      "en": "Rename",
+      "vars": []
+    },
+    {
+      "key": "contextMenu.duplicate",
+      "en": "Duplicate",
+      "vars": []
+    },
+    {
+      "key": "contextMenu.copyPath",
+      "en": "Copy path",
+      "vars": []
+    },
+    {
+      "key": "contextMenu.newFileHere",
+      "en": "New file here",
+      "vars": []
+    },
+    {
+      "key": "contextMenu.newSubfolder",
+      "en": "New subfolder",
+      "vars": []
+    },
+    {
+      "key": "contextMenu.delete",
+      "en": "Delete",
+      "vars": []
+    },
+    {
+      "key": "tree.alert.renameFailed",
+      "en": "Rename failed: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "tree.alert.deleteFailed",
+      "en": "Delete failed: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "tree.alert.openFailed",
+      "en": "Couldn't open file: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "tree.alert.folderFailed",
+      "en": "Could not create folder: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "doc.untitled",
+      "en": "Untitled",
+      "vars": []
+    },
+    {
+      "key": "doc.confirm.discardUnsaved",
+      "en": "Discard unsaved changes and start a new document?",
+      "vars": []
+    },
+    {
+      "key": "doc.alert.exportFailed",
+      "en": "Export failed: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "doc.alert.workspaceUnavailable",
+      "en": "Workspace storage isn't available in this browser.",
+      "vars": []
+    },
+    {
+      "key": "doc.alert.reopenFailed",
+      "en": "Could not reopen file. The browser may have lost permission, or the file may have been moved.",
+      "vars": []
+    },
+    {
+      "key": "dnd.dropHint",
+      "en": "Drop a .md, .csv, .tsv or .json file",
+      "vars": []
+    },
+    {
+      "key": "a11y.skipToContent",
+      "en": "Skip to content",
+      "vars": []
+    },
+    {
+      "key": "theme.toggle",
+      "en": "Toggle theme",
+      "vars": []
+    },
+    {
+      "key": "pwa.updateAvailable",
+      "en": "A new version is available",
+      "vars": []
+    },
+    {
+      "key": "pwa.reload",
+      "en": "Reload",
+      "vars": []
+    },
+    {
+      "key": "pwa.offlineReady",
+      "en": "Lumen is ready to work offline.",
+      "vars": []
+    },
+    {
+      "key": "pwa.dismiss",
+      "en": "Dismiss",
+      "vars": []
+    },
+    {
+      "key": "cmd.view.pageView",
+      "en": "📄 Page View (A4)",
+      "vars": []
+    },
+    {
+      "key": "cmd.view.pageView.on",
+      "en": "Currently ON",
+      "vars": []
+    },
+    {
+      "key": "cmd.view.pageView.off",
+      "en": "Currently OFF",
+      "vars": []
+    },
+    {
+      "key": "cmd.view.findReplace",
+      "en": "Find & Replace",
+      "vars": []
+    },
+    {
+      "key": "cmd.view.graphView",
+      "en": "Knowledge Graph",
+      "vars": []
+    },
+    {
+      "key": "cmd.view.graphView.hint",
+      "en": "visual map of file connections",
+      "vars": []
+    },
+    {
+      "key": "cmd.view.versionHistory",
+      "en": "Version History",
+      "vars": []
+    },
+    {
+      "key": "cmd.view.versionHistory.hint",
+      "en": "restore previous versions",
+      "vars": []
+    },
+    {
+      "key": "cmd.insert.table",
+      "en": "Insert Table (Editor)",
+      "vars": []
+    },
+    {
+      "key": "cmd.insert.table.hint",
+      "en": "visual table builder",
+      "vars": []
+    },
+    {
+      "key": "cmd.view.autoSave.off",
+      "en": "Disable Auto-Save",
+      "vars": []
+    },
+    {
+      "key": "cmd.view.autoSave.on",
+      "en": "Enable Auto-Save",
+      "vars": []
+    },
+    {
+      "key": "cmd.view.autoSave.hint",
+      "en": "every {interval}s",
+      "vars": [
+        "interval"
+      ]
+    },
+    {
+      "key": "cmd.view.canvas",
+      "en": "🎨 Canvas / Whiteboard",
+      "vars": []
+    },
+    {
+      "key": "cmd.view.canvas.hint",
+      "en": "Infinite canvas for visual notes",
+      "vars": []
+    },
+    {
+      "key": "cmd.view.plugins",
+      "en": "🔌 Plugin Gallery",
+      "vars": []
+    },
+    {
+      "key": "cmd.view.plugins.hint",
+      "en": "Browse & install plugins",
+      "vars": []
+    },
+    {
+      "key": "cmd.tools.voice",
+      "en": "🎙 Voice to Markdown",
+      "vars": []
+    },
+    {
+      "key": "cmd.tools.voice.hint",
+      "en": "Speech recognition → text",
+      "vars": []
+    },
+    {
+      "key": "cmd.security.encrypt",
+      "en": "🔒 Encrypt Document",
+      "vars": []
+    },
+    {
+      "key": "cmd.security.encrypt.hint",
+      "en": "AES-256-GCM",
+      "vars": []
+    },
+    {
+      "key": "cmd.security.decrypt",
+      "en": "🔓 Decrypt Document",
+      "vars": []
+    },
+    {
+      "key": "cmd.security.decrypt.hint",
+      "en": "Enter password to decrypt",
+      "vars": []
+    },
+    {
+      "key": "group.templates",
+      "en": "Templates",
+      "vars": []
+    },
+    {
+      "key": "group.tools",
+      "en": "Tools",
+      "vars": []
+    },
+    {
+      "key": "group.security",
+      "en": "Security",
+      "vars": []
+    },
+    {
+      "key": "group.ai",
+      "en": "AI Prompts",
+      "vars": []
+    },
+    {
+      "key": "group.plugins",
+      "en": "Plugins",
+      "vars": []
+    }
+  ]
+}
