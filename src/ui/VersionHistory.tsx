@@ -90,7 +90,7 @@ export function VersionHistory({ fileName, currentContent, onRestore, onClose }:
   const [selected, setSelected] = useState<Snapshot | null>(null);
 
   useEffect(() => {
-    loadSnapshots(fileName).then(setSnapshots);
+    loadSnapshots(fileName).then(setSnapshots).catch(() => setSnapshots([]));
   }, [fileName]);
 
   const handleRestore = useCallback(() => {
