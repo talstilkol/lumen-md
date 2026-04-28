@@ -243,6 +243,70 @@ function remarkAdmonitions() {
 }
 
 /**
+ * remark plugin: render `:::columns{cols=N}` container directives as a
+ * CSS grid. Each `:::` separator inside the column block delimits a
+ * column; the children between separators become column contents.
+ *
+ *   :::columns{cols=3}
+ *   First column body. Multiple paragraphs welcome.
+ *   :::
+ *   Second column body.
+ *   :::
+ *   Third column body.
+ *   :::
+ *
+ * The number of columns defaults to the number of `:::`-separated
+ * groups when `cols` isn't passed explicitly.
+ *
+ * Why a renderer-side directive instead of a ProseMirror NodeSpec:
+ * markdown round-trip stays trivial (the source is just text), the
+ * directive parses on every render so concurrent edits don't conflict
+ * with collab, and we avoid pushing 200 lines of NodeSpec + serializer
+ * into the WYSIWYG path. The cost: there's no inline editing of
+ * individual columns in WYSIWYG — users edit the source.
+ */
+function remarkColumns() {
+  interface DirectiveNode {
+    type: string;
+    name: string;
+    attributes?: Record<string, string | undefined>;
+    data?: Record<string, unknown>;
+    children?: Array<{ type: string; data?: Record<string, unknown> }>;
+  }
+  return (tree: MdastRoot) => {
+    visit(tree, (node) => {
+      const n = node as unknown as DirectiveNode;
+      if (n.type !== "containerDirective") return;
+      if (n.name !== "columns") return;
+
+      // Parse `cols=N` attr; fall back to number of children at top level.
+      const colsAttr = n.attributes?.cols;
+      const cols = colsAttr ? Math.max(1, Math.min(6, parseInt(colsAttr, 10) || 0)) : 0;
+
+      const data = (n.data ?? (n.data = {})) as Record<string, unknown>;
+      data.hName = "div";
+      data.hProperties = {
+        className: ["lumen-columns"],
+        style: `display: grid; grid-template-columns: repeat(${
+          cols || (n.children?.length ?? 1)
+        }, 1fr); gap: 16px;`,
+      };
+
+      // Wrap each direct child in a `lumen-column` div so flexible
+      // content (paragraphs, lists) renders inside its own grid cell.
+      n.children = (n.children ?? []).map((child) => ({
+        type: "paragraph",
+        data: {
+          hName: "div",
+          hProperties: { className: ["lumen-column"] },
+        },
+        children: [child],
+      }));
+    });
+  };
+}
+
+/**
  * remark plugin: strip the YAML frontmatter node (we surface it elsewhere).
  */
 function remarkStripFrontmatter() {
@@ -264,6 +328,7 @@ function getProcessor(isDark: () => boolean) {
       .use(remarkMath)
       .use(remarkDirective)
       .use(remarkAdmonitions)
+      .use(remarkColumns)
       .use(remarkWikiLinks)
       .use(remarkLumenBlocks)
       .use(remarkRehype, { allowDangerousHtml: true })
@@ -276,8 +341,12 @@ function getProcessor(isDark: () => boolean) {
         jsx,
         jsxs,
         components,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } as any) as unknown as Processor<MdastRoot, MdastRoot, HastRoot, HastRoot, ReactElement>;
+        // rehype-react's option type is parameterised by the JSX runtime
+        // shape; our `components` map is locally typed through hast-util's
+        // Components but rehype-react still wants a wider partial. The
+        // outer cast resolves the Processor type-parameter mismatch — the
+        // inner narrow lifts the option-bag through `unknown`.
+      } as unknown as Parameters<typeof rehypeReact>[0]) as unknown as Processor<MdastRoot, MdastRoot, HastRoot, HastRoot, ReactElement>;
   }
   return processor;
 }

@@ -1,6 +1,7 @@
 import { Component, lazy, Suspense, useEffect, useState, type ComponentType } from "react";
 import type { JSX } from "react";
 import { isAssetName, readWorkspaceBlob } from "../storage/workspace";
+import { log } from "../lib/logger";
 
 const ChartBlock = lazy(() => import("../plugins/ChartBlock"));
 const MermaidBlock = lazy(() => import("../plugins/MermaidBlock"));
@@ -67,8 +68,7 @@ class BlockErrorBoundary extends Component<
   componentDidCatch(error: Error) {
     // Log so the issue surfaces in dev tools / Sentry; don't toast — the
     // visible error card already conveys the problem to the reader.
-    // eslint-disable-next-line no-console
-    console.error(`[lumen-block:${this.props.label}]`, error);
+    log.error(`[lumen-block:${this.props.label}]`, error);
   }
   render() {
     if (this.state.error) {

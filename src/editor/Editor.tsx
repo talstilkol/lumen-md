@@ -27,6 +27,9 @@ import { insertSlashMenuExtension } from "./insertMenu";
 import { collabAwarenessExtension } from "./collabAwareness";
 import { typewriterModeExtension } from "./typewriterMode";
 import { markdownLintExtension } from "./lintExtension";
+import { commentDecorations } from "./commentDecorations";
+import { searchHighlightExtension } from "./searchHighlight";
+import { grammarExtension } from "./grammarExtension";
 import type { CollabSession } from "../collab/yjs";
 
 const mdHighlight = HighlightStyle.define([
@@ -60,6 +63,8 @@ interface EditorProps {
   vimEnabled?: boolean;
   /** Toggle browser-native spell-check (red squiggle underlines). */
   spellCheck?: boolean;
+  /** Toggle LanguageTool grammar/style checker (debounced network call). */
+  grammarCheck?: boolean;
   /** Centre the active line vertically (typewriter scroll mode). */
   typewriterMode?: boolean;
   /**
@@ -83,6 +88,8 @@ const vimCompartment = new Compartment();
 const spellCheckCompartment = new Compartment();
 const collabCompartment = new Compartment();
 const typewriterCompartment = new Compartment();
+const commentsCompartment = new Compartment();
+const grammarCompartment = new Compartment();
 
 let vimExtensionPromise: Promise<unknown> | null = null;
 async function loadVimExtension() {
@@ -215,6 +222,7 @@ export const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
     onAddAsset,
     vimEnabled = false,
     spellCheck = true,
+    grammarCheck = false,
     typewriterMode = false,
     collab = null,
     crdtPath = null,
@@ -331,11 +339,23 @@ export const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
       collabCompartment.of(
         collab?.awareness ? collabAwarenessExtension(collab.awareness) : [],
       ),
+      // Comment anchors as yellow highlights — the source of truth lives in
+      // the Yjs `lumen-comments` map; this extension just paints them.
+      commentsCompartment.of(
+        collab?.doc ? commentDecorations({ doc: collab.doc }) : [],
+      ),
       typewriterCompartment.of(typewriterMode ? typewriterModeExtension() : []),
+      // LanguageTool grammar / style — opt-in, debounced 1.5s. Off by
+      // default because the public endpoint is rate-limited; users with a
+      // self-hosted backend can flip this on with no other config change.
+      grammarCompartment.of(grammarCheck ? grammarExtension() : []),
       // Live markdown lint — wavy underlines for trailing whitespace,
       // mixed-indent, heading-skip, broken wiki-links. Runs every 250 ms
       // after the user stops typing.
       markdownLintExtension(),
+      // Workspace search → editor: when SearchDialog opens a hit, this
+      // extension flashes the matches and scrolls the first one into view.
+      searchHighlightExtension(),
       imageDropPasteHandlers,
       keymap.of([
         ...closeBracketsKeymap,
@@ -446,10 +466,15 @@ export const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
     if (!view) return;
     let cancelled = false;
     (async () => {
-      const ext = vimEnabled ? await loadVimExtension() : [];
+      // `loadVimExtension` returns the dynamically-imported plugin's
+      // default export — typed as `unknown` because @replit/codemirror-vim
+      // ships no .d.ts. Cast through Extension here so the compartment
+      // reconfigure call typechecks without a blanket `any`.
+      const ext = vimEnabled
+        ? ((await loadVimExtension()) as Extension)
+        : [];
       if (cancelled || !viewRef.current) return;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      view.dispatch({ effects: vimCompartment.reconfigure(ext as any) });
+      view.dispatch({ effects: vimCompartment.reconfigure(ext) });
     })();
     return () => {
       cancelled = true;
@@ -473,9 +498,14 @@ export const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
     const view = viewRef.current;
     if (!view) return;
     view.dispatch({
-      effects: collabCompartment.reconfigure(
-        collab?.awareness ? collabAwarenessExtension(collab.awareness) : [],
-      ),
+      effects: [
+        collabCompartment.reconfigure(
+          collab?.awareness ? collabAwarenessExtension(collab.awareness) : [],
+        ),
+        commentsCompartment.reconfigure(
+          collab?.doc ? commentDecorations({ doc: collab.doc }) : [],
+        ),
+      ],
     });
   }, [collab]);
 
@@ -489,6 +519,18 @@ export const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
       ),
     });
   }, [typewriterMode]);
+
+  // Toggle the grammar checker without recreating the editor. Mounting
+  // the extension also kicks off the first check via its constructor.
+  useEffect(() => {
+    const view = viewRef.current;
+    if (!view) return;
+    view.dispatch({
+      effects: grammarCompartment.reconfigure(
+        grammarCheck ? grammarExtension() : [],
+      ),
+    });
+  }, [grammarCheck]);
 
   // Mobile shortcut bar dispatches `lumen-mobile-insert` events. Listen at
   // window level so we receive them regardless of which surface dispatched.

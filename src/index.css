@@ -937,8 +937,17 @@
     font-size: 13px;
     color: hsl(var(--fg));
   }
-  .milkdown-slash-item:hover {
-    background: hsl(var(--accent) / 0.12);
+  .milkdown-slash-item:hover,
+  .milkdown-slash-item[data-selected="true"] {
+    background: hsl(var(--accent) / 0.18);
+    color: hsl(var(--fg));
+  }
+  /* Min-width — must match the menu so the selection bar fills the row. */
+  .milkdown-slash-item {
+    min-width: 220px;
+  }
+  .milkdown-slash-group {
+    min-width: 220px;
   }
   .milkdown-slash-item .slash-icon {
     width: 24px;
@@ -956,6 +965,52 @@
   .milkdown-tooltip {
     gap: 2px;
     padding: 4px;
+  }
+  /* γ.1 — Drag handle gets absolutely positioned 22px to the left of every
+     top-level block. Each direct child of the editable root is given
+     `position:relative` so the handle anchors to its own row. */
+  .milkdown .ProseMirror > * {
+    position: relative;
+  }
+  /* γ.1.c — Columns directive rendered by remarkColumns. Each direct
+     child becomes a `.lumen-column` wrapper inside a CSS grid. */
+  .lumen-columns {
+    margin: 1rem 0;
+  }
+  .lumen-columns > .lumen-column {
+    background: hsl(var(--bg-subtle) / 0.4);
+    border-radius: 6px;
+    padding: 8px 12px;
+    min-width: 0;
+  }
+  @media (max-width: 640px) {
+    .lumen-columns {
+      grid-template-columns: 1fr !important;
+    }
+  }
+  .lumen-drag-handle:hover {
+    opacity: 1 !important;
+    background: hsl(var(--accent) / 0.12) !important;
+  }
+  .lumen-drag-handle:active,
+  .lumen-drag-handle[draggable="true"]:focus-visible {
+    cursor: grabbing !important;
+    outline: 2px solid hsl(var(--accent));
+    outline-offset: 1px;
+  }
+  /* Comment-decoration flash on click — Tier 1 #2 follow-up.
+     Pulses the yellow background twice so the user gets a visible
+     confirmation that the click was registered. The animation ends
+     and the class is auto-removed (via animationend listener). */
+  @keyframes lumen-comment-flash {
+    0%   { background: hsl(48 95% 60% / 0.20); }
+    25%  { background: hsl(48 95% 60% / 0.65); }
+    50%  { background: hsl(48 95% 60% / 0.20); }
+    75%  { background: hsl(48 95% 60% / 0.65); }
+    100% { background: hsl(48 95% 60% / 0.20); }
+  }
+  .cm-lumen-comment-flash {
+    animation: lumen-comment-flash 720ms ease-in-out;
   }
   .milkdown-tooltip button {
     width: 28px;
