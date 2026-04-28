@@ -150,7 +150,7 @@ export function VersionHistory({ fileName, currentContent, onRestore, onClose }:
         ))}
         {snapshots.length === 0 && (
           <div style={{ padding: 16, color: "hsl(var(--fg-muted))", fontSize: 12 }}>
-            No versions saved yet. Versions are auto-saved when you switch files or save.
+            {t("versionHistory.noVersions")}
           </div>
         )}
       </div>
@@ -166,7 +166,7 @@ export function VersionHistory({ fileName, currentContent, onRestore, onClose }:
           borderBottom: "1px solid hsl(var(--border))",
         }}>
           <div style={{ fontSize: 12, color: "hsl(var(--fg-muted))" }}>
-            {selected ? `Δ ${diffChars} chars difference` : "Select a version to preview"}
+            {selected ? t("versionHistory.diffChars", { n: String(diffChars) }) : t("versionHistory.selectVersion")}
           </div>
           <div style={{ display: "flex", gap: 8 }}>
             {selected && (
@@ -180,11 +180,11 @@ export function VersionHistory({ fileName, currentContent, onRestore, onClose }:
                 cursor: "pointer",
                 fontWeight: 600,
               }}>
-                Restore this version
+                {t("versionHistory.restore")}
               </button>
             )}
-            <button onClick={onClose} className="icon-btn" style={{ width: "auto", padding: "4px 12px", fontSize: 12 }}>
-              Close
+            <button onClick={onClose} aria-label={t("versionHistory.close")} className="icon-btn" style={{ width: "auto", padding: "4px 12px", fontSize: 12 }}>
+              {t("versionHistory.close")}
             </button>
           </div>
         </div>

@@ -321,6 +321,11 @@ const en: Strings = {
   "searchDialog.searching": "Searching workspace…",
   "searchDialog.thinking": "Thinking…",
   "searchDialog.noRelevant": "No relevant files found in workspace.",
+  "versionHistory.restore": "Restore this version",
+  "versionHistory.close": "Close",
+  "versionHistory.selectVersion": "Select a version to preview",
+  "versionHistory.diffChars": "Δ {n} chars difference",
+  "versionHistory.noVersions": "No versions saved yet. Versions are auto-saved when you switch files or save.",
   "insertText.title": "Insert anything",
   "insertText.help": "Paste any markdown, HTML, or code. The detected type is shown below — switch manually if needed.",
   "insertText.smartHelp": "Paste a URL, CSV, JSON, SQL, Mermaid, GeoJSON, math, code — anything. Lumen detects the type and wraps it in the right block.",
@@ -1246,6 +1251,11 @@ const he: Strings = {
   "searchDialog.searching": "מחפש במרחב העבודה…",
   "searchDialog.thinking": "חושב…",
   "searchDialog.noRelevant": "לא נמצאו קבצים רלוונטיים במרחב העבודה.",
+  "versionHistory.restore": "שחזר גרסה זו",
+  "versionHistory.close": "סגירה",
+  "versionHistory.selectVersion": "בחר גרסה לתצוגה מקדימה",
+  "versionHistory.diffChars": "Δ {n} תווים הבדל",
+  "versionHistory.noVersions": "אין גרסאות שמורות. גרסאות נשמרות אוטומטית כשמחליפים קבצים או שומרים.",
 };
 
 
