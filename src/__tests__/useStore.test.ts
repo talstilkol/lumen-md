@@ -97,4 +97,29 @@ describe("useAppStore", () => {
     useAppStore.getState().setAiKey(null);
     expect(useAppStore.getState().aiKey).toBeNull();
   });
+
+  it("setTagFilter stores the active tag and its allowed paths", () => {
+    expect(useAppStore.getState().tagFilter).toBeNull();
+    useAppStore.getState().setTagFilter({
+      tag: "work",
+      paths: ["a.md", "folder/b.md"],
+    });
+    const f = useAppStore.getState().tagFilter;
+    expect(f?.tag).toBe("work");
+    expect(f?.paths).toEqual(["a.md", "folder/b.md"]);
+  });
+
+  it("setTagFilter(null) clears the active filter", () => {
+    useAppStore.getState().setTagFilter({ tag: "x", paths: ["x.md"] });
+    useAppStore.getState().setTagFilter(null);
+    expect(useAppStore.getState().tagFilter).toBeNull();
+  });
+
+  it("toggleGrammarCheck flips the grammar-check flag (defaults to off)", () => {
+    expect(useAppStore.getState().grammarCheck).toBe(false);
+    useAppStore.getState().toggleGrammarCheck();
+    expect(useAppStore.getState().grammarCheck).toBe(true);
+    useAppStore.getState().toggleGrammarCheck();
+    expect(useAppStore.getState().grammarCheck).toBe(false);
+  });
 });
