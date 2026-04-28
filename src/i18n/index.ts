@@ -364,6 +364,7 @@ const en: Strings = {
   "toast.insertText.success": "Text inserted and converted",
   "toast.pasteText.success": "Text pasted and converted",
   "toast.pasteText.prompt": "Paste HTML or rich text below:",
+  "toast.dismiss": "Dismiss",
   // Split-axis controls (labelled "Scroll orientation" in the UI so it sits
   // naturally next to the Scroll: Linked toggle).
   "toolbar.splitAxis": "Scroll orientation",
@@ -528,6 +529,8 @@ const en: Strings = {
   "fineTune.privacy": "Note: training uploads ~5 MB of your writing to OpenAI. The resulting model is only accessible from your account. Click \"Forget\" to drop the id from this device — to fully remove the trained model, delete it in your OpenAI dashboard too.",
   // ── Missing key cleanup (α.6.9) ────────────────────────────────────────
   "ai.prompt.key": "Enter your OpenAI API key (sk-…):",
+  "ai.prompt.placeholder": "Type here…",
+  "ai.prompt.submit": "Go",
   "ai.alert.keySaved": "AI key saved.",
   "canvas.close": "Close",
   "canvas.dialogLabel": "Whiteboard",
@@ -631,6 +634,9 @@ const en: Strings = {
   "dnd.dropHint": "Drop a .md, .csv, .tsv or .json file",
   // Skip link
   "a11y.skipToContent": "Skip to content",
+  "auth.signIn": "Sign in",
+  "auth.signOut": "Sign out",
+  "auth.signedInAs": "Signed in as",
   // Theme labels
   "theme.toggle": "Toggle theme",
   // PWA
@@ -941,6 +947,7 @@ const he: Strings = {
   "toast.insertText.success": "הטקסט הוסף והומר",
   "toast.pasteText.success": "הטקסט הודבק והומר",
   "toast.pasteText.prompt": "הדבק HTML או טקסט עשיר למטה:",
+  "toast.dismiss": "סגור",
   // Split-axis controls (labelled "Scroll orientation" so it sits next to the
   // Scroll: Linked toggle in the View menu).
   "toolbar.splitAxis": "כיוון גלילה",
@@ -1104,6 +1111,8 @@ const he: Strings = {
   "fineTune.privacy": "הערה: האימון מעלה ~5MB מהכתיבה שלך ל-OpenAI. המודל המתקבל נגיש רק מהחשבון שלך. לחץ \"שכח\" להסיר את המזהה ממכשיר זה — להסרה מלאה, מחק את המודל גם בלוח המחוונים של OpenAI.",
   // ── Missing key cleanup (α.6.9) ────────────────────────────────────────
   "ai.prompt.key": "הזן מפתח OpenAI API (sk-…):",
+  "ai.prompt.placeholder": "הקלד כאן…",
+  "ai.prompt.submit": "שלח",
   "ai.alert.keySaved": "מפתח ה-AI נשמר.",
   "canvas.close": "סגור",
   "canvas.dialogLabel": "לוח לבן",
@@ -1204,6 +1213,9 @@ const he: Strings = {
   "doc.alert.reopenFailed": "לא ניתן לפתוח מחדש את הקובץ. ייתכן שהדפדפן איבד הרשאה או שהקובץ הועבר.",
   "dnd.dropHint": "שחרר קובץ .md, .csv, .tsv או .json",
   "a11y.skipToContent": "דילוג לתוכן הראשי",
+  "auth.signIn": "התחברות",
+  "auth.signOut": "התנתקות",
+  "auth.signedInAs": "מחובר כ־",
   "theme.toggle": "החלפת ערכת נושא",
   "pwa.updateAvailable": "גרסה חדשה זמינה",
   "pwa.reload": "טעינה מחדש",
