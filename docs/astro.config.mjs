@@ -91,6 +91,12 @@ export default defineConfig({
             { label: "Privacy", slug: "security/privacy" },
           ],
         },
+        {
+          label: "Self-hosting",
+          items: [
+            { label: "Docker compose bundle", slug: "self-hosting/docker" },
+          ],
+        },
         { label: "FAQ", slug: "faq" },
       ],
     }),

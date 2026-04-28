@@ -25,7 +25,10 @@
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "budget": "node scripts/bundle-budget.mjs",
-    "lighthouse": "lhci autorun --config=./lighthouserc.json"
+    "lighthouse": "lhci autorun --config=./lighthouserc.json",
+    "lighthouse:a11y": "node scripts/lighthouse-a11y.mjs",
+    "i18n:extract": "node scripts/extract-i18n-keys.mjs",
+    "roadmap": "node scripts/generate-roadmap.mjs"
   },
   "dependencies": {
     "@capacitor/cli": "^8.3.1",
@@ -61,6 +64,8 @@
     "@milkdown/utils": "^7.20.0",
     "@mlc-ai/web-llm": "^0.2.82",
     "@replit/codemirror-vim": "^6.3.0",
+    "@sentry/browser": "^10.50.0",
+    "@sentry/react": "^10.50.0",
     "@tauri-apps/api": "^2.10.1",
     "abcjs": "^6.6.3",
     "class-variance-authority": "^0.7.1",
@@ -89,6 +94,7 @@
     "remark-rehype": "^11.1.1",
     "shiki": "^1.24.4",
     "tailwind-merge": "^2.5.5",
+    "tldraw": "^4.5.10",
     "unified": "^11.0.5",
     "unist-util-visit": "^5.0.0",
     "y-codemirror.next": "^0.3.5",
@@ -123,6 +129,10 @@
     "vitest": "^3.2.4"
   },
   "overrides": {
-    "serialize-javascript": "^7.0.5"
-  }
+    "serialize-javascript": "^7.0.5",
+    "uuid": "^14.0.0"
+  },
+  "browserslist": [
+    "defaults"
+  ]
 }

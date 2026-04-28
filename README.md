@@ -166,6 +166,50 @@ retrieval over your workspace:
 
 Smart search needs an OpenAI key (`⌘K → AI Settings`) but no account.
 
+## Self-hosting
+
+Lumen ships a complete on-prem Docker stack and individual Fly.io deploy configs.
+
+### Docker Compose (on-prem)
+
+The quickest way to run the full Lumen stack on your own server:
+
+```bash
+cp .env.onprem.example .env
+# Edit .env — set passwords, domain, etc.
+make onprem-up          # docker compose up -d
+make onprem-logs        # tail logs
+make onprem-down        # shut down
+make onprem-reset       # wipe volumes + restart
+```
+
+This brings up 5 services:
+- **web** — nginx serving the production build (port 80/443)
+- **collab** — Yjs WebSocket server for persistent collaboration
+- **billing** — entitlements API (optional, remove if not using Stripe)
+- **postgres** — data store for collab snapshots + audit log
+- **redis** — session cache
+
+See [`docker-compose.yml`](docker-compose.yml) and the [`docker/`](docker/) directory for the individual Dockerfiles.
+
+### Signaling server (Fly.io)
+
+The WebRTC signaling relay can run anywhere. We ship a ready-to-deploy Fly.io config:
+
+```bash
+cd sync-server
+fly launch --name lumen-signal --region sjc
+fly deploy
+# Point DNS: CNAME signal.yourdomain.com → lumen-signal.fly.dev
+fly certs add signal.yourdomain.com
+```
+
+Then set `VITE_WEBRTC_SIGNALING_URL=wss://signal.yourdomain.com` in your `.env`.
+
+### Detailed docs
+
+Full self-hosting guide with TLS, CSP headers, and Postgres schema: [`docs/src/content/docs/self-hosting/docker.md`](docs/src/content/docs/self-hosting/docker.md).
+
 ## Roadmap (deferred)
 
 - **Server-backed collaboration** with persistent rooms (the WebRTC build is peer-to-peer only — sessions evaporate when all peers leave).

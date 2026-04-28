@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Quality metrics (2026-04-27, post-Phase α)
+- Tests: **460 passing across 51 files** (Vitest) + 1 Playwright smoke spec (E2E).
+- Coverage: **lines 97.24 %, statements 97.24 %, branches 69.56 %, functions 46.48 %** (`npm run test:coverage`).
+- Bundle: vendor-shiki **740 KB** (down from 9.2 MB after lazy-grammar split).
+- Security: `npm audit` 0 critical / 0 high / 0 moderate (uuid pinned via overrides).
+- Production code: 0 `Math.random()` in collision-sensitive paths, 0 `console.*` outside the logger module.
+
 ### Added
 - MIT LICENSE file for public distribution.
 - CHANGELOG, CONTRIBUTING, and CODE_OF_CONDUCT for open-source hygiene.

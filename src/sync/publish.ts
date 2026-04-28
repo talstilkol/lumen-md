@@ -22,6 +22,7 @@
 
 import { useAppStore } from "../store/useStore";
 import { useEntitlement } from "../billing/useEntitlement";
+import { recordAudit } from "../lib/audit";
 
 export interface PublishResult {
   /** Public URL the note can now be read at. */
@@ -99,7 +100,16 @@ export async function publishNote(
     const text = await res.text().catch(() => "");
     throw new Error(`Publish failed (${res.status}): ${text.slice(0, 160)}`);
   }
-  return (await res.json()) as PublishResult;
+  const result = (await res.json()) as PublishResult;
+  // ε.2 — fire-and-forget audit event so SOC-2 evidence shows
+  // "user X published note <path> at <ts>". Doesn't block publish.
+  const userId = currentUserId();
+  if (userId) {
+    recordAudit(userId, "doc.publish", {
+      payload: { path, slug: result.slug, visibility: opts.visibility ?? "public", encrypted: !!opts.password },
+    });
+  }
+  return result;
 }
 
 /**
@@ -143,6 +153,15 @@ async function encryptForPublish(plaintext: string, password: string): Promise<s
   });
 }
 
+/** Read the active user id from the auth slice if any. Audit events are
+ *  scoped per user; anonymous publishes don't generate audit rows. */
+function currentUserId(): string | null {
+  const state = useAppStore.getState() as {
+    user?: { id?: string };
+  };
+  return state.user?.id ?? null;
+}
+
 export async function unpublishNote(slug: string): Promise<void> {
   ensurePro();
   const res = await fetch(`${endpoint()}/${encodeURIComponent(slug)}`, {
@@ -151,6 +170,10 @@ export async function unpublishNote(slug: string): Promise<void> {
   });
   if (!res.ok && res.status !== 404) {
     throw new Error(`Unpublish failed (${res.status})`);
+  }
+  const userId = currentUserId();
+  if (userId) {
+    recordAudit(userId, "doc.unpublish", { payload: { slug } });
   }
 }
 

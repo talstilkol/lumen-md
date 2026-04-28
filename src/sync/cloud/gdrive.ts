@@ -17,6 +17,7 @@
  */
 
 import { log } from "../../lib/logger";
+import { randomId } from "../../lib/cryptoRandom";
 import type { CloudFile, CloudProvider } from "./types";
 
 const TOKEN_KEY = "lumen.cloud.gdrive.token";
@@ -225,7 +226,10 @@ export const gdriveProvider: CloudProvider = {
       )}&fields=files(id)`,
     );
     const existing = search.files[0]?.id ?? null;
-    const boundary = "lumen-" + Math.random().toString(36).slice(2);
+    // Multipart boundary — must not collide with body bytes. randomId(8)
+    // gives 64 bits of entropy, which is enough for a single request even
+    // if the body contained near-random base64.
+    const boundary = "lumen-" + randomId(8);
     const meta = existing
       ? {}
       : { name: path, parents: [folder], mimeType: "text/markdown" };

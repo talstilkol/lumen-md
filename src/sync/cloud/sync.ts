@@ -10,6 +10,8 @@
 
 import { listWorkspace, readWorkspaceFile, writeWorkspaceFile } from "../../storage/workspace";
 import { log } from "../../lib/logger";
+import { recordAudit } from "../../lib/audit";
+import { useAppStore } from "../../store/useStore";
 import type { CloudProvider, SyncReport, CloudConflictResolution } from "./types";
 
 interface SyncOptions {
@@ -105,6 +107,22 @@ export async function syncWithCloud(
   }
 
   onProgress(1, "Done");
+  // ε.2 — emit one audit row per sync run summarising the totals so an
+  // admin can later prove what data moved when. Body is intentionally
+  // counts-only, never paths or content.
+  const userId = (useAppStore.getState() as { user?: { id?: string } }).user?.id;
+  if (userId) {
+    recordAudit(userId, "sync.cloud", {
+      payload: {
+        provider: provider.name,
+        uploaded: report.uploaded,
+        downloaded: report.downloaded,
+        deleted: report.deleted,
+        conflicts: report.conflicts.length,
+        errors: report.errors.length,
+      },
+    });
+  }
   return report;
 }
 

@@ -67,6 +67,7 @@ export function AppOverlays({
   const mode = useAppStore((s) => s.mode);
   const vimEnabled = useAppStore((s) => s.vimEnabled);
   const spellCheck = useAppStore((s) => s.spellCheck);
+  const grammarCheck = useAppStore((s) => s.grammarCheck);
   const typewriterMode = useAppStore((s) => s.typewriterMode);
   const pageView = useAppStore((s) => s.pageView);
   const deferredContent = useDeferredValue(doc.content);
@@ -158,6 +159,7 @@ export function AppOverlays({
             editorRef={editorRef}
             vimEnabled={vimEnabled}
             spellCheck={spellCheck}
+            grammarCheck={grammarCheck}
             typewriterMode={typewriterMode}
             activeFile={activeFile}
             pageView={pageView}

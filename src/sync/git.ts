@@ -55,8 +55,12 @@ async function load() {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         import("isomorphic-git/http/web") as Promise<any>,
       ]);
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const fs = new (LFS as any)("lumen-git") as Fs;
+      // LFS's default export is a class — its TS types declare the
+      // constructor's `name` parameter as `string` but the value comes
+      // through as a generic constructor. Cast through `unknown` to a
+      // typed `new`-able to keep the call site honest.
+      const FsCtor = LFS as unknown as new (name: string) => Fs;
+      const fs = new FsCtor("lumen-git");
       return { fs, http: http.default ?? http, git: isoGit.default ?? isoGit };
     })();
   }

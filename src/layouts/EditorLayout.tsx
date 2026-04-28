@@ -50,6 +50,7 @@ interface Props {
   editorRef: React.RefObject<EditorHandle | null>;
   vimEnabled: boolean;
   spellCheck: boolean;
+  grammarCheck: boolean;
   typewriterMode: boolean;
   activeFile: string | null;
   pageView: boolean;
@@ -66,6 +67,7 @@ export function EditorLayout({
   editorRef,
   vimEnabled,
   spellCheck,
+  grammarCheck,
   typewriterMode,
   activeFile,
   pageView,
@@ -307,6 +309,7 @@ export function EditorLayout({
             onAddAsset={handleAddAsset}
             vimEnabled={vimEnabled}
             spellCheck={spellCheck}
+            grammarCheck={grammarCheck}
             typewriterMode={typewriterMode}
             crdtPath={activeFile}
           />

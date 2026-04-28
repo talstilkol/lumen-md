@@ -1,5 +1,6 @@
 import { useState, useCallback } from "react";
 import { Plus, Minus } from "lucide-react";
+import { t } from "../i18n";
 
 interface Props {
   /** Initial markdown table text, or empty for a new table */
@@ -89,7 +90,7 @@ export function MarkdownTableEditor({ initialMarkdown, onUpdate, onClose }: Prop
         overflow: "auto",
       }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
-          <h3 style={{ margin: 0, fontSize: 15, color: "hsl(var(--fg))" }}>Table Editor</h3>
+          <h3 style={{ margin: 0, fontSize: 15, color: "hsl(var(--fg))" }}>{t("mdTable.title")}</h3>
           <div style={{ display: "flex", gap: 6 }}>
             <button onClick={addCol} className="icon-btn" title="Add Column" style={{ width: 28, height: 28 }}>
               <Plus size={12} />

@@ -8,8 +8,14 @@ import { StatusBar } from "./ui/StatusBar";
 import { ScrollProgress } from "./ui/ScrollProgress";
 import { SearchReplace } from "./ui/SearchReplace";
 const GraphView = lazy(() => import("./ui/GraphView").then(m => ({ default: m.GraphView })));
-const CanvasWhiteboard = lazy(() => import("./ui/CanvasWhiteboard").then(m => ({ default: m.CanvasWhiteboard })));
+// γ.2 — Canvas now backed by tldraw. The legacy custom-canvas component
+// `CanvasWhiteboard.tsx` remains in tree as a fallback in case we ever
+// need to surface old `.canvas.json` files; it's intentionally unused.
+const CanvasWhiteboard = lazy(() => import("./ui/CanvasTldraw").then(m => ({ default: m.CanvasTldraw })));
 const PluginGallery = lazy(() => import("./ui/PluginGallery").then(m => ({ default: m.PluginGallery })));
+const TemplateGallery = lazy(() => import("./ui/TemplateGallery").then(m => ({ default: m.TemplateGallery })));
+const AuditLog = lazy(() => import("./ui/AuditLog").then(m => ({ default: m.AuditLog })));
+const FineTuneSettings = lazy(() => import("./ui/FineTuneSettings").then(m => ({ default: m.FineTuneSettings })));
 const VersionHistory = lazy(() => import("./ui/VersionHistory").then(m => ({ default: m.VersionHistory })));
 const MarkdownTableEditor = lazy(() => import("./ui/MarkdownTableEditor").then(m => ({ default: m.MarkdownTableEditor })));
 import { htmlToMarkdown } from "./storage/fileFormats";
@@ -26,6 +32,7 @@ import { AiToastContainer, showAiToast } from "./ui/AiToast";
 import { MobileKeyboardBar } from "./ui/MobileKeyboardBar";
 import { TagsPanel } from "./ui/TagsPanel";
 import { CommentsPanel, addCommentFromSelection } from "./ui/CommentsPanel";
+import { DocTabs, tabId } from "./ui/DocTabs";
 import { AiInlinePromptOverlay } from "./ui/AiInlinePrompt";
 import { useFileDragDrop } from "./hooks/useFileDragDrop";
 import { useCollab } from "./hooks/useCollab";
@@ -68,6 +75,10 @@ export default function App() {
   const setContent = useAppStore((s) => s.setContent);
   const setDoc = useAppStore((s) => s.setDoc);
   const markSaved = useAppStore((s) => s.markSaved);
+  const openTabs = useAppStore((s) => s.openTabs);
+  const openTabAction = useAppStore((s) => s.openTab);
+  const closeTabAction = useAppStore((s) => s.closeTab);
+  const reorderTabs = useAppStore((s) => s.reorderTabs);
   const mode = useAppStore((s) => s.mode);
   const theme = useAppStore((s) => s.theme);
   const showOutline = useAppStore((s) => s.showOutline);
@@ -77,6 +88,7 @@ export default function App() {
   const showBacklinks = useAppStore((s) => s.showBacklinks);
   const vimEnabled = useAppStore((s) => s.vimEnabled);
   const spellCheck = useAppStore((s) => s.spellCheck);
+  const grammarCheck = useAppStore((s) => s.grammarCheck);
   const typewriterMode = useAppStore((s) => s.typewriterMode);
   const editorRef = useRef<EditorHandle | null>(null);
   const [paletteOpen, setPaletteOpen] = useState(false);
@@ -87,6 +99,9 @@ export default function App() {
   const [tableEditorOpen, setTableEditorOpen] = useState(false);
   const [canvasOpen, setCanvasOpen] = useState(false);
   const [galleryOpen, setGalleryOpen] = useState(false);
+  const [templateGalleryOpen, setTemplateGalleryOpen] = useState(false);
+  const [auditLogOpen, setAuditLogOpen] = useState(false);
+  const [fineTuneOpen, setFineTuneOpen] = useState(false);
   const [tagsPanelOpen, setTagsPanelOpen] = useState(false);
   const [commentsPanelOpen, setCommentsPanelOpen] = useState(false);
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
@@ -129,7 +144,16 @@ export default function App() {
   // Seed the Welcome document on first launch
   useEffect(() => {
     if (!doc.content) {
-      setDoc({ name: "Welcome.md", content: WELCOME_DOC, dirty: false });
+      // Use openTab so the Welcome doc lands on the tab strip too.
+      openTabAction({ name: "Welcome.md", content: WELCOME_DOC, workspaceName: null });
+    } else if (openTabs.length === 0) {
+      // Existing session before tabs existed — backfill a tab for the
+      // currently active doc so the strip shows up immediately.
+      openTabAction({
+        name: doc.name,
+        content: doc.content,
+        workspaceName: doc.workspaceName ?? null,
+      });
     }
     // Show onboarding tour on first launch
     try {
@@ -261,18 +285,14 @@ export default function App() {
     }
   }, []);
 
-  // Workspace: open a file from the file tree.
+  // Workspace: open a file from the file tree. Routed through `openTab` so
+  // re-opening an already-active doc just focuses its tab without losing
+  // unsaved edits in the previous one.
   const handleOpenFromWorkspace = useCallback(
     (name: string, content: string) => {
-      setDoc({
-        name,
-        content,
-        handle: undefined,
-        workspaceName: name,
-        dirty: false,
-      });
+      openTabAction({ name, content, workspaceName: name });
     },
-    [setDoc],
+    [openTabAction],
   );
 
   // Listen for `lumen-open-file` events fired by Database views, backlinks,
@@ -444,6 +464,9 @@ export default function App() {
     handleStartCollab, handleStopCollab,
     setSearchOpen, setFindReplaceOpen, setGraphOpen,
     setHistoryOpen, setTableEditorOpen, setCanvasOpen, setGalleryOpen,
+    setTemplateGalleryOpen,
+    setAuditLogOpen,
+    setFineTuneOpen,
     setTagsPanelOpen,
     setCommentsPanelOpen,
     onAddComment: collab
@@ -462,6 +485,16 @@ export default function App() {
         }
       : undefined,
   });
+
+  // Comment-anchor click in the editor → window event from
+  // commentDecorations.ts. Open the side panel + jump the panel
+  // scroll to the matching thread (the panel itself listens for the
+  // same event to highlight the right row).
+  useEffect(() => {
+    const onCommentFocus = () => setCommentsPanelOpen(true);
+    window.addEventListener("lumen-comment-focus", onCommentFocus);
+    return () => window.removeEventListener("lumen-comment-focus", onCommentFocus);
+  }, []);
 
   // Native Tauri menu wiring — no-op when running in a regular browser.
   useTauriMenu({
@@ -578,21 +611,43 @@ export default function App() {
             <SidebarResizer />
           </>
         )}
-        <EditorLayout
-          mode={mode}
-          docContent={doc.content}
-          docName={doc.name}
-          deferredContent={deferredContent}
-          editorRef={editorRef}
-          vimEnabled={vimEnabled}
-          spellCheck={spellCheck}
-          typewriterMode={typewriterMode}
-          activeFile={activeFile}
-          pageView={pageView}
-          collab={collab}
-          setContent={setContent}
-          handleAddAsset={handleAddAsset}
-        />
+        <div style={{ flex: 1, display: "flex", flexDirection: "column", minWidth: 0 }}>
+          <DocTabs
+            tabs={openTabs.map((t) => ({
+              id: t.id,
+              name: t.name,
+              dirty: t.dirty,
+            }))}
+            activeId={tabId(doc)}
+            onSelect={(id) => {
+              const target = openTabs.find((t) => t.id === id);
+              if (!target) return;
+              openTabAction({
+                name: target.name,
+                content: target.content,
+                workspaceName: target.workspaceName ?? null,
+              });
+            }}
+            onClose={(id) => closeTabAction(id)}
+            onReorder={(from, to) => reorderTabs(from, to)}
+          />
+          <EditorLayout
+            mode={mode}
+            docContent={doc.content}
+            docName={doc.name}
+            deferredContent={deferredContent}
+            editorRef={editorRef}
+            vimEnabled={vimEnabled}
+            spellCheck={spellCheck}
+            grammarCheck={grammarCheck}
+            typewriterMode={typewriterMode}
+            activeFile={activeFile}
+            pageView={pageView}
+            collab={collab}
+            setContent={setContent}
+            handleAddAsset={handleAddAsset}
+          />
+        </div>
         {showOutline && <Outline markdownText={doc.content} />}
         {showBacklinks && (
           <BacklinksPanel
@@ -726,6 +781,17 @@ export default function App() {
         <ErrorBoundary fallback={<div style={{ padding: '2rem', color: 'hsl(0 80% 60%)' }}>Component failed to load.</div>}>
           <CanvasWhiteboard open={canvasOpen} onClose={() => setCanvasOpen(false)} />
           <PluginGallery open={galleryOpen} onClose={() => setGalleryOpen(false)} />
+          <TemplateGallery open={templateGalleryOpen} onClose={() => setTemplateGalleryOpen(false)} />
+          <AuditLog
+            open={auditLogOpen}
+            onClose={() => setAuditLogOpen(false)}
+            // Org id falls through to the auth provider when wired; for free
+            // / pro tiers there's no org so we use the user id as the scope.
+            orgId={(useAppStore.getState() as { user?: { orgId?: string; id?: string } }).user?.orgId
+              ?? (useAppStore.getState() as { user?: { id?: string } }).user?.id
+              ?? "personal"}
+          />
+          <FineTuneSettings open={fineTuneOpen} onClose={() => setFineTuneOpen(false)} />
         </ErrorBoundary>
       </Suspense>
 
@@ -782,8 +848,9 @@ export default function App() {
             deferredContent={deferredContent}
             editorRef={editorRef}
             vimEnabled={vimEnabled}
-          spellCheck={spellCheck}
-          typewriterMode={typewriterMode}
+            spellCheck={spellCheck}
+            grammarCheck={grammarCheck}
+            typewriterMode={typewriterMode}
             activeFile={activeFile}
             pageView={pageView}
             collab={collab}

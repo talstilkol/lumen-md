@@ -41,6 +41,9 @@ export interface UseCommandsOptions {
   setTableEditorOpen: (open: boolean) => void;
   setCanvasOpen: (open: boolean) => void;
   setGalleryOpen: (open: boolean) => void;
+  setTemplateGalleryOpen?: (open: boolean) => void;
+  setAuditLogOpen?: (open: boolean) => void;
+  setFineTuneOpen?: (open: boolean) => void;
   setTagsPanelOpen?: (open: boolean) => void;
   setCommentsPanelOpen?: (open: boolean) => void;
   onAddComment?: () => void;
@@ -66,6 +69,9 @@ export function useCommands({
   setTableEditorOpen,
   setCanvasOpen,
   setGalleryOpen,
+  setTemplateGalleryOpen,
+  setAuditLogOpen,
+  setFineTuneOpen,
   setTagsPanelOpen,
   setCommentsPanelOpen,
   onAddComment,
@@ -94,6 +100,8 @@ export function useCommands({
   const toggleSpellCheck = useAppStore((s) => s.toggleSpellCheck);
   const toggleLocalAi = useAppStore((s) => s.toggleLocalAi);
   const toggleTypewriter = useAppStore((s) => s.toggleTypewriter);
+  const grammarCheck = useAppStore((s) => s.grammarCheck);
+  const toggleGrammarCheck = useAppStore((s) => s.toggleGrammarCheck);
   const setWritingGoal = useAppStore((s) => s.setWritingGoal);
   const toggleAutoSave = useAppStore((s) => s.toggleAutoSave);
 
@@ -384,6 +392,18 @@ export function useCommands({
         action: toggleTypewriter,
       },
       {
+        id: "view.grammarCheck",
+        label: grammarCheck
+          ? t("cmd.view.grammarCheck.off") ?? "Disable grammar check"
+          : t("cmd.view.grammarCheck.on") ?? "Enable grammar check (LanguageTool)",
+        hint:
+          t("cmd.view.grammarCheck.hint") ??
+          "Underlines grammar / style / typo issues. Calls LanguageTool — set VITE_LANGUAGETOOL_URL to self-host.",
+        icon: cmdIcons.Pencil,
+        group: t("group.view"),
+        action: toggleGrammarCheck,
+      },
+      {
         id: "tools.writingGoal",
         label: writingGoalWords > 0
           ? t("cmd.tools.writingGoal.set", { words: writingGoalWords })
@@ -402,8 +422,12 @@ export function useCommands({
       },
       {
         id: "ai.localToggle",
-        label: useLocalAi ? t("cmd.ai.local.off") : t("cmd.ai.local.on"),
-        hint: t("cmd.ai.local.hint"),
+        label: useLocalAi
+          ? (t("cmd.ai.privacy.off") ?? "Privacy Mode: turn off (use cloud AI)")
+          : (t("cmd.ai.privacy.on") ?? "Privacy Mode: run AI on this device (WebGPU)"),
+        hint:
+          t("cmd.ai.privacy.hint") ??
+          "When ON, every AI prompt runs locally via @mlc-ai/web-llm. No data leaves your browser.",
         icon: cmdIcons.Sparkles,
         group: t("group.ai"),
         action: async () => {
@@ -412,12 +436,18 @@ export function useCommands({
             const { localLlmAvailable } = await import("../ai/localLlm");
             const status = localLlmAvailable();
             if (!status.available) {
-              showAiToast(`Local AI not available: ${status.reason}`, "error");
+              showAiToast(
+                `Privacy Mode unavailable: ${status.reason}. Falls back to cloud AI.`,
+                "error",
+              );
               return;
             }
-            showAiToast("🧠 Local AI enabled — first prompt will download the model (~4 GB)", "info");
+            showAiToast(
+              "🛡️  Privacy Mode ON — first prompt downloads the model (~4 GB) into your browser; subsequent prompts are fully local.",
+              "info",
+            );
           } else {
-            showAiToast("🌐 Switched back to cloud AI", "info");
+            showAiToast("🌐 Privacy Mode OFF — switched back to cloud AI", "info");
           }
           toggleLocalAi();
         },
@@ -597,6 +627,42 @@ export function useCommands({
         group: t("group.view"),
         action: () => setGalleryOpen(true),
       },
+      ...(setTemplateGalleryOpen
+        ? [
+            {
+              id: "templates.open",
+              label: t("cmd.templates.open"),
+              hint: t("cmd.templates.open.hint"),
+              icon: cmdIcons.Sparkles,
+              group: t("group.view"),
+              action: () => setTemplateGalleryOpen(true),
+            },
+          ]
+        : []),
+      ...(setAuditLogOpen
+        ? [
+            {
+              id: "audit.open",
+              label: t("cmd.audit.open"),
+              hint: t("cmd.audit.open.hint"),
+              icon: cmdIcons.Sparkles,
+              group: t("group.security"),
+              action: () => setAuditLogOpen(true),
+            },
+          ]
+        : []),
+      ...(setFineTuneOpen
+        ? [
+            {
+              id: "ai.fineTune",
+              label: t("cmd.fineTune.open"),
+              hint: t("cmd.fineTune.open.hint"),
+              icon: cmdIcons.Sparkles,
+              group: t("group.ai"),
+              action: () => setFineTuneOpen(true),
+            },
+          ]
+        : []),
       ...(setTagsPanelOpen
         ? [
             {

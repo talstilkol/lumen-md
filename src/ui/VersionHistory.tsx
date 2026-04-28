@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { t } from "../i18n";
 
 /**
  * Version history stored in IndexedDB. Each "snapshot" captures the
@@ -122,8 +123,8 @@ export function VersionHistory({ fileName, currentContent, onRestore, onClose }:
         overflowY: "auto",
       }}>
         <div style={{ padding: "12px 16px", borderBottom: "1px solid hsl(var(--border))" }}>
-          <h3 style={{ margin: 0, fontSize: 14, color: "hsl(var(--fg))" }}>Version History</h3>
-          <p style={{ margin: "4px 0 0", fontSize: 11, color: "hsl(var(--fg-muted))" }}>{snapshots.length} versions saved</p>
+          <h3 style={{ margin: 0, fontSize: 14, color: "hsl(var(--fg))" }}>{t("versionHistory.title")}</h3>
+          <p style={{ margin: "4px 0 0", fontSize: 11, color: "hsl(var(--fg-muted))" }}>{t("versionHistory.savedCount", { count: String(snapshots.length) })}</p>
         </div>
         {snapshots.map((snap) => (
           <button
