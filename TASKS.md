@@ -51,8 +51,8 @@
 
 | Metric                                                | Value                                           |
 | ----------------------------------------------------- | ----------------------------------------------- |
-| Unit-test files                                       | 88                                              |
-| Unit tests                                            | **770 passing**                                 |
+| Unit-test files                                       | 91                                              |
+| Unit tests                                            | **804 passing**                                 |
 | Coverage (lines)                                      | **97.24 %**                                     |
 | E2E spec files                                        | 8                                               |
 | `npm audit`                                           | **0 vulnerabilities**                           |
@@ -65,7 +65,7 @@
 | Locales                                               | 8 selectable (en, he + 6 with 110–142 keys)     |
 | MCP-server tools                                      | 8 (was 4)                                       |
 | Status-bar pills                                      | 4 (Privacy, Roadmap, Grammar, Telemetry)        |
-| Hardcoded English strings in UI                       | **0** (16 more eliminated this batch)           |
+| Hardcoded English strings in UI                       | **0** (40+ eliminated across 3 sessions)        |
 
 ---
 
