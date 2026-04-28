@@ -1,0 +1,25 @@
+# Lumen billing service — runs the Cloudflare Worker code in a Node-shimmed
+# environment via wrangler local-mode, exposing port 4446. For self-hosted
+# deployments where Cloudflare Workers isn't an option.
+
+FROM node:20-alpine
+WORKDIR /app
+
+COPY edge-workers/billing/package.json edge-workers/billing/package-lock.json* ./
+RUN npm ci || npm install
+
+COPY edge-workers/billing/ ./
+
+ENV PORT=4446
+EXPOSE 4446
+
+# Required env at runtime (set via docker-compose.yml):
+#   STRIPE_SECRET_KEY=...
+#   STRIPE_WEBHOOK_SECRET=...
+#   D1_BACKEND=postgres   (compose substitutes a Postgres adapter for D1)
+#   DATABASE_URL=postgres://...
+
+HEALTHCHECK --interval=30s --timeout=5s --retries=3 \
+  CMD wget -q -O - http://localhost:4446/health > /dev/null || exit 1
+
+CMD ["npx", "-y", "wrangler", "dev", "--ip=0.0.0.0", "--port=4446", "--local"]

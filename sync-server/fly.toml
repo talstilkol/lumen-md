@@ -1,0 +1,37 @@
+# Fly.io configuration for the lumen-signal app.
+# Provision with:  fly launch --copy-config --no-deploy --name lumen-signal
+# Then:            fly deploy
+#
+# DNS:  CNAME signal.lumen.md → lumen-signal.fly.dev (proxy off, plain WebSocket)
+# Cert: fly certs add signal.lumen.md  (after the CNAME resolves)
+
+app = "lumen-signal"
+primary_region = "sjc"
+
+[build]
+  dockerfile = "Dockerfile"
+
+[env]
+  NODE_ENV = "production"
+  PORT = "4444"
+
+[http_service]
+  internal_port = 4444
+  force_https = true
+  auto_stop_machines = false
+  auto_start_machines = true
+  min_machines_running = 1
+
+  [[http_service.checks]]
+    grace_period = "10s"
+    interval = "30s"
+    method = "GET"
+    timeout = "5s"
+    path = "/"
+
+# 256 MB is plenty for a signalling server — it relays SDP offers and never
+# proxies the actual collab payload.
+[[vm]]
+  cpu_kind = "shared"
+  cpus = 1
+  memory_mb = 256

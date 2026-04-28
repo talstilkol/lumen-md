@@ -1,0 +1,26 @@
+# Lumen persistent collaboration server.
+# Wraps `sync-server/persistent-server.js` (y-websocket + LevelDB hot path
+# + Postgres archive) and exposes port 4445.
+
+FROM node:20-alpine
+WORKDIR /app
+
+COPY sync-server/package.json sync-server/package-lock.json* ./
+RUN npm ci --omit=dev || npm install --omit=dev
+
+COPY sync-server/persistent-server.js ./
+
+ENV NODE_ENV=production
+ENV PORT=4445
+EXPOSE 4445
+
+# DATABASE_URL must be supplied at runtime (docker-compose sets this from
+# the postgres service). LevelDB persists to /data which docker-compose
+# mounts as a named volume.
+VOLUME /data
+ENV LEVELDB_PATH=/data/yjs
+
+HEALTHCHECK --interval=30s --timeout=5s --retries=3 \
+  CMD wget -q -O - http://localhost:4445/health > /dev/null || exit 1
+
+CMD ["node", "persistent-server.js"]
