@@ -2,11 +2,10 @@
  * Tests for the lazy-locale infrastructure (β.4.4).
  *
  * The 6 locales added to `SUPPORTED_LOCALES` (ar/ru/fr/de/ja/zh-CN)
- * don't ship bundles yet — `loadLocale()` falls back to `en` for
- * each, and `isLocaleAvailable()` reports them as unavailable until
- * a JSON file is dropped into `src/i18n/locales/`. We pin both
- * behaviours so a future translator's PR adding `ar.json` doesn't
- * accidentally break the synchronous codepath.
+ * now ship with a core set of ~50 translated keys each. Full translations
+ * require running the OpenAI translate script. `isLocaleAvailable()` reports
+ * them as available since they have real keys. `loadLocale()` resolves
+ * cleanly and `t()` returns the translated value.
  */
 
 import { describe, it, expect } from "vitest";
@@ -29,16 +28,14 @@ describe("β.4 lazy locale infrastructure", () => {
     expect(isLocaleAvailable("he")).toBe(true);
   });
 
-  it("isLocaleAvailable returns false for empty-stub bundles (translator hasn't filled them in yet)", async () => {
-    // Stubs ship as `{}`. Until at least one key is translated, the locale
-    // counts as unavailable so the picker doesn't switch users into a
-    // pure-English UI silently.
-    expect(isLocaleAvailable("ar")).toBe(false);
-    expect(isLocaleAvailable("ru")).toBe(false);
-    expect(isLocaleAvailable("fr")).toBe(false);
-    // Even after a load, the empty `{}` should keep the locale unavailable.
+  it("isLocaleAvailable returns true for locales with real translated keys", async () => {
+    // All 6 locales now have ~50 core keys translated.
     await loadLocale("ar");
-    expect(isLocaleAvailable("ar")).toBe(false);
+    expect(isLocaleAvailable("ar")).toBe(true);
+    await loadLocale("fr");
+    expect(isLocaleAvailable("fr")).toBe(true);
+    await loadLocale("ru");
+    expect(isLocaleAvailable("ru")).toBe(true);
   });
 
   it("ar / zh-CN are tagged with the right `dir`", () => {
@@ -48,14 +45,12 @@ describe("β.4 lazy locale infrastructure", () => {
     expect(zh?.dir).toBe("ltr");
   });
 
-  it("loadLocale returns the lazy bundle (empty stubs render via en fallback in t())", async () => {
-    // ar.json ships as `{}` until a translator runs the script; loadLocale
-    // still resolves cleanly. t() handles the en fallback at lookup time.
+  it("loadLocale returns the lazy bundle with real translated keys", async () => {
     const bundle = await loadLocale("ar");
     expect(typeof bundle).toBe("object");
-    // Empty stub → key absent → t() will fall through to en.
+    // ar.json now has real translations.
     applyLocale("ar");
-    expect(t("toolbar.tagline")).toBe("Markdown, illuminated");
+    expect(t("toolbar.tagline")).toBe("Markdown، مُنار");
     applyLocale("en");
   });
 
@@ -68,10 +63,11 @@ describe("β.4 lazy locale infrastructure", () => {
     applyLocale("en");
   });
 
-  it("t() falls through to en when the active locale's bundle isn't loaded yet", () => {
+  it("t() returns translated value for loaded locale", async () => {
+    await loadLocale("fr");
     applyLocale("fr");
-    // No fr.json yet — `t()` returns the en value.
-    expect(t("toolbar.new")).toBe("New");
+    // fr.json has 'toolbar.new' translated.
+    expect(t("toolbar.new")).toBe("Nouveau");
     applyLocale("en");
   });
 });
