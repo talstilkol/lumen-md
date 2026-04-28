@@ -29,6 +29,8 @@
  * ships a small bridge that fakes a normal `LumenPluginAPI` on top.
  */
 
+import { log } from "../lib/logger";
+
 export interface PluginHandle {
   id: string;
   iframe: HTMLIFrameElement;
@@ -132,8 +134,7 @@ export function spawnPluginSandbox(opts: SandboxOptions): Promise<PluginHandle> 
         return;
       }
       if (msg.type === "error") {
-        // eslint-disable-next-line no-console
-        console.error(`[plugin:${opts.id}]`, msg.message);
+        log.error(`[plugin:${opts.id}]`, msg.message);
         if (!ready) reject(new Error(msg.message ?? "plugin failed to load"));
         return;
       }
