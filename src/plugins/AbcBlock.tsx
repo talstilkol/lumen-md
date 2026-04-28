@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { t } from "../i18n";
 
 let abcPromise: Promise<typeof import("abcjs")> | null = null;
 async function getAbc() {
@@ -54,7 +55,7 @@ export default function AbcBlock({ source }: Props) {
   return (
     <div className="chart-block">
       <div className="chart-block-header">
-        <span>Music · ABC notation</span>
+        <span>{t("plugin.abc")}</span>
       </div>
       <div ref={ref} style={{ padding: "0.75rem", overflow: "auto" }} />
     </div>

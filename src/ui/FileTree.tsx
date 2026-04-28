@@ -201,7 +201,7 @@ export function FileTree({
   }
 
   async function newFile(parentPath: string) {
-    const candidate = joinPath(parentPath, "Untitled.md");
+    const candidate = joinPath(parentPath, `${t("doc.untitled")}.md`);
     const path = await uniqueWorkspaceName(candidate);
     await writeWorkspaceFile(
       path,

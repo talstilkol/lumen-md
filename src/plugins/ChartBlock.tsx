@@ -3,6 +3,7 @@ import YAML from "yaml";
 import { RefreshCw } from "lucide-react";
 import { EChart } from "./EChart";
 import { useFetchSource } from "./useFetchSource";
+import { t } from "../i18n";
 
 interface Props {
   source: string;
@@ -62,7 +63,7 @@ export default function ChartBlock({ source, meta }: Props) {
   return (
     <div className="chart-block">
       <div className="chart-block-header">
-        <span>Chart{remote && url ? " · live" : ""}</span>
+        <span>{t("plugin.chart")}{remote && url ? " · live" : ""}</span>
         {url && (
           <button
             type="button"
@@ -78,7 +79,7 @@ export default function ChartBlock({ source, meta }: Props) {
               borderRadius: 6,
             }}
             disabled={loading}
-            aria-label="Refetch chart data"
+            aria-label={t("plugin.chart.refetch")}
           >
             <RefreshCw
               size={13}

@@ -641,6 +641,16 @@ const en: Strings = {
   "auth.signIn": "Sign in",
   "auth.signOut": "Sign out",
   "auth.signedInAs": "Signed in as",
+  // Time-ago strings
+  "time.justNow": "just now",
+  "time.minutesAgo": "{n}m ago",
+  "time.hoursAgo": "{n}h ago",
+  "time.daysAgo": "{n}d ago",
+  // Plugin labels
+  "plugin.map": "Map",
+  "plugin.chart": "Chart",
+  "plugin.chart.refetch": "Refetch chart data",
+  "plugin.abc": "Music · ABC notation",
   // Theme labels
   "theme.toggle": "Toggle theme",
   // PWA
@@ -1221,6 +1231,16 @@ const he: Strings = {
   "auth.signIn": "התחברות",
   "auth.signOut": "התנתקות",
   "auth.signedInAs": "מחובר כ־",
+  // Time-ago strings
+  "time.justNow": "עכשיו",
+  "time.minutesAgo": "לפני {n} דקות",
+  "time.hoursAgo": "לפני {n} שעות",
+  "time.daysAgo": "לפני {n} ימים",
+  // Plugin labels
+  "plugin.map": "מפה",
+  "plugin.chart": "תרשים",
+  "plugin.chart.refetch": "רענן נתוני תרשים",
+  "plugin.abc": "מוזיקה · תווי ABC",
   "theme.toggle": "החלפת ערכת נושא",
   "pwa.updateAvailable": "גרסה חדשה זמינה",
   "pwa.reload": "טעינה מחדש",

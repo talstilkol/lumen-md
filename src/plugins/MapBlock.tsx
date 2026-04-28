@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import YAML from "yaml";
+import { t } from "../i18n";
 
 interface Props {
   source: string;
@@ -131,7 +132,7 @@ export default function MapBlock({ source, lang }: Props) {
   return (
     <div className="chart-block">
       <div className="chart-block-header">
-        <span>Map</span>
+        <span>{t("plugin.map")}</span>
       </div>
       <div ref={ref} style={{ height: 360, width: "100%" }} />
     </div>

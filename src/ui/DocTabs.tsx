@@ -213,5 +213,5 @@ export const DocTabs = React.memo(function DocTabs({
 
 /** Utility: generate a unique tab ID. Mirrored in `useStore.tabIdOf`. */
 export function tabId(doc: DocFile): string {
-  return doc.workspaceName ?? doc.name ?? "Untitled";
+  return doc.workspaceName ?? doc.name ?? t("doc.untitled");
 }
