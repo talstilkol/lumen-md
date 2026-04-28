@@ -755,15 +755,15 @@ export default function App() {
       {graphOpen && (
         <div style={{ position: "fixed", inset: 0, zIndex: 9999, background: "hsl(var(--bg))" }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "8px 16px", borderBottom: "1px solid hsl(var(--border))" }}>
-            <h3 style={{ margin: 0, fontSize: 14, color: "hsl(var(--fg))" }}>Knowledge Graph</h3>
-            <button className="icon-btn" onClick={() => setGraphOpen(false)} style={{ width: "auto", padding: "4px 12px", fontSize: 12 }}>Close</button>
+            <h3 style={{ margin: 0, fontSize: 14, color: "hsl(var(--fg))" }}>{t("graphView.title")}</h3>
+            <button className="icon-btn" onClick={() => setGraphOpen(false)} style={{ width: "auto", padding: "4px 12px", fontSize: 12 }}>{t("dialog.cancel")}</button>
           </div>
           <div style={{ height: "calc(100vh - 42px)" }}>
-            <Suspense fallback={<div style={{padding:'2rem',color:'hsl(var(--fg-muted))'}}>Loading graph…</div>}>
+            <Suspense fallback={<div style={{padding:'2rem',color:'hsl(var(--fg-muted))'}}>Loading…</div>}>
               <ErrorBoundary fallback={
                 <div style={{ padding: "3rem", textAlign: "center", color: "hsl(0 80% 60%)" }}>
-                  <strong>Graph Render Failed</strong>
-                  <p>The workspace data resulted in an invalid node structure that crashed the renderer.</p>
+                  <strong>{t("graphView.renderFailed")}</strong>
+                  <p>{t("graphView.renderFailedDetail")}</p>
                 </div>
               }>
                 <GraphView onOpenFile={(path, content) => {
@@ -778,7 +778,7 @@ export default function App() {
 
       {/* Canvas Whiteboard overlay */}
       <Suspense fallback={null}>
-        <ErrorBoundary fallback={<div style={{ padding: '2rem', color: 'hsl(0 80% 60%)' }}>Component failed to load.</div>}>
+        <ErrorBoundary fallback={<div style={{ padding: '2rem', color: 'hsl(0 80% 60%)' }}>{t("errorBoundary.heading")}</div>}>
           <CanvasWhiteboard open={canvasOpen} onClose={() => setCanvasOpen(false)} />
           <PluginGallery open={galleryOpen} onClose={() => setGalleryOpen(false)} />
           <TemplateGallery open={templateGalleryOpen} onClose={() => setTemplateGalleryOpen(false)} />
@@ -797,8 +797,8 @@ export default function App() {
 
       {/* Version History overlay */}
       {historyOpen && (
-        <Suspense fallback={<div style={{padding:'2rem',color:'hsl(var(--fg-muted))'}}>Loading history…</div>}>
-          <ErrorBoundary fallback={<div style={{ padding: '2rem', color: 'hsl(0 80% 60%)' }}>Version history failed to load.</div>}>
+        <Suspense fallback={<div style={{padding:'2rem',color:'hsl(var(--fg-muted))'}}>Loading…</div>}>
+          <ErrorBoundary fallback={<div style={{ padding: '2rem', color: 'hsl(0 80% 60%)' }}>{t("errorBoundary.heading")}</div>}>
             <VersionHistory
               fileName={doc.name}
               currentContent={doc.content}
@@ -812,7 +812,7 @@ export default function App() {
       {/* Table Editor overlay */}
       {tableEditorOpen && (
         <Suspense fallback={null}>
-          <ErrorBoundary fallback={<div style={{ padding: '2rem', color: 'hsl(0 80% 60%)' }}>Table editor failed to load.</div>}>
+          <ErrorBoundary fallback={<div style={{ padding: '2rem', color: 'hsl(0 80% 60%)' }}>{t("errorBoundary.heading")}</div>}>
             <MarkdownTableEditor
               onUpdate={(md) => {
                 const current = doc.content;

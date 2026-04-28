@@ -3,6 +3,7 @@ import { renderMarkdown, extractFrontmatter } from "./pipeline";
 import { CopyButtonHandler } from "./components";
 import { Frontmatter } from "../ui/Frontmatter";
 import { ErrorBoundary } from "../ui/ErrorBoundary";
+import { t } from "../i18n";
 
 interface Props {
   markdownText: string;
@@ -70,8 +71,8 @@ export function Preview({ markdownText }: Props) {
         <Frontmatter data={frontmatter} />
         <ErrorBoundary fallback={
           <div style={{ padding: "16px", color: "hsl(0 80% 60%)", border: "1px solid currentColor", borderRadius: "8px", margin: "16px" }}>
-            <strong>Component Render Failed</strong>
-            <p style={{ marginTop: "4px", fontSize: "12px", opacity: 0.8 }}>One of the embedded visualizations crashed during render. The rest of the editor is kept safe.</p>
+            <strong>{t("errorBoundary.heading")}</strong>
+            <p style={{ marginTop: "4px", fontSize: "12px", opacity: 0.8 }}>{t("errorBoundary.renderDetail")}</p>
           </div>
         }>
           {tree}
