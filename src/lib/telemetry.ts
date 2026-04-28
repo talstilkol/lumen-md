@@ -1,37 +1,21 @@
 /**
- * Minimal opt-out error telemetry. Forwards `log.error` payloads to a Sentry
- * project via the Sentry envelope HTTP API — no SDK dependency.
+ * Error telemetry — built on `@sentry/react` SDK.
  *
  * Wire-up:
  * 1. Set `VITE_SENTRY_DSN` (e.g. `https://abcdef@o123.ingest.sentry.io/4567`).
  * 2. Call `initTelemetry()` once at startup (in `main.tsx`).
  * 3. The user can opt out by setting `localStorage["lumen.telemetry.optOut"] = "1"`.
+ *    Settings UI surfaces a toggle that flips this key.
  *
- * If the DSN is missing or the user opted out, the sink is a no-op.
+ * If the DSN is missing or the user opted out, the sink is a no-op and the
+ * SDK is never initialised — saving the network + bundle weight that the
+ * SDK's auto-instrumentation would otherwise add.
  */
 
+import * as Sentry from "@sentry/react";
 import { setErrorSink } from "./logger";
 
 const OPT_OUT_KEY = "lumen.telemetry.optOut";
-
-interface DsnComponents {
-  publicKey: string;
-  host: string;
-  projectId: string;
-  protocol: string;
-}
-
-function parseDsn(dsn: string): DsnComponents | null {
-  // dsn format: <protocol>://<publicKey>@<host>/<projectId>
-  const match = /^(https?):\/\/([^@]+)@([^/]+)\/(\d+)$/.exec(dsn.trim());
-  if (!match) return null;
-  return {
-    protocol: match[1],
-    publicKey: match[2],
-    host: match[3],
-    projectId: match[4],
-  };
-}
 
 function isOptedOut(): boolean {
   try {
@@ -41,7 +25,7 @@ function isOptedOut(): boolean {
   }
 }
 
-/** Public toggle — use from a Settings UI. */
+/** Public toggle — used by the Settings UI. */
 export function setTelemetryOptOut(value: boolean): void {
   try {
     if (value) localStorage.setItem(OPT_OUT_KEY, "1");
@@ -66,57 +50,72 @@ function readEnvDsn(): string | undefined {
   }
 }
 
-function buildEnvelope(
-  components: DsnComponents,
-  payload: unknown,
-): { url: string; body: string } {
-  const eventId =
-    crypto.randomUUID?.().replace(/-/g, "") ??
-    Math.random().toString(16).slice(2).padEnd(32, "0");
-  const sentAt = new Date().toISOString();
+/**
+ * Strip user-content fields from outgoing events. Lumen documents are
+ * private to the user — we never want a stack trace + breadcrumb chain
+ * to leak the doc body, vault contents, or auth tokens.
+ *
+ * Approach: redact any `extra` / `contexts` / `breadcrumbs.message` field
+ * whose key looks like user content (`note.*`, `doc.*`, `aiKey`, `vault`).
+ */
+function scrubPii(event: Sentry.ErrorEvent): Sentry.ErrorEvent | null {
+  const REDACT = /^(note\.|doc\.|aiKey|vault|workspace\.|password)/i;
 
-  const headers = JSON.stringify({
-    event_id: eventId,
-    sent_at: sentAt,
-    sdk: { name: "lumen.telemetry", version: "0.1.0" },
-  });
-  const itemHeader = JSON.stringify({ type: "event" });
-  const body =
-    headers + "\n" + itemHeader + "\n" + JSON.stringify(payload) + "\n";
-
-  const url =
-    `${components.protocol}://${components.host}/api/${components.projectId}/envelope/?` +
-    `sentry_key=${components.publicKey}&sentry_version=7&sentry_client=lumen.telemetry/0.1.0`;
-
-  return { url, body };
-}
-
-function shapeError(args: unknown[]): Record<string, unknown> {
-  const first = args.find((a) => a instanceof Error) as Error | undefined;
-  const messageArgs = args.filter((a) => a !== first);
-
-  return {
-    timestamp: Date.now() / 1000,
-    platform: "javascript",
-    level: "error",
-    logger: "lumen",
-    message: messageArgs.map((a) => formatArg(a)).join(" "),
-    exception: first
-      ? {
-          values: [
-            {
-              type: first.name || "Error",
-              value: first.message,
-              stacktrace: first.stack ? { frames: parseStack(first.stack) } : undefined,
-            },
-          ],
-        }
-      : undefined,
-    request: typeof location !== "undefined" ? { url: location.href } : undefined,
-    release: "lumen@0.1.0",
+  const redactObj = (obj: Record<string, unknown> | undefined): void => {
+    if (!obj) return;
+    for (const k of Object.keys(obj)) {
+      if (REDACT.test(k)) obj[k] = "[redacted]";
+    }
   };
+  redactObj(event.extra as Record<string, unknown> | undefined);
+  redactObj(event.contexts as unknown as Record<string, unknown> | undefined);
+  if (event.breadcrumbs) {
+    for (const bc of event.breadcrumbs) {
+      if (bc.data) redactObj(bc.data);
+    }
+  }
+  return event;
 }
 
+let initialized = false;
+
+/**
+ * Wire telemetry into the logger error sink. Safe to call multiple times.
+ * Initialises the Sentry SDK only when a DSN is set and the user hasn't
+ * opted out — otherwise the SDK isn't loaded at all.
+ */
+export function initTelemetry(): void {
+  if (initialized) return;
+  initialized = true;
+
+  const dsn = readEnvDsn();
+  if (!dsn) return; // no DSN = no telemetry, that's fine
+  if (isOptedOut()) return;
+
+  Sentry.init({
+    dsn,
+    integrations: [Sentry.browserTracingIntegration()],
+    tracesSampleRate: 0.1,
+    release: "lumen@0.1.0",
+    beforeSend(event) {
+      // PII scrub before any event leaves the browser.
+      return scrubPii(event as Sentry.ErrorEvent);
+    },
+  });
+
+  setErrorSink((...args: unknown[]) => {
+    if (isOptedOut()) return;
+    const errArg = args.find((a) => a instanceof Error) as Error | undefined;
+    const messageArgs = args.filter((a) => a !== errArg).map(formatArg).join(" ");
+    if (errArg) {
+      Sentry.captureException(errArg, { extra: { message: messageArgs } });
+    } else if (messageArgs) {
+      Sentry.captureMessage(messageArgs, "error");
+    }
+  });
+}
+
+/** Pretty-print non-Error args for `extra.message`. */
 function formatArg(a: unknown): string {
   if (a == null) return String(a);
   if (typeof a === "string") return a;
@@ -126,55 +125,4 @@ function formatArg(a: unknown): string {
   } catch {
     return String(a);
   }
-}
-
-function parseStack(stack: string): { filename: string; lineno?: number; colno?: number; function?: string }[] {
-  return stack
-    .split("\n")
-    .slice(1, 30)
-    .map((line) => {
-      const m = /at\s+(?:(.+?)\s+\()?([^)]+):(\d+):(\d+)\)?/.exec(line.trim());
-      if (!m) return { filename: line.trim() };
-      return {
-        function: m[1] || undefined,
-        filename: m[2],
-        lineno: Number(m[3]),
-        colno: Number(m[4]),
-      };
-    })
-    .filter((f) => f.filename);
-}
-
-let initialized = false;
-
-/** Wire telemetry into the logger error sink. Safe to call multiple times. */
-export function initTelemetry(): void {
-  if (initialized) return;
-  initialized = true;
-
-  const dsn = readEnvDsn();
-  if (!dsn) return; // no DSN = no telemetry, that's fine
-  const parsed = parseDsn(dsn);
-  if (!parsed) return;
-
-  setErrorSink((...args: unknown[]) => {
-    if (isOptedOut()) return;
-    try {
-      const payload = shapeError(args);
-      const { url, body } = buildEnvelope(parsed, payload);
-      // Use sendBeacon when available so errors flush during unload; fall back to fetch.
-      const blob = new Blob([body], { type: "application/x-sentry-envelope" });
-      if (navigator.sendBeacon?.(url, blob)) return;
-      fetch(url, {
-        method: "POST",
-        headers: { "Content-Type": "application/x-sentry-envelope" },
-        body,
-        keepalive: true,
-      }).catch(() => {
-        // network failure → drop; never recurse into error logging
-      });
-    } catch {
-      // never let telemetry failure crash the app
-    }
-  });
 }
