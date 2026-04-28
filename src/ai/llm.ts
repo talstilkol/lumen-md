@@ -126,7 +126,15 @@ export async function chat(
   const key = getAiKey();
   checkRateLimit();
   inflight++;
-  const model = opts.model ?? DEFAULT_MODEL;
+  // F3 — when the user has trained + enabled their personal model,
+  // route chat() through it. Caller-supplied `opts.model` still wins
+  // so individual call sites (e.g. autocomplete) can pin a fast model.
+  const storeState = useAppStore.getState();
+  const fineTuneOverride =
+    storeState.useFineTunedModel && storeState.fineTunedModelId
+      ? storeState.fineTunedModelId
+      : null;
+  const model = opts.model ?? fineTuneOverride ?? DEFAULT_MODEL;
   let lastError: Error | null = null;
 
   try {
