@@ -1,0 +1,11 @@
+name = "lumen-audit"
+main = "worker.ts"
+compatibility_date = "2026-04-27"
+
+# D1 binding — create the database with `wrangler d1 create lumen-audit`,
+# copy the printed `database_id` into this file, then run the migration:
+#   wrangler d1 execute lumen-audit --file=schema.sql
+[[d1_databases]]
+binding = "DB"
+database_name = "lumen-audit"
+database_id = "REPLACE_WITH_YOUR_D1_ID"
