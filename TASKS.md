@@ -51,8 +51,8 @@
 
 | Metric                                                | Value                                           |
 | ----------------------------------------------------- | ----------------------------------------------- |
-| Unit-test files                                       | 82                                              |
-| Unit tests                                            | **696 passing**                                 |
+| Unit-test files                                       | 88                                              |
+| Unit tests                                            | **770 passing**                                 |
 | Coverage (lines)                                      | **97.24 %**                                     |
 | E2E spec files                                        | 8                                               |
 | `npm audit`                                           | **0 vulnerabilities**                           |
@@ -62,7 +62,7 @@
 | Hardcoded English strings in UI                       | 0                                               |
 | Bundle: vendor-shiki                                  | 261 KB (was 9.2 MB)                             |
 | Bundle: vendor-tldraw lazy                            | 391 KB (canvas only)                            |
-| Locales                                               | 8 selectable (en, he + 6 with 50 core keys)     |
+| Locales                                               | 8 selectable (en, he + 6 with 110–142 keys)     |
 | MCP-server tools                                      | 8 (was 4)                                       |
 | Status-bar pills                                      | 4 (Privacy, Roadmap, Grammar, Telemetry)        |
 | Hardcoded English strings in UI                       | **0** (16 more eliminated this batch)           |
