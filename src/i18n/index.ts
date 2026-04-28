@@ -346,6 +346,8 @@ const en: Strings = {
   "insertText.previewEmpty": "(nothing yet — start typing)",
   "insertText.cancel": "Cancel",
   "insertText.confirm": "Insert",
+  "insertText.hintInsert": "to insert",
+  "insertText.hintCancel": "to cancel",
   // Block UI strings
   "block.htmlPreview.title": "HTML preview",
   "block.htmlPreview.source": "Source",
@@ -921,6 +923,8 @@ const he: Strings = {
   "insertText.previewEmpty": "(עדיין כלום — התחל להקליד)",
   "insertText.cancel": "ביטול",
   "insertText.confirm": "הוסף",
+  "insertText.hintInsert": "להוספה",
+  "insertText.hintCancel": "לביטול",
   // Block UI strings
   "block.htmlPreview.title": "תצוגת HTML",
   "block.liveCss.title": "CSS חי",

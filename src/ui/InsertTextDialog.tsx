@@ -267,7 +267,7 @@ function InsertTextDialogImpl({
 
         <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, marginTop: 4, alignItems: "center" }}>
           <span style={{ marginInlineEnd: "auto", fontSize: 11, color: "hsl(var(--fg-muted))" }}>
-            ⌘↵ to insert · Esc to cancel
+            ⌘↵ {t("insertText.hintInsert")} · Esc {t("insertText.hintCancel")}
           </span>
           <button
             onClick={() => onResolve(null)}
