@@ -41,6 +41,7 @@ export function CommentsPanel({ open, onClose, collab, onJump }: Props) {
   const [showResolved, setShowResolved] = useState(false);
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
   const [replyBody, setReplyBody] = useState("");
+  const [focusedId, setFocusedId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!open) return;
@@ -49,6 +50,31 @@ export function CommentsPanel({ open, onClose, collab, onJump }: Props) {
     refresh();
     return onCommentsChanged(collab.doc, refresh);
   }, [open, collab.doc, showResolved]);
+
+  // Listen for `lumen-comment-focus` events fired when the user clicks
+  // a comment decoration in the editor — scroll the matching thread
+  // into view + highlight it briefly.
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e: Event) => {
+      const id = (e as CustomEvent<{ id: string }>).detail?.id;
+      if (!id) return;
+      setFocusedId(id);
+      // Defer the scroll until after React has flushed the focused-row
+      // class so the highlight is visible at scroll target time.
+      setTimeout(() => {
+        const el = document.querySelector(
+          `[data-comment-row-id="${id}"]`,
+        ) as HTMLElement | null;
+        el?.scrollIntoView({ behavior: "smooth", block: "center" });
+      }, 16);
+      // Clear the focus halo after 1.5s.
+      const t = window.setTimeout(() => setFocusedId(null), 1500);
+      return () => window.clearTimeout(t);
+    };
+    window.addEventListener("lumen-comment-focus", handler);
+    return () => window.removeEventListener("lumen-comment-focus", handler);
+  }, [open]);
 
   if (!open) return null;
 
@@ -140,6 +166,7 @@ export function CommentsPanel({ open, onClose, collab, onJump }: Props) {
           return (
             <article
               key={c.id}
+              data-comment-row-id={c.id}
               style={{
                 marginBottom: 10,
                 padding: 10,
@@ -152,6 +179,16 @@ export function CommentsPanel({ open, onClose, collab, onJump }: Props) {
                 borderRadius: 8,
                 fontSize: 12.5,
                 lineHeight: 1.5,
+                outline:
+                  focusedId === c.id
+                    ? "2px solid hsl(var(--accent))"
+                    : "2px solid transparent",
+                outlineOffset: 2,
+                boxShadow:
+                  focusedId === c.id
+                    ? "0 0 0 4px hsl(var(--accent) / 0.18)"
+                    : "none",
+                transition: "outline-color 200ms ease, box-shadow 200ms ease",
               }}
             >
               <header style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 6 }}>

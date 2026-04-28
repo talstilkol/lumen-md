@@ -305,6 +305,7 @@ export function CommandPalette({ open, onClose, commands }: Props) {
       onClick={onClose}
       role="dialog"
       aria-modal="true"
+      aria-label={t("palette.placeholder")}
     >
       <div
         ref={dialogRef}
@@ -358,7 +359,13 @@ export function CommandPalette({ open, onClose, commands }: Props) {
           </div>
         )}
 
-        <div className="cmd-palette-list" ref={listRef} id="cmd-listbox" role="listbox">
+        <div
+          className="cmd-palette-list"
+          ref={listRef}
+          id="cmd-listbox"
+          role="listbox"
+          aria-label={t("palette.placeholder")}
+        >
           {filtered.length === 0 && (
             <div className="cmd-palette-empty">{t("palette.noMatch")}</div>
           )}

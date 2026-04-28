@@ -12,6 +12,7 @@ import { useCallback, useEffect, useState } from "react";
 import { Hash, X } from "lucide-react";
 import { buildTagsIndex, type TagsIndex } from "../views/tagsIndex";
 import { t } from "../i18n";
+import { useAppStore } from "../store/useStore";
 
 interface Props {
   open: boolean;
@@ -22,6 +23,30 @@ export function TagsPanel({ open, onClose }: Props) {
   const [index, setIndex] = useState<TagsIndex | null>(null);
   const [activeTag, setActiveTag] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const setTagFilter = useAppStore((s) => s.setTagFilter);
+
+  // Publish the tag's path-set into useStore so the FileTree can scope itself
+  // to it. Toggling a tag off clears the filter (the FileTree then shows
+  // everything again). The panel itself remains the source of truth for the
+  // visible "active tag" UI; the store mirrors it for the tree.
+  useEffect(() => {
+    if (!activeTag || !index) {
+      setTagFilter(null);
+      return;
+    }
+    const bucket = index.buckets.find((b) => b.tag === activeTag);
+    if (!bucket) {
+      setTagFilter(null);
+      return;
+    }
+    setTagFilter({ tag: activeTag, paths: bucket.paths });
+  }, [activeTag, index, setTagFilter]);
+
+  // Clear the filter on unmount so closing the panel doesn't leave the tree
+  // in a stuck-filtered state.
+  useEffect(() => {
+    return () => setTagFilter(null);
+  }, [setTagFilter]);
 
   const refresh = useCallback(async () => {
     setLoading(true);
