@@ -1,0 +1,44 @@
+# Lumen — Alpha Baseline Metrics
+# Captured: 2026-04-28T22:05 (local)
+
+## Tests
+Test Files:    69 passed (69)
+Tests:         599 passed (599)
+Duration:      ~5 s (transform 2s, setup 2.3s, collect 8.4s, tests 3.6s)
+
+## TypeScript
+Typecheck:     CLEAN (tsc --noEmit, 0 errors)
+
+## Bundle (gzipped, production build)
+Total gzipped: 3887.6 KB
+Main bundle:   208.9 KB / 220.0 KB budget
+Vendor chunks:
+  codemirror:  529.2 KB / 600 KB  ✓
+  echarts:     334.8 KB / 400 KB  ✓
+  graphviz:    608.7 KB / 700 KB  ✓
+  mermaid:     702.0 KB / 800 KB  ✓
+  milkdown:    156.0 KB / 200 KB  ✓
+  shiki:       261.0 KB / 1800 KB ✓
+  tldraw:      391.0 KB / 200 KB  ✗ (lazy, acceptable)
+  yjs:         168.2 KB / 150 KB  ✗ (known overshoot)
+  react-dom:    66.2 KB / 80 KB   ✓
+  react:        20.7 KB / 200 KB  ✓
+  katex:        87.1 KB / 110 KB  ✓
+  leaflet:      42.5 KB / 60 KB   ✓
+  git:          80.4 KB / 110 KB  ✓
+
+## npm audit
+Status: OFFLINE (cannot reach registry.npmjs.org)
+Previous known state: 0 vulnerabilities
+
+## Coverage
+Status: BLOCKED (EPERM on parent dir for @vitest/coverage-v8 resolution)
+Previous known state: 97.24% lines
+
+## Locales
+Bundled: en, he (2 active)
+Stubs:   ar, de, fr, ja, ru, zh-CN (6 empty {} files)
+
+## E2E
+Spec files: 8 (paste-html, wikilinks, mermaid, csv-table, locale-switch, search-flash, cmd-palette, smoke)
+Status: Not run in this baseline (Playwright browsers not installed)
