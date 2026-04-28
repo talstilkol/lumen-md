@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { listWorkspace, readWorkspaceFile } from "../storage/workspace";
 import { log } from "../lib/logger";
+import { t } from "../i18n";
 import { louvain, communityPalette } from "../views/louvain";
 
 interface Node {
@@ -257,7 +258,7 @@ export function GraphView({ onOpenFile }: { onOpenFile: (path: string, content: 
           color: "hsl(var(--fg-muted))",
           fontSize: 13,
         }}>
-          No workspace files found. Open the workspace panel and add files to see the knowledge graph.
+          {t("graphView.empty")}
         </div>
       ) : (
         <canvas
@@ -279,7 +280,7 @@ export function GraphView({ onOpenFile }: { onOpenFile: (path: string, content: 
         padding: "4px 8px",
         borderRadius: 6,
       }}>
-        {nodes.length} nodes · {nodes.reduce((s, n) => s + n.links.length, 0)} connections
+        {t("graphView.stats", { nodes: String(nodes.length), edges: String(nodes.reduce((s, n) => s + n.links.length, 0)) })}
       </div>
     </div>
   );

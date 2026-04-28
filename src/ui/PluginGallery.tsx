@@ -3,6 +3,7 @@ import { Search, Download, Trash2, ExternalLink, BadgeCheck } from "lucide-react
 import { getRegisteredPlugins, registerPlugin, unregisterPlugin } from "../plugins/pluginSystem";
 import type { LumenPlugin } from "../plugins/pluginSystem";
 import { log } from "../lib/logger";
+import { t } from "../i18n";
 
 interface RemotePluginEntry {
   id: string;
@@ -347,8 +348,8 @@ export function PluginGallery({ open, onClose }: Props) {
             />
             <input
               type="text"
-              placeholder="Search plugins..."
-              aria-label="Search plugins"
+              placeholder={t("pluginGallery.search")}
+              aria-label={t("pluginGallery.search")}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               style={{
@@ -366,7 +367,7 @@ export function PluginGallery({ open, onClose }: Props) {
           <button
             type="button"
             onClick={onClose}
-            aria-label="Close plugin gallery"
+            aria-label={t("pluginGallery.close")}
             style={{
               background: "transparent",
               border: "1px solid hsl(var(--border))",

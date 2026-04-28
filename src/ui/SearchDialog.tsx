@@ -228,7 +228,7 @@ export function SearchDialog({ open, onClose, onOpenFile }: Props) {
 
   async function askAi() {
     setAiLoading(true);
-    setAiAnswer("Searching workspace...");
+    setAiAnswer(t("searchDialog.searching"));
     setAiSources([]);
 
     try {
@@ -261,9 +261,9 @@ export function SearchDialog({ open, onClose, onOpenFile }: Props) {
       // Build context from semantic results
       const contextStr = results.length > 0
         ? results.map((r, i) => `---\n📄 [${i + 1}] ${r.path}\n${r.content}`).join("\n")
-        : "No relevant files found in workspace.";
+        : t("searchDialog.noRelevant");
 
-      setAiAnswer("Thinking...");
+      setAiAnswer(t("searchDialog.thinking"));
 
       // Build multi-turn messages
       const messages: ChatMessage[] = [
@@ -529,7 +529,7 @@ export function SearchDialog({ open, onClose, onOpenFile }: Props) {
             {aiLoading ? (
               <div style={{ display: "flex", alignItems: "center", gap: 8, color: "hsl(var(--accent))" }}>
                 <Loader2 size={14} style={{ animation: "spin 1s linear infinite" }} />
-                <span>{aiAnswer === "Searching workspace..." ? "Searching workspace..." : "Thinking..."}</span>
+                <span>{aiAnswer === t("searchDialog.searching") ? t("searchDialog.searching") : t("searchDialog.thinking")}</span>
               </div>
             ) : aiRendered ? (
               <>
