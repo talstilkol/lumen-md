@@ -9,6 +9,7 @@
  *
  *   • read_note(path)         — return the markdown body of a single note.
  *   • write_note(path, body)  — create or overwrite a note.
+ *   • append_note(path, body) — append to an existing note.
  *   • list_notes()            — return every .md path in the workspace.
  *   • search_workspace(query) — naive case-insensitive substring search.
  *
@@ -144,6 +145,18 @@ server.setRequestHandler(ListToolsRequestSchema, async () => ({
       },
     },
     {
+      name: "append_note",
+      description: "Append content to the end of an existing note.",
+      inputSchema: {
+        type: "object",
+        properties: {
+          path: { type: "string" },
+          content: { type: "string", description: "Content to append (will be preceded by a newline if needed)." },
+        },
+        required: ["path", "content"],
+      },
+    },
+    {
       name: "update_frontmatter",
       description:
         "Patch YAML frontmatter keys on a note. Existing keys not in `set` stay untouched. Pass `unset: [keys...]` to remove keys.",
@@ -193,6 +206,21 @@ server.setRequestHandler(CallToolRequestSchema, async (req) => {
       await fs.mkdir(path.dirname(abs), { recursive: true });
       await fs.writeFile(abs, content, "utf8");
       return { content: [{ type: "text", text: `Wrote ${rel} (${content.length} chars).` }] };
+    }
+    case "append_note": {
+      const rel = String(args.path ?? "");
+      const content = String(args.content ?? "");
+      const abs = safeJoin(rel);
+      let existing = "";
+      try {
+        existing = await fs.readFile(abs, "utf8");
+      } catch {
+        // File doesn't exist, we will create it
+      }
+      const newContent = existing ? (existing.endsWith("\n") ? existing + content : existing + "\n" + content) : content;
+      await fs.mkdir(path.dirname(abs), { recursive: true });
+      await fs.writeFile(abs, newContent, "utf8");
+      return { content: [{ type: "text", text: `Appended to ${rel} (${content.length} chars).` }] };
     }
     case "list_notes": {
       const files = await listMarkdownFiles(WORKSPACE);
