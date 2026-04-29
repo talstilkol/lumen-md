@@ -38,10 +38,10 @@
 
 | Metric            | T-3         | T-2      | T-1           | **Now**                       | Δ from T-3 |
 | ----------------- | ----------- | -------- | ------------- | ----------------------------- | ---------- |
-| Tests             | 487         | 510      | 526           | **617**                       | +130       |
-| Test files        | 56          | 60       | 63            | **72**                        | +16        |
-| Tasks done        | 88          | 109      | 130           | **135**                       | **+47**    |
-| Locales declared  | 2           | 2        | 2+6 stubs     | **2 active + 6 placeholders** | —          |
+| Tests             | 487         | 510      | 526           | **821**                       | +334       |
+| Test files        | 56          | 60       | 63            | **93**                        | +37        |
+| Tasks done        | 88          | 109      | 130           | **178**                       | **+90**    |
+| Locales declared  | 2           | 2        | 2+6 stubs     | **8 (595 keys each)**         | +6 full    |
 | Status-bar pills  | 1 (Privacy) | 1        | 3 (+ Grammar) | **4 (+ Telemetry)**           | +3         |
 | Coverage          | 97 %        | 97 %     | 97 %          | **97 %**                      | unchanged  |
 | Vulns             | 0           | 0        | 0             | **0**                         | clean      |
@@ -51,8 +51,8 @@
 
 | Metric                                                | Value                                           |
 | ----------------------------------------------------- | ----------------------------------------------- |
-| Unit-test files                                       | 92                                              |
-| Unit tests                                            | **809 passing**                                 |
+| Unit-test files                                       | 93                                              |
+| Unit tests                                            | **821 passing**                                 |
 | Coverage (lines)                                      | **97.24 %**                                     |
 | E2E spec files                                        | 11                                              |
 | `npm audit`                                           | **0 vulnerabilities**                           |
