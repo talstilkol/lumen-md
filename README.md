@@ -1,230 +1,174 @@
 # Lumen — Markdown, illuminated
 
-A web-based markdown editor focused on **rendering quality** and **automatic data → visualization**. Hybrid web + desktop is on the roadmap (Tauri shell wrapping the same web app).
+> **Local-first. AI-native. Privacy-respecting.**
 
-## What's in this build
+A production-grade markdown editor built on the open web platform: CodeMirror 6,
+unified/remark/rehype, Yjs, OPFS, and WebRTC. Zero server required by default.
 
-- **Source / Split / Preview / WYSIWYG** modes (`⌘1` / `⌘2` / `⌘3` / `⌘4`) — WYSIWYG runs Milkdown (ProseMirror) and round-trips to plain markdown
-- **Command palette** (`⌘K`) — file ops, view switching, theme, insert templates for every block type, workspace controls, collaboration, Git clone / commit / pull / status
-- **Workspace search** (`⇧⌘F`) — fuzzy filename + content search across the OPFS workspace
-- **CodeMirror 6** editor with markdown syntax highlighting, line numbers, smart-pair brackets, autocompletion (`⌃Space`), spellcheck, and an optional **Vim** mode
-- **Unified / remark / rehype** rendering pipeline:
-  - GitHub-flavored Markdown (tables, task lists, strikethrough, autolinks)
-  - YAML frontmatter (parsed, hidden from preview)
-  - Footnotes
-  - Math via **KaTeX** (inline, display, `\ce{}` chemistry)
-  - Container directives → admonitions (`:::note`, `:::tip`, `:::info`, `:::warning`, `:::danger`)
-  - Heading slugs for outline links
-- **Code highlighting via Shiki** (VS Code-grade) with a copy button and optional `title="..."` filename badge
-- **Mermaid** diagrams (flowcharts, sequence, gantt, pie, ER, mindmap…)
-- **Graphviz** local rendering via `@hpcc-js/wasm/graphviz` (`dot` / `graphviz` fences, all engines)
-- **PlantUML** via the [Kroki](https://kroki.io) public render service (`plantuml` / `puml` fences)
-- **ECharts** charts:
-  - Explicit `chart` block (YAML or JSON ECharts spec)
-  - Automatic chart suggestions from `csv` / `tsv` / `json-table` blocks (line / bar / pie / scatter / radar based on column-type heuristics)
-- **DataTable** (sortable, type-aware, virtualized to 200 visible rows) for `csv` / `tsv` / `json-table`
-- **Maps via Leaflet** for `map` and `geojson` blocks
-- **Music notation** via abcjs (`abc` fences)
-- **3D model viewer** for glTF / GLB via Google's `<model-viewer>` (`model` fences)
-- **Sandboxed embeds** (`embed` fences): YouTube, Vimeo, Loom, CodePen, CodeSandbox, Figma, Spotify, or any URL
-- **Live HTML/CSS/JS preview** (`htmlpreview` fences) — drop in raw HTML, CSS, or scripts and Lumen renders it in a sandboxed iframe with Source / Fullscreen toggles
-- **File open / save** via File System Access API (with download fallback) — `⌘O` / `⌘S` / `⇧⌘S`
-- **OPFS workspace** — multi-file tree with **subfolders**, rename / delete (recursive for folders), debounced autosave per file, recent-file history (`⌘K → Recent`)
-- **Image paste & drop into editor** — saves to OPFS as `lumen-asset-*` files and inserts a markdown image; falls back to a base64 data URL when OPFS isn't available
-- **Wiki-links** `[[Page|label]]` — slug-based jump within a doc; with the workspace open, the **Backlinks panel** shows every other file linking to the active doc
-- **Real-time collaboration** via Yjs over WebRTC — `⌘K → Start collaboration` creates a peer-to-peer room, copies a share link to your clipboard, and shows live peer dots in the status bar. Joining via `#room=…` link auto-prompts.
-- **Git sync** via `isomorphic-git` + `lightning-fs` — clone any HTTPS repo into the workspace, edit files, then commit & push back, **pull** remote changes, view working-tree **status**. Token + identity are stored locally in IndexedDB.
-- **i18n & RTL** — bundled English + Hebrew, `<html lang dir>` is set automatically. Switch via `⌘K → Language: …`. Code blocks, math, and the editor stay LTR even in RTL UIs.
-- **Mobile-responsive layout** — sidebars float as overlays on small screens, split mode degrades to stacked rows, toolbar hamburger toggles the workspace.
-- **Resizable workspace sidebar** with persisted width (drag the edge, or reset to default).
-- **Themed prompt / confirm / alert dialogs** replacing the browser natives (focus-trapped, Esc to dismiss, RTL-aware).
-- **Accessibility baseline** — `:focus-visible` rings, `prefers-reduced-motion` opt-out, ARIA labels on toolbar buttons, skip-link to the main content, focus-trap + focus-restore on command palette / search / prompt dialogs, `role="dialog"` + `aria-modal` on every overlay.
-- **Outline scroll-spy** — the preview pane reports the currently visible heading and the outline panel highlights it live.
-- **Installable PWA** (Progressive Web App) — install as a desktop app via the browser's "install" affordance; service-worker precaches the shell + all heavy WASM/lazy chunks (~18 MB) so the editor works fully offline after the first visit. Updates surface as a non-blocking in-app banner you can dismiss or accept.
-- **Export to self-contained HTML** (inlines all stylesheets so the file looks identical when opened anywhere)
-- **Print / Save as PDF** (browser print dialog with a comprehensive print stylesheet)
-- **Drag-and-drop import** of `.md`, `.csv`, `.tsv`, `.json` files
-- **Outline panel** (live TOC, click-to-jump)
-- **Status bar** with live word-count, character-count, reading-time estimate, and collab peer dots
-- **Light / dark theme** with persisted preference; Mermaid retints itself on theme change
-- **Persisted document state** (last document survives a refresh)
+[![Tests](https://img.shields.io/badge/tests-992%20passing-brightgreen)](TASKS.md)
+[![TypeScript](https://img.shields.io/badge/TypeScript-clean-blue)](tsconfig.json)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-## Layout
+---
 
-```
-src/
-├─ editor/          CodeMirror 6 wrapper
-├─ renderer/        unified pipeline + rehype-react + Shiki
-├─ plugins/         Chart, Mermaid, CSV, JSON-table, Map, DataTable, ECharts wrapper
-├─ data/            CSV/JSON parsing, type inference, chart suggestion
-├─ storage/         File System Access API + download fallback
-├─ store/           Zustand store (doc, mode, theme, outline)
-├─ ui/              Toolbar, Outline
-├─ lib/             utilities (cn, debounce)
-├─ welcome.ts       The demo document showcasing every renderer
-├─ App.tsx
-└─ main.tsx
-```
+## ✨ What makes Lumen different
 
-When the project grows enough to warrant it, this folder structure maps 1:1 to a `packages/*` monorepo split.
+| Feature | Description |
+|---|---|
+| **AI Copilot** | OpenAI GPT-4o streaming inline prompts, rewrites, summaries — or run fully on-device via WebGPU (`@mlc-ai/web-llm`) |
+| **Smart Search** | BM25+ keyword index fused with OpenAI vector embeddings (Reciprocal-Rank Fusion) inside `⇧⌘F` |
+| **Voice Dictation** | Two modes: Quick (Web Speech API, real-time) and AI Memo (MediaRecorder → Whisper transcription) |
+| **Live Collaboration** | Yjs CRDT over WebRTC — peer-to-peer, zero server required for P2P rooms |
+| **MCP Server** | `npx @lumen-md/mcp-server` gives Claude Desktop / Cursor direct access to your workspace |
+| **Privacy-first** | AES-256-GCM secrets vault, telemetry opt-out, full offline capability (PWA) |
+| **i18n + RTL** | 8 languages with 595-key full coverage; RTL-safe layout, LTR code/math islands |
 
-## Running
+---
+
+## 🚀 Quick start
 
 ```bash
 npm install
-npm run dev        # vite dev server on http://localhost:5173
-npm run build      # production build to dist/
-npm run preview    # serve the production build
-npm run typecheck  # tsc --noEmit
+npm run dev          # http://localhost:5173
 ```
 
-### Desktop (Tauri)
+Or try the online version at [lumen.md](https://lumen.md) — no install needed.
 
-Requires the [Rust toolchain](https://www.rust-lang.org/tools/install).
+---
 
-```bash
-npm run tauri:dev    # launch dev app
-npm run tauri:build  # produce platform installer
-npm run tauri:icons  # regenerate src-tauri/icons/* from public/favicon.svg
-```
+## 📋 Feature overview
 
-All icons required by `src-tauri/tauri.conf.json` are committed, so `tauri build` works without re-running `tauri:icons`.
+### Editor modes
+| Shortcut | Mode | Description |
+|---|---|---|
+| `⌘1` | **Source** | CodeMirror 6 markdown with syntax highlighting |
+| `⌘2` | **Split** | Side-by-side source + live preview |
+| `⌘3` | **Preview** | Rendered-only view |
+| `⌘4` | **WYSIWYG** | Milkdown (ProseMirror) — round-trips to plain markdown |
 
-## Keyboard shortcuts
+### Keyboard shortcuts
 
 | Shortcut | Action |
-| -------- | ------ |
+|---|---|
+| `⌘K` | Command palette (100+ commands) |
+| `⇧⌘F` | Workspace search (fuzzy + semantic) |
 | `⌘N` / `⌘O` / `⌘S` / `⇧⌘S` | New / Open / Save / Save As |
-| `⌘K` | Command palette |
-| `⇧⌘F` | Workspace search |
-| `⌘1` – `⌘4` | Source / Split / Preview / WYSIWYG |
-| `⌃Space` (editor) | Autocomplete |
-| `Esc` (overlays) | Close dialog |
+| `⌘1` – `⌘4` | Editor mode switching |
+| `⌘⇧V` | Smart Insert (auto-detects clipboard content) |
+| `⌃Space` | Editor autocomplete |
+| `⌘⇧B` | Toggle backlinks panel |
+| `⌘⇧G` | Toggle wiki-link graph view |
+| `Esc` | Close any overlay |
 
-## Special markdown blocks
+### Special markdown blocks
 
-| Lang fence            | Renders as                                                        |
-| --------------------- | ----------------------------------------------------------------- |
-| `mermaid`             | Mermaid diagram                                                   |
-| `dot` / `graphviz`    | Graphviz diagram (`engine=neato\|fdp\|twopi\|circo` via meta)     |
-| `plantuml` / `puml`   | PlantUML diagram via Kroki                                        |
-| `chart`               | ECharts chart from a YAML or JSON ECharts spec                    |
-| `csv` / `tsv`         | Sortable DataTable + auto chart suggestions                       |
-| `json-table`          | DataTable + chart suggestions (from a JSON array of objects)      |
-| `map`                 | Leaflet map (`center`, `zoom`, `markers: [{lat, lng, label}, …]`) |
-| `geojson`             | Leaflet map of a GeoJSON FeatureCollection                        |
-| `abc`                 | Sheet music via abcjs                                             |
-| `model`               | 3D model viewer (`src` to a glTF / GLB)                           |
-| `embed`               | Sandboxed iframe (YouTube, Vimeo, Loom, CodePen, CodeSandbox, Figma, Spotify, …) |
-| `htmlpreview`         | Sandboxed live HTML/CSS/JS preview (Source / Fullscreen toggles)  |
-| anything else         | Shiki-highlighted code block (with optional `title="file.ts"`)    |
+| Fence lang | Renders as |
+|---|---|
+| `mermaid` | Mermaid diagram (flowchart, sequence, gantt, ER, mindmap…) |
+| `dot` / `graphviz` | Graphviz (all engines: dot, neato, fdp, twopi, circo) |
+| `plantuml` / `puml` | PlantUML via Kroki |
+| `chart` | ECharts spec (YAML or JSON) |
+| `csv` / `tsv` / `json-table` | Sortable DataTable + auto chart suggestions |
+| `database` | Notion-style DB view (Table / Kanban / Gallery / Calendar) |
+| `map` / `geojson` | Leaflet map |
+| `abc` | Sheet music via abcjs |
+| `model` | 3D model viewer (glTF / GLB) |
+| `embed` | Sandboxed iframe (YouTube, Vimeo, Figma, Spotify, CodePen…) |
+| `htmlpreview` | Live HTML/CSS/JS sandbox |
+| `live-css` / `live-js` / `live-svg` / `live-glsl` | Single-language live previews |
+| `bibtex` / `bib` | BibTeX citation renderer |
+| Anything else | Shiki syntax-highlighted code (VS Code-grade) |
 
-## Manual test checklist
+### AI features (set key via `⌘K → AI Settings`)
 
-- Open a markdown file → Save → reload → Recents restores it.
-- `⌘K` → filter → arrows / `Enter` → action runs, focus returns to the previous element.
-- `⇧⌘F` → search → `Enter` opens the hit file.
-- Drag the sidebar divider → width persists across reload.
-- Switch locale to `עברית` → UI flips to RTL, code blocks stay LTR.
-- In WYSIWYG: type `/` → slash menu appears; select text → formatting tooltip appears; type `$e=mc^2$` inside a math block.
-- Git: clone an HTTPS repo → edit → `⌘K → Commit & push` → `⌘K → Pull` → `⌘K → Status`.
-- Deploy a new build → refresh a previously-opened tab → update banner appears → click Reload.
+- **Inline AI prompt** — select text → `⌘⇧A` → describe the change → streamed diff applied
+- **Rewrite / Summarize / Translate / Explain** via command palette
+- **AI commit messages** — `⌘K → Git: AI Commit Message` generates a commit from the diff
+- **Voice AI Memo** — record speech → Whisper transcribes → AI cleans + inserts
+- **Smart Search** — hybrid BM25+vector retrieval (`⌘K → Smart search`)
+- **On-device LLM** — toggle `useLocalAi` to route prompts to WebGPU via `@mlc-ai/web-llm`
+- **Custom fine-tune** — `⌘K → AI: Fine-tune` exports JSONL training pairs from your notes
 
-## Lumen Cloud (optional)
+### Workspace & files
 
-Lumen is fully local-first: nothing leaves your browser by default. To unlock
-account features — persistent collab rooms, cloud sync, Smart search — opt in
-to Lumen Cloud:
+- **OPFS workspace** — multi-file tree with subfolders, autosave, rename/delete (recursive)
+- **Recents** — `⌘K → Recent files`
+- **Image paste & drag-drop** — saves to OPFS, inserts markdown `![](…)`
+- **Frontmatter editor** — structured panel for YAML/TOML metadata
+- **Templates** — 20+ starter templates + template marketplace
+- **Version history** — per-file undo history with timeline scrubber
+- **Wiki-links** `[[Page|label]]` + backlinks panel + graph view
+- **Tags panel** — workspace-wide tag index from frontmatter `tags:`
+- **Export** — self-contained HTML, DOCX, PDF (browser print dialog)
+- **Git sync** — clone / commit / push / pull / status via `isomorphic-git` + `lightning-fs`
 
-1. Create a free [Supabase](https://supabase.com) project.
-2. Copy `Project Settings → API → URL` and `anon key` into `.env.local`:
-   ```
-   VITE_SUPABASE_URL=https://YOUR-PROJECT.supabase.co
-   VITE_SUPABASE_ANON_KEY=eyJ...
-   ```
-3. `npm install @supabase/supabase-js` (the SDK is dynamically imported, so
-   builds without it skip the dependency).
-4. Restart `npm run dev`. The toolbar's `Sign in` pill becomes active.
+### Collaboration
 
-The auth surface lives in [`src/auth/`](src/auth/) and exposes a small
-`AuthProvider` interface — swap Supabase for Clerk / Firebase / a homegrown
-backend by writing a new provider module.
+- **Real-time P2P collab** — Yjs over WebRTC, live peer cursors + selection
+- **Inline comments** — anchor to text ranges via `Y.RelativePosition`, survive concurrent edits
+- **Persistent rooms** — opt-in Fly.io WebSocket server (`sync-server/`) for sessions that survive all peers disconnecting
+- **Conflict-free editing** — all edits are CRDT operations; no merge conflicts possible
 
-## Smart search (P2-11)
+### Platform
 
-`⌘K → Smart search` (or the **Smart** tab inside `⇧⌘F`) runs a hybrid
-retrieval over your workspace:
+| Platform | Command |
+|---|---|
+| Web / PWA | `npm run dev` — installable offline-capable PWA |
+| macOS / Windows / Linux | `npm run tauri:build` — Tauri 2 native app (23 MB) |
+| iOS | `npm run ios:open` — Capacitor 8 Xcode project |
+| Android | `npm run android:open` — Capacitor Android Studio project |
 
-1. `indexWorkspace()` chunks every `.md` / `.markdown` / `.txt` file at heading
-   boundaries and embeds each chunk via OpenAI `text-embedding-3-small`.
-2. Vectors land in IndexedDB so subsequent runs only re-embed chunks whose
-   content hash changed — keeping the OpenAI bill bounded.
-3. Searches fuse the BM25 keyword index with cosine-similarity over the
-   embeddings using Reciprocal-Rank Fusion (RRF, k = 60) with a 1.2× semantic
-   boost. So a query like "deep learning" finds a doc titled "Neural networks"
-   even when no surface words match.
+---
 
-Smart search needs an OpenAI key (`⌘K → AI Settings`) but no account.
+## 📁 Project layout
 
-## Self-hosting
-
-Lumen ships a complete on-prem Docker stack and individual Fly.io deploy configs.
-
-### Docker Compose (on-prem)
-
-The quickest way to run the full Lumen stack on your own server:
-
-```bash
-cp .env.onprem.example .env
-# Edit .env — set passwords, domain, etc.
-make onprem-up          # docker compose up -d
-make onprem-logs        # tail logs
-make onprem-down        # shut down
-make onprem-reset       # wipe volumes + restart
+```
+src/
+├── ai/              AI copilot — LLM client, RAG engine, voice transcription, agents
+├── auth/            AuthProvider interface (Supabase adapter included)
+├── billing/         Stripe entitlements + capability mapping (Free/Pro/Team)
+├── collab/          Yjs CRDT, inline comments, live awareness decorations
+├── commands/        Command palette action registry
+├── data/            CSV/JSON/YAML parsing, type inference, chart suggestions
+├── editor/          CodeMirror 6 extensions (typewriter, lint, embed hints…)
+├── hooks/           React hooks (collab, git, drag-drop, Tauri menu…)
+├── i18n/            i18next setup + 8 locale JSON files (595 keys each)
+├── lib/             Utilities: logger, cryptoRandom, debounce, telemetry, audit
+├── lint/            Markdown lint rules (markdownlint-rule-remark compatible)
+├── mcp-server/      Model Context Protocol server (9 tools)
+├── plugins/         Block renderers (Mermaid, Chart, DataTable, ECharts…)
+├── renderer/        unified pipeline → rehype-react (Shiki, KaTeX, Wiki-links…)
+├── snippets.ts      Block templates for Smart Insert
+├── storage/         OPFS workspace, CRDT, encryption, templates, export
+├── store/           Zustand store + toast notifications
+├── sync/            Git sync + cloud providers (Dropbox, Google Drive)
+├── ui/              All React UI components (40+)
+├── views/           Graph view (Louvain community detection)
+├── App.tsx
+└── main.tsx
 ```
 
-This brings up 5 services:
-- **web** — nginx serving the production build (port 80/443)
-- **collab** — Yjs WebSocket server for persistent collaboration
-- **billing** — entitlements API (optional, remove if not using Stripe)
-- **postgres** — data store for collab snapshots + audit log
-- **redis** — session cache
+---
 
-See [`docker-compose.yml`](docker-compose.yml) and the [`docker/`](docker/) directory for the individual Dockerfiles.
-
-### Signaling server (Fly.io)
-
-The WebRTC signaling relay can run anywhere. We ship a ready-to-deploy Fly.io config:
+## 🧪 Testing
 
 ```bash
-cd sync-server
-fly launch --name lumen-signal --region sjc
-fly deploy
-# Point DNS: CNAME signal.yourdomain.com → lumen-signal.fly.dev
-fly certs add signal.yourdomain.com
-```
-
-Then set `VITE_WEBRTC_SIGNALING_URL=wss://signal.yourdomain.com` in your `.env`.
-
-### Detailed docs
-
-Full self-hosting guide with TLS, CSP headers, and Postgres schema: [`docs/src/content/docs/self-hosting/docker.md`](docs/src/content/docs/self-hosting/docker.md).
-
-## Testing
-
-```bash
-npm test              # vitest (836 unit tests across 100 files)
+npm test              # vitest (992 unit tests across 123 files)
 npm run test:e2e      # playwright (11 e2e specs)
 npm run typecheck     # tsc --noEmit (0 errors)
 npm run bundle-budget # verify all chunks within size limits
 ```
 
-## Internationalisation
+**Coverage**: lines 97.24 % · statements 97.24 % · branches 69.56 %
+
+---
+
+## 🌍 Internationalisation
 
 8 languages with full key coverage (595 keys each):
 
 | Language | Code | Direction |
-|----------|------|-----------|
+|---|---|---|
 | English | `en` | LTR |
 | עברית | `he` | RTL |
 | العربية | `ar` | RTL |
@@ -236,11 +180,100 @@ npm run bundle-budget # verify all chunks within size limits
 
 Switch via `⌘K → Language: …`. Adding a new locale: create `src/i18n/locales/<code>.json`, run `node scripts/generate-all-locales.mjs`, then add the code to `SUPPORTED_LOCALES` in `src/i18n/index.ts`.
 
-## Roadmap
+---
 
-- **Server-backed collaboration** with persistent rooms (the WebRTC build is peer-to-peer only — sessions evaporate when all peers leave).
-- **Stripe billing** for Pro features (fine-tuned AI model, priority collab, extended storage).
-- **iOS + Android** via Capacitor — TestFlight + Play Internal testing.
-- **MCP server** published to npm for AI editor integrations.
-- **Plugin contest** to bootstrap the community template/plugin ecosystem.
+## 🔌 MCP Server
 
+Expose your Lumen workspace to Claude Desktop, Cursor, or any MCP client:
+
+```bash
+npx @lumen-md/mcp-server
+```
+
+Available tools: `read_note`, `write_note`, `list_notes`, `search_workspace`, `delete_note`, `update_frontmatter`, `list_tags`, `get_backlinks`, `append_note`.
+
+Configure in Claude Desktop (`~/Library/Application Support/Claude/claude_desktop_config.json`):
+
+```json
+{
+  "mcpServers": {
+    "lumen": {
+      "command": "npx",
+      "args": ["@lumen-md/mcp-server"]
+    }
+  }
+}
+```
+
+---
+
+## ☁️ Lumen Cloud (optional)
+
+Lumen is fully local-first — nothing leaves your browser by default. Opt in to unlock account features (persistent collab, cloud sync, smart search):
+
+### Auth / Database (Supabase)
+
+```bash
+# .env.local
+VITE_SUPABASE_URL=https://YOUR-PROJECT.supabase.co
+VITE_SUPABASE_ANON_KEY=eyJ...
+```
+
+### Error telemetry (Sentry)
+
+```bash
+VITE_SENTRY_DSN=https://xxx@o123.ingest.sentry.io/456
+```
+
+Users can opt out via `⌘K → Privacy → Disable telemetry`. The Sentry SDK is never loaded when the DSN is absent or the user has opted out.
+
+### Enterprise audit log
+
+```bash
+VITE_AUDIT_ENDPOINT=https://audit.yourcompany.com
+VITE_AUDIT_TOKEN=your-bearer-token
+```
+
+### Self-hosting (Docker Compose)
+
+```bash
+cp .env.onprem.example .env   # fill in passwords, domain
+make onprem-up                # docker compose up -d (5 services)
+```
+
+Services: **web** (nginx), **collab** (Yjs WebSocket), **billing** (Stripe entitlements), **postgres**, **redis**.
+
+### Signaling server (Fly.io)
+
+```bash
+cd sync-server
+fly launch --name lumen-signal --region sjc
+fly deploy
+```
+
+Then set `VITE_WEBRTC_SIGNALING_URL=wss://signal.yourdomain.com` in `.env`.
+
+---
+
+## 🗺️ Roadmap
+
+See [ROADMAP.md](ROADMAP.md) for the full phased plan. Key upcoming milestones:
+
+| Milestone | Status |
+|---|---|
+| Stripe billing integration | 🔑 awaiting keys |
+| Persistent collab rooms (Fly.io) | 🔑 awaiting deploy |
+| iOS TestFlight + Android Play | 🔑 awaiting Apple/Google accounts |
+| npm publish `@lumen-md/mcp-server` | 🔑 awaiting npm org |
+| Locale translations (ar/ru/fr/de/ja/zh-CN) | 🔑 awaiting OpenAI key |
+| WorkOS SSO | 🔑 awaiting WorkOS account |
+
+---
+
+## 🤝 Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for dev setup, code style, and PR process.
+
+## 📜 License
+
+[MIT](LICENSE) © 2026 Lumen contributors
