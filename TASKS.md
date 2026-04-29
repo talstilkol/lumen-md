@@ -2,12 +2,12 @@
 
 > **Single source of truth** for plan execution.
 > Each `- [ ]` becomes `- [x]` when verified.
-> Last updated: 2026-04-29 20:40.
+> Last updated: 2026-04-29 22:25.
 > ⚠️ **Brutal-audit revision** at the bottom of this file lists F0–F7
 > follow-ups born from a self-audit. **All autonomous follow-ups are now done** —
-> 27 new test files, 1010 passing across 125 files; README fully rewritten;
-> auth, billing, pipeline, collab modules at branch-coverage saturation.
-> Remaining work is entirely credential-gated (see blocker list).
+> 30 new test files (128 total, 1038 passing); collab/yjs room utilities,
+> billing checkout, plugin signing, auth localProvider, and entitlement store
+> all now at branch-coverage saturation. Remaining work: credential-gated.
 
 ## 📊 Progress at a glance
 
@@ -39,8 +39,8 @@
 
 | Metric            | T-3         | T-2       | T-1      | **Now**                       | Δ from T-3 |
 | ----------------- | ----------- | --------- | -------- | ----------------------------- | ---------- |
-| Tests             | 487         | 821       | 992      | **1010**                      | +523       |
-| Test files        | 56          | 93        | 123      | **125**                       | +69        |
+| Tests             | 487         | 821       | 1010     | **1038**                      | +551       |
+| Test files        | 56          | 93        | 125      | **128**                       | +72        |
 | Tasks done        | 88          | 178       | 224      | **224**                       | **+136**   |
 | Locales declared  | 2           | 8 stubs   | 8 full   | **8 (595 keys each)**         | +6 full    |
 | Status-bar pills  | 1 (Privacy) | 4         | 4        | **4 (+ Telemetry)**           | +3         |
@@ -52,8 +52,8 @@
 
 | Metric                                                | Value                                           |
 | ----------------------------------------------------- | ----------------------------------------------- |
-| Unit-test files                                       | **125**                                         |
-| Unit tests                                            | **1010 passing**                                |
+| Unit-test files                                       | **128**                                         |
+| Unit tests                                            | **1038 passing**                                |
 | Coverage (lines)                                      | **97.24 %**                                     |
 | E2E spec files                                        | 11                                              |
 | `npm audit`                                           | **0 vulnerabilities**                           |
