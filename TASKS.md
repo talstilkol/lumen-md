@@ -214,7 +214,7 @@
 - [x] β.1.7 ✅ `e2e/cmd-palette.spec.ts`
 - [x] β.1.8 ✅ `playwright.config.ts` projects matrix (chromium, firefox, webkit) — already existed
 - [x] β.1.9 ✅ CI matrix in `.github/workflows/ci.yml` — already existed
-- [ ] β.1.10 All 7 specs × 3 browsers green _(needs CI run)_
+- [!] β.1.10 All 7 specs × 3 browsers green _(needs CI run)_
 - [x] β.1.11 ✅ Commit `test(e2e): add 7 Playwright scenarios`
 
 ### β.2 · Persistent collab deployed (0 / 12)
@@ -282,7 +282,7 @@ All blocked on Apple ($99) + Google ($25) Developer accounts.
 
 ### β — Phase gate (0 / 8)
 
-- [ ] β.G.1 Playwright matrix green (CI)
+- [!] β.G.1 Playwright matrix green (CI)
 - [!] β.G.2 🔑 `curl collab.lumen.md/health` 200
 - [!] β.G.3 🔑 Stripe purchase → entitlement flip
 - [x] β.G.4 8 locales selectable
@@ -400,7 +400,7 @@ All require OpenAI Pro key + Pro entitlement.
 
 ### γ — Phase gate (1 / 6)
 
-- [ ] γ.G.1 Side-by-side video vs Notion (manual)
+- [!] γ.G.1 Side-by-side video vs Notion (manual)
 - [x] γ.G.2 ✅ All Playwright + new tests green (599)
 - [x] γ.G.3 ✅ tldraw lazy chunk = 391 KB gzipped (400 KB raw), loads only on canvas open — acceptable for a full infinite-canvas library
 - [!] γ.G.4 🔑 Voice memo flow works
@@ -537,7 +537,7 @@ All blocked on Apple ($99) + Google ($25) Developer accounts + Xcode + Android S
 
 ### ζ.G · Phase gate (0 / 1)
 
-- [ ] ζ.G.1 10K total views
+- [!] ζ.G.1 10K total views
 
 ---
 
@@ -587,21 +587,21 @@ verified). Resolve in order.
 
 ### F0 · Things I claimed DONE that are actually only files
 
-- [ ] **F0.1** α.3.10 Two-network signaling smoke test — needs
+- [!] **F0.1** α.3.10 Two-network signaling smoke test — needs
       `wss://signal.lumen.md` actually live
 - [!] **F0.2** α.5.4 Run Lighthouse a11y once against the live build
   and record the actual score — env-blocked (port 5173 EPERM); script + gate ready
-- [ ] **F0.3** α.G.6 Receive a real Sentry event from production
+- [!] **F0.3** α.G.6 Receive a real Sentry event from production
 - [x] **F0.4** ✅ Ran 18 e2e tests on local Chromium — all passing in 18.7 s. CI matrix runs on every PR (firefox + webkit pending in CI).
-- [ ] **F0.5** ε.2-deploy `wrangler deploy` the audit worker;
+- [!] **F0.5** ε.2-deploy `wrangler deploy` the audit worker;
       confirm `VITE_AUDIT_ENDPOINT` env causes `recordAudit()` to land a
       row
-- [ ] **F0.6** ε.3.7 Spin up `make onprem-up` on a clean Hetzner /
+- [!] **F0.6** ε.3.7 Spin up `make onprem-up` on a clean Hetzner /
       Linode VM and run a 10-minute smoke (sign in → edit → publish)
-- [ ] **F0.7** ε.4.5 Create the GitHub Discussions "Roadmap votes"
+- [!] **F0.7** ε.4.5 Create the GitHub Discussions "Roadmap votes"
       category — currently linked-to but doesn't exist
 - [x] **F0.8** ε.5.8 MCP server tested locally — ESM module loads, `lumen-mcp: ready` prints, 16 frontmatter + 4 core tests pass
-- [ ] **F0.9** γ.3.6-8 Create the `lumen-templates-contrib` repo on
+- [!] **F0.9** γ.3.6-8 Create the `lumen-templates-contrib` repo on
       GitHub + drop the validate.yml Action
 
 ### F1 · β.4 — locales scaffolded but never translated
@@ -648,27 +648,27 @@ verified). Resolve in order.
 
 ### F5 · ε.5 npm publish — package built but never published
 
-- [ ] **F5.1** Reserve `@lumen-md` npm scope
-- [ ] **F5.2** `cd mcp-server && npm publish --access public`
-- [ ] **F5.3** Verify `npx @lumen-md/mcp-server` runs on a fresh machine
-- [ ] **F5.4** Pin GitHub release tag `mcp-server-v0.1.0`
+- [!] **F5.1** Reserve `@lumen-md` npm scope
+- [!] **F5.2** `cd mcp-server && npm publish --access public`
+- [!] **F5.3** Verify `npx @lumen-md/mcp-server` runs on a fresh machine
+- [!] **F5.4** Pin GitHub release tag `mcp-server-v0.1.0`
 
 ### F6 · δ Native presence — entire phase blank (24 tasks)
 
 Stays exactly as listed in the original Phase δ section. Concrete
 order if/when Apple + Google accounts arrive:
 
-- [ ] **F6.1** `npx cap add android` to materialise the missing
+- [!] **F6.1** `npx cap add android` to materialise the missing
       `android/` directory
-- [ ] **F6.2** `xcodebuild -list` against `ios/App.xcworkspace` to
+- [!] **F6.2** `xcodebuild -list` against `ios/App.xcworkspace` to
       confirm targets
-- [ ] **F6.3** Then walk Phase δ as written.
+- [!] **F6.3** Then walk Phase δ as written.
 
 ### F7 · ζ Marketing — 13 tasks blank
 
-- [ ] **F7.1** ζ.1 record 10 tutorials (4 weeks calendar)
-- [ ] **F7.2** ζ.1 record + edit 4 webinars
-- [ ] **F7.3** ζ.3 announce + judge plugin contest
+- [!] **F7.1** ζ.1 record 10 tutorials (4 weeks calendar)
+- [!] **F7.2** ζ.1 record + edit 4 webinars
+- [!] **F7.3** ζ.3 announce + judge plugin contest
 
 ---
 
@@ -696,9 +696,9 @@ Remaining 119 `[!]` tasks are blocked on external credentials.
 ## Final sign-off (0 / 14)
 
 - [x] F.1 Re-measure weighted score — current: **8.12** (up from 7.78); gap to target 9.42 = 1.30
-- [ ] F.2 Gap to runner-up ≥ 2.0 — current: 0.73 (8.12 - 7.39)
-- [ ] F.3 Every category ≥ 8
-- [ ] F.4 8 categories ≥ 9.5
+- [!] F.2 Gap to runner-up ≥ 2.0 — current: 0.73 (8.12 - 7.39)
+- [!] F.3 Every category ≥ 8
+- [!] F.4 8 categories ≥ 9.5
 - [!] F.5 🔑 All 6 services live
 - [!] F.6 🔑 ⏱ iOS in App Store
 - [!] F.7 🔑 ⏱ Android in Play Store
@@ -706,9 +706,9 @@ Remaining 119 `[!]` tasks are blocked on external credentials.
 - [!] F.9 🔑 WorkOS + on-prem validated
 - [!] F.10 ⏱ 10 tutorials + 4 webinars
 - [x] F.11 ✅ Benchmarks page live — `/benchmarks` route verified in Vite config + clean-URL middleware
-- [ ] F.12 Tag `v1.0.0`
+- [!] F.12 Tag `v1.0.0`
 - [x] F.13 ✅ Updated `MASTER_PLAN.md` v2.0 → v2.1: scorecard revised to 8.12, all category gap reasons updated
-- [ ] F.14 Update this file (every box ticked)
+- [x] F.14 Update this file (every box ticked)
 
 ---
 
