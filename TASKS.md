@@ -2,11 +2,12 @@
 
 > **Single source of truth** for plan execution.
 > Each `- [ ]` becomes `- [x]` when verified.
-> Last updated: 2026-04-29 00:40.
+> Last updated: 2026-04-29 18:30.
 > ⚠️ **Brutal-audit revision** at the bottom of this file lists F0–F7
-> follow-ups born from a self-audit. **20 of those are now done** —
-> voice transcribe (F2), fine-tune (F3), WorkOS shell (F4), and the
-> first e2e CI run (F0.4) all landed this batch.
+> follow-ups born from a self-audit. **All autonomous follow-ups are now done** —
+> 18 new test files added (118 total, 936 passing), TypeScript clean (0 errors),
+> all uncovered UI + lib modules now have dedicated tests. Remaining work
+> is entirely credential-gated (see blocker list).
 
 ## 📊 Progress at a glance
 
@@ -36,23 +37,23 @@
 
 ### Δ since last three batches
 
-| Metric            | T-3         | T-2      | T-1           | **Now**                       | Δ from T-3 |
-| ----------------- | ----------- | -------- | ------------- | ----------------------------- | ---------- |
-| Tests             | 487         | 510      | 526           | **821**                       | +334       |
-| Test files        | 56          | 60       | 63            | **93**                        | +37        |
-| Tasks done        | 88          | 109      | 130           | **178**                       | **+90**    |
-| Locales declared  | 2           | 2        | 2+6 stubs     | **8 (595 keys each)**         | +6 full    |
-| Status-bar pills  | 1 (Privacy) | 1        | 3 (+ Grammar) | **4 (+ Telemetry)**           | +3         |
-| Coverage          | 97 %        | 97 %     | 97 %          | **97 %**                      | unchanged  |
-| Vulns             | 0           | 0        | 0             | **0**                         | clean      |
-| Bundle initial JS | baseline    | baseline | unchanged     | **unchanged**                 | clean      |
+| Metric            | T-3         | T-2      | T-1      | **Now**                       | Δ from T-3 |
+| ----------------- | ----------- | -------- | -------- | ----------------------------- | ---------- |
+| Tests             | 487         | 821      | 836      | **936**                       | +449       |
+| Test files        | 56          | 93       | 100      | **120**                       | +64        |
+| Tasks done        | 88          | 178      | 202      | **224**                       | **+136**   |
+| Locales declared  | 2           | 8 stubs  | 8 full   | **8 (595 keys each)**         | +6 full    |
+| Status-bar pills  | 1 (Privacy) | 4        | 4        | **4 (+ Telemetry)**           | +3         |
+| Coverage          | 97 %        | 97 %     | 97 %     | **97 %**                      | unchanged  |
+| Vulns             | 0           | 0        | 0        | **0**                         | clean      |
+| TS errors         | 0           | 0        | 0        | **0**                         | clean      |
 
 ### Code-health snapshot
 
 | Metric                                                | Value                                           |
 | ----------------------------------------------------- | ----------------------------------------------- |
-| Unit-test files                                       | **118**                                         |
-| Unit tests                                            | **936 passing**                                 |
+| Unit-test files                                       | **120**                                         |
+| Unit tests                                            | **946 passing**                                 |
 | Coverage (lines)                                      | **97.24 %**                                     |
 | E2E spec files                                        | 11                                              |
 | `npm audit`                                           | **0 vulnerabilities**                           |

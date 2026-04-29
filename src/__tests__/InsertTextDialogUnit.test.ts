@@ -1,5 +1,4 @@
 import { describe, it, expect, vi } from "vitest";
-import { render } from "@testing-library/react";
 
 vi.mock("../i18n", () => ({
   t: (k: string) => k,

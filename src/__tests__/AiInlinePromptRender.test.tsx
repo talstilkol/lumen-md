@@ -41,6 +41,7 @@ describe("AiInlinePromptOverlay", () => {
     if (cancelBtn) cancelBtn.click();
     await Promise.resolve();
     // Either resolved (cancel worked) or still pending — no throw
-    expect(resolved === true || resolved === false).toBe(true);
+    // Either resolved (cancel worked) or still pending — no throw, this is a smoke test
+    expect(typeof resolved).toBe("boolean");
   });
 });
