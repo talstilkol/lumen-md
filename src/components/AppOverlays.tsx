@@ -84,7 +84,7 @@ export function AppOverlays({
             <button className="icon-btn" onClick={() => setGraphOpen(false)} style={{ width: "auto", padding: "4px 12px", fontSize: 12 }}>{t("dialog.cancel")}</button>
           </div>
           <div style={{ height: "calc(100vh - 42px)" }}>
-            <Suspense fallback={<div style={{padding:'2rem',color:'hsl(var(--fg-muted))'}}>Loading…</div>}>
+            <Suspense fallback={<div style={{padding:'2rem',color:'hsl(var(--fg-muted))'}}>{t("loading.generic")}</div>}>
               <ErrorBoundary fallback={
                 <div style={{ padding: "3rem", textAlign: "center", color: "hsl(0 80% 60%)" }}>
                   <strong>{t("graphView.renderFailed")}</strong>
@@ -111,7 +111,7 @@ export function AppOverlays({
 
       {/* Version History overlay */}
       {historyOpen && (
-        <Suspense fallback={<div style={{padding:'2rem',color:'hsl(var(--fg-muted))'}}>Loading…</div>}>
+        <Suspense fallback={<div style={{padding:'2rem',color:'hsl(var(--fg-muted))'}}>{t("loading.generic")}</div>}>
           <ErrorBoundary fallback={<div style={{ padding: '2rem', color: 'hsl(0 80% 60%)' }}>{t("errorBoundary.heading")}</div>}>
             <VersionHistory
               fileName={doc.name}

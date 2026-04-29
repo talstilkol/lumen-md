@@ -597,5 +597,8 @@
   "voice.recording": "Recording... ({lang})",
   "writingGoal.done": "Objectif atteint !",
   "writingGoal.label": "Objectif d'écriture",
-  "writingGoal.progress": "{{words}} / {{goal}} words · {{pct}}%"
+  "writingGoal.progress": "{{words}} / {{goal}} words · {{pct}}%",
+  "comment.selectTextFirst": "Select some text first to anchor the comment.",
+  "comment.promptLabel": "Comment:",
+  "loading.generic": "Loading…"
 }

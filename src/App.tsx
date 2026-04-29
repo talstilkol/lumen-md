@@ -475,10 +475,10 @@ export default function App() {
           if (!view) return;
           const { from, to } = view.state.selection.main;
           if (from === to) {
-            await uiAlert({ message: "Select some text first to anchor the comment." });
+            await uiAlert({ message: t("comment.selectTextFirst") });
             return;
           }
-          const body = await uiPrompt({ message: "Comment:" });
+          const body = await uiPrompt({ message: t("comment.promptLabel") });
           if (!body?.trim()) return;
           addCommentFromSelection(collab, body, from, to);
           setCommentsPanelOpen(true);
@@ -759,7 +759,7 @@ export default function App() {
             <button className="icon-btn" onClick={() => setGraphOpen(false)} style={{ width: "auto", padding: "4px 12px", fontSize: 12 }}>{t("dialog.cancel")}</button>
           </div>
           <div style={{ height: "calc(100vh - 42px)" }}>
-            <Suspense fallback={<div style={{padding:'2rem',color:'hsl(var(--fg-muted))'}}>Loading…</div>}>
+            <Suspense fallback={<div style={{padding:'2rem',color:'hsl(var(--fg-muted))'}}>{t("loading.generic")}</div>}>
               <ErrorBoundary fallback={
                 <div style={{ padding: "3rem", textAlign: "center", color: "hsl(0 80% 60%)" }}>
                   <strong>{t("graphView.renderFailed")}</strong>
@@ -797,7 +797,7 @@ export default function App() {
 
       {/* Version History overlay */}
       {historyOpen && (
-        <Suspense fallback={<div style={{padding:'2rem',color:'hsl(var(--fg-muted))'}}>Loading…</div>}>
+        <Suspense fallback={<div style={{padding:'2rem',color:'hsl(var(--fg-muted))'}}>{t("loading.generic")}</div>}>
           <ErrorBoundary fallback={<div style={{ padding: '2rem', color: 'hsl(0 80% 60%)' }}>{t("errorBoundary.heading")}</div>}>
             <VersionHistory
               fileName={doc.name}
