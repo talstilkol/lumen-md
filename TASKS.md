@@ -51,10 +51,10 @@
 
 | Metric                                                | Value                                           |
 | ----------------------------------------------------- | ----------------------------------------------- |
-| Unit-test files                                       | 91                                              |
-| Unit tests                                            | **804 passing**                                 |
+| Unit-test files                                       | 92                                              |
+| Unit tests                                            | **809 passing**                                 |
 | Coverage (lines)                                      | **97.24 %**                                     |
-| E2E spec files                                        | 8                                               |
+| E2E spec files                                        | 11                                              |
 | `npm audit`                                           | **0 vulnerabilities**                           |
 | `Math.random()` in collision-sensitive paths          | 0                                               |
 | `console.*` outside `lib/logger.ts` (production code) | 0 real                                          |
@@ -62,7 +62,7 @@
 | Hardcoded English strings in UI                       | 0                                               |
 | Bundle: vendor-shiki                                  | 261 KB (was 9.2 MB)                             |
 | Bundle: vendor-tldraw lazy                            | 391 KB (canvas only)                            |
-| Locales                                               | 8 selectable (en, he + 6 with 110–142 keys)     |
+| Locales                                               | 8 selectable (en, he + 6 with 595 keys each)    |
 | MCP-server tools                                      | 8 (was 4)                                       |
 | Status-bar pills                                      | 4 (Privacy, Roadmap, Grammar, Telemetry)        |
 | Hardcoded English strings in UI                       | **0** (40+ eliminated across 3 sessions)        |
