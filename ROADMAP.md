@@ -1,6 +1,6 @@
 # Lumen Roadmap
 
-> Auto-generated from `MASTER_PLAN.md`. Last refresh: 2026-04-27.
+> Auto-generated from `MASTER_PLAN.md`. Last refresh: 2026-04-29.
 >
 > Vote on items in [GitHub Discussions → Roadmap](https://github.com/lumen-md/lumen/discussions/categories/roadmap).
 
