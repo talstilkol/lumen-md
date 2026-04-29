@@ -600,5 +600,17 @@
   "writingGoal.progress": "{{words}} / {{goal}} words · {{pct}}%",
   "comment.selectTextFirst": "Select some text first to anchor the comment.",
   "comment.promptLabel": "Comment:",
-  "loading.generic": "Loading…"
+  "loading.generic": "Loading…",
+  "tour.next": "→ Next",
+  "tour.done": "✓ Done",
+  "tour.step.menu.title": "📋 Menu Bar",
+  "tour.step.menu.body": "Access File, Edit, Insert, View, and Help — each menu has clear sections, hover tooltips, and per-action descriptions.",
+  "tour.step.viewModes.title": "👁️ View Modes",
+  "tour.step.viewModes.body": "Switch between Source, Split, Preview, and WYSIWYG anytime (⌘1-4).",
+  "tour.step.workspace.title": "📁 Workspace",
+  "tour.step.workspace.body": "Manage files in your local workspace. Everything is stored in-browser.",
+  "tour.step.statusBar.title": "📊 Status Bar",
+  "tour.step.statusBar.body": "Word count, character count, reading time — always visible.",
+  "tour.step.editor.title": "✍️ Editor",
+  "tour.step.editor.body": "Write Markdown with full syntax highlighting, live preview, and AI assistance."
 }

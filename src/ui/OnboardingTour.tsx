@@ -1,41 +1,42 @@
 import { useState, useEffect, useCallback } from "react";
+import { t } from "../i18n";
 
 interface TourStep {
   target: string; // CSS selector
-  title: string;
-  body: string;
+  titleKey: string;
+  bodyKey: string;
   placement: "top" | "bottom" | "left" | "right";
 }
 
 const STEPS: TourStep[] = [
   {
     target: ".titlebar",
-    title: "📋 Menu Bar",
-    body: "Access File, Edit, Insert, View, and Help — each menu has clear sections, hover tooltips, and per-action descriptions.",
+    titleKey: "tour.step.menu.title",
+    bodyKey: "tour.step.menu.body",
     placement: "bottom",
   },
   {
     target: ".seg-group",
-    title: "👁️ View Modes",
-    body: "Switch between Source, Split, Preview, and WYSIWYG anytime (⌘1-4).",
+    titleKey: "tour.step.viewModes.title",
+    bodyKey: "tour.step.viewModes.body",
     placement: "bottom",
   },
   {
     target: ".file-tree",
-    title: "📁 Workspace",
-    body: "Manage files in your local workspace. Everything is stored in-browser.",
+    titleKey: "tour.step.workspace.title",
+    bodyKey: "tour.step.workspace.body",
     placement: "right",
   },
   {
     target: ".status-bar",
-    title: "📊 Status Bar",
-    body: "Word count, character count, reading time — always visible.",
+    titleKey: "tour.step.statusBar.title",
+    bodyKey: "tour.step.statusBar.body",
     placement: "top",
   },
   {
     target: "main",
-    title: "✍️ Editor",
-    body: "Write Markdown with full syntax highlighting, live preview, and AI assistance.",
+    titleKey: "tour.step.editor.title",
+    bodyKey: "tour.step.editor.body",
     placement: "top",
   },
 ];
@@ -166,7 +167,7 @@ export function OnboardingTour({ open, onClose }: Props) {
             color: "hsl(var(--fg))",
           }}
         >
-          {current.title}
+          {t(current.titleKey)}
         </h3>
         <p
           style={{
@@ -176,7 +177,7 @@ export function OnboardingTour({ open, onClose }: Props) {
             margin: 0,
           }}
         >
-          {current.body}
+          {t(current.bodyKey)}
         </p>
         {/* Navigation */}
         <div
@@ -225,7 +226,7 @@ export function OnboardingTour({ open, onClose }: Props) {
                 fontWeight: 600,
               }}
             >
-              {step < STEPS.length - 1 ? "→ Next" : "✓ Done"}
+              {step < STEPS.length - 1 ? t("tour.next") : t("tour.done")}
             </button>
           </div>
         </div>
