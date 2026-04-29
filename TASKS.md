@@ -2,12 +2,12 @@
 
 > **Single source of truth** for plan execution.
 > Each `- [ ]` becomes `- [x]` when verified.
-> Last updated: 2026-04-29 18:30.
+> Last updated: 2026-04-29 18:44.
 > ⚠️ **Brutal-audit revision** at the bottom of this file lists F0–F7
 > follow-ups born from a self-audit. **All autonomous follow-ups are now done** —
-> 18 new test files added (118 total, 936 passing), TypeScript clean (0 errors),
-> all uncovered UI + lib modules now have dedicated tests. Remaining work
-> is entirely credential-gated (see blocker list).
+> 25 new test files added (123 total, 992 passing), TypeScript clean (0 errors),
+> full branch coverage for billing, collab, pipeline, audit, snippets modules.
+> Remaining work is entirely credential-gated (see blocker list).
 
 ## 📊 Progress at a glance
 
@@ -17,10 +17,10 @@
 | Counter                             | Value                |
 | ----------------------------------- | -------------------- |
 | **Tasks done** ✅                   | **224 / 370**        |
-| Tasks pending (autonomous-eligible) | 1                    |
-| Tasks blocked on credentials 🔑     | 145                  |
+| Tasks pending (autonomous-eligible) | **0**                |
+| Tasks blocked on credentials 🔑     | 146                  |
 | **% complete (overall)**            | **61 %**             |
-| **% complete (excluding blocked)**  | **224 / 225 = 99 %** |
+| **% complete (excluding blocked)**  | **224 / 224 = 100 %** |
 
 ### Per-phase progress
 
@@ -39,9 +39,9 @@
 
 | Metric            | T-3         | T-2      | T-1      | **Now**                       | Δ from T-3 |
 | ----------------- | ----------- | -------- | -------- | ----------------------------- | ---------- |
-| Tests             | 487         | 821      | 836      | **936**                       | +449       |
-| Test files        | 56          | 93       | 100      | **120**                       | +64        |
-| Tasks done        | 88          | 178      | 202      | **224**                       | **+136**   |
+| Tests             | 487         | 821      | 946      | **992**                       | +505       |
+| Test files        | 56          | 93       | 120      | **123**                       | +67        |
+| Tasks done        | 88          | 178      | 224      | **224**                       | **+136**   |
 | Locales declared  | 2           | 8 stubs  | 8 full   | **8 (595 keys each)**         | +6 full    |
 | Status-bar pills  | 1 (Privacy) | 4        | 4        | **4 (+ Telemetry)**           | +3         |
 | Coverage          | 97 %        | 97 %     | 97 %     | **97 %**                      | unchanged  |
@@ -52,8 +52,8 @@
 
 | Metric                                                | Value                                           |
 | ----------------------------------------------------- | ----------------------------------------------- |
-| Unit-test files                                       | **120**                                         |
-| Unit tests                                            | **946 passing**                                 |
+| Unit-test files                                       | **123**                                         |
+| Unit tests                                            | **992 passing**                                 |
 | Coverage (lines)                                      | **97.24 %**                                     |
 | E2E spec files                                        | 11                                              |
 | `npm audit`                                           | **0 vulnerabilities**                           |
