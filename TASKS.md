@@ -2,7 +2,7 @@
 
 > **Single source of truth** for plan execution.
 > Each `- [ ]` becomes `- [x]` when verified.
-> Last updated: 2026-04-29 22:42.
+> Last updated: 2026-04-30 00:40.
 > ⚠️ **Brutal-audit revision** at the bottom of this file lists F0–F7
 > follow-ups born from a self-audit. **All autonomous follow-ups are now done** —
 > 33 new test files (131 total, 1074 passing); added SECURITY.md;
@@ -66,7 +66,7 @@
 | Locales                                               | 8 selectable (en, he + 6 with 595 keys each)    |
 | MCP-server tools                                      | 8 (was 4)                                       |
 | Status-bar pills                                      | 4 (Privacy, Roadmap, Grammar, Telemetry)        |
-| Hardcoded English strings in UI                       | **0** (40+ eliminated across 3 sessions)        |
+| Hardcoded English strings in UI                       | **0** (58+ eliminated across sessions)          |
 
 ---
 
@@ -578,6 +578,11 @@ visible while ticking the listed boxes.
 - [x] **`StatusBarTelemetry.test.tsx`** — 3 tests: renders pill, has aria-pressed, toggles on click
 - [x] **`gitSync.test.ts`** — 6 tests: token round-trip, identity storage, status types, clone auth guard
 - [x] **`cloudDiff.test.ts`** — 9 tests: 3-way diff engine (equal/local/remote/both/conflict hunks) + applyMerge picker
+- [x] **Deployment infrastructure** — production `Dockerfile` (multi-stage Node → nginx:alpine), `deploy/nginx.conf` (COOP/COEP, gzip, SPA fallback), `fly.toml`, `.dockerignore`, `docker:build`/`docker:run` npm scripts
+- [x] **Deploy workflow** — `.github/workflows/deploy.yml` auto-deploys to Fly.io on tag push with post-deploy healthcheck
+- [x] **OnboardingTour i18n** — 12 hardcoded English strings (5 step titles, 5 step bodies, 2 nav buttons) replaced with `t()` + full Hebrew translations
+- [x] **SECURITY.md** — vulnerability reporting, data-at-rest/in-transit model, plugin sandbox CSP, telemetry PII scrubbing
+- [x] **CONTRIBUTING.md rewrite** — architecture map, testing patterns, i18n 4-step checklist, plugin authoring, CI pipeline docs
 
 ## 🔥 Brutal audit follow-ups (2026-04-28)
 
