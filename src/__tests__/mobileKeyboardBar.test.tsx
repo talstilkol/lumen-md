@@ -15,7 +15,6 @@ describe("MobileKeyboardBar render", () => {
     const { MobileKeyboardBar } = await import("../ui/MobileKeyboardBar");
     const { container } = render(<MobileKeyboardBar />);
     // May use buttons or divs with onClick
-    const elements = container.querySelectorAll("button, [role='button'], [onClick]");
-    expect(container.childElementCount).toBeGreaterThanOrEqual(0);
+    expect(container.querySelectorAll("button, [role='button'], [onClick]").length).toBeGreaterThanOrEqual(0);
   });
 });

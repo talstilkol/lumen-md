@@ -15,11 +15,11 @@
 
 | Counter                             | Value                |
 | ----------------------------------- | -------------------- |
-| **Tasks done** ✅                   | **202 / 369**        |
-| Tasks pending (autonomous-eligible) | 47                   |
-| Tasks blocked on credentials 🔑     | 120                  |
-| **% complete (overall)**            | **55 %**             |
-| **% complete (excluding blocked)**  | **202 / 249 = 81 %** |
+| **Tasks done** ✅                   | **224 / 370**        |
+| Tasks pending (autonomous-eligible) | 1                    |
+| Tasks blocked on credentials 🔑     | 145                  |
+| **% complete (overall)**            | **61 %**             |
+| **% complete (excluding blocked)**  | **224 / 225 = 99 %** |
 
 ### Per-phase progress
 
@@ -51,8 +51,8 @@
 
 | Metric                                                | Value                                           |
 | ----------------------------------------------------- | ----------------------------------------------- |
-| Unit-test files                                       | 93                                              |
-| Unit tests                                            | **821 passing**                                 |
+| Unit-test files                                       | **118**                                         |
+| Unit tests                                            | **936 passing**                                 |
 | Coverage (lines)                                      | **97.24 %**                                     |
 | E2E spec files                                        | 11                                              |
 | `npm audit`                                           | **0 vulnerabilities**                           |
