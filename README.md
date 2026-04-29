@@ -5,7 +5,7 @@
 A production-grade markdown editor built on the open web platform: CodeMirror 6,
 unified/remark/rehype, Yjs, OPFS, and WebRTC. Zero server required by default.
 
-[![Tests](https://img.shields.io/badge/tests-992%20passing-brightgreen)](TASKS.md)
+[![Tests](https://img.shields.io/badge/tests-1074%20passing-brightgreen)](TASKS.md)
 [![TypeScript](https://img.shields.io/badge/TypeScript-clean-blue)](tsconfig.json)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
@@ -272,7 +272,11 @@ See [ROADMAP.md](ROADMAP.md) for the full phased plan. Key upcoming milestones:
 
 ## 🤝 Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for dev setup, code style, and PR process.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for dev setup, architecture, testing patterns, i18n rules, and PR process.
+
+## 🔒 Security
+
+See [SECURITY.md](SECURITY.md) for the vulnerability reporting process and the project's security architecture.
 
 ## 📜 License
 

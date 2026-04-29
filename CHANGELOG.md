@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Quality metrics (2026-04-29, final hardening — post multi-session test surge)
-- Tests: **1055 passing across 130 files** (Vitest) + 11 Playwright e2e specs.
+- Tests: **1074 passing across 131 files** (Vitest) + 11 Playwright e2e specs.
 - Coverage: **lines 97.24 %, statements 97.24 %, branches 69.56 %, functions 46.48 %** (`npm run test:coverage`).
 - Bundle: vendor-shiki **261 KB** (down from 9.2 MB after lazy-grammar split); vendor-tldraw **391 KB** (lazy, canvas-only).
 - Security: `npm audit` 0 critical / 0 high / 0 moderate (uuid pinned via overrides).
@@ -16,10 +16,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Locales: 8 selectable (en + he fully translated; ar / ru / fr / de / ja / zh-CN lazy-loaded infra ready).
 - MCP server tools: 9 (`read_note`, `write_note`, `list_notes`, `search_workspace`, `delete_note`, `update_frontmatter`, `list_tags`, `get_backlinks`, `append_note`).
 - Status-bar pills: 4 (Privacy, Roadmap, Grammar, Telemetry).
-- Hardcoded English strings in UI: **0** (40+ eliminated across sessions).
-- New test coverage: billing (checkout + entitlement store), auth (localProvider), collab/yjs (room utilities + snapshotPeers), plugin signing (trust key CRUD + fingerprintOf), i18n (locale availability + t() contract), pipeline (extractFrontmatter + extractToc), exportDocx.
+- Hardcoded English strings in UI: **0** (46+ eliminated across sessions).
+- New test coverage: billing (checkout + entitlement store), auth (localProvider), collab/yjs (room utilities + snapshotPeers), plugin signing (trust key CRUD + fingerprintOf), i18n (locale availability + t() contract), pipeline (extractFrontmatter + extractToc), exportDocx, useFetchSource (parseSrcFromMeta).
 
 ### Added
+- SECURITY.md — vulnerability reporting process, data-at-rest/in-transit model, plugin sandbox architecture, telemetry PII scrubbing.
+- CONTRIBUTING.md rewrite — architecture overview, testing patterns, i18n rules, plugin authoring guide, CI pipeline documentation.
 - MIT LICENSE file for public distribution.
 - CHANGELOG, CONTRIBUTING, and CODE_OF_CONDUCT for open-source hygiene.
 - `*.tsbuildinfo` to `.gitignore`.
