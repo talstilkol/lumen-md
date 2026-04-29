@@ -210,9 +210,37 @@ Then set `VITE_WEBRTC_SIGNALING_URL=wss://signal.yourdomain.com` in your `.env`.
 
 Full self-hosting guide with TLS, CSP headers, and Postgres schema: [`docs/src/content/docs/self-hosting/docker.md`](docs/src/content/docs/self-hosting/docker.md).
 
-## Roadmap (deferred)
+## Testing
+
+```bash
+npm test              # vitest (836 unit tests across 100 files)
+npm run test:e2e      # playwright (11 e2e specs)
+npm run typecheck     # tsc --noEmit (0 errors)
+npm run bundle-budget # verify all chunks within size limits
+```
+
+## Internationalisation
+
+8 languages with full key coverage (595 keys each):
+
+| Language | Code | Direction |
+|----------|------|-----------|
+| English | `en` | LTR |
+| עברית | `he` | RTL |
+| العربية | `ar` | RTL |
+| Français | `fr` | LTR |
+| Deutsch | `de` | LTR |
+| Русский | `ru` | LTR |
+| 日本語 | `ja` | LTR |
+| 简体中文 | `zh-CN` | LTR |
+
+Switch via `⌘K → Language: …`. Adding a new locale: create `src/i18n/locales/<code>.json`, run `node scripts/generate-all-locales.mjs`, then add the code to `SUPPORTED_LOCALES` in `src/i18n/index.ts`.
+
+## Roadmap
 
 - **Server-backed collaboration** with persistent rooms (the WebRTC build is peer-to-peer only — sessions evaporate when all peers leave).
-- **Dropbox / Google Drive / iCloud Drive** sync.
-- **Tauri native menus** (file / edit / view) wired to the same palette commands.
-- More locales beyond English / Hebrew.
+- **Stripe billing** for Pro features (fine-tuned AI model, priority collab, extended storage).
+- **iOS + Android** via Capacitor — TestFlight + Play Internal testing.
+- **MCP server** published to npm for AI editor integrations.
+- **Plugin contest** to bootstrap the community template/plugin ecosystem.
+
