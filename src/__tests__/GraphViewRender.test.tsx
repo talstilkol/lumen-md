@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
-import { render } from "@testing-library/react";
+import { render, waitFor } from "@testing-library/react";
 
 vi.mock("../i18n", () => ({ t: (k: string, p?: Record<string, string>) => {
   if (p) return Object.entries(p).reduce((s, [k2, v]) => s.replace(`{${k2}}`, v), k);
@@ -21,20 +21,24 @@ describe("GraphView", () => {
   it("renders without crashing", async () => {
     const { GraphView } = await import("../ui/GraphView");
     const { container } = render(<GraphView onOpenFile={vi.fn()} />);
-    expect(container).toBeDefined();
+    await waitFor(() => expect(container).toBeDefined());
   });
 
   it("shows empty state when no nodes", async () => {
     const { GraphView } = await import("../ui/GraphView");
     const { container } = render(<GraphView onOpenFile={vi.fn()} />);
     // With no workspace files, should show empty text
-    expect(container.textContent).toContain("graphView.empty");
+    await waitFor(() => {
+      expect(container.textContent).toContain("graphView.empty");
+    });
   });
 
   it("renders the stats overlay div", async () => {
     const { GraphView } = await import("../ui/GraphView");
     const { container } = render(<GraphView onOpenFile={vi.fn()} />);
     // The stats bar is always rendered
-    expect(container.querySelector("div")).not.toBeNull();
+    await waitFor(() => {
+      expect(container.querySelector("div")).not.toBeNull();
+    });
   });
 });

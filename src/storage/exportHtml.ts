@@ -1,4 +1,5 @@
 import { renderMarkdown } from "../renderer/pipeline";
+import { fetchWithRetry } from "../lib/fetchRetry";
 
 /**
  * Render the markdown to a self-contained HTML document and trigger a
@@ -82,7 +83,7 @@ async function collectStyles(): Promise<string> {
       const href = (sheet as CSSStyleSheet).href;
       if (!href) continue;
       try {
-        const res = await fetch(href);
+        const res = await fetchWithRetry(href, {}, { label: "exportHtml.stylesheet", maxRetries: 2, baseDelayMs: 600, maxDelayMs: 2500 });
         if (res.ok) chunks.push(await res.text());
       } catch {
         /* network unavailable; skip */

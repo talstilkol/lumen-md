@@ -19,6 +19,7 @@
 import { get, set } from "idb-keyval";
 import { useAppStore } from "../store/useStore";
 import { log } from "../lib/logger";
+import { fetchWithRetry } from "../lib/fetchRetry";
 import {
   isOPFSAvailable,
   listWorkspace,
@@ -125,14 +126,18 @@ export function chunkMarkdown(text: string): { start: number; end: number; text:
 async function embedTexts(texts: string[]): Promise<Float32Array[]> {
   const key = useAppStore.getState().aiKey;
   if (!key) throw new Error("Configure your AI Key (⌘K → AI Settings) to use semantic search.");
-  const res = await fetch(EMBED_URL, {
+  const res = await fetchWithRetry(
+    EMBED_URL,
+    {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${key}`,
     },
-    body: JSON.stringify({ model: EMBED_MODEL, input: texts }),
-  });
+      body: JSON.stringify({ model: EMBED_MODEL, input: texts }),
+    },
+    { label: "semantic.embed", maxRetries: 2, baseDelayMs: 500, maxDelayMs: 2000 },
+  );
   if (!res.ok) {
     const body = await res.text().catch(() => "");
     throw new Error(`Embedding API ${res.status}: ${body.slice(0, 200)}`);

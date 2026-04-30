@@ -22,6 +22,7 @@ import { useAppStore } from "../store/useStore";
 import { chat, getAiKey, AiError } from "./llm";
 import { PROMPTS } from "./prompts";
 import { log } from "../lib/logger";
+import { fetchWithRetry } from "../lib/fetchRetry";
 
 export interface TranscribeOptions {
   /** Override the language hint sent to Whisper (default: auto). */
@@ -70,12 +71,16 @@ async function transcribeCloud(
   form.append("model", "whisper-1");
   if (opts.language) form.append("language", opts.language);
   form.append("response_format", "json");
-  const res = await fetch(OPENAI_TRANSCRIPTION_URL, {
-    method: "POST",
-    headers: { Authorization: `Bearer ${key}` },
-    body: form,
-    signal: opts.signal,
-  });
+  const res = await fetchWithRetry(
+    OPENAI_TRANSCRIPTION_URL,
+    {
+      method: "POST",
+      headers: { Authorization: `Bearer ${key}` },
+      body: form,
+      signal: opts.signal,
+    },
+    { label: "transcribe.whisper", maxRetries: 2, baseDelayMs: 600, maxDelayMs: 2500 },
+  );
   if (!res.ok) {
     const detail = await res.text().catch(() => "");
     throw new AiError(

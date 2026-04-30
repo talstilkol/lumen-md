@@ -4,6 +4,7 @@ import { getRegisteredPlugins, registerPlugin, unregisterPlugin } from "../plugi
 import type { LumenPlugin } from "../plugins/pluginSystem";
 import { log } from "../lib/logger";
 import { t } from "../i18n";
+import { fetchWithRetry } from "../lib/fetchRetry";
 
 interface RemotePluginEntry {
   id: string;
@@ -194,7 +195,11 @@ export function PluginGallery({ open, onClose }: Props) {
     // so we never `setState` on an unmounted component.
     const ac = new AbortController();
     let cancelled = false;
-    fetch("/plugins/registry.json", { signal: ac.signal })
+    fetchWithRetry(
+      "/plugins/registry.json",
+      { signal: ac.signal },
+      { label: "plugins.registry", maxRetries: 2, baseDelayMs: 500, maxDelayMs: 2000 },
+    )
       .then((res) => res.json())
       .then((data) => {
         if (cancelled || !data?.plugins) return;

@@ -8,6 +8,7 @@
  */
 
 import { log } from "./logger";
+import { fetchWithRetry } from "./fetchRetry";
 
 interface AuditConfig {
   endpoint: string;
@@ -81,12 +82,12 @@ export function recordAudit(
   if (bearer) headers.Authorization = `Bearer ${bearer}`;
 
   // Use fetch with keepalive so the row survives an unload race.
-  fetch(`${endpoint.replace(/\/+$/, "")}/audit`, {
+  fetchWithRetry(`${endpoint.replace(/\/+$/, "")}/audit`, {
     method: "POST",
     headers,
     body: JSON.stringify(body),
     keepalive: true,
-  }).catch((err) => {
+  }, { label: "audit.record", maxRetries: 2, baseDelayMs: 700, maxDelayMs: 2500 }).catch((err) => {
     log.warn("audit submit failed", err);
   });
 }
@@ -106,9 +107,10 @@ export async function listAudit(opts: {
   if (opts.action) params.set("action", opts.action);
   const headers: Record<string, string> = {};
   if (bearer) headers.Authorization = `Bearer ${bearer}`;
-  const res = await fetch(
+  const res = await fetchWithRetry(
     `${endpoint.replace(/\/+$/, "")}/audit?${params.toString()}`,
     { headers },
+    { label: "audit.list", maxRetries: 2, baseDelayMs: 800, maxDelayMs: 3000 },
   );
   if (!res.ok) throw new Error(`audit list failed: ${res.status}`);
   const json = (await res.json()) as { rows: AuditRow[] };

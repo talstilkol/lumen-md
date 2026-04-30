@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Maximize2, Code2 } from "lucide-react";
 import { t } from "../i18n";
+import { sanitizeHtmlMarkup } from "../lib/markupSanitizer";
 
 interface Props {
   source: string;
@@ -15,9 +16,9 @@ interface Props {
  * user can write just a snippet (e.g. a `<style>` + body markup) without
  * worrying about boilerplate.
  *
- * Sandboxing: the iframe runs `allow-scripts` so demos can use JavaScript,
- * but `allow-same-origin` is intentionally omitted so the script has no
- * access to the parent page or its storage.
+ * Sandboxing: scripts are disabled by default; an opt-in control is shown for
+ * potentially unsafe snippets and can enable `allow-scripts` for the current
+ * block when the user explicitly chooses it.
  */
 export default function HtmlPreviewBlock({ source, meta }: Props) {
   const heightMatch = meta?.match(/height=(\d+)/);
@@ -26,9 +27,14 @@ export default function HtmlPreviewBlock({ source, meta }: Props) {
 
   const [showSource, setShowSource] = useState(false);
   const [fullScreen, setFullScreen] = useState(false);
+  const [allowScripts, setAllowScripts] = useState(false);
   const containerRef = useRef<HTMLDivElement | null>(null);
 
-  const html = useMemo(() => wrapHtml(source), [source]);
+  const rawHtml = useMemo(() => wrapHtml(source), [source]);
+  const html = useMemo(() => sanitizeHtmlMarkup(rawHtml), [rawHtml]);
+  const wasSanitized = html !== rawHtml;
+  const hasUnsafePatterns = /<\s*script\b|on\w+\s*=|javascript:\s*|<\s*iframe\b|<\s*object\b|<\s*embed\b/i.test(source);
+  const sandboxMode = allowScripts ? "allow-scripts" : "";
 
   // Toggle native fullscreen on the host container so the iframe still works.
   useEffect(() => {
@@ -57,6 +63,17 @@ export default function HtmlPreviewBlock({ source, meta }: Props) {
       <div className="chart-block-header">
         <span>{titleMatch?.[1] ?? t("block.htmlPreview.title")}</span>
         <div className="chart-block-tabs">
+          {hasUnsafePatterns ? (
+            <button
+              type="button"
+              className={`chart-block-tab ${allowScripts ? "active" : ""}`}
+              onClick={() => setAllowScripts((v) => !v)}
+              title={t("block.htmlPreview.toggleScripts")}
+              aria-pressed={allowScripts}
+            >
+              {allowScripts ? t("block.htmlPreview.scriptsOff") : t("block.htmlPreview.scriptsOn")}
+            </button>
+          ) : null}
           <button
             type="button"
             className={`chart-block-tab ${showSource ? "active" : ""}`}
@@ -96,9 +113,24 @@ export default function HtmlPreviewBlock({ source, meta }: Props) {
           <code>{source}</code>
         </pre>
       ) : (
+        wasSanitized && (
+          <div
+            style={{
+              padding: "8px 12px",
+              background: "hsl(36 90% 15% / 0.25)",
+              color: "hsl(36 90% 72%)",
+              borderBottom: "1px solid hsl(var(--border))",
+              fontSize: 12,
+            }}
+          >
+            ⚠︎ Some HTML content was sanitized before preview for safety.
+          </div>
+        )
+      )}
+      {!showSource && (
         <iframe
           srcDoc={html}
-          sandbox="allow-scripts allow-forms allow-pointer-lock"
+          sandbox={sandboxMode}
           referrerPolicy="no-referrer"
           loading="lazy"
           title={titleMatch?.[1] ?? "HTML preview"}
@@ -109,7 +141,7 @@ export default function HtmlPreviewBlock({ source, meta }: Props) {
             background: "white",
             display: "block",
           }}
-        />
+          />
       )}
     </div>
   );
@@ -124,6 +156,7 @@ function wrapHtml(source: string): string {
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' data: blob:; script-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none';" />
 <style>
   *, *::before, *::after { box-sizing: border-box; }
   body { margin: 0; font-family: system-ui, -apple-system, "Segoe UI", sans-serif; padding: 1rem; }

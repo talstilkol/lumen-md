@@ -1,11 +1,18 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo, type CSSProperties } from "react";
 import { t } from "../i18n";
 
 interface TourStep {
   target: string; // CSS selector
   titleKey: string;
   bodyKey: string;
+  actionId?: string;
   placement: "top" | "bottom" | "left" | "right";
+}
+
+export interface TourAction {
+  id: string;
+  label: string;
+  onRun: () => void;
 }
 
 const STEPS: TourStep[] = [
@@ -31,6 +38,7 @@ const STEPS: TourStep[] = [
     target: ".status-bar",
     titleKey: "tour.step.statusBar.title",
     bodyKey: "tour.step.statusBar.body",
+    actionId: "runtimeMetrics.open",
     placement: "top",
   },
   {
@@ -44,13 +52,23 @@ const STEPS: TourStep[] = [
 interface Props {
   open: boolean;
   onClose: () => void;
+  actions?: TourAction[];
 }
 
-export function OnboardingTour({ open, onClose }: Props) {
+export function OnboardingTour({ open, onClose, actions }: Props) {
   const [step, setStep] = useState(0);
   const [pos, setPos] = useState({ top: 0, left: 0, width: 0, height: 0 });
 
   const current = STEPS[step];
+  const actionById = useMemo(() => {
+    const map = new Map<string, TourAction>();
+    (actions ?? []).forEach((action) => map.set(action.id, action));
+    return map;
+  }, [actions]);
+  const currentAction = useMemo(
+    () => (current?.actionId ? actionById.get(current.actionId) ?? null : null),
+    [current, actionById],
+  );
 
   const updatePos = useCallback(() => {
     if (!current) return;
@@ -89,7 +107,7 @@ export function OnboardingTour({ open, onClose }: Props) {
 
   // Calculate tooltip position
   const gap = 12;
-  let tooltipStyle: React.CSSProperties = {};
+  let tooltipStyle: CSSProperties = {};
   switch (current.placement) {
     case "bottom":
       tooltipStyle = { top: pos.top + pos.height + gap, left: pos.left + pos.width / 2 };
@@ -191,29 +209,27 @@ export function OnboardingTour({ open, onClose }: Props) {
           <span style={{ fontSize: 11, color: "hsl(var(--fg-muted))" }}>
             {step + 1} / {STEPS.length}
           </span>
-          <div style={{ display: "flex", gap: 8 }}>
-            {step > 0 && (
-              <button
-                onClick={() => setStep(step - 1)}
-                style={{
-                  padding: "4px 12px",
-                  fontSize: 11,
-                  border: "1px solid hsl(var(--border))",
-                  borderRadius: 6,
-                  background: "transparent",
-                  color: "hsl(var(--fg-muted))",
-                  cursor: "pointer",
-                  fontFamily: "inherit",
-                }}
-              >
-                ←
-              </button>
-            )}
+        <div style={{ display: "flex", gap: 8 }}>
+          {step > 0 && (
             <button
-              onClick={() => {
-                if (step < STEPS.length - 1) setStep(step + 1);
-                else onClose();
+              onClick={() => setStep(step - 1)}
+              style={{
+                padding: "4px 12px",
+                fontSize: 11,
+                border: "1px solid hsl(var(--border))",
+                borderRadius: 6,
+                background: "transparent",
+                color: "hsl(var(--fg-muted))",
+                cursor: "pointer",
+                fontFamily: "inherit",
               }}
+            >
+              ←
+            </button>
+          )}
+          {currentAction && (
+            <button
+              onClick={currentAction.onRun}
               style={{
                 padding: "4px 14px",
                 fontSize: 11,
@@ -226,9 +242,29 @@ export function OnboardingTour({ open, onClose }: Props) {
                 fontWeight: 600,
               }}
             >
-              {step < STEPS.length - 1 ? t("tour.next") : t("tour.done")}
+              {currentAction.label}
             </button>
-          </div>
+          )}
+          <button
+            onClick={() => {
+              if (step < STEPS.length - 1) setStep(step + 1);
+              else onClose();
+            }}
+            style={{
+              padding: "4px 14px",
+              fontSize: 11,
+              border: "1px solid hsl(var(--accent) / 0.5)",
+              borderRadius: 6,
+              background: "hsl(var(--accent) / 0.15)",
+              color: "hsl(var(--accent))",
+              cursor: "pointer",
+              fontFamily: "inherit",
+              fontWeight: 600,
+            }}
+          >
+            {step < STEPS.length - 1 ? t("tour.next") : t("tour.done")}
+          </button>
+        </div>
         </div>
       </div>
     </>

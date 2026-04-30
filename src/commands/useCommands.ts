@@ -46,6 +46,7 @@ export interface UseCommandsOptions {
   setFineTuneOpen?: (open: boolean) => void;
   setTagsPanelOpen?: (open: boolean) => void;
   setCommentsPanelOpen?: (open: boolean) => void;
+  setRuntimeMetricsOpen?: (open: boolean) => void;
   onAddComment?: () => void;
 }
 
@@ -74,6 +75,7 @@ export function useCommands({
   setFineTuneOpen,
   setTagsPanelOpen,
   setCommentsPanelOpen,
+  setRuntimeMetricsOpen,
   onAddComment,
 }: UseCommandsOptions) {
   const doc = useAppStore((s) => s.doc);
@@ -364,6 +366,18 @@ export function useCommands({
           setSearchOpen(true);
         },
       },
+      ...(setRuntimeMetricsOpen
+        ? [
+            {
+              id: "view.runtimeMetrics",
+              label: t("cmd.view.runtimeMetrics"),
+              hint: t("cmd.view.runtimeMetrics.hint"),
+              icon: cmdIcons.BarChart3,
+              group: t("group.view"),
+              action: () => setRuntimeMetricsOpen(true),
+            },
+          ]
+        : []),
       {
         id: "view.vim",
         label: vimEnabled ? t("cmd.view.vim.off") : t("cmd.view.vim.on"),
@@ -1191,5 +1205,6 @@ export function useCommands({
     doc.workspaceName,
     doc.content,
     theme,
+    setRuntimeMetricsOpen,
   ]);
 }

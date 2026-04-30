@@ -20,6 +20,7 @@
  */
 
 import type { AuthProvider, User } from "./types";
+import { fetchWithRetry } from "../lib/fetchRetry";
 
 interface WorkOSConfig {
   /** Edge worker base URL, e.g. `https://auth.lumen.md`. */
@@ -60,9 +61,10 @@ export async function signInWithSso(domain: string): Promise<string> {
   const cfg = readConfig();
   if (!cfg) throw new Error("WorkOS endpoint not configured (VITE_WORKOS_ENDPOINT)");
   if (!domain.trim()) throw new Error("Org domain required");
-  const res = await fetch(
+  const res = await fetchWithRetry(
     `${cfg.endpoint}/api/sso/authorize?domain=${encodeURIComponent(domain)}`,
     { credentials: "include" },
+    { label: "workos.authorize", maxRetries: 2, baseDelayMs: 700, maxDelayMs: 2000 },
   );
   if (!res.ok) {
     throw new Error(`SSO authorize failed: ${res.status}`);
@@ -81,9 +83,13 @@ export async function loadSsoSession(): Promise<User | null> {
   const cfg = readConfig();
   if (!cfg) return null;
   try {
-    const res = await fetch(`${cfg.endpoint}/api/sso/session`, {
-      credentials: "include",
-    });
+    const res = await fetchWithRetry(
+      `${cfg.endpoint}/api/sso/session`,
+      {
+        credentials: "include",
+      },
+      { label: "workos.session", maxRetries: 2, baseDelayMs: 800, maxDelayMs: 2500 },
+    );
     if (res.status === 401 || res.status === 403) return null;
     if (!res.ok) return null;
     const json = (await res.json()) as { user?: User };
@@ -97,10 +103,14 @@ export async function signOutSso(): Promise<void> {
   const cfg = readConfig();
   if (!cfg) return;
   try {
-    await fetch(`${cfg.endpoint}/api/sso/signout`, {
-      method: "POST",
-      credentials: "include",
-    });
+    await fetchWithRetry(
+      `${cfg.endpoint}/api/sso/signout`,
+      {
+        method: "POST",
+        credentials: "include",
+      },
+      { label: "workos.signout", maxRetries: 2, baseDelayMs: 700, maxDelayMs: 2000 },
+    );
   } catch {
     // Best-effort. The cookie expires on its own.
   }

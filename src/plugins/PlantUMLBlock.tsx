@@ -1,4 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { sanitizeSvgMarkup } from "../lib/markupSanitizer";
+import { fetchWithRetry } from "../lib/fetchRetry";
 
 interface Props {
   source: string;
@@ -9,39 +11,83 @@ interface Cached {
   svg: string;
 }
 
-let lastCache: Cached | null = null;
+type RenderState = "idle" | "rendering" | "ready" | "failed";
+
+const MAX_CACHE = 16;
+const cache = new Map<string, Cached>();
 
 async function renderPlantUML(source: string): Promise<string> {
-  if (lastCache && lastCache.source === source) return lastCache.svg;
+  const cached = cache.get(source);
+  if (cached) return cached.svg;
   // Kroki public service: POST raw PlantUML text, receive SVG.
-  const res = await fetch("https://kroki.io/plantuml/svg", {
-    method: "POST",
-    headers: { "Content-Type": "text/plain" },
-    body: source,
-  });
+  const res = await fetchWithRetry(
+    "https://kroki.io/plantuml/svg",
+    {
+      method: "POST",
+      headers: { "Content-Type": "text/plain" },
+      body: source,
+    },
+    { label: "plantuml.render", maxRetries: 2, baseDelayMs: 500, maxDelayMs: 2000 },
+  );
   if (!res.ok) {
     const text = await res.text();
     throw new Error(text || `Kroki returned ${res.status}`);
   }
   const svg = await res.text();
-  lastCache = { source, svg };
+  cache.set(source, { source, svg });
+  if (cache.size > MAX_CACHE) {
+    const first = cache.keys().next().value;
+    if (first) cache.delete(first);
+  }
   return svg;
 }
 
 export default function PlantUMLBlock({ source }: Props) {
   const [svg, setSvg] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [state, setState] = useState<RenderState>("idle");
+  const [durationMs, setDurationMs] = useState<number | null>(null);
+  const cleanSource = useMemo(() => source.trim(), [source]);
+
+  const statusText = (() => {
+    switch (state) {
+      case "rendering":
+        return "Rendering…";
+      case "ready":
+        return durationMs == null ? "Rendered (cache)" : `Rendered in ${durationMs} ms`;
+      case "failed":
+        return "Render failed";
+      default:
+        return "Queued";
+    }
+  })();
 
   useEffect(() => {
     let cancelled = false;
+    setState("rendering");
+    setDurationMs(null);
     setError(null);
     setSvg(null);
-    renderPlantUML(source.trim())
+    const cached = cache.get(cleanSource);
+    if (cached) {
+      setSvg(cached.svg);
+      setState("ready");
+      return;
+    }
+    const started = performance.now();
+    renderPlantUML(cleanSource)
       .then((s) => {
-        if (!cancelled) setSvg(s);
+        if (!cancelled) setSvg(sanitizeSvgMarkup(s));
+        if (!cancelled) {
+          setDurationMs(Math.round(performance.now() - started));
+          setState("ready");
+        }
       })
       .catch((e: Error) => {
-        if (!cancelled) setError(e.message);
+        if (!cancelled) {
+          setError(e.message);
+          setState("failed");
+        }
       });
     return () => {
       cancelled = true;
@@ -75,10 +121,25 @@ export default function PlantUMLBlock({ source }: Props) {
     );
   }
   return (
-    <div
-      className="mermaid-block"
-      // SVG from Kroki is trusted enough for our use; nevertheless we sanitise minimally.
-      dangerouslySetInnerHTML={{ __html: svg }}
-    />
+    <div className="mermaid-block">
+      <div
+        style={{
+          padding: "0 10px 8px",
+          fontSize: 11,
+          color: state === "failed" ? "hsl(0 80% 65%)" : "hsl(var(--fg-muted))",
+          display: "flex",
+          justifyContent: "space-between",
+          gap: 12,
+        }}
+      >
+        <span>PlantUML</span>
+        <span>{statusText}</span>
+      </div>
+      <div
+        className="mermaid-block"
+        // SVG is rendered from an external service and then sanitized before insertion.
+        dangerouslySetInnerHTML={{ __html: svg }}
+      />
+    </div>
   );
 }

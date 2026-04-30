@@ -1,9 +1,10 @@
 import React, { useMemo, useState, useCallback } from "react";
-import { Sparkles, ShieldCheck, SpellCheck, Activity } from "lucide-react";
+import { Sparkles, ShieldCheck, SpellCheck, Activity, BarChart3 } from "lucide-react";
 import type { CollabPeer } from "../collab/yjs";
 import { t } from "../i18n";
 import { useAppStore } from "../store/useStore";
 import { getTelemetryOptOut, setTelemetryOptOut } from "../lib/telemetry";
+import type { ConfigHealthReport } from "../lib/configHealth";
 
 interface CollabInfo {
   roomName: string;
@@ -19,9 +20,18 @@ interface Props {
   filename: string;
   /** When in a collab session, shows peer dots and a leave action. */
   collab?: CollabInfo | null;
+  configHealth?: ConfigHealthReport;
+  onOpenRuntimeMetrics?: () => void;
 }
 
-export const StatusBar = React.memo(function StatusBar({ text, dirty, filename, collab }: Props) {
+export const StatusBar = React.memo(function StatusBar({
+  text,
+  dirty,
+  filename,
+  collab,
+  configHealth,
+  onOpenRuntimeMetrics,
+}: Props) {
   const stats = useMemo(() => computeStats(text), [text]);
   const aiKey = useAppStore((s) => s.aiKey);
   const useLocalAi = useAppStore((s) => s.useLocalAi);
@@ -33,6 +43,19 @@ export const StatusBar = React.memo(function StatusBar({ text, dirty, filename, 
     setTelemetryOptOut(next);
     setTelemetryOff(next);
   }, [telemetryOff]);
+  const healthIssues = configHealth
+    ? [
+        ...configHealth.blocked.map((item) => ({ ...item, emoji: "⚠", color: "hsl(12 90% 58%)" })),
+        ...configHealth.partial.map((item) => ({ ...item, emoji: "◌", color: "hsl(35 90% 60%)" })),
+      ].slice(0, 2)
+    : [];
+  const healthColor = !configHealth
+    ? "hsl(var(--fg-muted))"
+    : configHealth.score >= 85
+      ? "hsl(145 60% 45%)"
+      : configHealth.score >= 65
+        ? "hsl(35 90% 55%)"
+        : "hsl(12 90% 58%)";
   return (
     <footer className="status-bar">
       <span className="sb-item" title="Document">
@@ -87,6 +110,29 @@ export const StatusBar = React.memo(function StatusBar({ text, dirty, filename, 
         </span>
       )}
       <span className="sb-spacer" />
+      {configHealth ? (
+        <span
+          className="sb-item"
+          title={configHealth.items.map((item) => `${item.label}: ${item.details}`).join("\n")}
+          style={{
+            color: healthColor,
+            fontWeight: 600,
+            gap: 4,
+          }}
+        >
+          <span>{`Health ${configHealth.score}%`}</span>
+          {healthIssues.length > 0 && (
+            <span style={{ color: "hsl(var(--fg-muted))", fontWeight: 400 }}>
+              ·
+              {healthIssues.map((item) => (
+                <span key={item.key} title={item.details} style={{ marginLeft: 6, color: item.color }}>
+                  {item.emoji} {item.label}
+                </span>
+              ))}
+            </span>
+          )}
+        </span>
+      ) : null}
       <span className="sb-item" title="Word count">
         {t("status.words", { n: stats.words.toLocaleString() })}
       </span>
@@ -148,6 +194,27 @@ export const StatusBar = React.memo(function StatusBar({ text, dirty, filename, 
           {telemetryOff ? t("status.telemetry.off") : t("status.telemetry.on")}
         </span>
       </button>
+      {onOpenRuntimeMetrics && (
+        <button
+          type="button"
+          className="sb-item"
+          onClick={onOpenRuntimeMetrics}
+          title={t("status.runtimeMetrics.tooltip")}
+          data-testid="status-runtime-metrics"
+          style={{
+            gap: 4,
+            background: "transparent",
+            border: "none",
+            cursor: "pointer",
+            padding: 0,
+            font: "inherit",
+            color: "hsl(var(--accent))",
+          }}
+        >
+          <BarChart3 size={10} />
+          <span style={{ fontSize: 10, fontWeight: 600 }}>{t("status.runtimeMetrics")}</span>
+        </button>
+      )}
       {useLocalAi && (
         <span
           className="sb-item"

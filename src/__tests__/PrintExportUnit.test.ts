@@ -11,13 +11,16 @@ vi.mock("../renderer/pipeline", () => ({
 
 describe("printDocument", () => {
   beforeEach(() => {
+    const printDoc = document.implementation.createHTMLDocument("print");
+    printDoc.open();
+    const printWindow = {
+      document: printDoc,
+      focus: vi.fn(),
+      print: vi.fn(),
+    } as unknown as Window;
+
     // Mock window.open to avoid actually opening windows
-    vi.stubGlobal("open", vi.fn().mockReturnValue({
-      document: {
-        write: vi.fn(),
-        close: vi.fn(),
-      },
-    }));
+    vi.stubGlobal("open", vi.fn().mockReturnValue(printWindow));
   });
 
   it("can be imported without errors", async () => {

@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import YAML from "yaml";
+import { sanitizeUrl } from "../lib/urlSanitizer";
 
 interface Props {
   source: string;
@@ -62,6 +63,26 @@ export default function Model3DBlock({ source, meta }: Props) {
   const spec = parseSpec(source);
   const heightMatch = meta?.match(/height=(\d+)/);
   const height = heightMatch ? Number(heightMatch[1]) : 360;
+  const isSourceSafe = Boolean(spec?.src && sanitizeUrl(spec.src));
+  const isPosterSafe = !spec?.poster || sanitizeUrl(spec.poster);
+
+  useEffect(() => {
+    if (!spec || !isSourceSafe || !isPosterSafe) return;
+    const container = hostRef.current;
+    if (!container) return;
+    container.innerHTML = "";
+    const viewer = document.createElement("model-viewer") as HTMLElement;
+    viewer.setAttribute("src", spec.src);
+    if (spec.poster) viewer.setAttribute("poster", spec.poster);
+    if (spec.alt) viewer.setAttribute("alt", spec.alt);
+    if (spec.autoRotate !== false) viewer.setAttribute("auto-rotate", "");
+    viewer.setAttribute("camera-controls", "");
+    if (typeof spec.shadowIntensity === "number") {
+      viewer.setAttribute("shadow-intensity", String(spec.shadowIntensity));
+    }
+    viewer.setAttribute("style", "width: 100%; height: 100%; --poster-color: transparent;");
+    container.appendChild(viewer);
+  }, [spec, isSourceSafe, isPosterSafe]);
 
   if (!spec || !spec.src) {
     return (
@@ -73,35 +94,22 @@ export default function Model3DBlock({ source, meta }: Props) {
     );
   }
 
+  if (!isSourceSafe || !isPosterSafe) {
+    return (
+      <div className="chart-block">
+        <div style={{ padding: "1rem", color: "hsl(0 80% 60%)", fontSize: 13 }}>
+          ⚠︎ 3D block contains unsafe asset URL.
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="chart-block">
       <div className="chart-block-header">
         <span>3D · {spec.alt ?? new URL(spec.src, location.href).pathname.split("/").pop()}</span>
       </div>
-      <div
-        ref={hostRef}
-        style={{ height, background: spec.background ?? "transparent" }}
-        // model-viewer is a custom element, so we render via dangerouslySetInnerHTML
-        // to avoid TS jank with custom-element typings.
-        dangerouslySetInnerHTML={{
-          __html: `<model-viewer
-            src="${escape(spec.src)}"
-            ${spec.poster ? `poster="${escape(spec.poster)}"` : ""}
-            ${spec.alt ? `alt="${escape(spec.alt)}"` : ""}
-            ${spec.autoRotate !== false ? "auto-rotate" : ""}
-            camera-controls
-            shadow-intensity="${spec.shadowIntensity ?? 0.5}"
-            style="width: 100%; height: 100%; --poster-color: transparent;"
-          ></model-viewer>`,
-        }}
-      />
+      <div ref={hostRef} style={{ height, background: spec.background ?? "transparent" }} />
     </div>
   );
-}
-
-function escape(s: string): string {
-  return s
-    .replace(/&/g, "&amp;")
-    .replace(/"/g, "&quot;")
-    .replace(/</g, "&lt;");
 }

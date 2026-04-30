@@ -1,43 +1,64 @@
 /**
- * Live SVG block — renders raw `<svg>` markup safely. We sanitise out
- * any `<script>` / event-handler attributes before mounting, then drop
- * the cleaned XML into a host div via `dangerouslySetInnerHTML`.
+ * Live SVG block — renders raw `<svg>` markup safely.
  *
  * Why not `htmlpreview`: an SVG-only fence is the ergonomic equivalent
  * of a Mermaid block — a one-liner `<svg viewBox="…">…</svg>` should
- * render inline without iframe boilerplate. The sanitiser mitigates
- * the XSS risk that drove the broader `htmlpreview` to use a sandbox.
+ * render inline without iframe boilerplate.
  */
 
 import { useMemo } from "react";
+import { sanitizeSvgMarkup } from "../lib/markupSanitizer";
 
 interface Props {
   source: string;
   meta?: string;
 }
 
-const SANITIZE_TAGS = /<\s*\/?\s*script\b[^>]*>/gi;
-const SANITIZE_EVENT_ATTRS = /\s+on[a-z]+\s*=\s*("[^"]*"|'[^']*'|[^>\s]+)/gi;
-const SANITIZE_JS_HREF = /\s+(href|xlink:href)\s*=\s*("javascript:[^"]*"|'javascript:[^']*')/gi;
-
-function sanitizeSvg(input: string): string {
-  return input
-    .replace(SANITIZE_TAGS, "")
-    .replace(SANITIZE_EVENT_ATTRS, "")
-    .replace(SANITIZE_JS_HREF, "");
-}
-
 export default function LiveSvgBlock({ source, meta }: Props) {
   const heightMatch = meta?.match(/height=(\d+)/);
-  const sanitized = useMemo(() => sanitizeSvg(source.trim()), [source]);
+  const sanitized = useMemo(() => sanitizeSvgMarkup(source.trim()), [source]);
+  const isSafe = Boolean(sanitized.trim());
+  const status = isSafe ? "Rendered" : "Blocked";
   // If the user pasted a fragment, wrap it in an outer <svg>.
   const wrapped = sanitized.startsWith("<svg")
     ? sanitized
     : `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">${sanitized}</svg>`;
+  if (!isSafe) {
+    return (
+      <div className="chart-block">
+        <div
+          style={{
+            marginBottom: 6,
+            fontSize: 11,
+            color: "hsl(0 80% 60%)",
+            padding: "0 12px 8px",
+            display: "flex",
+            justifyContent: "space-between",
+          }}
+        >
+          <span>SVG</span>
+          <span>{status}</span>
+        </div>
+        <div style={{ padding: "1rem", color: "hsl(var(--fg-muted))" }}>
+          Empty or blocked SVG source.
+        </div>
+      </div>
+    );
+  }
   return (
     <div className="chart-block">
       <div className="chart-block-header">
-        <span>SVG</span>
+        <div
+          style={{
+            fontSize: 11,
+            color: "hsl(var(--fg-muted))",
+            display: "flex",
+            justifyContent: "space-between",
+          }}
+        >
+          <span>SVG</span>
+          <span>{status}</span>
+        </div>
       </div>
       <div
         style={{

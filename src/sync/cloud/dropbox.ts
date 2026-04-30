@@ -15,6 +15,7 @@
  */
 
 import { log } from "../../lib/logger";
+import { fetchWithRetry } from "../../lib/fetchRetry";
 import type { CloudFile, CloudProvider } from "./types";
 
 const TOKEN_KEY = "lumen.cloud.dropbox.token";
@@ -82,7 +83,7 @@ function randomString(len = 64): string {
 async function refreshAccessToken(): Promise<string> {
   const refresh = localStorage.getItem(REFRESH_KEY);
   if (!refresh) throw new Error("Dropbox is disconnected — sign in again.");
-  const res = await fetch("https://api.dropboxapi.com/oauth2/token", {
+  const res = await fetchWithRetry("https://api.dropboxapi.com/oauth2/token", {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: new URLSearchParams({
@@ -90,7 +91,7 @@ async function refreshAccessToken(): Promise<string> {
       refresh_token: refresh,
       client_id: appKey(),
     }),
-  });
+  }, { label: "dropbox.refreshToken", maxRetries: 2, baseDelayMs: 700, maxDelayMs: 4000 });
   if (!res.ok) {
     clearToken();
     throw new Error(`Dropbox refresh failed (${res.status})`);
@@ -124,11 +125,15 @@ async function api<T = unknown>(
   } else {
     headers["Content-Type"] = "application/json";
   }
-  const res = await fetch(url, {
-    method: "POST",
-    headers,
-    body: opts.raw ?? (body !== undefined ? JSON.stringify(body) : undefined),
-  });
+  const res = await fetchWithRetry(
+    url,
+    {
+      method: "POST",
+      headers,
+      body: opts.raw ?? (body !== undefined ? JSON.stringify(body) : undefined),
+    },
+    { label: `dropbox.api.${opts.contentEndpoint ? "content" : "metadata"}`, maxRetries: 2, baseDelayMs: 700, maxDelayMs: 2500 },
+  );
   if (!res.ok) {
     const text = await res.text().catch(() => "");
     throw new Error(`Dropbox ${res.status}: ${text.slice(0, 200)}`);
@@ -235,7 +240,7 @@ export const dropboxProvider: CloudProvider = {
 export async function finishDropboxOAuth(code: string): Promise<void> {
   const verifier = localStorage.getItem(PKCE_KEY);
   if (!verifier) throw new Error("Missing PKCE verifier — restart sign-in.");
-  const res = await fetch("https://api.dropboxapi.com/oauth2/token", {
+  const res = await fetchWithRetry("https://api.dropboxapi.com/oauth2/token", {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: new URLSearchParams({
@@ -245,7 +250,7 @@ export async function finishDropboxOAuth(code: string): Promise<void> {
       redirect_uri: redirectUri(),
       code_verifier: verifier,
     }),
-  });
+  }, { label: "dropbox.exchangeToken", maxRetries: 2, baseDelayMs: 700, maxDelayMs: 4000 });
   if (!res.ok) throw new Error(`OAuth exchange failed (${res.status})`);
   const json = (await res.json()) as {
     access_token: string;

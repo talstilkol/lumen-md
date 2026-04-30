@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
-import { render } from "@testing-library/react";
+import { render, waitFor } from "@testing-library/react";
 
 vi.mock("../i18n", () => ({ t: (k: string) => k }));
 vi.mock("../lib/logger", () => ({
@@ -15,7 +15,7 @@ describe("BacklinksPanel", () => {
     const { container } = render(
       <BacklinksPanel filePath={null} onOpen={vi.fn()} />,
     );
-    expect(container).toBeDefined();
+    await waitFor(() => expect(container).toBeDefined());
   });
 
   it("shows 'select file' hint when filePath is null", async () => {
@@ -23,7 +23,9 @@ describe("BacklinksPanel", () => {
     const { container } = render(
       <BacklinksPanel filePath={null} onOpen={vi.fn()} />,
     );
-    expect(container.textContent).toContain("backlinks.selectFile");
+    await waitFor(() => {
+      expect(container.textContent).toContain("backlinks.selectFile");
+    });
   });
 
   it("has correct aria-label on aside", async () => {
@@ -32,7 +34,9 @@ describe("BacklinksPanel", () => {
       <BacklinksPanel filePath={null} onOpen={vi.fn()} />,
     );
     const aside = container.querySelector("aside");
-    expect(aside?.getAttribute("aria-label")).toBe("backlinks.title");
+    await waitFor(() => {
+      expect(aside?.getAttribute("aria-label")).toBe("backlinks.title");
+    });
   });
 
   it("triggers loading state when filePath is provided", async () => {
@@ -41,6 +45,6 @@ describe("BacklinksPanel", () => {
       <BacklinksPanel filePath="/notes/foo.md" onOpen={vi.fn()} />,
     );
     // Should show scanning indicator initially
-    expect(container).toBeDefined();
+    await waitFor(() => expect(container).toBeDefined());
   });
 });

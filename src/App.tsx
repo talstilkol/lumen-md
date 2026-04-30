@@ -1,5 +1,5 @@
 import { useCommands } from "./commands/useCommands";
-import { lazy, Suspense, useCallback, useDeferredValue, useEffect, useRef, useState } from "react";
+import { lazy, Suspense, useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 import type { EditorHandle } from "./editor/Editor";
 
 import { Toolbar } from "./ui/Toolbar";
@@ -34,12 +34,17 @@ import { TagsPanel } from "./ui/TagsPanel";
 import { CommentsPanel, addCommentFromSelection } from "./ui/CommentsPanel";
 import { DocTabs, tabId } from "./ui/DocTabs";
 import { AiInlinePromptOverlay } from "./ui/AiInlinePrompt";
+import { RuntimeMetricsPanel } from "./ui/RuntimeMetricsPanel";
 import { useFileDragDrop } from "./hooks/useFileDragDrop";
 import { useCollab } from "./hooks/useCollab";
 import { useTauriMenu } from "./hooks/useTauriMenu";
 import { EditorLayout } from "./layouts/EditorLayout";
+import { useAuth } from "./auth/useAuth";
+import { useEntitlement } from "./billing/useEntitlement";
 import { useAppStore, applyTheme } from "./store/useStore";
 import { applyLocale, t } from "./i18n";
+import { localLlmAvailable } from "./ai/localLlm";
+import { assessConfigHealth } from "./lib/configHealth";
 import { openFileDialog, saveFile } from "./storage/fs";
 import { exportToHtml } from "./storage/exportHtml";
 import { getRecents, pushRecent, reopenRecent } from "./storage/recent";
@@ -90,7 +95,20 @@ export default function App() {
   const spellCheck = useAppStore((s) => s.spellCheck);
   const grammarCheck = useAppStore((s) => s.grammarCheck);
   const typewriterMode = useAppStore((s) => s.typewriterMode);
+  const aiKey = useAppStore((s) => s.aiKey);
+  const useLocalAi = useAppStore((s) => s.useLocalAi);
   const editorRef = useRef<EditorHandle | null>(null);
+  const authStatus = useAuth((s) => s.status);
+  const authProviderName = useAuth((s) => s.provider.name);
+  const authError = useAuth((s) => s.error);
+  const authUserId = useAuth((s) => s.user?.id);
+  const entitlementLoading = useEntitlement((s) => s.loading);
+  const entitlement = useEntitlement((s) => s.entitlement);
+  const capabilitiesCloudSync = useEntitlement((s) => s.capabilities.cloudSync);
+  const hasWebGPU = useMemo(() => {
+    if (typeof window === "undefined" || typeof navigator === "undefined") return false;
+    return localLlmAvailable().available;
+  }, []);
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [findReplaceOpen, setFindReplaceOpen] = useState(false);
@@ -104,6 +122,7 @@ export default function App() {
   const [fineTuneOpen, setFineTuneOpen] = useState(false);
   const [tagsPanelOpen, setTagsPanelOpen] = useState(false);
   const [commentsPanelOpen, setCommentsPanelOpen] = useState(false);
+  const [runtimeMetricsOpen, setRuntimeMetricsOpen] = useState(false);
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
   const [focusMode, setFocusMode] = useState(false);
   const [tourOpen, setTourOpen] = useState(false);
@@ -115,6 +134,10 @@ export default function App() {
   // Load recents on mount.
   useEffect(() => {
     getRecents().then(setRecents).catch(() => setRecents([]));
+  }, []);
+
+  useEffect(() => {
+    void useEntitlement.getState().refresh();
   }, []);
 
   // Apply theme on mount
@@ -166,6 +189,34 @@ export default function App() {
     // run once
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const configHealth = useMemo(
+    () =>
+      assessConfigHealth({
+        authStatus,
+        authProviderName,
+        authError,
+        userId: authUserId,
+        entitlementLoading,
+        entitlement,
+        capabilitiesCloudSync,
+        aiKey,
+        useLocalAi,
+        hasWebGPU,
+      }),
+    [
+      authStatus,
+      authProviderName,
+      authError,
+      authUserId,
+      entitlementLoading,
+      entitlement,
+      capabilitiesCloudSync,
+      aiKey,
+      useLocalAi,
+      hasWebGPU,
+    ],
+  );
 
   // Beforeunload warning if dirty
   useEffect(() => {
@@ -469,6 +520,7 @@ export default function App() {
     setFineTuneOpen,
     setTagsPanelOpen,
     setCommentsPanelOpen,
+    setRuntimeMetricsOpen,
     onAddComment: collab
       ? async () => {
           const view = editorRef.current?.getView();
@@ -699,6 +751,8 @@ export default function App() {
         text={doc.content}
         dirty={doc.dirty}
         filename={doc.name}
+        configHealth={configHealth}
+        onOpenRuntimeMetrics={() => setRuntimeMetricsOpen(true)}
         collab={
           collab
             ? {
@@ -831,12 +885,28 @@ export default function App() {
       <KeyboardShortcuts open={shortcutsOpen} onClose={() => setShortcutsOpen(false)} />
 
       {/* Onboarding Tour */}
-      <OnboardingTour open={tourOpen} onClose={() => {
-        setTourOpen(false);
-        try { localStorage.setItem("lumen-tour-done", "1"); } catch {
-          /* storage denied — tour will simply replay next session */
-        }
-      }} />
+      <OnboardingTour
+        open={tourOpen}
+        onClose={() => {
+          setTourOpen(false);
+          try { localStorage.setItem("lumen-tour-done", "1"); } catch {
+            /* storage denied — tour will simply replay next session */
+          }
+        }}
+        actions={[
+          {
+            id: "runtimeMetrics.open",
+            label: t("tour.action.openRuntimeMetrics"),
+            onRun: () => {
+              setRuntimeMetricsOpen(true);
+              setTourOpen(false);
+            },
+          },
+        ]}
+      />
+      {runtimeMetricsOpen && (
+        <RuntimeMetricsPanel onClose={() => setRuntimeMetricsOpen(false)} />
+      )}
 
       {/* Focus Mode overlay */}
       {focusMode && (

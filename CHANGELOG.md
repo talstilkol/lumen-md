@@ -47,6 +47,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - "Show Welcome.md" entry at the bottom of the File menu so first-timers can replay the tour.
 - Source-view content centered to a comfortable 80-column measure to match preview's prose width.
 - Submenus open as a horizontal 3-column grid via `createPortal` to escape parent `overflow:auto`.
+- Dynamic block hardening: centralized HTML/SVG sanitization via `markupSanitizer`, worker-isolated Live JS execution, and render status/timing telemetry for Mermaid/Graphviz/PlantUML/Live SVG/HTML preview paths.
 
 ### Changed
 - `package.json` declares `license: "MIT"`.

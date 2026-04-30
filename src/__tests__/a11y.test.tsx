@@ -10,7 +10,7 @@
  */
 
 import { describe, it, expect } from "vitest";
-import { render } from "@testing-library/react";
+import { render, waitFor } from "@testing-library/react";
 import axe from "axe-core";
 import { Toolbar } from "../ui/Toolbar";
 import { AuthDialog } from "../components/AuthDialog";
@@ -22,9 +22,66 @@ import { TagsPanel } from "../ui/TagsPanel";
 import { BacklinksPanel } from "../ui/BacklinksPanel";
 import { KeyboardShortcuts } from "../ui/KeyboardShortcuts";
 import { TemplateGallery } from "../ui/TemplateGallery";
-import { vi } from "vitest";
 import { StatusBar } from "../ui/StatusBar";
 import { DocTabs } from "../ui/DocTabs";
+import { afterEach, beforeEach, vi } from "vitest";
+
+const stubNavSymbol = "__cabinetMockNavigation";
+type MockCanvasContext = {
+  fillRect: () => void;
+  clearRect: () => void;
+  drawImage: () => void;
+  getImageData: () => { data: Uint8ClampedArray; width: number; height: number };
+  createImageData: () => { data: Uint8ClampedArray; width: number; height: number };
+  beginPath: () => void;
+  closePath: () => void;
+  moveTo: () => void;
+  lineTo: () => void;
+  arc: () => void;
+  fill: () => void;
+  stroke: () => void;
+};
+
+const createMockContext = (): MockCanvasContext => ({
+  fillRect: () => undefined,
+  clearRect: () => undefined,
+  drawImage: () => undefined,
+  getImageData: () => ({ data: new Uint8ClampedArray(4), width: 1, height: 1 }),
+  createImageData: () => ({ data: new Uint8ClampedArray(4), width: 1, height: 1 }),
+  beginPath: () => undefined,
+  closePath: () => undefined,
+  moveTo: () => undefined,
+  lineTo: () => undefined,
+  arc: () => undefined,
+  fill: () => undefined,
+  stroke: () => undefined,
+});
+
+beforeEach(() => {
+  const win = globalThis as Window & { [stubNavSymbol]?: { addEventListener: typeof vi.fn; removeEventListener: typeof vi.fn } };
+  if (!win[stubNavSymbol]) {
+    win[stubNavSymbol] = {
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+    };
+  }
+  const nav = (win as { navigation?: { addEventListener?: () => void; removeEventListener?: () => void } });
+  if (typeof nav.navigation === "undefined") {
+    nav.navigation = win[stubNavSymbol] as unknown as {
+      addEventListener: () => void;
+      removeEventListener: () => void;
+    };
+  }
+  if (typeof HTMLCanvasElement !== "undefined") {
+    vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockImplementation(
+      () => createMockContext() as unknown as CanvasRenderingContext2D,
+    );
+  }
+});
+
+afterEach(() => {
+  vi.restoreAllMocks();
+});
 
 async function runAxe(container: HTMLElement) {
   const result = await axe.run(container, {
@@ -45,6 +102,13 @@ function expectNoBlockers(violations: axe.Result[]) {
   expect(blockers).toEqual([]);
 }
 
+async function expectNoBlockersEventually(container: HTMLElement) {
+  await waitFor(async () => {
+    const violations = await runAxe(container);
+    expectNoBlockers(violations);
+  });
+}
+
 describe("axe a11y smoke", () => {
   it("Toolbar renders with no critical/serious axe violations", async () => {
     const { container } = render(
@@ -55,23 +119,23 @@ describe("axe a11y smoke", () => {
         onCommandPalette={() => {}}
       />,
     );
-    expectNoBlockers(await runAxe(container));
+    await expectNoBlockersEventually(container);
   });
 
   it("AuthDialog (open) renders with no critical/serious axe violations", async () => {
     const { container } = render(<AuthDialog open onClose={() => {}} />);
-    expectNoBlockers(await runAxe(container));
+    await expectNoBlockersEventually(container);
   });
 
   it("MobileKeyboardBar renders without blockers (component is hidden when not on touch device)", async () => {
     const { container } = render(<MobileKeyboardBar />);
-    expectNoBlockers(await runAxe(container));
+    await expectNoBlockersEventually(container);
   });
 
   it("Outline renders no blockers on a typical heading-rich doc", async () => {
     const md = "# Title\n## Sub-section A\n### Detail\n## Sub-section B\n";
     const { container } = render(<Outline markdownText={md} />);
-    expectNoBlockers(await runAxe(container));
+    await expectNoBlockersEventually(container);
   });
 
   it("CommandPalette (open) renders no blockers", async () => {
@@ -88,40 +152,43 @@ describe("axe a11y smoke", () => {
         ]}
       />,
     );
-    expectNoBlockers(await runAxe(container));
+    await waitFor(() => expect(container).toBeDefined());
+    await expectNoBlockersEventually(container);
   });
 
   it("SearchDialog (open) renders no blockers", async () => {
     const { container } = render(
       <SearchDialog open onClose={() => {}} onOpenFile={() => {}} />,
     );
-    expectNoBlockers(await runAxe(container));
+    await expectNoBlockersEventually(container);
   });
 
   it("TagsPanel (open) renders no blockers", async () => {
     const { container } = render(<TagsPanel open onClose={() => {}} />);
-    expectNoBlockers(await runAxe(container));
+    await waitFor(() => expect(container).toBeDefined());
+    await expectNoBlockersEventually(container);
   });
 
   it("BacklinksPanel renders no blockers (no active doc)", async () => {
     const { container } = render(
       <BacklinksPanel filePath={null} onOpen={() => {}} />,
     );
-    expectNoBlockers(await runAxe(container));
+    await waitFor(() => expect(container).toBeDefined());
+    await expectNoBlockersEventually(container);
   });
 
   it("KeyboardShortcuts (open) renders no blockers", async () => {
     const { container } = render(
       <KeyboardShortcuts open onClose={() => {}} />,
     );
-    expectNoBlockers(await runAxe(container));
+    await expectNoBlockersEventually(container);
   });
 
   it("StatusBar renders no blockers", async () => {
     const { container } = render(
       <StatusBar text="hello world" dirty={false} filename="test.md" />,
     );
-    expectNoBlockers(await runAxe(container));
+    await expectNoBlockersEventually(container);
   });
 
   it("TemplateGallery (open, mocked registry) renders no blockers", async () => {
@@ -145,9 +212,11 @@ describe("axe a11y smoke", () => {
     const { container } = render(
       <TemplateGallery open onClose={() => {}} />,
     );
-    // axe needs the async load to settle first.
-    await new Promise((r) => setTimeout(r, 50));
-    expectNoBlockers(await runAxe(container));
+    await waitFor(() => {
+      expect(container).toBeDefined();
+      expect(container.textContent).toContain("Demo");
+    });
+    await expectNoBlockersEventually(container);
   });
 
   it("DocTabs (3 tabs) renders no blockers; close-X is keyboard reachable", async () => {
@@ -163,6 +232,6 @@ describe("axe a11y smoke", () => {
         onClose={() => {}}
       />,
     );
-    expectNoBlockers(await runAxe(container));
+    await expectNoBlockersEventually(container);
   });
 });

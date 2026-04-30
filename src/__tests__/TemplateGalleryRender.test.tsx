@@ -69,8 +69,8 @@ describe("TemplateGallery", () => {
     render(<TemplateGallery open onClose={() => {}} />);
     await waitFor(() => {
       expect(screen.getByText("Daily Journal Pro")).toBeTruthy();
+      expect(screen.getByText("Weekly Review")).toBeTruthy();
     });
-    expect(screen.getByText("Weekly Review")).toBeTruthy();
     expect(fetchTemplateRegistry).toHaveBeenCalledTimes(1);
   });
 
@@ -86,8 +86,10 @@ describe("TemplateGallery", () => {
     expect(chip).toBeTruthy();
     fireEvent.click(chip!);
 
-    expect(screen.queryByText("Weekly Review")).toBeNull();
-    expect(screen.getByText("Daily Journal Pro")).toBeTruthy();
+    await waitFor(() => {
+      expect(screen.queryByText("Weekly Review")).toBeNull();
+      expect(screen.getByText("Daily Journal Pro")).toBeTruthy();
+    });
   });
 
   it("Install button calls installTemplate with the right id", async () => {
@@ -108,7 +110,10 @@ describe("TemplateGallery", () => {
   it("close button fires onClose", () => {
     const onClose = vi.fn();
     render(<TemplateGallery open onClose={onClose} />);
-    fireEvent.click(screen.getByRole("button", { name: /Close gallery/i }));
-    expect(onClose).toHaveBeenCalledOnce();
+    return waitFor(() => {
+      const closeButton = screen.getByRole("button", { name: /Close gallery/i });
+      fireEvent.click(closeButton);
+      expect(onClose).toHaveBeenCalledOnce();
+    });
   });
 });

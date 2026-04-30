@@ -12,7 +12,7 @@
  *
  * The server piece is intentionally out of this module. A reference
  * Cloudflare Worker that satisfies the contract is shipped under
- * `mcp-server/../publish-worker/` (TODO) — any HTTP backend that accepts
+ * `mcp-server/publish-worker/` — any HTTP backend that accepts
  * the same JSON shape works.
  *
  * The browser never sees a service-account key. Authorization rides on the
@@ -22,7 +22,19 @@
 
 import { useAppStore } from "../store/useStore";
 import { useEntitlement } from "../billing/useEntitlement";
+import { useAuth } from "../auth/useAuth";
 import { recordAudit } from "../lib/audit";
+import { fetchWithRetry } from "../lib/fetchRetry";
+
+interface MockPublishRecord {
+  path: string;
+  slug: string;
+  visibility: "public" | "unlisted";
+  encrypted: boolean;
+  createdAt: number;
+  updatedAt: number;
+  content: string;
+}
 
 export interface PublishResult {
   /** Public URL the note can now be read at. */
@@ -33,12 +45,142 @@ export interface PublishResult {
   expiresAt?: number;
 }
 
-function endpoint(): string {
-  const env = (
+interface PublishResultPayload {
+  url?: unknown;
+  slug?: unknown;
+  expiresAt?: unknown;
+}
+
+const PUBLISH_MOCK_KEY = "lumen.publish.mock-store";
+
+function publishEndpoint(): string | null {
+  return (
     import.meta as ImportMeta & { env?: { VITE_PUBLISH_ENDPOINT?: string } }
-  ).env?.VITE_PUBLISH_ENDPOINT;
-  if (!env) throw new Error("VITE_PUBLISH_ENDPOINT is not set — publishing offline.");
-  return env;
+  ).env?.VITE_PUBLISH_ENDPOINT ?? null;
+}
+
+function mockPublishEnabled(): boolean {
+  const env = (
+    import.meta as ImportMeta & { env?: { VITE_PUBLISH_MOCK_ENABLED?: string; DEV?: boolean } }
+  ).env;
+  const explicit = env?.VITE_PUBLISH_MOCK_ENABLED?.trim().toLowerCase();
+  if (explicit === "1" || explicit === "true" || explicit === "yes") return true;
+  if (env?.DEV) return true;
+  try {
+    return ["localhost", "127.0.0.1", "0.0.0.0"].includes(window.location.hostname);
+  } catch {
+    return false;
+  }
+}
+
+function publishTarget(): "remote" | "mock" {
+  if (publishEndpoint()) return "remote";
+  if (mockPublishEnabled()) return "mock";
+  throw new Error("VITE_PUBLISH_ENDPOINT is not set — publishing offline.");
+}
+
+function mockStore(): Record<string, MockPublishRecord> {
+  try {
+    const raw = localStorage.getItem(PUBLISH_MOCK_KEY);
+    const parsed = raw ? JSON.parse(raw) : {};
+    return typeof parsed === "object" && parsed !== null ? parsed : {};
+  } catch {
+    return {};
+  }
+}
+
+function saveMockStore(store: Record<string, MockPublishRecord>): void {
+  try {
+    localStorage.setItem(PUBLISH_MOCK_KEY, JSON.stringify(store));
+  } catch {
+    // Mock publish should stay functional even when storage is unavailable.
+  }
+}
+
+function toMockPublishUrl(slug: string): string {
+  if (typeof window === "undefined") return `/p/${encodeURIComponent(slug)}`;
+  const origin = window.location.origin.replace(/\/$/, "");
+  return `${origin}/p/${encodeURIComponent(slug)}`;
+}
+
+async function hashText(value: string): Promise<string> {
+  const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(value));
+  return Array.from(new Uint8Array(digest).slice(0, 16))
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+}
+
+function normalizeSlug(candidate: string): string {
+  return candidate
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9/-]+/g, "-")
+    .replace(/(^-|-$)/g, "")
+    .replace(/--+/g, "-")
+    .slice(0, 80);
+}
+
+async function mockSlug(content: string, path: string, candidate?: string): Promise<string> {
+  const requested = candidate ? normalizeSlug(candidate) : "";
+  const fallbackBase = await hashText(`${path}\u0000${content}`);
+  const fallback = requested || `${path}-${fallbackBase.slice(0, 16)}`;
+  const store = mockStore();
+  if (!store[fallback] || store[fallback].path === path) {
+    const defaultSlug = await hashText(path).then((v) => v.slice(0, 12));
+    return fallback || `note-${defaultSlug}`;
+  }
+  const hashInput = path + "\u0000" + (candidate ?? content);
+  const suffix = await hashText(hashInput).then((v) => v.slice(0, 8));
+  const candidateWithPath = `${fallback}-${suffix}`;
+  return candidateWithPath || `note-${await hashText(path).then((v) => v.slice(0, 12))}`;
+}
+
+async function publishToMock(payload: {
+  path: string;
+  content: string;
+  slug?: string;
+  visibility: "public" | "unlisted";
+  encrypted: boolean;
+}): Promise<PublishResult> {
+  const slug = await mockSlug(payload.content, payload.path, payload.slug);
+  const now = Date.now();
+  const existing = mockStore();
+  existing[slug] = {
+    path: payload.path,
+    slug,
+    visibility: payload.visibility,
+    encrypted: payload.encrypted,
+    createdAt: existing[slug]?.createdAt ?? now,
+    updatedAt: now,
+    content: payload.content,
+  };
+  saveMockStore(existing);
+
+  const userId = currentUserId();
+  if (userId) {
+    recordAudit(userId, "doc.publish", {
+      payload: {
+        path: payload.path,
+        slug,
+        visibility: payload.visibility,
+        encrypted: payload.encrypted,
+      },
+    });
+  }
+
+  return {
+    url: toMockPublishUrl(slug),
+    slug,
+  };
+}
+
+async function unpublishFromMock(slug: string): Promise<void> {
+  const store = mockStore();
+  if (!store[slug]) {
+    throw new Error(`Unpublish failed (404)`);
+  }
+  delete store[slug];
+  saveMockStore(store);
 }
 
 function authHeader(): Record<string, string> {
@@ -63,6 +205,7 @@ function ensurePro(): void {
   }
 }
 
+
 /**
  * Publish a note. Optional knobs:
  *   - `slug`        — custom URL suffix; server otherwise picks a content
@@ -85,9 +228,21 @@ export async function publishNote(
   const body = opts.password
     ? await encryptForPublish(content, opts.password)
     : content;
-  const res = await fetch(endpoint(), {
+  if (publishTarget() === "mock") {
+    return publishToMock({
+      path,
+      content: body,
+      slug: opts.slug,
+      visibility: opts.visibility ?? "public",
+      encrypted: !!opts.password,
+    });
+  }
+  const endpoint = publishEndpoint();
+  if (!endpoint) throw new Error("Publish endpoint unavailable.");
+  const res = await fetchWithRetry(endpoint, {
     method: "POST",
     headers: { "Content-Type": "application/json", ...authHeader() },
+    credentials: "include",
     body: JSON.stringify({
       path,
       content: body,
@@ -95,12 +250,12 @@ export async function publishNote(
       visibility: opts.visibility ?? "public",
       encrypted: !!opts.password,
     }),
-  });
+  }, { label: "publish.note" });
   if (!res.ok) {
     const text = await res.text().catch(() => "");
     throw new Error(`Publish failed (${res.status}): ${text.slice(0, 160)}`);
   }
-  const result = (await res.json()) as PublishResult;
+  const result = readPublishResult(await res.json());
   // ε.2 — fire-and-forget audit event so SOC-2 evidence shows
   // "user X published note <path> at <ts>". Doesn't block publish.
   const userId = currentUserId();
@@ -156,18 +311,22 @@ async function encryptForPublish(plaintext: string, password: string): Promise<s
 /** Read the active user id from the auth slice if any. Audit events are
  *  scoped per user; anonymous publishes don't generate audit rows. */
 function currentUserId(): string | null {
-  const state = useAppStore.getState() as {
-    user?: { id?: string };
-  };
-  return state.user?.id ?? null;
+  return useAuth.getState().user?.id ?? null;
 }
 
 export async function unpublishNote(slug: string): Promise<void> {
   ensurePro();
-  const res = await fetch(`${endpoint()}/${encodeURIComponent(slug)}`, {
+  if (publishTarget() === "mock") {
+    await unpublishFromMock(slug);
+    return;
+  }
+  const endpoint = publishEndpoint();
+  if (!endpoint) throw new Error("Publish endpoint unavailable.");
+  const res = await fetchWithRetry(`${endpoint}/${encodeURIComponent(slug)}`, {
     method: "DELETE",
+    credentials: "include",
     headers: authHeader(),
-  });
+  }, { label: "publish.unpublish" });
   if (!res.ok && res.status !== 404) {
     throw new Error(`Unpublish failed (${res.status})`);
   }
@@ -202,4 +361,15 @@ export function setPublishedSlug(content: string, slug: string | null): string {
     newBlock = `${block.replace(/\s*$/, "")}\npublished: ${slug}`;
   }
   return content.replace(fm[0], `${fm[1]}${newBlock}${fm[3]}`);
+}
+
+function readPublishResult(data: unknown): PublishResult {
+  const payload = data as PublishResultPayload;
+  const url = typeof payload?.url === "string" ? payload.url.trim() : "";
+  const slug = typeof payload?.slug === "string" ? payload.slug.trim() : "";
+  if (!url || !slug) {
+    throw new Error("Malformed publish response. Expected { url, slug }.");
+  }
+  const expiresAt = typeof payload?.expiresAt === "number" ? payload.expiresAt : undefined;
+  return { url, slug, expiresAt };
 }

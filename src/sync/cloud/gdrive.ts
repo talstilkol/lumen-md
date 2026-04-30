@@ -18,6 +18,7 @@
 
 import { log } from "../../lib/logger";
 import { randomId } from "../../lib/cryptoRandom";
+import { fetchWithRetry } from "../../lib/fetchRetry";
 import type { CloudFile, CloudProvider } from "./types";
 
 const TOKEN_KEY = "lumen.cloud.gdrive.token";
@@ -83,7 +84,7 @@ function randomString(len = 64): string {
 async function refreshAccessToken(): Promise<string> {
   const refresh = localStorage.getItem(REFRESH_KEY);
   if (!refresh) throw new Error("Google Drive is disconnected — sign in again.");
-  const res = await fetch("https://oauth2.googleapis.com/token", {
+  const res = await fetchWithRetry("https://oauth2.googleapis.com/token", {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: new URLSearchParams({
@@ -91,7 +92,7 @@ async function refreshAccessToken(): Promise<string> {
       refresh_token: refresh,
       client_id: clientId(),
     }),
-  });
+  }, { label: "gdrive.refreshToken", maxRetries: 2, baseDelayMs: 700, maxDelayMs: 4000 });
   if (!res.ok) {
     clearToken();
     throw new Error(`Google refresh failed (${res.status})`);
@@ -117,7 +118,7 @@ async function api<T>(path: string, opts: RequestInit = {}): Promise<T> {
   const url = path.startsWith("http") ? path : `https://www.googleapis.com${path}`;
   const headers = new Headers(opts.headers ?? {});
   headers.set("Authorization", `Bearer ${access}`);
-  const res = await fetch(url, { ...opts, headers });
+  const res = await fetchWithRetry(url, { ...opts, headers }, { label: "gdrive.api", maxRetries: 2, baseDelayMs: 700, maxDelayMs: 2500 });
   if (!res.ok) {
     const text = await res.text().catch(() => "");
     throw new Error(`Google Drive ${res.status}: ${text.slice(0, 200)}`);
@@ -270,7 +271,7 @@ export const gdriveProvider: CloudProvider = {
 export async function finishGDriveOAuth(code: string): Promise<void> {
   const verifier = localStorage.getItem(PKCE_KEY);
   if (!verifier) throw new Error("Missing PKCE verifier — restart sign-in.");
-  const res = await fetch("https://oauth2.googleapis.com/token", {
+  const res = await fetchWithRetry("https://oauth2.googleapis.com/token", {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: new URLSearchParams({
@@ -280,7 +281,7 @@ export async function finishGDriveOAuth(code: string): Promise<void> {
       redirect_uri: redirectUri(),
       code_verifier: verifier,
     }),
-  });
+  }, { label: "gdrive.exchangeToken", maxRetries: 2, baseDelayMs: 700, maxDelayMs: 4000 });
   if (!res.ok) throw new Error(`OAuth exchange failed (${res.status})`);
   const json = (await res.json()) as {
     access_token: string;

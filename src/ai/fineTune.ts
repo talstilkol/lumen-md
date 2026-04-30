@@ -20,6 +20,7 @@
 import { listWorkspace, readWorkspaceFile } from "../storage/workspace";
 import { getAiKey, AiError } from "./llm";
 import { log } from "../lib/logger";
+import { fetchWithRetry } from "../lib/fetchRetry";
 
 export interface FineTuneJob {
   id: string;
@@ -129,16 +130,20 @@ export async function uploadTrainingFile(
   const form = new FormData();
   form.append("file", blob, "lumen-fine-tune.jsonl");
   form.append("purpose", "fine-tune");
-  const res = await fetch("https://api.openai.com/v1/files", {
+  const res = await fetchWithRetry(
+    "https://api.openai.com/v1/files",
+    {
     method: "POST",
     headers: { Authorization: `Bearer ${key}` },
     body: form,
     signal: opts.signal,
-  });
+    },
+    { label: "openai.fineTune.upload", maxRetries: 2, baseDelayMs: 700 },
+  );
   if (!res.ok) {
     throw new AiError(
       "API_ERROR",
-      `OpenAI files upload failed (${res.status}): ${(await res.text()).slice(0, 200)}`,
+      `files upload failed (${res.status}): ${(await res.text()).slice(0, 200)}`,
     );
   }
   const json = (await res.json()) as { id?: string };
@@ -155,7 +160,9 @@ export async function createFineTuneJob(
   opts: FineTuneOptions = {},
 ): Promise<FineTuneJob> {
   const key = getAiKey();
-  const res = await fetch("https://api.openai.com/v1/fine_tuning/jobs", {
+  const res = await fetchWithRetry(
+    "https://api.openai.com/v1/fine_tuning/jobs",
+    {
     method: "POST",
     headers: {
       Authorization: `Bearer ${key}`,
@@ -164,9 +171,11 @@ export async function createFineTuneJob(
     body: JSON.stringify({
       training_file: trainingFileId,
       model: opts.baseModel ?? DEFAULT_BASE_MODEL,
-    }),
+      }),
     signal: opts.signal,
-  });
+    },
+    { label: "openai.fineTune.create", maxRetries: 2, baseDelayMs: 700 },
+  );
   if (!res.ok) {
     throw new AiError(
       "API_ERROR",
@@ -190,9 +199,13 @@ export async function createFineTuneJob(
 /** Poll a job's current status. */
 export async function getFineTuneJob(jobId: string): Promise<FineTuneJob> {
   const key = getAiKey();
-  const res = await fetch(`https://api.openai.com/v1/fine_tuning/jobs/${jobId}`, {
-    headers: { Authorization: `Bearer ${key}` },
-  });
+  const res = await fetchWithRetry(
+    `https://api.openai.com/v1/fine_tuning/jobs/${jobId}`,
+    {
+      headers: { Authorization: `Bearer ${key}` },
+    },
+    { label: "openai.fineTune.status", maxRetries: 2, baseDelayMs: 700 },
+  );
   if (!res.ok) {
     throw new AiError(
       "API_ERROR",
