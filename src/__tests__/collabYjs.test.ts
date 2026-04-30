@@ -1,14 +1,26 @@
 /**
- * Unit tests for the pure utility functions in src/collab/yjs.ts:
+ * Unit tests for helpers in src/collab/yjs.ts:
  *   makeRoomName, readRoomFromHash, setRoomInHash, snapshotPeers.
  *
- * connectCollab and makeUser are not tested here because they
- * instantiate WebrtcProvider (network I/O) — those belong in e2e tests.
+ * connectCollab lifecycle behavior is also tested with transport-safe mocks.
  */
 
 import { describe, it, expect, vi, afterEach } from "vitest";
 
 // Mock heavy collab deps that would try to open WebSocket connections
+vi.mock("y-websocket", () => {
+  const instances: unknown[] = [];
+  class WebsocketProvider {
+    static instances: unknown[] = instances;
+    destroy = vi.fn(() => {
+      return;
+    });
+    constructor() {
+      WebsocketProvider.instances.push(this);
+    }
+  }
+  return { WebsocketProvider };
+});
 vi.mock("y-webrtc", () => ({
   WebrtcProvider: class {
     awareness = { getStates: () => new Map(), setLocalStateField: vi.fn() };
@@ -32,6 +44,10 @@ vi.mock("../lib/cryptoRandom", () => ({
   randomInt: () => 42,
   randomId: () => "test-id",
 }));
+
+afterEach(() => {
+  localStorage.removeItem("lumen.collab.ws");
+});
 
 describe("makeRoomName", () => {
   it("returns a non-empty string", async () => {
@@ -167,5 +183,41 @@ describe("snapshotPeers", () => {
     const peers = snapshotPeers(session);
     expect(peers[0].isSelf).toBe(true);
     expect(peers[0].user.name).toBe("Self");
+  });
+});
+
+describe("connectCollab lifecycle", () => {
+  it("does not seed content if the session is destroyed before timeout", async () => {
+    const mod = await import("../collab/yjs");
+    vi.useFakeTimers();
+    try {
+      const session = mod.connectCollab("lumen-seed-room", "seed");
+      session.destroy();
+      vi.advanceTimersByTime(500);
+      expect(session.ytext.toString()).toBe("");
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("does not retain websocket provider when destroy happens before attach completes", async () => {
+    localStorage.setItem("lumen.collab.ws", "ws://localhost:4444");
+    const mod = await import("../collab/yjs");
+    const moduleMock = await import("y-websocket");
+    const instancesBefore = (moduleMock.WebsocketProvider as unknown as { instances: unknown[] }).instances.length;
+
+    const session = mod.connectCollab("lumen-seed-room", "");
+    session.destroy();
+    await Promise.resolve().then(() => Promise.resolve());
+
+    expect((moduleMock.WebsocketProvider as unknown as { instances: unknown[] }).instances.length).toBe(instancesBefore + 1);
+    expect(session.websocketProvider).toBeNull();
+
+    for (const instance of (moduleMock.WebsocketProvider as unknown as { instances: unknown[] }).instances) {
+      const destroy = (instance as { destroy: () => void }).destroy;
+      if (typeof destroy === "function") {
+        expect(destroy).toHaveBeenCalledTimes(1);
+      }
+    }
   });
 });
