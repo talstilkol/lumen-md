@@ -277,6 +277,10 @@ export function connectCollab(
   let websocketProvider: WebsocketLike | null = null;
   if (wsUrl) {
     void attachWebsocketProvider(wsUrl, roomName, doc).then((p) => {
+      if (destroyed) {
+        p?.destroy();
+        return;
+      }
       websocketProvider = p;
     });
   }
@@ -284,8 +288,12 @@ export function connectCollab(
   // Seed initial content once we know we're the only one in the room.
   // y-webrtc reports peers via `provider.awareness` and `provider.room`. For
   // simplicity we wait a short tick: if no remote state has arrived, insert.
-  setTimeout(() => {
-    if (ytext.length === 0 && seedContent) {
+  let seedTimer: ReturnType<typeof setTimeout> | null = null;
+  let destroyed = false;
+  seedTimer = setTimeout(() => {
+    if (destroyed) return;
+    const peersKnown = provider.awareness.getStates().size;
+    if (ytext.length === 0 && seedContent && peersKnown <= 1) {
       ytext.insert(0, seedContent);
     }
   }, 400);
@@ -304,6 +312,11 @@ export function connectCollab(
     roomName,
     user,
     destroy() {
+      destroyed = true;
+      if (seedTimer) {
+        clearTimeout(seedTimer);
+        seedTimer = null;
+      }
       try {
         provider.destroy();
       } catch {
