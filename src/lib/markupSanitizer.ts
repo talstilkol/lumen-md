@@ -1,4 +1,5 @@
 import DOMPurify from "dompurify";
+import type { Config as DOMPurifyConfig } from "dompurify";
 
 const SAFE_URI_REGEXP =
   /^(?:https?|mailto|tel|blob|#|\/|\.\/|\.\.\/|data:image\/(?:png|jpe?g|gif|webp|svg\+xml)(?:;charset=[\w.-]+)?;base64|data:application\/pdf;base64)/i;
@@ -132,7 +133,7 @@ function getSanitizer(): ReturnType<typeof DOMPurify> | null {
   return cachedPurifier;
 }
 
-function baseConfig(): DOMPurify.Config {
+function baseConfig(): DOMPurifyConfig {
   return {
     ALLOWED_URI_REGEXP: SAFE_URI_REGEXP,
     ALLOW_UNKNOWN_PROTOCOLS: false,

@@ -55,10 +55,6 @@ export function shouldRetryError(err: unknown): boolean {
   return message.includes("network") || message.includes("failed to fetch") || message.includes("econn") || message.includes("timeout");
 }
 
-function parseText(response: Response): Promise<string> {
-  return response.text().catch(() => "");
-}
-
 export async function fetchWithRetry(
   input: RequestInfo | URL,
   init: RequestInit,
@@ -83,17 +79,21 @@ export async function fetchWithRetry(
   }
 
   while (attempt <= maxRetries) {
-    let timeoutSignal: TimeoutSignal | null = null;
+    // Use a single-element ref instead of a `let` so TS doesn't narrow
+    // it to `null` for the lifetime of the closure (the callback
+    // assigns into it, but flow analysis can't see across the
+    // boundary).
+    const timeoutSignalRef: { current: TimeoutSignal | null } = { current: null };
     try {
       const requestSignal = withRequestSignal(baseSignal, timeoutMs, (signal) => {
-        timeoutSignal = signal;
+        timeoutSignalRef.current = signal;
       });
       const mergedInit: RequestInit = {
         ...init,
         ...(requestSignal ? { signal: requestSignal } : {}),
       };
       const response = await fetch(input, mergedInit);
-      timeoutSignal?.cleanup();
+      timeoutSignalRef.current?.cleanup();
       if (response.ok) {
         recordRuntimeRequest({
           label: options.label,
@@ -125,7 +125,7 @@ export async function fetchWithRetry(
       }
       continue;
     } catch (err) {
-      timeoutSignal?.cleanup();
+      timeoutSignalRef.current?.cleanup();
       if (err instanceof DOMException && err.name === "AbortError" && baseSignal?.aborted) {
         throw err;
       }

@@ -58,7 +58,7 @@ const createMockContext = (): MockCanvasContext => ({
 });
 
 beforeEach(() => {
-  const win = globalThis as Window & { [stubNavSymbol]?: { addEventListener: typeof vi.fn; removeEventListener: typeof vi.fn } };
+  const win = globalThis as unknown as Window & { [stubNavSymbol]?: { addEventListener: typeof vi.fn; removeEventListener: typeof vi.fn } };
   if (!win[stubNavSymbol]) {
     win[stubNavSymbol] = {
       addEventListener: vi.fn(),

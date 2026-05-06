@@ -58,11 +58,14 @@ export default function CodeDoctorBlock({ source, meta }: Props) {
 
   const dataTable = useMemo(() => {
     if (!repair.parses) return null;
-    // Only build a table preview when the parsed value is shaped like
-    // a record list (array of plain objects). A standalone object or
-    // a primitive doesn't tabulate meaningfully — and feeding either to
-    // parseJSONTable can produce misleading column types via aggressive
-    // Date.parse coercion on stringified array values.
+    // Only build a table preview when the parsed value is an array of
+    // plain objects whose values are ALL scalar (string / number /
+    // boolean / null). Skipping arrays-of-objects-with-array-values
+    // matters because parseJSONTable's inferType stringifies values
+    // like [1,2,3] to "1,2,3" and then Date.parse can return a real
+    // number on some engines — so an `items` column of arrays gets
+    // typed as DATE. Surfacing the raw repaired text alone is more
+    // honest than a misleadingly-typed table.
     let parsed: unknown;
     try {
       parsed = JSON.parse(
@@ -73,15 +76,18 @@ export default function CodeDoctorBlock({ source, meta }: Props) {
     } catch {
       return null;
     }
-    if (
-      !Array.isArray(parsed) ||
-      parsed.length === 0 ||
-      !parsed.every(
-        (r) => r !== null && typeof r === "object" && !Array.isArray(r),
-      )
-    ) {
-      return null;
-    }
+    if (!Array.isArray(parsed) || parsed.length === 0) return null;
+    const allScalarRecords = parsed.every((r) => {
+      if (r === null || typeof r !== "object" || Array.isArray(r)) return false;
+      return Object.values(r as Record<string, unknown>).every(
+        (v) =>
+          v === null ||
+          typeof v === "string" ||
+          typeof v === "number" ||
+          typeof v === "boolean",
+      );
+    });
+    if (!allScalarRecords) return null;
     try {
       return parseJSONTable(JSON.stringify(parsed));
     } catch {

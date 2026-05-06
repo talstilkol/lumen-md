@@ -7,13 +7,38 @@ describe("markup sanitizer", () => {
     expect(sanitizeHtmlMarkup(input)).toBe("<p>ok</p>");
   });
 
-  it("removes inline event handlers", () => {
+  it("removes inline event handlers (verifies the attribute hook fires)", () => {
     // Use <p> rather than <button>: the latter is in HTML_FORBID_TAGS
     // and gets removed entirely (a stricter policy that's also safe
     // but obscures whether the event-handler hook fired).
     const input = "<p onclick=\"alert(1)\">a</p>";
     expect(sanitizeHtmlMarkup(input)).toContain("<p>");
     expect(sanitizeHtmlMarkup(input)).not.toContain("onclick");
+  });
+
+  it("strips on* handlers across multiple sequential calls (regression: hook installed only on first instance)", () => {
+    // Before the markupSanitizer fix, the attribute-stripping hook was
+    // only installed on the FIRST DOMPurify instance (module-scoped
+    // `hooksInstalled` boolean + per-call `DOMPurify(window)` factory).
+    // Every subsequent sanitize() call ran without the hook —
+    // event-handler / javascript:-style / data:text/html filtering
+    // silently failed. This test runs three back-to-back to pin the
+    // cached-instance behavior.
+    const inputs = [
+      "<p onerror=\"x()\">a</p>",
+      "<a href=\"https://ok\" onmouseover=\"y()\">b</a>",
+      "<div onload=\"z()\">c</div>",
+    ];
+    for (const input of inputs) {
+      const out = sanitizeHtmlMarkup(input);
+      expect(out).not.toMatch(/on(?:error|mouseover|load|click|keydown)\s*=/i);
+    }
+  });
+
+  it("strips event handlers across HTML and SVG modes consistently", () => {
+    expect(sanitizeHtmlMarkup('<p onmouseover="x">a</p>')).not.toContain("onmouseover");
+    expect(sanitizeSvgMarkup('<svg><circle onclick="x" /></svg>')).not.toContain("onclick");
+    expect(sanitizeHtmlMarkup('<p onkeydown="x">b</p>')).not.toContain("onkeydown");
   });
 
   it("removes dangerous javascript href in html", () => {

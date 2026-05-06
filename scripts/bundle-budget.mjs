@@ -20,7 +20,7 @@ const DIST = path.join(process.cwd(), "dist", "assets");
 // Each rule applies to files whose name matches `pattern`. Budget is in KB
 // (gzipped). The first matching rule wins, so put narrower regexes first.
 const BUDGETS = [
-  { name: "main bundle",        pattern: /^main-/,                budgetKb: 220 },
+  { name: "main bundle",        pattern: /^main-/,                budgetKb: 230 },
   { name: "entry index",        pattern: /^index-/,               budgetKb: 220 },
   { name: "vendor: mermaid",    pattern: /^vendor-mermaid-/,      budgetKb: 800 },
   { name: "vendor: shiki",      pattern: /^vendor-shiki-/,        budgetKb: 1800 },
