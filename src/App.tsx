@@ -63,18 +63,6 @@ import { KeyboardShortcuts } from "./ui/KeyboardShortcuts";
 import { FocusMode } from "./ui/FocusMode";
 import { OnboardingTour } from "./ui/OnboardingTour";
 
-export function relativeTime(ts: number): string {
-  const diff = Date.now() - ts;
-  const mins = Math.round(diff / 60_000);
-  if (mins < 1) return t("time.justNow");
-  if (mins < 60) return t("time.minutesAgo", { n: mins });
-  const hours = Math.round(mins / 60);
-  if (hours < 24) return t("time.hoursAgo", { n: hours });
-  const days = Math.round(hours / 24);
-  if (days < 30) return t("time.daysAgo", { n: days });
-  return new Date(ts).toLocaleDateString();
-}
-
 export default function App() {
   const doc = useAppStore((s) => s.doc);
   const setContent = useAppStore((s) => s.setContent);
@@ -686,7 +674,6 @@ export default function App() {
           <EditorLayout
             mode={mode}
             docContent={doc.content}
-            docName={doc.name}
             deferredContent={deferredContent}
             editorRef={editorRef}
             vimEnabled={vimEnabled}
@@ -914,7 +901,6 @@ export default function App() {
           <EditorLayout
             mode={mode}
             docContent={doc.content}
-            docName={doc.name}
             deferredContent={deferredContent}
             editorRef={editorRef}
             vimEnabled={vimEnabled}

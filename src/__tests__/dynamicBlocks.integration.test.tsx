@@ -60,13 +60,21 @@ describe("dynamic block integration smoke", () => {
   });
 
   it("shows PlantUML failure path on non-200 responses", async () => {
-    fetchMock.mockResolvedValueOnce(
-      new Response("boom", { status: 500 }),
-    );
+    // PlantUMLBlock uses fetchWithRetry (maxRetries: 2, baseDelayMs:
+    // 500). Make ALL attempts fail so the block surfaces the error
+    // instead of a retry succeeding against the default beforeEach
+    // mock. The retry chain takes ~1.5s so waitFor needs a longer
+    // timeout than the default 1s.
+    fetchMock.mockResolvedValue(new Response("boom", { status: 500 }));
     render(<PlantUMLBlock source="bad source" />);
-    await waitFor(() => {
-      expect(screen.getByText(/PlantUML error \(rendered via kroki.io\)/)).toBeTruthy();
-    });
+    await waitFor(
+      () => {
+        expect(
+          screen.getByText(/PlantUML error \(rendered via kroki.io\)/),
+        ).toBeTruthy();
+      },
+      { timeout: 5000 },
+    );
   });
 
   it("renders Graphviz block with mocked wasm backend", async () => {

@@ -79,11 +79,12 @@ What we'll need to revisit:
 
 1. [x] Document the deferred-init convention as a `// PLUGIN AUTHORS:` block in [src/plugins/pluginSystem.ts](../../src/plugins/pluginSystem.ts), pointing at `EChart.tsx`'s `ensureChart` as the reference.
 2. [x] Document the CM6 dispatch convention as a `// CM6 AUTHORS:` block in [src/editor/Editor.tsx](../../src/editor/Editor.tsx), cross-referencing `lintExtension.ts` as the canonical example.
-3. [x] Tighten the prop comment in [src/layouts/EditorLayout.tsx](../../src/layouts/EditorLayout.tsx) to explicitly forbid memoizing live store values without depending on them.
-4. [x] Add three regression tests (one per bug class):
-   - Lint extension constructor doesn't throw on mount.
-   - EChart inside a 0×0 container doesn't warn until resized.
-   - EditorLayout passes hydrated content into `value` after async store update.
+3. [x] Tighten the prop comment in [src/layouts/EditorLayout.tsx](../../src/layouts/EditorLayout.tsx) to explicitly forbid memoizing live store values without depending on them. Cleaned up the unused `docName` prop that the bug had relied on (no callsite still passes it).
+4. [x] Add regression tests (one or more per bug class):
+   - **Bug #1 (lint dispatch):** [`lintExtensionMount.test.ts`](../../src/__tests__/lintExtensionMount.test.ts) — two tests. Spies on `console.error` to catch the "CodeMirror plugin crashed" log that fires when dispatch runs synchronously inside a ViewPlugin constructor. Also asserts dispatch is deferred to a macrotask via `vi.useFakeTimers`.
+   - **Bug #3 (ECharts 0×0):** [`EChartDeferredInit.test.tsx`](../../src/__tests__/EChartDeferredInit.test.tsx) — two tests. Mocks the `echarts` module to keep the test JSDOM-safe, then verifies (a) no canvas + no DOM-width warning when the host is 0×0, and (b) the captured `ResizeObserver` callback firing with a real size triggers init and a canvas appears.
+   - **Bug #2 (editor blank on hydrate):** [`EditorLayoutHydrate.test.tsx`](../../src/__tests__/EditorLayoutHydrate.test.tsx) — full integration test. Mounts a harness that mocks the heavy Editor/Preview, simulates async Zustand hydration, and asserts the hydrated content reaches the Editor. Replaces an earlier structural source-parsing test that was unable to detect the bug at runtime.
+5. [x] All five regression tests confirmed to FAIL on the pre-fix code (commit `22023604`) and pass on the post-fix code, proving they would catch a future regression.
 
 ## Dropped from earlier drafts
 

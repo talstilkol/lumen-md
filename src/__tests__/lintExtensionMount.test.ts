@@ -31,26 +31,30 @@ describe("markdownLintExtension mount lifecycle", () => {
     host.remove();
   });
 
-  it("does not throw or dispatch synchronously from the ViewPlugin constructor", () => {
-    const dispatchedSync: number[] = [];
-    let view: EditorView | null = null;
-
-    expect(() => {
-      view = new EditorView({
+  it("does not log a CodeMirror plugin crash during initial mount", () => {
+    // Before the fix, calling `view.dispatch({})` synchronously inside
+    // the ViewPlugin constructor caused CM6 to throw and log
+    // "CodeMirror plugin crashed". The error was caught internally so
+    // the editor mounted, but the console was flooded — so checking
+    // `.not.toThrow()` is vacuous. Spy on console.error instead.
+    const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    try {
+      const view = new EditorView({
         state: EditorState.create({
           doc: "# hello\n",
           extensions: [markdownLintExtension()],
         }),
         parent: host,
       });
-      // Capture the dispatch count immediately after construction. The lint
-      // plugin must NOT have called dispatch yet — the deferred setTimeout(0)
-      // run hasn't fired.
-      dispatchedSync.push(0);
-    }).not.toThrow();
-
-    expect(view).not.toBeNull();
-    view!.destroy();
+      const crashes = errorSpy.mock.calls
+        .flat()
+        .map((c) => String(c))
+        .filter((s) => /CodeMirror plugin crashed/i.test(s));
+      expect(crashes).toEqual([]);
+      view.destroy();
+    } finally {
+      errorSpy.mockRestore();
+    }
   });
 
   it("schedules the initial lint run on a macrotask, not synchronously", async () => {

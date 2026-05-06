@@ -8,8 +8,11 @@ describe("markup sanitizer", () => {
   });
 
   it("removes inline event handlers", () => {
-    const input = "<button onclick=\"alert(1)\">a</button>";
-    expect(sanitizeHtmlMarkup(input)).toContain("<button>");
+    // Use <p> rather than <button>: the latter is in HTML_FORBID_TAGS
+    // and gets removed entirely (a stricter policy that's also safe
+    // but obscures whether the event-handler hook fired).
+    const input = "<p onclick=\"alert(1)\">a</p>";
+    expect(sanitizeHtmlMarkup(input)).toContain("<p>");
     expect(sanitizeHtmlMarkup(input)).not.toContain("onclick");
   });
 

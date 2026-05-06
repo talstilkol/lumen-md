@@ -155,7 +155,6 @@ export function AppOverlays({
           <EditorLayout
             mode={mode}
             docContent={doc.content}
-            docName={doc.name}
             deferredContent={deferredContent}
             editorRef={editorRef}
             vimEnabled={vimEnabled}

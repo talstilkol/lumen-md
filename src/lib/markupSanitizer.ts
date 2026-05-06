@@ -58,6 +58,10 @@ const SVG_FORBID_TAGS = [
   "base",
   "frameset",
   "frame",
+  // <a> in SVG can carry xlink:href payloads and offers no rendering
+  // value over a plain group/text element. Strip the wrapper but keep
+  // its contents (KEEP_CONTENT in baseConfig).
+  "a",
 ];
 
 const SVG_FORBID_ATTRS = [
@@ -71,11 +75,18 @@ const SVG_FORBID_ATTRS = [
   "fill",
 ];
 
-let hooksInstalled = false;
+// Per-instance hook tracking. The previous module-scoped flag was a
+// real security bug: `getSanitizer()` returns a fresh DOMPurify
+// instance per call (DOMPurify(window) is a factory), so the first
+// instance got the hook and every subsequent instance had no
+// attribute-stripping hook installed at all — meaning event-handler
+// removal, javascript: in style, etc. silently stopped working after
+// the first sanitize() call.
+const hooksInstalledFor = new WeakSet<object>();
 
 function installSanitizerHooks(purifier: ReturnType<typeof DOMPurify>): void {
-  if (hooksInstalled) return;
-  hooksInstalled = true;
+  if (hooksInstalledFor.has(purifier as unknown as object)) return;
+  hooksInstalledFor.add(purifier as unknown as object);
 
   purifier.addHook("uponSanitizeAttribute", (node, data) => {
     const element = node as Element | null;
@@ -111,10 +122,14 @@ function installSanitizerHooks(purifier: ReturnType<typeof DOMPurify>): void {
   });
 }
 
+// Cache the configured DOMPurify instance so the hook is installed
+// exactly once and reused across every sanitize() call.
+let cachedPurifier: ReturnType<typeof DOMPurify> | null = null;
 function getSanitizer(): ReturnType<typeof DOMPurify> | null {
   if (typeof window === "undefined") return null;
   if (typeof document === "undefined") return null;
-  return DOMPurify(window);
+  if (!cachedPurifier) cachedPurifier = DOMPurify(window);
+  return cachedPurifier;
 }
 
 function baseConfig(): DOMPurify.Config {

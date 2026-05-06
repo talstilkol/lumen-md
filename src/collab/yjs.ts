@@ -206,8 +206,10 @@ async function attachWebsocketProvider(
   doc: Y.Doc,
 ): Promise<WebsocketLike | null> {
   try {
-    const pkg = "y-websocket";
-    const mod = (await import(/* @vite-ignore */ pkg)) as {
+    // Static-string dynamic import so vi.mock("y-websocket") resolves
+    // here in tests. The previous indirection-via-variable defeated
+    // the mock graph.
+    const mod = (await import("y-websocket")) as unknown as {
       WebsocketProvider: new (
         url: string,
         room: string,

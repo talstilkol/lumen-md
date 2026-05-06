@@ -45,7 +45,6 @@ function useResolvedAxis(pref: SplitAxis): SplitAxis {
 interface Props {
   mode: ViewMode;
   docContent: string;
-  docName: string;
   deferredContent: string;
   editorRef: React.RefObject<EditorHandle | null>;
   vimEnabled: boolean;

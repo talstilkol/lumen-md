@@ -9,67 +9,85 @@
  *
  * The fix removes the memo so the live `docContent` is forwarded on
  * every render; the Editor's internal sync effect handles the no-op
- * case via an equality check. This test pins that flow: starting with
- * an empty doc, simulate a Zustand-style async hydration via re-render,
- * and assert the new content lands on the editor.
+ * case via an equality check.
  *
- * Implementation note: we don't mount the full `<EditorLayout>` —
- * that pulls in markdown parsing, syntax highlighting, and dozens of
- * lazy chunks. Instead we test the prop-forwarding contract directly
- * by rendering the relevant memo / passthrough behavior.
+ * This test pins the runtime contract: a tiny harness renders just
+ * enough of the prop-forwarding chain to assert that a docContent
+ * change after first mount actually lands in the consumer. We mock
+ * the heavy Editor + Preview to keep the test focused on the
+ * EditorLayout's pass-through behavior, not CM6 internals.
  */
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
+import { render, waitFor } from "@testing-library/react";
+import { useState, useEffect } from "react";
+
+// Capture the `value` prop the Editor receives so the test can assert
+// it tracks the parent's docContent live.
+const capturedValues: string[] = [];
+
+vi.mock("../editor/Editor", () => ({
+  Editor: (props: { value: string }) => {
+    capturedValues.push(props.value);
+    return <div data-testid="fake-editor">{props.value}</div>;
+  },
+}));
+vi.mock("../renderer/Preview", () => ({
+  Preview: () => <div data-testid="fake-preview" />,
+}));
+vi.mock("../ui/ErrorBoundary", () => ({
+  ErrorBoundary: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+}));
+vi.mock("../ui/WritingGoalBanner", () => ({
+  WritingGoalBanner: () => null,
+}));
+vi.mock("../store/useStore", () => ({
+  useAppStore: Object.assign(
+    () => "auto",
+    {
+      getState: () => ({ syncScroll: "all" }),
+    },
+  ),
+}));
 
 describe("EditorLayout prop-forwarding contract (ADR-001)", () => {
-  it("does NOT memoize the value prop on [docName, mode] without including docContent", async () => {
-    // Read the source of EditorLayout and assert that the offending
-    // pattern is not reintroduced. This is a structural test: cheap,
-    // catches regressions at lint speed, doesn't require booting CM6.
-    const fs = await import("node:fs/promises");
-    const path = await import("node:path");
-    const url = await import("node:url");
-    const dir = path.dirname(url.fileURLToPath(import.meta.url));
-    const layoutSource = await fs.readFile(
-      path.resolve(dir, "..", "layouts", "EditorLayout.tsx"),
-      "utf8",
-    );
+  it("propagates docContent updates after first mount (regression: stale memo bug)", async () => {
+    capturedValues.length = 0;
+    const { EditorLayout } = await import("../layouts/EditorLayout");
 
-    // The known-bad pattern was:
-    //   const editorInitial = useMemo(() => docContent, [docName, mode]);
-    // Search for any `useMemo(... docContent, [...])` whose deps array
-    // omits `docContent`.
-    const memoLines = layoutSource
-      .split(/\r?\n/)
-      .map((l, i) => ({ i, l }))
-      .filter((x) => /useMemo\b[\s\S]*docContent/.test(x.l));
-    for (const { l } of memoLines) {
-      // If the file ever reintroduces a useMemo over docContent, the deps
-      // array MUST include docContent. (We don't try to parse the AST;
-      // a simple substring check is sufficient at this scale.)
-      const depsMatch = l.match(/\[([^\]]*)\]/);
-      if (depsMatch) {
-        expect(depsMatch[1]).toMatch(/docContent/);
-      }
+    function Harness() {
+      const [content, setContent] = useState("");
+      useEffect(() => {
+        // Simulate Zustand persist hydrating after first paint —
+        // happens one microtick after mount.
+        Promise.resolve().then(() => setContent("hydrated welcome doc"));
+      }, []);
+      return (
+        <EditorLayout
+          mode="split"
+          docContent={content}
+          deferredContent={content}
+          editorRef={{ current: null }}
+          vimEnabled={false}
+          spellCheck={false}
+          grammarCheck={false}
+          typewriterMode={false}
+          activeFile={null}
+          pageView={false}
+          collab={null}
+          setContent={() => {}}
+          handleAddAsset={async () => null}
+        />
+      );
     }
-  });
+    render(<Harness />);
+    // Wait for React to flush the state update + re-render.
+    await waitFor(() => {
+      expect(capturedValues).toContain("hydrated welcome doc");
+    });
 
-  it("forwards docContent live to the editor (no memoization barrier)", async () => {
-    // The current implementation should be a plain assignment — a
-    // structural assertion that catches the regression cheaply. Reads
-    // the source and verifies `editorInitial = docContent` (modulo
-    // whitespace) without a `useMemo` wrapper.
-    const fs = await import("node:fs/promises");
-    const path = await import("node:path");
-    const url = await import("node:url");
-    const dir = path.dirname(url.fileURLToPath(import.meta.url));
-    const layoutSource = await fs.readFile(
-      path.resolve(dir, "..", "layouts", "EditorLayout.tsx"),
-      "utf8",
-    );
-    expect(layoutSource).toMatch(/const\s+editorInitial\s*=\s*docContent\b/);
-    // And the bug pattern should not be present.
-    expect(layoutSource).not.toMatch(
-      /const\s+editorInitial\s*=\s*useMemo\([^,]*,\s*\[docName,\s*mode\]\s*\)/,
-    );
+    // First render captured "" (initial state). Subsequent render(s)
+    // must include the hydrated value. Before the fix, the memo
+    // pinned editorInitial to "" forever.
+    expect(capturedValues[0]).toBe("");
   });
 });

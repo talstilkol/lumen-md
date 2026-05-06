@@ -16,13 +16,20 @@ interface Props {
 
 export default function LiveSvgBlock({ source, meta }: Props) {
   const heightMatch = meta?.match(/height=(\d+)/);
-  const sanitized = useMemo(() => sanitizeSvgMarkup(source.trim()), [source]);
+  // Wrap before sanitizing — DOMPurify's SVG profile expects a valid
+  // <svg> root. Bare `<circle>` / `<rect>` fragments would otherwise be
+  // dropped entirely, marking safe input as "blocked".
+  const trimmed = source.trim();
+  const preWrapped = trimmed.startsWith("<svg")
+    ? trimmed
+    : `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">${trimmed}</svg>`;
+  const sanitized = useMemo(
+    () => sanitizeSvgMarkup(preWrapped),
+    [preWrapped],
+  );
   const isSafe = Boolean(sanitized.trim());
   const status = isSafe ? "Rendered" : "Blocked";
-  // If the user pasted a fragment, wrap it in an outer <svg>.
-  const wrapped = sanitized.startsWith("<svg")
-    ? sanitized
-    : `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">${sanitized}</svg>`;
+  const wrapped = sanitized;
   if (!isSafe) {
     return (
       <div className="chart-block">
