@@ -53,6 +53,8 @@ const SPECIAL_LANGS = new Set([
   "csv",
   "tsv",
   "json-table",
+  "insights",
+  "jsonl",
   // Tabular conversions — share the DataBlock renderer.
   "sql",
   "pandas",
@@ -99,6 +101,7 @@ function remarkLumenBlocks() {
       // Aliases.
       let tag: string;
       if (lang === "json-table") tag = "lumen-jsontable";
+      else if (lang === "insights" || lang === "jsonl") tag = "lumen-insights";
       else if (lang === "graphviz") tag = "lumen-dot";
       else if (lang === "puml") tag = "lumen-plantuml";
       else if (lang === "html-preview" || lang === "htmlpreview")

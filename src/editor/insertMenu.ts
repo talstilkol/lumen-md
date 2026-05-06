@@ -41,6 +41,14 @@ const ENTRIES: MenuEntry[] = [
     template: '```json-table\n[\n  { "name": "Alice", "score": 92 },\n  { "name": "Bob",   "score": 81 }\n]\n```',
   },
   {
+    id: "insights",
+    label: "JSONL insights",
+    hint: "Conclusions, probability table, charts, split-to-files",
+    group: "Data",
+    template:
+      '```insights\n{ "id": 1, "file": "a.pdf", "tags": ["alpha", "beta"] }\n{ "id": 2, "file": "a.pdf", "tags": ["alpha"] }\n{ "id": 3, "file": "b.pdf", "tags": ["beta", "gamma"] }\n```',
+  },
+  {
     id: "sql",
     label: "SQL → table",
     hint: "INSERT statements → DataTable",
