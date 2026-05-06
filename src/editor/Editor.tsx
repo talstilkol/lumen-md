@@ -1,3 +1,14 @@
+/**
+ * CM6 AUTHORS — ViewPlugin lifecycle constraints (ADR-001):
+ *   `ViewPlugin.fromClass` constructors run *inside* CodeMirror's
+ *   update cycle. Calling `view.dispatch(...)` synchronously from a
+ *   constructor (or from anything the constructor calls) throws
+ *   "Calls to EditorView.update are not allowed while an update is
+ *   in progress". Defer dispatches via `setTimeout(0)` — see
+ *   src/editor/lintExtension.ts (constructor + run()) for the
+ *   canonical example. Same rule applies to any code path inside
+ *   `update(u: ViewUpdate)` that wants to dispatch synchronously.
+ */
 import { useEffect, useImperativeHandle, useRef, useState, forwardRef } from "react";
 import { Compartment, EditorState } from "@codemirror/state";
 import { EditorView, keymap, highlightActiveLine, Decoration, WidgetType } from "@codemirror/view";

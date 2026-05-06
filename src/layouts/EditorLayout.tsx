@@ -6,7 +6,7 @@
  *  - deterministic ratio-based sync-scroll
  *  - editor and preview section refs
  */
-import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
+import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import { Editor } from "../editor/Editor";
 import type { EditorHandle } from "../editor/Editor";
 import { Preview } from "../renderer/Preview";
@@ -62,7 +62,6 @@ interface Props {
 export function EditorLayout({
   mode,
   docContent,
-  docName,
   deferredContent,
   editorRef,
   vimEnabled,
@@ -85,8 +84,20 @@ export function EditorLayout({
   const resolvedAxis: SplitAxis = useResolvedAxis(splitAxisPref);
   const isVerticalSplit = mode === "split" && resolvedAxis === "vertical";
 
-  // Memoize the editor's value prop to avoid resetting CM6 on every keystroke.
-  const editorInitial = useMemo(() => docContent, [docName, mode]);
+  // Forward the latest doc content to CM6. The Editor's internal sync
+  // effect bails when the incoming value already equals the editor's
+  // current state, so passing this on every keystroke is a no-op for the
+  // textarea itself.
+  //
+  // ADR-001 — DO NOT memoize live store values without including them
+  // in the dependency array. The previous `useMemo(() => docContent,
+  // [docName, mode])` was a real P0 bug: when the welcome doc was seeded
+  // asynchronously after first mount (docName/mode unchanged), the memo
+  // stayed pinned to the empty initial value and the editor rendered
+  // blank forever. If you ever feel tempted to memoize this kind of
+  // hand-off prop "for performance", trust the child's equality check
+  // instead.
+  const editorInitial = docContent;
 
   // ── Deterministic sync-scroll ─────────────────────────────────
   const editorSectionRef = useRef<HTMLElement | null>(null);

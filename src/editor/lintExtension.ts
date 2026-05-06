@@ -57,7 +57,13 @@ export function markdownLintExtension(opts: LintExtensionOptions = {}): Extensio
 
       constructor(view: EditorView) {
         this.decorations = Decoration.none;
-        this.run(view);
+        // Defer the initial run — calling `view.dispatch` synchronously
+        // from a ViewPlugin constructor is forbidden ("update in progress").
+        // setTimeout(0) lands us cleanly outside CodeMirror's update cycle.
+        this.timer = window.setTimeout(() => {
+          this.timer = null;
+          this.run(view);
+        }, 0);
       }
 
       update(u: ViewUpdate) {
@@ -79,7 +85,9 @@ export function markdownLintExtension(opts: LintExtensionOptions = {}): Extensio
         });
         this.decorations = decorationsFor(view, this.findings);
         opts.onFindings?.(this.findings);
-        view.dispatch({}); // force redraw of decorations
+        // Force a redraw so the new decoration set lands. Always called
+        // from a setTimeout callback, so we're outside the update cycle.
+        view.dispatch({});
       }
 
       destroy(): void {

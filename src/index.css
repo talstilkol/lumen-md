@@ -586,16 +586,20 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
+    gap: 0.5rem;
     padding: 0.5rem 0.85rem;
     font-family: theme(fontFamily.sans);
     font-size: 12px;
     color: hsl(var(--fg-muted));
     background: hsl(var(--bg-muted));
     border-bottom: 1px solid hsl(var(--border));
+    flex-wrap: wrap;
   }
   .chart-block-tabs {
     display: flex;
     gap: 0.25rem;
+    flex-wrap: wrap;
+    justify-content: flex-end;
   }
   .chart-block-tab {
     padding: 0.2rem 0.6rem;
@@ -605,6 +609,10 @@
     color: hsl(var(--fg-muted));
     cursor: pointer;
     border: 1px solid transparent;
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
   }
   .chart-block-tab:hover {
     background: hsl(var(--bg-inset));
@@ -614,6 +622,11 @@
     background: hsl(var(--accent) / 0.15);
     color: hsl(var(--accent));
     border-color: hsl(var(--accent) / 0.3);
+  }
+  @media (max-width: 480px) {
+    .chart-block-tab svg {
+      display: none;
+    }
   }
 
   /* Data table (CSV/JSON visualizer) */
