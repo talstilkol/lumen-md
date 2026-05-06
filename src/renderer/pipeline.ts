@@ -55,6 +55,8 @@ const SPECIAL_LANGS = new Set([
   "json-table",
   "insights",
   "jsonl",
+  "code-doctor",
+  "fix-json",
   // Tabular conversions — share the DataBlock renderer.
   "sql",
   "pandas",
@@ -102,6 +104,7 @@ function remarkLumenBlocks() {
       let tag: string;
       if (lang === "json-table") tag = "lumen-jsontable";
       else if (lang === "insights" || lang === "jsonl") tag = "lumen-insights";
+      else if (lang === "code-doctor" || lang === "fix-json") tag = "lumen-code-doctor";
       else if (lang === "graphviz") tag = "lumen-dot";
       else if (lang === "puml") tag = "lumen-plantuml";
       else if (lang === "html-preview" || lang === "htmlpreview")

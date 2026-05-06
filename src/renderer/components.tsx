@@ -8,6 +8,7 @@ const MermaidBlock = lazy(() => import("../plugins/MermaidBlock"));
 const CsvBlock = lazy(() => import("../plugins/CsvBlock"));
 const JsonTableBlock = lazy(() => import("../plugins/JsonTableBlock"));
 const InsightsBlock = lazy(() => import("../plugins/InsightsBlock"));
+const CodeDoctorBlock = lazy(() => import("../plugins/CodeDoctorBlock"));
 const MapBlock = lazy(() => import("../plugins/MapBlock"));
 const GraphvizBlock = lazy(() => import("../plugins/GraphvizBlock"));
 const AbcBlock = lazy(() => import("../plugins/AbcBlock"));
@@ -146,6 +147,11 @@ const JsonTable = withSuspense<BlockProps>(
 const Insights = withSuspense<BlockProps>(
   (props) => <InsightsBlock source={getText(props.children)} meta={props.meta} />,
   "insights",
+);
+
+const CodeDoctor = withSuspense<BlockProps>(
+  (props) => <CodeDoctorBlock source={getText(props.children)} meta={props.meta} />,
+  "code-doctor",
 );
 
 const MapView = withSuspense<BlockProps>(
@@ -347,6 +353,7 @@ export const components: Record<string, LumenBlock> = {
   "lumen-tsv": Csv as unknown as LumenBlock,
   "lumen-jsontable": JsonTable as unknown as LumenBlock,
   "lumen-insights": Insights as unknown as LumenBlock,
+  "lumen-code-doctor": CodeDoctor as unknown as LumenBlock,
   "lumen-map": MapView as unknown as LumenBlock,
   "lumen-geojson": MapView as unknown as LumenBlock,
   "lumen-dot": Graphviz as unknown as LumenBlock,
