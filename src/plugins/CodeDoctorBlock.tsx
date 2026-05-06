@@ -23,6 +23,7 @@ import {
 import {
   diagnoseJson,
   diagnoseJsonl,
+  isAllScalarRecordList,
   repairJson,
   type Diagnostic,
   type RepairResult,
@@ -76,18 +77,10 @@ export default function CodeDoctorBlock({ source, meta }: Props) {
     } catch {
       return null;
     }
-    if (!Array.isArray(parsed) || parsed.length === 0) return null;
-    const allScalarRecords = parsed.every((r) => {
-      if (r === null || typeof r !== "object" || Array.isArray(r)) return false;
-      return Object.values(r as Record<string, unknown>).every(
-        (v) =>
-          v === null ||
-          typeof v === "string" ||
-          typeof v === "number" ||
-          typeof v === "boolean",
-      );
-    });
-    if (!allScalarRecords) return null;
+    // Centralized predicate (see codeDoctor.ts) — kept testable and
+    // reusable. Skips arrays of non-objects, mixed shapes, and any
+    // record with an array-typed value.
+    if (!isAllScalarRecordList(parsed)) return null;
     try {
       return parseJSONTable(JSON.stringify(parsed));
     } catch {
