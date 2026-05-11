@@ -79,7 +79,7 @@
     "katex": "^0.16.11",
     "leaflet": "^1.9.4",
     "lucide-react": "^0.469.0",
-    "mermaid": "^11.4.1",
+    "mermaid": "^11.15.0",
     "papaparse": "^5.4.1",
     "prosemirror-state": "^1.4.4",
     "prosemirror-view": "^1.41.8",
