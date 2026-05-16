@@ -7,7 +7,7 @@
     "start:persistent": "node persistent-server.js"
   },
   "dependencies": {
-    "ws": "^8.16.0"
+    "ws": "^8.20.1"
   },
   "optionalDependencies": {
     "y-websocket": "^2.0.4",
