@@ -65,6 +65,13 @@ const SVG_FORBID_TAGS = [
   "a",
 ];
 
+// `fill` and `stroke` are intentionally NOT in this list — Mermaid /
+// Graphviz / etc. emit SVGs with explicit per-element fill colors that
+// the diagram needs to be visible. The `uponSanitizeAttribute` hook
+// below checks fill / stroke values for `url(javascript:...)` payloads
+// via the URI-attr branch, which is the only way they can carry an
+// active payload. Other style-attribute injection vectors are covered
+// by the style-attr check.
 const SVG_FORBID_ATTRS = [
   "onerror",
   "onload",
@@ -73,7 +80,6 @@ const SVG_FORBID_ATTRS = [
   "onmouseleave",
   "style",
   "xlink:href",
-  "fill",
 ];
 
 // Per-instance hook tracking. The previous module-scoped flag was a
@@ -99,6 +105,17 @@ function installSanitizerHooks(purifier: ReturnType<typeof DOMPurify>): void {
       return;
     }
     if (name === "style" && /(expression|url\(\s*['"]?\s*javascript:|behavior:)/i.test(value)) {
+      data.keepAttr = false;
+      return;
+    }
+    // `fill` and `stroke` can carry `url(#defs-id)` references — those are
+    // safe (same-document SVG defs) — but if the URL contains a
+    // javascript: payload it's an injection vector. Reject `url(...)`
+    // values whose contents look unsafe; keep the rest.
+    if (
+      (name === "fill" || name === "stroke") &&
+      /url\(\s*['"]?\s*(?:javascript|vbscript|data:text\/html)/i.test(value)
+    ) {
       data.keepAttr = false;
       return;
     }
@@ -135,7 +152,6 @@ function getSanitizer(): ReturnType<typeof DOMPurify> | null {
 
 function baseConfig(): DOMPurifyConfig {
   return {
-    ALLOWED_URI_REGEXP: SAFE_URI_REGEXP,
     ALLOW_UNKNOWN_PROTOCOLS: false,
     KEEP_CONTENT: true,
     SANITIZE_DOM: true,
@@ -150,15 +166,83 @@ function sanitize(raw: string, mode: "html" | "svg"): string {
   const cfg = mode === "svg"
     ? {
         ...baseConfig(),
-        USE_PROFILES: { svg: true },
+        USE_PROFILES: { svg: true, svgFilters: true },
         FORBID_TAGS: [...SVG_FORBID_TAGS],
         FORBID_ATTR: [...SVG_FORBID_ATTRS],
+        // DOMPurify's svg profile is conservative about both geometry
+        // and presentational attributes — without them, Mermaid /
+        // Graphviz / hand-authored SVGs render as invisible shapes
+        // (this was the round-11 screenshot bug). Add back the safe
+        // SVG attr set explicitly. The hook above rejects
+        // `fill="url(javascript:...)"` payloads, so allowing these is
+        // safe; scripts are already FORBID_TAGS in this profile.
+        ADD_ATTR: [
+          // Geometry — without these the shapes have no position/size.
+          "d",
+          "cx",
+          "cy",
+          "r",
+          "rx",
+          "ry",
+          "x",
+          "y",
+          "x1",
+          "y1",
+          "x2",
+          "y2",
+          "points",
+          "width",
+          "height",
+          "viewBox",
+          "preserveAspectRatio",
+          // Paint
+          "fill",
+          "stroke",
+          "stroke-width",
+          "stroke-dasharray",
+          "stroke-linecap",
+          "stroke-linejoin",
+          "stroke-opacity",
+          "fill-opacity",
+          "fill-rule",
+          "opacity",
+          // Transform & layout
+          "transform",
+          "transform-origin",
+          // Defs references
+          "marker-end",
+          "marker-start",
+          "marker-mid",
+          "clip-path",
+          "mask",
+          // Gradient stops
+          "stop-color",
+          "stop-opacity",
+          "offset",
+          // Text
+          "font-family",
+          "font-size",
+          "font-weight",
+          "text-anchor",
+          "dominant-baseline",
+          "alignment-baseline",
+          // ID / class for defs / styling
+          "id",
+          "class",
+        ],
       }
     : {
         ...baseConfig(),
         USE_PROFILES: { html: true },
         FORBID_TAGS: [...HTML_FORBID_TAGS],
         FORBID_ATTR: [...HTML_FORBID_ATTRS],
+        // URI allowlist is HTML-only. SVG mode handles unsafe URLs in
+        // the uponSanitizeAttribute hook (javascript: / vbscript: /
+        // data:text/html prefix check) — applying ALLOWED_URI_REGEXP
+        // in SVG mode also strips non-URI attribute values like
+        // `cx="10"`, `fill="red"`, etc., making diagrams invisible
+        // (the round-11 screenshot bug).
+        ALLOWED_URI_REGEXP: SAFE_URI_REGEXP,
       };
 
   return String(purifier.sanitize(raw, cfg));

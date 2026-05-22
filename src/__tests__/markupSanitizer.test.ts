@@ -91,6 +91,32 @@ describe("markup sanitizer", () => {
     expect(sanitizeSvgMarkup(input)).toContain("<rect");
   });
 
+  // Regression for round-11 bug: stripping every `fill` attribute on SVG
+  // made Mermaid diagrams render as invisible empty paths. Now we keep
+  // safe fill values and only block javascript:/vbscript: payloads.
+  it("preserves SVG fill/stroke colors so diagrams stay visible", () => {
+    const input = `<svg><path d="M0 0" fill="#1976d2" stroke="rgba(0,0,0,0.5)"/></svg>`;
+    const out = sanitizeSvgMarkup(input);
+    expect(out).toContain('fill="#1976d2"');
+    expect(out.toLowerCase()).toContain("stroke=");
+  });
+
+  it("preserves SVG named-color fill", () => {
+    const input = `<svg><circle cx="10" cy="10" r="5" fill="red"/></svg>`;
+    expect(sanitizeSvgMarkup(input)).toContain('fill="red"');
+  });
+
+  it("preserves SVG fill='url(#defsId)' (same-document defs reference)", () => {
+    const input = `<svg><defs><linearGradient id="g"><stop/></linearGradient></defs><rect fill="url(#g)" width="10" height="10"/></svg>`;
+    expect(sanitizeSvgMarkup(input)).toMatch(/fill="url\(#g\)"/);
+  });
+
+  it("blocks SVG fill='url(javascript:...)' (injection payload)", () => {
+    const input = `<svg><path d="M0 0" fill="url(javascript:alert(1))"/></svg>`;
+    const out = sanitizeSvgMarkup(input);
+    expect(out.toLowerCase()).not.toContain("javascript:");
+  });
+
   it("removes object and embed tags", () => {
     const input = "<div><object data=\"http://bad.test\"></object><embed src=\"http://bad.test\" /></div>";
     const out = sanitizeHtmlMarkup(input);
@@ -213,11 +239,15 @@ describe("markup sanitizer", () => {
     expect(out).toContain("https://openai.com");
   });
 
-  it("keeps basic svg circle without script", () => {
+  it("keeps basic svg circle with fill (Mermaid needs this)", () => {
     const input = "<svg><circle cx=\"50\" cy=\"50\" r=\"20\" fill=\"blue\"/></svg>";
     const out = sanitizeSvgMarkup(input);
     expect(out).toContain("<circle");
-    expect(out).not.toContain("fill=\"blue\"");
+    // Earlier rounds stripped `fill` defensively. After M6 screenshots
+    // revealed Mermaid diagrams rendering as invisible empty paths, the
+    // sanitizer was relaxed to preserve safe fill colors. The hook in
+    // markupSanitizer.ts rejects `fill="url(javascript:...)"` payloads.
+    expect(out).toContain('fill="blue"');
   });
 
   it("strips script from SVG text payloads", () => {
