@@ -29,7 +29,7 @@ export interface TagsIndex {
   untaggedPaths: string[];
 }
 
-function tagsFromFrontmatter(fm: unknown): string[] {
+export function tagsFromFrontmatter(fm: unknown): string[] {
   if (!fm || typeof fm !== "object") return [];
   const tags = (fm as Record<string, unknown>).tags;
   if (Array.isArray(tags)) {

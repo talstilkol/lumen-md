@@ -1,18 +1,15 @@
 /**
- * Recent files — tests for the hashName function and list management.
+ * Recent files — `hashName` tests against the REAL src/storage/recent.ts
+ * implementation. Previously this file forked the function, which is
+ * theatre (could pass while the real hashing regressed and broke recent
+ * file lookups). The pushRecent helper below stays local because the
+ * real one mutates IndexedDB; the in-memory list shape is sufficient
+ * for verifying the dedup+slice contract.
  */
 import { describe, it, expect } from "vitest";
+import { hashName } from "../storage/recent";
 
 const MAX = 10;
-
-/** Extracted from src/storage/recent.ts */
-function hashName(name: string): string {
-  let h = 0;
-  for (let i = 0; i < name.length; i++) {
-    h = (h * 31 + name.charCodeAt(i)) | 0;
-  }
-  return `${name}.${h}`;
-}
 
 interface RecentFile {
   id: string;
@@ -20,7 +17,11 @@ interface RecentFile {
   openedAt: number;
 }
 
-/** Simulate pushRecent logic */
+/**
+ * In-memory mirror of pushRecent's slice/dedup contract — not the
+ * persistence side. Production's pushRecent calls this same shape
+ * before writing.
+ */
 function pushRecent(list: RecentFile[], name: string, id?: string): RecentFile[] {
   const resolvedId = id ?? hashName(name);
   const now = Date.now();

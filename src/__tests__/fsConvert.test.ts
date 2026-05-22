@@ -1,30 +1,13 @@
 /**
  * fs — tests for the convertImported file-to-markdown transformation logic.
+ *
+ * Imports the REAL convertImported from src/storage/fs.ts rather than a
+ * local re-implementation, so any regression to the production code
+ * fails this suite. The previous version forked the implementation,
+ * which is theatre — could pass while production was broken.
  */
 import { describe, it, expect } from "vitest";
-
-/** Extracted from src/storage/fs.ts */
-function convertImported(name: string, raw: string): string {
-  const lower = name.toLowerCase();
-  if (lower.endsWith(".csv") || lower.endsWith(".tsv")) {
-    const lang = lower.endsWith(".tsv") ? "tsv" : "csv";
-    return `# ${name}\n\n\`\`\`${lang} title="${name}"\n${raw.trim()}\n\`\`\`\n`;
-  }
-  if (lower.endsWith(".json")) {
-    const trimmed = raw.trim();
-    let isArray = false;
-    try {
-      isArray = Array.isArray(JSON.parse(trimmed));
-    } catch {
-      /* malformed json */
-    }
-    if (isArray) {
-      return `# ${name}\n\n\`\`\`json-table title="${name}"\n${trimmed}\n\`\`\`\n`;
-    }
-    return `# ${name}\n\n\`\`\`json\n${trimmed}\n\`\`\`\n`;
-  }
-  return raw;
-}
+import { convertImported } from "../storage/fs";
 
 describe("convertImported", () => {
   it("wraps CSV in a csv fence", () => {
