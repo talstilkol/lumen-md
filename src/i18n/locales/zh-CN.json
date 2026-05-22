@@ -287,8 +287,6 @@
   "errorBoundary.renderDetail": "One of the embedded visualizations crashed during render. The rest of the editor is kept safe.",
   "findReplace.caseSensitive": "Case sensitive",
   "findReplace.close": "关闭 find & replace",
-  "findReplace.find": "查找",
-  "findReplace.matchCase": "区分大小写",
   "findReplace.next": "Next match",
   "findReplace.prev": "Previous match",
   "findReplace.regex": "正则表达式",
@@ -638,7 +636,5 @@
   "runtimeMetrics.column.timeouts": "超时",
   "runtimeMetrics.column.rateLimits": "速率限制",
   "cmd.view.runtimeMetrics": "运行时指标",
-  "cmd.view.runtimeMetrics.hint": "按传输类型查看重试、超时和延迟",
-  "mdTable.cancel": "取消",
-  "writingGoal.label": "写作目标"
+  "cmd.view.runtimeMetrics.hint": "按传输类型查看重试、超时和延迟"
 }
