@@ -5,9 +5,11 @@
 A production-grade markdown editor built on the open web platform: CodeMirror 6,
 unified/remark/rehype, Yjs, OPFS, and WebRTC. Zero server required by default.
 
-[![Tests](https://img.shields.io/badge/tests-1074%20passing-brightgreen)](TASKS.md)
+[![Tests](https://img.shields.io/badge/tests-1207%20passing-brightgreen)](TASKS.md)
 [![TypeScript](https://img.shields.io/badge/TypeScript-clean-blue)](tsconfig.json)
+[![E2E](https://img.shields.io/badge/e2e-33%2F33-brightgreen)](e2e/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Privacy](https://img.shields.io/badge/privacy-local--first-blue)](PRIVACY.md)
 
 ---
 
@@ -21,7 +23,7 @@ unified/remark/rehype, Yjs, OPFS, and WebRTC. Zero server required by default.
 | **Live Collaboration** | Yjs CRDT over WebRTC — peer-to-peer, zero server required for P2P rooms |
 | **MCP Server** | `npx @lumen-md/mcp-server` gives Claude Desktop / Cursor direct access to your workspace |
 | **Privacy-first** | AES-256-GCM secrets vault, telemetry opt-out, full offline capability (PWA) |
-| **i18n + RTL** | 8 languages with 595-key full coverage; RTL-safe layout, LTR code/math islands |
+| **i18n + RTL** | 8 languages (en, he, ar, de, fr, ja, ru, zh-CN) with 638-key full coverage; RTL-safe layout, LTR code/math islands; strict zero-drift CI guard |
 
 ---
 

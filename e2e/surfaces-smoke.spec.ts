@@ -69,6 +69,22 @@ test("Comments command exists and palette closes when invoked", async ({ page })
   expect(errs).toEqual([]);
 });
 
+test("Find & Replace command opens its dialog (M3 wiring trace)", async ({ page }) => {
+  // M3 audit gap: previously I claimed Find&Replace was "documented as
+  // test-infra issue" without ever tracing the actual wiring. This
+  // closes that gap with a real end-to-end assertion: palette command
+  // `view.findReplace` → setFindReplaceOpen(true) → SearchReplace
+  // dialog with role="dialog" (or close button aria-label) appears.
+  const palette = await openPalette(page);
+  await page.keyboard.type("Find & Replace");
+  await page.keyboard.press("Enter");
+  await expect(palette).not.toBeVisible({ timeout: 3000 });
+  // SearchReplace renders a Close button with this aria-label.
+  await expect(
+    page.locator('button[aria-label="Close find & replace"]'),
+  ).toBeVisible({ timeout: 3000 });
+});
+
 test("AI Fab is mounted in the page chrome", async ({ page }) => {
   // AI Fab is always-on chrome — no command needed. Verify the button
   // is in the DOM and visible.
