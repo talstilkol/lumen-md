@@ -2,8 +2,12 @@ import { test, expect } from "@playwright/test";
 
 test.describe("Focus Mode", () => {
   test.beforeEach(async ({ page }) => {
+    await page.addInitScript(() => {
+      localStorage.setItem("lumen-tour-done", "1");
+      localStorage.removeItem("lumen-md");
+    });
     await page.goto("/");
-    await page.waitForLoadState("networkidle");
+    await page.locator("header").first().waitFor({ state: "visible", timeout: 5000 });
   });
 
   test("toggles focus mode via command palette", async ({ page }) => {

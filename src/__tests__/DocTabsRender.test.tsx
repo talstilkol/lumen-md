@@ -170,4 +170,49 @@ describe("DocTabs", () => {
     fireEvent.drop(tabs[1], { dataTransfer: {} });
     expect(onReorder).not.toHaveBeenCalled();
   });
+
+  /**
+   * Wiring test (M7-real): proves the X-click hits the real store, not
+   * just an injected mock. Renders DocTabs with onClose bound to
+   * useAppStore.getState().closeTab, fires a real DOM click on the X
+   * for "b.md", and asserts the store's openTabs shrank by one.
+   */
+  it("clicking the X actually removes the tab from the live store", async () => {
+    // Import here to keep the existing pure-mock tests above unaffected.
+    const { useAppStore } = await import("../store/useStore");
+    const s = useAppStore.getState();
+    // Seed: three tabs, a.md active.
+    s.openTab({ name: "wire-a.md", content: "# A", workspaceName: null });
+    s.openTab({ name: "wire-b.md", content: "# B", workspaceName: null });
+    s.openTab({ name: "wire-c.md", content: "# C", workspaceName: null });
+    const before = useAppStore.getState().openTabs.map((t) => t.name);
+    expect(before).toContain("wire-b.md");
+
+    // Inline wrapper that mirrors App.tsx's real wiring.
+    function Wrapper() {
+      const openTabs = useAppStore((st) => st.openTabs);
+      const closeTab = useAppStore((st) => st.closeTab);
+      return (
+        <DocTabs
+          tabs={openTabs.map((t) => ({ id: t.id, name: t.name, dirty: t.dirty }))}
+          activeId={openTabs[0]?.id ?? ""}
+          onSelect={() => {}}
+          onClose={(id) => closeTab(id)}
+        />
+      );
+    }
+    render(<Wrapper />);
+    // Close buttons are labelled "Close tab" (generic). Find them in
+    // document order — index aligns with tab order. Among the live
+    // store's tabs, locate the index of wire-b.md and click the
+    // matching close button.
+    const liveNames = useAppStore.getState().openTabs.map((t) => t.name);
+    const bIndex = liveNames.indexOf("wire-b.md");
+    expect(bIndex).toBeGreaterThanOrEqual(0);
+    const closeButtons = screen.getAllByRole("button", { name: /^close tab$/i });
+    fireEvent.click(closeButtons[bIndex]);
+    const after = useAppStore.getState().openTabs.map((t) => t.name);
+    expect(after).not.toContain("wire-b.md");
+    expect(after.length).toBe(before.length - 1);
+  });
 });

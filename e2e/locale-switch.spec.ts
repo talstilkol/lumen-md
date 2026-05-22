@@ -12,6 +12,7 @@ test.beforeEach(async ({ page }) => {
     localStorage.removeItem("lumen-md");
   });
   await page.goto("/");
+  await page.locator("header").first().waitFor({ state: "visible", timeout: 5000 });
 });
 
 test("⌘K → 'עברית' flips <html dir> to rtl", async ({ page }) => {

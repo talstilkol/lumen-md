@@ -41,6 +41,37 @@ describe("markup sanitizer", () => {
     expect(sanitizeHtmlMarkup('<p onkeydown="x">b</p>')).not.toContain("onkeydown");
   });
 
+  // The custom uponSanitizeAttribute hook in markupSanitizer.ts catches
+  // three classes of payloads that DOMPurify alone does NOT block:
+  //   1. style attrs with `expression(...)` / `url(javascript:...)` /
+  //      `behavior:` (IE-era and legacy CSS injection vectors).
+  //   2. URI attrs (href, src, action, formaction, xlink:href) carrying
+  //      a non-image `data:` URI — those can be HTML/JS payloads.
+  //   3. Any value beginning with `javascript:`, `vbscript:`,
+  //      or `data:text/html` regardless of attr name.
+  // These tests pin those guards so a future "simplification" of the hook
+  // can't silently re-open the holes.
+  it("strips style attributes with CSS expression / javascript-url / behavior payloads", () => {
+    const expr = sanitizeHtmlMarkup('<p style="width: expression(alert(1))">a</p>');
+    expect(expr).not.toMatch(/expression/i);
+    const jsUrl = sanitizeHtmlMarkup('<p style="background:url(javascript:alert(1))">b</p>');
+    expect(jsUrl.toLowerCase()).not.toContain("javascript:");
+    const behavior = sanitizeHtmlMarkup('<p style="behavior:url(#x)">c</p>');
+    expect(behavior.toLowerCase()).not.toContain("behavior:");
+  });
+
+  it("blocks non-image data: URIs in href/src (only data:image/* is allowed)", () => {
+    const dataHtml = sanitizeHtmlMarkup('<a href="data:text/html,<script>x</script>">x</a>');
+    expect(dataHtml.toLowerCase()).not.toContain("data:text/html");
+    const dataApp = sanitizeHtmlMarkup('<a href="data:application/json,1">y</a>');
+    expect(dataApp.toLowerCase()).not.toContain("data:application/json");
+    // image data URLs survive (whitelisted by SAFE_URI_REGEXP + the hook).
+    const img = sanitizeHtmlMarkup(
+      '<img src="data:image/png;base64,iVBORw0KGgo=" alt="ok" />',
+    );
+    expect(img.toLowerCase()).toContain("data:image/png");
+  });
+
   it("removes dangerous javascript href in html", () => {
     const input = "<a href=\"javascript:alert(1)\">bad</a>";
     expect(sanitizeHtmlMarkup(input)).toContain("<a>");

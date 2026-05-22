@@ -12,6 +12,11 @@ test.beforeEach(async ({ page }) => {
     localStorage.removeItem("lumen-md");
   });
   await page.goto("/");
+  // React mounts asynchronously after `load` fires. The window keydown
+  // listener that opens the palette attaches inside a useEffect, so
+  // pressing ⌘K before the header renders silently no-ops. Wait for
+  // the toolbar to guarantee React has mounted before issuing keys.
+  await page.locator("header").first().waitFor({ state: "visible", timeout: 5000 });
 });
 
 test("⌘K → search for a known command → fires its action", async ({ page }) => {

@@ -20,7 +20,12 @@ const DIST = path.join(process.cwd(), "dist", "assets");
 // Each rule applies to files whose name matches `pattern`. Budget is in KB
 // (gzipped). The first matching rule wins, so put narrower regexes first.
 const BUDGETS = [
-  { name: "main bundle",        pattern: /^main-/,                budgetKb: 230 },
+  // main is the eager Lumen runtime (App + side panels + i18n table).
+  // Current size is ~220.8 KB gzipped — the 222 ceiling keeps pressure
+  // on regressions while leaving headroom for tiny i18n / icon adds.
+  // The round-3 reactive bump (220→230) was reduced here after M12
+  // confirmed only ~0.8 KB of real growth was justified.
+  { name: "main bundle",        pattern: /^main-/,                budgetKb: 222 },
   { name: "entry index",        pattern: /^index-/,               budgetKb: 220 },
   { name: "vendor: mermaid",    pattern: /^vendor-mermaid-/,      budgetKb: 800 },
   { name: "vendor: shiki",      pattern: /^vendor-shiki-/,        budgetKb: 1800 },
