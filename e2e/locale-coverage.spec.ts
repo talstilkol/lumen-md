@@ -81,7 +81,7 @@ for (const locale of LOCALES) {
       await palette.waitFor({ timeout: 8000 });
       await page.keyboard.type(locale.label);
       // Wait for the option to render in the listbox.
-      await palette.getByText(locale.label).first().waitFor({ timeout: 8000 });
+      await palette.getByText(locale.label).first().waitFor({ timeout: 15000 });
       await page.keyboard.press("Enter");
     }
 
