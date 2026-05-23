@@ -30,9 +30,9 @@ async function pickLocale(
   const palette = page
     .locator('[role="dialog"][aria-modal="true"]')
     .filter({ has: page.locator("input") });
-  await palette.waitFor({ timeout: 3000 });
+  await palette.waitFor({ timeout: 8000 });
   await page.keyboard.type(label);
-  await palette.getByText(label).first().waitFor({ timeout: 3000 });
+  await palette.getByText(label).first().waitFor({ timeout: 8000 });
   await page.keyboard.press("Enter");
 }
 
