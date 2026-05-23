@@ -52,7 +52,12 @@ for (const locale of LOCALES) {
           /Content Security Policy|violates the following|allow_external_modules/i.test(txt) ||
           /Failed to load resource|status of 40\d/i.test(txt) ||
           /KaTeX|font.+woff2|outside of Vite serving allow list/i.test(txt) ||
-          /Source map error|DevTools recommended/i.test(txt)
+          /Source map error|DevTools recommended/i.test(txt) ||
+          // WebKit-only noise: Safari logs an error for the
+          // `allow-presentation` sandbox token even though it's a
+          // valid HTML5 flag. Chromium and Firefox accept it. The
+          // iframe still renders correctly; the warning is cosmetic.
+          /sandbox' attribute: 'allow-presentation' is an invalid sandbox flag/i.test(txt)
         ) {
           return;
         }
