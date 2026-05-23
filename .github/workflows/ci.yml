@@ -112,6 +112,47 @@ jobs:
           name: playwright-report
           path: playwright-report/
 
+  e2e-prod:
+    name: e2e against production build
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    needs: check
+    # Vite dev mode and `vite preview` chunk modules differently;
+    # round-16 found a critical TDZ that only fires in the prod
+    # bundle. This job builds and serves the dist/ output, then
+    # runs the same e2e suite against it — so the prod-bundle bug
+    # class is regression-tested on every PR.
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20, cache: npm }
+      - run: npm ci || npm install
+      - name: Install Playwright browsers (chromium only — saves ~6 min)
+        run: npx playwright install --with-deps chromium
+      - name: Build production bundle
+        run: npm run build
+      - name: Serve dist with http-server
+        run: |
+          npx -y http-server@14 dist -p 5180 -c-1 --silent &
+          # Wait for server to come up.
+          for i in $(seq 1 30); do
+            if curl -sf http://localhost:5180/ -o /dev/null; then
+              echo "Server up."
+              break
+            fi
+            sleep 1
+          done
+      - name: Run E2E against prod bundle
+        env:
+          PLAYWRIGHT_BASE_URL: http://localhost:5180
+        run: npx playwright test --project=chromium --reporter=line
+      - name: Upload report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-prod
+          path: playwright-report/
+
   signal-health:
     name: signaling server health
     runs-on: ubuntu-latest
