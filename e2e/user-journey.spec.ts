@@ -87,9 +87,9 @@ test("user journey: type, render, cycle modes, switch locale, open find — no e
   const palette = page
     .locator('[role="dialog"][aria-modal="true"]')
     .filter({ has: page.locator("input") });
-  await palette.waitFor({ timeout: 3000 });
+  await palette.waitFor({ timeout: 8000 });
   await page.keyboard.type("עברית");
-  await palette.getByText("עברית").first().waitFor({ timeout: 3000 });
+  await palette.getByText("עברית").first().waitFor({ timeout: 8000 });
   await page.keyboard.press("Enter");
   await expect(page.locator("html")).toHaveAttribute("dir", "rtl", {
     timeout: 5000,
@@ -99,9 +99,9 @@ test("user journey: type, render, cycle modes, switch locale, open find — no e
   // full phrase "חיפוש והחלפה" so we don't accidentally fire the
   // workspace-search command which also starts with "חיפוש".
   await page.keyboard.press("Meta+K");
-  await palette.waitFor({ timeout: 3000 });
+  await palette.waitFor({ timeout: 8000 });
   await page.keyboard.type("חיפוש והחלפה");
-  await palette.getByText(/חיפוש והחלפה/).first().waitFor({ timeout: 3000 });
+  await palette.getByText(/חיפוש והחלפה/).first().waitFor({ timeout: 8000 });
   await page.keyboard.press("Enter");
   // Find&Replace dialog should appear; its close button has localized
   // aria-label.

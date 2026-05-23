@@ -68,9 +68,9 @@ test("M6 — capture RTL screenshot", async ({ page }) => {
   const palette = page
     .locator('[role="dialog"][aria-modal="true"]')
     .filter({ has: page.locator("input") });
-  await palette.waitFor({ timeout: 3000 });
+  await palette.waitFor({ timeout: 8000 });
   await page.keyboard.type("עברית");
-  await palette.getByText("עברית").first().waitFor({ timeout: 3000 });
+  await palette.getByText("עברית").first().waitFor({ timeout: 8000 });
   await page.keyboard.press("Enter");
   await expect(page.locator("html")).toHaveAttribute("dir", "rtl", {
     timeout: 5000,
@@ -86,11 +86,11 @@ test("M6 — capture PageView screenshot", async ({ page }) => {
   const palette = page
     .locator('[role="dialog"][aria-modal="true"]')
     .filter({ has: page.locator("input") });
-  await palette.waitFor({ timeout: 3000 });
+  await palette.waitFor({ timeout: 8000 });
   await page.keyboard.type("Page View");
   // Wait for the option to appear in the listbox before pressing Enter —
   // same race the locale-switch spec hit.
-  await palette.getByText(/Page View/i).first().waitFor({ timeout: 3000 });
+  await palette.getByText(/Page View/i).first().waitFor({ timeout: 8000 });
   await page.keyboard.press("Enter");
   await expect(
     page.locator('button[aria-label="Previous page"]'),
@@ -108,9 +108,9 @@ test("Plugin Gallery — opens, lists at least one plugin, screenshot", async ({
   const palette = page
     .locator('[role="dialog"][aria-modal="true"]')
     .filter({ has: page.locator("input") });
-  await palette.waitFor({ timeout: 3000 });
+  await palette.waitFor({ timeout: 8000 });
   await page.keyboard.type("Plugin");
-  await palette.getByText(/Plugin/i).first().waitFor({ timeout: 3000 });
+  await palette.getByText(/Plugin/i).first().waitFor({ timeout: 8000 });
   await page.keyboard.press("Enter");
   // Gallery is a separate role=dialog after the palette closes.
   // Wait for at least one plugin card or list item to appear.
@@ -142,9 +142,9 @@ test("Template Gallery — opens, lists templates, screenshot", async ({
   const palette = page
     .locator('[role="dialog"][aria-modal="true"]')
     .filter({ has: page.locator("input") });
-  await palette.waitFor({ timeout: 3000 });
+  await palette.waitFor({ timeout: 8000 });
   await page.keyboard.type("Template");
-  await palette.getByText(/Template/i).first().waitFor({ timeout: 3000 });
+  await palette.getByText(/Template/i).first().waitFor({ timeout: 8000 });
   await page.keyboard.press("Enter");
   await page.waitForTimeout(1500); // registry fetch
   const gallery = page

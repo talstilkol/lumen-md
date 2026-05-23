@@ -142,8 +142,17 @@ export default function App() {
       showToast: (msg: string) => showAiToast(msg, "info"),
     });
     registerPlugin(wordCountPlugin);
+    // Expose a tiny test surface on window.__lumen for e2e specs. This
+    // lets the prod-build paste-html spec call htmlToMarkdown without
+    // importing /src/* at runtime (which only works against the dev
+    // server). The surface is intentionally minimal — only utilities
+    // the test suite needs.
+    (window as unknown as { __lumen?: unknown }).__lumen = {
+      htmlToMarkdown,
+    };
     return () => {
       unregisterPlugin(wordCountPlugin.id);
+      delete (window as unknown as { __lumen?: unknown }).__lumen;
     };
   }, []);
 
