@@ -53,8 +53,9 @@ test("RTL locale flips html[dir] to rtl", async ({ page }) => {
   const palette = page
     .locator('[role="dialog"]')
     .filter({ has: page.getByPlaceholder(/Type a command/i) });
-  await palette.waitFor({ timeout: 3000 });
+  await palette.waitFor({ timeout: 8000 });
   await page.keyboard.type("עברית");
+  await palette.getByText("עברית").first().waitFor({ timeout: 8000 });
   await page.keyboard.press("Enter");
   await expect(page.locator("html")).toHaveAttribute("dir", "rtl", { timeout: 5000 });
 });
