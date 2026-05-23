@@ -37,6 +37,14 @@ import rehypeKatex from "rehype-katex";
 import rehypeSlug from "rehype-slug";
 import rehypeRaw from "rehype-raw";
 import rehypeReact from "rehype-react";
+// Eager-import katex BEFORE mhchem so Rollup's chunk graph keeps the
+// canonical katex module evaluated first. Without this, the production
+// bundle's vendor-katex chunk hits a Temporal Dead Zone error
+// ("Cannot access 'xn' before initialization") because mhchem's
+// side-effect mutation of katex internals runs before katex's own
+// initializers complete. The eager import binds katex into the chunk
+// graph as a regular dependency, not a side-effect afterthought.
+import "katex";
 // Side-effect import: registers \ce{}/\pu{} macros on KaTeX
 import "katex/contrib/mhchem";
 import { visit } from "unist-util-visit";

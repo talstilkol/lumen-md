@@ -21,11 +21,14 @@ const DIST = path.join(process.cwd(), "dist", "assets");
 // (gzipped). The first matching rule wins, so put narrower regexes first.
 const BUDGETS = [
   // main is the eager Lumen runtime (App + side panels + i18n table).
-  // Current size is ~220.8 KB gzipped — the 222 ceiling keeps pressure
-  // on regressions while leaving headroom for tiny i18n / icon adds.
-  // The round-3 reactive bump (220→230) was reduced here after M12
-  // confirmed only ~0.8 KB of real growth was justified.
-  { name: "main bundle",        pattern: /^main-/,                budgetKb: 222 },
+  // Round-16 bumped from 222 → 225 because the production-build TDZ
+  // fix re-chunked katex (added rehype-katex + mathml-tag-names to its
+  // chunk) which freed a tiny bit of code from main; the net main
+  // increase came from merging react and react-dom into a single
+  // vendor-react chunk so they no longer have a circular cross-chunk
+  // import. Trade-off: ~2 KB more in main vs. an app that actually
+  // boots in production.
+  { name: "main bundle",        pattern: /^main-/,                budgetKb: 225 },
   { name: "entry index",        pattern: /^index-/,               budgetKb: 220 },
   { name: "vendor: mermaid",    pattern: /^vendor-mermaid-/,      budgetKb: 800 },
   { name: "vendor: shiki",      pattern: /^vendor-shiki-/,        budgetKb: 1800 },
@@ -34,7 +37,9 @@ const BUDGETS = [
   { name: "vendor: graphviz",   pattern: /^vendor-graphviz-/,     budgetKb: 700 },
   { name: "vendor: yjs",        pattern: /^vendor-yjs-/,          budgetKb: 180 },
   { name: "vendor: milkdown",   pattern: /^vendor-milkdown-/,     budgetKb: 200 },
-  { name: "vendor: react-dom",  pattern: /^vendor-react-dom-/,    budgetKb: 80 },
+  // vendor-react now bundles both react and react-dom (round-16);
+  // splitting them caused a circular-import init crash.
+  { name: "vendor: react",      pattern: /^vendor-react-/,        budgetKb: 160 },
   { name: "vendor: katex",      pattern: /^vendor-katex-/,        budgetKb: 110 },
   { name: "vendor: leaflet",    pattern: /^vendor-leaflet-/,      budgetKb: 60 },
   { name: "vendor: git",        pattern: /^vendor-git-/,          budgetKb: 110 },

@@ -171,7 +171,16 @@ export default defineConfig({
           if (id.includes("@hpcc-js/wasm")) return "vendor-graphviz";
           if (id.includes("echarts") || id.includes("zrender")) return "vendor-echarts";
           if (id.includes("leaflet")) return "vendor-leaflet";
-          if (id.includes("katex")) return "vendor-katex";
+          // KaTeX + its mhchem extension + rehype-katex all share the
+          // same chunk. Without rehype-katex in the chunk, the
+          // production build hit a TDZ error ("Cannot access 'xn'
+          // before initialization") at the chunk boundary because
+          // rehype-katex re-exports katex internals that mhchem mutates.
+          if (
+            id.includes("katex") ||
+            id.includes("rehype-katex") ||
+            id.includes("mathml-tag-names")
+          ) return "vendor-katex";
           // Shiki's per-language and per-theme grammars live in
           // @shikijs/langs and @shikijs/themes and are imported dynamically
           // by shiki's web-bundle; let Rollup keep each one as its own
@@ -182,9 +191,27 @@ export default defineConfig({
           if (id.includes("shiki") || id.includes("@shikijs")) return "vendor-shiki";
           if (id.includes("isomorphic-git") || id.includes("lightning-fs")) return "vendor-git";
           if (id.includes("tldraw") || id.includes("@tldraw")) return "vendor-tldraw";
-          if (id.includes("yjs") || id.includes("y-")) return "vendor-yjs";
-          if (id.includes("react-dom")) return "vendor-react-dom";
-          if (id.includes("/react/")) return "vendor-react";
+          // Anchor `y-*` to node_modules/y-… so we don't accidentally
+          // match lucide-react icon file paths that contain `y-` in
+          // the filename (e.g. "y-axis.js"). Previously this broad
+          // match pulled lucide-react into vendor-yjs, which then
+          // cross-imported into vendor-katex and caused a Temporal
+          // Dead Zone error at module init time.
+          if (
+            id.includes("/yjs/") ||
+            id.includes("node_modules/yjs") ||
+            /node_modules\/y-[a-z]/.test(id)
+          ) return "vendor-yjs";
+          // React and react-dom MUST live in the same chunk: they share
+          // internal helpers and have a circular dependency that
+          // breaks (TDZ "Cannot set properties of undefined") when
+          // rollup splits them. Both are small + always loaded
+          // together; splitting saves nothing in real-world apps.
+          if (
+            id.includes("/react-dom/") ||
+            id.includes("/react/") ||
+            id.includes("/scheduler/")
+          ) return "vendor-react";
           return undefined;
         },
       },
