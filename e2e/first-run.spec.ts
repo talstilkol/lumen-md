@@ -24,12 +24,12 @@ test.beforeEach(async ({ page }) => {
     .waitFor({ state: "visible", timeout: 5000 });
 });
 
-test("fresh user sees the onboarding tour and can dismiss it to reach a usable editor", async ({
+test("fresh user can click through every tour step and lands on a usable editor", async ({
   page,
 }) => {
-  // Tour fires on a setTimeout(1200) after first render.
-  // The tour is plain <div>s — not role=dialog — so we anchor on the
-  // unique "→ Next" or "✓ Done" button text.
+  // Tour fires on a setTimeout(1200) after first render. The tour is
+  // plain <div>s — not role=dialog — so we anchor on the unique
+  // "→ Next" or "✓ Done" button text.
   const nextBtn = page.locator("button:has-text('→ Next')").first();
   const doneBtn = page.locator("button:has-text('✓ Done')").first();
   await Promise.race([
@@ -37,14 +37,22 @@ test("fresh user sees the onboarding tour and can dismiss it to reach a usable e
     doneBtn.waitFor({ state: "visible", timeout: 5000 }),
   ]);
 
-  // KNOWN UX ISSUE — some tour steps (.file-tree, .status-bar) anchor
-  // to elements that may be partially off-screen at 1280×720, causing
-  // the tooltip + Next button to land off-viewport. The dismiss path
-  // (Escape key / click backdrop) still works.
-  // To keep this spec stable while documenting the issue, we use the
-  // Escape-to-dismiss path. The "click-through every step" path is
-  // tracked as a follow-up UX bug.
-  await page.keyboard.press("Escape");
+  // Click "Next" until "Done" replaces it. The viewport-clamp fix in
+  // OnboardingTour.tsx (round-21 bug closure) ensures the tooltip
+  // stays inside the viewport on every step. Cap at 10 iterations
+  // (the tour has 5 steps; +5 for safety).
+  for (let i = 0; i < 10; i += 1) {
+    if (await nextBtn.isVisible({ timeout: 1000 }).catch(() => false)) {
+      await nextBtn.click();
+      await page.waitForTimeout(200);
+    } else {
+      break;
+    }
+  }
+  // Final step: click "Done".
+  if (await doneBtn.isVisible({ timeout: 1500 }).catch(() => false)) {
+    await doneBtn.click();
+  }
   await page.waitForTimeout(500);
 
   // The lumen-tour-done flag should be set now.
