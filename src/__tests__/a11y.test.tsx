@@ -234,4 +234,74 @@ describe("axe a11y smoke", () => {
     );
     await expectNoBlockersEventually(container);
   });
+
+  // ── Round-24 expansion: cover more surfaces ─────────────────────────
+  // (PromptDialog and InsertTextDialog only export imperative
+  // ui{Prompt,Confirm,Alert} / openInsertTextDialog helpers — not
+  // direct components. Their internal renderers can't be unit-tested
+  // here. Their a11y is covered indirectly through the surfaces-smoke
+  // e2e spec.)
+
+  it("OnboardingTour (open, step 1) renders no blockers", async () => {
+    const { OnboardingTour } = await import("../ui/OnboardingTour");
+    // Provide a target element so the spotlight has coords.
+    const stub = document.createElement("div");
+    stub.className = "titlebar";
+    stub.style.cssText = "position:absolute;top:0;left:0;width:100%;height:48px";
+    document.body.appendChild(stub);
+    try {
+      const { container } = render(
+        <OnboardingTour open onClose={() => {}} />,
+      );
+      await expectNoBlockersEventually(container);
+    } finally {
+      stub.remove();
+    }
+  });
+
+  it("ErrorBoundary fallback renders no blockers", async () => {
+    const { ErrorBoundary } = await import("../ui/ErrorBoundary");
+    function Bomb(): JSX.Element {
+      throw new Error("test");
+    }
+    // Silence the expected React console.error during boundary catch.
+    const consoleSpy = vi
+      .spyOn(console, "error")
+      .mockImplementation(() => {});
+    try {
+      const { container } = render(
+        <ErrorBoundary>
+          <Bomb />
+        </ErrorBoundary>,
+      );
+      await expectNoBlockersEventually(container);
+    } finally {
+      consoleSpy.mockRestore();
+    }
+  });
+
+  it("AiFab (closed) renders no blockers", async () => {
+    const { AiFab } = await import("../ui/AiFab");
+    const { container } = render(<AiFab commands={[]} />);
+    await expectNoBlockersEventually(container);
+  });
+
+  it("AiToastContainer (with one toast) renders no blockers", async () => {
+    const { AiToastContainer, showAiToast } = await import("../ui/AiToast");
+    const { container } = render(<AiToastContainer />);
+    showAiToast("Test toast", "info");
+    await expectNoBlockersEventually(container);
+  });
+
+  it("PluginGallery (open, mocked registry) renders no blockers", async () => {
+    vi.doMock("../storage/pluginMarketplace", () => ({
+      fetchPluginRegistry: async () => [],
+      installPlugin: async () => {},
+    }));
+    const { PluginGallery } = await import("../ui/PluginGallery");
+    const { container } = render(
+      <PluginGallery open onClose={() => {}} />,
+    );
+    await expectNoBlockersEventually(container);
+  });
 });

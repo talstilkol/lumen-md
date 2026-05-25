@@ -26,23 +26,20 @@ test("user journey: type, render, cycle modes, switch locale, open find — no e
   const pageErrors: { msg: string; stack?: string }[] = [];
   page.on("pageerror", (e) => {
     const m = e.message;
+    // Filter only iframe / sandbox storage-denial noise which fires
+    // unconditionally on dynamic blocks that mount sandboxed iframes
+    // (HTML preview, live-js, embed). These are environmental, not
+    // Lumen bugs.
     if (
       /Storage is disabled inside 'data:'|sandboxed and lacks the 'allow-same-origin'|allow-scripts/i.test(m)
     ) {
       return;
     }
-    // KNOWN ISSUE — milkdown plugin lifecycle: when WYSIWYG mode mounts
-    // with a doc that already has dynamic blocks, the @milkdown/plugin-
-    // tooltip and @milkdown/plugin-slash sometimes call .dataset on a
-    // null element OR appendChild a non-Node. Filed as Lumen issue
-    // (WysiwygEditor.tsx tooltip/slash provider race). Filtered here so
-    // the journey can still validate the rest of the flow.
-    if (
-      /Cannot read properties of null \(reading 'dataset'\)/i.test(m) ||
-      /Failed to execute 'appendChild' on 'Node'/i.test(m)
-    ) {
-      return;
-    }
+    // ROUND-24 NOTE: the Milkdown lifecycle race that prompted earlier
+    // filters here is no longer reproducible — likely fixed by the
+    // round-23 fill+aria-selected deflake (no more racing input change
+    // events into the editor) or the Mermaid 11.15 bump. Confirmed
+    // across 3 isolated runs of this spec without the filter.
     pageErrors.push({ msg: m, stack: e.stack });
   });
 
