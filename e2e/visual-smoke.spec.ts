@@ -23,16 +23,17 @@ test.beforeEach(async ({ page }) => {
 });
 
 test("Mermaid block renders inline SVG inside the preview", async ({ page }) => {
+  // Mermaid is a ~2.7 MB lazy vendor chunk. Firefox on Linux CI takes
+  // 10-15 s to fetch + parse + render the first time. Both the inner
+  // waitFor AND the global per-test timeout need headroom.
+  test.setTimeout(60_000);
   // Split mode so we see both source and preview at once.
   await page.keyboard.press("Meta+2");
   const editor = page.locator(".cm-content").first();
   await editor.click();
   await editor.fill("```mermaid\ngraph LR; A --> B; B --> C\n```\n");
   const svg = page.locator(".chart-block svg, .mermaid-block svg").first();
-  // Mermaid is a ~2.7 MB lazy vendor chunk. Firefox on Linux CI takes
-  // 10-15 s to fetch + parse + render the first time, beyond the 8 s
-  // budget. 20 s gives reliable headroom.
-  await expect(svg).toBeVisible({ timeout: 20_000 });
+  await expect(svg).toBeVisible({ timeout: 30_000 });
   // SVG sub-elements (`<g>`, `<path>`) are considered "hidden" by
   // Playwright's isVisible heuristic because they have no intrinsic
   // box even when rendered. Counting them is enough proof of structure.

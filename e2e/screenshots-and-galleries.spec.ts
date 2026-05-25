@@ -87,6 +87,8 @@ test("M6 — capture RTL screenshot", async ({ page }) => {
 });
 
 test("M6 — capture PageView screenshot", async ({ page }) => {
+  // PageView is lazy-loaded; firefox on slow CI needs the extra budget.
+  test.setTimeout(60_000);
   await page.keyboard.press("Meta+K");
   const palette = page
     .locator('[role="dialog"][aria-modal="true"]')
