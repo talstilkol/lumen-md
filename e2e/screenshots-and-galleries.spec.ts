@@ -99,9 +99,12 @@ test("M6 — capture PageView screenshot", async ({ page }) => {
     palette.locator('[role="option"][aria-selected="true"]'),
   ).toContainText(/Page View/i, { timeout: 8000 });
   await page.keyboard.press("Enter");
+  // PageView is lazy-loaded — firefox on CI's slow Linux runner can
+  // take 10+ seconds to fetch & mount the chunk. 8s was tight even
+  // on the macOS reference; 15s gives realistic headroom.
   await expect(
     page.locator('button[aria-label="Previous page"]'),
-  ).toBeVisible({ timeout: 8_000 });
+  ).toBeVisible({ timeout: 15_000 });
   await page.screenshot({
     path: path.join(OUT_DIR, "page-view.png"),
     fullPage: true,
