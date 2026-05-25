@@ -107,7 +107,11 @@ jobs:
     # one failing browser doesn't cancel the others.
     name: e2e (${{ matrix.browser }})
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    # Each browser independently: install + dev server cold-start +
+    # tests. The dev server is slow on the Linux runner (~3 min to come
+    # up vs. the prod static server's < 1s), so 20 min wasn't quite
+    # enough for the slower browsers. 30 min gives comfortable headroom.
+    timeout-minutes: 30
     needs: check
     strategy:
       fail-fast: false
