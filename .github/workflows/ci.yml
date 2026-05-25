@@ -102,7 +102,13 @@ jobs:
   e2e:
     name: e2e (Playwright)
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    # 20 min was tight even before round-25 — the dev server is slower
+    # than the prod-build server, and the suite runs across all three
+    # browsers (chromium + firefox + webkit) × ~80 tests. Round-25 added
+    # 16 more error-path specs, pushing past 20 min consistently.
+    # 30 min gives comfortable headroom without making the queue much
+    # worse — the prod-build job is the fast (~6 min) chromium-only run.
+    timeout-minutes: 30
     needs: check
     steps:
       - uses: actions/checkout@v4
