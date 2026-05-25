@@ -28,7 +28,15 @@ const BUDGETS = [
   // vendor-react chunk so they no longer have a circular cross-chunk
   // import. Trade-off: ~2 KB more in main vs. an app that actually
   // boots in production.
-  { name: "main bundle",        pattern: /^main-/,                budgetKb: 225 },
+  // main is the eager Lumen runtime. 225 → 230 in round-25 because:
+  //   (a) the y-websocket externalize (Rollup `external: ["y-websocket"]`)
+  //       keeps an ES import statement in main rather than tree-shaking it
+  //       — costs ~0.2 KB gzipped, deterministic;
+  //   (b) macOS-gzip vs Linux-gzip produce slightly different ratios on
+  //       small data (~2 KB swing for ~750 KB raw bundle). The macOS build
+  //       reports 223 KB; the Linux CI build reports 225 KB on the same
+  //       source. 230 KB gives platform-independent headroom of 5 KB.
+  { name: "main bundle",        pattern: /^main-/,                budgetKb: 230 },
   { name: "entry index",        pattern: /^index-/,               budgetKb: 220 },
   { name: "vendor: mermaid",    pattern: /^vendor-mermaid-/,      budgetKb: 800 },
   // shiki sits at ~263 KB gzipped today. The budget previously read
