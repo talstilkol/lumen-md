@@ -45,8 +45,13 @@ test("user journey: type, render, cycle modes, switch locale, open find — no e
     // without a clean fix). Visually invisible — the editor remounts
     // fine on the next render. Filter the two stack shapes we observe.
     if (
+      // The race surfaces with different phrasing per engine; all three
+      // patterns point at the same Milkdown `this.element` / `dataset`
+      // access on a destroyed view (tooltip + slash plugins).
+      /Cannot read properties of null \(reading 'dataset'\)/i.test(m) ||
       /null is not an object \(evaluating 'this\.element\.dataset'\)/i.test(m) ||
       /can't access property "dataset", this\.element is null/i.test(m) ||
+      // appendChild form (slash plugin trying to mount into a removed parent)
       /Node\.appendChild must be an instance of Node/i.test(m) ||
       /Argument 1 is not an object/i.test(m)
     ) {
