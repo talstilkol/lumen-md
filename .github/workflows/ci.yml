@@ -100,32 +100,33 @@ jobs:
           LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
 
   e2e:
-    name: e2e (Playwright)
+    # Per-browser matrix: each browser runs in its own runner so the
+    # three (chromium / firefox / webkit) execute in parallel. Before
+    # this split, all three ran sequentially in one job and took 30+
+    # minutes — past the timeout. Now each is ~10 min wall-clock, and
+    # one failing browser doesn't cancel the others.
+    name: e2e (${{ matrix.browser }})
     runs-on: ubuntu-latest
-    # The all-browsers run takes ~28 min on Linux (chromium 4.2m +
-    # firefox ~10m + webkit ~10m, sequential per Playwright defaults).
-    # 30 min was still too tight (timed out twice in round-25). 45 min
-    # leaves comfortable headroom even when one browser hits a slow
-    # case. The prod-build job remains the fast (~4 min, chromium-only)
-    # canary — this one's the broad cross-browser safety net.
-    # Follow-up: split per-browser into separate jobs so they run in
-    # parallel and bring this back to ~12 min wall-clock.
-    timeout-minutes: 45
+    timeout-minutes: 20
     needs: check
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chromium, firefox, webkit]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with: { node-version: 20, cache: npm }
       - run: npm ci || npm install
-      - name: Install Playwright browsers
-        run: npx playwright install --with-deps chromium firefox webkit
-      - name: Run E2E
-        run: npm run test:e2e
+      - name: Install Playwright browser (${{ matrix.browser }})
+        run: npx playwright install --with-deps ${{ matrix.browser }}
+      - name: Run E2E (${{ matrix.browser }})
+        run: npx playwright test --project=${{ matrix.browser }} --reporter=line
       - name: Upload report
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: playwright-report
+          name: playwright-report-${{ matrix.browser }}
           path: playwright-report/
 
   e2e-prod:
