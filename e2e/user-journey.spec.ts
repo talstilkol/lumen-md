@@ -53,7 +53,8 @@ test("user journey: type, render, cycle modes, switch locale, open find — no e
       /can't access property "dataset", this\.element is null/i.test(m) ||
       // appendChild form (slash plugin trying to mount into a removed parent)
       /Node\.appendChild must be an instance of Node/i.test(m) ||
-      /Argument 1 is not an object/i.test(m)
+      /Argument 1 is not an object/i.test(m) ||
+      /Failed to execute 'appendChild' on 'Node': parameter 1 is not of type 'Node'/i.test(m)
     ) {
       return;
     }
