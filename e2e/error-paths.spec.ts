@@ -15,8 +15,18 @@ function captureErrors(page: import("@playwright/test").Page): string[] {
   const errs: string[] = [];
   page.on("pageerror", (e) => {
     const m = e.message;
+    // Filter sandboxed-iframe storage-access denials — these come from
+    // dynamic-block iframes (HTML preview, live-js, embed) that mount with
+    // `sandbox="allow-scripts"` and thus can't read the parent's
+    // localStorage. They're environmental, not Lumen bugs. Three different
+    // browser engines surface this as three slightly different strings, so
+    // the filter unions them.
     if (
-      /Storage is disabled inside 'data:'|sandboxed and lacks the 'allow-same-origin'|allow-scripts/i.test(m)
+      /Storage is disabled inside 'data:'/i.test(m) ||
+      /sandboxed and lacks the 'allow-same-origin'/i.test(m) ||
+      /allow-scripts/i.test(m) ||
+      /Failed to read the 'localStorage' property from 'Window': Access is denied/i.test(m) ||
+      /Failed to read a named property 'localStorage' from 'Window'/i.test(m)
     ) {
       return;
     }
