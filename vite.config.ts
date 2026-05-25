@@ -247,6 +247,14 @@ export default defineConfig({
       // back locally.
       reporter: ["text-summary", "json-summary"],
       reportsDirectory: "coverage",
+      // Without `include`, v8 reports every JS file executed during tests
+      // — including ~3500 node_modules entries that artificially inflate
+      // the total. Worse, the inflation isn't deterministic across
+      // environments: locally the ratio came out at 97 %, in CI's
+      // minimal install it dropped to 37 % (same source code), tripping
+      // the >=60 % gate. Scope coverage to first-party src/ only — that's
+      // what the gate is actually measuring.
+      include: ["src/**/*.{ts,tsx}"],
       // Skip lazy-loaded vendor wrappers, build config, and the Tauri
       // / iOS native shells — they aren't unit-testable in jsdom.
       exclude: [
