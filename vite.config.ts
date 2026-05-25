@@ -24,6 +24,16 @@ const defineConfig = (config: ViteUserConfig & VitestConfig) =>
 import react from "@vitejs/plugin-react";
 import { VitePWA } from "vite-plugin-pwa";
 import path from "node:path";
+import { existsSync } from "node:fs";
+
+// y-websocket is an OPTIONAL peer dep. If the user has installed it
+// (i.e. `node_modules/y-websocket` exists), Vite resolves the import
+// normally. Otherwise we alias to a no-op stub so the dev server +
+// production build don't fail on the unresolved import — the runtime
+// try/catch in src/collab/yjs.ts handles the no-op cleanly.
+const yWebsocketInstalled = existsSync(
+  path.resolve(__dirname, "node_modules/y-websocket"),
+);
 
 /**
  * Tiny Vite plugin: rewrites clean URLs (`/roadmap`, `/landing`) to
@@ -125,6 +135,20 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
+      // y-websocket is OPTIONAL — only alias to the stub when the real
+      // package isn't installed. This way deployments that DO install
+      // y-websocket explicitly still get the real implementation, while
+      // bare `npm install` (most users, all CI runs) doesn't crash on
+      // the unresolved import. In test mode the test-level vi.mock
+      // overrides whichever resolution wins here.
+      ...(yWebsocketInstalled
+        ? {}
+        : {
+            "y-websocket": path.resolve(
+              __dirname,
+              "src/__tests__/stubs/y-websocket.ts",
+            ),
+          }),
     },
   },
   server: {
