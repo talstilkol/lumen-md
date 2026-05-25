@@ -131,6 +131,15 @@ export default defineConfig({
     port: 5173,
     host: true,
   },
+  // y-websocket is an optional peer-dep (see src/collab/yjs.ts). The
+  // Rollup `external` covers prod builds, but Vite's dev server uses
+  // esbuild dep-optimization which trips on the unresolved import. Tell
+  // Vite to skip pre-bundling it; the dynamic `await import(...)` will
+  // fail at runtime if the user hasn't installed the package, and the
+  // existing try/catch falls back to WebRTC-only collab cleanly.
+  optimizeDeps: {
+    exclude: ["y-websocket"],
+  },
   // ε.4.3 — clean-URL aliases for the auxiliary HTML pages so dev links
   // like `/roadmap` and `/landing` work without the `.html` suffix.
   // Production deployments are expected to handle this at the reverse
