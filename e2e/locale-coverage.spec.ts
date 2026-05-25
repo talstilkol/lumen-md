@@ -79,9 +79,21 @@ for (const locale of LOCALES) {
         .locator('[role="dialog"][aria-modal="true"]')
         .filter({ has: page.locator("input") });
       await palette.waitFor({ timeout: 8000 });
-      await page.keyboard.type(locale.label);
-      // Wait for the option to render in the listbox.
-      await palette.getByText(locale.label).first().waitFor({ timeout: 15000 });
+      // Use `fill` rather than `keyboard.type` so CJK / RTL labels
+      // (日本語, 简体中文, العربية, עברית) make it into the input
+      // verbatim. keyboard.type sends per-character keydown events
+      // and some CJK characters can't be entered that way without
+      // IME composition — they get dropped on the floor.
+      await palette.locator("input").first().fill(locale.label);
+      // Round-23 deflake: anchor readiness on the selected listbox
+      // option whose text equals the typed locale label. Previously
+      // `getByText` + Enter raced the filter; on slow first-paint
+      // runs Enter fired before the option was selected and the
+      // wrong command ran.
+      const selected = palette.locator(
+        '[role="option"][aria-selected="true"]',
+      );
+      await expect(selected).toContainText(locale.label, { timeout: 15000 });
       await page.keyboard.press("Enter");
     }
 

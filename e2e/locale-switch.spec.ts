@@ -31,8 +31,15 @@ async function pickLocale(
     .locator('[role="dialog"][aria-modal="true"]')
     .filter({ has: page.locator("input") });
   await palette.waitFor({ timeout: 8000 });
-  await page.keyboard.type(label);
-  await palette.getByText(label).first().waitFor({ timeout: 8000 });
+  // Use `fill` for non-ASCII labels — `keyboard.type` can drop CJK
+  // characters that need IME composition (round-23 deflake).
+  await palette.locator("input").first().fill(label);
+  // Wait on the aria-selected option, not just any getByText match,
+  // so we know the filter pass finished AND the right option is
+  // highlighted before pressing Enter.
+  await expect(
+    palette.locator('[role="option"][aria-selected="true"]'),
+  ).toContainText(label, { timeout: 8000 });
   await page.keyboard.press("Enter");
 }
 

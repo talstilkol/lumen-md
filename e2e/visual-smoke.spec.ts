@@ -54,8 +54,12 @@ test("RTL locale flips html[dir] to rtl", async ({ page }) => {
     .locator('[role="dialog"]')
     .filter({ has: page.getByPlaceholder(/Type a command/i) });
   await palette.waitFor({ timeout: 8000 });
-  await page.keyboard.type("עברית");
-  await palette.getByText("עברית").first().waitFor({ timeout: 8000 });
+  // `fill` is more reliable than `keyboard.type` for non-ASCII strings
+  // and for focus consistency across Playwright versions.
+  await palette.locator("input").first().fill("עברית");
+  await expect(
+    palette.locator('[role="option"][aria-selected="true"]'),
+  ).toContainText(/עברית/, { timeout: 8000 });
   await page.keyboard.press("Enter");
   await expect(page.locator("html")).toHaveAttribute("dir", "rtl", { timeout: 5000 });
 });
@@ -66,8 +70,13 @@ test("PageView mode renders pagination chrome (page nav buttons)", async ({ page
   const palette = page
     .locator('[role="dialog"]')
     .filter({ has: page.getByPlaceholder(/Type a command/i) });
-  await palette.waitFor({ timeout: 3000 });
-  await page.keyboard.type("Page View");
+  await palette.waitFor({ timeout: 8000 });
+  await palette.locator("input").first().fill("Page View");
+  // Wait for the palette's filter to settle: the highlighted option
+  // (aria-selected=true) must match what we typed.
+  await expect(
+    palette.locator('[role="option"][aria-selected="true"]'),
+  ).toContainText(/Page View/i, { timeout: 8000 });
   await page.keyboard.press("Enter");
   // PageView renders Previous/Next nav buttons with aria-labels — those
   // are the stable identifiers across re-renders and locales.

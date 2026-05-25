@@ -35,7 +35,10 @@ test("Tags panel opens via palette", async ({ page }) => {
   const palette = await openPalette(page);
   // Use the exact command label so we don't accidentally match the
   // "Insert tag" command or template names.
-  await page.keyboard.type("View tags");
+  await palette.locator("input").first().fill("View tags");
+  await expect(
+    palette.locator('[role="option"][aria-selected="true"]'),
+  ).toContainText(/View tags/i, { timeout: 5000 });
   await page.keyboard.press("Enter");
   await expect(palette).not.toBeVisible({ timeout: 3000 });
   // TagsPanel renders an <aside role="complementary" aria-label="Tags">.
@@ -46,7 +49,10 @@ test("Tags panel opens via palette", async ({ page }) => {
 
 test("Backlinks toggle command runs and closes palette", async ({ page }) => {
   const palette = await openPalette(page);
-  await page.keyboard.type("Toggle backlinks");
+  await palette.locator("input").first().fill("Toggle backlinks");
+  await expect(
+    palette.locator('[role="option"][aria-selected="true"]'),
+  ).toContainText(/backlinks/i, { timeout: 5000 });
   await page.keyboard.press("Enter");
   // Backlinks panel may or may not visibly render depending on whether
   // the current doc has incoming wiki links — the smoke contract is
@@ -76,7 +82,10 @@ test("Find & Replace command opens its dialog (M3 wiring trace)", async ({ page 
   // `view.findReplace` → setFindReplaceOpen(true) → SearchReplace
   // dialog with role="dialog" (or close button aria-label) appears.
   const palette = await openPalette(page);
-  await page.keyboard.type("Find & Replace");
+  await palette.locator("input").first().fill("Find & Replace");
+  await expect(
+    palette.locator('[role="option"][aria-selected="true"]'),
+  ).toContainText(/Find & Replace/i, { timeout: 5000 });
   await page.keyboard.press("Enter");
   await expect(palette).not.toBeVisible({ timeout: 3000 });
   // SearchReplace renders a Close button with this aria-label.
@@ -111,7 +120,10 @@ test("Print command fires via palette (window.open intent)", async ({ page }) =>
     window.print = () => {};
   });
   const palette = await openPalette(page);
-  await page.keyboard.type("Print");
+  await palette.locator("input").first().fill("Print");
+  await expect(
+    palette.locator('[role="option"][aria-selected="true"]'),
+  ).toContainText(/Print/i, { timeout: 5000 });
   await page.keyboard.press("Enter");
   await expect(palette).not.toBeVisible({ timeout: 3000 });
   // Action is dynamically imported; give it time.

@@ -19,7 +19,7 @@ export default defineConfig({
   // filter timing race (see e2e/locale-switch.spec.ts deflake notes
   // across rounds 7/13/16). The race fires < 1 % of runs but stacks
   // up across an 80-test suite. CI uses 2 retries.
-  retries: process.env.CI ? 2 : 1,
+  retries: process.env.CI ? 2 : 0,
   reporter: process.env.CI ? "github" : "list",
   use: {
     baseURL: BASE_URL,
