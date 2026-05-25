@@ -35,12 +35,17 @@ describe("UpdateBanner", () => {
   });
 
   it("shows the banner after onNeedRefresh fires; reload button invokes updateSW(true)", async () => {
-    const { render, act, screen } = await import("@testing-library/react");
+    const { render, act, screen, waitFor } = await import("@testing-library/react");
     const { UpdateBanner } = await import("../ui/UpdateBanner");
     render(<UpdateBanner />);
-    // Let the dynamic import + effect run.
-    await new Promise<void>((r) => setTimeout(r, 0));
-    expect(capturedOnNeedRefresh).not.toBeNull();
+    // The component does an async `import("virtual:pwa-register")` inside
+    // useEffect. A single setTimeout(0) tick isn't enough when the test
+    // runner is under CPU pressure (full coverage runs were intermittently
+    // racing past the import resolution). Poll until the captured callback
+    // is wired up — fast in the common case, robust under load.
+    await waitFor(() => {
+      expect(capturedOnNeedRefresh).not.toBeNull();
+    });
     await act(async () => {
       capturedOnNeedRefresh?.();
     });

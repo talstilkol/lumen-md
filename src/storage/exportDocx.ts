@@ -153,8 +153,19 @@ export async function exportToDocx(content: string, fileName: string): Promise<v
   a.download = `${baseName}.doc`;
   document.body.appendChild(a);
   a.click();
+  // Defer cleanup so the browser actually navigates to the blob. Guard
+  // against the document being gone (jsdom test teardown, page unload)
+  // — without this, the timer can fire after the global is dismantled
+  // and crash with "document is not defined". Production hits the same
+  // race rarely; the guard is cheap.
   setTimeout(() => {
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    try {
+      if (typeof document !== "undefined" && a.parentNode === document.body) {
+        document.body.removeChild(a);
+      }
+      URL.revokeObjectURL(url);
+    } catch {
+      // already torn down — nothing to clean
+    }
   }, 100);
 }

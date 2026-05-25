@@ -35,7 +35,12 @@ interface WorkerLog {
   parts?: string[];
 }
 
-const WORKER_SOURCE = `
+/**
+ * The worker source ships as a string and is exported only so unit tests
+ * can pin the throw/rejection containment properties without launching a
+ * real Worker (which jsdom can't reliably emulate).
+ */
+export const WORKER_SOURCE = `
 const toParts = function(args) {
   const list = Array.prototype.slice.call(args);
   return list.map(function(a) {
@@ -76,10 +81,16 @@ self.onmessage = function(event) {
 
   self.onerror = function(msg, filename, lineno, colno) {
     emit("error", [String(msg) + " (" + (filename || "inline") + ":" + (lineno || 0) + ":" + (colno || 0) + ")"], runId);
+    // Returning true suppresses the default action so the error does NOT
+    // bubble up to the parent (which would surface as a pageerror).
+    return true;
   };
   self.onunhandledrejection = function(e) {
     var reason = e && e.reason ? e.reason : e;
     emit("error", ["Unhandled rejection: " + (reason && reason.message ? reason.message : String(reason))], runId);
+    // Same as onerror — prevent default to keep the rejection from
+    // escaping the worker and surfacing as a pageerror in the parent.
+    if (e && typeof e.preventDefault === "function") e.preventDefault();
   };
 
   try {
@@ -89,9 +100,14 @@ self.onmessage = function(event) {
       warn: function() { emit("warn", arguments, runId); },
       error: function() { emit("error", arguments, runId); },
     };
+    // Note the leading "return" — without it, the async IIFE's promise is
+    // discarded and any rejection (e.g. user code throwing) becomes an
+    // unhandled rejection in the worker, which propagates as a worker
+    // error and surfaces as pageerror in the parent. With "return", the
+    // outer .then(_, errHandler) catches it cleanly.
     const runner = new Function(
       "console",
-      "(async function() {\\n" + source + "\\n})();"
+      "return (async function() {\\n" + source + "\\n})();"
     );
     Promise.resolve().then(function() { return runner(safeConsole); }).then(
       function() {
@@ -184,6 +200,25 @@ export default function LiveJsBlock({ source, meta }: Props) {
     );
   };
 
+    // Defense-in-depth: even though the worker's own onerror /
+    // onunhandledrejection suppress + preventDefault, a parent-side
+    // listener guarantees no worker error escapes to window.onerror /
+    // pageerror. Without this, certain browser quirks (older webkit,
+    // some headless modes) can still surface a worker error event.
+    const onWorkerError = (e: ErrorEvent) => {
+      e.preventDefault();
+      hadError = true;
+      setRunState("error");
+      setLogs((prev) =>
+        [...prev, {
+          id: ++idCounter.current,
+          level: "error" as LogLevel,
+          parts: [e.message ?? "Worker error"],
+          ts: Date.now(),
+        }].slice(-200),
+      );
+    };
+    worker.addEventListener("error", onWorkerError);
     worker.addEventListener("message", onMsg);
     worker.postMessage({
       type: "run",
@@ -202,6 +237,7 @@ export default function LiveJsBlock({ source, meta }: Props) {
     return () => {
       clearTimeout(timer);
       worker.removeEventListener("message", onMsg);
+      worker.removeEventListener("error", onWorkerError);
       worker.terminate();
       const workerUrl = (worker as Worker & { [WORKER_URL_KEY]?: string })[WORKER_URL_KEY];
       if (workerUrl) URL.revokeObjectURL(workerUrl);

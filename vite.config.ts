@@ -7,7 +7,9 @@ interface VitestConfig {
     environment?: string;
     include?: string[];
     globals?: boolean;
+    css?: boolean;
     setupFiles?: string[];
+    alias?: Record<string, string>;
     coverage?: {
       provider?: "v8" | "istanbul";
       reporter?: string[];
@@ -22,6 +24,16 @@ const defineConfig = (config: ViteUserConfig & VitestConfig) =>
 import react from "@vitejs/plugin-react";
 import { VitePWA } from "vite-plugin-pwa";
 import path from "node:path";
+import { existsSync } from "node:fs";
+
+// y-websocket is an OPTIONAL peer dep. If the user has installed it
+// (i.e. `node_modules/y-websocket` exists), Vite resolves the import
+// normally. Otherwise we alias to a no-op stub so the dev server +
+// production build don't fail on the unresolved import — the runtime
+// try/catch in src/collab/yjs.ts handles the no-op cleanly.
+const yWebsocketInstalled = existsSync(
+  path.resolve(__dirname, "node_modules/y-websocket"),
+);
 
 /**
  * Tiny Vite plugin: rewrites clean URLs (`/roadmap`, `/landing`) to
@@ -123,11 +135,34 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
+      // y-websocket is OPTIONAL — only alias to the stub when the real
+      // package isn't installed. This way deployments that DO install
+      // y-websocket explicitly still get the real implementation, while
+      // bare `npm install` (most users, all CI runs) doesn't crash on
+      // the unresolved import. In test mode the test-level vi.mock
+      // overrides whichever resolution wins here.
+      ...(yWebsocketInstalled
+        ? {}
+        : {
+            "y-websocket": path.resolve(
+              __dirname,
+              "src/__tests__/stubs/y-websocket.ts",
+            ),
+          }),
     },
   },
   server: {
     port: 5173,
     host: true,
+  },
+  // y-websocket is an optional peer-dep (see src/collab/yjs.ts). The
+  // Rollup `external` covers prod builds, but Vite's dev server uses
+  // esbuild dep-optimization which trips on the unresolved import. Tell
+  // Vite to skip pre-bundling it; the dynamic `await import(...)` will
+  // fail at runtime if the user hasn't installed the package, and the
+  // existing try/catch falls back to WebRTC-only collab cleanly.
+  optimizeDeps: {
+    exclude: ["y-websocket"],
   },
   // ε.4.3 — clean-URL aliases for the auxiliary HTML pages so dev links
   // like `/roadmap` and `/landing` work without the `.html` suffix.
@@ -149,6 +184,13 @@ export default defineConfig({
         roadmap: path.resolve(__dirname, "public/roadmap.html"),
         benchmarks: path.resolve(__dirname, "public/benchmarks.html"),
       },
+      // `y-websocket` is an OPTIONAL runtime dep (see comments in
+      // src/collab/yjs.ts). It's not in package.json — users opt in by
+      // installing it explicitly. Mark it external so Rollup doesn't
+      // try to bundle it; if the user hasn't installed it, the dynamic
+      // import in src/collab/yjs.ts catches the resolution failure and
+      // the session falls back to WebRTC-only.
+      external: ["y-websocket"],
       output: {
         // Route Shiki per-language and per-theme grammar chunks into a
         // dedicated `assets/shiki-langs/` subfolder so the PWA precache
@@ -224,10 +266,35 @@ export default defineConfig({
     globals: true,
     css: false,
     setupFiles: ["src/__tests__/setup.ts"],
+    // `y-websocket` is intentionally absent from package.json (loaded at
+    // runtime via dynamic import in src/collab/yjs.ts; users opt in by
+    // installing it explicitly). Without an alias, Vitest's import
+    // analyzer can't resolve `import("y-websocket")` in CI, even though
+    // the test file then does `vi.mock(...)` to replace it. The stub
+    // gives the analyzer a real file to resolve; the test's vi.mock
+    // still wins at runtime.
+    alias: {
+      "y-websocket": path.resolve(__dirname, "src/__tests__/stubs/y-websocket.ts"),
+    },
     coverage: {
       provider: "v8",
-      reporter: ["text-summary", "html", "json-summary"],
+      // HTML reporter was dropped in round-25 — istanbul's html writer
+      // crashed with `ERR_INVALID_ARG_VALUE` when mirroring Vite's
+      // null-byte-prefixed virtual modules (`\x00virtual:…`) under
+      // `coverage/`. CI only needs the JSON summary for the >=60% gate;
+      // the text-summary prints to the build log for humans. Anyone who
+      // wants a clickable HTML drilldown can opt-in by adding "html"
+      // back locally.
+      reporter: ["text-summary", "json-summary"],
       reportsDirectory: "coverage",
+      // Without `include`, v8 reports every JS file executed during tests
+      // — including ~3500 node_modules entries that artificially inflate
+      // the total. Worse, the inflation isn't deterministic across
+      // environments: locally the ratio came out at 97 %, in CI's
+      // minimal install it dropped to 37 % (same source code), tripping
+      // the >=60 % gate. Scope coverage to first-party src/ only — that's
+      // what the gate is actually measuring.
+      include: ["src/**/*.{ts,tsx}"],
       // Skip lazy-loaded vendor wrappers, build config, and the Tauri
       // / iOS native shells — they aren't unit-testable in jsdom.
       exclude: [

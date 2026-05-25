@@ -8,6 +8,7 @@
  */
 import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import { Editor } from "../editor/Editor";
+import { clampLineNumber } from "../editor/lineClamp";
 import type { EditorHandle } from "../editor/Editor";
 import { Preview } from "../renderer/Preview";
 import { ErrorBoundary } from "../ui/ErrorBoundary";
@@ -188,7 +189,15 @@ export function EditorLayout({
       function getEditorYForLine(line: number): number {
         const view = editorRef.current?.getView();
         if (!view) return 0;
-        const docLine = view.state.doc.line(line);
+        // Anchors are rebuilt asynchronously by the MutationObserver after
+        // the preview re-renders. Between a doc shrink and that rebuild,
+        // an anchor.line value can exceed `doc.lines` and make `doc.line(n)`
+        // throw "Invalid line number N in M-line document". `clampLineNumber`
+        // keeps the sync code defensive — the slight visual offset corrects
+        // on the next rebuild a few ms later.
+        const safe = clampLineNumber(line, view.state.doc.lines);
+        if (safe === 0) return 0;
+        const docLine = view.state.doc.line(safe);
         return view.lineBlockAt(docLine.from).top;
       }
 
