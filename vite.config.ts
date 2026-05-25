@@ -151,6 +151,13 @@ export default defineConfig({
         roadmap: path.resolve(__dirname, "public/roadmap.html"),
         benchmarks: path.resolve(__dirname, "public/benchmarks.html"),
       },
+      // `y-websocket` is an OPTIONAL runtime dep (see comments in
+      // src/collab/yjs.ts). It's not in package.json — users opt in by
+      // installing it explicitly. Mark it external so Rollup doesn't
+      // try to bundle it; if the user hasn't installed it, the dynamic
+      // import in src/collab/yjs.ts catches the resolution failure and
+      // the session falls back to WebRTC-only.
+      external: ["y-websocket"],
       output: {
         // Route Shiki per-language and per-theme grammar chunks into a
         // dedicated `assets/shiki-langs/` subfolder so the PWA precache

@@ -288,8 +288,14 @@ describe("axe a11y smoke", () => {
 
   it("AiToastContainer (with one toast) renders no blockers", async () => {
     const { AiToastContainer, showAiToast } = await import("../ui/AiToast");
+    const { act } = await import("@testing-library/react");
     const { container } = render(<AiToastContainer />);
-    showAiToast("Test toast", "info");
+    // showAiToast fires a setState inside the container subscription —
+    // wrap in act() so React flushes the update synchronously and the
+    // "not wrapped in act(...)" warning doesn't pollute the test log.
+    await act(async () => {
+      showAiToast("Test toast", "info");
+    });
     await expectNoBlockersEventually(container);
   });
 
