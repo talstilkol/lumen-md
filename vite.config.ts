@@ -238,7 +238,14 @@ export default defineConfig({
     },
     coverage: {
       provider: "v8",
-      reporter: ["text-summary", "html", "json-summary"],
+      // HTML reporter was dropped in round-25 — istanbul's html writer
+      // crashed with `ERR_INVALID_ARG_VALUE` when mirroring Vite's
+      // null-byte-prefixed virtual modules (`\x00virtual:…`) under
+      // `coverage/`. CI only needs the JSON summary for the >=60% gate;
+      // the text-summary prints to the build log for humans. Anyone who
+      // wants a clickable HTML drilldown can opt-in by adding "html"
+      // back locally.
+      reporter: ["text-summary", "json-summary"],
       reportsDirectory: "coverage",
       // Skip lazy-loaded vendor wrappers, build config, and the Tauri
       // / iOS native shells — they aren't unit-testable in jsdom.

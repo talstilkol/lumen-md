@@ -204,3 +204,93 @@ test("Escape during palette typing doesn't leave residual state", async ({
   expect(value).toBe("");
   expect(errs).toEqual([]);
 });
+
+test("malformed KaTeX inline math doesn't propagate as pageerror", async ({
+  page,
+}) => {
+  const errs = captureErrors(page);
+  await page.keyboard.press("Meta+2");
+  const editor = page.locator(".cm-content").first();
+  await editor.click();
+  // KaTeX should render an error span (.katex-error) for bad input,
+  // not crash the preview.
+  await editor.fill(
+    "Broken inline math: $\\frac{1}{}$ and $\\sqrt{$ — done.\n",
+  );
+  await page.waitForTimeout(1500);
+  expect(errs).toEqual([]);
+});
+
+test("malformed KaTeX display math doesn't propagate as pageerror", async ({
+  page,
+}) => {
+  const errs = captureErrors(page);
+  await page.keyboard.press("Meta+2");
+  const editor = page.locator(".cm-content").first();
+  await editor.click();
+  await editor.fill(
+    "$$\n\\begin{matrix} a & b \\\\ c \\end{wrongenv}\n$$\n",
+  );
+  await page.waitForTimeout(1500);
+  expect(errs).toEqual([]);
+});
+
+test("deeply nested blockquote (50 levels) renders without freezing or crashing", async ({
+  page,
+}) => {
+  const errs = captureErrors(page);
+  await page.keyboard.press("Meta+2");
+  const editor = page.locator(".cm-content").first();
+  await editor.click();
+  // Round-25 catches recursion-depth issues in the renderer pipeline.
+  const nesting = ">".repeat(50);
+  await editor.fill(`${nesting} deeply nested\n`);
+  await page.waitForTimeout(1000);
+  expect(errs).toEqual([]);
+});
+
+test("wiki-link cycle ([[a]] → [[b]] → [[a]]) doesn't infinite-loop", async ({
+  page,
+}) => {
+  const errs = captureErrors(page);
+  await page.keyboard.press("Meta+2");
+  const editor = page.locator(".cm-content").first();
+  await editor.click();
+  // Self-referential wiki-link should render as a (possibly broken)
+  // link, not trigger any recursive resolution loop.
+  await editor.fill("[[self]] points to [[self]]. Also [[a]] → [[b]] → [[a]].\n");
+  await page.waitForTimeout(1000);
+  expect(errs).toEqual([]);
+});
+
+test("pasting >100 KB of plain text into the editor doesn't pageerror", async ({
+  page,
+}) => {
+  const errs = captureErrors(page);
+  await page.keyboard.press("Meta+2");
+  const editor = page.locator(".cm-content").first();
+  await editor.click();
+  // Generate ~100 KB of plain text (paragraphs of lorem-style filler).
+  const para = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. ";
+  const huge = Array.from({ length: 800 }, () => para).join("\n\n");
+  await editor.fill(huge);
+  await page.waitForTimeout(2500);
+  await expect(editor).toBeVisible();
+  expect(errs).toEqual([]);
+});
+
+test("malformed YAML frontmatter renders the doc body without crashing", async ({
+  page,
+}) => {
+  const errs = captureErrors(page);
+  await page.keyboard.press("Meta+2");
+  const editor = page.locator(".cm-content").first();
+  await editor.click();
+  await editor.fill(
+    "---\ntitle: [unclosed bracket\nbroken: : :\nlist:\n  - a\n     bad indent\n---\n\n# Body still here\n",
+  );
+  await page.waitForTimeout(1500);
+  // The frontmatter parser should fall back to "no frontmatter" or
+  // surface a small error, but never throw to the page.
+  expect(errs).toEqual([]);
+});

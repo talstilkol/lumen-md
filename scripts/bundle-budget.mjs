@@ -31,7 +31,13 @@ const BUDGETS = [
   { name: "main bundle",        pattern: /^main-/,                budgetKb: 225 },
   { name: "entry index",        pattern: /^index-/,               budgetKb: 220 },
   { name: "vendor: mermaid",    pattern: /^vendor-mermaid-/,      budgetKb: 800 },
-  { name: "vendor: shiki",      pattern: /^vendor-shiki-/,        budgetKb: 1800 },
+  // shiki sits at ~263 KB gzipped today. The budget previously read
+  // 1800 KB — a relic from when per-language grammars were bundled into
+  // the same chunk. They've since been split into assets/shiki-langs/*
+  // and are fetched on-demand via the SW cache, so the core shiki
+  // wrapper is small and stable. 320 KB gives ~50 KB headroom without
+  // hiding a meaningful regression.
+  { name: "vendor: shiki",      pattern: /^vendor-shiki-/,        budgetKb: 320 },
   { name: "vendor: codemirror", pattern: /^vendor-codemirror-/,   budgetKb: 600 },
   { name: "vendor: echarts",    pattern: /^vendor-echarts-/,      budgetKb: 400 },
   { name: "vendor: graphviz",   pattern: /^vendor-graphviz-/,     budgetKb: 700 },
