@@ -137,16 +137,15 @@ test("typing then Cmd+Z undoes the last keystrokes", async ({ page }) => {
   await page.keyboard.type(" — added");
   // The full text should be "seed text — added".
   await expect(editor).toContainText("seed text — added");
-  // Re-focus the editor before issuing Cmd+Z — otherwise a focus drift
-  // (e.g. the Cmd press itself raising a menu) sends the keybinding to
-  // the page chrome instead of CM6 and undo silently no-ops. Click the
-  // editor inside Playwright's act() so the focus has time to settle.
+  // CM6's default undo binding is `Mod-z` — that's Cmd on macOS,
+  // Control on Linux/Windows. Playwright's `Meta` always means the
+  // Super/Cmd key, not the platform-Mod, so `Meta+Z` only works on
+  // macOS test runners; on Linux CI it hits the OS Super key and
+  // undo silently no-ops. Use Control+Z everywhere except darwin.
   await editor.click();
-  // Undo via Cmd+Z. CM6 typically groups bursts of consecutive
-  // keystrokes into one checkpoint, so a handful of presses is plenty
-  // to walk back to "seed text" or further.
+  const undoCombo = process.platform === "darwin" ? "Meta+Z" : "Control+Z";
   for (let i = 0; i < 10; i += 1) {
-    await page.keyboard.press("Meta+Z");
+    await page.keyboard.press(undoCombo);
     await page.waitForTimeout(30);
   }
   // After undo, the " — added" suffix should be gone.
