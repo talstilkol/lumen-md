@@ -4,12 +4,54 @@
  * itself, so the UI never goes blank).
  */
 
-export type Locale = "en" | "he";
+// β.4 — `Locale` includes the 6 deferred locales so the type is stable
+// across the rest of the codebase. Bundles for ar / ru / fr / de / ja /
+// zh-CN are lazy-loaded from `src/i18n/locales/<code>.json` when one is
+// selected; until those JSON files exist the locale entries are filtered
+// out of the picker via `isLocaleAvailable`.
+export type Locale =
+  | "en"
+  | "he"
+  | "ar"
+  | "ru"
+  | "fr"
+  | "de"
+  | "ja"
+  | "zh-CN";
 
 export const SUPPORTED_LOCALES: { code: Locale; label: string; dir: "ltr" | "rtl" }[] = [
   { code: "en", label: "English", dir: "ltr" },
   { code: "he", label: "עברית", dir: "rtl" },
+  { code: "ar", label: "العربية", dir: "rtl" },
+  { code: "ru", label: "Русский", dir: "ltr" },
+  { code: "fr", label: "Français", dir: "ltr" },
+  { code: "de", label: "Deutsch", dir: "ltr" },
+  { code: "ja", label: "日本語", dir: "ltr" },
+  { code: "zh-CN", label: "简体中文", dir: "ltr" },
 ];
+
+/**
+ * Locales whose bundle ships synchronously in the main JS chunk. The
+ * other six are loaded on demand via `loadLocale()`.
+ */
+const SYNCHRONOUS_LOCALES = new Set<Locale>(["en", "he"]);
+
+/**
+ * Returns true when the locale's bundle is currently usable. Synchronous
+ * locales (en + he) are always available. Lazy locales count as available
+ * only when the bundle is loaded AND has at least one key — this keeps
+ * empty placeholder stubs (`{}`) from being mistakenly treated as
+ * complete locales (a translator's PR-in-flight shouldn't silently flip
+ * the locale "on" for users).
+ */
+export function isLocaleAvailable(locale: Locale): boolean {
+  if (SYNCHRONOUS_LOCALES.has(locale)) return true;
+  const bundle = BUNDLES[locale];
+  if (!bundle) return false;
+  // Ignore underscore-prefixed metadata keys (e.g. _placeholder, _note)
+  const realKeys = Object.keys(bundle).filter((k) => !k.startsWith("_"));
+  return realKeys.length > 0;
+}
 
 type Strings = Record<string, string>;
 
@@ -254,6 +296,7 @@ const en: Strings = {
   "desc.openWelcome": "Open the bundled tour with every feature demoed",
   "canvas.switch": "Switch canvas",
   "docTabs.close": "Close tab",
+  "docTabs.label": "Open documents",
   "findReplace.searchInput": "Search query",
   "findReplace.replaceInput": "Replacement text",
   "findReplace.replacePlaceholder": "Replace with…",
@@ -263,6 +306,29 @@ const en: Strings = {
   "findReplace.next": "Next match",
   "findReplace.close": "Close find & replace",
   "findReplace.toggleReplace": "Toggle replace row",
+  "findReplace.replace": "Replace",
+  "findReplace.replaceAll": "Replace All",
+  "focusMode.exit": "Exit Focus Mode (Esc)",
+  "focusMode.exitShort": "✕ Exit Focus",
+  "graphView.empty": "No workspace files found. Open the workspace panel and add files to see the knowledge graph.",
+  "graphView.stats": "{nodes} nodes · {edges} connections",
+  "graphView.title": "Knowledge Graph",
+  "graphView.renderFailed": "Graph Render Failed",
+  "graphView.renderFailedDetail": "The workspace data resulted in an invalid node structure that crashed the renderer.",
+  "pluginGallery.search": "Search plugins…",
+  "pluginGallery.close": "Close plugin gallery",
+  "mdTable.addCol": "Add Column",
+  "mdTable.removeCol": "Remove Column",
+  "mdTable.addRow": "Add Row",
+  "mdTable.removeRow": "Remove Row",
+  "searchDialog.searching": "Searching workspace…",
+  "searchDialog.thinking": "Thinking…",
+  "searchDialog.noRelevant": "No relevant files found in workspace.",
+  "versionHistory.restore": "Restore this version",
+  "versionHistory.close": "Close",
+  "versionHistory.selectVersion": "Select a version to preview",
+  "versionHistory.diffChars": "Δ {n} chars difference",
+  "versionHistory.noVersions": "No versions saved yet. Versions are auto-saved when you switch files or save.",
   "insertText.title": "Insert anything",
   "insertText.help": "Paste any markdown, HTML, or code. The detected type is shown below — switch manually if needed.",
   "insertText.smartHelp": "Paste a URL, CSV, JSON, SQL, Mermaid, GeoJSON, math, code — anything. Lumen detects the type and wraps it in the right block.",
@@ -283,6 +349,8 @@ const en: Strings = {
   "insertText.previewEmpty": "(nothing yet — start typing)",
   "insertText.cancel": "Cancel",
   "insertText.confirm": "Insert",
+  "insertText.hintInsert": "to insert",
+  "insertText.hintCancel": "to cancel",
   // Block UI strings
   "block.htmlPreview.title": "HTML preview",
   "block.htmlPreview.source": "Source",
@@ -290,6 +358,9 @@ const en: Strings = {
   "block.htmlPreview.toggleSource": "Toggle source view",
   "block.htmlPreview.exitFullscreen": "Exit fullscreen",
   "block.htmlPreview.openFullscreen": "Fullscreen preview",
+  "block.htmlPreview.toggleScripts": "Toggle unsafe script execution",
+  "block.htmlPreview.scriptsOn": "Enable scripts",
+  "block.htmlPreview.scriptsOff": "Scripts off",
   "block.liveCss.title": "Live CSS",
   "block.liveJs.title": "Live JavaScript",
   "block.liveJs.run": "Run",
@@ -299,6 +370,7 @@ const en: Strings = {
   "toast.insertText.success": "Text inserted and converted",
   "toast.pasteText.success": "Text pasted and converted",
   "toast.pasteText.prompt": "Paste HTML or rich text below:",
+  "toast.dismiss": "Dismiss",
   // Split-axis controls (labelled "Scroll orientation" in the UI so it sits
   // naturally next to the Scroll: Linked toggle).
   "toolbar.splitAxis": "Scroll orientation",
@@ -383,6 +455,156 @@ const en: Strings = {
   "tree.expand": "Expand",
   "tree.opfsUnavailable": "OPFS isn't available in this browser. Use the file open / save commands instead.",
   "tree.emptyHint": "No files yet. Click + to create one.",
+  "tree.tagFilter": "# {tag} · {count} note(s)",
+  "tree.tagFilter.clear": "Clear tag filter",
+  "tree.tagFilter.empty": "No notes match this tag.",
+  "status.privacyMode": "PRIVATE",
+  "status.privacyMode.tooltip": "Privacy Mode — AI runs entirely on this device via WebGPU. No prompts leave your browser.",
+  "status.roadmap": "Roadmap",
+  "status.roadmap.tooltip": "View Lumen's public roadmap",
+  "status.grammar.on": "Grammar",
+  "status.grammar.off": "Grammar",
+  "status.grammar.tooltip.on": "Grammar check is ON. Click to disable.",
+  "status.grammar.tooltip.off": "Grammar check is OFF. Click to enable LanguageTool checking.",
+  "status.telemetry.on": "Telemetry",
+  "status.telemetry.off": "Telemetry",
+  "status.telemetry.tooltip.on": "Error telemetry is ON. Crash reports are sent to help improve Lumen. Click to opt out.",
+  "status.telemetry.tooltip.off": "Error telemetry is OFF. Click to enable anonymous crash reports.",
+  "status.runtimeMetrics": "Runtime metrics",
+  "status.runtimeMetrics.tooltip": "Open runtime metrics and transport diagnostics",
+  "runtimeMetrics.title": "Runtime metrics",
+  "runtimeMetrics.subtitle": "Session runtime telemetry for network + AI operations.",
+  "runtimeMetrics.section.categories": "Categories",
+  "runtimeMetrics.section.operations": "Operations",
+  "runtimeMetrics.totalRequests": "Total requests",
+  "runtimeMetrics.lastUpdated": "Last updated",
+  "runtimeMetrics.noData": "No runtime data yet. Use the app and retry operations to populate metrics.",
+  "runtimeMetrics.refresh": "Refresh",
+  "runtimeMetrics.clear": "Clear",
+  "runtimeMetrics.close": "Close",
+  "runtimeMetrics.cleared": "Runtime metrics cleared",
+  "runtimeMetrics.column.label": "Label",
+  "runtimeMetrics.column.total": "Total",
+  "runtimeMetrics.column.success": "Success",
+  "runtimeMetrics.column.retries": "Retry %",
+  "runtimeMetrics.column.avgMs": "Avg (ms)",
+  "runtimeMetrics.column.p95Ms": "p95 (ms)",
+  "runtimeMetrics.column.totalRetries": "Retries",
+  "runtimeMetrics.column.timeouts": "Timeouts",
+  "runtimeMetrics.column.rateLimits": "Rate limit",
+  "templates.title": "Template gallery",
+  "templates.close": "Close gallery",
+  "templates.searchPlaceholder": "Search templates by name, description, or tag…",
+  "templates.allCategories": "All",
+  "templates.sort": "Sort",
+  "templates.sort.rating": "Rating",
+  "templates.sort.downloads": "Most installed",
+  "templates.loading": "Loading templates…",
+  "templates.empty": "No templates match your filter.",
+  "templates.error": "Failed to load registry: {error}",
+  "templates.byAuthor": "by {author}",
+  "templates.rating": "{rating} stars",
+  "templates.downloads": "{count} installs",
+  "templates.install": "Install",
+  "templates.installing": "Installing…",
+  "templates.installed.button": "Installed",
+  "templates.installed": "✅ Installed {name} → {path}",
+  "templates.installFailed": "Install failed: {error}",
+  "templates.contribute": "Contribute a template:",
+  "templates.contributeLink": "lumen-templates-contrib →",
+  "cmd.templates.open": "Browse template gallery",
+  "cmd.templates.open.hint": "Browse + install community templates",
+  // ── Audit log admin (ε.2) ──────────────────────────────────────────────
+  "audit.title": "Audit log",
+  "audit.rows": "rows",
+  "audit.refresh": "Refresh",
+  "audit.export": "Export CSV",
+  "audit.close": "Close",
+  "audit.filter.action": "Filter by action…",
+  "audit.filter.user": "Filter by user id…",
+  "audit.empty": "No events match the current filter.",
+  "audit.col.ts": "Time",
+  "audit.col.user": "User",
+  "audit.col.action": "Action",
+  "audit.col.payload": "Payload",
+  "audit.fetchFailed": "Audit fetch failed: {error}",
+  "audit.exportDone": "✅ Exported {count} rows to CSV",
+  "cmd.audit.open": "Audit log…",
+  "cmd.audit.open.hint": "Inspect every recorded mutation; export CSV for compliance",
+  "cmd.fineTune.open": "AI fine-tune settings…",
+  "cmd.fineTune.open.hint": "Train a personal model on your writing style (Pro)",
+  "fineTune.title": "Train AI on my style",
+  "fineTune.intro": "Fine-tune a personal copy of GPT-4o-mini on the last 90 days of your writing. The model learns your tone + vocabulary so completions feel like you wrote them.",
+  "fineTune.status": "Status",
+  "fineTune.modelReady": "Personal model ready",
+  "fineTune.training": "Training… ({status})",
+  "fineTune.statsLine": "{chunks} chunks · ≈ {tokens} tokens",
+  "fineTune.notTrained": "No personal model yet. Click \"Train\" below to upload your last 90 days of writing.",
+  "fineTune.useToggle": "Route AI requests through my voice",
+  "fineTune.useToggleHint": "Off by default. Toggle on to make every AI completion use your fine-tuned model.",
+  "fineTune.train": "Train",
+  "fineTune.retrain": "Re-train",
+  "fineTune.forget": "Forget local model id",
+  "fineTune.close": "Close",
+  "fineTune.confirm": "Upload your last 90 days of writing to OpenAI to train a personal model? Training usually finishes in under an hour.",
+  "fineTune.forgetConfirm": "Forget the locally-stored fine-tune model id? You'll need to delete the model from your OpenAI dashboard separately for full removal.",
+  "fineTune.needKey": "Configure your AI Key first (⌘K → AI Settings).",
+  "fineTune.toast.queued": "Fine-tune started — {chunks} chunks (~{tokens} tokens) uploaded.",
+  "fineTune.toast.succeeded": "✅ Fine-tune ready: {model}",
+  "fineTune.toast.failed": "Fine-tune {status}. See OpenAI dashboard.",
+  "fineTune.toast.error": "Fine-tune failed: {error}",
+  "fineTune.toast.forgot": "Local fine-tune id removed.",
+  "fineTune.privacy": "Note: training uploads ~5 MB of your writing to OpenAI. The resulting model is only accessible from your account. Click \"Forget\" to drop the id from this device — to fully remove the trained model, delete it in your OpenAI dashboard too.",
+  // ── Missing key cleanup (α.6.9) ────────────────────────────────────────
+  "ai.prompt.key": "Enter your OpenAI API key (sk-…):",
+  "ai.prompt.placeholder": "Type here…",
+  "ai.prompt.submit": "Go",
+  "ai.alert.keySaved": "AI key saved.",
+  "canvas.close": "Close",
+  "canvas.dialogLabel": "Whiteboard",
+  "canvas.new": "New",
+  "canvas.new.prompt": "Canvas name:",
+  "canvas.picker": "Pick canvas",
+  "canvas.title": "Canvas",
+  "cmd.ai.settings": "AI Settings…",
+  "cmd.ai.settings.hint": "Configure your OpenAI API key + per-doc options",
+  "cmd.cmdPalette": "Command palette",
+  "cmd.focusMode": "Focus mode",
+  "cmd.new": "New document",
+  "cmd.open": "Open file…",
+  "cmd.preview": "Preview only",
+  "cmd.save": "Save",
+  "cmd.saveAs": "Save as…",
+  "cmd.search": "Search workspace…",
+  "cmd.shortcuts": "Keyboard shortcuts",
+  "cmd.source": "Source only",
+  "cmd.split": "Split editor + preview",
+  "git.alert.noRepo": "This workspace isn't a Git repo. Run `git clone` first or use `Init repository`.",
+  "git.prompt.cloneUrl": "Repository URL (https://… or git@…):",
+  "git.prompt.commitMessage": "Commit message:",
+  "group.edit": "Edit",
+  "canvas.autoSaved": "Canvas · auto-saved",
+  "canvas.legacy.found": "{count} legacy canvas(es) found",
+  "canvas.legacy.convert": "Convert {name} → tldraw",
+  "canvas.legacy.converting": "Converting {name}…",
+  "canvas.legacy.converted": "✅ Converted {name} ({count} shapes)",
+  "canvas.legacy.convertFailed": "Convert failed: {error}",
+  "versionHistory.title": "Version History",
+  "versionHistory.savedCount": "{count} versions saved",
+  "mdTable.title": "Table Editor",
+  "searchDialog.sources": "Sources",
+  "searchDialog.askPlaceholder": "Type a question and press Enter to ask the AI workspace.",
+  "voice.recording": "Recording... ({lang})",
+  "voice.memo.recording": "Recording memo…",
+  "voice.memo.stop": "⏹ Stop & insert",
+  "errorBoundary.heading": "Rendering Error",
+  "errorBoundary.renderDetail": "One of the embedded visualizations crashed during render. The rest of the editor is kept safe.",
+  "cmd.view.grammarCheck.on": "Enable grammar check (LanguageTool)",
+  "cmd.view.grammarCheck.off": "Disable grammar check",
+  "cmd.view.grammarCheck.hint": "Underlines grammar / style / typo issues. Set VITE_LANGUAGETOOL_URL to self-host.",
+  "cmd.ai.privacy.on": "Privacy Mode: run AI on this device (WebGPU)",
+  "cmd.ai.privacy.off": "Privacy Mode: turn off (use cloud AI)",
+  "cmd.ai.privacy.hint": "When ON, every AI prompt runs locally via @mlc-ai/web-llm. No data leaves your browser.",
   "tree.prompt.folderName": "New folder name:",
   "tree.alert.noSlashes": "Folder names can't contain slashes.",
   "tree.alert.renameNoSlashes": "Use the rename field for the basename only — no slashes.",
@@ -420,6 +642,9 @@ const en: Strings = {
   "cmd.collab.addComment": "\ud83d\udcac Add comment on selection",
   "cmd.collab.addComment.hint": "Anchor a thread to the highlighted text",
   "cmd.collab.viewComments": "\ud83d\udcac View comments panel",
+  "comment.selectTextFirst": "Select some text first to anchor the comment.",
+  "comment.promptLabel": "Comment:",
+  "loading.generic": "Loading…",
   "contextMenu.title": "File actions",
   "contextMenu.rename": "Rename",
   "contextMenu.duplicate": "Duplicate",
@@ -441,6 +666,33 @@ const en: Strings = {
   "dnd.dropHint": "Drop a .md, .csv, .tsv or .json file",
   // Skip link
   "a11y.skipToContent": "Skip to content",
+  // Onboarding tour
+  "tour.next": "→ Next",
+  "tour.done": "✓ Done",
+  "tour.step.menu.title": "📋 Menu Bar",
+  "tour.step.menu.body": "Access File, Edit, Insert, View, and Help — each menu has clear sections, hover tooltips, and per-action descriptions.",
+  "tour.step.viewModes.title": "👁️ View Modes",
+  "tour.step.viewModes.body": "Switch between Source, Split, Preview, and WYSIWYG anytime (⌘1-4).",
+  "tour.step.workspace.title": "📁 Workspace",
+  "tour.step.workspace.body": "Manage files in your local workspace. Everything is stored in-browser.",
+  "tour.step.statusBar.title": "📊 Status Bar",
+  "tour.step.statusBar.body": "Word count, character count, reading time — always visible.",
+  "tour.step.editor.title": "✍️ Editor",
+  "tour.step.editor.body": "Write Markdown with full syntax highlighting, live preview, and AI assistance.",
+  "tour.action.openRuntimeMetrics": "Open runtime metrics now",
+  "auth.signIn": "Sign in",
+  "auth.signOut": "Sign out",
+  "auth.signedInAs": "Signed in as",
+  // Time-ago strings
+  "time.justNow": "just now",
+  "time.minutesAgo": "{n}m ago",
+  "time.hoursAgo": "{n}h ago",
+  "time.daysAgo": "{n}d ago",
+  // Plugin labels
+  "plugin.map": "Map",
+  "plugin.chart": "Chart",
+  "plugin.chart.refetch": "Refetch chart data",
+  "plugin.abc": "Music · ABC notation",
   // Theme labels
   "theme.toggle": "Toggle theme",
   // PWA
@@ -455,6 +707,8 @@ const en: Strings = {
   "cmd.view.findReplace": "Find & Replace",
   "cmd.view.graphView": "Knowledge Graph",
   "cmd.view.graphView.hint": "visual map of file connections",
+  "cmd.view.runtimeMetrics": "Runtime metrics",
+  "cmd.view.runtimeMetrics.hint": "Inspect retries, timeouts, and latency by transport category",
   "cmd.view.versionHistory": "Version History",
   "cmd.view.versionHistory.hint": "restore previous versions",
   "cmd.insert.table": "Insert Table (Editor)",
@@ -703,6 +957,7 @@ const he: Strings = {
   "desc.openWelcome": "פתח את מסמך הסיור המובנה עם כל הפיצ'רים",
   "canvas.switch": "החלפת קנבס",
   "docTabs.close": "סגור טאב",
+  "docTabs.label": "מסמכים פתוחים",
   "findReplace.searchInput": "שאילתת חיפוש",
   "findReplace.replaceInput": "טקסט החלפה",
   "findReplace.replacePlaceholder": "החלף ב…",
@@ -732,6 +987,8 @@ const he: Strings = {
   "insertText.previewEmpty": "(עדיין כלום — התחל להקליד)",
   "insertText.cancel": "ביטול",
   "insertText.confirm": "הוסף",
+  "insertText.hintInsert": "להוספה",
+  "insertText.hintCancel": "לביטול",
   // Block UI strings
   "block.htmlPreview.title": "תצוגת HTML",
   "block.liveCss.title": "CSS חי",
@@ -744,10 +1001,14 @@ const he: Strings = {
   "block.htmlPreview.toggleSource": "החלף תצוגת מקור",
   "block.htmlPreview.exitFullscreen": "צא ממסך מלא",
   "block.htmlPreview.openFullscreen": "תצוגה במסך מלא",
+  "block.htmlPreview.toggleScripts": "שינוי מצב הרצת scripts",
+  "block.htmlPreview.scriptsOn": "הפעלת scripts",
+  "block.htmlPreview.scriptsOff": "כיבוי scripts",
   // Toasts
   "toast.insertText.success": "הטקסט הוסף והומר",
   "toast.pasteText.success": "הטקסט הודבק והומר",
   "toast.pasteText.prompt": "הדבק HTML או טקסט עשיר למטה:",
+  "toast.dismiss": "סגור",
   // Split-axis controls (labelled "Scroll orientation" so it sits next to the
   // Scroll: Linked toggle in the View menu).
   "toolbar.splitAxis": "כיוון גלילה",
@@ -831,6 +1092,156 @@ const he: Strings = {
   "tree.expand": "הרחבה",
   "tree.opfsUnavailable": "OPFS אינו זמין בדפדפן זה. השתמש בפעולות פתיחה/שמירה רגילות.",
   "tree.emptyHint": "אין עדיין קבצים. לחץ + ליצירה.",
+  "tree.tagFilter": "# {tag} · {count} פתקים",
+  "tree.tagFilter.clear": "ניקוי סינון תגית",
+  "tree.tagFilter.empty": "אין פתקים מתאימים לתגית.",
+  "status.privacyMode": "פרטי",
+  "status.privacyMode.tooltip": "מצב פרטי — ה-AI רץ במלואו במכשיר הזה דרך WebGPU. שום הודעה לא יוצאת מהדפדפן.",
+  "status.roadmap": "מפת דרכים",
+  "status.roadmap.tooltip": "צפה במפת הדרכים הציבורית של Lumen",
+  "status.grammar.on": "דקדוק",
+  "status.grammar.off": "דקדוק",
+  "status.grammar.tooltip.on": "בדיקת דקדוק פעילה. לחץ לכיבוי.",
+  "status.grammar.tooltip.off": "בדיקת דקדוק כבויה. לחץ להפעלת LanguageTool.",
+  "status.telemetry.on": "טלמטריה",
+  "status.telemetry.off": "טלמטריה",
+  "status.telemetry.tooltip.on": "טלמטריית שגיאות פעילה. דוחות קריסה נשלחים לשיפור Lumen. לחץ לביטול.",
+  "status.telemetry.tooltip.off": "טלמטריית שגיאות כבויה. לחץ להפעלת דוחות קריסה אנונימיים.",
+  "status.runtimeMetrics": "מדדי ריצה",
+  "status.runtimeMetrics.tooltip": "פתח דוח מדדים בזמן אמת וסטטיסטיקות רשת",
+  "runtimeMetrics.title": "מדדי ריצה",
+  "runtimeMetrics.subtitle": "מדדי ריצה בזמן אמת של קריאות רשת ו-AI.",
+  "runtimeMetrics.section.categories": "קטגוריות",
+  "runtimeMetrics.section.operations": "פעולות",
+  "runtimeMetrics.totalRequests": "סך כל הבקשות",
+  "runtimeMetrics.lastUpdated": "עודכן לאחרונה",
+  "runtimeMetrics.noData": "עדיין אין נתוני מדדים. השתמש באפליקציה כדי לאסוף נתונים.",
+  "runtimeMetrics.refresh": "רענון",
+  "runtimeMetrics.clear": "ניקוי",
+  "runtimeMetrics.close": "סגירה",
+  "runtimeMetrics.cleared": "מדדי הריצה נוקו",
+  "runtimeMetrics.column.label": "תווית",
+  "runtimeMetrics.column.total": "סה\"כ",
+  "runtimeMetrics.column.success": "הצלחה",
+  "runtimeMetrics.column.retries": "שיעור נסיונות חוזרים",
+  "runtimeMetrics.column.avgMs": "ממוצע (מ״ש)",
+  "runtimeMetrics.column.p95Ms": "p95 (מ״ש)",
+  "runtimeMetrics.column.totalRetries": "נסיונות חוזרים",
+  "runtimeMetrics.column.timeouts": "פגי זמן",
+  "runtimeMetrics.column.rateLimits": "הגבלות קצב",
+  "templates.title": "גלריית תבניות",
+  "templates.close": "סגור גלריה",
+  "templates.searchPlaceholder": "חפש תבניות לפי שם, תיאור או תגית…",
+  "templates.allCategories": "הכל",
+  "templates.sort": "מיון",
+  "templates.sort.rating": "דירוג",
+  "templates.sort.downloads": "הכי מותקנים",
+  "templates.loading": "טוען תבניות…",
+  "templates.empty": "אין תבניות שתואמות לסינון.",
+  "templates.error": "שגיאה בטעינת מאגר: {error}",
+  "templates.byAuthor": "מאת {author}",
+  "templates.rating": "{rating} כוכבים",
+  "templates.downloads": "{count} התקנות",
+  "templates.install": "התקן",
+  "templates.installing": "מתקין…",
+  "templates.installed.button": "הותקן",
+  "templates.installed": "✅ הותקן {name} → {path}",
+  "templates.installFailed": "ההתקנה נכשלה: {error}",
+  "templates.contribute": "תרום תבנית:",
+  "templates.contributeLink": "lumen-templates-contrib →",
+  "cmd.templates.open": "פתח גלריית תבניות",
+  "cmd.templates.open.hint": "עיון והתקנה של תבניות קהילתיות",
+  // ── Audit log admin (ε.2) ──────────────────────────────────────────────
+  "audit.title": "יומן ביקורת",
+  "audit.rows": "שורות",
+  "audit.refresh": "רענן",
+  "audit.export": "ייצוא CSV",
+  "audit.close": "סגור",
+  "audit.filter.action": "סנן לפי פעולה…",
+  "audit.filter.user": "סנן לפי מזהה משתמש…",
+  "audit.empty": "אין אירועים שתואמים לסינון הנוכחי.",
+  "audit.col.ts": "זמן",
+  "audit.col.user": "משתמש",
+  "audit.col.action": "פעולה",
+  "audit.col.payload": "נתונים",
+  "audit.fetchFailed": "טעינת יומן הביקורת נכשלה: {error}",
+  "audit.exportDone": "✅ {count} שורות יוצאו ל-CSV",
+  "cmd.audit.open": "יומן ביקורת…",
+  "cmd.audit.open.hint": "בדוק כל פעולה שנרשמה; ייצא CSV לדרישות תאימות",
+  "cmd.fineTune.open": "הגדרות אימון AI…",
+  "cmd.fineTune.open.hint": "אמן מודל פרטי על סגנון הכתיבה שלך (Pro)",
+  "fineTune.title": "אמן AI על הסגנון שלי",
+  "fineTune.intro": "אימון מודל פרטי של GPT-4o-mini על 90 הימים האחרונים של הכתיבה שלך. המודל לומד את הטון ואוצר המילים שלך כך שההשלמות מרגישות כאילו אתה כתבת אותן.",
+  "fineTune.status": "סטטוס",
+  "fineTune.modelReady": "מודל אישי מוכן",
+  "fineTune.training": "מתאמן… ({status})",
+  "fineTune.statsLine": "{chunks} מקטעים · ≈ {tokens} טוקנים",
+  "fineTune.notTrained": "אין עדיין מודל אישי. לחץ על \"אמן\" כדי להעלות את הכתיבה שלך מ-90 הימים האחרונים.",
+  "fineTune.useToggle": "נתב בקשות AI דרך הסגנון שלי",
+  "fineTune.useToggleHint": "כבוי כברירת מחדל. הפעל כדי להשתמש במודל המאומן בכל בקשת AI.",
+  "fineTune.train": "אמן",
+  "fineTune.retrain": "אמן מחדש",
+  "fineTune.forget": "שכח מזהה מודל מקומי",
+  "fineTune.close": "סגור",
+  "fineTune.confirm": "להעלות את 90 הימים האחרונים של הכתיבה שלך ל-OpenAI כדי לאמן מודל פרטי? אימון לרוב מסתיים בתוך שעה.",
+  "fineTune.forgetConfirm": "לשכוח את מזהה המודל המאומן השמור מקומית? תצטרך למחוק את המודל מלוח המחוונים של OpenAI בנפרד להסרה מלאה.",
+  "fineTune.needKey": "הגדר את מפתח ה-AI שלך תחילה (⌘K → הגדרות AI).",
+  "fineTune.toast.queued": "אימון התחיל — {chunks} מקטעים (~{tokens} טוקנים) הועלו.",
+  "fineTune.toast.succeeded": "✅ המודל המאומן מוכן: {model}",
+  "fineTune.toast.failed": "האימון {status}. ראה לוח מחוונים של OpenAI.",
+  "fineTune.toast.error": "האימון נכשל: {error}",
+  "fineTune.toast.forgot": "מזהה המודל המאומן הוסר מקומית.",
+  "fineTune.privacy": "הערה: האימון מעלה ~5MB מהכתיבה שלך ל-OpenAI. המודל המתקבל נגיש רק מהחשבון שלך. לחץ \"שכח\" להסיר את המזהה ממכשיר זה — להסרה מלאה, מחק את המודל גם בלוח המחוונים של OpenAI.",
+  // ── Missing key cleanup (α.6.9) ────────────────────────────────────────
+  "ai.prompt.key": "הזן מפתח OpenAI API (sk-…):",
+  "ai.prompt.placeholder": "הקלד כאן…",
+  "ai.prompt.submit": "שלח",
+  "ai.alert.keySaved": "מפתח ה-AI נשמר.",
+  "canvas.close": "סגור",
+  "canvas.dialogLabel": "לוח לבן",
+  "canvas.new": "חדש",
+  "canvas.new.prompt": "שם הקנבס:",
+  "canvas.picker": "בחר קנבס",
+  "canvas.title": "קנבס",
+  "cmd.ai.settings": "הגדרות AI…",
+  "cmd.ai.settings.hint": "הגדרת מפתח OpenAI ואפשרויות פר-מסמך",
+  "cmd.cmdPalette": "פלטת פקודות",
+  "cmd.focusMode": "מצב פוקוס",
+  "cmd.new": "מסמך חדש",
+  "cmd.open": "פתח קובץ…",
+  "cmd.preview": "תצוגה מקדימה בלבד",
+  "cmd.save": "שמירה",
+  "cmd.saveAs": "שמירה בשם…",
+  "cmd.search": "חיפוש במרחב העבודה…",
+  "cmd.shortcuts": "קיצורי מקלדת",
+  "cmd.source": "קוד בלבד",
+  "cmd.split": "עורך + תצוגה מקדימה",
+  "git.alert.noRepo": "מרחב העבודה הזה אינו ריפו של Git. הרץ `git clone` או השתמש ב-`Init repository`.",
+  "git.prompt.cloneUrl": "כתובת ריפו (https://… או git@…):",
+  "git.prompt.commitMessage": "הודעת commit:",
+  "group.edit": "עריכה",
+  "canvas.autoSaved": "קנבס · נשמר אוטומטית",
+  "canvas.legacy.found": "נמצאו {count} קנבסים ישנים",
+  "canvas.legacy.convert": "המר {name} ל-tldraw",
+  "canvas.legacy.converting": "ממיר {name}…",
+  "canvas.legacy.converted": "✅ הומר {name} ({count} צורות)",
+  "canvas.legacy.convertFailed": "ההמרה נכשלה: {error}",
+  "versionHistory.title": "היסטוריית גרסאות",
+  "versionHistory.savedCount": "{count} גרסאות שמורות",
+  "mdTable.title": "עורך טבלאות",
+  "searchDialog.sources": "מקורות",
+  "searchDialog.askPlaceholder": "הקלד שאלה ולחץ Enter כדי לשאול את ה-AI על המסמכים שלך.",
+  "voice.recording": "מקליט... ({lang})",
+  "voice.memo.recording": "מקליט הקלטה…",
+  "voice.memo.stop": "⏹ עצור והוסף",
+  "errorBoundary.heading": "שגיאת רינדור",
+  "errorBoundary.renderDetail": "אחד מרכיבי ההדמיה קרס במהלך הרינדור. שאר העורך נשמר בטוח.",
+  "cmd.view.grammarCheck.on": "הפעל בדיקת דקדוק (LanguageTool)",
+  "cmd.view.grammarCheck.off": "כבה בדיקת דקדוק",
+  "cmd.view.grammarCheck.hint": "מסמן בעיות דקדוק / סגנון / שגיאות הקלדה. הגדר VITE_LANGUAGETOOL_URL לאחסון עצמאי.",
+  "cmd.ai.privacy.on": "מצב פרטיות: הרץ AI במכשיר הזה (WebGPU)",
+  "cmd.ai.privacy.off": "מצב פרטיות: כבה (השתמש ב-AI בענן)",
+  "cmd.ai.privacy.hint": "כאשר מופעל, כל בקשת AI רצה מקומית דרך @mlc-ai/web-llm. שום נתון לא עוזב את הדפדפן.",
   "tree.prompt.folderName": "שם תיקייה חדשה:",
   "tree.alert.noSlashes": "שמות תיקיות לא יכולים להכיל סלאשים.",
   "tree.alert.renameNoSlashes": "השתמש בשדה השינוי לבסיס הקובץ בלבד — בלי סלאשים.",
@@ -859,6 +1270,9 @@ const he: Strings = {
   "commentsPanel.replyPlaceholder": "כתוב תשובה…",
   "commentsPanel.jump": "גלול לטקסט המקושר",
   "commentsPanel.viewAll": "הכל",
+  "comment.selectTextFirst": "בחר טקסט קודם כדי לעגן את ההערה.",
+  "comment.promptLabel": "הערה:",
+  "loading.generic": "טוען…",
   "commentsPanel.viewOpen": "פתוחות בלבד",
   "commentsPanel.showResolved": "הצג תגובות שטופלו",
   "commentsPanel.hideResolved": "הסתר תגובות שטופלו",
@@ -886,6 +1300,33 @@ const he: Strings = {
   "doc.alert.reopenFailed": "לא ניתן לפתוח מחדש את הקובץ. ייתכן שהדפדפן איבד הרשאה או שהקובץ הועבר.",
   "dnd.dropHint": "שחרר קובץ .md, .csv, .tsv או .json",
   "a11y.skipToContent": "דילוג לתוכן הראשי",
+  // סיור מודרך
+  "tour.next": "← הבא",
+  "tour.done": "✓ סיום",
+  "tour.step.menu.title": "📋 שורת תפריטים",
+  "tour.step.menu.body": "גש לקובץ, עריכה, הוספה, תצוגה ועזרה — לכל תפריט סעיפים ברורים, טיפים ותיאורי פעולה.",
+  "tour.step.viewModes.title": "👁️ מצבי תצוגה",
+  "tour.step.viewModes.body": "החלף בין מקור, מפוצל, תצוגה מקדימה ו-WYSIWYG בכל זמן (⌘1-4).",
+  "tour.step.workspace.title": "📁 מרחב עבודה",
+  "tour.step.workspace.body": "נהל קבצים במרחב העבודה המקומי שלך. הכל נשמר בדפדפן.",
+  "tour.step.statusBar.title": "📊 שורת מצב",
+  "tour.step.statusBar.body": "ספירת מילים, תווים, זמן קריאה — תמיד נראה.",
+  "tour.step.editor.title": "✍️ עורך",
+  "tour.step.editor.body": "כתוב Markdown עם הדגשת תחביר מלאה, תצוגה מקדימה חיה וסיוע AI.",
+  "tour.action.openRuntimeMetrics": "פתח עכשיו מדדי ריצה",
+  "auth.signIn": "התחברות",
+  "auth.signOut": "התנתקות",
+  "auth.signedInAs": "מחובר כ־",
+  // Time-ago strings
+  "time.justNow": "עכשיו",
+  "time.minutesAgo": "לפני {n} דקות",
+  "time.hoursAgo": "לפני {n} שעות",
+  "time.daysAgo": "לפני {n} ימים",
+  // Plugin labels
+  "plugin.map": "מפה",
+  "plugin.chart": "תרשים",
+  "plugin.chart.refetch": "רענן נתוני תרשים",
+  "plugin.abc": "מוזיקה · תווי ABC",
   "theme.toggle": "החלפת ערכת נושא",
   "pwa.updateAvailable": "גרסה חדשה זמינה",
   "pwa.reload": "טעינה מחדש",
@@ -898,6 +1339,8 @@ const he: Strings = {
   "cmd.view.findReplace": "חיפוש והחלפה",
   "cmd.view.graphView": "גרף ידע",
   "cmd.view.graphView.hint": "מפה חזותית של קשרי קבצים",
+  "cmd.view.runtimeMetrics": "מדדי ריצה",
+  "cmd.view.runtimeMetrics.hint": "בדוק ניסיון מחדש, פגיי זמן וזמני תגובה לפי קטגוריה",
   "cmd.view.versionHistory": "היסטוריית גרסאות",
   "cmd.view.versionHistory.hint": "שחזור גרסאות קודמות",
   "cmd.insert.table": "הוספת טבלה (עורך)",
@@ -921,10 +1364,39 @@ const he: Strings = {
   "group.security": "אבטחה",
   "group.ai": "בקשות AI",
   "group.plugins": "תוספים",
+  // ── Hardcoded-string fix batch (2026-04-29) ─────────────────────────────
+  "findReplace.replace": "החלפה",
+  "findReplace.replaceAll": "החלף הכל",
+  "focusMode.exit": "יציאה ממצב ריכוז (Esc)",
+  "focusMode.exitShort": "✕ יציאה",
+  "graphView.empty": "לא נמצאו קבצים. פתח את מרחב העבודה והוסף קבצים כדי לראות את גרף הידע.",
+  "graphView.stats": "{nodes} צמתים · {edges} חיבורים",
+  "graphView.title": "גרף ידע",
+  "graphView.renderFailed": "רינדור הגרף נכשל",
+  "graphView.renderFailedDetail": "נתוני מרחב העבודה גרמו למבנה צמתים לא תקין שגרם לקריסת המרנדר.",
+  "pluginGallery.search": "חפש תוספים…",
+  "pluginGallery.close": "סגור גלריית תוספים",
+  "mdTable.addCol": "הוסף עמודה",
+  "mdTable.removeCol": "הסר עמודה",
+  "mdTable.addRow": "הוסף שורה",
+  "mdTable.removeRow": "הסר שורה",
+  "searchDialog.searching": "מחפש במרחב העבודה…",
+  "searchDialog.thinking": "חושב…",
+  "searchDialog.noRelevant": "לא נמצאו קבצים רלוונטיים במרחב העבודה.",
+  "versionHistory.restore": "שחזר גרסה זו",
+  "versionHistory.close": "סגירה",
+  "versionHistory.selectVersion": "בחר גרסה לתצוגה מקדימה",
+  "versionHistory.diffChars": "Δ {n} תווים הבדל",
+  "versionHistory.noVersions": "אין גרסאות שמורות. גרסאות נשמרות אוטומטית כשמחליפים קבצים או שומרים.",
 };
 
 
-const BUNDLES: Record<Locale, Strings> = { en, he };
+/**
+ * Locale → bundle map. en + he are bundled synchronously (always
+ * present in the main JS chunk). The other 6 supported locales are
+ * lazy-imported by `loadLocale()` on first use and cached here.
+ */
+const BUNDLES: Partial<Record<Locale, Strings>> = { en, he };
 
 let activeLocale: Locale = "en";
 
@@ -932,13 +1404,56 @@ export function getLocale(): Locale {
   return activeLocale;
 }
 
-/** Apply the locale globally and update the document direction. */
-export function applyLocale(locale: Locale) {
+/**
+ * Lazy-load a locale's translations. Returns the loaded bundle or
+ * falls back to `en` when the locale isn't available (e.g. a JSON
+ * file hasn't been authored yet). Subsequent calls hit the cache.
+ */
+export async function loadLocale(locale: Locale): Promise<Strings> {
+  const cached = BUNDLES[locale];
+  if (cached) return cached;
+  try {
+    // Vite resolves the dynamic import at build time using a glob; any
+    // unauthored locale will fail to import and we fall back to `en`.
+    // Vite returns `{ default: T }` for JSON imports; some bundlers
+    // return the JSON object directly. Detect via the presence of a
+    // recognised i18n key (we know `toolbar.tagline` always exists).
+    const mod = (await import(`./locales/${locale}.json`)) as unknown;
+    let bundle: Strings;
+    if (
+      mod &&
+      typeof mod === "object" &&
+      "default" in mod &&
+      typeof (mod as { default: unknown }).default === "object"
+    ) {
+      bundle = (mod as { default: Strings }).default;
+    } else {
+      bundle = mod as Strings;
+    }
+    BUNDLES[locale] = bundle;
+    return bundle;
+  } catch {
+    return en;
+  }
+}
+
+/**
+ * Apply the locale globally and update the document direction. For
+ * non-bundled locales, the bundle is fetched in the background and
+ * the page re-renders once it lands.
+ */
+export function applyLocale(locale: Locale): void {
   activeLocale = locale;
   if (typeof document !== "undefined") {
     const meta = SUPPORTED_LOCALES.find((l) => l.code === locale);
     document.documentElement.lang = locale;
     document.documentElement.dir = meta?.dir ?? "ltr";
+  }
+  // Kick off an async fetch for non-synchronous locales so subsequent
+  // `t()` calls find the bundle. We don't await — `t()` falls back to
+  // `en` while the bundle is in flight, then upgrades on next render.
+  if (!SYNCHRONOUS_LOCALES.has(locale) && !(locale in BUNDLES)) {
+    void loadLocale(locale);
   }
 }
 
@@ -947,9 +1462,19 @@ export function t(id: string, vars?: Record<string, string | number>): string {
   const bundle = BUNDLES[activeLocale] ?? en;
   const template = bundle[id] ?? en[id] ?? id;
   if (!vars) return template;
-  return template.replace(/\{(\w+)\}/g, (_, k) =>
-    vars[k] !== undefined ? String(vars[k]) : `{${k}}`,
-  );
+  // Support both `{key}` (canonical) and `{{key}}` (some early templates
+  // accidentally used double-brace syntax). The double-brace form was
+  // a real production bug — users saw literal "{5} / {100}" because the
+  // outer braces were never stripped. Order matters: substitute the
+  // double-brace form FIRST so the regex doesn't leave inner braces
+  // behind for the single-brace pass to keep.
+  return template
+    .replace(/\{\{(\w+)\}\}/g, (_, k) =>
+      vars[k] !== undefined ? String(vars[k]) : `{{${k}}}`,
+    )
+    .replace(/\{(\w+)\}/g, (_, k) =>
+      vars[k] !== undefined ? String(vars[k]) : `{${k}}`,
+    );
 }
 
 export function isRTL(): boolean {

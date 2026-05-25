@@ -23,6 +23,9 @@ export interface DiffHunk {
   base: string[];
 }
 
+const THREE_WAY_DIFF_MAX_LINES = 3_000;
+const THREE_WAY_DIFF_CONTEXT_LINES = 120;
+
 /* ─── 2-way LCS-based line diff ──────────────────────────────────────── */
 
 interface Edit {
@@ -62,6 +65,67 @@ function lcsDiff(a: string[], b: string[]): Edit[] {
   return edits.reverse();
 }
 
+interface TrimmedDiffInput {
+  base: string[];
+  local: string[];
+  remote: string[];
+  prefix: number;
+  suffix: number;
+}
+
+function trimCommonEdges(
+  baseLines: string[],
+  localLines: string[],
+  remoteLines: string[],
+): TrimmedDiffInput {
+  let prefix = 0;
+  const maxPrefix = Math.min(baseLines.length, localLines.length, remoteLines.length);
+  while (prefix < maxPrefix) {
+    if (
+      baseLines[prefix] === localLines[prefix] &&
+      baseLines[prefix] === remoteLines[prefix]
+    ) {
+      prefix += 1;
+    } else {
+      break;
+    }
+  }
+
+  let suffix = 0;
+  while (
+    suffix + prefix < baseLines.length &&
+    suffix + prefix < localLines.length &&
+    suffix + prefix < remoteLines.length
+  ) {
+    const b = baseLines[baseLines.length - 1 - suffix];
+    const l = localLines[localLines.length - 1 - suffix];
+    const r = remoteLines[remoteLines.length - 1 - suffix];
+    if (b === l && b === r) {
+      suffix += 1;
+    } else {
+      break;
+    }
+  }
+
+  const maxSuffix = Math.min(
+    THREE_WAY_DIFF_CONTEXT_LINES,
+    suffix,
+    baseLines.length - prefix,
+    localLines.length - prefix,
+    remoteLines.length - prefix,
+  );
+
+  const maxPrefixLines = Math.min(prefix, THREE_WAY_DIFF_CONTEXT_LINES);
+
+  return {
+    base: baseLines.slice(maxPrefixLines, baseLines.length - maxSuffix),
+    local: localLines.slice(maxPrefixLines, localLines.length - maxSuffix),
+    remote: remoteLines.slice(maxPrefixLines, remoteLines.length - maxSuffix),
+    prefix: maxPrefixLines,
+    suffix: maxSuffix,
+  };
+}
+
 /* ─── 3-way merge ────────────────────────────────────────────────────── */
 
 /**
@@ -81,6 +145,45 @@ export function threeWayDiff(
   const baseLines = base.split("\n");
   const localLines = local.split("\n");
   const remoteLines = remote.split("\n");
+  const totalLines = baseLines.length + localLines.length + remoteLines.length;
+  if (totalLines <= THREE_WAY_DIFF_MAX_LINES) {
+    return buildThreeWayHunks(baseLines, localLines, remoteLines);
+  }
+
+  const trimmed = trimCommonEdges(baseLines, localLines, remoteLines);
+  const trimmedTotal = trimmed.base.length + trimmed.local.length + trimmed.remote.length;
+  if (trimmedTotal > THREE_WAY_DIFF_MAX_LINES) {
+    return [
+      {
+        op: "conflict",
+        local: localLines,
+        remote: remoteLines,
+        base: baseLines,
+      },
+    ];
+  }
+
+  const out: DiffHunk[] = [];
+  if (trimmed.prefix > 0) {
+    const p = trimmed.prefix;
+    const prefixLines = baseLines.slice(0, p);
+    out.push({ op: "equal", local: [...prefixLines], remote: [...prefixLines], base: [...prefixLines] });
+  }
+  const body = buildThreeWayHunks(trimmed.base, trimmed.local, trimmed.remote);
+  out.push(...body);
+  if (trimmed.suffix > 0) {
+    const s = trimmed.suffix;
+    const suffixLines = baseLines.slice(baseLines.length - s);
+    out.push({ op: "equal", local: [...suffixLines], remote: [...suffixLines], base: [...suffixLines] });
+  }
+  return mergeAdjacent(out);
+}
+
+function buildThreeWayHunks(
+  baseLines: string[],
+  localLines: string[],
+  remoteLines: string[],
+): DiffHunk[] {
 
   const localEdits = lcsDiff(baseLines, localLines);
   const remoteEdits = lcsDiff(baseLines, remoteLines);

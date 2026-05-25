@@ -16,6 +16,7 @@
  */
 
 import { writeWorkspaceFile } from "./workspace";
+import { fetchWithRetry } from "../lib/fetchRetry";
 
 export interface MarketplaceTemplate {
   id: string;
@@ -43,7 +44,7 @@ let cache: Registry | null = null;
 
 export async function fetchTemplateRegistry(force = false): Promise<MarketplaceTemplate[]> {
   if (cache && !force) return mergeLocalDownloads(cache.templates);
-  const res = await fetch("/templates/registry.json", { cache: "no-cache" });
+  const res = await fetchWithRetry("/templates/registry.json", { cache: "no-cache" }, { label: "templates.registry", maxRetries: 2, baseDelayMs: 600 });
   if (!res.ok) throw new Error(`Registry ${res.status}`);
   cache = (await res.json()) as Registry;
   return mergeLocalDownloads(cache.templates);
@@ -60,7 +61,7 @@ export async function installTemplate(
   const url = template.url.startsWith("/") || /^https?:\/\//.test(template.url)
     ? template.url
     : `/${template.url}`;
-  const res = await fetch(url, { cache: "no-cache" });
+  const res = await fetchWithRetry(url, { cache: "no-cache" }, { label: "templates.install", maxRetries: 2, baseDelayMs: 700, maxDelayMs: 2500 });
   if (!res.ok) throw new Error(`Template ${res.status}`);
   const body = await res.text();
   const path = `templates/${template.id}.md`;

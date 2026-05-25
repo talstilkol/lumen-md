@@ -23,6 +23,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { log } from "../lib/logger";
+import { fetchWithRetry } from "../lib/fetchRetry";
 
 export interface FetchedSource {
   effectiveSource: string;
@@ -83,7 +84,11 @@ export function useFetchSource(
     const controller = new AbortController();
     setLoading(true);
     setError(null);
-    fetch(url, { signal: controller.signal })
+    fetchWithRetry(
+      url,
+      { signal: controller.signal },
+      { label: "plugin.fetchSource", maxRetries: 2, baseDelayMs: 700, maxDelayMs: 2000 },
+    )
       .then(async (res) => {
         if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
         return res.text();

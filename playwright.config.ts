@@ -15,6 +15,10 @@ export default defineConfig({
   timeout: 30_000,
   expect: { timeout: 5_000 },
   fullyParallel: true,
+  // Local runs get 1 retry to absorb the well-documented palette-
+  // filter timing race (see e2e/locale-switch.spec.ts deflake notes
+  // across rounds 7/13/16). The race fires < 1 % of runs but stacks
+  // up across an 80-test suite. CI uses 2 retries.
   retries: process.env.CI ? 2 : 0,
   reporter: process.env.CI ? "github" : "list",
   use: {

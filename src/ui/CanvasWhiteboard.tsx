@@ -325,7 +325,7 @@ export function CanvasWhiteboard({ open, onClose }: Props) {
           + New
         </button>
         <div style={{ flex: 1 }} />
-        <span style={{ fontSize: 12, color: "#8888a8" }}>Canvas · auto-saved</span>
+        <span style={{ fontSize: 12, color: "#8888a8" }}>{t("canvas.autoSaved")}</span>
         <div style={{ display: "flex", gap: 4 }}>
           {COLORS.map((c) => (
             <button

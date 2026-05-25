@@ -1,3 +1,5 @@
+import { fetchWithRetry } from "../lib/fetchRetry";
+
 /**
  * LanguageTool grammar checker — a thin client that hits the public
  * `https://api.languagetool.org/v2/check` endpoint. Returns the raw matches
@@ -52,11 +54,20 @@ export async function checkGrammar(
     language,
     enabledOnly: "false",
   });
-  const res = await fetch(endpoint(), {
-    method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body,
-  });
+  const res = await fetchWithRetry(
+    endpoint(),
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body,
+    },
+    {
+      label: "grammar.check",
+      maxRetries: 2,
+      baseDelayMs: 600,
+      maxDelayMs: 2000,
+    },
+  );
   if (!res.ok) {
     throw new Error(`LanguageTool ${res.status}`);
   }

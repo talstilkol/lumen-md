@@ -5,6 +5,7 @@
 
 import { useEffect, useState } from "react";
 import { Sparkles, X, AlertTriangle, CheckCircle2 } from "lucide-react";
+import { t as i18n } from "../i18n";
 
 export type ToastType = "info" | "success" | "error";
 
@@ -90,6 +91,7 @@ export function AiToastContainer() {
             <span style={{ flex: 1 }}>{t.message}</span>
             <button
               onClick={() => setToasts((prev) => prev.filter((x) => x.id !== t.id))}
+              aria-label={i18n("toast.dismiss")}
               style={{
                 background: "transparent",
                 border: "none",

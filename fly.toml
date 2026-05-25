@@ -1,0 +1,38 @@
+# fly.toml — Fly.io deployment configuration for Lumen
+#
+# Deploy:  fly deploy
+# Scale:   fly scale count 2 --region iad,cdg
+# Secrets: fly secrets set VITE_SUPABASE_URL=... VITE_SENTRY_DSN=...
+#
+# The app is a static SPA served by nginx. No persistent state —
+# all user data lives in the browser (OPFS/IndexedDB).
+
+app = "lumen-md"
+primary_region = "iad"
+
+[build]
+  dockerfile = "Dockerfile"
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = "suspend"
+  auto_start_machines = true
+  min_machines_running = 1
+
+  [http_service.concurrency]
+    type = "requests"
+    hard_limit = 250
+    soft_limit = 200
+
+[[http_service.checks]]
+  grace_period = "10s"
+  interval = "30s"
+  method = "GET"
+  path = "/favicon.svg"
+  timeout = "5s"
+
+# Regional distribution — CDG covers Europe, IAD covers Americas.
+# Add NRT for Asia-Pacific when traffic warrants it.
+# [env]
+#   VITE_SIGNAL_URL = "wss://signal.lumen.md"

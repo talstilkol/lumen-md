@@ -8,6 +8,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Sparkles, X } from "lucide-react";
+import { t } from "../i18n";
 
 /** Pending prompt resolve function stored in module scope. */
 let pendingResolve: ((value: string | null) => void) | null = null;
@@ -120,6 +121,7 @@ export function AiInlinePromptOverlay() {
           <div style={{ flex: 1 }} />
           <button
             onClick={cancel}
+            aria-label={t("dialog.cancel")}
             style={{
               background: "transparent",
               border: "none",
@@ -137,7 +139,7 @@ export function AiInlinePromptOverlay() {
             value={value}
             onChange={(e) => setValue(e.target.value)}
             onKeyDown={onKey}
-            placeholder="Type here..."
+            placeholder={t("ai.prompt.placeholder")}
             style={{
               flex: 1,
               border: "1px solid hsl(var(--border))",
@@ -152,6 +154,7 @@ export function AiInlinePromptOverlay() {
           />
           <button
             onClick={submit}
+            aria-label={t("ai.prompt.submit")}
             style={{
               padding: "8px 16px",
               borderRadius: 8,
@@ -163,7 +166,7 @@ export function AiInlinePromptOverlay() {
               cursor: "pointer",
             }}
           >
-            Go
+            {t("ai.prompt.submit")}
           </button>
         </div>
         <div
@@ -181,7 +184,7 @@ export function AiInlinePromptOverlay() {
           </span>
           <span>
             <kbd style={{ background: "hsl(var(--bg-muted))", border: "1px solid hsl(var(--border))", borderRadius: 3, padding: "1px 4px", fontSize: 10, fontFamily: "monospace" }}>Esc</kbd>{" "}
-            Cancel
+            {t("dialog.cancel")}
           </span>
         </div>
       </div>

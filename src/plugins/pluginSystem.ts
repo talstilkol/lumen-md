@@ -6,6 +6,18 @@
  * - Add toolbar buttons
  * - Hook into document lifecycle events (open, save, change)
  * - Register custom markdown block renderers
+ *
+ * PLUGIN AUTHORS — initialization lifecycle (ADR-001):
+ *   Block plugins that imperatively render into a ref-attached DOM
+ *   element via an external library (echarts, abcjs, model-viewer,
+ *   leaflet, ...) MUST defer init until the host has nonzero size.
+ *   The renderer mounts blocks lazily through React.lazy + Suspense,
+ *   so `clientWidth`/`clientHeight` can be 0 at first effect.
+ *   Reference implementation: src/plugins/EChart.tsx's `ensureChart`
+ *   closure — guard with `clientWidth === 0 || clientHeight === 0`,
+ *   then re-attempt init from a ResizeObserver callback. Sibling
+ *   pattern for async-loaded sources: `useFetchSource` in
+ *   src/plugins/useFetchSource.ts.
  */
 
 import { log } from "../lib/logger";

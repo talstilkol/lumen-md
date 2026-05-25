@@ -1,5 +1,5 @@
 import { useCommands } from "./commands/useCommands";
-import { lazy, Suspense, useCallback, useDeferredValue, useEffect, useRef, useState } from "react";
+import { lazy, Suspense, useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 import type { EditorHandle } from "./editor/Editor";
 
 import { Toolbar } from "./ui/Toolbar";
@@ -8,8 +8,14 @@ import { StatusBar } from "./ui/StatusBar";
 import { ScrollProgress } from "./ui/ScrollProgress";
 import { SearchReplace } from "./ui/SearchReplace";
 const GraphView = lazy(() => import("./ui/GraphView").then(m => ({ default: m.GraphView })));
-const CanvasWhiteboard = lazy(() => import("./ui/CanvasWhiteboard").then(m => ({ default: m.CanvasWhiteboard })));
+// γ.2 — Canvas now backed by tldraw. The legacy custom-canvas component
+// `CanvasWhiteboard.tsx` remains in tree as a fallback in case we ever
+// need to surface old `.canvas.json` files; it's intentionally unused.
+const CanvasWhiteboard = lazy(() => import("./ui/CanvasTldraw").then(m => ({ default: m.CanvasTldraw })));
 const PluginGallery = lazy(() => import("./ui/PluginGallery").then(m => ({ default: m.PluginGallery })));
+const TemplateGallery = lazy(() => import("./ui/TemplateGallery").then(m => ({ default: m.TemplateGallery })));
+const AuditLog = lazy(() => import("./ui/AuditLog").then(m => ({ default: m.AuditLog })));
+const FineTuneSettings = lazy(() => import("./ui/FineTuneSettings").then(m => ({ default: m.FineTuneSettings })));
 const VersionHistory = lazy(() => import("./ui/VersionHistory").then(m => ({ default: m.VersionHistory })));
 const MarkdownTableEditor = lazy(() => import("./ui/MarkdownTableEditor").then(m => ({ default: m.MarkdownTableEditor })));
 import { htmlToMarkdown } from "./storage/fileFormats";
@@ -26,13 +32,19 @@ import { AiToastContainer, showAiToast } from "./ui/AiToast";
 import { MobileKeyboardBar } from "./ui/MobileKeyboardBar";
 import { TagsPanel } from "./ui/TagsPanel";
 import { CommentsPanel, addCommentFromSelection } from "./ui/CommentsPanel";
+import { DocTabs, tabId } from "./ui/DocTabs";
 import { AiInlinePromptOverlay } from "./ui/AiInlinePrompt";
+import { RuntimeMetricsPanel } from "./ui/RuntimeMetricsPanel";
 import { useFileDragDrop } from "./hooks/useFileDragDrop";
 import { useCollab } from "./hooks/useCollab";
 import { useTauriMenu } from "./hooks/useTauriMenu";
 import { EditorLayout } from "./layouts/EditorLayout";
+import { useAuth } from "./auth/useAuth";
+import { useEntitlement } from "./billing/useEntitlement";
 import { useAppStore, applyTheme } from "./store/useStore";
 import { applyLocale, t } from "./i18n";
+import { localLlmAvailable } from "./ai/localLlm";
+import { assessConfigHealth } from "./lib/configHealth";
 import { openFileDialog, saveFile } from "./storage/fs";
 import { exportToHtml } from "./storage/exportHtml";
 import { getRecents, pushRecent, reopenRecent } from "./storage/recent";
@@ -51,23 +63,15 @@ import { KeyboardShortcuts } from "./ui/KeyboardShortcuts";
 import { FocusMode } from "./ui/FocusMode";
 import { OnboardingTour } from "./ui/OnboardingTour";
 
-export function relativeTime(ts: number): string {
-  const diff = Date.now() - ts;
-  const mins = Math.round(diff / 60_000);
-  if (mins < 1) return "just now";
-  if (mins < 60) return `${mins}m ago`;
-  const hours = Math.round(mins / 60);
-  if (hours < 24) return `${hours}h ago`;
-  const days = Math.round(hours / 24);
-  if (days < 30) return `${days}d ago`;
-  return new Date(ts).toLocaleDateString();
-}
-
 export default function App() {
   const doc = useAppStore((s) => s.doc);
   const setContent = useAppStore((s) => s.setContent);
   const setDoc = useAppStore((s) => s.setDoc);
   const markSaved = useAppStore((s) => s.markSaved);
+  const openTabs = useAppStore((s) => s.openTabs);
+  const openTabAction = useAppStore((s) => s.openTab);
+  const closeTabAction = useAppStore((s) => s.closeTab);
+  const reorderTabs = useAppStore((s) => s.reorderTabs);
   const mode = useAppStore((s) => s.mode);
   const theme = useAppStore((s) => s.theme);
   const showOutline = useAppStore((s) => s.showOutline);
@@ -77,8 +81,22 @@ export default function App() {
   const showBacklinks = useAppStore((s) => s.showBacklinks);
   const vimEnabled = useAppStore((s) => s.vimEnabled);
   const spellCheck = useAppStore((s) => s.spellCheck);
+  const grammarCheck = useAppStore((s) => s.grammarCheck);
   const typewriterMode = useAppStore((s) => s.typewriterMode);
+  const aiKey = useAppStore((s) => s.aiKey);
+  const useLocalAi = useAppStore((s) => s.useLocalAi);
   const editorRef = useRef<EditorHandle | null>(null);
+  const authStatus = useAuth((s) => s.status);
+  const authProviderName = useAuth((s) => s.provider.name);
+  const authError = useAuth((s) => s.error);
+  const authUserId = useAuth((s) => s.user?.id);
+  const entitlementLoading = useEntitlement((s) => s.loading);
+  const entitlement = useEntitlement((s) => s.entitlement);
+  const capabilitiesCloudSync = useEntitlement((s) => s.capabilities.cloudSync);
+  const hasWebGPU = useMemo(() => {
+    if (typeof window === "undefined" || typeof navigator === "undefined") return false;
+    return localLlmAvailable().available;
+  }, []);
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [findReplaceOpen, setFindReplaceOpen] = useState(false);
@@ -87,8 +105,12 @@ export default function App() {
   const [tableEditorOpen, setTableEditorOpen] = useState(false);
   const [canvasOpen, setCanvasOpen] = useState(false);
   const [galleryOpen, setGalleryOpen] = useState(false);
+  const [templateGalleryOpen, setTemplateGalleryOpen] = useState(false);
+  const [auditLogOpen, setAuditLogOpen] = useState(false);
+  const [fineTuneOpen, setFineTuneOpen] = useState(false);
   const [tagsPanelOpen, setTagsPanelOpen] = useState(false);
   const [commentsPanelOpen, setCommentsPanelOpen] = useState(false);
+  const [runtimeMetricsOpen, setRuntimeMetricsOpen] = useState(false);
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
   const [focusMode, setFocusMode] = useState(false);
   const [tourOpen, setTourOpen] = useState(false);
@@ -100,6 +122,10 @@ export default function App() {
   // Load recents on mount.
   useEffect(() => {
     getRecents().then(setRecents).catch(() => setRecents([]));
+  }, []);
+
+  useEffect(() => {
+    void useEntitlement.getState().refresh();
   }, []);
 
   // Apply theme on mount
@@ -116,8 +142,17 @@ export default function App() {
       showToast: (msg: string) => showAiToast(msg, "info"),
     });
     registerPlugin(wordCountPlugin);
+    // Expose a tiny test surface on window.__lumen for e2e specs. This
+    // lets the prod-build paste-html spec call htmlToMarkdown without
+    // importing /src/* at runtime (which only works against the dev
+    // server). The surface is intentionally minimal — only utilities
+    // the test suite needs.
+    (window as unknown as { __lumen?: unknown }).__lumen = {
+      htmlToMarkdown,
+    };
     return () => {
       unregisterPlugin(wordCountPlugin.id);
+      delete (window as unknown as { __lumen?: unknown }).__lumen;
     };
   }, []);
 
@@ -129,7 +164,16 @@ export default function App() {
   // Seed the Welcome document on first launch
   useEffect(() => {
     if (!doc.content) {
-      setDoc({ name: "Welcome.md", content: WELCOME_DOC, dirty: false });
+      // Use openTab so the Welcome doc lands on the tab strip too.
+      openTabAction({ name: "Welcome.md", content: WELCOME_DOC, workspaceName: null });
+    } else if (openTabs.length === 0) {
+      // Existing session before tabs existed — backfill a tab for the
+      // currently active doc so the strip shows up immediately.
+      openTabAction({
+        name: doc.name,
+        content: doc.content,
+        workspaceName: doc.workspaceName ?? null,
+      });
     }
     // Show onboarding tour on first launch
     try {
@@ -142,6 +186,34 @@ export default function App() {
     // run once
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const configHealth = useMemo(
+    () =>
+      assessConfigHealth({
+        authStatus,
+        authProviderName,
+        authError,
+        userId: authUserId,
+        entitlementLoading,
+        entitlement,
+        capabilitiesCloudSync,
+        aiKey,
+        useLocalAi,
+        hasWebGPU,
+      }),
+    [
+      authStatus,
+      authProviderName,
+      authError,
+      authUserId,
+      entitlementLoading,
+      entitlement,
+      capabilitiesCloudSync,
+      aiKey,
+      useLocalAi,
+      hasWebGPU,
+    ],
+  );
 
   // Beforeunload warning if dirty
   useEffect(() => {
@@ -261,18 +333,14 @@ export default function App() {
     }
   }, []);
 
-  // Workspace: open a file from the file tree.
+  // Workspace: open a file from the file tree. Routed through `openTab` so
+  // re-opening an already-active doc just focuses its tab without losing
+  // unsaved edits in the previous one.
   const handleOpenFromWorkspace = useCallback(
     (name: string, content: string) => {
-      setDoc({
-        name,
-        content,
-        handle: undefined,
-        workspaceName: name,
-        dirty: false,
-      });
+      openTabAction({ name, content, workspaceName: name });
     },
-    [setDoc],
+    [openTabAction],
   );
 
   // Listen for `lumen-open-file` events fired by Database views, backlinks,
@@ -304,7 +372,7 @@ export default function App() {
 
   const handleActiveDeleted = useCallback(() => {
     setDoc({
-      name: "Untitled.md",
+      name: `${t("doc.untitled")}.md`,
       content: "",
       workspaceName: null,
       handle: undefined,
@@ -444,24 +512,38 @@ export default function App() {
     handleStartCollab, handleStopCollab,
     setSearchOpen, setFindReplaceOpen, setGraphOpen,
     setHistoryOpen, setTableEditorOpen, setCanvasOpen, setGalleryOpen,
+    setTemplateGalleryOpen,
+    setAuditLogOpen,
+    setFineTuneOpen,
     setTagsPanelOpen,
     setCommentsPanelOpen,
+    setRuntimeMetricsOpen,
     onAddComment: collab
       ? async () => {
           const view = editorRef.current?.getView();
           if (!view) return;
           const { from, to } = view.state.selection.main;
           if (from === to) {
-            await uiAlert({ message: "Select some text first to anchor the comment." });
+            await uiAlert({ message: t("comment.selectTextFirst") });
             return;
           }
-          const body = await uiPrompt({ message: "Comment:" });
+          const body = await uiPrompt({ message: t("comment.promptLabel") });
           if (!body?.trim()) return;
           addCommentFromSelection(collab, body, from, to);
           setCommentsPanelOpen(true);
         }
       : undefined,
   });
+
+  // Comment-anchor click in the editor → window event from
+  // commentDecorations.ts. Open the side panel + jump the panel
+  // scroll to the matching thread (the panel itself listens for the
+  // same event to highlight the right row).
+  useEffect(() => {
+    const onCommentFocus = () => setCommentsPanelOpen(true);
+    window.addEventListener("lumen-comment-focus", onCommentFocus);
+    return () => window.removeEventListener("lumen-comment-focus", onCommentFocus);
+  }, []);
 
   // Native Tauri menu wiring — no-op when running in a regular browser.
   useTauriMenu({
@@ -578,21 +660,42 @@ export default function App() {
             <SidebarResizer />
           </>
         )}
-        <EditorLayout
-          mode={mode}
-          docContent={doc.content}
-          docName={doc.name}
-          deferredContent={deferredContent}
-          editorRef={editorRef}
-          vimEnabled={vimEnabled}
-          spellCheck={spellCheck}
-          typewriterMode={typewriterMode}
-          activeFile={activeFile}
-          pageView={pageView}
-          collab={collab}
-          setContent={setContent}
-          handleAddAsset={handleAddAsset}
-        />
+        <div style={{ flex: 1, display: "flex", flexDirection: "column", minWidth: 0 }}>
+          <DocTabs
+            tabs={openTabs.map((t) => ({
+              id: t.id,
+              name: t.name,
+              dirty: t.dirty,
+            }))}
+            activeId={tabId(doc)}
+            onSelect={(id) => {
+              const target = openTabs.find((t) => t.id === id);
+              if (!target) return;
+              openTabAction({
+                name: target.name,
+                content: target.content,
+                workspaceName: target.workspaceName ?? null,
+              });
+            }}
+            onClose={(id) => closeTabAction(id)}
+            onReorder={(from, to) => reorderTabs(from, to)}
+          />
+          <EditorLayout
+            mode={mode}
+            docContent={doc.content}
+            deferredContent={deferredContent}
+            editorRef={editorRef}
+            vimEnabled={vimEnabled}
+            spellCheck={spellCheck}
+            grammarCheck={grammarCheck}
+            typewriterMode={typewriterMode}
+            activeFile={activeFile}
+            pageView={pageView}
+            collab={collab}
+            setContent={setContent}
+            handleAddAsset={handleAddAsset}
+          />
+        </div>
         {showOutline && <Outline markdownText={doc.content} />}
         {showBacklinks && (
           <BacklinksPanel
@@ -644,6 +747,8 @@ export default function App() {
         text={doc.content}
         dirty={doc.dirty}
         filename={doc.name}
+        configHealth={configHealth}
+        onOpenRuntimeMetrics={() => setRuntimeMetricsOpen(true)}
         collab={
           collab
             ? {
@@ -700,15 +805,15 @@ export default function App() {
       {graphOpen && (
         <div style={{ position: "fixed", inset: 0, zIndex: 9999, background: "hsl(var(--bg))" }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "8px 16px", borderBottom: "1px solid hsl(var(--border))" }}>
-            <h3 style={{ margin: 0, fontSize: 14, color: "hsl(var(--fg))" }}>Knowledge Graph</h3>
-            <button className="icon-btn" onClick={() => setGraphOpen(false)} style={{ width: "auto", padding: "4px 12px", fontSize: 12 }}>Close</button>
+            <h3 style={{ margin: 0, fontSize: 14, color: "hsl(var(--fg))" }}>{t("graphView.title")}</h3>
+            <button className="icon-btn" onClick={() => setGraphOpen(false)} style={{ width: "auto", padding: "4px 12px", fontSize: 12 }}>{t("dialog.cancel")}</button>
           </div>
           <div style={{ height: "calc(100vh - 42px)" }}>
-            <Suspense fallback={<div style={{padding:'2rem',color:'hsl(var(--fg-muted))'}}>Loading graph…</div>}>
+            <Suspense fallback={<div style={{padding:'2rem',color:'hsl(var(--fg-muted))'}}>{t("loading.generic")}</div>}>
               <ErrorBoundary fallback={
                 <div style={{ padding: "3rem", textAlign: "center", color: "hsl(0 80% 60%)" }}>
-                  <strong>Graph Render Failed</strong>
-                  <p>The workspace data resulted in an invalid node structure that crashed the renderer.</p>
+                  <strong>{t("graphView.renderFailed")}</strong>
+                  <p>{t("graphView.renderFailedDetail")}</p>
                 </div>
               }>
                 <GraphView onOpenFile={(path, content) => {
@@ -723,16 +828,27 @@ export default function App() {
 
       {/* Canvas Whiteboard overlay */}
       <Suspense fallback={null}>
-        <ErrorBoundary fallback={<div style={{ padding: '2rem', color: 'hsl(0 80% 60%)' }}>Component failed to load.</div>}>
+        <ErrorBoundary fallback={<div style={{ padding: '2rem', color: 'hsl(0 80% 60%)' }}>{t("errorBoundary.heading")}</div>}>
           <CanvasWhiteboard open={canvasOpen} onClose={() => setCanvasOpen(false)} />
           <PluginGallery open={galleryOpen} onClose={() => setGalleryOpen(false)} />
+          <TemplateGallery open={templateGalleryOpen} onClose={() => setTemplateGalleryOpen(false)} />
+          <AuditLog
+            open={auditLogOpen}
+            onClose={() => setAuditLogOpen(false)}
+            // Org id falls through to the auth provider when wired; for free
+            // / pro tiers there's no org so we use the user id as the scope.
+            orgId={(useAppStore.getState() as { user?: { orgId?: string; id?: string } }).user?.orgId
+              ?? (useAppStore.getState() as { user?: { id?: string } }).user?.id
+              ?? "personal"}
+          />
+          <FineTuneSettings open={fineTuneOpen} onClose={() => setFineTuneOpen(false)} />
         </ErrorBoundary>
       </Suspense>
 
       {/* Version History overlay */}
       {historyOpen && (
-        <Suspense fallback={<div style={{padding:'2rem',color:'hsl(var(--fg-muted))'}}>Loading history…</div>}>
-          <ErrorBoundary fallback={<div style={{ padding: '2rem', color: 'hsl(0 80% 60%)' }}>Version history failed to load.</div>}>
+        <Suspense fallback={<div style={{padding:'2rem',color:'hsl(var(--fg-muted))'}}>{t("loading.generic")}</div>}>
+          <ErrorBoundary fallback={<div style={{ padding: '2rem', color: 'hsl(0 80% 60%)' }}>{t("errorBoundary.heading")}</div>}>
             <VersionHistory
               fileName={doc.name}
               currentContent={doc.content}
@@ -746,7 +862,7 @@ export default function App() {
       {/* Table Editor overlay */}
       {tableEditorOpen && (
         <Suspense fallback={null}>
-          <ErrorBoundary fallback={<div style={{ padding: '2rem', color: 'hsl(0 80% 60%)' }}>Table editor failed to load.</div>}>
+          <ErrorBoundary fallback={<div style={{ padding: '2rem', color: 'hsl(0 80% 60%)' }}>{t("errorBoundary.heading")}</div>}>
             <MarkdownTableEditor
               onUpdate={(md) => {
                 const current = doc.content;
@@ -765,12 +881,28 @@ export default function App() {
       <KeyboardShortcuts open={shortcutsOpen} onClose={() => setShortcutsOpen(false)} />
 
       {/* Onboarding Tour */}
-      <OnboardingTour open={tourOpen} onClose={() => {
-        setTourOpen(false);
-        try { localStorage.setItem("lumen-tour-done", "1"); } catch {
-          /* storage denied — tour will simply replay next session */
-        }
-      }} />
+      <OnboardingTour
+        open={tourOpen}
+        onClose={() => {
+          setTourOpen(false);
+          try { localStorage.setItem("lumen-tour-done", "1"); } catch {
+            /* storage denied — tour will simply replay next session */
+          }
+        }}
+        actions={[
+          {
+            id: "runtimeMetrics.open",
+            label: t("tour.action.openRuntimeMetrics"),
+            onRun: () => {
+              setRuntimeMetricsOpen(true);
+              setTourOpen(false);
+            },
+          },
+        ]}
+      />
+      {runtimeMetricsOpen && (
+        <RuntimeMetricsPanel onClose={() => setRuntimeMetricsOpen(false)} />
+      )}
 
       {/* Focus Mode overlay */}
       {focusMode && (
@@ -778,12 +910,12 @@ export default function App() {
           <EditorLayout
             mode={mode}
             docContent={doc.content}
-            docName={doc.name}
             deferredContent={deferredContent}
             editorRef={editorRef}
             vimEnabled={vimEnabled}
-          spellCheck={spellCheck}
-          typewriterMode={typewriterMode}
+            spellCheck={spellCheck}
+            grammarCheck={grammarCheck}
+            typewriterMode={typewriterMode}
             activeFile={activeFile}
             pageView={pageView}
             collab={collab}

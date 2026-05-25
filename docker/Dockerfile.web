@@ -1,0 +1,29 @@
+# Lumen web shell — nginx serving the built SPA + a minimal CSP for self-hosted deployments.
+# Usage: built and orchestrated via the repo-root docker-compose.yml.
+
+# Multi-stage build: produce dist/ in stage 1 with the same toolchain CI uses,
+# then copy into a slim nginx layer for the runtime image.
+FROM node:20-alpine AS build
+WORKDIR /app
+COPY package.json package-lock.json* ./
+RUN npm ci
+COPY . .
+RUN npm run build
+
+FROM nginx:1.27-alpine
+WORKDIR /usr/share/nginx/html
+
+# Replace the default config with one that:
+#   - serves dist/ root
+#   - rewrites unknown routes to index.html (SPA)
+#   - sets long-lived cache for hashed assets, no-store for index.html
+#   - applies a Content-Security-Policy compatible with the app's runtime
+COPY docker/nginx.conf /etc/nginx/conf.d/default.conf
+
+COPY --from=build /app/dist .
+
+EXPOSE 80
+HEALTHCHECK --interval=30s --timeout=5s --retries=3 \
+  CMD wget -q -O - http://localhost/ > /dev/null || exit 1
+
+CMD ["nginx", "-g", "daemon off;"]

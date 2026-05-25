@@ -15,34 +15,88 @@
  */
 
 import type { PlanTier } from "./types";
+import { fetchWithRetry } from "../lib/fetchRetry";
 
-const PRICE_IDS: Record<Exclude<PlanTier, "free">, string> = {
-  pro: "price_pro_placeholder",
-  team: "price_team_placeholder",
-};
+type EnvShape = { VITE_BILLING_ENDPOINT?: string; VITE_PRICE_ID_PRO?: string; VITE_PRICE_ID_TEAM?: string };
+const env = () => (import.meta as ImportMeta & { env?: EnvShape }).env ?? {};
 
 function endpoint(): string {
-  const env = (
-    import.meta as ImportMeta & { env?: { VITE_BILLING_ENDPOINT?: string } }
-  ).env?.VITE_BILLING_ENDPOINT;
-  if (!env) throw new Error("VITE_BILLING_ENDPOINT is not set — billing offline.");
-  return env;
+  const value = env().VITE_BILLING_ENDPOINT;
+  if (!value) throw new Error("VITE_BILLING_ENDPOINT is not set — billing offline.");
+  return value;
+}
+
+function resolvePriceId(tier: Exclude<PlanTier, "free">): string {
+  const configured = (
+    tier === "pro"
+      ? env().VITE_PRICE_ID_PRO
+      : env().VITE_PRICE_ID_TEAM
+  )?.trim();
+  if (!configured) {
+    throw new Error(`VITE_PRICE_ID_${tier.toUpperCase()} is not set.`);
+  }
+  return configured;
+}
+
+function isConfiguredPriceId(value: string): boolean {
+  const normalized = value.trim();
+  return (
+    normalized.length > 0 &&
+    !normalized.includes("placeholder") &&
+    !normalized.includes("TODO") &&
+    !normalized.includes("example")
+  );
+}
+
+function isValidUrl(value: string): boolean {
+  try {
+    const parsed = new URL(value, location.origin);
+    return parsed.protocol === "http:" || parsed.protocol === "https:";
+  } catch {
+    return false;
+  }
+}
+
+function portalEndpoint(): string {
+  const base = endpoint();
+  if (!isValidUrl(base)) {
+    return `${base.replace(/\/+$/, "")}/portal`;
+  }
+  const url = new URL(base, location.origin);
+  const trimmed = url.pathname.replace(/\/checkout\/?$/, "");
+  const stem = trimmed.replace(/\/+$/, "");
+  url.pathname = stem === "" || stem === "/" ? "/portal" : `${stem}/portal`;
+  return url.toString();
 }
 
 export async function startCheckout(tier: Exclude<PlanTier, "free">, jwt: string | null): Promise<void> {
   if (!jwt) throw new Error("Sign in first to subscribe.");
-  const res = await fetch(endpoint(), {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${jwt}`,
+  // Validate the billing endpoint first — it's more fundamental than
+  // any price ID. If billing isn't configured at all we want the user
+  // to see that error, not a per-tier price-id error.
+  const checkoutUrl = endpoint();
+  const priceId = resolvePriceId(tier);
+  if (!isConfiguredPriceId(priceId)) {
+    throw new Error(`VITE_PRICE_ID_${tier.toUpperCase()} is not configured for ${tier}.`);
+  }
+  const res = await fetchWithRetry(
+    checkoutUrl,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${jwt}`,
+      },
+      body: JSON.stringify({
+        priceId,
+        successUrl: `${location.origin}/billing/success`,
+        cancelUrl: `${location.origin}/billing/cancel`,
+      }),
     },
-    body: JSON.stringify({
-      priceId: PRICE_IDS[tier],
-      successUrl: `${location.origin}/billing/success`,
-      cancelUrl: `${location.origin}/billing/cancel`,
-    }),
-  });
+    {
+      label: "billing.checkout",
+    },
+  );
   if (!res.ok) {
     const text = await res.text().catch(() => "");
     throw new Error(`Checkout failed (${res.status}): ${text.slice(0, 200)}`);
@@ -53,10 +107,16 @@ export async function startCheckout(tier: Exclude<PlanTier, "free">, jwt: string
 
 export async function openBillingPortal(jwt: string | null): Promise<void> {
   if (!jwt) throw new Error("Sign in first to manage billing.");
-  const res = await fetch(`${endpoint().replace(/\/checkout$/, "")}/portal`, {
-    method: "POST",
-    headers: { Authorization: `Bearer ${jwt}` },
-  });
+  const res = await fetchWithRetry(
+    portalEndpoint(),
+    {
+      method: "POST",
+      headers: { Authorization: `Bearer ${jwt}` },
+    },
+    {
+      label: "billing.portal",
+    },
+  );
   if (!res.ok) throw new Error(`Portal failed (${res.status})`);
   const { url } = (await res.json()) as { url: string };
   location.assign(url);

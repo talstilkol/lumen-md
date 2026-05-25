@@ -23,9 +23,36 @@ import react from "@vitejs/plugin-react";
 import { VitePWA } from "vite-plugin-pwa";
 import path from "node:path";
 
+/**
+ * Tiny Vite plugin: rewrites clean URLs (`/roadmap`, `/landing`) to
+ * their `.html` counterparts in `public/`. Production deployments
+ * usually handle this at the proxy layer; this keeps dev / preview
+ * parity with production so the status-bar link works locally.
+ */
+const cleanUrlAliases = {
+  name: "lumen-clean-url-aliases",
+  configureServer(server: { middlewares: { use: (fn: (req: { url?: string }, res: unknown, next: () => void) => void) => void } }) {
+    server.middlewares.use((req, _res, next) => {
+      if (req.url === "/roadmap") req.url = "/roadmap.html";
+      else if (req.url === "/landing") req.url = "/landing.html";
+      else if (req.url === "/benchmarks") req.url = "/benchmarks.html";
+      next();
+    });
+  },
+  configurePreviewServer(server: { middlewares: { use: (fn: (req: { url?: string }, res: unknown, next: () => void) => void) => void } }) {
+    server.middlewares.use((req, _res, next) => {
+      if (req.url === "/roadmap") req.url = "/roadmap.html";
+      else if (req.url === "/landing") req.url = "/landing.html";
+      else if (req.url === "/benchmarks") req.url = "/benchmarks.html";
+      next();
+    });
+  },
+};
+
 export default defineConfig({
   plugins: [
     react(),
+    cleanUrlAliases,
     VitePWA({
       registerType: "prompt",
       includeAssets: ["favicon.svg", "icons/*.png"],
@@ -53,7 +80,14 @@ export default defineConfig({
         // it's intentionally excluded from precache.
         maximumFileSizeToCacheInBytes: 12 * 1024 * 1024,
         globPatterns: ["**/*.{js,css,html,svg,wasm,woff2}"],
-        globIgnores: ["**/vendor-shiki-*.js"],
+        // Per-language Shiki grammars are now individual chunks in
+        // assets/shiki-langs/ — fetched on demand by the runtime cache.
+        // Keeping them out of precache cuts ~10 MB of installs the user
+        // probably never needs (cpp, emacs-lisp, etc).
+        globIgnores: [
+          "**/vendor-shiki-*.js",
+          "**/shiki-langs/**",
+        ],
         runtimeCaching: [
           {
             // Google Fonts CSS (mutable, but small)
@@ -95,6 +129,13 @@ export default defineConfig({
     port: 5173,
     host: true,
   },
+  // ε.4.3 — clean-URL aliases for the auxiliary HTML pages so dev links
+  // like `/roadmap` and `/landing` work without the `.html` suffix.
+  // Production deployments are expected to handle this at the reverse
+  // proxy layer (Cloudflare Pages, nginx).
+  preview: {
+    port: 5173,
+  },
   build: {
     target: "es2022",
     sourcemap: true,
@@ -105,8 +146,21 @@ export default defineConfig({
       input: {
         main: path.resolve(__dirname, "index.html"),
         landing: path.resolve(__dirname, "public/landing.html"),
+        roadmap: path.resolve(__dirname, "public/roadmap.html"),
+        benchmarks: path.resolve(__dirname, "public/benchmarks.html"),
       },
       output: {
+        // Route Shiki per-language and per-theme grammar chunks into a
+        // dedicated `assets/shiki-langs/` subfolder so the PWA precache
+        // can glob-exclude them. They still load on demand through the
+        // service-worker runtime cache when the user opens a code block.
+        chunkFileNames(chunkInfo) {
+          const id = chunkInfo.facadeModuleId ?? "";
+          if (id.includes("@shikijs/langs/") || id.includes("@shikijs/themes/")) {
+            return "assets/shiki-langs/[name]-[hash].js";
+          }
+          return "assets/[name]-[hash].js";
+        },
         // Manual chunking — keeps the initial JS small and lets the heavy
         // visualization libraries lazy-load only when their blocks render.
         manualChunks(id) {
@@ -117,12 +171,47 @@ export default defineConfig({
           if (id.includes("@hpcc-js/wasm")) return "vendor-graphviz";
           if (id.includes("echarts") || id.includes("zrender")) return "vendor-echarts";
           if (id.includes("leaflet")) return "vendor-leaflet";
-          if (id.includes("katex")) return "vendor-katex";
+          // KaTeX + its mhchem extension + rehype-katex all share the
+          // same chunk. Without rehype-katex in the chunk, the
+          // production build hit a TDZ error ("Cannot access 'xn'
+          // before initialization") at the chunk boundary because
+          // rehype-katex re-exports katex internals that mhchem mutates.
+          if (
+            id.includes("katex") ||
+            id.includes("rehype-katex") ||
+            id.includes("mathml-tag-names")
+          ) return "vendor-katex";
+          // Shiki's per-language and per-theme grammars live in
+          // @shikijs/langs and @shikijs/themes and are imported dynamically
+          // by shiki's web-bundle; let Rollup keep each one as its own
+          // chunk so a doc that uses TypeScript+JSON only fetches those
+          // two grammar chunks instead of the entire 9 MB language pack.
+          if (id.includes("@shikijs/langs/")) return undefined;
+          if (id.includes("@shikijs/themes/")) return undefined;
           if (id.includes("shiki") || id.includes("@shikijs")) return "vendor-shiki";
           if (id.includes("isomorphic-git") || id.includes("lightning-fs")) return "vendor-git";
-          if (id.includes("yjs") || id.includes("y-")) return "vendor-yjs";
-          if (id.includes("react-dom")) return "vendor-react-dom";
-          if (id.includes("/react/")) return "vendor-react";
+          if (id.includes("tldraw") || id.includes("@tldraw")) return "vendor-tldraw";
+          // Anchor `y-*` to node_modules/y-… so we don't accidentally
+          // match lucide-react icon file paths that contain `y-` in
+          // the filename (e.g. "y-axis.js"). Previously this broad
+          // match pulled lucide-react into vendor-yjs, which then
+          // cross-imported into vendor-katex and caused a Temporal
+          // Dead Zone error at module init time.
+          if (
+            id.includes("/yjs/") ||
+            id.includes("node_modules/yjs") ||
+            /node_modules\/y-[a-z]/.test(id)
+          ) return "vendor-yjs";
+          // React and react-dom MUST live in the same chunk: they share
+          // internal helpers and have a circular dependency that
+          // breaks (TDZ "Cannot set properties of undefined") when
+          // rollup splits them. Both are small + always loaded
+          // together; splitting saves nothing in real-world apps.
+          if (
+            id.includes("/react-dom/") ||
+            id.includes("/react/") ||
+            id.includes("/scheduler/")
+          ) return "vendor-react";
           return undefined;
         },
       },
@@ -133,6 +222,7 @@ export default defineConfig({
     environment: "jsdom",
     include: ["src/__tests__/**/*.test.{ts,tsx}"],
     globals: true,
+    css: false,
     setupFiles: ["src/__tests__/setup.ts"],
     coverage: {
       provider: "v8",

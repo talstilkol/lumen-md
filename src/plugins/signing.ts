@@ -26,16 +26,44 @@
 
 import { get, set } from "idb-keyval";
 
+type EnvShape = { VITE_PLUGIN_TRUSTED_KEYS?: string };
+
+function readEnvVar(key: keyof EnvShape): string {
+  try {
+    const env = (import.meta as ImportMeta & { env?: EnvShape }).env;
+    return env?.[key]?.trim() ?? "";
+  } catch {
+    return "";
+  }
+}
+
+function readBuiltinTrustRoots(): Record<string, string> {
+  const raw = readEnvVar("VITE_PLUGIN_TRUSTED_KEYS");
+  if (!raw) return {};
+  try {
+    const parsed = JSON.parse(raw);
+    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) return {};
+    const out: Record<string, string> = {};
+    for (const [fingerprint, value] of Object.entries(parsed)) {
+      if (typeof fingerprint !== "string" || typeof value !== "string") continue;
+      if (!fingerprint || !value) continue;
+      out[fingerprint] = value;
+    }
+    return out;
+  } catch {
+    return {};
+  }
+}
+
 /**
  * Built-in trust anchors. Keys are SHA-256 fingerprints of the public
  * keys (hex) — the public key bytes themselves live in `KNOWN_KEYS`
  * keyed by fingerprint.
  *
- * Replace with real keys before launch — these are placeholders.
+ * Built-ins are optional and loaded from VITE_PLUGIN_TRUSTED_KEYS.
  */
 const BUILTIN_TRUST: Record<string, string> = {
-  // fingerprint → base64 spki public key
-  // "lumen-team-2026": "MCowBQYDK2VwAyEA...",
+  ...readBuiltinTrustRoots(),
 };
 
 const TRUSTED_KEYS_DB_KEY = "lumen.plugins.trusted-keys";

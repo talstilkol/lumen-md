@@ -142,13 +142,13 @@ export function SearchReplace({ open, onClose, content, onChange }: Props) {
                 outline: "none",
               }}
             />
-            <button onClick={replaceOne} className="icon-btn" title="Replace"
+            <button onClick={replaceOne} className="icon-btn" title={t("findReplace.replace")}
               style={{ fontSize: 11, width: "auto", padding: "2px 8px" }}>
-              Replace
+              {t("findReplace.replace")}
             </button>
-            <button onClick={replaceAll} className="icon-btn" title="Replace All"
+            <button onClick={replaceAll} className="icon-btn" title={t("findReplace.replaceAll")}
               style={{ fontSize: 11, width: "auto", padding: "2px 8px" }}>
-              All
+              {t("findReplace.replaceAll")}
             </button>
           </>
         )}

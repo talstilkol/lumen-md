@@ -14,6 +14,7 @@ import {
 } from "../collab/yjs";
 import type { CollabPeer, CollabSession } from "../collab/yjs";
 import { log } from "../lib/logger";
+import { recordAudit } from "../lib/audit";
 
 type CollabSessionWithCleanup = CollabSession & { __cleanup?: () => void };
 import { useAppStore } from "../store/useStore";
@@ -78,6 +79,14 @@ export function useCollab(docContent: string): UseCollabReturn {
           const link = `${location.origin}${location.pathname}#room=${name}`;
           navigator.clipboard?.writeText(link).catch(() => {});
         }
+        // ε.2 — record start/join. Counts-only payload so the audit
+        // log doesn't leak the room name (which can be brand-named).
+        const userId = (useAppStore.getState() as { user?: { id?: string } }).user?.id;
+        if (userId) {
+          recordAudit(userId, joinName ? "collab.join" : "collab.start", {
+            payload: { roomNameLength: name.length },
+          });
+        }
       } catch (err) {
         log.error("collab init failed", err);
         // Reset state so user can retry
@@ -96,6 +105,10 @@ export function useCollab(docContent: string): UseCollabReturn {
     setCollab(null);
     setCollabPeers([]);
     setRoomInHash(null);
+    const userId = (useAppStore.getState() as { user?: { id?: string } }).user?.id;
+    if (userId) {
+      recordAudit(userId, "collab.stop", { payload: {} });
+    }
   }, [collab]);
 
   // On first load, if the URL contains #room=, offer to join.

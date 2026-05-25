@@ -14,6 +14,7 @@ import { semanticSearch, type RagResult } from "../ai/embeddings";
 import { indexWorkspace, searchHybrid, type SemanticHit } from "../ai/semanticSearch";
 import { useAppStore } from "../store/useStore";
 import { rememberSearch, getSearchHistory, forgetSearch } from "../storage/searchHistory";
+import { flashSearchHighlight } from "../editor/searchHighlight";
 
 interface Props {
   open: boolean;
@@ -173,22 +174,28 @@ export function SearchDialog({ open, onClose, onOpenFile }: Props) {
   async function openHit(hit: SearchHit) {
     // Persist the query that led to this open — enables the recent-searches
     // chip row when the dialog re-opens with an empty query.
-    if (query.trim()) rememberSearch(query.trim());
+    const q = query.trim();
+    if (q) rememberSearch(q);
     onClose();
     try {
       const content = await readWorkspaceFile(hit.path);
       onOpenFile(hit.path, content);
+      // Flash the editor on the first match so the user can see *where*
+      // their hit lives. Slight delay so the doc has loaded into the editor.
+      if (q) setTimeout(() => flashSearchHighlight(q), 80);
     } catch {
       /* file gone */
     }
   }
 
   async function openSmartHit(hit: SemanticHit) {
-    if (query.trim()) rememberSearch(query.trim());
+    const q = query.trim();
+    if (q) rememberSearch(q);
     onClose();
     try {
       const content = await readWorkspaceFile(hit.path);
       onOpenFile(hit.path, content);
+      if (q) setTimeout(() => flashSearchHighlight(q), 80);
     } catch {
       /* file gone */
     }
@@ -221,7 +228,7 @@ export function SearchDialog({ open, onClose, onOpenFile }: Props) {
 
   async function askAi() {
     setAiLoading(true);
-    setAiAnswer("Searching workspace...");
+    setAiAnswer(t("searchDialog.searching"));
     setAiSources([]);
 
     try {
@@ -254,9 +261,9 @@ export function SearchDialog({ open, onClose, onOpenFile }: Props) {
       // Build context from semantic results
       const contextStr = results.length > 0
         ? results.map((r, i) => `---\n📄 [${i + 1}] ${r.path}\n${r.content}`).join("\n")
-        : "No relevant files found in workspace.";
+        : t("searchDialog.noRelevant");
 
-      setAiAnswer("Thinking...");
+      setAiAnswer(t("searchDialog.thinking"));
 
       // Build multi-turn messages
       const messages: ChatMessage[] = [
@@ -522,7 +529,7 @@ export function SearchDialog({ open, onClose, onOpenFile }: Props) {
             {aiLoading ? (
               <div style={{ display: "flex", alignItems: "center", gap: 8, color: "hsl(var(--accent))" }}>
                 <Loader2 size={14} style={{ animation: "spin 1s linear infinite" }} />
-                <span>{aiAnswer === "Searching workspace..." ? "Searching workspace..." : "Thinking..."}</span>
+                <span>{aiAnswer === t("searchDialog.searching") ? t("searchDialog.searching") : t("searchDialog.thinking")}</span>
               </div>
             ) : aiRendered ? (
               <>
@@ -531,7 +538,7 @@ export function SearchDialog({ open, onClose, onOpenFile }: Props) {
                 </div>
                 {aiSources.length > 0 && (
                   <div style={{ borderTop: "1px solid hsl(var(--border))", paddingTop: 8, marginTop: 4 }}>
-                    <div style={{ fontSize: 11, color: "hsl(var(--fg-muted))", marginBottom: 4, fontWeight: 600 }}>Sources</div>
+                    <div style={{ fontSize: 11, color: "hsl(var(--fg-muted))", marginBottom: 4, fontWeight: 600 }}>{t("searchDialog.sources")}</div>
                     {aiSources.map((s, i) => (
                       <div
                         key={s.path}
@@ -555,7 +562,7 @@ export function SearchDialog({ open, onClose, onOpenFile }: Props) {
             ) : aiAnswer ? (
               <div style={{ whiteSpace: "pre-wrap" }}>{aiAnswer}</div>
             ) : (
-              <div style={{ opacity: 0.5, fontStyle: "italic" }}>Type a question and press Enter to ask the AI workspace.</div>
+              <div style={{ opacity: 0.5, fontStyle: "italic" }}>{t("searchDialog.askPlaceholder")}</div>
             )}
           </div>
         )}

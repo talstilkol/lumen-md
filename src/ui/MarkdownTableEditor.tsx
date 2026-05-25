@@ -1,5 +1,6 @@
 import { useState, useCallback } from "react";
 import { Plus, Minus } from "lucide-react";
+import { t } from "../i18n";
 
 interface Props {
   /** Initial markdown table text, or empty for a new table */
@@ -89,18 +90,18 @@ export function MarkdownTableEditor({ initialMarkdown, onUpdate, onClose }: Prop
         overflow: "auto",
       }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
-          <h3 style={{ margin: 0, fontSize: 15, color: "hsl(var(--fg))" }}>Table Editor</h3>
+          <h3 style={{ margin: 0, fontSize: 15, color: "hsl(var(--fg))" }}>{t("mdTable.title")}</h3>
           <div style={{ display: "flex", gap: 6 }}>
-            <button onClick={addCol} className="icon-btn" title="Add Column" style={{ width: 28, height: 28 }}>
+            <button onClick={addCol} className="icon-btn" title={t("mdTable.addCol")} style={{ width: 28, height: 28 }}>
               <Plus size={12} />
             </button>
-            <button onClick={removeCol} className="icon-btn" title="Remove Column" style={{ width: 28, height: 28 }}>
+            <button onClick={removeCol} className="icon-btn" title={t("mdTable.removeCol")} style={{ width: 28, height: 28 }}>
               <Minus size={12} />
             </button>
-            <button onClick={addRow} className="icon-btn" title="Add Row" style={{ width: 28, height: 28 }}>
+            <button onClick={addRow} className="icon-btn" title={t("mdTable.addRow")} style={{ width: 28, height: 28 }}>
               <Plus size={12} />
             </button>
-            <button onClick={removeRow} className="icon-btn" title="Remove Row" style={{ width: 28, height: 28 }}>
+            <button onClick={removeRow} className="icon-btn" title={t("mdTable.removeRow")} style={{ width: 28, height: 28 }}>
               <Minus size={12} />
             </button>
           </div>
@@ -176,7 +177,7 @@ export function MarkdownTableEditor({ initialMarkdown, onUpdate, onClose }: Prop
 
         <div style={{ display: "flex", gap: 8, marginTop: 12, justifyContent: "flex-end" }}>
           <button onClick={onClose} className="icon-btn" style={{ width: "auto", padding: "6px 16px", fontSize: 12 }}>
-            Cancel
+            {t("dialog.cancel")}
           </button>
           <button onClick={handleApply} style={{
             padding: "6px 16px",
@@ -188,7 +189,7 @@ export function MarkdownTableEditor({ initialMarkdown, onUpdate, onClose }: Prop
             cursor: "pointer",
             fontWeight: 600,
           }}>
-            Insert Table
+            {t("cmd.insert.table")}
           </button>
         </div>
       </div>

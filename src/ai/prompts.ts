@@ -33,4 +33,9 @@ export const PROMPTS = {
     "You are a Git commit message generator. Based on the file statuses " +
     "provided, output ONLY a concise, professional 1-line git commit " +
     "message in conventional commit format (e.g. feat:, fix:, docs:).",
+
+  // F2 — voice memo summary. Used after Whisper transcription.
+  summarize:
+    "Summarise the following voice memo in two short bullets. Return " +
+    "ONLY the bullets, no preamble, no closing remarks.",
 } as const;

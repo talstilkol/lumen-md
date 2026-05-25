@@ -1,0 +1,10 @@
+User-agent: *
+Allow: /
+Allow: /roadmap
+Allow: /benchmarks
+
+Sitemap: https://lumen.md/sitemap.xml
+
+# Disallow indexing of API/internal routes
+Disallow: /api/
+Disallow: /_/

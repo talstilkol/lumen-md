@@ -339,7 +339,7 @@ With the workspace enabled (\`⌘K → Toggle workspace\`), they'll cross files 
 
 ---
 
-## 12. Tabular conversions
+## 11. Tabular conversions
 
 Lumen turns SQL, Pandas, JSON and JS-object literals into the same sortable
 DataTable + chart-suggestion UI. The fence language picks the parser; use
@@ -380,7 +380,7 @@ all welcome):
 
 ---
 
-## 11. Social networks
+## 12. Social networks
 
 Drop a public URL inside an \`embed\` fence and Lumen renders the platform's
 own embed widget. Below: an iconic post from each supported platform —

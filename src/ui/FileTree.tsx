@@ -28,6 +28,7 @@ import type { WorkspaceNode } from "../storage/workspace";
 import { t } from "../i18n";
 import { uiAlert, uiConfirm, uiPrompt } from "./PromptDialog";
 import { FileContextMenu, buildFileActions } from "./FileContextMenu";
+import { useAppStore } from "../store/useStore";
 
 interface Props {
   /** Currently active workspace path (if any). */
@@ -51,6 +52,8 @@ export function FileTree({
   const [editValue, setEditValue] = useState("");
   const [collapsed, setCollapsed] = useState<Set<string>>(new Set());
   const [selectedPaths, setSelectedPaths] = useState<Set<string>>(new Set());
+  const tagFilter = useAppStore((s) => s.tagFilter);
+  const setTagFilter = useAppStore((s) => s.setTagFilter);
   const [contextMenu, setContextMenu] = useState<{
     x: number;
     y: number;
@@ -117,6 +120,28 @@ export function FileTree({
 
   const available = isOPFSAvailable();
 
+  /**
+   * Apply the active tag filter (if any) to the tree. A directory survives
+   * the filter when at least one of its descendants is in the allowed
+   * path set; that way the user still sees the folder structure leading
+   * to the matching files.
+   */
+  const displayedTree = useMemo<WorkspaceNode[]>(() => {
+    if (!tagFilter) return tree;
+    const allowed = new Set(tagFilter.paths);
+    function prune(node: WorkspaceNode): WorkspaceNode | null {
+      if (node.kind === "file") return allowed.has(node.path) ? node : null;
+      const kept = (node.children ?? [])
+        .map(prune)
+        .filter((n): n is WorkspaceNode => n !== null);
+      if (kept.length === 0) return null;
+      return { ...node, children: kept };
+    }
+    return tree
+      .map(prune)
+      .filter((n): n is WorkspaceNode => n !== null);
+  }, [tree, tagFilter]);
+
   const refresh = useMemo(
     () => async () => {
       if (!available) return;
@@ -176,7 +201,7 @@ export function FileTree({
   }
 
   async function newFile(parentPath: string) {
-    const candidate = joinPath(parentPath, "Untitled.md");
+    const candidate = joinPath(parentPath, `${t("doc.untitled")}.md`);
     const path = await uniqueWorkspaceName(candidate);
     await writeWorkspaceFile(
       path,
@@ -363,7 +388,51 @@ export function FileTree({
           </button>
         </div>
       </div>
-      {tree.length === 0 ? (
+      {tagFilter && (
+        <div
+          role="status"
+          aria-live="polite"
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 6,
+            padding: "6px 10px",
+            background: "hsl(var(--accent) / 0.10)",
+            borderBottom: "1px solid hsl(var(--accent) / 0.30)",
+            fontSize: 11,
+            color: "hsl(var(--accent))",
+            fontWeight: 600,
+          }}
+        >
+          <span>
+            {t("tree.tagFilter", {
+              tag: tagFilter.tag,
+              count: String(tagFilter.paths.length),
+            }) ?? `# ${tagFilter.tag} · ${tagFilter.paths.length}`}
+          </span>
+          <button
+            type="button"
+            onClick={() => setTagFilter(null)}
+            aria-label={
+              t("tree.tagFilter.clear") ?? "Clear tag filter"
+            }
+            title={t("tree.tagFilter.clear") ?? "Clear tag filter"}
+            style={{
+              marginInlineStart: "auto",
+              padding: "2px 6px",
+              fontSize: 11,
+              border: "none",
+              borderRadius: 6,
+              background: "transparent",
+              color: "hsl(var(--accent))",
+              cursor: "pointer",
+            }}
+          >
+            ×
+          </button>
+        </div>
+      )}
+      {displayedTree.length === 0 ? (
         <div
           style={{
             padding: "1rem 0.85rem",
@@ -371,7 +440,9 @@ export function FileTree({
             fontSize: 12,
           }}
         >
-          {t("tree.emptyHint")}
+          {tagFilter
+            ? (t("tree.tagFilter.empty") ?? "No notes match this tag.")
+            : t("tree.emptyHint")}
         </div>
       ) : (
         <>
@@ -443,7 +514,7 @@ export function FileTree({
             </div>
           )}
           <ul className="file-tree-list" role="tree">
-            {tree.map((node) =>
+            {displayedTree.map((node) =>
               renderNode(node, 0, {
                 activePath,
                 collapsed,

@@ -1,41 +1,50 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo, type CSSProperties } from "react";
+import { t } from "../i18n";
 
 interface TourStep {
   target: string; // CSS selector
-  title: string;
-  body: string;
+  titleKey: string;
+  bodyKey: string;
+  actionId?: string;
   placement: "top" | "bottom" | "left" | "right";
+}
+
+export interface TourAction {
+  id: string;
+  label: string;
+  onRun: () => void;
 }
 
 const STEPS: TourStep[] = [
   {
     target: ".titlebar",
-    title: "📋 Menu Bar",
-    body: "Access File, Edit, Insert, View, and Help — each menu has clear sections, hover tooltips, and per-action descriptions.",
+    titleKey: "tour.step.menu.title",
+    bodyKey: "tour.step.menu.body",
     placement: "bottom",
   },
   {
     target: ".seg-group",
-    title: "👁️ View Modes",
-    body: "Switch between Source, Split, Preview, and WYSIWYG anytime (⌘1-4).",
+    titleKey: "tour.step.viewModes.title",
+    bodyKey: "tour.step.viewModes.body",
     placement: "bottom",
   },
   {
     target: ".file-tree",
-    title: "📁 Workspace",
-    body: "Manage files in your local workspace. Everything is stored in-browser.",
+    titleKey: "tour.step.workspace.title",
+    bodyKey: "tour.step.workspace.body",
     placement: "right",
   },
   {
     target: ".status-bar",
-    title: "📊 Status Bar",
-    body: "Word count, character count, reading time — always visible.",
+    titleKey: "tour.step.statusBar.title",
+    bodyKey: "tour.step.statusBar.body",
+    actionId: "runtimeMetrics.open",
     placement: "top",
   },
   {
     target: "main",
-    title: "✍️ Editor",
-    body: "Write Markdown with full syntax highlighting, live preview, and AI assistance.",
+    titleKey: "tour.step.editor.title",
+    bodyKey: "tour.step.editor.body",
     placement: "top",
   },
 ];
@@ -43,13 +52,23 @@ const STEPS: TourStep[] = [
 interface Props {
   open: boolean;
   onClose: () => void;
+  actions?: TourAction[];
 }
 
-export function OnboardingTour({ open, onClose }: Props) {
+export function OnboardingTour({ open, onClose, actions }: Props) {
   const [step, setStep] = useState(0);
   const [pos, setPos] = useState({ top: 0, left: 0, width: 0, height: 0 });
 
   const current = STEPS[step];
+  const actionById = useMemo(() => {
+    const map = new Map<string, TourAction>();
+    (actions ?? []).forEach((action) => map.set(action.id, action));
+    return map;
+  }, [actions]);
+  const currentAction = useMemo(
+    () => (current?.actionId ? actionById.get(current.actionId) ?? null : null),
+    [current, actionById],
+  );
 
   const updatePos = useCallback(() => {
     if (!current) return;
@@ -86,23 +105,68 @@ export function OnboardingTour({ open, onClose }: Props) {
 
   if (!open || !current) return null;
 
-  // Calculate tooltip position
+  // Tooltip positioning. The popup uses position:fixed with viewport
+  // coords. The original logic had two bugs:
+  //   1. For "top" placement, the popup was anchored to pos.top-gap
+  //      with no vertical translate — meaning it extended DOWN past
+  //      the target's top edge instead of upward.
+  //   2. For "left" placement, the popup was anchored to pos.left-gap
+  //      with no horizontal translate — same issue, extended RIGHT
+  //      over the target.
+  // Plus a clamp bug: tooltips whose target centre sits within half-
+  // a-tooltip of a viewport edge land partially off-screen.
+  // Fix: switch all four placements to a single consistent strategy
+  // — compute the tooltip's TOP-LEFT corner directly, then clamp.
   const gap = 12;
-  let tooltipStyle: React.CSSProperties = {};
+  const tooltipW = Math.min(
+    320,
+    (typeof window !== "undefined" ? window.innerWidth : 1280) * 0.8,
+  );
+  const tooltipApproxH = 200; // title + body + footer + breathing room
+  const vw = typeof window !== "undefined" ? window.innerWidth : 1280;
+  const vh = typeof window !== "undefined" ? window.innerHeight : 720;
+  const MARGIN = 8;
+  function clampLeft(x: number): number {
+    return Math.max(MARGIN, Math.min(vw - tooltipW - MARGIN, x));
+  }
+  function clampTop(y: number): number {
+    return Math.max(MARGIN, Math.min(vh - tooltipApproxH - MARGIN, y));
+  }
+  let topLeft: { top: number; left: number };
   switch (current.placement) {
     case "bottom":
-      tooltipStyle = { top: pos.top + pos.height + gap, left: pos.left + pos.width / 2 };
+      // Below the target, centred horizontally.
+      topLeft = {
+        top: pos.top + pos.height + gap,
+        left: pos.left + pos.width / 2 - tooltipW / 2,
+      };
       break;
     case "top":
-      tooltipStyle = { top: pos.top - gap, left: pos.left + pos.width / 2 };
+      // Above the target, centred horizontally.
+      topLeft = {
+        top: pos.top - tooltipApproxH - gap,
+        left: pos.left + pos.width / 2 - tooltipW / 2,
+      };
       break;
     case "right":
-      tooltipStyle = { top: pos.top + pos.height / 2, left: pos.left + pos.width + gap };
+      // To the right of the target, centred vertically.
+      topLeft = {
+        top: pos.top + pos.height / 2 - tooltipApproxH / 2,
+        left: pos.left + pos.width + gap,
+      };
       break;
     case "left":
-      tooltipStyle = { top: pos.top + pos.height / 2, left: pos.left - gap };
+      // To the left of the target, centred vertically.
+      topLeft = {
+        top: pos.top + pos.height / 2 - tooltipApproxH / 2,
+        left: pos.left - tooltipW - gap,
+      };
       break;
   }
+  const tooltipStyle: CSSProperties = {
+    top: clampTop(topLeft.top),
+    left: clampLeft(topLeft.left),
+  };
 
   return (
     <>
@@ -146,10 +210,8 @@ export function OnboardingTour({ open, onClose }: Props) {
           position: "fixed",
           zIndex: 10000,
           ...tooltipStyle,
-          transform:
-            current.placement === "bottom" || current.placement === "top"
-              ? "translateX(-50%)"
-              : "translateY(-50%)",
+          // tooltipStyle is top-left coordinates of the tooltip's outer
+          // box (after clamping). No CSS transform needed.
           background: "hsl(var(--bg-muted))",
           border: "1px solid hsl(var(--accent) / 0.3)",
           borderRadius: 14,
@@ -166,7 +228,7 @@ export function OnboardingTour({ open, onClose }: Props) {
             color: "hsl(var(--fg))",
           }}
         >
-          {current.title}
+          {t(current.titleKey)}
         </h3>
         <p
           style={{
@@ -176,7 +238,7 @@ export function OnboardingTour({ open, onClose }: Props) {
             margin: 0,
           }}
         >
-          {current.body}
+          {t(current.bodyKey)}
         </p>
         {/* Navigation */}
         <div
@@ -190,29 +252,27 @@ export function OnboardingTour({ open, onClose }: Props) {
           <span style={{ fontSize: 11, color: "hsl(var(--fg-muted))" }}>
             {step + 1} / {STEPS.length}
           </span>
-          <div style={{ display: "flex", gap: 8 }}>
-            {step > 0 && (
-              <button
-                onClick={() => setStep(step - 1)}
-                style={{
-                  padding: "4px 12px",
-                  fontSize: 11,
-                  border: "1px solid hsl(var(--border))",
-                  borderRadius: 6,
-                  background: "transparent",
-                  color: "hsl(var(--fg-muted))",
-                  cursor: "pointer",
-                  fontFamily: "inherit",
-                }}
-              >
-                ←
-              </button>
-            )}
+        <div style={{ display: "flex", gap: 8 }}>
+          {step > 0 && (
             <button
-              onClick={() => {
-                if (step < STEPS.length - 1) setStep(step + 1);
-                else onClose();
+              onClick={() => setStep(step - 1)}
+              style={{
+                padding: "4px 12px",
+                fontSize: 11,
+                border: "1px solid hsl(var(--border))",
+                borderRadius: 6,
+                background: "transparent",
+                color: "hsl(var(--fg-muted))",
+                cursor: "pointer",
+                fontFamily: "inherit",
               }}
+            >
+              ←
+            </button>
+          )}
+          {currentAction && (
+            <button
+              onClick={currentAction.onRun}
               style={{
                 padding: "4px 14px",
                 fontSize: 11,
@@ -225,9 +285,29 @@ export function OnboardingTour({ open, onClose }: Props) {
                 fontWeight: 600,
               }}
             >
-              {step < STEPS.length - 1 ? "→ Next" : "✓ Done"}
+              {currentAction.label}
             </button>
-          </div>
+          )}
+          <button
+            onClick={() => {
+              if (step < STEPS.length - 1) setStep(step + 1);
+              else onClose();
+            }}
+            style={{
+              padding: "4px 14px",
+              fontSize: 11,
+              border: "1px solid hsl(var(--accent) / 0.5)",
+              borderRadius: 6,
+              background: "hsl(var(--accent) / 0.15)",
+              color: "hsl(var(--accent))",
+              cursor: "pointer",
+              fontFamily: "inherit",
+              fontWeight: 600,
+            }}
+          >
+            {step < STEPS.length - 1 ? t("tour.next") : t("tour.done")}
+          </button>
+        </div>
         </div>
       </div>
     </>

@@ -1,0 +1,41 @@
+name: Deploy
+
+# Auto-deploy to Fly.io when a release tag is pushed (after the Release
+# workflow builds and publishes artifacts). Can also be triggered manually.
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  fly:
+    name: Deploy to Fly.io
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    # Only deploy if Fly.io is configured
+    if: vars.FLY_APP_NAME != ''
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: superfly/flyctl-actions/setup-flyctl@master
+
+      - name: Deploy
+        run: flyctl deploy --remote-only --app "${{ vars.FLY_APP_NAME }}"
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+
+      - name: Healthcheck
+        run: |
+          sleep 10
+          URL="https://${{ vars.FLY_APP_NAME }}.fly.dev"
+          status=$(curl -s -o /dev/null -w '%{http_code}' -m 10 "$URL/favicon.svg" || true)
+          if [ "$status" = "200" ]; then
+            echo "✅ Deploy healthy ($URL → HTTP $status)"
+          else
+            echo "::warning::Post-deploy healthcheck failed (HTTP $status). Check Fly.io logs."
+          fi

@@ -25,9 +25,15 @@
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "budget": "node scripts/bundle-budget.mjs",
-    "lighthouse": "lhci autorun --config=./lighthouserc.json"
+    "lighthouse": "lhci autorun --config=./lighthouserc.json",
+    "lighthouse:a11y": "node scripts/lighthouse-a11y.mjs",
+    "i18n:extract": "node scripts/extract-i18n-keys.mjs",
+    "roadmap": "node scripts/generate-roadmap.mjs",
+    "docker:build": "docker build -t lumen-md .",
+    "docker:run": "docker run -p 8080:8080 lumen-md"
   },
   "dependencies": {
+    "dompurify": "^3.2.6",
     "@capacitor/cli": "^8.3.1",
     "@capacitor/core": "^8.3.1",
     "@capacitor/ios": "^8.3.1",
@@ -61,6 +67,8 @@
     "@milkdown/utils": "^7.20.0",
     "@mlc-ai/web-llm": "^0.2.82",
     "@replit/codemirror-vim": "^6.3.0",
+    "@sentry/browser": "^10.50.0",
+    "@sentry/react": "^10.50.0",
     "@tauri-apps/api": "^2.10.1",
     "abcjs": "^6.6.3",
     "class-variance-authority": "^0.7.1",
@@ -71,7 +79,7 @@
     "katex": "^0.16.11",
     "leaflet": "^1.9.4",
     "lucide-react": "^0.469.0",
-    "mermaid": "^11.4.1",
+    "mermaid": "^11.15.0",
     "papaparse": "^5.4.1",
     "prosemirror-state": "^1.4.4",
     "prosemirror-view": "^1.41.8",
@@ -89,6 +97,7 @@
     "remark-rehype": "^11.1.1",
     "shiki": "^1.24.4",
     "tailwind-merge": "^2.5.5",
+    "tldraw": "^4.5.10",
     "unified": "^11.0.5",
     "unist-util-visit": "^5.0.0",
     "y-codemirror.next": "^0.3.5",
@@ -115,7 +124,7 @@
     "axe-core": "^4.11.3",
     "fake-indexeddb": "^6.2.5",
     "jsdom": "^25.0.1",
-    "postcss": "^8.4.49",
+    "postcss": "^8.5.12",
     "tailwindcss": "^3.4.17",
     "typescript": "^5.7.2",
     "vite": "^6.0.5",
@@ -123,6 +132,10 @@
     "vitest": "^3.2.4"
   },
   "overrides": {
-    "serialize-javascript": "^7.0.5"
-  }
+    "serialize-javascript": "^7.0.5",
+    "uuid": "^14.0.0"
+  },
+  "browserslist": [
+    "defaults"
+  ]
 }

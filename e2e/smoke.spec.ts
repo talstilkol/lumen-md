@@ -14,6 +14,9 @@ test.beforeEach(async ({ page }) => {
     localStorage.removeItem("lumen-md");
   });
   await page.goto("/");
+  // React mounts asynchronously; window keydown listeners (⌘K, ⌘1..⌘4) attach
+  // inside a useEffect so we must wait for the toolbar before firing keys.
+  await page.locator("header").first().waitFor({ state: "visible", timeout: 5000 });
 });
 
 test("loads the editor shell", async ({ page }) => {

@@ -8,10 +8,19 @@ import { initCRDT } from "./storage/crdt";
 import { ToastContainer } from "./components/Toast";
 import { initTelemetry } from "./lib/telemetry";
 import { initAuth } from "./auth/useAuth";
+import { reportWebVitals } from "./lib/webVitals";
+import { log } from "./lib/logger";
 import "./index.css";
 
 initTelemetry();
 void initAuth();
+
+// Core Web Vitals — opt-out gates inside; sink writes to the structured
+// log so Sentry (when configured) picks them up alongside other events.
+// No-op in browsers without PerformanceObserver.
+reportWebVitals((sample) => {
+  log.info("[web-vitals]", sample);
+});
 
 // ─── Native Sync Dialog Capture (Milkdown overrides) ────────────────────
 const nativePrompt = window.prompt;

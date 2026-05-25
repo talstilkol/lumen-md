@@ -2,6 +2,7 @@ import { useState } from "react";
 import { LogIn, LogOut, User as UserIcon } from "lucide-react";
 import { useAuth } from "../auth/useAuth";
 import { AuthDialog } from "./AuthDialog";
+import { t } from "../i18n";
 
 /**
  * Toolbar entry-point for sign in / out. Renders a tiny pill on the right
@@ -106,7 +107,7 @@ export function AuthButton() {
                 borderBottom: "1px solid hsl(var(--border))",
               }}
             >
-              Signed in as
+              {t("auth.signedInAs")}
               <div style={{ color: "hsl(var(--fg))", fontWeight: 500, fontSize: 12, marginTop: 2 }}>
                 {user.email ?? user.name ?? user.id}
               </div>
@@ -120,7 +121,7 @@ export function AuthButton() {
               }}
               style={menuItemStyle}
             >
-              <LogOut size={13} aria-hidden /> Sign out
+              <LogOut size={13} aria-hidden /> {t("auth.signOut")}
             </button>
           </div>
         )}
@@ -133,7 +134,7 @@ export function AuthButton() {
       <button
         type="button"
         onClick={() => setDialogOpen(true)}
-        aria-label="Sign in"
+        aria-label={t("auth.signIn")}
         style={{
           display: "flex",
           alignItems: "center",
@@ -149,7 +150,7 @@ export function AuthButton() {
           flexShrink: 0,
         }}
       >
-        <LogIn size={13} aria-hidden /> Sign in
+        <LogIn size={13} aria-hidden /> {t("auth.signIn")}
       </button>
       <AuthDialog open={dialogOpen} onClose={() => setDialogOpen(false)} />
     </>

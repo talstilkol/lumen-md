@@ -1,4 +1,5 @@
 import React, { useEffect, useCallback } from "react";
+import { t } from "../i18n";
 
 /**
  * FocusMode overlay.
@@ -65,7 +66,7 @@ export function FocusMode({ active, onExit, children }: Props) {
       >
         <button
           onClick={onExit}
-          title="Exit Focus Mode (Esc)"
+          title={t("focusMode.exit")}
           style={{
             background: "hsl(var(--bg-muted))",
             border: "1px solid hsl(var(--border))",
@@ -77,7 +78,7 @@ export function FocusMode({ active, onExit, children }: Props) {
             fontFamily: "inherit",
           }}
         >
-          ✕ Exit Focus
+          {t("focusMode.exitShort")}
         </button>
       </div>
       {/* Centered editor area */}

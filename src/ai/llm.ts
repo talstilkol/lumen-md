@@ -5,6 +5,7 @@
 
 import { useAppStore } from "../store/useStore";
 import { toast } from "../store/useToastStore";
+import { fetchWithRetry } from "../lib/fetchRetry";
 
 // ── Rate limiting ───────────────────────────────────────────────────────
 // Token bucket — protects the user's API key against runaway loops.
@@ -126,13 +127,20 @@ export async function chat(
   const key = getAiKey();
   checkRateLimit();
   inflight++;
-  const model = opts.model ?? DEFAULT_MODEL;
-  let lastError: Error | null = null;
+  // F3 — when the user has trained + enabled their personal model,
+  // route chat() through it. Caller-supplied `opts.model` still wins
+  // so individual call sites (e.g. autocomplete) can pin a fast model.
+  const storeState = useAppStore.getState();
+  const fineTuneOverride =
+    storeState.useFineTunedModel && storeState.fineTunedModelId
+      ? storeState.fineTunedModelId
+      : null;
+  const model = opts.model ?? fineTuneOverride ?? DEFAULT_MODEL;
 
   try {
-  for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
-    try {
-      const res = await fetch(API_URL, {
+    const res = await fetchWithRetry(
+      API_URL,
+      {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -144,29 +152,22 @@ export async function chat(
           ...(opts.maxTokens ? { max_tokens: opts.maxTokens } : {}),
         }),
         signal: opts.signal,
-      });
-
-      if (!res.ok) {
-        const body = await res.text().catch(() => "");
-        throw new AiError("API_ERROR", `API ${res.status}: ${body.slice(0, 200)}`);
-      }
-
-      const data = await res.json();
-      const text = data.choices?.[0]?.message?.content?.trim();
-      if (!text) throw new AiError("PARSE_ERROR", "Empty AI response.");
-      return text;
-    } catch (e) {
-      if (e instanceof AiError && e.code === "NO_KEY") throw e;
-      if (e instanceof RateLimitError) throw e;
-      if (opts.signal?.aborted || (e as DOMException).name === "AbortError") return "";
-      lastError = e as Error;
-      if (attempt < MAX_RETRIES) {
-        await new Promise((r) => setTimeout(r, 500 * (attempt + 1)));
-      }
+      },
+      { label: "llm.chat", maxRetries: MAX_RETRIES, baseDelayMs: 500, maxDelayMs: 2000 },
+    );
+    if (!res.ok) {
+      const body = await res.text().catch(() => "");
+      throw new AiError("API_ERROR", `API ${res.status}: ${body.slice(0, 200)}`);
     }
-  }
-
-  throw lastError ?? new AiError("API_ERROR", "Unknown error.");
+    const data = await res.json();
+    const text = data.choices?.[0]?.message?.content?.trim();
+    if (!text) throw new AiError("PARSE_ERROR", "Empty AI response.");
+    return text;
+  } catch (err) {
+    if (opts.signal?.aborted || (err instanceof DOMException && err.name === "AbortError")) {
+      return "";
+    }
+    throw err;
   } finally {
     inflight--;
   }
@@ -185,20 +186,24 @@ export async function* chatStream(
   const model = opts.model ?? DEFAULT_MODEL;
 
   try {
-    const res = await fetch(API_URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${key}`,
+    const res = await fetchWithRetry(
+      API_URL,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${key}`,
+        },
+        body: JSON.stringify({
+          model,
+          messages,
+          stream: true,
+          ...(opts.maxTokens ? { max_tokens: opts.maxTokens } : {}),
+        }),
+        signal: opts.signal,
       },
-      body: JSON.stringify({
-        model,
-        messages,
-        stream: true,
-        ...(opts.maxTokens ? { max_tokens: opts.maxTokens } : {}),
-      }),
-      signal: opts.signal,
-    });
+      { label: "llm.chatStream", maxRetries: MAX_RETRIES, baseDelayMs: 500, maxDelayMs: 2000 },
+    );
 
     if (!res.ok) {
       const body = await res.text().catch(() => "");
@@ -232,6 +237,11 @@ export async function* chatStream(
         }
       }
     }
+  } catch (err) {
+    if (err instanceof DOMException && err.name === "AbortError") {
+      return;
+    }
+    throw err;
   } finally {
     inflight--;
   }

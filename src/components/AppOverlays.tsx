@@ -10,6 +10,7 @@ import type { CollabSession } from "../collab/yjs";
 import { EditorLayout } from "../layouts/EditorLayout";
 import { ErrorBoundary } from "../ui/ErrorBoundary";
 import { useAppStore } from "../store/useStore";
+import { t } from "../i18n";
 
 const GraphView = lazy(() => import("../ui/GraphView").then(m => ({ default: m.GraphView })));
 const CanvasWhiteboard = lazy(() => import("../ui/CanvasWhiteboard").then(m => ({ default: m.CanvasWhiteboard })));
@@ -67,6 +68,7 @@ export function AppOverlays({
   const mode = useAppStore((s) => s.mode);
   const vimEnabled = useAppStore((s) => s.vimEnabled);
   const spellCheck = useAppStore((s) => s.spellCheck);
+  const grammarCheck = useAppStore((s) => s.grammarCheck);
   const typewriterMode = useAppStore((s) => s.typewriterMode);
   const pageView = useAppStore((s) => s.pageView);
   const deferredContent = useDeferredValue(doc.content);
@@ -78,15 +80,15 @@ export function AppOverlays({
       {graphOpen && (
         <div style={{ position: "fixed", inset: 0, zIndex: 9999, background: "hsl(var(--bg))" }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "8px 16px", borderBottom: "1px solid hsl(var(--border))" }}>
-            <h3 style={{ margin: 0, fontSize: 14, color: "hsl(var(--fg))" }}>Knowledge Graph</h3>
-            <button className="icon-btn" onClick={() => setGraphOpen(false)} style={{ width: "auto", padding: "4px 12px", fontSize: 12 }}>Close</button>
+            <h3 style={{ margin: 0, fontSize: 14, color: "hsl(var(--fg))" }}>{t("graphView.title")}</h3>
+            <button className="icon-btn" onClick={() => setGraphOpen(false)} style={{ width: "auto", padding: "4px 12px", fontSize: 12 }}>{t("dialog.cancel")}</button>
           </div>
           <div style={{ height: "calc(100vh - 42px)" }}>
-            <Suspense fallback={<div style={{padding:'2rem',color:'hsl(var(--fg-muted))'}}>Loading graph…</div>}>
+            <Suspense fallback={<div style={{padding:'2rem',color:'hsl(var(--fg-muted))'}}>{t("loading.generic")}</div>}>
               <ErrorBoundary fallback={
                 <div style={{ padding: "3rem", textAlign: "center", color: "hsl(0 80% 60%)" }}>
-                  <strong>Graph Render Failed</strong>
-                  <p>The workspace data resulted in an invalid node structure that crashed the renderer.</p>
+                  <strong>{t("graphView.renderFailed")}</strong>
+                  <p>{t("graphView.renderFailedDetail")}</p>
                 </div>
               }>
                 <GraphView onOpenFile={(path: string, content: string) => {
@@ -101,7 +103,7 @@ export function AppOverlays({
 
       {/* Canvas Whiteboard + Plugin Gallery */}
       <Suspense fallback={null}>
-        <ErrorBoundary fallback={<div style={{ padding: '2rem', color: 'hsl(0 80% 60%)' }}>Component failed to load.</div>}>
+        <ErrorBoundary fallback={<div style={{ padding: '2rem', color: 'hsl(0 80% 60%)' }}>{t("errorBoundary.heading")}</div>}>
           <CanvasWhiteboard open={canvasOpen} onClose={() => setCanvasOpen(false)} />
           <PluginGallery open={galleryOpen} onClose={() => setGalleryOpen(false)} />
         </ErrorBoundary>
@@ -109,8 +111,8 @@ export function AppOverlays({
 
       {/* Version History overlay */}
       {historyOpen && (
-        <Suspense fallback={<div style={{padding:'2rem',color:'hsl(var(--fg-muted))'}}>Loading history…</div>}>
-          <ErrorBoundary fallback={<div style={{ padding: '2rem', color: 'hsl(0 80% 60%)' }}>Version history failed to load.</div>}>
+        <Suspense fallback={<div style={{padding:'2rem',color:'hsl(var(--fg-muted))'}}>{t("loading.generic")}</div>}>
+          <ErrorBoundary fallback={<div style={{ padding: '2rem', color: 'hsl(0 80% 60%)' }}>{t("errorBoundary.heading")}</div>}>
             <VersionHistory
               fileName={doc.name}
               currentContent={doc.content}
@@ -124,7 +126,7 @@ export function AppOverlays({
       {/* Table Editor overlay */}
       {tableEditorOpen && (
         <Suspense fallback={null}>
-          <ErrorBoundary fallback={<div style={{ padding: '2rem', color: 'hsl(0 80% 60%)' }}>Table editor failed to load.</div>}>
+          <ErrorBoundary fallback={<div style={{ padding: '2rem', color: 'hsl(0 80% 60%)' }}>{t("errorBoundary.heading")}</div>}>
             <MarkdownTableEditor
               onUpdate={(md: string) => {
                 const current = doc.content;
@@ -153,11 +155,11 @@ export function AppOverlays({
           <EditorLayout
             mode={mode}
             docContent={doc.content}
-            docName={doc.name}
             deferredContent={deferredContent}
             editorRef={editorRef}
             vimEnabled={vimEnabled}
             spellCheck={spellCheck}
+            grammarCheck={grammarCheck}
             typewriterMode={typewriterMode}
             activeFile={activeFile}
             pageView={pageView}

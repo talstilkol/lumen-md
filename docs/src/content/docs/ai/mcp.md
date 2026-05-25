@@ -44,6 +44,10 @@ Lumen workspace is now part of Claude's context.
 | `write_note` | `path`, `content` | Confirmation string |
 | `list_notes` | — | Newline-separated list of every `.md` / `.txt` |
 | `search_workspace` | `query`, `limit?` | Substring matches with line numbers |
+| `delete_note` | `path`, `confirm: true` | Refuses without `confirm: true` (safety guard) |
+| `update_frontmatter` | `path`, `set?`, `unset?` | Patch YAML keys; body untouched |
+| `list_tags` | — | Tag → count map across the whole workspace |
+| `get_backlinks` | `path` | Notes that contain `[[wiki-link]]` to this one |
 
 ## Examples
 
@@ -56,6 +60,17 @@ on each → composes a summary with citations linking back to your notes.
 
 Claude calls `write_note("meetings/2026-q3-prep.md", "...")` — your note
 appears in OPFS instantly (after the next `cap sync` or Git pull).
+
+> *Tag every note under `2024/` as archived.*
+
+Claude calls `list_notes` → filters to `2024/` → loops
+`update_frontmatter(path, { set: { status: "archived" } })`. Bodies stay
+intact; only frontmatter is rewritten.
+
+> *Which notes link to "Project Aurora"?*
+
+Claude calls `get_backlinks("projects/project-aurora.md")` → returns
+every note containing `[[Project Aurora]]`.
 
 ## Security boundary
 

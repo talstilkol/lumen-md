@@ -154,4 +154,76 @@ describe("syncWithCloud", () => {
     };
     await expect(syncWithCloud(provider)).rejects.toThrow(/not connected/);
   });
+
+  it("picks local on conflict when local is newer (newer policy)", async () => {
+    const stale = Date.now() - 60_000;
+    const fresh = Date.now();
+    (workspaceMock as unknown as {
+      __setLocalFiles(i: Record<string, { content: string; modified: number }>): void;
+    }).__setLocalFiles({
+      "doc.md": { content: "local-newer", modified: fresh },
+    });
+    const provider = fakeProvider({
+      "doc.md": { content: "remote-stale", modified: stale },
+    });
+    const report = await syncWithCloud(provider, { conflict: "newer" });
+    expect(report.conflicts).toHaveLength(1);
+    expect(report.conflicts[0].resolution).toBe("local");
+    expect(report.uploaded).toBe(1);
+    expect(report.downloaded).toBe(0);
+  });
+
+  it("records per-file errors instead of throwing the run", async () => {
+    (workspaceMock as unknown as {
+      __setLocalFiles(i: Record<string, { content: string; modified: number }>): void;
+    }).__setLocalFiles({
+      "broken.md": { content: "ok", modified: Date.now() },
+      "fine.md": { content: "ok", modified: Date.now() },
+    });
+    const provider = fakeProvider({});
+    // Make `broken.md` writes fail.
+    const original = provider.writeFile;
+    provider.writeFile = async (p, c) => {
+      if (p === "broken.md") throw new Error("boom");
+      return original(p, c);
+    };
+    const report = await syncWithCloud(provider);
+    expect(report.errors).toHaveLength(1);
+    expect(report.errors[0].path).toBe("broken.md");
+    expect(report.errors[0].error).toMatch(/boom/);
+    // Other file still uploaded.
+    expect(report.uploaded).toBe(1);
+  });
+
+  it("fires onProgress at start, mid, and end", async () => {
+    (workspaceMock as unknown as {
+      __setLocalFiles(i: Record<string, { content: string; modified: number }>): void;
+    }).__setLocalFiles({
+      "a.md": { content: "1", modified: Date.now() },
+      "b.md": { content: "2", modified: Date.now() },
+    });
+    const provider = fakeProvider({
+      "c.md": { content: "3", modified: Date.now() },
+    });
+    const ticks: number[] = [];
+    await syncWithCloud(provider, {
+      onProgress: (frac) => ticks.push(frac),
+    });
+    expect(ticks[0]).toBe(0); // listing local
+    expect(ticks[ticks.length - 1]).toBe(1); // done
+    // monotonic non-decreasing
+    for (let i = 1; i < ticks.length; i++) {
+      expect(ticks[i]).toBeGreaterThanOrEqual(ticks[i - 1]);
+    }
+  });
+
+  it("returns an empty report when both sides are empty", async () => {
+    const provider = fakeProvider({});
+    const report = await syncWithCloud(provider);
+    expect(report.uploaded).toBe(0);
+    expect(report.downloaded).toBe(0);
+    expect(report.deleted).toBe(0);
+    expect(report.conflicts).toEqual([]);
+    expect(report.errors).toEqual([]);
+  });
 });

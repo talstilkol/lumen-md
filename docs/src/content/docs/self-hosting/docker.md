@@ -1,0 +1,161 @@
+---
+title: Self-hosting with Docker
+description: Run Lumen on your own infrastructure with the docker-compose bundle.
+---
+
+> Lumen is a **local-first** editor — by default everything runs inside
+> your browser, no servers needed. This guide is for teams who want to
+> own the persistence layer (collab, billing, audit log) on their own
+> infrastructure.
+
+## What's in the bundle
+
+`docker-compose.yml` brings up five services on a single VM:
+
+| Service | Port | What |
+|---|---|---|
+| `lumen-web` | 80 | nginx serving the React SPA + strict CSP |
+| `lumen-signal` | 4444 | y-webrtc signaling — peers find each other |
+| `lumen-collab` | 4445 | Persistent y-websocket + Postgres archive |
+| `lumen-billing` | 4446 | Stripe webhook handler (optional) |
+| `postgres` | 5432 | Snapshot archive + entitlements + audit log |
+
+A LevelDB volume (`collab-data`) and a Postgres volume (`postgres-data`)
+persist outside container lifecycles.
+
+## Prerequisites
+
+- A Linux VM with **2 vCPU + 4 GB RAM** (Hetzner CX22, DigitalOcean
+  basic-2, AWS t4g.medium are all fine)
+- **Docker 24+** and **Docker Compose v2**
+- A domain pointing at the VM (we'll use `lumen.example.com` below)
+
+## 5-minute install
+
+```bash
+# 1. Clone Lumen
+git clone https://github.com/lumen-md/lumen.git
+cd lumen
+
+# 2. Copy + edit the env template
+cp .env.onprem.example .env.onprem
+$EDITOR .env.onprem
+#   set LUMEN_PG_PASSWORD to a strong value
+#   set LUMEN_BASE_URL to your domain
+#   leave Stripe / Sentry / WorkOS empty for now
+
+# 3. Build + start
+make onprem-up
+```
+
+After ~60 s of image build + container start, visit
+`http://<vm-ip>` and you should see the Lumen editor.
+
+## DNS setup (recommended)
+
+Point these subdomains at the VM:
+
+```
+lumen.example.com    A    <vm-ip>
+signal.example.com   A    <vm-ip>   # or proxy via lumen-web
+collab.example.com   A    <vm-ip>
+```
+
+Then put a TLS terminator (Caddy, Cloudflare Tunnel, or your existing
+nginx) in front. The bundled nginx serves HTTP only; the ports are
+mapped 1:1 so a reverse proxy can terminate SSL upstream.
+
+## Optional: Billing
+
+If you want to gate Pro features (persistent collab, semantic search,
+fine-tune AI) behind a paywall, add Stripe credentials and re-up with
+the `billing` profile:
+
+```bash
+# In .env.onprem
+STRIPE_SECRET_KEY=sk_live_xxx
+STRIPE_WEBHOOK_SECRET=whsec_xxx
+
+# Bring up with the billing service
+docker compose --env-file .env.onprem --profile billing up -d
+```
+
+The billing worker runs `wrangler local-mode` so the same code that
+powers the Cloudflare deployment also runs in your VM.
+
+## Optional: Sentry telemetry
+
+Set `SENTRY_DSN=https://…@sentry.io/…` in `.env.onprem` to enable
+opt-in error reporting. Users still see a toggle in Settings to turn
+it off; you control which DSN.
+
+## Optional: SSO with WorkOS
+
+Set `WORKOS_API_KEY=…` and `WORKOS_CLIENT_ID=…` to enable SAML / OIDC
+sign-in. A workspace admin pastes their IdP metadata URL into Settings
+→ Organisation; WorkOS handles the protocol dance.
+
+## Daily ops
+
+| What | Command |
+|---|---|
+| Tail logs | `make onprem-logs` |
+| Restart everything | `make onprem-down && make onprem-up` |
+| Check Postgres | `docker compose exec postgres psql -U lumen` |
+| Hard reset (deletes all data) | `make onprem-reset` |
+
+## Backup
+
+The two Docker volumes are the only state Lumen owns:
+
+```bash
+# Postgres dump
+docker compose exec postgres pg_dump -U lumen lumen | gzip > lumen-pg-$(date +%F).sql.gz
+
+# LevelDB collab snapshots
+docker run --rm -v lumen_collab-data:/data -v "$(pwd)":/backup alpine \
+  tar czf /backup/lumen-collab-$(date +%F).tar.gz -C /data .
+```
+
+User documents themselves never leave the browser — they live in OPFS
+(Origin Private File System) per browser, per origin. Encourage users
+to use the built-in **Export workspace** command to back up their
+local content.
+
+## Updating Lumen
+
+```bash
+git pull
+make onprem-up   # rebuilds images + restarts containers
+```
+
+Database migrations run automatically on container start
+(`docker/postgres-init.sql` is idempotent).
+
+## Sizing for scale
+
+Single-VM 2 vCPU / 4 GB handles:
+
+- Up to ~50 concurrent collab rooms (LevelDB hot cache)
+- ~1k entitlement reads / sec
+- Linear cost on audit volume — every mutation writes one row
+
+For larger deployments, split:
+
+- `lumen-web` + `lumen-signal` on one VM (stateless, horizontally
+  scalable)
+- `lumen-collab` on a dedicated VM with a persistent EBS / Block-Storage
+  volume
+- Postgres on managed RDS / Cloud SQL
+
+## Troubleshooting
+
+| Symptom | Likely cause |
+|---|---|
+| 502 from `lumen.example.com` | reverse proxy can't reach `lumen-web:80` |
+| Editor loads but collab silently fails | `lumen-signal` not reachable; check WS upgrade rules in proxy |
+| Pro features stay locked | `lumen-billing` not in the compose profile, or webhook signature secret wrong |
+| `pg_isready` fails | `LUMEN_PG_PASSWORD` mismatch between `.env.onprem` and the volume |
+
+If something else breaks, `make onprem-logs` is your friend — the
+five-line per-service prefix makes it easy to spot the offender.

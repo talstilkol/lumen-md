@@ -1,0 +1,103 @@
+# Lumen on-prem deployment.
+#
+# Brings up the full self-hosted stack on a single VM:
+#   - lumen-web      :80   (nginx serving the React SPA)
+#   - lumen-signal   :4444 (y-webrtc signaling — peers find each other)
+#   - lumen-collab   :4445 (persistent y-websocket + Postgres archive)
+#   - lumen-billing  :4446 (Stripe webhook handler — optional)
+#   - postgres       :5432 (snapshot archive + entitlements + audit log)
+#
+# Prerequisites:
+#   1. Copy .env.onprem.example → .env.onprem and fill in the secrets.
+#   2. `docker compose --env-file .env.onprem up -d`
+#   3. Point your DNS at this host:
+#        lumen.example.com    → lumen-web
+#        signal.example.com   → lumen-signal (or proxy via lumen-web)
+#        collab.example.com   → lumen-collab
+#        billing.example.com  → lumen-billing
+#
+# To skip optional services pass `--profile core` (omits billing).
+
+version: "3.9"
+
+x-restart: &restart
+  restart: unless-stopped
+
+x-logging: &logging
+  logging:
+    driver: json-file
+    options:
+      max-size: "10m"
+      max-file: "5"
+
+services:
+  lumen-web:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.web
+    ports:
+      - "80:80"
+    depends_on:
+      - lumen-signal
+      - lumen-collab
+    <<: [*restart, *logging]
+
+  lumen-signal:
+    build:
+      context: ./sync-server
+      dockerfile: Dockerfile
+    ports:
+      - "4444:4444"
+    <<: [*restart, *logging]
+
+  lumen-collab:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.collab
+    ports:
+      - "4445:4445"
+    environment:
+      DATABASE_URL: postgres://lumen:${LUMEN_PG_PASSWORD:-lumen}@postgres:5432/lumen
+      LEVELDB_PATH: /data/yjs
+    volumes:
+      - collab-data:/data
+    depends_on:
+      postgres:
+        condition: service_healthy
+    <<: [*restart, *logging]
+
+  lumen-billing:
+    profiles: ["billing"]
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.billing
+    ports:
+      - "4446:4446"
+    environment:
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET}
+      DATABASE_URL: postgres://lumen:${LUMEN_PG_PASSWORD:-lumen}@postgres:5432/lumen
+    depends_on:
+      postgres:
+        condition: service_healthy
+    <<: [*restart, *logging]
+
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: lumen
+      POSTGRES_PASSWORD: ${LUMEN_PG_PASSWORD:-lumen}
+      POSTGRES_DB: lumen
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./docker/postgres-init.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U lumen"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    <<: [*restart, *logging]
+
+volumes:
+  collab-data:
+  postgres-data:

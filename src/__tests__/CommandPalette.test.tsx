@@ -2,7 +2,7 @@
  * Component tests for CommandPalette.
  */
 import { describe, it, expect, vi } from "vitest";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { CommandPalette } from "../ui/CommandPalette";
 import type { Command } from "../ui/CommandPalette";
 
@@ -56,8 +56,10 @@ describe("CommandPalette", () => {
     render(
       <CommandPalette open={true} onClose={vi.fn()} commands={makeCommands()} />,
     );
-    expect(screen.getByText("New document")).toBeTruthy();
-    expect(screen.getByText("Open file")).toBeTruthy();
+    return waitFor(() => {
+      expect(screen.getByText("New document")).toBeTruthy();
+      expect(screen.getByText("Open file")).toBeTruthy();
+    });
   });
 
   it("filters commands by search query", () => {
@@ -66,8 +68,10 @@ describe("CommandPalette", () => {
     );
     const input = screen.getByRole("textbox");
     fireEvent.change(input, { target: { value: "chart" } });
-    expect(screen.getByText("Insert chart")).toBeTruthy();
-    expect(screen.queryByText("New document")).toBeNull();
+    return waitFor(() => {
+      expect(screen.getByText("Insert chart")).toBeTruthy();
+      expect(screen.queryByText("New document")).toBeNull();
+    });
   });
 
   it("closes on Escape key", () => {
@@ -77,7 +81,7 @@ describe("CommandPalette", () => {
     );
     const input = screen.getByRole("textbox");
     fireEvent.keyDown(input, { key: "Escape" });
-    expect(onClose).toHaveBeenCalledTimes(1);
+    return waitFor(() => expect(onClose).toHaveBeenCalledTimes(1));
   });
 
   it("closes on backdrop click", () => {
@@ -85,10 +89,12 @@ describe("CommandPalette", () => {
     render(
       <CommandPalette open={true} onClose={onClose} commands={makeCommands()} />,
     );
-    const backdrop = document.querySelector(".cmd-palette-backdrop");
-    expect(backdrop).toBeTruthy();
-    fireEvent.click(backdrop!);
-    expect(onClose).toHaveBeenCalledTimes(1);
+    return waitFor(() => {
+      const backdrop = document.querySelector(".cmd-palette-backdrop");
+      expect(backdrop).toBeTruthy();
+      fireEvent.click(backdrop!);
+      expect(onClose).toHaveBeenCalledTimes(1);
+    });
   });
 
   it("expands sub-menus on Enter when command has children", () => {
@@ -97,15 +103,17 @@ describe("CommandPalette", () => {
       <CommandPalette open={true} onClose={vi.fn()} commands={commands} />,
     );
     // The "View modes" command with children should show ▶ indicator
-    expect(screen.getByText("View modes")).toBeTruthy();
-    expect(screen.getByText("▶")).toBeTruthy();
+    return waitFor(() => {
+      expect(screen.getByText("View modes")).toBeTruthy();
+      expect(screen.getByText("▶")).toBeTruthy();
+    });
   });
 
   it("shows keyboard shortcut hints", () => {
     render(
       <CommandPalette open={true} onClose={vi.fn()} commands={makeCommands()} />,
     );
-    expect(screen.getByText("⌘O")).toBeTruthy();
+    return waitFor(() => expect(screen.getByText("⌘O")).toBeTruthy());
   });
 
   it("shows footer navigation hints", () => {
@@ -113,8 +121,10 @@ describe("CommandPalette", () => {
       <CommandPalette open={true} onClose={vi.fn()} commands={makeCommands()} />,
     );
     // Footer should have navigate/select/close hints
-    expect(screen.getByText("↑")).toBeTruthy();
-    expect(screen.getByText("↵")).toBeTruthy();
-    expect(screen.getByText("Esc")).toBeTruthy();
+    return waitFor(() => {
+      expect(screen.getByText("↑")).toBeTruthy();
+      expect(screen.getByText("↵")).toBeTruthy();
+      expect(screen.getByText("Esc")).toBeTruthy();
+    });
   });
 });

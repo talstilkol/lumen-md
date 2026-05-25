@@ -586,16 +586,20 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
+    gap: 0.5rem;
     padding: 0.5rem 0.85rem;
     font-family: theme(fontFamily.sans);
     font-size: 12px;
     color: hsl(var(--fg-muted));
     background: hsl(var(--bg-muted));
     border-bottom: 1px solid hsl(var(--border));
+    flex-wrap: wrap;
   }
   .chart-block-tabs {
     display: flex;
     gap: 0.25rem;
+    flex-wrap: wrap;
+    justify-content: flex-end;
   }
   .chart-block-tab {
     padding: 0.2rem 0.6rem;
@@ -605,6 +609,10 @@
     color: hsl(var(--fg-muted));
     cursor: pointer;
     border: 1px solid transparent;
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
   }
   .chart-block-tab:hover {
     background: hsl(var(--bg-inset));
@@ -614,6 +622,11 @@
     background: hsl(var(--accent) / 0.15);
     color: hsl(var(--accent));
     border-color: hsl(var(--accent) / 0.3);
+  }
+  @media (max-width: 480px) {
+    .chart-block-tab svg {
+      display: none;
+    }
   }
 
   /* Data table (CSV/JSON visualizer) */
@@ -937,8 +950,17 @@
     font-size: 13px;
     color: hsl(var(--fg));
   }
-  .milkdown-slash-item:hover {
-    background: hsl(var(--accent) / 0.12);
+  .milkdown-slash-item:hover,
+  .milkdown-slash-item[data-selected="true"] {
+    background: hsl(var(--accent) / 0.18);
+    color: hsl(var(--fg));
+  }
+  /* Min-width — must match the menu so the selection bar fills the row. */
+  .milkdown-slash-item {
+    min-width: 220px;
+  }
+  .milkdown-slash-group {
+    min-width: 220px;
   }
   .milkdown-slash-item .slash-icon {
     width: 24px;
@@ -956,6 +978,52 @@
   .milkdown-tooltip {
     gap: 2px;
     padding: 4px;
+  }
+  /* γ.1 — Drag handle gets absolutely positioned 22px to the left of every
+     top-level block. Each direct child of the editable root is given
+     `position:relative` so the handle anchors to its own row. */
+  .milkdown .ProseMirror > * {
+    position: relative;
+  }
+  /* γ.1.c — Columns directive rendered by remarkColumns. Each direct
+     child becomes a `.lumen-column` wrapper inside a CSS grid. */
+  .lumen-columns {
+    margin: 1rem 0;
+  }
+  .lumen-columns > .lumen-column {
+    background: hsl(var(--bg-subtle) / 0.4);
+    border-radius: 6px;
+    padding: 8px 12px;
+    min-width: 0;
+  }
+  @media (max-width: 640px) {
+    .lumen-columns {
+      grid-template-columns: 1fr !important;
+    }
+  }
+  .lumen-drag-handle:hover {
+    opacity: 1 !important;
+    background: hsl(var(--accent) / 0.12) !important;
+  }
+  .lumen-drag-handle:active,
+  .lumen-drag-handle[draggable="true"]:focus-visible {
+    cursor: grabbing !important;
+    outline: 2px solid hsl(var(--accent));
+    outline-offset: 1px;
+  }
+  /* Comment-decoration flash on click — Tier 1 #2 follow-up.
+     Pulses the yellow background twice so the user gets a visible
+     confirmation that the click was registered. The animation ends
+     and the class is auto-removed (via animationend listener). */
+  @keyframes lumen-comment-flash {
+    0%   { background: hsl(48 95% 60% / 0.20); }
+    25%  { background: hsl(48 95% 60% / 0.65); }
+    50%  { background: hsl(48 95% 60% / 0.20); }
+    75%  { background: hsl(48 95% 60% / 0.65); }
+    100% { background: hsl(48 95% 60% / 0.20); }
+  }
+  .cm-lumen-comment-flash {
+    animation: lumen-comment-flash 720ms ease-in-out;
   }
   .milkdown-tooltip button {
     width: 28px;
@@ -1384,6 +1452,25 @@
   [aria-label="Notifications"] {
     display: none !important;
   }
+}
+
+/* Narrow viewports (mobile portrait): collapse the AI Fab and Insert
+   Fab to icon-only buttons so they don't overlay editor content. The
+   menu still expands fully when tapped. */
+@media (max-width: 600px) {
+  .ai-fab > button > span,
+  .insert-fab > button > span {
+    display: none !important;
+  }
+  .ai-fab > button,
+  .insert-fab > button {
+    padding: 10px !important;
+    width: 40px;
+    height: 40px;
+    justify-content: center;
+  }
+}
+@media print {
   /* Editor section (CodeMirror) stays hidden; preview gets the full page. */
   main > section:first-child:not(:last-child) {
     display: none !important;
