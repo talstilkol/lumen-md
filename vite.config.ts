@@ -7,7 +7,9 @@ interface VitestConfig {
     environment?: string;
     include?: string[];
     globals?: boolean;
+    css?: boolean;
     setupFiles?: string[];
+    alias?: Record<string, string>;
     coverage?: {
       provider?: "v8" | "istanbul";
       reporter?: string[];
@@ -224,6 +226,16 @@ export default defineConfig({
     globals: true,
     css: false,
     setupFiles: ["src/__tests__/setup.ts"],
+    // `y-websocket` is intentionally absent from package.json (loaded at
+    // runtime via dynamic import in src/collab/yjs.ts; users opt in by
+    // installing it explicitly). Without an alias, Vitest's import
+    // analyzer can't resolve `import("y-websocket")` in CI, even though
+    // the test file then does `vi.mock(...)` to replace it. The stub
+    // gives the analyzer a real file to resolve; the test's vi.mock
+    // still wins at runtime.
+    alias: {
+      "y-websocket": path.resolve(__dirname, "src/__tests__/stubs/y-websocket.ts"),
+    },
     coverage: {
       provider: "v8",
       reporter: ["text-summary", "html", "json-summary"],
