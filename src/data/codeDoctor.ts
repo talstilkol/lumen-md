@@ -957,3 +957,35 @@ export function wrapInFence(
     after
   );
 }
+
+/**
+ * Predicate used by `CodeDoctorBlock` to decide whether to render the
+ * inline DataTable preview after a successful repair.
+ *
+ * Returns true only when the value is an array of plain objects AND
+ * every value in every record is scalar (string / number / boolean /
+ * null). Skipping array-valued records avoids a misleading column
+ * type: parseJSONTable's `inferType` stringifies arrays to "1,2,3",
+ * which Date.parse can return a real number for on some engines —
+ * causing an `items` column of arrays to be typed as DATE.
+ *
+ * Lives in the engine module (not in the React block) so it's
+ * unit-testable without mounting the UI.
+ */
+export function isAllScalarRecordList(value: unknown): boolean {
+  if (!Array.isArray(value) || value.length === 0) return false;
+  for (const r of value) {
+    if (r === null || typeof r !== "object" || Array.isArray(r)) return false;
+    for (const v of Object.values(r as Record<string, unknown>)) {
+      if (
+        v !== null &&
+        typeof v !== "string" &&
+        typeof v !== "number" &&
+        typeof v !== "boolean"
+      ) {
+        return false;
+      }
+    }
+  }
+  return true;
+}

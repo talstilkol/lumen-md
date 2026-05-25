@@ -42,13 +42,13 @@ describe("i18n locale drift", () => {
         (k) => !k.startsWith("_"),
       );
       const extra = localeKeys.filter((k) => !enKeys.has(k));
-      // Extra keys are warnings not errors — locales may have
-      // overrides for sub-dialects. Just log them.
-      if (extra.length > 0) {
-        console.warn(`[${locale}] extra keys: ${extra.join(", ")}`);
-      }
-      // Allow up to 10 extra keys (e.g. locale-specific overrides)
-      expect(extra.length).toBeLessThanOrEqual(10);
+      // Strictly zero extras — orphan translations bloat the bundle
+      // and confuse readers about which keys are still in production.
+      // The previous "allow up to 10" was a soft pass that let four
+      // dead keys (findReplace.find, findReplace.matchCase,
+      // mdTable.cancel, writingGoal.label) sit untouched. If a sub-
+      // dialect needs an override, add the key to the EN source first.
+      expect(extra, `Extra keys in ${locale}`).toEqual([]);
     });
   }
 });

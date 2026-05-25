@@ -1452,6 +1452,25 @@
   [aria-label="Notifications"] {
     display: none !important;
   }
+}
+
+/* Narrow viewports (mobile portrait): collapse the AI Fab and Insert
+   Fab to icon-only buttons so they don't overlay editor content. The
+   menu still expands fully when tapped. */
+@media (max-width: 600px) {
+  .ai-fab > button > span,
+  .insert-fab > button > span {
+    display: none !important;
+  }
+  .ai-fab > button,
+  .insert-fab > button {
+    padding: 10px !important;
+    width: 40px;
+    height: 40px;
+    justify-content: center;
+  }
+}
+@media print {
   /* Editor section (CodeMirror) stays hidden; preview gets the full page. */
   main > section:first-child:not(:last-child) {
     display: none !important;

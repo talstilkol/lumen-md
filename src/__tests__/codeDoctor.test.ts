@@ -16,6 +16,7 @@ import {
   diagnoseJsonl,
   detectRawJsonRegions,
   wrapInFence,
+  isAllScalarRecordList,
 } from "../data/codeDoctor";
 
 describe("tokenize", () => {
@@ -303,5 +304,59 @@ describe("wrapInFence", () => {
     const wrapped = wrapInFence(md, regions[0].span, "jsonl");
     expect(wrapped).toMatch(/before\n/);
     expect(wrapped).toMatch(/after\n/);
+  });
+});
+
+describe("isAllScalarRecordList (Code Doctor table-preview guard)", () => {
+  it("accepts an array of plain objects with all scalar values", () => {
+    expect(
+      isAllScalarRecordList([
+        { a: 1, b: "x", c: true, d: null },
+        { a: 2, b: "y", c: false },
+      ]),
+    ).toBe(true);
+  });
+
+  it("rejects an array containing a record with an array value", () => {
+    // Real-world case: `{items: [1,2,3]}` would otherwise get its
+    // `items` column typed as DATE because parseJSONTable's
+    // inferType stringifies arrays to "1,2,3" and Date.parse can
+    // return numbers for that on some engines.
+    expect(
+      isAllScalarRecordList([
+        { a: "hello", items: [1, 2, 3], unclosed: 1 },
+      ]),
+    ).toBe(false);
+  });
+
+  it("rejects an array of primitives (no records)", () => {
+    expect(isAllScalarRecordList([1, 2, 3])).toBe(false);
+    expect(isAllScalarRecordList(["a", "b"])).toBe(false);
+  });
+
+  it("rejects an empty array", () => {
+    expect(isAllScalarRecordList([])).toBe(false);
+  });
+
+  it("rejects null / undefined / non-array", () => {
+    expect(isAllScalarRecordList(null)).toBe(false);
+    expect(isAllScalarRecordList(undefined)).toBe(false);
+    expect(isAllScalarRecordList({})).toBe(false);
+    expect(isAllScalarRecordList("hello")).toBe(false);
+  });
+
+  it("rejects records with nested-object values", () => {
+    expect(
+      isAllScalarRecordList([{ a: 1, nested: { b: 2 } }]),
+    ).toBe(false);
+  });
+
+  it("rejects mixed arrays where one record is fine and another has an array", () => {
+    expect(
+      isAllScalarRecordList([
+        { a: 1, b: 2 },
+        { a: 3, items: [4, 5] },
+      ]),
+    ).toBe(false);
   });
 });

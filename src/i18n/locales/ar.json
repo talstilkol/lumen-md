@@ -287,8 +287,6 @@
   "errorBoundary.renderDetail": "One of the embedded visualizations crashed during render. The rest of the editor is kept safe.",
   "findReplace.caseSensitive": "Case sensitive",
   "findReplace.close": "إغلاق find & replace",
-  "findReplace.find": "بحث",
-  "findReplace.matchCase": "مطابقة حالة الأحرف",
   "findReplace.next": "Next match",
   "findReplace.prev": "Previous match",
   "findReplace.regex": "تعبير نمطي",
@@ -638,7 +636,5 @@
   "runtimeMetrics.column.timeouts": "Timeouts",
   "runtimeMetrics.column.rateLimits": "Rate limit",
   "cmd.view.runtimeMetrics": "Runtime metrics",
-  "cmd.view.runtimeMetrics.hint": "Inspect retries, timeouts, and latency by transport category",
-  "mdTable.cancel": "إلغاء",
-  "writingGoal.label": "هدف الكتابة"
+  "cmd.view.runtimeMetrics.hint": "Inspect retries, timeouts, and latency by transport category"
 }

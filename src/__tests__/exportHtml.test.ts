@@ -1,17 +1,10 @@
 /**
- * exportHtml — tests for the escapeHtml function.
+ * exportHtml.escapeHtml — tests against the REAL implementation.
+ * Previously this file forked the function, which is theatre (could
+ * pass while production XSS escapes regressed).
  */
 import { describe, it, expect } from "vitest";
-
-/** Extracted from src/storage/exportHtml.ts */
-function escapeHtml(s: string): string {
-  return s
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#39;");
-}
+import { escapeHtml } from "../storage/exportHtml";
 
 describe("escapeHtml", () => {
   it("escapes ampersand", () => {

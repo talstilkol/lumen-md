@@ -287,8 +287,6 @@
   "errorBoundary.renderDetail": "One of the embedded visualizations crashed during render. The rest of the editor is kept safe.",
   "findReplace.caseSensitive": "Case sensitive",
   "findReplace.close": "閉じる find & replace",
-  "findReplace.find": "検索",
-  "findReplace.matchCase": "大文字/小文字を区別",
   "findReplace.next": "Next match",
   "findReplace.prev": "Previous match",
   "findReplace.regex": "正規表現",
@@ -638,7 +636,5 @@
   "runtimeMetrics.column.timeouts": "Timeouts",
   "runtimeMetrics.column.rateLimits": "Rate limit",
   "cmd.view.runtimeMetrics": "Runtime metrics",
-  "cmd.view.runtimeMetrics.hint": "Inspect retries, timeouts, and latency by transport category",
-  "mdTable.cancel": "キャンセル",
-  "writingGoal.label": "執筆目標"
+  "cmd.view.runtimeMetrics.hint": "Inspect retries, timeouts, and latency by transport category"
 }

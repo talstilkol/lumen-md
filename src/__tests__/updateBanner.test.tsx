@@ -1,16 +1,54 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
 
-// UpdateBanner imports virtual:pwa-register dynamically — mock it
+/**
+ * UpdateBanner — listens to virtual:pwa-register's `onNeedRefresh`
+ * callback and shows a Reload affordance. Previously this test only
+ * asserted "container is defined" which is theatre — it would pass
+ * even if the banner never rendered.
+ *
+ * Now we capture the callback supplied to registerSW, fire it, and
+ * verify the banner appears + the reload button invokes the returned
+ * updateSW(true).
+ */
+
+let capturedOnNeedRefresh: (() => void) | null = null;
+const updateSwSpy = vi.fn();
+
 vi.mock("virtual:pwa-register", () => ({
-  registerSW: vi.fn(() => vi.fn()),
+  registerSW: vi.fn((opts: { onNeedRefresh?: () => void }) => {
+    capturedOnNeedRefresh = opts?.onNeedRefresh ?? null;
+    return updateSwSpy;
+  }),
 }));
 
-describe("UpdateBanner render", () => {
-  it("renders without crashing", async () => {
+describe("UpdateBanner", () => {
+  beforeEach(() => {
+    capturedOnNeedRefresh = null;
+    updateSwSpy.mockClear();
+  });
+
+  it("renders nothing before a service-worker prompts for refresh", async () => {
     const { render } = await import("@testing-library/react");
     const { UpdateBanner } = await import("../ui/UpdateBanner");
     const { container } = render(<UpdateBanner />);
-    // By default, needRefresh is false so the banner is hidden
-    expect(container).toBeDefined();
+    expect(container.querySelector(".pwa-update-banner")).toBeNull();
+  });
+
+  it("shows the banner after onNeedRefresh fires; reload button invokes updateSW(true)", async () => {
+    const { render, act, screen } = await import("@testing-library/react");
+    const { UpdateBanner } = await import("../ui/UpdateBanner");
+    render(<UpdateBanner />);
+    // Let the dynamic import + effect run.
+    await new Promise<void>((r) => setTimeout(r, 0));
+    expect(capturedOnNeedRefresh).not.toBeNull();
+    await act(async () => {
+      capturedOnNeedRefresh?.();
+    });
+    const banner = screen.getByRole("status");
+    expect(banner.className).toContain("pwa-update-banner");
+    const reloadBtn = banner.querySelector(".pwa-update-btn") as HTMLButtonElement;
+    expect(reloadBtn).not.toBeNull();
+    reloadBtn.click();
+    expect(updateSwSpy).toHaveBeenCalledWith(true);
   });
 });

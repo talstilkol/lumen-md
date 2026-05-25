@@ -168,15 +168,17 @@ export default function LiveJsBlock({ source, meta }: Props) {
         return;
       }
       if (!msg.level || !msg.parts) return;
-      if (msg.level === "error") {
+      const level: LogLevel = msg.level;
+      const parts: string[] = msg.parts;
+      if (level === "error") {
         hadError = true;
         setRunState("error");
       }
     setLogs((prev) =>
       [...prev, {
         id: ++idCounter.current,
-        level: msg.level,
-        parts: msg.parts,
+        level,
+        parts,
         ts: Date.now(),
       }].slice(-200),
     );

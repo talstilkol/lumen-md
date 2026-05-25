@@ -1,21 +1,12 @@
 /**
- * relativeTime — tests for the time-ago formatting logic.
- * Uses extracted pure logic (avoids importing App.tsx directly).
+ * relativeTime — tests against the REAL src/lib/relativeTime.ts.
+ * Previously this file re-implemented the formatter locally, which
+ * could pass while the real one regressed (or its i18n keys broke).
+ * Now we import the actual function and assert on the actual i18n
+ * output ("just now", "{n}m ago", etc. in the en locale default).
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-
-/** Extracted from src/App.tsx, using raw strings for testing */
-function relativeTime(ts: number): string {
-  const diff = Date.now() - ts;
-  const mins = Math.round(diff / 60_000);
-  if (mins < 1) return "just now";
-  if (mins < 60) return `${mins}m ago`;
-  const hours = Math.round(mins / 60);
-  if (hours < 24) return `${hours}h ago`;
-  const days = Math.round(hours / 24);
-  if (days < 30) return `${days}d ago`;
-  return new Date(ts).toLocaleDateString();
-}
+import { relativeTime } from "../lib/relativeTime";
 
 describe("relativeTime", () => {
   beforeEach(() => vi.useFakeTimers());

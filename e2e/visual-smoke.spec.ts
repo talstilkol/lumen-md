@@ -1,0 +1,89 @@
+import { test, expect } from "@playwright/test";
+
+/**
+ * Visual smoke for the four high-risk surfaces from Round-4 master plan M6:
+ *   - Mermaid block renders an SVG (not just chrome).
+ *   - WYSIWYG mode shows a ProseMirror editor and accepts text.
+ *   - RTL locale flips toolbar mirroring (html dir + computed dir on body).
+ *   - PageView shows page-style pagination (a `.page` element).
+ *
+ * Each test captures a screenshot on failure so a human can eyeball
+ * what the page actually rendered. The asserts are coarse (visibility +
+ * shape, not pixel diffs) because we just want a "the surface mounts and
+ * looks plausibly correct" smoke gate.
+ */
+
+test.beforeEach(async ({ page }) => {
+  await page.addInitScript(() => {
+    localStorage.setItem("lumen-tour-done", "1");
+    localStorage.removeItem("lumen-md");
+  });
+  await page.goto("/");
+  await page.locator("header").first().waitFor({ state: "visible", timeout: 5000 });
+});
+
+test("Mermaid block renders inline SVG inside the preview", async ({ page }) => {
+  // Split mode so we see both source and preview at once.
+  await page.keyboard.press("Meta+2");
+  const editor = page.locator(".cm-content").first();
+  await editor.click();
+  await editor.fill("```mermaid\ngraph LR; A --> B; B --> C\n```\n");
+  const svg = page.locator(".chart-block svg, .mermaid-block svg").first();
+  await expect(svg).toBeVisible({ timeout: 8_000 });
+  // SVG sub-elements (`<g>`, `<path>`) are considered "hidden" by
+  // Playwright's isVisible heuristic because they have no intrinsic
+  // box even when rendered. Counting them is enough proof of structure.
+  const groupCount = await svg.locator("g").count();
+  expect(groupCount).toBeGreaterThan(0);
+});
+
+test("WYSIWYG mode mounts ProseMirror and accepts typed input", async ({ page }) => {
+  await page.keyboard.press("Meta+4");
+  const pm = page.locator(".ProseMirror").first();
+  await expect(pm).toBeVisible({ timeout: 8_000 });
+  await pm.click();
+  await page.keyboard.type("hello-wysiwyg");
+  await expect(pm).toContainText("hello-wysiwyg");
+});
+
+test("RTL locale flips html[dir] to rtl", async ({ page }) => {
+  await expect(page.locator("html")).toHaveAttribute("dir", "ltr");
+  // Open palette and search for the Hebrew language toggle.
+  await page.keyboard.press("Meta+K");
+  const palette = page
+    .locator('[role="dialog"]')
+    .filter({ has: page.getByPlaceholder(/Type a command/i) });
+  await palette.waitFor({ timeout: 8000 });
+  // `fill` is more reliable than `keyboard.type` for non-ASCII strings
+  // and for focus consistency across Playwright versions.
+  await palette.locator("input").first().fill("עברית");
+  await expect(
+    palette.locator('[role="option"][aria-selected="true"]'),
+  ).toContainText(/עברית/, { timeout: 8000 });
+  await page.keyboard.press("Enter");
+  await expect(page.locator("html")).toHaveAttribute("dir", "rtl", { timeout: 5000 });
+});
+
+test("PageView mode renders pagination chrome (page nav buttons)", async ({ page }) => {
+  // PageView is mounted via the command palette ("Page View" command).
+  await page.keyboard.press("Meta+K");
+  const palette = page
+    .locator('[role="dialog"]')
+    .filter({ has: page.getByPlaceholder(/Type a command/i) });
+  await palette.waitFor({ timeout: 8000 });
+  await palette.locator("input").first().fill("Page View");
+  // Wait for the palette's filter to settle: the highlighted option
+  // (aria-selected=true) must match what we typed.
+  await expect(
+    palette.locator('[role="option"][aria-selected="true"]'),
+  ).toContainText(/Page View/i, { timeout: 8000 });
+  await page.keyboard.press("Enter");
+  // PageView renders Previous/Next nav buttons with aria-labels — those
+  // are the stable identifiers across re-renders and locales.
+  await expect(
+    page.locator('button[aria-label="Previous page"]'),
+  ).toBeVisible({ timeout: 8_000 });
+  await expect(
+    page.locator('button[aria-label="Next page"]'),
+  ).toBeVisible({ timeout: 8_000 });
+});

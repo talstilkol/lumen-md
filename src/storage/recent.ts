@@ -61,7 +61,7 @@ export async function reopenRecent(
   }
 }
 
-function hashName(name: string): string {
+export function hashName(name: string): string {
   let h = 0;
   for (let i = 0; i < name.length; i++) {
     h = (h * 31 + name.charCodeAt(i)) | 0;

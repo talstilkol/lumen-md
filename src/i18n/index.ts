@@ -1462,9 +1462,19 @@ export function t(id: string, vars?: Record<string, string | number>): string {
   const bundle = BUNDLES[activeLocale] ?? en;
   const template = bundle[id] ?? en[id] ?? id;
   if (!vars) return template;
-  return template.replace(/\{(\w+)\}/g, (_, k) =>
-    vars[k] !== undefined ? String(vars[k]) : `{${k}}`,
-  );
+  // Support both `{key}` (canonical) and `{{key}}` (some early templates
+  // accidentally used double-brace syntax). The double-brace form was
+  // a real production bug — users saw literal "{5} / {100}" because the
+  // outer braces were never stripped. Order matters: substitute the
+  // double-brace form FIRST so the regex doesn't leave inner braces
+  // behind for the single-brace pass to keep.
+  return template
+    .replace(/\{\{(\w+)\}\}/g, (_, k) =>
+      vars[k] !== undefined ? String(vars[k]) : `{{${k}}}`,
+    )
+    .replace(/\{(\w+)\}/g, (_, k) =>
+      vars[k] !== undefined ? String(vars[k]) : `{${k}}`,
+    );
 }
 
 export function isRTL(): boolean {

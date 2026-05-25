@@ -191,8 +191,11 @@ export default function MermaidBlock({ source }: Props) {
           Mermaid diagram (scroll to render)
         </div>
       )}
-      {/* SVG host — innerHTML is set imperatively, separate from chrome. */}
-      <div ref={ref} />
+      {/* SVG host — innerHTML is set imperatively, separate from chrome.
+          width:100% so Mermaid's responsive SVG gets the full block
+          width on first layout. minHeight prevents a flash where the
+          host briefly collapses to 0px before the SVG lands. */}
+      <div ref={ref} style={{ width: "100%", minHeight: 1 }} />
     </div>
   );
 }
