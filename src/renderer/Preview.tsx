@@ -48,7 +48,14 @@ export function Preview({ markdownText }: Props) {
   );
 
   return (
-    <div className="flex-1 min-h-0 overflow-y-auto" data-preview-root>
+    // `contain: layout` isolates the preview's content growth from
+    // shifting siblings. Without it, the async tree state update
+    // ripples into a CLS of 0.44+ (Lighthouse audit, M-perf-1).
+    <div
+      className="flex-1 min-h-0 overflow-y-auto"
+      data-preview-root
+      style={{ contain: "layout" }}
+    >
       <CopyButtonHandler />
       {error && (
         <div
