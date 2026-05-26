@@ -206,8 +206,15 @@ async function attachWebsocketProvider(
   doc: Y.Doc,
 ): Promise<WebsocketLike | null> {
   try {
-    const pkg = "y-websocket";
-    const mod = (await import(/* @vite-ignore */ pkg)) as {
+    // Static-string dynamic import so vi.mock("y-websocket") resolves
+    // here in tests. The previous indirection-via-variable defeated
+    // the mock graph. Vite's import-analysis plugin would try to
+    // resolve this at dev-server start, which crashes when the user
+    // hasn't installed the package — so vite.config.ts adds a
+    // resolve.alias mapping "y-websocket" → the test stub so the
+    // analyzer always finds *something*. The try/catch handles any
+    // runtime failure regardless.
+    const mod = (await import("y-websocket")) as unknown as {
       WebsocketProvider: new (
         url: string,
         room: string,

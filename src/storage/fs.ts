@@ -141,8 +141,11 @@ export async function saveFile(
  * Convert imported CSV/JSON files into a small markdown stub that drops the
  * raw content into the corresponding Lumen block, so the auto-table+chart
  * engine kicks in immediately.
+ *
+ * Exported so tests can exercise the actual transformation rather than a
+ * locally-reimplemented copy (which is theatre and can drift silently).
  */
-function convertImported(name: string, raw: string): string {
+export function convertImported(name: string, raw: string): string {
   const lower = name.toLowerCase();
   if (lower.endsWith(".csv") || lower.endsWith(".tsv")) {
     const lang = lower.endsWith(".tsv") ? "tsv" : "csv";

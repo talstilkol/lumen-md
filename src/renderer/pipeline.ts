@@ -37,6 +37,14 @@ import rehypeKatex from "rehype-katex";
 import rehypeSlug from "rehype-slug";
 import rehypeRaw from "rehype-raw";
 import rehypeReact from "rehype-react";
+// Eager-import katex BEFORE mhchem so Rollup's chunk graph keeps the
+// canonical katex module evaluated first. Without this, the production
+// bundle's vendor-katex chunk hits a Temporal Dead Zone error
+// ("Cannot access 'xn' before initialization") because mhchem's
+// side-effect mutation of katex internals runs before katex's own
+// initializers complete. The eager import binds katex into the chunk
+// graph as a regular dependency, not a side-effect afterthought.
+import "katex";
 // Side-effect import: registers \ce{}/\pu{} macros on KaTeX
 import "katex/contrib/mhchem";
 import { visit } from "unist-util-visit";
@@ -53,6 +61,10 @@ const SPECIAL_LANGS = new Set([
   "csv",
   "tsv",
   "json-table",
+  "insights",
+  "jsonl",
+  "code-doctor",
+  "fix-json",
   // Tabular conversions — share the DataBlock renderer.
   "sql",
   "pandas",
@@ -81,10 +93,17 @@ const SPECIAL_LANGS = new Set([
   "js-live",
   "live-svg",
   "svg-live",
+  "svg",
   "live-glsl",
   "glsl-live",
   "glsl",
   "shader",
+  // Plain `html` fence as alias for `html-preview` — Lumen treats a raw
+  // HTML fence as "render this HTML safely in a sanitized preview" rather
+  // than a syntax-highlighted code block. Matches the dynamic-blocks-
+  // hardening contract: any HTML the user types must round-trip through
+  // markupSanitizer before it touches the DOM.
+  "html",
 ]);
 
 /**
@@ -99,9 +118,11 @@ function remarkLumenBlocks() {
       // Aliases.
       let tag: string;
       if (lang === "json-table") tag = "lumen-jsontable";
+      else if (lang === "insights" || lang === "jsonl") tag = "lumen-insights";
+      else if (lang === "code-doctor" || lang === "fix-json") tag = "lumen-code-doctor";
       else if (lang === "graphviz") tag = "lumen-dot";
       else if (lang === "puml") tag = "lumen-plantuml";
-      else if (lang === "html-preview" || lang === "htmlpreview")
+      else if (lang === "html-preview" || lang === "htmlpreview" || lang === "html")
         tag = "lumen-htmlpreview";
       else if (lang === "bib") tag = "lumen-bibtex";
       // Tabular conversions all share the DataBlock component, with `lang`
@@ -113,7 +134,7 @@ function remarkLumenBlocks() {
       // which spelling the user picked.
       else if (lang === "live-css" || lang === "css-live") tag = "lumen-livecss";
       else if (lang === "live-js" || lang === "js-live") tag = "lumen-livejs";
-      else if (lang === "live-svg" || lang === "svg-live") tag = "lumen-livesvg";
+      else if (lang === "live-svg" || lang === "svg-live" || lang === "svg") tag = "lumen-livesvg";
       else if (lang === "live-glsl" || lang === "glsl-live" || lang === "glsl" || lang === "shader")
         tag = "lumen-liveglsl";
       else tag = `lumen-${lang}`;

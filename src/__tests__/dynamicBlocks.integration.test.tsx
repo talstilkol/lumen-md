@@ -60,13 +60,41 @@ describe("dynamic block integration smoke", () => {
   });
 
   it("shows PlantUML failure path on non-200 responses", async () => {
-    fetchMock.mockResolvedValueOnce(
-      new Response("boom", { status: 500 }),
-    );
+    // PlantUMLBlock uses fetchWithRetry (maxRetries: 2, baseDelayMs:
+    // 500). Make ALL attempts fail so the block surfaces the error
+    // instead of a retry succeeding against the default beforeEach
+    // mock. The retry chain takes ~1.5s so waitFor needs a longer
+    // timeout than the default 1s.
+    fetchMock.mockResolvedValue(new Response("boom", { status: 500 }));
     render(<PlantUMLBlock source="bad source" />);
-    await waitFor(() => {
-      expect(screen.getByText(/PlantUML error \(rendered via kroki.io\)/)).toBeTruthy();
-    });
+    await waitFor(
+      () => {
+        expect(
+          screen.getByText(/PlantUML error \(rendered via kroki.io\)/),
+        ).toBeTruthy();
+      },
+      { timeout: 5000 },
+    );
+  });
+
+  it("retries on transient failures and recovers — fail-fail-succeed", async () => {
+    // Pins retry-then-success behavior: the first two calls 500,
+    // the third returns a valid SVG. The block must end in
+    // "Rendered" state and fetch must have been called 3×.
+    fetchMock
+      .mockResolvedValueOnce(new Response("boom", { status: 500 }))
+      .mockResolvedValueOnce(new Response("boom", { status: 502 }))
+      .mockResolvedValue(
+        new Response('<svg xmlns="http://www.w3.org/2000/svg"><text>retried</text></svg>'),
+      );
+    render(<PlantUMLBlock source="retry me" />);
+    await waitFor(
+      () => {
+        expect(screen.getByText(/Rendered in/)).toBeTruthy();
+      },
+      { timeout: 5000 },
+    );
+    expect(fetchMock).toHaveBeenCalledTimes(3);
   });
 
   it("renders Graphviz block with mocked wasm backend", async () => {

@@ -71,12 +71,16 @@ function portalEndpoint(): string {
 
 export async function startCheckout(tier: Exclude<PlanTier, "free">, jwt: string | null): Promise<void> {
   if (!jwt) throw new Error("Sign in first to subscribe.");
+  // Validate the billing endpoint first — it's more fundamental than
+  // any price ID. If billing isn't configured at all we want the user
+  // to see that error, not a per-tier price-id error.
+  const checkoutUrl = endpoint();
   const priceId = resolvePriceId(tier);
   if (!isConfiguredPriceId(priceId)) {
     throw new Error(`VITE_PRICE_ID_${tier.toUpperCase()} is not configured for ${tier}.`);
   }
   const res = await fetchWithRetry(
-    endpoint(),
+    checkoutUrl,
     {
       method: "POST",
       headers: {

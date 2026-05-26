@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { t } from "../i18n";
 
 interface Props {
@@ -6,54 +6,85 @@ interface Props {
   onClose: () => void;
 }
 
-const isMac =
-  typeof navigator !== "undefined" && /mac/i.test(navigator.platform);
-const mod = isMac ? "⌘" : "Ctrl";
+/**
+ * Detect whether the user is on macOS. We previously used
+ * `navigator.platform` which is deprecated and unreliable — in
+ * Playwright's chromium on macOS, navigator.platform is "MacIntel"
+ * but in some embedded contexts (Tauri webview, electron) it returns
+ * "Linux x86_64". Round-12 screenshot revealed the dialog showed
+ * `Ctrl+S` etc. on macOS because of this. Prefer userAgentData
+ * (modern Chromium+) and fall back to userAgent substring match.
+ */
+export function detectIsMac(): boolean {
+  if (typeof navigator === "undefined") return false;
+  // Modern API — Chromium 90+, Edge, Opera.
+  const ua = (navigator as Navigator & {
+    userAgentData?: { platform?: string };
+  }).userAgentData;
+  if (ua?.platform) return /mac/i.test(ua.platform);
+  // Fallback: userAgent string ("Macintosh" is the canonical token).
+  if (navigator.userAgent) {
+    if (/Macintosh|Mac OS X|Mac_PowerPC/i.test(navigator.userAgent)) return true;
+  }
+  // Last resort: deprecated `platform`. Some build pipelines (sandboxed
+  // iframes, headless without ua) still expose it.
+  if (navigator.platform && /mac/i.test(navigator.platform)) return true;
+  return false;
+}
 
-const SECTIONS = [
-  {
-    title: () => t("group.file"),
-    items: [
-      { keys: `${mod}+S`, label: () => t("cmd.save") },
-      { keys: `${mod}+Shift+S`, label: () => t("cmd.saveAs") },
-      { keys: `${mod}+O`, label: () => t("cmd.open") },
-      { keys: `${mod}+N`, label: () => t("cmd.new") },
-    ],
-  },
-  {
-    title: () => t("group.edit"),
-    items: [
-      { keys: `${mod}+Z`, label: () => "Undo" },
-      { keys: `${mod}+Shift+Z`, label: () => "Redo" },
-      { keys: `${mod}+X`, label: () => "Cut" },
-      { keys: `${mod}+C`, label: () => "Copy" },
-      { keys: `${mod}+V`, label: () => "Paste" },
-      { keys: `${mod}+A`, label: () => "Select All" },
-      { keys: `${mod}+F`, label: () => t("cmd.search") },
-    ],
-  },
-  {
-    title: () => t("group.view"),
-    items: [
-      { keys: `${mod}+1`, label: () => t("cmd.source") },
-      { keys: `${mod}+2`, label: () => t("cmd.split") },
-      { keys: `${mod}+3`, label: () => t("cmd.preview") },
-      { keys: `${mod}+4`, label: () => "WYSIWYG" },
-      { keys: `${mod}+Shift+F`, label: () => t("cmd.focusMode") ?? "Focus Mode" },
-    ],
-  },
-  {
-    title: () => "Navigation",
-    items: [
-      { keys: `${mod}+K`, label: () => t("cmd.cmdPalette") },
-      { keys: `${mod}+/`, label: () => t("cmd.shortcuts") ?? "Keyboard Shortcuts" },
-      { keys: "Esc", label: () => t("palette.close") },
-    ],
-  },
-];
+function buildSections(mod: string) {
+  return [
+    {
+      title: () => t("group.file"),
+      items: [
+        { keys: `${mod}+S`, label: () => t("cmd.save") },
+        { keys: `${mod}+Shift+S`, label: () => t("cmd.saveAs") },
+        { keys: `${mod}+O`, label: () => t("cmd.open") },
+        { keys: `${mod}+N`, label: () => t("cmd.new") },
+      ],
+    },
+    {
+      title: () => t("group.edit"),
+      items: [
+        { keys: `${mod}+Z`, label: () => "Undo" },
+        { keys: `${mod}+Shift+Z`, label: () => "Redo" },
+        { keys: `${mod}+X`, label: () => "Cut" },
+        { keys: `${mod}+C`, label: () => "Copy" },
+        { keys: `${mod}+V`, label: () => "Paste" },
+        { keys: `${mod}+A`, label: () => "Select All" },
+        { keys: `${mod}+F`, label: () => t("cmd.search") },
+      ],
+    },
+    {
+      title: () => t("group.view"),
+      items: [
+        { keys: `${mod}+1`, label: () => t("cmd.source") },
+        { keys: `${mod}+2`, label: () => t("cmd.split") },
+        { keys: `${mod}+3`, label: () => t("cmd.preview") },
+        { keys: `${mod}+4`, label: () => "WYSIWYG" },
+        { keys: `${mod}+Shift+F`, label: () => t("cmd.focusMode") ?? "Focus Mode" },
+      ],
+    },
+    {
+      title: () => "Navigation",
+      items: [
+        { keys: `${mod}+K`, label: () => t("cmd.cmdPalette") },
+        { keys: `${mod}+/`, label: () => t("cmd.shortcuts") ?? "Keyboard Shortcuts" },
+        { keys: "Esc", label: () => t("palette.close") },
+      ],
+    },
+  ];
+}
 
 export function KeyboardShortcuts({ open, onClose }: Props) {
   const dialogRef = useRef<HTMLDivElement>(null);
+  // Compute platform-aware sections at render time, not module load —
+  // some webview contexts (tests, sandboxed iframes) don't have
+  // navigator.platform populated until after the bundle parses.
+  const SECTIONS = useMemo(
+    () => buildSections(detectIsMac() ? "⌘" : "Ctrl"),
+    [],
+  );
 
   useEffect(() => {
     if (!open) return;

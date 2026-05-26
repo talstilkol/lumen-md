@@ -105,23 +105,68 @@ export function OnboardingTour({ open, onClose, actions }: Props) {
 
   if (!open || !current) return null;
 
-  // Calculate tooltip position
+  // Tooltip positioning. The popup uses position:fixed with viewport
+  // coords. The original logic had two bugs:
+  //   1. For "top" placement, the popup was anchored to pos.top-gap
+  //      with no vertical translate — meaning it extended DOWN past
+  //      the target's top edge instead of upward.
+  //   2. For "left" placement, the popup was anchored to pos.left-gap
+  //      with no horizontal translate — same issue, extended RIGHT
+  //      over the target.
+  // Plus a clamp bug: tooltips whose target centre sits within half-
+  // a-tooltip of a viewport edge land partially off-screen.
+  // Fix: switch all four placements to a single consistent strategy
+  // — compute the tooltip's TOP-LEFT corner directly, then clamp.
   const gap = 12;
-  let tooltipStyle: CSSProperties = {};
+  const tooltipW = Math.min(
+    320,
+    (typeof window !== "undefined" ? window.innerWidth : 1280) * 0.8,
+  );
+  const tooltipApproxH = 200; // title + body + footer + breathing room
+  const vw = typeof window !== "undefined" ? window.innerWidth : 1280;
+  const vh = typeof window !== "undefined" ? window.innerHeight : 720;
+  const MARGIN = 8;
+  function clampLeft(x: number): number {
+    return Math.max(MARGIN, Math.min(vw - tooltipW - MARGIN, x));
+  }
+  function clampTop(y: number): number {
+    return Math.max(MARGIN, Math.min(vh - tooltipApproxH - MARGIN, y));
+  }
+  let topLeft: { top: number; left: number };
   switch (current.placement) {
     case "bottom":
-      tooltipStyle = { top: pos.top + pos.height + gap, left: pos.left + pos.width / 2 };
+      // Below the target, centred horizontally.
+      topLeft = {
+        top: pos.top + pos.height + gap,
+        left: pos.left + pos.width / 2 - tooltipW / 2,
+      };
       break;
     case "top":
-      tooltipStyle = { top: pos.top - gap, left: pos.left + pos.width / 2 };
+      // Above the target, centred horizontally.
+      topLeft = {
+        top: pos.top - tooltipApproxH - gap,
+        left: pos.left + pos.width / 2 - tooltipW / 2,
+      };
       break;
     case "right":
-      tooltipStyle = { top: pos.top + pos.height / 2, left: pos.left + pos.width + gap };
+      // To the right of the target, centred vertically.
+      topLeft = {
+        top: pos.top + pos.height / 2 - tooltipApproxH / 2,
+        left: pos.left + pos.width + gap,
+      };
       break;
     case "left":
-      tooltipStyle = { top: pos.top + pos.height / 2, left: pos.left - gap };
+      // To the left of the target, centred vertically.
+      topLeft = {
+        top: pos.top + pos.height / 2 - tooltipApproxH / 2,
+        left: pos.left - tooltipW - gap,
+      };
       break;
   }
+  const tooltipStyle: CSSProperties = {
+    top: clampTop(topLeft.top),
+    left: clampLeft(topLeft.left),
+  };
 
   return (
     <>
@@ -165,10 +210,8 @@ export function OnboardingTour({ open, onClose, actions }: Props) {
           position: "fixed",
           zIndex: 10000,
           ...tooltipStyle,
-          transform:
-            current.placement === "bottom" || current.placement === "top"
-              ? "translateX(-50%)"
-              : "translateY(-50%)",
+          // tooltipStyle is top-left coordinates of the tooltip's outer
+          // box (after clamping). No CSS transform needed.
           background: "hsl(var(--bg-muted))",
           border: "1px solid hsl(var(--accent) / 0.3)",
           borderRadius: 14,

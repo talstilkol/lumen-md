@@ -1,23 +1,10 @@
 /**
- * tagsFromFrontmatter — tests for the tag parser used by TagsPanel.
+ * tagsFromFrontmatter — tests against the REAL src/views/tagsIndex.ts
+ * implementation. Earlier this file forked the logic, which is theatre:
+ * could pass while the real one regressed.
  */
 import { describe, it, expect } from "vitest";
-
-/** Extracted from src/views/tagsIndex.ts for unit testing. */
-function tagsFromFrontmatter(fm: unknown): string[] {
-  if (!fm || typeof fm !== "object") return [];
-  const tags = (fm as Record<string, unknown>).tags;
-  if (Array.isArray(tags)) {
-    return tags.map((t) => String(t).toLowerCase()).filter(Boolean);
-  }
-  if (typeof tags === "string") {
-    return tags
-      .split(/[,\s]+/)
-      .map((t) => t.replace(/^#/, "").toLowerCase())
-      .filter(Boolean);
-  }
-  return [];
-}
+import { tagsFromFrontmatter } from "../views/tagsIndex";
 
 describe("tagsFromFrontmatter", () => {
   it("parses array of tags", () => {

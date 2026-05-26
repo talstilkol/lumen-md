@@ -7,10 +7,69 @@ describe("markup sanitizer", () => {
     expect(sanitizeHtmlMarkup(input)).toBe("<p>ok</p>");
   });
 
-  it("removes inline event handlers", () => {
-    const input = "<button onclick=\"alert(1)\">a</button>";
-    expect(sanitizeHtmlMarkup(input)).toContain("<button>");
+  it("removes inline event handlers (verifies the attribute hook fires)", () => {
+    // Use <p> rather than <button>: the latter is in HTML_FORBID_TAGS
+    // and gets removed entirely (a stricter policy that's also safe
+    // but obscures whether the event-handler hook fired).
+    const input = "<p onclick=\"alert(1)\">a</p>";
+    expect(sanitizeHtmlMarkup(input)).toContain("<p>");
     expect(sanitizeHtmlMarkup(input)).not.toContain("onclick");
+  });
+
+  it("strips on* handlers across multiple sequential calls (regression: hook installed only on first instance)", () => {
+    // Before the markupSanitizer fix, the attribute-stripping hook was
+    // only installed on the FIRST DOMPurify instance (module-scoped
+    // `hooksInstalled` boolean + per-call `DOMPurify(window)` factory).
+    // Every subsequent sanitize() call ran without the hook —
+    // event-handler / javascript:-style / data:text/html filtering
+    // silently failed. This test runs three back-to-back to pin the
+    // cached-instance behavior.
+    const inputs = [
+      "<p onerror=\"x()\">a</p>",
+      "<a href=\"https://ok\" onmouseover=\"y()\">b</a>",
+      "<div onload=\"z()\">c</div>",
+    ];
+    for (const input of inputs) {
+      const out = sanitizeHtmlMarkup(input);
+      expect(out).not.toMatch(/on(?:error|mouseover|load|click|keydown)\s*=/i);
+    }
+  });
+
+  it("strips event handlers across HTML and SVG modes consistently", () => {
+    expect(sanitizeHtmlMarkup('<p onmouseover="x">a</p>')).not.toContain("onmouseover");
+    expect(sanitizeSvgMarkup('<svg><circle onclick="x" /></svg>')).not.toContain("onclick");
+    expect(sanitizeHtmlMarkup('<p onkeydown="x">b</p>')).not.toContain("onkeydown");
+  });
+
+  // The custom uponSanitizeAttribute hook in markupSanitizer.ts catches
+  // three classes of payloads that DOMPurify alone does NOT block:
+  //   1. style attrs with `expression(...)` / `url(javascript:...)` /
+  //      `behavior:` (IE-era and legacy CSS injection vectors).
+  //   2. URI attrs (href, src, action, formaction, xlink:href) carrying
+  //      a non-image `data:` URI — those can be HTML/JS payloads.
+  //   3. Any value beginning with `javascript:`, `vbscript:`,
+  //      or `data:text/html` regardless of attr name.
+  // These tests pin those guards so a future "simplification" of the hook
+  // can't silently re-open the holes.
+  it("strips style attributes with CSS expression / javascript-url / behavior payloads", () => {
+    const expr = sanitizeHtmlMarkup('<p style="width: expression(alert(1))">a</p>');
+    expect(expr).not.toMatch(/expression/i);
+    const jsUrl = sanitizeHtmlMarkup('<p style="background:url(javascript:alert(1))">b</p>');
+    expect(jsUrl.toLowerCase()).not.toContain("javascript:");
+    const behavior = sanitizeHtmlMarkup('<p style="behavior:url(#x)">c</p>');
+    expect(behavior.toLowerCase()).not.toContain("behavior:");
+  });
+
+  it("blocks non-image data: URIs in href/src (only data:image/* is allowed)", () => {
+    const dataHtml = sanitizeHtmlMarkup('<a href="data:text/html,<script>x</script>">x</a>');
+    expect(dataHtml.toLowerCase()).not.toContain("data:text/html");
+    const dataApp = sanitizeHtmlMarkup('<a href="data:application/json,1">y</a>');
+    expect(dataApp.toLowerCase()).not.toContain("data:application/json");
+    // image data URLs survive (whitelisted by SAFE_URI_REGEXP + the hook).
+    const img = sanitizeHtmlMarkup(
+      '<img src="data:image/png;base64,iVBORw0KGgo=" alt="ok" />',
+    );
+    expect(img.toLowerCase()).toContain("data:image/png");
   });
 
   it("removes dangerous javascript href in html", () => {
@@ -30,6 +89,32 @@ describe("markup sanitizer", () => {
   it("keeps SVG basic shape tags", () => {
     const input = "<svg><rect width=\"10\" height=\"10\" /></svg>";
     expect(sanitizeSvgMarkup(input)).toContain("<rect");
+  });
+
+  // Regression for round-11 bug: stripping every `fill` attribute on SVG
+  // made Mermaid diagrams render as invisible empty paths. Now we keep
+  // safe fill values and only block javascript:/vbscript: payloads.
+  it("preserves SVG fill/stroke colors so diagrams stay visible", () => {
+    const input = `<svg><path d="M0 0" fill="#1976d2" stroke="rgba(0,0,0,0.5)"/></svg>`;
+    const out = sanitizeSvgMarkup(input);
+    expect(out).toContain('fill="#1976d2"');
+    expect(out.toLowerCase()).toContain("stroke=");
+  });
+
+  it("preserves SVG named-color fill", () => {
+    const input = `<svg><circle cx="10" cy="10" r="5" fill="red"/></svg>`;
+    expect(sanitizeSvgMarkup(input)).toContain('fill="red"');
+  });
+
+  it("preserves SVG fill='url(#defsId)' (same-document defs reference)", () => {
+    const input = `<svg><defs><linearGradient id="g"><stop/></linearGradient></defs><rect fill="url(#g)" width="10" height="10"/></svg>`;
+    expect(sanitizeSvgMarkup(input)).toMatch(/fill="url\(#g\)"/);
+  });
+
+  it("blocks SVG fill='url(javascript:...)' (injection payload)", () => {
+    const input = `<svg><path d="M0 0" fill="url(javascript:alert(1))"/></svg>`;
+    const out = sanitizeSvgMarkup(input);
+    expect(out.toLowerCase()).not.toContain("javascript:");
   });
 
   it("removes object and embed tags", () => {
@@ -154,11 +239,15 @@ describe("markup sanitizer", () => {
     expect(out).toContain("https://openai.com");
   });
 
-  it("keeps basic svg circle without script", () => {
+  it("keeps basic svg circle with fill (Mermaid needs this)", () => {
     const input = "<svg><circle cx=\"50\" cy=\"50\" r=\"20\" fill=\"blue\"/></svg>";
     const out = sanitizeSvgMarkup(input);
     expect(out).toContain("<circle");
-    expect(out).not.toContain("fill=\"blue\"");
+    // Earlier rounds stripped `fill` defensively. After M6 screenshots
+    // revealed Mermaid diagrams rendering as invisible empty paths, the
+    // sanitizer was relaxed to preserve safe fill colors. The hook in
+    // markupSanitizer.ts rejects `fill="url(javascript:...)"` payloads.
+    expect(out).toContain('fill="blue"');
   });
 
   it("strips script from SVG text payloads", () => {

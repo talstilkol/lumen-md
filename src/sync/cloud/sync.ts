@@ -336,6 +336,25 @@ export async function syncWithCloud(
           continue;
         }
 
+        // Fast equivalence check before treating this as a conflict:
+        // when both sides report the same modified-timestamp AND size,
+        // the content is identical and there's no work to do. Without
+        // this, a fresh sync (no cache) over an already-aligned pair
+        // falls through to the conflict path and downloads the remote
+        // copy redundantly.
+        if (l.modified === r.modified && l.size === r.size) {
+          const payload = await readLocalWithHash(l);
+          markPath(
+            nextCache,
+            path,
+            l,
+            r,
+            payload.hash,
+            r.hash ?? payload.hash,
+          );
+          continue;
+        }
+
         const decision: CloudConflictResolution =
           conflictPolicy === "ask" && opts.resolve
             ? await opts.resolve(path)

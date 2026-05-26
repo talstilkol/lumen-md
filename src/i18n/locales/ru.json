@@ -287,8 +287,6 @@
   "errorBoundary.renderDetail": "One of the embedded visualizations crashed during render. The rest of the editor is kept safe.",
   "findReplace.caseSensitive": "Case sensitive",
   "findReplace.close": "Закрыть find & replace",
-  "findReplace.find": "Найти",
-  "findReplace.matchCase": "С учётом регистра",
   "findReplace.next": "Next match",
   "findReplace.prev": "Previous match",
   "findReplace.regex": "Регулярное выражение",
@@ -383,7 +381,6 @@
   "insertText.title": "Вставить содержимое",
   "mdTable.addCol": "Добавить столбец",
   "mdTable.addRow": "Добавить строку",
-  "mdTable.cancel": "Отмена",
   "mdTable.removeCol": "Удалить столбец",
   "mdTable.removeRow": "Удалить строку",
   "mdTable.title": "Table Editor",
@@ -639,6 +636,5 @@
   "runtimeMetrics.column.timeouts": "Timeouts",
   "runtimeMetrics.column.rateLimits": "Rate limit",
   "cmd.view.runtimeMetrics": "Runtime metrics",
-  "cmd.view.runtimeMetrics.hint": "Inspect retries, timeouts, and latency by transport category",
-  "writingGoal.label": "Цель письма"
+  "cmd.view.runtimeMetrics.hint": "Inspect retries, timeouts, and latency by transport category"
 }

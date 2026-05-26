@@ -6,8 +6,9 @@
  *  - deterministic ratio-based sync-scroll
  *  - editor and preview section refs
  */
-import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
+import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import { Editor } from "../editor/Editor";
+import { clampLineNumber } from "../editor/lineClamp";
 import type { EditorHandle } from "../editor/Editor";
 import { Preview } from "../renderer/Preview";
 import { ErrorBoundary } from "../ui/ErrorBoundary";
@@ -45,7 +46,6 @@ function useResolvedAxis(pref: SplitAxis): SplitAxis {
 interface Props {
   mode: ViewMode;
   docContent: string;
-  docName: string;
   deferredContent: string;
   editorRef: React.RefObject<EditorHandle | null>;
   vimEnabled: boolean;
@@ -62,7 +62,6 @@ interface Props {
 export function EditorLayout({
   mode,
   docContent,
-  docName,
   deferredContent,
   editorRef,
   vimEnabled,
@@ -85,8 +84,20 @@ export function EditorLayout({
   const resolvedAxis: SplitAxis = useResolvedAxis(splitAxisPref);
   const isVerticalSplit = mode === "split" && resolvedAxis === "vertical";
 
-  // Memoize the editor's value prop to avoid resetting CM6 on every keystroke.
-  const editorInitial = useMemo(() => docContent, [docName, mode]);
+  // Forward the latest doc content to CM6. The Editor's internal sync
+  // effect bails when the incoming value already equals the editor's
+  // current state, so passing this on every keystroke is a no-op for the
+  // textarea itself.
+  //
+  // ADR-001 — DO NOT memoize live store values without including them
+  // in the dependency array. The previous `useMemo(() => docContent,
+  // [docName, mode])` was a real P0 bug: when the welcome doc was seeded
+  // asynchronously after first mount (docName/mode unchanged), the memo
+  // stayed pinned to the empty initial value and the editor rendered
+  // blank forever. If you ever feel tempted to memoize this kind of
+  // hand-off prop "for performance", trust the child's equality check
+  // instead.
+  const editorInitial = docContent;
 
   // ── Deterministic sync-scroll ─────────────────────────────────
   const editorSectionRef = useRef<HTMLElement | null>(null);
@@ -178,7 +189,15 @@ export function EditorLayout({
       function getEditorYForLine(line: number): number {
         const view = editorRef.current?.getView();
         if (!view) return 0;
-        const docLine = view.state.doc.line(line);
+        // Anchors are rebuilt asynchronously by the MutationObserver after
+        // the preview re-renders. Between a doc shrink and that rebuild,
+        // an anchor.line value can exceed `doc.lines` and make `doc.line(n)`
+        // throw "Invalid line number N in M-line document". `clampLineNumber`
+        // keeps the sync code defensive — the slight visual offset corrects
+        // on the next rebuild a few ms later.
+        const safe = clampLineNumber(line, view.state.doc.lines);
+        if (safe === 0) return 0;
+        const docLine = view.state.doc.line(safe);
         return view.lineBlockAt(docLine.from).top;
       }
 

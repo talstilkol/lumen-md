@@ -19,7 +19,7 @@ import { getPluginCommands } from "../plugins/pluginSystem";
 import { showAiToast } from "../ui/AiToast";
 import { encryptDocument, decryptDocument, isEncrypted } from "../storage/encryption";
 import { readWorkspaceFile } from "../storage/workspace";
-import { relativeTime } from "../App";
+import { relativeTime } from "../lib/relativeTime";
 
 export interface UseCommandsOptions {
   handleNew: () => void;

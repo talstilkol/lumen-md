@@ -12,33 +12,47 @@ test.beforeEach(async ({ page }) => {
     localStorage.removeItem("lumen-md");
   });
   await page.goto("/");
+  await page.locator("header").first().waitFor({ state: "visible", timeout: 5000 });
 });
 
-test("⌘K → 'עברית' flips <html dir> to rtl", async ({ page }) => {
-  // Default load is LTR.
-  await expect(page.locator("html")).toHaveAttribute("dir", "ltr");
-
-  // Open the command palette and search for the Hebrew locale entry.
-  // Using the fully-typed Hebrew name — the locale picker labels each
-  // option with its native name so the search hit is locale-agnostic.
+// Helper: open palette, type a locale label, wait for the matching
+// option to render in the dialog's listbox, then fire it via Enter.
+//
+// The palette placeholder is localized (English: "Type a command…",
+// Hebrew: "הקלד פקודה…"), so we can't filter by placeholder text in
+// this spec — it switches locales mid-test. Instead we look for the
+// generic palette `<input>` inside the role=dialog.
+async function pickLocale(
+  page: import("@playwright/test").Page,
+  label: string,
+): Promise<void> {
   await page.keyboard.press("Meta+K");
-  await page.keyboard.type("עברית");
+  const palette = page
+    .locator('[role="dialog"][aria-modal="true"]')
+    .filter({ has: page.locator("input") });
+  await palette.waitFor({ timeout: 8000 });
+  // Use `fill` for non-ASCII labels — `keyboard.type` can drop CJK
+  // characters that need IME composition (round-23 deflake).
+  await palette.locator("input").first().fill(label);
+  // Wait on the aria-selected option, not just any getByText match,
+  // so we know the filter pass finished AND the right option is
+  // highlighted before pressing Enter.
+  await expect(
+    palette.locator('[role="option"][aria-selected="true"]'),
+  ).toContainText(label, { timeout: 8000 });
   await page.keyboard.press("Enter");
+}
 
+test("⌘K → 'עברית' flips <html dir> to rtl", async ({ page }) => {
+  await expect(page.locator("html")).toHaveAttribute("dir", "ltr");
+  await pickLocale(page, "עברית");
   await expect(page.locator("html")).toHaveAttribute("dir", "rtl");
   await expect(page.locator("html")).toHaveAttribute("lang", "he");
 });
 
 test("switching back to English restores ltr", async ({ page }) => {
-  // Switch to Hebrew first.
-  await page.keyboard.press("Meta+K");
-  await page.keyboard.type("עברית");
-  await page.keyboard.press("Enter");
+  await pickLocale(page, "עברית");
   await expect(page.locator("html")).toHaveAttribute("dir", "rtl");
-
-  // Now switch back via "English" — search the English label.
-  await page.keyboard.press("Meta+K");
-  await page.keyboard.type("English");
-  await page.keyboard.press("Enter");
+  await pickLocale(page, "English");
   await expect(page.locator("html")).toHaveAttribute("dir", "ltr");
 });

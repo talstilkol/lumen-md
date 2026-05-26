@@ -36,8 +36,16 @@ test("security-critical dynamic blocks stay functional with safe status output",
 
   await expect(page.locator("text=JS run: Completed")).toBeVisible({ timeout: 8_000 });
   await expect(page.locator("text=/\\[log\\] js-ok/")).toBeVisible({ timeout: 8_000 });
-  await expect(page.locator("text=SVG")).toBeVisible();
-  await expect(page.locator("text=Rendered")).toBeVisible();
+  // The literal "SVG" matches the source code, the preview's raw
+  // text node, AND the status pill — the bare `text=SVG` was a
+  // strict-mode violation. Anchor to the chart-block header's lang
+  // chip and status text inside the rendered block instead.
+  await expect(
+    page.locator(".chart-block-header span", { hasText: /^SVG$/ }),
+  ).toBeVisible({ timeout: 8_000 });
+  await expect(
+    page.locator(".chart-block-header span", { hasText: /^Rendered/ }),
+  ).toBeVisible({ timeout: 8_000 });
 });
 
 

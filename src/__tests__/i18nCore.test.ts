@@ -57,4 +57,24 @@ describe("t() function", () => {
     const result = t("toolbar.new", {});
     expect(result).toBe("New");
   });
+
+  // Regression guard for the round-9 bug: 16 templates accidentally used
+  // `{{key}}` double-brace syntax. Before the fix, t() only replaced the
+  // inner `{key}` and left the outer braces, so users saw literal "{5}"
+  // in the writing-goal counter, "{12 selected}" in the file tree, etc.
+  it("interpolates {{key}} double-brace templates (regression guard)", () => {
+    applyLocale("en");
+    // writingGoal.progress is one of the 16 affected templates.
+    const result = t("writingGoal.progress", { words: "5", goal: "100", pct: "5" });
+    expect(result).toBe("5 / 100 words · 5%");
+    expect(result).not.toContain("{");
+    expect(result).not.toContain("}");
+  });
+
+  it("interpolates {{key}} in he locale too", () => {
+    applyLocale("he");
+    const result = t("writingGoal.progress", { words: "3", goal: "50", pct: "6" });
+    expect(result).toBe("3 / 50 מילים · 6%");
+    applyLocale("en");
+  });
 });
