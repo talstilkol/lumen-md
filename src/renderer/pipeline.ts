@@ -37,7 +37,9 @@ import remarkDirective from "remark-directive";
 import remarkRehype from "remark-rehype";
 import rehypeKatex from "rehype-katex";
 import rehypeSlug from "rehype-slug";
-import rehypeRaw from "rehype-raw";
+// rehype-raw is dynamically imported in getProcessorWithRaw() — it
+// pulls in parse5 (~275 KB raw / ~40 KB gzipped) and most docs don't
+// need it. Splitting it out of the main bundle is M12-followup-2.
 import rehypeReact from "rehype-react";
 // Eager-import katex BEFORE mhchem so Rollup's chunk graph keeps the
 // canonical katex module evaluated first. Without this, the production
@@ -338,47 +340,80 @@ function remarkStripFrontmatter() {
   };
 }
 
-let processor: Processor<MdastRoot, MdastRoot, HastRoot, HastRoot, ReactElement> | null = null;
+type LumenProcessor = Processor<MdastRoot, MdastRoot, HastRoot, HastRoot, ReactElement>;
 
-function getProcessor(isDark: () => boolean) {
-  if (!processor) {
-    processor = unified()
-      .use(remarkParse)
-      .use(remarkFrontmatter, ["yaml"])
-      .use(remarkStripFrontmatter)
-      .use(remarkGfm)
-      .use(remarkBreaks)
-      .use(remarkMath)
-      .use(remarkDirective)
-      .use(remarkAdmonitions)
-      .use(remarkColumns)
-      .use(remarkWikiLinks)
-      .use(remarkLumenBlocks)
-      .use(remarkRehype, { allowDangerousHtml: true })
-      .use(rehypeRaw)
-      .use(rehypeSlug)
-      .use(rehypeKatex)
-      .use(rehypeShiki, { isDark })
-      .use(rehypeReact, {
-        Fragment,
-        jsx,
-        jsxs,
-        components,
-        // rehype-react's option type is parameterised by the JSX runtime
-        // shape; our `components` map is locally typed through hast-util's
-        // Components but rehype-react still wants a wider partial. The
-        // outer cast resolves the Processor type-parameter mismatch — the
-        // inner narrow lifts the option-bag through `unknown`.
-      } as unknown as Parameters<typeof rehypeReact>[0]) as unknown as Processor<MdastRoot, MdastRoot, HastRoot, HastRoot, ReactElement>;
+let processorNoRaw: LumenProcessor | null = null;
+let processorWithRaw: LumenProcessor | null = null;
+
+function buildBase(_isDark: () => boolean) {
+  return unified()
+    .use(remarkParse)
+    .use(remarkFrontmatter, ["yaml"])
+    .use(remarkStripFrontmatter)
+    .use(remarkGfm)
+    .use(remarkBreaks)
+    .use(remarkMath)
+    .use(remarkDirective)
+    .use(remarkAdmonitions)
+    .use(remarkColumns)
+    .use(remarkWikiLinks)
+    .use(remarkLumenBlocks)
+    .use(remarkRehype, { allowDangerousHtml: true });
+}
+
+function finishPipeline(p: ReturnType<typeof buildBase>, isDark: () => boolean): LumenProcessor {
+  return p
+    .use(rehypeSlug)
+    .use(rehypeKatex)
+    .use(rehypeShiki, { isDark })
+    .use(rehypeReact, {
+      Fragment,
+      jsx,
+      jsxs,
+      components,
+      // rehype-react's option type is parameterised by the JSX runtime
+      // shape; our `components` map is locally typed through hast-util's
+      // Components but rehype-react still wants a wider partial. The
+      // outer cast resolves the Processor type-parameter mismatch — the
+      // inner narrow lifts the option-bag through `unknown`.
+    } as unknown as Parameters<typeof rehypeReact>[0]) as unknown as LumenProcessor;
+}
+
+function getProcessorNoRaw(isDark: () => boolean): LumenProcessor {
+  if (!processorNoRaw) {
+    processorNoRaw = finishPipeline(buildBase(isDark), isDark);
   }
-  return processor;
+  return processorNoRaw;
+}
+
+async function getProcessorWithRaw(isDark: () => boolean): Promise<LumenProcessor> {
+  if (!processorWithRaw) {
+    // Lazy import: parse5 + entities (~275 KB raw + 70 KB raw) only
+    // ship for docs that actually contain inline HTML.
+    const { default: rehypeRaw } = await import("rehype-raw");
+    processorWithRaw = finishPipeline(buildBase(isDark).use(rehypeRaw), isDark);
+  }
+  return processorWithRaw;
+}
+
+/**
+ * Cheap detection: does the markdown source contain anything that
+ * looks like raw HTML? Matches `<tag`, `</tag`, `<!--`. Doesn't try to
+ * be strict about code-fence boundaries — a false positive just means
+ * we load the bigger pipeline once for that doc, never a correctness
+ * issue.
+ */
+function hasRawHtml(source: string): boolean {
+  return /<[a-zA-Z!/]/.test(source);
 }
 
 export async function renderMarkdown(
   markdownText: string,
   isDark: () => boolean,
 ): Promise<ReactElement> {
-  const proc = getProcessor(isDark);
+  const proc = hasRawHtml(markdownText)
+    ? await getProcessorWithRaw(isDark)
+    : getProcessorNoRaw(isDark);
   const file = await proc.process(markdownText);
   return file.result as ReactElement;
 }

@@ -21,22 +21,15 @@ const DIST = path.join(process.cwd(), "dist", "assets");
 // (gzipped). The first matching rule wins, so put narrower regexes first.
 const BUDGETS = [
   // main is the eager Lumen runtime (App + side panels + i18n table).
-  // Round-16 bumped from 222 → 225 because the production-build TDZ
-  // fix re-chunked katex (added rehype-katex + mathml-tag-names to its
-  // chunk) which freed a tiny bit of code from main; the net main
-  // increase came from merging react and react-dom into a single
-  // vendor-react chunk so they no longer have a circular cross-chunk
-  // import. Trade-off: ~2 KB more in main vs. an app that actually
-  // boots in production.
-  // main is the eager Lumen runtime. 225 → 230 in round-25 because:
-  //   (a) the y-websocket externalize (Rollup `external: ["y-websocket"]`)
-  //       keeps an ES import statement in main rather than tree-shaking it
-  //       — costs ~0.2 KB gzipped, deterministic;
-  //   (b) macOS-gzip vs Linux-gzip produce slightly different ratios on
-  //       small data (~2 KB swing for ~750 KB raw bundle). The macOS build
-  //       reports 223 KB; the Linux CI build reports 225 KB on the same
-  //       source. 230 KB gives platform-independent headroom of 5 KB.
-  { name: "main bundle",        pattern: /^main-/,                budgetKb: 230 },
+  // History:
+  //   Round-16: 222 → 225 (TDZ fix re-chunked katex; react+react-dom merged)
+  //   Round-25: 225 → 230 (y-websocket externalize; macOS↔Linux gzip variance)
+  //   Audit M12-followup-2: 230 → 195 (rehype-raw lazy-loaded; parse5 +
+  //       entities + hast-util-raw moved into a dynamic chunk that only
+  //       fires when a doc contains inline HTML). Measured: 177.9 KB
+  //       gzipped on macOS post-fix. Budget gives ~17 KB headroom for
+  //       Linux gzip variance + future first-party growth.
+  { name: "main bundle",        pattern: /^main-/,                budgetKb: 195 },
   { name: "entry index",        pattern: /^index-/,               budgetKb: 220 },
   { name: "vendor: mermaid",    pattern: /^vendor-mermaid-/,      budgetKb: 800 },
   // shiki sits at ~263 KB gzipped today. The budget previously read
