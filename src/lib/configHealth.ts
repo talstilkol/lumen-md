@@ -456,7 +456,7 @@ export function assessConfigHealth(ctx: ConfigHealthContext): ConfigHealthReport
 
 function isPublishMockEnabled(): boolean {
   const explicit = readEnvVar("VITE_PUBLISH_MOCK_ENABLED");
-  if (["1", "true", "yes"].includes(explicit.toLowerCase())) return true;
+  if (["1", "true", "yes"].includes(explicit?.toLowerCase())) return true;
   const viteDev = ((import.meta as ImportMeta & { env?: { DEV?: boolean } }).env)?.DEV;
   if (viteDev) return true;
   try {

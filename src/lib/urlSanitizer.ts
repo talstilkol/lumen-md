@@ -15,6 +15,7 @@ export function sanitizeUrl(url: string): boolean {
   if (SAFE_DATA_URL.test(value)) {
     return true;
   }
+  if (BAD_URL_PREFIX.test(value)) return false;
   if (/^data:/i.test(value)) {
     return false;
   }

@@ -91,6 +91,11 @@
 			</dict>
 		</dict>
 	</array>
+	<!-- App Groups — required for Share Extension shared storage -->
+	<key>com.apple.security.application-groups</key>
+	<array>
+		<string>group.com.lumen.editor</string>
+	</array>
 	<!-- Status-bar tweaks so the WebView text doesn't slip under the notch. -->
 	<key>UIStatusBarStyle</key>
 	<string>UIStatusBarStyleLightContent</string>

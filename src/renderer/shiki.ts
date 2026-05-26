@@ -1,4 +1,4 @@
-import type { Root, Element } from "hast";
+import type { Root, Element, Text } from "hast";
 import { visit } from "unist-util-visit";
 
 let highlighterPromise: Promise<unknown> | null = null;
@@ -36,8 +36,11 @@ async function getHighlighter() {
       return hl;
     })();
   }
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return highlighterPromise as Promise<any>;
+  interface ShikiHighlighter {
+    codeToHast: (source: string, options: Record<string, unknown>) => Root;
+    loadLanguage: (lang: string) => Promise<void>;
+  }
+  return highlighterPromise as Promise<ShikiHighlighter>;
 }
 
 /**
@@ -53,9 +56,7 @@ async function ensureLang(lang: string): Promise<string> {
   if (!inFlight) {
     inFlight = (async () => {
       try {
-        const hl = (await getHighlighter()) as {
-          loadLanguage: (l: string) => Promise<void>;
-        };
+        const hl = await getHighlighter();
         await hl.loadLanguage(lang);
         loadedLangs.add(lang);
       } catch {
@@ -95,9 +96,8 @@ export function rehypeShiki(opts: ShikiOpts) {
       // Get raw source from text children
       const source =
         codeChild.children
-          .filter((c) => c.type === "text")
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          .map((c: any) => c.value as string)
+          .filter((c): c is Text => c.type === "text")
+          .map((c) => c.value)
           .join("") ?? "";
 
       tasks.push(async () => {

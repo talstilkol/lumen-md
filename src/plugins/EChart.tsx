@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import * as echarts from "echarts";
 
 interface Props {
@@ -8,20 +8,39 @@ interface Props {
 }
 
 export function EChart({ option, height = 360, isDark = true }: Props) {
-  const ref = useRef<HTMLDivElement | null>(null);
+  const containerRef = useRef<HTMLDivElement | null>(null);
   const chartRef = useRef<echarts.ECharts | null>(null);
   const latestOptionRef = useRef<Record<string, unknown>>(option);
+  // Defer chart init until the element enters viewport.
+  const [inView, setInView] = useState(false);
 
   useEffect(() => {
-    if (!ref.current) return;
-    const el = ref.current;
+    if (!containerRef.current || inView) return;
+    if (typeof IntersectionObserver === "undefined") {
+      setInView(true);
+      return;
+    }
+    const io = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((e) => e.isIntersecting)) {
+          setInView(true);
+          io.disconnect();
+        }
+      },
+      { rootMargin: "200px 0px" },
+    );
+    io.observe(containerRef.current);
+    return () => io.disconnect();
+  }, [inView]);
 
+  useEffect(() => {
+    if (!inView || !containerRef.current) return;
+    const el = containerRef.current;
     // ECharts.init warns ("Can't get DOM width or height") when the
     // container is 0-sized at mount — common in tabs/modals/lazy lists
     // that haven't laid out yet. Defer init until ResizeObserver sees a
     // real size, then keep observing for layout-driven resizes.
     let disposed = false;
-
     const ensureChart = () => {
       if (chartRef.current || disposed) return chartRef.current;
       if (el.clientWidth === 0 || el.clientHeight === 0) return null;
@@ -33,9 +52,7 @@ export function EChart({ option, height = 360, isDark = true }: Props) {
       chart.setOption(latestOptionRef.current, { notMerge: true });
       return chart;
     };
-
     ensureChart();
-
     const onResize = () => {
       const c = ensureChart();
       if (c) c.resize();
@@ -43,7 +60,6 @@ export function EChart({ option, height = 360, isDark = true }: Props) {
     window.addEventListener("resize", onResize);
     const ro = new ResizeObserver(() => onResize());
     ro.observe(el);
-
     return () => {
       disposed = true;
       window.removeEventListener("resize", onResize);
@@ -51,7 +67,7 @@ export function EChart({ option, height = 360, isDark = true }: Props) {
       chartRef.current?.dispose();
       chartRef.current = null;
     };
-  }, [isDark]);
+  }, [isDark, inView]);
 
   useEffect(() => {
     // The `?.` is deliberate: when the chart isn't yet initialized
@@ -64,7 +80,7 @@ export function EChart({ option, height = 360, isDark = true }: Props) {
 
   return (
     <div
-      ref={ref}
+      ref={containerRef}
       style={{
         width: "100%",
         height: typeof height === "number" ? `${height}px` : height,

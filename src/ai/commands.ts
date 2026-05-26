@@ -11,6 +11,7 @@ import { t } from "../i18n";
 import { log } from "../lib/logger";
 import { gitStatusSummary } from "../sync/git";
 import { showAiToast } from "../ui/AiToast";
+import { generateOutline, applyOutline } from "./outline";
 
 /**
  * Build the AI Settings command for the palette.
@@ -73,4 +74,38 @@ export async function generateAiCommitMessage(
     showAiToast("AI commit suggestion unavailable", "info");
     return "";
   }
+}
+
+/**
+ * Build the AI Generate Outline command for the palette.
+ */
+export function buildAiOutlineCommand(getContent: () => string, setContent: (s: string) => void): Command {
+  return {
+    id: "ai.outline",
+    label: t("cmd.ai.outline", { defaultValue: "AI: Generate Outline" }),
+    hint: t("cmd.ai.outline.hint", { defaultValue: "Add AI-suggested headings" }),
+    icon: cmdIcons.Sparkles,
+    group: t("group.ai", { defaultValue: "AI Copilot" }),
+    action: async () => {
+      try {
+        const content = getContent();
+        if (content.trim().length < 100) {
+          showAiToast("Document too short for outline generation", "info");
+          return;
+        }
+        showAiToast("Generating outline…", "info");
+        const headings = await generateOutline(content);
+        if (headings.length === 0) {
+          showAiToast("No outline generated", "info");
+          return;
+        }
+        const newContent = applyOutline(content, headings);
+        setContent(newContent);
+        showAiToast(`Inserted ${headings.length} headings`, "success");
+      } catch (e) {
+        log.warn("AI outline generation failed", e);
+        showAiToast("Outline generation failed", "error");
+      }
+    },
+  };
 }

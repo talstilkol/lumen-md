@@ -7,6 +7,7 @@
 
 import { EditorView, keymap } from "@codemirror/view";
 import type { Extension } from "@codemirror/state";
+import { safeSetHtml } from "../lib/trustedTypes";
 
 interface MenuEntry {
   id: string;
@@ -409,7 +410,7 @@ function render(state: MenuState) {
     item.type = "button";
     item.className = "lumen-slash-item";
     if (i === state.highlight) item.classList.add("active");
-    item.innerHTML = `<span class="lumen-slash-label">${escape(entry.label)}</span><span class="lumen-slash-hint">${escape(entry.hint)}</span>`;
+    safeSetHtml(item, `<span class="lumen-slash-label">${escape(entry.label)}</span><span class="lumen-slash-hint">${escape(entry.hint)}</span>`);
     item.addEventListener("mousedown", (e) => {
       e.preventDefault();
       insertEntry(state.view, entry, state.triggerFrom);

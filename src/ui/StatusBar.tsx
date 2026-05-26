@@ -1,10 +1,11 @@
-import React, { useMemo, useState, useCallback } from "react";
-import { Sparkles, ShieldCheck, SpellCheck, Activity, BarChart3 } from "lucide-react";
+import React, { useMemo, useState, useCallback, useSyncExternalStore } from "react";
+import { Sparkles, ShieldCheck, SpellCheck, Activity, BarChart3, CloudCog, CloudOff, AlertCircle } from "lucide-react";
 import type { CollabPeer } from "../collab/yjs";
 import { t } from "../i18n";
 import { useAppStore } from "../store/useStore";
 import { getTelemetryOptOut, setTelemetryOptOut } from "../lib/telemetry";
 import type { ConfigHealthReport } from "../lib/configHealth";
+import { subscribeSyncStatus } from "../sync/syncStatus";
 
 interface CollabInfo {
   roomName: string;
@@ -33,6 +34,11 @@ export const StatusBar = React.memo(function StatusBar({
   onOpenRuntimeMetrics,
 }: Props) {
   const stats = useMemo(() => computeStats(text), [text]);
+  const syncState = useSyncExternalStore(
+    subscribeSyncStatus,
+    () => "idle" as const,
+    () => "idle" as const,
+  );
   const aiKey = useAppStore((s) => s.aiKey);
   const useLocalAi = useAppStore((s) => s.useLocalAi);
   const grammarCheck = useAppStore((s) => s.grammarCheck);
@@ -61,6 +67,14 @@ export const StatusBar = React.memo(function StatusBar({
       <span className="sb-item" title="Document">
         {dirty ? "●" : "○"} {filename}
       </span>
+      {syncState !== "idle" && (
+        <span className="sb-item" title={`Sync: ${syncState}`} style={{ gap: 4 }}>
+          {syncState === "syncing" && <CloudCog size={10} className="spin" />}
+          {syncState === "error" && <AlertCircle size={10} style={{ color: "hsl(12 90% 58%)" }} />}
+          {syncState === "offline" && <CloudOff size={10} style={{ color: "hsl(var(--fg-muted))" }} />}
+          <span style={{ fontSize: 10, textTransform: "capitalize" }}>{syncState}</span>
+        </span>
+      )}
       {collab && (
         <span
           className="sb-item"

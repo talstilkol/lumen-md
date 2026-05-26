@@ -27,6 +27,27 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func applicationDidBecomeActive(_ application: UIApplication) {
         // Restart any tasks that were paused (or not yet started) while the application was inactive. If the application was previously in the background, optionally refresh the user interface.
+        checkForSharedNote()
+    }
+
+    func checkForSharedNote() {
+        guard let sharedDefaults = UserDefaults(suiteName: "group.com.lumen.editor") else { return }
+        guard let content = sharedDefaults.string(forKey: "pendingSharedNote"), !content.isEmpty else { return }
+        guard let timestamp = sharedDefaults.object(forKey: "pendingSharedNoteTimestamp") as? TimeInterval else { return }
+        // Only process if the note was shared within the last 60 seconds
+        if Date().timeIntervalSince1970 - timestamp > 60 { return }
+
+        // Clear the pending note so we don't process it again
+        sharedDefaults.removeObject(forKey: "pendingSharedNote")
+        sharedDefaults.removeObject(forKey: "pendingSharedNoteTimestamp")
+        sharedDefaults.synchronize()
+
+        // Notify the web app via Capacitor bridge
+        NotificationCenter.default.post(
+            name: Notification.Name("lumen:sharedNote"),
+            object: nil,
+            userInfo: ["content": content]
+        )
     }
 
     func applicationWillTerminate(_ application: UIApplication) {

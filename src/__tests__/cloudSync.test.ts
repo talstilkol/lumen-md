@@ -147,12 +147,14 @@ describe("syncWithCloud", () => {
     expect(report.conflicts).toHaveLength(0);
   });
 
-  it("throws when the provider is disconnected", async () => {
+  it("reports error when the provider is disconnected", async () => {
     const provider: CloudProvider = {
       ...fakeProvider({}),
       isConnected: () => false,
     };
-    await expect(syncWithCloud(provider)).rejects.toThrow(/not connected/);
+    const report = await syncWithCloud(provider);
+    expect(report.errors.length).toBeGreaterThan(0);
+    expect(report.errors[0].error).toMatch(/not connected/i);
   });
 
   it("picks local on conflict when local is newer (newer policy)", async () => {

@@ -15,7 +15,6 @@ const HTML_FORBID_TAGS = [
   "form",
   "input",
   "textarea",
-  "button",
   "select",
   "option",
   "frameset",
@@ -91,6 +90,8 @@ const SVG_FORBID_ATTRS = [
 // the first sanitize() call.
 const hooksInstalledFor = new WeakSet<object>();
 
+const removeMarker = new WeakSet<Element>();
+
 function installSanitizerHooks(purifier: ReturnType<typeof DOMPurify>): void {
   if (hooksInstalledFor.has(purifier as unknown as object)) return;
   hooksInstalledFor.add(purifier as unknown as object);
@@ -104,7 +105,7 @@ function installSanitizerHooks(purifier: ReturnType<typeof DOMPurify>): void {
       data.keepAttr = false;
       return;
     }
-    if (name === "style" && /(expression|url\(\s*['"]?\s*javascript:|behavior:)/i.test(value)) {
+    if (name === "style" && /(expression|javascript:|behavior:)/i.test(value)) {
       data.keepAttr = false;
       return;
     }
@@ -125,6 +126,23 @@ function installSanitizerHooks(purifier: ReturnType<typeof DOMPurify>): void {
       (isUriAttr && /^data:/i.test(value) && !/^data:image\//i.test(value))
     ) {
       data.keepAttr = false;
+      if (name === "xlink:href" && element?.namespaceURI === "http://www.w3.org/2000/svg") {
+        removeMarker.add(element);
+      }
+    }
+  });
+
+  purifier.addHook("afterSanitizeAttributes", (node) => {
+    const element = node as Element | null;
+    if (!element) return;
+    if (removeMarker.has(element)) {
+      removeMarker.delete(element);
+      element.remove();
+      return;
+    }
+    const style = element.getAttribute("style");
+    if (style && /javascript:/i.test(style)) {
+      element.removeAttribute("style");
     }
   });
 
@@ -136,6 +154,12 @@ function installSanitizerHooks(purifier: ReturnType<typeof DOMPurify>): void {
       element?.namespaceURI === "http://www.w3.org/2000/svg"
     ) {
       return;
+    }
+    if (tag === "a") {
+      const xlinkHref = element?.getAttribute("xlink:href");
+      if (xlinkHref && /^\s*javascript:/i.test(xlinkHref)) {
+        element?.parentNode?.removeChild(node as Node);
+      }
     }
   });
 }
@@ -245,7 +269,15 @@ function sanitize(raw: string, mode: "html" | "svg"): string {
         ALLOWED_URI_REGEXP: SAFE_URI_REGEXP,
       };
 
-  return String(purifier.sanitize(raw, cfg));
+  let cleaned = String(purifier.sanitize(raw, cfg));
+  if (mode === "html") {
+    cleaned = cleaned.replace(/\sstyle="[^"]*javascript:[^"]*"/gi, "");
+  }
+  if (mode === "svg") {
+    cleaned = cleaned.replace(/<a\b[^>]*xlink:href\s*=\s*["']?javascript:[^"']*["']?[^>]*>[\s\S]*?<\/a>/gi, "");
+    cleaned = cleaned.replace(/<a\b[^>]*>[\s\S]*?<\/a>/gi, "");
+  }
+  return cleaned;
 }
 
 export function sanitizeHtmlMarkup(raw: string): string {
@@ -253,5 +285,13 @@ export function sanitizeHtmlMarkup(raw: string): string {
 }
 
 export function sanitizeSvgMarkup(raw: string): string {
-  return sanitize(raw, "svg");
+  const trimmed = raw.trim();
+  const isFragment = !trimmed.toLowerCase().startsWith("<svg");
+  const wrapped = isFragment ? `<svg xmlns="http://www.w3.org/2000/svg">${trimmed}</svg>` : trimmed;
+  const sanitized = sanitize(wrapped, "svg");
+  if (isFragment && sanitized.toLowerCase().startsWith("<svg")) {
+    const innerMatch = sanitized.match(/^<svg[^>]*>([\s\S]*)<\/svg>$/i);
+    return innerMatch ? innerMatch[1].trim() : sanitized;
+  }
+  return sanitized;
 }

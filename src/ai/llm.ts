@@ -55,6 +55,7 @@ export interface ChatMessage {
 export interface ChatOptions {
   model?: string;
   maxTokens?: number;
+  temperature?: number;
   signal?: AbortSignal;
   /** If true, returns a ReadableStream for streaming responses. */
   stream?: boolean;
@@ -93,17 +94,44 @@ export class AiError extends Error {
  * available, the call is routed to `chatLocal()` instead of OpenAI.
  * This keeps prompts on-device for privacy / offline scenarios.
  */
+export type AiProvider = "openai" | "ollama" | "local-webgpu";
+
+export function getActiveProvider(): AiProvider {
+  try {
+    const stored = localStorage.getItem("lumen.ai.provider");
+    if (stored === "ollama" || stored === "local-webgpu" || stored === "openai") return stored;
+  } catch { /* */ }
+  const state = useAppStore.getState();
+  if (state.useLocalAi) return "local-webgpu";
+  return "openai";
+}
+
+export function setActiveProvider(provider: AiProvider): void {
+  localStorage.setItem("lumen.ai.provider", provider);
+}
+
 export async function chat(
   messages: ChatMessage[],
   opts: ChatOptions = {},
 ): Promise<string> {
-  if (useAppStore.getState().useLocalAi) {
+  const provider = getActiveProvider();
+
+  // ── Ollama (local server) ──────────────────────────────────────
+  if (provider === "ollama") {
+    const { chatOllama, isOllamaAvailable } = await import("./ollamaProvider");
+    if (await isOllamaAvailable()) {
+      return chatOllama(messages, opts);
+    }
+    toast.warn("Ollama unavailable", "Cannot reach Ollama at localhost:11434. Is it running?");
+    // Fall through to OpenAI
+  }
+
+  // ── WebGPU local (in-browser) ──────────────────────────────────
+  if (provider === "local-webgpu" || useAppStore.getState().useLocalAi) {
     const { chatLocal, localLlmAvailable, onLocalLlmProgress } = await import(
       "./localLlm"
     );
     if (localLlmAvailable().available) {
-      // Surface model-download progress as a lightweight toast so the user
-      // knows the first prompt may take a while (Llama-3-8B is ≈ 4 GB).
       let lastPct = -1;
       const off = onLocalLlmProgress(({ progress, text }) => {
         const pct = Math.round(progress * 100);
@@ -113,17 +141,18 @@ export async function chat(
         }
       });
       try {
-        return await chatLocal(messages, { model: opts.model, maxTokens: opts.maxTokens });
+        return await chatLocal(messages, { model: opts.model, maxTokens: opts.maxTokens, temperature: opts.temperature });
       } finally {
         off();
       }
     }
-    // WebGPU unavailable — fall through to the cloud path with a warning.
     toast.warn(
       "Local AI unavailable",
       "WebGPU isn't supported here — falling back to your OpenAI key.",
     );
   }
+
+  // ── OpenAI (cloud) ─────────────────────────────────────────────
   const key = getAiKey();
   checkRateLimit();
   inflight++;
@@ -150,6 +179,7 @@ export async function chat(
           model,
           messages,
           ...(opts.maxTokens ? { max_tokens: opts.maxTokens } : {}),
+          ...(opts.temperature !== undefined ? { temperature: opts.temperature } : {}),
         }),
         signal: opts.signal,
       },
@@ -175,11 +205,22 @@ export async function chat(
 
 /**
  * Stream a chat completion. Yields text chunks as they arrive.
+ * Routes through the active provider (Ollama / OpenAI / WebGPU).
  */
 export async function* chatStream(
   messages: ChatMessage[],
   opts: ChatOptions = {},
 ): AsyncGenerator<string, void, undefined> {
+  const provider = getActiveProvider();
+
+  if (provider === "ollama") {
+    const { chatOllamaStream, isOllamaAvailable } = await import("./ollamaProvider");
+    if (await isOllamaAvailable()) {
+      yield* chatOllamaStream(messages, opts);
+      return;
+    }
+  }
+
   const key = getAiKey();
   checkRateLimit();
   inflight++;

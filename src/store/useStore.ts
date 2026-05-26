@@ -144,7 +144,7 @@ export const useAppStore = create<AppState>()(
       pageView: false,
       aiKey: null,
       spellCheck: true,
-      useLocalAi: false,
+      useLocalAi: true,
       typewriterMode: false,
       writingGoalWords: 0,
       grammarCheck: false,

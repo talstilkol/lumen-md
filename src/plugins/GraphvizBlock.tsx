@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { sanitizeSvgMarkup } from "../lib/markupSanitizer";
+import { safeSetHtml } from "../lib/trustedTypes";
 
 interface GraphvizInstance {
   layout(dot: string, format: string, engine: string): string;
@@ -36,16 +37,39 @@ const cache = new Map<string, CacheEntry>();
 const MAX_CACHE = 12;
 
 export default function GraphvizBlock({ source, meta }: Props) {
-  const ref = useRef<HTMLDivElement | null>(null);
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const contentRef = useRef<HTMLDivElement | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [state, setState] = useState<RenderState>("idle");
   const [durationMs, setDurationMs] = useState<number | null>(null);
+  // Defer the heavy WASM load + render until the diagram enters viewport.
+  const [inView, setInView] = useState(false);
 
   // Engine: dot (default), neato, fdp, twopi, circo, sfdp, osage, patchwork.
   const engineMatch = meta?.match(/engine=([\w]+)/);
   const engine = engineMatch?.[1] ?? "dot";
 
   useEffect(() => {
+    if (!containerRef.current || inView) return;
+    if (typeof IntersectionObserver === "undefined") {
+      setInView(true);
+      return;
+    }
+    const io = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((e) => e.isIntersecting)) {
+          setInView(true);
+          io.disconnect();
+        }
+      },
+      { rootMargin: "300px 0px" },
+    );
+    io.observe(containerRef.current);
+    return () => io.disconnect();
+  }, [inView]);
+
+  useEffect(() => {
+    if (!inView) return;
     let cancelled = false;
     const key = `${engine}::${source}`;
     setState("rendering");
@@ -56,8 +80,8 @@ export default function GraphvizBlock({ source, meta }: Props) {
       if (cached) {
         setState("ready");
         setDurationMs(null);
-        if (!cancelled && ref.current) {
-        ref.current.innerHTML = cached.svg;
+        if (!cancelled && contentRef.current) {
+        safeSetHtml(contentRef.current, cached.svg);
         }
         return;
       }
@@ -65,9 +89,9 @@ export default function GraphvizBlock({ source, meta }: Props) {
         const started = performance.now();
         const gv = await getGraphviz();
         const svg = gv.layout(source, "svg", engine);
-        if (cancelled || !ref.current) return;
+        if (cancelled || !contentRef.current) return;
         const cleanSvg = sanitizeSvgMarkup(svg);
-        ref.current.innerHTML = cleanSvg;
+        safeSetHtml(contentRef.current, cleanSvg);
         setDurationMs(Math.round(performance.now() - started));
         setState("ready");
         cache.set(key, { key, svg: cleanSvg });
@@ -83,7 +107,7 @@ export default function GraphvizBlock({ source, meta }: Props) {
     return () => {
       cancelled = true;
     };
-  }, [source, engine]);
+  }, [source, engine, inView]);
 
   if (error) {
     return (
@@ -99,9 +123,11 @@ export default function GraphvizBlock({ source, meta }: Props) {
         ? durationMs == null
           ? "Rendered (cache)"
           : `Rendered in ${durationMs} ms`
-        : "Queued";
+        : inView
+          ? "Queued"
+          : "Scroll to render";
   return (
-    <div className="mermaid-block">
+    <div className="mermaid-block" ref={containerRef}>
       <div
         style={{
           padding: "0 10px 8px",
@@ -115,7 +141,20 @@ export default function GraphvizBlock({ source, meta }: Props) {
         <span>Graphviz · {engine}</span>
         <span>{statusText}</span>
       </div>
-      <div ref={ref} />
+      <div ref={contentRef} />
+      {!inView && (
+        <div
+          aria-busy="true"
+          style={{
+            padding: 18,
+            color: "hsl(var(--fg-muted))",
+            fontSize: 12,
+            textAlign: "center",
+          }}
+        >
+          Graphviz diagram (scroll to render)
+        </div>
+      )}
     </div>
   );
 }

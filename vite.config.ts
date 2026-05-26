@@ -61,32 +61,6 @@ const cleanUrlAliases = {
   },
 };
 
-/**
- * Tiny Vite plugin: rewrites clean URLs (`/roadmap`, `/landing`) to
- * their `.html` counterparts in `public/`. Production deployments
- * usually handle this at the proxy layer; this keeps dev / preview
- * parity with production so the status-bar link works locally.
- */
-const cleanUrlAliases = {
-  name: "lumen-clean-url-aliases",
-  configureServer(server: { middlewares: { use: (fn: (req: { url?: string }, res: unknown, next: () => void) => void) => void } }) {
-    server.middlewares.use((req, _res, next) => {
-      if (req.url === "/roadmap") req.url = "/roadmap.html";
-      else if (req.url === "/landing") req.url = "/landing.html";
-      else if (req.url === "/benchmarks") req.url = "/benchmarks.html";
-      next();
-    });
-  },
-  configurePreviewServer(server: { middlewares: { use: (fn: (req: { url?: string }, res: unknown, next: () => void) => void) => void } }) {
-    server.middlewares.use((req, _res, next) => {
-      if (req.url === "/roadmap") req.url = "/roadmap.html";
-      else if (req.url === "/landing") req.url = "/landing.html";
-      else if (req.url === "/benchmarks") req.url = "/benchmarks.html";
-      next();
-    });
-  },
-};
-
 export default defineConfig({
   plugins: [
     react(),
@@ -112,19 +86,26 @@ export default defineConfig({
         ],
       },
       workbox: {
-        // Generous limit so heavy WASM/lazy chunks (Mermaid, Graphviz, ECharts)
-        // are precached on install for offline use. Shiki bundles every
-        // grammar/theme and is lazy-loaded only when a code block renders, so
-        // it's intentionally excluded from precache.
-        maximumFileSizeToCacheInBytes: 12 * 1024 * 1024,
+        // Only precache small core files at install time. Heavy on-demand
+        // vendor chunks (Mermaid, tldraw, ECharts, Graphviz, CodeMirror,
+        // Milkdown) are fetched lazily by the runtime cache when first used.
+        // This keeps the initial SW install under ~2 MB instead of ~12 MB.
+        maximumFileSizeToCacheInBytes: 1024 * 1024,
         globPatterns: ["**/*.{js,css,html,svg,wasm,woff2}"],
-        // Per-language Shiki grammars are now individual chunks in
-        // assets/shiki-langs/ — fetched on demand by the runtime cache.
-        // Keeping them out of precache cuts ~10 MB of installs the user
-        // probably never needs (cpp, emacs-lisp, etc).
+        // Exclude heavy vendor chunks that are loaded on-demand via dynamic
+        // import — these will be cached at runtime when first fetched.
         globIgnores: [
           "**/vendor-shiki-*.js",
           "**/shiki-langs/**",
+          "**/vendor-mermaid-*.js",
+          "**/vendor-tldraw-*.js",
+          "**/vendor-echarts-*.js",
+          "**/vendor-graphviz-*.js",
+          "**/vendor-codemirror-*.js",
+          "**/vendor-milkdown-*.js",
+          "**/vendor-leaflet-*.js",
+          "**/vendor-katex-*.js",
+          "**/vendor-git-*.js",
         ],
         runtimeCaching: [
           {
@@ -149,6 +130,18 @@ export default defineConfig({
             urlPattern: ({ url }) => url.origin === "https://unpkg.com",
             handler: "StaleWhileRevalidate",
             options: { cacheName: "lumen-cdn" },
+          },
+          {
+            // Large on-demand vendor chunks (Mermaid, tldraw, ECharts, etc.)
+            // Cached at runtime when first loaded via dynamic import.
+            urlPattern: ({ url }) =>
+              url.origin === self.location.origin &&
+              /\/assets\/vendor-(mermaid|tldraw|echarts|graphviz|codemirror|milkdown|leaflet|katex|git|yjs|react|react-dom)-/.test(url.pathname),
+            handler: "StaleWhileRevalidate",
+            options: {
+              cacheName: "lumen-vendor-chunks",
+              expiration: { maxEntries: 50, maxAgeSeconds: 60 * 60 * 24 * 30 },
+            },
           },
         ],
       },

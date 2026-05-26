@@ -40,7 +40,7 @@ import { typewriterModeExtension } from "./typewriterMode";
 import { markdownLintExtension } from "./lintExtension";
 import { commentDecorations } from "./commentDecorations";
 import { searchHighlightExtension } from "./searchHighlight";
-import { grammarExtension } from "./grammarExtension";
+import { inlineSuggestion } from "./inlineSuggestion";
 import type { CollabSession } from "../collab/yjs";
 
 const mdHighlight = HighlightStyle.define([
@@ -108,6 +108,15 @@ async function loadVimExtension() {
     vimExtensionPromise = import("@replit/codemirror-vim").then((m) => m.vim());
   }
   return vimExtensionPromise;
+}
+
+let grammarExtensionPromise: Promise<typeof import("./grammarExtension")> | null = null;
+async function loadGrammarExtension() {
+  if (!grammarExtensionPromise) {
+    grammarExtensionPromise = import("./grammarExtension");
+  }
+  const m = await grammarExtensionPromise;
+  return m.grammarExtension;
 }
 
 /* ─── Ghost Text (Copilot-style inline completion) ─────────────── */
@@ -336,6 +345,7 @@ export const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
       highlightActiveLine(),
       search({ top: true }),
       ghostTextExtension(),
+      ...inlineSuggestion(),
       closeBrackets(),
       syntaxHighlighting(mdHighlight),
       markdown({
@@ -359,7 +369,8 @@ export const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
       // LanguageTool grammar / style — opt-in, debounced 1.5s. Off by
       // default because the public endpoint is rate-limited; users with a
       // self-hosted backend can flip this on with no other config change.
-      grammarCompartment.of(grammarCheck ? grammarExtension() : []),
+      // Loaded dynamically when toggled on to keep the initial bundle small.
+      grammarCompartment.of([]),
       // Live markdown lint — wavy underlines for trailing whitespace,
       // mixed-indent, heading-skip, broken wiki-links. Runs every 250 ms
       // after the user stops typing.
@@ -536,11 +547,15 @@ export const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
   useEffect(() => {
     const view = viewRef.current;
     if (!view) return;
-    view.dispatch({
-      effects: grammarCompartment.reconfigure(
-        grammarCheck ? grammarExtension() : [],
-      ),
-    });
+    let cancelled = false;
+    (async () => {
+      const ext = grammarCheck
+        ? (await loadGrammarExtension())()
+        : [];
+      if (cancelled || !viewRef.current) return;
+      view.dispatch({ effects: grammarCompartment.reconfigure(ext) });
+    })();
+    return () => { cancelled = true; };
   }, [grammarCheck]);
 
   // Mobile shortcut bar dispatches `lumen-mobile-insert` events. Listen at

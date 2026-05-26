@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import YAML from "yaml";
 import { t } from "../i18n";
 
@@ -58,16 +58,39 @@ async function getLeaflet() {
 }
 
 export default function MapBlock({ source, lang }: Props) {
-  const ref = useRef<HTMLDivElement | null>(null);
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const mapRef = useRef<HTMLDivElement | null>(null);
+  // Defer heavy Leaflet load until the map enters viewport.
+  const [inView, setInView] = useState(false);
 
   useEffect(() => {
+    if (!containerRef.current || inView) return;
+    if (typeof IntersectionObserver === "undefined") {
+      setInView(true);
+      return;
+    }
+    const io = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((e) => e.isIntersecting)) {
+          setInView(true);
+          io.disconnect();
+        }
+      },
+      { rootMargin: "300px 0px" },
+    );
+    io.observe(containerRef.current);
+    return () => io.disconnect();
+  }, [inView]);
+
+  useEffect(() => {
+    if (!inView) return;
     const spec = parseSpec(source, lang);
-    if (!spec || !ref.current) return;
+    if (!spec || !mapRef.current) return;
     let cancelled = false;
     let mapInstance: import("leaflet").Map | null = null;
     (async () => {
       const L = await getLeaflet();
-      if (cancelled || !ref.current) return;
+      if (cancelled || !mapRef.current) return;
 
       // Default center: world
       let center: [number, number] = spec.center ?? [20, 0];
@@ -84,7 +107,7 @@ export default function MapBlock({ source, lang }: Props) {
         zoom = markers.length === 1 ? 10 : 4;
       }
 
-      mapInstance = L.map(ref.current, {
+      mapInstance = L.map(mapRef.current, {
         center,
         zoom,
         scrollWheelZoom: false,
@@ -130,11 +153,11 @@ export default function MapBlock({ source, lang }: Props) {
   }, [source, lang]);
 
   return (
-    <div className="chart-block">
+    <div className="chart-block" ref={containerRef}>
       <div className="chart-block-header">
         <span>{t("plugin.map")}</span>
       </div>
-      <div ref={ref} style={{ height: 360, width: "100%" }} />
+      <div ref={mapRef} style={{ height: 360, width: "100%" }} />
     </div>
   );
 }

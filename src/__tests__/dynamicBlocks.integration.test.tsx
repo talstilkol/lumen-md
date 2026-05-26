@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { cleanup, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import GraphvizBlock from "../plugins/GraphvizBlock";
 import HtmlPreviewBlock from "../plugins/HtmlPreviewBlock";
@@ -32,10 +32,22 @@ describe("dynamic block integration smoke", () => {
       new Response("<svg xmlns=\"http://www.w3.org/2000/svg\"><text>plantuml</text></svg>"),
     );
     vi.stubGlobal("fetch", fetchMock);
+    // Mock IntersectionObserver for MermaidBlock
+    vi.stubGlobal("IntersectionObserver", class MockIO {
+      observe = vi.fn();
+      disconnect = vi.fn();
+      unobserve = vi.fn();
+      constructor(cb: IntersectionObserverCallback) {
+        const entry = { isIntersecting: true, target: document.createElement("div") } as unknown as IntersectionObserverEntry;
+        setTimeout(() => cb([entry], this as unknown as IntersectionObserver), 0);
+      }
+    });
   });
 
   afterEach(() => {
+    cleanup();
     vi.unstubAllGlobals();
+    vi.clearAllMocks();
   });
 
   it("sanitizes HTML preview source", () => {
@@ -119,7 +131,7 @@ describe("dynamic block integration smoke", () => {
 
   it("renders LiveSvg block in safe mode", () => {
     render(<LiveSvgBlock source={`<circle cx="50" cy="50" r="10" fill="red" />`} />);
-    expect(screen.getByText(/SVG/i)).toBeTruthy();
+    expect(screen.getAllByText(/SVG/i).length).toBeGreaterThanOrEqual(1);
     expect(screen.getByText(/Rendered/i)).toBeTruthy();
   });
 });

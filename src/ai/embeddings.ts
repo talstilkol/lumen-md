@@ -27,6 +27,13 @@ export interface RagResult {
   content: string;
 }
 
+/** Raw search hit returned from the worker (content loaded separately). */
+interface SearchHit {
+  path: string;
+  score: number;
+  snippet: string;
+}
+
 const IDB_KEY = "lumen-rag-bm25";
 const STALE_MS = 60_000; // rebuild if >60s old
 
@@ -40,7 +47,7 @@ let buildQueueResolver: (() => void) | null = null;
 // Search request sequence id
 let searchSeq = 0;
 // Map of seq -> Promise resolver
-const searchResolvers = new Map<number, { resolve: (r: any[]) => void, reject: (e: any) => void }>();
+const searchResolvers = new Map<number, { resolve: (r: SearchHit[]) => void, reject: (e: Error) => void }>();
 
 function initWorker() {
   if (searchWorker) return searchWorker;
@@ -148,7 +155,7 @@ export async function semanticSearch(
   const worker = initWorker();
   
   const seq = ++searchSeq;
-  const scored = await new Promise<any[]>((resolve, reject) => {
+  const scored = await new Promise<SearchHit[]>((resolve, reject) => {
     searchResolvers.set(seq, { resolve, reject });
     worker.postMessage({ type: "SEARCH", query, topK, seq });
   });

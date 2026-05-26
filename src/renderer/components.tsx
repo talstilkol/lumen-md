@@ -296,7 +296,7 @@ function LumenImg(props: ImgProps) {
   const fallbackAlt = !rest.alt
     ? (src ?? "").split("/").pop()?.replace(/\.[^.]+$/, "") ?? "image"
     : undefined;
-  return <img alt={fallbackAlt} {...rest} src={resolved} />;
+  return <img alt={fallbackAlt} loading="lazy" {...rest} src={resolved} />;
 }
 
 function normalize(src: string): string {

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { sanitizeSvgMarkup } from "../lib/markupSanitizer";
+import { safeSetHtml } from "../lib/trustedTypes";
 
 let mermaidPromise: Promise<typeof import("mermaid").default> | null = null;
 let initializedFor: "dark" | "light" | null = null;
@@ -77,6 +78,7 @@ export default function MermaidBlock({ source }: Props) {
   // rendered chrome (status row, queued indicator, etc.).
   const ref = useRef<HTMLDivElement | null>(null);
   const blockRef = useRef<HTMLDivElement | null>(null);
+  const contentRef = useRef<HTMLDivElement | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [state, setState] = useState<RenderState>("idle");
   const [durationMs, setDurationMs] = useState<number | null>(null);
@@ -115,8 +117,8 @@ export default function MermaidBlock({ source }: Props) {
     setDurationMs(null);
     setError(null);
     if (cached) {
-      if (!cancelled && ref.current) {
-        ref.current.innerHTML = cached;
+      if (!cancelled && contentRef.current) {
+        safeSetHtml(contentRef.current, cached);
         setState("ready");
       }
       return;
@@ -127,16 +129,16 @@ export default function MermaidBlock({ source }: Props) {
         const mermaid = await getMermaid();
         const id = `lumen-mermaid-${++counter}`;
         const { svg, bindFunctions } = await mermaid.render(id, source);
-        if (cancelled || !ref.current) return;
+        if (cancelled || !contentRef.current) return;
         const cleanSvg = sanitizeSvgMarkup(svg);
-        ref.current.innerHTML = cleanSvg;
+        safeSetHtml(contentRef.current, cleanSvg);
         cache.set(cacheKey, cleanSvg);
         setDurationMs(Math.round(performance.now() - started));
         if (cache.size > MAX_CACHE) {
           const first = cache.keys().next().value;
           if (first) cache.delete(first);
         }
-        bindFunctions?.(ref.current);
+        bindFunctions?.(contentRef.current);
         setState("ready");
       } catch (e) {
         if (!cancelled) setError((e as Error).message);
@@ -178,6 +180,7 @@ export default function MermaidBlock({ source }: Props) {
               : "Queued"}
         </span>
       </div>
+      <div ref={contentRef} />
       {!inView && (
         <div
           aria-busy="true"

@@ -308,6 +308,16 @@ export function connectCollab(
   const user = randomUser();
   provider.awareness.setLocalStateField("user", user);
 
+  // Wire version-history snapshots (5-min interval during collab).
+  let stopSnapshots: (() => void) | null = null;
+  import("./versionHistory").then(({ startSnapshotInterval }) => {
+    stopSnapshots = startSnapshotInterval(
+      roomName,
+      () => ytext.toString(),
+      () => ({ name: user.name, clientId: doc.clientID }),
+    );
+  }).catch(() => {});
+
   return {
     doc,
     ytext,
@@ -323,6 +333,10 @@ export function connectCollab(
       if (seedTimer) {
         clearTimeout(seedTimer);
         seedTimer = null;
+      }
+      if (stopSnapshots) {
+        stopSnapshots();
+        stopSnapshots = null;
       }
       try {
         provider.destroy();

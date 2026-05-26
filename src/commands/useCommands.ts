@@ -9,7 +9,7 @@ import type { RecentFile } from "../storage/recent";
 import { BLOCK_SNIPPETS } from "../snippets";
 import { uiAlert, uiPrompt } from "../ui/PromptDialog";
 import { generateAiCommitMessage } from "../ai/commands";
-import { buildAiSettingsCommand } from "../ai/commands";
+import { buildAiSettingsCommand, buildAiOutlineCommand } from "../ai/commands";
 import type { CollabSession } from "../collab/yjs";
 import { startVoiceRecording } from "../ui/VoiceDictation";
 import { TEMPLATES } from "../editor/templates";
@@ -542,6 +542,87 @@ export function useCommands({
         },
       },
       {
+        id: "ai.productAgent",
+        label: t("cmd.ai.productAgent", { defaultValue: "AI: Create Product" }),
+        hint: t("cmd.ai.productAgent.hint", { defaultValue: "Generate a complete project from a description" }),
+        icon: cmdIcons.Sparkles,
+        group: t("group.tools"),
+        action: async () => {
+          const idea = await uiPrompt({
+            message: "Describe the product you want to create:\n(e.g., 'A todo app with drag-and-drop, dark mode, and local storage')",
+          });
+          if (!idea) return;
+          try {
+            showAiToast("🚀 Product Agent starting...", "info");
+            const { createProduct } = await import("../ai/productAgent");
+            const result = await createProduct(idea, (progress) => {
+              showAiToast(`${progress.phase}: ${progress.message}`, "info");
+            });
+            if (result.success) {
+              showAiToast(`✅ Product created! ${result.files.size} files generated`, "success");
+              const summary = `# Product Created\n\n${result.files.size} files generated:\n\n${[...result.files.keys()].map((f) => `- \`${f}\``).join("\n")}`;
+              setContent(summary);
+            } else {
+              showAiToast(`Product creation failed: ${result.error}`, "error");
+            }
+          } catch (e) {
+            showAiToast(`Agent error: ${(e as Error).message}`, "error");
+          }
+        },
+      },
+      {
+        id: "ai.ollamaModels",
+        label: t("cmd.ai.ollama", { defaultValue: "AI: Ollama Models" }),
+        hint: t("cmd.ai.ollama.hint", { defaultValue: "Switch to a local Ollama model" }),
+        icon: cmdIcons.Sparkles,
+        group: t("group.tools"),
+        action: async () => {
+          const { listOllamaModels, isOllamaAvailable, setOllamaConfig } = await import("../ai/ollamaProvider");
+          const { setActiveProvider } = await import("../ai/llm");
+          if (!(await isOllamaAvailable())) {
+            await uiAlert({ message: "Ollama is not running.\n\nStart it with: ollama serve\nThen try again." });
+            return;
+          }
+          const models = await listOllamaModels();
+          if (models.length === 0) {
+            await uiAlert({ message: "No models found.\n\nPull a model with: ollama pull llama3.1" });
+            return;
+          }
+          const modelList = models.map((m) => `${m.name} (${(m.size / 1e9).toFixed(1)}GB)`).join("\n");
+          const choice = await uiPrompt({
+            message: `Available Ollama models:\n\n${modelList}\n\nType the model name to use:`,
+            defaultValue: models[0].name,
+          });
+          if (!choice) return;
+          setOllamaConfig({ model: choice.trim() });
+          setActiveProvider("ollama");
+          showAiToast(`✅ Switched to Ollama: ${choice.trim()}`, "success");
+        },
+      },
+      {
+        id: "ai.switchProvider",
+        label: t("cmd.ai.provider", { defaultValue: "AI: Switch Provider" }),
+        hint: t("cmd.ai.provider.hint", { defaultValue: "Choose between OpenAI, Ollama, or local WebGPU" }),
+        icon: cmdIcons.Sparkles,
+        group: t("group.tools"),
+        action: async () => {
+          const { setActiveProvider, getActiveProvider } = await import("../ai/llm");
+          const current = getActiveProvider();
+          const choice = await uiPrompt({
+            message: `Current AI provider: ${current}\n\nChoose provider:\n- openai (cloud, needs API key)\n- ollama (local server, needs ollama running)\n- local-webgpu (in-browser, needs WebGPU)\n\nType your choice:`,
+            defaultValue: current,
+          });
+          if (!choice) return;
+          const valid = choice.trim().toLowerCase();
+          if (valid === "openai" || valid === "ollama" || valid === "local-webgpu") {
+            setActiveProvider(valid);
+            showAiToast(`✅ AI provider set to: ${valid}`, "success");
+          } else {
+            await uiAlert({ message: "Invalid provider. Choose: openai, ollama, or local-webgpu" });
+          }
+        },
+      },
+      {
         id: "tools.checkGrammar",
         label: t("cmd.tools.grammar"),
         hint: t("cmd.tools.grammar.hint"),
@@ -814,6 +895,10 @@ export function useCommands({
       })),
       // ── AI Capabilities ──────────────────────────────────────────────────
       buildAiSettingsCommand(),
+      buildAiOutlineCommand(
+        () => useAppStore.getState().doc.content,
+        (s: string) => useAppStore.getState().setContent(s),
+      ),
       // ── Git ─────────────────────────────────────────────────────────────
       {
         id: "git.clone",

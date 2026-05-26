@@ -10,10 +10,12 @@ import { initTelemetry } from "./lib/telemetry";
 import { initAuth } from "./auth/useAuth";
 import { reportWebVitals } from "./lib/webVitals";
 import { log } from "./lib/logger";
+import { startAutoBackup } from "./sync/autoBackup";
 import "./index.css";
 
 initTelemetry();
 void initAuth();
+startAutoBackup();
 
 // Core Web Vitals — opt-out gates inside; sink writes to the structured
 // log so Sentry (when configured) picks them up alongside other events.
@@ -33,6 +35,21 @@ window.prompt = function(message?: string, _defaultText?: string): string | null
   }
   return nativePrompt.call(window, message, _defaultText);
 };
+
+// ─── iOS Share Extension — listen for shared note content
+function initShareExtension() {
+  if (typeof window === "undefined") return;
+  const listener = (event: Event) => {
+    const customEvent = event as CustomEvent<{ content?: string }>;
+    const content = customEvent.detail?.content;
+    if (!content) return;
+    // Store the shared note content; App.tsx will pick it up on mount
+    (window as unknown as Record<string, unknown>).__pendingSharedNote = content;
+  };
+  // Capacitor bridge fires a custom document event with shared content
+  window.addEventListener("lumen:sharedNote", listener);
+}
+initShareExtension();
 
 initCRDT().finally(() => {
   ReactDOM.createRoot(document.getElementById("root")!).render(

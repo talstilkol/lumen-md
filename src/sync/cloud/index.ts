@@ -7,4 +7,5 @@
 export type { CloudFile, CloudProvider, CloudConflictResolution, SyncReport } from "./types";
 export { dropboxProvider, finishDropboxOAuth } from "./dropbox";
 export { gdriveProvider, finishGDriveOAuth } from "./gdrive";
+export { gistProvider, pushCodeBlock } from "./githubGist";
 export { syncWithCloud } from "./sync";

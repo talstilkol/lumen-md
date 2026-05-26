@@ -35,6 +35,7 @@
   "dependencies": {
     "dompurify": "^3.2.6",
     "@capacitor/cli": "^8.3.1",
+    "@capacitor/android": "^8.3.1",
     "@capacitor/core": "^8.3.1",
     "@capacitor/ios": "^8.3.1",
     "@capacitor/keyboard": "^8.0.3",
@@ -104,6 +105,7 @@
     "y-protocols": "^1.0.7",
     "y-webrtc": "^10.3.0",
     "yaml": "^2.6.1",
+    "y-websocket": "^2.0.4",
     "yjs": "^13.6.30",
     "zustand": "^5.0.2"
   },

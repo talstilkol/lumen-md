@@ -8,11 +8,13 @@ import remarkGfm from "remark-gfm";
 function remarkBreaks() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return (tree: any) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const visit = (node: any) => {
       if (node.children) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const next: any[] = [];
         for (const child of node.children) {
-          if (child.type === "text" && child.value.includes("\n")) {
+          if (child.type === "text" && child.value?.includes("\n")) {
             const parts = child.value.split("\n");
             parts.forEach((part: string, i: number) => {
               if (part) next.push({ type: "text", value: part });

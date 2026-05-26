@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import YAML from "yaml";
 import { sanitizeUrl } from "../lib/urlSanitizer";
 
@@ -54,11 +54,34 @@ function parseSpec(source: string): ModelSpec | null {
 }
 
 export default function Model3DBlock({ source, meta }: Props) {
+  const containerRef = useRef<HTMLDivElement | null>(null);
   const hostRef = useRef<HTMLDivElement | null>(null);
+  // Defer model-viewer script + heavy 3D load until visible.
+  const [inView, setInView] = useState(false);
 
   useEffect(() => {
+    if (!containerRef.current || inView) return;
+    if (typeof IntersectionObserver === "undefined") {
+      setInView(true);
+      return;
+    }
+    const io = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((e) => e.isIntersecting)) {
+          setInView(true);
+          io.disconnect();
+        }
+      },
+      { rootMargin: "300px 0px" },
+    );
+    io.observe(containerRef.current);
+    return () => io.disconnect();
+  }, [inView]);
+
+  useEffect(() => {
+    if (!inView) return;
     ensureModelViewerLoaded();
-  }, []);
+  }, [inView]);
 
   const spec = parseSpec(source);
   const heightMatch = meta?.match(/height=(\d+)/);
@@ -67,7 +90,7 @@ export default function Model3DBlock({ source, meta }: Props) {
   const isPosterSafe = !spec?.poster || sanitizeUrl(spec.poster);
 
   useEffect(() => {
-    if (!spec || !isSourceSafe || !isPosterSafe) return;
+    if (!inView || !spec || !isSourceSafe || !isPosterSafe) return;
     const container = hostRef.current;
     if (!container) return;
     container.innerHTML = "";
@@ -82,7 +105,7 @@ export default function Model3DBlock({ source, meta }: Props) {
     }
     viewer.setAttribute("style", "width: 100%; height: 100%; --poster-color: transparent;");
     container.appendChild(viewer);
-  }, [spec, isSourceSafe, isPosterSafe]);
+  }, [spec, isSourceSafe, isPosterSafe, inView]);
 
   if (!spec || !spec.src) {
     return (
@@ -105,7 +128,7 @@ export default function Model3DBlock({ source, meta }: Props) {
   }
 
   return (
-    <div className="chart-block">
+    <div className="chart-block" ref={containerRef}>
       <div className="chart-block-header">
         <span>3D · {spec.alt ?? new URL(spec.src, location.href).pathname.split("/").pop()}</span>
       </div>

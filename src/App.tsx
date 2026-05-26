@@ -161,6 +161,17 @@ export default function App() {
     applyLocale(locale);
   }, [locale]);
 
+  // Check for a shared note from the iOS Share Extension.
+  useEffect(() => {
+    const pending = (window as unknown as Record<string, unknown>).__pendingSharedNote;
+    if (typeof pending === "string" && pending.length > 0) {
+      // Clear the pending note so we don't process it again.
+      delete (window as unknown as Record<string, unknown>).__pendingSharedNote;
+      openTabAction({ name: "Shared Note.md", content: pending, workspaceName: null });
+      showAiToast("Opened shared note from iOS.", "info");
+    }
+  }, []);
+
   // Seed the Welcome document on first launch
   useEffect(() => {
     if (!doc.content) {
@@ -176,13 +187,17 @@ export default function App() {
       });
     }
     // Show onboarding tour on first launch
+    let tourTimer: ReturnType<typeof setTimeout> | undefined;
     try {
       if (!localStorage.getItem("lumen-tour-done")) {
-        setTimeout(() => setTourOpen(true), 1200);
+        tourTimer = setTimeout(() => setTourOpen(true), 1200);
       }
     } catch {
       /* storage may be denied in private browsing — onboarding silently skips */
     }
+    return () => {
+      if (tourTimer) clearTimeout(tourTimer);
+    };
     // run once
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

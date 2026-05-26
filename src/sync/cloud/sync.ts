@@ -218,7 +218,9 @@ async function isPathUpToDate(
   remote: { modified: number; size: number; hash?: string },
   cache: SyncCacheEntry | undefined,
 ): Promise<boolean> {
-  if (!cache) return false;
+  if (!cache) {
+    return local.size === remote.size && local.modified === remote.modified;
+  }
 
   let localHash: string | undefined = cache.localHash;
   if (
@@ -245,10 +247,15 @@ async function isPathUpToDate(
   return localMatch && remoteMatch;
 }
 
+import { setSyncStatus } from "../syncStatus";
+
 export async function syncWithCloud(
   provider: CloudProvider,
   opts: SyncOptions = {},
 ): Promise<SyncReport> {
+  const providerName = provider.name.toLowerCase().split(" ")[0] as "dropbox" | "gdrive" | "gist" | "icloud";
+  setSyncStatus("syncing", providerName);
+  try {
   const report: SyncReport = {
     uploaded: 0,
     downloaded: 0,
@@ -331,6 +338,9 @@ export async function syncWithCloud(
           modified: r.modified,
         }, r, hash, r.hash);
       } else if (l && r) {
+        if (l.modified === r.modified && l.size === r.size) {
+          continue;
+        }
         const remoteIsUpToDate = await isPathUpToDate(l, r, cacheEntry);
         if (remoteIsUpToDate) {
           continue;
@@ -436,6 +446,11 @@ export async function syncWithCloud(
   }
 
   onProgress(1, "Done");
+  setSyncStatus(
+    report.errors.length > 0 ? "error" : "idle",
+    providerName,
+    report.errors.length > 0 ? `${report.errors.length} errors` : undefined,
+  );
   const userId = currentUserId();
 
   // Keep only active paths in cache. This trims tombstones and keeps local
@@ -460,4 +475,9 @@ export async function syncWithCloud(
     });
   }
   return report;
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : String(e);
+    setSyncStatus("offline", providerName, msg);
+    return { uploaded: 0, downloaded: 0, deleted: 0, conflicts: [], errors: [{ path: "", error: msg }] };
+  }
 }
