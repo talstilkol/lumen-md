@@ -567,12 +567,25 @@ export default function WysiwygEditor({ value, onChange }: Props) {
   const getView = () => viewRef.current;
 
   const mountedRef = useRef(false);
+  // Cross-effect cancellation flag for the Milkdown plugin lifecycle race
+  // (touched in rounds 9, 22, 23, 25). `MilkdownEditor.create()` is async,
+  // and the slash/tooltip `view()` callbacks fire from inside ProseView's
+  // constructor — which is called during that promise's resolution. If
+  // React unmounts (or `value` changes) while `.create()` is still in
+  // flight, the view callbacks run AFTER our cleanup has fired. The local
+  // `cancelled` closure inside the value effect is invisible to those
+  // callbacks once they execute, so we use a ref that the callbacks read
+  // directly. Without this guard, constructing a `SlashProvider` with a
+  // null `content` element throws on its first debounced update
+  // (`appendChild` on null, then `this.element.dataset` on null).
+  const cancelledRef = useRef(false);
 
   useEffect(() => {
     if (!hostRef.current) return;
     // Always build on first mount; skip subsequent if content unchanged
     if (mountedRef.current && lastEmittedRef.current === value) return;
     mountedRef.current = true;
+    cancelledRef.current = false;
     let cancelled = false;
     const host = hostRef.current;
 
@@ -585,7 +598,9 @@ export default function WysiwygEditor({ value, onChange }: Props) {
         }
         editorRef.current = null;
       }
-      if (cancelled || !host) return;
+      if (cancelled || !host) {
+        return;
+      }
       host.innerHTML = "";
 
       // Create floating menu DOMs lazily and reuse them.
@@ -613,10 +628,40 @@ export default function WysiwygEditor({ value, onChange }: Props) {
 
           ctx.set(slash.key, {
             view: (view: EditorView) => {
+              try {
+                return buildSlashView(view);
+              } catch (err) {
+                // Last-resort guard: if Milkdown's SlashProvider
+                // constructor throws (e.g. because the menu element was
+                // detached during a re-mount before this callback fired),
+                // contain the throw here. Returning a no-op view keeps
+                // the plugin slot occupied so the editor finishes
+                // setup; the cleanup pass will tear it down normally.
+                log.warn("[wysiwyg] slash view threw, using no-op", err);
+                return { update: () => {}, destroy: () => {} };
+              }
+            },
+          });
+
+          // Helper extracted for the try/catch above.
+          function buildSlashView(view: EditorView) {
+              const maybeMenu = slashElRef.current as SlashMenuRoot | null;
+              // RACE GUARD — see `cancelledRef` declaration. If the
+              // component unmounted (or `value` changed) before ProseView
+              // construction got here, `maybeMenu` may be null;
+              // constructing `SlashProvider({ content: null })` would
+              // throw on its first debounced update. The post-create
+              // branch in the value effect's async block tears the
+              // editor down right after, so a no-op view is safe.
+              if (cancelledRef.current || !maybeMenu) {
+                return { update: () => {}, destroy: () => {} };
+              }
+              // Reassign so inner function declarations capture the
+              // narrowed (non-null) type.
+              const menuEl: SlashMenuRoot = maybeMenu;
               viewRef.current = view;
-              const menuEl = slashElRef.current as SlashMenuRoot | null;
               const provider = new SlashProvider({
-                content: menuEl!,
+                content: menuEl,
                 debounce: 50,
                 trigger: "/",
               });
@@ -626,7 +671,6 @@ export default function WysiwygEditor({ value, onChange }: Props) {
               // `/` and forward it into the menu so it shows only matching
               // items. Runs on every editor update.
               function syncQuery(v: EditorView) {
-                if (!menuEl) return;
                 const { $from } = v.state.selection;
                 const text = $from.parent.textBetween(
                   0,
@@ -644,7 +688,7 @@ export default function WysiwygEditor({ value, onChange }: Props) {
               // visible (data-show="true"). Avoids stealing keys from the
               // editor when the slash menu is closed.
               const onKeyDown = (e: KeyboardEvent) => {
-                if (!menuEl || menuEl.dataset.show !== "true") return;
+                if (menuEl.dataset.show !== "true") return;
                 if (e.key === "ArrowDown") {
                   e.preventDefault();
                   menuEl.moveSelection(1);
@@ -659,7 +703,8 @@ export default function WysiwygEditor({ value, onChange }: Props) {
               window.addEventListener("keydown", onKeyDown, { capture: true });
 
               return {
-                update: (v: EditorView, prev) => {
+                update: (v: EditorView, prev: EditorView["state"]) => {
+                  if (cancelledRef.current) return;
                   viewRef.current = v;
                   provider.update(v, prev);
                   syncQuery(v);
@@ -672,19 +717,35 @@ export default function WysiwygEditor({ value, onChange }: Props) {
                   if (viewRef.current === view) viewRef.current = null;
                 },
               };
-            },
-          });
+          }
 
           ctx.set(tooltip.key, {
             view: (view: EditorView) => {
+              try {
+                return buildTooltipView(view);
+              } catch (err) {
+                // Same containment as slash view above.
+                log.warn("[wysiwyg] tooltip view threw, using no-op", err);
+                return { update: () => {}, destroy: () => {} };
+              }
+            },
+          });
+
+          function buildTooltipView(view: EditorView) {
+              const tooltipEl = tooltipElRef.current;
+              // Same race guard as the slash plugin above.
+              if (cancelledRef.current || !tooltipEl) {
+                return { update: () => {}, destroy: () => {} };
+              }
               viewRef.current = view;
               const provider = new TooltipProvider({
-                content: tooltipElRef.current!,
+                content: tooltipEl,
                 debounce: 50,
               });
               provider.update(view);
               return {
-                update: (v: EditorView, prev) => {
+                update: (v: EditorView, prev: EditorView["state"]) => {
+                  if (cancelledRef.current) return;
                   viewRef.current = v;
                   provider.update(v, prev);
                 },
@@ -693,8 +754,7 @@ export default function WysiwygEditor({ value, onChange }: Props) {
                   if (viewRef.current === view) viewRef.current = null;
                 },
               };
-            },
-          });
+          }
         })
         .use(commonmark)
         .use(gfm)
@@ -712,27 +772,37 @@ export default function WysiwygEditor({ value, onChange }: Props) {
       }
       editorRef.current = editor;
       lastEmittedRef.current = value;
-    })();
+    })().catch((e) => log.warn("[wysiwyg] async build threw", e));
 
     return () => {
       cancelled = true;
+      cancelledRef.current = true;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [value]);
 
-  // Final teardown.
+  // Final teardown. Defer DOM null-ing until the editor's async destroy
+  // resolves so any in-flight plugin view callback (slash, tooltip) still
+  // sees a valid menu element. The cancelledRef guard is the primary
+  // defense; this is layered insurance for the rare case where the view
+  // callback sneaks past the guard between cleanup and the next tick.
   useEffect(() => {
     return () => {
+      cancelledRef.current = true;
       const ed = editorRef.current;
+      editorRef.current = null;
+      const cleanupDom = () => {
+        slashElRef.current?.remove();
+        slashElRef.current = null;
+        tooltipElRef.current?.remove();
+        tooltipElRef.current = null;
+        viewRef.current = null;
+      };
       if (ed) {
-        ed.destroy(true).catch(() => {});
-        editorRef.current = null;
+        ed.destroy(true).then(cleanupDom, cleanupDom);
+      } else {
+        cleanupDom();
       }
-      slashElRef.current?.remove();
-      slashElRef.current = null;
-      tooltipElRef.current?.remove();
-      tooltipElRef.current = null;
-      viewRef.current = null;
     };
   }, []);
 
