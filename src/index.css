@@ -559,9 +559,18 @@
     background: hsl(var(--bg-subtle));
     border: 1px solid hsl(var(--border));
     border-radius: 0.6rem;
+    /* `flex` (row) collapses the status row + SVG host into two narrow
+       columns when both children are flex items — the fix introduced
+       in round-? to centre the SVG broke when the status row landed.
+       Use column so children stack normally; centre the SVG via the
+       inner rule below. */
+    display: flex;
+    flex-direction: column;
+    overflow-x: auto;
+  }
+  .mermaid-block > div:last-child {
     display: flex;
     justify-content: center;
-    overflow-x: auto;
   }
   .mermaid-block svg {
     max-width: 100%;

@@ -16,8 +16,27 @@
  * URLs which previously leaked between test runs. We clear those too so
  * a test box that was logged into gdrive/dropbox manually doesn't taint
  * the suite.
+ *
+ * Usage:
+ *   import { registerLumenStateReset } from "./_clear-state";
+ *   test.beforeEach(async ({ page }) => {
+ *     await registerLumenStateReset(page);
+ *     await page.goto("/");
+ *   });
+ *
+ * The pure function `clearLumenState` is also exported for browser-side
+ * use via `page.evaluate(clearLumenState)`. The browser-side body has
+ * NO non-browser dependencies so it can be cleanly serialised.
  */
-export const CLEAR_LUMEN_STATE = (): void => {
+
+import type { Page } from "@playwright/test";
+
+/**
+ * Browser-side cleanup. Runs inside the page; doesn't touch Node.
+ * Exported so Playwright can `page.addInitScript(clearLumenState)`
+ * and the same function works in `page.evaluate(...)`.
+ */
+export function clearLumenState(): void {
   try {
     const remove: string[] = [];
     for (let i = 0; i < localStorage.length; i += 1) {
@@ -31,6 +50,20 @@ export const CLEAR_LUMEN_STATE = (): void => {
     // user, second-launch" snapshot.
     localStorage.setItem("lumen-tour-done", "1");
   } catch {
-    /* localStorage unavailable — beforeEach will still pass. */
+    /* localStorage unavailable — caller still proceeds. */
   }
-};
+}
+
+/**
+ * Playwright-side helper. Registers the cleanup as an init script so
+ * it fires before any page script. Use in `beforeEach`.
+ */
+export async function registerLumenStateReset(page: Page): Promise<void> {
+  await page.addInitScript(clearLumenState);
+}
+
+/**
+ * Legacy alias kept for any spec that imports the old name.
+ * @deprecated Use `clearLumenState` (browser) or `registerLumenStateReset` (Playwright).
+ */
+export const CLEAR_LUMEN_STATE = clearLumenState;

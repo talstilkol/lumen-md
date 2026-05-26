@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import { registerLumenStateReset } from "./_clear-state";
 
 /**
  * Error-path e2e — systematically poke things that fail gracefully
@@ -36,10 +37,10 @@ function captureErrors(page: import("@playwright/test").Page): string[] {
 }
 
 test.beforeEach(async ({ page }) => {
-  await page.addInitScript(() => {
-    localStorage.setItem("lumen-tour-done", "1");
-    localStorage.removeItem("lumen-md");
-  });
+  // Deep reset: clears every "lumen-*" and "lumen.*" key, re-sets the
+  // tour-done flag. Avoids OAuth tokens / collab signaling state from
+  // leaking between runs. See e2e/_clear-state.ts.
+  await registerLumenStateReset(page);
   await page.goto("/");
   await page
     .locator("header")
