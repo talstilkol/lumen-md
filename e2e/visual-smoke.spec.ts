@@ -39,6 +39,15 @@ test("Mermaid block renders inline SVG inside the preview", async ({ page }) => 
   // box even when rendered. Counting them is enough proof of structure.
   const groupCount = await svg.locator("g").count();
   expect(groupCount).toBeGreaterThan(0);
+  // M6-followup: structural size assertion. The earlier audit found
+  // a CSS regression that collapsed the mermaid block to ~24×24 px;
+  // the existing assertions (svg visible, has child `g`) couldn't see
+  // that. Pin the bounding box so a future flex/grid mistake fails
+  // here loudly instead of producing an unreadable diagram.
+  const box = await svg.boundingBox();
+  expect(box, "Mermaid SVG must have a bounding box").not.toBeNull();
+  expect(box!.width).toBeGreaterThanOrEqual(200);
+  expect(box!.height).toBeGreaterThanOrEqual(80);
 });
 
 test("WYSIWYG mode mounts ProseMirror and accepts typed input", async ({ page }) => {
