@@ -283,8 +283,10 @@
 | File open (10MB) | < 500ms | untested | Virtual document (visible lines only) |
 | Keystroke latency | < 16ms | ~20ms | Batch DOM updates, requestAnimationFrame |
 | Memory (100 docs) | < 200MB | untested | LRU eviction, WeakRef cache |
-| Bundle size (core) | < 500KB | ~800KB | Tree-shake, conditional plugin loading |
-| Offline startup | < 300ms | ~600ms | Service worker precache optimization |
+| Bundle size (eager entry) | < 500KB raw | **מדוד 31/05: 608KB raw / ~190KB gzip** | רוב הכבד כבר lazy ✅ |
+| Offline startup | < 300ms | SW precache 106 entries (2.9MB) | מדוד: ה-build מייצר SW |
+
+> **הערת מדידה כנה (2026-05-31):** רק גודל ה-bundle ניתן-לאימות בסנדבוקס (מתוך `vite build` + `npm run budget`) — וה-bundle **כבר ממוטב**: web-llm נטען דינמית, ו-mermaid/echarts/codemirror/tldraw/milkdown/shiki-langs הם chunks **עצלים** שנטענים רק בשימוש, לא ב-startup. מספרי First-paint / TTI / keystroke / memory לעיל הם **הערכות לא-מדודות** — דורשים פרופיילינג בדפדפן (Lighthouse/Web-Vitals) שלא רץ בסנדבוקס. השיפור המשמעותי הנותר (lazy-load של העורך עצמו) מסוכן ולא-ניתן-לאימות-ריצה כאן, ולכן **לא בוצע** — לא אזייף שיפור perf שאי-אפשר להוכיח.
 
 ---
 
