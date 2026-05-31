@@ -5,6 +5,45 @@
 
 ---
 
+## עדכון סטטוס — 2026-05-29 (ביקורת יושרה + ביצוע)
+
+ביקורת מקיפה מול הקוד חשפה שסימוני הסטטוס בתוכנית היו לא מדויקים בשני הכיוונים.
+התיקונים הבאים בוצעו בפועל ואומתו בבדיקות:
+
+- **ייבוא:** ספריית הממירים (`fileFormats.ts`) הייתה **קוד מת** — לא חוברה לכפתור הייבוא.
+  עכשיו מחוברת דרך `importFile` (גם דיאלוג וגם גרירה). LaTeX/RST/AsciiDoc/Org/OPML/MHTML/EML עובדים.
+- **DOCX/ODT/EPUB ייבוא:** הוחלף regex-על-בייטים בקורא ZIP אמיתי (`zip.ts`, מבוסס `DecompressionStream`, אפס תלות).
+  DOCX מפענח כותרות/bold/italic/רשימות/טבלאות; EPUB עוקב אחר spine ב-OPF.
+- **DOCX ייצוא:** הוחלף "MHTML בתחפושת .doc" ב-**OOXML אמיתי** (zip writer מקורי).
+- **Python live (Pyodide)** ו-**SQL live (sql.js)** — נוספו בלוקים אמיתיים (WASM, lazy-load ב-Run).
+- **Collab:** הוסר facade של CRDT שנכתב בכל הקלדה אך מעולם לא נשלח (קוד מת ומטעה).
+- **סימונים שתוקנו:** תוסף דפדפן ❌→✅ (קיים ועובד), Android ✅→❌ (לא קיים `android/`),
+  ייצוא PDF ❌→⚠️ (עובד דרך print), Yjs realtime ✅→⚠️ (mirror של טקסט מלא, לא binding ברמת תו).
+
+---
+
+## עדכון סטטוס — 2026-05-31 (ביקורת יושרה שנייה, מאומתת מול הקוד)
+
+סבב ביקורת שני מול הקוד בפועל (grep קוראים, הרצת החבילה) חשף סימונים שעדיין לא מדויקים.
+תוקן בפועל ואומת:
+- **חבילת הטסטים הוחזרה לירוק:** 1308/1308 עוברים (היו 2+6 נכשלים — מפתחי `cmd.ai.*` חסרו ב-en/he וב-6 שפות).
+- **ייצוא DOCX שוכתב ל-best-in-class:** רשימות אמיתיות (`numbering.xml`+`w:numPr`, ממוספר/תבליט/מקונן), היפר-קישורים אמיתיים, קו אופקי, יישור טבלאות, `styles.xml`. 15 אסרציות מבניות.
+
+**סימונים שעדיין מטעים (לתיקון — ראו רשימת המשימות):**
+- **DOC ייבוא** ⚠️→🟥: לא מחלץ טקסט — פולט ג'יבריש בינארי. צריך מחלץ CFB אמיתי או הודעת-שגיאה כנה.
+- **MHTML ייצוא** ✅→❌ **הוסר**: `markdownToMhtml` היה **קוד מת** (אין קורא) → הוסר ב-2026-05-31. ייבוא MHTML עדיין נתמך ונבדק.
+- **AI "צ'ארט מנתונים" (ECharts)** ✅ **תוקן 2026-05-31**: ה-prompt `visualization` חובר לפקודה אמיתית "AI: Chart from Data" (`agents.generateChart` → בלוק ```chart```), עם טסט.
+- **Grammar "20 שפות"** 🟥: רק 4 שפות מיושמות (en/he/ar/ru).
+- **Shiki "190+ שפות"**: אמיתי כיכולת, אך 6 בלבד preloaded; שפה אקזוטית נופלת בשקט ל-`text`.
+- **בורר ספק AI**: תיבת-טקסט חופשי, לא dropdown; הרמז עדיין אומר "OpenAI/Ollama/WebGPU" בלבד אף ש-6 ספקים קיימים.
+- **Plugin marketplace** ✅→🟥: UI + מוני-localStorage בלבד, **אין backend** publish/install/rate.
+- **WebGPU LLM / Whisper מקומי**: קוד אמיתי אך WebGPU לא הוכח שטוען מודל, ו-`@xenova/transformers` **לא מותקן** (מקומי זורק).
+- **PDF ייבוא**: `pdfjs-dist` **לא מותקן** → תמיד נכשל.
+- **iOS ShareExtension**: קבצים קיימים אך **לא מחוברים** ל-Xcode build (`pbxproj` ללא הפניה).
+- **Python/SQL live**: אמיתי, אך תלוי הורדת runtime מ-CDN בזמן ריצה (offline=שבור); נבדק ב-smoke בלבד.
+
+---
+
 ## 1. ניתוח תחרותי — מה נדרש כדי להיות #1
 
 | מתחרה | חוזקה העיקרית | החולשה שלו | איפה Lumen מנצח |
@@ -36,11 +75,11 @@
 | Markdown (.md, .mdx) | ✅ קיים | — | כולל GFM, frontmatter, MDX |
 | HTML (.html, .htm) | ✅ קיים | — | DOMParser zero-dep |
 | RTF (.rtf) | ✅ קיים | — | |
-| DOCX (.docx) | ✅ בסיסי | P1 | שדרג ל-mammoth.js full-fidelity |
-| DOC (.doc) | ✅ בסיסי | P2 | Legacy binary, best-effort |
-| ODT (.odt) | ✅ בסיסי | P2 | |
-| PDF (.pdf) | ✅ קיים | P1 | הוסף OCR (Tesseract.js) לסרוקים |
-| EPUB (.epub) | ✅ קיים | — | |
+| DOCX (.docx) | ✅ אמיתי | — | unzip מקורי + WordprocessingML: כותרות/bold/italic/רשימות/טבלאות |
+| DOC (.doc) | ⚠️ best-effort | P2 | Legacy binary — חילוץ טקסט בלבד |
+| ODT (.odt) | ✅ אמיתי | — | unzip מקורי + content.xml (כותרות/פסקאות/רשימות) |
+| PDF (.pdf) | ⚠️ דורש pdfjs-dist | P1 | קוד lazy-import קיים אך החבילה לא מותקנת; הוסף OCR לסרוקים |
+| EPUB (.epub) | ✅ אמיתי | — | unzip מקורי + OPF spine → המרת פרקי XHTML |
 | LaTeX (.tex) | ✅ קיים | — | |
 | RST (.rst) | ✅ קיים | — | |
 | AsciiDoc (.adoc) | ✅ קיים | — | |
@@ -48,12 +87,12 @@
 | OPML (.opml) | ✅ קיים | — | |
 | CSV/TSV/JSON/XML/YAML | ✅ קיים | — | |
 | MHTML/EML | ✅ קיים | — | |
-| **PPTX** | ❌ חסר | P1 | slide → heading + bullets + images |
-| **XLSX** | ❌ חסר | P1 | sheet → markdown table / database view |
+| **PPTX** | ✅ אמיתי | — | unzip מקורי → slide → heading + bullets (תמונות עדיין לא) |
+| **XLSX** | ✅ אמיתי | — | unzip מקורי + sharedStrings → טבלת markdown לכל גיליון |
 | **Numbers/Pages** | ❌ חסר | P3 | Apple iWork — ZIP of XML |
 | **Google Docs/Sheets** | ❌ חסר | P2 | via Google Drive API export |
-| **Notion export** | ❌ חסר | P1 | JSON/MD/CSV migration tool |
-| **Obsidian vault** | ❌ חסר | P1 | full vault import with wikilinks mapping |
+| **Notion export** | ✅ אמיתי | — | zip → מיזוג .md+.csv; ניקוי "Title <hash>" |
+| **Obsidian vault** | ✅ אמיתי | — | zip → מיזוג .md; [[wikilinks]] נשמרים (Lumen תומך מקורית) |
 | **Confluence** | ❌ חסר | P2 | XHTML export → markdown |
 | **WordPress** | ❌ חסר | P2 | WXR XML → posts |
 | **Jupyter (.ipynb)** | ❌ חסר | P1 | cells → code blocks + output |
@@ -64,19 +103,19 @@
 | פורמט | סטטוס | עדיפות | הערות |
 |--------|--------|--------|-------|
 | HTML (self-contained) | ✅ קיים | — | inline styles + assets |
-| DOCX | ✅ קיים | P1 | שדרג: tables, images, styles |
+| DOCX | ✅ אמיתי | — | OOXML מקורי (zip writer): כותרות/bold/italic/רשימות/טבלאות. תמונות עדיין לא מוטמעות |
 | RTF | ✅ קיים | — | |
 | LaTeX | ✅ קיים | — | |
 | RST | ✅ קיים | — | |
 | AsciiDoc | ✅ קיים | — | |
 | Org-mode | ✅ קיים | — | |
 | OPML | ✅ קיים | — | |
-| MHTML | ✅ קיים | — | |
-| **PDF** | ❌ חסר | P0 | print-to-PDF + headless Chrome/Puppeteer |
-| **EPUB** | ❌ חסר | P1 | book publishing workflow |
+| MHTML | ❌ הוסר | — | היה קוד מת; ייבוא MHTML עדיין נתמך |
+| **PDF** | ⚠️ דרך print | P1 | PrintExport → window.print() ("Save as PDF"). לא generator תכנותי |
+| **EPUB** | ✅ אמיתי | — | EPUB3 חוקי (zip writer); פרקים מפוצלים לפי H1; round-trip מאומת |
 | **PPTX** | ❌ חסר | P2 | heading-based slide generation |
-| **Markdown → Static Site** | ❌ חסר | P1 | built-in blog/docs publishing |
-| **Reveal.js slides** | ❌ חסר | P1 | `---` separators → slide deck |
+| **Markdown → Static Site** | ✅ אמיתי | — | אתר HTML רב-עמודים (zip): עמוד per H1 + ניווט צד + RSS |
+| **Reveal.js slides** | ✅ אמיתי | — | מפצל על `---` ל-`<section>`; runtime מ-CDN |
 | **Jupyter notebook** | ❌ חסר | P2 | code blocks → executable cells |
 | **Confluence wiki** | ❌ חסר | P3 | for enterprise users |
 
@@ -95,10 +134,10 @@
 |--------|--------|--------|-------|
 | **Syntax highlighting** | ✅ 190+ שפות | — | Shiki/TextMate grammars |
 | **Live execution: JS/TS** | ✅ קיים | — | sandboxed iframe |
-| **Live execution: Python** | ❌ חסר | P0 | Pyodide (WASM) |
+| **Live execution: Python** | ✅ קיים | — | בלוק `live-python` — Pyodide (WASM, lazy ב-Run) |
 | **Live execution: Rust** | ❌ חסר | P2 | via Rust Playground API |
 | **Live execution: Go** | ❌ חסר | P2 | via Go Playground API |
-| **Live execution: SQL** | ❌ חסר | P1 | sql.js (SQLite WASM) |
+| **Live execution: SQL** | ✅ קיים | — | בלוק `live-sql` — sql.js (SQLite WASM, lazy ב-Run) |
 | **Live execution: R** | ❌ חסר | P2 | webR (WASM) |
 | **Live execution: Ruby** | ❌ חסר | P3 | ruby.wasm |
 | **Live execution: C/C++** | ❌ חסר | P3 | via Compiler Explorer API |
@@ -200,16 +239,16 @@
 
 | יכולת | עדיפות | תיאור |
 |--------|--------|-------|
-| **Multi-model** | P0 | Claude, GPT-4, Gemini, Llama, Mistral — user picks |
+| **Multi-model** | P0 | ✅ הושלם: OpenAI + Claude (Anthropic) + Gemini + Mistral + Ollama + WebGPU, עם בורר ספק |
 | **AI Agent mode** | P0 | "כתוב לי מאמר על X" → research + draft + format |
 | **Code generation** | P1 | "צור chart מהנתונים האלה" → ECharts spec |
 | **Smart templates** | P1 | AI ממלא template לפי context |
-| **Auto-translate** | P1 | תרגום מסמך שלם עם שימור formatting |
+| **Auto-translate** | ✅ | פקודה "AI: Translate Document" — תרגום מסמך שלם עם שימור formatting |
 | **Grammar in 20 languages** | P1 | LanguageTool + AI hybrid |
 | **Citation finder** | P2 | AI מוצא sources ומוסיף references |
 | **Image generation** | P2 | DALL-E / Stable Diffusion inline |
-| **Diagram from text** | P1 | "draw a flowchart of this process" → Mermaid |
-| **Meeting notes → action items** | P2 | structured extraction |
+| **Diagram from text** | ✅ | פקודה "AI: Diagram from Text" → בלוק Mermaid |
+| **Meeting notes → action items** | ✅ | פקודה "AI: Extract Action Items" → רשימת משימות |
 | **OCR + AI** | P2 | scan image → markdown with AI cleanup |
 
 ---
@@ -222,11 +261,11 @@
 | **macOS** | ✅ Tauri | P1 | שדרג: native menu, Spotlight integration |
 | **Windows** | ✅ Tauri | P1 | שדרג: native file associations |
 | **Linux** | ✅ Tauri | P2 | Snap/Flatpak packaging |
-| **iOS** | 🔜 Capacitor | P1 | חסום על Apple Developer account |
-| **Android** | 🔜 Capacitor | P1 | חסום על Google Play account |
+| **iOS** | 🔜 Capacitor | P1 | scaffold קיים (`ios/` + ShareExtension); חסום על Apple Developer account |
+| **Android** | ❌ לא קיים | P1 | תלויות מותקנות אך `android/` לא נוצר (`cap add android` לא רץ) |
 | **VS Code extension** | ❌ | P1 | Preview panel + markdown-it integration |
 | **CLI** | ❌ | P2 | `lumen render doc.md --to pdf` |
-| **Browser extension** | ❌ | P2 | clip any page → markdown |
+| **Browser extension** | ✅ קיים | — | `extension/` — MV3 web-clipper עובד (HTML→MD + context menu) |
 | **Raycast/Alfred** | ❌ | P3 | quick capture |
 | **Obsidian plugin** | ❌ | P2 | migration path for Obsidian users |
 | **API** | ❌ | P1 | headless conversion service |
@@ -302,7 +341,7 @@
 
 | יכולת | סטטוס | עדיפות |
 |--------|--------|--------|
-| P2P real-time (Yjs/WebRTC) | ✅ | — |
+| P2P real-time (Yjs/WebRTC) | ⚠️ חלקי | P1 | presence + תגובות אמיתיים; סנכרון טקסט = mirror מלא, לא binding ברמת תו (y-prosemirror) → סיכון clobber בעריכה במקביל |
 | Server-based rooms | 🔜 | P1 |
 | Comments & threads | ✅ | — |
 | Suggesting mode (track changes) | ❌ | P1 |
@@ -332,14 +371,15 @@
 **יעד:** Build עובד, 0 bugs, הכל יציב
 
 - [x] תקן postcss.config.js
-- [ ] תקן 11 בדיקות נכשלות
+- [x] PDF export (print-based) — PrintExport קיים ועובד
+- [x] Python live execution (Pyodide) — בלוק `live-python`
+- [x] SQL live execution (sql.js) — בלוק `live-sql`
+- [x] חיבור ספריית הייבוא + DOCX/ODT/EPUB אמיתי + ייצוא DOCX אמיתי
+- [x] PPTX/XLSX import — unzip מקורי
+- [x] Obsidian vault + Notion importer — zip → מיזוג markdown
+- [ ] תקן בדיקות נכשלות (אם נותרו)
 - [ ] נקה קבצי plan מהשורש
 - [ ] CI/CD pipeline מלא (build + test + deploy)
-- [ ] PDF export (print-based)
-- [ ] Python live execution (Pyodide)
-- [ ] SQL live execution (sql.js)
-- [ ] Obsidian vault importer
-- [ ] PPTX/XLSX import
 - [ ] VS Code extension (basic preview)
 - [ ] Performance: < 1.5s TTI
 

@@ -4,7 +4,6 @@ import App from "./App";
 import { UpdateBanner } from "./ui/UpdateBanner";
 import { ErrorBoundary } from "./ui/ErrorBoundary";
 import { showAiToast } from "./ui/AiToast";
-import { initCRDT } from "./storage/crdt";
 import { ToastContainer } from "./components/Toast";
 import { initTelemetry } from "./lib/telemetry";
 import { initAuth } from "./auth/useAuth";
@@ -51,8 +50,7 @@ function initShareExtension() {
 }
 initShareExtension();
 
-initCRDT().finally(() => {
-  ReactDOM.createRoot(document.getElementById("root")!).render(
+ReactDOM.createRoot(document.getElementById("root")!).render(
     <React.StrictMode>
       <ErrorBoundary fallback={
         <div style={{
@@ -89,5 +87,4 @@ initCRDT().finally(() => {
     <UpdateBanner />
     <ToastContainer />
   </React.StrictMode>,
-  );
-});
+);

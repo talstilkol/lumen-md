@@ -32,7 +32,6 @@ import { StateField, StateEffect } from "@codemirror/state";
 import type { Extension } from "@codemirror/state";
 import { chat } from "../ai/llm";
 import { PROMPTS } from "../ai/prompts";
-import { createInsert, createDelete } from "../storage/crdt";
 import { embedHintExtension } from "./embedHintExtension";
 import { insertSlashMenuExtension } from "./insertMenu";
 import { collabAwarenessExtension } from "./collabAwareness";
@@ -78,11 +77,6 @@ interface EditorProps {
   grammarCheck?: boolean;
   /** Centre the active line vertically (typewriter scroll mode). */
   typewriterMode?: boolean;
-  /**
-   * Active CRDT collaboration path. When provided, the editor intercepts text
-   * updates and sends them atomically to the local Conflict-Free Replicated Data Type queue.
-   */
-  crdtPath?: string | null;
   /** Active collaboration session — when set, peer cursors render live. */
   collab?: CollabSession | null;
 }
@@ -245,7 +239,6 @@ export const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
     grammarCheck = false,
     typewriterMode = false,
     collab = null,
-    crdtPath = null,
   },
   ref,
 ) {
@@ -389,20 +382,6 @@ export const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
       EditorView.updateListener.of((u) => {
         if (u.docChanged && !syncingRef.current) {
           onChangeRef.current(u.state.doc.toString());
-
-          // Dispatch atomic ops to CRDT queue
-          if (crdtPath) {
-            u.changes.iterChanges((fromA, toA, _fromB, _toB, inserted) => {
-              // Deletions
-              if (fromA < toA) {
-                createDelete(crdtPath, fromA, toA - fromA);
-              }
-              // Insertions
-              if (inserted.length) {
-                createInsert(crdtPath, fromA, inserted.toString());
-              }
-            });
-          }
         }
         // Track the current line for the floating line-number badge.
         if (u.docChanged || u.selectionSet) {

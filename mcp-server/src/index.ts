@@ -5,13 +5,17 @@
  *
  * The server is intentionally tiny: it points at a directory on disk (the
  * workspace the user keeps in sync with Lumen via Git or `lumen export`)
- * and offers four tools:
+ * and offers nine tools:
  *
- *   • read_note(path)         — return the markdown body of a single note.
- *   • write_note(path, body)  — create or overwrite a note.
- *   • append_note(path, body) — append to an existing note.
- *   • list_notes()            — return every .md path in the workspace.
- *   • search_workspace(query) — naive case-insensitive substring search.
+ *   • read_note(path)            — return the markdown body of a single note.
+ *   • write_note(path, body)     — create or overwrite a note.
+ *   • append_note(path, body)    — append to an existing note.
+ *   • delete_note(path)          — remove a note.
+ *   • list_notes()               — return every .md path in the workspace.
+ *   • search_workspace(query)    — naive case-insensitive substring search.
+ *   • update_frontmatter(path,…) — patch a note's YAML frontmatter.
+ *   • list_tags()                — aggregate tags across the workspace.
+ *   • get_backlinks(path)        — notes linking to the given note.
  *
  * Usage from Claude Desktop config:
  *   {

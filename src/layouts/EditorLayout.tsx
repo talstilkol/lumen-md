@@ -68,7 +68,6 @@ export function EditorLayout({
   spellCheck,
   grammarCheck,
   typewriterMode,
-  activeFile,
   pageView,
   collab,
   setContent,
@@ -330,7 +329,6 @@ export function EditorLayout({
             spellCheck={spellCheck}
             grammarCheck={grammarCheck}
             typewriterMode={typewriterMode}
-            crdtPath={activeFile}
           />
         </section>
       )}

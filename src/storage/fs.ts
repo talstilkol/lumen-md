@@ -3,7 +3,13 @@
  * Uses the File System Access API where supported, with a graceful fallback to
  * a hidden <input type="file"> + download trick for Save As.
  */
-import { rtfToMarkdown, htmlToMarkdown, xmlToMarkdown } from "./fileFormats";
+import {
+  rtfToMarkdown,
+  htmlToMarkdown,
+  xmlToMarkdown,
+  fileToMarkdown,
+  SUPPORTED_IMPORT_EXTENSIONS,
+} from "./fileFormats";
 
 declare global {
   interface Window {
@@ -62,12 +68,8 @@ export async function openFileDialog(): Promise<OpenedFile | null> {
         types: DATA_TYPES,
       });
       const file = await handle.getFile();
-      const raw = await file.text();
-      return {
-        name: file.name,
-        content: convertImported(file.name, raw),
-        handle,
-      };
+      const imported = await importFile(file);
+      return { ...imported, handle };
     } catch (e) {
       // user cancelled
       if ((e as Error).name === "AbortError") return null;
@@ -78,12 +80,11 @@ export async function openFileDialog(): Promise<OpenedFile | null> {
   return new Promise((resolve) => {
     const input = document.createElement("input");
     input.type = "file";
-    input.accept = ".md,.markdown,.txt,.csv,.tsv,.json,.rtf,.doc,.docx,.html,.htm,.xml";
+    input.accept = SUPPORTED_IMPORT_EXTENSIONS.map((e) => `.${e}`).join(",");
     input.onchange = async () => {
       const f = input.files?.[0];
       if (!f) return resolve(null);
-      const raw = await f.text();
-      resolve({ name: f.name, content: convertImported(f.name, raw) });
+      resolve(await importFile(f));
     };
     input.click();
   });
@@ -135,6 +136,25 @@ export async function saveFile(
   a.remove();
   URL.revokeObjectURL(url);
   return file;
+}
+
+/**
+ * Single entry point for importing any supported file.
+ *
+ * Tabular/markup formats (csv, tsv, json, rtf, html, xml) keep their special
+ * Lumen-block handling via `convertImported` so the auto-table+chart engine
+ * fires immediately. Everything else — including binary office formats (docx,
+ * odt, epub, pdf) that must be read as bytes, and markup converters (tex, rst,
+ * adoc, org, opml, mhtml) — goes through the full converter library, which
+ * reads the file itself (text or arrayBuffer as appropriate).
+ */
+export async function importFile(file: File): Promise<OpenedFile> {
+  if (/\.(csv|tsv|json|rtf|html?|xml)$/i.test(file.name)) {
+    const raw = await file.text();
+    return { name: file.name, content: convertImported(file.name, raw) };
+  }
+  const { name, content } = await fileToMarkdown(file);
+  return { name, content };
 }
 
 /**

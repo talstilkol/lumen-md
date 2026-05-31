@@ -260,6 +260,48 @@ export function useCommands({
         },
       },
       {
+        id: "file.exportReveal",
+        label: t("cmd.file.exportReveal"),
+        hint: t("cmd.file.exportReveal.hint"),
+        icon: cmdIcons.Download,
+        group: t("group.file"),
+        action: async () => {
+          const { markdownToRevealHtml, downloadText } = await import("../storage/exportFormats");
+          const baseName = doc.name.replace(/\.[^.]+$/, "");
+          downloadText(
+            `${baseName}.slides.html`,
+            markdownToRevealHtml(doc.content, baseName),
+            "text/html",
+          );
+        },
+      },
+      {
+        id: "file.exportEpub",
+        label: t("cmd.file.exportEpub"),
+        hint: t("cmd.file.exportEpub.hint"),
+        icon: cmdIcons.Download,
+        group: t("group.file"),
+        action: async () => {
+          const { markdownToEpubBytes, downloadBytes } = await import("../storage/exportFormats");
+          const baseName = doc.name.replace(/\.[^.]+$/, "");
+          const bytes = await markdownToEpubBytes(doc.content, baseName);
+          downloadBytes(`${baseName}.epub`, bytes, "application/epub+zip");
+        },
+      },
+      {
+        id: "file.exportSite",
+        label: t("cmd.file.exportSite"),
+        hint: t("cmd.file.exportSite.hint"),
+        icon: cmdIcons.Download,
+        group: t("group.file"),
+        action: async () => {
+          const { markdownToStaticSiteBytes, downloadBytes } = await import("../storage/exportFormats");
+          const baseName = doc.name.replace(/\.[^.]+$/, "");
+          const bytes = await markdownToStaticSiteBytes(doc.content, baseName);
+          downloadBytes(`${baseName}-site.zip`, bytes, "application/zip");
+        },
+      },
+      {
         id: "file.exportPdf",
         label: t("cmd.file.exportPdf"),
         hint: t("cmd.file.exportPdf.hint"),
@@ -571,6 +613,83 @@ export function useCommands({
         },
       },
       {
+        id: "ai.diagram",
+        label: t("cmd.ai.diagram", { defaultValue: "AI: Diagram from Text" }),
+        hint: t("cmd.ai.diagram.hint", { defaultValue: "Generate a Mermaid diagram from the document" }),
+        icon: cmdIcons.Sparkles,
+        group: t("group.tools"),
+        action: async () => {
+          try {
+            showAiToast("🧩 Generating diagram…", "info");
+            const { generateDiagram } = await import("../ai/agents");
+            const block = await generateDiagram(doc.content);
+            setContent(`${doc.content.trimEnd()}\n\n${block}\n`);
+            showAiToast("✅ Diagram inserted", "success");
+          } catch (e) {
+            showAiToast(`Diagram failed: ${(e as Error).message}`, "error");
+          }
+        },
+      },
+      {
+        id: "ai.actionItems",
+        label: t("cmd.ai.actionItems", { defaultValue: "AI: Extract Action Items" }),
+        hint: t("cmd.ai.actionItems.hint", { defaultValue: "Pull a task list out of meeting notes" }),
+        icon: cmdIcons.Sparkles,
+        group: t("group.tools"),
+        action: async () => {
+          try {
+            showAiToast("✅ Extracting action items…", "info");
+            const { extractActionItems } = await import("../ai/agents");
+            const list = await extractActionItems(doc.content);
+            setContent(`${doc.content.trimEnd()}\n\n## Action Items\n\n${list}\n`);
+            showAiToast("✅ Action items added", "success");
+          } catch (e) {
+            showAiToast(`Action items failed: ${(e as Error).message}`, "error");
+          }
+        },
+      },
+      {
+        id: "ai.translate",
+        label: t("cmd.ai.translate", { defaultValue: "AI: Translate Document" }),
+        hint: t("cmd.ai.translate.hint", { defaultValue: "Translate the whole document, preserving formatting" }),
+        icon: cmdIcons.Sparkles,
+        group: t("group.tools"),
+        action: async () => {
+          const target = await uiPrompt({
+            message: "Translate the document into which language?\n(e.g. Spanish, עברית, 日本語, Français)",
+            defaultValue: "",
+          });
+          if (!target || !target.trim()) return;
+          try {
+            showAiToast(`🌐 Translating to ${target}…`, "info");
+            const { translateMarkdown } = await import("../ai/agents");
+            const translated = await translateMarkdown(doc.content, target.trim());
+            setContent(translated);
+            showAiToast("✅ Document translated", "success");
+          } catch (e) {
+            showAiToast(`Translation failed: ${(e as Error).message}`, "error");
+          }
+        },
+      },
+      {
+        id: "ai.chart",
+        label: t("cmd.ai.chart", { defaultValue: "AI: Chart from Data" }),
+        hint: t("cmd.ai.chart.hint", { defaultValue: "Turn CSV or table data into an ECharts chart" }),
+        icon: cmdIcons.Sparkles,
+        group: t("group.tools"),
+        action: async () => {
+          try {
+            showAiToast("📊 Generating chart…", "info");
+            const { generateChart } = await import("../ai/agents");
+            const block = await generateChart(doc.content);
+            setContent(`${doc.content.trimEnd()}\n\n${block}\n`);
+            showAiToast("✅ Chart inserted", "success");
+          } catch (e) {
+            showAiToast(`Chart failed: ${(e as Error).message}`, "error");
+          }
+        },
+      },
+      {
         id: "ai.ollamaModels",
         label: t("cmd.ai.ollama", { defaultValue: "AI: Ollama Models" }),
         hint: t("cmd.ai.ollama.hint", { defaultValue: "Switch to a local Ollama model" }),
@@ -609,17 +728,38 @@ export function useCommands({
           const { setActiveProvider, getActiveProvider } = await import("../ai/llm");
           const current = getActiveProvider();
           const choice = await uiPrompt({
-            message: `Current AI provider: ${current}\n\nChoose provider:\n- openai (cloud, needs API key)\n- ollama (local server, needs ollama running)\n- local-webgpu (in-browser, needs WebGPU)\n\nType your choice:`,
+            message: `Current AI provider: ${current}\n\nChoose provider:\n- openai (cloud, needs API key)\n- anthropic (Claude, cloud, needs API key)\n- gemini (Google, cloud, needs API key)\n- mistral (cloud, needs API key)\n- ollama (local server, needs ollama running)\n- local-webgpu (in-browser, needs WebGPU)\n\nType your choice:`,
             defaultValue: current,
           });
           if (!choice) return;
           const valid = choice.trim().toLowerCase();
-          if (valid === "openai" || valid === "ollama" || valid === "local-webgpu") {
-            setActiveProvider(valid);
-            showAiToast(`✅ AI provider set to: ${valid}`, "success");
-          } else {
-            await uiAlert({ message: "Invalid provider. Choose: openai, ollama, or local-webgpu" });
+          const known = ["openai", "anthropic", "gemini", "mistral", "ollama", "local-webgpu"];
+          if (!known.includes(valid)) {
+            await uiAlert({ message: `Invalid provider. Choose: ${known.join(", ")}` });
+            return;
           }
+          setActiveProvider(
+            valid as "openai" | "anthropic" | "gemini" | "mistral" | "ollama" | "local-webgpu",
+          );
+          // Cloud providers other than OpenAI keep their key under
+          // lumen.ai.key.<provider>; prompt for it if missing.
+          if (valid === "anthropic" || valid === "gemini" || valid === "mistral") {
+            const existing = localStorage.getItem(`lumen.ai.key.${valid}`);
+            if (!existing) {
+              const label =
+                valid === "anthropic"
+                  ? "Anthropic (Claude)"
+                  : valid === "gemini"
+                    ? "Google Gemini"
+                    : "Mistral";
+              const key = await uiPrompt({
+                message: `Enter your ${label} API key:`,
+                defaultValue: "",
+              });
+              if (key && key.trim()) localStorage.setItem(`lumen.ai.key.${valid}`, key.trim());
+            }
+          }
+          showAiToast(`✅ AI provider set to: ${valid}`, "success");
         },
       },
       {

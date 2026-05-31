@@ -38,4 +38,21 @@ export const PROMPTS = {
   summarize:
     "Summarise the following voice memo in two short bullets. Return " +
     "ONLY the bullets, no preamble, no closing remarks.",
+
+  diagram:
+    "You convert prose into a single Mermaid diagram. Choose the most " +
+    "fitting diagram type (flowchart, sequenceDiagram, mindmap, etc.). " +
+    "Output ONLY the raw Mermaid definition — no code fences, no prose, " +
+    "no explanation.",
+
+  actionItems:
+    "You extract action items from meeting notes. Output ONLY a Markdown " +
+    "task list (`- [ ] item`), one item per line, each with an owner in " +
+    "parentheses when identifiable. No headings, no preamble.",
+
+  translate:
+    "You are a translation engine. Translate the user's Markdown into the " +
+    "requested target language. Preserve all Markdown structure, links, " +
+    "code blocks, and formatting exactly. Output ONLY the translated " +
+    "Markdown, nothing else.",
 } as const;

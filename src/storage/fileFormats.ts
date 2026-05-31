@@ -1,11 +1,14 @@
 /**
  * File format converters — zero external dependencies.
- * 
- * Supports: RTF, DOC, DOCX, HTML, CSV, TSV, JSON, XML
- * All convert to Markdown for the editor.
- * 
- * Uses browser-native DOMParser for HTML → Markdown.
+ *
+ * Text/markup: Markdown, HTML, RTF, XML, CSV/TSV/JSON, LaTeX, RST, AsciiDoc,
+ * Org, OPML, MHTML/EML. Office/ebook (ZIP-of-XML): DOCX, ODT, EPUB — unzipped
+ * via the native DecompressionStream-based reader in ./zip (no JSZip/mammoth).
+ * Legacy .doc and image-only PDF remain best-effort. All convert to Markdown.
+ *
+ * Uses browser-native DOMParser for XML/HTML parsing.
  */
+import { unzip, unzipText } from "./zip";
 
 /* ─── HTML → Markdown (zero-dep, uses DOMParser) ─── */
 
@@ -281,29 +284,23 @@ export async function fileToMarkdown(file: File): Promise<{ name: string; conten
       return { name: `${baseName}.md`, content: xmlToMarkdown(text) };
     }
     case "doc": {
-      // Legacy .doc — best-effort text extraction with warning
-      const text = await file.text();
-      const readable = text.replace(/[^\x20-\x7E\n\r\t\u0590-\u05FF\u0600-\u06FF]/g, "");
-      const warning = "> ⚠️ **Note:** DOC files use a legacy binary format. Complex formatting, tables, and images may be lost.\n> For best results, save as DOCX or export as HTML from Word.\n\n---\n\n";
-      return { name: `${baseName}.md`, content: warning + readable.trim() };
+      return { name: `${baseName}.md`, content: await legacyDocToMarkdown(file) };
     }
     case "docx": {
-      // DOCX is a ZIP — basic text extraction with warning
-      const text = await extractDocxText(file);
-      const warning = "> ⚠️ **Note:** DOCX text extraction is basic. Tables, images, and rich formatting may not convert perfectly.\n> For full fidelity, export as HTML from Word and use the Paste Text button.\n\n---\n\n";
-      return { name: `${baseName}.md`, content: warning + text };
+      return { name: `${baseName}.md`, content: await docxToMarkdown(file) };
     }
     case "odt": {
-      // ODT is a ZIP with content.xml — same regex-strip strategy as DOCX.
-      const buf = await file.arrayBuffer();
-      const raw = new TextDecoder().decode(buf);
-      const matches = raw.match(/<text:[ph][^>]*>[\s\S]*?<\/text:[ph]>/g) ?? [];
-      const body = matches
-        .map((m) => m.replace(/<[^>]+>/g, ""))
-        .join("\n\n")
-        .trim();
-      const warning = "> ⚠️ **Note:** ODT text extraction is basic. For full fidelity export as HTML from LibreOffice.\n\n---\n\n";
-      return { name: `${baseName}.md`, content: warning + body };
+      return { name: `${baseName}.md`, content: await odtToMarkdown(file) };
+    }
+    case "pptx": {
+      return { name: `${baseName}.md`, content: await pptxToMarkdown(file) };
+    }
+    case "xlsx": {
+      return { name: `${baseName}.md`, content: await xlsxToMarkdown(file) };
+    }
+    case "zip": {
+      // Notion export / Obsidian vault — a zip of Markdown (+ CSV).
+      return { name: `${baseName}.md`, content: await archiveToMarkdown(file) };
     }
     case "mhtml":
     case "mht":
@@ -356,53 +353,364 @@ export async function fileToMarkdown(file: File): Promise<{ name: string; conten
   }
 }
 
-/** Basic DOCX text extraction using the browser's native decompression */
-async function extractDocxText(file: File): Promise<string> {
-  try {
-    // DOCX = ZIP containing word/document.xml
-    // Use the native DecompressionStream API if available
-    const buffer = await file.arrayBuffer();
-    const blob = new Blob([buffer]);
+/* ─── DOCX → Markdown (real: unzip word/document.xml) ─────────────── */
 
-    // For browsers without ZIP support, fall back to reading raw XML fragments
-    const text = await blob.text();
-    // Extract text between <w:t> tags (Word XML text nodes)
-    const matches = text.match(/<w:t[^>]*>([^<]+)<\/w:t>/g);
-    if (matches) {
-      return matches
-        .map((m) => m.replace(/<[^>]+>/g, ""))
-        .join(" ")
-        .replace(/\s+/g, " ")
-        .trim();
-    }
-    return "⚠ DOCX parsing requires mammoth.js. Please install it with: npm install mammoth";
-  } catch {
-    return "⚠ Could not parse DOCX file.";
+const els = (parent: Element | Document, tag: string) =>
+  Array.from(parent.getElementsByTagName(tag));
+
+/**
+ * Real DOCX import: unzips `word/document.xml` and walks the WordprocessingML
+ * tree. Handles headings (Heading1–6 / Title styles), bold/italic runs,
+ * bulleted & numbered list items, and tables. Images are noted but not
+ * embedded (no asset extraction yet).
+ */
+export async function docxToMarkdown(file: File): Promise<string> {
+  let xml: string | null;
+  try {
+    xml = await unzipText(await file.arrayBuffer(), "word/document.xml");
+  } catch (err) {
+    return `> ⚠️ Could not read DOCX archive: ${(err as Error).message}`;
   }
+  if (!xml) return "> ⚠️ DOCX has no word/document.xml part.";
+
+  const doc = new DOMParser().parseFromString(xml, "application/xml");
+  const body = doc.getElementsByTagName("w:body")[0];
+  if (!body) return "> ⚠️ DOCX document body not found.";
+
+  const runText = (r: Element): string => {
+    let t = els(r, "w:t").map((x) => x.textContent ?? "").join("");
+    if (els(r, "w:tab").length) t = "\t" + t;
+    if (!t) return "";
+    const rPr = r.getElementsByTagName("w:rPr")[0];
+    const bold = rPr && els(rPr, "w:b").length > 0;
+    const italic = rPr && els(rPr, "w:i").length > 0;
+    if (bold) t = `**${t}**`;
+    if (italic) t = `*${t}*`;
+    return t;
+  };
+
+  const paraText = (p: Element): string =>
+    els(p, "w:r").map(runText).join("").trim();
+
+  const paraToMd = (p: Element): string => {
+    const text = paraText(p);
+    if (!text) return "";
+    const style = p
+      .getElementsByTagName("w:pStyle")[0]
+      ?.getAttribute("w:val")
+      ?.toLowerCase();
+    const headingMatch = style?.match(/heading(\d)/);
+    if (headingMatch) return `${"#".repeat(Math.min(6, +headingMatch[1]))} ${text}`;
+    if (style === "title") return `# ${text}`;
+    if (els(p, "w:numPr").length) return `- ${text}`;
+    return text;
+  };
+
+  // Walk only top-level body children so table cells aren't double-counted.
+  const out: string[] = [];
+  for (const node of Array.from(body.children)) {
+    const tag = node.tagName;
+    if (tag === "w:p") {
+      const md = paraToMd(node);
+      if (md) out.push(md);
+    } else if (tag === "w:tbl") {
+      out.push(docxTableToMd(node));
+    }
+  }
+  const md = out.join("\n\n").replace(/\n{3,}/g, "\n\n").trim();
+  return md || "> ⚠️ DOCX contained no extractable text.";
+}
+
+function docxTableToMd(tbl: Element): string {
+  const rows = els(tbl, "w:tr");
+  if (!rows.length) return "";
+  const cellText = (tc: Element) =>
+    els(tc, "w:p")
+      .map((p) => els(p, "w:t").map((t) => t.textContent ?? "").join(""))
+      .join(" ")
+      .trim();
+  const matrix = rows.map((tr) => els(tr, "w:tc").map(cellText));
+  const cols = Math.max(...matrix.map((r) => r.length));
+  const pad = (r: string[]) => [...r, ...Array(cols - r.length).fill("")];
+  const header = pad(matrix[0]);
+  const sep = header.map(() => "---");
+  const lines = [
+    "| " + header.join(" | ") + " |",
+    "| " + sep.join(" | ") + " |",
+    ...matrix.slice(1).map((r) => "| " + pad(r).join(" | ") + " |"),
+  ];
+  return lines.join("\n");
+}
+
+/* ─── ODT → Markdown (real: unzip content.xml) ────────────────────── */
+
+/**
+ * Real ODT import: unzips `content.xml` and walks the OpenDocument text tree.
+ * Handles headings (by outline level) and paragraphs, including list items.
+ * Inline bold/italic in ODT lives in indirected automatic-styles, so it is
+ * not resolved here — text is preserved, emphasis is not.
+ */
+export async function odtToMarkdown(file: File): Promise<string> {
+  let xml: string | null;
+  try {
+    xml = await unzipText(await file.arrayBuffer(), "content.xml");
+  } catch (err) {
+    return `> ⚠️ Could not read ODT archive: ${(err as Error).message}`;
+  }
+  if (!xml) return "> ⚠️ ODT has no content.xml part.";
+
+  const doc = new DOMParser().parseFromString(xml, "application/xml");
+  const out: string[] = [];
+  const walk = (parent: Element, inList: boolean) => {
+    for (const node of Array.from(parent.children)) {
+      const tag = node.tagName;
+      if (tag === "text:h") {
+        const level = Math.min(6, +(node.getAttribute("text:outline-level") || "1"));
+        const text = (node.textContent ?? "").trim();
+        if (text) out.push(`${"#".repeat(level)} ${text}`);
+      } else if (tag === "text:p") {
+        const text = (node.textContent ?? "").trim();
+        if (text) out.push(inList ? `- ${text}` : text);
+      } else if (tag === "text:list") {
+        walk(node, true);
+      } else {
+        walk(node, inList);
+      }
+    }
+  };
+  const bodyText = doc.getElementsByTagName("office:text")[0];
+  if (bodyText) walk(bodyText, false);
+  const md = out.join("\n\n").trim();
+  return md || "> ⚠️ ODT contained no extractable text.";
+}
+
+/* ─── PPTX → Markdown (real: unzip ppt/slides/*.xml) ──────────────── */
+
+const slideNum = (name: string) => Number(name.match(/(\d+)\.xml$/)?.[1] ?? 0);
+
+/**
+ * Real PPTX import: unzips the deck and converts each slide (in slide-number
+ * order) into a `## ` heading (first text line) plus bullets for the rest.
+ * Speaker notes and images are not extracted.
+ */
+export async function pptxToMarkdown(file: File): Promise<string> {
+  let files: Map<string, Uint8Array>;
+  try {
+    files = await unzip(await file.arrayBuffer());
+  } catch (err) {
+    return `> ⚠️ Could not read PPTX archive: ${(err as Error).message}`;
+  }
+  const dec = new TextDecoder();
+  const slides = [...files.keys()]
+    .filter((n) => /^ppt\/slides\/slide\d+\.xml$/.test(n))
+    .sort((a, b) => slideNum(a) - slideNum(b));
+  if (!slides.length) return "> ⚠️ PPTX: no slides found.";
+
+  const out: string[] = [];
+  slides.forEach((name, i) => {
+    const doc = new DOMParser().parseFromString(dec.decode(files.get(name)!), "application/xml");
+    const paras = els(doc, "a:p")
+      .map((p) => els(p, "a:t").map((t) => t.textContent ?? "").join("").trim())
+      .filter(Boolean);
+    out.push(`## ${paras[0] ?? `Slide ${i + 1}`}`);
+    for (const line of paras.slice(1)) out.push(`- ${line}`);
+  });
+  return out.join("\n\n");
+}
+
+/* ─── XLSX → Markdown tables (real: unzip xl/worksheets/*.xml) ─────── */
+
+/** Convert a cell reference like "B7" to a 0-based column index. */
+function colToIndex(ref: string): number {
+  const letters = ref.replace(/[0-9]/g, "").toUpperCase();
+  let n = 0;
+  for (const ch of letters) n = n * 26 + (ch.charCodeAt(0) - 64);
+  return Math.max(0, n - 1);
+}
+
+/**
+ * Real XLSX import: unzips the workbook, resolves shared strings, and renders
+ * each worksheet as a Markdown table under a `## SheetName` heading. Formulas
+ * render as their cached value; styles/merged cells are not preserved.
+ */
+export async function xlsxToMarkdown(file: File): Promise<string> {
+  let files: Map<string, Uint8Array>;
+  try {
+    files = await unzip(await file.arrayBuffer());
+  } catch (err) {
+    return `> ⚠️ Could not read XLSX archive: ${(err as Error).message}`;
+  }
+  const dec = new TextDecoder();
+  const parse = (name: string) =>
+    files.has(name)
+      ? new DOMParser().parseFromString(dec.decode(files.get(name)!), "application/xml")
+      : null;
+
+  const shared: string[] = [];
+  const ss = parse("xl/sharedStrings.xml");
+  if (ss) for (const si of els(ss, "si")) shared.push(els(si, "t").map((t) => t.textContent ?? "").join(""));
+
+  const names: string[] = [];
+  const wb = parse("xl/workbook.xml");
+  if (wb) for (const s of els(wb, "sheet")) names.push(s.getAttribute("name") ?? "");
+
+  const sheets = [...files.keys()]
+    .filter((n) => /^xl\/worksheets\/sheet\d+\.xml$/.test(n))
+    .sort((a, b) => slideNum(a) - slideNum(b));
+  if (!sheets.length) return "> ⚠️ XLSX: no worksheets found.";
+
+  const out: string[] = [];
+  sheets.forEach((name, si) => {
+    const doc = parse(name)!;
+    const matrix: string[][] = [];
+    for (const row of els(doc, "row")) {
+      const arr: string[] = [];
+      for (const c of els(row, "c")) {
+        const idx = colToIndex(c.getAttribute("r") ?? "A");
+        const type = c.getAttribute("t");
+        const raw = els(c, "v")[0]?.textContent ?? "";
+        arr[idx] =
+          type === "s"
+            ? shared[Number(raw)] ?? ""
+            : type === "inlineStr"
+              ? els(c, "t").map((t) => t.textContent ?? "").join("")
+              : raw;
+      }
+      for (let i = 0; i < arr.length; i++) if (arr[i] === undefined) arr[i] = "";
+      matrix.push(arr);
+    }
+    if (!matrix.length) return;
+    const cols = Math.max(...matrix.map((r) => r.length));
+    const pad = (r: string[]) => {
+      const c = [...r];
+      while (c.length < cols) c.push("");
+      return c;
+    };
+    const header = pad(matrix[0]);
+    out.push(
+      [
+        `## ${names[si] || `Sheet ${si + 1}`}`,
+        "",
+        "| " + header.join(" | ") + " |",
+        "| " + header.map(() => "---").join(" | ") + " |",
+        ...matrix.slice(1).map((r) => "| " + pad(r).join(" | ") + " |"),
+      ].join("\n"),
+    );
+  });
+  return out.join("\n\n") || "> ⚠️ XLSX contained no data.";
+}
+
+/* ─── Notion / Obsidian archive → merged Markdown ─────────────────── */
+
+/** Strip Notion's 32-hex-char id suffix and folder path from an entry name. */
+function cleanArchiveTitle(name: string): string {
+  return (
+    name
+      .replace(/\.md$/i, "")
+      .split("/")
+      .pop() ?? name
+  )
+    .replace(/\s+[0-9a-f]{32}$/i, "")
+    .trim();
+}
+
+/**
+ * Import a Notion export or Obsidian vault (both shipped as a .zip of Markdown
+ * files, possibly with CSV databases). Each .md file becomes a section (a
+ * leading H1 is added from the cleaned filename if the file lacks one); CSV
+ * files render as tables. Obsidian `[[wikilinks]]` pass through unchanged —
+ * Lumen renders them natively. Notion's "Title <hash>" names are cleaned up.
+ */
+export async function archiveToMarkdown(file: File): Promise<string> {
+  let files: Map<string, Uint8Array>;
+  try {
+    files = await unzip(await file.arrayBuffer());
+  } catch (err) {
+    return `> ⚠️ Could not read archive: ${(err as Error).message}`;
+  }
+  const dec = new TextDecoder();
+  const mdFiles = [...files.keys()].filter((n) => /\.md$/i.test(n) && !n.startsWith("__MACOSX")).sort();
+  const csvFiles = [...files.keys()].filter((n) => /\.csv$/i.test(n) && !n.startsWith("__MACOSX")).sort();
+  if (!mdFiles.length && !csvFiles.length) {
+    return "> ⚠️ Archive contains no Markdown or CSV files.";
+  }
+
+  const parts: string[] = [];
+  for (const name of mdFiles) {
+    const body = dec.decode(files.get(name)!).trim();
+    const hasLeadingH1 = /^#\s+/.test(body);
+    parts.push(hasLeadingH1 ? body : `# ${cleanArchiveTitle(name)}\n\n${body}`);
+  }
+  for (const name of csvFiles) {
+    parts.push(`## ${cleanArchiveTitle(name)}\n\n${csvToMarkdown(dec.decode(files.get(name)!))}`);
+  }
+  return parts.join("\n\n---\n\n");
 }
 
 /* ─── EPUB → Markdown (zero-dep regex over packaged XHTML) ────────── */
 
 /**
- * EPUB is a ZIP of XHTML chapters. Native browsers don't ship a ZIP
- * reader, so we sniff `<body>` blocks out of the raw bytes — works for
- * the majority of e-books that store text reasonably plainly. For
- * tightly compressed or DRM'd files use Calibre / Pandoc.
+ * Real EPUB import: unzips the archive, reads META-INF/container.xml to find
+ * the OPF package, then converts each spine document (in reading order) from
+ * XHTML to Markdown. Falls back to converting every (x)html entry if the OPF
+ * structure can't be read.
  */
 export async function epubToMarkdown(file: File): Promise<string> {
-  const buf = await file.arrayBuffer();
-  const text = new TextDecoder().decode(buf);
+  let files: Map<string, Uint8Array>;
+  try {
+    files = await unzip(await file.arrayBuffer());
+  } catch (err) {
+    return `> ⚠️ Could not read EPUB archive: ${(err as Error).message}`;
+  }
+  const dec = new TextDecoder();
+  const textOf = (name: string) => {
+    const b = files.get(name);
+    return b ? dec.decode(b) : null;
+  };
+  const htmlToChapter = (html: string) => {
+    const bodyMatch = html.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
+    return htmlToMarkdown(`<div>${bodyMatch ? bodyMatch[1] : html}</div>`).trim();
+  };
+
+  // Resolve the spine order via container.xml → OPF.
+  const container = textOf("META-INF/container.xml");
+  const opfPath = container?.match(/full-path="([^"]+)"/i)?.[1];
+  const opf = opfPath ? textOf(opfPath) : null;
+
   const chapters: string[] = [];
-  const bodyRe = /<body[^>]*>([\s\S]*?)<\/body>/gi;
-  let m: RegExpExecArray | null;
-  while ((m = bodyRe.exec(text)) !== null) {
-    const md = htmlToMarkdown(`<div>${m[1]}</div>`).trim();
-    if (md.length > 50) chapters.push(md);
+  if (opf && opfPath) {
+    const opfDir = opfPath.includes("/") ? opfPath.replace(/\/[^/]+$/, "/") : "";
+    const doc = new DOMParser().parseFromString(opf, "application/xml");
+    const manifest = new Map<string, string>();
+    for (const item of els(doc, "item")) {
+      const id = item.getAttribute("id");
+      const href = item.getAttribute("href");
+      if (id && href) manifest.set(id, href);
+    }
+    for (const ref of els(doc, "itemref")) {
+      const href = manifest.get(ref.getAttribute("idref") ?? "");
+      if (!href) continue;
+      const html = textOf(decodeURIComponent(opfDir + href));
+      if (html) {
+        const md = htmlToChapter(html);
+        if (md) chapters.push(md);
+      }
+    }
   }
+
+  // Fallback: every (x)html entry, in archive order.
   if (chapters.length === 0) {
-    return "> ⚠️ EPUB: no text bodies recognised. Use Calibre's CLI for a clean conversion.";
+    for (const [name, bytes] of files) {
+      if (/\.x?html?$/i.test(name)) {
+        const md = htmlToChapter(dec.decode(bytes));
+        if (md.length > 30) chapters.push(md);
+      }
+    }
   }
-  return chapters.join("\n\n---\n\n");
+
+  return chapters.length
+    ? chapters.join("\n\n---\n\n")
+    : "> ⚠️ EPUB: no readable chapters found.";
 }
 
 /* ─── PDF → Markdown (lazy-loads pdfjs-dist) ──────────────────────── */
@@ -547,6 +855,87 @@ export function rstToMarkdown(text: string): string {
     .replace(/``([^`]+)``/g, "`$1`");
 }
 
+/* ─── Legacy .doc (binary Word) → Markdown ─────────────────────────── */
+
+const DOC_LETTER = /[A-Za-zÀ-ɏ֐-׿؀-ۿ]/g;
+
+function countLetters(s: string): number {
+  return (s.match(DOC_LETTER) || []).length;
+}
+
+/** Keep only lines that are mostly letters — rejects interleaved binary noise. */
+function filterReadableLines(raw: string): string {
+  return raw
+    .split("\n")
+    .map((l) => l.replace(/[ \t]{2,}/g, " ").trimEnd())
+    .filter((l) => {
+      const t = l.trim();
+      if (t.length < 4) return false;
+      return countLetters(t) / t.length >= 0.5;
+    })
+    .join("\n")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+}
+
+/** Recover single-byte (ANSI/Latin-1) printable runs. */
+function recoverAnsiText(buf: Uint8Array): string {
+  let s = "";
+  for (let i = 0; i < buf.length; i++) {
+    const b = buf[i];
+    s +=
+      (b >= 0x20 && b <= 0x7e) || b === 0x09 || b === 0x0a || b === 0x0d
+        ? String.fromCharCode(b)
+        : "\n";
+  }
+  return filterReadableLines(s);
+}
+
+/** Recover UTF-16LE printable runs (modern Word stores text as UTF-16). */
+function recoverUtf16Text(buf: Uint8Array): string {
+  let s = "";
+  for (let i = 0; i + 1 < buf.length; i += 2) {
+    const lo = buf[i];
+    const hi = buf[i + 1];
+    s +=
+      hi === 0 &&
+      ((lo >= 0x20 && lo <= 0x7e) || lo === 0x09 || lo === 0x0a || lo === 0x0d)
+        ? String.fromCharCode(lo)
+        : "\n";
+  }
+  return filterReadableLines(s);
+}
+
+/**
+ * Convert a legacy binary .doc to Markdown. The old OLE/CFB Word format cannot
+ * be parsed losslessly in the browser, so this is deliberately honest rather
+ * than fake: it (1) reroutes files that are really RTF/HTML mislabeled as .doc,
+ * (2) attempts a conservative dual-encoding text recovery (ANSI + UTF-16LE,
+ * keeping whichever yields more letters), and (3) falls back to a clear
+ * "couldn't extract" notice instead of dumping binary noise.
+ */
+export async function legacyDocToMarkdown(file: File): Promise<string> {
+  const buf = new Uint8Array(await file.arrayBuffer());
+  const head = new TextDecoder("latin1").decode(buf.subarray(0, 16));
+
+  // A surprising share of ".doc" files in the wild are really RTF or HTML.
+  if (head.startsWith("{\\rtf")) return rtfToMarkdown(new TextDecoder("latin1").decode(buf));
+  if (/^\s*<(!doctype|html|\?xml)/i.test(head)) return htmlToMarkdown(new TextDecoder().decode(buf));
+
+  const note =
+    "> ⚠️ **Legacy .doc**: the old binary Word format can't be converted losslessly in the browser. " +
+    "For full fidelity, open it in Word/LibreOffice and **Save As .docx** (or .rtf), then import that.\n\n---\n\n";
+
+  const ansi = recoverAnsiText(buf);
+  const utf16 = recoverUtf16Text(buf);
+  const best = countLetters(utf16) > countLetters(ansi) ? utf16 : ansi;
+
+  if (countLetters(best) < 40) {
+    return note + "_No readable text could be recovered from this legacy .doc file._";
+  }
+  return note + best;
+}
+
 /* ─── AsciiDoc → Markdown ──────────────────────────────────────────── */
 
 export function adocToMarkdown(text: string): string {
@@ -576,7 +965,9 @@ export const SUPPORTED_IMPORT_EXTENSIONS = [
   // Tabular
   "csv", "tsv", "json", "xml", "yaml", "yml", "toml",
   // Office
-  "rtf", "doc", "docx", "odt",
+  "rtf", "doc", "docx", "odt", "pptx", "xlsx",
+  // Archives (Notion export / Obsidian vault)
+  "zip",
   // Web
   "html", "htm", "mhtml", "mht", "eml",
   // Documents

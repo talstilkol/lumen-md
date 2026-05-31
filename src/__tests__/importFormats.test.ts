@@ -12,7 +12,18 @@ import {
   orgToMarkdown,
   opmlToMarkdown,
   mhtmlToMarkdown,
+  legacyDocToMarkdown,
 } from "../storage/fileFormats";
+
+// jsdom's File doesn't implement .arrayBuffer(); mirror fsConvert's stand-in.
+function docFile(bytes: Uint8Array | number[]): File {
+  const arr = new Uint8Array(bytes);
+  return {
+    name: "legacy.doc",
+    arrayBuffer: async () => arr.buffer,
+    text: async () => new TextDecoder().decode(arr),
+  } as unknown as File;
+}
 
 describe("latexToMarkdown", () => {
   it("strips preamble and document wrappers", () => {
@@ -111,5 +122,33 @@ Content-Type: text/html
     expect(md).toContain("# Hello");
     expect(md).toContain("web archive");
     expect(md).not.toContain("ignore me");
+  });
+});
+
+describe("legacyDocToMarkdown (honest, no binary garbage)", () => {
+  it("returns an honest notice instead of dumping noise when nothing is readable", async () => {
+    const garbage = new Uint8Array(256).fill(0);
+    garbage.set([0x01, 0x02, 0x03, 0x7f, 0x80, 0xff], 10);
+    const out = await legacyDocToMarkdown(docFile(garbage));
+    expect(out).toContain("Legacy .doc");
+    expect(out).toContain("No readable text could be recovered");
+    // Crucially: the fallback ends with the notice — no binary was appended.
+    expect(out.trimEnd().endsWith("legacy .doc file._")).toBe(true);
+  });
+
+  it("recovers embedded readable text from surrounding binary", async () => {
+    const sentence = "This is a readable paragraph extracted from the document file.";
+    const pad = new Uint8Array(24); // zero bytes around the text
+    const body = new TextEncoder().encode(sentence);
+    const out = await legacyDocToMarkdown(docFile([...pad, ...body, ...pad]));
+    expect(out).toContain(sentence);
+    expect(out).not.toContain("No readable text could be recovered");
+  });
+
+  it("reroutes a .doc that is really RTF to the RTF converter", async () => {
+    const rtf = new TextEncoder().encode("{\\rtf1\\ansi Hello from RTF}");
+    const out = await legacyDocToMarkdown(docFile(rtf));
+    expect(out).toContain("Hello");
+    expect(out).not.toContain("Legacy .doc"); // took the RTF path, not the fallback
   });
 });

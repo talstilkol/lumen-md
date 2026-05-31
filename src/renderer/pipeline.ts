@@ -102,6 +102,14 @@ const SPECIAL_LANGS = new Set([
   "glsl-live",
   "glsl",
   "shader",
+  // Live Python via Pyodide (WASM, lazy-loaded on Run).
+  "live-python",
+  "python-live",
+  "live-py",
+  "py-live",
+  // Live SQL via sql.js / SQLite (WASM, lazy-loaded on Run).
+  "live-sql",
+  "sql-live",
   // Plain `html` fence as alias for `html-preview` — Lumen treats a raw
   // HTML fence as "render this HTML safely in a sanitized preview" rather
   // than a syntax-highlighted code block. Matches the dynamic-blocks-
@@ -141,6 +149,9 @@ function remarkLumenBlocks() {
       else if (lang === "live-svg" || lang === "svg-live" || lang === "svg") tag = "lumen-livesvg";
       else if (lang === "live-glsl" || lang === "glsl-live" || lang === "glsl" || lang === "shader")
         tag = "lumen-liveglsl";
+      else if (lang === "live-python" || lang === "python-live" || lang === "live-py" || lang === "py-live")
+        tag = "lumen-livepython";
+      else if (lang === "live-sql" || lang === "sql-live") tag = "lumen-livesql";
       else tag = `lumen-${lang}`;
       const data = (node.data ?? (node.data = {})) as Record<string, unknown>;
       data.hName = tag;

@@ -175,6 +175,20 @@ const ENTRIES: MenuEntry[] = [
     template: '```live-js height=200\nconst sum = (a, b) => a + b;\nconsole.log("2 + 2 =", sum(2, 2));\nfor (let i = 0; i < 3; i++) console.log("tick", i);\n```',
   },
   {
+    id: "live-python",
+    label: "Live Python",
+    hint: "Run Python via Pyodide (WASM)",
+    group: "Media",
+    template: '```live-python height=200\nimport sys\nprint("Python", sys.version.split()[0])\ntotal = sum(range(1, 11))\nprint("sum 1..10 =", total)\n```',
+  },
+  {
+    id: "live-sql",
+    label: "Live SQL",
+    hint: "Run SQLite via sql.js (WASM)",
+    group: "Media",
+    template: '```live-sql height=240\nCREATE TABLE fruit(name TEXT, qty INT);\nINSERT INTO fruit VALUES (\'apple\', 5), (\'pear\', 2), (\'kiwi\', 9);\nSELECT name, qty FROM fruit ORDER BY qty DESC;\n```',
+  },
+  {
     id: "live-svg",
     label: "Live SVG",
     hint: "Inline vector graphics",

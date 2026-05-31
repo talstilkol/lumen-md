@@ -6,6 +6,7 @@
  */
 
 import { chat, chatStream } from "./llm";
+import { PROMPTS } from "./prompts";
 import { log } from "../lib/logger";
 import {
   readWorkspaceFile,
@@ -389,4 +390,61 @@ export async function* streamDocument(
   for await (const chunk of stream) {
     yield chunk;
   }
+}
+
+/* ─── Content-generation helpers (diagram / action items / translate) ─ */
+
+/** Strip a single pair of surrounding ``` fences a model may have added. */
+export function stripCodeFences(s: string): string {
+  return s
+    .replace(/^\s*```[a-zA-Z]*\s*\n?/, "")
+    .replace(/\n?```\s*$/, "")
+    .trim();
+}
+
+/**
+ * Turn prose into a Mermaid diagram. Returns a ready-to-insert fenced
+ * ```mermaid block (fences the model may add are stripped first).
+ */
+export async function generateDiagram(text: string): Promise<string> {
+  const out = await chat([
+    { role: "system", content: PROMPTS.diagram },
+    { role: "user", content: text },
+  ]);
+  return "```mermaid\n" + stripCodeFences(out) + "\n```";
+}
+
+/** Extract action items from meeting notes as a Markdown task list. */
+export async function extractActionItems(text: string): Promise<string> {
+  const out = await chat([
+    { role: "system", content: PROMPTS.actionItems },
+    { role: "user", content: text },
+  ]);
+  return stripCodeFences(out);
+}
+
+/**
+ * Translate a Markdown document into the target language, preserving
+ * structure. The body may legitimately contain code fences, so the raw
+ * output is only trimmed (not fence-stripped).
+ */
+export async function translateMarkdown(text: string, targetLanguage: string): Promise<string> {
+  const out = await chat([
+    { role: "system", content: PROMPTS.translate },
+    { role: "user", content: `Target language: ${targetLanguage}\n\n---\n\n${text}` },
+  ]);
+  return out.trim();
+}
+
+/**
+ * Turn CSV/table data into an ECharts spec. Returns a ready-to-insert fenced
+ * ```chart block (any code fences the model adds are stripped first), which the
+ * renderer's EChart block picks up.
+ */
+export async function generateChart(data: string): Promise<string> {
+  const out = await chat([
+    { role: "system", content: PROMPTS.visualization },
+    { role: "user", content: data },
+  ]);
+  return "```chart\n" + stripCodeFences(out) + "\n```";
 }

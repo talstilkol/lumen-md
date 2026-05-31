@@ -566,26 +566,17 @@ export default function WysiwygEditor({ value, onChange }: Props) {
   const viewRef = useRef<EditorView | null>(null);
   const getView = () => viewRef.current;
 
-  const mountedRef = useRef(false);
-  // Cross-effect cancellation flag for the Milkdown plugin lifecycle race
-  // (touched in rounds 9, 22, 23, 25). `MilkdownEditor.create()` is async,
-  // and the slash/tooltip `view()` callbacks fire from inside ProseView's
-  // constructor — which is called during that promise's resolution. If
-  // React unmounts (or `value` changes) while `.create()` is still in
-  // flight, the view callbacks run AFTER our cleanup has fired. The local
-  // `cancelled` closure inside the value effect is invisible to those
-  // callbacks once they execute, so we use a ref that the callbacks read
-  // directly. Without this guard, constructing a `SlashProvider` with a
-  // null `content` element throws on its first debounced update
-  // (`appendChild` on null, then `this.element.dataset` on null).
-  const cancelledRef = useRef(false);
-
   useEffect(() => {
     if (!hostRef.current) return;
-    // Always build on first mount; skip subsequent if content unchanged
-    if (mountedRef.current && lastEmittedRef.current === value) return;
-    mountedRef.current = true;
-    cancelledRef.current = false;
+    // Skip rebuild when the editor already exists and content matches —
+    // this short-circuits the typical "user typed, parent re-rendered"
+    // round-trip. Gating on `editorRef.current` (rather than a mounted
+    // flag) means React 18 StrictMode's mount → unmount → remount cycle
+    // still rebuilds on the second mount: the first mount's async
+    // `create()` was torn down by the cleanup, so editorRef is null and
+    // we proceed normally. With a plain mounted-flag the second mount
+    // skipped and the editor never appeared in dev mode.
+    if (editorRef.current && lastEmittedRef.current === value) return;
     let cancelled = false;
     const host = hostRef.current;
 
@@ -646,14 +637,18 @@ export default function WysiwygEditor({ value, onChange }: Props) {
           // Helper extracted for the try/catch above.
           function buildSlashView(view: EditorView) {
               const maybeMenu = slashElRef.current as SlashMenuRoot | null;
-              // RACE GUARD — see `cancelledRef` declaration. If the
-              // component unmounted (or `value` changed) before ProseView
-              // construction got here, `maybeMenu` may be null;
-              // constructing `SlashProvider({ content: null })` would
-              // throw on its first debounced update. The post-create
-              // branch in the value effect's async block tears the
-              // editor down right after, so a no-op view is safe.
-              if (cancelledRef.current || !maybeMenu) {
+              // RACE GUARD — `MilkdownEditor.create()` is async, and this
+              // view callback fires inside the ProseView constructor that
+              // runs during that promise's resolution. If the value
+              // effect's cleanup ran first (component unmount or value
+              // change) and useEffect2's cleanupDom already nulled the
+              // ref, `maybeMenu` is null here. Constructing
+              // `new SlashProvider({ content: null })` would later throw
+              // on its first debounced update (`appendChild` on null,
+              // then `this.element.dataset` on null). A no-op view is
+              // safe because the surrounding async block tears the
+              // editor down right after via the `if (cancelled)` branch.
+              if (!maybeMenu) {
                 return { update: () => {}, destroy: () => {} };
               }
               // Reassign so inner function declarations capture the
@@ -704,7 +699,6 @@ export default function WysiwygEditor({ value, onChange }: Props) {
 
               return {
                 update: (v: EditorView, prev: EditorView["state"]) => {
-                  if (cancelledRef.current) return;
                   viewRef.current = v;
                   provider.update(v, prev);
                   syncQuery(v);
@@ -734,7 +728,7 @@ export default function WysiwygEditor({ value, onChange }: Props) {
           function buildTooltipView(view: EditorView) {
               const tooltipEl = tooltipElRef.current;
               // Same race guard as the slash plugin above.
-              if (cancelledRef.current || !tooltipEl) {
+              if (!tooltipEl) {
                 return { update: () => {}, destroy: () => {} };
               }
               viewRef.current = view;
@@ -745,7 +739,6 @@ export default function WysiwygEditor({ value, onChange }: Props) {
               provider.update(view);
               return {
                 update: (v: EditorView, prev: EditorView["state"]) => {
-                  if (cancelledRef.current) return;
                   viewRef.current = v;
                   provider.update(v, prev);
                 },
@@ -776,19 +769,17 @@ export default function WysiwygEditor({ value, onChange }: Props) {
 
     return () => {
       cancelled = true;
-      cancelledRef.current = true;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [value]);
 
-  // Final teardown. Defer DOM null-ing until the editor's async destroy
-  // resolves so any in-flight plugin view callback (slash, tooltip) still
-  // sees a valid menu element. The cancelledRef guard is the primary
-  // defense; this is layered insurance for the rare case where the view
-  // callback sneaks past the guard between cleanup and the next tick.
+  // Final teardown. Wait for the editor's async destroy to resolve before
+  // tearing the menu DOM down — otherwise an in-flight plugin view
+  // callback that's still inside ProseView's constructor would see a
+  // null `slashElRef.current` and `new SlashProvider({content: null})`
+  // would throw on its first debounced update.
   useEffect(() => {
     return () => {
-      cancelledRef.current = true;
       const ed = editorRef.current;
       editorRef.current = null;
       const cleanupDom = () => {

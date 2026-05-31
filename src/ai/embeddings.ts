@@ -1,6 +1,11 @@
 /**
  * Workspace RAG engine — BM25+ with bigram phrase matching.
  *
+ * NOTE on the filename: despite being called `embeddings.ts`, this module
+ * contains NO vector embeddings — it is a pure lexical BM25+ ranker. The real
+ * vector-embedding + cosine/RRF hybrid path lives in `semanticSearch.ts`. The
+ * name is kept only to avoid churning every import; treat it as "lexical search".
+ *
  * Upgraded to Web Worker architecture for zero UI blocking during indexing/search.
  *
  * The index is constructed in the worker and refreshed every 60s.

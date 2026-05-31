@@ -11,8 +11,7 @@
  * RTF), pipe through Pandoc. We document that in `docs/`.
  */
 
-const HEAD = (title: string) =>
-  `<!doctype html><html><head><meta charset="utf-8" /><title>${escapeHtml(title)}</title></head><body>`;
+import { zip } from "./zip";
 
 function escapeHtml(s: string): string {
   return s
@@ -230,38 +229,235 @@ export function markdownToOpml(md: string, title = "Outline"): string {
   return out.join("\n");
 }
 
+/* ─── Markdown → Reveal.js slide deck ──────────────────────────────── */
+
 /**
- * Wrap markdown in a self-contained MHTML envelope (`Content-Type:
- * multipart/related`). Useful when you want a single-file web archive
- * for email or offline reading.
+ * Build a self-contained Reveal.js presentation. Slides are split on `---`
+ * thematic breaks (the standard Reveal markdown convention); each becomes a
+ * `<section data-markdown>` rendered by Reveal's markdown plugin. Reveal's
+ * runtime + theme load from a CDN, so the file is portable but online.
  */
-export function markdownToMhtml(md: string, htmlBody: string, title: string): string {
-  const boundary = "----=_LumenBoundary_" + Date.now().toString(36);
+export function markdownToRevealHtml(md: string, title = "Slides"): string {
+  const slides = md
+    .split(/^\s*---\s*$/m)
+    .map((s) => s.trim())
+    .filter(Boolean);
+  const sections = (slides.length ? slides : [md])
+    .map(
+      (s) =>
+        `<section data-markdown><textarea data-template>\n${s}\n</textarea></section>`,
+    )
+    .join("\n");
+  const cdn = "https://cdn.jsdelivr.net/npm/reveal.js@5";
   return [
-    `From: <lumen@local>`,
-    `Subject: ${title}`,
-    `MIME-Version: 1.0`,
-    `Content-Type: multipart/related; boundary="${boundary}"`,
-    ``,
-    `--${boundary}`,
-    `Content-Type: text/html; charset="utf-8"`,
-    `Content-Location: lumen.html`,
-    ``,
-    `${HEAD(title)}<article>${htmlBody}</article></body></html>`,
-    ``,
-    `--${boundary}`,
-    `Content-Type: text/markdown; charset="utf-8"`,
-    `Content-Location: lumen.md`,
-    ``,
-    md,
-    ``,
-    `--${boundary}--`,
-  ].join("\r\n");
+    `<!doctype html>`,
+    `<html><head><meta charset="utf-8" />`,
+    `<meta name="viewport" content="width=device-width, initial-scale=1" />`,
+    `<title>${escapeHtml(title)}</title>`,
+    `<link rel="stylesheet" href="${cdn}/dist/reveal.css">`,
+    `<link rel="stylesheet" href="${cdn}/dist/theme/black.css">`,
+    `</head><body><div class="reveal"><div class="slides">`,
+    sections,
+    `</div></div>`,
+    `<script src="${cdn}/dist/reveal.js"></script>`,
+    `<script src="${cdn}/plugin/markdown/markdown.js"></script>`,
+    `<script>Reveal.initialize({ hash: true, plugins: [ RevealMarkdown ] });</script>`,
+    `</body></html>`,
+  ].join("\n");
+}
+
+/* ─── Markdown → EPUB 3 (real package, zipped) ─────────────────────── */
+
+function mdInlineToHtml(s: string): string {
+  return escapeHtml(s)
+    .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")
+    .replace(/\*([^*\n]+)\*/g, "<em>$1</em>")
+    .replace(/`([^`]+)`/g, "<code>$1</code>")
+    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>');
+}
+
+/** Minimal, well-formed XHTML body conversion for EPUB chapters. */
+function mdToXhtml(md: string): string {
+  const out: string[] = [];
+  let inList = false;
+  let inCode = false;
+  const closeList = () => {
+    if (inList) {
+      out.push("</ul>");
+      inList = false;
+    }
+  };
+  for (const line of md.split(/\r?\n/)) {
+    if (/^```/.test(line.trim())) {
+      closeList();
+      out.push(inCode ? "</code></pre>" : "<pre><code>");
+      inCode = !inCode;
+      continue;
+    }
+    if (inCode) {
+      out.push(escapeHtml(line));
+      continue;
+    }
+    const h = /^(#{1,6})\s+(.+)$/.exec(line);
+    if (h) {
+      closeList();
+      out.push(`<h${h[1].length}>${mdInlineToHtml(h[2])}</h${h[1].length}>`);
+      continue;
+    }
+    const li = /^[-*+]\s+(.+)$/.exec(line);
+    if (li) {
+      if (!inList) {
+        out.push("<ul>");
+        inList = true;
+      }
+      out.push(`<li>${mdInlineToHtml(li[1])}</li>`);
+      continue;
+    }
+    if (!line.trim()) {
+      closeList();
+      continue;
+    }
+    closeList();
+    out.push(`<p>${mdInlineToHtml(line)}</p>`);
+  }
+  closeList();
+  if (inCode) out.push("</code></pre>");
+  return out.join("\n");
+}
+
+/** Build a valid EPUB 3 package as raw bytes (chapters split on H1). */
+export async function markdownToEpubBytes(md: string, title = "Document"): Promise<Uint8Array> {
+  const parts = md
+    .split(/^(?=# )/m)
+    .map((s) => s.trim())
+    .filter(Boolean);
+  const chapters = (parts.length ? parts : [md]).map((c, i) => {
+    const chTitle = c.match(/^#\s+(.+)$/m)?.[1] ?? `Chapter ${i + 1}`;
+    const xhtml =
+      `<?xml version="1.0" encoding="utf-8"?>\n<!DOCTYPE html>\n` +
+      `<html xmlns="http://www.w3.org/1999/xhtml"><head><title>${escapeHtml(chTitle)}</title></head>` +
+      `<body>\n${mdToXhtml(c)}\n</body></html>`;
+    return { id: `ch${i + 1}`, href: `chapter${i + 1}.xhtml`, title: chTitle, xhtml };
+  });
+
+  const uid = "urn:uuid:" + (globalThis.crypto?.randomUUID?.() ?? Date.now().toString(16));
+  const container =
+    `<?xml version="1.0" encoding="utf-8"?>\n` +
+    `<container version="1.0" xmlns="urn:oasis:names:tc:opendocument:xmlns:container">` +
+    `<rootfiles><rootfile full-path="OEBPS/content.opf" media-type="application/oebps-package+xml"/></rootfiles></container>`;
+  const opf =
+    `<?xml version="1.0" encoding="utf-8"?>\n` +
+    `<package xmlns="http://www.idpf.org/2007/opf" version="3.0" unique-identifier="bookid">` +
+    `<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">` +
+    `<dc:identifier id="bookid">${uid}</dc:identifier>` +
+    `<dc:title>${escapeHtml(title)}</dc:title><dc:language>en</dc:language>` +
+    `<meta property="dcterms:modified">1970-01-01T00:00:00Z</meta></metadata>` +
+    `<manifest><item id="nav" href="nav.xhtml" media-type="application/xhtml+xml" properties="nav"/>` +
+    chapters.map((c) => `<item id="${c.id}" href="${c.href}" media-type="application/xhtml+xml"/>`).join("") +
+    `</manifest><spine>` +
+    chapters.map((c) => `<itemref idref="${c.id}"/>`).join("") +
+    `</spine></package>`;
+  const nav =
+    `<?xml version="1.0" encoding="utf-8"?>\n` +
+    `<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops"><head><title>Contents</title></head>` +
+    `<body><nav epub:type="toc"><ol>` +
+    chapters.map((c) => `<li><a href="${c.href}">${escapeHtml(c.title)}</a></li>`).join("") +
+    `</ol></nav></body></html>`;
+
+  return zip([
+    // The mimetype entry must come first and be stored (uncompressed).
+    { name: "mimetype", data: "application/epub+zip", store: true },
+    { name: "META-INF/container.xml", data: container },
+    { name: "OEBPS/content.opf", data: opf },
+    { name: "OEBPS/nav.xhtml", data: nav },
+    ...chapters.map((c) => ({ name: `OEBPS/${c.href}`, data: c.xhtml })),
+  ]);
+}
+
+/* ─── Markdown → static site (multi-page HTML + nav + RSS) ─────────── */
+
+const SITE_CSS = [
+  ":root{--accent:#7c5cff}",
+  "*{box-sizing:border-box}body{margin:0;font:16px/1.6 -apple-system,Segoe UI,Roboto,sans-serif;color:#222}",
+  ".layout{display:flex;min-height:100vh}",
+  "aside{width:240px;background:#f6f6fb;border-right:1px solid #e5e5ef;padding:24px 16px}",
+  "aside ul{list-style:none;margin:0;padding:0}aside li{margin:4px 0}",
+  "aside a{color:#444;text-decoration:none;display:block;padding:6px 10px;border-radius:6px}",
+  "aside a.active,aside a:hover{background:var(--accent);color:#fff}",
+  "main{flex:1;padding:40px 56px;max-width:820px}",
+  "h1,h2,h3{line-height:1.25}h1{border-bottom:2px solid var(--accent);padding-bottom:8px}",
+  "code{background:#f0f0f4;padding:2px 5px;border-radius:4px;font-size:.9em}",
+  "pre{background:#1e1e2e;color:#e8e8f0;padding:16px;border-radius:8px;overflow:auto}pre code{background:none}",
+  "a{color:var(--accent)}",
+].join("\n");
+
+function slugify(s: string, fallback: string): string {
+  return (
+    s
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-|-$/g, "") || fallback
+  );
+}
+
+/**
+ * Build a self-contained static documentation site as a zip: one HTML page per
+ * top-level (H1) section, a shared sidebar nav, a stylesheet, and an RSS feed.
+ * Open index.html to browse. Exported as bytes for download.
+ */
+export async function markdownToStaticSiteBytes(md: string, siteTitle = "Site"): Promise<Uint8Array> {
+  const parts = md
+    .split(/^(?=# )/m)
+    .map((s) => s.trim())
+    .filter(Boolean);
+  const seen = new Set<string>();
+  const pages = (parts.length ? parts : [md]).map((c, i) => {
+    const title = c.match(/^#\s+(.+)$/m)?.[1] ?? `Page ${i + 1}`;
+    let slug = slugify(title, `page-${i + 1}`);
+    while (seen.has(slug)) slug = `${slug}-${i}`;
+    seen.add(slug);
+    return { title, file: `${slug}.html`, body: mdToXhtml(c) };
+  });
+
+  const nav = (active: string) =>
+    `<nav><ul>` +
+    pages
+      .map(
+        (p) =>
+          `<li><a href="${p.file}"${p.file === active ? ' class="active"' : ""}>${escapeHtml(p.title)}</a></li>`,
+      )
+      .join("") +
+    `</ul></nav>`;
+  const pageHtml = (p: { title: string; file: string; body: string }) =>
+    `<!doctype html><html lang="en"><head><meta charset="utf-8" />` +
+    `<meta name="viewport" content="width=device-width, initial-scale=1" />` +
+    `<title>${escapeHtml(p.title)} — ${escapeHtml(siteTitle)}</title>` +
+    `<link rel="stylesheet" href="style.css" /></head><body>` +
+    `<div class="layout"><aside><strong>${escapeHtml(siteTitle)}</strong>${nav(p.file)}</aside>` +
+    `<main>${p.body}</main></div></body></html>`;
+
+  const rss =
+    `<?xml version="1.0" encoding="UTF-8"?>\n<rss version="2.0"><channel>` +
+    `<title>${escapeHtml(siteTitle)}</title><description>${escapeHtml(siteTitle)}</description>` +
+    pages.map((p) => `<item><title>${escapeHtml(p.title)}</title><link>${p.file}</link></item>`).join("") +
+    `</channel></rss>`;
+
+  return zip([
+    { name: "index.html", data: pageHtml(pages[0]) },
+    ...pages.map((p) => ({ name: p.file, data: pageHtml(p) })),
+    { name: "style.css", data: SITE_CSS },
+    { name: "feed.xml", data: rss },
+  ]);
 }
 
 /** Trigger a browser download for arbitrary text content. */
 export function downloadText(filename: string, content: string, mime = "text/plain"): void {
-  const blob = new Blob([content], { type: `${mime};charset=utf-8` });
+  downloadBytes(filename, new TextEncoder().encode(content), `${mime};charset=utf-8`);
+}
+
+/** Trigger a browser download for binary content. */
+export function downloadBytes(filename: string, bytes: Uint8Array, mime = "application/octet-stream"): void {
+  const blob = new Blob([bytes as BlobPart], { type: mime });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;

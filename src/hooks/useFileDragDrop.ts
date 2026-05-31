@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { type DocFile } from "../store/useStore";
+import { importFile } from "../storage/fs";
 
 export function useFileDragDrop(setDoc: (doc: Partial<DocFile>) => void) {
   const [dragHover, setDragHover] = useState(false);
@@ -36,33 +37,13 @@ export function useFileDragDrop(setDoc: (doc: Partial<DocFile>) => void) {
       const files = Array.from(e.dataTransfer?.files || []);
       if (!files.length) return;
 
-      // Support multi-file drop: process each file and concatenate
-      const parts: string[] = [];
-      let firstName = files[0].name;
-      
-      for (const f of files) {
-        const raw = await f.text();
-        const lower = f.name.toLowerCase();
-        let content = raw;
-
-        if (lower.endsWith(".csv") || lower.endsWith(".tsv")) {
-          const lang = lower.endsWith(".tsv") ? "tsv" : "csv";
-          content = `# ${f.name}\n\n\`\`\`${lang} title="${f.name}"\n${raw.trim()}\n\`\`\`\n`;
-        } else if (lower.endsWith(".json")) {
-          const trimmed = raw.trim();
-          let isArray = false;
-          try {
-            isArray = Array.isArray(JSON.parse(trimmed));
-          } catch {
-            // ignore
-          }
-          content = isArray
-            ? `# ${f.name}\n\n\`\`\`json-table title="${f.name}"\n${trimmed}\n\`\`\`\n`
-            : `# ${f.name}\n\n\`\`\`json\n${trimmed}\n\`\`\`\n`;
-        }
-        
-        parts.push(content);
-      }
+      // Support multi-file drop: process each file through the shared
+      // importer (handles every supported format incl. binary office files)
+      // and concatenate.
+      const firstName = files[0].name;
+      const parts = await Promise.all(
+        files.map(async (f) => (await importFile(f)).content),
+      );
 
       const finalContent = parts.join("\n\n---\n\n");
       const finalName = files.length > 1 ? `${firstName} (+${files.length - 1})` : firstName;

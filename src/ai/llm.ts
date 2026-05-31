@@ -94,12 +94,27 @@ export class AiError extends Error {
  * available, the call is routed to `chatLocal()` instead of OpenAI.
  * This keeps prompts on-device for privacy / offline scenarios.
  */
-export type AiProvider = "openai" | "ollama" | "local-webgpu";
+export type AiProvider =
+  | "openai"
+  | "ollama"
+  | "local-webgpu"
+  | "anthropic"
+  | "gemini"
+  | "mistral";
+
+const KNOWN_PROVIDERS: AiProvider[] = [
+  "openai",
+  "ollama",
+  "local-webgpu",
+  "anthropic",
+  "gemini",
+  "mistral",
+];
 
 export function getActiveProvider(): AiProvider {
   try {
-    const stored = localStorage.getItem("lumen.ai.provider");
-    if (stored === "ollama" || stored === "local-webgpu" || stored === "openai") return stored;
+    const stored = localStorage.getItem("lumen.ai.provider") as AiProvider | null;
+    if (stored && KNOWN_PROVIDERS.includes(stored)) return stored;
   } catch { /* */ }
   const state = useAppStore.getState();
   if (state.useLocalAi) return "local-webgpu";
@@ -108,6 +123,26 @@ export function getActiveProvider(): AiProvider {
 
 export function setActiveProvider(provider: AiProvider): void {
   localStorage.setItem("lumen.ai.provider", provider);
+}
+
+/**
+ * Return the API key for a cloud provider. Per-provider keys live in
+ * localStorage (`lumen.ai.key.<provider>`); OpenAI falls back to the primary
+ * `aiKey` in the store for backwards compatibility. Throws if none is set.
+ */
+export function getProviderKey(provider: AiProvider): string {
+  let key = "";
+  try {
+    key = localStorage.getItem(`lumen.ai.key.${provider}`) ?? "";
+  } catch { /* */ }
+  if (!key && provider === "openai") key = useAppStore.getState().aiKey ?? "";
+  if (!key) {
+    throw new AiError(
+      "NO_KEY",
+      `Please configure your ${provider} API key (⌘K → AI Settings).`,
+    );
+  }
+  return key;
 }
 
 export async function chat(
@@ -124,6 +159,42 @@ export async function chat(
     }
     toast.warn("Ollama unavailable", "Cannot reach Ollama at localhost:11434. Is it running?");
     // Fall through to OpenAI
+  }
+
+  // ── Anthropic Claude (cloud) ───────────────────────────────────
+  if (provider === "anthropic") {
+    const { chatAnthropic } = await import("./anthropicProvider");
+    checkRateLimit();
+    inflight++;
+    try {
+      return await chatAnthropic(messages, opts);
+    } finally {
+      inflight--;
+    }
+  }
+
+  // ── Google Gemini (cloud) ──────────────────────────────────────
+  if (provider === "gemini") {
+    const { chatGemini } = await import("./geminiProvider");
+    checkRateLimit();
+    inflight++;
+    try {
+      return await chatGemini(messages, opts);
+    } finally {
+      inflight--;
+    }
+  }
+
+  // ── Mistral (cloud, OpenAI-compatible) ─────────────────────────
+  if (provider === "mistral") {
+    const { chatMistral } = await import("./mistralProvider");
+    checkRateLimit();
+    inflight++;
+    try {
+      return await chatMistral(messages, opts);
+    } finally {
+      inflight--;
+    }
   }
 
   // ── WebGPU local (in-browser) ──────────────────────────────────
@@ -219,6 +290,24 @@ export async function* chatStream(
       yield* chatOllamaStream(messages, opts);
       return;
     }
+  }
+
+  if (provider === "anthropic") {
+    const { chatAnthropicStream } = await import("./anthropicProvider");
+    yield* chatAnthropicStream(messages, opts);
+    return;
+  }
+
+  if (provider === "gemini") {
+    const { chatGeminiStream } = await import("./geminiProvider");
+    yield* chatGeminiStream(messages, opts);
+    return;
+  }
+
+  if (provider === "mistral") {
+    const { chatMistralStream } = await import("./mistralProvider");
+    yield* chatMistralStream(messages, opts);
+    return;
   }
 
   const key = getAiKey();
