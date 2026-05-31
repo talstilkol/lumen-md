@@ -14,6 +14,7 @@ import {
   mhtmlToMarkdown,
   legacyDocToMarkdown,
   pdfToMarkdown,
+  ipynbToMarkdown,
 } from "../storage/fileFormats";
 
 // jsdom's File doesn't implement .arrayBuffer(); mirror fsConvert's stand-in.
@@ -188,4 +189,51 @@ describe("pdfToMarkdown (real pdfjs-dist extraction)", () => {
     const out = await pdfToMarkdown(docFile(junk));
     expect(out).toMatch(/Couldn't read this PDF|no extractable text/i);
   }, 30000);
+});
+
+describe("ipynbToMarkdown (Jupyter notebook import)", () => {
+  const ESC = String.fromCharCode(27);
+  const nb = JSON.stringify({
+    metadata: { language_info: { name: "python" } },
+    cells: [
+      { cell_type: "markdown", source: ["# Title\n", "Some **text**."] },
+      {
+        cell_type: "code",
+        source: "print('hi')",
+        outputs: [
+          { output_type: "stream", text: "hi\n" },
+          { output_type: "execute_result", data: { "text/plain": "42" } },
+        ],
+      },
+      {
+        cell_type: "code",
+        source: "1/0",
+        outputs: [
+          {
+            output_type: "error",
+            traceback: [`${ESC}[31mZeroDivisionError${ESC}[0m: division by zero`],
+          },
+        ],
+      },
+    ],
+  });
+
+  it("passes markdown cells through and fences code in the kernel language", () => {
+    const md = ipynbToMarkdown(nb);
+    expect(md).toContain("# Title");
+    expect(md).toContain("Some **text**.");
+    expect(md).toContain("```python\nprint('hi')\n```");
+  });
+
+  it("includes outputs and strips ANSI from error tracebacks", () => {
+    const md = ipynbToMarkdown(nb);
+    expect(md).toContain("hi");
+    expect(md).toContain("42");
+    expect(md).toContain("ZeroDivisionError: division by zero");
+    expect(md).not.toContain(ESC + "[");
+  });
+
+  it("returns an honest notice for invalid JSON", () => {
+    expect(ipynbToMarkdown("{ not json")).toContain("Invalid .ipynb");
+  });
 });

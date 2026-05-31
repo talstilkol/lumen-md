@@ -96,7 +96,7 @@
 | **Obsidian vault** | ✅ אמיתי | — | zip → מיזוג .md; [[wikilinks]] נשמרים (Lumen תומך מקורית) |
 | **Confluence** | ❌ חסר | P2 | XHTML export → markdown |
 | **WordPress** | ❌ חסר | P2 | WXR XML → posts |
-| **Jupyter (.ipynb)** | ❌ חסר | P1 | cells → code blocks + output |
+| **Jupyter (.ipynb)** | ✅ אמיתי | — | cells → markdown + fenced code (שפת הקרנל) + פלטים; ANSI מנוקה מ-tracebacks (מאומת) |
 | **Fountain (.fountain)** | ❌ חסר | P3 | screenwriting format |
 
 ### 2.2 ייצוא (Markdown → פורמט אחר)

@@ -338,6 +338,10 @@ export async function fileToMarkdown(file: File): Promise<{ name: string; conten
       const text = await file.text();
       return { name: `${baseName}.md`, content: orgToMarkdown(text) };
     }
+    case "ipynb": {
+      const text = await file.text();
+      return { name: `${baseName}.md`, content: ipynbToMarkdown(text) };
+    }
     case "yaml":
     case "yml":
     case "toml":
@@ -981,6 +985,65 @@ export function orgToMarkdown(text: string): string {
     .replace(/^#\+END_SRC$/gm, "```");
 }
 
+/* ─── Jupyter notebook (.ipynb) → Markdown ─────────────────────────── */
+
+interface IpynbCell {
+  cell_type?: string;
+  source?: string | string[];
+  outputs?: Array<{
+    output_type?: string;
+    text?: string | string[];
+    data?: Record<string, string | string[]>;
+    traceback?: string[];
+  }>;
+}
+
+/**
+ * Convert a Jupyter notebook to Markdown: markdown/raw cells pass through, code
+ * cells become fenced blocks in the notebook's language, and code outputs
+ * (stream text, text/plain results, ANSI-stripped error tracebacks) follow as
+ * plain fenced blocks.
+ */
+export function ipynbToMarkdown(jsonText: string): string {
+  let nb: { cells?: IpynbCell[]; metadata?: unknown };
+  try {
+    nb = JSON.parse(jsonText) as { cells?: IpynbCell[]; metadata?: unknown };
+  } catch {
+    return "> ⚠️ Invalid .ipynb file (not valid JSON).";
+  }
+  const cells = Array.isArray(nb.cells) ? nb.cells : [];
+  const meta = (nb.metadata ?? {}) as {
+    language_info?: { name?: string };
+    kernelspec?: { language?: string };
+  };
+  const lang = meta.language_info?.name || meta.kernelspec?.language || "python";
+  const join = (s: unknown): string =>
+    Array.isArray(s) ? s.join("") : typeof s === "string" ? s : "";
+
+  const blocks: string[] = [];
+  for (const cell of cells) {
+    const text = join(cell.source).replace(/\s+$/, "");
+    if (cell.cell_type === "markdown" || cell.cell_type === "raw") {
+      if (text.trim()) blocks.push(text);
+    } else if (cell.cell_type === "code") {
+      if (text.trim()) blocks.push("```" + lang + "\n" + text + "\n```");
+      const rendered: string[] = [];
+      for (const o of cell.outputs ?? []) {
+        if (o.output_type === "stream") {
+          rendered.push(join(o.text));
+        } else if (o.output_type === "execute_result" || o.output_type === "display_data") {
+          if (o.data?.["text/plain"]) rendered.push(join(o.data["text/plain"]));
+        } else if (o.output_type === "error") {
+          rendered.push(join(o.traceback).replace(/\[[0-9;]*m/g, ""));
+        }
+      }
+      const out = rendered.join("\n").replace(/\s+$/, "").trim();
+      if (out) blocks.push("```\n" + out + "\n```");
+    }
+  }
+  return blocks.join("\n\n");
+}
+
 export const SUPPORTED_IMPORT_EXTENSIONS = [
   // Plain text + markdown family
   "md", "markdown", "mdown", "mkd", "txt", "text",
@@ -998,6 +1061,8 @@ export const SUPPORTED_IMPORT_EXTENSIONS = [
   "opml",
   // Other markup
   "tex", "ltx", "rst", "adoc", "asciidoc", "org",
+  // Notebooks
+  "ipynb",
 ];
 
 export function isSupportedFormat(filename: string): boolean {
