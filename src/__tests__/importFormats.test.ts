@@ -15,6 +15,7 @@ import {
   legacyDocToMarkdown,
   pdfToMarkdown,
   ipynbToMarkdown,
+  wxrToMarkdown,
 } from "../storage/fileFormats";
 
 // jsdom's File doesn't implement .arrayBuffer(); mirror fsConvert's stand-in.
@@ -235,5 +236,47 @@ describe("ipynbToMarkdown (Jupyter notebook import)", () => {
 
   it("returns an honest notice for invalid JSON", () => {
     expect(ipynbToMarkdown("{ not json")).toContain("Invalid .ipynb");
+  });
+});
+
+describe("wxrToMarkdown (WordPress export)", () => {
+  const wxr = `<?xml version="1.0"?>
+<rss xmlns:wp="http://wordpress.org/export/1.2/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:dc="http://purl.org/dc/elements/1.1/">
+<channel>
+  <item>
+    <title>Hello Blog</title>
+    <dc:creator>alice</dc:creator>
+    <wp:post_type>post</wp:post_type>
+    <wp:status>publish</wp:status>
+    <content:encoded><![CDATA[<h2>Intro</h2><p>First <strong>post</strong>.</p>]]></content:encoded>
+  </item>
+  <item>
+    <title>A Draft</title>
+    <wp:post_type>post</wp:post_type>
+    <wp:status>draft</wp:status>
+    <content:encoded><![CDATA[<p>secret content</p>]]></content:encoded>
+  </item>
+  <item>
+    <title>logo.png</title>
+    <wp:post_type>attachment</wp:post_type>
+    <wp:status>inherit</wp:status>
+  </item>
+</channel>
+</rss>`;
+
+  it("converts published posts, skipping drafts and attachments", () => {
+    const md = wxrToMarkdown(wxr);
+    expect(md).toContain("# Hello Blog");
+    expect(md).toContain("by alice");
+    expect(md).toContain("## Intro");
+    expect(md).toContain("First **post**.");
+    expect(md).not.toContain("secret content");
+    expect(md).not.toContain("logo.png");
+  });
+
+  it("returns an honest notice when there are no published posts", () => {
+    expect(wxrToMarkdown("<rss><channel></channel></rss>")).toContain(
+      "No published WordPress posts",
+    );
   });
 });

@@ -281,7 +281,12 @@ export async function fileToMarkdown(file: File): Promise<{ name: string; conten
     }
     case "xml": {
       const text = await file.text();
-      return { name: `${baseName}.md`, content: xmlToMarkdown(text) };
+      // WordPress eXtended RSS exports are .xml; route them to the WXR reader.
+      const isWxr = /<wp:|xmlns:wp=/i.test(text);
+      return {
+        name: `${baseName}.md`,
+        content: isWxr ? wxrToMarkdown(text) : xmlToMarkdown(text),
+      };
     }
     case "doc": {
       return { name: `${baseName}.md`, content: await legacyDocToMarkdown(file) };
@@ -1042,6 +1047,44 @@ export function ipynbToMarkdown(jsonText: string): string {
     }
   }
   return blocks.join("\n\n");
+}
+
+/* ─── WordPress export (WXR) → Markdown ────────────────────────────── */
+
+/**
+ * WordPress eXtended RSS export → Markdown. Each published post/page becomes a
+ * section (H1 title + author/date meta + HTML body converted to Markdown).
+ * Drafts, trash, attachments and revisions are skipped. Namespaced tags are
+ * matched by localName so we don't depend on XML prefix handling.
+ */
+export function wxrToMarkdown(xml: string): string {
+  const doc = new DOMParser().parseFromString(xml, "text/xml");
+  const childText = (item: Element, localName: string): string => {
+    for (const child of Array.from(item.children)) {
+      if (child.localName === localName) return child.textContent?.trim() ?? "";
+    }
+    return "";
+  };
+  const sections: string[] = [];
+  for (const item of Array.from(doc.getElementsByTagName("item"))) {
+    const postType = childText(item, "post_type");
+    if (postType && postType !== "post" && postType !== "page") continue;
+    const status = childText(item, "status");
+    if (status && status !== "publish") continue;
+    const title = childText(item, "title") || "Untitled";
+    const author = childText(item, "creator");
+    const date = childText(item, "pubDate");
+    const html = childText(item, "encoded");
+    const body = html ? htmlToMarkdown(html) : "";
+    const meta = [author ? "by " + author : "", date].filter(Boolean).join(" · ");
+    const parts = ["# " + title];
+    if (meta) parts.push("_" + meta + "_");
+    if (body) parts.push(body);
+    sections.push(parts.join("\n\n"));
+  }
+  return sections.length
+    ? sections.join("\n\n---\n\n")
+    : "> ⚠️ No published WordPress posts found in this export.";
 }
 
 export const SUPPORTED_IMPORT_EXTENSIONS = [
