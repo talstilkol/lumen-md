@@ -1,9 +1,10 @@
 /**
  * Multi-language AI Prompt Templates.
  * 
- * Provides pre-built prompt templates for Hebrew, Arabic, Russian, and English.
- * Each template is designed for common writing tasks and optimized for the
- * target language's conventions.
+ * Provides pre-built prompt templates for 12 languages: Hebrew, Arabic,
+ * Russian, English, Spanish, French, German, Portuguese, Italian, Chinese,
+ * Japanese and Korean. Each template is written in the target language and
+ * optimized for its conventions.
  */
 
 export interface AiPromptTemplate {
@@ -140,6 +141,134 @@ export const AI_PROMPT_TEMPLATES: AiPromptTemplate[] = [
     lang: "en",
     prompt: "תרגם את הטקסט הבא לעברית טבעית ושוטפת:\n\n{content}",
     category: "translation",
+  },
+
+  // ── Spanish Templates ─────────────────────────────────────────────────
+  {
+    id: "es.summarize",
+    label: "📝 Resumen en español",
+    lang: "es",
+    prompt: "Resume el siguiente texto en español de forma concisa y clara, conservando los puntos principales:\n\n{content}",
+    category: "writing",
+  },
+  {
+    id: "es.improve",
+    label: "✨ Mejorar redacción",
+    lang: "es",
+    prompt: "Mejora el siguiente texto en español. Corrige errores gramaticales y mejora el estilo, conservando el significado original:\n\n{content}",
+    category: "editing",
+  },
+
+  // ── French Templates ──────────────────────────────────────────────────
+  {
+    id: "fr.summarize",
+    label: "📝 Résumé en français",
+    lang: "fr",
+    prompt: "Résumez le texte suivant en français de manière concise et claire, en conservant les points principaux :\n\n{content}",
+    category: "writing",
+  },
+  {
+    id: "fr.improve",
+    label: "✨ Améliorer la rédaction",
+    lang: "fr",
+    prompt: "Améliorez le texte suivant en français. Corrigez les fautes de grammaire et améliorez le style, en conservant le sens original :\n\n{content}",
+    category: "editing",
+  },
+
+  // ── German Templates ──────────────────────────────────────────────────
+  {
+    id: "de.summarize",
+    label: "📝 Zusammenfassung auf Deutsch",
+    lang: "de",
+    prompt: "Fassen Sie den folgenden Text auf Deutsch prägnant und klar zusammen und behalten Sie die wichtigsten Punkte bei:\n\n{content}",
+    category: "writing",
+  },
+  {
+    id: "de.improve",
+    label: "✨ Text verbessern",
+    lang: "de",
+    prompt: "Verbessern Sie den folgenden deutschen Text. Korrigieren Sie Grammatikfehler und verbessern Sie den Stil, ohne die ursprüngliche Bedeutung zu verändern:\n\n{content}",
+    category: "editing",
+  },
+
+  // ── Portuguese Templates ──────────────────────────────────────────────
+  {
+    id: "pt.summarize",
+    label: "📝 Resumo em português",
+    lang: "pt",
+    prompt: "Resuma o seguinte texto em português de forma concisa e clara, mantendo os pontos principais:\n\n{content}",
+    category: "writing",
+  },
+  {
+    id: "pt.improve",
+    label: "✨ Melhorar a escrita",
+    lang: "pt",
+    prompt: "Melhore o seguinte texto em português. Corrija erros gramaticais e melhore o estilo, mantendo o significado original:\n\n{content}",
+    category: "editing",
+  },
+
+  // ── Italian Templates ─────────────────────────────────────────────────
+  {
+    id: "it.summarize",
+    label: "📝 Riassunto in italiano",
+    lang: "it",
+    prompt: "Riassumi il seguente testo in italiano in modo conciso e chiaro, mantenendo i punti principali:\n\n{content}",
+    category: "writing",
+  },
+  {
+    id: "it.improve",
+    label: "✨ Migliorare la scrittura",
+    lang: "it",
+    prompt: "Migliora il seguente testo in italiano. Correggi gli errori grammaticali e migliora lo stile, mantenendo il significato originale:\n\n{content}",
+    category: "editing",
+  },
+
+  // ── Chinese Templates ─────────────────────────────────────────────────
+  {
+    id: "zh.summarize",
+    label: "📝 中文摘要",
+    lang: "zh",
+    prompt: "用简洁清晰的中文总结以下文本，保留要点：\n\n{content}",
+    category: "writing",
+  },
+  {
+    id: "zh.improve",
+    label: "✨ 改进写作",
+    lang: "zh",
+    prompt: "改进以下中文文本。修正语法错误并改善文风，同时保留原意：\n\n{content}",
+    category: "editing",
+  },
+
+  // ── Japanese Templates ────────────────────────────────────────────────
+  {
+    id: "ja.summarize",
+    label: "📝 日本語で要約",
+    lang: "ja",
+    prompt: "次のテキストを日本語で簡潔かつ明確に要約し、要点を保持してください：\n\n{content}",
+    category: "writing",
+  },
+  {
+    id: "ja.improve",
+    label: "✨ 文章を改善",
+    lang: "ja",
+    prompt: "次の日本語のテキストを改善してください。文法の誤りを修正し、元の意味を保ちながら文体を向上させてください：\n\n{content}",
+    category: "editing",
+  },
+
+  // ── Korean Templates ──────────────────────────────────────────────────
+  {
+    id: "ko.summarize",
+    label: "📝 한국어 요약",
+    lang: "ko",
+    prompt: "다음 텍스트를 한국어로 간결하고 명확하게 요약하고 핵심을 유지하세요:\n\n{content}",
+    category: "writing",
+  },
+  {
+    id: "ko.improve",
+    label: "✨ 글쓰기 개선",
+    lang: "ko",
+    prompt: "다음 한국어 텍스트를 개선하세요. 문법 오류를 수정하고 원래 의미를 유지하면서 문체를 향상시키세요:\n\n{content}",
+    category: "editing",
   },
 ];
 

@@ -41,9 +41,11 @@ describe("AI_PROMPT_TEMPLATES registry", () => {
     }
   });
 
-  it("covers Hebrew, Arabic, Russian, and English", () => {
+  it("covers 12 languages (he/ar/ru/en + es/fr/de/pt/it/zh/ja/ko)", () => {
     const langs = new Set(AI_PROMPT_TEMPLATES.map((t) => t.lang));
-    for (const l of ["he", "ar", "ru", "en"]) expect(langs.has(l)).toBe(true);
+    expect(langs.size).toBeGreaterThanOrEqual(12);
+    for (const l of ["he", "ar", "ru", "en", "es", "fr", "de", "pt", "it", "zh", "ja", "ko"])
+      expect(langs.has(l)).toBe(true);
   });
 });
 

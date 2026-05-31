@@ -33,7 +33,7 @@
 - **DOC ייבוא** ⚠️→🟥: לא מחלץ טקסט — פולט ג'יבריש בינארי. צריך מחלץ CFB אמיתי או הודעת-שגיאה כנה.
 - **MHTML ייצוא** ✅→❌ **הוסר**: `markdownToMhtml` היה **קוד מת** (אין קורא) → הוסר ב-2026-05-31. ייבוא MHTML עדיין נתמך ונבדק.
 - **AI "צ'ארט מנתונים" (ECharts)** ✅ **תוקן 2026-05-31**: ה-prompt `visualization` חובר לפקודה אמיתית "AI: Chart from Data" (`agents.generateChart` → בלוק ```chart```), עם טסט.
-- **Grammar "20 שפות"** 🟥: רק 4 שפות מיושמות (en/he/ar/ru).
+- **Grammar / תבניות-AI רב-לשוניות** ✅ **תוקן 2026-05-31**: הורחב מ-4 ל-**12 שפות** (he/ar/ru/en/es/fr/de/pt/it/zh/ja/ko) ב-`multiLangPrompts.ts`, עם טסט; הטענה "20" תוקנה ל-12 בכל מקום. (LanguageTool תומך נייטיב בעוד שפות.)
 - **Shiki "190+ שפות"**: אמיתי כיכולת, אך 6 בלבד preloaded; שפה אקזוטית נופלת בשקט ל-`text`.
 - **בורר ספק AI** ✅ **תוקן 2026-05-31**: הומר ל-dropdown אמיתי (`uiSelect` ב-`PromptDialog`) עם כל 6 הספקים; הרמז המטעה תוקן ב-8 השפות; נוסף טסט render.
 - **Plugin marketplace** ✅→🟥: UI + מוני-localStorage בלבד, **אין backend** publish/install/rate.
@@ -245,7 +245,7 @@
 | **Code generation** | P1 | "צור chart מהנתונים האלה" → ECharts spec |
 | **Smart templates** | P1 | AI ממלא template לפי context |
 | **Auto-translate** | ✅ | פקודה "AI: Translate Document" — תרגום מסמך שלם עם שימור formatting |
-| **Grammar in 20 languages** | P1 | LanguageTool + AI hybrid |
+| **Grammar / רב-לשוני** | ✅ 12 שפות (היה 4) | LanguageTool + 12 שפות AI templates; מאומת בטסט |
 | **Citation finder** | P2 | AI מוצא sources ומוסיף references |
 | **Image generation** | P2 | DALL-E / Stable Diffusion inline |
 | **Diagram from text** | ✅ | פקודה "AI: Diagram from Text" → בלוק Mermaid |
