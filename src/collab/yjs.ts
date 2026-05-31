@@ -251,7 +251,7 @@ function getRoomPassword(): string | null {
 export function connectCollab(
   roomName: string,
   seedContent: string,
-  opts: { password?: string | null } = {},
+  opts: { password?: string | null; isNewRoom?: boolean } = {},
 ): CollabSession {
   const doc = new Y.Doc();
   const ytext = doc.getText("lumen");
@@ -297,13 +297,22 @@ export function connectCollab(
   // simplicity we wait a short tick: if no remote state has arrived, insert.
   let seedTimer: ReturnType<typeof setTimeout> | null = null;
   let destroyed = false;
-  seedTimer = setTimeout(() => {
-    if (destroyed) return;
-    const peersKnown = provider.awareness.getStates().size;
-    if (ytext.length === 0 && seedContent && peersKnown <= 1) {
-      ytext.insert(0, seedContent);
-    }
-  }, 400);
+  if (opts.isNewRoom && seedContent && ytext.length === 0) {
+    // New room created by this peer: seed synchronously so the editor's
+    // char-level Yjs binding (y-codemirror `ySync`) has content to bind to.
+    // A delayed seed would let the binding momentarily clear the editor.
+    ytext.insert(0, seedContent);
+  } else {
+    // Joining (or unknown): wait a tick and only seed if we're still alone and
+    // no remote content has arrived — so we never clobber an existing room.
+    seedTimer = setTimeout(() => {
+      if (destroyed) return;
+      const peersKnown = provider.awareness.getStates().size;
+      if (ytext.length === 0 && seedContent && peersKnown <= 1) {
+        ytext.insert(0, seedContent);
+      }
+    }, 400);
+  }
 
   const user = randomUser();
   provider.awareness.setLocalStateField("user", user);

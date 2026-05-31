@@ -35,6 +35,7 @@ import { PROMPTS } from "../ai/prompts";
 import { embedHintExtension } from "./embedHintExtension";
 import { insertSlashMenuExtension } from "./insertMenu";
 import { collabAwarenessExtension } from "./collabAwareness";
+import { ySync, ySyncFacet, YSyncConfig } from "y-codemirror.next";
 import { typewriterModeExtension } from "./typewriterMode";
 import { markdownLintExtension } from "./lintExtension";
 import { commentDecorations } from "./commentDecorations";
@@ -351,7 +352,15 @@ export const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
         EditorView.contentAttributes.of({ spellcheck: spellCheck ? "true" : "false" }),
       ),
       collabCompartment.of(
-        collab?.awareness ? collabAwarenessExtension(collab.awareness) : [],
+        collab?.ytext
+          ? [
+              // Char-level CRDT binding: edits become Yjs ops (no full-doc
+              // clobber on concurrent edits), plus live remote cursors.
+              ySyncFacet.of(new YSyncConfig(collab.ytext, collab.awareness)),
+              ySync,
+              collabAwarenessExtension(collab.awareness),
+            ]
+          : [],
       ),
       // Comment anchors as yellow highlights — the source of truth lives in
       // the Yjs `lumen-comments` map; this extension just paints them.
@@ -501,7 +510,13 @@ export const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
     view.dispatch({
       effects: [
         collabCompartment.reconfigure(
-          collab?.awareness ? collabAwarenessExtension(collab.awareness) : [],
+          collab?.ytext
+            ? [
+                ySyncFacet.of(new YSyncConfig(collab.ytext, collab.awareness)),
+                ySync,
+                collabAwarenessExtension(collab.awareness),
+              ]
+            : [],
         ),
         commentsCompartment.reconfigure(
           collab?.doc ? commentDecorations({ doc: collab.doc }) : [],

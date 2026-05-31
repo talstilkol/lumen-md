@@ -42,7 +42,7 @@ export function useCollab(docContent: string): UseCollabReturn {
       if (collab) return;
       const name = joinName ?? makeRoomName();
       try {
-        const session = connectCollab(name, contentRef.current);
+        const session = connectCollab(name, contentRef.current, { isNewRoom: !joinName });
         setCollab(session);
         setRoomInHash(name);
 

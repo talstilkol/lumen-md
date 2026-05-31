@@ -39,6 +39,7 @@
 - **Plugin marketplace** ✅→🟥: UI + מוני-localStorage בלבד, **אין backend** publish/install/rate.
 - **WebGPU LLM / Whisper מקומי**: קוד אמיתי אך WebGPU לא הוכח שטוען מודל, ו-`@xenova/transformers` **לא מותקן** (מקומי זורק).
 - **PDF ייבוא** ✅ **תוקן 2026-05-31**: `pdfjs-dist` הותקן; ה-worker מתבנדל מקומית (בלי CDN), נטען-עצל; חילוץ טקסט אומת בטסט עם PDF אמיתי + נפילה כנה לסרוקים. (OCR לסרוקים עדיין לא — תועד בהודעה.)
+- **Collab clobber** ✅ **תוקן 2026-05-31**: הוחלף ה-mirror של מסמך-מלא ב-**binding ברמת-תו** (`y-codemirror ySync` ב-`Editor.tsx`); seed סינכרוני לחדר חדש מונע מחיקת תוכן בעת ה-bind. טסט 2-peers מוכיח התכנסות עם שני הצדדים נשמרים — אין יותר clobber. הפער התחרותי הגדול ביותר מול Notion נסגר.
 - **iOS ShareExtension**: קבצים קיימים אך **לא מחוברים** ל-Xcode build (`pbxproj` ללא הפניה).
 - **Python/SQL live**: אמיתי, אך תלוי הורדת runtime מ-CDN בזמן ריצה (offline=שבור); נבדק ב-smoke בלבד.
 
@@ -341,7 +342,7 @@
 
 | יכולת | סטטוס | עדיפות |
 |--------|--------|--------|
-| P2P real-time (Yjs/WebRTC) | ⚠️ חלקי | P1 | presence + תגובות אמיתיים; סנכרון טקסט = mirror מלא, לא binding ברמת תו (y-prosemirror) → סיכון clobber בעריכה במקביל |
+| P2P real-time (Yjs/WebRTC) | ✅ אמיתי | — | presence + תגובות + **binding ברמת-תו** (y-codemirror `ySync`) — עריכות מקבילות מתכנסות בלי clobber (מאומת בטסט 2-peers) |
 | Server-based rooms | 🔜 | P1 |
 | Comments & threads | ✅ | — |
 | Suggesting mode (track changes) | ❌ | P1 |
