@@ -289,6 +289,18 @@ export function useCommands({
         },
       },
       {
+        id: "file.exportIpynb",
+        label: t("cmd.file.exportIpynb"),
+        hint: t("cmd.file.exportIpynb.hint"),
+        icon: cmdIcons.Download,
+        group: t("group.file"),
+        action: async () => {
+          const { markdownToIpynb, downloadText } = await import("../storage/exportFormats");
+          const baseName = doc.name.replace(/\.[^.]+$/, "");
+          downloadText(`${baseName}.ipynb`, markdownToIpynb(doc.content), "application/x-ipynb+json");
+        },
+      },
+      {
         id: "file.exportSite",
         label: t("cmd.file.exportSite"),
         hint: t("cmd.file.exportSite.hint"),

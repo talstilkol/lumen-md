@@ -450,6 +450,66 @@ export async function markdownToStaticSiteBytes(md: string, siteTitle = "Site"):
   ]);
 }
 
+/* ─── Markdown → Jupyter notebook (.ipynb) ─────────────────────────── */
+
+/**
+ * Convert Markdown to a valid Jupyter notebook (nbformat 4.5). Fenced code
+ * blocks become code cells (in the fence's language); everything else becomes
+ * markdown cells. Round-trips with `ipynbToMarkdown` in ./fileFormats.
+ */
+export function markdownToIpynb(md: string, lang = "python"): string {
+  const lines = md.replace(/\r\n/g, "\n").split("\n");
+  const toSource = (text: string): string[] => {
+    if (text === "") return [];
+    const ls = text.split("\n");
+    return ls.map((l, idx) => (idx < ls.length - 1 ? l + "\n" : l));
+  };
+  const cells: Array<Record<string, unknown>> = [];
+  let prose: string[] = [];
+  const flushProse = () => {
+    const text = prose.join("\n").trim();
+    if (text) cells.push({ cell_type: "markdown", metadata: {}, source: toSource(text) });
+    prose = [];
+  };
+
+  let i = 0;
+  while (i < lines.length) {
+    const fence = lines[i].match(/^\s*```(\w+)?/);
+    if (fence) {
+      flushProse();
+      i++;
+      const code: string[] = [];
+      while (i < lines.length && !/^\s*```/.test(lines[i])) {
+        code.push(lines[i]);
+        i++;
+      }
+      i++; // closing fence
+      cells.push({
+        cell_type: "code",
+        execution_count: null,
+        metadata: {},
+        outputs: [],
+        source: toSource(code.join("\n")),
+      });
+    } else {
+      prose.push(lines[i]);
+      i++;
+    }
+  }
+  flushProse();
+
+  return JSON.stringify(
+    {
+      cells,
+      metadata: { language_info: { name: lang } },
+      nbformat: 4,
+      nbformat_minor: 5,
+    },
+    null,
+    1,
+  );
+}
+
 /** Trigger a browser download for arbitrary text content. */
 export function downloadText(filename: string, content: string, mime = "text/plain"): void {
   downloadBytes(filename, new TextEncoder().encode(content), `${mime};charset=utf-8`);

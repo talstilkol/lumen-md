@@ -102,6 +102,8 @@
   "cmd.file.exportReveal.hint": "Turn --- separated sections into a presentation",
   "cmd.file.exportEpub": "Export to EPUB",
   "cmd.file.exportEpub.hint": "Package the document as an e-book (chapters split on H1)",
+  "cmd.file.exportIpynb": "Export to Jupyter (.ipynb)",
+  "cmd.file.exportIpynb.hint": "Notebook: fenced code blocks become cells",
   "cmd.file.exportSite": "Export to Static Site",
   "cmd.file.exportSite.hint": "Multi-page HTML site with sidebar nav + RSS (pages split on H1)",
   "cmd.file.exportOrg": "Экспорт to Org-mode",

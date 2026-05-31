@@ -17,6 +17,7 @@ import {
   ipynbToMarkdown,
   wxrToMarkdown,
 } from "../storage/fileFormats";
+import { markdownToIpynb } from "../storage/exportFormats";
 
 // jsdom's File doesn't implement .arrayBuffer(); mirror fsConvert's stand-in.
 function docFile(bytes: Uint8Array | number[]): File {
@@ -278,5 +279,29 @@ describe("wxrToMarkdown (WordPress export)", () => {
     expect(wxrToMarkdown("<rss><channel></channel></rss>")).toContain(
       "No published WordPress posts",
     );
+  });
+});
+
+describe("markdownToIpynb (export) ↔ ipynbToMarkdown round-trip", () => {
+  const md = "# Title\n\nSome prose.\n\n```python\nprint('hi')\n```\n\nMore prose.";
+
+  it("produces a valid nbformat-4 notebook with code + markdown cells", () => {
+    const nb = JSON.parse(markdownToIpynb(md));
+    expect(nb.nbformat).toBe(4);
+    expect(nb.metadata.language_info.name).toBe("python");
+    const types = nb.cells.map((c: { cell_type: string }) => c.cell_type);
+    expect(types).toContain("markdown");
+    expect(types).toContain("code");
+    const code = nb.cells.find((c: { cell_type: string }) => c.cell_type === "code");
+    expect(code.outputs).toEqual([]);
+    expect(code.execution_count).toBeNull();
+  });
+
+  it("round-trips back to markdown via ipynbToMarkdown", () => {
+    const back = ipynbToMarkdown(markdownToIpynb(md));
+    expect(back).toContain("# Title");
+    expect(back).toContain("Some prose.");
+    expect(back).toContain("```python\nprint('hi')\n```");
+    expect(back).toContain("More prose.");
   });
 });

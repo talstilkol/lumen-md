@@ -117,7 +117,7 @@
 | **PPTX** | ❌ חסר | P2 | heading-based slide generation |
 | **Markdown → Static Site** | ✅ אמיתי | — | אתר HTML רב-עמודים (zip): עמוד per H1 + ניווט צד + RSS |
 | **Reveal.js slides** | ✅ אמיתי | — | מפצל על `---` ל-`<section>`; runtime מ-CDN |
-| **Jupyter notebook** | ❌ חסר | P2 | code blocks → executable cells |
+| **Jupyter notebook** | ✅ אמיתי | — | md → .ipynb תקין (nbformat 4.5): fenced code → תאי-קוד, פרוזה → תאי-markdown; round-trip מאומת מול ה-importer |
 | **Confluence wiki** | ❌ חסר | P3 | for enterprise users |
 
 ---
