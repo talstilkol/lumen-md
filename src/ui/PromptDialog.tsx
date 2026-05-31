@@ -25,6 +25,11 @@ interface DialogOpts {
   /** When provided, the input is rendered with this placeholder. */
   placeholder?: string;
   title?: string;
+  /**
+   * When provided (prompt kind), the dialog renders a real <select> dropdown
+   * of these options instead of a free-text input. Resolves the chosen value.
+   */
+  choices?: { value: string; label: string }[];
 }
 
 interface InternalProps extends DialogOpts {
@@ -40,10 +45,18 @@ function PromptDialogImpl({
   cancelLabel,
   placeholder,
   title,
+  choices,
   onResolve,
 }: InternalProps) {
-  const [value, setValue] = useState(defaultValue);
+  const initialValue =
+    choices && choices.length
+      ? choices.some((c) => c.value === defaultValue)
+        ? defaultValue
+        : choices[0].value
+      : defaultValue;
+  const [value, setValue] = useState(initialValue);
   const inputRef = useRef<HTMLInputElement | null>(null);
+  const selectRef = useRef<HTMLSelectElement | null>(null);
   const okRef = useRef<HTMLButtonElement | null>(null);
   const dialogRef = useRef<HTMLDivElement | null>(null);
   const previousFocusRef = useRef<Element | null>(null);
@@ -52,7 +65,9 @@ function PromptDialogImpl({
     previousFocusRef.current = document.activeElement;
     // Initial focus: input for prompt, OK for confirm/alert.
     setTimeout(() => {
-      if (kind === "prompt") {
+      if (kind === "prompt" && choices && choices.length) {
+        selectRef.current?.focus();
+      } else if (kind === "prompt") {
         inputRef.current?.focus();
         inputRef.current?.select();
       } else {
@@ -63,14 +78,14 @@ function PromptDialogImpl({
       const prev = previousFocusRef.current as HTMLElement | null;
       prev?.focus?.();
     };
-  }, [kind]);
+  }, [kind, choices]);
 
   // Focus trap inside the dialog.
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
       if (e.key === "Tab" && dialogRef.current) {
         const focusables = dialogRef.current.querySelectorAll<HTMLElement>(
-          'button, input, [tabindex]:not([tabindex="-1"])',
+          'button, input, select, [tabindex]:not([tabindex="-1"])',
         );
         if (focusables.length === 0) return;
         const first = focusables[0];
@@ -115,7 +130,30 @@ function PromptDialogImpl({
           {title ?? message}
         </div>
         {title && <div className="prompt-message">{message}</div>}
-        {kind === "prompt" && (
+        {kind === "prompt" && choices && choices.length > 0 ? (
+          <select
+            ref={selectRef}
+            className="prompt-input"
+            aria-label={title ?? message}
+            value={value}
+            onChange={(e) => setValue(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                submit();
+              } else if (e.key === "Escape") {
+                e.preventDefault();
+                cancel();
+              }
+            }}
+          >
+            {choices.map((c) => (
+              <option key={c.value} value={c.value}>
+                {c.label}
+              </option>
+            ))}
+          </select>
+        ) : kind === "prompt" ? (
           <input
             ref={inputRef}
             className="prompt-input"
@@ -134,7 +172,7 @@ function PromptDialogImpl({
             }}
             spellCheck={false}
           />
-        )}
+        ) : null}
         <div className="prompt-actions">
           {kind !== "alert" && (
             <button
@@ -189,6 +227,12 @@ function show<T>(kind: Kind, opts: DialogOpts): Promise<T> {
 }
 
 export function uiPrompt(opts: DialogOpts): Promise<string | null> {
+  return show<string | null>("prompt", opts);
+}
+/** Like uiPrompt, but renders a real <select> dropdown of `choices`. */
+export function uiSelect(
+  opts: DialogOpts & { choices: { value: string; label: string }[] },
+): Promise<string | null> {
   return show<string | null>("prompt", opts);
 }
 export function uiConfirm(opts: DialogOpts): Promise<boolean> {

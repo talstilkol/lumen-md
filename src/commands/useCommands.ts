@@ -7,7 +7,7 @@ import { getGitIdentity, setGitIdentity, setGitToken, cloneRepo, pullRepo, commi
 import { getRecents, removeRecent } from "../storage/recent";
 import type { RecentFile } from "../storage/recent";
 import { BLOCK_SNIPPETS } from "../snippets";
-import { uiAlert, uiPrompt } from "../ui/PromptDialog";
+import { uiAlert, uiPrompt, uiSelect } from "../ui/PromptDialog";
 import { generateAiCommitMessage } from "../ai/commands";
 import { buildAiSettingsCommand, buildAiOutlineCommand } from "../ai/commands";
 import type { CollabSession } from "../collab/yjs";
@@ -727,9 +727,18 @@ export function useCommands({
         action: async () => {
           const { setActiveProvider, getActiveProvider } = await import("../ai/llm");
           const current = getActiveProvider();
-          const choice = await uiPrompt({
-            message: `Current AI provider: ${current}\n\nChoose provider:\n- openai (cloud, needs API key)\n- anthropic (Claude, cloud, needs API key)\n- gemini (Google, cloud, needs API key)\n- mistral (cloud, needs API key)\n- ollama (local server, needs ollama running)\n- local-webgpu (in-browser, needs WebGPU)\n\nType your choice:`,
+          const choice = await uiSelect({
+            title: t("cmd.ai.provider", { defaultValue: "AI: Switch Provider" }),
+            message: "Choose your AI provider:",
             defaultValue: current,
+            choices: [
+              { value: "openai", label: "OpenAI \u2014 cloud (API key)" },
+              { value: "anthropic", label: "Claude / Anthropic \u2014 cloud (API key)" },
+              { value: "gemini", label: "Google Gemini \u2014 cloud (API key)" },
+              { value: "mistral", label: "Mistral \u2014 cloud (API key)" },
+              { value: "ollama", label: "Ollama \u2014 local server" },
+              { value: "local-webgpu", label: "Local WebGPU \u2014 in-browser" },
+            ],
           });
           if (!choice) return;
           const valid = choice.trim().toLowerCase();

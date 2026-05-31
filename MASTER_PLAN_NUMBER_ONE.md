@@ -35,7 +35,7 @@
 - **AI "צ'ארט מנתונים" (ECharts)** ✅ **תוקן 2026-05-31**: ה-prompt `visualization` חובר לפקודה אמיתית "AI: Chart from Data" (`agents.generateChart` → בלוק ```chart```), עם טסט.
 - **Grammar "20 שפות"** 🟥: רק 4 שפות מיושמות (en/he/ar/ru).
 - **Shiki "190+ שפות"**: אמיתי כיכולת, אך 6 בלבד preloaded; שפה אקזוטית נופלת בשקט ל-`text`.
-- **בורר ספק AI**: תיבת-טקסט חופשי, לא dropdown; הרמז עדיין אומר "OpenAI/Ollama/WebGPU" בלבד אף ש-6 ספקים קיימים.
+- **בורר ספק AI** ✅ **תוקן 2026-05-31**: הומר ל-dropdown אמיתי (`uiSelect` ב-`PromptDialog`) עם כל 6 הספקים; הרמז המטעה תוקן ב-8 השפות; נוסף טסט render.
 - **Plugin marketplace** ✅→🟥: UI + מוני-localStorage בלבד, **אין backend** publish/install/rate.
 - **WebGPU LLM / Whisper מקומי**: קוד אמיתי אך WebGPU לא הוכח שטוען מודל, ו-`@xenova/transformers` **לא מותקן** (מקומי זורק).
 - **PDF ייבוא**: `pdfjs-dist` **לא מותקן** → תמיד נכשל.
