@@ -52,6 +52,10 @@ const BUDGETS = [
   { name: "vendor: git",        pattern: /^vendor-git-/,          budgetKb: 110 },
   { name: "vendor: tldraw",     pattern: /^vendor-tldraw-/,       budgetKb: 420 },
   { name: "vendor: other",      pattern: /^vendor-/,              budgetKb: 200 },
+  // pdfjs-dist text extractor — lazy-loaded only when the user imports a PDF.
+  // ~144 KB gzipped today; the heavy worker ships as a separate .mjs (not
+  // size-checked here). It never touches the eager startup path.
+  { name: "lazy: pdfjs",        pattern: /^pdf-/,                 budgetKb: 165 },
   { name: "lazy plugin chunk",  pattern: /\.js$/,                 budgetKb: 100 },
 ];
 

@@ -38,7 +38,7 @@
 - **בורר ספק AI** ✅ **תוקן 2026-05-31**: הומר ל-dropdown אמיתי (`uiSelect` ב-`PromptDialog`) עם כל 6 הספקים; הרמז המטעה תוקן ב-8 השפות; נוסף טסט render.
 - **Plugin marketplace** ✅→🟥: UI + מוני-localStorage בלבד, **אין backend** publish/install/rate.
 - **WebGPU LLM / Whisper מקומי**: קוד אמיתי אך WebGPU לא הוכח שטוען מודל, ו-`@xenova/transformers` **לא מותקן** (מקומי זורק).
-- **PDF ייבוא**: `pdfjs-dist` **לא מותקן** → תמיד נכשל.
+- **PDF ייבוא** ✅ **תוקן 2026-05-31**: `pdfjs-dist` הותקן; ה-worker מתבנדל מקומית (בלי CDN), נטען-עצל; חילוץ טקסט אומת בטסט עם PDF אמיתי + נפילה כנה לסרוקים. (OCR לסרוקים עדיין לא — תועד בהודעה.)
 - **iOS ShareExtension**: קבצים קיימים אך **לא מחוברים** ל-Xcode build (`pbxproj` ללא הפניה).
 - **Python/SQL live**: אמיתי, אך תלוי הורדת runtime מ-CDN בזמן ריצה (offline=שבור); נבדק ב-smoke בלבד.
 
@@ -78,7 +78,7 @@
 | DOCX (.docx) | ✅ אמיתי | — | unzip מקורי + WordprocessingML: כותרות/bold/italic/רשימות/טבלאות |
 | DOC (.doc) | ⚠️ best-effort | P2 | Legacy binary — חילוץ טקסט בלבד |
 | ODT (.odt) | ✅ אמיתי | — | unzip מקורי + content.xml (כותרות/פסקאות/רשימות) |
-| PDF (.pdf) | ⚠️ דורש pdfjs-dist | P1 | קוד lazy-import קיים אך החבילה לא מותקנת; הוסף OCR לסרוקים |
+| PDF (.pdf) | ✅ אמיתי | — | pdfjs-dist + worker מקומי (בלי CDN), lazy, חילוץ טקסט מאומת. OCR לסרוקים עדיין לא |
 | EPUB (.epub) | ✅ אמיתי | — | unzip מקורי + OPF spine → המרת פרקי XHTML |
 | LaTeX (.tex) | ✅ קיים | — | |
 | RST (.rst) | ✅ קיים | — | |

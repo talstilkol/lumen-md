@@ -716,41 +716,63 @@ export async function epubToMarkdown(file: File): Promise<string> {
 /* ─── PDF → Markdown (lazy-loads pdfjs-dist) ──────────────────────── */
 
 /**
- * Dynamic-imports `pdfjs-dist` so the dependency is paid only when the
- * user drops a PDF. Falls back to a friendly message if the package
- * isn't installed (it's optional — heavy).
+ * Extract a PDF's text into Markdown. Dynamic-imports `pdfjs-dist` (heavy) so
+ * the cost is paid only when the user drops a PDF. Uses the locally bundled
+ * worker — no CDN — and degrades honestly: scanned/image-only PDFs return a
+ * clear "no extractable text" notice instead of silent garbage.
  */
 export async function pdfToMarkdown(file: File): Promise<string> {
-  try {
-    const pkg = "pdfjs-dist/legacy/build/pdf.mjs";
-    type PdfJs = {
-      getDocument: (src: { data: ArrayBuffer }) => {
-        promise: Promise<{
-          numPages: number;
-          getPage: (n: number) => Promise<{
-            getTextContent: () => Promise<{ items: Array<{ str: string }> }>;
-          }>;
+  type PdfjsModule = {
+    GlobalWorkerOptions: { workerSrc: string };
+    getDocument: (src: { data: Uint8Array; isEvalSupported?: boolean }) => {
+      promise: Promise<{
+        numPages: number;
+        getPage: (n: number) => Promise<{
+          getTextContent: () => Promise<{ items: Array<{ str?: string }> }>;
         }>;
-      };
-      GlobalWorkerOptions: { workerSrc: string };
+      }>;
     };
-    const mod = (await import(/* @vite-ignore */ pkg)) as PdfJs;
-    mod.GlobalWorkerOptions.workerSrc =
-      "https://unpkg.com/pdfjs-dist@latest/legacy/build/pdf.worker.mjs";
-    const buf = await file.arrayBuffer();
-    const pdf = await mod.getDocument({ data: buf }).promise;
-    const out: string[] = [];
+  };
+  try {
+    const pdfjs = (await import("pdfjs-dist/legacy/build/pdf.mjs")) as unknown as PdfjsModule;
+    // Bundle the worker locally (no CDN). In the browser Vite emits the asset;
+    // under node/vitest there is no Web Worker, so pdf.js falls back to a
+    // main-thread "fake worker" and text extraction still works.
+    // Worker source — no CDN. In the browser, Vite's `?url` emits the local
+    // worker asset. Under node/vitest we hand pdf.js the bare module specifier
+    // so it imports the worker via node_modules on the main thread (the `?url`
+    // value there is a web path pdf.js can't import).
+    const isNode =
+      typeof process !== "undefined" && !!(process as { versions?: { node?: string } })?.versions?.node;
+    let workerSrc = "pdfjs-dist/legacy/build/pdf.worker.min.mjs";
+    if (!isNode) {
+      try {
+        const url = (await import("pdfjs-dist/legacy/build/pdf.worker.min.mjs?url")).default;
+        if (typeof url === "string" && url) workerSrc = url;
+      } catch {
+        /* keep the bare specifier */
+      }
+    }
+    pdfjs.GlobalWorkerOptions.workerSrc = workerSrc;
+    const data = new Uint8Array(await file.arrayBuffer());
+    const pdf = await pdfjs.getDocument({ data, isEvalSupported: false }).promise;
+    const pages: string[] = [];
     for (let i = 1; i <= pdf.numPages; i++) {
       const page = await pdf.getPage(i);
       const content = await page.getTextContent();
-      const text = content.items.map((it) => it.str).join(" ").trim();
-      if (text) out.push(text);
+      const text = content.items
+        .map((it) => it.str ?? "")
+        .join(" ")
+        .replace(/[ \t]{2,}/g, " ")
+        .trim();
+      if (text) pages.push(text);
     }
-    if (out.length === 0)
-      return "> ⚠️ PDF appears to be a scanned image. OCR is not built in.";
-    return out.join("\n\n---\n\n");
+    if (pages.length === 0) {
+      return "> ⚠️ This PDF has no extractable text (likely a scanned image). OCR is not built in yet.";
+    }
+    return pages.join("\n\n---\n\n");
   } catch (err) {
-    return `> ⚠️ PDF import requires \`pdfjs-dist\`. Install with \`npm install pdfjs-dist\`.\n>\n> ${(err as Error).message}`;
+    return "> ⚠️ Couldn't read this PDF: " + (err as Error).message;
   }
 }
 
