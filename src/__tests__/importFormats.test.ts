@@ -16,6 +16,7 @@ import {
   pdfToMarkdown,
   ipynbToMarkdown,
   wxrToMarkdown,
+  confluenceToMarkdown,
 } from "../storage/fileFormats";
 import { markdownToIpynb } from "../storage/exportFormats";
 
@@ -303,5 +304,26 @@ describe("markdownToIpynb (export) ↔ ipynbToMarkdown round-trip", () => {
     expect(back).toContain("Some prose.");
     expect(back).toContain("```python\nprint('hi')\n```");
     expect(back).toContain("More prose.");
+  });
+});
+
+describe("confluenceToMarkdown (Confluence export)", () => {
+  const xhtml = `<div xmlns:ac="x" xmlns:ri="y">
+  <h1>Page Title</h1>
+  <p>Some <strong>text</strong>.</p>
+  <ac:structured-macro ac:name="code"><ac:plain-text-body><![CDATA[print("hi")]]></ac:plain-text-body></ac:structured-macro>
+  <ac:structured-macro ac:name="info"><ac:rich-text-body><p>An info panel.</p></ac:rich-text-body></ac:structured-macro>
+  <p>See <ac:link><ri:page ri:content-title="Other Page"/></ac:link> too.</p>
+</div>`;
+
+  it("converts code macros to fenced blocks and unwraps panels/links", () => {
+    const md = confluenceToMarkdown(xhtml);
+    expect(md).toContain("# Page Title");
+    expect(md).toContain("Some **text**.");
+    expect(md).toContain('print("hi")');
+    expect(md).toContain("An info panel.");
+    expect(md).toContain("Other Page");
+    expect(md).not.toContain("ac:structured-macro");
+    expect(md).not.toContain("<ri:");
   });
 });

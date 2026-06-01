@@ -265,7 +265,12 @@ export async function fileToMarkdown(file: File): Promise<{ name: string; conten
     case "html":
     case "htm": {
       const text = await file.text();
-      return { name: `${baseName}.md`, content: htmlToMarkdown(text) };
+      // Confluence exports are XHTML wrapped in ac:/ri: macros — detect + route.
+      const isConfluence = /xmlns:ac=|<ac:structured-macro|<ac:rich-text-body/i.test(text);
+      return {
+        name: `${baseName}.md`,
+        content: isConfluence ? confluenceToMarkdown(text) : htmlToMarkdown(text),
+      };
     }
     case "csv": {
       const text = await file.text();
@@ -1085,6 +1090,27 @@ export function wxrToMarkdown(xml: string): string {
   return sections.length
     ? sections.join("\n\n---\n\n")
     : "> ⚠️ No published WordPress posts found in this export.";
+}
+
+/* ─── Confluence storage/view XHTML → Markdown ─────────────────────── */
+
+/**
+ * Convert Confluence export XHTML to Markdown. Confluence wraps content in
+ * `ac:`/`ri:` macro tags; we turn code macros into fenced blocks, unwrap
+ * rich-text panels, resolve internal page links to their title, strip the
+ * remaining macro tags, then run the standard HTML→Markdown reader.
+ */
+export function confluenceToMarkdown(xhtml: string): string {
+  const html = xhtml
+    .replace(
+      /<ac:structured-macro[^>]*ac:name="code"[\s\S]*?<!\[CDATA\[([\s\S]*?)\]\]>[\s\S]*?<\/ac:structured-macro>/gi,
+      (_m, code: string) =>
+        `<pre><code>${code.replace(/&/g, "&amp;").replace(/</g, "&lt;")}</code></pre>`,
+    )
+    .replace(/<ac:rich-text-body>([\s\S]*?)<\/ac:rich-text-body>/gi, "$1")
+    .replace(/<ac:link[^>]*>[\s\S]*?ri:content-title="([^"]*)"[\s\S]*?<\/ac:link>/gi, "$1")
+    .replace(/<\/?(?:ac|ri):[^>]*>/gi, "");
+  return htmlToMarkdown(html);
 }
 
 export const SUPPORTED_IMPORT_EXTENSIONS = [

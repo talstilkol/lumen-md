@@ -94,7 +94,7 @@
 | **Google Docs/Sheets** | ❌ חסר | P2 | via Google Drive API export |
 | **Notion export** | ✅ אמיתי | — | zip → מיזוג .md+.csv; ניקוי "Title <hash>" |
 | **Obsidian vault** | ✅ אמיתי | — | zip → מיזוג .md; [[wikilinks]] נשמרים (Lumen תומך מקורית) |
-| **Confluence** | ❌ חסר | P2 | XHTML export → markdown |
+| **Confluence** | ✅ אמיתי | — | XHTML: code-macros→fenced, panels/links מפוענחים, זיהוי אוטומטי ב-.html (מאומת) |
 | **WordPress** | ✅ אמיתי | — | WXR (.xml) → פוסטים מפורסמים (HTML→md), דילוג על טיוטות/קבצים (מאומת); זיהוי אוטומטי ב-.xml |
 | **Jupyter (.ipynb)** | ✅ אמיתי | — | cells → markdown + fenced code (שפת הקרנל) + פלטים; ANSI מנוקה מ-tracebacks (מאומת) |
 | **Fountain (.fountain)** | ❌ חסר | P3 | screenwriting format |
