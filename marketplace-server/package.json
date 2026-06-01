@@ -1,0 +1,11 @@
+{
+  "name": "marketplace-server",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "main": "server.mjs",
+  "description": "Lumen plugin/template/theme marketplace backend — real publish/install/rate registry (replaces the static-registry + localStorage facade).",
+  "scripts": {
+    "start": "node server.mjs"
+  }
+}
