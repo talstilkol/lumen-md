@@ -67,6 +67,7 @@ export async function installTemplate(
   const path = `templates/${template.id}.md`;
   await writeWorkspaceFile(path, body);
   bumpDownloads(template.id);
+  void recordRemoteInstall(template.id);
   return { path, bytes: body.length };
 }
 
@@ -93,4 +94,115 @@ function mergeLocalDownloads(templates: MarketplaceTemplate[]): MarketplaceTempl
     ...t,
     downloads: t.downloads + (local[t.id] ?? 0),
   }));
+}
+
+/* ─── Real marketplace backend (marketplace-server) ────────────────── */
+
+const BACKEND_KEY = "lumen.marketplace.url";
+
+/** Configured marketplace backend base URL, or null for offline/static mode. */
+export function getMarketplaceBackendUrl(): string | null {
+  try {
+    const fromStorage = localStorage.getItem(BACKEND_KEY);
+    if (fromStorage) return fromStorage.replace(/\/+$/, "");
+  } catch {
+    /* private mode */
+  }
+  const env = (import.meta as ImportMeta & { env?: { VITE_MARKETPLACE_URL?: string } }).env
+    ?.VITE_MARKETPLACE_URL;
+  return env ? env.replace(/\/+$/, "") : null;
+}
+
+interface BackendItem {
+  id: string;
+  type: string;
+  name: string;
+  description: string;
+  author: string;
+  version: string;
+  url: string;
+  tags: string[];
+  downloads: number;
+  rating: number;
+}
+
+function toTemplate(it: BackendItem): MarketplaceTemplate {
+  return {
+    id: it.id,
+    name: it.name,
+    category: it.type,
+    author: it.author,
+    description: it.description,
+    icon: "🧩",
+    version: it.version,
+    url: it.url,
+    rating: it.rating,
+    downloads: it.downloads,
+    tags: it.tags ?? [],
+  };
+}
+
+/**
+ * List marketplace items from the REAL backend when one is configured
+ * (`localStorage["lumen.marketplace.url"]` or `VITE_MARKETPLACE_URL`); falls
+ * back to the bundled static registry so the gallery still works offline.
+ */
+export async function fetchMarketplaceItems(
+  opts: { type?: string; query?: string } = {},
+): Promise<MarketplaceTemplate[]> {
+  const backend = getMarketplaceBackendUrl();
+  if (!backend) return fetchTemplateRegistry();
+  const params = new URLSearchParams();
+  if (opts.type) params.set("type", opts.type);
+  if (opts.query) params.set("q", opts.query);
+  const qs = params.toString();
+  const res = await fetchWithRetry(
+    `${backend}/items${qs ? `?${qs}` : ""}`,
+    { cache: "no-cache" },
+    { label: "marketplace.list", maxRetries: 2, baseDelayMs: 600 },
+  );
+  if (!res.ok) throw new Error(`Marketplace ${res.status}`);
+  return ((await res.json()) as BackendItem[]).map(toTemplate);
+}
+
+/** Record a real install against the backend (best-effort; no-op offline). */
+export async function recordRemoteInstall(id: string): Promise<void> {
+  const backend = getMarketplaceBackendUrl();
+  if (!backend) return;
+  try {
+    await fetch(`${backend}/items/${encodeURIComponent(id)}/install`, { method: "POST" });
+  } catch {
+    /* best effort */
+  }
+}
+
+/** Publish (or update) an item on the marketplace backend. */
+export async function publishToMarketplace(item: {
+  id: string;
+  type: "template" | "plugin" | "theme";
+  name: string;
+  [k: string]: unknown;
+}): Promise<MarketplaceTemplate> {
+  const backend = getMarketplaceBackendUrl();
+  if (!backend) throw new Error("No marketplace backend configured");
+  const res = await fetch(`${backend}/items`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify(item),
+  });
+  if (!res.ok) throw new Error(`Publish ${res.status}`);
+  return toTemplate((await res.json()) as BackendItem);
+}
+
+/** Submit a 1–5 rating to the backend; returns the new average. */
+export async function rateMarketplaceItem(id: string, rating: number): Promise<number> {
+  const backend = getMarketplaceBackendUrl();
+  if (!backend) throw new Error("No marketplace backend configured");
+  const res = await fetch(`${backend}/items/${encodeURIComponent(id)}/rate`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ rating }),
+  });
+  if (!res.ok) throw new Error(`Rate ${res.status}`);
+  return ((await res.json()) as { rating: number }).rating;
 }

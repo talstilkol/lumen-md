@@ -36,7 +36,7 @@
 - **Grammar / תבניות-AI רב-לשוניות** ✅ **תוקן 2026-05-31**: הורחב מ-4 ל-**12 שפות** (he/ar/ru/en/es/fr/de/pt/it/zh/ja/ko) ב-`multiLangPrompts.ts`, עם טסט; הטענה "20" תוקנה ל-12 בכל מקום. (LanguageTool תומך נייטיב בעוד שפות.)
 - **Shiki "190+ שפות"**: אמיתי כיכולת, אך 6 בלבד preloaded; שפה אקזוטית נופלת בשקט ל-`text`.
 - **בורר ספק AI** ✅ **תוקן 2026-05-31**: הומר ל-dropdown אמיתי (`uiSelect` ב-`PromptDialog`) עם כל 6 הספקים; הרמז המטעה תוקן ב-8 השפות; נוסף טסט render.
-- **Plugin marketplace** 🟥→🟧 **backend נבנה 2026-06-01**: `marketplace-server/` אמיתי (publish/install/rate/list/persist, אפס-תלויות, Dockerfile) — 6 טסטי-יחידה + smoke end-to-end (curl) ירוקים. נותר: לחווט את הלקוח (`templateMarketplace.ts`) ל-backend במקום localStorage.
+- **Plugin marketplace** 🟥→✅ **2026-06-01**: (1) `marketplace-server/` אמיתי (publish/install/rate/list/persist, אפס-תלויות, Dockerfile) — 6 טסטי-יחידה + smoke end-to-end (curl); (2) הלקוח (`templateMarketplace.ts`) מחווט ל-backend (`fetchMarketplaceItems`/`publishToMarketplace`/`rateMarketplaceItem`/`recordRemoteInstall`) עם **fallback offline** לרישום הסטטי — 4 טסטי mock-fetch. ה-FAKED האחרון נסגר במלואו.
 - **WebGPU LLM / Whisper מקומי**: קוד אמיתי אך WebGPU לא הוכח שטוען מודל, ו-`@xenova/transformers` **לא מותקן** (מקומי זורק).
 - **PDF ייבוא** ✅ **תוקן 2026-05-31**: `pdfjs-dist` הותקן; ה-worker מתבנדל מקומית (בלי CDN), נטען-עצל; חילוץ טקסט אומת בטסט עם PDF אמיתי + נפילה כנה לסרוקים. (OCR לסרוקים עדיין לא — תועד בהודעה.)
 - **Collab clobber** ✅ **תוקן 2026-05-31**: הוחלף ה-mirror של מסמך-מלא ב-**binding ברמת-תו** (`y-codemirror ySync` ב-`Editor.tsx`); seed סינכרוני לחדר חדש מונע מחיקת תוכן בעת ה-bind. טסט 2-peers מוכיח התכנסות עם שני הצדדים נשמרים — אין יותר clobber. הפער התחרותי הגדול ביותר מול Notion נסגר.
