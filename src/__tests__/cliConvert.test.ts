@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { convert, listFormats } from "../cli/convert";
+import { convert, listFormats, handleConvert } from "../cli/convert";
 
 describe("CLI convert (headless, DOM-free)", () => {
   const md = "# Title\n\nSome **bold** text.\n\n```python\nprint(1)\n```";
@@ -42,5 +42,17 @@ describe("CLI convert (headless, DOM-free)", () => {
     expect(f.export).toContain("ipynb");
     expect(f.import).toContain("csv");
     expect(f.import).toContain("latex");
+  });
+});
+
+describe("handleConvert (HTTP API handler)", () => {
+  it("converts a valid payload", () => {
+    const out = handleConvert({ name: "doc.md", text: "# Hi\n\nbody", to: "tex" });
+    expect(out.name).toBe("doc.tex");
+    expect(out.text).toContain("\\section");
+  });
+  it("rejects payloads missing name/text", () => {
+    expect(() => handleConvert({ text: "x" })).toThrow(/required/);
+    expect(() => handleConvert({ name: "a.md" })).toThrow(/required/);
   });
 });

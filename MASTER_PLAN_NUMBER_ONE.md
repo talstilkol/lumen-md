@@ -269,7 +269,7 @@
 | **Browser extension** | ✅ קיים | — | `extension/` — MV3 web-clipper עובד (HTML→MD + context menu) |
 | **Raycast/Alfred** | ❌ | P3 | quick capture |
 | **Obsidian plugin** | ❌ | P2 | migration path for Obsidian users |
-| **API** | ❌ | P1 | headless conversion service |
+| **API** | ✅ אמיתי | — | `api-server/` — POST /convert, GET /formats/healthz (אפס-תלויות-runtime); 2 טסטי-handler + smoke end-to-end (curl) ✅ |
 
 ---
 

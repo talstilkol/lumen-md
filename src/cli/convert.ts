@@ -86,3 +86,23 @@ export function convert(
     );
   return { outName: `${base}.md`, outText: fn(inText) };
 }
+
+/**
+ * Request handler for the headless HTTP API (api-server/server.ts):
+ * `{ name, text, to? }` → `{ name, text }`. Throws on bad input or
+ * unsupported formats (the server maps that to a 400).
+ */
+export function handleConvert(payload: {
+  name?: unknown;
+  text?: unknown;
+  to?: unknown;
+}): { name: string; text: string } {
+  if (typeof payload?.name !== "string" || typeof payload?.text !== "string")
+    throw new Error("convert: 'name' and 'text' string fields are required");
+  const { outName, outText } = convert(
+    payload.name,
+    payload.text,
+    typeof payload.to === "string" ? payload.to : undefined,
+  );
+  return { name: outName, text: outText };
+}

@@ -1,0 +1,10 @@
+{
+  "name": "lumen-convert-api",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Headless document-conversion HTTP API over the Lumen converters (no browser).",
+  "scripts": {
+    "start": "tsx server.ts"
+  }
+}
