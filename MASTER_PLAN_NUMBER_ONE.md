@@ -265,7 +265,7 @@
 | **iOS** | 🔜 Capacitor | P1 | scaffold קיים (`ios/` + ShareExtension); חסום על Apple Developer account |
 | **Android** | ❌ לא קיים | P1 | תלויות מותקנות אך `android/` לא נוצר (`cap add android` לא רץ) |
 | **VS Code extension** | ❌ | P1 | Preview panel + markdown-it integration |
-| **CLI** | 🟧 חלקי | — | `npm run lumen convert in.md out.tex` — tex/rst/org/adoc/csv/json/ipynb ↔ md (ללא DOM), 4 טסטים + smoke ✅. publish/render-pdf עדיין לא |
+| **CLI** | ✅ אמיתי | — | `lumen convert in.md out.docx` — טקסט(tex/rst/org/adoc/csv/json/ipynb↔md) **+ בינארי (docx/epub)**; הפלט מזוהה ע"י ה-OS כ-"Microsoft Word 2007+". 10 טסטים + smoke ✅. publish עדיין לא |
 | **Browser extension** | ✅ קיים | — | `extension/` — MV3 web-clipper עובד (HTML→MD + context menu) |
 | **Raycast/Alfred** | ❌ | P3 | quick capture |
 | **Obsidian plugin** | ❌ | P2 | migration path for Obsidian users |

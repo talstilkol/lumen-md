@@ -16,7 +16,9 @@ import {
   markdownToRtf,
   markdownToOpml,
   markdownToIpynb,
+  markdownToEpubBytes,
 } from "../storage/exportFormats";
+import { markdownToDocxBytes } from "../storage/exportDocx";
 import {
   latexToMarkdown,
   rstToMarkdown,
@@ -52,8 +54,21 @@ const IMPORTERS: Record<string, (text: string) => string> = {
 
 const extOf = (name: string): string => (name.split(".").pop() || "").toLowerCase();
 
+/** Binary export targets — real OOXML/EPUB bytes (work in Node via zip.ts). */
+const BINARY_EXPORTERS: Record<string, (md: string) => Promise<Uint8Array>> = {
+  docx: (md) => markdownToDocxBytes(md),
+  epub: (md) => markdownToEpubBytes(md),
+};
+
+export function isBinaryTarget(ext: string): boolean {
+  return ext.toLowerCase() in BINARY_EXPORTERS;
+}
+
 export function listFormats(): { export: string[]; import: string[] } {
-  return { export: Object.keys(EXPORTERS).sort(), import: Object.keys(IMPORTERS).sort() };
+  return {
+    export: [...Object.keys(EXPORTERS), ...Object.keys(BINARY_EXPORTERS)].sort(),
+    import: Object.keys(IMPORTERS).sort(),
+  };
 }
 
 /**
@@ -105,4 +120,23 @@ export function handleConvert(payload: {
     typeof payload.to === "string" ? payload.to : undefined,
   );
   return { name: outName, text: outText };
+}
+
+/** Convert Markdown to a binary document (docx/epub) — returns raw bytes. */
+export async function convertBinary(
+  inName: string,
+  inText: string,
+  toExt: string,
+): Promise<{ outName: string; bytes: Uint8Array }> {
+  const inExt = extOf(inName);
+  if (inExt !== "md" && inExt !== "markdown")
+    throw new Error(`Binary export only supports Markdown input (got ".${inExt}")`);
+  const to = toExt.toLowerCase();
+  const fn = BINARY_EXPORTERS[to];
+  if (!fn)
+    throw new Error(
+      `Unknown binary target ".${to}". Supported: ${Object.keys(BINARY_EXPORTERS).join(", ")}`,
+    );
+  const base = inName.replace(/\.[^.]+$/, "");
+  return { outName: `${base}.${to}`, bytes: await fn(inText) };
 }

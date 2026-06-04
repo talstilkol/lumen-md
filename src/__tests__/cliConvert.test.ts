@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
-import { convert, listFormats, handleConvert } from "../cli/convert";
+import { convert, listFormats, handleConvert, convertBinary, isBinaryTarget } from "../cli/convert";
+import { unzip } from "../storage/zip";
 
 describe("CLI convert (headless, DOM-free)", () => {
   const md = "# Title\n\nSome **bold** text.\n\n```python\nprint(1)\n```";
@@ -54,5 +55,36 @@ describe("handleConvert (HTTP API handler)", () => {
   it("rejects payloads missing name/text", () => {
     expect(() => handleConvert({ text: "x" })).toThrow(/required/);
     expect(() => handleConvert({ name: "a.md" })).toThrow(/required/);
+  });
+});
+
+describe("convertBinary (md → docx/epub)", () => {
+  const unzipBytes = (b: Uint8Array) =>
+    unzip(b.buffer.slice(b.byteOffset, b.byteOffset + b.byteLength));
+
+  it("flags binary targets", () => {
+    expect(isBinaryTarget("docx")).toBe(true);
+    expect(isBinaryTarget("epub")).toBe(true);
+    expect(isBinaryTarget("tex")).toBe(false);
+  });
+
+  it("produces a valid .docx (zip with word/document.xml)", async () => {
+    const { outName, bytes } = await convertBinary("doc.md", "# Title\n\n- one\n- two", "docx");
+    expect(outName).toBe("doc.docx");
+    const files = await unzipBytes(bytes);
+    expect(files.has("word/document.xml")).toBe(true);
+    expect(new TextDecoder().decode(files.get("word/document.xml")!)).toContain("Title");
+  });
+
+  it("produces a multi-part .epub", async () => {
+    const { outName, bytes } = await convertBinary("doc.md", "# Chapter\n\nbody", "epub");
+    expect(outName).toBe("doc.epub");
+    const files = await unzipBytes(bytes);
+    expect(files.size).toBeGreaterThan(1);
+  });
+
+  it("rejects non-markdown input and unknown targets", async () => {
+    await expect(convertBinary("a.tex", "x", "docx")).rejects.toThrow(/Markdown input/);
+    await expect(convertBinary("a.md", "x", "xyz")).rejects.toThrow(/Unknown binary/);
   });
 });

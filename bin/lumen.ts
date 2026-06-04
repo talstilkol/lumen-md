@@ -8,9 +8,9 @@
  * Run with:  npx tsx bin/lumen.ts convert notes.md notes.tex
  */
 import { readFileSync, writeFileSync } from "node:fs";
-import { convert, listFormats } from "../src/cli/convert";
+import { convert, convertBinary, isBinaryTarget, listFormats } from "../src/cli/convert";
 
-function main(argv: string[]): number {
+async function main(argv: string[]): Promise<number> {
   const [cmd, ...rest] = argv;
 
   if (cmd === "formats") {
@@ -28,6 +28,15 @@ function main(argv: string[]): number {
   const inFile = rest[0];
   const inText = readFileSync(inFile, "utf8");
   const toExt = rest[1] ? rest[1].split(".").pop() : undefined;
+
+  if (toExt && isBinaryTarget(toExt)) {
+    const { outName, bytes } = await convertBinary(inFile, inText, toExt);
+    const outFile = rest[1] || outName;
+    writeFileSync(outFile, bytes);
+    console.log(`✓ ${inFile} → ${outFile} (${bytes.length} bytes)`);
+    return 0;
+  }
+
   const { outName, outText } = convert(inFile, inText, toExt);
   const outFile = rest[1] || outName;
   writeFileSync(outFile, outText);
@@ -35,9 +44,9 @@ function main(argv: string[]): number {
   return 0;
 }
 
-try {
-  process.exit(main(process.argv.slice(2)));
-} catch (err) {
-  console.error("error:", (err as Error).message);
-  process.exit(1);
-}
+main(process.argv.slice(2))
+  .then((code) => process.exit(code))
+  .catch((err) => {
+    console.error("error:", (err as Error).message);
+    process.exit(1);
+  });
