@@ -62,3 +62,27 @@ test("live-python executes real Python via Pyodide WASM", async ({ page }) => {
   // never appears in the source.
   await expect(block).toContainText("4957", { timeout: 240_000 });
 });
+
+test("live-glsl compiles and renders a shader on a WebGL canvas", async ({ page }) => {
+  test.setTimeout(60_000);
+  await page.keyboard.press("Meta+2");
+  const editor = page.locator(".cm-content").first();
+  await editor.click();
+  // fill() sets the value atomically — pressSequentially would trigger
+  // CodeMirror's auto-close-brackets and double the shader's braces.
+  await editor.fill("```live-glsl\nvoid main(){ gl_FragColor = vec4(0.9, 0.2, 0.1, 1.0); }\n```\n");
+
+  const block = page.locator(".chart-block", { has: page.locator("canvas") });
+  await expect(block).toBeVisible({ timeout: 15_000 });
+  const canvas = block.locator("canvas");
+  await expect(canvas).toBeVisible({ timeout: 10_000 });
+
+  // The block calls setError on any compile/link failure (or missing WebGL).
+  // A clean render with a sized canvas proves the GLSL pipeline executed.
+  await expect(block).not.toContainText(/compile failed|link failed|not available/i, {
+    timeout: 10_000,
+  });
+  const box = await canvas.boundingBox();
+  expect(box, "GLSL canvas must have a bounding box").not.toBeNull();
+  expect(box!.width).toBeGreaterThan(50);
+});

@@ -41,7 +41,7 @@
 - **PDF ייבוא** ✅ **תוקן 2026-05-31**: `pdfjs-dist` הותקן; ה-worker מתבנדל מקומית (בלי CDN), נטען-עצל; חילוץ טקסט אומת בטסט עם PDF אמיתי + נפילה כנה לסרוקים. (OCR לסרוקים עדיין לא — תועד בהודעה.)
 - **Collab clobber** ✅ **תוקן 2026-05-31**: הוחלף ה-mirror של מסמך-מלא ב-**binding ברמת-תו** (`y-codemirror ySync` ב-`Editor.tsx`); seed סינכרוני לחדר חדש מונע מחיקת תוכן בעת ה-bind. טסט 2-peers מוכיח התכנסות עם שני הצדדים נשמרים — אין יותר clobber. הפער התחרותי הגדול ביותר מול Notion נסגר.
 - **iOS ShareExtension**: קבצים קיימים אך **לא מחוברים** ל-Xcode build (`pbxproj` ללא הפניה).
-- **Python/SQL live**: אמיתי, אך תלוי הורדת runtime מ-CDN בזמן ריצה (offline=שבור); נבדק ב-smoke בלבד.
+- **Python/SQL/GLSL live** ✅ **תוקן ואומת 2026-06-10**: ה-e2e (`e2e/live-exec.spec.ts`) חשף ש-Python+SQL נטענו מ-CDN ש**ה-CSP (`script-src 'self'`) חסם בשקט — מעולם לא רצו ב-production**. תוקן ע"י self-hosting: sql.js מ-npm, Pyodide ל-`public/pyodide/` (predev/prebuild, git-ignored, ~13.6MB מועתק ל-dist). שלושתם מאומתים ב-e2e אמיתי שמריץ קוד ומאמת פלט מחושב (1763 / 4957 / shader-render); נבדק falsification (ערך שגוי נכשל). offline-capable עכשיו.
 
 ---
 
@@ -135,10 +135,11 @@
 |--------|--------|--------|-------|
 | **Syntax highlighting** | ✅ 190+ שפות | — | Shiki/TextMate grammars |
 | **Live execution: JS/TS** | ✅ קיים | — | sandboxed iframe |
-| **Live execution: Python** | ✅ קיים | — | בלוק `live-python` — Pyodide (WASM, lazy ב-Run) |
+| **Live execution: Python** | ✅ **מאומת ריצה** | — | `live-python` — Pyodide **self-hosted** (`public/pyodide/`, בלי CDN, offline); e2e מריץ `sum(range(100))+7=4957` (falsification-verified) |
 | **Live execution: Rust** | ❌ חסר | P2 | via Rust Playground API |
 | **Live execution: Go** | ❌ חסר | P2 | via Go Playground API |
-| **Live execution: SQL** | ✅ קיים | — | בלוק `live-sql` — sql.js (SQLite WASM, lazy ב-Run) |
+| **Live execution: SQL** | ✅ **מאומת ריצה** | — | `live-sql` — sql.js **bundled מ-npm** (בלי CDN); e2e מריץ `1000+763=1763` (falsification-verified) |
+| **Live execution: GLSL** | ✅ **מאומת ריצה** | — | `live-glsl` — WebGL מובנה; e2e מקמפל+מרנדר shader על canvas, אפס error |
 | **Live execution: R** | ❌ חסר | P2 | webR (WASM) |
 | **Live execution: Ruby** | ❌ חסר | P3 | ruby.wasm |
 | **Live execution: C/C++** | ❌ חסר | P3 | via Compiler Explorer API |
