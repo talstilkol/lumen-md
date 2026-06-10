@@ -227,6 +227,19 @@ export default defineConfig({
         // visualization libraries lazy-load only when their blocks render.
         manualChunks(id) {
           if (!id.includes("node_modules")) return undefined;
+          // ── Shared text-processing families get their own chunks ──
+          // The eager preview pipeline uses remark/micromark/unified and
+          // hast-util-to-html; the LAZY editors (milkdown, shiki) use them
+          // too. Without explicit homes Rollup co-located these shared
+          // modules inside vendor-milkdown / vendor-shiki, which made main
+          // statically import those chunks and EXECUTE all of milkdown +
+          // prosemirror + shiki at boot (~400KB gz) just to reach the
+          // helpers. (Diagnosed via sourcemap residents, 2026-06-10.)
+          if (/node_modules\/lodash(-es)?\//.test(id)) return "vendor-lodash";
+          if (
+            /node_modules\/(micromark|mdast-util-|remark-|rehype-(?!katex)|unified|vfile|unist-util-|hast-util-|html-void-elements|property-information|space-separated-tokens|comma-separated-tokens|web-namespaces|stringify-entities|character-entities|character-reference-invalid|is-(alphabetical|alphanumerical|decimal|hexadecimal|plain-obj)|bail|trough|devlop|extend|zwitch|ccount|longest-streak|markdown-table|escape-string-regexp|decode-named-character-reference)/.test(id)
+          ) return "vendor-unified";
+          if (id.includes("@floating-ui/")) return "vendor-floating";
           if (id.includes("@codemirror") || id.includes("@lezer")) return "vendor-codemirror";
           if (id.includes("@milkdown") || id.includes("prosemirror")) return "vendor-milkdown";
           if (id.includes("mermaid")) return "vendor-mermaid";

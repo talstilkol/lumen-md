@@ -286,12 +286,14 @@
 | Bundle size (eager entry) | < 500KB raw | **מדוד 31/05: 608KB raw / ~190KB gzip** | רוב הכבד כבר lazy ✅ |
 | Offline startup | < 300ms | SW precache 106 entries (2.9MB) | מדוד: ה-build מייצר SW |
 
-> **מדידה אמיתית (2026-06-10, Lighthouse ×3, desktop simulated):**
-> Performance **72**/100 · A11y **97** ✅ (היה 93 — תוקן: aria-label לעורך + ניגודיות) ·
-> FCP **1,789ms** ✅ (שער 1,800) · LCP **3,259ms** ⚠️ (שער 2,800) · TBT **33ms** ✅ · CLS **0.07** ✅.
-> בוצע: Sentry הוצא מנתיב-הבוט (vendor-react 121.7→**75.7KB gz**, chunk עצל נפרד).
-> `lhci assert` עובר (exit 0) — נותרו 2 אזהרות warn-בלבד.
-> **המנוף הבא ל-LCP:** ערימת-העורך (codemirror 542KB + shiki 270KB + milkdown 160KB + katex 95KB gz) נטענת eager ב-modulepreload — פיצול שלה הוא רפקטור זהיר רב-שלבי, מתועד ולא בוצע בחיפזון.
+> **מדידה אמיתית (2026-06-10, Lighthouse ×3, desktop simulated) — אחרי ניתוח-chunks:**
+> Performance **74** · A11y **97** ✅ · FCP **1,570ms** ✅ (−260ms מהבייסליין) · Speed-Index **1,570** ·
+> LCP **3,227ms** ⚠️ · TBT **66ms** ✅ · CLS ✅.
+> **מה בוצע:** (1) Sentry → chunk עצל (−46KB eager); (2) yjs/comments → on-demand (entry statics = react+codemirror+katex+unified);
+> (3) **ניתוח-העל**: sourcemaps חשפו ש-Rollup שיכן את משפחות remark/micromark/unified/lodash/hast-util-to-html המשותפות
+> בתוך vendor-milkdown/vendor-shiki — מה שהריץ את **כל** milkdown+prosemirror+shiki ב-boot (~400KB gz) רק כדי להגיע לעוזרים.
+> כללי-chunks ייעודיים (vendor-unified/lodash/floating) שחררו אותם; אומת ב-13 smoke-e2e **נגד ה-build האמיתי** (אין TDZ).
+> **המנוף האחרון ל-perf 85/LCP:** הרצת codemirror עצמו (529KB gz) — העורך הוא המוצר; פיצולו = ניסוי lazy-shell זהיר עם סיכון להרעת LCP.
 
 ---
 
