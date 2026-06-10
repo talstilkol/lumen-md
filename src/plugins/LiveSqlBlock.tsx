@@ -12,9 +12,6 @@ interface Props {
   meta?: string;
 }
 
-const SQLJS_VERSION = "1.12.0";
-const SQLJS_BASE = `https://cdn.jsdelivr.net/npm/sql.js@${SQLJS_VERSION}/dist/`;
-
 interface QueryResult {
   columns: string[];
   values: unknown[][];
@@ -29,30 +26,22 @@ interface SqlJsStatic {
 
 let sqlPromise: Promise<SqlJsStatic> | null = null;
 
-function loadScript(src: string): Promise<void> {
-  return new Promise((resolve, reject) => {
-    const existing = document.querySelector(`script[src="${src}"]`);
-    if (existing) {
-      resolve();
-      return;
-    }
-    const s = document.createElement("script");
-    s.src = src;
-    s.onload = () => resolve();
-    s.onerror = () => reject(new Error("Failed to load sql.js"));
-    document.head.appendChild(s);
-  });
-}
-
 async function getSql(): Promise<SqlJsStatic> {
   if (!sqlPromise) {
     sqlPromise = (async () => {
-      await loadScript(SQLJS_BASE + "sql-wasm.js");
-      const init = (globalThis as unknown as {
-        initSqlJs?: (cfg: { locateFile: (f: string) => string }) => Promise<SqlJsStatic>;
-      }).initSqlJs;
-      if (!init) throw new Error("sql.js global not found after load");
-      return init({ locateFile: (f) => SQLJS_BASE + f });
+      // Self-hosted runtime: bundled from the npm package, no CDN. The old
+      // jsDelivr <script> loader was silently blocked by the app's CSP
+      // (script-src 'self'), so SQL blocks NEVER worked in production —
+      // caught by the live-exec e2e. Local hosting also makes it work
+      // offline.
+      const [mod, wasm] = await Promise.all([
+        import("sql.js"),
+        import("sql.js/dist/sql-wasm.wasm?url"),
+      ]);
+      const init = mod.default as unknown as (cfg: {
+        locateFile: (f: string) => string;
+      }) => Promise<SqlJsStatic>;
+      return init({ locateFile: () => wasm.default });
     })().catch((err) => {
       sqlPromise = null;
       throw err;

@@ -53,3 +53,5 @@ coverage/
 
 # Claude Code session metadata — per-machine, not for the shared repo
 .claude/
+.vercel
+public/pyodide/

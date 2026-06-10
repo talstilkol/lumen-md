@@ -13,8 +13,11 @@ interface Props {
   meta?: string;
 }
 
-const PYODIDE_VERSION = "0.27.2";
-const PYODIDE_INDEX = `https://cdn.jsdelivr.net/pyodide/v${PYODIDE_VERSION}/full/`;
+// Same-origin runtime: scripts/copy-pyodide.mjs stages the core into
+// public/pyodide/ (predev/prebuild). The old jsDelivr URL was blocked by the
+// app's `script-src 'self'` CSP, so live-python never ran in production —
+// caught by the live-exec e2e. Same-origin also makes it work offline.
+const PYODIDE_INDEX = "/pyodide/";
 
 interface PyodideApi {
   runPythonAsync: (code: string) => Promise<unknown>;
@@ -24,15 +27,30 @@ interface PyodideApi {
 
 let pyodidePromise: Promise<PyodideApi> | null = null;
 
+function loadScript(src: string): Promise<void> {
+  return new Promise((resolve, reject) => {
+    if (document.querySelector(`script[src="${src}"]`)) return resolve();
+    const s = document.createElement("script");
+    s.src = src;
+    s.onload = () => resolve();
+    s.onerror = () => reject(new Error("Failed to load pyodide.js"));
+    document.head.appendChild(s);
+  });
+}
+
 /** Load (once) and return the shared Pyodide instance. */
 async function getPyodide(): Promise<PyodideApi> {
   if (!pyodidePromise) {
     pyodidePromise = (async () => {
-      const url = PYODIDE_INDEX + "pyodide.mjs";
-      const mod = (await import(/* @vite-ignore */ url)) as {
-        loadPyodide: (opts: { indexURL: string }) => Promise<PyodideApi>;
-      };
-      return mod.loadPyodide({ indexURL: PYODIDE_INDEX });
+      // Classic UMD script (not the .mjs): a same-origin <script> is a static
+      // request Vite's dev server won't try to transform, and it satisfies
+      // `script-src 'self'`. It registers globalThis.loadPyodide.
+      await loadScript(PYODIDE_INDEX + "pyodide.js");
+      const load = (globalThis as unknown as {
+        loadPyodide?: (opts: { indexURL: string }) => Promise<PyodideApi>;
+      }).loadPyodide;
+      if (!load) throw new Error("pyodide global not found after load");
+      return load({ indexURL: PYODIDE_INDEX });
     })().catch((err) => {
       // Reset so a later retry can attempt the load again.
       pyodidePromise = null;
