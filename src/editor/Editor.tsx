@@ -36,10 +36,13 @@ import { embedHintExtension } from "./embedHintExtension";
 import { insertSlashMenuExtension } from "./insertMenu";
 import { collabAwarenessExtension } from "./collabAwareness";
 import { t as i18nT } from "../i18n";
-import { ySync, ySyncFacet, YSyncConfig } from "y-codemirror.next";
+// y-codemirror.next (and the yjs stack behind it) is loaded on demand inside
+// the collab effect below — a static import dragged ~60KB gz of yjs into the
+// eager boot path for a feature that's off until a session starts.
 import { typewriterModeExtension } from "./typewriterMode";
 import { markdownLintExtension } from "./lintExtension";
-import { commentDecorations } from "./commentDecorations";
+// commentDecorations imports yjs (comment anchors are Y.Map relative
+// positions) — loaded on demand in the collab effect, like ySync below.
 import { searchHighlightExtension } from "./searchHighlight";
 import { inlineSuggestion } from "./inlineSuggestion";
 import type { CollabSession } from "../collab/yjs";
@@ -356,22 +359,13 @@ export const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
       spellCheckCompartment.of(
         EditorView.contentAttributes.of({ spellcheck: spellCheck ? "true" : "false" }),
       ),
-      collabCompartment.of(
-        collab?.ytext
-          ? [
-              // Char-level CRDT binding: edits become Yjs ops (no full-doc
-              // clobber on concurrent edits), plus live remote cursors.
-              ySyncFacet.of(new YSyncConfig(collab.ytext, collab.awareness)),
-              ySync,
-              collabAwarenessExtension(collab.awareness),
-            ]
-          : [],
-      ),
+      // Starts empty even mid-session: the collab effect below reconfigures
+      // with the (lazily-imported) char-level ySync binding right after mount.
+      collabCompartment.of([]),
       // Comment anchors as yellow highlights — the source of truth lives in
-      // the Yjs `lumen-comments` map; this extension just paints them.
-      commentsCompartment.of(
-        collab?.doc ? commentDecorations({ doc: collab.doc }) : [],
-      ),
+      // the Yjs `lumen-comments` map; the collab effect below loads the
+      // extension on demand and reconfigures (starts empty, like collab).
+      commentsCompartment.of([]),
       typewriterCompartment.of(typewriterMode ? typewriterModeExtension() : []),
       // LanguageTool grammar / style — opt-in, debounced 1.5s. Off by
       // default because the public endpoint is rate-limited; users with a
@@ -512,22 +506,34 @@ export const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
   useEffect(() => {
     const view = viewRef.current;
     if (!view) return;
-    view.dispatch({
-      effects: [
-        collabCompartment.reconfigure(
-          collab?.ytext
-            ? [
-                ySyncFacet.of(new YSyncConfig(collab.ytext, collab.awareness)),
-                ySync,
-                collabAwarenessExtension(collab.awareness),
-              ]
-            : [],
-        ),
-        commentsCompartment.reconfigure(
-          collab?.doc ? commentDecorations({ doc: collab.doc }) : [],
-        ),
-      ],
-    });
+    let cancelled = false;
+    (async () => {
+      let collabExt: Extension = [];
+      let commentsExt: Extension = [];
+      if (collab?.ytext) {
+        // Char-level CRDT binding: edits become Yjs ops (no full-doc clobber
+        // on concurrent edits), plus live remote cursors. Loaded on demand —
+        // see the import note at the top of the file.
+        const [{ ySync, ySyncFacet, YSyncConfig }, { commentDecorations }] =
+          await Promise.all([import("y-codemirror.next"), import("./commentDecorations")]);
+        collabExt = [
+          ySyncFacet.of(new YSyncConfig(collab.ytext, collab.awareness)),
+          ySync,
+          collabAwarenessExtension(collab.awareness),
+        ];
+        if (collab.doc) commentsExt = commentDecorations({ doc: collab.doc });
+      }
+      if (cancelled || !viewRef.current) return;
+      viewRef.current.dispatch({
+        effects: [
+          collabCompartment.reconfigure(collabExt),
+          commentsCompartment.reconfigure(commentsExt),
+        ],
+      });
+    })();
+    return () => {
+      cancelled = true;
+    };
   }, [collab]);
 
   // Toggle typewriter mode without recreating the editor.

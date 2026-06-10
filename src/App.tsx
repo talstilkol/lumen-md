@@ -31,7 +31,12 @@ import { SearchDialog } from "./ui/SearchDialog";
 import { AiToastContainer, showAiToast } from "./ui/AiToast";
 import { MobileKeyboardBar } from "./ui/MobileKeyboardBar";
 import { TagsPanel } from "./ui/TagsPanel";
-import { CommentsPanel, addCommentFromSelection } from "./ui/CommentsPanel";
+// CommentsPanel pulls collab/comments.ts → yjs; comments only exist inside a
+// collab session, so the panel is lazy and addCommentFromSelection is
+// imported at the call site to keep yjs off the boot path.
+const CommentsPanel = lazy(() =>
+  import("./ui/CommentsPanel").then((m) => ({ default: m.CommentsPanel })),
+);
 import { DocTabs, tabId } from "./ui/DocTabs";
 import { AiInlinePromptOverlay } from "./ui/AiInlinePrompt";
 import { RuntimeMetricsPanel } from "./ui/RuntimeMetricsPanel";
@@ -544,6 +549,7 @@ export default function App() {
           }
           const body = await uiPrompt({ message: t("comment.promptLabel") });
           if (!body?.trim()) return;
+          const { addCommentFromSelection } = await import("./ui/CommentsPanel");
           addCommentFromSelection(collab, body, from, to);
           setCommentsPanelOpen(true);
         }
@@ -804,6 +810,7 @@ export default function App() {
       <MobileKeyboardBar />
       <TagsPanel open={tagsPanelOpen} onClose={() => setTagsPanelOpen(false)} />
       {collab && (
+        <Suspense fallback={null}>
         <CommentsPanel
           open={commentsPanelOpen}
           onClose={() => setCommentsPanelOpen(false)}
@@ -819,6 +826,7 @@ export default function App() {
             });
           }}
         />
+        </Suspense>
       )}
 
       {/* Graph View overlay */}

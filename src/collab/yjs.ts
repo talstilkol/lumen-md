@@ -366,23 +366,10 @@ export function connectCollab(
   };
 }
 
-/** Read the room name from `#room=<name>` in the URL. */
-export function readRoomFromHash(): string | null {
-  if (typeof location === "undefined") return null;
-  const m = location.hash.match(/[#&]room=([\w-]+)/);
-  return m?.[1] ?? null;
-}
-
-export function setRoomInHash(name: string | null): void {
-  if (typeof location === "undefined") return;
-  if (!name) {
-    if (location.hash.startsWith("#room=")) {
-      history.replaceState(null, "", location.pathname + location.search);
-    }
-    return;
-  }
-  history.replaceState(null, "", `#room=${name}`);
-}
+// URL-hash helpers live in ./roomUrl (yjs-free) so the boot path can read
+// `#room=` without pulling this module's yjs/y-webrtc stack; re-exported here
+// for existing importers.
+export { readRoomFromHash, setRoomInHash } from "./roomUrl";
 
 /** Pull a friendly snapshot of current peers from the awareness state. */
 export interface CollabPeer {

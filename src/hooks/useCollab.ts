@@ -5,14 +5,15 @@
  * collaboration lifecycle in a single, testable unit.
  */
 import { useCallback, useEffect, useRef, useState } from "react";
-import {
-  connectCollab,
-  makeRoomName,
-  readRoomFromHash,
-  setRoomInHash,
-  snapshotPeers,
-} from "../collab/yjs";
 import type { CollabPeer, CollabSession } from "../collab/yjs";
+// URL helpers are yjs-free and safe on the boot path.
+import { readRoomFromHash, setRoomInHash } from "../collab/roomUrl";
+
+// The collab module pulls the whole yjs + y-webrtc stack (~60KB gz) — load it
+// only when a session actually starts, never on the boot path. Memoized so
+// repeated start/stop doesn't re-import.
+let collabModPromise: Promise<typeof import("../collab/yjs")> | null = null;
+const loadCollab = () => (collabModPromise ??= import("../collab/yjs"));
 import { log } from "../lib/logger";
 import { recordAudit } from "../lib/audit";
 
@@ -40,6 +41,17 @@ export function useCollab(docContent: string): UseCollabReturn {
   const handleStartCollab = useCallback(
     (joinName?: string) => {
       if (collab) return;
+      // Fire-and-forget async: the yjs stack is loaded on demand here, the
+      // first time a session starts (it is deliberately NOT in the boot path).
+      void (async () => {
+      let mod: Awaited<ReturnType<typeof loadCollab>>;
+      try {
+        mod = await loadCollab();
+      } catch (err) {
+        log.error("collab module load failed", err);
+        return;
+      }
+      const { connectCollab, makeRoomName, snapshotPeers } = mod;
       const name = joinName ?? makeRoomName();
       try {
         const session = connectCollab(name, contentRef.current, { isNewRoom: !joinName });
@@ -94,6 +106,7 @@ export function useCollab(docContent: string): UseCollabReturn {
         setCollabPeers([]);
         setRoomInHash(null);
       }
+      })();
     },
     [collab],
   );
