@@ -97,7 +97,7 @@
 | **Confluence** | ✅ אמיתי | — | XHTML: code-macros→fenced, panels/links מפוענחים, זיהוי אוטומטי ב-.html (מאומת) |
 | **WordPress** | ✅ אמיתי | — | WXR (.xml) → פוסטים מפורסמים (HTML→md), דילוג על טיוטות/קבצים (מאומת); זיהוי אוטומטי ב-.xml |
 | **Jupyter (.ipynb)** | ✅ אמיתי | — | cells → markdown + fenced code (שפת הקרנל) + פלטים; ANSI מנוקה מ-tracebacks (מאומת) |
-| **Fountain (.fountain)** | ❌ חסר | P3 | screenwriting format |
+| **Fountain (.fountain/.spmd)** | ✅ אמיתי | — | title-page→כותרת+מטא, סצנות/דמויות/דיאלוג/מעברים/sections; boneyard+notes מנוקים. 7 טסטים |
 
 ### 2.2 ייצוא (Markdown → פורמט אחר)
 

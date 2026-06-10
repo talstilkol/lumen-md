@@ -17,6 +17,8 @@ import {
   ipynbToMarkdown,
   wxrToMarkdown,
   confluenceToMarkdown,
+  fountainToMarkdown,
+  isSupportedFormat,
 } from "../storage/fileFormats";
 import { markdownToIpynb } from "../storage/exportFormats";
 
@@ -325,5 +327,82 @@ describe("confluenceToMarkdown (Confluence export)", () => {
     expect(md).toContain("Other Page");
     expect(md).not.toContain("ac:structured-macro");
     expect(md).not.toContain("<ri:");
+  });
+});
+
+describe("fountainToMarkdown (screenwriting)", () => {
+  const SCRIPT = [
+    "Title: The Heist",
+    "Author: Dana Lev",
+    "Draft date: 2026-01-01",
+    "",
+    "# Act One",
+    "",
+    "= Dana cases the bank.",
+    "",
+    "INT. BANK LOBBY - DAY",
+    "",
+    "Dana walks in, scanning the cameras.",
+    "",
+    "DANA (V.O.)",
+    "(quietly)",
+    "Three exits. Two guards.",
+    "",
+    "> CUT TO:",
+    "",
+    ".ROOFTOP - CONTINUOUS",
+    "",
+    ">THE END<",
+    "",
+    "===",
+    "",
+    "/* boneyard: never show this */",
+    "Some action [[with a private note]] here.",
+    "~La la la",
+  ].join("\n");
+
+  const md = fountainToMarkdown(SCRIPT);
+
+  it("maps the title page to a heading + bold metadata", () => {
+    expect(md).toContain("# The Heist");
+    expect(md).toContain("**Author:** Dana Lev");
+    expect(md).toContain("**Draft date:** 2026-01-01");
+  });
+
+  it("maps sections, synopses and scene headings", () => {
+    expect(md).toContain("## Act One"); // section shifted one level down
+    expect(md).toContain("*Dana cases the bank.*");
+    expect(md).toContain("## INT. BANK LOBBY - DAY");
+    expect(md).toContain("## ROOFTOP - CONTINUOUS"); // forced "." heading
+  });
+
+  it("formats character cue, parenthetical and dialogue", () => {
+    expect(md).toContain("**DANA (V.O.)**");
+    expect(md).toContain("*(quietly)*");
+    expect(md).toContain("> Three exits. Two guards.");
+  });
+
+  it("maps transitions, centered text and page breaks", () => {
+    expect(md).toContain("*CUT TO:*");
+    expect(md).toContain("**THE END**");
+    expect(md).toContain("\n---\n");
+  });
+
+  it("strips boneyard comments and inline notes, keeps lyrics italic", () => {
+    expect(md).not.toContain("boneyard");
+    expect(md).not.toContain("private note");
+    expect(md).toContain("Some action  here."); // note removed in-place
+    expect(md).toContain("*La la la*");
+  });
+
+  it("does not treat plain action or ellipsis as headings/cues", () => {
+    const md2 = fountainToMarkdown("...a beat.\n\nHe waits.\n");
+    expect(md2).toContain("...a beat.");
+    expect(md2).not.toContain("## ");
+  });
+
+  it(".fountain and .spmd are accepted import extensions", () => {
+    expect(isSupportedFormat("script.fountain")).toBe(true);
+    expect(isSupportedFormat("script.spmd")).toBe(true);
   });
 });
