@@ -25,22 +25,24 @@ const PageView = lazy(() => import("../ui/PageView").then(m => ({ default: m.Pag
  *
  * - "auto": follow the viewport — vertical split on phones (≤640px), horizontal
  *   otherwise. The default; tracks resize events.
- * - "horizontal" / "vertical": user's explicit choice, returned verbatim.
+ * - "vertical": user's explicit choice, returned verbatim.
+ * - "horizontal": honoured on wide viewports, but a ≤640px viewport still
+ *   stacks — two side-by-side panes at phone width are unusable, and users
+ *   expect narrowing the window to flow into the stacked layout.
  */
 function useResolvedAxis(pref: SplitAxis): SplitAxis {
-  const [autoAxis, setAutoAxis] = useState<SplitAxis>(() =>
-    typeof window !== "undefined" && window.innerWidth <= 640 ? "vertical" : "horizontal",
+  const [narrow, setNarrow] = useState<boolean>(
+    () => typeof window !== "undefined" && window.innerWidth <= 640,
   );
   useEffect(() => {
-    if (pref !== "auto" || typeof window === "undefined") return;
-    const onResize = () => {
-      setAutoAxis(window.innerWidth <= 640 ? "vertical" : "horizontal");
-    };
+    if (typeof window === "undefined") return;
+    const onResize = () => setNarrow(window.innerWidth <= 640);
     window.addEventListener("resize", onResize);
     onResize();
     return () => window.removeEventListener("resize", onResize);
-  }, [pref]);
-  return pref === "auto" ? autoAxis : pref;
+  }, []);
+  if (pref === "vertical") return "vertical";
+  return narrow ? "vertical" : pref === "auto" ? "horizontal" : pref;
 }
 
 interface Props {
@@ -102,20 +104,34 @@ export function EditorLayout({
   const editorSectionRef = useRef<HTMLElement | null>(null);
   const previewSectionRef = useRef<HTMLElement | null>(null);
 
+  // Subscribed (not getState()-once) so flipping "Scroll: Linked" applies
+  // immediately, and the axis flip (side-by-side ⇄ stacked on narrow
+  // viewports) re-binds the listeners against the new pane geometry.
+  const syncScroll = useAppStore((s) => s.syncScroll);
+
   useEffect(() => {
     if (mode !== "split") return;
-    const syncScrollMode = useAppStore.getState().syncScroll;
-    if (syncScrollMode === "single") return;
+    if (syncScroll === "single") return;
 
     let editorEl: HTMLElement | null = null;
     let previewEl: HTMLElement | null = null;
-    let rafId = 0;
+    // setTimeout (not requestAnimationFrame): rAF callbacks are starved in
+    // hidden/background tabs, which silently killed the sync there.
+    let debounceId: ReturnType<typeof setTimeout> | undefined;
 
-    // Wait for DOM to mount
-    const timer = setTimeout(() => {
+    // Wait for BOTH panes to mount. A one-shot timeout silently killed the
+    // sync whenever the lazy-loaded preview (or CodeMirror) took longer than
+    // the delay to appear — frequent on a cold dev server — so poll until
+    // both elements exist (bounded; gives up after ~8s).
+    let pollTries = 0;
+    const timer = setInterval(() => {
       editorEl = editorSectionRef.current?.querySelector(".cm-scroller") as HTMLElement | null;
       previewEl = previewSectionRef.current?.querySelector("[data-preview-root]") as HTMLElement | null;
-      if (!editorEl || !previewEl) return;
+      if (!editorEl || !previewEl) {
+        if (++pollTries > 80) clearInterval(timer);
+        return;
+      }
+      clearInterval(timer);
 
       // Heading-anchored sync: ratio-based sync drifts because the editor's
       // pixel height (monospace lines) and preview's pixel height (rendered
@@ -262,15 +278,15 @@ export function EditorLayout({
       const onEditorScroll = () => {
         if (performance.now() < suppressBounceUntil && activePane !== "editor") return;
         if (activePane !== "editor") return;
-        cancelAnimationFrame(rafId);
-        rafId = requestAnimationFrame(() => sync("editor"));
+        clearTimeout(debounceId);
+        debounceId = setTimeout(() => sync("editor"), 16);
       };
 
       const onPreviewScroll = () => {
         if (performance.now() < suppressBounceUntil && activePane !== "preview") return;
         if (activePane !== "preview") return;
-        cancelAnimationFrame(rafId);
-        rafId = requestAnimationFrame(() => sync("preview"));
+        clearTimeout(debounceId);
+        debounceId = setTimeout(() => sync("preview"), 16);
       };
 
       editorEl.addEventListener("scroll", onEditorScroll, { passive: true });
@@ -288,19 +304,19 @@ export function EditorLayout({
         previewEl?.removeEventListener("mouseenter", previewEnter);
         previewEl?.removeEventListener("focusin", previewEnter);
         previewObserver.disconnect();
-        cancelAnimationFrame(rafId);
+        clearTimeout(debounceId);
         cancelAnimationFrame(rebuildRaf);
       };
     }, 100);
 
     return () => {
-      clearTimeout(timer);
+      clearInterval(timer);
       const refWithCleanup = editorSectionRef as React.MutableRefObject<
         HTMLElement | null
       > & { _cleanup?: () => void };
       refWithCleanup._cleanup?.();
     };
-  }, [mode]);
+  }, [mode, syncScroll, isVerticalSplit]);
 
   return (
     <div

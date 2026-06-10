@@ -675,7 +675,12 @@ export default function App() {
             <SidebarResizer />
           </>
         )}
-        <div style={{ flex: 1, display: "flex", flexDirection: "column", minWidth: 0 }}>
+        {/* minHeight:0 is load-bearing: without it this flex item refuses to
+            shrink below its content (flex min-height:auto), the editor and
+            preview sections inflate to the full document height, their inner
+            scrollers never overflow, and pane scrolling + scroll-sync go
+            dead — the whole page scrolls as one block instead. */}
+        <div style={{ flex: 1, display: "flex", flexDirection: "column", minWidth: 0, minHeight: 0 }}>
           <DocTabs
             tabs={openTabs.map((t) => ({
               id: t.id,
