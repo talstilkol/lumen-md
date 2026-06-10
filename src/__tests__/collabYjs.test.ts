@@ -208,14 +208,15 @@ describe("connectCollab lifecycle", () => {
 
     const session = mod.connectCollab("lumen-seed-room", "");
     session.destroy();
-    // The attach path is `await import('y-websocket')` then `new
-    // WebsocketProvider(...)` then the consumer's `.then(p => …)`.
-    // That's three microtasks; flush enough of them to be safe.
-    for (let i = 0; i < 8; i++) {
-      await Promise.resolve();
-    }
-
-    expect((moduleMock.WebsocketProvider as unknown as { instances: unknown[] }).instances.length).toBe(instancesBefore + 1);
+    // The attach path is `await import('y-websocket')` → `new
+    // WebsocketProvider(...)` → the consumer's `.then(p => …)`. Microtask
+    // counts differ between vitest module runners, so poll instead of
+    // flushing a fixed number of ticks.
+    await vi.waitFor(() => {
+      expect(
+        (moduleMock.WebsocketProvider as unknown as { instances: unknown[] }).instances.length,
+      ).toBe(instancesBefore + 1);
+    });
     expect(session.websocketProvider).toBeNull();
 
     for (const instance of (moduleMock.WebsocketProvider as unknown as { instances: unknown[] }).instances) {

@@ -14,6 +14,7 @@ interface VitestConfig {
       provider?: "v8" | "istanbul";
       reporter?: string[];
       reportsDirectory?: string;
+      include?: string[];
       exclude?: string[];
     };
   };

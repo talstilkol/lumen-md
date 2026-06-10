@@ -175,13 +175,20 @@ describe("exportToDocx", () => {
     vi.restoreAllMocks();
   });
 
+  // Stub createObjectURL/revokeObjectURL while keeping URL constructible —
+  // a spread literal ({ ...URL }) loses the constructor, and jsdom under
+  // vitest 4 calls `new URL(...)` during anchor handling.
+  function stubUrl(createObjectURL: () => string): void {
+    class StubURL extends URL {
+      static createObjectURL = vi.fn(createObjectURL);
+      static revokeObjectURL = vi.fn();
+    }
+    vi.stubGlobal("URL", StubURL);
+  }
+
   it("triggers a download by creating and clicking an anchor", async () => {
     const clickSpy = vi.fn();
-    vi.stubGlobal("URL", {
-      ...URL,
-      createObjectURL: vi.fn(() => "blob:fake"),
-      revokeObjectURL: vi.fn(),
-    });
+    stubUrl(() => "blob:fake");
     const origAppend = document.body.appendChild.bind(document.body);
     vi.spyOn(document.body, "appendChild").mockImplementation((node) => {
       const el = node as HTMLAnchorElement;
@@ -193,12 +200,8 @@ describe("exportToDocx", () => {
   });
 
   it("rejects when URL.createObjectURL throws (error propagates correctly)", async () => {
-    vi.stubGlobal("URL", {
-      ...URL,
-      createObjectURL: vi.fn(() => {
-        throw new Error("unavailable");
-      }),
-      revokeObjectURL: vi.fn(),
+    stubUrl(() => {
+      throw new Error("unavailable");
     });
     const { exportToDocx } = await import("../storage/exportDocx");
     await expect(exportToDocx("# Test", "doc")).rejects.toThrow("unavailable");
