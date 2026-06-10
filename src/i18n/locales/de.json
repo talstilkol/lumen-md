@@ -76,6 +76,7 @@
   "cmd.ai.translate.hint": "Das gesamte Dokument unter Beibehaltung der Formatierung übersetzen",
   "cmd.ai.chart": "KI: Diagramm aus Daten",
   "cmd.ai.chart.hint": "CSV- oder Tabellendaten in ein ECharts-Diagramm umwandeln",
+  "editor.ariaLabel": "Markdown-Quelleditor",
   "cmd.audit.open": "Audit log…",
   "cmd.audit.open.hint": "Inspect every recorded mutation; export CSV for compliance",
   "cmd.cmdPalette": "Command palette",

@@ -76,6 +76,7 @@
   "cmd.ai.translate.hint": "ترجمة المستند بالكامل مع الحفاظ على التنسيق",
   "cmd.ai.chart": "AI: رسم بياني من البيانات",
   "cmd.ai.chart.hint": "حوّل بيانات CSV أو جدول إلى رسم ECharts",
+  "editor.ariaLabel": "محرر مصدر Markdown",
   "cmd.audit.open": "Audit log…",
   "cmd.audit.open.hint": "Inspect every recorded mutation; export CSV for compliance",
   "cmd.cmdPalette": "Command palette",

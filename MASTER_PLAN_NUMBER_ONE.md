@@ -286,7 +286,12 @@
 | Bundle size (eager entry) | < 500KB raw | **מדוד 31/05: 608KB raw / ~190KB gzip** | רוב הכבד כבר lazy ✅ |
 | Offline startup | < 300ms | SW precache 106 entries (2.9MB) | מדוד: ה-build מייצר SW |
 
-> **הערת מדידה כנה (2026-05-31):** רק גודל ה-bundle ניתן-לאימות בסנדבוקס (מתוך `vite build` + `npm run budget`) — וה-bundle **כבר ממוטב**: web-llm נטען דינמית, ו-mermaid/echarts/codemirror/tldraw/milkdown/shiki-langs הם chunks **עצלים** שנטענים רק בשימוש, לא ב-startup. מספרי First-paint / TTI / keystroke / memory לעיל הם **הערכות לא-מדודות** — דורשים פרופיילינג בדפדפן (Lighthouse/Web-Vitals) שלא רץ בסנדבוקס. השיפור המשמעותי הנותר (lazy-load של העורך עצמו) מסוכן ולא-ניתן-לאימות-ריצה כאן, ולכן **לא בוצע** — לא אזייף שיפור perf שאי-אפשר להוכיח.
+> **מדידה אמיתית (2026-06-10, Lighthouse ×3, desktop simulated):**
+> Performance **72**/100 · A11y **97** ✅ (היה 93 — תוקן: aria-label לעורך + ניגודיות) ·
+> FCP **1,789ms** ✅ (שער 1,800) · LCP **3,259ms** ⚠️ (שער 2,800) · TBT **33ms** ✅ · CLS **0.07** ✅.
+> בוצע: Sentry הוצא מנתיב-הבוט (vendor-react 121.7→**75.7KB gz**, chunk עצל נפרד).
+> `lhci assert` עובר (exit 0) — נותרו 2 אזהרות warn-בלבד.
+> **המנוף הבא ל-LCP:** ערימת-העורך (codemirror 542KB + shiki 270KB + milkdown 160KB + katex 95KB gz) נטענת eager ב-modulepreload — פיצול שלה הוא רפקטור זהיר רב-שלבי, מתועד ולא בוצע בחיפזון.
 
 ---
 

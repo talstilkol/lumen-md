@@ -192,9 +192,9 @@ describe("axe a11y smoke", () => {
   });
 
   it("TemplateGallery (open, mocked registry) renders no blockers", async () => {
-    // Stub the registry fetch so the gallery doesn't try to hit /templates/.
+    // Stub the marketplace load so the gallery doesn't try to hit /templates/.
     const mod = await import("../storage/templateMarketplace");
-    vi.spyOn(mod, "fetchTemplateRegistry").mockResolvedValue([
+    vi.spyOn(mod, "fetchMarketplaceItems").mockResolvedValue([
       {
         id: "demo",
         name: "Demo",

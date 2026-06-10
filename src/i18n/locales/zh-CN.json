@@ -76,6 +76,7 @@
   "cmd.ai.translate.hint": "翻译整个文档并保留格式",
   "cmd.ai.chart": "AI：从数据生成图表",
   "cmd.ai.chart.hint": "将 CSV 或表格数据转换为 ECharts 图表",
+  "editor.ariaLabel": "Markdown 源代码编辑器",
   "cmd.audit.open": "Audit log…",
   "cmd.audit.open.hint": "Inspect every recorded mutation; export CSV for compliance",
   "cmd.cmdPalette": "Command palette",

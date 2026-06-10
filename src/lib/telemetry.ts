@@ -12,7 +12,10 @@
  * SDK's auto-instrumentation would otherwise add.
  */
 
-import * as Sentry from "@sentry/react";
+// Type-only import — the SDK itself is loaded lazily inside initTelemetry()
+// so Sentry never sits in the eager boot path (it was bundled into
+// vendor-react and cost first-paint time for every user, even opted-out ones).
+import type { ErrorEvent as SentryErrorEvent } from "@sentry/react";
 import { setErrorSink } from "./logger";
 
 const OPT_OUT_KEY = "lumen.telemetry.optOut";
@@ -58,7 +61,7 @@ function readEnvDsn(): string | undefined {
  * Approach: redact any `extra` / `contexts` / `breadcrumbs.message` field
  * whose key looks like user content (`note.*`, `doc.*`, `aiKey`, `vault`).
  */
-function scrubPii(event: Sentry.ErrorEvent): Sentry.ErrorEvent | null {
+function scrubPii(event: SentryErrorEvent): SentryErrorEvent | null {
   const REDACT = /^(note\.|doc\.|aiKey|vault|workspace\.|password)/i;
 
   const redactObj = (obj: Record<string, unknown> | undefined): void => {
@@ -92,27 +95,36 @@ export function initTelemetry(): void {
   if (!dsn) return; // no DSN = no telemetry, that's fine
   if (isOptedOut()) return;
 
-  Sentry.init({
-    dsn,
-    integrations: [Sentry.browserTracingIntegration()],
-    tracesSampleRate: 0.1,
-    release: "lumen@0.1.0",
-    beforeSend(event) {
-      // PII scrub before any event leaves the browser.
-      return scrubPii(event as Sentry.ErrorEvent);
-    },
-  });
+  // Lazy-load the SDK off the boot path; telemetry wiring tolerates the
+  // few-ms gap (errors before init simply aren't reported, same as before
+  // init() returned).
+  void import("@sentry/react")
+    .then((Sentry) => {
+      Sentry.init({
+        dsn,
+        integrations: [Sentry.browserTracingIntegration()],
+        tracesSampleRate: 0.1,
+        release: "lumen@0.1.0",
+        beforeSend(event) {
+          // PII scrub before any event leaves the browser.
+          return scrubPii(event as SentryErrorEvent);
+        },
+      });
 
-  setErrorSink((...args: unknown[]) => {
-    if (isOptedOut()) return;
-    const errArg = args.find((a) => a instanceof Error) as Error | undefined;
-    const messageArgs = args.filter((a) => a !== errArg).map(formatArg).join(" ");
-    if (errArg) {
-      Sentry.captureException(errArg, { extra: { message: messageArgs } });
-    } else if (messageArgs) {
-      Sentry.captureMessage(messageArgs, "error");
-    }
-  });
+      setErrorSink((...args: unknown[]) => {
+        if (isOptedOut()) return;
+        const errArg = args.find((a) => a instanceof Error) as Error | undefined;
+        const messageArgs = args.filter((a) => a !== errArg).map(formatArg).join(" ");
+        if (errArg) {
+          Sentry.captureException(errArg, { extra: { message: messageArgs } });
+        } else if (messageArgs) {
+          Sentry.captureMessage(messageArgs, "error");
+        }
+      });
+    })
+    .catch(() => {
+      /* SDK failed to load (offline/blocked) — telemetry stays off */
+    });
 }
 
 /** Pretty-print non-Error args for `extra.message`. */

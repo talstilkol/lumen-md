@@ -72,7 +72,8 @@ export function Frontmatter({ data }: Props) {
       >
         {author && (
           <span>
-            <span style={{ opacity: 0.7 }}>by </span>
+            {/* no extra opacity on fg-muted — it dropped contrast below WCAG AA */}
+            <span>by </span>
             <span style={{ color: "hsl(var(--fg))", fontWeight: 500 }}>
               {author}
             </span>
@@ -89,7 +90,9 @@ export function Frontmatter({ data }: Props) {
                   borderRadius: 999,
                   border: "1px solid hsl(var(--accent) / 0.3)",
                   background: "hsl(var(--accent) / 0.08)",
-                  color: "hsl(var(--accent))",
+                  // fg (not accent) for the label — 11px text on a tinted
+                  // pill needs full AA contrast; accent stays in the chrome.
+                  color: "hsl(var(--fg))",
                   fontSize: 11,
                   fontWeight: 500,
                 }}
@@ -101,7 +104,7 @@ export function Frontmatter({ data }: Props) {
         )}
         {extra.map(([k, v]) => (
           <span key={k}>
-            <span style={{ opacity: 0.7 }}>{k}:</span>{" "}
+            <span>{k}:</span>{" "}
             <span style={{ color: "hsl(var(--fg))" }}>{stringOf(v)}</span>
           </span>
         ))}

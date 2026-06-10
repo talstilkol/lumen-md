@@ -264,6 +264,12 @@ export default defineConfig({
             id.includes("node_modules/yjs") ||
             /node_modules\/y-[a-z]/.test(id)
           ) return "vendor-yjs";
+          // @sentry/react's path matches the "/react/" rule below; without
+          // this guard the lazily-imported SDK is merged back into the
+          // EAGER vendor-react chunk — and a dynamic import can't be
+          // tree-shaken, so the full SDK doubled that chunk. Keep Sentry
+          // in its own chunk: it loads lazily (or never, without a DSN).
+          if (id.includes("@sentry")) return "vendor-sentry";
           // React and react-dom MUST live in the same chunk: they share
           // internal helpers and have a circular dependency that
           // breaks (TDZ "Cannot set properties of undefined") when

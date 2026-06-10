@@ -38,6 +38,9 @@ vi.mock("../storage/templateMarketplace", () => {
   ];
   return {
     fetchTemplateRegistry: vi.fn().mockResolvedValue(REGISTRY),
+    // The gallery now loads through the backend-aware wrapper (falls back to
+    // the static registry offline) — mock it with the same data.
+    fetchMarketplaceItems: vi.fn().mockResolvedValue(REGISTRY),
     installTemplate: vi.fn().mockResolvedValue({
       path: "templates/daily-journal-pro.md",
       bytes: 1234,
@@ -51,7 +54,7 @@ vi.mock("../ui/AiToast", () => ({
 }));
 
 import { TemplateGallery } from "../ui/TemplateGallery";
-import { fetchTemplateRegistry, installTemplate } from "../storage/templateMarketplace";
+import { fetchMarketplaceItems, installTemplate } from "../storage/templateMarketplace";
 
 describe("TemplateGallery", () => {
   beforeEach(() => {
@@ -71,7 +74,7 @@ describe("TemplateGallery", () => {
       expect(screen.getByText("Daily Journal Pro")).toBeTruthy();
       expect(screen.getByText("Weekly Review")).toBeTruthy();
     });
-    expect(fetchTemplateRegistry).toHaveBeenCalledTimes(1);
+    expect(fetchMarketplaceItems).toHaveBeenCalledTimes(1);
   });
 
   it("filters by category chip", async () => {

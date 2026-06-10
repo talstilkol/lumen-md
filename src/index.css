@@ -629,7 +629,9 @@
   }
   .chart-block-tab.active {
     background: hsl(var(--accent) / 0.15);
-    color: hsl(var(--accent));
+    /* fg for the 12px label — accent text on the tinted bg failed WCAG AA;
+       the accent identity stays in the background + border. */
+    color: hsl(var(--fg));
     border-color: hsl(var(--accent) / 0.3);
   }
   @media (max-width: 480px) {

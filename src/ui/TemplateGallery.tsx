@@ -11,7 +11,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Download, Search, Star, Tag, X, Loader2, Check } from "lucide-react";
 import {
-  fetchTemplateRegistry,
+  fetchMarketplaceItems,
   installTemplate,
   type MarketplaceTemplate,
 } from "../storage/templateMarketplace";
@@ -36,13 +36,14 @@ export function TemplateGallery({ open, onClose }: Props) {
   const [installing, setInstalling] = useState<Set<string>>(new Set());
   const [installed, setInstalled] = useState<Set<string>>(new Set());
 
-  // Load on open. fetchTemplateRegistry caches in module scope so
-  // re-opening is free.
+  // Load on open. Talks to the real marketplace backend when one is
+  // configured (lumen.marketplace.url / VITE_MARKETPLACE_URL) and falls back
+  // to the bundled static registry offline — see templateMarketplace.ts.
   useEffect(() => {
     if (!open) return;
     setLoading(true);
     setError(null);
-    fetchTemplateRegistry()
+    fetchMarketplaceItems()
       .then(setTemplates)
       .catch((e) => {
         log.error("template registry fetch failed", e);

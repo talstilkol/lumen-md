@@ -35,6 +35,7 @@ import { PROMPTS } from "../ai/prompts";
 import { embedHintExtension } from "./embedHintExtension";
 import { insertSlashMenuExtension } from "./insertMenu";
 import { collabAwarenessExtension } from "./collabAwareness";
+import { t as i18nT } from "../i18n";
 import { ySync, ySyncFacet, YSyncConfig } from "y-codemirror.next";
 import { typewriterModeExtension } from "./typewriterMode";
 import { markdownLintExtension } from "./lintExtension";
@@ -348,6 +349,10 @@ export const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
         addKeymap: true,
       }),
       EditorView.lineWrapping,
+      // Accessible name for the contenteditable (role=textbox) surface —
+      // without it, screen readers announce an unnamed input (axe:
+      // aria-input-field-name).
+      EditorView.contentAttributes.of({ "aria-label": i18nT("editor.ariaLabel") }),
       spellCheckCompartment.of(
         EditorView.contentAttributes.of({ spellcheck: spellCheck ? "true" : "false" }),
       ),

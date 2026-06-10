@@ -76,6 +76,7 @@
   "cmd.ai.translate.hint": "書式を保持したまま文書全体を翻訳",
   "cmd.ai.chart": "AI: データからチャート",
   "cmd.ai.chart.hint": "CSV や表のデータを ECharts チャートに変換",
+  "editor.ariaLabel": "Markdown ソースエディタ",
   "cmd.audit.open": "Audit log…",
   "cmd.audit.open.hint": "Inspect every recorded mutation; export CSV for compliance",
   "cmd.cmdPalette": "Command palette",

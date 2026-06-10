@@ -76,6 +76,7 @@
   "cmd.ai.translate.hint": "Traduire tout le document en conservant la mise en forme",
   "cmd.ai.chart": "IA : Graphique à partir de données",
   "cmd.ai.chart.hint": "Transformer des données CSV ou un tableau en graphique ECharts",
+  "editor.ariaLabel": "Éditeur source Markdown",
   "cmd.audit.open": "Audit log…",
   "cmd.audit.open.hint": "Inspect every recorded mutation; export CSV for compliance",
   "cmd.cmdPalette": "Command palette",
