@@ -226,6 +226,12 @@ export default defineConfig({
         // Manual chunking — keeps the initial JS small and lets the heavy
         // visualization libraries lazy-load only when their blocks render.
         manualChunks(id) {
+          // Vite's tiny preload helper (a VIRTUAL module — no node_modules in
+          // its id, so this must sit above the guard). Auto-placement parked
+          // it inside vendor-shiki, which made that 258KB chunk a STATIC dep
+          // of main; pin it to the always-eager react chunk instead.
+          if (id.includes("vite/preload-helper") || id.includes("vite/modulepreload-polyfill"))
+            return "vendor-react";
           if (!id.includes("node_modules")) return undefined;
           // ── Shared text-processing families get their own chunks ──
           // The eager preview pipeline uses remark/micromark/unified and

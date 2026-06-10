@@ -80,14 +80,14 @@ describe("EditorLayout prop-forwarding contract (ADR-001)", () => {
       );
     }
     render(<Harness />);
-    // Wait for React to flush the state update + re-render.
+    // The Editor is React.lazy now, so its first mount lands AFTER Suspense
+    // resolves — often after the hydration tick. The ADR-001 contract is
+    // that the LATEST forwarded value is the hydrated one (the stale-memo
+    // bug pinned it to "" forever); the exact first-frame value is a timing
+    // detail we no longer assert.
     await waitFor(() => {
       expect(capturedValues).toContain("hydrated welcome doc");
     });
-
-    // First render captured "" (initial state). Subsequent render(s)
-    // must include the hydrated value. Before the fix, the memo
-    // pinned editorInitial to "" forever.
-    expect(capturedValues[0]).toBe("");
+    expect(capturedValues[capturedValues.length - 1]).toBe("hydrated welcome doc");
   });
 });

@@ -293,7 +293,9 @@
 > (3) **ניתוח-העל**: sourcemaps חשפו ש-Rollup שיכן את משפחות remark/micromark/unified/lodash/hast-util-to-html המשותפות
 > בתוך vendor-milkdown/vendor-shiki — מה שהריץ את **כל** milkdown+prosemirror+shiki ב-boot (~400KB gz) רק כדי להגיע לעוזרים.
 > כללי-chunks ייעודיים (vendor-unified/lodash/floating) שחררו אותם; אומת ב-13 smoke-e2e **נגד ה-build האמיתי** (אין TDZ).
-> **המנוף האחרון ל-perf 85/LCP:** הרצת codemirror עצמו (529KB gz) — העורך הוא המוצר; פיצולו = ניסוי lazy-shell זהיר עם סיכון להרעת LCP.
+> **ניסוי lazy-editor (2026-06-10, בוצע ונמדד):** Editor (codemirror) + SearchDialog → lazy; helper-הpreload של Vite הוצמד ל-chunk eager (ישב ב-vendor-shiki והפך אותו לסטטי!). **main statics עכשיו: react+katex+unified בלבד.**
+> תוצאה: FCP **1,370ms** (מצטבר −25% מ-1,831) · LCP 3,386 (+159 — התוכן קודם, העורך אחריו) · score 74 · CLS יציב.
+> הוכרע להשאיר: התוכן הראשון מופיע ~חצי-שנייה מוקדם יותר. perf-85 דורש עבודת-preview עמוקה (SSR/precompute) — מתועד, לא בוצע.
 
 ---
 

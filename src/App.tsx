@@ -27,7 +27,11 @@ import { SidebarResizer } from "./ui/SidebarResizer";
 import { uiAlert, uiConfirm, uiPrompt } from "./ui/PromptDialog";
 import { openInsertTextDialog } from "./ui/InsertTextDialog";
 import { BacklinksPanel } from "./ui/BacklinksPanel";
-import { SearchDialog } from "./ui/SearchDialog";
+// SearchDialog imports the CodeMirror search-highlight extension; lazy so
+// the boot path stays CodeMirror-free (the dialog opens on ⌘⇧F).
+const SearchDialog = lazy(() =>
+  import("./ui/SearchDialog").then((m) => ({ default: m.SearchDialog })),
+);
 import { AiToastContainer, showAiToast } from "./ui/AiToast";
 import { MobileKeyboardBar } from "./ui/MobileKeyboardBar";
 import { TagsPanel } from "./ui/TagsPanel";
@@ -791,6 +795,7 @@ export default function App() {
         onClose={() => setPaletteOpen(false)}
         commands={commands}
       />
+      <Suspense fallback={null}>
       <SearchDialog
         open={searchOpen}
         onClose={() => setSearchOpen(false)}
@@ -805,6 +810,7 @@ export default function App() {
           if (!showWorkspace) toggleWorkspace();
         }}
       />
+      </Suspense>
       <AiToastContainer />
       <AiInlinePromptOverlay />
       <MobileKeyboardBar />

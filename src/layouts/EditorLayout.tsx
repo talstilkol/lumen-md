@@ -7,9 +7,16 @@
  *  - editor and preview section refs
  */
 import { lazy, Suspense, useEffect, useRef, useState } from "react";
-import { Editor } from "../editor/Editor";
 import { clampLineNumber } from "../editor/lineClamp";
 import type { EditorHandle } from "../editor/Editor";
+
+// The source editor drags the whole CodeMirror stack (~530KB gz). The page's
+// LCP element is the PREVIEW text, which doesn't need it — so the editor
+// hydrates lazily behind a layout-preserving skeleton and first paint stops
+// paying for CodeMirror's execute.
+const Editor = lazy(() =>
+  import("../editor/Editor").then((m) => ({ default: m.Editor })),
+);
 import { Preview } from "../renderer/Preview";
 import { ErrorBoundary } from "../ui/ErrorBoundary";
 import { WritingGoalBanner } from "../ui/WritingGoalBanner";
@@ -335,17 +342,21 @@ export function EditorLayout({
           }
         >
           <WritingGoalBanner />
-          <Editor
-            key={collab ? `collab:${collab.roomName}` : "local"}
-            ref={editorRef as React.Ref<EditorHandle>}
-            value={editorInitial}
-            onChange={setContent}
-            onAddAsset={handleAddAsset}
-            vimEnabled={vimEnabled}
-            spellCheck={spellCheck}
-            grammarCheck={grammarCheck}
-            typewriterMode={typewriterMode}
-          />
+          {/* Layout-preserving fallback: the pane keeps its flex size while
+              CodeMirror hydrates, so the lazy mount causes no CLS. */}
+          <Suspense fallback={<div className="flex-1 min-h-0" aria-hidden />}>
+            <Editor
+              key={collab ? `collab:${collab.roomName}` : "local"}
+              ref={editorRef as React.Ref<EditorHandle>}
+              value={editorInitial}
+              onChange={setContent}
+              onAddAsset={handleAddAsset}
+              vimEnabled={vimEnabled}
+              spellCheck={spellCheck}
+              grammarCheck={grammarCheck}
+              typewriterMode={typewriterMode}
+            />
+          </Suspense>
         </section>
       )}
       {showPreview && (
