@@ -553,12 +553,28 @@ function buildTooltip(getView: () => EditorView | null): HTMLDivElement {
  * Includes math (KaTeX), a `/` slash command menu, and a selection tooltip
  * for inline formatting.
  */
+/**
+ * Split a leading YAML frontmatter block off a markdown document. Milkdown
+ * has no frontmatter concept — fed raw, `---\ntitle: …\n---` renders as a
+ * thematic break + loose text (ugly, and editing it corrupts the metadata).
+ * We keep the block verbatim and re-prepend it on every emission, so the
+ * metadata survives WYSIWYG editing invisibly.
+ */
+export function splitFrontmatter(md: string): { fm: string; body: string } {
+  const m = md.match(/^---[ \t]*\r?\n[\s\S]*?\r?\n---[ \t]*(?:\r?\n|$)/);
+  if (!m) return { fm: "", body: md };
+  return { fm: m[0], body: md.slice(m[0].length) };
+}
+
 export default function WysiwygEditor({ value, onChange }: Props) {
   const hostRef = useRef<HTMLDivElement | null>(null);
   const editorRef = useRef<MilkdownEditor | null>(null);
   const onChangeRef = useRef(onChange);
   onChangeRef.current = onChange;
   const lastEmittedRef = useRef<string>(value);
+  // Leading YAML frontmatter of the current document — hidden from Milkdown,
+  // re-attached to every onChange so it is preserved, not destroyed.
+  const frontmatterRef = useRef<string>("");
 
   // DOM elements + view ref reused across editor recreations.
   const slashElRef = useRef<HTMLDivElement | null>(null);
@@ -598,13 +614,20 @@ export default function WysiwygEditor({ value, onChange }: Props) {
       if (!slashElRef.current) slashElRef.current = buildSlashMenu(getView);
       if (!tooltipElRef.current) tooltipElRef.current = buildTooltip(getView);
 
+      // Hide YAML frontmatter from the WYSIWYG surface; it is re-attached on
+      // every emission below so external value/lastEmitted comparisons keep
+      // operating on the full document.
+      const { fm, body } = splitFrontmatter(value);
+      frontmatterRef.current = fm;
+
       const editor = await MilkdownEditor.make()
         .config((ctx) => {
           ctx.set(rootCtx, host);
-          ctx.set(defaultValueCtx, value);
+          ctx.set(defaultValueCtx, body);
           ctx.get(listenerCtx).markdownUpdated((_, md) => {
-            lastEmittedRef.current = md;
-            onChangeRef.current(md);
+            const full = frontmatterRef.current + md;
+            lastEmittedRef.current = full;
+            onChangeRef.current(full);
           });
           // γ.1 — drag-handles per top-level block. The plugin reads /
           // writes its own meta key and registers `Decoration.widget`s
