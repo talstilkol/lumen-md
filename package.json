@@ -76,7 +76,7 @@
     "abcjs": "^6.6.3",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
-    "dompurify": "^3.2.6",
+    "dompurify": "^3.4.12",
     "echarts": "^5.5.1",
     "idb-keyval": "^6.2.2",
     "isomorphic-git": "^1.37.5",
