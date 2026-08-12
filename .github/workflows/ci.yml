@@ -128,7 +128,7 @@ jobs:
         run: npx playwright test --project=${{ matrix.browser }} --reporter=line
       - name: Upload report
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: playwright-report-${{ matrix.browser }}
           path: playwright-report/
@@ -169,7 +169,7 @@ jobs:
         run: npx playwright test --project=chromium --reporter=line
       - name: Upload report
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: playwright-report-prod
           path: playwright-report/
