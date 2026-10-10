@@ -1,4 +1,9 @@
-import { test, expect } from "@playwright/test";
+import { test, expect, type Locator } from "@playwright/test";
+
+async function replaceEditorSource(editor: Locator, source: string) {
+  await editor.fill(source);
+  await expect.poll(() => editor.locator(".cm-line").allTextContents()).toEqual(source.split("\n"));
+}
 
 /**
  * REAL execution proof for the live code blocks (master-plan §3). Until now
@@ -26,10 +31,15 @@ test("live-sql executes a real query via sql.js WASM", async ({ page }) => {
   await page.keyboard.press("Meta+2"); // split: source + preview
   const editor = page.locator(".cm-content").first();
   await editor.click();
-  // Use a SELECT-all + type so the async-seeded welcome doc can't survive
-  // alongside our block, and a value (1763) that appears nowhere else.
-  await editor.press("ControlOrMeta+a");
+  // Clear the async-seeded welcome doc, then verify all source lines
+  // before running the query so old text cannot enter SQL.
+  await editor.fill("");
   await editor.pressSequentially("```live-sql\nSELECT 1000 + 763 AS answer;\n```");
+  const sqlLines = editor.locator(".cm-line");
+  await expect(sqlLines).toHaveCount(3);
+  await expect(sqlLines.nth(0)).toHaveText("```live-sql");
+  await expect(sqlLines.nth(1)).toHaveText(/^SELECT 1000 \+ 763 AS [A-Za-z]+;$/);
+  await expect(sqlLines.nth(2)).toHaveText("```");
 
   // Scope to the live-sql block itself (the welcome doc renders its OWN
   // chart-blocks, so `.first()` would grab the wrong one).
@@ -48,8 +58,7 @@ test("live-python executes real Python via Pyodide WASM", async ({ page }) => {
   await page.keyboard.press("Meta+2");
   const editor = page.locator(".cm-content").first();
   await editor.click();
-  await editor.press("ControlOrMeta+a");
-  await editor.pressSequentially("```live-python\nprint(sum(range(100)) + 7)\n```");
+  await replaceEditorSource(editor, "```live-python\nprint(sum(range(100)) + 7)\n```");
 
   // Scope to the live-python block (the welcome doc renders other blocks).
   const block = page.locator(".chart-block", {
@@ -70,10 +79,22 @@ test("live-glsl compiles and renders a shader on a WebGL canvas", async ({ page 
   await editor.click();
   // fill() sets the value atomically — pressSequentially would trigger
   // CodeMirror's auto-close-brackets and double the shader's braces.
-  await editor.fill("```live-glsl\nvoid main(){ gl_FragColor = vec4(0.9, 0.2, 0.1, 1.0); }\n```\n");
+  await replaceEditorSource(editor, "```live-glsl\nvoid main(){ gl_FragColor = vec4(0.9, 0.2, 0.1, 1.0); }\n```\n");
 
-  const block = page.locator(".chart-block", { has: page.locator("canvas") });
+  const webglAvailable = await page.evaluate(() => {
+    const probe = document.createElement("canvas");
+    return Boolean(probe.getContext("webgl") ?? probe.getContext("experimental-webgl"));
+  });
+  console.log(`WebGL context available: ${webglAvailable}`);
+
+  const block = page.locator(".chart-block");
+  await expect(block).toHaveCount(1, { timeout: 15_000 });
   await expect(block).toBeVisible({ timeout: 15_000 });
+  if (!webglAvailable) {
+    await expect(block).toContainText("WebGL is not available in this browser.");
+    await expect(block.locator("canvas")).toHaveCount(0);
+    return;
+  }
   const canvas = block.locator("canvas");
   await expect(canvas).toBeVisible({ timeout: 10_000 });
 
