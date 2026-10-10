@@ -87,16 +87,16 @@ export default defineConfig({
         ],
       },
       workbox: {
-        // Only precache small core files at install time. Heavy on-demand
-        // vendor chunks (Mermaid, tldraw, ECharts, Graphviz, CodeMirror,
-        // Milkdown) are fetched lazily by the runtime cache when first used.
-        // This keeps the initial SW install under ~2 MB instead of ~12 MB.
-        maximumFileSizeToCacheInBytes: 1024 * 1024,
-        globPatterns: ["**/*.{js,css,html,svg,wasm,woff2}"],
+        // Precache the Pyodide core so Python also works on the first offline use.
+        // Heavy on-demand vendor chunks remain in the runtime cache.
+        maximumFileSizeToCacheInBytes: 10 * 1024 * 1024,
+        globPatterns: [
+          "**/*.{js,css,html,svg,wasm,woff2}",
+          "pyodide/{pyodide-lock.json,python_stdlib.zip,pyodide.asm.mjs}",
+        ],
         // Exclude heavy vendor chunks that are loaded on-demand via dynamic
         // import — these will be cached at runtime when first fetched.
         globIgnores: [
-          "**/pyodide/**",
           "**/vendor-shiki-*.js",
           "**/shiki-langs/**",
           "**/vendor-mermaid-*.js",
