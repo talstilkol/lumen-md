@@ -27,7 +27,7 @@ test("source editor selects all after welcome document hydration", async ({ page
 
   await expect.poll(savedContent, { timeout: 15_000 }).toBe(WELCOME_DOC);
   await editor.click();
-  await editor.press("ControlOrMeta+a");
+  await editor.press(browserReportsMac ? "Meta+a" : "Control+a");
   await expect.poll(savedContent).toBe(WELCOME_DOC);
 
   const code = "SELECT 1000 + 763";
