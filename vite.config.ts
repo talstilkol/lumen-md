@@ -96,6 +96,7 @@ export default defineConfig({
         // Exclude heavy vendor chunks that are loaded on-demand via dynamic
         // import — these will be cached at runtime when first fetched.
         globIgnores: [
+          "**/pyodide/**",
           "**/vendor-shiki-*.js",
           "**/shiki-langs/**",
           "**/vendor-mermaid-*.js",
