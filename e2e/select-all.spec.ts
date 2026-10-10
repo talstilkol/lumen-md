@@ -12,6 +12,8 @@ test("source editor selects all after welcome document hydration", async ({ page
 
   const editor = page.locator(".cm-content").first();
   await expect(editor).toBeVisible();
+  const browserReportsMac = await page.evaluate(() => /Mac/.test(navigator.platform));
+  console.log(`select_all_browser_mac=${browserReportsMac}`);
 
   const savedContent = () => page.evaluate(() => {
     const raw = localStorage.getItem("lumen-md");
