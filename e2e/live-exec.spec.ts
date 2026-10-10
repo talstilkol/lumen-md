@@ -2,7 +2,11 @@ import { test, expect, type Locator } from "@playwright/test";
 
 async function replaceEditorSource(editor: Locator, source: string) {
   await editor.fill(source);
-  await expect.poll(() => editor.locator(".cm-line").allTextContents()).toEqual(source.split("\n"));
+  await expect.poll(async () => {
+    const lines = await editor.locator(".cm-line").allTextContents();
+    // WebKit can retain one empty leading line after filling CodeMirror.
+    return lines[0] === "" ? lines.slice(1) : lines;
+  }).toEqual(source.split("\n"));
 }
 
 /**
