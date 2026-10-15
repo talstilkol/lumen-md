@@ -35,22 +35,14 @@ import remarkMath from "remark-math";
 import remarkFrontmatter from "remark-frontmatter";
 import remarkDirective from "remark-directive";
 import remarkRehype from "remark-rehype";
-import rehypeKatex from "rehype-katex";
+// rehype-katex (+ katex + mhchem, ~84 KB gz) is dynamically imported via
+// ./katexPlugin only for docs that contain `$` — it is no longer a static
+// dependency of the main chunk (A7 lever 1/3).
 import rehypeSlug from "rehype-slug";
 // rehype-raw is dynamically imported in getProcessorWithRaw() — it
 // pulls in parse5 (~275 KB raw / ~40 KB gzipped) and most docs don't
 // need it. Splitting it out of the main bundle is M12-followup-2.
 import rehypeReact from "rehype-react";
-// Eager-import katex BEFORE mhchem so Rollup's chunk graph keeps the
-// canonical katex module evaluated first. Without this, the production
-// bundle's vendor-katex chunk hits a Temporal Dead Zone error
-// ("Cannot access 'xn' before initialization") because mhchem's
-// side-effect mutation of katex internals runs before katex's own
-// initializers complete. The eager import binds katex into the chunk
-// graph as a regular dependency, not a side-effect afterthought.
-import "katex";
-// Side-effect import: registers \ce{}/\pu{} macros on KaTeX
-import "katex/contrib/mhchem";
 import { visit } from "unist-util-visit";
 import { Fragment, jsx, jsxs } from "react/jsx-runtime";
 import YAML from "yaml";
@@ -352,11 +344,9 @@ function remarkStripFrontmatter() {
 }
 
 type LumenProcessor = Processor<MdastRoot, MdastRoot, HastRoot, HastRoot, ReactElement>;
+type RehypeKatex = typeof import("./katexPlugin").default;
 
-let processorNoRaw: LumenProcessor | null = null;
-let processorWithRaw: LumenProcessor | null = null;
-
-function buildBase(_isDark: () => boolean) {
+function buildBase() {
   return unified()
     .use(remarkParse)
     .use(remarkFrontmatter, ["yaml"])
@@ -372,39 +362,50 @@ function buildBase(_isDark: () => boolean) {
     .use(remarkRehype, { allowDangerousHtml: true });
 }
 
-function finishPipeline(p: ReturnType<typeof buildBase>, isDark: () => boolean): LumenProcessor {
-  return p
-    .use(rehypeSlug)
-    .use(rehypeKatex)
-    .use(rehypeShiki, { isDark })
-    .use(rehypeReact, {
-      Fragment,
-      jsx,
-      jsxs,
-      components,
-      // rehype-react's option type is parameterised by the JSX runtime
-      // shape; our `components` map is locally typed through hast-util's
-      // Components but rehype-react still wants a wider partial. The
-      // outer cast resolves the Processor type-parameter mismatch — the
-      // inner narrow lifts the option-bag through `unknown`.
-    } as unknown as Parameters<typeof rehypeReact>[0]) as unknown as LumenProcessor;
+function toReact(p: ReturnType<typeof buildBase>): LumenProcessor {
+  return p.use(rehypeReact, {
+    Fragment,
+    jsx,
+    jsxs,
+    components,
+  } as unknown as Parameters<typeof rehypeReact>[0]) as unknown as LumenProcessor;
 }
 
-function getProcessorNoRaw(isDark: () => boolean): LumenProcessor {
-  if (!processorNoRaw) {
-    processorNoRaw = finishPipeline(buildBase(isDark), isDark);
+// Full processors, cached per (raw HTML?, math?) combination.
+const fullProcessors = new Map<string, LumenProcessor>();
+let fastProcessor: LumenProcessor | null = null;
+let katexPromise: Promise<RehypeKatex> | null = null;
+
+function loadKatex(): Promise<RehypeKatex> {
+  if (!katexPromise) {
+    katexPromise = import("./katexPlugin").then((m) => m.default);
+    katexPromise.catch(() => {
+      katexPromise = null; // allow a retry after a failed chunk fetch
+    });
   }
-  return processorNoRaw;
+  return katexPromise;
 }
 
-async function getProcessorWithRaw(isDark: () => boolean): Promise<LumenProcessor> {
-  if (!processorWithRaw) {
-    // Lazy import: parse5 + entities (~275 KB raw + 70 KB raw) only
-    // ship for docs that actually contain inline HTML.
-    const { default: rehypeRaw } = await import("rehype-raw");
-    processorWithRaw = finishPipeline(buildBase(isDark).use(rehypeRaw), isDark);
-  }
-  return processorWithRaw;
+async function getFullProcessor(
+  isDark: () => boolean,
+  opts: { raw: boolean; math: boolean },
+): Promise<LumenProcessor> {
+  const key = `${opts.raw ? 1 : 0}${opts.math ? 1 : 0}`;
+  const cached = fullProcessors.get(key);
+  if (cached) return cached;
+  // rehype-raw pulls in parse5 (~40 KB gz); only docs with inline HTML
+  // pay for it (M12-followup-2).
+  const [rehypeRaw, rehypeKatex] = await Promise.all([
+    opts.raw ? import("rehype-raw").then((m) => m.default) : null,
+    opts.math ? loadKatex() : null,
+  ]);
+  let p = buildBase();
+  if (rehypeRaw) p = p.use(rehypeRaw);
+  p = p.use(rehypeSlug);
+  if (rehypeKatex) p = p.use(rehypeKatex);
+  const proc = toReact(p.use(rehypeShiki, { isDark }));
+  fullProcessors.set(key, proc);
+  return proc;
 }
 
 /**
@@ -418,15 +419,39 @@ function hasRawHtml(source: string): boolean {
   return /<[a-zA-Z!/]/.test(source);
 }
 
+/** remark-math only recognises `$…$` / `$$…$$`; no `$` → no KaTeX. */
+function hasMath(source: string): boolean {
+  return source.includes("$");
+}
+
 export async function renderMarkdown(
   markdownText: string,
   isDark: () => boolean,
 ): Promise<ReactElement> {
-  const proc = hasRawHtml(markdownText)
-    ? await getProcessorWithRaw(isDark)
-    : getProcessorNoRaw(isDark);
+  const proc = await getFullProcessor(isDark, {
+    raw: hasRawHtml(markdownText),
+    math: hasMath(markdownText),
+  });
   const file = await proc.process(markdownText);
   return file.result as ReactElement;
+}
+
+/**
+ * Synchronous first-paint render (A7 levers 1 + 3).
+ *
+ * Same remark tree and heading ids as `renderMarkdown`, minus everything
+ * that needs a lazy chunk: no Shiki (code renders as plain `<pre>`), no
+ * KaTeX (math shows as its TeX source), no rehype-raw (inline HTML is
+ * dropped). Heavy blocks (mermaid, charts, maps…) render through the same
+ * `components` map, whose wrappers only fetch their chunk once the block
+ * scrolls near the viewport and the browser is idle — so this pass never
+ * triggers a vendor import.
+ */
+export function renderMarkdownFast(markdownText: string): ReactElement {
+  if (!fastProcessor) {
+    fastProcessor = toReact(buildBase().use(rehypeSlug));
+  }
+  return fastProcessor.processSync(markdownText).result as ReactElement;
 }
 
 /** Extract YAML frontmatter (parsed) from a markdown source, or null. */

@@ -1,7 +1,8 @@
-import { Component, lazy, Suspense, useEffect, useState, type ComponentType } from "react";
+import { Component, lazy, Suspense, useEffect, useRef, useState, type ComponentType } from "react";
 import type { JSX } from "react";
 import { isAssetName, readWorkspaceBlob } from "../storage/workspace";
 import { log } from "../lib/logger";
+import { scheduleIdle } from "../lib/idle";
 
 const ChartBlock = lazy(() => import("../plugins/ChartBlock"));
 const MermaidBlock = lazy(() => import("../plugins/MermaidBlock"));
@@ -35,9 +36,17 @@ function getText(children: React.ReactNode): string {
   return "";
 }
 
-function PluginFallback({ label }: { label: string }) {
+function PluginFallback({
+  label,
+  innerRef,
+}: {
+  label: string;
+  innerRef?: React.Ref<HTMLDivElement>;
+}) {
   return (
     <div
+      ref={innerRef}
+      data-lumen-block-pending={label}
       style={{
         margin: "1.25rem 0",
         padding: "1rem",
@@ -99,11 +108,55 @@ class BlockErrorBoundary extends Component<
   }
 }
 
+/**
+ * Gate a heavy block's lazy chunk behind visibility + idle time (A7 lever
+ * 1/3). Inside the live preview, the block shows its placeholder until it
+ * is within ~400px of the viewport AND the main thread is idle; only then
+ * does React.lazy fetch mermaid / echarts / leaflet / … So the first paint
+ * of a long doc like Welcome.md never competes with vendor downloads for
+ * blocks the reader can't see yet.
+ *
+ * Outside a `[data-preview-root]` (print/export render targets, the AI
+ * search answer, tests) there's no scroll viewport to wait on, so the
+ * block hydrates immediately.
+ */
+function useDeferredHydration(): [React.RefObject<HTMLDivElement>, boolean] {
+  const ref = useRef<HTMLDivElement>(null);
+  const [ready, setReady] = useState(false);
+  useEffect(() => {
+    if (ready) return;
+    const el = ref.current;
+    if (!el || !el.closest("[data-preview-root]") || typeof IntersectionObserver === "undefined") {
+      setReady(true);
+      return;
+    }
+    let cancelIdle: (() => void) | null = null;
+    const io = new IntersectionObserver(
+      (entries) => {
+        if (!entries.some((e) => e.isIntersecting)) return;
+        io.disconnect();
+        cancelIdle = scheduleIdle(() => setReady(true), 1000);
+      },
+      { rootMargin: "400px 0px" },
+    );
+    io.observe(el);
+    return () => {
+      io.disconnect();
+      cancelIdle?.();
+    };
+  }, [ready]);
+  return [ref, ready];
+}
+
 function withSuspense<P extends object>(
   Component: ComponentType<P>,
   label: string,
 ): ComponentType<P> {
   return function Wrapped(props: P) {
+    const [ref, ready] = useDeferredHydration();
+    if (!ready) {
+      return <PluginFallback label={label} innerRef={ref} />;
+    }
     return (
       <BlockErrorBoundary label={label}>
         <Suspense fallback={<PluginFallback label={label} />}>

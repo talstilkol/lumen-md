@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { renderMarkdown, extractFrontmatter } from "./pipeline";
+import { renderMarkdown, renderMarkdownFast, extractFrontmatter } from "./pipeline";
+import { scheduleIdle } from "../lib/idle";
 import { CopyButtonHandler } from "./components";
 import { Frontmatter } from "../ui/Frontmatter";
 import { ErrorBoundary } from "../ui/ErrorBoundary";
@@ -11,25 +12,65 @@ interface Props {
   debounceMs?: number;
 }
 
+/**
+ * Set once the full (Shiki/KaTeX) pipeline has completed a render in this
+ * page lifetime. After that the lazy chunks are cached, so later previews
+ * (mode switches, new tabs) go straight to the full pass.
+ */
+let fullPipelineWarm = false;
+
+/** Synchronous plain-text pass; null if it throws (the full pass reports). */
+function safeFastRender(markdownText: string): React.ReactElement | null {
+  try {
+    return renderMarkdownFast(markdownText);
+  } catch {
+    return null;
+  }
+}
+
 export function Preview({ markdownText }: Props) {
-  const [tree, setTree] = useState<React.ReactElement | null>(null);
+  // First paint (A7 levers 1 + 3): render the text synchronously on the
+  // very first commit with the chunk-free pipeline, so the LCP element
+  // (the welcome doc's headings / paragraphs) never waits on Shiki, KaTeX
+  // or a vendor chunk. Heavy blocks hydrate on their own (see
+  // DeferredBlock in ./components). The full pipeline runs once the
+  // browser is idle and swaps in highlighted code + math.
+  const [tree, setTree] = useState<React.ReactElement | null>(() =>
+    fullPipelineWarm ? null : safeFastRender(markdownText),
+  );
   const [error, setError] = useState<string | null>(null);
   const [themeVersion, setThemeVersion] = useState(0);
   const seqRef = useRef(0);
+  const fastTextRef = useRef<string | null>(fullPipelineWarm ? null : markdownText);
 
   useEffect(() => {
     const seq = ++seqRef.current;
     const isDark = () => document.documentElement.classList.contains("dark");
-    renderMarkdown(markdownText, isDark)
-      .then((el) => {
-        if (seq !== seqRef.current) return;
-        setTree(el);
-        setError(null);
-      })
-      .catch((e: Error) => {
-        if (seq !== seqRef.current) return;
-        setError(e.message);
-      });
+    const run = () => {
+      renderMarkdown(markdownText, isDark)
+        .then((el) => {
+          if (seq !== seqRef.current) return;
+          fullPipelineWarm = true;
+          setTree(el);
+          setError(null);
+        })
+        .catch((e: Error) => {
+          if (seq !== seqRef.current) return;
+          setError(e.message);
+        });
+    };
+    if (fullPipelineWarm) {
+      run();
+      return;
+    }
+    // Cold boot: until the full pipeline has rendered once, every new
+    // text (e.g. the welcome doc seeded one tick after mount) gets the
+    // synchronous fast pass now and the full pass when the browser idles.
+    if (fastTextRef.current !== markdownText) {
+      fastTextRef.current = markdownText;
+      setTree(safeFastRender(markdownText));
+    }
+    return scheduleIdle(run, 1500);
   }, [markdownText, themeVersion]);
 
   // Re-process when theme changes so Shiki picks up the right theme tokens.
