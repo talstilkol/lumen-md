@@ -184,8 +184,8 @@ jobs:
       - name: Healthcheck
         run: |
           URL="${SIGNAL_URL:-https://signal.lumen.md}"
-          echo "Checking $URL/health..."
-          status=$(curl -s -o /dev/null -w '%{http_code}' -m 10 "$URL/health" || true)
+          echo "Checking $URL/healthz..."
+          status=$(curl -s -o /dev/null -w '%{http_code}' -m 10 "$URL/healthz" || true)
           if [ "$status" = "200" ]; then
             echo "✅ Signal server healthy ($status)"
           else

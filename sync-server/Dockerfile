@@ -19,9 +19,9 @@ ENV NODE_ENV=production
 ENV PORT=4444
 EXPOSE 4444
 
-# Healthcheck — Fly looks for HTTP 200 on /. server.js responds to GET / with a
-# small JSON body so probes pass without WebSocket-upgrade gymnastics.
+# Healthcheck — server.js answers GET /healthz (also /health and /) with a
+# small JSON body ({"ok":true,...}) so probes pass without a WebSocket upgrade.
 HEALTHCHECK --interval=30s --timeout=5s --retries=3 \
-  CMD wget -q -O - http://localhost:4444/ > /dev/null || exit 1
+  CMD wget -q -O - "http://localhost:${PORT:-4444}/healthz" > /dev/null || exit 1
 
 CMD ["node", "server.js"]

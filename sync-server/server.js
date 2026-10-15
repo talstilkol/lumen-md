@@ -1,143 +1,250 @@
+/**
+ * Lumen y-webrtc signaling server.
+ *
+ * Speaks the y-webrtc signaling protocol (mirrors the reference
+ * implementation in `y-webrtc/bin/server.js`):
+ *
+ *   client → server  {type:'subscribe',   topics:[...]}
+ *   client → server  {type:'unsubscribe', topics:[...]}
+ *   client → server  {type:'publish',     topic, ...}   → forwarded to every
+ *                    subscriber of `topic` (INCLUDING the sender), with a
+ *                    `clients` field set to the subscriber count.
+ *   client → server  {type:'ping'}  → server replies {type:'pong'}
+ *
+ * Legacy protocol (kept because it is cheap): `{type:'join', room}` subscribes
+ * the socket to `room` and replies `{type:'joined', room, peers}`; any other
+ * message from a joined socket is relayed to the other members of that room.
+ *
+ * Usage:
+ *   node server.js                      # listens on $PORT (default 4444)
+ *   require('./server').createServer({ port: 0, heartbeatMs: 100 })
+ */
+
 const WebSocket = require("ws");
 const http = require("http");
 
-const log = (...args) => console.log(new Date().toISOString(), ...args);
+const log = (...args) => {
+  if (process.env.SIGNAL_QUIET) return;
+  console.log(new Date().toISOString(), ...args);
+};
 
-// ── Rate limiting ──────────────────────────────────────────────────────────
+const DEFAULT_PORT = 4444;
+const DEFAULT_HEARTBEAT_MS = 30_000;
 const RATE_LIMIT_WINDOW_MS = 60_000;
-const RATE_LIMIT_MAX = 120; // messages per minute per IP
-const ipMap = new Map(); // ip -> { count, resetAt }
+const DEFAULT_RATE_LIMIT_MAX = 120; // messages per minute per IP (SIGNAL_RATE_LIMIT_MAX)
 
-function checkRateLimit(ip) {
-  const now = Date.now();
-  const entry = ipMap.get(ip);
-  if (!entry || now > entry.resetAt) {
-    ipMap.set(ip, { count: 1, resetAt: now + RATE_LIMIT_WINDOW_MS });
-    return true;
+/**
+ * @param {{ port?: number, heartbeatMs?: number, rateLimitMax?: number }} [opts]
+ * @returns {Promise<{ server: http.Server, wss: WebSocket.Server, port: number, topics: Map<string, Set<WebSocket>>, close: () => Promise<void> }>}
+ */
+function createServer(opts = {}) {
+  const port = opts.port ?? Number(process.env.PORT || DEFAULT_PORT);
+  const heartbeatMs =
+    opts.heartbeatMs ?? Number(process.env.SIGNAL_HEARTBEAT_MS || DEFAULT_HEARTBEAT_MS);
+  const rateLimitMax =
+    opts.rateLimitMax ?? Number(process.env.SIGNAL_RATE_LIMIT_MAX || DEFAULT_RATE_LIMIT_MAX);
+
+  /** topic -> Set<ws> */
+  const topics = new Map();
+  /** ip -> { count, resetAt } */
+  const ipMap = new Map();
+
+  function checkRateLimit(ip) {
+    const now = Date.now();
+    const entry = ipMap.get(ip);
+    if (!entry || now > entry.resetAt) {
+      ipMap.set(ip, { count: 1, resetAt: now + RATE_LIMIT_WINDOW_MS });
+      return true;
+    }
+    entry.count++;
+    return entry.count <= rateLimitMax;
   }
-  entry.count++;
-  return entry.count <= RATE_LIMIT_MAX;
-}
 
-// ── Room registry ───────────────────────────────────────────────────────────
-const rooms = new Map(); // roomId -> Set<ws>
-const PING_INTERVAL_MS = 30_000;
-const PONG_TIMEOUT_MS = 90_000;
-
-// ── HTTP server ────────────────────────────────────────────────────────────
-const server = http.createServer((req, res) => {
-  if (req.url === "/healthz") {
-    res.writeHead(200, { "Content-Type": "application/json" });
-    res.end(JSON.stringify({ status: "ok", rooms: rooms.size, uptime: process.uptime() }));
-    return;
-  }
-  res.writeHead(200, { "Content-Type": "text/plain" });
-  res.end("Lumen IDE CRDT Sync Server\n");
-});
-
-// ── WebSocket server ─────────────────────────────────────────────────────────
-const wss = new WebSocket.Server({ server });
-
-wss.on("connection", (ws, req) => {
-  let currentRoom = null;
-  let peerId = null;
-  let lastPong = Date.now();
-
-  const ip = req.socket.remoteAddress || "unknown";
-
-  ws.on("message", (message) => {
-    if (!checkRateLimit(ip)) {
-      ws.send(JSON.stringify({ type: "error", error: "Rate limit exceeded" }));
-      ws.close(1008, "Rate limit exceeded");
+  function send(conn, message) {
+    if (conn.readyState !== WebSocket.CONNECTING && conn.readyState !== WebSocket.OPEN) {
+      conn.close();
       return;
     }
-
     try {
-      const data = JSON.parse(message);
+      conn.send(JSON.stringify(message));
+    } catch {
+      conn.close();
+    }
+  }
 
-      if (data.type === "join") {
-        // Leave previous room if switching
-        if (currentRoom && rooms.has(currentRoom)) {
-          rooms.get(currentRoom).delete(ws);
-          if (rooms.get(currentRoom).size === 0) {
-            rooms.delete(currentRoom);
-          }
-        }
+  function subscribe(conn, topicName) {
+    let subs = topics.get(topicName);
+    if (!subs) {
+      subs = new Set();
+      topics.set(topicName, subs);
+    }
+    subs.add(conn);
+    conn.subscribedTopics.add(topicName);
+  }
 
-        currentRoom = data.room;
-        peerId = data.peerId || "anon";
+  function unsubscribe(conn, topicName) {
+    const subs = topics.get(topicName);
+    if (subs) {
+      subs.delete(conn);
+      if (subs.size === 0) topics.delete(topicName);
+    }
+    conn.subscribedTopics.delete(topicName);
+  }
 
-        if (!rooms.has(currentRoom)) {
-          rooms.set(currentRoom, new Set());
-        }
-        rooms.get(currentRoom).add(ws);
-        log(`[${currentRoom}] Peer joined: ${peerId} (${ip})`);
+  const startedAt = Date.now();
+  const health = () => ({
+    ok: true,
+    status: "ok",
+    service: "lumen-signal",
+    topics: topics.size,
+    // Backwards-compatible alias for the old `rooms` field.
+    rooms: topics.size,
+    clients: wss.clients.size,
+    uptime: (Date.now() - startedAt) / 1000,
+  });
 
-        // Notify peer of room occupancy
-        ws.send(JSON.stringify({
-          type: "joined",
-          room: currentRoom,
-          peers: rooms.get(currentRoom).size,
-        }));
+  const server = http.createServer((req, res) => {
+    const pathname = (req.url || "/").split("?")[0];
+    if (pathname === "/healthz" || pathname === "/health" || pathname === "/") {
+      res.writeHead(200, { "Content-Type": "application/json" });
+      res.end(JSON.stringify(health()));
+      return;
+    }
+    res.writeHead(404, { "Content-Type": "application/json" });
+    res.end(JSON.stringify({ ok: false, error: "not found" }));
+  });
+
+  const wss = new WebSocket.Server({ server });
+
+  wss.on("connection", (ws, req) => {
+    const ip = (req && req.socket && req.socket.remoteAddress) || "unknown";
+    ws.isAlive = true;
+    ws.subscribedTopics = new Set();
+    /** Legacy `join` room, if any. */
+    let legacyRoom = null;
+    let closed = false;
+
+    ws.on("pong", () => {
+      ws.isAlive = true;
+    });
+
+    ws.on("message", (raw) => {
+      if (closed) return;
+      // Any traffic proves liveness.
+      ws.isAlive = true;
+      if (!checkRateLimit(ip)) {
+        send(ws, { type: "error", error: "Rate limit exceeded" });
+        ws.close(1008, "Rate limit exceeded");
         return;
       }
 
-      // Relay: any message with a target room goes only to that room
-      if (currentRoom) {
-        const clients = rooms.get(currentRoom);
-        if (clients) {
-          const out = JSON.stringify(data);
+      let message;
+      try {
+        message = JSON.parse(raw.toString());
+      } catch (e) {
+        log("Parse error", e.message);
+        send(ws, { type: "error", error: "Invalid JSON" });
+        return;
+      }
+      if (!message || typeof message.type !== "string") return;
+
+      switch (message.type) {
+        case "subscribe":
+          (Array.isArray(message.topics) ? message.topics : []).forEach((t) => {
+            if (typeof t === "string") subscribe(ws, t);
+          });
+          return;
+        case "unsubscribe":
+          (Array.isArray(message.topics) ? message.topics : []).forEach((t) => {
+            if (typeof t === "string") unsubscribe(ws, t);
+          });
+          return;
+        case "publish": {
+          if (!message.topic) return;
+          const receivers = topics.get(message.topic);
+          if (receivers) {
+            message.clients = receivers.size;
+            receivers.forEach((receiver) => send(receiver, message));
+          }
+          return;
+        }
+        case "ping":
+          send(ws, { type: "pong" });
+          return;
+        case "join": {
+          // Legacy protocol.
+          if (typeof message.room !== "string") return;
+          if (legacyRoom) unsubscribe(ws, legacyRoom);
+          legacyRoom = message.room;
+          subscribe(ws, legacyRoom);
+          log(`[${legacyRoom}] Peer joined: ${message.peerId || "anon"} (${ip})`);
+          send(ws, { type: "joined", room: legacyRoom, peers: topics.get(legacyRoom).size });
+          return;
+        }
+        default: {
+          // Legacy relay: forward to the other members of the joined room.
+          if (!legacyRoom) return;
+          const clients = topics.get(legacyRoom);
+          if (!clients) return;
           clients.forEach((client) => {
-            if (client !== ws && client.readyState === WebSocket.OPEN) {
-              client.send(out);
-            }
+            if (client !== ws && client.readyState === WebSocket.OPEN) send(client, message);
           });
         }
       }
-    } catch (e) {
-      log("Parse error", e.message);
-      ws.send(JSON.stringify({ type: "error", error: "Invalid JSON" }));
-    }
+    });
+
+    ws.on("close", () => {
+      closed = true;
+      Array.from(ws.subscribedTopics).forEach((t) => unsubscribe(ws, t));
+    });
   });
 
-  ws.on("pong", () => {
-    lastPong = Date.now();
-  });
-
-  ws.on("close", () => {
-    if (currentRoom && rooms.has(currentRoom)) {
-      rooms.get(currentRoom).delete(ws);
-      if (rooms.get(currentRoom).size === 0) {
-        rooms.delete(currentRoom);
-        log(`[${currentRoom}] Room destroyed (empty)`);
-      } else {
-        log(`[${currentRoom}] Peer left: ${peerId}`);
+  // ── Heartbeat ──────────────────────────────────────────────────────────
+  // Each tick: sockets that haven't answered the previous ping (or sent any
+  // message) since the last tick are terminated; the rest get a fresh ping.
+  const heartbeat = setInterval(() => {
+    wss.clients.forEach((ws) => {
+      if (ws.isAlive === false) {
+        ws.terminate();
+        return;
       }
-    }
+      ws.isAlive = false;
+      try {
+        ws.ping();
+      } catch {
+        ws.terminate();
+      }
+    });
+  }, heartbeatMs);
+  if (typeof heartbeat.unref === "function") heartbeat.unref();
+
+  const close = () =>
+    new Promise((resolve) => {
+      clearInterval(heartbeat);
+      wss.clients.forEach((ws) => ws.terminate());
+      wss.close(() => server.close(() => resolve()));
+    });
+
+  return new Promise((resolve, reject) => {
+    server.once("error", reject);
+    server.listen(port, () => {
+      const actualPort = server.address().port;
+      resolve({ server, wss, port: actualPort, topics, close });
+    });
   });
+}
 
-  // Send initial ping setup
-  ws.isAlive = true;
-});
+module.exports = { createServer, DEFAULT_PORT, DEFAULT_HEARTBEAT_MS };
 
-// ── Heartbeat / cleanup ─────────────────────────────────────────────────────
-const heartbeat = setInterval(() => {
-  const now = Date.now();
-  wss.clients.forEach((ws) => {
-    if (!ws.isAlive) {
-      ws.terminate();
-      return;
-    }
-    ws.isAlive = false;
-    ws.ping(() => {});
+if (require.main === module) {
+  createServer().then(({ port, close }) => {
+    log(`y-webrtc signaling server running on ws://localhost:${port}`);
+    log(`Health check: http://localhost:${port}/healthz`);
+    const shutdown = (sig) => {
+      log(`Received ${sig}, closing…`);
+      close().then(() => process.exit(0));
+    };
+    process.on("SIGTERM", () => shutdown("SIGTERM"));
+    process.on("SIGINT", () => shutdown("SIGINT"));
   });
-}, PING_INTERVAL_MS);
-
-// ── Startup ─────────────────────────────────────────────────────────────────
-const PORT = process.env.PORT || 8080;
-server.listen(PORT, () => {
-  log(`CRDT Sync Relay running on ws://localhost:${PORT}`);
-  log(`Health check: http://localhost:${PORT}/healthz`);
-});
-
-server.on("close", () => clearInterval(heartbeat));
+}
