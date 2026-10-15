@@ -31,6 +31,9 @@ jobs:
       - name: Typecheck
         run: npm run typecheck
 
+      - name: Code hygiene (no `as any` / console.log in production src)
+        run: npm run hygiene
+
       - name: Test
         run: npm run test
 
