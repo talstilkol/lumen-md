@@ -30,6 +30,7 @@
  */
 
 import { log } from "../lib/logger";
+import { setSandboxedSrcdoc } from "../lib/trustedTypes";
 
 export interface PluginHandle {
   id: string;
@@ -111,7 +112,7 @@ export function spawnPluginSandbox(opts: SandboxOptions): Promise<PluginHandle> 
     iframe.setAttribute("sandbox", SANDBOX_FLAGS);
     iframe.setAttribute("aria-hidden", "true");
     iframe.style.cssText = "position:fixed;left:-9999px;width:0;height:0;border:0";
-    iframe.srcdoc = bootHtml(opts.url);
+    setSandboxedSrcdoc(iframe, bootHtml(opts.url));
     let ready = false;
 
     const onMessage = async (e: MessageEvent) => {

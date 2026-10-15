@@ -16,7 +16,8 @@
  * style sheet can't reach the parent.
  */
 
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { setSandboxedSrcdoc } from "../lib/trustedTypes";
 import { Maximize2, Code2 } from "lucide-react";
 import { t } from "../i18n";
 
@@ -41,11 +42,19 @@ export default function LiveCssBlock({ source, meta }: Props) {
 
   const [showSource, setShowSource] = useState(false);
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const frameRef = useRef<HTMLIFrameElement | null>(null);
 
   const doc = useMemo(
     () => `<!doctype html><html><head><meta charset="utf-8" /><style>${source}</style></head><body>${html}</body></html>`,
     [source, html],
   );
+
+  // srcdoc is a Trusted Types sink — assign via the `lumen` policy's
+  // sandboxed path (frame is sandboxed without allow-same-origin).
+  useEffect(() => {
+    if (showSource || !frameRef.current) return;
+    setSandboxedSrcdoc(frameRef.current, doc);
+  }, [doc, showSource]);
 
   return (
     <div className="chart-block" ref={containerRef}>
@@ -83,7 +92,7 @@ export default function LiveCssBlock({ source, meta }: Props) {
         </pre>
       ) : (
         <iframe
-          srcDoc={doc}
+          ref={frameRef}
           sandbox="allow-forms"
           referrerPolicy="no-referrer"
           loading="lazy"

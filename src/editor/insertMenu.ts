@@ -397,7 +397,7 @@ function insertEntry(view: EditorView, entry: MenuEntry, replaceFrom: number) {
 function render(state: MenuState) {
   if (!openMenu) return;
   const { container } = openMenu;
-  container.innerHTML = "";
+  container.replaceChildren();
 
   const list = filtered(state.query);
   if (list.length === 0) {

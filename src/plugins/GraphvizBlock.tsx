@@ -81,7 +81,7 @@ export default function GraphvizBlock({ source, meta }: Props) {
         setState("ready");
         setDurationMs(null);
         if (!cancelled && contentRef.current) {
-        safeSetHtml(contentRef.current, cached.svg);
+        safeSetHtml(contentRef.current, cached.svg, "svg");
         }
         return;
       }
@@ -91,7 +91,7 @@ export default function GraphvizBlock({ source, meta }: Props) {
         const svg = gv.layout(source, "svg", engine);
         if (cancelled || !contentRef.current) return;
         const cleanSvg = sanitizeSvgMarkup(svg);
-        safeSetHtml(contentRef.current, cleanSvg);
+        safeSetHtml(contentRef.current, cleanSvg, "svg");
         setDurationMs(Math.round(performance.now() - started));
         setState("ready");
         cache.set(key, { key, svg: cleanSvg });

@@ -6,7 +6,7 @@
  */
 
 import { renderMarkdown } from "../renderer/pipeline";
-import { sanitizeHtmlMarkup } from "../lib/markupSanitizer";
+import { safeSetHtml, safeClearHtml } from "../lib/trustedTypes";
 
 /**
  * Generate a printable document from markdown content.
@@ -57,7 +57,8 @@ export async function printDocument(
 
   const safeDocName = docName || "Untitled";
   const safeStyles = styles.join("\n\n");
-  const printContent = sanitizeHtmlMarkup(htmlContent);
+  // Sanitized at the sink by the `lumen` Trusted Types policy (safeSetHtml).
+  const printContent = htmlContent;
 
   const printWindow = window.open("", "_blank");
   if (printWindow?.document) {
@@ -120,9 +121,9 @@ function hydratePrintDocument(
   const contentEl = targetDocument.createElement("div");
   contentEl.className = "prose-lumen";
   contentEl.id = "lumen-print-content";
-  contentEl.innerHTML = printContent;
+  safeSetHtml(contentEl, printContent);
 
-  body.innerHTML = "";
+  safeClearHtml(body);
   body.appendChild(headerEl);
   body.appendChild(contentEl);
 }
@@ -149,7 +150,7 @@ function printInlineFallback(
   const contentEl = document.createElement("div");
   contentEl.className = "prose-lumen";
   contentEl.id = "lumen-print-content";
-  contentEl.innerHTML = printContent;
+  safeSetHtml(contentEl, printContent);
 
   printRoot.setAttribute("class", themeClass);
   printRoot.setAttribute("dir", dir);

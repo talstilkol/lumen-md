@@ -97,7 +97,7 @@ export default function Model3DBlock({ source, meta }: Props) {
     if (!inView || !spec || !isSourceSafe || !isPosterSafe) return;
     const container = hostRef.current;
     if (!container) return;
-    container.innerHTML = "";
+    container.replaceChildren();
     const viewer = document.createElement("model-viewer") as HTMLElement;
     viewer.setAttribute("src", spec.src);
     if (spec.poster) viewer.setAttribute("poster", spec.poster);
