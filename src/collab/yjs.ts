@@ -1,9 +1,9 @@
 import * as Y from "yjs";
 import { WebrtcProvider } from "y-webrtc";
 import type { Awareness } from "y-protocols/awareness";
-import { randomChoice, randomInt, randomId } from "../lib/cryptoRandom";
+import { randomChoice, randomInt } from "../lib/cryptoRandom";
 import { log } from "../lib/logger";
-import { encryptOp, decryptOp } from "./encryption";
+import { wireE2E, type E2EChannel, type E2EErrorReason } from "./e2e";
 
 export interface CollabUser {
   name: string;
@@ -21,7 +21,19 @@ interface WebsocketLike {
 }
 
 export interface CollabSession {
+  /**
+   * The document the editor binds to. In password-protected rooms this doc
+   * is local-only — providers sync `transportDoc` (ciphertext) instead.
+   */
   doc: Y.Doc;
+  /**
+   * The doc attached to the network providers when the room is end-to-end
+   * encrypted; null for plain (non-password) rooms, where `doc` itself is
+   * what the providers sync.
+   */
+  transportDoc: Y.Doc | null;
+  /** True when the room password is set and the E2E transport is active. */
+  encrypted: boolean;
   ytext: Y.Text;
   awareness: Awareness;
   provider: WebrtcProvider;
@@ -132,54 +144,6 @@ export function makeRoomName(): string {
  * When the local doc is empty and we are the first peer, the provided
  * `seedContent` is inserted so other peers can pick it up.
  */
-/**
- * Wrap the doc's wire updates in AES-GCM. We attach a custom update
- * observer that fires for every local mutation and re-broadcasts the
- * encrypted payload over a hidden Y.Map keyed `__crypt__`. Inbound entries
- * on the same map decrypt → applyUpdate.
- *
- * This isn't a perfect secure-channel construction (the public protocol
- * still sees lengths + structure metadata) but it makes the document body
- * unreadable to a passive signaling-server eavesdropper and to a peer who
- * joined the room without the password. Good enough as a Pro privacy
- * upgrade; for paranoid threat models, run your own signaling server.
- */
-async function wireEncryption(doc: Y.Doc, password: string): Promise<void> {
-  const cryptMap = doc.getMap<string>("__crypt__");
-  // Local-origin updates: encrypt + push to the map. We use a unique key
-  // per update so concurrent peers don't clobber each other's payloads.
-  doc.on("update", async (update: Uint8Array, origin: unknown) => {
-    if (origin === "remote-decrypted") return; // avoid re-encrypting our own decrypts
-    try {
-      const cipher = await encryptOp(password, update);
-      const b64 = btoa(String.fromCharCode(...cipher));
-      // Crypto-strong key: collisions in this map can leak which peer wrote
-      // an op (every key is observable on the wire), so we don't rely on
-      // Math.random — it's biased and predictable.
-      const key = `${Date.now().toString(36)}-${randomId(3)}`;
-      cryptMap.set(key, b64);
-    } catch (err) {
-      log.warn("encrypt update failed", err);
-    }
-  });
-  // Inbound entries: decrypt + applyUpdate inside a transaction so the
-  // observer above doesn't re-encrypt them in a loop.
-  cryptMap.observe(async (event) => {
-    for (const key of event.keysChanged) {
-      const b64 = cryptMap.get(key);
-      if (!b64) continue;
-      try {
-        const cipher = Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
-        const plain = await decryptOp(password, cipher);
-        if (!plain) continue; // wrong password from another peer — drop
-        Y.applyUpdate(doc, plain, "remote-decrypted");
-      } catch (err) {
-        log.warn("decrypt update failed", err);
-      }
-    }
-  });
-}
-
 /** Optional persistent collab WebSocket URL (y-websocket compatible). */
 function getWebsocketUrl(): string | null {
   const fromStorage =
@@ -231,10 +195,10 @@ async function attachWebsocketProvider(
 
 /**
  * Read the optional room password from `localStorage["lumen.collab.password"]`
- * or `?password=…` in the URL hash. When present, every WebRTC update is
- * encrypted with AES-GCM (PBKDF2-derived key) before it leaves this peer,
- * and decrypted on receipt — turning the otherwise-public WebRTC mesh into
- * an end-to-end-encrypted channel (P3-13).
+ * or `?password=…` in the URL hash. When present, the editor's doc stays
+ * local and only AES-GCM ciphertext envelopes are handed to the providers
+ * (see `./e2e.ts`) — the WebRTC mesh, signaling servers and the optional
+ * y-websocket server never see document content (P3-13).
  */
 function getRoomPassword(): string | null {
   if (typeof localStorage !== "undefined") {
@@ -251,39 +215,56 @@ function getRoomPassword(): string | null {
 export function connectCollab(
   roomName: string,
   seedContent: string,
-  opts: { password?: string | null; isNewRoom?: boolean } = {},
+  opts: {
+    password?: string | null;
+    isNewRoom?: boolean;
+    /** Called once if an incoming encrypted update can't be decrypted. */
+    onE2EError?: (reason: E2EErrorReason) => void;
+  } = {},
 ): CollabSession {
   const doc = new Y.Doc();
   const ytext = doc.getText("lumen");
 
-  // E2E encryption: when a room password is set, install an update-handler
-  // that encrypts every doc update before peers see it on the wire and
-  // decrypts inbound payloads back into Y updates. Wrong-password peers
-  // can connect over signaling but never see plaintext.
   const password = opts.password ?? getRoomPassword();
 
+  // E2E: with a room password, `doc` (plaintext) is never attached to a
+  // provider. A separate transport doc carrying only ciphertext envelopes
+  // is synced instead. Without a password, `doc` is synced directly.
+  let transportDoc: Y.Doc | null = null;
+  let e2e: E2EChannel | null = null;
+  if (password) {
+    transportDoc = new Y.Doc();
+    // Share the client id so awareness (which borrows the synced doc's id)
+    // and `snapshotPeers`' self-detection line up with the plaintext doc
+    // the editor's relative cursor positions refer to.
+    transportDoc.clientID = doc.clientID;
+    e2e = wireE2E(doc, transportDoc, {
+      password,
+      room: roomName,
+      onDecryptError: (reason) => {
+        log.warn("collab e2e: could not decrypt incoming update", reason);
+        opts.onE2EError?.(reason);
+      },
+    });
+  }
+  const syncedDoc = transportDoc ?? doc;
+
   // Public rooms only — obscure name suffices for casual pair editing. Users
-  // wanting more privacy should run their own signaling server.
-  const provider = new WebrtcProvider(roomName, doc, {
+  // wanting more privacy should set a room password and/or run their own
+  // signaling server.
+  const provider = new WebrtcProvider(roomName, syncedDoc, {
     signaling: getSignalingUrls(),
     maxConns: 20,
   });
 
-  if (password) {
-    // y-webrtc transports payloads via its room's signaling channel. We tap
-    // the doc's update event ourselves: every local update is encrypted +
-    // applied to a side-doc that mirrors the public state, while remote
-    // payloads are decrypted before being applied to the visible doc.
-    void wireEncryption(doc, password);
-  }
-
   // If a persistent server is configured, attach a WebsocketProvider in the
-  // background. Doc state from the server is merged into the same Y.Doc so
-  // late joiners see history even when no other peer is online.
+  // background. It syncs the same doc as WebRTC (the ciphertext transport
+  // doc in password rooms, so the server only ever stores ciphertext) and
+  // lets late joiners see history even when no other peer is online.
   const wsUrl = getWebsocketUrl();
   let websocketProvider: WebsocketLike | null = null;
   if (wsUrl) {
-    void attachWebsocketProvider(wsUrl, roomName, doc).then((p) => {
+    void attachWebsocketProvider(wsUrl, roomName, syncedDoc).then((p) => {
       if (destroyed) {
         p?.destroy();
         return;
@@ -308,7 +289,11 @@ export function connectCollab(
     seedTimer = setTimeout(() => {
       if (destroyed) return;
       const peersKnown = provider.awareness.getStates().size;
-      if (ytext.length === 0 && seedContent && peersKnown <= 1) {
+      // In E2E rooms, ciphertext may have arrived but not finished
+      // decrypting (PBKDF2 + AES take a moment) — treat any envelope as
+      // "room has content" so we never seed on top of existing history.
+      const envelopesPending = (e2e?.envelopeCount() ?? 0) > 0;
+      if (ytext.length === 0 && seedContent && peersKnown <= 1 && !envelopesPending) {
         ytext.insert(0, seedContent);
       }
     }, 400);
@@ -329,6 +314,8 @@ export function connectCollab(
 
   return {
     doc,
+    transportDoc,
+    encrypted: transportDoc !== null,
     ytext,
     awareness: provider.awareness,
     provider,
@@ -347,6 +334,7 @@ export function connectCollab(
         stopSnapshots();
         stopSnapshots = null;
       }
+      e2e?.destroy();
       try {
         provider.destroy();
       } catch {
@@ -359,6 +347,7 @@ export function connectCollab(
       }
       try {
         doc.destroy();
+        transportDoc?.destroy();
       } catch {
         /* */
       }

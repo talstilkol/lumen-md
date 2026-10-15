@@ -661,5 +661,7 @@
   "runtimeMetrics.column.timeouts": "Timeouts",
   "runtimeMetrics.column.rateLimits": "Rate limit",
   "cmd.view.runtimeMetrics": "Runtime metrics",
-  "cmd.view.runtimeMetrics.hint": "Inspect retries, timeouts, and latency by transport category"
+  "cmd.view.runtimeMetrics.hint": "Inspect retries, timeouts, and latency by transport category",
+  "collab.e2e.decryptFailed": "Impossible de déchiffrer ce salon",
+  "collab.e2e.decryptFailed.body": "Le mot de passe du salon ne correspond pas à celui des autres participants. Rien n'a été appliqué à votre document — vérifiez le mot de passe et rejoignez à nouveau."
 }

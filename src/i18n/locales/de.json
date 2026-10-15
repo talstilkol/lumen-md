@@ -661,5 +661,7 @@
   "runtimeMetrics.column.timeouts": "Timeouts",
   "runtimeMetrics.column.rateLimits": "Rate limit",
   "cmd.view.runtimeMetrics": "Runtime metrics",
-  "cmd.view.runtimeMetrics.hint": "Inspect retries, timeouts, and latency by transport category"
+  "cmd.view.runtimeMetrics.hint": "Inspect retries, timeouts, and latency by transport category",
+  "collab.e2e.decryptFailed": "Raum kann nicht entschlüsselt werden",
+  "collab.e2e.decryptFailed.body": "Das Raumpasswort stimmt nicht mit dem der anderen Teilnehmenden überein. An deinem Dokument wurde nichts geändert – prüfe das Passwort und tritt erneut bei."
 }

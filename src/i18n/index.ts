@@ -452,6 +452,8 @@ const en: Strings = {
   "cmd.collab.leave": "Leave collaboration",
   "collab.prompt.room": "Room name:",
   "collab.prompt.join": "Join collaborative session \"{room}\"? Your current document will be replaced if other peers are present.",
+  "collab.e2e.decryptFailed": "Can't decrypt this room",
+  "collab.e2e.decryptFailed.body": "The room password doesn't match the one the other participants used. Nothing was applied to your document — check the password and rejoin.",
   // FileTree extras
   "tree.newFileRoot": "New file at root",
   "tree.newFolderRoot": "New folder at root",
@@ -1115,6 +1117,8 @@ const he: Strings = {
   "cmd.collab.leave": "יציאה משיתוף פעולה",
   "collab.prompt.room": "שם חדר:",
   "collab.prompt.join": "להצטרף לחדר \"{room}\"? המסמך הנוכחי יוחלף אם יש משתתפים אחרים.",
+  "collab.e2e.decryptFailed": "לא ניתן לפענח את החדר",
+  "collab.e2e.decryptFailed.body": "סיסמת החדר אינה תואמת לסיסמה של שאר המשתתפים. דבר לא הוחל על המסמך שלך — בדקו את הסיסמה והצטרפו מחדש.",
   "tree.newFileRoot": "קובץ חדש בשורש",
   "tree.newFolderRoot": "תיקייה חדשה בשורש",
   "tree.newFileHere": "קובץ חדש בתיקייה זו",

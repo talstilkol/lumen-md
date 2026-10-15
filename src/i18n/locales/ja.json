@@ -661,5 +661,7 @@
   "runtimeMetrics.column.timeouts": "Timeouts",
   "runtimeMetrics.column.rateLimits": "Rate limit",
   "cmd.view.runtimeMetrics": "Runtime metrics",
-  "cmd.view.runtimeMetrics.hint": "Inspect retries, timeouts, and latency by transport category"
+  "cmd.view.runtimeMetrics.hint": "Inspect retries, timeouts, and latency by transport category",
+  "collab.e2e.decryptFailed": "このルームを復号できません",
+  "collab.e2e.decryptFailed.body": "ルームのパスワードが他の参加者のものと一致しません。ドキュメントには何も適用されていません。パスワードを確認して再参加してください。"
 }

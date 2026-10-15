@@ -661,5 +661,7 @@
   "runtimeMetrics.column.timeouts": "Timeouts",
   "runtimeMetrics.column.rateLimits": "Rate limit",
   "cmd.view.runtimeMetrics": "Runtime metrics",
-  "cmd.view.runtimeMetrics.hint": "Inspect retries, timeouts, and latency by transport category"
+  "cmd.view.runtimeMetrics.hint": "Inspect retries, timeouts, and latency by transport category",
+  "collab.e2e.decryptFailed": "تعذّر فك تشفير هذه الغرفة",
+  "collab.e2e.decryptFailed.body": "كلمة مرور الغرفة لا تطابق تلك التي يستخدمها المشاركون الآخرون. لم يُطبَّق أي شيء على مستندك — تحقّق من كلمة المرور ثم انضم مجددًا."
 }
