@@ -61,7 +61,9 @@ export async function createSupabaseProvider(): Promise<AuthProvider | null> {
       opts?: { auth?: { persistSession?: boolean; autoRefreshToken?: boolean; detectSessionInUrl?: boolean } },
     ) => {
       auth: {
-        getSession: () => Promise<{ data: { session: { user: SupabaseSessionUser } | null } }>;
+        getSession: () => Promise<{
+          data: { session: { user: SupabaseSessionUser; access_token?: string } | null };
+        }>;
         signInWithPassword: (a: { email: string; password: string }) => Promise<{
           data: { user: SupabaseSessionUser | null };
           error: { message: string } | null;
@@ -123,6 +125,10 @@ export async function createSupabaseProvider(): Promise<AuthProvider | null> {
     },
     async signOut() {
       await client.auth.signOut();
+    },
+    async getAccessToken() {
+      const { data } = await client.auth.getSession();
+      return data.session?.access_token ?? null;
     },
   };
 }

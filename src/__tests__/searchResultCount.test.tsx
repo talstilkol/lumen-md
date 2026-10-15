@@ -39,7 +39,8 @@ describe("tPlural", () => {
     expect(tPlural("search.results", 7)).toBe("7 results");
   });
 
-  it("works in Hebrew", () => {
+  it("works in Hebrew", async () => {
+    await loadLocale("he");
     applyLocale("he");
     expect(tPlural("search.results", 1)).toBe("1 תוצאה");
     expect(tPlural("search.results", 5)).toBe("5 תוצאות");

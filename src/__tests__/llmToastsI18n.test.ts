@@ -20,7 +20,7 @@ vi.mock("../ai/ollamaProvider", () => ({
   getBaseUrl: () => "http://127.0.0.1:11434",
 }));
 
-import { applyLocale } from "../i18n";
+import { applyLocale, loadLocale } from "../i18n";
 import { chat } from "../ai/llm";
 
 describe("llm.chat — Ollama unavailable toast", () => {
@@ -43,6 +43,7 @@ describe("llm.chat — Ollama unavailable toast", () => {
   });
 
   it("uses the active locale (he)", async () => {
+    await loadLocale("he");
     applyLocale("he");
     await expect(chat([{ role: "user", content: "hi" }])).rejects.toMatchObject({ code: "NO_KEY" });
     const [title, body] = warn.mock.calls[0];

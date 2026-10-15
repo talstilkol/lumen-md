@@ -82,6 +82,43 @@ describe("useEntitlement store", () => {
   });
 });
 
+describe("useEntitlement backend fetch (VITE_ENTITLEMENT_ENDPOINT)", () => {
+  beforeEach(() => {
+    localStorage.clear();
+    vi.resetModules();
+  });
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it("sends the auth provider's access token and maps { entitlement } to capabilities", async () => {
+    const fetchSpy = vi.fn().mockResolvedValue(
+      new Response(JSON.stringify({ entitlement: { tier: "pro", status: "active", renewsAt: 123 } }), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      }),
+    );
+    vi.stubGlobal("fetch", fetchSpy);
+    const { useAuth } = await import("../auth/useAuth");
+    const provider = { ...useAuth.getState().provider, getAccessToken: async () => "jwt-abc" };
+    useAuth.setState({ status: "authenticated", user: { id: "u1", provider: "supabase" }, provider });
+
+    const { useEntitlement, __setEntitlementEndpointForTesting } = await import("../billing/useEntitlement");
+    __setEntitlementEndpointForTesting("https://billing.lumen.test/entitlements");
+    await useEntitlement.getState().refresh();
+    __setEntitlementEndpointForTesting(null);
+
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
+    const [url, init] = fetchSpy.mock.calls[0] as [string, RequestInit];
+    expect(url).toBe("https://billing.lumen.test/entitlements");
+    expect(init.method).toBe("GET");
+    expect((init.headers as Record<string, string>).Authorization).toBe("Bearer jwt-abc");
+    const state = useEntitlement.getState();
+    expect(state.entitlement).toEqual({ tier: "pro", status: "active", renewsAt: 123 });
+    expect(state.capabilities.smartSearch).toBe(true);
+  });
+});
+
 describe("useCapabilities via store state", () => {
   beforeEach(() => {
     localStorage.clear();
