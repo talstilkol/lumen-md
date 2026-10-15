@@ -1,3 +1,5 @@
+// Must stay the first import: Trusted Types policies before any DOM sink.
+import "./lib/trustedTypesInit";
 import React, { Suspense } from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App";

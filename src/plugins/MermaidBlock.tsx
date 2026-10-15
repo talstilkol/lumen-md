@@ -118,7 +118,7 @@ export default function MermaidBlock({ source }: Props) {
     setError(null);
     if (cached) {
       if (!cancelled && contentRef.current) {
-        safeSetHtml(contentRef.current, cached);
+        safeSetHtml(contentRef.current, cached, "svg");
         setState("ready");
       }
       return;
@@ -131,7 +131,7 @@ export default function MermaidBlock({ source }: Props) {
         const { svg, bindFunctions } = await mermaid.render(id, source);
         if (cancelled || !contentRef.current) return;
         const cleanSvg = sanitizeSvgMarkup(svg);
-        safeSetHtml(contentRef.current, cleanSvg);
+        safeSetHtml(contentRef.current, cleanSvg, "svg");
         cache.set(cacheKey, cleanSvg);
         setDurationMs(Math.round(performance.now() - started));
         if (cache.size > MAX_CACHE) {

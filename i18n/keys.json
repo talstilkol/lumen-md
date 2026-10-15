@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-04-28T16:44:32.547Z",
+  "generated_at": "2026-10-15T21:19:43.737Z",
   "source": "src/i18n/index.ts (en bundle)",
-  "count": 519,
+  "count": 675,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -507,6 +507,46 @@
     {
       "key": "cmd.file.exportOpml.hint",
       "en": "Outline interchange format (RSS readers, mind-maps)",
+      "vars": []
+    },
+    {
+      "key": "cmd.file.exportReveal",
+      "en": "Export to Slides (Reveal.js)",
+      "vars": []
+    },
+    {
+      "key": "cmd.file.exportReveal.hint",
+      "en": "Turn --- separated sections into a presentation",
+      "vars": []
+    },
+    {
+      "key": "cmd.file.exportEpub",
+      "en": "Export to EPUB",
+      "vars": []
+    },
+    {
+      "key": "cmd.file.exportEpub.hint",
+      "en": "Package the document as an e-book (chapters split on H1)",
+      "vars": []
+    },
+    {
+      "key": "cmd.file.exportIpynb",
+      "en": "Export to Jupyter (.ipynb)",
+      "vars": []
+    },
+    {
+      "key": "cmd.file.exportIpynb.hint",
+      "en": "Notebook: fenced code blocks become cells",
+      "vars": []
+    },
+    {
+      "key": "cmd.file.exportSite",
+      "en": "Export to Static Site",
+      "vars": []
+    },
+    {
+      "key": "cmd.file.exportSite.hint",
+      "en": "Multi-page HTML site with sidebar nav + RSS (pages split on H1)",
       "vars": []
     },
     {
@@ -1195,6 +1235,126 @@
       "vars": []
     },
     {
+      "key": "findReplace.replace",
+      "en": "Replace",
+      "vars": []
+    },
+    {
+      "key": "findReplace.replaceAll",
+      "en": "Replace All",
+      "vars": []
+    },
+    {
+      "key": "focusMode.exit",
+      "en": "Exit Focus Mode (Esc)",
+      "vars": []
+    },
+    {
+      "key": "focusMode.exitShort",
+      "en": "✕ Exit Focus",
+      "vars": []
+    },
+    {
+      "key": "graphView.empty",
+      "en": "No workspace files found. Open the workspace panel and add files to see the knowledge graph.",
+      "vars": []
+    },
+    {
+      "key": "graphView.stats",
+      "en": "{nodes} nodes · {edges} connections",
+      "vars": [
+        "nodes",
+        "edges"
+      ]
+    },
+    {
+      "key": "graphView.title",
+      "en": "Knowledge Graph",
+      "vars": []
+    },
+    {
+      "key": "graphView.renderFailed",
+      "en": "Graph Render Failed",
+      "vars": []
+    },
+    {
+      "key": "graphView.renderFailedDetail",
+      "en": "The workspace data resulted in an invalid node structure that crashed the renderer.",
+      "vars": []
+    },
+    {
+      "key": "pluginGallery.search",
+      "en": "Search plugins…",
+      "vars": []
+    },
+    {
+      "key": "pluginGallery.close",
+      "en": "Close plugin gallery",
+      "vars": []
+    },
+    {
+      "key": "mdTable.addCol",
+      "en": "Add Column",
+      "vars": []
+    },
+    {
+      "key": "mdTable.removeCol",
+      "en": "Remove Column",
+      "vars": []
+    },
+    {
+      "key": "mdTable.addRow",
+      "en": "Add Row",
+      "vars": []
+    },
+    {
+      "key": "mdTable.removeRow",
+      "en": "Remove Row",
+      "vars": []
+    },
+    {
+      "key": "searchDialog.searching",
+      "en": "Searching workspace…",
+      "vars": []
+    },
+    {
+      "key": "searchDialog.thinking",
+      "en": "Thinking…",
+      "vars": []
+    },
+    {
+      "key": "searchDialog.noRelevant",
+      "en": "No relevant files found in workspace.",
+      "vars": []
+    },
+    {
+      "key": "versionHistory.restore",
+      "en": "Restore this version",
+      "vars": []
+    },
+    {
+      "key": "versionHistory.close",
+      "en": "Close",
+      "vars": []
+    },
+    {
+      "key": "versionHistory.selectVersion",
+      "en": "Select a version to preview",
+      "vars": []
+    },
+    {
+      "key": "versionHistory.diffChars",
+      "en": "Δ {n} chars difference",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "versionHistory.noVersions",
+      "en": "No versions saved yet. Versions are auto-saved when you switch files or save.",
+      "vars": []
+    },
+    {
       "key": "insertText.title",
       "en": "Insert anything",
       "vars": []
@@ -1295,6 +1455,16 @@
       "vars": []
     },
     {
+      "key": "insertText.hintInsert",
+      "en": "to insert",
+      "vars": []
+    },
+    {
+      "key": "insertText.hintCancel",
+      "en": "to cancel",
+      "vars": []
+    },
+    {
       "key": "block.htmlPreview.title",
       "en": "HTML preview",
       "vars": []
@@ -1322,6 +1492,21 @@
     {
       "key": "block.htmlPreview.openFullscreen",
       "en": "Fullscreen preview",
+      "vars": []
+    },
+    {
+      "key": "block.htmlPreview.toggleScripts",
+      "en": "Toggle unsafe script execution",
+      "vars": []
+    },
+    {
+      "key": "block.htmlPreview.scriptsOn",
+      "en": "Enable scripts",
+      "vars": []
+    },
+    {
+      "key": "block.htmlPreview.scriptsOff",
+      "en": "Scripts off",
       "vars": []
     },
     {
@@ -1362,6 +1547,11 @@
     {
       "key": "toast.pasteText.prompt",
       "en": "Paste HTML or rich text below:",
+      "vars": []
+    },
+    {
+      "key": "toast.dismiss",
+      "en": "Dismiss",
       "vars": []
     },
     {
@@ -1805,6 +1995,156 @@
       "vars": []
     },
     {
+      "key": "status.grammar.on",
+      "en": "Grammar",
+      "vars": []
+    },
+    {
+      "key": "status.grammar.off",
+      "en": "Grammar",
+      "vars": []
+    },
+    {
+      "key": "status.grammar.tooltip.on",
+      "en": "Grammar check is ON. Click to disable.",
+      "vars": []
+    },
+    {
+      "key": "status.grammar.tooltip.off",
+      "en": "Grammar check is OFF. Click to enable LanguageTool checking.",
+      "vars": []
+    },
+    {
+      "key": "status.telemetry.on",
+      "en": "Telemetry",
+      "vars": []
+    },
+    {
+      "key": "status.telemetry.off",
+      "en": "Telemetry",
+      "vars": []
+    },
+    {
+      "key": "status.telemetry.tooltip.on",
+      "en": "Error telemetry is ON. Crash reports are sent to help improve Lumen. Click to opt out.",
+      "vars": []
+    },
+    {
+      "key": "status.telemetry.tooltip.off",
+      "en": "Error telemetry is OFF. Click to enable anonymous crash reports.",
+      "vars": []
+    },
+    {
+      "key": "status.runtimeMetrics",
+      "en": "Runtime metrics",
+      "vars": []
+    },
+    {
+      "key": "status.runtimeMetrics.tooltip",
+      "en": "Open runtime metrics and transport diagnostics",
+      "vars": []
+    },
+    {
+      "key": "runtimeMetrics.title",
+      "en": "Runtime metrics",
+      "vars": []
+    },
+    {
+      "key": "runtimeMetrics.subtitle",
+      "en": "Session runtime telemetry for network + AI operations.",
+      "vars": []
+    },
+    {
+      "key": "runtimeMetrics.section.categories",
+      "en": "Categories",
+      "vars": []
+    },
+    {
+      "key": "runtimeMetrics.section.operations",
+      "en": "Operations",
+      "vars": []
+    },
+    {
+      "key": "runtimeMetrics.totalRequests",
+      "en": "Total requests",
+      "vars": []
+    },
+    {
+      "key": "runtimeMetrics.lastUpdated",
+      "en": "Last updated",
+      "vars": []
+    },
+    {
+      "key": "runtimeMetrics.noData",
+      "en": "No runtime data yet. Use the app and retry operations to populate metrics.",
+      "vars": []
+    },
+    {
+      "key": "runtimeMetrics.refresh",
+      "en": "Refresh",
+      "vars": []
+    },
+    {
+      "key": "runtimeMetrics.clear",
+      "en": "Clear",
+      "vars": []
+    },
+    {
+      "key": "runtimeMetrics.close",
+      "en": "Close",
+      "vars": []
+    },
+    {
+      "key": "runtimeMetrics.cleared",
+      "en": "Runtime metrics cleared",
+      "vars": []
+    },
+    {
+      "key": "runtimeMetrics.column.label",
+      "en": "Label",
+      "vars": []
+    },
+    {
+      "key": "runtimeMetrics.column.total",
+      "en": "Total",
+      "vars": []
+    },
+    {
+      "key": "runtimeMetrics.column.success",
+      "en": "Success",
+      "vars": []
+    },
+    {
+      "key": "runtimeMetrics.column.retries",
+      "en": "Retry %",
+      "vars": []
+    },
+    {
+      "key": "runtimeMetrics.column.avgMs",
+      "en": "Avg (ms)",
+      "vars": []
+    },
+    {
+      "key": "runtimeMetrics.column.p95Ms",
+      "en": "p95 (ms)",
+      "vars": []
+    },
+    {
+      "key": "runtimeMetrics.column.totalRetries",
+      "en": "Retries",
+      "vars": []
+    },
+    {
+      "key": "runtimeMetrics.column.timeouts",
+      "en": "Timeouts",
+      "vars": []
+    },
+    {
+      "key": "runtimeMetrics.column.rateLimits",
+      "en": "Rate limit",
+      "vars": []
+    },
+    {
       "key": "templates.title",
       "en": "Template gallery",
       "vars": []
@@ -1908,6 +2248,13 @@
       ]
     },
     {
+      "key": "templates.loadFailed",
+      "en": "Couldn't open template: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
       "key": "templates.contribute",
       "en": "Contribute a template:",
       "vars": []
@@ -2002,13 +2349,229 @@
       ]
     },
     {
+      "key": "cmd.audit.open",
+      "en": "Audit log…",
+      "vars": []
+    },
+    {
+      "key": "cmd.audit.open.hint",
+      "en": "Inspect every recorded mutation; export CSV for compliance",
+      "vars": []
+    },
+    {
+      "key": "cmd.fineTune.open",
+      "en": "AI fine-tune settings…",
+      "vars": []
+    },
+    {
+      "key": "cmd.fineTune.open.hint",
+      "en": "Train a personal model on your writing style (Pro)",
+      "vars": []
+    },
+    {
+      "key": "fineTune.title",
+      "en": "Train AI on my style",
+      "vars": []
+    },
+    {
+      "key": "fineTune.intro",
+      "en": "Fine-tune a personal copy of GPT-4o-mini on the last 90 days of your writing. The model learns your tone + vocabulary so completions feel like you wrote them.",
+      "vars": []
+    },
+    {
+      "key": "fineTune.status",
+      "en": "Status",
+      "vars": []
+    },
+    {
+      "key": "fineTune.modelReady",
+      "en": "Personal model ready",
+      "vars": []
+    },
+    {
+      "key": "fineTune.training",
+      "en": "Training… ({status})",
+      "vars": [
+        "status"
+      ]
+    },
+    {
+      "key": "fineTune.statsLine",
+      "en": "{chunks} chunks · ≈ {tokens} tokens",
+      "vars": [
+        "chunks",
+        "tokens"
+      ]
+    },
+    {
+      "key": "fineTune.notTrained",
+      "en": "No personal model yet. Click \"Train\" below to upload your last 90 days of writing.",
+      "vars": []
+    },
+    {
+      "key": "fineTune.useToggle",
+      "en": "Route AI requests through my voice",
+      "vars": []
+    },
+    {
+      "key": "fineTune.useToggleHint",
+      "en": "Off by default. Toggle on to make every AI completion use your fine-tuned model.",
+      "vars": []
+    },
+    {
+      "key": "fineTune.train",
+      "en": "Train",
+      "vars": []
+    },
+    {
+      "key": "fineTune.retrain",
+      "en": "Re-train",
+      "vars": []
+    },
+    {
+      "key": "fineTune.forget",
+      "en": "Forget local model id",
+      "vars": []
+    },
+    {
+      "key": "fineTune.close",
+      "en": "Close",
+      "vars": []
+    },
+    {
+      "key": "fineTune.confirm",
+      "en": "Upload your last 90 days of writing to OpenAI to train a personal model? Training usually finishes in under an hour.",
+      "vars": []
+    },
+    {
+      "key": "fineTune.forgetConfirm",
+      "en": "Forget the locally-stored fine-tune model id? You'll need to delete the model from your OpenAI dashboard separately for full removal.",
+      "vars": []
+    },
+    {
+      "key": "fineTune.needKey",
+      "en": "Configure your AI Key first (⌘K → AI Settings).",
+      "vars": []
+    },
+    {
+      "key": "fineTune.toast.queued",
+      "en": "Fine-tune started — {chunks} chunks (~{tokens} tokens) uploaded.",
+      "vars": [
+        "chunks",
+        "tokens"
+      ]
+    },
+    {
+      "key": "fineTune.toast.succeeded",
+      "en": "✅ Fine-tune ready: {model}",
+      "vars": [
+        "model"
+      ]
+    },
+    {
+      "key": "fineTune.toast.failed",
+      "en": "Fine-tune {status}. See OpenAI dashboard.",
+      "vars": [
+        "status"
+      ]
+    },
+    {
+      "key": "fineTune.toast.error",
+      "en": "Fine-tune failed: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "fineTune.toast.forgot",
+      "en": "Local fine-tune id removed.",
+      "vars": []
+    },
+    {
+      "key": "fineTune.privacy",
+      "en": "Note: training uploads ~5 MB of your writing to OpenAI. The resulting model is only accessible from your account. Click \"Forget\" to drop the id from this device — to fully remove the trained model, delete it in your OpenAI dashboard too.",
+      "vars": []
+    },
+    {
       "key": "ai.prompt.key",
       "en": "Enter your OpenAI API key (sk-…):",
       "vars": []
     },
     {
+      "key": "ai.prompt.placeholder",
+      "en": "Type here…",
+      "vars": []
+    },
+    {
+      "key": "ai.prompt.submit",
+      "en": "Go",
+      "vars": []
+    },
+    {
       "key": "ai.alert.keySaved",
       "en": "AI key saved.",
+      "vars": []
+    },
+    {
+      "key": "ai.toast.ollamaUnavailable.title",
+      "en": "Ollama unavailable",
+      "vars": []
+    },
+    {
+      "key": "ai.toast.ollamaUnavailable.body",
+      "en": "Cannot reach Ollama at {url}. Is it running? Falling back to OpenAI.",
+      "vars": [
+        "url"
+      ]
+    },
+    {
+      "key": "ai.toast.localLoading.title",
+      "en": "Local AI loading",
+      "vars": []
+    },
+    {
+      "key": "ai.toast.localLoading.body",
+      "en": "{pct}% — {status}",
+      "vars": [
+        "pct",
+        "status"
+      ]
+    },
+    {
+      "key": "ai.toast.localLoading.preparing",
+      "en": "preparing model",
+      "vars": []
+    },
+    {
+      "key": "ai.toast.localUnavailable.title",
+      "en": "Local AI unavailable",
+      "vars": []
+    },
+    {
+      "key": "ai.toast.localUnavailable.body",
+      "en": "WebGPU isn't supported here — falling back to your OpenAI key.",
+      "vars": []
+    },
+    {
+      "key": "ai.toast.rateLimit.title",
+      "en": "AI rate limit reached",
+      "vars": []
+    },
+    {
+      "key": "ai.toast.rateLimit.body",
+      "en": "Wait {seconds}s before sending another prompt.",
+      "vars": [
+        "seconds"
+      ]
+    },
+    {
+      "key": "ai.toast.capacity.title",
+      "en": "AI requests at capacity",
+      "vars": []
+    },
+    {
+      "key": "ai.toast.capacity.body",
+      "en": "Wait for the current prompts to finish before sending more.",
       "vars": []
     },
     {
@@ -2042,6 +2605,46 @@
       "vars": []
     },
     {
+      "key": "cmd.ai.outline",
+      "en": "AI: Generate Outline",
+      "vars": []
+    },
+    {
+      "key": "cmd.ai.outline.hint",
+      "en": "Add AI-suggested headings",
+      "vars": []
+    },
+    {
+      "key": "cmd.ai.productAgent",
+      "en": "AI: Create Product",
+      "vars": []
+    },
+    {
+      "key": "cmd.ai.productAgent.hint",
+      "en": "Generate a complete project from a description",
+      "vars": []
+    },
+    {
+      "key": "cmd.ai.ollama",
+      "en": "AI: Ollama Models",
+      "vars": []
+    },
+    {
+      "key": "cmd.ai.ollama.hint",
+      "en": "Switch to a local Ollama model",
+      "vars": []
+    },
+    {
+      "key": "cmd.ai.provider",
+      "en": "AI: Switch Provider",
+      "vars": []
+    },
+    {
+      "key": "cmd.ai.provider.hint",
+      "en": "Switch AI provider: OpenAI, Claude, Gemini, Mistral, Ollama, or local WebGPU",
+      "vars": []
+    },
+    {
       "key": "cmd.ai.settings",
       "en": "AI Settings…",
       "vars": []
@@ -2049,6 +2652,51 @@
     {
       "key": "cmd.ai.settings.hint",
       "en": "Configure your OpenAI API key + per-doc options",
+      "vars": []
+    },
+    {
+      "key": "cmd.ai.diagram",
+      "en": "AI: Diagram from Text",
+      "vars": []
+    },
+    {
+      "key": "cmd.ai.diagram.hint",
+      "en": "Generate a Mermaid diagram from the document",
+      "vars": []
+    },
+    {
+      "key": "cmd.ai.actionItems",
+      "en": "AI: Extract Action Items",
+      "vars": []
+    },
+    {
+      "key": "cmd.ai.actionItems.hint",
+      "en": "Pull a task list out of meeting notes",
+      "vars": []
+    },
+    {
+      "key": "cmd.ai.translate",
+      "en": "AI: Translate Document",
+      "vars": []
+    },
+    {
+      "key": "cmd.ai.translate.hint",
+      "en": "Translate the whole document, preserving formatting",
+      "vars": []
+    },
+    {
+      "key": "cmd.ai.chart",
+      "en": "AI: Chart from Data",
+      "vars": []
+    },
+    {
+      "key": "cmd.ai.chart.hint",
+      "en": "Turn CSV or table data into an ECharts chart",
+      "vars": []
+    },
+    {
+      "key": "editor.ariaLabel",
+      "en": "Markdown source editor",
       "vars": []
     },
     {
@@ -2202,8 +2850,23 @@
       ]
     },
     {
+      "key": "voice.memo.recording",
+      "en": "Recording memo…",
+      "vars": []
+    },
+    {
+      "key": "voice.memo.stop",
+      "en": "⏹ Stop & insert",
+      "vars": []
+    },
+    {
       "key": "errorBoundary.heading",
       "en": "Rendering Error",
+      "vars": []
+    },
+    {
+      "key": "errorBoundary.renderDetail",
+      "en": "One of the embedded visualizations crashed during render. The rest of the editor is kept safe.",
       "vars": []
     },
     {
@@ -2438,6 +3101,21 @@
       "vars": []
     },
     {
+      "key": "comment.selectTextFirst",
+      "en": "Select some text first to anchor the comment.",
+      "vars": []
+    },
+    {
+      "key": "comment.promptLabel",
+      "en": "Comment:",
+      "vars": []
+    },
+    {
+      "key": "loading.generic",
+      "en": "Loading…",
+      "vars": []
+    },
+    {
       "key": "contextMenu.title",
       "en": "File actions",
       "vars": []
@@ -2538,6 +3216,132 @@
       "vars": []
     },
     {
+      "key": "tour.next",
+      "en": "→ Next",
+      "vars": []
+    },
+    {
+      "key": "tour.done",
+      "en": "✓ Done",
+      "vars": []
+    },
+    {
+      "key": "tour.step.menu.title",
+      "en": "📋 Menu Bar",
+      "vars": []
+    },
+    {
+      "key": "tour.step.menu.body",
+      "en": "Access File, Edit, Insert, View, and Help — each menu has clear sections, hover tooltips, and per-action descriptions.",
+      "vars": []
+    },
+    {
+      "key": "tour.step.viewModes.title",
+      "en": "👁️ View Modes",
+      "vars": []
+    },
+    {
+      "key": "tour.step.viewModes.body",
+      "en": "Switch between Source, Split, Preview, and WYSIWYG anytime (⌘1-4).",
+      "vars": []
+    },
+    {
+      "key": "tour.step.workspace.title",
+      "en": "📁 Workspace",
+      "vars": []
+    },
+    {
+      "key": "tour.step.workspace.body",
+      "en": "Manage files in your local workspace. Everything is stored in-browser.",
+      "vars": []
+    },
+    {
+      "key": "tour.step.statusBar.title",
+      "en": "📊 Status Bar",
+      "vars": []
+    },
+    {
+      "key": "tour.step.statusBar.body",
+      "en": "Word count, character count, reading time — always visible.",
+      "vars": []
+    },
+    {
+      "key": "tour.step.editor.title",
+      "en": "✍️ Editor",
+      "vars": []
+    },
+    {
+      "key": "tour.step.editor.body",
+      "en": "Write Markdown with full syntax highlighting, live preview, and AI assistance.",
+      "vars": []
+    },
+    {
+      "key": "tour.action.openRuntimeMetrics",
+      "en": "Open runtime metrics now",
+      "vars": []
+    },
+    {
+      "key": "auth.signIn",
+      "en": "Sign in",
+      "vars": []
+    },
+    {
+      "key": "auth.signOut",
+      "en": "Sign out",
+      "vars": []
+    },
+    {
+      "key": "auth.signedInAs",
+      "en": "Signed in as",
+      "vars": []
+    },
+    {
+      "key": "time.justNow",
+      "en": "just now",
+      "vars": []
+    },
+    {
+      "key": "time.minutesAgo",
+      "en": "{n}m ago",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "time.hoursAgo",
+      "en": "{n}h ago",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "time.daysAgo",
+      "en": "{n}d ago",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "plugin.map",
+      "en": "Map",
+      "vars": []
+    },
+    {
+      "key": "plugin.chart",
+      "en": "Chart",
+      "vars": []
+    },
+    {
+      "key": "plugin.chart.refetch",
+      "en": "Refetch chart data",
+      "vars": []
+    },
+    {
+      "key": "plugin.abc",
+      "en": "Music · ABC notation",
+      "vars": []
+    },
+    {
       "key": "theme.toggle",
       "en": "Toggle theme",
       "vars": []
@@ -2590,6 +3394,16 @@
     {
       "key": "cmd.view.graphView.hint",
       "en": "visual map of file connections",
+      "vars": []
+    },
+    {
+      "key": "cmd.view.runtimeMetrics",
+      "en": "Runtime metrics",
+      "vars": []
+    },
+    {
+      "key": "cmd.view.runtimeMetrics.hint",
+      "en": "Inspect retries, timeouts, and latency by transport category",
       "vars": []
     },
     {

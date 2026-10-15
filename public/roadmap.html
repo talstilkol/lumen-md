@@ -324,21 +324,6 @@
   ]]
 ]
     </script>
-    <script>
-      const data = JSON.parse(document.getElementById("roadmap-data").textContent);
-      for (const [phase, items] of data) {
-        const root = document.getElementById("phase-" + phase);
-        for (const [id, status, title, body] of items) {
-          const card = document.createElement("article");
-          card.className = "card";
-          card.innerHTML =
-            '<span class="tag ' + status + '">' + status + "</span>" +
-            '<div class="id">' + id + "</div>" +
-            "<h3>" + title + "</h3>" +
-            "<p>" + body + "</p>";
-          root.appendChild(card);
-        }
-      }
-    </script>
+    <script src="/roadmap.js" defer></script>
   </body>
 </html>

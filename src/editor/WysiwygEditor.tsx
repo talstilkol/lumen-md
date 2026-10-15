@@ -608,7 +608,7 @@ export default function WysiwygEditor({ value, onChange }: Props) {
       if (cancelled || !host) {
         return;
       }
-      host.innerHTML = "";
+      host.replaceChildren();
 
       // Create floating menu DOMs lazily and reuse them.
       if (!slashElRef.current) slashElRef.current = buildSlashMenu(getView);

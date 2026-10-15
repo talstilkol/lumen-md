@@ -17,10 +17,18 @@ import { log } from "./logger";
 const DB_NAME = "LumenEncryptedStorage";
 const DB_VERSION = 1;
 
+/**
+ * Byte buffers backed by a plain `ArrayBuffer` (never a SharedArrayBuffer).
+ * TS ≥5.7 makes `Uint8Array` generic over its buffer, and WebCrypto's
+ * `BufferSource` only accepts `ArrayBuffer`-backed views — so we pin the
+ * generic here instead of casting at every call site.
+ */
+type Bytes = Uint8Array<ArrayBuffer>;
+
 interface EncryptedRecord {
-  iv: Uint8Array;
-  salt: Uint8Array;
-  ciphertext: Uint8Array;
+  iv: Bytes;
+  salt: Bytes;
+  ciphertext: Bytes;
 }
 
 interface StoreConfig {
@@ -42,7 +50,7 @@ const IV_LENGTH = 12;   // 96-bit nonce for AES-GCM
 const SALT_LENGTH = 16; // 128-bit salt
 
 /** Derive an AES-GCM key from a password and salt. */
-async function deriveKey(password: string, salt: Uint8Array): Promise<CryptoKey> {
+async function deriveKey(password: string, salt: Bytes): Promise<CryptoKey> {
   const enc = new TextEncoder();
   const keyMaterial = await crypto.subtle.importKey(
     "raw",
@@ -54,7 +62,7 @@ async function deriveKey(password: string, salt: Uint8Array): Promise<CryptoKey>
   return crypto.subtle.deriveKey(
     {
       name: "PBKDF2",
-      salt: salt as any,
+      salt,
       iterations: PBKDF2_ITERATIONS,
       hash: "SHA-256",
     },
@@ -65,7 +73,7 @@ async function deriveKey(password: string, salt: Uint8Array): Promise<CryptoKey>
   );
 }
 
-function randomBytes(length: number): Uint8Array {
+function randomBytes(length: number): Bytes {
   return crypto.getRandomValues(new Uint8Array(length));
 }
 
@@ -80,7 +88,7 @@ export async function encrypt(
   const enc = new TextEncoder();
   const ciphertext = new Uint8Array(
     await crypto.subtle.encrypt(
-      { name: "AES-GCM", iv: iv as any },
+      { name: "AES-GCM", iv },
       key,
       enc.encode(plaintext),
     ),
@@ -95,9 +103,9 @@ export async function decrypt(
 ): Promise<string> {
   const key = await deriveKey(password, record.salt);
   const decrypted = await crypto.subtle.decrypt(
-    { name: "AES-GCM", iv: record.iv as any },
+    { name: "AES-GCM", iv: record.iv },
     key,
-    record.ciphertext as any,
+    record.ciphertext,
   );
   return new TextDecoder().decode(decrypted);
 }

@@ -27,6 +27,7 @@ const tag = "[lumen]";
 
 export const log = {
   debug: (...args: Args) => {
+    // hygiene-allow: the logger is the single sanctioned console sink (dev-only debug level)
     if (isDev) console.log(tag, ...args);
   },
   info: (...args: Args) => {

@@ -41,6 +41,18 @@ interface WorkerLog {
  * real Worker (which jsdom can't reliably emulate).
  */
 export const WORKER_SOURCE = `
+// A blob: worker inherits the page CSP, including
+// require-trusted-types-for 'script'. Running the fence body through
+// new Function() is this worker's whole purpose (it is isolated from the
+// page and has no DOM), so give it a default policy that accepts scripts.
+if (self.trustedTypes && !self.trustedTypes.defaultPolicy) {
+  try {
+    self.trustedTypes.createPolicy("default", {
+      createScript: function(s) { return s; },
+    });
+  } catch (e) {}
+}
+
 const toParts = function(args) {
   const list = Array.prototype.slice.call(args);
   return list.map(function(a) {
