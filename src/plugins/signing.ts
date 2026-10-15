@@ -108,6 +108,66 @@ export async function listTrustedKeys(): Promise<Array<{ fingerprint: string; so
   ];
 }
 
+/* ─── Public-key parsing (trusted-keys UI) ──────────────────────────── */
+
+/** DER prefix of an Ed25519 SubjectPublicKeyInfo (RFC 8410): 12 bytes + 32-byte key. */
+const ED25519_SPKI_PREFIX = [0x30, 0x2a, 0x30, 0x05, 0x06, 0x03, 0x2b, 0x65, 0x70, 0x03, 0x21, 0x00];
+const ED25519_SPKI_LENGTH = ED25519_SPKI_PREFIX.length + 32;
+
+export type PublicKeyParseError = "empty" | "notBase64" | "notEd25519";
+
+/**
+ * Validate a pasted public key and return it as canonical base64 SPKI.
+ * Accepts raw base64 / base64url SPKI, or a PEM `PUBLIC KEY` block.
+ */
+export function parseEd25519PublicKey(
+  input: string,
+): { ok: true; spkiBase64: string } | { ok: false; error: PublicKeyParseError } {
+  const trimmed = input.trim();
+  if (!trimmed) return { ok: false, error: "empty" };
+  const body = trimmed
+    .replace(/-----BEGIN PUBLIC KEY-----/, "")
+    .replace(/-----END PUBLIC KEY-----/, "")
+    .replace(/\s+/g, "")
+    .replace(/-/g, "+")
+    .replace(/_/g, "/");
+  if (!/^[A-Za-z0-9+/]+={0,2}$/.test(body)) return { ok: false, error: "notBase64" };
+  let bytes: Uint8Array;
+  try {
+    const padded = body + "=".repeat((4 - (body.length % 4)) % 4);
+    bytes = b64ToBytes(padded.replace(/={3,}$/, ""));
+  } catch {
+    return { ok: false, error: "notBase64" };
+  }
+  if (bytes.length !== ED25519_SPKI_LENGTH || ED25519_SPKI_PREFIX.some((b, i) => bytes[i] !== b)) {
+    return { ok: false, error: "notEd25519" };
+  }
+  let bin = "";
+  for (const b of bytes) bin += String.fromCharCode(b);
+  return { ok: true, spkiBase64: btoa(bin) };
+}
+
+/** Group a hex fingerprint as `ab12 cd34 …` for display. */
+export function formatFingerprint(fp: string): string {
+  return fp.replace(/(.{4})(?=.)/g, "$1 ");
+}
+
+/**
+ * Validate a pasted key, compute its fingerprint and trust it.
+ * Returns the fingerprint so the UI can highlight the new row.
+ */
+export async function trustPublicKey(
+  input: string,
+): Promise<{ ok: true; fingerprint: string; alreadyTrusted: boolean } | { ok: false; error: PublicKeyParseError }> {
+  const parsed = parseEd25519PublicKey(input);
+  if (!parsed.ok) return parsed;
+  const fingerprint = await fingerprintOf(parsed.spkiBase64);
+  const userKeys = await loadUserKeys();
+  const alreadyTrusted = fingerprint in BUILTIN_TRUST || fingerprint in userKeys;
+  if (!alreadyTrusted) await trustKey(fingerprint, parsed.spkiBase64);
+  return { ok: true, fingerprint, alreadyTrusted };
+}
+
 /* ─── Verification ───────────────────────────────────────────────────── */
 
 /** Decode a base64 string into a Uint8Array. */
