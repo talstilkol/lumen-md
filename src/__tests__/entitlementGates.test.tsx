@@ -1,0 +1,218 @@
+/**
+ * Entitlement enforcement (β.3.6 / β.3.7): gates, AI quota, and the gated
+ * UI entry points (AuditLog, CollabSettings) in both modes:
+ *   - self-hosted: no VITE_ENTITLEMENT_ENDPOINT → everything unlocked
+ *   - billed: endpoint configured (or dev tier shim) → plan limits apply
+ */
+
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+
+vi.mock("../lib/logger", () => ({
+  log: { info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() },
+}));
+vi.mock("../ui/AiToast", () => ({ showAiToast: vi.fn() }));
+vi.mock("../lib/audit", () => ({
+  listAudit: vi.fn().mockResolvedValue([
+    { user_id: "u1", org_id: "o", action: "doc.publish", payload_json: "{}", ts: 1714200000000 },
+  ]),
+  recordAudit: vi.fn(),
+}));
+
+import { useEntitlement, __setEntitlementEndpointForTesting } from "../billing/useEntitlement";
+import { FREE_CAPS, PRO_CAPS, TEAM_CAPS } from "../billing/types";
+import { gatesEnforced, effectiveCapabilities } from "../billing/gates";
+import {
+  monthKey,
+  getAiUsage,
+  recordAiPrompt,
+  aiQuotaStatus,
+  consumeAiPrompt,
+  isAiPromptCommand,
+  withAiQuota,
+} from "../billing/aiQuota";
+import { showAiToast } from "../ui/AiToast";
+import { listAudit } from "../lib/audit";
+import { AuditLog } from "../ui/AuditLog";
+import { CollabSettings } from "../ui/CollabSettings";
+
+const ENDPOINT = "https://billing.lumen.test/entitlement";
+
+function setCaps(caps: typeof FREE_CAPS) {
+  useEntitlement.setState({ capabilities: caps, entitlement: null, loading: false });
+}
+
+beforeEach(() => {
+  localStorage.clear();
+  vi.clearAllMocks();
+  setCaps(FREE_CAPS);
+});
+afterEach(() => {
+  __setEntitlementEndpointForTesting(null);
+  localStorage.clear();
+});
+
+describe("self-hosted mode (no billing endpoint)", () => {
+  it("does not enforce gates and unlocks every capability", () => {
+    expect(gatesEnforced()).toBe(false);
+    const caps = effectiveCapabilities();
+    expect(caps.auditLog).toBe(true);
+    expect(caps.persistentCollab).toBe(true);
+    expect(caps.workspaceSharing).toBe(true);
+    expect(caps.aiMonthlyPrompts).toBe(Number.POSITIVE_INFINITY);
+  });
+
+  it("treats placeholder endpoints as unconfigured", () => {
+    __setEntitlementEndpointForTesting("https://example.com/placeholder");
+    expect(gatesEnforced()).toBe(false);
+  });
+
+  it("never blocks AI prompts and writes nothing to storage", () => {
+    for (let i = 0; i < 500; i++) expect(consumeAiPrompt()).toBe(true);
+    expect(getAiUsage()).toBe(0);
+    expect(aiQuotaStatus().allowed).toBe(true);
+  });
+
+  it("AuditLog renders the table even on FREE caps", async () => {
+    render(<AuditLog open onClose={() => {}} orgId="o" />);
+    await waitFor(() => expect(screen.getByText("doc.publish")).toBeTruthy());
+    expect(screen.queryByTestId("upgrade-notice")).toBeNull();
+  });
+
+  it("CollabSettings lets the persistent server be saved", () => {
+    const onClose = vi.fn();
+    const { container } = render(<CollabSettings onClose={onClose} />);
+    const ws = container.querySelector("#collab-persistent-url") as HTMLInputElement;
+    expect(ws.disabled).toBe(false);
+    fireEvent.change(ws, { target: { value: "wss://yjs.example.org" } });
+    fireEvent.click(screen.getByText("Save"));
+    expect(localStorage.getItem("lumen.collab.ws")).toBe("wss://yjs.example.org");
+  });
+});
+
+describe("billed mode (endpoint configured)", () => {
+  beforeEach(() => {
+    __setEntitlementEndpointForTesting(ENDPOINT);
+  });
+
+  it("enforces the entitlement's capabilities", () => {
+    expect(gatesEnforced()).toBe(true);
+    expect(effectiveCapabilities().auditLog).toBe(false);
+    setCaps(TEAM_CAPS);
+    expect(effectiveCapabilities().auditLog).toBe(true);
+  });
+
+  it("AuditLog shows an upgrade notice and skips the fetch when not entitled", () => {
+    render(<AuditLog open onClose={() => {}} orgId="o" />);
+    expect(screen.getByTestId("upgrade-notice")).toBeTruthy();
+    expect(screen.getByText("The audit log is available on the Team plan.")).toBeTruthy();
+    expect(listAudit).not.toHaveBeenCalled();
+  });
+
+  it("AuditLog loads normally on the Team plan", async () => {
+    setCaps(TEAM_CAPS);
+    render(<AuditLog open onClose={() => {}} orgId="o" />);
+    await waitFor(() => expect(listAudit).toHaveBeenCalledTimes(1));
+    expect(screen.queryByTestId("upgrade-notice")).toBeNull();
+  });
+
+  it("CollabSettings disables the persistent server on Free and clears a stale value", () => {
+    localStorage.setItem("lumen.collab.ws", "wss://stale.example.org");
+    const { container } = render(<CollabSettings onClose={() => {}} />);
+    const ws = container.querySelector("#collab-persistent-url") as HTMLInputElement;
+    expect(ws.disabled).toBe(true);
+    expect(screen.getByTestId("upgrade-notice")).toBeTruthy();
+    fireEvent.click(screen.getByText("Save"));
+    expect(localStorage.getItem("lumen.collab.ws")).toBeNull();
+  });
+
+  it("CollabSettings enables the persistent server on Pro", () => {
+    setCaps(PRO_CAPS);
+    const { container } = render(<CollabSettings onClose={() => {}} />);
+    const ws = container.querySelector("#collab-persistent-url") as HTMLInputElement;
+    expect(ws.disabled).toBe(false);
+    expect(screen.queryByTestId("upgrade-notice")).toBeNull();
+  });
+
+  it("blocks AI prompts once the free monthly limit is reached", () => {
+    const now = new Date(2026, 9, 15);
+    localStorage.setItem(monthKey(now), String(FREE_CAPS.aiMonthlyPrompts - 1));
+    expect(consumeAiPrompt(now)).toBe(true);
+    expect(getAiUsage(now)).toBe(FREE_CAPS.aiMonthlyPrompts);
+    expect(consumeAiPrompt(now)).toBe(false);
+    expect(showAiToast).toHaveBeenCalledWith(expect.stringContaining("100"), "error");
+    expect(aiQuotaStatus(now)).toMatchObject({ allowed: false, used: 100, limit: 100, remaining: 0 });
+  });
+
+  it("uses the Pro limit when entitled", () => {
+    setCaps(PRO_CAPS);
+    const now = new Date(2026, 9, 15);
+    localStorage.setItem(monthKey(now), "100");
+    expect(consumeAiPrompt(now)).toBe(true);
+    expect(aiQuotaStatus(now).limit).toBe(1000);
+  });
+});
+
+describe("dev tier shim enforces gates without an endpoint", () => {
+  it("lumen.dev.tier=free enforces, =team unlocks the audit log", () => {
+    localStorage.setItem("lumen.dev.tier", "free");
+    expect(gatesEnforced()).toBe(true);
+    expect(effectiveCapabilities().auditLog).toBe(false);
+    useEntitlement.getState().setLocal("team");
+    expect(effectiveCapabilities().auditLog).toBe(true);
+  });
+});
+
+describe("aiQuota counter", () => {
+  it("keys counters by calendar month and resets on a new month", () => {
+    const oct = new Date(2026, 9, 31);
+    const nov = new Date(2026, 10, 1);
+    expect(monthKey(oct)).toBe("lumen.ai.quota.2026-10");
+    recordAiPrompt(oct);
+    recordAiPrompt(oct);
+    expect(getAiUsage(oct)).toBe(2);
+    expect(getAiUsage(nov)).toBe(0);
+    recordAiPrompt(nov);
+    // previous month's key is cleaned up
+    expect(localStorage.getItem("lumen.ai.quota.2026-10")).toBeNull();
+  });
+
+  it("ignores corrupt values and survives storage failures", () => {
+    localStorage.setItem(monthKey(), "garbage");
+    expect(getAiUsage()).toBe(0);
+    const spy = vi.spyOn(Storage.prototype, "getItem").mockImplementation(() => {
+      throw new Error("denied");
+    });
+    const setSpy = vi.spyOn(Storage.prototype, "setItem").mockImplementation(() => {
+      throw new Error("denied");
+    });
+    expect(getAiUsage()).toBe(0);
+    expect(() => recordAiPrompt()).not.toThrow();
+    spy.mockRestore();
+    setSpy.mockRestore();
+  });
+
+  it("classifies AI prompt commands", () => {
+    expect(isAiPromptCommand("ai.translate")).toBe(true);
+    expect(isAiPromptCommand("ai.prompt.summarize-en")).toBe(true);
+    expect(isAiPromptCommand("tools.autoTag")).toBe(true);
+    expect(isAiPromptCommand("ai.settings")).toBe(false);
+    expect(isAiPromptCommand("ai.switchProvider")).toBe(false);
+    expect(isAiPromptCommand("file.save")).toBe(false);
+  });
+
+  it("withAiQuota wraps only AI prompt commands", () => {
+    __setEntitlementEndpointForTesting(ENDPOINT);
+    localStorage.setItem(monthKey(), "100");
+    const aiAction = vi.fn();
+    const saveAction = vi.fn();
+    const cmds = withAiQuota([
+      { id: "ai.diagram", action: aiAction },
+      { id: "file.save", action: saveAction },
+    ]);
+    cmds[0].action();
+    cmds[1].action();
+    expect(aiAction).not.toHaveBeenCalled();
+    expect(saveAction).toHaveBeenCalledTimes(1);
+  });
+});
