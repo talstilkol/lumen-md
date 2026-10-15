@@ -56,6 +56,10 @@ const BUDGETS = [
   // ~144 KB gzipped today; the heavy worker ships as a separate .mjs (not
   // size-checked here). It never touches the eager startup path.
   { name: "lazy: pdfjs",        pattern: /^pdf-/,                 budgetKb: 165 },
+  // Prettier (Format document / code block) — standalone core + one chunk
+  // per language plugin, all dynamic-imported on first format. The
+  // TypeScript parser plugin is the largest at ~124 KB gz.
+  { name: "lazy: prettier",     pattern: /^prettier-/,            budgetKb: 140 },
   { name: "lazy plugin chunk",  pattern: /\.js$/,                 budgetKb: 100 },
 ];
 

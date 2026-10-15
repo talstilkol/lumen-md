@@ -774,6 +774,22 @@ const en: Strings = {
   "group.security": "Security",
   "group.ai": "AI Prompts",
   "group.plugins": "Plugins",
+  // Formatting + plan gates
+  "cmd.edit.formatDocument": "Format document",
+  "cmd.edit.formatDocument.hint": "Prettier: tidy Markdown, frontmatter and fenced code",
+  "cmd.edit.formatCodeBlock": "Format code block at cursor",
+  "cmd.edit.formatCodeBlock.hint": "Prettier: format the fenced block under the cursor",
+  "format.noFormatter": "No formatter for {lang}",
+  "format.failed": "Formatting failed: {error}",
+  "format.unchanged": "Already formatted",
+  "format.noBlock": "Place the cursor inside a fenced code block",
+  "format.needsSource": "Switch to Source or Split view to format a code block",
+  "billing.aiQuota.exceeded": "You've used all {limit} AI prompts for this month. Upgrade for more.",
+  "billing.upgrade.auditLog": "The audit log is available on the Team plan.",
+  "billing.upgrade.persistentCollab": "A persistent collaboration server is a Pro feature. Sessions use peer-to-peer WebRTC.",
+  "billing.upgrade.close": "Close",
+  "collab.persistent.label": "Persistent server (y-websocket)",
+  "collab.persistent.hint": "Optional. Keeps documents synced when no peer is online.",
 };
 
 const he: Strings = {
@@ -1472,6 +1488,22 @@ const he: Strings = {
   "versionHistory.selectVersion": "בחר גרסה לתצוגה מקדימה",
   "versionHistory.diffChars": "Δ {n} תווים הבדל",
   "versionHistory.noVersions": "אין גרסאות שמורות. גרסאות נשמרות אוטומטית כשמחליפים קבצים או שומרים.",
+  // Formatting + plan gates
+  "cmd.edit.formatDocument": "עיצוב המסמך",
+  "cmd.edit.formatDocument.hint": "Prettier: סידור Markdown, ‏frontmatter ובלוקי קוד",
+  "cmd.edit.formatCodeBlock": "עיצוב בלוק הקוד שבסמן",
+  "cmd.edit.formatCodeBlock.hint": "Prettier: עיצוב בלוק הקוד שהסמן נמצא בו",
+  "format.noFormatter": "אין מעצב עבור {lang}",
+  "format.failed": "העיצוב נכשל: {error}",
+  "format.unchanged": "המסמך כבר מעוצב",
+  "format.noBlock": "יש למקם את הסמן בתוך בלוק קוד",
+  "format.needsSource": "יש לעבור לתצוגת מקור או תצוגה מפוצלת כדי לעצב בלוק קוד",
+  "billing.aiQuota.exceeded": "ניצלת את כל {limit} בקשות ה-AI לחודש זה. שדרג כדי לקבל עוד.",
+  "billing.upgrade.auditLog": "יומן הביקורת זמין בתוכנית Team.",
+  "billing.upgrade.persistentCollab": "שרת שיתוף קבוע הוא תכונת Pro. השיתוף מתבצע ישירות בין המשתתפים (WebRTC).",
+  "billing.upgrade.close": "סגור",
+  "collab.persistent.label": "שרת קבוע (y-websocket)",
+  "collab.persistent.hint": "אופציונלי. שומר על סנכרון המסמכים גם כשאין משתתף מחובר.",
 };
 
 

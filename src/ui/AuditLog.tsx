@@ -6,10 +6,10 @@
  * Includes a CSV export action that downloads everything matching the
  * current filter — useful for SOC2 evidence + ad-hoc investigations.
  *
- * Visible only to enterprise-tier admins (route guarded upstream by
- * `useEntitlement`); the dialog itself doesn't enforce that — it just
- * reads what the worker returns. The worker enforces the bearer-token
- * + org-id constraints.
+ * Gated on `Capabilities.auditLog` (Team tier) via `useCapability` —
+ * non-entitled users see an upgrade notice and no fetch is made. When no
+ * billing backend is configured (self-hosted) the gate is open. The worker
+ * still enforces the bearer-token + org-id constraints server-side.
  */
 
 import { useEffect, useMemo, useState, useCallback } from "react";
@@ -18,6 +18,8 @@ import { listAudit, type AuditRow } from "../lib/audit";
 import { showAiToast } from "./AiToast";
 import { log } from "../lib/logger";
 import { t } from "../i18n";
+import { useCapability } from "../billing/gates";
+import { UpgradeNotice } from "./UpgradeNotice";
 
 interface Props {
   open: boolean;
@@ -75,6 +77,7 @@ function downloadBlob(blob: Blob, filename: string): void {
 }
 
 export function AuditLog({ open, onClose, orgId }: Props) {
+  const entitled = useCapability("auditLog");
   const [rows, setRows] = useState<AuditRow[]>([]);
   const [loading, setLoading] = useState(false);
   const [actionFilter, setActionFilter] = useState("");
@@ -98,9 +101,9 @@ export function AuditLog({ open, onClose, orgId }: Props) {
   }, [orgId, actionFilter]);
 
   useEffect(() => {
-    if (!open) return;
+    if (!open || !entitled) return;
     void refresh();
-  }, [open, refresh]);
+  }, [open, entitled, refresh]);
 
   const visible = useMemo(() => {
     if (!userFilter.trim()) return rows;
@@ -119,6 +122,26 @@ export function AuditLog({ open, onClose, orgId }: Props) {
   }, [visible, orgId]);
 
   if (!open) return null;
+
+  if (!entitled) {
+    return (
+      <div
+        className="cmd-palette-backdrop"
+        onClick={onClose}
+        role="dialog"
+        aria-modal="true"
+        aria-label={t("audit.title")}
+      >
+        <div className="cmd-palette" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 480 }}>
+          <UpgradeNotice
+            title={t("audit.title")}
+            message={t("billing.upgrade.auditLog")}
+            onClose={onClose}
+          />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div

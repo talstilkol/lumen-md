@@ -216,6 +216,11 @@ export default defineConfig({
           if (id.includes("@shikijs/langs/") || id.includes("@shikijs/themes/")) {
             return "assets/shiki-langs/[name]-[hash].js";
           }
+          // Prettier core + per-language plugins (lazy, src/editor/format.ts):
+          // prefix them so the bundle budget can give them their own rule.
+          if (id.includes("node_modules/prettier/")) {
+            return "assets/prettier-[name]-[hash].js";
+          }
           return "assets/[name]-[hash].js";
         },
         // Manual chunking — keeps the initial JS small and lets the heavy

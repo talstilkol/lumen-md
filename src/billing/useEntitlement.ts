@@ -85,9 +85,32 @@ function toEntitlement(payload: unknown): Entitlement | null {
   return ent;
 }
 
+// Vite inlines `import.meta.env` at transform time, so `vi.stubEnv` can't
+// reach it — tests set the endpoint through this hook instead (same
+// pattern as `__setAuditConfigForTesting` in lib/audit.ts).
+let endpointOverride: string | null = null;
+export function __setEntitlementEndpointForTesting(endpoint: string | null): void {
+  endpointOverride = endpoint;
+}
+
+/**
+ * True when a real billing backend is configured. Self-hosted / dev builds
+ * leave VITE_ENTITLEMENT_ENDPOINT empty — feature gates treat that as
+ * "everything unlocked" (see `billing/gates.ts`).
+ */
+export function isBillingConfigured(): boolean {
+  const endpoint = endpointOverride ?? readEnvVar("VITE_ENTITLEMENT_ENDPOINT");
+  return !!endpoint && !isPlaceholder(endpoint) && isValidUrl(endpoint);
+}
+
+/** True when the dev/QA tier shim (`lumen.dev.tier`) is set. */
+export function hasDevTierOverride(): boolean {
+  return readDevTier() !== null;
+}
+
 async function fetchEntitlementFromBackend(): Promise<Entitlement | null> {
-  const endpoint = readEnvVar("VITE_ENTITLEMENT_ENDPOINT");
-  if (!endpoint || isPlaceholder(endpoint) || !isValidUrl(endpoint)) return null;
+  if (!isBillingConfigured()) return null;
+  const endpoint = endpointOverride ?? readEnvVar("VITE_ENTITLEMENT_ENDPOINT");
   const res = await fetchWithRetry(
     endpoint,
     {

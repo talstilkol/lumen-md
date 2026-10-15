@@ -5,6 +5,7 @@ import { suggestCharts, type ChartSuggestion } from "../data/suggest";
 import { DataTable } from "./DataTable";
 import { EChart } from "./EChart";
 import { chat, parseJsonResponse } from "../ai/llm";
+import { consumeAiPrompt } from "../billing/aiQuota";
 import { PROMPTS } from "../ai/prompts";
 import { showAiToast } from "../ui/AiToast";
 import { Table2, BarChart3, Sparkles, RefreshCw } from "lucide-react";
@@ -123,6 +124,7 @@ export default function CsvBlock({ source, lang, meta }: Props) {
             onClick={async () => {
               setView("ai-chart");
               if (aiOption || aiLoading) return;
+              if (!consumeAiPrompt()) return;
               setAiLoading(true);
               try {
                 const response = await chat([

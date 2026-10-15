@@ -21,6 +21,9 @@ import { showAiToast } from "../ui/AiToast";
 import { encryptDocument, decryptDocument, isEncrypted } from "../storage/encryption";
 import { readWorkspaceFile } from "../storage/workspace";
 import { relativeTime } from "../lib/relativeTime";
+import { buildFormatCommands } from "../editor/formatCommands";
+import { withAiQuota } from "../billing/aiQuota";
+import { detectIsMac } from "../ui/KeyboardShortcuts";
 
 export interface UseCommandsOptions {
   handleNew: () => void;
@@ -49,6 +52,8 @@ export interface UseCommandsOptions {
   setCommentsPanelOpen?: (open: boolean) => void;
   setRuntimeMetricsOpen?: (open: boolean) => void;
   onAddComment?: () => void;
+  /** Mounted CodeMirror view (source/split mode) — used by the formatter. */
+  getEditorView?: () => import("@codemirror/view").EditorView | null;
 }
 
 export function useCommands({
@@ -78,6 +83,7 @@ export function useCommands({
   setCommentsPanelOpen,
   setRuntimeMetricsOpen,
   onAddComment,
+  getEditorView,
 }: UseCommandsOptions) {
   const doc = useAppStore((s) => s.doc);
   const theme = useAppStore((s) => s.theme);
@@ -136,7 +142,8 @@ export function useCommands({
       },
     ]);
 
-    return [
+    // AI-prompt commands are wrapped with the monthly quota check.
+    return withAiQuota([
       ...recentCmds,
       {
         id: "file.new",
@@ -1080,6 +1087,15 @@ export function useCommands({
           }
         },
       })),
+      // ── Formatting (Prettier, lazy) ───────────────────────────────────
+      ...buildFormatCommands(
+        {
+          getView: () => getEditorView?.() ?? null,
+          getContent: () => useAppStore.getState().doc.content,
+          setContent: (s: string) => useAppStore.getState().setContent(s),
+        },
+        detectIsMac(),
+      ).map((c) => ({ ...c, icon: cmdIcons.Pencil })),
       // ── AI Capabilities ──────────────────────────────────────────────────
       buildAiSettingsCommand(),
       buildAiOutlineCommand(
@@ -1453,7 +1469,7 @@ export function useCommands({
         group: t("group.insert"),
         action: () => insertSnippet(BLOCK_SNIPPETS.wikilink),
       },
-    ];
+    ]);
   }, [
     handleNew,
     handleOpen,

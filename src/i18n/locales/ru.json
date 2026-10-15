@@ -678,5 +678,20 @@
   "cmd.file.exportPptx.hint": "Один слайд на заголовок H1/H2 (или разделитель ---)",
   "search.results.one": "{n} результат",
   "search.results.other": "Результатов: {n}",
-  "ai.prompt.historyHint": "↑↓ история"
+  "ai.prompt.historyHint": "↑↓ история",
+  "cmd.edit.formatDocument": "Форматировать документ",
+  "cmd.edit.formatDocument.hint": "Prettier: привести в порядок Markdown, frontmatter и блоки кода",
+  "cmd.edit.formatCodeBlock": "Форматировать блок кода под курсором",
+  "cmd.edit.formatCodeBlock.hint": "Prettier: отформатировать блок кода, в котором стоит курсор",
+  "format.noFormatter": "Нет форматтера для {lang}",
+  "format.failed": "Ошибка форматирования: {error}",
+  "format.unchanged": "Уже отформатировано",
+  "format.noBlock": "Поставьте курсор внутрь блока кода",
+  "format.needsSource": "Переключитесь в режим исходника или разделённый режим, чтобы отформатировать блок кода",
+  "billing.aiQuota.exceeded": "Вы израсходовали все {limit} AI-запросов в этом месяце. Перейдите на тариф выше, чтобы получить больше.",
+  "billing.upgrade.auditLog": "Журнал аудита доступен на тарифе Team.",
+  "billing.upgrade.persistentCollab": "Постоянный сервер совместной работы — функция Pro. Сессии используют одноранговый WebRTC.",
+  "billing.upgrade.close": "Закрыть",
+  "collab.persistent.label": "Постоянный сервер (y-websocket)",
+  "collab.persistent.hint": "Необязательно. Синхронизирует документы, даже когда никого нет в сети."
 }

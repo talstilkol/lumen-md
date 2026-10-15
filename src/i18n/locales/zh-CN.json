@@ -678,5 +678,20 @@
   "cmd.file.exportPptx.hint": "每个 H1/H2 标题(或 --- 分隔符)生成一张幻灯片",
   "search.results.one": "{n} 个结果",
   "search.results.other": "{n} 个结果",
-  "ai.prompt.historyHint": "↑↓ 历史记录"
+  "ai.prompt.historyHint": "↑↓ 历史记录",
+  "cmd.edit.formatDocument": "格式化文档",
+  "cmd.edit.formatDocument.hint": "Prettier：整理 Markdown、前置元数据和代码块",
+  "cmd.edit.formatCodeBlock": "格式化光标处的代码块",
+  "cmd.edit.formatCodeBlock.hint": "Prettier：格式化光标所在的代码块",
+  "format.noFormatter": "没有适用于 {lang} 的格式化工具",
+  "format.failed": "格式化失败：{error}",
+  "format.unchanged": "已经是格式化后的内容",
+  "format.noBlock": "请将光标置于代码块内",
+  "format.needsSource": "请切换到源码或分屏视图以格式化代码块",
+  "billing.aiQuota.exceeded": "本月的 {limit} 次 AI 请求已用完。升级以获取更多次数。",
+  "billing.upgrade.auditLog": "审计日志仅在 Team 套餐中提供。",
+  "billing.upgrade.persistentCollab": "持久协作服务器是 Pro 功能。当前会话使用点对点 WebRTC。",
+  "billing.upgrade.close": "关闭",
+  "collab.persistent.label": "持久服务器 (y-websocket)",
+  "collab.persistent.hint": "可选。即使没有协作者在线，也能保持文档同步。"
 }

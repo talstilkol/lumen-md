@@ -678,5 +678,20 @@
   "cmd.file.exportPptx.hint": "Une diapositive par titre H1/H2 (ou séparateurs ---)",
   "search.results.one": "{n} résultat",
   "search.results.other": "{n} résultats",
-  "ai.prompt.historyHint": "↑↓ historique"
+  "ai.prompt.historyHint": "↑↓ historique",
+  "cmd.edit.formatDocument": "Formater le document",
+  "cmd.edit.formatDocument.hint": "Prettier : ranger le Markdown, le frontmatter et les blocs de code",
+  "cmd.edit.formatCodeBlock": "Formater le bloc de code sous le curseur",
+  "cmd.edit.formatCodeBlock.hint": "Prettier : formater le bloc de code où se trouve le curseur",
+  "format.noFormatter": "Aucun formateur pour {lang}",
+  "format.failed": "Échec du formatage : {error}",
+  "format.unchanged": "Déjà formaté",
+  "format.noBlock": "Placez le curseur dans un bloc de code",
+  "format.needsSource": "Passez en vue Source ou Partagée pour formater un bloc de code",
+  "billing.aiQuota.exceeded": "Vous avez utilisé vos {limit} requêtes IA de ce mois. Passez à une offre supérieure pour en avoir plus.",
+  "billing.upgrade.auditLog": "Le journal d'audit est disponible avec l'offre Team.",
+  "billing.upgrade.persistentCollab": "Un serveur de collaboration persistant est une fonctionnalité Pro. Les sessions utilisent WebRTC en pair à pair.",
+  "billing.upgrade.close": "Fermer",
+  "collab.persistent.label": "Serveur persistant (y-websocket)",
+  "collab.persistent.hint": "Facultatif. Garde les documents synchronisés même quand aucun participant n'est en ligne."
 }

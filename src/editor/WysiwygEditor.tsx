@@ -20,6 +20,7 @@ import { dragHandlePlugin } from "./dragHandles";
 import { buildIndentKeymap } from "./keymapExtra";
 import "katex/dist/katex.css";
 import { chat, chatStream, AiError } from "../ai/llm";
+import { consumeAiPrompt } from "../billing/aiQuota";
 import { PROMPTS } from "../ai/prompts";
 import { showAiToast } from "../ui/AiToast";
 import { openAiPrompt } from "../ui/AiInlinePrompt";
@@ -254,6 +255,7 @@ function buildSlashItems(): SlashItem[] {
       run: async (v) => {
         const promptStr = await openAiPrompt("What do you want the AI to write about?");
         if (!promptStr) return;
+        if (!consumeAiPrompt()) return;
 
         const placeholder = "🤖 Thinking...";
         const { state } = v;
@@ -511,6 +513,7 @@ function buildTooltip(getView: () => EditorView | null): HTMLDivElement {
         const selectedText = state.doc.textBetween(from, to, "\n");
         const instructions = await openAiPrompt("How should the AI rewrite this? (e.g. 'Make it professional', 'Translate to Spanish')");
         if (!instructions) return;
+        if (!consumeAiPrompt()) return;
         
         try {
           const rewritten = await chat(
