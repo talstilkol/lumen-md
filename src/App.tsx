@@ -15,6 +15,8 @@ const CanvasWhiteboard = lazy(() => import("./ui/CanvasTldraw").then(m => ({ def
 const PluginGallery = lazy(() => import("./ui/PluginGallery").then(m => ({ default: m.PluginGallery })));
 const TemplateGallery = lazy(() => import("./ui/TemplateGallery").then(m => ({ default: m.TemplateGallery })));
 const AuditLog = lazy(() => import("./ui/AuditLog").then(m => ({ default: m.AuditLog })));
+const OrgSettings = lazy(() => import("./ui/OrgSettings").then(m => ({ default: m.OrgSettings })));
+const TrustedKeysSettings = lazy(() => import("./ui/TrustedKeysSettings").then(m => ({ default: m.TrustedKeysSettings })));
 const FineTuneSettings = lazy(() => import("./ui/FineTuneSettings").then(m => ({ default: m.FineTuneSettings })));
 const VersionHistory = lazy(() => import("./ui/VersionHistory").then(m => ({ default: m.VersionHistory })));
 const MarkdownTableEditor = lazy(() => import("./ui/MarkdownTableEditor").then(m => ({ default: m.MarkdownTableEditor })));
@@ -117,6 +119,8 @@ export default function App() {
   const [templateGalleryOpen, setTemplateGalleryOpen] = useState(false);
   const [auditLogOpen, setAuditLogOpen] = useState(false);
   const [fineTuneOpen, setFineTuneOpen] = useState(false);
+  const [orgSettingsOpen, setOrgSettingsOpen] = useState(false);
+  const [trustedKeysOpen, setTrustedKeysOpen] = useState(false);
   const [tagsPanelOpen, setTagsPanelOpen] = useState(false);
   const [commentsPanelOpen, setCommentsPanelOpen] = useState(false);
   const [runtimeMetricsOpen, setRuntimeMetricsOpen] = useState(false);
@@ -538,6 +542,8 @@ export default function App() {
     setHistoryOpen, setTableEditorOpen, setCanvasOpen, setGalleryOpen,
     setTemplateGalleryOpen,
     setAuditLogOpen,
+    setOrgSettingsOpen,
+    setTrustedKeysOpen,
     setFineTuneOpen,
     setTagsPanelOpen,
     setCommentsPanelOpen,
@@ -877,6 +883,8 @@ export default function App() {
               ?? "personal"}
           />
           <FineTuneSettings open={fineTuneOpen} onClose={() => setFineTuneOpen(false)} />
+          <OrgSettings open={orgSettingsOpen} onClose={() => setOrgSettingsOpen(false)} onOpenAuditLog={() => setAuditLogOpen(true)} />
+          <TrustedKeysSettings open={trustedKeysOpen} onClose={() => setTrustedKeysOpen(false)} />
         </ErrorBoundary>
       </Suspense>
 

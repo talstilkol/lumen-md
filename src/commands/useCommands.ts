@@ -47,6 +47,8 @@ export interface UseCommandsOptions {
   setGalleryOpen: (open: boolean) => void;
   setTemplateGalleryOpen?: (open: boolean) => void;
   setAuditLogOpen?: (open: boolean) => void;
+  setOrgSettingsOpen?: (open: boolean) => void;
+  setTrustedKeysOpen?: (open: boolean) => void;
   setFineTuneOpen?: (open: boolean) => void;
   setTagsPanelOpen?: (open: boolean) => void;
   setCommentsPanelOpen?: (open: boolean) => void;
@@ -78,6 +80,8 @@ export function useCommands({
   setGalleryOpen,
   setTemplateGalleryOpen,
   setAuditLogOpen,
+  setOrgSettingsOpen,
+  setTrustedKeysOpen,
   setFineTuneOpen,
   setTagsPanelOpen,
   setCommentsPanelOpen,
@@ -927,6 +931,30 @@ export function useCommands({
               icon: cmdIcons.Sparkles,
               group: t("group.security"),
               action: () => setAuditLogOpen(true),
+            },
+          ]
+        : []),
+      ...(setOrgSettingsOpen
+        ? [
+            {
+              id: "settings.organization",
+              label: t("cmd.settings.organization"),
+              hint: t("cmd.settings.organization.hint"),
+              icon: cmdIcons.Sparkles,
+              group: t("group.security"),
+              action: () => setOrgSettingsOpen(true),
+            },
+          ]
+        : []),
+      ...(setTrustedKeysOpen
+        ? [
+            {
+              id: "settings.trustedKeys",
+              label: t("cmd.settings.trustedKeys"),
+              hint: t("cmd.settings.trustedKeys.hint"),
+              icon: cmdIcons.Sparkles,
+              group: t("group.security"),
+              action: () => setTrustedKeysOpen(true),
             },
           ]
         : []),
