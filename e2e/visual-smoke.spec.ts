@@ -61,9 +61,9 @@ test("Mermaid block renders inline SVG inside the preview", async ({ page }) => 
  * differs per engine and OS, and one stable baseline beats three flaky
  * ones. Baselines are per-platform (`…-chromium-linux.png`).
  *
- * First-run guard: when no baseline is committed yet, the test writes
- * one and passes with an annotation instead of failing — so CI produces
- * the baseline artifact on its first run. Commit it (or regenerate with
+ * The chromium-linux baseline is committed. First-run guard for any
+ * other platform: when no baseline exists, the test writes one and passes
+ * with an annotation instead of failing. Commit it (or regenerate with
  * `npx playwright test e2e/visual-smoke.spec.ts --project=chromium
  * --update-snapshots`) — see CONTRIBUTING.md.
  */
