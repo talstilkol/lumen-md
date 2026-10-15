@@ -208,6 +208,12 @@ export function wireEncryption(doc: Y.Doc, password: string): void {
   });
 }
 
+/**
+ * How long a joining peer waits for y-webrtc's `synced` event before
+ * deciding it is alone and seeding its local content.
+ */
+export const SEED_FALLBACK_MS = 1500;
+
 /** Optional persistent collab WebSocket URL (y-websocket compatible). */
 function getWebsocketUrl(): string | null {
   const fromStorage =
@@ -320,26 +326,63 @@ export function connectCollab(
     });
   }
 
-  // Seed initial content once we know we're the only one in the room.
-  // y-webrtc reports peers via `provider.awareness` and `provider.room`. For
-  // simplicity we wait a short tick: if no remote state has arrived, insert.
+  // Seed initial content only when we know we're the only one in the room.
   let seedTimer: ReturnType<typeof setTimeout> | null = null;
+  let onSynced: ((e: { synced: boolean }) => void) | null = null;
   let destroyed = false;
+  const stopSeedWait = () => {
+    if (seedTimer) {
+      clearTimeout(seedTimer);
+      seedTimer = null;
+    }
+    if (onSynced) {
+      try {
+        provider.off("synced", onSynced);
+      } catch {
+        /* */
+      }
+      onSynced = null;
+    }
+  };
   if (opts.isNewRoom && seedContent && ytext.length === 0) {
     // New room created by this peer: seed synchronously so the editor's
     // char-level Yjs binding (y-codemirror `ySync`) has content to bind to.
     // A delayed seed would let the binding momentarily clear the editor.
     ytext.insert(0, seedContent);
-  } else {
-    // Joining (or unknown): wait a tick and only seed if we're still alone and
-    // no remote content has arrived — so we never clobber an existing room.
-    seedTimer = setTimeout(() => {
-      if (destroyed) return;
-      const peersKnown = provider.awareness.getStates().size;
-      if (ytext.length === 0 && seedContent && peersKnown <= 1) {
+  } else if (seedContent) {
+    // Joining (or unknown): never clobber an existing room. y-webrtc emits
+    // `synced` once every connected peer has delivered its state; at that
+    // point the doc reflects the room and we decide once. If no peer ever
+    // shows up, `synced` never fires, so a fallback timer covers the
+    // "first one here" case.
+    const isAlone = () => {
+      const room = (provider as unknown as {
+        room?: { webrtcConns?: Map<unknown, unknown> } | null;
+      }).room;
+      const conns = room?.webrtcConns?.size ?? 0;
+      return conns === 0 && provider.awareness.getStates().size <= 1;
+    };
+    const maybeSeed = () => {
+      if (!destroyed && ytext.length === 0 && isAlone()) {
         ytext.insert(0, seedContent);
       }
-    }, 400);
+    };
+    onSynced = ({ synced }) => {
+      if (!synced) return;
+      stopSeedWait();
+      maybeSeed();
+    };
+    provider.on("synced", onSynced);
+    seedTimer = setTimeout(() => {
+      seedTimer = null;
+      if (destroyed) return;
+      if (isAlone()) {
+        stopSeedWait();
+        maybeSeed();
+      }
+      // Otherwise peers are connected but still syncing: keep waiting for
+      // `synced`, which decides once their state has arrived.
+    }, SEED_FALLBACK_MS);
   }
 
   const user = randomUser();
@@ -367,10 +410,7 @@ export function connectCollab(
     user,
     destroy() {
       destroyed = true;
-      if (seedTimer) {
-        clearTimeout(seedTimer);
-        seedTimer = null;
-      }
+      stopSeedWait();
       if (stopSnapshots) {
         stopSnapshots();
         stopSnapshots = null;

@@ -22,10 +22,27 @@ vi.mock("y-websocket", () => {
   return { WebsocketProvider };
 });
 vi.mock("y-webrtc", () => ({
+  // Minimal stand-in: an event emitter with controllable awareness peers and
+  // WebRTC connections so tests can drive the `synced` seeding logic.
   WebrtcProvider: class {
-    awareness = { getStates: () => new Map(), setLocalStateField: vi.fn() };
+    listeners = new Map<string, Set<(...args: unknown[]) => void>>();
+    awarenessStates = new Map<number, unknown>([[1, {}]]);
+    room: { webrtcConns: Map<string, unknown> } = { webrtcConns: new Map() };
+    awareness = {
+      getStates: () => this.awarenessStates,
+      setLocalStateField: vi.fn(),
+    };
     destroy = vi.fn();
-    on = vi.fn();
+    on(name: string, fn: (...args: unknown[]) => void) {
+      if (!this.listeners.has(name)) this.listeners.set(name, new Set());
+      this.listeners.get(name)!.add(fn);
+    }
+    off(name: string, fn: (...args: unknown[]) => void) {
+      this.listeners.get(name)?.delete(fn);
+    }
+    emit(name: string, args: unknown[]) {
+      this.listeners.get(name)?.forEach((fn) => fn(...args));
+    }
   },
 }));
 vi.mock("yjs", async () => {
@@ -225,5 +242,110 @@ describe("connectCollab lifecycle", () => {
         expect(destroy).toHaveBeenCalledTimes(1);
       }
     }
+  });
+});
+
+type MockProvider = {
+  emit: (name: string, args: unknown[]) => void;
+  listeners: Map<string, Set<unknown>>;
+  awarenessStates: Map<number, unknown>;
+  room: { webrtcConns: Map<string, unknown> };
+};
+
+describe("connectCollab join-time seeding", () => {
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it("seeds a new room synchronously", async () => {
+    const mod = await import("../collab/yjs");
+    const session = mod.connectCollab("lumen-new", "hello", { isNewRoom: true });
+    expect(session.ytext.toString()).toBe("hello");
+    session.destroy();
+  });
+
+  it("does not seed before synced or the fallback timeout", async () => {
+    vi.useFakeTimers();
+    const mod = await import("../collab/yjs");
+    const session = mod.connectCollab("lumen-join", "seed");
+    vi.advanceTimersByTime(mod.SEED_FALLBACK_MS - 1);
+    expect(session.ytext.toString()).toBe("");
+    session.destroy();
+  });
+
+  it("seeds via the fallback timer when no peers ever appear", async () => {
+    vi.useFakeTimers();
+    const mod = await import("../collab/yjs");
+    const session = mod.connectCollab("lumen-join", "seed");
+    vi.advanceTimersByTime(mod.SEED_FALLBACK_MS);
+    expect(session.ytext.toString()).toBe("seed");
+    // The synced listener is removed once we've decided.
+    const p = session.provider as unknown as MockProvider;
+    expect(p.listeners.get("synced")?.size ?? 0).toBe(0);
+    session.destroy();
+  });
+
+  it("seeds on synced when still empty and alone, and cancels the fallback timer", async () => {
+    vi.useFakeTimers();
+    const mod = await import("../collab/yjs");
+    const session = mod.connectCollab("lumen-join", "seed");
+    const p = session.provider as unknown as MockProvider;
+    p.emit("synced", [{ synced: true }]);
+    expect(session.ytext.toString()).toBe("seed");
+    expect(vi.getTimerCount()).toBe(0);
+    vi.advanceTimersByTime(mod.SEED_FALLBACK_MS * 2);
+    expect(session.ytext.toString()).toBe("seed"); // not seeded twice
+    session.destroy();
+  });
+
+  it("ignores synced:false", async () => {
+    vi.useFakeTimers();
+    const mod = await import("../collab/yjs");
+    const session = mod.connectCollab("lumen-join", "seed");
+    const p = session.provider as unknown as MockProvider;
+    p.emit("synced", [{ synced: false }]);
+    expect(session.ytext.toString()).toBe("");
+    expect(vi.getTimerCount()).toBe(1);
+    session.destroy();
+  });
+
+  it("does not seed when remote content arrived before synced", async () => {
+    vi.useFakeTimers();
+    const mod = await import("../collab/yjs");
+    const session = mod.connectCollab("lumen-join", "seed");
+    const p = session.provider as unknown as MockProvider;
+    session.ytext.insert(0, "remote doc");
+    p.emit("synced", [{ synced: true }]);
+    vi.advanceTimersByTime(mod.SEED_FALLBACK_MS * 2);
+    expect(session.ytext.toString()).toBe("remote doc");
+    session.destroy();
+  });
+
+  it("waits for synced instead of seeding on timeout when peers are connected", async () => {
+    vi.useFakeTimers();
+    const mod = await import("../collab/yjs");
+    const session = mod.connectCollab("lumen-join", "seed");
+    const p = session.provider as unknown as MockProvider;
+    p.room.webrtcConns.set("peer-1", {});
+    p.awarenessStates.set(2, {});
+    vi.advanceTimersByTime(mod.SEED_FALLBACK_MS);
+    expect(session.ytext.toString()).toBe("");
+    // Still listening for synced.
+    expect(p.listeners.get("synced")?.size).toBe(1);
+    // Peer delivers its (non-empty) state, then synced fires.
+    session.ytext.insert(0, "peer content");
+    p.emit("synced", [{ synced: true }]);
+    expect(session.ytext.toString()).toBe("peer content");
+    session.destroy();
+  });
+
+  it("removes the synced listener and timer on destroy", async () => {
+    vi.useFakeTimers();
+    const mod = await import("../collab/yjs");
+    const session = mod.connectCollab("lumen-join", "seed");
+    const p = session.provider as unknown as MockProvider;
+    session.destroy();
+    expect(p.listeners.get("synced")?.size ?? 0).toBe(0);
+    expect(vi.getTimerCount()).toBe(0);
   });
 });
