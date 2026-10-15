@@ -1,13 +1,14 @@
 ---
 title: End-to-end encryption for collab
-description: Add a room password and the signaling server can't read your doc.
+description: Add a room password and no relay, signaling server or sync server can read your document.
 ---
 
-Lumen's WebRTC mesh is unencrypted by default — clients negotiate a
-direct peer connection but the signaling server (and anyone on a shared
-network) sees the document state. For Pro / privacy-conscious users we
-ship an opt-in **AES-GCM-256** layer that encrypts every Yjs update with
-a key derived from a shared room password.
+Lumen's WebRTC mesh is unencrypted by default: peers sync the Yjs
+document directly, so a signaling server that relays messages, a
+`y-websocket` persistence server, or anyone who joins with the room
+link can read the content. Setting a **room password** switches the
+room to an end-to-end encrypted transport. Document content is then
+only ever readable by peers that know the password.
 
 ## Turn it on
 
@@ -19,53 +20,118 @@ localStorage.setItem("lumen.collab.password", "open-sesame-12345");
 //   #room=lumen-bright-river-77&password=open-sesame-12345
 ```
 
-Every peer in the room must use the same password — wrong-password peers
-can connect over signaling but receive only undecryptable ciphertext, so
-the editor stays out of sync until they fix it (no plaintext leaks).
+Every peer in the room must use the same password. A peer with the
+wrong password can still connect, but it only receives ciphertext it
+can't decrypt. Nothing is applied to its document, and it sees a
+"Can't decrypt this room" error.
+
+> Putting the password in the URL hash keeps it out of HTTP requests
+> (browsers never send the `#fragment`), but it still lands in browser
+> history and anywhere you paste the link. For anything sensitive,
+> share the room link and the password through different channels.
 
 ## How it works
 
-1. **Key derivation** — PBKDF2-SHA256 with a fixed application salt
-   (`lumen.collab.v1`) and 200 000 iterations. The same password produces
-   the same 256-bit AES key on every peer.
-2. **Wire format** — every Yjs update is encrypted with a fresh random
-   12-byte IV. The IV is prepended to the ciphertext; the auth tag is the
-   final 16 bytes (standard AES-GCM).
-3. **In-doc transport** — encrypted payloads ride a hidden `__crypt__`
-   Y.Map keyed by `<timestamp>-<random>`. Receivers decrypt and
-   `Y.applyUpdate` into the visible doc with origin tag
-   `remote-decrypted`, so the local update observer doesn't re-encrypt
-   them in a loop.
+Each peer keeps **two** Yjs documents:
 
-## What it does protect
+| Document | Contents | Attached to the network? |
+|---|---|---|
+| Plaintext doc | Text, comments, everything the editor shows | **No.** It stays in the tab. |
+| Transport doc | One append-only `Y.Array` of ciphertext envelopes | Yes (y-webrtc, and y-websocket if configured) |
 
-- Eavesdroppers on the WebRTC signaling channel.
-- Compromised public Yjs signaling servers.
-- Peers that joined the room via the share link without the password.
+1. **Key derivation:** PBKDF2-SHA-256, 200 000 iterations, salt
+   `lumen.collab.v2|<room name>`. The same password in two different
+   rooms gives two unrelated keys.
+2. **Outbound:** each local edit to the plaintext doc produces a Yjs
+   update. Edits made in the same tick are merged into one update,
+   encrypted with AES-GCM-256 under a fresh random 12-byte IV, and
+   appended to the transport array as `{ v: 2, iv, ct }`. The format
+   version and the snapshot flag are bound into the GCM tag as
+   additional authenticated data.
+3. **Inbound:** each envelope that appears in the transport array (from
+   a peer or from the persistence server) is decrypted and applied to
+   the plaintext doc with origin `e2e-remote`. The outbound listener
+   ignores that origin, so received edits are never encrypted again
+   (no update loop). If decryption fails, the envelope is dropped and
+   the user sees an error. Unauthenticated bytes are never applied.
+4. **Late joiners:** a peer that joins later receives the whole
+   transport array through the normal Yjs sync, decrypts every envelope
+   and rebuilds the document. Yjs buffers updates that arrive before
+   their dependencies, so envelopes can be decrypted in any order.
+5. **Compaction:** when the array grows past 500 envelopes, the peer
+   that just wrote one encrypts a full-state snapshot (`s: 1`) and
+   deletes only the envelopes it has already applied. A peer that has
+   ever failed to decrypt something never compacts, so it can't throw
+   away history it couldn't read.
 
-## What it doesn't protect
+## Who can read what
 
-- A peer with the password — they're in the trust circle by design.
-- Offline forensics on a peer's IndexedDB / OPFS storage. Use a Vault
-  password (`⌘K → Encrypt document`) for at-rest encryption.
-- Metadata: room name, peer count, awareness presence (cursors / colours)
-  remain visible to the signaling server. The document **content** is
-  protected, not the fact that a session exists.
+| Party | Document text & comments | Room name | Envelope count, sizes, timing | Presence: names, colours, cursor anchors |
+|---|---|---|---|---|
+| Peer with the password | Yes | Yes | Yes | Yes |
+| Peer without the password | **No** | Yes | Yes | Yes |
+| Signaling server | **No** | Yes | Yes (when relaying) | Yes (when relaying) |
+| `y-websocket` persistence server | **No** (it stores only ciphertext) | Yes | Yes | Yes |
+| Network eavesdropper | No (WebRTC is DTLS-encrypted anyway) | Depends on the signaling transport | Traffic shape | No |
+
+### Persistent rooms store only ciphertext
+
+With [persistent collab](/collab/persistent/) the `y-websocket` server
+syncs the **transport** doc. Its database holds the envelope array and
+never a key, so a leaked server backup reveals no document content. A
+peer that joins later still needs the password to read the history.
+
+## Limits: what this does *not* protect
+
+- **Awareness / presence is not encrypted.** Display names, colours and
+  cursor/selection positions are broadcast in clear through y-webrtc's
+  awareness channel. Cursor positions are Yjs *relative positions*, so
+  they contain item IDs (client id + clock) and no document text.
+  They still reveal who is active, and roughly where and when they
+  edit.
+- **Metadata:** room name, number of peers, number and size of
+  envelopes, and when they are written. Size and timing can hint at
+  how much is being typed.
+- **Integrity of the history as a whole.** Each envelope is
+  authenticated, but a malicious relay or persistence server can
+  *drop* or *withhold* envelopes, or delete them from the array. That
+  makes peers diverge or lose edits, but it can never inject or alter
+  content. Replayed envelopes are harmless because Yjs updates are
+  idempotent.
+- **Anyone with the password.** All peers who know it are trusted
+  equally. A peer with the password can also delete envelopes from the
+  shared array.
+- **Weak passwords.** The key comes only from the password and the room
+  name, both of which a server operator knows. An attacker holding the
+  ciphertext can run an offline guessing attack, slowed by 200 000
+  PBKDF2 iterations per guess. Use a long passphrase.
+- **No forward secrecy, no key rotation inside a room.** A password
+  that leaks later decrypts all stored history. To rotate, create a
+  new room with a new password (see below).
+- **Local storage.** Version-history snapshots and saved files on each
+  peer are plaintext on that device. Use a Vault password
+  (`⌘K → Encrypt document`) for at-rest encryption.
 
 ## Rotating
 
-Pick a new password and clear the old one:
+The key is tied to the room, so the clean way to rotate is to move to
+a new room with a new password:
 
 ```js
 localStorage.setItem("lumen.collab.password", "new-stronger-passphrase");
 ```
 
-Then leave + rejoin the room. Peers using the old password lose sync
-until they update.
+Then leave and start a fresh room, seeding it from your current
+document. If you change the password while staying in the same room,
+peers on the old password get "Can't decrypt" errors, and the old
+history stays encrypted under the old key on any persistence server.
 
 ## Trade-offs
 
 - A misplaced password locks everyone out. Treat it like any shared
-  secret — share via a side-channel (Signal, 1Password, etc.).
-- The 200 000-iteration PBKDF2 derivation runs once per password change;
-  it's fast on modern devices (≈ 100 ms) but noticeable on old phones.
+  secret and share it through a side channel (Signal, 1Password, etc.).
+- The PBKDF2 derivation runs once per password and room. That is about
+  100 ms on modern devices, but noticeable on old phones.
+- Each edit batch adds about 40 bytes of overhead (IV + GCM tag +
+  envelope framing). Long sessions grow the array until compaction
+  kicks in at 500 envelopes.

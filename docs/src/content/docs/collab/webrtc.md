@@ -33,12 +33,22 @@ their colour. The list of active peers shows in the status bar.
 
 ## End-to-end encryption
 
-Set `localStorage["lumen.collab.password"]` (or append
-`&password=…` to the share link) and every Yjs update gets AES-GCM-256
-encrypted with a PBKDF2-derived key before it hits the wire. Peers
-without the password can connect over signaling but receive only
-ciphertext. See [End-to-end encryption](/collab/encryption/) for the
-threat model.
+Without a password, the room is **not** end-to-end encrypted. Peers sync
+the plaintext Yjs document, so any signaling server that relays
+messages, any `y-websocket` server and anyone with the room link can
+read it.
+
+Set `localStorage["lumen.collab.password"]` (or append `&password=…` to
+the share link) to change that. The editor's document then stays
+local, and only AES-GCM-256 ciphertext envelopes (key = PBKDF2 of the
+password, salted with the room name) go to the mesh and to any
+persistence server. Peers without the password receive only ciphertext
+and see a "Can't decrypt this room" error.
+
+Presence is **not** encrypted: names, colours and cursor positions are
+still visible to relays. Neither are metadata such as the room name and
+the volume and timing of edits. See
+[End-to-end encryption](/collab/encryption/) for the full threat model.
 
 ## Rooms evaporate when the last peer leaves
 
@@ -59,7 +69,9 @@ collaborators insert paragraphs above. Open the comments panel from
 
 - Room cap: 20 simultaneous peers (raise via the WebRTC provider's
   `maxConns`).
-- Per-update overhead: ≈ 60 bytes encryption + base64 + Y.Map key.
+- Per-update overhead in password rooms: ≈ 40 bytes (IV + GCM tag +
+  envelope framing) per edit batch; edits made in the same tick share
+  one envelope.
 - Initial join: full Y.Doc snapshot synced via the signaling channel
   (≈ 1 KB per 1k characters of doc).
 
