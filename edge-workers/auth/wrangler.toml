@@ -1,0 +1,24 @@
+name = "lumen-auth"
+main = "worker.ts"
+compatibility_date = "2026-04-27"
+
+# Routes — serve the worker on its own subdomain so the session cookie is
+# scoped to it (the client calls `${VITE_WORKOS_ENDPOINT}/api/sso/*`):
+# routes = [
+#   { pattern = "auth.lumen.app/*", zone_name = "lumen.app" }
+# ]
+
+[vars]
+# Comma-separated app origins allowed to start SSO / read the session.
+# Credentialed CORS never uses `*`, so every origin must be listed.
+ALLOWED_ORIGINS = "https://lumen.app"
+# Optional: explicit callback URL registered in the WorkOS dashboard.
+# Defaults to `<worker origin>/api/sso/callback`.
+# WORKOS_REDIRECT_URI = "https://auth.lumen.app/api/sso/callback"
+# Optional: session lifetime in seconds (default 604800 = 7 days).
+# SESSION_TTL_SECONDS = "604800"
+
+# Required secrets (set via `wrangler secret put <NAME>`):
+#   WORKOS_API_KEY    — sk_live_… / sk_test_… from WorkOS → API Keys
+#   WORKOS_CLIENT_ID  — client_… from WorkOS → API Keys
+#   SESSION_SECRET    — ≥32 random bytes, e.g. `openssl rand -base64 48`

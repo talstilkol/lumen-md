@@ -169,6 +169,33 @@ wrangler deploy
 
 ---
 
+## 5b. SSO edge worker — WorkOS (ε.1 / F4.3) — 45 min
+
+Enterprise SAML / OIDC sign-in. Optional — skip it and Lumen keeps its
+local-only / Supabase auth. Details in `edge-workers/auth/README.md`.
+
+```bash
+# 5b-1. WorkOS dashboard: API Keys → copy the secret key (sk_…) + client id.
+#       Redirects → add https://<worker host>/api/sso/callback
+#       Organizations → create one per customer, add its email domain(s)
+#       and attach an SSO connection (SAML or OIDC).
+cd edge-workers/auth
+wrangler secret put WORKOS_API_KEY
+wrangler secret put WORKOS_CLIENT_ID
+wrangler secret put SESSION_SECRET        # openssl rand -base64 48
+# 5b-2. Set ALLOWED_ORIGINS in wrangler.toml to your app origin(s).
+wrangler deploy
+# → https://lumen-auth.<your>.workers.dev  (verify: GET /health → configured:true)
+
+# Client env:
+#   VITE_WORKOS_ENDPOINT=https://lumen-auth.<your>.workers.dev
+```
+
+The session cookie is `SameSite=None; Secure`, so the app must be served over
+HTTPS (or `http://localhost` during development).
+
+---
+
 ## 6. Cloud sync (Dropbox) — 1 hour (P2-04)
 
 ```bash
