@@ -1,0 +1,70 @@
+{
+  "name": "vscode-lumen",
+  "displayName": "Lumen Markdown Preview",
+  "description": "Preview Markdown with Lumen's dialect: GFM, KaTeX math, Mermaid diagrams, callouts, columns and wikilinks.",
+  "version": "0.1.0",
+  "publisher": "lumen-md",
+  "private": true,
+  "license": "MIT",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Programming Languages",
+    "Visualization"
+  ],
+  "keywords": [
+    "markdown",
+    "preview",
+    "katex",
+    "mermaid",
+    "lumen"
+  ],
+  "main": "./dist/extension.js",
+  "activationEvents": [],
+  "contributes": {
+    "commands": [
+      {
+        "command": "lumen.openPreview",
+        "title": "Open Preview",
+        "category": "Lumen",
+        "icon": "$(open-preview)"
+      }
+    ],
+    "menus": {
+      "editor/title": [
+        {
+          "command": "lumen.openPreview",
+          "when": "editorLangId == markdown",
+          "group": "navigation"
+        }
+      ],
+      "commandPalette": [
+        {
+          "command": "lumen.openPreview",
+          "when": "editorLangId == markdown"
+        }
+      ]
+    },
+    "keybindings": [
+      {
+        "command": "lumen.openPreview",
+        "key": "ctrl+alt+l",
+        "mac": "cmd+alt+l",
+        "when": "editorLangId == markdown"
+      }
+    ]
+  },
+  "scripts": {
+    "build": "node build.mjs",
+    "watch": "node build.mjs --watch",
+    "typecheck": "tsc --noEmit -p .",
+    "package": "npm run build && vsce package --no-dependencies"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/vscode": "1.85.0",
+    "esbuild": "^0.25.0",
+    "typescript": "^5.6.0"
+  }
+}

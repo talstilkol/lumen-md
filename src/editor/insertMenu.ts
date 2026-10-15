@@ -189,6 +189,13 @@ const ENTRIES: MenuEntry[] = [
     template: '```live-sql height=240\nCREATE TABLE fruit(name TEXT, qty INT);\nINSERT INTO fruit VALUES (\'apple\', 5), (\'pear\', 2), (\'kiwi\', 9);\nSELECT name, qty FROM fruit ORDER BY qty DESC;\n```',
   },
   {
+    id: "live-lua",
+    label: "Live Lua",
+    hint: "Run Lua 5.4 via wasmoon (WASM)",
+    group: "Media",
+    template: '```live-lua height=200\nlocal function fib(n) return n < 2 and n or fib(n - 1) + fib(n - 2) end\nfor i = 1, 10 do io.write(fib(i), " ") end\nprint()\nprint(_VERSION, "says", 1 + 1)\n```',
+  },
+  {
     id: "live-svg",
     label: "Live SVG",
     hint: "Inline vector graphics",

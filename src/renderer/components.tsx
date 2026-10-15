@@ -22,6 +22,7 @@ const DatabaseBlock = lazy(() => import("../views/DatabaseBlock"));
 const LiveCssBlock = lazy(() => import("../plugins/LiveCssBlock"));
 const LiveJsBlock = lazy(() => import("../plugins/LiveJsBlock"));
 const LivePyBlock = lazy(() => import("../plugins/LivePyBlock"));
+const LiveLuaBlock = lazy(() => import("../plugins/LiveLuaBlock"));
 const LiveSqlBlock = lazy(() => import("../plugins/LiveSqlBlock"));
 const LiveSvgBlock = lazy(() => import("../plugins/LiveSvgBlock"));
 const LiveGlslBlock = lazy(() => import("../plugins/LiveGlslBlock"));
@@ -244,6 +245,10 @@ const LivePy = withSuspense<BlockProps>(
   (props) => <LivePyBlock source={getText(props.children)} meta={props.meta} />,
   "live-python",
 );
+const LiveLua = withSuspense<BlockProps>(
+  (props) => <LiveLuaBlock source={getText(props.children)} meta={props.meta} />,
+  "live-lua",
+);
 const LiveSql = withSuspense<BlockProps>(
   (props) => <LiveSqlBlock source={getText(props.children)} meta={props.meta} />,
   "live-sql",
@@ -381,6 +386,7 @@ export const components: Record<string, LumenBlock> = {
   "lumen-liveglsl": LiveGlsl as unknown as LumenBlock,
   "lumen-livepython": LivePy as unknown as LumenBlock,
   "lumen-livesql": LiveSql as unknown as LumenBlock,
+  "lumen-livelua": LiveLua as unknown as LumenBlock,
   // Asset-resolving <img> override.
   img: LumenImg as unknown as LumenBlock,
   // GFM task-list checkboxes get an aria-label so they aren't announced bare.

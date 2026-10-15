@@ -1,0 +1,55 @@
+/* Lumen preview — follows VS Code theme variables; callout colours match the app. */
+body {
+  margin: 0;
+  padding: 0 1rem 3rem;
+  color: var(--vscode-editor-foreground);
+  background: var(--vscode-editor-background);
+  font-family: var(--vscode-markdown-font-family, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif);
+  font-size: var(--vscode-markdown-font-size, 15px);
+  line-height: 1.65;
+}
+.lumen-preview { max-width: 780px; margin: 0 auto; }
+a { color: var(--vscode-textLink-foreground); }
+h1, h2 { border-bottom: 1px solid var(--vscode-panel-border, rgba(128, 128, 128, 0.3)); padding-bottom: 0.3em; }
+code { font-family: var(--vscode-editor-font-family, ui-monospace, monospace); font-size: 0.9em; }
+:not(pre) > code { background: var(--vscode-textCodeBlock-background); padding: 0.1em 0.35em; border-radius: 4px; }
+pre { background: var(--vscode-textCodeBlock-background); padding: 0.85rem 1rem; border-radius: 6px; overflow: auto; }
+blockquote { margin: 1rem 0; padding: 0 1rem; border-inline-start: 4px solid var(--vscode-textBlockQuote-border); color: var(--vscode-textBlockQuote-foreground, inherit); }
+table { border-collapse: collapse; margin: 1rem 0; }
+th, td { border: 1px solid var(--vscode-panel-border, rgba(128, 128, 128, 0.35)); padding: 0.35rem 0.7rem; }
+img { max-width: 100%; }
+.katex-display { overflow-x: auto; overflow-y: hidden; padding: 0.25rem 0; }
+
+.admonition {
+  margin: 1.25rem 0;
+  padding: 0.85rem 1.1rem;
+  border-inline-start: 4px solid var(--admon-accent, #5b8def);
+  background: var(--admon-bg, rgba(91, 141, 239, 0.08));
+  border-radius: 0 6px 6px 0;
+}
+.admonition > :last-child { margin-bottom: 0; }
+.admonition .admonition-title {
+  font-weight: 600;
+  margin-bottom: 0.4rem;
+  color: var(--admon-accent);
+  text-transform: uppercase;
+  font-size: 12px;
+  letter-spacing: 0.06em;
+}
+.admonition.note { --admon-accent: hsl(220 90% 60%); --admon-bg: hsl(220 90% 60% / 0.08); }
+.admonition.tip { --admon-accent: hsl(160 70% 45%); --admon-bg: hsl(160 70% 45% / 0.1); }
+.admonition.info { --admon-accent: hsl(200 85% 55%); --admon-bg: hsl(200 85% 55% / 0.1); }
+.admonition.warning { --admon-accent: hsl(38 92% 55%); --admon-bg: hsl(38 92% 55% / 0.1); }
+.admonition.danger { --admon-accent: hsl(0 80% 60%); --admon-bg: hsl(0 80% 60% / 0.1); }
+
+.lumen-columns { margin: 1rem 0; }
+.wiki-link { text-decoration: underline dotted; }
+pre.mermaid { background: transparent; text-align: center; }
+pre.mermaid.mermaid-error { outline: 1px dashed var(--vscode-errorForeground); text-align: start; }
+.lumen-block-label {
+  margin: 1rem 0 -0.6rem;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--vscode-descriptionForeground);
+}

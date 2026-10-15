@@ -1,0 +1,5 @@
+dist/
+media/preview.js
+media/katex/
+*.vsix
+node_modules/

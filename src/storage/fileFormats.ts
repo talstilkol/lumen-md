@@ -4,11 +4,13 @@
  * Text/markup: Markdown, HTML, RTF, XML, CSV/TSV/JSON, LaTeX, RST, AsciiDoc,
  * Org, OPML, MHTML/EML. Office/ebook (ZIP-of-XML): DOCX, ODT, EPUB — unzipped
  * via the native DecompressionStream-based reader in ./zip (no JSZip/mammoth).
- * Legacy .doc and image-only PDF remain best-effort. All convert to Markdown.
+ * Apple iWork (.pages/.numbers/.key) via ./iwork. Legacy .doc and image-only
+ * PDF remain best-effort. All convert to Markdown.
  *
  * Uses browser-native DOMParser for XML/HTML parsing.
  */
 import { unzip, unzipText } from "./zip";
+import { iworkToMarkdown } from "./iwork";
 import { parseInertDocument } from "../lib/trustedTypes";
 
 /* ─── HTML → Markdown (zero-dep, uses DOMParser) ─── */
@@ -352,6 +354,19 @@ export async function fileToMarkdown(file: File): Promise<{ name: string; conten
     case "ipynb": {
       const text = await file.text();
       return { name: `${baseName}.md`, content: ipynbToMarkdown(text) };
+    }
+    case "pages":
+    case "numbers":
+    case "key": {
+      // Apple iWork — ZIP of XML ('09) or snappy-framed protobuf (IWA, '13+).
+      const content = await iworkToMarkdown(await file.arrayBuffer(), ext, {
+        pdfFallback: (pdf) =>
+          pdfToMarkdown({
+            name: "Preview.pdf",
+            arrayBuffer: async () => pdf.slice().buffer,
+          } as unknown as File),
+      });
+      return { name: `${baseName}.md`, content };
     }
     case "fountain":
     case "spmd": {
@@ -1267,6 +1282,8 @@ export const SUPPORTED_IMPORT_EXTENSIONS = [
   "csv", "tsv", "json", "xml", "yaml", "yml", "toml",
   // Office
   "rtf", "doc", "docx", "odt", "pptx", "xlsx",
+  // Apple iWork
+  "pages", "numbers", "key",
   // Archives (Notion export / Obsidian vault)
   "zip",
   // Web
