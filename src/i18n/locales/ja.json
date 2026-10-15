@@ -661,5 +661,20 @@
   "runtimeMetrics.column.timeouts": "Timeouts",
   "runtimeMetrics.column.rateLimits": "Rate limit",
   "cmd.view.runtimeMetrics": "Runtime metrics",
-  "cmd.view.runtimeMetrics.hint": "Inspect retries, timeouts, and latency by transport category"
+  "cmd.view.runtimeMetrics.hint": "Inspect retries, timeouts, and latency by transport category",
+  "cmd.edit.formatDocument": "ドキュメントを整形",
+  "cmd.edit.formatDocument.hint": "Prettier: Markdown・フロントマター・コードブロックを整える",
+  "cmd.edit.formatCodeBlock": "カーソル位置のコードブロックを整形",
+  "cmd.edit.formatCodeBlock.hint": "Prettier: カーソルがあるコードブロックを整形",
+  "format.noFormatter": "{lang} のフォーマッターはありません",
+  "format.failed": "整形に失敗しました: {error}",
+  "format.unchanged": "すでに整形済みです",
+  "format.noBlock": "カーソルをコードブロック内に置いてください",
+  "format.needsSource": "コードブロックを整形するにはソース表示または分割表示に切り替えてください",
+  "billing.aiQuota.exceeded": "今月の AI プロンプト {limit} 回をすべて使い切りました。アップグレードで上限を増やせます。",
+  "billing.upgrade.auditLog": "監査ログは Team プランで利用できます。",
+  "billing.upgrade.persistentCollab": "永続コラボサーバーは Pro 機能です。セッションはピアツーピアの WebRTC を使用します。",
+  "billing.upgrade.close": "閉じる",
+  "collab.persistent.label": "永続サーバー (y-websocket)",
+  "collab.persistent.hint": "任意。参加者がオンラインでなくてもドキュメントを同期し続けます。"
 }

@@ -661,5 +661,20 @@
   "runtimeMetrics.column.timeouts": "Timeouts",
   "runtimeMetrics.column.rateLimits": "Rate limit",
   "cmd.view.runtimeMetrics": "Runtime metrics",
-  "cmd.view.runtimeMetrics.hint": "Inspect retries, timeouts, and latency by transport category"
+  "cmd.view.runtimeMetrics.hint": "Inspect retries, timeouts, and latency by transport category",
+  "cmd.edit.formatDocument": "Форматировать документ",
+  "cmd.edit.formatDocument.hint": "Prettier: привести в порядок Markdown, frontmatter и блоки кода",
+  "cmd.edit.formatCodeBlock": "Форматировать блок кода под курсором",
+  "cmd.edit.formatCodeBlock.hint": "Prettier: отформатировать блок кода, в котором стоит курсор",
+  "format.noFormatter": "Нет форматтера для {lang}",
+  "format.failed": "Ошибка форматирования: {error}",
+  "format.unchanged": "Уже отформатировано",
+  "format.noBlock": "Поставьте курсор внутрь блока кода",
+  "format.needsSource": "Переключитесь в режим исходника или разделённый режим, чтобы отформатировать блок кода",
+  "billing.aiQuota.exceeded": "Вы израсходовали все {limit} AI-запросов в этом месяце. Перейдите на тариф выше, чтобы получить больше.",
+  "billing.upgrade.auditLog": "Журнал аудита доступен на тарифе Team.",
+  "billing.upgrade.persistentCollab": "Постоянный сервер совместной работы — функция Pro. Сессии используют одноранговый WebRTC.",
+  "billing.upgrade.close": "Закрыть",
+  "collab.persistent.label": "Постоянный сервер (y-websocket)",
+  "collab.persistent.hint": "Необязательно. Синхронизирует документы, даже когда никого нет в сети."
 }

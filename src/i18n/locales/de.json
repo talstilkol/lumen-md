@@ -661,5 +661,20 @@
   "runtimeMetrics.column.timeouts": "Timeouts",
   "runtimeMetrics.column.rateLimits": "Rate limit",
   "cmd.view.runtimeMetrics": "Runtime metrics",
-  "cmd.view.runtimeMetrics.hint": "Inspect retries, timeouts, and latency by transport category"
+  "cmd.view.runtimeMetrics.hint": "Inspect retries, timeouts, and latency by transport category",
+  "cmd.edit.formatDocument": "Dokument formatieren",
+  "cmd.edit.formatDocument.hint": "Prettier: Markdown, Frontmatter und Codeblöcke aufräumen",
+  "cmd.edit.formatCodeBlock": "Codeblock am Cursor formatieren",
+  "cmd.edit.formatCodeBlock.hint": "Prettier: den Codeblock unter dem Cursor formatieren",
+  "format.noFormatter": "Kein Formatierer für {lang}",
+  "format.failed": "Formatierung fehlgeschlagen: {error}",
+  "format.unchanged": "Bereits formatiert",
+  "format.noBlock": "Setze den Cursor in einen Codeblock",
+  "format.needsSource": "Wechsle zur Quell- oder geteilten Ansicht, um einen Codeblock zu formatieren",
+  "billing.aiQuota.exceeded": "Du hast alle {limit} KI-Anfragen für diesen Monat aufgebraucht. Upgrade für mehr.",
+  "billing.upgrade.auditLog": "Das Audit-Log ist im Team-Tarif verfügbar.",
+  "billing.upgrade.persistentCollab": "Ein dauerhafter Collaboration-Server ist eine Pro-Funktion. Sitzungen laufen per Peer-to-Peer-WebRTC.",
+  "billing.upgrade.close": "Schließen",
+  "collab.persistent.label": "Dauerhafter Server (y-websocket)",
+  "collab.persistent.hint": "Optional. Hält Dokumente synchron, auch wenn kein Teilnehmer online ist."
 }

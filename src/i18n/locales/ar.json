@@ -661,5 +661,20 @@
   "runtimeMetrics.column.timeouts": "Timeouts",
   "runtimeMetrics.column.rateLimits": "Rate limit",
   "cmd.view.runtimeMetrics": "Runtime metrics",
-  "cmd.view.runtimeMetrics.hint": "Inspect retries, timeouts, and latency by transport category"
+  "cmd.view.runtimeMetrics.hint": "Inspect retries, timeouts, and latency by transport category",
+  "cmd.edit.formatDocument": "تنسيق المستند",
+  "cmd.edit.formatDocument.hint": "Prettier: ترتيب Markdown والبيانات الأمامية وكتل الشيفرة",
+  "cmd.edit.formatCodeBlock": "تنسيق كتلة الشيفرة عند المؤشر",
+  "cmd.edit.formatCodeBlock.hint": "Prettier: تنسيق كتلة الشيفرة التي يقع فيها المؤشر",
+  "format.noFormatter": "لا يوجد منسّق للغة {lang}",
+  "format.failed": "فشل التنسيق: {error}",
+  "format.unchanged": "المستند منسّق بالفعل",
+  "format.noBlock": "ضع المؤشر داخل كتلة شيفرة",
+  "format.needsSource": "انتقل إلى عرض المصدر أو العرض المقسوم لتنسيق كتلة شيفرة",
+  "billing.aiQuota.exceeded": "استهلكت جميع طلبات الذكاء الاصطناعي البالغة {limit} لهذا الشهر. قم بالترقية للمزيد.",
+  "billing.upgrade.auditLog": "سجل التدقيق متاح في خطة Team.",
+  "billing.upgrade.persistentCollab": "خادم التعاون الدائم ميزة في خطة Pro. تستخدم الجلسات اتصال WebRTC المباشر بين الأقران.",
+  "billing.upgrade.close": "إغلاق",
+  "collab.persistent.label": "خادم دائم (y-websocket)",
+  "collab.persistent.hint": "اختياري. يبقي المستندات متزامنة حتى عند عدم اتصال أي مشارك."
 }
