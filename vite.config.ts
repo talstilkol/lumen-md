@@ -154,6 +154,17 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
+      // remark-math only uses the `math` syntax extension, but the
+      // package index also re-exports `mathHtml` (lib/html.js), which
+      // imports katex. html.js is tree-shaken, yet katex (not marked
+      // side-effect-free) survived as a bare `import "./vendor-katex"`
+      // in the EAGER vendor-unified chunk — ~84 KB gz on every boot.
+      // Point at the syntax module directly so KaTeX only loads via the
+      // dynamic ./renderer/katexPlugin import (A7 lever 1/3).
+      "micromark-extension-math": path.resolve(
+        __dirname,
+        "node_modules/micromark-extension-math/lib/syntax.js",
+      ),
       // y-websocket is OPTIONAL — only alias to the stub when the real
       // package isn't installed. This way deployments that DO install
       // y-websocket explicitly still get the real implementation, while

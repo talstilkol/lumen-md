@@ -5,7 +5,7 @@
  * locale-native quotes — a UI calling `t("key", { var: "X" })` then
  * shows literal `{var}` instead of "X". This test asserts that every
  * key whose English value carries placeholders also carries the same
- * set of placeholders in every other (synchronously-bundled) locale.
+ * set of placeholders in Hebrew (`locales/he.json`).
  *
  * Lazy-loaded JSON locales (ar, ru, fr, de, ja, zh-CN) ship as `{}`
  * placeholder stubs at the moment, so they're skipped — they're
@@ -42,7 +42,10 @@ function extractBundle(name: string): Bundle {
 }
 
 const en = extractBundle("en");
-const he = extractBundle("he");
+// Hebrew moved to a lazy JSON chunk (A7 lever 4) — read it from disk.
+const he: Bundle = JSON.parse(
+  readFileSync(resolve(__dirname, "..", "i18n", "locales", "he.json"), "utf8"),
+);
 
 function placeholders(s: string): Set<string> {
   return new Set([...s.matchAll(/\{(\w+)\}/g)].map((m) => m[1]));

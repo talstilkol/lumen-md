@@ -35,7 +35,8 @@ for (const f of listSourceFiles(SRC)) {
 
 const idx = readFileSync(join(SRC, "i18n", "index.ts"), "utf8");
 const enBlock = /const en:\s*Strings\s*=\s*\{([\s\S]+?)^\};/m.exec(idx);
-const heBlock = /const he:\s*Strings\s*=\s*\{([\s\S]+?)^\};/m.exec(idx);
+// Hebrew lives in src/i18n/locales/he.json (lazy chunk).
+const heJson = JSON.parse(readFileSync(join(SRC, "i18n", "locales", "he.json"), "utf8"));
 
 function parseKeys(body) {
   const out = new Set();
@@ -46,7 +47,7 @@ function parseKeys(body) {
 }
 
 const en = parseKeys(enBlock[1]);
-const he = parseKeys(heBlock[1]);
+const he = new Set(Object.keys(heJson));
 
 const missingEn = [...callKeys].filter((k) => !en.has(k)).sort();
 const missingHe = [...callKeys].filter((k) => !he.has(k)).sort();

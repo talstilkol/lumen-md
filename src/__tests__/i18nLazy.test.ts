@@ -8,7 +8,7 @@
  * cleanly and `t()` returns the translated value.
  */
 
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import {
   SUPPORTED_LOCALES,
   isLocaleAvailable,
@@ -69,5 +69,46 @@ describe("β.4 lazy locale infrastructure", () => {
     // fr.json has 'toolbar.new' translated.
     expect(t("toolbar.new")).toBe("Nouveau");
     applyLocale("en");
+  });
+});
+
+describe("A7 lever 4 — only English ships eagerly", () => {
+  // Fresh module instance per test so earlier loadLocale() calls don't leak.
+  async function freshI18n() {
+    vi.resetModules();
+    return import("../i18n");
+  }
+
+  it("Hebrew is not in memory until loaded, but is reported available", async () => {
+    const i18n = await freshI18n();
+    expect(i18n.isLocaleLoaded("en")).toBe(true);
+    expect(i18n.isLocaleLoaded("he")).toBe(false);
+    expect(i18n.isLocaleAvailable("he")).toBe(true);
+    await i18n.loadLocale("he");
+    expect(i18n.isLocaleLoaded("he")).toBe(true);
+  });
+
+  it("initLocale() preloads + applies the persisted locale before first render", async () => {
+    const i18n = await freshI18n();
+    localStorage.setItem("lumen-md", JSON.stringify({ state: { locale: "he" }, version: 0 }));
+    const locale = await i18n.initLocale();
+    expect(locale).toBe("he");
+    expect(i18n.getLocale()).toBe("he");
+    expect(i18n.t("toolbar.new")).toBe("חדש");
+    expect(document.documentElement.dir).toBe("rtl");
+    i18n.applyLocale("en");
+    localStorage.removeItem("lumen-md");
+  });
+
+  it("initLocale() defaults to English on missing / corrupt / unknown storage", async () => {
+    const i18n = await freshI18n();
+    localStorage.removeItem("lumen-md");
+    expect(await i18n.initLocale()).toBe("en");
+    localStorage.setItem("lumen-md", "{not json");
+    expect(await i18n.initLocale()).toBe("en");
+    localStorage.setItem("lumen-md", JSON.stringify({ state: { locale: "xx" } }));
+    expect(await i18n.initLocale()).toBe("en");
+    expect(i18n.t("toolbar.new")).toBe("New");
+    localStorage.removeItem("lumen-md");
   });
 });

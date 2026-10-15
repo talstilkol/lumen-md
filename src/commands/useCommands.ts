@@ -19,7 +19,7 @@ import { AI_PROMPT_TEMPLATES, applyTemplate } from "../ai/multiLangPrompts";
 import { getPluginCommands } from "../plugins/pluginSystem";
 import { showAiToast } from "../ui/AiToast";
 import { encryptDocument, decryptDocument, isEncrypted } from "../storage/encryption";
-import { readWorkspaceFile } from "../storage/workspace";
+import { isOPFSAvailable, readWorkspaceFile } from "../storage/workspace";
 import { relativeTime } from "../lib/relativeTime";
 import { buildFormatCommands } from "../editor/formatCommands";
 import { withAiQuota } from "../billing/aiQuota";
@@ -1367,6 +1367,41 @@ export function useCommands({
               },
             },
           ]),
+      {
+        id: "file.openSampleWorkspace",
+        label: t("cmd.file.openSampleWorkspace"),
+        hint: t("cmd.file.openSampleWorkspace.hint"),
+        icon: cmdIcons.FolderOpen,
+        group: t("group.file"),
+        action: async () => {
+          if (!isOPFSAvailable()) {
+            await uiAlert({ message: t("doc.alert.workspaceUnavailable") });
+            return;
+          }
+          try {
+            const { createSampleWorkspace } = await import("../storage/sampleWorkspace");
+            const result = await createSampleWorkspace();
+            window.dispatchEvent(new Event("lumen-workspace-changed"));
+            if (!useAppStore.getState().showWorkspace) toggleWorkspace();
+            const content = await readWorkspaceFile(result.entry);
+            useAppStore.getState().openTab({
+              name: result.entry,
+              content,
+              workspaceName: result.entry,
+            });
+            showAiToast(
+              result.created.length > 0
+                ? t("sample.toast.created", { count: result.created.length, folder: result.root })
+                : t("sample.toast.exists", { folder: result.root }),
+              "info",
+            );
+          } catch (e) {
+            await uiAlert({
+              message: t("sample.alert.failed", { error: (e as Error).message }),
+            });
+          }
+        },
+      },
       {
         id: "file.saveToWorkspace",
         label: t("cmd.file.saveToWorkspace"),

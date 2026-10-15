@@ -1,7 +1,10 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { Locale } from "../i18n";
-import { applyLocale } from "../i18n";
+import { applyLocale, isLocaleLoaded, loadLocale } from "../i18n";
+
+// Monotonic token so a slow lazy-locale fetch can't clobber a newer pick.
+let localeRequest = 0;
 
 export type ViewMode = "source" | "split" | "preview" | "wysiwyg";
 export type Theme = "light" | "dark" | "system";
@@ -158,8 +161,17 @@ export const useAppStore = create<AppState>()(
         applyTheme(t);
       },
       setLocale: (l) => {
-        set({ locale: l });
-        applyLocale(l);
+        const req = ++localeRequest;
+        const commit = () => {
+          if (req !== localeRequest) return;
+          applyLocale(l);
+          set({ locale: l });
+        };
+        // Non-English bundles are lazy chunks (A7 lever 4). Commit the
+        // store change only once the strings are in memory so the
+        // re-render it triggers already reads the new language via t().
+        if (isLocaleLoaded(l)) commit();
+        else void loadLocale(l).then(commit, commit);
       },
       setContent: (s) =>
         set((state) => {

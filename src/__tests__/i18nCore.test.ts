@@ -1,10 +1,16 @@
 /**
  * i18n t() function — comprehensive unit tests.
  */
-import { describe, it, expect } from "vitest";
-import { t, applyLocale, getLocale } from "../i18n";
+import { describe, it, expect, beforeAll } from "vitest";
+import { t, applyLocale, getLocale, loadLocale } from "../i18n";
 
 describe("t() function", () => {
+  // Hebrew is a lazy chunk since A7 lever 4; main.tsx preloads it via
+  // initLocale() before first render, the tests do the same here.
+  beforeAll(async () => {
+    await loadLocale("he");
+  });
+
   it("returns English string for known key", () => {
     applyLocale("en");
     expect(t("toolbar.new")).toBe("New");
