@@ -86,3 +86,19 @@ test("live-glsl compiles and renders a shader on a WebGL canvas", async ({ page 
   expect(box, "GLSL canvas must have a bounding box").not.toBeNull();
   expect(box!.width).toBeGreaterThan(50);
 });
+
+test("live-lua executes real Lua via wasmoon WASM in a worker", async ({ page }) => {
+  test.setTimeout(120_000);
+  await page.keyboard.press("Meta+2");
+  const editor = page.locator(".cm-content").first();
+  await editor.click();
+  await editor.press("ControlOrMeta+a");
+  await editor.fill("```live-lua\nlocal s = 0\nfor i = 1, 100 do s = s + i end\nprint(s + 13)\n```\n");
+
+  const block = page.locator('[data-testid="live-lua"]');
+  await expect(block).toBeVisible({ timeout: 15_000 });
+  await block.getByRole("button", { name: "Run" }).click();
+
+  // 5050 + 13 = 5063 — computed by the Lua VM, never present in the source.
+  await expect(block).toContainText("5063", { timeout: 90_000 });
+});
