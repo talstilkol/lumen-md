@@ -33,8 +33,7 @@ tags: [sample, index]
 
 # 👋 Welcome to the Lumen sample workspace
 
-This folder is a tiny, linked knowledge base. Every note below is plain
-Markdown stored in your browser — edit, rename or delete anything.
+This folder is a tiny, linked knowledge base. Every note below is plain Markdown stored in your browser — edit, rename or delete anything.
 
 ## Where to go next
 
@@ -63,8 +62,7 @@ tags: [sample, database]
 
 # Project Board
 
-Every note in \`Projects/\` with \`type: project\` in its frontmatter shows
-up here. Change a note's \`status:\` and the card moves column.
+Every note in \`Projects/\` with \`type: project\` in its frontmatter shows up here. Change a note's \`status:\` and the card moves column.
 
 \`\`\`database
 title: Projects by status
@@ -138,8 +136,7 @@ tags: [project, mobile]
 
 # Mobile App
 
-Offline-first companion app. Depends on the [[Website Redesign]] design
-system.
+Offline-first companion app. Depends on the [[Website Redesign]] design system.
 
 - [ ] Pick the sync strategy
 - [ ] Prototype the editor screen
@@ -174,8 +171,7 @@ tags: [sample, data]
 
 # Metrics
 
-Paste CSV straight into a fenced block and Lumen renders a sortable table
-with chart suggestions:
+Paste CSV straight into a fenced block and Lumen renders a sortable table with chart suggestions:
 
 \`\`\`csv title="Weekly visitors"
 week,visitors,signups
@@ -208,8 +204,7 @@ tags: [template]
 
 # Weekly Review — {{date}}
 
-> Duplicate this note each week (or install it from ⌘K → *Insert template*)
-> and fill in the blanks.
+> Duplicate this note each week (or install it from ⌘K → *Insert template*) and fill in the blanks.
 
 ## Wins
 
