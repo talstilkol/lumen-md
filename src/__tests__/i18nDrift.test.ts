@@ -19,7 +19,7 @@ describe("i18n locale drift", () => {
   let m: RegExpExecArray | null;
   while ((m = re.exec(enBlock)) !== null) enKeys.add(m[1]);
 
-  const locales = ["ar", "de", "fr", "ja", "ru", "zh-CN"];
+  const locales = ["he", "ar", "de", "fr", "ja", "ru", "zh-CN"];
   const localeDir = join(__dirname, "..", "i18n", "locales");
 
   for (const locale of locales) {

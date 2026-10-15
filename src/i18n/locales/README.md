@@ -29,5 +29,7 @@ parent `index.ts` `en` bundle.
 ## Why JSON, not TS
 
 JSON files are static assets — Vite splits them into their own chunks
-so `en + he` stays the only synchronous load. TS bundles would
+so `en` stays the only synchronous load (Hebrew moved here too — A7
+lever 4; `initLocale()` in main.tsx preloads the persisted locale before
+the first render). TS bundles would
 inflate the main JS chunk by ~80 KB per locale.

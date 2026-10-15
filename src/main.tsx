@@ -10,6 +10,7 @@ import { initAuth } from "./auth/useAuth";
 import { reportWebVitals } from "./lib/webVitals";
 import { log } from "./lib/logger";
 import { startAutoBackup } from "./sync/autoBackup";
+import { initLocale } from "./i18n";
 import "./index.css";
 
 initTelemetry();
@@ -50,6 +51,13 @@ function initShareExtension() {
 }
 initShareExtension();
 
+// Only the English string table ships in the main chunk (A7 lever 4).
+// Load the persisted locale's lazy bundle BEFORE the first render so the
+// synchronous t() calls never flash English for a Hebrew/French/… user.
+// initLocale() resolves to English on any failure, so boot never blocks.
+void initLocale().finally(renderApp);
+
+function renderApp() {
 ReactDOM.createRoot(document.getElementById("root")!).render(
     <React.StrictMode>
       <ErrorBoundary fallback={
@@ -88,3 +96,4 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
     <ToastContainer />
   </React.StrictMode>,
 );
+}
