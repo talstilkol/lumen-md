@@ -56,6 +56,9 @@ const BUDGETS = [
   { name: "vendor: leaflet",    pattern: /^vendor-leaflet-/,      budgetKb: 60 },
   { name: "vendor: git",        pattern: /^vendor-git-/,          budgetKb: 110 },
   { name: "vendor: tldraw",     pattern: /^vendor-tldraw-/,       budgetKb: 420 },
+  // @google/model-viewer + three.js, self-hosted (CSP bans the unpkg CDN).
+  // Dynamic-imported only when a document contains a ```model3d block.
+  { name: "vendor: modelviewer", pattern: /^vendor-modelviewer-/, budgetKb: 320 },
   { name: "vendor: other",      pattern: /^vendor-/,              budgetKb: 200 },
   // pdfjs-dist text extractor — lazy-loaded only when the user imports a PDF.
   // ~144 KB gzipped today; the heavy worker ships as a separate .mjs (not
