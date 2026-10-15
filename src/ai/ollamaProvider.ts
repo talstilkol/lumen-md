@@ -31,7 +31,8 @@ export interface OllamaModel {
   };
 }
 
-function getBaseUrl(): string {
+/** Configured Ollama base URL (`lumen.ollama.baseUrl`), default localhost:11434. */
+export function getBaseUrl(): string {
   try {
     const stored = localStorage.getItem("lumen.ollama.baseUrl");
     return stored || DEFAULT_OLLAMA_URL;

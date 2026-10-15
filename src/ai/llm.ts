@@ -6,6 +6,7 @@
 import { useAppStore } from "../store/useStore";
 import { toast } from "../store/useToastStore";
 import { fetchWithRetry } from "../lib/fetchRetry";
+import { t } from "../i18n";
 
 // ── Rate limiting ───────────────────────────────────────────────────────
 // Token bucket — protects the user's API key against runaway loops.
@@ -32,16 +33,13 @@ function checkRateLimit(): void {
     const oldest = requestTimestamps[0];
     const retryAfterMs = 60_000 - (now - oldest);
     toast.warn(
-      "AI rate limit reached",
-      `Wait ${Math.ceil(retryAfterMs / 1000)}s before sending another prompt.`,
+      t("ai.toast.rateLimit.title"),
+      t("ai.toast.rateLimit.body", { seconds: Math.ceil(retryAfterMs / 1000) }),
     );
     throw new RateLimitError(retryAfterMs);
   }
   if (inflight >= MAX_CONCURRENT) {
-    toast.warn(
-      "AI requests at capacity",
-      "Wait for the current prompts to finish before sending more.",
-    );
+    toast.warn(t("ai.toast.capacity.title"), t("ai.toast.capacity.body"));
     throw new RateLimitError(1_000);
   }
   requestTimestamps.push(now);
@@ -153,12 +151,19 @@ export async function chat(
 
   // ── Ollama (local server) ──────────────────────────────────────
   if (provider === "ollama") {
-    const { chatOllama, isOllamaAvailable } = await import("./ollamaProvider");
+    const { chatOllama, isOllamaAvailable, getBaseUrl } = await import("./ollamaProvider");
     if (await isOllamaAvailable()) {
       return chatOllama(messages, opts);
     }
-    toast.warn("Ollama unavailable", "Cannot reach Ollama at localhost:11434. Is it running?");
-    // Fall through to OpenAI
+    toast.warn(
+      t("ai.toast.ollamaUnavailable.title"),
+      t("ai.toast.ollamaUnavailable.body", { url: getBaseUrl() }),
+    );
+    // Ollama is unreachable. Execution continues below: the anthropic /
+    // gemini / mistral branches only match their own provider id, so they
+    // are skipped; the WebGPU branch runs only if `useLocalAi` is on; and
+    // otherwise we reach the OpenAI request at the end of this function,
+    // which throws NO_KEY when no OpenAI key is configured.
   }
 
   // ── Anthropic Claude (cloud) ───────────────────────────────────
@@ -208,7 +213,13 @@ export async function chat(
         const pct = Math.round(progress * 100);
         if (pct >= lastPct + 5 || pct === 100) {
           lastPct = pct;
-          toast.info("Local AI loading", `${pct}% — ${text || "preparing model"}`);
+          toast.info(
+            t("ai.toast.localLoading.title"),
+            t("ai.toast.localLoading.body", {
+              pct,
+              status: text || t("ai.toast.localLoading.preparing"),
+            }),
+          );
         }
       });
       try {
@@ -217,10 +228,7 @@ export async function chat(
         off();
       }
     }
-    toast.warn(
-      "Local AI unavailable",
-      "WebGPU isn't supported here — falling back to your OpenAI key.",
-    );
+    toast.warn(t("ai.toast.localUnavailable.title"), t("ai.toast.localUnavailable.body"));
   }
 
   // ── OpenAI (cloud) ─────────────────────────────────────────────
