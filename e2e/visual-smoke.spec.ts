@@ -50,6 +50,57 @@ test("Mermaid block renders inline SVG inside the preview", async ({ page }) => 
   expect(box!.height).toBeGreaterThanOrEqual(80);
 });
 
+/**
+ * M6 follow-up 1 — pixel-diff regression for Mermaid. The bounding-box
+ * assertion above catches the "collapsed to 24×24" bug; this catches
+ * subtler layout/theme regressions (wrapped labels, lost edge styling,
+ * wrong theme colours).
+ *
+ * Only the SVG element is captured (not the "Rendered in N ms" status
+ * row, which varies run to run). Chromium only: font rasterisation
+ * differs per engine and OS, and one stable baseline beats three flaky
+ * ones. Baselines are per-platform (`…-chromium-linux.png`).
+ *
+ * First-run guard: when no baseline is committed yet, the test writes
+ * one and passes with an annotation instead of failing — so CI produces
+ * the baseline artifact on its first run. Commit it (or regenerate with
+ * `npx playwright test e2e/visual-smoke.spec.ts --project=chromium
+ * --update-snapshots`) — see CONTRIBUTING.md.
+ */
+test("Mermaid block matches the pixel baseline", async ({ page, browserName }, testInfo) => {
+  test.skip(browserName !== "chromium", "pixel baseline is chromium-only");
+  test.setTimeout(60_000);
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await page.keyboard.press("Meta+2");
+  const editor = page.locator(".cm-content").first();
+  await editor.click();
+  await editor.fill("```mermaid\ngraph LR; A --> B; B --> C\n```\n");
+  const svg = page.locator(".mermaid-block svg").first();
+  await expect(svg).toBeVisible({ timeout: 30_000 });
+  // Let web fonts settle so text metrics are final before capture.
+  await page.evaluate(() => document.fonts.ready);
+
+  const name = "mermaid-flowchart.png";
+  const baseline = testInfo.snapshotPath(name, { kind: "screenshot" });
+  const { existsSync, mkdirSync } = await import("node:fs");
+  const { dirname } = await import("node:path");
+  if (!existsSync(baseline) && testInfo.config.updateSnapshots !== "all") {
+    mkdirSync(dirname(baseline), { recursive: true });
+    await svg.screenshot({ path: baseline, animations: "disabled" });
+    testInfo.annotations.push({
+      type: "baseline-created",
+      description: `No committed baseline — wrote ${baseline}. Commit it to enable the pixel diff.`,
+    });
+    return;
+  }
+  await expect(svg).toHaveScreenshot(name, {
+    animations: "disabled",
+    // Anti-aliasing noise across GPU/driver versions stays well under 1 %;
+    // a real regression (wrapped labels, collapsed nodes) moves > 10 %.
+    maxDiffPixelRatio: 0.02,
+  });
+});
+
 test("WYSIWYG mode mounts ProseMirror and accepts typed input", async ({ page }) => {
   await page.keyboard.press("Meta+4");
   const pm = page.locator(".ProseMirror").first();
