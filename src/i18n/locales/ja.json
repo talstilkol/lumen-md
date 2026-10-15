@@ -495,6 +495,7 @@
   "templates.error": "Failed to load registry: {error}",
   "templates.install": "インストール",
   "templates.installFailed": "インストール failed: {error}",
+  "templates.loadFailed": "テンプレートを開けませんでした: {error}",
   "templates.installed": "✅ インストール済み {name} → {path}",
   "templates.installed.button": "インストール済み",
   "templates.installing": "Installing…",

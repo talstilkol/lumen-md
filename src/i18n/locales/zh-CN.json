@@ -495,6 +495,7 @@
   "templates.error": "Failed to load registry: {error}",
   "templates.install": "安装",
   "templates.installFailed": "安装 failed: {error}",
+  "templates.loadFailed": "无法打开模板：{error}",
   "templates.installed": "✅ 已安装 {name} → {path}",
   "templates.installed.button": "已安装",
   "templates.installing": "Installing…",

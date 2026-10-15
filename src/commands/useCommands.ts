@@ -13,6 +13,7 @@ import { buildAiSettingsCommand, buildAiOutlineCommand } from "../ai/commands";
 import type { CollabSession } from "../collab/yjs";
 import { startVoiceRecording } from "../ui/VoiceDictation";
 import { TEMPLATES } from "../editor/templates";
+import { buildInstalledTemplateCommands, useInstalledTemplates } from "./installedTemplates";
 import { log } from "../lib/logger";
 import { AI_PROMPT_TEMPLATES, applyTemplate } from "../ai/multiLangPrompts";
 import { getPluginCommands } from "../plugins/pluginSystem";
@@ -106,6 +107,7 @@ export function useCommands({
   const toggleGrammarCheck = useAppStore((s) => s.toggleGrammarCheck);
   const setWritingGoal = useAppStore((s) => s.setWritingGoal);
   const toggleAutoSave = useAppStore((s) => s.toggleAutoSave);
+  const installedTemplates = useInstalledTemplates();
 
     return useMemo<Command[]>(() => {
     const setMode = useAppStore.getState().setMode;
@@ -965,6 +967,16 @@ export function useCommands({
           setDoc({ name: `${tpl.name}.md`, dirty: true });
         },
       })),
+      // Marketplace templates installed into the workspace (templates/<id>.md).
+      ...buildInstalledTemplateCommands(installedTemplates, {
+        groupLabel: t("group.templates"),
+        hint: t("templates.installed.button"),
+        apply: (name, content) => {
+          setContent(content);
+          setDoc({ name: `${name}.md`, dirty: true });
+        },
+        onError: (e) => showAiToast(t("templates.loadFailed", { error: e.message }), "error"),
+      }),
       // ── Voice-to-Markdown ─────────────────────────────────────────────────
       {
         id: "voice.dictate",
@@ -1452,5 +1464,6 @@ export function useCommands({
     doc.content,
     theme,
     setRuntimeMetricsOpen,
+    installedTemplates,
   ]);
 }

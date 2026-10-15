@@ -495,6 +495,7 @@
   "templates.error": "Failed to load registry: {error}",
   "templates.install": "Installer",
   "templates.installFailed": "Installer failed: {error}",
+  "templates.loadFailed": "Impossible d’ouvrir le modèle : {error}",
   "templates.installed": "✅ Installé {name} → {path}",
   "templates.installed.button": "Installé",
   "templates.installing": "Installing…",

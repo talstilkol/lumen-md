@@ -1,8 +1,10 @@
 /**
  * Template gallery — browse, filter, install community + first-party
  * templates from `public/templates/registry.json`. Installed templates
- * land in the workspace under `templates/<id>.md` and are picked up by
- * the existing `⌘K → Insert template` flow without further wiring.
+ * land in the workspace under `templates/<id>.md` and show up in
+ * `⌘K → Templates` (see `src/commands/installedTemplates.ts`, which lists
+ * that folder and refreshes on the `lumen:templates-changed` event fired
+ * by `installTemplate()`).
  *
  * Layout mirrors `PluginGallery.tsx` so users moving between the two
  * surfaces have a consistent affordance.

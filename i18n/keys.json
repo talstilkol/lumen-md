@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-10-15T21:16:13.620Z",
+  "generated_at": "2026-10-15T21:19:43.737Z",
   "source": "src/i18n/index.ts (en bundle)",
-  "count": 674,
+  "count": 675,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -2243,6 +2243,13 @@
     {
       "key": "templates.installFailed",
       "en": "Install failed: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "templates.loadFailed",
+      "en": "Couldn't open template: {error}",
       "vars": [
         "error"
       ]

@@ -495,6 +495,7 @@
   "templates.error": "Failed to load registry: {error}",
   "templates.install": "Установить",
   "templates.installFailed": "Установить failed: {error}",
+  "templates.loadFailed": "Не удалось открыть шаблон: {error}",
   "templates.installed": "✅ Установлено {name} → {path}",
   "templates.installed.button": "Установлено",
   "templates.installing": "Installing…",
