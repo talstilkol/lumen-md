@@ -36,10 +36,10 @@
     "docker:run": "docker run -p 8080:8080 lumen-md"
   },
   "dependencies": {
-    "@capacitor/android": "^8.3.1",
-    "@capacitor/cli": "^8.3.1",
-    "@capacitor/core": "^8.3.1",
-    "@capacitor/ios": "^8.3.1",
+    "@capacitor/android": "^8.5.3",
+    "@capacitor/cli": "^8.5.3",
+    "@capacitor/core": "^8.5.3",
+    "@capacitor/ios": "^8.5.3",
     "@capacitor/keyboard": "^8.0.3",
     "@capacitor/splash-screen": "^8.0.1",
     "@capacitor/status-bar": "^8.0.2",
@@ -85,7 +85,7 @@
     "lucide-react": "^0.469.0",
     "mermaid": "^11.15.0",
     "papaparse": "^5.4.1",
-    "pdfjs-dist": "^6.0.227",
+    "pdfjs-dist": "^6.4.299",
     "prosemirror-state": "^1.4.4",
     "prosemirror-view": "^1.41.8",
     "pyodide": "^314.0.0",
