@@ -56,23 +56,24 @@ test("user journey: type, render, cycle modes, switch locale, open find — no e
   await expect(svg).toBeVisible({ timeout: 8_000 });
 
   // 2. Cycle through view modes: Source → Preview → WYSIWYG → Split.
-  // Settle between mode flips so Milkdown's async teardown doesn't race
-  // the next mount. (Real users don't press Meta+1/3/4 in <100ms.)
+  // No settle delays: WysiwygEditor serialises Milkdown's async
+  // create()/destroy() on a per-instance lifecycle queue, so flipping
+  // modes back-to-back can't double-mount or orphan an editor
+  // (covered by src/__tests__/wysiwygLifecycle.test.tsx).
   await page.keyboard.press("Meta+1"); // Source-only
   await expect(page.locator(".cm-content").first()).toBeVisible();
-  await page.waitForTimeout(200);
   await page.keyboard.press("Meta+3"); // Preview-only
   await expect(
     page.locator(".markdown-preview h1, [data-preview-root] h1").first(),
   ).toBeVisible({ timeout: 5000 });
-  await page.waitForTimeout(200);
   await page.keyboard.press("Meta+4"); // WYSIWYG
   await expect(page.locator(".ProseMirror").first()).toBeVisible({
     timeout: 5000,
   });
-  await page.waitForTimeout(300);
+  await expect(page.locator(".ProseMirror")).toHaveCount(1);
   await page.keyboard.press("Meta+2"); // Back to split
-  await page.waitForTimeout(200);
+  await expect(page.locator(".cm-content").first()).toBeVisible();
+  await expect(page.locator(".ProseMirror")).toHaveCount(0);
 
   // 3. Switch locale to Hebrew via palette.
   await page.keyboard.press("Meta+K");
