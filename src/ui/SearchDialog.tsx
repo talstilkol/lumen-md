@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { ReactElement } from "react";
 import { Search, FileText, Sparkles, Loader2, FileCode2, Wand2 } from "lucide-react";
-import { t } from "../i18n";
+import { t, tPlural } from "../i18n";
 import { searchWorkspace, type SearchHit } from "../storage/workspaceIndex";
 import { isOPFSAvailable, readWorkspaceFile } from "../storage/workspace";
 import { chat, AiError } from "../ai/llm";
@@ -305,6 +305,11 @@ export function SearchDialog({ open, onClose, onOpenFile }: Props) {
     return hits.length === 0;
   }, [loading, hits, smartHits, mode]);
 
+  // Result-count badge: shown once a query has settled (not while the
+  // debounced search is in flight, and not on the Ask tab).
+  const resultCount = mode === "smart" ? smartHits.length : hits.length;
+  const showCount = !loading && query.trim().length > 0 && mode !== "ai";
+
   if (!open) return null;
 
   return (
@@ -360,6 +365,26 @@ export function SearchDialog({ open, onClose, onOpenFile }: Props) {
             spellCheck={false}
             disabled={!isOPFSAvailable()}
           />
+          {showCount && (
+            <span
+              data-testid="search-result-count"
+              role="status"
+              aria-live="polite"
+              style={{
+                flexShrink: 0,
+                fontSize: 11,
+                padding: "2px 8px",
+                borderRadius: 999,
+                background: resultCount ? "hsl(var(--accent) / 0.12)" : "hsl(var(--bg-subtle))",
+                color: resultCount ? "hsl(var(--accent))" : "hsl(var(--fg-muted))",
+                border: "1px solid hsl(var(--border))",
+                whiteSpace: "nowrap",
+                fontVariantNumeric: "tabular-nums",
+              }}
+            >
+              {tPlural("search.results", resultCount)}
+            </span>
+          )}
         </div>
         <div className="cmd-palette-list" ref={listRef}>
           {empty && (

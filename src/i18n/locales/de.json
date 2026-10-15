@@ -673,5 +673,10 @@
   "runtimeMetrics.column.timeouts": "Timeouts",
   "runtimeMetrics.column.rateLimits": "Rate limit",
   "cmd.view.runtimeMetrics": "Runtime metrics",
-  "cmd.view.runtimeMetrics.hint": "Inspect retries, timeouts, and latency by transport category"
+  "cmd.view.runtimeMetrics.hint": "Inspect retries, timeouts, and latency by transport category",
+  "cmd.file.exportPptx": "Als PowerPoint exportieren (.pptx)",
+  "cmd.file.exportPptx.hint": "Eine Folie pro H1/H2-Überschrift (oder ----Trenner)",
+  "search.results.one": "{n} Ergebnis",
+  "search.results.other": "{n} Ergebnisse",
+  "ai.prompt.historyHint": "↑↓ Verlauf"
 }

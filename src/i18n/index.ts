@@ -123,6 +123,8 @@ const en: Strings = {
   "search.unavailable": "Workspace storage isn't available in this browser.",
   "search.empty": "Workspace is empty.",
   "search.noMatches": "No matches.",
+  "search.results.one": "{n} result",
+  "search.results.other": "{n} results",
   // Generic dialog
   "dialog.ok": "OK",
   "dialog.cancel": "Cancel",
@@ -176,6 +178,8 @@ const en: Strings = {
   "cmd.file.exportIpynb.hint": "Notebook: fenced code blocks become cells",
   "cmd.file.exportSite": "Export to Static Site",
   "cmd.file.exportSite.hint": "Multi-page HTML site with sidebar nav + RSS (pages split on H1)",
+  "cmd.file.exportPptx": "Export to PowerPoint (.pptx)",
+  "cmd.file.exportPptx.hint": "One slide per H1/H2 heading (or --- separators)",
   "template.blank": "Blank document",
   "template.blank.desc": "Start with a clean slate",
   "template.meeting": "Meeting notes",
@@ -568,6 +572,7 @@ const en: Strings = {
   "ai.prompt.key": "Enter your OpenAI API key (sk-…):",
   "ai.prompt.placeholder": "Type here…",
   "ai.prompt.submit": "Go",
+  "ai.prompt.historyHint": "↑↓ history",
   "ai.alert.keySaved": "AI key saved.",
   "ai.toast.ollamaUnavailable.title": "Ollama unavailable",
   "ai.toast.ollamaUnavailable.body": "Cannot reach Ollama at {url}. Is it running? Falling back to OpenAI.",
@@ -840,6 +845,8 @@ const he: Strings = {
   "update.reload": "טען מחדש",
   "update.dismiss": "סגור",
   "search.noMatches": "אין התאמות.",
+  "search.results.one": "{n} תוצאה",
+  "search.results.other": "{n} תוצאות",
   "palette.placeholder": "הקלד פקודה, או חפש…",
   "palette.noMatch": "אין פקודות תואמות",
   "palette.navigate": "ניווט",
@@ -879,6 +886,8 @@ const he: Strings = {
   "cmd.file.exportIpynb.hint": "מחברת: בלוקי קוד הופכים לתאים",
   "cmd.file.exportSite": "ייצוא לאתר סטטי",
   "cmd.file.exportSite.hint": "אתר HTML רב-עמודים עם ניווט צד + RSS (עמודים מפוצלים לפי H1)",
+  "cmd.file.exportPptx": "ייצוא ל-PowerPoint (.pptx)",
+  "cmd.file.exportPptx.hint": "שקופית לכל כותרת H1/H2 (או מפרידי ---)",
   "template.blank": "מסמך ריק",
   "template.blank.desc": "התחלה מדף חלק",
   "template.meeting": "פרוטוקול ישיבה",
@@ -1242,6 +1251,7 @@ const he: Strings = {
   "ai.prompt.key": "הזן מפתח OpenAI API (sk-…):",
   "ai.prompt.placeholder": "הקלד כאן…",
   "ai.prompt.submit": "שלח",
+  "ai.prompt.historyHint": "↑↓ היסטוריה",
   "ai.alert.keySaved": "מפתח ה-AI נשמר.",
   "ai.toast.ollamaUnavailable.title": "Ollama לא זמין",
   "ai.toast.ollamaUnavailable.body": "לא ניתן להתחבר ל-Ollama בכתובת {url}. האם הוא פועל? עובר ל-OpenAI.",
@@ -1549,6 +1559,28 @@ export function t(id: string, vars?: Record<string, string | number>): string {
     .replace(/\{(\w+)\}/g, (_, k) =>
       vars[k] !== undefined ? String(vars[k]) : `{${k}}`,
     );
+}
+
+/**
+ * Plural-aware translate. Picks `${base}.${category}` where category comes
+ * from `Intl.PluralRules` for the active locale ("one", "two", "few", …),
+ * falling back to `${base}.other`. `{n}` is substituted with the count.
+ * Bundles only need `.one` + `.other`; locales with richer plural systems
+ * (ar, ru) can use a count-neutral `.other` phrasing.
+ */
+export function tPlural(base: string, n: number, vars?: Record<string, string | number>): string {
+  const bundle = BUNDLES[activeLocale] ?? en;
+  let category = "other";
+  try {
+    category = new Intl.PluralRules(activeLocale).select(n);
+  } catch {
+    /* unsupported locale — use "other" */
+  }
+  const key =
+    `${base}.${category}` in bundle || `${base}.${category}` in en
+      ? `${base}.${category}`
+      : `${base}.other`;
+  return t(key, { n, ...vars });
 }
 
 export function isRTL(): boolean {

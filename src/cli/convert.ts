@@ -3,6 +3,7 @@
  *
  * Uses ONLY the DOM-free converters so it runs in plain Node (no jsdom):
  *   md → tex / rst / org / adoc / rtf / opml / ipynb   (export)
+ *   md → docx / epub / pptx                            (binary export)
  *   tex / rst / org / adoc / csv / tsv / json / ipynb → md   (import)
  *
  * The dispatch is a pure function (tested in src/__tests__/cliConvert.test.ts);
@@ -19,6 +20,7 @@ import {
   markdownToEpubBytes,
 } from "../storage/exportFormats";
 import { markdownToDocxBytes } from "../storage/exportDocx";
+import { markdownToPptxBytes } from "../storage/exportPptx";
 import {
   latexToMarkdown,
   rstToMarkdown,
@@ -55,9 +57,10 @@ const IMPORTERS: Record<string, (text: string) => string> = {
 const extOf = (name: string): string => (name.split(".").pop() || "").toLowerCase();
 
 /** Binary export targets — real OOXML/EPUB bytes (work in Node via zip.ts). */
-const BINARY_EXPORTERS: Record<string, (md: string) => Promise<Uint8Array>> = {
+const BINARY_EXPORTERS: Record<string, (md: string, title: string) => Promise<Uint8Array>> = {
   docx: (md) => markdownToDocxBytes(md),
   epub: (md) => markdownToEpubBytes(md),
+  pptx: (md, title) => markdownToPptxBytes(md, title),
 };
 
 export function isBinaryTarget(ext: string): boolean {
@@ -138,5 +141,5 @@ export async function convertBinary(
       `Unknown binary target ".${to}". Supported: ${Object.keys(BINARY_EXPORTERS).join(", ")}`,
     );
   const base = inName.replace(/\.[^.]+$/, "");
-  return { outName: `${base}.${to}`, bytes: await fn(inText) };
+  return { outName: `${base}.${to}`, bytes: await fn(inText, base.split(/[\\/]/).pop() || base) };
 }

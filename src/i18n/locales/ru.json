@@ -673,5 +673,10 @@
   "runtimeMetrics.column.timeouts": "Timeouts",
   "runtimeMetrics.column.rateLimits": "Rate limit",
   "cmd.view.runtimeMetrics": "Runtime metrics",
-  "cmd.view.runtimeMetrics.hint": "Inspect retries, timeouts, and latency by transport category"
+  "cmd.view.runtimeMetrics.hint": "Inspect retries, timeouts, and latency by transport category",
+  "cmd.file.exportPptx": "Экспорт в PowerPoint (.pptx)",
+  "cmd.file.exportPptx.hint": "Один слайд на заголовок H1/H2 (или разделитель ---)",
+  "search.results.one": "{n} результат",
+  "search.results.other": "Результатов: {n}",
+  "ai.prompt.historyHint": "↑↓ история"
 }

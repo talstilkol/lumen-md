@@ -673,5 +673,10 @@
   "runtimeMetrics.column.timeouts": "超时",
   "runtimeMetrics.column.rateLimits": "速率限制",
   "cmd.view.runtimeMetrics": "运行时指标",
-  "cmd.view.runtimeMetrics.hint": "按传输类型查看重试、超时和延迟"
+  "cmd.view.runtimeMetrics.hint": "按传输类型查看重试、超时和延迟",
+  "cmd.file.exportPptx": "导出为 PowerPoint (.pptx)",
+  "cmd.file.exportPptx.hint": "每个 H1/H2 标题(或 --- 分隔符)生成一张幻灯片",
+  "search.results.one": "{n} 个结果",
+  "search.results.other": "{n} 个结果",
+  "ai.prompt.historyHint": "↑↓ 历史记录"
 }

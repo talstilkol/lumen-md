@@ -237,11 +237,50 @@ export function markdownToOpml(md: string, title = "Outline"): string {
  * `<section data-markdown>` rendered by Reveal's markdown plugin. Reveal's
  * runtime + theme load from a CDN, so the file is portable but online.
  */
+/**
+ * Shared slide splitter (Reveal + PPTX exports). When the deck uses `---`
+ * thematic breaks, those are the slide boundaries (the Reveal convention).
+ * Otherwise every H1/H2 heading starts a new slide. Fence-aware: `---` or
+ * `#` lines inside ``` code blocks never split. Empty chunks are dropped.
+ */
+export function splitSlides(md: string): string[] {
+  const lines = md.replace(/\r\n?/g, "\n").split("\n");
+  const isFence = (l: string) => /^\s*(```|~~~)/.test(l);
+  let inCode = false;
+  let hasRule = false;
+  for (const l of lines) {
+    if (isFence(l)) inCode = !inCode;
+    else if (!inCode && /^\s*---\s*$/.test(l)) hasRule = true;
+  }
+  const chunks: string[] = [];
+  let cur: string[] = [];
+  const flush = () => {
+    const s = cur.join("\n").trim();
+    if (s) chunks.push(s);
+    cur = [];
+  };
+  inCode = false;
+  for (const l of lines) {
+    if (isFence(l)) {
+      inCode = !inCode;
+      cur.push(l);
+      continue;
+    }
+    if (!inCode) {
+      if (hasRule && /^\s*---\s*$/.test(l)) {
+        flush();
+        continue;
+      }
+      if (!hasRule && /^#{1,2}\s/.test(l)) flush();
+    }
+    cur.push(l);
+  }
+  flush();
+  return chunks;
+}
+
 export function markdownToRevealHtml(md: string, title = "Slides"): string {
-  const slides = md
-    .split(/^\s*---\s*$/m)
-    .map((s) => s.trim())
-    .filter(Boolean);
+  const slides = splitSlides(md);
   const sections = (slides.length ? slides : [md])
     .map(
       (s) =>
