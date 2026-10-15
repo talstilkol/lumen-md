@@ -205,6 +205,11 @@ const en: Strings = {
   "cmd.file.exportPdf.hint": "colorful, exactly as shown",
   "cmd.file.saveToWorkspace": "Save to workspace",
   "cmd.file.saveToWorkspace.hint": "store this doc in OPFS",
+  "cmd.file.openSampleWorkspace": "Open sample workspace",
+  "cmd.file.openSampleWorkspace.hint": "linked demo notes: wiki-links, tags, database, chart, diagram",
+  "sample.toast.created": "Added {count} sample notes to “{folder}”.",
+  "sample.toast.exists": "The sample workspace “{folder}” is already here — nothing was overwritten.",
+  "sample.alert.failed": "Couldn't create the sample workspace: {error}",
   "cmd.file.openRecent": "Open: {name}",
   "cmd.file.removeRecent": "Remove from recents: {name}",
   // View commands
