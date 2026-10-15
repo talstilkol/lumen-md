@@ -43,16 +43,13 @@ function parseSpec(source: string, lang: "map" | "geojson"): MapSpec | null {
 let leafletPromise: Promise<typeof import("leaflet")> | null = null;
 async function getLeaflet() {
   if (!leafletPromise) {
-    // load Leaflet CSS once
-    const cssId = "leaflet-css";
-    if (!document.getElementById(cssId)) {
-      const link = document.createElement("link");
-      link.id = cssId;
-      link.rel = "stylesheet";
-      link.href = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css";
-      document.head.appendChild(link);
-    }
-    leafletPromise = import("leaflet");
+    // Self-hosted Leaflet CSS: the side-effect import is code-split with
+    // the leaflet chunk, so it ships from our origin (no unpkg / CSP hole)
+    // and only loads when a map block first enters the viewport.
+    leafletPromise = Promise.all([
+      import("leaflet/dist/leaflet.css"),
+      import("leaflet"),
+    ]).then(([, L]) => L);
   }
   return leafletPromise;
 }

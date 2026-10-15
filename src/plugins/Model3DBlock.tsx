@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import YAML from "yaml";
 import { sanitizeUrl } from "../lib/urlSanitizer";
+import { log } from "../lib/logger";
 
 interface Props {
   source: string;
@@ -19,19 +20,22 @@ interface ModelSpec {
   shadowIntensity?: number;
 }
 
-let mvLoaded = false;
-function ensureModelViewerLoaded() {
-  if (mvLoaded) return;
-  mvLoaded = true;
-  // model-viewer is a Google web component; load via CDN to avoid bundle bloat.
-  const id = "model-viewer-script";
-  if (document.getElementById(id)) return;
-  const script = document.createElement("script");
-  script.id = id;
-  script.type = "module";
-  script.src =
-    "https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js";
-  document.head.appendChild(script);
+let mvPromise: Promise<unknown> | null = null;
+/**
+ * Register the `<model-viewer>` custom element. Loaded from npm via a
+ * dynamic import so it lands in its own lazy chunk served from our origin
+ * (no CDN script → no CSP script-src exception) and only when a 3D block
+ * scrolls into view. A failed load is retried on the next call.
+ */
+export function ensureModelViewerLoaded(): Promise<unknown> {
+  if (typeof customElements !== "undefined" && customElements.get("model-viewer")) {
+    return Promise.resolve();
+  }
+  mvPromise ??= import("@google/model-viewer").catch((e: unknown) => {
+    mvPromise = null;
+    throw e;
+  });
+  return mvPromise;
 }
 
 function parseSpec(source: string): ModelSpec | null {
@@ -80,7 +84,7 @@ export default function Model3DBlock({ source, meta }: Props) {
 
   useEffect(() => {
     if (!inView) return;
-    ensureModelViewerLoaded();
+    ensureModelViewerLoaded().catch((e: unknown) => log.error("model-viewer failed to load", e));
   }, [inView]);
 
   const spec = parseSpec(source);

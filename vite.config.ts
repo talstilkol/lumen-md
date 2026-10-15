@@ -127,17 +127,11 @@ export default defineConfig({
             },
           },
           {
-            // CDN-loaded model-viewer + Leaflet
-            urlPattern: ({ url }) => url.origin === "https://unpkg.com",
-            handler: "StaleWhileRevalidate",
-            options: { cacheName: "lumen-cdn" },
-          },
-          {
             // Large on-demand vendor chunks (Mermaid, tldraw, ECharts, etc.)
             // Cached at runtime when first loaded via dynamic import.
             urlPattern: ({ url }) =>
               url.origin === self.location.origin &&
-              /\/assets\/vendor-(mermaid|tldraw|echarts|graphviz|codemirror|milkdown|leaflet|katex|git|yjs|react|react-dom)-/.test(url.pathname),
+              /\/assets\/vendor-(mermaid|tldraw|echarts|graphviz|codemirror|milkdown|leaflet|modelviewer|katex|git|yjs|react|react-dom)-/.test(url.pathname),
             handler: "StaleWhileRevalidate",
             options: {
               cacheName: "lumen-vendor-chunks",
@@ -252,6 +246,10 @@ export default defineConfig({
           if (id.includes("@hpcc-js/wasm")) return "vendor-graphviz";
           if (id.includes("echarts") || id.includes("zrender")) return "vendor-echarts";
           if (id.includes("leaflet")) return "vendor-leaflet";
+          // <model-viewer> web component + its three.js / lit runtime —
+          // lazy-loaded by Model3DBlock only when a 3D block is visible.
+          if (/node_modules\/(@google\/model-viewer|three|lit|lit-html|lit-element|@lit|@lit-labs|@monogrid)\//.test(id))
+            return "vendor-modelviewer";
           // KaTeX + its mhchem extension + rehype-katex all share the
           // same chunk. Without rehype-katex in the chunk, the
           // production build hit a TDZ error ("Cannot access 'xn'
