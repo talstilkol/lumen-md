@@ -314,6 +314,20 @@ export function useCommands({
         },
       },
       {
+        id: "file.exportPptx",
+        label: t("cmd.file.exportPptx"),
+        hint: t("cmd.file.exportPptx.hint"),
+        icon: cmdIcons.Download,
+        group: t("group.file"),
+        action: async () => {
+          const { markdownToPptxBytes, PPTX_MIME } = await import("../storage/exportPptx");
+          const { downloadBytes } = await import("../storage/exportFormats");
+          const baseName = doc.name.replace(/\.[^.]+$/, "");
+          const bytes = await markdownToPptxBytes(doc.content, baseName);
+          downloadBytes(`${baseName}.pptx`, bytes, PPTX_MIME);
+        },
+      },
+      {
         id: "file.exportPdf",
         label: t("cmd.file.exportPdf"),
         hint: t("cmd.file.exportPdf.hint"),

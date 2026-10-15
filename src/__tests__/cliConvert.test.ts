@@ -83,6 +83,18 @@ describe("convertBinary (md → docx/epub)", () => {
     expect(files.size).toBeGreaterThan(1);
   });
 
+  it("produces a .pptx with one slide per heading", async () => {
+    expect(isBinaryTarget("pptx")).toBe(true);
+    expect(listFormats().export).toContain("pptx");
+    const { outName, bytes } = await convertBinary("talks/deck.md", "# One\n\n- a\n\n## Two\n\nb", "pptx");
+    expect(outName).toBe("talks/deck.pptx");
+    const files = await unzipBytes(bytes);
+    expect(files.has("ppt/presentation.xml")).toBe(true);
+    expect(files.has("ppt/slides/slide2.xml")).toBe(true);
+    expect(files.has("ppt/slides/slide3.xml")).toBe(false);
+    expect(new TextDecoder().decode(files.get("docProps/core.xml")!)).toContain("<dc:title>deck</dc:title>");
+  });
+
   it("rejects non-markdown input and unknown targets", async () => {
     await expect(convertBinary("a.tex", "x", "docx")).rejects.toThrow(/Markdown input/);
     await expect(convertBinary("a.md", "x", "xyz")).rejects.toThrow(/Unknown binary/);
