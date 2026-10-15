@@ -661,5 +661,10 @@
   "runtimeMetrics.column.timeouts": "Timeouts",
   "runtimeMetrics.column.rateLimits": "Rate limit",
   "cmd.view.runtimeMetrics": "Runtime metrics",
-  "cmd.view.runtimeMetrics.hint": "Inspect retries, timeouts, and latency by transport category"
+  "cmd.view.runtimeMetrics.hint": "Inspect retries, timeouts, and latency by transport category",
+  "cmd.file.exportPptx": "PowerPoint (.pptx) にエクスポート",
+  "cmd.file.exportPptx.hint": "H1/H2 見出し(または --- 区切り)ごとに 1 枚のスライド",
+  "search.results.one": "{n} 件の結果",
+  "search.results.other": "{n} 件の結果",
+  "ai.prompt.historyHint": "↑↓ 履歴"
 }

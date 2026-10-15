@@ -661,5 +661,10 @@
   "runtimeMetrics.column.timeouts": "Timeouts",
   "runtimeMetrics.column.rateLimits": "Rate limit",
   "cmd.view.runtimeMetrics": "Runtime metrics",
-  "cmd.view.runtimeMetrics.hint": "Inspect retries, timeouts, and latency by transport category"
+  "cmd.view.runtimeMetrics.hint": "Inspect retries, timeouts, and latency by transport category",
+  "cmd.file.exportPptx": "تصدير إلى PowerPoint (.pptx)",
+  "cmd.file.exportPptx.hint": "شريحة لكل عنوان H1/H2 (أو فواصل ---)",
+  "search.results.one": "{n} نتيجة",
+  "search.results.other": "عدد النتائج: {n}",
+  "ai.prompt.historyHint": "↑↓ السجل"
 }
