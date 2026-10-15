@@ -3,9 +3,9 @@
 # Brings up the full self-hosted stack on a single VM:
 #   - lumen-web      :80   (nginx serving the React SPA)
 #   - lumen-signal   :4444 (y-webrtc signaling — peers find each other)
-#   - lumen-collab   :4445 (persistent y-websocket + Postgres archive)
+#   - lumen-collab   :4445 (persistent y-websocket, LevelDB on the collab-data volume)
 #   - lumen-billing  :4446 (Stripe webhook handler — optional)
-#   - postgres       :5432 (snapshot archive + entitlements + audit log)
+#   - postgres       :5432 (billing entitlements + audit log; not used by lumen-collab)
 #
 # Prerequisites:
 #   1. Copy .env.onprem.example → .env.onprem and fill in the secrets.
@@ -57,13 +57,11 @@ services:
     ports:
       - "4445:4445"
     environment:
-      DATABASE_URL: postgres://lumen:${LUMEN_PG_PASSWORD:-lumen}@postgres:5432/lumen
-      LEVELDB_PATH: /data/yjs
+      # LevelDB directory on the mounted volume. (No Postgres archive is
+      # implemented for collab, so DATABASE_URL is intentionally not set.)
+      YJS_STORAGE_DIR: /data/yjs
     volumes:
       - collab-data:/data
-    depends_on:
-      postgres:
-        condition: service_healthy
     <<: [*restart, *logging]
 
   lumen-billing:

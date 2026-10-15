@@ -30,8 +30,9 @@ launch, run your own so a public outage doesn't disable collab.
 ```bash
 cd sync-server
 npm install
-# Test locally
+# Test locally (PORT defaults to 4444)
 PORT=4444 node server.js
+curl http://localhost:4444/healthz   # → {"ok":true,...}  (/health and / also work)
 
 # Deploy to Fly.io (free):
 brew install flyctl
@@ -39,6 +40,11 @@ fly launch --name lumen-signal     # accept defaults
 fly deploy
 # → wss://lumen-signal.fly.dev/
 ```
+
+`server.js` speaks the y-webrtc signaling protocol (`subscribe` /
+`unsubscribe` / `publish` / `ping`). Fly and the Docker `HEALTHCHECK` probe
+`/healthz`. Optional env: `SIGNAL_HEARTBEAT_MS` (default 30000),
+`SIGNAL_RATE_LIMIT_MAX` (messages/min/IP, default 120).
 
 Update `.env.production`:
 
@@ -63,8 +69,16 @@ fly volumes create yjs_data --region iad --size 1
 #   [[mounts]]
 #   source = "yjs_data"
 #   destination = "/data"
+# and tell the server where to store LevelDB data:
+fly secrets set YJS_STORAGE_DIR=/data/yjs   # or [env] in fly.toml
 fly deploy
 ```
+
+Storage env: `YJS_STORAGE_DIR` (preferred; `LEVELDB_PATH` is accepted as a
+legacy alias). Defaults to `sync-server/.yjs-persistence`, which is **not**
+persistent on Fly — always point it at the mounted volume. Health checks:
+`/healthz` or `/health`. Persistence is LevelDB only; there is no Postgres
+archive and `DATABASE_URL` is not read by `persistent-server.js`.
 
 `.env.production`:
 

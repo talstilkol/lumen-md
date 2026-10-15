@@ -16,9 +16,9 @@ description: Run Lumen on your own infrastructure with the docker-compose bundle
 |---|---|---|
 | `lumen-web` | 80 | nginx serving the React SPA + strict CSP |
 | `lumen-signal` | 4444 | y-webrtc signaling — peers find each other |
-| `lumen-collab` | 4445 | Persistent y-websocket + Postgres archive |
+| `lumen-collab` | 4445 | Persistent y-websocket (LevelDB on the `collab-data` volume; health: `/healthz`) |
 | `lumen-billing` | 4446 | Stripe webhook handler (optional) |
-| `postgres` | 5432 | Snapshot archive + entitlements + audit log |
+| `postgres` | 5432 | Entitlements + audit log (collab does **not** write here — a Postgres snapshot archive is not implemented) |
 
 A LevelDB volume (`collab-data`) and a Postgres volume (`postgres-data`)
 persist outside container lifecycles.
