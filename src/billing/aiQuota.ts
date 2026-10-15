@@ -1,0 +1,123 @@
+/**
+ * Monthly AI prompt quota (Capabilities.aiMonthlyPrompts).
+ *
+ * A small client-side counter keyed by calendar month
+ * (`lumen.ai.quota.YYYY-MM`). It is a UX guard, not a security boundary —
+ * the hosted AI proxy enforces the real limit server-side. Storage access
+ * is wrapped in try/catch: with storage denied the counter reads 0 and the
+ * user is never blocked by a storage failure.
+ *
+ * Counting happens where AI commands are *dispatched* (command palette,
+ * editor AI actions) rather than inside `ai/llm.ts`, so one user action
+ * counts as one prompt even when an agent fans out into several requests.
+ */
+
+import { effectiveCapabilities, gatesEnforced } from "./gates";
+import { showAiToast } from "../ui/AiToast";
+import { t } from "../i18n";
+
+const KEY_PREFIX = "lumen.ai.quota.";
+
+export function monthKey(now: Date = new Date()): string {
+  const m = String(now.getMonth() + 1).padStart(2, "0");
+  return `${KEY_PREFIX}${now.getFullYear()}-${m}`;
+}
+
+/** Prompts used in the month containing `now`. */
+export function getAiUsage(now: Date = new Date()): number {
+  try {
+    const raw = localStorage.getItem(monthKey(now));
+    const n = raw ? Number.parseInt(raw, 10) : 0;
+    return Number.isFinite(n) && n > 0 ? n : 0;
+  } catch {
+    return 0;
+  }
+}
+
+/** Increment this month's counter; drops counters from earlier months. */
+export function recordAiPrompt(now: Date = new Date()): number {
+  const key = monthKey(now);
+  const next = getAiUsage(now) + 1;
+  try {
+    localStorage.setItem(key, String(next));
+    // Housekeeping: old months are dead weight.
+    for (let i = localStorage.length - 1; i >= 0; i--) {
+      const k = localStorage.key(i);
+      if (k && k.startsWith(KEY_PREFIX) && k !== key) localStorage.removeItem(k);
+    }
+  } catch {
+    /* storage denied — the counter just doesn't persist */
+  }
+  return next;
+}
+
+export interface AiQuotaStatus {
+  allowed: boolean;
+  used: number;
+  /** `Infinity` when unlimited (no billing configured). */
+  limit: number;
+  remaining: number;
+}
+
+export function aiQuotaStatus(now: Date = new Date()): AiQuotaStatus {
+  const limit = gatesEnforced() ? effectiveCapabilities().aiMonthlyPrompts : Number.POSITIVE_INFINITY;
+  const used = getAiUsage(now);
+  const remaining = Math.max(0, limit - used);
+  return { allowed: remaining > 0, used, limit, remaining };
+}
+
+/**
+ * Gate one AI prompt: returns true (and counts it) when allowed; otherwise
+ * shows an upgrade toast and returns false. Unlimited (self-hosted / no
+ * billing) setups always pass and nothing is written to storage.
+ */
+export function consumeAiPrompt(now: Date = new Date()): boolean {
+  if (!gatesEnforced()) return true;
+  const status = aiQuotaStatus(now);
+  if (!Number.isFinite(status.limit)) return true;
+  if (!status.allowed) {
+    showAiToast(t("billing.aiQuota.exceeded", { limit: status.limit }), "error");
+    return false;
+  }
+  recordAiPrompt(now);
+  return true;
+}
+
+/**
+ * Palette command ids that send a prompt to the LLM. Settings / provider
+ * pickers / local-model toggles are deliberately absent — they don't spend
+ * a prompt.
+ */
+const AI_PROMPT_COMMANDS = new Set([
+  "ai.outline",
+  "ai.productAgent",
+  "ai.diagram",
+  "ai.actionItems",
+  "ai.translate",
+  "ai.chart",
+  "tools.autoTag",
+  "tools.suggestLinks",
+]);
+
+export function isAiPromptCommand(id: string): boolean {
+  return AI_PROMPT_COMMANDS.has(id) || id.startsWith("ai.prompt.");
+}
+
+/** Wrap the actions of AI-prompt commands with the quota check. */
+export function withAiQuota<C extends { id: string; action: () => void; children?: C[] }>(
+  commands: C[],
+): C[] {
+  return commands.map((c) => {
+    const children = c.children ? withAiQuota(c.children) : c.children;
+    if (!isAiPromptCommand(c.id)) return children === c.children ? c : { ...c, children };
+    const action = c.action;
+    return {
+      ...c,
+      children,
+      action: () => {
+        if (!consumeAiPrompt()) return;
+        return action();
+      },
+    };
+  });
+}

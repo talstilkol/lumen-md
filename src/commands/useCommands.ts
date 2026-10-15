@@ -21,6 +21,7 @@ import { encryptDocument, decryptDocument, isEncrypted } from "../storage/encryp
 import { readWorkspaceFile } from "../storage/workspace";
 import { relativeTime } from "../lib/relativeTime";
 import { buildFormatCommands } from "../editor/formatCommands";
+import { withAiQuota } from "../billing/aiQuota";
 import { detectIsMac } from "../ui/KeyboardShortcuts";
 
 export interface UseCommandsOptions {
@@ -139,7 +140,8 @@ export function useCommands({
       },
     ]);
 
-    return [
+    // AI-prompt commands are wrapped with the monthly quota check.
+    return withAiQuota([
       ...recentCmds,
       {
         id: "file.new",
@@ -1441,7 +1443,7 @@ export function useCommands({
         group: t("group.insert"),
         action: () => insertSnippet(BLOCK_SNIPPETS.wikilink),
       },
-    ];
+    ]);
   }, [
     handleNew,
     handleOpen,
