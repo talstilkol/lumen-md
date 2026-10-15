@@ -25,6 +25,10 @@ vi.mock("y-webrtc", () => ({
   // Minimal stand-in: an event emitter with controllable awareness peers and
   // WebRTC connections so tests can drive the `synced` seeding logic.
   WebrtcProvider: class {
+    static lastDoc: unknown = null;
+    constructor(_room: string, doc: unknown) {
+      (this.constructor as unknown as { lastDoc: unknown }).lastDoc = doc;
+    }
     listeners = new Map<string, Set<(...args: unknown[]) => void>>();
     awarenessStates = new Map<number, unknown>([[1, {}]]);
     room: { webrtcConns: Map<string, unknown> } = { webrtcConns: new Map() };
@@ -49,10 +53,6 @@ vi.mock("yjs", async () => {
   const actual = await vi.importActual<typeof import("yjs")>("yjs");
   return actual;
 });
-vi.mock("../collab/encryption", () => ({
-  encryptOp: (op: unknown) => op,
-  decryptOp: (op: unknown) => op,
-}));
 vi.mock("../lib/logger", () => ({
   log: { info: vi.fn(), warn: vi.fn(), error: vi.fn() },
 }));
@@ -242,6 +242,30 @@ describe("connectCollab lifecycle", () => {
         expect(destroy).toHaveBeenCalledTimes(1);
       }
     }
+  });
+
+  it("plain rooms sync the editor doc directly", async () => {
+    const mod = await import("../collab/yjs");
+    const { WebrtcProvider } = await import("y-webrtc");
+    const session = mod.connectCollab("lumen-plain-room", "", { password: null });
+    expect(session.encrypted).toBe(false);
+    expect(session.transportDoc).toBeNull();
+    expect((WebrtcProvider as unknown as { lastDoc: unknown }).lastDoc).toBe(session.doc);
+    session.destroy();
+  });
+
+  it("password rooms attach providers to the ciphertext transport doc only", async () => {
+    const mod = await import("../collab/yjs");
+    const { WebrtcProvider } = await import("y-webrtc");
+    const session = mod.connectCollab("lumen-secret-room", "", { password: "pw-123456" });
+    expect(session.encrypted).toBe(true);
+    expect(session.transportDoc).not.toBeNull();
+    const attached = (WebrtcProvider as unknown as { lastDoc: unknown }).lastDoc;
+    expect(attached).toBe(session.transportDoc);
+    expect(attached).not.toBe(session.doc);
+    // Awareness self-detection relies on matching client ids.
+    expect(session.transportDoc!.clientID).toBe(session.doc.clientID);
+    session.destroy();
   });
 });
 

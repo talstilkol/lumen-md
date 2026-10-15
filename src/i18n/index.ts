@@ -486,6 +486,8 @@ const en: Strings = {
   "cmd.collab.leave": "Leave collaboration",
   "collab.prompt.room": "Room name:",
   "collab.prompt.join": "Join collaborative session \"{room}\"? Your current document will be replaced if other peers are present.",
+  "collab.e2e.decryptFailed": "Can't decrypt this room",
+  "collab.e2e.decryptFailed.body": "The room password doesn't match the one the other participants used. Nothing was applied to your document — check the password and rejoin.",
   // FileTree extras
   "tree.newFileRoot": "New file at root",
   "tree.newFolderRoot": "New folder at root",

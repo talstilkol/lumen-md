@@ -803,5 +803,7 @@
   "org.members.empty.title": "Connectez le SSO pour voir les membres",
   "org.members.empty.hint": "Les membres proviennent de votre fournisseur d'identité. En mode local, il n'y a personne d'autre à afficher.",
   "org.members.empty.cta": "Comment connecter le SSO",
-  "org.audit.open": "Ouvrir le journal d'audit"
+  "org.audit.open": "Ouvrir le journal d'audit",
+  "collab.e2e.decryptFailed": "Impossible de déchiffrer ce salon",
+  "collab.e2e.decryptFailed.body": "Le mot de passe du salon ne correspond pas à celui des autres participants. Rien n'a été appliqué à votre document — vérifiez le mot de passe et rejoignez à nouveau."
 }

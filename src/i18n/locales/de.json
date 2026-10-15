@@ -803,5 +803,7 @@
   "org.members.empty.title": "Verbinde SSO, um Mitglieder zu sehen",
   "org.members.empty.hint": "Mitglieder kommen von deinem Identitätsanbieter. Im rein lokalen Modus gibt es niemanden sonst.",
   "org.members.empty.cta": "So verbindest du SSO",
-  "org.audit.open": "Audit-Log öffnen"
+  "org.audit.open": "Audit-Log öffnen",
+  "collab.e2e.decryptFailed": "Raum kann nicht entschlüsselt werden",
+  "collab.e2e.decryptFailed.body": "Das Raumpasswort stimmt nicht mit dem der anderen Teilnehmenden überein. An deinem Dokument wurde nichts geändert – prüfe das Passwort und tritt erneut bei."
 }

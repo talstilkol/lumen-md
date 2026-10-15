@@ -803,5 +803,7 @@
   "org.members.empty.title": "连接 SSO 以查看成员",
   "org.members.empty.hint": "成员来自你的身份提供商。在纯本地模式下没有其他成员可显示。",
   "org.members.empty.cta": "如何连接 SSO",
-  "org.audit.open": "打开审计日志"
+  "org.audit.open": "打开审计日志",
+  "collab.e2e.decryptFailed": "无法解密此房间",
+  "collab.e2e.decryptFailed.body": "房间密码与其他参与者使用的不一致。你的文档未应用任何更改——请检查密码后重新加入。"
 }

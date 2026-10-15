@@ -803,5 +803,7 @@
   "org.members.empty.title": "חבר SSO כדי לראות את חברי הארגון",
   "org.members.empty.hint": "חברי הארגון מגיעים מספק הזהות. במצב מקומי בלבד אין משתמשים נוספים להציג.",
   "org.members.empty.cta": "איך לחבר SSO",
-  "org.audit.open": "פתח את יומן הביקורת"
+  "org.audit.open": "פתח את יומן הביקורת",
+  "collab.e2e.decryptFailed": "לא ניתן לפענח את החדר",
+  "collab.e2e.decryptFailed.body": "סיסמת החדר אינה תואמת לסיסמה של שאר המשתתפים. דבר לא הוחל על המסמך שלך — בדקו את הסיסמה והצטרפו מחדש."
 }

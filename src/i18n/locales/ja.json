@@ -803,5 +803,7 @@
   "org.members.empty.title": "メンバーを表示するには SSO を接続してください",
   "org.members.empty.hint": "メンバーは ID プロバイダーから取得されます。ローカル専用モードでは表示するメンバーはいません。",
   "org.members.empty.cta": "SSO の接続方法",
-  "org.audit.open": "監査ログを開く"
+  "org.audit.open": "監査ログを開く",
+  "collab.e2e.decryptFailed": "このルームを復号できません",
+  "collab.e2e.decryptFailed.body": "ルームのパスワードが他の参加者のものと一致しません。ドキュメントには何も適用されていません。パスワードを確認して再参加してください。"
 }
