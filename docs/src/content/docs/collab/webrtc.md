@@ -31,14 +31,15 @@ The editor renders peer cursors with a small floating name tag above
 the caret. A peer's selection highlights with a translucent version of
 their colour. The list of active peers shows in the status bar.
 
-## End-to-end encryption
+## Room passwords (not yet end-to-end encrypted)
 
-Set `localStorage["lumen.collab.password"]` (or append
-`&password=…` to the share link) and every Yjs update gets AES-GCM-256
-encrypted with a PBKDF2-derived key before it hits the wire. Peers
-without the password can connect over signaling but receive only
-ciphertext. See [End-to-end encryption](/collab/encryption/) for the
-threat model.
+Setting `localStorage["lumen.collab.password"]` (or appending
+`&password=…` to the share link) mirrors each local Yjs update,
+AES-GCM-256 encrypted, into the shared doc — but the plaintext doc is
+still synced to every peer, including peers without the password. It is
+**not** end-to-end encryption today. See
+[Room passwords](/collab/encryption/) for exactly what is and isn't
+protected.
 
 ## Rooms evaporate when the last peer leaves
 

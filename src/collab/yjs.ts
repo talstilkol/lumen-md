@@ -128,51 +128,79 @@ export function makeRoomName(): string {
 }
 
 /**
- * Connect to (or create) a collaborative editing session over WebRTC.
- * When the local doc is empty and we are the first peer, the provided
- * `seedContent` is inserted so other peers can pick it up.
+ * Transaction origin used for this layer's own writes to the `__crypt__` map.
+ * Updates carrying it are never re-encrypted (that recursion -- every
+ * `cryptMap.set` emitting an update that was encrypted again -- previously
+ * grew the map forever).
  */
+export const CRYPT_ORIGIN = Symbol("lumen.collab.crypt");
+/** Origin used when applying a decrypted payload back into the doc. */
+export const DECRYPT_ORIGIN = "remote-decrypted";
+export const CRYPT_MAP_NAME = "__crypt__";
+
 /**
- * Wrap the doc's wire updates in AES-GCM. We attach a custom update
- * observer that fires for every local mutation and re-broadcasts the
- * encrypted payload over a hidden Y.Map keyed `__crypt__`. Inbound entries
- * on the same map decrypt → applyUpdate.
+ * Mirror every local doc update, AES-GCM encrypted, into a hidden Y.Map
+ * (`__crypt__`) keyed per update. Inbound entries on the same map are
+ * decrypted and applied with `DECRYPT_ORIGIN`.
  *
- * This isn't a perfect secure-channel construction (the public protocol
- * still sees lengths + structure metadata) but it makes the document body
- * unreadable to a passive signaling-server eavesdropper and to a peer who
- * joined the room without the password. Good enough as a Pro privacy
- * upgrade; for paranoid threat models, run your own signaling server.
+ * SECURITY -- read before relying on this:
+ * The encrypted entries ride in the SAME Y.Doc as the plaintext `lumen`
+ * text, and y-webrtc syncs the whole doc. So the plaintext still reaches
+ * every connected peer, including peers that joined without (or with the
+ * wrong) password, and anyone who can read the WebRTC/y-websocket traffic
+ * of a peer. This layer therefore provides NO confidentiality today.
+ *
+ * TODO(collab-e2e): real E2E needs the plaintext doc kept local-only and
+ * only ciphertext on the wire -- e.g. pass `password` to WebrtcProvider
+ * (y-webrtc's built-in room encryption) and sync a separate ciphertext
+ * doc instead of the visible one. Tracked as a redesign; not attempted here.
  */
-async function wireEncryption(doc: Y.Doc, password: string): Promise<void> {
-  const cryptMap = doc.getMap<string>("__crypt__");
-  // Local-origin updates: encrypt + push to the map. We use a unique key
-  // per update so concurrent peers don't clobber each other's payloads.
-  doc.on("update", async (update: Uint8Array, origin: unknown) => {
-    if (origin === "remote-decrypted") return; // avoid re-encrypting our own decrypts
-    try {
-      const cipher = await encryptOp(password, update);
-      const b64 = btoa(String.fromCharCode(...cipher));
-      // Crypto-strong key: collisions in this map can leak which peer wrote
-      // an op (every key is observable on the wire), so we don't rely on
-      // Math.random — it's biased and predictable.
-      const key = `${Date.now().toString(36)}-${randomId(3)}`;
-      cryptMap.set(key, b64);
-    } catch (err) {
-      log.warn("encrypt update failed", err);
-    }
-  });
-  // Inbound entries: decrypt + applyUpdate inside a transaction so the
-  // observer above doesn't re-encrypt them in a loop.
+export function wireEncryption(doc: Y.Doc, password: string): void {
+  const cryptMap = doc.getMap<string>(CRYPT_MAP_NAME);
+  const cryptType = cryptMap as unknown as Y.AbstractType<unknown>;
+
+  doc.on(
+    "update",
+    async (update: Uint8Array, origin: unknown, _doc: Y.Doc, tr?: Y.Transaction) => {
+      // Our own crypt-map writes and our decrypt applies must not be
+      // re-encrypted, or every write triggers another write forever.
+      if (origin === CRYPT_ORIGIN || origin === DECRYPT_ORIGIN) return;
+      if (tr) {
+        // Only encrypt edits made on this peer -- remote updates were
+        // already encrypted by their author.
+        if (!tr.local) return;
+        // Updates that only touch the crypt map carry no document content.
+        if (tr.changed.size > 0 && Array.from(tr.changed.keys()).every((t) => t === cryptType)) {
+          return;
+        }
+      }
+      try {
+        const cipher = await encryptOp(password, update);
+        const b64 = btoa(String.fromCharCode(...cipher));
+        // Crypto-strong key: collisions in this map can leak which peer wrote
+        // an op (every key is observable on the wire), so we don't rely on
+        // Math.random -- it's biased and predictable.
+        const key = `${Date.now().toString(36)}-${randomId(3)}`;
+        doc.transact(() => cryptMap.set(key, b64), CRYPT_ORIGIN);
+      } catch (err) {
+        log.warn("encrypt update failed", err);
+      }
+    },
+  );
+
+  // Inbound entries: decrypt + applyUpdate with DECRYPT_ORIGIN so the
+  // observer above doesn't re-encrypt them.
   cryptMap.observe(async (event) => {
+    // Entries we just wrote ourselves are already applied locally.
+    if (event.transaction.origin === CRYPT_ORIGIN) return;
     for (const key of event.keysChanged) {
       const b64 = cryptMap.get(key);
       if (!b64) continue;
       try {
         const cipher = Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
         const plain = await decryptOp(password, cipher);
-        if (!plain) continue; // wrong password from another peer — drop
-        Y.applyUpdate(doc, plain, "remote-decrypted");
+        if (!plain) continue; // wrong password from another peer -- drop
+        Y.applyUpdate(doc, plain, DECRYPT_ORIGIN);
       } catch (err) {
         log.warn("decrypt update failed", err);
       }
@@ -231,10 +259,10 @@ async function attachWebsocketProvider(
 
 /**
  * Read the optional room password from `localStorage["lumen.collab.password"]`
- * or `?password=…` in the URL hash. When present, every WebRTC update is
- * encrypted with AES-GCM (PBKDF2-derived key) before it leaves this peer,
- * and decrypted on receipt — turning the otherwise-public WebRTC mesh into
- * an end-to-end-encrypted channel (P3-13).
+ * or `?password=…` in the URL hash. When present, local updates are also
+ * mirrored AES-GCM-encrypted into the doc (see `wireEncryption` -- the
+ * plaintext is still synced alongside, so this is NOT end-to-end
+ * encryption yet).
  */
 function getRoomPassword(): string | null {
   if (typeof localStorage !== "undefined") {
@@ -248,6 +276,11 @@ function getRoomPassword(): string | null {
   return null;
 }
 
+/**
+ * Connect to (or create) a collaborative editing session over WebRTC.
+ * When the local doc is empty and we are the first peer, the provided
+ * `seedContent` is inserted so other peers can pick it up.
+ */
 export function connectCollab(
   roomName: string,
   seedContent: string,
@@ -256,10 +289,9 @@ export function connectCollab(
   const doc = new Y.Doc();
   const ytext = doc.getText("lumen");
 
-  // E2E encryption: when a room password is set, install an update-handler
-  // that encrypts every doc update before peers see it on the wire and
-  // decrypts inbound payloads back into Y updates. Wrong-password peers
-  // can connect over signaling but never see plaintext.
+  // Optional room password: mirrors encrypted updates into the doc. NOTE the
+  // plaintext doc is still synced too -- see the SECURITY note on
+  // `wireEncryption`.
   const password = opts.password ?? getRoomPassword();
 
   // Public rooms only — obscure name suffices for casual pair editing. Users
@@ -270,11 +302,7 @@ export function connectCollab(
   });
 
   if (password) {
-    // y-webrtc transports payloads via its room's signaling channel. We tap
-    // the doc's update event ourselves: every local update is encrypted +
-    // applied to a side-doc that mirrors the public state, while remote
-    // payloads are decrypted before being applied to the visible doc.
-    void wireEncryption(doc, password);
+    wireEncryption(doc, password);
   }
 
   // If a persistent server is configured, attach a WebsocketProvider in the

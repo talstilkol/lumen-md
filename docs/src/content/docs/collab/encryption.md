@@ -1,15 +1,29 @@
 ---
-title: End-to-end encryption for collab
-description: Add a room password and the signaling server can't read your doc.
+title: Room passwords for collab (not yet end-to-end encrypted)
+description: What the collab room password does today — and what it does not protect.
 ---
 
-Lumen's WebRTC mesh is unencrypted by default — clients negotiate a
-direct peer connection but the signaling server (and anyone on a shared
-network) sees the document state. For Pro / privacy-conscious users we
-ship an opt-in **AES-GCM-256** layer that encrypts every Yjs update with
-a key derived from a shared room password.
+:::caution[Not end-to-end encrypted]
+Setting a room password does **not** currently keep your document
+confidential. The plaintext document is still synced to every connected
+peer alongside the encrypted copy. Do not rely on it for sensitive content.
+A real end-to-end design is tracked as a TODO in `src/collab/yjs.ts`
+(`wireEncryption`).
+:::
 
-## Turn it on
+## How collab traffic flows
+
+- **Signaling server** (`sync-server/server.js`, or the public y-webrtc
+  servers): helps peers find each other and relays WebRTC connection
+  offers. It sees the room name and the connection-setup messages; it does
+  not receive the document updates themselves.
+- **WebRTC data channels**: carry the Yjs document between peers. They
+  are transport-encrypted (DTLS), so a passive network observer cannot read
+  them — but every peer in the room receives the full document.
+- **Persistent server** (optional, `VITE_YJS_WEBSOCKET_URL`): stores and
+  serves the full document state, so its operator can read it.
+
+## What the room password does today
 
 ```js
 // Either:
@@ -19,53 +33,35 @@ localStorage.setItem("lumen.collab.password", "open-sesame-12345");
 //   #room=lumen-bright-river-77&password=open-sesame-12345
 ```
 
-Every peer in the room must use the same password — wrong-password peers
-can connect over signaling but receive only undecryptable ciphertext, so
-the editor stays out of sync until they fix it (no plaintext leaks).
+When a password is set, every **local** edit is additionally encrypted
+with **AES-GCM-256** (key derived via PBKDF2-SHA256, fixed application
+salt `lumen.collab.v1`, 200 000 iterations, fresh 12-byte IV per update)
+and written into a hidden `__crypt__` Y.Map. Receivers with the same
+password decrypt those entries and apply them with origin
+`remote-decrypted`. The layer's own writes use a dedicated transaction
+origin so they are never re-encrypted.
 
-## How it works
+Because the `__crypt__` map lives in the **same** Y.Doc as the visible
+text, the plaintext edits are synced too. In practice:
 
-1. **Key derivation** — PBKDF2-SHA256 with a fixed application salt
-   (`lumen.collab.v1`) and 200 000 iterations. The same password produces
-   the same 256-bit AES key on every peer.
-2. **Wire format** — every Yjs update is encrypted with a fresh random
-   12-byte IV. The IV is prepended to the ciphertext; the auth tag is the
-   final 16 bytes (standard AES-GCM).
-3. **In-doc transport** — encrypted payloads ride a hidden `__crypt__`
-   Y.Map keyed by `<timestamp>-<random>`. Receivers decrypt and
-   `Y.applyUpdate` into the visible doc with origin tag
-   `remote-decrypted`, so the local update observer doesn't re-encrypt
-   them in a loop.
+| Who | Can read the document? |
+|---|---|
+| Peer in the room **with** the password | Yes |
+| Peer in the room **without / with a wrong** password | **Yes** — plaintext still syncs |
+| Signaling server operator | No — doc updates don't pass through it (independent of the password) |
+| Persistent y-websocket server operator | **Yes** |
+| Passive network eavesdropper | No — WebRTC DTLS / `wss://` TLS (independent of the password) |
 
-## What it does protect
+So the password currently adds no confidentiality beyond the transport
+encryption that is already there. It also grows the shared doc by one
+encrypted entry per local edit.
 
-- Eavesdroppers on the WebRTC signaling channel.
-- Compromised public Yjs signaling servers.
-- Peers that joined the room via the share link without the password.
+## Recommendations until E2E ships
 
-## What it doesn't protect
-
-- A peer with the password — they're in the trust circle by design.
-- Offline forensics on a peer's IndexedDB / OPFS storage. Use a Vault
-  password (`⌘K → Encrypt document`) for at-rest encryption.
-- Metadata: room name, peer count, awareness presence (cursors / colours)
-  remain visible to the signaling server. The document **content** is
-  protected, not the fact that a session exists.
-
-## Rotating
-
-Pick a new password and clear the old one:
-
-```js
-localStorage.setItem("lumen.collab.password", "new-stronger-passphrase");
-```
-
-Then leave + rejoin the room. Peers using the old password lose sync
-until they update.
-
-## Trade-offs
-
-- A misplaced password locks everyone out. Treat it like any shared
-  secret — share via a side-channel (Signal, 1Password, etc.).
-- The 200 000-iteration PBKDF2 derivation runs once per password change;
-  it's fast on modern devices (≈ 100 ms) but noticeable on old phones.
+- Use an unguessable room name (the generated `lumen-<adj>-<noun>-<n>`
+  names are short — share links only with people you trust).
+- Don't attach a third-party persistent server to sensitive rooms.
+- For at-rest protection of local copies, use a Vault password
+  (`⌘K → Encrypt document`).
+- Metadata (room name, peer count, awareness presence such as cursors and
+  colours) is visible to the signaling server regardless.
