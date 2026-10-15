@@ -105,6 +105,7 @@ export default defineConfig({
           "**/vendor-codemirror-*.js",
           "**/vendor-milkdown-*.js",
           "**/vendor-leaflet-*.js",
+          "**/vendor-modelviewer-*.js",
           "**/vendor-katex-*.js",
           "**/vendor-git-*.js",
         ],
