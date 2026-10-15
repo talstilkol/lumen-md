@@ -14,6 +14,8 @@ export interface User {
   avatarUrl?: string;
   /** Provider that issued this session (e.g. "supabase", "local"). */
   provider: string;
+  /** Organization id, when the session came from an org SSO login (WorkOS). */
+  orgId?: string;
 }
 
 export type AuthStatus = "loading" | "anonymous" | "authenticated" | "error";

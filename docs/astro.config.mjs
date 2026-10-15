@@ -72,6 +72,7 @@ export default defineConfig({
           label: "Plugins + Templates",
           items: [
             { label: "Plugin gallery", slug: "plugins/gallery" },
+            { label: "Plugin signing keys", slug: "plugins/signing" },
             { label: "Templates marketplace", slug: "plugins/templates" },
             { label: "Web Clipper extension", slug: "plugins/web-clipper" },
           ],
@@ -82,6 +83,14 @@ export default defineConfig({
             { label: "Git sync", slug: "sync/git" },
             { label: "Cloud sync (Dropbox, Drive)", slug: "sync/cloud" },
             { label: "Read-mode publishing", slug: "sync/publish" },
+          ],
+        },
+        {
+          label: "Account",
+          items: [
+            { label: "Signing in", slug: "account/sign-in" },
+            { label: "Single sign-on (SSO)", slug: "account/sso" },
+            { label: "Organization settings", slug: "account/organization" },
           ],
         },
         {

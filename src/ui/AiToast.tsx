@@ -13,14 +13,21 @@ interface Toast {
   id: number;
   message: string;
   type: ToastType;
+  /** Optional "Learn more" docs link (PRODUCT_IMPROVEMENT 2.4). */
+  learnMoreUrl?: string;
+}
+
+export interface AiToastOptions {
+  /** Absolute docs URL rendered as a "Learn more" link — see `lib/docsLinks`. */
+  learnMoreUrl?: string;
 }
 
 let nextId = 0;
 const listeners = new Set<(toast: Toast) => void>();
 
 /** Show a toast notification from anywhere — no hooks needed. */
-export function showAiToast(message: string, type: ToastType = "info") {
-  const toast: Toast = { id: nextId++, message, type };
+export function showAiToast(message: string, type: ToastType = "info", opts: AiToastOptions = {}) {
+  const toast: Toast = { id: nextId++, message, type, learnMoreUrl: opts.learnMoreUrl };
   listeners.forEach((fn) => fn(toast));
 }
 
@@ -42,9 +49,10 @@ export function AiToastContainer() {
   useEffect(() => {
     const add = (t: Toast) => {
       setToasts((prev) => [...prev.slice(-4), t]);
+      // Toasts with a docs CTA stay longer so the link is actually clickable.
       setTimeout(() => {
         setToasts((prev) => prev.filter((x) => x.id !== t.id));
-      }, 4000);
+      }, t.learnMoreUrl ? 9000 : 4000);
     };
     listeners.add(add);
     return () => { listeners.delete(add); };
@@ -88,7 +96,22 @@ export function AiToastContainer() {
             }}
           >
             <Icon size={15} style={{ color: COLORS[t.type], flexShrink: 0 }} />
-            <span style={{ flex: 1 }}>{t.message}</span>
+            <span style={{ flex: 1 }}>
+              {t.message}
+              {t.learnMoreUrl && (
+                <>
+                  {" "}
+                  <a
+                    href={t.learnMoreUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{ color: "hsl(var(--accent))", textDecoration: "underline", whiteSpace: "nowrap" }}
+                  >
+                    {i18n("toast.learnMore")}
+                  </a>
+                </>
+              )}
+            </span>
             <button
               onClick={() => setToasts((prev) => prev.filter((x) => x.id !== t.id))}
               aria-label={i18n("toast.dismiss")}

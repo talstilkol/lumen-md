@@ -7,6 +7,7 @@ import { useAppStore } from "../store/useStore";
 import { toast } from "../store/useToastStore";
 import { fetchWithRetry } from "../lib/fetchRetry";
 import { t } from "../i18n";
+import { docsUrl } from "../lib/docsLinks";
 
 // ── Rate limiting ───────────────────────────────────────────────────────
 // Token bucket — protects the user's API key against runaway loops.
@@ -228,7 +229,7 @@ export async function chat(
         off();
       }
     }
-    toast.warn(t("ai.toast.localUnavailable.title"), t("ai.toast.localUnavailable.body"));
+    toast.warn(t("ai.toast.localUnavailable.title"), t("ai.toast.localUnavailable.body"), docsUrl("localLlm"));
   }
 
   // ── OpenAI (cloud) ─────────────────────────────────────────────
