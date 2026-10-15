@@ -34,7 +34,18 @@ type EnvShape = {
 
 type Env = { env?: EnvShape };
 
+let endpointOverride: string | null = null;
+
+/**
+ * Vite inlines `import.meta.env.VITE_*` at transform time, so `vi.stubEnv`
+ * can't reach this module. Tests set the endpoint here instead (null resets).
+ */
+export function __setEntitlementEndpointForTesting(url: string | null): void {
+  endpointOverride = url;
+}
+
 function readEnvVar(key: keyof EnvShape): string {
+  if (key === "VITE_ENTITLEMENT_ENDPOINT" && endpointOverride !== null) return endpointOverride;
   try {
     const env = (import.meta as ImportMeta & Env).env;
     return env?.[key]?.trim() ?? "";
@@ -85,15 +96,32 @@ function toEntitlement(payload: unknown): Entitlement | null {
   return ent;
 }
 
+async function accessToken(): Promise<string | null> {
+  try {
+    return (await useAuth.getState().provider.getAccessToken?.()) ?? null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * GET VITE_ENTITLEMENT_ENDPOINT (the billing worker's `/entitlements`).
+ * Sends the auth provider's access token as a bearer token when one is
+ * available; the worker answers `{ entitlement: { tier, status, … } }`
+ * and treats anonymous callers as free.
+ */
 async function fetchEntitlementFromBackend(): Promise<Entitlement | null> {
   const endpoint = readEnvVar("VITE_ENTITLEMENT_ENDPOINT");
   if (!endpoint || isPlaceholder(endpoint) || !isValidUrl(endpoint)) return null;
+  const headers: Record<string, string> = { Accept: "application/json" };
+  const token = await accessToken();
+  if (token) headers.Authorization = `Bearer ${token}`;
   const res = await fetchWithRetry(
     endpoint,
     {
       method: "GET",
       credentials: "include",
-      headers: { Accept: "application/json" },
+      headers,
     },
     { label: "entitlement.refresh" },
   );

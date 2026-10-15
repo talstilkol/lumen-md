@@ -37,4 +37,9 @@ export interface AuthProvider {
   signInWithProvider?(provider: "google" | "github"): Promise<User>;
   /** End the session. */
   signOut(): Promise<void>;
+  /**
+   * Current access token (JWT) for calling Lumen's own edge workers as
+   * `Authorization: Bearer <token>`, or null when anonymous / unsupported.
+   */
+  getAccessToken?(): Promise<string | null>;
 }

@@ -1,7 +1,17 @@
 /**
  * Lumen billing edge worker (Cloudflare).
  *
- * Three endpoints:
+ * Endpoints:
+ *
+ *   GET  /entitlements — the signed-in user's plan, read from the Supabase
+ *                    `entitlements` table. Auth: `Authorization: Bearer
+ *                    <supabase access token>`. Response:
+ *                    { entitlement: { tier, status, renewsAt?, subscriptionId? } }
+ *                    — the shape `src/billing/useEntitlement.ts` parses.
+ *                    No token / no row / unknown status → free tier.
+ *                    The client fetches with `credentials: "include"`, so
+ *                    this route answers with a credentialed CORS header for
+ *                    origins listed in ALLOWED_ORIGIN (never `*`).
  *
  *   POST /checkout — create a Stripe Checkout Session for the signed-in
  *                    user. Body: { priceId, successUrl, cancelUrl }. Returns
@@ -25,39 +35,73 @@
  *   cd edge-workers/billing && wrangler deploy
  */
 
-interface Env {
+export interface Env {
   STRIPE_SECRET_KEY: string;
   STRIPE_WEBHOOK_SECRET: string;
   SUPABASE_URL: string;
   SUPABASE_SERVICE_ROLE: string;
+  /** Comma-separated list of web origins allowed to make credentialed calls. */
+  ALLOWED_ORIGIN?: string;
 }
 
 const CORS = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
+  "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
   "Access-Control-Allow-Headers": "Authorization, Content-Type",
 };
 
+/**
+ * CORS headers for a specific request. When the caller's Origin is in
+ * ALLOWED_ORIGIN we echo it back and allow credentials (required because
+ * the entitlement client uses `credentials: "include"`, which browsers
+ * reject against a `*` origin). Otherwise fall back to the public `*`.
+ */
+export function corsFor(req: Request, env: Env): Record<string, string> {
+  const origin = req.headers.get("Origin");
+  const allowed = (env.ALLOWED_ORIGIN ?? "")
+    .split(",")
+    .map((o) => o.trim())
+    .filter(Boolean);
+  if (origin && allowed.includes(origin)) {
+    return {
+      ...CORS,
+      "Access-Control-Allow-Origin": origin,
+      "Access-Control-Allow-Credentials": "true",
+      "Access-Control-Max-Age": "600",
+      Vary: "Origin",
+    };
+  }
+  return { ...CORS, Vary: "Origin" };
+}
+
 export default {
   async fetch(req: Request, env: Env): Promise<Response> {
-    if (req.method === "OPTIONS") return new Response(null, { headers: CORS });
+    if (req.method === "OPTIONS") return new Response(null, { status: 204, headers: corsFor(req, env) });
     const url = new URL(req.url);
     try {
       switch (url.pathname) {
-        case "/checkout":  return json(await checkout(req, env));
-        case "/portal":    return json(await portal(req, env));
+        case "/entitlements":
+          if (req.method !== "GET") {
+            return new Response("Method not allowed", {
+              status: 405,
+              headers: { ...corsFor(req, env), Allow: "GET, OPTIONS" },
+            });
+          }
+          return entitlements(req, env);
+        case "/checkout":  return json(await checkout(req, env), req, env);
+        case "/portal":    return json(await portal(req, env), req, env);
         case "/webhook":   return webhook(req, env);
         default:           return new Response("Not found", { status: 404 });
       }
     } catch (err) {
-      return new Response(`${(err as Error).message}`, { status: 400, headers: CORS });
+      return new Response(`${(err as Error).message}`, { status: 400, headers: corsFor(req, env) });
     }
   },
 };
 
-function json(body: unknown): Response {
+function json(body: unknown, req: Request, env: Env): Response {
   return new Response(JSON.stringify(body), {
-    headers: { "Content-Type": "application/json", ...CORS },
+    headers: { "Content-Type": "application/json", ...corsFor(req, env) },
   });
 }
 
@@ -73,6 +117,102 @@ async function userId(req: Request, env: Env): Promise<string> {
   const u = (await res.json()) as { id?: string };
   if (!u.id) throw new Error("No user id in token");
   return u.id;
+}
+
+/* ─── GET /entitlements ──────────────────────────────────────────────── */
+
+type Tier = "free" | "pro" | "team";
+type Status = "active" | "past_due" | "canceled" | "trialing" | "none";
+
+export interface EntitlementBody {
+  tier: Tier;
+  status: Status;
+  renewsAt?: number;
+  subscriptionId?: string;
+}
+
+const FREE: EntitlementBody = { tier: "free", status: "none" };
+
+/**
+ * Map whatever the webhook stored (raw Stripe subscription / checkout
+ * status) onto the client's closed status set. Anything we don't
+ * recognise becomes "none", which the client treats as free.
+ */
+function normalizeStatus(raw: unknown): Status {
+  switch (raw) {
+    case "active":
+    case "trialing":
+    case "past_due":
+    case "canceled":
+      return raw;
+    case "complete": // checkout.session.completed — payment went through
+      return "active";
+    case "unpaid":
+      return "past_due";
+    default:
+      return "none";
+  }
+}
+
+function normalizeTier(raw: unknown): Tier {
+  return raw === "pro" || raw === "team" ? raw : "free";
+}
+
+async function entitlements(req: Request, env: Env): Promise<Response> {
+  const headers = {
+    ...corsFor(req, env),
+    "Content-Type": "application/json",
+    // Per-user answer — never let a shared cache hold it.
+    "Cache-Control": "private, no-store",
+    Vary: "Origin, Authorization",
+  };
+  const send = (entitlement: EntitlementBody, status = 200) =>
+    new Response(JSON.stringify({ entitlement }), { status, headers });
+
+  // Anonymous callers are simply on the free plan.
+  if (!req.headers.get("Authorization")) return send(FREE);
+
+  let uid: string;
+  try {
+    uid = await userId(req, env);
+  } catch {
+    return new Response(JSON.stringify({ error: "Invalid token" }), { status: 401, headers });
+  }
+
+  const res = await fetch(
+    `${env.SUPABASE_URL}/rest/v1/entitlements?user_id=eq.${encodeURIComponent(uid)}` +
+      `&select=tier,status,renews_at,stripe_subscription_id&limit=1`,
+    {
+      headers: {
+        apikey: env.SUPABASE_SERVICE_ROLE,
+        Authorization: `Bearer ${env.SUPABASE_SERVICE_ROLE}`,
+        Accept: "application/json",
+      },
+    },
+  );
+  if (!res.ok) {
+    return new Response(JSON.stringify({ error: "Entitlement lookup failed" }), {
+      status: 502,
+      headers,
+    });
+  }
+  const rows = (await res.json()) as {
+    tier?: unknown;
+    status?: unknown;
+    renews_at?: unknown;
+    stripe_subscription_id?: unknown;
+  }[];
+  const row = rows[0];
+  if (!row) return send(FREE);
+
+  const body: EntitlementBody = {
+    tier: normalizeTier(row.tier),
+    status: normalizeStatus(row.status),
+  };
+  const renews = typeof row.renews_at === "string" ? Number(row.renews_at) : row.renews_at;
+  if (typeof renews === "number" && Number.isFinite(renews)) body.renewsAt = renews;
+  if (typeof row.stripe_subscription_id === "string") body.subscriptionId = row.stripe_subscription_id;
+  return send(body);
 }
 
 /* ─── Stripe REST helpers (no SDK — keeps the worker tiny) ───────────── */
@@ -112,6 +252,9 @@ async function checkout(req: Request, env: Env): Promise<{ url: string }> {
     success_url: successUrl,
     cancel_url: cancelUrl,
     "metadata[userId]": uid,
+    // Copied onto the Subscription so customer.subscription.* webhooks
+    // can be attributed to the user too.
+    "subscription_data[metadata][userId]": uid,
     client_reference_id: uid,
   });
   return { url: session.url };
@@ -134,7 +277,7 @@ async function portal(req: Request, env: Env): Promise<{ url: string }> {
 
 async function fetchCustomer(env: Env, uid: string): Promise<string | null> {
   const res = await fetch(
-    `${env.SUPABASE_URL}/rest/v1/entitlements?user_id=eq.${uid}&select=stripe_customer_id`,
+    `${env.SUPABASE_URL}/rest/v1/entitlements?user_id=eq.${encodeURIComponent(uid)}&select=stripe_customer_id`,
     {
       headers: {
         apikey: env.SUPABASE_SERVICE_ROLE,
@@ -177,7 +320,13 @@ async function upsertEntitlement(
   env: Env,
   obj: Record<string, unknown>,
 ): Promise<void> {
-  const uid = (obj.client_reference_id ?? obj.metadata as { userId?: string })?.userId ?? null;
+  // Checkout sessions carry the user in client_reference_id; subscription
+  // events carry it in metadata.userId (set via subscription_data below).
+  const meta = (obj.metadata ?? {}) as { userId?: string };
+  const uid =
+    (typeof obj.client_reference_id === "string" && obj.client_reference_id) ||
+    meta.userId ||
+    null;
   if (!uid) return;
   await fetch(`${env.SUPABASE_URL}/rest/v1/entitlements`, {
     method: "POST",

@@ -133,6 +133,32 @@ wrangler deploy
 # 4d. Wire the Stripe webhook to /webhook on that URL via the Stripe Dashboard.
 # 4e. Set client env:
 #   VITE_BILLING_ENDPOINT=https://lumen-billing.<your>.workers.dev/checkout
+#   VITE_ENTITLEMENT_ENDPOINT=https://lumen-billing.<your>.workers.dev/entitlements
+# 4f. List every web origin that calls the worker (comma-separated) in
+#     wrangler.toml → [vars] ALLOWED_ORIGIN, e.g. "https://lumen.app,http://localhost:5173".
+#     The entitlement fetch uses credentials, so browsers need the exact origin
+#     echoed back — `*` is only returned to unlisted origins and won't work there.
+```
+
+`GET /entitlements` contract (consumed by `src/billing/useEntitlement.ts`):
+
+| Request | Response |
+|---|---|
+| no `Authorization` header | `200 {"entitlement":{"tier":"free","status":"none"}}` |
+| `Authorization: Bearer <supabase access token>`, no row in `entitlements` | `200` free, as above |
+| valid token, row present | `200 {"entitlement":{"tier":"pro","status":"active","renewsAt":1767225600,"subscriptionId":"sub_…"}}` |
+| invalid / expired token | `401` (client falls back to Free) |
+| Supabase unreachable | `502` (client falls back to Free) |
+
+Stored Stripe statuses are normalised: `complete` → `active`, `unpaid` → `past_due`,
+anything unrecognised → `none`. Only `active` / `trialing` unlock paid capabilities.
+Responses are `Cache-Control: private, no-store`.
+
+```bash
+# Smoke test after deploy:
+curl -s https://lumen-billing.<your>.workers.dev/entitlements            # → free
+curl -s -H "Authorization: Bearer $SUPABASE_ACCESS_TOKEN" \
+     https://lumen-billing.<your>.workers.dev/entitlements                # → your plan
 ```
 
 ---
