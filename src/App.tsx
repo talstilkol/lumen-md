@@ -542,6 +542,7 @@ export default function App() {
     setTagsPanelOpen,
     setCommentsPanelOpen,
     setRuntimeMetricsOpen,
+    getEditorView: () => editorRef.current?.getView() ?? null,
     onAddComment: collab
       ? async () => {
           const view = editorRef.current?.getView();

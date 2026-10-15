@@ -53,6 +53,7 @@ function buildSections(mod: string) {
         { keys: `${mod}+V`, label: () => "Paste" },
         { keys: `${mod}+A`, label: () => "Select All" },
         { keys: `${mod}+F`, label: () => t("cmd.search") },
+        { keys: mod === "⌘" ? "⇧⌥F" : "Shift+Alt+F", label: () => t("cmd.edit.formatDocument") },
       ],
     },
     {

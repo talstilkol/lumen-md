@@ -45,6 +45,7 @@ import { markdownLintExtension } from "./lintExtension";
 // positions) — loaded on demand in the collab effect, like ySync below.
 import { searchHighlightExtension } from "./searchHighlight";
 import { inlineSuggestion } from "./inlineSuggestion";
+import { formatKeymap } from "./formatCommands";
 import type { CollabSession } from "../collab/yjs";
 
 const mdHighlight = HighlightStyle.define([
@@ -380,6 +381,8 @@ export const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
       // extension flashes the matches and scrolls the first one into view.
       searchHighlightExtension(),
       imageDropPasteHandlers,
+      // Shift-Alt-F → format document (Prettier, lazy-loaded on first use).
+      formatKeymap(),
       keymap.of([
         ...closeBracketsKeymap,
         ...defaultKeymap,
