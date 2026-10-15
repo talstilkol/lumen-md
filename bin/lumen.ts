@@ -4,11 +4,35 @@
  *
  *   lumen convert <input> [output]   convert a file (format from extensions)
  *   lumen formats                    list supported import/export formats
+ *   lumen publish <dir|file> --out <dir> [--title <name>]
+ *                                    render .md files to a static website
  *
  * Run with:  npx tsx bin/lumen.ts convert notes.md notes.tex
+ *            npx tsx bin/lumen.ts publish docs --out site
  */
 import { readFileSync, writeFileSync } from "node:fs";
 import { convert, convertBinary, isBinaryTarget, listFormats } from "../src/cli/convert";
+import { publishSite } from "../src/cli/publish";
+
+const USAGE = [
+  "usage: lumen convert <input> [output]",
+  "       lumen formats",
+  "       lumen publish <dir|file> --out <dir> [--title <name>]",
+].join("\n");
+
+/** Parse `--flag value` / `--flag=value` pairs; returns flags + positionals. */
+function parseFlags(args: string[]): { flags: Record<string, string>; positional: string[] } {
+  const flags: Record<string, string> = {};
+  const positional: string[] = [];
+  for (let i = 0; i < args.length; i++) {
+    const a = args[i];
+    const m = /^--([\w-]+)(?:=(.*))?$/.exec(a);
+    if (!m) positional.push(a);
+    else if (m[2] !== undefined) flags[m[1]] = m[2];
+    else flags[m[1]] = args[++i] ?? "";
+  }
+  return { flags, positional };
+}
 
 async function main(argv: string[]): Promise<number> {
   const [cmd, ...rest] = argv;
@@ -20,8 +44,20 @@ async function main(argv: string[]): Promise<number> {
     return 0;
   }
 
+  if (cmd === "publish") {
+    const { flags, positional } = parseFlags(rest);
+    const out = flags.out;
+    if (positional.length !== 1 || !out) {
+      console.error(USAGE);
+      return 1;
+    }
+    const res = await publishSite(positional[0], out, { siteTitle: flags.title || undefined });
+    console.log(`✓ published ${res.pages.length} page(s) + ${res.assets.length} asset(s) → ${res.index}`);
+    return 0;
+  }
+
   if (cmd !== "convert" || rest.length < 1) {
-    console.error("usage: lumen convert <input> [output]\n       lumen formats");
+    console.error(USAGE);
     return 1;
   }
 
