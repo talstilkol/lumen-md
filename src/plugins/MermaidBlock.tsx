@@ -17,6 +17,12 @@ async function getMermaid() {
       startOnLoad: false,
       theme: dark ? "dark" : "default",
       securityLevel: "strict",
+      // Render labels as SVG <text>, not HTML inside <foreignObject>.
+      // sanitizeSvgMarkup forbids foreignObject (an HTML-injection vector
+      // inside SVG), so with Mermaid's default HTML labels every node /
+      // edge label was silently stripped — boxes rendered empty.
+      htmlLabels: false,
+      flowchart: { htmlLabels: false },
       fontFamily:
         "Inter, ui-sans-serif, system-ui, -apple-system, sans-serif",
       themeVariables: dark
