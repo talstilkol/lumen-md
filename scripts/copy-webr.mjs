@@ -69,7 +69,7 @@ const WORKER_ISOLATION_PRELUDE = `/* Lumen: isolate the webR worker */
     }
     try { Object.defineProperty(o, name, { value: undefined, configurable: false, writable: false }); } catch (e) { /* */ }
   }
-  ["indexedDB", "caches", "BroadcastChannel", "WebSocket", "WebTransport", "EventSource", "Worker", "SharedWorker", "RTCPeerConnection"].forEach(function (n) { drop(g, n); });
+  ["indexedDB", "caches", "BroadcastChannel", "WebSocket", "WebSocketStream", "WebTransport", "EventSource", "Worker", "SharedWorker", "RTCPeerConnection"].forEach(function (n) { drop(g, n); });
   if (g.navigator) ["storage", "serviceWorker", "locks", "sendBeacon"].forEach(function (n) { drop(g.navigator, n); });
   function allowed(u) {
     try {

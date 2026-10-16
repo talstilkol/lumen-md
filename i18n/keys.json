@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-10-16T20:31:27.248Z",
+  "generated_at": "2026-10-16T21:46:23.321Z",
   "source": "src/i18n/index.ts (en bundle)",
-  "count": 971,
+  "count": 977,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -3136,6 +3136,36 @@
     {
       "key": "cmd.ai.cache.hint",
       "en": "Reuse identical answers (tags, translation, diagrams) instead of paying again",
+      "vars": []
+    },
+    {
+      "key": "cmd.ai.mode",
+      "en": "AI: Cost Mode (Economy / Balanced / Quality)…",
+      "vars": []
+    },
+    {
+      "key": "cmd.ai.mode.hint",
+      "en": "Route small tasks to cheaper models and send only the relevant parts of your notes",
+      "vars": []
+    },
+    {
+      "key": "ai.mode.title",
+      "en": "AI cost mode",
+      "vars": []
+    },
+    {
+      "key": "ai.mode.economy",
+      "en": "Economy — small model for everything, ~2K tokens of context",
+      "vars": []
+    },
+    {
+      "key": "ai.mode.balanced",
+      "en": "Balanced — small model for small tasks, ~5K tokens of context (default)",
+      "vars": []
+    },
+    {
+      "key": "ai.mode.quality",
+      "en": "Quality — your chosen model for everything, ~12K tokens of context",
       "vars": []
     },
     {
