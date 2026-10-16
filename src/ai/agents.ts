@@ -218,7 +218,7 @@ export async function suggestTags(content: string): Promise<string[]> {
   const reply = await chat([
     { role: "system", content: AUTO_TAG_PROMPT },
     { role: "user", content: userMsg },
-  ]);
+  ], { cache: true });
   // Strip any code fence the model might add and parse the JSON array.
   const cleaned = reply.replace(/^```(?:json)?\s*/i, "").replace(/```\s*$/, "").trim();
   let parsed: unknown;
@@ -410,7 +410,7 @@ export async function generateDiagram(text: string): Promise<string> {
   const out = await chat([
     { role: "system", content: PROMPTS.diagram },
     { role: "user", content: text },
-  ]);
+  ], { cache: true });
   return "```mermaid\n" + stripCodeFences(out) + "\n```";
 }
 
@@ -419,7 +419,7 @@ export async function extractActionItems(text: string): Promise<string> {
   const out = await chat([
     { role: "system", content: PROMPTS.actionItems },
     { role: "user", content: text },
-  ]);
+  ], { cache: true });
   return stripCodeFences(out);
 }
 
@@ -432,7 +432,7 @@ export async function translateMarkdown(text: string, targetLanguage: string): P
   const out = await chat([
     { role: "system", content: PROMPTS.translate },
     { role: "user", content: `Target language: ${targetLanguage}\n\n---\n\n${text}` },
-  ]);
+  ], { cache: true });
   return out.trim();
 }
 
@@ -445,6 +445,6 @@ export async function generateChart(data: string): Promise<string> {
   const out = await chat([
     { role: "system", content: PROMPTS.visualization },
     { role: "user", content: data },
-  ]);
+  ], { cache: true });
   return "```chart\n" + stripCodeFences(out) + "\n```";
 }

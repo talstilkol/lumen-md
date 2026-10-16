@@ -53,6 +53,19 @@ export function buildGeminiBody(messages: ChatMessage[], opts: ChatOptions = {})
   };
 }
 
+/** `usageMetadata` → the usage meter. */
+function reportGeminiUsage(data: unknown, opts: ChatOptions): void {
+  const u = (data as { usageMetadata?: { promptTokenCount?: number; candidatesTokenCount?: number; cachedContentTokenCount?: number } })?.usageMetadata;
+  if (!u || typeof u.promptTokenCount !== "number") return;
+  const cached = u.cachedContentTokenCount ?? 0;
+  opts.onUsage?.({
+    model: getGeminiModel(opts),
+    inputTokens: u.promptTokenCount - cached,
+    outputTokens: u.candidatesTokenCount ?? 0,
+    ...(cached ? { cacheReadTokens: cached } : {}),
+  });
+}
+
 function extractText(data: unknown): string {
   const parts =
     (data as { candidates?: { content?: { parts?: { text?: string }[] } }[] })
@@ -76,8 +89,10 @@ export async function chatGemini(
     const body = await res.text().catch(() => "");
     throw new AiError("API_ERROR", `Gemini ${res.status}: ${body.slice(0, 200)}`);
   }
-  const text = extractText(await res.json()).trim();
+  const data = await res.json();
+  const text = extractText(data).trim();
   if (!text) throw new AiError("PARSE_ERROR", "Empty Gemini response.");
+  reportGeminiUsage(data, opts);
   return text;
 }
 
@@ -99,6 +114,7 @@ export async function* chatGeminiStream(
   }
   const reader = res.body?.getReader();
   if (!reader) throw new AiError("API_ERROR", "No response body from Gemini.");
+  let lastUsage: unknown = null;
   const decoder = new TextDecoder();
   let buffer = "";
   while (true) {
@@ -111,11 +127,15 @@ export async function* chatGeminiStream(
       const trimmed = line.trim();
       if (!trimmed.startsWith("data: ")) continue;
       try {
-        const delta = extractText(JSON.parse(trimmed.slice(6)));
+        const json = JSON.parse(trimmed.slice(6));
+        // Each chunk repeats the running usage; the last one is final.
+        if (json?.usageMetadata) lastUsage = json;
+        const delta = extractText(json);
         if (delta) yield delta;
       } catch {
         /* skip */
       }
     }
   }
+  if (lastUsage) reportGeminiUsage(lastUsage, opts);
 }

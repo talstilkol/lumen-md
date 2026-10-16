@@ -926,5 +926,15 @@
   "cmd.billing.upgradePro": "Facturation : passer à Pro",
   "cmd.billing.upgradeTeam": "Facturation : passer à Team",
   "cmd.billing.manage": "Facturation : gérer l'abonnement",
-  "cmd.billing.managePersonal": "Facturation : gérer l'abonnement personnel"
+  "cmd.billing.managePersonal": "Facturation : gérer l'abonnement personnel",
+  "cmd.ai.usage": "IA : utilisation et coût ce mois-ci",
+  "cmd.ai.usage.hint": "Requêtes, jetons et coût estimé par fournisseur sur cet appareil",
+  "cmd.ai.cache": "IA : cache des réponses…",
+  "cmd.ai.cache.hint": "Réutiliser les réponses identiques (tags, traduction, diagrammes) au lieu de payer à nouveau",
+  "ai.usage.title": "Utilisation de l’IA",
+  "ai.cache.title": "Cache des réponses IA",
+  "ai.cache.on": "Activé — les requêtes identiques sont servies localement",
+  "ai.cache.off": "Désactivé — toujours interroger le modèle",
+  "ai.cache.clear": "Effacer les réponses en cache",
+  "ai.cache.cleared": "{count} réponses en cache effacées"
 }

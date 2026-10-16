@@ -9,6 +9,7 @@ import { toast } from "../store/useToastStore";
 import { fetchWithRetry } from "../lib/fetchRetry";
 import { t } from "../i18n";
 import { docsUrl } from "../lib/docsLinks";
+import { estimateTokens, recordCacheHit, recordUsage, type Usage } from "./usage";
 
 // ── Rate limiting ───────────────────────────────────────────────────────
 // Token bucket — protects the user's API key against runaway loops.
@@ -74,6 +75,18 @@ export interface ChatOptions {
    * callers); the request just doesn't go out.
    */
   ownPrompt?: boolean | "silent";
+  /**
+   * Reuse an identical earlier answer from the local response cache (and
+   * store this one). Only for deterministic transformations of the given
+   * text; ignored when the user turned the cache off.
+   */
+  cache?: boolean;
+  /**
+   * Internal: providers report token usage here (exact where the API
+   * returns it). `provider` overrides the selected one when the request
+   * was routed elsewhere (fallbacks, local WebGPU).
+   */
+  onUsage?: (u: Omit<Usage, "provider"> & { provider?: string }) => void;
 }
 
 const DEFAULT_MODEL = "gpt-4o-mini";
@@ -160,7 +173,70 @@ export function getProviderKey(provider: AiProvider): string {
   return key;
 }
 
+/**
+ * The model a request to `provider` will use, for cache keys and the usage
+ * meter (the provider modules resolve it the same way).
+ */
+export function effectiveModel(provider: AiProvider, opts: ChatOptions = {}): string {
+  if (opts.model) return opts.model;
+  if (provider === "openai") {
+    const s = useAppStore.getState();
+    return (s.useFineTunedModel && s.fineTunedModelId) || DEFAULT_MODEL;
+  }
+  try {
+    return localStorage.getItem(`lumen.ai.model.${provider}`) || "default";
+  } catch {
+    return "default";
+  }
+}
+
+const promptChars = (messages: ChatMessage[]) => messages.map((m) => m.content).join("\n");
+
+/**
+ * Send a chat completion request. Returns the full text response.
+ * Answers may come from the local response cache (`opts.cache`); every
+ * request that goes out is recorded in the usage meter.
+ */
 export async function chat(
+  messages: ChatMessage[],
+  opts: ChatOptions = {},
+): Promise<string> {
+  const provider = getActiveProvider();
+  const model = effectiveModel(provider, opts);
+  const { aiCacheEnabled, cacheKey, getCached, putCached } = await import("./responseCache");
+  const key =
+    opts.cache && aiCacheEnabled()
+      ? await cacheKey({ v: 1, provider, model, messages, maxTokens: opts.maxTokens ?? null, temperature: opts.temperature ?? null }).catch(() => null)
+      : null;
+  if (key) {
+    const hit = await getCached(key);
+    if (hit) {
+      recordCacheHit(provider, model);
+      return hit.text;
+    }
+  }
+  let reported = false;
+  const text = await chatDirect(messages, {
+    ...opts,
+    onUsage: (u) => {
+      reported = true;
+      recordUsage({ ...u, provider: u.provider ?? provider });
+    },
+  });
+  if (text && !reported) {
+    recordUsage({
+      provider,
+      model,
+      inputTokens: estimateTokens(promptChars(messages)),
+      outputTokens: estimateTokens(text),
+      estimated: true,
+    });
+  }
+  if (key && text) await putCached(key, text, model);
+  return text;
+}
+
+async function chatDirect(
   messages: ChatMessage[],
   opts: ChatOptions = {},
 ): Promise<string> {
@@ -261,7 +337,15 @@ export async function chat(
       });
       try {
         charge();
-        return await chatLocal(messages, { model: opts.model, maxTokens: opts.maxTokens, temperature: opts.temperature });
+        const text = await chatLocal(messages, { model: opts.model, maxTokens: opts.maxTokens, temperature: opts.temperature });
+        opts.onUsage?.({
+          provider: "local-webgpu",
+          model: opts.model ?? "webgpu",
+          inputTokens: estimateTokens(promptChars(messages)),
+          outputTokens: estimateTokens(text),
+          estimated: true,
+        });
+        return text;
       } finally {
         off();
       }
@@ -310,6 +394,7 @@ export async function chat(
     const data = await res.json();
     const text = data.choices?.[0]?.message?.content?.trim();
     if (!text) throw new AiError("PARSE_ERROR", "Empty AI response.");
+    reportOpenAiUsage(data.usage, data.model ?? model, opts);
     return text;
   } catch (err) {
     if (opts.signal?.aborted || (err instanceof DOMException && err.name === "AbortError")) {
@@ -325,7 +410,58 @@ export async function chat(
  * Stream a chat completion. Yields text chunks as they arrive.
  * Routes through the active provider (Ollama / OpenAI / WebGPU).
  */
+/** OpenAI-shaped `usage` (OpenAI, Mistral) → the usage meter. */
+export function reportOpenAiUsage(
+  usage: { prompt_tokens?: number; completion_tokens?: number; prompt_tokens_details?: { cached_tokens?: number } } | undefined,
+  model: string,
+  opts: ChatOptions,
+  provider = "openai",
+): void {
+  if (!usage || typeof usage.prompt_tokens !== "number") return;
+  // OpenAI caches long prompt prefixes automatically (billed at a discount).
+  const cached = usage.prompt_tokens_details?.cached_tokens ?? 0;
+  opts.onUsage?.({
+    provider,
+    model,
+    inputTokens: usage.prompt_tokens - cached,
+    outputTokens: usage.completion_tokens ?? 0,
+    ...(cached ? { cacheReadTokens: cached } : {}),
+  });
+}
+
+/**
+ * Stream a chat completion. Yields text chunks as they arrive. Usage is
+ * recorded when the stream ends (exact when the provider reports it).
+ */
 export async function* chatStream(
+  messages: ChatMessage[],
+  opts: ChatOptions = {},
+): AsyncGenerator<string, void, undefined> {
+  const provider = getActiveProvider();
+  let reported = false;
+  let out = "";
+  for await (const chunk of chatStreamDirect(messages, {
+    ...opts,
+    onUsage: (u) => {
+      reported = true;
+      recordUsage({ ...u, provider: u.provider ?? provider });
+    },
+  })) {
+    out += chunk;
+    yield chunk;
+  }
+  if (out && !reported) {
+    recordUsage({
+      provider,
+      model: effectiveModel(provider, opts),
+      inputTokens: estimateTokens(promptChars(messages)),
+      outputTokens: estimateTokens(out),
+      estimated: true,
+    });
+  }
+}
+
+async function* chatStreamDirect(
   messages: ChatMessage[],
   opts: ChatOptions = {},
 ): AsyncGenerator<string, void, undefined> {
@@ -393,6 +529,8 @@ export async function* chatStream(
           model,
           messages,
           stream: true,
+          // The last chunk then carries `usage` (empty `choices`).
+          stream_options: { include_usage: true },
           ...(opts.maxTokens ? { max_tokens: opts.maxTokens } : {}),
         }),
         signal: opts.signal,
@@ -425,6 +563,7 @@ export async function* chatStream(
         if (!trimmed.startsWith("data: ")) continue;
         try {
           const json = JSON.parse(trimmed.slice(6));
+          if (json.usage) reportOpenAiUsage(json.usage, json.model ?? model, opts);
           const delta = json.choices?.[0]?.delta?.content;
           if (delta) yield delta;
         } catch {

@@ -26,14 +26,25 @@ export function getAnthropicModel(opts: ChatOptions): string {
   }
 }
 
+type TextBlock = { type: "text"; text: string; cache_control?: { type: "ephemeral" } };
+
 interface AnthropicBody {
   model: string;
   max_tokens: number;
-  system?: string;
+  system?: string | TextBlock[];
   temperature?: number;
   stream?: boolean;
-  messages: { role: "user" | "assistant"; content: string }[];
+  messages: { role: "user" | "assistant"; content: string | TextBlock[] }[];
 }
+
+/**
+ * Prompt caching: a prefix of at least ~1–2K tokens (by model) marked with
+ * `cache_control` is cached for 5 minutes and re-read at ~10% of the input
+ * price. Long system prompts and long first user messages (a document
+ * sent as context) are marked; shorter ones aren't worth a cache write.
+ */
+export const CACHE_MIN_CHARS = 8_000;
+const cached = (text: string): TextBlock[] => [{ type: "text", text, cache_control: { type: "ephemeral" } }];
 
 /** Pure mapping from our ChatMessage[] to the Anthropic Messages body. */
 export function buildAnthropicBody(
@@ -48,14 +59,37 @@ export function buildAnthropicBody(
   const turns = messages
     .filter((m) => m.role !== "system")
     .map((m) => ({ role: m.role as "user" | "assistant", content: m.content }));
+  // At most two breakpoints: the system prompt and the first user turn.
+  const first = turns.findIndex((m) => m.role === "user");
+  const messagesOut = turns.map((m, i) =>
+    i === first && m.content.length >= CACHE_MIN_CHARS ? { ...m, content: cached(m.content) } : m,
+  );
   return {
     model: getAnthropicModel(opts),
     max_tokens: opts.maxTokens ?? 1024,
-    ...(system ? { system } : {}),
+    ...(system ? { system: system.length >= CACHE_MIN_CHARS ? cached(system) : system } : {}),
     ...(opts.temperature !== undefined ? { temperature: opts.temperature } : {}),
     ...(stream ? { stream: true } : {}),
-    messages: turns,
+    messages: messagesOut,
   };
+}
+
+type AnthropicUsage = {
+  input_tokens?: number;
+  output_tokens?: number;
+  cache_read_input_tokens?: number;
+  cache_creation_input_tokens?: number;
+};
+
+function reportUsage(u: AnthropicUsage | undefined, model: string, opts: ChatOptions): void {
+  if (!u) return;
+  opts.onUsage?.({
+    model,
+    inputTokens: u.input_tokens ?? 0,
+    outputTokens: u.output_tokens ?? 0,
+    cacheReadTokens: u.cache_read_input_tokens ?? 0,
+    cacheWriteTokens: u.cache_creation_input_tokens ?? 0,
+  });
 }
 
 function headers(): HeadersInit {
@@ -89,6 +123,7 @@ export async function chatAnthropic(
     .join("")
     .trim();
   if (!text) throw new AiError("PARSE_ERROR", "Empty Anthropic response.");
+  reportUsage(data.usage, data.model ?? getAnthropicModel(opts), opts);
   return text;
 }
 
@@ -108,6 +143,10 @@ export async function* chatAnthropicStream(
   }
   const reader = res.body?.getReader();
   if (!reader) throw new AiError("API_ERROR", "No response body from Anthropic.");
+  // message_start carries the input usage, message_delta the output count.
+  const usage: AnthropicUsage = {};
+  let model = getAnthropicModel(opts);
+  let sawUsage = false;
   const decoder = new TextDecoder();
   let buffer = "";
   while (true) {
@@ -121,6 +160,14 @@ export async function* chatAnthropicStream(
       if (!trimmed.startsWith("data: ")) continue;
       try {
         const json = JSON.parse(trimmed.slice(6));
+        if (json?.type === "message_start" && json.message?.usage) {
+          Object.assign(usage, json.message.usage);
+          if (json.message.model) model = json.message.model;
+          sawUsage = true;
+        } else if (json?.type === "message_delta" && json.usage) {
+          Object.assign(usage, json.usage);
+          sawUsage = true;
+        }
         // content_block_delta carries { delta: { type: "text_delta", text } }
         const delta = json?.delta?.text;
         if (delta) yield delta;
@@ -129,4 +176,5 @@ export async function* chatAnthropicStream(
       }
     }
   }
+  if (sawUsage) reportUsage(usage, model, opts);
 }

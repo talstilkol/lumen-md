@@ -9,7 +9,7 @@
  */
 
 import type { ChatMessage, ChatOptions } from "./llm";
-import { getProviderKey, AiError } from "./llm";
+import { getProviderKey, AiError, reportOpenAiUsage } from "./llm";
 
 const API_URL = "https://api.mistral.ai/v1/chat/completions";
 const DEFAULT_MODEL = "mistral-small-latest";
@@ -57,6 +57,7 @@ export async function chatMistral(
   const data = await res.json();
   const text = data.choices?.[0]?.message?.content?.trim();
   if (!text) throw new AiError("PARSE_ERROR", "Empty Mistral response.");
+  reportOpenAiUsage(data.usage, data.model ?? "default", opts, "mistral");
   return text;
 }
 
@@ -90,6 +91,8 @@ export async function* chatMistralStream(
       if (!trimmed.startsWith("data: ")) continue;
       try {
         const json = JSON.parse(trimmed.slice(6));
+        // The final chunk carries `usage`.
+        if (json.usage) reportOpenAiUsage(json.usage, json.model ?? "default", opts, "mistral");
         const delta = json.choices?.[0]?.delta?.content;
         if (delta) yield delta;
       } catch {
