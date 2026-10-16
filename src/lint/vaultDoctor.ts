@@ -87,19 +87,22 @@ function blankFences(text: string): string {
  */
 function blankCodeSpans(text: string): string {
   const chars = text.split("");
-  const runs: Array<{ at: number; len: number }> = [];
+  // A backslash escapes one backtick outside a span (so an escaped run
+  // opens one shorter), but inside a span it's literal: closers ignore it.
+  const runs: Array<{ at: number; len: number; esc: boolean }> = [];
   for (let i = 0; i < text.length; ) {
-    if (text[i] !== "`" || (i > 0 && text[i - 1] === "\\")) {
+    if (text[i] !== "`") {
       i++;
       continue;
     }
     let j = i;
     while (text[j] === "`") j++;
-    runs.push({ at: i, len: j - i });
+    runs.push({ at: i, len: j - i, esc: i > 0 && text[i - 1] === "\\" });
     i = j;
   }
   for (let r = 0; r < runs.length; r++) {
-    const open = runs[r];
+    const open = runs[r].esc ? { at: runs[r].at + 1, len: runs[r].len - 1 } : runs[r];
+    if (!open.len) continue;
     const close = runs.findIndex((x, k) => k > r && x.len === open.len);
     if (close === -1) continue;
     // A blank line ends a paragraph: a span never crosses it.
@@ -155,6 +158,8 @@ export function stripCode(text: string): string {
   // An unterminated comment runs to the end of the note (CommonMark HTML block).
   out = out.replace(/<!--[\s\S]*?(?:-->|$)/g, blank);
   out = blankCodeSpans(out);
+  // Inline HTML tags: their attributes aren't Markdown (`<span title="[[x]]">`).
+  out = out.replace(/<[A-Za-z][\w-]*\s[^<>\n]*\[\[[^<>\n]*>/g, blank);
   return out;
 }
 
@@ -165,6 +170,7 @@ function headingText(md: string): string {
   return md
     .replace(/!\[([^\]]*)\]\([^)]*\)/g, "$1")
     .replace(/\[([^\]]*)\]\([^)]*\)/g, "$1")
+    .replace(/\[([^\]]*)\]\[[^\]]*\]/g, "$1") // reference links: `[Setup][docs]`
     .replace(/\[\[([^\]|]+)(?:\|([^\]]*))?\]\]/g, (_m, target: string, label?: string) => label ?? target)
     .replace(/`([^`]*)`/g, "$1")
     .replace(/(\*\*|__|\*|_|~~)(.+?)\1/g, "$2")
@@ -174,11 +180,11 @@ function headingText(md: string): string {
 
 /** Blank a leading YAML front matter block (its `# comments` aren't headings). */
 const blankFrontmatter = (text: string) =>
-  text.replace(/^---[ \t]*\r?\n[\s\S]*?\r?\n(?:---|\.\.\.)[ \t]*(?=\r?\n|$)/, (m) => m.replace(/[^\n]/g, " "));
+  text.replace(/^---[ \t]*\r?\n(?:[\s\S]*?\r?\n)?(?:---|\.\.\.)[ \t]*(?=\r?\n|$)/, (m) => m.replace(/[^\n]/g, " "));
 
-/** Ranges of Markdown links (`[text](url)`): a `[[x]]` inside their text is label text, not a wiki link. */
+/** Ranges of Markdown links (`[text](url)`, `[text][ref]`, `[text][]`): a `[[x]]` inside their text is label text, not a wiki link. */
 const markdownLinkRanges = (text: string): Array<[number, number]> =>
-  [...text.matchAll(/\[((?:[^\[\]\n]|\[\[[^\]\n]*\]\])*)\]\([^)\n]*\)/g)].map((l) => [l.index ?? 0, (l.index ?? 0) + l[0].length]);
+  [...text.matchAll(/\[((?:[^\[\]\n]|\[\[[^\]\n]*\]\])*)\](?:\([^)\n]*\)|\[[^\[\]\n]*\])/g)].map((l) => [l.index ?? 0, (l.index ?? 0) + l[0].length]);
 const insideAny = (ranges: ReadonlyArray<[number, number]>, at: number) => ranges.some(([a, b]) => at > a && at < b);
 
 function headingsOf(text: string): Set<string> {
@@ -209,7 +215,7 @@ function headingsOf(text: string): Set<string> {
 const hasHeading = (hs: Set<string> | undefined, h: string) => !!hs && (hs.has(headingSlug(h)) || hs.has(h.trim().toLowerCase()));
 
 function frontMatterless(text: string): string {
-  return text.replace(/^---[ \t]*\r?\n[\s\S]*?\r?\n(?:---|\.\.\.)[ \t]*(?:\r?\n|$)\s*/, "");
+  return text.replace(/^---[ \t]*\r?\n(?:[\s\S]*?\r?\n)?(?:---|\.\.\.)[ \t]*(?:\r?\n|$)\s*/, "");
 }
 
 /** Levenshtein distance, capped (returns cap + 1 beyond it). */

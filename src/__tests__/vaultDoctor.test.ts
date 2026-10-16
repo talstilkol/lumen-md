@@ -169,4 +169,14 @@ describe("vault doctor", () => {
       "[[Project]] [see [[Projct]]](https://example.com)",
     );
   });
+
+  it("reference links, inline HTML, escaped code-span closers, empty front matter", () => {
+    const notes: DoctorNote[] = [
+      { path: "a.md", text: "## [Setup][docs]\n\n[[#Setup]] [see [[Projct]]][site] <span title=\"[[Missing]]\">x</span> `[[Gone]]\\`\n\n[docs]: https://x.example\n[site]: https://y.example\n" },
+      { path: "e.md", text: "---\n---\n" },
+    ];
+    const f = runVaultDoctor(notes);
+    expect(f.filter((x) => x.kind === "broken-wiki-link" || x.kind === "missing-heading")).toEqual([]);
+    expect(f.some((x) => x.kind === "empty-note" && x.path === "e.md")).toBe(true);
+  });
 });
