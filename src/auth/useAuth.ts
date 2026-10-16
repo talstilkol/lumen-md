@@ -97,16 +97,29 @@ export const useAuth = create<AuthStore>((set, get) => ({
 
 /**
  * Bootstraps the auth store. Call once from `main.tsx`. Re-calls are no-ops.
- * Resolves the active provider (Supabase if configured, otherwise local) and
- * loads any persisted session.
+ * Resolves the active provider (Supabase if configured, otherwise WorkOS or
+ * local) and loads any persisted session, falling back to a WorkOS SSO
+ * session when SSO is configured alongside Supabase.
  */
 export async function initAuth(): Promise<void> {
   if (initialized) return;
   initialized = true;
   try {
-    const provider = await resolveProvider();
+    let provider = await resolveProvider();
     useAuth.setState({ provider });
-    const user: User | null = await provider.loadSession();
+    let user: User | null = await provider.loadSession();
+    // Supabase and WorkOS can both be configured (the sign-in dialog offers
+    // SSO next to email/OAuth). The primary provider wins when it has a
+    // session; otherwise restore an SSO session from the worker's cookie —
+    // e.g. right after the `?sso=ok` callback redirect.
+    if (!user && provider !== workosProvider && isWorkosEnabled()) {
+      const ssoUser = await workosProvider.loadSession();
+      if (ssoUser) {
+        provider = workosProvider;
+        user = ssoUser;
+        useAuth.setState({ provider });
+      }
+    }
     useAuth.setState({
       status: user ? "authenticated" : "anonymous",
       user,
