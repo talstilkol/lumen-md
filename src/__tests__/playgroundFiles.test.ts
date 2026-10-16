@@ -57,3 +57,25 @@ describe("playground project", () => {
     expect(found).toEqual(["playground", "web-playground"]);
   });
 });
+
+describe("importSpecifiers", () => {
+  it("finds real imports, re-exports and dynamic imports only", async () => {
+    const { importSpecifiers } = await import("../playground/files");
+    const code = [
+      'import React from "react";',
+      "import './side.css';",
+      'import { a,\n  b } from "./ab.js";',
+      'export { c } from "./c.js";',
+      'export * from "./star.js";',
+      'const lazy = import("./lazy.js");',
+      '// import "./missing.js"',
+      "/* import x from './nope.js' */",
+      "console.log('import \"react\"', `from \"./tpl.js\"`);",
+      'const from = "./not-an-import.js";',
+      "const meta = import.meta.url;",
+    ].join("\n");
+    const specs = importSpecifiers(code);
+    expect(specs.map((s) => s.spec)).toEqual(["react", "./side.css", "./ab.js", "./c.js", "./star.js", "./lazy.js"]);
+    for (const s of specs) expect(code.slice(s.start + 1, s.end - 1)).toBe(s.spec);
+  });
+});

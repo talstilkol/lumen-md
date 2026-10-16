@@ -16,6 +16,8 @@
  * for vue / vanilla. Pure: no DOM.
  */
 
+import { tokenize } from "../plugins/liveJsScope";
+
 export type PlaygroundFramework = "vanilla" | "react" | "vue";
 
 export interface PlaygroundFile {
@@ -94,6 +96,55 @@ export function resolveImport(spec: string, from: string, names: readonly string
 }
 
 /** Bare specifiers the runner provides. */
+/**
+ * Module specifiers of a module's real imports and re-exports — static
+ * `import … from "x"`, `import "x"`, `export … from "x"` and `import("x")`
+ * with a string literal — found with the live-js tokenizer, so import-like
+ * text in comments, strings and templates is ignored. `start` / `end`
+ * cover the string literal, quotes included.
+ */
+export function importSpecifiers(code: string): Array<{ start: number; end: number; spec: string }> {
+  const tokens = tokenize(code);
+  const out: Array<{ start: number; end: number; spec: string }> = [];
+  const add = (i: number) => {
+    const t = tokens[i];
+    if (t?.type === "str") out.push({ start: t.start, end: t.end, spec: t.value.slice(1, -1) });
+  };
+  // Inside a top-level `import` / `export` statement, waiting for `from`.
+  let inDecl = false;
+  for (let i = 0; i < tokens.length; i++) {
+    const t = tokens[i];
+    const prev = tokens[i - 1];
+    if (t.type === "punct") {
+      if (t.value === ";") inDecl = false;
+      continue;
+    }
+    if (t.type !== "ident" || prev?.value === "." || prev?.value === "?.") continue;
+    if (t.value === "import") {
+      const next = tokens[i + 1];
+      if (next?.type === "str") {
+        add(i + 1); // import "x"
+        continue;
+      }
+      if (next?.value === "(" && tokens[i + 2]?.type === "str" && tokens[i + 3]?.value === ")") {
+        add(i + 2); // import("x")
+        continue;
+      }
+      if (t.depth === 0 && next?.value !== "." && next?.value !== "(") inDecl = true;
+      continue;
+    }
+    if (t.value === "export" && t.depth === 0) {
+      inDecl = true;
+      continue;
+    }
+    if (t.value === "from" && inDecl && t.depth === 0 && tokens[i + 1]?.type === "str") {
+      add(i + 1);
+      inDecl = false;
+    }
+  }
+  return out;
+}
+
 export const PROVIDED_MODULES = ["react", "react-dom", "react-dom/client", "react/jsx-runtime", "vue"] as const;
 
 /** Messages between the block (page) and the runner (sandboxed iframe). */

@@ -9,19 +9,26 @@
  */
 import { transform } from "sucrase";
 import {
+  importSpecifiers,
   resolveImport,
   type PlaygroundProject,
   type RunnerMessage,
   type RunnerRequest,
 } from "./files";
 
-const vendor = (file: string) => new URL(`/playground/vendor/${file}`, location.href).href;
+// Beneath Vite's base (a subpath deployment serves them at /app/playground/…).
+const vendor = (file: string) => new URL(`${import.meta.env.BASE_URL}playground/vendor/${file}`, location.href).href;
 let runId = 0;
 const post = (msg: RunnerMessage) => parent.postMessage(msg, "*");
 
 function show(value: unknown): string {
   if (typeof value === "string") return value;
-  if (value instanceof Error) return value.stack || `${value.name}: ${value.message}`;
+  if (value instanceof Error) {
+    const head = `${value.name}: ${value.message}`;
+    // Firefox / Safari stacks don't start with the message.
+    if (!value.stack) return head;
+    return value.stack.includes(value.message) ? value.stack : `${head}\n${value.stack}`;
+  }
   try {
     const seen = new WeakSet<object>();
     return JSON.stringify(value, (_k, v: unknown) => {
@@ -100,7 +107,6 @@ async function providedModules(framework: PlaygroundProject["framework"]): Promi
   return out;
 }
 
-const IMPORT_RE = /(\bfrom\s*|\bimport\s*\(\s*|\bimport\s+)(["'])([^"'\n]+)\2/g;
 
 async function link(project: PlaygroundProject): Promise<string> {
   const provided = await providedModules(project.framework);
@@ -126,13 +132,19 @@ async function link(project: PlaygroundProject): Promise<string> {
         filePath: name,
       }).code;
     }
-    code = code.replace(IMPORT_RE, (_whole, pre: string, q: string, spec: string) => {
-      if (spec in provided) return `${pre}${q}${provided[spec]}${q}`;
-      const target = resolveImport(spec, name, names);
-      if (target) return `${pre}${q}${build(target)}${q}`;
-      if (/^(\.|\/)/.test(spec)) throw new Error(`${name}: can't find "${spec}"`);
-      throw new Error(`${name}: package "${spec}" isn't available here (react, react-dom, vue are)`);
-    });
+    // Only real import / re-export specifiers (not text in comments or
+    // strings), replaced from the end so offsets stay valid.
+    for (const { start, end, spec } of importSpecifiers(code).reverse()) {
+      let url: string;
+      if (spec in provided) url = provided[spec];
+      else {
+        const target = resolveImport(spec, name, names);
+        if (target) url = build(target);
+        else if (/^(\.|\/)/.test(spec)) throw new Error(`${name}: can't find "${spec}"`);
+        else throw new Error(`${name}: package "${spec}" isn't available here (react, react-dom, vue are)`);
+      }
+      code = code.slice(0, start) + JSON.stringify(url) + code.slice(end);
+    }
     const url = blob(code + `\n//# sourceURL=${name}`);
     urls.set(name, url);
     visiting.delete(name);
