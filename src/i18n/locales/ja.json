@@ -942,5 +942,22 @@
   "ai.mode.title": "AI コストモード",
   "ai.mode.economy": "節約 — すべて小型モデル、文脈は約 2K トークン",
   "ai.mode.balanced": "バランス — 小さなタスクは小型モデル、文脈は約 5K トークン（既定）",
-  "ai.mode.quality": "品質 — すべて選択したモデル、文脈は約 12K トークン"
+  "ai.mode.quality": "品質 — すべて選択したモデル、文脈は約 12K トークン",
+  "cmd.research.ask": "🔎 リサーチ：質問する…",
+  "cmd.research.ask.hint": "ウェブを検索し、出典を読み、各主張に引用付き脚注を付けたノートを作成",
+  "cmd.research.verify": "🔎 リサーチ：このノートの引用を検証",
+  "cmd.research.verify.hint": "脚注のリンクが生きていて、引用が実際にページにあるかを確認",
+  "cmd.research.settings": "🔎 リサーチ：設定…",
+  "cmd.research.settings.hint": "Claude のウェブ検索、または自分のキーで Brave / Tavily",
+  "research.question": "何を調べますか？",
+  "research.done": "リサーチ完了：出典 {sources} 件",
+  "research.unverified": "{count} 件の引用を確認できませんでした（ノートに ⚠️ で表示）",
+  "research.failed": "リサーチに失敗しました：{message}",
+  "research.noCitations": "このノートにはウェブリンク付きの脚注がありません",
+  "research.checking": "引用を確認中 {done}/{total}…",
+  "research.noService": "引用チェックと Brave / Tavily 検索には、このデプロイでリサーチサービス（VITE_RESEARCH_ENDPOINT）が必要です",
+  "research.provider.claude": "Claude ウェブ検索（Anthropic プロバイダー、検索は Anthropic が課金）",
+  "research.provider.brave": "Brave Search（あなたの API キー）",
+  "research.provider.tavily": "Tavily（あなたの API キー）",
+  "research.key": "{provider} の API キー："
 }

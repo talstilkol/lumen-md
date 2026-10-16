@@ -818,6 +818,81 @@ export function useCommands({
         },
       },
       {
+        id: "research.ask",
+        label: t("cmd.research.ask"),
+        hint: t("cmd.research.ask.hint"),
+        icon: cmdIcons.Sparkles,
+        group: t("group.ai"),
+        action: async () => {
+          const question = await uiPrompt({ message: t("research.question"), defaultValue: "" });
+          if (!question?.trim()) return;
+          try {
+            const { runResearch } = await import("../research/agent");
+            const result = await runResearch({ question: question.trim(), onProgress: (m) => showAiToast(m, "info") });
+            openTemplateDoc(`Research — ${question.trim().slice(0, 60)}`, result.markdown);
+            showAiToast(t("research.done", { sources: result.sources }), "success");
+            if (result.unverified) showAiToast(t("research.unverified", { count: result.unverified }), "error");
+          } catch (e) {
+            showAiToast(t("research.failed", { message: (e as Error).message }), "error");
+          }
+        },
+      },
+      {
+        id: "research.verify",
+        label: t("cmd.research.verify"),
+        hint: t("cmd.research.verify.hint"),
+        icon: cmdIcons.Sparkles,
+        group: t("group.ai"),
+        action: async () => {
+          const { parseCitations, verifyCitations, formatCitationReport } = await import("../research/citations");
+          const { extractPage, researchEndpoint } = await import("../research/client");
+          const citations = parseCitations(doc.content);
+          if (!citations.length) {
+            showAiToast(t("research.noCitations"), "info");
+            return;
+          }
+          if (!researchEndpoint()) {
+            showAiToast(t("research.noService"), "error");
+            return;
+          }
+          const checks = await verifyCitations(citations, (u) => extractPage(u), {
+            onProgress: (done, total) => {
+              if (done === total || done % 5 === 0) showAiToast(t("research.checking", { done, total }), "info");
+            },
+          });
+          openTemplateDoc(`Citation check — ${doc.name.replace(/\.(md|markdown)$/i, "")}`, formatCitationReport(doc.name, checks));
+        },
+      },
+      {
+        id: "research.settings",
+        label: t("cmd.research.settings"),
+        hint: t("cmd.research.settings.hint"),
+        icon: cmdIcons.Sparkles,
+        group: t("group.ai"),
+        action: async () => {
+          const { getResearchSettings, setResearchSettings, researchEndpoint } = await import("../research/client");
+          const cur = getResearchSettings();
+          const choice = await uiSelect({
+            title: t("cmd.research.settings"),
+            message: t("cmd.research.settings.hint"),
+            defaultValue: cur.provider,
+            choices: [
+              { value: "claude", label: t("research.provider.claude") },
+              { value: "brave", label: t("research.provider.brave") },
+              { value: "tavily", label: t("research.provider.tavily") },
+            ],
+          });
+          if (choice !== "claude" && choice !== "brave" && choice !== "tavily") return;
+          setResearchSettings({ provider: choice });
+          if (choice !== "claude") {
+            if (!researchEndpoint()) showAiToast(t("research.noService"), "error");
+            const key = await uiPrompt({ message: t("research.key", { provider: choice === "brave" ? "Brave Search" : "Tavily" }), defaultValue: cur.provider === choice ? cur.key : "" });
+            if (key !== null) setResearchSettings({ key: key.trim() });
+          }
+          showAiToast(t(`research.provider.${choice}`), "success");
+        },
+      },
+      {
         id: "ai.mode",
         label: t("cmd.ai.mode"),
         hint: t("cmd.ai.mode.hint"),

@@ -178,3 +178,44 @@ export async function* chatAnthropicStream(
   }
   if (sawUsage) reportUsage(usage, model, opts);
 }
+
+/** A passage of the answer and the web sources Claude cited for it. */
+export interface CitedBlock {
+  text: string;
+  citations: Array<{ url: string; title: string; quote: string }>;
+}
+
+/**
+ * One Messages API call with Claude's server-side web search tool: Claude
+ * searches, reads and answers, returning text blocks with the passages it
+ * relied on (`web_search_result_location` citations, quoted verbatim by the
+ * API). `maxSearches` caps the searches (each is billed by Anthropic).
+ */
+export async function anthropicWebResearch(
+  messages: ChatMessage[],
+  opts: ChatOptions & { maxSearches?: number } = {},
+): Promise<CitedBlock[]> {
+  const body = {
+    ...buildAnthropicBody(messages, { ...opts, maxTokens: opts.maxTokens ?? 4096 }),
+    tools: [{ type: "web_search_20250305", name: "web_search", max_uses: Math.max(1, Math.min(10, opts.maxSearches ?? 5)) }],
+  };
+  const res = await fetch(API_URL, { method: "POST", headers: headers(), body: JSON.stringify(body), signal: opts.signal });
+  if (!res.ok) {
+    const b = await res.text().catch(() => "");
+    throw new AiError("API_ERROR", `Anthropic ${res.status}: ${b.slice(0, 200)}`);
+  }
+  const data = await res.json();
+  reportUsage(data.usage, data.model ?? getAnthropicModel(opts), opts);
+  const blocks: CitedBlock[] = [];
+  for (const b of (data.content ?? []) as Array<{ type?: string; text?: string; citations?: Array<{ type?: string; url?: string; title?: string; cited_text?: string }> }>) {
+    if (b.type !== "text" || !b.text) continue;
+    blocks.push({
+      text: b.text,
+      citations: (b.citations ?? [])
+        .filter((c) => c.type === "web_search_result_location" && c.url)
+        .map((c) => ({ url: c.url!, title: c.title ?? "", quote: (c.cited_text ?? "").trim() })),
+    });
+  }
+  if (!blocks.length) throw new AiError("PARSE_ERROR", "Empty Anthropic response.");
+  return blocks;
+}

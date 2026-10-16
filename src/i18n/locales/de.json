@@ -942,5 +942,22 @@
   "ai.mode.title": "KI-Kostenmodus",
   "ai.mode.economy": "Sparsam — kleines Modell für alles, ~2K Tokens Kontext",
   "ai.mode.balanced": "Ausgewogen — kleines Modell für kleine Aufgaben, ~5K Tokens Kontext (Standard)",
-  "ai.mode.quality": "Qualität — dein gewähltes Modell für alles, ~12K Tokens Kontext"
+  "ai.mode.quality": "Qualität — dein gewähltes Modell für alles, ~12K Tokens Kontext",
+  "cmd.research.ask": "🔎 Recherche: Frage stellen…",
+  "cmd.research.ask.hint": "Sucht im Web, liest Quellen und schreibt eine Notiz mit zitierter Fußnote zu jeder Aussage",
+  "cmd.research.verify": "🔎 Recherche: Zitate in dieser Notiz prüfen",
+  "cmd.research.verify.hint": "Prüft, ob jeder Fußnoten-Link lebt und das Zitat wirklich auf der Seite steht",
+  "cmd.research.settings": "🔎 Recherche: Einstellungen…",
+  "cmd.research.settings.hint": "Claude-Websuche oder Brave / Tavily mit eigenem Schlüssel",
+  "research.question": "Was soll ich recherchieren?",
+  "research.done": "Recherche fertig: {sources} Quellen",
+  "research.unverified": "{count} Zitate nicht bestätigt — in der Notiz mit ⚠️ markiert",
+  "research.failed": "Recherche fehlgeschlagen: {message}",
+  "research.noCitations": "Keine Fußnoten mit Web-Links in dieser Notiz",
+  "research.checking": "Prüfe Zitate {done}/{total}…",
+  "research.noService": "Zitatprüfung und Brave-/Tavily-Suche brauchen den Recherche-Dienst (VITE_RESEARCH_ENDPOINT) in dieser Bereitstellung",
+  "research.provider.claude": "Claude-Websuche (Anbieter Anthropic; Suchen rechnet Anthropic ab)",
+  "research.provider.brave": "Brave Search (dein API-Schlüssel)",
+  "research.provider.tavily": "Tavily (dein API-Schlüssel)",
+  "research.key": "API-Schlüssel für {provider}:"
 }

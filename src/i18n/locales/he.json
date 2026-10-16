@@ -942,5 +942,22 @@
   "ai.mode.title": "מצב עלות AI",
   "ai.mode.economy": "חסכוני — מודל קטן לכל דבר, הקשר של כ-2K טוקנים",
   "ai.mode.balanced": "מאוזן — מודל קטן למשימות קטנות, הקשר של כ-5K טוקנים (ברירת מחדל)",
-  "ai.mode.quality": "איכות — המודל שבחרת לכל דבר, הקשר של כ-12K טוקנים"
+  "ai.mode.quality": "איכות — המודל שבחרת לכל דבר, הקשר של כ-12K טוקנים",
+  "cmd.research.ask": "🔎 מחקר: שאלה…",
+  "cmd.research.ask.hint": "מחפש ברשת, קורא מקורות וכותב פתק עם הערת שוליים מצוטטת לכל טענה",
+  "cmd.research.verify": "🔎 מחקר: בדיקת הציטוטים בפתק",
+  "cmd.research.verify.hint": "בודק שכל קישור בהערות השוליים חי ושהציטוט באמת מופיע בעמוד",
+  "cmd.research.settings": "🔎 מחקר: הגדרות…",
+  "cmd.research.settings.hint": "חיפוש הרשת של Claude, או Brave / Tavily עם מפתח משלך",
+  "research.question": "מה לחקור?",
+  "research.done": "המחקר הסתיים: {sources} מקורות",
+  "research.unverified": "{count} ציטוטים לא אומתו — מסומנים ⚠️ בפתק",
+  "research.failed": "המחקר נכשל: {message}",
+  "research.noCitations": "אין בפתק הערות שוליים עם קישורים",
+  "research.checking": "בודק ציטוטים {done}/{total}…",
+  "research.noService": "בדיקת ציטוטים וחיפוש Brave / Tavily דורשים את שירות המחקר (VITE_RESEARCH_ENDPOINT) בפריסה הזו",
+  "research.provider.claude": "חיפוש הרשת של Claude (ספק Anthropic; החיפושים מחויבים ע״י Anthropic)",
+  "research.provider.brave": "Brave Search (מפתח API שלך)",
+  "research.provider.tavily": "Tavily (מפתח API שלך)",
+  "research.key": "מפתח API עבור {provider}:"
 }

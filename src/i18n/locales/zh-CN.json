@@ -942,5 +942,22 @@
   "ai.mode.title": "AI 成本模式",
   "ai.mode.economy": "节约 — 全部使用小模型，上下文约 2K 令牌",
   "ai.mode.balanced": "平衡 — 小任务用小模型，上下文约 5K 令牌（默认）",
-  "ai.mode.quality": "质量 — 全部使用你选择的模型，上下文约 12K 令牌"
+  "ai.mode.quality": "质量 — 全部使用你选择的模型，上下文约 12K 令牌",
+  "cmd.research.ask": "🔎 研究：提出问题…",
+  "cmd.research.ask.hint": "搜索网络、阅读来源，并为每个论断写出带引文脚注的笔记",
+  "cmd.research.verify": "🔎 研究：核查本笔记的引用",
+  "cmd.research.verify.hint": "检查每个脚注链接是否有效、引文是否真的出现在页面上",
+  "cmd.research.settings": "🔎 研究：设置…",
+  "cmd.research.settings.hint": "Claude 网络搜索，或使用你自己的密钥的 Brave / Tavily",
+  "research.question": "要研究什么？",
+  "research.done": "研究完成：{sources} 个来源",
+  "research.unverified": "{count} 条引文无法核实 — 已在笔记中标记 ⚠️",
+  "research.failed": "研究失败：{message}",
+  "research.noCitations": "本笔记中没有带网页链接的脚注",
+  "research.checking": "正在核查引用 {done}/{total}…",
+  "research.noService": "引用核查和 Brave / Tavily 搜索需要此部署配置研究服务（VITE_RESEARCH_ENDPOINT）",
+  "research.provider.claude": "Claude 网络搜索（Anthropic 服务商；搜索由 Anthropic 计费）",
+  "research.provider.brave": "Brave Search（你的 API 密钥）",
+  "research.provider.tavily": "Tavily（你的 API 密钥）",
+  "research.key": "{provider} 的 API 密钥："
 }
