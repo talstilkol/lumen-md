@@ -31,7 +31,6 @@ import { tags as t } from "@lezer/highlight";
 import { StateField, StateEffect } from "@codemirror/state";
 import type { Extension } from "@codemirror/state";
 import { chat } from "../ai/llm";
-import { consumeAiPrompt } from "../billing/aiQuota";
 import { PROMPTS } from "../ai/prompts";
 import { embedHintExtension } from "./embedHintExtension";
 import { insertSlashMenuExtension } from "./insertMenu";
@@ -195,8 +194,8 @@ function ghostTextExtension(): Extension {
           if (!textBefore.trim()) return false;
 
           debounceTimer = setTimeout(async () => {
-            // Explicit Ctrl-Space request: counts against the AI quota.
-            if (!consumeAiPrompt()) return;
+            // Explicit Ctrl-Space request: counts against the AI quota when
+            // it is actually sent (ownPrompt), not before chat()'s checks.
             try {
               controller = new AbortController();
               const text = await chat(
@@ -204,7 +203,7 @@ function ghostTextExtension(): Extension {
                   { role: "system", content: PROMPTS.autocomplete },
                   { role: "user", content: textBefore },
                 ],
-                { maxTokens: 15, signal: controller.signal, prepaid: true },
+                { maxTokens: 15, signal: controller.signal, ownPrompt: true },
               );
               if (text && view.state.selection.main.head === pos) {
                 view.dispatch({ effects: setGhostText.of({ pos, text }) });

@@ -3,7 +3,7 @@
  * Single point for API calls, streaming, abort, retry, and error handling.
  */
 
-import { chargeAiCommandDispatch } from "../billing/aiQuota";
+import { AiQuotaExceededError, aiQuotaStatus, chargeAiCommandDispatch, consumeAiPrompt } from "../billing/aiQuota";
 import { useAppStore } from "../store/useStore";
 import { toast } from "../store/useToastStore";
 import { fetchWithRetry } from "../lib/fetchRetry";
@@ -65,6 +65,15 @@ export interface ChatOptions {
    * command that is waiting to dispatch.
    */
   prepaid?: boolean;
+  /**
+   * A non-palette request (Ctrl-Space, inline suggestions, Ask Workspace,
+   * voice-memo summary, …) that pays for ITSELF — at dispatch, after the
+   * provider / key / rate-limit checks, so a request that fails locally
+   * spends nothing — and never takes a waiting palette command's
+   * reservation. `"silent"`: no toast when the quota is spent (background
+   * callers); the request just doesn't go out.
+   */
+  ownPrompt?: boolean | "silent";
 }
 
 const DEFAULT_MODEL = "gpt-4o-mini";
@@ -159,7 +168,14 @@ export async function chat(
   // (after availability, key and rate-limit checks), so a request that
   // fails locally never spends a prompt.
   const charge = () => {
-    if (!opts.prepaid) chargeAiCommandDispatch();
+    if (opts.prepaid) return;
+    if (opts.ownPrompt) {
+      if (!consumeAiPrompt(new Date(), { silent: opts.ownPrompt === "silent" })) {
+        throw new AiQuotaExceededError(aiQuotaStatus(new Date()).limit);
+      }
+      return;
+    }
+    chargeAiCommandDispatch();
   };
   const provider = getActiveProvider();
 
@@ -314,7 +330,14 @@ export async function* chatStream(
   opts: ChatOptions = {},
 ): AsyncGenerator<string, void, undefined> {
   const charge = () => {
-    if (!opts.prepaid) chargeAiCommandDispatch();
+    if (opts.prepaid) return;
+    if (opts.ownPrompt) {
+      if (!consumeAiPrompt(new Date(), { silent: opts.ownPrompt === "silent" })) {
+        throw new AiQuotaExceededError(aiQuotaStatus(new Date()).limit);
+      }
+      return;
+    }
+    chargeAiCommandDispatch();
   };
   const provider = getActiveProvider();
 

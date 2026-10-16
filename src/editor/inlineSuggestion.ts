@@ -90,10 +90,9 @@ const suggestionPlugin = ViewPlugin.fromClass(
       // Don't suggest on empty lines or very short context
       if (context.trim().length < 3) return;
 
-      // Automatic suggestions are real LLM calls too: count them, and once the
-      // monthly quota is spent just stop suggesting (no toast per keystroke).
-      const { consumeAiPrompt } = await import("../billing/aiQuota");
-      if (!consumeAiPrompt(new Date(), { silent: true })) return;
+      // Automatic suggestions are real LLM calls too: they count when sent
+      // (ownPrompt), and once the monthly quota is spent they just stop
+      // (no toast per keystroke).
 
       this.abort = new AbortController();
       const signal = this.abort.signal;
@@ -114,7 +113,7 @@ const suggestionPlugin = ViewPlugin.fromClass(
               content: `Complete: "${context}"`,
             },
           ],
-          { maxTokens: 40, temperature: 0.3, prepaid: true },
+          { maxTokens: 40, temperature: 0.3, ownPrompt: "silent" },
         );
 
         if (signal.aborted) return;
