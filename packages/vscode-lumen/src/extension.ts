@@ -7,7 +7,7 @@ import * as vscode from "vscode";
 import { randomBytes } from "node:crypto";
 import { basename } from "node:path";
 import { renderPreviewDocument } from "./render";
-import { classifyLink } from "./links";
+import { classifyLink, findHeadingLine } from "./links";
 
 /** Handle a link clicked in the preview (relative to `doc`). */
 async function openLink(doc: vscode.TextDocument | undefined, href: unknown): Promise<void> {
@@ -24,6 +24,18 @@ async function openLink(doc: vscode.TextDocument | undefined, href: unknown): Pr
       await vscode.workspace.fs.stat(uri);
     } catch {
       void vscode.window.showWarningMessage(`Lumen: ${action.path} not found.`);
+      return;
+    }
+    if (action.fragment && /\.(md|markdown)$/i.test(uri.path)) {
+      // Jump to the linked heading (`guide.md#installation`).
+      const target = await vscode.workspace.openTextDocument(uri);
+      const line = findHeadingLine(target.getText(), action.fragment);
+      const pos = new vscode.Position(Math.max(line, 0), 0);
+      await vscode.window.showTextDocument(target, {
+        viewColumn: vscode.ViewColumn.One,
+        selection: new vscode.Range(pos, pos),
+      });
+      if (line < 0) void vscode.window.showInformationMessage(`Lumen: no heading "#${action.fragment}" in ${action.path}.`);
       return;
     }
     await vscode.commands.executeCommand("vscode.open", uri, vscode.ViewColumn.One);

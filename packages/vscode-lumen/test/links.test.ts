@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { classifyLink } from "../src/links";
+import { classifyLink, findHeadingLine, slugifyHeading } from "../src/links";
 
 describe("classifyLink", () => {
   it("keeps in-page anchors in the webview", () => {
@@ -22,5 +22,28 @@ describe("classifyLink", () => {
     for (const h of ["javascript:alert(1)", "command:workbench.action.quit", "file:///etc/passwd", "data:text/html,x", "//evil.test/x", ""]) {
       expect(classifyLink(h).kind, h).toBe("ignore");
     }
+  });
+});
+
+describe("findHeadingLine", () => {
+  const md = [
+    "# Guide",
+    "",
+    "## Installation",
+    "```sh",
+    "## not a heading",
+    "```",
+    "## Installation",
+    "### Über *Setup* (v2)",
+  ].join("\n");
+  it("finds headings by GitHub-style slug, with duplicate suffixes, skipping code", () => {
+    expect(findHeadingLine(md, "installation")).toBe(2);
+    expect(findHeadingLine(md, "installation-1")).toBe(6);
+    expect(findHeadingLine(md, "not-a-heading")).toBe(-1);
+    expect(findHeadingLine(md, encodeURIComponent("über-setup-v2"))).toBe(7);
+    expect(findHeadingLine(md, "Guide")).toBe(0);
+  });
+  it("slugifies like the preview", () => {
+    expect(slugifyHeading("Hello, World!")).toBe("hello-world");
   });
 });
