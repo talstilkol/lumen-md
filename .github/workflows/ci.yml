@@ -15,6 +15,11 @@ jobs:
     name: typecheck • test • build
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    permissions:
+      contents: read
+      # The bundle-size comment on PRs.
+      pull-requests: write
+      issues: write
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -56,7 +61,42 @@ jobs:
         run: npm run build
 
       - name: Bundle-size budget
-        run: npm run budget
+        run: npm run budget -- --json bundle-sizes.json
+
+      # Sizes on main are kept in the Actions cache; a PR compares its own
+      # against the newest main record and reports the change.
+      - name: Record bundle sizes (main)
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: mkdir -p .bundle-base && cp bundle-sizes.json .bundle-base/
+      - name: Save bundle sizes (main)
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: actions/cache/save@v4
+        with:
+          path: .bundle-base
+          key: bundle-sizes-${{ github.sha }}
+      - name: Restore main's bundle sizes
+        if: github.event_name == 'pull_request' && (success() || failure())
+        uses: actions/cache/restore@v4
+        with:
+          path: .bundle-base
+          key: bundle-sizes-${{ github.event.pull_request.base.sha }}
+          restore-keys: bundle-sizes-
+      - name: Bundle-size change
+        if: github.event_name == 'pull_request' && (success() || failure())
+        # Fork PRs get a read-only token: the summary still shows the table.
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR: ${{ github.event.pull_request.number }}
+        run: |
+          node scripts/bundle-diff.mjs .bundle-base/bundle-sizes.json bundle-sizes.json main > bundle-diff.md
+          cat bundle-diff.md >> "$GITHUB_STEP_SUMMARY"
+          id=$(gh api "repos/${{ github.repository }}/issues/$PR/comments" --paginate --jq '.[] | select(.body | contains("<!-- lumen-bundle-diff -->")) | .id' | tail -1)
+          if [ -n "$id" ]; then
+            gh api -X PATCH "repos/${{ github.repository }}/issues/comments/$id" -F body=@bundle-diff.md > /dev/null
+          else
+            gh api "repos/${{ github.repository }}/issues/$PR/comments" -F body=@bundle-diff.md > /dev/null
+          fi
 
       - name: i18n drift gate
         # Vitest already runs the i18nStrings test — this step also asserts
