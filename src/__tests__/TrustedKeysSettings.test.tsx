@@ -78,6 +78,13 @@ describe("trustPublicKey", () => {
     expect(await trustPublicKey(spki)).toEqual({ ok: true, fingerprint: fp, alreadyTrusted: true });
     expect(await listTrustedKeys()).toEqual([{ fingerprint: fp, source: "user" }]);
   });
+
+  it("rejects instead of reporting success when the key can't be persisted", async () => {
+    vi.mocked(idb.set).mockRejectedValueOnce(new Error("QuotaExceededError"));
+    const spki = await newEd25519Spki();
+    await expect(trustPublicKey(spki)).rejects.toThrow("QuotaExceededError");
+    expect(await listTrustedKeys()).toEqual([]);
+  });
 });
 
 describe("<TrustedKeysSettings />", () => {

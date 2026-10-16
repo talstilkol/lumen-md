@@ -97,7 +97,14 @@ export function TrustedKeysSettings({ open, onClose }: Props) {
         message: t("trustedKeys.remove.confirm", { fingerprint: fingerprint.slice(0, 16) }),
       });
       if (!ok) return;
-      await untrustKey(fingerprint);
+      try {
+        await untrustKey(fingerprint);
+      } catch (err) {
+        showAiToast(t("trustedKeys.saveFailed", { error: (err as Error).message }), "error", {
+          learnMoreUrl: docsUrl("pluginSigning"),
+        });
+        return;
+      }
       await refresh();
       showAiToast(t("trustedKeys.removed"), "success");
     },

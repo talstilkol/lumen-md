@@ -84,8 +84,13 @@ async function loadUserKeys(): Promise<Record<string, string>> {
   return v ?? {};
 }
 
+/**
+ * Persist the user's trusted keys. Storage failures (IndexedDB unavailable,
+ * quota, private mode) propagate so callers never report a key as trusted
+ * when it wasn't saved.
+ */
 async function saveUserKeys(keys: Record<string, string>): Promise<void> {
-  await set(TRUSTED_KEYS_DB_KEY, keys).catch(() => {});
+  await set(TRUSTED_KEYS_DB_KEY, keys);
 }
 
 export async function trustKey(fingerprint: string, spkiBase64: string): Promise<void> {
