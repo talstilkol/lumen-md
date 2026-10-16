@@ -184,6 +184,7 @@ export async function chat(
   // ── Anthropic Claude (cloud) ───────────────────────────────────
   if (provider === "anthropic") {
     const { chatAnthropic } = await import("./anthropicProvider");
+    getProviderKey("anthropic"); // NO_KEY before anything is charged
     checkRateLimit();
     charge();
     inflight++;
@@ -197,6 +198,7 @@ export async function chat(
   // ── Google Gemini (cloud) ──────────────────────────────────────
   if (provider === "gemini") {
     const { chatGemini } = await import("./geminiProvider");
+    getProviderKey("gemini"); // NO_KEY before anything is charged
     checkRateLimit();
     charge();
     inflight++;
@@ -210,6 +212,7 @@ export async function chat(
   // ── Mistral (cloud, OpenAI-compatible) ─────────────────────────
   if (provider === "mistral") {
     const { chatMistral } = await import("./mistralProvider");
+    getProviderKey("mistral"); // NO_KEY before anything is charged
     checkRateLimit();
     charge();
     inflight++;
@@ -326,6 +329,7 @@ export async function* chatStream(
 
   if (provider === "anthropic") {
     const { chatAnthropicStream } = await import("./anthropicProvider");
+    getProviderKey("anthropic"); // NO_KEY before anything is charged
     charge();
     yield* chatAnthropicStream(messages, opts);
     return;
@@ -333,6 +337,7 @@ export async function* chatStream(
 
   if (provider === "gemini") {
     const { chatGeminiStream } = await import("./geminiProvider");
+    getProviderKey("gemini"); // NO_KEY before anything is charged
     charge();
     yield* chatGeminiStream(messages, opts);
     return;
@@ -340,6 +345,7 @@ export async function* chatStream(
 
   if (provider === "mistral") {
     const { chatMistralStream } = await import("./mistralProvider");
+    getProviderKey("mistral"); // NO_KEY before anything is charged
     charge();
     yield* chatMistralStream(messages, opts);
     return;

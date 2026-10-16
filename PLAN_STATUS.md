@@ -13,7 +13,7 @@
 
 | מדד | לפני (2026-10-15) | אחרי (2026-10-16) |
 |---|---|---|
-| בדיקות יחידה (vitest) | 1360 / 1360 | **2171 / 2171** |
+| בדיקות יחידה (vitest) | 1360 / 1360 | **2180 / 2180** |
 | בדיקות e2e (Chromium, build ייצור + CSP/Trusted Types אכוף) | לא הורץ | **74 / 74** + בדיקת הפרות CSP חדשה (0 הפרות) |
 | e2e ב-CI (chromium / webkit / firefox + build ייצור) | — | **כולם ✅** — Firefox: ‏103 עברו, 0 flaky (בדיקת pixel אחת מוגבלת ל-Chromium בכוונה) |
 | `tsc --noEmit` | נקי | נקי |
@@ -156,7 +156,7 @@
 
 ## 6. מה אומת ואיך
 
-- **אומת בפועל:** typecheck, 2171 בדיקות יחידה, e2e ב-CI בשלושת הדפדפנים + build ייצור, hygiene, build ייצור, תקציב bundle, ו-74 בדיקות e2e ב-Chromium 141 מול build ייצור עם כותרות `public/_headers` (CSP + Trusted Types אכוף) — 0 הפרות.
+- **אומת בפועל:** typecheck, 2180 בדיקות יחידה, e2e ב-CI בשלושת הדפדפנים + build ייצור, hygiene, build ייצור, תקציב bundle, ו-74 בדיקות e2e ב-Chromium 141 מול build ייצור עם כותרות `public/_headers` (CSP + Trusted Types אכוף) — 0 הפרות.
 - **אומת חלקית:** קובצי PPTX נפתחו ב-python-pptx וב-LibreOffice (לא ב-PowerPoint עצמו).
 - **לא אומת:** קונטיינרי Docker לא נבנו; שרת collab הקבוע לא הורץ (תלויות אופציונליות); SSO/Stripe לא נבדקו חי; tldraw / תלת-ממד / מפות לא כוסו ב-e2e תחת Trusted Types.
 

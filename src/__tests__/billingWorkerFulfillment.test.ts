@@ -330,6 +330,40 @@ describe("Team plans bought by SSO organization members", () => {
   });
 });
 
+describe("a failed async payment after recovery", () => {
+  const event = { user_id: "u1", status: "unpaid", tier: "pro" as const, stripe_subscription_id: "sub_1" };
+  const stub = (body: object) => vi.stubGlobal("fetch", vi.fn(async () => new Response(JSON.stringify(body), { status: 200 })));
+
+  it("keeps access when Stripe shows the subscription active with a paid invoice", async () => {
+    const { withCurrentSubscriptionState } = await import("../../edge-workers/billing/worker");
+    stub({ status: "active", latest_invoice: { status: "paid" }, items: { data: [] } });
+    expect((await withCurrentSubscriptionState(env, event)).status).toBe("active");
+    stub({ status: "trialing", latest_invoice: { status: "paid" }, items: { data: [] } });
+    expect((await withCurrentSubscriptionState(env, event)).status).toBe("trialing");
+  });
+
+  it("stays unpaid while the payment is still open or the subscription incomplete", async () => {
+    const { withCurrentSubscriptionState } = await import("../../edge-workers/billing/worker");
+    for (const body of [
+      { status: "active", latest_invoice: { status: "open" } },
+      { status: "active", latest_invoice: "in_123" }, // not expanded
+      { status: "active" },
+      { status: "incomplete", latest_invoice: { status: "paid" } },
+    ]) {
+      stub({ ...body, items: { data: [] } });
+      expect((await withCurrentSubscriptionState(env, event)).status).toBe("unpaid");
+    }
+  });
+
+  it("asks Stripe for the latest invoice", async () => {
+    const { withCurrentSubscriptionState } = await import("../../edge-workers/billing/worker");
+    const f = vi.fn(async () => new Response(JSON.stringify({ status: "active" }), { status: 200 }));
+    vi.stubGlobal("fetch", f);
+    await withCurrentSubscriptionState(env, event);
+    expect(String((f.mock.calls[0] as unknown[])[0])).toContain("expand[]=latest_invoice");
+  });
+});
+
 describe("plan switches in the Billing Portal", () => {
   it("derive the tier from the current price, not the stale Checkout metadata", async () => {
     const { withCurrentSubscriptionState } = await import("../../edge-workers/billing/worker");

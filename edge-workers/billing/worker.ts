@@ -496,6 +496,23 @@ export function isSupersededEvent(stored: BillingRow | null, row: EntitlementUpd
 }
 
 /**
+ * A `checkout.session.async_payment_failed` can be delivered after the same
+ * subscription has recovered (the customer paid with another method). The
+ * failure stands unless Stripe's CURRENT state shows that recovery: a
+ * trial, or "active" with its latest invoice actually paid. "active" alone
+ * is not trusted, since an async first payment may still be pending, and
+ * that pending payment is what just failed.
+ */
+export function recoveredFromFailedPayment(sub: {
+  status?: unknown;
+  latest_invoice?: { status?: unknown } | string | null;
+}): boolean {
+  if (sub.status === "trialing") return true;
+  const inv = sub.latest_invoice;
+  return sub.status === "active" && typeof inv === "object" && inv !== null && inv.status === "paid";
+}
+
+/**
  * Replace the status / renewal / tier implied by the event with the
  * subscription's CURRENT state, fetched from Stripe. Events without a
  * subscription (one-off payments) are applied as-is. A subscription Stripe
@@ -507,7 +524,7 @@ export async function withCurrentSubscriptionState(
 ): Promise<EntitlementUpdate> {
   const id = update.stripe_subscription_id;
   if (!id) return update;
-  const res = await fetch(`https://api.stripe.com/v1/subscriptions/${encodeURIComponent(id)}`, {
+  const res = await fetch(`https://api.stripe.com/v1/subscriptions/${encodeURIComponent(id)}?expand[]=latest_invoice`, {
     headers: { Authorization: `Bearer ${env.STRIPE_SECRET_KEY}` },
   });
   if (res.status === 404) return { ...update, status: "canceled" };
@@ -517,10 +534,9 @@ export async function withCurrentSubscriptionState(
     current_period_end?: unknown;
     metadata?: { tier?: unknown };
     items?: { data?: Array<{ price?: { id?: unknown } }> };
+    latest_invoice?: { status?: unknown } | string | null;
   };
-  // An unpaid async checkout must not be upgraded by a subscription that is
-  // still "incomplete"/"active" pending that payment — keep the denial.
-  const status = update.status === "unpaid" ? "unpaid" : String(sub.status ?? update.status);
+  const status = update.status === "unpaid" && !recoveredFromFailedPayment(sub) ? "unpaid" : String(sub.status ?? update.status);
   const metaTier = sub.metadata?.tier === "pro" || sub.metadata?.tier === "team" ? sub.metadata.tier : null;
   const tier =
     // The CURRENT price wins: a plan switch in the Billing Portal changes the
