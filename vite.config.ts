@@ -77,7 +77,21 @@ const cleanUrlAliases = {
   },
 };
 
+/** Runtime caches of the self-hosted language runtimes, named per version. */
+const RUNTIME_CACHES = (
+  [
+    ["webr", "webr"],
+    ["ruby", "@ruby/3.4-wasm-wasi"],
+    ["pyodide", "pyodide"],
+  ] as const
+).map(([dir, pkg]) => ({ dir, cacheName: `lumen-runtime-${dir}-${runtimeVersion(pkg)}` }));
+
 export default defineConfig({
+  // The page deletes `lumen-runtime-*` caches of superseded versions
+  // (src/lib/runtimeCaches.ts): Workbox only cleans its precache.
+  define: {
+    __LUMEN_RUNTIME_CACHES__: JSON.stringify(RUNTIME_CACHES.map((c) => c.cacheName)),
+  },
   plugins: [
     react(),
     cleanUrlAliases,
@@ -167,19 +181,10 @@ export default defineConfig({
           // Self-hosted language runtimes (webR, ruby.wasm, Pyodide) are
           // kept out of the precache (tens of MB each) but cached the first
           // time a live block loads them, so they also work offline later.
-          ...(
-            [
-              ["webr", "webr"],
-              ["ruby", "@ruby/3.4-wasm-wasi"],
-              ["pyodide", "pyodide"],
-            ] as const
-          ).map(([dir, pkg]) => ({
+          ...RUNTIME_CACHES.map(({ dir, cacheName }) => ({
             urlPattern: new RegExp(`/${dir}/`),
             handler: "CacheFirst" as const,
-            options: {
-              cacheName: `lumen-runtime-${dir}-${runtimeVersion(pkg)}`,
-              cacheableResponse: { statuses: [200] },
-            },
+            options: { cacheName, cacheableResponse: { statuses: [200] } },
           })),
           {
             // Large on-demand vendor chunks (Mermaid, tldraw, ECharts, etc.)

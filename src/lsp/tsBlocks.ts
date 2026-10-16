@@ -12,6 +12,8 @@ export interface TsBlock {
   tsx: boolean;
   /** JavaScript (```js / ```live-js): syntax always, types with `// @ts-check`. */
   js: boolean;
+  /** A ```live-js block: it runs inside an async function (top-level `return` / `await`). */
+  live: boolean;
   /** `live-js shared[=name]` blocks share one global scope per name. */
   scope: string | null;
   /** Offset of the first code character in the document. */
@@ -51,6 +53,7 @@ export function findTsBlocks(doc: string): TsBlock[] {
             id: `block-${out.length}`,
             tsx: open.lang === "tsx" || open.lang === "jsx",
             js,
+            live: LIVE_JS_LANGS.has(open.lang),
             scope: shared ? (shared[1] ?? "default") : null,
             from: open.codeFrom,
             to,
@@ -83,6 +86,7 @@ export function findTsBlocks(doc: string): TsBlock[] {
       id: `block-${out.length}`,
       tsx: open.lang === "tsx" || open.lang === "jsx",
       js: JS_LANGS.has(open.lang),
+      live: LIVE_JS_LANGS.has(open.lang),
       scope: shared ? (shared[1] ?? "default") : null,
       from: open.codeFrom,
       to: doc.length,
@@ -124,6 +128,14 @@ export interface TsUnit {
   parts: Array<{ block: TsBlock; offset: number }>;
 }
 
+/**
+ * live-js runs a block inside an async function, so a top-level `return`
+ * or `await` is valid there: the unit's own block is checked the same way.
+ * (Plain ```js fences stay modules.)
+ */
+const LIVE_WRAP_OPEN = "(async () => {\n";
+const LIVE_WRAP_CLOSE = "\n})();";
+
 /** Joins the parts of a shared unit: ends any statement / line comment. */
 const PART_SEPARATOR = "\n;\n";
 const CHECK_HEADER = "// @ts-check\n";
@@ -149,19 +161,152 @@ const BLOCK_HEADS = new Set(["if", "while", "for", "with", "switch", "catch"]);
 /** Words that may precede a method name in an object literal or class body. */
 const METHOD_PREFIXES = new Set(["get", "set", "static", "async"]);
 
+interface FnScope {
+  /** Token range [from, to] covering parameters and body. */
+  from: number;
+  to: number;
+  /**
+   * Retained closure (declared, assigned, a method, returned): it runs
+   * later, so it sees the newest declaration. Otherwise it is passed as an
+   * argument or invoked in place (IIFE, `.map(x => …)`): it runs while the
+   * block is evaluated and sees that time's value.
+   */
+  retained: boolean;
+  /** Names bound inside it: parameters, its own name, local declarations. */
+  locals: Set<string>;
+}
+
+/** Index of the matching bracket for every `(`, `[`, `{` and its closer. */
+function matchBrackets(tokens: ReturnType<typeof tokenize>): Map<number, number> {
+  const match = new Map<number, number>();
+  const stack: number[] = [];
+  tokens.forEach((t, i) => {
+    if (t.type !== "punct") return;
+    if (t.value === "(" || t.value === "[" || t.value === "{") stack.push(i);
+    else if (t.value === ")" || t.value === "]" || t.value === "}") {
+      const open = stack.pop();
+      if (open !== undefined) {
+        match.set(open, i);
+        match.set(i, open);
+      }
+    }
+  });
+  return match;
+}
+
+/** Find function scopes (functions, arrows, methods) in a token list. */
+function functionScopes(tokens: ReturnType<typeof tokenize>, match: Map<number, number>): FnScope[] {
+  const scopes: FnScope[] = [];
+  const val = (i: number) => (tokens[i]?.type === "punct" || tokens[i]?.type === "ident" ? tokens[i].value : "");
+  const isPunct = (i: number, v: string) => tokens[i]?.type === "punct" && tokens[i].value === v;
+  /** Retained unless the function sits in argument / IIFE position. */
+  const retainedAt = (before: number) => {
+    let c = before;
+    if (val(c) === "async") c--;
+    return !(isPunct(c, "(") || isPunct(c, ","));
+  };
+  /** Locals: identifiers bound in the params and declared in the body. */
+  const collectLocals = (paramsFrom: number, paramsTo: number, bodyFrom: number, bodyTo: number, own?: string) => {
+    const locals = new Set<string>();
+    if (own) locals.add(own);
+    for (let i = paramsFrom; i <= paramsTo; i++) {
+      const t = tokens[i];
+      if (t?.type !== "ident") continue;
+      if (isPunct(i - 1, ".") || (isPunct(i + 1, ":") && (isPunct(i - 1, "{") || isPunct(i - 1, ",")))) continue;
+      locals.add(t.value);
+    }
+    for (let i = bodyFrom; i <= bodyTo; i++) {
+      const v = val(i);
+      if ((v === "const" || v === "let" || v === "var") && tokens[i].type === "ident") {
+        // `const a`, `const { a, b: c }`, `const [d, e]`
+        let j = i + 1;
+        if (tokens[j]?.type === "ident") locals.add(tokens[j].value);
+        else if (isPunct(j, "{") || isPunct(j, "[")) {
+          const close = match.get(j) ?? j;
+          for (let m = j + 1; m < close; m++) {
+            if (tokens[m]?.type !== "ident") continue;
+            if (isPunct(m + 1, ":")) continue; // property key, not a binding
+            if (isPunct(m - 1, "=")) continue; // default value (approximation)
+            locals.add(tokens[m].value);
+          }
+        }
+      } else if ((v === "function" || v === "class") && tokens[i + 1]?.type === "ident") {
+        locals.add(tokens[i + 1].value);
+      }
+    }
+    return locals;
+  };
+
+  for (let k = 0; k < tokens.length; k++) {
+    const t = tokens[k];
+    // function [*] [name] ( … ) { … }
+    if (t.type === "ident" && t.value === "function") {
+      let p = k + 1;
+      if (isPunct(p, "*")) p++;
+      const own = tokens[p]?.type === "ident" ? tokens[p].value : undefined;
+      if (own) p++;
+      if (!isPunct(p, "(")) continue;
+      const q = match.get(p);
+      if (q === undefined || !isPunct(q + 1, "{")) continue;
+      const end = match.get(q + 1) ?? tokens.length - 1;
+      scopes.push({ from: p, to: end, retained: retainedAt(k - 1), locals: collectLocals(p, q, q + 1, end, own) });
+      continue;
+    }
+    // ( … ) => …   /   x => …
+    if (t.type === "punct" && t.value === "=>") {
+      let pFrom = k - 1;
+      let pTo = k - 1;
+      if (isPunct(k - 1, ")")) pFrom = match.get(k - 1) ?? k - 1;
+      else if (tokens[k - 1]?.type !== "ident") continue;
+      let end: number;
+      if (isPunct(k + 1, "{")) end = match.get(k + 1) ?? tokens.length - 1;
+      else {
+        // Expression body: up to a `,` / `;` at this level or the enclosing closer.
+        end = k + 1;
+        for (let i = k + 1; i < tokens.length; i++) {
+          const v = tokens[i].type === "punct" ? tokens[i].value : "";
+          if (v === "(" || v === "[" || v === "{") {
+            i = match.get(i) ?? i;
+            end = i;
+            continue;
+          }
+          if (v === "," || v === ";" || v === ")" || v === "]" || v === "}") break;
+          end = i;
+        }
+      }
+      scopes.push({ from: pFrom, to: end, retained: retainedAt(pFrom - 1), locals: collectLocals(pFrom, pTo, k + 1, end) });
+      continue;
+    }
+    // Method: name ( … ) { … } in an object literal or class body.
+    if (t.type === "ident" && isPunct(k + 1, "(")) {
+      const q = match.get(k + 1);
+      if (q === undefined || !isPunct(q + 1, "{")) continue;
+      const prev = val(k - 1);
+      const keyPos = prev === "{" || prev === "," || prev === ";" || prev === "}" || prev === "*" || METHOD_PREFIXES.has(prev);
+      if (!keyPos || BLOCK_HEADS.has(t.value) || t.value === "function") continue;
+      const end = match.get(q + 1) ?? tokens.length - 1;
+      scopes.push({ from: k + 1, to: end, retained: true, locals: collectLocals(k + 1, q, q + 1, end) });
+    }
+  }
+  return scopes;
+}
+
 /**
  * Rewrite an EARLIER part of a shared unit for the state a later block
  * sees, renaming the bindings in `names` (name → stand-in) where they are
- * evaluated immediately:
+ * evaluated while that block ran:
  *
- *  - references at top level (and in nested statement blocks) are
- *    renamed: they read the value of that time;
- *  - references inside function, method and arrow bodies are NOT: those
- *    run later and, like the runtime (shared names live on the global
- *    object), see the newest declaration;
+ *  - at top level, in statement blocks, and inside functions that run
+ *    right away (IIFEs, callbacks passed as arguments) → renamed: they
+ *    read the value of that time;
+ *  - inside retained closures (declared or assigned functions, methods,
+ *    returned arrows) → kept: they run later and, like the runtime
+ *    (shared names live on the global object), see the newest declaration;
+ *  - names a function binds itself (parameters, its own name, local
+ *    declarations) → kept, with their references;
  *  - property accesses (`o.name`), object keys (`{ name: 1 }`) and method
- *    names (`{ name() {} }`, `get name()`) keep their name; a shorthand
- *    `{ name }` keeps its key and remaps only its value.
+ *    names keep their name; a shorthand `{ name }` keeps its key and
+ *    remaps only its value.
  *
  * Earlier parts are never mapped back to the document, so lengths may change.
  */
@@ -169,62 +314,43 @@ function rewriteEarlierPart(code: string, names: ReadonlyMap<string, string>): s
   const src = neutraliseDirectives(code);
   if (names.size === 0) return src;
   const tokens = tokenize(src);
+  const match = matchBrackets(tokens);
+  const scopes = functionScopes(tokens, match);
   const edits: Array<{ from: number; to: number; text: string }> = [];
-  // One frame per open bracket: its char and whether it starts a function body.
-  const frames: Array<{ ch: string; fn: boolean }> = [];
-  // Matching `(` index for each open paren, to classify the `{` after `)`.
-  const parenOpen: number[] = [];
-  const closedParenOpener = new Map<number, number>();
-  // Arrow bodies without braces: function scope until the expression ends.
-  const arrowExprDepths: number[] = [];
-  const inFunction = () => frames.some((f) => f.fn) || arrowExprDepths.length > 0;
-
+  const brackets: string[] = [];
   for (let k = 0; k < tokens.length; k++) {
     const tok = tokens[k];
-    const prev = tokens[k - 1];
-    const next = tokens[k + 1];
     if (tok.type === "punct") {
-      const v = tok.value;
-      if (v === "(" || v === "[") {
-        if (v === "(") parenOpen.push(k);
-        frames.push({ ch: v, fn: false });
-      } else if (v === "{") {
-        let fn = false;
-        if (prev?.type === "punct" && prev.value === "=>") fn = true;
-        else if (prev?.type === "punct" && prev.value === ")") {
-          const open = closedParenOpener.get(k - 1);
-          const head = open !== undefined ? tokens[open - 1] : undefined;
-          const headWord = head?.type === "ident" ? head.value : "";
-          fn = !(BLOCK_HEADS.has(headWord) || (headWord === "await" && tokens[open! - 2]?.value === "for"));
-        }
-        frames.push({ ch: v, fn });
-      } else if (v === ")" || v === "]" || v === "}") {
-        if (v === ")") {
-          const open = parenOpen.pop();
-          if (open !== undefined) closedParenOpener.set(k, open);
-        }
-        frames.pop();
-        while (arrowExprDepths.length && frames.length < arrowExprDepths[arrowExprDepths.length - 1]) arrowExprDepths.pop();
-      } else if (v === "=>" && !(next?.type === "punct" && next.value === "{")) {
-        arrowExprDepths.push(frames.length);
-      } else if ((v === "," || v === ";") && arrowExprDepths.length && frames.length === arrowExprDepths[arrowExprDepths.length - 1]) {
-        arrowExprDepths.pop();
-      }
+      if (tok.value === "{" || tok.value === "[" || tok.value === "(") brackets.push(tok.value);
+      else if (tok.value === "}" || tok.value === "]" || tok.value === ")") brackets.pop();
       continue;
     }
     if (tok.type !== "ident") continue;
     const to = names.get(tok.value);
     if (!to) continue;
+    const prev = tokens[k - 1];
+    const next = tokens[k + 1];
     const prevP = prev?.type === "punct" ? prev.value : "";
     const nextP = next?.type === "punct" ? next.value : "";
     if (prevP === "." || prevP === "?.") continue;
-    const inBraces = frames[frames.length - 1]?.ch === "{";
+    const inBraces = brackets[brackets.length - 1] === "{";
     const keyPos =
       inBraces &&
       (prevP === "{" || prevP === "," || prevP === ";" || prevP === "}" || prevP === "*" ||
         (prev?.type === "ident" && METHOD_PREFIXES.has(prev.value)));
     if (keyPos && (nextP === ":" || nextP === "(")) continue; // `{ name: … }`, `{ name() {} }`
-    if (inFunction()) continue; // late-bound: sees the newest declaration
+    // A named function EXPRESSION's own name is local to it (a function
+    // declaration's name is the shared binding itself).
+    if (prev?.type === "ident" && prev.value === "function") {
+      let c = k - 2;
+      if (tokens[c]?.type === "ident" && tokens[c].value === "async") c--;
+      const ctx = tokens[c];
+      if (ctx && ((ctx.type === "punct" && ["=", ":", "(", ",", "?", "||", "&&", "??"].includes(ctx.value)) || (ctx.type === "ident" && ctx.value === "return"))) continue;
+    }
+    // Enclosing functions, innermost first.
+    const enclosing = scopes.filter((f) => k >= f.from && k <= f.to).sort((x, y) => (y.from - x.from) || (x.to - y.to));
+    if (enclosing.some((f) => f.locals.has(tok.value))) continue; // a local binding
+    if (enclosing.some((f) => f.retained)) continue; // late-bound closure
     const shorthand = keyPos && (nextP === "}" || nextP === "," || nextP === "=");
     edits.push({ from: tok.start, to: tok.end, text: shorthand ? `${tok.value}: ${to}` : to });
   }
@@ -265,8 +391,10 @@ function sharedUnit(scope: readonly TsBlock[], k: number): TsUnit {
       for (const [n, at] of lastDecl) if (at > i) rename.set(n, standIn(n));
       text = rewriteEarlierPart(b.code, rename);
     }
+    if (i === k && b.live) code += LIVE_WRAP_OPEN;
     parts.push({ block: b, offset: code.length });
     code += text;
+    if (i === k && b.live) code += LIVE_WRAP_CLOSE;
   }
   return { id: own.id, code, tsx: false, js: true, shared: true, parts };
 }
@@ -276,7 +404,10 @@ export function toUnits(blocks: readonly TsBlock[]): TsUnit[] {
   const scopes = new Map<string, TsBlock[]>();
   for (const b of blocks) {
     if (!b.scope) {
-      units.push({ id: b.id, code: b.code, tsx: b.tsx, js: b.js, shared: false, parts: [{ block: b, offset: 0 }] });
+      // The wrapper would push `// @ts-check` out of the leading comments.
+      const open = b.live ? (hasTsCheck(b.code) ? CHECK_HEADER : "") + LIVE_WRAP_OPEN : "";
+      const code = b.live ? open + b.code + LIVE_WRAP_CLOSE : b.code;
+      units.push({ id: b.id, code, tsx: b.tsx, js: b.js, shared: false, parts: [{ block: b, offset: open.length }] });
       continue;
     }
     let scope = scopes.get(b.scope);

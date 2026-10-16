@@ -101,8 +101,8 @@ describe("JavaScript blocks and shared scopes", () => {
     // One unit per block; a shared block's unit is its scope's earlier
     // blocks + itself, joined by a statement boundary.
     expect(units.map((u) => u.id)).toEqual(["block-0", "block-1", "block-2", "block-3"]);
-    expect(units[1].code).toBe("const base = 2;\n;\nconst total = base * 21;");
-    expect(units[2].code).toBe("const base = 'x';");
+    expect(units[1].code).toBe("const base = 2;\n;\n(async () => {\nconst total = base * 21;\n})();");
+    expect(units[2].code).toBe("(async () => {\nconst base = 'x';\n})();");
     // Offsets map both ways, into the unit's own block only.
     const second = blocks[1];
     const at = unitAt(units, second.from + 6)!;
@@ -192,6 +192,27 @@ describe("JavaScript blocks and shared scopes", () => {
     expect(diags).toEqual([]);
   });
 
+  it("functions invoked while the earlier block runs see that time's value", () => {
+    const { units, diags } = checkShared(
+      "const value = 1; const result = (() => value)(); const doubled = [1].map((x) => x * value);",
+      "// @ts-check\nconst value = 'x';\nresult.toFixed(); doubled[0].toFixed();",
+    );
+    expect(units[1].code).toContain("const result = (() => value$prev)();");
+    expect(diags).toEqual([]);
+  });
+
+  it("parameters, a function's own name and its locals keep their binding", () => {
+    const { units, diags } = checkShared(
+      "const value = 1; function id(value) { return value; } const f = function value() { return value; }; [2].forEach((value) => { const k = value; });",
+      "// @ts-check\nconst value = 'x';\nid(2).toFixed();",
+    );
+    const first = units[1].code.split("\n;\n")[0];
+    expect(first).toContain("function id(value) { return value; }");
+    expect(first).toContain("function value() { return value; }");
+    expect(first).toContain("forEach((value) => { const k = value; })");
+    expect(diags).toEqual([]);
+  });
+
   it("method names and getters keep their key", () => {
     const { units, diags } = checkShared(
       "const value = 1; const obj = { value() { return 2; }, get other() { return value; } };",
@@ -213,6 +234,23 @@ describe("JavaScript blocks and shared scopes", () => {
       "const value = 'y';",
     );
     expect(units[1].code.split("\n;\n")[0]).toContain("const top = value$prev2;");
+  });
+
+  it("live-js blocks are checked as the async function they run in; js fences stay modules", () => {
+    const check = (doc: string) => {
+      const units = toUnits(findTsBlocks(doc));
+      const diags = service.diagnostics(units.map(({ id, tsx, js, shared, code }) => ({ id, tsx, js, shared, code })));
+      return diags.filter((d) => unitRangeToDoc(units.find((u) => u.id === d.id)!, d.start, d.length));
+    };
+    expect(check("```live-js\nconst r = await Promise.resolve(1)\nreturn r\n```\n")).toEqual([]);
+    expect(toUnits(findTsBlocks("```js\nreturn 1\n```\n"))[0].code).toBe("return 1"); // a plain module
+    // @ts-check still applies through the wrapper, and positions map back.
+    const doc = "```live-js\n// @ts-check\nlet n = 1;\nn = 'x';\n```\n";
+    const units = toUnits(findTsBlocks(doc));
+    const [d] = check(doc);
+    expect(d.code).toBe(2322);
+    const r = unitRangeToDoc(units[0], d.start, d.length)!;
+    expect(doc.slice(r.from, r.to)).toBe("n");
   });
 
   it("tilde fences may have backticks in the info string", () => {

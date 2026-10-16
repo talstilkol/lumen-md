@@ -43,6 +43,10 @@ describe("CriticMarkup through the WYSIWYG serializer", () => {
     expect(repairCriticMarkup("{~~a\\_b\\~>c~~} and {~~x\\~>y~~}")).toBe("{~~a\\_b~>c~~} and {~~x~>y~~}");
   });
 
+  it("repairs a substitution whose old text contains inline code", () => {
+    expect(repairCriticMarkup("{~~use `old`\\~>use `new`~~}")).toBe("{~~use `old`~>use `new`~~}");
+  });
+
   it("leaves code spans and fences byte for byte", () => {
     const md = "Use `{~~a\\~>b~~}` literally, but fix {~~x\\~>y~~}.\n\n```md\n{~~p\\~>q~~}\n```\n";
     expect(repairCriticMarkup(md)).toBe("Use `{~~a\\~>b~~}` literally, but fix {~~x~>y~~}.\n\n```md\n{~~p\\~>q~~}\n```\n");

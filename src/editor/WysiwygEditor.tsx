@@ -570,7 +570,9 @@ export function repairCriticMarkup(md: string): string {
   // byte for byte (suggestions are never parsed there either).
   const code = findCodeRanges(md);
   return md.replace(/\{~~([^~]*(?:~(?!~\})[^~]*)*?)\\~>/g, (m, old: string, at: number) =>
-    code.some((c) => at < c.to && at + m.length > c.from) ? m : `{~~${old}~>`,
+    // Only a substitution that STARTS inside code is literal; one whose old
+    // text merely contains an inline-code span is real markup.
+    code.some((c) => at >= c.from && at < c.to) ? m : `{~~${old}~>`,
   );
 }
 

@@ -124,6 +124,21 @@ describe("live-ruby on the real ruby.wasm runtime", () => {
     expect(err && "message" in err ? err.message : "").toMatch(/JS bridge .*not available.*\(LoadError\)/);
   }, 60_000);
 
+  it("cuts the JS bridge at the VM boundary, whatever path loads it", async () => {
+    for (const src of [
+      'Kernel.send(:require, "js")\nJS.global',
+      'method(:require).super_method.call("js")\nJS.global[:fetch]',
+      'load "/bundle/gems/js-2.10.1/lib/js.rb"\nJS.eval("1")',
+    ]) {
+      const msgs = await run(src);
+      const err = msgs.find((m) => m.type === "error");
+      expect(err && "message" in err ? err.message : "", src).toMatch(/JS bridge/);
+      expect(msgs.some((m) => m.type === "result"), src).toBe(false);
+    }
+    // The next run is unaffected.
+    expect(await run("1 + 1")).toContainEqual({ type: "result", runId: 1, text: "2" });
+  }, 120_000);
+
   it("gives every run a fresh VM", async () => {
     await run("$leak = 42");
     const msgs = await run("$leak.inspect");
