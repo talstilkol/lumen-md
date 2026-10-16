@@ -23,7 +23,8 @@ class FakeWorker extends EventTarget {
   }
 }
 const workers: FakeWorker[] = [];
-vi.mock("../plugins/ruby/rubyClient", async () => {
+vi.mock("../plugins/ruby/rubyClient", async (importOriginal) => {
+  const real = await importOriginal<typeof import("../plugins/ruby/rubyClient")>();
   let current: FakeWorker | null = null;
   let seq = 0;
   return {
@@ -40,6 +41,7 @@ vi.mock("../plugins/ruby/rubyClient", async () => {
       w.terminate();
     },
     nextRubyRunId: () => ++seq,
+    rubyTurn: real.rubyTurn,
     __reset: () => {
       current = null;
     },
@@ -77,9 +79,10 @@ describe("live-ruby", () => {
     expect(await rubyLangs("```ruby\nputs 1\n```")).toEqual([]);
   });
 
-  it("shows output, the result and the final state", () => {
+  it("shows output, the result and the final state", async () => {
     render(<LiveRubyBlock source="puts 1" />);
     fireEvent.click(screen.getByRole("button", { name: "Run" }));
+    await act(async () => {});
     const w = workers[0];
     const { runId } = w.posted[0] as { runId: number };
     act(() => {
@@ -93,16 +96,18 @@ describe("live-ruby", () => {
     expect(w.terminated).toBe(false); // kept for the next run
   });
 
-  it("terminates the worker when unmounted mid-run", () => {
+  it("terminates the worker when unmounted mid-run", async () => {
     const { unmount } = render(<LiveRubyBlock source="loop {}" />);
     fireEvent.click(screen.getByRole("button", { name: "Run" }));
+    await act(async () => {});
     unmount();
     expect(workers[0].terminated).toBe(true);
   });
 
-  it("leaves the shared worker alone when unmounted idle", () => {
+  it("leaves the shared worker alone when unmounted idle", async () => {
     const { unmount } = render(<LiveRubyBlock source="1" />);
     fireEvent.click(screen.getByRole("button", { name: "Run" }));
+    await act(async () => {});
     const w = workers[0];
     const { runId } = w.posted[0] as { runId: number };
     act(() => {
@@ -113,7 +118,35 @@ describe("live-ruby", () => {
     expect(w.terminated).toBe(false);
   });
 
-  it("kills a runaway run at its timeout, and another block's run hears it", () => {
+  it("runs take turns: a queued block neither arms timers nor can kill the active run", async () => {
+    vi.useFakeTimers();
+    render(
+      <>
+        <LiveRubyBlock source="loop {}" meta="timeout=300000" />
+        <LiveRubyBlock source="puts 2" />
+      </>,
+    );
+    const [a, b] = screen.getAllByTestId("live-ruby");
+    fireEvent.click(a.querySelector("button")!);
+    await act(async () => {});
+    const w = workers[0];
+    const { runId } = w.posted[0] as { runId: number };
+    act(() => w.reply({ type: "ready", runId }));
+    fireEvent.click(b.querySelector("button")!);
+    await act(async () => {});
+    expect(w.posted).toHaveLength(1); // b waits for its turn
+    // b's 180 s load timeout must not fire while it is only queued.
+    await act(async () => {
+      vi.advanceTimersByTime(200_000);
+    });
+    expect(w.terminated).toBe(false);
+    // Stop on the queued block leaves the active run alone.
+    fireEvent.click(b.querySelector("button")!);
+    expect(w.terminated).toBe(false);
+    expect(a.getAttribute("data-state")).toBe("running");
+  });
+
+  it("kills a runaway run at its timeout; the next queued run then gets a fresh worker", async () => {
     vi.useFakeTimers();
     render(
       <>
@@ -123,16 +156,19 @@ describe("live-ruby", () => {
     );
     const [a, b] = screen.getAllByTestId("live-ruby");
     fireEvent.click(a.querySelector("button")!);
+    await act(async () => {});
     const w = workers[0];
     const { runId } = w.posted[0] as { runId: number };
     act(() => w.reply({ type: "ready", runId }));
-    fireEvent.click(b.querySelector("button")!); // queued on the same worker
-    act(() => {
+    fireEvent.click(b.querySelector("button")!);
+    await act(async () => {});
+    await act(async () => {
       vi.advanceTimersByTime(1001);
     });
     expect(w.terminated).toBe(true);
     expect(a.getAttribute("data-state")).toBe("timeout");
-    expect(b.getAttribute("data-state")).toBe("error");
-    expect(b.textContent).toContain("Stopped");
+    expect(workers).toHaveLength(2);
+    expect(workers[1].posted).toHaveLength(1);
+    expect(b.getAttribute("data-state")).toBe("loading");
   });
 });

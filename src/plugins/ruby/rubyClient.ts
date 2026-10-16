@@ -29,3 +29,26 @@ export function killRubyWorker(target?: Worker): void {
 export function nextRubyRunId(): number {
   return ++seq;
 }
+
+// Runs take turns on the shared worker: a run posts its code, and arms its
+// timers, only once every earlier run has finished. So a queued block's
+// Stop or load timeout never terminates another block's run.
+let tail: Promise<void> = Promise.resolve();
+
+/** Wait for your turn; call `release` (idempotent) when the run is over. */
+export function rubyTurn(): { ready: Promise<void>; release: () => void } {
+  let done!: () => void;
+  const mine = new Promise<void>((r) => (done = r));
+  const ready = tail;
+  tail = tail.then(() => mine);
+  let released = false;
+  return {
+    ready,
+    release: () => {
+      if (!released) {
+        released = true;
+        done();
+      }
+    },
+  };
+}

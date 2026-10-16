@@ -25,7 +25,9 @@ const TS_LANGS = new Set(["ts", "typescript", "mts", "cts", "tsx"]);
 const JS_LANGS = new Set(["js", "javascript", "mjs", "cjs", "jsx", "live-js", "js-live"]);
 /** Fences that run as live-js (and so accept `shared`). */
 const LIVE_JS_LANGS = new Set(["live-js", "js-live"]);
-const OPEN_RE = /^ {0,3}(`{3,}|~{3,})\s*([^\s`]*)([^`]*)$/;
+// Info string: a backtick fence's may not contain backticks (CommonMark);
+// a tilde fence's may.
+const OPEN_RE = /^ {0,3}(?:(`{3,})\s*([^\s`]*)([^`]*)|(~{3,})\s*(\S*)(.*))$/;
 const SHARED_RE = /(?:^|\s)shared(?:=([\w-]+))?(?=\s|$)/;
 
 /** Fenced ```ts / ```typescript / ```tsx blocks, in document order. */
@@ -59,12 +61,13 @@ export function findTsBlocks(doc: string): TsBlock[] {
       }
     } else {
       const m = OPEN_RE.exec(line);
-      if (m && !(m[1][0] === "`" && line.slice(m[0].length).includes("`"))) {
+      if (m) {
+        const fence = m[1] ?? m[4];
         open = {
-          char: m[1][0],
-          len: m[1].length,
-          lang: m[2].toLowerCase(),
-          meta: m[3] ?? "",
+          char: fence[0],
+          len: fence.length,
+          lang: (m[2] ?? m[5] ?? "").toLowerCase(),
+          meta: (m[1] ? m[3] : m[6]) ?? "",
           codeFrom: nl === -1 ? doc.length : nl + 1,
         };
       }
@@ -127,42 +130,101 @@ const CHECK_HEADER = "// @ts-check\n";
 
 /** Does the block opt into type checking (`// @ts-check` in its leading comments)? */
 export function hasTsCheck(code: string): boolean {
-  const lead = /^(?:\s+|\/\/[^\n]*(?:\n|$)|\/\*[\s\S]*?\*\/)*/.exec(code)?.[0] ?? "";
+  const lead = LEADING_COMMENTS_RE.exec(code)?.[0] ?? "";
   return /@ts-check\b/.test(lead) && !/@ts-nocheck\b/.test(lead);
 }
 
+/** The leading comments of a block (where TypeScript reads file directives). */
+const LEADING_COMMENTS_RE = /^(?:\s+|\/\/[^\n]*(?:\n|$)|\/\*[\s\S]*?\*\/)*/;
+
+/** Neutralise `@ts-check` / `@ts-nocheck` in the leading comments only. */
+function neutraliseDirectives(code: string): string {
+  const lead = LEADING_COMMENTS_RE.exec(code)?.[0] ?? "";
+  if (!lead) return code;
+  return lead.replace(/@ts-(no)?check\b/g, (m) => "@ts-" + "_".repeat(m.length - 4)) + code.slice(lead.length);
+}
+
+/** Words before `(` that make the following `{` a statement block, not a function body. */
+const BLOCK_HEADS = new Set(["if", "while", "for", "with", "switch", "catch"]);
+/** Words that may precede a method name in an object literal or class body. */
+const METHOD_PREFIXES = new Set(["get", "set", "static", "async"]);
+
 /**
- * Rename `names` (map: name → stand-in) in an EARLIER part's JS `code` and
- * neutralise its `@ts-check` / `@ts-nocheck` directives. Earlier parts
- * are never mapped back to the document, so their length may change.
- * Property accesses (`o.name`) and object keys (`{ name: 1 }`) keep their
- * name; a shorthand `{ name }` keeps its key and remaps only the value
- * (`{ name: stand-in }`, also right in destructuring patterns).
+ * Rewrite an EARLIER part of a shared unit for the state a later block
+ * sees, renaming the bindings in `names` (name → stand-in) where they are
+ * evaluated immediately:
+ *
+ *  - references at top level (and in nested statement blocks) are
+ *    renamed: they read the value of that time;
+ *  - references inside function, method and arrow bodies are NOT: those
+ *    run later and, like the runtime (shared names live on the global
+ *    object), see the newest declaration;
+ *  - property accesses (`o.name`), object keys (`{ name: 1 }`) and method
+ *    names (`{ name() {} }`, `get name()`) keep their name; a shorthand
+ *    `{ name }` keeps its key and remaps only its value.
+ *
+ * Earlier parts are never mapped back to the document, so lengths may change.
  */
 function rewriteEarlierPart(code: string, names: ReadonlyMap<string, string>): string {
-  const src = code.replace(/@ts-(no)?check\b/g, (m) => "@ts-" + "_".repeat(m.length - 4));
+  const src = neutraliseDirectives(code);
   if (names.size === 0) return src;
   const tokens = tokenize(src);
   const edits: Array<{ from: number; to: number; text: string }> = [];
-  const brackets: string[] = [];
+  // One frame per open bracket: its char and whether it starts a function body.
+  const frames: Array<{ ch: string; fn: boolean }> = [];
+  // Matching `(` index for each open paren, to classify the `{` after `)`.
+  const parenOpen: number[] = [];
+  const closedParenOpener = new Map<number, number>();
+  // Arrow bodies without braces: function scope until the expression ends.
+  const arrowExprDepths: number[] = [];
+  const inFunction = () => frames.some((f) => f.fn) || arrowExprDepths.length > 0;
+
   for (let k = 0; k < tokens.length; k++) {
     const tok = tokens[k];
+    const prev = tokens[k - 1];
+    const next = tokens[k + 1];
     if (tok.type === "punct") {
-      if (tok.value === "{" || tok.value === "[" || tok.value === "(") brackets.push(tok.value);
-      else if (tok.value === "}" || tok.value === "]" || tok.value === ")") brackets.pop();
+      const v = tok.value;
+      if (v === "(" || v === "[") {
+        if (v === "(") parenOpen.push(k);
+        frames.push({ ch: v, fn: false });
+      } else if (v === "{") {
+        let fn = false;
+        if (prev?.type === "punct" && prev.value === "=>") fn = true;
+        else if (prev?.type === "punct" && prev.value === ")") {
+          const open = closedParenOpener.get(k - 1);
+          const head = open !== undefined ? tokens[open - 1] : undefined;
+          const headWord = head?.type === "ident" ? head.value : "";
+          fn = !(BLOCK_HEADS.has(headWord) || (headWord === "await" && tokens[open! - 2]?.value === "for"));
+        }
+        frames.push({ ch: v, fn });
+      } else if (v === ")" || v === "]" || v === "}") {
+        if (v === ")") {
+          const open = parenOpen.pop();
+          if (open !== undefined) closedParenOpener.set(k, open);
+        }
+        frames.pop();
+        while (arrowExprDepths.length && frames.length < arrowExprDepths[arrowExprDepths.length - 1]) arrowExprDepths.pop();
+      } else if (v === "=>" && !(next?.type === "punct" && next.value === "{")) {
+        arrowExprDepths.push(frames.length);
+      } else if ((v === "," || v === ";") && arrowExprDepths.length && frames.length === arrowExprDepths[arrowExprDepths.length - 1]) {
+        arrowExprDepths.pop();
+      }
       continue;
     }
     if (tok.type !== "ident") continue;
     const to = names.get(tok.value);
     if (!to) continue;
-    const prev = tokens[k - 1];
-    const next = tokens[k + 1];
     const prevP = prev?.type === "punct" ? prev.value : "";
     const nextP = next?.type === "punct" ? next.value : "";
     if (prevP === "." || prevP === "?.") continue;
-    const inBraces = brackets[brackets.length - 1] === "{";
-    const keyPos = inBraces && (prevP === "{" || prevP === ",");
-    if (keyPos && nextP === ":") continue; // `{ name: … }`
+    const inBraces = frames[frames.length - 1]?.ch === "{";
+    const keyPos =
+      inBraces &&
+      (prevP === "{" || prevP === "," || prevP === ";" || prevP === "}" || prevP === "*" ||
+        (prev?.type === "ident" && METHOD_PREFIXES.has(prev.value)));
+    if (keyPos && (nextP === ":" || nextP === "(")) continue; // `{ name: … }`, `{ name() {} }`
+    if (inFunction()) continue; // late-bound: sees the newest declaration
     const shorthand = keyPos && (nextP === "}" || nextP === "," || nextP === "=");
     edits.push({ from: tok.start, to: tok.end, text: shorthand ? `${tok.value}: ${to}` : to });
   }
@@ -177,14 +239,16 @@ function sharedUnit(scope: readonly TsBlock[], k: number): TsUnit {
   const lastDecl = new Map<string, number>();
   const declared = scope.slice(0, k + 1).map((b) => topLevelNames(b.code));
   declared.forEach((names, i) => names.forEach((n) => lastDecl.set(n, i)));
-  // Stand-ins for superseded bindings: `name$prev`, made unique against
-  // every declared name.
+  // Stand-ins for superseded bindings: `name$prev`, unique against every
+  // identifier in the unit's parts (nested bindings included).
+  const allIdents = new Set<string>();
+  for (const b of scope.slice(0, k + 1)) for (const t of tokenize(b.code)) if (t.type === "ident") allIdents.add(t.value);
   const mangled = new Map<string, string>();
   const standIn = (name: string): string => {
     let m = mangled.get(name);
     if (!m) {
       m = `${name}$prev`;
-      for (let n = 2; lastDecl.has(m) || [...mangled.values()].includes(m); n++) m = `${name}$prev${n}`;
+      for (let n = 2; allIdents.has(m) || [...mangled.values()].includes(m); n++) m = `${name}$prev${n}`;
       mangled.set(name, m);
     }
     return m;

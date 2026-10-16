@@ -181,6 +181,46 @@ describe("JavaScript blocks and shared scopes", () => {
     expect(first).toBe("const value$prev = 1; const o = { value: 2 }; o.value;");
   });
 
+  it("references inside functions stay late-bound to the newest declaration", () => {
+    const { units, diags } = checkShared(
+      "const value = 1; function read() { return value; } const arrow = () => value; const now = value;",
+      "// @ts-check\nconst value = 'x';\nread().toUpperCase(); arrow().toUpperCase(); now.toFixed();",
+    );
+    expect(units[1].code.split("\n;\n")[0]).toBe(
+      "// @ts-check\nconst value$prev = 1; function read() { return value; } const arrow = () => value; const now = value$prev;",
+    );
+    expect(diags).toEqual([]);
+  });
+
+  it("method names and getters keep their key", () => {
+    const { units, diags } = checkShared(
+      "const value = 1; const obj = { value() { return 2; }, get other() { return value; } };",
+      "// @ts-check\nconst value = 'x';\nobj.value().toFixed();",
+    );
+    expect(units[1].code.split("\n;\n")[0]).toContain("{ value() { return 2; }, get other() { return value; } }");
+    expect(diags).toEqual([]);
+  });
+
+  it("only leading directive comments are neutralised, not @ts-check as data", () => {
+    const { units } = checkShared('// @ts-check\nconst marker = "@ts-check";', "const later = 1;");
+    expect(units[1].code).toContain('const marker = "@ts-check";');
+    expect(units[1].code).toContain("// @ts-_____");
+  });
+
+  it("stand-ins never collide with nested bindings", () => {
+    const { units } = checkShared(
+      "const value = 1; const result = (() => { const value$prev = 'x'; return value; })(); const top = value;",
+      "const value = 'y';",
+    );
+    expect(units[1].code.split("\n;\n")[0]).toContain("const top = value$prev2;");
+  });
+
+  it("tilde fences may have backticks in the info string", () => {
+    const blocks = findTsBlocks("~~~js title=\"Use `x`\"\nconst a = 1\n~~~\n");
+    expect(blocks).toHaveLength(1);
+    expect(findTsBlocks("```js title=`x`\nconst a = 1\n```\n")).toHaveLength(0);
+  });
+
   it("shorthand properties keep their key when the binding is renamed", () => {
     const { units, input, diags } = checkShared(
       "const value = 1; const obj = { value }; const { value: v2, other = value } = obj;",

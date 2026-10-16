@@ -10,7 +10,7 @@ import { useEffect, useRef, useState } from "react";
 import { Code2, Play, Square, Trash2 } from "lucide-react";
 import { t } from "../i18n";
 import { DEFAULT_RUBY_TIMEOUT_MS, type RubyRunRequest, type RubyWorkerMessage } from "./ruby/rubyRuntime";
-import { RUBY_KILLED_EVENT, killRubyWorker, nextRubyRunId, rubyWorker } from "./ruby/rubyClient";
+import { RUBY_KILLED_EVENT, killRubyWorker, nextRubyRunId, rubyTurn, rubyWorker } from "./ruby/rubyClient";
 
 interface Props {
   source: string;
@@ -45,12 +45,18 @@ export default function LiveRubyBlock({ source, meta }: Props) {
   const runRef = useRef<number | null>(null);
   const cleanupRef = useRef<(() => void) | null>(null);
   const lineId = useRef(0);
+  // Set while this block's run holds the shared worker (its turn came).
   const activeWorker = useRef<Worker | null>(null);
+  const releaseRef = useRef<(() => void) | null>(null);
 
+  /** Forget the current run (queued or active) and give up its turn. */
   const detach = () => {
     cleanupRef.current?.();
     cleanupRef.current = null;
     runRef.current = null;
+    activeWorker.current = null;
+    releaseRef.current?.();
+    releaseRef.current = null;
   };
 
   // Unmounted mid-run (e.g. another document opened): the hard timeout
@@ -58,6 +64,7 @@ export default function LiveRubyBlock({ source, meta }: Props) {
   // runaway loop hold the shared worker forever.
   useEffect(
     () => () => {
+      // Only a run that holds the worker is stopped; a queued one just leaves.
       const busyWorker = runRef.current !== null ? activeWorker.current : null;
       detach();
       if (busyWorker) killRubyWorker(busyWorker);
@@ -75,17 +82,25 @@ export default function LiveRubyBlock({ source, meta }: Props) {
       return [...prev, { id: ++lineId.current, kind, text }].slice(-500);
     });
 
-  function run() {
+  async function run() {
     detach();
     const runId = nextRubyRunId();
     runRef.current = runId;
     setLines([]);
     setElapsed(null);
     setState("loading");
+    const turn = rubyTurn();
+    releaseRef.current = turn.release;
+    await turn.ready;
+    if (runRef.current !== runId) {
+      turn.release(); // Stopped or unmounted while queued
+      return;
+    }
     let worker: Worker;
     try {
       worker = rubyWorker();
     } catch (err) {
+      detach();
       setState("error");
       push("error", `${t("block.liveRuby.loadFailed")} ${(err as Error).message}`);
       return;
@@ -151,8 +166,11 @@ export default function LiveRubyBlock({ source, meta }: Props) {
   }
 
   function cancel() {
+    // Terminate the worker only if this run holds it; a queued run is
+    // simply dropped from the line.
+    const busyWorker = activeWorker.current;
     detach();
-    killRubyWorker();
+    if (busyWorker) killRubyWorker(busyWorker);
     push("error", t("block.liveRuby.stopped"));
     setState("error");
   }
@@ -181,7 +199,7 @@ export default function LiveRubyBlock({ source, meta }: Props) {
               {t("block.liveRuby.stop")}
             </button>
           ) : (
-            <button type="button" className="chart-block-tab" onClick={run} title={t("block.liveRuby.run")} aria-label={t("block.liveRuby.run")}>
+            <button type="button" className="chart-block-tab" onClick={() => void run()} title={t("block.liveRuby.run")} aria-label={t("block.liveRuby.run")}>
               <Play size={11} style={{ display: "inline", marginInlineEnd: 4 }} />
               {t("block.liveRuby.run")}
             </button>
