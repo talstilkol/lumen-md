@@ -165,3 +165,41 @@ describe("publishSite", () => {
     expect(existsSync(join(work, "out", "Index.html")) && !existsSync(join(work, "out", "index.html"))).toBe(false);
   });
 });
+
+describe("republishing into the same folder", () => {
+  it("removes what the previous publish wrote, so outputs can change shape", async () => {
+    write("guide.html/image.png", new Uint8Array([1, 2, 3]));
+    write("old.md", "# Old");
+    await publishSite(join(work, "src"), join(work, "out"));
+    expect(existsSync(join(work, "out", "guide.html", "image.png"))).toBe(true);
+    // Unrelated files the user put in the output folder stay.
+    writeFileSync(join(work, "out", "CNAME"), "docs.example.com");
+
+    rmSync(join(work, "src"), { recursive: true });
+    write("guide.md", "# Guide");
+    const res = await publishSite(join(work, "src"), join(work, "out"));
+    expect(res.skipped).toEqual([]);
+    expect(read("guide.html")).toContain("Guide");
+    expect(existsSync(join(work, "out", "old.html"))).toBe(false);
+    expect(existsSync(join(work, "out", "CNAME"))).toBe(true);
+  });
+
+  it("never deletes outside the output folder via a tampered manifest", async () => {
+    write("a.md", "# A");
+    writeFileSync(join(work, "keep.txt"), "x");
+    mkdirSync(join(work, "out"), { recursive: true });
+    writeFileSync(join(work, "out", ".lumen-publish.json"), JSON.stringify({ files: ["../keep.txt"] }));
+    await publishSite(join(work, "src"), join(work, "out"));
+    expect(existsSync(join(work, "keep.txt"))).toBe(true);
+  });
+});
+
+describe("page-list links", () => {
+  it("percent-encode URL delimiters in file names", async () => {
+    write("FAQ #1.md", "# FAQ");
+    write("what?.md", "# Q");
+    await publishSite(join(work, "src"), join(work, "out"));
+    expect(read("index.html")).toContain('href="FAQ%20%231.html"');
+    expect(read("index.html")).toContain('href="what%3F.html"');
+  });
+});

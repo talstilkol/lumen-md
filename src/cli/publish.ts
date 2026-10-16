@@ -16,7 +16,17 @@
  *
  * Node-only (uses node:fs); bin/lumen.ts is the thin argv wrapper.
  */
-import { copyFileSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
+import {
+  copyFileSync,
+  lstatSync,
+  mkdirSync,
+  readdirSync,
+  readFileSync,
+  rmdirSync,
+  statSync,
+  unlinkSync,
+  writeFileSync,
+} from "node:fs";
 import { basename, dirname, isAbsolute, join, relative, resolve, sep } from "node:path";
 import { renderHtmlDocument, escapeHtml } from "../storage/exportHtml";
 
@@ -123,10 +133,59 @@ function pageList(pages: PublishPage[], hrefPrefix = ""): string {
   const items = pages
     .map((p) => {
       const sub = dirname(p.output) === "." ? "" : `<small>${escapeHtml(dirname(p.output))}/</small>`;
-      return `<li><a href="${escapeHtml(hrefPrefix + p.output)}">${escapeHtml(p.title)}</a>${sub}</li>`;
+      return `<li><a href="${escapeHtml(hrefPrefix + encodePath(p.output))}">${escapeHtml(p.title)}</a>${sub}</li>`;
     })
     .join("\n");
   return `<ul class="lumen-site-pages">\n${items}\n</ul>`;
+}
+
+/** Percent-encode each segment of a relative output path for use in an href (`FAQ #1.html` → `FAQ%20%231.html`). */
+export function encodePath(p: string): string {
+  return p.split("/").map(encodeURIComponent).join("/");
+}
+
+/** Records what the last publish wrote, so a republish can remove it first. */
+export const PUBLISH_MANIFEST = ".lumen-publish.json";
+
+/**
+ * Remove the files a previous publish into `outAbs` wrote (per its
+ * manifest) and the folders they leave empty. Only listed files are
+ * touched — anything else in the folder is left alone — so a page or
+ * asset that was removed or changed shape (a `guide.html/` folder that is
+ * now a page) can't linger or block the new write.
+ */
+export function clearPreviousPublish(outAbs: string): void {
+  let listed: unknown;
+  try {
+    listed = (JSON.parse(readFileSync(join(outAbs, PUBLISH_MANIFEST), "utf8")) as { files?: unknown }).files;
+  } catch {
+    return; // no (readable) manifest: nothing we know we wrote
+  }
+  if (!Array.isArray(listed)) return;
+  const dirs = new Set<string>();
+  for (const rel of listed) {
+    if (typeof rel !== "string" || !rel) continue;
+    const target = resolve(outAbs, ...rel.split("/"));
+    const r = relative(outAbs, target);
+    if (!r || r.startsWith("..") || isAbsolute(r)) continue; // never outside the output folder
+    try {
+      if (!lstatSync(target).isFile()) continue;
+      unlinkSync(target);
+    } catch {
+      continue;
+    }
+    for (let d = dirname(target); d !== outAbs && relative(outAbs, d) && !relative(outAbs, d).startsWith(".."); d = dirname(d)) {
+      dirs.add(d);
+    }
+  }
+  // Deepest first, so a parent is empty by the time it's checked.
+  for (const d of [...dirs].sort((a, b) => b.length - a.length)) {
+    try {
+      if (readdirSync(d).length === 0) rmdirSync(d);
+    } catch {
+      /* already gone or not empty */
+    }
+  }
 }
 
 /** Publish `input` (a folder or a single .md file) as a static site in `outDir`. */
@@ -152,6 +211,7 @@ export async function publishSite(
   const siteTitle = opts.siteTitle ?? basename(root);
 
   mkdirSync(outAbs, { recursive: true });
+  clearPreviousPublish(outAbs);
   writeFileSync(join(outAbs, "style.css"), PUBLISH_CSS);
 
   const mdFiles = files.filter((f) => MD_RE.test(f));
@@ -250,6 +310,15 @@ export async function publishSite(
     copyFileSync(a, target);
     assetRels.push(rel);
   }
+
+  writeFileSync(
+    join(outAbs, PUBLISH_MANIFEST),
+    JSON.stringify(
+      { files: ["style.css", "index.html", ...pages.map((p) => p.output), ...assetRels].filter((f, i, a) => a.indexOf(f) === i) },
+      null,
+      2,
+    ) + "\n",
+  );
 
   return {
     pages: pages.map(({ source, output, title }) => ({ source, output, title })),
