@@ -78,4 +78,12 @@ describe("importSpecifiers", () => {
     expect(specs.map((s) => s.spec)).toEqual(["react", "./side.css", "./ab.js", "./c.js", "./star.js", "./lazy.js"]);
     for (const s of specs) expect(code.slice(s.start + 1, s.end - 1)).toBe(s.spec);
   });
+
+  it("finds dynamic imports inside template expressions", async () => {
+    const { importSpecifiers } = await import("../playground/files");
+    const code = 'const s = `a ${(await import("./dep.js")).default} b ${ {x: 1}.x } c ${`in ${await import("./deep.js")}`}`;';
+    const specs = importSpecifiers(code);
+    expect(specs.map((s) => s.spec)).toEqual(["./dep.js", "./deep.js"]);
+    for (const s of specs) expect(code.slice(s.start + 1, s.end - 1)).toBe(s.spec);
+  });
 });

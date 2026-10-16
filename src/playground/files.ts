@@ -115,6 +115,15 @@ export function importSpecifiers(code: string): Array<{ start: number; end: numb
   for (let i = 0; i < tokens.length; i++) {
     const t = tokens[i];
     const prev = tokens[i - 1];
+    if (t.type === "tpl") {
+      // `${ … }` expressions inside a template can hold dynamic imports.
+      for (const e of templateExpressions(t.value)) {
+        for (const hit of importSpecifiers(e.code)) {
+          out.push({ start: t.start + e.offset + hit.start, end: t.start + e.offset + hit.end, spec: hit.spec });
+        }
+      }
+      continue;
+    }
     if (t.type === "punct") {
       if (t.value === ";") inDecl = false;
       continue;
@@ -141,6 +150,26 @@ export function importSpecifiers(code: string): Array<{ start: number; end: numb
       add(i + 1);
       inDecl = false;
     }
+  }
+  return out;
+}
+
+/** The `${ … }` expressions of a template literal's source, with offsets into it. */
+function templateExpressions(tpl: string): Array<{ offset: number; code: string }> {
+  const out: Array<{ offset: number; code: string }> = [];
+  for (let i = 1; i < tpl.length; i++) {
+    if (tpl[i] === "\\") {
+      i++;
+      continue;
+    }
+    if (tpl[i] !== "$" || tpl[i + 1] !== "{") continue;
+    const from = i + 2;
+    // The expression ends at the first `}` outside its own brackets,
+    // strings and nested templates (the tokenizer tracks those).
+    const close = tokenize(tpl.slice(from)).find((x) => x.type === "punct" && x.value === "}" && x.depth === 0);
+    if (!close) break;
+    out.push({ offset: from, code: tpl.slice(from, from + close.start) });
+    i = from + close.start;
   }
   return out;
 }
