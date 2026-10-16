@@ -28,17 +28,21 @@ export interface Usage {
   estimated?: boolean;
 }
 
-/** USD per 1M tokens: [input, output]. Matched by model-id prefix, longest first. */
-const PRICE_TABLE: Array<[prefix: string, input: number, output: number]> = [
-  // OpenAI
-  ["gpt-4o-mini", 0.15, 0.6],
-  ["gpt-4o", 2.5, 10],
-  ["gpt-4.1-nano", 0.1, 0.4],
-  ["gpt-4.1-mini", 0.4, 1.6],
-  ["gpt-4.1", 2, 8],
-  ["o4-mini", 1.1, 4.4],
-  ["ft:gpt-4o-mini", 0.3, 1.2],
-  // Anthropic
+/**
+ * USD per 1M tokens: [input, output, cached input]. Matched by model-id
+ * prefix, longest first. Cached input defaults to the provider's discount
+ * (CACHE_READ_RATE) when not given.
+ */
+const PRICE_TABLE: Array<[prefix: string, input: number, output: number, cachedInput?: number]> = [
+  // OpenAI (automatic prompt caching: 50% off for GPT-4o, 75% for 4.1 / o4)
+  ["gpt-4o-mini", 0.15, 0.6, 0.075],
+  ["gpt-4o", 2.5, 10, 1.25],
+  ["gpt-4.1-nano", 0.1, 0.4, 0.025],
+  ["gpt-4.1-mini", 0.4, 1.6, 0.1],
+  ["gpt-4.1", 2, 8, 0.5],
+  ["o4-mini", 1.1, 4.4, 0.275],
+  ["ft:gpt-4o-mini", 0.3, 1.2, 0.15],
+  // Anthropic (cache reads 10%, writes 125% of input)
   ["claude-3-5-haiku", 0.8, 4],
   ["claude-3-5-sonnet", 3, 15],
   ["claude-3-7-sonnet", 3, 15],
@@ -46,13 +50,13 @@ const PRICE_TABLE: Array<[prefix: string, input: number, output: number]> = [
   ["claude-sonnet-4", 3, 15],
   ["claude-opus-4-5", 5, 25],
   ["claude-opus-4", 15, 75],
-  // Google
+  // Google (implicit caching: 75% off)
   ["gemini-1.5-flash", 0.075, 0.3],
   ["gemini-1.5-pro", 1.25, 5],
   ["gemini-2.0-flash", 0.1, 0.4],
   ["gemini-2.5-flash", 0.3, 2.5],
   ["gemini-2.5-pro", 1.25, 10],
-  // Mistral
+  // Mistral (no prompt-cache discount)
   ["mistral-small", 0.2, 0.6],
   ["mistral-medium", 0.4, 2],
   ["mistral-large", 2, 6],
@@ -61,23 +65,40 @@ const PRICE_TABLE: Array<[prefix: string, input: number, output: number]> = [
 const SORTED = [...PRICE_TABLE].sort((a, b) => b[0].length - a[0].length);
 /** Providers that run on the user's own hardware: no per-token cost. */
 const FREE_PROVIDERS = new Set(["ollama", "local-webgpu"]);
+/** Cached-input price as a share of the input price, per provider. */
+const CACHE_READ_RATE: Record<string, number> = { anthropic: 0.1, openai: 0.5, gemini: 0.25 };
+/** Cache-write price as a share of the input price (Anthropic only). */
+const CACHE_WRITE_RATE: Record<string, number> = { anthropic: 1.25 };
 
-/** [input, output] USD per 1M tokens, 0 for local providers, null when unknown. */
-export function priceFor(provider: string, model: string): [number, number] | null {
-  if (FREE_PROVIDERS.has(provider)) return [0, 0];
+export interface ModelPrice {
+  input: number;
+  output: number;
+  cachedInput: number;
+  cacheWrite: number;
+}
+
+/** USD per 1M tokens for a model; all 0 for local providers; null when unknown. */
+export function priceFor(provider: string, model: string): ModelPrice | null {
+  if (FREE_PROVIDERS.has(provider)) return { input: 0, output: 0, cachedInput: 0, cacheWrite: 0 };
   const m = model.toLowerCase();
   const hit = SORTED.find(([prefix]) => m.startsWith(prefix));
-  return hit ? [hit[1], hit[2]] : null;
+  if (!hit) return null;
+  const [, input, output, cached] = hit;
+  return {
+    input,
+    output,
+    cachedInput: cached ?? input * (CACHE_READ_RATE[provider] ?? 1),
+    cacheWrite: input * (CACHE_WRITE_RATE[provider] ?? 1),
+  };
 }
 
 /** Estimated USD for one usage record, or null when the model's price is unknown. */
 export function costOf(u: Usage): number | null {
   const p = priceFor(u.provider, u.model);
   if (!p) return null;
-  const [inp, out] = p;
   const read = u.cacheReadTokens ?? 0;
   const write = u.cacheWriteTokens ?? 0;
-  return (u.inputTokens * inp + read * inp * 0.1 + write * inp * 1.25 + u.outputTokens * out) / 1_000_000;
+  return (u.inputTokens * p.input + read * p.cachedInput + write * p.cacheWrite + u.outputTokens * p.output) / 1_000_000;
 }
 
 /** Rough token count for text we have no API count for (~4 chars / token). */

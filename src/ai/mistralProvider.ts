@@ -27,7 +27,8 @@ function body(messages: ChatMessage[], opts: ChatOptions, stream: boolean) {
   return JSON.stringify({
     model: getMistralModel(opts),
     messages,
-    ...(stream ? { stream: true } : {}),
+    // Mistral sends `usage` in streams only when asked to.
+    ...(stream ? { stream: true, stream_options: { include_usage: true } } : {}),
     ...(opts.maxTokens ? { max_tokens: opts.maxTokens } : {}),
     ...(opts.temperature !== undefined ? { temperature: opts.temperature } : {}),
   });
@@ -57,7 +58,7 @@ export async function chatMistral(
   const data = await res.json();
   const text = data.choices?.[0]?.message?.content?.trim();
   if (!text) throw new AiError("PARSE_ERROR", "Empty Mistral response.");
-  reportOpenAiUsage(data.usage, data.model ?? "default", opts, "mistral");
+  reportOpenAiUsage(data.usage, data.model ?? getMistralModel(opts), opts, "mistral");
   return text;
 }
 
@@ -92,7 +93,7 @@ export async function* chatMistralStream(
       try {
         const json = JSON.parse(trimmed.slice(6));
         // The final chunk carries `usage`.
-        if (json.usage) reportOpenAiUsage(json.usage, json.model ?? "default", opts, "mistral");
+        if (json.usage) reportOpenAiUsage(json.usage, json.model ?? getMistralModel(opts), opts, "mistral");
         const delta = json.choices?.[0]?.delta?.content;
         if (delta) yield delta;
       } catch {

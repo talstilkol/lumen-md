@@ -184,6 +184,8 @@ export function effectiveModel(provider: AiProvider, opts: ChatOptions = {}): st
     return (s.useFineTunedModel && s.fineTunedModelId) || DEFAULT_MODEL;
   }
   try {
+    // Ollama keeps its model where the Ollama picker writes it.
+    if (provider === "ollama") return localStorage.getItem("lumen.ollama.model") || "llama3.1";
     return localStorage.getItem(`lumen.ai.model.${provider}`) || "default";
   } catch {
     return "default";
@@ -216,11 +218,15 @@ export async function chat(
     }
   }
   let reported = false;
+  // Fallbacks (Ollama / WebGPU unavailable → OpenAI) answer under another
+  // provider: such an answer must not be cached under the selected one.
+  let answeredBy: string = provider;
   const text = await chatDirect(messages, {
     ...opts,
     onUsage: (u) => {
       reported = true;
-      recordUsage({ ...u, provider: u.provider ?? provider });
+      answeredBy = u.provider ?? provider;
+      recordUsage({ ...u, provider: answeredBy });
     },
   });
   if (text && !reported) {
@@ -232,7 +238,7 @@ export async function chat(
       estimated: true,
     });
   }
-  if (key && text) await putCached(key, text, model);
+  if (key && text && answeredBy === provider) await putCached(key, text, model);
   return text;
 }
 

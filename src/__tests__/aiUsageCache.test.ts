@@ -14,13 +14,16 @@ const sse = (events: unknown[]) =>
 
 describe("prices and cost", () => {
   it("matches the longest model prefix and prices cache reads / writes", () => {
-    expect(priceFor("openai", "gpt-4o-mini-2024-07-18")).toEqual([0.15, 0.6]);
-    expect(priceFor("openai", "gpt-4o-2024-08-06")).toEqual([2.5, 10]);
-    expect(priceFor("ollama", "llama3.1")).toEqual([0, 0]);
+    expect(priceFor("openai", "gpt-4o-mini-2024-07-18")).toMatchObject({ input: 0.15, output: 0.6, cachedInput: 0.075 });
+    expect(priceFor("openai", "gpt-4o-2024-08-06")).toMatchObject({ input: 2.5, output: 10, cachedInput: 1.25 });
+    expect(priceFor("ollama", "llama3.1")).toEqual({ input: 0, output: 0, cachedInput: 0, cacheWrite: 0 });
     expect(priceFor("openai", "some-new-model")).toBeNull();
-    // 1M in at $3, 1M cache-read at 10%, 1M cache-write at 125%, 1M out at $15.
+    // Anthropic: 1M in at $3, 1M cache-read at 10%, 1M cache-write at 125%, 1M out at $15.
     const c = costOf({ provider: "anthropic", model: "claude-sonnet-4-5", inputTokens: 1e6, outputTokens: 1e6, cacheReadTokens: 1e6, cacheWriteTokens: 1e6 });
     expect(c).toBeCloseTo(3 + 0.3 + 3.75 + 15, 6);
+    // OpenAI cached input is half price for GPT-4o; Gemini 25%.
+    expect(costOf({ provider: "openai", model: "gpt-4o", inputTokens: 0, outputTokens: 0, cacheReadTokens: 1e6 })).toBeCloseTo(1.25, 6);
+    expect(costOf({ provider: "gemini", model: "gemini-2.5-pro", inputTokens: 0, outputTokens: 0, cacheReadTokens: 1e6 })).toBeCloseTo(0.3125, 6);
   });
 
   it("sums a month per provider / model", () => {
@@ -110,6 +113,33 @@ describe("chat(): response cache and usage", () => {
     expect(fetchMock).toHaveBeenCalledTimes(4);
     const row = usageSummary().rows[0];
     expect([row.provider, row.model, row.requests, row.inputTokens]).toEqual(["mistral", "mistral-small-latest", 4, 20]);
+  });
+
+  it("doesn't cache an answer that came from a fallback provider", async () => {
+    // WebGPU selected but unavailable here → OpenAI answers.
+    setActiveProvider("local-webgpu");
+    const { useAppStore } = await import("../store/useStore");
+    useAppStore.setState({ aiKey: "sk-test" });
+    const fetchMock = vi.fn(async () =>
+      new Response(JSON.stringify({ model: "gpt-4o-mini", choices: [{ message: { content: "cloud" } }], usage: { prompt_tokens: 3, completion_tokens: 1 } }), { status: 200 }),
+    );
+    vi.stubGlobal("fetch", fetchMock);
+    const msgs = [{ role: "user" as const, content: "y" }];
+    await chat(msgs, { cache: true });
+    await chat(msgs, { cache: true });
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(usageSummary().rows.map((r) => r.provider)).toEqual(["openai"]);
+  });
+
+  it("asks Mistral for streamed usage", async () => {
+    setActiveProvider("mistral");
+    localStorage.setItem("lumen.ai.key.mistral", "m-key");
+    const fetchMock = vi.fn(async () => sse([{ choices: [{ delta: { content: "ok" } }] }, { model: "mistral-small-latest", choices: [], usage: { prompt_tokens: 9, completion_tokens: 2 } }]));
+    vi.stubGlobal("fetch", fetchMock);
+    for await (const _ of chatStream([{ role: "user", content: "x" }])) void _;
+    const init = (fetchMock.mock.calls[0] as unknown as [string, RequestInit])[1];
+    expect(JSON.parse(String(init.body)).stream_options).toEqual({ include_usage: true });
+    expect(usageSummary().rows[0]).toMatchObject({ provider: "mistral", inputTokens: 9, outputTokens: 2, estimated: 0 });
   });
 
   it("records streamed Anthropic usage from message_start / message_delta", async () => {
