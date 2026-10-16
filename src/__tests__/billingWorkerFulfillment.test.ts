@@ -134,3 +134,73 @@ describe("verifyStripeSig", () => {
     expect(await verifyStripeSig("{x}", `t=${now},v1=${good}`, env.STRIPE_WEBHOOK_SECRET, now)).toBe(false);
   });
 });
+
+describe("POST /webhook persistence", () => {
+  async function signedRequest(event: unknown) {
+    const payload = JSON.stringify(event);
+    const t = Math.floor(Date.now() / 1000);
+    const key = await crypto.subtle.importKey("raw", new TextEncoder().encode(env.STRIPE_WEBHOOK_SECRET), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
+    const sig = new Uint8Array(await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(`${t}.${payload}`)));
+    const v1 = Array.from(sig, (b) => b.toString(16).padStart(2, "0")).join("");
+    return new Request("https://billing.test/webhook", {
+      method: "POST",
+      headers: { "stripe-signature": `t=${t},v1=${v1}` },
+      body: payload,
+    });
+  }
+  const staleUpdated = {
+    type: "customer.subscription.updated",
+    data: {
+      object: {
+        id: "sub_1",
+        status: "active",
+        customer: "cus_1",
+        metadata: { userId: "u1", tier: "pro" },
+        items: { data: [{ price: { id: "price_pro_m" } }] },
+        current_period_end: 1_800_000_000,
+      },
+    },
+  };
+  function stub(opts: { subStatus?: number; sub?: unknown; supabase?: number }) {
+    const writes: Record<string, unknown>[] = [];
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+        const url = String(input);
+        if (url.startsWith("https://api.stripe.com/v1/subscriptions/")) {
+          return new Response(JSON.stringify(opts.sub ?? {}), { status: opts.subStatus ?? 200 });
+        }
+        writes.push(JSON.parse(String(init?.body)));
+        return new Response("", { status: opts.supabase ?? 201 });
+      }),
+    );
+    return writes;
+  }
+
+  it("applies the subscription's CURRENT state, so a late stale event can't revive a canceled plan", async () => {
+    const writes = stub({ sub: { id: "sub_1", status: "canceled", metadata: { tier: "pro" }, current_period_end: 1_800_000_000 } });
+    const res = await worker.fetch(await signedRequest(staleUpdated), env);
+    expect(res.status).toBe(200);
+    expect(writes).toHaveLength(1);
+    expect(writes[0]).toMatchObject({ user_id: "u1", status: "canceled", tier: "pro" });
+  });
+
+  it("treats a subscription Stripe no longer knows as canceled", async () => {
+    const writes = stub({ subStatus: 404 });
+    await worker.fetch(await signedRequest(staleUpdated), env);
+    expect(writes[0]).toMatchObject({ status: "canceled" });
+  });
+
+  it("returns 500 (so Stripe retries) when the entitlement write fails", async () => {
+    stub({ sub: { status: "active" }, supabase: 503 });
+    const res = await worker.fetch(await signedRequest(staleUpdated), env);
+    expect(res.status).toBe(500);
+  });
+
+  it("returns 500 without writing when Stripe can't be reached", async () => {
+    const writes = stub({ subStatus: 502 });
+    const res = await worker.fetch(await signedRequest(staleUpdated), env);
+    expect(res.status).toBe(500);
+    expect(writes).toHaveLength(0);
+  });
+});

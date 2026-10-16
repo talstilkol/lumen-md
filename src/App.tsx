@@ -52,6 +52,7 @@ import { useCollab } from "./hooks/useCollab";
 import { useTauriMenu } from "./hooks/useTauriMenu";
 import { EditorLayout } from "./layouts/EditorLayout";
 import { useAuth } from "./auth/useAuth";
+import { auditScope } from "./ui/auditScope";
 import { useEntitlement, watchAuthForEntitlements } from "./billing/useEntitlement";
 import { useAppStore, applyTheme } from "./store/useStore";
 import { applyLocale, t } from "./i18n";
@@ -103,6 +104,7 @@ export default function App() {
   const authProviderName = useAuth((s) => s.provider.name);
   const authError = useAuth((s) => s.error);
   const authUserId = useAuth((s) => s.user?.id);
+  const authOrgId = useAuth((s) => s.user?.orgId);
   const entitlementLoading = useEntitlement((s) => s.loading);
   const entitlement = useEntitlement((s) => s.entitlement);
   const capabilitiesCloudSync = useEntitlement((s) => s.capabilities.cloudSync);
@@ -892,11 +894,9 @@ export default function App() {
           <AuditLog
             open={auditLogOpen}
             onClose={() => setAuditLogOpen(false)}
-            // Org id falls through to the auth provider when wired; for free
-            // / pro tiers there's no org so we use the user id as the scope.
-            orgId={(useAppStore.getState() as { user?: { orgId?: string; id?: string } }).user?.orgId
-              ?? (useAppStore.getState() as { user?: { id?: string } }).user?.id
-              ?? "personal"}
+            // Scope = the signed-in user's organization (WorkOS SSO); free /
+            // pro users have no org, so their own id is the scope.
+            orgId={auditScope({ id: authUserId ?? "", orgId: authOrgId }) || "personal"}
           />
           <FineTuneSettings open={fineTuneOpen} onClose={() => setFineTuneOpen(false)} />
           <OrgSettings open={orgSettingsOpen} onClose={() => setOrgSettingsOpen(false)} onOpenAuditLog={() => setAuditLogOpen(true)} />

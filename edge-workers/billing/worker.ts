@@ -120,7 +120,7 @@ export default {
           return entitlements(req, env);
         case "/checkout":  return json(await checkout(req, env), req, env);
         case "/portal":    return json(await portal(req, env), req, env);
-        case "/webhook":   return webhook(req, env);
+        case "/webhook":   return await webhook(req, env);
         default:           return new Response("Not found", { status: 404 });
       }
     } catch (err) {
@@ -436,8 +436,56 @@ async function webhook(req: Request, env: Env): Promise<Response> {
     data: { object: Record<string, unknown> };
   };
   const update = entitlementFromEvent(env, event);
-  if (update) await upsertEntitlement(env, update);
+  if (!update) return new Response("ok");
+  try {
+    // Stripe doesn't deliver events in order: an old `subscription.updated`
+    // (active) can arrive after `subscription.deleted`. The event only says
+    // WHICH subscription changed — its current state comes from Stripe.
+    const row = await withCurrentSubscriptionState(env, update);
+    await upsertEntitlement(env, row);
+  } catch (err) {
+    // Non-2xx makes Stripe retry the delivery instead of dropping it.
+    return new Response(`Webhook not persisted: ${(err as Error).message}`, { status: 500 });
+  }
   return new Response("ok");
+}
+
+/**
+ * Replace the status / renewal / tier implied by the event with the
+ * subscription's CURRENT state, fetched from Stripe. Events without a
+ * subscription (one-off payments) are applied as-is. A subscription Stripe
+ * no longer knows is treated as canceled.
+ */
+export async function withCurrentSubscriptionState(
+  env: Env,
+  update: EntitlementUpdate,
+): Promise<EntitlementUpdate> {
+  const id = update.stripe_subscription_id;
+  if (!id) return update;
+  const res = await fetch(`https://api.stripe.com/v1/subscriptions/${encodeURIComponent(id)}`, {
+    headers: { Authorization: `Bearer ${env.STRIPE_SECRET_KEY}` },
+  });
+  if (res.status === 404) return { ...update, status: "canceled" };
+  if (!res.ok) throw new Error(`Stripe ${res.status} reading subscription`);
+  const sub = (await res.json()) as {
+    status?: unknown;
+    current_period_end?: unknown;
+    metadata?: { tier?: unknown };
+    items?: { data?: Array<{ price?: { id?: unknown } }> };
+  };
+  // An unpaid async checkout must not be upgraded by a subscription that is
+  // still "incomplete"/"active" pending that payment — keep the denial.
+  const status = update.status === "unpaid" ? "unpaid" : String(sub.status ?? update.status);
+  const metaTier = sub.metadata?.tier === "pro" || sub.metadata?.tier === "team" ? sub.metadata.tier : null;
+  const tier =
+    metaTier ?? (sub.items?.data ?? []).map((i) => tierForPrice(env, i.price?.id)).find((x) => x) ?? update.tier;
+  const end = sub.current_period_end;
+  return {
+    ...update,
+    status,
+    ...(tier ? { tier } : {}),
+    renews_at: typeof end === "number" ? end : (update.renews_at ?? null),
+  };
 }
 
 export interface EntitlementUpdate {
@@ -512,7 +560,7 @@ export function entitlementFromEvent(
 }
 
 async function upsertEntitlement(env: Env, row: EntitlementUpdate): Promise<void> {
-  await fetch(`${env.SUPABASE_URL}/rest/v1/entitlements`, {
+  const res = await fetch(`${env.SUPABASE_URL}/rest/v1/entitlements`, {
     method: "POST",
     headers: {
       apikey: env.SUPABASE_SERVICE_ROLE,
@@ -522,6 +570,8 @@ async function upsertEntitlement(env: Env, row: EntitlementUpdate): Promise<void
     },
     body: JSON.stringify({ ...row, updated_at: new Date().toISOString() }),
   });
+  // fetch() resolves on 4xx/5xx — a failed write must not be acknowledged.
+  if (!res.ok) throw new Error(`Supabase ${res.status}`);
 }
 
 /**
