@@ -125,7 +125,37 @@ export interface TsUnit {
   tsx: boolean;
   js: boolean;
   shared: boolean;
-  parts: Array<{ block: TsBlock; offset: number }>;
+  parts: Array<UnitPart>;
+}
+
+/** Where a block sits in a unit, and the length-changing edits made to its text. */
+export interface UnitPart {
+  block: TsBlock;
+  offset: number;
+  /** Edits in block-text coordinates, ascending: [from, to) replaced by `len` chars. */
+  edits?: Array<{ from: number; to: number; len: number }>;
+}
+
+/** Block-text offset → offset in the edited text. */
+function toEdited(part: UnitPart, x: number): number {
+  let cum = 0;
+  for (const e of part.edits ?? []) {
+    if (x < e.from) break;
+    if (x < e.to) return e.from + cum + Math.min(x - e.from, e.len);
+    cum += e.len - (e.to - e.from);
+  }
+  return x + cum;
+}
+
+/** Offset in the edited text → block-text offset (inside an edit: its start). */
+function fromEdited(part: UnitPart, u: number): number {
+  let cum = 0;
+  for (const e of part.edits ?? []) {
+    if (u < e.from + cum) break;
+    if (u < e.from + cum + e.len) return e.from;
+    cum += e.len - (e.to - e.from);
+  }
+  return u - cum;
 }
 
 /**
@@ -135,6 +165,31 @@ export interface TsUnit {
  */
 const LIVE_WRAP_OPEN = "(async () => {\n";
 const LIVE_WRAP_CLOSE = "\n})();";
+
+/**
+ * A shared live block runs inside an async function, so a top-level
+ * `return` is valid there — but wrapping the block in the unit would make
+ * its declarations local, unlike the runtime that hoists them to shared
+ * globals. Instead each top-level `return` becomes a `throw` — it leaves
+ * the block the same way, so narrowing after `if (!x) return;` still
+ * holds: `return x` → `throw  x` (same length), a bare `return` →
+ * `throw 0` (one longer, recorded as an edit for position mapping). Units
+ * are modules, so top-level `await` needs nothing.
+ */
+function neutraliseTopLevelReturns(code: string): { text: string; edits: Array<{ from: number; to: number; len: number }> } {
+  const tokens = tokenize(code);
+  const scopes = functionScopes(tokens, matchBrackets(tokens));
+  const edits: Array<{ from: number; to: number; len: number; text: string }> = [];
+  tokens.forEach((t, i) => {
+    if (t.type !== "ident" || t.value !== "return" || scopes.some((f) => i >= f.from && i <= f.to)) return;
+    const next = tokens[i + 1];
+    const bare = !next || next.nl || (next.type === "punct" && (next.value === ";" || next.value === "}"));
+    edits.push({ from: t.start, to: t.end, len: bare ? 7 : 6, text: bare ? "throw 0" : "throw " });
+  });
+  let text = code;
+  for (const e of [...edits].reverse()) text = text.slice(0, e.from) + e.text + text.slice(e.to);
+  return { text, edits: edits.filter((e) => e.len !== e.to - e.from).map(({ from, to, len }) => ({ from, to, len })) };
+}
 
 /** Joins the parts of a shared unit: ends any statement / line comment. */
 const PART_SEPARATOR = "\n;\n";
@@ -174,6 +229,17 @@ interface FnScope {
   retained: boolean;
   /** Names bound inside it: parameters, its own name, local declarations. */
   locals: Set<string>;
+  /**
+   * A top-level function DECLARATION whose name nothing else inside binds:
+   * references to it inside the body are the declaration's binding (the
+   * runner keeps it in the block's own scope), so they follow its rename.
+   */
+  selfName?: string;
+  /**
+   * Class bodies only: ranges evaluated when the class is defined (static
+   * initializers, static blocks, computed keys) — not late-bound.
+   */
+  eager?: Array<[number, number]>;
 }
 
 /** Does the `{` at `i` open a class body (`class X [extends Y] {`)? */
@@ -231,10 +297,40 @@ function functionScopes(tokens: ReturnType<typeof tokenize>, match: Map<number, 
    * `new Promise(executor)`); anything else may keep it for later
    * (`callbacks.push(fn)`, `setTimeout`, event listeners, `.then`).
    */
+  // Names visibly initialised with an array / string literal (`const xs =
+  // [0]`, `let s = "a"`): their `.map` / `.replace` are the built-ins.
+  const literalKind = new Map<string, "array" | "string">();
+  for (let i = 0; i + 3 < tokens.length; i++) {
+    const kw = val(i);
+    if ((kw !== "const" && kw !== "let" && kw !== "var") || tokens[i + 1]?.type !== "ident" || !isPunct(i + 2, "=")) continue;
+    const init = tokens[i + 3];
+    if (isPunct(i + 3, "[")) literalKind.set(tokens[i + 1].value, "array");
+    else if (init?.type === "str" || init?.type === "tpl") literalKind.set(tokens[i + 1].value, "string");
+  }
+  // Where each such name is assigned again (`xs = holder`, `xs += …`): from
+  // that point on it may no longer be the built-in.
+  const reassignedAt = new Map<string, number>();
+  for (let i = 1; i + 1 < tokens.length; i++) {
+    const t = tokens[i];
+    if (t.type !== "ident" || !literalKind.has(t.value) || reassignedAt.has(t.value)) continue;
+    const next = tokens[i + 1];
+    const prev = tokens[i - 1];
+    const declared = prev?.type === "ident" && (prev.value === "const" || prev.value === "let" || prev.value === "var");
+    if (declared || isPunct(i - 1, ".") || isPunct(i - 1, "?.")) continue;
+    if (next?.type === "punct" && /^(=|\+=|-=|\|\|=|&&=|\?\?=)$/.test(next.value)) reassignedAt.set(t.value, i);
+  }
+  // `Array` / `Object` / `Promise` are the built-ins only when the code doesn't bind its own.
+  const shadowed = new Set<string>();
+  for (let i = 1; i < tokens.length; i++) {
+    const t = tokens[i];
+    if (t.type !== "ident" || (t.value !== "Array" && t.value !== "Object" && t.value !== "Promise")) continue;
+    const prev = val(i - 1);
+    if (["const", "let", "var", "function", "class"].includes(prev) || (isPunct(i + 1, "=") && !isPunct(i - 1, "."))) shadowed.add(t.value);
+  }
   const callbackRetained = (open: number): boolean => {
     const callee = tokens[open - 1];
     if (callee?.type !== "ident") return true;
-    if (callee.value === "Promise" && val(open - 2) === "new") return false;
+    if (callee.value === "Promise" && val(open - 2) === "new" && !shadowed.has("Promise")) return false;
     if (!SYNC_CALLBACK_METHODS.has(callee.value) || !isPunct(open - 2, ".")) return true;
     // Only when the receiver is known to be the built-in: an array literal
     // (`[…].map`), a string literal (`"…".replace`), `Array.from`,
@@ -244,8 +340,12 @@ function functionScopes(tokens: ReturnType<typeof tokenize>, match: Map<number, 
     if (!recv) return true;
     if (recv.type === "str" || recv.type === "tpl") return !(callee.value === "replace" || callee.value === "replaceAll");
     if (recv.type === "ident") {
-      if (recv.value === "Array") return callee.value !== "from";
-      if (recv.value === "Object") return !(callee.value === "fromEntries" || callee.value === "groupBy");
+      if (recv.value === "Array" && !shadowed.has("Array")) return callee.value !== "from";
+      if (recv.value === "Object" && !shadowed.has("Object")) return !(callee.value === "fromEntries" || callee.value === "groupBy");
+      const again = reassignedAt.get(recv.value);
+      const kind = isPunct(open - 4, ".") || (again !== undefined && again < open) ? undefined : literalKind.get(recv.value);
+      if (kind === "string") return !(callee.value === "replace" || callee.value === "replaceAll");
+      if (kind === "array") return callee.value === "replace" || callee.value === "replaceAll" || callee.value === "from" || callee.value === "fromEntries" || callee.value === "groupBy";
       return true;
     }
     if (isPunct(open - 3, "]")) {
@@ -284,6 +384,82 @@ function functionScopes(tokens: ReturnType<typeof tokenize>, match: Map<number, 
     // A grouping parenthesis: classify by what the group sits in.
     return retainedAt(c - 1);
   };
+  /**
+   * Identifiers a destructuring pattern at `open` binds: property keys and
+   * whole default expressions (`{ x = (value) }`, `[a = f(value)]`) are
+   * skipped; nested patterns recurse.
+   */
+  const addPatternBindings = (into: Set<string>, open: number) => {
+    const close = match.get(open) ?? open;
+    for (let m = open + 1; m < close; m++) {
+      if (isPunct(m, "=")) {
+        // Skip the default expression up to the next `,` / closer at this level.
+        let depth = 0;
+        for (m++; m < close; m++) {
+          const v = tokens[m].type === "punct" ? tokens[m].value : "";
+          if (v === "(" || v === "[" || v === "{") depth++;
+          else if (v === ")" || v === "]" || v === "}") depth--;
+          else if (v === "," && depth === 0) break;
+        }
+        continue;
+      }
+      if (isPunct(m, "{") || isPunct(m, "[")) {
+        addPatternBindings(into, m);
+        m = match.get(m) ?? m;
+        continue;
+      }
+      if (tokens[m]?.type !== "ident") continue;
+      if (isPunct(m + 1, ":")) continue; // property key, not a binding
+      into.add(tokens[m].value);
+    }
+  };
+  /** Parts of a class body run at definition: static fields / blocks, computed keys. */
+  const classEagerRanges = (open: number, close: number): Array<[number, number]> => {
+    const out: Array<[number, number]> = [];
+    let memberStart = true;
+    for (let m = open + 1; m < close; m++) {
+      const t = tokens[m];
+      if (t.type === "punct" && (t.value === "(" || t.value === "[" || t.value === "{")) {
+        const end = match.get(m) ?? m;
+        // `[expr]` as a member name is computed at definition time.
+        if (t.value === "[" && (memberStart || val(m - 1) === "static")) out.push([m, end]);
+        m = end;
+        memberStart = t.value === "{"; // after a method body, a new member starts
+        continue;
+      }
+      if (t.type === "punct" && t.value === ";") {
+        memberStart = true;
+        continue;
+      }
+      if (t.type === "ident" && t.value === "static" && memberStart) {
+        if (isPunct(m + 1, "{")) {
+          // static { … } block
+          const end = match.get(m + 1) ?? m + 1;
+          out.push([m + 1, end]);
+          m = end;
+          continue;
+        }
+        // static name = initializer  →  the initializer up to `;` / next member
+        let k = m + 1;
+        while (k < close && !isPunct(k, "=") && !isPunct(k, ";") && !isPunct(k, "(") && !(k > m + 1 && tokens[k].nl)) k++;
+        if (isPunct(k, "=")) {
+          let e = k + 1;
+          while (e < close && !isPunct(e, ";") && !(e > k + 1 && tokens[e].nl && tokens[e].depth === tokens[k].depth)) {
+            const v = tokens[e].type === "punct" ? tokens[e].value : "";
+            if (v === "(" || v === "[" || v === "{") e = match.get(e) ?? e;
+            e++;
+          }
+          out.push([k, e]);
+          m = e - 1;
+        }
+        memberStart = false;
+        continue;
+      }
+      if (t.nl) memberStart = true;
+      else memberStart = false;
+    }
+    return out;
+  };
   /** Function bodies [open, close] (to skip nested function scopes). */
   const fnBodies: Array<[number, number]> = [];
   /**
@@ -313,15 +489,7 @@ function functionScopes(tokens: ReturnType<typeof tokenize>, match: Map<number, 
       if (v === "const" || v === "let" || v === "var") {
         const j = i + 1;
         if (tokens[j]?.type === "ident") into.add(tokens[j].value);
-        else if (isPunct(j, "{") || isPunct(j, "[")) {
-          const close = match.get(j) ?? j;
-          for (let m = j + 1; m < close; m++) {
-            if (tokens[m]?.type !== "ident") continue;
-            if (isPunct(m + 1, ":")) continue; // property key, not a binding
-            if (isPunct(m - 1, "=")) continue; // default value (approximation)
-            into.add(tokens[m].value);
-          }
-        }
+        else if (isPunct(j, "{") || isPunct(j, "[")) addPatternBindings(into, j);
       } else if (here && (v === "function" || v === "class") && tokens[i + 1]?.type === "ident") {
         into.add(tokens[i + 1].value);
       }
@@ -346,6 +514,14 @@ function functionScopes(tokens: ReturnType<typeof tokenize>, match: Map<number, 
         }
         continue;
       }
+      // `{ [key]: v }`: a computed key is an expression (a reference).
+      if (isPunct(i, "[") && (isPunct(i - 1, "{") || isPunct(i - 1, ","))) {
+        const close = match.get(i);
+        if (close !== undefined && isPunct(close + 1, ":")) {
+          i = close;
+          continue;
+        }
+      }
       if (t?.type !== "ident") continue;
       if (isPunct(i - 1, ".") || (isPunct(i + 1, ":") && (isPunct(i - 1, "{") || isPunct(i - 1, ",")))) continue;
       locals.add(t.value);
@@ -367,7 +543,18 @@ function functionScopes(tokens: ReturnType<typeof tokenize>, match: Map<number, 
       if (q === undefined || !isPunct(q + 1, "{")) continue;
       const end = match.get(q + 1) ?? tokens.length - 1;
       fnBodies.push([q + 1, end]);
-      pending.push(() => ({ from: p, to: end, retained: retainedAt(k - 1), locals: collectLocals(p, q, q + 1, end, own) }));
+      // `function () { … }()` in expression position runs now. (A
+      // declaration followed by `(` on the next line is two statements.)
+      let b = k - 1;
+      if (val(b) === "async") b--;
+      const statementStart = b < 0 || isPunct(b, ";") || isPunct(b, "{") || isPunct(b, "}") || val(b) === "export" || val(b) === "default";
+      const invoked = !statementStart && isPunct(end + 1, "(");
+      pending.push(() => {
+        const locals = collectLocals(p, q, q + 1, end);
+        const selfName = own && statementStart && tokens[k].depth === 0 && !locals.has(own) ? own : undefined;
+        if (own) locals.add(own);
+        return { from: p, to: end, retained: invoked ? false : retainedAt(k - 1), locals, selfName };
+      });
       continue;
     }
     // ( … ) => …   /   x => …
@@ -396,6 +583,21 @@ function functionScopes(tokens: ReturnType<typeof tokenize>, match: Map<number, 
       pending.push(() => ({ from: pFrom, to: end, retained: retainedAt(pFrom - 1), locals: collectLocals(pFrom, pTo, k + 1, end) }));
       continue;
     }
+    // Method with a computed or literal key: [expr]( … ) { … }, "name"( … ) { … }.
+    if ((isPunct(k, "]") || t.type === "str" || t.type === "num") && isPunct(k + 1, "(")) {
+      const q = match.get(k + 1);
+      if (q === undefined || !isPunct(q + 1, "{")) continue;
+      const keyStart = isPunct(k, "]") ? (match.get(k) ?? -1) : k;
+      // `]` must close a `[` that starts a key, not an index (`a[0](…) {`
+      // isn't valid anyway, but `[x](…)` after `{` / `,` / prefix is a key).
+      const prev = val(keyStart - 1);
+      const keyPos = prev === "{" || prev === "," || prev === ";" || prev === "}" || prev === "*" || METHOD_PREFIXES.has(prev);
+      if (keyStart < 0 || !keyPos) continue;
+      const end = match.get(q + 1) ?? tokens.length - 1;
+      fnBodies.push([q + 1, end]);
+      pending.push(() => ({ from: k + 1, to: end, retained: true, locals: collectLocals(k + 1, q, q + 1, end) }));
+      continue;
+    }
     // Method: name ( … ) { … } in an object literal or class body.
     if (t.type === "ident" && isPunct(k + 1, "(")) {
       const q = match.get(k + 1);
@@ -420,7 +622,7 @@ function functionScopes(tokens: ReturnType<typeof tokenize>, match: Map<number, 
     // like methods. (A `static` initializer runs at definition; rare enough
     // to treat the same.)
     if (isClassBody(tokens, i)) {
-      scopes.push({ from: i, to: close, retained: true, locals: new Set() });
+      scopes.push({ from: i, to: close, retained: true, locals: new Set(), eager: classEagerRanges(i, close) });
       return;
     }
     const locals = new Set<string>();
@@ -449,8 +651,9 @@ function functionScopes(tokens: ReturnType<typeof tokenize>, match: Map<number, 
  *
  * Earlier parts are never mapped back to the document, so lengths may change.
  */
-function rewriteEarlierPart(code: string, names: ReadonlyMap<string, string>): string {
-  const src = neutraliseDirectives(code);
+function rewriteEarlierPart(code: string, names: ReadonlyMap<string, string>, preserveLength = false): string {
+  // The unit's own block keeps its directives (and so its offsets).
+  const src = preserveLength ? code : neutraliseDirectives(code);
   if (names.size === 0) return src;
   const tokens = tokenize(src);
   const match = matchBrackets(tokens);
@@ -463,6 +666,20 @@ function rewriteEarlierPart(code: string, names: ReadonlyMap<string, string>): s
       if (tok.value === "{") brackets.push(isClassBody(tokens, k) ? "class" : "{");
       else if (tok.value === "[" || tok.value === "(") brackets.push(tok.value);
       else if (tok.value === "}" || tok.value === "]" || tok.value === ")") brackets.pop();
+      continue;
+    }
+    if (tok.type === "tpl") {
+      // `${ … }` expressions: rewrite them like code at this point, minus
+      // names bound by enclosing functions; nothing inside a late-bound
+      // closure.
+      const around = scopes.filter((f) => k >= f.from && k <= f.to);
+      if (around.some((f) => f.retained && !f.eager?.some(([a, b]) => k >= a && k <= b))) continue;
+      const visible = new Map([...names].filter(([n]) => !around.some((f) => f.locals.has(n))));
+      if (!visible.size) continue;
+      for (const e of templateExpressions(tok.value)) {
+        const rewritten = rewriteEarlierPart(e.code, visible, preserveLength);
+        if (rewritten !== e.code) edits.push({ from: tok.start + e.offset, to: tok.start + e.offset + e.code.length, text: rewritten });
+      }
       continue;
     }
     if (tok.type !== "ident") continue;
@@ -493,13 +710,42 @@ function rewriteEarlierPart(code: string, names: ReadonlyMap<string, string>): s
     }
     // Enclosing functions, innermost first.
     const enclosing = scopes.filter((f) => k >= f.from && k <= f.to).sort((x, y) => (y.from - x.from) || (x.to - y.to));
-    if (enclosing.some((f) => f.locals.has(tok.value))) continue; // a local binding
-    if (enclosing.some((f) => f.retained)) continue; // late-bound closure
+    const binder = enclosing.find((f) => f.locals.has(tok.value));
+    if (binder) {
+      // A recursive reference to a top-level function declaration is that
+      // declaration's binding: it follows the rename. Anything else bound
+      // inside is local.
+      if (binder.selfName === tok.value) edits.push({ from: tok.start, to: tok.end, text: to });
+      continue;
+    }
+    // Late-bound closure — except code a class body runs at definition.
+    if (enclosing.some((f) => f.retained && !f.eager?.some(([a, b]) => k >= a && k <= b))) continue;
     const shorthand = keyPos && (nextP === "}" || nextP === "," || nextP === "=");
+    // In the unit's own block offsets must not move: a shorthand keeps
+    // the name (and its newest binding).
+    if (shorthand && preserveLength) continue;
     edits.push({ from: tok.start, to: tok.end, text: shorthand ? `${tok.value}: ${to}` : to });
   }
   let out = src;
   for (let e = edits.length - 1; e >= 0; e--) out = out.slice(0, edits[e].from) + edits[e].text + out.slice(edits[e].to);
+  return out;
+}
+
+/** The `${ … }` expressions of a template literal's source, with offsets into it. */
+function templateExpressions(tpl: string): Array<{ offset: number; code: string }> {
+  const out: Array<{ offset: number; code: string }> = [];
+  for (let i = 1; i < tpl.length; i++) {
+    if (tpl[i] === "\\") {
+      i++;
+      continue;
+    }
+    if (tpl[i] !== "$" || tpl[i + 1] !== "{") continue;
+    const from = i + 2;
+    const close = tokenize(tpl.slice(from)).find((x) => x.type === "punct" && x.value === "}" && x.depth === 0);
+    if (!close) break;
+    out.push({ offset: from, code: tpl.slice(from, from + close.start) });
+    i = from + close.start;
+  }
   return out;
 }
 
@@ -512,41 +758,101 @@ function constAsLet(code: string): string {
   return out;
 }
 
+/**
+ * Offsets where a part re-declares a top-level name it already declared
+ * (`let value = 1; let value = 'x'`): the shared runner turns both into
+ * assignments, so code after the second declaration sees the new value.
+ * Each cut starts a new version.
+ */
+function redeclarationCuts(code: string): number[] {
+  const tokens = tokenize(code);
+  // Top-level declaration statements, in order.
+  const starts: number[] = [];
+  for (let i = 0; i < tokens.length; i++) {
+    const t = tokens[i];
+    if (t.depth !== 0 || t.type !== "ident") continue;
+    const prev = tokens[i - 1];
+    const atStart = !prev || t.nl || (prev.type === "punct" && (prev.value === ";" || prev.value === "}"));
+    if (!atStart) continue;
+    const kw = t.value === "async" && tokens[i + 1]?.value === "function" ? "function" : t.value;
+    if (["let", "const", "var", "function", "class"].includes(kw)) starts.push(t.start);
+  }
+  // Each statement's names (every declarator and pattern binding): the
+  // slice up to the next declaration holds just this one.
+  const seen = new Set<string>();
+  const cuts: number[] = [];
+  starts.forEach((from, n) => {
+    const names = topLevelNames(code.slice(from, starts[n + 1] ?? code.length));
+    if (from > 0 && names.some((name) => seen.has(name))) cuts.push(from);
+    for (const name of names) seen.add(name);
+  });
+  return cuts;
+}
+
+/** Same-length stand-in for `name`, unused in the unit (own block only). */
+function sameLengthName(name: string, taken: Set<string>): string {
+  const alphabet = "$_abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  for (let pos = name.length - 1; pos >= 0; pos--) {
+    for (const ch of alphabet) {
+      if (pos === 0 && ch >= "0" && ch <= "9") continue;
+      const cand = name.slice(0, pos) + ch + name.slice(pos + 1);
+      if (cand !== name && !taken.has(cand)) return cand;
+    }
+  }
+  return name; // every variant taken: leave it (diagnostics may be imprecise)
+}
+
 function sharedUnit(scope: readonly TsBlock[], k: number): TsUnit {
   const own = scope[k];
-  // For each name: the parts (≤ k) that declare it, in order.
-  const declaredIn = new Map<string, number[]>();
+  // Every part is split at its own re-declarations into segments; each
+  // segment is one version step. seg = [part, from, to].
+  const segs: Array<{ part: number; from: number; to: number }> = [];
   scope.slice(0, k + 1).forEach((b, i) => {
-    for (const n of topLevelNames(b.code)) {
+    const cuts = redeclarationCuts(b.code);
+    let from = 0;
+    for (const c of cuts) {
+      segs.push({ part: i, from, to: c });
+      from = c;
+    }
+    segs.push({ part: i, from, to: b.code.length });
+  });
+  // For each name: the segments that declare it, in order.
+  const declaredIn = new Map<string, number[]>();
+  segs.forEach((g, i) => {
+    for (const n of topLevelNames(scope[g.part].code.slice(g.from, g.to))) {
       const at = declaredIn.get(n) ?? [];
       if (at[at.length - 1] !== i) at.push(i);
       declaredIn.set(n, at);
     }
   });
-  // One stand-in per superseded VERSION (declaring part), unique against
+  // One stand-in per superseded VERSION (declaring segment), unique against
   // every identifier in the unit's parts (nested bindings included):
-  // `name$prev`, `name$prev2`, …
+  // `name$prev`, `name$prev2`, … — or, inside the unit's own block, a
+  // same-length name so its offsets don't move.
   const allIdents = new Set<string>();
   for (const b of scope.slice(0, k + 1)) for (const t of tokenize(b.code)) if (t.type === "ident") allIdents.add(t.value);
   const used = new Set<string>();
   const versions = new Map<string, string>();
-  const standIn = (name: string, part: number): string => {
-    const key = `${name}@${part}`;
+  const standIn = (name: string, seg: number): string => {
+    const key = `${name}@${seg}`;
     let m = versions.get(key);
     if (!m) {
-      m = `${name}$prev`;
-      for (let n = 2; allIdents.has(m) || used.has(m); n++) m = `${name}$prev${n}`;
+      if (segs[seg].part === k) m = sameLengthName(name, new Set([...allIdents, ...used]));
+      else {
+        m = `${name}$prev`;
+        for (let n = 2; allIdents.has(m) || used.has(m); n++) m = `${name}$prev${n}`;
+      }
       used.add(m);
       versions.set(key, m);
     }
     return m;
   };
-  /** Part i's renames: each superseded name → the version visible to part i. */
+  /** Segment i's renames: each superseded name → the version visible to it. */
   const renamesFor = (i: number): Map<string, string> => {
     const rename = new Map<string, string>();
     for (const [n, at] of declaredIn) {
       const newest = at[at.length - 1];
-      if (newest <= i) continue; // part i already sees the final version
+      if (newest <= i) continue; // segment i already sees the final version
       const visible = [...at].reverse().find((d) => d <= i) ?? at[0];
       rename.set(n, standIn(n, visible));
     }
@@ -558,14 +864,20 @@ function sharedUnit(scope: readonly TsBlock[], k: number): TsUnit {
   for (let i = 0; i <= k; i++) {
     const b = scope[i];
     if (i > 0) code += PART_SEPARATOR;
-    let text = i < k ? rewriteEarlierPart(b.code, renamesFor(i)) : b.code;
+    let text = "";
+    segs.forEach((g, si) => {
+      if (g.part !== i) return;
+      const piece = b.code.slice(g.from, g.to);
+      const last = si === segs.length - 1;
+      text += last ? piece : rewriteEarlierPart(piece, renamesFor(si), i === k);
+    });
     // Shared runs turn top-level bindings into reassignable globals
     // (liveJsScope.hoistTopLevelBindings): `const` → `let`, same length.
     text = constAsLet(text);
-    if (i === k && b.live) code += LIVE_WRAP_OPEN;
-    parts.push({ block: b, offset: code.length });
+    let edits: UnitPart["edits"];
+    if (b.live) ({ text, edits } = neutraliseTopLevelReturns(text));
+    parts.push({ block: b, offset: code.length, ...(i === k && edits?.length ? { edits } : {}) });
     code += text;
-    if (i === k && b.live) code += LIVE_WRAP_CLOSE;
   }
   return { id: own.id, code, tsx: false, js: true, shared: true, parts };
 }
@@ -590,7 +902,7 @@ export function toUnits(blocks: readonly TsBlock[]): TsUnit[] {
 }
 
 /** The unit's own block (the one its diagnostics and positions belong to). */
-export function ownPart(unit: TsUnit): { block: TsBlock; offset: number } {
+export function ownPart(unit: TsUnit): UnitPart {
   return unit.parts[unit.parts.length - 1];
 }
 
@@ -603,18 +915,22 @@ export function unitRangeToDoc(
   start: number,
   length: number,
 ): { from: number; to: number } | null {
-  const { block, offset } = ownPart(unit);
-  if (start < offset || start > offset + block.code.length) return null;
-  const from = block.from + (start - offset);
-  const to = Math.min(from + Math.max(length, 1), block.to);
+  const part = ownPart(unit);
+  const { block, offset } = part;
+  const editedLen = toEdited(part, block.code.length);
+  if (start < offset || start > offset + editedLen) return null;
+  const from = block.from + fromEdited(part, start - offset);
+  const end = block.from + fromEdited(part, start - offset + Math.max(length, 1));
+  const to = Math.min(Math.max(end, from + 1), block.to);
   return to > from ? { from, to } : { from, to: Math.min(from + 1, block.to + 1) };
 }
 
 /** The unit and unit-relative offset for a document position, or null. */
 export function unitAt(units: readonly TsUnit[], pos: number): { unit: TsUnit; offset: number } | null {
   for (const unit of units) {
-    const { block, offset } = ownPart(unit);
-    if (pos >= block.from && pos <= block.to) return { unit, offset: offset + (pos - block.from) };
+    const part = ownPart(unit);
+    const { block, offset } = part;
+    if (pos >= block.from && pos <= block.to) return { unit, offset: offset + toEdited(part, pos - block.from) };
   }
   return null;
 }

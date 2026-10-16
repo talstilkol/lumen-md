@@ -20,7 +20,7 @@ jobs:
     # Only deploy if Fly.io is configured
     if: vars.FLY_APP_NAME != ''
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - uses: superfly/flyctl-actions/setup-flyctl@master
 

@@ -10,9 +10,10 @@
  *
  * Usage:
  *   node scripts/extract-i18n-keys.mjs > i18n/keys.json
+ *   node scripts/extract-i18n-keys.mjs --check   # CI: fail if keys.json is stale
  */
 
-import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
+import { existsSync, readFileSync, writeFileSync, mkdirSync } from "node:fs";
 import { resolve } from "node:path";
 
 const PATH = resolve("src/i18n/index.ts");
@@ -55,8 +56,30 @@ const out = {
   entries,
 };
 
-mkdirSync("i18n", { recursive: true });
 const dest = resolve("i18n/keys.json");
+
+if (process.argv.includes("--check")) {
+  // Compare everything but the timestamp; never writes.
+  const committed = existsSync(dest) ? JSON.parse(readFileSync(dest, "utf8")) : { entries: [] };
+  const same = JSON.stringify(committed.entries) === JSON.stringify(entries) && committed.count === entries.length;
+  if (same) {
+    console.error(`✓ i18n/keys.json is up to date (${entries.length} entries)`);
+    process.exit(0);
+  }
+  const was = new Map((committed.entries ?? []).map((e) => [e.key, JSON.stringify(e)]));
+  const now = new Map(entries.map((e) => [e.key, JSON.stringify(e)]));
+  const added = [...now.keys()].filter((k) => !was.has(k));
+  const removed = [...was.keys()].filter((k) => !now.has(k));
+  const changed = [...now.keys()].filter((k) => was.has(k) && was.get(k) !== now.get(k));
+  console.error(`✗ i18n/keys.json is stale: ${added.length} missing, ${removed.length} removed, ${changed.length} changed.`);
+  for (const [label, keys] of [["missing", added], ["removed", removed], ["changed", changed]]) {
+    if (keys.length) console.error(`  ${label}: ${keys.slice(0, 20).join(", ")}${keys.length > 20 ? ", …" : ""}`);
+  }
+  console.error("  Run `npm run i18n:extract` and commit i18n/keys.json.");
+  process.exit(1);
+}
+
+mkdirSync("i18n", { recursive: true });
 writeFileSync(dest, JSON.stringify(out, null, 2) + "\n");
 console.error(`✓ wrote ${entries.length} entries to ${dest}`);
 // Echo the JSON to stdout too so the script can be piped.
