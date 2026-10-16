@@ -301,7 +301,10 @@ const MAX_LINKED_PAGES = 1000;
 export function linkedPages(start: string, root: string): string[] {
   const seen = new Set<string>([start]);
   const queue = [start];
-  const LINK_RE = /\]\(\s*<?([^)\s>]+)|^\s{0,3}\[[^\]]+\]:\s*<?(\S+?)>?(?:\s|$)|\bhref="([^"]+)"/gm;
+  // Inline `](<dest with spaces>)` / `](dest)`, reference definitions
+  // (`[x]: <dest>` / `[x]: dest`) and raw `href="…"`.
+  const LINK_RE =
+    /\]\(\s*(?:<([^>\n]+)>|([^)\s]+))|^\s{0,3}\[[^\]]+\]:\s*(?:<([^>\n]+)>|(\S+))|\bhref="([^"]+)"/gm;
   while (queue.length && seen.size < MAX_LINKED_PAGES) {
     const cur = queue.shift()!;
     let md: string;
@@ -311,7 +314,7 @@ export function linkedPages(start: string, root: string): string[] {
       continue;
     }
     for (const m of md.matchAll(LINK_RE)) {
-      let url = (m[1] ?? m[2] ?? m[3] ?? "").replace(/&amp;/g, "&");
+      let url = (m[1] ?? m[2] ?? m[3] ?? m[4] ?? m[5] ?? "").replace(/&amp;/g, "&");
       if (!url || /^([a-z][a-z0-9+.-]*:|\/\/|\/|#)/i.test(url)) continue;
       url = url.replace(/[?#].*$/, "");
       try {

@@ -33,8 +33,9 @@ describe("findTsBlocks", () => {
     expect(blockAt(blocks, 0)).toBeNull();
   });
 
-  it("ignores unclosed fences and backtick info strings", () => {
-    expect(findTsBlocks("```ts\nopen")).toEqual([]);
+  it("checks an unclosed fence through the end; ignores backtick info strings", () => {
+    const open = findTsBlocks("intro\n```ts\nconst x = 1");
+    expect(open.map((b) => b.code)).toEqual(["const x = 1"]);
     expect(findTsBlocks("```ts `x`\na\n```")).toEqual([]);
   });
 });

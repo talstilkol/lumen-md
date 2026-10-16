@@ -312,3 +312,33 @@ describe("ZIP inflation limits", () => {
     expect(IWORK_UNZIP_LIMITS.maxEntryBytes).toBeLessThanOrEqual(64 * 1024 * 1024);
   });
 });
+
+describe("legacy iWork gzip limit", () => {
+  it("stops inflating a gzip member past its cap", async () => {
+    const { gunzip } = await import("../storage/iwork");
+    const cs = new CompressionStream("gzip");
+    const big = new Uint8Array(2 * 1024 * 1024);
+    const src = new ReadableStream<Uint8Array>({
+      start(c) {
+        c.enqueue(big);
+        c.close();
+      },
+    });
+    const reader = src.pipeThrough(cs as unknown as ReadableWritablePair<Uint8Array, Uint8Array>).getReader();
+    const parts: Uint8Array[] = [];
+    for (;;) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      parts.push(value);
+    }
+    const gz = new Uint8Array(parts.reduce((a, c) => a + c.length, 0));
+    let o = 0;
+    for (const p of parts) {
+      gz.set(p, o);
+      o += p.length;
+    }
+    expect(gz.length).toBeLessThan(64 * 1024);
+    await expect(gunzip(gz, 1024 * 1024)).rejects.toThrow(/size limit/);
+    expect((await gunzip(gz)).length).toBe(2 * 1024 * 1024);
+  });
+});

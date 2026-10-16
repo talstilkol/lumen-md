@@ -58,6 +58,17 @@ export function findTsBlocks(doc: string): TsBlock[] {
     if (nl === -1) break;
     pos = nl + 1;
   }
+  // An unclosed fence runs to the end of the document (CommonMark) — a
+  // block still being typed is checked too.
+  if (open && TS_LANGS.has(open.lang) && open.codeFrom <= doc.length) {
+    out.push({
+      id: `block-${out.length}`,
+      tsx: open.lang === "tsx",
+      from: open.codeFrom,
+      to: doc.length,
+      code: doc.slice(open.codeFrom),
+    });
+  }
   return out;
 }
 
