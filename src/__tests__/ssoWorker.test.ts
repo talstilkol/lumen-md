@@ -61,7 +61,7 @@ function orgsResponse(data: unknown[]) {
 
 /** Run /authorize successfully and return the state + nonce cookie. */
 async function startFlow(): Promise<{ state: string; nonce: string }> {
-  fetchMock.mockResolvedValueOnce(orgsResponse([{ id: "org_01" }]));
+  fetchMock.mockResolvedValueOnce(orgsResponse([{ id: "org_01", domains: [{ domain: "acme.com" }] }]));
   const res = await worker.fetch(req("/api/sso/authorize?domain=acme.com"), env);
   expect(res.status).toBe(200);
   const { redirect } = (await res.json()) as { redirect: string };
@@ -101,7 +101,7 @@ describe("routing + config", () => {
 
 describe("GET /api/sso/authorize", () => {
   it("returns the WorkOS authorization URL and sets a state cookie", async () => {
-    fetchMock.mockResolvedValueOnce(orgsResponse([{ id: "org_01" }]));
+    fetchMock.mockResolvedValueOnce(orgsResponse([{ id: "org_01", domains: [{ domain: "acme.com" }] }]));
     const res = await worker.fetch(req("/api/sso/authorize?domain=Acme.com"), env);
     expect(res.status).toBe(200);
     const [orgUrl, orgInit] = fetchMock.mock.calls[0];
@@ -125,7 +125,7 @@ describe("GET /api/sso/authorize", () => {
   });
 
   it("honours WORKOS_REDIRECT_URI", async () => {
-    fetchMock.mockResolvedValueOnce(orgsResponse([{ id: "org_01" }]));
+    fetchMock.mockResolvedValueOnce(orgsResponse([{ id: "org_01", domains: [{ domain: "acme.com" }] }]));
     const res = await worker.fetch(req("/api/sso/authorize?domain=acme.com"), {
       ...env,
       WORKOS_REDIRECT_URI: "https://sso.example.org/cb",
@@ -158,6 +158,13 @@ describe("GET /api/sso/authorize", () => {
     const res = await worker.fetch(req("/api/sso/authorize?domain=acme.com"), env);
     expect(res.status).toBe(404);
     expect(((await res.json()) as { error: string }).error).toBe("no_sso_connection");
+  });
+
+  it("never routes to an organization that doesn't list the domain", async () => {
+    // e.g. the domain filter ignored: the environment's first org comes back.
+    fetchMock.mockResolvedValueOnce(orgsResponse([{ id: "org_other", domains: [{ domain: "other.io" }] }]));
+    const res = await worker.fetch(req("/api/sso/authorize?domain=acme.com"), env);
+    expect(res.status).toBe(404);
   });
 
   it("502s when WorkOS errors or is unreachable", async () => {

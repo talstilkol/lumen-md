@@ -284,7 +284,10 @@ async function handleAuthorize(req: Request, env: Env, url: URL, cors: Record<st
     return errorJson(502, "workos_error", `WorkOS organization lookup failed (${orgRes.status}).`, cors);
   }
   const orgs = (await orgRes.json().catch(() => ({}))) as WorkOSOrganizationList;
-  const org = orgs.data?.[0];
+  // Only an organization that actually lists this domain: if the filter
+  // were ignored, the first organization of the environment must not be
+  // used for someone else's domain.
+  const org = orgs.data?.find((o) => o.domains?.some((d) => d.domain?.toLowerCase() === domain));
   if (!org) {
     return errorJson(404, "no_sso_connection", `No SSO organization is configured for ${domain}.`, cors);
   }
