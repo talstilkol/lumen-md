@@ -307,3 +307,22 @@ describe("Team plans bought by SSO organization members", () => {
     expect(calls[0].body.get("customer")).toBe("cus_me");
   });
 });
+
+describe("plan switches in the Billing Portal", () => {
+  it("derive the tier from the current price, not the stale Checkout metadata", async () => {
+    const { withCurrentSubscriptionState } = await import("../../edge-workers/billing/worker");
+    const sub = (price: string) => ({
+      id: "sub_1",
+      status: "active",
+      customer: "cus_1",
+      metadata: { userId: "u1", tier: "pro" }, // stamped at Checkout
+      items: { data: [{ price: { id: price } }] },
+    });
+    // Event payload: Pro → Team upgrade.
+    expect(entitlementFromEvent(env, { type: "customer.subscription.updated", data: { object: sub("price_team_m") } })).toMatchObject({ tier: "team" });
+    // Current-state refresh: Team → Pro downgrade even though metadata says team.
+    vi.stubGlobal("fetch", vi.fn(async () => new Response(JSON.stringify({ ...sub("price_pro_m"), metadata: { tier: "team" } }), { status: 200 })));
+    const row = await withCurrentSubscriptionState(env, { user_id: "u1", status: "active", tier: "team", stripe_subscription_id: "sub_1" });
+    expect(row.tier).toBe("pro");
+  });
+});

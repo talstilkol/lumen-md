@@ -461,3 +461,13 @@ if (typeof window !== "undefined" && window.matchMedia) {
 export function applyDirection(rtl: boolean) {
   document.documentElement.dir = rtl ? "rtl" : "ltr";
 }
+
+/**
+ * Align the (already rehydrated) store with the locale boot actually
+ * applied. `initLocale` falls back to English when the saved locale's chunk
+ * can't load; without this, App's mount effect would re-apply the saved
+ * locale (English strings under e.g. Hebrew RTL).
+ */
+export function adoptBootLocale(applied: Locale): void {
+  if (useAppStore.getState().locale !== applied) useAppStore.setState({ locale: applied });
+}

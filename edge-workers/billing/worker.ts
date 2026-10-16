@@ -499,7 +499,9 @@ export async function withCurrentSubscriptionState(
   const status = update.status === "unpaid" ? "unpaid" : String(sub.status ?? update.status);
   const metaTier = sub.metadata?.tier === "pro" || sub.metadata?.tier === "team" ? sub.metadata.tier : null;
   const tier =
-    metaTier ?? (sub.items?.data ?? []).map((i) => tierForPrice(env, i.price?.id)).find((x) => x) ?? update.tier;
+    // The CURRENT price wins: a plan switch in the Billing Portal changes the
+    // item's price but not the tier metadata Checkout stamped.
+    (sub.items?.data ?? []).map((i) => tierForPrice(env, i.price?.id)).find((x) => x) ?? metaTier ?? update.tier;
   const end = sub.current_period_end;
   return {
     ...update,
@@ -564,7 +566,8 @@ export function entitlementFromEvent(
     case "customer.subscription.updated":
     case "customer.subscription.deleted": {
       const items = (obj.items as { data?: Array<{ price?: { id?: unknown } }> } | undefined)?.data ?? [];
-      const tier = metaTier ?? items.map((i) => tierForPrice(env, i.price?.id)).find((x) => x) ?? null;
+      // Current price first (portal plan switches don't rewrite metadata).
+      const tier = items.map((i) => tierForPrice(env, i.price?.id)).find((x) => x) ?? metaTier ?? null;
       const end = obj.current_period_end;
       return {
         user_id: uid,

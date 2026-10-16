@@ -13,6 +13,7 @@ import { reportWebVitals } from "./lib/webVitals";
 import { log } from "./lib/logger";
 import { startAutoBackup } from "./sync/autoBackup";
 import { initLocale } from "./i18n";
+import { adoptBootLocale } from "./store/useStore";
 import "./index.css";
 
 initTelemetry();
@@ -57,7 +58,15 @@ initShareExtension();
 // Load the persisted locale's lazy bundle BEFORE the first render so the
 // synchronous t() calls never flash English for a Hebrew/French/… user.
 // initLocale() resolves to English on any failure, so boot never blocks.
-void initLocale().finally(renderApp);
+void initLocale()
+  .then((applied) => {
+    // initLocale falls back to English when the saved locale's chunk can't
+    // load; the store was already rehydrated with the saved locale, and
+    // App applies the store's locale on mount — sync it so that doesn't
+    // undo the fallback (English strings under an RTL `lang`).
+    adoptBootLocale(applied);
+  })
+  .finally(renderApp);
 
 function renderApp() {
 ReactDOM.createRoot(document.getElementById("root")!).render(

@@ -116,6 +116,27 @@ describe("A7 lever 4 — only English ships eagerly", () => {
     }
   });
 
+  it("boot fallback updates the rehydrated store so App's mount effect can't re-apply RTL", async () => {
+    vi.doMock("../i18n/locales/he.json", () => {
+      throw new Error("offline");
+    });
+    try {
+      vi.resetModules();
+      localStorage.setItem("lumen-md", JSON.stringify({ state: { locale: "he" }, version: 0 }));
+      const { useAppStore, adoptBootLocale } = await import("../store/useStore");
+      const i18n = await import("../i18n");
+      expect(useAppStore.getState().locale).toBe("he"); // rehydrated from storage
+      adoptBootLocale(await i18n.initLocale());
+      expect(useAppStore.getState().locale).toBe("en");
+      // What App's effect does on mount:
+      i18n.applyLocale(useAppStore.getState().locale);
+      expect(document.documentElement.dir).not.toBe("rtl");
+    } finally {
+      vi.doUnmock("../i18n/locales/he.json");
+      localStorage.removeItem("lumen-md");
+    }
+  });
+
   it("switching to a locale whose chunk can't load keeps the UI English and LTR", async () => {
     vi.doMock("../i18n/locales/he.json", () => {
       throw new Error("offline");
