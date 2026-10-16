@@ -92,11 +92,14 @@ export interface ChatOptions {
    * was routed elsewhere (fallbacks, local WebGPU).
    */
   onUsage?: (u: Omit<Usage, "provider"> & { provider?: string }) => void;
+  /** Internal: the provider a fallback actually sent the request to. */
+  onRoute?: (provider: AiProvider) => void;
 }
 
 const DEFAULT_MODEL = "gpt-4o-mini";
 /** Each cloud provider's model when the user hasn't picked one (the provider modules use these). */
 export const PROVIDER_DEFAULT_MODELS = {
+  "local-webgpu": "Llama-3-8B-Instruct-q4f16_1-MLC",
   anthropic: "claude-3-5-sonnet-latest",
   gemini: "gemini-1.5-flash",
   mistral: "mistral-small-latest",
@@ -235,6 +238,9 @@ export async function chat(
   let answeredBy: string = provider;
   const text = await chatDirect(messages, {
     ...opts,
+    onRoute: (p) => {
+      answeredBy = p;
+    },
     onUsage: (u) => {
       reported = true;
       answeredBy = u.provider ?? provider;
@@ -243,8 +249,8 @@ export async function chat(
   });
   if (text && !reported) {
     recordUsage({
-      provider,
-      model,
+      provider: answeredBy,
+      model: answeredBy === provider ? model : effectiveModel(answeredBy as AiProvider, {}),
       inputTokens: estimateTokens(promptChars(messages)),
       outputTokens: estimateTokens(text),
       estimated: true,
@@ -358,7 +364,7 @@ async function chatDirect(
         const text = await chatLocal(messages, { model: opts.model, maxTokens: opts.maxTokens, temperature: opts.temperature });
         opts.onUsage?.({
           provider: "local-webgpu",
-          model: opts.model ?? "webgpu",
+          model: opts.model ?? PROVIDER_DEFAULT_MODELS["local-webgpu"],
           inputTokens: estimateTokens(promptChars(messages)),
           outputTokens: estimateTokens(text),
           estimated: true,
@@ -372,6 +378,8 @@ async function chatDirect(
   }
 
   // ── OpenAI (cloud) ─────────────────────────────────────────────
+  // Also the fallback when Ollama / WebGPU isn't available.
+  opts.onRoute?.("openai");
   const key = getAiKey();
   checkRateLimit();
   charge();
@@ -410,9 +418,10 @@ async function chatDirect(
       throw new AiError("API_ERROR", `API ${res.status}: ${body.slice(0, 200)}`);
     }
     const data = await res.json();
+    // Metered even when the answer turns out empty (it was billed).
+    reportOpenAiUsage(data.usage, data.model ?? model, opts);
     const text = data.choices?.[0]?.message?.content?.trim();
     if (!text) throw new AiError("PARSE_ERROR", "Empty AI response.");
-    reportOpenAiUsage(data.usage, data.model ?? model, opts);
     return text;
   } catch (err) {
     if (opts.signal?.aborted || (err instanceof DOMException && err.name === "AbortError")) {
@@ -458,9 +467,13 @@ export async function* chatStream(
   const provider = getActiveProvider();
   let reported = false;
   let out = "";
+  let routedTo: AiProvider = provider;
   try {
     for await (const chunk of chatStreamDirect(messages, {
       ...opts,
+      onRoute: (p) => {
+        routedTo = p;
+      },
       onUsage: (u) => {
         reported = true;
         recordUsage({ ...u, provider: u.provider ?? provider });
@@ -474,8 +487,8 @@ export async function* chatStream(
     // final usage event never arrived, but the generated text was billed.
     if (out && !reported) {
       recordUsage({
-        provider,
-        model: effectiveModel(provider, opts),
+        provider: routedTo,
+        model: effectiveModel(routedTo, routedTo === provider ? opts : {}),
         inputTokens: estimateTokens(promptChars(messages)),
         outputTokens: estimateTokens(out),
         estimated: true,
@@ -533,6 +546,8 @@ async function* chatStreamDirect(
     return;
   }
 
+  // OpenAI — also the fallback when Ollama isn't available.
+  opts.onRoute?.("openai");
   const key = getAiKey();
   checkRateLimit();
   charge();
