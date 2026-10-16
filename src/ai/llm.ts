@@ -82,18 +82,16 @@ export interface ChatOptions {
    */
   cache?: boolean;
   /**
-<<<<<<< HEAD
    * "light": a small task (tags, titles, outline, completions). In the
    * economy / balanced AI modes it goes to the provider's small model
    * unless `model` pins one. Economy mode routes every unpinned request.
    */
   tier?: "light" | "heavy";
-=======
+  /**
    * With `cache`: store the answer only when this accepts it (e.g. it
    * parses), so a malformed answer is retried next time, not replayed.
    */
   cacheIf?: (text: string) => boolean;
->>>>>>> feat/ai-cache-usage
   /**
    * Internal: providers report token usage here (exact where the API
    * returns it). `provider` overrides the selected one when the request
