@@ -456,6 +456,17 @@ export async function generateChart(data: string): Promise<string> {
   const out = await chat([
     { role: "system", content: PROMPTS.visualization },
     { role: "user", content: data },
-  ], { cache: true });
+  ], {
+    cache: true,
+    // Cache only a chart spec that parses.
+    cacheIf: (r) => {
+      try {
+        JSON.parse(stripCodeFences(r));
+        return true;
+      } catch {
+        return false;
+      }
+    },
+  });
   return "```chart\n" + stripCodeFences(out) + "\n```";
 }
