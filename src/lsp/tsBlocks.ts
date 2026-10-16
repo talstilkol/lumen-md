@@ -569,6 +569,20 @@ function rewriteEarlierPart(code: string, names: ReadonlyMap<string, string>, pr
       else if (tok.value === "}" || tok.value === "]" || tok.value === ")") brackets.pop();
       continue;
     }
+    if (tok.type === "tpl") {
+      // `${ … }` expressions: rewrite them like code at this point, minus
+      // names bound by enclosing functions; nothing inside a late-bound
+      // closure.
+      const around = scopes.filter((f) => k >= f.from && k <= f.to);
+      if (around.some((f) => f.retained && !f.eager?.some(([a, b]) => k >= a && k <= b))) continue;
+      const visible = new Map([...names].filter(([n]) => !around.some((f) => f.locals.has(n))));
+      if (!visible.size) continue;
+      for (const e of templateExpressions(tok.value)) {
+        const rewritten = rewriteEarlierPart(e.code, visible, preserveLength);
+        if (rewritten !== e.code) edits.push({ from: tok.start + e.offset, to: tok.start + e.offset + e.code.length, text: rewritten });
+      }
+      continue;
+    }
     if (tok.type !== "ident") continue;
     const to = names.get(tok.value);
     if (!to) continue;
@@ -615,6 +629,24 @@ function rewriteEarlierPart(code: string, names: ReadonlyMap<string, string>, pr
   }
   let out = src;
   for (let e = edits.length - 1; e >= 0; e--) out = out.slice(0, edits[e].from) + edits[e].text + out.slice(edits[e].to);
+  return out;
+}
+
+/** The `${ … }` expressions of a template literal's source, with offsets into it. */
+function templateExpressions(tpl: string): Array<{ offset: number; code: string }> {
+  const out: Array<{ offset: number; code: string }> = [];
+  for (let i = 1; i < tpl.length; i++) {
+    if (tpl[i] === "\\") {
+      i++;
+      continue;
+    }
+    if (tpl[i] !== "$" || tpl[i + 1] !== "{") continue;
+    const from = i + 2;
+    const close = tokenize(tpl.slice(from)).find((x) => x.type === "punct" && x.value === "}" && x.depth === 0);
+    if (!close) break;
+    out.push({ offset: from, code: tpl.slice(from, from + close.start) });
+    i = from + close.start;
+  }
   return out;
 }
 

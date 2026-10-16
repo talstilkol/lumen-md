@@ -85,6 +85,18 @@ const WORKER_ISOLATION_PRELUDE = `/* Lumen: isolate the webR worker */
     };
     try { Object.defineProperty(g, "fetch", { value: guardedFetch, configurable: false, writable: false }); } catch (e) { g.fetch = guardedFetch; }
   }
+  // importScripts is another way to load (and send) cross-origin
+  // requests: same allowlist (webR loads R.js from this folder).
+  if (typeof g.importScripts === "function") {
+    var realImport = g.importScripts.bind(g);
+    var guardedImport = function () {
+      for (var i = 0; i < arguments.length; i++) {
+        if (!allowed(arguments[i])) throw new TypeError("Network access is disabled in live-r blocks");
+      }
+      return realImport.apply(null, arguments);
+    };
+    try { Object.defineProperty(g, "importScripts", { value: guardedImport, configurable: false, writable: false }); } catch (e) { g.importScripts = guardedImport; }
+  }
   if (g.XMLHttpRequest) {
     var open = g.XMLHttpRequest.prototype.open;
     var guardedOpen = function (method, url) {

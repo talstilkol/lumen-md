@@ -232,6 +232,17 @@ describe("JavaScript blocks and shared scopes", () => {
     expect(r.diags).toEqual([]);
   });
 
+  it("references inside template interpolations follow the version at that point", () => {
+    const { units, diags } = checkShared(
+      "const value = 1; const id = (s, v) => v; const saved = id`n=${value}`; const late = () => `${value}`;",
+      "// @ts-check\nconst value = 'x';\nsaved.toFixed(); late().toUpperCase();",
+    );
+    const first = units[1].code.split("\n;\n")[0];
+    expect(first).toContain("id`n=${value$prev}`");
+    expect(first).toContain("() => `${value}`"); // late-bound closure: newest
+    expect(diags).toEqual([]);
+  });
+
   it("a directly invoked function expression runs with that time's value", () => {
     const { units, diags } = checkShared(
       "const value = 1; const result = function () { return value; }(); function decl() { return value; }\n(0);",

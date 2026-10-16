@@ -163,7 +163,7 @@ test("live-r executes real R via webR and draws a plot", async ({ page }) => {
   // R can evaluate JavaScript in its worker (webr::eval_js): the worker is
   // isolated, so storage APIs are gone there.
   await editor.fill(
-    "```live-r\nx <- 1:100\ncat(sum(x) + 37, \"\\n\")\ncat(webr::eval_js(\"[typeof indexedDB, typeof caches, String(navigator.storage)].join('/')\"), \"\\n\")\nplot(x, x^2)\n```\n",
+    "```live-r\nx <- 1:100\ncat(sum(x) + 37, \"\\n\")\ncat(webr::eval_js(\"[typeof indexedDB, typeof caches, String(navigator.storage)].join('/')\"), \"\\n\")\ncat(webr::eval_js(\"try { importScripts('https://example.com/x.js'); 'loaded' } catch (e) { 'blocked' }\"), \"\\n\")\nplot(x, x^2)\n```\n",
   );
 
   const diag: string[] = [];
@@ -184,6 +184,7 @@ test("live-r executes real R via webR and draws a plot", async ({ page }) => {
     throw new Error(`live-r never printed 5087. data-state=${state}\nblock: ${text.slice(0, 400)}\n${diag.slice(-25).join("\n")}\n${String(err)}`);
   }
   await expect(block).toContainText("undefined/undefined/undefined");
+  await expect(block).toContainText("blocked");
   await expect(block.locator("canvas")).toHaveCount(1);
   await expect(block).toHaveAttribute("data-state", "success");
 });

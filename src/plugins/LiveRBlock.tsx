@@ -54,6 +54,20 @@ export default function LiveRBlock({ source, meta }: Props) {
   const timeoutMs = parseTimeout(meta);
   const [lines, setLines] = useState<ROutputLine[]>([]);
   const [images, setImages] = useState<ImageBitmap[]>([]);
+  // Plot bitmaps are native allocations: close the previous set when it is
+  // replaced or cleared, and on unmount (canvases already hold the pixels).
+  useEffect(
+    () => () => {
+      for (const b of images) {
+        try {
+          b.close?.();
+        } catch {
+          /* already closed */
+        }
+      }
+    },
+    [images],
+  );
   const [state, setState] = useState<RunState>("idle");
   const [elapsed, setElapsed] = useState<number | null>(null);
   const [showSource, setShowSource] = useState(false);
@@ -118,7 +132,11 @@ export default function LiveRBlock({ source, meta }: Props) {
         }),
         timedOut,
       ]);
-      if (runId !== runSeq.current || out === null) return;
+      if (runId !== runSeq.current || out === null) {
+        // A superseded run's plots are never shown.
+        if (out && out !== "timeout") for (const b of out.images) b.close?.();
+        return;
+      }
       if (out === "timeout") {
         // R can't be interrupted over the PostMessage channel: drop the
         // runtime; the next Run boots a fresh one.
