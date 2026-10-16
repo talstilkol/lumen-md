@@ -151,10 +151,18 @@ wrangler secret put STRIPE_SECRET_KEY
 wrangler secret put STRIPE_WEBHOOK_SECRET
 wrangler secret put SUPABASE_URL
 wrangler secret put SUPABASE_SERVICE_ROLE
+# Sellable prices (same ids as VITE_PRICE_ID_PRO / VITE_PRICE_ID_TEAM);
+# /checkout refuses any other price and derives the tier from this list:
+wrangler secret put STRIPE_PRICE_PRO     # e.g. price_123 (comma-separate monthly,yearly)
+wrangler secret put STRIPE_PRICE_TEAM
 wrangler deploy
 # → https://lumen-billing.<your>.workers.dev
 
 # 4d. Wire the Stripe webhook to /webhook on that URL via the Stripe Dashboard.
+#     Events: checkout.session.completed, checkout.session.async_payment_succeeded,
+#     checkout.session.async_payment_failed, customer.subscription.created,
+#     customer.subscription.updated, customer.subscription.deleted.
+#     Access is granted only once Stripe reports the payment as paid.
 # 4e. Set client env:
 #   VITE_BILLING_ENDPOINT=https://lumen-billing.<your>.workers.dev/checkout
 #   VITE_ENTITLEMENT_ENDPOINT=https://lumen-billing.<your>.workers.dev/entitlements
@@ -225,16 +233,27 @@ wrangler secret put BILLING_TOKEN_SECRET  # that value
 #   and in edge-workers/billing: wrangler secret put SSO_TOKEN_SECRET  (same value)
 #   Entitlement rows for SSO users are keyed `workos:<user id>`, or
 #   `workos-org:<organization id>` for an org-wide (enterprise) plan.
-# 5b-2. Set ALLOWED_ORIGINS in wrangler.toml to your app origin(s).
+# 5b-2. Set ALLOWED_ORIGINS in wrangler.toml to your app origin(s), and give
+#       the worker a host on the SAME SITE as the app (see below), e.g. the
+#       `routes` example in edge-workers/auth/wrangler.toml.
 wrangler deploy
-# → https://lumen-auth.<your>.workers.dev  (verify: GET /health → configured:true)
+# verify: GET https://auth.<your-domain>/health → configured:true
 
 # Client env:
-#   VITE_WORKOS_ENDPOINT=https://lumen-auth.<your>.workers.dev
+#   VITE_WORKOS_ENDPOINT=https://auth.<your-domain>
 ```
 
-The session cookie is `SameSite=None; Secure`, so the app must be served over
-HTTPS (or `http://localhost` during development).
+**Serve the SSO worker on the app's own site.** The nonce and session
+cookies are set by the worker. If it lives on a different registrable
+domain than the app (e.g. `lumen-auth.<you>.workers.dev` while the app is on
+`example.org`), they are third-party cookies — Safari blocks those
+outright, so sign-in ends in `state_mismatch` and sessions never stick.
+Use a sibling subdomain (`auth.example.org` for an app on
+`app.example.org` / `example.org`) or a route on the app's own host
+(`example.org/api/sso/*`, then `VITE_WORKOS_ENDPOINT=https://example.org`).
+`*.workers.dev` is fine for local testing in Chrome only; the app logs a
+warning when the configured endpoint is cross-site. Cookies are
+`SameSite=None; Secure`, so serve over HTTPS (or `http://localhost`).
 
 ---
 

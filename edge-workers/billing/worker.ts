@@ -30,6 +30,8 @@
  *   - STRIPE_WEBHOOK_SECRET    — whsec_…
  *   - SUPABASE_URL
  *   - SUPABASE_SERVICE_ROLE
+ *   - STRIPE_PRICE_PRO / STRIPE_PRICE_TEAM — sellable price ids per tier
+ *                                (comma-separated); /checkout rejects others
  *   - SSO_TOKEN_SECRET         — optional; same value as the SSO worker's
  *                                BILLING_TOKEN_SECRET. Lets WorkOS/SSO users
  *                                (who have no Supabase token) authenticate
@@ -51,6 +53,25 @@ export interface Env {
   ALLOWED_ORIGIN?: string;
   /** HS256 secret shared with the SSO worker (its BILLING_TOKEN_SECRET). */
   SSO_TOKEN_SECRET?: string;
+  /**
+   * Stripe price ids that may be bought, comma-separated per tier (the
+   * same values as the client's VITE_PRICE_ID_PRO / VITE_PRICE_ID_TEAM).
+   * /checkout refuses any other price, and the tier is derived from here —
+   * never taken from the request.
+   */
+  STRIPE_PRICE_PRO?: string;
+  STRIPE_PRICE_TEAM?: string;
+}
+
+type PaidTier = "pro" | "team";
+
+/** The tier a Stripe price id grants, or null when it isn't on the allowlist. */
+export function tierForPrice(env: Env, priceId: unknown): PaidTier | null {
+  if (typeof priceId !== "string" || !priceId) return null;
+  const list = (v?: string) => (v ?? "").split(",").map((x) => x.trim()).filter(Boolean);
+  if (list(env.STRIPE_PRICE_TEAM).includes(priceId)) return "team";
+  if (list(env.STRIPE_PRICE_PRO).includes(priceId)) return "pro";
+  return null;
 }
 
 const CORS = {
@@ -220,7 +241,7 @@ function normalizeStatus(raw: unknown): Status {
     case "past_due":
     case "canceled":
       return raw;
-    case "complete": // checkout.session.completed — payment went through
+    case "complete": // legacy rows written from a completed Checkout Session
       return "active";
     case "unpaid":
       return "past_due";
@@ -332,6 +353,14 @@ async function checkout(req: Request, env: Env): Promise<{ url: string }> {
     successUrl: string;
     cancelUrl: string;
   };
+  // The price comes from the browser: only sell prices on the server-side
+  // allowlist, and derive the tier from it (never trust a client tier).
+  const tier = tierForPrice(env, priceId);
+  if (!tier) throw new Error("Unknown price");
+  // Stripe redirects back to these; keep them on our own origins.
+  for (const u of [successUrl, cancelUrl]) {
+    if (!isAllowedRedirect(env, u)) throw new Error("Redirect URL not allowed");
+  }
   const session = await stripe<{ url: string; id: string }>(env, "/checkout/sessions", {
     mode: "subscription",
     "line_items[0][price]": priceId,
@@ -339,12 +368,28 @@ async function checkout(req: Request, env: Env): Promise<{ url: string }> {
     success_url: successUrl,
     cancel_url: cancelUrl,
     "metadata[userId]": uid,
+    "metadata[tier]": tier,
     // Copied onto the Subscription so customer.subscription.* webhooks
-    // can be attributed to the user too.
+    // can be attributed to the user (and plan) too.
     "subscription_data[metadata][userId]": uid,
+    "subscription_data[metadata][tier]": tier,
     client_reference_id: uid,
   });
   return { url: session.url };
+}
+
+/** http(s) URL on one of ALLOWED_ORIGIN's origins (any origin when unset, for dev). */
+function isAllowedRedirect(env: Env, url: unknown): boolean {
+  if (typeof url !== "string") return false;
+  let u: URL;
+  try {
+    u = new URL(url);
+  } catch {
+    return false;
+  }
+  if (u.protocol !== "https:" && u.protocol !== "http:") return false;
+  const allowed = (env.ALLOWED_ORIGIN ?? "").split(",").map((o) => o.trim()).filter(Boolean);
+  return allowed.length === 0 || allowed.includes(u.origin);
 }
 
 /* ─── /portal ────────────────────────────────────────────────────────── */
@@ -390,31 +435,83 @@ async function webhook(req: Request, env: Env): Promise<Response> {
     type: string;
     data: { object: Record<string, unknown> };
   };
-  // Persist whatever the event implies. We only handle the subset that
-  // affects entitlement status — the full table lives in Stripe.
-  if (
-    event.type === "checkout.session.completed" ||
-    event.type === "customer.subscription.created" ||
-    event.type === "customer.subscription.updated" ||
-    event.type === "customer.subscription.deleted"
-  ) {
-    await upsertEntitlement(env, event.data.object);
-  }
+  const update = entitlementFromEvent(env, event);
+  if (update) await upsertEntitlement(env, update);
   return new Response("ok");
 }
 
-async function upsertEntitlement(
+export interface EntitlementUpdate {
+  user_id: string;
+  status: string;
+  /** Omitted when it can't be derived, so an upsert keeps the stored tier. */
+  tier?: PaidTier;
+  stripe_customer_id?: string | null;
+  stripe_subscription_id?: string | null;
+  renews_at?: number | null;
+}
+
+/**
+ * Map a (signature-verified) Stripe event to the entitlement row it implies,
+ * or null for events that don't change access. Rules:
+ *  - Checkout grants access only once paid: `checkout.session.completed`
+ *    with payment_status "paid"/"no_payment_required", or
+ *    `checkout.session.async_payment_succeeded` for delayed methods;
+ *    `…async_payment_failed` records "unpaid" (= no access).
+ *  - Subscription events carry Stripe's own status (active, trialing,
+ *    past_due, canceled, …); deletion is "canceled".
+ *  - The tier comes from metadata stamped by /checkout, else from the
+ *    subscription's price via the allowlist — never defaults to a paid plan.
+ */
+export function entitlementFromEvent(
   env: Env,
-  obj: Record<string, unknown>,
-): Promise<void> {
-  // Checkout sessions carry the user in client_reference_id; subscription
-  // events carry it in metadata.userId (set via subscription_data below).
-  const meta = (obj.metadata ?? {}) as { userId?: string };
+  event: { type: string; data: { object: Record<string, unknown> } },
+): EntitlementUpdate | null {
+  const obj = event.data.object;
+  const meta = (obj.metadata ?? {}) as { userId?: unknown; tier?: unknown };
   const uid =
     (typeof obj.client_reference_id === "string" && obj.client_reference_id) ||
-    meta.userId ||
+    (typeof meta.userId === "string" && meta.userId) ||
     null;
-  if (!uid) return;
+  if (!uid) return null;
+  const metaTier = meta.tier === "pro" || meta.tier === "team" ? meta.tier : null;
+  const customer = typeof obj.customer === "string" ? obj.customer : null;
+
+  switch (event.type) {
+    case "checkout.session.completed":
+    case "checkout.session.async_payment_succeeded":
+    case "checkout.session.async_payment_failed": {
+      const paid = obj.payment_status === "paid" || obj.payment_status === "no_payment_required";
+      if (event.type === "checkout.session.completed" && !paid) return null; // wait for async result
+      const ok = event.type !== "checkout.session.async_payment_failed" && paid;
+      return {
+        user_id: uid,
+        status: ok ? "active" : "unpaid",
+        ...(metaTier ? { tier: metaTier } : {}),
+        stripe_customer_id: customer,
+        stripe_subscription_id: typeof obj.subscription === "string" ? obj.subscription : null,
+      };
+    }
+    case "customer.subscription.created":
+    case "customer.subscription.updated":
+    case "customer.subscription.deleted": {
+      const items = (obj.items as { data?: Array<{ price?: { id?: unknown } }> } | undefined)?.data ?? [];
+      const tier = metaTier ?? items.map((i) => tierForPrice(env, i.price?.id)).find((x) => x) ?? null;
+      const end = obj.current_period_end;
+      return {
+        user_id: uid,
+        status: event.type === "customer.subscription.deleted" ? "canceled" : String(obj.status ?? "incomplete"),
+        ...(tier ? { tier } : {}),
+        stripe_customer_id: customer,
+        stripe_subscription_id: typeof obj.id === "string" ? obj.id : null,
+        renews_at: typeof end === "number" ? end : null,
+      };
+    }
+    default:
+      return null;
+  }
+}
+
+async function upsertEntitlement(env: Env, row: EntitlementUpdate): Promise<void> {
   await fetch(`${env.SUPABASE_URL}/rest/v1/entitlements`, {
     method: "POST",
     headers: {
@@ -423,15 +520,7 @@ async function upsertEntitlement(
       "Content-Type": "application/json",
       Prefer: "resolution=merge-duplicates",
     },
-    body: JSON.stringify({
-      user_id: uid,
-      tier: obj.metadata && (obj.metadata as { tier?: string }).tier ? (obj.metadata as { tier?: string }).tier : "pro",
-      status: obj.status ?? "active",
-      stripe_customer_id: obj.customer ?? null,
-      stripe_subscription_id: obj.id ?? null,
-      renews_at: obj.current_period_end ?? null,
-      updated_at: new Date().toISOString(),
-    }),
+    body: JSON.stringify({ ...row, updated_at: new Date().toISOString() }),
   });
 }
 
@@ -439,16 +528,28 @@ async function upsertEntitlement(
  * Minimal Stripe webhook signature verifier — same algorithm as the
  * official SDK without pulling it in. The header is `t=…,v1=…`.
  */
-async function verifyStripeSig(
+/** Max age of a webhook signature (Stripe's recommended replay window). */
+const STRIPE_SIG_TOLERANCE_S = 300;
+
+export async function verifyStripeSig(
   payload: string,
   header: string,
   secret: string,
+  nowSec = Math.floor(Date.now() / 1000),
 ): Promise<boolean> {
-  const parts = Object.fromEntries(header.split(",").map((p) => p.split("=") as [string, string]));
-  const t = parts.t;
-  const v1 = parts.v1;
-  if (!t || !v1) return false;
-  const data = `${t}.${payload}`;
+  let t = "";
+  const v1: string[] = [];
+  for (const part of header.split(",")) {
+    const i = part.indexOf("=");
+    if (i < 0) continue;
+    const k = part.slice(0, i).trim();
+    const v = part.slice(i + 1).trim();
+    if (k === "t") t = v;
+    else if (k === "v1") v1.push(v);
+  }
+  if (!t || v1.length === 0) return false;
+  const ts = Number(t);
+  if (!Number.isFinite(ts) || Math.abs(nowSec - ts) > STRIPE_SIG_TOLERANCE_S) return false;
   const key = await crypto.subtle.importKey(
     "raw",
     new TextEncoder().encode(secret),
@@ -456,7 +557,13 @@ async function verifyStripeSig(
     false,
     ["sign"],
   );
-  const sig = new Uint8Array(await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(data)));
+  const sig = new Uint8Array(await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(`${t}.${payload}`)));
   const hex = Array.from(sig, (b) => b.toString(16).padStart(2, "0")).join("");
-  return hex === v1;
+  // Constant-time compare against each provided v1 (Stripe may send several).
+  return v1.some((cand) => {
+    if (cand.length !== hex.length) return false;
+    let diff = 0;
+    for (let i = 0; i < hex.length; i++) diff |= hex.charCodeAt(i) ^ cand.charCodeAt(i);
+    return diff === 0;
+  });
 }
