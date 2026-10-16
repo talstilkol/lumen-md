@@ -36,6 +36,12 @@ export interface PublishResult {
   assets: string[];
   /** Absolute path of the written index.html. */
   index: string;
+  /**
+   * Source files that were NOT written because their output path collides
+   * with a generated file (a page, the index or style.css). Generated
+   * targets always win so every Markdown page and the index survive.
+   */
+  skipped: { source: string; output: string; reason: string }[];
 }
 
 /** Minimal stylesheet: the app's CSS variables are absent outside Lumen. */
@@ -135,11 +141,26 @@ export async function publishSite(
   const mdFiles = files.filter((f) => MD_RE.test(f));
   const assets = files.filter((f) => !MD_RE.test(f));
 
-  const pages: (PublishPage & { md: string })[] = mdFiles.map((f) => {
+  const skipped: PublishResult["skipped"] = [];
+  // Output paths are compared case-insensitively: on macOS/Windows file
+  // systems `Guide.html` and `guide.html` are the same file.
+  const key = (p: string) => p.toLowerCase();
+  const reserved = new Map<string, string>([[key("style.css"), "the site stylesheet"]]);
+
+  const pages: (PublishPage & { md: string })[] = [];
+  for (const f of mdFiles) {
     const rel = toPosix(relative(root, f));
+    const output = rel.replace(MD_RE, ".html");
+    const taken = reserved.get(key(output));
+    if (taken) {
+      skipped.push({ source: rel, output, reason: `collides with ${taken}` });
+      continue;
+    }
+    reserved.set(key(output), `the page generated from ${rel}`);
     const md = readFileSync(f, "utf8");
-    return { source: rel, output: rel.replace(MD_RE, ".html"), title: pageTitle(md, rel), md };
-  });
+    pages.push({ source: rel, output, title: pageTitle(md, rel), md });
+  }
+  if (!reserved.has(key("index.html"))) reserved.set(key("index.html"), "the generated page index");
   const rootIndex = pages.find((p) => p.output.toLowerCase() === "index.html");
   const listed = pages
     .filter((p) => p !== rootIndex)
@@ -180,6 +201,11 @@ export async function publishSite(
   const assetRels: string[] = [];
   for (const a of assets) {
     const rel = toPosix(relative(root, a));
+    const taken = reserved.get(key(rel));
+    if (taken) {
+      skipped.push({ source: rel, output: rel, reason: `collides with ${taken}` });
+      continue;
+    }
     const target = join(outAbs, ...rel.split("/"));
     mkdirSync(dirname(target), { recursive: true });
     copyFileSync(a, target);
@@ -190,5 +216,6 @@ export async function publishSite(
     pages: pages.map(({ source, output, title }) => ({ source, output, title })),
     assets: assetRels,
     index: join(outAbs, "index.html"),
+    skipped,
   };
 }

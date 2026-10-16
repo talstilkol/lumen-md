@@ -113,4 +113,24 @@ describe("publishSite", () => {
     expect(readFileSync(join(work, "src", "style.css"), "utf8")).toBe("body{color:red}");
     expect(existsSync(join(work, "src", "a.html"))).toBe(false);
   });
+
+  it("never lets a source file overwrite a generated page, the index or style.css", async () => {
+    write("guide.md", "# Guide");
+    write("guide.html", "<p>hand-written</p>");
+    write("Notes.md", "# Notes");
+    write("notes.markdown", "# Other notes");
+    write("index.html", "<p>old index</p>");
+    write("style.css", "body{color:red}");
+    write("img.png", new Uint8Array([1, 2, 3]));
+    const res = await publishSite(join(work, "src"), join(work, "out"));
+    expect(read("guide.html")).toContain("Guide");
+    expect(read("guide.html")).not.toContain("hand-written");
+    expect(read("index.html")).toContain("lumen-site-pages");
+    expect(read("style.css")).not.toContain("color:red");
+    expect(res.assets).toEqual(["img.png"]);
+    expect(res.skipped.map((s) => s.source).sort()).toEqual(
+      ["guide.html", "index.html", "notes.markdown", "style.css"].sort(),
+    );
+    expect(res.pages.map((p) => p.source).sort()).toEqual(["Notes.md", "guide.md"]);
+  });
 });

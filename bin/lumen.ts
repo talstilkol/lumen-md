@@ -52,6 +52,9 @@ async function main(argv: string[]): Promise<number> {
       return 1;
     }
     const res = await publishSite(positional[0], out, { siteTitle: flags.title || undefined });
+    for (const s of res.skipped) {
+      console.warn(`! skipped ${s.source}: ${s.output} ${s.reason}`);
+    }
     console.log(`✓ published ${res.pages.length} page(s) + ${res.assets.length} asset(s) → ${res.index}`);
     return 0;
   }
