@@ -224,7 +224,16 @@ export async function chat(
   const { aiCacheEnabled, cacheKey, getCached, putCached } = await import("./responseCache");
   const key =
     opts.cache && aiCacheEnabled()
-      ? await cacheKey({ v: 1, provider, model, messages, maxTokens: opts.maxTokens ?? null, temperature: opts.temperature ?? null }).catch(() => null)
+      ? await cacheKey({
+          v: 1,
+          provider,
+          model,
+          // Two Ollama servers can serve different weights under one name.
+          endpoint: provider === "ollama" ? (localStorage.getItem("lumen.ollama.baseUrl") ?? "default") : null,
+          messages,
+          maxTokens: opts.maxTokens ?? null,
+          temperature: opts.temperature ?? null,
+        }).catch(() => null)
       : null;
   if (key) {
     const hit = await getCached(key);
