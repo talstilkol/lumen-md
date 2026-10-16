@@ -16,7 +16,7 @@
  *  - images without alt text;
  *  - empty notes (nothing but front matter / whitespace).
  */
-import { slug as headingSlug } from "github-slugger";
+import GithubSlugger, { slug as headingSlug } from "github-slugger";
 import { resolveWikiTarget, splitWikiTarget } from "../renderer/wikiLinks";
 
 export type DoctorKind =
@@ -58,7 +58,10 @@ function blankFences(text: string): string {
   const lines = text.split("\n");
   let open: { ch: string; len: number } | null = null;
   for (let i = 0; i < lines.length; i++) {
-    const m = /^ {0,3}(`{3,}|~{3,})(.*)$/.exec(lines[i]);
+    // Fences may sit inside block quotes (`> `) and list items (`- `, `1. `,
+    // or indented continuation): look past those container prefixes.
+    const inner = lines[i].replace(/^(?:[ \t]*>[ ]?)*/, "").replace(/^[ \t]*(?:[-*+]|\d+[.)])[ \t]+/, "");
+    const m = /^[ \t]*(`{3,}|~{3,})(.*)$/.exec(inner);
     if (!open) {
       if (m && !(m[1][0] === "`" && m[2].includes("`"))) {
         open = { ch: m[1][0], len: m[1].length };
@@ -166,15 +169,20 @@ function headingsOf(text: string): Set<string> {
   // Inline code in headings matters for the rendered text, so scan only
   // with fenced blocks blanked.
   const fenced = blankFences(text);
-  const add = (raw: string) => {
-    const rendered = headingText(raw);
-    out.add(headingSlug(rendered));
-    out.add(rendered.toLowerCase());
-  };
-  for (const m of fenced.matchAll(/^#{1,6}\s+(.+?)\s*#*\s*$/gm)) add(m[1]);
+  // In document order, with a stateful slugger: a repeated heading gets
+  // `-1`, `-2`… like rehype-slug, so `[[Note#setup-1]]` resolves.
+  const found: Array<{ at: number; raw: string }> = [];
+  for (const m of fenced.matchAll(/^#{1,6}\s+(.+?)\s*#*\s*$/gm)) found.push({ at: m.index ?? 0, raw: m[1] });
   // Setext headings: a text line underlined with === or --- (the line
   // above must be text, not a list item, quote or blank line).
-  for (const m of fenced.matchAll(/^(?! {0,3}([-*+>]|\d+[.)])\s)( {0,3}\S[^\n]*)\n {0,3}(=+|-+)[ \t]*$/gm)) add(m[2].trim());
+  for (const m of fenced.matchAll(/^(?! {0,3}([-*+>]|\d+[.)])\s)( {0,3}\S[^\n]*)\n {0,3}(=+|-+)[ \t]*$/gm)) found.push({ at: m.index ?? 0, raw: m[2].trim() });
+  const slugger = new GithubSlugger();
+  for (const h of found.sort((a, b) => a.at - b.at)) {
+    const rendered = headingText(h.raw);
+    out.add(slugger.slug(rendered));
+    out.add(headingSlug(rendered));
+    out.add(rendered.toLowerCase());
+  }
   return out;
 }
 
@@ -351,6 +359,10 @@ export function runVaultDoctor(notes: readonly DoctorNote[], opts: DoctorOptions
     }
 
     // Images without alt text: ![](src) and <img> without alt.
+    // Reference-style images with empty alt: `![][logo]` / `![ ][logo]`.
+    for (const m of text.matchAll(/!\[\s*\]\[([^\]\n]+)\]/g)) {
+      findings.push({ kind: "missing-alt", path: note.path, line: lineAt(note.text, m.index ?? 0), detail: `[${m[1]}]` });
+    }
     for (const m of text.matchAll(/!\[\s*\]\(([^)\s]+)[^)]*\)/g)) {
       findings.push({ kind: "missing-alt", path: note.path, line: lineAt(note.text, m.index ?? 0), detail: m[1] });
     }

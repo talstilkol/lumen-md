@@ -127,4 +127,15 @@ describe("vault doctor", () => {
     expect(f.some((x) => x.kind === "orphan" && x.path === "Guide.md")).toBe(false);
     expect(f.filter((x) => x.kind === "missing-alt")).toEqual([]);
   });
+
+  it("fences in quotes and lists, duplicate heading ids, reference images", () => {
+    const notes: DoctorNote[] = [
+      { path: "index.md", text: "> ```\n> [[Quoted Code]]\n> ```\n\n- item\n  ```\n  [[List Code]]\n  ```\n\n[[Guide#setup-1]] [[Guide#setup-2]]\n\n![][logo]\n\n[logo]: chart.png\n" },
+      { path: "Guide.md", text: "## Setup\n\n## Setup\n" },
+    ];
+    const f = runVaultDoctor(notes);
+    expect(f.filter((x) => x.kind === "broken-wiki-link")).toEqual([]);
+    expect(f.filter((x) => x.kind === "missing-heading").map((x) => x.detail)).toEqual(["Guide#setup-2"]);
+    expect(f.filter((x) => x.kind === "missing-alt").map((x) => x.detail)).toEqual(["[logo]"]);
+  });
 });
