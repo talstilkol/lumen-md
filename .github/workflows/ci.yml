@@ -15,6 +15,10 @@ jobs:
     name: typecheck • test • build
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    # Read-only: this job runs the PR's code. The comment is posted by
+    # bundle-comment below, which runs none of it.
+    permissions:
+      contents: read
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -56,7 +60,38 @@ jobs:
         run: npm run build
 
       - name: Bundle-size budget
-        run: npm run budget
+        run: npm run budget -- --json bundle-sizes.json
+
+      # Sizes on main are kept in the Actions cache; a PR compares its own
+      # against the newest main record and reports the change.
+      - name: Record bundle sizes (main)
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: mkdir -p .bundle-base && cp bundle-sizes.json .bundle-base/
+      - name: Save bundle sizes (main)
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: actions/cache/save@v5
+        with:
+          path: .bundle-base
+          key: bundle-sizes-${{ github.sha }}
+      - name: Restore main's bundle sizes
+        if: github.event_name == 'pull_request' && (success() || failure())
+        uses: actions/cache/restore@v5
+        with:
+          path: .bundle-base
+          key: bundle-sizes-${{ github.event.pull_request.base.sha }}
+          restore-keys: bundle-sizes-
+      - name: Bundle-size change
+        if: github.event_name == 'pull_request' && (success() || failure())
+        run: |
+          node scripts/bundle-diff.mjs .bundle-base/bundle-sizes.json bundle-sizes.json main > bundle-diff.md
+          cat bundle-diff.md >> "$GITHUB_STEP_SUMMARY"
+      - name: Upload bundle-size change
+        if: github.event_name == 'pull_request' && (success() || failure())
+        uses: actions/upload-artifact@v7
+        with:
+          name: bundle-diff
+          path: bundle-diff.md
+          retention-days: 3
 
       - name: i18n drift gate
         # Vitest already runs the i18nStrings test — this step also asserts
@@ -74,6 +109,37 @@ jobs:
           if [ "$diff" -gt 10 ]; then
             echo "::error::i18n drift > 10 keys; run `node scripts/print-missing-i18n-keys.mjs` and fix."
             exit 1
+          fi
+
+  bundle-comment:
+    name: bundle-size comment
+    needs: check
+    # Posts the table the check job produced. It checks out nothing and runs
+    # no PR code, so it alone holds a write token. Fork PRs get a read-only
+    # token: the table stays in the check job's summary.
+    if: always() && github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      pull-requests: write
+      issues: write
+    steps:
+      - uses: actions/download-artifact@v7
+        continue-on-error: true
+        with:
+          name: bundle-diff
+      - name: Post or update the comment
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR: ${{ github.event.pull_request.number }}
+          REPO: ${{ github.repository }}
+        run: |
+          [ -s bundle-diff.md ] || { echo "no bundle-size table"; exit 0; }
+          id=$(gh api "repos/$REPO/issues/$PR/comments" --paginate --jq '.[] | select(.user.login == "github-actions[bot]" and (.body | contains("<!-- lumen-bundle-diff -->"))) | .id' | tail -1)
+          if [ -n "$id" ]; then
+            gh api -X PATCH "repos/$REPO/issues/comments/$id" -F body=@bundle-diff.md > /dev/null
+          else
+            gh api "repos/$REPO/issues/$PR/comments" -F body=@bundle-diff.md > /dev/null
           fi
 
   lighthouse:
