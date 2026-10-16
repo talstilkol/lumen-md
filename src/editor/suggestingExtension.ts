@@ -23,6 +23,8 @@ import {
 } from "@codemirror/state";
 import type { ChangeSpec, Extension, Range, TransactionSpec } from "@codemirror/state";
 import { Decoration, EditorView } from "@codemirror/view";
+import { showAiToast } from "../ui/AiToast";
+import { t } from "../i18n";
 import type { DecorationSet } from "@codemirror/view";
 import {
   editKindFor,
@@ -95,10 +97,12 @@ export function suggestTransaction(tr: Transaction): Transaction | TransactionSp
   const marks: Array<{ cur: number; delta: number }> = [];
   let lowerBound = Number.POSITIVE_INFINITY;
   let changed = false;
+  let untrackable = false;
   for (let i = original.length - 1; i >= 0; i--) {
     const c = original[i];
     const kind = editKindFor(userEvent, c.from, c.to, c.insert);
     const res = kind ? transformEdit(text, { ...c, kind }) : null;
+    if (res?.untrackable) untrackable = true;
     const out = res ? res.change : c;
     if (res) changed = true;
     if (out) {
@@ -116,6 +120,10 @@ export function suggestTransaction(tr: Transaction): Transaction | TransactionSp
     marks.unshift({ cur, delta: out ? out.insert.length - (out.to - out.from) : 0 });
   }
   if (!changed) return tr;
+  if (untrackable) {
+    // Never silently drop typing: say why (after the filter returns).
+    queueMicrotask(() => showAiToast(t("suggesting.untrackable"), "info"));
+  }
 
   // A mark's cursor ignores the length change of the edits before it.
   let shift = 0;

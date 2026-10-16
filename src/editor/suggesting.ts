@@ -277,6 +277,13 @@ export interface SuggestResult {
   change: PlainChange | null;
   /** Cursor position in the *new* document. */
   cursor: number;
+  /**
+   * Set when the edit can't be recorded unambiguously — the text itself
+   * contains CriticMarkup delimiters (e.g. pasting `a++}b`), so wrapping it
+   * would change what accept/reject produce. The edit is dropped (`change`
+   * is null) and the UI tells the user.
+   */
+  untrackable?: true;
 }
 
 type Seg =
@@ -370,8 +377,28 @@ function retarget(
  *
  * Returns null when the edit should pass through untouched (it lies entirely
  * inside a code block / code span, where CriticMarkup would be literal).
+ *
+ * CriticMarkup has no escape syntax, so text containing a closing delimiter
+ * (`++}`, `--}`, `~>`, `~~}`) can't always be wrapped safely. Every result
+ * is therefore verified: a tracked edit must leave the "reject all" view
+ * unchanged (that view is the original document), and an insertion must
+ * grow the "accept all" view by exactly the inserted text. A result that
+ * breaks either is refused with `untrackable` instead of corrupting the
+ * document.
  */
 export function transformEdit(text: string, edit: SuggestEdit): SuggestResult | null {
+  const res = transformEditUnchecked(text, edit);
+  if (!res || !res.change) return res;
+  const next = applyChange(text, res.change);
+  const ok =
+    resolveAll(next, "reject") === resolveAll(text, "reject") &&
+    (edit.kind !== "insert" ||
+      resolveAll(next, "accept").length === resolveAll(text, "accept").length + edit.insert.length);
+  if (ok) return res;
+  return { change: null, cursor: edit.kind === "backward" ? edit.to : edit.from, untrackable: true };
+}
+
+function transformEditUnchecked(text: string, edit: SuggestEdit): SuggestResult | null {
   const code = findCodeRanges(text);
   const sugg = parseSuggestions(text, code);
   let { from, to } = edit;

@@ -908,5 +908,6 @@
   "chart.reason.radar": "{n} 項目に {k} 個の指標 — プロファイルを比較します。",
   "chart.reason.summary": "カテゴリ列や時間列がないため、列の平均を比較します。",
   "chart.alternatives": "グラフの候補",
-  "billing.upgrade.smartSearch": "スマート検索（埋め込みによるセマンティック検索）は Pro プランの機能です。キーワード検索は引き続き利用できます。"
+  "billing.upgrade.smartSearch": "スマート検索（埋め込みによるセマンティック検索）は Pro プランの機能です。キーワード検索は引き続き利用できます。",
+  "suggesting.untrackable": "このテキストには提案マークアップ（{++、++}、~> など）が含まれているため、変更として記録できません。挿入するには提案モードをオフにしてください。"
 }

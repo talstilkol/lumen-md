@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-10-16T02:11:58.224Z",
+  "generated_at": "2026-10-16T02:17:51.737Z",
   "source": "src/i18n/index.ts (en bundle)",
-  "count": 910,
+  "count": 911,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -2180,6 +2180,11 @@
     {
       "key": "status.suggesting.on",
       "en": "Suggesting",
+      "vars": []
+    },
+    {
+      "key": "suggesting.untrackable",
+      "en": "That text contains suggestion markup ({++, ++}, ~>, …) and can't be tracked. Turn off suggesting mode to insert it.",
       "vars": []
     },
     {

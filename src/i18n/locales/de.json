@@ -908,5 +908,6 @@
   "chart.reason.radar": "{k} Kennzahlen für {n} Einträge – Profile vergleichen.",
   "chart.reason.summary": "Keine Kategorie- oder Zeitspalte – Spaltendurchschnitte im Vergleich.",
   "chart.alternatives": "Diagrammvorschläge",
-  "billing.upgrade.smartSearch": "Die intelligente Suche (semantisch, mit Embeddings) ist eine Pro-Funktion. Die Stichwortsuche bleibt verfügbar."
+  "billing.upgrade.smartSearch": "Die intelligente Suche (semantisch, mit Embeddings) ist eine Pro-Funktion. Die Stichwortsuche bleibt verfügbar.",
+  "suggesting.untrackable": "Dieser Text enthält Vorschlags-Markup ({++, ++}, ~> …) und kann nicht nachverfolgt werden. Schalte den Vorschlagsmodus aus, um ihn einzufügen."
 }

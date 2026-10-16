@@ -375,3 +375,32 @@ describe("round trip", () => {
     expect(resolveAll(text, "accept")).toBe("The quick red fox");
   });
 });
+
+describe("transformEdit — text that contains CriticMarkup delimiters", () => {
+  it("refuses (untrackable) instead of corrupting: pasting a++}b", () => {
+    const r = transformEdit("xy", { from: 1, to: 1, insert: "a++}b", kind: "insert" });
+    expect(r).toMatchObject({ change: null, untrackable: true });
+  });
+
+  it("refuses a replacement whose old or new text holds ~> / ~~}", () => {
+    expect(transformEdit("p~>q", { from: 0, to: 4, insert: "z", kind: "replace" })).toMatchObject({ untrackable: true });
+    expect(transformEdit("abc", { from: 0, to: 3, insert: "n~~}m", kind: "replace" })).toMatchObject({ untrackable: true });
+  });
+
+  it("refuses deleting text that contains --}", () => {
+    expect(transformEdit("a--}b", { from: 0, to: 5, insert: "", kind: "selection" })).toMatchObject({ untrackable: true });
+  });
+
+  it("refuses typing into an insertion when it would close it early", () => {
+    // {++a+|++}  typing "+}" would make the content contain ++}.
+    expect(transformEdit("{++a+++}", { from: 5, to: 5, insert: "+}", kind: "insert" })).toMatchObject({ untrackable: true });
+  });
+
+  it("still tracks delimiter-adjacent characters that are unambiguous", () => {
+    for (const s of ["+", "++", "a+", "-", "~", ">", "}", "{"]) {
+      const [out] = edit("xy", 1, 1, s);
+      expect(resolveAll(out, "accept")).toBe(`x${s}y`);
+      expect(resolveAll(out, "reject")).toBe("xy");
+    }
+  });
+});

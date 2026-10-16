@@ -516,6 +516,7 @@ const en: Strings = {
   "status.grammar.tooltip.on": "Grammar check is ON. Click to disable.",
   "status.grammar.tooltip.off": "Grammar check is OFF. Click to enable LanguageTool checking.",
   "status.suggesting.on": "Suggesting",
+  "suggesting.untrackable": "That text contains suggestion markup ({++, ++}, ~>, …) and can't be tracked. Turn off suggesting mode to insert it.",
   "status.suggesting.off": "Editing",
   "status.suggesting.tooltip.on": "Suggesting mode is ON: your edits are recorded as tracked changes (CriticMarkup). Click to edit directly.",
   "status.suggesting.tooltip.off": "Editing directly. Click to turn on suggesting mode (track changes).",
