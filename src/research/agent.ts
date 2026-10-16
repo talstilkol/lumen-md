@@ -137,11 +137,15 @@ export function parseAnswer(raw: string): { report: string; quotes: Map<number, 
   const quotes = new Map<number, string[]>();
   if (at !== -1) {
     try {
-      const arr = parseJsonResponse<Array<{ n?: number; quote?: string }>>(raw.slice(at + QUOTES_MARK.length));
+      const arr = parseJsonResponse<Array<{ n?: number; i?: number; quote?: string }>>(raw.slice(at + QUOTES_MARK.length));
       for (const q of Array.isArray(arr) ? arr : []) {
-        if (typeof q.n !== "number" || typeof q.quote !== "string" || !q.quote.trim()) continue;
+        if (typeof q.n !== "number") continue;
         const list = quotes.get(q.n) ?? [];
-        list.push(q.quote.trim());
+        const quote = typeof q.quote === "string" ? q.quote.trim() : "";
+        // `i` names the claim (the i-th marker of that source); without it,
+        // entries are in marker order. An empty quote keeps its place.
+        if (Number.isInteger(q.i) && q.i! >= 1 && q.i! <= 200) list[q.i! - 1] = quote;
+        else list.push(quote);
         quotes.set(q.n, list);
       }
     } catch {
@@ -234,7 +238,8 @@ async function proxyResearch(o: ResearchOptions, settings: ResearchSettings): Pr
           SYSTEM_REPORT +
           " Use ONLY the numbered sources below. After each claim add a footnote marker with the source number, like [^2]. " +
           `Then, on its own line, write ${QUOTES_MARK} followed by a JSON array with one entry per footnote marker, in the order the markers appear: ` +
-          '[{"n": 2, "quote": "a short passage copied verbatim from source 2 that supports that specific claim"}]. ' +
+          '[{"n": 2, "i": 1, "quote": "a short passage copied verbatim from source 2 that supports that specific claim"}], ' +
+          'where "i" counts the markers of that source (1 for its first claim, 2 for its second…). ' +
           "A source cited for three claims gets three entries, each with the passage behind its own claim.",
       },
       { role: "user", content: `Question: ${o.question}\n\nSources:\n\n${packed.map((p) => `${p.path}\n${p.text}`).join("\n\n---\n\n")}` },

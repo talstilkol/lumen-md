@@ -116,6 +116,11 @@ describe("research agent", () => {
     const { report, quotes } = parseAnswer('Report text [^1].\n---QUOTES---\n[{"n":1,"quote":"exact words"},{"n":"x"}]');
     expect(report).toBe("Report text [^1].");
     expect([...quotes]).toEqual([[1, ["exact words"]]]);
+    // An explicit claim number keeps alignment when an earlier quote is missing.
+    const q2 = parseAnswer('R [^1] [^1]\n---QUOTES---\n[{"n":1,"i":2,"quote":"second"}]').quotes.get(1)!;
+    expect(q2[0]).toBeUndefined();
+    expect(q2[1]).toBe("second");
+    expect(parseAnswer('R\n---QUOTES---\n[{"n":1,"quote":""},{"n":1,"quote":"b"}]').quotes.get(1)).toEqual(["", "b"]);
   });
 
   describe("search route (Brave / Tavily via the research service)", () => {
