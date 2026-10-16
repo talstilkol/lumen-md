@@ -148,15 +148,19 @@ export function runR(
 ): Promise<RRunResult | null> {
   const run = chain.then(async () => {
     if (hooks.isCancelled?.()) return null;
+    // A run ahead of this one may have reset the runtime (Stop / timeout):
+    // boot the replacement inside this turn but BEFORE onStart, so the
+    // boot gets its own budget (BOOT_TIMEOUT_MS), not the run's timeout.
+    const webR = await getWebR();
+    if (hooks.isCancelled?.()) return null;
     hooks.onStart?.();
-    return runROnce(code, plot);
+    return runROnce(webR, code, plot);
   });
   chain = run.catch(() => {});
   return run;
 }
 
-async function runROnce(code: string, plot: { width: number; height: number }): Promise<RRunResult> {
-  const webR = await getWebR();
+async function runROnce(webR: WebRType, code: string, plot: { width: number; height: number }): Promise<RRunResult> {
   await webR.flush(); // drop anything left over from an earlier run
   // webR's built-in graphics capture fails over the PostMessage channel, so
   // open its canvas device ourselves and read the frames from the queue.

@@ -98,9 +98,9 @@ export default function LiveRBlock({ source, meta }: Props) {
         void resetWebR();
         throw new Error(t("block.liveR.loadTimeout"));
       }
-      setState("running");
-      // The execution timer starts when the run does (other R blocks may
-      // be ahead of it in the queue).
+      // The execution timer (and the "running" state) start when the run
+      // does: other R blocks may be ahead of it in the queue, and a
+      // runtime they reset is re-booted before onStart.
       let startTimer: () => void = () => {};
       const timedOut = new Promise<"timeout">((resolve) => {
         startTimer = () => timers.push(setTimeout(() => resolve("timeout"), timeoutMs));
@@ -109,6 +109,7 @@ export default function LiveRBlock({ source, meta }: Props) {
         runR(source, undefined, {
           onStart: () => {
             executing.current = true;
+            setState("running");
             startTimer();
           },
           isCancelled: () => runId !== runSeq.current,

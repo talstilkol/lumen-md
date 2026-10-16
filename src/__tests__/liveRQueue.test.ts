@@ -2,6 +2,7 @@ import { describe, it, expect, vi } from "vitest";
 
 const log: string[] = [];
 let initHangs = false;
+let initGate: Promise<void> | null = null;
 let created = 0;
 vi.mock("webr", () => {
   class Shelter {
@@ -19,7 +20,7 @@ vi.mock("webr", () => {
       created++;
     }
     init() {
-      return initHangs ? new Promise<void>(() => {}) : Promise.resolve();
+      return initHangs ? new Promise<void>(() => {}) : (initGate ?? Promise.resolve());
     }
     async flush() {
       return [];
@@ -75,5 +76,31 @@ describe("runR", () => {
     await rt.getWebR(); // a fresh instance, not the dead one
     expect(created).toBe(before + 2);
     vi.useRealTimers();
+  });
+
+  it("boots a runtime reset by an earlier run before onStart (outside the run's timer)", async () => {
+    vi.resetModules();
+    const rt = await import("../plugins/r/rRuntime");
+    await rt.getWebR();
+    let release: () => void = () => {};
+    const events: string[] = [];
+    const first = rt.runR("slow", undefined, {
+      onStart: () => {
+        events.push("start slow");
+        // Stop / timeout while another run is queued: the runtime is reset
+        // and its replacement takes a while to boot.
+        initGate = new Promise<void>((r) => (release = r));
+        void rt.resetWebR();
+      },
+    });
+    const second = rt.runR("fast", undefined, { onStart: () => events.push("start fast") });
+    await first.catch(() => {});
+    await new Promise((r) => setTimeout(r, 5));
+    // Still booting: the queued run has not started (its timer isn't armed).
+    expect(events).toEqual(["start slow"]);
+    release();
+    initGate = null;
+    expect((await second)?.lines[0].text).toBe("fast");
+    expect(events).toEqual(["start slow", "start fast"]);
   });
 });

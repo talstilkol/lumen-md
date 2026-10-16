@@ -101,8 +101,9 @@ describe("JavaScript blocks and shared scopes", () => {
     // One unit per block; a shared block's unit is its scope's earlier
     // blocks + itself, joined by a statement boundary.
     expect(units.map((u) => u.id)).toEqual(["block-0", "block-1", "block-2", "block-3"]);
-    expect(units[1].code).toBe("let   base = 2;\n;\n(async () => {\nlet   total = base * 21;\n})();");
-    expect(units[2].code).toBe("(async () => {\nlet   base = 'x';\n})();");
+    // A shared live block is wrapped only for a top-level await / return.
+    expect(units[1].code).toBe("let   base = 2;\n;\nlet   total = base * 21;");
+    expect(units[2].code).toBe("let   base = 'x';");
     // Offsets map both ways, into the unit's own block only.
     const second = blocks[1];
     const at = unitAt(units, second.from + 6)!;
@@ -199,6 +200,45 @@ describe("JavaScript blocks and shared scopes", () => {
     );
     expect(units[1].code).toContain("let   result = (() => value$prev)();");
     expect(diags).toEqual([]);
+  });
+
+  it("a block that re-declares a name sees each version in turn", () => {
+    // In the checked block itself: offsets are kept.
+    let r = checkShared("// @ts-check\nlet value = 1; const n = value; let value = 'x'; value.toUpperCase(); n.toFixed();");
+    expect(r.diags).toEqual([]);
+    expect(r.units[0].code).toContain("let value = 'x'; value.toUpperCase();");
+    expect(r.units[0].code).not.toContain("$prev");
+    // In an earlier block: versions are renamed as usual.
+    r = checkShared("let value = 1; const n = value; let value = 'x';", "// @ts-check\nvalue.toUpperCase(); n.toFixed();");
+    expect(r.diags).toEqual([]);
+    // And a real error after the re-declaration is still reported.
+    r = checkShared("// @ts-check\nlet value = 1; let value = 'x'; value.toFixed();");
+    expect(r.diags.map((d) => d.code)).toEqual([2551]);
+  });
+
+  it("a directly invoked function expression runs with that time's value", () => {
+    const { units, diags } = checkShared(
+      "const value = 1; const result = function () { return value; }(); function decl() { return value; }\n(0);",
+      "// @ts-check\nconst value = 'x';\nresult.toFixed(); decl().toUpperCase();",
+    );
+    const first = units[1].code.split("\n;\n")[0];
+    expect(first).toContain("function () { return value$prev; }()");
+    // A declaration followed by `(` on the next line is not invoked.
+    expect(first).toContain("function decl() { return value; }");
+    expect(diags).toEqual([]);
+  });
+
+  it("earlier retained closures see an unwrapped live block's declarations", () => {
+    const doc = ["```live-js shared", "const value = 1; function read() { return value; }", "```", "```live-js shared", "// @ts-check", "const value = 'x';", "read().toFixed();", "```"].join("\n");
+    const units = toUnits(findTsBlocks(doc));
+    expect(units[1].code).not.toContain("async () =>");
+    const diags = service
+      .diagnostics(units.map(({ id, tsx, js, shared, code }) => ({ id, tsx, js, shared, code })))
+      .filter((d) => unitRangeToDoc(units[1], d.start, d.length) !== null);
+    expect(diags.map((d) => d.code)).toEqual([2551]); // toFixed doesn't exist on string
+    // A top-level await still needs the async wrapper.
+    const awaiting = toUnits(findTsBlocks(doc.replace("read().toFixed();", "await read();")));
+    expect(awaiting[1].code).toContain("(async () => {");
   });
 
   it("parameters, a function's own name and its locals keep their binding", () => {

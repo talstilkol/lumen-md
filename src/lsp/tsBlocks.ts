@@ -136,6 +136,21 @@ export interface TsUnit {
 const LIVE_WRAP_OPEN = "(async () => {\n";
 const LIVE_WRAP_CLOSE = "\n})();";
 
+/**
+ * Whether a shared live block needs the async wrapper to type-check: only
+ * a top-level `await` / `return` does. Without them the block is checked
+ * at the unit's top level, where earlier parts' retained closures see its
+ * declarations — as they do at runtime, which hoists shared bindings to
+ * globals.
+ */
+function needsLiveWrap(code: string): boolean {
+  const tokens = tokenize(neutraliseDirectives(code));
+  const scopes = functionScopes(tokens, matchBrackets(tokens));
+  return tokens.some(
+    (t, i) => t.type === "ident" && (t.value === "await" || t.value === "return") && !scopes.some((f) => i >= f.from && i <= f.to),
+  );
+}
+
 /** Joins the parts of a shared unit: ends any statement / line comment. */
 const PART_SEPARATOR = "\n;\n";
 const CHECK_HEADER = "// @ts-check\n";
@@ -440,7 +455,13 @@ function functionScopes(tokens: ReturnType<typeof tokenize>, match: Map<number, 
       if (q === undefined || !isPunct(q + 1, "{")) continue;
       const end = match.get(q + 1) ?? tokens.length - 1;
       fnBodies.push([q + 1, end]);
-      pending.push(() => ({ from: p, to: end, retained: retainedAt(k - 1), locals: collectLocals(p, q, q + 1, end, own) }));
+      // `function () { … }()` in expression position runs now. (A
+      // declaration followed by `(` on the next line is two statements.)
+      let b = k - 1;
+      if (val(b) === "async") b--;
+      const statementStart = b < 0 || isPunct(b, ";") || isPunct(b, "{") || isPunct(b, "}") || val(b) === "export" || val(b) === "default";
+      const invoked = !statementStart && isPunct(end + 1, "(");
+      pending.push(() => ({ from: p, to: end, retained: invoked ? false : retainedAt(k - 1), locals: collectLocals(p, q, q + 1, end, own) }));
       continue;
     }
     // ( … ) => …   /   x => …
@@ -522,8 +543,9 @@ function functionScopes(tokens: ReturnType<typeof tokenize>, match: Map<number, 
  *
  * Earlier parts are never mapped back to the document, so lengths may change.
  */
-function rewriteEarlierPart(code: string, names: ReadonlyMap<string, string>): string {
-  const src = neutraliseDirectives(code);
+function rewriteEarlierPart(code: string, names: ReadonlyMap<string, string>, preserveLength = false): string {
+  // The unit's own block keeps its directives (and so its offsets).
+  const src = preserveLength ? code : neutraliseDirectives(code);
   if (names.size === 0) return src;
   const tokens = tokenize(src);
   const match = matchBrackets(tokens);
@@ -570,6 +592,9 @@ function rewriteEarlierPart(code: string, names: ReadonlyMap<string, string>): s
     // Late-bound closure — except code a class body runs at definition.
     if (enclosing.some((f) => f.retained && !f.eager?.some(([a, b]) => k >= a && k <= b))) continue;
     const shorthand = keyPos && (nextP === "}" || nextP === "," || nextP === "=");
+    // In the unit's own block offsets must not move: a shorthand keeps
+    // the name (and its newest binding).
+    if (shorthand && preserveLength) continue;
     edits.push({ from: tok.start, to: tok.end, text: shorthand ? `${tok.value}: ${to}` : to });
   }
   let out = src;
@@ -586,41 +611,101 @@ function constAsLet(code: string): string {
   return out;
 }
 
+/**
+ * Offsets where a part re-declares a top-level name it already declared
+ * (`let value = 1; let value = 'x'`): the shared runner turns both into
+ * assignments, so code after the second declaration sees the new value.
+ * Each cut starts a new version. Only the first declarator of a
+ * `let` / `const` / `var` and function / class names are considered.
+ */
+function redeclarationCuts(code: string): number[] {
+  const tokens = tokenize(code);
+  const seen = new Set<string>();
+  const cuts: number[] = [];
+  for (let i = 0; i < tokens.length; i++) {
+    const t = tokens[i];
+    if (t.depth !== 0 || t.type !== "ident") continue;
+    const prev = tokens[i - 1];
+    const atStart = !prev || t.nl || (prev.type === "punct" && (prev.value === ";" || prev.value === "}"));
+    if (!atStart) continue;
+    let k = i;
+    if (t.value === "async" && tokens[k + 1]?.value === "function") k++;
+    const kw = tokens[k].value;
+    if (!["let", "const", "var", "function", "class"].includes(kw)) continue;
+    let n = k + 1;
+    if (kw === "function" && tokens[n]?.value === "*") n++;
+    const name = tokens[n]?.type === "ident" ? tokens[n].value : null;
+    if (!name) continue;
+    if (seen.has(name) && t.start > 0) cuts.push(t.start);
+    seen.add(name);
+  }
+  return [...new Set(cuts)];
+}
+
+/** Same-length stand-in for `name`, unused in the unit (own block only). */
+function sameLengthName(name: string, taken: Set<string>): string {
+  const alphabet = "$_abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  for (let pos = name.length - 1; pos >= 0; pos--) {
+    for (const ch of alphabet) {
+      if (pos === 0 && ch >= "0" && ch <= "9") continue;
+      const cand = name.slice(0, pos) + ch + name.slice(pos + 1);
+      if (cand !== name && !taken.has(cand)) return cand;
+    }
+  }
+  return name; // every variant taken: leave it (diagnostics may be imprecise)
+}
+
 function sharedUnit(scope: readonly TsBlock[], k: number): TsUnit {
   const own = scope[k];
-  // For each name: the parts (≤ k) that declare it, in order.
-  const declaredIn = new Map<string, number[]>();
+  // Every part is split at its own re-declarations into segments; each
+  // segment is one version step. seg = [part, from, to].
+  const segs: Array<{ part: number; from: number; to: number }> = [];
   scope.slice(0, k + 1).forEach((b, i) => {
-    for (const n of topLevelNames(b.code)) {
+    const cuts = redeclarationCuts(b.code);
+    let from = 0;
+    for (const c of cuts) {
+      segs.push({ part: i, from, to: c });
+      from = c;
+    }
+    segs.push({ part: i, from, to: b.code.length });
+  });
+  // For each name: the segments that declare it, in order.
+  const declaredIn = new Map<string, number[]>();
+  segs.forEach((g, i) => {
+    for (const n of topLevelNames(scope[g.part].code.slice(g.from, g.to))) {
       const at = declaredIn.get(n) ?? [];
       if (at[at.length - 1] !== i) at.push(i);
       declaredIn.set(n, at);
     }
   });
-  // One stand-in per superseded VERSION (declaring part), unique against
+  // One stand-in per superseded VERSION (declaring segment), unique against
   // every identifier in the unit's parts (nested bindings included):
-  // `name$prev`, `name$prev2`, …
+  // `name$prev`, `name$prev2`, … — or, inside the unit's own block, a
+  // same-length name so its offsets don't move.
   const allIdents = new Set<string>();
   for (const b of scope.slice(0, k + 1)) for (const t of tokenize(b.code)) if (t.type === "ident") allIdents.add(t.value);
   const used = new Set<string>();
   const versions = new Map<string, string>();
-  const standIn = (name: string, part: number): string => {
-    const key = `${name}@${part}`;
+  const standIn = (name: string, seg: number): string => {
+    const key = `${name}@${seg}`;
     let m = versions.get(key);
     if (!m) {
-      m = `${name}$prev`;
-      for (let n = 2; allIdents.has(m) || used.has(m); n++) m = `${name}$prev${n}`;
+      if (segs[seg].part === k) m = sameLengthName(name, new Set([...allIdents, ...used]));
+      else {
+        m = `${name}$prev`;
+        for (let n = 2; allIdents.has(m) || used.has(m); n++) m = `${name}$prev${n}`;
+      }
       used.add(m);
       versions.set(key, m);
     }
     return m;
   };
-  /** Part i's renames: each superseded name → the version visible to part i. */
+  /** Segment i's renames: each superseded name → the version visible to it. */
   const renamesFor = (i: number): Map<string, string> => {
     const rename = new Map<string, string>();
     for (const [n, at] of declaredIn) {
       const newest = at[at.length - 1];
-      if (newest <= i) continue; // part i already sees the final version
+      if (newest <= i) continue; // segment i already sees the final version
       const visible = [...at].reverse().find((d) => d <= i) ?? at[0];
       rename.set(n, standIn(n, visible));
     }
@@ -632,14 +717,21 @@ function sharedUnit(scope: readonly TsBlock[], k: number): TsUnit {
   for (let i = 0; i <= k; i++) {
     const b = scope[i];
     if (i > 0) code += PART_SEPARATOR;
-    let text = i < k ? rewriteEarlierPart(b.code, renamesFor(i)) : b.code;
+    let text = "";
+    segs.forEach((g, si) => {
+      if (g.part !== i) return;
+      const piece = b.code.slice(g.from, g.to);
+      const last = si === segs.length - 1;
+      text += last ? piece : rewriteEarlierPart(piece, renamesFor(si), i === k);
+    });
     // Shared runs turn top-level bindings into reassignable globals
     // (liveJsScope.hoistTopLevelBindings): `const` → `let`, same length.
     text = constAsLet(text);
-    if (i === k && b.live) code += LIVE_WRAP_OPEN;
+    const wrap = i === k && b.live && needsLiveWrap(b.code);
+    if (wrap) code += LIVE_WRAP_OPEN;
     parts.push({ block: b, offset: code.length });
     code += text;
-    if (i === k && b.live) code += LIVE_WRAP_CLOSE;
+    if (wrap) code += LIVE_WRAP_CLOSE;
   }
   return { id: own.id, code, tsx: false, js: true, shared: true, parts };
 }
