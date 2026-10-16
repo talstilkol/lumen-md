@@ -357,7 +357,7 @@
 | P2P real-time (Yjs/WebRTC) | ✅ אמיתי | — | presence + תגובות + **binding ברמת-תו** (y-codemirror `ySync`) — עריכות מקבילות מתכנסות בלי clobber (מאומת בטסט 2-peers) |
 | Server-based rooms | 🔜 | P1 |
 | Comments & threads | ✅ | — |
-| Suggesting mode (track changes) | ❌ | P1 |
+| Suggesting mode (track changes) | ✅ | — | CriticMarkup ב-source editor (transactionFilter), accept/reject, תצוגה כ-`<ins>/<del>/<mark>` — `src/editor/suggesting.ts` |
 | @mentions | ❌ | P2 |
 | Permissions (view/edit/admin) | ❌ | P1 |
 | Team workspaces | ❌ | P1 |
