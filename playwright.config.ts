@@ -38,7 +38,7 @@ export default defineConfig({
         // Force the software WebGL path the way Chromium's SwiftShader
         // gives one to the chromium project.
         launchOptions: {
-          firefoxUserPrefs: { "webgl.force-enabled": true, "webgl.disabled": false },
+          firefoxUserPrefs: { "webgl.force-enabled": true, "webgl.disabled": false, "webgl.out-of-process": false },
         },
       },
     },

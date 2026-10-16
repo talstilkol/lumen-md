@@ -387,6 +387,17 @@ describe("transformEdit — text that contains CriticMarkup delimiters", () => {
     expect(transformEdit("abc", { from: 0, to: 3, insert: "n~~}m", kind: "replace" })).toMatchObject({ untrackable: true });
   });
 
+  it("refuses a replacement whose new text is a whole CriticMarkup span (accept-all must be final)", () => {
+    expect(transformEdit("old", { from: 0, to: 3, insert: "{++x++}", kind: "replace" })).toMatchObject({ untrackable: true });
+    expect(transformEdit("ab", { from: 1, to: 1, insert: "{--y--}", kind: "insert" })).toMatchObject({ untrackable: true });
+  });
+
+  it("still tracks ordinary replacements", () => {
+    const r = transformEdit("old", { from: 0, to: 3, insert: "new", kind: "replace" });
+    expect(r?.untrackable).toBeFalsy();
+    expect(r?.change).not.toBeNull();
+  });
+
   it("refuses deleting text that contains --}", () => {
     expect(transformEdit("a--}b", { from: 0, to: 5, insert: "", kind: "selection" })).toMatchObject({ untrackable: true });
   });

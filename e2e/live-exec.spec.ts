@@ -143,8 +143,11 @@ test("live-lua executes real Lua via wasmoon WASM in a worker", async ({ page })
     ]);
     const state = await block.getAttribute("data-state", { timeout: 2_000 }).catch(() => "?");
     const text = await block.innerText({ timeout: 2_000 }).catch(() => "?");
+    const blocks = await block.count();
+    const doc = await editor.innerText({ timeout: 2_000 }).catch(() => "?");
     throw new Error(
-      `live-lua never printed 5063. data-state=${state}; ${alive}\nblock: ${text.slice(0, 400)}\n` +
+      `live-lua never printed 5063. blocks=${blocks} data-state=${state}; ${alive}\nblock: ${text.slice(0, 400)}\n` +
+        `editor: ${doc.slice(0, 300)}\n` +
         diag.slice(-40).join("\n") +
         `\n--- ${(err as Error).message.split("\n")[0]}`,
     );

@@ -390,12 +390,24 @@ export function transformEdit(text: string, edit: SuggestEdit): SuggestResult | 
   const res = transformEditUnchecked(text, edit);
   if (!res || !res.change) return res;
   const next = applyChange(text, res.change);
+  const accepted = resolveAll(next, "accept");
+  // "Accept all" must be final: typed text that itself looks like
+  // CriticMarkup (e.g. replacing a selection with `{++x++}`) would otherwise
+  // surface as a NEW suggestion once accepted, and a second accept would
+  // change the literal text the user typed.
   const ok =
     resolveAll(next, "reject") === resolveAll(text, "reject") &&
+    (resolveAll(accepted, "accept") === accepted || !isFixedPointAccept(text)) &&
     (edit.kind !== "insert" ||
-      resolveAll(next, "accept").length === resolveAll(text, "accept").length + edit.insert.length);
+      accepted.length === resolveAll(text, "accept").length + edit.insert.length);
   if (ok) return res;
   return { change: null, cursor: edit.kind === "backward" ? edit.to : edit.from, untrackable: true };
+}
+
+/** True when accepting all suggestions leaves no further suggestions behind. */
+function isFixedPointAccept(text: string): boolean {
+  const acc = resolveAll(text, "accept");
+  return resolveAll(acc, "accept") === acc;
 }
 
 function transformEditUnchecked(text: string, edit: SuggestEdit): SuggestResult | null {
