@@ -168,6 +168,9 @@ export function clearPreviousPublish(outAbs: string): void {
     const target = resolve(outAbs, ...rel.split("/"));
     const r = relative(outAbs, target);
     if (!r || r.startsWith("..") || isAbsolute(r)) continue; // never outside the output folder
+    // Every folder between the output root and the file must be a real
+    // directory: a symlinked one would make unlink delete a file outside.
+    if (!realDirsBetween(outAbs, target)) continue;
     try {
       if (!lstatSync(target).isFile()) continue;
       unlinkSync(target);
@@ -186,6 +189,22 @@ export function clearPreviousPublish(outAbs: string): void {
       /* already gone or not empty */
     }
   }
+}
+
+/** True when each path component strictly between `root` and `target` is a real directory (not a symlink). */
+function realDirsBetween(root: string, target: string): boolean {
+  const parts = relative(root, target).split(sep).slice(0, -1);
+  let cur = root;
+  for (const part of parts) {
+    cur = join(cur, part);
+    try {
+      const st = lstatSync(cur);
+      if (st.isSymbolicLink() || !st.isDirectory()) return false;
+    } catch {
+      return false;
+    }
+  }
+  return true;
 }
 
 /** Publish `input` (a folder or a single .md file) as a static site in `outDir`. */

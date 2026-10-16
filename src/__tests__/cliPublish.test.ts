@@ -3,7 +3,7 @@
  * checks pages, the index, link rewriting and asset copying on disk.
  */
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
-import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, existsSync, rmSync } from "node:fs";
+import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, existsSync, rmSync, symlinkSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { publishSite, rewriteMarkdownLinks, pageTitle } from "../cli/publish";
@@ -191,6 +191,21 @@ describe("republishing into the same folder", () => {
     writeFileSync(join(work, "out", ".lumen-publish.json"), JSON.stringify({ files: ["../keep.txt"] }));
     await publishSite(join(work, "src"), join(work, "out"));
     expect(existsSync(join(work, "keep.txt"))).toBe(true);
+  });
+});
+
+describe("republish cleanup and symlinks", () => {
+  it("doesn't follow a symlinked folder out of the output directory", async () => {
+    write("assets/logo.png", new Uint8Array([1]));
+    await publishSite(join(work, "src"), join(work, "out"));
+    // Replace out/assets with a link to an outside folder holding a same-named file.
+    mkdirSync(join(work, "elsewhere"));
+    writeFileSync(join(work, "elsewhere", "logo.png"), "precious");
+    rmSync(join(work, "out", "assets"), { recursive: true });
+    symlinkSync(join(work, "elsewhere"), join(work, "out", "assets"), "dir");
+    rmSync(join(work, "src", "assets"), { recursive: true });
+    await publishSite(join(work, "src"), join(work, "out"));
+    expect(readFileSync(join(work, "elsewhere", "logo.png"), "utf8")).toBe("precious");
   });
 });
 

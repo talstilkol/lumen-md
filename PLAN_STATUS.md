@@ -11,7 +11,7 @@
 
 | מדד | לפני (2026-10-15) | אחרי (2026-10-16) |
 |---|---|---|
-| בדיקות יחידה (vitest) | 1360 / 1360 | **2115 / 2115** |
+| בדיקות יחידה (vitest) | 1360 / 1360 | **2117 / 2117** |
 | בדיקות e2e (Chromium, build ייצור + CSP/Trusted Types אכוף) | לא הורץ | **74 / 74** + בדיקת הפרות CSP חדשה (0 הפרות) |
 | e2e ב-CI (chromium / webkit / firefox + build ייצור) | — | **כולם ✅** — Firefox: ‏103 עברו, 0 flaky (בדיקת pixel אחת מוגבלת ל-Chromium בכוונה) |
 | `tsc --noEmit` | נקי | נקי |
@@ -81,6 +81,8 @@
 | Live JS משותף | בלוק עם `"use strict"` זרק `ReferenceError` על `const` משותף | השמות נוצרים מראש על `globalThis` אחרי ה-prologue (כולל destructuring ו-class) |
 | `lumen publish` | פרסום חוזר לאותה תיקייה השאיר קבצים ישנים (ונכשל ב-`EISDIR` כשמבנה פלט השתנה) | מניפסט `.lumen-publish.json`: לפני פרסום נמחקים רק הקבצים שהפרסום הקודם כתב; קבצים אחרים (למשל `CNAME`) נשארים |
 | `lumen publish` | קישורים ברשימת הדפים נשברו בשמות עם `#` / `?` | קידוד URL לכל מקטע בנתיב |
+| `lumen publish` | ניקוי פרסום קודם יכול היה למחוק קובץ מחוץ לתיקייה דרך תיקייה-symlink | מחיקה רק כשכל התיקיות בדרך הן תיקיות אמיתיות (לא symlink) |
+| תוסף VS Code | `[[Note]]` בתצוגה המקדימה לא עשה כלום כשאין כותרת כזו במסמך | הקליק נשלח לתוסף, שמאתר את הפתק ב-workspace ופותח אותו (כולל `#Heading`) |
 
 ## 3. השלמת תוכניות ופיצ'רים חדשים
 
@@ -131,7 +133,7 @@
 
 ## 6. מה אומת ואיך
 
-- **אומת בפועל:** typecheck, 2115 בדיקות יחידה, e2e ב-CI בשלושת הדפדפנים + build ייצור, hygiene, build ייצור, תקציב bundle, ו-74 בדיקות e2e ב-Chromium 141 מול build ייצור עם כותרות `public/_headers` (CSP + Trusted Types אכוף) — 0 הפרות.
+- **אומת בפועל:** typecheck, 2117 בדיקות יחידה, e2e ב-CI בשלושת הדפדפנים + build ייצור, hygiene, build ייצור, תקציב bundle, ו-74 בדיקות e2e ב-Chromium 141 מול build ייצור עם כותרות `public/_headers` (CSP + Trusted Types אכוף) — 0 הפרות.
 - **אומת חלקית:** קובצי PPTX נפתחו ב-python-pptx וב-LibreOffice (לא ב-PowerPoint עצמו).
 - **לא אומת:** קונטיינרי Docker לא נבנו; שרת collab הקבוע לא הורץ (תלויות אופציונליות); SSO/Stripe לא נבדקו חי; tldraw / תלת-ממד / מפות לא כוסו ב-e2e תחת Trusted Types.
 

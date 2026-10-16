@@ -7,7 +7,8 @@ import * as vscode from "vscode";
 import { randomBytes } from "node:crypto";
 import { basename } from "node:path";
 import { renderPreviewDocument } from "./render";
-import { classifyLink, findHeadingLine } from "./links";
+import { classifyLink, findHeadingLine, slugifyHeading } from "./links";
+import { resolveWikiNote, splitWikiTarget } from "./wikiLinks";
 
 /** Handle a link clicked in the preview (relative to `doc`). */
 async function openLink(doc: vscode.TextDocument | undefined, href: unknown): Promise<void> {
@@ -40,6 +41,27 @@ async function openLink(doc: vscode.TextDocument | undefined, href: unknown): Pr
     }
     await vscode.commands.executeCommand("vscode.open", uri, vscode.ViewColumn.One);
   }
+}
+
+/** Open the workspace note a `[[Note]]` / `[[Note#Heading]]` link names. */
+async function openWikiLink(doc: vscode.TextDocument | undefined, target: unknown): Promise<void> {
+  if (typeof target !== "string" || !doc) return;
+  const { note, heading } = splitWikiTarget(target);
+  const files = await vscode.workspace.findFiles("**/*.{md,markdown}", "**/node_modules/**");
+  const byPath = new Map(files.map((u) => [vscode.workspace.asRelativePath(u, false).replace(/\\/g, "/"), u]));
+  const hit = resolveWikiNote(note, [...byPath.keys()]);
+  if (!hit) {
+    void vscode.window.showWarningMessage(`Lumen: no note named "${note}" in the workspace.`);
+    return;
+  }
+  const opened = await vscode.workspace.openTextDocument(byPath.get(hit)!);
+  const line = heading ? findHeadingLine(opened.getText(), slugifyHeading(heading)) : 0;
+  const pos = new vscode.Position(Math.max(line, 0), 0);
+  await vscode.window.showTextDocument(opened, {
+    viewColumn: vscode.ViewColumn.One,
+    selection: new vscode.Range(pos, pos),
+  });
+  if (heading && line < 0) void vscode.window.showInformationMessage(`Lumen: no heading "${heading}" in ${hit}.`);
 }
 
 let panel: vscode.WebviewPanel | undefined;
@@ -98,8 +120,9 @@ function openPreview(context: vscode.ExtensionContext): void {
       { enableScripts: true, localResourceRoots: roots },
     );
     panel.webview.onDidReceiveMessage(
-      (msg: { type?: string; href?: unknown }) => {
+      (msg: { type?: string; href?: unknown; target?: unknown }) => {
         if (msg?.type === "openLink") void openLink(currentDoc, msg.href);
+        else if (msg?.type === "openWikiLink") void openWikiLink(currentDoc, msg.target);
       },
       null,
       context.subscriptions,

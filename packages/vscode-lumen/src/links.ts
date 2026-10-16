@@ -67,3 +67,4 @@ export function findHeadingLine(markdown: string, fragment: string): number {
   const hit = headingAnchors(markdown).find((a) => a.id.toLowerCase() === target);
   return hit ? hit.line : -1;
 }
+
