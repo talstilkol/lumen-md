@@ -135,7 +135,7 @@ jobs:
           REPO: ${{ github.repository }}
         run: |
           [ -s bundle-diff.md ] || { echo "no bundle-size table"; exit 0; }
-          id=$(gh api "repos/$REPO/issues/$PR/comments" --paginate --jq '.[] | select(.body | contains("<!-- lumen-bundle-diff -->")) | .id' | tail -1)
+          id=$(gh api "repos/$REPO/issues/$PR/comments" --paginate --jq '.[] | select(.user.login == "github-actions[bot]" and (.body | contains("<!-- lumen-bundle-diff -->"))) | .id' | tail -1)
           if [ -n "$id" ]; then
             gh api -X PATCH "repos/$REPO/issues/comments/$id" -F body=@bundle-diff.md > /dev/null
           else
