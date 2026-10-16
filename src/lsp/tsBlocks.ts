@@ -69,6 +69,20 @@ export function findTsBlocks(doc: string): TsBlock[] {
     if (nl === -1) break;
     pos = nl + 1;
   }
+  // An unclosed fence runs to the end of the document (CommonMark) — a
+  // block still being typed is checked too.
+  if (open && (TS_LANGS.has(open.lang) || JS_LANGS.has(open.lang)) && open.codeFrom <= doc.length) {
+    const shared = open.lang === "live-js" ? SHARED_RE.exec(open.meta) : null;
+    out.push({
+      id: `block-${out.length}`,
+      tsx: open.lang === "tsx" || open.lang === "jsx",
+      js: JS_LANGS.has(open.lang),
+      scope: shared ? (shared[1] ?? "default") : null,
+      from: open.codeFrom,
+      to: doc.length,
+      code: doc.slice(open.codeFrom),
+    });
+  }
   return out;
 }
 

@@ -460,7 +460,7 @@ const APP_NAMES: Record<string, string> = {
   key: "Apple Keynote",
 };
 
-async function gunzip(data: Uint8Array): Promise<Uint8Array> {
+export async function gunzip(data: Uint8Array, maxBytes = IWORK_UNZIP_LIMITS.maxEntryBytes): Promise<Uint8Array> {
   const ds = new DecompressionStream("gzip") as unknown as ReadableWritablePair<Uint8Array, Uint8Array>;
   const src = new ReadableStream<Uint8Array>({
     start(c) {
@@ -470,12 +470,21 @@ async function gunzip(data: Uint8Array): Promise<Uint8Array> {
   });
   const reader = src.pipeThrough(ds).getReader();
   const chunks: Uint8Array[] = [];
+  let total = 0;
   for (;;) {
     const { done, value } = await reader.read();
     if (done) break;
-    if (value) chunks.push(value);
+    if (value) {
+      total += value.length;
+      // A small crafted gzip member can expand enormously: stop at the cap.
+      if (total > maxBytes) {
+        await reader.cancel().catch(() => {});
+        throw new Error("gzip entry exceeds the size limit");
+      }
+      chunks.push(value);
+    }
   }
-  const out = new Uint8Array(chunks.reduce((a, c) => a + c.length, 0));
+  const out = new Uint8Array(total);
   let o = 0;
   for (const c of chunks) {
     out.set(c, o);

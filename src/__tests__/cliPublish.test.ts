@@ -295,6 +295,14 @@ describe("single-file publish follows page links", () => {
     expect(read("README.html")).toContain('href="docs/guide.html#install"');
   });
 
+  it("follows angle-bracket destinations that contain spaces", async () => {
+    write("README.md", "[Guide](<User Guide.md>) and [ref]\n\n[ref]: <Other Page.md>");
+    write("User Guide.md", "# Guide");
+    write("Other Page.md", "# Other");
+    const res = await publishSite(join(work, "src", "README.md"), join(work, "out"));
+    expect(res.pages.map((p) => p.output).sort()).toEqual(["Other Page.html", "README.html", "User Guide.html"]);
+  });
+
   it("does not follow links outside the source folder", async () => {
     writeFileSync(join(work, "outside.md"), "# Outside");
     write("README.md", "[x](../outside.md)");
