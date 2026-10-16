@@ -319,18 +319,18 @@ function functionScopes(tokens: ReturnType<typeof tokenize>, match: Map<number, 
     if (declared || isPunct(i - 1, ".") || isPunct(i - 1, "?.")) continue;
     if (next?.type === "punct" && /^(=|\+=|-=|\|\|=|&&=|\?\?=)$/.test(next.value)) reassignedAt.set(t.value, i);
   }
-  // `Array` / `Object` are the built-ins only when the code doesn't bind its own.
+  // `Array` / `Object` / `Promise` are the built-ins only when the code doesn't bind its own.
   const shadowed = new Set<string>();
   for (let i = 1; i < tokens.length; i++) {
     const t = tokens[i];
-    if (t.type !== "ident" || (t.value !== "Array" && t.value !== "Object")) continue;
+    if (t.type !== "ident" || (t.value !== "Array" && t.value !== "Object" && t.value !== "Promise")) continue;
     const prev = val(i - 1);
     if (["const", "let", "var", "function", "class"].includes(prev) || (isPunct(i + 1, "=") && !isPunct(i - 1, "."))) shadowed.add(t.value);
   }
   const callbackRetained = (open: number): boolean => {
     const callee = tokens[open - 1];
     if (callee?.type !== "ident") return true;
-    if (callee.value === "Promise" && val(open - 2) === "new") return false;
+    if (callee.value === "Promise" && val(open - 2) === "new" && !shadowed.has("Promise")) return false;
     if (!SYNC_CALLBACK_METHODS.has(callee.value) || !isPunct(open - 2, ".")) return true;
     // Only when the receiver is known to be the built-in: an array literal
     // (`[…].map`), a string literal (`"…".replace`), `Array.from`,
