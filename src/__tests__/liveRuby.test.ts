@@ -139,6 +139,15 @@ describe("live-ruby on the real ruby.wasm runtime", () => {
     expect(await run("1 + 1")).toContainEqual({ type: "result", runId: 1, text: "2" });
   }, 120_000);
 
+  it("caps huge results and error messages inside Ruby", async () => {
+    const big = await run('"x" * 1_000_000');
+    const res = big.find((m) => m.type === "result");
+    expect(res && "text" in res ? res.text.length : 0).toBeLessThan(MAX_OUTPUT_CHARS + 50);
+    expect(res && "text" in res ? res.text : "").toMatch(/truncated\)$/);
+    const err = (await run('raise "y" * 1_000_000')).find((m) => m.type === "error");
+    expect(err && "message" in err ? err.message.length : 0).toBeLessThan(MAX_OUTPUT_CHARS + 500);
+  }, 60_000);
+
   it("gives every run a fresh VM", async () => {
     await run("$leak = 42");
     const msgs = await run("$leak.inspect");

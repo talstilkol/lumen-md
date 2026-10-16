@@ -204,6 +204,7 @@ const SYNC_CALLBACK_METHODS = new Set([
 /** Find function scopes (functions, arrows, methods) in a token list. */
 function functionScopes(tokens: ReturnType<typeof tokenize>, match: Map<number, number>): FnScope[] {
   const scopes: FnScope[] = [];
+  const pending: Array<() => FnScope> = [];
   const val = (i: number) => (tokens[i]?.type === "punct" || tokens[i]?.type === "ident" ? tokens[i].value : "");
   const isPunct = (i: number, v: string) => tokens[i]?.type === "punct" && tokens[i].value === v;
   /** Retained unless the function sits in argument / IIFE position. */
@@ -219,7 +220,27 @@ function functionScopes(tokens: ReturnType<typeof tokenize>, match: Map<number, 
     const callee = tokens[open - 1];
     if (callee?.type !== "ident") return true;
     if (callee.value === "Promise" && val(open - 2) === "new") return false;
-    return !SYNC_CALLBACK_METHODS.has(callee.value);
+    if (!SYNC_CALLBACK_METHODS.has(callee.value) || !isPunct(open - 2, ".")) return true;
+    // Only when the receiver is known to be the built-in: an array literal
+    // (`[…].map`), a string literal (`"…".replace`), `Array.from`,
+    // `Object.fromEntries` / `Object.groupBy`. A user's own `holder.map`
+    // may keep the callback.
+    const recv = tokens[open - 3];
+    if (!recv) return true;
+    if (recv.type === "str" || recv.type === "tpl") return !(callee.value === "replace" || callee.value === "replaceAll");
+    if (recv.type === "ident") {
+      if (recv.value === "Array") return callee.value !== "from";
+      if (recv.value === "Object") return !(callee.value === "fromEntries" || callee.value === "groupBy");
+      return true;
+    }
+    if (isPunct(open - 3, "]")) {
+      const lit = match.get(open - 3);
+      const before = lit !== undefined ? tokens[lit - 1] : undefined;
+      // `[…]` is a literal unless it indexes something (`a[0]`, `f()[0]`).
+      const indexes = before && (before.type === "ident" || (before.type === "punct" && CALLEE_END.has(before.value)));
+      return !!indexes;
+    }
+    return true;
   };
   const retainedAt = (before: number): boolean => {
     let c = before;
@@ -248,6 +269,49 @@ function functionScopes(tokens: ReturnType<typeof tokenize>, match: Map<number, 
     // A grouping parenthesis: classify by what the group sits in.
     return retainedAt(c - 1);
   };
+  /** Function bodies [open, close] (to skip nested function scopes). */
+  const fnBodies: Array<[number, number]> = [];
+  /**
+   * Names declared in the block whose braces are [from, to]: let / const /
+   * class / function at its own level; with `fnLevel`, also `var` anywhere
+   * inside (hoisted to the function), but never inside nested functions.
+   */
+  const addDeclarations = (into: Set<string>, from: number, to: number, fnLevel: boolean) => {
+    let depth = 0;
+    for (let i = from + 1; i < to; i++) {
+      const t = tokens[i];
+      if (t.type === "punct") {
+        if (t.value === "{" || t.value === "(" || t.value === "[") {
+          const nested = fnBodies.find(([a]) => a === i);
+          if (nested) {
+            i = nested[1];
+            continue;
+          }
+          depth++;
+        } else if (t.value === "}" || t.value === ")" || t.value === "]") depth--;
+        continue;
+      }
+      const v = t.type === "ident" ? t.value : "";
+      const here = depth === 0;
+      if ((v === "const" || v === "let") && !here) continue;
+      if (v === "var" && !fnLevel && !here) continue;
+      if (v === "const" || v === "let" || v === "var") {
+        const j = i + 1;
+        if (tokens[j]?.type === "ident") into.add(tokens[j].value);
+        else if (isPunct(j, "{") || isPunct(j, "[")) {
+          const close = match.get(j) ?? j;
+          for (let m = j + 1; m < close; m++) {
+            if (tokens[m]?.type !== "ident") continue;
+            if (isPunct(m + 1, ":")) continue; // property key, not a binding
+            if (isPunct(m - 1, "=")) continue; // default value (approximation)
+            into.add(tokens[m].value);
+          }
+        }
+      } else if (here && (v === "function" || v === "class") && tokens[i + 1]?.type === "ident") {
+        into.add(tokens[i + 1].value);
+      }
+    }
+  };
   /** Locals: identifiers bound in the params and declared in the body. */
   const collectLocals = (paramsFrom: number, paramsTo: number, bodyFrom: number, bodyTo: number, own?: string) => {
     const locals = new Set<string>();
@@ -258,25 +322,7 @@ function functionScopes(tokens: ReturnType<typeof tokenize>, match: Map<number, 
       if (isPunct(i - 1, ".") || (isPunct(i + 1, ":") && (isPunct(i - 1, "{") || isPunct(i - 1, ",")))) continue;
       locals.add(t.value);
     }
-    for (let i = bodyFrom; i <= bodyTo; i++) {
-      const v = val(i);
-      if ((v === "const" || v === "let" || v === "var") && tokens[i].type === "ident") {
-        // `const a`, `const { a, b: c }`, `const [d, e]`
-        let j = i + 1;
-        if (tokens[j]?.type === "ident") locals.add(tokens[j].value);
-        else if (isPunct(j, "{") || isPunct(j, "[")) {
-          const close = match.get(j) ?? j;
-          for (let m = j + 1; m < close; m++) {
-            if (tokens[m]?.type !== "ident") continue;
-            if (isPunct(m + 1, ":")) continue; // property key, not a binding
-            if (isPunct(m - 1, "=")) continue; // default value (approximation)
-            locals.add(tokens[m].value);
-          }
-        }
-      } else if ((v === "function" || v === "class") && tokens[i + 1]?.type === "ident") {
-        locals.add(tokens[i + 1].value);
-      }
-    }
+    addDeclarations(locals, bodyFrom, bodyTo, true);
     return locals;
   };
 
@@ -292,7 +338,8 @@ function functionScopes(tokens: ReturnType<typeof tokenize>, match: Map<number, 
       const q = match.get(p);
       if (q === undefined || !isPunct(q + 1, "{")) continue;
       const end = match.get(q + 1) ?? tokens.length - 1;
-      scopes.push({ from: p, to: end, retained: retainedAt(k - 1), locals: collectLocals(p, q, q + 1, end, own) });
+      fnBodies.push([q + 1, end]);
+      pending.push(() => ({ from: p, to: end, retained: retainedAt(k - 1), locals: collectLocals(p, q, q + 1, end, own) }));
       continue;
     }
     // ( … ) => …   /   x => …
@@ -317,7 +364,8 @@ function functionScopes(tokens: ReturnType<typeof tokenize>, match: Map<number, 
           end = i;
         }
       }
-      scopes.push({ from: pFrom, to: end, retained: retainedAt(pFrom - 1), locals: collectLocals(pFrom, pTo, k + 1, end) });
+      if (isPunct(k + 1, "{")) fnBodies.push([k + 1, end]);
+      pending.push(() => ({ from: pFrom, to: end, retained: retainedAt(pFrom - 1), locals: collectLocals(pFrom, pTo, k + 1, end) }));
       continue;
     }
     // Method: name ( … ) { … } in an object literal or class body.
@@ -328,9 +376,22 @@ function functionScopes(tokens: ReturnType<typeof tokenize>, match: Map<number, 
       const keyPos = prev === "{" || prev === "," || prev === ";" || prev === "}" || prev === "*" || METHOD_PREFIXES.has(prev);
       if (!keyPos || BLOCK_HEADS.has(t.value) || t.value === "function") continue;
       const end = match.get(q + 1) ?? tokens.length - 1;
-      scopes.push({ from: k + 1, to: end, retained: true, locals: collectLocals(k + 1, q, q + 1, end) });
+      fnBodies.push([q + 1, end]);
+      pending.push(() => ({ from: k + 1, to: end, retained: true, locals: collectLocals(k + 1, q, q + 1, end) }));
     }
   }
+  // Locals need every function body known first (nested ones are skipped).
+  for (const make of pending) scopes.push(make());
+  // Statement blocks are scopes too: a `let` / `const` inside `{ … }` only
+  // shadows within it. (Object literals declare nothing, so they're inert.)
+  tokens.forEach((t, i) => {
+    if (t.type !== "punct" || t.value !== "{" || fnBodies.some(([a]) => a === i)) return;
+    const close = match.get(i);
+    if (close === undefined) return;
+    const locals = new Set<string>();
+    addDeclarations(locals, i, close, false);
+    if (locals.size) scopes.push({ from: i, to: close, retained: false, locals });
+  });
   return scopes;
 }
 
@@ -402,6 +463,15 @@ function rewriteEarlierPart(code: string, names: ReadonlyMap<string, string>): s
   return out;
 }
 
+/** Top-level `const` → `let  ` (length kept, so offsets don't move). */
+function constAsLet(code: string): string {
+  let out = code;
+  for (const t of tokenize(code)) {
+    if (t.type === "ident" && t.value === "const" && t.depth === 0) out = out.slice(0, t.start) + "let  " + out.slice(t.end);
+  }
+  return out;
+}
+
 function sharedUnit(scope: readonly TsBlock[], k: number): TsUnit {
   const own = scope[k];
   // For each name: the parts (≤ k) that declare it, in order.
@@ -448,10 +518,10 @@ function sharedUnit(scope: readonly TsBlock[], k: number): TsUnit {
   for (let i = 0; i <= k; i++) {
     const b = scope[i];
     if (i > 0) code += PART_SEPARATOR;
-    let text = b.code;
-    if (i < k) {
-      text = rewriteEarlierPart(b.code, renamesFor(i));
-    }
+    let text = i < k ? rewriteEarlierPart(b.code, renamesFor(i)) : b.code;
+    // Shared runs turn top-level bindings into reassignable globals
+    // (liveJsScope.hoistTopLevelBindings): `const` → `let`, same length.
+    text = constAsLet(text);
     if (i === k && b.live) code += LIVE_WRAP_OPEN;
     parts.push({ block: b, offset: code.length });
     code += text;

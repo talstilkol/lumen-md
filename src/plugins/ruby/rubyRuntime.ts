@@ -83,7 +83,12 @@ export function rubyProgram(source: string): string {
     `->(src) {`,
     `  begin`,
     `    r = TOPLEVEL_BINDING.eval(src, "block", 1)`,
-    `    r.nil? ? nil : r.inspect`,
+    // Results and error messages are capped inside Ruby, before they are
+    // converted to JS strings and posted to the page.
+    `    r.nil? ? nil : (s = r.inspect; s.length > ${MAX_OUTPUT_CHARS} ? s[0, ${MAX_OUTPUT_CHARS}] + "… (truncated)" : s)`,
+    `  rescue Exception => e`,
+    `    m = e.message.to_s`,
+    `    raise(m.length > ${MAX_OUTPUT_CHARS} ? e.exception(m[0, ${MAX_OUTPUT_CHARS}] + "… (truncated)") : e)`,
     `  ensure`,
     `    $stdout.flush`,
     `    $stderr.flush`,
@@ -91,6 +96,9 @@ export function rubyProgram(source: string): string {
     `}.call(${rubyStringLiteral(source)})`,
   ].join("\n");
 }
+
+/** Defensive cap for anything posted to the page. */
+const capText = (t: string) => (t.length > MAX_OUTPUT_CHARS ? t.slice(0, MAX_OUTPUT_CHARS) + "… (truncated)" : t);
 
 /** Clean up ruby.wasm's error text (drop the JS-side prefix). */
 export function rubyErrorMessage(err: unknown): string {
@@ -191,10 +199,10 @@ export function createRubyHandler(deps: {
       deps.post({ type: "ready", runId });
       const res = vm.eval(rubyProgram(source));
       if (res.call("nil?").toString() !== "true") {
-        deps.post({ type: "result", runId, text: res.toString() });
+        deps.post({ type: "result", runId, text: capText(res.toString()) });
       }
     } catch (err) {
-      deps.post({ type: "error", runId, message: rubyErrorMessage(err) });
+      deps.post({ type: "error", runId, message: capText(rubyErrorMessage(err)) });
     } finally {
       deps.post({ type: "done", runId, ms: now() - started });
     }

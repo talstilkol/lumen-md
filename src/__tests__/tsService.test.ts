@@ -101,8 +101,8 @@ describe("JavaScript blocks and shared scopes", () => {
     // One unit per block; a shared block's unit is its scope's earlier
     // blocks + itself, joined by a statement boundary.
     expect(units.map((u) => u.id)).toEqual(["block-0", "block-1", "block-2", "block-3"]);
-    expect(units[1].code).toBe("const base = 2;\n;\n(async () => {\nconst total = base * 21;\n})();");
-    expect(units[2].code).toBe("(async () => {\nconst base = 'x';\n})();");
+    expect(units[1].code).toBe("let   base = 2;\n;\n(async () => {\nlet   total = base * 21;\n})();");
+    expect(units[2].code).toBe("(async () => {\nlet   base = 'x';\n})();");
     // Offsets map both ways, into the unit's own block only.
     const second = blocks[1];
     const at = unitAt(units, second.from + 6)!;
@@ -150,7 +150,7 @@ describe("JavaScript blocks and shared scopes", () => {
     expect(diags).toEqual([]);
     const { units, input } = checkShared("const value = 1;", "// @ts-check\nconst value = 'x';\nvalue;");
     const at = units[1].code.lastIndexOf("value");
-    expect(service.quickInfo(input, units[1].id, at + 1)?.text).toBe('const value: "x"');
+    expect(service.quickInfo(input, units[1].id, at + 1)?.text).toBe("let value: string");
   });
 
   it("later shared blocks are invisible to earlier ones", () => {
@@ -178,7 +178,7 @@ describe("JavaScript blocks and shared scopes", () => {
   it("re-declared names are renamed in earlier parts only where they are bindings", () => {
     const { units } = checkShared("const value = 1; const o = { value: 2 }; o.value;", "const value = 'x';");
     const first = units[1].code.split("\n;\n")[0];
-    expect(first).toBe("const value$prev = 1; const o = { value: 2 }; o.value;");
+    expect(first).toBe("let   value$prev = 1; let   o = { value: 2 }; o.value;");
   });
 
   it("references inside functions stay late-bound to the newest declaration", () => {
@@ -187,7 +187,7 @@ describe("JavaScript blocks and shared scopes", () => {
       "// @ts-check\nconst value = 'x';\nread().toUpperCase(); arrow().toUpperCase(); now.toFixed();",
     );
     expect(units[1].code.split("\n;\n")[0]).toBe(
-      "// @ts-check\nconst value$prev = 1; function read() { return value; } const arrow = () => value; const now = value$prev;",
+      "// @ts-check\nlet   value$prev = 1; function read() { return value; } let   arrow = () => value; let   now = value$prev;",
     );
     expect(diags).toEqual([]);
   });
@@ -197,7 +197,7 @@ describe("JavaScript blocks and shared scopes", () => {
       "const value = 1; const result = (() => value)(); const doubled = [1].map((x) => x * value);",
       "// @ts-check\nconst value = 'x';\nresult.toFixed(); doubled[0].toFixed();",
     );
-    expect(units[1].code).toContain("const result = (() => value$prev)();");
+    expect(units[1].code).toContain("let   result = (() => value$prev)();");
     expect(diags).toEqual([]);
   });
 
@@ -235,13 +235,39 @@ describe("JavaScript blocks and shared scopes", () => {
     expect(diags).toEqual([]);
   });
 
+  it("shared bindings are reassignable, as at run time", () => {
+    const { diags } = checkShared("// @ts-check\nconst count = 1;", "// @ts-check\ncount = 2;\nconst k = 3; k = 4;");
+    expect(diags).toEqual([]);
+  });
+
+  it("a nested block's own binding doesn't hide the outer reference", () => {
+    const { units } = checkShared(
+      "const value = 1; const result = (() => { const before = value; { const value = 2; value; } return before; })();",
+      "const value = 'x';",
+    );
+    expect(units[1].code).toContain("const before = value$prev; { const value = 2; value; }");
+  });
+
+  it("only built-in receivers count as synchronous callers", () => {
+    const { units } = checkShared(
+      "const value = 1; holder.map(() => value); [1].map(() => value); \"a\".replace(/a/, () => value); Array.from([1], () => value); xs[0].map(() => value);",
+      "const value = 'x';",
+    );
+    const first = units[1].code.split("\n;\n")[0];
+    expect(first).toContain("holder.map(() => value)");
+    expect(first).toContain("[1].map(() => value$prev)");
+    expect(first).toContain('"a".replace(/a/, () => value$prev)');
+    expect(first).toContain("Array.from([1], () => value$prev)");
+    expect(first).toContain("xs[0].map(() => value)");
+  });
+
   it("a closure in grouping parentheses is still retained", () => {
     const { units, diags } = checkShared(
       "const value = 1; const fn = (() => value); const now = (() => value)();",
       "// @ts-check\nconst value = 'x';\nfn().toUpperCase(); now.toFixed();",
     );
-    expect(units[1].code).toContain("const fn = (() => value);");
-    expect(units[1].code).toContain("const now = (() => value$prev)();");
+    expect(units[1].code).toContain("let   fn = (() => value);");
+    expect(units[1].code).toContain("let   now = (() => value$prev)();");
     expect(diags).toEqual([]);
   });
 
@@ -256,7 +282,7 @@ describe("JavaScript blocks and shared scopes", () => {
 
   it("only leading directive comments are neutralised, not @ts-check as data", () => {
     const { units } = checkShared('// @ts-check\nconst marker = "@ts-check";', "const later = 1;");
-    expect(units[1].code).toContain('const marker = "@ts-check";');
+    expect(units[1].code).toContain('let   marker = "@ts-check";');
     expect(units[1].code).toContain("// @ts-_____");
   });
 
@@ -265,7 +291,7 @@ describe("JavaScript blocks and shared scopes", () => {
       "const value = 1; const result = (() => { const value$prev = 'x'; return value; })(); const top = value;",
       "const value = 'y';",
     );
-    expect(units[1].code.split("\n;\n")[0]).toContain("const top = value$prev2;");
+    expect(units[1].code.split("\n;\n")[0]).toContain("let   top = value$prev2;");
   });
 
   it("live-js blocks are checked as the async function they run in; js fences stay modules", () => {
@@ -297,7 +323,7 @@ describe("JavaScript blocks and shared scopes", () => {
       "// @ts-check\nconst value = 'x';\nobj.value.toFixed();",
     );
     expect(units[1].code.split("\n;\n")[0]).toBe(
-      "// @ts-check\nconst value$prev = 1; const obj = { value: value$prev }; const { value: v2, other = value$prev } = obj;",
+      "// @ts-check\nlet   value$prev = 1; let   obj = { value: value$prev }; let   { value: v2, other = value$prev } = obj;",
     );
     expect(diags).toEqual([]); // obj.value is still the number from the first block
     const at = units[1].code.lastIndexOf("value");
