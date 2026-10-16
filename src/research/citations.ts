@@ -71,16 +71,22 @@ function quotedPassage(s: string): string | undefined {
 /** Footnote definitions that cite an http(s) URL. Code is ignored. */
 export function parseCitations(md: string): Citation[] {
   const out: Citation[] = [];
-  let fence: string | null = null;
+  let fence: string | null = null; // the opening run, e.g. "````"
   md.split("\n").forEach((line, i) => {
-    const f = /^ {0,3}(`{3,}|~{3,})/.exec(line);
+    const f = /^ {0,3}(`{3,}|~{3,})(.*)$/.exec(line);
     if (f) {
-      if (!fence) fence = f[1][0];
-      else if (f[1][0] === fence) fence = null;
-      return;
+      if (!fence) {
+        fence = f[1];
+        return;
+      }
+      // Closes only on the same character, at least as long, with nothing after it.
+      if (f[1][0] === fence[0] && f[1].length >= fence.length && !f[2].trim()) {
+        fence = null;
+        return;
+      }
     }
     if (fence) return;
-    const m = /^\[\^([^\]\s]+)\]:\s*(.+)$/.exec(line);
+    const m = /^ {0,3}\[\^([^\]\s]+)\]:\s*(.+)$/.exec(line);
     if (!m) return;
     const rest = m[2];
     const link = markdownLink(rest);

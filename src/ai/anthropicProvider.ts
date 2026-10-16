@@ -202,10 +202,10 @@ export async function anthropicWebResearch(
   const configured = getAnthropicModel(opts);
   const model = /^claude-3/.test(configured) ? PROVIDER_DEFAULT_MODELS.anthropic : configured;
   const base = buildAnthropicBody(messages, { ...opts, model, maxTokens: opts.maxTokens ?? 4096 });
-  const body: Record<string, unknown> & { messages: unknown[] } = {
-    ...base,
-    tools: [{ type: "web_search_20250305", name: "web_search", max_uses: Math.max(1, Math.min(10, opts.maxSearches ?? 5)) }],
-  };
+  const maxSearches = Math.max(1, Math.min(10, opts.maxSearches ?? 5));
+  const tool = { type: "web_search_20250305", name: "web_search", max_uses: maxSearches };
+  const body: Record<string, unknown> & { messages: unknown[] } = { ...base, tools: [tool] };
+  let searched = 0;
   const content: Array<{ type?: string; text?: string; citations?: Array<{ type?: string; url?: string; title?: string; cited_text?: string }> }> = [];
   // A long search turn can stop with `pause_turn`: send it back to continue
   // (bounded).
@@ -219,6 +219,11 @@ export async function anthropicWebResearch(
     reportUsage(data.usage, data.model ?? model, opts);
     content.push(...(data.content ?? []));
     if (data.stop_reason !== "pause_turn") break;
+    // `max_uses` applies per request: carry the remaining budget over, and
+    // stop continuing once the run's searches are spent.
+    searched += Number(data.usage?.server_tool_use?.web_search_requests) || 0;
+    if (searched >= maxSearches) break;
+    tool.max_uses = maxSearches - searched;
     body.messages = [...body.messages, { role: "assistant", content: data.content }];
   }
   const blocks: CitedBlock[] = [];

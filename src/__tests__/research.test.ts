@@ -115,7 +115,7 @@ describe("research agent", () => {
   it("parses the answer and its quotes", () => {
     const { report, quotes } = parseAnswer('Report text [^1].\n---QUOTES---\n[{"n":1,"quote":"exact words"},{"n":"x"}]');
     expect(report).toBe("Report text [^1].");
-    expect([...quotes]).toEqual([[1, "exact words"]]);
+    expect([...quotes]).toEqual([[1, ["exact words"]]]);
   });
 
   describe("search route (Brave / Tavily via the research service)", () => {
@@ -154,6 +154,27 @@ describe("research agent", () => {
       expect(result.markdown).toContain("Bananas are blue.\n");
       expect(result.markdown).not.toContain("[^3]");
     });
+
+    it("gives every cited claim its own quote, and stops before searching on provider errors", async () => {
+      setActiveProvider("mistral");
+      localStorage.setItem("lumen.ai.key.mistral", "m-key");
+      const answers = [
+        '["roses"]',
+        "Prune in spring.[^1] Roses are blue.[^1]\n---QUOTES---\n" + '[{"n":1,"quote":"Prune roses in early spring"}]',
+      ];
+      vi.stubGlobal("fetch", vi.fn(async () => new Response(JSON.stringify({ choices: [{ message: { content: answers.shift() } }] }), { status: 200 })));
+      const page: ExtractedPage = { url: "https://a.example/r", finalUrl: "https://a.example/r", status: 200, title: "Roses", text: "Prune roses in early spring." };
+      const deps = { settings: { provider: "brave" as const, key: "k" }, search: async () => [{ title: "Roses", url: "https://a.example/r", snippet: "" }], extract: async () => page };
+      const result = await runResearch({ question: "Roses?", deps });
+      expect(result.unverified).toBe(1);
+      expect(result.markdown).toContain("Prune in spring.[^1] Roses are blue.[^2]");
+      expect(result.markdown).toMatch(/\[\^2\]: \[Roses\]\(https:\/\/a\.example\/r\) ⚠️ \*no supporting quote given\*/);
+      // The planner call fails (provider error): no search is spent.
+      vi.stubGlobal("fetch", vi.fn(async () => new Response("quota", { status: 429 })));
+      const search = vi.fn(deps.search);
+      await expect(runResearch({ question: "Roses?", deps: { ...deps, search } })).rejects.toThrow();
+      expect(search).not.toHaveBeenCalled();
+    });
   });
 
   it("asks for the Anthropic provider for Claude web search", async () => {
@@ -181,6 +202,7 @@ describe("research agent", () => {
     expect(bodies).toHaveLength(2);
     expect(bodies[0].model).toBe("claude-sonnet-4-5"); // 3.x can't use web search
     expect(bodies[1].messages).toHaveLength(2); // the paused assistant turn is sent back
+    expect((bodies[1] as unknown as { tools: Array<{ max_uses: number }> }).tools[0].max_uses).toBe(2); // 5 - 3 already used
     expect(usage[0]).toMatchObject({ webSearches: 3 });
     expect(costOf({ provider: "anthropic", model: "claude-sonnet-4-5", inputTokens: 0, outputTokens: 0, webSearches: 3 })).toBeCloseTo(0.03, 6);
     vi.unstubAllGlobals();
@@ -192,6 +214,8 @@ describe("research agent", () => {
   });
 
   it("reads a quote up to its own closing mark", () => {
+    expect(parseCitations("  [^1]: https://indented.example/a").map((x) => x.url)).toEqual(["https://indented.example/a"]);
+    expect(parseCitations("````md\n```\n[^1]: https://example.example/in-code\n```\n````\n[^2]: https://real.example/b").map((x) => x.url)).toEqual(["https://real.example/b"]);
     const c = parseCitations('[^1]: [A](https://a.example) — “The article says "quoted words" are important.”');
     expect(c[0].quote).toBe('The article says "quoted words" are important.');
   });

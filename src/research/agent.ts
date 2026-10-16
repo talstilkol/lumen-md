@@ -126,15 +126,23 @@ async function claudeResearch(o: ResearchOptions): Promise<ResearchResult> {
 
 const QUOTES_MARK = "---QUOTES---";
 
-export function parseAnswer(raw: string): { report: string; quotes: Map<number, string> } {
+/**
+ * The report and its quotes: for each source number, the supporting
+ * passages in the order of that source's markers in the report (one quote
+ * per cited claim).
+ */
+export function parseAnswer(raw: string): { report: string; quotes: Map<number, string[]> } {
   const at = raw.indexOf(QUOTES_MARK);
   const report = (at === -1 ? raw : raw.slice(0, at)).trim();
-  const quotes = new Map<number, string>();
+  const quotes = new Map<number, string[]>();
   if (at !== -1) {
     try {
       const arr = parseJsonResponse<Array<{ n?: number; quote?: string }>>(raw.slice(at + QUOTES_MARK.length));
       for (const q of Array.isArray(arr) ? arr : []) {
-        if (typeof q.n === "number" && typeof q.quote === "string" && q.quote.trim() && !quotes.has(q.n)) quotes.set(q.n, q.quote.trim());
+        if (typeof q.n !== "number" || typeof q.quote !== "string" || !q.quote.trim()) continue;
+        const list = quotes.get(q.n) ?? [];
+        list.push(q.quote.trim());
+        quotes.set(q.n, list);
       }
     } catch {
       /* no quotes: footnotes without them */
@@ -151,14 +159,16 @@ async function proxyResearch(o: ResearchOptions, settings: ResearchSettings): Pr
   // 1. Plan searches.
   o.onProgress?.("Planning searches…");
   let queries: string[] = [];
+  // Provider errors (no key, quota, network, cancel) stop here, before any
+  // search is spent; only an unparseable plan falls back to the question.
+  const plan = await chat(
+    [
+      { role: "system", content: "Reply with a JSON array of 2-4 short web search queries that together answer the user's question. No prose." },
+      { role: "user", content: o.question },
+    ],
+    { maxTokens: 200, temperature: 0.2, tier: "light", signal: o.signal },
+  );
   try {
-    const plan = await chat(
-      [
-        { role: "system", content: "Reply with a JSON array of 2-4 short web search queries that together answer the user's question. No prose." },
-        { role: "user", content: o.question },
-      ],
-      { maxTokens: 200, temperature: 0.2, tier: "light", signal: o.signal },
-    );
     const arr = parseJsonResponse<unknown>(plan);
     if (Array.isArray(arr)) queries = arr.filter((q): q is string => typeof q === "string" && !!q.trim());
   } catch {
@@ -223,8 +233,9 @@ async function proxyResearch(o: ResearchOptions, settings: ResearchSettings): Pr
         content:
           SYSTEM_REPORT +
           " Use ONLY the numbered sources below. After each claim add a footnote marker with the source number, like [^2]. " +
-          `Then, on its own line, write ${QUOTES_MARK} followed by a JSON array with one entry per source you cited: ` +
-          '[{"n": 2, "quote": "a short passage copied verbatim from source 2 that supports your claims"}].',
+          `Then, on its own line, write ${QUOTES_MARK} followed by a JSON array with one entry per footnote marker, in the order the markers appear: ` +
+          '[{"n": 2, "quote": "a short passage copied verbatim from source 2 that supports that specific claim"}]. ' +
+          "A source cited for three claims gets three entries, each with the passage behind its own claim.",
       },
       { role: "user", content: `Question: ${o.question}\n\nSources:\n\n${packed.map((p) => `${p.path}\n${p.text}`).join("\n\n---\n\n")}` },
     ],
@@ -232,26 +243,37 @@ async function proxyResearch(o: ResearchOptions, settings: ResearchSettings): Pr
   );
   const { report, quotes } = parseAnswer(raw);
 
-  // 5. Footnotes for the cited sources; verify each quote against its page.
-  const cited = [...new Set([...report.matchAll(/\[\^(\d+)\]/g)].map((m) => Number(m[1])))].filter((n) => n >= 1 && n <= pages.length).sort((a, b) => a - b);
-  // An answer that cites none of the sources read isn't research.
-  if (!cited.length) throw new Error("The answer didn't cite any of the sources it read — try again or rephrase the question.");
+  // 5. One footnote per cited claim: each marker gets its own supporting
+  //    quote, verified against the page it came from.
+  const valid = (n: number) => n >= 1 && n <= pages.length;
+  const cited = new Set<number>();
+  const seenPerSource = new Map<number, number>();
+  const defs: string[] = [];
   let unverified = 0;
-  const defs = cited.map((n) => {
+  const body = report.replace(/\[\^(\d+)\]/g, (_m, num: string) => {
+    const n = Number(num);
+    if (!valid(n)) return ""; // a marker for a source that doesn't exist
+    cited.add(n);
+    const k = seenPerSource.get(n) ?? 0;
+    seenPerSource.set(n, k + 1);
     const { hit, page } = pages[n - 1];
-    const quote = quotes.get(n) ?? "";
+    const quote = quotes.get(n)?.[k] ?? "";
     let flag = "";
     if (!quote) {
-      // No supporting passage given: the claim can't be checked.
+      // No supporting passage given for this claim: it can't be checked.
       unverified++;
       flag = " ⚠️ *no supporting quote given*";
     } else if (quoteCoverage(quote, page.text!) < APPROXIMATE_AT) {
       unverified++;
       flag = " ⚠️ *quote not found in the source*";
     }
-    return footnote(n, { title: page.title || hit.title, url: page.finalUrl }, quote, flag);
+    const id = defs.length + 1;
+    defs.push(footnote(id, { title: page.title || hit.title, url: page.finalUrl }, quote, flag));
+    return `[^${id}]`;
   });
-  const uncited = pages.map((p, i) => ({ p, n: i + 1 })).filter(({ n }) => !cited.includes(n));
+  // An answer that cites none of the sources read isn't research.
+  if (!cited.size) throw new Error("The answer didn't cite any of the sources it read — try again or rephrase the question.");
+  const uncited = pages.map((p, i) => ({ p, n: i + 1 })).filter(({ n }) => !cited.has(n));
   const markdown = [
     `# ${title(o.question)}`,
     "",
@@ -259,7 +281,7 @@ async function proxyResearch(o: ResearchOptions, settings: ResearchSettings): Pr
       unverified ? `**${unverified} quote${unverified === 1 ? "" : "s"} could not be verified**` : "every quote checked against its source"
     }.*`,
     "",
-    report.replace(/\[\^(\d+)\]/g, (m, n: string) => (cited.includes(Number(n)) ? m : "")),
+    body,
     "",
     ...(uncited.length ? ["## Also read", "", ...uncited.map(({ p }) => `- [${p.page.title || p.hit.title}](${p.page.finalUrl})`), ""] : []),
     ...defs,
