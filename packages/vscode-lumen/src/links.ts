@@ -31,11 +31,19 @@ export function classifyLink(href: string): LinkAction {
   const fragment = hash < 0 ? "" : h.slice(hash + 1);
   const query = beforeHash.indexOf("?");
   let path = query < 0 ? beforeHash : beforeHash.slice(0, query);
-  try {
-    path = decodeURI(path);
-  } catch {
-    /* keep raw */
-  }
+  // Decode per segment with decodeURIComponent: the query and fragment are
+  // already split off, so `%23` / `%3F` in a file name (`FAQ%231.md`) mean
+  // a literal `#` / `?`. `%2F` stays escaped so it can't add a path level.
+  path = path
+    .split("/")
+    .map((seg) => {
+      try {
+        return decodeURIComponent(seg.replace(/%2f/gi, "%252F"));
+      } catch {
+        return seg; // malformed escape: keep raw
+      }
+    })
+    .join("/");
   if (!path) return { kind: "fragment" };
   return { kind: "relative", path, fragment };
 }

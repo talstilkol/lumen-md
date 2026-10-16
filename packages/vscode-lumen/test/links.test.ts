@@ -1,6 +1,15 @@
 import { describe, it, expect } from "vitest";
 import { classifyLink, findHeadingLine, slugifyHeading } from "../src/links";
 
+describe("classifyLink decoding", () => {
+  it("decodes reserved characters in file names, keeps malformed escapes raw", () => {
+    expect(classifyLink("FAQ%231.md")).toEqual({ kind: "relative", path: "FAQ#1.md", fragment: "" });
+    expect(classifyLink("what%3F.md#top")).toEqual({ kind: "relative", path: "what?.md", fragment: "top" });
+    expect(classifyLink("bad%E0.md")).toEqual({ kind: "relative", path: "bad%E0.md", fragment: "" });
+    expect(classifyLink("a%2Fb.md")).toEqual({ kind: "relative", path: "a%2Fb.md", fragment: "" });
+  });
+});
+
 describe("classifyLink", () => {
   it("keeps in-page anchors in the webview", () => {
     expect(classifyLink("#install")).toEqual({ kind: "fragment" });
