@@ -140,8 +140,8 @@ export function importSpecifiers(code: string): Array<{ start: number; end: numb
         add(i + 1); // import "x"
         continue;
       }
-      if (next?.value === "(" && tokens[i + 2]?.type === "str" && tokens[i + 3]?.value === ")") {
-        add(i + 2); // import("x")
+      if (next?.value === "(" && tokens[i + 2]?.type === "str" && (tokens[i + 3]?.value === ")" || tokens[i + 3]?.value === ",")) {
+        add(i + 2); // import("x") / import("x", { with: … })
         continue;
       }
       if (t.depth === 0 && next?.value !== "." && next?.value !== "(") inDecl = true;
