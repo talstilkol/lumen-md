@@ -217,6 +217,25 @@ describe("connectCollab lifecycle", () => {
     }
   });
 
+  it("does not attach a saved persistent server when the plan doesn't include it", async () => {
+    localStorage.setItem("lumen.collab.ws", "ws://localhost:4444");
+    const { useEntitlement, __setEntitlementEndpointForTesting } = await import("../billing/useEntitlement");
+    const { FREE_CAPS } = await import("../billing/types");
+    __setEntitlementEndpointForTesting("https://billing.lumen.test/entitlements");
+    useEntitlement.setState({ capabilities: FREE_CAPS, entitlement: null, loading: false });
+    try {
+      const mod = await import("../collab/yjs");
+      const moduleMock = await import(/* @vite-ignore */ "y-websocket");
+      const before = (moduleMock.WebsocketProvider as unknown as { instances: unknown[] }).instances.length;
+      const session = mod.connectCollab("lumen-free-room", "");
+      await new Promise((r) => setTimeout(r, 20));
+      expect((moduleMock.WebsocketProvider as unknown as { instances: unknown[] }).instances.length).toBe(before);
+      session.destroy();
+    } finally {
+      __setEntitlementEndpointForTesting(null);
+    }
+  });
+
   it("does not retain websocket provider when destroy happens before attach completes", async () => {
     localStorage.setItem("lumen.collab.ws", "ws://localhost:4444");
     const mod = await import("../collab/yjs");
