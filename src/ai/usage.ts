@@ -222,12 +222,13 @@ export function formatUsageReport(s: UsageSummary): string {
   const lines = [
     `${s.month} — ${n(s.total.requests)} requests, ${n(s.total.cacheHits)} answered from cache`,
     `Tokens: ${n(s.total.inputTokens)} in · ${n(s.total.outputTokens)} out` +
-      (s.total.cacheReadTokens ? ` · ${n(s.total.cacheReadTokens)} prompt-cache reads` : ""),
+      (s.total.cacheReadTokens ? ` · ${n(s.total.cacheReadTokens)} prompt-cache reads` : "") +
+      (s.total.cacheWriteTokens ? ` · ${n(s.total.cacheWriteTokens)} prompt-cache writes` : ""),
     `Estimated cost: ${usd(s.total.cost)}${s.total.unpriced ? ` (+ ${s.total.unpriced} requests with unknown prices)` : ""}`,
     "",
     ...s.rows.map(
       (r) =>
-        `• ${r.provider} / ${r.model}: ${n(r.requests)} req · ${n(r.inputTokens + r.cacheReadTokens)} in · ${n(r.outputTokens)} out · ${usd(r.cost)}` +
+        `• ${r.provider} / ${r.model}: ${n(r.requests)} req · ${n(r.inputTokens + r.cacheReadTokens + r.cacheWriteTokens)} in · ${n(r.outputTokens)} out · ${usd(r.cost)}` +
         (r.cacheHits ? ` · ${n(r.cacheHits)} cached` : "") +
         (r.estimated ? ` · ${r.estimated} estimated` : ""),
     ),
