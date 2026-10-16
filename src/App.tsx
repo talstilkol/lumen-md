@@ -94,6 +94,7 @@ export default function App() {
   const spellCheck = useAppStore((s) => s.spellCheck);
   const grammarCheck = useAppStore((s) => s.grammarCheck);
   const typewriterMode = useAppStore((s) => s.typewriterMode);
+  const suggestingMode = useAppStore((s) => s.suggestingMode);
   const aiKey = useAppStore((s) => s.aiKey);
   const useLocalAi = useAppStore((s) => s.useLocalAi);
   const editorRef = useRef<EditorHandle | null>(null);
@@ -726,6 +727,7 @@ export default function App() {
             spellCheck={spellCheck}
             grammarCheck={grammarCheck}
             typewriterMode={typewriterMode}
+            suggestingMode={suggestingMode}
             activeFile={activeFile}
             pageView={pageView}
             collab={collab}
@@ -959,6 +961,7 @@ export default function App() {
             spellCheck={spellCheck}
             grammarCheck={grammarCheck}
             typewriterMode={typewriterMode}
+            suggestingMode={suggestingMode}
             activeFile={activeFile}
             pageView={pageView}
             collab={collab}

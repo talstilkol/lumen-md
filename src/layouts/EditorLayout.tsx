@@ -61,6 +61,8 @@ interface Props {
   spellCheck: boolean;
   grammarCheck: boolean;
   typewriterMode: boolean;
+  /** Suggesting mode (track changes) in the source editor. */
+  suggestingMode?: boolean;
   activeFile: string | null;
   pageView: boolean;
   collab: CollabSession | null;
@@ -77,6 +79,7 @@ export function EditorLayout({
   spellCheck,
   grammarCheck,
   typewriterMode,
+  suggestingMode = false,
   pageView,
   collab,
   setContent,
@@ -355,6 +358,7 @@ export function EditorLayout({
               spellCheck={spellCheck}
               grammarCheck={grammarCheck}
               typewriterMode={typewriterMode}
+              suggesting={suggestingMode}
             />
           </Suspense>
         </section>

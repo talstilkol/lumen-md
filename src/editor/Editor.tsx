@@ -46,6 +46,7 @@ import { markdownLintExtension } from "./lintExtension";
 import { searchHighlightExtension } from "./searchHighlight";
 import { inlineSuggestion } from "./inlineSuggestion";
 import { formatKeymap } from "./formatCommands";
+import { setSuggesting, suggestingExtension, suggestingSkip } from "./suggestingExtension";
 import type { CollabSession } from "../collab/yjs";
 
 const mdHighlight = HighlightStyle.define([
@@ -85,6 +86,8 @@ interface EditorProps {
   typewriterMode?: boolean;
   /** Active collaboration session — when set, peer cursors render live. */
   collab?: CollabSession | null;
+  /** Suggesting mode (track changes): record edits as CriticMarkup. */
+  suggesting?: boolean;
 }
 
 export interface EditorHandle {
@@ -245,6 +248,7 @@ export const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
     grammarCheck = false,
     typewriterMode = false,
     collab = null,
+    suggesting = false,
   },
   ref,
 ) {
@@ -380,6 +384,9 @@ export const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
       // Workspace search → editor: when SearchDialog opens a hit, this
       // extension flashes the matches and scrolls the first one into view.
       searchHighlightExtension(),
+      // Suggesting mode (track changes) — CriticMarkup decorations are
+      // always on; the edit-rewriting filter only while the flag is set.
+      suggestingExtension(suggesting),
       imageDropPasteHandlers,
       // Shift-Alt-F → format document (Prettier, lazy-loaded on first use).
       formatKeymap(),
@@ -519,10 +526,17 @@ export const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
         // see the import note at the top of the file.
         const [{ ySync, ySyncFacet, YSyncConfig }, { commentDecorations }] =
           await Promise.all([import("y-codemirror.next"), import("./commentDecorations")]);
+        const syncConf = new YSyncConfig(collab.ytext, collab.awareness);
         collabExt = [
-          ySyncFacet.of(new YSyncConfig(collab.ytext, collab.awareness)),
+          ySyncFacet.of(syncConf),
           ySync,
           collabAwarenessExtension(collab.awareness),
+          // Remote peers' edits arrive tagged with ySync's annotation (whose
+          // value is this config): never re-wrap them as our suggestions.
+          suggestingSkip.of((tr) =>
+            (tr as unknown as { annotations: ReadonlyArray<{ value: unknown }> }).annotations
+              .some((a) => a.value === syncConf),
+          ),
         ];
         if (collab.doc) commentsExt = commentDecorations({ doc: collab.doc });
       }
@@ -538,6 +552,13 @@ export const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
       cancelled = true;
     };
   }, [collab]);
+
+  // Toggle suggesting mode (track changes) without recreating the editor.
+  useEffect(() => {
+    const view = viewRef.current;
+    if (!view) return;
+    view.dispatch({ effects: setSuggesting.of(suggesting) });
+  }, [suggesting]);
 
   // Toggle typewriter mode without recreating the editor.
   useEffect(() => {

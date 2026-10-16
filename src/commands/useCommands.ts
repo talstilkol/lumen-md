@@ -22,6 +22,7 @@ import { encryptDocument, decryptDocument, isEncrypted } from "../storage/encryp
 import { isOPFSAvailable, readWorkspaceFile } from "../storage/workspace";
 import { relativeTime } from "../lib/relativeTime";
 import { buildFormatCommands } from "../editor/formatCommands";
+import { buildSuggestingCommands } from "../editor/suggestingCommands";
 import { withAiQuota } from "../billing/aiQuota";
 import { detectIsMac } from "../ui/KeyboardShortcuts";
 
@@ -115,6 +116,8 @@ export function useCommands({
   const toggleTypewriter = useAppStore((s) => s.toggleTypewriter);
   const grammarCheck = useAppStore((s) => s.grammarCheck);
   const toggleGrammarCheck = useAppStore((s) => s.toggleGrammarCheck);
+  const suggestingMode = useAppStore((s) => s.suggestingMode);
+  const toggleSuggestingMode = useAppStore((s) => s.toggleSuggestingMode);
   const setWritingGoal = useAppStore((s) => s.setWritingGoal);
   const toggleAutoSave = useAppStore((s) => s.toggleAutoSave);
   const installedTemplates = useInstalledTemplates();
@@ -1124,6 +1127,14 @@ export function useCommands({
         },
         detectIsMac(),
       ).map((c) => ({ ...c, icon: cmdIcons.Pencil })),
+      // ── Suggesting mode (track changes, CriticMarkup) ─────────────────
+      ...buildSuggestingCommands({
+        getView: () => getEditorView?.() ?? null,
+        getContent: () => useAppStore.getState().doc.content,
+        setContent: (s: string) => useAppStore.getState().setContent(s),
+        suggesting: suggestingMode,
+        toggle: toggleSuggestingMode,
+      }).map((c) => ({ ...c, icon: cmdIcons.Pencil })),
       // ── AI Capabilities ──────────────────────────────────────────────────
       buildAiSettingsCommand(),
       buildAiOutlineCommand(
@@ -1558,5 +1569,7 @@ export function useCommands({
     theme,
     setRuntimeMetricsOpen,
     installedTemplates,
+    suggestingMode,
+    toggleSuggestingMode,
   ]);
 }

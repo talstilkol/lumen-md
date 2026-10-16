@@ -53,6 +53,8 @@ interface AppState {
   writingGoalWords: number;
   /** Toggle LanguageTool-powered grammar/style checking in the editor. */
   grammarCheck: boolean;
+  /** Suggesting mode (track changes): edits are recorded as CriticMarkup. */
+  suggestingMode: boolean;
   /**
    * F3 — when set, `chat()` routes to the user's fine-tuned model
    * (id stored in `fineTunedModelId`). Off by default; flipped from
@@ -96,6 +98,8 @@ interface AppState {
   setWritingGoal: (words: number) => void;
   /** Toggle the LanguageTool grammar checker. */
   toggleGrammarCheck: () => void;
+  /** Toggle suggesting mode (track changes). */
+  toggleSuggestingMode: () => void;
   /** Toggle the personal fine-tuned model on/off (F3). */
   toggleFineTunedModel: () => void;
   /** Persist the resulting model id from a successful fine-tune job. */
@@ -151,6 +155,7 @@ export const useAppStore = create<AppState>()(
       typewriterMode: false,
       writingGoalWords: 0,
       grammarCheck: false,
+      suggestingMode: false,
       useFineTunedModel: false,
       fineTunedModelId: null,
       tagFilter: null,
@@ -229,6 +234,7 @@ export const useAppStore = create<AppState>()(
       toggleTypewriter: () => set((s) => ({ typewriterMode: !s.typewriterMode })),
       setWritingGoal: (words) => set({ writingGoalWords: Math.max(0, Math.floor(words)) }),
       toggleGrammarCheck: () => set((s) => ({ grammarCheck: !s.grammarCheck })),
+      toggleSuggestingMode: () => set((s) => ({ suggestingMode: !s.suggestingMode })),
       toggleFineTunedModel: () =>
         set((s) => {
           // Refuse to flip ON when no model id is persisted.
@@ -350,6 +356,7 @@ export const useAppStore = create<AppState>()(
         typewriterMode: s.typewriterMode,
         writingGoalWords: s.writingGoalWords,
         grammarCheck: s.grammarCheck,
+        suggestingMode: s.suggestingMode,
         useFineTunedModel: s.useFineTunedModel,
         fineTunedModelId: s.fineTunedModelId,
         // aiKey intentionally excluded — session-only for security
