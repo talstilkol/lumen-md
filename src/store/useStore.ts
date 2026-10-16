@@ -420,8 +420,7 @@ export const useAppStore = create<AppState>()(
           ...p,
           themeSettings: sanitizeThemeSettings(p.themeSettings),
         };
-        // Never restore the WYSIWYG + suggesting combination (see setMode).
-        if (merged.suggestingMode && merged.mode === "wysiwyg") merged.mode = "split";
+        // WYSIWYG and suggesting work together now: restore both as saved.
         return merged;
       },
     },

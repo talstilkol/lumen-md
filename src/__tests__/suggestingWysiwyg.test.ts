@@ -26,6 +26,12 @@ describe("suggesting mode × WYSIWYG", () => {
     expect(useToastStore.getState().toasts).toEqual([]);
   });
 
+  it("a saved WYSIWYG + suggesting session is restored as is", async () => {
+    const persist = (useAppStore as unknown as { persist: { getOptions: () => { merge: (p: unknown, c: unknown) => { mode: string; suggestingMode: boolean } } } }).persist;
+    const merged = persist.getOptions().merge({ mode: "wysiwyg", suggestingMode: true }, useAppStore.getState());
+    expect([merged.mode, merged.suggestingMode]).toEqual(["wysiwyg", true]);
+  });
+
   it("cursor commands go to the WYSIWYG editor when no source editor is mounted", () => {
     const resolve = vi.fn(() => true);
     const jump = vi.fn(() => true);
