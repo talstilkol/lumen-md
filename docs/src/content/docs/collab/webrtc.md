@@ -45,9 +45,12 @@ password, salted with the room name) go to the mesh and to any
 persistence server. Peers without the password receive only ciphertext
 and see a "Can't decrypt this room" error.
 
-Presence is **not** encrypted: names, colours and cursor positions are
-still visible to relays. Neither are metadata such as the room name and
-the volume and timing of edits. See
+The password also encrypts y-webrtc's signaling, so a peer without it
+can't connect at all and relays never see presence (names, colours,
+cursor positions) — only peers holding the password do. Metadata such
+as the room name and the volume and timing of edits is still visible.
+A wrong password therefore looks like an empty room: Lumen asks before
+sharing your document into it rather than forking the room silently. See
 [End-to-end encryption](/collab/encryption/) for the full threat model.
 
 ## Rooms evaporate when the last peer leaves

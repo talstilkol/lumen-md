@@ -69,9 +69,9 @@ Each peer keeps **two** Yjs documents:
 | Party | Document text & comments | Room name | Envelope count, sizes, timing | Presence: names, colours, cursor anchors |
 |---|---|---|---|---|
 | Peer with the password | Yes | Yes | Yes | Yes |
-| Peer without the password | **No** | Yes | Yes | Yes |
-| Signaling server | **No** | Yes | Yes (when relaying) | Yes (when relaying) |
-| `y-websocket` persistence server | **No** (it stores only ciphertext) | Yes | Yes | Yes |
+| Peer without the password | **No** | Yes | Only through a persistence server it can reach | **No** — it can't complete the WebRTC handshake |
+| Signaling server | **No** | Yes | Traffic shape only (its messages are encrypted with the password) | **No** |
+| `y-websocket` persistence server | **No** (it stores only ciphertext) | Yes | Yes | **No** — Lumen publishes no presence to it |
 | Network eavesdropper | No (WebRTC is DTLS-encrypted anyway) | Depends on the signaling transport | Traffic shape | No |
 
 ### Persistent rooms store only ciphertext
