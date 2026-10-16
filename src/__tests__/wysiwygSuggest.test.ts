@@ -115,6 +115,14 @@ describe("tracking edits while suggesting", () => {
     expect(e.view.state.selection.head).toBe(e.at("ld."));
   });
 
+  it("blocks inline atoms (a hard break) while suggesting", async () => {
+    const e = await open("Hello world.", true);
+    const at = e.at(" world");
+    const br = e.view.state.schema.nodes.hardbreak ?? e.view.state.schema.nodes.hard_break;
+    e.view.dispatch(e.view.state.tr.insert(at, br.create()));
+    expect(e.md()).toBe("Hello world.");
+  });
+
   it("edits inside a fenced code block pass untracked", async () => {
     const e = await open("```\ncode here\n```", true);
     const at = e.at("here");

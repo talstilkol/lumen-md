@@ -460,7 +460,11 @@ export function trackChanges(
     //    multi-block paste) can't be expressed as CriticMarkup or undone
     //    by Reject, so they are blocked, like structural deletions — and
     //    so is text that would form a CriticMarkup delimiter (`a++}b`).
-    if (insertedEnd > at && (c.structural || formsDelimiter(tr.doc, at, insertedEnd))) {
+    // Inline atoms (an image, a hard break) can't carry the insertion mark
+    // either, so Reject couldn't remove them: blocked too.
+    let atom = false;
+    if (insertedEnd > at) tr.doc.nodesBetween(at, insertedEnd, (n) => void (n.isInline && !n.isText && (atom = true)));
+    if (insertedEnd > at && (c.structural || atom || formsDelimiter(tr.doc, at, insertedEnd))) {
       tr.delete(at, insertedEnd);
     } else if (insertedEnd > at) {
       tr.removeMark(at, insertedEnd, del);
