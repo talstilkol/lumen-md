@@ -200,10 +200,21 @@ function functionScopes(tokens: ReturnType<typeof tokenize>, match: Map<number, 
   const val = (i: number) => (tokens[i]?.type === "punct" || tokens[i]?.type === "ident" ? tokens[i].value : "");
   const isPunct = (i: number, v: string) => tokens[i]?.type === "punct" && tokens[i].value === v;
   /** Retained unless the function sits in argument / IIFE position. */
-  const retainedAt = (before: number) => {
+  const CALLEE_END = new Set([")", "]"]);
+  const NOT_CALLEE = new Set(["return", "typeof", "void", "delete", "await", "yield", "in", "of", "new", "case", "else", "do"]);
+  const retainedAt = (before: number): boolean => {
     let c = before;
     if (val(c) === "async") c--;
-    return !(isPunct(c, "(") || isPunct(c, ","));
+    if (isPunct(c, ",")) return false; // an argument (or array / sequence item)
+    if (!isPunct(c, "(")) return true;
+    // `( … )(…)`: an IIFE runs now.
+    const close = match.get(c);
+    if (close !== undefined && isPunct(close + 1, "(")) return false;
+    // `f( … )`: a callback argument runs (typically) now.
+    const t = tokens[c - 1];
+    if (t && ((t.type === "ident" && !NOT_CALLEE.has(t.value)) || (t.type === "punct" && CALLEE_END.has(t.value)))) return false;
+    // A grouping parenthesis: classify by what the group sits in.
+    return retainedAt(c - 1);
   };
   /** Locals: identifiers bound in the params and declared in the body. */
   const collectLocals = (paramsFrom: number, paramsTo: number, bodyFrom: number, bodyTo: number, own?: string) => {
@@ -361,23 +372,43 @@ function rewriteEarlierPart(code: string, names: ReadonlyMap<string, string>): s
 
 function sharedUnit(scope: readonly TsBlock[], k: number): TsUnit {
   const own = scope[k];
-  // For each name: the last part (≤ k) that declares it.
-  const lastDecl = new Map<string, number>();
-  const declared = scope.slice(0, k + 1).map((b) => topLevelNames(b.code));
-  declared.forEach((names, i) => names.forEach((n) => lastDecl.set(n, i)));
-  // Stand-ins for superseded bindings: `name$prev`, unique against every
-  // identifier in the unit's parts (nested bindings included).
+  // For each name: the parts (≤ k) that declare it, in order.
+  const declaredIn = new Map<string, number[]>();
+  scope.slice(0, k + 1).forEach((b, i) => {
+    for (const n of topLevelNames(b.code)) {
+      const at = declaredIn.get(n) ?? [];
+      if (at[at.length - 1] !== i) at.push(i);
+      declaredIn.set(n, at);
+    }
+  });
+  // One stand-in per superseded VERSION (declaring part), unique against
+  // every identifier in the unit's parts (nested bindings included):
+  // `name$prev`, `name$prev2`, …
   const allIdents = new Set<string>();
   for (const b of scope.slice(0, k + 1)) for (const t of tokenize(b.code)) if (t.type === "ident") allIdents.add(t.value);
-  const mangled = new Map<string, string>();
-  const standIn = (name: string): string => {
-    let m = mangled.get(name);
+  const used = new Set<string>();
+  const versions = new Map<string, string>();
+  const standIn = (name: string, part: number): string => {
+    const key = `${name}@${part}`;
+    let m = versions.get(key);
     if (!m) {
       m = `${name}$prev`;
-      for (let n = 2; allIdents.has(m) || [...mangled.values()].includes(m); n++) m = `${name}$prev${n}`;
-      mangled.set(name, m);
+      for (let n = 2; allIdents.has(m) || used.has(m); n++) m = `${name}$prev${n}`;
+      used.add(m);
+      versions.set(key, m);
     }
     return m;
+  };
+  /** Part i's renames: each superseded name → the version visible to part i. */
+  const renamesFor = (i: number): Map<string, string> => {
+    const rename = new Map<string, string>();
+    for (const [n, at] of declaredIn) {
+      const newest = at[at.length - 1];
+      if (newest <= i) continue; // part i already sees the final version
+      const visible = [...at].reverse().find((d) => d <= i) ?? at[0];
+      rename.set(n, standIn(n, visible));
+    }
+    return rename;
   };
 
   let code = hasTsCheck(own.code) ? CHECK_HEADER : "";
@@ -387,9 +418,7 @@ function sharedUnit(scope: readonly TsBlock[], k: number): TsUnit {
     if (i > 0) code += PART_SEPARATOR;
     let text = b.code;
     if (i < k) {
-      const rename = new Map<string, string>();
-      for (const [n, at] of lastDecl) if (at > i) rename.set(n, standIn(n));
-      text = rewriteEarlierPart(b.code, rename);
+      text = rewriteEarlierPart(b.code, renamesFor(i));
     }
     if (i === k && b.live) code += LIVE_WRAP_OPEN;
     parts.push({ block: b, offset: code.length });

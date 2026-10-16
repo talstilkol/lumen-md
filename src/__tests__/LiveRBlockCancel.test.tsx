@@ -8,8 +8,9 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 const resetWebR = vi.fn(async () => {});
 let release: (() => void) | null = null;
 let startHook: (() => void) | undefined;
+let bootHangs = false;
 vi.mock("../plugins/r/rRuntime", () => ({
-  getWebR: async () => ({}),
+  getWebR: () => (bootHangs ? new Promise(() => {}) : Promise.resolve({})),
   resetWebR: () => resetWebR(),
   // A run that starts only when the test says so (queued behind another).
   runR: (_code: string, _plot: unknown, hooks: { onStart?: () => void; isCancelled?: () => boolean } = {}) => {
@@ -27,6 +28,8 @@ afterEach(() => {
   resetWebR.mockClear();
   release = null;
   startHook = undefined;
+  bootHangs = false;
+  vi.useRealTimers();
 });
 
 const flush = () => act(async () => {
@@ -66,5 +69,17 @@ describe("LiveRBlock cancellation", () => {
     act(() => startHook?.());
     b.unmount();
     expect(resetWebR).toHaveBeenCalledTimes(1);
+  });
+
+  it("drops a boot that hangs past the load timeout, so the next Run retries", async () => {
+    vi.useFakeTimers();
+    bootHangs = true;
+    render(<LiveRBlock source="x" />);
+    fireEvent.click(screen.getByRole("button", { name: "Run" }));
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(180_001);
+    });
+    expect(resetWebR).toHaveBeenCalledTimes(1);
+    expect(screen.getByTestId("live-r").getAttribute("data-state")).toBe("error");
   });
 });

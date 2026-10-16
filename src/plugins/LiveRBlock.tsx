@@ -92,7 +92,12 @@ export default function LiveRBlock({ source, meta }: Props) {
       const { getWebR } = await import("./r/rRuntime");
       const ready = await Promise.race([getWebR().then(() => "ready" as const), after(LOAD_TIMEOUT_MS)]);
       if (runId !== runSeq.current) return;
-      if (ready === "timeout") throw new Error(t("block.liveR.loadTimeout"));
+      if (ready === "timeout") {
+        // A boot that hangs (never rejects) would stay cached: drop it so the
+        // next Run starts a fresh instance.
+        void resetWebR();
+        throw new Error(t("block.liveR.loadTimeout"));
+      }
       setState("running");
       // The execution timer starts when the run does (other R blocks may
       // be ahead of it in the queue).

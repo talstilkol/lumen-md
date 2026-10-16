@@ -213,6 +213,25 @@ describe("JavaScript blocks and shared scopes", () => {
     expect(diags).toEqual([]);
   });
 
+  it("each superseded version gets its own stand-in", () => {
+    const { diags } = checkShared(
+      "const value = 1;",
+      "const value = 'x'; const saved = value;",
+      "// @ts-check\nconst value = true;\nsaved.toUpperCase();",
+    );
+    expect(diags).toEqual([]);
+  });
+
+  it("a closure in grouping parentheses is still retained", () => {
+    const { units, diags } = checkShared(
+      "const value = 1; const fn = (() => value); const now = (() => value)();",
+      "// @ts-check\nconst value = 'x';\nfn().toUpperCase(); now.toFixed();",
+    );
+    expect(units[1].code).toContain("const fn = (() => value);");
+    expect(units[1].code).toContain("const now = (() => value$prev)();");
+    expect(diags).toEqual([]);
+  });
+
   it("method names and getters keep their key", () => {
     const { units, diags } = checkShared(
       "const value = 1; const obj = { value() { return 2; }, get other() { return value; } };",

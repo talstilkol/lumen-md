@@ -93,18 +93,29 @@ footer { border-top: 1px solid var(--line); padding-top: 16px; font-size: 0.9rem
 a { color: var(--ink); }
 a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 @media (max-width: 520px) { body { font-size: 15px; } th, td { padding: 8px 9px; } }
+.timeline { display: grid; gap: 8px; }
+.tl-row { display: grid; grid-template-columns: minmax(0, 12rem) minmax(0, 1fr); gap: 12px; align-items: center; }
+.tl-row .lab { font-size: 0.9rem; min-width: 0; }
+.tl-row .lane { position: relative; height: 18px; background: var(--bar-bg); border-radius: 4px; }
+.tl-row .seg { position: absolute; top: 0; bottom: 0; border-radius: 4px; background: var(--accent); opacity: 0.9; }
+.tl-row .seg.tal { background: var(--ink); }
+.tl-row .seg.wait { background: repeating-linear-gradient(45deg, var(--bar-bg), var(--bar-bg) 4px, var(--muted) 4px, var(--muted) 6px); opacity: 0.5; }
+.tl-axis { display: grid; grid-template-columns: minmax(0, 12rem) minmax(0, 1fr); gap: 12px; font-family: var(--font-mono); font-size: 0.75rem; color: var(--muted); }
+.tl-axis .ticks { display: flex; justify-content: space-between; direction: rtl; }
+.eta { display: grid; grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); gap: 12px; }
+@media (max-width: 520px) { .tl-row, .tl-axis { grid-template-columns: minmax(0, 7rem) minmax(0, 1fr); } }
 </style>
 
 <div class="page" dir="rtl" lang="he">
 
 <header class="top">
-  <div class="eyebrow">LUMEN-MD · MASTER PLAN · 16.10.2026</div>
+  <div class="eyebrow">LUMEN-MD · MASTER PLAN · 16.10.2026 · 16:05</div>
   <h1>תוכנית אב — Lumen</h1>
   <p>כל המשימות שנותרו בפרויקט, עם אחוז ביצוע, מי מבצע ואומדן שעות (נמוך / מרכזי / גבוה). מבוסס על <code>PLAN_STATUS.md</code>, <code>TASKS.md</code> ו-PR&nbsp;#106 כפי שהם בסוף 16.10.2026.</p>
   <div class="meta">
     <span>ענף: <code>feat/plans-completion</code></span>
     <span>PR: <a href="https://github.com/talstilkol/lumen-md/pull/106">#106</a></span>
-    <span>ראשי ענפים: <code>05aee55</code> (#106) · <code>0c43fb3</code> (<a href="https://github.com/talstilkol/lumen-md/pull/107">#107</a>)</span>
+    <span>main: <code>62598c5</code> (#106 מוזג) · <a href="https://github.com/talstilkol/lumen-md/pull/107">#107</a>: <code>feat/ts-checks-plus</code> → main</span>
   </div>
 </header>
 
@@ -113,10 +124,10 @@ a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
   <div class="stats">
     <div class="stat"><span class="n">63%</span><span class="l">משימות TASKS.md שבוצעו (245 / 387)</span></div>
     <div class="stat"><span class="n">100%</span><span class="l">מהמשימות שלא חסומות חיצונית (245 / 245)</span></div>
-    <div class="stat"><span class="n">2209</span><span class="l">בדיקות יחידה בענף #107, כולן עוברות</span></div>
+    <div class="stat"><span class="n">2238</span><span class="l">בדיקות יחידה בענף #107, כולן עוברות</span></div>
     <div class="stat"><span class="n">0 / 5</span><span class="l">פגיעויות npm קריטי / גבוה (5 בכלי build בלבד)</span></div>
   </div>
-  <p class="muted">אחוזי TASKS.md לא כוללים את מה שנבנה היום מעבר לתוכנית: ייחוס מחבר להצעות, הצפנת נוכחות בחדרי סיסמה ובדיקות TypeScript בבלוקי קוד. CI על #106 ירוק בכל הדפדפנים בכל סבב. כל סבב של Codex מוצא ממצאים חדשים; כולם תוקנו, נענו ונסגרו (4 סבבים ב-#106, 2 ב-#107).</p>
+  <p class="muted">אחוזי TASKS.md לא כוללים את מה שנבנה היום מעבר לתוכנית: ייחוס מחבר להצעות, הצפנת נוכחות בחדרי סיסמה ובדיקות TypeScript בבלוקי קוד. CI על #106 ירוק בכל הדפדפנים בכל סבב. כל סבב של Codex מוצא ממצאים חדשים; כולם תוקנו, נענו ונסגרו (7 סבבים ב-#106 עד המיזוג, 5 ב-#107 עד כה).</p>
   <p class="muted"><b>באג ייצור שנמצא ותוקן היום:</b> מדיניות Trusted Types בכותרות חלה גם על ה-service worker וחסמה בו את <code>importScripts</code>, כך שבייצור לא היה אופליין בכלל. תוקן ב-#107 ואומת e2e: טעינה, ניתוק רשת, רענון והרצת Ruby.</p>
 
   <div class="box">
@@ -148,7 +159,7 @@ a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
     <div class="answer">
       <span class="q">למזג את PR #106 ל-main?</span>
       <p><b>כן.</b> אחרי שאישרת את כל השינויים, אמזג ברגע שה-CI על ראש הענף ירוק בכל הדפדפנים. זה גם מה ש-Dependabot צריך: ההתראות נספרות רק על <code>main</code>. סקירות Codex ימשיכו על PR-ים הבאים.</p>
-      <span class="tag">ממתין: CI וסקירת Codex על 05aee55. אמזג כשה-CI ירוק ואין ממצאים פתוחים.</span>
+      <span class="tag">בוצע: #106 מוזג ל-main ב-16.10 (62598c5), CI ירוק בכל הדפדפנים ו-0 ממצאים פתוחים.</span>
     </div>
     <div class="answer">
       <span class="q">הצטרפות לחדר מוצפן כשאף אחד לא עונה</span>
@@ -176,7 +187,7 @@ a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
     <table>
       <thead><tr><th>#</th><th>משימה</th><th>בוצע</th><th>רמה</th><th class="num">שעות נ/מ/ג</th><th>הערה</th></tr></thead>
       <tbody>
-        <tr><td class="mono">C1</td><td>מיזוג PR #106 ל-main</td><td><div class="bar"><div class="track"><div class="fill" style="width:97%"></div></div><span class="pct">97%</span></div></td><td><span class="lvl L1">L1</span></td><td class="num">0.2 / 0.5 / 1</td><td>CI ירוק; ממתין לסבב Codex האחרון</td></tr>
+        <tr><td class="mono">C1</td><td>מיזוג PR #106 ל-main</td><td><div class="bar"><div class="track"><div class="fill done" style="width:100%"></div></div><span class="pct">100%</span></div></td><td><span class="lvl L1">L1</span></td><td class="num">0 / 0 / 0</td><td>מוזג ל-main (62598c5)</td></tr>
         <tr><td class="mono">C2</td><td>הרחבת בדיקות TS: טיפוס ב-hover, בדיקת בלוקי <code>live-js</code>, הצהרות משותפות בין בלוקי <code>shared</code></td><td><div class="bar"><div class="track"><div class="fill done" style="width:100%"></div></div><span class="pct">100%</span></div></td><td><span class="lvl L1">L1</span></td><td class="num">0 / 0 / 0</td><td>נבנה ב-PR #107. בבלוקי <code>shared</code> כל בלוק נבדק רק מול הבלוקים שלפניו, הצהרה חוזרת מחליפה את הטיפוס, וכל בלוק קובע לעצמו <code>// @ts-check</code></td></tr>
         <tr><td class="mono">C3</td><td>מצב הצעות (track changes) גם ב-WYSIWYG</td><td><div class="bar"><div class="track"><div class="fill" style="width:50%"></div></div><span class="pct">50%</span></div></td><td><span class="lvl L1">L1</span></td><td class="num">12 / 16 / 24</td><td>עובד בעורך המקור, כולל ייחוס מחבר</td></tr>
         <tr><td class="mono">C4</td><td>שפות חיות נוספות: webR (R), ruby.wasm</td><td><div class="bar"><div class="track"><div class="fill done" style="width:100%"></div></div><span class="pct">100%</span></div></td><td><span class="lvl L1">L1</span></td><td class="num">0 / 0 / 0</td><td>נבנה ב-PR #107: <code>live-r</code> (כולל גרפים) ו-<code>live-ruby</code> (worker מבודד בלי רשת ואחסון). שתיהן עובדות גם אופליין</td></tr>
@@ -216,16 +227,52 @@ a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 <section>
   <h2><span class="sec">§5</span>סדר ריצה</h2>
   <ol class="steps">
-    <li><b>היום:</b> C1 מיזוג PR #106 כשה-CI ירוק ואין ממצאי Codex פתוחים, ואז C9.</li>
+    <li><b>היום:</b> C1 בוצע. עכשיו: #107 (C2 + C4) מכוון ל-main, ימוזג כשה-CI ירוק ואין ממצאים פתוחים; ואז C9.</li>
     <li><b>אצלך, במקביל:</b> לבחור דומיין (§2), ואז E1 → E2 → E3. אלה שלושת החסמים שפותחים את β ואת C7.</li>
-    <li><b>אני, ברצף:</b> C2 ו-C4 נבנו (PR #107, ימוזג אחרי #106) → C5 Playground → C3 (WYSIWYG). כל אחד ב-PR נפרד, עם סקירת Codex ו-CI ירוק לפני מיזוג.</li>
+    <li><b>אני, ברצף:</b> P1 סיום #107 → P2 → P3 (C3 WYSIWYG) → P4 (C5 Playground). לוח זמנים מפורט ב-§6.</li>
     <li><b>אחרי פריסה:</b> C7 מדידת ביצועים, E4–E6 בדיקות חיות.</li>
     <li><b>בהמשך:</b> C8 ו-E7–E9 לפי סדר העדיפויות שתקבע.</li>
   </ol>
 </section>
 
+
+<section>
+  <h2><span class="sec">§6</span>תוכנית קדימה והערכת זמן לסיום</h2>
+  <p class="muted">עודכן 16.10.2026, 16:05. הנחות: כ-6 שעות עבודה שלי ביום עבודה (א׳–ה׳), ועוד כ-15% לסבבי סקירת Codex על כל PR (לפי הקצב של #106 ו-#107: 5–7 סבבים לכל PR גדול). כל שלב הוא PR נפרד שממוזג רק עם CI ירוק ו-0 ממצאים פתוחים.</p>
+  <div class="box">
+    <table>
+      <thead><tr><th>שלב</th><th>מה</th><th>מי</th><th class="num">שעות נ/מ/ג</th><th>תלוי ב</th><th class="num">סיום משוער (מרכזי)</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">P1</td><td>סיום PR #107 (C2 בדיקות TS מורחבות + C4 R ו-Ruby): עוד 1–3 סבבי Codex, CI, מיזוג</td><td>אני</td><td class="num">2 / 4 / 6</td><td>—</td><td class="num">18.10</td></tr>
+        <tr><td class="mono">P2</td><td>C9 מיזוג עדכוני Dependabot שנפתחו אחרי המיזוג ל-main</td><td>אני</td><td class="num">1 / 2 / 4</td><td>—</td><td class="num">18.10</td></tr>
+        <tr><td class="mono">P3</td><td>C3 מצב הצעות גם ב-WYSIWYG: סכמת CriticMarkup ב-Milkdown (סימון, קבלה ודחייה, ייחוס מחבר)</td><td>אני</td><td class="num">12 / 16 / 24</td><td>P1</td><td class="num">21.10</td></tr>
+        <tr><td class="mono">P4</td><td>C5 Web Playground: בלוק עם קבצים מרובים, JSX/TS, תצוגה חיה React ו-Vue בעמוד הרצה מבודד (Svelte בשלב ב׳ אם המהדר נכנס לתקציב)</td><td>אני</td><td class="num">40 / 60 / 80</td><td>P3</td><td class="num">8.11</td></tr>
+        <tr><td class="mono">P5</td><td>E1–E3: חשבון Fly.io ודומיין, Sentry DSN, מוצרים ומפתחות ב-Stripe ו-<code>wrangler deploy</code></td><td>טל</td><td class="num">6 / 7 / 8</td><td>—</td><td class="num">בקצב שלך</td></tr>
+        <tr><td class="mono">P6</td><td>C7 מדידת זמן טעינה מול יעד TTI &lt; 1.5s על הפריסה החיה</td><td>אני</td><td class="num">1 / 1 / 2</td><td>P5</td><td class="num">יום אחרי P5</td></tr>
+        <tr><td class="mono">P7</td><td>C8 Team workspaces · שוק ערכות נושא · פרסום לרשת. דורש שרת וחשבונות; תוכנית נפרדת אחרי הפריסה</td><td>אני + טל</td><td class="num">80 / 120 / 200</td><td>P5</td><td class="num">אחרי P4</td></tr>
+        <tr><td class="mono">—</td><td>C6 חבילות npm ב-<code>live-js</code>: ההמלצה היא לא לבנות (פותח את ה-CSP ל-CDN). אבנה רק אם תבחר באפשרות self-host</td><td>הכרעה שלך</td><td class="num">0 (6 / 8 / 12)</td><td>הכרעה</td><td class="num">—</td></tr>
+      </tbody>
+      <tfoot><tr><td></td><td>סה״כ עבודה שלי עד סוף P4 (כולל סבבי סקירה)</td><td></td><td class="num">63 / 94 / 131</td><td></td><td class="num">1.11 – 16.11</td></tr></tfoot>
+    </table>
+  </div>
+
+  <div class="timeline" aria-label="ציר זמן לפי ימי עבודה">
+    <div class="tl-axis"><span></span><div class="ticks"><span>18.10</span><span>25.10</span><span>1.11</span><span>8.11</span><span>15.11</span><span>22.11</span></div></div>
+    <div class="tl-row"><span class="lab">P1 · סיום PR #107</span><div class="lane"><div class="seg " style="right:0.0%;width:4.0%"></div></div></div><div class="tl-row"><span class="lab">P2 · C9 Dependabot</span><div class="lane"><div class="seg " style="right:2.4%;width:1.6%"></div></div></div><div class="tl-row"><span class="lab">P3 · C3 הצעות ב-WYSIWYG</span><div class="lane"><div class="seg " style="right:4.0%;width:12.0%"></div></div></div><div class="tl-row"><span class="lab">P4 · C5 Web Playground</span><div class="lane"><div class="seg " style="right:16.0%;width:48.0%"></div><div class="seg wait" style="right:64.0%;width:24.0%"></div></div></div><div class="tl-row"><span class="lab">P5 · E1–E3 פריסה, Sentry, Stripe (טל)</span><div class="lane"><div class="seg tal" style="right:0.0%;width:20.0%"></div></div></div><div class="tl-row"><span class="lab">P6 · C7 מדידת TTI</span><div class="lane"><div class="seg " style="right:20.0%;width:4.0%"></div></div></div>
+  </div>
+  <p class="muted">ענבר: עבודה שלי · כחול: עבודה שלך · מפוספס: טווח הסיכון של P4 (עד התרחיש הגבוה).</p>
+
+  <div class="eta">
+    <div class="stat"><span class="n">8.11.2026</span><span class="l">סיום משוער של כל עבודת הקוד שאני יכול לעשות לבד (P1–P4), תרחיש מרכזי</span></div>
+    <div class="stat"><span class="n">1.11 – 16.11</span><span class="l">טווח: תרחיש נמוך עד גבוה</span></div>
+    <div class="stat"><span class="n">≈ 7 שעות</span><span class="l">עבודה שלך שפותחת את P6 ואת C8 (P5)</span></div>
+    <div class="stat"><span class="n">+ 3–6 שבועות</span><span class="l">C8 אחרי הפריסה, אם תחליט להתקדם איתו</span></div>
+  </div>
+  <p class="muted"><b>מה לא נכלל:</b> בדיקות חיות מול WorkOS, Stripe ו-OpenAI (E4–E6, אצלך), אפליקציות מובייל (E7) והפצה בחנויות (E8). ההערכות הן אומדן, לא התחייבות: הגורם הגדול ביותר לסטייה הוא P4.</p>
+</section>
+
 <footer>
-  TASKS.md: ‏245 / 387 — ‏63% · ללא חסימות חיצוניות: 245 / 245 — ‏100% · קוד שנותר: 7 משימות (4 ניתנות לביצוע עכשיו, 3 תלויות בהכרעה או בתשתית) · חסום חיצונית: 9 משימות, ≈ 25 שעות שלך · בדיקות יחידה: 2209 / 2209 · עודכן 16.10.2026.
+  TASKS.md: ‏245 / 387 — ‏63% · ללא חסימות חיצוניות: 245 / 245 — ‏100% · קוד שנותר: 6 משימות (3 ניתנות לביצוע עכשיו, 3 תלויות בהכרעה או בתשתית) · חסום חיצונית: 9 משימות, ≈ 25 שעות שלך · בדיקות יחידה: 2238 / 2238 · עודכן 16.10.2026.
 </footer>
 
 </div>
