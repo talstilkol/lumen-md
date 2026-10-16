@@ -670,6 +670,8 @@ export function useCommands({
             const note = notes.find((n) => n.path === path)!;
             await writeWorkspaceFile(path, applyLinkFixes(note.text, fixes));
           }
+          // Backlinks, tags, file tree and database views refresh on this.
+          window.dispatchEvent(new CustomEvent("lumen-workspace-changed"));
           showAiToast(t("doctor.fixed", { links, files: byFile.size }), "success");
         },
       },

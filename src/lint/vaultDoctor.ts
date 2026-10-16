@@ -103,8 +103,46 @@ function blankCodeSpans(text: string): string {
   return chars.join("");
 }
 
+/** Same-length blanking (newlines kept). */
+const blank = (m: string) => m.replace(/[^\n]/g, " ");
+
+/**
+ * Indented code blocks (4+ spaces or a tab) that follow a blank line (or
+ * start the note) and aren't list continuation — blanked line by line.
+ */
+function blankIndentedCode(text: string): string {
+  const lines = text.split("\n");
+  let inCode = false;
+  let prevBlank = true;
+  let inList = false;
+  for (let i = 0; i < lines.length; i++) {
+    const l = lines[i];
+    const isBlank = !l.trim();
+    const indented = /^( {4}|\t)/.test(l);
+    if (/^ {0,3}([-*+]|\d+[.)])\s/.test(l)) inList = true;
+    else if (!isBlank && !indented) inList = false;
+    if (inCode) {
+      if (isBlank || indented) {
+        if (!isBlank) lines[i] = blank(l);
+        prevBlank = isBlank;
+        continue;
+      }
+      inCode = false;
+    }
+    if (indented && !isBlank && prevBlank && !inList) {
+      inCode = true;
+      lines[i] = blank(l);
+    }
+    prevBlank = isBlank;
+  }
+  return lines.join("\n");
+}
+
 export function stripCode(text: string): string {
   let out = blankFences(text);
+  out = blankIndentedCode(out);
+  // HTML comments are invisible: their links aren't links.
+  out = out.replace(/<!--[\s\S]*?-->/g, blank);
   out = blankCodeSpans(out);
   return out;
 }
@@ -279,9 +317,9 @@ export function runVaultDoctor(notes: readonly DoctorNote[], opts: DoctorOptions
     // Relative Markdown links to notes: inline [label](other.md#h) and
     // reference definitions `[id]: ./dir/x.md "title"`.
     const mdLinks = [
-      ...text.matchAll(/(?<!!)\[[^\]\n]*\]\(\s*([^)\s<>]+\.(?:md|markdown))(?:#[^)\s>]*)?(?:\s+"[^"]*")?\s*\)/gi),
+      ...text.matchAll(/(?<!!)\[[^\]\n]*\]\(\s*([^)\s<>]+\.(?:md|markdown))(?:#[^)\s>]*)?(?:\s+(?:"[^"]*"|'[^']*'|\([^)]*\)))?\s*\)/gi),
       // `[label](<Name with spaces.md>)`: angle brackets allow spaces.
-      ...text.matchAll(/(?<!!)\[[^\]\n]*\]\(\s*<([^>\n]+?\.(?:md|markdown))(?:#[^>\n]*)?>(?:\s+"[^"]*")?\s*\)/gi),
+      ...text.matchAll(/(?<!!)\[[^\]\n]*\]\(\s*<([^>\n]+?\.(?:md|markdown))(?:#[^>\n]*)?>(?:\s+(?:"[^"]*"|'[^']*'|\([^)]*\)))?\s*\)/gi),
       ...text.matchAll(/^[ \t]{0,3}\[[^\]\n]+\]:[ \t]*(?:<([^>\n]+?\.(?:md|markdown))(?:#[^>\n]*)?>|([^\s<>]+\.(?:md|markdown))(?:#\S*)?)(?:[ \t]+(?:"[^"]*"|'[^']*'|\([^)]*\)))?[ \t]*$/gim),
     ].sort((a, b) => (a.index ?? 0) - (b.index ?? 0));
     for (const m of mdLinks) {
@@ -316,7 +354,7 @@ export function runVaultDoctor(notes: readonly DoctorNote[], opts: DoctorOptions
     for (const m of text.matchAll(/!\[\s*\]\(([^)\s]+)[^)]*\)/g)) {
       findings.push({ kind: "missing-alt", path: note.path, line: lineAt(note.text, m.index ?? 0), detail: m[1] });
     }
-    for (const m of text.matchAll(/<img\b(?![^>]*\balt\s*=\s*["'][^"']+["'])[^>]*>/gi)) {
+    for (const m of text.matchAll(/<img\b(?![^>]*\balt\s*=\s*(?:"[^"]*\S[^"]*"|'[^']*\S[^']*'|[^\s"'=<>`]+))[^>]*>/gi)) {
       findings.push({ kind: "missing-alt", path: note.path, line: lineAt(note.text, m.index ?? 0), detail: m[0].slice(0, 60) });
     }
 

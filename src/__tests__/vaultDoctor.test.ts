@@ -112,4 +112,19 @@ describe("vault doctor", () => {
     expect(f.filter((x) => x.kind === "broken-wiki-link" || x.kind === "missing-heading")).toEqual([]);
     expect(f.filter((x) => x.kind === "broken-md-link").map((x) => x.detail)).toEqual(["../Guide.md"]);
   });
+
+  it("indented code, HTML comments, single-quoted titles and unquoted alt", () => {
+    const notes: DoctorNote[] = [
+      {
+        path: "index.md",
+        text:
+          "Intro\n\n    [[In Indented Code]]\n\n- item\n\n    [[List Continuation]]\n\n<!-- [[Commented Out]] -->\n\n[g](Guide.md 'Guide') <img src=a.png alt=diagram>\n",
+      },
+      { path: "Guide.md", text: "x" },
+    ];
+    const f = runVaultDoctor(notes);
+    expect(f.filter((x) => x.kind === "broken-wiki-link").map((x) => x.detail)).toEqual(["List Continuation"]);
+    expect(f.some((x) => x.kind === "orphan" && x.path === "Guide.md")).toBe(false);
+    expect(f.filter((x) => x.kind === "missing-alt")).toEqual([]);
+  });
 });
