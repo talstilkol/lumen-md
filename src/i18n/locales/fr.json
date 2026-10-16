@@ -987,5 +987,16 @@
   "ai.mode.title": "Mode de coût de l’IA",
   "ai.mode.economy": "Économie — petit modèle pour tout, ~2K jetons de contexte",
   "ai.mode.balanced": "Équilibré — petit modèle pour les petites tâches, ~5K jetons de contexte (par défaut)",
-  "ai.mode.quality": "Qualité — votre modèle pour tout, ~12K jetons de contexte"
+  "ai.mode.quality": "Qualité — votre modèle pour tout, ~12K jetons de contexte",
+  "cmd.tools.vaultDoctor": "🩺 Docteur du coffre : vérifier l’espace de travail",
+  "cmd.tools.vaultDoctor.hint": "Liens cassés, notes orphelines, quasi-doublons, texte alternatif manquant — sans IA, rien ne quitte votre appareil",
+  "cmd.tools.vaultDoctorFix": "🩺 Docteur du coffre : appliquer les corrections de liens suggérées",
+  "cmd.tools.vaultDoctorFix.hint": "Réécrire les [[liens]] cassés qui ont exactement une correspondance proche",
+  "doctor.noWorkspace": "Ouvrez d’abord un dossier d’espace de travail",
+  "doctor.readFailed": "Impossible de lire {path} : Vault Doctor s’est arrêté pour ne pas signaler ni corriger de liens sur un espace de travail incomplet",
+  "doctor.checking": "Vérification de {count} notes…",
+  "doctor.done": "{count} constats",
+  "doctor.noFixes": "Aucun lien cassé avec une seule suggestion claire",
+  "doctor.confirmFix": "Corriger {links} liens dans {files} notes ?\n\n{list}\n\nLes notes ouvertes dans un onglet sont ignorées.",
+  "doctor.fixed": "{links} liens corrigés dans {files} notes"
 }

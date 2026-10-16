@@ -987,5 +987,16 @@
   "ai.mode.title": "AI コストモード",
   "ai.mode.economy": "節約 — すべて小型モデル、文脈は約 2K トークン",
   "ai.mode.balanced": "バランス — 小さなタスクは小型モデル、文脈は約 5K トークン（既定）",
-  "ai.mode.quality": "品質 — すべて選択したモデル、文脈は約 12K トークン"
+  "ai.mode.quality": "品質 — すべて選択したモデル、文脈は約 12K トークン",
+  "cmd.tools.vaultDoctor": "🩺 Vault Doctor：ワークスペースを検査",
+  "cmd.tools.vaultDoctor.hint": "壊れたリンク、孤立ノート、重複、alt なし画像 — AI 不要、データは端末外に出ません",
+  "cmd.tools.vaultDoctorFix": "🩺 Vault Doctor：提案されたリンク修正を適用",
+  "cmd.tools.vaultDoctorFix.hint": "近い候補が 1 つだけの壊れた [[リンク]] を書き換え",
+  "doctor.noWorkspace": "先にワークスペースフォルダーを開いてください",
+  "doctor.readFailed": "{path} を読み込めませんでした。不完全なワークスペースでリンクを報告・修正しないよう、Vault Doctor を中止しました",
+  "doctor.checking": "{count} 件のノートを検査中…",
+  "doctor.done": "{count} 件の検出",
+  "doctor.noFixes": "明確な候補が 1 つの壊れたリンクはありません",
+  "doctor.confirmFix": "{files} 件のノートで {links} 件のリンクを修正しますか？\n\n{list}\n\nタブで開いているノートはスキップされます。",
+  "doctor.fixed": "{files} 件のノートで {links} 件のリンクを修正しました"
 }

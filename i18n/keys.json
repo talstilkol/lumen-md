@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-10-16T21:46:23.899Z",
+  "generated_at": "2026-10-16T22:18:18.402Z",
   "source": "src/i18n/index.ts (en bundle)",
-  "count": 989,
+  "count": 1000,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -882,6 +882,74 @@
       "key": "cmd.tools.autoTag.hint",
       "en": "AI proposes tags from your existing vocabulary",
       "vars": []
+    },
+    {
+      "key": "cmd.tools.vaultDoctor",
+      "en": "🩺 Vault Doctor: Check Workspace",
+      "vars": []
+    },
+    {
+      "key": "cmd.tools.vaultDoctor.hint",
+      "en": "Broken links, orphans, near-duplicates, missing alt text — no AI, nothing leaves your device",
+      "vars": []
+    },
+    {
+      "key": "cmd.tools.vaultDoctorFix",
+      "en": "🩺 Vault Doctor: Apply Suggested Link Fixes",
+      "vars": []
+    },
+    {
+      "key": "cmd.tools.vaultDoctorFix.hint",
+      "en": "Rewrite broken [[links]] that have exactly one close match",
+      "vars": []
+    },
+    {
+      "key": "doctor.noWorkspace",
+      "en": "Open a workspace folder first",
+      "vars": []
+    },
+    {
+      "key": "doctor.readFailed",
+      "en": "Couldn't read {path}: Vault Doctor stopped so it won't report or fix links against an incomplete workspace",
+      "vars": [
+        "path"
+      ]
+    },
+    {
+      "key": "doctor.checking",
+      "en": "Checking {count} notes…",
+      "vars": [
+        "count"
+      ]
+    },
+    {
+      "key": "doctor.done",
+      "en": "{count} findings",
+      "vars": [
+        "count"
+      ]
+    },
+    {
+      "key": "doctor.noFixes",
+      "en": "No broken links with a single clear suggestion",
+      "vars": []
+    },
+    {
+      "key": "doctor.confirmFix",
+      "en": "Fix {links} links in {files} notes?\\n\\n{list}\\n\\nNotes open in a tab are skipped.",
+      "vars": [
+        "links",
+        "files",
+        "list"
+      ]
+    },
+    {
+      "key": "doctor.fixed",
+      "en": "Fixed {links} links in {files} notes",
+      "vars": [
+        "links",
+        "files"
+      ]
     },
     {
       "key": "cmd.tools.suggestLinks",
