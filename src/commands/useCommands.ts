@@ -852,8 +852,10 @@ export function useCommands({
           const prefix = folder.trim().replace(/^\/+|\/+$/g, "");
           const { readAllNotes } = await import("../storage/workspaceNotes");
           const all = await readAllNotes();
-          // Skip earlier translations (name.xx.md) so a re-run doesn't translate them.
-          const notes = all.filter((n) => (!prefix || n.path.startsWith(prefix + "/")) && !(op === "translate" && /\.[a-z-]{2,20}\.md$/i.test(n.path) && all.some((m) => m.path === n.path.replace(/\.[a-z-]{2,20}\.md$/i, ".md"))));
+          // Skip translations earlier batches created (by recorded path,
+          // not by file-name shape) so a re-run doesn't translate them.
+          const made = batch.knownTranslations();
+          const notes = all.filter((n) => (!prefix || n.path.startsWith(prefix + "/")) && !(op === "translate" && made.has(n.path)));
           if (!notes.length) {
             showAiToast(t("batch.noNotes"), "error");
             return;
@@ -902,8 +904,8 @@ export function useCommands({
             return;
           }
           const { writeWorkspaceFile } = await import("../storage/workspace");
-          const { mergeTagsIntoFrontmatter } = await import("../ai/agents");
           let processing = 0;
+          let wroteAny = false;
           for (const job of pending) {
             let results;
             try {
@@ -926,26 +928,44 @@ export function useCommands({
             const open = new Set(useAppStore.getState().openTabs.map((tab) => tab.workspaceName).filter(Boolean));
             const current = useAppStore.getState().doc.workspaceName;
             if (current) open.add(current);
+            const changed: string[] = [];
             const writes = batch
-              .planWrites(job, results.answers, (p) => notes.find((n) => n.path === p)?.text ?? null, mergeTagsIntoFrontmatter, (p) =>
-                notes.some((n) => n.path.toLowerCase() === p.toLowerCase()),
+              .planWrites(
+                job,
+                results.answers,
+                (p) => notes.find((n) => n.path === p)?.text ?? null,
+                (p) => notes.some((n) => n.path.toLowerCase() === p.toLowerCase()),
+                changed,
               )
-              .filter((w) => !open.has(w.path));
+              // A note open in a tab may have unsaved edits: skip it (and
+              // translations made from it).
+              .filter((w) => !open.has(w.path) && !open.has(w.source));
             const created = writes.filter((w) => w.created).length;
+            const notes2 = [results.failed ? `${results.failed} failed` : "", changed.length ? `${changed.length} edited since — skipped` : ""].filter(Boolean).join(", ");
             const ok = await uiConfirm({
-              message: t("batch.apply", {
-                op: job.op,
-                changes: writes.length - created,
-                created,
-                failed: results.failed ? ` (${results.failed} failed)` : "",
-              }),
+              message: t("batch.apply", { op: job.op, changes: writes.length - created, created, failed: notes2 ? ` (${notes2})` : "" }),
             });
             if (!ok) continue;
-            for (const w of writes) await writeWorkspaceFile(w.path, w.content);
-            job.status = "applied";
-            showAiToast(t("batch.applied", { count: writes.length }), "success");
+            // Write one by one; a failure keeps what was written and leaves
+            // the job retryable without duplicating finished translations.
+            const done: string[] = [];
+            let failedWrites = 0;
+            for (const w of writes) {
+              try {
+                await writeWorkspaceFile(w.path, w.content);
+                done.push(w.path);
+              } catch {
+                failedWrites++;
+              }
+            }
+            if (job.op === "translate") batch.rememberTranslations(done.filter((p) => writes.find((w) => w.path === p)?.created));
+            if (done.length) wroteAny = true;
+            job.status = failedWrites ? "ended" : "applied";
+            showAiToast(t("batch.applied", { count: done.length }), failedWrites ? "error" : "success");
           }
           batch.saveJobs(jobs);
+          // File tree, tags, backlinks and database views refresh on this.
+          if (wroteAny) window.dispatchEvent(new CustomEvent("lumen-workspace-changed"));
           if (processing) showAiToast(t("batch.processing", { count: processing }), "info");
         },
       },

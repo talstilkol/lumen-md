@@ -18,6 +18,37 @@ export type BatchProvider = "anthropic" | "openai";
 export interface BatchItem {
   customId: string;
   path: string;
+  /** Fingerprint of the text that was sent: results for a note edited since are skipped. */
+  hash?: string;
+}
+
+/** Short, stable fingerprint of a note's text (FNV-1a 32-bit, hex). */
+export function textHash(text: string): string {
+  let h = 0x811c9dc5;
+  for (let i = 0; i < text.length; i++) {
+    h ^= text.charCodeAt(i);
+    h = Math.imul(h, 0x01000193) >>> 0;
+  }
+  return h.toString(16).padStart(8, "0");
+}
+
+const TRANSLATIONS = "lumen.ai.batch.translations";
+/** Paths of translation files batches created (so later batches skip exactly those). */
+export function knownTranslations(): Set<string> {
+  try {
+    const v = JSON.parse(localStorage.getItem(TRANSLATIONS) ?? "[]");
+    return new Set(Array.isArray(v) ? v : []);
+  } catch {
+    return new Set();
+  }
+}
+export function rememberTranslations(paths: readonly string[]): void {
+  try {
+    const all = [...knownTranslations(), ...paths].slice(-5000);
+    localStorage.setItem(TRANSLATIONS, JSON.stringify(all));
+  } catch {
+    /* */
+  }
 }
 
 export interface BatchJob {
@@ -98,7 +129,7 @@ export async function submitBatch(
   const provider = batchProviderFor(getActiveProvider());
   if (!provider) throw new AiError("API_ERROR", "Batch jobs need the OpenAI or Anthropic provider (AI: Switch Provider).");
   const model = effectiveModel(provider);
-  const items: BatchItem[] = notes.map((n, i) => ({ customId: `n${i}`, path: n.path }));
+  const items: BatchItem[] = notes.map((n, i) => ({ customId: `n${i}`, path: n.path, hash: textHash(n.text) }));
   let id: string;
   if (provider === "anthropic") {
     const requests = notes.map((n, i) => {
@@ -183,7 +214,9 @@ export async function fetchBatchResults(job: BatchJob, fetchImpl: Fetch = fetch)
   const b = await res.json();
   if (b.status === "failed" || b.status === "expired" || b.status === "cancelled") return { state: b.status, answers, failed: job.items.length };
   if (b.status !== "completed") return { state: "processing", answers, failed };
-  if (!b.output_file_id) return { state: "ended", answers, failed: job.items.length };
+  // Failed requests go to error_file_id; request_counts has the total.
+  const reportedFailed = Number(b.request_counts?.failed ?? 0);
+  if (!b.output_file_id) return { state: "ended", answers, failed: Math.max(reportedFailed, job.items.length) };
   {
     const out = await fetchImpl(`${OPENAI}/files/${b.output_file_id}/content`, { headers: { Authorization: `Bearer ${key}` } });
     if (!out.ok) throw new AiError("API_ERROR", `OpenAI batch results ${out.status}`);
@@ -198,7 +231,7 @@ export async function fetchBatchResults(job: BatchJob, fetchImpl: Fetch = fetch)
       } else failed++;
     }
   }
-  return { state: "ended", answers, failed };
+  return { state: "ended", answers, failed: Math.max(failed + reportedFailed, job.items.length - answers.size) };
 }
 
 /* ─── Applying results ──────────────────────────────────────────────── */
@@ -214,9 +247,10 @@ export function setFrontmatterField(content: string, key: string, value: string)
   const at = lines.findIndex((l) => new RegExp(`^${key}\\s*:`).test(l));
   if (at === -1) lines.push(line);
   else {
-    // Drop an indented block value that belonged to the old field.
+    // Drop the old value's continuation: indented lines, and blank lines
+    // inside a block scalar / list, up to the next top-level key.
     let end = at + 1;
-    while (end < lines.length && /^\s+\S/.test(lines[end])) end++;
+    while (end < lines.length && (/^\s+\S/.test(lines[end]) || (!lines[end].trim() && lines.slice(end + 1).some((l) => l.trim()) && /^\s+\S/.test(lines.slice(end + 1).find((l) => l.trim()) ?? "")))) end++;
     lines.splice(at, end - at, line);
   }
   return `---\n${lines.join("\n")}\n---` + content.slice(fm[0].length);
@@ -243,6 +277,28 @@ export interface PlannedWrite {
   content: string;
   /** A new file (translation) rather than an update. */
   created: boolean;
+  /** The note the result came from. */
+  source: string;
+}
+
+/** Existing tags in the front matter: inline `[a, b]`, `a, b`, or a block list. */
+export function frontmatterTags(content: string): string[] {
+  const fm = /^---\r?\n([\s\S]*?)\r?\n---/.exec(content)?.[1];
+  if (!fm) return [];
+  const lines = fm.split(/\r?\n/);
+  const at = lines.findIndex((l) => /^tags\s*:/.test(l));
+  if (at === -1) return [];
+  const inline = lines[at].replace(/^tags\s*:\s*/, "").trim();
+  if (inline) return inline.replace(/^\[|\]$/g, "").split(",").map((t) => t.trim().replace(/^["']|["']$/g, "")).filter(Boolean);
+  const out: string[] = [];
+  for (let i = at + 1; i < lines.length && /^\s+-\s*/.test(lines[i]); i++) out.push(lines[i].replace(/^\s+-\s*/, "").trim().replace(/^["']|["']$/g, ""));
+  return out.filter(Boolean);
+}
+
+/** Existing tags plus new ones (no duplicates), written as one inline array. */
+export function mergeTags(content: string, tags: readonly string[]): string {
+  const all = [...new Set([...frontmatterTags(content), ...tags])];
+  return setFrontmatterField(content, "tags", `[${all.join(", ")}]`);
 }
 
 /**
@@ -253,8 +309,9 @@ export function planWrites(
   job: BatchJob,
   answers: ReadonlyMap<string, string>,
   read: (path: string) => string | null,
-  mergeTags: (content: string, tags: string[]) => string,
   exists: (path: string) => boolean = (p) => read(p) !== null,
+  /** Notes edited since submission are collected here (their results are skipped). */
+  changed: string[] = [],
 ): PlannedWrite[] {
   const out: PlannedWrite[] = [];
   const taken = new Set<string>();
@@ -268,18 +325,23 @@ export function planWrites(
   for (const item of job.items) {
     const answer = answers.get(item.customId);
     if (!answer) continue;
-    if (job.op === "translate") {
-      const code = (job.lang ?? "translated").toLowerCase().replace(/[^a-z0-9-]+/g, "-").slice(0, 20);
-      out.push({ path: freePath(item.path.replace(/(\.(md|markdown))?$/i, `.${code}.md`)), content: answer.trim() + "\n", created: true });
-      continue;
-    }
     const current = read(item.path);
     if (current === null) continue;
+    // The answer is about the text that was sent: skip notes edited since.
+    if (item.hash && textHash(current) !== item.hash) {
+      changed.push(item.path);
+      continue;
+    }
+    if (job.op === "translate") {
+      const code = (job.lang ?? "translated").toLowerCase().replace(/[^a-z0-9-]+/g, "-").slice(0, 20);
+      out.push({ path: freePath(item.path.replace(/(\.(md|markdown))?$/i, `.${code}.md`)), content: answer.trim() + "\n", created: true, source: item.path });
+      continue;
+    }
     if (job.op === "tags") {
       const tags = parseTags(answer);
-      if (tags.length) out.push({ path: item.path, content: mergeTags(current, tags), created: false });
+      if (tags.length) out.push({ path: item.path, content: mergeTags(current, tags), created: false, source: item.path });
     } else {
-      out.push({ path: item.path, content: setFrontmatterField(current, "summary", yamlString(answer)), created: false });
+      out.push({ path: item.path, content: setFrontmatterField(current, "summary", yamlString(answer)), created: false, source: item.path });
     }
   }
   return out;

@@ -1,11 +1,10 @@
 /** Batch AI over a folder (Plan D: D9). Network is a mocked fetch. */
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { fetchBatchResults, loadJobs, parseTags, planWrites, requestFor, setFrontmatterField, submitBatch } from "../ai/batch";
+import { fetchBatchResults, frontmatterTags, loadJobs, mergeTags, parseTags, planWrites, requestFor, setFrontmatterField, submitBatch, textHash } from "../ai/batch";
 import { setActiveProvider } from "../ai/llm";
 import { costOf, clearUsage, usageSummary } from "../ai/usage";
 import { useAppStore } from "../store/useStore";
 
-const merge = (c: string, tags: string[]) => setFrontmatterField(c, "tags", `[${tags.join(", ")}]`);
 
 describe("batch helpers", () => {
   it("builds per-op requests and caps long notes", () => {
@@ -21,15 +20,30 @@ describe("batch helpers", () => {
 
   it("parses tags and plans the writes", () => {
     expect(parseTags('```json\n["Machine Learning","#ai"]\n```')).toEqual(["machine-learning", "ai"]);
-    const job = { id: "b", provider: "openai" as const, model: "m", op: "translate" as const, lang: "French", createdAt: "", status: "ended" as const, items: [{ customId: "n0", path: "a/x.md" }] };
-    expect(planWrites(job, new Map([["n0", "Bonjour"]]), (p) => (p === "a/x.md" ? "Hello" : null), merge)).toEqual([{ path: "a/x.french.md", content: "Bonjour\n", created: true }]);
+    const job = { id: "b", provider: "openai" as const, model: "m", op: "translate" as const, lang: "French", createdAt: "", status: "ended" as const, items: [{ customId: "n0", path: "a/x.md", hash: textHash("Hello") }] };
+    expect(planWrites(job, new Map([["n0", "Bonjour"]]), (p) => (p === "a/x.md" ? "Hello" : null))).toEqual([{ path: "a/x.french.md", content: "Bonjour\n", created: true, source: "a/x.md" }]);
     // An existing translation is never overwritten: the next free name is used.
     const existing = new Set(["a/x.md", "a/x.french.md", "a/x.french-2.md"]);
-    expect(planWrites(job, new Map([["n0", "Bonjour"]]), (p) => (existing.has(p) ? "x" : null), merge)[0].path).toBe("a/x.french-3.md");
+    expect(planWrites(job, new Map([["n0", "Bonjour"]]), (p) => (p === "a/x.md" ? "Hello" : existing.has(p) ? "x" : null))[0].path).toBe("a/x.french-3.md");
+    // A note edited after submission is skipped and reported.
+    const changed: string[] = [];
+    expect(planWrites(job, new Map([["n0", "Bonjour"]]), (p) => (p === "a/x.md" ? "Hello, edited" : null), undefined, changed)).toEqual([]);
+    expect(changed).toEqual(["a/x.md"]);
     const tagJob = { ...job, op: "tags" as const, items: [{ customId: "n0", path: "a/x.md" }, { customId: "n1", path: "gone.md" }] };
-    expect(planWrites(tagJob, new Map([["n0", '["alpha","beta"]'], ["n1", '["gamma"]']]), (p) => (p === "a/x.md" ? "Hi" : null), merge)).toEqual([
-      { path: "a/x.md", content: "---\ntags: [alpha, beta]\n---\n\nHi", created: false },
+    expect(planWrites(tagJob, new Map([["n0", '["alpha","beta"]'], ["n1", '["gamma"]']]), (p) => (p === "a/x.md" ? "Hi" : null))).toEqual([
+      { path: "a/x.md", content: "---\ntags: [alpha, beta]\n---\n\nHi", created: false, source: "a/x.md" },
     ]);
+  });
+
+  it("merges with block-list tags and replaces block scalars whole", () => {
+    const note = "---\ntitle: T\ntags:\n  - existing\n  - alpha\nsummary: |\n  line one\n\n  line three\nother: x\n---\nBody";
+    expect(frontmatterTags(note)).toEqual(["existing", "alpha"]);
+    const merged = mergeTags(note, ["alpha", "beta"]);
+    expect(merged).toContain("tags: [existing, alpha, beta]");
+    expect(merged).not.toContain("  - existing");
+    const replaced = setFrontmatterField(note, "summary", '"New"');
+    expect(replaced).toContain('summary: "New"\nother: x');
+    expect(replaced).not.toContain("line three");
   });
 
   it("prices batch usage at half", () => {
