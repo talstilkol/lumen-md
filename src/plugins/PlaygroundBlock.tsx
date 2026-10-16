@@ -24,6 +24,9 @@ interface ConsoleLine {
   text: string;
 }
 
+/** Console / error messages kept per run (the runner itself sends at most 500). */
+const MAX_MESSAGES = 600;
+
 export function runnerUrl(base: string = import.meta.env?.BASE_URL ?? "/"): string {
   return `${base.replace(/\/?$/, "/")}playground-runner.html`;
 }
@@ -40,6 +43,8 @@ export default function PlaygroundBlock({ source, meta }: Props) {
   const frameRef = useRef<HTMLIFrameElement | null>(null);
   const runRef = useRef(0);
   const lineId = useRef(0);
+  /** Messages accepted for the current run (project code can post too). */
+  const received = useRef(0);
   const projectRef = useRef(project);
   projectRef.current = project;
 
@@ -56,13 +61,18 @@ export default function PlaygroundBlock({ source, meta }: Props) {
         return;
       }
       if (msg.runId !== runRef.current) return;
+      // The project's own code shares the iframe and can post messages too:
+      // bound what is accepted, whatever the sender claims to be.
+      if ((msg.type === "console" || msg.type === "error") && ++received.current > MAX_MESSAGES) return;
+      const clip = (v: unknown) => (typeof v === "string" ? v : String(v)).slice(0, 10_000);
       if (msg.type === "console") {
-        setLines((prev) => [...prev, { id: ++lineId.current, level: msg.level, text: String(msg.text) }].slice(-500));
+        const level = (["log", "info", "warn", "error"] as const).find((l) => l === msg.level) ?? "log";
+        setLines((prev) => [...prev, { id: ++lineId.current, level, text: clip(msg.text) }].slice(-500));
       } else if (msg.type === "error") {
-        setLines((prev) => [...prev, { id: ++lineId.current, level: "error" as const, text: String(msg.message) }].slice(-500));
+        setLines((prev) => [...prev, { id: ++lineId.current, level: "error" as const, text: clip(msg.message) }].slice(-500));
         setState("error");
       } else if (msg.type === "done") {
-        setElapsed(msg.ms);
+        setElapsed(Number(msg.ms) || 0);
         setState((s) => (s === "error" ? s : "success"));
       }
     };
@@ -72,6 +82,7 @@ export default function PlaygroundBlock({ source, meta }: Props) {
 
   function run() {
     runRef.current++;
+    received.current = 0;
     setLines([]);
     setElapsed(null);
     setState("running");
