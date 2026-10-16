@@ -47,7 +47,17 @@ function threads(n) {
   try {
     return gh(`repos/${repo}/pulls/${n}/ccr/review_threads`)
       .filter((t) => !t.resolved)
-      .map((t) => ({ path: t.path, body: "" }));
+      .map((t) => {
+        let body = "";
+        if (showThreads && t.comment_ids?.[0]) {
+          try {
+            body = gh(`repos/${repo}/pulls/comments/${t.comment_ids[0]}`).body ?? "";
+          } catch {
+            /* comment unavailable */
+          }
+        }
+        return { path: t.path, body, id: t.comment_ids?.[0] };
+      });
   } catch {
     return null;
   }
@@ -70,6 +80,10 @@ for (const { p, c, open, ready } of rows) {
   console.log(`${pad(p.number, 6)}${pad(c.state, 9)}${pad(t, 9)}${pad(verdict, 8)}${p.title}`);
   if (c.failed.length) console.log(`      failed: ${c.failed.join(", ")}`);
   if (showThreads && open?.length) {
-    for (const th of open) console.log(`      • ${th.path}${th.body ? ` — ${th.body.split("\n").find((l) => l.trim() && !l.startsWith("<"))?.slice(0, 120)}` : ""}`);
+    for (const th of open) {
+      // First prose line (skipping badges / HTML) as the thread's title.
+      const title = th.body.split("\n").map((l) => l.replace(/<[^>]+>|!\[[^\]]*\]\([^)]*\)|\*\*/g, "").trim()).find(Boolean);
+      console.log(`      • ${th.path}${th.id ? ` (#${th.id})` : ""}${title ? ` — ${title.slice(0, 120)}` : ""}`);
+    }
   }
 }
