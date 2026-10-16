@@ -123,6 +123,16 @@ describe("tracking edits while suggesting", () => {
     expect(e.md()).toBe("Hello world.");
   });
 
+  it("typing over a selection across paragraphs keeps the structure and drops the typed text", async () => {
+    const e = await open("First para.\n\nSecond para.", true);
+    const from = e.at("para.");
+    const to = e.at("Second") + 6;
+    e.select(from, to);
+    e.view.someProp("handleTextInput", (f) => f(e.view, from, to, "X", () => e.view.state.tr));
+    // Accepting can't remove a paragraph break, so the typed text isn't kept.
+    expect(e.md()).toBe("First {--para.--}{>>@Tal<<}\n\n{--Second--}{>>@Tal<<} para.");
+  });
+
   it("edits inside a fenced code block pass untracked", async () => {
     const e = await open("```\ncode here\n```", true);
     const at = e.at("here");

@@ -402,6 +402,15 @@ function isStructural(slice: Slice): boolean {
   return block;
 }
 
+/** True when a slice holds an inline node other than text (an image, a hard break). */
+function hasAtom(slice: Slice): boolean {
+  let atom = false;
+  slice.content.descendants((n) => {
+    if (n.isInline && !n.isText) atom = true;
+  });
+  return atom;
+}
+
 /** Text content of a slice, ignoring structure. */
 const sliceText = (slice: Slice) => slice.content.textBetween(0, slice.content.size, "", "");
 
@@ -426,7 +435,7 @@ export function trackChanges(
 
   // Collect replace steps across the transactions, with the mapping that
   // carries a position from just after each step to `newState.doc`.
-  const changes: Array<Change & { toEnd: Mapping }> = [];
+  const changes: Array<Change & { toEnd: Mapping; deletesStructure: boolean }> = [];
   user.forEach((tr, ti) => {
     tr.steps.forEach((step, i) => {
       if (!(step instanceof ReplaceStep)) return;
@@ -439,6 +448,7 @@ export function trackChanges(
         insertedSize: s.slice.size,
         deleted: before.slice(s.from, s.to),
         structural: s.slice.size > 0 && isStructural(s.slice),
+        deletesStructure: s.to > s.from && (!before.resolve(s.from).sameParent(before.resolve(s.to)) || hasAtom(before.slice(s.from, s.to))),
         toEnd,
       });
     });
@@ -464,7 +474,10 @@ export function trackChanges(
     // either, so Reject couldn't remove them: blocked too.
     let atom = false;
     if (insertedEnd > at) tr.doc.nodesBetween(at, insertedEnd, (n) => void (n.isInline && !n.isText && (atom = true)));
-    if (insertedEnd > at && (c.structural || atom || formsDelimiter(tr.doc, at, insertedEnd))) {
+    // A replacement that removes structure (a paragraph boundary, an image)
+    // can't be tracked as one suggestion either: the old text comes back
+    // as a suggested deletion, the typed text is dropped.
+    if (insertedEnd > at && (c.structural || atom || c.deletesStructure || formsDelimiter(tr.doc, at, insertedEnd))) {
       tr.delete(at, insertedEnd);
     } else if (insertedEnd > at) {
       tr.removeMark(at, insertedEnd, del);
