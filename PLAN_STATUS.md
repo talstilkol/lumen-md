@@ -11,16 +11,16 @@
 
 | מדד | לפני (2026-10-15) | אחרי (2026-10-16) |
 |---|---|---|
-| בדיקות יחידה (vitest) | 1360 / 1360 | **2034 / 2034** |
+| בדיקות יחידה (vitest) | 1360 / 1360 | **2072 / 2072** |
 | בדיקות e2e (Chromium, build ייצור + CSP/Trusted Types אכוף) | לא הורץ | **74 / 74** + בדיקת הפרות CSP חדשה (0 הפרות) |
-| e2e ב-CI (chromium / webkit / firefox) | — | chromium ✅ · webkit ✅ · firefox: GLSL ממתין לאימות (ראו §2ב) |
+| e2e ב-CI (chromium / webkit / firefox + build ייצור) | — | **כולם ✅** — Firefox: ‏103 עברו, 0 flaky (בדיקת pixel אחת מוגבלת ל-Chromium בכוונה) |
 | `tsc --noEmit` | נקי | נקי |
 | `as any` / `console.log` בקוד ייצור | 6 / — | **0 / 0** (שער `npm run hygiene` ב-CI) |
 | main bundle (gzip) | 151 KB | 168 KB / תקציב 195 KB — כל החלקים בתקציב |
 | פגיעויות npm (קריטי / גבוה) | 5 / 32 | **0 / 5** (5 הנותרות: שרשרת כלי build בפיתוח בלבד — [פירוט](docs/audit/DEPENDENCY-AUDIT-2026-10.md)) |
 | TASKS.md | 241 בוצעו · 145 חסומים | **245 בוצעו · 141 חסומים חיצונית · 0 פתוחים** |
 
-119 commits · 269 קבצים · ‎+29.4K / ‎−5.8K שורות.
+~126 commits · ~275 קבצים · ‎+30K / ‎−5.9K שורות.
 
 ## 2. באגים שתוקנו
 
@@ -57,7 +57,14 @@
 | VS Code | קישורי `#כותרת` בתצוגה לא עבדו | קפיצה לכותרת היעד |
 | פיתוח | הרצת Lua ראשונה גרמה ל-Vite לטעון מחדש את כל הדף (אובדן עריכות) — נמצא דרך אבחון ב-e2e ושוחזר מקומית | `optimizeDeps.include: ["wasmoon"]` |
 | CI | WebKit: הקלדה השאירה טקסט welcome בבלוקים | `fill()` אטומי |
-| CI | Firefox: אין דרייבר GL במכונת CI (`FEATURE_FAILURE_WEBGL_EXHAUSTED_DRIVERS`) | Firefox רץ headed תחת Xvfb עם Mesa — **ממתין לאימות ב-CI** |
+| אבטחה | יומן ביקורת: טוקן משותף בתוך ה-bundle אפשר לזייף/לקרוא אירועים של כל ארגון; הרשאת Team רק ב-UI | ה-worker מאמת את טוקן המשתמש עצמו, גוזר משתמש+ארגון, קריאה רק לאדמין ארגון (תפקיד WorkOS) + תוכנית Team |
+| חיוב | רכישת Team ע"י חבר ארגון זיכתה רק אותו | הזכאות נרשמת לארגון; פורטל התשלום רק לרוכש |
+| AI | פקודות AI חויבו גם כשבוטלו; בקשת רקע חייבה פקודה אחרת | חיוב רק ברגע השליחה למודל, פעם אחת, לבקשה הנכונה |
+| Docker | ה-SPA ב-on-prem לא השתמש בשרתי ה-collab של ה-stack | כתובות signaling/collab עוברות כ-build args |
+| i18n | כשל טעינת עברית → טקסט אנגלי בפריסת RTL | נפילה לאנגלית LTR |
+| publish | נכס בתיקייה בשם `guide.html/` הפיל את הפרסום; `INDEX.md` יצא `INDEX.html` | דילוג מדווח; תמיד `index.html` |
+| VS Code | קישורי `#כותרת` לא מצאו כותרות Setext / עם קישור; בדיקות התוסף לא רצו כלל | עוגנים מאותו pipeline של התצוגה; הבדיקות נכללו ב-vitest |
+| CI | Firefox: אין דרייבר GL במכונת CI (`FEATURE_FAILURE_WEBGL_EXHAUSTED_DRIVERS`) | Firefox רץ headed תחת Xvfb עם Mesa — **אומת: ירוק** |
 
 ## 3. השלמת תוכניות ופיצ'רים חדשים
 
@@ -91,6 +98,7 @@
 | הפצה | npm scope ‏`@lumen-md` · Chrome Web Store ($5) · חתימת Tauri · VS Code Marketplace | חצי יום |
 | קהילה | repos לרישום תבניות/תוספים · GitHub Discussions · סקירת דוברי שפה (ar/de/fr/ja/ru/zh-CN) · סקירה משפטית PRIVACY/TERMS | מתמשך |
 | Dependabot | מיזוג ה-PR הזה ל-`main` (ההתראות נספרות על ענף ברירת המחדל) | 10 דק' |
+| יומן ביקורת | ב-worker: ‏`SUPABASE_URL`+`SUPABASE_ANON_KEY` ו/או `SSO_TOKEN_SECRET`; ‏`ENTITLEMENT_URL`; תפקידי admin ב-WorkOS (או `AUDIT_ALLOW_ALL_MEMBERS=1`). `VITE_AUDIT_TOKEN` הוסר | 30 דק' |
 
 ## 5. מה נותר — קוד (לא נעשה בסבב הזה, בכוונה או מחוסר זמן)
 
@@ -107,7 +115,7 @@
 
 ## 6. מה אומת ואיך
 
-- **אומת בפועל:** typecheck, 2034 בדיקות יחידה, hygiene, build ייצור, תקציב bundle, ו-74 בדיקות e2e ב-Chromium 141 מול build ייצור עם כותרות `public/_headers` (CSP + Trusted Types אכוף) — 0 הפרות.
+- **אומת בפועל:** typecheck, 2072 בדיקות יחידה, e2e ב-CI בשלושת הדפדפנים + build ייצור, hygiene, build ייצור, תקציב bundle, ו-74 בדיקות e2e ב-Chromium 141 מול build ייצור עם כותרות `public/_headers` (CSP + Trusted Types אכוף) — 0 הפרות.
 - **אומת חלקית:** קובצי PPTX נפתחו ב-python-pptx וב-LibreOffice (לא ב-PowerPoint עצמו).
 - **לא אומת:** קונטיינרי Docker לא נבנו; שרת collab הקבוע לא הורץ (תלויות אופציונליות); SSO/Stripe לא נבדקו חי; tldraw / תלת-ממד / מפות לא כוסו ב-e2e תחת Trusted Types.
 
