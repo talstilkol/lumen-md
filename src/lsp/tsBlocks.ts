@@ -274,6 +274,17 @@ function functionScopes(tokens: ReturnType<typeof tokenize>, match: Map<number, 
     if (isPunct(i + 3, "[")) literalKind.set(tokens[i + 1].value, "array");
     else if (init?.type === "str" || init?.type === "tpl") literalKind.set(tokens[i + 1].value, "string");
   }
+  // A name assigned again anywhere (`xs = holder`, `xs += …`) may no longer
+  // be the built-in: forget it.
+  for (let i = 1; i + 1 < tokens.length; i++) {
+    const t = tokens[i];
+    if (t.type !== "ident" || !literalKind.has(t.value)) continue;
+    const next = tokens[i + 1];
+    const prev = tokens[i - 1];
+    const declared = prev?.type === "ident" && (prev.value === "const" || prev.value === "let" || prev.value === "var");
+    if (declared || isPunct(i - 1, ".") || isPunct(i - 1, "?.")) continue;
+    if (next?.type === "punct" && /^(=|\+=|-=|\|\|=|&&=|\?\?=)$/.test(next.value)) literalKind.delete(t.value);
+  }
   const callbackRetained = (open: number): boolean => {
     const callee = tokens[open - 1];
     if (callee?.type !== "ident") return true;
@@ -519,6 +530,21 @@ function functionScopes(tokens: ReturnType<typeof tokenize>, match: Map<number, 
       }
       if (isPunct(k + 1, "{")) fnBodies.push([k + 1, end]);
       pending.push(() => ({ from: pFrom, to: end, retained: retainedAt(pFrom - 1), locals: collectLocals(pFrom, pTo, k + 1, end) }));
+      continue;
+    }
+    // Method with a computed or literal key: [expr]( … ) { … }, "name"( … ) { … }.
+    if ((isPunct(k, "]") || t.type === "str" || t.type === "num") && isPunct(k + 1, "(")) {
+      const q = match.get(k + 1);
+      if (q === undefined || !isPunct(q + 1, "{")) continue;
+      const keyStart = isPunct(k, "]") ? (match.get(k) ?? -1) : k;
+      // `]` must close a `[` that starts a key, not an index (`a[0](…) {`
+      // isn't valid anyway, but `[x](…)` after `{` / `,` / prefix is a key).
+      const prev = val(keyStart - 1);
+      const keyPos = prev === "{" || prev === "," || prev === ";" || prev === "}" || prev === "*" || METHOD_PREFIXES.has(prev);
+      if (keyStart < 0 || !keyPos) continue;
+      const end = match.get(q + 1) ?? tokens.length - 1;
+      fnBodies.push([q + 1, end]);
+      pending.push(() => ({ from: k + 1, to: end, retained: true, locals: collectLocals(k + 1, q, q + 1, end) }));
       continue;
     }
     // Method: name ( … ) { … } in an object literal or class body.

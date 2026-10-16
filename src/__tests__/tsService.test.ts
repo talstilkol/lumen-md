@@ -254,6 +254,19 @@ describe("JavaScript blocks and shared scopes", () => {
     expect(diags).toEqual([]);
   });
 
+  it("computed-key methods keep their returns; reassigned receivers aren't built-ins", () => {
+    const doc = ["```live-js shared", "const k = 'm'; const o = { [k]() { return 1; }, 'q'() { return 2; } };", "```", "```live-js shared", "// @ts-check", "o.m().toFixed(); o.q().toFixed();", "```"].join("\n");
+    const units = toUnits(findTsBlocks(doc));
+    expect(units[1].code).toContain("[k]() { return 1; }");
+    expect(units[1].code).toContain("'q'() { return 2; }");
+    const { units: u2, diags } = checkShared(
+      "const value = 1; let xs = [0]; xs = { map: (f) => [f] }; const saved = xs.map(() => value);",
+      "// @ts-check\nconst value = 'x';",
+    );
+    expect(u2[1].code.split("\n;\n")[0]).toContain("xs.map(() => value)"); // may be retained: newest
+    expect(diags).toEqual([]);
+  });
+
   it("a directly invoked function expression runs with that time's value", () => {
     const { units, diags } = checkShared(
       "const value = 1; const result = function () { return value; }(); function decl() { return value; }\n(0);",
