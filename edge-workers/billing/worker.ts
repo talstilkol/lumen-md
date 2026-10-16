@@ -467,12 +467,32 @@ async function webhook(req: Request, env: Env): Promise<Response> {
     // (active) can arrive after `subscription.deleted`. The event only says
     // WHICH subscription changed — its current state comes from Stripe.
     const row = await withCurrentSubscriptionState(env, update);
+    // A late event for a subscription the user has since replaced must not
+    // overwrite the replacement (the row is keyed by user, not subscription).
+    if (row.stripe_subscription_id) {
+      const stored = await fetchBillingRow(env, row.user_id);
+      if (isSupersededEvent(stored, row)) return new Response("ok (superseded subscription)");
+    }
     await upsertEntitlement(env, row);
   } catch (err) {
     // Non-2xx makes Stripe retry the delivery instead of dropping it.
     return new Response(`Webhook not persisted: ${(err as Error).message}`, { status: 500 });
   }
   return new Response("ok");
+}
+
+/**
+ * True when `row` (an event's subscription, refreshed from Stripe) is for a
+ * different subscription than the one stored for that user AND no longer
+ * bills — i.e. the user canceled it and has a newer subscription, so the
+ * stale event must not replace the newer one. A live subscription that
+ * differs from the stored one is a replacement and is applied.
+ */
+export function isSupersededEvent(stored: BillingRow | null, row: EntitlementUpdate): boolean {
+  const storedSub = stored?.stripe_subscription_id;
+  if (!storedSub || !row.stripe_subscription_id) return false;
+  if (storedSub === row.stripe_subscription_id) return false;
+  return !BILLING_STATUSES.has(row.status);
 }
 
 /**

@@ -250,6 +250,10 @@ export function hoistTopLevelBindings(src: string): string {
   const tokens = tokenize(src);
   const edits: Array<{ from: number; to: number; text: string }> = [];
   const functionNames: string[] = [];
+  // Names the rewritten assignments write to. They're pre-created on the
+  // global object so the assignments also work in strict mode (a
+  // `"use strict"` prologue), where writing an undeclared name throws.
+  const declaredNames: string[] = [];
 
   for (let i = 0; i < tokens.length; i++) {
     const tok = tokens[i];
@@ -292,6 +296,7 @@ export function hoistTopLevelBindings(src: string): string {
       }
       flush(bodyEnd);
       if (decls.length === 0) continue;
+      for (const d of decls) declaredNames.push(...bindingNames(tokenize(d.pattern)));
       const text =
         "0, " + decls.map((d) => `${d.pattern} = ${d.init ?? "void 0"}`).join(", ") + ";";
       const last = tokens[end - 1];
@@ -307,6 +312,7 @@ export function hoistTopLevelBindings(src: string): string {
       let close = k + 1;
       while (close < tokens.length && !(tokens[close].depth === 0 && tokens[close].value === "}")) close++;
       if (close >= tokens.length) continue;
+      declaredNames.push(next.value);
       edits.push({ from: tok.start, to: tok.start, text: `${next.value} = ` });
       edits.push({ from: tokens[close].end, to: tokens[close].end, text: ";" });
       i = close;
@@ -324,17 +330,119 @@ export function hoistTopLevelBindings(src: string): string {
     }
   }
 
+  const prelude = [
+    ...[...new Set(declaredNames)].map(
+      (n) => `${JSON.stringify(n)} in globalThis || (globalThis[${JSON.stringify(n)}] = void 0);`,
+    ),
+    ...functionNames.map((f) => `if (typeof ${f} === "function") globalThis.${f} = ${f};`),
+  ].join(" ");
+  if (prelude) {
+    // After the directive prologue (so `"use strict"` stays a directive),
+    // on the same line as what follows so reported line numbers stay put.
+    const at = directivePrologueEnd(tokens);
+    if (at.semi === false) edits.unshift({ from: at.pos, to: at.pos, text: "; " + prelude + " " });
+    else edits.unshift({ from: at.pos, to: at.pos, text: (at.pos > 0 ? " " : "") + prelude + " " });
+  }
+
   let out = src;
+  // Apply right-to-left; a prelude edit at position 0 sorts first.
+  edits.sort((a, b) => a.from - b.from);
   for (let e = edits.length - 1; e >= 0; e--) {
     const { from, to, text } = edits[e];
     out = out.slice(0, from) + text + out.slice(to);
   }
-  if (functionNames.length > 0) {
-    const prelude = functionNames
-      .map((f) => `if (typeof ${f} === "function") globalThis.${f} = ${f};`)
-      .join(" ");
-    // Same line as the first statement so reported line numbers stay put.
-    out = prelude + " " + out;
-  }
   return out;
+}
+
+/**
+ * Where the directive prologue (`"use strict";` …) ends: the offset just
+ * past it, and whether its last directive ended with a semicolon (null
+ * when there is no prologue).
+ */
+function directivePrologueEnd(tokens: Token[]): { pos: number; semi: boolean | null } {
+  let pos = 0;
+  let semi: boolean | null = null;
+  let i = 0;
+  while (i < tokens.length && tokens[i].type === "str") {
+    const after = tokens[i + 1];
+    if (after?.type === "punct" && after.value === ";") {
+      pos = after.end;
+      semi = true;
+      i += 2;
+    } else if (!after || after.nl) {
+      pos = tokens[i].end;
+      semi = false;
+      i += 1;
+    } else break; // `"a" + b` — an expression, not a directive
+  }
+  return { pos, semi };
+}
+
+/**
+ * Identifiers bound by a declaration pattern: `a`, `{ b, c: d, ...e }`,
+ * `[f, , g = 1, ...h]` → the binding names, skipping property keys,
+ * computed keys and default-value expressions.
+ */
+export function bindingNames(tokens: Token[]): string[] {
+  const names: string[] = [];
+  // Container stack: "{" object pattern, "[" array pattern.
+  const stack: string[] = [];
+  for (let k = 0; k < tokens.length; k++) {
+    const t = tokens[k];
+    if (t.type === "punct") {
+      if (t.value === "{" || t.value === "[") {
+        // `[` at a property position of an object pattern is a computed key.
+        const prev = tokens[k - 1];
+        if (
+          t.value === "[" &&
+          stack[stack.length - 1] === "{" &&
+          prev?.type === "punct" &&
+          (prev.value === "{" || prev.value === ",")
+        ) {
+          k = skipBalanced(tokens, k);
+          continue;
+        }
+        stack.push(t.value);
+      } else if (t.value === "}" || t.value === "]") {
+        stack.pop();
+      } else if (t.value === "=") {
+        // Default value: skip to the `,` or closer that ends it.
+        k = skipExpression(tokens, k + 1) - 1;
+      }
+      continue;
+    }
+    if (t.type !== "ident") continue;
+    const after = tokens[k + 1];
+    if (stack[stack.length - 1] === "{" && after?.type === "punct" && after.value === ":") continue;
+    names.push(t.value);
+  }
+  return names;
+}
+
+/** Index of the token matching the bracket at tokens[open]. */
+function skipBalanced(tokens: Token[], open: number): number {
+  let depth = 0;
+  for (let k = open; k < tokens.length; k++) {
+    const v = tokens[k].type === "punct" ? tokens[k].value : "";
+    if (v === "{" || v === "[" || v === "(") depth++;
+    else if (v === "}" || v === "]" || v === ")") {
+      depth--;
+      if (depth === 0) return k;
+    }
+  }
+  return tokens.length;
+}
+
+/** Index of the `,` / closer that ends an expression starting at tokens[from]. */
+function skipExpression(tokens: Token[], from: number): number {
+  let depth = 0;
+  for (let k = from; k < tokens.length; k++) {
+    const v = tokens[k].type === "punct" ? tokens[k].value : "";
+    if (v === "{" || v === "[" || v === "(") depth++;
+    else if (v === "}" || v === "]" || v === ")") {
+      if (depth === 0) return k;
+      depth--;
+    } else if (v === "," && depth === 0) return k;
+  }
+  return tokens.length;
 }

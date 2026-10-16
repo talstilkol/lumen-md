@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { renderMarkdown, renderMarkdownFast, extractFrontmatter } from "./pipeline";
 import { PreviewDocKeyContext } from "./previewDoc";
 import { handleWikiLinkClick } from "./wikiLinks";
+import { slug } from "./remarkLumen";
 import { scheduleIdle } from "../lib/idle";
 import { CopyButtonHandler } from "./components";
 import { Frontmatter } from "../ui/Frontmatter";
@@ -115,7 +116,12 @@ export function Preview({ markdownText, docKey = null }: Props) {
             const { listWorkspace } = await import("../storage/workspace");
             return (await listWorkspace()).map((f) => f.path);
           },
-          (path) => window.dispatchEvent(new CustomEvent("lumen-open-file", { detail: { path } })),
+          (path, heading) =>
+            window.dispatchEvent(
+              new CustomEvent("lumen-open-file", {
+                detail: heading ? { path, heading: slug(heading) } : { path },
+              }),
+            ),
         );
       }}
     >

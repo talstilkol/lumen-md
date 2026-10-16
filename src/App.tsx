@@ -76,6 +76,7 @@ import { ErrorBoundary } from "./ui/ErrorBoundary";
 import { KeyboardShortcuts } from "./ui/KeyboardShortcuts";
 import { FocusMode } from "./ui/FocusMode";
 import { OnboardingTour } from "./ui/OnboardingTour";
+import { scrollToHeadingWhenRendered } from "./renderer/wikiLinks";
 
 export default function App() {
   const doc = useAppStore((s) => s.doc);
@@ -384,12 +385,15 @@ export default function App() {
   // hub keeps the open path consistent (recents, dirty handling, etc).
   useEffect(() => {
     async function onOpen(e: Event) {
-      const detail = (e as CustomEvent<{ path: string }>).detail;
+      const detail = (e as CustomEvent<{ path: string; heading?: string }>).detail;
       if (!detail?.path) return;
       try {
         const { readWorkspaceFile } = await import("./storage/workspace");
         const content = await readWorkspaceFile(detail.path);
         handleOpenFromWorkspace(detail.path, content);
+        // `[[Note#Heading]]`: scroll to the heading (by its slug id) once the
+        // opened note has rendered.
+        if (detail.heading) scrollToHeadingWhenRendered(detail.heading);
       } catch {
         /* file moved/deleted — silently ignore */
       }

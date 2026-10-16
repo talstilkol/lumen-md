@@ -187,7 +187,7 @@ describe("POST /webhook persistence", () => {
       },
     },
   };
-  function stub(opts: { subStatus?: number; sub?: unknown; supabase?: number }) {
+  function stub(opts: { subStatus?: number; sub?: unknown; supabase?: number; stored?: unknown[] }) {
     const writes: Record<string, unknown>[] = [];
     vi.stubGlobal(
       "fetch",
@@ -195,6 +195,9 @@ describe("POST /webhook persistence", () => {
         const url = String(input);
         if (url.startsWith("https://api.stripe.com/v1/subscriptions/")) {
           return new Response(JSON.stringify(opts.sub ?? {}), { status: opts.subStatus ?? 200 });
+        }
+        if ((init?.method ?? "GET") === "GET" && url.includes("/rest/v1/entitlements")) {
+          return new Response(JSON.stringify(opts.stored ?? []), { status: 200 });
         }
         writes.push(JSON.parse(String(init?.body)));
         return new Response("", { status: opts.supabase ?? 201 });
@@ -209,6 +212,25 @@ describe("POST /webhook persistence", () => {
     expect(res.status).toBe(200);
     expect(writes).toHaveLength(1);
     expect(writes[0]).toMatchObject({ user_id: "u1", status: "canceled", tier: "pro" });
+  });
+
+  it("ignores a late event for a canceled subscription the user has since replaced", async () => {
+    const writes = stub({
+      sub: { id: "sub_1", status: "canceled", metadata: { tier: "pro" } },
+      stored: [{ stripe_customer_id: "cus_1", stripe_subscription_id: "sub_2", status: "active" }],
+    });
+    const res = await worker.fetch(await signedRequest(staleUpdated), env);
+    expect(res.status).toBe(200);
+    expect(writes).toHaveLength(0);
+  });
+
+  it("applies a live replacement subscription over the stored canceled one", async () => {
+    const writes = stub({
+      sub: { id: "sub_1", status: "active", metadata: { tier: "pro" } },
+      stored: [{ stripe_customer_id: "cus_1", stripe_subscription_id: "sub_0", status: "canceled" }],
+    });
+    await worker.fetch(await signedRequest(staleUpdated), env);
+    expect(writes[0]).toMatchObject({ stripe_subscription_id: "sub_1", status: "active" });
   });
 
   it("treats a subscription Stripe no longer knows as canceled", async () => {

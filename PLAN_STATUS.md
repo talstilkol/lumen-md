@@ -11,7 +11,7 @@
 
 | מדד | לפני (2026-10-15) | אחרי (2026-10-16) |
 |---|---|---|
-| בדיקות יחידה (vitest) | 1360 / 1360 | **2105 / 2105** |
+| בדיקות יחידה (vitest) | 1360 / 1360 | **2112 / 2112** |
 | בדיקות e2e (Chromium, build ייצור + CSP/Trusted Types אכוף) | לא הורץ | **74 / 74** + בדיקת הפרות CSP חדשה (0 הפרות) |
 | e2e ב-CI (chromium / webkit / firefox + build ייצור) | — | **כולם ✅** — Firefox: ‏103 עברו, 0 flaky (בדיקת pixel אחת מוגבלת ל-Chromium בכוונה) |
 | `tsc --noEmit` | נקי | נקי |
@@ -76,6 +76,9 @@
 | CSP | כתובות שהמשתמש הגדיר בזמן ריצה (Ollama ברשת, marketplace) נחסמו בשקט | נשארת רשימה מפורשת; כתובת חסומה מתעלמת עם אזהרה; `VITE_CSP_CONNECT_EXTRA` לפריסה |
 | חיוב | בעל מנוי אישי + Team ארגוני לא יכל לנהל את האישי | פקודה "ניהול מנוי אישי" |
 | CI | Firefox: אין דרייבר GL במכונת CI (`FEATURE_FAILURE_WEBGL_EXHAUSTED_DRIVERS`) | Firefox רץ headed תחת Xvfb עם Mesa — **אומת: ירוק** |
+| חיוב | אירוע מאוחר של מנוי שבוטל דרס מנוי חלופי חדש (השורה ממופתחת לפי משתמש) | אירוע של מנוי אחר מהשמור שכבר לא מחייב — מתעלמים ממנו |
+| קישורי ויקי | `[[Note#Heading]]` לא פתח כלום | הפיצול לפי `#`: פותחים את הפתק וגוללים לכותרת |
+| Live JS משותף | בלוק עם `"use strict"` זרק `ReferenceError` על `const` משותף | השמות נוצרים מראש על `globalThis` אחרי ה-prologue (כולל destructuring ו-class) |
 
 ## 3. השלמת תוכניות ופיצ'רים חדשים
 
@@ -126,7 +129,7 @@
 
 ## 6. מה אומת ואיך
 
-- **אומת בפועל:** typecheck, 2105 בדיקות יחידה, e2e ב-CI בשלושת הדפדפנים + build ייצור, hygiene, build ייצור, תקציב bundle, ו-74 בדיקות e2e ב-Chromium 141 מול build ייצור עם כותרות `public/_headers` (CSP + Trusted Types אכוף) — 0 הפרות.
+- **אומת בפועל:** typecheck, 2112 בדיקות יחידה, e2e ב-CI בשלושת הדפדפנים + build ייצור, hygiene, build ייצור, תקציב bundle, ו-74 בדיקות e2e ב-Chromium 141 מול build ייצור עם כותרות `public/_headers` (CSP + Trusted Types אכוף) — 0 הפרות.
 - **אומת חלקית:** קובצי PPTX נפתחו ב-python-pptx וב-LibreOffice (לא ב-PowerPoint עצמו).
 - **לא אומת:** קונטיינרי Docker לא נבנו; שרת collab הקבוע לא הורץ (תלויות אופציונליות); SSO/Stripe לא נבדקו חי; tldraw / תלת-ממד / מפות לא כוסו ב-e2e תחת Trusted Types.
 

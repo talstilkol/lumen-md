@@ -348,8 +348,12 @@ describe("hoistTopLevelBindings", () => {
   };
 
   it("rewrites declarations and leaves other code alone", () => {
-    expect(hoistTopLevelBindings("const a = 1;")).toBe("0, a = 1;");
-    expect(hoistTopLevelBindings("let b")).toBe("0, b = void 0;");
+    expect(hoistTopLevelBindings("const a = 1;")).toBe(
+      '"a" in globalThis || (globalThis["a"] = void 0); 0, a = 1;',
+    );
+    expect(hoistTopLevelBindings("let b")).toBe(
+      '"b" in globalThis || (globalThis["b"] = void 0); 0, b = void 0;',
+    );
     expect(hoistTopLevelBindings("console.log(1)")).toBe("console.log(1)");
   });
 
@@ -411,6 +415,21 @@ describe("hoistTopLevelBindings", () => {
   it("keeps line numbers stable for error reporting", () => {
     const src = "function f() {}\nconst a = 1\nthrow new Error('x')";
     expect(hoistTopLevelBindings(src).split("\n")).toHaveLength(3);
+  });
+
+  it("persists bindings under a \"use strict\" prologue (with and without semicolon)", () => {
+    const g = run('"use strict"; const value = 1, { b, c: [d = 2], ...rest } = { b: 3, c: [], e: 4 }\nclass K {}\nlet n');
+    expect(g.value).toBe(1);
+    expect([g.b, g.d, g.rest]).toEqual([3, 2, { e: 4 }]);
+    expect(typeof g.K).toBe("function");
+    expect("n" in g).toBe(true);
+    // Keys and defaults are not bindings.
+    expect(g.c).toBeUndefined();
+    const g2 = run("'use strict'\nconst x = 5\nfunction f() { return x }\nconst y = f()");
+    expect(g2.y).toBe(5);
+    expect(typeof g2.f).toBe("function");
+    // The directive is still the first statement, so the code stays strict.
+    expect(hoistTopLevelBindings('"use strict"; const a = 1').startsWith('"use strict";')).toBe(true);
   });
 
   it("tokenizer distinguishes division from regex", () => {
