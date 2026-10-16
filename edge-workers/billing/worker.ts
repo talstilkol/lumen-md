@@ -30,6 +30,13 @@
  *   - STRIPE_WEBHOOK_SECRET    — whsec_…
  *   - SUPABASE_URL
  *   - SUPABASE_SERVICE_ROLE
+ *   - SSO_TOKEN_SECRET         — optional; same value as the SSO worker's
+ *                                BILLING_TOKEN_SECRET. Lets WorkOS/SSO users
+ *                                (who have no Supabase token) authenticate
+ *                                with the short-lived token from
+ *                                `GET /api/sso/token`. Their rows are keyed
+ *                                `workos:<user id>`, with an org-wide
+ *                                fallback row `workos-org:<organization id>`.
  *
  * Deploy with:
  *   cd edge-workers/billing && wrangler deploy
@@ -42,6 +49,8 @@ export interface Env {
   SUPABASE_SERVICE_ROLE: string;
   /** Comma-separated list of web origins allowed to make credentialed calls. */
   ALLOWED_ORIGIN?: string;
+  /** HS256 secret shared with the SSO worker (its BILLING_TOKEN_SECRET). */
+  SSO_TOKEN_SECRET?: string;
 }
 
 const CORS = {
@@ -105,18 +114,84 @@ function json(body: unknown, req: Request, env: Env): Response {
   });
 }
 
-/** Decode the bearer token to get the Supabase user id. */
-async function userId(req: Request, env: Env): Promise<string> {
+/* ─── Caller identity ───────────────────────────────────────────────── */
+
+/** Issuer / audience of the billing tokens minted by the SSO worker. */
+export const SSO_TOKEN_ISS = "lumen-sso";
+export const SSO_TOKEN_AUD = "lumen-billing";
+
+interface Identity {
+  /** Key of the caller's own `entitlements` row. */
+  uid: string;
+  /** Org-wide fallback row (SSO users), e.g. an enterprise contract. */
+  orgUid?: string;
+}
+
+const te = new TextEncoder();
+
+function b64urlToBytes(s: string): Uint8Array<ArrayBuffer> {
+  const b64 = s.replace(/-/g, "+").replace(/_/g, "/") + "===".slice((s.length + 3) % 4);
+  return Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
+}
+
+/**
+ * Verify an HS256 billing token from the SSO worker. Returns null for
+ * anything that isn't one (so the caller can fall back to Supabase) and
+ * throws for one that claims to be ours but fails verification.
+ */
+export async function verifySsoBillingToken(
+  token: string,
+  secret: string,
+  nowSec = Math.floor(Date.now() / 1000),
+): Promise<Identity | null> {
+  const parts = token.split(".");
+  if (parts.length !== 3) return null;
+  let head: { alg?: unknown };
+  let payload: { iss?: unknown; aud?: unknown; sub?: unknown; org?: unknown; exp?: unknown };
+  try {
+    head = JSON.parse(new TextDecoder().decode(b64urlToBytes(parts[0])));
+    payload = JSON.parse(new TextDecoder().decode(b64urlToBytes(parts[1])));
+  } catch {
+    return null;
+  }
+  if (head.alg !== "HS256" || payload.iss !== SSO_TOKEN_ISS) return null;
+  const key = await crypto.subtle.importKey("raw", te.encode(secret), { name: "HMAC", hash: "SHA-256" }, false, ["verify"]);
+  let ok = false;
+  try {
+    ok = await crypto.subtle.verify("HMAC", key, b64urlToBytes(parts[2]), te.encode(`${parts[0]}.${parts[1]}`));
+  } catch {
+    ok = false;
+  }
+  if (!ok) throw new Error("Invalid token");
+  if (payload.aud !== SSO_TOKEN_AUD) throw new Error("Invalid token");
+  if (typeof payload.exp !== "number" || payload.exp <= nowSec) throw new Error("Token expired");
+  if (typeof payload.sub !== "string" || !payload.sub) throw new Error("No user id in token");
+  return {
+    uid: `workos:${payload.sub}`,
+    ...(typeof payload.org === "string" && payload.org ? { orgUid: `workos-org:${payload.org}` } : {}),
+  };
+}
+
+/** Resolve the caller from the bearer token: an SSO billing token or a Supabase JWT. */
+async function identify(req: Request, env: Env): Promise<Identity> {
   const auth = req.headers.get("Authorization");
   if (!auth?.startsWith("Bearer ")) throw new Error("Missing bearer token");
   const jwt = auth.slice(7);
+  if (env.SSO_TOKEN_SECRET) {
+    const sso = await verifySsoBillingToken(jwt, env.SSO_TOKEN_SECRET);
+    if (sso) return sso;
+  }
   const res = await fetch(`${env.SUPABASE_URL}/auth/v1/user`, {
     headers: { Authorization: `Bearer ${jwt}`, apikey: env.SUPABASE_SERVICE_ROLE },
   });
   if (!res.ok) throw new Error("Invalid token");
   const u = (await res.json()) as { id?: string };
   if (!u.id) throw new Error("No user id in token");
-  return u.id;
+  return { uid: u.id };
+}
+
+async function userId(req: Request, env: Env): Promise<string> {
+  return (await identify(req, env)).uid;
 }
 
 /* ─── GET /entitlements ──────────────────────────────────────────────── */
@@ -172,16 +247,18 @@ async function entitlements(req: Request, env: Env): Promise<Response> {
   // Anonymous callers are simply on the free plan.
   if (!req.headers.get("Authorization")) return send(FREE);
 
-  let uid: string;
+  let who: Identity;
   try {
-    uid = await userId(req, env);
+    who = await identify(req, env);
   } catch {
     return new Response(JSON.stringify({ error: "Invalid token" }), { status: 401, headers });
   }
 
+  // The caller's own row first; SSO users fall back to their org's row.
+  const ids = [who.uid, ...(who.orgUid ? [who.orgUid] : [])];
   const res = await fetch(
-    `${env.SUPABASE_URL}/rest/v1/entitlements?user_id=eq.${encodeURIComponent(uid)}` +
-      `&select=tier,status,renews_at,stripe_subscription_id&limit=1`,
+    `${env.SUPABASE_URL}/rest/v1/entitlements?user_id=in.(${ids.map((i) => `"${encodeURIComponent(i)}"`).join(",")})` +
+      `&select=user_id,tier,status,renews_at,stripe_subscription_id`,
     {
       headers: {
         apikey: env.SUPABASE_SERVICE_ROLE,
@@ -196,13 +273,18 @@ async function entitlements(req: Request, env: Env): Promise<Response> {
       headers,
     });
   }
-  const rows = (await res.json()) as {
+  const found = (await res.json()) as {
+    user_id?: unknown;
     tier?: unknown;
     status?: unknown;
     renews_at?: unknown;
     stripe_subscription_id?: unknown;
   }[];
-  const row = rows[0];
+  const rows = ids.map((id) => found.find((r) => r.user_id === id)).filter((r) => r !== undefined);
+  // An active plan on the user's own row wins; otherwise an active org-wide
+  // plan; otherwise whatever (lapsed) row exists.
+  const live = (r: (typeof rows)[number]) => normalizeStatus(r.status) !== "none" && normalizeStatus(r.status) !== "canceled";
+  const row = rows.find(live) ?? rows[0];
   if (!row) return send(FREE);
 
   const body: EntitlementBody = {

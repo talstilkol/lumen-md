@@ -20,3 +20,6 @@ ALLOWED_ORIGIN = "https://lumen.app"
 #   STRIPE_WEBHOOK_SECRET    — whsec_… from the Stripe webhook config
 #   SUPABASE_URL             — https://<your-project>.supabase.co
 #   SUPABASE_SERVICE_ROLE    — service-role JWT
+# Optional:
+#   SSO_TOKEN_SECRET         — accept SSO (WorkOS) users' bearer tokens; same
+#                              value as the SSO worker's BILLING_TOKEN_SECRET

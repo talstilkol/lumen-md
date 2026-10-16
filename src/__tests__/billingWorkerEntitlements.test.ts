@@ -9,7 +9,8 @@
  * and stub global fetch to play the Supabase side.
  */
 import { describe, it, expect, vi, afterEach } from "vitest";
-import worker, { type Env } from "../../edge-workers/billing/worker";
+import worker, { type Env, verifySsoBillingToken, SSO_TOKEN_ISS, SSO_TOKEN_AUD } from "../../edge-workers/billing/worker";
+import { signJwt } from "../../edge-workers/auth/worker";
 import { capabilitiesFor, FREE_CAPS, PRO_CAPS, type Entitlement } from "../billing/types";
 
 const ORIGIN = "https://lumen.app";
@@ -41,8 +42,14 @@ function mockSupabase(users: Record<string, string>, rows: Record<string, Row[]>
     }
     if (url.startsWith(`${SUPABASE}/rest/v1/entitlements?`)) {
       expect(headers.get("apikey")).toBe(env.SUPABASE_SERVICE_ROLE);
-      const uid = decodeURIComponent(new URL(url).searchParams.get("user_id")!.replace(/^eq\./, ""));
-      return new Response(JSON.stringify(rows[uid] ?? []), { status: 200 });
+      // PostgREST `user_id=in.("a","b")` (values URL-encoded inside quotes).
+      const param = new URL(url).searchParams.get("user_id")!;
+      const ids = param
+        .replace(/^in\.\(|\)$/g, "")
+        .split(",")
+        .map((v) => decodeURIComponent(v.replace(/^"|"$/g, "")));
+      const out = ids.flatMap((id) => (rows[id] ?? []).map((r) => ({ user_id: id, ...r })));
+      return new Response(JSON.stringify(out), { status: 200 });
     }
     throw new Error(`unexpected fetch ${url}`);
   });
@@ -103,7 +110,7 @@ describe("billing worker GET /entitlements", () => {
     expect(ent).toEqual({ tier: "pro", status: "active", renewsAt: 1_900_000_000, subscriptionId: "sub_123" });
     expect(capabilitiesFor(ent)).toEqual(PRO_CAPS);
     // Looked up the caller's own row only.
-    expect(calls.some((u) => u.includes("user_id=eq.user-pro"))).toBe(true);
+    expect(calls.some((u) => decodeURIComponent(u).includes('user_id=in.("user-pro")'))).toBe(true);
   });
 
   it("canceled pro / unknown status → no pro capabilities", async () => {
@@ -188,5 +195,60 @@ describe("billing worker CORS", () => {
     );
     expect(res.headers.get("Access-Control-Allow-Origin")).toBe("*");
     expect(res.headers.get("Access-Control-Allow-Credentials")).toBeNull();
+  });
+});
+
+describe("billing worker — SSO (WorkOS) billing tokens", () => {
+  const SECRET = "billing-token-secret-0123456789abcdef";
+  const ssoEnv: Env = { ...env, SSO_TOKEN_SECRET: SECRET };
+  const now = () => Math.floor(Date.now() / 1000);
+  const token = (claims: Record<string, unknown>, secret = SECRET) =>
+    signJwt({ iss: SSO_TOKEN_ISS, aud: SSO_TOKEN_AUD, sub: "user_01", org: "org_9", iat: now(), exp: now() + 300, ...claims }, secret);
+
+  it("SSO user with their own active row gets that plan, without calling Supabase auth", async () => {
+    const { calls } = mockSupabase({}, { "workos:user_01": [{ tier: "pro", status: "active" }] });
+    const res = await worker.fetch(get("/entitlements", { Authorization: `Bearer ${await token({})}` }), ssoEnv);
+    expect(res.status).toBe(200);
+    expect(await entitlementOf(res)).toMatchObject({ tier: "pro", status: "active" });
+    expect(calls.some((u) => u.endsWith("/auth/v1/user"))).toBe(false);
+  });
+
+  it("falls back to an active org-wide row", async () => {
+    mockSupabase({}, { "workos-org:org_9": [{ tier: "team", status: "active" }] });
+    const res = await worker.fetch(get("/entitlements", { Authorization: `Bearer ${await token({})}` }), ssoEnv);
+    expect(await entitlementOf(res)).toMatchObject({ tier: "team", status: "active" });
+  });
+
+  it("an active org plan beats the user's own lapsed row", async () => {
+    mockSupabase({}, {
+      "workos:user_01": [{ tier: "pro", status: "canceled" }],
+      "workos-org:org_9": [{ tier: "team", status: "active" }],
+    });
+    const res = await worker.fetch(get("/entitlements", { Authorization: `Bearer ${await token({})}` }), ssoEnv);
+    expect(await entitlementOf(res)).toMatchObject({ tier: "team" });
+  });
+
+  it("rejects a forged, expired or wrong-audience SSO token with 401", async () => {
+    mockSupabase({}, { "workos:user_01": [{ tier: "pro", status: "active" }] });
+    for (const bad of [
+      await token({}, "another-secret-another-secret-xx"),
+      await token({ exp: now() - 1 }),
+      await token({ aud: "something-else" }),
+    ]) {
+      const res = await worker.fetch(get("/entitlements", { Authorization: `Bearer ${bad}` }), ssoEnv);
+      expect(res.status).toBe(401);
+    }
+  });
+
+  it("ignores SSO tokens when SSO_TOKEN_SECRET isn't configured (falls back to Supabase → 401)", async () => {
+    mockSupabase({}, {});
+    const res = await worker.fetch(get("/entitlements", { Authorization: `Bearer ${await token({})}` }), env);
+    expect(res.status).toBe(401);
+  });
+
+  it("verifySsoBillingToken returns null for non-SSO JWTs so Supabase tokens still work", async () => {
+    const supabaseLike = await signJwt({ iss: "supabase", sub: "u", exp: now() + 60 }, "x");
+    expect(await verifySsoBillingToken(supabaseLike, SECRET)).toBeNull();
+    expect(await verifySsoBillingToken("not-a-jwt", SECRET)).toBeNull();
   });
 });

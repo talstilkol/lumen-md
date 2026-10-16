@@ -24,13 +24,22 @@
  *   POST /api/sso/signout
  *        → clears the session cookie (204). Origin-checked.
  *
+ *   GET  /api/sso/token
+ *        → `{ token, expiresAt }`: a 5-minute HS256 bearer token
+ *          (iss "lumen-sso", aud "lumen-billing", sub, org) signed with
+ *          BILLING_TOKEN_SECRET, for the billing worker's /entitlements.
+ *          The session cookie is HttpOnly, so this is how an SSO user
+ *          proves who they are to another service. Origin-checked;
+ *          501 when BILLING_TOKEN_SECRET isn't set.
+ *
  * Cookies are `SameSite=None; Secure` because the app and the worker are
  * normally on different sites (the client uses `credentials: "include"`).
  * CORS only echoes origins listed in `ALLOWED_ORIGINS` — never `*`, which
  * browsers reject for credentialed requests anyway.
  *
  * Secrets (`wrangler secret put`): WORKOS_API_KEY, WORKOS_CLIENT_ID,
- * SESSION_SECRET. Vars: ALLOWED_ORIGINS, optional WORKOS_REDIRECT_URI,
+ * SESSION_SECRET, optional BILLING_TOKEN_SECRET (same value as the billing
+ * worker's SSO_TOKEN_SECRET; keep it distinct from SESSION_SECRET). Vars: ALLOWED_ORIGINS, optional WORKOS_REDIRECT_URI,
  * WORKOS_API_BASE, SESSION_TTL_SECONDS.
  *
  * Deploy: `cd edge-workers/auth && wrangler deploy` (see README.md).
@@ -51,6 +60,12 @@ export interface Env {
   WORKOS_API_BASE?: string;
   /** Session lifetime in seconds. Default 7 days. */
   SESSION_TTL_SECONDS?: string;
+  /**
+   * Signs the short-lived billing tokens (`GET /api/sso/token`). Must equal
+   * the billing worker's SSO_TOKEN_SECRET and differ from SESSION_SECRET, so
+   * the billing worker can verify tokens without being able to mint sessions.
+   */
+  BILLING_TOKEN_SECRET?: string;
 }
 
 /** Shape the client expects (`src/auth/types.ts` → `User`). */
@@ -66,6 +81,9 @@ export const SESSION_COOKIE = "lumen_session";
 export const STATE_COOKIE = "lumen_sso_state";
 const STATE_TTL_SECONDS = 10 * 60;
 const DEFAULT_SESSION_TTL = 7 * 24 * 60 * 60;
+export const BILLING_TOKEN_TTL = 5 * 60;
+export const BILLING_TOKEN_ISS = "lumen-sso";
+export const BILLING_TOKEN_AUD = "lumen-billing";
 const DEFAULT_API_BASE = "https://api.workos.com";
 const DOMAIN_RE = /^(?=.{1,253}$)([a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}$/i;
 
@@ -363,6 +381,35 @@ async function handleSession(req: Request, env: Env, cors: Record<string, string
   return json({ user }, 200, cors);
 }
 
+async function handleToken(req: Request, env: Env, cors: Record<string, string>): Promise<Response> {
+  // Only the app's own origins may read a bearer token minted from the cookie.
+  if (!isAllowedOrigin(req.headers.get("origin"), env)) {
+    return errorJson(403, "origin_not_allowed", "This origin is not allowed.", cors);
+  }
+  if (!env.BILLING_TOKEN_SECRET) {
+    return errorJson(501, "not_configured", "BILLING_TOKEN_SECRET is not set on the SSO worker.", cors);
+  }
+  const session = readCookie(req, SESSION_COOKIE);
+  const payload = session ? await verifyJwt(session, env.SESSION_SECRET) : null;
+  const user = payload?.user as SessionUser | undefined;
+  if (!user?.id) return errorJson(401, "no_session", "Not signed in.", cors);
+  const now = Math.floor(Date.now() / 1000);
+  // Never outlive the session it was minted from.
+  const exp = Math.min(now + BILLING_TOKEN_TTL, payload!.exp as number);
+  const token = await signJwt(
+    {
+      iss: BILLING_TOKEN_ISS,
+      aud: BILLING_TOKEN_AUD,
+      sub: user.id,
+      ...(user.orgId ? { org: user.orgId } : {}),
+      iat: now,
+      exp,
+    },
+    env.BILLING_TOKEN_SECRET,
+  );
+  return json({ token, expiresAt: exp }, 200, cors);
+}
+
 function handleSignout(req: Request, env: Env, cors: Record<string, string>): Response {
   // CSRF: a cross-site form could POST here; only allowed origins may.
   if (!isAllowedOrigin(req.headers.get("origin"), env)) {
@@ -401,8 +448,10 @@ export default {
         return handleSession(req, env, cors);
       case "POST /api/sso/signout":
         return handleSignout(req, env, cors);
+      case "GET /api/sso/token":
+        return handleToken(req, env, cors);
       default:
-        if (["/api/sso/authorize", "/api/sso/callback", "/api/sso/session", "/api/sso/signout"].includes(url.pathname)) {
+        if (["/api/sso/authorize", "/api/sso/callback", "/api/sso/session", "/api/sso/signout", "/api/sso/token"].includes(url.pathname)) {
           return errorJson(405, "method_not_allowed", "Method not allowed.", cors);
         }
         return errorJson(404, "not_found", "Not found.", cors);

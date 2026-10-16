@@ -12,6 +12,7 @@ plain `fetch`, so it runs on any Workers-compatible runtime.
 | `GET` | `/api/sso/callback?code=…&state=…` | IdP lands here. Verifies the HMAC-signed `state` **and** the nonce cookie, exchanges the code at `POST /sso/token`, sets the `lumen_session` cookie (HS256 JWT) and 302s to `<origin>/?sso=ok` — or `/?sso=error&reason=<code>`. |
 | `GET` | `/api/sso/session` | `{ user }` for a valid session, `401` otherwise. |
 | `POST` | `/api/sso/signout` | Clears the session cookie (`204`). |
+| `GET` | `/api/sso/token` | `{ token, expiresAt }` — a ≤5-minute HS256 bearer token (`iss: lumen-sso`, `aud: lumen-billing`, `sub`, `org`) signed with `BILLING_TOKEN_SECRET`, used by the client's `getAccessToken()` so the billing worker's `/entitlements` can identify SSO users (the session cookie itself is HttpOnly). Origin-checked; `501` when `BILLING_TOKEN_SECRET` isn't set. |
 | `GET` | `/health` | `{ ok, configured }`. |
 
 `user` matches the client's `User` type: `{ id, email?, name?, provider: "workos", orgId? }`.
@@ -43,6 +44,8 @@ cd edge-workers/auth
 wrangler secret put WORKOS_API_KEY
 wrangler secret put WORKOS_CLIENT_ID
 wrangler secret put SESSION_SECRET      # openssl rand -base64 48
+# optional — only if the billing worker is deployed:
+wrangler secret put BILLING_TOKEN_SECRET  # same value as billing's SSO_TOKEN_SECRET
 # edit ALLOWED_ORIGINS in wrangler.toml, then:
 wrangler deploy
 ```

@@ -22,3 +22,6 @@ ALLOWED_ORIGINS = "https://lumen.app"
 #   WORKOS_API_KEY    — sk_live_… / sk_test_… from WorkOS → API Keys
 #   WORKOS_CLIENT_ID  — client_… from WorkOS → API Keys
 #   SESSION_SECRET    — ≥32 random bytes, e.g. `openssl rand -base64 48`
+# Optional:
+#   BILLING_TOKEN_SECRET — enables GET /api/sso/token for the billing worker;
+#                          must equal billing's SSO_TOKEN_SECRET, differ from SESSION_SECRET

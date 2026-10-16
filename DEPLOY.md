@@ -209,6 +209,12 @@ cd edge-workers/auth
 wrangler secret put WORKOS_API_KEY
 wrangler secret put WORKOS_CLIENT_ID
 wrangler secret put SESSION_SECRET        # openssl rand -base64 48
+# If billing is deployed too, let SSO users prove who they are to it:
+#   generate ONE new value (openssl rand -base64 48), then
+wrangler secret put BILLING_TOKEN_SECRET  # that value
+#   and in edge-workers/billing: wrangler secret put SSO_TOKEN_SECRET  (same value)
+#   Entitlement rows for SSO users are keyed `workos:<user id>`, or
+#   `workos-org:<organization id>` for an org-wide (enterprise) plan.
 # 5b-2. Set ALLOWED_ORIGINS in wrangler.toml to your app origin(s).
 wrangler deploy
 # → https://lumen-auth.<your>.workers.dev  (verify: GET /health → configured:true)

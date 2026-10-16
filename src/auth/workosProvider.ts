@@ -14,9 +14,13 @@
  *   3. `loadSession()` reads the cookie (or `?sso=ok` flash param)
  *      and returns the resulting `User`.
  *
+ *   4. `getAccessToken()` fetches a short-lived bearer token from
+ *      `/api/sso/token` (the session cookie is HttpOnly) so other
+ *      services — the billing worker's `/entitlements` — can identify
+ *      the SSO user.
+ *
  * This module is the **client surface only**. The edge worker that
- * holds the WorkOS API key is in `edge-workers/auth/worker.ts`
- * (created in F4.3 once the WorkOS account exists).
+ * holds the WorkOS API key is in `edge-workers/auth/worker.ts`.
  */
 
 import type { AuthProvider, User } from "./types";
@@ -45,6 +49,7 @@ let testOverride: WorkOSConfig | null = null;
 /** Test-only hook — skips the env read so tests can drive the provider. */
 export function __setWorkOSConfigForTesting(cfg: WorkOSConfig | null): void {
   testOverride = cfg;
+  cachedToken = null;
 }
 
 function readConfig(): WorkOSConfig | null {
@@ -99,7 +104,37 @@ export async function loadSsoSession(): Promise<User | null> {
   }
 }
 
+let cachedToken: { token: string; expiresAt: number } | null = null;
+
+/**
+ * Short-lived bearer token for the billing worker (see the SSO worker's
+ * `GET /api/sso/token`). Cached until 30 s before expiry. Returns `null`
+ * when not signed in, the worker isn't configured for billing tokens, or
+ * it can't be reached — callers then behave as anonymous.
+ */
+export async function getSsoAccessToken(nowSec = Math.floor(Date.now() / 1000)): Promise<string | null> {
+  const cfg = readConfig();
+  if (!cfg) return null;
+  if (cachedToken && cachedToken.expiresAt - 30 > nowSec) return cachedToken.token;
+  cachedToken = null;
+  try {
+    const res = await fetchWithRetry(
+      `${cfg.endpoint}/api/sso/token`,
+      { credentials: "include" },
+      { label: "workos.token", maxRetries: 1, baseDelayMs: 500, maxDelayMs: 1500 },
+    );
+    if (!res.ok) return null;
+    const json = (await res.json()) as { token?: unknown; expiresAt?: unknown };
+    if (typeof json.token !== "string" || typeof json.expiresAt !== "number") return null;
+    cachedToken = { token: json.token, expiresAt: json.expiresAt };
+    return json.token;
+  } catch {
+    return null;
+  }
+}
+
 export async function signOutSso(): Promise<void> {
+  cachedToken = null;
   const cfg = readConfig();
   if (!cfg) return;
   try {
@@ -126,6 +161,9 @@ export const workosProvider: AuthProvider = {
   name: "workos",
   async loadSession() {
     return loadSsoSession();
+  },
+  async getAccessToken() {
+    return getSsoAccessToken();
   },
   async signOut() {
     await signOutSso();

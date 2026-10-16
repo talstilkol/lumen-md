@@ -11,6 +11,7 @@ import worker, {
   verifyJwt,
   SESSION_COOKIE,
   STATE_COOKIE,
+  BILLING_TOKEN_TTL,
   type Env,
 } from "../../edge-workers/auth/worker";
 
@@ -302,5 +303,52 @@ describe("jwt helpers", () => {
     const [, body, sig] = token.split(".");
     const noneHeader = btoa(JSON.stringify({ alg: "none" })).replace(/=+$/, "");
     expect(await verifyJwt(`${noneHeader}.${body}.${sig}`, "s")).toBeNull();
+  });
+});
+
+describe("GET /api/sso/token (billing bearer token)", () => {
+  const tokenEnv: Env = { ...env, BILLING_TOKEN_SECRET: "b".repeat(40) };
+  const now = () => Math.floor(Date.now() / 1000);
+  async function sessionCookie(user: Record<string, unknown>, ttl = 3600): Promise<string> {
+    const jwt = await signJwt({ sub: user.id, user, iat: now(), exp: now() + ttl }, env.SESSION_SECRET);
+    return `${SESSION_COOKIE}=${jwt}`;
+  }
+
+  it("mints a short-lived token with sub/org, signed with BILLING_TOKEN_SECRET (not the session secret)", async () => {
+    const cookie = await sessionCookie({ id: "user_01", provider: "workos", orgId: "org_9" });
+    const res = await worker.fetch(req("/api/sso/token", { cookie }), tokenEnv);
+    expect(res.status).toBe(200);
+    expect(res.headers.get("access-control-allow-origin")).toBe(APP);
+    const { token, expiresAt } = (await res.json()) as { token: string; expiresAt: number };
+    expect(expiresAt - now()).toBeLessThanOrEqual(BILLING_TOKEN_TTL);
+    const claims = await verifyJwt(token, tokenEnv.BILLING_TOKEN_SECRET!);
+    expect(claims).toMatchObject({ iss: "lumen-sso", aud: "lumen-billing", sub: "user_01", org: "org_9" });
+    // Can't be replayed as a session.
+    expect(await verifyJwt(token, env.SESSION_SECRET)).toBeNull();
+  });
+
+  it("never outlives the session it was minted from", async () => {
+    const cookie = await sessionCookie({ id: "u", provider: "workos" }, 60);
+    const res = await worker.fetch(req("/api/sso/token", { cookie }), tokenEnv);
+    const { expiresAt } = (await res.json()) as { expiresAt: number };
+    expect(expiresAt).toBeLessThanOrEqual(now() + 60);
+  });
+
+  it("401s without a valid session, 403s for other origins, 501s when not configured", async () => {
+    expect((await worker.fetch(req("/api/sso/token"), tokenEnv)).status).toBe(401);
+    const cookie = await sessionCookie({ id: "u", provider: "workos" });
+    expect((await worker.fetch(req("/api/sso/token", { cookie, origin: "https://evil.test" }), tokenEnv)).status).toBe(403);
+    expect((await worker.fetch(req("/api/sso/token", { cookie, origin: null }), tokenEnv)).status).toBe(403);
+    expect((await worker.fetch(req("/api/sso/token", { cookie }), env)).status).toBe(501);
+  });
+
+  it("a minted token is accepted by the billing worker", async () => {
+    const billing = await import("../../edge-workers/billing/worker");
+    const cookie = await sessionCookie({ id: "user_01", provider: "workos", orgId: "org_9" });
+    const { token } = (await (await worker.fetch(req("/api/sso/token", { cookie }), tokenEnv)).json()) as { token: string };
+    expect(await billing.verifySsoBillingToken(token, tokenEnv.BILLING_TOKEN_SECRET!)).toEqual({
+      uid: "workos:user_01",
+      orgUid: "workos-org:org_9",
+    });
   });
 });
