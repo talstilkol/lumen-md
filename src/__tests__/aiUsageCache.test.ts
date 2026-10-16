@@ -142,6 +142,23 @@ describe("chat(): response cache and usage", () => {
     expect(usageSummary().rows[0]).toMatchObject({ provider: "mistral", inputTokens: 9, outputTokens: 2, estimated: 0 });
   });
 
+  it("caches only answers the caller accepts, under the provider's real default model", async () => {
+    setActiveProvider("anthropic");
+    localStorage.setItem("lumen.ai.key.anthropic", "a-key");
+    const replies = ["not json", '["a"]', "unused"];
+    const fetchMock = vi.fn(async () => new Response(JSON.stringify({ content: [{ type: "text", text: replies.shift() }] }), { status: 200 }));
+    vi.stubGlobal("fetch", fetchMock);
+    const msgs = [{ role: "user" as const, content: "tags?" }];
+    const cacheIf = (r: string) => r.startsWith("[");
+    expect(await chat(msgs, { cache: true, cacheIf })).toBe("not json"); // rejected: not cached
+    expect(await chat(msgs, { cache: true, cacheIf })).toBe('["a"]'); // accepted: cached
+    expect(await chat(msgs, { cache: true, cacheIf })).toBe('["a"]');
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    const { effectiveModel } = await import("../ai/llm");
+    expect(effectiveModel("anthropic")).toBe("claude-3-5-sonnet-latest");
+    expect(usageSummary().rows.map((r) => r.model)).toEqual(["claude-3-5-sonnet-latest"]);
+  });
+
   it("records streamed Anthropic usage from message_start / message_delta", async () => {
     setActiveProvider("anthropic");
     localStorage.setItem("lumen.ai.key.anthropic", "a-key");
