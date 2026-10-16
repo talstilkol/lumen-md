@@ -17,7 +17,7 @@
  * Node-only (uses node:fs); bin/lumen.ts is the thin argv wrapper.
  */
 import { copyFileSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
-import { basename, dirname, join, relative, resolve, sep } from "node:path";
+import { basename, dirname, isAbsolute, join, relative, resolve, sep } from "node:path";
 import { renderHtmlDocument, escapeHtml } from "../storage/exportHtml";
 
 const MD_RE = /\.(md|markdown)$/i;
@@ -117,6 +117,15 @@ export async function publishSite(
   const outAbs = resolve(outDir);
   const st = statSync(inAbs);
   const root = st.isDirectory() ? inAbs : dirname(inAbs);
+  // Writing into the source folder (or one of its ancestors) would overwrite
+  // source files -- style.css, hand-written .html -- with no way to restore
+  // them. An output folder *inside* the source is fine: walk() skips it.
+  const rel = relative(outAbs, root);
+  if (rel === "" || (!rel.startsWith("..") && !isAbsolute(rel))) {
+    throw new Error(
+      `Refusing to publish into ${outAbs}: it is the source folder or contains it. Choose a separate --out folder.`,
+    );
+  }
   const files = st.isDirectory() ? walk(root, outAbs).sort() : [inAbs];
   const siteTitle = opts.siteTitle ?? basename(root);
 

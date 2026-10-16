@@ -102,4 +102,15 @@ describe("publishSite", () => {
     expect(single.pages).toHaveLength(1);
     expect(read("one.html")).toContain("One");
   });
+
+  it("refuses to publish into the source folder or one of its ancestors", async () => {
+    write("a.md", "# A");
+    write("style.css", "body{color:red}");
+    await expect(publishSite(join(work, "src"), join(work, "src"))).rejects.toThrow(/Refusing to publish/);
+    await expect(publishSite(join(work, "src"), work)).rejects.toThrow(/Refusing to publish/);
+    await expect(publishSite(join(work, "src", "a.md"), join(work, "src"))).rejects.toThrow(/Refusing to publish/);
+    // Source files are untouched.
+    expect(readFileSync(join(work, "src", "style.css"), "utf8")).toBe("body{color:red}");
+    expect(existsSync(join(work, "src", "a.html"))).toBe(false);
+  });
 });
