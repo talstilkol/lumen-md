@@ -109,6 +109,14 @@ variables (see `src/build/cspEndpoints.ts`): set them before
 Verify after deploy: the response header and the meta tag both list your
 worker origins in `connect-src`.
 
+`connect-src` is an explicit allowlist, so endpoints users set at
+**runtime** (a LAN Ollama host in `lumen.ollama.baseUrl`, a marketplace
+backend in `lumen.marketplace.url`) only work when their origin is allowed.
+List such origins in `VITE_CSP_CONNECT_EXTRA` (comma/space separated, e.g.
+`http://192.168.1.20:11434,https://market.example.org`) at build time; an
+override whose origin isn't allowed is ignored with a console warning
+instead of failing silently.
+
 Run `npm run build && wrangler pages deploy dist` (Cloudflare) or let
 Netlify build from `netlify.toml`.
 

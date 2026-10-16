@@ -286,6 +286,34 @@ describe("aiQuota counter", () => {
     vi.unstubAllGlobals();
   });
 
+  it("re-checks the quota when a waiting command finally dispatches", async () => {
+    __setEntitlementEndpointForTesting(ENDPOINT);
+    const now = new Date();
+    localStorage.setItem(monthKey(now), String(FREE_CAPS.aiMonthlyPrompts - 1)); // 99/100
+    let resume!: () => void;
+    const dialog = new Promise<void>((r) => (resume = r));
+    let threw: unknown = null;
+    const translate = withAiQuota([
+      {
+        id: "ai.translate",
+        action: async () => {
+          await dialog;
+          try {
+            chargeAiCommandDispatch(now);
+          } catch (e) {
+            threw = e;
+          }
+        },
+      },
+    ]);
+    const running = translate[0].action() as unknown as Promise<void>; // passes the up-front check
+    expect(consumeAiPrompt(now, { silent: true })).toBe(true); // inline suggestion takes prompt 100
+    resume();
+    await running;
+    expect(threw).toBeInstanceOf(Error);
+    expect(getAiUsage(now)).toBe(FREE_CAPS.aiMonthlyPrompts); // never 101
+  });
+
   it("counts and enforces AI requests made outside the palette (commit message, voice memo, …)", () => {
     __setEntitlementEndpointForTesting(ENDPOINT);
     const now = new Date();

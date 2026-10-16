@@ -151,10 +151,19 @@ export function chargeAiCommandDispatch(now: Date = new Date()): void {
   if (armedCommands.length) {
     const pending = armedCommands.find((c) => !c.charged);
     if (!pending) return; // follow-up call of a command that already paid
+    if (gatesEnforced()) {
+      const status = aiQuotaStatus(now);
+      if (Number.isFinite(status.limit) && hasAiCredentials()) {
+        // Re-check at dispatch: another request may have used the last
+        // prompt while this command waited in its dialog.
+        if (!status.allowed) {
+          showAiToast(t("billing.aiQuota.exceeded", { limit: status.limit }), "error");
+          throw new AiQuotaExceededError(status.limit);
+        }
+        recordAiPrompt(now);
+      }
+    }
     pending.charged = true;
-    if (!gatesEnforced()) return;
-    if (!Number.isFinite(aiQuotaStatus(now).limit) || !hasAiCredentials()) return;
-    recordAiPrompt(now);
     return;
   }
   if (!gatesEnforced()) return;

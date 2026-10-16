@@ -15,6 +15,8 @@
  * cache when needed.
  */
 
+import { log } from "../lib/logger";
+import { connectAllowedByCsp } from "../lib/cspConnect";
 import { isOPFSAvailable, listWorkspace, readWorkspaceFile, writeWorkspaceFile } from "./workspace";
 import { fetchWithRetry } from "../lib/fetchRetry";
 
@@ -184,7 +186,16 @@ const BACKEND_KEY = "lumen.marketplace.url";
 export function getMarketplaceBackendUrl(): string | null {
   try {
     const fromStorage = localStorage.getItem(BACKEND_KEY);
-    if (fromStorage) return fromStorage.replace(/\/+$/, "");
+    if (fromStorage) {
+      const url = fromStorage.replace(/\/+$/, "");
+      // A runtime override the page's CSP doesn't allow would be blocked by
+      // the browser; say so and fall back instead of failing silently.
+      if (connectAllowedByCsp(url)) return url;
+      log.warn(
+        `Ignoring ${BACKEND_KEY}=${url}: its origin isn't in this deployment's CSP connect-src. ` +
+          "Set VITE_MARKETPLACE_URL (or VITE_CSP_CONNECT_EXTRA) at build time to allow it.",
+      );
+    }
   } catch {
     /* private mode */
   }

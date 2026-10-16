@@ -26,6 +26,14 @@ export const ENDPOINT_ENV_VARS = [
   "VITE_SUPABASE_URL",
 ] as const;
 
+/**
+ * Extra connect-src origins a deployment wants to allow (comma/space
+ * separated), e.g. a LAN Ollama host or a marketplace backend that users
+ * set at runtime. The supported way to reach endpoints not known as
+ * VITE_*_ENDPOINT — the policy itself stays an explicit allowlist.
+ */
+export const EXTRA_CONNECT_ENV_VAR = "VITE_CSP_CONNECT_EXTRA";
+
 /** Placeholder marker in docker/nginx.conf, replaced in the image build. */
 export const NGINX_PLACEHOLDER = "__CSP_CONNECT_EXTRA__";
 
@@ -51,6 +59,15 @@ export function endpointOrigins(env: Record<string, string | undefined>): string
     if (url.protocol !== "https:" && url.protocol !== "http:") continue;
     if (/(^|\.)example\.(com|org|net)$/i.test(url.hostname) || /placeholder|your-/i.test(raw)) continue;
     out.add(url.origin);
+  }
+  for (const raw of (env[EXTRA_CONNECT_ENV_VAR] ?? "").split(/[\s,]+/)) {
+    if (!raw) continue;
+    try {
+      const u = new URL(raw);
+      if (["https:", "http:", "wss:", "ws:"].includes(u.protocol)) out.add(u.origin);
+    } catch {
+      /* not an origin — ignore */
+    }
   }
   return [...out].sort();
 }

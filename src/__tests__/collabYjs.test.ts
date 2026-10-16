@@ -469,8 +469,12 @@ describe("seeding with a persistent (y-websocket) server", () => {
       expect(session.websocketProvider).not.toBeNull();
       (session.provider as unknown as MockProvider).emit("synced", [{ synced: true }]);
       expect(session.ytext.toString()).toBe("");
+      const provider = session.websocketProvider as unknown as { destroy: ReturnType<typeof vi.fn> };
       vi.advanceTimersByTime(mod.PERSISTENT_SYNC_TIMEOUT_MS);
       expect(session.ytext.toString()).toBe("local draft");
+      // Torn down, so a later reconnect can't merge server history into the seeded doc.
+      expect(provider.destroy).toHaveBeenCalled();
+      expect(session.websocketProvider).toBeNull();
       session.destroy();
     } finally {
       vi.useRealTimers();

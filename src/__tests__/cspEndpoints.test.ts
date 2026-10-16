@@ -66,3 +66,12 @@ describe("applied to the real policy files", () => {
     expect(readFileSync(resolve(ROOT, "docker/Dockerfile.web"), "utf8")).toContain(NGINX_PLACEHOLDER);
   });
 });
+
+describe("VITE_CSP_CONNECT_EXTRA", () => {
+  it("adds explicitly listed origins (http/https/ws/wss) and ignores junk", async () => {
+    const { endpointOrigins } = await import("../build/cspEndpoints");
+    expect(
+      endpointOrigins({ VITE_CSP_CONNECT_EXTRA: "http://192.168.1.20:11434, https://market.acme.dev/api wss://collab.acme.dev javascript:x nope" }),
+    ).toEqual(["http://192.168.1.20:11434", "https://market.acme.dev", "wss://collab.acme.dev"]);
+  });
+});

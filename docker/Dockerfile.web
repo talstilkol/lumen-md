@@ -24,6 +24,8 @@ ARG VITE_SUPABASE_ANON_KEY
 # the on-prem persistent collab service.
 ARG VITE_WEBRTC_SIGNALING_URL
 ARG VITE_YJS_WEBSOCKET_URL
+# Extra connect-src origins (runtime overrides: LAN Ollama, marketplace…).
+ARG VITE_CSP_CONNECT_EXTRA
 RUN npm run build
 
 FROM nginx:1.27-alpine

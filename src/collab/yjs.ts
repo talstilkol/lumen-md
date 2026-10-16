@@ -312,6 +312,18 @@ export function connectCollab(
         giveUp = null;
         p.off?.("sync", onSync);
         p.off?.("connection-error" as "sync", onError);
+        if (state === "none") {
+          // Declared unavailable: tear it down. y-websocket reconnects on its
+          // own, and a later reconnect would merge the server's history into
+          // a document we may now seed — two independent docs, corrupted room.
+          // This session continues WebRTC-only.
+          try {
+            p.destroy();
+          } catch {
+            /* already gone */
+          }
+          if (websocketProvider === p) websocketProvider = null;
+        }
         settlePersistent(state);
       };
       const onSync = (isSynced: boolean) => {
