@@ -46,7 +46,7 @@ export async function generateOutline(
           content: `Propose headings for this markdown document (\${lines.length} lines):\n\n${text.slice(0, 4000)}`,
         },
       ],
-      { maxTokens: 600, temperature: 0.2, cache: true },
+      { maxTokens: 600, temperature: 0.2, cache: true, tier: "light" },
     );
 
     const json = extractJsonArray(response);

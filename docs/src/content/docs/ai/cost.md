@@ -53,3 +53,25 @@ With Claude, long system prompts and long documents sent as context
 A follow-up request on the same document within about five minutes reads
 that prefix at roughly 10% of the normal input price. The usage report
 shows these cache reads separately.
+
+## Cost mode
+
+Command: `AI: Cost Mode (Economy / Balanced / Quality)…`.
+
+| Mode | Small tasks¹ | Other requests | Context per question² |
+|---|---|---|---|
+| Economy | Small model | Small model | ~2,000 tokens |
+| Balanced (default) | Small model | Your chosen model | ~5,000 tokens |
+| Quality | Your chosen model | Your chosen model | ~12,000 tokens |
+
+¹ Tags, heading suggestions, completions and commit messages. The small
+models are GPT-4o mini, Claude Haiku 4.5, Gemini 2.5 Flash and Mistral
+Small. Local providers (Ollama, WebGPU) are never rerouted, and a
+request that names its own model is left alone.
+
+² **Ask Workspace** reads the matching notes in full, then sends only
+the parts relevant to your question. Each note is split at its
+headings, the sections are ranked against the question (BM25), and the
+best ones are kept within the budget. Every note also sends its heading
+outline, so the model still sees how it is structured. Notes that
+already fit are sent unchanged.
