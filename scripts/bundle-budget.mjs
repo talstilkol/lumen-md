@@ -9,6 +9,9 @@
  * The budgets reflect what Lumen ships *today* with a small headroom, so we
  * catch rgressions without rewriting the file every time we add a feature.
  * Update the table when an intentional new feature lands.
+ *
+ * `--json <file>` also writes the gzipped size per budget class (summed
+ * over its files) and in total, for scripts/bundle-diff.mjs.
  */
 
 import { promises as fs } from "node:fs";
@@ -96,6 +99,8 @@ async function main() {
 
   let failed = 0;
   let total = 0;
+  /** Gzipped KB per budget class, for --json. */
+  const classes = {};
   console.log(
     "\n  Budget                  Actual          File\n" +
       "  ─────────               ─────────       ────",
@@ -108,6 +113,9 @@ async function main() {
     total += kb;
     const rule = BUDGETS.find((r) => r.pattern.test(file));
     if (!rule) continue;
+    const c = (classes[rule.name] ??= { kb: 0, files: 0 });
+    c.kb += kb;
+    c.files++;
     const ok = kb <= rule.budgetKb;
     if (!ok) failed++;
     const mark = ok ? "✓" : "✗";
@@ -117,6 +125,12 @@ async function main() {
   }
 
   console.log(`\n  Total gzipped: ${format(total)}`);
+  const jsonAt = process.argv.indexOf("--json");
+  if (jsonAt !== -1 && process.argv[jsonAt + 1]) {
+    const round = (x) => Math.round(x * 10) / 10;
+    const out = { totalKb: round(total), classes: Object.fromEntries(Object.entries(classes).map(([k, v]) => [k, { kb: round(v.kb), files: v.files }])) };
+    await fs.writeFile(process.argv[jsonAt + 1], JSON.stringify(out, null, 2) + "\n");
+  }
   if (failed > 0) {
     console.error(
       `\n✗ ${failed} chunk${failed === 1 ? "" : "s"} exceeded its budget. ` +

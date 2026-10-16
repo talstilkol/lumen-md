@@ -13,6 +13,13 @@ const sse = (events: unknown[]) =>
   new Response(events.map((e) => `data: ${JSON.stringify(e)}\n\n`).join(""), { status: 200 });
 
 describe("prices and cost", () => {
+  it("estimates tokens by script", async () => {
+    const { estimateTokens } = await import("../ai/usage");
+    expect(estimateTokens("abcdefgh")).toBe(2);
+    expect(estimateTokens("שלום עולם")).toBe(5); // 8 Hebrew letters / 2 + 1 space / 4
+    expect(estimateTokens("你好世界")).toBe(4);
+  });
+
   it("matches the longest model prefix and prices cache reads / writes", () => {
     expect(priceFor("openai", "gpt-4o-mini-2024-07-18")).toMatchObject({ input: 0.15, output: 0.6, cachedInput: 0.075 });
     expect(priceFor("openai", "gpt-4o-2024-08-06")).toMatchObject({ input: 2.5, output: 10, cachedInput: 1.25 });
