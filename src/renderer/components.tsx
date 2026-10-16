@@ -377,7 +377,19 @@ function normalize(src: string): string {
  */
 function LumenInput(props: React.InputHTMLAttributes<HTMLInputElement>) {
   if (props.type === "checkbox") {
-    return <input {...props} aria-label={props["aria-label"] ?? "task"} />;
+    // The fast first-paint pipeline and the full pipeline don't agree on
+    // whether an unchecked task carries `checked={false}` or no `checked` at
+    // all; React then sees the same input flip controlled → uncontrolled
+    // when the full render swaps in. Always pass a boolean so it stays
+    // controlled (read-only unless a handler is supplied).
+    return (
+      <input
+        {...props}
+        checked={Boolean(props.checked)}
+        readOnly={props.onChange ? props.readOnly : true}
+        aria-label={props["aria-label"] ?? "task"}
+      />
+    );
   }
   return <input {...props} />;
 }

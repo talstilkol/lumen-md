@@ -98,3 +98,24 @@ describe("<Preview> first paint", () => {
     expect(await findByTestId("mermaid-hydrated", {}, { timeout: 3000 })).toBeTruthy();
   });
 });
+
+describe("task-list checkboxes across the fast → full pipeline swap", () => {
+  it("stay controlled (no controlled→uncontrolled React warning) and keep their state", async () => {
+    // Raw HTML switches the full pass to rehype-raw, which re-parses the tree
+    // and drops `checked={false}` — the case that warned in the live app.
+    const md = "<details><summary>More</summary>hidden</details>\n\n- [ ] open task\n- [x] done task\n";
+    const errors = vi.spyOn(console, "error").mockImplementation(() => {});
+    try {
+      const fast = renderMarkdownFast(md);
+      const full = await renderMarkdown(md, () => false);
+      const { container, rerender } = render(<div>{fast}</div>);
+      rerender(<div>{full}</div>);
+      const boxes = [...container.querySelectorAll<HTMLInputElement>('input[type="checkbox"]')];
+      expect(boxes.map((b) => b.checked)).toEqual([false, true]);
+      const msgs = errors.mock.calls.map((c) => String(c[0]));
+      expect(msgs.filter((m) => /controlled input to be uncontrolled|uncontrolled input to be controlled/.test(m))).toEqual([]);
+    } finally {
+      errors.mockRestore();
+    }
+  });
+});
