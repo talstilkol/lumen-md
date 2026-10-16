@@ -3,7 +3,7 @@ import { parseJSONTable } from "../data/csv";
 import type { DataSet } from "../data/csv";
 import { suggestCharts, type ChartSuggestion } from "../data/suggest";
 import { DataTable } from "./DataTable";
-import { EChart } from "./EChart";
+import { ChartSuggestions } from "./ChartSuggestions";
 import { Table2, BarChart3, Sparkles, RefreshCw } from "lucide-react";
 import { useFetchSource } from "./useFetchSource";
 
@@ -29,7 +29,6 @@ export default function JsonTableBlock({ source, meta }: Props) {
   );
 
   const [view, setView] = useState<"table" | "chart">("table");
-  const [activeIdx, setActiveIdx] = useState(0);
 
   if (fetchError) {
     return (
@@ -51,7 +50,6 @@ export default function JsonTableBlock({ source, meta }: Props) {
   }
 
   const data = result.data;
-  const active = suggestions[activeIdx];
   const titleMatch = meta?.match(/title=["']([^"']+)["']/);
 
   return (
@@ -110,32 +108,8 @@ export default function JsonTableBlock({ source, meta }: Props) {
         </div>
       </div>
       {view === "table" && <DataTable data={data} />}
-      {view === "chart" && active && (
-        <div>
-          <div
-            style={{
-              display: "flex",
-              gap: 6,
-              padding: "0.5rem 0.85rem",
-              borderBottom: "1px solid hsl(var(--border))",
-              flexWrap: "wrap",
-              background: "hsl(var(--bg-subtle))",
-            }}
-          >
-            {suggestions.map((s, i) => (
-              <button
-                key={i}
-                className={`chart-block-tab ${i === activeIdx ? "active" : ""}`}
-                onClick={() => setActiveIdx(i)}
-              >
-                {s.label}
-              </button>
-            ))}
-          </div>
-          <div style={{ padding: "0.5rem" }}>
-            <EChart option={active.option} height={360} />
-          </div>
-        </div>
+      {view === "chart" && suggestions.length > 0 && (
+        <ChartSuggestions suggestions={suggestions} />
       )}
     </div>
   );

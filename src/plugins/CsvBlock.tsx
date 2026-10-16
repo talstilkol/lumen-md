@@ -4,6 +4,7 @@ import type { DataSet } from "../data/csv";
 import { suggestCharts, type ChartSuggestion } from "../data/suggest";
 import { DataTable } from "./DataTable";
 import { EChart } from "./EChart";
+import { ChartSuggestions } from "./ChartSuggestions";
 import { chat, parseJsonResponse } from "../ai/llm";
 import { consumeAiPrompt } from "../billing/aiQuota";
 import { PROMPTS } from "../ai/prompts";
@@ -41,7 +42,6 @@ export default function CsvBlock({ source, lang, meta }: Props) {
       ? "chart"
       : "table",
   );
-  const [activeIdx, setActiveIdx] = useState(0);
   const [aiLoading, setAiLoading] = useState(false);
   const [aiOption, setAiOption] = useState<any>(null);
 
@@ -64,7 +64,6 @@ export default function CsvBlock({ source, lang, meta }: Props) {
     );
   }
 
-  const active = suggestions[activeIdx];
   const titleMatch = meta?.match(/title=["']([^"']+)["']/);
 
   return (
@@ -149,32 +148,8 @@ export default function CsvBlock({ source, lang, meta }: Props) {
 
       {view === "table" && <DataTable data={data} />}
 
-      {view === "chart" && active && (
-        <div>
-          <div
-            style={{
-              display: "flex",
-              gap: 6,
-              padding: "0.5rem 0.85rem",
-              borderBottom: "1px solid hsl(var(--border))",
-              flexWrap: "wrap",
-              background: "hsl(var(--bg-subtle))",
-            }}
-          >
-            {suggestions.map((s, i) => (
-              <button
-                key={i}
-                className={`chart-block-tab ${i === activeIdx ? "active" : ""}`}
-                onClick={() => setActiveIdx(i)}
-              >
-                {iconFor(s.kind)} {s.label}
-              </button>
-            ))}
-          </div>
-          <div style={{ padding: "0.5rem" }}>
-            <EChart option={active.option} height={360} />
-          </div>
-        </div>
+      {view === "chart" && suggestions.length > 0 && (
+        <ChartSuggestions suggestions={suggestions} />
       )}
 
       {view === "ai-chart" && (
@@ -196,21 +171,3 @@ export default function CsvBlock({ source, lang, meta }: Props) {
   );
 }
 
-function iconFor(kind: string): string {
-  switch (kind) {
-    case "line":
-      return "📈";
-    case "bar":
-      return "📊";
-    case "pie":
-      return "🥧";
-    case "scatter":
-      return "✦";
-    case "radar":
-      return "◆";
-    case "heatmap":
-      return "▦";
-    default:
-      return "•";
-  }
-}
