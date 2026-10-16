@@ -582,11 +582,29 @@ export const suggestTracking = $prose(
         // Typing over a selection: some browsers (Firefox) report it as the
         // minimal DOM diff ("Hello" → "H" deletes only "ello"), which would
         // track the wrong range. Replace the whole selection instead.
+        // Typing over a selection is taken before the browser edits the DOM:
+        // Firefox otherwise turns "H" over "Hello" into a deletion of "ello"
+        // (a DOM diff), which can't be told apart from a real deletion.
+        handleDOMEvents: {
+          beforeinput: (view, event) => {
+            const e = event as InputEvent;
+            if (!config.enabled() || e.inputType !== "insertText" || !e.data || view.composing) return false;
+            const sel = view.state.selection;
+            if (sel.empty) return false;
+            e.preventDefault();
+            view.dispatch(view.state.tr.insertText(e.data, sel.from, sel.to).scrollIntoView());
+            return true;
+          },
+        },
         handleTextInput: (view, from, to, text) => {
           if (!config.enabled()) return false;
           const sel = view.state.selection;
           if (sel.empty || from < sel.from || to > sel.to) return false;
-          const tr = view.state.tr.insertText(text, sel.from, sel.to);
+          // The reported range is a diff: the selected text outside it was
+          // kept in the DOM (typing "H" over "Hello" arrives as "ello" → "").
+          const doc = view.state.doc;
+          const typed = doc.textBetween(sel.from, from, "", "") + text + doc.textBetween(to, sel.to, "", "");
+          const tr = view.state.tr.insertText(typed, sel.from, sel.to);
           view.dispatch(tr.scrollIntoView());
           return true;
         },

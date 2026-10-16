@@ -181,10 +181,13 @@ describe("tracking edits while suggesting", () => {
     const e = await open("Hello world.", true);
     const from = e.at("Hello");
     e.select(from, from + 5);
-    // Firefox: typing "i" over "Hello" can arrive as a diff over "ello" only.
-    const handled = e.view.someProp("handleTextInput", (f) => f(e.view, from + 1, from + 5, "i", () => e.view.state.tr));
+    // Firefox: typing "H" over "Hello" arrives as a diff that deletes "ello"
+    // (the "H" already matches).
+    const handled = e.view.someProp("handleTextInput", (f) => f(e.view, from + 1, from + 5, "", () => e.view.state.tr));
     expect(handled).toBe(true);
-    expect(e.md()).toBe("{~~Hello~>i~~}{>>@Tal<<} world.");
+    expect(e.md()).toBe("{~~Hello~>H~~}{>>@Tal<<} world.");
+    e.type("i");
+    expect(e.md()).toBe("{~~Hello~>Hi~~}{>>@Tal<<} world.");
   });
 
   it("a block join is restored (not inlined) and existing deletions keep their author", async () => {
