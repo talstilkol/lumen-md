@@ -26,6 +26,7 @@
  * (when the archive ships one) so the user can see what the original looked
  * like.
  */
+import { parseInertDocument } from "../lib/trustedTypes";
 import { unzip } from "./zip";
 
 /* ─── Snappy (raw block format) ─────────────────────────────────────── */
@@ -404,7 +405,10 @@ function gridToMarkdown(model: Element): string | null {
 
 /** Convert legacy iWork XML (index.xml / index.apxl) to Markdown. */
 export function iworkXmlToMarkdown(xml: string): string {
-  const doc = new DOMParser().parseFromString(xml, "application/xml");
+  // Through the inert Trusted Types helper: under `require-trusted-types-for`
+  // a plain string would hit the default (DOMPurify) policy and lose the
+  // proprietary sf:*/key:* elements this importer reads.
+  const doc = parseInertDocument(xml, "application/xml");
   if (doc.getElementsByTagName("parsererror").length) {
     return "> ⚠️ iWork: the document XML could not be parsed.";
   }
