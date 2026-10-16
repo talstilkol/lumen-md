@@ -230,3 +230,62 @@ describe("POST /webhook persistence", () => {
     expect(writes).toHaveLength(0);
   });
 });
+
+describe("Team plans bought by SSO organization members", () => {
+  const SECRET = "billing-token-secret-0123456789abcdef";
+  const ssoEnv: Env = { ...env, SSO_TOKEN_SECRET: SECRET };
+  async function ssoBearer() {
+    const { signJwt } = await import("../../edge-workers/auth/worker");
+    const { SSO_TOKEN_ISS, SSO_TOKEN_AUD } = await import("../../edge-workers/shared/ssoToken");
+    const now = Math.floor(Date.now() / 1000);
+    return signJwt({ iss: SSO_TOKEN_ISS, aud: SSO_TOKEN_AUD, sub: "user_01", org: "org_9", iat: now, exp: now + 300 }, SECRET);
+  }
+  function stub(rows: Record<string, unknown[]> = {}, sub: unknown = {}) {
+    const stripeCalls: { url: string; body: URLSearchParams }[] = [];
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+        const url = String(input);
+        if (url.includes("/rest/v1/entitlements")) {
+          const id = decodeURIComponent(new URL(url).searchParams.get("user_id")!.replace(/^eq\./, ""));
+          return new Response(JSON.stringify(rows[id] ?? []), { status: 200 });
+        }
+        if (url.startsWith("https://api.stripe.com/v1/subscriptions/")) return new Response(JSON.stringify(sub), { status: 200 });
+        stripeCalls.push({ url, body: new URLSearchParams(String(init?.body ?? "")) });
+        return new Response(JSON.stringify({ url: "https://stripe.test/x", id: "cs_1" }), { status: 200 });
+      }),
+    );
+    return stripeCalls;
+  }
+  const req = (path: string, token: string, body?: unknown) =>
+    new Request(`https://billing.test${path}`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json", Origin: "https://lumen.app" },
+      body: JSON.stringify(body ?? {}),
+    });
+
+  it("entitles the organization's row for Team, the member's own row for Pro", async () => {
+    const tok = await ssoBearer();
+    let calls = stub();
+    await worker.fetch(req("/checkout", tok, { priceId: "price_team_m", successUrl: "https://lumen.app/ok", cancelUrl: "https://lumen.app/no" }), ssoEnv);
+    expect(calls[0].body.get("metadata[userId]")).toBe("workos-org:org_9");
+    expect(calls[0].body.get("client_reference_id")).toBe("workos-org:org_9");
+    expect(calls[0].body.get("subscription_data[metadata][purchaser]")).toBe("workos:user_01");
+    calls = stub();
+    await worker.fetch(req("/checkout", tok, { priceId: "price_pro_m", successUrl: "https://lumen.app/ok", cancelUrl: "https://lumen.app/no" }), ssoEnv);
+    expect(calls[0].body.get("metadata[userId]")).toBe("workos:user_01");
+  });
+
+  it("opens the org's billing portal only for the member who purchased it", async () => {
+    const tok = await ssoBearer();
+    const orgRow = { "workos-org:org_9": [{ stripe_customer_id: "cus_org", stripe_subscription_id: "sub_org", status: "active" }] };
+    let calls = stub(orgRow, { metadata: { purchaser: "workos:user_01" } });
+    let res = await worker.fetch(req("/portal", tok), ssoEnv);
+    expect(res.status).toBe(200);
+    expect(calls[0].body.get("customer")).toBe("cus_org");
+    calls = stub(orgRow, { metadata: { purchaser: "workos:someone_else" } });
+    res = await worker.fetch(req("/portal", tok), ssoEnv);
+    expect(res.status).toBe(400);
+    expect(calls).toHaveLength(0);
+  });
+});

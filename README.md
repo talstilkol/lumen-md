@@ -241,6 +241,11 @@ user and their organization from it, so no shared audit secret ships in the
 browser bundle. Configure the worker with `SUPABASE_URL` + `SUPABASE_ANON_KEY`
 and/or `SSO_TOKEN_SECRET` (= the SSO worker's `BILLING_TOKEN_SECRET`).
 `AUDIT_SERVICE_SECRET` is optional and only for trusted back-ends.
+Reading the log is authorized in the worker: for an organization, only
+WorkOS roles in `AUDIT_ADMIN_ROLES` (default `admin`; set
+`AUDIT_ALLOW_ALL_MEMBERS=1` if your org has no roles), and — when
+`ENTITLEMENT_URL` points at the billing worker's `/entitlements` — only on an
+active Team plan.
 
 ### Self-hosting (Docker Compose)
 

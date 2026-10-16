@@ -14,6 +14,8 @@ export interface SsoClaims {
   sub: string;
   /** WorkOS organization id, when the session came from an org login. */
   org?: string;
+  /** WorkOS role slug in that organization (e.g. "admin"), when configured. */
+  role?: string;
 }
 
 const te = new TextEncoder();
@@ -36,7 +38,7 @@ export async function verifySsoToken(
   const parts = token.split(".");
   if (parts.length !== 3) return null;
   let head: { alg?: unknown };
-  let payload: { iss?: unknown; aud?: unknown; sub?: unknown; org?: unknown; exp?: unknown };
+  let payload: { iss?: unknown; aud?: unknown; sub?: unknown; org?: unknown; role?: unknown; exp?: unknown };
   try {
     head = JSON.parse(new TextDecoder().decode(b64urlToBytes(parts[0])));
     payload = JSON.parse(new TextDecoder().decode(b64urlToBytes(parts[1])));
@@ -58,5 +60,6 @@ export async function verifySsoToken(
   return {
     sub: payload.sub,
     ...(typeof payload.org === "string" && payload.org ? { org: payload.org } : {}),
+    ...(typeof payload.role === "string" && payload.role ? { role: payload.role } : {}),
   };
 }

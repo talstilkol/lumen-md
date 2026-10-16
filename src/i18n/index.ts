@@ -1157,7 +1157,12 @@ export async function initLocale(storageKey = "lumen-md"): Promise<Locale> {
   } catch {
     /* corrupt storage — stay on English */
   }
-  if (locale !== "en") await loadLocale(locale);
+  if (locale !== "en") {
+    await loadLocale(locale);
+    // The chunk couldn't be fetched (offline, missing): don't apply e.g.
+    // `lang="he"` + RTL over English strings — fall back to English.
+    if (!isLocaleLoaded(locale)) locale = "en";
+  }
   applyLocale(locale);
   return locale;
 }

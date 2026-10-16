@@ -100,6 +100,22 @@ describe("A7 lever 4 — only English ships eagerly", () => {
     localStorage.removeItem("lumen-md");
   });
 
+  it("initLocale() falls back to English (LTR) when the locale chunk can't load", async () => {
+    vi.doMock("../i18n/locales/he.json", () => {
+      throw new Error("offline");
+    });
+    try {
+      const i18n = await freshI18n();
+      localStorage.setItem("lumen-md", JSON.stringify({ state: { locale: "he" }, version: 0 }));
+      expect(await i18n.initLocale()).toBe("en");
+      expect(i18n.getLocale()).toBe("en");
+      expect(document.documentElement.dir).not.toBe("rtl");
+    } finally {
+      vi.doUnmock("../i18n/locales/he.json");
+      localStorage.removeItem("lumen-md");
+    }
+  });
+
   it("initLocale() defaults to English on missing / corrupt / unknown storage", async () => {
     const i18n = await freshI18n();
     localStorage.removeItem("lumen-md");

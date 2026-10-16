@@ -133,4 +133,26 @@ describe("publishSite", () => {
     );
     expect(res.pages.map((p) => p.source).sort()).toEqual(["Notes.md", "guide.md"]);
   });
+
+  it("skips assets under a folder named like a generated page instead of aborting (ENOTDIR)", async () => {
+    write("guide.md", "# Guide");
+    write("guide.html/diagram.png", new Uint8Array([1, 2]));
+    write("ok/pic.png", new Uint8Array([3]));
+    const res = await publishSite(join(work, "src"), join(work, "out"));
+    expect(read("guide.html")).toContain("Guide");
+    expect(res.assets).toEqual(["ok/pic.png"]);
+    expect(res.skipped).toEqual([
+      expect.objectContaining({ source: "guide.html/diagram.png", reason: expect.stringContaining("guide.md") }),
+    ]);
+  });
+
+  it("writes a root INDEX.md / Index.md as lowercase index.html", async () => {
+    write("Index.md", "# Home page");
+    write("a.md", "# A");
+    const res = await publishSite(join(work, "src"), join(work, "out"), { siteTitle: "Site" });
+    expect(res.pages.find((p) => p.source === "Index.md")?.output).toBe("index.html");
+    expect(read("index.html")).toContain("Home page");
+    expect(read("index.html")).toContain('<a href="a.html">A</a>');
+    expect(existsSync(join(work, "out", "Index.html")) && !existsSync(join(work, "out", "index.html"))).toBe(false);
+  });
 });

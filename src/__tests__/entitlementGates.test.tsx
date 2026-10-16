@@ -259,4 +259,19 @@ describe("aiQuota counter", () => {
     await agent[0].action();
     expect(getAiUsage(now)).toBe(1);
   });
+
+  it("a background request counted by its caller doesn't also bill a command waiting in a dialog", async () => {
+    __setEntitlementEndpointForTesting(ENDPOINT);
+    const now = new Date();
+    let finishDialog!: () => void;
+    const dialog = new Promise<void>((r) => (finishDialog = r));
+    const translate = withAiQuota([{ id: "ai.translate", action: () => dialog }]);
+    const running = translate[0].action() as unknown as Promise<void>;
+    // Inline suggestion fires meanwhile: counts itself, then dispatches.
+    expect(consumeAiPrompt(now, { silent: true })).toBe(true);
+    chargeAiCommandDispatch(now);
+    finishDialog(); // user cancels the translation
+    await running;
+    expect(getAiUsage(now)).toBe(1);
+  });
 });

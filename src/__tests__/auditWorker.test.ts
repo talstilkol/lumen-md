@@ -94,11 +94,42 @@ describe("audit worker auth", () => {
 
   it("lists only the caller's scope and forbids other orgs", async () => {
     const { env, queries } = makeEnv();
-    const tok = await ssoToken({ sub: "user_01", org: "org_acme" });
+    const tok = await ssoToken({ sub: "user_01", org: "org_acme", role: "admin" });
     expect((await worker.fetch(get(tok), env)).status).toBe(200);
     expect(queries[0][0]).toBe("org_acme");
     expect((await worker.fetch(get(tok, "?orgId=org_acme"), env)).status).toBe(200);
     expect((await worker.fetch(get(tok, "?orgId=org_other"), env)).status).toBe(403);
+  });
+
+  it("lets only org admins read an organization's log (members can still write)", async () => {
+    const { env, inserts } = makeEnv();
+    const member = await ssoToken({ sub: "user_02", org: "org_acme", role: "member" });
+    const noRole = await ssoToken({ sub: "user_03", org: "org_acme" });
+    expect((await worker.fetch(get(member), env)).status).toBe(403);
+    expect((await worker.fetch(get(noRole), env)).status).toBe(403);
+    expect((await worker.fetch(post(member, { action: "doc.publish" }), env)).status).toBe(200);
+    expect(inserts).toHaveLength(1);
+    const { env: open } = makeEnv({ AUDIT_ALLOW_ALL_MEMBERS: "1" });
+    expect((await worker.fetch(get(member), open)).status).toBe(200);
+    const { env: custom } = makeEnv({ AUDIT_ADMIN_ROLES: "owner, auditor" });
+    expect((await worker.fetch(get(await ssoToken({ sub: "u", org: "o", role: "auditor" })), custom)).status).toBe(200);
+  });
+
+  it("requires an active Team plan when billing is configured", async () => {
+    const plan = { tier: "pro", status: "active" };
+    const seen: string[] = [];
+    vi.stubGlobal("fetch", vi.fn(async (_input: RequestInfo | URL, init?: RequestInit) => {
+      seen.push(new Headers(init?.headers).get("Authorization") ?? "");
+      return new Response(JSON.stringify({ entitlement: plan }), { status: 200 });
+    }));
+    const { env } = makeEnv({ ENTITLEMENT_URL: "https://billing.test/entitlements" });
+    const tok = await ssoToken({ sub: "user_01", org: "org_acme", role: "admin" });
+    expect((await worker.fetch(get(tok), env)).status).toBe(403);
+    expect(seen[0]).toBe(`Bearer ${tok}`); // checked with the caller's own token
+    plan.tier = "team";
+    expect((await worker.fetch(get(tok), env)).status).toBe(200);
+    plan.status = "canceled";
+    expect((await worker.fetch(get(tok), env)).status).toBe(403);
   });
 
   it("lets a trusted back-end with AUDIT_SERVICE_SECRET name the user and org", async () => {

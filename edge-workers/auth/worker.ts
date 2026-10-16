@@ -75,6 +75,8 @@ export interface SessionUser {
   name?: string;
   provider: "workos";
   orgId?: string;
+  /** WorkOS role slug within the organization (e.g. "admin"), when configured. */
+  role?: string;
 }
 
 export const SESSION_COOKIE = "lumen_session";
@@ -314,6 +316,8 @@ interface WorkOSProfileResponse {
     last_name?: string | null;
     organization_id?: string | null;
     connection_id?: string;
+    /** Role assigned in WorkOS (SSO / directory group role mapping), if configured. */
+    role?: { slug?: string | null } | null;
   };
 }
 
@@ -365,6 +369,7 @@ async function handleCallback(req: Request, env: Env, url: URL): Promise<Respons
     ...(p.email ? { email: p.email } : {}),
     ...(name ? { name } : {}),
     ...(p.organization_id ? { orgId: p.organization_id } : {}),
+    ...(p.role?.slug ? { role: p.role.slug } : {}),
   };
   const ttl = Number(env.SESSION_TTL_SECONDS) > 0 ? Number(env.SESSION_TTL_SECONDS) : DEFAULT_SESSION_TTL;
   const now = Math.floor(Date.now() / 1000);
@@ -402,6 +407,8 @@ async function handleToken(req: Request, env: Env, cors: Record<string, string>)
       aud: BILLING_TOKEN_AUD,
       sub: user.id,
       ...(user.orgId ? { org: user.orgId } : {}),
+      // Lets Lumen's workers authorize org-admin actions (audit log).
+      ...(user.role ? { role: user.role } : {}),
       iat: now,
       exp,
     },

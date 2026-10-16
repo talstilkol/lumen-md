@@ -91,6 +91,7 @@ export function consumeAiPrompt(now: Date = new Date(), opts: { silent?: boolean
     return false;
   }
   recordAiPrompt(now);
+  prepaid.push(now.getTime());
   return true;
 }
 
@@ -124,9 +125,25 @@ export function isAiPromptCommand(id: string): boolean {
  */
 const armedCommands: object[] = [];
 
+/**
+ * Prompts already counted by direct callers (`consumeAiPrompt` right before
+ * their own chat() — inline suggestions, Ask Workspace, …). Their dispatch
+ * must use that credit, not bill a palette command that happens to be
+ * waiting in a dialog. Credits expire, so one whose request never went out
+ * can't absorb a later command's charge for long.
+ */
+const prepaid: number[] = [];
+const PREPAID_TTL_MS = 15_000;
+
 /** Called by the LLM layer right before a request is sent. */
 export function chargeAiCommandDispatch(now: Date = new Date()): void {
-  // Oldest running command that hasn't dispatched yet pays for this call.
+  while (prepaid.length && now.getTime() - prepaid[0] > PREPAID_TTL_MS) prepaid.shift();
+  if (prepaid.length) {
+    prepaid.shift(); // already counted by its caller
+    return;
+  }
+  // Otherwise the oldest running palette command that hasn't dispatched
+  // yet pays for this call (palette commands are modal, one at a time).
   if (armedCommands.shift() === undefined) return;
   if (!gatesEnforced()) return;
   if (!Number.isFinite(aiQuotaStatus(now).limit) || !hasAiCredentials()) return;

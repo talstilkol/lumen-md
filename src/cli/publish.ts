@@ -145,23 +145,45 @@ export async function publishSite(
   // Output paths are compared case-insensitively: on macOS/Windows file
   // systems `Guide.html` and `guide.html` are the same file.
   const key = (p: string) => p.toLowerCase();
-  const reserved = new Map<string, string>([[key("style.css"), "the site stylesheet"]]);
+  // Files we will write, and the directories their paths need. A new path
+  // collides with a reserved file at the same path, with a reserved file
+  // standing where one of its ancestor directories must go (`guide.html`
+  // vs `guide.html/img.png`), or with a directory a reserved file needs.
+  const reserved = new Map<string, string>();
+  const reservedDirs = new Map<string, string>();
+  const ancestors = (p: string) => {
+    const parts = key(p).split("/");
+    return parts.slice(0, -1).map((_, i) => parts.slice(0, i + 1).join("/"));
+  };
+  const collision = (p: string): string | undefined =>
+    reserved.get(key(p)) ??
+    reservedDirs.get(key(p)) ??
+    ancestors(p).map((a) => reserved.get(a)).find(Boolean);
+  const reserve = (p: string, what: string) => {
+    reserved.set(key(p), what);
+    for (const a of ancestors(p)) if (!reservedDirs.has(a)) reservedDirs.set(a, `a folder needed by ${what}`);
+  };
+  reserve("style.css", "the site stylesheet");
 
   const pages: (PublishPage & { md: string })[] = [];
   for (const f of mdFiles) {
     const rel = toPosix(relative(root, f));
-    const output = rel.replace(MD_RE, ".html");
-    const taken = reserved.get(key(output));
+    let output = rel.replace(MD_RE, ".html");
+    // The root index is always written as lowercase index.html — the name
+    // the navigation links and PublishResult.index use on case-sensitive
+    // hosts too.
+    if (output.toLowerCase() === "index.html") output = "index.html";
+    const taken = collision(output);
     if (taken) {
       skipped.push({ source: rel, output, reason: `collides with ${taken}` });
       continue;
     }
-    reserved.set(key(output), `the page generated from ${rel}`);
+    reserve(output, `the page generated from ${rel}`);
     const md = readFileSync(f, "utf8");
     pages.push({ source: rel, output, title: pageTitle(md, rel), md });
   }
-  if (!reserved.has(key("index.html"))) reserved.set(key("index.html"), "the generated page index");
-  const rootIndex = pages.find((p) => p.output.toLowerCase() === "index.html");
+  if (!reserved.has(key("index.html"))) reserve("index.html", "the generated page index");
+  const rootIndex = pages.find((p) => p.output === "index.html");
   const listed = pages
     .filter((p) => p !== rootIndex)
     .sort((a, b) => a.output.localeCompare(b.output));
@@ -201,11 +223,12 @@ export async function publishSite(
   const assetRels: string[] = [];
   for (const a of assets) {
     const rel = toPosix(relative(root, a));
-    const taken = reserved.get(key(rel));
+    const taken = collision(rel);
     if (taken) {
       skipped.push({ source: rel, output: rel, reason: `collides with ${taken}` });
       continue;
     }
+    reserve(rel, `the asset ${rel}`);
     const target = join(outAbs, ...rel.split("/"));
     mkdirSync(dirname(target), { recursive: true });
     copyFileSync(a, target);

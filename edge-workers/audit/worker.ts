@@ -27,6 +27,9 @@
  *   wrangler secret put SUPABASE_URL / SUPABASE_ANON_KEY   (Supabase auth)
  *   wrangler secret put SSO_TOKEN_SECRET                    (= the SSO worker's BILLING_TOKEN_SECRET)
  *   wrangler secret put AUDIT_SERVICE_SECRET                (optional, server-to-server only)
+ *   ENTITLEMENT_URL      = billing worker /entitlements (Team plan check)
+ *   AUDIT_ADMIN_ROLES    = WorkOS role slugs that may read an org's log (default "admin")
+ *   AUDIT_ALLOW_ALL_MEMBERS=1 to let every org member read it
  */
 
 import { verifySsoToken } from "../shared/ssoToken";
@@ -38,6 +41,16 @@ export interface Env {
   SUPABASE_ANON_KEY?: string;
   SSO_TOKEN_SECRET?: string;
   AUDIT_SERVICE_SECRET?: string;
+  /**
+   * The billing worker's `/entitlements` URL. When set, reading the log
+   * requires an active Team plan (checked with the caller's own token).
+   * Unset = self-hosted / no billing: no plan check, like the app's gates.
+   */
+  ENTITLEMENT_URL?: string;
+  /** Comma-separated WorkOS role slugs allowed to read an org's log (default "admin"). */
+  AUDIT_ADMIN_ROLES?: string;
+  /** "1" lets every member of an org read its log (orgs without WorkOS roles). */
+  AUDIT_ALLOW_ALL_MEMBERS?: string;
 }
 
 interface D1Database {
@@ -67,7 +80,7 @@ interface AuditRow {
 }
 
 export type Caller =
-  | { kind: "user"; userId: string; scope: string }
+  | { kind: "user"; userId: string; scope: string; orgMember: boolean; role?: string; token: string }
   | { kind: "service" };
 
 function timingSafeEqual(a: string, b: string): boolean {
@@ -92,7 +105,16 @@ export async function identifyCaller(req: Request, env: Env): Promise<Caller | n
   if (env.SSO_TOKEN_SECRET) {
     try {
       const sso = await verifySsoToken(token, env.SSO_TOKEN_SECRET);
-      if (sso) return { kind: "user", userId: sso.sub, scope: sso.org ?? sso.sub };
+      if (sso) {
+        return {
+          kind: "user",
+          userId: sso.sub,
+          scope: sso.org ?? sso.sub,
+          orgMember: !!sso.org,
+          ...(sso.role ? { role: sso.role } : {}),
+          token,
+        };
+      }
     } catch {
       return null; // claims to be ours but fails verification
     }
@@ -103,9 +125,45 @@ export async function identifyCaller(req: Request, env: Env): Promise<Caller | n
     });
     if (!res.ok) return null;
     const u = (await res.json()) as { id?: unknown };
-    if (typeof u.id === "string" && u.id) return { kind: "user", userId: u.id, scope: u.id };
+    if (typeof u.id === "string" && u.id) return { kind: "user", userId: u.id, scope: u.id, orgMember: false, token };
   }
   return null;
+}
+
+/**
+ * May this caller READ their scope's log? (Writing your own events needs
+ * only authentication.) Enforced here, not just in the UI:
+ *  - org scope: only org admins (WorkOS role in AUDIT_ADMIN_ROLES, default
+ *    "admin") unless AUDIT_ALLOW_ALL_MEMBERS=1 — members can't read each
+ *    other's events, IPs and user agents;
+ *  - with billing configured (ENTITLEMENT_URL), an active Team plan.
+ */
+export async function canReadAudit(caller: Caller, env: Env): Promise<{ ok: true } | { ok: false; status: number; reason: string }> {
+  if (caller.kind === "service") return { ok: true };
+  if (caller.orgMember && env.AUDIT_ALLOW_ALL_MEMBERS !== "1") {
+    const roles = (env.AUDIT_ADMIN_ROLES ?? "admin").split(",").map((r) => r.trim()).filter(Boolean);
+    if (!caller.role || !roles.includes(caller.role)) {
+      return { ok: false, status: 403, reason: "Only organization admins can read the audit log" };
+    }
+  }
+  if (env.ENTITLEMENT_URL) {
+    let tier = "free";
+    let status = "none";
+    try {
+      const res = await fetch(env.ENTITLEMENT_URL, { headers: { Authorization: `Bearer ${caller.token}`, Accept: "application/json" } });
+      if (res.ok) {
+        const body = (await res.json()) as { entitlement?: { tier?: unknown; status?: unknown } };
+        tier = String(body.entitlement?.tier ?? "free");
+        status = String(body.entitlement?.status ?? "none");
+      }
+    } catch {
+      /* fail closed below */
+    }
+    if (tier !== "team" || (status !== "active" && status !== "trialing")) {
+      return { ok: false, status: 403, reason: "The audit log requires an active Team plan" };
+    }
+  }
+  return { ok: true };
 }
 
 /** Append a single audit row. */
@@ -208,6 +266,10 @@ export default {
     }
 
     if (req.method === "GET") {
+      const allowed = await canReadAudit(caller, env);
+      if (!allowed.ok) {
+        return new Response(allowed.reason, { status: allowed.status, headers: CORS });
+      }
       const requested = url.searchParams.get("orgId");
       let orgId: string;
       if (caller.kind === "user") {

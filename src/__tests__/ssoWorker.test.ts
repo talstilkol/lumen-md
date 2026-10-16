@@ -342,6 +342,13 @@ describe("GET /api/sso/token (billing bearer token)", () => {
     expect((await worker.fetch(req("/api/sso/token", { cookie }), env)).status).toBe(501);
   });
 
+  it("carries the WorkOS role, which the shared verifier exposes to the audit worker", async () => {
+    const { verifySsoToken } = await import("../../edge-workers/shared/ssoToken");
+    const cookie = await sessionCookie({ id: "user_01", provider: "workos", orgId: "org_9", role: "admin" });
+    const { token } = (await (await worker.fetch(req("/api/sso/token", { cookie }), tokenEnv)).json()) as { token: string };
+    expect(await verifySsoToken(token, tokenEnv.BILLING_TOKEN_SECRET!)).toEqual({ sub: "user_01", org: "org_9", role: "admin" });
+  });
+
   it("a minted token is accepted by the billing worker", async () => {
     const billing = await import("../../edge-workers/billing/worker");
     const cookie = await sessionCookie({ id: "user_01", provider: "workos", orgId: "org_9" });

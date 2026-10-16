@@ -185,9 +185,6 @@ async function identify(req: Request, env: Env): Promise<Identity> {
   return { uid: u.id };
 }
 
-async function userId(req: Request, env: Env): Promise<string> {
-  return (await identify(req, env)).uid;
-}
 
 /* ─── GET /entitlements ──────────────────────────────────────────────── */
 
@@ -321,7 +318,7 @@ async function stripe<T = unknown>(
 /* ─── /checkout ──────────────────────────────────────────────────────── */
 
 async function checkout(req: Request, env: Env): Promise<{ url: string }> {
-  const uid = await userId(req, env);
+  const who = await identify(req, env);
   const { priceId, successUrl, cancelUrl } = (await req.json()) as {
     priceId: string;
     successUrl: string;
@@ -335,6 +332,10 @@ async function checkout(req: Request, env: Env): Promise<{ url: string }> {
   for (const u of [successUrl, cancelUrl]) {
     if (!isAllowedRedirect(env, u)) throw new Error("Redirect URL not allowed");
   }
+  // A Team plan bought by an SSO organization member belongs to the
+  // organization: entitle the org row (every member's /entitlements falls
+  // back to it) rather than only the purchaser's personal row.
+  const uid = tier === "team" && who.orgUid ? who.orgUid : who.uid;
   // One customer per user: Stripe creates a fresh Customer for every
   // subscription Session without `customer`, which would orphan the old
   // subscription (still billing, unreachable from the portal). A user with
@@ -356,6 +357,9 @@ async function checkout(req: Request, env: Env): Promise<{ url: string }> {
     // can be attributed to the user (and plan) too.
     "subscription_data[metadata][userId]": uid,
     "subscription_data[metadata][tier]": tier,
+    // Who bought it — for an organization plan, only they may open the
+    // billing portal for it (members have no billing role in the token).
+    "subscription_data[metadata][purchaser]": who.uid,
     client_reference_id: uid,
   });
   return { url: session.url };
@@ -378,10 +382,24 @@ function isAllowedRedirect(env: Env, url: unknown): boolean {
 /* ─── /portal ────────────────────────────────────────────────────────── */
 
 async function portal(req: Request, env: Env): Promise<{ url: string }> {
-  const uid = await userId(req, env);
+  const who = await identify(req, env);
   // Look up the customer id from Supabase. We assume the webhook below
   // populated `entitlements` with stripe_customer_id when Checkout completed.
-  const customer = (await fetchBillingRow(env, uid))?.stripe_customer_id ?? null;
+  // Personal subscription first, then the organization's (Team) one — the
+  // latter only for the member who bought it.
+  let customer = (await fetchBillingRow(env, who.uid))?.stripe_customer_id ?? null;
+  if (!customer && who.orgUid) {
+    const org = await fetchBillingRow(env, who.orgUid);
+    if (org?.stripe_customer_id && org.stripe_subscription_id) {
+      const res = await fetch(
+        `https://api.stripe.com/v1/subscriptions/${encodeURIComponent(org.stripe_subscription_id)}`,
+        { headers: { Authorization: `Bearer ${env.STRIPE_SECRET_KEY}` } },
+      );
+      const sub = res.ok ? ((await res.json()) as { metadata?: { purchaser?: unknown } }) : null;
+      if (sub?.metadata?.purchaser === who.uid) customer = org.stripe_customer_id;
+      else throw new Error("Your organization's plan is managed by the member who purchased it.");
+    }
+  }
   if (!customer) throw new Error("No subscription on file. Subscribe first.");
   const session = await stripe<{ url: string }>(env, "/billing_portal/sessions", {
     customer,
@@ -395,12 +413,13 @@ const BILLING_STATUSES = new Set(["active", "trialing", "past_due", "unpaid", "i
 
 interface BillingRow {
   stripe_customer_id?: string | null;
+  stripe_subscription_id?: string | null;
   status?: string | null;
 }
 
 async function fetchBillingRow(env: Env, uid: string): Promise<BillingRow | null> {
   const res = await fetch(
-    `${env.SUPABASE_URL}/rest/v1/entitlements?user_id=eq.${encodeURIComponent(uid)}&select=stripe_customer_id,status`,
+    `${env.SUPABASE_URL}/rest/v1/entitlements?user_id=eq.${encodeURIComponent(uid)}&select=stripe_customer_id,stripe_subscription_id,status`,
     {
       headers: {
         apikey: env.SUPABASE_SERVICE_ROLE,
