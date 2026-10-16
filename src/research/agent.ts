@@ -257,7 +257,11 @@ async function proxyResearch(o: ResearchOptions, settings: ResearchSettings): Pr
   let unverified = 0;
   const body = report.replace(/\[\^(\d+)\]/g, (_m, num: string) => {
     const n = Number(num);
-    if (!valid(n)) return ""; // a marker for a source that doesn't exist
+    if (!valid(n)) {
+      // A marker for a source that wasn't read: the claim stays, flagged.
+      unverified++;
+      return " ⚠️ *cites a source that wasn't read*";
+    }
     cited.add(n);
     const k = seenPerSource.get(n) ?? 0;
     seenPerSource.set(n, k + 1);

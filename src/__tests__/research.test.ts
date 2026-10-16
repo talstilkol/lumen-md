@@ -152,11 +152,11 @@ describe("research agent", () => {
         },
       });
       expect(result.sources).toBe(2);
-      expect(result.unverified).toBe(1); // source 2's quote isn't on the page
+      expect(result.unverified).toBe(2); // source 2's quote isn't on the page; [^3] wasn't read
       expect(result.markdown).toContain("[^1]: [Roses](https://a.example/roses) — “Prune roses in early spring”");
       expect(result.markdown).toMatch(/\[\^2\]: \[Shears\]\(https:\/\/b\.example\/shears\) — “Clean shears prevent the spread of disease” ⚠️/);
-      // A marker for a source that doesn't exist is dropped.
-      expect(result.markdown).toContain("Bananas are blue.\n");
+      // A marker for a source that wasn't read is flagged, not dropped.
+      expect(result.markdown).toContain("Bananas are blue. ⚠️ *cites a source that wasn't read*");
       expect(result.markdown).not.toContain("[^3]");
     });
 
