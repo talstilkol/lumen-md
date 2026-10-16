@@ -954,6 +954,7 @@ export function useCommands({
               try {
                 await writeWorkspaceFile(w.path, w.content);
                 done.push(w.path);
+                job.done = [...(job.done ?? []), w.source];
               } catch {
                 failedWrites++;
               }

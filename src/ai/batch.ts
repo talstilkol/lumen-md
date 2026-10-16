@@ -63,6 +63,8 @@ export interface BatchJob {
   status: "submitted" | "ended" | "applied" | "failed" | "expired" | "cancelled";
   /** Usage already recorded (results are re-downloaded until applied). */
   metered?: boolean;
+  /** Notes (sources) whose result has already been written — skipped on a retry. */
+  done?: string[];
 }
 
 const STORE = "lumen.ai.batches";
@@ -324,7 +326,7 @@ export function planWrites(
   };
   for (const item of job.items) {
     const answer = answers.get(item.customId);
-    if (!answer) continue;
+    if (!answer || job.done?.includes(item.path)) continue;
     const current = read(item.path);
     if (current === null) continue;
     // The answer is about the text that was sent: skip notes edited since.
