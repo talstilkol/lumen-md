@@ -37,6 +37,11 @@ export default defineConfig({
         // so live-glsl rendered its "WebGL is not available" error view.
         // Force the software WebGL path the way Chromium's SwiftShader
         // gives one to the chromium project.
+        // Headless Firefox still found no GL driver on CI even with Mesa
+        // installed (FEATURE_FAILURE_WEBGL_EXHAUSTED_DRIVERS), so CI runs it
+        // headed under Xvfb (PW_FIREFOX_HEADED=1), where Mesa's llvmpipe
+        // provides GLX.
+        headless: !process.env.PW_FIREFOX_HEADED,
         launchOptions: {
           firefoxUserPrefs: { "webgl.force-enabled": true, "webgl.disabled": false, "webgl.out-of-process": false },
         },

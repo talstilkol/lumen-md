@@ -197,6 +197,11 @@ export default defineConfig({
   // existing try/catch falls back to WebRTC-only collab cleanly.
   optimizeDeps: {
     exclude: ["y-websocket"],
+    // Deps reached only from lazily-loaded workers/blocks are otherwise
+    // discovered on first use, and Vite then FULL-RELOADS the page
+    // ("optimized dependencies changed. reloading") — losing the user's
+    // unsaved edits in dev and flaking the live-lua e2e. Pre-bundle them.
+    include: ["wasmoon"],
   },
   // ε.4.3 — clean-URL aliases for the auxiliary HTML pages so dev links
   // like `/roadmap` and `/landing` work without the `.html` suffix.
