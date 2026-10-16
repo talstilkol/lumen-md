@@ -3,6 +3,7 @@ import {
   Editor as MilkdownEditor,
   rootCtx,
   defaultValueCtx,
+  editorViewCtx,
   prosePluginsCtx,
 } from "@milkdown/core";
 import { commonmark } from "@milkdown/preset-commonmark";
@@ -25,6 +26,25 @@ import { showAiToast } from "../ui/AiToast";
 import { openAiPrompt } from "../ui/AiInlinePrompt";
 import { log } from "../lib/logger";
 import { findCodeRanges } from "./suggesting";
+import { getMarkdown } from "@milkdown/utils";
+import {
+  configureWysiwygSuggest,
+  encodeCriticForWysiwyg,
+  setActiveWysiwygView,
+  wysiwygSuggestPlugins,
+} from "./wysiwygSuggest";
+import { useAppStore } from "../store/useStore";
+import { useAuth } from "../auth/useAuth";
+
+// Suggesting mode (track changes) works in WYSIWYG too: CriticMarkup ↔
+// marks, edits tracked while the store's suggestingMode is on.
+configureWysiwygSuggest({
+  enabled: () => useAppStore.getState().suggestingMode,
+  author: () => {
+    const user = useAuth.getState().user;
+    return user?.name?.trim() || user?.email?.split("@")[0] || null;
+  },
+});
 
 interface Props {
   value: string;
@@ -627,9 +647,14 @@ export default function WysiwygEditor({ value, onChange }: Props) {
       .then(op)
       .catch((e) => log.warn("[wysiwyg] lifecycle op threw", e));
   };
+  // The editor's markdown as of its creation / last emission: on unmount,
+  // anything else is an edit the debounced listener hasn't emitted yet.
+  const serializedRef = useRef<string | null>(null);
   const destroyCurrent = async () => {
     const ed = editorRef.current;
     editorRef.current = null;
+    serializedRef.current = null;
+    setActiveWysiwygView(null);
     if (!ed) return;
     try {
       await ed.destroy(true);
@@ -666,13 +691,14 @@ export default function WysiwygEditor({ value, onChange }: Props) {
       const editor = await MilkdownEditor.make()
         .config((ctx) => {
           ctx.set(rootCtx, host);
-          ctx.set(defaultValueCtx, body);
+          ctx.set(defaultValueCtx, encodeCriticForWysiwyg(body));
           ctx.get(listenerCtx).markdownUpdated((_, md) => {
             // The listener plugin debounces emissions by 200ms and
             // nothing cancels that timer on destroy, so a torn-down (or
             // superseded) editor can still fire here. Forwarding it would
             // overwrite the store with stale content after a mode switch.
             if (gen !== genRef.current) return;
+            serializedRef.current = md;
             const full = frontmatterRef.current + repairCriticMarkup(md);
             lastEmittedRef.current = full;
             onChangeRef.current(full);
@@ -820,6 +846,8 @@ export default function WysiwygEditor({ value, onChange }: Props) {
               };
           }
         })
+        // First, so suggestion marks wrap other marks (`{++**b**++}`).
+        .use(wysiwygSuggestPlugins)
         .use(commonmark)
         .use(gfm)
         .use(history)
@@ -842,6 +870,8 @@ export default function WysiwygEditor({ value, onChange }: Props) {
       }
       editorRef.current = editor;
       lastEmittedRef.current = value;
+      setActiveWysiwygView(editor.action((ctx) => ctx.get(editorViewCtx)));
+      serializedRef.current = editor.action(getMarkdown());
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [value]);
@@ -850,6 +880,24 @@ export default function WysiwygEditor({ value, onChange }: Props) {
   // menu DOM is only removed once no plugin view can still reference it.
   useEffect(() => {
     return () => {
+      // Leaving WYSIWYG (mode switch, tab close): the listener debounces
+      // emissions by 200 ms, so the last edits would be dropped by the
+      // generation guard below. Flush them now, synchronously.
+      const ed = editorRef.current;
+      if (ed && serializedRef.current !== null) {
+        try {
+          const md = ed.action(getMarkdown());
+          if (md === serializedRef.current) throw new Error("no pending edit");
+          serializedRef.current = md;
+          const full = frontmatterRef.current + repairCriticMarkup(md);
+          if (full !== lastEmittedRef.current) {
+            lastEmittedRef.current = full;
+            onChangeRef.current(full);
+          }
+        } catch {
+          /* editor already torn down */
+        }
+      }
       genRef.current++;
       enqueue(async () => {
         await destroyCurrent();

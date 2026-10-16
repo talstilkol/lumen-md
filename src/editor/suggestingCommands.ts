@@ -18,6 +18,7 @@ import {
   rejectSuggestionAtCursor,
 } from "./suggestingExtension";
 import type { ViewLike } from "./suggestingExtension";
+import { getWysiwygSuggestActions } from "./wysiwygSuggestBridge";
 
 export interface SuggestingCommandDeps {
   getView: () => EditorView | null;
@@ -37,9 +38,19 @@ export interface SuggestingPaletteCommand {
 
 export function buildSuggestingCommands(deps: SuggestingCommandDeps): SuggestingPaletteCommand[] {
   const group = t("group.edit");
-  const withView = (run: (v: ViewLike) => boolean, atCursor: boolean) => () => {
+  const withView = (
+    run: (v: ViewLike) => boolean,
+    atCursor: boolean,
+    wysiwyg?: (a: NonNullable<ReturnType<typeof getWysiwygSuggestActions>>) => boolean,
+  ) => () => {
     const view = deps.getView();
     if (!view) {
+      // WYSIWYG mounted instead of the source editor: same command there.
+      const actions = getWysiwygSuggestActions();
+      if (actions && wysiwyg) {
+        if (!wysiwyg(actions)) showAiToast(atCursor ? t("suggest.noneAtCursor") : t("suggest.none"), "info");
+        return;
+      }
       showAiToast(t("suggest.needsSource"), "info");
       return;
     }
@@ -71,14 +82,14 @@ export function buildSuggestingCommands(deps: SuggestingCommandDeps): Suggesting
       label: t("cmd.suggest.accept"),
       hint: t("cmd.suggest.accept.hint"),
       group,
-      action: withView(acceptSuggestionAtCursor, true),
+      action: withView(acceptSuggestionAtCursor, true, (a) => a.resolve("accept")),
     },
     {
       id: "edit.suggesting.reject",
       label: t("cmd.suggest.reject"),
       hint: t("cmd.suggest.reject.hint"),
       group,
-      action: withView(rejectSuggestionAtCursor, true),
+      action: withView(rejectSuggestionAtCursor, true, (a) => a.resolve("reject")),
     },
     {
       id: "edit.suggesting.acceptAll",
@@ -96,13 +107,13 @@ export function buildSuggestingCommands(deps: SuggestingCommandDeps): Suggesting
       id: "edit.suggesting.next",
       label: t("cmd.suggest.next"),
       group,
-      action: withView(nextSuggestionCommand, false),
+      action: withView(nextSuggestionCommand, false, (a) => a.jump(1)),
     },
     {
       id: "edit.suggesting.prev",
       label: t("cmd.suggest.prev"),
       group,
-      action: withView(prevSuggestionCommand, false),
+      action: withView(prevSuggestionCommand, false, (a) => a.jump(-1)),
     },
   ];
 }
