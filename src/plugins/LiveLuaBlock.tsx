@@ -133,7 +133,7 @@ export default function LiveLuaBlock({ source, meta }: Props) {
   const failed = state === "error" || state === "timeout";
 
   return (
-    <div className="chart-block" data-testid="live-lua">
+    <div className="chart-block" data-testid="live-lua" data-state={state}>
       <div className="chart-block-header">
         <span>{t("block.liveLua.title")}</span>
         <div className="chart-block-tabs">

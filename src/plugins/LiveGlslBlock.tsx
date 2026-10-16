@@ -41,9 +41,17 @@ export default function LiveGlslBlock({ source, meta }: Props) {
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
+    // Browsers explain WHY a context couldn't be created (blocklisted GPU,
+    // no software fallback, headless…) only through this event.
+    let reason = "";
+    const onCreationError = (e: Event) => {
+      reason = (e as WebGLContextEvent).statusMessage || reason;
+    };
+    canvas.addEventListener("webglcontextcreationerror", onCreationError);
     const gl = canvas.getContext("webgl") ?? canvas.getContext("experimental-webgl") as WebGLRenderingContext | null;
+    canvas.removeEventListener("webglcontextcreationerror", onCreationError);
     if (!gl) {
-      setError("WebGL is not available in this browser.");
+      setError(`WebGL is not available in this browser.${reason ? ` (${reason})` : ""}`);
       return;
     }
     setError(null);

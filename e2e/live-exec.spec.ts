@@ -33,7 +33,7 @@ test("live-sql executes a real query via sql.js WASM", async ({ page }) => {
   // Use a SELECT-all + type so the async-seeded welcome doc can't survive
   // alongside our block, and a value (1763) that appears nowhere else.
   await editor.press("ControlOrMeta+a");
-  await editor.pressSequentially("```live-sql\nSELECT 1000 + 763 AS answer;\n```");
+  await editor.fill("```live-sql\nSELECT 1000 + 763 AS answer;\n```\n");
 
   // Scope to the live-sql block itself (the welcome doc renders its OWN
   // chart-blocks, so `.first()` would grab the wrong one).
@@ -53,7 +53,7 @@ test("live-python executes real Python via Pyodide WASM", async ({ page }) => {
   const editor = page.locator(".cm-content").first();
   await editor.click();
   await editor.press("ControlOrMeta+a");
-  await editor.pressSequentially("```live-python\nprint(sum(range(100)) + 7)\n```");
+  await editor.fill("```live-python\nprint(sum(range(100)) + 7)\n```\n");
 
   // Scope to the live-python block (the welcome doc renders other blocks).
   const block = page.locator(".chart-block", {
@@ -81,7 +81,18 @@ test("live-glsl compiles and renders a shader on a WebGL canvas", async ({ page 
   // which one it was instead of just "no canvas".
   const anyGlsl = page.locator(".chart-block", { hasText: /GLSL/ }).first();
   await expect(anyGlsl).toBeVisible({ timeout: 15_000 });
-  await expect(anyGlsl).not.toContainText("GLSL error", { timeout: 5_000 });
+  await expect(anyGlsl).not.toContainText("GLSL error", { timeout: 5_000 }).catch(async (err: Error) => {
+    // Say what the browser offers, so "no WebGL" is distinguishable from a bug.
+    const env = await page.evaluate(() => {
+      const c = document.createElement("canvas");
+      const msgs: string[] = [];
+      c.addEventListener("webglcontextcreationerror", (e) => msgs.push((e as WebGLContextEvent).statusMessage));
+      const gl1 = !!c.getContext("webgl");
+      const gl2 = !!document.createElement("canvas").getContext("webgl2");
+      return `webgl=${gl1} webgl2=${gl2} reasons=[${msgs.join(" | ")}] ua=${navigator.userAgent}`;
+    });
+    throw new Error(`${err.message.split("\n")[0]}\nblock: ${await anyGlsl.innerText()}\nenv: ${env}`);
+  });
   const block = page.locator(".chart-block", { has: page.locator("canvas") });
   await expect(block).toBeVisible({ timeout: 15_000 });
   const canvas = block.locator("canvas");
@@ -105,10 +116,37 @@ test("live-lua executes real Lua via wasmoon WASM in a worker", async ({ page })
   await editor.press("ControlOrMeta+a");
   await editor.fill("```live-lua\nlocal s = 0\nfor i = 1, 100 do s = s + i end\nprint(s + 13)\n```\n");
 
+  // Diagnostics: Firefox/WebKit CI runs stalled at "Running…" without the
+  // hard-kill timer ever firing, and job logs aren't reachable — so a failure
+  // must carry what the page saw (console, page errors, worker lifecycle,
+  // whether the main thread still answers) in its own message.
+  const diag: string[] = [];
+  page.on("console", (m) => diag.push(`console.${m.type()}: ${m.text()}`));
+  page.on("pageerror", (e) => diag.push(`pageerror: ${e.message}`));
+  page.on("worker", (w) => {
+    diag.push(`worker started: ${w.url()}`);
+    w.on("close", () => diag.push(`worker closed: ${w.url()}`));
+  });
+  page.on("requestfailed", (r) => diag.push(`requestfailed: ${r.url()} ${r.failure()?.errorText ?? ""}`));
+
   const block = page.locator('[data-testid="live-lua"]');
   await expect(block).toBeVisible({ timeout: 15_000 });
   await block.getByRole("button", { name: "Run" }).click();
 
   // 5050 + 13 = 5063 — computed by the Lua VM, never present in the source.
-  await expect(block).toContainText("5063", { timeout: 90_000 });
+  try {
+    await expect(block).toContainText("5063", { timeout: 60_000 });
+  } catch (err) {
+    const alive = await Promise.race([
+      page.evaluate(() => "main thread responsive").catch((e: Error) => `evaluate failed: ${e.message}`),
+      new Promise<string>((r) => setTimeout(() => r("main thread BLOCKED (evaluate timed out)"), 5_000)),
+    ]);
+    const state = await block.getAttribute("data-state", { timeout: 2_000 }).catch(() => "?");
+    const text = await block.innerText({ timeout: 2_000 }).catch(() => "?");
+    throw new Error(
+      `live-lua never printed 5063. data-state=${state}; ${alive}\nblock: ${text.slice(0, 400)}\n` +
+        diag.slice(-40).join("\n") +
+        `\n--- ${(err as Error).message.split("\n")[0]}`,
+    );
+  }
 });
