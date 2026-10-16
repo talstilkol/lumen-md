@@ -165,8 +165,8 @@ describe("chat(): response cache and usage", () => {
     expect(await chat(msgs, { cache: true, cacheIf })).toBe('["a"]');
     expect(fetchMock).toHaveBeenCalledTimes(2);
     const { effectiveModel } = await import("../ai/llm");
-    expect(effectiveModel("anthropic")).toBe("claude-3-5-sonnet-latest");
-    expect(usageSummary().rows.map((r) => r.model)).toEqual(["claude-3-5-sonnet-latest"]);
+    expect(effectiveModel("anthropic")).toBe("claude-sonnet-4-5");
+    expect(usageSummary().rows.map((r) => r.model)).toEqual(["claude-sonnet-4-5"]);
   });
 
   it("records streamed Anthropic usage from message_start / message_delta", async () => {

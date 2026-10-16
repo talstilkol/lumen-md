@@ -25,7 +25,8 @@ export interface Usage {
   /** Anthropic: input tokens written to the prompt cache (billed at ~125%). */
   cacheWriteTokens?: number;
   /** Counts were estimated from characters, not reported by the API. */
-  estimated?: boolean;
+  estimated?: boolean;  /** Server-side web searches (Claude web search: $10 per 1,000). */
+  webSearches?: number;
 }
 
 /**
@@ -98,7 +99,10 @@ export function costOf(u: Usage): number | null {
   if (!p) return null;
   const read = u.cacheReadTokens ?? 0;
   const write = u.cacheWriteTokens ?? 0;
-  return (u.inputTokens * p.input + read * p.cachedInput + write * p.cacheWrite + u.outputTokens * p.output) / 1_000_000;
+  return (
+    (u.inputTokens * p.input + read * p.cachedInput + write * p.cacheWrite + u.outputTokens * p.output) / 1_000_000 +
+    ((u.webSearches ?? 0) * 10) / 1000
+  );
 }
 
 /** Rough token count for text we have no API count for (~4 chars / token). */
