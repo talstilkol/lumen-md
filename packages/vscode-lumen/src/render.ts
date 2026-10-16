@@ -173,6 +173,45 @@ export interface PreviewDocumentOptions {
   katexCssUri: string;
   scriptUri: string;
   title: string;
+  /**
+   * Webview URI (as a string, trailing slash optional) of the Markdown
+   * file's folder. Document-relative `src` attributes (images, video,
+   * audio) are rewritten against it — a webview can't load raw relative
+   * workspace paths, only `webview.asWebviewUri(...)` URLs.
+   */
+  resourceBaseUri?: string;
+}
+
+/** True for a `src` value that is relative to the document (no scheme, not protocol-relative, not root-absolute). */
+function isDocumentRelative(src: string): boolean {
+  return src !== "" && !/^[a-z][a-z0-9+.-]*:/i.test(src) && !src.startsWith("//") && !src.startsWith("/") && !src.startsWith("#");
+}
+
+/**
+ * Rewrite document-relative `src="…"` attributes in rendered HTML to
+ * `base` + path. Query/fragment are kept; each path segment is
+ * percent-encoded once (already-encoded input is decoded first).
+ */
+export function rewriteRelativeResources(html: string, base: string): string {
+  const prefix = base.endsWith("/") ? base : `${base}/`;
+  return html.replace(/(\ssrc=)(["'])(.*?)\2/gi, (m, attr: string, q: string, raw: string) => {
+    const src = raw.replace(/&amp;/g, "&");
+    if (!isDocumentRelative(src)) return m;
+    const cut = src.search(/[?#]/);
+    const path = cut < 0 ? src : src.slice(0, cut);
+    const tail = cut < 0 ? "" : src.slice(cut);
+    const segments = path.replace(/^\.\//, "").split("/").map((seg) => {
+      if (seg === "." || seg === "..") return seg;
+      let decoded = seg;
+      try {
+        decoded = decodeURIComponent(seg);
+      } catch {
+        /* keep as-is */
+      }
+      return encodeURIComponent(decoded);
+    });
+    return `${attr}${q}${escapeHtml(prefix + segments.join("/") + tail)}${q}`;
+  });
 }
 
 export function escapeHtml(s: string): string {
@@ -181,7 +220,8 @@ export function escapeHtml(s: string): string {
 
 /** Wrap a rendered body in the webview document (strict CSP, nonce'd script). */
 export function renderPreviewDocument(markdown: string, opts: PreviewDocumentOptions): string {
-  const body = renderMarkdownBody(markdown);
+  const rendered = renderMarkdownBody(markdown);
+  const body = opts.resourceBaseUri ? rewriteRelativeResources(rendered, opts.resourceBaseUri) : rendered;
   const csp = [
     "default-src 'none'",
     `img-src ${opts.cspSource} https: data:`,

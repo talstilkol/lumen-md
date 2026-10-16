@@ -21,6 +21,13 @@ function render(context: vscode.ExtensionContext): void {
   const webview = panel.webview;
   const media = (f: string) => webview.asWebviewUri(vscode.Uri.joinPath(context.extensionUri, "media", f)).toString();
   panel.title = `Lumen: ${basename(currentDoc.fileName)}`;
+  // The webview may only load files under its localResourceRoots; make sure
+  // the current document's folder is one (it may sit outside the workspace).
+  const docDir = vscode.Uri.joinPath(currentDoc.uri, "..");
+  const roots = webview.options.localResourceRoots ?? [];
+  if (!roots.some((r) => r.toString() === docDir.toString())) {
+    webview.options = { ...webview.options, localResourceRoots: [...roots, docDir] };
+  }
   webview.html = renderPreviewDocument(currentDoc.getText(), {
     nonce: randomBytes(16).toString("base64"),
     cspSource: webview.cspSource,
@@ -28,6 +35,7 @@ function render(context: vscode.ExtensionContext): void {
     katexCssUri: media("katex/katex.min.css"),
     scriptUri: media("preview.js"),
     title: basename(currentDoc.fileName),
+    resourceBaseUri: webview.asWebviewUri(docDir).toString(),
   });
 }
 

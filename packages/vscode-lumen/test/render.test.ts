@@ -4,7 +4,7 @@
  *   npx vitest run vscodeLumen
  */
 import { describe, it, expect } from "vitest";
-import { renderMarkdownBody, renderPreviewDocument, escapeHtml } from "../src/render";
+import { renderMarkdownBody, renderPreviewDocument, escapeHtml, rewriteRelativeResources } from "../src/render";
 
 const docOpts = {
   nonce: "abc123",
@@ -90,5 +90,24 @@ describe("renderPreviewDocument", () => {
 
   it("escapes HTML metacharacters", () => {
     expect(escapeHtml(`<a href="x">'&'</a>`)).toBe("&lt;a href=&quot;x&quot;&gt;&#39;&amp;&#39;&lt;/a&gt;");
+  });
+
+  it("rewrites document-relative image sources to the webview resource base", () => {
+    const base = "https://file+.vscode-resource.vscode-cdn.net/home/me/notes";
+    const html = renderPreviewDocument(
+      "![a](images/a.png) ![b](<./my pic.png?v=2>) ![c](https://e.com/c.png) ![d](data:image/png;base64,AA==)",
+      { ...docOpts, resourceBaseUri: base },
+    );
+    expect(html).toContain(`src="${base}/images/a.png"`);
+    expect(html).toContain(`src="${base}/my%20pic.png?v=2"`);
+    expect(html).toContain('src="https://e.com/c.png"');
+    expect(html).toContain('src="data:image/png;base64,AA=="');
+    // Bundled assets are untouched.
+    expect(html).toContain('src="vscode-resource:/media/preview.js"');
+  });
+
+  it("leaves root-absolute, protocol-relative and fragment sources alone", () => {
+    const out = rewriteRelativeResources('<img src="/x.png"><img src="//h/x.png"><img src="#f"><img src="y.png">', "B/");
+    expect(out).toBe('<img src="/x.png"><img src="//h/x.png"><img src="#f"><img src="B/y.png">');
   });
 });
