@@ -49,6 +49,6 @@ test("WYSIWYG edits are tracked as suggestions while suggesting is on", async ({
   // Back to source: the document holds CriticMarkup.
   await page.keyboard.press("Meta+1");
   await expect(source).toContainText("{~~Hello~>Hi~~}", { timeout: 5_000 });
-  await expect(source).toContainText(/\{\+\+[\s\u00a0]?big\+\+\}/);
+  await expect(source).toContainText(/\{\+\+[\s\u00a0]?big[\s\u00a0]?\+\+\}/);
   await expect(source).toContainText("{++earlier++}");
 });

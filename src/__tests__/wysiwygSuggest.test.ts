@@ -81,8 +81,19 @@ describe("tracking edits while suggesting", () => {
     const e = await open("Hello world.", true);
     e.select(e.at(" world"));
     e.type(" big");
-    // The serializer keeps whitespace at a mark's edge outside it.
-    expect(e.md()).toBe("Hello {++big++}{>>@Tal<<} world.");
+    // The inserted space is part of the suggestion (rejecting it removes it).
+    expect(e.md()).toBe("Hello{++ big++}{>>@Tal<<} world.");
+  });
+
+  it("keeps separate suggestions and their unmarked whitespace apart", async () => {
+    for (const src of [
+      "{++one++}{>>@Tal<<} {++two++}{>>@Tal<<} end.",
+      "Keep {--old--}{>>@Alice<<}{++new++}{>>@Bob<<} end.",
+      "Keep {++a trailing ++}{>>@Tal<<}word.",
+    ]) {
+      const e = await open(src, false);
+      expect(e.md()).toBe(src);
+    }
   });
 
   it("backspace keeps the text as a deletion and moves the caret past it", async () => {
@@ -98,6 +109,16 @@ describe("tracking edits while suggesting", () => {
     e.select(e.at("world"), e.at("world", 5));
     e.type("there");
     expect(e.md()).toBe("Hello {~~world~>there~~}{>>@Tal<<}.");
+  });
+
+  it("typing over a selection reported as a minimal DOM diff replaces the whole selection", async () => {
+    const e = await open("Hello world.", true);
+    const from = e.at("Hello");
+    e.select(from, from + 5);
+    // Firefox: typing "i" over "Hello" can arrive as a diff over "ello" only.
+    const handled = e.view.someProp("handleTextInput", (f) => f(e.view, from + 1, from + 5, "i", () => e.view.state.tr));
+    expect(handled).toBe(true);
+    expect(e.md()).toBe("{~~Hello~>i~~}{>>@Tal<<} world.");
   });
 
   it("deleting your own suggested insertion really deletes it", async () => {

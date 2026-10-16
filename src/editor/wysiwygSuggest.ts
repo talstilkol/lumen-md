@@ -28,6 +28,7 @@ import type { Mark, Schema, Slice } from "@milkdown/prose/model";
 import { Plugin, PluginKey, TextSelection, type EditorState, type Transaction } from "@milkdown/prose/state";
 import { ReplaceStep, type Mapping } from "@milkdown/prose/transform";
 import type { Parents, PhrasingContent, Root } from "mdast";
+import { defaultHandlers } from "mdast-util-to-markdown";
 import { CRITIC_LITERAL, CRITIC_SENTINELS as S, prepareCriticMarkup, unescapeUserSentinels } from "../renderer/criticMarkup";
 import { sanitizeAuthor } from "./suggesting";
 import { setWysiwygSuggestActions } from "./wysiwygSuggestBridge";
@@ -80,6 +81,9 @@ export function encodeCriticForWysiwyg(markdown: string): string {
 interface CriticNode {
   type: "criticInsert" | "criticDelete";
   author?: string;
+  /** Spaces Milkdown's serializer moved out of the mark (restored on stringify). */
+  spaceBefore?: string;
+  spaceAfter?: string;
   children: PhrasingContent[];
 }
 
@@ -204,53 +208,86 @@ const siblings = (node: unknown, parent?: { children: unknown[] }) => {
   };
 };
 
+const sameAuthor = (a?: { author?: string | null }, b?: { author?: string | null }) => (a?.author ?? null) === (b?.author ?? null);
+const isCritic = (n: unknown): n is CriticNode => {
+  const t = (n as { type?: string } | undefined)?.type;
+  return t === "criticInsert" || t === "criticDelete";
+};
+
 /**
- * The serializer keeps whitespace at a mark's edge outside the mark, which
- * splits `{++new **bold**++}` into two runs around the space. Fold such a
- * following run (same kind and author, separated only by whitespace) back
- * into this one before printing.
+ * Milkdown's serializer moves spaces at a mark's edges out of the mark
+ * (`{++big ++}` → `{++big++} `), which would leave an inserted / deleted
+ * space unmarked and split `{++new **bold**++}` around its space. The mark
+ * runner records what moves (spaceBefore / spaceAfter); here those spaces
+ * go back inside, and directly adjacent runs of the same kind and author
+ * are joined. Plain whitespace BETWEEN two suggestions stays outside, so
+ * `{++one++} {++two++}` stays two suggestions.
  */
-function absorbFollowing(node: CriticNode, parent?: { children: unknown[] }): void {
-  if (!parent) return;
-  const i = parent.children.indexOf(node);
-  for (;;) {
-    const a = parent.children[i + 1] as { type: string; value?: string; author?: string; children?: PhrasingContent[] } | undefined;
-    const b = parent.children[i + 2] as typeof a;
-    if (a && a.type === node.type && (a.author ?? null) === (node.author ?? null)) {
-      node.children.push(...(a.children ?? []));
-      parent.children.splice(i + 1, 1);
-      continue;
+function restoreCriticSpaces(node: { children?: unknown[] }): void {
+  const kids = node.children as Array<{ type: string; value?: string; children?: unknown[] }> | undefined;
+  if (!kids) return;
+  for (let i = 0; i < kids.length; i++) {
+    const c = kids[i];
+    if (!isCritic(c)) continue;
+    const prev = kids[i - 1];
+    if (c.spaceBefore && prev?.type === "text" && prev.value?.endsWith(c.spaceBefore)) {
+      prev.value = prev.value.slice(0, -c.spaceBefore.length);
+      c.children.unshift({ type: "text", value: c.spaceBefore });
+      if (!prev.value) {
+        kids.splice(i - 1, 1);
+        i--;
+      }
     }
-    if (a?.type === "text" && /^\s+$/.test(a.value ?? "") && b && b.type === node.type && (b.author ?? null) === (node.author ?? null)) {
-      node.children.push({ type: "text", value: a.value! }, ...(b.children ?? []));
-      parent.children.splice(i + 1, 2);
-      continue;
+    const next = kids[i + 1];
+    if (c.spaceAfter && next?.type === "text" && next.value?.startsWith(c.spaceAfter)) {
+      next.value = next.value.slice(c.spaceAfter.length);
+      c.children.push({ type: "text", value: c.spaceAfter });
+      if (!next.value) kids.splice(i + 1, 1);
     }
-    return;
+    delete c.spaceBefore;
+    delete c.spaceAfter;
   }
+  // Join runs the serializer split (now directly adjacent).
+  for (let i = kids.length - 1; i > 0; i--) {
+    const a = kids[i - 1];
+    const b = kids[i];
+    if (isCritic(a) && isCritic(b) && a.type === b.type && sameAuthor(a, b)) {
+      a.children.push(...b.children);
+      kids.splice(i, 1);
+    }
+  }
+  for (const c of kids) restoreCriticSpaces(c);
 }
 
 const criticDeleteHandler: Handler = (node, parent, state, info) => {
-  absorbFollowing(node, parent);
   const inner = state.containerPhrasing(node, info);
   const { next } = siblings(node, parent);
-  // A deletion followed directly by an insertion is one substitution.
-  if (next?.type === "criticInsert") return `{~~${inner}~>`;
+  // A deletion followed directly by an insertion BY THE SAME AUTHOR is one
+  // substitution; different authors stay two independent changes.
+  if (next?.type === "criticInsert" && sameAuthor(node, next)) return `{~~${inner}~>`;
   return `{--${inner}--}${tag(node.author)}`;
 };
 const criticInsertHandler: Handler = (node, parent, state, info) => {
-  absorbFollowing(node, parent);
   const inner = state.containerPhrasing(node, info);
   const { prev } = siblings(node, parent);
-  if (prev?.type === "criticDelete") return `${inner}~~}${tag(node.author ?? prev.author)}`;
+  if (prev?.type === "criticDelete" && sameAuthor(node, prev)) return `${inner}~~}${tag(node.author)}`;
   return `{++${inner}++}${tag(node.author)}`;
 };
+
+type RootHandler = (node: unknown, parent: unknown, state: unknown, info: unknown) => string;
 
 /** The remark plugin: parse sentinels on the way in, write CriticMarkup out. */
 export function remarkCriticMarkup(this: { data: (key?: string) => Record<string, unknown> }) {
   const data = this.data() as { toMarkdownExtensions?: unknown[] };
   (data.toMarkdownExtensions ??= []).push({
-    handlers: { criticInsert: criticInsertHandler, criticDelete: criticDeleteHandler },
+    handlers: {
+      criticInsert: criticInsertHandler,
+      criticDelete: criticDeleteHandler,
+      root: ((node, parent, state, info) => {
+        restoreCriticSpaces(node as { children?: unknown[] });
+        return (defaultHandlers.root as unknown as RootHandler)(node, parent, state, info);
+      }) as RootHandler,
+    },
   });
   return (tree: Root) => {
     transformTree(tree);
@@ -290,8 +327,18 @@ const markSchema = (name: "critic_insert" | "critic_delete", mdType: CriticNode[
     },
     toMarkdown: {
       match: (mark: Mark) => mark.type.name === name,
-      runner: (state, mark) => {
-        state.withMark(mark, mdType, undefined, mark.attrs.author ? { author: mark.attrs.author } : {});
+      runner: (state, mark, node) => {
+        const props: Record<string, string> = mark.attrs.author ? { author: mark.attrs.author } : {};
+        // Record the edge spaces the serializer will move out of the mark
+        // (it does so when the mark closes after this text, which is only
+        // reliable when no other mark wraps the text).
+        const text = node.isText ? (node.text ?? "") : "";
+        if (text && node.marks.every((m) => m.type.name === "critic_insert" || m.type.name === "critic_delete")) {
+          if (text.startsWith(" ")) props.spaceBefore = text.slice(0, text.length - text.trimStart().length);
+          if (text.endsWith(" ")) props.spaceAfter = text.slice(text.trimEnd().length);
+          if (!text.trim()) delete props.spaceBefore; // all-space text: moved once, after
+        }
+        state.withMark(mark, mdType, undefined, props);
       },
     },
   }));
@@ -402,6 +449,19 @@ export const suggestTracking = $prose(
       key: trackingKey,
       appendTransaction: (trs, oldState, newState) =>
         config.enabled() ? trackChanges(trs, oldState, newState, config.author()) : null,
+      props: {
+        // Typing over a selection: some browsers (Firefox) report it as the
+        // minimal DOM diff ("Hello" → "H" deletes only "ello"), which would
+        // track the wrong range. Replace the whole selection instead.
+        handleTextInput: (view, from, to, text) => {
+          if (!config.enabled()) return false;
+          const sel = view.state.selection;
+          if (sel.empty || from < sel.from || to > sel.to) return false;
+          const tr = view.state.tr.insertText(text, sel.from, sel.to);
+          view.dispatch(tr.scrollIntoView());
+          return true;
+        },
+      },
     }),
 );
 
