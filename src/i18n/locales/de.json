@@ -926,5 +926,15 @@
   "cmd.billing.upgradePro": "Abrechnung: Auf Pro upgraden",
   "cmd.billing.upgradeTeam": "Abrechnung: Auf Team upgraden",
   "cmd.billing.manage": "Abrechnung: Abo verwalten",
-  "cmd.billing.managePersonal": "Abrechnung: Persönliches Abo verwalten"
+  "cmd.billing.managePersonal": "Abrechnung: Persönliches Abo verwalten",
+  "cmd.tools.vaultDoctor": "🩺 Vault-Doktor: Arbeitsbereich prüfen",
+  "cmd.tools.vaultDoctor.hint": "Defekte Links, Waisen, Beinahe-Duplikate, fehlender Alt-Text — ohne KI, nichts verlässt dein Gerät",
+  "cmd.tools.vaultDoctorFix": "🩺 Vault-Doktor: Vorgeschlagene Link-Korrekturen anwenden",
+  "cmd.tools.vaultDoctorFix.hint": "Defekte [[Links]] mit genau einem nahen Treffer umschreiben",
+  "doctor.noWorkspace": "Öffne zuerst einen Arbeitsbereich-Ordner",
+  "doctor.checking": "Prüfe {count} Notizen…",
+  "doctor.done": "{count} Befunde",
+  "doctor.noFixes": "Keine defekten Links mit genau einem klaren Vorschlag",
+  "doctor.confirmFix": "{links} Links in {files} Notizen korrigieren?\n\n{list}\n\nIn einem Tab geöffnete Notizen werden übersprungen.",
+  "doctor.fixed": "{links} Links in {files} Notizen korrigiert"
 }

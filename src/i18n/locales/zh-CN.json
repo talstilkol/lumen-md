@@ -926,5 +926,15 @@
   "cmd.billing.upgradePro": "账单：升级到 Pro",
   "cmd.billing.upgradeTeam": "账单：升级到 Team",
   "cmd.billing.manage": "账单：管理订阅",
-  "cmd.billing.managePersonal": "账单：管理个人订阅"
+  "cmd.billing.managePersonal": "账单：管理个人订阅",
+  "cmd.tools.vaultDoctor": "🩺 库医生：检查工作区",
+  "cmd.tools.vaultDoctor.hint": "失效链接、孤立笔记、近似重复、缺少替代文字 — 无需 AI，数据不离开设备",
+  "cmd.tools.vaultDoctorFix": "🩺 库医生：应用建议的链接修复",
+  "cmd.tools.vaultDoctorFix.hint": "改写只有一个近似匹配的失效 [[链接]]",
+  "doctor.noWorkspace": "请先打开一个工作区文件夹",
+  "doctor.checking": "正在检查 {count} 条笔记…",
+  "doctor.done": "{count} 项发现",
+  "doctor.noFixes": "没有只有一个明确建议的失效链接",
+  "doctor.confirmFix": "在 {files} 条笔记中修复 {links} 个链接？\n\n{list}\n\n已在标签页中打开的笔记将被跳过。",
+  "doctor.fixed": "已在 {files} 条笔记中修复 {links} 个链接"
 }

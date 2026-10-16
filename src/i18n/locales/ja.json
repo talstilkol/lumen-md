@@ -926,5 +926,15 @@
   "cmd.billing.upgradePro": "請求: Pro にアップグレード",
   "cmd.billing.upgradeTeam": "請求: Team にアップグレード",
   "cmd.billing.manage": "請求: サブスクリプションを管理",
-  "cmd.billing.managePersonal": "請求: 個人のサブスクリプションを管理"
+  "cmd.billing.managePersonal": "請求: 個人のサブスクリプションを管理",
+  "cmd.tools.vaultDoctor": "🩺 Vault Doctor：ワークスペースを検査",
+  "cmd.tools.vaultDoctor.hint": "壊れたリンク、孤立ノート、重複、alt なし画像 — AI 不要、データは端末外に出ません",
+  "cmd.tools.vaultDoctorFix": "🩺 Vault Doctor：提案されたリンク修正を適用",
+  "cmd.tools.vaultDoctorFix.hint": "近い候補が 1 つだけの壊れた [[リンク]] を書き換え",
+  "doctor.noWorkspace": "先にワークスペースフォルダーを開いてください",
+  "doctor.checking": "{count} 件のノートを検査中…",
+  "doctor.done": "{count} 件の検出",
+  "doctor.noFixes": "明確な候補が 1 つの壊れたリンクはありません",
+  "doctor.confirmFix": "{files} 件のノートで {links} 件のリンクを修正しますか？\n\n{list}\n\nタブで開いているノートはスキップされます。",
+  "doctor.fixed": "{files} 件のノートで {links} 件のリンクを修正しました"
 }

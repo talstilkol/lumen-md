@@ -926,5 +926,15 @@
   "cmd.billing.upgradePro": "Оплата: перейти на Pro",
   "cmd.billing.upgradeTeam": "Оплата: перейти на Team",
   "cmd.billing.manage": "Оплата: управление подпиской",
-  "cmd.billing.managePersonal": "Оплата: управление личной подпиской"
+  "cmd.billing.managePersonal": "Оплата: управление личной подпиской",
+  "cmd.tools.vaultDoctor": "🩺 Доктор хранилища: проверить рабочую область",
+  "cmd.tools.vaultDoctor.hint": "Битые ссылки, сироты, почти-дубликаты, нет alt — без ИИ, ничего не покидает устройство",
+  "cmd.tools.vaultDoctorFix": "🩺 Доктор хранилища: применить предложенные исправления ссылок",
+  "cmd.tools.vaultDoctorFix.hint": "Исправить битые [[ссылки]], у которых ровно одно близкое совпадение",
+  "doctor.noWorkspace": "Сначала откройте папку рабочей области",
+  "doctor.checking": "Проверка заметок: {count}…",
+  "doctor.done": "Найдено: {count}",
+  "doctor.noFixes": "Нет битых ссылок с единственным явным вариантом",
+  "doctor.confirmFix": "Исправить ссылок: {links} в заметках: {files}?\n\n{list}\n\nЗаметки, открытые во вкладках, пропускаются.",
+  "doctor.fixed": "Исправлено ссылок: {links} в заметках: {files}"
 }

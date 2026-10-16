@@ -926,5 +926,15 @@
   "cmd.billing.upgradePro": "Facturation : passer à Pro",
   "cmd.billing.upgradeTeam": "Facturation : passer à Team",
   "cmd.billing.manage": "Facturation : gérer l'abonnement",
-  "cmd.billing.managePersonal": "Facturation : gérer l'abonnement personnel"
+  "cmd.billing.managePersonal": "Facturation : gérer l'abonnement personnel",
+  "cmd.tools.vaultDoctor": "🩺 Docteur du coffre : vérifier l’espace de travail",
+  "cmd.tools.vaultDoctor.hint": "Liens cassés, notes orphelines, quasi-doublons, texte alternatif manquant — sans IA, rien ne quitte votre appareil",
+  "cmd.tools.vaultDoctorFix": "🩺 Docteur du coffre : appliquer les corrections de liens suggérées",
+  "cmd.tools.vaultDoctorFix.hint": "Réécrire les [[liens]] cassés qui ont exactement une correspondance proche",
+  "doctor.noWorkspace": "Ouvrez d’abord un dossier d’espace de travail",
+  "doctor.checking": "Vérification de {count} notes…",
+  "doctor.done": "{count} constats",
+  "doctor.noFixes": "Aucun lien cassé avec une seule suggestion claire",
+  "doctor.confirmFix": "Corriger {links} liens dans {files} notes ?\n\n{list}\n\nLes notes ouvertes dans un onglet sont ignorées.",
+  "doctor.fixed": "{links} liens corrigés dans {files} notes"
 }

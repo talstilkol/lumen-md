@@ -926,5 +926,15 @@
   "cmd.billing.upgradePro": "الفوترة: الترقية إلى Pro",
   "cmd.billing.upgradeTeam": "الفوترة: الترقية إلى Team",
   "cmd.billing.manage": "الفوترة: إدارة الاشتراك",
-  "cmd.billing.managePersonal": "الفوترة: إدارة الاشتراك الشخصي"
+  "cmd.billing.managePersonal": "الفوترة: إدارة الاشتراك الشخصي",
+  "cmd.tools.vaultDoctor": "🩺 طبيب الخزنة: فحص مساحة العمل",
+  "cmd.tools.vaultDoctor.hint": "روابط معطّلة، صفحات يتيمة، تكرارات، صور بلا نص بديل — دون ذكاء اصطناعي ودون مغادرة جهازك",
+  "cmd.tools.vaultDoctorFix": "🩺 طبيب الخزنة: تطبيق إصلاحات الروابط المقترحة",
+  "cmd.tools.vaultDoctorFix.hint": "إعادة كتابة [[الروابط]] المعطّلة التي لها تطابق قريب واحد فقط",
+  "doctor.noWorkspace": "افتح مجلد مساحة عمل أولًا",
+  "doctor.checking": "جارٍ فحص {count} ملاحظة…",
+  "doctor.done": "{count} نتيجة",
+  "doctor.noFixes": "لا توجد روابط معطّلة باقتراح واحد واضح",
+  "doctor.confirmFix": "إصلاح {links} رابطًا في {files} ملاحظة؟\n\n{list}\n\nتُتخطّى الملاحظات المفتوحة في علامة تبويب.",
+  "doctor.fixed": "تم إصلاح {links} رابطًا في {files} ملاحظة"
 }
