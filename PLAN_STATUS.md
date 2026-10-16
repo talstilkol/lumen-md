@@ -5,6 +5,8 @@
 > **מקור אמת יחיד לסטטוס הביצוע** · עודכן 2026-10-16 · ענף `feat/plans-completion`
 >
 > מסמך זה מחליף ~15 מסמכי סטטוס/תוכנית ישנים (הועברו ל-[`docs/archive/plans-2026-04/`](docs/archive/plans-2026-04/README.md)).
+> **תוכנית האב העדכנית (משימות שנותרו, אחוזים ואומדנים):** [`MASTER_PLAN_2026-10-16.html`](MASTER_PLAN_2026-10-16.html)
+>
 > התוכניות החיות: [`MASTER_PLAN_NUMBER_ONE.md`](MASTER_PLAN_NUMBER_ONE.md) (מפת פיצ'רים), [`TASKS.md`](TASKS.md) (צ'קליסט שלבים), [`docs/audit/LAUNCH-READINESS-2026-05-26.md`](docs/audit/LAUNCH-READINESS-2026-05-26.md) (חסמי השקה).
 
 ## 1. תמונת מצב
