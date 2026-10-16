@@ -85,7 +85,7 @@
 ## 0 · Prerequisites from user (10)
 
 - [!] **P0-1** 🔑 Provide Sentry DSN, or "skip"
-- [!] **P0-2** 🔑 Confirm domain (placeholder: `lumen.md`)
+- [!] **P0-2** 🔑 Buy the domain: `lumen-md.app` (decided 16.10.2026; check availability first — fallbacks `lumenmd.app`, `lumen-md.dev`)
 - [!] **P1-1** 🔑 💰 Fly.io account + payment ($10/mo budget)
 - [!] **P1-2** 🔑 Stripe account, get test + live keys
 - [!] **P1-3** 🔑 💰 Apple Developer Program ($99/yr)
@@ -133,10 +133,10 @@
 - [x] α.3.2 ✅ `sync-server/fly.toml` with health check
 - [!] α.3.3 🔑 `fly launch --name lumen-signal --region sjc`
 - [!] α.3.4 🔑 `fly deploy`
-- [!] α.3.5 🔑 DNS CNAME `signal.lumen.md → lumen-signal.fly.dev`
-- [!] α.3.6 🔑 `fly certs add signal.lumen.md`
+- [!] α.3.5 🔑 DNS CNAME `signal.lumen-md.app → lumen-signal.fly.dev`
+- [!] α.3.6 🔑 `fly certs add signal.lumen-md.app`
 - [x] α.3.7 ✅ `PUBLIC_SIGNALING_FALLBACK` updated in `src/collab/yjs.ts`
-- [x] α.3.8 ✅ `.env.example` has `VITE_WEBRTC_SIGNALING_URL=wss://signal.lumen.md`
+- [x] α.3.8 ✅ `.env.example` has `VITE_WEBRTC_SIGNALING_URL=wss://signal.lumen-md.app`
 - [x] α.3.9 ✅ README "Self-hosting" section added (Docker Compose + Fly.io signaling + docs link)
 - [!] α.3.10 🔑 Two-network smoke (laptop Wi-Fi + phone LTE)
 - [x] α.3.11 ✅ CI healthcheck job for signaling server added (warns if unreachable, runs on main push)
@@ -190,7 +190,7 @@
 - [x] α.G.2 ✅ `npm run test` ≥ 470 (487)
 - [x] α.G.3 ✅ Coverage ≥ 60 % (97 %)
 - [x] α.G.4 ✅ `npm run lighthouse:a11y` script + gate raised from 0.9 → 0.95 in `lighthouserc.json`
-- [!] α.G.5 🔑 `curl -fI https://signal.lumen.md/` 200
+- [!] α.G.5 🔑 `curl -fI https://signal.lumen-md.app/` 200
 - [!] α.G.6 🔑 Sentry test event received
 - [x] α.G.7 ✅ `npm audit` 0/0/0
 - [x] α.G.8 Merge `phase-alpha` → `main` (worked on main)
@@ -228,7 +228,7 @@ All blocked on Fly.io creds.
 - [!] β.2.4 🔑 `fly launch --name lumen-collab`
 - [!] β.2.5 🔑 `fly postgres create + attach`
 - [!] β.2.6 🔑 `fly deploy && fly certs add`
-- [!] β.2.7 🔑 DNS CNAME `collab.lumen.md`
+- [!] β.2.7 🔑 DNS CNAME `collab.lumen-md.app`
 - [!] β.2.8 🔑 Frontend WebsocketProvider switch
 - [!] β.2.9 🔑 Reconnect protocol
 - [!] β.2.10 🔑 e2e/persistent-collab.spec.ts
@@ -284,7 +284,7 @@ All blocked on Apple ($99) + Google ($25) Developer accounts.
 ### β — Phase gate (0 / 8)
 
 - [!] β.G.1 Playwright matrix green (CI)
-- [!] β.G.2 🔑 `curl collab.lumen.md/health` 200
+- [!] β.G.2 🔑 `curl collab.lumen-md.app/health` 200
 - [!] β.G.3 🔑 Stripe purchase → entitlement flip
 - [x] β.G.4 8 locales selectable
 - [!] β.G.5 🔑 ⏱ TestFlight build live
@@ -594,7 +594,7 @@ verified). Resolve in order.
 ### F0 · Things I claimed DONE that are actually only files
 
 - [!] **F0.1** α.3.10 Two-network signaling smoke test — needs
-      `wss://signal.lumen.md` actually live
+      `wss://signal.lumen-md.app` actually live
 - [!] **F0.2** α.5.4 Run Lighthouse a11y once against the live build
   and record the actual score — env-blocked (port 5173 EPERM); script + gate ready
 - [!] **F0.3** α.G.6 Receive a real Sentry event from production
@@ -765,7 +765,7 @@ Remaining 119 `[!]` tasks are blocked on external credentials.
 | Decision                | Choice                                      | Rationale                     |
 | ----------------------- | ------------------------------------------- | ----------------------------- |
 | Brand                   | Lumen                                       | per `package.json`            |
-| Domain placeholder      | `lumen.md`                                  | non-blocking                  |
+| Domain placeholder      | `lumen-md.app`                                  | non-blocking                  |
 | i18n strategy           | AI-first, native review = P2                | unblocks β.4                  |
 | Plugin registry         | Separate repo `lumen-plugins-registry`      | cleanest blast-radius         |
 | Fine-tune default       | Opt-in, off, Pro-only                       | privacy + cost                |
