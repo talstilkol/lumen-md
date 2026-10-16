@@ -209,7 +209,7 @@ function headingsOf(text: string): Set<string> {
 const hasHeading = (hs: Set<string> | undefined, h: string) => !!hs && (hs.has(headingSlug(h)) || hs.has(h.trim().toLowerCase()));
 
 function frontMatterless(text: string): string {
-  return text.replace(/^---\r?\n[\s\S]*?\r?\n---\s*/, "");
+  return text.replace(/^---[ \t]*\r?\n[\s\S]*?\r?\n(?:---|\.\.\.)[ \t]*(?:\r?\n|$)\s*/, "");
 }
 
 /** Levenshtein distance, capped (returns cap + 1 beyond it). */

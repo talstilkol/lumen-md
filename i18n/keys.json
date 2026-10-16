@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-10-16T17:25:20.953Z",
+  "generated_at": "2026-10-16T20:58:32.213Z",
   "source": "src/i18n/index.ts (en bundle)",
-  "count": 938,
+  "count": 939,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -907,6 +907,13 @@
       "key": "doctor.noWorkspace",
       "en": "Open a workspace folder first",
       "vars": []
+    },
+    {
+      "key": "doctor.readFailed",
+      "en": "Couldn't read {path}: Vault Doctor stopped so it won't report or fix links against an incomplete workspace",
+      "vars": [
+        "path"
+      ]
     },
     {
       "key": "doctor.checking",

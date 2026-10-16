@@ -932,6 +932,7 @@
   "cmd.tools.vaultDoctorFix": "🩺 Vault Doctor：提案されたリンク修正を適用",
   "cmd.tools.vaultDoctorFix.hint": "近い候補が 1 つだけの壊れた [[リンク]] を書き換え",
   "doctor.noWorkspace": "先にワークスペースフォルダーを開いてください",
+  "doctor.readFailed": "{path} を読み込めませんでした。不完全なワークスペースでリンクを報告・修正しないよう、Vault Doctor を中止しました",
   "doctor.checking": "{count} 件のノートを検査中…",
   "doctor.done": "{count} 件の検出",
   "doctor.noFixes": "明確な候補が 1 つの壊れたリンクはありません",

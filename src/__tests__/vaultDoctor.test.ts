@@ -164,6 +164,7 @@ describe("vault doctor", () => {
   it("front matter comments aren't headings; fixes skip Markdown link labels", () => {
     const f = runVaultDoctor([{ path: "a.md", text: "---\ntitle: A\n# Project\n---\n\n[[#Project]]\n" }]);
     expect(f.filter((x) => x.kind === "missing-heading").map((x) => x.detail)).toEqual(["#Project"]);
+    expect(runVaultDoctor([{ path: "e.md", text: "---\ntitle: E\n...\n" }]).some((x) => x.kind === "empty-note")).toBe(true);
     expect(applyLinkFixes("[[Projct]] [see [[Projct]]](https://example.com)", [{ from: "Projct", to: "Project" }])).toBe(
       "[[Project]] [see [[Projct]]](https://example.com)",
     );

@@ -255,6 +255,7 @@ const en: Strings = {
   "cmd.tools.vaultDoctorFix": "🩺 Vault Doctor: Apply Suggested Link Fixes",
   "cmd.tools.vaultDoctorFix.hint": "Rewrite broken [[links]] that have exactly one close match",
   "doctor.noWorkspace": "Open a workspace folder first",
+  "doctor.readFailed": "Couldn't read {path}: Vault Doctor stopped so it won't report or fix links against an incomplete workspace",
   "doctor.checking": "Checking {count} notes…",
   "doctor.done": "{count} findings",
   "doctor.noFixes": "No broken links with a single clear suggestion",

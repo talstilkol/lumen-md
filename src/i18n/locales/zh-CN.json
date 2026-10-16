@@ -932,6 +932,7 @@
   "cmd.tools.vaultDoctorFix": "🩺 库医生：应用建议的链接修复",
   "cmd.tools.vaultDoctorFix.hint": "改写只有一个近似匹配的失效 [[链接]]",
   "doctor.noWorkspace": "请先打开一个工作区文件夹",
+  "doctor.readFailed": "无法读取 {path}：Vault Doctor 已停止，以免在不完整的工作区中报告或修复链接",
   "doctor.checking": "正在检查 {count} 条笔记…",
   "doctor.done": "{count} 项发现",
   "doctor.noFixes": "没有只有一个明确建议的失效链接",

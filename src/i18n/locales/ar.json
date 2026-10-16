@@ -932,6 +932,7 @@
   "cmd.tools.vaultDoctorFix": "🩺 طبيب الخزنة: تطبيق إصلاحات الروابط المقترحة",
   "cmd.tools.vaultDoctorFix.hint": "إعادة كتابة [[الروابط]] المعطّلة التي لها تطابق قريب واحد فقط",
   "doctor.noWorkspace": "افتح مجلد مساحة عمل أولًا",
+  "doctor.readFailed": "تعذّرت قراءة {path}: توقف Vault Doctor حتى لا يبلغ عن الروابط أو يصلحها في مساحة عمل غير مكتملة",
   "doctor.checking": "جارٍ فحص {count} ملاحظة…",
   "doctor.done": "{count} نتيجة",
   "doctor.noFixes": "لا توجد روابط معطّلة باقتراح واحد واضح",

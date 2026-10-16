@@ -107,7 +107,10 @@ async function loadDoctorNotes(): Promise<Array<{ path: string; text: string }> 
     try {
       notes.push({ path: f.path, text: await readWorkspaceFile(f.path) });
     } catch {
-      /* unreadable: skip */
+      // A missing note would look like a broken link target (and "fix"
+      // links to it): stop rather than scan an incomplete workspace.
+      showAiToast(t("doctor.readFailed", { path: f.path }), "error");
+      return null;
     }
   }
   if (!notes.length) {

@@ -932,6 +932,7 @@
   "cmd.tools.vaultDoctorFix": "🩺 רופא הכספת: החלת תיקוני הקישורים המוצעים",
   "cmd.tools.vaultDoctorFix.hint": "תיקון [[קישורים]] שבורים שיש להם התאמה קרובה אחת בלבד",
   "doctor.noWorkspace": "קודם צריך לפתוח תיקיית סביבת עבודה",
+  "doctor.readFailed": "לא ניתן לקרוא את {path}: Vault Doctor נעצר כדי לא לדווח על קישורים או לתקן אותם בסביבת עבודה חלקית",
   "doctor.checking": "בודק {count} פתקים…",
   "doctor.done": "{count} ממצאים",
   "doctor.noFixes": "אין קישורים שבורים עם הצעה ברורה אחת",

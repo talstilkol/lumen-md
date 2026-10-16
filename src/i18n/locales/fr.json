@@ -932,6 +932,7 @@
   "cmd.tools.vaultDoctorFix": "🩺 Docteur du coffre : appliquer les corrections de liens suggérées",
   "cmd.tools.vaultDoctorFix.hint": "Réécrire les [[liens]] cassés qui ont exactement une correspondance proche",
   "doctor.noWorkspace": "Ouvrez d’abord un dossier d’espace de travail",
+  "doctor.readFailed": "Impossible de lire {path} : Vault Doctor s’est arrêté pour ne pas signaler ni corriger de liens sur un espace de travail incomplet",
   "doctor.checking": "Vérification de {count} notes…",
   "doctor.done": "{count} constats",
   "doctor.noFixes": "Aucun lien cassé avec une seule suggestion claire",
