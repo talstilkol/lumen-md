@@ -76,6 +76,12 @@ test("live-glsl compiles and renders a shader on a WebGL canvas", async ({ page 
   // CodeMirror's auto-close-brackets and double the shader's braces.
   await editor.fill("```live-glsl\nvoid main(){ gl_FragColor = vec4(0.9, 0.2, 0.1, 1.0); }\n```\n");
 
+  // The block renders an error view WITHOUT a canvas when WebGL is missing
+  // or the shader fails; assert on the error text first so a failure says
+  // which one it was instead of just "no canvas".
+  const anyGlsl = page.locator(".chart-block", { hasText: /GLSL/ }).first();
+  await expect(anyGlsl).toBeVisible({ timeout: 15_000 });
+  await expect(anyGlsl).not.toContainText("GLSL error", { timeout: 5_000 });
   const block = page.locator(".chart-block", { has: page.locator("canvas") });
   await expect(block).toBeVisible({ timeout: 15_000 });
   const canvas = block.locator("canvas");
