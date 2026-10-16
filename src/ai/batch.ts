@@ -84,14 +84,16 @@ export function loadJobs(): BatchJob[] {
   }
 }
 
-export function saveJobs(jobs: BatchJob[]): void {
+/** Persist the job list; false when storage is full or blocked. */
+export function saveJobs(jobs: BatchJob[]): boolean {
   try {
     // Unfinished jobs are always kept; only finished history is trimmed.
     const finished = jobs.filter((j) => j.status === "applied" || j.status === "failed" || j.status === "expired" || j.status === "cancelled");
     const keep = new Set([...jobs.filter((j) => !finished.includes(j)), ...finished.slice(-50)]);
     localStorage.setItem(STORE, JSON.stringify(jobs.filter((j) => keep.has(j))));
+    return true;
   } catch {
-    /* */
+    return false;
   }
 }
 
@@ -172,7 +174,13 @@ export async function submitBatch(
     id = (await res.json()).id;
   }
   const job: BatchJob = { id, provider, model, op, lang: opts.lang, createdAt: new Date().toISOString(), items, status: "submitted" };
-  saveJobs([...loadJobs(), job]);
+  if (!saveJobs([...loadJobs(), job])) {
+    // The provider already has the job: give its ID so the results stay reachable.
+    throw new AiError(
+      "API_ERROR",
+      `Batch ${id} was submitted to ${provider}, but this device couldn't save it (storage full or blocked), so "Check Batch Jobs" won't list it. Its results are in your ${provider} console under that ID.`,
+    );
+  }
   return job;
 }
 
@@ -244,6 +252,21 @@ export async function fetchBatchResults(job: BatchJob, fetchImpl: Fetch = fetch)
 const yamlString = (s: string) => JSON.stringify(s.replace(/\s+/g, " ").trim());
 
 /** Set (or replace) a top-level `key: value` line in the note's front matter, creating it when absent. */
+/** True when every `[` / `{` opened in a YAML flow value is closed (quotes respected). */
+function flowClosed(text: string, open: string): boolean {
+  const close = open === "[" ? "]" : "}";
+  let depth = 0;
+  let quote: string | null = null;
+  for (const ch of text.slice(text.indexOf(open))) {
+    if (quote) {
+      if (ch === quote) quote = null;
+    } else if (ch === '"' || ch === "'") quote = ch;
+    else if (ch === open) depth++;
+    else if (ch === close && --depth === 0) return true;
+  }
+  return false;
+}
+
 export function setFrontmatterField(content: string, key: string, value: string): string {
   // `---\n---` (empty front matter) counts too.
   const fm = /^---\r?\n(?:([\s\S]*?)\r?\n)?---/.exec(content);
@@ -257,6 +280,13 @@ export function setFrontmatterField(content: string, key: string, value: string)
     // inside a block scalar / list, up to the next top-level key.
     let end = at + 1;
     while (end < lines.length && (/^\s+\S/.test(lines[end]) || (!lines[end].trim() && lines.slice(end + 1).some((l) => l.trim()) && /^\s+\S/.test(lines.slice(end + 1).find((l) => l.trim()) ?? "")))) end++;
+    // A multi-line flow collection (`key: [` … `]`) ends at its closing
+    // bracket, which may sit at column 0.
+    const flow = /^[^:]+:\s*([[{])/.exec(lines[at]);
+    if (flow && !flowClosed(lines.slice(at, end).join("\n"), flow[1])) {
+      while (end < lines.length && !flowClosed(lines.slice(at, end + 1).join("\n"), flow[1])) end++;
+      end = Math.min(lines.length, end + 1);
+    }
     lines.splice(at, end - at, line);
   }
   return `---\n${lines.join("\n")}\n---` + content.slice(fm[0].length);
@@ -294,7 +324,13 @@ export function frontmatterTags(content: string): string[] {
   const lines = fm.split(/\r?\n/);
   const at = lines.findIndex((l) => /^tags\s*:/.test(l));
   if (at === -1) return [];
-  const inline = lines[at].replace(/^tags\s*:\s*/, "").trim();
+  let inline = lines[at].replace(/^tags\s*:\s*/, "").trim();
+  // A flow list over several lines: `tags: [` … `]`.
+  if (inline.startsWith("[")) {
+    let end = at;
+    while (end + 1 < lines.length && !flowClosed(lines.slice(at, end + 1).join("\n"), "[")) end++;
+    inline = lines.slice(at, end + 1).join(" ").replace(/^tags\s*:\s*/, "").replace(/,\s*\]\s*$/, "]").trim();
+  }
   if (inline) {
     // Split on commas outside quotes: ["a, b", c] is two tags.
     const body = inline.replace(/^\[|\]$/g, "");

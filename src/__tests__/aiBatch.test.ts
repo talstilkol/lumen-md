@@ -44,6 +44,9 @@ describe("batch helpers", () => {
     expect(mergeTags("---\ntags:\n  - \"a: b\"\n  - c#d\n---\nx", ["new"])).toContain('tags: ["a: b", "c#d", new]');
     expect(frontmatterTags('---\ntags: ["a, b", c]\n---\n')).toEqual(["a, b", "c"]);
     expect(setFrontmatterField("---\n---\nBody", "summary", '"S"')).toBe('---\nsummary: "S"\n---\nBody');
+    const flowNote = "---\ntitle: T\ntags: [\n  alpha,\n  beta\n]\nother: x\n---\nBody";
+    expect(frontmatterTags(flowNote)).toEqual(["alpha", "beta"]);
+    expect(mergeTags(flowNote, ["gamma"])).toBe("---\ntitle: T\ntags: [alpha, beta, gamma]\nother: x\n---\nBody");
     const replaced = setFrontmatterField(note, "summary", '"New"');
     expect(replaced).toContain('summary: "New"\nother: x');
     expect(replaced).not.toContain("line three");
@@ -90,6 +93,20 @@ describe("batch APIs", () => {
     // Fetching the results again (not applied yet) doesn't meter twice.
     await fetchBatchResults(job, f);
     expect(usageSummary().rows[0]).toMatchObject({ requests: 1, inputTokens: 100 });
+  });
+
+  it("reports a submitted job it couldn't save, with its ID", async () => {
+    setActiveProvider("anthropic");
+    localStorage.setItem("lumen.ai.key.anthropic", "a-key");
+    const f = vi.fn(async () => new Response(JSON.stringify({ id: "msgbatch_9" }))) as unknown as typeof fetch;
+    const spy = vi.spyOn(Storage.prototype, "setItem").mockImplementation(() => {
+      throw new Error("QuotaExceededError");
+    });
+    try {
+      await expect(submitBatch("tags", [{ path: "a.md", text: "x" }], { fetchImpl: f })).rejects.toThrow(/msgbatch_9/);
+    } finally {
+      spy.mockRestore();
+    }
   });
 
   it("submits an OpenAI batch via a JSONL file and reports processing", async () => {
