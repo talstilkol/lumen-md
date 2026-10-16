@@ -137,18 +137,19 @@ export async function signOutSso(): Promise<void> {
   cachedToken = null;
   const cfg = readConfig();
   if (!cfg) return;
-  try {
-    await fetchWithRetry(
-      `${cfg.endpoint}/api/sso/signout`,
-      {
-        method: "POST",
-        credentials: "include",
-      },
-      { label: "workos.signout", maxRetries: 2, baseDelayMs: 700, maxDelayMs: 2000 },
-    );
-  } catch {
-    // Best-effort. The cookie expires on its own.
-  }
+  // The session cookie is HttpOnly and lives up to SESSION_TTL (7 days), so
+  // only the worker can end it. If that fails, say so: reporting "signed
+  // out" while the cookie survives would silently restore the account on the
+  // next load (bad on a shared device).
+  const res = await fetchWithRetry(
+    `${cfg.endpoint}/api/sso/signout`,
+    {
+      method: "POST",
+      credentials: "include",
+    },
+    { label: "workos.signout", maxRetries: 2, baseDelayMs: 700, maxDelayMs: 2000 },
+  );
+  if (!res.ok) throw new Error(`SSO sign-out failed: ${res.status}`);
 }
 
 /**

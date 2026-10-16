@@ -80,3 +80,16 @@ describe("signOut after a restored SSO session", () => {
     expect(useAuth.getState().provider).toBe(supabaseProvider);
   });
 });
+
+describe("signOut failure keeps the session", () => {
+  it("stays authenticated (and on WorkOS) when the SSO worker can't clear the cookie", async () => {
+    workosProvider.loadSession.mockResolvedValue({ id: "user_01", provider: "workos" });
+    workosProvider.signOut.mockRejectedValueOnce(new Error("SSO sign-out failed: 503"));
+    const { initAuth, useAuth } = await freshAuth();
+    await initAuth();
+    await expect(useAuth.getState().signOut()).rejects.toThrow("503");
+    expect(useAuth.getState().status).toBe("authenticated");
+    expect(useAuth.getState().user).toMatchObject({ id: "user_01" });
+    expect(useAuth.getState().provider).toBe(workosProvider);
+  });
+});

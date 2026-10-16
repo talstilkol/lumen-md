@@ -123,13 +123,22 @@ describe("signOutSso + workosProvider record", () => {
 
   it("workosProvider.loadSession + signOut are wired through to the helpers", async () => {
     __setWorkOSConfigForTesting({ endpoint: "https://auth.lumen.md" });
-    const fetchSpy = vi.fn().mockResolvedValue(
-      new Response("", { status: 401 }),
-    );
+    const fetchSpy = vi
+      .fn()
+      .mockResolvedValueOnce(new Response("", { status: 401 }))
+      .mockResolvedValueOnce(new Response(null, { status: 204 }));
     vi.stubGlobal("fetch", fetchSpy);
     await workosProvider.loadSession();
     await workosProvider.signOut();
     expect(fetchSpy).toHaveBeenCalledTimes(2);
+  });
+
+  it("signOutSso rejects when the worker doesn't clear the session (HTTP error or network)", async () => {
+    __setWorkOSConfigForTesting({ endpoint: "https://auth.lumen.md" });
+    vi.stubGlobal("fetch", vi.fn(async () => new Response("{}", { status: 403 })));
+    await expect(signOutSso()).rejects.toThrow(/sign-out failed/);
+    vi.stubGlobal("fetch", vi.fn(async () => { throw new TypeError("Failed to fetch"); }));
+    await expect(signOutSso()).rejects.toThrow();
   });
 });
 
