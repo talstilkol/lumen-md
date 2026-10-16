@@ -49,6 +49,7 @@ export interface UseCommandsOptions {
   setAuditLogOpen?: (open: boolean) => void;
   setOrgSettingsOpen?: (open: boolean) => void;
   setTrustedKeysOpen?: (open: boolean) => void;
+  setThemeSettingsOpen?: (open: boolean) => void;
   setFineTuneOpen?: (open: boolean) => void;
   setTagsPanelOpen?: (open: boolean) => void;
   setCommentsPanelOpen?: (open: boolean) => void;
@@ -82,6 +83,7 @@ export function useCommands({
   setAuditLogOpen,
   setOrgSettingsOpen,
   setTrustedKeysOpen,
+  setThemeSettingsOpen,
   setFineTuneOpen,
   setTagsPanelOpen,
   setCommentsPanelOpen,
@@ -955,6 +957,18 @@ export function useCommands({
               icon: cmdIcons.Sparkles,
               group: t("group.security"),
               action: () => setTrustedKeysOpen(true),
+            },
+          ]
+        : []),
+      ...(setThemeSettingsOpen
+        ? [
+            {
+              id: "settings.theme",
+              label: t("cmd.settings.theme"),
+              hint: t("cmd.settings.theme.hint"),
+              icon: theme === "dark" ? cmdIcons.Moon : cmdIcons.Sun,
+              group: t("group.view"),
+              action: () => setThemeSettingsOpen(true),
             },
           ]
         : []),

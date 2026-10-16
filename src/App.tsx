@@ -17,6 +17,7 @@ const TemplateGallery = lazy(() => import("./ui/TemplateGallery").then(m => ({ d
 const AuditLog = lazy(() => import("./ui/AuditLog").then(m => ({ default: m.AuditLog })));
 const OrgSettings = lazy(() => import("./ui/OrgSettings").then(m => ({ default: m.OrgSettings })));
 const TrustedKeysSettings = lazy(() => import("./ui/TrustedKeysSettings").then(m => ({ default: m.TrustedKeysSettings })));
+const ThemeSettings = lazy(() => import("./ui/ThemeSettings").then(m => ({ default: m.ThemeSettings })));
 const FineTuneSettings = lazy(() => import("./ui/FineTuneSettings").then(m => ({ default: m.FineTuneSettings })));
 const VersionHistory = lazy(() => import("./ui/VersionHistory").then(m => ({ default: m.VersionHistory })));
 const MarkdownTableEditor = lazy(() => import("./ui/MarkdownTableEditor").then(m => ({ default: m.MarkdownTableEditor })));
@@ -121,6 +122,7 @@ export default function App() {
   const [fineTuneOpen, setFineTuneOpen] = useState(false);
   const [orgSettingsOpen, setOrgSettingsOpen] = useState(false);
   const [trustedKeysOpen, setTrustedKeysOpen] = useState(false);
+  const [themeSettingsOpen, setThemeSettingsOpen] = useState(false);
   const [tagsPanelOpen, setTagsPanelOpen] = useState(false);
   const [commentsPanelOpen, setCommentsPanelOpen] = useState(false);
   const [runtimeMetricsOpen, setRuntimeMetricsOpen] = useState(false);
@@ -544,6 +546,7 @@ export default function App() {
     setAuditLogOpen,
     setOrgSettingsOpen,
     setTrustedKeysOpen,
+    setThemeSettingsOpen,
     setFineTuneOpen,
     setTagsPanelOpen,
     setCommentsPanelOpen,
@@ -885,6 +888,7 @@ export default function App() {
           <FineTuneSettings open={fineTuneOpen} onClose={() => setFineTuneOpen(false)} />
           <OrgSettings open={orgSettingsOpen} onClose={() => setOrgSettingsOpen(false)} onOpenAuditLog={() => setAuditLogOpen(true)} />
           <TrustedKeysSettings open={trustedKeysOpen} onClose={() => setTrustedKeysOpen(false)} />
+          {themeSettingsOpen && <ThemeSettings open={themeSettingsOpen} onClose={() => setThemeSettingsOpen(false)} />}
         </ErrorBoundary>
       </Suspense>
 
