@@ -475,28 +475,34 @@ export function changeAt(state: EditorState, pos: number): { from: number; to: n
   const $pos = state.doc.resolve(pos);
   const parent = $pos.parent;
   const base = $pos.start();
-  const ranges: Array<{ from: number; to: number; type: "insert" | "delete" }> = [];
+  const ranges: Array<{ from: number; to: number; type: "insert" | "delete"; author: string | null }> = [];
   parent.forEach((child, offset) => {
     if (!child.isText) return;
-    const type = ins.isInSet(child.marks) ? "insert" : del.isInSet(child.marks) ? "delete" : null;
-    if (!type) return;
+    const mark = ins.isInSet(child.marks) ?? del.isInSet(child.marks);
+    if (!mark) return;
+    const type = mark.type === ins ? "insert" : "delete";
+    const author = (mark.attrs.author as string | null) ?? null;
     const from = base + offset;
     const to = from + child.nodeSize;
     const last = ranges[ranges.length - 1];
-    if (last && last.type === type && last.to === from) last.to = to;
-    else ranges.push({ from, to, type });
+    // One change = adjacent text of the same kind AND author.
+    if (last && last.type === type && last.author === author && last.to === from) last.to = to;
+    else ranges.push({ from, to, type, author });
   });
-  // A substitution (deletion + insertion) resolves as one.
+  // A substitution (deletion + insertion by the same author) resolves as one.
+  const inR = (x: { from: number; to: number }) => pos >= x.from && pos <= x.to;
+  const pick = (r: (typeof ranges)[number]) => ({ from: r.from, to: r.to, type: r.type });
   for (let i = 0; i < ranges.length; i++) {
     const r = ranges[i];
     const n = ranges[i + 1];
-    const inR = (x: { from: number; to: number }) => pos >= x.from && pos <= x.to;
-    if (r.type === "delete" && n?.type === "insert" && n.from === r.to && (inR(r) || inR(n))) {
+    if (r.type === "delete" && n?.type === "insert" && n.from === r.to && n.author === r.author && (inR(r) || inR(n))) {
       return { from: r.from, to: n.to, type: "delete" };
     }
-    if (inR(r)) return r;
   }
-  return null;
+  // Otherwise the change under the cursor; at a boundary between two, the
+  // one the cursor is inside of (or ends) first.
+  const hit = ranges.find((r) => pos > r.from && pos < r.to) ?? ranges.find(inR);
+  return hit ? pick(hit) : null;
 }
 
 /** Accept or reject every change in [from, to). */

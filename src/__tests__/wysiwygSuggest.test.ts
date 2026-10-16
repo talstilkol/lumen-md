@@ -151,4 +151,15 @@ describe("accept / reject in WYSIWYG", () => {
     expect(e.md()).toBe("A one B two C y D");
     expect(jumpToChange(e.view, 1)).toBe(false);
   });
+
+  it("resolves different authors' adjacent changes separately", async () => {
+    const e = await open("Keep {--old--}{>>@Alice<<}{++new++}{>>@Bob<<} end.", false);
+    e.select(e.at("old", 1));
+    expect(resolveAtCursor(e.view, "reject")).toBe(true); // only Alice's deletion
+    expect(e.md()).toBe("Keep old{++new++}{>>@Bob<<} end.");
+    const same = await open("Keep {~~old~>new~~}{>>@Tal<<} end.", false);
+    same.select(same.at("old", 1));
+    expect(resolveAtCursor(same.view, "accept")).toBe(true); // one substitution
+    expect(same.md()).toBe("Keep new end.");
+  });
 });
