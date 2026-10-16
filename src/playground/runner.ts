@@ -10,6 +10,8 @@
 import { transform } from "sucrase";
 import {
   IMPORT_ATTRS_RE,
+  LOOP_GUARD,
+  guardLoops,
   importSpecifiers,
   resolveImport,
   type PlaygroundProject,
@@ -137,6 +139,7 @@ async function link(project: PlaygroundProject): Promise<string> {
         production: true,
         filePath: name,
       }).code;
+      code = guardLoops(code);
     }
     // Only real import / re-export specifiers (not text in comments or
     // strings), replaced from the end so offsets stay valid.
@@ -163,6 +166,24 @@ async function link(project: PlaygroundProject): Promise<string> {
   if (!project.entry) throw new Error("No script to run: add a main.js / main.jsx file");
   return build(project.entry);
 }
+
+/*
+ * Runaway loops: the iframe may share the editor's thread, so a loop that
+ * never yields would freeze the whole app. Every loop condition calls the
+ * guard (see guardLoops); a heartbeat marks each time the event loop turns.
+ * If the page has been busy for 5 s without turning, the loop throws.
+ */
+const BUSY_LIMIT_MS = 5000;
+let lastTurn = performance.now();
+setInterval(() => (lastTurn = performance.now()), 100);
+let loopCalls = 0;
+(globalThis as unknown as Record<string, () => boolean>)[LOOP_GUARD] = () => {
+  if ((++loopCalls & 0x3ff) === 0 && performance.now() - lastTurn > BUSY_LIMIT_MS) {
+    lastTurn = performance.now(); // let the error be reported, then the next loop run
+    throw new Error(`Stopped a loop that kept the page busy for over ${BUSY_LIMIT_MS / 1000} s`);
+  }
+  return true;
+};
 
 async function run(project: PlaygroundProject): Promise<void> {
   const started = performance.now();

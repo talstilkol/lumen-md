@@ -164,6 +164,50 @@ export function importSpecifiers(code: string): Array<{ start: number; end: numb
   return out;
 }
 
+/** The loop guard the runner defines (it throws once the page has been busy too long). */
+export const LOOP_GUARD = "__lumenLoop";
+
+/**
+ * Loop conditions guarded: `while (c)` → `while (__lumenLoop() && (c))`,
+ * `for (a; c; b)` likewise (`do … while` is covered by its `while`), so a
+ * runaway loop throws instead of freezing the editor. `for … of / in`
+ * loops are left alone.
+ */
+export function guardLoops(code: string): string {
+  const tokens = tokenize(code);
+  const edits: Array<{ at: number; text: string }> = [];
+  for (let i = 0; i < tokens.length; i++) {
+    const t = tokens[i];
+    if (t.type !== "ident" || (t.value !== "while" && t.value !== "for")) continue;
+    const prev = tokens[i - 1];
+    if (prev && (prev.value === "." || prev.value === "?.")) continue;
+    const open = tokens[i + 1];
+    if (!open || open.value !== "(") continue;
+    const d = open.depth;
+    let close = -1;
+    const semis: number[] = [];
+    for (let k = i + 2; k < tokens.length; k++) {
+      const x = tokens[k];
+      if (x.type === "punct" && x.value === ")" && x.depth === d) {
+        close = k;
+        break;
+      }
+      if (x.type === "punct" && x.value === ";" && x.depth === d + 1) semis.push(k);
+    }
+    if (close === -1) continue;
+    if (t.value === "while") {
+      edits.push({ at: open.end, text: `${LOOP_GUARD}() && (` }, { at: tokens[close].start, text: ")" });
+    } else if (semis.length === 2) {
+      const [a, b] = semis;
+      if (b === a + 1) edits.push({ at: tokens[a].end, text: ` ${LOOP_GUARD}()` });
+      else edits.push({ at: tokens[a].end, text: ` ${LOOP_GUARD}() && (` }, { at: tokens[b].start, text: ")" });
+    }
+  }
+  let out = code;
+  for (const e of edits.sort((x, y) => y.at - x.at)) out = out.slice(0, e.at) + e.text + out.slice(e.at);
+  return out;
+}
+
 /** The `${ … }` expressions of a template literal's source, with offsets into it. */
 function templateExpressions(tpl: string): Array<{ offset: number; code: string }> {
   const out: Array<{ offset: number; code: string }> = [];
