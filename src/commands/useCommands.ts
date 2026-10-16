@@ -886,7 +886,12 @@ export function useCommands({
           });
           if (choice !== "claude" && choice !== "brave" && choice !== "tavily") return;
           if (choice !== "claude") {
-            if (!researchEndpoint()) showAiToast(t("research.noService"), "error");
+            // Brave / Tavily go through the research service: without it the
+            // choice can't work, so keep the current setting.
+            if (!researchEndpoint()) {
+              showAiToast(t("research.noService"), "error");
+              return;
+            }
             const key = await uiPrompt({ message: t("research.key", { provider: choice === "brave" ? "Brave Search" : "Tavily" }), defaultValue: cur.provider === choice ? cur.key : "" });
             // Cancelled (or no key): keep the previous provider and key.
             if (key === null || !key.trim()) return;

@@ -209,7 +209,13 @@ export function formatCitationReport(docName: string, checks: readonly CitationC
   lines.push("| | Footnote | Line | Source | Result |", "|---|---|---:|---|---|");
   const order: CitationStatus[] = ["quote-not-found", "dead", "unreachable", "approximate", "reachable", "supported"];
   for (const c of [...checks].sort((a, b) => order.indexOf(a.status) - order.indexOf(b.status))) {
-    const src = `[${esc(c.title || new URL(c.url).hostname)}](${c.url})`;
+    let host = c.url;
+    try {
+      host = new URL(c.url).hostname;
+    } catch {
+      /* malformed: show it as written */
+    }
+    const src = `[${esc(c.title || host)}](${c.url})`;
     lines.push(`| ${ICON[c.status]} | \`[^${esc(c.id)}]\` | ${c.line} | ${src} | ${LABEL[c.status]}${c.detail ? ` (${esc(c.detail)})` : ""} |`);
   }
   return lines.join("\n");

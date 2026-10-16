@@ -53,8 +53,15 @@ const SYSTEM_REPORT =
   "and never invent facts, numbers or sources.";
 
 const title = (q: string) => q.replace(/\s+/g, " ").trim().slice(0, 120);
+const hostOf = (u: string) => {
+  try {
+    return new URL(u).hostname;
+  } catch {
+    return u;
+  }
+};
 const footnote = (n: number, src: { title: string; url: string }, quote: string, flag = "") =>
-  `[^${n}]: [${(src.title || new URL(src.url).hostname).replace(/[[\]]/g, "")}](${src.url})${quote ? ` — “${quote.replace(/[“”]/g, '"').replace(/\s+/g, " ")}”` : ""}${flag}`;
+  `[^${n}]: [${(src.title || hostOf(src.url)).replace(/[[\]]/g, "")}](${src.url})${quote ? ` — “${quote.replace(/[“”]/g, '"').replace(/\s+/g, " ")}”` : ""}${flag}`;
 
 /* ─── Claude web search ─────────────────────────────────────────────── */
 
@@ -217,6 +224,8 @@ async function proxyResearch(o: ResearchOptions, settings: ResearchSettings): Pr
 
   // 5. Footnotes for the cited sources; verify each quote against its page.
   const cited = [...new Set([...report.matchAll(/\[\^(\d+)\]/g)].map((m) => Number(m[1])))].filter((n) => n >= 1 && n <= pages.length).sort((a, b) => a - b);
+  // An answer that cites none of the sources read isn't research.
+  if (!cited.length) throw new Error("The answer didn't cite any of the sources it read — try again or rephrase the question.");
   let unverified = 0;
   const defs = cited.map((n) => {
     const { hit, page } = pages[n - 1];
