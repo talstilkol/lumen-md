@@ -70,13 +70,19 @@ export function aiQuotaStatus(now: Date = new Date()): AiQuotaStatus {
  * Gate one AI prompt: returns true (and counts it) when allowed; otherwise
  * shows an upgrade toast and returns false. Unlimited (self-hosted / no
  * billing) setups always pass and nothing is written to storage.
+ *
+ * Every production path that calls the LLM goes through this (palette
+ * commands via `withAiQuota`, Ask Workspace, Ctrl-Space completion,
+ * automatic inline suggestions, WYSIWYG Ghostwriter/Rewrite, CSV chart).
+ * Background callers pass `{ silent: true }` so an exhausted quota just
+ * stops them instead of toasting on every keystroke.
  */
-export function consumeAiPrompt(now: Date = new Date()): boolean {
+export function consumeAiPrompt(now: Date = new Date(), opts: { silent?: boolean } = {}): boolean {
   if (!gatesEnforced()) return true;
   const status = aiQuotaStatus(now);
   if (!Number.isFinite(status.limit)) return true;
   if (!status.allowed) {
-    showAiToast(t("billing.aiQuota.exceeded", { limit: status.limit }), "error");
+    if (!opts.silent) showAiToast(t("billing.aiQuota.exceeded", { limit: status.limit }), "error");
     return false;
   }
   recordAiPrompt(now);

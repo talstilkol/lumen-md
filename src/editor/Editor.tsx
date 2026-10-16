@@ -31,6 +31,7 @@ import { tags as t } from "@lezer/highlight";
 import { StateField, StateEffect } from "@codemirror/state";
 import type { Extension } from "@codemirror/state";
 import { chat } from "../ai/llm";
+import { consumeAiPrompt } from "../billing/aiQuota";
 import { PROMPTS } from "../ai/prompts";
 import { embedHintExtension } from "./embedHintExtension";
 import { insertSlashMenuExtension } from "./insertMenu";
@@ -191,6 +192,8 @@ function ghostTextExtension(): Extension {
           if (!textBefore.trim()) return false;
 
           debounceTimer = setTimeout(async () => {
+            // Explicit Ctrl-Space request: counts against the AI quota.
+            if (!consumeAiPrompt()) return;
             try {
               controller = new AbortController();
               const text = await chat(

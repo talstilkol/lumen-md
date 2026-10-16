@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-10-16T01:48:28.738Z",
+  "generated_at": "2026-10-16T02:11:58.224Z",
   "source": "src/i18n/index.ts (en bundle)",
-  "count": 909,
+  "count": 910,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -3845,6 +3845,11 @@
     {
       "key": "billing.upgrade.close",
       "en": "Close",
+      "vars": []
+    },
+    {
+      "key": "billing.upgrade.smartSearch",
+      "en": "Smart search (semantic, embedding-based) is a Pro feature. Keyword search stays available.",
       "vars": []
     },
     {

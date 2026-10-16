@@ -907,5 +907,6 @@
   "chart.reason.map": "{lat} / {lon} 看起来是坐标——在地图上显示。",
   "chart.reason.radar": "{n} 个项目的 {k} 个指标——比较它们的轮廓。",
   "chart.reason.summary": "没有类别或时间列——比较各列平均值。",
-  "chart.alternatives": "图表建议"
+  "chart.alternatives": "图表建议",
+  "billing.upgrade.smartSearch": "智能搜索（基于嵌入的语义搜索）是 Pro 版功能。关键词搜索仍可使用。"
 }

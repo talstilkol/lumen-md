@@ -907,5 +907,6 @@
   "chart.reason.map": "{lat} / {lon} sehen nach Koordinaten aus – auf einer Karte zeigen.",
   "chart.reason.radar": "{k} Kennzahlen für {n} Einträge – Profile vergleichen.",
   "chart.reason.summary": "Keine Kategorie- oder Zeitspalte – Spaltendurchschnitte im Vergleich.",
-  "chart.alternatives": "Diagrammvorschläge"
+  "chart.alternatives": "Diagrammvorschläge",
+  "billing.upgrade.smartSearch": "Die intelligente Suche (semantisch, mit Embeddings) ist eine Pro-Funktion. Die Stichwortsuche bleibt verfügbar."
 }

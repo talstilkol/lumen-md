@@ -12,6 +12,9 @@ import { log } from "../lib/logger";
 import { showAiToast } from "../ui/AiToast";
 import { semanticSearch, type RagResult } from "../ai/embeddings";
 import { indexWorkspace, searchHybrid, type SemanticHit } from "../ai/semanticSearch";
+import { useCapability } from "../billing/gates";
+import { consumeAiPrompt } from "../billing/aiQuota";
+import { UpgradeNotice } from "./UpgradeNotice";
 import { useAppStore } from "../store/useStore";
 import { rememberSearch, getSearchHistory, forgetSearch } from "../storage/searchHistory";
 import { flashSearchHighlight } from "../editor/searchHighlight";
@@ -25,6 +28,9 @@ interface Props {
 
 export function SearchDialog({ open, onClose, onOpenFile }: Props) {
   const [mode, setMode] = useState<"search" | "smart" | "ai">("search");
+  // Smart (embedding) search is a Pro capability when billing is enforced;
+  // self-hosted setups always have it.
+  const smartAllowed = useCapability("smartSearch");
   const [query, setQuery] = useState("");
   const [hits, setHits] = useState<SearchHit[]>([]);
   const [smartHits, setSmartHits] = useState<SemanticHit[]>([]);
@@ -118,7 +124,7 @@ export function SearchDialog({ open, onClose, onOpenFile }: Props) {
   useEffect(() => {
     if (!open) return;
     if (mode !== "smart") return;
-    if (!query.trim()) {
+    if (!smartAllowed || !query.trim()) {
       setSmartHits([]);
       return;
     }
@@ -142,7 +148,7 @@ export function SearchDialog({ open, onClose, onOpenFile }: Props) {
       cancelled = true;
       clearTimeout(handle);
     };
-  }, [open, query, mode]);
+  }, [open, query, mode, smartAllowed]);
 
   async function rebuildSmartIndex() {
     if (!aiKey) {
@@ -227,6 +233,8 @@ export function SearchDialog({ open, onClose, onOpenFile }: Props) {
   }
 
   async function askAi() {
+    // Each question is one LLM prompt against the monthly AI quota.
+    if (!consumeAiPrompt()) return;
     setAiLoading(true);
     setAiAnswer(t("searchDialog.searching"));
     setAiSources([]);
@@ -236,7 +244,7 @@ export function SearchDialog({ open, onClose, onOpenFile }: Props) {
       // (Smart tab → Build) we fuse BM25 + semantic via RRF for genuinely
       // semantic-aware Q&A. When the index is empty, `searchHybrid` falls
       // back to BM25 alone, so we never block the AI tab on a missing index.
-      const hybridHits = aiKey
+      const hybridHits = aiKey && smartAllowed
         ? await searchHybrid(query, 8).catch(() => [] as SemanticHit[])
         : [];
       const fallback =
@@ -330,7 +338,7 @@ export function SearchDialog({ open, onClose, onOpenFile }: Props) {
           <button className={`chart-block-tab ${mode === "ai" ? "active" : ""}`} style={{ fontSize: 13, background: "transparent" }} onClick={() => setMode("ai")}>
              <Sparkles size={11} style={{display:"inline", marginRight:4}}/> Ask Workspace
           </button>
-          {mode === "smart" && (
+          {mode === "smart" && smartAllowed && (
             <button
               type="button"
               onClick={rebuildSmartIndex}
@@ -387,7 +395,10 @@ export function SearchDialog({ open, onClose, onOpenFile }: Props) {
           )}
         </div>
         <div className="cmd-palette-list" ref={listRef}>
-          {empty && (
+          {mode === "smart" && !smartAllowed && (
+            <UpgradeNotice compact message={t("billing.upgrade.smartSearch")} />
+          )}
+          {empty && !(mode === "smart" && !smartAllowed) && (
             <div className="cmd-palette-empty">
               {mode === "smart" && !smartIndexedAt && !query
                 ? "Click \u201CBuild index\u201D to enable Smart search."

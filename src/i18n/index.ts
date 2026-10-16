@@ -843,6 +843,7 @@ const en: Strings = {
   "billing.upgrade.auditLog": "The audit log is available on the Team plan.",
   "billing.upgrade.persistentCollab": "A persistent collaboration server is a Pro feature. Sessions use peer-to-peer WebRTC.",
   "billing.upgrade.close": "Close",
+  "billing.upgrade.smartSearch": "Smart search (semantic, embedding-based) is a Pro feature. Keyword search stays available.",
   "collab.persistent.label": "Persistent server (y-websocket)",
   "collab.persistent.hint": "Optional. Keeps documents synced when no peer is online.",
   "toast.learnMore": "Learn more",

@@ -1,0 +1,105 @@
+/**
+ * SearchDialog honours the plan gates: Smart (embedding) search needs the
+ * `smartSearch` capability, and each Ask-Workspace question spends one AI
+ * prompt from the monthly quota. Self-hosted (no billing) stays unlocked.
+ */
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { render, screen, fireEvent, waitFor, cleanup } from "@testing-library/react";
+
+vi.mock("../storage/workspaceIndex", () => ({ searchWorkspace: vi.fn(async () => []) }));
+vi.mock("../storage/workspace", () => ({
+  isOPFSAvailable: () => true,
+  readWorkspaceFile: vi.fn(async () => ""),
+}));
+const searchHybrid = vi.fn(async () => []);
+vi.mock("../ai/semanticSearch", () => ({
+  indexWorkspace: vi.fn(),
+  searchHybrid: (...a: unknown[]) => searchHybrid(...(a as [])),
+}));
+vi.mock("../ai/embeddings", () => ({ semanticSearch: vi.fn(async () => []) }));
+const chat = vi.fn(async () => "answer");
+vi.mock("../ai/llm", async (orig) => ({
+  ...(await orig<typeof import("../ai/llm")>()),
+  chat: (...a: unknown[]) => chat(...(a as [])),
+}));
+vi.mock("../ui/AiToast", () => ({ showAiToast: vi.fn() }));
+
+import { SearchDialog } from "../ui/SearchDialog";
+import { useEntitlement, __setEntitlementEndpointForTesting } from "../billing/useEntitlement";
+import { FREE_CAPS, PRO_CAPS } from "../billing/types";
+import { getAiUsage, recordAiPrompt, consumeAiPrompt } from "../billing/aiQuota";
+import { showAiToast } from "../ui/AiToast";
+
+function setCaps(caps: typeof FREE_CAPS) {
+  useEntitlement.setState({ capabilities: caps, entitlement: null, loading: false });
+}
+function openOn(mode: "smart" | "ai") {
+  (window as unknown as { __lumenSearchMode?: string }).__lumenSearchMode = mode;
+  render(<SearchDialog open onClose={() => {}} onOpenFile={() => {}} />);
+}
+
+beforeEach(() => {
+  localStorage.clear();
+  vi.clearAllMocks();
+  setCaps(FREE_CAPS);
+});
+afterEach(() => {
+  cleanup();
+  __setEntitlementEndpointForTesting(null);
+  localStorage.clear();
+});
+
+describe("Smart search gate", () => {
+  it("free plan with billing: shows an upgrade notice and never queries embeddings", async () => {
+    __setEntitlementEndpointForTesting("https://billing.lumen.test/entitlements");
+    openOn("smart");
+    expect(await screen.findByTestId("upgrade-notice")).toBeTruthy();
+    fireEvent.change(screen.getByRole("textbox"), { target: { value: "quarterly plan" } });
+    await new Promise((r) => setTimeout(r, 300));
+    expect(searchHybrid).not.toHaveBeenCalled();
+    expect(screen.queryByText(/Build index|Re-index/)).toBeNull();
+  });
+
+  it("Pro plan with billing: smart search runs", async () => {
+    __setEntitlementEndpointForTesting("https://billing.lumen.test/entitlements");
+    setCaps(PRO_CAPS);
+    openOn("smart");
+    fireEvent.change(screen.getByRole("textbox"), { target: { value: "quarterly plan" } });
+    await waitFor(() => expect(searchHybrid).toHaveBeenCalled());
+    expect(screen.queryByTestId("upgrade-notice")).toBeNull();
+  });
+
+  it("self-hosted (no billing): unlocked even on FREE caps", async () => {
+    openOn("smart");
+    fireEvent.change(screen.getByRole("textbox"), { target: { value: "quarterly plan" } });
+    await waitFor(() => expect(searchHybrid).toHaveBeenCalled());
+    expect(screen.queryByTestId("upgrade-notice")).toBeNull();
+  });
+});
+
+describe("Ask Workspace spends the AI quota", () => {
+  it("counts one prompt per question and blocks once the free limit is reached", async () => {
+    __setEntitlementEndpointForTesting("https://billing.lumen.test/entitlements");
+    openOn("ai");
+    const input = screen.getByRole("textbox");
+    fireEvent.change(input, { target: { value: "what changed?" } });
+    fireEvent.keyDown(input, { key: "Enter" });
+    await waitFor(() => expect(chat).toHaveBeenCalledTimes(1));
+    expect(getAiUsage()).toBe(1);
+
+    for (let i = 1; i < FREE_CAPS.aiMonthlyPrompts; i++) recordAiPrompt();
+    fireEvent.keyDown(input, { key: "Enter" });
+    await new Promise((r) => setTimeout(r, 50));
+    expect(chat).toHaveBeenCalledTimes(1);
+    expect(showAiToast).toHaveBeenCalled();
+  });
+});
+
+describe("silent quota checks for background callers", () => {
+  it("returns false without a toast when exhausted", () => {
+    __setEntitlementEndpointForTesting("https://billing.lumen.test/entitlements");
+    for (let i = 0; i < FREE_CAPS.aiMonthlyPrompts; i++) recordAiPrompt();
+    expect(consumeAiPrompt(new Date(), { silent: true })).toBe(false);
+    expect(showAiToast).not.toHaveBeenCalled();
+  });
+});

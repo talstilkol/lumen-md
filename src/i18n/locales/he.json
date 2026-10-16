@@ -907,5 +907,6 @@
   "chart.reason.map": "{lat} / {lon} נראים כמו קואורדינטות — הצגה על מפה.",
   "chart.reason.radar": "{k} מדדים ל־{n} פריטים — השוואת הפרופילים שלהם.",
   "chart.reason.summary": "אין עמודת קטגוריה או זמן — השוואת ממוצעי העמודות.",
-  "chart.alternatives": "הצעות לתרשים"
+  "chart.alternatives": "הצעות לתרשים",
+  "billing.upgrade.smartSearch": "חיפוש חכם (סמנטי, מבוסס embeddings) הוא תכונה של תוכנית Pro. חיפוש לפי מילות מפתח נשאר זמין."
 }

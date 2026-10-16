@@ -90,6 +90,11 @@ const suggestionPlugin = ViewPlugin.fromClass(
       // Don't suggest on empty lines or very short context
       if (context.trim().length < 3) return;
 
+      // Automatic suggestions are real LLM calls too: count them, and once the
+      // monthly quota is spent just stop suggesting (no toast per keystroke).
+      const { consumeAiPrompt } = await import("../billing/aiQuota");
+      if (!consumeAiPrompt(new Date(), { silent: true })) return;
+
       this.abort = new AbortController();
       const signal = this.abort.signal;
 

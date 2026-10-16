@@ -907,5 +907,6 @@
   "chart.reason.map": "{lat} / {lon} ressemblent à des coordonnées — affichez-les sur une carte.",
   "chart.reason.radar": "{k} mesures pour {n} éléments — comparez leurs profils.",
   "chart.reason.summary": "Ni catégorie ni temps — comparaison des moyennes de colonnes.",
-  "chart.alternatives": "Suggestions de graphiques"
+  "chart.alternatives": "Suggestions de graphiques",
+  "billing.upgrade.smartSearch": "La recherche intelligente (sémantique, par embeddings) est une fonctionnalité Pro. La recherche par mots-clés reste disponible."
 }

@@ -907,5 +907,6 @@
   "chart.reason.map": "{lat} / {lon} は座標のようです。地図上に表示します。",
   "chart.reason.radar": "{n} 項目に {k} 個の指標 — プロファイルを比較します。",
   "chart.reason.summary": "カテゴリ列や時間列がないため、列の平均を比較します。",
-  "chart.alternatives": "グラフの候補"
+  "chart.alternatives": "グラフの候補",
+  "billing.upgrade.smartSearch": "スマート検索（埋め込みによるセマンティック検索）は Pro プランの機能です。キーワード検索は引き続き利用できます。"
 }
