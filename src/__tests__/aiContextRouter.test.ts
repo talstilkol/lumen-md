@@ -39,12 +39,22 @@ describe("packContext", () => {
     expect(p.text).toContain("borrowing rules");
   });
 
+  it("keeps something of every retrieved note, even with no shared words", () => {
+    const a = { path: "a.md", content: section("Rust", "ownership borrow checker lifetimes", 80) };
+    const b = { path: "b.md", content: section("Memory", "allocation arenas regions", 80) }; // a semantic hit
+    const packed = packContext("borrow checker lifetimes", [a, b], 600);
+    expect(packed[1].text).toContain("arenas");
+    expect(estimateTokens(packed.map((p) => p.text).join(""))).toBeLessThanOrEqual(600);
+  });
+
   it("spreads the budget across documents by relevance", () => {
     const a = { path: "a.md", content: section("Rust", "ownership borrow checker lifetimes", 80) };
     const b = { path: "b.md", content: section("Cooking", "pasta sauce garlic onion", 80) };
     const packed = packContext("borrow checker lifetimes", [a, b], 400);
     expect(packed[0].text).toContain("borrow checker");
-    expect(packed[1].text).not.toContain("garlic");
+    // The unrelated note gets at most a fair share; the relevant one gets the rest.
+    expect(estimateTokens(packed[1].text)).toBeLessThanOrEqual(200 + 20);
+    expect(estimateTokens(packed[0].text)).toBeGreaterThan(estimateTokens(packed[1].text));
   });
 
   it("has a budget per mode and remembers the mode", () => {

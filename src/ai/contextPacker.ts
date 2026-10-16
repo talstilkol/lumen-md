@@ -97,27 +97,51 @@ export function packContext(query: string, docs: readonly PackInput[], budgetTok
   const outlines = docs.map((d) => outline(d.content));
   let used = outlines.reduce((n, o) => n + estimateTokens(o) + 8, 0);
   const keep = new Set<Chunk>();
+  /** The beginning of `c` (cut at a paragraph / sentence) in about `room` tokens. */
+  const cutTo = (c: Chunk, room: number) => {
+    const chars = room * 4 - 4;
+    let cut = c.text.lastIndexOf("\n\n", chars);
+    if (cut < chars / 2) cut = c.text.lastIndexOf(". ", chars) + 1;
+    if (cut < chars / 2) cut = chars;
+    c.text = c.text.slice(0, cut).trimEnd() + " …";
+    c.tokens = estimateTokens(c.text);
+    c.partial = true;
+  };
+  // A document the retriever chose but that shares no words with the
+  // question (a semantic match) still gets its opening, within half a fair
+  // share; documents with matching sections compete below.
+  const share = Math.floor((budgetTokens - used) / Math.max(1, docs.length) / 2);
+  docs.forEach((_, doc) => {
+    const mine = chunks.filter((c) => c.doc === doc);
+    if (!mine.length || mine.some((c) => c.score > 0.25)) return;
+    const first = mine[0];
+    const room = Math.min(share, budgetTokens - used);
+    if (first.tokens > room) {
+      if (room < 40) return;
+      cutTo(first, room);
+    }
+    keep.add(first);
+    used += first.tokens;
+  });
+  let relevantKept = false;
   for (const c of [...chunks].sort((x, y) => y.score - x.score)) {
+    if (keep.has(c)) continue;
     if (c.score <= 0 && keep.size > 0) break; // nothing relevant left
     const left = budgetTokens - used;
     if (c.tokens > left) {
       // The most relevant chunk doesn't fit whole: keep its beginning
       // (cut at a paragraph or sentence) rather than skipping it.
-      if (keep.size === 0 && c.score > 0 && left > 40) {
-        const room = left * 4 - 4;
-        let cut = c.text.lastIndexOf("\n\n", room);
-        if (cut < room / 2) cut = c.text.lastIndexOf(". ", room) + 1;
-        if (cut < room / 2) cut = room;
-        c.text = c.text.slice(0, cut).trimEnd() + " …";
-        c.tokens = estimateTokens(c.text);
-        c.partial = true;
+      if (!relevantKept && c.score > 0 && left > 40) {
+        cutTo(c, left);
         keep.add(c);
         used += c.tokens;
+        relevantKept = true;
       }
       continue; // otherwise try smaller ones
     }
     keep.add(c);
     used += c.tokens;
+    if (c.score > 0) relevantKept = true;
   }
 
   return docs.map((d, doc) => {

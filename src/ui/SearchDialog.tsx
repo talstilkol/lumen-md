@@ -248,7 +248,8 @@ export function SearchDialog({ open, onClose, onOpenFile }: Props) {
         : [];
       const fallback =
         hybridHits.length === 0
-          ? await semanticSearch(query, { topK: 8, maxContentChars: 6000 })
+          ? // Whole notes (bounded), like the hybrid path: the packer trims.
+            await semanticSearch(query, { topK: 8, maxContentChars: 200_000 })
           : [];
       // Materialise the hybrid hits into RagResult shape so the existing
       // citation-rendering code below works untouched.
