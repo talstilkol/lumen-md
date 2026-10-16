@@ -26,6 +26,8 @@ export interface Usage {
   cacheWriteTokens?: number;
   /** Counts were estimated from characters, not reported by the API. */
   estimated?: boolean;
+  /** Billed through a batch API (half price at OpenAI and Anthropic). */
+  batch?: boolean;
   /** Server-side web searches (Claude web search: $10 per 1,000). */
   webSearches?: number;
 }
@@ -110,10 +112,10 @@ export function costOf(u: Usage): number | null {
   const p = longContext(u, base);
   const read = u.cacheReadTokens ?? 0;
   const write = u.cacheWriteTokens ?? 0;
-  return (
+  const full =
     (u.inputTokens * p.input + read * p.cachedInput + write * p.cacheWrite + u.outputTokens * p.output) / 1_000_000 +
-    ((u.webSearches ?? 0) * 10) / 1000
-  );
+    ((u.webSearches ?? 0) * 10) / 1000;
+  return u.batch ? full / 2 : full;
 }
 
 /** Rough token count for text we have no API count for (~4 chars / token). */
