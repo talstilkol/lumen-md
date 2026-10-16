@@ -25,6 +25,7 @@ describe("playground project", () => {
     expect(p).toMatchObject({ framework: "react", entry: "main.jsx", html: '<div id="root"></div>', css: ["b{}"] });
     expect(buildProject("--- lib.ts ---\nx", "vue").entry).toBe("lib.ts");
     expect(buildProject("--- src/App.jsx ---\na\n--- src/main.jsx ---\nb", "react").entry).toBe("src/main.jsx");
+    expect(buildProject("--- about.html ---\n<p>a</p>\n--- index.html ---\n<p>i</p>\n--- main.js ---\nx").html).toBe("<p>i</p>");
     expect(buildProject("x", "vue").html).toBe('<div id="app"></div>');
     expect(frameworkFromMeta(undefined)).toBe("vanilla");
   });
@@ -87,5 +88,16 @@ describe("importSpecifiers", () => {
     const specs = importSpecifiers(code);
     expect(specs.map((s) => s.spec)).toEqual(["./dep.js", "./deep.js"]);
     for (const s of specs) expect(code.slice(s.start + 1, s.end - 1)).toBe(s.spec);
+  });
+});
+
+describe("IMPORT_ATTRS_RE", () => {
+  it("matches static and dynamic import attributes only", async () => {
+    const { IMPORT_ATTRS_RE } = await import("../playground/files");
+    expect(' with { type: "json" };'.replace(IMPORT_ATTRS_RE, "")).toBe(";");
+    expect(', { with: { type: "json" } });'.replace(IMPORT_ATTRS_RE, "")).toBe(");");
+    expect(" assert {type:'css'}".replace(IMPORT_ATTRS_RE, "")).toBe("");
+    expect(";\nwith (x) {}".replace(IMPORT_ATTRS_RE, "")).toBe(";\nwith (x) {}");
+    expect(").then(f)".replace(IMPORT_ATTRS_RE, "")).toBe(").then(f)");
   });
 });

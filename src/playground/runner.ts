@@ -9,6 +9,7 @@
  */
 import { transform } from "sucrase";
 import {
+  IMPORT_ATTRS_RE,
   importSpecifiers,
   resolveImport,
   type PlaygroundProject,
@@ -141,14 +142,18 @@ async function link(project: PlaygroundProject): Promise<string> {
     // strings), replaced from the end so offsets stay valid.
     for (const { start, end, spec } of importSpecifiers(code).reverse()) {
       let url: string;
+      let rest = code.slice(end);
       if (spec in provided) url = provided[spec];
       else {
         const target = resolveImport(spec, name, names);
+        // JSON and CSS files become JavaScript modules here: drop the
+        // import attributes (`with { type: "json" }`) that would reject them.
+        if (target && /\.(json|css)$/i.test(target)) rest = rest.replace(IMPORT_ATTRS_RE, "");
         if (target) url = build(target);
         else if (/^(\.|\/)/.test(spec)) throw new Error(`${name}: can't find "${spec}"`);
         else throw new Error(`${name}: package "${spec}" isn't available here (react, react-dom, vue are)`);
       }
-      code = code.slice(0, start) + JSON.stringify(url) + code.slice(end);
+      code = code.slice(0, start) + JSON.stringify(url) + rest;
     }
     const url = blob(code + `\n//# sourceURL=${name}`);
     urls.set(name, url);

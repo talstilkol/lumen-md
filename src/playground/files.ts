@@ -82,10 +82,15 @@ export function buildProject(body: string, meta?: string): PlaygroundProject {
       .sort((a, b) => a.name.split("/").length - b.name.split("/").length)[0]?.name ??
     scripts[0]?.name ??
     null;
-  const htmlFile = files.find((f) => /\.html?$/i.test(f.name));
+  const htmlFiles = files.filter((f) => /\.html?$/i.test(f.name));
+  // `index.html` is the page; another HTML file only when there's no index.
+  const htmlFile = htmlFiles.find((f) => /(?:^|\/)index\.html?$/i.test(f.name)) ?? htmlFiles[0];
   const html = htmlFile?.code ?? (framework === "vue" ? '<div id="app"></div>' : '<div id="root"></div>');
   return { framework, files, entry, html, css: files.filter((f) => /\.css$/i.test(f.name)).map((f) => f.code) };
 }
+
+/** Import attributes right after a specifier: static `with {…}` / `assert {…}`, or a dynamic import's options. */
+export const IMPORT_ATTRS_RE = /^\s*(?:(?:with|assert)\s*\{[^{}]*\}|,\s*\{\s*(?:with|assert)\s*:\s*\{[^{}]*\}\s*,?\s*\}\s*,?)/;
 
 /** Resolve a relative import (`./App.jsx`, `./App`) against the project. */
 export function resolveImport(spec: string, from: string, names: readonly string[]): string | null {
