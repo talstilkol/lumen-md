@@ -262,16 +262,18 @@ describe("aiQuota counter", () => {
 
   it("a background request counted by its caller doesn't also bill a command waiting in a dialog", async () => {
     __setEntitlementEndpointForTesting(ENDPOINT);
-    const now = new Date();
+    vi.stubGlobal("fetch", vi.fn(async () => new Response("{}", { status: 500 })));
+    const { chat } = await import("../ai/llm");
     let finishDialog!: () => void;
     const dialog = new Promise<void>((r) => (finishDialog = r));
     const translate = withAiQuota([{ id: "ai.translate", action: () => dialog }]);
     const running = translate[0].action() as unknown as Promise<void>;
-    // Inline suggestion fires meanwhile: counts itself, then dispatches.
-    expect(consumeAiPrompt(now, { silent: true })).toBe(true);
-    chargeAiCommandDispatch(now);
+    // Inline suggestion fires meanwhile: counts itself, then dispatches as prepaid.
+    expect(consumeAiPrompt(new Date(), { silent: true })).toBe(true);
+    await chat([{ role: "user", content: "x" }], { prepaid: true, maxTokens: 1 }).catch(() => {});
     finishDialog(); // user cancels the translation
     await running;
-    expect(getAiUsage(now)).toBe(1);
+    expect(getAiUsage()).toBe(1);
+    vi.unstubAllGlobals();
   });
 });

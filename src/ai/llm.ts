@@ -59,6 +59,12 @@ export interface ChatOptions {
   signal?: AbortSignal;
   /** If true, returns a ReadableStream for streaming responses. */
   stream?: boolean;
+  /**
+   * The caller already counted this request against the AI quota
+   * (`consumeAiPrompt`), so it must not also be billed to a palette
+   * command that is waiting to dispatch.
+   */
+  prepaid?: boolean;
 }
 
 const DEFAULT_MODEL = "gpt-4o-mini";
@@ -149,7 +155,7 @@ export async function chat(
   messages: ChatMessage[],
   opts: ChatOptions = {},
 ): Promise<string> {
-  chargeAiCommandDispatch();
+  if (!opts.prepaid) chargeAiCommandDispatch();
   const provider = getActiveProvider();
 
   // ── Ollama (local server) ──────────────────────────────────────
@@ -293,7 +299,7 @@ export async function* chatStream(
   messages: ChatMessage[],
   opts: ChatOptions = {},
 ): AsyncGenerator<string, void, undefined> {
-  chargeAiCommandDispatch();
+  if (!opts.prepaid) chargeAiCommandDispatch();
   const provider = getActiveProvider();
 
   if (provider === "ollama") {

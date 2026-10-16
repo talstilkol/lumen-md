@@ -129,7 +129,7 @@ export default function CsvBlock({ source, lang, meta }: Props) {
                 const response = await chat([
                   { role: "system", content: PROMPTS.visualization },
                   { role: "user", content: `Raw CSV Data:\n\n${source}` },
-                ]);
+                ], { prepaid: true });
                 setAiOption(parseJsonResponse(response));
               } catch (e) {
                 log.error("AI chart generation failed", e);

@@ -116,6 +116,23 @@ describe("A7 lever 4 — only English ships eagerly", () => {
     }
   });
 
+  it("switching to a locale whose chunk can't load keeps the UI English and LTR", async () => {
+    vi.doMock("../i18n/locales/he.json", () => {
+      throw new Error("offline");
+    });
+    try {
+      vi.resetModules();
+      const i18n = await import("../i18n");
+      const { useAppStore } = await import("../store/useStore");
+      useAppStore.getState().setLocale("he");
+      await vi.waitFor(() => expect(i18n.getLocale()).toBe("en"));
+      expect(useAppStore.getState().locale).toBe("en");
+      expect(document.documentElement.dir).not.toBe("rtl");
+    } finally {
+      vi.doUnmock("../i18n/locales/he.json");
+    }
+  });
+
   it("initLocale() defaults to English on missing / corrupt / unknown storage", async () => {
     const i18n = await freshI18n();
     localStorage.removeItem("lumen-md");

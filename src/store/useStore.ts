@@ -204,8 +204,12 @@ export const useAppStore = create<AppState>()(
         const req = ++localeRequest;
         const commit = () => {
           if (req !== localeRequest) return;
-          applyLocale(l);
-          set({ locale: l });
+          // The chunk couldn't load (offline / missing): stay consistent
+          // and switch to English rather than English strings under an
+          // RTL `lang="he"` UI.
+          const locale = isLocaleLoaded(l) ? l : "en";
+          applyLocale(locale);
+          set({ locale });
         };
         // Non-English bundles are lazy chunks (A7 lever 4). Commit the
         // store change only once the strings are in memory so the

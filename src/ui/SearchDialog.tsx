@@ -280,7 +280,7 @@ export function SearchDialog({ open, onClose, onOpenFile }: Props) {
         { role: "user", content: `Context Files:\n${contextStr}\n\nQuestion: ${query}` },
       ];
 
-      const answer = await chat(messages);
+      const answer = await chat(messages, { prepaid: true });
       setAiAnswer(answer);
 
       // Save to conversation history

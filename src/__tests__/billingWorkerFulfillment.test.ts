@@ -288,4 +288,22 @@ describe("Team plans bought by SSO organization members", () => {
     expect(res.status).toBe(400);
     expect(calls).toHaveLength(0);
   });
+
+  it("prefers the org Team plan the caller bought over their personal Pro, with an explicit personal scope", async () => {
+    const tok = await ssoBearer();
+    const rows = {
+      "workos-org:org_9": [{ stripe_customer_id: "cus_org", stripe_subscription_id: "sub_org", status: "active" }],
+      "workos:user_01": [{ stripe_customer_id: "cus_me", stripe_subscription_id: "sub_me", status: "active" }],
+    };
+    let calls = stub(rows, { metadata: { purchaser: "workos:user_01" } });
+    await worker.fetch(req("/portal", tok), ssoEnv);
+    expect(calls[0].body.get("customer")).toBe("cus_org");
+    calls = stub(rows, { metadata: { purchaser: "workos:user_01" } });
+    await worker.fetch(req("/portal", tok, { scope: "personal" }), ssoEnv);
+    expect(calls[0].body.get("customer")).toBe("cus_me");
+    // Someone else's org plan doesn't block the member's own portal.
+    calls = stub(rows, { metadata: { purchaser: "workos:other" } });
+    await worker.fetch(req("/portal", tok), ssoEnv);
+    expect(calls[0].body.get("customer")).toBe("cus_me");
+  });
 });

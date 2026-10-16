@@ -114,7 +114,7 @@ const suggestionPlugin = ViewPlugin.fromClass(
               content: `Complete: "${context}"`,
             },
           ],
-          { maxTokens: 40, temperature: 0.3 },
+          { maxTokens: 40, temperature: 0.3, prepaid: true },
         );
 
         if (signal.aborted) return;

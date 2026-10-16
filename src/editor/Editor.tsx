@@ -201,7 +201,7 @@ function ghostTextExtension(): Extension {
                   { role: "system", content: PROMPTS.autocomplete },
                   { role: "user", content: textBefore },
                 ],
-                { maxTokens: 15, signal: controller.signal },
+                { maxTokens: 15, signal: controller.signal, prepaid: true },
               );
               if (text && view.state.selection.main.head === pos) {
                 view.dispatch({ effects: setGhostText.of({ pos, text }) });

@@ -269,6 +269,7 @@ function buildSlashItems(): SlashItem[] {
               { role: "system", content: PROMPTS.ghostwriter },
               { role: "user", content: promptStr },
             ],
+            { prepaid: true },
           );
           // Remove placeholder before streaming
           const removeTr = v.state.tr;
@@ -521,6 +522,7 @@ function buildTooltip(getView: () => EditorView | null): HTMLDivElement {
               { role: "system", content: PROMPTS.rewrite },
               { role: "user", content: `Instruction: ${instructions}\n\nText: ${selectedText}` },
             ],
+            { prepaid: true },
           );
           dispatch(state.tr.replaceWith(from, to, state.schema.text(rewritten)));
         } catch (e) {

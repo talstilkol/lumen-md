@@ -385,10 +385,15 @@ async function portal(req: Request, env: Env): Promise<{ url: string }> {
   const who = await identify(req, env);
   // Look up the customer id from Supabase. We assume the webhook below
   // populated `entitlements` with stripe_customer_id when Checkout completed.
-  // Personal subscription first, then the organization's (Team) one — the
-  // latter only for the member who bought it.
-  let customer = (await fetchBillingRow(env, who.uid))?.stripe_customer_id ?? null;
-  if (!customer && who.orgUid) {
+  // The organization's Team subscription when this caller bought it (that
+  // is the plan they're most likely managing, and a personal Pro customer
+  // would otherwise shadow it), else their personal subscription.
+  // `{ "scope": "personal" }` in the body selects the personal plan
+  // explicitly (for a purchaser who has both).
+  const body = (await req.json().catch(() => ({}))) as { scope?: unknown };
+  let customer: string | null = null;
+  let orgDenied = false;
+  if (who.orgUid && body.scope !== "personal") {
     const org = await fetchBillingRow(env, who.orgUid);
     if (org?.stripe_customer_id && org.stripe_subscription_id) {
       const res = await fetch(
@@ -397,8 +402,12 @@ async function portal(req: Request, env: Env): Promise<{ url: string }> {
       );
       const sub = res.ok ? ((await res.json()) as { metadata?: { purchaser?: unknown } }) : null;
       if (sub?.metadata?.purchaser === who.uid) customer = org.stripe_customer_id;
-      else throw new Error("Your organization's plan is managed by the member who purchased it.");
+      else orgDenied = true;
     }
+  }
+  customer ??= (await fetchBillingRow(env, who.uid))?.stripe_customer_id ?? null;
+  if (!customer && orgDenied) {
+    throw new Error("Your organization's plan is managed by the member who purchased it.");
   }
   if (!customer) throw new Error("No subscription on file. Subscribe first.");
   const session = await stripe<{ url: string }>(env, "/billing_portal/sessions", {
