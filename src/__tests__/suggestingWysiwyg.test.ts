@@ -29,11 +29,13 @@ describe("suggesting mode × WYSIWYG", () => {
   it("cursor commands go to the WYSIWYG editor when no source editor is mounted", () => {
     const resolve = vi.fn(() => true);
     const jump = vi.fn(() => true);
-    setWysiwygSuggestActions({ resolve, jump });
+    const resolveAll = vi.fn(() => true);
+    const setContent = vi.fn();
+    setWysiwygSuggestActions({ resolve, jump, resolveAll });
     const cmds = buildSuggestingCommands({
       getView: () => null,
-      getContent: () => "",
-      setContent: () => {},
+      getContent: () => "{++stale snapshot++}",
+      setContent,
       suggesting: true,
       toggle: () => {},
     });
@@ -44,5 +46,11 @@ describe("suggesting mode × WYSIWYG", () => {
     run("edit.suggesting.prev");
     expect(resolve.mock.calls).toEqual([["accept"], ["reject"]]);
     expect(jump.mock.calls).toEqual([[1], [-1]]);
+    // Accept / Reject All use the live editor, never the content snapshot.
+    run("edit.suggesting.acceptAll");
+    run("edit.suggesting.rejectAll");
+    expect(resolveAll.mock.calls).toEqual([["accept"], ["reject"]]);
+    expect(setContent).not.toHaveBeenCalled();
+    setWysiwygSuggestActions(null);
   });
 });

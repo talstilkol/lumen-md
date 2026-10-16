@@ -63,6 +63,17 @@ export function setActiveWysiwygView(view: typeof activeView): void {
             if (ok) v!.focus();
             return ok;
           },
+          // Against the live editor state, so edits the debounced listener
+          // hasn't emitted yet are neither lost nor missed.
+          resolveAll: (mode) => {
+            const v = getActiveWysiwygView();
+            if (!v) return false;
+            const tr = resolveRange(v.state, 0, v.state.doc.content.size, mode);
+            if (!tr) return false;
+            v.dispatch(tr);
+            v.focus();
+            return true;
+          },
         }
       : null,
   );
@@ -418,14 +429,19 @@ export function trackChanges(
       return own;
     })();
     if (onlyOwnInsert) continue;
-    tr.insert(at, c.deleted.content);
-    const end = at + c.deleted.content.size;
+    // Re-insert the deleted slice with its openness, so a removed block
+    // boundary (Backspace at a paragraph start) is restored, not inlined:
+    // structural joins are blocked while the text is suggested deleted.
+    const mapsBefore = tr.mapping.maps.length;
+    tr.replace(at, at, c.deleted);
+    const end = tr.mapping.slice(mapsBefore).map(at, 1);
     // Drop the parts that were suggested insertions; mark the rest deleted.
     const ownRanges: Array<[number, number]> = [];
     tr.doc.nodesBetween(at, end, (n, pos) => {
       if (n.isText) {
         if (ins.isInSet(n.marks)) ownRanges.push([pos, pos + n.nodeSize]);
-        else tr.addMark(Math.max(pos, at), Math.min(pos + n.nodeSize, end), del.create(attrs));
+        // Text that was already a suggested deletion keeps its author.
+        else if (!del.isInSet(n.marks)) tr.addMark(Math.max(pos, at), Math.min(pos + n.nodeSize, end), del.create(attrs));
       }
     });
     for (const [f, t] of ownRanges.reverse()) tr.delete(f, t);

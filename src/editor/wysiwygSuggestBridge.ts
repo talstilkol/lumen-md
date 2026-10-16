@@ -8,6 +8,8 @@ export interface WysiwygSuggestActions {
   resolve(mode: "accept" | "reject"): boolean;
   /** Move to the next (1) / previous (-1) change; false when there is none. */
   jump(dir: 1 | -1): boolean;
+  /** Accept / reject every change in the mounted document; false when there is none. */
+  resolveAll(mode: "accept" | "reject"): boolean;
 }
 
 let actions: WysiwygSuggestActions | null = null;

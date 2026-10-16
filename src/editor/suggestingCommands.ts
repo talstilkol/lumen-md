@@ -64,6 +64,13 @@ export function buildSuggestingCommands(deps: SuggestingCommandDeps): Suggesting
       if (!ok) showAiToast(t("suggest.none"), "info");
       return;
     }
+    // WYSIWYG mounted: resolve in its live state (the content snapshot may
+    // lag behind its debounced listener).
+    const actions = getWysiwygSuggestActions();
+    if (actions) {
+      if (!actions.resolveAll(mode)) showAiToast(t("suggest.none"), "info");
+      return;
+    }
     const before = deps.getContent();
     const after = resolveAll(before, mode);
     if (after === before) showAiToast(t("suggest.none"), "info");

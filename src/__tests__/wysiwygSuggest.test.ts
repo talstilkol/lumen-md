@@ -121,6 +121,21 @@ describe("tracking edits while suggesting", () => {
     expect(e.md()).toBe("{~~Hello~>i~~}{>>@Tal<<} world.");
   });
 
+  it("a block join is restored (not inlined) and existing deletions keep their author", async () => {
+    const e = await open("First para.\n\nSecond para.", true, "Bob");
+    // Backspace at the start of the second paragraph: delete the boundary.
+    const start = e.at("Second");
+    e.view.dispatch(e.view.state.tr.delete(start - 2, start));
+    expect(e.view.state.doc.childCount).toBe(2);
+    expect(e.md()).toBe("First para.\n\nSecond para.");
+    // Bob deletes across Alice's deletion: Alice's stays Alice's.
+    const a = await open("Keep {--old--}{>>@Alice<<} text.", true, "Bob");
+    const from = a.at("Keep ");
+    a.select(from + 3, a.at(" text"));
+    a.backspace();
+    expect(a.md()).toBe("Kee{--p --}{>>@Bob<<}{--old--}{>>@Alice<<} text.");
+  });
+
   it("deleting your own suggested insertion really deletes it", async () => {
     const e = await open("Hello world.", true);
     e.select(e.at(" world"));
