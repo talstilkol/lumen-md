@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-10-16T08:23:57.272Z",
+  "generated_at": "2026-10-16T08:37:22.362Z",
   "source": "src/i18n/index.ts (en bundle)",
-  "count": 925,
+  "count": 928,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -812,6 +812,21 @@
     {
       "key": "cmd.view.typewriter.hint",
       "en": "Keep the active line vertically centred",
+      "vars": []
+    },
+    {
+      "key": "cmd.view.tsChecks.on",
+      "en": "Enable TypeScript checks in code blocks",
+      "vars": []
+    },
+    {
+      "key": "cmd.view.tsChecks.off",
+      "en": "Disable TypeScript checks in code blocks",
+      "vars": []
+    },
+    {
+      "key": "cmd.view.tsChecks.hint",
+      "en": "Type errors and completions in ```ts blocks (downloads the TypeScript compiler, ~2 MB)",
       "vars": []
     },
     {

@@ -117,6 +117,8 @@ export function useCommands({
   const toggleSpellCheck = useAppStore((s) => s.toggleSpellCheck);
   const toggleLocalAi = useAppStore((s) => s.toggleLocalAi);
   const toggleTypewriter = useAppStore((s) => s.toggleTypewriter);
+  const tsChecks = useAppStore((s) => s.tsChecks);
+  const toggleTsChecks = useAppStore((s) => s.toggleTsChecks);
   const grammarCheck = useAppStore((s) => s.grammarCheck);
   const toggleGrammarCheck = useAppStore((s) => s.toggleGrammarCheck);
   const suggestingMode = useAppStore((s) => s.suggestingMode);
@@ -491,6 +493,14 @@ export function useCommands({
         icon: cmdIcons.Pencil,
         group: t("group.view"),
         action: toggleTypewriter,
+      },
+      {
+        id: "view.tsChecks",
+        label: tsChecks ? t("cmd.view.tsChecks.off") : t("cmd.view.tsChecks.on"),
+        hint: t("cmd.view.tsChecks.hint"),
+        icon: cmdIcons.Pencil,
+        group: t("group.view"),
+        action: toggleTsChecks,
       },
       {
         id: "view.grammarCheck",

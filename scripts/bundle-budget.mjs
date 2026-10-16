@@ -68,6 +68,11 @@ const BUDGETS = [
   // per language plugin, all dynamic-imported on first format. The
   // TypeScript parser plugin is the largest at ~124 KB gz.
   { name: "lazy: prettier",     pattern: /^prettier-/,            budgetKb: 140 },
+  // TypeScript compiler + ES/DOM lib .d.ts files for the opt-in "TypeScript
+  // checks in code blocks" (src/lsp). One worker file, fetched only after
+  // the user enables the setting; excluded from the PWA precache. Measured
+  // 1325 KB gzipped (TypeScript 5.9).
+  { name: "lazy: ts checker",   pattern: /^tsCheck\.worker-/,     budgetKb: 1450 },
   { name: "lazy plugin chunk",  pattern: /\.js$/,                 budgetKb: 100 },
 ];
 

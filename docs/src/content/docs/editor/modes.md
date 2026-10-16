@@ -81,3 +81,26 @@ the file stays plain markdown:
   all, reject all, next / previous suggestion. Accept all / reject all
   also work from Preview and WYSIWYG.
 - The status-bar pill shows how many suggestions the document contains.
+- **Who suggested it.** When you are signed in, each new suggestion is
+  followed by an author tag — a comment holding only `@name`, e.g.
+  `{++new text++}{>>@Tal<<}`. The tag belongs to its change: accepting
+  or rejecting the change removes it too. Hover a suggestion to see
+  "Suggested by …"; the preview shows the name as a small comment.
+  Typing inside someone else's suggestion keeps their name on it.
+
+## TypeScript checks in code blocks
+
+Run **Enable TypeScript checks in code blocks** from the command palette.
+In the Source / Split editor, every ` ```ts `, ` ```typescript ` and
+` ```tsx ` block is then type-checked by the real TypeScript compiler:
+
+- Errors get a wavy underline — hover it for the message (`TS2322: …`).
+- Completions pop up while you type (after `.` or a few letters;
+  `Ctrl-Space` forces them).
+- Each block is checked on its own (its declarations don't leak into
+  other blocks), in strict mode against the ES2022 and DOM libraries.
+  Imports of npm packages aren't resolved and aren't reported.
+
+The compiler (~1.3 MB compressed) runs in a background worker and is
+downloaded only after you turn the setting on; it is not part of the
+offline app shell. The setting is remembered.

@@ -58,6 +58,8 @@ interface AppState {
   useLocalAi: boolean;
   /** Typewriter scroll mode — keep the active line vertically centred. */
   typewriterMode: boolean;
+  /** Type-check ```ts blocks in the source editor (loads the TS compiler). */
+  tsChecks: boolean;
   /** Daily writing goal (words). 0 disables the banner. */
   writingGoalWords: number;
   /** Toggle LanguageTool-powered grammar/style checking in the editor. */
@@ -108,6 +110,7 @@ interface AppState {
   toggleSpellCheck: () => void;
   toggleLocalAi: () => void;
   toggleTypewriter: () => void;
+  toggleTsChecks: () => void;
   setWritingGoal: (words: number) => void;
   /** Toggle the LanguageTool grammar checker. */
   toggleGrammarCheck: () => void;
@@ -167,6 +170,7 @@ export const useAppStore = create<AppState>()(
       spellCheck: true,
       useLocalAi: true,
       typewriterMode: false,
+      tsChecks: false,
       writingGoalWords: 0,
       grammarCheck: false,
       suggestingMode: false,
@@ -271,6 +275,7 @@ export const useAppStore = create<AppState>()(
       toggleSpellCheck: () => set((s) => ({ spellCheck: !s.spellCheck })),
       toggleLocalAi: () => set((s) => ({ useLocalAi: !s.useLocalAi })),
       toggleTypewriter: () => set((s) => ({ typewriterMode: !s.typewriterMode })),
+      toggleTsChecks: () => set((s) => ({ tsChecks: !s.tsChecks })),
       setWritingGoal: (words) => set({ writingGoalWords: Math.max(0, Math.floor(words)) }),
       toggleGrammarCheck: () => set((s) => ({ grammarCheck: !s.grammarCheck })),
       toggleSuggestingMode: () =>
@@ -402,6 +407,7 @@ export const useAppStore = create<AppState>()(
         spellCheck: s.spellCheck,
         useLocalAi: s.useLocalAi,
         typewriterMode: s.typewriterMode,
+        tsChecks: s.tsChecks,
         writingGoalWords: s.writingGoalWords,
         grammarCheck: s.grammarCheck,
         suggestingMode: s.suggestingMode,

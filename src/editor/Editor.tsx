@@ -41,6 +41,7 @@ import { t as i18nT } from "../i18n";
 // the collab effect below — a static import dragged ~60KB gz of yjs into the
 // eager boot path for a feature that's off until a session starts.
 import { typewriterModeExtension } from "./typewriterMode";
+import { useAppStore } from "../store/useStore";
 import { markdownLintExtension } from "./lintExtension";
 // commentDecorations imports yjs (comment anchors are Y.Map relative
 // positions) — loaded on demand in the collab effect, like ySync below.
@@ -104,6 +105,7 @@ const vimCompartment = new Compartment();
 const spellCheckCompartment = new Compartment();
 const collabCompartment = new Compartment();
 const typewriterCompartment = new Compartment();
+const tsChecksCompartment = new Compartment();
 const commentsCompartment = new Compartment();
 const grammarCompartment = new Compartment();
 
@@ -376,6 +378,9 @@ export const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
       // extension on demand and reconfigures (starts empty, like collab).
       commentsCompartment.of([]),
       typewriterCompartment.of(typewriterMode ? typewriterModeExtension() : []),
+      // TypeScript checks in ```ts blocks — opt-in; the extension (and the
+      // compiler worker) is loaded only once the setting is on.
+      tsChecksCompartment.of([]),
       // LanguageTool grammar / style — opt-in, debounced 1.5s. Off by
       // default because the public endpoint is rate-limited; users with a
       // self-hosted backend can flip this on with no other config change.
@@ -569,6 +574,30 @@ export const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
     if (!view) return;
     view.dispatch({ effects: setSuggesting.of(suggesting) });
   }, [suggesting]);
+
+  // TypeScript checks: lazy-load the extension + worker client when enabled.
+  const tsChecks = useAppStore((s) => s.tsChecks);
+  useEffect(() => {
+    let cancelled = false;
+    void (async () => {
+      let ext: Extension = [];
+      if (tsChecks) {
+        const [{ tsCheckExtension }, { tsClient }] = await Promise.all([
+          import("./tsCheckExtension"),
+          import("../lsp/tsClient"),
+        ]);
+        ext = tsCheckExtension(tsClient);
+      } else {
+        const { tsClient } = await import("../lsp/tsClient");
+        tsClient.dispose();
+      }
+      if (cancelled || !viewRef.current) return;
+      viewRef.current.dispatch({ effects: tsChecksCompartment.reconfigure(ext) });
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [tsChecks]);
 
   // Toggle typewriter mode without recreating the editor.
   useEffect(() => {

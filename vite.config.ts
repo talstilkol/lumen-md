@@ -112,6 +112,9 @@ export default defineConfig({
           "**/vendor-modelviewer-*.js",
           "**/vendor-katex-*.js",
           "**/vendor-git-*.js",
+          // TypeScript compiler + lib files for the opt-in code-block checks
+          // (several MB; fetched only when the user enables the setting).
+          "**/tsCheck.worker-*.js",
           // Pyodide (~13 MB, staged into public/ by prebuild) loads on the
           // first live-python Run; its 9.6 MB wasm would also trip the
           // precache size limit and fail `npm run build`.
