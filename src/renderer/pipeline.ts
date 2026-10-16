@@ -22,6 +22,7 @@ import type { Root as MdastRoot, Code } from "mdast";
 import type { Root as HastRoot } from "hast";
 import { components } from "./components";
 import { rehypeShiki } from "./shiki";
+import { prepareCriticMarkup, rehypeCriticMarkup, stripCriticDelimiters } from "./criticMarkup";
 import {
   remarkBreaks,
   remarkWikiLinks,
@@ -195,7 +196,9 @@ async function getFullProcessor(
   ]);
   let p = buildBase();
   if (rehypeRaw) p = p.use(rehypeRaw);
-  p = p.use(rehypeSlug);
+  // CriticMarkup (suggesting mode) → <ins>/<del>/<mark>; before rehypeSlug
+  // so heading ids are computed from the rendered text.
+  p = p.use(rehypeCriticMarkup).use(rehypeSlug);
   if (rehypeKatex) p = p.use(rehypeKatex);
   const proc = toReact(p.use(rehypeShiki, { isDark }));
   fullProcessors.set(key, proc);
@@ -226,7 +229,7 @@ export async function renderMarkdown(
     raw: hasRawHtml(markdownText),
     math: hasMath(markdownText),
   });
-  const file = await proc.process(markdownText);
+  const file = await proc.process(prepareCriticMarkup(markdownText));
   return file.result as ReactElement;
 }
 
@@ -243,9 +246,9 @@ export async function renderMarkdown(
  */
 export function renderMarkdownFast(markdownText: string): ReactElement {
   if (!fastProcessor) {
-    fastProcessor = toReact(buildBase().use(rehypeSlug));
+    fastProcessor = toReact(buildBase().use(rehypeCriticMarkup).use(rehypeSlug));
   }
-  return fastProcessor.processSync(markdownText).result as ReactElement;
+  return fastProcessor.processSync(prepareCriticMarkup(markdownText)).result as ReactElement;
 }
 
 /** Extract YAML frontmatter (parsed) from a markdown source, or null. */
@@ -272,7 +275,9 @@ export function extractToc(
   // Strip YAML / TOML frontmatter before parsing so it never appears in the
   // heading list (a top-level `---title:…---` block parses as a setext h2
   // when the frontmatter plugin isn't applied).
-  const stripped = markdownText
+  // CriticMarkup delimiters are dropped so ids match the rendered
+  // headings, whose <ins>/<del>/<mark> text rehype-slug reads.
+  const stripped = stripCriticDelimiters(markdownText)
     .replace(/^---\r?\n[\s\S]*?\r?\n---\r?\n?/m, "")
     .replace(/^\+\+\+\r?\n[\s\S]*?\r?\n\+\+\+\r?\n?/m, "");
   const tree = unified().use(remarkParse).parse(stripped) as MdastRoot;

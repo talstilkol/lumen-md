@@ -54,3 +54,30 @@ anyone migrating from Notion.
 
 The mode persists across reloads (per-document), so you can come back to
 your preferred view automatically.
+
+## Suggesting mode (track changes)
+
+Turn it on from the command palette ("Turn on suggesting mode") or with
+the **Editing / Suggesting** pill in the status bar. While it is on, edits
+in the Source / Split editor are recorded as
+[CriticMarkup](https://github.com/CriticMarkup/CriticMarkup-toolkit), so
+the file stays plain markdown:
+
+| You do | Stored as |
+| --- | --- |
+| Type text | `{++inserted++}` |
+| Delete text (Backspace, Delete, cut) | `{--deleted--}` |
+| Type over a selection | `{~~old~>new~~}` |
+| Write a note by hand | `{>>comment<<}` / `{==highlight==}` |
+
+- Typing next to your own insertion extends it, and consecutive deletions
+  merge. Deleting text inside your own `{++ ++}` really deletes it.
+- Undo / redo, edits from collaborators, and edits inside code blocks or
+  inline code are never turned into suggestions.
+- The editor shows insertions underlined in green, deletions struck
+  through in red and comments highlighted; the preview renders them as
+  `<ins>`, `<del>` and `<mark>`.
+- Palette commands: accept / reject the suggestion at the cursor, accept
+  all, reject all, next / previous suggestion. Accept all / reject all
+  also work from Preview and WYSIWYG.
+- The status-bar pill shows how many suggestions the document contains.

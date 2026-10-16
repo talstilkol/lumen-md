@@ -1324,6 +1324,30 @@
   unicode-bidi: isolate;
 }
 
+/* ─── CriticMarkup (suggesting mode) in the preview ─── */
+.prose-lumen ins.critic-ins {
+  text-decoration: underline 2px;
+  text-decoration-color: hsl(145 60% 40%);
+  text-underline-offset: 3px;
+  background: hsl(145 60% 45% / 0.12);
+}
+.prose-lumen del.critic-del {
+  text-decoration: line-through 2px;
+  text-decoration-color: hsl(0 75% 55%);
+  background: hsl(0 75% 55% / 0.1);
+}
+.prose-lumen mark.critic-highlight,
+.prose-lumen mark.critic-comment {
+  background: hsl(45 95% 55% / 0.3);
+  color: inherit;
+  border-radius: 2px;
+}
+.prose-lumen mark.critic-comment {
+  font-style: italic;
+  font-size: 0.9em;
+  padding: 0 0.25em;
+}
+
 /* ─── Mobile responsive ─── */
 @media (max-width: 760px) {
   /* Toolbar squeezes: hide the tagline + filename strip, keep icons */
