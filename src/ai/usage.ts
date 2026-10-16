@@ -118,7 +118,18 @@ export function costOf(u: Usage): number | null {
 
 /** Rough token count for text we have no API count for (~4 chars / token). */
 export function estimateTokens(text: string): number {
-  return Math.ceil(text.length / 4);
+  // ~4 Latin characters per token; other scripts are denser: CJK / kana /
+  // Hangul ≈ 1 token per character, Hebrew / Arabic / Cyrillic etc. ≈ 2.
+  let latin = 0;
+  let cjk = 0;
+  let other = 0;
+  for (const ch of text) {
+    const c = ch.codePointAt(0)!;
+    if (c < 0x250) latin++;
+    else if ((c >= 0x2e80 && c <= 0x9fff) || (c >= 0xac00 && c <= 0xd7af) || (c >= 0xf900 && c <= 0xfaff) || c >= 0x20000) cjk++;
+    else other++;
+  }
+  return Math.ceil(latin / 4 + cjk + other / 2);
 }
 
 export interface UsageBucket {
