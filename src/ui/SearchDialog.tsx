@@ -248,7 +248,8 @@ export function SearchDialog({ open, onClose, onOpenFile }: Props) {
         : [];
       const fallback =
         hybridHits.length === 0
-          ? await semanticSearch(query, { topK: 8, maxContentChars: 6000 })
+          ? // Whole notes (bounded), like the hybrid path: the packer trims.
+            await semanticSearch(query, { topK: 8, maxContentChars: 200_000 })
           : [];
       // Materialise the hybrid hits into RagResult shape so the existing
       // citation-rendering code below works untouched.
@@ -258,16 +259,24 @@ export function SearchDialog({ open, onClose, onOpenFile }: Props) {
           score: h.score,
           snippet: h.snippet,
           content: await readWorkspaceFile(h.path)
-            .then((c) => c.slice(0, 6000))
+            // Whole notes (bounded): the context packer picks the parts.
+            .then((c) => c.slice(0, 200_000))
             .catch(() => h.snippet),
         })),
       );
       const results = hybridResults.length > 0 ? hybridResults : fallback;
       setAiSources(results);
 
-      // Build context from semantic results
+      // Build context from semantic results: only the parts relevant to the
+      // question, within the AI mode's token budget (context packer).
+      const { packContext, CONTEXT_BUDGET, getAiMode } = await import("../ai/contextPacker");
+      const packed = packContext(
+        query,
+        results.map((r) => ({ path: r.path, content: r.content })),
+        CONTEXT_BUDGET[getAiMode()],
+      );
       const contextStr = results.length > 0
-        ? results.map((r, i) => `---\n📄 [${i + 1}] ${r.path}\n${r.content}`).join("\n")
+        ? packed.map((r, i) => `---\n📄 [${i + 1}] ${r.path}\n${r.text}`).join("\n")
         : t("searchDialog.noRelevant");
 
       setAiAnswer(t("searchDialog.thinking"));

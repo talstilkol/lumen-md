@@ -45,6 +45,8 @@ export interface RubyPrinter {
 export const DEFAULT_RUBY_TIMEOUT_MS = 10_000;
 /** Cap on captured output per run (characters) so a print loop can't OOM the page. */
 export const MAX_OUTPUT_CHARS = 200_000;
+/** Output messages per run (stream switches flush a batch). */
+export const MAX_OUTPUT_MESSAGES = 2_000;
 
 export const JS_DISABLED = "The JS bridge (require \"js\") is not available in Lumen's sandboxed Ruby";
 
@@ -184,8 +186,15 @@ export function createRubyHandler(deps: {
     let emitted = 0;
     let truncated = false;
     let pending: { stream: "out" | "err"; text: string } | null = null;
+    // Messages are capped too: code alternating stdout / stderr one
+    // character at a time would otherwise post one message per switch.
+    let messages = 0;
     const flush = () => {
-      if (pending) deps.post({ type: "output", runId, stream: pending.stream, text: pending.text });
+      if (pending) {
+        messages++;
+        if (messages <= MAX_OUTPUT_MESSAGES) deps.post({ type: "output", runId, stream: pending.stream, text: pending.text });
+        else if (messages === MAX_OUTPUT_MESSAGES + 1) deps.post({ type: "output", runId, stream: "err", text: "\n… output truncated (too many writes)\n" });
+      }
       pending = null;
     };
     const emit = (stream: "out" | "err") => (text: unknown) => {

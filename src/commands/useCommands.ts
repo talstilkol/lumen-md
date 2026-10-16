@@ -818,6 +818,29 @@ export function useCommands({
         },
       },
       {
+        id: "ai.mode",
+        label: t("cmd.ai.mode"),
+        hint: t("cmd.ai.mode.hint"),
+        icon: cmdIcons.Sparkles,
+        group: t("group.tools"),
+        action: async () => {
+          const { getAiMode, setAiMode } = await import("../ai/contextPacker");
+          const choice = await uiSelect({
+            title: t("ai.mode.title"),
+            message: t("cmd.ai.mode.hint"),
+            defaultValue: getAiMode(),
+            choices: [
+              { value: "economy", label: t("ai.mode.economy") },
+              { value: "balanced", label: t("ai.mode.balanced") },
+              { value: "quality", label: t("ai.mode.quality") },
+            ],
+          });
+          if (choice !== "economy" && choice !== "balanced" && choice !== "quality") return;
+          setAiMode(choice);
+          showAiToast(t(`ai.mode.${choice}`), "success");
+        },
+      },
+      {
         id: "ai.cache",
         label: t("cmd.ai.cache"),
         hint: t("cmd.ai.cache.hint"),

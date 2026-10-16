@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { describe, it, expect, beforeAll } from "vitest";
 import {
-  MAX_OUTPUT_CHARS,
+  MAX_OUTPUT_CHARS, MAX_OUTPUT_MESSAGES,
   createRubyHandler,
   hardenWorkerScope,
   rubyErrorMessage,
@@ -70,6 +70,23 @@ describe("rubyRuntime helpers", () => {
     expect(text.length).toBeLessThan(MAX_OUTPUT_CHARS + 100);
     expect(text).toContain("output truncated");
     expect(msgs.at(-1)?.type).toBe("done");
+  });
+
+  it("caps the number of messages when streams alternate", async () => {
+    const msgs: RubyWorkerMessage[] = [];
+    const handle = createRubyHandler({
+      loadVm: async (printer) => ({
+        eval: () => {
+          for (let i = 0; i < 50_000; i++) (i % 2 ? printer.stderr : printer.stdout)("x");
+          return { toString: () => "", call: () => ({ toString: () => "true", call: () => ({}) as never }) };
+        },
+      }),
+      post: (m) => msgs.push(m),
+    });
+    await handle({ type: "run", runId: 4, source: "" });
+    const outputs = msgs.filter((m) => m.type === "output") as Array<{ text: string }>;
+    expect(outputs.length).toBe(MAX_OUTPUT_MESSAGES + 1);
+    expect(outputs.at(-1)!.text).toContain("too many writes");
   });
 
   it("batches many short writes into few messages", async () => {

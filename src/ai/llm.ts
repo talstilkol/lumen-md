@@ -82,6 +82,12 @@ export interface ChatOptions {
    */
   cache?: boolean;
   /**
+   * "light": a small task (tags, titles, outline, completions). In the
+   * economy / balanced AI modes it goes to the provider's small model
+   * unless `model` pins one. Economy mode routes every unpinned request.
+   */
+  tier?: "light" | "heavy";
+  /**
    * With `cache`: store the answer only when this accepts it (e.g. it
    * parses), so a malformed answer is retried next time, not replayed.
    */
@@ -208,6 +214,32 @@ export function effectiveModel(provider: AiProvider, opts: ChatOptions = {}): st
   }
 }
 
+/** Each cloud provider's small, cheap model for light tasks. */
+export const LIGHT_MODELS: Partial<Record<AiProvider, string>> = {
+  openai: "gpt-4o-mini",
+  anthropic: "claude-haiku-4-5",
+  gemini: "gemini-2.5-flash",
+  mistral: "mistral-small-latest",
+};
+
+/**
+ * Model router (Plan D: D4): picks the small model for light tasks (and,
+ * in economy mode, for everything) unless the caller pinned a model.
+ * Local providers are never rerouted.
+ */
+export function routeOptions(provider: AiProvider, opts: ChatOptions, mode: "economy" | "balanced" | "quality"): ChatOptions {
+  if (opts.model || mode === "quality") return opts;
+  const light = LIGHT_MODELS[provider];
+  if (!light) return opts;
+  if (opts.tier === "light" || mode === "economy") return { ...opts, model: light };
+  return opts;
+}
+
+async function routed(provider: AiProvider, opts: ChatOptions): Promise<ChatOptions> {
+  const { getAiMode } = await import("./contextPacker");
+  return routeOptions(provider, opts, getAiMode());
+}
+
 const promptChars = (messages: ChatMessage[]) => messages.map((m) => m.content).join("\n");
 
 /**
@@ -217,9 +249,10 @@ const promptChars = (messages: ChatMessage[]) => messages.map((m) => m.content).
  */
 export async function chat(
   messages: ChatMessage[],
-  opts: ChatOptions = {},
+  options: ChatOptions = {},
 ): Promise<string> {
   const provider = getActiveProvider();
+  const opts = await routed(provider, options);
   const model = effectiveModel(provider, opts);
   const { aiCacheEnabled, cacheKey, getCached, putCached } = await import("./responseCache");
   const key =
@@ -474,9 +507,10 @@ export function reportOpenAiUsage(
  */
 export async function* chatStream(
   messages: ChatMessage[],
-  opts: ChatOptions = {},
+  options: ChatOptions = {},
 ): AsyncGenerator<string, void, undefined> {
   const provider = getActiveProvider();
+  const opts = await routed(provider, options);
   let reported = false;
   let out = "";
   let routedTo: AiProvider = provider;

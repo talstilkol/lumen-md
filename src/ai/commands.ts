@@ -69,7 +69,7 @@ export async function generateAiCommitMessage(
         { role: "system", content: PROMPTS.commitMessage },
         { role: "user", content: `Changes:\n${changes}` },
       ],
-      { maxTokens: 30, ownPrompt: true },
+      { maxTokens: 30, ownPrompt: true, tier: "light" },
     );
   } catch (e) {
     log.warn("AI commit generation skipped", e);
