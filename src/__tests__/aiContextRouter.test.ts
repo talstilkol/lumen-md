@@ -76,9 +76,9 @@ describe("packContext", () => {
 
 describe("model router", () => {
   it("routes light tasks (and everything in economy) to the small model unless pinned", () => {
-    expect(routeOptions("anthropic", { tier: "light" }, "balanced").model).toBe("claude-haiku-4-5");
+    expect(routeOptions("anthropic", { tier: "light" }, "balanced").model).toBe("claude-haiku-5-5");
     expect(routeOptions("anthropic", {}, "balanced").model).toBeUndefined();
-    expect(routeOptions("anthropic", {}, "economy").model).toBe("claude-haiku-4-5");
+    expect(routeOptions("anthropic", {}, "economy").model).toBe("claude-haiku-5-5");
     expect(routeOptions("anthropic", { tier: "light" }, "quality").model).toBeUndefined();
     expect(routeOptions("anthropic", { tier: "light", model: "pinned" }, "economy").model).toBe("pinned");
     expect(routeOptions("ollama", { tier: "light" }, "economy").model).toBeUndefined();
@@ -95,7 +95,7 @@ describe("model router", () => {
       await chat([{ role: "user", content: "title?" }], { tier: "light" });
       await chat([{ role: "user", content: "essay" }]);
       const models = fetchMock.mock.calls.map((c) => JSON.parse(String((c as unknown as [string, RequestInit])[1].body)).model);
-      expect(models).toEqual(["claude-haiku-4-5", "claude-sonnet-4-5"]);
+      expect(models).toEqual(["claude-haiku-5-5", "claude-sonnet-5-5"]);
     });
   });
 });

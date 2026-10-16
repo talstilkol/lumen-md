@@ -106,8 +106,8 @@ const DEFAULT_MODEL = "gpt-4o-mini";
 /** Each cloud provider's model when the user hasn't picked one (the provider modules use these). */
 export const PROVIDER_DEFAULT_MODELS = {
   "local-webgpu": "Llama-3-8B-Instruct-q4f16_1-MLC",
-  // Claude 3.5 Sonnet is retired; Sonnet 4.5 is the current general model.
-  anthropic: "claude-sonnet-4-5",
+  // Sonnet 4.5 is deprecated (retires 30 Nov 2026); Sonnet 5.5 is the current general model.
+  anthropic: "claude-sonnet-5-5",
   gemini: "gemini-1.5-flash",
   mistral: "mistral-small-latest",
 } as const;
@@ -217,7 +217,7 @@ export function effectiveModel(provider: AiProvider, opts: ChatOptions = {}): st
 /** Each cloud provider's small, cheap model for light tasks. */
 export const LIGHT_MODELS: Partial<Record<AiProvider, string>> = {
   openai: "gpt-4o-mini",
-  anthropic: "claude-haiku-4-5",
+  anthropic: "claude-haiku-5-5",
   gemini: "gemini-2.5-flash",
   mistral: "mistral-small-latest",
 };

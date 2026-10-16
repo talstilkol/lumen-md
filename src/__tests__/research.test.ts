@@ -173,14 +173,16 @@ describe("research agent", () => {
       localStorage.setItem("lumen.ai.key.mistral", "m-key");
       const answers = [
         '["roses"]',
-        "Prune in spring.[^1] Roses are blue.[^1]\n---QUOTES---\n" + '[{"n":1,"quote":"Prune roses in early spring"}]',
+        "Prune in spring.[^1] Roses are blue.[^1]\n\nAn unmarked paragraph that makes a claim without any footnote at all.\n---QUOTES---\n" +
+          '[{"n":1,"quote":"Prune roses in early spring"}]',
       ];
       vi.stubGlobal("fetch", vi.fn(async () => new Response(JSON.stringify({ choices: [{ message: { content: answers.shift() } }] }), { status: 200 })));
       const page: ExtractedPage = { url: "https://a.example/r", finalUrl: "https://a.example/r", status: 200, title: "Roses", text: "Prune roses in early spring." };
       const deps = { settings: { provider: "brave" as const, key: "k" }, search: async () => [{ title: "Roses", url: "https://a.example/r", snippet: "" }], extract: async () => page };
       const result = await runResearch({ question: "Roses?", deps });
-      expect(result.unverified).toBe(1);
+      expect(result.unverified).toBe(2);
       expect(result.markdown).toContain("Prune in spring.[^1] Roses are blue.[^2]");
+      expect(result.markdown).toContain("without any footnote at all. ⚠️ *no source cited*");
       expect(result.markdown).toMatch(/\[\^2\]: \[Roses\]\(https:\/\/a\.example\/r\) ⚠️ \*no supporting quote given\*/);
       // The planner call fails (provider error): no search is spent.
       vi.stubGlobal("fetch", vi.fn(async () => new Response("quota", { status: 429 })));
@@ -231,7 +233,7 @@ describe("research agent", () => {
     const blocks = await anthropicWebResearch([{ role: "user", content: "q?" }], { onUsage: (u) => usage.push(u) });
     expect(blocks.map((b) => b.text)).toEqual(["Done."]);
     expect(bodies).toHaveLength(2);
-    expect(bodies[0].model).toBe("claude-sonnet-4-5"); // 3.x can't use web search
+    expect(bodies[0].model).toBe("claude-sonnet-5-5"); // 3.x can't use web search
     expect(bodies[1].messages).toHaveLength(2); // the paused assistant turn is sent back
     expect((bodies[1] as unknown as { tools: Array<{ max_uses: number }> }).tools[0].max_uses).toBe(2); // 5 - 3 already used
     expect((bodies[1] as unknown as { tool_choice?: unknown }).tool_choice).toBeUndefined();

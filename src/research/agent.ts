@@ -300,6 +300,15 @@ async function proxyResearch(o: ResearchOptions, settings: ResearchSettings): Pr
   });
   // An answer that cites none of the sources read isn't research.
   if (!cited.size) throw new Error("The answer didn't cite any of the sources it read — try again or rephrase the question.");
+  // Substantial paragraphs the model left without any marker are flagged.
+  const flaggedBody = body
+    .split(/\n{2,}/)
+    .map((para) => {
+      if (/\[\^\d+\]|⚠️/.test(para) || !isClaim(para)) return para;
+      unverified++;
+      return para.replace(/\s*$/, " ⚠️ *no source cited*");
+    })
+    .join("\n\n");
   const uncited = pages.map((p, i) => ({ p, n: i + 1 })).filter(({ n }) => !cited.has(n));
   const markdown = [
     `# ${title(o.question)}`,
@@ -308,7 +317,7 @@ async function proxyResearch(o: ResearchOptions, settings: ResearchSettings): Pr
       unverified ? `**${unverified} quote${unverified === 1 ? "" : "s"} could not be verified**` : "every quote checked against its source"
     }.*`,
     "",
-    body,
+    flaggedBody,
     "",
     ...(uncited.length ? ["## Also read", "", ...uncited.map(({ p }) => `- [${p.page.title || p.hit.title}](${p.page.finalUrl})`), ""] : []),
     ...defs,

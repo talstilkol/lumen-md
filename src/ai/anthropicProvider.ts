@@ -198,7 +198,7 @@ export async function anthropicWebResearch(
   opts: ChatOptions & { maxSearches?: number } = {},
 ): Promise<CitedBlock[]> {
   // The web search tool needs a current model: an explicit or configured
-  // Claude 3.x choice falls back to the default (Sonnet 4.5).
+  // Claude 3.x choice falls back to the default (Sonnet 5.5).
   const configured = getAnthropicModel(opts);
   const model = /^claude-3/.test(configured) ? PROVIDER_DEFAULT_MODELS.anthropic : configured;
   const base = buildAnthropicBody(messages, { ...opts, model, maxTokens: opts.maxTokens ?? 4096 });
