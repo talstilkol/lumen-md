@@ -203,6 +203,13 @@ const ENTRIES: MenuEntry[] = [
     template: '```live-r height=320\nx <- c(3, 1, 4, 1, 5, 9, 2, 6)\nsummary(x)\nplot(x, type = "b", main = "Live R")\n```',
   },
   {
+    id: "playground",
+    label: "Web Playground (React)",
+    hint: "Multi-file HTML / CSS / JSX, run live",
+    group: "Media",
+    template: '```playground react height=260\n--- App.jsx ---\nimport { useState } from "react";\nexport default function App() {\n  const [n, setN] = useState(0);\n  return <button onClick={() => setN(n + 1)}>Clicked {n} times</button>;\n}\n--- main.jsx ---\nimport { createRoot } from "react-dom/client";\nimport App from "./App.jsx";\ncreateRoot(document.getElementById("root")).render(<App />);\n--- style.css ---\nbutton { font: 16px system-ui; padding: 8px 14px; }\n```',
+  },
+  {
     id: "live-ruby",
     label: "Live Ruby",
     hint: "Run Ruby 3.4 via ruby.wasm (WASM)",

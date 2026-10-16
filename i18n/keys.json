@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-10-16T22:10:29.753Z",
+  "generated_at": "2026-10-16T22:34:14.475Z",
   "source": "src/i18n/index.ts (en bundle)",
-  "count": 1007,
+  "count": 1019,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -1937,6 +1937,68 @@
     {
       "key": "block.liveRuby.state.timeout",
       "en": "Timed out",
+      "vars": []
+    },
+    {
+      "key": "block.playground.title",
+      "en": "Web Playground",
+      "vars": []
+    },
+    {
+      "key": "block.playground.run",
+      "en": "Run",
+      "vars": []
+    },
+    {
+      "key": "block.playground.reset",
+      "en": "Reset",
+      "vars": []
+    },
+    {
+      "key": "block.playground.preview",
+      "en": "Preview",
+      "vars": []
+    },
+    {
+      "key": "block.playground.console",
+      "en": "Console",
+      "vars": []
+    },
+    {
+      "key": "block.playground.prompt",
+      "en": "Click Run to start this project (files are separated by --- name.ext --- lines).",
+      "vars": []
+    },
+    {
+      "key": "block.playground.frameTitle",
+      "en": "Web Playground preview",
+      "vars": []
+    },
+    {
+      "key": "block.playground.errors",
+      "en": "{n} errors",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "block.playground.state.idle",
+      "en": "Not run",
+      "vars": []
+    },
+    {
+      "key": "block.playground.state.running",
+      "en": "Running…",
+      "vars": []
+    },
+    {
+      "key": "block.playground.state.success",
+      "en": "Running",
+      "vars": []
+    },
+    {
+      "key": "block.playground.state.error",
+      "en": "Error",
       "vars": []
     },
     {

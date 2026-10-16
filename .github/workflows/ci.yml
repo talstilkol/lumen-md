@@ -235,7 +235,10 @@ jobs:
         run: npm run build
       - name: Serve dist with http-server
         run: |
-          npx -y http-server@14 dist -p 5180 -c-1 --silent &
+          # --cors: the Web Playground runner is an opaque-origin iframe,
+          # so its module scripts need Access-Control-Allow-Origin (as the
+          # production `_headers` / nginx config sends for /assets/*).
+          npx -y http-server@14 dist -p 5180 -c-1 --cors --silent &
           # Wait for server to come up.
           for i in $(seq 1 30); do
             if curl -sf http://localhost:5180/ -o /dev/null; then
