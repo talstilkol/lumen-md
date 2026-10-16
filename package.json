@@ -6,9 +6,9 @@
   "license": "MIT",
   "description": "Lumen — a hybrid markdown editor focused on world-class rendering and turning data into beautiful tables and charts.",
   "scripts": {
-    "predev": "node scripts/copy-pyodide.mjs && node scripts/copy-webr.mjs && node scripts/copy-ruby.mjs",
+    "predev": "node scripts/copy-pyodide.mjs && node scripts/copy-webr.mjs && node scripts/copy-ruby.mjs && node scripts/copy-playground-vendor.mjs",
     "dev": "vite",
-    "prebuild": "node scripts/copy-pyodide.mjs && node scripts/copy-webr.mjs && node scripts/copy-ruby.mjs",
+    "prebuild": "node scripts/copy-pyodide.mjs && node scripts/copy-webr.mjs && node scripts/copy-ruby.mjs && node scripts/copy-playground-vendor.mjs",
     "build": "tsc -b && vite build",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
@@ -111,6 +111,7 @@
     "remark-rehype": "^11.1.1",
     "shiki": "^4.5.0",
     "sql.js": "^1.14.1",
+    "sucrase": "3.35.1",
     "tailwind-merge": "^2.5.5",
     "three": "^0.183.2",
     "tldraw": "^4.5.10",
@@ -149,7 +150,8 @@
     "typescript": "^6.0.3",
     "vite": "^6.0.5",
     "vite-plugin-pwa": "^1.2.0",
-    "vitest": "^4.1.8"
+    "vitest": "^4.1.8",
+    "vue": "3.5.43"
   },
   "overrides": {
     "serialize-javascript": "^7.0.5",

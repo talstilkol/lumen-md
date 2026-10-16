@@ -78,6 +78,9 @@ const cleanUrlAliases = {
   },
 };
 
+/** Dev / preview CORS: the playground runner's opaque origin and localhost. */
+const playgroundCorsOrigin = ["null", /^https?:\/\/(localhost|127\.0\.0\.1|\[::1\])(:\d+)?$/];
+
 /**
  * The staging script can rewrite runtime files (copy-webr.mjs prepends the
  * worker isolation prelude): its hash is part of the cache name, so a fix
@@ -250,6 +253,9 @@ export default defineConfig({
   server: {
     port: 5173,
     host: true,
+    // The Web Playground runner (sandboxed iframe, origin "null") loads its
+    // module scripts with CORS; allow it and local pages, nothing else.
+    cors: { origin: playgroundCorsOrigin },
   },
   // y-websocket is an optional peer-dep (see src/collab/yjs.ts). The
   // Rollup `external` covers prod builds, but Vite's dev server uses
@@ -271,6 +277,7 @@ export default defineConfig({
   // proxy layer (Cloudflare Pages, nginx).
   preview: {
     port: 5173,
+    cors: { origin: playgroundCorsOrigin },
   },
   build: {
     target: "es2022",
@@ -284,6 +291,8 @@ export default defineConfig({
         landing: path.resolve(__dirname, "public/landing.html"),
         roadmap: path.resolve(__dirname, "public/roadmap.html"),
         benchmarks: path.resolve(__dirname, "public/benchmarks.html"),
+        // Web Playground runner: the page inside the block's sandboxed iframe.
+        playground: path.resolve(__dirname, "playground-runner.html"),
       },
       // `y-websocket` is an OPTIONAL runtime dep (see comments in
       // src/collab/yjs.ts). It's not in package.json — users opt in by

@@ -15,6 +15,11 @@
 # worker origins (src/build/cspEndpoints.ts). Netlify applies _headers from
 # the publish directory; keeping a second static CSP here would be enforced
 # too and block those origins.
+#
+# Known limitation: Netlify's _headers grammar can't detach the catch-all
+# headers (Cloudflare's `! Header`), so /playground-runner.html inherits the
+# app's X-Frame-Options / CSP and the Web Playground block can't run here.
+# Use Cloudflare Pages, Vercel or the Docker image for the playground.
 
 [[headers]]
   for = "/assets/*"
