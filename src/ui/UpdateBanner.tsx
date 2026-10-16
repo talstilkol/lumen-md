@@ -24,6 +24,8 @@ export function UpdateBanner() {
           },
         });
         setUpdateSW(() => fn);
+        // Drop runtime caches left by earlier versions (best effort).
+        void import("../lib/runtimeCaches").then((m) => m.deleteStaleRuntimeCaches()).catch(() => {});
       })
       .catch(() => {
         // SW not available (dev / unsupported browser) — no banner.

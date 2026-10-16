@@ -153,3 +153,119 @@ test("live-lua executes real Lua via wasmoon WASM in a worker", async ({ page })
     );
   }
 });
+
+test("live-r executes real R via webR and draws a plot", async ({ page }) => {
+  test.setTimeout(240_000);
+  await page.keyboard.press("Meta+2");
+  const editor = page.locator(".cm-content").first();
+  await editor.click();
+  await editor.press("ControlOrMeta+a");
+  // R can evaluate JavaScript in its worker (webr::eval_js): the worker is
+  // isolated, so storage APIs are gone there.
+  await editor.fill(
+    "```live-r\nx <- 1:100\ncat(sum(x) + 37, \"\\n\")\ncat(webr::eval_js(\"[typeof indexedDB, typeof caches, String(navigator.storage), typeof WebSocketStream].join('/')\"), \"\\n\")\ncat(webr::eval_js(\"try { importScripts('https://example.com/x.js'); 'loaded' } catch (e) { 'blocked' }\"), \"\\n\")\nplot(x, x^2)\n```\n",
+  );
+
+  const diag: string[] = [];
+  page.on("console", (m) => diag.push(`console.${m.type()}: ${m.text()}`));
+  page.on("pageerror", (e) => diag.push(`pageerror: ${e.message}`));
+  page.on("requestfailed", (r) => diag.push(`requestfailed: ${r.url()} ${r.failure()?.errorText ?? ""}`));
+
+  const block = page.locator('[data-testid="live-r"]');
+  await expect(block).toBeVisible({ timeout: 15_000 });
+  await block.getByRole("button", { name: "Run" }).click();
+
+  // 5050 + 37 = 5087 — computed by R, never present in the source.
+  try {
+    await expect(block).toContainText("5087", { timeout: 200_000 });
+  } catch (err) {
+    const state = await block.getAttribute("data-state").catch(() => "?");
+    const text = await block.innerText().catch(() => "?");
+    throw new Error(`live-r never printed 5087. data-state=${state}\nblock: ${text.slice(0, 400)}\n${diag.slice(-25).join("\n")}\n${String(err)}`);
+  }
+  await expect(block).toContainText("undefined/undefined/undefined/undefined");
+  await expect(block).toContainText("blocked");
+  await expect(block.locator("canvas")).toHaveCount(1);
+  await expect(block).toHaveAttribute("data-state", "success");
+});
+
+test("live-ruby executes real Ruby via ruby.wasm in a sandboxed worker", async ({ page }) => {
+  test.setTimeout(240_000);
+  await page.keyboard.press("Meta+2");
+  const editor = page.locator(".cm-content").first();
+  await editor.click();
+  await editor.press("ControlOrMeta+a");
+  // The JS bridge is refused (the worker is sandboxed); the rest runs.
+  await editor.fill(
+    '```live-ruby\nputs (1..100).sum + 41\nbegin\n  require "js"\nrescue LoadError => e\n  puts "blocked: #{e.message[0, 13]}"\nend\n[1, 2].map { _1 * 3 }\n```\n',
+  );
+
+  const diag: string[] = [];
+  page.on("console", (m) => diag.push(`console.${m.type()}: ${m.text()}`));
+  page.on("pageerror", (e) => diag.push(`pageerror: ${e.message}`));
+  page.on("requestfailed", (r) => diag.push(`requestfailed: ${r.url()} ${r.failure()?.errorText ?? ""}`));
+
+  const block = page.locator('[data-testid="live-ruby"]');
+  await expect(block).toBeVisible({ timeout: 15_000 });
+  await block.getByRole("button", { name: "Run" }).click();
+
+  // 5050 + 41 = 5091 — computed by Ruby, never present in the source.
+  try {
+    await expect(block).toContainText("5091", { timeout: 200_000 });
+  } catch (err) {
+    const state = await block.getAttribute("data-state").catch(() => "?");
+    const text = await block.innerText().catch(() => "?");
+    throw new Error(`live-ruby never printed 5091. data-state=${state}\nblock: ${text.slice(0, 400)}\n${diag.slice(-25).join("\n")}\n${String(err)}`);
+  }
+  await expect(block).toContainText("blocked: The JS bridge");
+  await expect(block).toContainText("=> [3, 6]");
+  await expect(block).toHaveAttribute("data-state", "success");
+
+  // A runaway loop is killed by the page and the next Run works again.
+  await editor.click();
+  await editor.press("ControlOrMeta+a");
+  await editor.fill("```live-ruby timeout=1500\nloop {}\n```\n\n```live-ruby\nputs 6 * 7\n```\n");
+  const [looping, after] = [block.nth(0), block.nth(1)];
+  await looping.getByRole("button", { name: "Run" }).click();
+  await expect(looping).toHaveAttribute("data-state", "timeout", { timeout: 60_000 });
+  await after.getByRole("button", { name: "Run" }).click();
+  await expect(after).toContainText("42", { timeout: 120_000 });
+});
+
+test("live-ruby runs offline once the runtime was loaded (service-worker runtime cache)", async ({ page, context }) => {
+  test.setTimeout(240_000);
+  // Production builds only: the dev server registers no service worker.
+  const hasSw = await page.evaluate(async () => {
+    if (!("serviceWorker" in navigator)) return false;
+    const reg = await Promise.race([
+      navigator.serviceWorker.ready.then(() => true),
+      new Promise<boolean>((r) => setTimeout(() => r(false), 10_000)),
+    ]);
+    return reg;
+  });
+  test.skip(!hasSw, "no service worker (dev server)");
+  // The worker's fetch goes through the SW only once the page is controlled.
+  if (!(await page.evaluate(() => !!navigator.serviceWorker.controller))) {
+    await page.reload();
+    await expect(page.locator(".cm-content").first()).toContainText("Welcome to", { timeout: 15_000 });
+  }
+  const runOnce = async (expected: string) => {
+    await page.keyboard.press("Meta+2");
+    const editor = page.locator(".cm-content").first();
+    await editor.click();
+    await editor.press("ControlOrMeta+a");
+    await editor.fill("```live-ruby\nputs [3, 4].sum * 1000 + 7\n```\n");
+    const block = page.locator('[data-testid="live-ruby"]');
+    await block.getByRole("button", { name: "Run" }).click();
+    await expect(block).toContainText(expected, { timeout: 200_000 });
+  };
+  await runOnce("7007");
+  await context.setOffline(true);
+  try {
+    await page.reload();
+    await expect(page.locator(".cm-content").first()).toContainText("Welcome to", { timeout: 15_000 });
+    await runOnce("7007");
+  } finally {
+    await context.setOffline(false);
+  }
+});

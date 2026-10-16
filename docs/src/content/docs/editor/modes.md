@@ -92,14 +92,23 @@ the file stays plain markdown:
 
 Run **Enable TypeScript checks in code blocks** from the command palette.
 In the Source / Split editor, every ` ```ts `, ` ```typescript ` and
-` ```tsx ` block is then type-checked by the real TypeScript compiler:
+` ```tsx ` block (and JavaScript blocks, see below) is then checked by the
+real TypeScript compiler:
 
 - Errors get a wavy underline — hover it for the message (`TS2322: …`).
+- Hovering a name shows its type (and its JSDoc, if any).
 - Completions pop up while you type (after `.` or a few letters;
   `Ctrl-Space` forces them).
 - Each block is checked on its own (its declarations don't leak into
   other blocks), in strict mode against the ES2022 and DOM libraries.
   Imports of npm packages aren't resolved and aren't reported.
+- JavaScript blocks (` ```js `, ` ```javascript `, ` ```live-js `) get
+  syntax errors, hover and completions; add `// @ts-check` as the first
+  line to also get type errors.
+- ` ```live-js shared ` blocks are checked together per scope
+  (`shared=name`), in document order — a later block sees the names an
+  earlier one declared, exactly as when they run. Re-declaring a name
+  there is allowed.
 
 The compiler (~1.3 MB compressed) runs in a background worker and is
 downloaded only after you turn the setting on; it is not part of the
