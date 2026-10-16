@@ -178,6 +178,26 @@ describe("chat(): response cache and usage", () => {
     expect([row.requests, row.inputTokens, row.outputTokens]).toEqual([2, 17, 32]);
   });
 
+  it("records an estimate when the consumer stops a stream early", async () => {
+    setActiveProvider("anthropic");
+    localStorage.setItem("lumen.ai.key.anthropic", "a-key");
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () =>
+        sse([
+          { type: "content_block_delta", delta: { type: "text_delta", text: "12345678" } },
+          { type: "content_block_delta", delta: { type: "text_delta", text: "more" } },
+        ]),
+      ),
+    );
+    for await (const c of chatStream([{ role: "user", content: "1234" }])) {
+      expect(c).toBe("12345678");
+      break; // stop after the first chunk
+    }
+    const row = usageSummary().rows[0];
+    expect([row.inputTokens, row.outputTokens, row.estimated]).toEqual([1, 2, 1]);
+  });
+
   it("estimates when the provider reports nothing", async () => {
     setActiveProvider("gemini");
     localStorage.setItem("lumen.ai.key.gemini", "g-key");

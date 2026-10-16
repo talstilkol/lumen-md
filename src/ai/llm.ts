@@ -446,24 +446,29 @@ export async function* chatStream(
   const provider = getActiveProvider();
   let reported = false;
   let out = "";
-  for await (const chunk of chatStreamDirect(messages, {
-    ...opts,
-    onUsage: (u) => {
-      reported = true;
-      recordUsage({ ...u, provider: u.provider ?? provider });
-    },
-  })) {
-    out += chunk;
-    yield chunk;
-  }
-  if (out && !reported) {
-    recordUsage({
-      provider,
-      model: effectiveModel(provider, opts),
-      inputTokens: estimateTokens(promptChars(messages)),
-      outputTokens: estimateTokens(out),
-      estimated: true,
-    });
+  try {
+    for await (const chunk of chatStreamDirect(messages, {
+      ...opts,
+      onUsage: (u) => {
+        reported = true;
+        recordUsage({ ...u, provider: u.provider ?? provider });
+      },
+    })) {
+      out += chunk;
+      yield chunk;
+    }
+  } finally {
+    // Also on abort, a read error or the consumer stopping early: the
+    // final usage event never arrived, but the generated text was billed.
+    if (out && !reported) {
+      recordUsage({
+        provider,
+        model: effectiveModel(provider, opts),
+        inputTokens: estimateTokens(promptChars(messages)),
+        outputTokens: estimateTokens(out),
+        estimated: true,
+      });
+    }
   }
 }
 
