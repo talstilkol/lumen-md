@@ -17,6 +17,10 @@ document.addEventListener("click", (e) => {
   const msg = previewClickMessage(a, (id) => document.getElementById(id) !== null);
   if (!msg) return; // in-page anchor: let the browser scroll
   e.preventDefault();
+  if (msg.type === "scrollTo") {
+    document.getElementById(msg.id)?.scrollIntoView({ block: "start" });
+    return;
+  }
   vscodeApi.postMessage(msg);
 });
 

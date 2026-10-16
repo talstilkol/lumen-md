@@ -30,6 +30,8 @@ import {
 } from "node:fs";
 import { basename, dirname, isAbsolute, join, relative, resolve, sep } from "node:path";
 import { renderHtmlDocument, escapeHtml } from "../storage/exportHtml";
+import { slug as headingSlug } from "github-slugger";
+import { resolveWikiTarget, splitWikiTarget } from "../renderer/wikiLinks";
 
 const MD_RE = /\.(md|markdown)$/i;
 
@@ -100,6 +102,55 @@ export function rewriteMarkdownLinks(html: string, fromOutput = "index.html"): s
       target = m[1].replace(/[^/]+$/, "index") + ".html";
     }
     return `${pre}${target}${m[3]}"`;
+  });
+}
+
+const unescapeHtml = (s: string) =>
+  s
+    .replace(/&quot;/g, '"')
+    .replace(/&#x27;|&#39;/g, "'")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&amp;/g, "&");
+
+/**
+ * Point `[[Note]]` / `[[Note#Heading]]` links at the published page of that
+ * note. The renderer emits wiki links as in-page anchors (`#note`) for the
+ * app, whose click handler opens the note; a static site has no handler.
+ * A link whose target is a heading of this page (by its href fragment or
+ * the Unicode-aware heading slug) stays an in-page jump, as in the app;
+ * an unresolved note is left as is.
+ */
+export function rewriteWikiLinks(
+  html: string,
+  fromOutput: string,
+  pages: ReadonlyArray<Pick<PublishPage, "source" | "output">>,
+): string {
+  if (!html.includes("data-wiki-target")) return html;
+  const ids = new Set<string>();
+  for (const m of html.matchAll(/\sid="([^"]*)"/g)) ids.add(unescapeHtml(m[1]));
+  const sources = pages.map((p) => p.source);
+  const fromDir = fromOutput.split("/").slice(0, -1);
+  return html.replace(/<a\b[^>]*\sdata-wiki-target="([^"]*)"[^>]*>/g, (tag, rawTarget: string) => {
+    const target = unescapeHtml(rawTarget);
+    const href = /\shref="([^"]*)"/.exec(tag)?.[1] ?? "";
+    let frag = "";
+    try {
+      frag = href.startsWith("#") ? decodeURIComponent(href.slice(1)) : "";
+    } catch {
+      /* malformed escape: not one of our ids */
+    }
+    if ((frag && ids.has(frag)) || ids.has(headingSlug(target))) return tag;
+    const { note, heading } = splitWikiTarget(target);
+    const source = note ? resolveWikiTarget(note, sources) : null;
+    const page = source ? pages.find((p) => p.source === source) : undefined;
+    if (!page) return tag;
+    const to = page.output.split("/");
+    let common = 0;
+    while (common < fromDir.length && common < to.length - 1 && fromDir[common] === to[common]) common++;
+    const rel = [...Array(fromDir.length - common).fill(".."), ...to.slice(common)].join("/");
+    const url = encodePath(rel) + (heading ? `#${encodeURIComponent(headingSlug(heading))}` : "");
+    return tag.replace(/\shref="[^"]*"/, ` href="${escapeHtml(url)}"`);
   });
 }
 
@@ -442,6 +493,7 @@ export async function publishSite(
       before: nav,
     });
     html = rewriteMarkdownLinks(html, p.output);
+    html = rewriteWikiLinks(html, p.output, pages);
     if (isIndex && listed.length) {
       html = appendToMain(html, pageList(listed));
     }

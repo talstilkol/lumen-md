@@ -332,6 +332,26 @@ describe("aiQuota counter", () => {
     vi.unstubAllGlobals();
   });
 
+  it.each(["anthropic", "gemini", "mistral"])("a %s request without its key spends no prompt (chat and stream)", async (provider) => {
+    __setEntitlementEndpointForTesting(ENDPOINT);
+    const fetchSpy = vi.fn(async () => new Response("{}", { status: 500 }));
+    vi.stubGlobal("fetch", fetchSpy);
+    const { chat, chatStream } = await import("../ai/llm");
+    localStorage.setItem("lumen.ai.provider", provider);
+    localStorage.removeItem(`lumen.ai.key.${provider}`);
+    const now = new Date();
+    await expect(chat([{ role: "user", content: "x" }])).rejects.toThrow(/configure/i);
+    await expect(
+      (async () => {
+        for await (const _ of chatStream([{ role: "user", content: "x" }])) void _;
+      })(),
+    ).rejects.toThrow(/configure/i);
+    expect(getAiUsage(now)).toBe(0);
+    expect(fetchSpy).not.toHaveBeenCalled();
+    localStorage.removeItem("lumen.ai.provider");
+    vi.unstubAllGlobals();
+  });
+
   it("re-checks the quota when a waiting command finally dispatches", async () => {
     __setEntitlementEndpointForTesting(ENDPOINT);
     const now = new Date();

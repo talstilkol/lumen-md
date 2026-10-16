@@ -89,6 +89,23 @@ describe("publishSite", () => {
     expect(existsSync(join(work, "out", "style.css"))).toBe(true);
   });
 
+  it("points wiki links at the published page; same-page headings stay anchors", async () => {
+    write("README.md", "# Home\n\nSee [[Guide]], [[docs/Deep Dive#Set up]], [[Home]], [[שלום עולם]] and [[Missing]].\n\n## שלום עולם\n");
+    write("Guide.md", "# Guide\n\nBack to [[README]].\n");
+    write("docs/Deep Dive.md", "# Deep\n\n## Set up\n\nSee [[Guide]].\n");
+    await publishSite(join(work, "src"), join(work, "out"));
+    const home = readFileSync(join(work, "out", "README.html"), "utf8");
+    expect(home).toMatch(/href="Guide\.html"[^>]*data-wiki-target="Guide"/);
+    expect(home).toMatch(/href="docs\/Deep%20Dive\.html#set-up"/);
+    expect(home).toMatch(/href="#home"[^>]*data-wiki-target="Home"/); // heading on this page
+    expect(home).toMatch(/data-wiki-target="שלום עולם"/);
+    expect(home).not.toMatch(/href="[^"#]*\.html[^"]*"[^>]*data-wiki-target="שלום עולם"/);
+    expect(home).toMatch(/href="#missing"[^>]*data-wiki-target="Missing"/); // unresolved: unchanged
+    const deep = readFileSync(join(work, "out", "docs", "Deep Dive.html"), "utf8");
+    expect(deep).toMatch(/href="\.\.\/Guide\.html"/);
+    expect(readFileSync(join(work, "out", "Guide.html"), "utf8")).toMatch(/href="README\.html"/);
+  });
+
   it("uses a root index.md as the home page and appends the page list", async () => {
     write("index.md", "# Welcome\n\nHello <world> & co.");
     write("a.md", "# A");
