@@ -163,7 +163,7 @@ export function CollabSettings({ onClose }: Props) {
         />
         {!persistentAllowed && (
           <div style={{ marginTop: 8 }}>
-            <UpgradeNotice compact message={t("billing.upgrade.persistentCollab")} />
+            <UpgradeNotice compact plan="pro" message={t("billing.upgrade.persistentCollab")} />
           </div>
         )}
         <div

@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-10-16T03:01:21.648Z",
+  "generated_at": "2026-10-16T06:01:39.991Z",
   "source": "src/i18n/index.ts (en bundle)",
-  "count": 912,
+  "count": 920,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -3855,6 +3855,46 @@
     {
       "key": "billing.upgrade.close",
       "en": "Close",
+      "vars": []
+    },
+    {
+      "key": "billing.action.upgradePro",
+      "en": "Upgrade to Pro",
+      "vars": []
+    },
+    {
+      "key": "billing.action.upgradeTeam",
+      "en": "Upgrade to Team",
+      "vars": []
+    },
+    {
+      "key": "billing.action.manage",
+      "en": "Manage billing",
+      "vars": []
+    },
+    {
+      "key": "billing.action.signInFirst",
+      "en": "Sign in first to choose a plan.",
+      "vars": []
+    },
+    {
+      "key": "billing.action.failed",
+      "en": "Billing is unavailable right now",
+      "vars": []
+    },
+    {
+      "key": "cmd.billing.upgradePro",
+      "en": "Billing: Upgrade to Pro",
+      "vars": []
+    },
+    {
+      "key": "cmd.billing.upgradeTeam",
+      "en": "Billing: Upgrade to Team",
+      "vars": []
+    },
+    {
+      "key": "cmd.billing.manage",
+      "en": "Billing: Manage subscription",
       "vars": []
     },
     {

@@ -115,24 +115,52 @@ export function isAiPromptCommand(id: string): boolean {
 }
 
 /**
- * Commands currently running that have passed the quota check but not yet
- * reached the model. A command is charged when it actually dispatches (see
+ * Palette commands currently running (passed the up-front quota check).
+ * A command is charged when it actually dispatches (see
  * `chargeAiCommandDispatch`, called by chat()/chatStream()), not when it
  * starts — cancelling its prompt dialog or failing a prerequisite (no
  * workspace file, too-short document…) must not spend a prompt. A command
- * that makes several model calls is charged once.
+ * that makes several model calls is charged once: its token stays in the
+ * list (marked charged) until the command settles.
  */
-const armedCommands: object[] = [];
+const armedCommands: { charged: boolean }[] = [];
 
-/** Called by the LLM layer right before a request is sent. */
+/** Thrown by the LLM layer when an uncounted request would exceed the quota. */
+export class AiQuotaExceededError extends Error {
+  constructor(limit: number) {
+    super(t("billing.aiQuota.exceeded", { limit }));
+    this.name = "AiQuotaExceededError";
+  }
+}
+
+/**
+ * Called by the LLM layer right before a request is sent (requests whose
+ * caller already counted them pass `prepaid` to chat() and never get here).
+ *  - A running palette command that hasn't dispatched yet pays for it
+ *    (palette commands are modal, one at a time); its follow-up calls are
+ *    free.
+ *  - Anything else — an AI request from outside the palette (voice-memo
+ *    summary, AI commit message, …) — is enforced and counted here, so no
+ *    path bypasses the monthly limit. Throws AiQuotaExceededError when the
+ *    quota is spent.
+ */
 export function chargeAiCommandDispatch(now: Date = new Date()): void {
-  // Requests whose caller already counted them pass `prepaid` to chat()
-  // and never get here. Otherwise the oldest running palette command that
-  // hasn't dispatched yet pays for this call (palette commands are modal,
-  // one at a time).
-  if (armedCommands.shift() === undefined) return;
+  if (armedCommands.length) {
+    const pending = armedCommands.find((c) => !c.charged);
+    if (!pending) return; // follow-up call of a command that already paid
+    pending.charged = true;
+    if (!gatesEnforced()) return;
+    if (!Number.isFinite(aiQuotaStatus(now).limit) || !hasAiCredentials()) return;
+    recordAiPrompt(now);
+    return;
+  }
   if (!gatesEnforced()) return;
-  if (!Number.isFinite(aiQuotaStatus(now).limit) || !hasAiCredentials()) return;
+  const status = aiQuotaStatus(now);
+  if (!Number.isFinite(status.limit) || !hasAiCredentials()) return;
+  if (!status.allowed) {
+    showAiToast(t("billing.aiQuota.exceeded", { limit: status.limit }), "error");
+    throw new AiQuotaExceededError(status.limit);
+  }
   recordAiPrompt(now);
 }
 
@@ -157,7 +185,7 @@ export function withAiQuota<C extends { id: string; action: () => void; children
             return;
           }
         }
-        const token = {};
+        const token = { charged: false };
         armedCommands.push(token);
         // Never dispatched (cancelled / prerequisite failed)? Release it uncharged.
         const disarm = () => {

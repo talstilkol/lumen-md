@@ -910,5 +910,13 @@
   "chart.alternatives": "הצעות לתרשים",
   "billing.upgrade.smartSearch": "חיפוש חכם (סמנטי, מבוסס embeddings) הוא תכונה של תוכנית Pro. חיפוש לפי מילות מפתח נשאר זמין.",
   "suggesting.untrackable": "הטקסט מכיל סימוני הצעות ({++, ++}, ~> וכו') ולא ניתן לעקוב אחריו. כבו את מצב ההצעות כדי להוסיף אותו.",
-  "suggesting.noWysiwyg": "מצב הצעות עוקב אחרי שינויים בעורך המקור, ולכן WYSIWYG אינו זמין כשהוא פעיל — מוצגת תצוגה מפוצלת במקום."
+  "suggesting.noWysiwyg": "מצב הצעות עוקב אחרי שינויים בעורך המקור, ולכן WYSIWYG אינו זמין כשהוא פעיל — מוצגת תצוגה מפוצלת במקום.",
+  "billing.action.upgradePro": "שדרוג ל-Pro",
+  "billing.action.upgradeTeam": "שדרוג ל-Team",
+  "billing.action.manage": "ניהול חיוב",
+  "billing.action.signInFirst": "יש להתחבר קודם כדי לבחור תוכנית.",
+  "billing.action.failed": "החיוב אינו זמין כרגע",
+  "cmd.billing.upgradePro": "חיוב: שדרוג ל-Pro",
+  "cmd.billing.upgradeTeam": "חיוב: שדרוג ל-Team",
+  "cmd.billing.manage": "חיוב: ניהול מנוי"
 }

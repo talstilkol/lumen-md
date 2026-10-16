@@ -6,6 +6,7 @@
 
 import { Lock } from "lucide-react";
 import { t } from "../i18n";
+import { canPurchasePlans, hasManageableSubscription, manageBilling, upgradeTo } from "../billing/planActions";
 
 interface Props {
   title?: string;
@@ -13,9 +14,14 @@ interface Props {
   onClose?: () => void;
   /** Compact variant for use inside a form instead of a whole dialog. */
   compact?: boolean;
+  /** Plan that unlocks the feature: shows an "Upgrade" action (billing builds only). */
+  plan?: "pro" | "team";
 }
 
-export function UpgradeNotice({ title, message, onClose, compact }: Props) {
+export function UpgradeNotice({ title, message, onClose, compact, plan }: Props) {
+  const showActions = !!plan && canPurchasePlans();
+  const manage = showActions && hasManageableSubscription();
+  const actionStyle = { width: "auto", padding: compact ? "3px 10px" : "6px 16px", fontSize: compact ? 11 : 12 } as const;
   return (
     <div
       role="status"
@@ -41,6 +47,24 @@ export function UpgradeNotice({ title, message, onClose, compact }: Props) {
         {compact && <Lock size={11} aria-hidden="true" style={{ marginInlineEnd: 6, verticalAlign: "-1px" }} />}
         {message}
       </p>
+      {showActions && (
+        <div style={{ display: "flex", gap: 8, justifyContent: compact ? "flex-start" : "center", flexWrap: "wrap" }}>
+          <button
+            type="button"
+            data-testid="upgrade-action"
+            className="icon-btn"
+            style={{ ...actionStyle, fontWeight: 600, color: "hsl(var(--accent))" }}
+            onClick={() => void upgradeTo(plan!)}
+          >
+            {plan === "team" ? t("billing.action.upgradeTeam") : t("billing.action.upgradePro")}
+          </button>
+          {manage && (
+            <button type="button" data-testid="manage-billing" className="icon-btn" style={actionStyle} onClick={() => void manageBilling()}>
+              {t("billing.action.manage")}
+            </button>
+          )}
+        </div>
+      )}
       {onClose && (
         <button
           type="button"

@@ -290,7 +290,7 @@ export function OrgSettings({ open, onClose, onOpenAuditLog }: Props) {
                   {t("org.audit.open")}
                 </button>
               ) : (
-                <UpgradeNotice compact message={t("billing.upgrade.auditLog")} />
+                <UpgradeNotice compact plan="team" message={t("billing.upgrade.auditLog")} />
               )}
             </section>
           )}

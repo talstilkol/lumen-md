@@ -134,6 +134,7 @@ export function AuditLog({ open, onClose, orgId }: Props) {
       >
         <div className="cmd-palette" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 480 }}>
           <UpgradeNotice
+            plan="team"
             title={t("audit.title")}
             message={t("billing.upgrade.auditLog")}
             onClose={onClose}

@@ -243,14 +243,14 @@ describe("aiQuota counter", () => {
     // Cancelled dialog / failed prerequisite: no model call → not charged.
     const cancelled = withAiQuota([{ id: "ai.translate", action: async () => {} }]);
     await cancelled[0].action();
-    chargeAiCommandDispatch(now); // an unrelated later dispatch must not bill it
     expect(getAiUsage(now)).toBe(0);
 
-    // A command that makes two model calls is charged once.
+    // A command that makes three model calls is charged once.
     const agent = withAiQuota([
       {
         id: "ai.productAgent",
         action: async () => {
+          chargeAiCommandDispatch(now);
           chargeAiCommandDispatch(now);
           chargeAiCommandDispatch(now);
         },
@@ -258,6 +258,16 @@ describe("aiQuota counter", () => {
     ]);
     await agent[0].action();
     expect(getAiUsage(now)).toBe(1);
+  });
+
+  it("counts and enforces AI requests made outside the palette (commit message, voice memo, …)", () => {
+    __setEntitlementEndpointForTesting(ENDPOINT);
+    const now = new Date();
+    chargeAiCommandDispatch(now); // unarmed, not prepaid → its own prompt
+    expect(getAiUsage(now)).toBe(1);
+    localStorage.setItem(monthKey(now), String(FREE_CAPS.aiMonthlyPrompts));
+    expect(() => chargeAiCommandDispatch(now)).toThrow(/100/);
+    expect(getAiUsage(now)).toBe(FREE_CAPS.aiMonthlyPrompts);
   });
 
   it("a background request counted by its caller doesn't also bill a command waiting in a dialog", async () => {

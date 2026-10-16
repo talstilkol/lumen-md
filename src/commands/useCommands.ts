@@ -24,6 +24,7 @@ import { relativeTime } from "../lib/relativeTime";
 import { buildFormatCommands } from "../editor/formatCommands";
 import { buildSuggestingCommands } from "../editor/suggestingCommands";
 import { withAiQuota } from "../billing/aiQuota";
+import { canPurchasePlans, manageBilling, upgradeTo } from "../billing/planActions";
 import { detectIsMac } from "../ui/KeyboardShortcuts";
 
 export interface UseCommandsOptions {
@@ -1149,6 +1150,14 @@ export function useCommands({
         suggesting: suggestingMode,
         toggle: toggleSuggestingMode,
       }).map((c) => ({ ...c, icon: cmdIcons.Pencil })),
+      // ── Plans (billing builds only) ─────────────────────────────────────
+      ...(canPurchasePlans()
+        ? [
+            { id: "billing.upgradePro", label: t("cmd.billing.upgradePro"), action: () => void upgradeTo("pro") },
+            { id: "billing.upgradeTeam", label: t("cmd.billing.upgradeTeam"), action: () => void upgradeTo("team") },
+            { id: "billing.manage", label: t("cmd.billing.manage"), action: () => void manageBilling() },
+          ].map((c) => ({ ...c, icon: cmdIcons.Sparkles, group: t("group.tools") }))
+        : []),
       // ── AI Capabilities ──────────────────────────────────────────────────
       buildAiSettingsCommand(),
       buildAiOutlineCommand(

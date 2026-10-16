@@ -910,5 +910,13 @@
   "chart.alternatives": "グラフの候補",
   "billing.upgrade.smartSearch": "スマート検索（埋め込みによるセマンティック検索）は Pro プランの機能です。キーワード検索は引き続き利用できます。",
   "suggesting.untrackable": "このテキストには提案マークアップ（{++、++}、~> など）が含まれているため、変更として記録できません。挿入するには提案モードをオフにしてください。",
-  "suggesting.noWysiwyg": "提案モードはソースエディターで変更を記録するため、有効な間は WYSIWYG を使えません。代わりに分割表示にします。"
+  "suggesting.noWysiwyg": "提案モードはソースエディターで変更を記録するため、有効な間は WYSIWYG を使えません。代わりに分割表示にします。",
+  "billing.action.upgradePro": "Pro にアップグレード",
+  "billing.action.upgradeTeam": "Team にアップグレード",
+  "billing.action.manage": "請求を管理",
+  "billing.action.signInFirst": "プランを選ぶには先にサインインしてください。",
+  "billing.action.failed": "現在、請求機能を利用できません",
+  "cmd.billing.upgradePro": "請求: Pro にアップグレード",
+  "cmd.billing.upgradeTeam": "請求: Team にアップグレード",
+  "cmd.billing.manage": "請求: サブスクリプションを管理"
 }

@@ -910,5 +910,13 @@
   "chart.alternatives": "Suggestions de graphiques",
   "billing.upgrade.smartSearch": "La recherche intelligente (sémantique, par embeddings) est une fonctionnalité Pro. La recherche par mots-clés reste disponible.",
   "suggesting.untrackable": "Ce texte contient du balisage de suggestion ({++, ++}, ~>, …) et ne peut pas être suivi. Désactivez le mode suggestion pour l’insérer.",
-  "suggesting.noWysiwyg": "Le mode suggestion suit les modifications dans l’éditeur source ; le WYSIWYG n’est donc pas disponible tant qu’il est actif — affichage en vue partagée à la place."
+  "suggesting.noWysiwyg": "Le mode suggestion suit les modifications dans l’éditeur source ; le WYSIWYG n’est donc pas disponible tant qu’il est actif — affichage en vue partagée à la place.",
+  "billing.action.upgradePro": "Passer à Pro",
+  "billing.action.upgradeTeam": "Passer à Team",
+  "billing.action.manage": "Gérer la facturation",
+  "billing.action.signInFirst": "Connectez-vous d'abord pour choisir une offre.",
+  "billing.action.failed": "La facturation est indisponible pour le moment",
+  "cmd.billing.upgradePro": "Facturation : passer à Pro",
+  "cmd.billing.upgradeTeam": "Facturation : passer à Team",
+  "cmd.billing.manage": "Facturation : gérer l'abonnement"
 }

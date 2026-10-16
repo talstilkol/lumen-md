@@ -396,7 +396,7 @@ export function SearchDialog({ open, onClose, onOpenFile }: Props) {
         </div>
         <div className="cmd-palette-list" ref={listRef}>
           {mode === "smart" && !smartAllowed && (
-            <UpgradeNotice compact message={t("billing.upgrade.smartSearch")} />
+            <UpgradeNotice compact plan="pro" message={t("billing.upgrade.smartSearch")} />
           )}
           {empty && !(mode === "smart" && !smartAllowed) && (
             <div className="cmd-palette-empty">

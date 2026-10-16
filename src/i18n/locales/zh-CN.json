@@ -910,5 +910,13 @@
   "chart.alternatives": "图表建议",
   "billing.upgrade.smartSearch": "智能搜索（基于嵌入的语义搜索）是 Pro 版功能。关键词搜索仍可使用。",
   "suggesting.untrackable": "该文本包含建议标记（{++、++}、~> 等），无法作为修订记录。请关闭建议模式后再插入。",
-  "suggesting.noWysiwyg": "建议模式在源码编辑器中记录修改，开启时无法使用所见即所得（WYSIWYG）——已改为分屏视图。"
+  "suggesting.noWysiwyg": "建议模式在源码编辑器中记录修改，开启时无法使用所见即所得（WYSIWYG）——已改为分屏视图。",
+  "billing.action.upgradePro": "升级到 Pro",
+  "billing.action.upgradeTeam": "升级到 Team",
+  "billing.action.manage": "管理账单",
+  "billing.action.signInFirst": "请先登录以选择套餐。",
+  "billing.action.failed": "账单功能暂不可用",
+  "cmd.billing.upgradePro": "账单：升级到 Pro",
+  "cmd.billing.upgradeTeam": "账单：升级到 Team",
+  "cmd.billing.manage": "账单：管理订阅"
 }

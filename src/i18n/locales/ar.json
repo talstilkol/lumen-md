@@ -910,5 +910,13 @@
   "chart.alternatives": "اقتراحات المخططات",
   "billing.upgrade.smartSearch": "البحث الذكي (الدلالي، المعتمد على التضمينات) ميزة في خطة Pro. يبقى البحث بالكلمات المفتاحية متاحًا.",
   "suggesting.untrackable": "يحتوي هذا النص على علامات اقتراحات ({++ و++} و~> …) ولا يمكن تتبّعه. أوقف وضع الاقتراحات لإدراجه.",
-  "suggesting.noWysiwyg": "يتتبّع وضع الاقتراحات التغييرات في محرر المصدر، لذا لا يتوفر WYSIWYG أثناء تشغيله — يُعرض العرض المقسوم بدلًا منه."
+  "suggesting.noWysiwyg": "يتتبّع وضع الاقتراحات التغييرات في محرر المصدر، لذا لا يتوفر WYSIWYG أثناء تشغيله — يُعرض العرض المقسوم بدلًا منه.",
+  "billing.action.upgradePro": "الترقية إلى Pro",
+  "billing.action.upgradeTeam": "الترقية إلى Team",
+  "billing.action.manage": "إدارة الفوترة",
+  "billing.action.signInFirst": "سجّل الدخول أولاً لاختيار خطة.",
+  "billing.action.failed": "الفوترة غير متاحة حالياً",
+  "cmd.billing.upgradePro": "الفوترة: الترقية إلى Pro",
+  "cmd.billing.upgradeTeam": "الفوترة: الترقية إلى Team",
+  "cmd.billing.manage": "الفوترة: إدارة الاشتراك"
 }
