@@ -122,7 +122,7 @@ jobs:
       - name: Install Playwright browser (${{ matrix.browser }})
         run: npx playwright install --with-deps ${{ matrix.browser }}
       - name: Run E2E (${{ matrix.browser }})
-        run: npx playwright test --project=${{ matrix.browser }} --reporter=line
+        run: npx playwright test --project=${{ matrix.browser }} --reporter=line,github,html
       - name: Upload report
         if: failure()
         uses: actions/upload-artifact@v4
@@ -163,7 +163,7 @@ jobs:
       - name: Run E2E against prod bundle
         env:
           PLAYWRIGHT_BASE_URL: http://localhost:5180
-        run: npx playwright test --project=chromium --reporter=line
+        run: npx playwright test --project=chromium --reporter=line,github,html
       - name: Upload report
         if: failure()
         uses: actions/upload-artifact@v4
