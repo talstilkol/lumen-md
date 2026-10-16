@@ -36,12 +36,24 @@ test("WYSIWYG edits are tracked as suggestions while suggesting is on", async ({
   await page.keyboard.press("Home");
   for (let i = 0; i < "Hello world".length; i++) await page.keyboard.press("ArrowRight");
   await page.keyboard.type(" big");
-  await page.keyboard.press("Home");
-  await page.keyboard.press("Shift+ArrowRight");
-  await page.keyboard.press("Shift+ArrowRight");
-  await page.keyboard.press("Shift+ArrowRight");
-  await page.keyboard.press("Shift+ArrowRight");
-  await page.keyboard.press("Shift+ArrowRight");
+  // Select "Hello" through the DOM (key-repeat selection races the
+  // re-render after the previous edit on slow CI machines).
+  await expect(pm.locator("ins.critic-ins").filter({ hasText: "big" })).toBeVisible();
+  await pm.evaluate((root) => {
+    const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+    for (let n = walker.nextNode(); n; n = walker.nextNode()) {
+      const at = n.textContent!.indexOf("Hello");
+      if (at === -1) continue;
+      const range = document.createRange();
+      range.setStart(n, at);
+      range.setEnd(n, at + 5);
+      const sel = window.getSelection()!;
+      sel.removeAllRanges();
+      sel.addRange(range);
+      return;
+    }
+  });
+  await expect.poll(() => page.evaluate(() => window.getSelection()?.toString())).toBe("Hello");
   await page.keyboard.type("Hi");
   await expect(pm.locator("del.critic-del")).toHaveText("Hello");
   await expect(pm.locator("ins.critic-ins").first()).toHaveText("Hi");
