@@ -280,6 +280,29 @@ describe("canonical paths", () => {
   });
 });
 
+describe("single-file publish follows page links", () => {
+  it("publishes the Markdown pages a single file links to (transitively)", async () => {
+    write("README.md", "# Home\n\nSee [the guide](docs/guide.md#install) and [ref].\n\n[ref]: notes.md");
+    write("docs/guide.md", "# Guide\n\n![shot](img/a.png) back to [home](../README.md) and [faq](faq.md)");
+    write("docs/faq.md", "# FAQ");
+    write("docs/img/a.png", new Uint8Array([1]));
+    write("notes.md", "# Notes");
+    write("unlinked.md", "# Not linked");
+    const res = await publishSite(join(work, "src", "README.md"), join(work, "out"));
+    expect(res.pages.map((p) => p.output).sort()).toEqual(["README.html", "docs/faq.html", "docs/guide.html", "notes.html"]);
+    expect(res.assets).toEqual(["docs/img/a.png"]);
+    expect(existsSync(join(work, "out", "unlinked.html"))).toBe(false);
+    expect(read("README.html")).toContain('href="docs/guide.html#install"');
+  });
+
+  it("does not follow links outside the source folder", async () => {
+    writeFileSync(join(work, "outside.md"), "# Outside");
+    write("README.md", "[x](../outside.md)");
+    const res = await publishSite(join(work, "src", "README.md"), join(work, "out"));
+    expect(res.pages.map((p) => p.output)).toEqual(["README.html"]);
+  });
+});
+
 describe("page-list links", () => {
   it("percent-encode URL delimiters in file names", async () => {
     write("FAQ #1.md", "# FAQ");

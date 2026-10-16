@@ -155,13 +155,19 @@ export async function chat(
   messages: ChatMessage[],
   opts: ChatOptions = {},
 ): Promise<string> {
-  if (!opts.prepaid) chargeAiCommandDispatch();
+  // The monthly quota is charged right before a request actually goes out
+  // (after availability, key and rate-limit checks), so a request that
+  // fails locally never spends a prompt.
+  const charge = () => {
+    if (!opts.prepaid) chargeAiCommandDispatch();
+  };
   const provider = getActiveProvider();
 
   // ── Ollama (local server) ──────────────────────────────────────
   if (provider === "ollama") {
     const { chatOllama, isOllamaAvailable, getBaseUrl } = await import("./ollamaProvider");
     if (await isOllamaAvailable()) {
+      charge();
       return chatOllama(messages, opts);
     }
     toast.warn(
@@ -179,6 +185,7 @@ export async function chat(
   if (provider === "anthropic") {
     const { chatAnthropic } = await import("./anthropicProvider");
     checkRateLimit();
+    charge();
     inflight++;
     try {
       return await chatAnthropic(messages, opts);
@@ -191,6 +198,7 @@ export async function chat(
   if (provider === "gemini") {
     const { chatGemini } = await import("./geminiProvider");
     checkRateLimit();
+    charge();
     inflight++;
     try {
       return await chatGemini(messages, opts);
@@ -203,6 +211,7 @@ export async function chat(
   if (provider === "mistral") {
     const { chatMistral } = await import("./mistralProvider");
     checkRateLimit();
+    charge();
     inflight++;
     try {
       return await chatMistral(messages, opts);
@@ -232,6 +241,7 @@ export async function chat(
         }
       });
       try {
+        charge();
         return await chatLocal(messages, { model: opts.model, maxTokens: opts.maxTokens, temperature: opts.temperature });
       } finally {
         off();
@@ -243,6 +253,7 @@ export async function chat(
   // ── OpenAI (cloud) ─────────────────────────────────────────────
   const key = getAiKey();
   checkRateLimit();
+  charge();
   inflight++;
   // F3 — when the user has trained + enabled their personal model,
   // route chat() through it. Caller-supplied `opts.model` still wins
@@ -299,12 +310,15 @@ export async function* chatStream(
   messages: ChatMessage[],
   opts: ChatOptions = {},
 ): AsyncGenerator<string, void, undefined> {
-  if (!opts.prepaid) chargeAiCommandDispatch();
+  const charge = () => {
+    if (!opts.prepaid) chargeAiCommandDispatch();
+  };
   const provider = getActiveProvider();
 
   if (provider === "ollama") {
     const { chatOllamaStream, isOllamaAvailable } = await import("./ollamaProvider");
     if (await isOllamaAvailable()) {
+      charge();
       yield* chatOllamaStream(messages, opts);
       return;
     }
@@ -312,24 +326,28 @@ export async function* chatStream(
 
   if (provider === "anthropic") {
     const { chatAnthropicStream } = await import("./anthropicProvider");
+    charge();
     yield* chatAnthropicStream(messages, opts);
     return;
   }
 
   if (provider === "gemini") {
     const { chatGeminiStream } = await import("./geminiProvider");
+    charge();
     yield* chatGeminiStream(messages, opts);
     return;
   }
 
   if (provider === "mistral") {
     const { chatMistralStream } = await import("./mistralProvider");
+    charge();
     yield* chatMistralStream(messages, opts);
     return;
   }
 
   const key = getAiKey();
   checkRateLimit();
+  charge();
   inflight++;
   const model = opts.model ?? DEFAULT_MODEL;
 

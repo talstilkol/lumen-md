@@ -319,6 +319,19 @@ describe("aiQuota counter", () => {
     expect(getAiUsage(now)).toBe(2);
   });
 
+  it("a request that fails before it is sent (Ollama down, no fallback key) spends no prompt", async () => {
+    __setEntitlementEndpointForTesting(ENDPOINT);
+    vi.stubGlobal("fetch", vi.fn(async () => { throw new TypeError("connection refused"); }));
+    const { chat } = await import("../ai/llm");
+    useAppStore.setState({ aiKey: null, useLocalAi: false });
+    localStorage.setItem("lumen.ai.provider", "ollama"); // counts as usable credentials
+    const now = new Date();
+    await expect(chat([{ role: "user", content: "x" }])).rejects.toThrow(/configure/i);
+    expect(getAiUsage(now)).toBe(0);
+    localStorage.removeItem("lumen.ai.provider");
+    vi.unstubAllGlobals();
+  });
+
   it("re-checks the quota when a waiting command finally dispatches", async () => {
     __setEntitlementEndpointForTesting(ENDPOINT);
     const now = new Date();

@@ -290,6 +290,53 @@ export function canonicalPath(p: string): string {
   }
 }
 
+/** Most pages a single-file publish follows links to. */
+const MAX_LINKED_PAGES = 1000;
+
+/**
+ * `start` plus every local Markdown page reachable from it through
+ * relative links (inline `[x](page.md)`, reference definitions, `href=`),
+ * staying inside `root` and never following symlinks. `start` first.
+ */
+export function linkedPages(start: string, root: string): string[] {
+  const seen = new Set<string>([start]);
+  const queue = [start];
+  const LINK_RE = /\]\(\s*<?([^)\s>]+)|^\s{0,3}\[[^\]]+\]:\s*<?(\S+?)>?(?:\s|$)|\bhref="([^"]+)"/gm;
+  while (queue.length && seen.size < MAX_LINKED_PAGES) {
+    const cur = queue.shift()!;
+    let md: string;
+    try {
+      md = readFileSync(cur, "utf8");
+    } catch {
+      continue;
+    }
+    for (const m of md.matchAll(LINK_RE)) {
+      let url = (m[1] ?? m[2] ?? m[3] ?? "").replace(/&amp;/g, "&");
+      if (!url || /^([a-z][a-z0-9+.-]*:|\/\/|\/|#)/i.test(url)) continue;
+      url = url.replace(/[?#].*$/, "");
+      try {
+        url = decodeURIComponent(url);
+      } catch {
+        continue;
+      }
+      if (!MD_RE.test(url)) continue;
+      const abs = resolve(dirname(cur), url);
+      const r = relative(root, abs);
+      if (!r || r.startsWith("..") || isAbsolute(r) || seen.has(abs)) continue;
+      if (!realDirsBetween(root, abs)) continue;
+      try {
+        if (!lstatSync(abs).isFile()) continue;
+      } catch {
+        continue;
+      }
+      seen.add(abs);
+      queue.push(abs);
+      if (seen.size >= MAX_LINKED_PAGES) break;
+    }
+  }
+  return [...seen];
+}
+
 /** Publish `input` (a folder or a single .md file) as a static site in `outDir`. */
 export async function publishSite(
   input: string,
@@ -319,7 +366,9 @@ export async function publishSite(
       `Refusing to publish into ${outAbs}: it is the source folder or contains it. Choose a separate --out folder.`,
     );
   }
-  const files = st.isDirectory() ? walk(root, outAbs).sort() : [inAbs];
+  // A single file brings along the Markdown pages it links to (and theirs),
+  // so its links to sibling pages aren't rewritten to pages that don't exist.
+  const files = st.isDirectory() ? walk(root, outAbs).sort() : linkedPages(inAbs, root);
   const siteTitle = opts.siteTitle ?? basename(root);
 
   mkdirSync(outAbs, { recursive: true });
@@ -396,7 +445,8 @@ export async function publishSite(
     // A single published file has no folder walk: bring along the local
     // files (images, downloads) it references.
     if (singleFile) {
-      for (const a of referencedLocalFiles(html, root, root)) if (!assets.includes(a)) assets.push(a);
+      const pageDir = join(root, ...dirname(p.source).split("/"));
+      for (const a of referencedLocalFiles(html, pageDir, root)) if (!assets.includes(a)) assets.push(a);
     }
     writeFileSync(prepareOutputPath(outAbs, p.output), html);
   }

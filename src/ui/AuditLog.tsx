@@ -33,10 +33,14 @@ function fmtTs(ts: number): string {
   return new Date(ts).toISOString().replace("T", " ").slice(0, 19);
 }
 
-/** Escape a single field for CSV. Quotes any cell containing comma / quote / newline. */
+/** Escape a single field for CSV: neutralizes formulas, quotes cells with comma / quote / newline. */
 function csvCell(value: unknown): string {
   if (value === null || value === undefined) return "";
-  const str = String(value);
+  let str = String(value);
+  // Spreadsheet apps run cells that start with = + - @ (or a tab / CR
+  // before one) as formulas. Audit fields are caller-controlled, so prefix
+  // them with an apostrophe to keep them as text (CSV injection).
+  if (/^[=+\-@\t\r]/.test(str)) str = `'${str}`;
   if (/[",\n\r]/.test(str)) {
     return `"${str.replace(/"/g, '""')}"`;
   }

@@ -25,6 +25,11 @@ function ensureWorker(): Worker {
     else p.reject(new Error(e.data.error ?? "TypeScript worker error"));
   };
   worker.onerror = (e) => {
+    // A worker that failed to load or crashed never answers again: drop it
+    // so the next request starts a fresh one (e.g. once back online).
+    const failed = worker;
+    worker = null;
+    failed?.terminate();
     for (const p of pending.values()) p.reject(new Error(e.message || "TypeScript worker failed"));
     pending.clear();
   };
