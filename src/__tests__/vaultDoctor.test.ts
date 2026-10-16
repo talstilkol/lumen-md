@@ -68,4 +68,23 @@ describe("vault doctor", () => {
     expect(md).toContain("did you mean [[Project Plan]]?");
     expect(md).toContain("Apply Suggested Link Fixes");
   });
+
+  it("handles formatted headings, reference links, same-note headings and ambiguous suggestions", () => {
+    const notes: DoctorNote[] = [
+      { path: "index.md", text: "[[Guide#Setup and run]] [[Guide#Missing]] [[Overview]]\n\n## Overview\n\n[ref]: ./gone.md\n[ok]: ./Guide.md \"Guide\"\n" },
+      { path: "Guide.md", text: "## **Setup** and `run`\n\n[[Notez]]\n" },
+      { path: "Overview.md", text: "x" },
+      { path: "a/Notes.md", text: "x" },
+      { path: "b/Notes.md", text: "x" },
+    ];
+    const f = runVaultDoctor(notes);
+    // `## **Setup** and \`run\`` renders as "Setup and run".
+    expect(f.filter((x) => x.kind === "missing-heading").map((x) => x.detail)).toEqual(["Guide#Missing"]);
+    expect(f.filter((x) => x.kind === "broken-md-link").map((x) => x.detail)).toEqual(["./gone.md"]);
+    // [[Overview]] is the heading in index itself: Overview.md gets no link from it.
+    expect(f.some((x) => x.kind === "orphan" && x.path === "Overview.md")).toBe(true);
+    // "Notez" is close to "Notes", but two notes are named Notes: no suggestion.
+    const broken = f.find((x) => x.kind === "broken-wiki-link")!;
+    expect([broken.detail, broken.suggestion]).toEqual(["Notez", undefined]);
+  });
 });

@@ -61,14 +61,32 @@ export function stripCode(text: string): string {
 
 const lineAt = (text: string, index: number) => text.slice(0, index).split("\n").length;
 
+/** A heading's rendered text: inline Markdown (emphasis, code, links, images) reduced to its text. */
+function headingText(md: string): string {
+  return md
+    .replace(/!\[([^\]]*)\]\([^)]*\)/g, "$1")
+    .replace(/\[([^\]]*)\]\([^)]*\)/g, "$1")
+    .replace(/\[\[([^\]|]+)(?:\|([^\]]*))?\]\]/g, (_m, target: string, label?: string) => label ?? target)
+    .replace(/`([^`]*)`/g, "$1")
+    .replace(/(\*\*|__|\*|_|~~)(.+?)\1/g, "$2")
+    .replace(/<[^>]+>/g, "")
+    .trim();
+}
+
 function headingsOf(text: string): Set<string> {
   const out = new Set<string>();
-  for (const m of stripCode(text).matchAll(/^#{1,6}\s+(.+?)\s*#*\s*$/gm)) {
-    out.add(headingSlug(m[1]));
-    out.add(m[1].trim().toLowerCase());
+  // Inline code in headings matters for the rendered text, so scan only
+  // with fenced blocks blanked.
+  const fenced = text.replace(/^(\s*)(`{3,}|~{3,})[^\n]*\n[\s\S]*?(?:\n\1\2[^\n]*|$)/gm, (m) => m.replace(/[^\n]/g, " "));
+  for (const m of fenced.matchAll(/^#{1,6}\s+(.+?)\s*#*\s*$/gm)) {
+    const rendered = headingText(m[1]);
+    out.add(headingSlug(rendered));
+    out.add(rendered.toLowerCase());
   }
   return out;
 }
+
+const hasHeading = (hs: Set<string> | undefined, h: string) => !!hs && (hs.has(headingSlug(h)) || hs.has(h.trim().toLowerCase()));
 
 function frontMatterless(text: string): string {
   return text.replace(/^---\r?\n[\s\S]*?\r?\n---\s*/, "");
@@ -108,6 +126,9 @@ function suggestFor(target: string, names: Map<string, string[]>): string | unde
   }
   return bestD <= 2 && best.length === 1 ? best[0] : undefined;
 }
+
+/** A suggestion is only useful when `[[it]]` opens exactly one note. */
+const unique = (name: string | undefined, names: Map<string, string[]>) => (name && names.get(name)?.length === 1 ? name : undefined);
 
 /* ─── MinHash near-duplicates ───────────────────────────────────────── */
 
@@ -176,31 +197,33 @@ export function runVaultDoctor(notes: readonly DoctorNote[], opts: DoctorOptions
       const { note: target, heading } = splitWikiTarget(raw);
       const line = lineAt(note.text, m.index ?? 0);
       if (!target) {
-        if (heading && !headings.get(note.path)?.has(headingSlug(heading)) && !headings.get(note.path)?.has(heading.toLowerCase())) {
+        if (heading && !hasHeading(headings.get(note.path), heading)) {
           findings.push({ kind: "missing-heading", path: note.path, line, detail: raw });
         }
         continue;
       }
+      // `[[Heading]]` to a heading in this same note wins over a note of
+      // that name (the preview jumps in-page first).
+      if (!heading && hasHeading(headings.get(note.path), target)) continue;
       const resolved = resolveWikiTarget(target, paths);
       if (resolved) {
         if (resolved !== note.path) incoming.set(resolved, (incoming.get(resolved) ?? 0) + 1);
-        if (heading) {
-          const hs = headings.get(resolved);
-          if (hs && !hs.has(headingSlug(heading)) && !hs.has(heading.toLowerCase())) {
-            findings.push({ kind: "missing-heading", path: note.path, line, detail: raw });
-          }
+        if (heading && !hasHeading(headings.get(resolved), heading)) {
+          findings.push({ kind: "missing-heading", path: note.path, line, detail: raw });
         }
         continue;
       }
-      // `[[Heading]]` to a heading in this same note is the v1 meaning.
-      const own = headings.get(note.path);
-      if (!heading && own && (own.has(headingSlug(target)) || own.has(target.toLowerCase()))) continue;
-      const suggestion = suggestFor(target, names);
+      const suggestion = unique(suggestFor(target, names), names);
       findings.push({ kind: "broken-wiki-link", path: note.path, line, detail: raw, ...(suggestion ? { suggestion } : {}) });
     }
 
-    // Relative Markdown links to notes: [label](other.md) / (./dir/x.md#h).
-    for (const m of text.matchAll(/(?<!!)\[[^\]\n]*\]\(\s*<?([^)\s>]+\.(?:md|markdown))(?:#[^)\s>]*)?>?(?:\s+"[^"]*")?\s*\)/gi)) {
+    // Relative Markdown links to notes: inline [label](other.md#h) and
+    // reference definitions `[id]: ./dir/x.md "title"`.
+    const mdLinks = [
+      ...text.matchAll(/(?<!!)\[[^\]\n]*\]\(\s*<?([^)\s>]+\.(?:md|markdown))(?:#[^)\s>]*)?>?(?:\s+"[^"]*")?\s*\)/gi),
+      ...text.matchAll(/^[ \t]{0,3}\[[^\]\n]+\]:[ \t]*<?([^\s>]+\.(?:md|markdown))(?:#[^\s>]*)?>?(?:[ \t]+(?:"[^"]*"|'[^']*'|\([^)]*\)))?[ \t]*$/gim),
+    ].sort((a, b) => (a.index ?? 0) - (b.index ?? 0));
+    for (const m of mdLinks) {
       const href = m[1];
       if (/^[a-z][a-z0-9+.-]*:/i.test(href) || href.startsWith("/")) continue; // absolute / external
       let decoded = href;
