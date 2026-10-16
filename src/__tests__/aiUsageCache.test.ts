@@ -131,6 +131,16 @@ describe("chat(): response cache and usage", () => {
     expect(usageSummary().rows.map((r) => r.provider)).toEqual(["openai"]);
   });
 
+  it("an estimate for a stream that fell back to OpenAI is OpenAI's", async () => {
+    setActiveProvider("local-webgpu");
+    const { useAppStore } = await import("../store/useStore");
+    useAppStore.setState({ aiKey: "sk-test" });
+    vi.stubGlobal("fetch", vi.fn(async () => sse([{ choices: [{ delta: { content: "12345678" } }] }, { choices: [{ delta: { content: "more" } }] }])));
+    const { chatStream: stream } = await import("../ai/llm");
+    for await (const _ of stream([{ role: "user", content: "1234" }])) break;
+    expect(usageSummary().rows.map((r) => [r.provider, r.estimated])).toEqual([["openai", 1]]);
+  });
+
   it("asks Mistral for streamed usage", async () => {
     setActiveProvider("mistral");
     localStorage.setItem("lumen.ai.key.mistral", "m-key");
