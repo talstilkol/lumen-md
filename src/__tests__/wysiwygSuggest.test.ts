@@ -142,6 +142,22 @@ describe("tracking edits while suggesting", () => {
     expect(e.md()).toBe("One paragraph here.");
   });
 
+  it("refuses formatting and delimiter deletions; pasted inline text is suggested", async () => {
+    const e = await open("Hello a--}b world.", true);
+    const { Slice, Fragment } = await import("@milkdown/prose/model");
+    const sc = e.view.state.schema;
+    // Bold on existing text: a mark step.
+    const strong = sc.marks.strong;
+    e.view.dispatch(e.view.state.tr.addMark(e.at("Hello"), e.at("Hello", 5), strong.create()));
+    // Deleting text that contains `--}`.
+    e.view.dispatch(e.view.state.tr.delete(e.at("a--}b"), e.at("a--}b", 5)));
+    expect(e.md()).toBe("Hello a--}b world.");
+    // Pasting inline text (an open paragraph slice) is a normal suggestion.
+    const at = e.at(" world");
+    e.view.dispatch(e.view.state.tr.replace(at, at, new Slice(Fragment.from(sc.nodes.paragraph.create(null, sc.text(" pasted"))), 1, 1)));
+    expect(e.md()).toBe("Hello a--}b{++ pasted++}{>>@Tal<<} world.");
+  });
+
   it("edits inside a fenced code block pass untracked", async () => {
     const e = await open("```\ncode here\n```", true);
     const at = e.at("here");

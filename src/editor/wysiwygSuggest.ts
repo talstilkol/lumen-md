@@ -26,7 +26,7 @@
 import { $markSchema, $prose, $remark } from "@milkdown/utils";
 import type { Mark, Schema, Slice } from "@milkdown/prose/model";
 import { Plugin, PluginKey, TextSelection, type EditorState, type Transaction } from "@milkdown/prose/state";
-import { ReplaceAroundStep, ReplaceStep, type Mapping } from "@milkdown/prose/transform";
+import { ReplaceStep, type Mapping } from "@milkdown/prose/transform";
 import type { Parents, PhrasingContent, Root } from "mdast";
 import { defaultHandlers } from "mdast-util-to-markdown";
 import { CRITIC_LITERAL, CRITIC_SENTINELS as S, prepareCriticMarkup, unescapeUserSentinels } from "../renderer/criticMarkup";
@@ -402,6 +402,32 @@ function isStructural(slice: Slice): boolean {
   return block;
 }
 
+/**
+ * A user transaction suggesting mode can't track:
+ *  - any step other than a plain replace: formatting (mark steps), block
+ *    type and list structure (replace-around), node attributes;
+ *  - a replace that inserts structure (a paragraph split, a multi-block
+ *    paste, a dragged block);
+ *  - a deletion whose text contains a CriticMarkup delimiter, which
+ *    couldn't be read back as one suggestion.
+ * Edits wholly inside a code block are exempt (they pass untracked).
+ */
+function untrackable(tr: Transaction): boolean {
+  return tr.steps.some((st, i) => {
+    if (!(st instanceof ReplaceStep)) return true;
+    const { from, to, slice } = st as unknown as { from: number; to: number; slice: Slice };
+    const before = tr.docs[i];
+    const $from = before.resolve(from);
+    if ($from.parent.type.spec.code && $from.sameParent(before.resolve(to))) return false;
+    if (slice.size > 0 && isStructural(slice) && !$from.parent.type.spec.code) return true;
+    if (to > from) {
+      CRITIC_DELIM.lastIndex = 0;
+      if (CRITIC_DELIM.test(before.textBetween(from, to, "\n", "\ufffc"))) return true;
+    }
+    return false;
+  });
+}
+
 /** True when a slice holds an inline node other than text (an image, a hard break). */
 function hasAtom(slice: Slice): boolean {
   let atom = false;
@@ -544,15 +570,14 @@ export const suggestTracking = $prose(
       key: trackingKey,
       appendTransaction: (trs, oldState, newState) =>
         config.enabled() ? trackChanges(trs, oldState, newState, config.author()) : null,
-      // Structure changes that move content around (wrap in a list, indent
-      // or outdent an item, change a block's type) can't be written as
-      // CriticMarkup, so Reject couldn't undo them: refused while suggesting.
+      // Edits CriticMarkup can't express are refused while suggesting, so
+      // nothing changes that Reject couldn't undo (see untrackable).
       filterTransaction: (tr) =>
         !config.enabled() ||
         !!tr.getMeta(SUGGEST_META) ||
         !!tr.getMeta("history$") ||
         tr.getMeta("addToHistory") === false ||
-        !tr.steps.some((st) => st instanceof ReplaceAroundStep),
+        !untrackable(tr),
       props: {
         // Typing over a selection: some browsers (Firefox) report it as the
         // minimal DOM diff ("Hello" → "H" deletes only "ello"), which would
