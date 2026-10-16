@@ -267,6 +267,29 @@ describe("JavaScript blocks and shared scopes", () => {
     expect(diags).toEqual([]);
   });
 
+  it("a top-level return keeps narrowing, and positions after it still map", () => {
+    const doc = ["```live-js shared", "// @ts-check", "const s = /** @type {string | undefined} */ (document.title || undefined);", "if (!s) return", "s.toUpperCase();", "s.nope();", "```"].join("\n");
+    const units = toUnits(findTsBlocks(doc));
+    const diags = service
+      .diagnostics(units.map(({ id, tsx, js, shared, code }) => ({ id, tsx, js, shared, code })))
+      .map((d) => unitRangeToDoc(units[0], d.start, d.length));
+    // Only `nope` is wrong (s is narrowed to string after the return).
+    expect(diags).toHaveLength(1);
+    expect(doc.slice(diags[0]!.from, diags[0]!.to)).toBe("nope");
+    // And the doc → unit mapping round-trips after the longer rewrite.
+    const pos = doc.indexOf("nope");
+    const at = unitAt(units, pos)!;
+    expect(at.unit.code.slice(at.offset, at.offset + 4)).toBe("nope");
+  });
+
+  it("a computed key in a destructured parameter is a reference, not a local", () => {
+    const { units } = checkShared(
+      "const value = 'k'; const pick = (({ [value]: v }) => v)({ k: 1 });",
+      "// @ts-check\nconst value = 2;",
+    );
+    expect(units[1].code.split("\n;\n")[0]).toContain("({ [value$prev]: v }) => v");
+  });
+
   it("a directly invoked function expression runs with that time's value", () => {
     const { units, diags } = checkShared(
       "const value = 1; const result = function () { return value; }(); function decl() { return value; }\n(0);",
@@ -301,7 +324,7 @@ describe("JavaScript blocks and shared scopes", () => {
     const retDoc = doc.replace("read().toFixed();", "read().toFixed();\nif (read()) return;\nreturn value;");
     const returning = toUnits(findTsBlocks(retDoc));
     expect(returning[1].code).not.toContain("async () =>");
-    expect(returning[1].code).toContain("if (read()) void 0;\nvoid   value;");
+    expect(returning[1].code).toContain("if (read()) throw 0;\nthrow  value;");
     const retDiags = service
       .diagnostics(returning.map(({ id, tsx, js, shared, code }) => ({ id, tsx, js, shared, code })))
       .filter((d) => unitRangeToDoc(returning[1], d.start, d.length) !== null);

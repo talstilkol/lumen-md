@@ -125,7 +125,37 @@ export interface TsUnit {
   tsx: boolean;
   js: boolean;
   shared: boolean;
-  parts: Array<{ block: TsBlock; offset: number }>;
+  parts: Array<UnitPart>;
+}
+
+/** Where a block sits in a unit, and the length-changing edits made to its text. */
+export interface UnitPart {
+  block: TsBlock;
+  offset: number;
+  /** Edits in block-text coordinates, ascending: [from, to) replaced by `len` chars. */
+  edits?: Array<{ from: number; to: number; len: number }>;
+}
+
+/** Block-text offset → offset in the edited text. */
+function toEdited(part: UnitPart, x: number): number {
+  let cum = 0;
+  for (const e of part.edits ?? []) {
+    if (x < e.from) break;
+    if (x < e.to) return e.from + cum + Math.min(x - e.from, e.len);
+    cum += e.len - (e.to - e.from);
+  }
+  return x + cum;
+}
+
+/** Offset in the edited text → block-text offset (inside an edit: its start). */
+function fromEdited(part: UnitPart, u: number): number {
+  let cum = 0;
+  for (const e of part.edits ?? []) {
+    if (u < e.from + cum) break;
+    if (u < e.from + cum + e.len) return e.from;
+    cum += e.len - (e.to - e.from);
+  }
+  return u - cum;
 }
 
 /**
@@ -140,22 +170,25 @@ const LIVE_WRAP_CLOSE = "\n})();";
  * A shared live block runs inside an async function, so a top-level
  * `return` is valid there — but wrapping the block in the unit would make
  * its declarations local, unlike the runtime that hoists them to shared
- * globals. Instead each top-level `return` becomes a same-length
- * expression statement (`return x` → `void   x`, bare `return` → `void 0`):
- * offsets stay put, the block's bindings stay at the unit's top level,
- * and units are modules, so top-level `await` needs nothing.
+ * globals. Instead each top-level `return` becomes a `throw` — it leaves
+ * the block the same way, so narrowing after `if (!x) return;` still
+ * holds: `return x` → `throw  x` (same length), a bare `return` →
+ * `throw 0` (one longer, recorded as an edit for position mapping). Units
+ * are modules, so top-level `await` needs nothing.
  */
-function neutraliseTopLevelReturns(code: string): string {
+function neutraliseTopLevelReturns(code: string): { text: string; edits: Array<{ from: number; to: number; len: number }> } {
   const tokens = tokenize(code);
   const scopes = functionScopes(tokens, matchBrackets(tokens));
-  let out = code;
+  const edits: Array<{ from: number; to: number; len: number; text: string }> = [];
   tokens.forEach((t, i) => {
     if (t.type !== "ident" || t.value !== "return" || scopes.some((f) => i >= f.from && i <= f.to)) return;
     const next = tokens[i + 1];
     const bare = !next || next.nl || (next.type === "punct" && (next.value === ";" || next.value === "}"));
-    out = out.slice(0, t.start) + (bare ? "void 0" : "void  ") + out.slice(t.end);
+    edits.push({ from: t.start, to: t.end, len: bare ? 7 : 6, text: bare ? "throw 0" : "throw " });
   });
-  return out;
+  let text = code;
+  for (const e of [...edits].reverse()) text = text.slice(0, e.from) + e.text + text.slice(e.to);
+  return { text, edits: edits.filter((e) => e.len !== e.to - e.from).map(({ from, to, len }) => ({ from, to, len })) };
 }
 
 /** Joins the parts of a shared unit: ends any statement / line comment. */
@@ -470,6 +503,14 @@ function functionScopes(tokens: ReturnType<typeof tokenize>, match: Map<number, 
           } else if (v === "," && depth === 0) break;
         }
         continue;
+      }
+      // `{ [key]: v }`: a computed key is an expression (a reference).
+      if (isPunct(i, "[") && (isPunct(i - 1, "{") || isPunct(i - 1, ","))) {
+        const close = match.get(i);
+        if (close !== undefined && isPunct(close + 1, ":")) {
+          i = close;
+          continue;
+        }
       }
       if (t?.type !== "ident") continue;
       if (isPunct(i - 1, ".") || (isPunct(i + 1, ":") && (isPunct(i - 1, "{") || isPunct(i - 1, ",")))) continue;
@@ -823,8 +864,9 @@ function sharedUnit(scope: readonly TsBlock[], k: number): TsUnit {
     // Shared runs turn top-level bindings into reassignable globals
     // (liveJsScope.hoistTopLevelBindings): `const` → `let`, same length.
     text = constAsLet(text);
-    if (b.live) text = neutraliseTopLevelReturns(text);
-    parts.push({ block: b, offset: code.length });
+    let edits: UnitPart["edits"];
+    if (b.live) ({ text, edits } = neutraliseTopLevelReturns(text));
+    parts.push({ block: b, offset: code.length, ...(i === k && edits?.length ? { edits } : {}) });
     code += text;
   }
   return { id: own.id, code, tsx: false, js: true, shared: true, parts };
@@ -850,7 +892,7 @@ export function toUnits(blocks: readonly TsBlock[]): TsUnit[] {
 }
 
 /** The unit's own block (the one its diagnostics and positions belong to). */
-export function ownPart(unit: TsUnit): { block: TsBlock; offset: number } {
+export function ownPart(unit: TsUnit): UnitPart {
   return unit.parts[unit.parts.length - 1];
 }
 
@@ -863,18 +905,22 @@ export function unitRangeToDoc(
   start: number,
   length: number,
 ): { from: number; to: number } | null {
-  const { block, offset } = ownPart(unit);
-  if (start < offset || start > offset + block.code.length) return null;
-  const from = block.from + (start - offset);
-  const to = Math.min(from + Math.max(length, 1), block.to);
+  const part = ownPart(unit);
+  const { block, offset } = part;
+  const editedLen = toEdited(part, block.code.length);
+  if (start < offset || start > offset + editedLen) return null;
+  const from = block.from + fromEdited(part, start - offset);
+  const end = block.from + fromEdited(part, start - offset + Math.max(length, 1));
+  const to = Math.min(Math.max(end, from + 1), block.to);
   return to > from ? { from, to } : { from, to: Math.min(from + 1, block.to + 1) };
 }
 
 /** The unit and unit-relative offset for a document position, or null. */
 export function unitAt(units: readonly TsUnit[], pos: number): { unit: TsUnit; offset: number } | null {
   for (const unit of units) {
-    const { block, offset } = ownPart(unit);
-    if (pos >= block.from && pos <= block.to) return { unit, offset: offset + (pos - block.from) };
+    const part = ownPart(unit);
+    const { block, offset } = part;
+    if (pos >= block.from && pos <= block.to) return { unit, offset: offset + toEdited(part, pos - block.from) };
   }
   return null;
 }
