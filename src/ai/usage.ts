@@ -25,7 +25,8 @@ export interface Usage {
   /** Anthropic: input tokens written to the prompt cache (billed at ~125%). */
   cacheWriteTokens?: number;
   /** Counts were estimated from characters, not reported by the API. */
-  estimated?: boolean;  /** Server-side web searches (Claude web search: $10 per 1,000). */
+  estimated?: boolean;
+  /** Server-side web searches (Claude web search: $10 per 1,000). */
   webSearches?: number;
 }
 
