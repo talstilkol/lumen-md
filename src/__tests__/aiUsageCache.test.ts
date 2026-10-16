@@ -23,7 +23,9 @@ describe("prices and cost", () => {
     expect(c).toBeCloseTo(3 + 0.3 + 3.75 + 15, 6);
     // OpenAI cached input is half price for GPT-4o; Gemini 25%.
     expect(costOf({ provider: "openai", model: "gpt-4o", inputTokens: 0, outputTokens: 0, cacheReadTokens: 1e6 })).toBeCloseTo(1.25, 6);
-    expect(costOf({ provider: "gemini", model: "gemini-2.5-pro", inputTokens: 0, outputTokens: 0, cacheReadTokens: 1e6 })).toBeCloseTo(0.3125, 6);
+    expect(costOf({ provider: "gemini", model: "gemini-2.5-pro", inputTokens: 0, outputTokens: 0, cacheReadTokens: 1e5 })).toBeCloseTo(0.03125, 6);
+    // Gemini 2.5 Pro above 200K prompt tokens: long-context rates.
+    expect(costOf({ provider: "gemini", model: "gemini-2.5-pro", inputTokens: 300_000, outputTokens: 1e6 })).toBeCloseTo(0.75 + 15, 6);
   });
 
   it("sums a month per provider / model", () => {
