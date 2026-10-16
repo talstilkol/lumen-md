@@ -21,7 +21,7 @@ type CollabSessionWithCleanup = CollabSession & { __cleanup?: () => void };
 import { useAppStore } from "../store/useStore";
 import { uiConfirm } from "../ui/PromptDialog";
 import { t } from "../i18n";
-import { toast } from "../store/useToastStore";
+import { toast, useToastStore } from "../store/useToastStore";
 
 export interface UseCollabReturn {
   collab: CollabSession | null;
@@ -61,6 +61,14 @@ export function useCollab(docContent: string): UseCollabReturn {
           // applied to the doc — tell the user why it isn't syncing.
           onE2EError: () =>
             toast.error(t("collab.e2e.decryptFailed"), t("collab.e2e.decryptFailed.body")),
+          onEncryptedRoomEmpty: (share) =>
+            useToastStore.getState().push({
+              kind: "warning",
+              ttlMs: 0,
+              title: t("collab.e2e.emptyRoom"),
+              body: t("collab.e2e.emptyRoom.body"),
+              action: { label: t("collab.e2e.emptyRoom.share"), run: share },
+            }),
         });
         setCollab(session);
         setRoomInHash(name);

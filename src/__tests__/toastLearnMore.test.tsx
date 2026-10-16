@@ -42,3 +42,18 @@ describe("Toast store learn-more link", () => {
     expect(screen.getByRole("alert").textContent).toContain("Start again.");
   });
 });
+
+describe("toast action button", () => {
+  it("runs the action and dismisses the toast", async () => {
+    const { fireEvent } = await import("@testing-library/react");
+    useToastStore.getState().clear();
+    let ran = 0;
+    render(<ToastContainer />);
+    act(() => {
+      useToastStore.getState().push({ kind: "warning", title: "Room is empty", ttlMs: 0, action: { label: "Share", run: () => ran++ } });
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Share" }));
+    expect(ran).toBe(1);
+    expect(useToastStore.getState().toasts).toHaveLength(0);
+  });
+});

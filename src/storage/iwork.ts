@@ -103,8 +103,16 @@ export function snappyDecompress(src: Uint8Array): Uint8Array {
  * Undo Apple's IWA framing: a sequence of `[0x00][len:u24le][snappy block]`
  * chunks whose decompressed bodies concatenate into one protobuf stream.
  */
-export function decodeIwa(buf: Uint8Array): Uint8Array {
+/**
+ * Cap on one IWA file's total decompressed size. Real documents' text
+ * archives are a few MB; a crafted file could otherwise chain many chunks
+ * that each expand toward snappy's per-block limit and exhaust memory.
+ */
+export const MAX_IWA_DECOMPRESSED = 64 * 1024 * 1024;
+
+export function decodeIwa(buf: Uint8Array, maxTotal = MAX_IWA_DECOMPRESSED): Uint8Array {
   const parts: Uint8Array[] = [];
+  let total = 0;
   let p = 0;
   while (p < buf.length) {
     if (p + 4 > buf.length) throw new Error("IWA: truncated chunk header");
@@ -112,10 +120,14 @@ export function decodeIwa(buf: Uint8Array): Uint8Array {
     const len = buf[p + 1] | (buf[p + 2] << 8) | (buf[p + 3] << 16);
     p += 4;
     if (p + len > buf.length) throw new Error("IWA: chunk overruns file");
-    parts.push(snappyDecompress(buf.subarray(p, p + len)));
+    // Check the declared size before allocating it.
+    const [declared] = readUvarint(buf, p);
+    if (total + declared > maxTotal) throw new Error("IWA: decompressed size exceeds limit");
+    const part = snappyDecompress(buf.subarray(p, p + len));
+    total += part.length;
+    parts.push(part);
     p += len;
   }
-  const total = parts.reduce((a, c) => a + c.length, 0);
   const out = new Uint8Array(total);
   let o = 0;
   for (const c of parts) {

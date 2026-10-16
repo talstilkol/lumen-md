@@ -57,6 +57,18 @@ function ToastCard({ toast }: { toast: ToastType }) {
             {t("toast.learnMore")}
           </a>
         ) : null}
+        {toast.action ? (
+          <button
+            type="button"
+            onClick={() => {
+              dismiss(toast.id);
+              toast.action!.run();
+            }}
+            className="mt-2 block rounded border border-current px-2 py-0.5 text-xs font-medium hover:opacity-80"
+          >
+            {toast.action.label}
+          </button>
+        ) : null}
       </div>
       <button
         type="button"

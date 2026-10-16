@@ -12,6 +12,8 @@ export interface Toast {
   ttlMs: number;
   /** Optional "Learn more" docs link (PRODUCT_IMPROVEMENT 2.4). */
   learnMoreUrl?: string;
+  /** Optional action button; clicking runs it and dismisses the toast. */
+  action?: { label: string; run: () => void };
 }
 
 interface ToastState {

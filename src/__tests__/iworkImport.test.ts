@@ -115,6 +115,16 @@ describe("decodeIwa", () => {
   it("rejects unknown chunk types", () => {
     expect(() => decodeIwa(new Uint8Array([1, 0, 0, 0]))).toThrow(/chunk type/);
   });
+
+  it("bounds the cumulative decompressed size before allocating", () => {
+    const block = snappyLiteral(new TextEncoder().encode("x".repeat(40)));
+    const framed = iwaFrame(block, block, block);
+    expect(decodeIwa(framed, 120).length).toBe(120);
+    expect(() => decodeIwa(framed, 100)).toThrow(/exceeds limit/);
+    // A block that merely *declares* a huge size is refused up front.
+    const huge = new Uint8Array([...varint(200 * 1024 * 1024), 0]);
+    expect(() => decodeIwa(iwaFrame(huge))).toThrow(/exceeds limit/);
+  });
 });
 
 /* ─── protobuf / IWA messages ─── */

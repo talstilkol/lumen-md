@@ -218,13 +218,21 @@ async function attachWebsocketProvider(
  * y-websocket server never see document content (P3-13).
  */
 function getRoomPassword(): string | null {
+  // The share link's password is specific to its room: it wins over a
+  // stored default left from another session.
+  if (typeof location !== "undefined") {
+    const m = location.hash.match(/[#&]password=([^&]+)/);
+    if (m) {
+      try {
+        return decodeURIComponent(m[1]);
+      } catch {
+        return m[1];
+      }
+    }
+  }
   if (typeof localStorage !== "undefined") {
     const stored = localStorage.getItem("lumen.collab.password");
     if (stored) return stored;
-  }
-  if (typeof location !== "undefined") {
-    const m = location.hash.match(/[#&]password=([^&]+)/);
-    if (m) return decodeURIComponent(m[1]);
   }
   return null;
 }
@@ -242,6 +250,13 @@ export function connectCollab(
     isNewRoom?: boolean;
     /** Called once if an incoming encrypted update can't be decrypted. */
     onE2EError?: (reason: E2EErrorReason) => void;
+    /**
+     * Joining a password room and nobody answered. With encrypted signaling
+     * a wrong password looks exactly like an empty room, so the local
+     * document is NOT seeded automatically (that would fork the room under
+     * its name). The callback gets `share()`, which seeds it on request.
+     */
+    onEncryptedRoomEmpty?: (share: () => void) => void;
   } = {},
 ): CollabSession {
   const doc = new Y.Doc();
@@ -405,9 +420,18 @@ export function connectCollab(
       // In E2E rooms ciphertext may have arrived but not finished
       // decrypting -- treat any envelope as "room has content".
       const envelopesPending = (e2e?.envelopeCount() ?? 0) > 0;
-      if (!destroyed && ytext.length === 0 && isAlone() && !envelopesPending) {
-        ytext.insert(0, seedContent);
+      const canSeed = () =>
+        !destroyed && ytext.length === 0 && isAlone() && (e2e?.envelopeCount() ?? 0) === 0;
+      if (!canSeed() || envelopesPending) return;
+      if (e2e) {
+        // Encrypted join: an empty room and a mistyped password can't be
+        // told apart — ask instead of forking.
+        opts.onEncryptedRoomEmpty?.(() => {
+          if (canSeed()) ytext.insert(0, seedContent);
+        });
+        return;
       }
+      ytext.insert(0, seedContent);
     };
     onSynced = ({ synced }) => {
       if (!synced) return;

@@ -380,6 +380,44 @@ describe("connectCollab join-time seeding", () => {
     session.destroy();
   });
 
+  it("never auto-seeds an encrypted room it joins alone; seeds only on request", async () => {
+    vi.useFakeTimers();
+    const mod = await import("../collab/yjs");
+    let share: (() => void) | null = null;
+    const session = mod.connectCollab("lumen-join-secret", "seed", {
+      password: "pw-123456",
+      onEncryptedRoomEmpty: (fn) => {
+        share = fn;
+      },
+    });
+    vi.advanceTimersByTime(mod.SEED_FALLBACK_MS);
+    expect(session.ytext.toString()).toBe(""); // a wrong password must not fork the room
+    expect(share).not.toBeNull();
+    share!();
+    expect(session.ytext.toString()).toBe("seed");
+    session.destroy();
+  });
+
+  it("the share link's password wins over a stored default", async () => {
+    const mod = await import("../collab/yjs");
+    const { WebrtcProvider } = await import("y-webrtc");
+    localStorage.setItem("lumen.collab.password", "old-default");
+    const orig = globalThis.location;
+    Object.defineProperty(globalThis, "location", {
+      value: { ...orig, hash: "#room=new-room&password=from-link" },
+      configurable: true,
+      writable: true,
+    });
+    try {
+      const session = mod.connectCollab("new-room", "");
+      expect((WebrtcProvider as unknown as { lastOpts: { password?: string } }).lastOpts.password).toBe("from-link");
+      session.destroy();
+    } finally {
+      Object.defineProperty(globalThis, "location", { value: orig, configurable: true, writable: true });
+      localStorage.removeItem("lumen.collab.password");
+    }
+  });
+
   it("seeds on synced when still empty and alone, and cancels the fallback timer", async () => {
     vi.useFakeTimers();
     const mod = await import("../collab/yjs");

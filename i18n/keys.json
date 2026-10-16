@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-10-16T08:18:07.637Z",
+  "generated_at": "2026-10-16T08:23:57.272Z",
   "source": "src/i18n/index.ts (en bundle)",
-  "count": 922,
+  "count": 925,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -2067,6 +2067,21 @@
     {
       "key": "collab.e2e.decryptFailed.body",
       "en": "The room password doesn't match the one the other participants used. Nothing was applied to your document — check the password and rejoin.",
+      "vars": []
+    },
+    {
+      "key": "collab.e2e.emptyRoom",
+      "en": "No one with this password is here yet",
+      "vars": []
+    },
+    {
+      "key": "collab.e2e.emptyRoom.body",
+      "en": "If you expected other people in this room, check the password — a wrong one looks like an empty room. Otherwise share your document to start the room.",
+      "vars": []
+    },
+    {
+      "key": "collab.e2e.emptyRoom.share",
+      "en": "Share my document here",
       "vars": []
     },
     {

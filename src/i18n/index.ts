@@ -493,6 +493,9 @@ const en: Strings = {
   "collab.prompt.join": "Join collaborative session \"{room}\"? Your current document will be replaced if other peers are present.",
   "collab.e2e.decryptFailed": "Can't decrypt this room",
   "collab.e2e.decryptFailed.body": "The room password doesn't match the one the other participants used. Nothing was applied to your document — check the password and rejoin.",
+  "collab.e2e.emptyRoom": "No one with this password is here yet",
+  "collab.e2e.emptyRoom.body": "If you expected other people in this room, check the password — a wrong one looks like an empty room. Otherwise share your document to start the room.",
+  "collab.e2e.emptyRoom.share": "Share my document here",
   // FileTree extras
   "tree.newFileRoot": "New file at root",
   "tree.newFolderRoot": "New folder at root",
