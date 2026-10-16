@@ -975,5 +975,16 @@
   "ai.mode.title": "KI-Kostenmodus",
   "ai.mode.economy": "Sparsam — kleines Modell für alles, ~2K Tokens Kontext",
   "ai.mode.balanced": "Ausgewogen — kleines Modell für kleine Aufgaben, ~5K Tokens Kontext (Standard)",
-  "ai.mode.quality": "Qualität — dein gewähltes Modell für alles, ~12K Tokens Kontext"
+  "ai.mode.quality": "Qualität — dein gewähltes Modell für alles, ~12K Tokens Kontext",
+  "cmd.tools.vaultDoctor": "🩺 Vault-Doktor: Arbeitsbereich prüfen",
+  "cmd.tools.vaultDoctor.hint": "Defekte Links, Waisen, Beinahe-Duplikate, fehlender Alt-Text — ohne KI, nichts verlässt dein Gerät",
+  "cmd.tools.vaultDoctorFix": "🩺 Vault-Doktor: Vorgeschlagene Link-Korrekturen anwenden",
+  "cmd.tools.vaultDoctorFix.hint": "Defekte [[Links]] mit genau einem nahen Treffer umschreiben",
+  "doctor.noWorkspace": "Öffne zuerst einen Arbeitsbereich-Ordner",
+  "doctor.readFailed": "{path} konnte nicht gelesen werden: Vault Doctor wurde angehalten, damit keine Links in einem unvollständigen Arbeitsbereich gemeldet oder korrigiert werden",
+  "doctor.checking": "Prüfe {count} Notizen…",
+  "doctor.done": "{count} Befunde",
+  "doctor.noFixes": "Keine defekten Links mit genau einem klaren Vorschlag",
+  "doctor.confirmFix": "{links} Links in {files} Notizen korrigieren?\n\n{list}\n\nIn einem Tab geöffnete Notizen werden übersprungen.",
+  "doctor.fixed": "{links} Links in {files} Notizen korrigiert"
 }
