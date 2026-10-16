@@ -272,14 +272,6 @@ Then set `VITE_WEBRTC_SIGNALING_URL=wss://signal.yourdomain.com` in `.env`.
 
 The current plan, status and what's left live in one place: [MASTER_PLAN.md](MASTER_PLAN.md).
 
----|---|
-| Stripe billing integration | 🔑 awaiting keys |
-| Persistent collab rooms (Fly.io) | 🔑 awaiting deploy |
-| iOS TestFlight + Android Play | 🔑 awaiting Apple/Google accounts |
-| npm publish `@lumen-md/mcp-server` | 🔑 awaiting npm org |
-| Locale translations (ar/ru/fr/de/ja/zh-CN) | 🔑 awaiting OpenAI key |
-| WorkOS SSO | 🔑 awaiting WorkOS account |
-
 ---
 
 ## 🤝 Contributing
