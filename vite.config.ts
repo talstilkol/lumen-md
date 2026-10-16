@@ -122,6 +122,9 @@ export default defineConfig({
           // webR (R in WebAssembly, ~45 MB, staged by scripts/copy-webr.mjs)
           // loads on the first live-r Run.
           "webr/**",
+          // ruby.wasm (~30 MB, staged by scripts/copy-ruby.mjs): fetched on
+          // the first live-ruby Run.
+          "ruby/**",
         ],
         runtimeCaching: [
           {

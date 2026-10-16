@@ -182,3 +182,46 @@ test("live-r executes real R via webR and draws a plot", async ({ page }) => {
   await expect(block.locator("canvas")).toHaveCount(1);
   await expect(block).toHaveAttribute("data-state", "success");
 });
+
+test("live-ruby executes real Ruby via ruby.wasm in a sandboxed worker", async ({ page }) => {
+  test.setTimeout(240_000);
+  await page.keyboard.press("Meta+2");
+  const editor = page.locator(".cm-content").first();
+  await editor.click();
+  await editor.press("ControlOrMeta+a");
+  // The JS bridge is refused (the worker is sandboxed); the rest runs.
+  await editor.fill(
+    '```live-ruby\nputs (1..100).sum + 41\nbegin\n  require "js"\nrescue LoadError => e\n  puts "blocked: #{e.message[0, 13]}"\nend\n[1, 2].map { _1 * 3 }\n```\n',
+  );
+
+  const diag: string[] = [];
+  page.on("console", (m) => diag.push(`console.${m.type()}: ${m.text()}`));
+  page.on("pageerror", (e) => diag.push(`pageerror: ${e.message}`));
+  page.on("requestfailed", (r) => diag.push(`requestfailed: ${r.url()} ${r.failure()?.errorText ?? ""}`));
+
+  const block = page.locator('[data-testid="live-ruby"]');
+  await expect(block).toBeVisible({ timeout: 15_000 });
+  await block.getByRole("button", { name: "Run" }).click();
+
+  // 5050 + 41 = 5091 — computed by Ruby, never present in the source.
+  try {
+    await expect(block).toContainText("5091", { timeout: 200_000 });
+  } catch (err) {
+    const state = await block.getAttribute("data-state").catch(() => "?");
+    const text = await block.innerText().catch(() => "?");
+    throw new Error(`live-ruby never printed 5091. data-state=${state}\nblock: ${text.slice(0, 400)}\n${diag.slice(-25).join("\n")}\n${String(err)}`);
+  }
+  await expect(block).toContainText("blocked: The JS bridge");
+  await expect(block).toContainText("=> [3, 6]");
+  await expect(block).toHaveAttribute("data-state", "success");
+
+  // A runaway loop is killed by the page and the next Run works again.
+  await editor.click();
+  await editor.press("ControlOrMeta+a");
+  await editor.fill("```live-ruby timeout=1500\nloop {}\n```\n\n```live-ruby\nputs 6 * 7\n```\n");
+  const [looping, after] = [block.nth(0), block.nth(1)];
+  await looping.getByRole("button", { name: "Run" }).click();
+  await expect(looping).toHaveAttribute("data-state", "timeout", { timeout: 60_000 });
+  await after.getByRole("button", { name: "Run" }).click();
+  await expect(after).toContainText("42", { timeout: 120_000 });
+});

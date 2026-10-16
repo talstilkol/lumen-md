@@ -203,6 +203,13 @@ const ENTRIES: MenuEntry[] = [
     template: '```live-r height=320\nx <- c(3, 1, 4, 1, 5, 9, 2, 6)\nsummary(x)\nplot(x, type = "b", main = "Live R")\n```',
   },
   {
+    id: "live-ruby",
+    label: "Live Ruby",
+    hint: "Run Ruby 3.4 via ruby.wasm (WASM)",
+    group: "Media",
+    template: '```live-ruby height=220\nwords = %w[ruby runs in the browser]\nputs words.map(&:capitalize).join(" ")\nputs RUBY_VERSION\nwords.group_by(&:size)\n```',
+  },
+  {
     id: "live-svg",
     label: "Live SVG",
     hint: "Inline vector graphics",

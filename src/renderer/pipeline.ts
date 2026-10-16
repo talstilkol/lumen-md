@@ -89,6 +89,9 @@ const SPECIAL_LANGS = new Set([
   // Live R via webR (R in WASM, self-hosted under /webr/, loaded on Run).
   "live-r",
   "r-live",
+  // Live Ruby via ruby.wasm (CRuby in WASI, in a Worker, loaded on Run).
+  "live-ruby",
+  "ruby-live",
   // Plain `html` fence as alias for `html-preview` — Lumen treats a raw
   // HTML fence as "render this HTML safely in a sanitized preview" rather
   // than a syntax-highlighted code block. Matches the dynamic-blocks-
@@ -133,6 +136,7 @@ function remarkLumenBlocks() {
       else if (lang === "live-sql" || lang === "sql-live") tag = "lumen-livesql";
       else if (lang === "live-lua" || lang === "lua-live") tag = "lumen-livelua";
       else if (lang === "live-r" || lang === "r-live") tag = "lumen-liver";
+      else if (lang === "live-ruby" || lang === "ruby-live") tag = "lumen-liveruby";
       else tag = `lumen-${lang}`;
       const data = (node.data ?? (node.data = {})) as Record<string, unknown>;
       data.hName = tag;

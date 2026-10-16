@@ -25,6 +25,7 @@ Lumen's killer feature is **dynamic blocks**: write a fenced code block in markd
 | ` ```live-js ` | JS sandbox (Worker isolate) with console output | Stdout/stderr/error states; timeout-protected; `shared` = one REPL scope per document (see below) |
 | ` ```live-lua ` / ` ```lua-live ` | Lua 5.4 (wasmoon WASM) in a Web Worker, with `print`/`io.write` output and return values | Loads on Run; self-hosted wasm (no CDN); `timeout=` ms (default 5000) |
 | ` ```live-r ` / ` ```r-live ` | R (webR, WebAssembly): printed output, messages, warnings, errors and base-graphics plots | Loads on first Run (~45 MB, self-hosted, cached); `timeout=` ms (default 30000); base R + bundled recommended packages, no CRAN installs |
+| ` ```live-ruby ` / ` ```ruby-live ` | Ruby 3.4 (ruby.wasm) in a sandboxed Web Worker: `puts`/`warn` output, the last value (`=> …`), errors with `block:<line>` | Loads on first Run (~30 MB, self-hosted, cached); `timeout=` ms (default 10000; a runaway loop is killed); full stdlib (`require "json"`, `set`, …), no gems; fresh VM per run; no network, storage or JS bridge |
 | ` ```live-css ` | Sandboxed iframe HTML+CSS preview | `srcdoc` + sandbox flags |
 | ` ```live-glsl ` / ` ```glsl ` / ` ```shader ` | GLSL fragment shader on a quad | Hot-reloads on edit |
 | ` ```bibtex ` / ` ```bib ` | Citation list (formatted from BibTeX) | Click → copy citation |
