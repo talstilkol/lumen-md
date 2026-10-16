@@ -63,6 +63,8 @@ jobs:
         # that en + he (src/i18n/locales/he.json) stay within 10 keys of each other (catches lazy
         # ports of new keys to one bundle and not the other).
         run: |
+          # The committed manifest feeds translation tooling: it must match.
+          node scripts/extract-i18n-keys.mjs --check
           node scripts/extract-i18n-keys.mjs > /dev/null
           en_count=$(node -e 'const j=JSON.parse(require("fs").readFileSync("i18n/keys.json","utf8")); console.log(j.entries.length)')
           # Hebrew ships as a lazy JSON bundle like the other locales.
