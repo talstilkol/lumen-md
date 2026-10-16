@@ -2,11 +2,17 @@ name = "lumen-auth"
 main = "worker.ts"
 compatibility_date = "2026-04-27"
 
-# Routes — serve the worker on its own subdomain so the session cookie is
-# scoped to it (the client calls `${VITE_WORKOS_ENDPOINT}/api/sso/*`):
+# Routes — REQUIRED in production: the worker must be on the same site as
+# the app, or its cookies are third-party and Safari drops them (sign-in
+# fails with state_mismatch). Either a sibling subdomain …
 # routes = [
 #   { pattern = "auth.lumen.app/*", zone_name = "lumen.app" }
 # ]
+# … or a path on the app's own host (then VITE_WORKOS_ENDPOINT=https://lumen.app):
+# routes = [
+#   { pattern = "lumen.app/api/sso/*", zone_name = "lumen.app" }
+# ]
+# The default *.workers.dev host is for local testing only.
 
 [vars]
 # Comma-separated app origins allowed to start SSO / read the session.

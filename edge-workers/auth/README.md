@@ -55,6 +55,12 @@ redirect URI, create an Organization with your email domain and attach an
 SSO connection to it. Then set `VITE_WORKOS_ENDPOINT=https://<worker host>`
 in the app's `.env`.
 
+The worker host must be on the **same site** as the app (a sibling
+subdomain such as `auth.example.org`, or a route on the app's own host).
+On another registrable domain — including `*.workers.dev` — its cookies
+are third-party, which Safari blocks: sign-in fails with `state_mismatch`
+and the session isn't kept. The app logs a console warning in that case.
+
 ## Tests
 
 `src/__tests__/ssoWorker.test.ts` drives every route with a mocked `fetch`:

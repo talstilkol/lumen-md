@@ -172,3 +172,20 @@ describe("getAccessToken (billing bearer token)", () => {
     expect(await getSsoAccessToken()).toBeNull();
   });
 });
+
+describe("isCrossSiteEndpoint (third-party cookie check)", () => {
+  it("treats sibling subdomains and same host as same-site", async () => {
+    const { isCrossSiteEndpoint } = await import("../auth/workosProvider");
+    expect(isCrossSiteEndpoint("https://auth.example.org", "app.example.org")).toBe(false);
+    expect(isCrossSiteEndpoint("https://example.org/api", "example.org")).toBe(false);
+    expect(isCrossSiteEndpoint("http://localhost:8787", "localhost")).toBe(false);
+  });
+  it("flags workers.dev and other registrable domains as cross-site", async () => {
+    const { isCrossSiteEndpoint } = await import("../auth/workosProvider");
+    expect(isCrossSiteEndpoint("https://lumen-auth.acme.workers.dev", "app.example.org")).toBe(true);
+    // workers.dev is a public suffix: the account subdomain is the site.
+    expect(isCrossSiteEndpoint("https://a.acme.workers.dev", "b.acme.workers.dev")).toBe(false);
+    expect(isCrossSiteEndpoint("https://a.acme.workers.dev", "b.other.workers.dev")).toBe(true);
+    expect(isCrossSiteEndpoint("https://auth.other.com", "example.org")).toBe(true);
+  });
+});

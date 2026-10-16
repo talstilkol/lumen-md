@@ -25,6 +25,7 @@
 
 import type { AuthProvider, User } from "./types";
 import { fetchWithRetry } from "../lib/fetchRetry";
+import { log } from "../lib/logger";
 
 interface WorkOSConfig {
   /** Edge worker base URL, e.g. `https://auth.lumen.md`. */
@@ -65,6 +66,7 @@ function readConfig(): WorkOSConfig | null {
 export async function signInWithSso(domain: string): Promise<string> {
   const cfg = readConfig();
   if (!cfg) throw new Error("WorkOS endpoint not configured (VITE_WORKOS_ENDPOINT)");
+  warnIfCrossSite(cfg.endpoint);
   if (!domain.trim()) throw new Error("Org domain required");
   const res = await fetchWithRetry(
     `${cfg.endpoint}/api/sso/authorize?domain=${encodeURIComponent(domain)}`,
@@ -174,4 +176,37 @@ export const workosProvider: AuthProvider = {
 /** Whether WorkOS is available (env var set). */
 export function isWorkosEnabled(): boolean {
   return readConfig() !== null;
+}
+
+/** Registrable-domain approximation: the last two labels (`a.b.example.org` → `example.org`). */
+function siteOf(hostname: string): string {
+  const h = hostname.toLowerCase().replace(/\.$/, "");
+  if (h === "localhost" || /^[\d.]+$/.test(h) || h.includes(":")) return h;
+  // workers.dev / pages.dev are public suffixes: each subdomain is its own site.
+  if (/\.(workers|pages)\.dev$/.test(h)) return h.split(".").slice(-3).join(".");
+  return h.split(".").slice(-2).join(".");
+}
+
+/**
+ * True when the SSO worker lives on a different site than the app, so its
+ * cookies are third-party (blocked by Safari; see DEPLOY.md §5b). Pure —
+ * exported for tests.
+ */
+export function isCrossSiteEndpoint(endpoint: string, appHostname: string): boolean {
+  try {
+    return siteOf(new URL(endpoint).hostname) !== siteOf(appHostname);
+  } catch {
+    return false;
+  }
+}
+
+let warnedCrossSite = false;
+function warnIfCrossSite(endpoint: string): void {
+  if (warnedCrossSite || typeof location === "undefined") return;
+  if (!isCrossSiteEndpoint(endpoint, location.hostname)) return;
+  warnedCrossSite = true;
+  log.warn(
+    `SSO worker ${endpoint} is on a different site than this app: its cookies are third-party and ` +
+      "Safari blocks them (sign-in fails with state_mismatch). Serve it from the app's own site — see DEPLOY.md §5b.",
+  );
 }
