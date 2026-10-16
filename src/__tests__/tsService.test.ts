@@ -178,7 +178,20 @@ describe("JavaScript blocks and shared scopes", () => {
   it("re-declared names are renamed in earlier parts only where they are bindings", () => {
     const { units } = checkShared("const value = 1; const o = { value: 2 }; o.value;", "const value = 'x';");
     const first = units[1].code.split("\n;\n")[0];
-    expect(first).toMatch(/^const \u05d0alue = 1; const o = \{ value: 2 \}; o\.value;$/);
+    expect(first).toBe("const value$prev = 1; const o = { value: 2 }; o.value;");
+  });
+
+  it("shorthand properties keep their key when the binding is renamed", () => {
+    const { units, input, diags } = checkShared(
+      "const value = 1; const obj = { value }; const { value: v2, other = value } = obj;",
+      "// @ts-check\nconst value = 'x';\nobj.value.toFixed();",
+    );
+    expect(units[1].code.split("\n;\n")[0]).toBe(
+      "// @ts-check\nconst value$prev = 1; const obj = { value: value$prev }; const { value: v2, other = value$prev } = obj;",
+    );
+    expect(diags).toEqual([]); // obj.value is still the number from the first block
+    const at = units[1].code.lastIndexOf("value");
+    expect(service.quickInfo(input, units[1].id, at + 1)?.text).toBe("(property) value: number");
   });
 
   it("describes the symbol under the cursor", () => {

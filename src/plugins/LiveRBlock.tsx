@@ -58,13 +58,21 @@ export default function LiveRBlock({ source, meta }: Props) {
   const [elapsed, setElapsed] = useState<number | null>(null);
   const [showSource, setShowSource] = useState(false);
   const runSeq = useRef(0);
+  // True while this block's run holds the shared webR instance (it has left
+  // the queue). Only then may Stop / unmount reset the runtime; a run that
+  // is still queued is just skipped, so another block's run survives.
+  const executing = useRef(false);
 
-  useEffect(
-    () => () => {
-      runSeq.current++;
-    },
-    [],
-  );
+  /** Drop the current run; reset webR only if that run is executing. */
+  const abandon = () => {
+    runSeq.current++;
+    if (executing.current) {
+      executing.current = false;
+      void resetWebR();
+    }
+  };
+
+  useEffect(() => abandon, []);
 
   async function run() {
     const runId = ++runSeq.current;
@@ -93,13 +101,22 @@ export default function LiveRBlock({ source, meta }: Props) {
         startTimer = () => timers.push(setTimeout(() => resolve("timeout"), timeoutMs));
       });
       const out = await Promise.race([
-        runR(source, undefined, { onStart: () => startTimer(), isCancelled: () => runId !== runSeq.current }),
+        runR(source, undefined, {
+          onStart: () => {
+            executing.current = true;
+            startTimer();
+          },
+          isCancelled: () => runId !== runSeq.current,
+        }).finally(() => {
+          if (runId === runSeq.current) executing.current = false;
+        }),
         timedOut,
       ]);
       if (runId !== runSeq.current || out === null) return;
       if (out === "timeout") {
         // R can't be interrupted over the PostMessage channel: drop the
         // runtime; the next Run boots a fresh one.
+        executing.current = false;
         await resetWebR();
         setLines([{ kind: "err", text: t("block.liveR.timedOut", { ms: timeoutMs }) }]);
         setState("timeout");
@@ -120,8 +137,7 @@ export default function LiveRBlock({ source, meta }: Props) {
   }
 
   function cancel() {
-    runSeq.current++;
-    void resetWebR();
+    abandon();
     setLines((prev) => [...prev, { kind: "err", text: t("block.liveR.stopped") }]);
     setState("error");
   }

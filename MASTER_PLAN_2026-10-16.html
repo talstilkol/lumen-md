@@ -1,8 +1,3 @@
-<!doctype html>
-<html lang="he" dir="rtl">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Lumen Master Plan</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -99,8 +94,6 @@ a { color: var(--ink); }
 a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 @media (max-width: 520px) { body { font-size: 15px; } th, td { padding: 8px 9px; } }
 </style>
-</head>
-<body>
 
 <div class="page" dir="rtl" lang="he">
 
@@ -111,7 +104,7 @@ a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
   <div class="meta">
     <span>ענף: <code>feat/plans-completion</code></span>
     <span>PR: <a href="https://github.com/talstilkol/lumen-md/pull/106">#106</a></span>
-    <span>ראש הענף: <code>4dd5c82</code></span>
+    <span>ראשי ענפים: <code>05aee55</code> (#106) · <code>0c43fb3</code> (<a href="https://github.com/talstilkol/lumen-md/pull/107">#107</a>)</span>
   </div>
 </header>
 
@@ -120,10 +113,11 @@ a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
   <div class="stats">
     <div class="stat"><span class="n">63%</span><span class="l">משימות TASKS.md שבוצעו (245 / 387)</span></div>
     <div class="stat"><span class="n">100%</span><span class="l">מהמשימות שלא חסומות חיצונית (245 / 245)</span></div>
-    <div class="stat"><span class="n">2166</span><span class="l">בדיקות יחידה, כולן עוברות</span></div>
+    <div class="stat"><span class="n">2209</span><span class="l">בדיקות יחידה בענף #107, כולן עוברות</span></div>
     <div class="stat"><span class="n">0 / 5</span><span class="l">פגיעויות npm קריטי / גבוה (5 בכלי build בלבד)</span></div>
   </div>
-  <p class="muted">אחוזי TASKS.md לא כוללים את מה שנבנה היום מעבר לתוכנית: ייחוס מחבר להצעות, הצפנת נוכחות בחדרי סיסמה ובדיקות TypeScript בבלוקי קוד. CI על ראש הענף: typecheck · test · build עבר; ה-e2e רצים כעת.</p>
+  <p class="muted">אחוזי TASKS.md לא כוללים את מה שנבנה היום מעבר לתוכנית: ייחוס מחבר להצעות, הצפנת נוכחות בחדרי סיסמה ובדיקות TypeScript בבלוקי קוד. CI על #106 ירוק בכל הדפדפנים בכל סבב. כל סבב של Codex מוצא ממצאים חדשים; כולם תוקנו, נענו ונסגרו (4 סבבים ב-#106, 2 ב-#107).</p>
+  <p class="muted"><b>באג ייצור שנמצא ותוקן היום:</b> מדיניות Trusted Types בכותרות חלה גם על ה-service worker וחסמה בו את <code>importScripts</code>, כך שבייצור לא היה אופליין בכלל. תוקן ב-#107 ואומת e2e: טעינה, ניתוק רשת, רענון והרצת Ruby.</p>
 
   <div class="box">
     <table>
@@ -154,7 +148,7 @@ a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
     <div class="answer">
       <span class="q">למזג את PR #106 ל-main?</span>
       <p><b>כן.</b> אחרי שאישרת את כל השינויים, אמזג ברגע שה-CI על ראש הענף ירוק בכל הדפדפנים. זה גם מה ש-Dependabot צריך: ההתראות נספרות רק על <code>main</code>. סקירות Codex ימשיכו על PR-ים הבאים.</p>
-      <span class="tag">ממתין: e2e על 4dd5c82 (רץ עכשיו).</span>
+      <span class="tag">ממתין: CI וסקירת Codex על 05aee55. אמזג כשה-CI ירוק ואין ממצאים פתוחים.</span>
     </div>
     <div class="answer">
       <span class="q">הצטרפות לחדר מוצפן כשאף אחד לא עונה</span>
@@ -182,17 +176,17 @@ a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
     <table>
       <thead><tr><th>#</th><th>משימה</th><th>בוצע</th><th>רמה</th><th class="num">שעות נ/מ/ג</th><th>הערה</th></tr></thead>
       <tbody>
-        <tr><td class="mono">C1</td><td>מיזוג PR #106 ל-main</td><td><div class="bar"><div class="track"><div class="fill" style="width:95%"></div></div><span class="pct">95%</span></div></td><td><span class="lvl L1">L1</span></td><td class="num">0.2 / 0.5 / 1</td><td>אחרי e2e ירוק</td></tr>
-        <tr><td class="mono">C2</td><td>הרחבת בדיקות TS: טיפוס ב-hover, בדיקת בלוקי <code>live-js</code>, הצהרות משותפות בין בלוקי <code>shared</code></td><td><div class="bar"><div class="track"><div class="fill" style="width:60%"></div></div><span class="pct">60%</span></div></td><td><span class="lvl L1">L1</span></td><td class="num">8 / 12 / 16</td><td>הבסיס (שגיאות + השלמה) נבנה היום</td></tr>
+        <tr><td class="mono">C1</td><td>מיזוג PR #106 ל-main</td><td><div class="bar"><div class="track"><div class="fill" style="width:97%"></div></div><span class="pct">97%</span></div></td><td><span class="lvl L1">L1</span></td><td class="num">0.2 / 0.5 / 1</td><td>CI ירוק; ממתין לסבב Codex האחרון</td></tr>
+        <tr><td class="mono">C2</td><td>הרחבת בדיקות TS: טיפוס ב-hover, בדיקת בלוקי <code>live-js</code>, הצהרות משותפות בין בלוקי <code>shared</code></td><td><div class="bar"><div class="track"><div class="fill done" style="width:100%"></div></div><span class="pct">100%</span></div></td><td><span class="lvl L1">L1</span></td><td class="num">0 / 0 / 0</td><td>נבנה ב-PR #107. בבלוקי <code>shared</code> כל בלוק נבדק רק מול הבלוקים שלפניו, הצהרה חוזרת מחליפה את הטיפוס, וכל בלוק קובע לעצמו <code>// @ts-check</code></td></tr>
         <tr><td class="mono">C3</td><td>מצב הצעות (track changes) גם ב-WYSIWYG</td><td><div class="bar"><div class="track"><div class="fill" style="width:50%"></div></div><span class="pct">50%</span></div></td><td><span class="lvl L1">L1</span></td><td class="num">12 / 16 / 24</td><td>עובד בעורך המקור, כולל ייחוס מחבר</td></tr>
-        <tr><td class="mono">C4</td><td>שפות חיות נוספות: webR (R), ruby.wasm</td><td><div class="bar"><div class="track"><div class="fill" style="width:0%"></div></div><span class="pct">0%</span></div></td><td><span class="lvl L1">L1</span></td><td class="num">16 / 24 / 32</td><td>20–40MB לכל שפה, טעינה עצלה</td></tr>
+        <tr><td class="mono">C4</td><td>שפות חיות נוספות: webR (R), ruby.wasm</td><td><div class="bar"><div class="track"><div class="fill done" style="width:100%"></div></div><span class="pct">100%</span></div></td><td><span class="lvl L1">L1</span></td><td class="num">0 / 0 / 0</td><td>נבנה ב-PR #107: <code>live-r</code> (כולל גרפים) ו-<code>live-ruby</code> (worker מבודד בלי רשת ואחסון). שתיהן עובדות גם אופליין</td></tr>
         <tr><td class="mono">C5</td><td>Web Playground (קבצים מרובים, JSX) + תצוגה חיה React / Vue / Svelte</td><td><div class="bar"><div class="track"><div class="fill" style="width:0%"></div></div><span class="pct">0%</span></div></td><td><span class="lvl L1">L1</span></td><td class="num">40 / 60 / 80</td><td>הגדול מבין פריטי הקוד</td></tr>
         <tr><td class="mono">C6</td><td>ייבוא חבילות npm ב-<code>live-js</code> (esm.sh)</td><td><div class="bar"><div class="track"><div class="fill" style="width:0%"></div></div><span class="pct">0%</span></div></td><td><span class="lvl L2">L2</span></td><td class="num">6 / 8 / 12</td><td>נדחה במכוון: פותח את ה-CSP ל-CDN חיצוני. אפשרי רק כאופציית self-host</td></tr>
         <tr><td class="mono">C7</td><td>מדידת זמן טעינה מול יעד TTI &lt; 1.5s</td><td><div class="bar"><div class="track"><div class="fill" style="width:0%"></div></div><span class="pct">0%</span></div></td><td><span class="lvl L2">L2</span></td><td class="num">1 / 1 / 2</td><td>דורש פריסה חיה (E1)</td></tr>
         <tr><td class="mono">C8</td><td>Team workspaces · שוק ערכות נושא · פרסום לרשת (<code>lumen/user/doc</code>)</td><td><div class="bar"><div class="track"><div class="fill" style="width:10%"></div></div><span class="pct">10%</span></div></td><td><span class="lvl L2">L2</span></td><td class="num">80 / 120 / 200</td><td>צריך שרת וחשבונות</td></tr>
         <tr><td class="mono">C9</td><td>מיזוג תיקוני Dependabot שיופיעו אחרי C1</td><td><div class="bar"><div class="track"><div class="fill" style="width:0%"></div></div><span class="pct">0%</span></div></td><td><span class="lvl L1">L1</span></td><td class="num">1 / 2 / 4</td><td>תלוי ב-C1</td></tr>
       </tbody>
-      <tfoot><tr><td></td><td>סה״כ קוד</td><td></td><td></td><td class="num">164 / 244 / 371</td><td>L1 בלבד: 77 / 115 / 157</td></tr></tfoot>
+      <tfoot><tr><td></td><td>סה״כ קוד שנותר</td><td></td><td></td><td class="num">140 / 208 / 323</td><td>L1 בלבד: 53 / 79 / 109</td></tr></tfoot>
     </table>
   </div>
 </section>
@@ -222,18 +216,16 @@ a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 <section>
   <h2><span class="sec">§5</span>סדר ריצה</h2>
   <ol class="steps">
-    <li><b>היום:</b> C1 מיזוג PR #106 כשה-CI ירוק, ואז C9.</li>
+    <li><b>היום:</b> C1 מיזוג PR #106 כשה-CI ירוק ואין ממצאי Codex פתוחים, ואז C9.</li>
     <li><b>אצלך, במקביל:</b> לבחור דומיין (§2), ואז E1 → E2 → E3. אלה שלושת החסמים שפותחים את β ואת C7.</li>
-    <li><b>אני, ברצף:</b> C2 → C3 → C4. כל אחד ב-PR נפרד, עם סקירת Codex ו-CI ירוק לפני מיזוג.</li>
+    <li><b>אני, ברצף:</b> C2 ו-C4 נבנו (PR #107, ימוזג אחרי #106) → C5 Playground → C3 (WYSIWYG). כל אחד ב-PR נפרד, עם סקירת Codex ו-CI ירוק לפני מיזוג.</li>
     <li><b>אחרי פריסה:</b> C7 מדידת ביצועים, E4–E6 בדיקות חיות.</li>
-    <li><b>בהמשך:</b> C5 Playground, ואז C8 ו-E7–E9 לפי סדר העדיפויות שתקבע.</li>
+    <li><b>בהמשך:</b> C8 ו-E7–E9 לפי סדר העדיפויות שתקבע.</li>
   </ol>
 </section>
 
 <footer>
-  TASKS.md: ‏245 / 387 — ‏63% · ללא חסימות חיצוניות: 245 / 245 — ‏100% · קוד שנותר: 9 משימות (6 ניתנות לביצוע עכשיו, 3 תלויות בהכרעה או בתשתית) · חסום חיצונית: 9 משימות, ≈ 25 שעות שלך · בדיקות יחידה: 2166 / 2166 · נוצר 16.10.2026.
+  TASKS.md: ‏245 / 387 — ‏63% · ללא חסימות חיצוניות: 245 / 245 — ‏100% · קוד שנותר: 7 משימות (4 ניתנות לביצוע עכשיו, 3 תלויות בהכרעה או בתשתית) · חסום חיצונית: 9 משימות, ≈ 25 שעות שלך · בדיקות יחידה: 2209 / 2209 · עודכן 16.10.2026.
 </footer>
 
 </div>
-</body>
-</html>

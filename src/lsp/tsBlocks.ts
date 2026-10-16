@@ -104,8 +104,8 @@ export function blockAt(blocks: readonly TsBlock[], pos: number): TsBlock | null
  *  - parts are joined with a statement boundary (`;`), as each block is a
  *    separate run — semicolonless code can't merge across blocks;
  *  - a name an earlier block declares and a later one re-declares is
- *    renamed (same length) in the earlier parts, so references use the
- *    newest declaration's type, as the runtime replaces the value;
+ *    renamed in the earlier parts, so references use the newest
+ *    declaration's type, as the runtime replaces the value;
  *  - only the unit's own block decides `// @ts-check`: directives in the
  *    earlier parts are neutralised and the unit gets its own header.
  *
@@ -131,31 +131,43 @@ export function hasTsCheck(code: string): boolean {
   return /@ts-check\b/.test(lead) && !/@ts-nocheck\b/.test(lead);
 }
 
-/** Same-length stand-ins for renamed identifiers (Hebrew letters: valid ID_Start). */
-const MANGLE_PREFIXES = Array.from({ length: 27 }, (_, i) => String.fromCharCode(0x05d0 + i));
-
 /**
- * Rename `names` (map: name → stand-in of the same length) in JS `code`,
- * skipping property accesses (`o.name`) and object-literal keys
- * (`{ name: 1 }`), and neutralise `@ts-check` / `@ts-nocheck` directives.
+ * Rename `names` (map: name → stand-in) in an EARLIER part's JS `code` and
+ * neutralise its `@ts-check` / `@ts-nocheck` directives. Earlier parts
+ * are never mapped back to the document, so their length may change.
+ * Property accesses (`o.name`) and object keys (`{ name: 1 }`) keep their
+ * name; a shorthand `{ name }` keeps its key and remaps only the value
+ * (`{ name: stand-in }`, also right in destructuring patterns).
  */
 function rewriteEarlierPart(code: string, names: ReadonlyMap<string, string>): string {
-  let out = code.replace(/@ts-(no)?check\b/g, (m) => "@ts-" + "_".repeat(m.length - 4));
-  if (names.size === 0) return out;
-  const tokens = tokenize(code);
-  const chars = out.split("");
+  const src = code.replace(/@ts-(no)?check\b/g, (m) => "@ts-" + "_".repeat(m.length - 4));
+  if (names.size === 0) return src;
+  const tokens = tokenize(src);
+  const edits: Array<{ from: number; to: number; text: string }> = [];
+  const brackets: string[] = [];
   for (let k = 0; k < tokens.length; k++) {
     const tok = tokens[k];
+    if (tok.type === "punct") {
+      if (tok.value === "{" || tok.value === "[" || tok.value === "(") brackets.push(tok.value);
+      else if (tok.value === "}" || tok.value === "]" || tok.value === ")") brackets.pop();
+      continue;
+    }
     if (tok.type !== "ident") continue;
     const to = names.get(tok.value);
     if (!to) continue;
     const prev = tokens[k - 1];
     const next = tokens[k + 1];
-    if (prev?.type === "punct" && (prev.value === "." || prev.value === "?.")) continue;
-    if (next?.type === "punct" && next.value === ":" && prev?.type === "punct" && (prev.value === "{" || prev.value === ",")) continue;
-    for (let c = 0; c < to.length; c++) chars[tok.start + c] = to[c];
+    const prevP = prev?.type === "punct" ? prev.value : "";
+    const nextP = next?.type === "punct" ? next.value : "";
+    if (prevP === "." || prevP === "?.") continue;
+    const inBraces = brackets[brackets.length - 1] === "{";
+    const keyPos = inBraces && (prevP === "{" || prevP === ",");
+    if (keyPos && nextP === ":") continue; // `{ name: … }`
+    const shorthand = keyPos && (nextP === "}" || nextP === "," || nextP === "=");
+    edits.push({ from: tok.start, to: tok.end, text: shorthand ? `${tok.value}: ${to}` : to });
   }
-  out = chars.join("");
+  let out = src;
+  for (let e = edits.length - 1; e >= 0; e--) out = out.slice(0, edits[e].from) + edits[e].text + out.slice(edits[e].to);
   return out;
 }
 
@@ -165,21 +177,16 @@ function sharedUnit(scope: readonly TsBlock[], k: number): TsUnit {
   const lastDecl = new Map<string, number>();
   const declared = scope.slice(0, k + 1).map((b) => topLevelNames(b.code));
   declared.forEach((names, i) => names.forEach((n) => lastDecl.set(n, i)));
-  const used = new Set<string>();
+  // Stand-ins for superseded bindings: `name$prev`, made unique against
+  // every declared name.
   const mangled = new Map<string, string>();
   const standIn = (name: string): string => {
     let m = mangled.get(name);
-    if (m) return m;
-    for (const p of MANGLE_PREFIXES) {
-      const cand = p + name.slice(1);
-      if (!used.has(cand) && !lastDecl.has(cand)) {
-        m = cand;
-        break;
-      }
+    if (!m) {
+      m = `${name}$prev`;
+      for (let n = 2; lastDecl.has(m) || [...mangled.values()].includes(m); n++) m = `${name}$prev${n}`;
+      mangled.set(name, m);
     }
-    m ??= MANGLE_PREFIXES[0] + name.slice(1);
-    used.add(m);
-    mangled.set(name, m);
     return m;
   };
 

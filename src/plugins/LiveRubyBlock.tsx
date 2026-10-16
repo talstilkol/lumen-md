@@ -45,6 +45,7 @@ export default function LiveRubyBlock({ source, meta }: Props) {
   const runRef = useRef<number | null>(null);
   const cleanupRef = useRef<(() => void) | null>(null);
   const lineId = useRef(0);
+  const activeWorker = useRef<Worker | null>(null);
 
   const detach = () => {
     cleanupRef.current?.();
@@ -52,7 +53,17 @@ export default function LiveRubyBlock({ source, meta }: Props) {
     runRef.current = null;
   };
 
-  useEffect(() => detach, []);
+  // Unmounted mid-run (e.g. another document opened): the hard timeout
+  // goes with the UI, so stop the Ruby code now instead of letting a
+  // runaway loop hold the shared worker forever.
+  useEffect(
+    () => () => {
+      const busyWorker = runRef.current !== null ? activeWorker.current : null;
+      detach();
+      if (busyWorker) killRubyWorker(busyWorker);
+    },
+    [],
+  );
 
   const push = (kind: Line["kind"], text: string) =>
     setLines((prev) => {
@@ -79,6 +90,7 @@ export default function LiveRubyBlock({ source, meta }: Props) {
       push("error", `${t("block.liveRuby.loadFailed")} ${(err as Error).message}`);
       return;
     }
+    activeWorker.current = worker;
     let hadError = false;
     let timer: ReturnType<typeof setTimeout> | null = null;
     const arm = (ms: number, text: string) => {
