@@ -157,7 +157,14 @@ describe("accept / reject in WYSIWYG", () => {
     e.select(e.at("old", 1));
     expect(resolveAtCursor(e.view, "reject")).toBe(true); // only Alice's deletion
     expect(e.md()).toBe("Keep old{++new++}{>>@Bob<<} end.");
+    // "Next change" from Alice's deletion moves to Bob's insertion.
+    const jump = await open("Keep {--old--}{>>@Alice<<}{++new++}{>>@Bob<<} end.", false);
+    jump.select(jump.at("old", 1));
+    expect(jumpToChange(jump.view, 1)).toBe(true);
+    expect(jump.view.state.selection.head).toBe(jump.at("new"));
     const same = await open("Keep {~~old~>new~~}{>>@Tal<<} end.", false);
+    same.select(same.at("old", 1));
+    expect(jumpToChange(same.view, 1)).toBe(false); // one substitution, nothing after it
     same.select(same.at("old", 1));
     expect(resolveAtCursor(same.view, "accept")).toBe(true); // one substitution
     expect(same.md()).toBe("Keep new end.");

@@ -547,16 +547,28 @@ export function jumpToChange(view: { state: EditorState; dispatch: (tr: Transact
   const del = state.schema.marks.critic_delete;
   if (!ins || !del) return false;
   const head = state.selection.head;
+  // A change starts where marked text begins, or where the kind or author
+  // changes — except a same-author deletion followed by an insertion,
+  // which is one substitution (as changeAt resolves it).
   const starts: number[] = [];
-  let prevMarked = false;
+  let prev: { kind: "insert" | "delete"; author: string | null; end: number } | null = null;
   state.doc.descendants((n, pos) => {
     if (!n.isText) {
-      prevMarked = false;
+      prev = null;
       return;
     }
-    const marked = !!(ins.isInSet(n.marks) || del.isInSet(n.marks));
-    if (marked && !prevMarked) starts.push(pos);
-    prevMarked = marked;
+    const mark = ins.isInSet(n.marks) ?? del.isInSet(n.marks);
+    if (!mark) {
+      prev = null;
+      return;
+    }
+    const kind = mark.type === ins ? "insert" : "delete";
+    const author = (mark.attrs.author as string | null) ?? null;
+    const p = prev as { kind: "insert" | "delete"; author: string | null; end: number } | null;
+    const continues =
+      !!p && p.end === pos && p.author === author && (p.kind === kind || (p.kind === "delete" && kind === "insert"));
+    if (!continues) starts.push(pos);
+    prev = { kind, author, end: pos + n.nodeSize };
   });
   const target = dir === 1 ? starts.find((p) => p > head) : [...starts].reverse().find((p) => p < head);
   if (target === undefined) return false;
