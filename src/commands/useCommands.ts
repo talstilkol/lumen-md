@@ -7,7 +7,7 @@ import { getGitIdentity, setGitIdentity, setGitToken, cloneRepo, pullRepo, commi
 import { getRecents, removeRecent } from "../storage/recent";
 import type { RecentFile } from "../storage/recent";
 import { BLOCK_SNIPPETS } from "../snippets";
-import { uiAlert, uiPrompt, uiSelect } from "../ui/PromptDialog";
+import { uiAlert, uiConfirm, uiPrompt, uiSelect } from "../ui/PromptDialog";
 import { generateAiCommitMessage } from "../ai/commands";
 import { buildAiSettingsCommand, buildAiOutlineCommand } from "../ai/commands";
 import type { CollabSession } from "../collab/yjs";
@@ -815,6 +815,136 @@ export function useCommands({
         action: async () => {
           const { usageSummary, formatUsageReport } = await import("../ai/usage");
           await uiAlert({ title: t("ai.usage.title"), message: formatUsageReport(usageSummary()) });
+        },
+      },
+      {
+        id: "ai.batch",
+        label: t("cmd.ai.batch"),
+        hint: t("cmd.ai.batch.hint"),
+        icon: cmdIcons.Sparkles,
+        group: t("group.tools"),
+        action: async () => {
+          const batch = await import("../ai/batch");
+          const { getActiveProvider, effectiveModel } = await import("../ai/llm");
+          const provider = batch.batchProviderFor(getActiveProvider());
+          if (!provider) {
+            showAiToast(t("batch.provider"), "error");
+            return;
+          }
+          const op = await uiSelect({
+            title: t("cmd.ai.batch"),
+            message: t("batch.op"),
+            defaultValue: "tags",
+            choices: [
+              { value: "tags", label: t("batch.op.tags") },
+              { value: "summary", label: t("batch.op.summary") },
+              { value: "translate", label: t("batch.op.translate") },
+            ],
+          });
+          if (op !== "tags" && op !== "summary" && op !== "translate") return;
+          let lang: string | undefined;
+          if (op === "translate") {
+            lang = (await uiPrompt({ message: t("batch.lang"), defaultValue: "English" }))?.trim();
+            if (!lang) return;
+          }
+          const folder = await uiPrompt({ message: t("batch.folder"), defaultValue: "" });
+          if (folder === null) return;
+          const prefix = folder.trim().replace(/^\/+|\/+$/g, "");
+          const { readAllNotes } = await import("../storage/workspaceNotes");
+          const all = await readAllNotes();
+          // Skip earlier translations (name.xx.md) so a re-run doesn't translate them.
+          const notes = all.filter((n) => (!prefix || n.path.startsWith(prefix + "/")) && !(op === "translate" && /\.[a-z-]{2,20}\.md$/i.test(n.path) && all.some((m) => m.path === n.path.replace(/\.[a-z-]{2,20}\.md$/i, ".md"))));
+          if (!notes.length) {
+            showAiToast(t("batch.noNotes"), "error");
+            return;
+          }
+          const { aiQuotaStatus, recordAiPrompt } = await import("../billing/aiQuota");
+          const quota = aiQuotaStatus();
+          if (Number.isFinite(quota.limit) && quota.remaining < notes.length) {
+            showAiToast(t("batch.quota", { count: notes.length }), "error");
+            return;
+          }
+          const { estimateTokens, costOf } = await import("../ai/usage");
+          const model = effectiveModel(provider);
+          let input = 0;
+          let output = 0;
+          for (const n of notes) {
+            const r = batch.requestFor(op, n.text, lang);
+            input += estimateTokens(r.system + r.user);
+            output += op === "translate" ? estimateTokens(n.text) : r.maxTokens / 2;
+          }
+          const usd = costOf({ provider, model, inputTokens: input, outputTokens: output, batch: true });
+          const ok = await uiConfirm({
+            message: t("batch.confirm", { count: notes.length, provider, model, cost: usd === null ? "?" : `~$${usd.toFixed(2)}` }),
+          });
+          if (!ok) return;
+          try {
+            const job = await batch.submitBatch(op, notes, { lang });
+            if (Number.isFinite(quota.limit)) for (let i = 0; i < notes.length; i++) recordAiPrompt();
+            showAiToast(t("batch.submitted", { count: job.items.length }), "success");
+          } catch (e) {
+            showAiToast((e as Error).message, "error");
+          }
+        },
+      },
+      {
+        id: "ai.batchCheck",
+        label: t("cmd.ai.batchCheck"),
+        hint: t("cmd.ai.batchCheck.hint"),
+        icon: cmdIcons.Sparkles,
+        group: t("group.tools"),
+        action: async () => {
+          const batch = await import("../ai/batch");
+          const jobs = batch.loadJobs();
+          const pending = jobs.filter((j) => j.status === "submitted" || j.status === "ended");
+          if (!pending.length) {
+            showAiToast(t("batch.none"), "info");
+            return;
+          }
+          const { writeWorkspaceFile } = await import("../storage/workspace");
+          const { mergeTagsIntoFrontmatter } = await import("../ai/agents");
+          let processing = 0;
+          for (const job of pending) {
+            let results;
+            try {
+              results = await batch.fetchBatchResults(job);
+            } catch (e) {
+              showAiToast((e as Error).message, "error");
+              continue;
+            }
+            if (results.state === "processing") {
+              processing++;
+              continue;
+            }
+            if (results.state !== "ended") {
+              job.status = results.state;
+              continue;
+            }
+            job.status = "ended";
+            const { readAllNotes } = await import("../storage/workspaceNotes");
+            const notes = await readAllNotes();
+            const open = new Set(useAppStore.getState().openTabs.map((tab) => tab.workspaceName).filter(Boolean));
+            const current = useAppStore.getState().doc.workspaceName;
+            if (current) open.add(current);
+            const writes = batch
+              .planWrites(job, results.answers, (p) => notes.find((n) => n.path === p)?.text ?? null, mergeTagsIntoFrontmatter)
+              .filter((w) => !open.has(w.path) && !(w.created && notes.some((n) => n.path === w.path)));
+            const created = writes.filter((w) => w.created).length;
+            const ok = await uiConfirm({
+              message: t("batch.apply", {
+                op: job.op,
+                changes: writes.length - created,
+                created,
+                failed: results.failed ? ` (${results.failed} failed)` : "",
+              }),
+            });
+            if (!ok) continue;
+            for (const w of writes) await writeWorkspaceFile(w.path, w.content);
+            job.status = "applied";
+            showAiToast(t("batch.applied", { count: writes.length }), "success");
+          }
+          batch.saveJobs(jobs);
+          if (processing) showAiToast(t("batch.processing", { count: processing }), "info");
         },
       },
       {

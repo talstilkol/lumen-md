@@ -26,6 +26,8 @@ export interface Usage {
   cacheWriteTokens?: number;
   /** Counts were estimated from characters, not reported by the API. */
   estimated?: boolean;
+  /** Billed through a batch API (half price at OpenAI and Anthropic). */
+  batch?: boolean;
 }
 
 /**
@@ -98,7 +100,8 @@ export function costOf(u: Usage): number | null {
   if (!p) return null;
   const read = u.cacheReadTokens ?? 0;
   const write = u.cacheWriteTokens ?? 0;
-  return (u.inputTokens * p.input + read * p.cachedInput + write * p.cacheWrite + u.outputTokens * p.output) / 1_000_000;
+  const full = (u.inputTokens * p.input + read * p.cachedInput + write * p.cacheWrite + u.outputTokens * p.output) / 1_000_000;
+  return u.batch ? full / 2 : full;
 }
 
 /** Rough token count for text we have no API count for (~4 chars / token). */
