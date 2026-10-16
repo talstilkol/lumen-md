@@ -1,6 +1,6 @@
 /**
  * The service worker caches each self-hosted language runtime (webR,
- * ruby.wasm, Pyodide) in a cache named per version, `lumen-runtime-<dir>-<v>`.
+ * ruby.wasm, Pyodide) in a cache named per version, `lumen-runtime-<dir>-<version>-<staging revision>`.
  * Workbox's cleanup only covers its precache, so after an upgrade the old
  * runtime (tens of MB) would stay until quota eviction. Delete every
  * `lumen-runtime-*` cache that isn't one of the current names.

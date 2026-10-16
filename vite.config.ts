@@ -26,6 +26,7 @@ const defineConfig = (config: ViteUserConfig & VitestConfig) =>
 import react from "@vitejs/plugin-react";
 import { VitePWA } from "vite-plugin-pwa";
 import path from "node:path";
+import { createHash } from "node:crypto";
 import { existsSync, readFileSync } from "node:fs";
 
 /**
@@ -77,14 +78,24 @@ const cleanUrlAliases = {
   },
 };
 
-/** Runtime caches of the self-hosted language runtimes, named per version. */
+/**
+ * The staging script can rewrite runtime files (copy-webr.mjs prepends the
+ * worker isolation prelude): its hash is part of the cache name, so a fix
+ * there reaches installed apps without a runtime upgrade.
+ */
+function stagingRevision(dir: string): string {
+  const script = path.resolve(__dirname, `scripts/copy-${dir}.mjs`);
+  return existsSync(script) ? createHash("sha256").update(readFileSync(script)).digest("hex").slice(0, 8) : "0";
+}
+
+/** Runtime caches of the self-hosted language runtimes, named per version and staging revision. */
 const RUNTIME_CACHES = (
   [
     ["webr", "webr"],
     ["ruby", "@ruby/3.4-wasm-wasi"],
     ["pyodide", "pyodide"],
   ] as const
-).map(([dir, pkg]) => ({ dir, cacheName: `lumen-runtime-${dir}-${runtimeVersion(pkg)}` }));
+).map(([dir, pkg]) => ({ dir, cacheName: `lumen-runtime-${dir}-${runtimeVersion(pkg)}-${stagingRevision(dir)}` }));
 
 export default defineConfig({
   // The page deletes `lumen-runtime-*` caches of superseded versions
