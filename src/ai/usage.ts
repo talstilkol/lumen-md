@@ -25,7 +25,8 @@ export interface Usage {
   /** Anthropic: input tokens written to the prompt cache (billed at ~125%). */
   cacheWriteTokens?: number;
   /** Counts were estimated from characters, not reported by the API. */
-  estimated?: boolean;  /** Server-side web searches (Claude web search: $10 per 1,000). */
+  estimated?: boolean;
+  /** Server-side web searches (Claude web search: $10 per 1,000). */
   webSearches?: number;
 }
 
@@ -94,9 +95,19 @@ export function priceFor(provider: string, model: string): ModelPrice | null {
 }
 
 /** Estimated USD for one usage record, or null when the model's price is unknown. */
+/** Gemini 2.5 Pro bills prompts over 200K tokens at its long-context rates. */
+function longContext(u: Usage, p: ModelPrice): ModelPrice {
+  const prompt = u.inputTokens + (u.cacheReadTokens ?? 0);
+  if (u.provider === "gemini" && /^gemini-2\.5-pro/i.test(u.model) && prompt > 200_000) {
+    return { input: 2.5, output: 15, cachedInput: 2.5 * (CACHE_READ_RATE.gemini ?? 1), cacheWrite: 2.5 };
+  }
+  return p;
+}
+
 export function costOf(u: Usage): number | null {
-  const p = priceFor(u.provider, u.model);
-  if (!p) return null;
+  const base = priceFor(u.provider, u.model);
+  if (!base) return null;
+  const p = longContext(u, base);
   const read = u.cacheReadTokens ?? 0;
   const write = u.cacheWriteTokens ?? 0;
   return (
