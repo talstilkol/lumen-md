@@ -138,6 +138,11 @@ describe("tracking edits while suggesting", () => {
     const at = e.at("here");
     e.view.dispatch(e.view.state.tr.delete(at, at + 4));
     expect(e.md()).toBe("```\ncode \n```");
+    // An edit that reaches past the code block is tracked (here: blocked join).
+    const t = await open("```\ncode\n```\n\nAfter text.", true);
+    t.view.dispatch(t.view.state.tr.delete(t.at("code") + 2, t.at("After") + 3));
+    expect(t.view.state.doc.childCount).toBe(2);
+    expect(t.md()).toBe("```\ncode\n```\n\n{--Aft--}{>>@Tal<<}er text.");
   });
 
   it("typing over a selection is a substitution", async () => {

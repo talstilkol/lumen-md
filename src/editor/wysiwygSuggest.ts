@@ -435,7 +435,7 @@ export function trackChanges(
 
   // Collect replace steps across the transactions, with the mapping that
   // carries a position from just after each step to `newState.doc`.
-  const changes: Array<Change & { toEnd: Mapping; deletesStructure: boolean }> = [];
+  const changes: Array<Change & { toEnd: Mapping; deletesStructure: boolean; inCode: boolean }> = [];
   user.forEach((tr, ti) => {
     tr.steps.forEach((step, i) => {
       if (!(step instanceof ReplaceStep)) return;
@@ -448,6 +448,10 @@ export function trackChanges(
         insertedSize: s.slice.size,
         deleted: before.slice(s.from, s.to),
         structural: s.slice.size > 0 && isStructural(s.slice),
+        inCode: (() => {
+          const $from = before.resolve(s.from);
+          return !!$from.parent.type.spec.code && $from.sameParent(before.resolve(s.to));
+        })(),
         deletesStructure: s.to > s.from && (!before.resolve(s.from).sameParent(before.resolve(s.to)) || hasAtom(before.slice(s.from, s.to))),
         toEnd,
       });
@@ -465,7 +469,8 @@ export function trackChanges(
     const insertedEnd = tr.mapping.map(c.toEnd.map(c.from + c.insertedSize, 1), 1);
     // Code blocks can't carry marks: edits there pass untracked, as in
     // source mode (CriticMarkup inside code is literal text).
-    if (tr.doc.resolve(at).parent.type.spec.code) continue;
+    // Only edits wholly inside one code block (judged before the edit).
+    if (c.inCode) continue;
     // 1. Insertions are suggested. Structural ones (a new paragraph, a
     //    multi-block paste) can't be expressed as CriticMarkup or undone
     //    by Reject, so they are blocked, like structural deletions — and
