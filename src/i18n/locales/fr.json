@@ -981,5 +981,11 @@
   "ai.cache.on": "Activé — les requêtes identiques sont servies localement",
   "ai.cache.off": "Désactivé — toujours interroger le modèle",
   "ai.cache.clear": "Effacer les réponses en cache",
-  "ai.cache.cleared": "{count} réponses en cache effacées"
+  "ai.cache.cleared": "{count} réponses en cache effacées",
+  "cmd.ai.mode": "IA : mode de coût (économie / équilibré / qualité)…",
+  "cmd.ai.mode.hint": "Envoyer les petites tâches à des modèles moins chers et seulement les parties utiles de vos notes",
+  "ai.mode.title": "Mode de coût de l’IA",
+  "ai.mode.economy": "Économie — petit modèle pour tout, ~2K jetons de contexte",
+  "ai.mode.balanced": "Équilibré — petit modèle pour les petites tâches, ~5K jetons de contexte (par défaut)",
+  "ai.mode.quality": "Qualité — votre modèle pour tout, ~12K jetons de contexte"
 }

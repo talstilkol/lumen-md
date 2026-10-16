@@ -981,5 +981,11 @@
   "ai.cache.on": "开启 — 相同请求在本地应答",
   "ai.cache.off": "关闭 — 始终询问模型",
   "ai.cache.clear": "清除缓存的回答",
-  "ai.cache.cleared": "已清除 {count} 条缓存回答"
+  "ai.cache.cleared": "已清除 {count} 条缓存回答",
+  "cmd.ai.mode": "AI：成本模式（节约 / 平衡 / 质量）…",
+  "cmd.ai.mode.hint": "将小任务交给更便宜的模型，只发送笔记中相关的部分",
+  "ai.mode.title": "AI 成本模式",
+  "ai.mode.economy": "节约 — 全部使用小模型，上下文约 2K 令牌",
+  "ai.mode.balanced": "平衡 — 小任务用小模型，上下文约 5K 令牌（默认）",
+  "ai.mode.quality": "质量 — 全部使用你选择的模型，上下文约 12K 令牌"
 }

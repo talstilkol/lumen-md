@@ -981,5 +981,11 @@
   "ai.cache.on": "オン — 同一のリクエストはローカルで応答",
   "ai.cache.off": "オフ — 常にモデルに問い合わせる",
   "ai.cache.clear": "キャッシュされた回答を消去",
-  "ai.cache.cleared": "{count} 件のキャッシュされた回答を消去しました"
+  "ai.cache.cleared": "{count} 件のキャッシュされた回答を消去しました",
+  "cmd.ai.mode": "AI: コストモード（節約 / バランス / 品質）…",
+  "cmd.ai.mode.hint": "小さなタスクを安価なモデルへ回し、ノートの関連部分だけを送信",
+  "ai.mode.title": "AI コストモード",
+  "ai.mode.economy": "節約 — すべて小型モデル、文脈は約 2K トークン",
+  "ai.mode.balanced": "バランス — 小さなタスクは小型モデル、文脈は約 5K トークン（既定）",
+  "ai.mode.quality": "品質 — すべて選択したモデル、文脈は約 12K トークン"
 }
