@@ -270,10 +270,9 @@ Then set `VITE_WEBRTC_SIGNALING_URL=wss://signal.yourdomain.com` in `.env`.
 
 ## 🗺️ Roadmap
 
-See [MASTER_PLAN.md](MASTER_PLAN.md) for the current plan, status and what's left. Key upcoming milestones:
+The current plan, status and what's left live in one place: [MASTER_PLAN.md](MASTER_PLAN.md).
 
-| Milestone | Status |
-|---|---|
+---|---|
 | Stripe billing integration | 🔑 awaiting keys |
 | Persistent collab rooms (Fly.io) | 🔑 awaiting deploy |
 | iOS TestFlight + Android Play | 🔑 awaiting Apple/Google accounts |
