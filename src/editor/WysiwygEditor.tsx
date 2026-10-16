@@ -559,6 +559,18 @@ function buildTooltip(getView: () => EditorView | null): HTMLDivElement {
  * for inline formatting.
  */
 /**
+ * Undo the one escape Milkdown's serializer adds that breaks CriticMarkup:
+ * it writes the `~>` of a substitution as `\~>` (GFM strikethrough safety),
+ * so `{~~old~>new~~}` would come back as `{~~old\~>new~~}` and stop being
+ * a suggestion after any WYSIWYG edit. Other escapes it adds (`\*`, `\_`)
+ * are markdown-equivalent and left alone.
+ */
+export function repairCriticMarkup(md: string): string {
+  if (md.indexOf("\\~>") === -1) return md;
+  return md.replace(/\{~~([^~]*(?:~(?!~\})[^~]*)*?)\\~>/g, (_m, old: string) => `{~~${old}~>`);
+}
+
+/**
  * Split a leading YAML frontmatter block off a markdown document. Milkdown
  * has no frontmatter concept — fed raw, `---\ntitle: …\n---` renders as a
  * thematic break + loose text (ugly, and editing it corrupts the metadata).
@@ -655,7 +667,7 @@ export default function WysiwygEditor({ value, onChange }: Props) {
             // superseded) editor can still fire here. Forwarding it would
             // overwrite the store with stale content after a mode switch.
             if (gen !== genRef.current) return;
-            const full = frontmatterRef.current + md;
+            const full = frontmatterRef.current + repairCriticMarkup(md);
             lastEmittedRef.current = full;
             onChangeRef.current(full);
           });
