@@ -53,8 +53,27 @@ const baseName = (p: string) => (p.split("/").pop() ?? p).replace(/\.(md|markdow
 const ENTRY_NAMES = new Set(["index", "readme", "home", "welcome", "start here", "vault doctor report"]);
 
 /** Text with fenced code blocks and inline code blanked (same length, lines kept). */
+/** Fenced code blocks blanked (same length, lines kept). A fence closes at a line of at least as many of the same character. */
+function blankFences(text: string): string {
+  const lines = text.split("\n");
+  let open: { ch: string; len: number } | null = null;
+  for (let i = 0; i < lines.length; i++) {
+    const m = /^ {0,3}(`{3,}|~{3,})(.*)$/.exec(lines[i]);
+    if (!open) {
+      if (m && !(m[1][0] === "`" && m[2].includes("`"))) {
+        open = { ch: m[1][0], len: m[1].length };
+        lines[i] = " ".repeat(lines[i].length);
+      }
+      continue;
+    }
+    if (m && m[1][0] === open.ch && m[1].length >= open.len && !m[2].trim()) open = null;
+    lines[i] = " ".repeat(lines[i].length);
+  }
+  return lines.join("\n");
+}
+
 export function stripCode(text: string): string {
-  let out = text.replace(/^(\s*)(`{3,}|~{3,})[^\n]*\n[\s\S]*?(?:\n\1\2[^\n]*|$)/gm, (m) => m.replace(/[^\n]/g, " "));
+  let out = blankFences(text);
   out = out.replace(/(`+)[^`\n]+?\1/g, (m) => " ".repeat(m.length));
   return out;
 }
@@ -77,7 +96,7 @@ function headingsOf(text: string): Set<string> {
   const out = new Set<string>();
   // Inline code in headings matters for the rendered text, so scan only
   // with fenced blocks blanked.
-  const fenced = text.replace(/^(\s*)(`{3,}|~{3,})[^\n]*\n[\s\S]*?(?:\n\1\2[^\n]*|$)/gm, (m) => m.replace(/[^\n]/g, " "));
+  const fenced = blankFences(text);
   for (const m of fenced.matchAll(/^#{1,6}\s+(.+?)\s*#*\s*$/gm)) {
     const rendered = headingText(m[1]);
     out.add(headingSlug(rendered));
@@ -177,10 +196,15 @@ export function runVaultDoctor(notes: readonly DoctorNote[], opts: DoctorOptions
   const md = notes.filter((n) => isMd(n.path));
   const paths = md.map((n) => n.path);
   const pathSet = new Set(paths.map((p) => p.toLowerCase()));
+  // Grouped case-insensitively, like resolveWikiTarget; the key is the
+  // first spelling seen (used for suggestions).
   const names = new Map<string, string[]>();
+  const byLower = new Map<string, string>();
   for (const p of paths) {
     const b = baseName(p);
-    names.set(b, [...(names.get(b) ?? []), p]);
+    const key = byLower.get(b.toLowerCase()) ?? b;
+    byLower.set(b.toLowerCase(), key);
+    names.set(key, [...(names.get(key) ?? []), p]);
   }
   const headings = new Map(md.map((n) => [n.path, headingsOf(n.text)]));
   const incoming = new Map<string, number>(paths.map((p) => [p, 0]));
@@ -220,11 +244,13 @@ export function runVaultDoctor(notes: readonly DoctorNote[], opts: DoctorOptions
     // Relative Markdown links to notes: inline [label](other.md#h) and
     // reference definitions `[id]: ./dir/x.md "title"`.
     const mdLinks = [
-      ...text.matchAll(/(?<!!)\[[^\]\n]*\]\(\s*<?([^)\s>]+\.(?:md|markdown))(?:#[^)\s>]*)?>?(?:\s+"[^"]*")?\s*\)/gi),
-      ...text.matchAll(/^[ \t]{0,3}\[[^\]\n]+\]:[ \t]*<?([^\s>]+\.(?:md|markdown))(?:#[^\s>]*)?>?(?:[ \t]+(?:"[^"]*"|'[^']*'|\([^)]*\)))?[ \t]*$/gim),
+      ...text.matchAll(/(?<!!)\[[^\]\n]*\]\(\s*([^)\s<>]+\.(?:md|markdown))(?:#[^)\s>]*)?(?:\s+"[^"]*")?\s*\)/gi),
+      // `[label](<Name with spaces.md>)`: angle brackets allow spaces.
+      ...text.matchAll(/(?<!!)\[[^\]\n]*\]\(\s*<([^>\n]+?\.(?:md|markdown))(?:#[^>\n]*)?>(?:\s+"[^"]*")?\s*\)/gi),
+      ...text.matchAll(/^[ \t]{0,3}\[[^\]\n]+\]:[ \t]*(?:<([^>\n]+?\.(?:md|markdown))(?:#[^>\n]*)?>|([^\s<>]+\.(?:md|markdown))(?:#\S*)?)(?:[ \t]+(?:"[^"]*"|'[^']*'|\([^)]*\)))?[ \t]*$/gim),
     ].sort((a, b) => (a.index ?? 0) - (b.index ?? 0));
     for (const m of mdLinks) {
-      const href = m[1];
+      const href = m[1] ?? m[2];
       if (/^[a-z][a-z0-9+.-]*:/i.test(href) || href.startsWith("/")) continue; // absolute / external
       let decoded = href;
       try {

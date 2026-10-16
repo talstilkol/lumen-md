@@ -87,4 +87,19 @@ describe("vault doctor", () => {
     const broken = f.find((x) => x.kind === "broken-wiki-link")!;
     expect([broken.detail, broken.suggestion]).toEqual(["Notez", undefined]);
   });
+
+  it("longer closing fences, spaced angle-bracket links and case-insensitive names", () => {
+    const notes: DoctorNote[] = [
+      { path: "index.md", text: "```\n[[Inside Code]]\n````\n\n[[After Fence]] [plan](<Project Plan.md>) [x](<Missing Note.md>)\n\n[d]: <Other Plan.md>\n" },
+      { path: "Project Plan.md", text: "x" },
+      { path: "Other Plan.md", text: "x" },
+      { path: "Notes.md", text: "x" },
+      { path: "archive/notes.md", text: "x" },
+    ];
+    const f = runVaultDoctor(notes);
+    expect(f.filter((x) => x.kind === "broken-wiki-link").map((x) => x.detail)).toEqual(["After Fence"]);
+    expect(f.filter((x) => x.kind === "broken-md-link").map((x) => x.detail)).toEqual(["Missing Note.md"]);
+    expect(f.some((x) => x.kind === "orphan" && /Plan/.test(x.path))).toBe(false);
+    expect(f.filter((x) => x.kind === "ambiguous-name").map((x) => x.path).sort()).toEqual(["Notes.md", "archive/notes.md"]);
+  });
 });
