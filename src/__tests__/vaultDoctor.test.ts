@@ -102,4 +102,14 @@ describe("vault doctor", () => {
     expect(f.some((x) => x.kind === "orphan" && /Plan/.test(x.path))).toBe(false);
     expect(f.filter((x) => x.kind === "ambiguous-name").map((x) => x.path).sort()).toEqual(["Notes.md", "archive/notes.md"]);
   });
+
+  it("setext headings, multi-line / multi-backtick code spans and links above the root", () => {
+    const notes: DoctorNote[] = [
+      { path: "index.md", text: "Overview\n========\n\n[[Overview]] [[Guide#Usage]]\n\nA span `` a ` b\n[[Missing]] `` ends.\n\n[up](../Guide.md)\n" },
+      { path: "Guide.md", text: "Usage\n-----\n" },
+    ];
+    const f = runVaultDoctor(notes);
+    expect(f.filter((x) => x.kind === "broken-wiki-link" || x.kind === "missing-heading")).toEqual([]);
+    expect(f.filter((x) => x.kind === "broken-md-link").map((x) => x.detail)).toEqual(["../Guide.md"]);
+  });
 });

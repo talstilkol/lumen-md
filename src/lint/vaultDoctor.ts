@@ -72,9 +72,40 @@ function blankFences(text: string): string {
   return lines.join("\n");
 }
 
+/**
+ * CommonMark code spans blanked: a run of N backticks opens a span that
+ * ends at the next run of exactly N backticks (it may cross line endings;
+ * a run with no matching closer is literal). Newlines are kept.
+ */
+function blankCodeSpans(text: string): string {
+  const chars = text.split("");
+  const runs: Array<{ at: number; len: number }> = [];
+  for (let i = 0; i < text.length; ) {
+    if (text[i] !== "`" || (i > 0 && text[i - 1] === "\\")) {
+      i++;
+      continue;
+    }
+    let j = i;
+    while (text[j] === "`") j++;
+    runs.push({ at: i, len: j - i });
+    i = j;
+  }
+  for (let r = 0; r < runs.length; r++) {
+    const open = runs[r];
+    const close = runs.findIndex((x, k) => k > r && x.len === open.len);
+    if (close === -1) continue;
+    // A blank line ends a paragraph: a span never crosses it.
+    const end = runs[close].at + runs[close].len;
+    if (/\n[ \t]*\n/.test(text.slice(open.at, end))) continue;
+    for (let k = open.at; k < end; k++) if (chars[k] !== "\n") chars[k] = " ";
+    r = close;
+  }
+  return chars.join("");
+}
+
 export function stripCode(text: string): string {
   let out = blankFences(text);
-  out = out.replace(/(`+)[^`\n]+?\1/g, (m) => " ".repeat(m.length));
+  out = blankCodeSpans(out);
   return out;
 }
 
@@ -97,11 +128,15 @@ function headingsOf(text: string): Set<string> {
   // Inline code in headings matters for the rendered text, so scan only
   // with fenced blocks blanked.
   const fenced = blankFences(text);
-  for (const m of fenced.matchAll(/^#{1,6}\s+(.+?)\s*#*\s*$/gm)) {
-    const rendered = headingText(m[1]);
+  const add = (raw: string) => {
+    const rendered = headingText(raw);
     out.add(headingSlug(rendered));
     out.add(rendered.toLowerCase());
-  }
+  };
+  for (const m of fenced.matchAll(/^#{1,6}\s+(.+?)\s*#*\s*$/gm)) add(m[1]);
+  // Setext headings: a text line underlined with === or --- (the line
+  // above must be text, not a list item, quote or blank line).
+  for (const m of fenced.matchAll(/^(?! {0,3}([-*+>]|\d+[.)])\s)( {0,3}\S[^\n]*)\n {0,3}(=+|-+)[ \t]*$/gm)) add(m[2].trim());
   return out;
 }
 
@@ -259,13 +294,17 @@ export function runVaultDoctor(notes: readonly DoctorNote[], opts: DoctorOptions
         /* keep as written */
       }
       const parts: string[] = [];
+      let escapes = false;
       for (const seg of (dir + decoded).split("/")) {
         if (seg === "" || seg === ".") continue;
-        if (seg === "..") parts.pop();
-        else parts.push(seg);
+        if (seg === "..") {
+          // More `..` than folders: the link points outside the workspace.
+          if (!parts.length) escapes = true;
+          parts.pop();
+        } else parts.push(seg);
       }
       const target = parts.join("/");
-      if (pathSet.has(target.toLowerCase())) {
+      if (!escapes && pathSet.has(target.toLowerCase())) {
         const real = paths.find((p) => p.toLowerCase() === target.toLowerCase())!;
         if (real !== note.path) incoming.set(real, (incoming.get(real) ?? 0) + 1);
       } else {
