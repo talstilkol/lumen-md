@@ -31,7 +31,12 @@ interface Token {
   nl: boolean;
   /** Bracket depth before this token. */
   depth: number;
+  /** A `)` closing the condition of `if` / `while` / `for` / `with`. */
+  ctrl?: boolean;
 }
+
+/** Keywords whose parenthesised head is followed by a statement, not an operator. */
+const CONTROL_HEADS = new Set(["if", "while", "for", "with"]);
 
 const PUNCTUATORS = [
   ">>>=", "...", "===", "!==", "**=", "<<=", ">>=", ">>>", "&&=", "||=", "??=",
@@ -65,6 +70,8 @@ export function tokenize(src: string): Token[] {
     const prev = out[out.length - 1];
     if (!prev) return true;
     if (prev.type === "ident") return REGEX_AFTER_WORD.has(prev.value);
+    // `if (x) /re/.test(s)`: after a control head's `)` a statement starts.
+    if (prev.type === "punct" && prev.ctrl) return true;
     if (prev.type === "punct") return !(prev.value === ")" || prev.value === "]" || prev.value === "++" || prev.value === "--");
     return false;
   };
@@ -140,17 +147,26 @@ export function tokenize(src: string): Token[] {
     return n;
   };
 
+  // For each open `(`: does it start a control-statement head?
+  const parens: boolean[] = [];
   const push = (type: Token["type"], start: number, end: number) => {
     const value = src.slice(start, end);
     let d = depth;
+    let ctrl = false;
     if (type === "punct") {
+      if (value === "(") {
+        const prev = out[out.length - 1];
+        // `for await (…)` too.
+        const head = prev?.value === "await" ? out[out.length - 2] : prev;
+        parens.push(head?.type === "ident" && CONTROL_HEADS.has(head.value));
+      } else if (value === ")") ctrl = parens.pop() ?? false;
       if (value === "(" || value === "[" || value === "{") depth++;
       else if (value === ")" || value === "]" || value === "}") {
         depth = Math.max(0, depth - 1);
         d = depth;
       }
     }
-    out.push({ type, value, start, end, nl, depth: d });
+    out.push(ctrl ? { type, value, start, end, nl, depth: d, ctrl } : { type, value, start, end, nl, depth: d });
     nl = false;
   };
 
@@ -203,7 +219,7 @@ export function tokenize(src: string): Token[] {
 /** Can `tok` be the last token of a complete expression? */
 function endsExpression(tok: Token): boolean {
   if (tok.type === "ident") return !OPERATOR_WORDS.has(tok.value) && !REGEX_AFTER_WORD.has(tok.value);
-  if (tok.type === "punct") return [")", "]", "}", "++", "--"].includes(tok.value);
+  if (tok.type === "punct") return !tok.ctrl && [")", "]", "}", "++", "--"].includes(tok.value);
   return true;
 }
 

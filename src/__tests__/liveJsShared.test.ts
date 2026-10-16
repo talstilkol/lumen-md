@@ -436,4 +436,12 @@ describe("hoistTopLevelBindings", () => {
     const toks = tokenize("a / b / c; x = /re/");
     expect(toks.filter((t) => t.type === "regex").map((t) => t.value)).toEqual(["/re/"]);
   });
+
+  it("treats `/` after a control head's `)` as a regex, not division", () => {
+    const toks = tokenize("if (ok) /{/.test(v); while (x) /}/g.exec(s); f(a) / 2; for await (const x of y) /a/.test(x)");
+    expect(toks.filter((t) => t.type === "regex").map((t) => t.value)).toEqual(["/{/", "/}/g", "/a/"]);
+    // …so a `{` inside such a regex doesn't hide later top-level bindings.
+    const out = hoistTopLevelBindings("if (enabled) /{/.test(value);\nconst result = 1");
+    expect(out).toContain("0, result = 1");
+  });
 });
