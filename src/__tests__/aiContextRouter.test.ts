@@ -95,7 +95,7 @@ describe("model router", () => {
       await chat([{ role: "user", content: "title?" }], { tier: "light" });
       await chat([{ role: "user", content: "essay" }]);
       const models = fetchMock.mock.calls.map((c) => JSON.parse(String((c as unknown as [string, RequestInit])[1].body)).model);
-      expect(models).toEqual(["claude-haiku-4-5", "claude-3-5-sonnet-latest"]);
+      expect(models).toEqual(["claude-haiku-4-5", "claude-sonnet-4-5"]);
     });
   });
 });

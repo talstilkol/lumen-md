@@ -28,6 +28,8 @@ export interface Usage {
   estimated?: boolean;
   /** Billed through a batch API (half price at OpenAI and Anthropic). */
   batch?: boolean;
+  /** Server-side web searches (Claude web search: $10 per 1,000). */
+  webSearches?: number;
 }
 
 /**
@@ -100,7 +102,9 @@ export function costOf(u: Usage): number | null {
   if (!p) return null;
   const read = u.cacheReadTokens ?? 0;
   const write = u.cacheWriteTokens ?? 0;
-  const full = (u.inputTokens * p.input + read * p.cachedInput + write * p.cacheWrite + u.outputTokens * p.output) / 1_000_000;
+  const full =
+    (u.inputTokens * p.input + read * p.cachedInput + write * p.cacheWrite + u.outputTokens * p.output) / 1_000_000 +
+    ((u.webSearches ?? 0) * 10) / 1000;
   return u.batch ? full / 2 : full;
 }
 

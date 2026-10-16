@@ -927,8 +927,10 @@ export function useCommands({
             const current = useAppStore.getState().doc.workspaceName;
             if (current) open.add(current);
             const writes = batch
-              .planWrites(job, results.answers, (p) => notes.find((n) => n.path === p)?.text ?? null, mergeTagsIntoFrontmatter)
-              .filter((w) => !open.has(w.path) && !(w.created && notes.some((n) => n.path === w.path)));
+              .planWrites(job, results.answers, (p) => notes.find((n) => n.path === p)?.text ?? null, mergeTagsIntoFrontmatter, (p) =>
+                notes.some((n) => n.path.toLowerCase() === p.toLowerCase()),
+              )
+              .filter((w) => !open.has(w.path));
             const created = writes.filter((w) => w.created).length;
             const ok = await uiConfirm({
               message: t("batch.apply", {

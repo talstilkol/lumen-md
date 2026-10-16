@@ -22,7 +22,10 @@ describe("batch helpers", () => {
   it("parses tags and plans the writes", () => {
     expect(parseTags('```json\n["Machine Learning","#ai"]\n```')).toEqual(["machine-learning", "ai"]);
     const job = { id: "b", provider: "openai" as const, model: "m", op: "translate" as const, lang: "French", createdAt: "", status: "ended" as const, items: [{ customId: "n0", path: "a/x.md" }] };
-    expect(planWrites(job, new Map([["n0", "Bonjour"]]), () => "Hello", merge)).toEqual([{ path: "a/x.french.md", content: "Bonjour\n", created: true }]);
+    expect(planWrites(job, new Map([["n0", "Bonjour"]]), (p) => (p === "a/x.md" ? "Hello" : null), merge)).toEqual([{ path: "a/x.french.md", content: "Bonjour\n", created: true }]);
+    // An existing translation is never overwritten: the next free name is used.
+    const existing = new Set(["a/x.md", "a/x.french.md", "a/x.french-2.md"]);
+    expect(planWrites(job, new Map([["n0", "Bonjour"]]), (p) => (existing.has(p) ? "x" : null), merge)[0].path).toBe("a/x.french-3.md");
     const tagJob = { ...job, op: "tags" as const, items: [{ customId: "n0", path: "a/x.md" }, { customId: "n1", path: "gone.md" }] };
     expect(planWrites(tagJob, new Map([["n0", '["alpha","beta"]'], ["n1", '["gamma"]']]), (p) => (p === "a/x.md" ? "Hi" : null), merge)).toEqual([
       { path: "a/x.md", content: "---\ntags: [alpha, beta]\n---\n\nHi", created: false },
@@ -67,6 +70,9 @@ describe("batch APIs", () => {
     expect([...res.answers]).toEqual([["n0", '["roses"]']]);
     expect(res.failed).toBe(1);
     expect(usageSummary().rows[0]).toMatchObject({ provider: "anthropic", inputTokens: 100, outputTokens: 5 });
+    // Fetching the results again (not applied yet) doesn't meter twice.
+    await fetchBatchResults(job, f);
+    expect(usageSummary().rows[0]).toMatchObject({ requests: 1, inputTokens: 100 });
   });
 
   it("submits an OpenAI batch via a JSONL file and reports processing", async () => {

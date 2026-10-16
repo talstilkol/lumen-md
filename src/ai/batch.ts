@@ -30,6 +30,8 @@ export interface BatchJob {
   createdAt: string;
   items: BatchItem[];
   status: "submitted" | "ended" | "applied" | "failed" | "expired" | "cancelled";
+  /** Usage already recorded (results are re-downloaded until applied). */
+  metered?: boolean;
 }
 
 const STORE = "lumen.ai.batches";
@@ -150,8 +152,12 @@ export interface BatchResults {
 export async function fetchBatchResults(job: BatchJob, fetchImpl: Fetch = fetch): Promise<BatchResults> {
   const answers = new Map<string, string>();
   let failed = 0;
-  const meter = (model: string, usage: { input: number; output: number }) =>
-    recordUsage({ provider: job.provider, model, inputTokens: usage.input, outputTokens: usage.output, batch: true });
+  // Results may be fetched again (user declined to apply): meter once.
+  const alreadyMetered = !!job.metered;
+  const meter = (model: string, usage: { input: number; output: number }) => {
+    if (!alreadyMetered) recordUsage({ provider: job.provider, model, inputTokens: usage.input, outputTokens: usage.output, batch: true });
+    job.metered = true;
+  };
   if (job.provider === "anthropic") {
     const res = await fetchImpl(`${ANTHROPIC}/${job.id}`, { headers: anthropicHeaders() });
     if (!res.ok) throw new AiError("API_ERROR", `Anthropic batch ${res.status}`);
@@ -248,14 +254,23 @@ export function planWrites(
   answers: ReadonlyMap<string, string>,
   read: (path: string) => string | null,
   mergeTags: (content: string, tags: string[]) => string,
+  exists: (path: string) => boolean = (p) => read(p) !== null,
 ): PlannedWrite[] {
   const out: PlannedWrite[] = [];
+  const taken = new Set<string>();
+  /** `base.md`, else `base-2.md`, `base-3.md`… — never an existing or planned file. */
+  const freePath = (want: string) => {
+    let p = want;
+    for (let n = 2; exists(p) || taken.has(p.toLowerCase()); n++) p = want.replace(/\.md$/i, `-${n}.md`);
+    taken.add(p.toLowerCase());
+    return p;
+  };
   for (const item of job.items) {
     const answer = answers.get(item.customId);
     if (!answer) continue;
     if (job.op === "translate") {
       const code = (job.lang ?? "translated").toLowerCase().replace(/[^a-z0-9-]+/g, "-").slice(0, 20);
-      out.push({ path: item.path.replace(/(\.(md|markdown))?$/i, `.${code}.md`), content: answer.trim() + "\n", created: true });
+      out.push({ path: freePath(item.path.replace(/(\.(md|markdown))?$/i, `.${code}.md`)), content: answer.trim() + "\n", created: true });
       continue;
     }
     const current = read(item.path);
