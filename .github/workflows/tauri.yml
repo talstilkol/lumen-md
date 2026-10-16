@@ -1,0 +1,50 @@
+name: Tauri
+
+# Separate from CI so that adding the `tauri` label starts this check
+# without re-running (and cancelling) the whole CI workflow.
+on:
+  push:
+    branches: [main]
+    paths: ['src-tauri/**', '.github/workflows/tauri.yml']
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened, labeled]
+
+# Adding an unrelated label must not cancel a running check, so label
+# events get their own group.
+concurrency:
+  group: tauri-${{ github.ref }}-${{ github.event.action == 'labeled' && github.event.label.name || 'code' }}
+  cancel-in-progress: true
+
+jobs:
+  tauri-check:
+    name: tauri (cargo check, Linux)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    # Pushes to main that touch the desktop shell; PRs that carry the
+    # `tauri` label (including the moment it is added) or come from a
+    # Tauri / Cargo update branch.
+    if: >-
+      github.event_name == 'push' ||
+      (github.event.action == 'labeled' && github.event.label.name == 'tauri') ||
+      (github.event.action != 'labeled' && (
+        contains(join(github.event.pull_request.labels.*.name, ','), 'tauri') ||
+        startsWith(github.head_ref, 'chore/tauri') ||
+        startsWith(github.head_ref, 'dependabot/cargo/')))
+    steps:
+      - uses: actions/checkout@v7
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri
+      - name: System libraries
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev \
+            patchelf libsoup-3.0-dev javascriptcoregtk-4.1-dev
+      - name: cargo check
+        # The frontend dist isn't built here: tauri only needs the folder.
+        run: |
+          mkdir -p dist
+          cargo check --manifest-path src-tauri/Cargo.toml --locked
