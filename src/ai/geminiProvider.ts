@@ -55,13 +55,18 @@ export function buildGeminiBody(messages: ChatMessage[], opts: ChatOptions = {})
 
 /** `usageMetadata` → the usage meter. */
 function reportGeminiUsage(data: unknown, opts: ChatOptions): void {
-  const u = (data as { usageMetadata?: { promptTokenCount?: number; candidatesTokenCount?: number; cachedContentTokenCount?: number } })?.usageMetadata;
+  const u = (
+    data as {
+      usageMetadata?: { promptTokenCount?: number; candidatesTokenCount?: number; cachedContentTokenCount?: number; thoughtsTokenCount?: number };
+    }
+  )?.usageMetadata;
   if (!u || typeof u.promptTokenCount !== "number") return;
   const cached = u.cachedContentTokenCount ?? 0;
   opts.onUsage?.({
     model: getGeminiModel(opts),
     inputTokens: u.promptTokenCount - cached,
-    outputTokens: u.candidatesTokenCount ?? 0,
+    // Thinking tokens are billed as output.
+    outputTokens: (u.candidatesTokenCount ?? 0) + (u.thoughtsTokenCount ?? 0),
     ...(cached ? { cacheReadTokens: cached } : {}),
   });
 }
@@ -90,9 +95,10 @@ export async function chatGemini(
     throw new AiError("API_ERROR", `Gemini ${res.status}: ${body.slice(0, 200)}`);
   }
   const data = await res.json();
+  // A blocked prompt can return no candidates but still be billed.
+  reportGeminiUsage(data, opts);
   const text = extractText(data).trim();
   if (!text) throw new AiError("PARSE_ERROR", "Empty Gemini response.");
-  reportGeminiUsage(data, opts);
   return text;
 }
 

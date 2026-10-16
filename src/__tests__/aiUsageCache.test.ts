@@ -163,6 +163,21 @@ describe("chat(): response cache and usage", () => {
     expect([row.model, row.inputTokens, row.outputTokens, row.estimated]).toEqual(["claude-haiku-4-5", 50, 7, 0]);
   });
 
+  it("counts Gemini thinking tokens as output and records usage of a blocked prompt", async () => {
+    setActiveProvider("gemini");
+    localStorage.setItem("lumen.ai.key.gemini", "g-key");
+    localStorage.setItem("lumen.ai.model.gemini", "gemini-2.5-flash");
+    const replies = [
+      { candidates: [{ content: { parts: [{ text: "hi" }] } }], usageMetadata: { promptTokenCount: 10, candidatesTokenCount: 2, thoughtsTokenCount: 30 } },
+      { promptFeedback: { blockReason: "SAFETY" }, usageMetadata: { promptTokenCount: 7 } },
+    ];
+    vi.stubGlobal("fetch", vi.fn(async () => new Response(JSON.stringify(replies.shift()), { status: 200 })));
+    await chat([{ role: "user", content: "a" }]);
+    await expect(chat([{ role: "user", content: "b" }])).rejects.toThrow(/Empty Gemini/);
+    const row = usageSummary().rows[0];
+    expect([row.requests, row.inputTokens, row.outputTokens]).toEqual([2, 17, 32]);
+  });
+
   it("estimates when the provider reports nothing", async () => {
     setActiveProvider("gemini");
     localStorage.setItem("lumen.ai.key.gemini", "g-key");
