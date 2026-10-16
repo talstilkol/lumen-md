@@ -87,3 +87,24 @@ describe("TOC ids match rendered headings", () => {
     expect(extractToc("# Title {++new++}")[0].id).toBe("title-new");
   });
 });
+
+describe("user-authored private-use characters", () => {
+  const PUA = "";
+  it("are preserved when the document has no suggestions", () => {
+    const out = html(`Glyphs ${PUA} and \`code ${PUA}\``);
+    expect(out).toContain(`Glyphs ${PUA}`);
+    expect(out).toContain(`code ${PUA}`);
+    expect(out).not.toContain("{++");
+  });
+
+  it("are preserved next to real suggestions", () => {
+    const out = html(`a {++new++} b`);
+    expect(out).toContain("a");
+    expect(out).toContain("b");
+    expect(out).toMatch(/<ins class="critic-ins">new<\/ins>/);
+  });
+
+  it("survive the TOC strip", () => {
+    expect(stripCriticDelimiters(`# Hi  {++x++}`)).toBe(`# Hi  x`);
+  });
+});

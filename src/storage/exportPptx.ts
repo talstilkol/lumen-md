@@ -19,7 +19,7 @@
  * Not handled: images, tables (rendered as "a | b" text), speaker notes.
  */
 import { zip } from "./zip";
-import { splitSlides } from "./exportFormats";
+import { createFenceTracker, splitSlides } from "./exportFormats";
 
 export const PPTX_MIME =
   "application/vnd.openxmlformats-officedocument.presentationml.presentation";
@@ -83,20 +83,13 @@ function parseSlide(chunk: string, fallbackTitle: string): PptxSlide {
   const lines = chunk.replace(/\r\n?/g, "\n").split("\n");
   let title = "";
   const body: PptxParagraph[] = [];
-  let inCode = false;
-  let fence = "";
+  // Same CommonMark fence rules as splitSlides (marker char, minimum
+  // length, indentation, nothing after a closing fence).
+  const fenceAt = createFenceTracker();
   for (const raw of lines) {
     const trimmed = raw.trim();
-    const f = /^(```+|~~~+)/.exec(trimmed);
-    if (f && (!inCode || trimmed.startsWith(fence))) {
-      if (inCode) {
-        inCode = false;
-      } else {
-        inCode = true;
-        fence = f[1];
-      }
-      continue;
-    }
+    const { fence, inCode } = fenceAt(raw);
+    if (fence) continue;
     if (inCode) {
       body.push({ kind: "code", text: raw.replace(/\t/g, "    ") });
       continue;

@@ -177,3 +177,14 @@ describe("splitSlides fence tracking (CommonMark)", () => {
     expect(at("`````")).toEqual({ fence: true, inCode: false });
   });
 });
+
+describe("markdownToSlides code fences", () => {
+  it("keeps a line that merely starts with the fence marker inside the code block", async () => {
+    const { markdownToSlides } = await import("../storage/exportPptx");
+    const md = ["# Slide", "```js", "```not-a-close", "# still code", "- still code", "```", "- bullet"].join("\n");
+    const [slide] = markdownToSlides(md);
+    const code = slide.body.filter((p) => p.kind === "code").map((p) => p.text);
+    expect(code).toEqual(["```not-a-close", "# still code", "- still code"]);
+    expect(slide.body.some((p) => p.kind !== "code" && p.text.includes("bullet"))).toBe(true);
+  });
+});

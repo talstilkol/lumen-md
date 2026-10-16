@@ -53,8 +53,23 @@ const LITERAL: Record<string, string> = {
 const SENTINEL_RE = /[-]/;
 const SENTINEL_SPLIT_RE = /([-])/;
 
+/**
+ * Characters the document itself contains in the sentinel range (or the
+ * escape char) are escaped as ESC + a letter before sentinels are inserted,
+ * and restored after the rehype pass — so a user's own private-use glyphs
+ * are never mistaken for generated markers.
+ */
+const ESC = "\uE00B";
+const ESCAPABLE_RE = /[\uE000-\uE00B]/g;
+const ESCAPED_RE = /\uE00B([a-l])/g;
+const escapeUserSentinels = (s: string) =>
+  s.replace(ESCAPABLE_RE, (c) => ESC + String.fromCharCode(97 + c.charCodeAt(0) - 0xe000));
+export const unescapeUserSentinels = (s: string) =>
+  s.indexOf(ESC) === -1 ? s : s.replace(ESCAPED_RE, (_m, l: string) => String.fromCharCode(0xe000 + l.charCodeAt(0) - 97));
+
 /** Replace CriticMarkup delimiters (outside code) with sentinels. */
-export function prepareCriticMarkup(markdown: string): string {
+export function prepareCriticMarkup(source: string): string {
+  const markdown = escapeUserSentinels(source);
   if (!mayContainCriticMarkup(markdown)) return markdown;
   const suggestions = parseSuggestions(markdown);
   if (suggestions.length === 0) return markdown;
@@ -89,7 +104,7 @@ export function prepareCriticMarkup(markdown: string): string {
 /** Drop CriticMarkup delimiters, keeping every part's text (TOC slugs). */
 export function stripCriticDelimiters(markdown: string): string {
   const prepared = prepareCriticMarkup(markdown);
-  return prepared === markdown ? markdown : prepared.replace(/[\uE000-\uE00A]/g, "");
+  return prepared === markdown ? markdown : unescapeUserSentinels(prepared.replace(/[\uE000-\uE00A]/g, ""));
 }
 
 type Node = ElementContent | RootContent;
@@ -190,9 +205,32 @@ function transform(node: Root | Element) {
 }
 
 /** rehype plugin — must run on the tree produced from `prepareCriticMarkup` output. */
+/** Restore escaped user characters in every text node and string property. */
+function restoreUserSentinels(node: Node | Root) {
+  if (node.type === "text") {
+    node.value = unescapeUserSentinels(node.value);
+    return;
+  }
+  if (node.type === "element") {
+    for (const [k, v] of Object.entries(node.properties ?? {})) {
+      if (typeof v === "string" && v.includes(ESC)) node.properties![k] = unescapeUserSentinels(v);
+    }
+  }
+  if ("children" in node) for (const c of node.children) restoreUserSentinels(c as Node);
+}
+
+function hasEscape(node: Node | Root): boolean {
+  if (node.type === "text") return node.value.includes(ESC);
+  if (node.type === "element" && Object.values(node.properties ?? {}).some((v) => typeof v === "string" && v.includes(ESC))) {
+    return true;
+  }
+  if ("children" in node) return node.children.some((c) => hasEscape(c as Node));
+  return false;
+}
+
 export function rehypeCriticMarkup() {
   return (tree: Root) => {
-    if (!hasSentinel(tree)) return;
-    transform(tree);
+    if (hasSentinel(tree)) transform(tree);
+    if (hasEscape(tree)) restoreUserSentinels(tree);
   };
 }
