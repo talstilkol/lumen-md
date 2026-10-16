@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-10-16T20:05:50.196Z",
+  "generated_at": "2026-10-16T20:35:15.959Z",
   "source": "src/i18n/index.ts (en bundle)",
-  "count": 973,
+  "count": 983,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -3179,6 +3179,58 @@
       "key": "cmd.ai.provider.hint",
       "en": "Switch AI provider: OpenAI, Claude, Gemini, Mistral, Ollama, or local WebGPU",
       "vars": []
+    },
+    {
+      "key": "cmd.ai.usage",
+      "en": "AI: Usage & Cost This Month",
+      "vars": []
+    },
+    {
+      "key": "cmd.ai.usage.hint",
+      "en": "Requests, tokens and estimated cost per provider on this device",
+      "vars": []
+    },
+    {
+      "key": "cmd.ai.cache",
+      "en": "AI: Answer Cache…",
+      "vars": []
+    },
+    {
+      "key": "cmd.ai.cache.hint",
+      "en": "Reuse identical answers (tags, translation, diagrams) instead of paying again",
+      "vars": []
+    },
+    {
+      "key": "ai.usage.title",
+      "en": "AI usage",
+      "vars": []
+    },
+    {
+      "key": "ai.cache.title",
+      "en": "AI answer cache",
+      "vars": []
+    },
+    {
+      "key": "ai.cache.on",
+      "en": "On — identical requests are answered locally",
+      "vars": []
+    },
+    {
+      "key": "ai.cache.off",
+      "en": "Off — always ask the model",
+      "vars": []
+    },
+    {
+      "key": "ai.cache.clear",
+      "en": "Clear cached answers",
+      "vars": []
+    },
+    {
+      "key": "ai.cache.cleared",
+      "en": "Cleared {count} cached answers",
+      "vars": [
+        "count"
+      ]
     },
     {
       "key": "cmd.ai.settings",
