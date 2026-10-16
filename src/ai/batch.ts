@@ -86,7 +86,10 @@ export function loadJobs(): BatchJob[] {
 
 export function saveJobs(jobs: BatchJob[]): void {
   try {
-    localStorage.setItem(STORE, JSON.stringify(jobs.slice(-50)));
+    // Unfinished jobs are always kept; only finished history is trimmed.
+    const finished = jobs.filter((j) => j.status === "applied" || j.status === "failed" || j.status === "expired" || j.status === "cancelled");
+    const keep = new Set([...jobs.filter((j) => !finished.includes(j)), ...finished.slice(-50)]);
+    localStorage.setItem(STORE, JSON.stringify(jobs.filter((j) => keep.has(j))));
   } catch {
     /* */
   }
@@ -242,10 +245,11 @@ const yamlString = (s: string) => JSON.stringify(s.replace(/\s+/g, " ").trim());
 
 /** Set (or replace) a top-level `key: value` line in the note's front matter, creating it when absent. */
 export function setFrontmatterField(content: string, key: string, value: string): string {
-  const fm = /^---\r?\n([\s\S]*?)\r?\n---/.exec(content);
+  // `---\n---` (empty front matter) counts too.
+  const fm = /^---\r?\n(?:([\s\S]*?)\r?\n)?---/.exec(content);
   const line = `${key}: ${value}`;
   if (!fm) return `---\n${line}\n---\n\n${content}`;
-  const lines = fm[1].split(/\r?\n/);
+  const lines = fm[1] ? fm[1].split(/\r?\n/) : [];
   const at = lines.findIndex((l) => new RegExp(`^${key}\\s*:`).test(l));
   if (at === -1) lines.push(line);
   else {
@@ -285,13 +289,29 @@ export interface PlannedWrite {
 
 /** Existing tags in the front matter: inline `[a, b]`, `a, b`, or a block list. */
 export function frontmatterTags(content: string): string[] {
-  const fm = /^---\r?\n([\s\S]*?)\r?\n---/.exec(content)?.[1];
+  const fm = /^---\r?\n(?:([\s\S]*?)\r?\n)?---/.exec(content)?.[1];
   if (!fm) return [];
   const lines = fm.split(/\r?\n/);
   const at = lines.findIndex((l) => /^tags\s*:/.test(l));
   if (at === -1) return [];
   const inline = lines[at].replace(/^tags\s*:\s*/, "").trim();
-  if (inline) return inline.replace(/^\[|\]$/g, "").split(",").map((t) => t.trim().replace(/^["']|["']$/g, "")).filter(Boolean);
+  if (inline) {
+    // Split on commas outside quotes: ["a, b", c] is two tags.
+    const body = inline.replace(/^\[|\]$/g, "");
+    const out: string[] = [];
+    for (const m of body.matchAll(/\s*("(?:[^"\\]|\\.)*"|'(?:[^']|'')*'|[^,]+)\s*(?:,|$)/g)) {
+      let t = m[1].trim();
+      if (t.startsWith('"')) {
+        try {
+          t = JSON.parse(t);
+        } catch {
+          t = t.slice(1, -1);
+        }
+      } else if (t.startsWith("'")) t = t.slice(1, -1).replace(/''/g, "'");
+      if (t) out.push(t);
+    }
+    return out;
+  }
   const out: string[] = [];
   for (let i = at + 1; i < lines.length && /^\s+-\s*/.test(lines[i]); i++) out.push(lines[i].replace(/^\s+-\s*/, "").trim().replace(/^["']|["']$/g, ""));
   return out.filter(Boolean);

@@ -42,6 +42,8 @@ describe("batch helpers", () => {
     expect(merged).toContain("tags: [existing, alpha, beta]");
     expect(merged).not.toContain("  - existing");
     expect(mergeTags("---\ntags:\n  - \"a: b\"\n  - c#d\n---\nx", ["new"])).toContain('tags: ["a: b", "c#d", new]');
+    expect(frontmatterTags('---\ntags: ["a, b", c]\n---\n')).toEqual(["a, b", "c"]);
+    expect(setFrontmatterField("---\n---\nBody", "summary", '"S"')).toBe('---\nsummary: "S"\n---\nBody');
     const replaced = setFrontmatterField(note, "summary", '"New"');
     expect(replaced).toContain('summary: "New"\nother: x');
     expect(replaced).not.toContain("line three");
