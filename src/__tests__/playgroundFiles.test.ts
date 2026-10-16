@@ -24,6 +24,7 @@ describe("playground project", () => {
     const p = buildProject("--- App.jsx ---\nx\n--- main.jsx ---\ny\n--- a.css ---\nb{}", "react height=300");
     expect(p).toMatchObject({ framework: "react", entry: "main.jsx", html: '<div id="root"></div>', css: ["b{}"] });
     expect(buildProject("--- lib.ts ---\nx", "vue").entry).toBe("lib.ts");
+    expect(buildProject("--- src/App.jsx ---\na\n--- src/main.jsx ---\nb", "react").entry).toBe("src/main.jsx");
     expect(buildProject("x", "vue").html).toBe('<div id="app"></div>');
     expect(frameworkFromMeta(undefined)).toBe("vanilla");
   });

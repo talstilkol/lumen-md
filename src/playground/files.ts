@@ -76,7 +76,12 @@ export function buildProject(body: string, meta?: string): PlaygroundProject {
   const files = splitFiles(body, framework);
   const scripts = files.filter((f) => SCRIPT_EXT_RE.test(f.name));
   const entry =
-    scripts.find((f) => /^(main|index)\.(m?jsx?|tsx?)$/i.test(f.name))?.name ?? scripts[0]?.name ?? null;
+    scripts
+      .filter((f) => /(?:^|\/)(main|index)\.(m?jsx?|tsx?)$/i.test(f.name))
+      // The shallowest main / index wins (`main.js` before `src/main.jsx`).
+      .sort((a, b) => a.name.split("/").length - b.name.split("/").length)[0]?.name ??
+    scripts[0]?.name ??
+    null;
   const htmlFile = files.find((f) => /\.html?$/i.test(f.name));
   const html = htmlFile?.code ?? (framework === "vue" ? '<div id="app"></div>' : '<div id="root"></div>');
   return { framework, files, entry, html, css: files.filter((f) => /\.css$/i.test(f.name)).map((f) => f.code) };

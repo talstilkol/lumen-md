@@ -54,8 +54,13 @@ for (const level of ["log", "info", "warn", "error"] as const) {
     if (sent++ < MAX_CONSOLE) post({ type: "console", runId, level, text: args.map(show).join(" ").slice(0, 10_000) });
   };
 }
-addEventListener("error", (e) => post({ type: "error", runId, message: e.error ? show(e.error) : e.message }));
-addEventListener("unhandledrejection", (e) => post({ type: "error", runId, message: show(e.reason) }));
+// Errors share the console's budget and size cap, so a huge thrown value
+// can't flood the parent.
+const postError = (message: string) => {
+  if (sent++ < MAX_CONSOLE) post({ type: "error", runId, message: String(message).slice(0, 10_000) });
+};
+addEventListener("error", (e) => postError(e.error ? show(e.error) : e.message));
+addEventListener("unhandledrejection", (e) => postError(show(e.reason)));
 
 function loadScript(src: string): Promise<void> {
   return new Promise((resolve, reject) => {
