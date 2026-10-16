@@ -44,7 +44,11 @@ fly deploy
 `server.js` speaks the y-webrtc signaling protocol (`subscribe` /
 `unsubscribe` / `publish` / `ping`). Fly and the Docker `HEALTHCHECK` probe
 `/healthz`. Optional env: `SIGNAL_HEARTBEAT_MS` (default 30000),
-`SIGNAL_RATE_LIMIT_MAX` (messages/min/IP, default 120).
+`SIGNAL_RATE_LIMIT_MAX` (messages/min/IP, default 120), and resource caps
+`SIGNAL_MAX_TOPICS_PER_CONN` (64), `SIGNAL_MAX_TOPIC_LENGTH` (256 chars),
+`SIGNAL_MAX_PAYLOAD` (262144 bytes/message), `SIGNAL_MAX_CONNS_PER_IP` (64).
+Behind a reverse proxy set `SIGNAL_TRUST_PROXY=1` (already in `sync-server/fly.toml`)
+so per-IP limits use `Fly-Client-IP` / `X-Forwarded-For` instead of the proxy's address.
 
 Update `.env.production`:
 

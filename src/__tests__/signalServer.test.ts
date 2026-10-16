@@ -180,3 +180,86 @@ describe("signaling server (y-webrtc protocol)", () => {
     expect(body.ok).toBe(true);
   });
 });
+
+describe("signaling server resource caps", () => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let srv: any;
+  const socks: Client[] = [];
+  afterEach(async () => {
+    socks.splice(0).forEach((c) => c.ws.terminate());
+    await srv.close();
+  });
+  const start = async (opts: Record<string, unknown>) => {
+    srv = await createServer({ port: 0, heartbeatMs: 10_000, ...opts });
+  };
+  const open = async () => {
+    const c = await connect(srv.port);
+    socks.push(c);
+    return c;
+  };
+
+  it("bounds topics per connection: one huge subscribe retains at most the cap", async () => {
+    await start({ maxTopicsPerConn: 5 });
+    const a = await open();
+    a.send({ type: "subscribe", topics: Array.from({ length: 10_000 }, (_, i) => `t${i}`) });
+    expect(await a.next((m) => m.type === "error")).toEqual({ type: "error", error: "Topic limit exceeded" });
+    expect(srv.topics.size).toBe(5);
+    // Further subscribes on the same socket are refused too.
+    a.send({ type: "subscribe", topics: ["another"] });
+    await a.next((m) => m.type === "error");
+    expect(srv.topics.has("another")).toBe(false);
+  });
+
+  it("rejects over-long and empty topic names", async () => {
+    await start({ maxTopicLength: 16 });
+    const a = await open();
+    a.send({ type: "subscribe", topics: ["x".repeat(17), "", "ok"] });
+    await a.next((m) => m.type === "error");
+    expect([...srv.topics.keys()]).toEqual(["ok"]);
+  });
+
+  it("closes connections that send a payload larger than maxPayload", async () => {
+    await start({ maxPayload: 1024 });
+    const a = await open();
+    const closed = new Promise<number>((r) => a.ws.on("close", (code: number) => r(code)));
+    a.send({ type: "publish", topic: "t", data: "x".repeat(4096) });
+    expect(await closed).toBe(1009); // "message too big"
+  });
+
+  it("limits concurrent connections per IP", async () => {
+    await start({ maxConnsPerIp: 2 });
+    await open();
+    await open();
+    const third = await connect(srv.port);
+    socks.push(third);
+    const code = await new Promise<number>((r) => third.ws.on("close", (c: number) => r(c)));
+    expect(code).toBe(1008);
+  });
+});
+
+describe("signaling server client IP behind a proxy", () => {
+  it("uses Fly-Client-IP / X-Forwarded-For only when trustProxy is on", async () => {
+    const srv = await createServer({ port: 0, heartbeatMs: 10_000, maxConnsPerIp: 1, trustProxy: true });
+    const a = await connect(srv.port, { headers: { "Fly-Client-IP": "203.0.113.1" } });
+    const b = await connect(srv.port, { headers: { "Fly-Client-IP": "203.0.113.2" } });
+    // Different forwarded IPs → both allowed despite the same socket address.
+    await new Promise((r) => setTimeout(r, 50));
+    expect(a.ws.readyState).toBe(1);
+    expect(b.ws.readyState).toBe(1);
+    const c = await connect(srv.port, { headers: { "Fly-Client-IP": "203.0.113.1" } });
+    const code = await new Promise<number>((r) => c.ws.on("close", (x: number) => r(x)));
+    expect(code).toBe(1008);
+    [a, b].forEach((x) => x.ws.terminate());
+    await srv.close();
+  });
+
+  it("ignores forwarding headers by default (they are client-controlled)", async () => {
+    const srv = await createServer({ port: 0, heartbeatMs: 10_000, maxConnsPerIp: 1 });
+    const a = await connect(srv.port, { headers: { "X-Forwarded-For": "198.51.100.1" } });
+    const b = await connect(srv.port, { headers: { "X-Forwarded-For": "198.51.100.2" } });
+    const code = await new Promise<number>((r) => b.ws.on("close", (x: number) => r(x)));
+    expect(code).toBe(1008);
+    a.ws.terminate();
+    await srv.close();
+  });
+});
