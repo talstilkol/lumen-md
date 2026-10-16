@@ -300,13 +300,17 @@ async function proxyResearch(o: ResearchOptions, settings: ResearchSettings): Pr
   });
   // An answer that cites none of the sources read isn't research.
   if (!cited.size) throw new Error("The answer didn't cite any of the sources it read — try again or rephrase the question.");
-  // Substantial paragraphs the model left without any marker are flagged.
+  // Claims the model left without a marker are flagged, sentence by
+  // sentence (a marker elsewhere in the paragraph doesn't cover them).
   const flaggedBody = body
     .split(/\n{2,}/)
     .map((para) => {
-      if (/\[\^\d+\]|⚠️/.test(para) || !isClaim(para)) return para;
-      unverified++;
-      return para.replace(/\s*$/, " ⚠️ *no source cited*");
+      if (/^\s*#{1,6}\s/.test(para) || !isClaim(para)) return para;
+      return para.replace(/[^.!?\n]*[.!?]+(?:\[\^\d+\]|\s*⚠️ \*[^*]+\*)*/g, (sentence) => {
+        if (/\[\^\d+\]|⚠️/.test(sentence) || sentence.trim().length < 40) return sentence;
+        unverified++;
+        return `${sentence} ⚠️ *no source cited*`;
+      });
     })
     .join("\n\n");
   const uncited = pages.map((p, i) => ({ p, n: i + 1 })).filter(({ n }) => !cited.has(n));

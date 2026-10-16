@@ -64,11 +64,15 @@ export function buildAnthropicBody(
   const messagesOut = turns.map((m, i) =>
     i === first && m.content.length >= CACHE_MIN_CHARS ? { ...m, content: cached(m.content) } : m,
   );
+  const model = getAnthropicModel(opts);
+  // Claude 5.x accepts only the default sampling settings: a temperature
+  // would be rejected with HTTP 400.
+  const sampling = opts.temperature !== undefined && !/^claude-(?:sonnet|opus|haiku)-5/i.test(model);
   return {
-    model: getAnthropicModel(opts),
+    model,
     max_tokens: opts.maxTokens ?? 1024,
     ...(system ? { system: system.length >= CACHE_MIN_CHARS ? cached(system) : system } : {}),
-    ...(opts.temperature !== undefined ? { temperature: opts.temperature } : {}),
+    ...(sampling ? { temperature: opts.temperature } : {}),
     ...(stream ? { stream: true } : {}),
     messages: messagesOut,
   };

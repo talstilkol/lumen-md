@@ -173,14 +173,15 @@ describe("research agent", () => {
       localStorage.setItem("lumen.ai.key.mistral", "m-key");
       const answers = [
         '["roses"]',
-        "Prune in spring.[^1] Roses are blue.[^1]\n\nAn unmarked paragraph that makes a claim without any footnote at all.\n---QUOTES---\n" +
+        "Prune in spring.[^1] Roses are blue.[^1] A separate unsupported claim follows here, quite long.\n\nAn unmarked paragraph that makes a claim without any footnote at all.\n---QUOTES---\n" +
           '[{"n":1,"quote":"Prune roses in early spring"}]',
       ];
       vi.stubGlobal("fetch", vi.fn(async () => new Response(JSON.stringify({ choices: [{ message: { content: answers.shift() } }] }), { status: 200 })));
       const page: ExtractedPage = { url: "https://a.example/r", finalUrl: "https://a.example/r", status: 200, title: "Roses", text: "Prune roses in early spring." };
       const deps = { settings: { provider: "brave" as const, key: "k" }, search: async () => [{ title: "Roses", url: "https://a.example/r", snippet: "" }], extract: async () => page };
       const result = await runResearch({ question: "Roses?", deps });
-      expect(result.unverified).toBe(2);
+      expect(result.unverified).toBe(3);
+      expect(result.markdown).toContain("unsupported claim follows here, quite long. ⚠️ *no source cited*");
       expect(result.markdown).toContain("Prune in spring.[^1] Roses are blue.[^2]");
       expect(result.markdown).toContain("without any footnote at all. ⚠️ *no source cited*");
       expect(result.markdown).toMatch(/\[\^2\]: \[Roses\]\(https:\/\/a\.example\/r\) ⚠️ \*no supporting quote given\*/);
