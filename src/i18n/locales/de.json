@@ -959,5 +959,15 @@
   "cmd.billing.upgradePro": "Abrechnung: Auf Pro upgraden",
   "cmd.billing.upgradeTeam": "Abrechnung: Auf Team upgraden",
   "cmd.billing.manage": "Abrechnung: Abo verwalten",
-  "cmd.billing.managePersonal": "Abrechnung: Persönliches Abo verwalten"
+  "cmd.billing.managePersonal": "Abrechnung: Persönliches Abo verwalten",
+  "cmd.ai.usage": "KI: Nutzung & Kosten diesen Monat",
+  "cmd.ai.usage.hint": "Anfragen, Tokens und geschätzte Kosten pro Anbieter auf diesem Gerät",
+  "cmd.ai.cache": "KI: Antwort-Cache…",
+  "cmd.ai.cache.hint": "Identische Antworten (Tags, Übersetzung, Diagramme) wiederverwenden statt erneut zu zahlen",
+  "ai.usage.title": "KI-Nutzung",
+  "ai.cache.title": "KI-Antwort-Cache",
+  "ai.cache.on": "An — identische Anfragen werden lokal beantwortet",
+  "ai.cache.off": "Aus — immer das Modell fragen",
+  "ai.cache.clear": "Gespeicherte Antworten löschen",
+  "ai.cache.cleared": "{count} gespeicherte Antworten gelöscht"
 }

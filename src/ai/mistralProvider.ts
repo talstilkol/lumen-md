@@ -9,10 +9,10 @@
  */
 
 import type { ChatMessage, ChatOptions } from "./llm";
-import { getProviderKey, AiError } from "./llm";
+import { getProviderKey, AiError, reportOpenAiUsage, PROVIDER_DEFAULT_MODELS } from "./llm";
 
 const API_URL = "https://api.mistral.ai/v1/chat/completions";
-const DEFAULT_MODEL = "mistral-small-latest";
+const DEFAULT_MODEL = PROVIDER_DEFAULT_MODELS.mistral;
 
 export function getMistralModel(opts: ChatOptions): string {
   if (opts.model) return opts.model;
@@ -27,7 +27,8 @@ function body(messages: ChatMessage[], opts: ChatOptions, stream: boolean) {
   return JSON.stringify({
     model: getMistralModel(opts),
     messages,
-    ...(stream ? { stream: true } : {}),
+    // Mistral sends `usage` in streams only when asked to.
+    ...(stream ? { stream: true, stream_options: { include_usage: true } } : {}),
     ...(opts.maxTokens ? { max_tokens: opts.maxTokens } : {}),
     ...(opts.temperature !== undefined ? { temperature: opts.temperature } : {}),
   });
@@ -55,6 +56,7 @@ export async function chatMistral(
     throw new AiError("API_ERROR", `Mistral ${res.status}: ${b.slice(0, 200)}`);
   }
   const data = await res.json();
+  reportOpenAiUsage(data.usage, data.model ?? getMistralModel(opts), opts, "mistral");
   const text = data.choices?.[0]?.message?.content?.trim();
   if (!text) throw new AiError("PARSE_ERROR", "Empty Mistral response.");
   return text;
@@ -90,6 +92,8 @@ export async function* chatMistralStream(
       if (!trimmed.startsWith("data: ")) continue;
       try {
         const json = JSON.parse(trimmed.slice(6));
+        // The final chunk carries `usage`.
+        if (json.usage) reportOpenAiUsage(json.usage, json.model ?? getMistralModel(opts), opts, "mistral");
         const delta = json.choices?.[0]?.delta?.content;
         if (delta) yield delta;
       } catch {

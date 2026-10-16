@@ -959,5 +959,15 @@
   "cmd.billing.upgradePro": "账单：升级到 Pro",
   "cmd.billing.upgradeTeam": "账单：升级到 Team",
   "cmd.billing.manage": "账单：管理订阅",
-  "cmd.billing.managePersonal": "账单：管理个人订阅"
+  "cmd.billing.managePersonal": "账单：管理个人订阅",
+  "cmd.ai.usage": "AI：本月用量与费用",
+  "cmd.ai.usage.hint": "此设备上各服务商的请求数、令牌数和估算费用",
+  "cmd.ai.cache": "AI：回答缓存…",
+  "cmd.ai.cache.hint": "复用相同的回答（标签、翻译、图表），无需再次付费",
+  "ai.usage.title": "AI 用量",
+  "ai.cache.title": "AI 回答缓存",
+  "ai.cache.on": "开启 — 相同请求在本地应答",
+  "ai.cache.off": "关闭 — 始终询问模型",
+  "ai.cache.clear": "清除缓存的回答",
+  "ai.cache.cleared": "已清除 {count} 条缓存回答"
 }
