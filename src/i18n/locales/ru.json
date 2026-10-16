@@ -1017,5 +1017,22 @@
   "batch.processing": "Ещё обрабатывается заданий: {count}",
   "batch.apply": "Пакет \"{op}\" готов: обновить заметок — {changes}, новых файлов — {created}{failed}.\n\nПрименить сейчас? Открытые во вкладках заметки пропускаются.",
   "batch.applied": "Применено результатов: {count}",
-  "batch.noNotes": "В этой папке рабочей области нет заметок"
+  "batch.noNotes": "В этой папке рабочей области нет заметок",
+  "cmd.research.ask": "🔎 Исследование: задать вопрос…",
+  "cmd.research.ask.hint": "Ищет в сети, читает источники и пишет заметку со сноской-цитатой к каждому утверждению",
+  "cmd.research.verify": "🔎 Исследование: проверить цитаты в заметке",
+  "cmd.research.verify.hint": "Проверяет, что ссылки в сносках живы, а цитаты действительно есть на странице",
+  "cmd.research.settings": "🔎 Исследование: настройки…",
+  "cmd.research.settings.hint": "Веб-поиск Claude или Brave / Tavily со своим ключом",
+  "research.question": "Что исследовать?",
+  "research.done": "Исследование готово: источников {sources}",
+  "research.unverified": "Не удалось проверить цитат: {count} — помечены ⚠️ в заметке",
+  "research.failed": "Ошибка исследования: {message}",
+  "research.noCitations": "В заметке нет сносок со ссылками",
+  "research.checking": "Проверка цитат {done}/{total}…",
+  "research.noService": "Для проверки цитат и поиска Brave / Tavily нужен сервис исследования (VITE_RESEARCH_ENDPOINT)",
+  "research.provider.claude": "Веб-поиск Claude (провайдер Anthropic; поиски оплачиваются в Anthropic)",
+  "research.provider.brave": "Brave Search (ваш API-ключ)",
+  "research.provider.tavily": "Tavily (ваш API-ключ)",
+  "research.key": "API-ключ для {provider}:"
 }

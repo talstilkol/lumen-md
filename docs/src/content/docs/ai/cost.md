@@ -65,7 +65,7 @@ Command: `AI: Cost Mode (Economy / Balanced / Quality)…`.
 | Quality | Your chosen model | Your chosen model | ~12,000 tokens |
 
 ¹ Tags, heading suggestions, completions and commit messages. The small
-models are GPT-4o mini, Claude Haiku 4.5, Gemini 2.5 Flash and Mistral
+models are GPT-4o mini, Claude Haiku 5.5, Gemini 2.5 Flash and Mistral
 Small. Local providers (Ollama, WebGPU) are never rerouted, and a
 request that names its own model is left alone.
 

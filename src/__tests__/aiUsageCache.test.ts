@@ -26,6 +26,9 @@ describe("prices and cost", () => {
     expect(priceFor("ollama", "llama3.1")).toEqual({ input: 0, output: 0, cachedInput: 0, cacheWrite: 0 });
     expect(priceFor("openai", "some-new-model")).toBeNull();
     // Anthropic: 1M in at $3, 1M cache-read at 10%, 1M cache-write at 125%, 1M out at $15.
+    expect(costOf({ provider: "anthropic", model: "claude-sonnet-5-5", inputTokens: 1e6, outputTokens: 1e6 })).toBeCloseTo(12, 6);
+    expect(costOf({ provider: "anthropic", model: "claude-haiku-5-5", inputTokens: 1e6, outputTokens: 0 })).toBeCloseTo(0.5, 6); // > 100K: long-context rate
+    expect(costOf({ provider: "anthropic", model: "claude-haiku-5-5", inputTokens: 50_000, outputTokens: 0 })).toBeCloseTo(0.005, 6);
     const c = costOf({ provider: "anthropic", model: "claude-sonnet-4-5", inputTokens: 1e6, outputTokens: 1e6, cacheReadTokens: 1e6, cacheWriteTokens: 1e6 });
     expect(c).toBeCloseTo(3 + 0.3 + 3.75 + 15, 6);
     // OpenAI cached input is half price for GPT-4o; Gemini 25%.
@@ -174,8 +177,8 @@ describe("chat(): response cache and usage", () => {
     expect(await chat(msgs, { cache: true, cacheIf })).toBe('["a"]');
     expect(fetchMock).toHaveBeenCalledTimes(2);
     const { effectiveModel } = await import("../ai/llm");
-    expect(effectiveModel("anthropic")).toBe("claude-sonnet-4-5");
-    expect(usageSummary().rows.map((r) => r.model)).toEqual(["claude-sonnet-4-5"]);
+    expect(effectiveModel("anthropic")).toBe("claude-sonnet-5-5");
+    expect(usageSummary().rows.map((r) => r.model)).toEqual(["claude-sonnet-5-5"]);
   });
 
   it("records streamed Anthropic usage from message_start / message_delta", async () => {

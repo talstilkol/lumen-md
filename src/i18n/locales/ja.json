@@ -1017,5 +1017,22 @@
   "batch.processing": "{count} 件のバッチジョブが処理中です",
   "batch.apply": "バッチ「{op}」完了：更新 {changes} 件、新規ファイル {created} 件{failed}。\n\n今すぐ適用しますか？タブで開いているノートはスキップされます。",
   "batch.applied": "{count} 件のバッチ結果を適用しました",
-  "batch.noNotes": "ワークスペースのそのフォルダーにノートが見つかりません"
+  "batch.noNotes": "ワークスペースのそのフォルダーにノートが見つかりません",
+  "cmd.research.ask": "🔎 リサーチ：質問する…",
+  "cmd.research.ask.hint": "ウェブを検索し、出典を読み、各主張に引用付き脚注を付けたノートを作成",
+  "cmd.research.verify": "🔎 リサーチ：このノートの引用を検証",
+  "cmd.research.verify.hint": "脚注のリンクが生きていて、引用が実際にページにあるかを確認",
+  "cmd.research.settings": "🔎 リサーチ：設定…",
+  "cmd.research.settings.hint": "Claude のウェブ検索、または自分のキーで Brave / Tavily",
+  "research.question": "何を調べますか？",
+  "research.done": "リサーチ完了：出典 {sources} 件",
+  "research.unverified": "{count} 件の引用を確認できませんでした（ノートに ⚠️ で表示）",
+  "research.failed": "リサーチに失敗しました：{message}",
+  "research.noCitations": "このノートにはウェブリンク付きの脚注がありません",
+  "research.checking": "引用を確認中 {done}/{total}…",
+  "research.noService": "引用チェックと Brave / Tavily 検索には、このデプロイでリサーチサービス（VITE_RESEARCH_ENDPOINT）が必要です",
+  "research.provider.claude": "Claude ウェブ検索（Anthropic プロバイダー、検索は Anthropic が課金）",
+  "research.provider.brave": "Brave Search（あなたの API キー）",
+  "research.provider.tavily": "Tavily（あなたの API キー）",
+  "research.key": "{provider} の API キー："
 }

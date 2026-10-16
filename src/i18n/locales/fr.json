@@ -1017,5 +1017,22 @@
   "batch.processing": "{count} lots encore en cours",
   "batch.apply": "Lot \"{op}\" terminé : {changes} notes à mettre à jour, {created} nouveaux fichiers{failed}.\n\nAppliquer maintenant ? Les notes ouvertes dans un onglet sont ignorées.",
   "batch.applied": "{count} résultats de lot appliqués",
-  "batch.noNotes": "Aucune note trouvée dans ce dossier de l’espace de travail"
+  "batch.noNotes": "Aucune note trouvée dans ce dossier de l’espace de travail",
+  "cmd.research.ask": "🔎 Recherche : poser une question…",
+  "cmd.research.ask.hint": "Cherche sur le web, lit les sources et rédige une note avec une note de bas de page citée pour chaque affirmation",
+  "cmd.research.verify": "🔎 Recherche : vérifier les citations de cette note",
+  "cmd.research.verify.hint": "Vérifie que chaque lien de note fonctionne et que la citation figure vraiment sur la page",
+  "cmd.research.settings": "🔎 Recherche : réglages…",
+  "cmd.research.settings.hint": "Recherche web de Claude, ou Brave / Tavily avec votre clé",
+  "research.question": "Que dois-je rechercher ?",
+  "research.done": "Recherche terminée : {sources} sources",
+  "research.unverified": "{count} citations non vérifiées — marquées ⚠️ dans la note",
+  "research.failed": "Échec de la recherche : {message}",
+  "research.noCitations": "Aucune note de bas de page avec lien web dans cette note",
+  "research.checking": "Vérification des citations {done}/{total}…",
+  "research.noService": "La vérification des citations et la recherche Brave / Tavily nécessitent le service de recherche (VITE_RESEARCH_ENDPOINT) sur ce déploiement",
+  "research.provider.claude": "Recherche web de Claude (fournisseur Anthropic ; recherches facturées par Anthropic)",
+  "research.provider.brave": "Brave Search (votre clé API)",
+  "research.provider.tavily": "Tavily (votre clé API)",
+  "research.key": "Clé API pour {provider} :"
 }

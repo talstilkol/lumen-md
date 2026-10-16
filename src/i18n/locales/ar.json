@@ -1017,5 +1017,22 @@
   "batch.processing": "{count} مهام دفعات ما زالت قيد المعالجة",
   "batch.apply": "انتهت دفعة \"{op}\": {changes} ملاحظة للتحديث، و{created} ملفات جديدة{failed}.\n\nتطبيق الآن؟ تُتخطّى الملاحظات المفتوحة في علامة تبويب.",
   "batch.applied": "تم تطبيق {count} من نتائج الدفعات",
-  "batch.noNotes": "لم يُعثر على ملاحظات في هذا المجلد من مساحة العمل"
+  "batch.noNotes": "لم يُعثر على ملاحظات في هذا المجلد من مساحة العمل",
+  "cmd.research.ask": "🔎 بحث: اطرح سؤالًا…",
+  "cmd.research.ask.hint": "يبحث في الويب ويقرأ المصادر ويكتب ملاحظة بحاشية مقتبسة لكل ادعاء",
+  "cmd.research.verify": "🔎 بحث: التحقق من الاستشهادات في هذه الملاحظة",
+  "cmd.research.verify.hint": "يتحقق من أن كل رابط في الحواشي يعمل وأن الاقتباس موجود فعلًا في الصفحة",
+  "cmd.research.settings": "🔎 بحث: الإعدادات…",
+  "cmd.research.settings.hint": "بحث Claude على الويب، أو Brave / Tavily بمفتاحك",
+  "research.question": "ما الذي تريد البحث عنه؟",
+  "research.done": "اكتمل البحث: {sources} مصادر",
+  "research.unverified": "تعذّر التحقق من {count} اقتباسات — معلَّمة ⚠️ في الملاحظة",
+  "research.failed": "فشل البحث: {message}",
+  "research.noCitations": "لا توجد حواشٍ بروابط ويب في هذه الملاحظة",
+  "research.checking": "جارٍ التحقق من الاستشهادات {done}/{total}…",
+  "research.noService": "يتطلب التحقق من الاستشهادات وبحث Brave / Tavily خدمة البحث (VITE_RESEARCH_ENDPOINT) في هذا النشر",
+  "research.provider.claude": "بحث Claude على الويب (مزوّد Anthropic؛ تُحتسب عمليات البحث من Anthropic)",
+  "research.provider.brave": "Brave Search (مفتاح API الخاص بك)",
+  "research.provider.tavily": "Tavily (مفتاح API الخاص بك)",
+  "research.key": "مفتاح API لـ {provider}:"
 }

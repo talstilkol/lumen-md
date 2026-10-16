@@ -108,6 +108,7 @@ const AI_PROMPT_COMMANDS = new Set([
   "ai.chart",
   "tools.autoTag",
   "tools.suggestLinks",
+  "research.ask",
 ]);
 
 export function isAiPromptCommand(id: string): boolean {

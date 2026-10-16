@@ -53,6 +53,13 @@ const PRICE_TABLE: Array<[prefix: string, input: number, output: number, cachedI
   ["claude-haiku-4", 1, 5],
   ["claude-sonnet-4", 3, 15],
   ["claude-opus-4-5", 5, 25],
+  // Claude 5.5: cache reads at 5% of input.
+  ["claude-haiku-5-5", 0.1, 0.5, 0.005], // over 100K prompt tokens: see longContext
+  ["claude-sonnet-5-5", 2, 10, 0.1],
+  ["claude-opus-5-5", 4, 20, 0.2],
+  ["claude-haiku-5", 0.1, 0.5],
+  ["claude-sonnet-5", 2, 10],
+  ["claude-opus-5", 4, 20],
   ["claude-opus-4", 15, 75],
   // Google (implicit caching: 75% off)
   ["gemini-1.5-flash", 0.075, 0.3],
@@ -97,11 +104,15 @@ export function priceFor(provider: string, model: string): ModelPrice | null {
 }
 
 /** Estimated USD for one usage record, or null when the model's price is unknown. */
-/** Gemini 2.5 Pro bills prompts over 200K tokens at its long-context rates. */
+/** Long-context rates: Gemini 2.5 Pro over 200K prompt tokens, Claude Haiku 5.5 over 100K. */
 function longContext(u: Usage, p: ModelPrice): ModelPrice {
-  const prompt = u.inputTokens + (u.cacheReadTokens ?? 0);
+  const prompt = u.inputTokens + (u.cacheReadTokens ?? 0) + (u.cacheWriteTokens ?? 0);
   if (u.provider === "gemini" && /^gemini-2\.5-pro/i.test(u.model) && prompt > 200_000) {
     return { input: 2.5, output: 15, cachedInput: 2.5 * (CACHE_READ_RATE.gemini ?? 1), cacheWrite: 2.5 };
+  }
+  // Haiku 5.5 bills prompts over 100K tokens at its long-context rates.
+  if (u.provider === "anthropic" && /^claude-haiku-5/i.test(u.model) && prompt > 100_000) {
+    return { input: 0.5, output: 2.5, cachedInput: 0.025, cacheWrite: 0.625 };
   }
   return p;
 }

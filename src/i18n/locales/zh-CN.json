@@ -1017,5 +1017,22 @@
   "batch.processing": "{count} 个批处理任务仍在处理中",
   "batch.apply": "批次“{op}”已完成：需更新 {changes} 条笔记，新建 {created} 个文件{failed}。\n\n现在应用吗？在标签页中打开的笔记将被跳过。",
   "batch.applied": "已应用 {count} 条批处理结果",
-  "batch.noNotes": "工作区的该文件夹中没有找到笔记"
+  "batch.noNotes": "工作区的该文件夹中没有找到笔记",
+  "cmd.research.ask": "🔎 研究：提出问题…",
+  "cmd.research.ask.hint": "搜索网络、阅读来源，并为每个论断写出带引文脚注的笔记",
+  "cmd.research.verify": "🔎 研究：核查本笔记的引用",
+  "cmd.research.verify.hint": "检查每个脚注链接是否有效、引文是否真的出现在页面上",
+  "cmd.research.settings": "🔎 研究：设置…",
+  "cmd.research.settings.hint": "Claude 网络搜索，或使用你自己的密钥的 Brave / Tavily",
+  "research.question": "要研究什么？",
+  "research.done": "研究完成：{sources} 个来源",
+  "research.unverified": "{count} 条引文无法核实 — 已在笔记中标记 ⚠️",
+  "research.failed": "研究失败：{message}",
+  "research.noCitations": "本笔记中没有带网页链接的脚注",
+  "research.checking": "正在核查引用 {done}/{total}…",
+  "research.noService": "引用核查和 Brave / Tavily 搜索需要此部署配置研究服务（VITE_RESEARCH_ENDPOINT）",
+  "research.provider.claude": "Claude 网络搜索（Anthropic 服务商；搜索由 Anthropic 计费）",
+  "research.provider.brave": "Brave Search（你的 API 密钥）",
+  "research.provider.tavily": "Tavily（你的 API 密钥）",
+  "research.key": "{provider} 的 API 密钥："
 }

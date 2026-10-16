@@ -34,6 +34,11 @@ describe("buildAnthropicBody", () => {
     expect(body.max_tokens).toBe(50);
     expect(body.stream).toBe(true);
   });
+
+  it("drops temperature for Claude 5.x (only the default is accepted)", () => {
+    expect(buildAnthropicBody(MSGS, { model: "claude-sonnet-5-5", temperature: 0.2 }).temperature).toBeUndefined();
+    expect(buildAnthropicBody(MSGS, { model: "claude-haiku-4-5", temperature: 0.2 }).temperature).toBe(0.2);
+  });
 });
 
 describe("buildGeminiBody", () => {

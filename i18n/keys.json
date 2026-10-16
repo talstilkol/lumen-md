@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-10-16T23:18:01.504Z",
+  "generated_at": "2026-10-16T23:44:15.813Z",
   "source": "src/i18n/index.ts (en bundle)",
-  "count": 1019,
+  "count": 1036,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -3267,6 +3267,102 @@
       "key": "cmd.ai.cache.hint",
       "en": "Reuse identical answers (tags, translation, diagrams) instead of paying again",
       "vars": []
+    },
+    {
+      "key": "cmd.research.ask",
+      "en": "🔎 Research: Ask a Question…",
+      "vars": []
+    },
+    {
+      "key": "cmd.research.ask.hint",
+      "en": "Searches the web, reads sources and writes a note with a quoted footnote for every claim",
+      "vars": []
+    },
+    {
+      "key": "cmd.research.verify",
+      "en": "🔎 Research: Verify Citations in This Note",
+      "vars": []
+    },
+    {
+      "key": "cmd.research.verify.hint",
+      "en": "Checks every footnote link is alive and its quote really appears on the page",
+      "vars": []
+    },
+    {
+      "key": "cmd.research.settings",
+      "en": "🔎 Research: Settings…",
+      "vars": []
+    },
+    {
+      "key": "cmd.research.settings.hint",
+      "en": "Claude web search, or Brave / Tavily with your own key",
+      "vars": []
+    },
+    {
+      "key": "research.question",
+      "en": "What should I research?",
+      "vars": []
+    },
+    {
+      "key": "research.done",
+      "en": "Research done: {sources} sources",
+      "vars": [
+        "sources"
+      ]
+    },
+    {
+      "key": "research.unverified",
+      "en": "{count} quotes could not be verified — marked ⚠️ in the note",
+      "vars": [
+        "count"
+      ]
+    },
+    {
+      "key": "research.failed",
+      "en": "Research failed: {message}",
+      "vars": [
+        "message"
+      ]
+    },
+    {
+      "key": "research.noCitations",
+      "en": "No footnotes with web links in this note",
+      "vars": []
+    },
+    {
+      "key": "research.checking",
+      "en": "Checking citations {done}/{total}…",
+      "vars": [
+        "done",
+        "total"
+      ]
+    },
+    {
+      "key": "research.noService",
+      "en": "Citation checks and Brave / Tavily search need the research service (VITE_RESEARCH_ENDPOINT) on this deployment",
+      "vars": []
+    },
+    {
+      "key": "research.provider.claude",
+      "en": "Claude web search (Anthropic provider; searches billed by Anthropic)",
+      "vars": []
+    },
+    {
+      "key": "research.provider.brave",
+      "en": "Brave Search (your API key)",
+      "vars": []
+    },
+    {
+      "key": "research.provider.tavily",
+      "en": "Tavily (your API key)",
+      "vars": []
+    },
+    {
+      "key": "research.key",
+      "en": "API key for {provider}:",
+      "vars": [
+        "provider"
+      ]
     },
     {
       "key": "cmd.ai.batch",
