@@ -260,11 +260,16 @@ describe("JavaScript blocks and shared scopes", () => {
     expect(units[1].code).toContain("[k]() { return 1; }");
     expect(units[1].code).toContain("'q'() { return 2; }");
     const { units: u2, diags } = checkShared(
-      "const value = 1; let xs = [0]; xs = { map: (f) => [f] }; const saved = xs.map(() => value);",
+      "const value = 1; let xs = [0]; const before = xs.map(() => value); xs = { map: (f) => [f] }; const saved = xs.map(() => value);",
       "// @ts-check\nconst value = 'x';",
     );
-    expect(u2[1].code.split("\n;\n")[0]).toContain("xs.map(() => value)"); // may be retained: newest
+    const first = u2[1].code.split("\n;\n")[0];
+    expect(first).toContain("before = xs.map(() => value$prev)"); // still the array here
+    expect(first).toContain("saved = xs.map(() => value)"); // after the reassignment: may be retained
     expect(diags).toEqual([]);
+    // A local `Array` isn't the built-in.
+    const { units: u3 } = checkShared("const value = 1; const Array = { from: (f) => f }; const g = Array.from(() => value);", "// @ts-check\nconst value = 'x';");
+    expect(u3[1].code.split("\n;\n")[0]).toContain("Array.from(() => value)");
   });
 
   it("a top-level return keeps narrowing, and positions after it still map", () => {

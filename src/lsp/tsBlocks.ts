@@ -307,16 +307,25 @@ function functionScopes(tokens: ReturnType<typeof tokenize>, match: Map<number, 
     if (isPunct(i + 3, "[")) literalKind.set(tokens[i + 1].value, "array");
     else if (init?.type === "str" || init?.type === "tpl") literalKind.set(tokens[i + 1].value, "string");
   }
-  // A name assigned again anywhere (`xs = holder`, `xs += …`) may no longer
-  // be the built-in: forget it.
+  // Where each such name is assigned again (`xs = holder`, `xs += …`): from
+  // that point on it may no longer be the built-in.
+  const reassignedAt = new Map<string, number>();
   for (let i = 1; i + 1 < tokens.length; i++) {
     const t = tokens[i];
-    if (t.type !== "ident" || !literalKind.has(t.value)) continue;
+    if (t.type !== "ident" || !literalKind.has(t.value) || reassignedAt.has(t.value)) continue;
     const next = tokens[i + 1];
     const prev = tokens[i - 1];
     const declared = prev?.type === "ident" && (prev.value === "const" || prev.value === "let" || prev.value === "var");
     if (declared || isPunct(i - 1, ".") || isPunct(i - 1, "?.")) continue;
-    if (next?.type === "punct" && /^(=|\+=|-=|\|\|=|&&=|\?\?=)$/.test(next.value)) literalKind.delete(t.value);
+    if (next?.type === "punct" && /^(=|\+=|-=|\|\|=|&&=|\?\?=)$/.test(next.value)) reassignedAt.set(t.value, i);
+  }
+  // `Array` / `Object` are the built-ins only when the code doesn't bind its own.
+  const shadowed = new Set<string>();
+  for (let i = 1; i < tokens.length; i++) {
+    const t = tokens[i];
+    if (t.type !== "ident" || (t.value !== "Array" && t.value !== "Object")) continue;
+    const prev = val(i - 1);
+    if (["const", "let", "var", "function", "class"].includes(prev) || (isPunct(i + 1, "=") && !isPunct(i - 1, "."))) shadowed.add(t.value);
   }
   const callbackRetained = (open: number): boolean => {
     const callee = tokens[open - 1];
@@ -331,9 +340,10 @@ function functionScopes(tokens: ReturnType<typeof tokenize>, match: Map<number, 
     if (!recv) return true;
     if (recv.type === "str" || recv.type === "tpl") return !(callee.value === "replace" || callee.value === "replaceAll");
     if (recv.type === "ident") {
-      if (recv.value === "Array") return callee.value !== "from";
-      if (recv.value === "Object") return !(callee.value === "fromEntries" || callee.value === "groupBy");
-      const kind = isPunct(open - 4, ".") ? undefined : literalKind.get(recv.value);
+      if (recv.value === "Array" && !shadowed.has("Array")) return callee.value !== "from";
+      if (recv.value === "Object" && !shadowed.has("Object")) return !(callee.value === "fromEntries" || callee.value === "groupBy");
+      const again = reassignedAt.get(recv.value);
+      const kind = isPunct(open - 4, ".") || (again !== undefined && again < open) ? undefined : literalKind.get(recv.value);
       if (kind === "string") return !(callee.value === "replace" || callee.value === "replaceAll");
       if (kind === "array") return callee.value === "replace" || callee.value === "replaceAll" || callee.value === "from" || callee.value === "fromEntries" || callee.value === "groupBy";
       return true;
