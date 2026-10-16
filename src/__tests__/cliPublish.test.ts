@@ -209,6 +209,42 @@ describe("republish cleanup and symlinks", () => {
   });
 });
 
+describe("symlinks at generated paths", () => {
+  it("replaces a symlinked output file instead of writing through it", async () => {
+    write("a.md", "# A");
+    await publishSite(join(work, "src"), join(work, "out"));
+    writeFileSync(join(work, "outside.css"), "precious");
+    rmSync(join(work, "out", "style.css"));
+    symlinkSync(join(work, "outside.css"), join(work, "out", "style.css"));
+    await publishSite(join(work, "src"), join(work, "out"));
+    expect(readFileSync(join(work, "outside.css"), "utf8")).toBe("precious");
+    expect(read("style.css")).not.toBe("precious");
+  });
+
+  it("refuses to write through a symlinked output folder", async () => {
+    write("docs/a.md", "# A");
+    mkdirSync(join(work, "elsewhere"));
+    mkdirSync(join(work, "out"));
+    symlinkSync(join(work, "elsewhere"), join(work, "out", "docs"), "dir");
+    await expect(publishSite(join(work, "src"), join(work, "out"))).rejects.toThrow(/symlink/);
+    expect(existsSync(join(work, "elsewhere", "a.html"))).toBe(false);
+  });
+});
+
+describe("single-file publish", () => {
+  it("copies the local files the page references", async () => {
+    write("README.md", "# Readme\n\n![logo](logo.png)\n\n[guide](docs/My%20Guide.pdf) [ext](https://x.y/a.png) [up](../secret.txt)");
+    write("logo.png", new Uint8Array([1, 2]));
+    write("docs/My Guide.pdf", "pdf");
+    write("unused.png", new Uint8Array([3]));
+    writeFileSync(join(work, "secret.txt"), "s");
+    const res = await publishSite(join(work, "src", "README.md"), join(work, "out"));
+    expect(res.assets.sort()).toEqual(["docs/My Guide.pdf", "logo.png"]);
+    expect(existsSync(join(work, "out", "unused.png"))).toBe(false);
+    expect(existsSync(join(work, "out", "secret.txt"))).toBe(false);
+  });
+});
+
 describe("page-list links", () => {
   it("percent-encode URL delimiters in file names", async () => {
     write("FAQ #1.md", "# FAQ");

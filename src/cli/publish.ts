@@ -207,6 +207,68 @@ function realDirsBetween(root: string, target: string): boolean {
   return true;
 }
 
+/**
+ * Absolute path for writing `rel` inside `outAbs`, creating its folders,
+ * without ever following a symlink in the output folder: a symlinked folder
+ * on the way is refused, and a symlink standing at the target itself is
+ * removed (the link, never what it points to) so the write creates a plain
+ * file instead of overwriting the link's destination.
+ */
+export function prepareOutputPath(outAbs: string, rel: string): string {
+  const parts = rel.split("/");
+  let cur = outAbs;
+  for (const part of parts.slice(0, -1)) {
+    cur = join(cur, part);
+    let st;
+    try {
+      st = lstatSync(cur);
+    } catch {
+      mkdirSync(cur);
+      continue;
+    }
+    if (st.isSymbolicLink() || !st.isDirectory()) {
+      throw new Error(
+        `Refusing to write ${rel}: ${toPosix(relative(outAbs, cur))} in the output folder is ${st.isSymbolicLink() ? "a symlink" : "not a folder"}.`,
+      );
+    }
+  }
+  const target = join(cur, parts[parts.length - 1]);
+  try {
+    if (lstatSync(target).isSymbolicLink()) unlinkSync(target);
+  } catch {
+    /* doesn't exist yet */
+  }
+  return target;
+}
+
+/**
+ * Local files a rendered page references (`src` / `href`), resolved against
+ * `root`: relative URLs only, inside `root`, existing regular files that
+ * aren't Markdown. Used to bring a single published file's images along.
+ */
+export function referencedLocalFiles(html: string, fromDir: string, root: string): string[] {
+  const out = new Set<string>();
+  for (const m of html.matchAll(/\s(?:src|href)="([^"]*)"/g)) {
+    let url = m[1].replace(/&amp;/g, "&");
+    if (!url || /^([a-z][a-z0-9+.-]*:|\/\/|\/|#)/i.test(url)) continue;
+    url = url.replace(/[?#].*$/, "");
+    try {
+      url = decodeURIComponent(url);
+    } catch {
+      continue;
+    }
+    const abs = resolve(fromDir, url);
+    const r = relative(root, abs);
+    if (!r || r.startsWith("..") || isAbsolute(r) || MD_RE.test(abs)) continue;
+    try {
+      if (statSync(abs).isFile()) out.add(abs);
+    } catch {
+      /* missing — leave the link as is */
+    }
+  }
+  return [...out];
+}
+
 /** Publish `input` (a folder or a single .md file) as a static site in `outDir`. */
 export async function publishSite(
   input: string,
@@ -231,10 +293,11 @@ export async function publishSite(
 
   mkdirSync(outAbs, { recursive: true });
   clearPreviousPublish(outAbs);
-  writeFileSync(join(outAbs, "style.css"), PUBLISH_CSS);
+  writeFileSync(prepareOutputPath(outAbs, "style.css"), PUBLISH_CSS);
 
   const mdFiles = files.filter((f) => MD_RE.test(f));
   const assets = files.filter((f) => !MD_RE.test(f));
+  const singleFile = !st.isDirectory();
 
   const skipped: PublishResult["skipped"] = [];
   // Output paths are compared case-insensitively: on macOS/Windows file
@@ -299,9 +362,12 @@ export async function publishSite(
     if (isIndex && listed.length) {
       html = appendToMain(html, pageList(listed));
     }
-    const target = join(outAbs, ...p.output.split("/"));
-    mkdirSync(dirname(target), { recursive: true });
-    writeFileSync(target, html);
+    // A single published file has no folder walk: bring along the local
+    // files (images, downloads) it references.
+    if (singleFile) {
+      for (const a of referencedLocalFiles(html, root, root)) if (!assets.includes(a)) assets.push(a);
+    }
+    writeFileSync(prepareOutputPath(outAbs, p.output), html);
   }
 
   if (!rootIndex) {
@@ -312,7 +378,7 @@ export async function publishSite(
       title: siteTitle,
       head: `\n<link rel="stylesheet" href="style.css" />`,
     });
-    writeFileSync(join(outAbs, "index.html"), appendToMain(html, body));
+    writeFileSync(prepareOutputPath(outAbs, "index.html"), appendToMain(html, body));
   }
 
   const assetRels: string[] = [];
@@ -324,14 +390,12 @@ export async function publishSite(
       continue;
     }
     reserve(rel, `the asset ${rel}`);
-    const target = join(outAbs, ...rel.split("/"));
-    mkdirSync(dirname(target), { recursive: true });
-    copyFileSync(a, target);
+    copyFileSync(a, prepareOutputPath(outAbs, rel));
     assetRels.push(rel);
   }
 
   writeFileSync(
-    join(outAbs, PUBLISH_MANIFEST),
+    prepareOutputPath(outAbs, PUBLISH_MANIFEST),
     JSON.stringify(
       { files: ["style.css", "index.html", ...pages.map((p) => p.output), ...assetRels].filter((f, i, a) => a.indexOf(f) === i) },
       null,
