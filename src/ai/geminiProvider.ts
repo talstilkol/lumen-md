@@ -11,10 +11,10 @@
  */
 
 import type { ChatMessage, ChatOptions } from "./llm";
-import { getProviderKey, AiError } from "./llm";
+import { getProviderKey, AiError, PROVIDER_DEFAULT_MODELS } from "./llm";
 
 const BASE = "https://generativelanguage.googleapis.com/v1beta/models";
-const DEFAULT_MODEL = "gemini-1.5-flash";
+const DEFAULT_MODEL = PROVIDER_DEFAULT_MODELS.gemini;
 
 export function getGeminiModel(opts: ChatOptions): string {
   if (opts.model) return opts.model;

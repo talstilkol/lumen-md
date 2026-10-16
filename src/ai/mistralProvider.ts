@@ -9,10 +9,10 @@
  */
 
 import type { ChatMessage, ChatOptions } from "./llm";
-import { getProviderKey, AiError, reportOpenAiUsage } from "./llm";
+import { getProviderKey, AiError, reportOpenAiUsage, PROVIDER_DEFAULT_MODELS } from "./llm";
 
 const API_URL = "https://api.mistral.ai/v1/chat/completions";
-const DEFAULT_MODEL = "mistral-small-latest";
+const DEFAULT_MODEL = PROVIDER_DEFAULT_MODELS.mistral;
 
 export function getMistralModel(opts: ChatOptions): string {
   if (opts.model) return opts.model;
