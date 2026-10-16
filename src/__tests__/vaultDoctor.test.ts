@@ -138,4 +138,13 @@ describe("vault doctor", () => {
     expect(f.filter((x) => x.kind === "missing-heading").map((x) => x.detail)).toEqual(["Guide#setup-2"]);
     expect(f.filter((x) => x.kind === "missing-alt").map((x) => x.detail)).toEqual(["[logo]"]);
   });
+
+  it("indented fence lines, quoted headings, wiki text in links, open comments", () => {
+    const notes: DoctorNote[] = [
+      { path: "index.md", text: "Para\n\n    ```\n\n[[After Indented]]\n\n> ## Quoted\n\n[[#Quoted]] [see [[Inside Link]]](https://x.example)\n\n<!-- [[Never Closed]]\n" },
+    ];
+    const f = runVaultDoctor(notes);
+    expect(f.filter((x) => x.kind === "broken-wiki-link").map((x) => x.detail)).toEqual(["After Indented"]);
+    expect(f.filter((x) => x.kind === "missing-heading")).toEqual([]);
+  });
 });

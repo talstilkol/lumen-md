@@ -60,8 +60,13 @@ function blankFences(text: string): string {
   for (let i = 0; i < lines.length; i++) {
     // Fences may sit inside block quotes (`> `) and list items (`- `, `1. `,
     // or indented continuation): look past those container prefixes.
-    const inner = lines[i].replace(/^(?:[ \t]*>[ ]?)*/, "").replace(/^[ \t]*(?:[-*+]|\d+[.)])[ \t]+/, "");
-    const m = /^[ \t]*(`{3,}|~{3,})(.*)$/.exec(inner);
+    // At the top level a fence may be indented at most 3 spaces (4+ is an
+    // indented code block); inside a container its content offset applies.
+    const raw = lines[i];
+    const quoted = raw.replace(/^(?:[ \t]*>[ ]?)*/, "");
+    const listed = quoted.replace(/^[ \t]*(?:[-*+]|\d+[.)])[ \t]+/, "");
+    const inContainer: boolean = quoted !== raw || listed !== quoted || /^ {2,}\S/.test(raw) && i > 0 && /^\s*([-*+]|\d+[.)])\s/.test(lines.slice(0, i).reverse().find((l) => l.trim()) ?? "");
+    const m: RegExpExecArray | null = (inContainer ? /^[ \t]*(`{3,}|~{3,})(.*)$/ : /^ {0,3}(`{3,}|~{3,})(.*)$/).exec(listed);
     if (!open) {
       if (m && !(m[1][0] === "`" && m[2].includes("`"))) {
         open = { ch: m[1][0], len: m[1].length };
@@ -145,7 +150,8 @@ export function stripCode(text: string): string {
   let out = blankFences(text);
   out = blankIndentedCode(out);
   // HTML comments are invisible: their links aren't links.
-  out = out.replace(/<!--[\s\S]*?-->/g, blank);
+  // An unterminated comment runs to the end of the note (CommonMark HTML block).
+  out = out.replace(/<!--[\s\S]*?(?:-->|$)/g, blank);
   out = blankCodeSpans(out);
   return out;
 }
@@ -168,7 +174,8 @@ function headingsOf(text: string): Set<string> {
   const out = new Set<string>();
   // Inline code in headings matters for the rendered text, so scan only
   // with fenced blocks blanked.
-  const fenced = blankFences(text);
+  // Headings inside block quotes render (with ids) too: drop the `>` prefixes.
+  const fenced = blankFences(text).replace(/^(?:[ \t]*>[ ]?)+/gm, "");
   // In document order, with a stateful slugger: a repeated heading gets
   // `-1`, `-2`… like rehype-slug, so `[[Note#setup-1]]` resolves.
   const found: Array<{ at: number; raw: string }> = [];
@@ -296,7 +303,10 @@ export function runVaultDoctor(notes: readonly DoctorNote[], opts: DoctorOptions
     const dir = note.path.includes("/") ? note.path.slice(0, note.path.lastIndexOf("/") + 1) : "";
 
     // Wiki links: [[target]] / [[target|label]] (not ![[embeds]] of assets).
+    // `[[x]]` inside a Markdown link's text (`[see [[x]]](url)`) is link text, not a wiki link.
+    const linkTexts = [...text.matchAll(/\[((?:[^\[\]\n]|\[\[[^\]\n]*\]\])*)\]\([^)\n]*\)/g)].map((l) => [l.index ?? 0, (l.index ?? 0) + l[0].length]);
     for (const m of text.matchAll(/(!?)\[\[([^\]|\n]+)(?:\|[^\]\n]*)?\]\]/g)) {
+      if (linkTexts.some(([a, b]) => (m.index ?? 0) > a && (m.index ?? 0) < b)) continue;
       const raw = m[2].trim();
       if (m[1] && !isMd(raw) && /\.\w+$/.test(raw)) continue; // embedded image / file
       const { note: target, heading } = splitWikiTarget(raw);
