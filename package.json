@@ -33,7 +33,6 @@
     "lighthouse:a11y": "node scripts/lighthouse-a11y.mjs",
     "i18n:extract": "node scripts/extract-i18n-keys.mjs",
     "i18n:check": "node scripts/extract-i18n-keys.mjs --check",
-    "roadmap": "node scripts/generate-roadmap.mjs",
     "docker:build": "docker build -t lumen-md .",
     "docker:run": "docker run -p 8080:8080 lumen-md"
   },

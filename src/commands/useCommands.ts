@@ -807,6 +807,45 @@ export function useCommands({
         },
       },
       {
+        id: "ai.usage",
+        label: t("cmd.ai.usage"),
+        hint: t("cmd.ai.usage.hint"),
+        icon: cmdIcons.Sparkles,
+        group: t("group.tools"),
+        action: async () => {
+          const { usageSummary, formatUsageReport } = await import("../ai/usage");
+          await uiAlert({ title: t("ai.usage.title"), message: formatUsageReport(usageSummary()) });
+        },
+      },
+      {
+        id: "ai.cache",
+        label: t("cmd.ai.cache"),
+        hint: t("cmd.ai.cache.hint"),
+        icon: cmdIcons.Sparkles,
+        group: t("group.tools"),
+        action: async () => {
+          const { aiCacheEnabled, setAiCacheEnabled, clearAiCache } = await import("../ai/responseCache");
+          const choice = await uiSelect({
+            title: t("ai.cache.title"),
+            message: t("cmd.ai.cache.hint"),
+            defaultValue: aiCacheEnabled() ? "on" : "off",
+            choices: [
+              { value: "on", label: t("ai.cache.on") },
+              { value: "off", label: t("ai.cache.off") },
+              { value: "clear", label: t("ai.cache.clear") },
+            ],
+          });
+          if (!choice) return;
+          if (choice === "clear") {
+            const count = await clearAiCache();
+            showAiToast(t("ai.cache.cleared", { count }), "success");
+            return;
+          }
+          setAiCacheEnabled(choice === "on");
+          showAiToast(choice === "on" ? t("ai.cache.on") : t("ai.cache.off"), "success");
+        },
+      },
+      {
         id: "ai.switchProvider",
         label: t("cmd.ai.provider", { defaultValue: "AI: Switch Provider" }),
         hint: t("cmd.ai.provider.hint", { defaultValue: "Choose between OpenAI, Ollama, or local WebGPU" }),
