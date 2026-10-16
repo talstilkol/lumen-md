@@ -176,6 +176,21 @@ interface FnScope {
   locals: Set<string>;
 }
 
+/** Does the `{` at `i` open a class body (`class X [extends Y] {`)? */
+function isClassBody(tokens: ReturnType<typeof tokenize>, i: number): boolean {
+  for (let j = i - 1, depth = 0; j >= 0 && i - j < 64; j--) {
+    const t = tokens[j];
+    if (t.type === "punct") {
+      if (t.value === ")" || t.value === "]") depth++;
+      else if (t.value === "(" || t.value === "[") depth--;
+      else if (depth === 0 && (t.value === ";" || t.value === "{" || t.value === "}" || t.value === "=>")) return false;
+      continue;
+    }
+    if (depth === 0 && t.type === "ident" && t.value === "class") return true;
+  }
+  return false;
+}
+
 /** Index of the matching bracket for every `(`, `[`, `{` and its closer. */
 function matchBrackets(tokens: ReturnType<typeof tokenize>): Map<number, number> {
   const match = new Map<number, number>();
@@ -318,6 +333,19 @@ function functionScopes(tokens: ReturnType<typeof tokenize>, match: Map<number, 
     if (own) locals.add(own);
     for (let i = paramsFrom; i <= paramsTo; i++) {
       const t = tokens[i];
+      // `x = value`: the default expression references, it doesn't bind.
+      if (isPunct(i, "=")) {
+        let depth = 0;
+        for (i++; i <= paramsTo; i++) {
+          const v = tokens[i].type === "punct" ? tokens[i].value : "";
+          if (v === "(" || v === "[" || v === "{") depth++;
+          else if (v === ")" || v === "]" || v === "}") {
+            if (depth === 0) break;
+            depth--;
+          } else if (v === "," && depth === 0) break;
+        }
+        continue;
+      }
       if (t?.type !== "ident") continue;
       if (isPunct(i - 1, ".") || (isPunct(i + 1, ":") && (isPunct(i - 1, "{") || isPunct(i - 1, ",")))) continue;
       locals.add(t.value);
@@ -388,6 +416,13 @@ function functionScopes(tokens: ReturnType<typeof tokenize>, match: Map<number, 
     if (t.type !== "punct" || t.value !== "{" || fnBodies.some(([a]) => a === i)) return;
     const close = match.get(i);
     if (close === undefined) return;
+    // Class bodies: field initializers run at `new`, i.e. later — late-bound
+    // like methods. (A `static` initializer runs at definition; rare enough
+    // to treat the same.)
+    if (isClassBody(tokens, i)) {
+      scopes.push({ from: i, to: close, retained: true, locals: new Set() });
+      return;
+    }
     const locals = new Set<string>();
     addDeclarations(locals, i, close, false);
     if (locals.size) scopes.push({ from: i, to: close, retained: false, locals });
@@ -425,7 +460,8 @@ function rewriteEarlierPart(code: string, names: ReadonlyMap<string, string>): s
   for (let k = 0; k < tokens.length; k++) {
     const tok = tokens[k];
     if (tok.type === "punct") {
-      if (tok.value === "{" || tok.value === "[" || tok.value === "(") brackets.push(tok.value);
+      if (tok.value === "{") brackets.push(isClassBody(tokens, k) ? "class" : "{");
+      else if (tok.value === "[" || tok.value === "(") brackets.push(tok.value);
       else if (tok.value === "}" || tok.value === "]" || tok.value === ")") brackets.pop();
       continue;
     }
@@ -437,12 +473,16 @@ function rewriteEarlierPart(code: string, names: ReadonlyMap<string, string>): s
     const prevP = prev?.type === "punct" ? prev.value : "";
     const nextP = next?.type === "punct" ? next.value : "";
     if (prevP === "." || prevP === "?.") continue;
-    const inBraces = brackets[brackets.length - 1] === "{";
+    const top = brackets[brackets.length - 1];
+    const inBraces = top === "{" || top === "class";
     const keyPos =
       inBraces &&
       (prevP === "{" || prevP === "," || prevP === ";" || prevP === "}" || prevP === "*" ||
         (prev?.type === "ident" && METHOD_PREFIXES.has(prev.value)));
     if (keyPos && (nextP === ":" || nextP === "(")) continue; // `{ name: … }`, `{ name() {} }`
+    // A class member name (`value;`, `value = 1`, `static value`, last in
+    // the body, or ending its line) is a key, never the shared binding.
+    if (top === "class" && keyPos && (nextP === ";" || nextP === "=" || nextP === "}" || !next || next.nl)) continue;
     // A named function EXPRESSION's own name is local to it (a function
     // declaration's name is the shared binding itself).
     if (prev?.type === "ident" && prev.value === "function") {

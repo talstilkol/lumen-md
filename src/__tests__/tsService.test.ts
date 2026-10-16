@@ -261,6 +261,17 @@ describe("JavaScript blocks and shared scopes", () => {
     expect(first).toContain("xs[0].map(() => value)");
   });
 
+  it("class field names keep their key; parameter defaults still reference the shared name", () => {
+    const { units } = checkShared(
+      "const value = 1; class C { value; static value = 2; other = value; } const result = (function (x = value) { return x; })();",
+      "const value = 'x';",
+    );
+    const first = units[1].code.split("\n;\n")[0];
+    // Field initializers run at `new C()`, later: late-bound like methods.
+    expect(first).toContain("class C { value; static value = 2; other = value; }");
+    expect(first).toContain("(function (x = value$prev) { return x; })()");
+  });
+
   it("a closure in grouping parentheses is still retained", () => {
     const { units, diags } = checkShared(
       "const value = 1; const fn = (() => value); const now = (() => value)();",
