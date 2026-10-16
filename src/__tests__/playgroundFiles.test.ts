@@ -1,0 +1,123 @@
+import { describe, it, expect } from "vitest";
+import { buildProject, frameworkFromMeta, resolveImport, splitFiles } from "../playground/files";
+import { runnerUrl } from "../plugins/PlaygroundBlock";
+import { renderMarkdown } from "../renderer/pipeline";
+import { components } from "../renderer/components";
+import { isValidElement, type ReactNode } from "react";
+
+describe("playground project", () => {
+  it("splits files at --- name.ext --- markers", () => {
+    const files = splitFiles("--- index.html ---\n<div id=x></div>\n--- app.js ---\nconsole.log(1)\n\n", "vanilla");
+    expect(files).toEqual([
+      { name: "index.html", code: "<div id=x></div>" },
+      { name: "app.js", code: "console.log(1)" },
+    ]);
+  });
+
+  it("treats an unmarked body as one entry file per framework", () => {
+    expect(splitFiles("console.log(1)", "vanilla")).toEqual([{ name: "main.js", code: "console.log(1)" }]);
+    expect(splitFiles("<App />", "react")).toEqual([{ name: "main.jsx", code: "<App />" }]);
+    expect(splitFiles("   ", "vue")).toEqual([]);
+  });
+
+  it("picks main.* as the entry, default markup per framework, and collects CSS", () => {
+    const p = buildProject("--- App.jsx ---\nx\n--- main.jsx ---\ny\n--- a.css ---\nb{}", "react height=300");
+    expect(p).toMatchObject({ framework: "react", entry: "main.jsx", html: '<div id="root"></div>', css: ["b{}"] });
+    expect(buildProject("--- lib.ts ---\nx", "vue").entry).toBe("lib.ts");
+    expect(buildProject("--- src/App.jsx ---\na\n--- src/main.jsx ---\nb", "react").entry).toBe("src/main.jsx");
+    expect(buildProject("--- about.html ---\n<p>a</p>\n--- index.html ---\n<p>i</p>\n--- main.js ---\nx").html).toBe("<p>i</p>");
+    expect(buildProject("x", "vue").html).toBe('<div id="app"></div>');
+    expect(frameworkFromMeta(undefined)).toBe("vanilla");
+  });
+
+  it("resolves relative imports with or without an extension", () => {
+    const names = ["main.jsx", "App.tsx", "lib/util.js", "lib/index.ts"];
+    expect(resolveImport("./App", "main.jsx", names)).toBe("App.tsx");
+    expect(resolveImport("./lib/util.js", "main.jsx", names)).toBe("lib/util.js");
+    expect(resolveImport("../App", "lib/util.js", names)).toBe("App.tsx");
+    expect(resolveImport("./lib", "main.jsx", names)).toBe("lib/index.ts");
+    expect(resolveImport("./nope", "main.jsx", names)).toBeNull();
+    expect(resolveImport("react", "main.jsx", names)).toBeNull();
+  });
+
+  it("serves the runner under the base path", () => {
+    expect(runnerUrl("/")).toBe("/playground-runner.html");
+    expect(runnerUrl("/app")).toBe("/app/playground-runner.html");
+  });
+
+  it("routes ```playground / ```web-playground fences to the block", async () => {
+    const target = (components as Record<string, unknown>)["lumen-playground"];
+    const found: string[] = [];
+    const walk = (n: ReactNode) => {
+      if (Array.isArray(n)) return n.forEach(walk);
+      if (!isValidElement(n)) return;
+      const props = n.props as { lang?: string; children?: ReactNode };
+      if (n.type === target) found.push(String(props.lang));
+      walk(props.children);
+    };
+    walk(await renderMarkdown("```playground react\nx\n```\n\n```web-playground\ny\n```", () => false));
+    expect(found).toEqual(["playground", "web-playground"]);
+  });
+});
+
+describe("importSpecifiers", () => {
+  it("finds real imports, re-exports and dynamic imports only", async () => {
+    const { importSpecifiers } = await import("../playground/files");
+    const code = [
+      'import React from "react";',
+      "import './side.css';",
+      'import { a,\n  b } from "./ab.js";',
+      'export { c } from "./c.js";',
+      'export * from "./star.js";',
+      'const lazy = import("./lazy.js");',
+      'const opts = import("./opts.json", { with: { type: "json" } });',
+      '// import "./missing.js"',
+      "/* import x from './nope.js' */",
+      "console.log('import \"react\"', `from \"./tpl.js\"`);",
+      'const from = "./not-an-import.js";',
+      "const meta = import.meta.url;",
+    ].join("\n");
+    const specs = importSpecifiers(code);
+    expect(specs.map((s) => s.spec)).toEqual(["react", "./side.css", "./ab.js", "./c.js", "./star.js", "./lazy.js", "./opts.json"]);
+    for (const s of specs) expect(code.slice(s.start + 1, s.end - 1)).toBe(s.spec);
+  });
+
+  it("finds dynamic imports inside template expressions", async () => {
+    const { importSpecifiers } = await import("../playground/files");
+    const code = 'const s = `a ${(await import("./dep.js")).default} b ${ {x: 1}.x } c ${`in ${await import("./deep.js")}`}`;';
+    const specs = importSpecifiers(code);
+    expect(specs.map((s) => s.spec)).toEqual(["./dep.js", "./deep.js"]);
+    for (const s of specs) expect(code.slice(s.start + 1, s.end - 1)).toBe(s.spec);
+  });
+});
+
+describe("IMPORT_ATTRS_RE", () => {
+  it("matches static and dynamic import attributes only", async () => {
+    const { IMPORT_ATTRS_RE } = await import("../playground/files");
+    expect(' with { type: "json" };'.replace(IMPORT_ATTRS_RE, "")).toBe(";");
+    expect(', { with: { type: "json" } });'.replace(IMPORT_ATTRS_RE, "")).toBe(");");
+    expect(" assert {type:'css'}".replace(IMPORT_ATTRS_RE, "")).toBe("");
+    expect(";\nwith (x) {}".replace(IMPORT_ATTRS_RE, "")).toBe(";\nwith (x) {}");
+    expect(").then(f)".replace(IMPORT_ATTRS_RE, "")).toBe(").then(f)");
+  });
+});
+
+describe("guardLoops", () => {
+  it("guards while / for conditions and leaves for-of, strings and members alone", async () => {
+    const { guardLoops } = await import("../playground/files");
+    expect(guardLoops("while (x < 3) x++;")).toBe("while (__lumenLoop() && (x < 3)) x++;");
+    expect(guardLoops("for (let i = 0; i < n; i++) {}")).toBe("for (let i = 0; __lumenLoop() && ( i < n); i++) {}");
+    expect(guardLoops("for (;;) {}")).toBe("for (; __lumenLoop();) {}");
+    expect(guardLoops("do { a() } while (f(g(1)))")).toBe("do { a() } while (__lumenLoop() && (f(g(1))))");
+    expect(guardLoops('for (const x of xs) {} s = "while (1)"; o.while(1); o.for(2)')).toBe('for (const x of xs) {} s = "while (1)"; o.while(1); o.for(2)');
+    expect(guardLoops("for (let i = 0, j = (1, 2); i < j; i++) {}")).toBe("for (let i = 0, j = (1, 2); __lumenLoop() && ( i < j); i++) {}");
+  });
+
+  it("guarded code still runs and the guard can stop it", async () => {
+    const { guardLoops } = await import("../playground/files");
+    let calls = 0;
+    const guard = () => ++calls < 50;
+    const run = new Function("__lumenLoop", guardLoops("let n = 0; while (true) n++; return n;"));
+    expect(run(guard)).toBe(49);
+  });
+});
