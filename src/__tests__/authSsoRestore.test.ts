@@ -67,3 +67,16 @@ describe("initAuth with Supabase + WorkOS configured", () => {
     expect(workosProvider.loadSession).not.toHaveBeenCalled();
   });
 });
+
+describe("signOut after a restored SSO session", () => {
+  it("switches back to the primary (Supabase) provider", async () => {
+    workosProvider.loadSession.mockResolvedValue({ id: "user_01", provider: "workos" });
+    const { initAuth, useAuth } = await freshAuth();
+    await initAuth();
+    expect(useAuth.getState().provider).toBe(workosProvider);
+    await useAuth.getState().signOut();
+    expect(workosProvider.signOut).toHaveBeenCalled();
+    expect(useAuth.getState().status).toBe("anonymous");
+    expect(useAuth.getState().provider).toBe(supabaseProvider);
+  });
+});

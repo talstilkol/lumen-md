@@ -88,7 +88,11 @@ export const useAuth = create<AuthStore>((set, get) => ({
     const { provider } = get();
     try {
       await provider.signOut();
-      set({ status: "anonymous", user: null });
+      // A restored SSO session temporarily made WorkOS the active provider;
+      // once signed out, go back to the configured primary (e.g. Supabase)
+      // so its password / OAuth sign-in methods are offered again.
+      const primary = providerPromise ? await providerPromise : provider;
+      set({ status: "anonymous", user: null, provider: primary });
     } catch (err) {
       fail("signOut", err);
     }
