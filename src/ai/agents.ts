@@ -220,6 +220,7 @@ export async function suggestTags(content: string): Promise<string[]> {
     { role: "user", content: userMsg },
   ], {
     cache: true,
+    tier: "light",
     // Cache only an answer that parses as a JSON array.
     cacheIf: (r) => {
       try {

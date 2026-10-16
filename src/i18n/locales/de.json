@@ -936,5 +936,11 @@
   "ai.cache.on": "An — identische Anfragen werden lokal beantwortet",
   "ai.cache.off": "Aus — immer das Modell fragen",
   "ai.cache.clear": "Gespeicherte Antworten löschen",
-  "ai.cache.cleared": "{count} gespeicherte Antworten gelöscht"
+  "ai.cache.cleared": "{count} gespeicherte Antworten gelöscht",
+  "cmd.ai.mode": "KI: Kostenmodus (Sparsam / Ausgewogen / Qualität)…",
+  "cmd.ai.mode.hint": "Kleine Aufgaben an günstigere Modelle leiten und nur relevante Teile der Notizen senden",
+  "ai.mode.title": "KI-Kostenmodus",
+  "ai.mode.economy": "Sparsam — kleines Modell für alles, ~2K Tokens Kontext",
+  "ai.mode.balanced": "Ausgewogen — kleines Modell für kleine Aufgaben, ~5K Tokens Kontext (Standard)",
+  "ai.mode.quality": "Qualität — dein gewähltes Modell für alles, ~12K Tokens Kontext"
 }
