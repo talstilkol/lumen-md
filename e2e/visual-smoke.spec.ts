@@ -47,7 +47,9 @@ test("Mermaid block renders inline SVG inside the preview", async ({ page }) => 
   const box = await svg.boundingBox();
   expect(box, "Mermaid SVG must have a bounding box").not.toBeNull();
   expect(box!.width).toBeGreaterThanOrEqual(200);
-  expect(box!.height).toBeGreaterThanOrEqual(80);
+  // 60 still catches the ~24 px collapse this guards against; SVG-text
+  // labels (fb72bbb) render a tighter LR flowchart in WebKit (~79 px).
+  expect(box!.height).toBeGreaterThanOrEqual(60);
 });
 
 /**

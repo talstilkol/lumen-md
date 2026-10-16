@@ -29,7 +29,19 @@ export default defineConfig({
   },
   projects: [
     { name: "chromium", use: { ...devices["Desktop Chrome"] } },
-    { name: "firefox", use: { ...devices["Desktop Firefox"] } },
+    {
+      name: "firefox",
+      use: {
+        ...devices["Desktop Firefox"],
+        // Headless Firefox on CI runners (no GPU) blocks WebGL by default,
+        // so live-glsl rendered its "WebGL is not available" error view.
+        // Force the software WebGL path the way Chromium's SwiftShader
+        // gives one to the chromium project.
+        launchOptions: {
+          firefoxUserPrefs: { "webgl.force-enabled": true, "webgl.disabled": false },
+        },
+      },
+    },
     { name: "webkit", use: { ...devices["Desktop Safari"] } },
   ],
   webServer: process.env.PLAYWRIGHT_BASE_URL

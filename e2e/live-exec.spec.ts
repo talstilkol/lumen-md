@@ -19,6 +19,10 @@ test.beforeEach(async ({ page }) => {
   });
   await page.goto("/");
   await page.locator("header").first().waitFor({ state: "visible", timeout: 5000 });
+  // The welcome doc is seeded after mount. Wait for it, so the tests'
+  // select-all + type replaces it instead of racing it (WebKit typed into a
+  // half-seeded doc and the block swallowed welcome text).
+  await expect(page.locator(".cm-content").first()).toContainText("Welcome to", { timeout: 15_000 });
 });
 
 test("live-sql executes a real query via sql.js WASM", async ({ page }) => {
