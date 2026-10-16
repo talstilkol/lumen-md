@@ -352,6 +352,7 @@ const MAX_LINKED_PAGES = 1000;
 export function linkedPages(start: string, root: string): string[] {
   const seen = new Set<string>([start]);
   const queue = [start];
+  let mdUnderRoot: string[] | undefined;
   // Inline `](<dest with spaces>)` / `](dest)`, reference definitions
   // (`[x]: <dest>` / `[x]: dest`) and raw `href="…"`.
   const LINK_RE =
@@ -387,9 +388,32 @@ export function linkedPages(start: string, root: string): string[] {
       queue.push(abs);
       if (seen.size >= MAX_LINKED_PAGES) break;
     }
+    // `[[Note]]` / `[[Note#Heading|label]]`: resolved by name or path among
+    // the Markdown files under the root, as the app resolves them.
+    for (const m of md.matchAll(WIKI_RE)) {
+      if (seen.size >= MAX_LINKED_PAGES) break;
+      const { note } = splitWikiTarget(m[1].split("|")[0]);
+      if (!note) continue;
+      mdUnderRoot ??= walk(root, "")
+        .filter((f) => MD_RE.test(f))
+        .map((f) => toPosix(relative(root, f)));
+      const rel = resolveWikiTarget(note, mdUnderRoot);
+      if (!rel) continue;
+      const abs = resolve(root, rel);
+      if (seen.has(abs) || !realDirsBetween(root, abs)) continue;
+      try {
+        if (!lstatSync(abs).isFile()) continue;
+      } catch {
+        continue;
+      }
+      seen.add(abs);
+      queue.push(abs);
+    }
   }
   return [...seen];
 }
+
+const WIKI_RE = /\[\[([^\]\n]+)\]\]/g;
 
 /** Publish `input` (a folder or a single .md file) as a static site in `outDir`. */
 export async function publishSite(

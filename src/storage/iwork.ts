@@ -110,6 +110,13 @@ export function snappyDecompress(src: Uint8Array): Uint8Array {
  */
 export const MAX_IWA_DECOMPRESSED = 64 * 1024 * 1024;
 
+/**
+ * All IWA components of one document together. Each stays under
+ * MAX_IWA_DECOMPRESSED, but many small Snappy streams could otherwise each
+ * expand near that cap and, held together, exhaust the tab.
+ */
+export const MAX_IWA_DOCUMENT_DECOMPRESSED = 128 * 1024 * 1024;
+
 /** The outer package (and a nested Index.zip): per entry and in total. */
 export const IWORK_UNZIP_LIMITS = { maxEntryBytes: 64 * 1024 * 1024, maxTotalBytes: 128 * 1024 * 1024 };
 
@@ -316,17 +323,24 @@ export interface IwaExtraction {
  * Extract text from a set of decoded IWA files (name → raw `.iwa` bytes).
  * `Index/Document.iwa` is read first so the body precedes slides/sidebars.
  */
-export function extractIwaText(iwaFiles: Map<string, Uint8Array>): IwaExtraction {
+export function extractIwaText(
+  iwaFiles: Map<string, Uint8Array>,
+  maxDocumentBytes = MAX_IWA_DOCUMENT_DECOMPRESSED,
+): IwaExtraction {
   const names = [...iwaFiles.keys()].sort((a, b) => {
     const rank = (n: string) => (/Document\.iwa$/.test(n) ? 0 : /Slide/i.test(n) ? 1 : 2);
     return rank(a) - rank(b) || a.localeCompare(b, "en", { numeric: true });
   });
   const messages: IwaMessage[] = [];
+  let remaining = maxDocumentBytes;
   for (const name of names) {
+    if (remaining <= 0) break; // document-wide budget spent: keep what we have
     try {
-      messages.push(...parseIwaMessages(decodeIwa(iwaFiles.get(name)!)));
+      const stream = decodeIwa(iwaFiles.get(name)!, Math.min(MAX_IWA_DECOMPRESSED, remaining));
+      remaining -= stream.length;
+      messages.push(...parseIwaMessages(stream));
     } catch {
-      /* skip unreadable component; others may still yield text */
+      /* skip unreadable (or over-budget) component; others may still yield text */
     }
   }
   const paragraphs: string[] = [];

@@ -129,6 +129,17 @@ describe("publishSite", () => {
     expect(read("one.html")).toContain("One");
   });
 
+  it("a single-file publish brings along the notes its wiki links name, transitively", async () => {
+    write("README.md", "# Home\n\nSee [[Guide|the guide]] and [[Missing]].\n");
+    write("Guide.md", "# Guide\n\nMore in [[notes/Deep#Part]].\n");
+    write("notes/Deep.md", "# Deep\n\n## Part\n");
+    write("Unrelated.md", "# Unrelated\n");
+    const res = await publishSite(join(work, "src", "README.md"), join(work, "out"));
+    expect(res.pages.map((p) => p.source).sort()).toEqual(["Guide.md", "README.md", "notes/Deep.md"]);
+    expect(read("README.html")).toMatch(/href="Guide\.html"[^>]*data-wiki-target="Guide"/);
+    expect(read("Guide.html")).toMatch(/href="notes\/Deep\.html#part"/);
+  });
+
   it("refuses to publish into the source folder or one of its ancestors", async () => {
     write("a.md", "# A");
     write("style.css", "body{color:red}");

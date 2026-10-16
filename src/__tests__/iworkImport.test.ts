@@ -165,6 +165,17 @@ describe("parseIwaMessages / extractIwaText", () => {
     expect(ex.tableStrings).toEqual(["Apples", "Pears"]);
   });
 
+  it("bounds decompression across all IWA files of a document", () => {
+    const one = (text: string) => iwaFrame(snappyLiteral(iwaObject(3, 4242, cat(pbString(2, text)))));
+    const decodedSize = decodeIwa(one("Component number 1 text.")).length;
+    const files = new Map<string, Uint8Array>();
+    for (let i = 1; i <= 5; i++) files.set(`Index/Part-${i}.iwa`, one(`Component number ${i} text.`));
+    // Budget for two components: the rest are never decompressed.
+    const ex = extractIwaText(files, decodedSize * 2);
+    expect(ex.paragraphs).toEqual(["Component number 1 text.", "Component number 2 text."]);
+    expect(extractIwaText(files).paragraphs).toHaveLength(5);
+  });
+
   it("falls back to a heuristic scan of nested string fields", () => {
     const nested = cat(pbBytes(4, cat(pbString(2, "A sentence hidden in an unknown message."))), pbString(5, "com.apple.iWork.id"));
     const ex = extractIwaText(new Map([["Index/Other.iwa", iwaFrame(snappyLiteral(iwaObject(3, 4242, nested)))]]));
