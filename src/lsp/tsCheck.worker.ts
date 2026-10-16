@@ -23,13 +23,16 @@ const service = createTsService(ts, libs);
 
 export type TsWorkerRequest =
   | { id: number; type: "check"; blocks: BlockInput[] }
-  | { id: number; type: "complete"; blocks: BlockInput[]; block: string; pos: number };
+  | { id: number; type: "complete"; blocks: BlockInput[]; block: string; pos: number }
+  | { id: number; type: "hover"; blocks: BlockInput[]; block: string; pos: number };
 
 self.onmessage = (e: MessageEvent<TsWorkerRequest>) => {
   const msg = e.data;
   try {
     if (msg.type === "check") {
       self.postMessage({ id: msg.id, ok: true, result: service.diagnostics(msg.blocks) });
+    } else if (msg.type === "hover") {
+      self.postMessage({ id: msg.id, ok: true, result: service.quickInfo(msg.blocks, msg.block, msg.pos) });
     } else {
       self.postMessage({ id: msg.id, ok: true, result: service.completions(msg.blocks, msg.block, msg.pos) });
     }

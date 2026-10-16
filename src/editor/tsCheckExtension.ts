@@ -1,16 +1,18 @@
 /**
- * TypeScript checks inside ```ts / ```tsx code blocks of the source editor:
- * type errors as wavy underlines (hover for the message) and completions
- * while typing. Opt-in ("Enable TypeScript checks in code blocks") because
+ * TypeScript checks inside code blocks of the source editor — ```ts /
+ * ```tsx, and JavaScript (```js, ```live-js: syntax errors always, type
+ * errors with `// @ts-check`): wavy underlines with the message, type info
+ * on hover and completions while typing. `live-js shared` blocks of one
+ * scope are checked together, as they run. Opt-in ("Enable TypeScript checks in code blocks") because
  * the compiler is a multi-MB download, loaded in a worker on first use.
  */
 import { StateEffect, StateField } from "@codemirror/state";
 import type { Extension, Range } from "@codemirror/state";
-import { Decoration, EditorView, ViewPlugin } from "@codemirror/view";
+import { Decoration, EditorView, ViewPlugin, hoverTooltip } from "@codemirror/view";
 import type { DecorationSet, ViewUpdate } from "@codemirror/view";
 import { autocompletion } from "@codemirror/autocomplete";
 import type { CompletionContext, CompletionResult } from "@codemirror/autocomplete";
-import { blockAt, findTsBlocks, type TsBlock } from "../lsp/tsBlocks";
+import { findTsBlocks, toUnits, unitAt, unitRangeToDoc, type TsUnit } from "../lsp/tsBlocks";
 import type { TsClient } from "../lsp/tsClient";
 import type { TsDiagnostic } from "../lsp/tsService";
 
@@ -26,19 +28,21 @@ const tsDiagnosticsField = StateField.define<DecorationSet>({
   provide: (f) => EditorView.decorations.from(f),
 });
 
-/** Map diagnostics (block-relative) to document decorations. */
+/** Map diagnostics (unit-relative) to document decorations. */
 export function diagnosticDecorations(
-  blocks: readonly TsBlock[],
+  units: readonly TsUnit[],
   diags: readonly TsDiagnostic[],
   docLength: number,
 ): DecorationSet {
-  const byId = new Map(blocks.map((b) => [b.id, b]));
+  const byId = new Map(units.map((u) => [u.id, u]));
   const ranges: Range<Decoration>[] = [];
   for (const d of diags) {
-    const b = byId.get(d.id);
-    if (!b) continue;
-    const from = Math.min(b.from + d.start, docLength);
-    const to = Math.min(Math.max(from + Math.max(d.length, 1), from + 1), Math.max(b.to, from + 1), docLength);
+    const u = byId.get(d.id);
+    if (!u) continue;
+    const r = unitRangeToDoc(u, d.start, d.length);
+    if (!r) continue;
+    const from = Math.min(r.from, docLength);
+    const to = Math.min(r.to, docLength);
     if (to <= from) continue;
     ranges.push(
       Decoration.mark({
@@ -51,12 +55,16 @@ export function diagnosticDecorations(
   return Decoration.set(ranges, true);
 }
 
-const toInput = (blocks: readonly TsBlock[]) => blocks.map(({ id, tsx, code }) => ({ id, tsx, code }));
+const toInput = (units: readonly TsUnit[]) =>
+  units.map(({ id, tsx, js, shared, code }) => ({ id, tsx, js, shared, code }));
 
 const theme = EditorView.baseTheme({
   ".cm-ts-error": { textDecoration: "underline wavy hsl(0 80% 60%)", textDecorationSkipInk: "none" },
   ".cm-ts-warning": { textDecoration: "underline wavy hsl(40 90% 55%)", textDecorationSkipInk: "none" },
   ".cm-ts-info": { textDecoration: "underline dotted hsl(220 14% 60%)" },
+  ".cm-ts-hover": { padding: "4px 8px", maxWidth: "60ch", fontSize: "12px", direction: "ltr" },
+  ".cm-ts-hover code": { whiteSpace: "pre-wrap", fontFamily: "var(--font-mono, monospace)" },
+  ".cm-ts-hover-doc": { marginTop: "4px", opacity: "0.8" },
 });
 
 /** The extension; `client` is injectable for tests. */
@@ -80,12 +88,12 @@ export function tsCheckExtension(client: TsClient, opts: { debounceMs?: number }
         this.timer = null;
         const run = ++this.run;
         const doc = this.view.state.doc.toString();
-        const blocks = findTsBlocks(doc);
+        const units = toUnits(findTsBlocks(doc));
         let deco = Decoration.none;
-        if (blocks.length > 0) {
+        if (units.length > 0) {
           try {
-            const diags = await client.check(toInput(blocks));
-            deco = diagnosticDecorations(blocks, diags, doc.length);
+            const diags = await client.check(toInput(units));
+            deco = diagnosticDecorations(units, diags, doc.length);
           } catch {
             return; // worker failed to load — leave the editor untouched
           }
@@ -103,15 +111,16 @@ export function tsCheckExtension(client: TsClient, opts: { debounceMs?: number }
 
   const source = async (ctx: CompletionContext): Promise<CompletionResult | null> => {
     const doc = ctx.state.doc.toString();
-    const block = blockAt(findTsBlocks(doc), ctx.pos);
-    if (!block) return null;
+    const units = toUnits(findTsBlocks(doc));
+    const at = unitAt(units, ctx.pos);
+    if (!at) return null;
     const word = ctx.matchBefore(/[\w$]*/);
-    const afterDot = /\.\s*$/.test(doc.slice(Math.max(block.from, ctx.pos - 2), ctx.pos - (word?.text.length ?? 0)));
+    const before = at.unit.code.slice(Math.max(0, at.offset - (word?.text.length ?? 0) - 2), at.offset - (word?.text.length ?? 0));
+    const afterDot = /\.\s*$/.test(before);
     if (!ctx.explicit && !afterDot && (!word || word.text.length === 0)) return null;
-    const blocks = findTsBlocks(doc);
     let items;
     try {
-      items = await client.complete(toInput(blocks), block.id, ctx.pos - block.from);
+      items = await client.complete(toInput(units), at.unit.id, at.offset);
     } catch {
       return null;
     }
@@ -123,7 +132,37 @@ export function tsCheckExtension(client: TsClient, opts: { debounceMs?: number }
     };
   };
 
-  return [tsDiagnosticsField, checker, theme, autocompletion({ override: [source] })];
+  const hover = hoverTooltip(async (view, pos) => {
+    const units = toUnits(findTsBlocks(view.state.doc.toString()));
+    const at = unitAt(units, pos);
+    if (!at) return null;
+    let info;
+    try {
+      info = await client.hover(toInput(units), at.unit.id, at.offset);
+    } catch {
+      return null;
+    }
+    if (!info) return null;
+    return {
+      pos,
+      create: () => {
+        const dom = document.createElement("div");
+        dom.className = "cm-ts-hover";
+        const sig = document.createElement("code");
+        sig.textContent = info.text;
+        dom.appendChild(sig);
+        if (info.doc) {
+          const docEl = document.createElement("div");
+          docEl.className = "cm-ts-hover-doc";
+          docEl.textContent = info.doc;
+          dom.appendChild(docEl);
+        }
+        return { dom };
+      },
+    };
+  });
+
+  return [tsDiagnosticsField, checker, theme, hover, autocompletion({ override: [source] })];
 }
 
 function completionType(kind: string): string {

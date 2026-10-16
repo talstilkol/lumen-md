@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-10-16T21:07:13.378Z",
+  "generated_at": "2026-10-16T21:42:28.334Z",
   "source": "src/i18n/index.ts (en bundle)",
-  "count": 955,
+  "count": 988,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -1767,6 +1767,175 @@
     },
     {
       "key": "block.liveLua.state.timeout",
+      "en": "Timed out",
+      "vars": []
+    },
+    {
+      "key": "block.liveR.title",
+      "en": "Live R",
+      "vars": []
+    },
+    {
+      "key": "block.liveR.run",
+      "en": "Run",
+      "vars": []
+    },
+    {
+      "key": "block.liveR.stop",
+      "en": "Stop",
+      "vars": []
+    },
+    {
+      "key": "block.liveR.clear",
+      "en": "Clear output",
+      "vars": []
+    },
+    {
+      "key": "block.liveR.prompt",
+      "en": "Click Run to execute this R block. The first run downloads R (~45 MB, cached afterwards).",
+      "vars": []
+    },
+    {
+      "key": "block.liveR.loading",
+      "en": "Loading R…",
+      "vars": []
+    },
+    {
+      "key": "block.liveR.loadFailed",
+      "en": "Failed to load the R runtime.",
+      "vars": []
+    },
+    {
+      "key": "block.liveR.loadTimeout",
+      "en": "R took too long to load.",
+      "vars": []
+    },
+    {
+      "key": "block.liveR.timedOut",
+      "en": "Execution timed out after {ms} ms.",
+      "vars": [
+        "ms"
+      ]
+    },
+    {
+      "key": "block.liveR.stopped",
+      "en": "Stopped.",
+      "vars": []
+    },
+    {
+      "key": "block.liveR.plot",
+      "en": "R plot",
+      "vars": []
+    },
+    {
+      "key": "block.liveR.state.idle",
+      "en": "Not run",
+      "vars": []
+    },
+    {
+      "key": "block.liveR.state.loading",
+      "en": "Loading…",
+      "vars": []
+    },
+    {
+      "key": "block.liveR.state.running",
+      "en": "Running…",
+      "vars": []
+    },
+    {
+      "key": "block.liveR.state.success",
+      "en": "Completed",
+      "vars": []
+    },
+    {
+      "key": "block.liveR.state.error",
+      "en": "Error",
+      "vars": []
+    },
+    {
+      "key": "block.liveR.state.timeout",
+      "en": "Timed out",
+      "vars": []
+    },
+    {
+      "key": "block.liveRuby.title",
+      "en": "Live Ruby",
+      "vars": []
+    },
+    {
+      "key": "block.liveRuby.run",
+      "en": "Run",
+      "vars": []
+    },
+    {
+      "key": "block.liveRuby.stop",
+      "en": "Stop",
+      "vars": []
+    },
+    {
+      "key": "block.liveRuby.clear",
+      "en": "Clear output",
+      "vars": []
+    },
+    {
+      "key": "block.liveRuby.prompt",
+      "en": "Click Run to execute this Ruby block. The first run downloads Ruby (~30 MB, cached afterwards).",
+      "vars": []
+    },
+    {
+      "key": "block.liveRuby.loading",
+      "en": "Loading Ruby…",
+      "vars": []
+    },
+    {
+      "key": "block.liveRuby.loadFailed",
+      "en": "Failed to load the Ruby runtime.",
+      "vars": []
+    },
+    {
+      "key": "block.liveRuby.loadTimeout",
+      "en": "Ruby took too long to load.",
+      "vars": []
+    },
+    {
+      "key": "block.liveRuby.timedOut",
+      "en": "Execution timed out after {ms} ms.",
+      "vars": [
+        "ms"
+      ]
+    },
+    {
+      "key": "block.liveRuby.stopped",
+      "en": "Stopped.",
+      "vars": []
+    },
+    {
+      "key": "block.liveRuby.state.idle",
+      "en": "Not run",
+      "vars": []
+    },
+    {
+      "key": "block.liveRuby.state.loading",
+      "en": "Loading…",
+      "vars": []
+    },
+    {
+      "key": "block.liveRuby.state.running",
+      "en": "Running…",
+      "vars": []
+    },
+    {
+      "key": "block.liveRuby.state.success",
+      "en": "Completed",
+      "vars": []
+    },
+    {
+      "key": "block.liveRuby.state.error",
+      "en": "Error",
+      "vars": []
+    },
+    {
+      "key": "block.liveRuby.state.timeout",
       "en": "Timed out",
       "vars": []
     },
