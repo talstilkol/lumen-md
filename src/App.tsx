@@ -52,6 +52,7 @@ import { useCollab } from "./hooks/useCollab";
 import { useTauriMenu } from "./hooks/useTauriMenu";
 import { EditorLayout } from "./layouts/EditorLayout";
 import { useAuth } from "./auth/useAuth";
+import { docIdentity } from "./renderer/previewDoc";
 import { auditScope } from "./ui/auditScope";
 import { useEntitlement, watchAuthForEntitlements } from "./billing/useEntitlement";
 import { useAppStore, applyTheme } from "./store/useStore";
@@ -539,7 +540,7 @@ export default function App() {
   // Debounce preview rendering — keeps typing smooth for large docs. The
   // document identity is deferred together with its text so the preview
   // never pairs one document's markdown with another's identity.
-  const currentDocKey = doc.workspaceName ?? doc.name ?? null;
+  const currentDocKey = docIdentity(doc);
   const previewSource = useMemo(
     () => ({ content: doc.content, docKey: currentDocKey }),
     [doc.content, currentDocKey],

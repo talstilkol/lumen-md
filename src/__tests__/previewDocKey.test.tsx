@@ -46,3 +46,20 @@ describe("PreviewDocKeyContext", () => {
     expect(screen.getByTestId("probe").dataset.doc).toBe("b.md");
   });
 });
+
+describe("docIdentity", () => {
+  it("distinguishes same-named files opened from different folders by handle", async () => {
+    const { docIdentity } = await import("../renderer/previewDoc");
+    const a = {}, b = {};
+    const ka = docIdentity({ name: "readme.md", handle: a });
+    const kb = docIdentity({ name: "readme.md", handle: b });
+    expect(ka).not.toBe(kb);
+    expect(docIdentity({ name: "readme.md", handle: a })).toBe(ka); // stable per handle
+  });
+  it("prefers the workspace path, then falls back to the name", async () => {
+    const { docIdentity } = await import("../renderer/previewDoc");
+    expect(docIdentity({ name: "x.md", workspaceName: "notes/x.md", handle: {} })).toBe("ws:notes/x.md");
+    expect(docIdentity({ name: "Untitled.md" })).toBe("name:Untitled.md");
+    expect(docIdentity({ name: "" })).toBeNull();
+  });
+});

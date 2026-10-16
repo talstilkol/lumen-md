@@ -6,7 +6,7 @@
 import { useEffect, useRef, useState, useContext } from "react";
 import { Code2, Play, RotateCcw, Trash2 } from "lucide-react";
 import { t } from "../i18n";
-import { PreviewDocKeyContext } from "../renderer/previewDoc";
+import { PreviewDocKeyContext, docIdentity } from "../renderer/previewDoc";
 import { useAppStore } from "../store/useStore";
 import { hoistTopLevelBindings } from "./liveJsScope";
 import { SharedScopeRegistry, sharedScopeName } from "./liveJsShared";
@@ -205,7 +205,7 @@ export default function LiveJsBlock({ source, meta }: Props) {
   // tabs the old tree is still on screen and must not run in the new
   // document's scope. Fall back to the store outside a document preview.
   const previewDocKey = useContext(PreviewDocKeyContext);
-  const storeDocKey = useAppStore((s) => s.doc.workspaceName ?? s.doc.name);
+  const storeDocKey = useAppStore((s) => docIdentity(s.doc));
   const docKey = previewDocKey ?? storeDocKey;
   const scopeKey = sharedName ? `${docKey}\u0000${sharedName}` : null;
   const [logs, setLogs] = useState<LogEntry[]>([]);
