@@ -909,5 +909,6 @@
   "chart.reason.summary": "Ni catégorie ni temps — comparaison des moyennes de colonnes.",
   "chart.alternatives": "Suggestions de graphiques",
   "billing.upgrade.smartSearch": "La recherche intelligente (sémantique, par embeddings) est une fonctionnalité Pro. La recherche par mots-clés reste disponible.",
-  "suggesting.untrackable": "Ce texte contient du balisage de suggestion ({++, ++}, ~>, …) et ne peut pas être suivi. Désactivez le mode suggestion pour l’insérer."
+  "suggesting.untrackable": "Ce texte contient du balisage de suggestion ({++, ++}, ~>, …) et ne peut pas être suivi. Désactivez le mode suggestion pour l’insérer.",
+  "suggesting.noWysiwyg": "Le mode suggestion suit les modifications dans l’éditeur source ; le WYSIWYG n’est donc pas disponible tant qu’il est actif — affichage en vue partagée à la place."
 }

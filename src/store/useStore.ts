@@ -1,7 +1,8 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { Locale } from "../i18n";
-import { applyLocale, isLocaleLoaded, loadLocale } from "../i18n";
+import { applyLocale, isLocaleLoaded, loadLocale, t } from "../i18n";
+import { toast } from "./useToastStore";
 import {
   DEFAULT_THEME_SETTINGS,
   applyThemeSettings,
@@ -146,7 +147,7 @@ const DEFAULT_DOC: DocFile = {
 
 export const useAppStore = create<AppState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       doc: DEFAULT_DOC,
       mode: "split",
       theme: "dark",
@@ -173,7 +174,17 @@ export const useAppStore = create<AppState>()(
       fineTunedModelId: null,
       tagFilter: null,
       openTabs: [],
-      setMode: (m) => set({ mode: m }),
+      // Suggesting mode records CriticMarkup through the source editor only;
+      // WYSIWYG edits would bypass it. Keep the two exclusive: entering
+      // WYSIWYG while suggesting lands in Split instead (and says why).
+      setMode: (m) => {
+        if (m === "wysiwyg" && get().suggestingMode) {
+          set({ mode: "split" });
+          toast.info(t("suggesting.noWysiwyg"));
+          return;
+        }
+        set({ mode: m });
+      },
       setTheme: (t) => {
         set({ theme: t });
         applyTheme(t);
@@ -258,7 +269,15 @@ export const useAppStore = create<AppState>()(
       toggleTypewriter: () => set((s) => ({ typewriterMode: !s.typewriterMode })),
       setWritingGoal: (words) => set({ writingGoalWords: Math.max(0, Math.floor(words)) }),
       toggleGrammarCheck: () => set((s) => ({ grammarCheck: !s.grammarCheck })),
-      toggleSuggestingMode: () => set((s) => ({ suggestingMode: !s.suggestingMode })),
+      toggleSuggestingMode: () =>
+        set((s) => {
+          const on = !s.suggestingMode;
+          if (on && s.mode === "wysiwyg") {
+            toast.info(t("suggesting.noWysiwyg"));
+            return { suggestingMode: true, mode: "split" as ViewMode };
+          }
+          return { suggestingMode: on };
+        }),
       toggleFineTunedModel: () =>
         set((s) => {
           // Refuse to flip ON when no model id is persisted.
@@ -400,11 +419,14 @@ export const useAppStore = create<AppState>()(
       // field-by-field on rehydrate instead of trusting localStorage.
       merge: (persisted, current) => {
         const p = (persisted ?? {}) as Partial<AppState>;
-        return {
+        const merged = {
           ...current,
           ...p,
           themeSettings: sanitizeThemeSettings(p.themeSettings),
         };
+        // Never restore the WYSIWYG + suggesting combination (see setMode).
+        if (merged.suggestingMode && merged.mode === "wysiwyg") merged.mode = "split";
+        return merged;
       },
     },
   ),

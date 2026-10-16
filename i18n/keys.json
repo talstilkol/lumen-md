@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-10-16T02:17:51.737Z",
+  "generated_at": "2026-10-16T03:01:21.648Z",
   "source": "src/i18n/index.ts (en bundle)",
-  "count": 911,
+  "count": 912,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -2180,6 +2180,11 @@
     {
       "key": "status.suggesting.on",
       "en": "Suggesting",
+      "vars": []
+    },
+    {
+      "key": "suggesting.noWysiwyg",
+      "en": "Suggesting mode tracks changes in the source editor, so WYSIWYG is unavailable while it is on — showing Split view instead.",
       "vars": []
     },
     {
