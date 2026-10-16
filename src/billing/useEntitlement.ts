@@ -21,6 +21,13 @@ interface EntitlementStore {
   entitlement: Entitlement | null;
   capabilities: Capabilities;
   loading: boolean;
+  /**
+   * The last refresh failed (network / backend error). The capabilities are
+   * then FREE_CAPS as a safe default, but the user's real plan is unknown —
+   * callers that would *destroy* paid state (clear a saved server URL,
+   * skip persistence) must not treat this as a downgrade.
+   */
+  failed: boolean;
   refresh: () => Promise<void>;
   /** Dev/QA helper — set the local tier without round-tripping the backend. */
   setLocal: (tier: Entitlement["tier"]) => void;
@@ -171,6 +178,7 @@ export const useEntitlement = create<EntitlementStore>((set) => ({
   entitlement: null,
   capabilities: FREE_CAPS,
   loading: true,
+  failed: false,
   async refresh() {
     const seq = ++refreshSeq;
     const apply = (patch: Partial<EntitlementStore>) => {
@@ -181,19 +189,19 @@ export const useEntitlement = create<EntitlementStore>((set) => ({
       // Prefer the dev shim while we wait for the real backend.
       const dev = readDevTier();
       if (dev) {
-        apply({ entitlement: dev, capabilities: capabilitiesFor(dev), loading: false });
+        apply({ entitlement: dev, capabilities: capabilitiesFor(dev), loading: false, failed: false });
         return;
       }
       const user = useAuth.getState().user;
       const ent = user ? await fetchEntitlementFromBackend() : null;
       if (ent) {
-        apply({ entitlement: ent, capabilities: capabilitiesFor(ent), loading: false });
+        apply({ entitlement: ent, capabilities: capabilitiesFor(ent), loading: false, failed: false });
         return;
       }
-      apply({ entitlement: null, capabilities: FREE_CAPS, loading: false });
+      apply({ entitlement: null, capabilities: FREE_CAPS, loading: false, failed: false });
     } catch (err) {
       log.warn("entitlement refresh failed", err);
-      apply({ entitlement: null, capabilities: FREE_CAPS, loading: false });
+      apply({ entitlement: null, capabilities: FREE_CAPS, loading: false, failed: true });
     }
   },
   setLocal(tier) {
@@ -203,7 +211,7 @@ export const useEntitlement = create<EntitlementStore>((set) => ({
       /* */
     }
     const ent: Entitlement = { tier, status: "active" };
-    set({ entitlement: ent, capabilities: capabilitiesFor(ent), loading: false });
+    set({ entitlement: ent, capabilities: capabilitiesFor(ent), loading: false, failed: false });
   },
 }));
 

@@ -47,3 +47,44 @@ export function useCapability<K extends keyof Capabilities>(key: K): Capabilitie
   useEntitlement((s) => s.entitlement);
   return gatesEnforced() ? value : UNLOCKED_CAPS[key];
 }
+
+/**
+ * True once the plan is actually known: gates aren't enforced, or the last
+ * entitlement refresh finished successfully. While loading (or after a
+ * failed refresh) the capabilities read FREE_CAPS only as a placeholder.
+ */
+export function entitlementResolved(): boolean {
+  if (!gatesEnforced()) return true;
+  const s = useEntitlement.getState();
+  return !s.loading && !s.failed;
+}
+
+/** React form of `entitlementResolved()`. */
+export function useEntitlementResolved(): boolean {
+  const resolved = useEntitlement((s) => !s.loading && !s.failed);
+  useEntitlement((s) => s.entitlement);
+  return gatesEnforced() ? resolved : true;
+}
+
+/**
+ * Resolve once the plan is known (true) or after `timeoutMs` (false), so a
+ * decision that depends on a paid capability isn't taken from the
+ * placeholder FREE_CAPS shown while the entitlement is still loading.
+ */
+export function waitForEntitlement(timeoutMs: number): Promise<boolean> {
+  if (entitlementResolved()) return Promise.resolve(true);
+  return new Promise((resolve) => {
+    let done = false;
+    const finish = (value: boolean) => {
+      if (done) return;
+      done = true;
+      clearTimeout(timer);
+      unsubscribe();
+      resolve(value);
+    };
+    const unsubscribe = useEntitlement.subscribe(() => {
+      if (entitlementResolved()) finish(true);
+    });
+    const timer = setTimeout(() => finish(false), timeoutMs);
+  });
+}

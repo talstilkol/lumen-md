@@ -250,6 +250,31 @@ describe("connectCollab lifecycle", () => {
     }
   });
 
+  it("waits for a loading entitlement before deciding on the persistent server", async () => {
+    localStorage.setItem("lumen.collab.ws", "ws://localhost:4444");
+    const { useEntitlement, __setEntitlementEndpointForTesting } = await import("../billing/useEntitlement");
+    const { FREE_CAPS, capabilitiesFor } = await import("../billing/types");
+    __setEntitlementEndpointForTesting("https://billing.lumen.test/entitlements");
+    // Returning paid user: the plan is still loading, placeholder FREE_CAPS.
+    useEntitlement.setState({ capabilities: FREE_CAPS, entitlement: null, loading: true, failed: false });
+    try {
+      const mod = await import("../collab/yjs");
+      const moduleMock = await import(/* @vite-ignore */ "y-websocket");
+      const count = () => (moduleMock.WebsocketProvider as unknown as { instances: unknown[] }).instances.length;
+      const before = count();
+      const session = mod.connectCollab("lumen-paid-room", "");
+      await new Promise((r) => setTimeout(r, 20));
+      expect(count()).toBe(before); // undecided, not skipped
+      const pro = { tier: "pro" as const, status: "active" as const };
+      useEntitlement.setState({ capabilities: capabilitiesFor(pro), entitlement: pro, loading: false, failed: false });
+      await vi.waitFor(() => expect(count()).toBe(before + 1));
+      session.destroy();
+    } finally {
+      __setEntitlementEndpointForTesting(null);
+      useEntitlement.setState({ loading: false, failed: false });
+    }
+  });
+
   it("does not retain websocket provider when destroy happens before attach completes", async () => {
     localStorage.setItem("lumen.collab.ws", "ws://localhost:4444");
     const mod = await import("../collab/yjs");

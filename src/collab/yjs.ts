@@ -3,7 +3,7 @@ import { WebrtcProvider } from "y-webrtc";
 import type { Awareness } from "y-protocols/awareness";
 import { randomChoice, randomInt } from "../lib/cryptoRandom";
 import { log } from "../lib/logger";
-import { effectiveCapabilities } from "../billing/gates";
+import { effectiveCapabilities, entitlementResolved, waitForEntitlement } from "../billing/gates";
 import { wireE2E, type E2EChannel, type E2EErrorReason } from "./e2e";
 
 export interface CollabUser {
@@ -157,11 +157,11 @@ export function makeRoomName(): string {
  */
 export const SEED_FALLBACK_MS = 1500;
 
-/** Optional persistent collab WebSocket URL (y-websocket compatible). */
-function getWebsocketUrl(): string | null {
-  // A persistent server is a plan capability: re-check it for every session,
-  // so a URL saved while entitled stops being used after sign-out / downgrade.
-  if (!effectiveCapabilities().persistentCollab) return null;
+/**
+ * Optional persistent collab WebSocket URL (y-websocket compatible), as
+ * configured — before the plan check (see `connectCollab`).
+ */
+function configuredWebsocketUrl(): string | null {
   const fromStorage =
     typeof localStorage !== "undefined"
       ? localStorage.getItem("lumen.collab.ws")
@@ -283,7 +283,11 @@ export function connectCollab(
   // background. It syncs the same doc as WebRTC (the ciphertext transport
   // doc in password rooms, so the server only ever stores ciphertext) and
   // lets late joiners see history even when no other peer is online.
-  const wsUrl = getWebsocketUrl();
+  // A persistent server is a plan capability, re-checked for every session
+  // so a URL saved while entitled stops being used after a downgrade. While
+  // the entitlement is still loading its placeholder is FREE_CAPS, so a
+  // paid user's decision waits for the real plan (bounded) instead.
+  const wsUrl = configuredWebsocketUrl();
   let websocketProvider: WebsocketLike | null = null;
   // While a persistent server is configured but hasn't delivered its state,
   // the room may hold history that no WebRTC peer has — seeding then would
@@ -295,8 +299,8 @@ export function connectCollab(
     persistent = state;
     onPersistentSettled?.();
   };
-  if (wsUrl) {
-    void attachWebsocketProvider(wsUrl, roomName, syncedDoc).then((p) => {
+  const startPersistent = (url: string) => {
+    void attachWebsocketProvider(url, roomName, syncedDoc).then((p) => {
       if (destroyed) {
         p?.destroy();
         return;
@@ -334,6 +338,18 @@ export function connectCollab(
       p.on("connection-error" as "sync", onError);
       giveUp = setTimeout(() => finish("none"), PERSISTENT_SYNC_TIMEOUT_MS);
     });
+  };
+  if (wsUrl) {
+    if (entitlementResolved()) {
+      if (effectiveCapabilities().persistentCollab) startPersistent(wsUrl);
+      else persistent = "none";
+    } else {
+      void waitForEntitlement(PERSISTENT_SYNC_TIMEOUT_MS).then(() => {
+        if (destroyed) return;
+        if (effectiveCapabilities().persistentCollab) startPersistent(wsUrl);
+        else settlePersistent("none");
+      });
+    }
   }
 
   // Seed initial content only when we know we're the only one in the room.

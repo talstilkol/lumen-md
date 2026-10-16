@@ -5,13 +5,14 @@
  *
  * The persistent server is a Pro capability (`Capabilities.persistentCollab`).
  * When not entitled the field is disabled with an upgrade notice, and saving
- * clears any stored persistent URL so sessions fall back to WebRTC P2P. With
+ * clears any stored persistent URL so sessions fall back to WebRTC P2P --
+ * but only once the plan is known (never while it is loading or failed). With
  * no billing backend configured (self-hosted) the gate is open.
  * Accessible from the command palette or toolbar.
  */
 import { useState } from "react";
 import { t } from "../i18n";
-import { useCapability } from "../billing/gates";
+import { useCapability, useEntitlementResolved } from "../billing/gates";
 import { UpgradeNotice } from "./UpgradeNotice";
 
 interface Props {
@@ -40,12 +41,16 @@ function writeKey(key: string, value: string): void {
 
 export function CollabSettings({ onClose }: Props) {
   const persistentAllowed = useCapability("persistentCollab");
+  // While the plan is loading (or its check failed) "not allowed" is only a
+  // placeholder: keep the saved persistent URL rather than erase it.
+  const planKnown = useEntitlementResolved();
   const [url, setUrl] = useState(() => readKey(SIGNALING_KEY));
   const [wsUrl, setWsUrl] = useState(() => readKey(PERSISTENT_KEY));
 
   const handleSave = () => {
     writeKey(SIGNALING_KEY, url.trim());
-    writeKey(PERSISTENT_KEY, persistentAllowed ? wsUrl.trim() : "");
+    if (persistentAllowed) writeKey(PERSISTENT_KEY, wsUrl.trim());
+    else if (planKnown) writeKey(PERSISTENT_KEY, ""); // an established downgrade
     onClose();
   };
 

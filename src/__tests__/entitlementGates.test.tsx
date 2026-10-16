@@ -41,7 +41,7 @@ import { CollabSettings } from "../ui/CollabSettings";
 const ENDPOINT = "https://billing.lumen.test/entitlement";
 
 function setCaps(caps: typeof FREE_CAPS) {
-  useEntitlement.setState({ capabilities: caps, entitlement: null, loading: false });
+  useEntitlement.setState({ capabilities: caps, entitlement: null, loading: false, failed: false });
 }
 
 beforeEach(() => {
@@ -129,6 +129,17 @@ describe("billed mode (endpoint configured)", () => {
     expect(screen.getByTestId("upgrade-notice")).toBeTruthy();
     fireEvent.click(screen.getByText("Save"));
     expect(localStorage.getItem("lumen.collab.ws")).toBeNull();
+  });
+
+  it("CollabSettings keeps a saved persistent URL while the plan is loading or its check failed", () => {
+    for (const state of [{ loading: true, failed: false }, { loading: false, failed: true }]) {
+      localStorage.setItem("lumen.collab.ws", "wss://mine.example.org");
+      useEntitlement.setState({ capabilities: FREE_CAPS, entitlement: null, ...state });
+      const { unmount } = render(<CollabSettings onClose={() => {}} />);
+      fireEvent.click(screen.getByText("Save"));
+      expect(localStorage.getItem("lumen.collab.ws")).toBe("wss://mine.example.org");
+      unmount();
+    }
   });
 
   it("CollabSettings enables the persistent server on Pro", () => {
