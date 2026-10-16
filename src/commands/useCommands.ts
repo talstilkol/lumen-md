@@ -829,7 +829,7 @@ export function useCommands({
           try {
             const { runResearch } = await import("../research/agent");
             const result = await runResearch({ question: question.trim(), onProgress: (m) => showAiToast(m, "info") });
-            openTemplateDoc(`Research — ${question.trim().slice(0, 60)}`, result.markdown);
+            openTemplateDoc(`Research — ${question.trim().slice(0, 60).replace(/[\\/:*?"<>|]+/g, " ")}`, result.markdown);
             showAiToast(t("research.done", { sources: result.sources }), "success");
             if (result.unverified) showAiToast(t("research.unverified", { count: result.unverified }), "error");
           } catch (e) {
@@ -860,7 +860,9 @@ export function useCommands({
               if (done === total || done % 5 === 0) showAiToast(t("research.checking", { done, total }), "info");
             },
           });
-          openTemplateDoc(`Citation check — ${doc.name.replace(/\.(md|markdown)$/i, "")}`, formatCitationReport(doc.name, checks));
+          // A tab name, not a path: the note's base name only.
+          const base = (doc.name.split("/").pop() ?? doc.name).replace(/\.(md|markdown)$/i, "");
+          openTemplateDoc(`Citation check — ${base}`, formatCitationReport(base, checks));
         },
       },
       {
@@ -883,12 +885,13 @@ export function useCommands({
             ],
           });
           if (choice !== "claude" && choice !== "brave" && choice !== "tavily") return;
-          setResearchSettings({ provider: choice });
           if (choice !== "claude") {
             if (!researchEndpoint()) showAiToast(t("research.noService"), "error");
             const key = await uiPrompt({ message: t("research.key", { provider: choice === "brave" ? "Brave Search" : "Tavily" }), defaultValue: cur.provider === choice ? cur.key : "" });
-            if (key !== null) setResearchSettings({ key: key.trim() });
-          }
+            // Cancelled (or no key): keep the previous provider and key.
+            if (key === null || !key.trim()) return;
+            setResearchSettings({ provider: choice, key: key.trim() });
+          } else setResearchSettings({ provider: choice });
           showAiToast(t(`research.provider.${choice}`), "success");
         },
       },

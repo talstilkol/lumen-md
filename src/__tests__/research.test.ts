@@ -5,6 +5,8 @@ import { formatCitationReport, parseCitations, quoteCoverage, verifyCitations } 
 import { citedBlocksToMarkdown, parseAnswer, runResearch } from "../research/agent";
 import { setActiveProvider } from "../ai/llm";
 import type { ExtractedPage } from "../research/client";
+import { anthropicWebResearch } from "../ai/anthropicProvider";
+import { costOf } from "../ai/usage";
 
 describe("research worker helpers", () => {
   it("fetches public http(s) URLs only", () => {
@@ -153,5 +155,34 @@ describe("research agent", () => {
     localStorage.clear();
     setActiveProvider("openai");
     await expect(runResearch({ question: "x", deps: { settings: { provider: "claude", key: "" } } })).rejects.toThrow(/Anthropic provider/);
+  });
+
+  it("continues a paused Claude search turn and prices the searches", async () => {
+    localStorage.clear();
+    localStorage.setItem("lumen.ai.key.anthropic", "a-key");
+    localStorage.setItem("lumen.ai.model.anthropic", "claude-3-5-sonnet-latest");
+    const bodies: Array<{ model: string; messages: unknown[] }> = [];
+    const replies = [
+      { stop_reason: "pause_turn", content: [{ type: "server_tool_use", id: "s1" }], usage: { input_tokens: 10, output_tokens: 1, server_tool_use: { web_search_requests: 3 } } },
+      { stop_reason: "end_turn", content: [{ type: "text", text: "Done.", citations: [{ type: "web_search_result_location", url: "https://a.example", title: "A", cited_text: "q" }] }], usage: { input_tokens: 5, output_tokens: 2 } },
+    ];
+    vi.stubGlobal("fetch", vi.fn(async (_u: string, init?: RequestInit) => {
+      bodies.push(JSON.parse(String(init!.body)));
+      return new Response(JSON.stringify(replies.shift()));
+    }));
+    const usage: unknown[] = [];
+    const blocks = await anthropicWebResearch([{ role: "user", content: "q?" }], { onUsage: (u) => usage.push(u) });
+    expect(blocks.map((b) => b.text)).toEqual(["Done."]);
+    expect(bodies).toHaveLength(2);
+    expect(bodies[0].model).toBe("claude-sonnet-4-5"); // 3.x can't use web search
+    expect(bodies[1].messages).toHaveLength(2); // the paused assistant turn is sent back
+    expect(usage[0]).toMatchObject({ webSearches: 3 });
+    expect(costOf({ provider: "anthropic", model: "claude-sonnet-4-5", inputTokens: 0, outputTokens: 0, webSearches: 3 })).toBeCloseTo(0.03, 6);
+    vi.unstubAllGlobals();
+  });
+
+  it("keeps balanced parentheses in footnote URLs", () => {
+    const c = parseCitations("[^1]: [Wiki](https://en.wikipedia.org/wiki/Rose_(plant)) — “A rose is a woody plant”\n[^2]: see https://x.example/a_(b) for more");
+    expect(c.map((x) => x.url)).toEqual(["https://en.wikipedia.org/wiki/Rose_(plant)", "https://x.example/a_(b)"]);
   });
 });

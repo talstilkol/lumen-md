@@ -222,7 +222,11 @@ async function proxyResearch(o: ResearchOptions, settings: ResearchSettings): Pr
     const { hit, page } = pages[n - 1];
     const quote = quotes.get(n) ?? "";
     let flag = "";
-    if (quote && quoteCoverage(quote, page.text!) < APPROXIMATE_AT) {
+    if (!quote) {
+      // No supporting passage given: the claim can't be checked.
+      unverified++;
+      flag = " ⚠️ *no supporting quote given*";
+    } else if (quoteCoverage(quote, page.text!) < APPROXIMATE_AT) {
       unverified++;
       flag = " ⚠️ *quote not found in the source*";
     }

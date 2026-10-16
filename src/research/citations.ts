@@ -28,6 +28,32 @@ export interface CitationCheck extends Citation {
   detail?: string;
 }
 
+/** `[title](url)` with balanced parentheses in the URL (Wikipedia-style `Foo_(bar)`). */
+function markdownLink(s: string): { title: string; url: string } | null {
+  const m = /\[([^\]]*)\]\((https?:\/\/)/.exec(s);
+  if (!m) return null;
+  let i = (m.index ?? 0) + m[0].length;
+  let depth = 0;
+  const start = i - m[2].length;
+  for (; i < s.length; i++) {
+    const c = s[i];
+    if (/\s/.test(c)) break;
+    if (c === "(") depth++;
+    else if (c === ")") {
+      if (depth === 0) break;
+      depth--;
+    }
+  }
+  return { title: m[1], url: s.slice(start, i) };
+}
+
+/** A bare URL without an unbalanced trailing `)` (from surrounding prose). */
+function trimUrl(u: string): string {
+  let out = u;
+  while (out.endsWith(")") && (out.match(/\(/g)?.length ?? 0) < (out.match(/\)/g)?.length ?? 0)) out = out.slice(0, -1);
+  return out;
+}
+
 const QUOTE_RE = /[“"«„]([^”"»]{8,})[”"»]/;
 
 /** Footnote definitions that cite an http(s) URL. Code is ignored. */
@@ -45,13 +71,13 @@ export function parseCitations(md: string): Citation[] {
     const m = /^\[\^([^\]\s]+)\]:\s*(.+)$/.exec(line);
     if (!m) return;
     const rest = m[2];
-    const link = /\[([^\]]*)\]\((https?:\/\/[^)\s]+)\)/.exec(rest);
-    const bare = /(https?:\/\/[^\s)>\]"”]+)/.exec(rest);
-    const url = link?.[2] ?? bare?.[1];
+    const link = markdownLink(rest);
+    const bare = /(https?:\/\/[^\s>\]"”]+)/.exec(rest);
+    const url = link?.url ?? (bare ? trimUrl(bare[1]) : undefined);
     if (!url) return;
     const afterUrl = rest.slice(rest.indexOf(url) + url.length);
     const quote = QUOTE_RE.exec(afterUrl)?.[1]?.trim();
-    out.push({ id: m[1], url: url.replace(/[.,;]+$/, ""), title: link?.[1] || undefined, quote, line: i + 1 });
+    out.push({ id: m[1], url: url.replace(/[.,;]+$/, ""), title: link?.title || undefined, quote, line: i + 1 });
   });
   return out;
 }

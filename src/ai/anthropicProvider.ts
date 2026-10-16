@@ -75,6 +75,7 @@ export function buildAnthropicBody(
 }
 
 type AnthropicUsage = {
+  server_tool_use?: { web_search_requests?: number };
   input_tokens?: number;
   output_tokens?: number;
   cache_read_input_tokens?: number;
@@ -89,6 +90,7 @@ function reportUsage(u: AnthropicUsage | undefined, model: string, opts: ChatOpt
     outputTokens: u.output_tokens ?? 0,
     cacheReadTokens: u.cache_read_input_tokens ?? 0,
     cacheWriteTokens: u.cache_creation_input_tokens ?? 0,
+    ...(u.server_tool_use?.web_search_requests ? { webSearches: u.server_tool_use.web_search_requests } : {}),
   });
 }
 
@@ -195,19 +197,32 @@ export async function anthropicWebResearch(
   messages: ChatMessage[],
   opts: ChatOptions & { maxSearches?: number } = {},
 ): Promise<CitedBlock[]> {
-  const body = {
-    ...buildAnthropicBody(messages, { ...opts, maxTokens: opts.maxTokens ?? 4096 }),
+  // The web search tool needs a current model: an explicit or configured
+  // Claude 3.x choice falls back to the default (Sonnet 4.5).
+  const configured = getAnthropicModel(opts);
+  const model = /^claude-3/.test(configured) ? PROVIDER_DEFAULT_MODELS.anthropic : configured;
+  const base = buildAnthropicBody(messages, { ...opts, model, maxTokens: opts.maxTokens ?? 4096 });
+  const body: Record<string, unknown> & { messages: unknown[] } = {
+    ...base,
     tools: [{ type: "web_search_20250305", name: "web_search", max_uses: Math.max(1, Math.min(10, opts.maxSearches ?? 5)) }],
   };
-  const res = await fetch(API_URL, { method: "POST", headers: headers(), body: JSON.stringify(body), signal: opts.signal });
-  if (!res.ok) {
-    const b = await res.text().catch(() => "");
-    throw new AiError("API_ERROR", `Anthropic ${res.status}: ${b.slice(0, 200)}`);
+  const content: Array<{ type?: string; text?: string; citations?: Array<{ type?: string; url?: string; title?: string; cited_text?: string }> }> = [];
+  // A long search turn can stop with `pause_turn`: send it back to continue
+  // (bounded).
+  for (let turn = 0; turn < 4; turn++) {
+    const res = await fetch(API_URL, { method: "POST", headers: headers(), body: JSON.stringify(body), signal: opts.signal });
+    if (!res.ok) {
+      const b = await res.text().catch(() => "");
+      throw new AiError("API_ERROR", `Anthropic ${res.status}: ${b.slice(0, 200)}`);
+    }
+    const data = await res.json();
+    reportUsage(data.usage, data.model ?? model, opts);
+    content.push(...(data.content ?? []));
+    if (data.stop_reason !== "pause_turn") break;
+    body.messages = [...body.messages, { role: "assistant", content: data.content }];
   }
-  const data = await res.json();
-  reportUsage(data.usage, data.model ?? getAnthropicModel(opts), opts);
   const blocks: CitedBlock[] = [];
-  for (const b of (data.content ?? []) as Array<{ type?: string; text?: string; citations?: Array<{ type?: string; url?: string; title?: string; cited_text?: string }> }>) {
+  for (const b of content) {
     if (b.type !== "text" || !b.text) continue;
     blocks.push({
       text: b.text,
