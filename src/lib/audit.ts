@@ -5,6 +5,11 @@
  *
  * Disabled when `VITE_AUDIT_ENDPOINT` is not set — keeps the cost
  * (network + storage) out of free-tier installs.
+ *
+ * Requests carry the signed-in user's own access token (Supabase JWT or
+ * the SSO worker's token); the audit worker derives the user and their
+ * scope from it. There is deliberately no shared audit secret in the
+ * browser bundle — anyone could extract it and forge or read events.
  */
 
 import { log } from "./logger";
@@ -17,6 +22,15 @@ import { auditScope } from "../ui/auditScope";
  * scope the audit-log UI reads (`auditScope`) — the SSO organization for
  * org members, else the user's own id — so every event shows up there.
  */
+async function bearerFor(cfg: AuditConfig): Promise<string | null> {
+  if (cfg.bearer !== undefined) return cfg.bearer || null;
+  try {
+    return (await useAuth.getState().provider.getAccessToken?.()) ?? null;
+  } catch {
+    return null;
+  }
+}
+
 function defaultScope(userId: string): string {
   const user = useAuth.getState().user;
   return user && user.id === userId ? auditScope(user) : userId;
@@ -24,7 +38,8 @@ function defaultScope(userId: string): string {
 
 interface AuditConfig {
   endpoint: string;
-  bearer: string;
+  /** Test-only fixed bearer; production uses the auth provider's token. */
+  bearer?: string;
 }
 
 let testOverride: AuditConfig | null = null;
@@ -49,15 +64,12 @@ function readConfig(): AuditConfig {
   try {
     const env = (
       import.meta as ImportMeta & {
-        env?: { VITE_AUDIT_ENDPOINT?: string; VITE_AUDIT_TOKEN?: string };
+        env?: { VITE_AUDIT_ENDPOINT?: string };
       }
     ).env;
-    return {
-      endpoint: env?.VITE_AUDIT_ENDPOINT ?? "",
-      bearer: env?.VITE_AUDIT_TOKEN ?? "",
-    };
+    return { endpoint: env?.VITE_AUDIT_ENDPOINT ?? "" };
   } catch {
-    return { endpoint: "", bearer: "" };
+    return { endpoint: "" };
   }
 }
 
@@ -79,9 +91,12 @@ export function recordAudit(
   action: string,
   opts: { orgId?: string | null; payload?: unknown } = {},
 ): void {
-  const { endpoint, bearer } = readConfig();
+  const cfg = readConfig();
+  const { endpoint } = cfg;
   if (!endpoint) return; // audit disabled; no-op
 
+  // user_id / org_id are informational: the worker records the identity
+  // and scope it derives from the bearer token.
   const body: AuditRow = {
     user_id: userId,
     org_id: opts.orgId !== undefined ? opts.orgId : defaultScope(userId),
@@ -90,16 +105,17 @@ export function recordAudit(
     ts: Date.now(),
   };
 
-  const headers: Record<string, string> = { "Content-Type": "application/json" };
-  if (bearer) headers.Authorization = `Bearer ${bearer}`;
-
-  // Use fetch with keepalive so the row survives an unload race.
-  fetchWithRetry(`${endpoint.replace(/\/+$/, "")}/audit`, {
-    method: "POST",
-    headers,
-    body: JSON.stringify(body),
-    keepalive: true,
-  }, { label: "audit.record", maxRetries: 2, baseDelayMs: 700, maxDelayMs: 2500 }).catch((err) => {
+  void (async () => {
+    const bearer = await bearerFor(cfg);
+    if (!bearer) return; // not signed in — nothing the worker could attribute
+    // Use fetch with keepalive so the row survives an unload race.
+    await fetchWithRetry(`${endpoint.replace(/\/+$/, "")}/audit`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${bearer}` },
+      body: JSON.stringify(body),
+      keepalive: true,
+    }, { label: "audit.record", maxRetries: 2, baseDelayMs: 700, maxDelayMs: 2500 });
+  })().catch((err) => {
     log.warn("audit submit failed", err);
   });
 }
@@ -111,14 +127,16 @@ export async function listAudit(opts: {
   before?: number;
   action?: string;
 }): Promise<AuditRow[]> {
-  const { endpoint, bearer } = readConfig();
+  const cfg = readConfig();
+  const { endpoint } = cfg;
   if (!endpoint) return [];
+  const bearer = await bearerFor(cfg);
+  if (!bearer) throw new Error("Sign in to view the audit log");
   const params = new URLSearchParams({ orgId: opts.orgId });
   if (opts.limit) params.set("limit", String(opts.limit));
   if (opts.before) params.set("before", String(opts.before));
   if (opts.action) params.set("action", opts.action);
-  const headers: Record<string, string> = {};
-  if (bearer) headers.Authorization = `Bearer ${bearer}`;
+  const headers: Record<string, string> = { Authorization: `Bearer ${bearer}` };
   const res = await fetchWithRetry(
     `${endpoint.replace(/\/+$/, "")}/audit?${params.toString()}`,
     { headers },

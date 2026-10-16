@@ -3,6 +3,7 @@
  * Single point for API calls, streaming, abort, retry, and error handling.
  */
 
+import { chargeAiCommandDispatch } from "../billing/aiQuota";
 import { useAppStore } from "../store/useStore";
 import { toast } from "../store/useToastStore";
 import { fetchWithRetry } from "../lib/fetchRetry";
@@ -148,6 +149,7 @@ export async function chat(
   messages: ChatMessage[],
   opts: ChatOptions = {},
 ): Promise<string> {
+  chargeAiCommandDispatch();
   const provider = getActiveProvider();
 
   // ── Ollama (local server) ──────────────────────────────────────
@@ -291,6 +293,7 @@ export async function* chatStream(
   messages: ChatMessage[],
   opts: ChatOptions = {},
 ): AsyncGenerator<string, void, undefined> {
+  chargeAiCommandDispatch();
   const provider = getActiveProvider();
 
   if (provider === "ollama") {

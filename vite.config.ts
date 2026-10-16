@@ -335,7 +335,8 @@ export default defineConfig({
   // ── Vitest ──────────────────────────────────────────────────────────
   test: {
     environment: "jsdom",
-    include: ["src/__tests__/**/*.test.{ts,tsx}"],
+    // The VS Code extension's pure helpers are tested from the root suite too.
+    include: ["src/__tests__/**/*.test.{ts,tsx}", "packages/vscode-lumen/test/**/*.test.ts"],
     globals: true,
     css: false,
     setupFiles: ["src/__tests__/setup.ts"],

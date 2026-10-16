@@ -156,6 +156,24 @@ const processor = unified()
   .use(rehypeKatex, { throwOnError: false, strict: false })
   .use(rehypeCodeLang);
 
+/**
+ * Heading anchors exactly as the preview renders them: the same parser and
+ * plugin chain, with `rehype-slug` assigning the ids — so ATX and Setext
+ * headings, inline markup/links in heading text and duplicate suffixes all
+ * match what a `#fragment` link targets. `line` is 0-based in the source.
+ */
+export function headingAnchors(markdown: string): { id: string; line: number }[] {
+  const hast = processor.runSync(processor.parse(markdown)) as HastRoot;
+  const out: { id: string; line: number }[] = [];
+  visit(hast, "element", (node: Element) => {
+    if (!/^h[1-6]$/.test(node.tagName)) return;
+    const id = node.properties?.id;
+    const line = node.position?.start.line;
+    if (typeof id === "string" && typeof line === "number") out.push({ id, line: line - 1 });
+  });
+  return out;
+}
+
 /** Render Markdown to an HTML fragment (the preview body). */
 export function renderMarkdownBody(markdown: string): string {
   const mdast = processor.parse(markdown);

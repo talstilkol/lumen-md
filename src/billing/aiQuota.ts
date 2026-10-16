@@ -114,6 +114,25 @@ export function isAiPromptCommand(id: string): boolean {
   return AI_PROMPT_COMMANDS.has(id) || id.startsWith("ai.prompt.");
 }
 
+/**
+ * Commands currently running that have passed the quota check but not yet
+ * reached the model. A command is charged when it actually dispatches (see
+ * `chargeAiCommandDispatch`, called by chat()/chatStream()), not when it
+ * starts — cancelling its prompt dialog or failing a prerequisite (no
+ * workspace file, too-short document…) must not spend a prompt. A command
+ * that makes several model calls is charged once.
+ */
+const armedCommands: object[] = [];
+
+/** Called by the LLM layer right before a request is sent. */
+export function chargeAiCommandDispatch(now: Date = new Date()): void {
+  // Oldest running command that hasn't dispatched yet pays for this call.
+  if (armedCommands.shift() === undefined) return;
+  if (!gatesEnforced()) return;
+  if (!Number.isFinite(aiQuotaStatus(now).limit) || !hasAiCredentials()) return;
+  recordAiPrompt(now);
+}
+
 /** Wrap the actions of AI-prompt commands with the quota check. */
 export function withAiQuota<C extends { id: string; action: () => void; children?: C[] }>(
   commands: C[],
@@ -126,8 +145,33 @@ export function withAiQuota<C extends { id: string; action: () => void; children
       ...c,
       children,
       action: () => {
-        if (!consumeAiPrompt()) return;
-        return action();
+        // Block up front when the quota is spent (so the user isn't walked
+        // through a dialog that can't run), but only charge on dispatch.
+        if (gatesEnforced()) {
+          const status = aiQuotaStatus();
+          if (Number.isFinite(status.limit) && !status.allowed) {
+            showAiToast(t("billing.aiQuota.exceeded", { limit: status.limit }), "error");
+            return;
+          }
+        }
+        const token = {};
+        armedCommands.push(token);
+        // Never dispatched (cancelled / prerequisite failed)? Release it uncharged.
+        const disarm = () => {
+          const i = armedCommands.indexOf(token);
+          if (i >= 0) armedCommands.splice(i, 1);
+        };
+        try {
+          const result = action() as unknown;
+          if (result && typeof (result as Promise<unknown>).finally === "function") {
+            return (result as Promise<unknown>).finally(disarm) as unknown as void;
+          }
+          disarm();
+          return result as void;
+        } catch (err) {
+          disarm();
+          throw err;
+        }
       },
     };
   });

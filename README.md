@@ -233,8 +233,14 @@ Users can opt out via `⌘K → Privacy → Disable telemetry`. The Sentry SDK i
 
 ```bash
 VITE_AUDIT_ENDPOINT=https://audit.yourcompany.com
-VITE_AUDIT_TOKEN=your-bearer-token
 ```
+
+Requests are authenticated with the signed-in user's own token (Supabase JWT or
+the SSO worker's token); the audit worker (`edge-workers/audit`) derives the
+user and their organization from it, so no shared audit secret ships in the
+browser bundle. Configure the worker with `SUPABASE_URL` + `SUPABASE_ANON_KEY`
+and/or `SSO_TOKEN_SECRET` (= the SSO worker's `BILLING_TOKEN_SECRET`).
+`AUDIT_SERVICE_SECRET` is optional and only for trusted back-ends.
 
 ### Self-hosting (Docker Compose)
 

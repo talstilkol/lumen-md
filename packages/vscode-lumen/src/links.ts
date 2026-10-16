@@ -5,6 +5,7 @@
  * these pure helpers to decide what to do. No `vscode` import — unit-tested
  * in plain Node.
  */
+import { headingAnchors } from "./render";
 
 export type LinkAction =
   /** In-page anchor: let the webview scroll. */
@@ -51,9 +52,9 @@ export function slugifyHeading(text: string): string {
 }
 
 /**
- * 0-based line of the ATX heading whose slug matches `fragment` (decoded,
- * case-insensitive), or -1. Duplicate headings get GitHub's `-1`, `-2`…
- * suffixes. Fenced code blocks are skipped.
+ * 0-based line of the heading whose anchor matches `fragment` (decoded,
+ * case-insensitive), or -1. Anchors come from the preview's own pipeline
+ * (`headingAnchors`), so every heading form the preview links to is found.
  */
 export function findHeadingLine(markdown: string, fragment: string): number {
   let target = fragment;
@@ -63,25 +64,6 @@ export function findHeadingLine(markdown: string, fragment: string): number {
     /* keep raw */
   }
   target = target.toLowerCase();
-  const seen = new Map<string, number>();
-  let fence: string | null = null;
-  const lines = markdown.split(/\r?\n/);
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i];
-    const f = /^ {0,3}(`{3,}|~{3,})/.exec(line);
-    if (f) {
-      if (!fence) fence = f[1][0];
-      else if (f[1][0] === fence) fence = null;
-      continue;
-    }
-    if (fence) continue;
-    const h = /^ {0,3}#{1,6}\s+(.*?)\s*#*\s*$/.exec(line);
-    if (!h) continue;
-    const base = slugifyHeading(h[1]);
-    const n = seen.get(base) ?? 0;
-    seen.set(base, n + 1);
-    const slug = n === 0 ? base : `${base}-${n}`;
-    if (slug === target) return i;
-  }
-  return -1;
+  const hit = headingAnchors(markdown).find((a) => a.id.toLowerCase() === target);
+  return hit ? hit.line : -1;
 }

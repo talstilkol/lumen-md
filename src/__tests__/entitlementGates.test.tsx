@@ -30,6 +30,7 @@ import {
   consumeAiPrompt,
   isAiPromptCommand,
   withAiQuota,
+  chargeAiCommandDispatch,
 } from "../billing/aiQuota";
 import { showAiToast } from "../ui/AiToast";
 import { useAppStore } from "../store/useStore";
@@ -234,5 +235,28 @@ describe("aiQuota counter", () => {
     cmds[1].action();
     expect(aiAction).not.toHaveBeenCalled();
     expect(saveAction).toHaveBeenCalledTimes(1);
+  });
+
+  it("charges a wrapped command only when it actually dispatches, once", async () => {
+    __setEntitlementEndpointForTesting(ENDPOINT);
+    const now = new Date();
+    // Cancelled dialog / failed prerequisite: no model call → not charged.
+    const cancelled = withAiQuota([{ id: "ai.translate", action: async () => {} }]);
+    await cancelled[0].action();
+    chargeAiCommandDispatch(now); // an unrelated later dispatch must not bill it
+    expect(getAiUsage(now)).toBe(0);
+
+    // A command that makes two model calls is charged once.
+    const agent = withAiQuota([
+      {
+        id: "ai.productAgent",
+        action: async () => {
+          chargeAiCommandDispatch(now);
+          chargeAiCommandDispatch(now);
+        },
+      },
+    ]);
+    await agent[0].action();
+    expect(getAiUsage(now)).toBe(1);
   });
 });

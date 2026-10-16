@@ -44,6 +44,8 @@
  *   cd edge-workers/billing && wrangler deploy
  */
 
+import { verifySsoToken } from "../shared/ssoToken";
+
 export interface Env {
   STRIPE_SECRET_KEY: string;
   STRIPE_WEBHOOK_SECRET: string;
@@ -137,9 +139,7 @@ function json(body: unknown, req: Request, env: Env): Response {
 
 /* ─── Caller identity ───────────────────────────────────────────────── */
 
-/** Issuer / audience of the billing tokens minted by the SSO worker. */
-export const SSO_TOKEN_ISS = "lumen-sso";
-export const SSO_TOKEN_AUD = "lumen-billing";
+export { SSO_TOKEN_ISS, SSO_TOKEN_AUD } from "../shared/ssoToken";
 
 interface Identity {
   /** Key of the caller's own `entitlements` row. */
@@ -148,48 +148,22 @@ interface Identity {
   orgUid?: string;
 }
 
-const te = new TextEncoder();
-
-function b64urlToBytes(s: string): Uint8Array<ArrayBuffer> {
-  const b64 = s.replace(/-/g, "+").replace(/_/g, "/") + "===".slice((s.length + 3) % 4);
-  return Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
-}
-
 /**
- * Verify an HS256 billing token from the SSO worker. Returns null for
- * anything that isn't one (so the caller can fall back to Supabase) and
- * throws for one that claims to be ours but fails verification.
+ * Verify an HS256 billing token from the SSO worker (see
+ * ../shared/ssoToken). Returns null for anything that isn't one (so the
+ * caller can fall back to Supabase) and throws for one that claims to be
+ * ours but fails verification.
  */
 export async function verifySsoBillingToken(
   token: string,
   secret: string,
   nowSec = Math.floor(Date.now() / 1000),
 ): Promise<Identity | null> {
-  const parts = token.split(".");
-  if (parts.length !== 3) return null;
-  let head: { alg?: unknown };
-  let payload: { iss?: unknown; aud?: unknown; sub?: unknown; org?: unknown; exp?: unknown };
-  try {
-    head = JSON.parse(new TextDecoder().decode(b64urlToBytes(parts[0])));
-    payload = JSON.parse(new TextDecoder().decode(b64urlToBytes(parts[1])));
-  } catch {
-    return null;
-  }
-  if (head.alg !== "HS256" || payload.iss !== SSO_TOKEN_ISS) return null;
-  const key = await crypto.subtle.importKey("raw", te.encode(secret), { name: "HMAC", hash: "SHA-256" }, false, ["verify"]);
-  let ok = false;
-  try {
-    ok = await crypto.subtle.verify("HMAC", key, b64urlToBytes(parts[2]), te.encode(`${parts[0]}.${parts[1]}`));
-  } catch {
-    ok = false;
-  }
-  if (!ok) throw new Error("Invalid token");
-  if (payload.aud !== SSO_TOKEN_AUD) throw new Error("Invalid token");
-  if (typeof payload.exp !== "number" || payload.exp <= nowSec) throw new Error("Token expired");
-  if (typeof payload.sub !== "string" || !payload.sub) throw new Error("No user id in token");
+  const claims = await verifySsoToken(token, secret, nowSec);
+  if (!claims) return null;
   return {
-    uid: `workos:${payload.sub}`,
-    ...(typeof payload.org === "string" && payload.org ? { orgUid: `workos-org:${payload.org}` } : {}),
+    uid: `workos:${claims.sub}`,
+    ...(claims.org ? { orgUid: `workos-org:${claims.org}` } : {}),
   };
 }
 

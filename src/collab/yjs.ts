@@ -161,7 +161,8 @@ function getWebsocketUrl(): string | null {
       ? (import.meta as ImportMeta & { env?: { VITE_YJS_WEBSOCKET_URL?: string } })
           .env?.VITE_YJS_WEBSOCKET_URL
       : undefined;
-  return envUrl ?? null;
+  // An empty build arg (Docker compose with LUMEN_COLLAB_URL unset) means "none".
+  return envUrl?.trim() || null;
 }
 
 /**

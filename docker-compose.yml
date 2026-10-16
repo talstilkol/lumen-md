@@ -35,6 +35,13 @@ services:
     build:
       context: .
       dockerfile: docker/Dockerfile.web
+      # Baked into the SPA at build time (.env files aren't in the build
+      # context). Point them at how browsers reach lumen-signal /
+      # lumen-collab — see .env.onprem.example.
+      args:
+        VITE_WEBRTC_SIGNALING_URL: ${LUMEN_SIGNAL_URL:-}
+        VITE_YJS_WEBSOCKET_URL: ${LUMEN_COLLAB_URL:-}
+        VITE_AUDIT_ENDPOINT: ${LUMEN_AUDIT_URL:-}
     ports:
       - "80:80"
     depends_on:

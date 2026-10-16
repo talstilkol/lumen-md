@@ -43,6 +43,12 @@ describe("findHeadingLine", () => {
     expect(findHeadingLine(md, encodeURIComponent("über-setup-v2"))).toBe(7);
     expect(findHeadingLine(md, "Guide")).toBe(0);
   });
+  it("finds Setext headings and headings whose text is a link, like the preview's anchors", () => {
+    const doc = ["Intro", "", "Setup", "-----", "", "# [Install](docs/install.md)", "", "Usage", "====="].join("\n");
+    expect(findHeadingLine(doc, "setup")).toBe(2);
+    expect(findHeadingLine(doc, "install")).toBe(5);
+    expect(findHeadingLine(doc, "usage")).toBe(7);
+  });
   it("slugifies like the preview", () => {
     expect(slugifyHeading("Hello, World!")).toBe("hello-world");
   });
