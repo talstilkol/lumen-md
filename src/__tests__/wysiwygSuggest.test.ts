@@ -136,6 +136,20 @@ describe("tracking edits while suggesting", () => {
     expect(a.md()).toBe("Kee{--p --}{>>@Bob<<}{--old--}{>>@Alice<<} text.");
   });
 
+  it("blocks structural insertions and keeps the author when typing inside an insertion", async () => {
+    const e = await open("One paragraph here.", true, "Bob");
+    // Enter in the middle of the paragraph: a block split.
+    e.select(e.at(" here"));
+    e.view.dispatch(e.view.state.tr.split(e.at(" here")));
+    expect(e.view.state.doc.childCount).toBe(1);
+    expect(e.md()).toBe("One paragraph here.");
+    // Bob types inside Alice's insertion: still Alice's suggestion.
+    const a = await open("Say {++hello there++}{>>@Alice<<} now.", true, "Bob");
+    a.select(a.at("hello", 5));
+    a.type(" big");
+    expect(a.md()).toBe("Say {++hello big there++}{>>@Alice<<} now.");
+  });
+
   it("deleting your own suggested insertion really deletes it", async () => {
     const e = await open("Hello world.", true);
     e.select(e.at(" world"));

@@ -365,6 +365,18 @@ interface Change {
   from: number;
   insertedSize: number;
   deleted: Slice;
+  /** The insertion adds block structure (Enter, multi-paragraph paste). */
+  structural: boolean;
+}
+
+/** A slice that adds or splits blocks rather than only inline content. */
+function isStructural(slice: Slice): boolean {
+  if (slice.openStart > 0 || slice.openEnd > 0) return true;
+  let block = false;
+  slice.content.forEach((n) => {
+    if (n.isBlock) block = true;
+  });
+  return block;
 }
 
 /** Text content of a slice, ignoring structure. */
@@ -399,7 +411,13 @@ export function trackChanges(
       const s = step as unknown as { from: number; to: number; slice: Slice };
       const toEnd = tr.mapping.slice(i + 1);
       for (const later of user.slice(ti + 1)) toEnd.appendMapping(later.mapping);
-      changes.push({ from: s.from, insertedSize: s.slice.size, deleted: before.slice(s.from, s.to), toEnd });
+      changes.push({
+        from: s.from,
+        insertedSize: s.slice.size,
+        deleted: before.slice(s.from, s.to),
+        structural: s.slice.size > 0 && isStructural(s.slice),
+        toEnd,
+      });
     });
   });
   if (changes.length === 0) return null;
@@ -412,10 +430,20 @@ export function trackChanges(
   for (const c of changes) {
     const at = tr.mapping.map(c.toEnd.map(c.from, -1), -1);
     const insertedEnd = tr.mapping.map(c.toEnd.map(c.from + c.insertedSize, 1), 1);
-    // 1. Insertions are suggested.
-    if (insertedEnd > at) {
+    // 1. Insertions are suggested. Structural ones (a new paragraph, a
+    //    multi-block paste) can't be expressed as CriticMarkup or undone
+    //    by Reject, so they are blocked, like structural deletions.
+    if (insertedEnd > at && c.structural) {
+      tr.delete(at, insertedEnd);
+    } else if (insertedEnd > at) {
       tr.removeMark(at, insertedEnd, del);
-      tr.addMark(at, insertedEnd, ins.create(attrs));
+      // Typing inside someone's suggested insertion extends it (their
+      // mark is inherited): keep that author, as source mode does.
+      let inherited = true;
+      tr.doc.nodesBetween(at, insertedEnd, (n) => {
+        if (n.isText && !ins.isInSet(n.marks)) inherited = false;
+      });
+      if (!inherited) tr.addMark(at, insertedEnd, ins.create(attrs));
     }
     // 2. Deletions are kept, marked — unless they only removed one's own
     //    suggested insertion, which really goes away.
