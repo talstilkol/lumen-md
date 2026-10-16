@@ -15,6 +15,8 @@ describe("research worker helpers", () => {
       "file:///etc/passwd",
       "ftp://example.org/",
       "http://localhost/",
+      "http://localhost./",
+      "http://metadata.google.internal./",
       "http://127.0.0.1/",
       "http://10.1.2.3/",
       "http://169.254.169.254/latest/meta-data",
@@ -68,6 +70,9 @@ describe("citation verifier", () => {
     expect(quoteCoverage("prune roses in early spring", page)).toBe(1);
     expect(quoteCoverage("Prune roses in early spring, when buds swell.", page)).toBeGreaterThanOrEqual(0.85);
     expect(quoteCoverage("Roses love being pruned in midsummer heat", page)).toBeLessThan(0.5);
+    // Same words, reversed: not a match.
+    const q = "one two three four five six seven eight nine ten";
+    expect(quoteCoverage(q, q.split(" ").reverse().join(" "))).toBeLessThan(0.5);
   });
 
   it("verifies each citation once per page and reports problems first", async () => {
@@ -184,5 +189,10 @@ describe("research agent", () => {
   it("keeps balanced parentheses in footnote URLs", () => {
     const c = parseCitations("[^1]: [Wiki](https://en.wikipedia.org/wiki/Rose_(plant)) — “A rose is a woody plant”\n[^2]: see https://x.example/a_(b) for more");
     expect(c.map((x) => x.url)).toEqual(["https://en.wikipedia.org/wiki/Rose_(plant)", "https://x.example/a_(b)"]);
+  });
+
+  it("reads a quote up to its own closing mark", () => {
+    const c = parseCitations('[^1]: [A](https://a.example) — “The article says "quoted words" are important.”');
+    expect(c[0].quote).toBe('The article says "quoted words" are important.');
   });
 });

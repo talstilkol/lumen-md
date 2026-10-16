@@ -54,7 +54,19 @@ function trimUrl(u: string): string {
   return out;
 }
 
-const QUOTE_RE = /[“"«„]([^”"»]{8,})[”"»]/;
+/** The first quoted passage, closed by ITS matching delimiter (other quote marks may appear inside). */
+function quotedPassage(s: string): string | undefined {
+  const pairs: Record<string, string> = { "“": "”", '"': '"', "«": "»", "„": "“" };
+  for (let i = 0; i < s.length; i++) {
+    const close = pairs[s[i]];
+    if (!close) continue;
+    const end = s.indexOf(close, i + 1);
+    // „…“ (German) closes with “; a straight quote closes with the last one on the line.
+    const j = s[i] === '"' ? s.lastIndexOf('"') : end;
+    if (j > i + 8) return s.slice(i + 1, j).trim();
+  }
+  return undefined;
+}
 
 /** Footnote definitions that cite an http(s) URL. Code is ignored. */
 export function parseCitations(md: string): Citation[] {
@@ -76,7 +88,7 @@ export function parseCitations(md: string): Citation[] {
     const url = link?.url ?? (bare ? trimUrl(bare[1]) : undefined);
     if (!url) return;
     const afterUrl = rest.slice(rest.indexOf(url) + url.length);
-    const quote = QUOTE_RE.exec(afterUrl)?.[1]?.trim();
+    const quote = quotedPassage(afterUrl);
     out.push({ id: m[1], url: url.replace(/[.,;]+$/, ""), title: link?.title || undefined, quote, line: i + 1 });
   });
   return out;
@@ -96,25 +108,28 @@ export function quoteCoverage(quote: string, page: string): number {
   const qw = words(quote);
   if (qw.length < 3) return 0;
   const pw = words(page);
-  const need = new Map<string, number>();
-  for (const w of qw) need.set(w, (need.get(w) ?? 0) + 1);
-  const win = Math.ceil(qw.length * 1.3);
+  // Order-aware: for each start in the page where the quote's first or
+  // second word occurs, match the quote's words IN ORDER within a window
+  // (skipping up to a few extra or missing words). A passage with the same
+  // words in another order doesn't count.
+  const win = Math.ceil(qw.length * 1.3) + 2;
+  const firsts = new Set(qw.slice(0, 3));
   let best = 0;
-  // Sliding window of page words; count multiset overlap with the quote.
-  const have = new Map<string, number>();
-  let overlap = 0;
-  const add = (w: string, d: 1 | -1) => {
-    const n = (have.get(w) ?? 0) + d;
-    have.set(w, n);
-    const cap = need.get(w) ?? 0;
-    if (d === 1 && n <= cap) overlap++;
-    if (d === -1 && n < cap) overlap--;
-  };
-  for (let i = 0; i < pw.length; i++) {
-    add(pw[i], 1);
-    if (i >= win) add(pw[i - win], -1);
-    if (overlap > best) best = overlap;
-    if (best === qw.length) break;
+  for (let i = 0; i < pw.length && best < qw.length; i++) {
+    if (!firsts.has(pw[i])) continue;
+    let q = 0;
+    let matched = 0;
+    for (let j = i; j < Math.min(pw.length, i + win) && q < qw.length; j++) {
+      // Find pw[j] among the next few quote words (tolerates a dropped word).
+      for (let k = q; k < Math.min(qw.length, q + 3); k++) {
+        if (qw[k] === pw[j]) {
+          matched++;
+          q = k + 1;
+          break;
+        }
+      }
+    }
+    if (matched > best) best = matched;
   }
   return best / qw.length;
 }

@@ -40,7 +40,8 @@ export function isFetchableUrl(raw: string): boolean {
   if (u.protocol !== "https:" && u.protocol !== "http:") return false;
   if (u.username || u.password) return false;
   if (u.port && u.port !== "80" && u.port !== "443") return false;
-  const host = u.hostname.replace(/^\[|\]$/g, "").toLowerCase();
+  // `localhost.` is the same host as `localhost`: drop the DNS root dot(s).
+  const host = u.hostname.replace(/^\[|\]$/g, "").toLowerCase().replace(/\.+$/, "");
   if (!host || BLOCKED_HOSTS.test(host)) return false;
   if (ipv4Private(host)) return false;
   // IPv6 literals: refuse all (loopback, ULA, link-local, mapped v4…).
