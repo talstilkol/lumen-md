@@ -228,6 +228,24 @@ describe("billing worker — SSO (WorkOS) billing tokens", () => {
     expect(await entitlementOf(res)).toMatchObject({ tier: "team" });
   });
 
+  it("an active org Team plan beats the member's own active Pro (strongest live plan wins)", async () => {
+    mockSupabase({}, {
+      "workos:user_01": [{ tier: "pro", status: "active" }],
+      "workos-org:org_9": [{ tier: "team", status: "active" }],
+    });
+    const res = await worker.fetch(get("/entitlements", { Authorization: `Bearer ${await token({})}` }), ssoEnv);
+    expect(await entitlementOf(res)).toMatchObject({ tier: "team", status: "active" });
+  });
+
+  it("the member's own Team plan wins a tie with the org's", async () => {
+    mockSupabase({}, {
+      "workos:user_01": [{ tier: "team", status: "trialing" }],
+      "workos-org:org_9": [{ tier: "team", status: "active" }],
+    });
+    const res = await worker.fetch(get("/entitlements", { Authorization: `Bearer ${await token({})}` }), ssoEnv);
+    expect(await entitlementOf(res)).toMatchObject({ tier: "team", status: "trialing" });
+  });
+
   it("rejects a forged, expired or wrong-audience SSO token with 401", async () => {
     mockSupabase({}, { "workos:user_01": [{ tier: "pro", status: "active" }] });
     for (const bad of [

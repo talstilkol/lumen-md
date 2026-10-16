@@ -148,3 +148,32 @@ describe("markdownToPptxBytes", () => {
     expect(files.get("ppt/slides/slide1.xml")).toContain("Empty");
   });
 });
+
+describe("splitSlides fence tracking (CommonMark)", () => {
+  it("doesn't split on --- or headings inside a longer fence that shows a ``` block", async () => {
+    const { splitSlides } = await import("../storage/exportFormats");
+    const md = [
+      "# One",
+      "````md",
+      "```js",
+      "---",
+      "# not a slide",
+      "````",
+      "---",
+      "# Two",
+    ].join("\n");
+    const slides = splitSlides(md);
+    expect(slides).toHaveLength(2);
+    expect(slides[0]).toContain("# not a slide");
+    expect(slides[1]).toBe("# Two");
+  });
+
+  it("doesn't close a ``` fence on ~~~ or a shorter run", async () => {
+    const { createFenceTracker } = await import("../storage/exportFormats");
+    const at = createFenceTracker();
+    expect(at("````").inCode).toBe(true);
+    expect(at("```")).toEqual({ fence: false, inCode: true });
+    expect(at("~~~~")).toEqual({ fence: false, inCode: true });
+    expect(at("`````")).toEqual({ fence: true, inCode: false });
+  });
+});

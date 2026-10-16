@@ -1,4 +1,4 @@
-import { Component, lazy, Suspense, useEffect, useRef, useState, type ComponentType } from "react";
+import { Component, createContext, lazy, Suspense, useContext, useEffect, useRef, useState, type ComponentType } from "react";
 import type { JSX } from "react";
 import { isAssetName, readWorkspaceBlob } from "../storage/workspace";
 import { log } from "../lib/logger";
@@ -149,12 +149,42 @@ function useDeferredHydration(): [React.RefObject<HTMLDivElement>, boolean] {
   return [ref, ready];
 }
 
+/**
+ * True while the tree is serialized with `renderToStaticMarkup` (HTML
+ * export, `lumen publish`). That render never runs effects, so the
+ * deferred-hydration gate would leave every block as "Loading…" forever,
+ * and there's no runtime to hydrate it later — static rendering instead
+ * keeps each block's source as a readable code block.
+ */
+export const StaticRenderContext = createContext(false);
+
+/**
+ * Static stand-in for an interactive block: its fenced source as a code
+ * element (the surrounding markdown `<pre>` makes it a normal code block).
+ */
+function StaticBlock({ label, source, lang }: { label: string; source: string; lang?: unknown }) {
+  return (
+    <code
+      className={`lumen-static-block${typeof lang === "string" && lang ? ` language-${lang}` : ""}`}
+      data-lumen-block={label}
+    >
+      {source}
+    </code>
+  );
+}
+
 function withSuspense<P extends object>(
   Component: ComponentType<P>,
   label: string,
 ): ComponentType<P> {
   return function Wrapped(props: P) {
+    const isStatic = useContext(StaticRenderContext);
     const [ref, ready] = useDeferredHydration();
+    if (isStatic) {
+      const p = props as { children?: React.ReactNode; source?: unknown; lang?: unknown };
+      const source = typeof p.source === "string" ? p.source : getText(p.children);
+      return <StaticBlock label={label} source={source} lang={p.lang} />;
+    }
     if (!ready) {
       return <PluginFallback label={label} innerRef={ref} />;
     }

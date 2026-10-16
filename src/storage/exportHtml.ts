@@ -29,7 +29,13 @@ export async function renderHtmlDocument(
   // Render to a React tree, then stringify.
   const tree = await renderMarkdown(markdown, () => isDark);
   const { renderToStaticMarkup } = await import("react-dom/server");
-  const body = renderToStaticMarkup(tree as React.ReactElement);
+  const { createElement } = await import("react");
+  const { StaticRenderContext } = await import("../renderer/components");
+  // Static mode: interactive blocks serialize as their source instead of a
+  // never-hydrated "Loading…" placeholder.
+  const body = renderToStaticMarkup(
+    createElement(StaticRenderContext.Provider, { value: true }, tree as React.ReactElement),
+  );
 
   return `<!doctype html>
 <html lang="${escapeHtml(opts.lang ?? "en")}" class="${isDark ? "dark" : ""}">

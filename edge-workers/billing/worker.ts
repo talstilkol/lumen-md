@@ -273,15 +273,19 @@ async function entitlements(req: Request, env: Env): Promise<Response> {
     stripe_subscription_id?: unknown;
   }[];
   const rows = ids.map((id) => found.find((r) => r.user_id === id)).filter((r) => r !== undefined);
-  // An active plan on the user's own row wins; otherwise an active org-wide
-  // plan; otherwise whatever (lapsed) row exists.
+  // The STRONGEST live plan wins (team > pro), so an org Team plan isn't
+  // shadowed by a member's personal Pro; on a tie the user's own row (it
+  // comes first). With nothing live, whatever (lapsed) row exists.
   // Only statuses that actually unlock capabilities on the client count as
   // live (`capabilitiesFor` treats past_due/canceled/none as free).
   const live = (r: (typeof rows)[number]) => {
     const st = normalizeStatus(r.status);
     return st === "active" || st === "trialing";
   };
-  const row = rows.find(live) ?? rows[0];
+  const rank = (r: (typeof rows)[number]) => ({ team: 2, pro: 1 })[normalizeTier(r.tier) as "team" | "pro"] ?? 0;
+  const row =
+    rows.filter(live).reduce<(typeof rows)[number] | undefined>((best, r) => (!best || rank(r) > rank(best) ? r : best), undefined) ??
+    rows[0];
   if (!row) return send(FREE);
 
   const body: EntitlementBody = {
