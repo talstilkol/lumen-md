@@ -12,6 +12,9 @@
 import { chunkMarkdown } from "./semanticSearch";
 import { estimateTokens } from "./usage";
 
+/** Tokens of the separators around one kept section ("\n\n[…]\n\n"). */
+const SEPARATOR_TOKENS = 3;
+
 export type AiMode = "economy" | "balanced" | "quality";
 
 /** Context budget (tokens) per AI mode. */
@@ -69,7 +72,8 @@ export function packContext(query: string, docs: readonly PackInput[], budgetTok
       const words = terms(c.text);
       const tf = new Map<string, number>();
       for (const w of words) tf.set(w, (tf.get(w) ?? 0) + 1);
-      chunks.push({ doc, idx, text: c.text.trim(), tokens: estimateTokens(c.text), score: 0, tf, len: words.length });
+      // + the "\n\n[…]\n\n" around it in the packed text.
+      chunks.push({ doc, idx, text: c.text.trim(), tokens: estimateTokens(c.text) + SEPARATOR_TOKENS, score: 0, tf, len: words.length });
     });
   });
   // BM25 over chunks.
@@ -104,7 +108,7 @@ export function packContext(query: string, docs: readonly PackInput[], budgetTok
     if (cut < chars / 2) cut = c.text.lastIndexOf(". ", chars) + 1;
     if (cut < chars / 2) cut = chars;
     c.text = c.text.slice(0, cut).trimEnd() + " …";
-    c.tokens = estimateTokens(c.text);
+    c.tokens = estimateTokens(c.text) + SEPARATOR_TOKENS;
     c.partial = true;
   };
   // A document the retriever chose but that shares no words with the
@@ -144,21 +148,32 @@ export function packContext(query: string, docs: readonly PackInput[], budgetTok
     if (c.score > 0) relevantKept = true;
   }
 
-  return docs.map((d, doc) => {
-    const mine = chunks.filter((c) => c.doc === doc);
-    const kept = mine.filter((c) => keep.has(c));
-    if (kept.length === mine.length && !kept.some((c) => c.partial)) return { path: d.path, text: d.content, trimmed: false };
-    const parts: string[] = [];
-    if (outlines[doc]) parts.push(`Outline: ${outlines[doc]}`);
-    let prev = -1;
-    for (const c of kept) {
-      if (c.idx !== prev + 1) parts.push("[…]");
-      parts.push(c.text);
-      prev = c.idx;
-    }
-    if (prev !== mine.length - 1) parts.push("[…]");
-    return { path: d.path, text: parts.join("\n\n"), trimmed: true };
-  });
+  const assemble = (): PackedDoc[] =>
+    docs.map((d, doc) => {
+      const mine = chunks.filter((c) => c.doc === doc);
+      const kept = mine.filter((c) => keep.has(c));
+      if (kept.length === mine.length && !kept.some((c) => c.partial)) return { path: d.path, text: d.content, trimmed: false };
+      const parts: string[] = [];
+      if (outlines[doc]) parts.push(`Outline: ${outlines[doc]}`);
+      let prev = -1;
+      for (const c of kept) {
+        if (c.idx !== prev + 1) parts.push("[…]");
+        parts.push(c.text);
+        prev = c.idx;
+      }
+      if (prev !== mine.length - 1) parts.push("[…]");
+      return { path: d.path, text: parts.join("\n\n"), trimmed: true };
+    });
+  // The separators and gap markers cost tokens too: drop the least relevant
+  // kept sections until the assembled text fits.
+  let out = assemble();
+  const size = (o: PackedDoc[]) => o.reduce((n, p) => n + estimateTokens(p.text), 0);
+  while (size(out) > budgetTokens && keep.size > 0) {
+    const worst = [...keep].reduce((a, c) => (c.score < a.score ? c : a));
+    keep.delete(worst);
+    out = assemble();
+  }
+  return out;
 }
 
 /** The user's AI mode (economy / balanced / quality); balanced by default. */

@@ -47,6 +47,12 @@ describe("packContext", () => {
     expect(estimateTokens(packed.map((p) => p.text).join(""))).toBeLessThanOrEqual(600);
   });
 
+  it("counts separators: many tiny matching sections stay within the budget", () => {
+    const content = Array.from({ length: 300 }, (_, i) => `## H${i}\n\nkiwi ${i}`).join("\n\n");
+    const packed = packContext("kiwi", [{ path: "k.md", content }], 300);
+    expect(estimateTokens(packed[0].text)).toBeLessThanOrEqual(300);
+  });
+
   it("spreads the budget across documents by relevance", () => {
     const a = { path: "a.md", content: section("Rust", "ownership borrow checker lifetimes", 80) };
     const b = { path: "b.md", content: section("Cooking", "pasta sauce garlic onion", 80) };
