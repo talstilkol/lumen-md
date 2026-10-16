@@ -260,6 +260,26 @@ describe("single-file publish and symlinks", () => {
   });
 });
 
+describe("canonical paths", () => {
+  it("refuses an output folder reached through a symlink to the source", async () => {
+    write("a.md", "# A");
+    symlinkSync(join(work, "src"), join(work, "src-link"), "dir");
+    // Input via the link, --out the real source folder.
+    await expect(publishSite(join(work, "src-link"), join(work, "src"))).rejects.toThrow(/Refusing to publish/);
+    // --out itself a symlink pointing back into the source.
+    symlinkSync(join(work, "src"), join(work, "out-link"), "dir");
+    await expect(publishSite(join(work, "src"), join(work, "out-link"))).rejects.toThrow(/symlink/);
+    expect(existsSync(join(work, "src", "style.css"))).toBe(false);
+  });
+
+  it("still publishes from a symlinked input into a separate folder", async () => {
+    write("a.md", "# A");
+    symlinkSync(join(work, "src"), join(work, "src-link"), "dir");
+    const res = await publishSite(join(work, "src-link"), join(work, "out"));
+    expect(res.pages.map((p) => p.output)).toEqual(["a.html"]);
+  });
+});
+
 describe("page-list links", () => {
   it("percent-encode URL delimiters in file names", async () => {
     write("FAQ #1.md", "# FAQ");

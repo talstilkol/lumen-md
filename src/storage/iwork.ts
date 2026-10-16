@@ -110,6 +110,9 @@ export function snappyDecompress(src: Uint8Array): Uint8Array {
  */
 export const MAX_IWA_DECOMPRESSED = 64 * 1024 * 1024;
 
+/** The outer package (and a nested Index.zip): per entry and in total. */
+export const IWORK_UNZIP_LIMITS = { maxEntryBytes: 64 * 1024 * 1024, maxTotalBytes: 128 * 1024 * 1024 };
+
 export function decodeIwa(buf: Uint8Array, maxTotal = MAX_IWA_DECOMPRESSED): Uint8Array {
   const parts: Uint8Array[] = [];
   let total = 0;
@@ -520,7 +523,7 @@ export async function iworkToMarkdown(
   const app = APP_NAMES[ext] ?? "Apple iWork";
   let files: Map<string, Uint8Array>;
   try {
-    files = await unzip(buffer);
+    files = await unzip(buffer, IWORK_UNZIP_LIMITS);
   } catch (err) {
     return `> ⚠️ Could not read ${app} file: ${(err as Error).message}. If it is a package folder, re-save it from ${app} as a single file.`;
   }
@@ -528,7 +531,7 @@ export async function iworkToMarkdown(
   const nested = files.get("Index.zip");
   if (nested) {
     try {
-      const inner = await unzip(nested.slice().buffer);
+      const inner = await unzip(nested.slice().buffer, IWORK_UNZIP_LIMITS);
       for (const [k, v] of inner) files.set(k.startsWith("Index/") ? k : `Index/${k}`, v);
     } catch {
       /* ignore — fall through to whatever else the archive has */

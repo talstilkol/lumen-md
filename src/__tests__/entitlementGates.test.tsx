@@ -297,6 +297,28 @@ describe("aiQuota counter", () => {
     vi.unstubAllGlobals();
   });
 
+  it("two overlapping palette commands are charged two prompts", async () => {
+    __setEntitlementEndpointForTesting(ENDPOINT);
+    const now = new Date();
+    let resumeA!: () => void;
+    const pauseA = new Promise<void>((r) => (resumeA = r));
+    const [a] = withAiQuota([
+      {
+        id: "ai.translate",
+        action: async () => {
+          await pauseA; // e.g. a lazy import before its chat()
+          chargeAiCommandDispatch(now);
+        },
+      },
+    ]);
+    const [b] = withAiQuota([{ id: "ai.outline", action: async () => chargeAiCommandDispatch(now) }]);
+    const runA = a.action() as unknown as Promise<void>;
+    await (b.action() as unknown as Promise<void>); // B dispatches and finishes first
+    resumeA();
+    await runA;
+    expect(getAiUsage(now)).toBe(2);
+  });
+
   it("re-checks the quota when a waiting command finally dispatches", async () => {
     __setEntitlementEndpointForTesting(ENDPOINT);
     const now = new Date();

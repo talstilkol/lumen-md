@@ -289,3 +289,26 @@ describe("iworkToMarkdown / fileToMarkdown", () => {
     expect(isSupportedFormat("a.key")).toBe(true);
   });
 });
+
+describe("ZIP inflation limits", () => {
+  it("stops inflating an entry past the per-entry limit", async () => {
+    const { unzip } = await import("../storage/zip");
+    const bomb = await zip([{ name: "big.bin", data: new Uint8Array(2 * 1024 * 1024) }]); // zeros compress tiny
+    expect(bomb.length).toBeLessThan(64 * 1024);
+    await expect(unzip(bomb.slice().buffer, { maxEntryBytes: 1024 * 1024 })).rejects.toThrow(/size limit/);
+    expect((await unzip(bomb.slice().buffer)).get("big.bin")!.length).toBe(2 * 1024 * 1024);
+  });
+
+  it("enforces a total limit across entries", async () => {
+    const { unzip } = await import("../storage/zip");
+    const many = await zip(
+      Array.from({ length: 4 }, (_, i) => ({ name: `p${i}.bin`, data: new Uint8Array(512 * 1024) })),
+    );
+    await expect(unzip(many.slice().buffer, { maxTotalBytes: 1024 * 1024 })).rejects.toThrow(/size limit/);
+  });
+
+  it("the iWork importer applies its limits to the outer package", async () => {
+    const { IWORK_UNZIP_LIMITS } = await import("../storage/iwork");
+    expect(IWORK_UNZIP_LIMITS.maxEntryBytes).toBeLessThanOrEqual(64 * 1024 * 1024);
+  });
+});

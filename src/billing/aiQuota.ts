@@ -176,6 +176,18 @@ export function chargeAiCommandDispatch(now: Date = new Date()): void {
   recordAiPrompt(now);
 }
 
+/** Charge one prompt now (enforced, with the usual exceeded toast). */
+function chargeUpFront(now: Date = new Date()): void {
+  if (!gatesEnforced()) return;
+  const status = aiQuotaStatus(now);
+  if (!Number.isFinite(status.limit) || !hasAiCredentials()) return;
+  if (!status.allowed) {
+    showAiToast(t("billing.aiQuota.exceeded", { limit: status.limit }), "error");
+    throw new AiQuotaExceededError(status.limit);
+  }
+  recordAiPrompt(now);
+}
+
 /** Wrap the actions of AI-prompt commands with the quota check. */
 export function withAiQuota<C extends { id: string; action: () => void; children?: C[] }>(
   commands: C[],
@@ -198,6 +210,19 @@ export function withAiQuota<C extends { id: string; action: () => void; children
           }
         }
         const token = { charged: false };
+        // Dispatches can't be traced back to the command that made them
+        // (actions aren't awaited and may pause on lazy imports), so with
+        // two commands in flight a dispatch could pay with the other one's
+        // token. Only one command may wait to be charged at a time: a
+        // command started while another is still in flight pays up front.
+        if (armedCommands.length > 0) {
+          try {
+            chargeUpFront();
+          } catch {
+            return; // quota spent — toast already shown
+          }
+          token.charged = true;
+        }
         armedCommands.push(token);
         // Never dispatched (cancelled / prerequisite failed)? Release it uncharged.
         const disarm = () => {

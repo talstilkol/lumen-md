@@ -22,6 +22,7 @@ import {
   mkdirSync,
   readdirSync,
   readFileSync,
+  realpathSync,
   rmdirSync,
   statSync,
   unlinkSync,
@@ -272,14 +273,41 @@ export function referencedLocalFiles(html: string, fromDir: string, root: string
   return [...out];
 }
 
+/** Real path of `p`, resolving symlinks in its existing prefix (the rest may not exist yet). */
+export function canonicalPath(p: string): string {
+  const rest: string[] = [];
+  let cur = resolve(p);
+  for (;;) {
+    try {
+      return join(realpathSync(cur), ...rest.reverse());
+    } catch (err) {
+      if ((err as NodeJS.ErrnoException).code !== "ENOENT") throw err;
+      const parent = dirname(cur);
+      if (parent === cur) return resolve(p);
+      rest.push(basename(cur));
+      cur = parent;
+    }
+  }
+}
+
 /** Publish `input` (a folder or a single .md file) as a static site in `outDir`. */
 export async function publishSite(
   input: string,
   outDir: string,
   opts: { siteTitle?: string } = {},
 ): Promise<PublishResult> {
-  const inAbs = resolve(input);
-  const outAbs = resolve(outDir);
+  // Compare and write through canonical paths: a symlinked input or --out
+  // must not let the containment check below be bypassed.
+  const inAbs = realpathSync(resolve(input));
+  const outLexical = resolve(outDir);
+  try {
+    if (lstatSync(outLexical).isSymbolicLink()) {
+      throw new Error(`Refusing to publish into ${outLexical}: the output folder is a symlink. Pass its real path.`);
+    }
+  } catch (err) {
+    if ((err as NodeJS.ErrnoException).code !== "ENOENT") throw err;
+  }
+  const outAbs = canonicalPath(outLexical);
   const st = statSync(inAbs);
   const root = st.isDirectory() ? inAbs : dirname(inAbs);
   // Writing into the source folder (or one of its ancestors) would overwrite
