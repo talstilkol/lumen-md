@@ -65,7 +65,18 @@ const footnote = (n: number, src: { title: string; url: string }, quote: string,
 
 /* ─── Claude web search ─────────────────────────────────────────────── */
 
-export function citedBlocksToMarkdown(question: string, blocks: readonly CitedBlock[], now = new Date()): { markdown: string; sources: number } {
+/** A passage substantial enough to need a source (not a heading or a short connective line). */
+const isClaim = (text: string) => {
+  const prose = text.replace(/^\s*#{1,6}\s.*$/gm, "").replace(/\s+/g, " ").trim();
+  return prose.length >= 60 && /[.!?]/.test(prose);
+};
+
+export function citedBlocksToMarkdown(
+  question: string,
+  blocks: readonly CitedBlock[],
+  now = new Date(),
+): { markdown: string; sources: number; unverified: number } {
+  let unverified = 0;
   const ids = new Map<string, number>(); // url + quote → footnote number
   const defs: string[] = [];
   const urls = new Set<string>();
@@ -83,6 +94,11 @@ export function citedBlocksToMarkdown(question: string, blocks: readonly CitedBl
       urls.add(c.url);
       if (!refs.includes(`[^${n}]`)) refs += `[^${n}]`;
     }
+    // A substantial passage Claude gave without any source is flagged.
+    if (!b.citations.length && isClaim(b.text)) {
+      unverified++;
+      refs = " ⚠️ *no source cited*";
+    }
     // Citations attach to the end of the passage, before trailing whitespace.
     const m = /^([\s\S]*?)(\s*)$/.exec(b.text)!;
     body += m[1] + refs + m[2];
@@ -90,14 +106,16 @@ export function citedBlocksToMarkdown(question: string, blocks: readonly CitedBl
   const markdown = [
     `# ${title(question)}`,
     "",
-    `*Researched ${now.toISOString().slice(0, 10)} with Claude web search · ${urls.size} sources · quotes are verbatim from the cited pages.*`,
+    `*Researched ${now.toISOString().slice(0, 10)} with Claude web search · ${urls.size} sources · quotes are verbatim from the cited pages${
+      unverified ? ` · **${unverified} passage${unverified === 1 ? "" : "s"} without a source**` : ""
+    }.*`,
     "",
     body.trim(),
     "",
     ...defs,
     "",
   ].join("\n");
-  return { markdown, sources: urls.size };
+  return { markdown, sources: urls.size, unverified };
 }
 
 async function claudeResearch(o: ResearchOptions): Promise<ResearchResult> {
@@ -116,10 +134,10 @@ async function claudeResearch(o: ResearchOptions): Promise<ResearchResult> {
       onUsage: (u) => recordUsage({ ...u, provider: "anthropic" }),
     },
   );
-  const { markdown, sources } = citedBlocksToMarkdown(o.question, blocks);
+  const { markdown, sources, unverified } = citedBlocksToMarkdown(o.question, blocks);
   // An answer without web citations isn't research (Claude answered from memory).
   if (!sources) throw new Error("Claude answered without citing any web source — try again or rephrase the question.");
-  return { markdown, route: "claude", sources, unverified: 0 };
+  return { markdown, route: "claude", sources, unverified };
 }
 
 /* ─── Brave / Tavily through the research worker ───────────────────── */

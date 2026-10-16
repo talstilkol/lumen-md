@@ -108,6 +108,14 @@ describe("research agent", () => {
     );
     expect(sources).toBe(2);
     expect(markdown).toContain("Prune in early spring.[^1] Use clean shears.[^2][^1]");
+    const flagged = citedBlocksToMarkdown("Q", [
+      { text: "## Findings\n", citations: [] },
+      { text: "Cited claim.", citations: [{ url: "https://a.example", title: "A", quote: "q" }] },
+      { text: " Roses also grow well on the moon according to many gardeners.", citations: [] },
+    ]);
+    expect(flagged.unverified).toBe(1);
+    expect(flagged.markdown).toContain("many gardeners. ⚠️ *no source cited*");
+    expect(flagged.markdown).not.toContain("Findings ⚠️");
     expect(markdown).toContain("[^1]: [A](https://a.example/x) — “Prune roses in early spring”");
     expect(markdown).toContain("[^2]: [B](https://b.example/y) — “clean shears”");
   });
