@@ -94,22 +94,23 @@ VITE_YJS_WEBSOCKET_URL=wss://lumen-collab.fly.dev
 
 ## 3. CSP + headers in production (DONE — verify only)
 
-`index.html` ships a strict CSP that allows the 16 embed providers, OpenAI,
-Stripe, Supabase, Dropbox, LanguageTool. After deploy, add HTTP headers via
-your host:
+The CSP lives in two places that are both enforced: the `<meta>` tag in
+`index.html` and `public/_headers` (copied to `dist/_headers`). Cloudflare
+Pages **and Netlify** serve `dist/_headers`; `netlify.toml` deliberately
+sets no CSP of its own. The self-hosted nginx image uses
+`docker/nginx.conf`.
 
-**Cloudflare Pages** (recommended) — drop a `_headers` file:
+Your own workers (SSO, billing/entitlements, publish, audit, marketplace,
+self-hosted LanguageTool, Supabase) are added to `connect-src`
+**automatically at build time** from the `VITE_*_ENDPOINT` / `VITE_*_URL`
+variables (see `src/build/cspEndpoints.ts`): set them before
+`npm run build`. For the Docker web image pass them as build args, e.g.
+`docker build -f docker/Dockerfile.web --build-arg VITE_WORKOS_ENDPOINT=https://auth.example.org .`
+Verify after deploy: the response header and the meta tag both list your
+worker origins in `connect-src`.
 
-```
-/*
-  Strict-Transport-Security: max-age=63072000; includeSubDomains; preload
-  X-Content-Type-Options: nosniff
-  X-Frame-Options: DENY
-  Referrer-Policy: strict-origin-when-cross-origin
-  Permissions-Policy: interest-cohort=(), geolocation=(self), microphone=(self), camera=(self)
-```
-
-Run `npm run build && wrangler pages deploy dist`.
+Run `npm run build && wrangler pages deploy dist` (Cloudflare) or let
+Netlify build from `netlify.toml`.
 
 ---
 
@@ -120,8 +121,10 @@ Code is in `edge-workers/billing/worker.ts`. Configure + deploy:
 ```bash
 # 4a. Create the Supabase entitlements table (one-time)
 psql "<your-supabase-conn-string>" <<EOF
+-- user_id is text, not a uuid FK: besides Supabase user ids it holds
+-- 'workos:<user id>' and 'workos-org:<organization id>' rows for SSO users.
 create table if not exists entitlements (
-  user_id uuid primary key references auth.users on delete cascade,
+  user_id text primary key,
   tier text not null default 'free',
   status text not null default 'active',
   stripe_customer_id text,
@@ -129,6 +132,9 @@ create table if not exists entitlements (
   renews_at bigint,
   updated_at timestamptz default now()
 );
+-- Upgrading a table created from an older version of this guide:
+--   alter table entitlements drop constraint if exists entitlements_user_id_fkey;
+--   alter table entitlements alter column user_id type text;
 EOF
 
 # 4b. Create Stripe products + prices

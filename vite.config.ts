@@ -1,6 +1,7 @@
 /// <reference types="vitest" />
 import { defineConfig as defineViteConfig } from "vite";
 import type { UserConfig as ViteUserConfig } from "vite";
+import { cspEndpointsPlugin } from "./src/build/cspEndpoints";
 
 interface VitestConfig {
   test?: {
@@ -66,6 +67,9 @@ export default defineConfig({
   plugins: [
     react(),
     cleanUrlAliases,
+    // Adds the deployment's own worker origins (VITE_*_ENDPOINT …) to the
+    // CSP connect-src of index.html, dist/_headers and the nginx image.
+    cspEndpointsPlugin(),
     VitePWA({
       registerType: "prompt",
       includeAssets: ["favicon.svg", "icons/*.png"],

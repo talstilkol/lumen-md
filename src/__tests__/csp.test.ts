@@ -2,13 +2,13 @@
  * CSP alignment gate.
  *
  * The page is served with BOTH the <meta> CSP in index.html and the
- * response-header CSP (public/_headers on Cloudflare Pages, netlify.toml on
- * Netlify). Browsers enforce every policy, so a host has to be allowed in
+ * response-header CSP (public/_headers, served as dist/_headers by both
+ * Cloudflare Pages and Netlify; netlify.toml deliberately has no CSP). Browsers enforce every policy, so a host has to be allowed in
  * all of them — drift silently breaks shipped features (this is how the AI
  * providers, Drive sync and the WebGPU model download were blocked).
  *
  * Asserts:
- *  (a) index.html, public/_headers and netlify.toml (and the connect-src of
+ *  (a) index.html and public/_headers (and the connect-src of
  *      docker/nginx.conf) share the same connect-src host set;
  *  (b) every provider base URL constant in src/ai/*Provider.ts is allowed;
  *  plus Trusted Types / script-src invariants for the header policies.
@@ -48,22 +48,17 @@ function cspFromHeadersFile(): Policy {
   return parsePolicy(m[1]);
 }
 
-function cspFromNetlifyToml(): Policy {
-  const m = read("netlify.toml").match(/^\s*Content-Security-Policy\s*=\s*"([^"]+)"/m);
-  if (!m) throw new Error("netlify.toml: CSP header not found");
-  return parsePolicy(m[1]);
-}
 
 function connectSrcFromNginx(): string[] {
   const m = read("docker/nginx.conf").match(/^\s*connect-src ([^;]+);/m);
   if (!m) throw new Error("docker/nginx.conf: connect-src not found");
-  return m[1].trim().split(/\s+/);
+  // The build-time placeholder for deployment worker origins isn't a host.
+  return m[1].trim().split(/\s+/).filter((t) => t !== "__CSP_CONNECT_EXTRA__");
 }
 
 const POLICIES: Record<string, Policy> = {
   "index.html": cspFromIndexHtml(),
   "public/_headers": cspFromHeadersFile(),
-  "netlify.toml": cspFromNetlifyToml(),
 };
 
 const sorted = (xs: string[]) => [...new Set(xs)].sort();
@@ -121,7 +116,11 @@ function providerBaseUrls(): { file: string; url: string }[] {
 }
 
 describe("CSP alignment", () => {
-  it("(a) index.html, public/_headers and netlify.toml share one connect-src set", () => {
+  it("netlify.toml sets no CSP of its own (it would be enforced alongside dist/_headers)", () => {
+    expect(read("netlify.toml")).not.toMatch(/Content-Security-Policy\s*=/);
+  });
+
+  it("(a) index.html and public/_headers share one connect-src set", () => {
     const sets = Object.entries(POLICIES).map(([name, p]) => {
       const list = p.get("connect-src");
       expect(list, `${name} has no connect-src`).toBeDefined();
@@ -215,7 +214,7 @@ describe("CSP script-src / Trusted Types invariants", () => {
     expect(html).not.toMatch(/\son[a-z]+="/i);
   });
 
-  it.each(["public/_headers", "netlify.toml"])(
+  it.each(["public/_headers"])(
     "%s enforces Trusted Types and allows exactly the app's policy names",
     (file) => {
       const p = POLICIES[file];

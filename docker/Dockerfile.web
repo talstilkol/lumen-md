@@ -8,6 +8,17 @@ WORKDIR /app
 COPY package.json package-lock.json* ./
 RUN npm ci
 COPY . .
+# Deployment endpoints are baked in at build time (Vite) and added to the
+# CSP connect-src. Pass them with `--build-arg` / compose `build.args`.
+ARG VITE_WORKOS_ENDPOINT
+ARG VITE_BILLING_ENDPOINT
+ARG VITE_ENTITLEMENT_ENDPOINT
+ARG VITE_PUBLISH_ENDPOINT
+ARG VITE_AUDIT_ENDPOINT
+ARG VITE_MARKETPLACE_URL
+ARG VITE_LANGUAGETOOL_URL
+ARG VITE_SUPABASE_URL
+ARG VITE_SUPABASE_ANON_KEY
 RUN npm run build
 
 FROM nginx:1.27-alpine
@@ -21,6 +32,10 @@ WORKDIR /usr/share/nginx/html
 COPY docker/nginx.conf /etc/nginx/conf.d/default.conf
 
 COPY --from=build /app/dist .
+# Fill in the deployment's worker origins (written by the Vite CSP plugin).
+RUN extra="$(cat .csp-connect-extra 2>/dev/null | tr -d '\n')"; \
+    sed -i "s#__CSP_CONNECT_EXTRA__#${extra}#" /etc/nginx/conf.d/default.conf && \
+    rm -f .csp-connect-extra
 
 EXPOSE 80
 HEALTHCHECK --interval=30s --timeout=5s --retries=3 \
