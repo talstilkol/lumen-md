@@ -202,9 +202,11 @@
   /* === Editor (CodeMirror) === */
   .cm-editor {
     background: transparent !important;
-    font-family: theme(fontFamily.mono);
-    font-size: 14px;
-    line-height: 1.65;
+    /* --editor-* / --content-width are set by the Theme settings panel
+       (src/lib/themeSettings.ts); the fallbacks are the stock look. */
+    font-family: var(--editor-font, theme(fontFamily.mono));
+    font-size: var(--editor-font-size, 14px);
+    line-height: var(--editor-line-height, 1.65);
   }
   .cm-editor.cm-focused {
     outline: none !important;
@@ -221,7 +223,7 @@
      math and selection painting correct. */
   .cm-editor .cm-content {
     caret-color: hsl(var(--accent));
-    max-width: min(80ch, 100%);
+    max-width: min(var(--content-width, 80ch), 100%);
     margin-inline: auto;
   }
   .cm-editor .cm-line {
@@ -291,7 +293,7 @@
   /* === Preview prose === */
   .prose-lumen {
     color: hsl(var(--fg));
-    max-width: 72ch;
+    max-width: var(--preview-width, 72ch);
     margin: 0 auto;
     font-family: theme(fontFamily.serif);
     font-size: 17px;

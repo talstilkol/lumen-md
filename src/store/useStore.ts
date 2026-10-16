@@ -2,6 +2,12 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { Locale } from "../i18n";
 import { applyLocale, isLocaleLoaded, loadLocale } from "../i18n";
+import {
+  DEFAULT_THEME_SETTINGS,
+  applyThemeSettings,
+  sanitizeThemeSettings,
+  type ThemeSettings,
+} from "../lib/themeSettings";
 
 // Monotonic token so a slow lazy-locale fetch can't clobber a newer pick.
 let localeRequest = 0;
@@ -31,6 +37,8 @@ interface AppState {
   doc: DocFile;
   mode: ViewMode;
   theme: Theme;
+  /** Theme customisation (preset, accent, typography, measure). */
+  themeSettings: ThemeSettings;
   locale: Locale;
   showOutline: boolean;
   showWorkspace: boolean;
@@ -75,6 +83,10 @@ interface AppState {
   openTabs: Array<{ id: string; name: string; content: string; workspaceName: string | null; dirty: boolean }>;
   setMode: (m: ViewMode) => void;
   setTheme: (t: Theme) => void;
+  /** Merge a patch into the theme customisation and apply it live. */
+  setThemeSettings: (patch: Partial<ThemeSettings>) => void;
+  /** Restore the stock theme customisation. */
+  resetThemeSettings: () => void;
   setLocale: (l: Locale) => void;
   setContent: (s: string) => void;
   setDoc: (d: Partial<DocFile>) => void;
@@ -134,6 +146,7 @@ export const useAppStore = create<AppState>()(
       doc: DEFAULT_DOC,
       mode: "split",
       theme: "dark",
+      themeSettings: { ...DEFAULT_THEME_SETTINGS },
       locale: "en",
       showOutline: true,
       showWorkspace: false,
@@ -159,6 +172,17 @@ export const useAppStore = create<AppState>()(
       setTheme: (t) => {
         set({ theme: t });
         applyTheme(t);
+      },
+      setThemeSettings: (patch) =>
+        set((s) => {
+          const next = sanitizeThemeSettings({ ...s.themeSettings, ...patch });
+          if (typeof document !== "undefined") applyThemeSettings(next, document.documentElement);
+          return { themeSettings: next };
+        }),
+      resetThemeSettings: () => {
+        const next = { ...DEFAULT_THEME_SETTINGS };
+        if (typeof document !== "undefined") applyThemeSettings(next, document.documentElement);
+        set({ themeSettings: next });
       },
       setLocale: (l) => {
         const req = ++localeRequest;
@@ -334,6 +358,7 @@ export const useAppStore = create<AppState>()(
       partialize: (s) => ({
         mode: s.mode,
         theme: s.theme,
+        themeSettings: s.themeSettings,
         locale: s.locale,
         showOutline: s.showOutline,
         showWorkspace: s.showWorkspace,
@@ -364,6 +389,16 @@ export const useAppStore = create<AppState>()(
         // structured-cloneable through localStorage anyway).
         openTabs: s.openTabs,
       }),
+      // Persisted theme settings may be stale or hand-edited — sanitise
+      // field-by-field on rehydrate instead of trusting localStorage.
+      merge: (persisted, current) => {
+        const p = (persisted ?? {}) as Partial<AppState>;
+        return {
+          ...current,
+          ...p,
+          themeSettings: sanitizeThemeSettings(p.themeSettings),
+        };
+      },
     },
   ),
 );
@@ -375,6 +410,8 @@ export function applyTheme(theme: Theme) {
     (theme === "system" &&
       window.matchMedia("(prefers-color-scheme: dark)").matches);
   root.classList.toggle("dark", dark);
+  // Preset palettes differ between light and dark, so re-apply them.
+  applyThemeSettings(useAppStore.getState().themeSettings, root, dark);
 }
 
 // Re-apply when the OS color scheme changes (only meaningful for theme="system").
