@@ -133,6 +133,15 @@ describe("tracking edits while suggesting", () => {
     expect(e.md()).toBe("First {--para.--}{>>@Tal<<}\n\n{--Second--}{>>@Tal<<} para.");
   });
 
+  it("refuses structure changes that can't be suggested (wrapping in a list)", async () => {
+    const e = await open("One paragraph here.", true);
+    const { wrapInList } = await import("@milkdown/prose/schema-list");
+    const list = e.view.state.schema.nodes.bullet_list;
+    e.select(e.at("One"));
+    wrapInList(list)(e.view.state, e.view.dispatch);
+    expect(e.md()).toBe("One paragraph here.");
+  });
+
   it("edits inside a fenced code block pass untracked", async () => {
     const e = await open("```\ncode here\n```", true);
     const at = e.at("here");

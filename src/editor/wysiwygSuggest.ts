@@ -26,7 +26,7 @@
 import { $markSchema, $prose, $remark } from "@milkdown/utils";
 import type { Mark, Schema, Slice } from "@milkdown/prose/model";
 import { Plugin, PluginKey, TextSelection, type EditorState, type Transaction } from "@milkdown/prose/state";
-import { ReplaceStep, type Mapping } from "@milkdown/prose/transform";
+import { ReplaceAroundStep, ReplaceStep, type Mapping } from "@milkdown/prose/transform";
 import type { Parents, PhrasingContent, Root } from "mdast";
 import { defaultHandlers } from "mdast-util-to-markdown";
 import { CRITIC_LITERAL, CRITIC_SENTINELS as S, prepareCriticMarkup, unescapeUserSentinels } from "../renderer/criticMarkup";
@@ -544,6 +544,15 @@ export const suggestTracking = $prose(
       key: trackingKey,
       appendTransaction: (trs, oldState, newState) =>
         config.enabled() ? trackChanges(trs, oldState, newState, config.author()) : null,
+      // Structure changes that move content around (wrap in a list, indent
+      // or outdent an item, change a block's type) can't be written as
+      // CriticMarkup, so Reject couldn't undo them: refused while suggesting.
+      filterTransaction: (tr) =>
+        !config.enabled() ||
+        !!tr.getMeta(SUGGEST_META) ||
+        !!tr.getMeta("history$") ||
+        tr.getMeta("addToHistory") === false ||
+        !tr.steps.some((st) => st instanceof ReplaceAroundStep),
       props: {
         // Typing over a selection: some browsers (Firefox) report it as the
         // minimal DOM diff ("Hello" → "H" deletes only "ello"), which would
