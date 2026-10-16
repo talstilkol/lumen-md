@@ -160,4 +160,12 @@ describe("vault doctor", () => {
     expect(f.filter((x) => x.kind === "missing-heading").map((x) => x.detail)).toEqual(["#Not A Heading"]);
     expect(f.some((x) => x.kind === "orphan" && x.path === "Notes_(old).md")).toBe(false);
   });
+
+  it("front matter comments aren't headings; fixes skip Markdown link labels", () => {
+    const f = runVaultDoctor([{ path: "a.md", text: "---\ntitle: A\n# Project\n---\n\n[[#Project]]\n" }]);
+    expect(f.filter((x) => x.kind === "missing-heading").map((x) => x.detail)).toEqual(["#Project"]);
+    expect(applyLinkFixes("[[Projct]] [see [[Projct]]](https://example.com)", [{ from: "Projct", to: "Project" }])).toBe(
+      "[[Project]] [see [[Projct]]](https://example.com)",
+    );
+  });
 });

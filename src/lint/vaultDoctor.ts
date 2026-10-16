@@ -172,12 +172,21 @@ function headingText(md: string): string {
     .trim();
 }
 
+/** Blank a leading YAML front matter block (its `# comments` aren't headings). */
+const blankFrontmatter = (text: string) =>
+  text.replace(/^---[ \t]*\r?\n[\s\S]*?\r?\n(?:---|\.\.\.)[ \t]*(?=\r?\n|$)/, (m) => m.replace(/[^\n]/g, " "));
+
+/** Ranges of Markdown links (`[text](url)`): a `[[x]]` inside their text is label text, not a wiki link. */
+const markdownLinkRanges = (text: string): Array<[number, number]> =>
+  [...text.matchAll(/\[((?:[^\[\]\n]|\[\[[^\]\n]*\]\])*)\]\([^)\n]*\)/g)].map((l) => [l.index ?? 0, (l.index ?? 0) + l[0].length]);
+const insideAny = (ranges: ReadonlyArray<[number, number]>, at: number) => ranges.some(([a, b]) => at > a && at < b);
+
 function headingsOf(text: string): Set<string> {
   const out = new Set<string>();
   // Inline code in headings matters for the rendered text, so scan only
   // with fenced blocks blanked.
   // Headings inside block quotes render (with ids) too: drop the `>` prefixes.
-  const fenced = blankFences(text)
+  const fenced = blankFences(blankFrontmatter(text))
     .replace(/<(pre|script|style|textarea)\b[\s\S]*?(?:<\/\1>|$)/gi, (m) => m.replace(/[^\n]/g, " "))
     .replace(/^(?:[ \t]*>[ ]?)+/gm, "");
   // In document order, with a stateful slugger: a repeated heading gets
@@ -307,9 +316,9 @@ export function runVaultDoctor(notes: readonly DoctorNote[], opts: DoctorOptions
 
     // Wiki links: [[target]] / [[target|label]] (not ![[embeds]] of assets).
     // `[[x]]` inside a Markdown link's text (`[see [[x]]](url)`) is link text, not a wiki link.
-    const linkTexts = [...text.matchAll(/\[((?:[^\[\]\n]|\[\[[^\]\n]*\]\])*)\]\([^)\n]*\)/g)].map((l) => [l.index ?? 0, (l.index ?? 0) + l[0].length]);
+    const linkTexts = markdownLinkRanges(text);
     for (const m of text.matchAll(/(!?)\[\[([^\]|\n]+)(?:\|[^\]\n]*)?\]\]/g)) {
-      if (linkTexts.some(([a, b]) => (m.index ?? 0) > a && (m.index ?? 0) < b)) continue;
+      if (insideAny(linkTexts, m.index ?? 0)) continue;
       const raw = m[2].trim();
       if (m[1] && !isMd(raw) && /\.\w+$/.test(raw)) continue; // embedded image / file
       const { note: target, heading } = splitWikiTarget(raw);
@@ -437,9 +446,11 @@ export function applyLinkFixes(text: string, fixes: ReadonlyArray<{ from: string
   if (!fixes.length) return text;
   const map = new Map(fixes.map((f) => [f.from.trim(), f.to]));
   const code = stripCode(text);
+  const linkTexts = markdownLinkRanges(code);
   let out = "";
   let last = 0;
   for (const m of code.matchAll(/\[\[([^\]|\n]+)(\|[^\]\n]*)?\]\]/g)) {
+    if (insideAny(linkTexts, m.index ?? 0)) continue; // label text of a Markdown link
     const raw = m[1].trim();
     const { note, heading } = splitWikiTarget(raw);
     const to = map.get(raw) ?? map.get(note);
