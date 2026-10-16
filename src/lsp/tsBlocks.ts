@@ -137,16 +137,25 @@ const LIVE_WRAP_OPEN = "(async () => {\n";
 const LIVE_WRAP_CLOSE = "\n})();";
 
 /**
- * Whether a shared live block needs the async wrapper to type-check: only
- * a top-level `return` does (units are modules, so top-level `await` is
- * already valid). Without the wrapper the block is checked at the unit's
- * top level, where earlier parts' retained closures see its declarations
- * — as they do at runtime, which hoists shared bindings to globals.
+ * A shared live block runs inside an async function, so a top-level
+ * `return` is valid there — but wrapping the block in the unit would make
+ * its declarations local, unlike the runtime that hoists them to shared
+ * globals. Instead each top-level `return` becomes a same-length
+ * expression statement (`return x` → `void   x`, bare `return` → `void 0`):
+ * offsets stay put, the block's bindings stay at the unit's top level,
+ * and units are modules, so top-level `await` needs nothing.
  */
-function needsLiveWrap(code: string): boolean {
-  const tokens = tokenize(neutraliseDirectives(code));
+function neutraliseTopLevelReturns(code: string): string {
+  const tokens = tokenize(code);
   const scopes = functionScopes(tokens, matchBrackets(tokens));
-  return tokens.some((t, i) => t.type === "ident" && t.value === "return" && !scopes.some((f) => i >= f.from && i <= f.to));
+  let out = code;
+  tokens.forEach((t, i) => {
+    if (t.type !== "ident" || t.value !== "return" || scopes.some((f) => i >= f.from && i <= f.to)) return;
+    const next = tokens[i + 1];
+    const bare = !next || next.nl || (next.type === "punct" && (next.value === ";" || next.value === "}"));
+    out = out.slice(0, t.start) + (bare ? "void 0" : "void  ") + out.slice(t.end);
+  });
+  return out;
 }
 
 /** Joins the parts of a shared unit: ends any statement / line comment. */
@@ -255,6 +264,16 @@ function functionScopes(tokens: ReturnType<typeof tokenize>, match: Map<number, 
    * `new Promise(executor)`); anything else may keep it for later
    * (`callbacks.push(fn)`, `setTimeout`, event listeners, `.then`).
    */
+  // Names visibly initialised with an array / string literal (`const xs =
+  // [0]`, `let s = "a"`): their `.map` / `.replace` are the built-ins.
+  const literalKind = new Map<string, "array" | "string">();
+  for (let i = 0; i + 3 < tokens.length; i++) {
+    const kw = val(i);
+    if ((kw !== "const" && kw !== "let" && kw !== "var") || tokens[i + 1]?.type !== "ident" || !isPunct(i + 2, "=")) continue;
+    const init = tokens[i + 3];
+    if (isPunct(i + 3, "[")) literalKind.set(tokens[i + 1].value, "array");
+    else if (init?.type === "str" || init?.type === "tpl") literalKind.set(tokens[i + 1].value, "string");
+  }
   const callbackRetained = (open: number): boolean => {
     const callee = tokens[open - 1];
     if (callee?.type !== "ident") return true;
@@ -270,6 +289,9 @@ function functionScopes(tokens: ReturnType<typeof tokenize>, match: Map<number, 
     if (recv.type === "ident") {
       if (recv.value === "Array") return callee.value !== "from";
       if (recv.value === "Object") return !(callee.value === "fromEntries" || callee.value === "groupBy");
+      const kind = isPunct(open - 4, ".") ? undefined : literalKind.get(recv.value);
+      if (kind === "string") return !(callee.value === "replace" || callee.value === "replaceAll");
+      if (kind === "array") return callee.value === "replace" || callee.value === "replaceAll" || callee.value === "from" || callee.value === "fromEntries" || callee.value === "groupBy";
       return true;
     }
     if (isPunct(open - 3, "]")) {
@@ -775,11 +797,9 @@ function sharedUnit(scope: readonly TsBlock[], k: number): TsUnit {
     // Shared runs turn top-level bindings into reassignable globals
     // (liveJsScope.hoistTopLevelBindings): `const` → `let`, same length.
     text = constAsLet(text);
-    const wrap = i === k && b.live && needsLiveWrap(b.code);
-    if (wrap) code += LIVE_WRAP_OPEN;
+    if (b.live) text = neutraliseTopLevelReturns(text);
     parts.push({ block: b, offset: code.length });
     code += text;
-    if (wrap) code += LIVE_WRAP_CLOSE;
   }
   return { id: own.id, code, tsx: false, js: true, shared: true, parts };
 }

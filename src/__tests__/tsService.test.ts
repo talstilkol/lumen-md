@@ -243,6 +243,17 @@ describe("JavaScript blocks and shared scopes", () => {
     expect(diags).toEqual([]);
   });
 
+  it("callbacks on locally declared array / string literals run now", () => {
+    const { units, diags } = checkShared(
+      "const value = 1; const xs = [0]; const saved = xs.map(() => value)[0]; const s = 'a'; const t = s.replace('a', () => String(value)); const later = { map: (f) => f };",
+      "// @ts-check\nconst value = 'x';\nsaved.toFixed();",
+    );
+    const first = units[1].code.split("\n;\n")[0];
+    expect(first).toContain("xs.map(() => value$prev)");
+    expect(first).toContain("s.replace('a', () => String(value$prev))");
+    expect(diags).toEqual([]);
+  });
+
   it("a directly invoked function expression runs with that time's value", () => {
     const { units, diags } = checkShared(
       "const value = 1; const result = function () { return value; }(); function decl() { return value; }\n(0);",
@@ -272,9 +283,16 @@ describe("JavaScript blocks and shared scopes", () => {
       .diagnostics(awaiting.map(({ id, tsx, js, shared, code }) => ({ id, tsx, js, shared, code })))
       .filter((d) => unitRangeToDoc(awaiting[1], d.start, d.length) !== null);
     expect(awaitDiags.map((d) => d.code)).toEqual([2551]);
-    // A top-level return needs the async wrapper.
-    const returning = toUnits(findTsBlocks(doc.replace("read().toFixed();", "if (read()) return;")));
-    expect(returning[1].code).toContain("(async () => {");
+    // A top-level return is neutralised in place (same length), not
+    // wrapped: the block's bindings stay visible to earlier closures.
+    const retDoc = doc.replace("read().toFixed();", "read().toFixed();\nif (read()) return;\nreturn value;");
+    const returning = toUnits(findTsBlocks(retDoc));
+    expect(returning[1].code).not.toContain("async () =>");
+    expect(returning[1].code).toContain("if (read()) void 0;\nvoid   value;");
+    const retDiags = service
+      .diagnostics(returning.map(({ id, tsx, js, shared, code }) => ({ id, tsx, js, shared, code })))
+      .filter((d) => unitRangeToDoc(returning[1], d.start, d.length) !== null);
+    expect(retDiags.map((d) => d.code)).toEqual([2551]);
   });
 
   it("parameters, a function's own name and its locals keep their binding", () => {
