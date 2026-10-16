@@ -113,7 +113,7 @@ const suggestionPlugin = ViewPlugin.fromClass(
               content: `Complete: "${context}"`,
             },
           ],
-          { maxTokens: 40, temperature: 0.3, ownPrompt: "silent" },
+          { maxTokens: 40, temperature: 0.3, ownPrompt: "silent", tier: "light" },
         );
 
         if (signal.aborted) return;
