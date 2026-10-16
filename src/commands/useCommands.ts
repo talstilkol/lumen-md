@@ -1156,6 +1156,11 @@ export function useCommands({
             { id: "billing.upgradePro", label: t("cmd.billing.upgradePro"), action: () => void upgradeTo("pro") },
             { id: "billing.upgradeTeam", label: t("cmd.billing.upgradeTeam"), action: () => void upgradeTo("team") },
             { id: "billing.manage", label: t("cmd.billing.manage"), action: () => void manageBilling() },
+            {
+              id: "billing.managePersonal",
+              label: t("cmd.billing.managePersonal"),
+              action: () => void manageBilling("personal"),
+            },
           ].map((c) => ({ ...c, icon: cmdIcons.Sparkles, group: t("group.tools") }))
         : []),
       // ── AI Capabilities ──────────────────────────────────────────────────

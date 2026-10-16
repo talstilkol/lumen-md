@@ -454,4 +454,27 @@ describe("seeding with a persistent (y-websocket) server", () => {
       ws.WebsocketProvider.withSync = false;
     }
   });
+
+  it("falls back to WebRTC-only seeding when the server never syncs (offline)", async () => {
+    localStorage.setItem("lumen.collab.ws", "ws://localhost:4444");
+    const ws = (await import(/* @vite-ignore */ "y-websocket")) as unknown as {
+      WebsocketProvider: { withSync: boolean };
+    };
+    ws.WebsocketProvider.withSync = true;
+    try {
+      const mod = await import("../collab/yjs");
+      vi.useFakeTimers();
+      const session = mod.connectCollab("lumen-offline-server", "local draft");
+      for (let i = 0; i < 20 && !session.websocketProvider; i++) await vi.advanceTimersByTimeAsync(1);
+      expect(session.websocketProvider).not.toBeNull();
+      (session.provider as unknown as MockProvider).emit("synced", [{ synced: true }]);
+      expect(session.ytext.toString()).toBe("");
+      vi.advanceTimersByTime(mod.PERSISTENT_SYNC_TIMEOUT_MS);
+      expect(session.ytext.toString()).toBe("local draft");
+      session.destroy();
+    } finally {
+      vi.useRealTimers();
+      ws.WebsocketProvider.withSync = false;
+    }
+  });
 });

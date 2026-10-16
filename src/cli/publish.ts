@@ -65,14 +65,30 @@ export const PUBLISH_CSS = [
 
 const toPosix = (p: string) => p.split(sep).join("/");
 
-/** Rewrite relative `href="….md(#frag)"` links in rendered HTML to `.html`. */
-export function rewriteMarkdownLinks(html: string): string {
+/**
+ * Rewrite relative `href="….md(#frag)"` links in rendered HTML to `.html`.
+ * `fromOutput` is the linking page's output path (e.g. `docs/a.html`): a
+ * link that resolves to the site's root index — any casing, `INDEX.md`,
+ * `Index.markdown` — becomes `index.html`, the name publication writes.
+ */
+export function rewriteMarkdownLinks(html: string, fromOutput = "index.html"): string {
+  const fromDir = fromOutput.split("/").slice(0, -1);
   return html.replace(/(\shref=")([^"]*)"/g, (whole, pre: string, href: string) => {
     // Leave absolute URLs (scheme:, //host, /root) and pure fragments alone.
     if (/^([a-z][a-z0-9+.-]*:|\/\/|\/|#)/i.test(href)) return whole;
     const m = /^([^?#]*?)\.(md|markdown)((?:[?#].*)?)$/i.exec(href);
     if (!m) return whole;
-    return `${pre}${m[1]}.html${m[3]}"`;
+    let target = `${m[1]}.html`;
+    // Resolve against the page's folder to spot the root index.
+    const parts = [...fromDir];
+    for (const seg of m[1].split("/")) {
+      if (seg === "..") parts.pop();
+      else if (seg !== "." && seg !== "") parts.push(seg);
+    }
+    if (parts.length === 1 && parts[0].toLowerCase() === "index") {
+      target = m[1].replace(/[^/]+$/, "index") + ".html";
+    }
+    return `${pre}${target}${m[3]}"`;
   });
 }
 
@@ -200,7 +216,7 @@ export async function publishSite(
       head: `\n<link rel="stylesheet" href="${up}style.css" />`,
       before: nav,
     });
-    html = rewriteMarkdownLinks(html);
+    html = rewriteMarkdownLinks(html, p.output);
     if (isIndex && listed.length) {
       html = appendToMain(html, pageList(listed));
     }

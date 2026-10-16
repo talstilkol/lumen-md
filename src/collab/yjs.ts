@@ -17,6 +17,13 @@ export interface CollabUser {
  * the optional `y-websocket` package doesn't have to be bundled for users on
  * the WebRTC-only path.
  */
+/**
+ * How long join-time seeding waits for a configured persistent server to
+ * deliver the room's history before falling back to WebRTC-only seeding
+ * (server offline / unreachable).
+ */
+export const PERSISTENT_SYNC_TIMEOUT_MS = 8000;
+
 interface WebsocketLike {
   destroy(): void;
   /** y-websocket: true once the server's state has been applied. */
@@ -297,12 +304,23 @@ export function connectCollab(
       websocketProvider = p;
       if (!p) return settlePersistent("none"); // package missing / attach failed
       if (p.synced || typeof p.on !== "function") return settlePersistent("ready");
-      const onSync = (isSynced: boolean) => {
-        if (!isSynced) return;
+      // An unreachable server never emits `sync`: bound the wait, and give up
+      // early on a connection error, then fall back to WebRTC-only seeding.
+      let giveUp: ReturnType<typeof setTimeout> | null = null;
+      const finish = (state: "none" | "ready") => {
+        if (giveUp) clearTimeout(giveUp);
+        giveUp = null;
         p.off?.("sync", onSync);
-        settlePersistent("ready");
+        p.off?.("connection-error" as "sync", onError);
+        settlePersistent(state);
       };
+      const onSync = (isSynced: boolean) => {
+        if (isSynced) finish("ready");
+      };
+      const onError = () => finish("none");
       p.on("sync", onSync);
+      p.on("connection-error" as "sync", onError);
+      giveUp = setTimeout(() => finish("none"), PERSISTENT_SYNC_TIMEOUT_MS);
     });
   }
 

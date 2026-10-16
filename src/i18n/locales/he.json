@@ -918,5 +918,6 @@
   "billing.action.failed": "החיוב אינו זמין כרגע",
   "cmd.billing.upgradePro": "חיוב: שדרוג ל-Pro",
   "cmd.billing.upgradeTeam": "חיוב: שדרוג ל-Team",
-  "cmd.billing.manage": "חיוב: ניהול מנוי"
+  "cmd.billing.manage": "חיוב: ניהול מנוי",
+  "cmd.billing.managePersonal": "חיוב: ניהול מנוי אישי"
 }

@@ -40,7 +40,16 @@ describe("UpgradeNotice actions", () => {
     useAuth.setState({ provider: { ...provider, getAccessToken: async () => "jwt-2" } });
     render(<UpgradeNotice plan="team" message="x" />);
     fireEvent.click(screen.getByTestId("manage-billing"));
-    await waitFor(() => expect(openBillingPortal).toHaveBeenCalledWith("jwt-2"));
+    await waitFor(() => expect(openBillingPortal).toHaveBeenCalledWith("jwt-2", {}));
+    useAuth.setState({ provider });
+  });
+
+  it("can open the personal plan's portal explicitly (dual subscribers)", async () => {
+    const { manageBilling } = await import("../billing/planActions");
+    const provider = useAuth.getState().provider;
+    useAuth.setState({ provider: { ...provider, getAccessToken: async () => "jwt-3" } });
+    await manageBilling("personal");
+    expect(openBillingPortal).toHaveBeenCalledWith("jwt-3", { scope: "personal" });
     useAuth.setState({ provider });
   });
 });

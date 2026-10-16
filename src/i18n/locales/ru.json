@@ -918,5 +918,6 @@
   "billing.action.failed": "Оплата сейчас недоступна",
   "cmd.billing.upgradePro": "Оплата: перейти на Pro",
   "cmd.billing.upgradeTeam": "Оплата: перейти на Team",
-  "cmd.billing.manage": "Оплата: управление подпиской"
+  "cmd.billing.manage": "Оплата: управление подпиской",
+  "cmd.billing.managePersonal": "Оплата: управление личной подпиской"
 }

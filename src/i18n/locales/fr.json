@@ -918,5 +918,6 @@
   "billing.action.failed": "La facturation est indisponible pour le moment",
   "cmd.billing.upgradePro": "Facturation : passer à Pro",
   "cmd.billing.upgradeTeam": "Facturation : passer à Team",
-  "cmd.billing.manage": "Facturation : gérer l'abonnement"
+  "cmd.billing.manage": "Facturation : gérer l'abonnement",
+  "cmd.billing.managePersonal": "Facturation : gérer l'abonnement personnel"
 }

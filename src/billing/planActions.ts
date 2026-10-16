@@ -43,8 +43,11 @@ export async function upgradeTo(tier: Exclude<PlanTier, "free">): Promise<void> 
   }
 }
 
-/** Open the Stripe billing portal for the signed-in user. */
-export async function manageBilling(): Promise<void> {
+/**
+ * Open the Stripe billing portal for the signed-in user. `personal` opens
+ * their own plan even when they also bought their organization's Team plan.
+ */
+export async function manageBilling(scope?: "personal"): Promise<void> {
   const jwt = await accessToken();
   if (!jwt) {
     toast.info(t("billing.action.signInFirst"));
@@ -52,7 +55,7 @@ export async function manageBilling(): Promise<void> {
   }
   try {
     const { openBillingPortal } = await import("./checkout");
-    await openBillingPortal(jwt);
+    await openBillingPortal(jwt, scope ? { scope } : {});
   } catch (err) {
     toast.error(t("billing.action.failed"), (err as Error).message);
   }

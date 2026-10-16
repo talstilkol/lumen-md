@@ -853,6 +853,7 @@ const en: Strings = {
   "cmd.billing.upgradePro": "Billing: Upgrade to Pro",
   "cmd.billing.upgradeTeam": "Billing: Upgrade to Team",
   "cmd.billing.manage": "Billing: Manage subscription",
+  "cmd.billing.managePersonal": "Billing: Manage personal subscription",
   "billing.upgrade.smartSearch": "Smart search (semantic, embedding-based) is a Pro feature. Keyword search stays available.",
   "collab.persistent.label": "Persistent server (y-websocket)",
   "collab.persistent.hint": "Optional. Keeps documents synced when no peer is online.",

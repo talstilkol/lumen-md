@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-10-16T06:01:39.991Z",
+  "generated_at": "2026-10-16T06:27:58.759Z",
   "source": "src/i18n/index.ts (en bundle)",
-  "count": 920,
+  "count": 921,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -3895,6 +3895,11 @@
     {
       "key": "cmd.billing.manage",
       "en": "Billing: Manage subscription",
+      "vars": []
+    },
+    {
+      "key": "cmd.billing.managePersonal",
+      "en": "Billing: Manage personal subscription",
       "vars": []
     },
     {

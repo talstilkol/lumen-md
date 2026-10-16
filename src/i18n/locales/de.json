@@ -918,5 +918,6 @@
   "billing.action.failed": "Die Abrechnung ist gerade nicht verfügbar",
   "cmd.billing.upgradePro": "Abrechnung: Auf Pro upgraden",
   "cmd.billing.upgradeTeam": "Abrechnung: Auf Team upgraden",
-  "cmd.billing.manage": "Abrechnung: Abo verwalten"
+  "cmd.billing.manage": "Abrechnung: Abo verwalten",
+  "cmd.billing.managePersonal": "Abrechnung: Persönliches Abo verwalten"
 }

@@ -918,5 +918,6 @@
   "billing.action.failed": "الفوترة غير متاحة حالياً",
   "cmd.billing.upgradePro": "الفوترة: الترقية إلى Pro",
   "cmd.billing.upgradeTeam": "الفوترة: الترقية إلى Team",
-  "cmd.billing.manage": "الفوترة: إدارة الاشتراك"
+  "cmd.billing.manage": "الفوترة: إدارة الاشتراك",
+  "cmd.billing.managePersonal": "الفوترة: إدارة الاشتراك الشخصي"
 }

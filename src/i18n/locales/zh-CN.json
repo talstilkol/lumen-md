@@ -918,5 +918,6 @@
   "billing.action.failed": "账单功能暂不可用",
   "cmd.billing.upgradePro": "账单：升级到 Pro",
   "cmd.billing.upgradeTeam": "账单：升级到 Team",
-  "cmd.billing.manage": "账单：管理订阅"
+  "cmd.billing.manage": "账单：管理订阅",
+  "cmd.billing.managePersonal": "账单：管理个人订阅"
 }

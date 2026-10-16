@@ -33,6 +33,15 @@ describe("rewriteMarkdownLinks", () => {
         '<a href="https://e.com/x.md">e</a><a href="/abs.md">f</a><a href="#h">g</a><a href="img.png">i</a>',
     );
   });
+
+  it("points links to the root index (any casing) at the lowercase index.html", () => {
+    expect(rewriteMarkdownLinks('<a href="INDEX.md">h</a>', "about.html")).toBe('<a href="index.html">h</a>');
+    expect(rewriteMarkdownLinks('<a href="../Index.markdown#top">h</a>', "docs/a.html")).toBe(
+      '<a href="../index.html#top">h</a>',
+    );
+    // A nested INDEX.md is not the root index: keep its own name.
+    expect(rewriteMarkdownLinks('<a href="INDEX.md">h</a>', "docs/a.html")).toBe('<a href="INDEX.html">h</a>');
+  });
 });
 
 describe("pageTitle", () => {

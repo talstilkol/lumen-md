@@ -918,5 +918,6 @@
   "billing.action.failed": "現在、請求機能を利用できません",
   "cmd.billing.upgradePro": "請求: Pro にアップグレード",
   "cmd.billing.upgradeTeam": "請求: Team にアップグレード",
-  "cmd.billing.manage": "請求: サブスクリプションを管理"
+  "cmd.billing.manage": "請求: サブスクリプションを管理",
+  "cmd.billing.managePersonal": "請求: 個人のサブスクリプションを管理"
 }
