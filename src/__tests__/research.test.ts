@@ -188,6 +188,24 @@ describe("research agent", () => {
     await expect(runResearch({ question: "x", deps: { settings: { provider: "claude", key: "" } } })).rejects.toThrow(/Anthropic provider/);
   });
 
+  it("finishes a paused turn with searching off once the budget is spent", async () => {
+    localStorage.clear();
+    localStorage.setItem("lumen.ai.key.anthropic", "a-key");
+    const bodies: Array<{ tool_choice?: unknown }> = [];
+    const replies = [
+      { stop_reason: "pause_turn", content: [{ type: "server_tool_use", id: "s1" }], usage: { input_tokens: 1, output_tokens: 1, server_tool_use: { web_search_requests: 5 } } },
+      { stop_reason: "end_turn", content: [{ type: "text", text: "Answer.", citations: [] }], usage: { input_tokens: 1, output_tokens: 1 } },
+    ];
+    vi.stubGlobal("fetch", vi.fn(async (_u: string, init?: RequestInit) => {
+      bodies.push(JSON.parse(String(init!.body)));
+      return new Response(JSON.stringify(replies.shift()));
+    }));
+    const blocks = await anthropicWebResearch([{ role: "user", content: "q?" }], { maxSearches: 5 });
+    expect(blocks.map((b) => b.text)).toEqual(["Answer."]);
+    expect(bodies[1].tool_choice).toEqual({ type: "none" });
+    vi.unstubAllGlobals();
+  });
+
   it("continues a paused Claude search turn and prices the searches", async () => {
     localStorage.clear();
     localStorage.setItem("lumen.ai.key.anthropic", "a-key");
@@ -208,6 +226,7 @@ describe("research agent", () => {
     expect(bodies[0].model).toBe("claude-sonnet-4-5"); // 3.x can't use web search
     expect(bodies[1].messages).toHaveLength(2); // the paused assistant turn is sent back
     expect((bodies[1] as unknown as { tools: Array<{ max_uses: number }> }).tools[0].max_uses).toBe(2); // 5 - 3 already used
+    expect((bodies[1] as unknown as { tool_choice?: unknown }).tool_choice).toBeUndefined();
     expect(usage[0]).toMatchObject({ webSearches: 3 });
     expect(costOf({ provider: "anthropic", model: "claude-sonnet-4-5", inputTokens: 0, outputTokens: 0, webSearches: 3 })).toBeCloseTo(0.03, 6);
     vi.unstubAllGlobals();

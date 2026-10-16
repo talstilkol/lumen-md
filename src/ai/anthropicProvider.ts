@@ -222,8 +222,10 @@ export async function anthropicWebResearch(
     // `max_uses` applies per request: carry the remaining budget over, and
     // stop continuing once the run's searches are spent.
     searched += Number(data.usage?.server_tool_use?.web_search_requests) || 0;
-    if (searched >= maxSearches) break;
-    tool.max_uses = maxSearches - searched;
+    // Budget spent: still continue the paused turn (it isn't finished), but
+    // with searching switched off so the answer gets written.
+    if (searched >= maxSearches) body.tool_choice = { type: "none" };
+    else tool.max_uses = maxSearches - searched;
     body.messages = [...body.messages, { role: "assistant", content: data.content }];
   }
   const blocks: CitedBlock[] = [];
