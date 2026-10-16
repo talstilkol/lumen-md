@@ -421,8 +421,8 @@ function untrackable(tr: Transaction): boolean {
     if ($from.parent.type.spec.code && $from.sameParent(before.resolve(to))) return false;
     if (slice.size > 0 && isStructural(slice) && !$from.parent.type.spec.code) return true;
     if (to > from) {
-      CRITIC_DELIM.lastIndex = 0;
-      if (CRITIC_DELIM.test(before.textBetween(from, to, "\n", "\ufffc"))) return true;
+      // `match` (not `test`) leaves the shared global regex's lastIndex alone.
+      if (before.textBetween(from, to, "\n", "\ufffc").match(CRITIC_DELIM)) return true;
     }
     return false;
   });
