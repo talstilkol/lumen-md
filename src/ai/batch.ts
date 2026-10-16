@@ -300,7 +300,10 @@ export function frontmatterTags(content: string): string[] {
 /** Existing tags plus new ones (no duplicates), written as one inline array. */
 export function mergeTags(content: string, tags: readonly string[]): string {
   const all = [...new Set([...frontmatterTags(content), ...tags])];
-  return setFrontmatterField(content, "tags", `[${all.join(", ")}]`);
+  // Plain tags stay bare; anything YAML could misread (spaces, `:`, `#`,
+  // brackets, quotes…) is quoted.
+  const yaml = (t: string) => (/^[\p{L}\p{N}_./-]+$/u.test(t) && !/^[-.]/.test(t) ? t : JSON.stringify(t));
+  return setFrontmatterField(content, "tags", `[${all.map(yaml).join(", ")}]`);
 }
 
 /**

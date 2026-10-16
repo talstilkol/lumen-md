@@ -873,7 +873,8 @@ export function useCommands({
           for (const n of notes) {
             const r = batch.requestFor(op, n.text, lang);
             input += estimateTokens(r.system + r.user);
-            output += op === "translate" ? estimateTokens(n.text) : r.maxTokens / 2;
+            // A translation is about as long as the (possibly truncated) text sent.
+            output += op === "translate" ? Math.min(r.maxTokens, estimateTokens(r.user)) : r.maxTokens / 2;
           }
           const usd = costOf({ provider, model, inputTokens: input, outputTokens: output, batch: true });
           const ok = await uiConfirm({
