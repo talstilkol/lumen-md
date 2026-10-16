@@ -260,6 +260,32 @@ describe("aiQuota counter", () => {
     expect(getAiUsage(now)).toBe(1);
   });
 
+  it("a prepaid request while a command waits leaves the command's own charge intact", async () => {
+    __setEntitlementEndpointForTesting(ENDPOINT);
+    vi.stubGlobal("fetch", vi.fn(async () => new Response("{}", { status: 500 })));
+    const { chat } = await import("../ai/llm");
+    const now = new Date();
+    let resume!: () => void;
+    const dialog = new Promise<void>((r) => (resume = r));
+    const translate = withAiQuota([
+      {
+        id: "ai.translate",
+        action: async () => {
+          await dialog; // user still typing the language
+          chargeAiCommandDispatch(now); // the command's own model call
+        },
+      },
+    ]);
+    const running = translate[0].action() as unknown as Promise<void>;
+    // e.g. the AI commit message counts itself and dispatches as prepaid.
+    expect(consumeAiPrompt(now)).toBe(true);
+    await chat([{ role: "user", content: "x" }], { prepaid: true, maxTokens: 1 }).catch(() => {});
+    resume();
+    await running;
+    expect(getAiUsage(now)).toBe(2); // two model requests, two prompts
+    vi.unstubAllGlobals();
+  });
+
   it("counts and enforces AI requests made outside the palette (commit message, voice memo, …)", () => {
     __setEntitlementEndpointForTesting(ENDPOINT);
     const now = new Date();

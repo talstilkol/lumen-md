@@ -139,10 +139,13 @@ export class AiQuotaExceededError extends Error {
  *  - A running palette command that hasn't dispatched yet pays for it
  *    (palette commands are modal, one at a time); its follow-up calls are
  *    free.
- *  - Anything else — an AI request from outside the palette (voice-memo
- *    summary, AI commit message, …) — is enforced and counted here, so no
- *    path bypasses the monthly limit. Throws AiQuotaExceededError when the
- *    quota is spent.
+ *  - Known non-palette callers (inline suggestions, Ask Workspace,
+ *    voice-memo summary, AI commit message, …) count themselves with
+ *    consumeAiPrompt and dispatch as `prepaid`, so they never take a
+ *    waiting command's reservation.
+ *  - Anything else with no running command is enforced and counted here
+ *    (safety net), so no path bypasses the monthly limit. Throws
+ *    AiQuotaExceededError when the quota is spent.
  */
 export function chargeAiCommandDispatch(now: Date = new Date()): void {
   if (armedCommands.length) {

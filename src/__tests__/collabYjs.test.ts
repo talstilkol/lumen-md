@@ -12,11 +12,25 @@ vi.mock("y-websocket", () => {
   const instances: unknown[] = [];
   class WebsocketProvider {
     static instances: unknown[] = instances;
+    /** Set by a test to model y-websocket's sync handshake; plain stubs settle at once. */
+    static withSync = false;
     destroy = vi.fn(() => {
       return;
     });
+    synced = false;
+    syncListeners = new Set<(s: boolean) => void>();
+    on?: (e: string, fn: (s: boolean) => void) => void;
+    off?: (e: string, fn: (s: boolean) => void) => void;
     constructor() {
       WebsocketProvider.instances.push(this);
+      if (WebsocketProvider.withSync) {
+        this.on = (_e, fn) => this.syncListeners.add(fn);
+        this.off = (_e, fn) => this.syncListeners.delete(fn);
+      }
+    }
+    emitSync(v: boolean) {
+      this.synced = v;
+      this.syncListeners.forEach((fn) => fn(v));
     }
   }
   return { WebsocketProvider };
@@ -390,5 +404,54 @@ describe("connectCollab join-time seeding", () => {
     session.destroy();
     expect(p.listeners.get("synced")?.size ?? 0).toBe(0);
     expect(vi.getTimerCount()).toBe(0);
+  });
+});
+
+describe("seeding with a persistent (y-websocket) server", () => {
+  afterEach(() => {
+    localStorage.removeItem("lumen.collab.ws");
+  });
+
+  it("waits for the server's sync before seeding, and doesn't seed over its history", async () => {
+    localStorage.setItem("lumen.collab.ws", "ws://localhost:4444");
+    const ws = (await import(/* @vite-ignore */ "y-websocket")) as unknown as {
+      WebsocketProvider: { withSync: boolean; instances: { emitSync(v: boolean): void }[] };
+    };
+    ws.WebsocketProvider.withSync = true;
+    try {
+      const mod = await import("../collab/yjs");
+      const session = mod.connectCollab("lumen-persisted", "local draft");
+      const p = session.provider as unknown as MockProvider;
+      p.emit("synced", [{ synced: true }]); // WebRTC: alone, nothing from peers
+      expect(session.ytext.toString()).toBe(""); // not seeded yet: server pending
+      await vi.waitFor(() => expect(session.websocketProvider).not.toBeNull());
+      // Server delivers the room's history, then reports synced.
+      session.ytext.insert(0, "server history");
+      ws.WebsocketProvider.instances.at(-1)!.emitSync(true);
+      expect(session.ytext.toString()).toBe("server history"); // no merge with the local draft
+      session.destroy();
+    } finally {
+      ws.WebsocketProvider.withSync = false;
+    }
+  });
+
+  it("seeds once the server reports an empty room", async () => {
+    localStorage.setItem("lumen.collab.ws", "ws://localhost:4444");
+    const ws = (await import(/* @vite-ignore */ "y-websocket")) as unknown as {
+      WebsocketProvider: { withSync: boolean; instances: { emitSync(v: boolean): void }[] };
+    };
+    ws.WebsocketProvider.withSync = true;
+    try {
+      const mod = await import("../collab/yjs");
+      const session = mod.connectCollab("lumen-empty-persisted", "local draft");
+      (session.provider as unknown as MockProvider).emit("synced", [{ synced: true }]);
+      await vi.waitFor(() => expect(session.websocketProvider).not.toBeNull());
+      expect(session.ytext.toString()).toBe("");
+      ws.WebsocketProvider.instances.at(-1)!.emitSync(true);
+      expect(session.ytext.toString()).toBe("local draft");
+      session.destroy();
+    } finally {
+      ws.WebsocketProvider.withSync = false;
+    }
   });
 });

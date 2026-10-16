@@ -62,12 +62,16 @@ export async function generateAiCommitMessage(
 
     if (!changes) return "";
 
+    // Counted here (prepaid), never billed to a palette command that may be
+    // waiting in a dialog at the same time.
+    const { consumeAiPrompt } = await import("../billing/aiQuota");
+    if (!consumeAiPrompt()) return "";
     return await chat(
       [
         { role: "system", content: PROMPTS.commitMessage },
         { role: "user", content: `Changes:\n${changes}` },
       ],
-      { maxTokens: 30 },
+      { maxTokens: 30, prepaid: true },
     );
   } catch (e) {
     log.warn("AI commit generation skipped", e);

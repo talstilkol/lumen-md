@@ -145,12 +145,16 @@ type PipelineLoader = (
  */
 export async function summarizeMemo(transcript: string): Promise<string> {
   if (!transcript.trim()) return "";
+  // Counted by this caller (not attributed to a palette command that may be
+  // waiting in a dialog at the same time).
+  const { consumeAiPrompt } = await import("../billing/aiQuota");
+  if (!consumeAiPrompt()) return "";
   return chat(
     [
       { role: "system", content: PROMPTS.summarize },
       { role: "user", content: transcript },
     ],
-    { maxTokens: 120 },
+    { maxTokens: 120, prepaid: true },
   );
 }
 

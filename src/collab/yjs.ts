@@ -19,6 +19,10 @@ export interface CollabUser {
  */
 interface WebsocketLike {
   destroy(): void;
+  /** y-websocket: true once the server's state has been applied. */
+  synced?: boolean;
+  on?(event: "sync", fn: (isSynced: boolean) => void): void;
+  off?(event: "sync", fn: (isSynced: boolean) => void): void;
 }
 
 export interface CollabSession {
@@ -274,6 +278,16 @@ export function connectCollab(
   // lets late joiners see history even when no other peer is online.
   const wsUrl = getWebsocketUrl();
   let websocketProvider: WebsocketLike | null = null;
+  // While a persistent server is configured but hasn't delivered its state,
+  // the room may hold history that no WebRTC peer has — seeding then would
+  // merge the local document into it. Seeding waits for this to settle.
+  let persistent: "none" | "pending" | "ready" = wsUrl ? "pending" : "none";
+  let onPersistentSettled: (() => void) | null = null;
+  const settlePersistent = (state: "none" | "ready") => {
+    if (persistent !== "pending") return;
+    persistent = state;
+    onPersistentSettled?.();
+  };
   if (wsUrl) {
     void attachWebsocketProvider(wsUrl, roomName, syncedDoc).then((p) => {
       if (destroyed) {
@@ -281,6 +295,14 @@ export function connectCollab(
         return;
       }
       websocketProvider = p;
+      if (!p) return settlePersistent("none"); // package missing / attach failed
+      if (p.synced || typeof p.on !== "function") return settlePersistent("ready");
+      const onSync = (isSynced: boolean) => {
+        if (!isSynced) return;
+        p.off?.("sync", onSync);
+        settlePersistent("ready");
+      };
+      p.on("sync", onSync);
     });
   }
 
@@ -321,6 +343,13 @@ export function connectCollab(
       return conns === 0 && provider.awareness.getStates().size <= 1;
     };
     const maybeSeed = () => {
+      if (persistent === "pending") {
+        // Decide once the persistent server has answered (its history may
+        // be the room's only copy).
+        onPersistentSettled = maybeSeed;
+        return;
+      }
+      onPersistentSettled = null;
       // In E2E rooms ciphertext may have arrived but not finished
       // decrypting -- treat any envelope as "room has content".
       const envelopesPending = (e2e?.envelopeCount() ?? 0) > 0;
@@ -373,6 +402,7 @@ export function connectCollab(
     user,
     destroy() {
       destroyed = true;
+      onPersistentSettled = null;
       stopSeedWait();
       if (stopSnapshots) {
         stopSnapshots();
