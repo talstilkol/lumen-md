@@ -150,6 +150,18 @@ describe("tracking edits while suggesting", () => {
     expect(a.md()).toBe("Say {++hello big there++}{>>@Alice<<} now.");
   });
 
+  it("refuses insertions that would form a CriticMarkup delimiter", async () => {
+    const e = await open("Hello world.", true);
+    e.select(e.at(" world"));
+    e.type("a++}b");
+    expect(e.md()).toBe("Hello world.");
+    // Typed one character at a time: the last one completes `++}`.
+    const t = await open("Hello world.", true);
+    t.select(t.at(" world"));
+    for (const ch of "x++}") t.type(ch);
+    expect(t.md()).toBe("Hello{++x++++}{>>@Tal<<} world.");
+  });
+
   it("deleting your own suggested insertion really deletes it", async () => {
     const e = await open("Hello world.", true);
     e.select(e.at(" world"));

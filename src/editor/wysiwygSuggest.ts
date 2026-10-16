@@ -370,6 +370,29 @@ interface Change {
 }
 
 /** A slice that adds or splits blocks rather than only inline content. */
+/** CriticMarkup delimiters: typed inside a suggestion they'd end or nest it. */
+const CRITIC_DELIM = /\{(?:\+\+|--|~~|==|>>)|(?:\+\+|--|~~|==|<<)\}|~>/g;
+
+/**
+ * True when text inserted at [from, to) would form a CriticMarkup
+ * delimiter with itself or its neighbours: serialized as `{++…++}`, such
+ * an insertion couldn't be read back as one suggestion (source mode
+ * refuses the same edits).
+ */
+function formsDelimiter(doc: EditorState["doc"], from: number, to: number): boolean {
+  const $from = doc.resolve(from);
+  if (!$from.parent.isTextblock || $from.parent.type.spec.code) return false;
+  const start = Math.max($from.start(), from - 2);
+  const end = Math.min($from.end(), to + 2);
+  if (to > end) return false;
+  const text = doc.textBetween(start, end, "\n", "\ufffc");
+  for (const m of text.matchAll(CRITIC_DELIM)) {
+    const a = start + m.index!;
+    if (a < to && a + m[0].length > from) return true;
+  }
+  return false;
+}
+
 function isStructural(slice: Slice): boolean {
   if (slice.openStart > 0 || slice.openEnd > 0) return true;
   let block = false;
@@ -432,8 +455,9 @@ export function trackChanges(
     const insertedEnd = tr.mapping.map(c.toEnd.map(c.from + c.insertedSize, 1), 1);
     // 1. Insertions are suggested. Structural ones (a new paragraph, a
     //    multi-block paste) can't be expressed as CriticMarkup or undone
-    //    by Reject, so they are blocked, like structural deletions.
-    if (insertedEnd > at && c.structural) {
+    //    by Reject, so they are blocked, like structural deletions — and
+    //    so is text that would form a CriticMarkup delimiter (`a++}b`).
+    if (insertedEnd > at && (c.structural || formsDelimiter(tr.doc, at, insertedEnd))) {
       tr.delete(at, insertedEnd);
     } else if (insertedEnd > at) {
       tr.removeMark(at, insertedEnd, del);
