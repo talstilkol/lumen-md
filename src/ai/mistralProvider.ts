@@ -56,9 +56,9 @@ export async function chatMistral(
     throw new AiError("API_ERROR", `Mistral ${res.status}: ${b.slice(0, 200)}`);
   }
   const data = await res.json();
+  reportOpenAiUsage(data.usage, data.model ?? getMistralModel(opts), opts, "mistral");
   const text = data.choices?.[0]?.message?.content?.trim();
   if (!text) throw new AiError("PARSE_ERROR", "Empty Mistral response.");
-  reportOpenAiUsage(data.usage, data.model ?? getMistralModel(opts), opts, "mistral");
   return text;
 }
 
