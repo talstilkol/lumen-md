@@ -13,13 +13,21 @@ export function readRoomFromHash(): string | null {
   return m?.[1] ?? null;
 }
 
+/**
+ * Write `#room=<name>` into the URL, KEEPING a `password=` fragment that
+ * was there (the documented `#room=…&password=…` join link). Dropping it
+ * would lose the room password on refresh — the session would then attach
+ * the plaintext document to the providers instead of the encrypted
+ * transport. `null` clears both (the session ended).
+ */
 export function setRoomInHash(name: string | null): void {
   if (typeof location === "undefined") return;
   if (!name) {
-    if (location.hash.startsWith("#room=")) {
+    if (/^#(room|password)=/.test(location.hash) || /[#&]room=/.test(location.hash)) {
       history.replaceState(null, "", location.pathname + location.search);
     }
     return;
   }
-  history.replaceState(null, "", `#room=${name}`);
+  const pw = location.hash.match(/[#&]password=([^&]+)/)?.[1];
+  history.replaceState(null, "", `#room=${name}${pw ? `&password=${pw}` : ""}`);
 }

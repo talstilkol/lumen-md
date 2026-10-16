@@ -163,6 +163,7 @@ export function Toolbar({
   // Export/print commands resolved from the central command list.
   const exportHtmlCmd = commands.find((c) => c.id === "file.exportHtml");
   const exportPdfCmd = commands.find((c) => c.id === "file.exportPdf");
+  const exportPptxCmd = commands.find((c) => c.id === "file.exportPptx");
   const printCmd = commands.find((c) => c.id === "file.print");
 
   return (
@@ -231,6 +232,9 @@ export function Toolbar({
           )}
           {exportPdfCmd && (
             <MenuItem icon={<Download size={14} />} label={t("toolbar.exportPdf")} description={t("desc.exportPdf")} onClick={() => exec(exportPdfCmd.action)} />
+          )}
+          {exportPptxCmd && (
+            <MenuItem icon={<Download size={14} />} label={exportPptxCmd.label} description={exportPptxCmd.hint} onClick={() => exec(exportPptxCmd.action)} />
           )}
           {printCmd && (
             <MenuItem icon={<Printer size={14} />} label={t("toolbar.print")} description={t("desc.print")} hint="⌘P" onClick={() => exec(printCmd.action)} />

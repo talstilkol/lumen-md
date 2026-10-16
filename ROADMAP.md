@@ -1,12 +1,12 @@
 # Lumen Roadmap
 
-> Auto-generated from `MASTER_PLAN.md`. Last refresh: 2026-04-29.
+> Auto-generated from `MASTER_PLAN.md`. Last refresh: 2026-10-16.
 >
-> Vote on items in [GitHub Discussions → Roadmap](https://github.com/lumen-md/lumen/discussions/categories/roadmap).
+> Vote on items in [GitHub Discussions → Roadmap](https://github.com/talstilkol/lumen-md/discussions).
 
 ## Where we are today
 
-Lumen is **#1 by weighted scorecard** (7.78) but the lead is fragile (0.39 over Obsidian).
+Live execution status (what's done, what's blocked on accounts/credentials) is in [`PLAN_STATUS.md`](PLAN_STATUS.md). The phase list below is the long-range plan from `MASTER_PLAN.md`.
 The roadmap below closes the gap to **9.42 / 2.0+ ahead of every competitor**.
 
 ## Phases
@@ -109,6 +109,6 @@ The roadmap below closes the gap to **9.42 / 2.0+ ahead of every competitor**.
 
 ## Want to influence priorities?
 
-1. 👍 the items you care about in [GitHub Discussions](https://github.com/lumen-md/lumen/discussions/categories/roadmap).
+1. 👍 the items you care about in [GitHub Discussions](https://github.com/talstilkol/lumen-md/discussions).
 2. Comment with a use-case — concrete user stories help us scope.
 3. PRs welcome on Phase α + β items (no credentials required); see [CONTRIBUTING.md](CONTRIBUTING.md).

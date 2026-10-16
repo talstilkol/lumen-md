@@ -267,6 +267,7 @@ function buildSlashItems(): SlashItem[] {
               { role: "system", content: PROMPTS.ghostwriter },
               { role: "user", content: promptStr },
             ],
+            { ownPrompt: true },
           );
           // Remove placeholder before streaming
           const removeTr = v.state.tr;
@@ -518,11 +519,13 @@ function buildTooltip(getView: () => EditorView | null): HTMLDivElement {
               { role: "system", content: PROMPTS.rewrite },
               { role: "user", content: `Instruction: ${instructions}\n\nText: ${selectedText}` },
             ],
+            { ownPrompt: true },
           );
           dispatch(state.tr.replaceWith(from, to, state.schema.text(rewritten)));
         } catch (e) {
           log.error("WYSIWYG AI rewrite failed", e);
-          showAiToast("AI Rewrite failed", "error");
+          // A spent quota already showed its own toast.
+          if (!(e instanceof Error && e.name === "AiQuotaExceededError")) showAiToast("AI Rewrite failed", "error");
         }
       },
     },
@@ -582,33 +585,53 @@ export default function WysiwygEditor({ value, onChange }: Props) {
   const viewRef = useRef<EditorView | null>(null);
   const getView = () => viewRef.current;
 
+  // ── Lifecycle sequencing ─────────────────────────────────────────
+  // Milkdown's `create()` and `destroy()` are both async, and
+  // `destroy()` called while another `destroy()` is in flight resolves
+  // immediately (status OnDestroy) — so naive "destroy then create"
+  // effects let two editors mount into the same host at once (rapid
+  // mode switches, StrictMode's mount→unmount→remount, or a value
+  // change landing while the previous rebuild is still awaiting).
+  //
+  // Every lifecycle operation is therefore appended to ONE promise
+  // chain per component instance, and each build carries a generation
+  // number. A build whose generation has been superseded by the time it
+  // runs (or by the time its `create()` resolves) is skipped / torn down,
+  // and unmount bumps the generation and queues the final teardown
+  // behind any in-flight build. Net effect: at most one editor is ever
+  // alive, and destroy never overlaps create.
+  const lifecycleRef = useRef<Promise<void>>(Promise.resolve());
+  const genRef = useRef(0);
+  const enqueue = (op: () => Promise<void>) => {
+    lifecycleRef.current = lifecycleRef.current
+      .then(op)
+      .catch((e) => log.warn("[wysiwyg] lifecycle op threw", e));
+  };
+  const destroyCurrent = async () => {
+    const ed = editorRef.current;
+    editorRef.current = null;
+    if (!ed) return;
+    try {
+      await ed.destroy(true);
+    } catch {
+      /* ignore */
+    }
+  };
+
   useEffect(() => {
     if (!hostRef.current) return;
     // Skip rebuild when the editor already exists and content matches —
     // this short-circuits the typical "user typed, parent re-rendered"
-    // round-trip. Gating on `editorRef.current` (rather than a mounted
-    // flag) means React 18 StrictMode's mount → unmount → remount cycle
-    // still rebuilds on the second mount: the first mount's async
-    // `create()` was torn down by the cleanup, so editorRef is null and
-    // we proceed normally. With a plain mounted-flag the second mount
-    // skipped and the editor never appeared in dev mode.
+    // round-trip.
     if (editorRef.current && lastEmittedRef.current === value) return;
-    let cancelled = false;
+    const gen = ++genRef.current;
     const host = hostRef.current;
 
-    (async () => {
-      if (editorRef.current) {
-        try {
-          await editorRef.current.destroy(true);
-        } catch {
-          /* ignore */
-        }
-        editorRef.current = null;
-      }
-      if (cancelled || !host) {
-        return;
-      }
-      host.innerHTML = "";
+    enqueue(async () => {
+      if (gen !== genRef.current) return; // superseded before it started
+      await destroyCurrent();
+      if (gen !== genRef.current) return;
+      host.replaceChildren();
 
       // Create floating menu DOMs lazily and reuse them.
       if (!slashElRef.current) slashElRef.current = buildSlashMenu(getView);
@@ -625,6 +648,11 @@ export default function WysiwygEditor({ value, onChange }: Props) {
           ctx.set(rootCtx, host);
           ctx.set(defaultValueCtx, body);
           ctx.get(listenerCtx).markdownUpdated((_, md) => {
+            // The listener plugin debounces emissions by 200ms and
+            // nothing cancels that timer on destroy, so a torn-down (or
+            // superseded) editor can still fire here. Forwarding it would
+            // overwrite the store with stale content after a mode switch.
+            if (gen !== genRef.current) return;
             const full = frontmatterRef.current + md;
             lastEmittedRef.current = full;
             onChangeRef.current(full);
@@ -782,42 +810,37 @@ export default function WysiwygEditor({ value, onChange }: Props) {
         .use(tooltip)
         .create();
 
-      if (cancelled) {
-        await editor.destroy(true);
+      if (gen !== genRef.current) {
+        // Superseded (unmount or newer value) while create() was pending.
+        // The queue guarantees nothing else touched the host meanwhile.
+        try {
+          await editor.destroy(true);
+        } catch {
+          /* ignore */
+        }
         return;
       }
       editorRef.current = editor;
       lastEmittedRef.current = value;
-    })().catch((e) => log.warn("[wysiwyg] async build threw", e));
-
-    return () => {
-      cancelled = true;
-    };
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [value]);
 
-  // Final teardown. Wait for the editor's async destroy to resolve before
-  // tearing the menu DOM down — otherwise an in-flight plugin view
-  // callback that's still inside ProseView's constructor would see a
-  // null `slashElRef.current` and `new SlashProvider({content: null})`
-  // would throw on its first debounced update.
+  // Final teardown — queued behind any in-flight build so the floating
+  // menu DOM is only removed once no plugin view can still reference it.
   useEffect(() => {
     return () => {
-      const ed = editorRef.current;
-      editorRef.current = null;
-      const cleanupDom = () => {
+      genRef.current++;
+      enqueue(async () => {
+        await destroyCurrent();
         slashElRef.current?.remove();
         slashElRef.current = null;
         tooltipElRef.current?.remove();
         tooltipElRef.current = null;
         viewRef.current = null;
-      };
-      if (ed) {
-        ed.destroy(true).then(cleanupDom, cleanupDom);
-      } else {
-        cleanupDom();
-      }
+      });
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (

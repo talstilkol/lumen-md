@@ -1,26 +1,56 @@
 /**
- * CollabSettings – small dialog to set/clear the custom signaling server URL.
- * Persists to localStorage under `lumen.collab.signaling`.
+ * CollabSettings – small dialog to set/clear the custom signaling server URL
+ * (`lumen.collab.signaling`) and the optional persistent y-websocket server
+ * (`lumen.collab.ws`, read by src/collab/yjs.ts).
+ *
+ * The persistent server is a Pro capability (`Capabilities.persistentCollab`).
+ * When not entitled the field is disabled with an upgrade notice, and saving
+ * clears any stored persistent URL so sessions fall back to WebRTC P2P --
+ * but only once the plan is known (never while it is loading or failed). With
+ * no billing backend configured (self-hosted) the gate is open.
  * Accessible from the command palette or toolbar.
  */
 import { useState } from "react";
+import { t } from "../i18n";
+import { useCapability, useEntitlementResolved } from "../billing/gates";
+import { UpgradeNotice } from "./UpgradeNotice";
 
 interface Props {
   onClose: () => void;
 }
 
+const SIGNALING_KEY = "lumen.collab.signaling";
+const PERSISTENT_KEY = "lumen.collab.ws";
+
+function readKey(key: string): string {
+  try {
+    return localStorage.getItem(key) ?? "";
+  } catch {
+    return "";
+  }
+}
+
+function writeKey(key: string, value: string): void {
+  try {
+    if (value) localStorage.setItem(key, value);
+    else localStorage.removeItem(key);
+  } catch {
+    /* storage denied */
+  }
+}
+
 export function CollabSettings({ onClose }: Props) {
-  const [url, setUrl] = useState(
-    () => localStorage.getItem("lumen.collab.signaling") ?? "",
-  );
+  const persistentAllowed = useCapability("persistentCollab");
+  // While the plan is loading (or its check failed) "not allowed" is only a
+  // placeholder: keep the saved persistent URL rather than erase it.
+  const planKnown = useEntitlementResolved();
+  const [url, setUrl] = useState(() => readKey(SIGNALING_KEY));
+  const [wsUrl, setWsUrl] = useState(() => readKey(PERSISTENT_KEY));
 
   const handleSave = () => {
-    const trimmed = url.trim();
-    if (trimmed) {
-      localStorage.setItem("lumen.collab.signaling", trimmed);
-    } else {
-      localStorage.removeItem("lumen.collab.signaling");
-    }
+    writeKey(SIGNALING_KEY, url.trim());
+    if (persistentAllowed) writeKey(PERSISTENT_KEY, wsUrl.trim());
+    else if (planKnown) writeKey(PERSISTENT_KEY, ""); // an established downgrade
     onClose();
   };
 
@@ -95,6 +125,52 @@ export function CollabSettings({ onClose }: Props) {
           }}
           autoFocus
         />
+        <label
+          htmlFor="collab-persistent-url"
+          style={{
+            display: "block",
+            margin: "16px 0 6px",
+            fontSize: 12,
+            fontWeight: 600,
+            color: "hsl(var(--fg))",
+          }}
+        >
+          {t("collab.persistent.label")}
+        </label>
+        <p style={{ margin: "0 0 8px", fontSize: 12, color: "hsl(var(--fg-muted))", lineHeight: 1.5 }}>
+          {t("collab.persistent.hint")}
+        </p>
+        <input
+          id="collab-persistent-url"
+          type="url"
+          value={persistentAllowed ? wsUrl : ""}
+          onChange={(e) => setWsUrl(e.target.value)}
+          disabled={!persistentAllowed}
+          aria-disabled={!persistentAllowed}
+          placeholder="wss://your-yjs-server.example.com"
+          style={{
+            width: "100%",
+            padding: "8px 12px",
+            fontSize: 13,
+            border: "1px solid hsl(var(--border))",
+            borderRadius: 8,
+            background: "hsl(var(--bg-subtle))",
+            color: "hsl(var(--fg))",
+            outline: "none",
+            boxSizing: "border-box",
+            fontFamily: "JetBrains Mono, ui-monospace, monospace",
+            opacity: persistentAllowed ? 1 : 0.5,
+          }}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") handleSave();
+            if (e.key === "Escape") onClose();
+          }}
+        />
+        {!persistentAllowed && (
+          <div style={{ marginTop: 8 }}>
+            <UpgradeNotice compact plan="pro" message={t("billing.upgrade.persistentCollab")} />
+          </div>
+        )}
         <div
           style={{
             display: "flex",

@@ -56,11 +56,15 @@ interface Props {
   mode: ViewMode;
   docContent: string;
   deferredContent: string;
+  /** Document identity matching `deferredContent` (they lag together). */
+  deferredDocKey?: string | null;
   editorRef: React.RefObject<EditorHandle | null>;
   vimEnabled: boolean;
   spellCheck: boolean;
   grammarCheck: boolean;
   typewriterMode: boolean;
+  /** Suggesting mode (track changes) in the source editor. */
+  suggestingMode?: boolean;
   activeFile: string | null;
   pageView: boolean;
   collab: CollabSession | null;
@@ -72,11 +76,13 @@ export function EditorLayout({
   mode,
   docContent,
   deferredContent,
+  deferredDocKey = null,
   editorRef,
   vimEnabled,
   spellCheck,
   grammarCheck,
   typewriterMode,
+  suggestingMode = false,
   pageView,
   collab,
   setContent,
@@ -355,6 +361,7 @@ export function EditorLayout({
               spellCheck={spellCheck}
               grammarCheck={grammarCheck}
               typewriterMode={typewriterMode}
+              suggesting={suggestingMode}
             />
           </Suspense>
         </section>
@@ -372,10 +379,10 @@ export function EditorLayout({
         >
           {pageView ? (
             <Suspense fallback={<div style={{padding:'2rem',color:'hsl(var(--fg-muted))'}}>Loading page view…</div>}>
-              <PageView markdownText={deferredContent} />
+              <PageView markdownText={deferredContent} docKey={deferredDocKey} />
             </Suspense>
           ) : (
-            <Preview markdownText={deferredContent} />
+            <Preview markdownText={deferredContent} docKey={deferredDocKey} />
           )}
         </section>
       )}

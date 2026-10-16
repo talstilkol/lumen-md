@@ -12,6 +12,7 @@
     "build": "tsc -b && vite build",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
+    "hygiene": "node scripts/check-code-hygiene.mjs",
     "tauri": "tauri",
     "tauri:dev": "tauri dev",
     "tauri:build": "tauri build",
@@ -36,10 +37,10 @@
     "docker:run": "docker run -p 8080:8080 lumen-md"
   },
   "dependencies": {
-    "@capacitor/android": "^8.3.1",
-    "@capacitor/cli": "^8.3.1",
-    "@capacitor/core": "^8.3.1",
-    "@capacitor/ios": "^8.3.1",
+    "@capacitor/android": "^8.5.3",
+    "@capacitor/cli": "^8.5.3",
+    "@capacitor/core": "^8.5.3",
+    "@capacitor/ios": "^8.5.3",
     "@capacitor/keyboard": "^8.0.3",
     "@capacitor/splash-screen": "^8.0.1",
     "@capacitor/status-bar": "^8.0.2",
@@ -51,6 +52,7 @@
     "@codemirror/search": "^6.5.8",
     "@codemirror/state": "^6.5.0",
     "@codemirror/view": "^6.36.1",
+    "@google/model-viewer": "^4.3.1",
     "@hpcc-js/wasm": "^2.33.2",
     "@isomorphic-git/lightning-fs": "^4.6.2",
     "@lezer/highlight": "^1.2.1",
@@ -77,7 +79,8 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "dompurify": "^3.2.6",
-    "echarts": "^5.5.1",
+    "echarts": "^6.1.0",
+    "github-slugger": "^2.0.0",
     "idb-keyval": "^6.2.2",
     "isomorphic-git": "^1.37.5",
     "katex": "^0.16.11",
@@ -85,7 +88,8 @@
     "lucide-react": "^0.469.0",
     "mermaid": "^11.15.0",
     "papaparse": "^5.4.1",
-    "pdfjs-dist": "^6.0.227",
+    "pdfjs-dist": "^6.4.299",
+    "prettier": "^3.9.10",
     "prosemirror-state": "^1.4.4",
     "prosemirror-view": "^1.41.8",
     "pyodide": "^314.0.0",
@@ -104,9 +108,11 @@
     "shiki": "^1.24.4",
     "sql.js": "^1.14.1",
     "tailwind-merge": "^2.5.5",
+    "three": "^0.183.2",
     "tldraw": "^4.5.10",
     "unified": "^11.0.5",
     "unist-util-visit": "^5.0.0",
+    "wasmoon": "^1.16.0",
     "y-codemirror.next": "^0.3.5",
     "y-protocols": "^1.0.7",
     "y-webrtc": "^10.3.0",
@@ -146,5 +152,8 @@
   },
   "browserslist": [
     "defaults"
-  ]
+  ],
+  "engines": {
+    "node": ">=22"
+  }
 }

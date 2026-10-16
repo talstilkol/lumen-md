@@ -1,9 +1,10 @@
 import * as Y from "yjs";
 import { WebrtcProvider } from "y-webrtc";
 import type { Awareness } from "y-protocols/awareness";
-import { randomChoice, randomInt, randomId } from "../lib/cryptoRandom";
+import { randomChoice, randomInt } from "../lib/cryptoRandom";
 import { log } from "../lib/logger";
-import { encryptOp, decryptOp } from "./encryption";
+import { effectiveCapabilities, entitlementResolved, waitForEntitlement } from "../billing/gates";
+import { wireE2E, type E2EChannel, type E2EErrorReason } from "./e2e";
 
 export interface CollabUser {
   name: string;
@@ -16,12 +17,35 @@ export interface CollabUser {
  * the optional `y-websocket` package doesn't have to be bundled for users on
  * the WebRTC-only path.
  */
+/**
+ * How long join-time seeding waits for a configured persistent server to
+ * deliver the room's history before falling back to WebRTC-only seeding
+ * (server offline / unreachable).
+ */
+export const PERSISTENT_SYNC_TIMEOUT_MS = 8000;
+
 interface WebsocketLike {
   destroy(): void;
+  /** y-websocket: true once the server's state has been applied. */
+  synced?: boolean;
+  on?(event: "sync", fn: (isSynced: boolean) => void): void;
+  off?(event: "sync", fn: (isSynced: boolean) => void): void;
 }
 
 export interface CollabSession {
+  /**
+   * The document the editor binds to. In password-protected rooms this doc
+   * is local-only — providers sync `transportDoc` (ciphertext) instead.
+   */
   doc: Y.Doc;
+  /**
+   * The doc attached to the network providers when the room is end-to-end
+   * encrypted; null for plain (non-password) rooms, where `doc` itself is
+   * what the providers sync.
+   */
+  transportDoc: Y.Doc | null;
+  /** True when the room password is set and the E2E transport is active. */
+  encrypted: boolean;
   ytext: Y.Text;
   awareness: Awareness;
   provider: WebrtcProvider;
@@ -128,60 +152,16 @@ export function makeRoomName(): string {
 }
 
 /**
- * Connect to (or create) a collaborative editing session over WebRTC.
- * When the local doc is empty and we are the first peer, the provided
- * `seedContent` is inserted so other peers can pick it up.
+ * How long a joining peer waits for y-webrtc's `synced` event before
+ * deciding it is alone and seeding its local content.
  */
-/**
- * Wrap the doc's wire updates in AES-GCM. We attach a custom update
- * observer that fires for every local mutation and re-broadcasts the
- * encrypted payload over a hidden Y.Map keyed `__crypt__`. Inbound entries
- * on the same map decrypt → applyUpdate.
- *
- * This isn't a perfect secure-channel construction (the public protocol
- * still sees lengths + structure metadata) but it makes the document body
- * unreadable to a passive signaling-server eavesdropper and to a peer who
- * joined the room without the password. Good enough as a Pro privacy
- * upgrade; for paranoid threat models, run your own signaling server.
- */
-async function wireEncryption(doc: Y.Doc, password: string): Promise<void> {
-  const cryptMap = doc.getMap<string>("__crypt__");
-  // Local-origin updates: encrypt + push to the map. We use a unique key
-  // per update so concurrent peers don't clobber each other's payloads.
-  doc.on("update", async (update: Uint8Array, origin: unknown) => {
-    if (origin === "remote-decrypted") return; // avoid re-encrypting our own decrypts
-    try {
-      const cipher = await encryptOp(password, update);
-      const b64 = btoa(String.fromCharCode(...cipher));
-      // Crypto-strong key: collisions in this map can leak which peer wrote
-      // an op (every key is observable on the wire), so we don't rely on
-      // Math.random — it's biased and predictable.
-      const key = `${Date.now().toString(36)}-${randomId(3)}`;
-      cryptMap.set(key, b64);
-    } catch (err) {
-      log.warn("encrypt update failed", err);
-    }
-  });
-  // Inbound entries: decrypt + applyUpdate inside a transaction so the
-  // observer above doesn't re-encrypt them in a loop.
-  cryptMap.observe(async (event) => {
-    for (const key of event.keysChanged) {
-      const b64 = cryptMap.get(key);
-      if (!b64) continue;
-      try {
-        const cipher = Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
-        const plain = await decryptOp(password, cipher);
-        if (!plain) continue; // wrong password from another peer — drop
-        Y.applyUpdate(doc, plain, "remote-decrypted");
-      } catch (err) {
-        log.warn("decrypt update failed", err);
-      }
-    }
-  });
-}
+export const SEED_FALLBACK_MS = 1500;
 
-/** Optional persistent collab WebSocket URL (y-websocket compatible). */
-function getWebsocketUrl(): string | null {
+/**
+ * Optional persistent collab WebSocket URL (y-websocket compatible), as
+ * configured — before the plan check (see `connectCollab`).
+ */
+function configuredWebsocketUrl(): string | null {
   const fromStorage =
     typeof localStorage !== "undefined"
       ? localStorage.getItem("lumen.collab.ws")
@@ -192,7 +172,8 @@ function getWebsocketUrl(): string | null {
       ? (import.meta as ImportMeta & { env?: { VITE_YJS_WEBSOCKET_URL?: string } })
           .env?.VITE_YJS_WEBSOCKET_URL
       : undefined;
-  return envUrl ?? null;
+  // An empty build arg (Docker compose with LUMEN_COLLAB_URL unset) means "none".
+  return envUrl?.trim() || null;
 }
 
 /**
@@ -231,87 +212,243 @@ async function attachWebsocketProvider(
 
 /**
  * Read the optional room password from `localStorage["lumen.collab.password"]`
- * or `?password=…` in the URL hash. When present, every WebRTC update is
- * encrypted with AES-GCM (PBKDF2-derived key) before it leaves this peer,
- * and decrypted on receipt — turning the otherwise-public WebRTC mesh into
- * an end-to-end-encrypted channel (P3-13).
+ * or `?password=…` in the URL hash. When present, the editor's doc stays
+ * local and only AES-GCM ciphertext envelopes are handed to the providers
+ * (see `./e2e.ts`) — the WebRTC mesh, signaling servers and the optional
+ * y-websocket server never see document content (P3-13).
  */
 function getRoomPassword(): string | null {
+  // The share link's password is specific to its room: it wins over a
+  // stored default left from another session.
+  if (typeof location !== "undefined") {
+    const m = location.hash.match(/[#&]password=([^&]+)/);
+    if (m) {
+      try {
+        return decodeURIComponent(m[1]);
+      } catch {
+        return m[1];
+      }
+    }
+  }
   if (typeof localStorage !== "undefined") {
     const stored = localStorage.getItem("lumen.collab.password");
     if (stored) return stored;
   }
-  if (typeof location !== "undefined") {
-    const m = location.hash.match(/[#&]password=([^&]+)/);
-    if (m) return decodeURIComponent(m[1]);
-  }
   return null;
 }
 
+/**
+ * Connect to (or create) a collaborative editing session over WebRTC.
+ * When the local doc is empty and we are the first peer, the provided
+ * `seedContent` is inserted so other peers can pick it up.
+ */
 export function connectCollab(
   roomName: string,
   seedContent: string,
-  opts: { password?: string | null; isNewRoom?: boolean } = {},
+  opts: {
+    password?: string | null;
+    isNewRoom?: boolean;
+    /** Called once if an incoming encrypted update can't be decrypted. */
+    onE2EError?: (reason: E2EErrorReason) => void;
+    /**
+     * Joining a password room and nobody answered. With encrypted signaling
+     * a wrong password looks exactly like an empty room, so the local
+     * document is NOT seeded automatically (that would fork the room under
+     * its name). The callback gets `share()`, which seeds it on request.
+     */
+    onEncryptedRoomEmpty?: (share: () => void) => void;
+  } = {},
 ): CollabSession {
   const doc = new Y.Doc();
   const ytext = doc.getText("lumen");
 
-  // E2E encryption: when a room password is set, install an update-handler
-  // that encrypts every doc update before peers see it on the wire and
-  // decrypts inbound payloads back into Y updates. Wrong-password peers
-  // can connect over signaling but never see plaintext.
   const password = opts.password ?? getRoomPassword();
 
+  // E2E: with a room password, `doc` (plaintext) is never attached to a
+  // provider. A separate transport doc carrying only ciphertext envelopes
+  // is synced instead. Without a password, `doc` is synced directly.
+  let transportDoc: Y.Doc | null = null;
+  let e2e: E2EChannel | null = null;
+  if (password) {
+    transportDoc = new Y.Doc();
+    // Share the client id so awareness (which borrows the synced doc's id)
+    // and `snapshotPeers`' self-detection line up with the plaintext doc
+    // the editor's relative cursor positions refer to.
+    transportDoc.clientID = doc.clientID;
+    e2e = wireE2E(doc, transportDoc, {
+      password,
+      room: roomName,
+      onDecryptError: (reason) => {
+        log.warn("collab e2e: could not decrypt incoming update", reason);
+        opts.onE2EError?.(reason);
+      },
+    });
+  }
+  const syncedDoc = transportDoc ?? doc;
+
   // Public rooms only — obscure name suffices for casual pair editing. Users
-  // wanting more privacy should run their own signaling server.
-  const provider = new WebrtcProvider(roomName, doc, {
+  // wanting more privacy should set a room password and/or run their own
+  // signaling server.
+  // In password rooms the password is also handed to y-webrtc, which then
+  // encrypts every signaling and BroadcastChannel message with a key derived
+  // from it. A peer without the password can't complete the WebRTC
+  // handshake, so presence (names, colours, cursors) only ever reaches
+  // peers that hold the password; the signaling server sees ciphertext.
+  const provider = new WebrtcProvider(roomName, syncedDoc, {
     signaling: getSignalingUrls(),
     maxConns: 20,
+    ...(password ? { password } : {}),
   });
 
-  if (password) {
-    // y-webrtc transports payloads via its room's signaling channel. We tap
-    // the doc's update event ourselves: every local update is encrypted +
-    // applied to a side-doc that mirrors the public state, while remote
-    // payloads are decrypted before being applied to the visible doc.
-    void wireEncryption(doc, password);
-  }
-
   // If a persistent server is configured, attach a WebsocketProvider in the
-  // background. Doc state from the server is merged into the same Y.Doc so
-  // late joiners see history even when no other peer is online.
-  const wsUrl = getWebsocketUrl();
+  // background. It syncs the same doc as WebRTC (the ciphertext transport
+  // doc in password rooms, so the server only ever stores ciphertext) and
+  // lets late joiners see history even when no other peer is online.
+  // A persistent server is a plan capability, re-checked for every session
+  // so a URL saved while entitled stops being used after a downgrade. While
+  // the entitlement is still loading its placeholder is FREE_CAPS, so a
+  // paid user's decision waits for the real plan (bounded) instead.
+  const wsUrl = configuredWebsocketUrl();
   let websocketProvider: WebsocketLike | null = null;
-  if (wsUrl) {
-    void attachWebsocketProvider(wsUrl, roomName, doc).then((p) => {
+  // While a persistent server is configured but hasn't delivered its state,
+  // the room may hold history that no WebRTC peer has — seeding then would
+  // merge the local document into it. Seeding waits for this to settle.
+  let persistent: "none" | "pending" | "ready" = wsUrl ? "pending" : "none";
+  let onPersistentSettled: (() => void) | null = null;
+  const settlePersistent = (state: "none" | "ready") => {
+    if (persistent !== "pending") return;
+    persistent = state;
+    onPersistentSettled?.();
+  };
+  const startPersistent = (url: string) => {
+    void attachWebsocketProvider(url, roomName, syncedDoc).then((p) => {
       if (destroyed) {
         p?.destroy();
         return;
       }
       websocketProvider = p;
+      if (!p) return settlePersistent("none"); // package missing / attach failed
+      if (p.synced || typeof p.on !== "function") return settlePersistent("ready");
+      // An unreachable server never emits `sync`: bound the wait, and give up
+      // early on a connection error, then fall back to WebRTC-only seeding.
+      let giveUp: ReturnType<typeof setTimeout> | null = null;
+      const finish = (state: "none" | "ready") => {
+        if (giveUp) clearTimeout(giveUp);
+        giveUp = null;
+        p.off?.("sync", onSync);
+        p.off?.("connection-error" as "sync", onError);
+        if (state === "none") {
+          // Declared unavailable: tear it down. y-websocket reconnects on its
+          // own, and a later reconnect would merge the server's history into
+          // a document we may now seed — two independent docs, corrupted room.
+          // This session continues WebRTC-only.
+          try {
+            p.destroy();
+          } catch {
+            /* already gone */
+          }
+          if (websocketProvider === p) websocketProvider = null;
+        }
+        settlePersistent(state);
+      };
+      const onSync = (isSynced: boolean) => {
+        if (isSynced) finish("ready");
+      };
+      const onError = () => finish("none");
+      p.on("sync", onSync);
+      p.on("connection-error" as "sync", onError);
+      giveUp = setTimeout(() => finish("none"), PERSISTENT_SYNC_TIMEOUT_MS);
     });
+  };
+  if (wsUrl) {
+    if (entitlementResolved()) {
+      if (effectiveCapabilities().persistentCollab) startPersistent(wsUrl);
+      else persistent = "none";
+    } else {
+      void waitForEntitlement(PERSISTENT_SYNC_TIMEOUT_MS).then(() => {
+        if (destroyed) return;
+        if (effectiveCapabilities().persistentCollab) startPersistent(wsUrl);
+        else settlePersistent("none");
+      });
+    }
   }
 
-  // Seed initial content once we know we're the only one in the room.
-  // y-webrtc reports peers via `provider.awareness` and `provider.room`. For
-  // simplicity we wait a short tick: if no remote state has arrived, insert.
+  // Seed initial content only when we know we're the only one in the room.
   let seedTimer: ReturnType<typeof setTimeout> | null = null;
+  let onSynced: ((e: { synced: boolean }) => void) | null = null;
   let destroyed = false;
+  const stopSeedWait = () => {
+    if (seedTimer) {
+      clearTimeout(seedTimer);
+      seedTimer = null;
+    }
+    if (onSynced) {
+      try {
+        provider.off("synced", onSynced);
+      } catch {
+        /* */
+      }
+      onSynced = null;
+    }
+  };
   if (opts.isNewRoom && seedContent && ytext.length === 0) {
     // New room created by this peer: seed synchronously so the editor's
     // char-level Yjs binding (y-codemirror `ySync`) has content to bind to.
     // A delayed seed would let the binding momentarily clear the editor.
     ytext.insert(0, seedContent);
-  } else {
-    // Joining (or unknown): wait a tick and only seed if we're still alone and
-    // no remote content has arrived — so we never clobber an existing room.
-    seedTimer = setTimeout(() => {
-      if (destroyed) return;
-      const peersKnown = provider.awareness.getStates().size;
-      if (ytext.length === 0 && seedContent && peersKnown <= 1) {
-        ytext.insert(0, seedContent);
+  } else if (seedContent) {
+    // Joining (or unknown): never clobber an existing room. y-webrtc emits
+    // `synced` once every connected peer has delivered its state; at that
+    // point the doc reflects the room and we decide once. If no peer ever
+    // shows up, `synced` never fires, so a fallback timer covers the
+    // "first one here" case.
+    const isAlone = () => {
+      const room = (provider as unknown as {
+        room?: { webrtcConns?: Map<unknown, unknown> } | null;
+      }).room;
+      const conns = room?.webrtcConns?.size ?? 0;
+      return conns === 0 && provider.awareness.getStates().size <= 1;
+    };
+    const maybeSeed = () => {
+      if (persistent === "pending") {
+        // Decide once the persistent server has answered (its history may
+        // be the room's only copy).
+        onPersistentSettled = maybeSeed;
+        return;
       }
-    }, 400);
+      onPersistentSettled = null;
+      // In E2E rooms ciphertext may have arrived but not finished
+      // decrypting -- treat any envelope as "room has content".
+      const envelopesPending = (e2e?.envelopeCount() ?? 0) > 0;
+      const canSeed = () =>
+        !destroyed && ytext.length === 0 && isAlone() && (e2e?.envelopeCount() ?? 0) === 0;
+      if (!canSeed() || envelopesPending) return;
+      if (e2e) {
+        // Encrypted join: an empty room and a mistyped password can't be
+        // told apart — ask instead of forking.
+        opts.onEncryptedRoomEmpty?.(() => {
+          if (canSeed()) ytext.insert(0, seedContent);
+        });
+        return;
+      }
+      ytext.insert(0, seedContent);
+    };
+    onSynced = ({ synced }) => {
+      if (!synced) return;
+      stopSeedWait();
+      maybeSeed();
+    };
+    provider.on("synced", onSynced);
+    seedTimer = setTimeout(() => {
+      seedTimer = null;
+      if (destroyed) return;
+      if (isAlone()) {
+        stopSeedWait();
+        maybeSeed();
+      }
+      // Otherwise peers are connected but still syncing: keep waiting for
+      // `synced`, which decides once their state has arrived.
+    }, SEED_FALLBACK_MS);
   }
 
   const user = randomUser();
@@ -329,6 +466,8 @@ export function connectCollab(
 
   return {
     doc,
+    transportDoc,
+    encrypted: transportDoc !== null,
     ytext,
     awareness: provider.awareness,
     provider,
@@ -339,14 +478,13 @@ export function connectCollab(
     user,
     destroy() {
       destroyed = true;
-      if (seedTimer) {
-        clearTimeout(seedTimer);
-        seedTimer = null;
-      }
+      onPersistentSettled = null;
+      stopSeedWait();
       if (stopSnapshots) {
         stopSnapshots();
         stopSnapshots = null;
       }
+      e2e?.destroy();
       try {
         provider.destroy();
       } catch {
@@ -359,6 +497,7 @@ export function connectCollab(
       }
       try {
         doc.destroy();
+        transportDoc?.destroy();
       } catch {
         /* */
       }

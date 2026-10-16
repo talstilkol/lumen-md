@@ -1,11 +1,17 @@
 import React, { useMemo, useState, useCallback, useSyncExternalStore } from "react";
-import { Sparkles, ShieldCheck, SpellCheck, Activity, BarChart3, CloudCog, CloudOff, AlertCircle } from "lucide-react";
+import { Sparkles, ShieldCheck, SpellCheck, FileDiff, Activity, BarChart3, CloudCog, CloudOff, AlertCircle } from "lucide-react";
 import type { CollabPeer } from "../collab/yjs";
 import { t } from "../i18n";
 import { useAppStore } from "../store/useStore";
 import { getTelemetryOptOut, setTelemetryOptOut } from "../lib/telemetry";
 import type { ConfigHealthReport } from "../lib/configHealth";
 import { subscribeSyncStatus } from "../sync/syncStatus";
+import { parseSuggestions, mayContainCriticMarkup } from "../editor/suggesting";
+
+/** Number of CriticMarkup suggestions (cheap no-op for plain docs). */
+function countCriticMarkup(text: string): number {
+  return mayContainCriticMarkup(text) ? parseSuggestions(text).length : 0;
+}
 
 interface CollabInfo {
   roomName: string;
@@ -43,6 +49,9 @@ export const StatusBar = React.memo(function StatusBar({
   const useLocalAi = useAppStore((s) => s.useLocalAi);
   const grammarCheck = useAppStore((s) => s.grammarCheck);
   const toggleGrammarCheck = useAppStore((s) => s.toggleGrammarCheck);
+  const suggestingMode = useAppStore((s) => s.suggestingMode);
+  const toggleSuggestingMode = useAppStore((s) => s.toggleSuggestingMode);
+  const suggestionCount = useMemo(() => countCriticMarkup(text), [text]);
   const [telemetryOff, setTelemetryOff] = useState(getTelemetryOptOut);
   const toggleTelemetry = useCallback(() => {
     const next = !telemetryOff;
@@ -156,6 +165,33 @@ export const StatusBar = React.memo(function StatusBar({
       <span className="sb-item" title="Reading time at ~220 wpm">
         {t("status.reading", { n: stats.readingMin })}
       </span>
+      <button
+        type="button"
+        className="sb-item"
+        onClick={toggleSuggestingMode}
+        title={
+          suggestingMode
+            ? t("status.suggesting.tooltip.on")
+            : t("status.suggesting.tooltip.off")
+        }
+        data-testid="status-suggesting"
+        aria-pressed={suggestingMode}
+        style={{
+          gap: 4,
+          background: "transparent",
+          border: "none",
+          cursor: "pointer",
+          padding: 0,
+          font: "inherit",
+          color: suggestingMode ? "hsl(145 60% 45%)" : "hsl(var(--fg-muted))",
+        }}
+      >
+        <FileDiff size={10} />
+        <span style={{ fontSize: 10, fontWeight: suggestingMode ? 600 : 400 }}>
+          {suggestingMode ? t("status.suggesting.on") : t("status.suggesting.off")}
+          {suggestionCount > 0 ? ` · ${suggestionCount}` : ""}
+        </span>
+      </button>
       <button
         type="button"
         className="sb-item"

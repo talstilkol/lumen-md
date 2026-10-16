@@ -105,13 +105,23 @@ export async function startCheckout(tier: Exclude<PlanTier, "free">, jwt: string
   location.assign(url);
 }
 
-export async function openBillingPortal(jwt: string | null): Promise<void> {
+/**
+ * Open the Stripe billing portal. By default the worker picks the
+ * organization's Team plan the caller bought, else their personal plan;
+ * `scope: "personal"` always opens the personal one (for someone who has
+ * both).
+ */
+export async function openBillingPortal(
+  jwt: string | null,
+  opts: { scope?: "personal" } = {},
+): Promise<void> {
   if (!jwt) throw new Error("Sign in first to manage billing.");
   const res = await fetchWithRetry(
     portalEndpoint(),
     {
       method: "POST",
-      headers: { Authorization: `Bearer ${jwt}` },
+      headers: { Authorization: `Bearer ${jwt}`, "Content-Type": "application/json" },
+      body: JSON.stringify(opts.scope ? { scope: opts.scope } : {}),
     },
     {
       label: "billing.portal",

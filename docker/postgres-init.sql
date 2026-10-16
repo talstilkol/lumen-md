@@ -2,6 +2,8 @@
 -- Tables here mirror the D1 schema used in the Cloudflare deployment.
 
 -- ── Persistent collab snapshots ────────────────────────────────────────────
+-- NOT IMPLEMENTED: reserved schema only. sync-server/persistent-server.js
+-- persists to LevelDB and never writes this table.
 CREATE TABLE IF NOT EXISTS room_snapshots (
   room TEXT NOT NULL,
   vector BYTEA NOT NULL,

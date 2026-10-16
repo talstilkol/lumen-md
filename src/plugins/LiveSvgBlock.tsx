@@ -8,6 +8,7 @@
 
 import { useMemo } from "react";
 import { sanitizeSvgMarkup } from "../lib/markupSanitizer";
+import { toTrustedHTML } from "../lib/trustedTypes";
 
 interface Props {
   source: string;
@@ -75,7 +76,8 @@ export default function LiveSvgBlock({ source, meta }: Props) {
           overflow: "auto",
           textAlign: "center",
         }}
-        dangerouslySetInnerHTML={{ __html: wrapped }}
+        // Routed through the `lumen` Trusted Types policy (re-sanitizes as SVG).
+        dangerouslySetInnerHTML={{ __html: toTrustedHTML(wrapped, "svg") }}
       />
     </div>
   );

@@ -1,5 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { renderMarkdown, extractFrontmatter } from "./pipeline";
+import { renderMarkdown, renderMarkdownFast, extractFrontmatter } from "./pipeline";
+import { PreviewDocKeyContext } from "./previewDoc";
+import { handleWikiLinkClick } from "./wikiLinks";
+import { slug as headingSlug } from "github-slugger";
+import { scheduleIdle } from "../lib/idle";
 import { CopyButtonHandler } from "./components";
 import { Frontmatter } from "../ui/Frontmatter";
 import { ErrorBoundary } from "../ui/ErrorBoundary";
@@ -7,30 +11,78 @@ import { t } from "../i18n";
 
 interface Props {
   markdownText: string;
+  /** Identity of the document `markdownText` belongs to (see ./previewDoc). */
+  docKey?: string | null;
   /** Re-render is debounced by this many ms */
   debounceMs?: number;
 }
 
-export function Preview({ markdownText }: Props) {
-  const [tree, setTree] = useState<React.ReactElement | null>(null);
+/**
+ * Set once the full (Shiki/KaTeX) pipeline has completed a render in this
+ * page lifetime. After that the lazy chunks are cached, so later previews
+ * (mode switches, new tabs) go straight to the full pass.
+ */
+let fullPipelineWarm = false;
+
+/** Synchronous plain-text pass; null if it throws (the full pass reports). */
+function safeFastRender(markdownText: string): React.ReactElement | null {
+  try {
+    return renderMarkdownFast(markdownText);
+  } catch {
+    return null;
+  }
+}
+
+export function Preview({ markdownText, docKey = null }: Props) {
+  // First paint (A7 levers 1 + 3): render the text synchronously on the
+  // very first commit with the chunk-free pipeline, so the LCP element
+  // (the welcome doc's headings / paragraphs) never waits on Shiki, KaTeX
+  // or a vendor chunk. Heavy blocks hydrate on their own (see
+  // DeferredBlock in ./components). The full pipeline runs once the
+  // browser is idle and swaps in highlighted code + math.
+  const [tree, setTree] = useState<React.ReactElement | null>(() =>
+    fullPipelineWarm ? null : safeFastRender(markdownText),
+  );
+  // The document the *displayed* tree was rendered from — it lags `docKey`
+  // until the async render for the new document lands.
+  const [treeDocKey, setTreeDocKey] = useState<string | null>(docKey);
   const [error, setError] = useState<string | null>(null);
   const [themeVersion, setThemeVersion] = useState(0);
   const seqRef = useRef(0);
+  const fastTextRef = useRef<string | null>(fullPipelineWarm ? null : markdownText);
 
   useEffect(() => {
     const seq = ++seqRef.current;
     const isDark = () => document.documentElement.classList.contains("dark");
-    renderMarkdown(markdownText, isDark)
-      .then((el) => {
-        if (seq !== seqRef.current) return;
-        setTree(el);
-        setError(null);
-      })
-      .catch((e: Error) => {
-        if (seq !== seqRef.current) return;
-        setError(e.message);
-      });
-  }, [markdownText, themeVersion]);
+    const renderedFor = docKey;
+    const run = () => {
+      renderMarkdown(markdownText, isDark)
+        .then((el) => {
+          if (seq !== seqRef.current) return;
+          fullPipelineWarm = true;
+          setTree(el);
+          setTreeDocKey(renderedFor);
+          setError(null);
+        })
+        .catch((e: Error) => {
+          if (seq !== seqRef.current) return;
+          setError(e.message);
+        });
+    };
+    if (fullPipelineWarm) {
+      run();
+      return;
+    }
+    // Cold boot: until the full pipeline has rendered once, every new
+    // text (e.g. the welcome doc seeded one tick after mount) gets the
+    // synchronous fast pass now and the full pass when the browser idles.
+    if (fastTextRef.current !== markdownText) {
+      fastTextRef.current = markdownText;
+      setTree(safeFastRender(markdownText));
+      setTreeDocKey(renderedFor);
+    }
+    return scheduleIdle(run, 1500);
+  }, [markdownText, themeVersion, docKey]);
 
   // Re-process when theme changes so Shiki picks up the right theme tokens.
   useEffect(() => {
@@ -54,7 +106,29 @@ export function Preview({ markdownText }: Props) {
     <div
       className="flex-1 min-h-0 overflow-y-auto"
       data-preview-root
+      // The document the displayed tree belongs to (it lags behind while a
+      // newly opened note renders) — lets callers wait for the right one.
+      data-preview-doc={treeDocKey ?? ""}
       style={{ contain: "layout" }}
+      onClick={(e) => {
+        // [[Wiki links]] without a matching heading here open the note.
+        handleWikiLinkClick(
+          e,
+          e.currentTarget,
+          async () => {
+            const { listWorkspace } = await import("../storage/workspace");
+            return (await listWorkspace()).map((f) => f.path);
+          },
+          (path, heading) =>
+            window.dispatchEvent(
+              new CustomEvent("lumen-open-file", {
+                // Same slugger rehype-slug gives the rendered headings
+                // (Unicode-aware: Hebrew / CJK headings keep their text).
+                detail: heading ? { path, heading: headingSlug(heading) } : { path },
+              }),
+            ),
+        );
+      }}
     >
       <CopyButtonHandler />
       {error && (
@@ -82,7 +156,7 @@ export function Preview({ markdownText }: Props) {
             <p style={{ marginTop: "4px", fontSize: "12px", opacity: 0.8 }}>{t("errorBoundary.renderDetail")}</p>
           </div>
         }>
-          {tree}
+          <PreviewDocKeyContext.Provider value={treeDocKey}>{tree}</PreviewDocKeyContext.Provider>
         </ErrorBoundary>
       </div>
     </div>

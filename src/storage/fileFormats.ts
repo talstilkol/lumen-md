@@ -4,11 +4,14 @@
  * Text/markup: Markdown, HTML, RTF, XML, CSV/TSV/JSON, LaTeX, RST, AsciiDoc,
  * Org, OPML, MHTML/EML. Office/ebook (ZIP-of-XML): DOCX, ODT, EPUB — unzipped
  * via the native DecompressionStream-based reader in ./zip (no JSZip/mammoth).
- * Legacy .doc and image-only PDF remain best-effort. All convert to Markdown.
+ * Apple iWork (.pages/.numbers/.key) via ./iwork. Legacy .doc and image-only
+ * PDF remain best-effort. All convert to Markdown.
  *
  * Uses browser-native DOMParser for XML/HTML parsing.
  */
 import { unzip, unzipText } from "./zip";
+import { iworkToMarkdown } from "./iwork";
+import { parseInertDocument } from "../lib/trustedTypes";
 
 /* ─── HTML → Markdown (zero-dep, uses DOMParser) ─── */
 
@@ -112,7 +115,7 @@ function tableToMd(table: HTMLTableElement): string {
 }
 
 export function htmlToMarkdown(html: string): string {
-  const doc = new DOMParser().parseFromString(html, "text/html");
+  const doc = parseInertDocument(html, "text/html");
   const md = htmlNodeToMd(doc.body);
   return md.replace(/\n{3,}/g, "\n\n").trim();
 }
@@ -216,7 +219,7 @@ export function jsonToMarkdown(jsonText: string): string {
 
 export function xmlToMarkdown(xmlText: string): string {
   try {
-    const doc = new DOMParser().parseFromString(xmlText, "text/xml");
+    const doc = parseInertDocument(xmlText, "text/xml");
     const error = doc.querySelector("parsererror");
     if (error) return "```xml\n" + xmlText + "\n```";
 
@@ -352,6 +355,19 @@ export async function fileToMarkdown(file: File): Promise<{ name: string; conten
       const text = await file.text();
       return { name: `${baseName}.md`, content: ipynbToMarkdown(text) };
     }
+    case "pages":
+    case "numbers":
+    case "key": {
+      // Apple iWork — ZIP of XML ('09) or snappy-framed protobuf (IWA, '13+).
+      const content = await iworkToMarkdown(await file.arrayBuffer(), ext, {
+        pdfFallback: (pdf) =>
+          pdfToMarkdown({
+            name: "Preview.pdf",
+            arrayBuffer: async () => pdf.slice().buffer,
+          } as unknown as File),
+      });
+      return { name: `${baseName}.md`, content };
+    }
     case "fountain":
     case "spmd": {
       const text = await file.text();
@@ -392,7 +408,7 @@ export async function docxToMarkdown(file: File): Promise<string> {
   }
   if (!xml) return "> ⚠️ DOCX has no word/document.xml part.";
 
-  const doc = new DOMParser().parseFromString(xml, "application/xml");
+  const doc = parseInertDocument(xml, "application/xml");
   const body = doc.getElementsByTagName("w:body")[0];
   if (!body) return "> ⚠️ DOCX document body not found.";
 
@@ -478,7 +494,7 @@ export async function odtToMarkdown(file: File): Promise<string> {
   }
   if (!xml) return "> ⚠️ ODT has no content.xml part.";
 
-  const doc = new DOMParser().parseFromString(xml, "application/xml");
+  const doc = parseInertDocument(xml, "application/xml");
   const out: string[] = [];
   const walk = (parent: Element, inList: boolean) => {
     for (const node of Array.from(parent.children)) {
@@ -527,7 +543,7 @@ export async function pptxToMarkdown(file: File): Promise<string> {
 
   const out: string[] = [];
   slides.forEach((name, i) => {
-    const doc = new DOMParser().parseFromString(dec.decode(files.get(name)!), "application/xml");
+    const doc = parseInertDocument(dec.decode(files.get(name)!), "application/xml");
     const paras = els(doc, "a:p")
       .map((p) => els(p, "a:t").map((t) => t.textContent ?? "").join("").trim())
       .filter(Boolean);
@@ -562,7 +578,7 @@ export async function xlsxToMarkdown(file: File): Promise<string> {
   const dec = new TextDecoder();
   const parse = (name: string) =>
     files.has(name)
-      ? new DOMParser().parseFromString(dec.decode(files.get(name)!), "application/xml")
+      ? parseInertDocument(dec.decode(files.get(name)!), "application/xml")
       : null;
 
   const shared: string[] = [];
@@ -699,7 +715,7 @@ export async function epubToMarkdown(file: File): Promise<string> {
   const chapters: string[] = [];
   if (opf && opfPath) {
     const opfDir = opfPath.includes("/") ? opfPath.replace(/\/[^/]+$/, "/") : "";
-    const doc = new DOMParser().parseFromString(opf, "application/xml");
+    const doc = parseInertDocument(opf, "application/xml");
     const manifest = new Map<string, string>();
     for (const item of els(doc, "item")) {
       const id = item.getAttribute("id");
@@ -825,7 +841,7 @@ export function mhtmlToMarkdown(text: string): string {
 
 export function opmlToMarkdown(text: string): string {
   try {
-    const doc = new DOMParser().parseFromString(text, "application/xml");
+    const doc = parseInertDocument(text, "application/xml");
     const title = doc.querySelector("head > title")?.textContent?.trim() ?? "Outline";
     const lines: string[] = [`# ${title}`, ""];
     function walk(el: Element, depth: number): void {
@@ -1068,7 +1084,7 @@ export function ipynbToMarkdown(jsonText: string): string {
  * matched by localName so we don't depend on XML prefix handling.
  */
 export function wxrToMarkdown(xml: string): string {
-  const doc = new DOMParser().parseFromString(xml, "text/xml");
+  const doc = parseInertDocument(xml, "text/xml");
   const childText = (item: Element, localName: string): string => {
     for (const child of Array.from(item.children)) {
       if (child.localName === localName) return child.textContent?.trim() ?? "";
@@ -1266,6 +1282,8 @@ export const SUPPORTED_IMPORT_EXTENSIONS = [
   "csv", "tsv", "json", "xml", "yaml", "yml", "toml",
   // Office
   "rtf", "doc", "docx", "odt", "pptx", "xlsx",
+  // Apple iWork
+  "pages", "numbers", "key",
   // Archives (Notion export / Obsidian vault)
   "zip",
   // Web

@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import type { Command } from "../ui/CommandPalette";
 import { cmdIcons } from "../ui/CommandPalette";
-import { useAppStore } from "../store/useStore";
+import { tabIdOf, useAppStore } from "../store/useStore";
 import { t, SUPPORTED_LOCALES } from "../i18n";
 import { getGitIdentity, setGitIdentity, setGitToken, cloneRepo, pullRepo, commitAndPush, gitStatusSummary } from "../sync/git";
 import { getRecents, removeRecent } from "../storage/recent";
@@ -13,13 +13,19 @@ import { buildAiSettingsCommand, buildAiOutlineCommand } from "../ai/commands";
 import type { CollabSession } from "../collab/yjs";
 import { startVoiceRecording } from "../ui/VoiceDictation";
 import { TEMPLATES } from "../editor/templates";
+import { buildInstalledTemplateCommands, useInstalledTemplates } from "./installedTemplates";
 import { log } from "../lib/logger";
 import { AI_PROMPT_TEMPLATES, applyTemplate } from "../ai/multiLangPrompts";
 import { getPluginCommands } from "../plugins/pluginSystem";
 import { showAiToast } from "../ui/AiToast";
 import { encryptDocument, decryptDocument, isEncrypted } from "../storage/encryption";
-import { readWorkspaceFile } from "../storage/workspace";
+import { isOPFSAvailable, readWorkspaceFile } from "../storage/workspace";
 import { relativeTime } from "../lib/relativeTime";
+import { buildFormatCommands } from "../editor/formatCommands";
+import { buildSuggestingCommands } from "../editor/suggestingCommands";
+import { withAiQuota } from "../billing/aiQuota";
+import { canPurchasePlans, manageBilling, upgradeTo } from "../billing/planActions";
+import { detectIsMac } from "../ui/KeyboardShortcuts";
 
 export interface UseCommandsOptions {
   handleNew: () => void;
@@ -43,11 +49,49 @@ export interface UseCommandsOptions {
   setGalleryOpen: (open: boolean) => void;
   setTemplateGalleryOpen?: (open: boolean) => void;
   setAuditLogOpen?: (open: boolean) => void;
+  setOrgSettingsOpen?: (open: boolean) => void;
+  setTrustedKeysOpen?: (open: boolean) => void;
+  setThemeSettingsOpen?: (open: boolean) => void;
   setFineTuneOpen?: (open: boolean) => void;
   setTagsPanelOpen?: (open: boolean) => void;
   setCommentsPanelOpen?: (open: boolean) => void;
   setRuntimeMetricsOpen?: (open: boolean) => void;
   onAddComment?: () => void;
+  /** Mounted CodeMirror view (source/split mode) — used by the formatter. */
+  getEditorView?: () => import("@codemirror/view").EditorView | null;
+}
+
+/**
+ * Open a template as a NEW unsaved tab. Never writes into the active
+ * document (that would overwrite its unsaved content), and never reuses an
+ * open tab of the same name (that would ignore the template body):
+ * "Meeting notes.md" → "Meeting notes 2.md" → …
+ */
+export function openTemplateDoc(base: string, content: string): void {
+  const st = useAppStore.getState();
+  const currentId = tabIdOf(st.doc);
+  if (st.doc.content && !st.openTabs.some((tab) => tab.id === currentId)) {
+    // The active doc has no tab (e.g. after a rename): give it one first so
+    // switching to the template can't drop it.
+    useAppStore.setState((s) => ({
+      openTabs: [
+        ...s.openTabs,
+        {
+          id: currentId,
+          name: s.doc.name,
+          content: s.doc.content,
+          workspaceName: s.doc.workspaceName ?? null,
+          dirty: s.doc.dirty,
+        },
+      ],
+    }));
+  }
+  const taken = new Set(useAppStore.getState().openTabs.map((tab) => tab.id));
+  taken.add(currentId);
+  let name = `${base}.md`;
+  for (let i = 2; taken.has(tabIdOf({ workspaceName: null, name })); i++) name = `${base} ${i}.md`;
+  useAppStore.getState().openTab({ name, content, workspaceName: null });
+  useAppStore.getState().setDoc({ dirty: true });
 }
 
 export function useCommands({
@@ -72,11 +116,15 @@ export function useCommands({
   setGalleryOpen,
   setTemplateGalleryOpen,
   setAuditLogOpen,
+  setOrgSettingsOpen,
+  setTrustedKeysOpen,
+  setThemeSettingsOpen,
   setFineTuneOpen,
   setTagsPanelOpen,
   setCommentsPanelOpen,
   setRuntimeMetricsOpen,
   onAddComment,
+  getEditorView,
 }: UseCommandsOptions) {
   const doc = useAppStore((s) => s.doc);
   const theme = useAppStore((s) => s.theme);
@@ -102,10 +150,15 @@ export function useCommands({
   const toggleSpellCheck = useAppStore((s) => s.toggleSpellCheck);
   const toggleLocalAi = useAppStore((s) => s.toggleLocalAi);
   const toggleTypewriter = useAppStore((s) => s.toggleTypewriter);
+  const tsChecks = useAppStore((s) => s.tsChecks);
+  const toggleTsChecks = useAppStore((s) => s.toggleTsChecks);
   const grammarCheck = useAppStore((s) => s.grammarCheck);
   const toggleGrammarCheck = useAppStore((s) => s.toggleGrammarCheck);
+  const suggestingMode = useAppStore((s) => s.suggestingMode);
+  const toggleSuggestingMode = useAppStore((s) => s.toggleSuggestingMode);
   const setWritingGoal = useAppStore((s) => s.setWritingGoal);
   const toggleAutoSave = useAppStore((s) => s.toggleAutoSave);
+  const installedTemplates = useInstalledTemplates();
 
     return useMemo<Command[]>(() => {
     const setMode = useAppStore.getState().setMode;
@@ -134,7 +187,8 @@ export function useCommands({
       },
     ]);
 
-    return [
+    // AI-prompt commands are wrapped with the monthly quota check.
+    return withAiQuota([
       ...recentCmds,
       {
         id: "file.new",
@@ -314,6 +368,20 @@ export function useCommands({
         },
       },
       {
+        id: "file.exportPptx",
+        label: t("cmd.file.exportPptx"),
+        hint: t("cmd.file.exportPptx.hint"),
+        icon: cmdIcons.Download,
+        group: t("group.file"),
+        action: async () => {
+          const { markdownToPptxBytes, PPTX_MIME } = await import("../storage/exportPptx");
+          const { downloadBytes } = await import("../storage/exportFormats");
+          const baseName = doc.name.replace(/\.[^.]+$/, "");
+          const bytes = await markdownToPptxBytes(doc.content, baseName);
+          downloadBytes(`${baseName}.pptx`, bytes, PPTX_MIME);
+        },
+      },
+      {
         id: "file.exportPdf",
         label: t("cmd.file.exportPdf"),
         hint: t("cmd.file.exportPdf.hint"),
@@ -458,6 +526,14 @@ export function useCommands({
         icon: cmdIcons.Pencil,
         group: t("group.view"),
         action: toggleTypewriter,
+      },
+      {
+        id: "view.tsChecks",
+        label: tsChecks ? t("cmd.view.tsChecks.off") : t("cmd.view.tsChecks.on"),
+        hint: t("cmd.view.tsChecks.hint"),
+        icon: cmdIcons.Pencil,
+        group: t("group.view"),
+        action: toggleTsChecks,
       },
       {
         id: "view.grammarCheck",
@@ -907,6 +983,42 @@ export function useCommands({
             },
           ]
         : []),
+      ...(setOrgSettingsOpen
+        ? [
+            {
+              id: "settings.organization",
+              label: t("cmd.settings.organization"),
+              hint: t("cmd.settings.organization.hint"),
+              icon: cmdIcons.Sparkles,
+              group: t("group.security"),
+              action: () => setOrgSettingsOpen(true),
+            },
+          ]
+        : []),
+      ...(setTrustedKeysOpen
+        ? [
+            {
+              id: "settings.trustedKeys",
+              label: t("cmd.settings.trustedKeys"),
+              hint: t("cmd.settings.trustedKeys.hint"),
+              icon: cmdIcons.Sparkles,
+              group: t("group.security"),
+              action: () => setTrustedKeysOpen(true),
+            },
+          ]
+        : []),
+      ...(setThemeSettingsOpen
+        ? [
+            {
+              id: "settings.theme",
+              label: t("cmd.settings.theme"),
+              hint: t("cmd.settings.theme.hint"),
+              icon: theme === "dark" ? cmdIcons.Moon : cmdIcons.Sun,
+              group: t("group.view"),
+              action: () => setThemeSettingsOpen(true),
+            },
+          ]
+        : []),
       ...(setFineTuneOpen
         ? [
             {
@@ -960,11 +1072,15 @@ export function useCommands({
         hint: tpl.category,
         icon: cmdIcons.FileText,
         group: t("group.templates"),
-        action: () => {
-          setContent(tpl.content);
-          setDoc({ name: `${tpl.name}.md`, dirty: true });
-        },
+        action: () => openTemplateDoc(tpl.name, tpl.content),
       })),
+      // Marketplace templates installed into the workspace (templates/<id>.md).
+      ...buildInstalledTemplateCommands(installedTemplates, {
+        groupLabel: t("group.templates"),
+        hint: t("templates.installed.button"),
+        apply: (name, content) => openTemplateDoc(name, content),
+        onError: (e) => showAiToast(t("templates.loadFailed", { error: e.message }), "error"),
+      }),
       // ── Voice-to-Markdown ─────────────────────────────────────────────────
       {
         id: "voice.dictate",
@@ -1054,6 +1170,36 @@ export function useCommands({
           }
         },
       })),
+      // ── Formatting (Prettier, lazy) ───────────────────────────────────
+      ...buildFormatCommands(
+        {
+          getView: () => getEditorView?.() ?? null,
+          getContent: () => useAppStore.getState().doc.content,
+          setContent: (s: string) => useAppStore.getState().setContent(s),
+        },
+        detectIsMac(),
+      ).map((c) => ({ ...c, icon: cmdIcons.Pencil })),
+      // ── Suggesting mode (track changes, CriticMarkup) ─────────────────
+      ...buildSuggestingCommands({
+        getView: () => getEditorView?.() ?? null,
+        getContent: () => useAppStore.getState().doc.content,
+        setContent: (s: string) => useAppStore.getState().setContent(s),
+        suggesting: suggestingMode,
+        toggle: toggleSuggestingMode,
+      }).map((c) => ({ ...c, icon: cmdIcons.Pencil })),
+      // ── Plans (billing builds only) ─────────────────────────────────────
+      ...(canPurchasePlans()
+        ? [
+            { id: "billing.upgradePro", label: t("cmd.billing.upgradePro"), action: () => void upgradeTo("pro") },
+            { id: "billing.upgradeTeam", label: t("cmd.billing.upgradeTeam"), action: () => void upgradeTo("team") },
+            { id: "billing.manage", label: t("cmd.billing.manage"), action: () => void manageBilling() },
+            {
+              id: "billing.managePersonal",
+              label: t("cmd.billing.managePersonal"),
+              action: () => void manageBilling("personal"),
+            },
+          ].map((c) => ({ ...c, icon: cmdIcons.Sparkles, group: t("group.tools") }))
+        : []),
       // ── AI Capabilities ──────────────────────────────────────────────────
       buildAiSettingsCommand(),
       buildAiOutlineCommand(
@@ -1298,6 +1444,41 @@ export function useCommands({
             },
           ]),
       {
+        id: "file.openSampleWorkspace",
+        label: t("cmd.file.openSampleWorkspace"),
+        hint: t("cmd.file.openSampleWorkspace.hint"),
+        icon: cmdIcons.FolderOpen,
+        group: t("group.file"),
+        action: async () => {
+          if (!isOPFSAvailable()) {
+            await uiAlert({ message: t("doc.alert.workspaceUnavailable") });
+            return;
+          }
+          try {
+            const { createSampleWorkspace } = await import("../storage/sampleWorkspace");
+            const result = await createSampleWorkspace();
+            window.dispatchEvent(new Event("lumen-workspace-changed"));
+            if (!useAppStore.getState().showWorkspace) toggleWorkspace();
+            const content = await readWorkspaceFile(result.entry);
+            useAppStore.getState().openTab({
+              name: result.entry,
+              content,
+              workspaceName: result.entry,
+            });
+            showAiToast(
+              result.created.length > 0
+                ? t("sample.toast.created", { count: result.created.length, folder: result.root })
+                : t("sample.toast.exists", { folder: result.root }),
+              "info",
+            );
+          } catch (e) {
+            await uiAlert({
+              message: t("sample.alert.failed", { error: (e as Error).message }),
+            });
+          }
+        },
+      },
+      {
         id: "file.saveToWorkspace",
         label: t("cmd.file.saveToWorkspace"),
         hint: t("cmd.file.saveToWorkspace.hint"),
@@ -1427,7 +1608,7 @@ export function useCommands({
         group: t("group.insert"),
         action: () => insertSnippet(BLOCK_SNIPPETS.wikilink),
       },
-    ];
+    ]);
   }, [
     handleNew,
     handleOpen,
@@ -1452,5 +1633,8 @@ export function useCommands({
     doc.content,
     theme,
     setRuntimeMetricsOpen,
+    installedTemplates,
+    suggestingMode,
+    toggleSuggestingMode,
   ]);
 }

@@ -54,3 +54,53 @@ anyone migrating from Notion.
 
 The mode persists across reloads (per-document), so you can come back to
 your preferred view automatically.
+
+## Suggesting mode (track changes)
+
+Turn it on from the command palette ("Turn on suggesting mode") or with
+the **Editing / Suggesting** pill in the status bar. While it is on, edits
+in the Source / Split editor are recorded as
+[CriticMarkup](https://github.com/CriticMarkup/CriticMarkup-toolkit), so
+the file stays plain markdown:
+
+| You do | Stored as |
+| --- | --- |
+| Type text | `{++inserted++}` |
+| Delete text (Backspace, Delete, cut) | `{--deleted--}` |
+| Type over a selection | `{~~old~>new~~}` |
+| Write a note by hand | `{>>comment<<}` / `{==highlight==}` |
+
+- Typing next to your own insertion extends it, and consecutive deletions
+  merge. Deleting text inside your own `{++ ++}` really deletes it.
+- Undo / redo, edits from collaborators, and edits inside code blocks or
+  inline code are never turned into suggestions.
+- The editor shows insertions underlined in green, deletions struck
+  through in red and comments highlighted; the preview renders them as
+  `<ins>`, `<del>` and `<mark>`.
+- Palette commands: accept / reject the suggestion at the cursor, accept
+  all, reject all, next / previous suggestion. Accept all / reject all
+  also work from Preview and WYSIWYG.
+- The status-bar pill shows how many suggestions the document contains.
+- **Who suggested it.** When you are signed in, each new suggestion is
+  followed by an author tag — a comment holding only `@name`, e.g.
+  `{++new text++}{>>@Tal<<}`. The tag belongs to its change: accepting
+  or rejecting the change removes it too. Hover a suggestion to see
+  "Suggested by …"; the preview shows the name as a small comment.
+  Typing inside someone else's suggestion keeps their name on it.
+
+## TypeScript checks in code blocks
+
+Run **Enable TypeScript checks in code blocks** from the command palette.
+In the Source / Split editor, every ` ```ts `, ` ```typescript ` and
+` ```tsx ` block is then type-checked by the real TypeScript compiler:
+
+- Errors get a wavy underline — hover it for the message (`TS2322: …`).
+- Completions pop up while you type (after `.` or a few letters;
+  `Ctrl-Space` forces them).
+- Each block is checked on its own (its declarations don't leak into
+  other blocks), in strict mode against the ES2022 and DOM libraries.
+  Imports of npm packages aren't resolved and aren't reported.
+
+The compiler (~1.3 MB compressed) runs in a background worker and is
+downloaded only after you turn the setting on; it is not part of the
+offline app shell. The setting is remembered.

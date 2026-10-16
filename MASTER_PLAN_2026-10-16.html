@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Lumen Master Plan</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@500;700&family=Assistant:wght@400;600;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: one reading column (RTL), status band on top, tables in scroll boxes, progress bars as the recurring visual. */
+:root {
+  --bg: #f6f7fb;
+  --surface: #ffffff;
+  --fg: #1b2233;
+  --muted: #5b6478;
+  --line: #dde1ea;
+  --accent: #b7791f;      /* lamp amber — "lumen" */
+  --accent-soft: #fbefd9;
+  --ink: #23407a;          /* deep blue for headings / links */
+  --ok: #1f8a4c;
+  --warn: #b7791f;
+  --block: #b23b3b;
+  --bar-bg: #e7eaf1;
+  --font-display: "Frank Ruhl Libre", "David", "Times New Roman", serif;
+  --font-body: "Assistant", "Segoe UI", "Arial", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #11151f; --surface: #181e2b; --fg: #e6e9f1; --muted: #9aa3b8; --line: #2a3242;
+    --accent: #e3a548; --accent-soft: #3a2d17; --ink: #9db8f2; --ok: #4cc584; --warn: #e3a548; --block: #ef7b7b; --bar-bg: #262e3e;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #11151f; --surface: #181e2b; --fg: #e6e9f1; --muted: #9aa3b8; --line: #2a3242;
+  --accent: #e3a548; --accent-soft: #3a2d17; --ink: #9db8f2; --ok: #4cc584; --warn: #e3a548; --block: #ef7b7b; --bar-bg: #262e3e;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--fg);
+  font-family: var(--font-body); font-size: 16px; line-height: 1.6;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 32px 64px;
+}
+.page { max-width: 1040px; margin-inline: auto; display: grid; gap: 40px; }
+h1, h2, h3 { font-family: var(--font-display); color: var(--ink); text-wrap: balance; margin: 0; line-height: 1.25; }
+h1 { font-size: clamp(1.9rem, 4vw, 2.6rem); }
+h2 { font-size: 1.55rem; display: flex; gap: 12px; align-items: baseline; }
+h2 .sec { font-family: var(--font-mono); font-size: 0.95rem; color: var(--accent); }
+h3 { font-size: 1.15rem; }
+p { margin: 0; max-width: 68ch; }
+.muted { color: var(--muted); }
+code, .mono { font-family: var(--font-mono); font-size: 0.86em; }
+code { background: var(--bar-bg); padding: 1px 5px; border-radius: 4px; direction: ltr; unicode-bidi: embed; }
+section { display: grid; gap: 16px; min-width: 0; }
+
+header.top { display: grid; gap: 12px; border-bottom: 2px solid var(--accent); padding-bottom: 20px; }
+.eyebrow { font-family: var(--font-mono); font-size: 0.8rem; letter-spacing: 0.06em; color: var(--muted); }
+.meta { display: flex; flex-wrap: wrap; gap: 8px 20px; color: var(--muted); font-size: 0.92rem; }
+
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; }
+.stat { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; display: grid; gap: 4px; min-width: 0; }
+.stat .n { font-family: var(--font-mono); font-size: 1.6rem; font-weight: 600; font-variant-numeric: tabular-nums; }
+.stat .l { color: var(--muted); font-size: 0.9rem; }
+
+.box { overflow-x: auto; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; }
+table { border-collapse: collapse; width: 100%; font-size: 0.93rem; }
+th, td { padding: 9px 12px; text-align: right; vertical-align: top; border-bottom: 1px solid var(--line); }
+th { font-weight: 700; color: var(--muted); font-size: 0.8rem; letter-spacing: 0.03em; background: var(--bg); white-space: nowrap; }
+tr:last-child td { border-bottom: none; }
+td.num, th.num { font-family: var(--font-mono); font-variant-numeric: tabular-nums; white-space: nowrap; text-align: left; direction: ltr; }
+tfoot td { font-weight: 700; background: var(--bg); }
+
+.bar { display: flex; align-items: center; gap: 8px; min-width: 130px; }
+.bar .track { flex: 1; height: 8px; background: var(--bar-bg); border-radius: 4px; overflow: hidden; }
+.bar .fill { height: 100%; background: var(--accent); border-radius: 4px; }
+.bar .fill.done { background: var(--ok); }
+.bar .pct { font-family: var(--font-mono); font-size: 0.82rem; font-variant-numeric: tabular-nums; width: 3.4em; text-align: left; direction: ltr; }
+
+.lvl { display: inline-block; font-family: var(--font-mono); font-size: 0.75rem; font-weight: 600; padding: 1px 7px; border-radius: 999px; border: 1px solid currentColor; white-space: nowrap; }
+.L1 { color: var(--ok); }
+.L2 { color: var(--warn); }
+.L3 { color: var(--block); }
+
+.answers { display: grid; gap: 12px; }
+.answer { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; display: grid; gap: 6px; }
+.answer .q { font-weight: 700; }
+.answer .tag { font-family: var(--font-mono); font-size: 0.75rem; color: var(--muted); }
+
+ol.steps { margin: 0; padding-inline-start: 22px; display: grid; gap: 8px; }
+.legend { display: flex; flex-wrap: wrap; gap: 8px 18px; font-size: 0.9rem; color: var(--muted); }
+footer { border-top: 1px solid var(--line); padding-top: 16px; font-size: 0.9rem; color: var(--muted); }
+a { color: var(--ink); }
+a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+@media (max-width: 520px) { body { font-size: 15px; } th, td { padding: 8px 9px; } }
+</style>
+</head>
+<body>
+
+<div class="page" dir="rtl" lang="he">
+
+<header class="top">
+  <div class="eyebrow">LUMEN-MD · MASTER PLAN · 16.10.2026</div>
+  <h1>תוכנית אב — Lumen</h1>
+  <p>כל המשימות שנותרו בפרויקט, עם אחוז ביצוע, מי מבצע ואומדן שעות (נמוך / מרכזי / גבוה). מבוסס על <code>PLAN_STATUS.md</code>, <code>TASKS.md</code> ו-PR&nbsp;#106 כפי שהם בסוף 16.10.2026.</p>
+  <div class="meta">
+    <span>ענף: <code>feat/plans-completion</code></span>
+    <span>PR: <a href="https://github.com/talstilkol/lumen-md/pull/106">#106</a></span>
+    <span>ראש הענף: <code>4dd5c82</code></span>
+  </div>
+</header>
+
+<section>
+  <h2><span class="sec">§1</span>תמונת מצב</h2>
+  <div class="stats">
+    <div class="stat"><span class="n">63%</span><span class="l">משימות TASKS.md שבוצעו (245 / 387)</span></div>
+    <div class="stat"><span class="n">100%</span><span class="l">מהמשימות שלא חסומות חיצונית (245 / 245)</span></div>
+    <div class="stat"><span class="n">2166</span><span class="l">בדיקות יחידה, כולן עוברות</span></div>
+    <div class="stat"><span class="n">0 / 5</span><span class="l">פגיעויות npm קריטי / גבוה (5 בכלי build בלבד)</span></div>
+  </div>
+  <p class="muted">אחוזי TASKS.md לא כוללים את מה שנבנה היום מעבר לתוכנית: ייחוס מחבר להצעות, הצפנת נוכחות בחדרי סיסמה ובדיקות TypeScript בבלוקי קוד. CI על ראש הענף: typecheck · test · build עבר; ה-e2e רצים כעת.</p>
+
+  <div class="box">
+    <table>
+      <thead><tr><th>שלב</th><th>תוכן</th><th class="num">בוצע / סה״כ</th><th>התקדמות</th><th>מה חוסם</th></tr></thead>
+      <tbody>
+        <tr><td>0</td><td>דרישות מקדימות מטל</td><td class="num">0 / 10</td><td><div class="bar"><div class="track"><div class="fill" style="width:0%"></div></div><span class="pct">0%</span></div></td><td>חשבונות ומפתחות (טל)</td></tr>
+        <tr><td>α</td><td>בסיס כן ויציב</td><td class="num">43 / 60</td><td><div class="bar"><div class="track"><div class="fill" style="width:72%"></div></div><span class="pct">72%</span></div></td><td>פריסת signaling, Sentry</td></tr>
+        <tr><td>β</td><td>משלוח לאנשים</td><td class="num">14 / 64</td><td><div class="bar"><div class="track"><div class="fill" style="width:22%"></div></div><span class="pct">22%</span></div></td><td>Fly.io, Stripe, חנויות מובייל</td></tr>
+        <tr><td>γ</td><td>חוויית פרימיום</td><td class="num">42 / 75</td><td><div class="bar"><div class="track"><div class="fill" style="width:56%"></div></div><span class="pct">56%</span></div></td><td>מפתח OpenAI (תמלול, fine-tune)</td></tr>
+        <tr><td>δ</td><td>אפליקציות נייטיב</td><td class="num">0 / 20</td><td><div class="bar"><div class="track"><div class="fill" style="width:0%"></div></div><span class="pct">0%</span></div></td><td>Xcode, Apple / Google Developer</td></tr>
+        <tr><td>ε</td><td>ארגונים ואקו-סיסטם</td><td class="num">32 / 43</td><td><div class="bar"><div class="track"><div class="fill" style="width:74%"></div></div><span class="pct">74%</span></div></td><td>WorkOS, npm scope</td></tr>
+        <tr><td>ζ</td><td>שיווק וקהילה</td><td class="num">1 / 4</td><td><div class="bar"><div class="track"><div class="fill" style="width:25%"></div></div><span class="pct">25%</span></div></td><td>תוכן ותחרות (חיצוני)</td></tr>
+        <tr><td>F</td><td>חתימה סופית</td><td class="num">0 / 14</td><td><div class="bar"><div class="track"><div class="fill" style="width:0%"></div></div><span class="pct">0%</span></div></td><td>תלוי בכל השאר</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section>
+  <h2><span class="sec">§2</span>תשובות לשאלות הפתוחות</h2>
+  <p class="muted">אישרת את כל השינויים וביקשת שאחקור לבד את השאלות הפתוחות. אלה ההכרעות. מה שלא הצלחתי לאמת מסומן.</p>
+  <div class="answers">
+    <div class="answer">
+      <span class="q">דומיין: <code>lumen.md</code> או <code>lumen.app</code>?</span>
+      <p><b>המלצה: לבחור דומיין אחד בשם של הריפו (למשל <code>lumen-md.app</code>) ולא אף אחד מהשניים.</b> בקוד יש כיום ערבוב: 32 הפניות ל-<code>lumen.app</code> ו-27 ל-<code>lumen.md</code> (בעיקר תת-דומיינים: auth, audit, signal). "Lumen" הוא שם מסחרי תפוס בתחום (Lumen Technologies, ואפליקציית Lumen של MWM בחנות של Apple), כך שיש סיכון סימן מסחר. לסיומת ‎.md (מולדובה) מחיר פרימיום ויש סביבה מחלוקת משפטית על ניהולה.</p>
+      <span class="tag">לא אומת: זמינות הדומיינים ומחירם. בדיקת DNS מהסביבה שלי חסומה. צריך בדיקה אצל רשם (5 דק׳).</span>
+    </div>
+    <div class="answer">
+      <span class="q">למזג את PR #106 ל-main?</span>
+      <p><b>כן.</b> אחרי שאישרת את כל השינויים, אמזג ברגע שה-CI על ראש הענף ירוק בכל הדפדפנים. זה גם מה ש-Dependabot צריך: ההתראות נספרות רק על <code>main</code>. סקירות Codex ימשיכו על PR-ים הבאים.</p>
+      <span class="tag">ממתין: e2e על 4dd5c82 (רץ עכשיו).</span>
+    </div>
+    <div class="answer">
+      <span class="q">הצטרפות לחדר מוצפן כשאף אחד לא עונה</span>
+      <p><b>הוחלט: לא לשתף את המסמך אוטומטית.</b> עם הצפנת ה-signaling, סיסמה שגויה נראית בדיוק כמו חדר ריק, ושיתוף אוטומטי היה יוצר העתק שקט של החדר. מופיעה הודעה עם כפתור "שתף את המסמך שלי כאן".</p>
+    </div>
+    <div class="answer">
+      <span class="q">שתי פקודות AI חופפות — לחייב מראש או לחסום?</span>
+      <p><b>הוחלט: לחייב מראש</b> את הפקודה השנייה כשהראשונה עדיין רצה. חסימה הייתה מפריעה לעבודה, וחיוב חסר היה מאפשר לעקוף את המכסה. מחיר: אם הפקודה השנייה בוטלה בדיאלוג — היא עדיין נספרה (מקרה נדיר).</p>
+    </div>
+    <div class="answer">
+      <span class="q">בדיקות TypeScript: להפעיל כברירת מחדל?</span>
+      <p><b>הוחלט: לא, רק בהפעלה ידנית.</b> המהדר שוקל ~1.3MB דחוס. מי שמפעיל מוריד אותו פעם אחת, והוא לא נכנס לקבצי האופליין של האפליקציה.</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2><span class="sec">§3</span>משימות שנותרו — קוד</h2>
+  <div class="legend">
+    <span><span class="lvl L1">L1</span> אני מבצע, מאושר</span>
+    <span><span class="lvl L2">L2</span> צריך הכרעה או תשתית לפני ביצוע</span>
+    <span><span class="lvl L3">L3</span> רק טל</span>
+  </div>
+  <div class="box">
+    <table>
+      <thead><tr><th>#</th><th>משימה</th><th>בוצע</th><th>רמה</th><th class="num">שעות נ/מ/ג</th><th>הערה</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">C1</td><td>מיזוג PR #106 ל-main</td><td><div class="bar"><div class="track"><div class="fill" style="width:95%"></div></div><span class="pct">95%</span></div></td><td><span class="lvl L1">L1</span></td><td class="num">0.2 / 0.5 / 1</td><td>אחרי e2e ירוק</td></tr>
+        <tr><td class="mono">C2</td><td>הרחבת בדיקות TS: טיפוס ב-hover, בדיקת בלוקי <code>live-js</code>, הצהרות משותפות בין בלוקי <code>shared</code></td><td><div class="bar"><div class="track"><div class="fill" style="width:60%"></div></div><span class="pct">60%</span></div></td><td><span class="lvl L1">L1</span></td><td class="num">8 / 12 / 16</td><td>הבסיס (שגיאות + השלמה) נבנה היום</td></tr>
+        <tr><td class="mono">C3</td><td>מצב הצעות (track changes) גם ב-WYSIWYG</td><td><div class="bar"><div class="track"><div class="fill" style="width:50%"></div></div><span class="pct">50%</span></div></td><td><span class="lvl L1">L1</span></td><td class="num">12 / 16 / 24</td><td>עובד בעורך המקור, כולל ייחוס מחבר</td></tr>
+        <tr><td class="mono">C4</td><td>שפות חיות נוספות: webR (R), ruby.wasm</td><td><div class="bar"><div class="track"><div class="fill" style="width:0%"></div></div><span class="pct">0%</span></div></td><td><span class="lvl L1">L1</span></td><td class="num">16 / 24 / 32</td><td>20–40MB לכל שפה, טעינה עצלה</td></tr>
+        <tr><td class="mono">C5</td><td>Web Playground (קבצים מרובים, JSX) + תצוגה חיה React / Vue / Svelte</td><td><div class="bar"><div class="track"><div class="fill" style="width:0%"></div></div><span class="pct">0%</span></div></td><td><span class="lvl L1">L1</span></td><td class="num">40 / 60 / 80</td><td>הגדול מבין פריטי הקוד</td></tr>
+        <tr><td class="mono">C6</td><td>ייבוא חבילות npm ב-<code>live-js</code> (esm.sh)</td><td><div class="bar"><div class="track"><div class="fill" style="width:0%"></div></div><span class="pct">0%</span></div></td><td><span class="lvl L2">L2</span></td><td class="num">6 / 8 / 12</td><td>נדחה במכוון: פותח את ה-CSP ל-CDN חיצוני. אפשרי רק כאופציית self-host</td></tr>
+        <tr><td class="mono">C7</td><td>מדידת זמן טעינה מול יעד TTI &lt; 1.5s</td><td><div class="bar"><div class="track"><div class="fill" style="width:0%"></div></div><span class="pct">0%</span></div></td><td><span class="lvl L2">L2</span></td><td class="num">1 / 1 / 2</td><td>דורש פריסה חיה (E1)</td></tr>
+        <tr><td class="mono">C8</td><td>Team workspaces · שוק ערכות נושא · פרסום לרשת (<code>lumen/user/doc</code>)</td><td><div class="bar"><div class="track"><div class="fill" style="width:10%"></div></div><span class="pct">10%</span></div></td><td><span class="lvl L2">L2</span></td><td class="num">80 / 120 / 200</td><td>צריך שרת וחשבונות</td></tr>
+        <tr><td class="mono">C9</td><td>מיזוג תיקוני Dependabot שיופיעו אחרי C1</td><td><div class="bar"><div class="track"><div class="fill" style="width:0%"></div></div><span class="pct">0%</span></div></td><td><span class="lvl L1">L1</span></td><td class="num">1 / 2 / 4</td><td>תלוי ב-C1</td></tr>
+      </tbody>
+      <tfoot><tr><td></td><td>סה״כ קוד</td><td></td><td></td><td class="num">164 / 244 / 371</td><td>L1 בלבד: 77 / 115 / 157</td></tr></tfoot>
+    </table>
+  </div>
+</section>
+
+<section>
+  <h2><span class="sec">§4</span>משימות שנותרו — חסומות חיצונית</h2>
+  <p class="muted">הקוד לכל אלה קיים ונבדק. מה שחסר הוא חשבון, מפתח או פעולה שלך. האחוז הוא החלק שכבר מוכן בקוד.</p>
+  <div class="box">
+    <table>
+      <thead><tr><th>#</th><th>משימה</th><th>מוכן</th><th>רמה</th><th>מה צריך ממך</th><th class="num">שעות</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">E1</td><td>פריסה: web, signaling, collab</td><td><div class="bar"><div class="track"><div class="fill" style="width:85%"></div></div><span class="pct">85%</span></div></td><td><span class="lvl L3">L3</span></td><td>חשבון Fly.io + דומיין (§2) + DNS</td><td class="num">2 / 2.5 / 3</td></tr>
+        <tr><td class="mono">E2</td><td>ניטור שגיאות</td><td><div class="bar"><div class="track"><div class="fill" style="width:90%"></div></div><span class="pct">90%</span></div></td><td><span class="lvl L3">L3</span></td><td>Sentry DSN</td><td class="num">0.25</td></tr>
+        <tr><td class="mono">E3</td><td>חיוב</td><td><div class="bar"><div class="track"><div class="fill" style="width:85%"></div></div><span class="pct">85%</span></div></td><td><span class="lvl L3">L3</span></td><td>מוצרים ומפתחות ב-Stripe + <code>wrangler deploy</code> ב-Cloudflare (D1/KV)</td><td class="num">3 / 3.5 / 4</td></tr>
+        <tr><td class="mono">E4</td><td>SSO ארגוני</td><td><div class="bar"><div class="track"><div class="fill" style="width:80%"></div></div><span class="pct">80%</span></div></td><td><span class="lvl L3">L3</span></td><td>חשבון WorkOS + בדיקה חיה</td><td class="num">1 / 1.5 / 2</td></tr>
+        <tr><td class="mono">E5</td><td>יומן ביקורת בייצור</td><td><div class="bar"><div class="track"><div class="fill" style="width:90%"></div></div><span class="pct">90%</span></div></td><td><span class="lvl L3">L3</span></td><td>משתני סביבה ל-worker + תפקידי admin ב-WorkOS</td><td class="num">0.5</td></tr>
+        <tr><td class="mono">E6</td><td>תמלול קולי ו-fine-tune (γ.4, γ.5)</td><td><div class="bar"><div class="track"><div class="fill" style="width:75%"></div></div><span class="pct">75%</span></div></td><td><span class="lvl L3">L3</span></td><td>מפתח OpenAI לבדיקות</td><td class="num">0.5</td></tr>
+        <tr><td class="mono">E7</td><td>אפליקציות מובייל ושעון (δ)</td><td><div class="bar"><div class="track"><div class="fill" style="width:15%"></div></div><span class="pct">15%</span></div></td><td><span class="lvl L3">L3</span></td><td>Apple Developer ($99) · Google Play ($25) · Xcode</td><td class="num">8 / 12 / 16</td></tr>
+        <tr><td class="mono">E8</td><td>הפצה: npm, Chrome Web Store, חתימת Tauri, VS Code Marketplace</td><td><div class="bar"><div class="track"><div class="fill" style="width:70%"></div></div><span class="pct">70%</span></div></td><td><span class="lvl L3">L3</span></td><td>scope ‏<code>@lumen-md</code> · $5 Chrome · תעודות חתימה · publisher</td><td class="num">3 / 4 / 6</td></tr>
+        <tr><td class="mono">E9</td><td>קהילה ותוכן (ζ)</td><td><div class="bar"><div class="track"><div class="fill" style="width:25%"></div></div><span class="pct">25%</span></div></td><td><span class="lvl L3">L3</span></td><td>מאגרי תבניות ותוספים · Discussions · דוברי שפה ל-6 תרגומים · סקירה משפטית</td><td class="num">מתמשך</td></tr>
+      </tbody>
+      <tfoot><tr><td></td><td>סה״כ זמן שלך</td><td></td><td></td><td></td><td class="num">≈ 18 / 25 / 32</td></tr></tfoot>
+    </table>
+  </div>
+</section>
+
+<section>
+  <h2><span class="sec">§5</span>סדר ריצה</h2>
+  <ol class="steps">
+    <li><b>היום:</b> C1 מיזוג PR #106 כשה-CI ירוק, ואז C9.</li>
+    <li><b>אצלך, במקביל:</b> לבחור דומיין (§2), ואז E1 → E2 → E3. אלה שלושת החסמים שפותחים את β ואת C7.</li>
+    <li><b>אני, ברצף:</b> C2 → C3 → C4. כל אחד ב-PR נפרד, עם סקירת Codex ו-CI ירוק לפני מיזוג.</li>
+    <li><b>אחרי פריסה:</b> C7 מדידת ביצועים, E4–E6 בדיקות חיות.</li>
+    <li><b>בהמשך:</b> C5 Playground, ואז C8 ו-E7–E9 לפי סדר העדיפויות שתקבע.</li>
+  </ol>
+</section>
+
+<footer>
+  TASKS.md: ‏245 / 387 — ‏63% · ללא חסימות חיצוניות: 245 / 245 — ‏100% · קוד שנותר: 9 משימות (6 ניתנות לביצוע עכשיו, 3 תלויות בהכרעה או בתשתית) · חסום חיצונית: 9 משימות, ≈ 25 שעות שלך · בדיקות יחידה: 2166 / 2166 · נוצר 16.10.2026.
+</footer>
+
+</div>
+</body>
+</html>

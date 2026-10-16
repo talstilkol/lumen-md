@@ -31,7 +31,12 @@ const BUDGETS = [
   //       Linux gzip variance + future first-party growth.
   { name: "main bundle",        pattern: /^main-/,                budgetKb: 195 },
   { name: "entry index",        pattern: /^index-/,               budgetKb: 220 },
-  { name: "vendor: mermaid",    pattern: /^vendor-mermaid-/,      budgetKb: 800 },
+  // mermaid: 800 → 860 (2026-10 dependency audit). mermaid 11.15 → 11.17.2
+  //   fixes GHSA-6x64-9x62-f2gx (CSS injection), GHSA-c4c3-pg64-4m4v and
+  //   GHSA-3rrr-jr9j-h3q3 (prototype pollution), GHSA-2v8p-3f2j-5mp7 and
+  //   GHSA-rhh3-jpg6-66xh (DoS). Measured 833.3 KB gzipped on Linux after
+  //   the bump; lazy chunk, only fetched when a doc has a mermaid block.
+  { name: "vendor: mermaid",    pattern: /^vendor-mermaid-/,      budgetKb: 860 },
   // shiki sits at ~263 KB gzipped today. The budget previously read
   // 1800 KB — a relic from when per-language grammars were bundled into
   // the same chunk. They've since been split into assets/shiki-langs/*
@@ -51,11 +56,23 @@ const BUDGETS = [
   { name: "vendor: leaflet",    pattern: /^vendor-leaflet-/,      budgetKb: 60 },
   { name: "vendor: git",        pattern: /^vendor-git-/,          budgetKb: 110 },
   { name: "vendor: tldraw",     pattern: /^vendor-tldraw-/,       budgetKb: 420 },
+  // @google/model-viewer + three.js, self-hosted (CSP bans the unpkg CDN).
+  // Dynamic-imported only when a document contains a ```model3d block.
+  { name: "vendor: modelviewer", pattern: /^vendor-modelviewer-/, budgetKb: 320 },
   { name: "vendor: other",      pattern: /^vendor-/,              budgetKb: 200 },
   // pdfjs-dist text extractor — lazy-loaded only when the user imports a PDF.
   // ~144 KB gzipped today; the heavy worker ships as a separate .mjs (not
   // size-checked here). It never touches the eager startup path.
   { name: "lazy: pdfjs",        pattern: /^pdf-/,                 budgetKb: 165 },
+  // Prettier (Format document / code block) — standalone core + one chunk
+  // per language plugin, all dynamic-imported on first format. The
+  // TypeScript parser plugin is the largest at ~124 KB gz.
+  { name: "lazy: prettier",     pattern: /^prettier-/,            budgetKb: 140 },
+  // TypeScript compiler + ES/DOM lib .d.ts files for the opt-in "TypeScript
+  // checks in code blocks" (src/lsp). One worker file, fetched only after
+  // the user enables the setting; excluded from the PWA precache. Measured
+  // 1325 KB gzipped (TypeScript 5.9).
+  { name: "lazy: ts checker",   pattern: /^tsCheck\.worker-/,     budgetKb: 1450 },
   { name: "lazy plugin chunk",  pattern: /\.js$/,                 budgetKb: 100 },
 ];
 

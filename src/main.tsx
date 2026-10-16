@@ -1,3 +1,5 @@
+// Must stay the first import: Trusted Types policies before any DOM sink.
+import "./lib/trustedTypesInit";
 import React, { Suspense } from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App";
@@ -10,6 +12,8 @@ import { initAuth } from "./auth/useAuth";
 import { reportWebVitals } from "./lib/webVitals";
 import { log } from "./lib/logger";
 import { startAutoBackup } from "./sync/autoBackup";
+import { initLocale } from "./i18n";
+import { adoptBootLocale } from "./store/useStore";
 import "./index.css";
 
 initTelemetry();
@@ -50,6 +54,21 @@ function initShareExtension() {
 }
 initShareExtension();
 
+// Only the English string table ships in the main chunk (A7 lever 4).
+// Load the persisted locale's lazy bundle BEFORE the first render so the
+// synchronous t() calls never flash English for a Hebrew/French/… user.
+// initLocale() resolves to English on any failure, so boot never blocks.
+void initLocale()
+  .then((applied) => {
+    // initLocale falls back to English when the saved locale's chunk can't
+    // load; the store was already rehydrated with the saved locale, and
+    // App applies the store's locale on mount — sync it so that doesn't
+    // undo the fallback (English strings under an RTL `lang`).
+    adoptBootLocale(applied);
+  })
+  .finally(renderApp);
+
+function renderApp() {
 ReactDOM.createRoot(document.getElementById("root")!).render(
     <React.StrictMode>
       <ErrorBoundary fallback={
@@ -88,3 +107,4 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
     <ToastContainer />
   </React.StrictMode>,
 );
+}

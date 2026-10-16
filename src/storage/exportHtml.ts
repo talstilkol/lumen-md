@@ -1,34 +1,51 @@
 import { renderMarkdown } from "../renderer/pipeline";
 import { fetchWithRetry } from "../lib/fetchRetry";
 
+export interface HtmlDocumentOptions {
+  /** <title> text. */
+  title: string;
+  /** Render in dark mode (adds `class="dark"` and dark code themes). */
+  isDark?: boolean;
+  /** CSS inlined into the document's <style> block. */
+  styles?: string;
+  /** Extra markup appended to <head> (e.g. a stylesheet <link>). */
+  head?: string;
+  /** Markup inserted before the rendered body (e.g. a nav bar). */
+  before?: string;
+  /** `lang` attribute of <html>. */
+  lang?: string;
+}
+
 /**
- * Render the markdown to a self-contained HTML document and trigger a
- * download. Inlines all stylesheets currently attached to the page, including
- * the bundled Vite CSS, KaTeX, and Leaflet — so the resulting file looks the
- * same as the live preview when opened anywhere.
+ * Render Markdown to a complete, standalone HTML document string. DOM-free
+ * (works in Node — used by the `lumen publish` CLI); `exportToHtml` wraps it
+ * with the page's live stylesheets and a browser download.
  */
-export async function exportToHtml(
+export async function renderHtmlDocument(
   markdown: string,
-  filename: string,
-): Promise<void> {
-  const isDark = document.documentElement.classList.contains("dark");
+  opts: HtmlDocumentOptions,
+): Promise<string> {
+  const isDark = Boolean(opts.isDark);
   // Render to a React tree, then stringify.
   const tree = await renderMarkdown(markdown, () => isDark);
   const { renderToStaticMarkup } = await import("react-dom/server");
-  const body = renderToStaticMarkup(tree as React.ReactElement);
+  const { createElement } = await import("react");
+  const { StaticRenderContext } = await import("../renderer/components");
+  // Static mode: interactive blocks serialize as their source instead of a
+  // never-hydrated "Loading…" placeholder.
+  const body = renderToStaticMarkup(
+    createElement(StaticRenderContext.Provider, { value: true }, tree as React.ReactElement),
+  );
 
-  const styles = await collectStyles();
-  const docTitle = (filename.replace(/\.(md|markdown|html)$/i, "") || "Document").trim();
-
-  const html = `<!doctype html>
-<html lang="en" class="${isDark ? "dark" : ""}">
+  return `<!doctype html>
+<html lang="${escapeHtml(opts.lang ?? "en")}" class="${isDark ? "dark" : ""}">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <meta name="generator" content="Lumen" />
-<title>${escapeHtml(docTitle)}</title>
+<title>${escapeHtml(opts.title)}</title>
 <style>
-${styles}
+${opts.styles ?? ""}
 
 /* Self-contained tweaks */
 body {
@@ -45,14 +62,30 @@ body {
   body { padding: 0; }
   .code-block, .chart-block, .mermaid-block { break-inside: avoid; }
 }
-</style>
+</style>${opts.head ?? ""}
 </head>
 <body>
-<main class="prose-lumen lumen-export">
+${opts.before ?? ""}<main class="prose-lumen lumen-export">
 ${body}
 </main>
 </body>
 </html>`;
+}
+
+/**
+ * Render the markdown to a self-contained HTML document and trigger a
+ * download. Inlines all stylesheets currently attached to the page, including
+ * the bundled Vite CSS, KaTeX, and Leaflet — so the resulting file looks the
+ * same as the live preview when opened anywhere.
+ */
+export async function exportToHtml(
+  markdown: string,
+  filename: string,
+): Promise<void> {
+  const isDark = document.documentElement.classList.contains("dark");
+  const styles = await collectStyles();
+  const docTitle = (filename.replace(/\.(md|markdown|html)$/i, "") || "Document").trim();
+  const html = await renderHtmlDocument(markdown, { title: docTitle, isDark, styles });
 
   const blob = new Blob([html], { type: "text/html;charset=utf-8" });
   const url = URL.createObjectURL(blob);

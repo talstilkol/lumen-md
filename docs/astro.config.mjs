@@ -12,12 +12,13 @@ export default defineConfig({
     starlight({
       title: "Lumen Docs",
       description: "Markdown, illuminated. The user manual.",
-      social: {
-        github: "https://github.com/",
-      },
-      defaultLocale: "en",
+      social: [
+        { icon: "github", label: "GitHub", href: "https://github.com/talstilkol/lumen-md" },
+      ],
+      // Content lives at the collection root (no en/ folder), so English is
+      // the root locale; Hebrew pages fall back to English until translated.
       locales: {
-        en: { label: "English" },
+        root: { label: "English", lang: "en" },
         he: { label: "עברית", lang: "he" },
       },
       sidebar: [
@@ -26,7 +27,6 @@ export default defineConfig({
           items: [
             { label: "Welcome to Lumen", slug: "getting-started/welcome" },
             { label: "Quickstart", slug: "getting-started/quickstart" },
-            { label: "Keyboard shortcuts", slug: "getting-started/shortcuts" },
           ],
         },
         {
@@ -34,18 +34,15 @@ export default defineConfig({
           items: [
             { label: "Source / Split / Preview / WYSIWYG", slug: "editor/modes" },
             { label: "Smart Insert", slug: "editor/smart-insert" },
-            { label: "Slash menu", slug: "editor/slash-menu" },
           ],
         },
         {
           label: "Markdown blocks",
-          autogenerate: { directory: "blocks" },
+          items: [{ autogenerate: { directory: "blocks" } }],
         },
         {
           label: "Workspace",
           items: [
-            { label: "OPFS file tree", slug: "workspace/opfs" },
-            { label: "Wiki-links + Backlinks", slug: "workspace/wiki-links" },
             { label: "Database views", slug: "workspace/database-views" },
             { label: "Search (BM25 + Smart)", slug: "workspace/search" },
           ],
@@ -54,15 +51,12 @@ export default defineConfig({
           label: "Collaboration",
           items: [
             { label: "Real-time WebRTC", slug: "collab/webrtc" },
-            { label: "Persistent rooms (Pro)", slug: "collab/persistent" },
             { label: "End-to-end encryption", slug: "collab/encryption" },
           ],
         },
         {
           label: "AI",
           items: [
-            { label: "AI Settings", slug: "ai/settings" },
-            { label: "Smart search", slug: "ai/smart-search" },
             { label: "Auto-tag + link suggestions", slug: "ai/agents" },
             { label: "Local LLM (web-llm)", slug: "ai/local-llm" },
             { label: "MCP integration (Claude Desktop, Cursor)", slug: "ai/mcp" },
@@ -71,7 +65,9 @@ export default defineConfig({
         {
           label: "Plugins + Templates",
           items: [
+            { label: "Plugin SDK", slug: "plugins/sdk" },
             { label: "Plugin gallery", slug: "plugins/gallery" },
+            { label: "Plugin signing keys", slug: "plugins/signing" },
             { label: "Templates marketplace", slug: "plugins/templates" },
             { label: "Web Clipper extension", slug: "plugins/web-clipper" },
           ],
@@ -85,10 +81,17 @@ export default defineConfig({
           ],
         },
         {
+          label: "Account",
+          items: [
+            { label: "Signing in", slug: "account/sign-in" },
+            { label: "Single sign-on (SSO)", slug: "account/sso" },
+            { label: "Organization settings", slug: "account/organization" },
+          ],
+        },
+        {
           label: "Security",
           items: [
             { label: "Vault + recovery phrase", slug: "security/vault" },
-            { label: "Privacy", slug: "security/privacy" },
           ],
         },
         {
@@ -97,7 +100,6 @@ export default defineConfig({
             { label: "Docker compose bundle", slug: "self-hosting/docker" },
           ],
         },
-        { label: "FAQ", slug: "faq" },
       ],
     }),
   ],

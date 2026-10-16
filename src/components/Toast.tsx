@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { X, Info, CheckCircle2, AlertTriangle, AlertCircle } from "lucide-react";
 import { useToastStore, type Toast as ToastType, type ToastKind } from "../store/useToastStore";
+import { t } from "../i18n";
 
 const ICONS: Record<ToastKind, typeof Info> = {
   info: Info,
@@ -46,11 +47,33 @@ function ToastCard({ toast }: { toast: ToastType }) {
         {toast.body ? (
           <div className="mt-1 text-xs opacity-90 break-words">{toast.body}</div>
         ) : null}
+        {toast.learnMoreUrl ? (
+          <a
+            href={toast.learnMoreUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-1 inline-block text-xs font-medium underline"
+          >
+            {t("toast.learnMore")}
+          </a>
+        ) : null}
+        {toast.action ? (
+          <button
+            type="button"
+            onClick={() => {
+              dismiss(toast.id);
+              toast.action!.run();
+            }}
+            className="mt-2 block rounded border border-current px-2 py-0.5 text-xs font-medium hover:opacity-80"
+          >
+            {toast.action.label}
+          </button>
+        ) : null}
       </div>
       <button
         type="button"
         onClick={() => dismiss(toast.id)}
-        aria-label="Dismiss notification"
+        aria-label={t("toast.dismiss")}
         className="shrink-0 rounded p-1 opacity-70 hover:opacity-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-current"
       >
         <X size={14} />
@@ -64,11 +87,11 @@ export function ToastContainer() {
   if (toasts.length === 0) return null;
   return (
     <div
-      aria-label="Notifications"
+      aria-label={t("toast.region")}
       className="pointer-events-none fixed bottom-4 right-4 z-[1000] flex flex-col gap-2 [direction:ltr]"
     >
-      {toasts.map((t) => (
-        <ToastCard key={t.id} toast={t} />
+      {toasts.map((item) => (
+        <ToastCard key={item.id} toast={item} />
       ))}
     </div>
   );

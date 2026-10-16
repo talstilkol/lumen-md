@@ -22,6 +22,33 @@ function escapeHtml(s: string): string {
 }
 
 /**
+ * CommonMark-style fenced-code tracker. A fence opens with ``` or ~~~ (3+,
+ * up to 3 spaces indent) and closes only on a line of the SAME character,
+ * at least as long, with nothing else on it — so a ```` block that
+ * demonstrates a ``` fence (or a ~~~ line inside ```) stays code.
+ * Feed every line in order; returns whether it is a fence line and whether
+ * we're inside code after it.
+ */
+export function createFenceTracker(): (line: string) => { fence: boolean; inCode: boolean } {
+  let open: { ch: string; len: number } | null = null;
+  return (line: string) => {
+    const m = /^ {0,3}(`{3,}|~{3,})(.*)$/.exec(line);
+    if (!open) {
+      if (m && !(m[1][0] === "`" && m[2].includes("`"))) {
+        open = { ch: m[1][0], len: m[1].length };
+        return { fence: true, inCode: true };
+      }
+      return { fence: false, inCode: false };
+    }
+    if (m && m[1][0] === open.ch && m[1].length >= open.len && m[2].trim() === "") {
+      open = null;
+      return { fence: true, inCode: false };
+    }
+    return { fence: false, inCode: true };
+  };
+}
+
+/**
  * Markdown → RTF. Uses the minimal RTF 1.5 dialect that every RTF
  * reader on macOS / Windows / Pages handles. Headings become
  * \pard\fs36\b, bold becomes \b…\b0, etc.
@@ -35,10 +62,10 @@ export function markdownToRtf(md: string): string {
     "{\\colortbl;\\red0\\green0\\blue0;\\red120\\green80\\blue255;}",
     "\\fs24",
   );
-  let inCode = false;
+  const fenceAt = createFenceTracker();
   for (const line of lines) {
-    if (/^```/.test(line.trim())) {
-      inCode = !inCode;
+    const { fence, inCode } = fenceAt(line);
+    if (fence) {
       out.push(inCode ? "\\pard\\f1\\fs20" : "\\pard\\f0\\fs24");
       continue;
     }
@@ -93,11 +120,11 @@ export function markdownToLatex(md: string): string {
     "\\usepackage{amsmath}",
     "\\begin{document}",
   ];
-  let inCode = false;
+  const fenceAt = createFenceTracker();
   let inList = false;
   for (const line of lines) {
-    if (/^```/.test(line.trim())) {
-      inCode = !inCode;
+    const { fence, inCode } = fenceAt(line);
+    if (fence) {
       out.push(inCode ? "\\begin{verbatim}" : "\\end{verbatim}");
       continue;
     }
@@ -237,11 +264,51 @@ export function markdownToOpml(md: string, title = "Outline"): string {
  * `<section data-markdown>` rendered by Reveal's markdown plugin. Reveal's
  * runtime + theme load from a CDN, so the file is portable but online.
  */
+/**
+ * Shared slide splitter (Reveal + PPTX exports). When the deck uses `---`
+ * thematic breaks, those are the slide boundaries (the Reveal convention).
+ * Otherwise every H1/H2 heading starts a new slide. Fence-aware: `---` or
+ * `#` lines inside ``` code blocks never split. Empty chunks are dropped.
+ */
+export function splitSlides(md: string): string[] {
+  const lines = md.replace(/\r\n?/g, "\n").split("\n");
+  let hasRule = false;
+  {
+    const fenceAt = createFenceTracker();
+    for (const l of lines) {
+      const { fence, inCode } = fenceAt(l);
+      if (!fence && !inCode && /^\s*---\s*$/.test(l)) hasRule = true;
+    }
+  }
+  const chunks: string[] = [];
+  let cur: string[] = [];
+  const flush = () => {
+    const s = cur.join("\n").trim();
+    if (s) chunks.push(s);
+    cur = [];
+  };
+  const fenceAt = createFenceTracker();
+  for (const l of lines) {
+    const { fence, inCode } = fenceAt(l);
+    if (fence) {
+      cur.push(l);
+      continue;
+    }
+    if (!inCode) {
+      if (hasRule && /^\s*---\s*$/.test(l)) {
+        flush();
+        continue;
+      }
+      if (!hasRule && /^#{1,2}\s/.test(l)) flush();
+    }
+    cur.push(l);
+  }
+  flush();
+  return chunks;
+}
+
 export function markdownToRevealHtml(md: string, title = "Slides"): string {
-  const slides = md
-    .split(/^\s*---\s*$/m)
-    .map((s) => s.trim())
-    .filter(Boolean);
+  const slides = splitSlides(md);
   const sections = (slides.length ? slides : [md])
     .map(
       (s) =>

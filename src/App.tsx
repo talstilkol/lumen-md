@@ -15,6 +15,9 @@ const CanvasWhiteboard = lazy(() => import("./ui/CanvasTldraw").then(m => ({ def
 const PluginGallery = lazy(() => import("./ui/PluginGallery").then(m => ({ default: m.PluginGallery })));
 const TemplateGallery = lazy(() => import("./ui/TemplateGallery").then(m => ({ default: m.TemplateGallery })));
 const AuditLog = lazy(() => import("./ui/AuditLog").then(m => ({ default: m.AuditLog })));
+const OrgSettings = lazy(() => import("./ui/OrgSettings").then(m => ({ default: m.OrgSettings })));
+const TrustedKeysSettings = lazy(() => import("./ui/TrustedKeysSettings").then(m => ({ default: m.TrustedKeysSettings })));
+const ThemeSettings = lazy(() => import("./ui/ThemeSettings").then(m => ({ default: m.ThemeSettings })));
 const FineTuneSettings = lazy(() => import("./ui/FineTuneSettings").then(m => ({ default: m.FineTuneSettings })));
 const VersionHistory = lazy(() => import("./ui/VersionHistory").then(m => ({ default: m.VersionHistory })));
 const MarkdownTableEditor = lazy(() => import("./ui/MarkdownTableEditor").then(m => ({ default: m.MarkdownTableEditor })));
@@ -49,7 +52,9 @@ import { useCollab } from "./hooks/useCollab";
 import { useTauriMenu } from "./hooks/useTauriMenu";
 import { EditorLayout } from "./layouts/EditorLayout";
 import { useAuth } from "./auth/useAuth";
-import { useEntitlement } from "./billing/useEntitlement";
+import { docIdentity } from "./renderer/previewDoc";
+import { auditScope } from "./ui/auditScope";
+import { useEntitlement, watchAuthForEntitlements } from "./billing/useEntitlement";
 import { useAppStore, applyTheme } from "./store/useStore";
 import { applyLocale, t } from "./i18n";
 import { localLlmAvailable } from "./ai/localLlm";
@@ -71,6 +76,7 @@ import { ErrorBoundary } from "./ui/ErrorBoundary";
 import { KeyboardShortcuts } from "./ui/KeyboardShortcuts";
 import { FocusMode } from "./ui/FocusMode";
 import { OnboardingTour } from "./ui/OnboardingTour";
+import { scrollToHeadingWhenRendered } from "./renderer/wikiLinks";
 
 export default function App() {
   const doc = useAppStore((s) => s.doc);
@@ -92,6 +98,7 @@ export default function App() {
   const spellCheck = useAppStore((s) => s.spellCheck);
   const grammarCheck = useAppStore((s) => s.grammarCheck);
   const typewriterMode = useAppStore((s) => s.typewriterMode);
+  const suggestingMode = useAppStore((s) => s.suggestingMode);
   const aiKey = useAppStore((s) => s.aiKey);
   const useLocalAi = useAppStore((s) => s.useLocalAi);
   const editorRef = useRef<EditorHandle | null>(null);
@@ -99,6 +106,7 @@ export default function App() {
   const authProviderName = useAuth((s) => s.provider.name);
   const authError = useAuth((s) => s.error);
   const authUserId = useAuth((s) => s.user?.id);
+  const authOrgId = useAuth((s) => s.user?.orgId);
   const entitlementLoading = useEntitlement((s) => s.loading);
   const entitlement = useEntitlement((s) => s.entitlement);
   const capabilitiesCloudSync = useEntitlement((s) => s.capabilities.cloudSync);
@@ -117,6 +125,9 @@ export default function App() {
   const [templateGalleryOpen, setTemplateGalleryOpen] = useState(false);
   const [auditLogOpen, setAuditLogOpen] = useState(false);
   const [fineTuneOpen, setFineTuneOpen] = useState(false);
+  const [orgSettingsOpen, setOrgSettingsOpen] = useState(false);
+  const [trustedKeysOpen, setTrustedKeysOpen] = useState(false);
+  const [themeSettingsOpen, setThemeSettingsOpen] = useState(false);
   const [tagsPanelOpen, setTagsPanelOpen] = useState(false);
   const [commentsPanelOpen, setCommentsPanelOpen] = useState(false);
   const [runtimeMetricsOpen, setRuntimeMetricsOpen] = useState(false);
@@ -135,6 +146,8 @@ export default function App() {
 
   useEffect(() => {
     void useEntitlement.getState().refresh();
+    // Re-fetch when the user signs in/out or the session restore finishes.
+    return watchAuthForEntitlements();
   }, []);
 
   // Apply theme on mount
@@ -372,12 +385,17 @@ export default function App() {
   // hub keeps the open path consistent (recents, dirty handling, etc).
   useEffect(() => {
     async function onOpen(e: Event) {
-      const detail = (e as CustomEvent<{ path: string }>).detail;
+      const detail = (e as CustomEvent<{ path: string; heading?: string }>).detail;
       if (!detail?.path) return;
       try {
         const { readWorkspaceFile } = await import("./storage/workspace");
         const content = await readWorkspaceFile(detail.path);
         handleOpenFromWorkspace(detail.path, content);
+        // `[[Note#Heading]]`: scroll to the heading (by its slug id) once the
+        // opened note has rendered.
+        if (detail.heading) {
+          scrollToHeadingWhenRendered(detail.heading, { docKey: docIdentity(useAppStore.getState().doc) ?? undefined });
+        }
       } catch {
         /* file moved/deleted — silently ignore */
       }
@@ -525,8 +543,16 @@ export default function App() {
 
   const pageView = useAppStore((s) => s.pageView);
 
-  // Debounce preview rendering — keeps typing smooth for large docs
-  const deferredContent = useDeferredValue(doc.content);
+  // Debounce preview rendering — keeps typing smooth for large docs. The
+  // document identity is deferred together with its text so the preview
+  // never pairs one document's markdown with another's identity.
+  const currentDocKey = docIdentity(doc);
+  const previewSource = useMemo(
+    () => ({ content: doc.content, docKey: currentDocKey }),
+    [doc.content, currentDocKey],
+  );
+  const deferredPreview = useDeferredValue(previewSource);
+  const deferredContent = deferredPreview.content;
 
   const activeFile = doc.name;
 
@@ -538,10 +564,14 @@ export default function App() {
     setHistoryOpen, setTableEditorOpen, setCanvasOpen, setGalleryOpen,
     setTemplateGalleryOpen,
     setAuditLogOpen,
+    setOrgSettingsOpen,
+    setTrustedKeysOpen,
+    setThemeSettingsOpen,
     setFineTuneOpen,
     setTagsPanelOpen,
     setCommentsPanelOpen,
     setRuntimeMetricsOpen,
+    getEditorView: () => editorRef.current?.getView() ?? null,
     onAddComment: collab
       ? async () => {
           const view = editorRef.current?.getView();
@@ -714,11 +744,13 @@ export default function App() {
             mode={mode}
             docContent={doc.content}
             deferredContent={deferredContent}
+            deferredDocKey={deferredPreview.docKey}
             editorRef={editorRef}
             vimEnabled={vimEnabled}
             spellCheck={spellCheck}
             grammarCheck={grammarCheck}
             typewriterMode={typewriterMode}
+            suggestingMode={suggestingMode}
             activeFile={activeFile}
             pageView={pageView}
             collab={collab}
@@ -869,13 +901,14 @@ export default function App() {
           <AuditLog
             open={auditLogOpen}
             onClose={() => setAuditLogOpen(false)}
-            // Org id falls through to the auth provider when wired; for free
-            // / pro tiers there's no org so we use the user id as the scope.
-            orgId={(useAppStore.getState() as { user?: { orgId?: string; id?: string } }).user?.orgId
-              ?? (useAppStore.getState() as { user?: { id?: string } }).user?.id
-              ?? "personal"}
+            // Scope = the signed-in user's organization (WorkOS SSO); free /
+            // pro users have no org, so their own id is the scope.
+            orgId={auditScope({ id: authUserId ?? "", orgId: authOrgId }) || "personal"}
           />
           <FineTuneSettings open={fineTuneOpen} onClose={() => setFineTuneOpen(false)} />
+          <OrgSettings open={orgSettingsOpen} onClose={() => setOrgSettingsOpen(false)} onOpenAuditLog={() => setAuditLogOpen(true)} />
+          <TrustedKeysSettings open={trustedKeysOpen} onClose={() => setTrustedKeysOpen(false)} />
+          {themeSettingsOpen && <ThemeSettings open={themeSettingsOpen} onClose={() => setThemeSettingsOpen(false)} />}
         </ErrorBoundary>
       </Suspense>
 
@@ -945,11 +978,13 @@ export default function App() {
             mode={mode}
             docContent={doc.content}
             deferredContent={deferredContent}
+            deferredDocKey={deferredPreview.docKey}
             editorRef={editorRef}
             vimEnabled={vimEnabled}
             spellCheck={spellCheck}
             grammarCheck={grammarCheck}
             typewriterMode={typewriterMode}
+            suggestingMode={suggestingMode}
             activeFile={activeFile}
             pageView={pageView}
             collab={collab}

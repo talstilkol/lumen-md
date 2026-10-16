@@ -14,6 +14,7 @@ import {
   signOutSso,
   workosProvider,
   isWorkosEnabled,
+  getSsoAccessToken,
   __setWorkOSConfigForTesting,
 } from "../auth/workosProvider";
 
@@ -122,12 +123,69 @@ describe("signOutSso + workosProvider record", () => {
 
   it("workosProvider.loadSession + signOut are wired through to the helpers", async () => {
     __setWorkOSConfigForTesting({ endpoint: "https://auth.lumen.md" });
-    const fetchSpy = vi.fn().mockResolvedValue(
-      new Response("", { status: 401 }),
-    );
+    const fetchSpy = vi
+      .fn()
+      .mockResolvedValueOnce(new Response("", { status: 401 }))
+      .mockResolvedValueOnce(new Response(null, { status: 204 }));
     vi.stubGlobal("fetch", fetchSpy);
     await workosProvider.loadSession();
     await workosProvider.signOut();
     expect(fetchSpy).toHaveBeenCalledTimes(2);
+  });
+
+  it("signOutSso rejects when the worker doesn't clear the session (HTTP error or network)", async () => {
+    __setWorkOSConfigForTesting({ endpoint: "https://auth.lumen.md" });
+    vi.stubGlobal("fetch", vi.fn(async () => new Response("{}", { status: 403 })));
+    await expect(signOutSso()).rejects.toThrow(/sign-out failed/);
+    vi.stubGlobal("fetch", vi.fn(async () => { throw new TypeError("Failed to fetch"); }));
+    await expect(signOutSso()).rejects.toThrow();
+  });
+});
+
+describe("getAccessToken (billing bearer token)", () => {
+  it("returns null when no endpoint is configured", async () => {
+    expect(await workosProvider.getAccessToken!()).toBeNull();
+  });
+
+  it("fetches /api/sso/token with credentials and caches until near expiry", async () => {
+    __setWorkOSConfigForTesting({ endpoint: "https://auth.lumen.md" });
+    const fetchSpy = vi.fn(async () =>
+      new Response(JSON.stringify({ token: "tok-1", expiresAt: 1_000_300 }), { status: 200 }),
+    );
+    vi.stubGlobal("fetch", fetchSpy);
+    expect(await getSsoAccessToken(1_000_000)).toBe("tok-1");
+    expect(await getSsoAccessToken(1_000_200)).toBe("tok-1");
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
+    const [url, init] = fetchSpy.mock.calls[0] as unknown as [string, RequestInit];
+    expect(url).toBe("https://auth.lumen.md/api/sso/token");
+    expect(init.credentials).toBe("include");
+    // Within 30 s of expiry → refetch.
+    await getSsoAccessToken(1_000_280);
+    expect(fetchSpy).toHaveBeenCalledTimes(2);
+  });
+
+  it("returns null (anonymous) when signed out or the worker isn't configured for billing", async () => {
+    __setWorkOSConfigForTesting({ endpoint: "https://auth.lumen.md" });
+    vi.stubGlobal("fetch", vi.fn(async () => new Response("{}", { status: 401 })));
+    expect(await getSsoAccessToken()).toBeNull();
+    vi.stubGlobal("fetch", vi.fn(async () => new Response("{}", { status: 501 })));
+    expect(await getSsoAccessToken()).toBeNull();
+  });
+});
+
+describe("isCrossSiteEndpoint (third-party cookie check)", () => {
+  it("treats sibling subdomains and same host as same-site", async () => {
+    const { isCrossSiteEndpoint } = await import("../auth/workosProvider");
+    expect(isCrossSiteEndpoint("https://auth.example.org", "app.example.org")).toBe(false);
+    expect(isCrossSiteEndpoint("https://example.org/api", "example.org")).toBe(false);
+    expect(isCrossSiteEndpoint("http://localhost:8787", "localhost")).toBe(false);
+  });
+  it("flags workers.dev and other registrable domains as cross-site", async () => {
+    const { isCrossSiteEndpoint } = await import("../auth/workosProvider");
+    expect(isCrossSiteEndpoint("https://lumen-auth.acme.workers.dev", "app.example.org")).toBe(true);
+    // workers.dev is a public suffix: the account subdomain is the site.
+    expect(isCrossSiteEndpoint("https://a.acme.workers.dev", "b.acme.workers.dev")).toBe(false);
+    expect(isCrossSiteEndpoint("https://a.acme.workers.dev", "b.other.workers.dev")).toBe(true);
+    expect(isCrossSiteEndpoint("https://auth.other.com", "example.org")).toBe(true);
   });
 });

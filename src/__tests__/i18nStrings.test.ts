@@ -51,10 +51,13 @@ function loadBundle(): { en: Record<string, string>; he: Record<string, string> 
   // Both bundles are object literals named `en` and `he` — extract the
   // keys with a forgiving regex (we don't run the file).
   const enBlock = /const en:\s*Strings\s*=\s*\{([\s\S]+?)^\};/m.exec(idx);
-  const heBlock = /const he:\s*Strings\s*=\s*\{([\s\S]+?)^\};/m.exec(idx);
-  if (!enBlock || !heBlock) {
-    throw new Error("Could not isolate `en` / `he` blocks in i18n/index.ts");
+  if (!enBlock) {
+    throw new Error("Could not isolate the `en` block in i18n/index.ts");
   }
+  // Hebrew lives in a lazy JSON chunk (A7 lever 4).
+  const heJson = JSON.parse(
+    readFileSync(join(SRC, "i18n", "locales", "he.json"), "utf8"),
+  ) as Record<string, string>;
   function parseKeys(body: string): Record<string, string> {
     const out: Record<string, string> = {};
     const re = /^\s*"([\w.\-]+)"\s*:/gm;
@@ -64,7 +67,7 @@ function loadBundle(): { en: Record<string, string>; he: Record<string, string> 
   }
   return {
     en: parseKeys(enBlock[1]),
-    he: parseKeys(heBlock[1]),
+    he: Object.fromEntries(Object.keys(heJson).map((k) => [k, ""])),
   };
 }
 

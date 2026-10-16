@@ -90,6 +90,14 @@ async function flushQueue(force = false): Promise<void> {
   }
 }
 
+function isDirectoryHandle(h: FileSystemHandle): h is FileSystemDirectoryHandle {
+  return h.kind === "directory";
+}
+
+function isFileHandle(h: FileSystemHandle): h is FileSystemFileHandle {
+  return h.kind === "file";
+}
+
 /**
  * Keep at most MAX_VERSIONS snapshots per document, deleting oldest first.
  */
@@ -99,11 +107,12 @@ async function pruneOldVersions(): Promise<void> {
     const backupsDir = await opfs.getDirectoryHandle("backups", { create: false });
     if (!backupsDir) return;
 
-    for await (const [_docName, handle] of (backupsDir as any).entries() as AsyncIterableIterator<[string, FileSystemDirectoryHandle]>) {
-      if (handle.kind !== "directory") continue;
+    for await (const [, entry] of backupsDir.entries()) {
+      if (!isDirectoryHandle(entry)) continue;
+      const handle = entry;
       const files: { name: string; handle: FileSystemFileHandle }[] = [];
-      for await (const [fileName, fileHandle] of (handle as any).entries() as AsyncIterableIterator<[string, FileSystemFileHandle]>) {
-        if (fileHandle.kind === "file") {
+      for await (const [fileName, fileHandle] of handle.entries()) {
+        if (isFileHandle(fileHandle)) {
           files.push({ name: fileName, handle: fileHandle });
         }
       }

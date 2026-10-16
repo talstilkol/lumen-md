@@ -1,6 +1,7 @@
 /// <reference types="vitest" />
 import { defineConfig as defineViteConfig } from "vite";
 import type { UserConfig as ViteUserConfig } from "vite";
+import { cspEndpointsPlugin } from "./src/build/cspEndpoints";
 
 interface VitestConfig {
   test?: {
@@ -66,6 +67,9 @@ export default defineConfig({
   plugins: [
     react(),
     cleanUrlAliases,
+    // Adds the deployment's own worker origins (VITE_*_ENDPOINT …) to the
+    // CSP connect-src of index.html, dist/_headers and the nginx image.
+    cspEndpointsPlugin(),
     VitePWA({
       registerType: "prompt",
       includeAssets: ["favicon.svg", "icons/*.png"],
@@ -105,8 +109,16 @@ export default defineConfig({
           "**/vendor-codemirror-*.js",
           "**/vendor-milkdown-*.js",
           "**/vendor-leaflet-*.js",
+          "**/vendor-modelviewer-*.js",
           "**/vendor-katex-*.js",
           "**/vendor-git-*.js",
+          // TypeScript compiler + lib files for the opt-in code-block checks
+          // (several MB; fetched only when the user enables the setting).
+          "**/tsCheck.worker-*.js",
+          // Pyodide (~13 MB, staged into public/ by prebuild) loads on the
+          // first live-python Run; its 9.6 MB wasm would also trip the
+          // precache size limit and fail `npm run build`.
+          "pyodide/**",
         ],
         runtimeCaching: [
           {
@@ -127,17 +139,11 @@ export default defineConfig({
             },
           },
           {
-            // CDN-loaded model-viewer + Leaflet
-            urlPattern: ({ url }) => url.origin === "https://unpkg.com",
-            handler: "StaleWhileRevalidate",
-            options: { cacheName: "lumen-cdn" },
-          },
-          {
             // Large on-demand vendor chunks (Mermaid, tldraw, ECharts, etc.)
             // Cached at runtime when first loaded via dynamic import.
             urlPattern: ({ url }) =>
               url.origin === self.location.origin &&
-              /\/assets\/vendor-(mermaid|tldraw|echarts|graphviz|codemirror|milkdown|leaflet|katex|git|yjs|react|react-dom)-/.test(url.pathname),
+              /\/assets\/vendor-(mermaid|tldraw|echarts|graphviz|codemirror|milkdown|leaflet|modelviewer|katex|git|yjs|react|react-dom)-/.test(url.pathname),
             handler: "StaleWhileRevalidate",
             options: {
               cacheName: "lumen-vendor-chunks",
@@ -155,6 +161,17 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
+      // remark-math only uses the `math` syntax extension, but the
+      // package index also re-exports `mathHtml` (lib/html.js), which
+      // imports katex. html.js is tree-shaken, yet katex (not marked
+      // side-effect-free) survived as a bare `import "./vendor-katex"`
+      // in the EAGER vendor-unified chunk — ~84 KB gz on every boot.
+      // Point at the syntax module directly so KaTeX only loads via the
+      // dynamic ./renderer/katexPlugin import (A7 lever 1/3).
+      "micromark-extension-math": path.resolve(
+        __dirname,
+        "node_modules/micromark-extension-math/lib/syntax.js",
+      ),
       // y-websocket is OPTIONAL — only alias to the stub when the real
       // package isn't installed. This way deployments that DO install
       // y-websocket explicitly still get the real implementation, while
@@ -183,6 +200,11 @@ export default defineConfig({
   // existing try/catch falls back to WebRTC-only collab cleanly.
   optimizeDeps: {
     exclude: ["y-websocket"],
+    // Deps reached only from lazily-loaded workers/blocks are otherwise
+    // discovered on first use, and Vite then FULL-RELOADS the page
+    // ("optimized dependencies changed. reloading") — losing the user's
+    // unsaved edits in dev and flaking the live-lua e2e. Pre-bundle them.
+    include: ["wasmoon"],
   },
   // ε.4.3 — clean-URL aliases for the auxiliary HTML pages so dev links
   // like `/roadmap` and `/landing` work without the `.html` suffix.
@@ -221,6 +243,11 @@ export default defineConfig({
           if (id.includes("@shikijs/langs/") || id.includes("@shikijs/themes/")) {
             return "assets/shiki-langs/[name]-[hash].js";
           }
+          // Prettier core + per-language plugins (lazy, src/editor/format.ts):
+          // prefix them so the bundle budget can give them their own rule.
+          if (id.includes("node_modules/prettier/")) {
+            return "assets/prettier-[name]-[hash].js";
+          }
           return "assets/[name]-[hash].js";
         },
         // Manual chunking — keeps the initial JS small and lets the heavy
@@ -252,6 +279,10 @@ export default defineConfig({
           if (id.includes("@hpcc-js/wasm")) return "vendor-graphviz";
           if (id.includes("echarts") || id.includes("zrender")) return "vendor-echarts";
           if (id.includes("leaflet")) return "vendor-leaflet";
+          // <model-viewer> web component + its three.js / lit runtime —
+          // lazy-loaded by Model3DBlock only when a 3D block is visible.
+          if (/node_modules\/(@google\/model-viewer|three|lit|lit-html|lit-element|@lit|@lit-labs|@monogrid)\//.test(id))
+            return "vendor-modelviewer";
           // KaTeX + its mhchem extension + rehype-katex all share the
           // same chunk. Without rehype-katex in the chunk, the
           // production build hit a TDZ error ("Cannot access 'xn'
@@ -307,7 +338,8 @@ export default defineConfig({
   // ── Vitest ──────────────────────────────────────────────────────────
   test: {
     environment: "jsdom",
-    include: ["src/__tests__/**/*.test.{ts,tsx}"],
+    // The VS Code extension's pure helpers are tested from the root suite too.
+    include: ["src/__tests__/**/*.test.{ts,tsx}", "packages/vscode-lumen/test/**/*.test.ts"],
     globals: true,
     css: false,
     setupFiles: ["src/__tests__/setup.ts"],

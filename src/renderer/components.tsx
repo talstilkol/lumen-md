@@ -1,7 +1,8 @@
-import { Component, lazy, Suspense, useEffect, useState, type ComponentType } from "react";
+import { Component, createContext, lazy, Suspense, useContext, useEffect, useRef, useState, type ComponentType } from "react";
 import type { JSX } from "react";
 import { isAssetName, readWorkspaceBlob } from "../storage/workspace";
 import { log } from "../lib/logger";
+import { scheduleIdle } from "../lib/idle";
 
 const ChartBlock = lazy(() => import("../plugins/ChartBlock"));
 const MermaidBlock = lazy(() => import("../plugins/MermaidBlock"));
@@ -22,6 +23,7 @@ const DatabaseBlock = lazy(() => import("../views/DatabaseBlock"));
 const LiveCssBlock = lazy(() => import("../plugins/LiveCssBlock"));
 const LiveJsBlock = lazy(() => import("../plugins/LiveJsBlock"));
 const LivePyBlock = lazy(() => import("../plugins/LivePyBlock"));
+const LiveLuaBlock = lazy(() => import("../plugins/LiveLuaBlock"));
 const LiveSqlBlock = lazy(() => import("../plugins/LiveSqlBlock"));
 const LiveSvgBlock = lazy(() => import("../plugins/LiveSvgBlock"));
 const LiveGlslBlock = lazy(() => import("../plugins/LiveGlslBlock"));
@@ -35,9 +37,17 @@ function getText(children: React.ReactNode): string {
   return "";
 }
 
-function PluginFallback({ label }: { label: string }) {
+function PluginFallback({
+  label,
+  innerRef,
+}: {
+  label: string;
+  innerRef?: React.Ref<HTMLDivElement>;
+}) {
   return (
     <div
+      ref={innerRef}
+      data-lumen-block-pending={label}
       style={{
         margin: "1.25rem 0",
         padding: "1rem",
@@ -99,11 +109,85 @@ class BlockErrorBoundary extends Component<
   }
 }
 
+/**
+ * Gate a heavy block's lazy chunk behind visibility + idle time (A7 lever
+ * 1/3). Inside the live preview, the block shows its placeholder until it
+ * is within ~400px of the viewport AND the main thread is idle; only then
+ * does React.lazy fetch mermaid / echarts / leaflet / … So the first paint
+ * of a long doc like Welcome.md never competes with vendor downloads for
+ * blocks the reader can't see yet.
+ *
+ * Outside a `[data-preview-root]` (print/export render targets, the AI
+ * search answer, tests) there's no scroll viewport to wait on, so the
+ * block hydrates immediately.
+ */
+function useDeferredHydration(): [React.RefObject<HTMLDivElement>, boolean] {
+  const ref = useRef<HTMLDivElement>(null);
+  const [ready, setReady] = useState(false);
+  useEffect(() => {
+    if (ready) return;
+    const el = ref.current;
+    if (!el || !el.closest("[data-preview-root]") || typeof IntersectionObserver === "undefined") {
+      setReady(true);
+      return;
+    }
+    let cancelIdle: (() => void) | null = null;
+    const io = new IntersectionObserver(
+      (entries) => {
+        if (!entries.some((e) => e.isIntersecting)) return;
+        io.disconnect();
+        cancelIdle = scheduleIdle(() => setReady(true), 1000);
+      },
+      { rootMargin: "400px 0px" },
+    );
+    io.observe(el);
+    return () => {
+      io.disconnect();
+      cancelIdle?.();
+    };
+  }, [ready]);
+  return [ref, ready];
+}
+
+/**
+ * True while the tree is serialized with `renderToStaticMarkup` (HTML
+ * export, `lumen publish`). That render never runs effects, so the
+ * deferred-hydration gate would leave every block as "Loading…" forever,
+ * and there's no runtime to hydrate it later — static rendering instead
+ * keeps each block's source as a readable code block.
+ */
+export const StaticRenderContext = createContext(false);
+
+/**
+ * Static stand-in for an interactive block: its fenced source as a code
+ * element (the surrounding markdown `<pre>` makes it a normal code block).
+ */
+function StaticBlock({ label, source, lang }: { label: string; source: string; lang?: unknown }) {
+  return (
+    <code
+      className={`lumen-static-block${typeof lang === "string" && lang ? ` language-${lang}` : ""}`}
+      data-lumen-block={label}
+    >
+      {source}
+    </code>
+  );
+}
+
 function withSuspense<P extends object>(
   Component: ComponentType<P>,
   label: string,
 ): ComponentType<P> {
   return function Wrapped(props: P) {
+    const isStatic = useContext(StaticRenderContext);
+    const [ref, ready] = useDeferredHydration();
+    if (isStatic) {
+      const p = props as { children?: React.ReactNode; source?: unknown; lang?: unknown };
+      const source = typeof p.source === "string" ? p.source : getText(p.children);
+      return <StaticBlock label={label} source={source} lang={p.lang} />;
+    }
+    if (!ready) {
+      return <PluginFallback label={label} innerRef={ref} />;
+    }
     return (
       <BlockErrorBoundary label={label}>
         <Suspense fallback={<PluginFallback label={label} />}>
@@ -244,6 +328,10 @@ const LivePy = withSuspense<BlockProps>(
   (props) => <LivePyBlock source={getText(props.children)} meta={props.meta} />,
   "live-python",
 );
+const LiveLua = withSuspense<BlockProps>(
+  (props) => <LiveLuaBlock source={getText(props.children)} meta={props.meta} />,
+  "live-lua",
+);
 const LiveSql = withSuspense<BlockProps>(
   (props) => <LiveSqlBlock source={getText(props.children)} meta={props.meta} />,
   "live-sql",
@@ -319,7 +407,19 @@ function normalize(src: string): string {
  */
 function LumenInput(props: React.InputHTMLAttributes<HTMLInputElement>) {
   if (props.type === "checkbox") {
-    return <input {...props} aria-label={props["aria-label"] ?? "task"} />;
+    // The fast first-paint pipeline and the full pipeline don't agree on
+    // whether an unchecked task carries `checked={false}` or no `checked` at
+    // all; React then sees the same input flip controlled → uncontrolled
+    // when the full render swaps in. Always pass a boolean so it stays
+    // controlled (read-only unless a handler is supplied).
+    return (
+      <input
+        {...props}
+        checked={Boolean(props.checked)}
+        readOnly={props.onChange ? props.readOnly : true}
+        aria-label={props["aria-label"] ?? "task"}
+      />
+    );
   }
   return <input {...props} />;
 }
@@ -381,6 +481,7 @@ export const components: Record<string, LumenBlock> = {
   "lumen-liveglsl": LiveGlsl as unknown as LumenBlock,
   "lumen-livepython": LivePy as unknown as LumenBlock,
   "lumen-livesql": LiveSql as unknown as LumenBlock,
+  "lumen-livelua": LiveLua as unknown as LumenBlock,
   // Asset-resolving <img> override.
   img: LumenImg as unknown as LumenBlock,
   // GFM task-list checkboxes get an aria-label so they aren't announced bare.

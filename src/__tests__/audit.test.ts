@@ -49,7 +49,7 @@ describe("recordAudit", () => {
       payload: { slug: "hello" },
     });
 
-    expect(fetchSpy).toHaveBeenCalledTimes(1);
+    await vi.waitFor(() => expect(fetchSpy).toHaveBeenCalledTimes(1));
     const [url, init] = fetchSpy.mock.calls[0];
     expect(url).toBe("https://audit.lumen.md/audit");
     const initWithHeaders = init as RequestInit;
@@ -65,6 +65,52 @@ describe("recordAudit", () => {
     });
     expect(body.payload_json).toBe(JSON.stringify({ slug: "hello" }));
     expect(body.ts).toBeGreaterThan(0);
+  });
+
+  it("files events under the signed-in user's audit scope when no orgId is passed", async () => {
+    const fetchSpy = vi.fn().mockResolvedValue(new Response("{}", { status: 200 }));
+    vi.stubGlobal("fetch", fetchSpy);
+    const mod = await import("../lib/audit");
+    const { useAuth } = await import("../auth/useAuth");
+    mod.__setAuditConfigForTesting({ endpoint: "https://audit.lumen.md", bearer: "tok" });
+    const bodyOf = (i: number) => JSON.parse((fetchSpy.mock.calls[i][1] as RequestInit).body as string);
+
+    // SSO org member → the organization (what the org audit log queries).
+    useAuth.setState({ user: { id: "user_01", provider: "workos", orgId: "org_acme" } });
+    mod.recordAudit("user_01", "doc.publish");
+    await vi.waitFor(() => expect(fetchSpy).toHaveBeenCalledTimes(1));
+    expect(bodyOf(0).org_id).toBe("org_acme");
+
+    // Personal user → their own id (what their audit log queries).
+    useAuth.setState({ user: { id: "sb-1", provider: "supabase" } });
+    mod.recordAudit("sb-1", "sync.cloud");
+    await vi.waitFor(() => expect(fetchSpy).toHaveBeenCalledTimes(2));
+    expect(bodyOf(1).org_id).toBe("sb-1");
+
+    // An explicit orgId (including null) still wins.
+    mod.recordAudit("sb-1", "x", { orgId: null });
+    await vi.waitFor(() => expect(fetchSpy).toHaveBeenCalledTimes(3));
+    expect(bodyOf(2).org_id).toBeNull();
+  });
+
+  it("sends the signed-in user's own token, and nothing when signed out", async () => {
+    const fetchSpy = vi.fn().mockResolvedValue(new Response("{}", { status: 200 }));
+    vi.stubGlobal("fetch", fetchSpy);
+    const mod = await import("../lib/audit");
+    const { useAuth } = await import("../auth/useAuth");
+    mod.__setAuditConfigForTesting({ endpoint: "https://audit.lumen.md" });
+    const provider = useAuth.getState().provider;
+
+    useAuth.setState({ provider: { ...provider, getAccessToken: async () => "user-jwt" } });
+    mod.recordAudit("u1", "doc.publish");
+    await vi.waitFor(() => expect(fetchSpy).toHaveBeenCalledTimes(1));
+    expect((fetchSpy.mock.calls[0][1] as RequestInit).headers).toMatchObject({ Authorization: "Bearer user-jwt" });
+
+    useAuth.setState({ provider: { ...provider, getAccessToken: async () => null } });
+    mod.recordAudit("u1", "doc.publish");
+    await new Promise((r) => setTimeout(r, 20));
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
+    await expect(mod.listAudit({ orgId: "u1" })).rejects.toThrow(/Sign in/);
   });
 });
 
@@ -92,7 +138,7 @@ describe("listAudit", () => {
     const mod = await import("../lib/audit");
     mod.__setAuditConfigForTesting({
       endpoint: "https://audit.lumen.md",
-      bearer: "",
+      bearer: "tok",
     });
     const rows = await mod.listAudit({
       orgId: "org-1",

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import YAML from "yaml";
 import { t } from "../i18n";
+import { getLeaflet } from "./map/leaflet";
 
 interface Props {
   source: string;
@@ -38,23 +39,6 @@ function parseSpec(source: string, lang: "map" | "geojson"): MapSpec | null {
   } catch {
     return null;
   }
-}
-
-let leafletPromise: Promise<typeof import("leaflet")> | null = null;
-async function getLeaflet() {
-  if (!leafletPromise) {
-    // load Leaflet CSS once
-    const cssId = "leaflet-css";
-    if (!document.getElementById(cssId)) {
-      const link = document.createElement("link");
-      link.id = cssId;
-      link.rel = "stylesheet";
-      link.href = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css";
-      document.head.appendChild(link);
-    }
-    leafletPromise = import("leaflet");
-  }
-  return leafletPromise;
 }
 
 export default function MapBlock({ source, lang }: Props) {
@@ -150,7 +134,7 @@ export default function MapBlock({ source, lang }: Props) {
       cancelled = true;
       mapInstance?.remove();
     };
-  }, [source, lang]);
+  }, [source, lang, inView]);
 
   return (
     <div className="chart-block" ref={containerRef}>

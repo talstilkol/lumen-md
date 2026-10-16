@@ -3,54 +3,18 @@ import type { Processor } from "unified";
 import type { ReactElement } from "react";
 import remarkParse from "remark-parse";
 import remarkGfm from "remark-gfm";
-
-// Inline remark-breaks plugin: converts single newlines in paragraphs to <br>.
-function remarkBreaks() {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return (tree: any) => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const visit = (node: any) => {
-      if (node.children) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const next: any[] = [];
-        for (const child of node.children) {
-          if (child.type === "text" && child.value?.includes("\n")) {
-            const parts = child.value.split("\n");
-            parts.forEach((part: string, i: number) => {
-              if (part) next.push({ type: "text", value: part });
-              if (i < parts.length - 1) next.push({ type: "break" });
-            });
-          } else {
-            visit(child);
-            next.push(child);
-          }
-        }
-        node.children = next;
-      }
-    };
-    visit(tree);
-  };
-}
 import remarkMath from "remark-math";
 import remarkFrontmatter from "remark-frontmatter";
 import remarkDirective from "remark-directive";
 import remarkRehype from "remark-rehype";
-import rehypeKatex from "rehype-katex";
+// rehype-katex (+ katex + mhchem, ~84 KB gz) is dynamically imported via
+// ./katexPlugin only for docs that contain `$` — it is no longer a static
+// dependency of the main chunk (A7 lever 1/3).
 import rehypeSlug from "rehype-slug";
 // rehype-raw is dynamically imported in getProcessorWithRaw() — it
 // pulls in parse5 (~275 KB raw / ~40 KB gzipped) and most docs don't
 // need it. Splitting it out of the main bundle is M12-followup-2.
 import rehypeReact from "rehype-react";
-// Eager-import katex BEFORE mhchem so Rollup's chunk graph keeps the
-// canonical katex module evaluated first. Without this, the production
-// bundle's vendor-katex chunk hits a Temporal Dead Zone error
-// ("Cannot access 'xn' before initialization") because mhchem's
-// side-effect mutation of katex internals runs before katex's own
-// initializers complete. The eager import binds katex into the chunk
-// graph as a regular dependency, not a side-effect afterthought.
-import "katex";
-// Side-effect import: registers \ce{}/\pu{} macros on KaTeX
-import "katex/contrib/mhchem";
 import { visit } from "unist-util-visit";
 import { Fragment, jsx, jsxs } from "react/jsx-runtime";
 import YAML from "yaml";
@@ -58,6 +22,15 @@ import type { Root as MdastRoot, Code } from "mdast";
 import type { Root as HastRoot } from "hast";
 import { components } from "./components";
 import { rehypeShiki } from "./shiki";
+import { prepareCriticMarkup, rehypeCriticMarkup, stripCriticDelimiters } from "./criticMarkup";
+import {
+  remarkBreaks,
+  remarkWikiLinks,
+  remarkAdmonitions,
+  remarkColumns,
+  remarkStripFrontmatter,
+  slug,
+} from "./remarkLumen";
 
 const SPECIAL_LANGS = new Set([
   "mermaid",
@@ -110,6 +83,9 @@ const SPECIAL_LANGS = new Set([
   // Live SQL via sql.js / SQLite (WASM, lazy-loaded on Run).
   "live-sql",
   "sql-live",
+  // Live Lua via wasmoon (Lua 5.4 WASM in a Worker, lazy-loaded on Run).
+  "live-lua",
+  "lua-live",
   // Plain `html` fence as alias for `html-preview` — Lumen treats a raw
   // HTML fence as "render this HTML safely in a sanitized preview" rather
   // than a syntax-highlighted code block. Matches the dynamic-blocks-
@@ -152,6 +128,7 @@ function remarkLumenBlocks() {
       else if (lang === "live-python" || lang === "python-live" || lang === "live-py" || lang === "py-live")
         tag = "lumen-livepython";
       else if (lang === "live-sql" || lang === "sql-live") tag = "lumen-livesql";
+      else if (lang === "live-lua" || lang === "lua-live") tag = "lumen-livelua";
       else tag = `lumen-${lang}`;
       const data = (node.data ?? (node.data = {})) as Record<string, unknown>;
       data.hName = tag;
@@ -161,202 +138,10 @@ function remarkLumenBlocks() {
   };
 }
 
-/**
- * Convert `[[Page Name]]` and `[[target|label]]` text occurrences into
- * intra-document links. v1: target slug becomes the URL fragment, so clicking
- * jumps to a heading with that title. Workspace-aware behavior comes later.
- */
-function remarkWikiLinks() {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  function walk(parent: any) {
-    if (!parent || !Array.isArray(parent.children)) return;
-    for (let i = 0; i < parent.children.length; i++) {
-      const child = parent.children[i];
-      if (
-        child.type === "text" &&
-        typeof child.value === "string" &&
-        child.value.includes("[[")
-      ) {
-        const replacement = splitWikiText(child.value);
-        if (replacement.length > 1) {
-          parent.children.splice(i, 1, ...replacement);
-          i += replacement.length - 1;
-        }
-      } else if (
-        child.type !== "code" &&
-        child.type !== "inlineCode" &&
-        child.type !== "link" &&
-        Array.isArray(child.children)
-      ) {
-        walk(child);
-      }
-    }
-  }
-  return (tree: MdastRoot) => walk(tree);
-}
-
-interface MdastTextLike {
-  type: "text" | "link";
-  value?: string;
-  url?: string;
-  title?: null;
-  data?: { hProperties?: Record<string, unknown> };
-  children?: { type: "text"; value: string }[];
-}
-
-function splitWikiText(value: string): MdastTextLike[] {
-  const out: MdastTextLike[] = [];
-  const re = /\[\[([^\]\r\n|]+?)(?:\|([^\]\r\n]+?))?\]\]/g;
-  let last = 0;
-  let m: RegExpExecArray | null;
-  while ((m = re.exec(value)) !== null) {
-    if (m.index > last) {
-      out.push({ type: "text", value: value.slice(last, m.index) });
-    }
-    const target = m[1].trim();
-    const label = (m[2] ?? target).trim();
-    out.push({
-      type: "link",
-      url: `#${slug(target)}`,
-      title: null,
-      data: {
-        hProperties: { className: ["wiki-link"], "data-wiki-target": target },
-      },
-      children: [{ type: "text", value: label }],
-    });
-    last = m.index + m[0].length;
-  }
-  if (last < value.length) {
-    out.push({ type: "text", value: value.slice(last) });
-  }
-  return out;
-}
-
-/**
- * remark plugin: convert :::name container directives into admonitions.
- */
-function remarkAdmonitions() {
-  const known = new Set(["note", "tip", "info", "warning", "danger"]);
-  // remark-directive nodes don't ship type defs in mdast — narrow locally.
-  interface DirectiveNode {
-    type: string;
-    name: string;
-    attributes?: Record<string, string | undefined> & { title?: string };
-    data?: Record<string, unknown>;
-    children?: unknown[];
-  }
-  return (tree: MdastRoot) => {
-    visit(tree, (node) => {
-      const n = node as unknown as DirectiveNode;
-      if (
-        n.type !== "containerDirective" &&
-        n.type !== "leafDirective" &&
-        n.type !== "textDirective"
-      ) {
-        return;
-      }
-      if (!known.has(n.name)) return;
-
-      const data = (n.data ?? (n.data = {})) as Record<string, unknown>;
-      data.hName = "div";
-      data.hProperties = { className: ["admonition", n.name] };
-
-      const titleText: string =
-        (n.attributes && n.attributes.title) ??
-        (n.name as string).charAt(0).toUpperCase() + (n.name as string).slice(1);
-
-      const titleNode = {
-        type: "paragraph",
-        data: {
-          hName: "div",
-          hProperties: { className: ["admonition-title"] },
-        },
-        children: [{ type: "text", value: titleText }],
-      };
-      n.children = [titleNode, ...(n.children ?? [])];
-    });
-  };
-}
-
-/**
- * remark plugin: render `:::columns{cols=N}` container directives as a
- * CSS grid. Each `:::` separator inside the column block delimits a
- * column; the children between separators become column contents.
- *
- *   :::columns{cols=3}
- *   First column body. Multiple paragraphs welcome.
- *   :::
- *   Second column body.
- *   :::
- *   Third column body.
- *   :::
- *
- * The number of columns defaults to the number of `:::`-separated
- * groups when `cols` isn't passed explicitly.
- *
- * Why a renderer-side directive instead of a ProseMirror NodeSpec:
- * markdown round-trip stays trivial (the source is just text), the
- * directive parses on every render so concurrent edits don't conflict
- * with collab, and we avoid pushing 200 lines of NodeSpec + serializer
- * into the WYSIWYG path. The cost: there's no inline editing of
- * individual columns in WYSIWYG — users edit the source.
- */
-function remarkColumns() {
-  interface DirectiveNode {
-    type: string;
-    name: string;
-    attributes?: Record<string, string | undefined>;
-    data?: Record<string, unknown>;
-    children?: Array<{ type: string; data?: Record<string, unknown> }>;
-  }
-  return (tree: MdastRoot) => {
-    visit(tree, (node) => {
-      const n = node as unknown as DirectiveNode;
-      if (n.type !== "containerDirective") return;
-      if (n.name !== "columns") return;
-
-      // Parse `cols=N` attr; fall back to number of children at top level.
-      const colsAttr = n.attributes?.cols;
-      const cols = colsAttr ? Math.max(1, Math.min(6, parseInt(colsAttr, 10) || 0)) : 0;
-
-      const data = (n.data ?? (n.data = {})) as Record<string, unknown>;
-      data.hName = "div";
-      data.hProperties = {
-        className: ["lumen-columns"],
-        style: `display: grid; grid-template-columns: repeat(${
-          cols || (n.children?.length ?? 1)
-        }, 1fr); gap: 16px;`,
-      };
-
-      // Wrap each direct child in a `lumen-column` div so flexible
-      // content (paragraphs, lists) renders inside its own grid cell.
-      n.children = (n.children ?? []).map((child) => ({
-        type: "paragraph",
-        data: {
-          hName: "div",
-          hProperties: { className: ["lumen-column"] },
-        },
-        children: [child],
-      }));
-    });
-  };
-}
-
-/**
- * remark plugin: strip the YAML frontmatter node (we surface it elsewhere).
- */
-function remarkStripFrontmatter() {
-  return (tree: MdastRoot) => {
-    tree.children = tree.children.filter((c) => c.type !== "yaml");
-  };
-}
-
 type LumenProcessor = Processor<MdastRoot, MdastRoot, HastRoot, HastRoot, ReactElement>;
+type RehypeKatex = typeof import("./katexPlugin").default;
 
-let processorNoRaw: LumenProcessor | null = null;
-let processorWithRaw: LumenProcessor | null = null;
-
-function buildBase(_isDark: () => boolean) {
+function buildBase() {
   return unified()
     .use(remarkParse)
     .use(remarkFrontmatter, ["yaml"])
@@ -372,39 +157,52 @@ function buildBase(_isDark: () => boolean) {
     .use(remarkRehype, { allowDangerousHtml: true });
 }
 
-function finishPipeline(p: ReturnType<typeof buildBase>, isDark: () => boolean): LumenProcessor {
-  return p
-    .use(rehypeSlug)
-    .use(rehypeKatex)
-    .use(rehypeShiki, { isDark })
-    .use(rehypeReact, {
-      Fragment,
-      jsx,
-      jsxs,
-      components,
-      // rehype-react's option type is parameterised by the JSX runtime
-      // shape; our `components` map is locally typed through hast-util's
-      // Components but rehype-react still wants a wider partial. The
-      // outer cast resolves the Processor type-parameter mismatch — the
-      // inner narrow lifts the option-bag through `unknown`.
-    } as unknown as Parameters<typeof rehypeReact>[0]) as unknown as LumenProcessor;
+function toReact(p: ReturnType<typeof buildBase>): LumenProcessor {
+  return p.use(rehypeReact, {
+    Fragment,
+    jsx,
+    jsxs,
+    components,
+  } as unknown as Parameters<typeof rehypeReact>[0]) as unknown as LumenProcessor;
 }
 
-function getProcessorNoRaw(isDark: () => boolean): LumenProcessor {
-  if (!processorNoRaw) {
-    processorNoRaw = finishPipeline(buildBase(isDark), isDark);
+// Full processors, cached per (raw HTML?, math?) combination.
+const fullProcessors = new Map<string, LumenProcessor>();
+let fastProcessor: LumenProcessor | null = null;
+let katexPromise: Promise<RehypeKatex> | null = null;
+
+function loadKatex(): Promise<RehypeKatex> {
+  if (!katexPromise) {
+    katexPromise = import("./katexPlugin").then((m) => m.default);
+    katexPromise.catch(() => {
+      katexPromise = null; // allow a retry after a failed chunk fetch
+    });
   }
-  return processorNoRaw;
+  return katexPromise;
 }
 
-async function getProcessorWithRaw(isDark: () => boolean): Promise<LumenProcessor> {
-  if (!processorWithRaw) {
-    // Lazy import: parse5 + entities (~275 KB raw + 70 KB raw) only
-    // ship for docs that actually contain inline HTML.
-    const { default: rehypeRaw } = await import("rehype-raw");
-    processorWithRaw = finishPipeline(buildBase(isDark).use(rehypeRaw), isDark);
-  }
-  return processorWithRaw;
+async function getFullProcessor(
+  isDark: () => boolean,
+  opts: { raw: boolean; math: boolean },
+): Promise<LumenProcessor> {
+  const key = `${opts.raw ? 1 : 0}${opts.math ? 1 : 0}`;
+  const cached = fullProcessors.get(key);
+  if (cached) return cached;
+  // rehype-raw pulls in parse5 (~40 KB gz); only docs with inline HTML
+  // pay for it (M12-followup-2).
+  const [rehypeRaw, rehypeKatex] = await Promise.all([
+    opts.raw ? import("rehype-raw").then((m) => m.default) : null,
+    opts.math ? loadKatex() : null,
+  ]);
+  let p = buildBase();
+  if (rehypeRaw) p = p.use(rehypeRaw);
+  // CriticMarkup (suggesting mode) → <ins>/<del>/<mark>; before rehypeSlug
+  // so heading ids are computed from the rendered text.
+  p = p.use(rehypeCriticMarkup).use(rehypeSlug);
+  if (rehypeKatex) p = p.use(rehypeKatex);
+  const proc = toReact(p.use(rehypeShiki, { isDark }));
+  fullProcessors.set(key, proc);
+  return proc;
 }
 
 /**
@@ -418,15 +216,39 @@ function hasRawHtml(source: string): boolean {
   return /<[a-zA-Z!/]/.test(source);
 }
 
+/** remark-math only recognises `$…$` / `$$…$$`; no `$` → no KaTeX. */
+function hasMath(source: string): boolean {
+  return source.includes("$");
+}
+
 export async function renderMarkdown(
   markdownText: string,
   isDark: () => boolean,
 ): Promise<ReactElement> {
-  const proc = hasRawHtml(markdownText)
-    ? await getProcessorWithRaw(isDark)
-    : getProcessorNoRaw(isDark);
-  const file = await proc.process(markdownText);
+  const proc = await getFullProcessor(isDark, {
+    raw: hasRawHtml(markdownText),
+    math: hasMath(markdownText),
+  });
+  const file = await proc.process(prepareCriticMarkup(markdownText));
   return file.result as ReactElement;
+}
+
+/**
+ * Synchronous first-paint render (A7 levers 1 + 3).
+ *
+ * Same remark tree and heading ids as `renderMarkdown`, minus everything
+ * that needs a lazy chunk: no Shiki (code renders as plain `<pre>`), no
+ * KaTeX (math shows as its TeX source), no rehype-raw (inline HTML is
+ * dropped). Heavy blocks (mermaid, charts, maps…) render through the same
+ * `components` map, whose wrappers only fetch their chunk once the block
+ * scrolls near the viewport and the browser is idle — so this pass never
+ * triggers a vendor import.
+ */
+export function renderMarkdownFast(markdownText: string): ReactElement {
+  if (!fastProcessor) {
+    fastProcessor = toReact(buildBase().use(rehypeCriticMarkup).use(rehypeSlug));
+  }
+  return fastProcessor.processSync(prepareCriticMarkup(markdownText)).result as ReactElement;
 }
 
 /** Extract YAML frontmatter (parsed) from a markdown source, or null. */
@@ -453,7 +275,9 @@ export function extractToc(
   // Strip YAML / TOML frontmatter before parsing so it never appears in the
   // heading list (a top-level `---title:…---` block parses as a setext h2
   // when the frontmatter plugin isn't applied).
-  const stripped = markdownText
+  // CriticMarkup delimiters are dropped so ids match the rendered
+  // headings, whose <ins>/<del>/<mark> text rehype-slug reads.
+  const stripped = stripCriticDelimiters(markdownText)
     .replace(/^---\r?\n[\s\S]*?\r?\n---\r?\n?/m, "")
     .replace(/^\+\+\+\r?\n[\s\S]*?\r?\n\+\+\+\r?\n?/m, "");
   const tree = unified().use(remarkParse).parse(stripped) as MdastRoot;
@@ -472,13 +296,4 @@ function mdToString(node: any): string {
   if (Array.isArray(node?.children))
     return node.children.map(mdToString).join("");
   return "";
-}
-
-function slug(s: string): string {
-  return s
-    .toLowerCase()
-    .trim()
-    .replace(/[^\w\s-]/g, "")
-    .replace(/\s+/g, "-")
-    .replace(/-+/g, "-");
 }

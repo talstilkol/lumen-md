@@ -33,7 +33,7 @@ chart suggestions.
 **3. AI assists, never gates.** Bring your own key. Disable AI entirely
 and Lumen still ships every other feature.
 
-**4. Privacy is structural, not promised.** Local-first storage, optional
-end-to-end encryption for collab, opt-in telemetry that's off by default.
+**4. Privacy is structural, not promised.** Local-first storage, transport-encrypted
+(WebRTC DTLS) collab, opt-in telemetry that's off by default.
 
 Continue to the [Quickstart](/getting-started/quickstart/) →

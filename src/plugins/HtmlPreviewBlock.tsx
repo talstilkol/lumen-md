@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Maximize2, Code2 } from "lucide-react";
 import { t } from "../i18n";
 import { sanitizeHtmlMarkup } from "../lib/markupSanitizer";
+import { setSandboxedSrcdoc } from "../lib/trustedTypes";
 
 interface Props {
   source: string;
@@ -29,12 +30,21 @@ export default function HtmlPreviewBlock({ source, meta }: Props) {
   const [fullScreen, setFullScreen] = useState(false);
   const [allowScripts, setAllowScripts] = useState(false);
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const frameRef = useRef<HTMLIFrameElement | null>(null);
 
   const rawHtml = useMemo(() => wrapHtml(source), [source]);
   const html = useMemo(() => sanitizeHtmlMarkup(rawHtml), [rawHtml]);
   const wasSanitized = html !== rawHtml;
   const hasUnsafePatterns = /<\s*script\b|on\w+\s*=|javascript:\s*|<\s*iframe\b|<\s*object\b|<\s*embed\b/i.test(source);
   const sandboxMode = allowScripts ? "allow-scripts" : "";
+
+  // srcdoc is a Trusted Types sink. Assign it imperatively through the
+  // `lumen` policy's sandboxed path (the frame never gets
+  // allow-same-origin) instead of React's string attribute write.
+  useEffect(() => {
+    if (showSource || !frameRef.current) return;
+    setSandboxedSrcdoc(frameRef.current, html);
+  }, [html, sandboxMode, showSource]);
 
   // Toggle native fullscreen on the host container so the iframe still works.
   useEffect(() => {
@@ -129,7 +139,7 @@ export default function HtmlPreviewBlock({ source, meta }: Props) {
       )}
       {!showSource && (
         <iframe
-          srcDoc={html}
+          ref={frameRef}
           sandbox={sandboxMode}
           referrerPolicy="no-referrer"
           loading="lazy"

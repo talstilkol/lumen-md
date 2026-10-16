@@ -95,6 +95,25 @@ Scopes are area names: `editor`, `renderer`, `collab`, `storage`, `ui`, `ai`, `i
 - Run unit tests: `npm run test` (single-shot) or `npm run test:watch`.
 - Run E2E: `npx playwright test` (requires a running dev server).
 
+### Visual (pixel-diff) baselines
+
+`e2e/visual-smoke.spec.ts` pins the Mermaid diagram with
+`toHaveScreenshot()` (chromium only, `maxDiffPixelRatio: 0.02`). Baselines
+live next to the spec in `e2e/visual-smoke.spec.ts-snapshots/` and are
+per-platform (`…-chromium-linux.png`).
+
+- **First run without a baseline** writes one and passes with a
+  `baseline-created` annotation (so CI can produce it). Download it from
+  the CI artifacts or regenerate locally, review it, and commit it.
+- **Intentional visual change** (Mermaid theme, block CSS): regenerate with
+
+  ```bash
+  npx playwright test e2e/visual-smoke.spec.ts --project=chromium --update-snapshots
+  ```
+
+  and commit the updated PNG together with the change. Generate Linux
+  baselines on Linux (or in CI) — macOS font rendering differs.
+
 ### Guidelines
 
 - Add a test for any non-trivial change.

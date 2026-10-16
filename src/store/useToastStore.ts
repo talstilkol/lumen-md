@@ -10,6 +10,10 @@ export interface Toast {
   body?: string;
   /** Auto-dismiss after this many ms. 0 = sticky (user must dismiss). */
   ttlMs: number;
+  /** Optional "Learn more" docs link (PRODUCT_IMPROVEMENT 2.4). */
+  learnMoreUrl?: string;
+  /** Optional action button; clicking runs it and dismisses the toast. */
+  action?: { label: string; run: () => void };
 }
 
 interface ToastState {
@@ -52,8 +56,8 @@ export const toast = {
     useToastStore.getState().push({ kind: "info", title, body }),
   success: (title: string, body?: string) =>
     useToastStore.getState().push({ kind: "success", title, body }),
-  warn: (title: string, body?: string) =>
-    useToastStore.getState().push({ kind: "warning", title, body }),
-  error: (title: string, body?: string) =>
-    useToastStore.getState().push({ kind: "error", title, body }),
+  warn: (title: string, body?: string, learnMoreUrl?: string) =>
+    useToastStore.getState().push({ kind: "warning", title, body, learnMoreUrl }),
+  error: (title: string, body?: string, learnMoreUrl?: string) =>
+    useToastStore.getState().push({ kind: "error", title, body, learnMoreUrl }),
 };

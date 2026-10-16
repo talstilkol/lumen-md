@@ -145,12 +145,14 @@ type PipelineLoader = (
  */
 export async function summarizeMemo(transcript: string): Promise<string> {
   if (!transcript.trim()) return "";
+  // Pays for itself when sent (ownPrompt), not attributed to a palette
+  // command that may be waiting in a dialog at the same time.
   return chat(
     [
       { role: "system", content: PROMPTS.summarize },
       { role: "user", content: transcript },
     ],
-    { maxTokens: 120 },
+    { maxTokens: 120, ownPrompt: true },
   );
 }
 

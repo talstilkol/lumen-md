@@ -15,7 +15,9 @@
  * cache when needed.
  */
 
-import { writeWorkspaceFile } from "./workspace";
+import { log } from "../lib/logger";
+import { connectAllowedByCsp } from "../lib/cspConnect";
+import { isOPFSAvailable, listWorkspace, readWorkspaceFile, writeWorkspaceFile } from "./workspace";
 import { fetchWithRetry } from "../lib/fetchRetry";
 
 export interface MarketplaceTemplate {
@@ -67,8 +69,88 @@ export async function installTemplate(
   const path = `templates/${template.id}.md`;
   await writeWorkspaceFile(path, body);
   bumpDownloads(template.id);
+  rememberInstalledName(template.id, template.name);
   void recordRemoteInstall(template.id);
+  notifyInstalledTemplatesChanged();
   return { path, bytes: body.length };
+}
+
+/* ─── Installed templates (OPFS `templates/<id>.md`) ───────────────── */
+
+/** Folder in the workspace where `installTemplate()` writes bodies. */
+export const INSTALLED_TEMPLATES_DIR = "templates";
+/** Window event fired after an install so listeners (⌘K) can refresh. */
+export const TEMPLATES_CHANGED_EVENT = "lumen:templates-changed";
+const INSTALLED_NAMES_KEY = "lumen.templates.installedNames";
+
+export interface InstalledTemplate {
+  id: string;
+  /** Display name (registry name captured at install time, else derived from the id). */
+  name: string;
+  /** Workspace path, e.g. `templates/weekly-review.md`. */
+  path: string;
+}
+
+function readInstalledNames(): Record<string, string> {
+  try {
+    const raw = localStorage.getItem(INSTALLED_NAMES_KEY);
+    const parsed: unknown = raw ? JSON.parse(raw) : {};
+    return parsed && typeof parsed === "object" ? (parsed as Record<string, string>) : {};
+  } catch {
+    return {};
+  }
+}
+
+function rememberInstalledName(id: string, name: string): void {
+  try {
+    const names = readInstalledNames();
+    names[id] = name;
+    localStorage.setItem(INSTALLED_NAMES_KEY, JSON.stringify(names));
+  } catch {
+    /* private mode — fall back to an id-derived name */
+  }
+}
+
+function notifyInstalledTemplatesChanged(): void {
+  if (typeof window === "undefined") return;
+  window.dispatchEvent(new Event(TEMPLATES_CHANGED_EVENT));
+}
+
+function nameFromId(id: string): string {
+  const words = id.replace(/[-_]+/g, " ").trim();
+  return words ? words.charAt(0).toUpperCase() + words.slice(1) : id;
+}
+
+/**
+ * List templates installed from the marketplace — every `*.md` file directly
+ * inside the workspace `templates/` folder. Returns `[]` when OPFS is
+ * unavailable or the folder doesn't exist yet. Sorted by name.
+ */
+export async function listInstalledTemplates(): Promise<InstalledTemplate[]> {
+  if (!isOPFSAvailable()) return [];
+  let entries: Awaited<ReturnType<typeof listWorkspace>>;
+  try {
+    entries = await listWorkspace();
+  } catch {
+    return [];
+  }
+  const names = readInstalledNames();
+  const prefix = `${INSTALLED_TEMPLATES_DIR}/`;
+  const out: InstalledTemplate[] = [];
+  for (const e of entries) {
+    if (!e.path.startsWith(prefix)) continue;
+    const rest = e.path.slice(prefix.length);
+    if (rest.includes("/") || !/\.md$/i.test(rest)) continue;
+    const id = rest.replace(/\.md$/i, "");
+    out.push({ id, name: names[id] || nameFromId(id), path: e.path });
+  }
+  out.sort((a, b) => a.name.localeCompare(b.name));
+  return out;
+}
+
+/** Read the markdown body of an installed template. */
+export async function readInstalledTemplate(tpl: Pick<InstalledTemplate, "path">): Promise<string> {
+  return readWorkspaceFile(tpl.path);
 }
 
 function bumpDownloads(id: string): void {
@@ -104,7 +186,16 @@ const BACKEND_KEY = "lumen.marketplace.url";
 export function getMarketplaceBackendUrl(): string | null {
   try {
     const fromStorage = localStorage.getItem(BACKEND_KEY);
-    if (fromStorage) return fromStorage.replace(/\/+$/, "");
+    if (fromStorage) {
+      const url = fromStorage.replace(/\/+$/, "");
+      // A runtime override the page's CSP doesn't allow would be blocked by
+      // the browser; say so and fall back instead of failing silently.
+      if (connectAllowedByCsp(url)) return url;
+      log.warn(
+        `Ignoring ${BACKEND_KEY}=${url}: its origin isn't in this deployment's CSP connect-src. ` +
+          "Set VITE_MARKETPLACE_URL (or VITE_CSP_CONNECT_EXTRA) at build time to allow it.",
+      );
+    }
   } catch {
     /* private mode */
   }

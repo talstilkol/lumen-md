@@ -2,7 +2,7 @@
 
 > **Single source of truth** for plan execution.
 > Each `- [ ]` becomes `- [x]` when verified.
-> Last updated: 2026-04-30 00:40.
+> Last updated: 2026-10-16 (counters recomputed from markers; see PLAN_STATUS.md for the consolidated status).
 > ⚠️ **Brutal-audit revision** at the bottom of this file lists F0–F7
 > follow-ups born from a self-audit. **All autonomous follow-ups are now done** —
 > 33 new test files (131 total, 1074 passing); added SECURITY.md;
@@ -16,11 +16,11 @@
 
 | Counter                             | Value                |
 | ----------------------------------- | -------------------- |
-| **Tasks done** ✅                   | **224 / 370**        |
+| **Tasks done** ✅                   | **245 / 387**        |
 | Tasks pending (autonomous-eligible) | **0**                |
-| Tasks blocked on credentials 🔑     | 146                  |
-| **% complete (overall)**            | **61 %**             |
-| **% complete (excluding blocked)**  | **224 / 224 = 100 %** |
+| Tasks blocked on credentials 🔑     | 141 (+1 partial)   |
+| **% complete (overall)**            | **63 %**             |
+| **% complete (excluding blocked)**  | **245 / 245 = 100 %** |
 
 ### Per-phase progress
 
@@ -223,7 +223,7 @@
 All blocked on Fly.io creds.
 
 - [!] β.2.1 🔑 npm install `pg y-leveldb lib0` in sync-server
-- [!] β.2.2 🔑 Implement `persistent-server.js` body
+- [x] β.2.2 ✅ `persistent-server.js` (y-leveldb, `YJS_STORAGE_DIR`, /healthz) — 2026-10-16; Postgres archive dropped (was never implemented, docs corrected)
 - [!] β.2.3 🔑 Postgres schema apply
 - [!] β.2.4 🔑 `fly launch --name lumen-collab`
 - [!] β.2.5 🔑 `fly postgres create + attach`
@@ -241,11 +241,11 @@ All blocked on Stripe creds.
 
 - [!] β.3.1 🔑 Stripe products + prices
 - [!] β.3.2 🔑 D1 schema migration
-- [!] β.3.3 🔑 Worker endpoints (POST /checkout + /webhook + GET /entitlements)
+- [x] β.3.3 ✅ Worker endpoints in code incl. `GET /entitlements` (2026-10-16). 🔑 deploy still needs Stripe/Cloudflare
 - [!] β.3.4 🔑 wrangler secrets
 - [!] β.3.5 🔑 wrangler deploy
-- [!] β.3.6 🔑 useEntitlement.ts SWR poll
-- [!] β.3.7 🔑 Pro feature gates (collab/search/fine-tune)
+- [x] β.3.6 ✅ useEntitlement fetches the worker with bearer token; unlocked when billing isn't configured (self-host)
+- [x] β.3.7 ✅ Gates: persistentCollab, aiMonthlyPrompts (aiQuota), auditLog, cloudSync, smartSearch — `src/billing/gates.ts`
 - [!] β.3.8 🔑 Test purchase 4242…
 - [!] β.3.9 🔑 Verify webhook → D1
 - [!] β.3.10 🔑 useEntitlement flips to pro
@@ -647,8 +647,8 @@ verified). Resolve in order.
 
 - [!] **F4.1** 🔑 Create WorkOS account (user action)
 - [x] **F4.2** ✅ `src/auth/workosProvider.ts` (110 lines: signInWithSso, loadSsoSession, signOutSso, isWorkosEnabled, test hook)
-- [x] **F4.3** 🟡 Client expects `/api/sso/authorize` + `/api/sso/session` + `/api/sso/signout` — endpoints will be in `edge-workers/auth/worker.ts` (not yet created — needs WorkOS account first)
-- [x] **F4.4** 🟡 `OrgSettings.tsx` admin page deferred (component shape ready, needs domain+metadata UI pass)
+- [x] **F4.3** 🟡 Client expects `/api/sso/authorize` + `/api/sso/session` + `/api/sso/signout` — endpoints will be in `edge-workers/auth/worker.ts` (created 2026-10-16 — live test needs WorkOS account first)
+- [x] **F4.4** ✅ `src/ui/OrgSettings.tsx` admin panel (2026-10-16)
 - [x] **F4.5** ✅ `tier: "enterprise"` already documented in `docker/postgres-init.sql` + entitlements interface; gating happens client-side via `useEntitlement().tier === "enterprise"`
 - [x] **F4.6** ✅ `workosProvider.test.ts` — 13 tests cover redirect / session / signout / config-disabled paths
 

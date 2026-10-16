@@ -23,13 +23,22 @@ function bytesToStream(data: Uint8Array): ReadableStream<Uint8Array> {
   });
 }
 
-async function drain(stream: ReadableStream<Uint8Array>): Promise<Uint8Array> {
+async function drain(stream: ReadableStream<Uint8Array>, maxBytes = Number.POSITIVE_INFINITY): Promise<Uint8Array> {
   const reader = stream.getReader();
   const chunks: Uint8Array[] = [];
+  let total = 0;
   for (;;) {
     const { done, value } = await reader.read();
     if (done) break;
-    if (value) chunks.push(value);
+    if (value) {
+      total += value.length;
+      if (total > maxBytes) {
+        // Stop inflating a ZIP bomb as soon as it crosses the limit.
+        await reader.cancel().catch(() => {});
+        throw new Error("ZIP entry exceeds the size limit");
+      }
+      chunks.push(value);
+    }
   }
   const len = chunks.reduce((a, c) => a + c.length, 0);
   const out = new Uint8Array(len);
@@ -43,10 +52,26 @@ async function drain(stream: ReadableStream<Uint8Array>): Promise<Uint8Array> {
 
 type ByteTransform = ReadableWritablePair<Uint8Array, Uint8Array>;
 
-async function inflateRaw(data: Uint8Array): Promise<Uint8Array> {
+async function inflateRaw(data: Uint8Array, maxBytes?: number): Promise<Uint8Array> {
   const ds = new DecompressionStream("deflate-raw") as unknown as ByteTransform;
-  return drain(bytesToStream(data).pipeThrough(ds));
+  return drain(bytesToStream(data).pipeThrough(ds), maxBytes);
 }
+
+export interface UnzipLimits {
+  /** Largest inflated size of one entry (bytes). */
+  maxEntryBytes?: number;
+  /** Largest inflated size of all entries together (bytes). */
+  maxTotalBytes?: number;
+}
+
+/**
+ * Defaults for every import: generous for real documents, but a few-KB
+ * ZIP bomb can no longer inflate to gigabytes and exhaust the tab.
+ */
+export const DEFAULT_UNZIP_LIMITS: Required<UnzipLimits> = {
+  maxEntryBytes: 256 * 1024 * 1024,
+  maxTotalBytes: 512 * 1024 * 1024,
+};
 
 async function deflateRaw(data: Uint8Array): Promise<Uint8Array> {
   const cs = new CompressionStream("deflate-raw") as unknown as ByteTransform;
@@ -57,7 +82,13 @@ async function deflateRaw(data: Uint8Array): Promise<Uint8Array> {
  * Inflate every entry in a ZIP archive into a name → bytes map.
  * Directory entries (names ending in "/") are skipped.
  */
-export async function unzip(buffer: ArrayBufferLike): Promise<Map<string, Uint8Array>> {
+export async function unzip(
+  buffer: ArrayBufferLike,
+  limits: UnzipLimits = {},
+): Promise<Map<string, Uint8Array>> {
+  const maxEntry = limits.maxEntryBytes ?? DEFAULT_UNZIP_LIMITS.maxEntryBytes;
+  const maxTotal = limits.maxTotalBytes ?? DEFAULT_UNZIP_LIMITS.maxTotalBytes;
+  let total = 0;
   const bytes = new Uint8Array(buffer);
   const view = new DataView(buffer);
 
@@ -95,13 +126,18 @@ export async function unzip(buffer: ArrayBufferLike): Promise<Map<string, Uint8A
     const dataStart = localOffset + 30 + lhNameLen + lhExtraLen;
     const compressed = bytes.subarray(dataStart, dataStart + compSize);
 
+    let data: Uint8Array;
     if (method === 0) {
-      out.set(name, compressed.slice());
+      if (compressed.length > maxEntry) throw new Error(`ZIP entry ${name} exceeds the size limit`);
+      data = compressed.slice();
     } else if (method === 8) {
-      out.set(name, await inflateRaw(compressed));
+      data = await inflateRaw(compressed, Math.min(maxEntry, maxTotal - total));
     } else {
       throw new Error(`Unsupported ZIP compression method ${method} for ${name}`);
     }
+    total += data.length;
+    if (total > maxTotal) throw new Error("ZIP archive exceeds the total size limit");
+    out.set(name, data);
   }
   return out;
 }

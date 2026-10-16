@@ -103,3 +103,14 @@ describe("rowsToCsv", () => {
     expect(csv).toBe("ts,user_id,org_id,action,payload,ip,user_agent\n");
   });
 });
+
+describe("CSV formula injection", () => {
+  it("prefixes cells that a spreadsheet would run as formulas", () => {
+    expect(csvCell("=HYPERLINK(\"http://x\",\"y\")")).toBe(`"'=HYPERLINK(""http://x"",""y"")"`);
+    expect(csvCell("+1+1")).toBe("'+1+1");
+    expect(csvCell("-2")).toBe("'-2");
+    expect(csvCell("@SUM(A1)")).toBe("'@SUM(A1)");
+    expect(csvCell("\t=1")).toBe("'\t=1");
+    expect(csvCell("doc.open")).toBe("doc.open");
+  });
+});

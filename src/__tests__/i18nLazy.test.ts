@@ -8,7 +8,7 @@
  * cleanly and `t()` returns the translated value.
  */
 
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import {
   SUPPORTED_LOCALES,
   isLocaleAvailable,
@@ -69,5 +69,100 @@ describe("β.4 lazy locale infrastructure", () => {
     // fr.json has 'toolbar.new' translated.
     expect(t("toolbar.new")).toBe("Nouveau");
     applyLocale("en");
+  });
+});
+
+describe("A7 lever 4 — only English ships eagerly", () => {
+  // Fresh module instance per test so earlier loadLocale() calls don't leak.
+  async function freshI18n() {
+    vi.resetModules();
+    return import("../i18n");
+  }
+
+  it("Hebrew is not in memory until loaded, but is reported available", async () => {
+    const i18n = await freshI18n();
+    expect(i18n.isLocaleLoaded("en")).toBe(true);
+    expect(i18n.isLocaleLoaded("he")).toBe(false);
+    expect(i18n.isLocaleAvailable("he")).toBe(true);
+    await i18n.loadLocale("he");
+    expect(i18n.isLocaleLoaded("he")).toBe(true);
+  });
+
+  it("initLocale() preloads + applies the persisted locale before first render", async () => {
+    const i18n = await freshI18n();
+    localStorage.setItem("lumen-md", JSON.stringify({ state: { locale: "he" }, version: 0 }));
+    const locale = await i18n.initLocale();
+    expect(locale).toBe("he");
+    expect(i18n.getLocale()).toBe("he");
+    expect(i18n.t("toolbar.new")).toBe("חדש");
+    expect(document.documentElement.dir).toBe("rtl");
+    i18n.applyLocale("en");
+    localStorage.removeItem("lumen-md");
+  });
+
+  it("initLocale() falls back to English (LTR) when the locale chunk can't load", async () => {
+    vi.doMock("../i18n/locales/he.json", () => {
+      throw new Error("offline");
+    });
+    try {
+      const i18n = await freshI18n();
+      localStorage.setItem("lumen-md", JSON.stringify({ state: { locale: "he" }, version: 0 }));
+      expect(await i18n.initLocale()).toBe("en");
+      expect(i18n.getLocale()).toBe("en");
+      expect(document.documentElement.dir).not.toBe("rtl");
+    } finally {
+      vi.doUnmock("../i18n/locales/he.json");
+      localStorage.removeItem("lumen-md");
+    }
+  });
+
+  it("boot fallback updates the rehydrated store so App's mount effect can't re-apply RTL", async () => {
+    vi.doMock("../i18n/locales/he.json", () => {
+      throw new Error("offline");
+    });
+    try {
+      vi.resetModules();
+      localStorage.setItem("lumen-md", JSON.stringify({ state: { locale: "he" }, version: 0 }));
+      const { useAppStore, adoptBootLocale } = await import("../store/useStore");
+      const i18n = await import("../i18n");
+      expect(useAppStore.getState().locale).toBe("he"); // rehydrated from storage
+      adoptBootLocale(await i18n.initLocale());
+      expect(useAppStore.getState().locale).toBe("en");
+      // What App's effect does on mount:
+      i18n.applyLocale(useAppStore.getState().locale);
+      expect(document.documentElement.dir).not.toBe("rtl");
+    } finally {
+      vi.doUnmock("../i18n/locales/he.json");
+      localStorage.removeItem("lumen-md");
+    }
+  });
+
+  it("switching to a locale whose chunk can't load keeps the UI English and LTR", async () => {
+    vi.doMock("../i18n/locales/he.json", () => {
+      throw new Error("offline");
+    });
+    try {
+      vi.resetModules();
+      const i18n = await import("../i18n");
+      const { useAppStore } = await import("../store/useStore");
+      useAppStore.getState().setLocale("he");
+      await vi.waitFor(() => expect(i18n.getLocale()).toBe("en"));
+      expect(useAppStore.getState().locale).toBe("en");
+      expect(document.documentElement.dir).not.toBe("rtl");
+    } finally {
+      vi.doUnmock("../i18n/locales/he.json");
+    }
+  });
+
+  it("initLocale() defaults to English on missing / corrupt / unknown storage", async () => {
+    const i18n = await freshI18n();
+    localStorage.removeItem("lumen-md");
+    expect(await i18n.initLocale()).toBe("en");
+    localStorage.setItem("lumen-md", "{not json");
+    expect(await i18n.initLocale()).toBe("en");
+    localStorage.setItem("lumen-md", JSON.stringify({ state: { locale: "xx" } }));
+    expect(await i18n.initLocale()).toBe("en");
+    expect(i18n.t("toolbar.new")).toBe("New");
+    localStorage.removeItem("lumen-md");
   });
 });

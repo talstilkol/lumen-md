@@ -19,10 +19,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Node 20
+      - name: Setup Node 22
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: npm
 
       - name: Install
@@ -30,6 +30,9 @@ jobs:
 
       - name: Typecheck
         run: npm run typecheck
+
+      - name: Code hygiene (no `as any` / console.log in production src)
+        run: npm run hygiene
 
       - name: Test
         run: npm run test
@@ -57,19 +60,13 @@ jobs:
 
       - name: i18n drift gate
         # Vitest already runs the i18nStrings test — this step also asserts
-        # that en + he stay within 10 keys of each other (catches lazy
+        # that en + he (src/i18n/locales/he.json) stay within 10 keys of each other (catches lazy
         # ports of new keys to one bundle and not the other).
         run: |
           node scripts/extract-i18n-keys.mjs > /dev/null
           en_count=$(node -e 'const j=JSON.parse(require("fs").readFileSync("i18n/keys.json","utf8")); console.log(j.entries.length)')
-          # Count keys in `he` block via the same regex the test uses.
-          he_count=$(node -e '
-            const fs=require("fs");
-            const t=fs.readFileSync("src/i18n/index.ts","utf8");
-            const m=t.match(/const he:\s*Strings\s*=\s*\{([\s\S]+?)^\};/m);
-            const keys=m[1].match(/"\w[\w.\-]+"/g);
-            console.log(keys ? keys.length : 0);
-          ')
+          # Hebrew ships as a lazy JSON bundle like the other locales.
+          he_count=$(node -e 'console.log(Object.keys(JSON.parse(require("fs").readFileSync("src/i18n/locales/he.json","utf8"))).length)')
           diff=$(( en_count > he_count ? en_count - he_count : he_count - en_count ))
           echo "i18n keys — en: $en_count, he: $he_count, diff: $diff"
           if [ "$diff" -gt 10 ]; then
@@ -91,7 +88,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-        with: { node-version: 20, cache: npm }
+        with: { node-version: 22, cache: npm }
       - run: npm ci || npm install
       - run: npm run build
       - name: Lighthouse CI
@@ -120,12 +117,28 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-        with: { node-version: 20, cache: npm }
+        with: { node-version: 22, cache: npm }
       - run: npm ci || npm install
       - name: Install Playwright browser (${{ matrix.browser }})
         run: npx playwright install --with-deps ${{ matrix.browser }}
+      - name: Software GL for headless WebGL (firefox)
+        # GitHub runners have no GPU; Firefox reports
+        # FEATURE_FAILURE_WEBGL_EXHAUSTED_DRIVERS unless Mesa's llvmpipe is
+        # present and selected. Chromium/WebKit ship their own fallbacks.
+        if: matrix.browser == 'firefox'
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq xvfb libgl1-mesa-dri libglx-mesa0 libegl-mesa0 libegl1 libgles2 mesa-utils
       - name: Run E2E (${{ matrix.browser }})
-        run: npx playwright test --project=${{ matrix.browser }} --reporter=line
+        env:
+          LIBGL_ALWAYS_SOFTWARE: ${{ matrix.browser == 'firefox' && '1' || '' }}
+          GALLIUM_DRIVER: ${{ matrix.browser == 'firefox' && 'llvmpipe' || '' }}
+          PW_FIREFOX_HEADED: ${{ matrix.browser == 'firefox' && '1' || '' }}
+        run: |
+          if [ "${{ matrix.browser }}" = firefox ]; then
+            xvfb-run --auto-servernum --server-args="-screen 0 1280x960x24" \
+              npx playwright test --project=firefox --reporter=line,github,html
+          else
+            npx playwright test --project=${{ matrix.browser }} --reporter=line,github,html
+          fi
       - name: Upload report
         if: failure()
         uses: actions/upload-artifact@v4
@@ -146,7 +159,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-        with: { node-version: 20, cache: npm }
+        with: { node-version: 22, cache: npm }
       - run: npm ci || npm install
       - name: Install Playwright browsers (chromium only — saves ~6 min)
         run: npx playwright install --with-deps chromium
@@ -166,7 +179,7 @@ jobs:
       - name: Run E2E against prod bundle
         env:
           PLAYWRIGHT_BASE_URL: http://localhost:5180
-        run: npx playwright test --project=chromium --reporter=line
+        run: npx playwright test --project=chromium --reporter=line,github,html
       - name: Upload report
         if: failure()
         uses: actions/upload-artifact@v4
@@ -184,8 +197,8 @@ jobs:
       - name: Healthcheck
         run: |
           URL="${SIGNAL_URL:-https://signal.lumen.md}"
-          echo "Checking $URL/health..."
-          status=$(curl -s -o /dev/null -w '%{http_code}' -m 10 "$URL/health" || true)
+          echo "Checking $URL/healthz..."
+          status=$(curl -s -o /dev/null -w '%{http_code}' -m 10 "$URL/healthz" || true)
           if [ "$status" = "200" ]; then
             echo "✅ Signal server healthy ($status)"
           else

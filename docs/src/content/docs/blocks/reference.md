@@ -22,13 +22,58 @@ Lumen's killer feature is **dynamic blocks**: write a fenced code block in markd
 | ` ```embed ` | Universal embed (YouTube, Vimeo, Twitter, Loom, CodePen, oembed) | URL on the body line |
 | ` ```html ` / ` ```html-preview ` | Sanitized HTML preview | DOMPurify allowlist; no JS executes in the page |
 | ` ```svg ` / ` ```live-svg ` | Sanitized inline SVG preview | Same hardening as HTML |
-| ` ```live-js ` | JS sandbox (Worker isolate) with console output | Stdout/stderr/error states; timeout-protected |
+| ` ```live-js ` | JS sandbox (Worker isolate) with console output | Stdout/stderr/error states; timeout-protected; `shared` = one REPL scope per document (see below) |
+| ` ```live-lua ` / ` ```lua-live ` | Lua 5.4 (wasmoon WASM) in a Web Worker, with `print`/`io.write` output and return values | Loads on Run; self-hosted wasm (no CDN); `timeout=` ms (default 5000) |
 | ` ```live-css ` | Sandboxed iframe HTML+CSS preview | `srcdoc` + sandbox flags |
 | ` ```live-glsl ` / ` ```glsl ` / ` ```shader ` | GLSL fragment shader on a quad | Hot-reloads on edit |
 | ` ```bibtex ` / ` ```bib ` | Citation list (formatted from BibTeX) | Click → copy citation |
 | ` ```database ` | Workspace-wide database query (markdown frontmatter as the "table") | Lumen-native query DSL |
 | ` ```insights ` / ` ```jsonl ` | JSONL analyzer: conclusions, freq, charts, file generators | No external model |
 | ` ```code-doctor ` / ` ```fix-json ` | Malformed JSON/JSONL repair with diff + accept-fix UI | 7-pass tolerant tokenizer |
+
+## Live JavaScript — shared scope (REPL across blocks)
+
+By default every ` ```live-js ` block runs in its own fresh Web Worker, so nothing one block defines is visible to another. Add `shared` to the fence to turn the blocks of a document into one REPL session:
+
+````markdown
+```live-js shared
+const prices = [12, 7, 30]
+function total(xs) { return xs.reduce((a, b) => a + b, 0) }
+```
+
+Some prose in between…
+
+```live-js shared
+console.log(total(prices))   // 49
+```
+````
+
+- All `shared` blocks of the open document use **one worker**, and its global scope persists across runs and across blocks. Top-level `const` / `let` / `var`, `function` and `class` declarations become globals of that worker, so later runs and later blocks can use them. Declarations nested in blocks, functions or loop heads stay local.
+- As in a browser console, running a block again may redeclare its names, and top-level `const` bindings can be reassigned by later runs.
+- Blocks share state in the order they **run**. Each block runs when it renders and when you click **Run**; runs are queued and execute one at a time.
+- `shared=name` (for example ` ```live-js shared=physics `) gives a separate named scope inside the same document. Different documents never share a scope.
+- **Reset scope** (shown on shared blocks) discards the worker and every global in it; the next run starts fresh. Re-run the blocks you depend on afterwards.
+- Sandboxing is unchanged: the worker has no DOM and no access to the page, shared mode adds no module or network-import support (the page CSP still applies inside the worker), and a run that exceeds the 8-second timeout is stopped. A timeout terminates the worker, which also resets the scope.
+- An unused scope is disposed five minutes after the last shared block of that document unmounts.
+
+## Live Lua
+
+````markdown
+```live-lua height=200 timeout=3000
+local function fib(n) return n < 2 and n or fib(n - 1) + fib(n - 2) end
+for i = 1, 10 do io.write(fib(i), " ") end
+print()
+return _VERSION
+```
+````
+
+Click **Run** to execute. Nothing is downloaded until then; the ~270 KB `glue.wasm` is bundled with Lumen and served from the same origin, so it works offline and under the app's CSP. Each run gets a fresh Web Worker and a fresh Lua state:
+
+- `print` and `io.write` stream to the output panel; values `return`ed from the chunk are shown after a `→`.
+- Errors show the line (`block:2: boom`).
+- A runaway loop is stopped after `timeout` ms (100–60000, default 5000) by an instruction-count hook, and the page kills the worker if it stops responding. **Stop** cancels a run.
+- The Lua heap is capped at 64 MB and captured output at 200 000 characters.
+- The standard libraries are available except process and file access: `os.exit`, `os.execute`, `os.getenv`, `os.remove`, `os.rename`, `io.open`, `io.popen`, `io.read`, `require`, `dofile`, `loadfile` and `package` are removed. Lua cannot reach JavaScript objects.
 
 ## Security & hardening
 

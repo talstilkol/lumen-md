@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { sanitizeSvgMarkup } from "../lib/markupSanitizer";
 import { fetchWithRetry } from "../lib/fetchRetry";
+import { toTrustedHTML } from "../lib/trustedTypes";
 
 interface Props {
   source: string;
@@ -137,8 +138,9 @@ export default function PlantUMLBlock({ source }: Props) {
       </div>
       <div
         className="mermaid-block"
-        // SVG is rendered from an external service and then sanitized before insertion.
-        dangerouslySetInnerHTML={{ __html: svg }}
+        // SVG comes from an external service (kroki.io); it was sanitized on
+        // arrival and is routed through the `lumen` Trusted Types policy.
+        dangerouslySetInnerHTML={{ __html: toTrustedHTML(svg, "svg") }}
       />
     </div>
   );

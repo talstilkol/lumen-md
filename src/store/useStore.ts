@@ -1,7 +1,17 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { Locale } from "../i18n";
-import { applyLocale } from "../i18n";
+import { applyLocale, isLocaleLoaded, loadLocale, t } from "../i18n";
+import { toast } from "./useToastStore";
+import {
+  DEFAULT_THEME_SETTINGS,
+  applyThemeSettings,
+  sanitizeThemeSettings,
+  type ThemeSettings,
+} from "../lib/themeSettings";
+
+// Monotonic token so a slow lazy-locale fetch can't clobber a newer pick.
+let localeRequest = 0;
 
 export type ViewMode = "source" | "split" | "preview" | "wysiwyg";
 export type Theme = "light" | "dark" | "system";
@@ -28,6 +38,8 @@ interface AppState {
   doc: DocFile;
   mode: ViewMode;
   theme: Theme;
+  /** Theme customisation (preset, accent, typography, measure). */
+  themeSettings: ThemeSettings;
   locale: Locale;
   showOutline: boolean;
   showWorkspace: boolean;
@@ -46,10 +58,14 @@ interface AppState {
   useLocalAi: boolean;
   /** Typewriter scroll mode — keep the active line vertically centred. */
   typewriterMode: boolean;
+  /** Type-check ```ts blocks in the source editor (loads the TS compiler). */
+  tsChecks: boolean;
   /** Daily writing goal (words). 0 disables the banner. */
   writingGoalWords: number;
   /** Toggle LanguageTool-powered grammar/style checking in the editor. */
   grammarCheck: boolean;
+  /** Suggesting mode (track changes): edits are recorded as CriticMarkup. */
+  suggestingMode: boolean;
   /**
    * F3 — when set, `chat()` routes to the user's fine-tuned model
    * (id stored in `fineTunedModelId`). Off by default; flipped from
@@ -72,6 +88,10 @@ interface AppState {
   openTabs: Array<{ id: string; name: string; content: string; workspaceName: string | null; dirty: boolean }>;
   setMode: (m: ViewMode) => void;
   setTheme: (t: Theme) => void;
+  /** Merge a patch into the theme customisation and apply it live. */
+  setThemeSettings: (patch: Partial<ThemeSettings>) => void;
+  /** Restore the stock theme customisation. */
+  resetThemeSettings: () => void;
   setLocale: (l: Locale) => void;
   setContent: (s: string) => void;
   setDoc: (d: Partial<DocFile>) => void;
@@ -90,9 +110,12 @@ interface AppState {
   toggleSpellCheck: () => void;
   toggleLocalAi: () => void;
   toggleTypewriter: () => void;
+  toggleTsChecks: () => void;
   setWritingGoal: (words: number) => void;
   /** Toggle the LanguageTool grammar checker. */
   toggleGrammarCheck: () => void;
+  /** Toggle suggesting mode (track changes). */
+  toggleSuggestingMode: () => void;
   /** Toggle the personal fine-tuned model on/off (F3). */
   toggleFineTunedModel: () => void;
   /** Persist the resulting model id from a successful fine-tune job. */
@@ -127,10 +150,11 @@ const DEFAULT_DOC: DocFile = {
 
 export const useAppStore = create<AppState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       doc: DEFAULT_DOC,
       mode: "split",
       theme: "dark",
+      themeSettings: { ...DEFAULT_THEME_SETTINGS },
       locale: "en",
       showOutline: true,
       showWorkspace: false,
@@ -146,20 +170,56 @@ export const useAppStore = create<AppState>()(
       spellCheck: true,
       useLocalAi: true,
       typewriterMode: false,
+      tsChecks: false,
       writingGoalWords: 0,
       grammarCheck: false,
+      suggestingMode: false,
       useFineTunedModel: false,
       fineTunedModelId: null,
       tagFilter: null,
       openTabs: [],
-      setMode: (m) => set({ mode: m }),
+      // Suggesting mode records CriticMarkup through the source editor only;
+      // WYSIWYG edits would bypass it. Keep the two exclusive: entering
+      // WYSIWYG while suggesting lands in Split instead (and says why).
+      setMode: (m) => {
+        if (m === "wysiwyg" && get().suggestingMode) {
+          set({ mode: "split" });
+          toast.info(t("suggesting.noWysiwyg"));
+          return;
+        }
+        set({ mode: m });
+      },
       setTheme: (t) => {
         set({ theme: t });
         applyTheme(t);
       },
+      setThemeSettings: (patch) =>
+        set((s) => {
+          const next = sanitizeThemeSettings({ ...s.themeSettings, ...patch });
+          if (typeof document !== "undefined") applyThemeSettings(next, document.documentElement);
+          return { themeSettings: next };
+        }),
+      resetThemeSettings: () => {
+        const next = { ...DEFAULT_THEME_SETTINGS };
+        if (typeof document !== "undefined") applyThemeSettings(next, document.documentElement);
+        set({ themeSettings: next });
+      },
       setLocale: (l) => {
-        set({ locale: l });
-        applyLocale(l);
+        const req = ++localeRequest;
+        const commit = () => {
+          if (req !== localeRequest) return;
+          // The chunk couldn't load (offline / missing): stay consistent
+          // and switch to English rather than English strings under an
+          // RTL `lang="he"` UI.
+          const locale = isLocaleLoaded(l) ? l : "en";
+          applyLocale(locale);
+          set({ locale });
+        };
+        // Non-English bundles are lazy chunks (A7 lever 4). Commit the
+        // store change only once the strings are in memory so the
+        // re-render it triggers already reads the new language via t().
+        if (isLocaleLoaded(l)) commit();
+        else void loadLocale(l).then(commit, commit);
       },
       setContent: (s) =>
         set((state) => {
@@ -215,8 +275,18 @@ export const useAppStore = create<AppState>()(
       toggleSpellCheck: () => set((s) => ({ spellCheck: !s.spellCheck })),
       toggleLocalAi: () => set((s) => ({ useLocalAi: !s.useLocalAi })),
       toggleTypewriter: () => set((s) => ({ typewriterMode: !s.typewriterMode })),
+      toggleTsChecks: () => set((s) => ({ tsChecks: !s.tsChecks })),
       setWritingGoal: (words) => set({ writingGoalWords: Math.max(0, Math.floor(words)) }),
       toggleGrammarCheck: () => set((s) => ({ grammarCheck: !s.grammarCheck })),
+      toggleSuggestingMode: () =>
+        set((s) => {
+          const on = !s.suggestingMode;
+          if (on && s.mode === "wysiwyg") {
+            toast.info(t("suggesting.noWysiwyg"));
+            return { suggestingMode: true, mode: "split" as ViewMode };
+          }
+          return { suggestingMode: on };
+        }),
       toggleFineTunedModel: () =>
         set((s) => {
           // Refuse to flip ON when no model id is persisted.
@@ -322,6 +392,7 @@ export const useAppStore = create<AppState>()(
       partialize: (s) => ({
         mode: s.mode,
         theme: s.theme,
+        themeSettings: s.themeSettings,
         locale: s.locale,
         showOutline: s.showOutline,
         showWorkspace: s.showWorkspace,
@@ -336,8 +407,10 @@ export const useAppStore = create<AppState>()(
         spellCheck: s.spellCheck,
         useLocalAi: s.useLocalAi,
         typewriterMode: s.typewriterMode,
+        tsChecks: s.tsChecks,
         writingGoalWords: s.writingGoalWords,
         grammarCheck: s.grammarCheck,
+        suggestingMode: s.suggestingMode,
         useFineTunedModel: s.useFineTunedModel,
         fineTunedModelId: s.fineTunedModelId,
         // aiKey intentionally excluded — session-only for security
@@ -352,6 +425,19 @@ export const useAppStore = create<AppState>()(
         // structured-cloneable through localStorage anyway).
         openTabs: s.openTabs,
       }),
+      // Persisted theme settings may be stale or hand-edited — sanitise
+      // field-by-field on rehydrate instead of trusting localStorage.
+      merge: (persisted, current) => {
+        const p = (persisted ?? {}) as Partial<AppState>;
+        const merged = {
+          ...current,
+          ...p,
+          themeSettings: sanitizeThemeSettings(p.themeSettings),
+        };
+        // Never restore the WYSIWYG + suggesting combination (see setMode).
+        if (merged.suggestingMode && merged.mode === "wysiwyg") merged.mode = "split";
+        return merged;
+      },
     },
   ),
 );
@@ -363,6 +449,8 @@ export function applyTheme(theme: Theme) {
     (theme === "system" &&
       window.matchMedia("(prefers-color-scheme: dark)").matches);
   root.classList.toggle("dark", dark);
+  // Preset palettes differ between light and dark, so re-apply them.
+  applyThemeSettings(useAppStore.getState().themeSettings, root, dark);
 }
 
 // Re-apply when the OS color scheme changes (only meaningful for theme="system").
@@ -378,4 +466,14 @@ if (typeof window !== "undefined" && window.matchMedia) {
 
 export function applyDirection(rtl: boolean) {
   document.documentElement.dir = rtl ? "rtl" : "ltr";
+}
+
+/**
+ * Align the (already rehydrated) store with the locale boot actually
+ * applied. `initLocale` falls back to English when the saved locale's chunk
+ * can't load; without this, App's mount effect would re-apply the saved
+ * locale (English strings under e.g. Hebrew RTL).
+ */
+export function adoptBootLocale(applied: Locale): void {
+  if (useAppStore.getState().locale !== applied) useAppStore.setState({ locale: applied });
 }

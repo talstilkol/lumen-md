@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { ReactElement } from "react";
 import { Search, FileText, Sparkles, Loader2, FileCode2, Wand2 } from "lucide-react";
-import { t } from "../i18n";
+import { t, tPlural } from "../i18n";
 import { searchWorkspace, type SearchHit } from "../storage/workspaceIndex";
 import { isOPFSAvailable, readWorkspaceFile } from "../storage/workspace";
 import { chat, AiError } from "../ai/llm";
@@ -12,6 +12,8 @@ import { log } from "../lib/logger";
 import { showAiToast } from "../ui/AiToast";
 import { semanticSearch, type RagResult } from "../ai/embeddings";
 import { indexWorkspace, searchHybrid, type SemanticHit } from "../ai/semanticSearch";
+import { useCapability } from "../billing/gates";
+import { UpgradeNotice } from "./UpgradeNotice";
 import { useAppStore } from "../store/useStore";
 import { rememberSearch, getSearchHistory, forgetSearch } from "../storage/searchHistory";
 import { flashSearchHighlight } from "../editor/searchHighlight";
@@ -25,6 +27,9 @@ interface Props {
 
 export function SearchDialog({ open, onClose, onOpenFile }: Props) {
   const [mode, setMode] = useState<"search" | "smart" | "ai">("search");
+  // Smart (embedding) search is a Pro capability when billing is enforced;
+  // self-hosted setups always have it.
+  const smartAllowed = useCapability("smartSearch");
   const [query, setQuery] = useState("");
   const [hits, setHits] = useState<SearchHit[]>([]);
   const [smartHits, setSmartHits] = useState<SemanticHit[]>([]);
@@ -118,7 +123,7 @@ export function SearchDialog({ open, onClose, onOpenFile }: Props) {
   useEffect(() => {
     if (!open) return;
     if (mode !== "smart") return;
-    if (!query.trim()) {
+    if (!smartAllowed || !query.trim()) {
       setSmartHits([]);
       return;
     }
@@ -142,7 +147,7 @@ export function SearchDialog({ open, onClose, onOpenFile }: Props) {
       cancelled = true;
       clearTimeout(handle);
     };
-  }, [open, query, mode]);
+  }, [open, query, mode, smartAllowed]);
 
   async function rebuildSmartIndex() {
     if (!aiKey) {
@@ -227,6 +232,8 @@ export function SearchDialog({ open, onClose, onOpenFile }: Props) {
   }
 
   async function askAi() {
+    // Each question is one LLM prompt against the monthly AI quota, counted
+    // when it is actually sent (ownPrompt).
     setAiLoading(true);
     setAiAnswer(t("searchDialog.searching"));
     setAiSources([]);
@@ -236,7 +243,7 @@ export function SearchDialog({ open, onClose, onOpenFile }: Props) {
       // (Smart tab → Build) we fuse BM25 + semantic via RRF for genuinely
       // semantic-aware Q&A. When the index is empty, `searchHybrid` falls
       // back to BM25 alone, so we never block the AI tab on a missing index.
-      const hybridHits = aiKey
+      const hybridHits = aiKey && smartAllowed
         ? await searchHybrid(query, 8).catch(() => [] as SemanticHit[])
         : [];
       const fallback =
@@ -272,7 +279,7 @@ export function SearchDialog({ open, onClose, onOpenFile }: Props) {
         { role: "user", content: `Context Files:\n${contextStr}\n\nQuestion: ${query}` },
       ];
 
-      const answer = await chat(messages);
+      const answer = await chat(messages, { ownPrompt: true });
       setAiAnswer(answer);
 
       // Save to conversation history
@@ -289,6 +296,8 @@ export function SearchDialog({ open, onClose, onOpenFile }: Props) {
       if (e instanceof AiError && e.code === "NO_KEY") {
         setAiAnswer("⚠️ Please configure your AI Key (⌘K → AI Settings).");
         showAiToast("Please configure your AI Key (⌘K → AI Settings)", "error");
+      } else if (e instanceof Error && e.name === "AiQuotaExceededError") {
+        setAiAnswer(e.message); // the quota toast was already shown
       } else {
         log.error("AI workspace search failed", e);
         setAiAnswer("Failed to reach AI API.");
@@ -304,6 +313,11 @@ export function SearchDialog({ open, onClose, onOpenFile }: Props) {
     if (mode === "smart") return smartHits.length === 0;
     return hits.length === 0;
   }, [loading, hits, smartHits, mode]);
+
+  // Result-count badge: shown once a query has settled (not while the
+  // debounced search is in flight, and not on the Ask tab).
+  const resultCount = mode === "smart" ? smartHits.length : hits.length;
+  const showCount = !loading && query.trim().length > 0 && mode !== "ai";
 
   if (!open) return null;
 
@@ -325,7 +339,7 @@ export function SearchDialog({ open, onClose, onOpenFile }: Props) {
           <button className={`chart-block-tab ${mode === "ai" ? "active" : ""}`} style={{ fontSize: 13, background: "transparent" }} onClick={() => setMode("ai")}>
              <Sparkles size={11} style={{display:"inline", marginRight:4}}/> Ask Workspace
           </button>
-          {mode === "smart" && (
+          {mode === "smart" && smartAllowed && (
             <button
               type="button"
               onClick={rebuildSmartIndex}
@@ -360,9 +374,32 @@ export function SearchDialog({ open, onClose, onOpenFile }: Props) {
             spellCheck={false}
             disabled={!isOPFSAvailable()}
           />
+          {showCount && (
+            <span
+              data-testid="search-result-count"
+              role="status"
+              aria-live="polite"
+              style={{
+                flexShrink: 0,
+                fontSize: 11,
+                padding: "2px 8px",
+                borderRadius: 999,
+                background: resultCount ? "hsl(var(--accent) / 0.12)" : "hsl(var(--bg-subtle))",
+                color: resultCount ? "hsl(var(--accent))" : "hsl(var(--fg-muted))",
+                border: "1px solid hsl(var(--border))",
+                whiteSpace: "nowrap",
+                fontVariantNumeric: "tabular-nums",
+              }}
+            >
+              {tPlural("search.results", resultCount)}
+            </span>
+          )}
         </div>
         <div className="cmd-palette-list" ref={listRef}>
-          {empty && (
+          {mode === "smart" && !smartAllowed && (
+            <UpgradeNotice compact plan="pro" message={t("billing.upgrade.smartSearch")} />
+          )}
+          {empty && !(mode === "smart" && !smartAllowed) && (
             <div className="cmd-palette-empty">
               {mode === "smart" && !smartIndexedAt && !query
                 ? "Click \u201CBuild index\u201D to enable Smart search."

@@ -62,12 +62,14 @@ export async function generateAiCommitMessage(
 
     if (!changes) return "";
 
+    // Pays for itself when sent (ownPrompt), never billed to a palette
+    // command that may be waiting in a dialog at the same time.
     return await chat(
       [
         { role: "system", content: PROMPTS.commitMessage },
         { role: "user", content: `Changes:\n${changes}` },
       ],
-      { maxTokens: 30 },
+      { maxTokens: 30, ownPrompt: true },
     );
   } catch (e) {
     log.warn("AI commit generation skipped", e);

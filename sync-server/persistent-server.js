@@ -19,9 +19,19 @@
  * client (`src/collab/yjs.ts`) will attach a `WebsocketProvider` alongside
  * the WebRTC peer mesh, so docs survive across full sign-outs.
  *
+ * ── Storage ───────────────────────────────────────────────────────────────
+ *   YJS_STORAGE_DIR (preferred) or LEVELDB_PATH (legacy alias) selects the
+ *   LevelDB directory; defaults to `./.yjs-persistence`. Point it at a
+ *   mounted volume in production (docker-compose uses /data/yjs).
+ *   LevelDB is the ONLY storage backend — there is no Postgres archive;
+ *   DATABASE_URL is not read by this server.
+ *
+ * ── Health ────────────────────────────────────────────────────────────────
+ *   GET /healthz and GET /health → 200 {"ok":true}
+ *
  * ── Deployment ────────────────────────────────────────────────────────────
- *   • Fly.io: `fly launch && fly deploy` — set the persistent volume to mount
- *     at `./.yjs-persistence`.
+ *   • Fly.io: `fly launch && fly deploy` — mount a volume at /data and set
+ *     YJS_STORAGE_DIR=/data/yjs.
  *   • Render / Railway: same, using a persistent disk.
  *   • Always front with TLS (wss://) before exposing publicly.
  */
@@ -47,7 +57,12 @@ try {
 }
 
 const PORT = Number(process.env.PORT || 4444);
-const STORAGE_DIR = process.env.YJS_STORAGE_DIR || path.join(__dirname, ".yjs-persistence");
+// YJS_STORAGE_DIR wins; LEVELDB_PATH is accepted for older Docker images /
+// compose files that set it.
+const STORAGE_DIR =
+  process.env.YJS_STORAGE_DIR ||
+  process.env.LEVELDB_PATH ||
+  path.join(__dirname, ".yjs-persistence");
 
 // ── Persistence ──────────────────────────────────────────────────────────────
 const persistence = new LeveldbPersistence(STORAGE_DIR);
@@ -67,9 +82,10 @@ yWebsocketUtils.setPersistence({
 
 // ── HTTP + WebSocket ─────────────────────────────────────────────────────────
 const server = http.createServer((req, res) => {
-  if (req.url === "/healthz") {
-    res.writeHead(200, { "Content-Type": "text/plain" });
-    res.end("ok");
+  const pathname = (req.url || "/").split("?")[0];
+  if (pathname === "/healthz" || pathname === "/health") {
+    res.writeHead(200, { "Content-Type": "application/json" });
+    res.end(JSON.stringify({ ok: true, status: "ok", service: "lumen-collab" }));
     return;
   }
   res.writeHead(200, { "Content-Type": "text/plain" });

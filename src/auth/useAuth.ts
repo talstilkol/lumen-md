@@ -2,7 +2,11 @@ import { create } from "zustand";
 import type { AuthProvider, AuthState, User } from "./types";
 import { localProvider } from "./localProvider";
 import { createSupabaseProvider } from "./supabaseProvider";
+import { workosProvider, isWorkosEnabled } from "./workosProvider";
+import { consumeSsoFlash, describeAuthError } from "./authStatus";
 import { log } from "../lib/logger";
+import { toast } from "../store/useToastStore";
+import { t } from "../i18n";
 
 interface AuthStore extends AuthState {
   signIn: (email: string, password: string) => Promise<void>;
@@ -19,16 +23,24 @@ async function resolveProvider(): Promise<AuthProvider> {
   if (providerPromise) return providerPromise;
   providerPromise = (async () => {
     const supabase = await createSupabaseProvider();
-    return supabase ?? localProvider;
+    if (supabase) return supabase;
+    // Enterprise SSO only — the edge worker owns the session cookie.
+    if (isWorkosEnabled()) return workosProvider;
+    return localProvider;
   })();
   return providerPromise;
 }
 
-function fail(state: AuthStore, action: string, err: unknown): never {
+/**
+ * Record a failed auth action. Uses `setState` (not mutation) so the
+ * toolbar / status bar re-render with the error. A failed sign-in keeps
+ * an existing session intact — only the error message is updated.
+ */
+function fail(action: string, err: unknown): never {
   const message = err instanceof Error ? err.message : String(err);
   log.warn(`auth ${action} failed`, message);
-  state.status = "error";
-  state.error = message;
+  const { user } = useAuth.getState();
+  useAuth.setState(user ? { error: message } : { status: "error", error: message });
   throw err;
 }
 
@@ -45,7 +57,7 @@ export const useAuth = create<AuthStore>((set, get) => ({
       const user = await provider.signInWithPassword(email, password);
       set({ status: "authenticated", user, error: undefined });
     } catch (err) {
-      fail(get(), "signIn", err);
+      fail("signIn", err);
     }
   },
   signUp: async (email, password) => {
@@ -57,7 +69,7 @@ export const useAuth = create<AuthStore>((set, get) => ({
       const user = await provider.signUpWithPassword(email, password);
       set({ status: "authenticated", user, error: undefined });
     } catch (err) {
-      fail(get(), "signUp", err);
+      fail("signUp", err);
     }
   },
   signInWithProvider: async (oauth) => {
@@ -69,38 +81,70 @@ export const useAuth = create<AuthStore>((set, get) => ({
       const user = await provider.signInWithProvider(oauth);
       set({ status: "authenticated", user, error: undefined });
     } catch (err) {
-      fail(get(), "oauth", err);
+      fail("oauth", err);
     }
   },
   signOut: async () => {
     const { provider } = get();
     try {
       await provider.signOut();
-      set({ status: "anonymous", user: null });
+      // A restored SSO session temporarily made WorkOS the active provider;
+      // once signed out, go back to the configured primary (e.g. Supabase)
+      // so its password / OAuth sign-in methods are offered again.
+      const primary = providerPromise ? await providerPromise : provider;
+      set({ status: "anonymous", user: null, provider: primary });
     } catch (err) {
-      fail(get(), "signOut", err);
+      fail("signOut", err);
     }
   },
 }));
 
 /**
  * Bootstraps the auth store. Call once from `main.tsx`. Re-calls are no-ops.
- * Resolves the active provider (Supabase if configured, otherwise local) and
- * loads any persisted session.
+ * Resolves the active provider (Supabase if configured, otherwise WorkOS or
+ * local) and loads any persisted session, falling back to a WorkOS SSO
+ * session when SSO is configured alongside Supabase.
  */
 export async function initAuth(): Promise<void> {
   if (initialized) return;
   initialized = true;
   try {
-    const provider = await resolveProvider();
+    let provider = await resolveProvider();
     useAuth.setState({ provider });
-    const user: User | null = await provider.loadSession();
+    let user: User | null = await provider.loadSession();
+    // Supabase and WorkOS can both be configured (the sign-in dialog offers
+    // SSO next to email/OAuth). The primary provider wins when it has a
+    // session; otherwise restore an SSO session from the worker's cookie —
+    // e.g. right after the `?sso=ok` callback redirect.
+    if (!user && provider !== workosProvider && isWorkosEnabled()) {
+      const ssoUser = await workosProvider.loadSession();
+      if (ssoUser) {
+        provider = workosProvider;
+        user = ssoUser;
+        useAuth.setState({ provider });
+      }
+    }
     useAuth.setState({
       status: user ? "authenticated" : "anonymous",
       user,
+      error: undefined,
     });
+    reportSsoFlash(user !== null);
   } catch (err) {
     log.warn("auth init failed", err);
-    useAuth.setState({ status: "error", error: String(err) });
+    useAuth.setState({ status: "error", error: err instanceof Error ? err.message : String(err) });
   }
+}
+
+/** Turn the SSO worker's `?sso=ok|error` redirect flag into a toast. */
+function reportSsoFlash(hasSession: boolean): void {
+  const flash = consumeSsoFlash();
+  if (!flash) return;
+  if (flash.ok && hasSession) {
+    toast.success(t("auth.sso.success"));
+    return;
+  }
+  const reason = flash.ok ? "sessionExpired" : flash.reason;
+  const d = describeAuthError(reason);
+  toast.error(t("auth.sso.failed"), d.hint, d.learnMoreUrl);
 }

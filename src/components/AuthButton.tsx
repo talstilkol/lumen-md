@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { LogIn, LogOut, User as UserIcon } from "lucide-react";
+import { LogIn, LogOut, AlertTriangle } from "lucide-react";
 import { useAuth } from "../auth/useAuth";
+import { describeAuthStatus } from "../auth/authStatus";
 import { AuthDialog } from "./AuthDialog";
 import { t } from "../i18n";
 
@@ -11,7 +12,7 @@ import { t } from "../i18n";
  */
 
 export function AuthButton() {
-  const { status, user, signOut } = useAuth();
+  const { status, user, signOut, provider, error } = useAuth();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -28,8 +29,8 @@ export function AuthButton() {
           onClick={() => setMenuOpen((v) => !v)}
           aria-haspopup="menu"
           aria-expanded={menuOpen}
-          aria-label={`Account menu for ${user.email ?? user.name ?? "you"}`}
-          title={user.email ?? user.name ?? "Account"}
+          aria-label={t("auth.accountMenu", { user: user.email ?? user.name ?? user.id })}
+          title={user.email ?? user.name ?? user.id}
           style={{
             display: "flex",
             alignItems: "center",
@@ -129,18 +130,24 @@ export function AuthButton() {
     );
   }
 
+  // Signed out / not configured / error: the pill opens the dialog and its
+  // tooltip says *why* the user is signed out (PRODUCT_IMPROVEMENT 1.4).
+  const described = describeAuthStatus({ status, providerName: provider.name, error });
+  const isError = described.kind === "error";
   return (
     <>
       <button
         type="button"
         onClick={() => setDialogOpen(true)}
-        aria-label={t("auth.signIn")}
+        aria-label={`${t("auth.signIn")} — ${described.title}`}
+        title={`${described.title}: ${described.hint}`}
+        data-auth-status={described.kind}
         style={{
           display: "flex",
           alignItems: "center",
           gap: 6,
           padding: "4px 10px",
-          border: "1px solid hsl(var(--border))",
+          border: isError ? "1px solid hsl(0 70% 60% / 0.6)" : "1px solid hsl(var(--border))",
           borderRadius: 999,
           background: "transparent",
           color: "hsl(var(--fg))",
@@ -150,7 +157,12 @@ export function AuthButton() {
           flexShrink: 0,
         }}
       >
-        <LogIn size={13} aria-hidden /> {t("auth.signIn")}
+        {isError ? (
+          <AlertTriangle size={13} aria-hidden style={{ color: "hsl(0 70% 60%)" }} />
+        ) : (
+          <LogIn size={13} aria-hidden />
+        )}{" "}
+        {t("auth.signIn")}
       </button>
       <AuthDialog open={dialogOpen} onClose={() => setDialogOpen(false)} />
     </>
@@ -170,6 +182,3 @@ const menuItemStyle: React.CSSProperties = {
   cursor: "pointer",
   textAlign: "start",
 };
-
-// keep an unused import alive for downstream usage of UserIcon
-void UserIcon;

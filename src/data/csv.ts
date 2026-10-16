@@ -26,6 +26,22 @@ export interface DataSet {
 
 const NUM_RE = /^-?\d+(\.\d+)?(e[+-]?\d+)?$/i;
 const ISO_DATE_RE = /^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}(:\d{2})?(\.\d+)?(Z|[+-]\d{2}:?\d{2})?)?$/;
+// d/m/y with a consistent separator, or year-month ("2024-03", "2024/3").
+const DATE_SEP_RE = /\b\d{1,4}([/.-])\d{1,2}\1\d{1,4}\b|^\d{4}[/-]\d{1,2}$/;
+const MONTH_WORD_RE = /\b(jan|feb|mar|apr|may|jun|jul|aug|sep|sept|oct|nov|dec)[a-z]*\.?\b/i;
+
+/**
+ * V8's `Date.parse` is very lenient — "50%", "Team 1" and "x 2" all parse
+ * to a timestamp. Outside strict ISO, only treat a string as a date when
+ * it also *looks* like one: digits plus a d/m/y separator or a month name,
+ * and no trailing percent sign.
+ */
+export function looksLikeDate(s: string): boolean {
+  if (ISO_DATE_RE.test(s)) return true;
+  if (/%\s*$/.test(s) || !/\d/.test(s)) return false;
+  if (!DATE_SEP_RE.test(s) && !MONTH_WORD_RE.test(s)) return false;
+  return !Number.isNaN(Date.parse(s));
+}
 
 export function inferType(values: unknown[]): ColType {
   let num = 0;
@@ -48,7 +64,7 @@ export function inferType(values: unknown[]): ColType {
       num++;
       continue;
     }
-    if (ISO_DATE_RE.test(s) || !Number.isNaN(Date.parse(s))) {
+    if (looksLikeDate(s)) {
       // be conservative: only count as date if it's not also a number
       if (!NUM_RE.test(s)) dat++;
       continue;

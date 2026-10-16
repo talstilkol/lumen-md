@@ -21,6 +21,13 @@ interface EntitlementStore {
   entitlement: Entitlement | null;
   capabilities: Capabilities;
   loading: boolean;
+  /**
+   * The last refresh failed (network / backend error). The capabilities are
+   * then FREE_CAPS as a safe default, but the user's real plan is unknown —
+   * callers that would *destroy* paid state (clear a saved server URL,
+   * skip persistence) must not treat this as a downgrade.
+   */
+  failed: boolean;
   refresh: () => Promise<void>;
   /** Dev/QA helper — set the local tier without round-tripping the backend. */
   setLocal: (tier: Entitlement["tier"]) => void;
@@ -34,7 +41,18 @@ type EnvShape = {
 
 type Env = { env?: EnvShape };
 
+let endpointOverride: string | null = null;
+
+/**
+ * Vite inlines `import.meta.env.VITE_*` at transform time, so `vi.stubEnv`
+ * can't reach this module. Tests set the endpoint here instead (null resets).
+ */
+export function __setEntitlementEndpointForTesting(url: string | null): void {
+  endpointOverride = url;
+}
+
 function readEnvVar(key: keyof EnvShape): string {
+  if (key === "VITE_ENTITLEMENT_ENDPOINT" && endpointOverride !== null) return endpointOverride;
   try {
     const env = (import.meta as ImportMeta & Env).env;
     return env?.[key]?.trim() ?? "";
@@ -85,15 +103,47 @@ function toEntitlement(payload: unknown): Entitlement | null {
   return ent;
 }
 
-async function fetchEntitlementFromBackend(): Promise<Entitlement | null> {
+/**
+ * True when a real billing backend is configured. Self-hosted / dev builds
+ * leave VITE_ENTITLEMENT_ENDPOINT empty — feature gates treat that as
+ * "everything unlocked" (see `billing/gates.ts`).
+ */
+export function isBillingConfigured(): boolean {
   const endpoint = readEnvVar("VITE_ENTITLEMENT_ENDPOINT");
-  if (!endpoint || isPlaceholder(endpoint) || !isValidUrl(endpoint)) return null;
+  return !!endpoint && !isPlaceholder(endpoint) && isValidUrl(endpoint);
+}
+
+/** True when the dev/QA tier shim (`lumen.dev.tier`) is set. */
+export function hasDevTierOverride(): boolean {
+  return readDevTier() !== null;
+}
+
+async function accessToken(): Promise<string | null> {
+  try {
+    return (await useAuth.getState().provider.getAccessToken?.()) ?? null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * GET VITE_ENTITLEMENT_ENDPOINT (the billing worker's `/entitlements`).
+ * Sends the auth provider's access token as a bearer token when one is
+ * available; the worker answers `{ entitlement: { tier, status, … } }`
+ * and treats anonymous callers as free.
+ */
+async function fetchEntitlementFromBackend(): Promise<Entitlement | null> {
+  if (!isBillingConfigured()) return null;
+  const endpoint = readEnvVar("VITE_ENTITLEMENT_ENDPOINT");
+  const headers: Record<string, string> = { Accept: "application/json" };
+  const token = await accessToken();
+  if (token) headers.Authorization = `Bearer ${token}`;
   const res = await fetchWithRetry(
     endpoint,
     {
       method: "GET",
       credentials: "include",
-      headers: { Accept: "application/json" },
+      headers,
     },
     { label: "entitlement.refresh" },
   );
@@ -121,29 +171,37 @@ function readDevTier(): Entitlement | null {
   return null;
 }
 
+/** Bumped by every refresh; a slower, older refresh never overwrites a newer one. */
+let refreshSeq = 0;
+
 export const useEntitlement = create<EntitlementStore>((set) => ({
   entitlement: null,
   capabilities: FREE_CAPS,
   loading: true,
+  failed: false,
   async refresh() {
+    const seq = ++refreshSeq;
+    const apply = (patch: Partial<EntitlementStore>) => {
+      if (seq === refreshSeq) set(patch);
+    };
     set({ loading: true });
     try {
       // Prefer the dev shim while we wait for the real backend.
       const dev = readDevTier();
       if (dev) {
-        set({ entitlement: dev, capabilities: capabilitiesFor(dev), loading: false });
+        apply({ entitlement: dev, capabilities: capabilitiesFor(dev), loading: false, failed: false });
         return;
       }
       const user = useAuth.getState().user;
       const ent = user ? await fetchEntitlementFromBackend() : null;
       if (ent) {
-        set({ entitlement: ent, capabilities: capabilitiesFor(ent), loading: false });
+        apply({ entitlement: ent, capabilities: capabilitiesFor(ent), loading: false, failed: false });
         return;
       }
-      set({ entitlement: null, capabilities: FREE_CAPS, loading: false });
+      apply({ entitlement: null, capabilities: FREE_CAPS, loading: false, failed: false });
     } catch (err) {
       log.warn("entitlement refresh failed", err);
-      set({ entitlement: null, capabilities: FREE_CAPS, loading: false });
+      apply({ entitlement: null, capabilities: FREE_CAPS, loading: false, failed: true });
     }
   },
   setLocal(tier) {
@@ -153,10 +211,28 @@ export const useEntitlement = create<EntitlementStore>((set) => ({
       /* */
     }
     const ent: Entitlement = { tier, status: "active" };
-    set({ entitlement: ent, capabilities: capabilitiesFor(ent), loading: false });
+    set({ entitlement: ent, capabilities: capabilitiesFor(ent), loading: false, failed: false });
   },
 }));
 
 export function useCapabilities(): Capabilities {
   return useEntitlement((s) => s.capabilities);
+}
+
+/**
+ * Keep the entitlement in step with the signed-in identity: refresh whenever
+ * the user (or the auth provider that vouches for them) changes — sign-in,
+ * sign-out, or the initial session restore finishing after the app mounted.
+ * Returns the unsubscribe function.
+ */
+export function watchAuthForEntitlements(): () => void {
+  const key = (s: ReturnType<typeof useAuth.getState>) =>
+    s.status === "loading" ? "loading" : `${s.provider?.name ?? ""}:${s.user?.id ?? ""}`;
+  let last = key(useAuth.getState());
+  return useAuth.subscribe((state) => {
+    const next = key(state);
+    if (next === last) return;
+    last = next;
+    if (next !== "loading") void useEntitlement.getState().refresh();
+  });
 }

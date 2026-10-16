@@ -1,0 +1,37 @@
+import { createContext } from "react";
+
+/**
+ * Identity of the document whose markdown the surrounding preview tree was
+ * rendered from. The preview renders asynchronously, so while switching tabs
+ * it briefly still shows the previous document's tree; blocks that keep
+ * per-document state (live-js shared scopes) must use this — not the
+ * store's *current* document — or the old blocks would run in the new
+ * document's scope. null outside a document preview.
+ */
+export const PreviewDocKeyContext = createContext<string | null>(null);
+
+const handleIds = new WeakMap<object, string>();
+let nextHandleId = 0;
+
+/**
+ * Stable per-document key for per-document runtime state. Workspace files
+ * are identified by their workspace path; files opened from disk by their
+ * FileSystemFileHandle (two `readme.md` from different folders share a
+ * name but not a handle); anything else by name.
+ */
+export function docIdentity(doc: {
+  workspaceName?: string | null;
+  name?: string | null;
+  handle?: object | null;
+}): string | null {
+  if (doc.workspaceName) return `ws:${doc.workspaceName}`;
+  if (doc.handle) {
+    let id = handleIds.get(doc.handle);
+    if (!id) {
+      id = `fh:${++nextHandleId}`;
+      handleIds.set(doc.handle, id);
+    }
+    return `${id}:${doc.name ?? ""}`;
+  }
+  return doc.name ? `name:${doc.name}` : null;
+}

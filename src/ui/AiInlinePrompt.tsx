@@ -9,6 +9,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Sparkles, X } from "lucide-react";
 import { t } from "../i18n";
+import { getAiPromptHistory, rememberAiPrompt } from "../storage/aiPromptHistory";
 
 /** Pending prompt resolve function stored in module scope. */
 let pendingResolve: ((value: string | null) => void) | null = null;
@@ -31,11 +32,17 @@ export function AiInlinePromptOverlay() {
   const [question, setQuestion] = useState("");
   const [value, setValue] = useState("");
   const inputRef = useRef<HTMLInputElement | null>(null);
+  // Prompt history: snapshot taken when the overlay opens; `historyIndex`
+  // is -1 while the user is typing freely, otherwise the index into it.
+  const [history, setHistory] = useState<string[]>([]);
+  const [historyIndex, setHistoryIndex] = useState(-1);
 
   useEffect(() => {
     const show = (q: string) => {
       setQuestion(q);
       setValue("");
+      setHistory(getAiPromptHistory());
+      setHistoryIndex(-1);
       setVisible(true);
       setTimeout(() => inputRef.current?.focus(), 0);
     };
@@ -45,6 +52,7 @@ export function AiInlinePromptOverlay() {
 
   const submit = useCallback(() => {
     const v = value.trim();
+    if (v) rememberAiPrompt(v);
     setVisible(false);
     if (pendingResolve) {
       pendingResolve(v || null);
@@ -68,9 +76,20 @@ export function AiInlinePromptOverlay() {
       } else if (e.key === "Escape") {
         e.preventDefault();
         cancel();
+      } else if (e.key === "ArrowUp" || e.key === "ArrowDown") {
+        // Only cycle when the input is empty or we're already browsing
+        // history — never clobber a prompt the user is typing.
+        const browsing = historyIndex >= 0;
+        if (!history.length || (!browsing && value !== "")) return;
+        e.preventDefault();
+        let next = historyIndex;
+        if (e.key === "ArrowUp") next = Math.min(historyIndex + 1, history.length - 1);
+        else if (browsing) next = historyIndex - 1;
+        setHistoryIndex(next);
+        setValue(next >= 0 ? history[next] : "");
       }
     },
-    [submit, cancel],
+    [submit, cancel, history, historyIndex, value],
   );
 
   if (!visible) return null;
@@ -137,7 +156,10 @@ export function AiInlinePromptOverlay() {
           <input
             ref={inputRef}
             value={value}
-            onChange={(e) => setValue(e.target.value)}
+            onChange={(e) => {
+              setValue(e.target.value);
+              setHistoryIndex(-1);
+            }}
             onKeyDown={onKey}
             placeholder={t("ai.prompt.placeholder")}
             style={{
@@ -186,6 +208,9 @@ export function AiInlinePromptOverlay() {
             <kbd style={{ background: "hsl(var(--bg-muted))", border: "1px solid hsl(var(--border))", borderRadius: 3, padding: "1px 4px", fontSize: 10, fontFamily: "monospace" }}>Esc</kbd>{" "}
             {t("dialog.cancel")}
           </span>
+          {history.length > 0 && (
+            <span data-testid="ai-prompt-history-hint">{t("ai.prompt.historyHint")}</span>
+          )}
         </div>
       </div>
     </div>

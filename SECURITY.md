@@ -36,7 +36,7 @@ Lumen is a **local-first** application. By default, no data leaves the browser.
 
 | Feature | Transport | Encryption |
 |---|---|---|
-| P2P collaboration | WebRTC (DTLS/SRTP) | End-to-end encrypted by default |
+| P2P collaboration | WebRTC (DTLS/SRTP) | Transport encrypted via WebRTC DTLS (hop-by-hop between peers; signaling servers, relays and the optional persistent y-websocket server are not covered). Password-protected rooms additionally encrypt document updates end-to-end — see [`docs/src/content/docs/collab/encryption.md`](docs/src/content/docs/collab/encryption.md). Rooms without a password are **not** end-to-end encrypted. |
 | Signaling server | WSS (TLS 1.2+) | Transport-layer only |
 | AI prompts (OpenAI) | HTTPS (TLS 1.2+) | Transport-layer only |
 | Smart search embeddings | HTTPS to OpenAI | Transport-layer only |
@@ -68,7 +68,7 @@ Third-party plugins run in a sandboxed `<iframe>` with:
 ### Known limitations
 
 - OPFS data is not encrypted at rest (relies on browser origin isolation)
-- WebRTC P2P rooms are ephemeral — the signaling server sees room names but not document content
+- WebRTC P2P rooms are ephemeral. Signaling servers see room names and peer metadata; without a room password, anything routed through a signaling/relay or persistent sync server is not end-to-end encrypted. Use a room password for end-to-end encryption of document updates (see `docs/src/content/docs/collab/encryption.md`)
 - PlantUML rendering uses the public Kroki API (diagram source is sent to `kroki.io`)
 - `htmlpreview` fenced blocks execute user-authored HTML/JS in a sandboxed iframe
 

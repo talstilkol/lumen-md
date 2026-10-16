@@ -30,8 +30,9 @@ launch, run your own so a public outage doesn't disable collab.
 ```bash
 cd sync-server
 npm install
-# Test locally
+# Test locally (PORT defaults to 4444)
 PORT=4444 node server.js
+curl http://localhost:4444/healthz   # → {"ok":true,...}  (/health and / also work)
 
 # Deploy to Fly.io (free):
 brew install flyctl
@@ -39,6 +40,15 @@ fly launch --name lumen-signal     # accept defaults
 fly deploy
 # → wss://lumen-signal.fly.dev/
 ```
+
+`server.js` speaks the y-webrtc signaling protocol (`subscribe` /
+`unsubscribe` / `publish` / `ping`). Fly and the Docker `HEALTHCHECK` probe
+`/healthz`. Optional env: `SIGNAL_HEARTBEAT_MS` (default 30000),
+`SIGNAL_RATE_LIMIT_MAX` (messages/min/IP, default 120), and resource caps
+`SIGNAL_MAX_TOPICS_PER_CONN` (64), `SIGNAL_MAX_TOPIC_LENGTH` (256 chars),
+`SIGNAL_MAX_PAYLOAD` (262144 bytes/message), `SIGNAL_MAX_CONNS_PER_IP` (64).
+Behind a reverse proxy set `SIGNAL_TRUST_PROXY=1` (already in `sync-server/fly.toml`)
+so per-IP limits use `Fly-Client-IP` / `X-Forwarded-For` instead of the proxy's address.
 
 Update `.env.production`:
 
@@ -63,8 +73,16 @@ fly volumes create yjs_data --region iad --size 1
 #   [[mounts]]
 #   source = "yjs_data"
 #   destination = "/data"
+# and tell the server where to store LevelDB data:
+fly secrets set YJS_STORAGE_DIR=/data/yjs   # or [env] in fly.toml
 fly deploy
 ```
+
+Storage env: `YJS_STORAGE_DIR` (preferred; `LEVELDB_PATH` is accepted as a
+legacy alias). Defaults to `sync-server/.yjs-persistence`, which is **not**
+persistent on Fly — always point it at the mounted volume. Health checks:
+`/healthz` or `/health`. Persistence is LevelDB only; there is no Postgres
+archive and `DATABASE_URL` is not read by `persistent-server.js`.
 
 `.env.production`:
 
@@ -76,22 +94,31 @@ VITE_YJS_WEBSOCKET_URL=wss://lumen-collab.fly.dev
 
 ## 3. CSP + headers in production (DONE — verify only)
 
-`index.html` ships a strict CSP that allows the 16 embed providers, OpenAI,
-Stripe, Supabase, Dropbox, LanguageTool. After deploy, add HTTP headers via
-your host:
+The CSP lives in two places that are both enforced: the `<meta>` tag in
+`index.html` and `public/_headers` (copied to `dist/_headers`). Cloudflare
+Pages **and Netlify** serve `dist/_headers`; `netlify.toml` deliberately
+sets no CSP of its own. The self-hosted nginx image uses
+`docker/nginx.conf`.
 
-**Cloudflare Pages** (recommended) — drop a `_headers` file:
+Your own workers (SSO, billing/entitlements, publish, audit, marketplace,
+self-hosted LanguageTool, Supabase) are added to `connect-src`
+**automatically at build time** from the `VITE_*_ENDPOINT` / `VITE_*_URL`
+variables (see `src/build/cspEndpoints.ts`): set them before
+`npm run build`. For the Docker web image pass them as build args, e.g.
+`docker build -f docker/Dockerfile.web --build-arg VITE_WORKOS_ENDPOINT=https://auth.example.org .`
+Verify after deploy: the response header and the meta tag both list your
+worker origins in `connect-src`.
 
-```
-/*
-  Strict-Transport-Security: max-age=63072000; includeSubDomains; preload
-  X-Content-Type-Options: nosniff
-  X-Frame-Options: DENY
-  Referrer-Policy: strict-origin-when-cross-origin
-  Permissions-Policy: interest-cohort=(), geolocation=(self), microphone=(self), camera=(self)
-```
+`connect-src` is an explicit allowlist, so endpoints users set at
+**runtime** (a LAN Ollama host in `lumen.ollama.baseUrl`, a marketplace
+backend in `lumen.marketplace.url`) only work when their origin is allowed.
+List such origins in `VITE_CSP_CONNECT_EXTRA` (comma/space separated, e.g.
+`http://192.168.1.20:11434,https://market.example.org`) at build time; an
+override whose origin isn't allowed is ignored with a console warning
+instead of failing silently.
 
-Run `npm run build && wrangler pages deploy dist`.
+Run `npm run build && wrangler pages deploy dist` (Cloudflare) or let
+Netlify build from `netlify.toml`.
 
 ---
 
@@ -102,8 +129,10 @@ Code is in `edge-workers/billing/worker.ts`. Configure + deploy:
 ```bash
 # 4a. Create the Supabase entitlements table (one-time)
 psql "<your-supabase-conn-string>" <<EOF
+-- user_id is text, not a uuid FK: besides Supabase user ids it holds
+-- 'workos:<user id>' and 'workos-org:<organization id>' rows for SSO users.
 create table if not exists entitlements (
-  user_id uuid primary key references auth.users on delete cascade,
+  user_id text primary key,
   tier text not null default 'free',
   status text not null default 'active',
   stripe_customer_id text,
@@ -111,6 +140,9 @@ create table if not exists entitlements (
   renews_at bigint,
   updated_at timestamptz default now()
 );
+-- Upgrading a table created from an older version of this guide:
+--   alter table entitlements drop constraint if exists entitlements_user_id_fkey;
+--   alter table entitlements alter column user_id type text;
 EOF
 
 # 4b. Create Stripe products + prices
@@ -127,12 +159,46 @@ wrangler secret put STRIPE_SECRET_KEY
 wrangler secret put STRIPE_WEBHOOK_SECRET
 wrangler secret put SUPABASE_URL
 wrangler secret put SUPABASE_SERVICE_ROLE
+# Sellable prices (same ids as VITE_PRICE_ID_PRO / VITE_PRICE_ID_TEAM);
+# /checkout refuses any other price and derives the tier from this list:
+wrangler secret put STRIPE_PRICE_PRO     # e.g. price_123 (comma-separate monthly,yearly)
+wrangler secret put STRIPE_PRICE_TEAM
 wrangler deploy
 # → https://lumen-billing.<your>.workers.dev
 
 # 4d. Wire the Stripe webhook to /webhook on that URL via the Stripe Dashboard.
+#     Events: checkout.session.completed, checkout.session.async_payment_succeeded,
+#     checkout.session.async_payment_failed, customer.subscription.created,
+#     customer.subscription.updated, customer.subscription.deleted.
+#     Access is granted only once Stripe reports the payment as paid.
 # 4e. Set client env:
 #   VITE_BILLING_ENDPOINT=https://lumen-billing.<your>.workers.dev/checkout
+#   VITE_ENTITLEMENT_ENDPOINT=https://lumen-billing.<your>.workers.dev/entitlements
+# 4f. List every web origin that calls the worker (comma-separated) in
+#     wrangler.toml → [vars] ALLOWED_ORIGIN, e.g. "https://lumen.app,http://localhost:5173".
+#     The entitlement fetch uses credentials, so browsers need the exact origin
+#     echoed back — `*` is only returned to unlisted origins and won't work there.
+```
+
+`GET /entitlements` contract (consumed by `src/billing/useEntitlement.ts`):
+
+| Request | Response |
+|---|---|
+| no `Authorization` header | `200 {"entitlement":{"tier":"free","status":"none"}}` |
+| `Authorization: Bearer <supabase access token>`, no row in `entitlements` | `200` free, as above |
+| valid token, row present | `200 {"entitlement":{"tier":"pro","status":"active","renewsAt":1767225600,"subscriptionId":"sub_…"}}` |
+| invalid / expired token | `401` (client falls back to Free) |
+| Supabase unreachable | `502` (client falls back to Free) |
+
+Stored Stripe statuses are normalised: `complete` → `active`, `unpaid` → `past_due`,
+anything unrecognised → `none`. Only `active` / `trialing` unlock paid capabilities.
+Responses are `Cache-Control: private, no-store`.
+
+```bash
+# Smoke test after deploy:
+curl -s https://lumen-billing.<your>.workers.dev/entitlements            # → free
+curl -s -H "Authorization: Bearer $SUPABASE_ACCESS_TOKEN" \
+     https://lumen-billing.<your>.workers.dev/entitlements                # → your plan
 ```
 
 ---
@@ -152,6 +218,50 @@ wrangler deploy
 # Client env:
 #   VITE_PUBLISH_ENDPOINT=https://lumen-publish.<your>.workers.dev
 ```
+
+---
+
+## 5b. SSO edge worker — WorkOS (ε.1 / F4.3) — 45 min
+
+Enterprise SAML / OIDC sign-in. Optional — skip it and Lumen keeps its
+local-only / Supabase auth. Details in `edge-workers/auth/README.md`.
+
+```bash
+# 5b-1. WorkOS dashboard: API Keys → copy the secret key (sk_…) + client id.
+#       Redirects → add https://<worker host>/api/sso/callback
+#       Organizations → create one per customer, add its email domain(s)
+#       and attach an SSO connection (SAML or OIDC).
+cd edge-workers/auth
+wrangler secret put WORKOS_API_KEY
+wrangler secret put WORKOS_CLIENT_ID
+wrangler secret put SESSION_SECRET        # openssl rand -base64 48
+# If billing is deployed too, let SSO users prove who they are to it:
+#   generate ONE new value (openssl rand -base64 48), then
+wrangler secret put BILLING_TOKEN_SECRET  # that value
+#   and in edge-workers/billing: wrangler secret put SSO_TOKEN_SECRET  (same value)
+#   Entitlement rows for SSO users are keyed `workos:<user id>`, or
+#   `workos-org:<organization id>` for an org-wide (enterprise) plan.
+# 5b-2. Set ALLOWED_ORIGINS in wrangler.toml to your app origin(s), and give
+#       the worker a host on the SAME SITE as the app (see below), e.g. the
+#       `routes` example in edge-workers/auth/wrangler.toml.
+wrangler deploy
+# verify: GET https://auth.<your-domain>/health → configured:true
+
+# Client env:
+#   VITE_WORKOS_ENDPOINT=https://auth.<your-domain>
+```
+
+**Serve the SSO worker on the app's own site.** The nonce and session
+cookies are set by the worker. If it lives on a different registrable
+domain than the app (e.g. `lumen-auth.<you>.workers.dev` while the app is on
+`example.org`), they are third-party cookies — Safari blocks those
+outright, so sign-in ends in `state_mismatch` and sessions never stick.
+Use a sibling subdomain (`auth.example.org` for an app on
+`app.example.org` / `example.org`) or a route on the app's own host
+(`example.org/api/sso/*`, then `VITE_WORKOS_ENDPOINT=https://example.org`).
+`*.workers.dev` is fine for local testing in Chrome only; the app logs a
+warning when the configured endpoint is cross-site. Cookies are
+`SameSite=None; Secure`, so serve over HTTPS (or `http://localhost`).
 
 ---
 

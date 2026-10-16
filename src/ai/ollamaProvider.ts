@@ -9,6 +9,7 @@
 
 import type { ChatMessage, ChatOptions } from "./llm";
 import { log } from "../lib/logger";
+import { connectAllowedByCsp } from "../lib/cspConnect";
 
 const DEFAULT_OLLAMA_URL = "http://localhost:11434";
 
@@ -31,9 +32,18 @@ export interface OllamaModel {
   };
 }
 
-function getBaseUrl(): string {
+/** Configured Ollama base URL (`lumen.ollama.baseUrl`), default localhost:11434. */
+export function getBaseUrl(): string {
   try {
     const stored = localStorage.getItem("lumen.ollama.baseUrl");
+    if (stored && !connectAllowedByCsp(stored)) {
+      // The browser would block it under this deployment's CSP.
+      log.warn(
+        `Ollama URL ${stored} isn't in this deployment's CSP connect-src; using ${DEFAULT_OLLAMA_URL}. ` +
+          "Add its origin with VITE_CSP_CONNECT_EXTRA at build time.",
+      );
+      return DEFAULT_OLLAMA_URL;
+    }
     return stored || DEFAULT_OLLAMA_URL;
   } catch {
     return DEFAULT_OLLAMA_URL;
