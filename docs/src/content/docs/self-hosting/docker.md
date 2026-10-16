@@ -72,6 +72,10 @@ a sub-path `base` such as `/app/`, prefix those routes yourself,
 including the Web Playground's `/playground-runner.html`, `/assets/*`
 and `/playground/*` rules. Without them the playground preview is blocked.
 
+On Netlify the Web Playground preview doesn't load: Netlify's `_headers`
+format can't lift the app-wide frame and CSP headers for the runner page.
+Cloudflare Pages, Vercel and this Docker image are supported.
+
 ## Optional: Billing
 
 If you want to gate Pro features (persistent collab, semantic search,
