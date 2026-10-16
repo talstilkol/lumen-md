@@ -487,6 +487,7 @@ export function trackChanges(
     const mapsBefore = tr.mapping.maps.length;
     tr.replace(at, at, c.deleted);
     const end = tr.mapping.slice(mapsBefore).map(at, 1);
+    const mapsRestored = tr.mapping.maps.length;
     // Drop the parts that were suggested insertions; mark the rest deleted.
     const ownRanges: Array<[number, number]> = [];
     tr.doc.nodesBetween(at, end, (n, pos) => {
@@ -497,7 +498,8 @@ export function trackChanges(
       }
     });
     for (const [f, t] of ownRanges.reverse()) tr.delete(f, t);
-    const keptEnd = tr.mapping.map(end, -1);
+    // `end` is already past the restored slice: map it through the removals only.
+    const keptEnd = tr.mapping.slice(mapsRestored).map(end, -1);
     // Backspace leaves the caret before the kept text; Delete after it.
     if (c.insertedSize === 0) {
       const backward = oldHead > c.from;

@@ -104,6 +104,17 @@ describe("tracking edits while suggesting", () => {
     expect(e.view.state.selection.head).toBe(e.at("world"));
   });
 
+  it("forward Delete steps over each character it marks", async () => {
+    const e = await open("Hello world.", true);
+    e.select(e.at("world"));
+    for (let i = 0; i < 3; i++) {
+      const head = e.view.state.selection.head;
+      e.view.dispatch(e.view.state.tr.delete(head, head + 1));
+    }
+    expect(e.md()).toBe("Hello {--wor--}{>>@Tal<<}ld.");
+    expect(e.view.state.selection.head).toBe(e.at("ld."));
+  });
+
   it("typing over a selection is a substitution", async () => {
     const e = await open("Hello world.", true);
     e.select(e.at("world"), e.at("world", 5));
