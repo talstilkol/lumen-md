@@ -48,23 +48,3 @@ jobs:
         run: |
           mkdir -p dist
           cargo check --manifest-path src-tauri/Cargo.toml --locked
-
-  signal-health:
-    name: signaling server health
-    runs-on: ubuntu-latest
-    timeout-minutes: 2
-    # Only on main pushes — the signaling server must be deployed first.
-    if: github.event_name == 'push'
-    steps:
-      - name: Healthcheck
-        run: |
-          URL="${SIGNAL_URL:-https://signal.lumen.md}"
-          echo "Checking $URL/healthz..."
-          status=$(curl -s -o /dev/null -w '%{http_code}' -m 10 "$URL/healthz" || true)
-          if [ "$status" = "200" ]; then
-            echo "✅ Signal server healthy ($status)"
-          else
-            echo "::warning::Signaling server unreachable (HTTP $status). Deploy pending."
-          fi
-        env:
-          SIGNAL_URL: ${{ vars.SIGNAL_URL || 'https://signal.lumen.md' }}
