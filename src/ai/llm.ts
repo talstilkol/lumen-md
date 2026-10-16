@@ -82,11 +82,18 @@ export interface ChatOptions {
    */
   cache?: boolean;
   /**
+<<<<<<< HEAD
    * "light": a small task (tags, titles, outline, completions). In the
    * economy / balanced AI modes it goes to the provider's small model
    * unless `model` pins one. Economy mode routes every unpinned request.
    */
   tier?: "light" | "heavy";
+=======
+   * With `cache`: store the answer only when this accepts it (e.g. it
+   * parses), so a malformed answer is retried next time, not replayed.
+   */
+  cacheIf?: (text: string) => boolean;
+>>>>>>> feat/ai-cache-usage
   /**
    * Internal: providers report token usage here (exact where the API
    * returns it). `provider` overrides the selected one when the request
@@ -96,6 +103,12 @@ export interface ChatOptions {
 }
 
 const DEFAULT_MODEL = "gpt-4o-mini";
+/** Each cloud provider's model when the user hasn't picked one (the provider modules use these). */
+export const PROVIDER_DEFAULT_MODELS = {
+  anthropic: "claude-3-5-sonnet-latest",
+  gemini: "gemini-1.5-flash",
+  mistral: "mistral-small-latest",
+} as const;
 const API_URL = "https://api.openai.com/v1/chat/completions";
 const MAX_RETRIES = 2;
 
@@ -192,7 +205,8 @@ export function effectiveModel(provider: AiProvider, opts: ChatOptions = {}): st
   try {
     // Ollama keeps its model where the Ollama picker writes it.
     if (provider === "ollama") return localStorage.getItem("lumen.ollama.model") || "llama3.1";
-    return localStorage.getItem(`lumen.ai.model.${provider}`) || "default";
+    const fallback = (PROVIDER_DEFAULT_MODELS as Record<string, string>)[provider] ?? "default";
+    return localStorage.getItem(`lumen.ai.model.${provider}`) || fallback;
   } catch {
     return "default";
   }
@@ -271,7 +285,7 @@ export async function chat(
       estimated: true,
     });
   }
-  if (key && text && answeredBy === provider) await putCached(key, text, model);
+  if (key && text && answeredBy === provider && (!opts.cacheIf || opts.cacheIf(text))) await putCached(key, text, model);
   return text;
 }
 

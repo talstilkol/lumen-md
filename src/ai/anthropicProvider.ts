@@ -11,11 +11,11 @@
  */
 
 import type { ChatMessage, ChatOptions } from "./llm";
-import { getProviderKey, AiError } from "./llm";
+import { getProviderKey, AiError, PROVIDER_DEFAULT_MODELS } from "./llm";
 
 const API_URL = "https://api.anthropic.com/v1/messages";
 const ANTHROPIC_VERSION = "2023-06-01";
-const DEFAULT_MODEL = "claude-3-5-sonnet-latest";
+const DEFAULT_MODEL = PROVIDER_DEFAULT_MODELS.anthropic;
 
 export function getAnthropicModel(opts: ChatOptions): string {
   if (opts.model) return opts.model;
