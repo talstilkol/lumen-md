@@ -57,3 +57,4 @@ coverage/
 public/pyodide/
 public/webr/
 public/ruby/
+public/playground/vendor/
