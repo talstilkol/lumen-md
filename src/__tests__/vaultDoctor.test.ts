@@ -147,4 +147,17 @@ describe("vault doctor", () => {
     expect(f.filter((x) => x.kind === "broken-wiki-link").map((x) => x.detail)).toEqual(["After Indented"]);
     expect(f.filter((x) => x.kind === "missing-heading")).toEqual([]);
   });
+
+  it("case-sensitive relative paths, parentheses in destinations, HTML blocks", () => {
+    const notes: DoctorNote[] = [
+      { path: "index.md", text: "[a](guide.md) [b](Notes_(old).md)\n\n<pre>\n# Not A Heading\n[[Inside Pre]]\n</pre>\n\n[[#Not A Heading]]\n" },
+      { path: "Guide.md", text: "x" },
+      { path: "Notes_(old).md", text: "x" },
+    ];
+    const f = runVaultDoctor(notes);
+    expect(f.filter((x) => x.kind === "broken-md-link").map((x) => x.detail)).toEqual(["guide.md"]);
+    expect(f.filter((x) => x.kind === "broken-wiki-link")).toEqual([]);
+    expect(f.filter((x) => x.kind === "missing-heading").map((x) => x.detail)).toEqual(["#Not A Heading"]);
+    expect(f.some((x) => x.kind === "orphan" && x.path === "Notes_(old).md")).toBe(false);
+  });
 });
