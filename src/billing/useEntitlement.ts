@@ -164,29 +164,36 @@ function readDevTier(): Entitlement | null {
   return null;
 }
 
+/** Bumped by every refresh; a slower, older refresh never overwrites a newer one. */
+let refreshSeq = 0;
+
 export const useEntitlement = create<EntitlementStore>((set) => ({
   entitlement: null,
   capabilities: FREE_CAPS,
   loading: true,
   async refresh() {
+    const seq = ++refreshSeq;
+    const apply = (patch: Partial<EntitlementStore>) => {
+      if (seq === refreshSeq) set(patch);
+    };
     set({ loading: true });
     try {
       // Prefer the dev shim while we wait for the real backend.
       const dev = readDevTier();
       if (dev) {
-        set({ entitlement: dev, capabilities: capabilitiesFor(dev), loading: false });
+        apply({ entitlement: dev, capabilities: capabilitiesFor(dev), loading: false });
         return;
       }
       const user = useAuth.getState().user;
       const ent = user ? await fetchEntitlementFromBackend() : null;
       if (ent) {
-        set({ entitlement: ent, capabilities: capabilitiesFor(ent), loading: false });
+        apply({ entitlement: ent, capabilities: capabilitiesFor(ent), loading: false });
         return;
       }
-      set({ entitlement: null, capabilities: FREE_CAPS, loading: false });
+      apply({ entitlement: null, capabilities: FREE_CAPS, loading: false });
     } catch (err) {
       log.warn("entitlement refresh failed", err);
-      set({ entitlement: null, capabilities: FREE_CAPS, loading: false });
+      apply({ entitlement: null, capabilities: FREE_CAPS, loading: false });
     }
   },
   setLocal(tier) {
@@ -202,4 +209,22 @@ export const useEntitlement = create<EntitlementStore>((set) => ({
 
 export function useCapabilities(): Capabilities {
   return useEntitlement((s) => s.capabilities);
+}
+
+/**
+ * Keep the entitlement in step with the signed-in identity: refresh whenever
+ * the user (or the auth provider that vouches for them) changes — sign-in,
+ * sign-out, or the initial session restore finishing after the app mounted.
+ * Returns the unsubscribe function.
+ */
+export function watchAuthForEntitlements(): () => void {
+  const key = (s: ReturnType<typeof useAuth.getState>) =>
+    s.status === "loading" ? "loading" : `${s.provider?.name ?? ""}:${s.user?.id ?? ""}`;
+  let last = key(useAuth.getState());
+  return useAuth.subscribe((state) => {
+    const next = key(state);
+    if (next === last) return;
+    last = next;
+    if (next !== "loading") void useEntitlement.getState().refresh();
+  });
 }

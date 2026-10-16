@@ -52,7 +52,7 @@ import { useCollab } from "./hooks/useCollab";
 import { useTauriMenu } from "./hooks/useTauriMenu";
 import { EditorLayout } from "./layouts/EditorLayout";
 import { useAuth } from "./auth/useAuth";
-import { useEntitlement } from "./billing/useEntitlement";
+import { useEntitlement, watchAuthForEntitlements } from "./billing/useEntitlement";
 import { useAppStore, applyTheme } from "./store/useStore";
 import { applyLocale, t } from "./i18n";
 import { localLlmAvailable } from "./ai/localLlm";
@@ -142,6 +142,8 @@ export default function App() {
 
   useEffect(() => {
     void useEntitlement.getState().refresh();
+    // Re-fetch when the user signs in/out or the session restore finishes.
+    return watchAuthForEntitlements();
   }, []);
 
   // Apply theme on mount
