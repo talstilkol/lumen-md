@@ -115,6 +115,13 @@ describe("tracking edits while suggesting", () => {
     expect(e.view.state.selection.head).toBe(e.at("ld."));
   });
 
+  it("edits inside a fenced code block pass untracked", async () => {
+    const e = await open("```\ncode here\n```", true);
+    const at = e.at("here");
+    e.view.dispatch(e.view.state.tr.delete(at, at + 4));
+    expect(e.md()).toBe("```\ncode \n```");
+  });
+
   it("typing over a selection is a substitution", async () => {
     const e = await open("Hello world.", true);
     e.select(e.at("world"), e.at("world", 5));

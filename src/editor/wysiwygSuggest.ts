@@ -453,6 +453,9 @@ export function trackChanges(
   for (const c of changes) {
     const at = tr.mapping.map(c.toEnd.map(c.from, -1), -1);
     const insertedEnd = tr.mapping.map(c.toEnd.map(c.from + c.insertedSize, 1), 1);
+    // Code blocks can't carry marks: edits there pass untracked, as in
+    // source mode (CriticMarkup inside code is literal text).
+    if (tr.doc.resolve(at).parent.type.spec.code) continue;
     // 1. Insertions are suggested. Structural ones (a new paragraph, a
     //    multi-block paste) can't be expressed as CriticMarkup or undone
     //    by Reject, so they are blocked, like structural deletions — and

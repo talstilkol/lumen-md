@@ -58,8 +58,10 @@ export function getWebR(): Promise<WebRType> {
       }
       return webR;
     })();
-    instance.catch(() => {
-      instance = null; // let a later Run retry
+    const boot = instance;
+    boot.catch(() => {
+      // Let a later Run retry — unless a reset already replaced this boot.
+      if (instance === boot) instance = null;
     });
   }
   return instance;
