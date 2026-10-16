@@ -260,8 +260,11 @@ export function referencedLocalFiles(html: string, fromDir: string, root: string
     const abs = resolve(fromDir, url);
     const r = relative(root, abs);
     if (!r || r.startsWith("..") || isAbsolute(r) || MD_RE.test(abs)) continue;
+    // Never follow a symlink (at the file or a folder on the way): a
+    // `logo.png -> /etc/passwd` must not be copied into the site.
+    if (!realDirsBetween(root, abs)) continue;
     try {
-      if (statSync(abs).isFile()) out.add(abs);
+      if (lstatSync(abs).isFile()) out.add(abs);
     } catch {
       /* missing — leave the link as is */
     }

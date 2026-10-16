@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { renderMarkdown, renderMarkdownFast, extractFrontmatter } from "./pipeline";
 import { PreviewDocKeyContext } from "./previewDoc";
 import { handleWikiLinkClick } from "./wikiLinks";
-import { slug } from "./remarkLumen";
+import { slug as headingSlug } from "github-slugger";
 import { scheduleIdle } from "../lib/idle";
 import { CopyButtonHandler } from "./components";
 import { Frontmatter } from "../ui/Frontmatter";
@@ -119,7 +119,9 @@ export function Preview({ markdownText, docKey = null }: Props) {
           (path, heading) =>
             window.dispatchEvent(
               new CustomEvent("lumen-open-file", {
-                detail: heading ? { path, heading: slug(heading) } : { path },
+                // Same slugger rehype-slug gives the rendered headings
+                // (Unicode-aware: Hebrew / CJK headings keep their text).
+                detail: heading ? { path, heading: headingSlug(heading) } : { path },
               }),
             ),
         );

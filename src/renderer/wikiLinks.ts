@@ -5,6 +5,8 @@
  * workspace file whose name (or path) matches the target.
  */
 
+import { slug as headingSlug } from "github-slugger";
+
 /**
  * Split `Note#Heading` into the note and the heading fragment. A target
  * without `#` has no fragment; `#Heading` alone has an empty note.
@@ -42,8 +44,18 @@ export function handleWikiLinkClick(
   if (!el) return false;
   const href = el.getAttribute("href") ?? "";
   const id = href.startsWith("#") ? decodeURIComponent(href.slice(1)) : "";
-  // A heading with that id in this note: keep the in-page jump.
-  if (id && Array.from(root.querySelectorAll("[id]")).some((n) => n.id === id)) return false;
+  // A heading with that id in this note: keep the in-page jump. Rendered
+  // heading ids come from rehype-slug (Unicode-aware), so also try its slug
+  // of the target — `[[שלום]]` to a Hebrew heading here.
+  const targetId = headingSlug(el.getAttribute("data-wiki-target") ?? "");
+  const byId = (want: string) => (want ? Array.from(root.querySelectorAll("[id]")).find((n) => n.id === want) : undefined);
+  if (byId(id)) return false;
+  const here = byId(targetId);
+  if (here) {
+    e.preventDefault();
+    here.scrollIntoView({ block: "start" });
+    return true;
+  }
   // `[[Note#Heading]]` names the note before the `#`; the heading is
   // carried through so the opened note can scroll to it. `[[#Heading]]`
   // is same-note only — nothing to open.

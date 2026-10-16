@@ -1,4 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
+import { slug as headingSlug } from "github-slugger";
 import { handleWikiLinkClick, resolveWikiTarget, scrollToHeadingWhenRendered, splitWikiTarget } from "../renderer/wikiLinks";
 
 describe("resolveWikiTarget", () => {
@@ -87,5 +88,24 @@ describe("wiki-link fragments", () => {
     expect(h.scrollIntoView).toHaveBeenCalled();
     preview.remove();
     vi.useRealTimers();
+  });
+});
+
+describe("Unicode wiki-link headings", () => {
+  it("jumps to a Hebrew heading in this note via the rendered slug", () => {
+    const root = document.createElement("div");
+    root.innerHTML = '<h2 id="שלום-עולם">שלום עולם</h2><a class="wiki-link" data-wiki-target="שלום עולם" href="#-">x</a>';
+    const h = root.querySelector("h2")!;
+    h.scrollIntoView = vi.fn();
+    const preventDefault = vi.fn();
+    expect(handleWikiLinkClick({ target: root.querySelector("a"), preventDefault }, root, async () => [], vi.fn())).toBe(true);
+    expect(h.scrollIntoView).toHaveBeenCalled();
+  });
+});
+
+describe("heading fragments for other notes", () => {
+  it("are slugged like rendered headings (Unicode kept)", () => {
+    expect(headingSlug("安装")).toBe("安装");
+    expect(headingSlug("התקנה מהירה")).toBe("התקנה-מהירה");
   });
 });

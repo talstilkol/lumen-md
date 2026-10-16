@@ -245,6 +245,21 @@ describe("single-file publish", () => {
   });
 });
 
+describe("single-file publish and symlinks", () => {
+  it("doesn't copy a referenced asset that is (or sits under) a symlink", async () => {
+    writeFileSync(join(work, "secret.txt"), "secret");
+    mkdirSync(join(work, "outsideDir"));
+    writeFileSync(join(work, "outsideDir", "img.png"), "secret2");
+    write("README.md", "![a](logo.png) ![b](linked/img.png) ![c](ok.png)");
+    write("ok.png", new Uint8Array([1]));
+    symlinkSync(join(work, "secret.txt"), join(work, "src", "logo.png"));
+    symlinkSync(join(work, "outsideDir"), join(work, "src", "linked"), "dir");
+    const res = await publishSite(join(work, "src", "README.md"), join(work, "out"));
+    expect(res.assets).toEqual(["ok.png"]);
+    expect(existsSync(join(work, "out", "logo.png"))).toBe(false);
+  });
+});
+
 describe("page-list links", () => {
   it("percent-encode URL delimiters in file names", async () => {
     write("FAQ #1.md", "# FAQ");
