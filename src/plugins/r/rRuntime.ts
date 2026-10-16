@@ -107,22 +107,53 @@ export function toLines(output: ReadonlyArray<{ type: string; data: unknown }>):
   return lines;
 }
 
+/** Plot pages one run shows; later pages are dropped (and their bitmaps closed). */
+export const MAX_PLOT_PAGES = 20;
+
+const closeBitmap = (b: ImageBitmap | null | undefined) => {
+  try {
+    b?.close?.();
+  } catch {
+    /* already closed */
+  }
+};
+
 /**
  * Collect plot pages from webR's output queue: each `canvasNewPage` starts a
  * page, and the latest `canvasImage` after it is that page's final state.
+ * At most `max` pages are kept; superseded and dropped bitmaps are closed
+ * so their memory is released. `dropped` counts pages beyond the cap.
  */
-export function plotPages(msgs: ReadonlyArray<{ type: string; data?: unknown }>): ImageBitmap[] {
+export function collectPlotPages(
+  msgs: ReadonlyArray<{ type: string; data?: unknown }>,
+  max = MAX_PLOT_PAGES,
+): { pages: ImageBitmap[]; dropped: number } {
   const pages: Array<ImageBitmap | null> = [];
+  let total = 0;
   for (const m of msgs) {
     if (m.type !== "canvas") continue;
     const data = m.data as { event?: string; image?: ImageBitmap } | undefined;
-    if (data?.event === "canvasNewPage") pages.push(null);
-    else if (data?.event === "canvasImage" && data.image) {
-      if (pages.length === 0) pages.push(null);
-      pages[pages.length - 1] = data.image;
+    if (data?.event === "canvasNewPage") {
+      total++;
+      if (pages.length < max) pages.push(null);
+    } else if (data?.event === "canvasImage" && data.image) {
+      if (total === 0) {
+        total = 1;
+        pages.push(null);
+      }
+      if (total > max) closeBitmap(data.image); // a page beyond the cap
+      else {
+        closeBitmap(pages[pages.length - 1]); // superseded by a later frame
+        pages[pages.length - 1] = data.image;
+      }
     }
   }
-  return pages.filter((p): p is ImageBitmap => p !== null);
+  return { pages: pages.filter((p): p is ImageBitmap => p !== null), dropped: Math.max(0, total - max) };
+}
+
+/** The kept plot pages (see collectPlotPages). */
+export function plotPages(msgs: ReadonlyArray<{ type: string; data?: unknown }>): ImageBitmap[] {
+  return collectPlotPages(msgs).pages;
 }
 
 export interface RRunHooks {
@@ -175,8 +206,10 @@ async function runROnce(webR: WebRType, code: string, plot: { width: number; hei
       throwJsException: false,
     });
     await webR.evalRVoid("while (grDevices::dev.cur() > 1) grDevices::dev.off()");
-    const images = plotPages(await webR.flush());
-    return { lines: toLines(res.output), images };
+    const { pages: images, dropped } = collectPlotPages(await webR.flush());
+    const lines = toLines(res.output);
+    if (dropped) lines.push({ kind: "msg", text: `… ${dropped} more plot${dropped === 1 ? "" : "s"} not shown (first ${MAX_PLOT_PAGES} kept)` });
+    return { lines, images };
   } finally {
     await shelter.purge();
   }

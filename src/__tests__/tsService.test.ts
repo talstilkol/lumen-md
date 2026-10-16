@@ -252,9 +252,18 @@ describe("JavaScript blocks and shared scopes", () => {
       .diagnostics(units.map(({ id, tsx, js, shared, code }) => ({ id, tsx, js, shared, code })))
       .filter((d) => unitRangeToDoc(units[1], d.start, d.length) !== null);
     expect(diags.map((d) => d.code)).toEqual([2551]); // toFixed doesn't exist on string
-    // A top-level await still needs the async wrapper.
-    const awaiting = toUnits(findTsBlocks(doc.replace("read().toFixed();", "await read();")));
-    expect(awaiting[1].code).toContain("(async () => {");
+    // Top-level await is fine in a module unit: still unwrapped, so the
+    // earlier closure sees the new binding.
+    const awaitDoc = doc.replace("read().toFixed();", "await 0;\nread().toFixed();");
+    const awaiting = toUnits(findTsBlocks(awaitDoc));
+    expect(awaiting[1].code).not.toContain("async () =>");
+    const awaitDiags = service
+      .diagnostics(awaiting.map(({ id, tsx, js, shared, code }) => ({ id, tsx, js, shared, code })))
+      .filter((d) => unitRangeToDoc(awaiting[1], d.start, d.length) !== null);
+    expect(awaitDiags.map((d) => d.code)).toEqual([2551]);
+    // A top-level return needs the async wrapper.
+    const returning = toUnits(findTsBlocks(doc.replace("read().toFixed();", "if (read()) return;")));
+    expect(returning[1].code).toContain("(async () => {");
   });
 
   it("parameters, a function's own name and its locals keep their binding", () => {

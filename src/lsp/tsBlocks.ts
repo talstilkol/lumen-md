@@ -138,17 +138,15 @@ const LIVE_WRAP_CLOSE = "\n})();";
 
 /**
  * Whether a shared live block needs the async wrapper to type-check: only
- * a top-level `await` / `return` does. Without them the block is checked
- * at the unit's top level, where earlier parts' retained closures see its
- * declarations — as they do at runtime, which hoists shared bindings to
- * globals.
+ * a top-level `return` does (units are modules, so top-level `await` is
+ * already valid). Without the wrapper the block is checked at the unit's
+ * top level, where earlier parts' retained closures see its declarations
+ * — as they do at runtime, which hoists shared bindings to globals.
  */
 function needsLiveWrap(code: string): boolean {
   const tokens = tokenize(neutraliseDirectives(code));
   const scopes = functionScopes(tokens, matchBrackets(tokens));
-  return tokens.some(
-    (t, i) => t.type === "ident" && (t.value === "await" || t.value === "return") && !scopes.some((f) => i >= f.from && i <= f.to),
-  );
+  return tokens.some((t, i) => t.type === "ident" && t.value === "return" && !scopes.some((f) => i >= f.from && i <= f.to));
 }
 
 /** Joins the parts of a shared unit: ends any statement / line comment. */

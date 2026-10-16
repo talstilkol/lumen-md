@@ -1,5 +1,5 @@
-import { describe, it, expect } from "vitest";
-import { MAX_OUTPUT_CHARS, MAX_OUTPUT_LINES, plotPages, toLines, webrBaseUrl } from "../plugins/r/rRuntime";
+import { describe, it, expect, vi } from "vitest";
+import { MAX_OUTPUT_CHARS, MAX_OUTPUT_LINES, collectPlotPages, plotPages, toLines, webrBaseUrl } from "../plugins/r/rRuntime";
 
 describe("live-r runtime helpers", () => {
   it("serves webR under the app base path", () => {
@@ -50,5 +50,25 @@ describe("plot pages", () => {
     expect(big.at(-1)?.text).toMatch(/truncated/);
     const many = toLines(Array.from({ length: MAX_OUTPUT_LINES + 50 }, () => ({ type: "stdout", data: "a" })));
     expect(many).toHaveLength(MAX_OUTPUT_LINES + 1);
+  });
+
+  it("caps plot pages and closes superseded / dropped bitmaps", () => {
+    const bm = (n: string) => ({ n, close: vi.fn() }) as unknown as ImageBitmap & { close: ReturnType<typeof vi.fn> };
+    const imgs = [bm("p1a"), bm("p1b"), bm("p2"), bm("p3")];
+    const msgs = [
+      { type: "canvas", data: { event: "canvasNewPage" } },
+      { type: "canvas", data: { event: "canvasImage", image: imgs[0] } },
+      { type: "canvas", data: { event: "canvasImage", image: imgs[1] } },
+      { type: "canvas", data: { event: "canvasNewPage" } },
+      { type: "canvas", data: { event: "canvasImage", image: imgs[2] } },
+      { type: "canvas", data: { event: "canvasNewPage" } },
+      { type: "canvas", data: { event: "canvasImage", image: imgs[3] } },
+    ];
+    const { pages, dropped } = collectPlotPages(msgs, 2);
+    expect(pages).toEqual([imgs[1], imgs[2]]);
+    expect(dropped).toBe(1);
+    expect(imgs[0].close).toHaveBeenCalled(); // superseded
+    expect(imgs[3].close).toHaveBeenCalled(); // beyond the cap
+    expect(imgs[1].close).not.toHaveBeenCalled();
   });
 });
