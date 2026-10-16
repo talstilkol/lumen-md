@@ -216,6 +216,22 @@ describe("JavaScript blocks and shared scopes", () => {
     expect(r.diags.map((d) => d.code)).toEqual([2551]);
   });
 
+  it("every declarator and pattern starts a version, and recursion follows its declaration", () => {
+    let r = checkShared("// @ts-check\nlet first = 0, value = 1; let value = 'x'; value.toUpperCase();");
+    expect(r.diags).toEqual([]);
+    // (A shorthand pattern in the checked block itself keeps its name, since
+    // offsets there can't move; in an earlier block it is versioned too.)
+    r = checkShared("let { value } = { value: 1 }; const n = value; let value = 'x';", "// @ts-check\nvalue.toUpperCase(); n.toFixed();");
+    expect(r.diags).toEqual([]);
+    // The original function recurses into itself, not the newer `value`.
+    r = checkShared(
+      "function value(n) { return n ? value(n - 1) : 1; } const saved = value;",
+      "// @ts-check\nfunction value() { return 'x'; }\nsaved(1).toFixed();",
+    );
+    expect(r.units[1].code.split("\n;\n")[0]).toContain("function value$prev(n) { return n ? value$prev(n - 1) : 1; }");
+    expect(r.diags).toEqual([]);
+  });
+
   it("a directly invoked function expression runs with that time's value", () => {
     const { units, diags } = checkShared(
       "const value = 1; const result = function () { return value; }(); function decl() { return value; }\n(0);",

@@ -190,6 +190,12 @@ interface FnScope {
   /** Names bound inside it: parameters, its own name, local declarations. */
   locals: Set<string>;
   /**
+   * A top-level function DECLARATION whose name nothing else inside binds:
+   * references to it inside the body are the declaration's binding (the
+   * runner keeps it in the block's own scope), so they follow its rename.
+   */
+  selfName?: string;
+  /**
    * Class bodies only: ranges evaluated when the class is defined (static
    * initializers, static blocks, computed keys) — not late-bound.
    */
@@ -461,7 +467,12 @@ function functionScopes(tokens: ReturnType<typeof tokenize>, match: Map<number, 
       if (val(b) === "async") b--;
       const statementStart = b < 0 || isPunct(b, ";") || isPunct(b, "{") || isPunct(b, "}") || val(b) === "export" || val(b) === "default";
       const invoked = !statementStart && isPunct(end + 1, "(");
-      pending.push(() => ({ from: p, to: end, retained: invoked ? false : retainedAt(k - 1), locals: collectLocals(p, q, q + 1, end, own) }));
+      pending.push(() => {
+        const locals = collectLocals(p, q, q + 1, end);
+        const selfName = own && statementStart && tokens[k].depth === 0 && !locals.has(own) ? own : undefined;
+        if (own) locals.add(own);
+        return { from: p, to: end, retained: invoked ? false : retainedAt(k - 1), locals, selfName };
+      });
       continue;
     }
     // ( … ) => …   /   x => …
@@ -588,7 +599,14 @@ function rewriteEarlierPart(code: string, names: ReadonlyMap<string, string>, pr
     }
     // Enclosing functions, innermost first.
     const enclosing = scopes.filter((f) => k >= f.from && k <= f.to).sort((x, y) => (y.from - x.from) || (x.to - y.to));
-    if (enclosing.some((f) => f.locals.has(tok.value))) continue; // a local binding
+    const binder = enclosing.find((f) => f.locals.has(tok.value));
+    if (binder) {
+      // A recursive reference to a top-level function declaration is that
+      // declaration's binding: it follows the rename. Anything else bound
+      // inside is local.
+      if (binder.selfName === tok.value) edits.push({ from: tok.start, to: tok.end, text: to });
+      continue;
+    }
     // Late-bound closure — except code a class body runs at definition.
     if (enclosing.some((f) => f.retained && !f.eager?.some(([a, b]) => k >= a && k <= b))) continue;
     const shorthand = keyPos && (nextP === "}" || nextP === "," || nextP === "=");
@@ -615,31 +633,31 @@ function constAsLet(code: string): string {
  * Offsets where a part re-declares a top-level name it already declared
  * (`let value = 1; let value = 'x'`): the shared runner turns both into
  * assignments, so code after the second declaration sees the new value.
- * Each cut starts a new version. Only the first declarator of a
- * `let` / `const` / `var` and function / class names are considered.
+ * Each cut starts a new version.
  */
 function redeclarationCuts(code: string): number[] {
   const tokens = tokenize(code);
-  const seen = new Set<string>();
-  const cuts: number[] = [];
+  // Top-level declaration statements, in order.
+  const starts: number[] = [];
   for (let i = 0; i < tokens.length; i++) {
     const t = tokens[i];
     if (t.depth !== 0 || t.type !== "ident") continue;
     const prev = tokens[i - 1];
     const atStart = !prev || t.nl || (prev.type === "punct" && (prev.value === ";" || prev.value === "}"));
     if (!atStart) continue;
-    let k = i;
-    if (t.value === "async" && tokens[k + 1]?.value === "function") k++;
-    const kw = tokens[k].value;
-    if (!["let", "const", "var", "function", "class"].includes(kw)) continue;
-    let n = k + 1;
-    if (kw === "function" && tokens[n]?.value === "*") n++;
-    const name = tokens[n]?.type === "ident" ? tokens[n].value : null;
-    if (!name) continue;
-    if (seen.has(name) && t.start > 0) cuts.push(t.start);
-    seen.add(name);
+    const kw = t.value === "async" && tokens[i + 1]?.value === "function" ? "function" : t.value;
+    if (["let", "const", "var", "function", "class"].includes(kw)) starts.push(t.start);
   }
-  return [...new Set(cuts)];
+  // Each statement's names (every declarator and pattern binding): the
+  // slice up to the next declaration holds just this one.
+  const seen = new Set<string>();
+  const cuts: number[] = [];
+  starts.forEach((from, n) => {
+    const names = topLevelNames(code.slice(from, starts[n + 1] ?? code.length));
+    if (from > 0 && names.some((name) => seen.has(name))) cuts.push(from);
+    for (const name of names) seen.add(name);
+  });
+  return cuts;
 }
 
 /** Same-length stand-in for `name`, unused in the unit (own block only). */
