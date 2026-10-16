@@ -15,6 +15,7 @@
 import { effectiveCapabilities, gatesEnforced } from "./gates";
 import { showAiToast } from "../ui/AiToast";
 import { t } from "../i18n";
+import { hasAiCredentials } from "../ai/credentials";
 
 const KEY_PREFIX = "lumen.ai.quota.";
 
@@ -81,6 +82,10 @@ export function consumeAiPrompt(now: Date = new Date(), opts: { silent?: boolean
   if (!gatesEnforced()) return true;
   const status = aiQuotaStatus(now);
   if (!Number.isFinite(status.limit)) return true;
+  // No usable provider: the request fails before reaching any model (the
+  // caller surfaces "configure your key"), so it must not spend a prompt.
+  // Background callers (inline suggestions) simply don't start.
+  if (!hasAiCredentials()) return !opts.silent;
   if (!status.allowed) {
     if (!opts.silent) showAiToast(t("billing.aiQuota.exceeded", { limit: status.limit }), "error");
     return false;

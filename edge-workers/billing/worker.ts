@@ -361,7 +361,16 @@ async function checkout(req: Request, env: Env): Promise<{ url: string }> {
   for (const u of [successUrl, cancelUrl]) {
     if (!isAllowedRedirect(env, u)) throw new Error("Redirect URL not allowed");
   }
+  // One customer per user: Stripe creates a fresh Customer for every
+  // subscription Session without `customer`, which would orphan the old
+  // subscription (still billing, unreachable from the portal). A user with
+  // a subscription that is still billing manages/changes it in the portal.
+  const existing = await fetchBillingRow(env, uid);
+  if (existing && BILLING_STATUSES.has(existing.status ?? "")) {
+    throw new Error("Already subscribed: use Manage billing to change plans.");
+  }
   const session = await stripe<{ url: string; id: string }>(env, "/checkout/sessions", {
+    ...(existing?.stripe_customer_id ? { customer: existing.stripe_customer_id } : {}),
     mode: "subscription",
     "line_items[0][price]": priceId,
     "line_items[0][quantity]": "1",
@@ -398,7 +407,7 @@ async function portal(req: Request, env: Env): Promise<{ url: string }> {
   const uid = await userId(req, env);
   // Look up the customer id from Supabase. We assume the webhook below
   // populated `entitlements` with stripe_customer_id when Checkout completed.
-  const customer = await fetchCustomer(env, uid);
+  const customer = (await fetchBillingRow(env, uid))?.stripe_customer_id ?? null;
   if (!customer) throw new Error("No subscription on file. Subscribe first.");
   const session = await stripe<{ url: string }>(env, "/billing_portal/sessions", {
     customer,
@@ -407,9 +416,17 @@ async function portal(req: Request, env: Env): Promise<{ url: string }> {
   return { url: session.url };
 }
 
-async function fetchCustomer(env: Env, uid: string): Promise<string | null> {
+/** Subscription statuses under which Stripe may still charge the customer. */
+const BILLING_STATUSES = new Set(["active", "trialing", "past_due", "unpaid", "incomplete"]);
+
+interface BillingRow {
+  stripe_customer_id?: string | null;
+  status?: string | null;
+}
+
+async function fetchBillingRow(env: Env, uid: string): Promise<BillingRow | null> {
   const res = await fetch(
-    `${env.SUPABASE_URL}/rest/v1/entitlements?user_id=eq.${encodeURIComponent(uid)}&select=stripe_customer_id`,
+    `${env.SUPABASE_URL}/rest/v1/entitlements?user_id=eq.${encodeURIComponent(uid)}&select=stripe_customer_id,status`,
     {
       headers: {
         apikey: env.SUPABASE_SERVICE_ROLE,
@@ -417,9 +434,11 @@ async function fetchCustomer(env: Env, uid: string): Promise<string | null> {
       },
     },
   );
-  if (!res.ok) return null;
-  const rows = (await res.json()) as { stripe_customer_id?: string }[];
-  return rows[0]?.stripe_customer_id ?? null;
+  // Fail closed: if we can't tell whether a subscription exists, don't
+  // start a second one.
+  if (!res.ok) throw new Error(`Billing lookup failed (${res.status})`);
+  const rows = (await res.json()) as BillingRow[];
+  return rows[0] ?? null;
 }
 
 /* ─── /webhook ───────────────────────────────────────────────────────── */

@@ -33,13 +33,14 @@ describe("tierForPrice", () => {
 });
 
 describe("POST /checkout", () => {
-  function stub() {
+  function stub(rows: unknown[] = []) {
     const calls: { url: string; body: URLSearchParams }[] = [];
     vi.stubGlobal(
       "fetch",
       vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
         const url = String(input);
         if (url.endsWith("/auth/v1/user")) return new Response(JSON.stringify({ id: "u1" }), { status: 200 });
+        if (url.includes("/rest/v1/entitlements")) return new Response(JSON.stringify(rows), { status: 200 });
         calls.push({ url, body: new URLSearchParams(String(init?.body ?? "")) });
         return new Response(JSON.stringify({ url: "https://checkout.stripe.com/x", id: "cs_1" }), { status: 200 });
       }),
@@ -63,6 +64,31 @@ describe("POST /checkout", () => {
     const b = calls[0].body;
     expect(b.get("metadata[tier]")).toBe("team");
     expect(b.get("subscription_data[metadata][tier]")).toBe("team");
+  });
+
+  const okBody = { priceId: "price_pro_m", successUrl: "https://lumen.app/ok", cancelUrl: "https://lumen.app/no" };
+
+  it("reuses the user's existing Stripe customer instead of creating a new one", async () => {
+    const calls = stub([{ stripe_customer_id: "cus_old", status: "canceled" }]);
+    const res = await worker.fetch(post(okBody), env);
+    expect(res.status).toBe(200);
+    expect(calls[0].body.get("customer")).toBe("cus_old");
+  });
+
+  it("omits customer for a first-time subscriber", async () => {
+    const calls = stub([]);
+    await worker.fetch(post(okBody), env);
+    expect(calls[0].body.has("customer")).toBe(false);
+  });
+
+  it("refuses a second subscription while one is still billing", async () => {
+    for (const status of ["active", "trialing", "past_due"]) {
+      const calls = stub([{ stripe_customer_id: "cus_1", status }]);
+      const res = await worker.fetch(post(okBody), env);
+      expect(res.status).toBe(400);
+      expect(await res.text()).toMatch(/Already subscribed/);
+      expect(calls).toHaveLength(0);
+    }
   });
 
   it("refuses prices that aren't allow-listed and off-site redirect URLs", async () => {

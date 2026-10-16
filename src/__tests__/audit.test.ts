@@ -66,6 +66,29 @@ describe("recordAudit", () => {
     expect(body.payload_json).toBe(JSON.stringify({ slug: "hello" }));
     expect(body.ts).toBeGreaterThan(0);
   });
+
+  it("files events under the signed-in user's audit scope when no orgId is passed", async () => {
+    const fetchSpy = vi.fn().mockResolvedValue(new Response("{}", { status: 200 }));
+    vi.stubGlobal("fetch", fetchSpy);
+    const mod = await import("../lib/audit");
+    const { useAuth } = await import("../auth/useAuth");
+    mod.__setAuditConfigForTesting({ endpoint: "https://audit.lumen.md", bearer: "" });
+    const bodyOf = (i: number) => JSON.parse((fetchSpy.mock.calls[i][1] as RequestInit).body as string);
+
+    // SSO org member → the organization (what the org audit log queries).
+    useAuth.setState({ user: { id: "user_01", provider: "workos", orgId: "org_acme" } });
+    mod.recordAudit("user_01", "doc.publish");
+    expect(bodyOf(0).org_id).toBe("org_acme");
+
+    // Personal user → their own id (what their audit log queries).
+    useAuth.setState({ user: { id: "sb-1", provider: "supabase" } });
+    mod.recordAudit("sb-1", "sync.cloud");
+    expect(bodyOf(1).org_id).toBe("sb-1");
+
+    // An explicit orgId (including null) still wins.
+    mod.recordAudit("sb-1", "x", { orgId: null });
+    expect(bodyOf(2).org_id).toBeNull();
+  });
 });
 
 describe("listAudit", () => {

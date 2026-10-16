@@ -32,6 +32,7 @@ import {
   withAiQuota,
 } from "../billing/aiQuota";
 import { showAiToast } from "../ui/AiToast";
+import { useAppStore } from "../store/useStore";
 import { listAudit } from "../lib/audit";
 import { AuditLog } from "../ui/AuditLog";
 import { CollabSettings } from "../ui/CollabSettings";
@@ -44,6 +45,9 @@ function setCaps(caps: typeof FREE_CAPS) {
 
 beforeEach(() => {
   localStorage.clear();
+  // A configured provider, so quota tests exercise counting (see the
+  // no-key test for the other path).
+  useAppStore.setState({ aiKey: "sk-test" });
   vi.clearAllMocks();
   setCaps(FREE_CAPS);
 });
@@ -132,6 +136,22 @@ describe("billed mode (endpoint configured)", () => {
     const ws = container.querySelector("#collab-persistent-url") as HTMLInputElement;
     expect(ws.disabled).toBe(false);
     expect(screen.queryByTestId("upgrade-notice")).toBeNull();
+  });
+
+  it("doesn't spend a prompt when no AI provider is usable (no key)", () => {
+    useAppStore.setState({ aiKey: null });
+    const now = new Date(2026, 9, 15);
+    expect(consumeAiPrompt(now, { silent: true })).toBe(false); // background: don't start
+    expect(consumeAiPrompt(now)).toBe(true); // manual: proceed so chat() explains the missing key
+    expect(getAiUsage(now)).toBe(0);
+  });
+
+  it("counts prompts for a keyless local provider", () => {
+    useAppStore.setState({ aiKey: null });
+    localStorage.setItem("lumen.ai.provider", "ollama");
+    const now = new Date(2026, 9, 15);
+    expect(consumeAiPrompt(now, { silent: true })).toBe(true);
+    expect(getAiUsage(now)).toBe(1);
   });
 
   it("blocks AI prompts once the free monthly limit is reached", () => {

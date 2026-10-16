@@ -29,6 +29,7 @@ import { useEntitlement, __setEntitlementEndpointForTesting } from "../billing/u
 import { FREE_CAPS, PRO_CAPS } from "../billing/types";
 import { getAiUsage, recordAiPrompt, consumeAiPrompt } from "../billing/aiQuota";
 import { showAiToast } from "../ui/AiToast";
+import { useAppStore } from "../store/useStore";
 
 function setCaps(caps: typeof FREE_CAPS) {
   useEntitlement.setState({ capabilities: caps, entitlement: null, loading: false });
@@ -40,6 +41,7 @@ function openOn(mode: "smart" | "ai") {
 
 beforeEach(() => {
   localStorage.clear();
+  useAppStore.setState({ aiKey: "sk-test" }); // a usable provider, so prompts count
   vi.clearAllMocks();
   setCaps(FREE_CAPS);
 });

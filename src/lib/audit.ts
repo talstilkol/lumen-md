@@ -9,6 +9,18 @@
 
 import { log } from "./logger";
 import { fetchWithRetry } from "./fetchRetry";
+import { useAuth } from "../auth/useAuth";
+import { auditScope } from "../ui/auditScope";
+
+/**
+ * Scope an event is filed under when the caller doesn't pass one: the same
+ * scope the audit-log UI reads (`auditScope`) — the SSO organization for
+ * org members, else the user's own id — so every event shows up there.
+ */
+function defaultScope(userId: string): string {
+  const user = useAuth.getState().user;
+  return user && user.id === userId ? auditScope(user) : userId;
+}
 
 interface AuditConfig {
   endpoint: string;
@@ -72,7 +84,7 @@ export function recordAudit(
 
   const body: AuditRow = {
     user_id: userId,
-    org_id: opts.orgId ?? null,
+    org_id: opts.orgId !== undefined ? opts.orgId : defaultScope(userId),
     action,
     payload_json: opts.payload === undefined ? undefined : JSON.stringify(opts.payload),
     ts: Date.now(),
