@@ -22,6 +22,7 @@ RUN adduser -D -u 1001 lumen && \
 
 # Copy the custom nginx config
 COPY deploy/nginx.conf /etc/nginx/nginx.conf
+COPY deploy/lumen-runtime-headers.conf /etc/nginx/lumen-runtime-headers.conf
 
 # Copy the built assets from the builder stage
 COPY --from=builder /app/dist /usr/share/nginx/html
