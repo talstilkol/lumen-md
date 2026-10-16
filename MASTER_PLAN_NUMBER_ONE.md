@@ -390,10 +390,10 @@
 - [x] חיבור ספריית הייבוא + DOCX/ODT/EPUB אמיתי + ייצוא DOCX אמיתי
 - [x] PPTX/XLSX import — unzip מקורי
 - [x] Obsidian vault + Notion importer — zip → מיזוג markdown
-- [ ] תקן בדיקות נכשלות (אם נותרו)
-- [ ] נקה קבצי plan מהשורש
-- [ ] CI/CD pipeline מלא (build + test + deploy)
-- [ ] VS Code extension (basic preview)
+- [x] תקן בדיקות נכשלות (אם נותרו) — 1949/1949 ירוקות (2026-10-16)
+- [x] נקה קבצי plan מהשורש — הועברו ל-docs/archive/plans-2026-04/, סטטוס מאוחד ב-PLAN_STATUS.md
+- [~] CI/CD pipeline מלא (build + test + deploy) — build+test+hygiene ב-CI; deploy חסום על חשבונות (Fly/Cloudflare)
+- [x] VS Code extension (basic preview) — packages/vscode-lumen
 - [ ] Performance: < 1.5s TTI
 
 ### Phase 2: Power (חודשים 3–4)
@@ -401,41 +401,41 @@
 
 - [ ] Web Playground (multi-file, npm imports, JSX)
 - [ ] React/Vue/Svelte live preview
-- [ ] Multi-model AI (Claude + GPT + Gemini + local)
-- [ ] AI Agent mode (research + write)
+- [x] Multi-model AI (Claude + GPT + Gemini + local)
+- [x] AI Agent mode (research + write) — src/ai/agents.ts
 - [ ] Code completion (JS/TS/Python)
-- [ ] REPL mode (persistent state across blocks)
-- [ ] Suggesting mode (track changes)
+- [x] REPL mode (persistent state across blocks) — ```live-js shared```
+- [x] Suggesting mode (track changes) — CriticMarkup, src/editor/suggesting.ts
 - [ ] Team workspaces
-- [ ] EPUB export
-- [ ] Slide deck mode (Reveal.js)
+- [x] EPUB export
+- [x] Slide deck mode (Reveal.js)
 - [ ] Performance: < 500ms first paint
 
 ### Phase 3: Platform (חודשים 5–6)
 **יעד:** Marketplace + publishing + mobile
 
-- [ ] Plugin marketplace (publish, install, rate)
-- [ ] Theme marketplace
+- [~] Plugin marketplace (publish, install, rate) — התקנה+דירוג בקוד; repo רישום ציבורי חסום חיצונית
+- [~] Theme marketplace — התאמת ערכת נושא + ייבוא/ייצוא JSON קיימים; אין marketplace
 - [ ] Publish to web (lumen.md/user/doc)
 - [ ] Blog/docs engine
 - [ ] iOS app (App Store)
 - [ ] Android app (Play Store)
-- [ ] CLI tool (`lumen convert`, `lumen publish`)
-- [ ] Browser extension (web clipper)
-- [ ] API service (headless rendering)
-- [ ] Notion/Confluence importer
+- [x] CLI tool (`lumen convert`, `lumen publish`)
+- [x] Browser extension (web clipper)
+- [x] API service (headless rendering) — api-server/
+- [x] Notion/Confluence importer
 
 ### Phase 4: Dominance (חודשים 7–12)
 **יעד:** קהילה, enterprise, שוק
 
-- [ ] Enterprise SSO/SCIM
-- [ ] Self-hosted option (Docker)
+- [~] Enterprise SSO/SCIM — SSO (WorkOS worker + OrgSettings) בקוד; SCIM לא; בדיקה חיה דורשת חשבון WorkOS
+- [x] Self-hosted option (Docker)
 - [ ] White-label API
 - [ ] Community plugins (100+)
 - [ ] Community themes (50+)
 - [ ] Community templates (200+)
 - [ ] Education edition (free for students)
-- [ ] AI training on user's style (fine-tune)
+- [x] AI training on user's style (fine-tune)
 - [ ] Real-time translation (40 languages)
 - [ ] Certification program for plugin devs
 - [ ] Conference / community event
