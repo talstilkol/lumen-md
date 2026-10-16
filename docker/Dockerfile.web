@@ -3,7 +3,7 @@
 
 # Multi-stage build: produce dist/ in stage 1 with the same toolchain CI uses,
 # then copy into a slim nginx layer for the runtime image.
-FROM node:20-alpine AS build
+FROM node:22-alpine AS build
 WORKDIR /app
 COPY package.json package-lock.json* ./
 RUN npm ci

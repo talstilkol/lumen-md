@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-10-15T21:19:43.737Z",
+  "generated_at": "2026-10-16T01:48:28.738Z",
   "source": "src/i18n/index.ts (en bundle)",
-  "count": 675,
+  "count": 909,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -313,6 +313,20 @@
       "vars": []
     },
     {
+      "key": "search.results.one",
+      "en": "{n} result",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "search.results.other",
+      "en": "{n} results",
+      "vars": [
+        "n"
+      ]
+    },
+    {
       "key": "dialog.ok",
       "en": "OK",
       "vars": []
@@ -550,6 +564,16 @@
       "vars": []
     },
     {
+      "key": "cmd.file.exportPptx",
+      "en": "Export to PowerPoint (.pptx)",
+      "vars": []
+    },
+    {
+      "key": "cmd.file.exportPptx.hint",
+      "en": "One slide per H1/H2 heading (or --- separators)",
+      "vars": []
+    },
+    {
       "key": "template.blank",
       "en": "Blank document",
       "vars": []
@@ -638,6 +662,38 @@
       "key": "cmd.file.saveToWorkspace.hint",
       "en": "store this doc in OPFS",
       "vars": []
+    },
+    {
+      "key": "cmd.file.openSampleWorkspace",
+      "en": "Open sample workspace",
+      "vars": []
+    },
+    {
+      "key": "cmd.file.openSampleWorkspace.hint",
+      "en": "linked demo notes: wiki-links, tags, database, chart, diagram",
+      "vars": []
+    },
+    {
+      "key": "sample.toast.created",
+      "en": "Added {count} sample notes to “{folder}”.",
+      "vars": [
+        "count",
+        "folder"
+      ]
+    },
+    {
+      "key": "sample.toast.exists",
+      "en": "The sample workspace “{folder}” is already here — nothing was overwritten.",
+      "vars": [
+        "folder"
+      ]
+    },
+    {
+      "key": "sample.alert.failed",
+      "en": "Couldn't create the sample workspace: {error}",
+      "vars": [
+        "error"
+      ]
     },
     {
       "key": "cmd.file.openRecent",
@@ -1535,6 +1591,103 @@
       "vars": []
     },
     {
+      "key": "block.liveJs.shared",
+      "en": "shared scope",
+      "vars": []
+    },
+    {
+      "key": "block.liveJs.sharedHint",
+      "en": "Runs in this document's shared worker: top-level variables and functions stay available to later runs and other shared blocks.",
+      "vars": []
+    },
+    {
+      "key": "block.liveJs.resetScope",
+      "en": "Reset scope",
+      "vars": []
+    },
+    {
+      "key": "block.liveJs.resetScope.hint",
+      "en": "Discard every variable defined by this document's shared blocks",
+      "vars": []
+    },
+    {
+      "key": "block.liveJs.scopeReset",
+      "en": "Scope reset",
+      "vars": []
+    },
+    {
+      "key": "block.liveLua.title",
+      "en": "Live Lua",
+      "vars": []
+    },
+    {
+      "key": "block.liveLua.run",
+      "en": "Run",
+      "vars": []
+    },
+    {
+      "key": "block.liveLua.stop",
+      "en": "Stop",
+      "vars": []
+    },
+    {
+      "key": "block.liveLua.clear",
+      "en": "Clear output",
+      "vars": []
+    },
+    {
+      "key": "block.liveLua.prompt",
+      "en": "Click Run to execute this Lua block.",
+      "vars": []
+    },
+    {
+      "key": "block.liveLua.workerUnavailable",
+      "en": "Web Workers are unavailable in this browser.",
+      "vars": []
+    },
+    {
+      "key": "block.liveLua.loadFailed",
+      "en": "Failed to load the Lua runtime.",
+      "vars": []
+    },
+    {
+      "key": "block.liveLua.timedOut",
+      "en": "Execution timed out after {ms} ms.",
+      "vars": [
+        "ms"
+      ]
+    },
+    {
+      "key": "block.liveLua.stopped",
+      "en": "Stopped.",
+      "vars": []
+    },
+    {
+      "key": "block.liveLua.state.idle",
+      "en": "Not run",
+      "vars": []
+    },
+    {
+      "key": "block.liveLua.state.running",
+      "en": "Running…",
+      "vars": []
+    },
+    {
+      "key": "block.liveLua.state.success",
+      "en": "Completed",
+      "vars": []
+    },
+    {
+      "key": "block.liveLua.state.error",
+      "en": "Error",
+      "vars": []
+    },
+    {
+      "key": "block.liveLua.state.timeout",
+      "en": "Timed out",
+      "vars": []
+    },
+    {
       "key": "toast.insertText.success",
       "en": "Text inserted and converted",
       "vars": []
@@ -1907,6 +2060,16 @@
       ]
     },
     {
+      "key": "collab.e2e.decryptFailed",
+      "en": "Can't decrypt this room",
+      "vars": []
+    },
+    {
+      "key": "collab.e2e.decryptFailed.body",
+      "en": "The room password doesn't match the one the other participants used. Nothing was applied to your document — check the password and rejoin.",
+      "vars": []
+    },
+    {
       "key": "tree.newFileRoot",
       "en": "New file at root",
       "vars": []
@@ -2012,6 +2175,96 @@
     {
       "key": "status.grammar.tooltip.off",
       "en": "Grammar check is OFF. Click to enable LanguageTool checking.",
+      "vars": []
+    },
+    {
+      "key": "status.suggesting.on",
+      "en": "Suggesting",
+      "vars": []
+    },
+    {
+      "key": "status.suggesting.off",
+      "en": "Editing",
+      "vars": []
+    },
+    {
+      "key": "status.suggesting.tooltip.on",
+      "en": "Suggesting mode is ON: your edits are recorded as tracked changes (CriticMarkup). Click to edit directly.",
+      "vars": []
+    },
+    {
+      "key": "status.suggesting.tooltip.off",
+      "en": "Editing directly. Click to turn on suggesting mode (track changes).",
+      "vars": []
+    },
+    {
+      "key": "cmd.suggest.toggle.on",
+      "en": "Turn on suggesting mode (track changes)",
+      "vars": []
+    },
+    {
+      "key": "cmd.suggest.toggle.off",
+      "en": "Turn off suggesting mode",
+      "vars": []
+    },
+    {
+      "key": "cmd.suggest.toggle.hint",
+      "en": "Record edits in the source editor as CriticMarkup suggestions",
+      "vars": []
+    },
+    {
+      "key": "cmd.suggest.accept",
+      "en": "Accept suggestion at cursor",
+      "vars": []
+    },
+    {
+      "key": "cmd.suggest.accept.hint",
+      "en": "Apply the tracked change under the cursor",
+      "vars": []
+    },
+    {
+      "key": "cmd.suggest.reject",
+      "en": "Reject suggestion at cursor",
+      "vars": []
+    },
+    {
+      "key": "cmd.suggest.reject.hint",
+      "en": "Discard the tracked change under the cursor",
+      "vars": []
+    },
+    {
+      "key": "cmd.suggest.acceptAll",
+      "en": "Accept all suggestions",
+      "vars": []
+    },
+    {
+      "key": "cmd.suggest.rejectAll",
+      "en": "Reject all suggestions",
+      "vars": []
+    },
+    {
+      "key": "cmd.suggest.next",
+      "en": "Next suggestion",
+      "vars": []
+    },
+    {
+      "key": "cmd.suggest.prev",
+      "en": "Previous suggestion",
+      "vars": []
+    },
+    {
+      "key": "suggest.needsSource",
+      "en": "Switch to Source or Split view to work with suggestions at the cursor",
+      "vars": []
+    },
+    {
+      "key": "suggest.noneAtCursor",
+      "en": "No suggestion at the cursor",
+      "vars": []
+    },
+    {
+      "key": "suggest.none",
+      "en": "This document has no suggestions",
       "vars": []
     },
     {
@@ -2505,6 +2758,11 @@
     {
       "key": "ai.prompt.submit",
       "en": "Go",
+      "vars": []
+    },
+    {
+      "key": "ai.prompt.historyHint",
+      "en": "↑↓ history",
       "vars": []
     },
     {
@@ -3516,6 +3774,1045 @@
     {
       "key": "group.plugins",
       "en": "Plugins",
+      "vars": []
+    },
+    {
+      "key": "cmd.edit.formatDocument",
+      "en": "Format document",
+      "vars": []
+    },
+    {
+      "key": "cmd.edit.formatDocument.hint",
+      "en": "Prettier: tidy Markdown, frontmatter and fenced code",
+      "vars": []
+    },
+    {
+      "key": "cmd.edit.formatCodeBlock",
+      "en": "Format code block at cursor",
+      "vars": []
+    },
+    {
+      "key": "cmd.edit.formatCodeBlock.hint",
+      "en": "Prettier: format the fenced block under the cursor",
+      "vars": []
+    },
+    {
+      "key": "format.noFormatter",
+      "en": "No formatter for {lang}",
+      "vars": [
+        "lang"
+      ]
+    },
+    {
+      "key": "format.failed",
+      "en": "Formatting failed: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "format.unchanged",
+      "en": "Already formatted",
+      "vars": []
+    },
+    {
+      "key": "format.noBlock",
+      "en": "Place the cursor inside a fenced code block",
+      "vars": []
+    },
+    {
+      "key": "format.needsSource",
+      "en": "Switch to Source or Split view to format a code block",
+      "vars": []
+    },
+    {
+      "key": "billing.aiQuota.exceeded",
+      "en": "You've used all {limit} AI prompts for this month. Upgrade for more.",
+      "vars": [
+        "limit"
+      ]
+    },
+    {
+      "key": "billing.upgrade.auditLog",
+      "en": "The audit log is available on the Team plan.",
+      "vars": []
+    },
+    {
+      "key": "billing.upgrade.persistentCollab",
+      "en": "A persistent collaboration server is a Pro feature. Sessions use peer-to-peer WebRTC.",
+      "vars": []
+    },
+    {
+      "key": "billing.upgrade.close",
+      "en": "Close",
+      "vars": []
+    },
+    {
+      "key": "collab.persistent.label",
+      "en": "Persistent server (y-websocket)",
+      "vars": []
+    },
+    {
+      "key": "collab.persistent.hint",
+      "en": "Optional. Keeps documents synced when no peer is online.",
+      "vars": []
+    },
+    {
+      "key": "toast.learnMore",
+      "en": "Learn more",
+      "vars": []
+    },
+    {
+      "key": "toast.region",
+      "en": "Notifications",
+      "vars": []
+    },
+    {
+      "key": "auth.accountMenu",
+      "en": "Account menu for {user}",
+      "vars": [
+        "user"
+      ]
+    },
+    {
+      "key": "auth.status.loading",
+      "en": "Checking sign-in…",
+      "vars": []
+    },
+    {
+      "key": "auth.status.loading.hint",
+      "en": "Lumen is restoring your session.",
+      "vars": []
+    },
+    {
+      "key": "auth.status.signedIn",
+      "en": "Signed in",
+      "vars": []
+    },
+    {
+      "key": "auth.status.signedIn.hint",
+      "en": "Signed in as {user}.",
+      "vars": [
+        "user"
+      ]
+    },
+    {
+      "key": "auth.status.signedIn.hintAnon",
+      "en": "Your account session is active.",
+      "vars": []
+    },
+    {
+      "key": "auth.status.signedOut",
+      "en": "Signed out",
+      "vars": []
+    },
+    {
+      "key": "auth.status.signedOut.hint",
+      "en": "Sign in to unlock cloud sync, persistent rooms and Smart search. Your local files keep working.",
+      "vars": []
+    },
+    {
+      "key": "auth.status.notConfigured",
+      "en": "Sign-in not configured",
+      "vars": []
+    },
+    {
+      "key": "auth.status.notConfigured.hint",
+      "en": "This build runs in local-only mode — everything works offline. To enable accounts, set the auth environment variables and rebuild.",
+      "vars": []
+    },
+    {
+      "key": "auth.status.error",
+      "en": "Sign-in error",
+      "vars": []
+    },
+    {
+      "key": "auth.error.network",
+      "en": "Can't reach the sign-in service. Check your connection, VPN or proxy and try again — Lumen keeps working locally meanwhile.",
+      "vars": []
+    },
+    {
+      "key": "auth.error.invalidCredentials",
+      "en": "The email or password is incorrect. Check them or reset your password.",
+      "vars": []
+    },
+    {
+      "key": "auth.error.sessionExpired",
+      "en": "Your session expired. Sign in again — your local documents are untouched.",
+      "vars": []
+    },
+    {
+      "key": "auth.error.ssoNoConnection",
+      "en": "No SSO organization is set up for that domain. Check the spelling or ask your admin to add it.",
+      "vars": []
+    },
+    {
+      "key": "auth.error.ssoStateMismatch",
+      "en": "The sign-in link expired or was opened in another browser. Start the SSO sign-in again.",
+      "vars": []
+    },
+    {
+      "key": "auth.error.ssoDenied",
+      "en": "Your identity provider refused the sign-in. Ask your IT admin to give you access to Lumen.",
+      "vars": []
+    },
+    {
+      "key": "auth.error.unknown",
+      "en": "Something went wrong while signing in. Try again; if it keeps happening, see the troubleshooting guide.",
+      "vars": []
+    },
+    {
+      "key": "auth.sso.success",
+      "en": "Signed in with SSO",
+      "vars": []
+    },
+    {
+      "key": "auth.sso.failed",
+      "en": "SSO sign-in failed",
+      "vars": []
+    },
+    {
+      "key": "auth.dialog.signInTitle",
+      "en": "Sign in",
+      "vars": []
+    },
+    {
+      "key": "auth.dialog.signUpTitle",
+      "en": "Create an account",
+      "vars": []
+    },
+    {
+      "key": "auth.dialog.intro",
+      "en": "Sign-in is optional — Lumen works fully without an account. Sign in to unlock persistent collab rooms, cloud sync, and semantic search.",
+      "vars": []
+    },
+    {
+      "key": "auth.dialog.email",
+      "en": "Email",
+      "vars": []
+    },
+    {
+      "key": "auth.dialog.password",
+      "en": "Password",
+      "vars": []
+    },
+    {
+      "key": "auth.dialog.createAccount",
+      "en": "Create account",
+      "vars": []
+    },
+    {
+      "key": "auth.dialog.or",
+      "en": "or",
+      "vars": []
+    },
+    {
+      "key": "auth.dialog.google",
+      "en": "Continue with Google",
+      "vars": []
+    },
+    {
+      "key": "auth.dialog.github",
+      "en": "Continue with GitHub",
+      "vars": []
+    },
+    {
+      "key": "auth.dialog.needAccount",
+      "en": "Need an account? Sign up",
+      "vars": []
+    },
+    {
+      "key": "auth.dialog.haveAccount",
+      "en": "Have an account? Sign in",
+      "vars": []
+    },
+    {
+      "key": "auth.dialog.ssoDomain",
+      "en": "Work email domain (SSO)",
+      "vars": []
+    },
+    {
+      "key": "auth.dialog.ssoContinue",
+      "en": "Continue with SSO",
+      "vars": []
+    },
+    {
+      "key": "auth.dialog.close",
+      "en": "Close",
+      "vars": []
+    },
+    {
+      "key": "cmd.settings.trustedKeys",
+      "en": "Trusted plugin signing keys…",
+      "vars": []
+    },
+    {
+      "key": "cmd.settings.trustedKeys.hint",
+      "en": "List, add or remove the Ed25519 keys plugins must be signed with",
+      "vars": []
+    },
+    {
+      "key": "trustedKeys.title",
+      "en": "Trusted signing keys",
+      "vars": []
+    },
+    {
+      "key": "trustedKeys.close",
+      "en": "Close",
+      "vars": []
+    },
+    {
+      "key": "trustedKeys.intro",
+      "en": "Plugins install only when signed by a key listed here. Compare the fingerprint with the one the publisher lists before trusting a key.",
+      "vars": []
+    },
+    {
+      "key": "trustedKeys.section.user",
+      "en": "Your keys",
+      "vars": []
+    },
+    {
+      "key": "trustedKeys.section.builtin",
+      "en": "Built-in keys",
+      "vars": []
+    },
+    {
+      "key": "trustedKeys.builtinBadge",
+      "en": "Built-in",
+      "vars": []
+    },
+    {
+      "key": "trustedKeys.loading",
+      "en": "Loading keys…",
+      "vars": []
+    },
+    {
+      "key": "trustedKeys.empty",
+      "en": "You haven't trusted any keys yet.",
+      "vars": []
+    },
+    {
+      "key": "trustedKeys.add.label",
+      "en": "Add a public key",
+      "vars": []
+    },
+    {
+      "key": "trustedKeys.add.help",
+      "en": "Paste an Ed25519 public key as PEM or base64 SPKI.",
+      "vars": []
+    },
+    {
+      "key": "trustedKeys.add.submit",
+      "en": "Trust key",
+      "vars": []
+    },
+    {
+      "key": "trustedKeys.error.empty",
+      "en": "Paste a public key first.",
+      "vars": []
+    },
+    {
+      "key": "trustedKeys.error.notBase64",
+      "en": "That doesn't look like a PEM or base64 key — check that you copied the whole block.",
+      "vars": []
+    },
+    {
+      "key": "trustedKeys.error.notEd25519",
+      "en": "Not an Ed25519 public key. Only Ed25519 keys (44-byte SPKI) are accepted.",
+      "vars": []
+    },
+    {
+      "key": "trustedKeys.added",
+      "en": "Key trusted",
+      "vars": []
+    },
+    {
+      "key": "trustedKeys.alreadyTrusted",
+      "en": "This key is already trusted",
+      "vars": []
+    },
+    {
+      "key": "trustedKeys.saveFailed",
+      "en": "Couldn't save the key: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "trustedKeys.removed",
+      "en": "Key removed",
+      "vars": []
+    },
+    {
+      "key": "trustedKeys.remove.title",
+      "en": "Remove key",
+      "vars": []
+    },
+    {
+      "key": "trustedKeys.remove.confirm",
+      "en": "Stop trusting key {fingerprint}…? Plugins signed only with it will no longer install.",
+      "vars": [
+        "fingerprint"
+      ]
+    },
+    {
+      "key": "trustedKeys.remove.aria",
+      "en": "Remove key {fingerprint}",
+      "vars": [
+        "fingerprint"
+      ]
+    },
+    {
+      "key": "cmd.settings.organization",
+      "en": "Organization settings…",
+      "vars": []
+    },
+    {
+      "key": "cmd.settings.organization.hint",
+      "en": "Name, allowed email domains, SSO status, members and audit log",
+      "vars": []
+    },
+    {
+      "key": "org.title",
+      "en": "Organization",
+      "vars": []
+    },
+    {
+      "key": "org.close",
+      "en": "Close",
+      "vars": []
+    },
+    {
+      "key": "org.localOnly",
+      "en": "Local only",
+      "vars": []
+    },
+    {
+      "key": "org.localOnly.hint",
+      "en": "These settings are stored only in this browser. Connect SSO to manage your organization across devices.",
+      "vars": []
+    },
+    {
+      "key": "org.name.label",
+      "en": "Organization name",
+      "vars": []
+    },
+    {
+      "key": "org.name.placeholder",
+      "en": "Acme Inc.",
+      "vars": []
+    },
+    {
+      "key": "org.domains.label",
+      "en": "Allowed email domains",
+      "vars": []
+    },
+    {
+      "key": "org.domains.help",
+      "en": "Members sign in with addresses on these domains. The first one is suggested for SSO sign-in.",
+      "vars": []
+    },
+    {
+      "key": "org.domains.add",
+      "en": "Add",
+      "vars": []
+    },
+    {
+      "key": "org.domains.invalid",
+      "en": "Enter a domain like acme.com.",
+      "vars": []
+    },
+    {
+      "key": "org.domains.duplicate",
+      "en": "{domain} is already in the list.",
+      "vars": [
+        "domain"
+      ]
+    },
+    {
+      "key": "org.domains.remove",
+      "en": "Remove {domain}",
+      "vars": [
+        "domain"
+      ]
+    },
+    {
+      "key": "org.save",
+      "en": "Save",
+      "vars": []
+    },
+    {
+      "key": "org.saved",
+      "en": "Organization settings saved",
+      "vars": []
+    },
+    {
+      "key": "org.saveFailed",
+      "en": "Couldn't save — browser storage is unavailable (private mode?).",
+      "vars": []
+    },
+    {
+      "key": "org.sso.title",
+      "en": "Single sign-on",
+      "vars": []
+    },
+    {
+      "key": "org.sso.notConfigured",
+      "en": "SSO not configured",
+      "vars": []
+    },
+    {
+      "key": "org.sso.notConfigured.hint",
+      "en": "Deploy the SSO worker and set VITE_WORKOS_ENDPOINT to let members sign in with your identity provider.",
+      "vars": []
+    },
+    {
+      "key": "org.sso.configured",
+      "en": "SSO available — not signed in",
+      "vars": []
+    },
+    {
+      "key": "org.sso.configured.hint",
+      "en": "The SSO worker is set up. Sign in with your work domain to connect this organization.",
+      "vars": []
+    },
+    {
+      "key": "org.sso.connected",
+      "en": "SSO connected",
+      "vars": []
+    },
+    {
+      "key": "org.sso.connected.hint",
+      "en": "Signed in through your identity provider (organization {org}).",
+      "vars": [
+        "org"
+      ]
+    },
+    {
+      "key": "org.sso.account",
+      "en": "Account",
+      "vars": []
+    },
+    {
+      "key": "org.members.title",
+      "en": "Members",
+      "vars": []
+    },
+    {
+      "key": "org.members.you",
+      "en": "You",
+      "vars": []
+    },
+    {
+      "key": "org.members.directoryHint",
+      "en": "The full member list appears once Directory Sync is enabled for your organization.",
+      "vars": []
+    },
+    {
+      "key": "org.members.empty.title",
+      "en": "Connect SSO to see members",
+      "vars": []
+    },
+    {
+      "key": "org.members.empty.hint",
+      "en": "Members come from your identity provider. In local-only mode there is nobody else to list.",
+      "vars": []
+    },
+    {
+      "key": "org.members.empty.cta",
+      "en": "How to connect SSO",
+      "vars": []
+    },
+    {
+      "key": "org.audit.open",
+      "en": "Open audit log",
+      "vars": []
+    },
+    {
+      "key": "cmd.settings.theme",
+      "en": "Theme settings…",
+      "vars": []
+    },
+    {
+      "key": "cmd.settings.theme.hint",
+      "en": "Accent color, editor font, size, line height, content width and presets",
+      "vars": []
+    },
+    {
+      "key": "themeSettings.title",
+      "en": "Theme",
+      "vars": []
+    },
+    {
+      "key": "themeSettings.close",
+      "en": "Close",
+      "vars": []
+    },
+    {
+      "key": "themeSettings.preview",
+      "en": "Live preview",
+      "vars": []
+    },
+    {
+      "key": "themeSettings.preview.heading",
+      "en": "# Heading in the accent color",
+      "vars": []
+    },
+    {
+      "key": "themeSettings.preview.body",
+      "en": "Body text uses the editor font, size and line height you pick below.",
+      "vars": []
+    },
+    {
+      "key": "themeSettings.preview.muted",
+      "en": "Secondary text stays readable too.",
+      "vars": []
+    },
+    {
+      "key": "themeSettings.presets",
+      "en": "Presets",
+      "vars": []
+    },
+    {
+      "key": "themeSettings.preset.default",
+      "en": "Default",
+      "vars": []
+    },
+    {
+      "key": "themeSettings.preset.sepia",
+      "en": "Sepia",
+      "vars": []
+    },
+    {
+      "key": "themeSettings.preset.nord",
+      "en": "Nord",
+      "vars": []
+    },
+    {
+      "key": "themeSettings.preset.highContrast",
+      "en": "High contrast",
+      "vars": []
+    },
+    {
+      "key": "themeSettings.accent",
+      "en": "Accent color",
+      "vars": []
+    },
+    {
+      "key": "themeSettings.accent.picker",
+      "en": "Pick accent color",
+      "vars": []
+    },
+    {
+      "key": "themeSettings.accent.hex",
+      "en": "Accent color (hex)",
+      "vars": []
+    },
+    {
+      "key": "themeSettings.accent.usePreset",
+      "en": "Use preset accent",
+      "vars": []
+    },
+    {
+      "key": "themeSettings.accent.invalid",
+      "en": "Enter a hex color like #3366ff.",
+      "vars": []
+    },
+    {
+      "key": "themeSettings.typography",
+      "en": "Typography & layout",
+      "vars": []
+    },
+    {
+      "key": "themeSettings.font",
+      "en": "Editor font",
+      "vars": []
+    },
+    {
+      "key": "themeSettings.font.system",
+      "en": "System sans-serif",
+      "vars": []
+    },
+    {
+      "key": "themeSettings.font.serif",
+      "en": "Serif",
+      "vars": []
+    },
+    {
+      "key": "themeSettings.font.mono",
+      "en": "Monospace",
+      "vars": []
+    },
+    {
+      "key": "themeSettings.font.custom",
+      "en": "Custom…",
+      "vars": []
+    },
+    {
+      "key": "themeSettings.font.customName",
+      "en": "Font name",
+      "vars": []
+    },
+    {
+      "key": "themeSettings.font.customHelp",
+      "en": "Any font installed on this device, e.g. Fira Code. Falls back to monospace.",
+      "vars": []
+    },
+    {
+      "key": "themeSettings.font.customInvalid",
+      "en": "Use letters, digits, spaces, hyphens or underscores only (max 64).",
+      "vars": []
+    },
+    {
+      "key": "themeSettings.fontSize",
+      "en": "Font size",
+      "vars": []
+    },
+    {
+      "key": "themeSettings.lineHeight",
+      "en": "Line height",
+      "vars": []
+    },
+    {
+      "key": "themeSettings.contentWidth",
+      "en": "Content width",
+      "vars": []
+    },
+    {
+      "key": "themeSettings.px",
+      "en": "{n} px",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "themeSettings.ch",
+      "en": "{n} ch",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "themeSettings.contrast",
+      "en": "Contrast (WCAG AA)",
+      "vars": []
+    },
+    {
+      "key": "themeSettings.contrast.text",
+      "en": "Text on background",
+      "vars": []
+    },
+    {
+      "key": "themeSettings.contrast.muted",
+      "en": "Secondary text",
+      "vars": []
+    },
+    {
+      "key": "themeSettings.contrast.accent",
+      "en": "Accent on background",
+      "vars": []
+    },
+    {
+      "key": "themeSettings.contrast.onAccent",
+      "en": "Text on accent buttons",
+      "vars": []
+    },
+    {
+      "key": "themeSettings.contrast.pass",
+      "en": "Pass",
+      "vars": []
+    },
+    {
+      "key": "themeSettings.contrast.fail",
+      "en": "Needs {min}:1",
+      "vars": [
+        "min"
+      ]
+    },
+    {
+      "key": "themeSettings.export",
+      "en": "Export JSON",
+      "vars": []
+    },
+    {
+      "key": "themeSettings.import",
+      "en": "Import JSON",
+      "vars": []
+    },
+    {
+      "key": "themeSettings.reset",
+      "en": "Reset to default",
+      "vars": []
+    },
+    {
+      "key": "themeSettings.import.done",
+      "en": "Theme imported.",
+      "vars": []
+    },
+    {
+      "key": "themeSettings.import.error.tooLarge",
+      "en": "That file is too large to be a theme (max 8 KB).",
+      "vars": []
+    },
+    {
+      "key": "themeSettings.import.error.notJson",
+      "en": "That file isn't valid JSON.",
+      "vars": []
+    },
+    {
+      "key": "themeSettings.import.error.notObject",
+      "en": "A theme file must contain a single JSON object.",
+      "vars": []
+    },
+    {
+      "key": "themeSettings.import.error.badVersion",
+      "en": "Not a Lumen theme file (missing \"lumenTheme\": 1).",
+      "vars": []
+    },
+    {
+      "key": "themeSettings.import.error.unknownKey",
+      "en": "Unknown setting \"{key}\" — the file was rejected.",
+      "vars": [
+        "key"
+      ]
+    },
+    {
+      "key": "themeSettings.import.error.invalidColor",
+      "en": "\"{key}\" must be a hex color like #3366ff.",
+      "vars": [
+        "key"
+      ]
+    },
+    {
+      "key": "themeSettings.import.error.invalidValue",
+      "en": "\"{key}\" has an invalid or out-of-range value.",
+      "vars": [
+        "key"
+      ]
+    },
+    {
+      "key": "chart.label.line",
+      "en": "{y} over {x}",
+      "vars": [
+        "y",
+        "x"
+      ]
+    },
+    {
+      "key": "chart.label.lineBy",
+      "en": "{y} over {x} by {by}",
+      "vars": [
+        "y",
+        "x",
+        "by"
+      ]
+    },
+    {
+      "key": "chart.label.bar",
+      "en": "{y} by {x}",
+      "vars": [
+        "y",
+        "x"
+      ]
+    },
+    {
+      "key": "chart.label.barTop",
+      "en": "Top {n} {x} by {y}",
+      "vars": [
+        "n",
+        "x",
+        "y"
+      ]
+    },
+    {
+      "key": "chart.label.stackedBar",
+      "en": "{y} by {x} (stacked)",
+      "vars": [
+        "y",
+        "x"
+      ]
+    },
+    {
+      "key": "chart.label.pie",
+      "en": "{y} share by {x}",
+      "vars": [
+        "y",
+        "x"
+      ]
+    },
+    {
+      "key": "chart.label.scatter",
+      "en": "{y} vs {x}",
+      "vars": [
+        "y",
+        "x"
+      ]
+    },
+    {
+      "key": "chart.label.scatterBy",
+      "en": "{y} vs {x} by {by}",
+      "vars": [
+        "y",
+        "x",
+        "by"
+      ]
+    },
+    {
+      "key": "chart.label.histogram",
+      "en": "Distribution of {x}",
+      "vars": [
+        "x"
+      ]
+    },
+    {
+      "key": "chart.label.map",
+      "en": "Map of {n} points",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "chart.label.radar",
+      "en": "{y} per {x}",
+      "vars": [
+        "y",
+        "x"
+      ]
+    },
+    {
+      "key": "chart.label.summary",
+      "en": "Average of numeric columns",
+      "vars": []
+    },
+    {
+      "key": "chart.reason.line",
+      "en": "{x} is a time axis with {n} points — a line shows the trend.",
+      "vars": [
+        "x",
+        "n"
+      ]
+    },
+    {
+      "key": "chart.reason.lineBy",
+      "en": "{x} is a time axis with {n} points; one line per {by} ({k} series).",
+      "vars": [
+        "x",
+        "n",
+        "by",
+        "k"
+      ]
+    },
+    {
+      "key": "chart.reason.bar",
+      "en": "{n} categories compared on {y}.",
+      "vars": [
+        "n",
+        "y"
+      ]
+    },
+    {
+      "key": "chart.reason.barGrouped",
+      "en": "{n} categories × {k} measures, side by side.",
+      "vars": [
+        "n",
+        "k"
+      ]
+    },
+    {
+      "key": "chart.reason.barTop",
+      "en": "{total} categories is too many to read — showing the top {n}.",
+      "vars": [
+        "total",
+        "n"
+      ]
+    },
+    {
+      "key": "chart.reason.stackedBar",
+      "en": "{k} measures in the same unit — stacking shows each category’s total and its parts.",
+      "vars": [
+        "k"
+      ]
+    },
+    {
+      "key": "chart.reason.stackedBarMixed",
+      "en": "{k} measures stacked — their scales differ, so totals may mislead.",
+      "vars": [
+        "k"
+      ]
+    },
+    {
+      "key": "chart.reason.pieSum",
+      "en": "{n} parts adding up to {total} — a whole split into shares.",
+      "vars": [
+        "n",
+        "total"
+      ]
+    },
+    {
+      "key": "chart.reason.piePercent",
+      "en": "{y} is a percentage across {n} slices.",
+      "vars": [
+        "y",
+        "n"
+      ]
+    },
+    {
+      "key": "chart.reason.pie",
+      "en": "Only {n} categories — small enough to compare as slices.",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "chart.reason.scatter",
+      "en": "Two numeric columns — see how {y} relates to {x}.",
+      "vars": [
+        "y",
+        "x"
+      ]
+    },
+    {
+      "key": "chart.reason.scatterCorr",
+      "en": "{x} and {y} are strongly correlated (r = {r}).",
+      "vars": [
+        "x",
+        "y",
+        "r"
+      ]
+    },
+    {
+      "key": "chart.reason.histogram",
+      "en": "{n} values of {x} — {k} bins show how they are distributed.",
+      "vars": [
+        "n",
+        "x",
+        "k"
+      ]
+    },
+    {
+      "key": "chart.reason.map",
+      "en": "{lat} / {lon} look like coordinates — plot them on a map.",
+      "vars": [
+        "lat",
+        "lon"
+      ]
+    },
+    {
+      "key": "chart.reason.radar",
+      "en": "{k} measures for {n} items — compare their profiles.",
+      "vars": [
+        "k",
+        "n"
+      ]
+    },
+    {
+      "key": "chart.reason.summary",
+      "en": "No category or time column — comparing column averages.",
+      "vars": []
+    },
+    {
+      "key": "chart.alternatives",
+      "en": "Chart suggestions",
       "vars": []
     }
   ]

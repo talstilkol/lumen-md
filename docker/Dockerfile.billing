@@ -2,7 +2,7 @@
 # environment via wrangler local-mode, exposing port 4446. For self-hosted
 # deployments where Cloudflare Workers isn't an option.
 
-FROM node:20-alpine
+FROM node:22-alpine
 WORKDIR /app
 
 COPY edge-workers/billing/package.json edge-workers/billing/package-lock.json* ./
