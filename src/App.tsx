@@ -534,8 +534,16 @@ export default function App() {
 
   const pageView = useAppStore((s) => s.pageView);
 
-  // Debounce preview rendering — keeps typing smooth for large docs
-  const deferredContent = useDeferredValue(doc.content);
+  // Debounce preview rendering — keeps typing smooth for large docs. The
+  // document identity is deferred together with its text so the preview
+  // never pairs one document's markdown with another's identity.
+  const currentDocKey = doc.workspaceName ?? doc.name ?? null;
+  const previewSource = useMemo(
+    () => ({ content: doc.content, docKey: currentDocKey }),
+    [doc.content, currentDocKey],
+  );
+  const deferredPreview = useDeferredValue(previewSource);
+  const deferredContent = deferredPreview.content;
 
   const activeFile = doc.name;
 
@@ -727,6 +735,7 @@ export default function App() {
             mode={mode}
             docContent={doc.content}
             deferredContent={deferredContent}
+            deferredDocKey={deferredPreview.docKey}
             editorRef={editorRef}
             vimEnabled={vimEnabled}
             spellCheck={spellCheck}
@@ -962,6 +971,7 @@ export default function App() {
             mode={mode}
             docContent={doc.content}
             deferredContent={deferredContent}
+            deferredDocKey={deferredPreview.docKey}
             editorRef={editorRef}
             vimEnabled={vimEnabled}
             spellCheck={spellCheck}

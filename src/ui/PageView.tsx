@@ -13,9 +13,10 @@ const CONTENT_HEIGHT = PAGE_HEIGHT - PAGE_PADDING * 2; // = 912px
 
 interface Props {
   markdownText: string;
+  docKey?: string | null;
 }
 
-export function PageView({ markdownText }: Props) {
+export function PageView({ markdownText, docKey = null }: Props) {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -129,7 +130,7 @@ export function PageView({ markdownText }: Props) {
           pointerEvents: "none",
         }}
       >
-        <Preview markdownText={markdownText} />
+        <Preview markdownText={markdownText} docKey={docKey} />
       </div>
 
       {/* Page container */}
@@ -183,7 +184,7 @@ export function PageView({ markdownText }: Props) {
                   transform: `translateY(-${(pageNum - 1) * CONTENT_HEIGHT}px)`,
                 }}
               >
-                <Preview markdownText={markdownText} />
+                <Preview markdownText={markdownText} docKey={docKey} />
               </div>
             </div>
 

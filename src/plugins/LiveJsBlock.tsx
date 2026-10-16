@@ -3,9 +3,10 @@
  * stdout-like console output from a dedicated worker context.
  */
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useContext } from "react";
 import { Code2, Play, RotateCcw, Trash2 } from "lucide-react";
 import { t } from "../i18n";
+import { PreviewDocKeyContext } from "../renderer/previewDoc";
 import { useAppStore } from "../store/useStore";
 import { hoistTopLevelBindings } from "./liveJsScope";
 import { SharedScopeRegistry, sharedScopeName } from "./liveJsShared";
@@ -199,8 +200,13 @@ export default function LiveJsBlock({ source, meta }: Props) {
   const heightMatch = meta?.match(/height=(\d+)/);
   const height = heightMatch ? Number(heightMatch[1]) : 240;
   const sharedName = sharedScopeName(meta);
-  // Scope per open document: two docs never see each other's globals.
-  const docKey = useAppStore((s) => s.doc.workspaceName ?? s.doc.name);
+  // Scope per open document: two docs never see each other's globals. Use
+  // the document this preview tree was rendered from — while switching
+  // tabs the old tree is still on screen and must not run in the new
+  // document's scope. Fall back to the store outside a document preview.
+  const previewDocKey = useContext(PreviewDocKeyContext);
+  const storeDocKey = useAppStore((s) => s.doc.workspaceName ?? s.doc.name);
+  const docKey = previewDocKey ?? storeDocKey;
   const scopeKey = sharedName ? `${docKey}\u0000${sharedName}` : null;
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const [showSource, setShowSource] = useState(false);

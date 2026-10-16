@@ -56,6 +56,8 @@ interface Props {
   mode: ViewMode;
   docContent: string;
   deferredContent: string;
+  /** Document identity matching `deferredContent` (they lag together). */
+  deferredDocKey?: string | null;
   editorRef: React.RefObject<EditorHandle | null>;
   vimEnabled: boolean;
   spellCheck: boolean;
@@ -74,6 +76,7 @@ export function EditorLayout({
   mode,
   docContent,
   deferredContent,
+  deferredDocKey = null,
   editorRef,
   vimEnabled,
   spellCheck,
@@ -376,10 +379,10 @@ export function EditorLayout({
         >
           {pageView ? (
             <Suspense fallback={<div style={{padding:'2rem',color:'hsl(var(--fg-muted))'}}>Loading page view…</div>}>
-              <PageView markdownText={deferredContent} />
+              <PageView markdownText={deferredContent} docKey={deferredDocKey} />
             </Suspense>
           ) : (
-            <Preview markdownText={deferredContent} />
+            <Preview markdownText={deferredContent} docKey={deferredDocKey} />
           )}
         </section>
       )}

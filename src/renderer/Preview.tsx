@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { renderMarkdown, renderMarkdownFast, extractFrontmatter } from "./pipeline";
+import { PreviewDocKeyContext } from "./previewDoc";
 import { scheduleIdle } from "../lib/idle";
 import { CopyButtonHandler } from "./components";
 import { Frontmatter } from "../ui/Frontmatter";
@@ -8,6 +9,8 @@ import { t } from "../i18n";
 
 interface Props {
   markdownText: string;
+  /** Identity of the document `markdownText` belongs to (see ./previewDoc). */
+  docKey?: string | null;
   /** Re-render is debounced by this many ms */
   debounceMs?: number;
 }
@@ -28,7 +31,7 @@ function safeFastRender(markdownText: string): React.ReactElement | null {
   }
 }
 
-export function Preview({ markdownText }: Props) {
+export function Preview({ markdownText, docKey = null }: Props) {
   // First paint (A7 levers 1 + 3): render the text synchronously on the
   // very first commit with the chunk-free pipeline, so the LCP element
   // (the welcome doc's headings / paragraphs) never waits on Shiki, KaTeX
@@ -38,6 +41,9 @@ export function Preview({ markdownText }: Props) {
   const [tree, setTree] = useState<React.ReactElement | null>(() =>
     fullPipelineWarm ? null : safeFastRender(markdownText),
   );
+  // The document the *displayed* tree was rendered from — it lags `docKey`
+  // until the async render for the new document lands.
+  const [treeDocKey, setTreeDocKey] = useState<string | null>(docKey);
   const [error, setError] = useState<string | null>(null);
   const [themeVersion, setThemeVersion] = useState(0);
   const seqRef = useRef(0);
@@ -46,12 +52,14 @@ export function Preview({ markdownText }: Props) {
   useEffect(() => {
     const seq = ++seqRef.current;
     const isDark = () => document.documentElement.classList.contains("dark");
+    const renderedFor = docKey;
     const run = () => {
       renderMarkdown(markdownText, isDark)
         .then((el) => {
           if (seq !== seqRef.current) return;
           fullPipelineWarm = true;
           setTree(el);
+          setTreeDocKey(renderedFor);
           setError(null);
         })
         .catch((e: Error) => {
@@ -69,9 +77,10 @@ export function Preview({ markdownText }: Props) {
     if (fastTextRef.current !== markdownText) {
       fastTextRef.current = markdownText;
       setTree(safeFastRender(markdownText));
+      setTreeDocKey(renderedFor);
     }
     return scheduleIdle(run, 1500);
-  }, [markdownText, themeVersion]);
+  }, [markdownText, themeVersion, docKey]);
 
   // Re-process when theme changes so Shiki picks up the right theme tokens.
   useEffect(() => {
@@ -123,7 +132,7 @@ export function Preview({ markdownText }: Props) {
             <p style={{ marginTop: "4px", fontSize: "12px", opacity: 0.8 }}>{t("errorBoundary.renderDetail")}</p>
           </div>
         }>
-          {tree}
+          <PreviewDocKeyContext.Provider value={treeDocKey}>{tree}</PreviewDocKeyContext.Provider>
         </ErrorBoundary>
       </div>
     </div>
