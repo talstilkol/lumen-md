@@ -72,6 +72,41 @@ describe("rubyRuntime helpers", () => {
     expect(msgs.at(-1)?.type).toBe("done");
   });
 
+  it("batches many short writes into few messages", async () => {
+    const msgs: RubyWorkerMessage[] = [];
+    const handle = createRubyHandler({
+      loadVm: async (printer) => ({
+        eval: () => {
+          for (let i = 0; i < 10_000; i++) printer.stdout("x\n");
+          printer.stderr("warn\n");
+          return { toString: () => "", call: () => ({ toString: () => "true", call: () => ({}) as never }) };
+        },
+      }),
+      post: (m) => msgs.push(m),
+    });
+    await handle({ type: "run", runId: 3, source: "" });
+    const outputs = msgs.filter((m) => m.type === "output") as Array<{ stream: string; text: string }>;
+    expect(outputs.length).toBeLessThan(10);
+    expect(outputs.filter((o) => o.stream === "out").map((o) => o.text).join("")).toBe("x\n".repeat(10_000));
+    expect(outputs.at(-1)).toMatchObject({ stream: "err", text: "warn\n" });
+  });
+
+  it("the final result shares the output budget", async () => {
+    const msgs: RubyWorkerMessage[] = [];
+    const handle = createRubyHandler({
+      loadVm: async (printer) => ({
+        eval: () => {
+          printer.stdout("y".repeat(MAX_OUTPUT_CHARS - 10));
+          return { toString: () => "z".repeat(MAX_OUTPUT_CHARS), call: () => ({ toString: () => "false", call: () => ({}) as never }) };
+        },
+      }),
+      post: (m) => msgs.push(m),
+    });
+    await handle({ type: "run", runId: 2, source: "" });
+    const result = msgs.find((m) => m.type === "result") as { text: string } | undefined;
+    expect(result?.text).toBe("z".repeat(10) + "… (truncated)");
+  });
+
   it("ignores malformed messages", async () => {
     const msgs: RubyWorkerMessage[] = [];
     const handle = createRubyHandler({ loadVm: () => Promise.reject(new Error("no")), post: (m) => msgs.push(m) });
@@ -138,6 +173,15 @@ describe("live-ruby on the real ruby.wasm runtime", () => {
     // The next run is unaffected.
     expect(await run("1 + 1")).toContainEqual({ type: "result", runId: 1, text: "2" });
   }, 120_000);
+
+  it("caps huge results and error messages inside Ruby", async () => {
+    const big = await run('"x" * 1_000_000');
+    const res = big.find((m) => m.type === "result");
+    expect(res && "text" in res ? res.text.length : 0).toBeLessThan(MAX_OUTPUT_CHARS + 50);
+    expect(res && "text" in res ? res.text : "").toMatch(/truncated\)$/);
+    const err = (await run('raise "y" * 1_000_000')).find((m) => m.type === "error");
+    expect(err && "message" in err ? err.message.length : 0).toBeLessThan(MAX_OUTPUT_CHARS + 500);
+  }, 60_000);
 
   it("gives every run a fresh VM", async () => {
     await run("$leak = 42");

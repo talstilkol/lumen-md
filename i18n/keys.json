@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-10-16T09:28:14.692Z",
+  "generated_at": "2026-10-16T20:01:45.243Z",
   "source": "src/i18n/index.ts (en bundle)",
-  "count": 945,
+  "count": 961,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -1786,6 +1786,88 @@
     },
     {
       "key": "block.liveR.state.timeout",
+      "en": "Timed out",
+      "vars": []
+    },
+    {
+      "key": "block.liveRuby.title",
+      "en": "Live Ruby",
+      "vars": []
+    },
+    {
+      "key": "block.liveRuby.run",
+      "en": "Run",
+      "vars": []
+    },
+    {
+      "key": "block.liveRuby.stop",
+      "en": "Stop",
+      "vars": []
+    },
+    {
+      "key": "block.liveRuby.clear",
+      "en": "Clear output",
+      "vars": []
+    },
+    {
+      "key": "block.liveRuby.prompt",
+      "en": "Click Run to execute this Ruby block. The first run downloads Ruby (~30 MB, cached afterwards).",
+      "vars": []
+    },
+    {
+      "key": "block.liveRuby.loading",
+      "en": "Loading Ruby…",
+      "vars": []
+    },
+    {
+      "key": "block.liveRuby.loadFailed",
+      "en": "Failed to load the Ruby runtime.",
+      "vars": []
+    },
+    {
+      "key": "block.liveRuby.loadTimeout",
+      "en": "Ruby took too long to load.",
+      "vars": []
+    },
+    {
+      "key": "block.liveRuby.timedOut",
+      "en": "Execution timed out after {ms} ms.",
+      "vars": [
+        "ms"
+      ]
+    },
+    {
+      "key": "block.liveRuby.stopped",
+      "en": "Stopped.",
+      "vars": []
+    },
+    {
+      "key": "block.liveRuby.state.idle",
+      "en": "Not run",
+      "vars": []
+    },
+    {
+      "key": "block.liveRuby.state.loading",
+      "en": "Loading…",
+      "vars": []
+    },
+    {
+      "key": "block.liveRuby.state.running",
+      "en": "Running…",
+      "vars": []
+    },
+    {
+      "key": "block.liveRuby.state.success",
+      "en": "Completed",
+      "vars": []
+    },
+    {
+      "key": "block.liveRuby.state.error",
+      "en": "Error",
+      "vars": []
+    },
+    {
+      "key": "block.liveRuby.state.timeout",
       "en": "Timed out",
       "vars": []
     },

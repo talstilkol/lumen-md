@@ -109,7 +109,7 @@ a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 <div class="page" dir="rtl" lang="he">
 
 <header class="top">
-  <div class="eyebrow">LUMEN-MD · MASTER PLAN · 16.10.2026 · 16:05</div>
+  <div class="eyebrow">LUMEN-MD · MASTER PLAN · 16.10.2026 · 17:30</div>
   <h1>תוכנית אב — Lumen</h1>
   <p>כל המשימות שנותרו בפרויקט, עם אחוז ביצוע, מי מבצע ואומדן שעות (נמוך / מרכזי / גבוה). מבוסס על <code>PLAN_STATUS.md</code>, <code>TASKS.md</code> ו-PR&nbsp;#106 כפי שהם בסוף 16.10.2026.</p>
   <div class="meta">
@@ -152,9 +152,9 @@ a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
   <p class="muted">אישרת את כל השינויים וביקשת שאחקור לבד את השאלות הפתוחות. אלה ההכרעות. מה שלא הצלחתי לאמת מסומן.</p>
   <div class="answers">
     <div class="answer">
-      <span class="q">דומיין: <code>lumen.md</code> או <code>lumen.app</code>?</span>
-      <p><b>המלצה: לבחור דומיין אחד בשם של הריפו (למשל <code>lumen-md.app</code>) ולא אף אחד מהשניים.</b> בקוד יש כיום ערבוב: 32 הפניות ל-<code>lumen.app</code> ו-27 ל-<code>lumen.md</code> (בעיקר תת-דומיינים: auth, audit, signal). "Lumen" הוא שם מסחרי תפוס בתחום (Lumen Technologies, ואפליקציית Lumen של MWM בחנות של Apple), כך שיש סיכון סימן מסחר. לסיומת ‎.md (מולדובה) מחיר פרימיום ויש סביבה מחלוקת משפטית על ניהולה.</p>
-      <span class="tag">לא אומת: זמינות הדומיינים ומחירם. בדיקת DNS מהסביבה שלי חסומה. צריך בדיקה אצל רשם (5 דק׳).</span>
+      <span class="q">דומיין — הוחלט: <code>lumen-md.app</code></span>
+      <p><b>נבחר <code>lumen-md.app</code></b> (PR #109 מעביר את כל הכתובות בקוד, כ-95 הפניות ב-39 קבצים). הנימוקים: זהה לשם הריפו והחבילה, ולכן אין צורך במיתוג מחדש. <code>.app</code> מחייב HTTPS (HSTS preload), מה שמתאים ל-PWA. השם "Lumen" לבדו צפוף מאוד (Lumen Technologies, LumenMD הרפואית, אפליקציות פתקים בשם Lumen), ו-<code>lumen.md</code> כבר בשימוש של מוצר אחר. חלופות לפי סדר: <code>lumenmd.app</code>, אחריה <code>lumen-md.dev</code>.</p>
+      <span class="tag">לא אומת: זמינות הדומיין. אין גישה לרשמים מהסביבה שלי. לפני הקנייה (Cloudflare Registrar, במחיר עלות) צריך לבדוק שהוא פנוי, כ-2 דקות. אם הוא תפוס, עוברים לחלופה הבאה ואני מעדכן את הקוד.</span>
     </div>
     <div class="answer">
       <span class="q">למזג את PR #106 ל-main?</span>
@@ -173,6 +173,22 @@ a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
       <span class="q">בדיקות TypeScript: להפעיל כברירת מחדל?</span>
       <p><b>הוחלט: לא, רק בהפעלה ידנית.</b> המהדר שוקל ~1.3MB דחוס. מי שמפעיל מוריד אותו פעם אחת, והוא לא נכנס לקבצי האופליין של האפליקציה.</p>
     </div>
+    <div class="answer">
+      <span class="q">C6 — חבילות npm ב-<code>live-js</code> (esm.sh)?</span>
+      <p><b>הוחלט: לא בונים.</b> טעינת קוד מ-CDN חיצוני מחייבת לפתוח את ה-CSP, וזה מבטל את ההגנה שעליה נשענות כל השפות החיות (R, Ruby, Python, Lua רצים מקוד מאוחסן עצמית). מי שצריך ספרייה יכול להדביק אותה כבלוק <code>live-js shared</code>. אם בעתיד יתבקש, הדרך היא bundle מקומי של חבילות נבחרות, לא CDN.</p>
+    </div>
+    <div class="answer">
+      <span class="q">C8 — Team workspaces, שוק ערכות נושא, פרסום לרשת: מתי?</span>
+      <p><b>הוחלט: אחרי הפריסה (E1–E3), כתוכנית נפרדת.</b> שלושתם תלויים בשרת חי, בחשבונות משתמשים ובחיוב. בנייה לפני הפריסה תהיה בלי בדיקה מול שרת אמיתי. הסדר אחרי הפריסה: פרסום לרשת (הקוד לפרסום כבר קיים) → Team workspaces → שוק ערכות נושא.</p>
+    </div>
+    <div class="answer">
+      <span class="q">Vite 8 ו-Tauri 2.11 — לשדרג?</span>
+      <p><b>הוחלט: כן, כל אחד ב-PR נפרד.</b> Vite 8 עובר ל-Rolldown, ולכן צריך להתאים את חלוקת ה-chunks ואת תוסף ה-PWA (גרסה 2). את Tauri 2.11 אי אפשר לקמפל בסביבה שלי (חסרות ספריות GTK), אז אוסיף ל-CI בדיקת קומפילציה של Tauri על Linux ואשדרג רק כשהיא ירוקה.</p>
+    </div>
+    <div class="answer">
+      <span class="q">מצב הצעות ב-WYSIWYG — לבנות מלא?</span>
+      <p><b>הוחלט ונבנה (P3):</b> הוספה ומחיקה הן סימונים (marks) בעורך. מחיקה משאירה את הטקסט מסומן, והקלדה על בחירה יוצרת החלפה. "קבל" ו"דחה" זמינים ליד הסמן, ויש מעבר בין הצעות. המסמך נשמר כ-CriticMarkup רגיל, ומעכשיו אפשר לעבוד במצב הצעות גם ב-WYSIWYG. מגבלה ידועה: שינויי מבנה (איחוד פסקאות) לא נרשמים כהצעה ונחסמים.</p>
+    </div>
   </div>
 </section>
 
@@ -189,13 +205,13 @@ a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
       <tbody>
         <tr><td class="mono">C1</td><td>מיזוג PR #106 ל-main</td><td><div class="bar"><div class="track"><div class="fill done" style="width:100%"></div></div><span class="pct">100%</span></div></td><td><span class="lvl L1">L1</span></td><td class="num">0 / 0 / 0</td><td>מוזג ל-main (62598c5)</td></tr>
         <tr><td class="mono">C2</td><td>הרחבת בדיקות TS: טיפוס ב-hover, בדיקת בלוקי <code>live-js</code>, הצהרות משותפות בין בלוקי <code>shared</code></td><td><div class="bar"><div class="track"><div class="fill done" style="width:100%"></div></div><span class="pct">100%</span></div></td><td><span class="lvl L1">L1</span></td><td class="num">0 / 0 / 0</td><td>נבנה ב-PR #107. בבלוקי <code>shared</code> כל בלוק נבדק רק מול הבלוקים שלפניו, הצהרה חוזרת מחליפה את הטיפוס, וכל בלוק קובע לעצמו <code>// @ts-check</code></td></tr>
-        <tr><td class="mono">C3</td><td>מצב הצעות (track changes) גם ב-WYSIWYG</td><td><div class="bar"><div class="track"><div class="fill" style="width:50%"></div></div><span class="pct">50%</span></div></td><td><span class="lvl L1">L1</span></td><td class="num">12 / 16 / 24</td><td>עובד בעורך המקור, כולל ייחוס מחבר</td></tr>
+        <tr><td class="mono">C3</td><td>מצב הצעות (track changes) גם ב-WYSIWYG</td><td><div class="bar"><div class="track"><div class="fill" style="width:90%"></div></div><span class="pct">90%</span></div></td><td><span class="lvl L1">L1</span></td><td class="num">1 / 2 / 4</td><td>נבנה: marks, מעקב עריכות, קבל/דחה, מעבר בין הצעות, 8 בדיקות על Milkdown אמיתי + e2e. נותר: PR, סקירה, מיזוג</td></tr>
         <tr><td class="mono">C4</td><td>שפות חיות נוספות: webR (R), ruby.wasm</td><td><div class="bar"><div class="track"><div class="fill done" style="width:100%"></div></div><span class="pct">100%</span></div></td><td><span class="lvl L1">L1</span></td><td class="num">0 / 0 / 0</td><td>נבנה ב-PR #107: <code>live-r</code> (כולל גרפים) ו-<code>live-ruby</code> (worker מבודד בלי רשת ואחסון). שתיהן עובדות גם אופליין</td></tr>
         <tr><td class="mono">C5</td><td>Web Playground (קבצים מרובים, JSX) + תצוגה חיה React / Vue / Svelte</td><td><div class="bar"><div class="track"><div class="fill" style="width:0%"></div></div><span class="pct">0%</span></div></td><td><span class="lvl L1">L1</span></td><td class="num">40 / 60 / 80</td><td>הגדול מבין פריטי הקוד</td></tr>
-        <tr><td class="mono">C6</td><td>ייבוא חבילות npm ב-<code>live-js</code> (esm.sh)</td><td><div class="bar"><div class="track"><div class="fill" style="width:0%"></div></div><span class="pct">0%</span></div></td><td><span class="lvl L2">L2</span></td><td class="num">6 / 8 / 12</td><td>נדחה במכוון: פותח את ה-CSP ל-CDN חיצוני. אפשרי רק כאופציית self-host</td></tr>
+        <tr><td class="mono">C6</td><td>ייבוא חבילות npm ב-<code>live-js</code> (esm.sh)</td><td><div class="bar"><div class="track"><div class="fill done" style="width:100%"></div></div><span class="pct">סגור</span></div></td><td><span class="lvl L1">L1</span></td><td class="num">0 / 0 / 0</td><td>הוחלט לא לבנות (§2): פותח את ה-CSP</td></tr>
         <tr><td class="mono">C7</td><td>מדידת זמן טעינה מול יעד TTI &lt; 1.5s</td><td><div class="bar"><div class="track"><div class="fill" style="width:0%"></div></div><span class="pct">0%</span></div></td><td><span class="lvl L2">L2</span></td><td class="num">1 / 1 / 2</td><td>דורש פריסה חיה (E1)</td></tr>
-        <tr><td class="mono">C8</td><td>Team workspaces · שוק ערכות נושא · פרסום לרשת (<code>lumen/user/doc</code>)</td><td><div class="bar"><div class="track"><div class="fill" style="width:10%"></div></div><span class="pct">10%</span></div></td><td><span class="lvl L2">L2</span></td><td class="num">80 / 120 / 200</td><td>צריך שרת וחשבונות</td></tr>
-        <tr><td class="mono">C9</td><td>מיזוג תיקוני Dependabot שיופיעו אחרי C1</td><td><div class="bar"><div class="track"><div class="fill" style="width:0%"></div></div><span class="pct">0%</span></div></td><td><span class="lvl L1">L1</span></td><td class="num">1 / 2 / 4</td><td>תלוי ב-C1</td></tr>
+        <tr><td class="mono">C8</td><td>Team workspaces · שוק ערכות נושא · פרסום לרשת (<code>lumen/user/doc</code>)</td><td><div class="bar"><div class="track"><div class="fill" style="width:10%"></div></div><span class="pct">10%</span></div></td><td><span class="lvl L1">L1</span></td><td class="num">80 / 120 / 200</td><td>צריך שרת וחשבונות</td></tr>
+        <tr><td class="mono">C9</td><td>תיקוני Dependabot אחרי C1</td><td><div class="bar"><div class="track"><div class="fill" style="width:80%"></div></div><span class="pct">80%</span></div></td><td><span class="lvl L1">L1</span></td><td class="num">0.5 / 1 / 2</td><td>נסגרו 24 PR-ים מיושנים ו-4 ישנים. PR #108: TS 6, jsdom 29, shiki 4, lucide 1, Actions v7, ו-105 בדיקות e2e עברו. נותרו vite 8 ו-tauri 2.11, כל אחד ב-PR נפרד</td></tr>
       </tbody>
       <tfoot><tr><td></td><td>סה״כ קוד שנותר</td><td></td><td></td><td class="num">140 / 208 / 323</td><td>L1 בלבד: 53 / 79 / 109</td></tr></tfoot>
     </table>
@@ -228,7 +244,7 @@ a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
   <h2><span class="sec">§5</span>סדר ריצה</h2>
   <ol class="steps">
     <li><b>היום:</b> C1 בוצע. עכשיו: #107 (C2 + C4) מכוון ל-main, ימוזג כשה-CI ירוק ואין ממצאים פתוחים; ואז C9.</li>
-    <li><b>אצלך, במקביל:</b> לבחור דומיין (§2), ואז E1 → E2 → E3. אלה שלושת החסמים שפותחים את β ואת C7.</li>
+    <li><b>אצלך, במקביל:</b> לקנות את <code>lumen-md.app</code> (§2, אחרי בדיקת זמינות), ואז E1 → E2 → E3. אלה שלושת החסמים שפותחים את β ואת C7.</li>
     <li><b>אני, ברצף:</b> P1 סיום #107 → P2 → P3 (C3 WYSIWYG) → P4 (C5 Playground). לוח זמנים מפורט ב-§6.</li>
     <li><b>אחרי פריסה:</b> C7 מדידת ביצועים, E4–E6 בדיקות חיות.</li>
     <li><b>בהמשך:</b> C8 ו-E7–E9 לפי סדר העדיפויות שתקבע.</li>
@@ -244,15 +260,15 @@ a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
       <thead><tr><th>שלב</th><th>מה</th><th>מי</th><th class="num">שעות נ/מ/ג</th><th>תלוי ב</th><th class="num">סיום משוער (מרכזי)</th></tr></thead>
       <tbody>
         <tr><td class="mono">P1</td><td>סיום PR #107 (C2 בדיקות TS מורחבות + C4 R ו-Ruby): עוד 1–3 סבבי Codex, CI, מיזוג</td><td>אני</td><td class="num">2 / 4 / 6</td><td>—</td><td class="num">18.10</td></tr>
-        <tr><td class="mono">P2</td><td>C9 מיזוג עדכוני Dependabot שנפתחו אחרי המיזוג ל-main</td><td>אני</td><td class="num">1 / 2 / 4</td><td>—</td><td class="num">18.10</td></tr>
-        <tr><td class="mono">P3</td><td>C3 מצב הצעות גם ב-WYSIWYG: סכמת CriticMarkup ב-Milkdown (סימון, קבלה ודחייה, ייחוס מחבר)</td><td>אני</td><td class="num">12 / 16 / 24</td><td>P1</td><td class="num">21.10</td></tr>
+        <tr><td class="mono">P2</td><td>C9 עדכוני Dependabot (PR #108 פתוח) + מעבר לדומיין (PR #109 פתוח)</td><td>אני</td><td class="num">1 / 2 / 4</td><td>—</td><td class="num">18.10</td></tr>
+        <tr><td class="mono">P3</td><td>C3 מצב הצעות גם ב-WYSIWYG — <b>נבנה ונבדק</b> (marks, מעקב, קבל/דחה, e2e). נותרו PR, סקירה ומיזוג</td><td>אני</td><td class="num">1 / 2 / 4</td><td>P1</td><td class="num">19.10</td></tr>
         <tr><td class="mono">P4</td><td>C5 Web Playground: בלוק עם קבצים מרובים, JSX/TS, תצוגה חיה React ו-Vue בעמוד הרצה מבודד (Svelte בשלב ב׳ אם המהדר נכנס לתקציב)</td><td>אני</td><td class="num">40 / 60 / 80</td><td>P3</td><td class="num">8.11</td></tr>
-        <tr><td class="mono">P5</td><td>E1–E3: חשבון Fly.io ודומיין, Sentry DSN, מוצרים ומפתחות ב-Stripe ו-<code>wrangler deploy</code></td><td>טל</td><td class="num">6 / 7 / 8</td><td>—</td><td class="num">בקצב שלך</td></tr>
+        <tr><td class="mono">P5</td><td>E1–E3: חשבון Fly.io וקניית <code>lumen-md.app</code>, Sentry DSN, מוצרים ומפתחות ב-Stripe ו-<code>wrangler deploy</code></td><td>טל</td><td class="num">6 / 7 / 8</td><td>—</td><td class="num">בקצב שלך</td></tr>
         <tr><td class="mono">P6</td><td>C7 מדידת זמן טעינה מול יעד TTI &lt; 1.5s על הפריסה החיה</td><td>אני</td><td class="num">1 / 1 / 2</td><td>P5</td><td class="num">יום אחרי P5</td></tr>
         <tr><td class="mono">P7</td><td>C8 Team workspaces · שוק ערכות נושא · פרסום לרשת. דורש שרת וחשבונות; תוכנית נפרדת אחרי הפריסה</td><td>אני + טל</td><td class="num">80 / 120 / 200</td><td>P5</td><td class="num">אחרי P4</td></tr>
         <tr><td class="mono">—</td><td>C6 חבילות npm ב-<code>live-js</code>: ההמלצה היא לא לבנות (פותח את ה-CSP ל-CDN). אבנה רק אם תבחר באפשרות self-host</td><td>הכרעה שלך</td><td class="num">0 (6 / 8 / 12)</td><td>הכרעה</td><td class="num">—</td></tr>
       </tbody>
-      <tfoot><tr><td></td><td>סה״כ עבודה שלי עד סוף P4 (כולל סבבי סקירה)</td><td></td><td class="num">63 / 94 / 131</td><td></td><td class="num">1.11 – 16.11</td></tr></tfoot>
+      <tfoot><tr><td></td><td>סה״כ עבודה שלי עד סוף P4 (כולל סבבי סקירה)</td><td></td><td class="num">50 / 76 / 104</td><td></td><td class="num">29.10 – 12.11</td></tr></tfoot>
     </table>
   </div>
 
@@ -263,12 +279,35 @@ a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
   <p class="muted">ענבר: עבודה שלי · כחול: עבודה שלך · מפוספס: טווח הסיכון של P4 (עד התרחיש הגבוה).</p>
 
   <div class="eta">
-    <div class="stat"><span class="n">8.11.2026</span><span class="l">סיום משוער של כל עבודת הקוד שאני יכול לעשות לבד (P1–P4), תרחיש מרכזי</span></div>
-    <div class="stat"><span class="n">1.11 – 16.11</span><span class="l">טווח: תרחיש נמוך עד גבוה</span></div>
+    <div class="stat"><span class="n">5.11.2026</span><span class="l">סיום משוער של כל עבודת הקוד שאני יכול לעשות לבד (P1–P4), תרחיש מרכזי</span></div>
+    <div class="stat"><span class="n">29.10 – 12.11</span><span class="l">טווח: תרחיש נמוך עד גבוה</span></div>
     <div class="stat"><span class="n">≈ 7 שעות</span><span class="l">עבודה שלך שפותחת את P6 ואת C8 (P5)</span></div>
     <div class="stat"><span class="n">+ 3–6 שבועות</span><span class="l">C8 אחרי הפריסה, אם תחליט להתקדם איתו</span></div>
   </div>
   <p class="muted"><b>מה לא נכלל:</b> בדיקות חיות מול WorkOS, Stripe ו-OpenAI (E4–E6, אצלך), אפליקציות מובייל (E7) והפצה בחנויות (E8). ההערכות הן אומדן, לא התחייבות: הגורם הגדול ביותר לסטייה הוא P4.</p>
+</section>
+
+
+<section>
+  <h2><span class="sec">§7</span>מה צריך ממך — רשימת פעולות</h2>
+  <p class="muted">כל ההכרעות ב-§2 התקבלו. מה שנשאר אלה פעולות שרק בעל החשבון יכול לעשות. הסדר הוא לפי מה שפותח הכי הרבה עבודה.</p>
+  <div class="box">
+    <table>
+      <thead><tr><th>#</th><th>פעולה</th><th>איפה</th><th>פותח</th><th class="num">זמן</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">1</td><td>לבדוק שהדומיין <code>lumen-md.app</code> פנוי ולקנות אותו. אם הוא תפוס: <code>lumenmd.app</code>, ותגיד לי</td><td>Cloudflare Registrar</td><td>E1, PR #109</td><td class="num">10 דק׳</td></tr>
+        <tr><td class="mono">2</td><td>חשבון Fly.io + <code>fly deploy</code> ל-web, signaling ו-collab (ההוראות ב-DEPLOY.md)</td><td>fly.io</td><td>E1 → C7, C8</td><td class="num">≈ 2.5 ש׳</td></tr>
+        <tr><td class="mono">3</td><td>פרויקט Sentry ו-DSN כמשתנה סביבה</td><td>sentry.io</td><td>E2</td><td class="num">15 דק׳</td></tr>
+        <tr><td class="mono">4</td><td>מוצרים ומחירים ב-Stripe, מפתחות ו-<code>wrangler deploy</code> ל-worker החיוב (D1/KV)</td><td>Stripe + Cloudflare</td><td>E3</td><td class="num">≈ 3.5 ש׳</td></tr>
+        <tr><td class="mono">5</td><td>Email Routing לכתובות <code>security@</code>, <code>plugins@</code> ו-<code>tal@</code> על הדומיין</td><td>Cloudflare</td><td>SECURITY.md</td><td class="num">10 דק׳</td></tr>
+        <tr><td class="mono">6</td><td>חשבון WorkOS + בדיקת SSO חיה</td><td>workos.com</td><td>E4, E5</td><td class="num">≈ 2 ש׳</td></tr>
+        <tr><td class="mono">7</td><td>מפתח OpenAI לבדיקת תמלול ו-fine-tune</td><td>platform.openai.com</td><td>E6</td><td class="num">5 דק׳</td></tr>
+        <tr><td class="mono">8</td><td>Apple Developer ($99), Google Play ($25), מחשב עם Xcode</td><td>—</td><td>E7</td><td class="num">8–16 ש׳</td></tr>
+        <tr><td class="mono">9</td><td>scope <code>@lumen-md</code> ב-npm, חשבון Chrome Web Store ($5), publisher ל-VS Code</td><td>—</td><td>E8</td><td class="num">≈ 4 ש׳</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="muted">אין שום דבר שחוסם אותי עכשיו. אני ממשיך ב-P1–P4 במקביל לפעולות שלך.</p>
 </section>
 
 <footer>

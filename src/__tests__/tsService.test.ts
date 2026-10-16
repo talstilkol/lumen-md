@@ -101,8 +101,9 @@ describe("JavaScript blocks and shared scopes", () => {
     // One unit per block; a shared block's unit is its scope's earlier
     // blocks + itself, joined by a statement boundary.
     expect(units.map((u) => u.id)).toEqual(["block-0", "block-1", "block-2", "block-3"]);
-    expect(units[1].code).toBe("const base = 2;\n;\n(async () => {\nconst total = base * 21;\n})();");
-    expect(units[2].code).toBe("(async () => {\nconst base = 'x';\n})();");
+    // A shared live block is wrapped only for a top-level await / return.
+    expect(units[1].code).toBe("let   base = 2;\n;\nlet   total = base * 21;");
+    expect(units[2].code).toBe("let   base = 'x';");
     // Offsets map both ways, into the unit's own block only.
     const second = blocks[1];
     const at = unitAt(units, second.from + 6)!;
@@ -150,7 +151,7 @@ describe("JavaScript blocks and shared scopes", () => {
     expect(diags).toEqual([]);
     const { units, input } = checkShared("const value = 1;", "// @ts-check\nconst value = 'x';\nvalue;");
     const at = units[1].code.lastIndexOf("value");
-    expect(service.quickInfo(input, units[1].id, at + 1)?.text).toBe('const value: "x"');
+    expect(service.quickInfo(input, units[1].id, at + 1)?.text).toBe("let value: string");
   });
 
   it("later shared blocks are invisible to earlier ones", () => {
@@ -178,7 +179,7 @@ describe("JavaScript blocks and shared scopes", () => {
   it("re-declared names are renamed in earlier parts only where they are bindings", () => {
     const { units } = checkShared("const value = 1; const o = { value: 2 }; o.value;", "const value = 'x';");
     const first = units[1].code.split("\n;\n")[0];
-    expect(first).toBe("const value$prev = 1; const o = { value: 2 }; o.value;");
+    expect(first).toBe("let   value$prev = 1; let   o = { value: 2 }; o.value;");
   });
 
   it("references inside functions stay late-bound to the newest declaration", () => {
@@ -187,7 +188,7 @@ describe("JavaScript blocks and shared scopes", () => {
       "// @ts-check\nconst value = 'x';\nread().toUpperCase(); arrow().toUpperCase(); now.toFixed();",
     );
     expect(units[1].code.split("\n;\n")[0]).toBe(
-      "// @ts-check\nconst value$prev = 1; function read() { return value; } const arrow = () => value; const now = value$prev;",
+      "// @ts-check\nlet   value$prev = 1; function read() { return value; } let   arrow = () => value; let   now = value$prev;",
     );
     expect(diags).toEqual([]);
   });
@@ -197,8 +198,142 @@ describe("JavaScript blocks and shared scopes", () => {
       "const value = 1; const result = (() => value)(); const doubled = [1].map((x) => x * value);",
       "// @ts-check\nconst value = 'x';\nresult.toFixed(); doubled[0].toFixed();",
     );
-    expect(units[1].code).toContain("const result = (() => value$prev)();");
+    expect(units[1].code).toContain("let   result = (() => value$prev)();");
     expect(diags).toEqual([]);
+  });
+
+  it("a block that re-declares a name sees each version in turn", () => {
+    // In the checked block itself: offsets are kept.
+    let r = checkShared("// @ts-check\nlet value = 1; const n = value; let value = 'x'; value.toUpperCase(); n.toFixed();");
+    expect(r.diags).toEqual([]);
+    expect(r.units[0].code).toContain("let value = 'x'; value.toUpperCase();");
+    expect(r.units[0].code).not.toContain("$prev");
+    // In an earlier block: versions are renamed as usual.
+    r = checkShared("let value = 1; const n = value; let value = 'x';", "// @ts-check\nvalue.toUpperCase(); n.toFixed();");
+    expect(r.diags).toEqual([]);
+    // And a real error after the re-declaration is still reported.
+    r = checkShared("// @ts-check\nlet value = 1; let value = 'x'; value.toFixed();");
+    expect(r.diags.map((d) => d.code)).toEqual([2551]);
+  });
+
+  it("every declarator and pattern starts a version, and recursion follows its declaration", () => {
+    let r = checkShared("// @ts-check\nlet first = 0, value = 1; let value = 'x'; value.toUpperCase();");
+    expect(r.diags).toEqual([]);
+    // (A shorthand pattern in the checked block itself keeps its name, since
+    // offsets there can't move; in an earlier block it is versioned too.)
+    r = checkShared("let { value } = { value: 1 }; const n = value; let value = 'x';", "// @ts-check\nvalue.toUpperCase(); n.toFixed();");
+    expect(r.diags).toEqual([]);
+    // The original function recurses into itself, not the newer `value`.
+    r = checkShared(
+      "function value(n) { return n ? value(n - 1) : 1; } const saved = value;",
+      "// @ts-check\nfunction value() { return 'x'; }\nsaved(1).toFixed();",
+    );
+    expect(r.units[1].code.split("\n;\n")[0]).toContain("function value$prev(n) { return n ? value$prev(n - 1) : 1; }");
+    expect(r.diags).toEqual([]);
+  });
+
+  it("references inside template interpolations follow the version at that point", () => {
+    const { units, diags } = checkShared(
+      "const value = 1; const id = (s, v) => v; const saved = id`n=${value}`; const late = () => `${value}`;",
+      "// @ts-check\nconst value = 'x';\nsaved.toFixed(); late().toUpperCase();",
+    );
+    const first = units[1].code.split("\n;\n")[0];
+    expect(first).toContain("id`n=${value$prev}`");
+    expect(first).toContain("() => `${value}`"); // late-bound closure: newest
+    expect(diags).toEqual([]);
+  });
+
+  it("callbacks on locally declared array / string literals run now", () => {
+    const { units, diags } = checkShared(
+      "const value = 1; const xs = [0]; const saved = xs.map(() => value)[0]; const s = 'a'; const t = s.replace('a', () => String(value)); const later = { map: (f) => f };",
+      "// @ts-check\nconst value = 'x';\nsaved.toFixed();",
+    );
+    const first = units[1].code.split("\n;\n")[0];
+    expect(first).toContain("xs.map(() => value$prev)");
+    expect(first).toContain("s.replace('a', () => String(value$prev))");
+    expect(diags).toEqual([]);
+  });
+
+  it("computed-key methods keep their returns; reassigned receivers aren't built-ins", () => {
+    const doc = ["```live-js shared", "const k = 'm'; const o = { [k]() { return 1; }, 'q'() { return 2; } };", "```", "```live-js shared", "// @ts-check", "o.m().toFixed(); o.q().toFixed();", "```"].join("\n");
+    const units = toUnits(findTsBlocks(doc));
+    expect(units[1].code).toContain("[k]() { return 1; }");
+    expect(units[1].code).toContain("'q'() { return 2; }");
+    const { units: u2, diags } = checkShared(
+      "const value = 1; let xs = [0]; const before = xs.map(() => value); xs = { map: (f) => [f] }; const saved = xs.map(() => value);",
+      "// @ts-check\nconst value = 'x';",
+    );
+    const first = u2[1].code.split("\n;\n")[0];
+    expect(first).toContain("before = xs.map(() => value$prev)"); // still the array here
+    expect(first).toContain("saved = xs.map(() => value)"); // after the reassignment: may be retained
+    expect(diags).toEqual([]);
+    // A local `Array` isn't the built-in.
+    const { units: u3 } = checkShared("const value = 1; const Array = { from: (f) => f }; const g = Array.from(() => value);", "// @ts-check\nconst value = 'x';");
+    expect(u3[1].code.split("\n;\n")[0]).toContain("Array.from(() => value)");
+  });
+
+  it("a top-level return keeps narrowing, and positions after it still map", () => {
+    const doc = ["```live-js shared", "// @ts-check", "const s = /** @type {string | undefined} */ (document.title || undefined);", "if (!s) return", "s.toUpperCase();", "s.nope();", "```"].join("\n");
+    const units = toUnits(findTsBlocks(doc));
+    const diags = service
+      .diagnostics(units.map(({ id, tsx, js, shared, code }) => ({ id, tsx, js, shared, code })))
+      .map((d) => unitRangeToDoc(units[0], d.start, d.length));
+    // Only `nope` is wrong (s is narrowed to string after the return).
+    expect(diags).toHaveLength(1);
+    expect(doc.slice(diags[0]!.from, diags[0]!.to)).toBe("nope");
+    // And the doc → unit mapping round-trips after the longer rewrite.
+    const pos = doc.indexOf("nope");
+    const at = unitAt(units, pos)!;
+    expect(at.unit.code.slice(at.offset, at.offset + 4)).toBe("nope");
+  });
+
+  it("a computed key in a destructured parameter is a reference, not a local", () => {
+    const { units } = checkShared(
+      "const value = 'k'; const pick = (({ [value]: v }) => v)({ k: 1 });",
+      "// @ts-check\nconst value = 2;",
+    );
+    expect(units[1].code.split("\n;\n")[0]).toContain("({ [value$prev]: v }) => v");
+  });
+
+  it("a directly invoked function expression runs with that time's value", () => {
+    const { units, diags } = checkShared(
+      "const value = 1; const result = function () { return value; }(); function decl() { return value; }\n(0);",
+      "// @ts-check\nconst value = 'x';\nresult.toFixed(); decl().toUpperCase();",
+    );
+    const first = units[1].code.split("\n;\n")[0];
+    expect(first).toContain("function () { return value$prev; }()");
+    // A declaration followed by `(` on the next line is not invoked.
+    expect(first).toContain("function decl() { return value; }");
+    expect(diags).toEqual([]);
+  });
+
+  it("earlier retained closures see an unwrapped live block's declarations", () => {
+    const doc = ["```live-js shared", "const value = 1; function read() { return value; }", "```", "```live-js shared", "// @ts-check", "const value = 'x';", "read().toFixed();", "```"].join("\n");
+    const units = toUnits(findTsBlocks(doc));
+    expect(units[1].code).not.toContain("async () =>");
+    const diags = service
+      .diagnostics(units.map(({ id, tsx, js, shared, code }) => ({ id, tsx, js, shared, code })))
+      .filter((d) => unitRangeToDoc(units[1], d.start, d.length) !== null);
+    expect(diags.map((d) => d.code)).toEqual([2551]); // toFixed doesn't exist on string
+    // Top-level await is fine in a module unit: still unwrapped, so the
+    // earlier closure sees the new binding.
+    const awaitDoc = doc.replace("read().toFixed();", "await 0;\nread().toFixed();");
+    const awaiting = toUnits(findTsBlocks(awaitDoc));
+    expect(awaiting[1].code).not.toContain("async () =>");
+    const awaitDiags = service
+      .diagnostics(awaiting.map(({ id, tsx, js, shared, code }) => ({ id, tsx, js, shared, code })))
+      .filter((d) => unitRangeToDoc(awaiting[1], d.start, d.length) !== null);
+    expect(awaitDiags.map((d) => d.code)).toEqual([2551]);
+    // A top-level return is neutralised in place (same length), not
+    // wrapped: the block's bindings stay visible to earlier closures.
+    const retDoc = doc.replace("read().toFixed();", "read().toFixed();\nif (read()) return;\nreturn value;");
+    const returning = toUnits(findTsBlocks(retDoc));
+    expect(returning[1].code).not.toContain("async () =>");
+    expect(returning[1].code).toContain("if (read()) throw 0;\nthrow  value;");
+    const retDiags = service
+      .diagnostics(returning.map(({ id, tsx, js, shared, code }) => ({ id, tsx, js, shared, code })))
+      .filter((d) => unitRangeToDoc(returning[1], d.start, d.length) !== null);
+    expect(retDiags.map((d) => d.code)).toEqual([2551]);
   });
 
   it("parameters, a function's own name and its locals keep their binding", () => {
@@ -235,13 +370,64 @@ describe("JavaScript blocks and shared scopes", () => {
     expect(diags).toEqual([]);
   });
 
+  it("shared bindings are reassignable, as at run time", () => {
+    const { diags } = checkShared("// @ts-check\nconst count = 1;", "// @ts-check\ncount = 2;\nconst k = 3; k = 4;");
+    expect(diags).toEqual([]);
+  });
+
+  it("a nested block's own binding doesn't hide the outer reference", () => {
+    const { units } = checkShared(
+      "const value = 1; const result = (() => { const before = value; { const value = 2; value; } return before; })();",
+      "const value = 'x';",
+    );
+    expect(units[1].code).toContain("const before = value$prev; { const value = 2; value; }");
+  });
+
+  it("only built-in receivers count as synchronous callers", () => {
+    const { units } = checkShared(
+      "const value = 1; holder.map(() => value); [1].map(() => value); \"a\".replace(/a/, () => value); Array.from([1], () => value); xs[0].map(() => value);",
+      "const value = 'x';",
+    );
+    const first = units[1].code.split("\n;\n")[0];
+    expect(first).toContain("holder.map(() => value)");
+    expect(first).toContain("[1].map(() => value$prev)");
+    expect(first).toContain('"a".replace(/a/, () => value$prev)');
+    expect(first).toContain("Array.from([1], () => value$prev)");
+    expect(first).toContain("xs[0].map(() => value)");
+  });
+
+  it("class field names keep their key; parameter defaults still reference the shared name", () => {
+    const { units } = checkShared(
+      "const value = 1; class C { value; static value = 2; other = value; } const result = (function (x = value) { return x; })();",
+      "const value = 'x';",
+    );
+    const first = units[1].code.split("\n;\n")[0];
+    // Field initializers run at `new C()`, later: late-bound like methods.
+    expect(first).toContain("class C { value; static value = 2; other = value; }");
+    expect(first).toContain("(function (x = value$prev) { return x; })()");
+  });
+
+  it("static initializers and computed keys run at definition; destructuring defaults reference", () => {
+    const { units } = checkShared(
+      "const value = 1; class C { static saved = value; static { this.b = value; } [value] = 1; late = value; m() { return value; } } const r = (() => { const { x = (value) } = {}; return x; })();",
+      "const value = 'x';",
+    );
+    const first = units[1].code.split("\n;\n")[0];
+    expect(first).toContain("static saved = value$prev;");
+    expect(first).toContain("static { this.b = value$prev; }");
+    expect(first).toContain("[value$prev] = 1;");
+    expect(first).toContain("late = value;");
+    expect(first).toContain("m() { return value; }");
+    expect(first).toContain("const { x = (value$prev) } = {}");
+  });
+
   it("a closure in grouping parentheses is still retained", () => {
     const { units, diags } = checkShared(
       "const value = 1; const fn = (() => value); const now = (() => value)();",
       "// @ts-check\nconst value = 'x';\nfn().toUpperCase(); now.toFixed();",
     );
-    expect(units[1].code).toContain("const fn = (() => value);");
-    expect(units[1].code).toContain("const now = (() => value$prev)();");
+    expect(units[1].code).toContain("let   fn = (() => value);");
+    expect(units[1].code).toContain("let   now = (() => value$prev)();");
     expect(diags).toEqual([]);
   });
 
@@ -256,7 +442,7 @@ describe("JavaScript blocks and shared scopes", () => {
 
   it("only leading directive comments are neutralised, not @ts-check as data", () => {
     const { units } = checkShared('// @ts-check\nconst marker = "@ts-check";', "const later = 1;");
-    expect(units[1].code).toContain('const marker = "@ts-check";');
+    expect(units[1].code).toContain('let   marker = "@ts-check";');
     expect(units[1].code).toContain("// @ts-_____");
   });
 
@@ -265,7 +451,7 @@ describe("JavaScript blocks and shared scopes", () => {
       "const value = 1; const result = (() => { const value$prev = 'x'; return value; })(); const top = value;",
       "const value = 'y';",
     );
-    expect(units[1].code.split("\n;\n")[0]).toContain("const top = value$prev2;");
+    expect(units[1].code.split("\n;\n")[0]).toContain("let   top = value$prev2;");
   });
 
   it("live-js blocks are checked as the async function they run in; js fences stay modules", () => {
@@ -297,7 +483,7 @@ describe("JavaScript blocks and shared scopes", () => {
       "// @ts-check\nconst value = 'x';\nobj.value.toFixed();",
     );
     expect(units[1].code.split("\n;\n")[0]).toBe(
-      "// @ts-check\nconst value$prev = 1; const obj = { value: value$prev }; const { value: v2, other = value$prev } = obj;",
+      "// @ts-check\nlet   value$prev = 1; let   obj = { value: value$prev }; let   { value: v2, other = value$prev } = obj;",
     );
     expect(diags).toEqual([]); // obj.value is still the number from the first block
     const at = units[1].code.lastIndexOf("value");

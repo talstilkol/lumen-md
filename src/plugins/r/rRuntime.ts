@@ -77,10 +77,15 @@ export async function resetWebR(): Promise<void> {
 }
 
 /** Map webR's captured output entries to display lines. */
+/** Caps on what one run shows (characters / lines), like the other live blocks. */
+export const MAX_OUTPUT_CHARS = 200_000;
+export const MAX_OUTPUT_LINES = 2_000;
+
 export function toLines(output: ReadonlyArray<{ type: string; data: unknown }>): ROutputLine[] {
   const lines: ROutputLine[] = [];
+  let chars = 0;
   for (const o of output) {
-    const text =
+    let text =
       typeof o.data === "string"
         ? o.data
         : o.data && typeof (o.data as { message?: unknown }).message === "string"
@@ -88,27 +93,67 @@ export function toLines(output: ReadonlyArray<{ type: string; data: unknown }>):
           : String(o.data);
     const kind: ROutputLine["kind"] =
       o.type === "stdout" ? "out" : o.type === "warning" ? "warn" : o.type === "message" ? "msg" : "err";
+    const room = MAX_OUTPUT_CHARS - chars;
+    const full = lines.length >= MAX_OUTPUT_LINES || room <= 0;
+    if (!full && text.length > room) text = text.slice(0, room);
+    if (full || text.length < (typeof o.data === "string" ? o.data.length : text.length)) {
+      if (!full) lines.push({ kind, text });
+      lines.push({ kind: "msg", text: "… output truncated" });
+      break;
+    }
+    chars += text.length;
     lines.push({ kind, text });
   }
   return lines;
 }
 
+/** Plot pages one run shows; later pages are dropped (and their bitmaps closed). */
+export const MAX_PLOT_PAGES = 20;
+
+const closeBitmap = (b: ImageBitmap | null | undefined) => {
+  try {
+    b?.close?.();
+  } catch {
+    /* already closed */
+  }
+};
+
 /**
  * Collect plot pages from webR's output queue: each `canvasNewPage` starts a
  * page, and the latest `canvasImage` after it is that page's final state.
+ * At most `max` pages are kept; superseded and dropped bitmaps are closed
+ * so their memory is released. `dropped` counts pages beyond the cap.
  */
-export function plotPages(msgs: ReadonlyArray<{ type: string; data?: unknown }>): ImageBitmap[] {
+export function collectPlotPages(
+  msgs: ReadonlyArray<{ type: string; data?: unknown }>,
+  max = MAX_PLOT_PAGES,
+): { pages: ImageBitmap[]; dropped: number } {
   const pages: Array<ImageBitmap | null> = [];
+  let total = 0;
   for (const m of msgs) {
     if (m.type !== "canvas") continue;
     const data = m.data as { event?: string; image?: ImageBitmap } | undefined;
-    if (data?.event === "canvasNewPage") pages.push(null);
-    else if (data?.event === "canvasImage" && data.image) {
-      if (pages.length === 0) pages.push(null);
-      pages[pages.length - 1] = data.image;
+    if (data?.event === "canvasNewPage") {
+      total++;
+      if (pages.length < max) pages.push(null);
+    } else if (data?.event === "canvasImage" && data.image) {
+      if (total === 0) {
+        total = 1;
+        pages.push(null);
+      }
+      if (total > max) closeBitmap(data.image); // a page beyond the cap
+      else {
+        closeBitmap(pages[pages.length - 1]); // superseded by a later frame
+        pages[pages.length - 1] = data.image;
+      }
     }
   }
-  return pages.filter((p): p is ImageBitmap => p !== null);
+  return { pages: pages.filter((p): p is ImageBitmap => p !== null), dropped: Math.max(0, total - max) };
+}
+
+/** The kept plot pages (see collectPlotPages). */
+export function plotPages(msgs: ReadonlyArray<{ type: string; data?: unknown }>): ImageBitmap[] {
+  return collectPlotPages(msgs).pages;
 }
 
 export interface RRunHooks {
@@ -134,15 +179,19 @@ export function runR(
 ): Promise<RRunResult | null> {
   const run = chain.then(async () => {
     if (hooks.isCancelled?.()) return null;
+    // A run ahead of this one may have reset the runtime (Stop / timeout):
+    // boot the replacement inside this turn but BEFORE onStart, so the
+    // boot gets its own budget (BOOT_TIMEOUT_MS), not the run's timeout.
+    const webR = await getWebR();
+    if (hooks.isCancelled?.()) return null;
     hooks.onStart?.();
-    return runROnce(code, plot);
+    return runROnce(webR, code, plot);
   });
   chain = run.catch(() => {});
   return run;
 }
 
-async function runROnce(code: string, plot: { width: number; height: number }): Promise<RRunResult> {
-  const webR = await getWebR();
+async function runROnce(webR: WebRType, code: string, plot: { width: number; height: number }): Promise<RRunResult> {
   await webR.flush(); // drop anything left over from an earlier run
   // webR's built-in graphics capture fails over the PostMessage channel, so
   // open its canvas device ourselves and read the frames from the queue.
@@ -157,8 +206,10 @@ async function runROnce(code: string, plot: { width: number; height: number }): 
       throwJsException: false,
     });
     await webR.evalRVoid("while (grDevices::dev.cur() > 1) grDevices::dev.off()");
-    const images = plotPages(await webR.flush());
-    return { lines: toLines(res.output), images };
+    const { pages: images, dropped } = collectPlotPages(await webR.flush());
+    const lines = toLines(res.output);
+    if (dropped) lines.push({ kind: "msg", text: `… ${dropped} more plot${dropped === 1 ? "" : "s"} not shown (first ${MAX_PLOT_PAGES} kept)` });
+    return { lines, images };
   } finally {
     await shelter.purge();
   }

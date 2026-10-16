@@ -83,7 +83,12 @@ export function rubyProgram(source: string): string {
     `->(src) {`,
     `  begin`,
     `    r = TOPLEVEL_BINDING.eval(src, "block", 1)`,
-    `    r.nil? ? nil : r.inspect`,
+    // Results and error messages are capped inside Ruby, before they are
+    // converted to JS strings and posted to the page.
+    `    r.nil? ? nil : (s = r.inspect; s.length > ${MAX_OUTPUT_CHARS} ? s[0, ${MAX_OUTPUT_CHARS}] + "… (truncated)" : s)`,
+    `  rescue Exception => e`,
+    `    m = e.message.to_s`,
+    `    raise(m.length > ${MAX_OUTPUT_CHARS} ? e.exception(m[0, ${MAX_OUTPUT_CHARS}] + "… (truncated)") : e)`,
     `  ensure`,
     `    $stdout.flush`,
     `    $stderr.flush`,
@@ -91,6 +96,9 @@ export function rubyProgram(source: string): string {
     `}.call(${rubyStringLiteral(source)})`,
   ].join("\n");
 }
+
+/** Defensive cap for anything posted to the page. */
+const capText = (t: string) => (t.length > MAX_OUTPUT_CHARS ? t.slice(0, MAX_OUTPUT_CHARS) + "… (truncated)" : t);
 
 /** Clean up ruby.wasm's error text (drop the JS-side prefix). */
 export function rubyErrorMessage(err: unknown): string {
@@ -175,6 +183,11 @@ export function createRubyHandler(deps: {
 
     let emitted = 0;
     let truncated = false;
+    let pending: { stream: "out" | "err"; text: string } | null = null;
+    const flush = () => {
+      if (pending) deps.post({ type: "output", runId, stream: pending.stream, text: pending.text });
+      pending = null;
+    };
     const emit = (stream: "out" | "err") => (text: unknown) => {
       if (truncated) return;
       let s = String(text ?? "");
@@ -183,19 +196,33 @@ export function createRubyHandler(deps: {
         truncated = true;
       }
       emitted += s.length;
-      if (s) deps.post({ type: "output", runId, stream, text: s });
+      if (!s) return;
+      // Many short writes (a loop printing one char) are batched: one
+      // message per stream switch or per 8 KB, not one per write.
+      if (pending && pending.stream !== stream) flush();
+      pending = pending ? { stream, text: pending.text + s } : { stream, text: s };
+      if (pending.text.length >= 8192) flush();
     };
 
     try {
       const vm = await deps.loadVm({ stdout: emit("out"), stderr: emit("err") });
       deps.post({ type: "ready", runId });
       const res = vm.eval(rubyProgram(source));
+      flush();
       if (res.call("nil?").toString() !== "true") {
-        deps.post({ type: "result", runId, text: res.toString() });
+        // Already capped inside Ruby; it also shares the run's output
+        // budget with stdout / stderr.
+        let text = capText(res.toString());
+        const left = Math.max(0, MAX_OUTPUT_CHARS - emitted);
+        if (truncated || left === 0) text = "… (truncated)";
+        else if (text.length > left) text = text.slice(0, left) + "… (truncated)";
+        deps.post({ type: "result", runId, text });
       }
     } catch (err) {
-      deps.post({ type: "error", runId, message: rubyErrorMessage(err) });
+      flush();
+      deps.post({ type: "error", runId, message: capText(rubyErrorMessage(err)) });
     } finally {
+      flush();
       deps.post({ type: "done", runId, ms: now() - started });
     }
   };

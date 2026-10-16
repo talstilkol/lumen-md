@@ -53,10 +53,64 @@ if (typeof self !== "undefined" && self.trustedTypes && !self.trustedTypes.defau
   } catch (e) { /* policy name not allowed: leave as is */ }
 }
 `;
+// Document code runs in this worker, and R can evaluate JavaScript there
+// (webr::eval_js). The worker is same-origin, so without this it could
+// reach the app's IndexedDB / OPFS workspace / Cache Storage and the
+// network. Remove storage and messaging APIs, nested workers, and limit
+// fetch / XHR to the runtime's own files (this folder), like the Ruby
+// worker's hardenWorkerScope. Runs before webR's own code.
+const WORKER_ISOLATION_PRELUDE = `/* Lumen: isolate the webR worker */
+(function () {
+  var g = self;
+  var base = new URL("./", g.location.href).href;
+  function drop(o, name) {
+    for (var p = o; p; p = Object.getPrototypeOf(p)) {
+      try { if (Object.prototype.hasOwnProperty.call(p, name)) delete p[name]; } catch (e) { /* */ }
+    }
+    try { Object.defineProperty(o, name, { value: undefined, configurable: false, writable: false }); } catch (e) { /* */ }
+  }
+  ["indexedDB", "caches", "BroadcastChannel", "WebSocket", "WebTransport", "EventSource", "Worker", "SharedWorker", "RTCPeerConnection"].forEach(function (n) { drop(g, n); });
+  if (g.navigator) ["storage", "serviceWorker", "locks", "sendBeacon"].forEach(function (n) { drop(g.navigator, n); });
+  function allowed(u) {
+    try {
+      var url = new URL(String(u && u.url ? u.url : u), g.location.href);
+      return url.protocol === "data:" || url.protocol === "blob:" || url.href.indexOf(base) === 0;
+    } catch (e) { return false; }
+  }
+  var realFetch = g.fetch && g.fetch.bind(g);
+  if (realFetch) {
+    var guardedFetch = function (input, init) {
+      if (!allowed(input)) return Promise.reject(new TypeError("Network access is disabled in live-r blocks"));
+      return realFetch(input, init);
+    };
+    try { Object.defineProperty(g, "fetch", { value: guardedFetch, configurable: false, writable: false }); } catch (e) { g.fetch = guardedFetch; }
+  }
+  // importScripts is another way to load (and send) cross-origin
+  // requests: same allowlist (webR loads R.js from this folder).
+  if (typeof g.importScripts === "function") {
+    var realImport = g.importScripts.bind(g);
+    var guardedImport = function () {
+      for (var i = 0; i < arguments.length; i++) {
+        if (!allowed(arguments[i])) throw new TypeError("Network access is disabled in live-r blocks");
+      }
+      return realImport.apply(null, arguments);
+    };
+    try { Object.defineProperty(g, "importScripts", { value: guardedImport, configurable: false, writable: false }); } catch (e) { g.importScripts = guardedImport; }
+  }
+  if (g.XMLHttpRequest) {
+    var open = g.XMLHttpRequest.prototype.open;
+    var guardedOpen = function (method, url) {
+      if (!allowed(url)) throw new TypeError("Network access is disabled in live-r blocks");
+      return open.apply(this, arguments);
+    };
+    try { Object.defineProperty(g.XMLHttpRequest.prototype, "open", { value: guardedOpen, configurable: false, writable: false }); } catch (e) { g.XMLHttpRequest.prototype.open = guardedOpen; }
+  }
+})();
+`;
 const workerFile = join(outDir, "webr-worker.js");
 if (existsSync(workerFile)) {
   const body = readFileSync(workerFile, "utf8");
-  if (!body.startsWith("/* Lumen: Trusted Types")) writeFileSync(workerFile, WORKER_TT_PRELUDE + body);
+  if (!body.startsWith("/* Lumen:")) writeFileSync(workerFile, WORKER_TT_PRELUDE + WORKER_ISOLATION_PRELUDE + body);
 }
 
 console.log(`copy-webr: ${copied} entries → public/webr/ (${(bytes / 1e6).toFixed(1)} MB)`);

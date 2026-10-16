@@ -51,4 +51,8 @@ describe("CriticMarkup through the WYSIWYG serializer", () => {
     const md = "Use `{~~a\\~>b~~}` literally, but fix {~~x\\~>y~~}.\n\n```md\n{~~p\\~>q~~}\n```\n";
     expect(repairCriticMarkup(md)).toBe("Use `{~~a\\~>b~~}` literally, but fix {~~x~>y~~}.\n\n```md\n{~~p\\~>q~~}\n```\n");
   });
+
+  it("repairs only complete substitutions", () => {
+    expect(repairCriticMarkup("{~~old\\~>new~~} and {~~draft\\~>pending")).toBe("{~~old~>new~~} and {~~draft\\~>pending");
+  });
 });

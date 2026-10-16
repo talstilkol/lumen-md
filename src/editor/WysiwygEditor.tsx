@@ -589,10 +589,12 @@ export function repairCriticMarkup(md: string): string {
   // Code is literal: a `{~~a\~>b~~}` inside a code span or fence is kept
   // byte for byte (suggestions are never parsed there either).
   const code = findCodeRanges(md);
-  return md.replace(/\{~~([^~]*(?:~(?!~\})[^~]*)*?)\\~>/g, (m, old: string, at: number) =>
+  // Only a COMPLETE substitution (`{~~old\~>new~~}`) is repaired; text that
+  // merely starts with `{~~` keeps its backslash.
+  return md.replace(/\{~~((?:[^~]|~(?!~\}))*?)\\~>((?:[^~]|~(?!~\}))*?)~~\}/g, (m, old: string, neu: string, at: number) =>
     // Only a substitution that STARTS inside code is literal; one whose old
     // text merely contains an inline-code span is real markup.
-    code.some((c) => at >= c.from && at < c.to) ? m : `{~~${old}~>`,
+    code.some((c) => at >= c.from && at < c.to) ? m : `{~~${old}~>${neu}~~}`,
   );
 }
 

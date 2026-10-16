@@ -23,7 +23,7 @@ import {
   Box,
   Workflow,
   Link,
-  Youtube,
+  SquarePlay as Youtube,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { t } from "../i18n";

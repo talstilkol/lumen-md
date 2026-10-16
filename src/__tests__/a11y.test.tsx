@@ -65,7 +65,7 @@ beforeEach(() => {
       removeEventListener: vi.fn(),
     };
   }
-  const nav = (win as { navigation?: { addEventListener?: () => void; removeEventListener?: () => void } });
+  const nav = (win as unknown as { navigation?: { addEventListener?: () => void; removeEventListener?: () => void } });
   if (typeof nav.navigation === "undefined") {
     nav.navigation = win[stubNavSymbol] as unknown as {
       addEventListener: () => void;
