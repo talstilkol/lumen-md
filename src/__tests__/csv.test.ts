@@ -5,7 +5,7 @@
  */
 
 import { describe, it, expect } from "vitest";
-import { inferType, coerce, parseCSV, parseJSONTable } from "../data/csv";
+import { inferType, coerce, parseCSV, parseJSONTable, looksLikeDate } from "../data/csv";
 
 describe("inferType", () => {
   it("returns 'number' when every value is a numeric string", () => {
@@ -22,6 +22,33 @@ describe("inferType", () => {
   });
   it("ignores empty cells when inferring", () => {
     expect(inferType(["", "1", null, "2"])).toBe("number");
+  });
+  it("accepts common non-ISO date spellings", () => {
+    expect(inferType(["03/15/2024", "04/01/2024"])).toBe("date");
+    expect(inferType(["Mar 5, 2024", "Apr 9, 2024"])).toBe("date");
+    expect(inferType(["2024-03", "2024-04"])).toBe("date");
+  });
+  it("does not mistake V8-lenient strings for dates", () => {
+    // Date.parse("50%") and Date.parse("Team 1") both succeed in V8.
+    expect(inferType(["50%", "25%", "25%"])).toBe("string");
+    expect(inferType(["Team 1", "Team 2", "Team 3"])).toBe("string");
+    expect(inferType(["x 2", "y 3"])).toBe("string");
+  });
+});
+
+describe("looksLikeDate", () => {
+  it.each([
+    ["2026-04-27", true],
+    ["2026-04-27T10:00:00Z", true],
+    ["2024/03/15", true],
+    ["March 3 2024", true],
+    ["12%", false],
+    ["Apple 1", false],
+    ["1.2", false],
+    ["", false],
+    ["Q1 2024", false],
+  ])("%s → %s", (s, expected) => {
+    expect(looksLikeDate(s)).toBe(expected);
   });
 });
 
