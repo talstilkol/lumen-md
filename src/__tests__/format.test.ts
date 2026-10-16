@@ -63,6 +63,14 @@ describe("findFencedBlockAt", () => {
     expect(findFencedBlockAt(doc, doc.indexOf("text"))).toBeNull();
     expect(findFencedBlockAt(doc, 0)).toBeNull();
   });
+  it("finds closing fences in CRLF documents and excludes the line break", () => {
+    const crlf = doc.replace(/\n/g, "\r\n");
+    const b = findFencedBlockAt(crlf, crlf.indexOf("const"))!;
+    expect(b.lang).toBe("js");
+    expect(crlf.slice(b.codeFrom, b.codeTo)).toBe("const a=1");
+    // The text after the block is outside it (the close was recognised).
+    expect(findFencedBlockAt(crlf, crlf.indexOf("text"))).toBeNull();
+  });
   it("handles tilde fences that need a matching-length close", () => {
     const b = findFencedBlockAt(doc, doc.indexOf("a{b"))!;
     expect(b.lang).toBe("css");

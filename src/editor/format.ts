@@ -125,10 +125,13 @@ export function findFencedBlockAt(doc: string, pos: number): FencedBlock | null 
   let offset = 0;
   let open: { marker: string; lang: string; from: number; codeFrom: number; indent: string } | null = null;
   for (let i = 0; i < lines.length; i++) {
-    const line = lines[i];
+    // CRLF files: match on the line without its carriage return (`.` and `$`
+    // don't cover `\r`), but advance offsets over the raw line.
+    const raw = lines[i];
+    const line = raw.endsWith("\r") ? raw.slice(0, -1) : raw;
     const lineFrom = offset;
     const lineTo = offset + line.length;
-    offset = lineTo + 1;
+    offset = lineFrom + raw.length + 1;
     if (!open) {
       const m = OPEN_RE.exec(line);
       if (!m) continue;
@@ -138,7 +141,7 @@ export function findFencedBlockAt(doc: string, pos: number): FencedBlock | null 
         marker: m[2],
         lang: normalizeLang(m[3]),
         from: lineFrom,
-        codeFrom: Math.min(lineTo + 1, doc.length),
+        codeFrom: Math.min(offset, doc.length),
         indent: m[1],
       };
       continue;
@@ -152,7 +155,8 @@ export function findFencedBlockAt(doc: string, pos: number): FencedBlock | null 
         fenceFrom: open.from,
         fenceTo: lineTo,
         codeFrom: open.codeFrom,
-        codeTo: Math.max(open.codeFrom, lineFrom - 1),
+        // Exclude the line break before the closing fence (LF or CRLF).
+        codeTo: Math.max(open.codeFrom, lineFrom - (doc[lineFrom - 2] === "\r" ? 2 : 1)),
         indent: open.indent,
       };
       if (pos >= block.fenceFrom && pos <= block.fenceTo) return block;
