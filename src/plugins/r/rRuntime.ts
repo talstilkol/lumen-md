@@ -20,6 +20,9 @@ export interface RRunResult {
 
 let instance: Promise<WebRType> | null = null;
 
+/** Download + boot budget for the runtime (~45 MB on a slow connection). */
+export const BOOT_TIMEOUT_MS = 180_000;
+
 /** Where the runtime is served (respects a non-root Vite base path). */
 export function webrBaseUrl(base: string = import.meta.env?.BASE_URL ?? "/"): string {
   return `${base.replace(/\/?$/, "/")}webr/`;
@@ -35,7 +38,24 @@ export function getWebR(): Promise<WebRType> {
         channelType: ChannelType.PostMessage,
         interactive: false,
       });
-      await webR.init();
+      // A boot that hangs (never settles) must not stay cached for every
+      // later Run, whichever block started it: give up after the budget.
+      let timer: ReturnType<typeof setTimeout> | undefined;
+      const timedOut = new Promise<never>((_, reject) => {
+        timer = setTimeout(() => {
+          try {
+            webR.close();
+          } catch {
+            /* not started */
+          }
+          reject(new Error("webR boot timed out"));
+        }, BOOT_TIMEOUT_MS);
+      });
+      try {
+        await Promise.race([webR.init(), timedOut]);
+      } finally {
+        clearTimeout(timer);
+      }
       return webR;
     })();
     instance.catch(() => {

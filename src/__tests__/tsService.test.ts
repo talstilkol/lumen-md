@@ -222,6 +222,19 @@ describe("JavaScript blocks and shared scopes", () => {
     expect(diags).toEqual([]);
   });
 
+  it("callbacks stay late-bound unless the callee runs them synchronously", () => {
+    const { units, diags } = checkShared(
+      "const value = 1; const callbacks = []; callbacks.push(() => value); setTimeout(() => value, 0, 1); const xs = [1].map((x) => value); const reg = [0, () => value];",
+      "// @ts-check\nconst value = 'x';\ncallbacks[0]().toUpperCase(); xs[0].toFixed();",
+    );
+    const first = units[1].code.split("\n;\n")[0];
+    expect(first).toContain("callbacks.push(() => value)");
+    expect(first).toContain("setTimeout(() => value, 0, 1)");
+    expect(first).toContain("[1].map((x) => value$prev)");
+    expect(first).toContain("[0, () => value]");
+    expect(diags).toEqual([]);
+  });
+
   it("a closure in grouping parentheses is still retained", () => {
     const { units, diags } = checkShared(
       "const value = 1; const fn = (() => value); const now = (() => value)();",

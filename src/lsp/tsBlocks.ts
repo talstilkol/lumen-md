@@ -194,6 +194,13 @@ function matchBrackets(tokens: ReturnType<typeof tokenize>): Map<number, number>
   return match;
 }
 
+/** Callees that invoke their callback argument before returning. */
+const SYNC_CALLBACK_METHODS = new Set([
+  "map", "filter", "forEach", "reduce", "reduceRight", "some", "every", "find", "findIndex",
+  "findLast", "findLastIndex", "flatMap", "sort", "toSorted", "from", "replace", "replaceAll",
+  "groupBy", "fromEntries",
+]);
+
 /** Find function scopes (functions, arrows, methods) in a token list. */
 function functionScopes(tokens: ReturnType<typeof tokenize>, match: Map<number, number>): FnScope[] {
   const scopes: FnScope[] = [];
@@ -202,17 +209,42 @@ function functionScopes(tokens: ReturnType<typeof tokenize>, match: Map<number, 
   /** Retained unless the function sits in argument / IIFE position. */
   const CALLEE_END = new Set([")", "]"]);
   const NOT_CALLEE = new Set(["return", "typeof", "void", "delete", "await", "yield", "in", "of", "new", "case", "else", "do"]);
+  /**
+   * A callback passed to the call whose `(` is at `open`: run now only when
+   * the callee is known to call it synchronously (array / string helpers,
+   * `new Promise(executor)`); anything else may keep it for later
+   * (`callbacks.push(fn)`, `setTimeout`, event listeners, `.then`).
+   */
+  const callbackRetained = (open: number): boolean => {
+    const callee = tokens[open - 1];
+    if (callee?.type !== "ident") return true;
+    if (callee.value === "Promise" && val(open - 2) === "new") return false;
+    return !SYNC_CALLBACK_METHODS.has(callee.value);
+  };
   const retainedAt = (before: number): boolean => {
     let c = before;
     if (val(c) === "async") c--;
-    if (isPunct(c, ",")) return false; // an argument (or array / sequence item)
+    if (isPunct(c, ",")) {
+      // A later argument: find the call's `(` and classify like the first.
+      // A later argument (or array / object item): find the enclosing opener.
+      let open = c - 1;
+      while (open >= 0) {
+        if ((isPunct(open, "(") || isPunct(open, "[") || isPunct(open, "{")) && (match.get(open) ?? -1) > c) break;
+        open = isPunct(open, ")") || isPunct(open, "]") || isPunct(open, "}") ? (match.get(open) ?? open) - 1 : open - 1;
+      }
+      if (!isPunct(open, "(")) return true; // array / object item: kept for later
+      const callee = tokens[open - 1];
+      const isCall = callee && ((callee.type === "ident" && !NOT_CALLEE.has(callee.value)) || (callee.type === "punct" && CALLEE_END.has(callee.value)));
+      return isCall ? callbackRetained(open) : true;
+    }
     if (!isPunct(c, "(")) return true;
     // `( … )(…)`: an IIFE runs now.
     const close = match.get(c);
     if (close !== undefined && isPunct(close + 1, "(")) return false;
-    // `f( … )`: a callback argument runs (typically) now.
     const t = tokens[c - 1];
-    if (t && ((t.type === "ident" && !NOT_CALLEE.has(t.value)) || (t.type === "punct" && CALLEE_END.has(t.value)))) return false;
+    if (t && ((t.type === "ident" && !NOT_CALLEE.has(t.value)) || (t.type === "punct" && CALLEE_END.has(t.value)))) {
+      return callbackRetained(c);
+    }
     // A grouping parenthesis: classify by what the group sits in.
     return retainedAt(c - 1);
   };

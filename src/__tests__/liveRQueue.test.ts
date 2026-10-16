@@ -1,6 +1,8 @@
 import { describe, it, expect, vi } from "vitest";
 
 const log: string[] = [];
+let initHangs = false;
+let created = 0;
 vi.mock("webr", () => {
   class Shelter {
     async captureR(code: string) {
@@ -13,7 +15,12 @@ vi.mock("webr", () => {
   }
   class WebR {
     Shelter = Shelter;
-    async init() {}
+    constructor() {
+      created++;
+    }
+    init() {
+      return initHangs ? new Promise<void>(() => {}) : Promise.resolve();
+    }
     async flush() {
       return [];
     }
@@ -52,5 +59,21 @@ describe("runR", () => {
     await first;
     expect(await second).toBeNull();
     expect(log).not.toContain("start never");
+  });
+
+  it("a boot that hangs is dropped after the budget, whichever block started it", async () => {
+    vi.useFakeTimers();
+    vi.resetModules();
+    const rt = await import("../plugins/r/rRuntime");
+    initHangs = true;
+    const before = created;
+    const first = rt.getWebR();
+    const failed = expect(first).rejects.toThrow(/timed out/);
+    await vi.advanceTimersByTimeAsync(rt.BOOT_TIMEOUT_MS + 1);
+    await failed;
+    initHangs = false;
+    await rt.getWebR(); // a fresh instance, not the dead one
+    expect(created).toBe(before + 2);
+    vi.useRealTimers();
   });
 });
