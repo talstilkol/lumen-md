@@ -24,6 +24,7 @@ import { PROMPTS } from "../ai/prompts";
 import { showAiToast } from "../ui/AiToast";
 import { openAiPrompt } from "../ui/AiInlinePrompt";
 import { log } from "../lib/logger";
+import { findCodeRanges } from "./suggesting";
 
 interface Props {
   value: string;
@@ -557,6 +558,27 @@ function buildTooltip(getView: () => EditorView | null): HTMLDivElement {
  * for inline formatting.
  */
 /**
+ * Undo the one escape Milkdown's serializer adds that breaks CriticMarkup:
+ * it writes the `~>` of a substitution as `\~>` (GFM strikethrough safety),
+ * so `{~~old~>new~~}` would come back as `{~~old\~>new~~}` and stop being
+ * a suggestion after any WYSIWYG edit. Other escapes it adds (`\*`, `\_`)
+ * are markdown-equivalent and left alone.
+ */
+export function repairCriticMarkup(md: string): string {
+  if (md.indexOf("\\~>") === -1) return md;
+  // Code is literal: a `{~~a\~>b~~}` inside a code span or fence is kept
+  // byte for byte (suggestions are never parsed there either).
+  const code = findCodeRanges(md);
+  // Only a COMPLETE substitution (`{~~old\~>new~~}`) is repaired; text that
+  // merely starts with `{~~` keeps its backslash.
+  return md.replace(/\{~~((?:[^~]|~(?!~\}))*?)\\~>((?:[^~]|~(?!~\}))*?)~~\}/g, (m, old: string, neu: string, at: number) =>
+    // Only a substitution that STARTS inside code is literal; one whose old
+    // text merely contains an inline-code span is real markup.
+    code.some((c) => at >= c.from && at < c.to) ? m : `{~~${old}~>${neu}~~}`,
+  );
+}
+
+/**
  * Split a leading YAML frontmatter block off a markdown document. Milkdown
  * has no frontmatter concept — fed raw, `---\ntitle: …\n---` renders as a
  * thematic break + loose text (ugly, and editing it corrupts the metadata).
@@ -653,7 +675,7 @@ export default function WysiwygEditor({ value, onChange }: Props) {
             // superseded) editor can still fire here. Forwarding it would
             // overwrite the store with stale content after a mode switch.
             if (gen !== genRef.current) return;
-            const full = frontmatterRef.current + md;
+            const full = frontmatterRef.current + repairCriticMarkup(md);
             lastEmittedRef.current = full;
             onChangeRef.current(full);
           });

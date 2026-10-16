@@ -2,11 +2,12 @@
  * Main-thread client for the TypeScript worker. The worker (and with it the
  * compiler download) is created on first use.
  */
-import type { BlockInput, TsCompletion, TsDiagnostic } from "./tsService";
+import type { BlockInput, TsCompletion, TsDiagnostic, TsQuickInfo } from "./tsService";
 
 export interface TsClient {
   check(blocks: BlockInput[]): Promise<TsDiagnostic[]>;
   complete(blocks: BlockInput[], block: string, pos: number): Promise<TsCompletion[]>;
+  hover(blocks: BlockInput[], block: string, pos: number): Promise<TsQuickInfo | null>;
   dispose(): void;
 }
 
@@ -47,6 +48,7 @@ function call<T>(msg: Record<string, unknown>): Promise<T> {
 export const tsClient: TsClient = {
   check: (blocks) => call<TsDiagnostic[]>({ type: "check", blocks }),
   complete: (blocks, block, pos) => call<TsCompletion[]>({ type: "complete", blocks, block, pos }),
+  hover: (blocks, block, pos) => call<TsQuickInfo | null>({ type: "hover", blocks, block, pos }),
   dispose() {
     worker?.terminate();
     worker = null;

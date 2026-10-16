@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-10-16T20:59:29.323Z",
+  "generated_at": "2026-10-16T22:06:44.713Z",
   "source": "src/i18n/index.ts (en bundle)",
-  "count": 961,
+  "count": 1005,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -884,6 +884,74 @@
       "vars": []
     },
     {
+      "key": "cmd.tools.vaultDoctor",
+      "en": "🩺 Vault Doctor: Check Workspace",
+      "vars": []
+    },
+    {
+      "key": "cmd.tools.vaultDoctor.hint",
+      "en": "Broken links, orphans, near-duplicates, missing alt text — no AI, nothing leaves your device",
+      "vars": []
+    },
+    {
+      "key": "cmd.tools.vaultDoctorFix",
+      "en": "🩺 Vault Doctor: Apply Suggested Link Fixes",
+      "vars": []
+    },
+    {
+      "key": "cmd.tools.vaultDoctorFix.hint",
+      "en": "Rewrite broken [[links]] that have exactly one close match",
+      "vars": []
+    },
+    {
+      "key": "doctor.noWorkspace",
+      "en": "Open a workspace folder first",
+      "vars": []
+    },
+    {
+      "key": "doctor.readFailed",
+      "en": "Couldn't read {path}: Vault Doctor stopped so it won't report or fix links against an incomplete workspace",
+      "vars": [
+        "path"
+      ]
+    },
+    {
+      "key": "doctor.checking",
+      "en": "Checking {count} notes…",
+      "vars": [
+        "count"
+      ]
+    },
+    {
+      "key": "doctor.done",
+      "en": "{count} findings",
+      "vars": [
+        "count"
+      ]
+    },
+    {
+      "key": "doctor.noFixes",
+      "en": "No broken links with a single clear suggestion",
+      "vars": []
+    },
+    {
+      "key": "doctor.confirmFix",
+      "en": "Fix {links} links in {files} notes?\\n\\n{list}\\n\\nNotes open in a tab are skipped.",
+      "vars": [
+        "links",
+        "files",
+        "list"
+      ]
+    },
+    {
+      "key": "doctor.fixed",
+      "en": "Fixed {links} links in {files} notes",
+      "vars": [
+        "links",
+        "files"
+      ]
+    },
+    {
       "key": "cmd.tools.suggestLinks",
       "en": "🔗 Suggest wiki-links",
       "vars": []
@@ -1699,6 +1767,175 @@
     },
     {
       "key": "block.liveLua.state.timeout",
+      "en": "Timed out",
+      "vars": []
+    },
+    {
+      "key": "block.liveR.title",
+      "en": "Live R",
+      "vars": []
+    },
+    {
+      "key": "block.liveR.run",
+      "en": "Run",
+      "vars": []
+    },
+    {
+      "key": "block.liveR.stop",
+      "en": "Stop",
+      "vars": []
+    },
+    {
+      "key": "block.liveR.clear",
+      "en": "Clear output",
+      "vars": []
+    },
+    {
+      "key": "block.liveR.prompt",
+      "en": "Click Run to execute this R block. The first run downloads R (~45 MB, cached afterwards).",
+      "vars": []
+    },
+    {
+      "key": "block.liveR.loading",
+      "en": "Loading R…",
+      "vars": []
+    },
+    {
+      "key": "block.liveR.loadFailed",
+      "en": "Failed to load the R runtime.",
+      "vars": []
+    },
+    {
+      "key": "block.liveR.loadTimeout",
+      "en": "R took too long to load.",
+      "vars": []
+    },
+    {
+      "key": "block.liveR.timedOut",
+      "en": "Execution timed out after {ms} ms.",
+      "vars": [
+        "ms"
+      ]
+    },
+    {
+      "key": "block.liveR.stopped",
+      "en": "Stopped.",
+      "vars": []
+    },
+    {
+      "key": "block.liveR.plot",
+      "en": "R plot",
+      "vars": []
+    },
+    {
+      "key": "block.liveR.state.idle",
+      "en": "Not run",
+      "vars": []
+    },
+    {
+      "key": "block.liveR.state.loading",
+      "en": "Loading…",
+      "vars": []
+    },
+    {
+      "key": "block.liveR.state.running",
+      "en": "Running…",
+      "vars": []
+    },
+    {
+      "key": "block.liveR.state.success",
+      "en": "Completed",
+      "vars": []
+    },
+    {
+      "key": "block.liveR.state.error",
+      "en": "Error",
+      "vars": []
+    },
+    {
+      "key": "block.liveR.state.timeout",
+      "en": "Timed out",
+      "vars": []
+    },
+    {
+      "key": "block.liveRuby.title",
+      "en": "Live Ruby",
+      "vars": []
+    },
+    {
+      "key": "block.liveRuby.run",
+      "en": "Run",
+      "vars": []
+    },
+    {
+      "key": "block.liveRuby.stop",
+      "en": "Stop",
+      "vars": []
+    },
+    {
+      "key": "block.liveRuby.clear",
+      "en": "Clear output",
+      "vars": []
+    },
+    {
+      "key": "block.liveRuby.prompt",
+      "en": "Click Run to execute this Ruby block. The first run downloads Ruby (~30 MB, cached afterwards).",
+      "vars": []
+    },
+    {
+      "key": "block.liveRuby.loading",
+      "en": "Loading Ruby…",
+      "vars": []
+    },
+    {
+      "key": "block.liveRuby.loadFailed",
+      "en": "Failed to load the Ruby runtime.",
+      "vars": []
+    },
+    {
+      "key": "block.liveRuby.loadTimeout",
+      "en": "Ruby took too long to load.",
+      "vars": []
+    },
+    {
+      "key": "block.liveRuby.timedOut",
+      "en": "Execution timed out after {ms} ms.",
+      "vars": [
+        "ms"
+      ]
+    },
+    {
+      "key": "block.liveRuby.stopped",
+      "en": "Stopped.",
+      "vars": []
+    },
+    {
+      "key": "block.liveRuby.state.idle",
+      "en": "Not run",
+      "vars": []
+    },
+    {
+      "key": "block.liveRuby.state.loading",
+      "en": "Loading…",
+      "vars": []
+    },
+    {
+      "key": "block.liveRuby.state.running",
+      "en": "Running…",
+      "vars": []
+    },
+    {
+      "key": "block.liveRuby.state.success",
+      "en": "Completed",
+      "vars": []
+    },
+    {
+      "key": "block.liveRuby.state.error",
+      "en": "Error",
+      "vars": []
+    },
+    {
+      "key": "block.liveRuby.state.timeout",
       "en": "Timed out",
       "vars": []
     },

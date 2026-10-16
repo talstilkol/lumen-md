@@ -7,7 +7,7 @@ import { describe, it, expect, vi } from "vitest";
 import { EditorState } from "@codemirror/state";
 import { EditorView } from "@codemirror/view";
 import { tsCheckExtension, tsDiagnosticsField, diagnosticDecorations } from "../editor/tsCheckExtension";
-import { findTsBlocks } from "../lsp/tsBlocks";
+import { findTsBlocks, toUnits } from "../lsp/tsBlocks";
 import type { TsClient } from "../lsp/tsClient";
 import type { TsDiagnostic } from "../lsp/tsService";
 
@@ -19,6 +19,7 @@ function fakeClient(over: Partial<TsClient> = {}): TsClient {
       { id: "block-0", start: 6, length: 1, message: "Type 'string' is not assignable to type 'number'.", severity: "error" as const, code: 2322 },
     ]),
     complete: vi.fn(async () => [{ label: "toFixed", kind: "method", sort: "11" }]),
+    hover: vi.fn(async () => ({ text: "const n: number", doc: "" })),
     dispose: vi.fn(),
     ...over,
   };
@@ -40,7 +41,7 @@ describe("tsCheckExtension", () => {
       parent: document.body,
     });
     await vi.waitFor(() => expect(titlesOf(view)).toEqual([["n", "TS2322: Type 'string' is not assignable to type 'number'."]]));
-    expect(client.check).toHaveBeenCalledWith([{ id: "block-0", tsx: false, code: "const n: number = 'x';" }]);
+    expect(client.check).toHaveBeenCalledWith([{ id: "block-0", tsx: false, js: false, shared: false, code: "const n: number = 'x';" }]);
     view.destroy();
   });
 
@@ -81,7 +82,7 @@ describe("tsCheckExtension", () => {
   it("maps block-relative ranges and clamps them to the block", () => {
     const blocks = findTsBlocks(DOC);
     const set = diagnosticDecorations(
-      blocks,
+      toUnits(blocks),
       [{ id: "block-0", start: 18, length: 999, message: "m", severity: "warning", code: 9 }],
       DOC.length,
     );
