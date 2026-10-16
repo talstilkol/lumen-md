@@ -225,3 +225,41 @@ test("live-ruby executes real Ruby via ruby.wasm in a sandboxed worker", async (
   await after.getByRole("button", { name: "Run" }).click();
   await expect(after).toContainText("42", { timeout: 120_000 });
 });
+
+test("live-ruby runs offline once the runtime was loaded (service-worker runtime cache)", async ({ page, context }) => {
+  test.setTimeout(240_000);
+  // Production builds only: the dev server registers no service worker.
+  const hasSw = await page.evaluate(async () => {
+    if (!("serviceWorker" in navigator)) return false;
+    const reg = await Promise.race([
+      navigator.serviceWorker.ready.then(() => true),
+      new Promise<boolean>((r) => setTimeout(() => r(false), 10_000)),
+    ]);
+    return reg;
+  });
+  test.skip(!hasSw, "no service worker (dev server)");
+  // The worker's fetch goes through the SW only once the page is controlled.
+  if (!(await page.evaluate(() => !!navigator.serviceWorker.controller))) {
+    await page.reload();
+    await expect(page.locator(".cm-content").first()).toContainText("Welcome to", { timeout: 15_000 });
+  }
+  const runOnce = async (expected: string) => {
+    await page.keyboard.press("Meta+2");
+    const editor = page.locator(".cm-content").first();
+    await editor.click();
+    await editor.press("ControlOrMeta+a");
+    await editor.fill("```live-ruby\nputs [3, 4].sum * 1000 + 7\n```\n");
+    const block = page.locator('[data-testid="live-ruby"]');
+    await block.getByRole("button", { name: "Run" }).click();
+    await expect(block).toContainText(expected, { timeout: 200_000 });
+  };
+  await runOnce("7007");
+  await context.setOffline(true);
+  try {
+    await page.reload();
+    await expect(page.locator(".cm-content").first()).toContainText("Welcome to", { timeout: 15_000 });
+    await runOnce("7007");
+  } finally {
+    await context.setOffline(false);
+  }
+});

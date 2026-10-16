@@ -26,7 +26,21 @@ const defineConfig = (config: ViteUserConfig & VitestConfig) =>
 import react from "@vitejs/plugin-react";
 import { VitePWA } from "vite-plugin-pwa";
 import path from "node:path";
-import { existsSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
+
+/**
+ * Version of a self-hosted runtime package. Its files keep fixed names
+ * (no content hash), so the runtime cache is named per version: an
+ * upgrade starts a fresh cache instead of serving the old files forever.
+ */
+function runtimeVersion(pkg: string): string {
+  try {
+    const file = path.resolve(__dirname, "node_modules", pkg, "package.json");
+    return (JSON.parse(readFileSync(file, "utf8")) as { version?: string }).version ?? "0";
+  } catch {
+    return "0";
+  }
+}
 
 // y-websocket is an OPTIONAL peer dep. If the user has installed it
 // (i.e. `node_modules/y-websocket` exists), Vite resolves the import
@@ -96,6 +110,12 @@ export default defineConfig({
         // Milkdown) are fetched lazily by the runtime cache when first used.
         // This keeps the initial SW install under ~2 MB instead of ~12 MB.
         maximumFileSizeToCacheInBytes: 1024 * 1024,
+        // One self-contained sw.js. Production serves
+        // `require-trusted-types-for 'script'` (public/_headers), which also
+        // applies to the service worker: the default split build's
+        // importScripts("workbox-*.js") is blocked there, leaving an
+        // "activated" worker with no precache and no routes (no offline).
+        inlineWorkboxRuntime: true,
         globPatterns: ["**/*.{js,css,html,svg,wasm,woff2}"],
         // Exclude heavy vendor chunks that are loaded on-demand via dynamic
         // import — these will be cached at runtime when first fetched.
@@ -144,6 +164,23 @@ export default defineConfig({
               expiration: { maxAgeSeconds: 60 * 60 * 24 * 365 },
             },
           },
+          // Self-hosted language runtimes (webR, ruby.wasm, Pyodide) are
+          // kept out of the precache (tens of MB each) but cached the first
+          // time a live block loads them, so they also work offline later.
+          ...(
+            [
+              ["webr", "webr"],
+              ["ruby", "@ruby/3.4-wasm-wasi"],
+              ["pyodide", "pyodide"],
+            ] as const
+          ).map(([dir, pkg]) => ({
+            urlPattern: new RegExp(`/${dir}/`),
+            handler: "CacheFirst" as const,
+            options: {
+              cacheName: `lumen-runtime-${dir}-${runtimeVersion(pkg)}`,
+              cacheableResponse: { statuses: [200] },
+            },
+          })),
           {
             // Large on-demand vendor chunks (Mermaid, tldraw, ECharts, etc.)
             // Cached at runtime when first loaded via dynamic import.

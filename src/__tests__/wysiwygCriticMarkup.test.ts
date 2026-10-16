@@ -42,4 +42,9 @@ describe("CriticMarkup through the WYSIWYG serializer", () => {
     expect(repairCriticMarkup("a \\~> b")).toBe("a \\~> b");
     expect(repairCriticMarkup("{~~a\\_b\\~>c~~} and {~~x\\~>y~~}")).toBe("{~~a\\_b~>c~~} and {~~x~>y~~}");
   });
+
+  it("leaves code spans and fences byte for byte", () => {
+    const md = "Use `{~~a\\~>b~~}` literally, but fix {~~x\\~>y~~}.\n\n```md\n{~~p\\~>q~~}\n```\n";
+    expect(repairCriticMarkup(md)).toBe("Use `{~~a\\~>b~~}` literally, but fix {~~x~>y~~}.\n\n```md\n{~~p\\~>q~~}\n```\n");
+  });
 });

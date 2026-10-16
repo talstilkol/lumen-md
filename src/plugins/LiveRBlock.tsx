@@ -20,6 +20,8 @@ interface Props {
 type RunState = "idle" | "loading" | "running" | "success" | "error" | "timeout";
 
 const DEFAULT_TIMEOUT_MS = 30_000;
+/** Downloading (~45 MB) and booting R on a slow connection. */
+const LOAD_TIMEOUT_MS = 180_000;
 
 function parseTimeout(meta?: string): number {
   const m = meta?.match(/timeout=(\d+)/);
@@ -71,19 +73,30 @@ export default function LiveRBlock({ source, meta }: Props) {
     setElapsed(null);
     setState("loading");
     const started = performance.now();
-    let timer: ReturnType<typeof setTimeout> | null = null;
-    const timedOut = new Promise<"timeout">((resolve) => {
-      timer = setTimeout(() => resolve("timeout"), timeoutMs);
-    });
+    const timers: Array<ReturnType<typeof setTimeout>> = [];
+    const after = (ms: number) =>
+      new Promise<"timeout">((resolve) => {
+        timers.push(setTimeout(() => resolve("timeout"), ms));
+      });
     try {
-      // The first Run boots the runtime; flip to "running" once that's done.
+      // The first Run downloads and boots the runtime: that gets its own,
+      // longer budget, so the block's `timeout=` is all execution time.
       const { getWebR } = await import("./r/rRuntime");
-      const ready = await Promise.race([getWebR().then(() => "ready" as const), timedOut]);
+      const ready = await Promise.race([getWebR().then(() => "ready" as const), after(LOAD_TIMEOUT_MS)]);
       if (runId !== runSeq.current) return;
       if (ready === "timeout") throw new Error(t("block.liveR.loadTimeout"));
       setState("running");
-      const out = await Promise.race([runR(source), timedOut]);
-      if (runId !== runSeq.current) return;
+      // The execution timer starts when the run does (other R blocks may
+      // be ahead of it in the queue).
+      let startTimer: () => void = () => {};
+      const timedOut = new Promise<"timeout">((resolve) => {
+        startTimer = () => timers.push(setTimeout(() => resolve("timeout"), timeoutMs));
+      });
+      const out = await Promise.race([
+        runR(source, undefined, { onStart: () => startTimer(), isCancelled: () => runId !== runSeq.current }),
+        timedOut,
+      ]);
+      if (runId !== runSeq.current || out === null) return;
       if (out === "timeout") {
         // R can't be interrupted over the PostMessage channel: drop the
         // runtime; the next Run boots a fresh one.
@@ -102,7 +115,7 @@ export default function LiveRBlock({ source, meta }: Props) {
       setLines([{ kind: "err", text: `${t("block.liveR.loadFailed")} ${detail}`.trim() }]);
       setState("error");
     } finally {
-      if (timer) clearTimeout(timer);
+      for (const h of timers) clearTimeout(h);
     }
   }
 

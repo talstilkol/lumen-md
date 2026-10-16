@@ -91,8 +91,37 @@ export function plotPages(msgs: ReadonlyArray<{ type: string; data?: unknown }>)
   return pages.filter((p): p is ImageBitmap => p !== null);
 }
 
-/** Run R code, capturing printed output, messages, warnings and plots. */
-export async function runR(code: string, plot = { width: 504, height: 360 }): Promise<RRunResult> {
+export interface RRunHooks {
+  /** Called when this run actually starts (after any queued runs). */
+  onStart?: () => void;
+  /** Checked before starting: a cancelled run is skipped (resolves null). */
+  isCancelled?: () => boolean;
+}
+
+// Runs share one webR instance, its output queue and its graphics
+// devices, so they execute one at a time: a run never drains or closes
+// another run's plot frames.
+let chain: Promise<unknown> = Promise.resolve();
+
+/**
+ * Run R code, capturing printed output, messages, warnings and plots.
+ * Calls are serialised; see RRunHooks for queueing.
+ */
+export function runR(
+  code: string,
+  plot = { width: 504, height: 360 },
+  hooks: RRunHooks = {},
+): Promise<RRunResult | null> {
+  const run = chain.then(async () => {
+    if (hooks.isCancelled?.()) return null;
+    hooks.onStart?.();
+    return runROnce(code, plot);
+  });
+  chain = run.catch(() => {});
+  return run;
+}
+
+async function runROnce(code: string, plot: { width: number; height: number }): Promise<RRunResult> {
   const webR = await getWebR();
   await webR.flush(); // drop anything left over from an earlier run
   // webR's built-in graphics capture fails over the PostMessage channel, so

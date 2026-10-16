@@ -98,14 +98,26 @@ describe("JavaScript blocks and shared scopes", () => {
       [true, null],
     ]);
     const units = toUnits(blocks);
-    expect(units.map((u) => u.id)).toEqual(["scope-default", "scope-other", "block-3"]);
-    expect(units[0].code).toBe("const base = 2;\nconst total = base * 21;");
-    // Offsets map both ways through the concatenation.
+    // One unit per block; a shared block's unit is its scope's earlier
+    // blocks + itself, joined by a statement boundary.
+    expect(units.map((u) => u.id)).toEqual(["block-0", "block-1", "block-2", "block-3"]);
+    expect(units[1].code).toBe("const base = 2;\n;\nconst total = base * 21;");
+    expect(units[2].code).toBe("const base = 'x';");
+    // Offsets map both ways, into the unit's own block only.
     const second = blocks[1];
     const at = unitAt(units, second.from + 6)!;
-    expect(at.unit.id).toBe("scope-default");
+    expect(at.unit.id).toBe("block-1");
     expect(at.unit.code.slice(at.offset, at.offset + 5)).toBe("total");
-    expect(unitRangeToDoc(units[0], at.offset, 5)).toEqual({ from: second.from + 6, to: second.from + 11 });
+    expect(unitRangeToDoc(units[1], at.offset, 5)).toEqual({ from: second.from + 6, to: second.from + 11 });
+    expect(unitRangeToDoc(units[1], 0, 5)).toBeNull(); // in the earlier block
+  });
+
+  it("recognises the js-live alias, shared too", () => {
+    const blocks = findTsBlocks("```js-live shared\nconst a = 1\n```\n```js-live shared\na\n```\n");
+    expect(blocks.map((b) => [b.js, b.scope])).toEqual([
+      [true, "default"],
+      [true, "default"],
+    ]);
   });
 
   it("checks JS syntax always and types only with // @ts-check", () => {
@@ -117,10 +129,56 @@ describe("JavaScript blocks and shared scopes", () => {
     expect(checked.map((d) => d.code)).toEqual([2322]);
   });
 
-  it("shared blocks see each other's declarations and may redeclare", () => {
-    const code = "// @ts-check\nconst base = 2;\nconst base = 3;\nconst total = base.toFixed(1);";
-    const diags = service.diagnostics([{ id: "scope-default", code, tsx: false, js: true, shared: true }]);
+  const sharedDoc = (...bodies: string[]) => bodies.map((b) => "```live-js shared\n" + b + "\n```").join("\n");
+  const checkShared = (...bodies: string[]) => {
+    const units = toUnits(findTsBlocks(sharedDoc(...bodies)));
+    const input = units.map(({ id, tsx, js, shared, code }) => ({ id, tsx, js, shared, code }));
+    const diags = service.diagnostics(input);
+    // Keep only diagnostics inside each unit's own block, as the editor does.
+    return {
+      units,
+      input,
+      diags: diags.filter((d) => {
+        const u = units.find((x) => x.id === d.id)!;
+        return unitRangeToDoc(u, d.start, d.length) !== null;
+      }),
+    };
+  };
+
+  it("shared blocks see earlier declarations, and a re-declaration replaces the type", () => {
+    const { diags } = checkShared("// @ts-check\nconst value = 1;", "// @ts-check\nconst value = 'x';\nvalue.toUpperCase();", "// @ts-check\nvalue.toUpperCase();");
     expect(diags).toEqual([]);
+    const { units, input } = checkShared("const value = 1;", "// @ts-check\nconst value = 'x';\nvalue;");
+    const at = units[1].code.lastIndexOf("value");
+    expect(service.quickInfo(input, units[1].id, at + 1)?.text).toBe('const value: "x"');
+  });
+
+  it("later shared blocks are invisible to earlier ones", () => {
+    const { units, input } = checkShared("// @ts-check\nlater();", "function later() {}");
+    expect(units[0].code).not.toContain("later() {}");
+    const { diags } = checkShared("// @ts-check\nlater();", "function later() {}");
+    expect(diags.map((d) => [d.id, d.code])).toEqual([["block-0", 2304]]);
+    expect(service.completions(input, "block-0", units[0].code.indexOf("later")).some((c) => c.label === "later")).toBe(false);
+  });
+
+  it("each shared block decides // @ts-check for itself", () => {
+    // Directive only in the later block: its type errors are reported.
+    let r = checkShared("const n = 1;", "// @ts-check\nlet s = 'a';\ns = 1;");
+    expect(r.diags.map((d) => [d.id, d.code])).toEqual([["block-1", 2322]]);
+    // Directive only in the first block: the later block stays unchecked.
+    r = checkShared("// @ts-check\nconst n = 1;", "let s = 'a';\ns = 1;");
+    expect(r.diags).toEqual([]);
+  });
+
+  it("semicolonless shared blocks don't merge across the boundary", () => {
+    const { diags } = checkShared("// @ts-check\nconst xs = [1]", "// @ts-check\n[2].forEach((x) => x.toFixed())");
+    expect(diags).toEqual([]);
+  });
+
+  it("re-declared names are renamed in earlier parts only where they are bindings", () => {
+    const { units } = checkShared("const value = 1; const o = { value: 2 }; o.value;", "const value = 'x';");
+    const first = units[1].code.split("\n;\n")[0];
+    expect(first).toMatch(/^const \u05d0alue = 1; const o = \{ value: 2 \}; o\.value;$/);
   });
 
   it("describes the symbol under the cursor", () => {

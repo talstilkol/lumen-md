@@ -25,6 +25,7 @@ import { PROMPTS } from "../ai/prompts";
 import { showAiToast } from "../ui/AiToast";
 import { openAiPrompt } from "../ui/AiInlinePrompt";
 import { log } from "../lib/logger";
+import { findCodeRanges } from "./suggesting";
 
 interface Props {
   value: string;
@@ -567,7 +568,12 @@ function buildTooltip(getView: () => EditorView | null): HTMLDivElement {
  */
 export function repairCriticMarkup(md: string): string {
   if (md.indexOf("\\~>") === -1) return md;
-  return md.replace(/\{~~([^~]*(?:~(?!~\})[^~]*)*?)\\~>/g, (_m, old: string) => `{~~${old}~>`);
+  // Code is literal: a `{~~a\~>b~~}` inside a code span or fence is kept
+  // byte for byte (suggestions are never parsed there either).
+  const code = findCodeRanges(md);
+  return md.replace(/\{~~([^~]*(?:~(?!~\})[^~]*)*?)\\~>/g, (m, old: string, at: number) =>
+    code.some((c) => at < c.to && at + m.length > c.from) ? m : `{~~${old}~>`,
+  );
 }
 
 /**

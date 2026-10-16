@@ -13,7 +13,7 @@
 
 | מדד | לפני (2026-10-15) | אחרי (2026-10-16) |
 |---|---|---|
-| בדיקות יחידה (vitest) | 1360 / 1360 | **2192 / 2192** |
+| בדיקות יחידה (vitest) | 1360 / 1360 | **2200 / 2200** |
 | בדיקות e2e (Chromium, build ייצור + CSP/Trusted Types אכוף) | לא הורץ | **74 / 74** + בדיקת הפרות CSP חדשה (0 הפרות) |
 | e2e ב-CI (chromium / webkit / firefox + build ייצור) | — | **כולם ✅** — Firefox: ‏103 עברו, 0 flaky (בדיקת pixel אחת מוגבלת ל-Chromium בכוונה) |
 | `tsc --noEmit` | נקי | נקי |
@@ -128,6 +128,7 @@
 | עורך | **הרחבת בדיקות TS** — טיפוס + JSDoc ב-hover; בלוקי JavaScript (`js`/`live-js`): תחביר תמיד, טיפוסים עם `// @ts-check`; בלוקי `live-js shared` נבדקים יחד לפי scope (מוכרזים בבלוק מוקדם נראים בבלוק מאוחר, הכרזה חוזרת מותרת). אומת: e2e ל-hover ולהשלמה ב-Chromium | §5 (לשעבר "הרחבת בדיקות TS") |
 | שפות חיות | **` ```live-r ` — R ב-WebAssembly (webR 0.6)**: פלט, הודעות, אזהרות, שגיאות וגרפים (base graphics); נטען בהרצה הראשונה (~45MB, מאוחסן עצמית ב-`/webr/`, מחוץ ל-precache); timeout עם איפוס הסביבה; כפתור בתפריט ההוספה, 8 שפות. אומת e2e (Chromium) מול dev, מול build ייצור ומול build ייצור עם כותרות CSP + Trusted Types אמיתיות | §5 (לשעבר "שפות חיות נוספות") |
 | שפות חיות | **` ```live-ruby ` — Ruby 3.4 ב-WebAssembly (ruby.wasm 2.10.1)** ב-Web Worker משותף: `puts`/`warn`, ערך אחרון (`=> …`), שגיאות עם `block:<שורה>`; ה-stdlib המלא; VM חדש לכל הרצה (המודול מקומפל פעם אחת); ה-worker מוחק את ממשקי הרשת והאחסון (fetch, XHR, WebSocket, IndexedDB, Cache, OPFS) לפני הרצת קוד, וגשר ה-JS חסום עם הודעה ברורה; timeout הורג את ה-worker וההרצה הבאה עובדת; ~30MB מאוחסן עצמית ב-`/ruby/` מחוץ ל-precache; 8 שפות. 12 בדיקות יחידה (7 על הסביבה האמיתית) + e2e מול build ייצור עם כותרות CSP + Trusted Types אמיתיות | §5 |
+| PWA / אופליין | **באג ייצור תוקן:** כותרת `require-trusted-types-for 'script'` חלה גם על ה-service worker, ו-`importScripts("workbox-*.js")` נחסם — ה-SW היה "activated" בלי precache ובלי routes, כלומר **אין אופליין בייצור**. עכשיו `inlineWorkboxRuntime` (קובץ sw.js אחד). בנוסף: runtime cache (CacheFirst, שם מטמון לפי גרסה) ל-`/webr/`, `/ruby/`, `/pyodide/`; ב-nginx של Docker ‏location לסביבות ההרצה עם `no-cache` ו-CSP ל-worker של webR (‏`'unsafe-eval'` רק שם; לא נבדק מול nginx אמיתי — אין daemon בסביבה). אומת e2e: טעינה, ניתוק רשת, רענון, והרצת Ruby אופליין | Codex #107 |
 | עורך | **ייחוס מחבר להצעות** — הצעה חדשה מקבלת תג `{>>@שם<<}` של המשתמש המחובר (שם, או החלק שלפני @ במייל); התג שייך לשינוי (מתקבל/נדחה איתו), מוצג כ-tooltip בעורך וכהערה קטנה בתצוגה; תרגום ל-8 שפות. מגבלה: הקלדה בתוך הצעה של מישהו אחר נשארת מיוחסת לו | §5 (לשעבר "ייחוס מחבר") |
 | אבטחה | **נוכחות (awareness) בחדרי סיסמה** — הסיסמה מועברת גם ל-y-webrtc, שמצפין את כל תעבורת ה-signaling וה-BroadcastChannel; עמית בלי הסיסמה לא משלים חיבור ולא רואה שמות/סמנים. נשאר: מחזיקי הסיסמה רואים נוכחות (מתועד ב-`collab/encryption`). לא נבדק e2e עם שני דפדפנים | §5 (לשעבר "הצפנת awareness") |
 
@@ -158,7 +159,7 @@
 
 ## 6. מה אומת ואיך
 
-- **אומת בפועל:** typecheck, 2192 בדיקות יחידה, e2e ב-CI בשלושת הדפדפנים + build ייצור, hygiene, build ייצור, תקציב bundle, ו-74 בדיקות e2e ב-Chromium 141 מול build ייצור עם כותרות `public/_headers` (CSP + Trusted Types אכוף) — 0 הפרות.
+- **אומת בפועל:** typecheck, 2200 בדיקות יחידה, e2e ב-CI בשלושת הדפדפנים + build ייצור, hygiene, build ייצור, תקציב bundle, ו-74 בדיקות e2e ב-Chromium 141 מול build ייצור עם כותרות `public/_headers` (CSP + Trusted Types אכוף) — 0 הפרות.
 - **אומת חלקית:** קובצי PPTX נפתחו ב-python-pptx וב-LibreOffice (לא ב-PowerPoint עצמו).
 - **לא אומת:** קונטיינרי Docker לא נבנו; שרת collab הקבוע לא הורץ (תלויות אופציונליות); SSO/Stripe לא נבדקו חי; tldraw / תלת-ממד / מפות לא כוסו ב-e2e תחת Trusted Types.
 
