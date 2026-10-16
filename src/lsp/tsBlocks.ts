@@ -174,6 +174,11 @@ interface FnScope {
   retained: boolean;
   /** Names bound inside it: parameters, its own name, local declarations. */
   locals: Set<string>;
+  /**
+   * Class bodies only: ranges evaluated when the class is defined (static
+   * initializers, static blocks, computed keys) — not late-bound.
+   */
+  eager?: Array<[number, number]>;
 }
 
 /** Does the `{` at `i` open a class body (`class X [extends Y] {`)? */
@@ -284,6 +289,82 @@ function functionScopes(tokens: ReturnType<typeof tokenize>, match: Map<number, 
     // A grouping parenthesis: classify by what the group sits in.
     return retainedAt(c - 1);
   };
+  /**
+   * Identifiers a destructuring pattern at `open` binds: property keys and
+   * whole default expressions (`{ x = (value) }`, `[a = f(value)]`) are
+   * skipped; nested patterns recurse.
+   */
+  const addPatternBindings = (into: Set<string>, open: number) => {
+    const close = match.get(open) ?? open;
+    for (let m = open + 1; m < close; m++) {
+      if (isPunct(m, "=")) {
+        // Skip the default expression up to the next `,` / closer at this level.
+        let depth = 0;
+        for (m++; m < close; m++) {
+          const v = tokens[m].type === "punct" ? tokens[m].value : "";
+          if (v === "(" || v === "[" || v === "{") depth++;
+          else if (v === ")" || v === "]" || v === "}") depth--;
+          else if (v === "," && depth === 0) break;
+        }
+        continue;
+      }
+      if (isPunct(m, "{") || isPunct(m, "[")) {
+        addPatternBindings(into, m);
+        m = match.get(m) ?? m;
+        continue;
+      }
+      if (tokens[m]?.type !== "ident") continue;
+      if (isPunct(m + 1, ":")) continue; // property key, not a binding
+      into.add(tokens[m].value);
+    }
+  };
+  /** Parts of a class body run at definition: static fields / blocks, computed keys. */
+  const classEagerRanges = (open: number, close: number): Array<[number, number]> => {
+    const out: Array<[number, number]> = [];
+    let memberStart = true;
+    for (let m = open + 1; m < close; m++) {
+      const t = tokens[m];
+      if (t.type === "punct" && (t.value === "(" || t.value === "[" || t.value === "{")) {
+        const end = match.get(m) ?? m;
+        // `[expr]` as a member name is computed at definition time.
+        if (t.value === "[" && (memberStart || val(m - 1) === "static")) out.push([m, end]);
+        m = end;
+        memberStart = t.value === "{"; // after a method body, a new member starts
+        continue;
+      }
+      if (t.type === "punct" && t.value === ";") {
+        memberStart = true;
+        continue;
+      }
+      if (t.type === "ident" && t.value === "static" && memberStart) {
+        if (isPunct(m + 1, "{")) {
+          // static { … } block
+          const end = match.get(m + 1) ?? m + 1;
+          out.push([m + 1, end]);
+          m = end;
+          continue;
+        }
+        // static name = initializer  →  the initializer up to `;` / next member
+        let k = m + 1;
+        while (k < close && !isPunct(k, "=") && !isPunct(k, ";") && !isPunct(k, "(") && !(k > m + 1 && tokens[k].nl)) k++;
+        if (isPunct(k, "=")) {
+          let e = k + 1;
+          while (e < close && !isPunct(e, ";") && !(e > k + 1 && tokens[e].nl && tokens[e].depth === tokens[k].depth)) {
+            const v = tokens[e].type === "punct" ? tokens[e].value : "";
+            if (v === "(" || v === "[" || v === "{") e = match.get(e) ?? e;
+            e++;
+          }
+          out.push([k, e]);
+          m = e - 1;
+        }
+        memberStart = false;
+        continue;
+      }
+      if (t.nl) memberStart = true;
+      else memberStart = false;
+    }
+    return out;
+  };
   /** Function bodies [open, close] (to skip nested function scopes). */
   const fnBodies: Array<[number, number]> = [];
   /**
@@ -313,15 +394,7 @@ function functionScopes(tokens: ReturnType<typeof tokenize>, match: Map<number, 
       if (v === "const" || v === "let" || v === "var") {
         const j = i + 1;
         if (tokens[j]?.type === "ident") into.add(tokens[j].value);
-        else if (isPunct(j, "{") || isPunct(j, "[")) {
-          const close = match.get(j) ?? j;
-          for (let m = j + 1; m < close; m++) {
-            if (tokens[m]?.type !== "ident") continue;
-            if (isPunct(m + 1, ":")) continue; // property key, not a binding
-            if (isPunct(m - 1, "=")) continue; // default value (approximation)
-            into.add(tokens[m].value);
-          }
-        }
+        else if (isPunct(j, "{") || isPunct(j, "[")) addPatternBindings(into, j);
       } else if (here && (v === "function" || v === "class") && tokens[i + 1]?.type === "ident") {
         into.add(tokens[i + 1].value);
       }
@@ -420,7 +493,7 @@ function functionScopes(tokens: ReturnType<typeof tokenize>, match: Map<number, 
     // like methods. (A `static` initializer runs at definition; rare enough
     // to treat the same.)
     if (isClassBody(tokens, i)) {
-      scopes.push({ from: i, to: close, retained: true, locals: new Set() });
+      scopes.push({ from: i, to: close, retained: true, locals: new Set(), eager: classEagerRanges(i, close) });
       return;
     }
     const locals = new Set<string>();
@@ -494,7 +567,8 @@ function rewriteEarlierPart(code: string, names: ReadonlyMap<string, string>): s
     // Enclosing functions, innermost first.
     const enclosing = scopes.filter((f) => k >= f.from && k <= f.to).sort((x, y) => (y.from - x.from) || (x.to - y.to));
     if (enclosing.some((f) => f.locals.has(tok.value))) continue; // a local binding
-    if (enclosing.some((f) => f.retained)) continue; // late-bound closure
+    // Late-bound closure — except code a class body runs at definition.
+    if (enclosing.some((f) => f.retained && !f.eager?.some(([a, b]) => k >= a && k <= b))) continue;
     const shorthand = keyPos && (nextP === "}" || nextP === "," || nextP === "=");
     edits.push({ from: tok.start, to: tok.end, text: shorthand ? `${tok.value}: ${to}` : to });
   }

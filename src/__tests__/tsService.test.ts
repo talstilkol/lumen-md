@@ -272,6 +272,20 @@ describe("JavaScript blocks and shared scopes", () => {
     expect(first).toContain("(function (x = value$prev) { return x; })()");
   });
 
+  it("static initializers and computed keys run at definition; destructuring defaults reference", () => {
+    const { units } = checkShared(
+      "const value = 1; class C { static saved = value; static { this.b = value; } [value] = 1; late = value; m() { return value; } } const r = (() => { const { x = (value) } = {}; return x; })();",
+      "const value = 'x';",
+    );
+    const first = units[1].code.split("\n;\n")[0];
+    expect(first).toContain("static saved = value$prev;");
+    expect(first).toContain("static { this.b = value$prev; }");
+    expect(first).toContain("[value$prev] = 1;");
+    expect(first).toContain("late = value;");
+    expect(first).toContain("m() { return value; }");
+    expect(first).toContain("const { x = (value$prev) } = {}");
+  });
+
   it("a closure in grouping parentheses is still retained", () => {
     const { units, diags } = checkShared(
       "const value = 1; const fn = (() => value); const now = (() => value)();",

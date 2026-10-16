@@ -77,10 +77,15 @@ export async function resetWebR(): Promise<void> {
 }
 
 /** Map webR's captured output entries to display lines. */
+/** Caps on what one run shows (characters / lines), like the other live blocks. */
+export const MAX_OUTPUT_CHARS = 200_000;
+export const MAX_OUTPUT_LINES = 2_000;
+
 export function toLines(output: ReadonlyArray<{ type: string; data: unknown }>): ROutputLine[] {
   const lines: ROutputLine[] = [];
+  let chars = 0;
   for (const o of output) {
-    const text =
+    let text =
       typeof o.data === "string"
         ? o.data
         : o.data && typeof (o.data as { message?: unknown }).message === "string"
@@ -88,6 +93,15 @@ export function toLines(output: ReadonlyArray<{ type: string; data: unknown }>):
           : String(o.data);
     const kind: ROutputLine["kind"] =
       o.type === "stdout" ? "out" : o.type === "warning" ? "warn" : o.type === "message" ? "msg" : "err";
+    const room = MAX_OUTPUT_CHARS - chars;
+    const full = lines.length >= MAX_OUTPUT_LINES || room <= 0;
+    if (!full && text.length > room) text = text.slice(0, room);
+    if (full || text.length < (typeof o.data === "string" ? o.data.length : text.length)) {
+      if (!full) lines.push({ kind, text });
+      lines.push({ kind: "msg", text: "… output truncated" });
+      break;
+    }
+    chars += text.length;
     lines.push({ kind, text });
   }
   return lines;

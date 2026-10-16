@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { plotPages, toLines, webrBaseUrl } from "../plugins/r/rRuntime";
+import { MAX_OUTPUT_CHARS, MAX_OUTPUT_LINES, plotPages, toLines, webrBaseUrl } from "../plugins/r/rRuntime";
 
 describe("live-r runtime helpers", () => {
   it("serves webR under the app base path", () => {
@@ -42,5 +42,13 @@ describe("plot pages", () => {
       { type: "canvas", data: { event: "canvasNewPage" } }, // empty page: dropped
     ];
     expect(plotPages(msgs)).toEqual([a2, b1]);
+  });
+
+  it("caps output by characters and lines", () => {
+    const big = toLines([{ type: "stdout", data: "x".repeat(MAX_OUTPUT_CHARS * 3) }]);
+    expect(big.reduce((n, l) => n + l.text.length, 0)).toBeLessThan(MAX_OUTPUT_CHARS + 50);
+    expect(big.at(-1)?.text).toMatch(/truncated/);
+    const many = toLines(Array.from({ length: MAX_OUTPUT_LINES + 50 }, () => ({ type: "stdout", data: "a" })));
+    expect(many).toHaveLength(MAX_OUTPUT_LINES + 1);
   });
 });
