@@ -117,6 +117,8 @@ async function claudeResearch(o: ResearchOptions): Promise<ResearchResult> {
     },
   );
   const { markdown, sources } = citedBlocksToMarkdown(o.question, blocks);
+  // An answer without web citations isn't research (Claude answered from memory).
+  if (!sources) throw new Error("Claude answered without citing any web source — try again or rephrase the question.");
   return { markdown, route: "claude", sources, unverified: 0 };
 }
 
@@ -167,10 +169,18 @@ async function proxyResearch(o: ResearchOptions, settings: ResearchSettings): Pr
 
   // 2. Search; interleave results so every query contributes.
   const lists: SearchHit[][] = [];
+  let lastError: unknown = null;
   for (const q of queries) {
     o.onProgress?.(`Searching: ${q}`);
-    lists.push(await search(q, settings).catch(() => []));
+    lists.push(
+      await search(q, settings).catch((e) => {
+        lastError = e;
+        return [];
+      }),
+    );
   }
+  // Every search failed (bad key, quota, service down): say why.
+  if (lastError && lists.every((l) => !l.length)) throw lastError instanceof Error ? lastError : new Error(String(lastError));
   const picked: SearchHit[] = [];
   const seen = new Set<string>();
   for (let r = 0; picked.length < maxSources && lists.some((l) => l.length > r); r++) {
