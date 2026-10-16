@@ -93,7 +93,7 @@ export interface ChatOptions {
    */
   onUsage?: (u: Omit<Usage, "provider"> & { provider?: string }) => void;
   /** Internal: the provider a fallback actually sent the request to. */
-  onRoute?: (provider: AiProvider) => void;
+  onRoute?: (provider: AiProvider, model: string) => void;
 }
 
 const DEFAULT_MODEL = "gpt-4o-mini";
@@ -237,10 +237,12 @@ export async function chat(
   // Fallbacks (Ollama / WebGPU unavailable → OpenAI) answer under another
   // provider: such an answer must not be cached under the selected one.
   let answeredBy: string = provider;
+  let sentModel = model;
   const text = await chatDirect(messages, {
     ...opts,
-    onRoute: (p) => {
+    onRoute: (p, m) => {
       answeredBy = p;
+      sentModel = m;
     },
     onUsage: (u) => {
       reported = true;
@@ -251,7 +253,7 @@ export async function chat(
   if (text && !reported) {
     recordUsage({
       provider: answeredBy,
-      model: answeredBy === provider ? model : effectiveModel(answeredBy as AiProvider, {}),
+      model: sentModel,
       inputTokens: estimateTokens(promptChars(messages)),
       outputTokens: estimateTokens(text),
       estimated: true,
@@ -380,7 +382,6 @@ async function chatDirect(
 
   // ── OpenAI (cloud) ─────────────────────────────────────────────
   // Also the fallback when Ollama / WebGPU isn't available.
-  opts.onRoute?.("openai");
   const key = getAiKey();
   checkRateLimit();
   charge();
@@ -394,6 +395,7 @@ async function chatDirect(
       ? storeState.fineTunedModelId
       : null;
   const model = opts.model ?? fineTuneOverride ?? DEFAULT_MODEL;
+  opts.onRoute?.("openai", model);
 
   try {
     const res = await fetchWithRetry(
@@ -469,11 +471,13 @@ export async function* chatStream(
   let reported = false;
   let out = "";
   let routedTo: AiProvider = provider;
+  let sentModel = effectiveModel(provider, opts);
   try {
     for await (const chunk of chatStreamDirect(messages, {
       ...opts,
-      onRoute: (p) => {
+      onRoute: (p, m) => {
         routedTo = p;
+        sentModel = m;
       },
       onUsage: (u) => {
         reported = true;
@@ -489,7 +493,7 @@ export async function* chatStream(
     if (out && !reported) {
       recordUsage({
         provider: routedTo,
-        model: effectiveModel(routedTo, routedTo === provider ? opts : {}),
+        model: sentModel,
         inputTokens: estimateTokens(promptChars(messages)),
         outputTokens: estimateTokens(out),
         estimated: true,
@@ -548,12 +552,12 @@ async function* chatStreamDirect(
   }
 
   // OpenAI — also the fallback when Ollama isn't available.
-  opts.onRoute?.("openai");
   const key = getAiKey();
   checkRateLimit();
   charge();
   inflight++;
   const model = opts.model ?? DEFAULT_MODEL;
+  opts.onRoute?.("openai", model);
 
   try {
     const res = await fetchWithRetry(
