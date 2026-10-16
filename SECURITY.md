@@ -10,7 +10,7 @@
 
 **Do not open a public GitHub issue for security vulnerabilities.**
 
-Instead, please email **security@lumen.md** with:
+Instead, please email **security@lumen-md.app** with:
 
 1. A description of the vulnerability
 2. Steps to reproduce

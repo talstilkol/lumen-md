@@ -6,7 +6,7 @@
  *   1. Client calls `publishNote(path)` — POST {path, content, slug?} to the
  *      configured `VITE_PUBLISH_ENDPOINT` (Cloudflare Worker / Vercel edge /
  *      Supabase Edge Function — operator's choice).
- *   2. The endpoint stores the rendered HTML at `lumen.app/p/<slug>` and
+ *   2. The endpoint stores the rendered HTML at `lumen-md.app/p/<slug>` and
  *      returns `{ url, slug }`.
  *   3. `unpublishNote(slug)` flips the document back to private.
  *

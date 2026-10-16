@@ -16,7 +16,7 @@ const env: Env = {
   STRIPE_WEBHOOK_SECRET: "whsec_test",
   SUPABASE_URL: "https://proj.supabase.co",
   SUPABASE_SERVICE_ROLE: "svc",
-  ALLOWED_ORIGIN: "https://lumen.app",
+  ALLOWED_ORIGIN: "https://lumen-md.app",
   STRIPE_PRICE_PRO: "price_pro_m, price_pro_y",
   STRIPE_PRICE_TEAM: "price_team_m",
 };
@@ -50,14 +50,14 @@ describe("POST /checkout", () => {
   const post = (body: unknown) =>
     new Request("https://billing.test/checkout", {
       method: "POST",
-      headers: { Authorization: "Bearer jwt", "Content-Type": "application/json", Origin: "https://lumen.app" },
+      headers: { Authorization: "Bearer jwt", "Content-Type": "application/json", Origin: "https://lumen-md.app" },
       body: JSON.stringify(body),
     });
 
   it("stamps the server-derived tier on the session and the subscription", async () => {
     const calls = stub();
     const res = await worker.fetch(
-      post({ priceId: "price_team_m", successUrl: "https://lumen.app/ok", cancelUrl: "https://lumen.app/no" }),
+      post({ priceId: "price_team_m", successUrl: "https://lumen-md.app/ok", cancelUrl: "https://lumen-md.app/no" }),
       env,
     );
     expect(res.status).toBe(200);
@@ -66,7 +66,7 @@ describe("POST /checkout", () => {
     expect(b.get("subscription_data[metadata][tier]")).toBe("team");
   });
 
-  const okBody = { priceId: "price_pro_m", successUrl: "https://lumen.app/ok", cancelUrl: "https://lumen.app/no" };
+  const okBody = { priceId: "price_pro_m", successUrl: "https://lumen-md.app/ok", cancelUrl: "https://lumen-md.app/no" };
 
   it("reuses the user's existing Stripe customer instead of creating a new one", async () => {
     const calls = stub([{ stripe_customer_id: "cus_old", status: "canceled" }]);
@@ -94,12 +94,12 @@ describe("POST /checkout", () => {
   it("refuses prices that aren't allow-listed and off-site redirect URLs", async () => {
     const calls = stub();
     let res = await worker.fetch(
-      post({ priceId: "price_cheap_other", successUrl: "https://lumen.app/ok", cancelUrl: "https://lumen.app/no" }),
+      post({ priceId: "price_cheap_other", successUrl: "https://lumen-md.app/ok", cancelUrl: "https://lumen-md.app/no" }),
       env,
     );
     expect(res.status).toBe(400);
     res = await worker.fetch(
-      post({ priceId: "price_pro_m", successUrl: "https://evil.test/ok", cancelUrl: "https://lumen.app/no" }),
+      post({ priceId: "price_pro_m", successUrl: "https://evil.test/ok", cancelUrl: "https://lumen-md.app/no" }),
       env,
     );
     expect(res.status).toBe(400);
@@ -282,19 +282,19 @@ describe("Team plans bought by SSO organization members", () => {
   const req = (path: string, token: string, body?: unknown) =>
     new Request(`https://billing.test${path}`, {
       method: "POST",
-      headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json", Origin: "https://lumen.app" },
+      headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json", Origin: "https://lumen-md.app" },
       body: JSON.stringify(body ?? {}),
     });
 
   it("entitles the organization's row for Team, the member's own row for Pro", async () => {
     const tok = await ssoBearer();
     let calls = stub();
-    await worker.fetch(req("/checkout", tok, { priceId: "price_team_m", successUrl: "https://lumen.app/ok", cancelUrl: "https://lumen.app/no" }), ssoEnv);
+    await worker.fetch(req("/checkout", tok, { priceId: "price_team_m", successUrl: "https://lumen-md.app/ok", cancelUrl: "https://lumen-md.app/no" }), ssoEnv);
     expect(calls[0].body.get("metadata[userId]")).toBe("workos-org:org_9");
     expect(calls[0].body.get("client_reference_id")).toBe("workos-org:org_9");
     expect(calls[0].body.get("subscription_data[metadata][purchaser]")).toBe("workos:user_01");
     calls = stub();
-    await worker.fetch(req("/checkout", tok, { priceId: "price_pro_m", successUrl: "https://lumen.app/ok", cancelUrl: "https://lumen.app/no" }), ssoEnv);
+    await worker.fetch(req("/checkout", tok, { priceId: "price_pro_m", successUrl: "https://lumen-md.app/ok", cancelUrl: "https://lumen-md.app/no" }), ssoEnv);
     expect(calls[0].body.get("metadata[userId]")).toBe("workos:user_01");
   });
 

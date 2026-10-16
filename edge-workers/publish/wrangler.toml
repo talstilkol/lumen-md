@@ -4,7 +4,7 @@ compatibility_date = "2026-04-01"
 account_id = "REPLACE_WITH_CLOUDFLARE_ACCOUNT_ID"
 
 # routes = [
-#   { pattern = "publish.lumen.app/*", zone_name = "lumen.app" }
+#   { pattern = "publish.lumen-md.app/*", zone_name = "lumen-md.app" }
 # ]
 
 # KV namespace — create with `wrangler kv:namespace create PUBLISHED`,

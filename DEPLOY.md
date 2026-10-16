@@ -11,7 +11,10 @@ code is done.
 
 ## 0. Prerequisites (one-time, ~30 min)
 
-- [ ] Buy `lumen.app` (or whichever domain) — Cloudflare Registrar / Namecheap.
+- [ ] Buy `lumen-md.app` — decided 16.10.2026 (see below). Cloudflare Registrar sells at cost and keeps DNS where the workers already run.
+  - **Why this domain:** it matches the repo / package name, so no rebrand is needed. The `.app` TLD is HSTS-preloaded (HTTPS-only by construction), which suits a PWA. It also avoids the bare "Lumen" name, which is crowded (Lumen Technologies, a medical "LumenMD", other "Lumen" note apps), and `lumen.md` is already used by another product.
+  - **Fallbacks if it's taken:** `lumenmd.app`, then `lumen-md.dev`. Availability couldn't be checked from the build environment (no registry access), so check at the registrar first.
+  - **Subdomains used in code:** `signal.`, `auth.`, `billing.`, `audit.`, `collab.`, `docs.`, `publish.` on the same domain. Mail addresses (`security@`, `plugins@`, `tal@`) need Email Routing on the domain.
 - [ ] Cloudflare account (free) — used for DNS + Workers.
 - [ ] Stripe account (free until you start billing).
 - [ ] Apple Developer Program ($99/yr).
@@ -175,7 +178,7 @@ wrangler deploy
 #   VITE_BILLING_ENDPOINT=https://lumen-billing.<your>.workers.dev/checkout
 #   VITE_ENTITLEMENT_ENDPOINT=https://lumen-billing.<your>.workers.dev/entitlements
 # 4f. List every web origin that calls the worker (comma-separated) in
-#     wrangler.toml → [vars] ALLOWED_ORIGIN, e.g. "https://lumen.app,http://localhost:5173".
+#     wrangler.toml → [vars] ALLOWED_ORIGIN, e.g. "https://lumen-md.app,http://localhost:5173".
 #     The entitlement fetch uses credentials, so browsers need the exact origin
 #     echoed back — `*` is only returned to unlisted origins and won't work there.
 ```
@@ -271,7 +274,7 @@ warning when the configured endpoint is cross-site. Cookies are
 # 6a. Register a Dropbox app:
 # https://www.dropbox.com/developers/apps → Create app
 # Permissions: "App folder" + files.content.write + files.content.read
-# Redirect URIs: https://lumen.app/oauth/dropbox
+# Redirect URIs: https://lumen-md.app/oauth/dropbox
 
 # 6b. Set env:
 #   VITE_DROPBOX_APP_KEY=<your-app-key>
@@ -345,7 +348,7 @@ npm run android:open
 #   Env vars: paste every VITE_* from steps 1–7
 
 # 8c. Custom domain:
-#   Pages → lumen-app → Custom domains → Add → lumen.app
+#   Pages → lumen-app → Custom domains → Add → lumen-md.app
 ```
 
 PWA service worker auto-updates clients on next visit.
@@ -420,7 +423,7 @@ After every step above is green:
 - [ ] `npm run budget` passes — bundle still within targets.
 - [ ] Sentry receiving events from at least one production session.
 - [ ] First 10 users invited via TestFlight + Play Internal track.
-- [ ] `https://lumen.app/p/<test-slug>` returns a published note.
+- [ ] `https://lumen-md.app/p/<test-slug>` returns a published note.
 - [ ] Right-click → "Save selection to Lumen" creates a clip.
 - [ ] Subscribe → return to app → Pro features unlock.
 - [ ] `⌘K → "AI: Switch to local AI"` downloads + serves answers offline.

@@ -13,7 +13,7 @@ import worker, { type Env, verifySsoBillingToken, SSO_TOKEN_ISS, SSO_TOKEN_AUD }
 import { signJwt } from "../../edge-workers/auth/worker";
 import { capabilitiesFor, FREE_CAPS, PRO_CAPS, type Entitlement } from "../billing/types";
 
-const ORIGIN = "https://lumen.app";
+const ORIGIN = "https://lumen-md.app";
 const SUPABASE = "https://proj.supabase.co";
 
 const env: Env = {

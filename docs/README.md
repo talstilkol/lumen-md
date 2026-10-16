@@ -16,7 +16,7 @@ npm run dev          # http://localhost:4321
 npm run build        # → dist/
 ```
 
-Deploy `dist/` to any static host. We point `docs.lumen.app` at Cloudflare
+Deploy `dist/` to any static host. We point `docs.lumen-md.app` at Cloudflare
 Pages with `npm run build` as the build command.
 
 ## Structure

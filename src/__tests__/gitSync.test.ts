@@ -50,10 +50,10 @@ describe("git sync — helpers", () => {
     expect(defaultId.name).toBe("Lumen User");
     expect(defaultId.email).toContain("example");
 
-    await setGitIdentity({ name: "Tal", email: "tal@lumen.md" });
+    await setGitIdentity({ name: "Tal", email: "tal@lumen-md.app" });
     const id = await getGitIdentity();
     expect(id.name).toBe("Tal");
-    expect(id.email).toBe("tal@lumen.md");
+    expect(id.email).toBe("tal@lumen-md.app");
   });
 
   it("GitStatusEntry state mapping covers all cases", async () => {

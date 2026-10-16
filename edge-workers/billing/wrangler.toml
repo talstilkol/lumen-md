@@ -5,7 +5,7 @@ account_id = "REPLACE_WITH_CLOUDFLARE_ACCOUNT_ID"
 
 # Routes — set your custom domain or use the default workers.dev:
 # routes = [
-#   { pattern = "billing.lumen.app/*", zone_name = "lumen.app" }
+#   { pattern = "billing.lumen-md.app/*", zone_name = "lumen-md.app" }
 # ]
 
 [vars]
@@ -13,7 +13,7 @@ account_id = "REPLACE_WITH_CLOUDFLARE_ACCOUNT_ID"
 # role go through `wrangler secret put` so they never land in source.
 # Comma-separated. Origins listed here get a credentialed CORS response
 # (required by GET /entitlements, which the app calls with credentials).
-ALLOWED_ORIGIN = "https://lumen.app"
+ALLOWED_ORIGIN = "https://lumen-md.app"
 
 # Required secrets (set via `wrangler secret put <NAME>`):
 #   STRIPE_SECRET_KEY        — sk_live_… (or sk_test_… for staging)

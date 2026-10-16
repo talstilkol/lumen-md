@@ -59,7 +59,7 @@ export interface CollabSession {
 
 /**
  * Default signaling-server endpoints. Order matters — the first entry is
- * tried first; the rest are used only if it fails. `signal.lumen.md` is
+ * tried first; the rest are used only if it fails. `signal.lumen-md.app` is
  * Lumen's own deployed service (`sync-server/`); the public yjs.dev
  * endpoints are kept as last-resort fallbacks for users running off-cluster.
  *
@@ -67,7 +67,7 @@ export interface CollabSession {
  * `VITE_WEBRTC_SIGNALING_URL` env var (single URL or comma-separated list).
  */
 const PUBLIC_SIGNALING_FALLBACK = [
-  "wss://signal.lumen.md",
+  "wss://signal.lumen-md.app",
   "wss://signaling.yjs.dev",
   "wss://y-webrtc-signaling-eu.herokuapp.com",
 ];
