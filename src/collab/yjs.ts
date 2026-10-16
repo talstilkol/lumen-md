@@ -274,9 +274,15 @@ export function connectCollab(
   // Public rooms only — obscure name suffices for casual pair editing. Users
   // wanting more privacy should set a room password and/or run their own
   // signaling server.
+  // In password rooms the password is also handed to y-webrtc, which then
+  // encrypts every signaling and BroadcastChannel message with a key derived
+  // from it. A peer without the password can't complete the WebRTC
+  // handshake, so presence (names, colours, cursors) only ever reaches
+  // peers that hold the password; the signaling server sees ciphertext.
   const provider = new WebrtcProvider(roomName, syncedDoc, {
     signaling: getSignalingUrls(),
     maxConns: 20,
+    ...(password ? { password } : {}),
   });
 
   // If a persistent server is configured, attach a WebsocketProvider in the

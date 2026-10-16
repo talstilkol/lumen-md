@@ -40,8 +40,10 @@ vi.mock("y-webrtc", () => ({
   // WebRTC connections so tests can drive the `synced` seeding logic.
   WebrtcProvider: class {
     static lastDoc: unknown = null;
-    constructor(_room: string, doc: unknown) {
+    static lastOpts: unknown = null;
+    constructor(_room: string, doc: unknown, opts?: unknown) {
       (this.constructor as unknown as { lastDoc: unknown }).lastDoc = doc;
+      (this.constructor as unknown as { lastOpts: unknown }).lastOpts = opts;
     }
     listeners = new Map<string, Set<(...args: unknown[]) => void>>();
     awarenessStates = new Map<number, unknown>([[1, {}]]);
@@ -300,6 +302,17 @@ describe("connectCollab lifecycle", () => {
         expect(destroy).toHaveBeenCalledTimes(1);
       }
     }
+  });
+
+  it("password rooms encrypt y-webrtc signaling (so presence only reaches password holders)", async () => {
+    const mod = await import("../collab/yjs");
+    const { WebrtcProvider } = await import("y-webrtc");
+    const secret = mod.connectCollab("lumen-secret-presence", "", { password: "pw-123456" });
+    expect((WebrtcProvider as unknown as { lastOpts: { password?: string } }).lastOpts.password).toBe("pw-123456");
+    secret.destroy();
+    const open = mod.connectCollab("lumen-open-presence", "", { password: null });
+    expect((WebrtcProvider as unknown as { lastOpts: { password?: string } }).lastOpts.password).toBeUndefined();
+    open.destroy();
   });
 
   it("plain rooms sync the editor doc directly", async () => {

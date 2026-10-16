@@ -83,12 +83,15 @@ peer that joins later still needs the password to read the history.
 
 ## Limits: what this does *not* protect
 
-- **Awareness / presence is not encrypted.** Display names, colours and
-  cursor/selection positions are broadcast in clear through y-webrtc's
-  awareness channel. Cursor positions are Yjs *relative positions*, so
-  they contain item IDs (client id + clock) and no document text.
-  They still reveal who is active, and roughly where and when they
-  edit.
+- **Awareness / presence reaches every peer that holds the password.**
+  The room password is also given to y-webrtc, which encrypts all
+  signaling and BroadcastChannel traffic with a key derived from it, and
+  peer connections are DTLS-encrypted — so the signaling server and peers
+  *without* the password never see display names, colours or cursors.
+  Presence itself is not wrapped in Lumen's envelopes, though: every
+  password holder sees it. Cursor positions are Yjs *relative positions*
+  (item IDs: client id + clock, no document text). The persistent
+  `y-websocket` server receives no presence from Lumen.
 - **Metadata:** room name, number of peers, number and size of
   envelopes, and when they are written. Size and timing can hint at
   how much is being typed.
