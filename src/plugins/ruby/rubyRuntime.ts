@@ -199,7 +199,13 @@ export function createRubyHandler(deps: {
       deps.post({ type: "ready", runId });
       const res = vm.eval(rubyProgram(source));
       if (res.call("nil?").toString() !== "true") {
-        deps.post({ type: "result", runId, text: capText(res.toString()) });
+        // Already capped inside Ruby; it also shares the run's output
+        // budget with stdout / stderr.
+        let text = capText(res.toString());
+        const left = Math.max(0, MAX_OUTPUT_CHARS - emitted);
+        if (truncated || left === 0) text = "… (truncated)";
+        else if (text.length > left) text = text.slice(0, left) + "… (truncated)";
+        deps.post({ type: "result", runId, text });
       }
     } catch (err) {
       deps.post({ type: "error", runId, message: capText(rubyErrorMessage(err)) });

@@ -72,6 +72,22 @@ describe("rubyRuntime helpers", () => {
     expect(msgs.at(-1)?.type).toBe("done");
   });
 
+  it("the final result shares the output budget", async () => {
+    const msgs: RubyWorkerMessage[] = [];
+    const handle = createRubyHandler({
+      loadVm: async (printer) => ({
+        eval: () => {
+          printer.stdout("y".repeat(MAX_OUTPUT_CHARS - 10));
+          return { toString: () => "z".repeat(MAX_OUTPUT_CHARS), call: () => ({ toString: () => "false", call: () => ({}) as never }) };
+        },
+      }),
+      post: (m) => msgs.push(m),
+    });
+    await handle({ type: "run", runId: 2, source: "" });
+    const result = msgs.find((m) => m.type === "result") as { text: string } | undefined;
+    expect(result?.text).toBe("z".repeat(10) + "… (truncated)");
+  });
+
   it("ignores malformed messages", async () => {
     const msgs: RubyWorkerMessage[] = [];
     const handle = createRubyHandler({ loadVm: () => Promise.reject(new Error("no")), post: (m) => msgs.push(m) });
