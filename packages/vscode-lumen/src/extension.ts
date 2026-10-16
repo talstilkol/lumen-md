@@ -7,6 +7,28 @@ import * as vscode from "vscode";
 import { randomBytes } from "node:crypto";
 import { basename } from "node:path";
 import { renderPreviewDocument } from "./render";
+import { classifyLink } from "./links";
+
+/** Handle a link clicked in the preview (relative to `doc`). */
+async function openLink(doc: vscode.TextDocument | undefined, href: unknown): Promise<void> {
+  if (typeof href !== "string" || !doc) return;
+  const action = classifyLink(href);
+  if (action.kind === "external") {
+    await vscode.env.openExternal(vscode.Uri.parse(action.url));
+  } else if (action.kind === "relative") {
+    const target = action.path.startsWith("/")
+      ? (vscode.workspace.getWorkspaceFolder(doc.uri)?.uri ?? vscode.Uri.joinPath(doc.uri, ".."))
+      : vscode.Uri.joinPath(doc.uri, "..");
+    const uri = vscode.Uri.joinPath(target, action.path.replace(/^\/+/, ""));
+    try {
+      await vscode.workspace.fs.stat(uri);
+    } catch {
+      void vscode.window.showWarningMessage(`Lumen: ${action.path} not found.`);
+      return;
+    }
+    await vscode.commands.executeCommand("vscode.open", uri, vscode.ViewColumn.One);
+  }
+}
 
 let panel: vscode.WebviewPanel | undefined;
 let currentDoc: vscode.TextDocument | undefined;
@@ -62,6 +84,13 @@ function openPreview(context: vscode.ExtensionContext): void {
       "Lumen Preview",
       { viewColumn: vscode.ViewColumn.Beside, preserveFocus: true },
       { enableScripts: true, localResourceRoots: roots },
+    );
+    panel.webview.onDidReceiveMessage(
+      (msg: { type?: string; href?: unknown }) => {
+        if (msg?.type === "openLink") void openLink(currentDoc, msg.href);
+      },
+      null,
+      context.subscriptions,
     );
     panel.onDidDispose(() => {
       panel = undefined;
