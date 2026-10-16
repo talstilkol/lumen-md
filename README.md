@@ -5,7 +5,7 @@
 A production-grade markdown editor built on the open web platform: CodeMirror 6,
 unified/remark/rehype, Yjs, OPFS, and WebRTC. Zero server required by default.
 
-[![Tests](https://img.shields.io/badge/tests-1949%20passing-brightgreen)](PLAN_STATUS.md)
+[![Tests](https://img.shields.io/badge/tests-2196%20passing-brightgreen)](MASTER_PLAN.md)
 [![TypeScript](https://img.shields.io/badge/TypeScript-clean-blue)](tsconfig.json)
 [![E2E](https://img.shields.io/badge/e2e-33%2F33-brightgreen)](e2e/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
@@ -270,7 +270,7 @@ Then set `VITE_WEBRTC_SIGNALING_URL=wss://signal.yourdomain.com` in `.env`.
 
 ## 🗺️ Roadmap
 
-See [ROADMAP.md](ROADMAP.md) for the full phased plan. Key upcoming milestones:
+See [MASTER_PLAN.md](MASTER_PLAN.md) for the current plan, status and what's left. Key upcoming milestones:
 
 | Milestone | Status |
 |---|---|
