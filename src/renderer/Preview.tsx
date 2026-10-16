@@ -106,6 +106,9 @@ export function Preview({ markdownText, docKey = null }: Props) {
     <div
       className="flex-1 min-h-0 overflow-y-auto"
       data-preview-root
+      // The document the displayed tree belongs to (it lags behind while a
+      // newly opened note renders) — lets callers wait for the right one.
+      data-preview-doc={treeDocKey ?? ""}
       style={{ contain: "layout" }}
       onClick={(e) => {
         // [[Wiki links]] without a matching heading here open the note.

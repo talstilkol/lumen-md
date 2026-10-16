@@ -91,6 +91,34 @@ describe("wiki-link fragments", () => {
   });
 });
 
+describe("scrolling to the opened note's heading", () => {
+  it("ignores the previous note's heading while it is still mounted", () => {
+    vi.useFakeTimers();
+    const preview = document.createElement("div");
+    preview.setAttribute("data-preview-root", "");
+    preview.setAttribute("data-preview-doc", "old.md");
+    const old = document.createElement("h2");
+    old.id = "introduction";
+    old.scrollIntoView = vi.fn();
+    preview.appendChild(old);
+    document.body.appendChild(preview);
+    scrollToHeadingWhenRendered("introduction", { docKey: "other.md" });
+    vi.advanceTimersByTime(350);
+    expect(old.scrollIntoView).not.toHaveBeenCalled();
+    // The destination note renders into the same root.
+    preview.setAttribute("data-preview-doc", "other.md");
+    preview.innerHTML = "";
+    const next = document.createElement("h2");
+    next.id = "introduction";
+    next.scrollIntoView = vi.fn();
+    preview.appendChild(next);
+    vi.advanceTimersByTime(150);
+    expect(next.scrollIntoView).toHaveBeenCalled();
+    preview.remove();
+    vi.useRealTimers();
+  });
+});
+
 describe("Unicode wiki-link headings", () => {
   it("jumps to a Hebrew heading in this note via the rendered slug", () => {
     const root = document.createElement("div");

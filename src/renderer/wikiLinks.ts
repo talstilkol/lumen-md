@@ -82,11 +82,21 @@ export function handleWikiLinkClick(
  */
 export function scrollToHeadingWhenRendered(
   headingId: string,
-  { intervalMs = 100, timeoutMs = 3000, doc = document } = {},
+  {
+    intervalMs = 100,
+    timeoutMs = 3000,
+    doc = document,
+    docKey,
+  }: { intervalMs?: number; timeoutMs?: number; doc?: Document; docKey?: string } = {},
 ): void {
   const started = Date.now();
   const tick = () => {
-    const el = Array.from(doc.querySelectorAll("[data-preview-root] [id]")).find((n) => n.id === headingId);
+    // With `docKey`, only a preview that already shows the opened note
+    // counts: the previous note may still be mounted, with the same heading.
+    const roots = Array.from(doc.querySelectorAll<HTMLElement>("[data-preview-root]")).filter(
+      (r) => docKey === undefined || r.getAttribute("data-preview-doc") === docKey,
+    );
+    const el = roots.flatMap((r) => Array.from(r.querySelectorAll("[id]"))).find((n) => n.id === headingId);
     if (el) {
       el.scrollIntoView({ block: "start" });
       return;

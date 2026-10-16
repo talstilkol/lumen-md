@@ -393,7 +393,9 @@ export default function App() {
         handleOpenFromWorkspace(detail.path, content);
         // `[[Note#Heading]]`: scroll to the heading (by its slug id) once the
         // opened note has rendered.
-        if (detail.heading) scrollToHeadingWhenRendered(detail.heading);
+        if (detail.heading) {
+          scrollToHeadingWhenRendered(detail.heading, { docKey: docIdentity(useAppStore.getState().doc) ?? undefined });
+        }
       } catch {
         /* file moved/deleted — silently ignore */
       }

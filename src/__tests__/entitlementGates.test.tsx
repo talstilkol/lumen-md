@@ -352,6 +352,56 @@ describe("aiQuota counter", () => {
     vi.unstubAllGlobals();
   });
 
+  describe("ownPrompt requests (Ctrl-Space, Ask Workspace, inline, …)", () => {
+    it("are charged when sent, not when they fail before sending", async () => {
+      __setEntitlementEndpointForTesting(ENDPOINT);
+      vi.stubGlobal("fetch", vi.fn(async () => { throw new TypeError("connection refused"); }));
+      const { chat } = await import("../ai/llm");
+      useAppStore.setState({ aiKey: null, useLocalAi: false });
+      localStorage.setItem("lumen.ai.provider", "ollama"); // unreachable, no fallback key
+      const now = new Date();
+      await expect(chat([{ role: "user", content: "x" }], { ownPrompt: true })).rejects.toThrow(/configure/i);
+      expect(getAiUsage(now)).toBe(0);
+      localStorage.removeItem("lumen.ai.provider");
+      vi.unstubAllGlobals();
+    });
+
+    it("pay for themselves, leaving a waiting palette command's charge intact", async () => {
+      __setEntitlementEndpointForTesting(ENDPOINT);
+      vi.stubGlobal("fetch", vi.fn(async () => new Response("{}", { status: 500 })));
+      useAppStore.setState({ aiKey: "sk-test" });
+      const { chat } = await import("../ai/llm");
+      const now = new Date();
+      let resume!: () => void;
+      const dialog = new Promise<void>((r) => (resume = r));
+      const [cmd] = withAiQuota([{ id: "ai.translate", action: async () => { await dialog; chargeAiCommandDispatch(now); } }]);
+      const running = cmd.action() as unknown as Promise<void>;
+      await chat([{ role: "user", content: "x" }], { ownPrompt: true, maxTokens: 1 }).catch(() => {});
+      expect(getAiUsage(now)).toBe(1);
+      resume();
+      await running;
+      expect(getAiUsage(now)).toBe(2);
+      vi.unstubAllGlobals();
+    });
+
+    it("are refused at the limit without a request; 'silent' shows no toast", async () => {
+      __setEntitlementEndpointForTesting(ENDPOINT);
+      const fetchSpy = vi.fn(async () => new Response("{}", { status: 500 }));
+      vi.stubGlobal("fetch", fetchSpy);
+      useAppStore.setState({ aiKey: "sk-test" });
+      const { chat } = await import("../ai/llm");
+      const now = new Date();
+      localStorage.setItem(monthKey(now), String(FREE_CAPS.aiMonthlyPrompts));
+      vi.mocked(showAiToast).mockClear();
+      await expect(chat([{ role: "user", content: "x" }], { ownPrompt: "silent" })).rejects.toThrow();
+      expect(showAiToast).not.toHaveBeenCalled();
+      await expect(chat([{ role: "user", content: "x" }], { ownPrompt: true })).rejects.toThrow();
+      expect(showAiToast).toHaveBeenCalled();
+      expect(fetchSpy).not.toHaveBeenCalled();
+      vi.unstubAllGlobals();
+    });
+  });
+
   it("re-checks the quota when a waiting command finally dispatches", async () => {
     __setEntitlementEndpointForTesting(ENDPOINT);
     const now = new Date();

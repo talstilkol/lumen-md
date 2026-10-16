@@ -13,7 +13,6 @@ import { showAiToast } from "../ui/AiToast";
 import { semanticSearch, type RagResult } from "../ai/embeddings";
 import { indexWorkspace, searchHybrid, type SemanticHit } from "../ai/semanticSearch";
 import { useCapability } from "../billing/gates";
-import { consumeAiPrompt } from "../billing/aiQuota";
 import { UpgradeNotice } from "./UpgradeNotice";
 import { useAppStore } from "../store/useStore";
 import { rememberSearch, getSearchHistory, forgetSearch } from "../storage/searchHistory";
@@ -233,8 +232,8 @@ export function SearchDialog({ open, onClose, onOpenFile }: Props) {
   }
 
   async function askAi() {
-    // Each question is one LLM prompt against the monthly AI quota.
-    if (!consumeAiPrompt()) return;
+    // Each question is one LLM prompt against the monthly AI quota, counted
+    // when it is actually sent (ownPrompt).
     setAiLoading(true);
     setAiAnswer(t("searchDialog.searching"));
     setAiSources([]);
@@ -280,7 +279,7 @@ export function SearchDialog({ open, onClose, onOpenFile }: Props) {
         { role: "user", content: `Context Files:\n${contextStr}\n\nQuestion: ${query}` },
       ];
 
-      const answer = await chat(messages, { prepaid: true });
+      const answer = await chat(messages, { ownPrompt: true });
       setAiAnswer(answer);
 
       // Save to conversation history
@@ -297,6 +296,8 @@ export function SearchDialog({ open, onClose, onOpenFile }: Props) {
       if (e instanceof AiError && e.code === "NO_KEY") {
         setAiAnswer("⚠️ Please configure your AI Key (⌘K → AI Settings).");
         showAiToast("Please configure your AI Key (⌘K → AI Settings)", "error");
+      } else if (e instanceof Error && e.name === "AiQuotaExceededError") {
+        setAiAnswer(e.message); // the quota toast was already shown
       } else {
         log.error("AI workspace search failed", e);
         setAiAnswer("Failed to reach AI API.");

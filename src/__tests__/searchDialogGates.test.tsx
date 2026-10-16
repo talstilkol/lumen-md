@@ -80,20 +80,16 @@ describe("Smart search gate", () => {
 });
 
 describe("Ask Workspace spends the AI quota", () => {
-  it("counts one prompt per question and blocks once the free limit is reached", async () => {
+  it("asks chat() to charge the question itself, when it is actually sent", async () => {
     __setEntitlementEndpointForTesting("https://billing.lumen.test/entitlements");
     openOn("ai");
     const input = screen.getByRole("textbox");
     fireEvent.change(input, { target: { value: "what changed?" } });
     fireEvent.keyDown(input, { key: "Enter" });
     await waitFor(() => expect(chat).toHaveBeenCalledTimes(1));
-    expect(getAiUsage()).toBe(1);
-
-    for (let i = 1; i < FREE_CAPS.aiMonthlyPrompts; i++) recordAiPrompt();
-    fireEvent.keyDown(input, { key: "Enter" });
-    await new Promise((r) => setTimeout(r, 50));
-    expect(chat).toHaveBeenCalledTimes(1);
-    expect(showAiToast).toHaveBeenCalled();
+    expect((chat.mock.calls[0] as unknown[])[1]).toMatchObject({ ownPrompt: true });
+    // Nothing is counted up front: chat() charges at dispatch (llm tests).
+    expect(getAiUsage()).toBe(0);
   });
 });
 

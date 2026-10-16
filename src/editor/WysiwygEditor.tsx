@@ -20,7 +20,6 @@ import { dragHandlePlugin } from "./dragHandles";
 import { buildIndentKeymap } from "./keymapExtra";
 import "katex/dist/katex.css";
 import { chat, chatStream, AiError } from "../ai/llm";
-import { consumeAiPrompt } from "../billing/aiQuota";
 import { PROMPTS } from "../ai/prompts";
 import { showAiToast } from "../ui/AiToast";
 import { openAiPrompt } from "../ui/AiInlinePrompt";
@@ -256,7 +255,6 @@ function buildSlashItems(): SlashItem[] {
       run: async (v) => {
         const promptStr = await openAiPrompt("What do you want the AI to write about?");
         if (!promptStr) return;
-        if (!consumeAiPrompt()) return;
 
         const placeholder = "🤖 Thinking...";
         const { state } = v;
@@ -270,7 +268,7 @@ function buildSlashItems(): SlashItem[] {
               { role: "system", content: PROMPTS.ghostwriter },
               { role: "user", content: promptStr },
             ],
-            { prepaid: true },
+            { ownPrompt: true },
           );
           // Remove placeholder before streaming
           const removeTr = v.state.tr;
@@ -515,7 +513,6 @@ function buildTooltip(getView: () => EditorView | null): HTMLDivElement {
         const selectedText = state.doc.textBetween(from, to, "\n");
         const instructions = await openAiPrompt("How should the AI rewrite this? (e.g. 'Make it professional', 'Translate to Spanish')");
         if (!instructions) return;
-        if (!consumeAiPrompt()) return;
         
         try {
           const rewritten = await chat(
@@ -523,12 +520,13 @@ function buildTooltip(getView: () => EditorView | null): HTMLDivElement {
               { role: "system", content: PROMPTS.rewrite },
               { role: "user", content: `Instruction: ${instructions}\n\nText: ${selectedText}` },
             ],
-            { prepaid: true },
+            { ownPrompt: true },
           );
           dispatch(state.tr.replaceWith(from, to, state.schema.text(rewritten)));
         } catch (e) {
           log.error("WYSIWYG AI rewrite failed", e);
-          showAiToast("AI Rewrite failed", "error");
+          // A spent quota already showed its own toast.
+          if (!(e instanceof Error && e.name === "AiQuotaExceededError")) showAiToast("AI Rewrite failed", "error");
         }
       },
     },
