@@ -75,3 +75,27 @@ headings, the sections are ranked against the question (BM25), and the
 best ones are kept within the budget. Every note also sends its heading
 outline, so the model still sees how it is structured. Notes that
 already fit are sent unchanged.
+
+## Batch over a folder (half price)
+
+Command: `AI: Batch over a Folder (half price)…`, then `AI: Check Batch Jobs`.
+
+To tag, summarise or translate many notes, Lumen sends them as one job to
+the provider's batch API: OpenAI's Batch API or Anthropic's Message
+Batches. Both charge half the normal price and return results within
+24 hours.
+
+1. Pick what to do (tags, a one-line `summary` in the front matter, or
+   a translation into a new `name.<language>.md` file next to each note)
+   and which folder to process.
+2. Lumen shows the number of notes and an estimated cost before
+   anything is sent. Each note counts as one AI prompt against your
+   plan's quota.
+3. Later, run `AI: Check Batch Jobs`. When a job has finished, Lumen
+   shows how many notes will change and how many files will be created,
+   and applies the changes only after you confirm. Notes that are open
+   in a tab are skipped, and existing files are never overwritten by a
+   translation.
+
+Batch jobs need the OpenAI or Anthropic provider. Their usage appears
+in the usage report at batch prices.

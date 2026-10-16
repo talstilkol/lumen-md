@@ -900,6 +900,160 @@ export function useCommands({
         },
       },
       {
+        id: "ai.batch",
+        label: t("cmd.ai.batch"),
+        hint: t("cmd.ai.batch.hint"),
+        icon: cmdIcons.Sparkles,
+        group: t("group.tools"),
+        action: async () => {
+          const batch = await import("../ai/batch");
+          const { getActiveProvider, effectiveModel } = await import("../ai/llm");
+          const provider = batch.batchProviderFor(getActiveProvider());
+          if (!provider) {
+            showAiToast(t("batch.provider"), "error");
+            return;
+          }
+          const op = await uiSelect({
+            title: t("cmd.ai.batch"),
+            message: t("batch.op"),
+            defaultValue: "tags",
+            choices: [
+              { value: "tags", label: t("batch.op.tags") },
+              { value: "summary", label: t("batch.op.summary") },
+              { value: "translate", label: t("batch.op.translate") },
+            ],
+          });
+          if (op !== "tags" && op !== "summary" && op !== "translate") return;
+          let lang: string | undefined;
+          if (op === "translate") {
+            lang = (await uiPrompt({ message: t("batch.lang"), defaultValue: "English" }))?.trim();
+            if (!lang) return;
+          }
+          const folder = await uiPrompt({ message: t("batch.folder"), defaultValue: "" });
+          if (folder === null) return;
+          const prefix = folder.trim().replace(/^\/+|\/+$/g, "");
+          const { readAllNotes } = await import("../storage/workspaceNotes");
+          const all = await readAllNotes();
+          // Skip translations earlier batches created (by recorded path,
+          // not by file-name shape) so a re-run doesn't translate them.
+          const made = batch.knownTranslations();
+          const notes = all.filter((n) => (!prefix || n.path.startsWith(prefix + "/")) && !(op === "translate" && made.has(n.path)));
+          if (!notes.length) {
+            showAiToast(t("batch.noNotes"), "error");
+            return;
+          }
+          const { aiQuotaStatus, recordAiPrompt } = await import("../billing/aiQuota");
+          const quota = aiQuotaStatus();
+          if (Number.isFinite(quota.limit) && quota.remaining < notes.length) {
+            showAiToast(t("batch.quota", { count: notes.length }), "error");
+            return;
+          }
+          const { estimateTokens, costOf } = await import("../ai/usage");
+          const model = effectiveModel(provider);
+          let input = 0;
+          let output = 0;
+          for (const n of notes) {
+            const r = batch.requestFor(op, n.text, lang);
+            input += estimateTokens(r.system + r.user);
+            // A translation is about as long as the (possibly truncated) text sent.
+            output += op === "translate" ? Math.min(r.maxTokens, estimateTokens(r.user)) : r.maxTokens / 2;
+          }
+          const usd = costOf({ provider, model, inputTokens: input, outputTokens: output, batch: true });
+          const ok = await uiConfirm({
+            message: t("batch.confirm", { count: notes.length, provider, model, cost: usd === null ? "?" : `~$${usd.toFixed(2)}` }),
+          });
+          if (!ok) return;
+          try {
+            const job = await batch.submitBatch(op, notes, { lang });
+            if (Number.isFinite(quota.limit)) for (let i = 0; i < notes.length; i++) recordAiPrompt();
+            showAiToast(t("batch.submitted", { count: job.items.length }), "success");
+          } catch (e) {
+            showAiToast((e as Error).message, "error");
+          }
+        },
+      },
+      {
+        id: "ai.batchCheck",
+        label: t("cmd.ai.batchCheck"),
+        hint: t("cmd.ai.batchCheck.hint"),
+        icon: cmdIcons.Sparkles,
+        group: t("group.tools"),
+        action: async () => {
+          const batch = await import("../ai/batch");
+          const jobs = batch.loadJobs();
+          const pending = jobs.filter((j) => j.status === "submitted" || j.status === "ended");
+          if (!pending.length) {
+            showAiToast(t("batch.none"), "info");
+            return;
+          }
+          const { writeWorkspaceFile } = await import("../storage/workspace");
+          let processing = 0;
+          let wroteAny = false;
+          for (const job of pending) {
+            let results;
+            try {
+              results = await batch.fetchBatchResults(job);
+            } catch (e) {
+              showAiToast((e as Error).message, "error");
+              continue;
+            }
+            if (results.state === "processing") {
+              processing++;
+              continue;
+            }
+            if (results.state !== "ended") {
+              job.status = results.state;
+              continue;
+            }
+            job.status = "ended";
+            const { readAllNotes } = await import("../storage/workspaceNotes");
+            const notes = await readAllNotes();
+            const open = new Set(useAppStore.getState().openTabs.map((tab) => tab.workspaceName).filter(Boolean));
+            const current = useAppStore.getState().doc.workspaceName;
+            if (current) open.add(current);
+            const changed: string[] = [];
+            const writes = batch
+              .planWrites(
+                job,
+                results.answers,
+                (p) => notes.find((n) => n.path === p)?.text ?? null,
+                (p) => notes.some((n) => n.path.toLowerCase() === p.toLowerCase()),
+                changed,
+              )
+              // A note open in a tab may have unsaved edits: skip it (and
+              // translations made from it).
+              .filter((w) => !open.has(w.path) && !open.has(w.source));
+            const created = writes.filter((w) => w.created).length;
+            const notes2 = [results.failed ? `${results.failed} failed` : "", changed.length ? `${changed.length} edited since — skipped` : ""].filter(Boolean).join(", ");
+            const ok = await uiConfirm({
+              message: t("batch.apply", { op: job.op, changes: writes.length - created, created, failed: notes2 ? ` (${notes2})` : "" }),
+            });
+            if (!ok) continue;
+            // Write one by one; a failure keeps what was written and leaves
+            // the job retryable without duplicating finished translations.
+            const done: string[] = [];
+            let failedWrites = 0;
+            for (const w of writes) {
+              try {
+                await writeWorkspaceFile(w.path, w.content);
+                done.push(w.path);
+                job.done = [...(job.done ?? []), w.source];
+              } catch {
+                failedWrites++;
+              }
+            }
+            if (job.op === "translate") batch.rememberTranslations(done.filter((p) => writes.find((w) => w.path === p)?.created));
+            if (done.length) wroteAny = true;
+            job.status = failedWrites ? "ended" : "applied";
+            showAiToast(t("batch.applied", { count: done.length }), failedWrites ? "error" : "success");
+          }
+          batch.saveJobs(jobs);
+          // File tree, tags, backlinks and database views refresh on this.
+          if (wroteAny) window.dispatchEvent(new CustomEvent("lumen-workspace-changed"));
+          if (processing) showAiToast(t("batch.processing", { count: processing }), "info");
+        },
+      },
+      {
         id: "ai.mode",
         label: t("cmd.ai.mode"),
         hint: t("cmd.ai.mode.hint"),
