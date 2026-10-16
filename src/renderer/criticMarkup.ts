@@ -96,6 +96,9 @@ export function prepareCriticMarkup(source: string): string {
         out += S.hlOpen + body(s.contentFrom, s.contentTo) + S.hlClose;
         break;
     }
+    // An author tag (`{>>@name<<}`) folded into the change still shows as
+    // the small comment it is in the source.
+    if (s.authorFrom !== undefined) out += S.comOpen + "@" + s.author + S.comClose;
     pos = s.to;
   }
   return out + markdown.slice(pos);

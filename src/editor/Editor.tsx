@@ -47,7 +47,8 @@ import { markdownLintExtension } from "./lintExtension";
 import { searchHighlightExtension } from "./searchHighlight";
 import { inlineSuggestion } from "./inlineSuggestion";
 import { formatKeymap } from "./formatCommands";
-import { setSuggesting, suggestingExtension, suggestingSkip } from "./suggestingExtension";
+import { setSuggesting, suggestingAuthor, suggestingExtension, suggestingSkip } from "./suggestingExtension";
+import { useAuth } from "../auth/useAuth";
 import type { CollabSession } from "../collab/yjs";
 
 const mdHighlight = HighlightStyle.define([
@@ -390,6 +391,12 @@ export const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
       // Suggesting mode (track changes) — CriticMarkup decorations are
       // always on; the edit-rewriting filter only while the flag is set.
       suggestingExtension(suggesting),
+      // New suggestions are attributed to the signed-in user (name, else the
+      // part of the e-mail before @); anonymous edits stay unattributed.
+      suggestingAuthor.of(() => {
+        const user = useAuth.getState().user;
+        return user?.name?.trim() || user?.email?.split("@")[0] || null;
+      }),
       imageDropPasteHandlers,
       // Shift-Alt-F → format document (Prettier, lazy-loaded on first use).
       formatKeymap(),

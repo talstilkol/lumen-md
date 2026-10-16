@@ -910,6 +910,7 @@
   "chart.alternatives": "הצעות לתרשים",
   "billing.upgrade.smartSearch": "חיפוש חכם (סמנטי, מבוסס embeddings) הוא תכונה של תוכנית Pro. חיפוש לפי מילות מפתח נשאר זמין.",
   "suggesting.untrackable": "הטקסט מכיל סימוני הצעות ({++, ++}, ~> וכו') ולא ניתן לעקוב אחריו. כבו את מצב ההצעות כדי להוסיף אותו.",
+  "suggesting.byAuthor": "הוצע על ידי {name}",
   "suggesting.noWysiwyg": "מצב הצעות עוקב אחרי שינויים בעורך המקור, ולכן WYSIWYG אינו זמין כשהוא פעיל — מוצגת תצוגה מפוצלת במקום.",
   "billing.action.upgradePro": "שדרוג ל-Pro",
   "billing.action.upgradeTeam": "שדרוג ל-Team",

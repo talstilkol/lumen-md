@@ -56,6 +56,15 @@ export const suggestingField = StateField.define<boolean>({
  */
 export const suggestingSkip = Facet.define<(tr: Transaction) => boolean>();
 
+/**
+ * Who is suggesting. The editor provides a getter (read per transaction, so
+ * signing in/out needs no reconfiguration); new suggestions are tagged
+ * `{>>@name<<}` when it returns a name.
+ */
+export const suggestingAuthor = Facet.define<() => string | null, () => string | null>({
+  combine: (getters) => getters[0] ?? (() => null),
+});
+
 /** Parsed suggestions of the current document (shared by decorations + commands). */
 export const suggestionsField = StateField.define<Suggestion[]>({
   create: (state) => parseSuggestions(state.doc.toString()),
@@ -98,10 +107,16 @@ export function suggestTransaction(tr: Transaction): Transaction | TransactionSp
   let lowerBound = Number.POSITIVE_INFINITY;
   let changed = false;
   let untrackable = false;
+  let author: string | null = null;
+  try {
+    author = tr.startState.facet(suggestingAuthor)();
+  } catch {
+    author = null;
+  }
   for (let i = original.length - 1; i >= 0; i--) {
     const c = original[i];
     const kind = editKindFor(userEvent, c.from, c.to, c.insert);
-    const res = kind ? transformEdit(text, { ...c, kind }) : null;
+    const res = kind ? transformEdit(text, { ...c, kind, author }) : null;
     if (res?.untrackable) untrackable = true;
     const out = res ? res.change : c;
     if (res) changed = true;
@@ -160,6 +175,14 @@ const delMark = Decoration.mark({ class: "cm-sugg-del" });
 const commentMark = Decoration.mark({ class: "cm-sugg-comment" });
 const highlightMark = Decoration.mark({ class: "cm-sugg-highlight" });
 
+/** The same mark, with a tooltip naming the change's author. */
+function withAuthor(_base: Decoration, className: string, author: string): Decoration {
+  return Decoration.mark({
+    class: className,
+    attributes: { title: t("suggesting.byAuthor", { name: author }), "data-author": author },
+  });
+}
+
 export function buildSuggestionDecorations(suggestions: readonly Suggestion[]): DecorationSet {
   const ranges: Range<Decoration>[] = [];
   const add = (deco: Decoration, from: number, to: number) => {
@@ -167,17 +190,19 @@ export function buildSuggestionDecorations(suggestions: readonly Suggestion[]): 
   };
   for (const s of suggestions) {
     add(delim, s.from, s.contentFrom);
+    const ins = s.author ? withAuthor(insMark, "cm-sugg-ins", s.author) : insMark;
+    const del = s.author ? withAuthor(delMark, "cm-sugg-del", s.author) : delMark;
     switch (s.kind) {
       case "insert":
-        add(insMark, s.contentFrom, s.contentTo);
+        add(ins, s.contentFrom, s.contentTo);
         break;
       case "delete":
-        add(delMark, s.contentFrom, s.contentTo);
+        add(del, s.contentFrom, s.contentTo);
         break;
       case "substitute":
-        add(delMark, s.contentFrom, s.contentTo);
+        add(del, s.contentFrom, s.contentTo);
         add(delim, s.contentTo, s.newFrom!);
-        add(insMark, s.newFrom!, s.newTo!);
+        add(ins, s.newFrom!, s.newTo!);
         break;
       case "comment":
         add(commentMark, s.contentFrom, s.contentTo);

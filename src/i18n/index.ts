@@ -518,6 +518,7 @@ const en: Strings = {
   "status.suggesting.on": "Suggesting",
   "suggesting.noWysiwyg": "Suggesting mode tracks changes in the source editor, so WYSIWYG is unavailable while it is on — showing Split view instead.",
   "suggesting.untrackable": "That text contains suggestion markup ({++, ++}, ~>, …) and can't be tracked. Turn off suggesting mode to insert it.",
+  "suggesting.byAuthor": "Suggested by {name}",
   "status.suggesting.off": "Editing",
   "status.suggesting.tooltip.on": "Suggesting mode is ON: your edits are recorded as tracked changes (CriticMarkup). Click to edit directly.",
   "status.suggesting.tooltip.off": "Editing directly. Click to turn on suggesting mode (track changes).",

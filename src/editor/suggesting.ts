@@ -6,6 +6,11 @@
  *
  *   {++inserted++}   {--deleted--}   {~~old~>new~~}   {>>comment<<}   {==highlight==}
  *
+ * Authorship: a change may be followed directly by an author tag — a
+ * comment holding only `@name` — e.g. `{++new text++}{>>@Tal<<}`. The tag
+ * belongs to that change (it is accepted / rejected with it and shown as
+ * its author); new suggestions get one when an author is known.
+ *
  * This module is DOM- and CodeMirror-free: it parses CriticMarkup, resolves
  * (accepts / rejects) it, and rewrites a single user edit into the
  * CriticMarkup-preserving edit that suggesting mode applies instead. The
@@ -27,6 +32,23 @@ export interface Suggestion {
   /** `substitute` only — range of the *new* text. */
   newFrom?: number;
   newTo?: number;
+  /** Author from a trailing `{>>@name<<}` tag (insert / delete / substitute). */
+  author?: string;
+  /** Start of that tag; `to` then includes it. */
+  authorFrom?: number;
+}
+
+const AUTHOR_TAG_RE = /^@([^@<>{}\n]{1,64})$/;
+
+/** A name safe to embed in an author tag (`{>>@name<<}`), or null. */
+export function sanitizeAuthor(name: string | null | undefined): string | null {
+  const clean = (name ?? "").replace(/[@<>{}\n\r~+=-]/g, " ").replace(/\s+/g, " ").trim().slice(0, 64).trim();
+  return clean || null;
+}
+
+/** The author tag markup for `author`. */
+export function authorTag(author: string): string {
+  return `{>>@${author}<<}`;
 }
 
 export interface TextRange {
@@ -178,6 +200,30 @@ export function parseSuggestions(text: string, code: TextRange[] = findCodeRange
       out.push({ kind: "highlight", from, to, contentFrom: from + 3, contentTo: to - 3 });
     }
   }
+  return attachAuthorTags(text, out);
+}
+
+/** Fold an `{>>@name<<}` comment directly after a change into that change. */
+function attachAuthorTags(text: string, list: Suggestion[]): Suggestion[] {
+  const out: Suggestion[] = [];
+  for (let i = 0; i < list.length; i++) {
+    const s = list[i];
+    const next = list[i + 1];
+    if (
+      next &&
+      next.kind === "comment" &&
+      next.from === s.to &&
+      (s.kind === "insert" || s.kind === "delete" || s.kind === "substitute")
+    ) {
+      const m = AUTHOR_TAG_RE.exec(text.slice(next.contentFrom, next.contentTo));
+      if (m) {
+        out.push({ ...s, author: m[1].trim(), authorFrom: next.from, to: next.to });
+        i++;
+        continue;
+      }
+    }
+    out.push(s);
+  }
   return out;
 }
 
@@ -270,6 +316,8 @@ export interface SuggestEdit {
   to: number;
   insert: string;
   kind: EditKind;
+  /** Who is suggesting; new suggestions get an author tag. */
+  author?: string | null;
 }
 
 export interface SuggestResult {
@@ -287,7 +335,7 @@ export interface SuggestResult {
 }
 
 type Seg =
-  | { t: "text" | "raw"; text: string }
+  | { t: "text" | "raw"; text: string; tag?: true }
   | { t: "del" | "ins"; text: string; fresh: boolean }
   | { t: "mark" };
 
@@ -415,6 +463,8 @@ function transformEditUnchecked(text: string, edit: SuggestEdit): SuggestResult 
   const sugg = parseSuggestions(text, code);
   let { from, to } = edit;
   const insert = edit.insert;
+  const author = sanitizeAuthor(edit.author);
+  const tag = author ? authorTag(author) : "";
 
   const touching = sugg.filter((s) => s.from <= to && s.to >= from);
   if (touching.length === 0 && isInsideCode(code, from, to)) return null;
@@ -442,7 +492,7 @@ function transformEditUnchecked(text: string, edit: SuggestEdit): SuggestResult 
         cursor: after.contentFrom + insert.length,
       };
     }
-    return { change: { from: p, to: p, insert: `{++${insert}++}` }, cursor: p + 3 + insert.length };
+    return { change: { from: p, to: p, insert: `{++${insert}++}${tag}` }, cursor: p + 3 + insert.length };
   }
 
   /* Backspace / Delete: skip delimiters and already-deleted text. */
@@ -462,7 +512,7 @@ function transformEditUnchecked(text: string, edit: SuggestEdit): SuggestResult 
   if (edit.kind === "replace" && !sugg.some((s) => s.from <= to && s.to >= from)) {
     const old = text.slice(from, to);
     return {
-      change: { from, to, insert: `{~~${old}~>${insert}~~}` },
+      change: { from, to, insert: `{~~${old}~>${insert}~~}${tag}` },
       cursor: from + 3 + old.length + 2 + insert.length,
     };
   }
@@ -531,13 +581,17 @@ function transformEditUnchecked(text: string, edit: SuggestEdit): SuggestResult 
       default:
         segs.push({ t: "raw", text: text.slice(s.from, s.to) });
     }
+    if (s.authorFrom !== undefined) {
+      placeAt(s.authorFrom);
+      segs.push({ t: "raw", text: text.slice(s.authorFrom, s.to), tag: true });
+    }
     placeAt(s.to);
     q = s.to;
   }
   if (q < spanTo) emitInterval(q, spanTo, "text", "del");
   placeAt(Number.POSITIVE_INFINITY);
 
-  const ser = serialize(segs);
+  const ser = serialize(segs, tag);
   const cursorInSpan =
     edit.kind === "replace"
       ? ser.freshInsEnd ?? ser.markPos
@@ -563,7 +617,7 @@ interface Serialized {
  * and folding a deletion directly followed by an insertion into
  * `{~~old~>new~~}`.
  */
-function serialize(segs: Seg[]): Serialized {
+function serialize(segs: Seg[], tag = ""): Serialized {
   let out = "";
   let markPos = 0;
   let freshInsEnd: number | undefined;
@@ -620,6 +674,7 @@ function serialize(segs: Seg[]): Serialized {
     const insText = textOf(insStart, insEnd);
     const runStart = out.length;
     let hasFreshDel = false;
+    let hasFresh = false;
 
     const emitBody = (a: number, b: number) => {
       for (let k = a; k < b; k++) {
@@ -630,6 +685,7 @@ function serialize(segs: Seg[]): Serialized {
         }
         if (g.t === "text" || g.t === "raw") continue;
         out += g.text;
+        if ((g.t === "del" || g.t === "ins") && g.fresh && g.text) hasFresh = true;
         if (g.t === "del" && g.fresh && g.text) hasFreshDel = true;
         if (g.t === "ins" && g.fresh) freshInsEnd = out.length;
       }
@@ -669,6 +725,13 @@ function serialize(segs: Seg[]): Serialized {
       lastFreshDelEnd = out.length;
     }
     i = Math.max(delEnd, insEnd);
+    // A run with new content and no author tag of its own gets one. Marks
+    // between the run and an existing tag don't separate them.
+    let k = i;
+    while (k < segs.length && segs[k].t === "mark") k++;
+    const nextSeg = segs[k];
+    const tagged = nextSeg?.t === "raw" && nextSeg.tag === true;
+    if (tag && hasFresh && !tagged) out += tag;
   }
   return { out, markPos, freshInsEnd, firstFreshDelStart, lastFreshDelEnd };
 }
