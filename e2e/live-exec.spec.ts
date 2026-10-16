@@ -153,3 +153,32 @@ test("live-lua executes real Lua via wasmoon WASM in a worker", async ({ page })
     );
   }
 });
+
+test("live-r executes real R via webR and draws a plot", async ({ page }) => {
+  test.setTimeout(240_000);
+  await page.keyboard.press("Meta+2");
+  const editor = page.locator(".cm-content").first();
+  await editor.click();
+  await editor.press("ControlOrMeta+a");
+  await editor.fill("```live-r\nx <- 1:100\ncat(sum(x) + 37, \"\\n\")\nplot(x, x^2)\n```\n");
+
+  const diag: string[] = [];
+  page.on("console", (m) => diag.push(`console.${m.type()}: ${m.text()}`));
+  page.on("pageerror", (e) => diag.push(`pageerror: ${e.message}`));
+  page.on("requestfailed", (r) => diag.push(`requestfailed: ${r.url()} ${r.failure()?.errorText ?? ""}`));
+
+  const block = page.locator('[data-testid="live-r"]');
+  await expect(block).toBeVisible({ timeout: 15_000 });
+  await block.getByRole("button", { name: "Run" }).click();
+
+  // 5050 + 37 = 5087 — computed by R, never present in the source.
+  try {
+    await expect(block).toContainText("5087", { timeout: 200_000 });
+  } catch (err) {
+    const state = await block.getAttribute("data-state").catch(() => "?");
+    const text = await block.innerText().catch(() => "?");
+    throw new Error(`live-r never printed 5087. data-state=${state}\nblock: ${text.slice(0, 400)}\n${diag.slice(-25).join("\n")}\n${String(err)}`);
+  }
+  await expect(block.locator("canvas")).toHaveCount(1);
+  await expect(block).toHaveAttribute("data-state", "success");
+});

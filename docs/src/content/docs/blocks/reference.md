@@ -24,6 +24,7 @@ Lumen's killer feature is **dynamic blocks**: write a fenced code block in markd
 | ` ```svg ` / ` ```live-svg ` | Sanitized inline SVG preview | Same hardening as HTML |
 | ` ```live-js ` | JS sandbox (Worker isolate) with console output | Stdout/stderr/error states; timeout-protected; `shared` = one REPL scope per document (see below) |
 | ` ```live-lua ` / ` ```lua-live ` | Lua 5.4 (wasmoon WASM) in a Web Worker, with `print`/`io.write` output and return values | Loads on Run; self-hosted wasm (no CDN); `timeout=` ms (default 5000) |
+| ` ```live-r ` / ` ```r-live ` | R (webR, WebAssembly): printed output, messages, warnings, errors and base-graphics plots | Loads on first Run (~45 MB, self-hosted, cached); `timeout=` ms (default 30000); base R + bundled recommended packages, no CRAN installs |
 | ` ```live-css ` | Sandboxed iframe HTML+CSS preview | `srcdoc` + sandbox flags |
 | ` ```live-glsl ` / ` ```glsl ` / ` ```shader ` | GLSL fragment shader on a quad | Hot-reloads on edit |
 | ` ```bibtex ` / ` ```bib ` | Citation list (formatted from BibTeX) | Click → copy citation |

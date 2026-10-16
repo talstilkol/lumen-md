@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-10-16T08:37:22.362Z",
+  "generated_at": "2026-10-16T09:28:14.692Z",
   "source": "src/i18n/index.ts (en bundle)",
-  "count": 928,
+  "count": 945,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -826,7 +826,7 @@
     },
     {
       "key": "cmd.view.tsChecks.hint",
-      "en": "Type errors and completions in ```ts blocks (downloads the TypeScript compiler, ~2 MB)",
+      "en": "Type errors and completions in ```ts blocks (downloads the TypeScript compiler, ~1.3 MB)",
       "vars": []
     },
     {
@@ -1699,6 +1699,93 @@
     },
     {
       "key": "block.liveLua.state.timeout",
+      "en": "Timed out",
+      "vars": []
+    },
+    {
+      "key": "block.liveR.title",
+      "en": "Live R",
+      "vars": []
+    },
+    {
+      "key": "block.liveR.run",
+      "en": "Run",
+      "vars": []
+    },
+    {
+      "key": "block.liveR.stop",
+      "en": "Stop",
+      "vars": []
+    },
+    {
+      "key": "block.liveR.clear",
+      "en": "Clear output",
+      "vars": []
+    },
+    {
+      "key": "block.liveR.prompt",
+      "en": "Click Run to execute this R block. The first run downloads R (~45 MB, cached afterwards).",
+      "vars": []
+    },
+    {
+      "key": "block.liveR.loading",
+      "en": "Loading R…",
+      "vars": []
+    },
+    {
+      "key": "block.liveR.loadFailed",
+      "en": "Failed to load the R runtime.",
+      "vars": []
+    },
+    {
+      "key": "block.liveR.loadTimeout",
+      "en": "R took too long to load.",
+      "vars": []
+    },
+    {
+      "key": "block.liveR.timedOut",
+      "en": "Execution timed out after {ms} ms.",
+      "vars": [
+        "ms"
+      ]
+    },
+    {
+      "key": "block.liveR.stopped",
+      "en": "Stopped.",
+      "vars": []
+    },
+    {
+      "key": "block.liveR.plot",
+      "en": "R plot",
+      "vars": []
+    },
+    {
+      "key": "block.liveR.state.idle",
+      "en": "Not run",
+      "vars": []
+    },
+    {
+      "key": "block.liveR.state.loading",
+      "en": "Loading…",
+      "vars": []
+    },
+    {
+      "key": "block.liveR.state.running",
+      "en": "Running…",
+      "vars": []
+    },
+    {
+      "key": "block.liveR.state.success",
+      "en": "Completed",
+      "vars": []
+    },
+    {
+      "key": "block.liveR.state.error",
+      "en": "Error",
+      "vars": []
+    },
+    {
+      "key": "block.liveR.state.timeout",
       "en": "Timed out",
       "vars": []
     },

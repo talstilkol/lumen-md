@@ -86,6 +86,9 @@ const SPECIAL_LANGS = new Set([
   // Live Lua via wasmoon (Lua 5.4 WASM in a Worker, lazy-loaded on Run).
   "live-lua",
   "lua-live",
+  // Live R via webR (R in WASM, self-hosted under /webr/, loaded on Run).
+  "live-r",
+  "r-live",
   // Plain `html` fence as alias for `html-preview` — Lumen treats a raw
   // HTML fence as "render this HTML safely in a sanitized preview" rather
   // than a syntax-highlighted code block. Matches the dynamic-blocks-
@@ -129,6 +132,7 @@ function remarkLumenBlocks() {
         tag = "lumen-livepython";
       else if (lang === "live-sql" || lang === "sql-live") tag = "lumen-livesql";
       else if (lang === "live-lua" || lang === "lua-live") tag = "lumen-livelua";
+      else if (lang === "live-r" || lang === "r-live") tag = "lumen-liver";
       else tag = `lumen-${lang}`;
       const data = (node.data ?? (node.data = {})) as Record<string, unknown>;
       data.hName = tag;

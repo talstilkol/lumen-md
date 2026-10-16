@@ -196,6 +196,13 @@ const ENTRIES: MenuEntry[] = [
     template: '```live-lua height=200\nlocal function fib(n) return n < 2 and n or fib(n - 1) + fib(n - 2) end\nfor i = 1, 10 do io.write(fib(i), " ") end\nprint()\nprint(_VERSION, "says", 1 + 1)\n```',
   },
   {
+    id: "live-r",
+    label: "Live R",
+    hint: "Run R via webR (WASM) — output and plots",
+    group: "Media",
+    template: '```live-r height=320\nx <- c(3, 1, 4, 1, 5, 9, 2, 6)\nsummary(x)\nplot(x, type = "b", main = "Live R")\n```',
+  },
+  {
     id: "live-svg",
     label: "Live SVG",
     hint: "Inline vector graphics",

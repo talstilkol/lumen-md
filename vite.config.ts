@@ -119,6 +119,9 @@ export default defineConfig({
           // first live-python Run; its 9.6 MB wasm would also trip the
           // precache size limit and fail `npm run build`.
           "pyodide/**",
+          // webR (R in WebAssembly, ~45 MB, staged by scripts/copy-webr.mjs)
+          // loads on the first live-r Run.
+          "webr/**",
         ],
         runtimeCaching: [
           {
