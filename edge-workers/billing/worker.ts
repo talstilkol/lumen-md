@@ -283,7 +283,12 @@ async function entitlements(req: Request, env: Env): Promise<Response> {
   const rows = ids.map((id) => found.find((r) => r.user_id === id)).filter((r) => r !== undefined);
   // An active plan on the user's own row wins; otherwise an active org-wide
   // plan; otherwise whatever (lapsed) row exists.
-  const live = (r: (typeof rows)[number]) => normalizeStatus(r.status) !== "none" && normalizeStatus(r.status) !== "canceled";
+  // Only statuses that actually unlock capabilities on the client count as
+  // live (`capabilitiesFor` treats past_due/canceled/none as free).
+  const live = (r: (typeof rows)[number]) => {
+    const st = normalizeStatus(r.status);
+    return st === "active" || st === "trialing";
+  };
   const row = rows.find(live) ?? rows[0];
   if (!row) return send(FREE);
 

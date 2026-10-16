@@ -251,4 +251,13 @@ describe("billing worker — SSO (WorkOS) billing tokens", () => {
     expect(await verifySsoBillingToken(supabaseLike, SECRET)).toBeNull();
     expect(await verifySsoBillingToken("not-a-jwt", SECRET)).toBeNull();
   });
+
+  it("an active org plan beats a personal past_due row (past_due doesn't unlock anything)", async () => {
+    mockSupabase({}, {
+      "workos:user_01": [{ tier: "pro", status: "past_due" }],
+      "workos-org:org_9": [{ tier: "team", status: "active" }],
+    });
+    const res = await worker.fetch(get("/entitlements", { Authorization: `Bearer ${await token({})}` }), ssoEnv);
+    expect(await entitlementOf(res)).toMatchObject({ tier: "team", status: "active" });
+  });
 });
