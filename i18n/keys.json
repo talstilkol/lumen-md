@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-10-16T22:14:30.712Z",
+  "generated_at": "2026-10-16T22:34:13.834Z",
   "source": "src/i18n/index.ts (en bundle)",
-  "count": 988,
+  "count": 1007,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -3205,6 +3205,119 @@
       "key": "cmd.ai.cache.hint",
       "en": "Reuse identical answers (tags, translation, diagrams) instead of paying again",
       "vars": []
+    },
+    {
+      "key": "cmd.ai.batch",
+      "en": "AI: Batch over a Folder (half price)…",
+      "vars": []
+    },
+    {
+      "key": "cmd.ai.batch.hint",
+      "en": "Tag, summarise or translate many notes through the provider's batch API — results within 24 h",
+      "vars": []
+    },
+    {
+      "key": "cmd.ai.batchCheck",
+      "en": "AI: Check Batch Jobs",
+      "vars": []
+    },
+    {
+      "key": "cmd.ai.batchCheck.hint",
+      "en": "Fetch finished batch results and apply them to your notes",
+      "vars": []
+    },
+    {
+      "key": "batch.op",
+      "en": "What should the batch do?",
+      "vars": []
+    },
+    {
+      "key": "batch.op.tags",
+      "en": "Tag each note (front matter tags)",
+      "vars": []
+    },
+    {
+      "key": "batch.op.summary",
+      "en": "Summarise each note (front matter summary)",
+      "vars": []
+    },
+    {
+      "key": "batch.op.translate",
+      "en": "Translate each note (new file next to it)",
+      "vars": []
+    },
+    {
+      "key": "batch.folder",
+      "en": "Folder to process (empty = whole workspace):",
+      "vars": []
+    },
+    {
+      "key": "batch.lang",
+      "en": "Translate into which language?",
+      "vars": []
+    },
+    {
+      "key": "batch.confirm",
+      "en": "Send {count} notes to {provider} ({model}) as one batch?\\n\\nEstimated cost: {cost} (batch price). Results arrive within 24 hours; run \"AI: Check Batch Jobs\" to apply them. Counts as {count} AI prompts.",
+      "vars": [
+        "count",
+        "provider",
+        "model",
+        "cost"
+      ]
+    },
+    {
+      "key": "batch.submitted",
+      "en": "Batch submitted: {count} notes",
+      "vars": [
+        "count"
+      ]
+    },
+    {
+      "key": "batch.provider",
+      "en": "Batch jobs need the OpenAI or Anthropic provider",
+      "vars": []
+    },
+    {
+      "key": "batch.quota",
+      "en": "Not enough AI prompts left this month for {count} notes",
+      "vars": [
+        "count"
+      ]
+    },
+    {
+      "key": "batch.noNotes",
+      "en": "No notes found in that folder of the workspace",
+      "vars": []
+    },
+    {
+      "key": "batch.none",
+      "en": "No batch jobs waiting",
+      "vars": []
+    },
+    {
+      "key": "batch.processing",
+      "en": "{count} batch jobs still processing",
+      "vars": [
+        "count"
+      ]
+    },
+    {
+      "key": "batch.apply",
+      "en": "Batch \"{op}\" finished: {changes} notes to update, {created} new files{failed}.\\n\\nApply now? Notes open in a tab are skipped.",
+      "vars": [
+        "op",
+        "changes",
+        "created",
+        "failed"
+      ]
+    },
+    {
+      "key": "batch.applied",
+      "en": "Applied {count} batch results",
+      "vars": [
+        "count"
+      ]
     },
     {
       "key": "cmd.ai.mode",
