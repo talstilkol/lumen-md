@@ -1,6 +1,6 @@
 /** Batch AI over a folder (Plan D: D9). Network is a mocked fetch. */
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { fetchBatchResults, frontmatterTags, loadJobs, mergeTags, parseTags, planWrites, requestFor, setFrontmatterField, submitBatch, textHash } from "../ai/batch";
+import { fetchBatchResults, frontmatterField, frontmatterTags, isBatchTranslation, loadJobs, mergeTags, parseTags, planWrites, requestFor, setFrontmatterField, submitBatch, textHash } from "../ai/batch";
 import { setActiveProvider } from "../ai/llm";
 import { costOf, clearUsage, usageSummary } from "../ai/usage";
 import { useAppStore } from "../store/useStore";
@@ -21,7 +21,9 @@ describe("batch helpers", () => {
   it("parses tags and plans the writes", () => {
     expect(parseTags('```json\n["Machine Learning","#ai"]\n```')).toEqual(["machine-learning", "ai"]);
     const job = { id: "b", provider: "openai" as const, model: "m", op: "translate" as const, lang: "French", createdAt: "", status: "ended" as const, items: [{ customId: "n0", path: "a/x.md", hash: textHash("Hello") }] };
-    expect(planWrites(job, new Map([["n0", "Bonjour"]]), (p) => (p === "a/x.md" ? "Hello" : null))).toEqual([{ path: "a/x.french.md", content: "Bonjour\n", created: true, source: "a/x.md" }]);
+    expect(planWrites(job, new Map([["n0", "Bonjour"]]), (p) => (p === "a/x.md" ? "Hello" : null))).toEqual([
+      { path: "a/x.french.md", content: '---\ntranslatedFrom: "a/x.md"\ntranslationJob: "b"\n---\n\nBonjour\n', created: true, source: "a/x.md" },
+    ]);
     // An existing translation is never overwritten: the next free name is used.
     const existing = new Set(["a/x.md", "a/x.french.md", "a/x.french-2.md"]);
     expect(planWrites(job, new Map([["n0", "Bonjour"]]), (p) => (p === "a/x.md" ? "Hello" : existing.has(p) ? "x" : null))[0].path).toBe("a/x.french-3.md");
@@ -50,6 +52,36 @@ describe("batch helpers", () => {
     const replaced = setFrontmatterField(note, "summary", '"New"');
     expect(replaced).toContain('summary: "New"\nother: x');
     expect(replaced).not.toContain("line three");
+  });
+
+  it("ignores YAML comments and decodes quoted block-list tags", () => {
+    expect(frontmatterTags("---\ntags: [alpha, beta] # project tags\n---\n")).toEqual(["alpha", "beta"]);
+    expect(frontmatterTags("---\ntags: alpha, beta # c\n---\n")).toEqual(["alpha", "beta"]);
+    expect(frontmatterTags('---\ntags: ["a # b", c#d] # note\n---\n')).toEqual(["a # b", "c#d"]);
+    expect(frontmatterTags("---\ntags: [\n  alpha, # first\n  beta\n] # end\n---\n")).toEqual(["alpha", "beta"]);
+    expect(frontmatterTags("---\ntags:\n  - 'author''s notes'\n  - \"say \\\"hi\\\"\"\n  - plain # comment\n  - don't\n---\n")).toEqual([
+      "author's notes",
+      'say "hi"',
+      "plain",
+      "don't",
+    ]);
+    expect(mergeTags("---\ntags:\n  - 'author''s notes'\n---\nx", ["new"])).toContain('tags: ["author\'s notes", new]');
+    expect(mergeTags("---\ntags: [alpha, beta] # project tags\n---\nx", ["gamma"])).toContain("tags: [alpha, beta, gamma]\n");
+  });
+
+  it("marks every translation it creates, and a retry of the same job doesn't duplicate it", () => {
+    const job = { id: "job1", provider: "openai" as const, model: "m", op: "translate" as const, lang: "French", createdAt: "", status: "ended" as const, items: [{ customId: "n0", path: "x.md", hash: textHash("Hello") }] };
+    const [w] = planWrites(job, new Map([["n0", "---\ntitle: Bonjour\n---\nBonjour"]]), (p) => (p === "x.md" ? "Hello" : null));
+    expect(isBatchTranslation(w.content)).toBe(true);
+    expect(frontmatterField(w.content, "translatedFrom")).toBe("x.md");
+    expect(frontmatterField(w.content, "title")).toBe("Bonjour");
+    expect(isBatchTranslation("---\ntitle: x\n---\nHello")).toBe(false);
+    expect(isBatchTranslation("---\ntranslatedFrom: \"my-own.md\"\n---\nHello")).toBe(false); // the user's own field
+    // The job's earlier write is found (here behind an unrelated x.french.md).
+    const files = new Map([["x.md", "Hello"], ["x.french.md", "mine"], ["x.french-2.md", w.content]]);
+    expect(planWrites(job, new Map([["n0", "Bonjour"]]), (p) => files.get(p) ?? null)).toEqual([]);
+    // Another job's translation of the same note doesn't count.
+    expect(planWrites({ ...job, id: "job2" }, new Map([["n0", "Bonjour"]]), (p) => files.get(p) ?? null)[0].path).toBe("x.french-3.md");
   });
 
   it("prices batch usage at half", () => {
@@ -121,5 +153,12 @@ describe("batch APIs", () => {
     expect(job).toMatchObject({ id: "batch_1", provider: "openai", op: "summary" });
     const res = await fetchBatchResults(job, f);
     expect(res.state).toBe("processing");
+  });
+});
+
+describe("stripYamlComment", () => {
+  it("keeps doubled quotes inside single-quoted scalars", async () => {
+    const { stripYamlComment } = await import("../ai/batch");
+    expect(stripYamlComment("tags: ['author''s # notes', b] # comment")).toBe("tags: ['author''s # notes', b]");
   });
 });

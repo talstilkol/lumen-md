@@ -16,6 +16,7 @@
  * for vue / vanilla. Pure: no DOM.
  */
 
+import { parse, tokenizer } from "acorn";
 import { tokenize } from "../plugins/liveJsScope";
 
 export type PlaygroundFramework = "vanilla" | "react" | "vue";
@@ -101,7 +102,7 @@ export function resolveImport(spec: string, from: string, names: readonly string
     else if (seg !== ".") parts.push(seg);
   }
   const base = parts.join("/");
-  const candidates = [base, ...[".js", ".jsx", ".ts", ".tsx", ".mjs"].map((e) => base + e), ...["/index.js", "/index.jsx", "/index.ts", "/index.tsx"].map((e) => base + e)];
+  const candidates = [base, ...[".js", ".jsx", ".ts", ".tsx", ".mjs", ".css", ".json"].map((e) => base + e), ...["/index.js", "/index.jsx", "/index.ts", "/index.tsx"].map((e) => base + e)];
   return candidates.find((c) => names.includes(c)) ?? null;
 }
 
@@ -118,7 +119,7 @@ export function importSpecifiers(code: string): Array<{ start: number; end: numb
   const out: Array<{ start: number; end: number; spec: string }> = [];
   const add = (i: number) => {
     const t = tokens[i];
-    if (t?.type === "str") out.push({ start: t.start, end: t.end, spec: t.value.slice(1, -1) });
+    if (t?.type === "str" || isPlainTemplate(t)) out.push({ start: t.start, end: t.end, spec: t.value.slice(1, -1) });
   };
   // Inside a top-level `import` / `export` statement, waiting for `from`.
   let inDecl = false;
@@ -145,8 +146,9 @@ export function importSpecifiers(code: string): Array<{ start: number; end: numb
         add(i + 1); // import "x"
         continue;
       }
-      if (next?.value === "(" && tokens[i + 2]?.type === "str" && (tokens[i + 3]?.value === ")" || tokens[i + 3]?.value === ",")) {
-        add(i + 2); // import("x") / import("x", { with: … })
+      const arg = tokens[i + 2];
+      if (next?.value === "(" && (arg?.type === "str" || isPlainTemplate(arg)) && (tokens[i + 3]?.value === ")" || tokens[i + 3]?.value === ",")) {
+        add(i + 2); // import("x") / import(`x`) / import("x", { with: … })
         continue;
       }
       if (t.depth === 0 && next?.value !== "." && next?.value !== "(") inDecl = true;
@@ -164,49 +166,81 @@ export function importSpecifiers(code: string): Array<{ start: number; end: numb
   return out;
 }
 
+/** A template literal with no `${…}` substitutions or escapes: a static string. */
+function isPlainTemplate<T extends { type: string; value: string }>(t: T | undefined): t is T {
+  return t?.type === "tpl" && !/\$\{|\\/.test(t.value);
+}
+
 /** The loop guard the runner defines (it throws once the page has been busy too long). */
 export const LOOP_GUARD = "__lumenLoop";
 
 /**
  * Loop conditions guarded: `while (c)` → `while (__lumenLoop() && (c))`,
- * `for (a; c; b)` likewise (`do … while` is covered by its `while`), so a
- * runaway loop throws instead of freezing the editor. `for … of / in`
- * loops are left alone.
+ * `for (a; c; b)` likewise, `do … while (c)` too, so a runaway loop throws
+ * instead of freezing the editor. Found with a real parser (acorn), so
+ * methods or properties named `for` / `while`, labels, ASI and every other
+ * statement position are read exactly as the browser reads them.
+ * `for … of / in` loops are left alone. Unparseable code is returned as is
+ * (the browser reports its syntax error).
  */
 export function guardLoops(code: string): string {
-  const tokens = tokenize(code);
-  const edits: Array<{ at: number; text: string }> = [];
-  for (let i = 0; i < tokens.length; i++) {
-    const t = tokens[i];
-    if (t.type !== "ident" || (t.value !== "while" && t.value !== "for")) continue;
-    const prev = tokens[i - 1];
-    if (prev && (prev.value === "." || prev.value === "?.")) continue;
-    const open = tokens[i + 1];
-    if (!open || open.value !== "(") continue;
-    const d = open.depth;
-    let close = -1;
-    const semis: number[] = [];
-    for (let k = i + 2; k < tokens.length; k++) {
-      const x = tokens[k];
-      if (x.type === "punct" && x.value === ")" && x.depth === d) {
-        close = k;
-        break;
-      }
-      if (x.type === "punct" && x.value === ";" && x.depth === d + 1) semis.push(k);
-    }
-    if (close === -1) continue;
-    if (t.value === "while") {
-      edits.push({ at: open.end, text: `${LOOP_GUARD}() && (` }, { at: tokens[close].start, text: ")" });
-    } else if (semis.length === 2) {
-      const [a, b] = semis;
-      if (b === a + 1) edits.push({ at: tokens[a].end, text: ` ${LOOP_GUARD}()` });
-      else edits.push({ at: tokens[a].end, text: ` ${LOOP_GUARD}() && (` }, { at: tokens[b].start, text: ")" });
-    }
+  let ast: AcornNode;
+  try {
+    ast = parse(code, {
+      ecmaVersion: "latest",
+      sourceType: "module",
+      allowAwaitOutsideFunction: true,
+      allowReturnOutsideFunction: true,
+      allowHashBang: true,
+    }) as unknown as AcornNode;
+  } catch {
+    return code;
   }
+  const edits: Array<{ at: number; text: string }> = [];
+  const wrap = (test: AcornNode) =>
+    edits.push({ at: test.start, text: `${LOOP_GUARD}() && (` }, { at: test.end, text: ")" });
+  const visit = (n: AcornNode) => {
+    if (n.type === "WhileStatement" || n.type === "DoWhileStatement") wrap(n.test as AcornNode);
+    else if (n.type === "ForStatement") {
+      if (n.test) wrap(n.test as AcornNode);
+      else {
+        // `for (init;; update)`: the guard goes right after the first `;`.
+        // Found with acorn's tokenizer, so a `;` in a comment isn't taken.
+        // Without an init, tokenize from `for` itself (its `(` may follow a
+        // comment that holds one too).
+        const from = n.init ? (n.init as AcornNode).end : n.start;
+        let inHead = !!n.init;
+        for (const t of tokenizer(code.slice(from), { ecmaVersion: "latest" })) {
+          if (!inHead) {
+            inHead = t.type.label === "(";
+            continue;
+          }
+          if (t.type.label === ";") {
+            edits.push({ at: from + t.end, text: ` ${LOOP_GUARD}()` });
+            break;
+          }
+        }
+      }
+    }
+    for (const key in n) {
+      const v = (n as unknown as Record<string, unknown>)[key];
+      if (Array.isArray(v)) for (const c of v) isNode(c) && visit(c);
+      else if (isNode(v)) visit(v);
+    }
+  };
+  visit(ast);
   let out = code;
   for (const e of edits.sort((x, y) => y.at - x.at)) out = out.slice(0, e.at) + e.text + out.slice(e.at);
   return out;
 }
+
+interface AcornNode {
+  type: string;
+  start: number;
+  end: number;
+  [key: string]: unknown;
+}
+const isNode = (v: unknown): v is AcornNode => !!v && typeof v === "object" && typeof (v as AcornNode).type === "string";
 
 /** The `${ … }` expressions of a template literal's source, with offsets into it. */
 function templateExpressions(tpl: string): Array<{ offset: number; code: string }> {
@@ -226,6 +260,72 @@ function templateExpressions(tpl: string): Array<{ offset: number; code: string 
     i = from + close.start;
   }
   return out;
+}
+
+/**
+ * JSON-like text for a logged value, built with an output budget: the walk
+ * stops once `max` characters are written (ending in `…`), so logging a
+ * huge object or typed array never serializes all of it. Circular
+ * references, functions and bigints are shown the way JSON can't.
+ */
+export function formatValue(value: unknown, max = 10_000): string {
+  let out = "";
+  const full = () => out.length >= max;
+  const write = (s: string) => {
+    if (!full()) out += s;
+  };
+  // Strings are cut to the remaining budget before JSON-encoding them, so a
+  // huge string value or key is never serialized whole.
+  const str = (t: string) => JSON.stringify(t.slice(0, Math.max(0, max - out.length) + 1));
+  const seen = new WeakSet<object>();
+  const walk = (v: unknown, inArray: boolean): void => {
+    if (full()) return;
+    if (v !== null && typeof v === "object" && typeof (v as { toJSON?: unknown }).toJSON === "function") {
+      try {
+        v = (v as { toJSON: () => unknown }).toJSON();
+      } catch {
+        /* keep the object */
+      }
+    }
+    if (typeof v === "function") return write(str(`[Function ${String((v as { name?: string }).name || "anonymous").slice(0, max)}]`));
+    if (typeof v === "bigint") return write(JSON.stringify(`${v}n`));
+    if (v === undefined || typeof v === "symbol") return write(inArray ? "null" : String(v));
+    if (typeof v === "number") return write(Number.isFinite(v) ? String(v) : "null");
+    if (typeof v === "string") return write(str(v));
+    if (v === null || typeof v !== "object") return write(JSON.stringify(v));
+    if (seen.has(v)) return write('"[Circular]"');
+    seen.add(v);
+    if (Array.isArray(v) || ArrayBuffer.isView(v)) {
+      const list = v as ArrayLike<unknown>;
+      write("[");
+      for (let k = 0; k < list.length && !full(); k++) {
+        if (k) write(",");
+        walk(list[k], true);
+      }
+      write("]");
+    } else {
+      write("{");
+      let first = true;
+      for (const k in v) {
+        if (full()) break;
+        if (!Object.prototype.hasOwnProperty.call(v, k)) continue;
+        const x = (v as Record<string, unknown>)[k];
+        if (x === undefined || typeof x === "symbol") continue;
+        if (!first) write(",");
+        first = false;
+        write(str(k) + ":");
+        walk(x, false);
+      }
+      write("}");
+    }
+    seen.delete(v);
+  };
+  try {
+    walk(value, false);
+  } catch {
+    return String(value).slice(0, max);
+  }
+  return out.length >= max ? out.slice(0, max) + "…" : out;
 }
 
 export const PROVIDED_MODULES = ["react", "react-dom", "react-dom/client", "react/jsx-runtime", "vue"] as const;

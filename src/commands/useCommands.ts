@@ -1017,10 +1017,13 @@ export function useCommands({
           const prefix = folder.trim().replace(/^\/+|\/+$/g, "");
           const { readAllNotes } = await import("../storage/workspaceNotes");
           const all = await readAllNotes();
-          // Skip translations earlier batches created (by recorded path,
-          // not by file-name shape) so a re-run doesn't translate them.
+          // Skip translations earlier batches created (by their
+          // `translatedFrom` marker, or the older recorded paths — not by
+          // file-name shape) so a re-run doesn't translate them.
           const made = batch.knownTranslations();
-          const notes = all.filter((n) => (!prefix || n.path.startsWith(prefix + "/")) && !(op === "translate" && made.has(n.path)));
+          const notes = all.filter(
+            (n) => (!prefix || n.path.startsWith(prefix + "/")) && !(op === "translate" && (made.has(n.path) || batch.isBatchTranslation(n.text))),
+          );
           if (!notes.length) {
             showAiToast(t("batch.noNotes"), "error");
             return;
@@ -1085,10 +1088,18 @@ export function useCommands({
               continue;
             }
             if (results.state !== "ended") {
+              // Tell the user before the job leaves the pending list.
               job.status = results.state;
+              showAiToast(t("batch.terminal", { op: job.op, id: job.id, state: t(`batch.state.${results.state}`) }), "error");
               continue;
             }
             job.status = "ended";
+            // Record the metering now: if the state can't be saved, stop
+            // before writing anything (a later check would meter again).
+            if (!batch.saveJobs(jobs)) {
+              showAiToast(t("batch.saveFailed", { id: job.id }), "error");
+              return;
+            }
             const { readAllNotes } = await import("../storage/workspaceNotes");
             const notes = await readAllNotes();
             const open = new Set(useAppStore.getState().openTabs.map((tab) => tab.workspaceName).filter(Boolean));
@@ -1125,12 +1136,18 @@ export function useCommands({
                 failedWrites++;
               }
             }
-            if (job.op === "translate") batch.rememberTranslations(done.filter((p) => writes.find((w) => w.path === p)?.created));
             if (done.length) wroteAny = true;
             job.status = failedWrites ? "ended" : "applied";
+            // A retry after a failed save is safe (translations carry their
+            // job's marker; tags merge; summaries replace), but say so.
+            if (!batch.saveJobs(jobs)) {
+              showAiToast(t("batch.saveFailed", { id: job.id }), "error");
+              if (wroteAny) window.dispatchEvent(new CustomEvent("lumen-workspace-changed"));
+              return;
+            }
             showAiToast(t("batch.applied", { count: done.length }), failedWrites ? "error" : "success");
           }
-          batch.saveJobs(jobs);
+          if (!batch.saveJobs(jobs)) showAiToast(t("batch.saveFailed", { id: pending.map((j) => j.id).join(", ") }), "error");
           // File tree, tags, backlinks and database views refresh on this.
           if (wroteAny) window.dispatchEvent(new CustomEvent("lumen-workspace-changed"));
           if (processing) showAiToast(t("batch.processing", { count: processing }), "info");

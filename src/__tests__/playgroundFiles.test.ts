@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import { buildProject, frameworkFromMeta, resolveImport, splitFiles } from "../playground/files";
 import { runnerUrl } from "../plugins/PlaygroundBlock";
 import { renderMarkdown } from "../renderer/pipeline";
@@ -38,6 +38,12 @@ describe("playground project", () => {
     expect(resolveImport("./lib", "main.jsx", names)).toBe("lib/index.ts");
     expect(resolveImport("./nope", "main.jsx", names)).toBeNull();
     expect(resolveImport("react", "main.jsx", names)).toBeNull();
+  });
+
+  it("resolves extensionless CSS and JSON imports", () => {
+    const names = ["main.js", "theme.css", "data/items.json"];
+    expect(resolveImport("./theme", "main.js", names)).toBe("theme.css");
+    expect(resolveImport("./data/items", "main.js", names)).toBe("data/items.json");
   });
 
   it("serves the runner under the base path", () => {
@@ -91,6 +97,16 @@ describe("importSpecifiers", () => {
   });
 });
 
+describe("importSpecifiers: template literals", () => {
+  it("treats a substitution-free template in import() as a static specifier", async () => {
+    const { importSpecifiers } = await import("../playground/files");
+    const code = "const a = import(`./dep.js`); const b = import(`./${name}.js`);";
+    const specs = importSpecifiers(code);
+    expect(specs.map((s) => s.spec)).toEqual(["./dep.js"]);
+    expect(code.slice(specs[0].start, specs[0].end)).toBe("`./dep.js`");
+  });
+});
+
 describe("IMPORT_ATTRS_RE", () => {
   it("matches static and dynamic import attributes only", async () => {
     const { IMPORT_ATTRS_RE } = await import("../playground/files");
@@ -106,11 +122,33 @@ describe("guardLoops", () => {
   it("guards while / for conditions and leaves for-of, strings and members alone", async () => {
     const { guardLoops } = await import("../playground/files");
     expect(guardLoops("while (x < 3) x++;")).toBe("while (__lumenLoop() && (x < 3)) x++;");
-    expect(guardLoops("for (let i = 0; i < n; i++) {}")).toBe("for (let i = 0; __lumenLoop() && ( i < n); i++) {}");
+    expect(guardLoops("for (let i = 0; i < n; i++) {}")).toBe("for (let i = 0; __lumenLoop() && (i < n); i++) {}");
     expect(guardLoops("for (;;) {}")).toBe("for (; __lumenLoop();) {}");
     expect(guardLoops("do { a() } while (f(g(1)))")).toBe("do { a() } while (__lumenLoop() && (f(g(1))))");
     expect(guardLoops('for (const x of xs) {} s = "while (1)"; o.while(1); o.for(2)')).toBe('for (const x of xs) {} s = "while (1)"; o.while(1); o.for(2)');
-    expect(guardLoops("for (let i = 0, j = (1, 2); i < j; i++) {}")).toBe("for (let i = 0, j = (1, 2); __lumenLoop() && ( i < j); i++) {}");
+    expect(guardLoops("for (let i = 0, j = (1, 2); i < j; i++) {}")).toBe("for (let i = 0, j = (1, 2); __lumenLoop() && (i < j); i++) {}");
+  });
+
+  it("leaves methods named while / for alone and still guards loops inside them", async () => {
+    const { guardLoops } = await import("../playground/files");
+    const keep = [
+      "const helper = { while(value) { return value; } };",
+      "const o = { a: 1, for(x) { return x; } };",
+      "class A { while(x) {} for(y) {} static for(z) {} get while() { return 1; } }",
+      "class B extends Base { m() {} while(x) { return x; } }",
+      "f({ while(v) { return v; } });",
+      "const c = class { async *for(x) {} };",
+    ];
+    for (const code of keep) expect(guardLoops(code)).toBe(code);
+    expect(guardLoops("class C { run() { while (x) x--; } }")).toBe("class C { run() { while (__lumenLoop() && (x)) x--; } }");
+    expect(guardLoops("const o = { run() { for (;;) {} } };")).toBe("const o = { run() { for (; __lumenLoop();) {} } };");
+    expect(guardLoops("if (a) { while (b) {} } else { outer: for (;;) {} }")).toBe(
+      "if (a) { while (__lumenLoop() && (b)) {} } else { outer: for (; __lumenLoop();) {} }",
+    );
+    expect(guardLoops("switch (k) { case 1: { while (b) {} } }")).toBe("switch (k) { case 1: { while (__lumenLoop() && (b)) {} } }");
+    expect(guardLoops("const f = () => { do { x() } while (y) };")).toBe("const f = () => { do { x() } while (__lumenLoop() && (y)) };");
+    // The result is valid JavaScript.
+    expect(() => new Function(guardLoops("const helper = { while(value) { return value; } }; class A { for(y) { while (y) y--; } }"))).not.toThrow();
   });
 
   it("guarded code still runs and the guard can stop it", async () => {
@@ -119,5 +157,69 @@ describe("guardLoops", () => {
     const guard = () => ++calls < 50;
     const run = new Function("__lumenLoop", guardLoops("let n = 0; while (true) n++; return n;"));
     expect(run(guard)).toBe(49);
+  });
+});
+
+describe("formatValue", () => {
+  it("formats like JSON, with functions, bigints and cycles shown", async () => {
+    const { formatValue } = await import("../playground/files");
+    const o: Record<string, unknown> = { a: 1, s: "x", u: undefined, f: function named() {}, n: 10n, arr: [1, undefined], d: new Date(0) };
+    o.self = o;
+    expect(formatValue(o)).toBe('{"a":1,"s":"x","f":"[Function named]","n":"10n","arr":[1,null],"d":"1970-01-01T00:00:00.000Z","self":"[Circular]"}');
+    const shared = { x: 1 };
+    expect(formatValue([shared, shared])).toBe('[{"x":1},{"x":1}]');
+    expect(formatValue(undefined)).toBe("undefined");
+    expect(formatValue(null)).toBe("null");
+  });
+
+  it("stops walking once the output budget is reached", async () => {
+    const { formatValue } = await import("../playground/files");
+    const typed = formatValue(new Float64Array(5_000_000), 100);
+    expect(typed).toHaveLength(101);
+    expect(typed.startsWith("[0,0,0")).toBe(true);
+    expect(typed.endsWith("…")).toBe(true);
+    // Elements past the budget are never read.
+    let reads = 0;
+    const counted = new Proxy(new Array(1_000_000).fill(7), {
+      get(t, k) {
+        if (typeof k === "string" && /^\d+$/.test(k)) reads++;
+        return Reflect.get(t, k);
+      },
+    });
+    expect(formatValue(counted, 100)).toHaveLength(101);
+    expect(reads).toBeLessThan(60);
+    expect(formatValue({ list: Array.from({ length: 1e5 }, (_, i) => i) }, 50)).toHaveLength(51);
+  });
+});
+
+describe("guardLoops in labeled blocks", () => {
+  it("guards a loop inside a labeled block but not object-literal methods", async () => {
+    const { guardLoops } = await import("../playground/files");
+    expect(guardLoops("outer: { while (true) {} }")).toContain("__lumenLoop()");
+    expect(guardLoops("function f() { outer: { for (;;) break outer; } }")).toContain("__lumenLoop()");
+    expect(guardLoops("const o = { a: { while(x) { return x; } } };")).not.toContain("__lumenLoop");
+    expect(guardLoops("function* g() { yield\n{ while (true) {} } }")).toContain("__lumenLoop()");
+    expect(guardLoops("if (ready) outer: { while (true) {} }")).toContain("__lumenLoop()");
+    expect(guardLoops("let async = 1; async\nwhile (true) {}")).toContain("__lumenLoop()");
+    expect(guardLoops("this is not js (")).toBe("this is not js (");
+    expect(guardLoops("for (let i = 0 /* ; */; ; ) {}")).toBe("for (let i = 0 /* ; */; __lumenLoop() ; ) {}");
+    expect(guardLoops("for /* (; */ (;;) {}")).toBe("for /* (; */ (; __lumenLoop();) {}");
+  });
+});
+
+describe("formatValue bounds strings", () => {
+  it("never encodes a huge string or key whole", async () => {
+    const { formatValue } = await import("../playground/files");
+    const big = "x".repeat(5_000_000);
+    const spy = vi.spyOn(JSON, "stringify");
+    const out = formatValue({ [big]: big }, 100);
+    expect(out.length).toBeLessThanOrEqual(101);
+    for (const call of spy.mock.calls) expect(String(call[0]).length).toBeLessThan(200);
+    spy.mockClear();
+    const fn = () => 0;
+    Object.defineProperty(fn, "name", { value: big });
+    expect(formatValue(fn, 100).length).toBeLessThanOrEqual(101);
+    for (const call of spy.mock.calls) expect(String(call[0]).length).toBeLessThan(200);
+    spy.mockRestore();
   });
 });
