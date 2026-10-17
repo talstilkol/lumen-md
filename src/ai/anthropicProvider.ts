@@ -11,7 +11,7 @@
  */
 
 import type { ChatMessage, ChatOptions } from "./llm";
-import { getProviderKey, AiError, PROVIDER_DEFAULT_MODELS } from "./llm";
+import { getProviderKey, AiError, PROVIDER_DEFAULT_MODELS, withRequestLimit } from "./llm";
 
 const API_URL = "https://api.anthropic.com/v1/messages";
 const ANTHROPIC_VERSION = "2023-06-01";
@@ -191,6 +191,9 @@ export interface CitedBlock {
   citations: Array<{ url: string; title: string; quote: string }>;
 }
 
+/** Requests per research run: the first plus up to three `pause_turn` continuations. */
+export const MAX_RESEARCH_TURNS = 4;
+
 /**
  * One Messages API call with Claude's server-side web search tool: Claude
  * searches, reads and answers, returning text blocks with the passages it
@@ -199,7 +202,7 @@ export interface CitedBlock {
  */
 export async function anthropicWebResearch(
   messages: ChatMessage[],
-  opts: ChatOptions & { maxSearches?: number } = {},
+  opts: ChatOptions & { maxSearches?: number; charge?: () => void } = {},
 ): Promise<CitedBlock[]> {
   // The web search tool needs a current model: an explicit or configured
   // Claude 3.x choice falls back to the default (Sonnet 5.5).
@@ -212,17 +215,22 @@ export async function anthropicWebResearch(
   let searched = 0;
   const content: Array<{ type?: string; text?: string; citations?: Array<{ type?: string; url?: string; title?: string; cited_text?: string }> }> = [];
   // A long search turn can stop with `pause_turn`: send it back to continue
-  // (bounded).
-  for (let turn = 0; turn < 4; turn++) {
-    const res = await fetch(API_URL, { method: "POST", headers: headers(), body: JSON.stringify(body), signal: opts.signal });
-    if (!res.ok) {
-      const b = await res.text().catch(() => "");
-      throw new AiError("API_ERROR", `Anthropic ${res.status}: ${b.slice(0, 200)}`);
-    }
-    const data = await res.json();
+  // (bounded). Each request, continuations included, goes through the same
+  // rate / concurrency limits as other AI calls.
+  let stopReason: string | undefined;
+  for (let turn = 0; turn < MAX_RESEARCH_TURNS; turn++) {
+    const data = await withRequestLimit(async () => {
+      const res = await fetch(API_URL, { method: "POST", headers: headers(), body: JSON.stringify(body), signal: opts.signal });
+      if (!res.ok) {
+        const b = await res.text().catch(() => "");
+        throw new AiError("API_ERROR", `Anthropic ${res.status}: ${b.slice(0, 200)}`);
+      }
+      return res.json();
+    }, turn === 0 ? opts.charge : undefined); // one research run is one prompt
     reportUsage(data.usage, data.model ?? model, opts);
     content.push(...(data.content ?? []));
-    if (data.stop_reason !== "pause_turn") break;
+    stopReason = data.stop_reason;
+    if (stopReason !== "pause_turn") break;
     // `max_uses` applies per request: carry the remaining budget over, and
     // stop continuing once the run's searches are spent.
     searched += Number(data.usage?.server_tool_use?.web_search_requests) || 0;
@@ -231,6 +239,11 @@ export async function anthropicWebResearch(
     if (searched >= maxSearches) body.tool_choice = { type: "none" };
     else tool.max_uses = maxSearches - searched;
     body.messages = [...body.messages, { role: "assistant", content: data.content }];
+  }
+  // Still paused after the last continuation: the answer is unfinished, and
+  // saving it would pass a partial note off as a complete one.
+  if (stopReason === "pause_turn") {
+    throw new AiError("API_ERROR", `Claude's web search didn't finish within ${MAX_RESEARCH_TURNS} requests — try a narrower question.`);
   }
   const blocks: CitedBlock[] = [];
   for (const b of content) {
