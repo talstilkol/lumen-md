@@ -26,6 +26,7 @@ import type {
 } from "./types";
 import { DEFAULT_EXECUTOR_ORDER, getExecutor, listExecutors, pickExecutor } from "./executors";
 import { parseProtocolTurn, toolProtocolPrompt, toolResultMessage } from "./protocol";
+import { hebrewRatio } from "../text/hebrew";
 import { checkJson } from "./tools/validate";
 import { formatSchemaErrors, validateSchema } from "./schema";
 import { ToolError } from "./tools/define";
@@ -79,7 +80,44 @@ function systemPrompt<I extends AgentInput, O>(def: AgentDefinition<I, O>, input
   // JSON (otherwise it can emit whitespace to the token limit), and a
   // native-tools model needs to know the shape of its final answer.
   else if (def.outputSchema) parts.push("Reply with JSON only (no prose, no code fences) matching this schema: " + JSON.stringify(def.outputSchema));
+  const lang = languageInstruction(def, input);
+  if (lang) parts.push(lang);
   return parts.join("\n\n");
+}
+
+function inputTextOf<I extends AgentInput>(def: AgentDefinition<I, unknown>, input: I): string {
+  try {
+    return input.text ?? def.user(input);
+  } catch {
+    return input.text ?? "";
+  }
+}
+
+/**
+ * "Answer in the language of the input" (T27): every prompt says it, for
+ * local and cloud models alike, because small local models drift into
+ * English on Hebrew input.
+ */
+function languageInstruction<I extends AgentInput>(def: AgentDefinition<I, unknown>, input: I): string | null {
+  if ((def.language ?? "input") === "any") return null;
+  const text = inputTextOf(def, input);
+  if (hebrewRatio(text) >= 0.5) return "The user's text is in Hebrew. Write every natural-language part of your answer in Hebrew (keep code, URLs, file names and JSON keys as they are).";
+  return "Write every natural-language part of your answer in the same language as the user's text.";
+}
+
+/**
+ * The script check behind it: a mostly-Hebrew input must not get a
+ * mostly-Latin answer. Short answers (under 20 letters) and non-Hebrew
+ * inputs pass — they say too little to judge.
+ */
+export function sameScript(inputText: string, output: unknown): { ok: true } | { ok: false; reason: string; hint: string } {
+  if (hebrewRatio(inputText) < 0.5) return { ok: true };
+  const text = typeof output === "string" ? output : JSON.stringify(output ?? "").replace(/"[\w$-]+":/g, " ");
+  const letters = text.match(/\p{L}/gu) ?? [];
+  if (letters.length < 20) return { ok: true };
+  const r = hebrewRatio(text);
+  if (r >= 0.15) return { ok: true };
+  return { ok: false, reason: `the input is Hebrew but the answer is ${Math.round(r * 100)}% Hebrew`, hint: "Answer in Hebrew, the language of the user's text." };
 }
 
 /** A short stable key of an agent's input: a retry patch is bound to it. */
@@ -309,6 +347,11 @@ export async function runAgent<I extends AgentInput, O = string>(def: AgentDefin
         if (errors.length) {
           failure = { kind: "validation", attempt, maxRetries, tier, executor: executor.id, label: "schema", reason: `JSON does not match the required schema: ${formatSchemaErrors(errors)}`, hint: "Reply with JSON matching the schema exactly.", inputChars };
         }
+      }
+      if (!failure && output !== undefined && (def.language ?? "input") === "input") {
+        const r = sameScript(inputTextOf(def, input), output);
+        step({ kind: "validate", ms: 0, label: "language", ok: r.ok, detail: r.ok ? undefined : r.reason });
+        if (!r.ok) failure = { kind: "validation", attempt, maxRetries, tier, executor: executor.id, label: "language", reason: r.reason, hint: r.hint, inputChars };
       }
       if (!failure && output !== undefined) {
         for (const v of def.validators ?? []) {

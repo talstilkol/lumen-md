@@ -18,6 +18,7 @@ export type EChartsOption = Record<string, unknown>;
 
 export const charterAgent: AgentDefinition<CharterInput, EChartsOption> = registerAgent<CharterInput, EChartsOption>({
   id: "charter",
+  language: "any",
   commandId: "ai.chart",
   description: "Turn tabular data into an ECharts option",
   system:

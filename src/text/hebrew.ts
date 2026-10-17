@@ -107,3 +107,10 @@ export function hebrewFind(haystack: string, needle: string): { start: number; e
   }
   return null;
 }
+
+/** Share of letters that are Hebrew (0–1); 0 when there are no letters. */
+export function hebrewRatio(text: string): number {
+  const letters = text.match(/\p{L}/gu) ?? [];
+  if (!letters.length) return 0;
+  return letters.filter((c) => /\p{Script=Hebrew}/u.test(c)).length / letters.length;
+}
