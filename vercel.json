@@ -5,6 +5,18 @@
   "outputDirectory": "dist",
   "rewrites": [
     {
+      "source": "/roadmap",
+      "destination": "/roadmap.html"
+    },
+    {
+      "source": "/landing",
+      "destination": "/landing.html"
+    },
+    {
+      "source": "/benchmarks",
+      "destination": "/benchmarks.html"
+    },
+    {
       "source": "/((?!assets/|sw\\.js|workbox-|manifest|favicon|.*\\.[a-z0-9]+$).*)",
       "destination": "/index.html"
     }
