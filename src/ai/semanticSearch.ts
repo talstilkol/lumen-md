@@ -28,6 +28,8 @@ import {
   isAssetName,
 } from "../storage/workspace";
 import { searchWorkspace } from "../storage/workspaceIndex";
+import { getAiPolicy } from "./policy";
+import { useAppStore } from "../store/useStore";
 
 const IDB_KEY = "lumen-semantic-index";
 const MAX_CHUNK_CHARS = 1800; // ~450 tokens
@@ -123,16 +125,49 @@ export function chunkMarkdown(text: string): { start: number; end: number; text:
 
 /* ─── Embedding ─────────────────────────────────────────────────────── */
 
-let providerPromise: Promise<EmbeddingProvider> | null = null;
-const provider = () => (providerPromise ??= pickEmbeddingProvider().catch((e) => {
-  providerPromise = null;
-  throw e;
-}));
+/**
+ * The provider is re-picked whenever what decides it changes — the AI
+ * policy, a cloud key, the Ollama address — and at least once a minute, so
+ * starting Ollama or pulling an embedding model is noticed without a
+ * reload. (The index records which provider built it; a switch rebuilds.)
+ */
+const PROVIDER_TTL_MS = 60_000;
+let picked: { sig: string; at: number; promise: Promise<EmbeddingProvider> } | null = null;
 
-/** Tests / policy changes: pick the provider again on next use. */
-export function resetEmbeddingProvider(): void {
-  providerPromise = null;
+function providerSignature(): string {
+  let policy = "";
+  let ollama = "";
+  try {
+    policy = localStorage.getItem("lumen.ai.policy") ?? "";
+    ollama = localStorage.getItem("lumen.ollama.baseUrl") ?? "";
+  } catch {
+    /* storage denied */
+  }
+  return [policy, getAiPolicy(), useAppStore.getState().aiKey ? "key" : "", ollama].join("|");
 }
+
+const provider = (): Promise<EmbeddingProvider> => {
+  const sig = providerSignature();
+  if (picked && picked.sig === sig && Date.now() - picked.at < PROVIDER_TTL_MS) return picked.promise;
+  const entry = {
+    sig,
+    at: Date.now(),
+    promise: pickEmbeddingProvider().catch((e) => {
+      if (picked === entry) picked = null;
+      throw e;
+    }),
+  };
+  picked = entry;
+  return entry.promise;
+};
+
+/** Tests: pick the provider again on next use. */
+export function resetEmbeddingProvider(): void {
+  picked = null;
+}
+
+/** Tests. */
+export const __embedForTests = (texts: string[]): Promise<Float32Array[]> => embedTexts(texts);
 
 async function embedTexts(texts: string[], kind: EmbeddingKind = "passage"): Promise<Float32Array[]> {
   return (await provider()).embed(texts, kind);
