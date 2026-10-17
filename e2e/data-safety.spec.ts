@@ -85,6 +85,34 @@ test("auto-backups no longer create files in the vault", async ({ page }) => {
   expect(names).not.toContain("backups");
 });
 
+/**
+ * Safari before 26 (and Playwright WebKit) has no createWritable on the main
+ * thread: vault writes go through a sync-access-handle worker. Remove the
+ * method here so every engine exercises that path.
+ */
+test("saving to the vault works without createWritable (Safari path)", async ({ page }) => {
+  await page.addInitScript(() => {
+    const proto = (globalThis as { FileSystemFileHandle?: { prototype: Record<string, unknown> } }).FileSystemFileHandle?.prototype;
+    if (proto) delete proto.createWritable;
+  });
+  await page.reload();
+  await expect(page.locator(".cm-content").first()).toContainText("Welcome to", { timeout: 15_000 });
+  const run = (id: string) => page.evaluate((cmd) => window.dispatchEvent(new CustomEvent("lumen-run-command", { detail: { id: cmd } })), id);
+  await page.keyboard.press("Meta+1");
+  const editor = page.locator(".cm-content").first();
+  await editor.click();
+  await editor.press("ControlOrMeta+a");
+  await editor.fill("# Written by the worker");
+  await run("file.saveToWorkspace");
+  await expect(page.locator("aside.file-tree .file-tree-name", { hasText: "Welcome.md" })).toBeVisible({ timeout: 10_000 });
+  const text = await page.evaluate(async () => {
+    const root = await navigator.storage.getDirectory();
+    const file = await (await root.getFileHandle("Welcome.md")).getFile();
+    return file.text();
+  });
+  expect(text).toBe("# Written by the worker");
+});
+
 /** Part B — safe files (T46): rename keeps links, delete is undoable. */
 test("renaming a note rewrites links to it; deleting it goes to the trash with Undo", async ({ page }) => {
   const run = (id: string) => page.evaluate((cmd) => window.dispatchEvent(new CustomEvent("lumen-run-command", { detail: { id: cmd } })), id);

@@ -6,6 +6,7 @@
  */
 
 import { randomId } from "../lib/cryptoRandom";
+import { needsSyncWriteFallback, syncWriteOpfs } from "./opfsSyncWrite";
 
 export interface WorkspaceEntry {
   /** File path relative to the workspace root. */
@@ -170,6 +171,7 @@ export async function writeWorkspaceFile(
   content: string,
 ): Promise<void> {
   const handle = await getFileHandleAt(path, { create: true });
+  if (needsSyncWriteFallback(handle)) return syncWriteOpfs(splitPath(path), content);
   const writable = await handle.createWritable();
   await writable.write(content);
   await writable.close();
@@ -181,6 +183,7 @@ export async function writeWorkspaceBlob(
   data: Blob | ArrayBuffer | Uint8Array,
 ): Promise<void> {
   const handle = await getFileHandleAt(path, { create: true });
+  if (needsSyncWriteFallback(handle)) return syncWriteOpfs(splitPath(path), data);
   const writable = await handle.createWritable();
   await writable.write(data as FileSystemWriteChunkType);
   await writable.close();
