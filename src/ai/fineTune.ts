@@ -19,6 +19,7 @@
 
 import { listWorkspace, readWorkspaceFile } from "../storage/workspace";
 import { getAiKey, AiError } from "./llm";
+import { assertCloudAllowed } from "./policy";
 import { log } from "../lib/logger";
 import { fetchWithRetry } from "../lib/fetchRetry";
 
@@ -198,6 +199,7 @@ export async function createFineTuneJob(
 
 /** Poll a job's current status. */
 export async function getFineTuneJob(jobId: string): Promise<FineTuneJob> {
+  assertCloudAllowed("OpenAI fine-tuning");
   const key = getAiKey();
   const res = await fetchWithRetry(
     `https://api.openai.com/v1/fine_tuning/jobs/${jobId}`,
@@ -233,6 +235,7 @@ export async function getFineTuneJob(jobId: string): Promise<FineTuneJob> {
 export async function startFineTune(
   opts: FineTuneOptions = {},
 ): Promise<FineTuneJob & { chunks: number; estimatedTokens: number }> {
+  assertCloudAllowed("OpenAI fine-tuning (uploads your writing)");
   const built = await buildTrainingJsonl(opts);
   log.info("fine-tune training set built", {
     chunks: built.chunks,
