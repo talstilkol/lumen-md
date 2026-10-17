@@ -1226,5 +1226,19 @@
   "spell.he.installed": "تم تثبيت القاموس العبري ({n} كلمة).",
   "spell.he.failed": "تعذّر تنزيل القاموس: {error}",
   "spell.he.removeConfirm": "إزالة القاموس العبري من هذا الجهاز؟",
-  "spell.he.removed": "تمت إزالة القاموس العبري."
+  "spell.he.removed": "تمت إزالة القاموس العبري.",
+  "cmd.vault.export": "تصدير الخزنة كاملة…",
+  "cmd.vault.export.hint": "كل الملاحظات والمرفقات مع المجلدات كملف zip أو إلى مجلد",
+  "cmd.vault.import": "استيراد ملاحظات (zip / مجلد: Obsidian، Notion، Lumen)…",
+  "cmd.vault.import.hint": "إلى مجلد جديد — لا يُستبدل أي شيء موجود",
+  "vault.export.where": "تصدير كـ…",
+  "vault.export.zip": "ملف zip واحد",
+  "vault.export.folder": "إلى مجلد على هذا الحاسوب",
+  "vault.export.done": "تم تصدير {n} ملفات.",
+  "vault.export.failed": "فشل التصدير: {error}",
+  "vault.import.what": "استيراد من…",
+  "vault.import.zip": "ملف zip",
+  "vault.import.folder": "مجلد",
+  "vault.import.done": "تم استيراد {notes} ملاحظات و{files} ملفات ({source}) إلى «{folder}».",
+  "vault.import.failed": "فشل الاستيراد: {error}"
 }
