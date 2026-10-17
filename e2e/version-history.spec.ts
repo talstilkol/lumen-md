@@ -24,7 +24,9 @@ test.describe("Version History", () => {
     // the same text appearing in the editor body underneath.
     const palette = page.locator('[role="dialog"]').filter({ has: page.locator("input") });
     await expect(palette).toBeVisible({ timeout: 3000 });
-    await page.keyboard.type("version history");
+    // fill() targets the input itself: typing right after the palette
+    // appears can land before it has focus.
+    await palette.locator("input").first().fill("version history");
     await expect(palette.locator('[role="option"][aria-selected="true"]')).toContainText(/Version History/i, { timeout: 5000 });
     // Use keyboard Enter — the palette already focuses the first
     // match, and a mouse click can be intercepted by the backdrop.

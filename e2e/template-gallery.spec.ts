@@ -20,7 +20,7 @@ test.describe("Template Gallery", () => {
     const palette = page.locator('[role="dialog"]', { hasNot: page.locator("not-real") })
       .filter({ has: page.getByPlaceholder(PALETTE_LABEL) });
     await palette.waitFor({ timeout: 3000 });
-    await page.keyboard.type("template gallery");
+    await palette.locator("input").first().fill("template gallery");
     await expect(palette.locator('[role="option"][aria-selected="true"]')).toContainText(/template/i, { timeout: 5000 });
     await page.keyboard.press("Enter");
     // Once the action fires, the PALETTE itself closes and the gallery
@@ -34,7 +34,7 @@ test.describe("Template Gallery", () => {
     const palette = page.locator('[role="dialog"]')
       .filter({ has: page.getByPlaceholder(PALETTE_LABEL) });
     await palette.waitFor({ timeout: 3000 });
-    await page.keyboard.type("template gallery");
+    await palette.locator("input").first().fill("template gallery");
     await expect(palette.locator('[role="option"][aria-selected="true"]')).toContainText(/template/i, { timeout: 5000 });
     await page.keyboard.press("Enter");
     await expect(palette).not.toBeVisible({ timeout: 3000 });

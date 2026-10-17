@@ -65,7 +65,7 @@ test("Comments command is offered only with collaboration on; the palette handle
   const errs: string[] = [];
   page.on("pageerror", (e) => errs.push(e.message));
   const palette = await openPalette(page);
-  await page.keyboard.type("View comments panel");
+  await palette.locator("input").first().fill("View comments panel");
   // The command exists only in a collaboration session (`collab` set);
   // the default build has none, so the search comes back empty and
   // Enter must not throw. (The old test waited 200 ms and asserted nothing.)

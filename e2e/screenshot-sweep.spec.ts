@@ -100,7 +100,7 @@ test("light-mode", async ({ page }) => {
     .locator('[role="dialog"][aria-modal="true"]')
     .filter({ has: page.locator("input") });
   await palette.waitFor({ timeout: 3000 });
-  await page.keyboard.type("light theme");
+  await palette.locator("input").first().fill("light theme");
   await expect(palette.locator('[role="option"][aria-selected="true"]')).toContainText(/light/i, { timeout: 5000 });
   await page.keyboard.press("Enter");
   await expect(palette).toBeHidden({ timeout: 3000 });
