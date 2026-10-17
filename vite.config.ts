@@ -514,8 +514,6 @@ export default defineConfig({
         "src/plugins/MermaidBlock.tsx",
         "src/plugins/HtmlPreviewBlock.tsx",
         "src/plugins/EmbedBlock.tsx",
-        "src/ui/**",
-        "src/editor/**",
         "src/layouts/**",
         "src/components/**",
         "src/views/DatabaseBlock.tsx",

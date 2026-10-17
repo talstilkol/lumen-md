@@ -15,11 +15,10 @@ export default defineConfig({
   timeout: 30_000,
   expect: { timeout: 5_000 },
   fullyParallel: true,
-  // Local runs get 1 retry to absorb the well-documented palette-
-  // filter timing race (see e2e/locale-switch.spec.ts deflake notes
-  // across rounds 7/13/16). The race fires < 1 % of runs but stacks
-  // up across an 80-test suite. CI uses 2 retries.
-  retries: process.env.CI ? 2 : 0,
+  // Every wait in e2e/ is a condition now (T23), so CI gets one retry,
+  // not two; a test that needs it shows up in `npm run e2e:flake` and is
+  // fixed there. Goes to 0 once e2e:flake --times 10 is green on CI.
+  retries: process.env.CI ? 1 : 0,
   reporter: process.env.CI ? "github" : "list",
   use: {
     baseURL: BASE_URL,
