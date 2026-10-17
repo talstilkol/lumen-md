@@ -1680,8 +1680,9 @@ export function useCommands({
           const prompt = applyTemplate(tpl, doc.content);
           try {
             showAiToast(`🤖 Processing ${tpl.label}...`, "info");
-            const { chat } = await import("../ai/llm");
-            const result = await chat([{ role: "user", content: prompt }]);
+            const { runAgentOrThrow } = await import("../agents/runtime");
+            const { templaterAgent } = await import("../agents/defs");
+            const result = await runAgentOrThrow(templaterAgent, { text: prompt, extra: { templateId: tpl.id } }, { document: doc.content });
             setContent(doc.content + "\n\n---\n\n" + result);
             showAiToast(`✅ ${tpl.label} completed`, "success");
           } catch (e) {
