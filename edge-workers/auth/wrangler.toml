@@ -2,25 +2,24 @@ name = "lumen-auth"
 main = "worker.ts"
 compatibility_date = "2026-04-27"
 
-# Routes — REQUIRED in production: the worker must be on the same site as
-# the app, or its cookies are third-party and Safari drops them (sign-in
-# fails with state_mismatch). Either a sibling subdomain …
-# routes = [
-#   { pattern = "auth.lumen-md.app/*", zone_name = "lumen-md.app" }
-# ]
-# … or a path on the app's own host (then VITE_WORKOS_ENDPOINT=https://lumen-md.app):
-# routes = [
-#   { pattern = "lumen-md.app/api/sso/*", zone_name = "lumen-md.app" }
-# ]
-# The default *.workers.dev host is for local testing only.
+# Same-site requirement: the worker's cookies must be first-party for the
+# app, or Safari drops them (sign-in fails with state_mismatch). The app is
+# on lumen-md.vercel.app and has no custom domain, so a workers.dev host is
+# a different site. Serve the worker through the app's own host instead:
+# deploy it (it gets https://lumen-auth.<account>.workers.dev), then add a
+# Vercel rewrite in vercel.json:
+#   { "source": "/api/sso/:path*",   (place it before the SPA rewrite)
+#     "destination": "https://lumen-auth.<account>.workers.dev/api/sso/:path*" }
+# and build the app with VITE_WORKOS_ENDPOINT=https://lumen-md.vercel.app.
+# Calling the workers.dev host directly is for local testing only.
 
 [vars]
 # Comma-separated app origins allowed to start SSO / read the session.
 # Credentialed CORS never uses `*`, so every origin must be listed.
-ALLOWED_ORIGINS = "https://lumen-md.app"
+ALLOWED_ORIGINS = "https://lumen-md.vercel.app"
 # Optional: explicit callback URL registered in the WorkOS dashboard.
 # Defaults to `<worker origin>/api/sso/callback`.
-# WORKOS_REDIRECT_URI = "https://auth.lumen-md.app/api/sso/callback"
+# WORKOS_REDIRECT_URI = "https://lumen-md.vercel.app/api/sso/callback"
 # Optional: session lifetime in seconds (default 604800 = 7 days).
 # SESSION_TTL_SECONDS = "604800"
 

@@ -1,13 +1,13 @@
 import { defineConfig } from "astro/config";
 import starlight from "@astrojs/starlight";
 
-// Lumen's user docs. Hosted at docs.lumen-md.app — point your CNAME there.
+// Lumen's user docs. Hosted at lumen-md-docs.vercel.app (Vercel project `lumen-md-docs`, root `docs`).
 //
 // `npm install && npm run dev` from inside `docs/` to author. The site
 // builds to `docs/dist/` for any static host (Cloudflare Pages, Netlify,
 // GitHub Pages).
 export default defineConfig({
-  site: "https://docs.lumen-md.app",
+  site: "https://lumen-md-docs.vercel.app",
   integrations: [
     starlight({
       title: "Lumen Docs",

@@ -8,7 +8,7 @@
  * copy of the docs site with `VITE_DOCS_URL`.
  */
 
-const DEFAULT_DOCS_BASE = "https://docs.lumen-md.app";
+const DEFAULT_DOCS_BASE = "https://lumen-md-docs.vercel.app";
 
 /** Topic → docs slug (path under the docs site, no leading slash). */
 export const DOCS_TOPICS = {

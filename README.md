@@ -34,7 +34,7 @@ npm install
 npm run dev          # http://localhost:5173
 ```
 
-Or try the online version at [lumen-md.app](https://lumen-md.app) — no install needed.
+Or try the online version at [lumen-md.vercel.app](https://lumen-md.vercel.app) — no install needed.
 
 ---
 

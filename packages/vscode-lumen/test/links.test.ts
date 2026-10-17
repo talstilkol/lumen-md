@@ -15,7 +15,7 @@ describe("classifyLink", () => {
     expect(classifyLink("#install")).toEqual({ kind: "fragment" });
   });
   it("opens http(s)/mailto externally", () => {
-    expect(classifyLink("https://lumen-md.app")).toEqual({ kind: "external", url: "https://lumen-md.app" });
+    expect(classifyLink("https://lumen-md.vercel.app")).toEqual({ kind: "external", url: "https://lumen-md.vercel.app" });
     expect(classifyLink("mailto:a@b.c")).toEqual({ kind: "external", url: "mailto:a@b.c" });
   });
   it("resolves document-relative links, dropping query and keeping the fragment", () => {

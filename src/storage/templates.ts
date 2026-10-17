@@ -93,7 +93,7 @@ Wrap up with a takeaway or call to action.
 
 ---
 
-*Written with [Lumen](https://lumen-md.app)*
+*Written with [Lumen](https://lumen-md.vercel.app)*
 `,
     },
     {
