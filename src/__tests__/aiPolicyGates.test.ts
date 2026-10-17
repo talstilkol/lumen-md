@@ -11,7 +11,7 @@ vi.mock("../lib/logger", () => ({ log: { info: vi.fn(), warn: vi.fn(), error: vi
  * under the local-only policy before any request goes out.
  */
 describe("AI policy gates on direct cloud paths", () => {
-  const fetchSpy = vi.fn(async () => new Response("{}", { status: 200 }));
+  const fetchSpy = vi.fn(async (_input: RequestInfo | URL, _init?: RequestInit) => new Response("{}", { status: 200 }));
   beforeEach(() => {
     localStorage.clear();
     localStorage.setItem("lumen.ai.policy", "local-only");
