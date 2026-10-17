@@ -1377,6 +1377,64 @@ export function useCommands({
         },
       },
       {
+        id: "vault.export",
+        label: t("cmd.vault.export"),
+        hint: t("cmd.vault.export.hint"),
+        icon: cmdIcons.Save,
+        group: t("group.file"),
+        action: async () => {
+          const { exportVaultZip, exportVaultToFolder } = await import("../storage/exportAll");
+          try {
+            const picker = (window as unknown as { showDirectoryPicker?: (o?: object) => Promise<unknown> }).showDirectoryPicker;
+            const choice = picker
+              ? await uiSelect({ message: t("vault.export.where"), choices: [{ value: "zip", label: t("vault.export.zip") }, { value: "folder", label: t("vault.export.folder") }] })
+              : "zip";
+            if (!choice) return;
+            if (choice === "folder" && picker) {
+              const dir = await picker({ mode: "readwrite" });
+              const n = await exportVaultToFolder(dir as Parameters<typeof exportVaultToFolder>[0]);
+              showAiToast(t("vault.export.done", { n: String(n) }), "info");
+              return;
+            }
+            const { bytes, files } = await exportVaultZip();
+            const { downloadBytes } = await import("../storage/exportFormats");
+            downloadBytes(`lumen-vault-${new Date().toISOString().slice(0, 10)}.zip`, bytes, "application/zip");
+            showAiToast(t("vault.export.done", { n: String(files) }), "info");
+          } catch (e) {
+            if ((e as DOMException)?.name === "AbortError") return;
+            showAiToast(t("vault.export.failed", { error: (e as Error).message }), "error");
+          }
+        },
+      },
+      {
+        id: "vault.import",
+        label: t("cmd.vault.import"),
+        hint: t("cmd.vault.import.hint"),
+        icon: cmdIcons.Save,
+        group: t("group.file"),
+        action: async () => {
+          const choice = await uiSelect({ message: t("vault.import.what"), choices: [{ value: "zip", label: t("vault.import.zip") }, { value: "folder", label: t("vault.import.folder") }] });
+          if (!choice) return;
+          const input = document.createElement("input");
+          input.type = "file";
+          if (choice === "zip") input.accept = ".zip,application/zip";
+          else (input as HTMLInputElement & { webkitdirectory: boolean }).webkitdirectory = true;
+          input.onchange = async () => {
+            const files = input.files;
+            if (!files?.length) return;
+            const { importZip, importFileList } = await import("../storage/exportAll");
+            try {
+              const r = choice === "zip" ? await importZip(await files[0].arrayBuffer(), files[0].name) : await importFileList(files);
+              window.dispatchEvent(new Event("lumen-workspace-changed"));
+              showAiToast(t("vault.import.done", { notes: String(r.notes), files: String(r.attachments), folder: r.folder, source: r.source }), "info");
+            } catch (e) {
+              showAiToast(t("vault.import.failed", { error: (e as Error).message }), "error");
+            }
+          };
+          input.click();
+        },
+      },
+      {
         id: "file.trash",
         label: t("cmd.file.trash"),
         hint: t("cmd.file.trash.hint"),
