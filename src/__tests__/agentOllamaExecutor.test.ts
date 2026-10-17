@@ -14,7 +14,8 @@ import {
 } from "../agents/executors/ollama";
 import { defineTool } from "../agents/tools/define";
 
-vi.mock("../ai/ollamaProvider", () => ({ getBaseUrl: () => "http://127.0.0.1:11434" }));
+const base = vi.hoisted(() => ({ url: "http://127.0.0.1:11434" }));
+vi.mock("../ai/ollamaProvider", () => ({ getBaseUrl: () => base.url }));
 
 type Route = (url: string, init?: RequestInit) => Response | Promise<Response>;
 const json = (data: unknown, status = 200) => new Response(JSON.stringify(data), { status, headers: { "Content-Type": "application/json" } });
@@ -240,5 +241,23 @@ describe("ollama executor — server", () => {
     routes["/api/chat"] = () => json({ model: "m", message: { content: "ok" }, done: true });
     await ollamaExecutor.chat({ messages: [{ role: "user", content: "hi" }], schema: { type: "object" } });
     expect(calls.find((c) => c.url.endsWith("/api/chat"))!.body!.format).toBeUndefined();
+  });
+});
+
+describe("ollama executor under local-only (review)", () => {
+  afterEach(() => {
+    base.url = "http://127.0.0.1:11434";
+    localStorage.removeItem("lumen.ai.policy");
+  });
+
+  it("refuses a remote Ollama before probing or sending anything", async () => {
+    const fetchSpy = vi.fn();
+    vi.stubGlobal("fetch", fetchSpy);
+    base.url = "https://ollama.example.com";
+    localStorage.setItem("lumen.ai.policy", "local-only");
+    expect(await ollamaExecutor.available()).toEqual({ available: false, reason: "policy", detail: "https://ollama.example.com" });
+    await expect(ollamaExecutor.chat({ messages: [{ role: "user", content: "secret" }] })).rejects.toMatchObject({ code: "POLICY" });
+    expect(fetchSpy).not.toHaveBeenCalled();
+    vi.unstubAllGlobals();
   });
 });
