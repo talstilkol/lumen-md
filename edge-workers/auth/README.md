@@ -50,10 +50,18 @@ wrangler secret put BILLING_TOKEN_SECRET  # same value as billing's SSO_TOKEN_SE
 wrangler deploy
 ```
 
-In the WorkOS dashboard add `https://<worker host>/api/sso/callback` as a
-redirect URI, create an Organization with your email domain and attach an
-SSO connection to it. Then set `VITE_WORKOS_ENDPOINT=https://<worker host>`
-in the app's `.env`.
+Serve the worker through the app's own host. On Vercel, add this rewrite to
+`vercel.json` before the SPA rewrite:
+
+```json
+{ "source": "/api/sso/:path*",
+  "destination": "https://lumen-auth.<account>.workers.dev/api/sso/:path*" }
+```
+
+In the WorkOS dashboard add `https://lumen-md.vercel.app/api/sso/callback`
+(the app host, matching `WORKOS_REDIRECT_URI`) as a redirect URI, create an
+Organization with your email domain and attach an SSO connection to it.
+Then set `VITE_WORKOS_ENDPOINT=https://lumen-md.vercel.app` for the app build.
 
 The worker host must be on the **same site** as the app (a sibling
 subdomain such as `auth.example.org`, or a route on the app's own host).

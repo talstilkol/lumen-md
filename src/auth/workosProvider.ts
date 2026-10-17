@@ -28,7 +28,7 @@ import { fetchWithRetry } from "../lib/fetchRetry";
 import { log } from "../lib/logger";
 
 interface WorkOSConfig {
-  /** Edge worker base URL, e.g. `https://lumen-auth.<account>.workers.dev`. */
+  /** SSO base URL: the app's own host when the worker is proxied there, e.g. `https://lumen-md.vercel.app`. */
   endpoint: string;
 }
 

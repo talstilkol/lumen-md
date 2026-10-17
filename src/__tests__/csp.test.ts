@@ -217,16 +217,28 @@ describe("vercel.json (production host) mirrors public/_headers", () => {
     }
   });
 
-  it("CSP equals public/_headers plus https://*.workers.dev in connect-src", () => {
-    // Static headers can't take the build-time worker origins, so the
-    // edge workers' default *.workers.dev hosts are allowed instead.
+  it("CSP equals public/_headers except a scheme-only connect-src", () => {
+    // A static header can't take the build-time origins (VITE_*_ENDPOINT,
+    // VITE_CSP_CONNECT_EXTRA), so its connect-src only bounds the schemes.
+    // Browsers enforce every policy: the exact host list stays in force
+    // through the <meta> CSP, which the build extends with those origins.
     const vercel = parsePolicy(global.headers.find((h) => h.key === "Content-Security-Policy")!.value);
     const file = cspFromHeadersFile();
     expect([...vercel.keys()].sort()).toEqual([...file.keys()].sort());
     for (const [name, values] of file) {
-      const extra = name === "connect-src" ? ["https://*.workers.dev"] : [];
-      expect(sorted(vercel.get(name)!), name).toEqual(sorted([...values, ...extra]));
+      if (name === "connect-src") continue;
+      expect(sorted(vercel.get(name)!), name).toEqual(sorted(values));
     }
+    const connect = vercel.get("connect-src")!;
+    expect(sorted(connect)).toEqual(
+      sorted(["'self'", "blob:", "data:", "ws:", "wss:", "https:", "http://localhost:11434", "http://127.0.0.1:11434"]),
+    );
+    // Everything the file policy allows is still allowed by the header.
+    for (const src of file.get("connect-src")!) {
+      if (/^https:\/\//.test(src)) expect(connect).toContain("https:");
+    }
+    // The meta policy keeps naming hosts explicitly (asserted above in (a)).
+    expect(POLICIES["index.html"].get("connect-src")).not.toContain("https:");
   });
 });
 
