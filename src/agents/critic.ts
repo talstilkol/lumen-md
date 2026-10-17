@@ -97,6 +97,12 @@ function availabilitySuggestions(skipped: Failure["skipped"] = []): Suggestion[]
         push(s("use-ollama", "agent.suggest.useOllama", { detail: "agent.suggest.useOllama.detail", action: { type: "switch-executor", executor: "ollama" } }));
         push(s("webgpu-browser", "agent.suggest.webgpuBrowser", { detail: "agent.suggest.webgpuBrowser.detail", action: { type: "open-docs", key: "localLlm" } }));
         break;
+      case "no-local":
+        // A cloud provider is selected under local-only and nothing local can answer.
+        push(s("start-ollama", "agent.suggest.startOllama", { detail: "agent.suggest.startOllama.detail", action: { type: "open-docs", key: "localAgents" } }));
+        push(s("webgpu-browser", "agent.suggest.webgpuBrowser", { detail: "agent.suggest.webgpuBrowser.detail", action: { type: "open-docs", key: "localLlm" } }));
+        push(s("allow-cloud", "agent.suggest.allowCloud", { detail: "agent.suggest.allowCloud.detail", action: { type: "set-policy", policy: "local-first" } }));
+        break;
       case "no-model":
         push(s("pull-model", "agent.suggest.pullModel", { params: { model: availability.detail ?? "" }, action: { type: "pull-model", executor: id, model: availability.detail ?? "" } }));
         break;

@@ -3,13 +3,18 @@ import type { AgentDefinition, Executor, ExecutorRequest, ExecutorResponse } fro
 import { defineTool } from "../agents/tools/define";
 import { jsonValidator } from "../agents/tools/validate";
 
-vi.mock("../store/useStore", () => ({
-  useAppStore: { getState: () => ({ aiKey: null, useLocalAi: false, useFineTunedModel: false, fineTunedModelId: null }) },
-}));
+const storeState = { aiKey: null as string | null, useLocalAi: false, useFineTunedModel: false, fineTunedModelId: null };
+vi.mock("../store/useStore", () => ({ useAppStore: { getState: () => storeState } }));
+const ollamaUp = vi.fn(async () => false);
+let ollamaBase = "http://localhost:11434";
+vi.mock("../ai/ollamaProvider", () => ({ isOllamaAvailable: () => ollamaUp(), getBaseUrl: () => ollamaBase, chatOllama: vi.fn(), chatOllamaStream: vi.fn() }));
+const webgpu = { available: false };
+vi.mock("../ai/localLlm", () => ({ localLlmAvailable: () => webgpu, chatLocal: vi.fn(), chatLocalStream: vi.fn(), onLocalLlmProgress: () => () => {} }));
 vi.mock("../store/useToastStore", () => ({ toast: { info: vi.fn(), warn: vi.fn(), error: vi.fn() } }));
 vi.mock("../billing/aiQuota", () => ({ chargeAiCommandDispatch: vi.fn(), AiQuotaExceededError: class extends Error {} }));
 
 import { runAgent, runAgentOrThrow, AgentRunError } from "../agents/runtime";
+import { chatExecutor } from "../agents/executors/chatExecutor";
 import { registerExecutor, resetExecutors } from "../agents/executors";
 import { clearTrace, listRuns, loadTrace } from "../agents/trace";
 
@@ -247,6 +252,39 @@ describe("agent runtime", () => {
     const run = await runAgent({ ...textAgent, streaming: true }, { text: "hi" }, { onDelta: (c) => chunks.push(c) });
     expect(run.output).toBe("hello");
     expect(chunks.join("")).toBe("hello");
+  });
+
+  it("chat executor availability mirrors chat()'s local routing for a selected cloud provider", async () => {
+    localStorage.setItem("lumen.ai.provider", "anthropic");
+    localStorage.setItem("lumen.ai.policy", "local-only");
+    try {
+      expect(await chatExecutor.available()).toMatchObject({ available: false, reason: "no-local" });
+      ollamaUp.mockResolvedValue(true);
+      expect(await chatExecutor.available()).toEqual({ available: true });
+      ollamaBase = "https://ollama.example.com"; // not local → not a local route
+      expect(await chatExecutor.available()).toMatchObject({ available: false, reason: "no-local" });
+      webgpu.available = true;
+      expect(await chatExecutor.available()).toEqual({ available: true });
+      // local-first without a key or opt-in: WebGPU is not used, the key is needed.
+      webgpu.available = false;
+      ollamaUp.mockResolvedValue(false);
+      localStorage.setItem("lumen.ai.policy", "local-first");
+      expect(await chatExecutor.available()).toMatchObject({ available: false, reason: "no-key" });
+      localStorage.setItem("lumen.ai.key.anthropic", "k");
+      expect(await chatExecutor.available()).toEqual({ available: true });
+      // Ollama selected explicitly on a public origin under local-only: refused.
+      localStorage.setItem("lumen.ai.provider", "ollama");
+      localStorage.setItem("lumen.ai.policy", "local-only");
+      ollamaUp.mockResolvedValue(true);
+      expect(await chatExecutor.available()).toMatchObject({ available: false, reason: "policy" });
+    } finally {
+      localStorage.removeItem("lumen.ai.provider");
+      localStorage.removeItem("lumen.ai.policy");
+      localStorage.removeItem("lumen.ai.key.anthropic");
+      ollamaBase = "http://localhost:11434";
+      ollamaUp.mockResolvedValue(false);
+      webgpu.available = false;
+    }
   });
 
   it("gives up when the model never produces a final answer within maxSteps", async () => {

@@ -4,13 +4,15 @@ const state = { aiKey: null as string | null, useLocalAi: false, useFineTunedMod
 vi.mock("../store/useStore", () => ({ useAppStore: { getState: () => state } }));
 vi.mock("../store/useToastStore", () => ({ toast: { info: vi.fn(), warn: vi.fn(), error: vi.fn() } }));
 const ollamaUp = vi.fn().mockResolvedValue(false);
+const ollamaChat = vi.fn().mockResolvedValue("from ollama");
+let ollamaBase = "http://127.0.0.1:11434";
 vi.mock("../ai/ollamaProvider", () => ({
   isOllamaAvailable: () => ollamaUp(),
-  chatOllama: vi.fn().mockResolvedValue("from ollama"),
+  chatOllama: (m: unknown, o: unknown) => ollamaChat(m, o),
   chatOllamaStream: async function* () {
     yield "ollama-stream";
   },
-  getBaseUrl: () => "http://127.0.0.1:11434",
+  getBaseUrl: () => ollamaBase,
 }));
 vi.mock("../ai/localLlm", () => ({
   localLlmAvailable: () => ({ available: false }),
@@ -31,6 +33,9 @@ describe("AI policy", () => {
     state.aiKey = null;
     state.useLocalAi = false;
     ollamaUp.mockResolvedValue(false);
+    ollamaChat.mockClear();
+    ollamaBase = "http://127.0.0.1:11434";
+    localStorage.removeItem("lumen.ai.mode");
   });
   afterEach(() => {
     for (const k of KEYS) localStorage.removeItem(k);
@@ -105,6 +110,34 @@ describe("AI policy", () => {
     expect((await gen.next()).value).toBe("ollama-stream");
     ollamaUp.mockResolvedValue(false);
     await expect(chat([{ role: "user", content: "hi" }])).resolves.toBe("from claude");
+  });
+
+  it("drops a router-chosen cloud model when rerouting to Ollama, but keeps a caller-pinned one", async () => {
+    localStorage.setItem("lumen.ai.provider", "anthropic");
+    localStorage.setItem("lumen.ai.key.anthropic", "k");
+    setAiPolicy("local-first");
+    ollamaUp.mockResolvedValue(true);
+    // tier: light → the router picks claude-haiku; the Ollama call must not carry it.
+    await chat([{ role: "user", content: "hi" }], { tier: "light" });
+    expect(ollamaChat.mock.calls[0][1].model).toBeUndefined();
+    await chat([{ role: "user", content: "hi" }], { model: "my-ollama-model" });
+    expect(ollamaChat.mock.calls[1][1].model).toBe("my-ollama-model");
+  });
+
+  it("an Ollama server off this machine is not a local route under local-only", async () => {
+    ollamaBase = "https://ollama.example.com";
+    ollamaUp.mockResolvedValue(true);
+    localStorage.setItem("lumen.ai.provider", "anthropic");
+    localStorage.setItem("lumen.ai.key.anthropic", "k");
+    setAiPolicy("local-only");
+    await expect(chat([{ role: "user", content: "hi" }])).rejects.toMatchObject({ code: "NO_LOCAL" });
+    expect(ollamaChat).not.toHaveBeenCalled();
+    // Selected explicitly, it is refused outright.
+    localStorage.setItem("lumen.ai.provider", "ollama");
+    await expect(chat([{ role: "user", content: "hi" }])).rejects.toMatchObject({ code: "POLICY" });
+    // Under local-first a remote Ollama the user configured still answers.
+    setAiPolicy("local-first");
+    await expect(chat([{ role: "user", content: "hi" }])).resolves.toBe("from ollama");
   });
 
   it("direct cloud paths honour the policy: embeddings, transcription, batch, fine-tune, grammar, research", async () => {

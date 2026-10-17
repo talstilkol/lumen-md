@@ -10,7 +10,7 @@ import { fetchWithRetry } from "../lib/fetchRetry";
 import { t } from "../i18n";
 import { docsUrl } from "../lib/docsLinks";
 import { estimateTokens, recordCacheHit, recordUsage, type Usage } from "./usage";
-import { cloudAllowed, getAiPolicy, isCloudProvider, providerAllowed } from "./policy";
+import { cloudAllowed, getAiPolicy, isCloudProvider, isLocalOrigin, providerAllowed } from "./policy";
 
 // ── Rate limiting ───────────────────────────────────────────────────────
 // Token bucket — protects the user's API key against runaway loops.
@@ -118,6 +118,11 @@ export interface ChatOptions {
   onUsage?: (u: Omit<Usage, "provider"> & { provider?: string }) => void;
   /** Internal: the provider a fallback actually sent the request to. */
   onRoute?: (provider: AiProvider, model: string) => void;
+  /**
+   * Internal: `model` was chosen by the model router for the selected
+   * provider, not pinned by the caller — a local reroute must drop it.
+   */
+  modelFromRouter?: boolean;
 }
 
 const DEFAULT_MODEL = "gpt-4o-mini";
@@ -185,8 +190,9 @@ async function localRoute(provider: AiProvider): Promise<"ollama" | "local-webgp
   if (!isCloudProvider(provider)) return null;
   const policy = getAiPolicy();
   if (policy === "cloud") return null;
-  const { isOllamaAvailable } = await import("./ollamaProvider");
-  if (await isOllamaAvailable()) return "ollama";
+  const { isOllamaAvailable, getBaseUrl } = await import("./ollamaProvider");
+  // A custom Ollama URL on a public origin is a third party, not a local route.
+  if (isLocalOrigin(getBaseUrl()) && (await isOllamaAvailable())) return "ollama";
   if (policy === "local-only" || useAppStore.getState().useLocalAi) {
     const { localLlmAvailable } = await import("./localLlm");
     if (localLlmAvailable().available) return "local-webgpu";
@@ -195,6 +201,13 @@ async function localRoute(provider: AiProvider): Promise<"ollama" | "local-webgp
     throw new AiError("NO_LOCAL", `AI policy is "local-only": ${provider} is a cloud provider and no local backend (Ollama, WebGPU) is available.`);
   }
   return null;
+}
+
+/** Under `local-only`, an Ollama server off this machine / network is a third party. */
+function assertOllamaOrigin(baseUrl: string): void {
+  if (getAiPolicy() === "local-only" && !isLocalOrigin(baseUrl)) {
+    throw new AiError("POLICY", `AI policy is "local-only": the Ollama server at ${baseUrl} is not on this machine or network.`);
+  }
 }
 
 function assertCloudFallback(unavailable: string): void {
@@ -298,8 +311,13 @@ export function routeOptions(provider: AiProvider, opts: ChatOptions, mode: "eco
   if (opts.model || mode === "quality") return opts;
   const light = LIGHT_MODELS[provider];
   if (!light) return opts;
-  if (opts.tier === "light" || mode === "economy") return { ...opts, model: light };
+  if (opts.tier === "light" || mode === "economy") return { ...opts, model: light, modelFromRouter: true };
   return opts;
+}
+
+/** Options for a request rerouted to a local backend: a router-chosen cloud model name must not travel with it. */
+function forLocal(opts: ChatOptions): ChatOptions {
+  return opts.modelFromRouter ? { ...opts, model: undefined, modelFromRouter: false } : opts;
 }
 
 async function routed(provider: AiProvider, opts: ChatOptions): Promise<ChatOptions> {
@@ -397,10 +415,12 @@ async function chatDirect(
   // ── Ollama (local server) ──────────────────────────────────────
   if (provider === "ollama" || localFirst === "ollama") {
     const { chatOllama, isOllamaAvailable, getBaseUrl } = await import("./ollamaProvider");
+    assertOllamaOrigin(getBaseUrl());
     if (await isOllamaAvailable()) {
       charge();
-      opts.onRoute?.("ollama", effectiveModel("ollama", opts));
-      return chatOllama(messages, opts);
+      const local = forLocal(opts);
+      opts.onRoute?.("ollama", effectiveModel("ollama", local));
+      return chatOllama(messages, local);
     }
     toast.warn(
       t("ai.toast.ollamaUnavailable.title"),
@@ -482,10 +502,11 @@ async function chatDirect(
       });
       try {
         charge();
-        const text = await chatLocal(messages, { model: opts.model, maxTokens: opts.maxTokens, temperature: opts.temperature });
+        const localModel = forLocal(opts).model;
+        const text = await chatLocal(messages, { model: localModel, maxTokens: opts.maxTokens, temperature: opts.temperature });
         opts.onUsage?.({
           provider: "local-webgpu",
-          model: opts.model ?? PROVIDER_DEFAULT_MODELS["local-webgpu"],
+          model: localModel ?? PROVIDER_DEFAULT_MODELS["local-webgpu"],
           inputTokens: estimateTokens(promptChars(messages)),
           outputTokens: estimateTokens(text),
           estimated: true,
@@ -643,11 +664,13 @@ async function* chatStreamDirect(
   const localFirst = await localRoute(provider);
 
   if (provider === "ollama" || localFirst === "ollama") {
-    const { chatOllamaStream, isOllamaAvailable } = await import("./ollamaProvider");
+    const { chatOllamaStream, isOllamaAvailable, getBaseUrl } = await import("./ollamaProvider");
+    assertOllamaOrigin(getBaseUrl());
     if (await isOllamaAvailable()) {
       charge();
-      opts.onRoute?.("ollama", effectiveModel("ollama", opts));
-      yield* chatOllamaStream(messages, opts);
+      const local = forLocal(opts);
+      opts.onRoute?.("ollama", effectiveModel("ollama", local));
+      yield* chatOllamaStream(messages, local);
       return;
     }
     assertCloudFallback("Ollama");

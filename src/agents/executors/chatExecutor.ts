@@ -11,7 +11,8 @@
 import type { Availability, Executor, ExecutorMessage, ExecutorRequest, ExecutorResponse, ModelTier } from "../types";
 import { chat, chatStream, effectiveModel, getActiveProvider, type ChatMessage } from "../../ai/llm";
 import { estimateTokens } from "../../ai/usage";
-import { getAiPolicy, isCloudProvider, providerAllowed } from "../../ai/policy";
+import { getAiPolicy, isCloudProvider, isLocalOrigin } from "../../ai/policy";
+import { useAppStore } from "../../store/useStore";
 import { toolResultMessage } from "../protocol";
 
 /** Flatten tool turns into plain chat messages for a text-only provider. */
@@ -41,16 +42,25 @@ export const chatExecutor: Executor = {
   label: "Lumen chat()",
   async available(): Promise<Availability> {
     const provider = getActiveProvider();
-    if (!providerAllowed(provider)) return { available: false, reason: "policy", detail: `${provider} is a cloud provider; policy is ${getAiPolicy()}` };
+    const policy = getAiPolicy();
+    const { isOllamaAvailable, getBaseUrl } = await import("../../ai/ollamaProvider");
+    const { localLlmAvailable } = await import("../../ai/localLlm");
+    const ollamaUp = async () => isLocalOrigin(getBaseUrl()) && (await isOllamaAvailable());
     if (provider === "ollama") {
-      const { isOllamaAvailable } = await import("../../ai/ollamaProvider");
-      return (await isOllamaAvailable()) ? { available: true } : { available: false, reason: "ollama-offline" };
+      if (policy === "local-only" && !isLocalOrigin(getBaseUrl())) return { available: false, reason: "policy", detail: getBaseUrl() };
+      return (await isOllamaAvailable()) ? { available: true } : { available: false, reason: "ollama-offline", detail: getBaseUrl() };
     }
     if (provider === "local-webgpu") {
-      const { localLlmAvailable } = await import("../../ai/localLlm");
       return localLlmAvailable().available ? { available: true } : { available: false, reason: "no-webgpu" };
     }
     if (isCloudProvider(provider)) {
+      // Mirrors chat()'s localRoute(): under a local policy a reachable
+      // Ollama (or WebGPU when opted in / local-only) answers instead.
+      if (policy !== "cloud") {
+        if (await ollamaUp()) return { available: true };
+        if ((policy === "local-only" || useAppStore.getState().useLocalAi) && localLlmAvailable().available) return { available: true };
+        if (policy === "local-only") return { available: false, reason: "no-local", detail: provider };
+      }
       const { hasAiCredentials } = await import("../../ai/credentials");
       return hasAiCredentials() ? { available: true } : { available: false, reason: "no-key", detail: provider };
     }
