@@ -1,16 +1,16 @@
 /** Research worker helpers, citation verifier and research agent (Plan D: D6, D7). */
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { htmlToText, isFetchableUrl } from "../../edge-workers/research/extract";
+import { charsetOf, htmlToText, isFetchableUrl } from "../../edge-workers/research/extract";
 import { formatCitationReport, parseCitations, quoteCoverage, verifyCitations } from "../research/citations";
 import { citedBlocksToMarkdown, parseAnswer, runResearch } from "../research/agent";
 import { setActiveProvider } from "../ai/llm";
 import type { ExtractedPage } from "../research/client";
-import { anthropicWebResearch } from "../ai/anthropicProvider";
+import { anthropicWebResearch, MAX_RESEARCH_TURNS } from "../ai/anthropicProvider";
 import { costOf } from "../ai/usage";
 
 describe("research worker helpers", () => {
   it("fetches public http(s) URLs only", () => {
-    for (const ok of ["https://example.org/a?b=1", "http://news.example.com/x"]) expect(isFetchableUrl(ok)).toBe(true);
+    for (const ok of ["https://example.org/a?b=1", "http://news.example.com/x", "http://example.org:80/", "https://example.org:443/"]) expect(isFetchableUrl(ok)).toBe(true);
     for (const bad of [
       "file:///etc/passwd",
       "ftp://example.org/",
@@ -27,6 +27,9 @@ describe("research worker helpers", () => {
       "http://printer.local/",
       "https://user:pw@example.org/",
       "https://example.org:8443/",
+      // Each scheme only on its own default port.
+      "http://example.org:443/",
+      "https://example.org:80/",
       "not a url",
     ])
       expect(isFetchableUrl(bad)).toBe(false);
@@ -39,6 +42,19 @@ describe("research worker helpers", () => {
     const { title, text } = htmlToText(html);
     expect(title).toBe("Rose care & pruning");
     expect(text).toBe("Pruning roses\nPrune roses in early spring, when buds swell.\nUse clean shears");
+  });
+
+  it("keeps an article's own header but drops the site header", () => {
+    const html = `<body><header>Site menu</header><article><header><h1>Headline</h1><p>The lead passage.</p></header><p>Body text.</p></article></body>`;
+    expect(htmlToText(html).text).toBe("Headline\nThe lead passage.\nBody text.");
+    expect(htmlToText(`<body><header>Site menu</header><p>Body text.</p></body>`).text).toBe("Body text.");
+  });
+
+  it("reads quoted and unquoted charsets", () => {
+    expect(charsetOf('text/html; charset="windows-1252"')).toBe("windows-1252");
+    expect(charsetOf("text/html;charset=ISO-8859-1")).toBe("ISO-8859-1");
+    expect(charsetOf("text/html")).toBe("utf-8");
+    expect(charsetOf(null)).toBe("utf-8");
   });
 });
 
@@ -73,6 +89,31 @@ describe("citation verifier", () => {
     // Same words, reversed: not a match.
     const q = "one two three four five six seven eight nine ten";
     expect(quoteCoverage(q, q.split(" ").reverse().join(" "))).toBeLessThan(0.5);
+  });
+
+  it("finds a quote whose opening words aren't on the page", () => {
+    const quote = Array.from({ length: 30 }, (_, i) => `word${i}`).join(" ");
+    const page = `Intro text. ${quote.split(" ").slice(3).join(" ")} Outro.`;
+    expect(quoteCoverage(quote, page)).toBeCloseTo(27 / 30, 5);
+  });
+
+  it("skips a Markdown link title when reading the quote", () => {
+    const [c] = parseCitations('[^1]: [Source](https://example.com "Official site") — “the actual passage on the page”');
+    expect(c.url).toBe("https://example.com");
+    expect(c.quote).toBe("the actual passage on the page");
+    expect(parseCitations("[^1]: [S](https://example.com 'Title') “another real passage”")[0].quote).toBe("another real passage");
+  });
+
+  it("doesn't call a quote missing when only the start of a long page was read", async () => {
+    const [c] = parseCitations("[^1]: https://long.example/page “a passage much further down the page”");
+    const page: ExtractedPage = { url: c.url, finalUrl: c.url, status: 200, text: "The beginning of a very long page.", truncated: true };
+    const [check] = await verifyCitations([c], async () => page);
+    expect(check.status).toBe("not-in-excerpt");
+    const report = formatCitationReport("n.md", [check]);
+    expect(report).toContain("**1 to look at**");
+    expect(report).toContain("part of the page that was read");
+    // Untruncated, the same miss is a definite one.
+    expect((await verifyCitations([c], async () => ({ ...page, truncated: false })))[0].status).toBe("quote-not-found");
   });
 
   it("verifies each citation once per page and reports problems first", async () => {
@@ -191,6 +232,30 @@ describe("research agent", () => {
       await expect(runResearch({ question: "Roses?", deps: { ...deps, search } })).rejects.toThrow();
       expect(search).not.toHaveBeenCalled();
     });
+
+    it("ignores markers in code, sees them after closing quotes, and checks prose under a heading", async () => {
+      setActiveProvider("mistral");
+      localStorage.setItem("lumen.ai.key.mistral", "m-key");
+      const answers = [
+        '["roses"]',
+        "## Findings\nThis unsupported claim sits right under the heading and is long enough.\n\n" +
+          "The source calls this “an exceptionally important result for every gardener.”[^1] Write `text[^1]` for a footnote.\n\n" +
+          "```md\nAn example sentence inside a code block that carries a marker.[^1]\n```\n---QUOTES---\n" +
+          '[{"n":1,"quote":"Prune roses in early spring"}]',
+      ];
+      vi.stubGlobal("fetch", vi.fn(async () => new Response(JSON.stringify({ choices: [{ message: { content: answers.shift() } }] }), { status: 200 })));
+      const page: ExtractedPage = { url: "https://a.example/r", finalUrl: "https://a.example/r", status: 200, title: "Roses", text: "Prune roses in early spring." };
+      const result = await runResearch({
+        question: "Roses?",
+        deps: { settings: { provider: "brave", key: "k" }, search: async () => [{ title: "Roses", url: "https://a.example/r", snippet: "" }], extract: async () => page },
+      });
+      expect(result.unverified).toBe(1); // only the claim under the heading
+      expect(result.markdown).toContain("long enough. ⚠️ *no source cited*");
+      expect(result.markdown).not.toContain("Findings ⚠️");
+      expect(result.markdown).toContain("every gardener.”[^1] Write `text[^1]` for a footnote.");
+      expect(result.markdown).toContain("carries a marker.[^1]\n```");
+      expect(result.markdown).not.toContain("[^2]");
+    });
   });
 
   it("asks for the Anthropic provider for Claude web search", async () => {
@@ -214,6 +279,44 @@ describe("research agent", () => {
     const blocks = await anthropicWebResearch([{ role: "user", content: "q?" }], { maxSearches: 5 });
     expect(blocks.map((b) => b.text)).toEqual(["Answer."]);
     expect(bodies[1].tool_choice).toEqual({ type: "none" });
+    vi.unstubAllGlobals();
+  });
+
+  it("fails rather than returning a turn still paused after the last continuation", async () => {
+    localStorage.clear();
+    localStorage.setItem("lumen.ai.key.anthropic", "a-key");
+    const fetchMock = vi.fn(async () =>
+      new Response(JSON.stringify({ stop_reason: "pause_turn", content: [{ type: "text", text: "Partial…", citations: [] }], usage: { input_tokens: 1, output_tokens: 1 } })),
+    );
+    vi.stubGlobal("fetch", fetchMock);
+    await expect(anthropicWebResearch([{ role: "user", content: "q?" }])).rejects.toThrow(/didn't finish/);
+    expect(fetchMock).toHaveBeenCalledTimes(MAX_RESEARCH_TURNS);
+    vi.unstubAllGlobals();
+  });
+
+  it("applies the AI rate limits to web research and charges the quota once per run", async () => {
+    localStorage.clear();
+    localStorage.setItem("lumen.ai.key.anthropic", "a-key");
+    const release: Array<() => void> = [];
+    vi.stubGlobal("fetch", vi.fn(() => new Promise<Response>((resolve) => {
+      release.push(() => resolve(new Response(JSON.stringify({ stop_reason: "end_turn", content: [{ type: "text", text: "Ok.", citations: [] }], usage: {} }))));
+    })));
+    const charge = vi.fn();
+    const runs = Array.from({ length: 5 }, () => anthropicWebResearch([{ role: "user", content: "q?" }], { charge }));
+    // A sixth concurrent run is refused before any request goes out or anything is charged.
+    await expect(anthropicWebResearch([{ role: "user", content: "q?" }], { charge })).rejects.toThrow(/Rate limit/);
+    expect(charge).toHaveBeenCalledTimes(5);
+    release.forEach((r) => r());
+    await Promise.all(runs);
+    // The slots are free again; a paused turn's continuation isn't charged again.
+    const replies = [
+      { stop_reason: "pause_turn", content: [], usage: {} },
+      { stop_reason: "end_turn", content: [{ type: "text", text: "Done.", citations: [] }], usage: {} },
+    ];
+    vi.stubGlobal("fetch", vi.fn(async () => new Response(JSON.stringify(replies.shift()))));
+    charge.mockClear();
+    await anthropicWebResearch([{ role: "user", content: "q?" }], { charge });
+    expect(charge).toHaveBeenCalledTimes(1);
     vi.unstubAllGlobals();
   });
 

@@ -39,7 +39,10 @@ export function isFetchableUrl(raw: string): boolean {
   }
   if (u.protocol !== "https:" && u.protocol !== "http:") return false;
   if (u.username || u.password) return false;
-  if (u.port && u.port !== "80" && u.port !== "443") return false;
+  // URL drops a scheme's own default port (`http://x:80` → port ""), so any
+  // port left is non-default for its scheme — including `http://x:443` and
+  // `https://x:80`, which would reach a different service.
+  if (u.port) return false;
   // `localhost.` is the same host as `localhost`: drop the DNS root dot(s).
   const host = u.hostname.replace(/^\[|\]$/g, "").toLowerCase().replace(/\.+$/, "");
   if (!host || BLOCKED_HOSTS.test(host)) return false;
@@ -63,6 +66,14 @@ export function decodeEntities(s: string): string {
   });
 }
 
+/**
+ * The charset of a Content-Type header, accepting quoted values
+ * (`charset="windows-1252"`); utf-8 when absent.
+ */
+export function charsetOf(contentType: string | null): string {
+  return /;\s*charset\s*=\s*"?([^";\s]+)"?/i.exec(contentType ?? "")?.[1] ?? "utf-8";
+}
+
 /** Elements whose content is never article text. */
 const DROP = ["script", "style", "noscript", "template", "svg", "nav", "header", "footer", "aside", "form", "iframe", "button", "select"];
 const BLOCK = /<\/?(p|div|section|article|main|h[1-6]|li|ul|ol|tr|table|blockquote|pre|br|hr|dd|dt|figcaption)\b[^>]*>/gi;
@@ -74,9 +85,12 @@ const BLOCK = /<\/?(p|div|section|article|main|h[1-6]|li|ul|ol|tr|table|blockquo
  */
 export function htmlToText(html: string): { title: string; text: string } {
   const title = decodeEntities((/<title[^>]*>([\s\S]*?)<\/title>/i.exec(html)?.[1] ?? "").replace(/\s+/g, " ").trim());
-  let body = /<article\b[^>]*>([\s\S]*?)<\/article>/i.exec(html)?.[1] ?? /<main\b[^>]*>([\s\S]*?)<\/main>/i.exec(html)?.[1] ?? /<body\b[^>]*>([\s\S]*)<\/body>/i.exec(html)?.[1] ?? html;
+  const content = /<article\b[^>]*>([\s\S]*?)<\/article>/i.exec(html)?.[1] ?? /<main\b[^>]*>([\s\S]*?)<\/main>/i.exec(html)?.[1];
+  let body = content ?? /<body\b[^>]*>([\s\S]*)<\/body>/i.exec(html)?.[1] ?? html;
   body = body.replace(/<!--[\s\S]*?-->/g, " ");
-  for (const tag of DROP) body = body.replace(new RegExp(`<${tag}\\b[\\s\\S]*?<\\/${tag}>`, "gi"), " ");
+  // A <header> inside the article / main holds its headline and lead, not
+  // site chrome (the site header is outside it): keep it there.
+  for (const tag of content === undefined ? DROP : DROP.filter((t) => t !== "header")) body = body.replace(new RegExp(`<${tag}\\b[\\s\\S]*?<\\/${tag}>`, "gi"), " ");
   body = body.replace(BLOCK, "\n").replace(/<[^>]+>/g, " ");
   const text = decodeEntities(body)
     .split("\n")

@@ -66,6 +66,21 @@ const footnote = (n: number, src: { title: string; url: string }, quote: string,
 /* ─── Claude web search ─────────────────────────────────────────────── */
 
 /** A passage substantial enough to need a source (not a heading or a short connective line). */
+/**
+ * Replace fenced code blocks and inline code spans with opaque tokens (no
+ * punctuation, no `[^n]`, no newlines) so citation and sentence matching
+ * only see prose; `restore` puts the code back verbatim.
+ */
+export function maskCode(md: string): { masked: string; restore: (s: string) => string } {
+  const saved: string[] = [];
+  const token = (code: string) => `\uE000${saved.push(code) - 1}\uE001`;
+  const masked = md
+    .replace(/^ {0,3}(`{3,}|~{3,})[^\n]*\n[\s\S]*?(?:\n {0,3}\1[`~]*[ \t]*(?=\n|$)|(?![\s\S]))/gm, token) // an unclosed fence runs to the end
+    // A code span doesn't cross a blank line (a paragraph break).
+    .replace(/(`+)(?!`)(?:[^\n]|\n(?![ \t]*\n))*?[^`\n]\1(?!`)/g, token);
+  return { masked, restore: (s) => s.replace(/\uE000(\d+)\uE001/g, (_m, i: string) => saved[Number(i)]) };
+}
+
 const isClaim = (text: string) => {
   const prose = text.replace(/^\s*#{1,6}\s.*$/gm, "").replace(/\s+/g, " ").trim();
   return prose.length >= 60 && /[.!?]/.test(prose);
@@ -120,7 +135,6 @@ export function citedBlocksToMarkdown(
 
 async function claudeResearch(o: ResearchOptions): Promise<ResearchResult> {
   getProviderKey("anthropic"); // NO_KEY before anything is charged
-  chargeAiCommandDispatch();
   o.onProgress?.("Claude is searching and reading…");
   const blocks = await anthropicWebResearch(
     [
@@ -131,6 +145,8 @@ async function claudeResearch(o: ResearchOptions): Promise<ResearchResult> {
       signal: o.signal,
       maxSearches: o.maxSearches ?? 5,
       maxTokens: 4096,
+      // Charged once the first request passes the rate limit, not before.
+      charge: chargeAiCommandDispatch,
       onUsage: (u) => recordUsage({ ...u, provider: "anthropic" }),
     },
   );
@@ -273,7 +289,10 @@ async function proxyResearch(o: ResearchOptions, settings: ResearchSettings): Pr
   const seenPerSource = new Map<number, number>();
   const defs: string[] = [];
   let unverified = 0;
-  const body = report.replace(/\[\^(\d+)\]/g, (_m, num: string) => {
+  // Code (fenced blocks, inline spans) is masked first: a `text[^1]` example
+  // isn't a citation, and code isn't a claim to flag.
+  const { masked, restore } = maskCode(report);
+  const body = masked.replace(/\[\^(\d+)\]/g, (_m, num: string) => {
     const n = Number(num);
     if (!valid(n)) {
       // A marker for a source that wasn't read: the claim stays, flagged.
@@ -302,17 +321,28 @@ async function proxyResearch(o: ResearchOptions, settings: ResearchSettings): Pr
   if (!cited.size) throw new Error("The answer didn't cite any of the sources it read — try again or rephrase the question.");
   // Claims the model left without a marker are flagged, sentence by
   // sentence (a marker elsewhere in the paragraph doesn't cover them).
-  const flaggedBody = body
-    .split(/\n{2,}/)
-    .map((para) => {
-      if (/^\s*#{1,6}\s/.test(para) || !isClaim(para)) return para;
-      return para.replace(/[^.!?\n]*[.!?]+(?:\[\^\d+\]|\s*⚠️ \*[^*]+\*)*/g, (sentence) => {
-        if (/\[\^\d+\]|⚠️/.test(sentence) || sentence.trim().length < 40) return sentence;
-        unverified++;
-        return `${sentence} ⚠️ *no source cited*`;
-      });
-    })
-    .join("\n\n");
+  // Heading lines are skipped, not the prose right under them. A marker may
+  // follow closing quotes, brackets or emphasis: `“…result.”[^1]`.
+  const flaggedBody = restore(
+    body
+      .split(/\n{2,}/)
+      .map((para) => {
+        if (!isClaim(para)) return para;
+        return para
+          .split("\n")
+          .map((line) =>
+            /^\s*#{1,6}\s/.test(line)
+              ? line
+              : line.replace(/[^.!?\n]*[.!?]+[)\]"'”’»*_]*(?:\[\^\d+\]|\s*⚠️ \*[^*]+\*)*/g, (sentence) => {
+                  if (/\[\^\d+\]|⚠️/.test(sentence) || sentence.trim().length < 40) return sentence;
+                  unverified++;
+                  return `${sentence} ⚠️ *no source cited*`;
+                }),
+          )
+          .join("\n");
+      })
+      .join("\n\n"),
+  );
   const uncited = pages.map((p, i) => ({ p, n: i + 1 })).filter(({ n }) => !cited.has(n));
   const markdown = [
     `# ${title(o.question)}`,

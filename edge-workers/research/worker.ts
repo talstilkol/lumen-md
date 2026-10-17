@@ -8,8 +8,13 @@
  *   GET  /healthz                   → "ok"
  *
  * Safety:
- *  - Only origins in ALLOWED_ORIGINS may call it (CORS + an Origin check);
- *    it is not an open proxy.
+ *  - Only origins in ALLOWED_ORIGINS may call it (CORS + an Origin check;
+ *    a request without an Origin is refused). That keeps other sites'
+ *    pages from using it, but a non-browser client can send any Origin, so
+ *    it is not authentication. With RESEARCH_TOKEN set, every request must
+ *    also carry it in X-Lumen-Research-Token; the app sends it when built
+ *    with VITE_RESEARCH_TOKEN. In a public web app that value ships in the
+ *    bundle, so it only stops casual reuse; see README.md.
  *  - Public http(s) URLs only, re-checked on every redirect (max 5); no
  *    cookies or credentials are forwarded; 10 s timeout; at most 2 MB read;
  *    HTML / plain text only; returned text capped at 200K characters.
@@ -19,11 +24,23 @@
  *    limiting rule in production (see README.md).
  *  - Extractions are cached at the edge for an hour.
  */
-import { htmlToText, isFetchableUrl } from "./extract";
+import { charsetOf, htmlToText, isFetchableUrl } from "./extract";
 
-interface Env {
+export interface Env {
   /** Comma-separated app origins, e.g. "https://lumen-md.app,http://localhost:5173". */
   ALLOWED_ORIGINS: string;
+  /** Optional shared token (a Worker secret) required in X-Lumen-Research-Token. */
+  RESEARCH_TOKEN?: string;
+}
+
+export const TOKEN_HEADER = "X-Lumen-Research-Token";
+
+/** Constant-time string comparison, so the token can't be guessed by timing. */
+function sameToken(a: string, b: string): boolean {
+  if (a.length !== b.length) return false;
+  let diff = 0;
+  for (let i = 0; i < a.length; i++) diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  return diff === 0;
 }
 
 const MAX_BYTES = 2 * 1024 * 1024;
@@ -48,7 +65,7 @@ function cors(origin: string | null, env: Env): Record<string, string> | null {
   return {
     "Access-Control-Allow-Origin": origin,
     "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-    "Access-Control-Allow-Headers": "Content-Type",
+    "Access-Control-Allow-Headers": `Content-Type, ${TOKEN_HEADER}`,
     "Access-Control-Max-Age": "86400",
     Vary: "Origin",
   };
@@ -81,7 +98,7 @@ async function readCapped(res: Response): Promise<{ text: string; truncated: boo
     all.set(c, off);
     off += c.byteLength;
   }
-  const charset = /charset=([\w-]+)/i.exec(res.headers.get("content-type") ?? "")?.[1] ?? "utf-8";
+  const charset = charsetOf(res.headers.get("content-type"));
   let decoder: TextDecoder;
   try {
     decoder = new TextDecoder(charset);
@@ -93,12 +110,15 @@ async function readCapped(res: Response): Promise<{ text: string; truncated: boo
 
 async function extract(target: string): Promise<Record<string, unknown>> {
   let url = target;
+  // One deadline for the whole extraction (every redirect hop and the body
+  // read), so a chain of slow redirects can't stretch it past TIMEOUT_MS.
+  const signal = AbortSignal.timeout(TIMEOUT_MS);
   for (let hop = 0; hop <= MAX_REDIRECTS; hop++) {
     if (!isFetchableUrl(url)) return { url: target, finalUrl: url, status: 0, error: "blocked-url" };
     const res = await fetch(url, {
       redirect: "manual",
       headers: { "User-Agent": UA, Accept: "text/html,application/xhtml+xml,text/plain;q=0.9,*/*;q=0.1" },
-      signal: AbortSignal.timeout(TIMEOUT_MS),
+      signal,
     });
     if (res.status >= 300 && res.status < 400 && res.headers.get("location")) {
       url = new URL(res.headers.get("location")!, url).href;
@@ -160,6 +180,10 @@ export default {
     const headers = cors(req.headers.get("Origin"), env);
     if (!headers) return new Response("Forbidden origin", { status: 403 });
     if (req.method === "OPTIONS") return new Response(null, { status: 204, headers });
+    // Checked after the preflight: browsers never send custom headers on OPTIONS.
+    if (env.RESEARCH_TOKEN && !sameToken(req.headers.get(TOKEN_HEADER) ?? "", env.RESEARCH_TOKEN)) {
+      return json({ error: "unauthorized" }, headers, 401);
+    }
     const ip = req.headers.get("CF-Connecting-IP") ?? "unknown";
     if (rateLimited(ip)) return json({ error: "rate-limited" }, { ...headers, "Retry-After": "60" }, 429);
 
