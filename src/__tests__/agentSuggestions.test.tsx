@@ -16,7 +16,7 @@ vi.mock("../ai/ollamaProvider", async (orig) => ({
 vi.mock("../agents/executors/ollama", async (orig) => ({ ...(await orig<object>()), refreshOllama: vi.fn(async () => ({})) }));
 
 import { registerExecutor, resetExecutors } from "../agents/executors";
-import { runAgent, runAgentOrThrow, AgentRunError } from "../agents/runtime";
+import { runAgent, runAgentOrThrow, AgentRunError, inputKeyOf } from "../agents/runtime";
 import { reportAgentFailure, runSuggestion, setNextRunPatch, onAgentSuggestions } from "../agents/suggestions";
 import { setModelCritic, review } from "../agents/critic";
 import { modelReview } from "../agents/modelCritic";
@@ -42,6 +42,29 @@ describe("suggestions", () => {
     expect(ex.calls[0]).toMatchObject({ tier: "large", temperature: 0 });
     await runAgent(textAgent, { text: "a" });
     expect(ex.calls[1].tier).toBe("small");
+  });
+
+  it("a retry patch waits for the input that failed (other inputs of the same command run untouched)", async () => {
+    const ex = fakeExecutor(sequence("ok"));
+    registerExecutor(ex);
+    setNextRunPatch("t", { tier: "large" }, inputKeyOf(textAgent, { text: "chunk 2" }));
+    await runAgent(textAgent, { text: "chunk 1" });
+    expect(ex.calls[0].tier).toBe("small");
+    await runAgent(textAgent, { text: "chunk 2" });
+    expect(ex.calls[1].tier).toBe("large");
+    await runAgent(textAgent, { text: "chunk 2" });
+    expect(ex.calls[2].tier).toBe("small");
+  });
+
+  it("a forced executor that is still offline is consumed, so later runs pick normally", async () => {
+    registerExecutor(fakeExecutor(sequence("ok")));
+    registerExecutor({ ...fakeExecutor(sequence("ok")), id: "webllm", available: async () => ({ available: false, reason: "no-webgpu" }) });
+    setNextRunPatch("t", { executor: "webllm" });
+    const first = await runAgent(textAgent, { text: "a" });
+    expect(first.errorCode).toBe("no-executor");
+    const second = await runAgent(textAgent, { text: "a" });
+    expect(second.status).toBe("ok");
+    expect(second.executor).toBe("ollama");
   });
 
   it("actions: retry/switch set the next-run patch, set-policy changes the policy, pull-model pulls", async () => {

@@ -82,6 +82,23 @@ function systemPrompt<I extends AgentInput, O>(def: AgentDefinition<I, O>, input
   return parts.join("\n\n");
 }
 
+/** A short stable key of an agent's input: a retry patch is bound to it. */
+export function inputKeyOf<I extends AgentInput>(def: AgentDefinition<I, unknown>, input: I): string {
+  let text: string;
+  try {
+    text = def.id + "\u0000" + def.user(input);
+  } catch {
+    text = def.id + "\u0000" + (input.text ?? "");
+  }
+  // FNV-1a, 32 bit, plus the length: enough to tell inputs of one command apart.
+  let h = 0x811c9dc5;
+  for (let i = 0; i < text.length; i++) {
+    h ^= text.charCodeAt(i);
+    h = Math.imul(h, 0x01000193);
+  }
+  return `${(h >>> 0).toString(36)}-${text.length.toString(36)}`;
+}
+
 export async function runAgent<I extends AgentInput, O = string>(def: AgentDefinition<I, O>, input: I, opts: RunOptions = {}): Promise<AgentRun<O>> {
   const run: AgentRun<O> = {
     id: newRunId(),
@@ -96,6 +113,7 @@ export async function runAgent<I extends AgentInput, O = string>(def: AgentDefin
     steps: [],
     suggestions: [],
     tokens: { input: 0, output: 0, estimated: false },
+    inputKey: inputKeyOf(def, input),
   };
   const step = (st: Omit<AgentStep, "at">): void => {
     const full = { at: Date.now(), ...st };
@@ -119,17 +137,18 @@ export async function runAgent<I extends AgentInput, O = string>(def: AgentDefin
   const maxSteps = def.maxSteps ?? DEFAULT_MAX_STEPS;
   const preference = def.executorPreference ?? DEFAULT_EXECUTOR_ORDER;
 
-  const pendingExecutor = (await import("./suggestions")).peekNextRunExecutor(def.id);
+  // A suggestion the user picked for this agent and this input (suggestions panel) applies once.
+  const { peekNextRunExecutor, takeNextRunPatch } = await import("./suggestions");
+  const pendingExecutor = peekNextRunExecutor(def.id, run.inputKey);
   let pick = await pickExecutor(preference, opts.executor ?? pendingExecutor);
+  const pending = takeNextRunPatch(def.id, run.inputKey);
   if (!pick.executor) {
     const verdict = await review({ kind: "no-executor", attempt: 1, maxRetries, tier: def.tier ?? "small", executor: null, skipped: pick.skipped, inputChars });
     step({ kind: "critic", ms: 0, label: verdict.diagnosis, ok: false, detail: pick.skipped.map((x) => `${x.id}: ${x.availability.reason ?? "unavailable"}`).join("; ") });
     return finish("failed", { errorCode: "no-executor", error: `No AI executor is available (${verdict.diagnosis})`, suggestions: verdict.suggestions });
   }
   let executor = pick.executor;
-  // A suggestion the user picked for this agent (suggestions panel) applies once.
-  const { takeNextRunPatch } = await import("./suggestions");
-  let patch: RetryPatch = { ...(takeNextRunPatch(def.id) ?? {}), ...(opts.patch ?? {}) };
+  let patch: RetryPatch = { ...(pending ?? {}), ...(opts.patch ?? {}) };
 
   // A cached, already-validated answer costs nothing: no prompt, no model.
   const cacheKeyOf = async (): Promise<string | null> => {

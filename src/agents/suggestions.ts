@@ -40,24 +40,55 @@ export function reportAgentFailure(e: unknown, commandId?: string): boolean {
   return listeners.size > 0;
 }
 
-/* ── One-shot overrides for the next run of an agent ─────────────────── */
+/* ── One-shot overrides for the retry of a failed run ───────────────── */
 
-const nextPatch = new Map<string, RetryPatch>();
-
-export function setNextRunPatch(agentId: string, patch: RetryPatch): void {
-  nextPatch.set(agentId, { ...(nextPatch.get(agentId) ?? {}), ...patch });
+/**
+ * A patch picked in the panel applies once, to the run of the same agent
+ * on the same input as the run that failed (`AgentRun.inputKey`): a
+ * command that runs the agent several times (translation chunk by chunk)
+ * re-runs the earlier inputs untouched — often from the cache — and the
+ * patch waits for the input that failed. It expires after ten minutes.
+ */
+interface PendingPatch {
+  patch: RetryPatch;
+  inputKey?: string;
+  expires: number;
 }
 
-/** The executor a pending patch forces, without consuming the patch. */
-export function peekNextRunExecutor(agentId: string): ExecutorId | undefined {
-  return nextPatch.get(agentId)?.executor;
+const PATCH_TTL_MS = 10 * 60_000;
+const nextPatch = new Map<string, PendingPatch>();
+
+export function setNextRunPatch(agentId: string, patch: RetryPatch, inputKey?: string): void {
+  const prev = nextPatch.get(agentId);
+  const merged = prev && prev.inputKey === inputKey && prev.expires > Date.now() ? { ...prev.patch, ...patch } : patch;
+  nextPatch.set(agentId, { patch: merged, inputKey, expires: Date.now() + PATCH_TTL_MS });
 }
 
-/** Consumed by the runtime at the start of a run. */
-export function takeNextRunPatch(agentId: string): RetryPatch | undefined {
+function pendingFor(agentId: string, inputKey?: string): PendingPatch | undefined {
   const p = nextPatch.get(agentId);
+  if (!p) return undefined;
+  if (p.expires <= Date.now()) {
+    nextPatch.delete(agentId);
+    return undefined;
+  }
+  return !p.inputKey || p.inputKey === inputKey ? p : undefined;
+}
+
+/** The executor a pending patch forces for this input, without consuming it. */
+export function peekNextRunExecutor(agentId: string, inputKey?: string): ExecutorId | undefined {
+  return pendingFor(agentId, inputKey)?.patch.executor;
+}
+
+/**
+ * Consumed by the runtime once it has tried to pick an executor for the
+ * matching input — also when that pick failed, so a forced executor that
+ * is still offline does not stay forced.
+ */
+export function takeNextRunPatch(agentId: string, inputKey?: string): RetryPatch | undefined {
+  const p = pendingFor(agentId, inputKey);
+  if (!p) return undefined;
   nextPatch.delete(agentId);
-  return p;
+  return p.patch;
 }
 
 /** Ask the app to run a palette command again (App listens for this event). */
@@ -79,10 +110,10 @@ export async function runSuggestion(s: Suggestion, run: AgentRun, ctx: ActionCon
   if (!a) return false;
   switch (a.type) {
     case "retry":
-      setNextRunPatch(run.agentId, a.patch);
+      setNextRunPatch(run.agentId, a.patch, run.inputKey);
       return true;
     case "switch-executor":
-      setNextRunPatch(run.agentId, { executor: a.executor as ExecutorId });
+      setNextRunPatch(run.agentId, { executor: a.executor as ExecutorId }, run.inputKey);
       return true;
     case "set-policy": {
       const { setAiPolicy } = await import("../ai/policy");

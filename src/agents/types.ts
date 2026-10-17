@@ -235,6 +235,8 @@ export interface AgentRun<O = unknown> {
   steps: AgentStep[];
   suggestions: Suggestion[];
   tokens: { input: number; output: number; estimated: boolean };
+  /** Key of the input (agent + user prompt): a retry picked in the panel applies to this input. */
+  inputKey?: string;
 }
 
 export interface RunOptions {
