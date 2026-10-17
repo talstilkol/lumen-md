@@ -179,12 +179,23 @@ function wrapChildren(children: PhrasingContent[]): PhrasingContent[] {
   return mergeText(out);
 }
 
-function unescapeTree(node: { type: string; value?: string; children?: unknown[] }): void {
-  if (node.type === "text" && typeof node.value === "string") node.value = unescapeUserSentinels(node.value);
-  if (node.type === "inlineCode" || node.type === "code") {
-    if (typeof node.value === "string") node.value = unescapeUserSentinels(node.value);
+const GENERATED_SENTINEL = /[\uE000-\uE00A]/g;
+
+/**
+ * Restore the original characters in every string property: escaped user
+ * sentinels everywhere, and generated sentinels that pairing didn't consume
+ * — CriticMarkup inside a link destination or title, an image's alt, raw
+ * HTML or math lives in a property (`url`, `title`, `alt`, `value`), not in
+ * child text, so it stays literal markup there instead of leaking
+ * private-use characters into the document.
+ */
+function unescapeTree(node: { type: string; children?: unknown[] } & Record<string, unknown>): void {
+  for (const key of Object.keys(node)) {
+    const v = node[key];
+    if (key === "type" || typeof v !== "string") continue;
+    node[key] = unescapeUserSentinels(v.replace(GENERATED_SENTINEL, (c) => CRITIC_LITERAL[c] ?? c));
   }
-  for (const c of (node.children ?? []) as Array<{ type: string; value?: string; children?: unknown[] }>) unescapeTree(c);
+  for (const c of (node.children ?? []) as Array<{ type: string; children?: unknown[] } & Record<string, unknown>>) unescapeTree(c);
 }
 
 const PHRASING_PARENTS = new Set(["paragraph", "heading", "tableCell", "emphasis", "strong", "delete", "link", "linkReference"]);
@@ -302,7 +313,7 @@ export function remarkCriticMarkup(this: { data: (key?: string) => Record<string
   });
   return (tree: Root) => {
     transformTree(tree);
-    unescapeTree(tree as unknown as { type: string; children?: unknown[] });
+    unescapeTree(tree as unknown as Parameters<typeof unescapeTree>[0]);
   };
 }
 

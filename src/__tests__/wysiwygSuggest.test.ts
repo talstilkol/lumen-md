@@ -70,6 +70,13 @@ describe("CriticMarkup ↔ marks", () => {
     expect(e.view.dom.querySelector("ins.critic-ins")?.getAttribute("title")).toBe("@Tal");
   });
 
+  it("keeps CriticMarkup in link destinations and titles as literal markup", async () => {
+    const src = '[x](https://example.test/{++version++} "a {--b--}") and {++y++}.';
+    const e = await open(src);
+    expect(e.md()).toBe(src);
+    expect(e.md()).not.toMatch(/[\uE000-\uE00B]/);
+  });
+
   it("leaves CriticMarkup in code alone", async () => {
     const src = "Literal `{++x++}` here.";
     expect((await open(src)).md()).toBe(src);
