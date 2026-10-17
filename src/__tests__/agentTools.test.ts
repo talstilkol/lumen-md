@@ -87,6 +87,10 @@ describe("workspace tools", () => {
 
   it("writes (scope write) and lists markdown only", async () => {
     expect(writeFileTool.scope).toBe("write");
+    // A malformed call never erases a file.
+    await expect(writeFileTool.run({ path: "notes/a.md" } as never, ctx({ grants: new Set(["read", "write"]) }))).rejects.toMatchObject({ code: "bad-args" });
+    await expect(writeFileTool.run({ path: "notes/a.md", content: 42 } as never, ctx({ grants: new Set(["read", "write"]) }))).rejects.toMatchObject({ code: "bad-args" });
+    expect(files.get("notes/a.md")).toContain("hello world");
     await writeFileTool.run({ path: "notes/c.md", content: "# C" }, ctx({ grants: new Set(["read", "write"]) }));
     expect(files.get("notes/c.md")).toBe("# C");
     const l = await listFilesTool.run({ prefix: "notes/" }, ctx());

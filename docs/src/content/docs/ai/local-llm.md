@@ -43,10 +43,20 @@ What happens when WebGPU (or Ollama) isn't available depends on your
 - **Local only** (the default on a fresh install): nothing leaves the
   device. The command stops with a clear message and the agent's
   suggestions (start Ollama, pick a smaller model, use a WebGPU browser).
-- **Local first**: `chat()` warns you and falls back to your cloud key.
-  An installation that already had a cloud provider or key configured
-  before policies existed keeps working this way until you choose.
-- **Cloud**: the selected cloud provider is used directly.
+- **Local first**: a reachable Ollama server answers first (also when a
+  cloud provider is selected); in-browser WebGPU takes the request when
+  Privacy Mode is on; only then the cloud provider with your key. An
+  installation that had only a cloud key before policies existed keeps
+  this behaviour until you choose.
+- **Cloud**: the selected cloud provider is used directly. An
+  installation that had a cloud provider selected before policies
+  existed starts here.
+
+Under **Local only** every other path that would send content to a third
+party stops as well: smart-search embeddings, Whisper transcription,
+batch jobs, fine-tuning, Claude web search, a remote research service and
+the public LanguageTool API (a LanguageTool or SearXNG on this machine or
+network is fine).
 
 See [Local agents](/ai/local-agents/) for how every AI command runs
 through the local agent runtime.

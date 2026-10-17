@@ -10,11 +10,12 @@
  *
  * The stored value (`lumen.ai.policy`) wins. Until the user picks one, the
  * default is `local-only` — except for an installation that was already
- * set up for the cloud before policies existed (a cloud provider selected
- * in `lumen.ai.provider`, or any cloud key configured): that keeps working
- * as `local-first`, so an upgrade never silently cuts a configured
- * provider off. The AI settings panel shows the effective policy and lets
- * the user pin it.
+ * set up for the cloud before policies existed, which keeps the behaviour
+ * it had so an upgrade never silently changes where prompts go:
+ *   - a cloud provider selected explicitly in `lumen.ai.provider` → `cloud`;
+ *   - otherwise a cloud key configured (the old "WebGPU with OpenAI as the
+ *     fallback" setup) → `local-first`.
+ * The AI settings panel shows the effective policy and lets the user pin it.
  */
 
 import { useAppStore } from "../store/useStore";
@@ -74,7 +75,8 @@ function cloudProviderSelected(): boolean {
 export function getAiPolicy(): AiPolicy {
   const stored = storedPolicy();
   if (stored) return stored;
-  return cloudProviderSelected() || hasAnyCloudKey() ? "local-first" : "local-only";
+  if (cloudProviderSelected()) return "cloud";
+  return hasAnyCloudKey() ? "local-first" : "local-only";
 }
 
 export function setAiPolicy(policy: AiPolicy): void {
@@ -93,4 +95,39 @@ export function cloudAllowed(policy: AiPolicy = getAiPolicy()): boolean {
  */
 export function providerAllowed(provider: string, policy: AiPolicy = getAiPolicy()): boolean {
   return !isCloudProvider(provider) || cloudAllowed(policy);
+}
+
+/** Thrown by `assertCloudAllowed`: the request was not sent. `code` matches `AiError`. */
+export class AiPolicyError extends Error {
+  readonly code = "POLICY" as const;
+  constructor(message: string) {
+    super(message);
+    this.name = "AiPolicyError";
+  }
+}
+
+/**
+ * Gate for every path that would send content to a third-party service
+ * outside `chat()` — embeddings, transcription, batch jobs, fine-tuning,
+ * web research, a public grammar checker. Throws under `local-only`.
+ */
+export function assertCloudAllowed(what: string, policy: AiPolicy = getAiPolicy()): void {
+  if (!cloudAllowed(policy)) {
+    throw new AiPolicyError(`AI policy is "local-only": ${what} would send content to a third-party service and was not run.`);
+  }
+}
+
+/** Loopback, private-network and `.local` origins count as "this machine / this network", not the cloud. */
+export function isLocalOrigin(url: string): boolean {
+  let host: string;
+  try {
+    host = new URL(url).hostname.toLowerCase();
+  } catch {
+    return false;
+  }
+  if (host === "localhost" || host === "127.0.0.1" || host === "::1" || host === "[::1]" || host.endsWith(".localhost") || host.endsWith(".local")) return true;
+  const m = host.match(/^(\d+)\.(\d+)\.(\d+)\.(\d+)$/);
+  if (!m) return false;
+  const [a, b] = [Number(m[1]), Number(m[2])];
+  return a === 10 || (a === 172 && b >= 16 && b <= 31) || (a === 192 && b === 168);
 }

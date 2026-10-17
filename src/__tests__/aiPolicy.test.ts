@@ -7,7 +7,9 @@ const ollamaUp = vi.fn().mockResolvedValue(false);
 vi.mock("../ai/ollamaProvider", () => ({
   isOllamaAvailable: () => ollamaUp(),
   chatOllama: vi.fn().mockResolvedValue("from ollama"),
-  chatOllamaStream: vi.fn(),
+  chatOllamaStream: async function* () {
+    yield "ollama-stream";
+  },
   getBaseUrl: () => "http://127.0.0.1:11434",
 }));
 vi.mock("../ai/localLlm", () => ({
@@ -42,15 +44,17 @@ describe("AI policy", () => {
     expect(providerAllowed("ollama")).toBe(true);
   });
 
-  it("keeps a pre-policy cloud setup working as local-first", () => {
+  it("keeps a pre-policy cloud setup working: explicit cloud provider → cloud, key only → local-first", () => {
     localStorage.setItem("lumen.ai.key.anthropic", "k");
     expect(hasAnyCloudKey()).toBe(true);
     expect(getAiPolicy()).toBe("local-first");
     localStorage.removeItem("lumen.ai.key.anthropic");
     localStorage.setItem("lumen.ai.provider", "gemini");
-    expect(getAiPolicy()).toBe("local-first");
+    expect(getAiPolicy()).toBe("cloud");
     localStorage.removeItem("lumen.ai.provider");
     state.aiKey = "sk";
+    expect(getAiPolicy()).toBe("local-first");
+    localStorage.setItem("lumen.ai.provider", "ollama");
     expect(getAiPolicy()).toBe("local-first");
   });
 
@@ -76,15 +80,47 @@ describe("AI policy", () => {
     await expect(chat([{ role: "user", content: "hi" }])).resolves.toBe("from ollama");
   });
 
-  it("chat(): a cloud provider is refused under an explicit local-only policy (POLICY)", async () => {
+  it("chat(): a cloud provider under an explicit local-only policy goes local, or stops (NO_LOCAL)", async () => {
     localStorage.setItem("lumen.ai.provider", "anthropic");
     localStorage.setItem("lumen.ai.key.anthropic", "k");
     setAiPolicy("local-only");
-    await expect(chat([{ role: "user", content: "hi" }])).rejects.toMatchObject({ code: "POLICY" });
+    await expect(chat([{ role: "user", content: "hi" }])).rejects.toMatchObject({ code: "NO_LOCAL" });
     expect(hasAiCredentials()).toBe(false);
+    // Ollama reachable → it answers instead of Claude.
+    ollamaUp.mockResolvedValue(true);
+    await expect(chat([{ role: "user", content: "hi" }])).resolves.toBe("from ollama");
+    ollamaUp.mockResolvedValue(false);
     setAiPolicy("cloud");
     await expect(chat([{ role: "user", content: "hi" }])).resolves.toBe("from claude");
     expect(hasAiCredentials()).toBe(true);
+  });
+
+  it("chat(): local-first tries Ollama before a selected cloud provider, then the cloud", async () => {
+    localStorage.setItem("lumen.ai.provider", "anthropic");
+    localStorage.setItem("lumen.ai.key.anthropic", "k");
+    setAiPolicy("local-first");
+    ollamaUp.mockResolvedValue(true);
+    await expect(chat([{ role: "user", content: "hi" }])).resolves.toBe("from ollama");
+    const gen = chatStream([{ role: "user", content: "hi" }]);
+    expect((await gen.next()).value).toBe("ollama-stream");
+    ollamaUp.mockResolvedValue(false);
+    await expect(chat([{ role: "user", content: "hi" }])).resolves.toBe("from claude");
+  });
+
+  it("direct cloud paths honour the policy: embeddings, transcription, batch, fine-tune, grammar, research", async () => {
+    const { assertCloudAllowed, isLocalOrigin, AiPolicyError } = await import("../ai/policy");
+    expect(() => assertCloudAllowed("x")).toThrow(AiPolicyError);
+    expect(() => assertCloudAllowed("x")).toThrow(/local-only/);
+    setAiPolicy("local-first");
+    expect(() => assertCloudAllowed("x")).not.toThrow();
+    expect(isLocalOrigin("http://localhost:8010/v2/check")).toBe(true);
+    expect(isLocalOrigin("http://192.168.1.20:8080")).toBe(true);
+    expect(isLocalOrigin("http://10.0.0.5")).toBe(true);
+    expect(isLocalOrigin("http://172.20.1.1")).toBe(true);
+    expect(isLocalOrigin("http://searx.lan.local")).toBe(true);
+    expect(isLocalOrigin("https://api.languagetool.org/v2/check")).toBe(false);
+    expect(isLocalOrigin("http://172.32.0.1")).toBe(false);
+    expect(isLocalOrigin("not a url")).toBe(false);
   });
 
   it("chat(): local-first still falls back to OpenAI (NO_KEY when no key)", async () => {

@@ -1,4 +1,5 @@
 import { fetchWithRetry } from "../lib/fetchRetry";
+import { assertCloudAllowed, isLocalOrigin } from "./policy";
 
 /**
  * LanguageTool grammar checker — a thin client that hits the public
@@ -43,6 +44,9 @@ export async function checkGrammar(
   text: string,
   language = "en-US",
 ): Promise<GrammarMatch[]> {
+  // A self-hosted LanguageTool on this machine or network is fine under
+  // every policy; the public API is a third party.
+  if (!isLocalOrigin(endpoint())) assertCloudAllowed("the public LanguageTool API");
   const trimmed = text.trim();
   if (trimmed.length < 40) return [];
   const cacheKey = `${language}\n${trimmed}`;

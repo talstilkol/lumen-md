@@ -10,7 +10,7 @@ import { fetchWithRetry } from "../lib/fetchRetry";
 import { t } from "../i18n";
 import { docsUrl } from "../lib/docsLinks";
 import { estimateTokens, recordCacheHit, recordUsage, type Usage } from "./usage";
-import { cloudAllowed, getAiPolicy, providerAllowed } from "./policy";
+import { cloudAllowed, getAiPolicy, isCloudProvider, providerAllowed } from "./policy";
 
 // ── Rate limiting ───────────────────────────────────────────────────────
 // Token bucket — protects the user's API key against runaway loops.
@@ -165,6 +165,36 @@ function assertCloudProvider(provider: AiProvider): void {
   if (!providerAllowed(provider)) {
     throw new AiError("POLICY", `AI policy is "${getAiPolicy()}": ${provider} is a cloud provider and was not contacted.`);
   }
+}
+
+/**
+ * Where a request goes when a CLOUD provider is selected but the policy
+ * prefers local backends:
+ *
+ *   local-first  a reachable Ollama server, else in-browser WebGPU when the
+ *                user turned Privacy Mode on (never a surprise multi-GB
+ *                download for someone who picked a cloud provider), else
+ *                null — the cloud provider answers.
+ *   local-only   Ollama, else WebGPU, else NO_LOCAL — the cloud provider is
+ *                never contacted.
+ *   cloud        null.
+ *
+ * A selected local provider returns null and takes the normal branches.
+ */
+async function localRoute(provider: AiProvider): Promise<"ollama" | "local-webgpu" | null> {
+  if (!isCloudProvider(provider)) return null;
+  const policy = getAiPolicy();
+  if (policy === "cloud") return null;
+  const { isOllamaAvailable } = await import("./ollamaProvider");
+  if (await isOllamaAvailable()) return "ollama";
+  if (policy === "local-only" || useAppStore.getState().useLocalAi) {
+    const { localLlmAvailable } = await import("./localLlm");
+    if (localLlmAvailable().available) return "local-webgpu";
+  }
+  if (policy === "local-only") {
+    throw new AiError("NO_LOCAL", `AI policy is "local-only": ${provider} is a cloud provider and no local backend (Ollama, WebGPU) is available.`);
+  }
+  return null;
 }
 
 function assertCloudFallback(unavailable: string): void {
@@ -360,12 +390,16 @@ async function chatDirect(
     chargeAiCommandDispatch();
   };
   const provider = getActiveProvider();
+  // At the monthly limit nothing goes out — not even the local probe.
+  if (!opts.prepaid && !aiQuotaStatus(new Date()).allowed) charge();
+  const localFirst = await localRoute(provider);
 
   // ── Ollama (local server) ──────────────────────────────────────
-  if (provider === "ollama") {
+  if (provider === "ollama" || localFirst === "ollama") {
     const { chatOllama, isOllamaAvailable, getBaseUrl } = await import("./ollamaProvider");
     if (await isOllamaAvailable()) {
       charge();
+      opts.onRoute?.("ollama", effectiveModel("ollama", opts));
       return chatOllama(messages, opts);
     }
     toast.warn(
@@ -382,7 +416,7 @@ async function chatDirect(
   }
 
   // ── Anthropic Claude (cloud) ───────────────────────────────────
-  if (provider === "anthropic") {
+  if (provider === "anthropic" && !localFirst) {
     const { chatAnthropic } = await import("./anthropicProvider");
     assertCloudProvider("anthropic");
     getProviderKey("anthropic"); // NO_KEY before anything is charged
@@ -397,7 +431,7 @@ async function chatDirect(
   }
 
   // ── Google Gemini (cloud) ──────────────────────────────────────
-  if (provider === "gemini") {
+  if (provider === "gemini" && !localFirst) {
     const { chatGemini } = await import("./geminiProvider");
     assertCloudProvider("gemini");
     getProviderKey("gemini"); // NO_KEY before anything is charged
@@ -412,7 +446,7 @@ async function chatDirect(
   }
 
   // ── Mistral (cloud, OpenAI-compatible) ─────────────────────────
-  if (provider === "mistral") {
+  if (provider === "mistral" && !localFirst) {
     const { chatMistral } = await import("./mistralProvider");
     assertCloudProvider("mistral");
     getProviderKey("mistral"); // NO_KEY before anything is charged
@@ -427,7 +461,7 @@ async function chatDirect(
   }
 
   // ── WebGPU local (in-browser) ──────────────────────────────────
-  if (provider === "local-webgpu" || useAppStore.getState().useLocalAi) {
+  if (provider === "local-webgpu" || localFirst === "local-webgpu" || (!isCloudProvider(provider) && useAppStore.getState().useLocalAi)) {
     const { chatLocal, localLlmAvailable, onLocalLlmProgress } = await import(
       "./localLlm"
     );
@@ -605,11 +639,14 @@ async function* chatStreamDirect(
     chargeAiCommandDispatch();
   };
   const provider = getActiveProvider();
+  if (!opts.prepaid && !aiQuotaStatus(new Date()).allowed) charge();
+  const localFirst = await localRoute(provider);
 
-  if (provider === "ollama") {
+  if (provider === "ollama" || localFirst === "ollama") {
     const { chatOllamaStream, isOllamaAvailable } = await import("./ollamaProvider");
     if (await isOllamaAvailable()) {
       charge();
+      opts.onRoute?.("ollama", effectiveModel("ollama", opts));
       yield* chatOllamaStream(messages, opts);
       return;
     }
@@ -618,7 +655,7 @@ async function* chatStreamDirect(
 
   // Streaming has no in-browser WebGPU path yet; under `local-only` that
   // is a local failure, not a reason to reach a cloud provider.
-  if (provider === "local-webgpu" || useAppStore.getState().useLocalAi) {
+  if (provider === "local-webgpu" || (!isCloudProvider(provider) && useAppStore.getState().useLocalAi)) {
     assertCloudFallback("Local WebGPU AI (streaming)");
   }
 

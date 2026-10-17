@@ -64,7 +64,9 @@ export const writeFileTool = defineTool<{ path: string; content: string }, { pat
   run: async (args) => {
     needWorkspace();
     const path = safeWorkspacePath(requireString(args, "path"));
-    const content = typeof args.content === "string" ? args.content : "";
+    // A missing or non-string body is a malformed call, never an empty file.
+    if (typeof args.content !== "string") throw new ToolError("bad-args", '"content" must be a string');
+    const content = args.content;
     await writeWorkspaceFile(path, content);
     return { path, bytes: content.length };
   },

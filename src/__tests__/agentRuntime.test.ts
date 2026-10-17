@@ -100,6 +100,27 @@ describe("agent runtime", () => {
     expect(run.steps.filter((s) => s.kind === "retry")).toHaveLength(2);
   });
 
+  it("enforces the declared schema on parsed JSON, also when the executor claims native schema support", async () => {
+    const ex = fakeExecutor((_req, n) => (n === 1 ? reply("{}") : n === 2 ? reply('{"tags":[]}') : reply('{"tags":["ok"]}')), { supportsSchema: () => true });
+    registerExecutor(ex);
+    const def: AgentDefinition<{ text: string }, { tags: string[] }> = {
+      id: "schema",
+      description: "",
+      system: "sys",
+      user: (i) => i.text,
+      outputSchema: { type: "object", properties: { tags: { type: "array", items: { type: "string" }, minItems: 1 } }, required: ["tags"] },
+    };
+    const run = await runAgent(def, { text: "doc" });
+    expect(run.status).toBe("ok");
+    expect(run.output).toEqual({ tags: ["ok"] });
+    expect(run.attempts).toBe(3);
+    const schemaSteps = run.steps.filter((s) => s.kind === "validate" && s.label === "schema");
+    expect(schemaSteps.map((s) => s.ok)).toEqual([false, false, true]);
+    expect(schemaSteps[0].detail).toContain("$.tags is required");
+    expect(ex.calls[1].messages[1].content).toContain("does not match the required schema");
+    expect(ex.calls[0].schema).toEqual(def.outputSchema);
+  });
+
   it("fails with suggestions after the retries are exhausted", async () => {
     registerExecutor(fakeExecutor(() => reply("still not json")));
     const def: AgentDefinition<{ text: string }, unknown> = {

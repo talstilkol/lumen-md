@@ -27,6 +27,7 @@ import type {
 import { DEFAULT_EXECUTOR_ORDER, getExecutor, listExecutors, pickExecutor } from "./executors";
 import { parseProtocolTurn, toolProtocolPrompt, toolResultMessage } from "./protocol";
 import { checkJson } from "./tools/validate";
+import { formatSchemaErrors, validateSchema } from "./schema";
 import { ToolError } from "./tools/define";
 import { review, type Failure } from "./critic";
 import { recordRun } from "./trace";
@@ -225,6 +226,16 @@ export async function runAgent<I extends AgentInput, O = string>(def: AgentDefin
         } catch (e) {
           failure = { kind: "parse", attempt, maxRetries, tier, executor: executor.id, reason: (e as Error)?.message ?? "parse failed", hint: def.outputSchema ? "Reply with JSON only." : undefined, inputChars };
           step({ kind: "validate", ms: 0, label: "parse", ok: false, detail: failure.reason });
+        }
+      }
+      // The declared schema is enforced on the parsed value even when the
+      // executor constrained the output natively: a model can still ignore
+      // the constraint, and prompt-only executors never had one.
+      if (!failure && output !== undefined && def.outputSchema) {
+        const errors = validateSchema(output, def.outputSchema);
+        step({ kind: "validate", ms: 0, label: "schema", ok: errors.length === 0, detail: errors.length ? formatSchemaErrors(errors) : undefined });
+        if (errors.length) {
+          failure = { kind: "validation", attempt, maxRetries, tier, executor: executor.id, label: "schema", reason: `JSON does not match the required schema: ${formatSchemaErrors(errors)}`, hint: "Reply with JSON matching the schema exactly.", inputChars };
         }
       }
       if (!failure && output !== undefined) {
