@@ -83,4 +83,12 @@ describe("AiSettingsPanel", () => {
     expect(onClose).toHaveBeenCalled();
     window.removeEventListener("lumen-run-command", on);
   });
+
+  it("does not store a research address the browser can't use", async () => {
+    render(<AiSettingsPanel open onClose={() => {}} />);
+    fireEvent.change(await screen.findByPlaceholderText("http://localhost:8787"), { target: { value: "not a url" } });
+    for (const b of screen.getAllByText("Save")) fireEvent.click(b);
+    await waitFor(() => expect(screen.getByRole("alert").textContent).toContain("not a url"));
+    expect(localStorage.getItem("lumen.research.endpoint")).toBeNull();
+  });
 });

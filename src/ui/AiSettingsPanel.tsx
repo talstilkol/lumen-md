@@ -72,6 +72,7 @@ export function AiSettingsPanel({ open, onClose }: Props) {
   const [catalog, setCatalog] = useState<Array<{ id: string; label: string; vram: number }>>([]);
   const [grammarUrl, setGrammarUrl] = useState("");
   const [researchUrl, setResearchUrl] = useState("");
+  const [endpointError, setEndpointError] = useState("");
   const [styleOn, setStyleOn] = useState(false);
   const [hasStyle, setHasStyle] = useState(false);
   const [runs, setRuns] = useState<AgentRun[]>([]);
@@ -176,8 +177,17 @@ export function AiSettingsPanel({ open, onClose }: Props) {
   };
 
   const saveEndpoints = async () => {
+    // An address the browser can't reach (bad URL, blocked by the CSP) is
+    // not stored: it would hide a working build-time endpoint.
+    const { usableResearchEndpoint } = await import("../research/client");
+    const research = researchUrl.trim() ? usableResearchEndpoint(researchUrl) : "";
+    if (research === null) {
+      setEndpointError(t("research.endpointInvalid", { url: researchUrl.trim() }));
+      return;
+    }
+    setEndpointError("");
     setLs("lumen.grammar.endpoint", grammarUrl);
-    setLs("lumen.research.endpoint", researchUrl);
+    setLs("lumen.research.endpoint", research);
     const { clearGrammarCache } = await import("../ai/grammar");
     clearGrammarCache();
     flash();
@@ -310,6 +320,11 @@ export function AiSettingsPanel({ open, onClose }: Props) {
               <input style={input} value={researchUrl} onChange={(e) => setResearchUrl(e.target.value)} placeholder="http://localhost:8787" />
             </label>
             <div style={muted}>{t("ai.settings.endpoints.hint")}</div>
+            {endpointError && (
+              <div role="alert" style={{ fontSize: 12, color: "hsl(var(--danger, 0 72% 51%))" }}>
+                {endpointError}
+              </div>
+            )}
             <div style={row}>
               <button type="button" style={primary} onClick={() => void saveEndpoints()}>{t("ai.settings.save")}</button>
             </div>
