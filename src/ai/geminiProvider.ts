@@ -11,7 +11,7 @@
  */
 
 import type { ChatMessage, ChatOptions } from "./llm";
-import { getProviderKey, AiError, PROVIDER_DEFAULT_MODELS } from "./llm";
+import { getProviderKey, AiError, PROVIDER_DEFAULT_MODELS, isRetiredGeminiModel } from "./llm";
 
 const BASE = "https://generativelanguage.googleapis.com/v1beta/models";
 const DEFAULT_MODEL = PROVIDER_DEFAULT_MODELS.gemini;
@@ -19,7 +19,8 @@ const DEFAULT_MODEL = PROVIDER_DEFAULT_MODELS.gemini;
 export function getGeminiModel(opts: ChatOptions): string {
   if (opts.model) return opts.model;
   try {
-    return localStorage.getItem("lumen.ai.model.gemini") || DEFAULT_MODEL;
+    const saved = localStorage.getItem("lumen.ai.model.gemini");
+    return saved && !isRetiredGeminiModel(saved) ? saved : DEFAULT_MODEL;
   } catch {
     return DEFAULT_MODEL;
   }
