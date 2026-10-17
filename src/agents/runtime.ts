@@ -345,7 +345,8 @@ export async function* streamAgent<I extends AgentInput>(def: AgentDefinition<I,
   let result: AgentRun<string> | null = null;
   const ctrl = new AbortController();
   const onOuter = () => ctrl.abort();
-  opts.signal?.addEventListener("abort", onOuter, { once: true });
+  if (opts.signal?.aborted) ctrl.abort();
+  else opts.signal?.addEventListener("abort", onOuter, { once: true });
   const p = runAgent(def, input, {
     ...opts,
     signal: ctrl.signal,

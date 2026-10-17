@@ -8,7 +8,6 @@
 
 import type { AgentDefinition, AgentInput, ValidationResult } from "../types";
 import { registerAgent } from "../registry";
-import { checkJson } from "../tools/validate";
 import { fail, ok, stripFences } from "./shared";
 
 export interface ProductSpecOut {
@@ -71,10 +70,15 @@ export function checkGeneratedFile(path: string, content: string): ValidationRes
   if (!content.trim()) return fail("empty file");
   const ext = path.split(".").pop()?.toLowerCase() ?? "";
   if (ext === "json") {
-    const j = checkJson(content);
-    if (!j.ok) return fail(`invalid JSON: ${j.error}`, "Return the complete JSON file only.");
+    // The whole file must parse — prose around an object is not a JSON file.
+    let value: unknown;
+    try {
+      value = JSON.parse(content);
+    } catch (e) {
+      return fail(`invalid JSON: ${(e as Error).message}`, "Return the complete JSON file only, with no text before or after it.");
+    }
     if (/(^|\/)package\.json$/.test(path)) {
-      const v = j.value as Record<string, unknown>;
+      const v = value as Record<string, unknown>;
       if (!v || typeof v !== "object" || typeof v.name !== "string") return fail("package.json needs a string `name`");
     }
   }
