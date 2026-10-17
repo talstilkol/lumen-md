@@ -14,12 +14,17 @@ nothing leaves the machine.
 ⌘K → "Switch to local AI (WebGPU)"
 ```
 
-The first prompt downloads the model weights (≈ 4 GB for
-`Llama-3-8B-Instruct-q4f16_1`). Subsequent prompts are instant — the
-model lives in WebGPU buffers until you close the tab.
+The first prompt downloads a model **sized for this device** — the
+model manager probes the GPU (WebGPU, `shader-f16`, device memory) and
+picks the largest model of the task's tier that fits, from about 0.4 GB
+(SmolLM2 360M) to 6 GB (Qwen3 8B, Gemma 2 9B). Pick one yourself with
+`⌘K → "AI: Local Models (WebGPU)"`, which also shows what is already
+downloaded and lets you download a model ahead of time. Weights are
+cached in the browser; later prompts start instantly.
 
-A toast surfaces download progress at 5% intervals so you know the
-first prompt is working, not stuck.
+Inference runs in a **Web Worker**, so the editor stays responsive
+while a model loads or generates, and a toast reports download progress
+at 5 % intervals.
 
 ## When to use it
 
@@ -63,14 +68,11 @@ through the local agent runtime.
 
 ## Pick a different model
 
-```js
-// Example only — UI exposure of the model picker comes in a follow-up.
-import { chatLocal } from "lumen/ai/localLlm";
-await chatLocal(messages, { model: "Phi-3-mini-4k-instruct-q4f16_1-MLC" });
-```
-
-Models registered in `@mlc-ai/web-llm` work without any changes — the
-chat function takes the model id verbatim.
+`⌘K → "AI: Local Models (WebGPU)"` lists the curated catalog for this GPU
+(size, tier, downloaded, recommended). "Automatic" lets the model manager
+choose per task: small models for tags and completions, larger ones for
+translation and documents, Hermes (function calling) when an agent needs
+tools, Qwen2.5 Coder for the product builder.
 
 ## Privacy claim
 

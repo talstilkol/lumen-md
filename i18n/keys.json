@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-10-17T12:58:10.347Z",
+  "generated_at": "2026-10-17T13:17:17.129Z",
   "source": "src/i18n/index.ts (en bundle)",
-  "count": 1051,
+  "count": 1066,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -3254,6 +3254,16 @@
       "vars": []
     },
     {
+      "key": "cmd.ai.localModels",
+      "en": "AI: Local Models (WebGPU)",
+      "vars": []
+    },
+    {
+      "key": "cmd.ai.localModels.hint",
+      "en": "Choose and download the in-browser model for this GPU",
+      "vars": []
+    },
+    {
       "key": "cmd.ai.policy",
       "en": "AI: Local or Cloud Policy",
       "vars": []
@@ -3562,6 +3572,84 @@
       "key": "ai.usage.title",
       "en": "AI usage",
       "vars": []
+    },
+    {
+      "key": "ai.localModels.title",
+      "en": "Local models (WebGPU)",
+      "vars": []
+    },
+    {
+      "key": "ai.localModels.message",
+      "en": "About {budget} GB of GPU memory is usable on this device ({f16} weights).",
+      "vars": [
+        "budget",
+        "f16"
+      ]
+    },
+    {
+      "key": "ai.localModels.noWebgpu",
+      "en": "WebGPU is not available in this browser.",
+      "vars": []
+    },
+    {
+      "key": "ai.localModels.selected",
+      "en": "selected",
+      "vars": []
+    },
+    {
+      "key": "ai.localModels.recommended",
+      "en": "recommended",
+      "vars": []
+    },
+    {
+      "key": "ai.localModels.cached",
+      "en": "downloaded",
+      "vars": []
+    },
+    {
+      "key": "ai.localModels.tooBig",
+      "en": "may not fit",
+      "vars": []
+    },
+    {
+      "key": "ai.localModels.auto",
+      "en": "Automatic — pick by hardware and task",
+      "vars": []
+    },
+    {
+      "key": "ai.localModels.autoSet",
+      "en": "Automatic model selection. Current pick: {model}",
+      "vars": [
+        "model"
+      ]
+    },
+    {
+      "key": "ai.localModels.set",
+      "en": "Local model: {model}",
+      "vars": [
+        "model"
+      ]
+    },
+    {
+      "key": "ai.localModels.downloadNow",
+      "en": "Download {model} now? It is cached in the browser for later prompts.",
+      "vars": [
+        "model"
+      ]
+    },
+    {
+      "key": "ai.localModels.ready",
+      "en": "{model} is ready.",
+      "vars": [
+        "model"
+      ]
+    },
+    {
+      "key": "ai.localModels.failed",
+      "en": "Model download failed: {error}",
+      "vars": [
+        "error"
+      ]
     },
     {
       "key": "ai.policy.title",
