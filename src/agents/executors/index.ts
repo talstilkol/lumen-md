@@ -35,6 +35,33 @@ export function resetExecutors(): void {
   registerExecutor(chatExecutor);
 }
 
+export const EXECUTOR_PREF_KEY = "lumen.ai.executor";
+
+/** The user's preferred executor from the AI settings panel, or null for automatic. */
+export function preferredExecutor(): ExecutorId | null {
+  try {
+    const v = localStorage.getItem(EXECUTOR_PREF_KEY);
+    return v === "ollama" || v === "webllm" || v === "chat" ? v : null;
+  } catch {
+    return null;
+  }
+}
+
+export function setPreferredExecutor(id: ExecutorId | null): void {
+  try {
+    if (id) localStorage.setItem(EXECUTOR_PREF_KEY, id);
+    else localStorage.removeItem(EXECUTOR_PREF_KEY);
+  } catch {
+    /* storage denied */
+  }
+}
+
+/** Move the preferred executor to the front when the agent allows it at all. */
+export function withPreference(order: ExecutorId[], pref: ExecutorId | null = preferredExecutor()): ExecutorId[] {
+  if (!pref || !order.includes(pref)) return order;
+  return [pref, ...order.filter((id) => id !== pref)];
+}
+
 export interface ExecutorPick {
   executor: Executor | null;
   /** Why each candidate was skipped, in order. */
@@ -47,7 +74,7 @@ export interface ExecutorPick {
  * `executor` from the suggestions panel still wins).
  */
 export async function pickExecutor(preference: ExecutorId[] = DEFAULT_EXECUTOR_ORDER, forced?: ExecutorId): Promise<ExecutorPick> {
-  const order = forced ? [forced] : preference;
+  const order = forced ? [forced] : withPreference(preference);
   const skipped: ExecutorPick["skipped"] = [];
   const cloudOnly = !forced && getAiPolicy() === "cloud";
   for (const id of order) {
