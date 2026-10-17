@@ -393,10 +393,22 @@ function formsDelimiter(doc: EditorState["doc"], from: number, to: number): bool
   return false;
 }
 
-function isStructural(slice: Slice): boolean {
-  if (slice.openStart > 0 || slice.openEnd > 0) return true;
+export function isStructural(slice: Slice): boolean {
+  // A slice open on both sides around a single textblock (how a pasted
+  // paragraph of inline text can arrive: `paragraph("x")` open 1/1) is
+  // inline content; any other block boundary in it is structure.
+  let frag = slice.content;
+  let start = slice.openStart;
+  let end = slice.openEnd;
+  while (start > 0 && end > 0) {
+    if (frag.childCount !== 1) return true;
+    frag = frag.firstChild!.content;
+    start--;
+    end--;
+  }
+  if (start !== end) return true;
   let block = false;
-  slice.content.forEach((n) => {
+  frag.forEach((n) => {
     if (n.isBlock) block = true;
   });
   return block;

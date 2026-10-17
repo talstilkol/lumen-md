@@ -264,6 +264,17 @@ describe("tracking edits while suggesting", () => {
     expect(e.view.state.doc.childCount).toBe(2);
   });
 
+  it("an open single-paragraph slice is inline content, two paragraphs are structure", async () => {
+    const { isStructural } = await import("../editor/wysiwygSuggest");
+    const e = await open("x", true);
+    const { Slice, Fragment } = await import("@milkdown/prose/model");
+    const sc = e.view.state.schema;
+    const p = (t: string) => sc.nodes.paragraph.create(null, sc.text(t));
+    expect(isStructural(new Slice(Fragment.from(p("a")), 1, 1))).toBe(false);
+    expect(isStructural(new Slice(Fragment.from([p("a"), p("b")]), 1, 1))).toBe(true);
+    expect(isStructural(new Slice(Fragment.from(p("a")), 0, 0))).toBe(true);
+  });
+
   it("is off when suggesting is off", async () => {
     const e = await open("Hello world.", false);
     e.select(e.at(" world"));
