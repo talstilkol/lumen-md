@@ -6,7 +6,7 @@
  *
  *   → { id, type: "load",        modelId }
  *   → { id, type: "chat",        modelId, request, stream }
- *   → { id, type: "interrupt" }
+ *   → { id, type: "interrupt", target }        (cancel one chat: skip it if queued, stop it if running)
  *   → { id, type: "unload" }
  *   → { id, type: "hasModel",    modelId }
  *   → { id, type: "deleteModel", modelId }
@@ -38,7 +38,7 @@ export interface WorkerChatResult {
 export type WorkerIn =
   | { id: number; type: "load"; modelId: string }
   | { id: number; type: "chat"; modelId: string; request: WorkerChatRequest; stream: boolean }
-  | { id: number; type: "interrupt" }
+  | { id: number; type: "interrupt"; target?: number }
   | { id: number; type: "unload" }
   | { id: number; type: "hasModel"; modelId: string }
   | { id: number; type: "deleteModel"; modelId: string };
@@ -54,6 +54,9 @@ const post = (m: WorkerOut): void => (self as unknown as { postMessage(m: Worker
 let engine: MLCEngineInterface | null = null;
 let loadedModel: string | null = null;
 let queue: Promise<unknown> = Promise.resolve();
+/** The chat currently generating, and chats cancelled while queued. */
+let running: number | null = null;
+const cancelled = new Set<number>();
 
 async function ensureLoaded(id: number, modelId: string): Promise<MLCEngineInterface> {
   if (engine && loadedModel === modelId) return engine;
@@ -112,12 +115,24 @@ export async function handle(msg: WorkerIn): Promise<void> {
         post({ id, type: "result", value: msg.modelId });
         return;
       case "chat": {
-        const value = await serial(() => chat(id, msg.modelId, msg.request, msg.stream));
+        const value = await serial(async () => {
+          if (cancelled.delete(id)) throw new DOMException("aborted", "AbortError");
+          running = id;
+          try {
+            return await chat(id, msg.modelId, msg.request, msg.stream);
+          } finally {
+            running = null;
+          }
+        });
         post({ id, type: "result", value });
         return;
       }
       case "interrupt":
-        engine?.interruptGenerate();
+        // Only the targeted chat is affected: stop it when it is the one
+        // generating, skip it when it is still queued. Without a target
+        // (legacy), stop whatever runs.
+        if (msg.target === undefined || msg.target === running) engine?.interruptGenerate();
+        else cancelled.add(msg.target);
         post({ id, type: "result", value: true });
         return;
       case "unload": {

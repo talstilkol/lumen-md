@@ -24,6 +24,7 @@ class FakeWorker {
   terminate = terminate;
   constructor(public url: URL) {
     created++;
+    (globalThis as unknown as { __lastWorker?: FakeWorker }).__lastWorker = this;
   }
   postMessage(msg: WorkerIn) {
     received.push(msg);
@@ -85,16 +86,20 @@ describe("webllmEngine (worker client)", () => {
     await expect(webLlmChat("big", { messages: [] })).rejects.toThrow("OOM");
   });
 
-  it("sends interrupt on abort and refuses an already-aborted request", async () => {
+  it("rejects an aborted call, targets the interrupt at it, and drops its late result", async () => {
+    const late: { fn?: () => void } = {};
     script = (msg, reply) => {
       if (msg.type === "chat") {
         ctrl.abort();
-        reply({ id: msg.id, type: "result", value: { content: "partial", tool_calls: [], model: "m" } });
+        late.fn = () => reply({ id: msg.id, type: "result", value: { content: "partial", tool_calls: [], model: "m" } });
       } else reply({ id: msg.id, type: "result", value: true });
     };
     const ctrl = new AbortController();
-    await webLlmChat("m", { messages: [] }, { signal: ctrl.signal });
+    await expect(webLlmChat("m", { messages: [] }, { signal: ctrl.signal })).rejects.toMatchObject({ name: "AbortError" });
+    late.fn?.();
+    const chatId = received[0].id;
     expect(received.map((m) => m.type)).toEqual(["chat", "interrupt"]);
+    expect((received[1] as { target?: number }).target).toBe(chatId);
     const aborted = new AbortController();
     aborted.abort();
     await expect(webLlmChat("m", { messages: [] }, { signal: aborted.signal })).rejects.toMatchObject({ name: "AbortError" });
@@ -102,6 +107,19 @@ describe("webllmEngine (worker client)", () => {
     __resetWebLlmEngine();
     interruptWebLlm();
     expect(created).toBe(1);
+  });
+
+  it("discards a worker that failed at the top level so the next call starts a fresh one", async () => {
+    script = () => {};
+    const p = webLlmChat("m", { messages: [] });
+    const w = (globalThis as unknown as { __lastWorker?: FakeWorker }).__lastWorker;
+    expect(w).toBeTruthy();
+    w!.onerror?.({ message: "module load failed" });
+    await expect(p).rejects.toThrow(/module load failed/);
+    expect(terminate).toHaveBeenCalledTimes(1);
+    script = (msg, reply) => reply({ id: msg.id, type: "result", value: true });
+    await webLlmModelCached("x");
+    expect(created).toBe(2);
   });
 
   it("checks and deletes cached models, and unloads by terminating the worker", async () => {

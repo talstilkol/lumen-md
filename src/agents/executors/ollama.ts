@@ -204,7 +204,9 @@ export const ollamaExecutor: Executor = {
   async available(): Promise<Availability> {
     try {
       const s = await refreshOllama();
-      if (!s.models.length) return { available: false, reason: "no-model", detail: RECOMMENDED_OLLAMA_MODEL };
+      // Only chat-capable installs count: an embedding-only Ollama would
+      // otherwise be picked and then 404 on the recommended model.
+      if (!s.models.some((m) => !/embed/i.test(m.name))) return { available: false, reason: "no-model", detail: RECOMMENDED_OLLAMA_MODEL };
       const model = this.modelFor("small");
       if (model) await probeToolSupport(model);
       return { available: true };
@@ -259,6 +261,7 @@ export const ollamaExecutor: Executor = {
 
     if (!stream) {
       const data = (await res.json()) as Record<string, unknown>;
+      if (typeof data.error === "string") throw new Error(`Ollama API error: ${data.error}`);
       const msg = (data.message ?? {}) as Record<string, unknown>;
       return {
         content: String(msg.content ?? "").trim(),
@@ -285,6 +288,10 @@ export const ollamaExecutor: Executor = {
       } catch {
         return;
       }
+      // Ollama reports a failure after streaming began as an NDJSON object
+      // with `error` under HTTP 200; a truncated prefix must not pass as
+      // an answer.
+      if (typeof json.error === "string") throw new Error(`Ollama API error: ${json.error}`);
       if (typeof json.model === "string") answeredModel = json.model;
       const msg = json.message as Record<string, unknown> | undefined;
       const delta = typeof msg?.content === "string" ? msg.content : "";

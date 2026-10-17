@@ -184,6 +184,22 @@ describe("agent runtime", () => {
     expect(ex.calls[0].messages[0].content).not.toContain("To call a tool");
   });
 
+  it("decides native tool support on the model the tier resolves to, and pins that model on the request", async () => {
+    const ex = fakeExecutor((req, n) => (n === 1 ? reply('{"tool":"upper","args":{"text":"a"}}', req.model) : reply('{"final":"ok"}', req.model)), {
+      modelFor: (tier) => (tier === "medium" ? "gemma3:12b" : "qwen2.5:7b"),
+      supportsTools: (model) => model === "qwen2.5:7b",
+    });
+    registerExecutor(ex);
+    const def: AgentDefinition = { id: "tier-tools", description: "", system: "sys", user: () => "u", tools: [echo], tier: "medium" };
+    const run = await runAgent(def, {});
+    expect(run.status).toBe("ok");
+    // Medium → gemma3 → no native tools → the protocol prompt is present and no `tools` are sent.
+    expect(ex.calls[0].model).toBe("gemma3:12b");
+    expect(ex.calls[0].tools).toBeUndefined();
+    expect(ex.calls[0].messages[0].content).toContain("To call a tool");
+    expect(run.model).toBe("gemma3:12b");
+  });
+
   it("refuses a write tool the run was not granted, and tells the model", async () => {
     const ex = fakeExecutor((req, n) => {
       if (n === 1) return reply('{"tool":"write_something","args":{"path":"a.md"}}');

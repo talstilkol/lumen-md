@@ -6,6 +6,7 @@
  */
 
 import type { Availability, Executor, ExecutorId } from "../types";
+import { getAiPolicy } from "../../ai/policy";
 import { chatExecutor } from "./chatExecutor";
 import { ollamaExecutor } from "./ollama";
 import { webllmExecutor } from "./webllm";
@@ -40,13 +41,23 @@ export interface ExecutorPick {
   skipped: Array<{ id: ExecutorId; availability: Availability }>;
 }
 
+/**
+ * Under the `cloud` policy the selected provider answers directly, through
+ * the chat() adapter; the native local executors are skipped (an explicit
+ * `executor` from the suggestions panel still wins).
+ */
 export async function pickExecutor(preference: ExecutorId[] = DEFAULT_EXECUTOR_ORDER, forced?: ExecutorId): Promise<ExecutorPick> {
   const order = forced ? [forced] : preference;
   const skipped: ExecutorPick["skipped"] = [];
+  const cloudOnly = !forced && getAiPolicy() === "cloud";
   for (const id of order) {
     const ex = registry.get(id);
     if (!ex) {
       skipped.push({ id, availability: { available: false, reason: "not-registered" } });
+      continue;
+    }
+    if (cloudOnly && id !== "chat") {
+      skipped.push({ id, availability: { available: false, reason: "policy", detail: "cloud" } });
       continue;
     }
     let a: Availability;

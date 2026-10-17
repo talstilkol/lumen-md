@@ -198,6 +198,19 @@ describe("ollama executor — server", () => {
     expect(calls.find((c) => c.url.endsWith("/api/chat"))!.body!.stream).toBe(true);
   });
 
+  it("treats an `error` object in the NDJSON stream (HTTP 200) as a failure, not a truncated answer", async () => {
+    await ollamaExecutor.available();
+    routes["/api/chat"] = () => ndjson([{ model: "m", message: { role: "assistant", content: "Hel" }, done: false }, { error: "context canceled" }]);
+    await expect(ollamaExecutor.chat({ messages: [{ role: "user", content: "hi" }], onDelta: () => {} })).rejects.toThrow(/Ollama API error: context canceled/);
+    routes["/api/chat"] = () => json({ error: "something broke" });
+    await expect(ollamaExecutor.chat({ messages: [{ role: "user", content: "hi" }] })).rejects.toThrow(/something broke/);
+  });
+
+  it("is not available when only embedding models are installed", async () => {
+    routes["/api/tags"] = () => json({ models: [{ name: "nomic-embed-text:latest", details: { parameter_size: "137M" } }] });
+    expect(await ollamaExecutor.available()).toMatchObject({ available: false, reason: "no-model" });
+  });
+
   it("surfaces HTTP errors with the status so the critic can classify them", async () => {
     await ollamaExecutor.available();
     routes["/api/chat"] = () => new Response('{"error":"model \\"nope\\" not found"}', { status: 404 });

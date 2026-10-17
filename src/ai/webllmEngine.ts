@@ -73,7 +73,14 @@ function getWorker(): Worker {
     }
   };
   w.onerror = (ev) => {
+    // A top-level worker failure (module load, GPU loss) leaves nothing to
+    // talk to: reject everything and let the next call start a fresh one.
     failAll(`web-llm worker error: ${ev.message || "unknown"}`);
+    if (worker === w) {
+      worker = null;
+      loadedModel = null;
+    }
+    w.terminate();
   };
   worker = w;
   return w;
@@ -81,11 +88,31 @@ function getWorker(): Worker {
 
 type WorkerCall = WorkerIn extends infer M ? (M extends { id: number } ? Omit<M, "id"> : never) : never;
 
-function call<T>(msg: WorkerCall, onDelta?: (text: string) => void): Promise<T> {
+function call<T>(msg: WorkerCall, onDelta?: (text: string) => void, signal?: AbortSignal): Promise<T> {
   const id = ++seq;
   return new Promise<T>((resolve, reject) => {
     pending.set(id, { resolve: resolve as (v: unknown) => void, reject, onDelta });
     getWorker().postMessage({ ...msg, id } as WorkerIn);
+    if (signal) {
+      const onAbort = () => {
+        // Reject this call now — its late result (often partial text) is
+        // dropped — and tell the worker to stop or skip exactly this chat.
+        if (pending.delete(id)) {
+          reject(new DOMException("aborted", "AbortError"));
+          void call<boolean>({ type: "interrupt", target: id }).catch(() => {});
+        }
+      };
+      signal.addEventListener("abort", onAbort, { once: true });
+      const done = () => signal.removeEventListener("abort", onAbort);
+      pending.get(id)!.resolve = (v) => {
+        done();
+        resolve(v as T);
+      };
+      pending.get(id)!.reject = (e) => {
+        done();
+        reject(e);
+      };
+    }
   });
 }
 
@@ -102,15 +129,9 @@ export async function webLlmChat(
   opts: { onDelta?: (text: string) => void; signal?: AbortSignal } = {},
 ): Promise<WorkerChatResult> {
   if (opts.signal?.aborted) throw new DOMException("aborted", "AbortError");
-  const onAbort = () => interruptWebLlm();
-  opts.signal?.addEventListener("abort", onAbort, { once: true });
-  try {
-    const res = await call<WorkerChatResult>({ type: "chat", modelId, request, stream: !!opts.onDelta }, opts.onDelta);
-    loadedModel = modelId;
-    return res;
-  } finally {
-    opts.signal?.removeEventListener("abort", onAbort);
-  }
+  const res = await call<WorkerChatResult>({ type: "chat", modelId, request, stream: !!opts.onDelta }, opts.onDelta, opts.signal);
+  loadedModel = modelId;
+  return res;
 }
 
 /** Is `modelId` already in Cache Storage (no download needed)? */

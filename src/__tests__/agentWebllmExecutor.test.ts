@@ -7,12 +7,17 @@ let hardware: Hardware = { webgpu: true, f16: true, maxBufferMB: 2048, deviceMem
 vi.mock("../ai/webllmEngine", () => ({
   webLlmChat: (model: string, request: unknown, opts: unknown) => chat(model, request, opts),
 }));
+const state = { useLocalAi: false, aiKey: null as string | null, useFineTunedModel: false, fineTunedModelId: null };
+vi.mock("../store/useStore", () => ({ useAppStore: { getState: () => state } }));
+vi.mock("../store/useToastStore", () => ({ toast: { info: vi.fn(), warn: vi.fn(), error: vi.fn() } }));
 vi.mock("../ai/modelManager", async (orig) => {
   const real = await orig<typeof import("../ai/modelManager")>();
   return { ...real, detectHardware: async () => hardware };
 });
 
-import { webllmExecutor, toOpenAiMessages, parseOpenAiToolCalls, describeWebLlmModel } from "../agents/executors/webllm";
+import { webllmExecutor, toOpenAiMessages, parseOpenAiToolCalls, describeWebLlmModel, WEBLLM_TOOL_MODELS } from "../agents/executors/webllm";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { setWebLlmModel } from "../ai/modelManager";
 import { defineTool } from "../agents/tools/define";
 
@@ -22,14 +27,30 @@ describe("webllm executor", () => {
   beforeEach(() => {
     chat.mockReset();
     setWebLlmModel(null);
+    state.useLocalAi = false;
+    localStorage.removeItem("lumen.ai.provider");
+    localStorage.setItem("lumen.ai.policy", "local-only");
     hardware = { webgpu: true, f16: true, maxBufferMB: 2048, deviceMemoryGB: 8, cores: 8, mobile: false };
   });
 
-  it("is available only with WebGPU and picks models by tier for this GPU", async () => {
+  it("is available only with WebGPU, when the user opted into in-browser AI, and picks models by tier", async () => {
+    localStorage.setItem("lumen.ai.policy", "local-only");
     expect(await webllmExecutor.available()).toEqual({ available: true });
+    // local-first without Privacy Mode or the WebGPU provider: no surprise download.
+    localStorage.setItem("lumen.ai.policy", "local-first");
+    expect(await webllmExecutor.available()).toMatchObject({ available: false, reason: "not-opted-in" });
+    localStorage.setItem("lumen.ai.provider", "local-webgpu");
+    expect(await webllmExecutor.available()).toEqual({ available: true });
+    localStorage.removeItem("lumen.ai.provider");
+    state.useLocalAi = true;
+    expect(await webllmExecutor.available()).toEqual({ available: true });
+    localStorage.setItem("lumen.ai.policy", "cloud");
+    expect(await webllmExecutor.available()).toMatchObject({ available: false, reason: "policy" });
+    localStorage.setItem("lumen.ai.policy", "local-only");
     expect(webllmExecutor.modelFor("small")).toBe("Phi-3.5-mini-instruct-q4f16_1-MLC");
     expect(webllmExecutor.supportsSchema()).toBe(true);
     expect(webllmExecutor.supportsTools("Hermes-3-Llama-3.1-8B-q4f16_1-MLC")).toBe(true);
+    expect(webllmExecutor.supportsTools("Hermes-3-Llama-3.2-3B-q4f16_1-MLC")).toBe(false);
     expect(webllmExecutor.supportsTools("Qwen3-4B-q4f16_1-MLC")).toBe(false);
     hardware = { ...hardware, webgpu: false, reason: "no-webgpu" };
     expect(await webllmExecutor.available()).toMatchObject({ available: false, reason: "no-webgpu" });
@@ -91,6 +112,14 @@ describe("webllm executor", () => {
     chat.mockResolvedValue({ content: "x", tool_calls: [], model: "m" });
     await webllmExecutor.chat({ messages: [{ role: "user", content: "hi" }], signal: ctrl.signal });
     expect(chat.mock.calls[0][2].signal).toBe(ctrl.signal);
+  });
+
+  it("lists exactly the installed library's function-calling models", () => {
+    const lib = readFileSync(join(__dirname, "..", "..", "node_modules", "@mlc-ai", "web-llm", "lib", "index.js"), "utf8");
+    const m = lib.match(/functionCallingModelIds = \[([^\]]+)\]/);
+    expect(m).toBeTruthy();
+    const ids = [...m![1].matchAll(/"([^"]+)"/g)].map((x) => x[1]).sort();
+    expect([...WEBLLM_TOOL_MODELS].sort()).toEqual(ids);
   });
 
   it("maps messages and tool calls to the OpenAI shape", () => {

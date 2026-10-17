@@ -15,9 +15,22 @@ import { flattenMessages } from "./chatExecutor";
 import { detectHardware, webLlmModelFor, catalogEntryFor } from "../../ai/modelManager";
 import { webLlmChat } from "../../ai/webllmEngine";
 import { estimateTokens } from "../../ai/usage";
+import { getAiPolicy } from "../../ai/policy";
+import { getActiveProvider } from "../../ai/llm";
+import { useAppStore } from "../../store/useStore";
 
-/** web-llm's native function-calling models (its `functionCallingModelIds`). */
-const TOOL_MODELS = /^Hermes-(2-Pro|3)-/;
+/**
+ * web-llm's native function-calling models — exactly its
+ * `functionCallingModelIds` (0.2.82). Hermes-3-Llama-3.2-3B is NOT in it.
+ * webllmToolModels.test.ts checks this list against the installed library.
+ */
+export const WEBLLM_TOOL_MODELS: readonly string[] = [
+  "Hermes-2-Pro-Llama-3-8B-q4f16_1-MLC",
+  "Hermes-2-Pro-Llama-3-8B-q4f32_1-MLC",
+  "Hermes-2-Pro-Mistral-7B-q4f16_1-MLC",
+  "Hermes-3-Llama-3.1-8B-q4f32_1-MLC",
+  "Hermes-3-Llama-3.1-8B-q4f16_1-MLC",
+];
 
 let hwSnapshot: Awaited<ReturnType<typeof detectHardware>> | null = null;
 
@@ -63,13 +76,20 @@ export const webllmExecutor: Executor = {
   id: "webllm",
   label: "WebGPU (web-llm)",
   async available(): Promise<Availability> {
+    // In-browser inference means a multi-GB download on first use: only
+    // when the user asked for it (Privacy Mode, the WebGPU provider) or the
+    // policy allows nothing else (local-only).
+    const policy = getAiPolicy();
+    const optedIn = useAppStore.getState().useLocalAi || getActiveProvider() === "local-webgpu";
+    if (policy === "cloud") return { available: false, reason: "policy", detail: "cloud" };
+    if (policy === "local-first" && !optedIn) return { available: false, reason: "not-opted-in" };
     hwSnapshot = await detectHardware();
     if (!hwSnapshot.webgpu) return { available: false, reason: "no-webgpu", detail: hwSnapshot.reason };
     return { available: true };
   },
   supportsTools(model?: string): boolean {
     const m = model ?? this.modelFor("small");
-    return TOOL_MODELS.test(m);
+    return WEBLLM_TOOL_MODELS.includes(m);
   },
   supportsSchema(): boolean {
     return true;

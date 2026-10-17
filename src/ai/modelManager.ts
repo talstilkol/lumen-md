@@ -36,7 +36,9 @@ export const WEBLLM_CATALOG: WebLlmCatalogEntry[] = [
   { base: "Llama-3.2-1B-Instruct", label: "Llama 3.2 1B", tier: "tiny", vramMB: { f16: 879, f32: 1129 }, lowResource: true, multilingual: true },
   { base: "SmolLM2-1.7B-Instruct", label: "SmolLM2 1.7B", tier: "tiny", vramMB: { f16: 1774, f32: 2692 }, lowResource: true },
   { base: "Llama-3.2-3B-Instruct", label: "Llama 3.2 3B", tier: "small", vramMB: { f16: 2264, f32: 2952 }, lowResource: true, multilingual: true },
-  { base: "Hermes-3-Llama-3.2-3B", label: "Hermes 3 (Llama 3.2 3B)", tier: "small", vramMB: { f16: 2264, f32: 2952 }, lowResource: true, tools: true },
+  // web-llm's function-calling support (functionCallingModelIds) covers the
+  // 8B Hermes models only; the 3B model gets the JSON-ReAct protocol.
+  { base: "Hermes-3-Llama-3.2-3B", label: "Hermes 3 (Llama 3.2 3B)", tier: "small", vramMB: { f16: 2264, f32: 2952 }, lowResource: true },
   { base: "Qwen3-4B", label: "Qwen3 4B", tier: "small", vramMB: { f16: 3432, f32: 4328 }, lowResource: true, multilingual: true },
   { base: "Phi-3.5-mini-instruct", label: "Phi 3.5 mini", tier: "small", vramMB: { f16: 3672, f32: 5483 }, lowResource: false },
   { base: "Qwen2.5-Coder-7B-Instruct", label: "Qwen2.5 Coder 7B", tier: "medium", vramMB: { f16: 5107, f32: 5900 }, lowResource: false, code: true },

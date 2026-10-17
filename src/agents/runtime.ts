@@ -141,13 +141,16 @@ export async function runAgent<I extends AgentInput, O = string>(def: AgentDefin
     }
     run.executor = executor.id;
     const tier: ModelTier = patch.tier ?? def.tier ?? "small";
-    const nativeTools = !!def.tools?.length && executor.supportsTools(patch.model);
-    const nativeSchema = !!def.outputSchema && !def.tools?.length && executor.supportsSchema(patch.model);
+    // The model is resolved once here and pinned on the request, so the
+    // capability decision (native tools / schema) and the call agree.
+    const model = patch.model ?? executor.modelFor(tier);
+    const nativeTools = !!def.tools?.length && executor.supportsTools(model);
+    const nativeSchema = !!def.outputSchema && !def.tools?.length && executor.supportsSchema(model);
     const messages: ExecutorMessage[] = [
       { role: "system", content: systemPrompt(def, input, nativeTools, nativeSchema, patch) },
       { role: "user", content: def.user(input) + (patch.promptSuffix ? `\n\n${patch.promptSuffix}` : "") },
     ];
-    run.model = patch.model ?? executor.modelFor(tier);
+    run.model = model;
 
     let failure: Failure | null = null;
     let finalText: string | null = null;
@@ -160,7 +163,7 @@ export async function runAgent<I extends AgentInput, O = string>(def: AgentDefin
           messages,
           tools: nativeTools ? def.tools : undefined,
           schema: nativeSchema ? def.outputSchema : undefined,
-          model: patch.model,
+          model,
           tier,
           maxTokens: def.maxTokens,
           temperature: patch.temperature ?? def.temperature,

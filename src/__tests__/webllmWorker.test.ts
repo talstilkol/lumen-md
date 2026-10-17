@@ -66,13 +66,21 @@ describe("webllm worker", () => {
     posted.length = 0;
     await handle({ id: 6, type: "interrupt" });
     expect(interruptGenerate).toHaveBeenCalled();
+    interruptGenerate.mockClear();
+    // A targeted interrupt for a chat that is not running cancels it when
+    // its turn comes, without touching the current generation.
+    await handle({ id: 11, type: "interrupt", target: 12 });
+    expect(interruptGenerate).not.toHaveBeenCalled();
+    create.mockResolvedValue({ choices: [{ message: { content: "never" } }] });
+    await handle({ id: 12, type: "chat", modelId: "b", request: { messages: [] }, stream: false });
+    expect(posted.at(-1)).toEqual({ id: 12, type: "error", message: "aborted" });
+    posted.length = 0;
     await handle({ id: 7, type: "hasModel", modelId: "cached" });
     await handle({ id: 8, type: "deleteModel", modelId: "b" });
     expect(unload).toHaveBeenCalledTimes(1);
     expect(deleteModelAllInfoInCache).toHaveBeenCalledWith("b");
     await handle({ id: 9, type: "unload" });
     expect(posted).toEqual([
-      { id: 6, type: "result", value: true },
       { id: 7, type: "result", value: true },
       { id: 8, type: "result", value: true },
       { id: 9, type: "result", value: true },
