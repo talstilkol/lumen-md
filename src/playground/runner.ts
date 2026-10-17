@@ -10,6 +10,7 @@
 import { transform } from "sucrase";
 import {
   IMPORT_ATTRS_RE,
+  formatValue,
   LOOP_GUARD,
   guardLoops,
   importSpecifiers,
@@ -32,35 +33,24 @@ function show(value: unknown): string {
     if (!value.stack) return head;
     return value.stack.includes(value.message) ? value.stack : `${head}\n${value.stack}`;
   }
-  try {
-    const seen = new WeakSet<object>();
-    return JSON.stringify(value, (_k, v: unknown) => {
-      if (typeof v === "object" && v !== null) {
-        if (seen.has(v)) return "[Circular]";
-        seen.add(v);
-      }
-      if (typeof v === "function") return `[Function ${(v as { name?: string }).name || "anonymous"}]`;
-      if (typeof v === "bigint") return `${v}n`;
-      return v;
-    }) ?? String(value);
-  } catch {
-    return String(value);
-  }
+  // Bounded: a huge object stops being walked once the cap is reached.
+  return formatValue(value, MAX_TEXT);
 }
 
+const MAX_TEXT = 10_000;
 const MAX_CONSOLE = 500;
 let sent = 0;
 for (const level of ["log", "info", "warn", "error"] as const) {
   const orig = console[level].bind(console);
   console[level] = (...args: unknown[]) => {
     orig(...args);
-    if (sent++ < MAX_CONSOLE) post({ type: "console", runId, level, text: args.map(show).join(" ").slice(0, 10_000) });
+    if (sent++ < MAX_CONSOLE) post({ type: "console", runId, level, text: args.map(show).join(" ").slice(0, MAX_TEXT) });
   };
 }
 // Errors share the console's budget and size cap, so a huge thrown value
 // can't flood the parent.
 const postError = (message: string) => {
-  if (sent++ < MAX_CONSOLE) post({ type: "error", runId, message: String(message).slice(0, 10_000) });
+  if (sent++ < MAX_CONSOLE) post({ type: "error", runId, message: String(message).slice(0, MAX_TEXT) });
 };
 addEventListener("error", (e) => postError(e.error ? show(e.error) : e.message));
 addEventListener("unhandledrejection", (e) => postError(show(e.reason)));
