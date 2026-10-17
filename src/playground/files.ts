@@ -16,7 +16,7 @@
  * for vue / vanilla. Pure: no DOM.
  */
 
-import { parse } from "acorn";
+import { parse, tokenizer } from "acorn";
 import { tokenize } from "../plugins/liveJsScope";
 
 export type PlaygroundFramework = "vanilla" | "react" | "vue";
@@ -205,9 +205,14 @@ export function guardLoops(code: string): string {
       if (n.test) wrap(n.test as AcornNode);
       else {
         // `for (init;; update)`: the guard goes right after the first `;`.
+        // Found with acorn's tokenizer, so a `;` in a comment isn't taken.
         const from = n.init ? (n.init as AcornNode).end : code.indexOf("(", n.start) + 1;
-        const semi = code.indexOf(";", from);
-        if (semi !== -1) edits.push({ at: semi + 1, text: ` ${LOOP_GUARD}()` });
+        for (const t of tokenizer(code.slice(from), { ecmaVersion: "latest" })) {
+          if (t.type.label === ";") {
+            edits.push({ at: from + t.end, text: ` ${LOOP_GUARD}()` });
+            break;
+          }
+        }
       }
     }
     for (const key in n) {
