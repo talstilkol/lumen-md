@@ -13,6 +13,7 @@ import remarkRehype from "remark-rehype";
 // dependency of the main chunk (A7 lever 1/3).
 import rehypeSlug from "rehype-slug";
 import { rehypeDirAuto } from "./rehypeDirAuto";
+import { rehypeSanitizeRaw } from "./rehypeSanitizeRaw";
 // rehype-raw is dynamically imported in getProcessorWithRaw() — it
 // pulls in parse5 (~275 KB raw / ~40 KB gzipped) and most docs don't
 // need it. Splitting it out of the main bundle is M12-followup-2.
@@ -208,7 +209,8 @@ async function getFullProcessor(
     opts.math ? loadKatex() : null,
   ]);
   let p = buildBase();
-  if (rehypeRaw) p = p.use(rehypeRaw);
+  // Inline HTML goes through the allowlist sanitizer right after parsing (T48).
+  if (rehypeRaw) p = p.use(rehypeRaw).use(rehypeSanitizeRaw);
   // CriticMarkup (suggesting mode) → <ins>/<del>/<mark>; before rehypeSlug
   // so heading ids are computed from the rendered text.
   p = p.use(rehypeCriticMarkup).use(rehypeSlug).use(rehypeDirAuto);
