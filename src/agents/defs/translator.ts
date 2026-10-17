@@ -2,7 +2,8 @@
  * translator — `ai.translate`. Translates Markdown into a target language
  * while keeping its structure. Long documents are translated chunk by
  * chunk (never splitting a code fence); each chunk is checked:
- * code fences, link URLs and image URLs must survive unchanged, and the
+ * fenced code and every URL (inline, reference, autolink, bare) must
+ * survive unchanged, and the
  * output must be written in the target language's script when that
  * script is distinctive (Hebrew, Arabic, Cyrillic, CJK) — the most common
  * local-model failure is answering in English.
@@ -32,7 +33,12 @@ export function expectedScript(targetLanguage: string): Script | null {
   return null;
 }
 
-/** Split Markdown into chunks of about CHUNK_CHARS at blank lines, never inside a code fence. */
+/**
+ * Split Markdown into chunks of about CHUNK_CHARS, never inside a code
+ * fence: at a blank line when one comes, else — for a long table, list or
+ * paragraph with no blank line — at a line boundary once the chunk is a
+ * quarter over the target. `chunks.join("\n")` is the original text.
+ */
 export function chunkMarkdown(text: string, max = CHUNK_CHARS): string[] {
   if (text.length <= max) return [text];
   const lines = text.split("\n");
@@ -44,7 +50,7 @@ export function chunkMarkdown(text: string, max = CHUNK_CHARS): string[] {
     if (/^\s*(```|~~~)/.test(line)) inFence = !inFence;
     current.push(line);
     size += line.length + 1;
-    if (!inFence && size >= max && line.trim() === "") {
+    if (!inFence && (size >= max && line.trim() === "" || size >= max * 1.25)) {
       chunks.push(current.join("\n"));
       current = [];
       size = 0;
@@ -54,7 +60,33 @@ export function chunkMarkdown(text: string, max = CHUNK_CHARS): string[] {
   return chunks;
 }
 
-const urlsOf = (s: string): string[] => [...s.matchAll(/!?\[[^\]]*\]\(([^)\s]+)[^)]*\)/g)].map((m) => m[1]).sort();
+/** Every link / image / reference-definition / autolink / bare URL target, sorted (a multiset). */
+export function urlsOf(s: string): string[] {
+  const out: string[] = [];
+  for (const m of s.matchAll(/!?\[[^\]]*\]\(\s*<?([^)\s>]+)>?[^)]*\)/g)) out.push(m[1]);
+  for (const m of s.matchAll(/^\s{0,3}\[[^\]]+\]:\s*<?(\S+?)>?(?:\s|$)/gm)) out.push(m[1]);
+  for (const m of s.matchAll(/<((?:https?|mailto|ftp):[^>\s]+)>/g)) out.push(m[1]);
+  // Bare URLs not already captured as a link target above.
+  const linked = s.replace(/!?\[[^\]]*\]\([^)]*\)/g, " ").replace(/^\s{0,3}\[[^\]]+\]:.*$/gm, " ").replace(/<(?:https?|mailto|ftp):[^>\s]+>/g, " ");
+  for (const m of linked.matchAll(/\bhttps?:\/\/[^\s<>()\]]+[^\s<>()\].,;:!?'"]/g)) out.push(m[0]);
+  return out.sort();
+}
+
+/** The contents of every fenced code block, in order (trailing spaces ignored). */
+export function fencedBlocks(s: string): string[] {
+  const out: string[] = [];
+  let open: { marker: string; body: string[] } | null = null;
+  for (const line of s.split("\n")) {
+    const m = /^\s*(`{3,}|~{3,})/.exec(line);
+    if (!open) {
+      if (m) open = { marker: m[1][0], body: [] };
+    } else if (m && m[1][0] === open.marker) {
+      out.push(open.body.map((l) => l.replace(/\s+$/, "")).join("\n"));
+      open = null;
+    } else open.body.push(line);
+  }
+  return out;
+}
 
 /** The prose of a Markdown text: no code blocks, inline code, URLs or frontmatter — what the script check should look at. */
 export function proseOf(s: string): string {
@@ -68,10 +100,13 @@ export function proseOf(s: string): string {
 }
 const fenceCount = (s: string): number => (s.match(/^\s*(```|~~~)/gm) ?? []).length;
 
-/** Structure must survive: same fences, same link/image URLs; script must match the target. */
+/** Structure must survive: same fences with the same code, same URLs in every link form; script must match the target. */
 export function checkTranslation(output: string, source: string, targetLanguage: string): ValidationResult {
   if (!output.trim()) return fail("empty translation");
   if (fenceCount(output) !== fenceCount(source)) return fail("code fences changed", "Keep every ``` code block exactly as in the source, untranslated.");
+  const codeA = fencedBlocks(source);
+  const codeB = fencedBlocks(output);
+  if (codeA.some((c, i) => c !== codeB[i])) return fail("code inside a fenced block changed", "Copy every code block character for character; do not translate code or its comments.");
   const a = urlsOf(source);
   const b = urlsOf(output);
   if (a.length !== b.length || a.some((u, i) => u !== b[i])) return fail("link or image URLs changed", "Keep every link and image URL exactly as in the source.");

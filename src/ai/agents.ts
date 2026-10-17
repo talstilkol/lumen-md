@@ -379,7 +379,13 @@ export async function translateMarkdown(text: string, targetLanguage: string): P
       out.push(chunk);
       continue;
     }
-    out.push(await runAgentOrThrow(translatorAgent, { text: chunk, extra: { targetLanguage } }, { document: text }));
+    // The model's answer is trimmed; the blank lines around each chunk are
+    // the document's paragraph breaks, so they are put back as they were.
+    const lead = /^\s*/.exec(chunk)?.[0] ?? "";
+    const trail = /\s*$/.exec(chunk)?.[0] ?? "";
+    const body = chunk.slice(lead.length, chunk.length - trail.length);
+    const translated = await runAgentOrThrow(translatorAgent, { text: body, extra: { targetLanguage } }, { document: text });
+    out.push(lead + translated.trim() + trail);
   }
   return out.join("\n").trim();
 }
