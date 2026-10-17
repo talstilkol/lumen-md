@@ -245,7 +245,8 @@ const PHRASING_PARENTS = new Set(["paragraph", "heading", "tableCell", "emphasis
  * no difference: when nothing precedes it in its first block or nothing
  * follows it in its last (a substitution: both), the breaks it would
  * drop only leave empty paragraphs. And only for runs of sibling
- * paragraphs / headings whose sentinels are all direct children. Anything
+ * paragraphs (a heading may start the run, where its `#` is outside the
+ * change in source mode too) whose sentinels are all direct children. Anything
  * else stays literal text, written back unchanged. */
 
 const TEXT_BLOCKS = new Set(["paragraph", "heading"]);
@@ -296,7 +297,9 @@ function pairAcrossBlocks(blocks: TextBlock[]): void {
     let end = -1;
     for (let j = i + 1; j < blocks.length && end === -1; j++) {
       const b = blocks[j];
-      const sen = TEXT_BLOCKS.has(b.type) ? blockSentinels(b) : null;
+      // Only paragraphs continue a run: a later heading's `#` would stay
+      // outside the mark (accepting `{--a\n\n# b--}` must not leave `#`).
+      const sen = b.type === "paragraph" ? blockSentinels(b) : null;
       if (!sen) break;
       const next = open === "sub" ? S.subMid : CLOSER[open];
       if (sen.length === 0) roles.push({ block: b, open, role: "middle" });

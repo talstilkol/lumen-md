@@ -102,6 +102,9 @@ describe("CriticMarkup ↔ marks", () => {
         expect(resolveAll(e.md(), mode).trim()).toBe(resolveAll(src, mode).trim());
       }
     }
+    // A heading inside the run isn't split (its `#` would survive accepting):
+    // the markup stays literal and is written back unchanged.
+    expect((await open("{--first\n\n# second--}", false)).md()).toBe("{--first\n\n# second--}");
     // Accept at the cursor resolves that block's piece.
     const e = await open("{--first\n\nsecond--}", false);
     e.select(e.at("second", 2));
