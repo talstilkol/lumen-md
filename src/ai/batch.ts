@@ -9,12 +9,14 @@
  * confirms).
  */
 import { getActiveProvider, getProviderKey, effectiveModel, AiError, type AiProvider } from "./llm";
-import { assertCloudAllowed } from "./policy";
+import { assertCloudAllowed, getAiPolicy } from "./policy";
+import { get as idbGet, set as idbSet, del as idbDel } from "idb-keyval";
 import { PROMPTS } from "./prompts";
 import { recordUsage } from "./usage";
 
 export type BatchOp = "tags" | "summary" | "translate";
-export type BatchProvider = "anthropic" | "openai";
+/** "local": a queue this device runs through chat() (policy-routed to the local model). */
+export type BatchProvider = "anthropic" | "openai" | "local";
 
 export interface BatchItem {
   customId: string;
@@ -76,8 +78,14 @@ const STORE = "lumen.ai.batches";
 /** Characters of each note sent (long notes are cut, with a marker). */
 export const MAX_NOTE_CHARS = 24_000;
 
+/**
+ * Where a batch runs: the provider's half-price Batch API only under the
+ * `cloud` policy with OpenAI / Anthropic selected; otherwise the local
+ * queue on this device.
+ */
 export function batchProviderFor(provider: AiProvider): BatchProvider | null {
-  return provider === "anthropic" || provider === "openai" ? provider : null;
+  if (getAiPolicy() === "cloud") return provider === "anthropic" || provider === "openai" ? provider : null;
+  return "local";
 }
 
 export function loadJobs(): BatchJob[] {
@@ -140,6 +148,7 @@ export async function submitBatch(
   const f = opts.fetchImpl ?? fetch;
   const provider = batchProviderFor(getActiveProvider());
   if (!provider) throw new AiError("API_ERROR", "Batch jobs need the OpenAI or Anthropic provider (AI: Switch Provider).");
+  if (provider === "local") return submitLocalBatch(op, notes, opts.lang);
   assertCloudAllowed(`${provider} batch API`);
   const model = effectiveModel(provider);
   const items: BatchItem[] = notes.map((n, i) => ({ customId: `n${i}`, path: n.path, hash: textHash(n.text) }));
@@ -200,6 +209,7 @@ export interface BatchResults {
 
 /** Poll a job; when it has ended, download its results and meter them (batch price). */
 export async function fetchBatchResults(job: BatchJob, fetchImpl: Fetch = fetch): Promise<BatchResults> {
+  if (job.provider === "local") return localBatchResults(job);
   assertCloudAllowed(`${job.provider} batch API`);
   const answers = new Map<string, string>();
   let failed = 0;
@@ -461,4 +471,106 @@ function writtenByJob(want: string, source: string, id: string, read: (path: str
     if (text !== null && frontmatterField(text, TRANSLATED_FROM) === source && frontmatterField(text, TRANSLATION_JOB) === id) return true;
   }
   return false;
+}
+
+/* ─── Local queue ───────────────────────────────────────────────────── */
+
+/**
+ * The local queue: each note goes through chat() — which the AI policy
+ * routes to Ollama / WebGPU — one at a time in the background, with the
+ * same prompts as the cloud Batch API, so "Check Batch Jobs" and
+ * planWrites() apply the answers unchanged. Answers are kept in
+ * IndexedDB (`lumen-batch-local:<id>`), so a run interrupted by closing
+ * the tab resumes on the next check from the notes that are still
+ * missing (re-read from the workspace; edited notes are skipped by
+ * planWrites' hash check as usual).
+ */
+interface LocalState {
+  answers: Record<string, string>;
+  failed: string[];
+  finished: boolean;
+}
+
+const LOCAL_KEY = (id: string) => `lumen-batch-local:${id}`;
+const running = new Map<string, Promise<void>>();
+
+async function loadLocal(id: string): Promise<LocalState> {
+  const v = (await idbGet(LOCAL_KEY(id)).catch(() => undefined)) as LocalState | undefined;
+  return v ?? { answers: {}, failed: [], finished: false };
+}
+
+/** Injected in tests; defaults to chat() with the quota already paid at submit. */
+let localAnswer: (system: string, user: string, maxTokens: number) => Promise<string> = async (system, user, maxTokens) => {
+  const { chat } = await import("./llm");
+  return chat([{ role: "system", content: system }, { role: "user", content: user }], { maxTokens, prepaid: true, tier: "light" });
+};
+let readNote: (path: string) => Promise<string | null> = async (path) => {
+  const { readWorkspaceFile } = await import("../storage/workspace");
+  return readWorkspaceFile(path).catch(() => null);
+};
+
+export function __setLocalBatchDeps(deps: { answer?: typeof localAnswer; read?: typeof readNote }): void {
+  if (deps.answer) localAnswer = deps.answer;
+  if (deps.read) readNote = deps.read;
+}
+
+function runLocal(job: BatchJob, texts?: ReadonlyMap<string, string>): Promise<void> {
+  const existing = running.get(job.id);
+  if (existing) return existing;
+  const p = (async () => {
+    const state = await loadLocal(job.id);
+    for (const item of job.items) {
+      if (item.customId in state.answers || state.failed.includes(item.customId)) continue;
+      const text = texts?.get(item.path) ?? (await readNote(item.path));
+      if (text === null) {
+        state.failed.push(item.customId);
+      } else {
+        const r = requestFor(job.op, text, job.lang);
+        try {
+          const answer = await localAnswer(r.system, r.user, r.maxTokens);
+          if (answer.trim()) state.answers[item.customId] = answer;
+          else state.failed.push(item.customId);
+        } catch {
+          state.failed.push(item.customId);
+        }
+      }
+      await idbSet(LOCAL_KEY(job.id), state).catch(() => {});
+    }
+    state.finished = true;
+    await idbSet(LOCAL_KEY(job.id), state).catch(() => {});
+  })().finally(() => running.delete(job.id));
+  running.set(job.id, p);
+  return p;
+}
+
+async function submitLocalBatch(op: BatchOp, notes: ReadonlyArray<{ path: string; text: string }>, lang?: string): Promise<BatchJob> {
+  const { effectiveModel: modelOf, getActiveProvider: active } = await import("./llm");
+  const items: BatchItem[] = notes.map((n, i) => ({ customId: `n${i}`, path: n.path, hash: textHash(n.text) }));
+  const id = `local_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
+  const job: BatchJob = { id, provider: "local", model: modelOf(active()), op, lang, createdAt: new Date().toISOString(), items, status: "submitted" };
+  if (!saveJobs([...loadJobs(), job])) throw new AiError("API_ERROR", "This device couldn't save the batch job (storage full or blocked).");
+  void runLocal(job, new Map(notes.map((n) => [n.path, n.text])));
+  return job;
+}
+
+async function localBatchResults(job: BatchJob): Promise<BatchResults> {
+  let state = await loadLocal(job.id);
+  if (!state.finished && !running.has(job.id)) {
+    // The tab was closed mid-run: resume in the background.
+    void runLocal(job);
+    state = await loadLocal(job.id);
+  }
+  const answers = new Map(Object.entries(state.answers));
+  if (!state.finished) return { state: "processing", answers: new Map(), failed: state.failed.length };
+  return { state: "ended", answers, failed: state.failed.length };
+}
+
+/** Forget a local job's stored answers (after it was applied). */
+export async function clearLocalBatch(id: string): Promise<void> {
+  await idbDel(LOCAL_KEY(id)).catch(() => {});
+}
+
+/** Tests: wait for a running local job. */
+export function __localBatchRun(id: string): Promise<void> | undefined {
+  return running.get(id);
 }

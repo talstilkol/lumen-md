@@ -1054,7 +1054,7 @@ export function useCommands({
             return;
           }
           const { estimateTokens, costOf } = await import("../ai/usage");
-          const model = effectiveModel(provider);
+          const model = provider === "local" ? effectiveModel(getActiveProvider()) : effectiveModel(provider);
           let input = 0;
           let output = 0;
           for (const n of notes) {
@@ -1063,9 +1063,12 @@ export function useCommands({
             // A translation is about as long as the (possibly truncated) text sent.
             output += op === "translate" ? Math.min(r.maxTokens, estimateTokens(r.user)) : r.maxTokens / 2;
           }
-          const usd = costOf({ provider, model, inputTokens: input, outputTokens: output, batch: true });
+          const usd = provider === "local" ? 0 : costOf({ provider, model, inputTokens: input, outputTokens: output, batch: true });
           const ok = await uiConfirm({
-            message: t("batch.confirm", { count: notes.length, provider, model, cost: usd === null ? "?" : `~$${usd.toFixed(2)}` }),
+            message:
+              provider === "local"
+                ? t("batch.confirmLocal", { count: notes.length, model })
+                : t("batch.confirm", { count: notes.length, provider, model, cost: usd === null ? "?" : `~$${usd.toFixed(2)}` }),
           });
           if (!ok) return;
           try {
