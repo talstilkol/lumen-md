@@ -1,0 +1,63 @@
+import { describe, it, expect, vi, beforeEach } from "vitest";
+
+vi.mock("../store/useStore", () => ({ useAppStore: { getState: () => ({ aiKey: null, useLocalAi: false, useFineTunedModel: false, fineTunedModelId: null }) } }));
+vi.mock("../billing/aiQuota", () => ({ chargeAiCommandDispatch: vi.fn(), consumeAiPrompt: vi.fn(() => true), aiQuotaStatus: () => ({ allowed: true, limit: Infinity }), AiQuotaExceededError: class extends Error {} }));
+
+import { registerExecutor, resetExecutors } from "../agents/executors";
+import { EVAL_CASES } from "../agents/eval/fixtures";
+import { runEvalCase } from "../agents/eval/run";
+import { formatEvalReport, hebrewRatio, passed, runCheck } from "../agents/eval/score";
+import { fakeExecutor, sequence } from "./helpers/fakeExecutor";
+
+beforeEach(() => resetExecutors());
+
+describe("agent eval — scoring", () => {
+  it("hebrewRatio counts letters only and judges structured values, not keys", () => {
+    expect(hebrewRatio("שלום world")).toBeCloseTo(4 / 9);
+    expect(hebrewRatio("123 !!")).toBe(0);
+    expect(runCheck({ type: "hebrew", min: 0.9 }, { tags: ["שלום", "עולם"] }).ok).toBe(true);
+  });
+
+  it("each check type passes and fails as documented", () => {
+    expect(runCheck({ type: "contains", all: ["A", "b"] }, "a B c").ok).toBe(true);
+    expect(runCheck({ type: "contains", all: ["z"] }, "a").detail).toBe("missing: z");
+    expect(runCheck({ type: "containsAny", any: ["x", "c"] }, "abc").ok).toBe(true);
+    expect(runCheck({ type: "notContains", none: ["b"] }, "abc").ok).toBe(false);
+    expect(runCheck({ type: "maxChars", max: 3 }, "abcd").ok).toBe(false);
+    expect(runCheck({ type: "minItems", path: "a.b", min: 2 }, { a: { b: [1, 2] } }).ok).toBe(true);
+    expect(runCheck({ type: "matches", source: "^x", flags: "m" }, "a\nx").ok).toBe(true);
+  });
+
+  it("the report lists every case with a pass count", () => {
+    const md = formatEvalReport(
+      [
+        { id: "a", agent: "tagger", status: "ok", executor: "ollama", model: "m", attempts: 1, ms: 1200, checks: [] },
+        { id: "b", agent: "tasker", status: "failed", executor: "ollama", model: "m", attempts: 3, ms: 800, checks: [], error: "validation: x|y" },
+        { id: "c", agent: "writer", status: "skipped", executor: null, model: null, attempts: 0, ms: 0, checks: [] },
+      ],
+      { model: "qwen2.5:7b", url: "http://localhost:11434", date: "2026-10-17" },
+    );
+    expect(md).toContain("**1/2 passed**");
+    expect(md).toContain("| b | tasker | FAIL | 3 | 0.8 s | validation: x\\|y |");
+    expect(md).toContain("| c | writer | skipped |");
+  });
+});
+
+describe("agent eval — fixtures", () => {
+  it("ids are unique and most cases are Hebrew", () => {
+    const ids = EVAL_CASES.map((c) => c.id);
+    expect(new Set(ids).size).toBe(ids.length);
+    expect(EVAL_CASES.filter((c) => hebrewRatio(c.input.text ?? "") > 0.5).length).toBeGreaterThanOrEqual(EVAL_CASES.length / 2);
+  });
+
+  for (const c of EVAL_CASES) {
+    it(`${c.id}: the reference answer passes the agent's parser, validators and the checks`, async () => {
+      registerExecutor(fakeExecutor(sequence(c.example)));
+      const r = await runEvalCase(c, { executor: "ollama" });
+      expect(r.error).toBeUndefined();
+      expect(r.checks.filter((x) => !x.ok)).toEqual([]);
+      expect(passed(r)).toBe(true);
+      expect(r.attempts).toBe(1);
+    });
+  }
+});
