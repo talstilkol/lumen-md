@@ -23,6 +23,11 @@ describe("quoteCoverage bounds", () => {
     const head = Array.from({ length: 200 }, (_, k) => `h${k}`);
     const quote = [...head, ...Array.from({ length: 100 }, (_, k) => `made${k}`)].join(" ");
     expect(quoteCoverage(quote, `${head.join(" ")} other words`)).toBeLessThan(0.85);
+    // A 300-word quote that differs from the page by one word still matches.
+    const long = Array.from({ length: 300 }, (_, k) => `w${k}`);
+    const changed = [...long];
+    changed[150] = "different";
+    expect(quoteCoverage(changed.join(" "), long.join(" "))).toBeGreaterThan(0.85);
     const passage = ["the", ...Array.from({ length: 99 }, (_, k) => `real${k}`)];
     const page = [...Array.from({ length: 30_000 }, () => "the noise"), ...passage].join(" ");
     expect(quoteCoverage(passage.join(" ") + " extra", page)).toBeGreaterThan(0.85);

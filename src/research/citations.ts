@@ -143,19 +143,44 @@ export function quoteCoverage(quote: string, page: string): number {
   const q = normaliseForMatch(quote).replace(/\.\.\.|…/g, " ");
   const p = normaliseForMatch(page);
   if (q && p.includes(q)) return 1;
-  // Bounded work: long quotes are judged on their first 200 words, each
-  // opening word starts at most 2 alignments, and the scan stops after a
-  // fixed budget of comparisons (the check runs on the UI thread).
   const all = words(quote);
-  const qw = all.slice(0, 200);
-  if (qw.length < 3) return 0;
+  if (all.length < 3) return 0;
   const pw = words(page);
-  // Order-aware: for each start in the page where one of the quote's
-  // opening words occurs, match the quote's words IN ORDER from that word on
-  // within a window (skipping up to a few extra or missing words). A passage
-  // with the same words in another order doesn't count. Starts reach past
-  // the first few words so a quote whose opening words were dropped can
-  // still reach the approximate threshold (the dropped words count as missed).
+  // Bounded work: a long quote is matched as up to 5 segments of 200 words
+  // spread over its whole length (head and tail always included), so a
+  // fabricated tail lowers the score and a one-word difference doesn't.
+  const SEG = 200;
+  const segs: string[][] = [];
+  if (all.length <= SEG) segs.push(all);
+  else {
+    const n = Math.min(5, Math.ceil(all.length / SEG));
+    for (let k = 0; k < n; k++) {
+      const at = Math.round(((all.length - SEG) * k) / Math.max(1, n - 1));
+      segs.push(all.slice(at, at + SEG));
+    }
+  }
+  let matched = 0;
+  let compared = 0;
+  for (const seg of segs) {
+    matched += matchSegment(seg, pw);
+    compared += seg.length;
+  }
+  return matched / compared;
+}
+
+/**
+ * Words of `qw` matched IN ORDER somewhere in the page (best alignment).
+ * For each start in the page where one of the segment's opening words
+ * occurs, match its words in order from that word on within a window
+ * (skipping up to a few extra or missing words). A passage with the same
+ * words in another order doesn't count. Starts reach past the first few
+ * words so a quote whose opening words were dropped can still reach the
+ * approximate threshold (the dropped words count as missed). Each opening
+ * word starts at most 2 alignments, and candidate starts are sampled evenly
+ * across the page when there are too many (the check runs on the UI thread).
+ */
+function matchSegment(qw: string[], pw: string[]): number {
+  if (!qw.length) return 0;
   const win = Math.ceil(qw.length * 1.3) + 2;
   const lead = Math.max(3, Math.ceil(qw.length * (1 - APPROXIMATE_AT)) + 1);
   const starts = new Map<string, number[]>(); // word → its indexes among the opening words
@@ -163,12 +188,9 @@ export function quoteCoverage(quote: string, page: string): number {
     const at = starts.get(w) ?? [];
     if (at.length < 2) starts.set(w, [...at, s]);
   });
-  // Candidate starts across the whole page, sampled evenly when there are
-  // many (a common opening word mustn't use up the budget before the
-  // real passage is reached).
   let cand: number[] = [];
   for (let i = 0; i < pw.length; i++) if (starts.has(pw[i])) cand.push(i);
-  const MAX_CANDIDATES = Math.max(50, Math.floor(4_000_000 / (win * 6)));
+  const MAX_CANDIDATES = Math.max(50, Math.floor(800_000 / (win * 6)));
   if (cand.length > MAX_CANDIDATES) {
     const step = cand.length / MAX_CANDIDATES;
     cand = Array.from({ length: MAX_CANDIDATES }, (_, k) => cand[Math.floor(k * step)]);
@@ -192,8 +214,7 @@ export function quoteCoverage(quote: string, page: string): number {
       if (matched > best) best = matched;
     }
   }
-  // Words past the first 200 weren't compared: they can't count as found.
-  return best / all.length;
+  return best;
 }
 
 export const APPROXIMATE_AT = 0.85;
