@@ -36,7 +36,7 @@ describe("auto-backup flush on pagehide", () => {
     window.dispatchEvent(new Event("pagehide"));
     await vi.runAllTimersAsync();
     expect(writes).toHaveLength(1);
-    expect(writes[0].path).toMatch(/^backups\/Notes\.md\/\d+\.md$/);
+    expect(writes[0].path).toMatch(/^backups\/Notes-[0-9a-f]{8}\/\d+\.md$/);
     expect(writes[0].content).toBe("# first draft");
   });
 
