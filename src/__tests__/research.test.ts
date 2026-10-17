@@ -8,6 +8,17 @@ import type { ExtractedPage } from "../research/client";
 import { anthropicWebResearch, MAX_RESEARCH_TURNS } from "../ai/anthropicProvider";
 import { costOf } from "../ai/usage";
 
+describe("quoteCoverage bounds", () => {
+  it("stays fast on a long quote with repeated opening words against a long page", async () => {
+    const { quoteCoverage } = await import("../research/citations");
+    const quote = Array.from({ length: 600 }, (_, k) => (k % 2 ? "the" : `w${k}`)).join(" ");
+    const page = Array.from({ length: 60_000 }, (_, k) => (k % 3 ? "the" : `p${k}`)).join(" ");
+    const t = performance.now();
+    expect(quoteCoverage(quote, page)).toBeLessThan(0.85);
+    expect(performance.now() - t).toBeLessThan(2000);
+  });
+});
+
 describe("research worker helpers", () => {
   it("fetches public http(s) URLs only", () => {
     for (const ok of ["https://example.org/a?b=1", "http://news.example.com/x", "http://example.org:80/", "https://example.org:443/"]) expect(isFetchableUrl(ok)).toBe(true);

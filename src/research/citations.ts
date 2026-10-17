@@ -135,7 +135,10 @@ export function quoteCoverage(quote: string, page: string): number {
   const q = normaliseForMatch(quote).replace(/\.\.\.|…/g, " ");
   const p = normaliseForMatch(page);
   if (q && p.includes(q)) return 1;
-  const qw = words(quote);
+  // Bounded work: long quotes are judged on their first 200 words, each
+  // opening word starts at most 2 alignments, and the scan stops after a
+  // fixed budget of comparisons (the check runs on the UI thread).
+  const qw = words(quote).slice(0, 200);
   if (qw.length < 3) return 0;
   const pw = words(page);
   // Order-aware: for each start in the page where one of the quote's
@@ -147,10 +150,15 @@ export function quoteCoverage(quote: string, page: string): number {
   const win = Math.ceil(qw.length * 1.3) + 2;
   const lead = Math.max(3, Math.ceil(qw.length * (1 - APPROXIMATE_AT)) + 1);
   const starts = new Map<string, number[]>(); // word → its indexes among the opening words
-  qw.slice(0, lead).forEach((w, s) => starts.set(w, [...(starts.get(w) ?? []), s]));
+  qw.slice(0, lead).forEach((w, s) => {
+    const at = starts.get(w) ?? [];
+    if (at.length < 2) starts.set(w, [...at, s]);
+  });
   let best = 0;
-  for (let i = 0; i < pw.length && best < qw.length; i++) {
+  let budget = 4_000_000;
+  for (let i = 0; i < pw.length && best < qw.length && budget > 0; i++) {
     for (const s of starts.get(pw[i]) ?? []) {
+      budget -= win * 3;
       let q = s;
       let matched = 0;
       for (let j = i; j < Math.min(pw.length, i + win) && q < qw.length; j++) {
