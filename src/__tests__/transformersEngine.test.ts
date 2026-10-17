@@ -121,6 +121,15 @@ describe("transformersEngine (worker client)", () => {
     expect((received[1] as { target?: number }).target).toBe(received[0].id);
   });
 
+  it("aborting while the hardware probe is pending posts nothing", async () => {
+    script = () => {};
+    const ctrl = new AbortController();
+    const p = transcribeAudio(new Float32Array(16), { signal: ctrl.signal });
+    ctrl.abort(); // before detectHardware() resolves
+    await expect(p).rejects.toMatchObject({ name: "AbortError" });
+    expect(received.filter((m) => m.type === "transcribe")).toEqual([]);
+  });
+
   it("discards a worker that failed at the top level so the next call starts fresh", async () => {
     script = () => {};
     const p = embedTextsLocal(["x"]);

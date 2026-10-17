@@ -107,6 +107,9 @@ function getWorker(): Worker {
 type WorkerCall = WorkerIn extends infer M ? (M extends { id: number } ? Omit<M, "id"> : never) : never;
 
 function call<T>(msg: WorkerCall, transfer: Transferable[] = [], signal?: AbortSignal): Promise<T> {
+  // Aborted while the caller was still preparing (e.g. awaiting the
+  // hardware probe): nothing is posted, so no download or inference starts.
+  if (signal?.aborted) return Promise.reject(new DOMException("aborted", "AbortError"));
   const id = ++seq;
   return new Promise<T>((resolve, reject) => {
     const entry: Pending = { resolve: resolve as (v: unknown) => void, reject };
