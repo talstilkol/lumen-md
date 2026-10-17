@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-10-17T02:52:33.511Z",
+  "generated_at": "2026-10-17T03:38:18.020Z",
   "source": "src/i18n/index.ts (en bundle)",
-  "count": 1036,
+  "count": 1041,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -3475,6 +3475,37 @@
       "en": "Applied {count} batch results",
       "vars": [
         "count"
+      ]
+    },
+    {
+      "key": "batch.terminal",
+      "en": "Batch \"{op}\" ({id}) {state} — no results were applied",
+      "vars": [
+        "op",
+        "id",
+        "state"
+      ]
+    },
+    {
+      "key": "batch.state.failed",
+      "en": "failed",
+      "vars": []
+    },
+    {
+      "key": "batch.state.expired",
+      "en": "expired",
+      "vars": []
+    },
+    {
+      "key": "batch.state.cancelled",
+      "en": "was cancelled",
+      "vars": []
+    },
+    {
+      "key": "batch.saveFailed",
+      "en": "Couldn't save the batch job state for {id} (storage full or blocked). Free some space, then run \"AI: Check Batch Jobs\" again — already-applied results won't be duplicated.",
+      "vars": [
+        "id"
       ]
     },
     {
