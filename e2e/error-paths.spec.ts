@@ -103,6 +103,7 @@ test("LiveJS with throw doesn't propagate up to pageerror", async ({
   await editor.fill(
     "```live-js\nthrow new Error(\"intentional from user code\");\n```\n",
   );
+  await page.getByRole("button", { name: "Run", exact: true }).first().click();
   // The live-js block catches the throw and shows its status; no
   // uncaught pageerror leaks.
   await expect(page.locator(".chart-block").first()).toContainText(/Runtime error|intentional from user code/i, { timeout: 15_000 });
@@ -119,6 +120,7 @@ test("LiveJS with infinite loop is timed out (block status reflects it)", async 
   await editor.fill(
     "```live-js\nwhile (true) { /* user typo */ }\n```\n",
   );
+  await page.getByRole("button", { name: "Run", exact: true }).first().click();
   // The worker has a hard timeout (~3-5s): the status flips to "Timed out".
   await expect(page.locator("text=/Timed out|Runtime error/i").first()).toBeVisible({
     timeout: 15_000,
