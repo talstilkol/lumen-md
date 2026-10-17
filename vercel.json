@@ -3,7 +3,7 @@
   "framework": "vite",
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
-  "ignoreCommand": "git diff --quiet HEAD^ HEAD -- . ':(exclude,glob)*.md' ':(exclude,glob)docs/**' ':(exclude,glob)edge-workers/**' ':(exclude,glob)sync-server/**' ':(exclude,glob)mcp-server/**' ':(exclude,glob)api-server/**' ':(exclude,glob)marketplace-server/**' ':(exclude,glob)packages/**' ':(exclude,glob)extension/**' ':(exclude,glob)src-tauri/**' ':(exclude,glob)ios/**' ':(exclude,glob)android/**' ':(exclude,glob)e2e/**' ':(exclude,glob).github/**'",
+  "ignoreCommand": "bash scripts/vercel-ignore.sh",
   "rewrites": [
     {
       "source": "/((?!assets/|sw\\.js|workbox-|manifest|favicon|.*\\.[a-z0-9]+$).*)",
