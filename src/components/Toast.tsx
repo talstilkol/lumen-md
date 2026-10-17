@@ -45,7 +45,7 @@ function ToastCard({ toast }: { toast: ToastType }) {
       <div className="min-w-0 flex-1">
         <div className="text-sm font-semibold">{toast.title}</div>
         {toast.body ? (
-          <div className="mt-1 text-xs opacity-90 break-words">{toast.body}</div>
+          <div className="mt-1 text-xs opacity-90 wrap-break-word">{toast.body}</div>
         ) : null}
         {toast.learnMoreUrl ? (
           <a
@@ -64,7 +64,7 @@ function ToastCard({ toast }: { toast: ToastType }) {
               dismiss(toast.id);
               toast.action!.run();
             }}
-            className="mt-2 block rounded border border-current px-2 py-0.5 text-xs font-medium hover:opacity-80"
+            className="mt-2 block rounded-sm border border-current px-2 py-0.5 text-xs font-medium hover:opacity-80"
           >
             {toast.action.label}
           </button>
@@ -74,7 +74,7 @@ function ToastCard({ toast }: { toast: ToastType }) {
         type="button"
         onClick={() => dismiss(toast.id)}
         aria-label={t("toast.dismiss")}
-        className="shrink-0 rounded p-1 opacity-70 hover:opacity-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-current"
+        className="shrink-0 rounded-sm p-1 opacity-70 hover:opacity-100 focus-visible:outline-solid focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-current"
       >
         <X size={14} />
       </button>
@@ -88,7 +88,7 @@ export function ToastContainer() {
   return (
     <div
       aria-label={t("toast.region")}
-      className="pointer-events-none fixed bottom-4 right-4 z-[1000] flex flex-col gap-2 [direction:ltr]"
+      className="pointer-events-none fixed bottom-4 right-4 z-1000 flex flex-col gap-2 [direction:ltr]"
     >
       {toasts.map((item) => (
         <ToastCard key={item.id} toast={item} />
