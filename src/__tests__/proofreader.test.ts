@@ -7,7 +7,7 @@ vi.mock("../billing/aiQuota", () => ({ chargeAiCommandDispatch: vi.fn(), consume
 import { registerExecutor, resetExecutors } from "../agents/executors";
 import { fakeExecutor, sequence } from "./helpers/fakeExecutor";
 import { locateIssues } from "../agents/defs";
-import { checkGrammar, clearGrammarCache, grammarEndpoint, GRAMMAR_ENDPOINT_KEY } from "../ai/grammar";
+import { checkGrammar, clearGrammarCache, grammarEndpoint, GRAMMAR_ENDPOINT_KEY, __grammarCacheSize } from "../ai/grammar";
 
 const TEXT = "This are a sentence that have two mistakes, and it is long enough for a check.";
 
@@ -46,5 +46,13 @@ describe("proofreader", () => {
     } finally {
       vi.unstubAllGlobals();
     }
+  });
+
+  it("the proofreader path keeps the cache within its limit", async () => {
+    clearGrammarCache();
+    localStorage.setItem("lumen.ai.policy", "local-only");
+    registerExecutor(fakeExecutor(sequence('{"issues": []}')));
+    for (let i = 0; i < 20; i++) await checkGrammar(`Document number ${i} has enough words to be checked by the proofreader.`, "en-US", { allowModel: true });
+    expect(__grammarCacheSize()).toBeLessThanOrEqual(16);
   });
 });

@@ -33,6 +33,22 @@ const DEFAULT_URL = "https://api.languagetool.org/v2/check";
 const RECENT: Map<string, GrammarMatch[]> = new Map();
 const RECENT_LIMIT = 16;
 
+/** Every cache write goes through here, so the size limit holds on every path. */
+function remember(key: string, matches: GrammarMatch[]): void {
+  RECENT.delete(key);
+  while (RECENT.size >= RECENT_LIMIT) {
+    const oldest = RECENT.keys().next().value;
+    if (oldest === undefined) break;
+    RECENT.delete(oldest);
+  }
+  RECENT.set(key, matches);
+}
+
+/** Tests. */
+export function __grammarCacheSize(): number {
+  return RECENT.size;
+}
+
 export const GRAMMAR_ENDPOINT_KEY = "lumen.grammar.endpoint";
 
 export function grammarEndpoint(): string {
@@ -79,7 +95,7 @@ export async function checkGrammar(
   if (!isLocalOrigin(endpoint()) && !cloudAllowed()) {
     if (!opts.allowModel) return [];
     const matches = await checkWithModel(trimmed, language);
-    RECENT.set(cacheKey, matches);
+    remember(cacheKey, matches);
     return matches;
   }
 
@@ -123,11 +139,7 @@ export async function checkGrammar(
   }));
 
   // Tiny LRU.
-  if (RECENT.size >= RECENT_LIMIT) {
-    const firstKey = RECENT.keys().next().value;
-    if (firstKey !== undefined) RECENT.delete(firstKey);
-  }
-  RECENT.set(cacheKey, matches);
+  remember(cacheKey, matches);
   return matches;
 }
 
