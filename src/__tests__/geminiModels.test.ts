@@ -43,4 +43,12 @@ describe("Gemini models", () => {
     const lite = costOf({ provider: "gemini", model: "gemini-3.5-flash-lite", inputTokens: 1e6, outputTokens: 1e6 });
     expect(lite).toBeCloseTo(0.3 + 2.5, 6);
   });
+
+  it("prices Gemini 3.x cache reads at 10% of input, as the pricing page lists", () => {
+    const cached = (model: string) => costOf({ provider: "gemini", model, inputTokens: 0, outputTokens: 0, cacheReadTokens: 1e6 });
+    expect(cached("gemini-3.8-flash")).toBeCloseTo(0.075, 6);
+    expect(cached("gemini-3.6-flash")).toBeCloseTo(0.075, 6);
+    expect(cached("gemini-3.5-flash-lite")).toBeCloseTo(0.03, 6);
+    expect(cached("gemini-3.1-flash-lite")).toBeCloseTo(0.025, 6);
+  });
 });
