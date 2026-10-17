@@ -3,8 +3,9 @@ name: CI
 on:
   push:
     branches: [main]
+  # Every pull request, whatever its base: stacked PRs (a feature branch
+  # on top of another) were getting no CI at all with `branches: [main]`.
   pull_request:
-    branches: [main]
 
 concurrency:
   group: ci-${{ github.ref }}
