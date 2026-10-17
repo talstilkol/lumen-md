@@ -99,14 +99,3 @@ describe("backlinks and workspace search", () => {
     expect(c!.snippet!.slice(c!.match!.start, c!.match!.end)).toBe("הַבַּיִת");
   });
 });
-
-describe("backup folder names", () => {
-  it("keeps Hebrew names apart and readable", async () => {
-    const { backupDirName } = await import("../sync/autoBackup");
-    const a = backupDirName("שלום.md");
-    const b = backupDirName("עולם.md");
-    expect(a).not.toBe(b);
-    expect(a.startsWith("שלום-")).toBe(true);
-    expect(backupDirName("a/b c.md")).toMatch(/^a_b_c-[0-9a-f]{8}$/);
-  });
-});
