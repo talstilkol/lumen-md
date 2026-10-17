@@ -11,6 +11,8 @@
  * with a family list as the fallback for older servers.
  */
 
+import { hebrewSupportOf, prefersHebrew } from "../../ai/modelCatalog";
+import { useAppStore } from "../../store/useStore";
 import type { AgentTool, Availability, Executor, ExecutorMessage, ExecutorRequest, ExecutorResponse, ModelTier, ToolCall } from "../types";
 import { getBaseUrl } from "../../ai/ollamaProvider";
 import { AiPolicyError, getAiPolicy, isLocalOrigin } from "../../ai/policy";
@@ -21,6 +23,17 @@ function remoteRefused(): boolean {
 }
 
 export const RECOMMENDED_OLLAMA_MODEL = "qwen2.5:7b";
+const HEBREW_RANK = { strong: 3, good: 2, basic: 1, none: 0 } as const;
+
+/** The open note / UI language is Hebrew (cheap; read on every pick). */
+function notesInHebrew(): boolean {
+  try {
+    const s = useAppStore.getState() as { locale?: string; doc?: { content?: string } };
+    return prefersHebrew(s.locale, s.doc?.content);
+  } catch {
+    return false;
+  }
+}
 /** Ollama accepts a JSON schema in `format` from this version on. */
 const SCHEMA_MIN_VERSION = [0, 5, 0] as const;
 const TAGS_TTL_MS = 30_000;
@@ -81,7 +94,7 @@ function configuredModel(): string | null {
  * below it, else (everything installed is bigger) the smallest installed.
  * Embedding models are never chosen for chat.
  */
-export function pickModel(tier: ModelTier, models: InstalledModel[], configured: string | null): string | null {
+export function pickModel(tier: ModelTier, models: InstalledModel[], configured: string | null, opts: { hebrew?: boolean } = {}): string | null {
   const chat = models.filter((m) => !/embed/i.test(m.name));
   if (!chat.length) return configured;
   const byName = new Map(chat.map((m) => [m.name, m]));
@@ -89,7 +102,10 @@ export function pickModel(tier: ModelTier, models: InstalledModel[], configured:
   if (cfg && tierOf(cfg.params) === tier) return cfg.name;
   const lower = tier === "tiny" ? 0 : tier === "small" ? TIER_MAX_PARAMS.tiny : tier === "medium" ? TIER_MAX_PARAMS.small : TIER_MAX_PARAMS.medium;
   const upper = TIER_MAX_PARAMS[tier];
-  const largest = (list: InstalledModel[]) => list.reduce((b, m) => ((m.params ?? 0) > (b.params ?? 0) ? m : b));
+  // Hebrew notes: among models of the right size, the one with the better
+  // Hebrew wins over the merely larger one (T27).
+  const heb = (m: InstalledModel) => (opts.hebrew ? HEBREW_RANK[hebrewSupportOf(m.name) ?? "none"] : 0);
+  const largest = (list: InstalledModel[]) => list.reduce((b, m) => (heb(m) > heb(b) || (heb(m) === heb(b) && (m.params ?? 0) > (b.params ?? 0)) ? m : b));
   const smallest = (list: InstalledModel[]) => list.reduce((b, m) => ((m.params ?? Infinity) < (b.params ?? Infinity) ? m : b));
   const sized = chat.filter((m) => m.params !== null);
   const inBand = sized.filter((m) => m.params! > lower && m.params! <= upper);
@@ -241,7 +257,7 @@ export const ollamaExecutor: Executor = {
   },
   modelFor(tier: ModelTier, opts: { tools?: boolean } = {}): string {
     const configured = configuredModel();
-    const pick = pickModel(tier, state.models, configured) ?? configured ?? RECOMMENDED_OLLAMA_MODEL;
+    const pick = pickModel(tier, state.models, configured, { hebrew: notesInHebrew() }) ?? configured ?? RECOMMENDED_OLLAMA_MODEL;
     if (!opts.tools || this.supportsTools(pick)) return pick;
     // A tool-calling agent prefers an installed model with tool support in
     // the same tier (then any tier) over the plain pick.

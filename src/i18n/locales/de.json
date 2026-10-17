@@ -1204,5 +1204,6 @@
   "versionHistory.reason.vault": "Tresor-Schnappschuss",
   "versionHistory.reason.close": "beim Schließen",
   "versionHistory.reason.restore": "vor Wiederherstellung",
-  "versionHistory.reason.manual": "manuell"
+  "versionHistory.reason.manual": "manuell",
+  "ai.doctor.fix.pullHebrew": "Deine Notizen sind auf Hebräisch; dieses Modell kann gut Hebräisch:"
 }

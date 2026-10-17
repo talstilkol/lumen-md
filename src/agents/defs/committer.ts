@@ -32,6 +32,7 @@ export function cleanSubject(text: string): string {
 
 export const committerAgent: AgentDefinition<CommitterInput, string> = registerAgent({
   id: "committer",
+  language: "any",
   commandId: "git.commit",
   description: "Write a one-line conventional commit message",
   system:

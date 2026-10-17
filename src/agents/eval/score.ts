@@ -32,12 +32,8 @@ export function textOf(output: unknown): string {
 }
 
 /** Share of letters that are Hebrew (0 when there are no letters). */
-export function hebrewRatio(text: string): number {
-  const letters = text.match(/\p{L}/gu) ?? [];
-  if (!letters.length) return 0;
-  const hebrew = letters.filter((c) => /\p{Script=Hebrew}/u.test(c)).length;
-  return hebrew / letters.length;
-}
+export { hebrewRatio } from "../../text/hebrew";
+import { hebrewRatio } from "../../text/hebrew";
 
 function at(value: unknown, path: string): unknown {
   let cur: unknown = value;

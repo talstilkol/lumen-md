@@ -12,6 +12,7 @@
 import type { ChatCompletionMessageParam } from "@mlc-ai/web-llm";
 import type { Availability, Executor, ExecutorMessage, ExecutorRequest, ExecutorResponse, ModelTier, ToolCall } from "../types";
 import { flattenMessages } from "./chatExecutor";
+import { prefersHebrew } from "../../ai/modelCatalog";
 import { detectHardware, webLlmModelFor, catalogEntryFor } from "../../ai/modelManager";
 import { webLlmChat } from "../../ai/webllmEngine";
 import { estimateTokens } from "../../ai/usage";
@@ -106,7 +107,8 @@ export const webllmExecutor: Executor = {
   },
   modelFor(tier: ModelTier, opts: { tools?: boolean } = {}): string {
     const hw = hwSnapshot ?? { webgpu: true, f16: true, maxBufferMB: null, deviceMemoryGB: null, cores: null, mobile: false };
-    return webLlmModelFor(tier, hw, { tools: opts.tools });
+    const st = useAppStore.getState() as { locale?: string; doc?: { content?: string } };
+    return webLlmModelFor(tier, hw, { tools: opts.tools, multilingual: prefersHebrew(st.locale, st.doc?.content) });
   },
   async chat(req: ExecutorRequest): Promise<ExecutorResponse> {
     const model = req.model ?? this.modelFor(req.tier ?? "small", { tools: !!req.tools?.length });

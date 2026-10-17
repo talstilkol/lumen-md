@@ -1204,5 +1204,6 @@
   "versionHistory.reason.vault": "保险库快照",
   "versionHistory.reason.close": "关闭时",
   "versionHistory.reason.restore": "恢复前",
-  "versionHistory.reason.manual": "手动"
+  "versionHistory.reason.manual": "手动",
+  "ai.doctor.fix.pullHebrew": "你的笔记是希伯来语；此模型擅长希伯来语："
 }

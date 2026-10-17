@@ -202,6 +202,13 @@ export interface AgentDefinition<I extends AgentInput = AgentInput, O = string> 
    * transformations of the given input; the user can turn the cache off.
    */
   cache?: boolean;
+  /**
+   * The language of the answer (T27). "input" (default): the same language
+   * as the user's text — the runtime says so in the prompt and rejects a
+   * prose answer in another script. "any": the agent decides (translation,
+   * code, commit messages, chart and diagram syntax).
+   */
+  language?: "input" | "any";
 }
 
 export type StepKind = "model" | "tool" | "validate" | "retry" | "critic" | "cache";
