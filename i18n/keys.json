@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-10-17T16:19:58.645Z",
+  "generated_at": "2026-10-17T16:34:56.541Z",
   "source": "src/i18n/index.ts (en bundle)",
-  "count": 1072,
+  "count": 1088,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -3261,6 +3261,94 @@
     {
       "key": "cmd.ai.localModels.hint",
       "en": "Choose and download the in-browser model for this GPU",
+      "vars": []
+    },
+    {
+      "key": "cmd.ai.styleProfile",
+      "en": "AI: My Writing Style (local)",
+      "vars": []
+    },
+    {
+      "key": "cmd.ai.styleProfile.hint",
+      "en": "Learn your style from your notes on this device and use it when the AI writes — instead of fine-tuning",
+      "vars": []
+    },
+    {
+      "key": "ai.style.title",
+      "en": "Writing style",
+      "vars": []
+    },
+    {
+      "key": "ai.style.none",
+      "en": "No style profile yet. Build one from your notes (stays on this device).",
+      "vars": []
+    },
+    {
+      "key": "ai.style.current",
+      "en": "Profile from {notes} notes — {tone}",
+      "vars": [
+        "notes",
+        "tone"
+      ]
+    },
+    {
+      "key": "ai.style.build",
+      "en": "Build from my notes…",
+      "vars": []
+    },
+    {
+      "key": "ai.style.on",
+      "en": "Use my style when the AI writes",
+      "vars": []
+    },
+    {
+      "key": "ai.style.off",
+      "en": "Stop using my style",
+      "vars": []
+    },
+    {
+      "key": "ai.style.show",
+      "en": "Show the profile",
+      "vars": []
+    },
+    {
+      "key": "ai.style.modelfile",
+      "en": "Export an Ollama Modelfile",
+      "vars": []
+    },
+    {
+      "key": "ai.style.clear",
+      "en": "Delete the profile",
+      "vars": []
+    },
+    {
+      "key": "ai.style.folder",
+      "en": "Folder to learn from (empty = the whole workspace):",
+      "vars": []
+    },
+    {
+      "key": "ai.style.building",
+      "en": "Reading your notes and describing your style…",
+      "vars": []
+    },
+    {
+      "key": "ai.style.built",
+      "en": "Style profile ready: {rules} rules from {notes} notes. The AI now writes in your style.",
+      "vars": [
+        "rules",
+        "notes"
+      ]
+    },
+    {
+      "key": "ai.style.modelfileSaved",
+      "en": "Saved {path} — run: ollama create my-style -f {path}",
+      "vars": [
+        "path"
+      ]
+    },
+    {
+      "key": "ai.style.cleared",
+      "en": "Style profile deleted.",
       "vars": []
     },
     {
