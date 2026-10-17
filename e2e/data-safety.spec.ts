@@ -200,6 +200,7 @@ test("renaming a note rewrites links to it; deleting it goes to the trash with U
 
 /** Part C — export everything (T47): the vault comes out as a .zip with paths. */
 test("the whole vault exports as a zip", async ({ page }) => {
+  test.skip(!(await opfsWritable(page)), "OPFS writes are unavailable in this engine's test context");
   const run = (id: string) => page.evaluate((cmd) => window.dispatchEvent(new CustomEvent("lumen-run-command", { detail: { id: cmd } })), id);
   await page.keyboard.press("Meta+1");
   const editor = page.locator(".cm-content").first();
