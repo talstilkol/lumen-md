@@ -191,3 +191,12 @@ describe("formatValue", () => {
     expect(formatValue({ list: Array.from({ length: 1e5 }, (_, i) => i) }, 50)).toHaveLength(51);
   });
 });
+
+describe("guardLoops in labeled blocks", () => {
+  it("guards a loop inside a labeled block but not object-literal methods", async () => {
+    const { guardLoops } = await import("../playground/files");
+    expect(guardLoops("outer: { while (true) {} }")).toContain("__lumenLoop()");
+    expect(guardLoops("function f() { outer: { for (;;) break outer; } }")).toContain("__lumenLoop()");
+    expect(guardLoops("const o = { a: { while(x) { return x; } } };")).not.toContain("__lumenLoop");
+  });
+});

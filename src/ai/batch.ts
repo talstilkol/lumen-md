@@ -327,6 +327,7 @@ export function stripYamlComment(line: string): string {
     const ch = line[i];
     if (quote) {
       if (quote === '"' && ch === "\\") i++;
+      else if (quote === "'" && ch === "'" && line[i + 1] === "'") i++; // '' is an escaped quote
       else if (ch === quote) quote = null;
     } else if ((ch === '"' || ch === "'") && (i === 0 || /[\s:[{,-]/.test(line[i - 1]))) quote = ch;
     else if (ch === "#" && (i === 0 || /\s/.test(line[i - 1]))) return line.slice(0, i).trimEnd();

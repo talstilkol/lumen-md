@@ -263,6 +263,14 @@ function isObjectLiteral(tokens: Tok[], b: number): boolean {
   if (prev.type !== "punct") return false;
   if (prev.value === ")" || prev.value === "]" || prev.value === "}" || prev.value === ";" || prev.value === "{" || prev.value === "=>") return false;
   if (prev.value === ":") {
+    // `label: {` is a labeled block when the label starts a statement: at
+    // the start, after `;` / `}`, or inside a `{` that is itself a block.
+    const label = tokens[b - 2];
+    if (label?.type === "ident") {
+      const before = tokens[b - 3];
+      if (!before || before.value === ";" || before.value === "}") return false;
+      if (before.value === "{") return isObjectLiteral(tokens, b - 3);
+    }
     // `case x: {` / `default: {` open a block.
     for (let k = b - 2; k >= 0 && tokens[k].depth >= prev.depth; k--) {
       const t = tokens[k];

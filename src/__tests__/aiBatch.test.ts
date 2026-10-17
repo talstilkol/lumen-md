@@ -154,3 +154,10 @@ describe("batch APIs", () => {
     expect(res.state).toBe("processing");
   });
 });
+
+describe("stripYamlComment", () => {
+  it("keeps doubled quotes inside single-quoted scalars", async () => {
+    const { stripYamlComment } = await import("../ai/batch");
+    expect(stripYamlComment("tags: ['author''s # notes', b] # comment")).toBe("tags: ['author''s # notes', b]");
+  });
+});
