@@ -30,7 +30,7 @@ import { ReplaceStep, type Mapping } from "@milkdown/prose/transform";
 import type { Parents, PhrasingContent, Root } from "mdast";
 import { defaultHandlers } from "mdast-util-to-markdown";
 import { CRITIC_LITERAL, CRITIC_SENTINELS as S, prepareCriticMarkup, unescapeUserSentinels } from "../renderer/criticMarkup";
-import { sanitizeAuthor } from "./suggesting";
+import { parseSuggestions, sanitizeAuthor, type Resolution, type Suggestion } from "./suggesting";
 import { setWysiwygSuggestActions } from "./wysiwygSuggestBridge";
 
 /* ─── Configuration (set by the editor host) ────────────────────────── */
@@ -68,7 +68,7 @@ export function setActiveWysiwygView(view: typeof activeView): void {
           resolveAll: (mode) => {
             const v = getActiveWysiwygView();
             if (!v) return false;
-            const tr = resolveRange(v.state, 0, v.state.doc.content.size, mode);
+            const tr = resolveAllChanges(v.state, mode);
             if (!tr) return false;
             v.dispatch(tr);
             v.focus();
@@ -743,6 +743,62 @@ export function resolveRange(state: EditorState, from: number, to: number, mode:
     else tr.removeMark(a, b, isIns ? ins : del);
   });
   for (const [a, b] of drop.reverse()) tr.delete(a, b);
+  return tr.docChanged ? tr : null;
+}
+
+/** The ranges of `s` to delete so that it collapses to its resolved text. */
+function literalDrops(s: Suggestion, mode: Resolution): Array<[number, number]> {
+  const keep = (a: number, b: number): Array<[number, number]> => [
+    [s.from, a],
+    [b, s.to],
+  ];
+  switch (s.kind) {
+    case "insert":
+      return mode === "accept" ? keep(s.contentFrom, s.contentTo) : [[s.from, s.to]];
+    case "delete":
+      return mode === "accept" ? [[s.from, s.to]] : keep(s.contentFrom, s.contentTo);
+    case "substitute":
+      return mode === "accept" ? keep(s.newFrom!, s.newTo!) : keep(s.contentFrom, s.contentTo);
+    case "comment":
+      return [[s.from, s.to]];
+    case "highlight":
+      return keep(s.contentFrom, s.contentTo);
+  }
+}
+
+/**
+ * Accept or reject everything in the document, as the source editor's
+ * resolveAll does on the text: the marked changes, and the CriticMarkup
+ * WYSIWYG keeps as literal text — comments, highlights, markup whose
+ * delimiters couldn't be paired — found per textblock with the source
+ * parser (code and marked text masked out) and resolved with its semantics.
+ */
+export function resolveAllChanges(state: EditorState, mode: Resolution): Transaction | null {
+  const ins = state.schema.marks.critic_insert;
+  const del = state.schema.marks.critic_delete;
+  if (!ins || !del) return null;
+  const tr = resolveRange(state, 0, state.doc.content.size, mode) ?? state.tr.setMeta(SUGGEST_META, true);
+  const drops: Array<[number, number]> = [];
+  state.doc.descendants((block, pos) => {
+    if (!block.isTextblock) return true;
+    if (block.type.spec.code) return false;
+    // One character per position, so offsets map straight to the block.
+    let text = "";
+    block.forEach((child) => {
+      const masked = !child.isText || child.marks.some((m) => m.type.spec.code || m.type === ins || m.type === del);
+      text += masked ? "\ufffc".repeat(child.nodeSize) : child.text!;
+    });
+    for (const sg of parseSuggestions(text, [])) {
+      for (const [a, b] of literalDrops(sg, mode)) if (b > a) drops.push([pos + 1 + a, pos + 1 + b]);
+    }
+    return false;
+  });
+  // Positions are in `state.doc`; map each through what's been done so far.
+  for (const [a, b] of drops) {
+    const from = tr.mapping.map(a, 1);
+    const to = tr.mapping.map(b, -1);
+    if (to > from) tr.delete(from, to);
+  }
   return tr.docChanged ? tr : null;
 }
 

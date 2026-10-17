@@ -17,8 +17,11 @@ import {
   jumpToChange,
   resolveAtCursor,
   resolveRange,
+  setActiveWysiwygView,
   wysiwygSuggestPlugins,
 } from "../editor/wysiwygSuggest";
+import { getWysiwygSuggestActions } from "../editor/wysiwygSuggestBridge";
+import { resolveAll } from "../editor/suggesting";
 
 let editors: Editor[] = [];
 afterEach(async () => {
@@ -344,6 +347,23 @@ describe("accept / reject in WYSIWYG", () => {
     expect(resolveAtCursor(e.view, "accept")).toBe(true); // x → y
     expect(e.md()).toBe("A one B two C y D");
     expect(jumpToChange(e.view, 1)).toBe(false);
+  });
+
+  it("Accept / Reject All also resolve literal comments and highlights, as in source mode", async () => {
+    const src = "Keep {==important `code`==} and {++x++}{>>review this<<} but `{>>literal<<}` {~~a~>b~~}.";
+    for (const mode of ["accept", "reject"] as const) {
+      const e = await open(src, false);
+      setActiveWysiwygView(e.view);
+      expect(getWysiwygSuggestActions()!.resolveAll(mode)).toBe(true);
+      expect(e.md()).toBe(resolveAll(src, mode));
+      setActiveWysiwygView(null);
+    }
+    const only = await open("Just {>>a note<<} here.", false);
+    setActiveWysiwygView(only.view);
+    expect(getWysiwygSuggestActions()!.resolveAll("reject")).toBe(true);
+    expect(only.md()).toBe("Just  here.");
+    expect(getWysiwygSuggestActions()!.resolveAll("reject")).toBe(false);
+    setActiveWysiwygView(null);
   });
 
   it("resolves suggestions holding inline atoms (a hard break) as a whole", async () => {
