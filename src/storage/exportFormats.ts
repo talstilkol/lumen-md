@@ -12,6 +12,7 @@
  */
 
 import { zip } from "./zip";
+import { firstStrongDirection, markdownBaseDirection, scriptLanguage } from "../lib/textDirection";
 
 function escapeHtml(s: string): string {
   return s
@@ -112,14 +113,49 @@ function escapeRtfInline(s: string): string {
  */
 export function markdownToLatex(md: string): string {
   const lines = md.split(/\r?\n/);
-  const out: string[] = [
-    "\\documentclass{article}",
-    "\\usepackage[utf8]{inputenc}",
-    "\\usepackage{hyperref}",
-    "\\usepackage{listings}",
-    "\\usepackage{amsmath}",
-    "\\begin{document}",
-  ];
+  // Hebrew (or Arabic) anywhere → XeLaTeX + polyglossia, the only engine
+  // that typesets RTL properly; the main language follows the document's
+  // base direction and every paragraph in the other direction is wrapped
+  // in that language's environment (T44).
+  const rtl = /[\u0590-\u08FF]/.test(md);
+  const base = markdownBaseDirection(md);
+  const rtlLang = scriptLanguage(md) === "ar" ? "arabic" : "hebrew";
+  const out: string[] = rtl
+    ? [
+        "% Compile with xelatex (Hebrew/Arabic need fontspec + polyglossia).",
+        "\\documentclass{article}",
+        "\\usepackage{fontspec}",
+        "\\usepackage{polyglossia}",
+        base === "rtl" ? `\\setmainlanguage{${rtlLang}}` : "\\setmainlanguage{english}",
+        base === "rtl" ? "\\setotherlanguage{english}" : `\\setotherlanguage{${rtlLang}}`,
+        "\\setmainfont{Noto Serif}",
+        rtlLang === "hebrew" ? "\\newfontfamily\\hebrewfont[Script=Hebrew]{Noto Serif Hebrew}" : "\\newfontfamily\\arabicfont[Script=Arabic]{Noto Naskh Arabic}",
+        "\\usepackage{hyperref}",
+        "\\usepackage{listings}",
+        "\\usepackage{amsmath}",
+        "\\begin{document}",
+      ]
+    : [
+        "\\documentclass{article}",
+        "\\usepackage[utf8]{inputenc}",
+        "\\usepackage{hyperref}",
+        "\\usepackage{listings}",
+        "\\usepackage{amsmath}",
+        "\\begin{document}",
+      ];
+  const otherLang = base === "rtl" ? "english" : rtlLang;
+  /** Wrap a paragraph whose direction differs from the document's. */
+  const inLang = (tex: string, source: string): string => {
+    if (!rtl) return tex;
+    const d = firstStrongDirection(source);
+    return d && d !== base ? `\\begin{${otherLang}}${tex}\\end{${otherLang}}` : tex;
+  };
+  /** Same, inline (headings, list items): \\textenglish{…} / \\texthebrew{…}. */
+  const inLangInline = (tex: string, source: string): string => {
+    if (!rtl) return tex;
+    const d = firstStrongDirection(source);
+    return d && d !== base ? `\\text${otherLang}{${tex}}` : tex;
+  };
   const fenceAt = createFenceTracker();
   let inList = false;
   for (const line of lines) {
@@ -140,7 +176,7 @@ export function markdownToLatex(md: string): string {
           : h[1].length === 2
             ? "subsection"
             : "subsubsection";
-      out.push(`\\${cmd}{${escapeLatex(h[2])}}`);
+      out.push(`\\${cmd}{${inLangInline(escapeLatex(h[2]), h[2])}}`);
       continue;
     }
     if (/^[-*+]\s/.test(line)) {
@@ -148,7 +184,8 @@ export function markdownToLatex(md: string): string {
         out.push("\\begin{itemize}");
         inList = true;
       }
-      out.push(`\\item ${escapeLatexInline(line.replace(/^[-*+]\s+/, ""))}`);
+      const item = line.replace(/^[-*+]\s+/, "");
+      out.push(`\\item ${inLangInline(escapeLatexInline(item), item)}`);
       continue;
     } else if (inList && line.trim() === "") {
       out.push("\\end{itemize}");
@@ -158,11 +195,17 @@ export function markdownToLatex(md: string): string {
       out.push("");
       continue;
     }
-    out.push(escapeLatexInline(line));
+    out.push(inLang(escapeLatexInline(line), line));
   }
   if (inList) out.push("\\end{itemize}");
   out.push("\\end{document}");
   return out.join("\n");
+}
+
+/** lang for a rendered page body: he / ar by script, else en. */
+function pageLang(html: string): string {
+  const text = html.replace(/<[^>]+>/g, " ");
+  return firstStrongDirection(text) === "rtl" ? scriptLanguage(text) ?? "en" : "en";
 }
 
 function escapeLatex(s: string): string {
@@ -398,11 +441,17 @@ export async function markdownToEpubBytes(md: string, title = "Document"): Promi
     .split(/^(?=# )/m)
     .map((s) => s.trim())
     .filter(Boolean);
+  // Language and reading direction (T44): a Hebrew book opens from the
+  // right and reads right-to-left in every reader.
+  const bookDir = markdownBaseDirection(md);
+  const bookLang = (bookDir === "rtl" ? scriptLanguage(md) : null) ?? "en";
   const chapters = (parts.length ? parts : [md]).map((c, i) => {
     const chTitle = c.match(/^#\s+(.+)$/m)?.[1] ?? `Chapter ${i + 1}`;
+    const dir = markdownBaseDirection(c);
+    const lang = (dir === "rtl" ? scriptLanguage(c) : null) ?? (dir === bookDir ? bookLang : "en");
     const xhtml =
       `<?xml version="1.0" encoding="utf-8"?>\n<!DOCTYPE html>\n` +
-      `<html xmlns="http://www.w3.org/1999/xhtml"><head><title>${escapeHtml(chTitle)}</title></head>` +
+      `<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="${lang}" lang="${lang}" dir="${dir}"><head><title>${escapeHtml(chTitle)}</title></head>` +
       `<body>\n${mdToXhtml(c)}\n</body></html>`;
     return { id: `ch${i + 1}`, href: `chapter${i + 1}.xhtml`, title: chTitle, xhtml };
   });
@@ -417,16 +466,16 @@ export async function markdownToEpubBytes(md: string, title = "Document"): Promi
     `<package xmlns="http://www.idpf.org/2007/opf" version="3.0" unique-identifier="bookid">` +
     `<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">` +
     `<dc:identifier id="bookid">${uid}</dc:identifier>` +
-    `<dc:title>${escapeHtml(title)}</dc:title><dc:language>en</dc:language>` +
+    `<dc:title>${escapeHtml(title)}</dc:title><dc:language>${bookLang}</dc:language>` +
     `<meta property="dcterms:modified">1970-01-01T00:00:00Z</meta></metadata>` +
     `<manifest><item id="nav" href="nav.xhtml" media-type="application/xhtml+xml" properties="nav"/>` +
     chapters.map((c) => `<item id="${c.id}" href="${c.href}" media-type="application/xhtml+xml"/>`).join("") +
-    `</manifest><spine>` +
+    `</manifest><spine${bookDir === "rtl" ? ' page-progression-direction="rtl"' : ""}>` +
     chapters.map((c) => `<itemref idref="${c.id}"/>`).join("") +
     `</spine></package>`;
   const nav =
     `<?xml version="1.0" encoding="utf-8"?>\n` +
-    `<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops"><head><title>Contents</title></head>` +
+    `<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops" xml:lang="${bookLang}" lang="${bookLang}" dir="${bookDir}"><head><title>Contents</title></head>` +
     `<body><nav epub:type="toc"><ol>` +
     chapters.map((c) => `<li><a href="${c.href}">${escapeHtml(c.title)}</a></li>`).join("") +
     `</ol></nav></body></html>`;
@@ -496,7 +545,7 @@ export async function markdownToStaticSiteBytes(md: string, siteTitle = "Site"):
       .join("") +
     `</ul></nav>`;
   const pageHtml = (p: { title: string; file: string; body: string }) =>
-    `<!doctype html><html lang="en"><head><meta charset="utf-8" />` +
+    `<!doctype html><html lang="${pageLang(p.body)}" dir="${firstStrongDirection(p.body.replace(/<[^>]+>/g, " ")) ?? "ltr"}"><head><meta charset="utf-8" />` +
     `<meta name="viewport" content="width=device-width, initial-scale=1" />` +
     `<title>${escapeHtml(p.title)} — ${escapeHtml(siteTitle)}</title>` +
     `<link rel="stylesheet" href="style.css" /></head><body>` +
