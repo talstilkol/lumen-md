@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-10-17T14:46:51.475Z",
+  "generated_at": "2026-10-17T16:08:28.215Z",
   "source": "src/i18n/index.ts (en bundle)",
-  "count": 1070,
+  "count": 1071,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -3365,6 +3365,13 @@
       "vars": [
         "done",
         "total"
+      ]
+    },
+    {
+      "key": "research.endpointInvalid",
+      "en": "That address can't be used here — not an http(s) URL, or not allowed by this deployment's content security policy: {url}",
+      "vars": [
+        "url"
       ]
     },
     {

@@ -1068,5 +1068,6 @@
   "research.provider.tavily": "Tavily (dein API-Schlüssel)",
   "research.provider.searxng": "SearXNG auf diesem Rechner (ohne Schlüssel; lokaler Recherchedienst)",
   "research.endpoint": "URL des Recherchedienstes (lokal mit docker/local-ai.yml starten — siehe Doku):",
-  "research.key": "API-Schlüssel für {provider}:"
+  "research.key": "API-Schlüssel für {provider}:",
+  "research.endpointInvalid": "Diese Adresse ist hier nicht nutzbar — keine http(s)-URL oder von der Content-Security-Policy dieser Installation nicht erlaubt: {url}"
 }

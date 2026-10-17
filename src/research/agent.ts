@@ -42,7 +42,7 @@ export interface ResearchOptions {
 
 export interface ResearchResult {
   markdown: string;
-  route: "claude" | "brave" | "tavily";
+  route: "claude" | "brave" | "tavily" | "searxng";
   sources: number;
   /** Footnotes whose quote couldn't be found in the source text. */
   unverified: number;
@@ -157,7 +157,10 @@ async function claudeResearch(o: ResearchOptions): Promise<ResearchResult> {
   return { markdown, route: "claude", sources, unverified };
 }
 
-/* ─── Brave / Tavily through the research worker ───────────────────── */
+/* ─── Brave / Tavily / SearXNG through the research worker ─────────── */
+
+type ProxyProvider = "brave" | "tavily" | "searxng";
+const PROVIDER_LABEL: Record<ProxyProvider, string> = { brave: "Brave", tavily: "Tavily", searxng: "SearXNG" };
 
 const QUOTES_MARK = "---QUOTES---";
 
@@ -348,7 +351,7 @@ async function proxyResearch(o: ResearchOptions, settings: ResearchSettings): Pr
   const markdown = [
     `# ${title(o.question)}`,
     "",
-    `*Researched ${new Date().toISOString().slice(0, 10)} with ${settings.provider === "brave" ? "Brave" : "Tavily"} search · ${pages.length} sources read · ${
+    `*Researched ${new Date().toISOString().slice(0, 10)} with ${PROVIDER_LABEL[settings.provider as ProxyProvider] ?? settings.provider} search · ${pages.length} sources read · ${
       unverified ? `**${unverified} quote${unverified === 1 ? "" : "s"} could not be verified**` : "every quote checked against its source"
     }.*`,
     "",
@@ -358,7 +361,7 @@ async function proxyResearch(o: ResearchOptions, settings: ResearchSettings): Pr
     ...defs,
     "",
   ].join("\n");
-  return { markdown, route: settings.provider as "brave" | "tavily", sources: pages.length, unverified };
+  return { markdown, route: settings.provider as ProxyProvider, sources: pages.length, unverified };
 }
 
 export async function runResearch(o: ResearchOptions): Promise<ResearchResult> {

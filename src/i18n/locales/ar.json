@@ -1068,5 +1068,6 @@
   "research.provider.tavily": "Tavily (مفتاح API الخاص بك)",
   "research.provider.searxng": "SearXNG على هذا الجهاز (بلا مفتاح؛ خدمة بحث محلية)",
   "research.endpoint": "عنوان خدمة البحث (شغّلها محليًا عبر docker/local-ai.yml — راجع التوثيق):",
-  "research.key": "مفتاح API لـ {provider}:"
+  "research.key": "مفتاح API لـ {provider}:",
+  "research.endpointInvalid": "لا يمكن استخدام هذا العنوان هنا — ليس عنوان http(s)، أو لا تسمح به سياسة أمان المحتوى لهذا النشر: {url}"
 }

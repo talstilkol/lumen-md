@@ -972,14 +972,18 @@ export function useCommands({
             // Keyless: the research service on this machine queries a local SearXNG.
             const endpoint = await uiPrompt({ message: t("research.endpoint"), defaultValue: researchEndpoint() ?? "http://localhost:8787" });
             if (endpoint === null || !endpoint.trim()) return;
+            // Checked before it is stored: a bad override would hide a
+            // working build-time endpoint.
+            const { usableResearchEndpoint } = await import("../research/client");
+            const usable = usableResearchEndpoint(endpoint);
+            if (!usable) {
+              showAiToast(t("research.endpointInvalid", { url: endpoint.trim() }), "error");
+              return;
+            }
             try {
-              localStorage.setItem("lumen.research.endpoint", endpoint.trim().replace(/\/+$/, ""));
+              localStorage.setItem("lumen.research.endpoint", usable);
             } catch {
               /* storage denied */
-            }
-            if (!researchEndpoint()) {
-              showAiToast(t("research.noService"), "error");
-              return;
             }
             setResearchSettings({ provider: "searxng" });
           } else if (choice !== "claude") {

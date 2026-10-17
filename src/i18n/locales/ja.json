@@ -1068,5 +1068,6 @@
   "research.provider.tavily": "Tavily（あなたの API キー）",
   "research.provider.searxng": "このマシンの SearXNG（キー不要・ローカルのリサーチサービス）",
   "research.endpoint": "リサーチサービスの URL（docker/local-ai.yml でローカル実行 — ドキュメント参照）:",
-  "research.key": "{provider} の API キー："
+  "research.key": "{provider} の API キー：",
+  "research.endpointInvalid": "このアドレスはここでは使えません — http(s) の URL ではないか、このデプロイのコンテンツセキュリティポリシーで許可されていません: {url}"
 }

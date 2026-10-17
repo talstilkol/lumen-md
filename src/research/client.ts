@@ -42,6 +42,18 @@ const ls = (k: string) => {
   }
 };
 
+/** A research-service address this deployment can actually reach (http(s) and allowed by the CSP). */
+export function usableResearchEndpoint(url: string): string | null {
+  const clean = url.trim().replace(/\/+$/, "");
+  try {
+    const u = new URL(clean);
+    if (u.protocol !== "http:" && u.protocol !== "https:") return null;
+  } catch {
+    return null;
+  }
+  return connectAllowedByCsp(clean) ? clean : null;
+}
+
 export function researchEndpoint(): string | null {
   const built = (import.meta.env?.VITE_RESEARCH_ENDPOINT as string | undefined)?.trim();
   const override = ls("lumen.research.endpoint")?.trim();
@@ -73,7 +85,8 @@ export function getResearchSettings(): ResearchSettings {
     } catch {
       policy = null;
     }
-    const cloudy = policy === "cloud" || policy === "local-first" || !!ls("lumen.ai.key.anthropic");
+    // An explicit local-only choice wins over a leftover Anthropic key.
+    const cloudy = policy === "cloud" || policy === "local-first" || (policy !== "local-only" && !!ls("lumen.ai.key.anthropic"));
     provider = cloudy ? "claude" : "searxng";
   }
   return { provider, key: ls("lumen.research.searchKey") ?? "" };

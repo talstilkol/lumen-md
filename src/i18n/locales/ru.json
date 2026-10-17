@@ -1068,5 +1068,6 @@
   "research.provider.tavily": "Tavily (ваш API-ключ)",
   "research.provider.searxng": "SearXNG на этой машине (без ключа; локальный сервис исследований)",
   "research.endpoint": "URL сервиса исследований (запустите локально через docker/local-ai.yml — см. документацию):",
-  "research.key": "API-ключ для {provider}:"
+  "research.key": "API-ключ для {provider}:",
+  "research.endpointInvalid": "Этот адрес здесь использовать нельзя — это не http(s)-URL или его не разрешает политика безопасности контента этого развёртывания: {url}"
 }

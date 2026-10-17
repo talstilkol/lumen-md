@@ -1068,5 +1068,6 @@
   "research.provider.tavily": "Tavily (מפתח API שלך)",
   "research.provider.searxng": "SearXNG במחשב הזה (בלי מפתח; שירות מחקר מקומי)",
   "research.endpoint": "כתובת שירות המחקר (להרצה מקומית עם docker/local-ai.yml — ראו בתיעוד):",
-  "research.key": "מפתח API עבור {provider}:"
+  "research.key": "מפתח API עבור {provider}:",
+  "research.endpointInvalid": "אי אפשר להשתמש בכתובת הזו כאן — היא לא כתובת http(s), או שמדיניות האבטחה של האתר לא מתירה אותה: {url}"
 }

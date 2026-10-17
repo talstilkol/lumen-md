@@ -741,6 +741,7 @@ const en: Strings = {
   "research.failed": "Research failed: {message}",
   "research.noCitations": "No footnotes with web links in this note",
   "research.checking": "Checking citations {done}/{total}…",
+  "research.endpointInvalid": "That address can't be used here — not an http(s) URL, or not allowed by this deployment's content security policy: {url}",
   "research.noService": "Citation checks and Brave / Tavily search need the research service (VITE_RESEARCH_ENDPOINT) on this deployment",
   "research.provider.claude": "Claude web search (Anthropic provider; searches billed by Anthropic)",
   "research.provider.brave": "Brave Search (your API key)",
