@@ -33,7 +33,7 @@ import {
   unregisterWysiwygView,
   wysiwygSuggestPlugins,
 } from "./wysiwygSuggest";
-import { useAppStore } from "../store/useStore";
+import { registerPendingEdits, useAppStore } from "../store/useStore";
 import { useAuth } from "../auth/useAuth";
 
 // Suggesting mode (track changes) works in WYSIWYG too: CriticMarkup ↔
@@ -638,6 +638,30 @@ export default function WysiwygEditor({ value, onChange }: Props) {
   // instance (Focus Mode over the main editor) may be registered too, so
   // only this one is unregistered.
   const registeredViewRef = useRef<EditorView | null>(null);
+  // Emit, synchronously, an edit the debounced listener hasn't emitted yet.
+  const flushPending = () => {
+    const ed = editorRef.current;
+    if (!ed || serializedRef.current === null) return;
+    let md: string;
+    try {
+      md = ed.action(getMarkdown());
+    } catch {
+      return; // editor already torn down
+    }
+    if (md === serializedRef.current) return;
+    serializedRef.current = md;
+    const full = frontmatterRef.current + md;
+    if (full !== lastEmittedRef.current) {
+      lastEmittedRef.current = full;
+      onChangeRef.current(full);
+    }
+  };
+  // Switching or closing the active tab inside the debounce window: the
+  // `[value]` rebuild below would drop the edit (its generation guard), and
+  // by then `onChange` already writes the NEW active document. The store
+  // calls this before it switches, while the edit's own document is active.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => registerPendingEdits(flushPending), []);
   const destroyCurrent = async () => {
     const ed = editorRef.current;
     editorRef.current = null;
@@ -687,6 +711,7 @@ export default function WysiwygEditor({ value, onChange }: Props) {
             // superseded) editor can still fire here. Forwarding it would
             // overwrite the store with stale content after a mode switch.
             if (gen !== genRef.current) return;
+            if (md === serializedRef.current) return; // already flushed
             serializedRef.current = md;
             const full = frontmatterRef.current + md;
             lastEmittedRef.current = full;
@@ -870,24 +895,10 @@ export default function WysiwygEditor({ value, onChange }: Props) {
   // menu DOM is only removed once no plugin view can still reference it.
   useEffect(() => {
     return () => {
-      // Leaving WYSIWYG (mode switch, tab close): the listener debounces
-      // emissions by 200 ms, so the last edits would be dropped by the
-      // generation guard below. Flush them now, synchronously.
-      const ed = editorRef.current;
-      if (ed && serializedRef.current !== null) {
-        try {
-          const md = ed.action(getMarkdown());
-          if (md === serializedRef.current) throw new Error("no pending edit");
-          serializedRef.current = md;
-          const full = frontmatterRef.current + md;
-          if (full !== lastEmittedRef.current) {
-            lastEmittedRef.current = full;
-            onChangeRef.current(full);
-          }
-        } catch {
-          /* editor already torn down */
-        }
-      }
+      // Leaving WYSIWYG (mode switch): the listener debounces emissions
+      // by 200 ms, so the last edits would be dropped by the generation
+      // guard below. Flush them now, synchronously.
+      flushPending();
       genRef.current++;
       enqueue(async () => {
         await destroyCurrent();

@@ -15,6 +15,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import WysiwygEditor from "../editor/WysiwygEditor";
 import { getActiveWysiwygView } from "../editor/wysiwygSuggest";
 import { getWysiwygSuggestActions } from "../editor/wysiwygSuggestBridge";
+import { useAppStore } from "../store/useStore";
 
 vi.mock("../ai/llm", () => ({
   chat: vi.fn(),
@@ -133,5 +134,52 @@ describe("WysiwygEditor lifecycle sequencing", () => {
     main.unmount();
     await settle();
     expect(getWysiwygSuggestActions()).toBeNull();
+  });
+
+  it("an edit pending in the listener's debounce goes to its own tab when the tab switches or closes", async () => {
+    // As EditorLayout mounts it: the active doc's content, edits via setContent.
+    function Host() {
+      const content = useAppStore((s) => s.doc.content);
+      const setContent = useAppStore((s) => s.setContent);
+      return <WysiwygEditor value={content} onChange={setContent} />;
+    }
+    const tab = (id: string, content: string) => ({ id, name: id, content, workspaceName: id, dirty: false });
+    const reset = () =>
+      useAppStore.setState({
+        doc: { name: "a.md", content: "Alpha doc", workspaceName: "a.md", dirty: false },
+        openTabs: [tab("a.md", "Alpha doc"), tab("b.md", "Beta doc")],
+      });
+    const typeAtEnd = (text: string) => {
+      const view = getActiveWysiwygView()!;
+      view.dispatch(view.state.tr.insertText(text, view.state.doc.content.size - 1));
+    };
+    const tabContent = (id: string) => useAppStore.getState().openTabs.find((t) => t.id === id)?.content;
+
+    reset();
+    render(<Host />);
+    await settle();
+    act(() => {
+      typeAtEnd(" edited");
+      // Within the 200 ms debounce: switch to the other tab.
+      useAppStore.getState().openTab({ name: "b.md", content: "Beta doc", workspaceName: "b.md" });
+    });
+    await settle(600);
+    expect(tabContent("a.md")).toBe("Alpha doc edited\n");
+    expect(tabContent("b.md")).toBe("Beta doc");
+    expect(useAppStore.getState().doc.content).toBe("Beta doc");
+    cleanup();
+
+    // Closing the active tab: the edit must not land in the tab that takes over.
+    reset();
+    render(<Host />);
+    await settle();
+    act(() => {
+      typeAtEnd(" edited");
+      useAppStore.getState().closeTab("a.md");
+    });
+    await settle(600);
+    expect(useAppStore.getState().doc.name).toBe("b.md");
+    expect(useAppStore.getState().doc.content).toBe("Beta doc");
+    expect(tabContent("b.md")).toBe("Beta doc");
   });
 });
