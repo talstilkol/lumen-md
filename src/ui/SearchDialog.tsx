@@ -12,6 +12,8 @@ import { log } from "../lib/logger";
 import { showAiToast } from "../ui/AiToast";
 import { semanticSearch, type RagResult } from "../ai/embeddings";
 import { indexWorkspace, searchHybrid, type SemanticHit } from "../ai/semanticSearch";
+import { rerank } from "../ai/reranker";
+import { CITE_INSTRUCTIONS, verifyVaultCitations, type VaultCitation } from "../ai/vaultCitations";
 import { useCapability } from "../billing/gates";
 import { UpgradeNotice } from "./UpgradeNotice";
 import { rememberSearch, getSearchHistory, forgetSearch } from "../storage/searchHistory";
@@ -45,6 +47,7 @@ export function SearchDialog({ open, onClose, onOpenFile }: Props) {
   const [aiRendered, setAiRendered] = useState<ReactElement | null>(null);
   const [aiLoading, setAiLoading] = useState(false);
   const [aiSources, setAiSources] = useState<RagResult[]>([]);
+  const [aiCitations, setAiCitations] = useState<{ citations: VaultCitation[]; verifiedCount: number } | null>(null);
   const [conversation, setConversation] = useState<ChatMessage[]>([]);
 
   useEffect(() => {
@@ -129,7 +132,10 @@ export function SearchDialog({ open, onClose, onOpenFile }: Props) {
     setLoading(true);
     const handle = setTimeout(async () => {
       try {
-        const results = await searchHybrid(query, 20);
+        const fused = await searchHybrid(query, 30);
+        // T29: reorder the 30 candidates by relevance (local reranker).
+        const ranked = await rerank(query, fused.map((h) => ({ ...h, text: `${h.path}\n${h.snippet}` })));
+        const results = ranked.slice(0, 20).map(({ text: _text, rerankScore: _r, ...h }) => h);
         if (cancelled) return;
         setSmartHits(results);
         setActive(0);
@@ -233,6 +239,7 @@ export function SearchDialog({ open, onClose, onOpenFile }: Props) {
     setAiLoading(true);
     setAiAnswer(t("searchDialog.searching"));
     setAiSources([]);
+    setAiCitations(null);
 
     try {
       // Hybrid retrieval — when the user has built the embedding index
@@ -240,7 +247,7 @@ export function SearchDialog({ open, onClose, onOpenFile }: Props) {
       // semantic-aware Q&A. When the index is empty, `searchHybrid` falls
       // back to BM25 alone, so we never block the AI tab on a missing index.
       const hybridHits = smartAllowed
-        ? await searchHybrid(query, 8).catch(() => [] as SemanticHit[])
+        ? await searchHybrid(query, 30).catch(() => [] as SemanticHit[])
         : [];
       const fallback =
         hybridHits.length === 0
@@ -260,8 +267,15 @@ export function SearchDialog({ open, onClose, onOpenFile }: Props) {
             .catch(() => h.snippet),
         })),
       );
-      const results = hybridResults.length > 0 ? hybridResults : fallback;
+      // T29: rerank the candidates against the question, keep the best 8.
+      const pool = hybridResults.length > 0 ? hybridResults : fallback;
+      const results: RagResult[] = (
+        await rerank(query, pool.map((r) => ({ ...r, text: `${r.snippet ?? ""}\n${r.content.slice(0, 1500)}` })))
+      )
+        .slice(0, 8)
+        .map(({ text: _text, rerankScore: _r, ...r }) => r as RagResult);
       setAiSources(results);
+      setAiCitations(null);
 
       // Build context from semantic results: only the parts relevant to the
       // question, within the AI mode's token budget (context packer).
@@ -279,13 +293,15 @@ export function SearchDialog({ open, onClose, onOpenFile }: Props) {
 
       // Build multi-turn messages
       const messages: ChatMessage[] = [
-        { role: "system", content: PROMPTS.ragAssistant + "\n\nWhen referencing information from context files, cite them as [1], [2], etc." },
+        { role: "system", content: PROMPTS.ragAssistant + "\n\n" + CITE_INSTRUCTIONS },
         ...conversation,
         { role: "user", content: `Context Files:\n${contextStr}\n\nQuestion: ${query}` },
       ];
 
       const answer = await chat(messages, { ownPrompt: true });
       setAiAnswer(answer);
+      // Check every citation against the note it names (T29).
+      setAiCitations(verifyVaultCitations(answer, results.map((r) => ({ path: r.path, content: r.content }))));
 
       // Save to conversation history
       setConversation((prev) => [
@@ -578,6 +594,41 @@ export function SearchDialog({ open, onClose, onOpenFile }: Props) {
                 <div className="prose-lumen" style={{ padding: 0, fontSize: 13, lineHeight: 1.6, maxWidth: "none" }}>
                   {aiRendered}
                 </div>
+                {aiCitations && (
+                  <div data-testid="vault-citations" style={{ borderTop: "1px solid hsl(var(--border))", paddingTop: 8, marginTop: 4, fontSize: 11.5 }}>
+                    {aiCitations.verifiedCount === 0 ? (
+                      <div role="alert" style={{ color: "hsl(35 90% 45%)", fontWeight: 600, marginBottom: 4 }}>{t("vaultCite.unsupported")}</div>
+                    ) : (
+                      <div style={{ color: "hsl(var(--fg-muted))", fontWeight: 600, marginBottom: 4 }}>
+                        {t("vaultCite.summary", { ok: aiCitations.verifiedCount, total: aiCitations.citations.length })}
+                      </div>
+                    )}
+                    {aiCitations.citations.map((c, i) => (
+                      <button
+                        type="button"
+                        key={`${c.n}-${i}`}
+                        disabled={!c.path}
+                        data-verified={c.verified ? "1" : "0"}
+                        onClick={() => {
+                          const src = aiSources[c.n - 1];
+                          if (!src) return;
+                          onClose();
+                          onOpenFile(src.path, src.content);
+                          if (c.line) window.dispatchEvent(new CustomEvent("lumen-reveal-line", { detail: { line: c.line } }));
+                        }}
+                        style={{ display: "flex", gap: 6, alignItems: "baseline", width: "100%", textAlign: "start", padding: "3px 0", background: "none", border: 0, color: "inherit", cursor: c.path ? "pointer" : "default" }}
+                      >
+                        <span style={{ color: c.verified ? "hsl(145 60% 38%)" : "hsl(0 70% 55%)", fontWeight: 700 }} aria-label={c.verified ? t("vaultCite.verified") : t("vaultCite.notVerified")}>
+                          {c.verified ? "✓" : "✗"}
+                        </span>
+                        <span style={{ color: "hsl(var(--accent))", whiteSpace: "nowrap" }}>
+                          [{c.n}] <bdi>{c.path ?? t("vaultCite.noSource")}</bdi>{c.line ? `:${c.line}` : ""}
+                        </span>
+                        {c.quote && <span dir="auto" style={{ color: "hsl(var(--fg-muted))", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>“{c.quote}”</span>}
+                      </button>
+                    ))}
+                  </div>
+                )}
                 {aiSources.length > 0 && (
                   <div style={{ borderTop: "1px solid hsl(var(--border))", paddingTop: 8, marginTop: 4 }}>
                     <div style={{ fontSize: 11, color: "hsl(var(--fg-muted))", marginBottom: 4, fontWeight: 600 }}>{t("searchDialog.sources")}</div>

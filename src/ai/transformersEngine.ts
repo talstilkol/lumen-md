@@ -27,6 +27,8 @@ export const WHISPER_MODELS = {
 
 export const EMBEDDING_MODEL = "Xenova/multilingual-e5-small";
 export const EMBEDDING_DIMS = 384;
+/** Multilingual cross-encoder (Hebrew included) for reranking search hits (T29). */
+export const RERANK_MODEL = "onnx-community/bge-reranker-v2-m3-ONNX";
 
 export interface DownloadProgress {
   file: string;
@@ -164,6 +166,13 @@ export async function embedTextsLocal(texts: string[], opts: { model?: string } 
   if (!texts.length) return { vectors: [], dims: EMBEDDING_DIMS };
   const device = await transformersDevice();
   return call<EmbedResult>({ type: "embed", model: opts.model ?? EMBEDDING_MODEL, device, texts });
+}
+
+/** Relevance of each passage to `query`, 0..1, from the local cross-encoder. */
+export async function rerankLocal(query: string, passages: string[], opts: { model?: string; signal?: AbortSignal } = {}): Promise<number[]> {
+  if (!passages.length) return [];
+  const device = await transformersDevice();
+  return call<number[]>({ type: "rerank", model: opts.model ?? RERANK_MODEL, device, query, passages }, [], opts.signal);
 }
 
 /** Download / compile a model ahead of time. */

@@ -647,6 +647,30 @@ export const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
     return () => window.removeEventListener("lumen-mobile-insert", onInsert);
   }, []);
 
+  // `lumen-reveal-line` {line} (1-based): jump to and select that line —
+  // used by vault citations (T29). Retries briefly while a just-opened
+  // note is still loading into the editor.
+  useEffect(() => {
+    function onReveal(e: Event) {
+      const line = (e as CustomEvent<{ line: number }>).detail?.line;
+      if (!line || line < 1) return;
+      let tries = 0;
+      const go = () => {
+        const view = viewRef.current;
+        if (!view || view.state.doc.lines < line) {
+          if (tries++ < 10) setTimeout(go, 100);
+          return;
+        }
+        const l = view.state.doc.line(line);
+        view.dispatch({ selection: { anchor: l.from, head: l.to }, effects: EditorView.scrollIntoView(l.from, { y: "center" }) });
+        view.focus();
+      };
+      go();
+    }
+    window.addEventListener("lumen-reveal-line", onReveal);
+    return () => window.removeEventListener("lumen-reveal-line", onReveal);
+  }, []);
+
   return (
     <div
       className="flex-1 min-h-0 relative overflow-hidden"
