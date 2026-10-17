@@ -1054,7 +1054,16 @@ export function useCommands({
             return;
           }
           const { estimateTokens, costOf } = await import("../ai/usage");
-          const model = provider === "local" ? effectiveModel(getActiveProvider()) : effectiveModel(provider);
+          // A local job runs on Ollama or the in-browser model only; show the model that will actually answer.
+          let model: string;
+          if (provider === "local") {
+            const route = await batch.localBatchRoute();
+            if (!route) {
+              showAiToast(new batch.NoLocalModelError().message, "error");
+              return;
+            }
+            model = route.model;
+          } else model = effectiveModel(provider);
           let input = 0;
           let output = 0;
           for (const n of notes) {
@@ -1167,6 +1176,8 @@ export function useCommands({
               if (wroteAny) window.dispatchEvent(new CustomEvent("lumen-workspace-changed"));
               return;
             }
+            // Saved as applied: a local job's stored answers are no longer needed.
+            if (job.status === "applied" && job.provider === "local") void batch.clearLocalBatch(job.id);
             showAiToast(t("batch.applied", { count: done.length }), failedWrites ? "error" : "success");
           }
           if (!batch.saveJobs(jobs)) showAiToast(t("batch.saveFailed", { id: pending.map((j) => j.id).join(", ") }), "error");

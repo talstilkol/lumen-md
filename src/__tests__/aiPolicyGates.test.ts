@@ -47,7 +47,7 @@ describe("AI policy gates on direct cloud paths", () => {
   it("batch jobs run in the local queue under local-only; the cloud Batch API is refused", async () => {
     localStorage.setItem("lumen.ai.provider", "openai");
     const batch = await import("../ai/batch");
-    batch.__setLocalBatchDeps({ answer: async () => '["local-tag"]', read: async () => "hello world" });
+    batch.__setLocalBatchDeps({ answer: async () => '["local-tag"]', read: async () => "hello world", route: async () => ({ executor: "ollama", model: "qwen2.5:7b" }) });
     const job = await batch.submitBatch("tags", [{ path: "a.md", text: "hello world" }], { lang: "he" });
     expect(job.provider).toBe("local");
     await batch.__localBatchRun(job.id);
