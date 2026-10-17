@@ -1205,5 +1205,19 @@
   "versionHistory.reason.close": "בסגירה",
   "versionHistory.reason.restore": "לפני שחזור",
   "versionHistory.reason.manual": "ידני",
-  "ai.doctor.fix.pullHebrew": "הפתקים שלך בעברית; המודל הזה טוב בעברית:"
+  "ai.doctor.fix.pullHebrew": "הפתקים שלך בעברית; המודל הזה טוב בעברית:",
+  "tree.confirm.replace": "„{path}” כבר קיים. להחליף אותו? (הקיים יעבור לסל המחזור.)",
+  "tree.trashed": "{count} הועברו לסל המחזור",
+  "tree.undo": "ביטול",
+  "tree.linksUpdated": "הקישורים עודכנו ב-{count} פתקים",
+  "trash.title": "סל המחזור",
+  "trash.close": "סגירה",
+  "trash.empty": "סל המחזור ריק.",
+  "trash.emptyAll": "ריקון הסל",
+  "trash.restore": "שחזור",
+  "trash.deleteForever": "מחיקה לצמיתות",
+  "trash.restored": "שוחזר אל {path}",
+  "trash.daysLeft": "יימחק לצמיתות בעוד {n} ימים",
+  "cmd.file.trash": "סל המחזור…",
+  "cmd.file.trash.hint": "שחזור פתקים שנמחקו (נשמרים 30 יום)"
 }

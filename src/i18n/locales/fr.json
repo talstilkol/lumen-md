@@ -1205,5 +1205,19 @@
   "versionHistory.reason.close": "à la fermeture",
   "versionHistory.reason.restore": "avant restauration",
   "versionHistory.reason.manual": "manuel",
-  "ai.doctor.fix.pullHebrew": "Vos notes sont en hébreu ; ce modèle gère bien l'hébreu :"
+  "ai.doctor.fix.pullHebrew": "Vos notes sont en hébreu ; ce modèle gère bien l'hébreu :",
+  "tree.confirm.replace": "« {path} » existe déjà. Le remplacer ? (L'existant ira à la corbeille.)",
+  "tree.trashed": "{count} déplacé(s) dans la corbeille",
+  "tree.undo": "Annuler",
+  "tree.linksUpdated": "Liens mis à jour dans {count} notes",
+  "trash.title": "Corbeille",
+  "trash.close": "Fermer",
+  "trash.empty": "La corbeille est vide.",
+  "trash.emptyAll": "Vider la corbeille",
+  "trash.restore": "Restaurer",
+  "trash.deleteForever": "Supprimer définitivement",
+  "trash.restored": "Restauré dans {path}",
+  "trash.daysLeft": "supprimé définitivement dans {n} jours",
+  "cmd.file.trash": "Corbeille…",
+  "cmd.file.trash.hint": "Restaurer les notes supprimées (30 jours)"
 }
