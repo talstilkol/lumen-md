@@ -764,6 +764,8 @@ export async function pdfToMarkdown(file: File): Promise<string> {
         numPages: number;
         getPage: (n: number) => Promise<{
           getTextContent: () => Promise<{ items: Array<{ str?: string }> }>;
+          getViewport: (o: { scale: number }) => { width: number; height: number };
+          render: (o: { canvasContext: CanvasRenderingContext2D; viewport: { width: number; height: number } }) => { promise: Promise<void> };
         }>;
       }>;
     };
@@ -803,7 +805,29 @@ export async function pdfToMarkdown(file: File): Promise<string> {
       if (text) pages.push(text);
     }
     if (pages.length === 0) {
-      return "> ⚠️ This PDF has no extractable text (likely a scanned image). OCR is not built in yet.";
+      // A scanned PDF: render each page and read it with on-device OCR
+      // (Hebrew + English, T31). Browser only — tests have no canvas.
+      if (!isNode && typeof document !== "undefined") {
+        const { ocrImage } = await import("../ai/ocr");
+        const max = Math.min(pdf.numPages, 30);
+        for (let i = 1; i <= max; i++) {
+          const page = await pdf.getPage(i);
+          const viewport = page.getViewport({ scale: 2 });
+          const canvas = document.createElement("canvas");
+          canvas.width = Math.ceil(viewport.width);
+          canvas.height = Math.ceil(viewport.height);
+          const ctx = canvas.getContext("2d");
+          if (!ctx) break;
+          await page.render({ canvasContext: ctx, viewport }).promise;
+          const { text } = await ocrImage(canvas).catch(() => ({ text: "" }));
+          if (text) pages.push(text);
+        }
+        if (pages.length) {
+          const note = pdf.numPages > max ? `\n\n> ℹ️ OCR read the first ${max} of ${pdf.numPages} pages.` : "";
+          return `> ℹ️ Scanned PDF — text recognised on this device (OCR); check it against the original.\n\n${pages.join("\n\n---\n\n")}${note}`;
+        }
+      }
+      return "> ⚠️ This PDF has no extractable text (likely a scanned image), and on-device OCR found none either.";
     }
     return pages.join("\n\n---\n\n");
   } catch (err) {

@@ -1377,5 +1377,10 @@
   "cmd.ai.rerankModel": "KI: Suche mit lokalem Modell neu ordnen",
   "cmd.ai.rerankModel.hint": "An: bge-reranker-v2-m3 auf diesem Gerät (einmalig ~570 MB). Aus: schneller Wortabgleich.",
   "toast.rerankModelOn": "Neuordnung: lokales Modell (Download bei erster Nutzung)",
-  "toast.rerankModelOff": "Neuordnung: Wortabgleich"
+  "toast.rerankModelOff": "Neuordnung: Wortabgleich",
+  "cmd.image.altText": "Bilder: Alternativtext per OCR / lokaler Bildanalyse",
+  "cmd.image.altText.hint": "Liest Text in den Bildern dieser Notiz auf dem Gerät (Hebräisch + Englisch); beschreibt den Rest mit einem lokalen Ollama-Bildmodell",
+  "toast.imageAlt.none": "Keine Bilder ohne Alternativtext in dieser Notiz",
+  "toast.imageAlt.working": "Bilder werden auf dem Gerät gelesen: {count} …",
+  "toast.imageAlt.done": "Alternativtext ergänzt: {done} von {count}"
 }
