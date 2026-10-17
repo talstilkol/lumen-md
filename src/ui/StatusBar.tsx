@@ -2,7 +2,7 @@ import { countWords } from "../text/hebrew";
 import React, { useMemo, useState, useCallback, useSyncExternalStore } from "react";
 import { Sparkles, ShieldCheck, SpellCheck, FileDiff, Activity, BarChart3, CloudCog, CloudOff, AlertCircle } from "lucide-react";
 import type { CollabPeer } from "../collab/yjs";
-import { t } from "../i18n";
+import { t, getLocale } from "../i18n";
 import { useAppStore } from "../store/useStore";
 import { getTelemetryOptOut, setTelemetryOptOut } from "../lib/telemetry";
 import type { ConfigHealthReport } from "../lib/configHealth";
@@ -158,10 +158,10 @@ export const StatusBar = React.memo(function StatusBar({
         </span>
       ) : null}
       <span className="sb-item" title="Word count">
-        {t("status.words", { n: stats.words.toLocaleString() })}
+        {t("status.words", { n: stats.words.toLocaleString(getLocale()) })}
       </span>
       <span className="sb-item" title="Characters (without spaces)">
-        {t("status.chars", { n: stats.chars.toLocaleString() })}
+        {t("status.chars", { n: stats.chars.toLocaleString(getLocale()) })}
       </span>
       <span className="sb-item" title="Reading time at ~220 wpm">
         {t("status.reading", { n: stats.readingMin })}
