@@ -7,6 +7,7 @@
 
 import type { Availability, Executor, ExecutorId } from "../types";
 import { chatExecutor } from "./chatExecutor";
+import { ollamaExecutor } from "./ollama";
 
 const registry = new Map<ExecutorId, Executor>();
 
@@ -27,6 +28,7 @@ export function listExecutors(): Executor[] {
 /** Reset to the built-in set (tests). */
 export function resetExecutors(): void {
   registry.clear();
+  registerExecutor(ollamaExecutor);
   registerExecutor(chatExecutor);
 }
 
