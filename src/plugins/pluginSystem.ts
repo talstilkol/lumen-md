@@ -20,6 +20,7 @@
  *   src/plugins/useFetchSource.ts.
  */
 
+import { countWords } from "../text/hebrew";
 import { log } from "../lib/logger";
 
 export interface LumenCommand {
@@ -195,7 +196,7 @@ export const wordCountPlugin: LumenPlugin = {
       hint: "Show detailed word statistics",
       action: () => {
         const content = api.getContent();
-        const words = content.split(/\s+/).filter(Boolean).length;
+        const words = countWords(content);
         const chars = content.length;
         const lines = content.split("\n").length;
         const sentences = content.split(/[.!?]+/).filter(Boolean).length;
