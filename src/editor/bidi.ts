@@ -19,29 +19,22 @@ import { Decoration, EditorView, ViewPlugin, type DecorationSet, type ViewUpdate
 import { syntaxTree } from "@codemirror/language";
 import type { EditorState } from "@codemirror/state";
 
+export { firstStrongDirection } from "../lib/textDirection";
+
 export type Dir = "auto" | "ltr" | "rtl";
 
-const RTL_CHAR = /[֐-ࣿיִ-﷿ﹰ-﻿]/;
-const LTR_CHAR = /[A-Za-zÀ-ɏͰ-ϿЀ-ӿ぀-ヿ一-鿿가-힯]/;
-
-/**
- * The base direction a block of text would get from its first strong
- * character (what `dir="auto"` resolves to), or null when there is none.
- */
-export function firstStrongDirection(text: string): "ltr" | "rtl" | null {
-  for (const ch of text) {
-    if (RTL_CHAR.test(ch)) return "rtl";
-    if (LTR_CHAR.test(ch)) return "ltr";
-  }
-  return null;
+/** End offset of a leading YAML frontmatter block (just past its closing fence), or -1. */
+export function frontmatterEnd(doc: string): number {
+  if (!doc.startsWith("---")) return -1;
+  const end = doc.indexOf("\n---", 3);
+  return end < 0 ? -1 : end + 4;
 }
 
 /** `dir: rtl|ltr|auto` from a note's YAML frontmatter, else null. */
 export function frontmatterDir(doc: string): Dir | null {
-  if (!doc.startsWith("---")) return null;
-  const end = doc.indexOf("\n---", 3);
+  const end = frontmatterEnd(doc);
   if (end < 0) return null;
-  const m = /^dir:\s*["']?(auto|ltr|rtl)["']?\s*$/m.exec(doc.slice(3, end));
+  const m = /^dir:\s*["']?(auto|ltr|rtl)["']?\s*$/m.exec(doc.slice(3, end - 4));
   return m ? (m[1] as Dir) : null;
 }
 
@@ -69,15 +62,22 @@ function ltrRanges(state: EditorState, from: number, to: number): Array<[number,
 }
 
 function build(view: EditorView): DecorationSet {
-  const pinned = frontmatterDir(view.state.sliceDoc(0, Math.min(view.state.doc.length, 2000)));
+  const head = view.state.sliceDoc(0, Math.min(view.state.doc.length, 2000));
+  const pinned = frontmatterDir(head);
+  // The editor's markdown parser has no frontmatter node (the block parses
+  // as a rule and a heading), so the YAML block is found textually.
+  const fm = frontmatterEnd(head);
   const ranges: ReturnType<typeof ATTR.auto.range>[] = [];
   for (const { from, to } of view.visibleRanges) {
-    const ltr = pinned === "auto" || pinned === null ? ltrRanges(view.state, from, to) : [];
+    // Code and the frontmatter are LTR even when the note pins a
+    // direction: a `dir: rtl` author still reads code left-to-right.
+    const ltr = ltrRanges(view.state, from, to);
+    if (fm > 0) ltr.push([0, fm]);
     let pos = from;
     while (pos <= to) {
       const line = view.state.doc.lineAt(pos);
       const inCode = ltr.some(([a, b]) => line.from >= a && line.from < b);
-      const dir: Dir = inCode ? "ltr" : (pinned ?? "auto");
+      const dir: Dir = inCode ? "ltr" : pinned ?? "auto";
       ranges.push(ATTR[dir].range(line.from));
       if (line.to >= to) break;
       pos = line.to + 1;
