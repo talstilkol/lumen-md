@@ -30,6 +30,7 @@ import { checkJson } from "./tools/validate";
 import { ToolError } from "./tools/define";
 import { review, type Failure } from "./critic";
 import { recordRun } from "./trace";
+import { AiQuotaExceededError, chargeAiCommandDispatch } from "../billing/aiQuota";
 
 export const DEFAULT_MAX_STEPS = 8;
 export const DEFAULT_MAX_RETRIES = 2;
@@ -121,6 +122,15 @@ export async function runAgent<I extends AgentInput, O = string>(def: AgentDefin
   }
   let executor = pick.executor;
   let patch: RetryPatch = { ...(opts.patch ?? {}) };
+
+  // One user action = one prompt against the monthly quota, however many
+  // model calls, tools and retries the run takes. Executors run prepaid.
+  try {
+    chargeAiCommandDispatch();
+  } catch (e) {
+    if (e instanceof AiQuotaExceededError) return finish("failed", { errorCode: "quota", error: e.message });
+    throw e;
+  }
 
   for (let attempt = 1; attempt <= maxRetries + 1; attempt++) {
     run.attempts = attempt;

@@ -69,7 +69,8 @@ export const chatExecutor: Executor = {
       temperature: req.temperature,
       signal: req.signal,
       tier: req.tier === "tiny" || req.tier === "small" ? ("light" as const) : undefined,
-      ownPrompt: "silent" as const,
+      // The runtime charged the quota once for the whole run.
+      prepaid: true,
     };
     let content = "";
     if (req.onDelta) {

@@ -7,6 +7,7 @@ vi.mock("../store/useStore", () => ({
   useAppStore: { getState: () => ({ aiKey: null, useLocalAi: false, useFineTunedModel: false, fineTunedModelId: null }) },
 }));
 vi.mock("../store/useToastStore", () => ({ toast: { info: vi.fn(), warn: vi.fn(), error: vi.fn() } }));
+vi.mock("../billing/aiQuota", () => ({ chargeAiCommandDispatch: vi.fn(), AiQuotaExceededError: class extends Error {} }));
 
 import { runAgent, runAgentOrThrow, AgentRunError } from "../agents/runtime";
 import { registerExecutor, resetExecutors } from "../agents/executors";
