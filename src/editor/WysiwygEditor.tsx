@@ -37,6 +37,7 @@ import {
 } from "./wysiwygSuggest";
 import { registerPendingEdits, useAppStore } from "../store/useStore";
 import { useAuth } from "../auth/useAuth";
+import { t } from "../i18n";
 
 // Suggesting mode (track changes) works in WYSIWYG too: CriticMarkup ↔
 // marks, edits tracked while the store's suggestingMode is on.
@@ -547,7 +548,7 @@ function buildTooltip(getView: () => EditorView | null): HTMLDivElement {
         } catch (e) {
           log.error("WYSIWYG AI rewrite failed", e);
           // A spent quota already showed its own toast.
-          if (!(e instanceof Error && e.name === "AiQuotaExceededError")) showAiToast("AI Rewrite failed", "error");
+          if (!(e instanceof Error && e.name === "AiQuotaExceededError")) showAiToast(t("toast.aiRewriteFailed"), "error");
         }
       },
     },
