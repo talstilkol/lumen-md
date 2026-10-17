@@ -332,3 +332,53 @@ export async function runAgentOrThrow<I extends AgentInput, O = string>(def: Age
   if (run.status === "ok" && run.output !== undefined) return run.output;
   throw new AgentRunError(run as AgentRun, run.error ?? run.status);
 }
+
+/**
+ * Run a streaming agent as an async generator of text deltas (what the
+ * editor's streaming UIs consume). Throws AgentRunError when the run does
+ * not end with a usable answer. Closing the generator early aborts the run.
+ */
+export async function* streamAgent<I extends AgentInput>(def: AgentDefinition<I, string>, input: I, opts: RunOptions = {}): AsyncGenerator<string, void, undefined> {
+  const queue: string[] = [];
+  let wake: (() => void) | null = null;
+  let done = false;
+  let result: AgentRun<string> | null = null;
+  const ctrl = new AbortController();
+  const onOuter = () => ctrl.abort();
+  opts.signal?.addEventListener("abort", onOuter, { once: true });
+  const p = runAgent(def, input, {
+    ...opts,
+    signal: ctrl.signal,
+    onDelta: (d) => {
+      queue.push(d);
+      wake?.();
+    },
+  }).then((r) => {
+    result = r;
+    done = true;
+    wake?.();
+  });
+  let yielded = false;
+  try {
+    for (;;) {
+      if (queue.length) {
+        yielded = true;
+        yield queue.shift()!;
+        continue;
+      }
+      if (done) break;
+      await new Promise<void>((r) => {
+        wake = r;
+      });
+      wake = null;
+    }
+    await p;
+    const run = result as AgentRun<string> | null;
+    if (!run || run.status !== "ok") throw new AgentRunError(run as AgentRun, run?.error ?? "agent failed");
+    // An executor that could not stream: the whole answer arrives once.
+    if (!yielded && run.output) yield run.output;
+  } finally {
+    opts.signal?.removeEventListener("abort", onOuter);
+    if (!done) ctrl.abort();
+  }
+}

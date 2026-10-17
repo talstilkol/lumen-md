@@ -21,7 +21,7 @@ import { wrapInList } from "prosemirror-schema-list";
 import { dragHandlePlugin } from "./dragHandles";
 import { buildIndentKeymap } from "./keymapExtra";
 import "katex/dist/katex.css";
-import { chat, chatStream, AiError } from "../ai/llm";
+import { chat, AiError } from "../ai/llm";
 import { PROMPTS } from "../ai/prompts";
 import { showAiToast } from "../ui/AiToast";
 import { openAiPrompt } from "../ui/AiInlinePrompt";
@@ -287,13 +287,9 @@ function buildSlashItems(): SlashItem[] {
 
         try {
           let accumulated = "";
-          const stream = chatStream(
-            [
-              { role: "system", content: PROMPTS.ghostwriter },
-              { role: "user", content: promptStr },
-            ],
-            { ownPrompt: true },
-          );
+          const { streamAgent } = await import("../agents/runtime");
+          const { writerAgent } = await import("../agents/defs");
+          const stream = streamAgent(writerAgent, { text: promptStr }, { ownPrompt: true });
           // Remove placeholder before streaming
           const removeTr = v.state.tr;
           removeTr.delete(insertPos, insertPos + placeholder.length);
@@ -320,7 +316,7 @@ function buildSlashItems(): SlashItem[] {
           showAiToast(
             e instanceof AiError && e.code === "NO_KEY"
               ? "Please configure your AI Key (⌘K → AI Settings)"
-              : "AI Ghostwriter failed — check console for details",
+              : `AI Ghostwriter failed: ${(e as Error)?.message ?? "unknown error"} (⌘K → AI: Recent Agent Runs)`,
             "error",
           );
         }
