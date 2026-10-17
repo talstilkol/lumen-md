@@ -1,18 +1,21 @@
 /**
- * Auto-backup — saves a versioned snapshot of the current document every
- * 30 s after the user stops typing, even if they never press Ctrl+S.
+ * Auto-backup — a snapshot of the current document 30 s after the user
+ * stops typing, even if they never save, plus a snapshot of every note
+ * that changed in the vault every ten minutes (T35).
  *
- * Snapshots land in OPFS (`/backups/<name>/<ts>.md`) and are kept with
- * an LRU cap so disk usage stays bounded.
+ * Both go to the one history store (src/storage/history.ts) that the
+ * Version History panel reads. They used to be written as files under
+ * `backups/` in the vault itself, where they showed up in the file tree,
+ * in search and in the embeddings index — and never in the history panel.
  */
 
-import { writeWorkspaceFile } from "../storage/workspace";
 import { useAppStore } from "../store/useStore";
 import { log } from "../lib/logger";
+import { historyKey, recordSnapshot } from "../storage/history";
 
 const AUTO_BACKUP_INTERVAL_MS = 30_000;
 const IDLE_CALLBACK_TIMEOUT_MS = 2_000;
-const MAX_VERSIONS = 100;
+export const VAULT_SNAPSHOT_EVERY_MS = 10 * 60_000;
 
 let timer: ReturnType<typeof setTimeout> | undefined;
 let snapshotQueue: Array<{ name: string; content: string; ts: number }> = [];
@@ -29,7 +32,7 @@ export function startAutoBackup(): void {
   const unsub = useAppStore.subscribe((state, prevState) => {
     if (state.doc.content === prevState.doc.content) return;
     if (!state.doc.content) return;
-    scheduleSnapshot(state.doc.name, state.doc.content);
+    scheduleSnapshot(historyKey(state.doc), state.doc.content);
   });
 
   // Flush when the tab closes or is hidden: the 30 s timer may still be
@@ -73,7 +76,7 @@ export function flushNow(): Promise<void> {
     snapshotQueue.push({ ...pending, ts: Date.now() });
     pending = null;
   }
-  return flushQueue(true);
+  return flushQueue();
 }
 
 function scheduleSnapshot(name: string, content: string): void {
@@ -97,89 +100,58 @@ function scheduleSnapshot(name: string, content: string): void {
   }, AUTO_BACKUP_INTERVAL_MS);
 }
 
-async function flushQueue(force = false): Promise<void> {
+async function flushQueue(): Promise<void> {
   if (isWriting) return;
   isWriting = true;
   try {
     while (snapshotQueue.length > 0) {
       const snapshot = snapshotQueue.shift();
       if (!snapshot) continue;
-      const { name, content, ts } = snapshot;
-      const path = `backups/${backupDirName(name)}/${ts}.md`;
       try {
-        await writeWorkspaceFile(path, content);
+        await recordSnapshot(snapshot.name, snapshot.content, "auto-backup", snapshot.ts);
       } catch (err) {
         log.error("[auto-backup] write failed:", (err as Error).message);
       }
-    }
-    // Prune old versions after every flush.
-    if (force || Math.random() < 0.1) {
-      await pruneOldVersions();
     }
   } finally {
     isWriting = false;
   }
 }
 
-/**
- * Folder for one document's snapshots: a readable part plus a hash of the
- * full name (T26). The old `[^\w.-] → _` turned every Hebrew name into
- * underscores, so "שלום.md" and "עולם.md" shared — and pruned — one folder.
- */
-export function backupDirName(name: string): string {
-  let h = 0x811c9dc5;
-  for (const ch of name.normalize("NFC")) {
-    h ^= ch.codePointAt(0) ?? 0;
-    h = Math.imul(h, 0x01000193) >>> 0;
-  }
-  const readable = name
-    .normalize("NFC")
-    .replace(/\.(md|markdown)$/i, "")
-    .replace(/[^\p{L}\p{M}\p{N}._-]+/gu, "_")
-    .replace(/^_+|_+$/g, "")
-    .slice(0, 40);
-  return `${readable || "note"}-${h.toString(16).padStart(8, "0")}`;
-}
-
-function isDirectoryHandle(h: FileSystemHandle): h is FileSystemDirectoryHandle {
-  return h.kind === "directory";
-}
-
-function isFileHandle(h: FileSystemHandle): h is FileSystemFileHandle {
-  return h.kind === "file";
-}
+/** Last modified time already snapshotted, per vault path. */
+const vaultSeen = new Map<string, number>();
 
 /**
- * Keep at most MAX_VERSIONS snapshots per document, deleting oldest first.
+ * Snapshot every vault note whose modified time moved since the last
+ * pass. Identical content is skipped by the store, so this is cheap when
+ * little changed. Returns the number of snapshots written.
  */
-async function pruneOldVersions(): Promise<void> {
-  try {
-    const opfs = await navigator.storage.getDirectory();
-    const backupsDir = await opfs.getDirectoryHandle("backups", { create: false });
-    if (!backupsDir) return;
-
-    for await (const [, entry] of backupsDir.entries()) {
-      if (!isDirectoryHandle(entry)) continue;
-      const handle = entry;
-      const files: { name: string; handle: FileSystemFileHandle }[] = [];
-      for await (const [fileName, fileHandle] of handle.entries()) {
-        if (isFileHandle(fileHandle)) {
-          files.push({ name: fileName, handle: fileHandle });
-        }
-      }
-      if (files.length <= MAX_VERSIONS) continue;
-      // Sort by filename (which is timestamp) ascending = oldest first
-      files.sort((a, b) => a.name.localeCompare(b.name));
-      const toDelete = files.slice(0, files.length - MAX_VERSIONS);
-      for (const f of toDelete) {
-        try {
-          await handle.removeEntry(f.name);
-        } catch {
-          /* ignore pruning errors */
-        }
-      }
+export async function snapshotVault(): Promise<number> {
+  const ws = await import("../storage/workspace");
+  if (!ws.isOPFSAvailable()) return 0;
+  let written = 0;
+  const list = await ws.listWorkspace({ includeAssets: false });
+  for (const e of list) {
+    if (ws.isAssetName(e.path) || vaultSeen.get(e.path) === e.modified) continue;
+    try {
+      const content = await ws.readWorkspaceFile(e.path);
+      if (await recordSnapshot(e.path, content, "vault")) written++;
+      vaultSeen.set(e.path, e.modified);
+    } catch (err) {
+      log.warn("[auto-backup] vault snapshot skipped", e.path, (err as Error).message);
     }
-  } catch {
-    /* OPFS may be unavailable — silently skip pruning */
   }
+  return written;
+}
+
+let vaultTimer: ReturnType<typeof setInterval> | undefined;
+/** Start the ten-minute vault snapshots (first pass after one minute). */
+export function startVaultSnapshots(): () => void {
+  const first = setTimeout(() => void snapshotVault().catch(() => 0), 60_000);
+  vaultTimer = setInterval(() => void snapshotVault().catch(() => 0), VAULT_SNAPSHOT_EVERY_MS);
+  return () => {
+    clearTimeout(first);
+    if (vaultTimer) clearInterval(vaultTimer);
+    vaultTimer = undefined;
+  };
 }

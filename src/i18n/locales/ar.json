@@ -1194,5 +1194,15 @@
   "ai.doctor.action.openSettings": "فتح إعدادات الذكاء الاصطناعي",
   "ai.doctor.action.pullModel": "تنزيل الآن",
   "ai.doctor.action.setPolicyLocalFirst": "التبديل إلى \"محلي أولاً\"",
-  "ai.doctor.action.retry": "إعادة المحاولة"
+  "ai.doctor.action.retry": "إعادة المحاولة",
+  "doc.save.failedRetrying": "تعذّر حفظ «{name}» في الخزنة — جارٍ إعادة المحاولة. نصك لا يزال في هذا المتصفح.",
+  "doc.save.quota": "مساحة تخزين هذا الموقع في المتصفح ممتلئة — لم يُحفظ «{name}». أفرغ مساحة أو صدّر ملاحظاتك.",
+  "doc.history.quota": "لا توجد مساحة لسجل الإصدارات حتى بعد حذف أقدم الإصدارات.",
+  "versionHistory.reason.autosave": "حفظ تلقائي",
+  "versionHistory.reason.save": "محفوظ",
+  "versionHistory.reason.auto-backup": "نسخة احتياطية",
+  "versionHistory.reason.vault": "لقطة للخزنة",
+  "versionHistory.reason.close": "عند الإغلاق",
+  "versionHistory.reason.restore": "قبل الاستعادة",
+  "versionHistory.reason.manual": "يدوي"
 }
