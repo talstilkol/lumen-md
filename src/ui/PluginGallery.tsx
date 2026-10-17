@@ -230,12 +230,29 @@ export function PluginGallery({ open, onClose }: Props) {
     };
   }, [open]);
 
-  if (!open) return null;
+  // Escape closes the dialog, like every other overlay.
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        e.stopPropagation();
+        onClose();
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [open, onClose]);
 
-  const allAvailable = [...COMMUNITY_PLUGINS, ...remotePlugins];
+  const allAvailable = useMemo(() => [...COMMUNITY_PLUGINS, ...remotePlugins], [remotePlugins]);
 
   // Index categories for the side rail. Built-ins live in "Community";
   // remote-registry plugins surface their declared category (or "Featured").
+  //
+  // This hook must run on every render, including the closed one: the
+  // gallery is mounted with `open={false}` from App and flipped open
+  // later, and a hook that only ran once open made React throw
+  // "Rendered more hooks than during the previous render" the first
+  // time the gallery was opened. Every hook stays above the early return.
   const categoryIndex = useMemo(() => {
     const map = new Map<string, number>();
     map.set("all", allAvailable.length);
@@ -246,6 +263,8 @@ export function PluginGallery({ open, onClose }: Props) {
     }
     return map;
   }, [allAvailable.length, remoteRaw]);
+
+  if (!open) return null;
 
   const matchesCategory = (id: string): boolean => {
     if (activeCategory === "all") return true;
@@ -475,6 +494,7 @@ export function PluginGallery({ open, onClose }: Props) {
                 return (
                   <div
                     key={plugin.id}
+                    data-testid="plugin-card"
                     style={{
                       display: "flex",
                       flexDirection: "column",
