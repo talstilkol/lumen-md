@@ -76,6 +76,7 @@ describe("batch helpers", () => {
     expect(frontmatterField(w.content, "translatedFrom")).toBe("x.md");
     expect(frontmatterField(w.content, "title")).toBe("Bonjour");
     expect(isBatchTranslation("---\ntitle: x\n---\nHello")).toBe(false);
+    expect(isBatchTranslation("---\ntranslatedFrom: \"my-own.md\"\n---\nHello")).toBe(false); // the user's own field
     // The job's earlier write is found (here behind an unrelated x.french.md).
     const files = new Map([["x.md", "Hello"], ["x.french.md", "mine"], ["x.french-2.md", w.content]]);
     expect(planWrites(job, new Map([["n0", "Bonjour"]]), (p) => files.get(p) ?? null)).toEqual([]);

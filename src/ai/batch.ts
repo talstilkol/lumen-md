@@ -51,7 +51,8 @@ export const TRANSLATION_JOB = "translationJob";
 
 /** True for a note a translation batch generated (so later batches skip it). */
 export function isBatchTranslation(content: string): boolean {
-  return frontmatterField(content, TRANSLATED_FROM) !== null;
+  // Both markers: a user's own `translatedFrom` field alone isn't ours.
+  return frontmatterField(content, TRANSLATED_FROM) !== null && frontmatterField(content, TRANSLATION_JOB) !== null;
 }
 
 export interface BatchJob {
