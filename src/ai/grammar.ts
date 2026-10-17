@@ -1,5 +1,6 @@
 import { fetchWithRetry } from "../lib/fetchRetry";
-import { assertCloudAllowed, isLocalOrigin } from "./policy";
+import { cloudAllowed, isLocalOrigin } from "./policy";
+import { connectAllowedByCsp } from "../lib/cspConnect";
 
 /**
  * LanguageTool grammar checker — a thin client that hits the public
@@ -9,8 +10,12 @@ import { assertCloudAllowed, isLocalOrigin } from "./policy";
  * The free tier rate-limits anonymous requests, so callers should debounce
  * (e.g. 1.5s after the user stops typing) and skip very short documents.
  *
- * Self-host: drop in `VITE_LANGUAGETOOL_URL=https://your-host:8081/v2/check`
- * to send traffic somewhere private.
+ * Self-host: run LanguageTool locally (docker/local-ai.yml, port 8010) and set
+ * the endpoint at run time (`lumen.grammar.endpoint`, CSP-checked) or at
+ * build time (`VITE_LANGUAGETOOL_URL`). When no LanguageTool on this machine
+ * is configured and the AI policy keeps the public API off limits, an
+ * explicit check (`{ allowModel: true }`) uses the local `proofreader`
+ * agent instead; background checks just return nothing.
  */
 
 export interface GrammarMatch {
@@ -28,11 +33,30 @@ const DEFAULT_URL = "https://api.languagetool.org/v2/check";
 const RECENT: Map<string, GrammarMatch[]> = new Map();
 const RECENT_LIMIT = 16;
 
-function endpoint(): string {
+export const GRAMMAR_ENDPOINT_KEY = "lumen.grammar.endpoint";
+
+export function grammarEndpoint(): string {
+  try {
+    const stored = localStorage.getItem(GRAMMAR_ENDPOINT_KEY);
+    if (stored && connectAllowedByCsp(stored)) return stored;
+  } catch {
+    /* storage denied */
+  }
   const env = (
     import.meta as ImportMeta & { env?: { VITE_LANGUAGETOOL_URL?: string } }
   ).env?.VITE_LANGUAGETOOL_URL;
   return env || DEFAULT_URL;
+}
+
+const endpoint = grammarEndpoint;
+
+/** Grammar through the local proofreader agent: issues mapped to LanguageTool-shaped matches. */
+async function checkWithModel(text: string, language: string): Promise<GrammarMatch[]> {
+  const { runAgentOrThrow } = await import("../agents/runtime");
+  const { proofreaderAgent, locateIssues, PROOF_MAX_CHARS } = await import("../agents/defs");
+  const slice = text.slice(0, PROOF_MAX_CHARS);
+  const out = await runAgentOrThrow(proofreaderAgent, { text: slice, extra: { language } }, { document: text });
+  return locateIssues(out.issues, slice).map((i) => ({ ...i, rule: { id: "LOCAL_MODEL", category: "local" } }));
 }
 
 /**
@@ -43,6 +67,7 @@ function endpoint(): string {
 export async function checkGrammar(
   text: string,
   language = "en-US",
+  opts: { allowModel?: boolean } = {},
 ): Promise<GrammarMatch[]> {
   const trimmed = text.trim();
   if (trimmed.length < 40) return [];
@@ -51,7 +76,12 @@ export async function checkGrammar(
   if (cached) return cached;
   // A self-hosted LanguageTool on this machine or network is fine under
   // every policy; the public API is a third party.
-  if (!isLocalOrigin(endpoint())) assertCloudAllowed("the public LanguageTool API");
+  if (!isLocalOrigin(endpoint()) && !cloudAllowed()) {
+    if (!opts.allowModel) return [];
+    const matches = await checkWithModel(trimmed, language);
+    RECENT.set(cacheKey, matches);
+    return matches;
+  }
 
   const body = new URLSearchParams({
     text: trimmed,
