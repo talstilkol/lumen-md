@@ -120,6 +120,8 @@ Or try the online version at [lumen.md](https://lumen.md) — no install needed.
 | iOS | `npm run ios:open` — Capacitor 8 Xcode project |
 | Android | `npm run android:open` — Capacitor Android Studio project |
 
+**Minimum browser / WebView** (set by Tailwind CSS 4): Safari and iOS 16.4+, Chrome / Edge 111+, Firefox 128+. The iOS app targets iOS 16.4. On Linux the desktop app needs a WebKitGTK release with the same CSS support (2.40+).
+
 ---
 
 ## 📁 Project layout
