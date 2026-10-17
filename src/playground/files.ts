@@ -262,6 +262,9 @@ export function formatValue(value: unknown, max = 10_000): string {
   const write = (s: string) => {
     if (!full()) out += s;
   };
+  // Strings are cut to the remaining budget before JSON-encoding them, so a
+  // huge string value or key is never serialized whole.
+  const str = (t: string) => JSON.stringify(t.slice(0, Math.max(0, max - out.length) + 1));
   const seen = new WeakSet<object>();
   const walk = (v: unknown, inArray: boolean): void => {
     if (full()) return;
@@ -276,6 +279,7 @@ export function formatValue(value: unknown, max = 10_000): string {
     if (typeof v === "bigint") return write(JSON.stringify(`${v}n`));
     if (v === undefined || typeof v === "symbol") return write(inArray ? "null" : String(v));
     if (typeof v === "number") return write(Number.isFinite(v) ? String(v) : "null");
+    if (typeof v === "string") return write(str(v));
     if (v === null || typeof v !== "object") return write(JSON.stringify(v));
     if (seen.has(v)) return write('"[Circular]"');
     seen.add(v);
@@ -297,7 +301,7 @@ export function formatValue(value: unknown, max = 10_000): string {
         if (x === undefined || typeof x === "symbol") continue;
         if (!first) write(",");
         first = false;
-        write(JSON.stringify(k) + ":");
+        write(str(k) + ":");
         walk(x, false);
       }
       write("}");

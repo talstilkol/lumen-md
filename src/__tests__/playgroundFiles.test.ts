@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import { buildProject, frameworkFromMeta, resolveImport, splitFiles } from "../playground/files";
 import { runnerUrl } from "../plugins/PlaygroundBlock";
 import { renderMarkdown } from "../renderer/pipeline";
@@ -202,5 +202,17 @@ describe("guardLoops in labeled blocks", () => {
     expect(guardLoops("if (ready) outer: { while (true) {} }")).toContain("__lumenLoop()");
     expect(guardLoops("let async = 1; async\nwhile (true) {}")).toContain("__lumenLoop()");
     expect(guardLoops("this is not js (")).toBe("this is not js (");
+  });
+});
+
+describe("formatValue bounds strings", () => {
+  it("never encodes a huge string or key whole", async () => {
+    const { formatValue } = await import("../playground/files");
+    const big = "x".repeat(5_000_000);
+    const spy = vi.spyOn(JSON, "stringify");
+    const out = formatValue({ [big]: big }, 100);
+    expect(out.length).toBeLessThanOrEqual(101);
+    for (const call of spy.mock.calls) expect(String(call[0]).length).toBeLessThan(200);
+    spy.mockRestore();
   });
 });
