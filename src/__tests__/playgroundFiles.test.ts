@@ -198,5 +198,6 @@ describe("guardLoops in labeled blocks", () => {
     expect(guardLoops("outer: { while (true) {} }")).toContain("__lumenLoop()");
     expect(guardLoops("function f() { outer: { for (;;) break outer; } }")).toContain("__lumenLoop()");
     expect(guardLoops("const o = { a: { while(x) { return x; } } };")).not.toContain("__lumenLoop");
+    expect(guardLoops("function* g() { yield\n{ while (true) {} } }")).toContain("__lumenLoop()");
   });
 });

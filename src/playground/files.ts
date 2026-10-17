@@ -259,7 +259,12 @@ function isClassBody(tokens: Tok[], b: number): boolean {
 function isObjectLiteral(tokens: Tok[], b: number): boolean {
   const prev = tokens[b - 1];
   if (!prev) return false;
-  if (prev.type === "ident") return ["return", "yield", "await", "typeof", "void", "in", "of", "case", "delete", "throw", "new"].includes(prev.value);
+  if (prev.type === "ident") {
+    // `return` / `yield` end at a line break (ASI): a `{` on the next line
+    // opens a block.
+    if ((prev.value === "return" || prev.value === "yield") && tokens[b].nl) return false;
+    return ["return", "yield", "await", "typeof", "void", "in", "of", "case", "delete", "throw", "new"].includes(prev.value);
+  }
   if (prev.type !== "punct") return false;
   if (prev.value === ")" || prev.value === "]" || prev.value === "}" || prev.value === ";" || prev.value === "{" || prev.value === "=>") return false;
   if (prev.value === ":") {
