@@ -37,9 +37,19 @@ first prompt is working, not stuck.
 
 ## How to fall back
 
-When WebGPU isn't available on your device, `chat()` automatically
-warns you and falls back to your OpenAI key. No reconfiguration needed
-— just re-run the command.
+What happens when WebGPU (or Ollama) isn't available depends on your
+**AI policy** (`⌘K → "AI: Local or Cloud Policy"`):
+
+- **Local only** (the default on a fresh install): nothing leaves the
+  device. The command stops with a clear message and the agent's
+  suggestions (start Ollama, pick a smaller model, use a WebGPU browser).
+- **Local first**: `chat()` warns you and falls back to your cloud key.
+  An installation that already had a cloud provider or key configured
+  before policies existed keeps working this way until you choose.
+- **Cloud**: the selected cloud provider is used directly.
+
+See [Local agents](/ai/local-agents/) for how every AI command runs
+through the local agent runtime.
 
 ## Pick a different model
 
