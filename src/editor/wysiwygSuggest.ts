@@ -24,7 +24,7 @@
  *    deletes it); structural deletions (joining blocks) are undone.
  */
 import { $markSchema, $prose, $remark } from "@milkdown/utils";
-import type { Mark, Schema, Slice } from "@milkdown/prose/model";
+import type { Mark, Node as ProseNode, Schema, Slice } from "@milkdown/prose/model";
 import { Plugin, PluginKey, TextSelection, type EditorState, type Transaction } from "@milkdown/prose/state";
 import { ReplaceStep, type Mapping } from "@milkdown/prose/transform";
 import type { Parents, PhrasingContent, Root } from "mdast";
@@ -414,6 +414,27 @@ export function isStructural(slice: Slice): boolean {
   return block;
 }
 
+/** Inline code: text with a `code` mark (CriticMarkup is literal there). */
+const isCodeText = (n: ProseNode | null | undefined) => !!n && n.isText && n.marks.some((m) => m.type.spec.code);
+
+/**
+ * True when a replace step lies wholly in code, where source mode leaves
+ * edits untracked: inside one code block, or inside an inline code span —
+ * which in ProseMirror is a mark on paragraph text, not a code node, so the
+ * removed and the inserted inline content must all be code-marked text,
+ * next to existing code.
+ */
+function stepInCode(before: ProseNode, from: number, to: number, slice: Slice): boolean {
+  const $from = before.resolve(from);
+  if (!$from.sameParent(before.resolve(to))) return false;
+  if ($from.parent.type.spec.code) return true;
+  if (!isCodeText($from.nodeBefore) && !isCodeText($from.nodeAfter)) return false;
+  let code = true;
+  if (to > from) before.nodesBetween(from, to, (n) => void (n.isInline && !isCodeText(n) && (code = false)));
+  slice.content.descendants((n) => void (n.isInline && !isCodeText(n) && (code = false)));
+  return code;
+}
+
 /**
  * A user transaction suggesting mode can't track:
  *  - any step other than a plain replace: formatting (mark steps), block
@@ -422,7 +443,7 @@ export function isStructural(slice: Slice): boolean {
  *    paste, a dragged block);
  *  - a deletion whose text contains a CriticMarkup delimiter, which
  *    couldn't be read back as one suggestion.
- * Edits wholly inside a code block are exempt (they pass untracked).
+ * Edits wholly inside a code block or code span are exempt (they pass untracked).
  */
 function untrackable(tr: Transaction): boolean {
   return tr.steps.some((st, i) => {
@@ -430,7 +451,7 @@ function untrackable(tr: Transaction): boolean {
     const { from, to, slice } = st as unknown as { from: number; to: number; slice: Slice };
     const before = tr.docs[i];
     const $from = before.resolve(from);
-    if ($from.parent.type.spec.code && $from.sameParent(before.resolve(to))) return false;
+    if (stepInCode(before, from, to, slice)) return false;
     if (slice.size > 0 && isStructural(slice) && !$from.parent.type.spec.code) return true;
     // The text the step leaves behind — two characters each side, plus any
     // inserted text — mustn't form a CriticMarkup delimiter across the edit
@@ -503,10 +524,7 @@ export function trackChanges(
         insertedSize: s.slice.size,
         deleted: before.slice(s.from, s.to),
         structural: s.slice.size > 0 && isStructural(s.slice),
-        inCode: (() => {
-          const $from = before.resolve(s.from);
-          return !!$from.parent.type.spec.code && $from.sameParent(before.resolve(s.to));
-        })(),
+        inCode: stepInCode(before, s.from, s.to, s.slice),
         deletesStructure: s.to > s.from && (!before.resolve(s.from).sameParent(before.resolve(s.to)) || hasAtom(before.slice(s.from, s.to))),
         toEnd,
       });
@@ -522,9 +540,9 @@ export function trackChanges(
   for (const c of changes) {
     const at = tr.mapping.map(c.toEnd.map(c.from, -1), -1);
     const insertedEnd = tr.mapping.map(c.toEnd.map(c.from + c.insertedSize, 1), 1);
-    // Code blocks can't carry marks: edits there pass untracked, as in
+    // Code can't carry suggestions: edits there pass untracked, as in
     // source mode (CriticMarkup inside code is literal text).
-    // Only edits wholly inside one code block (judged before the edit).
+    // Only edits wholly inside one code block or span (judged before the edit).
     if (c.inCode) continue;
     // 1. Insertions are suggested. Structural ones (a new paragraph, a
     //    multi-block paste) can't be expressed as CriticMarkup or undone

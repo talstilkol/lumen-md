@@ -170,6 +170,20 @@ describe("tracking edits while suggesting", () => {
     expect(t.md()).toBe("```\ncode\n```\n\nAfter text."); // crosses a block boundary: refused
   });
 
+  it("edits inside an inline code span pass untracked, delimiter-like text included", async () => {
+    const e = await open("Run `npm test` now.", true);
+    e.select(e.at(" test"));
+    e.type("++}");
+    expect(e.md()).toBe("Run `npm++} test` now.");
+    e.select(e.at("test"), e.at("test", 4));
+    e.backspace();
+    expect(e.md()).toBe("Run `npm++} ` now.");
+    // Outside the span: tracked as usual.
+    e.select(e.at("now"));
+    e.type("!");
+    expect(e.md()).toBe("Run `npm++} ` {++!++}{>>@Tal<<}now.");
+  });
+
   it("typing over a selection is a substitution", async () => {
     const e = await open("Hello world.", true);
     e.select(e.at("world"), e.at("world", 5));
