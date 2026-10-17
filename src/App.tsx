@@ -36,6 +36,7 @@ const SearchDialog = lazy(() =>
   import("./ui/SearchDialog").then((m) => ({ default: m.SearchDialog })),
 );
 import { AiToastContainer, showAiToast } from "./ui/AiToast";
+import { AiSuggestionsPanel } from "./ui/AiSuggestionsPanel";
 import { MobileKeyboardBar } from "./ui/MobileKeyboardBar";
 import { TagsPanel } from "./ui/TagsPanel";
 // CommentsPanel pulls collab/comments.ts → yjs; comments only exist inside a
@@ -590,6 +591,31 @@ export default function App() {
       : undefined,
   });
 
+  // The suggestions panel (and other UIs) re-run a palette command by id.
+  const commandsRef = useRef(commands);
+  commandsRef.current = commands;
+  useEffect(() => {
+    const onRun = (e: Event) => {
+      const id = (e as CustomEvent<{ id?: string }>).detail?.id;
+      const find = (list: typeof commands): (typeof commands)[number] | undefined => {
+        for (const c of list) {
+          if (c.id === id) return c;
+          const child = c.children ? find(c.children as typeof commands) : undefined;
+          if (child) return child;
+        }
+        return undefined;
+      };
+      const cmd = id ? find(commandsRef.current) : undefined;
+      if (cmd) void cmd.action();
+    };
+    window.addEventListener("lumen-run-command", onRun);
+    return () => window.removeEventListener("lumen-run-command", onRun);
+  }, []);
+  // Stage 2 of the improvement agent (a small local model proposes suggestions).
+  useEffect(() => {
+    void import("./agents/modelCritic").then((m) => m.installModelCritic());
+  }, []);
+
   // Comment-anchor click in the editor → window event from
   // commentDecorations.ts. Open the side panel + jump the panel
   // scroll to the matching thread (the panel itself listens for the
@@ -844,6 +870,7 @@ export default function App() {
       />
       </Suspense>
       <AiToastContainer />
+      <AiSuggestionsPanel />
       <AiInlinePromptOverlay />
       <MobileKeyboardBar />
       <TagsPanel open={tagsPanelOpen} onClose={() => setTagsPanelOpen(false)} />
