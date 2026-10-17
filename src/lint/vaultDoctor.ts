@@ -16,6 +16,7 @@
  *  - images without alt text;
  *  - empty notes (nothing but front matter / whitespace).
  */
+import { decodeNamedCharacterReference } from "decode-named-character-reference";
 import GithubSlugger, { slug as headingSlug } from "github-slugger";
 import { resolveWikiTarget, splitWikiTarget } from "../renderer/wikiLinks";
 
@@ -56,26 +57,51 @@ const ENTRY_NAMES = new Set(["index", "readme", "home", "welcome", "start here",
 /** Fenced code blocks blanked (same length, lines kept). A fence closes at a line of at least as many of the same character. */
 function blankFences(text: string): string {
   const lines = text.split("\n");
-  let open: { ch: string; len: number } | null = null;
+  // `depth`: block-quote markers around the opening fence; `indent`: the
+  // list item's content offset (0 at the top level). Both belong to the
+  // fence's container, so only they are stripped from later lines.
+  let open: { ch: string; len: number; depth: number; indent: number } | null = null;
+  /** Strip up to `n` block-quote markers; returns the rest and how many were found. */
+  const unquote = (l: string, n = Infinity) => {
+    let depth = 0;
+    let rest = l;
+    for (let q: RegExpExecArray | null; depth < n && (q = /^ {0,3}>[ ]?/.exec(rest)); depth++) rest = rest.slice(q[0].length);
+    return { rest, depth };
+  };
   for (let i = 0; i < lines.length; i++) {
+    const raw = lines[i];
+    if (open) {
+      const { rest, depth } = unquote(raw, open.depth);
+      const lead = /^[ ]*/.exec(rest)![0].length;
+      // CommonMark ends a fenced block with its container: a line with fewer
+      // `>` (blank or not — no lazy continuation for code) closes the quote,
+      // and a non-blank line indented less than the item's content closes
+      // the list item. Then this line is ordinary content again.
+      if (depth < open.depth || (open.indent && rest.trim() && lead < open.indent)) open = null;
+      else {
+        // Only the container's own prefix is removed: a `- ```` inside a
+        // top-level fence is code content, not a closer.
+        const own = rest.slice(Math.min(lead, open.indent));
+        const c = /^ {0,3}(`{3,}|~{3,})[ \t]*\r?$/.exec(own); // CRLF notes keep a \r
+        if (c && c[1][0] === open.ch && c[1].length >= open.len) open = null;
+        lines[i] = " ".repeat(raw.length);
+        continue;
+      }
+    }
     // Fences may sit inside block quotes (`> `) and list items (`- `, `1. `,
     // or indented continuation): look past those container prefixes.
     // At the top level a fence may be indented at most 3 spaces (4+ is an
     // indented code block); inside a container its content offset applies.
-    const raw = lines[i];
-    const quoted = raw.replace(/^(?:[ \t]*>[ ]?)*/, "");
+    const { rest: quoted, depth } = unquote(raw);
     const listed = quoted.replace(/^[ \t]*(?:[-*+]|\d+[.)])[ \t]+/, "");
-    const inContainer: boolean = quoted !== raw || listed !== quoted || /^ {2,}\S/.test(raw) && i > 0 && /^\s*([-*+]|\d+[.)])\s/.test(lines.slice(0, i).reverse().find((l) => l.trim()) ?? "");
+    const continuation = /^ {2,}\S/.test(quoted) && i > 0 && /^\s*([-*+]|\d+[.)])\s/.test(unquote(lines.slice(0, i).reverse().find((l) => l.trim()) ?? "").rest);
+    const inContainer: boolean = depth > 0 || listed !== quoted || continuation;
     const m: RegExpExecArray | null = (inContainer ? /^[ \t]*(`{3,}|~{3,})(.*)$/ : /^ {0,3}(`{3,}|~{3,})(.*)$/).exec(listed);
-    if (!open) {
-      if (m && !(m[1][0] === "`" && m[2].includes("`"))) {
-        open = { ch: m[1][0], len: m[1].length };
-        lines[i] = " ".repeat(lines[i].length);
-      }
-      continue;
+    if (m && !(m[1][0] === "`" && m[2].includes("`"))) {
+      const indent = listed !== quoted ? quoted.length - listed.length : continuation ? /^ */.exec(quoted)![0].length : 0;
+      open = { ch: m[1][0], len: m[1].length, depth, indent };
+      lines[i] = " ".repeat(raw.length);
     }
-    if (m && m[1][0] === open.ch && m[1].length >= open.len && !m[2].trim()) open = null;
-    lines[i] = " ".repeat(lines[i].length);
   }
   return lines.join("\n");
 }
@@ -163,19 +189,77 @@ export function stripCode(text: string): string {
   return out;
 }
 
+/** CommonMark's HTML block type 6 tag names: these start a raw block even mid-paragraph. */
+const BLOCK_TAGS = new Set(
+  ("address article aside base basefont blockquote body caption center col colgroup dd details dialog dir div dl dt fieldset figcaption figure footer form frame frameset h1 h2 h3 h4 h5 h6 head header hr html iframe legend li link main menu menuitem nav noframes ol optgroup option p param search section summary table tbody td tfoot th thead title tr track ul").split(" "),
+);
+/** HTML block type 7: one complete open or closing tag, alone on its line. */
+const LONE_TAG = /^ {0,3}(?:<([A-Za-z][A-Za-z0-9-]*)(?:\s+[A-Za-z_:][\w.:-]*(?:\s*=\s*(?:[^\s"'=<>`]+|'[^']*'|"[^"]*"))?)*\s*\/?>|<\/([A-Za-z][A-Za-z0-9-]*)\s*>)[ \t]*$/;
+
+/**
+ * Raw HTML blocks of types 6 and 7 (`<div>` … up to a blank line) blanked:
+ * the parser keeps their whole body as HTML, so `[[x]]` and `[t](u)` in it
+ * never become links. (Types 1 and 2 — `<pre>`… and comments — are blanked
+ * by stripCode.) Inline `<img>` checks run on the text before this, since
+ * HTML images in a block still render.
+ */
+function blankHtmlBlocks(text: string): string {
+  const lines = text.split("\n");
+  let inBlock = false;
+  let prevBlank = true;
+  for (let i = 0; i < lines.length; i++) {
+    const l = lines[i];
+    const isBlank = !l.trim();
+    if (inBlock && isBlank) inBlock = false;
+    else if (!inBlock && !isBlank) {
+      const t6 = /^ {0,3}<\/?([A-Za-z][A-Za-z0-9-]*)(?=[\s/>]|$)/.exec(l);
+      const t7 = LONE_TAG.exec(l);
+      const name7 = (t7?.[1] ?? t7?.[2] ?? "").toLowerCase();
+      // Type 7 can't interrupt a paragraph; `pre`/`script`/`style`/`textarea` are type 1.
+      if ((t6 && BLOCK_TAGS.has(t6[1].toLowerCase())) || (t7 && prevBlank && !/^(pre|script|style|textarea)$/.test(name7))) inBlock = true;
+    }
+    if (inBlock) lines[i] = blank(l);
+    prevBlank = isBlank;
+  }
+  return lines.join("\n");
+}
+
+/** The text that wiki and Markdown links are scanned in: no front matter, code, or raw HTML. */
+const linkScanText = (text: string) => blankHtmlBlocks(stripCode(blankFrontmatter(text)));
+
 const lineAt = (text: string, index: number) => text.slice(0, index).split("\n").length;
 
 /** A heading's rendered text: inline Markdown (emphasis, code, links, images) reduced to its text. */
 function headingText(md: string): string {
-  return md
-    .replace(/!\[([^\]]*)\]\([^)]*\)/g, "$1")
-    .replace(/\[([^\]]*)\]\([^)]*\)/g, "$1")
-    .replace(/\[([^\]]*)\]\[[^\]]*\]/g, "$1") // reference links: `[Setup][docs]`
-    .replace(/\[\[([^\]|]+)(?:\|([^\]]*))?\]\]/g, (_m, target: string, label?: string) => label ?? target)
-    .replace(/`([^`]*)`/g, "$1")
-    .replace(/(\*\*|__|\*|_|~~)(.+?)\1/g, "$2")
-    .replace(/<[^>]+>/g, "")
+  // Character references (`&amp;`, `&#38;`) render decoded — rehype-slug
+  // slugs `A & B` — except inside code spans, so `&` there is parked on a
+  // private-use character until the decoding is done.
+  const AMP = "";
+  return decodeCharacterReferences(
+    md
+      .replace(/!\[([^\]]*)\]\([^)]*\)/g, "$1")
+      .replace(/\[([^\]]*)\]\([^)]*\)/g, "$1")
+      .replace(/\[([^\]]*)\]\[[^\]]*\]/g, "$1") // reference links: `[Setup][docs]`
+      .replace(/\[\[([^\]|]+)(?:\|([^\]]+))?\]\]/g, (_m, target: string, label?: string) => label ?? target)
+      .replace(/`([^`]*)`/g, (_m, code: string) => code.replace(/&/g, AMP))
+      .replace(/(\*\*|__|\*|_|~~)(.+?)\1/g, "$2")
+      .replace(/<[^>]+>/g, ""),
+  )
+    .replace(new RegExp(AMP, "g"), "&")
     .trim();
+}
+
+/** Decode HTML character references the way Markdown does (unknown names stay literal). */
+function decodeCharacterReferences(s: string): string {
+  return s.replace(/&(?:#[xX]([0-9a-fA-F]{1,6})|#([0-9]{1,7})|([A-Za-z][A-Za-z0-9]{0,31}));/g, (m, hex?: string, dec?: string, name?: string) => {
+    if (name) {
+      const decoded = decodeNamedCharacterReference(name);
+      return decoded === false ? m : decoded;
+    }
+    const code = parseInt(hex ?? dec ?? "", hex ? 16 : 10);
+    // Invalid / surrogate / zero code points become U+FFFD, as in CommonMark.
+    return String.fromCodePoint(code === 0 || code > 0x10ffff || (code >= 0xd800 && code <= 0xdfff) ? 0xfffd : code);
+  });
 }
 
 /** Blank a leading YAML front matter block (its `# comments` aren't headings). */
@@ -192,13 +276,14 @@ function headingsOf(text: string): Set<string> {
   // Inline code in headings matters for the rendered text, so scan only
   // with fenced blocks blanked.
   // Headings inside block quotes render (with ids) too: drop the `>` prefixes.
-  const fenced = blankFences(blankFrontmatter(text))
-    .replace(/<(pre|script|style|textarea)\b[\s\S]*?(?:<\/\1>|$)/gi, (m) => m.replace(/[^\n]/g, " "))
+  // A `# line` inside a raw HTML block is HTML text, not a heading.
+  const fenced = blankHtmlBlocks(blankFences(blankFrontmatter(text)).replace(/<(pre|script|style|textarea)\b[\s\S]*?(?:<\/\1>|$)/gi, blank))
     .replace(/^(?:[ \t]*>[ ]?)+/gm, "");
   // In document order, with a stateful slugger: a repeated heading gets
   // `-1`, `-2`… like rehype-slug, so `[[Note#setup-1]]` resolves.
   const found: Array<{ at: number; raw: string }> = [];
-  for (const m of fenced.matchAll(/^#{1,6}\s+(.+?)\s*#*\s*$/gm)) found.push({ at: m.index ?? 0, raw: m[1] });
+  // ATX headings may be indented up to 3 spaces (4+ is indented code).
+  for (const m of fenced.matchAll(/^ {0,3}#{1,6}[ \t]+(.+?)\s*#*\s*$/gm)) found.push({ at: m.index ?? 0, raw: m[1] });
   // Setext headings: a text line underlined with === or --- (the line
   // above must be text, not a list item, quote or blank line).
   for (const m of fenced.matchAll(/^(?! {0,3}([-*+>]|\d+[.)])\s)( {0,3}\S[^\n]*)\n {0,3}(=+|-+)[ \t]*$/gm)) found.push({ at: m.index ?? 0, raw: m[2].trim() });
@@ -212,7 +297,11 @@ function headingsOf(text: string): Set<string> {
   return out;
 }
 
-const hasHeading = (hs: Set<string> | undefined, h: string) => !!hs && (hs.has(headingSlug(h)) || hs.has(h.trim().toLowerCase()));
+// The wiki target's heading is decoded like the heading text (`[[#A &amp; B]]`).
+const hasHeading = (hs: Set<string> | undefined, raw: string) => {
+  const h = decodeCharacterReferences(raw);
+  return !!hs && (hs.has(headingSlug(h)) || hs.has(h.trim().toLowerCase()));
+};
 
 function frontMatterless(text: string): string {
   return text.replace(/^---[ \t]*\r?\n(?:[\s\S]*?\r?\n)?(?:---|\.\.\.)[ \t]*(?:\r?\n|$)\s*/, "");
@@ -317,13 +406,18 @@ export function runVaultDoctor(notes: readonly DoctorNote[], opts: DoctorOptions
   const findings: DoctorFinding[] = [];
 
   for (const note of md) {
-    const text = stripCode(note.text);
+    // Links are looked for outside front matter (the preview drops it) and
+    // raw HTML blocks; `<img>` tags in those blocks still render, so the
+    // alt-text check uses `code`.
+    const code = stripCode(blankFrontmatter(note.text));
+    const text = blankHtmlBlocks(code);
     const dir = note.path.includes("/") ? note.path.slice(0, note.path.lastIndexOf("/") + 1) : "";
 
     // Wiki links: [[target]] / [[target|label]] (not ![[embeds]] of assets).
     // `[[x]]` inside a Markdown link's text (`[see [[x]]](url)`) is link text, not a wiki link.
     const linkTexts = markdownLinkRanges(text);
-    for (const m of text.matchAll(/(!?)\[\[([^\]|\n]+)(?:\|[^\]\n]*)?\]\]/g)) {
+    // A `|` needs a non-empty label after it (as in remarkLumen): `[[x|]]` is plain text.
+    for (const m of text.matchAll(/(!?)\[\[([^\]|\n]+)(?:\|[^\]\n]+)?\]\]/g)) {
       if (insideAny(linkTexts, m.index ?? 0)) continue;
       const raw = m[2].trim();
       if (m[1] && !isMd(raw) && /\.\w+$/.test(raw)) continue; // embedded image / file
@@ -396,7 +490,8 @@ export function runVaultDoctor(notes: readonly DoctorNote[], opts: DoctorOptions
     for (const m of text.matchAll(/!\[\s*\]\(([^)\s]+)[^)]*\)/g)) {
       findings.push({ kind: "missing-alt", path: note.path, line: lineAt(note.text, m.index ?? 0), detail: m[1] });
     }
-    for (const m of text.matchAll(/<img\b(?![^>]*\balt\s*=\s*(?:"[^"]*\S[^"]*"|'[^']*\S[^']*'|[^\s"'=<>`]+))[^>]*>/gi)) {
+    // `alt` must be a whole attribute name (`\s` before it, so `data-alt` doesn't count).
+    for (const m of code.matchAll(/<img\b(?![^>]*\salt\s*=\s*(?:"[^"]*\S[^"]*"|'[^']*\S[^']*'|[^\s"'=<>`]+))[^>]*>/gi)) {
       findings.push({ kind: "missing-alt", path: note.path, line: lineAt(note.text, m.index ?? 0), detail: m[0].slice(0, 60) });
     }
 
@@ -451,11 +546,12 @@ export function runVaultDoctor(notes: readonly DoctorNote[], opts: DoctorOptions
 export function applyLinkFixes(text: string, fixes: ReadonlyArray<{ from: string; to: string }>): string {
   if (!fixes.length) return text;
   const map = new Map(fixes.map((f) => [f.from.trim(), f.to]));
-  const code = stripCode(text);
+  // Same scan text as runVaultDoctor: front matter and raw HTML are never rewritten.
+  const code = linkScanText(text);
   const linkTexts = markdownLinkRanges(code);
   let out = "";
   let last = 0;
-  for (const m of code.matchAll(/\[\[([^\]|\n]+)(\|[^\]\n]*)?\]\]/g)) {
+  for (const m of code.matchAll(/\[\[([^\]|\n]+)(\|[^\]\n]+)?\]\]/g)) {
     if (insideAny(linkTexts, m.index ?? 0)) continue; // label text of a Markdown link
     const raw = m[1].trim();
     const { note, heading } = splitWikiTarget(raw);
