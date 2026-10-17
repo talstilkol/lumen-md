@@ -24,6 +24,8 @@ describe("agent eval — scoring", () => {
     expect(runCheck({ type: "containsAny", any: ["x", "c"] }, "abc").ok).toBe(true);
     expect(runCheck({ type: "notContains", none: ["b"] }, "abc").ok).toBe(false);
     expect(runCheck({ type: "maxChars", max: 3 }, "abcd").ok).toBe(false);
+    expect(runCheck({ type: "maxHebrew", max: 0.02 }, "Dana will send it").ok).toBe(true);
+    expect(runCheck({ type: "maxHebrew", max: 0.02 }, "Dana will שלוח it").ok).toBe(false);
     expect(runCheck({ type: "minItems", path: "a.b", min: 2 }, { a: { b: [1, 2] } }).ok).toBe(true);
     expect(runCheck({ type: "matches", source: "^x", flags: "m" }, "a\nx").ok).toBe(true);
   });
@@ -58,6 +60,13 @@ describe("agent eval — fixtures", () => {
       expect(r.checks.filter((x) => !x.ok)).toEqual([]);
       expect(passed(r)).toBe(true);
       expect(r.attempts).toBe(1);
+    });
+
+    it(`${c.id}: --model pins the requested model on every case`, async () => {
+      const ex = fakeExecutor(sequence(c.example));
+      registerExecutor(ex);
+      await runEvalCase(c, { executor: "ollama", model: "llama3.1:8b" });
+      expect(ex.calls[0].model).toBe("llama3.1:8b");
     });
   }
 });

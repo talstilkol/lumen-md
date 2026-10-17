@@ -7,6 +7,8 @@
 export type Check =
   /** At least `min` (0–1) of the letters are Hebrew. */
   | { type: "hebrew"; min: number }
+  /** At most `max` (0–1) of the letters are Hebrew (a translation out of Hebrew). */
+  | { type: "maxHebrew"; max: number }
   /** Every listed string appears (case-insensitive). */
   | { type: "contains"; all: string[] }
   /** At least one of the listed strings appears (case-insensitive). */
@@ -55,6 +57,10 @@ export function runCheck(check: Check, output: unknown): CheckResult {
       const values = typeof output === "string" ? text : JSON.stringify(output).replace(/"[A-Za-z_]+":/g, "");
       const r = hebrewRatio(values);
       return { check, ok: r >= check.min, detail: `${Math.round(r * 100)}% Hebrew letters` };
+    }
+    case "maxHebrew": {
+      const r = hebrewRatio(text);
+      return { check, ok: r <= check.max, detail: `${Math.round(r * 100)}% Hebrew letters` };
     }
     case "contains": {
       const missing = check.all.filter((s) => !lower.includes(s.toLowerCase()));

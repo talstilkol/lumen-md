@@ -43,7 +43,8 @@ describe(`agent eval — ${model} @ ${url}`, () => {
         results.push({ id: c.id, agent: c.agent, status: "skipped", executor: null, model: null, attempts: 0, ms: 0, checks: [] });
         continue;
       }
-      const r = await runEvalCase(c, { executor: "ollama" });
+      // Every case runs on the requested model, whatever tier it asks for.
+      const r = await runEvalCase(c, { executor: "ollama", model });
       results.push(r);
       // hygiene-allow: progress output of a CLI eval run
       console.log(`${passed(r) ? "pass" : "FAIL"}  ${c.id}  ${(r.ms / 1000).toFixed(1)} s  ${r.error ?? r.checks.filter((x) => !x.ok).map((x) => x.detail).join("; ")}`);

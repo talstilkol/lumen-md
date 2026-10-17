@@ -109,7 +109,7 @@ export const EVAL_CASES: EvalCase[] = [
     id: "translator-he-en",
     agent: "translator",
     input: { text: MEETING_HE, extra: { targetLanguage: "English" } },
-    checks: [{ type: "hebrew", min: 0 }, { type: "containsAny", any: ["Dana", "Danna"] }, { type: "matches", source: "Thursday", flags: "i" }],
+    checks: [{ type: "maxHebrew", max: 0.02 }, { type: "containsAny", any: ["Dana", "Danna"] }, { type: "matches", source: "Thursday", flags: "i" }],
     example: "Team meeting — 12.10\n\nPresent: Dana, Yoav, Michal.\n\n- Dana will send the price quote to the client by Thursday.\n- Yoav will check the mobile login bug.\n- It was decided to postpone the launch by a week.\n- Michal will set up a meeting with the design team next week.",
   },
   {
