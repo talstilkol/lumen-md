@@ -285,6 +285,13 @@ describe("tracking edits while suggesting", () => {
     expect(t.md()).toBe("Say a+X+}b now.");
   });
 
+  it("refuses a replacement whose text would form a delimiter, deletion included", async () => {
+    const e = await open("Hello world.", true);
+    e.select(e.at("world"), e.at("world", 5));
+    e.type("a++}b");
+    expect(e.md()).toBe("Hello world.");
+  });
+
   it("is off when suggesting is off", async () => {
     const e = await open("Hello world.", false);
     e.select(e.at(" world"));
