@@ -61,3 +61,35 @@ describe("research worker extraction", () => {
     expect(new Set(signals).size).toBe(1);
   });
 });
+
+describe("research worker — SearXNG (keyless)", () => {
+  const post = (body: unknown, env: Env) =>
+    worker.fetch(
+      new Request("https://research.example/search", {
+        method: "POST",
+        headers: { Origin: ORIGIN, "Content-Type": "application/json", "CF-Connecting-IP": `198.51.100.${++ip % 250}` },
+        body: JSON.stringify(body),
+      }),
+      env,
+      ctx,
+    );
+
+  it("queries SEARXNG_URL as JSON without a key and keeps only fetchable URLs", async () => {
+    const f = vi.fn(async () =>
+      new Response(JSON.stringify({ results: [{ title: "A", url: "https://a.example/", content: "snippet" }, { title: "L", url: "http://127.0.0.1/x", content: "" }] }), { status: 200 }),
+    );
+    vi.stubGlobal("fetch", f);
+    const res = await post({ provider: "searxng", query: "local llm" }, { ALLOWED_ORIGINS: ORIGIN, SEARXNG_URL: "http://searxng:8080/" });
+    expect(res.status).toBe(200);
+    expect(await res.json()).toEqual({ results: [{ title: "A", url: "https://a.example/", snippet: "snippet" }] });
+    expect(String((f.mock.calls[0] as unknown[])[0])).toBe("http://searxng:8080/search?q=local%20llm&format=json");
+  });
+
+  it("reports a missing SEARXNG_URL and still requires a key for Brave / Tavily", async () => {
+    vi.stubGlobal("fetch", vi.fn());
+    const r = await post({ provider: "searxng", query: "q" }, { ALLOWED_ORIGINS: ORIGIN });
+    expect(r.status).toBe(502);
+    expect((await r.json()).error).toMatch(/SEARXNG_URL/);
+    expect((await post({ provider: "brave", query: "q" }, { ALLOWED_ORIGINS: ORIGIN })).status).toBe(400);
+  });
+});

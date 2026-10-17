@@ -1066,5 +1066,8 @@
   "research.provider.claude": "Recherche web de Claude (fournisseur Anthropic ; recherches facturées par Anthropic)",
   "research.provider.brave": "Brave Search (votre clé API)",
   "research.provider.tavily": "Tavily (votre clé API)",
-  "research.key": "Clé API pour {provider} :"
+  "research.provider.searxng": "SearXNG sur cette machine (sans clé ; service de recherche local)",
+  "research.endpoint": "URL du service de recherche (à lancer localement avec docker/local-ai.yml — voir la doc) :",
+  "research.key": "Clé API pour {provider} :",
+  "research.endpointInvalid": "Cette adresse n’est pas utilisable ici — ce n’est pas une URL http(s), ou la politique de sécurité du contenu de ce déploiement ne l’autorise pas : {url}"
 }
