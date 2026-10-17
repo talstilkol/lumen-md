@@ -15,6 +15,7 @@ import { log } from "./lib/logger";
 import { startAutoBackup, startVaultSnapshots } from "./sync/autoBackup";
 import { requestPersistentStorage } from "./storage/persistentStorage";
 import { initLocale, t } from "./i18n";
+import { initSecretStore } from "./lib/secretStore";
 import { adoptBootLocale } from "./store/useStore";
 import "./index.css";
 
@@ -63,8 +64,11 @@ initShareExtension();
 // Load the persisted locale's lazy bundle BEFORE the first render so the
 // synchronous t() calls never flash English for a Hebrew/French/… user.
 // initLocale() resolves to English on any failure, so boot never blocks.
-void initLocale()
-  .then((applied) => {
+// Secrets (API keys, tokens) are decrypted into memory before the first
+// render so synchronous reads see them (T36); never blocks boot for long.
+const secretsReady = Promise.race([initSecretStore(), new Promise((r) => setTimeout(r, 1500))]);
+void Promise.all([initLocale(), secretsReady])
+  .then(([applied]) => {
     // initLocale falls back to English when the saved locale's chunk can't
     // load; the store was already rehydrated with the saved locale, and
     // App applies the store's locale on mount — sync it so that doesn't

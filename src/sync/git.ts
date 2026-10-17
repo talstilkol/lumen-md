@@ -16,6 +16,7 @@ import {
   workspaceHasFile,
   writeWorkspaceBlob,
 } from "../storage/workspace";
+import { getSecret, setSecret, initSecretStore, flushSecrets } from "../lib/secretStore";
 
 type Fs = {
   promises: {
@@ -70,12 +71,14 @@ async function load() {
 const TOKEN_KEY = "lumen.git.token.v1";
 
 export async function setGitToken(token: string | null): Promise<void> {
-  await set(TOKEN_KEY, token ?? "");
+  await initSecretStore();
+  setSecret(TOKEN_KEY, token || null);
+  await flushSecrets();
 }
 
 export async function getGitToken(): Promise<string> {
-  const v = (await get(TOKEN_KEY)) as string | undefined;
-  return typeof v === "string" ? v : "";
+  await initSecretStore();
+  return getSecret(TOKEN_KEY) ?? "";
 }
 
 function repoNameFromUrl(url: string): string {
