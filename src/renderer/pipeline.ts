@@ -11,6 +11,7 @@ import remarkRehype from "remark-rehype";
 // ./katexPlugin only for docs that contain `$` — it is no longer a static
 // dependency of the main chunk (A7 lever 1/3).
 import rehypeSlug from "rehype-slug";
+import { rehypeDirAuto } from "./rehypeDirAuto";
 // rehype-raw is dynamically imported in getProcessorWithRaw() — it
 // pulls in parse5 (~275 KB raw / ~40 KB gzipped) and most docs don't
 // need it. Splitting it out of the main bundle is M12-followup-2.
@@ -210,7 +211,7 @@ async function getFullProcessor(
   if (rehypeRaw) p = p.use(rehypeRaw);
   // CriticMarkup (suggesting mode) → <ins>/<del>/<mark>; before rehypeSlug
   // so heading ids are computed from the rendered text.
-  p = p.use(rehypeCriticMarkup).use(rehypeSlug);
+  p = p.use(rehypeCriticMarkup).use(rehypeSlug).use(rehypeDirAuto);
   if (rehypeKatex) p = p.use(rehypeKatex);
   const proc = toReact(p.use(rehypeShiki, { isDark }));
   fullProcessors.set(key, proc);
@@ -258,7 +259,7 @@ export async function renderMarkdown(
  */
 export function renderMarkdownFast(markdownText: string): ReactElement {
   if (!fastProcessor) {
-    fastProcessor = toReact(buildBase().use(rehypeCriticMarkup).use(rehypeSlug));
+    fastProcessor = toReact(buildBase().use(rehypeCriticMarkup).use(rehypeSlug).use(rehypeDirAuto));
   }
   return fastProcessor.processSync(prepareCriticMarkup(markdownText)).result as ReactElement;
 }
