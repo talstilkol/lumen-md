@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-10-17T16:34:56.541Z",
+  "generated_at": "2026-10-17T16:40:26.135Z",
   "source": "src/i18n/index.ts (en bundle)",
-  "count": 1088,
+  "count": 1111,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -3792,6 +3792,134 @@
     {
       "key": "ai.trace.empty",
       "en": "No agent runs yet.",
+      "vars": []
+    },
+    {
+      "key": "agent.panel.title",
+      "en": "The AI couldn't answer — here is what may help",
+      "vars": []
+    },
+    {
+      "key": "agent.panel.summary",
+      "en": "{agent} · {attempts} attempt(s) · {executor} / {model}",
+      "vars": [
+        "agent",
+        "attempts",
+        "executor",
+        "model"
+      ]
+    },
+    {
+      "key": "agent.panel.close",
+      "en": "Close",
+      "vars": []
+    },
+    {
+      "key": "agent.panel.do",
+      "en": "Do it",
+      "vars": []
+    },
+    {
+      "key": "agent.panel.none",
+      "en": "No specific suggestion. Try a shorter input or a larger model.",
+      "vars": []
+    },
+    {
+      "key": "agent.panel.trace",
+      "en": "Recent agent runs",
+      "vars": []
+    },
+    {
+      "key": "agent.suggest.startOllama",
+      "en": "Start Ollama on this computer",
+      "vars": []
+    },
+    {
+      "key": "agent.suggest.startOllama.detail",
+      "en": "Install it from ollama.com, run it, then pull a model such as qwen2.5:7b.",
+      "vars": []
+    },
+    {
+      "key": "agent.suggest.ollamaOrigins",
+      "en": "Allow this app in Ollama (OLLAMA_ORIGINS)",
+      "vars": []
+    },
+    {
+      "key": "agent.suggest.ollamaOrigins.detail",
+      "en": "Ollama refused the request: start it with OLLAMA_ORIGINS set to this app's address.",
+      "vars": []
+    },
+    {
+      "key": "agent.suggest.useOllama",
+      "en": "Use Ollama instead",
+      "vars": []
+    },
+    {
+      "key": "agent.suggest.useOllama.detail",
+      "en": "This browser has no usable WebGPU; a local Ollama server works in any browser.",
+      "vars": []
+    },
+    {
+      "key": "agent.suggest.webgpuBrowser",
+      "en": "Use a browser with WebGPU",
+      "vars": []
+    },
+    {
+      "key": "agent.suggest.webgpuBrowser.detail",
+      "en": "Chrome or Edge 113+, Safari 26 or Firefox 141+ run models in the browser.",
+      "vars": []
+    },
+    {
+      "key": "agent.suggest.pullModel",
+      "en": "Download the model {model}",
+      "vars": [
+        "model"
+      ]
+    },
+    {
+      "key": "agent.suggest.allowCloud",
+      "en": "Allow the cloud as a fallback",
+      "vars": []
+    },
+    {
+      "key": "agent.suggest.allowCloud.detail",
+      "en": "Switches the AI policy to \"local first\": your cloud key is used only when no local model can answer.",
+      "vars": []
+    },
+    {
+      "key": "agent.suggest.configureKey",
+      "en": "Add your {provider} key",
+      "vars": [
+        "provider"
+      ]
+    },
+    {
+      "key": "agent.suggest.splitInput",
+      "en": "Select a smaller part and run it again",
+      "vars": []
+    },
+    {
+      "key": "agent.suggest.splitInput.detail",
+      "en": "Long documents overflow small local models; a selection is easier to answer.",
+      "vars": []
+    },
+    {
+      "key": "agent.suggest.switchExecutor",
+      "en": "Try again with {executor}",
+      "vars": [
+        "executor"
+      ]
+    },
+    {
+      "key": "agent.suggest.largerModel",
+      "en": "Try again with a larger model ({tier})",
+      "vars": [
+        "tier"
+      ]
+    },
+    {
+      "key": "agent.suggest.retry",
+      "en": "Try again",
       "vars": []
     },
     {

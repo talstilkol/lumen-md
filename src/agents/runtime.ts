@@ -119,14 +119,17 @@ export async function runAgent<I extends AgentInput, O = string>(def: AgentDefin
   const maxSteps = def.maxSteps ?? DEFAULT_MAX_STEPS;
   const preference = def.executorPreference ?? DEFAULT_EXECUTOR_ORDER;
 
-  let pick = await pickExecutor(preference, opts.executor);
+  const pendingExecutor = (await import("./suggestions")).peekNextRunExecutor(def.id);
+  let pick = await pickExecutor(preference, opts.executor ?? pendingExecutor);
   if (!pick.executor) {
     const verdict = await review({ kind: "no-executor", attempt: 1, maxRetries, tier: def.tier ?? "small", executor: null, skipped: pick.skipped, inputChars });
     step({ kind: "critic", ms: 0, label: verdict.diagnosis, ok: false, detail: pick.skipped.map((x) => `${x.id}: ${x.availability.reason ?? "unavailable"}`).join("; ") });
     return finish("failed", { errorCode: "no-executor", error: `No AI executor is available (${verdict.diagnosis})`, suggestions: verdict.suggestions });
   }
   let executor = pick.executor;
-  let patch: RetryPatch = { ...(opts.patch ?? {}) };
+  // A suggestion the user picked for this agent (suggestions panel) applies once.
+  const { takeNextRunPatch } = await import("./suggestions");
+  let patch: RetryPatch = { ...(takeNextRunPatch(def.id) ?? {}), ...(opts.patch ?? {}) };
 
   // A cached, already-validated answer costs nothing: no prompt, no model.
   const cacheKeyOf = async (): Promise<string | null> => {
@@ -314,7 +317,7 @@ export async function runAgent<I extends AgentInput, O = string>(def: AgentDefin
     for (const ex of listExecutors()) {
       if (ex.id !== executor.id && preference.includes(ex.id) && (await ex.available()).available) alternatives.push(ex.id);
     }
-    const verdict = await review({ ...failure!, alternatives });
+    const verdict = await review({ ...failure!, alternatives, agentId: def.id });
     step({ kind: "critic", ms: 0, label: verdict.diagnosis, ok: !!verdict.retry, detail: failure!.reason });
     if (verdict.retry && attempt <= maxRetries) {
       patch = { ...patch, ...verdict.retry };

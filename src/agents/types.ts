@@ -161,8 +161,10 @@ export type SuggestionAction =
 
 export interface Suggestion {
   id: string;
-  /** i18n key for the title (the UI translates it). */
+  /** i18n key for the title (the UI translates it) — or plain text when `raw`. */
   title: string;
+  /** Title/detail are plain text (the model critic writes them), not i18n keys. */
+  raw?: boolean;
   /** i18n key for the detail; `params` fill its placeholders. */
   detail?: string;
   params?: Record<string, string | number>;
