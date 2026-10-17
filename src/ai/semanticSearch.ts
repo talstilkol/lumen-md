@@ -1,6 +1,7 @@
 /**
  * Semantic search — workspace RAG layer that complements the existing BM25
- * keyword index with OpenAI text-embedding-3-small vectors.
+ * keyword index with embedding vectors, computed on this device by default
+ * (Ollama or transformers.js; see ./embeddingProvider.ts).
  *
  * Flow:
  *   1. `indexWorkspace()` chunks every workspace file at heading boundaries,
@@ -13,14 +14,13 @@
  *      match.
  *
  * Vectors live in IndexedDB so the index survives reloads. Re-indexing only
- * re-embeds chunks whose hash changed, keeping the API cost bounded.
+ * re-embeds chunks whose hash changed; an index built by another embedding
+ * model is discarded (vectors of different models are not comparable).
  */
 
 import { get, set } from "idb-keyval";
-import { useAppStore } from "../store/useStore";
-import { assertCloudAllowed } from "./policy";
 import { log } from "../lib/logger";
-import { fetchWithRetry } from "../lib/fetchRetry";
+import { pickEmbeddingProvider, type EmbeddingKind, type EmbeddingProvider } from "./embeddingProvider";
 import {
   isOPFSAvailable,
   listWorkspace,
@@ -29,9 +29,6 @@ import {
 } from "../storage/workspace";
 import { searchWorkspace } from "../storage/workspaceIndex";
 
-const EMBED_MODEL = "text-embedding-3-small";
-const EMBED_URL = "https://api.openai.com/v1/embeddings";
-const EMBED_DIMS = 1536;
 const IDB_KEY = "lumen-semantic-index";
 const MAX_CHUNK_CHARS = 1800; // ~450 tokens
 const EMBED_BATCH_SIZE = 16;
@@ -52,6 +49,8 @@ export interface FileRecord {
 
 export interface SemanticIndex {
   builtAt: number;
+  /** Embedding provider + model that built the vectors (absent: legacy OpenAI index). */
+  embedding?: string;
   files: Record<string, FileRecord>;
 }
 
@@ -122,37 +121,28 @@ export function chunkMarkdown(text: string): { start: number; end: number; text:
   return out;
 }
 
-/* ─── OpenAI embedding ──────────────────────────────────────────────── */
+/* ─── Embedding ─────────────────────────────────────────────────────── */
 
-async function embedTexts(texts: string[]): Promise<Float32Array[]> {
-  assertCloudAllowed("OpenAI embeddings (smart search)");
-  const key = useAppStore.getState().aiKey;
-  if (!key) throw new Error("Configure your AI Key (⌘K → AI Settings) to use semantic search.");
-  const res = await fetchWithRetry(
-    EMBED_URL,
-    {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${key}`,
-    },
-      body: JSON.stringify({ model: EMBED_MODEL, input: texts }),
-    },
-    { label: "semantic.embed", maxRetries: 2, baseDelayMs: 500, maxDelayMs: 2000 },
-  );
-  if (!res.ok) {
-    const body = await res.text().catch(() => "");
-    throw new Error(`Embedding API ${res.status}: ${body.slice(0, 200)}`);
-  }
-  const json = (await res.json()) as { data: { embedding: number[] }[] };
-  return json.data.map((d) => Float32Array.from(d.embedding));
+let providerPromise: Promise<EmbeddingProvider> | null = null;
+const provider = () => (providerPromise ??= pickEmbeddingProvider().catch((e) => {
+  providerPromise = null;
+  throw e;
+}));
+
+/** Tests / policy changes: pick the provider again on next use. */
+export function resetEmbeddingProvider(): void {
+  providerPromise = null;
+}
+
+async function embedTexts(texts: string[], kind: EmbeddingKind = "passage"): Promise<Float32Array[]> {
+  return (await provider()).embed(texts, kind);
 }
 
 async function embedTextsInBatches(texts: string[]): Promise<Float32Array[]> {
   const out: Float32Array[] = [];
   for (let i = 0; i < texts.length; i += EMBED_BATCH_SIZE) {
     const slice = texts.slice(i, i + EMBED_BATCH_SIZE);
-    const vecs = await embedTexts(slice);
+    const vecs = await embedTexts(slice, "passage");
     out.push(...vecs);
   }
   return out;
@@ -178,13 +168,16 @@ let inFlightIndex: Promise<SemanticIndex> | null = null;
 export async function indexWorkspace(opts: { force?: boolean } = {}): Promise<SemanticIndex> {
   if (inFlightIndex && !opts.force) return inFlightIndex;
   inFlightIndex = (async () => {
-    assertCloudAllowed("OpenAI embeddings (smart search)");
     if (!isOPFSAvailable()) return { builtAt: 0, files: {} };
+    const embedding = (await provider()).id;
     const entries = await listWorkspace({ includeAssets: false });
     const files = entries.filter(
       (n) => /\.(md|markdown|txt)$/i.test(n.path) && !isAssetName(n.name),
     );
-    const index = await loadIndex();
+    let index = await loadIndex();
+    // Vectors from another model are not comparable: start over.
+    if ((index.embedding ?? "openai:text-embedding-3-small") !== embedding) index = { builtAt: 0, embedding, files: {} };
+    index.embedding = embedding;
     const wantedPaths = new Set(files.map((f) => f.path));
 
     // Drop entries for files that no longer exist.
@@ -264,8 +257,10 @@ export async function searchSemantic(query: string, k = 8): Promise<SemanticHit[
   if (!query.trim()) return [];
   const index = await loadIndex();
   if (!Object.keys(index.files).length) return [];
-  const [qVec] = await embedTexts([query]);
-  if (qVec.length !== EMBED_DIMS) {
+  const p = await provider();
+  if ((index.embedding ?? "openai:text-embedding-3-small") !== p.id) return [];
+  const [qVec] = await embedTexts([query], "query");
+  if (p.dims && qVec.length !== p.dims) {
     log.warn("query vector unexpected dim", qVec.length);
   }
   const all: SemanticHit[] = [];
