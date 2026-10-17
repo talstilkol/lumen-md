@@ -111,6 +111,53 @@ jobs:
             exit 1
           fi
 
+  local-ai:
+    name: local agents (fake Ollama)
+    runs-on: ubuntu-latest
+    needs: check
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+      - name: Setup Node 22
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install
+        run: npm ci || npm install
+      - name: Start the fake Ollama server
+        run: |
+          npm run -s fake-ollama -- --port 11434 > fake-ollama.log 2>&1 &
+          for i in $(seq 1 20); do curl -sf http://localhost:11434/api/tags > /dev/null && break; sleep 0.5; done
+          cat fake-ollama.log
+      - name: Every agent once, over real HTTP
+        # The eval cases run through the real runtime and the real Ollama
+        # executor against the fake server; a wiring regression fails here
+        # even though no model is involved. Model quality is measured by
+        # `npm run eval:agents` on a machine with Ollama.
+        env:
+          LUMEN_EVAL_OLLAMA_URL: http://localhost:11434
+          LUMEN_EVAL_MODEL: qwen2.5:7b
+          LUMEN_EVAL_OUT: eval/results
+        run: |
+          npm run -s eval:agents
+          node -e '
+            const fs = require("fs");
+            const f = fs.readdirSync("eval/results").find((n) => n.endsWith(".json"));
+            const r = JSON.parse(fs.readFileSync("eval/results/" + f, "utf8"));
+            const bad = r.results.filter((x) => x.status !== "ok" || x.checks.some((c) => !c.ok));
+            console.log(`${r.results.length - bad.length}/${r.results.length} cases passed against the fake server`);
+            if (bad.length) { console.error(bad.map((x) => `${x.id}: ${x.error ?? x.checks.filter((c) => !c.ok).map((c) => c.detail).join("; ")}`).join("\n")); process.exit(1); }
+          '
+      - name: Upload the report
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: local-agents-eval
+          path: eval/results/
+          if-no-files-found: ignore
+
   bundle-comment:
     name: bundle-size comment
     needs: check
