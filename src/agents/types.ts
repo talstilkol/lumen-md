@@ -106,8 +106,11 @@ export interface Executor {
   supportsTools(model?: string): boolean;
   /** Native JSON-schema constrained output. */
   supportsSchema(model?: string): boolean;
-  /** The model the executor would use for a tier, for traces and suggestions. */
-  modelFor(tier: ModelTier): string;
+  /**
+   * The model the executor would use for a tier (and, when the agent calls
+   * tools, one that supports them natively if the device has one).
+   */
+  modelFor(tier: ModelTier, opts?: { tools?: boolean }): string;
 }
 
 export interface AgentInput {

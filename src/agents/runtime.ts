@@ -70,11 +70,15 @@ async function execTool(tools: AgentTool[], call: ToolCall, ctx: ToolContext): P
   }
 }
 
-function systemPrompt<I extends AgentInput, O>(def: AgentDefinition<I, O>, input: I, nativeTools: boolean, nativeSchema: boolean, patch: RetryPatch): string {
+function systemPrompt<I extends AgentInput, O>(def: AgentDefinition<I, O>, input: I, nativeTools: boolean, patch: RetryPatch): string {
   const base = patch.systemOverride ?? (typeof def.system === "function" ? def.system(input) : def.system);
   const parts = [base];
   if (def.tools?.length && !nativeTools) parts.push(toolProtocolPrompt(def.tools, def.outputSchema));
-  else if (def.outputSchema && !nativeSchema) parts.push("Reply with JSON only (no prose, no code fences) matching this schema: " + JSON.stringify(def.outputSchema));
+  // The schema stays in the prompt even when the executor constrains the
+  // output natively: web-llm's JSON mode requires the prompt to ask for
+  // JSON (otherwise it can emit whitespace to the token limit), and a
+  // native-tools model needs to know the shape of its final answer.
+  else if (def.outputSchema) parts.push("Reply with JSON only (no prose, no code fences) matching this schema: " + JSON.stringify(def.outputSchema));
   return parts.join("\n\n");
 }
 
@@ -141,13 +145,16 @@ export async function runAgent<I extends AgentInput, O = string>(def: AgentDefin
     }
     run.executor = executor.id;
     const tier: ModelTier = patch.tier ?? def.tier ?? "small";
-    const nativeTools = !!def.tools?.length && executor.supportsTools(patch.model);
-    const nativeSchema = !!def.outputSchema && !def.tools?.length && executor.supportsSchema(patch.model);
+    // The model is resolved once here and pinned on the request, so the
+    // capability decision (native tools / schema) and the call agree.
+    const model = patch.model ?? executor.modelFor(tier, { tools: !!def.tools?.length });
+    const nativeTools = !!def.tools?.length && executor.supportsTools(model);
+    const nativeSchema = !!def.outputSchema && !def.tools?.length && executor.supportsSchema(model);
     const messages: ExecutorMessage[] = [
-      { role: "system", content: systemPrompt(def, input, nativeTools, nativeSchema, patch) },
+      { role: "system", content: systemPrompt(def, input, nativeTools, patch) },
       { role: "user", content: def.user(input) + (patch.promptSuffix ? `\n\n${patch.promptSuffix}` : "") },
     ];
-    run.model = patch.model ?? executor.modelFor(tier);
+    run.model = model;
 
     let failure: Failure | null = null;
     let finalText: string | null = null;
@@ -160,7 +167,7 @@ export async function runAgent<I extends AgentInput, O = string>(def: AgentDefin
           messages,
           tools: nativeTools ? def.tools : undefined,
           schema: nativeSchema ? def.outputSchema : undefined,
-          model: patch.model,
+          model,
           tier,
           maxTokens: def.maxTokens,
           temperature: patch.temperature ?? def.temperature,

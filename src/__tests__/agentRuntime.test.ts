@@ -126,6 +126,32 @@ describe("agent runtime", () => {
     expect(ex.calls[0].schema).toEqual(def.outputSchema);
   });
 
+  it("keeps the JSON instruction in the prompt with native schema support and with native tools", async () => {
+    const ex = fakeExecutor((req, n) => (n === 1 && req.tools ? { content: "", toolCalls: [{ id: "c", name: "upper", args: { text: "a" } }], model: "m" } : reply('{"tags":["x"]}')), {
+      supportsSchema: () => true,
+      supportsTools: () => true,
+    });
+    registerExecutor(ex);
+    const schema = { type: "object", properties: { tags: { type: "array" } }, required: ["tags"] };
+    await runAgent({ id: "s1", description: "", system: "sys", user: () => "u", outputSchema: schema }, {});
+    expect(ex.calls[0].schema).toEqual(schema);
+    expect(ex.calls[0].messages[0].content).toContain("Reply with JSON only");
+    await runAgent({ id: "s2", description: "", system: "sys", user: () => "u", outputSchema: schema, tools: [echo] }, {});
+    expect(ex.calls[1].tools).toHaveLength(1);
+    expect(ex.calls[1].messages[0].content).toContain("Reply with JSON only");
+    expect(ex.calls[1].messages[0].content).not.toContain("To call a tool");
+  });
+
+  it("asks the executor for a tool-capable model when the agent calls tools", async () => {
+    const modelFor = vi.fn((tier: string, o?: { tools?: boolean }) => (o?.tools ? `hermes-${tier}` : `plain-${tier}`));
+    const ex = fakeExecutor((req) => reply('{"final":"ok"}', req.model), { modelFor });
+    registerExecutor(ex);
+    await runAgent({ id: "t", description: "", system: "s", user: () => "u", tools: [echo] }, {});
+    expect(ex.calls[0].model).toBe("hermes-small");
+    await runAgent(textAgent, { text: "x" });
+    expect(ex.calls[1].model).toBe("plain-small");
+  });
+
   it("fails with suggestions after the retries are exhausted", async () => {
     registerExecutor(fakeExecutor(() => reply("still not json")));
     const def: AgentDefinition<{ text: string }, unknown> = {
@@ -182,6 +208,22 @@ describe("agent runtime", () => {
     expect(run.output).toBe("final text");
     expect(ex.calls[0].tools?.map((t) => t.name)).toEqual(["upper"]);
     expect(ex.calls[0].messages[0].content).not.toContain("To call a tool");
+  });
+
+  it("decides native tool support on the model the tier resolves to, and pins that model on the request", async () => {
+    const ex = fakeExecutor((req, n) => (n === 1 ? reply('{"tool":"upper","args":{"text":"a"}}', req.model) : reply('{"final":"ok"}', req.model)), {
+      modelFor: (tier) => (tier === "medium" ? "gemma3:12b" : "qwen2.5:7b"),
+      supportsTools: (model) => model === "qwen2.5:7b",
+    });
+    registerExecutor(ex);
+    const def: AgentDefinition = { id: "tier-tools", description: "", system: "sys", user: () => "u", tools: [echo], tier: "medium" };
+    const run = await runAgent(def, {});
+    expect(run.status).toBe("ok");
+    // Medium → gemma3 → no native tools → the protocol prompt is present and no `tools` are sent.
+    expect(ex.calls[0].model).toBe("gemma3:12b");
+    expect(ex.calls[0].tools).toBeUndefined();
+    expect(ex.calls[0].messages[0].content).toContain("To call a tool");
+    expect(run.model).toBe("gemma3:12b");
   });
 
   it("refuses a write tool the run was not granted, and tells the model", async () => {
