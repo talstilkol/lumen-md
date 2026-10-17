@@ -54,8 +54,9 @@ const post = (m: WorkerOut): void => (self as unknown as { postMessage(m: Worker
 let engine: MLCEngineInterface | null = null;
 let loadedModel: string | null = null;
 let queue: Promise<unknown> = Promise.resolve();
-/** The chat currently generating, and chats cancelled while queued. */
+/** The chat currently running (loading or generating), whether it is past the load, and chats cancelled before they generate. */
 let running: number | null = null;
+let generating = false;
 const cancelled = new Set<number>();
 
 async function ensureLoaded(id: number, modelId: string): Promise<MLCEngineInterface> {
@@ -74,6 +75,10 @@ async function ensureLoaded(id: number, modelId: string): Promise<MLCEngineInter
 
 async function chat(id: number, modelId: string, request: WorkerChatRequest, stream: boolean): Promise<WorkerChatResult> {
   const e = await ensureLoaded(id, modelId);
+  // An interrupt that arrived during the (possibly long) load could not
+  // stop a generation: it was recorded instead, and ends the chat here.
+  if (cancelled.delete(id)) throw new DOMException("aborted", "AbortError");
+  generating = true;
   if (stream) {
     const it = await e.chat.completions.create({ ...request, stream: true, stream_options: { include_usage: true } });
     let content = "";
@@ -122,6 +127,7 @@ export async function handle(msg: WorkerIn): Promise<void> {
             return await chat(id, msg.modelId, msg.request, msg.stream);
           } finally {
             running = null;
+            generating = false;
           }
         });
         post({ id, type: "result", value });
@@ -131,7 +137,8 @@ export async function handle(msg: WorkerIn): Promise<void> {
         // Only the targeted chat is affected: stop it when it is the one
         // generating, skip it when it is still queued. Without a target
         // (legacy), stop whatever runs.
-        if (msg.target === undefined || msg.target === running) engine?.interruptGenerate();
+        if (msg.target === undefined) engine?.interruptGenerate();
+        else if (msg.target === running && generating) engine?.interruptGenerate();
         else cancelled.add(msg.target);
         post({ id, type: "result", value: true });
         return;

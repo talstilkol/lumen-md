@@ -78,11 +78,17 @@ export async function* chatLocalStream(messages: ChatMessage[], opts: LocalChatO
   if (!status.available) {
     throw new Error(`Local LLM unavailable: ${status.reason}`);
   }
-  // The worker streams deltas through a callback; bridge them into the generator.
+  // The worker streams deltas through a callback; bridge them into the
+  // generator. Closing the generator early (the consumer stops reading)
+  // aborts the worker call, so the GPU does not finish an unread answer.
   const buffer: string[] = [];
   let wake: (() => void) | null = null;
   let done = false;
   let failure: Error | null = null;
+  const ctrl = new AbortController();
+  const onOuterAbort = () => ctrl.abort();
+  opts.signal?.addEventListener("abort", onOuterAbort, { once: true });
+  if (opts.signal?.aborted) ctrl.abort();
   const run = webLlmChat(
     opts.model ?? (await defaultLocalModel()),
     {
@@ -91,7 +97,7 @@ export async function* chatLocalStream(messages: ChatMessage[], opts: LocalChatO
       ...(opts.temperature !== undefined ? { temperature: opts.temperature } : {}),
     },
     {
-      signal: opts.signal,
+      signal: ctrl.signal,
       onDelta: (text) => {
         buffer.push(text);
         wake?.();
@@ -109,18 +115,23 @@ export async function* chatLocalStream(messages: ChatMessage[], opts: LocalChatO
       wake?.();
     },
   );
-  for (;;) {
-    if (buffer.length) {
-      yield buffer.shift()!;
-      continue;
+  try {
+    for (;;) {
+      if (buffer.length) {
+        yield buffer.shift()!;
+        continue;
+      }
+      if (done) break;
+      await new Promise<void>((r) => {
+        wake = r;
+      });
+      wake = null;
     }
-    if (done) break;
-    await new Promise<void>((r) => {
-      wake = r;
-    });
-    wake = null;
+    if (failure) throw failure;
+  } finally {
+    opts.signal?.removeEventListener("abort", onOuterAbort);
+    if (!done) ctrl.abort();
   }
-  if (failure) throw failure;
 }
 
 /** Drop the cached engine — useful when switching models or freeing the GPU. */

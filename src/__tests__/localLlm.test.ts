@@ -65,6 +65,19 @@ describe("chatLocal / chatLocalStream", () => {
     for await (const c of chatLocalStream([{ role: "user", content: "x" }], { model: "Own" })) out.push(c);
     expect(out).toEqual(["a", "b"]);
     expect(webLlmChat.mock.calls[1][0]).toBe("Own");
+    // Closing the generator early aborts the worker call.
+    let seenSignal: AbortSignal | undefined;
+    webLlmChat.mockImplementationOnce(async (_m: string, _r: unknown, opts: { onDelta?: (t: string) => void; signal?: AbortSignal }) => {
+      seenSignal = opts.signal;
+      opts.onDelta?.("first");
+      await new Promise((r) => setTimeout(r, 20));
+      opts.onDelta?.("second");
+      return { content: "first second", tool_calls: [], model: "m" };
+    });
+    const gen = chatLocalStream([{ role: "user", content: "x" }], { model: "Own" });
+    expect((await gen.next()).value).toBe("first");
+    await gen.return(undefined);
+    expect(seenSignal?.aborted).toBe(true);
     webLlmChat.mockRejectedValueOnce(new Error("gpu lost"));
     await expect((async () => {
       for await (const _c of chatLocalStream([{ role: "user", content: "x" }])) void _c;

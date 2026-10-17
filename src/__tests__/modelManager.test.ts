@@ -72,6 +72,12 @@ describe("model manager — selection and hardware", () => {
     expect(webLlmModelFor("small", hw())).toBe("Qwen3-4B-q4f16_1-MLC");
     expect(webLlmModelFor("tiny", hw())).toBe("Qwen3-4B-q4f16_1-MLC");
     expect(webLlmModelFor("medium", hw())).toBe("Qwen3-8B-q4f16_1-MLC");
+    // A tool-calling agent gets a function-calling model instead of a plain choice when the device can run one…
+    setWebLlmModel("Qwen3-8B-q4f16_1-MLC");
+    expect(webLlmModelFor("medium", hw(), { tools: true })).toBe("Hermes-3-Llama-3.1-8B-q4f16_1-MLC");
+    expect(webLlmModelFor("medium", hw())).toBe("Qwen3-8B-q4f16_1-MLC");
+    // …and keeps the choice when no native tool model fits (mobile budget).
+    expect(webLlmModelFor("medium", hw({ mobile: true }), { tools: true })).toBe("Qwen3-8B-q4f16_1-MLC");
     // An id outside the catalog is trusted as-is.
     setWebLlmModel("Custom-Model-q4f16_1-MLC");
     expect(webLlmModelFor("large", hw())).toBe("Custom-Model-q4f16_1-MLC");

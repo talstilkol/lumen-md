@@ -206,6 +206,22 @@ describe("ollama executor — server", () => {
     await expect(ollamaExecutor.chat({ messages: [{ role: "user", content: "hi" }] })).rejects.toThrow(/something broke/);
   });
 
+  it("rejects a stream that ends without its terminal record", async () => {
+    await ollamaExecutor.available();
+    routes["/api/chat"] = () => ndjson([{ model: "m", message: { role: "assistant", content: "partial" }, done: false }]);
+    await expect(ollamaExecutor.chat({ messages: [{ role: "user", content: "hi" }], onDelta: () => {} })).rejects.toThrow(/stream ended before the final record/);
+  });
+
+  it("probes tool support for every tier's model and prefers a tool model for tool agents", async () => {
+    await ollamaExecutor.available();
+    const probed = calls.filter((c) => c.url.endsWith("/api/show")).map((c) => c.body!.model);
+    expect(new Set(probed)).toEqual(new Set(["llama3.2:3b", "qwen2.5:7b", "gemma3:12b"]));
+    // medium → gemma3 (no tools); a tool agent on medium gets the best tool-capable model instead.
+    expect(ollamaExecutor.modelFor("medium")).toBe("gemma3:12b");
+    expect(ollamaExecutor.modelFor("medium", { tools: true })).toBe("qwen2.5:7b");
+    expect(ollamaExecutor.supportsTools("gemma3:12b")).toBe(false);
+  });
+
   it("is not available when only embedding models are installed", async () => {
     routes["/api/tags"] = () => json({ models: [{ name: "nomic-embed-text:latest", details: { parameter_size: "137M" } }] });
     expect(await ollamaExecutor.available()).toMatchObject({ available: false, reason: "no-model" });

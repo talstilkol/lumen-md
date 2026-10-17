@@ -67,6 +67,22 @@ describe("webllm worker", () => {
     await handle({ id: 6, type: "interrupt" });
     expect(interruptGenerate).toHaveBeenCalled();
     interruptGenerate.mockClear();
+    // A targeted interrupt that lands while the chat is still LOADING its
+    // model is recorded and ends the chat before it generates.
+    let releaseLoad: (() => void) | null = null;
+    reload.mockImplementationOnce(() => new Promise<void>((r) => (releaseLoad = r)));
+    create.mockResolvedValue({ choices: [{ message: { content: "should not run" } }] });
+    const createCallsBefore = create.mock.calls.length;
+    const loading = handle({ id: 20, type: "chat", modelId: "other-model", request: { messages: [] }, stream: false });
+    await new Promise((r) => setTimeout(r, 0));
+    await handle({ id: 21, type: "interrupt", target: 20 });
+    expect(interruptGenerate).not.toHaveBeenCalled();
+    releaseLoad!();
+    await loading;
+    expect(posted.at(-1)).toEqual({ id: 20, type: "error", message: "aborted" });
+    expect(create.mock.calls.length).toBe(createCallsBefore);
+    posted.length = 0;
+    create.mockReset();
     // A targeted interrupt for a chat that is not running cancels it when
     // its turn comes, without touching the current generation.
     await handle({ id: 11, type: "interrupt", target: 12 });
@@ -76,9 +92,10 @@ describe("webllm worker", () => {
     expect(posted.at(-1)).toEqual({ id: 12, type: "error", message: "aborted" });
     posted.length = 0;
     await handle({ id: 7, type: "hasModel", modelId: "cached" });
-    await handle({ id: 8, type: "deleteModel", modelId: "b" });
+    // The loaded model is now "other-model" (the cancelled chat switched to it).
+    await handle({ id: 8, type: "deleteModel", modelId: "other-model" });
     expect(unload).toHaveBeenCalledTimes(1);
-    expect(deleteModelAllInfoInCache).toHaveBeenCalledWith("b");
+    expect(deleteModelAllInfoInCache).toHaveBeenCalledWith("other-model");
     await handle({ id: 9, type: "unload" });
     expect(posted).toEqual([
       { id: 7, type: "result", value: true },

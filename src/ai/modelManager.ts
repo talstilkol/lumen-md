@@ -170,7 +170,14 @@ export function webLlmModelFor(tier: ModelTier, hw: Hardware, opts: { tools?: bo
   if (chosen) {
     const entry = catalogEntryFor(chosen);
     const order: ModelTier[] = ["tiny", "small", "medium", "large"];
-    if (!entry || order.indexOf(entry.tier) >= order.indexOf(tier)) return chosen;
+    // An explicit choice wins, except that a tool-calling agent gets a
+    // function-calling model when the choice has no native tool support
+    // and the device can run one (otherwise the choice runs the protocol).
+    if (!entry || order.indexOf(entry.tier) >= order.indexOf(tier)) {
+      if (!opts.tools || entry?.tools) return chosen;
+      const native = recommendWebLlmModel(tier, hw, { tools: true });
+      return catalogEntryFor(native)?.tools ? native : chosen;
+    }
   }
   return recommendWebLlmModel(tier, hw, opts);
 }

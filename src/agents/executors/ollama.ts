@@ -207,8 +207,15 @@ export const ollamaExecutor: Executor = {
       // Only chat-capable installs count: an embedding-only Ollama would
       // otherwise be picked and then 404 on the recommended model.
       if (!s.models.some((m) => !/embed/i.test(m.name))) return { available: false, reason: "no-model", detail: RECOMMENDED_OLLAMA_MODEL };
-      const model = this.modelFor("small");
-      if (model) await probeToolSupport(model);
+      // Cache tool support for every model a tier can select (and the
+      // tool-preferring picks), so the synchronous supportsTools() the
+      // runtime consults is backed by /api/show, not the name heuristic.
+      const candidates = new Set<string>();
+      for (const tier of ["tiny", "small", "medium", "large"] as const) {
+        candidates.add(this.modelFor(tier));
+        candidates.add(this.modelFor(tier, { tools: true }));
+      }
+      await Promise.all([...candidates].filter(Boolean).map((m) => probeToolSupport(m)));
       return { available: true };
     } catch (e) {
       const status = (e as { status?: number }).status;
@@ -225,12 +232,23 @@ export const ollamaExecutor: Executor = {
   supportsSchema(): boolean {
     return state.schemaOk;
   },
-  modelFor(tier: ModelTier): string {
-    return pickModel(tier, state.models, configuredModel()) ?? configuredModel() ?? RECOMMENDED_OLLAMA_MODEL;
+  modelFor(tier: ModelTier, opts: { tools?: boolean } = {}): string {
+    const configured = configuredModel();
+    const pick = pickModel(tier, state.models, configured) ?? configured ?? RECOMMENDED_OLLAMA_MODEL;
+    if (!opts.tools || this.supportsTools(pick)) return pick;
+    // A tool-calling agent prefers an installed model with tool support in
+    // the same tier (then any tier) over the plain pick.
+    const supports = (m: InstalledModel) => state.tools.get(m.name) ?? TOOL_FAMILIES.test(m.name);
+    const chat = state.models.filter((m) => !/embed/i.test(m.name) && supports(m));
+    const sameTier = chat.filter((m) => tierOf(m.params) === tier);
+    const best = (list: InstalledModel[]) => list.reduce((b, m) => ((m.params ?? 0) > (b.params ?? 0) ? m : b));
+    if (sameTier.length) return best(sameTier).name;
+    if (chat.length) return best(chat).name;
+    return pick;
   },
   async chat(req: ExecutorRequest): Promise<ExecutorResponse> {
     const base = getBaseUrl();
-    const model = req.model ?? this.modelFor(req.tier ?? "small");
+    const model = req.model ?? this.modelFor(req.tier ?? "small", { tools: !!req.tools?.length });
     const useTools = !!req.tools?.length && this.supportsTools(model);
     const stream = !!req.onDelta && !useTools;
     const body: Record<string, unknown> = {
@@ -279,6 +297,7 @@ export const ollamaExecutor: Executor = {
     let toolCalls: ToolCall[] = [];
     let usage: ExecutorResponse["usage"];
     let answeredModel = model;
+    let sawDone = false;
     const consume = (line: string) => {
       const trimmed = line.trim();
       if (!trimmed) return;
@@ -300,7 +319,10 @@ export const ollamaExecutor: Executor = {
         req.onDelta?.(delta);
       }
       if (msg?.tool_calls) toolCalls = toolCalls.concat(parseToolCalls(msg.tool_calls));
-      if (json.done) usage = usageOf(json);
+      if (json.done) {
+        sawDone = true;
+        usage = usageOf(json);
+      }
     };
     for (;;) {
       const { done, value } = await reader.read();
@@ -311,6 +333,9 @@ export const ollamaExecutor: Executor = {
       for (const line of lines) consume(line);
     }
     consume(buffer);
+    // A stream that ends without its terminal `done` record was cut off
+    // (server, proxy, network): a prefix is not an answer.
+    if (!sawDone) throw new Error("Ollama API error: stream ended before the final record");
     return { content: content.trim(), toolCalls, model: answeredModel, usage };
   },
 };

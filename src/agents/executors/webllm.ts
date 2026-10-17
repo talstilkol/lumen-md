@@ -94,12 +94,12 @@ export const webllmExecutor: Executor = {
   supportsSchema(): boolean {
     return true;
   },
-  modelFor(tier: ModelTier): string {
+  modelFor(tier: ModelTier, opts: { tools?: boolean } = {}): string {
     const hw = hwSnapshot ?? { webgpu: true, f16: true, maxBufferMB: null, deviceMemoryGB: null, cores: null, mobile: false };
-    return webLlmModelFor(tier, hw);
+    return webLlmModelFor(tier, hw, { tools: opts.tools });
   },
   async chat(req: ExecutorRequest): Promise<ExecutorResponse> {
-    const model = req.model ?? this.modelFor(req.tier ?? "small");
+    const model = req.model ?? this.modelFor(req.tier ?? "small", { tools: !!req.tools?.length });
     const native = !!req.tools?.length && this.supportsTools(model);
     const messages: ChatCompletionMessageParam[] = native ? toOpenAiMessages(req.messages) : flattenMessages(req.messages);
     const request = {
