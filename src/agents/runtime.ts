@@ -31,7 +31,7 @@ import { formatSchemaErrors, validateSchema } from "./schema";
 import { ToolError } from "./tools/define";
 import { review, type Failure } from "./critic";
 import { recordRun } from "./trace";
-import { AiQuotaExceededError, chargeAiCommandDispatch } from "../billing/aiQuota";
+import { AiQuotaExceededError, aiQuotaStatus, chargeAiCommandDispatch, consumeAiPrompt } from "../billing/aiQuota";
 
 export const DEFAULT_MAX_STEPS = 8;
 export const DEFAULT_MAX_RETRIES = 2;
@@ -128,10 +128,38 @@ export async function runAgent<I extends AgentInput, O = string>(def: AgentDefin
   let executor = pick.executor;
   let patch: RetryPatch = { ...(opts.patch ?? {}) };
 
+  // A cached, already-validated answer costs nothing: no prompt, no model.
+  const cacheKeyOf = async (): Promise<string | null> => {
+    if (!def.cache) return null;
+    const { aiCacheEnabled, cacheKey } = await import("../ai/responseCache");
+    if (!aiCacheEnabled()) return null;
+    const sys = typeof def.system === "function" ? def.system(input) : def.system;
+    return cacheKey({ v: 2, agent: def.id, executor: executor.id, model: executor.modelFor(patch.tier ?? def.tier ?? "small"), sys, user: def.user(input), patch }).catch(() => null);
+  };
+  const key = await cacheKeyOf();
+  if (key) {
+    const { getCached } = await import("../ai/responseCache");
+    const hit = await getCached(key);
+    if (hit) {
+      let output: O | undefined;
+      try {
+        output = (def.outputSchema || !def.parse ? JSON.parse(hit.text) : def.parse(hit.text, input)) as O;
+      } catch {
+        output = undefined;
+      }
+      if (output !== undefined) {
+        step({ kind: "cache", ms: 0, label: "hit", ok: true });
+        return finish("ok", { output, model: hit.model });
+      }
+    }
+  }
+
   // One user action = one prompt against the monthly quota, however many
   // model calls, tools and retries the run takes. Executors run prepaid.
   try {
-    chargeAiCommandDispatch();
+    if (opts.ownPrompt) {
+      if (!consumeAiPrompt(new Date(), { silent: opts.ownPrompt === "silent" })) throw new AiQuotaExceededError(aiQuotaStatus(new Date()).limit);
+    } else chargeAiCommandDispatch();
   } catch (e) {
     if (e instanceof AiQuotaExceededError) return finish("failed", { errorCode: "quota", error: e.message });
     throw e;
@@ -256,7 +284,14 @@ export async function runAgent<I extends AgentInput, O = string>(def: AgentDefin
           }
         }
       }
-      if (!failure) return finish("ok", { output });
+      if (!failure) {
+        if (key) {
+          const { putCached } = await import("../ai/responseCache");
+          // Text agents cache the raw model text (re-parsed on a hit); JSON agents the value.
+          await putCached(key, def.outputSchema || !def.parse ? JSON.stringify(output) : text, run.model ?? "").catch(() => {});
+        }
+        return finish("ok", { output });
+      }
     }
 
     // No usable answer: ask the critic.

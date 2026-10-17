@@ -8,9 +8,14 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 vi.mock("../ai/llm", () => ({
   chat: vi.fn(),
   chatStream: vi.fn(),
+  getActiveProvider: () => "ollama",
+  effectiveModel: () => "mock",
 }));
+vi.mock("../billing/aiQuota", () => ({ chargeAiCommandDispatch: vi.fn(), consumeAiPrompt: () => true, aiQuotaStatus: () => ({ allowed: true, limit: Infinity }), AiQuotaExceededError: class extends Error {} }));
 
 import { chat } from "../ai/llm";
+import { registerExecutor, resetExecutors } from "../agents/executors";
+import { fakeExecutor, sequence } from "./helpers/fakeExecutor";
 import {
   stripCodeFences,
   generateDiagram,
@@ -21,7 +26,11 @@ import {
 
 const mockChat = vi.mocked(chat);
 
-beforeEach(() => mockChat.mockReset());
+beforeEach(() => {
+  mockChat.mockReset();
+  resetExecutors();
+  localStorage.setItem("lumen.ai.cache", "off");
+});
 
 describe("stripCodeFences", () => {
   it("removes a surrounding fenced block", () => {
@@ -44,12 +53,19 @@ describe("generateDiagram", () => {
   });
 });
 
-describe("extractActionItems", () => {
-  it("returns the task list from the model", async () => {
-    mockChat.mockResolvedValue("- [ ] Ship it (Bob)\n- [ ] Review (Ann)");
+describe("extractActionItems (tasker agent)", () => {
+  it("returns the task list from the model, stripping fences", async () => {
+    registerExecutor(fakeExecutor(sequence("```markdown\n- [ ] Ship it (Bob)\n- [ ] Review (Ann)\n```")));
     const out = await extractActionItems("notes...");
-    expect(out).toContain("- [ ] Ship it (Bob)");
-    expect(out).toContain("- [ ] Review (Ann)");
+    expect(out).toBe("- [ ] Ship it (Bob)\n- [ ] Review (Ann)");
+  });
+
+  it("retries when the answer is not a task list, feeding the reason back", async () => {
+    const ex = fakeExecutor(sequence("Here are the items: ship it, review.", "- [ ] Ship it (Bob)"));
+    registerExecutor(ex);
+    expect(await extractActionItems("notes...")).toBe("- [ ] Ship it (Bob)");
+    expect(ex.calls).toHaveLength(2);
+    expect(ex.calls[1].messages[1].content).toContain("no `- [ ]` task line");
   });
 });
 
