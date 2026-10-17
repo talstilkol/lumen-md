@@ -19,10 +19,10 @@
 | מדד | ערך |
 |---|---|
 | PR-ים שמוזגו | #106–#108, #110–#114, #117–#134 |
-| PR-ים פתוחים, ממתינים למיזוג של טל (לפי הסדר) | **#109**, **#135**, **#136** (המסמך הזה), ואז המחסנית **#137 → #150, #155** (A1…E2), ואז **#156** (F1), **#157** (F2/T25), **#158** (F3/T21) — כל אחד על קודמו. (#151–#154, #159–#168 = dependabot, לא חלק מהתוכנית) |
+| PR-ים פתוחים, ממתינים למיזוג של טל (לפי הסדר) | **#109**, **#135**, **#136** (המסמך הזה), ואז המחסנית **#137 → #150, #155**, ואז **#156 → #158, #169 → #176** (F1…I3) — כל אחד על קודמו. (#151–#154, #159–#168 = dependabot) |
 | תוכנית הסוכנים המקומיים (§3–§7) | **100% כתוב** (A1–E2, 15 PR-ים), כל הערות ה-review של Codex נענו ונסגרו (0 פתוחות). **CI אמיתי ב-GitHub על ראש המחסנית (#155) — ירוק (17.10 21:30)**: typecheck/test/build, e2e ב-Chromium + Firefox + WebKit, e2e מול build ייצור, bundle-size, local agents (fake Ollama). עד #155 הטריגר דילג על PR-ים מוערמים (#138–#154 לא קיבלו CI); תוקן ב-#155 |
 | אומת חי על מודל אמיתי | **0%** — אין Ollama / GPU / docker בסביבה שלי. ב-CI רץ Ollama מזויף (T22) שמוכיח חיווט, לא איכות |
-| תוכנית סגירת החולשות (§12–§13) | 80 חולשות נמצאו, 12 מהן 🔴 לתיקון ראשון. **בוצעו**: F1 (#156, CI ירוק), F2/T25 (#157), F3/T21 (#158), T22; **F4/T23 בעבודה** (ענף `test/honest`, ≈ 70% — ראו "מסירה"). נשארו 33 כלים, ≈ 245 שעות |
+| תוכנית סגירת החולשות (§12–§13) | 80 חולשות, 12 🔴. **בוצעו 11 PR-ים** (18.10 02:30): F1–F5, G1–G3, I1–I3 (#156–#158, #169–#176). נשארו 26 PR-ים, ≈ 190 שעות הערכה. הבא: G4 (ייצוא דו-כיווני) |
 | פעולות של טל (§8) | ≈ 1 שעה (מיזוג + Ollama + הרצת eval); ≈ 22 שעות לחשבונות ולפריסה (לא חוסם) |
 
 ## 2. העיקרון: AI מקומי קודם
@@ -144,7 +144,7 @@
 
 | # | פעולה | פותח | זמן |
 |---|---|---|---|
-| 1 | **למזג ב-GitHub לפי הסדר**: #109, #135, #136, ואז #137, #138, … #150, #155, #156, #157, #158 (כל PR בנוי על קודמו; אחרי כל מיזוג GitHub מעדכן את הבסיס של הבא). המיזוג נחסם אצלי על ידי בקר האבטחה | כל התוכנית | 10 דק׳ |
+| 1 | **למזג ב-GitHub לפי הסדר**: #109, #135, #136, ואז #137 … #150, #155, #156, #157, #158, #169, #170, #171, #172, #173, #174, #175, #176 (כל PR בנוי על קודמו; אחרי כל מיזוג GitHub מעדכן את הבסיס של הבא). המיזוג נחסם אצלי על ידי בקר האבטחה | כל התוכנית | 15 דק׳ |
 | 2 | **Ollama** ≥ 0.5 על המחשב (`ollama.com/download`), ואז: `ollama pull qwen2.5:7b && ollama pull nomic-embed-text` (8GB) או `gemma3:12b` (16GB). **חובה** לאפליקציה ב-Vercel: `OLLAMA_ORIGINS=https://lumen-md.vercel.app` (אחרת Ollama מחזיר 403 לדפדפן). ב-macOS: `launchctl setenv OLLAMA_ORIGINS https://lumen-md.vercel.app` והפעלה מחדש | כל סוכני Ollama, בדיקת העברית | 15 דק׳ + הורדה |
 | 3 | אופציונלי: `docker compose -f docker/local-ai.yml up -d` — LanguageTool ו-SearXNG מקומיים (#144) | דקדוק ומחקר בלי שירות חיצוני | 10 דק׳ |
 | 3א | **להריץ את ה-eval ולשלוח לי את הדוח**: `npm run eval:agents -- --model qwen2.5:7b` (ואם יש זיכרון: גם `gemma3:12b`, `aya-expanse:8b`). הדוח ב-`eval/results/` | ציון עברית אמיתי לכל סוכן; בחירת מודל ברירת המחדל (T27) | 20 דק׳ |
@@ -450,16 +450,16 @@
 | F1 | `fix/immediate` | F1 | סדר hooks בגלריה, אייקוני manifest, `storage.persist()`, flush ב-`pagehide`, `dir` ב-HTML export, שמירת מסמכים ללא כותרת | e2e פותח את הגלריה (בלי `expect(true)`); בדיקת `persist()` נקרא | 3 | ✅ **#156** — CI ירוק ב-GitHub (3 דפדפנים) |
 | F2 | `feat/agents-f1` | T25 | כיוון לכל שורה/בלוק, גופנים עבריים, CSS לוגי | `e2e/rtl.spec.ts` ב-3 דפדפנים; בדיקת CSS | 12 | ✅ **#157** — `rtl.spec.ts` ירוק ב-Chromium/Firefox/WebKit ב-GitHub; ריצת build ייצור תוקנה (93fd4926) ו-CI הופעל מחדש אחרי שההעברה לארגון ביטלה אותו |
 | F3 | `feat/ai-doctor` | T21 | רופא AI + פאנל | בדיקה עם Ollama מזויף: כל שורה ירוקה; בלי Ollama: ההצעה הנכונה | 6 | ✅ **#158** — `aiDoctor.test.ts` (10, Ollama מזויף ב-fetch), `AiDoctorPanelRender` (4), `e2e/ai-doctor.spec.ts`; 2,683 ירוקות; CI הופעל מחדש |
-| F4 | `test/honest` | T23 | מחיקת `expect(true)`, `waitForTimeout` → תנאים, כיסוי, `retries` | CI ירוק 5 פעמים ברצף | 8 | **בעבודה** — ענף `test/honest` (7e61a504, על `feat/ai-doctor`): 0 `waitForTimeout`, 0 `expect(true)`, `paste-html` רץ, 2 באגים תוקנו, `e2e:flake` עובד. חסר: שער כיסוי, `retries: 1`, ריצה מלאה, PR |
-| F5 | `test/visual` | T24 | רגרסיה חזותית מקומית | `npm run preview:visual` | 4 | |
-| G1 | `feat/hebrew-core` | T26 | slug אחד, backlinks, tokenizer, גיבויים, ספירת מילים | `hebrew.test.ts`, e2e מתאר עברי | 8 | |
-| G2 | `feat/hebrew-models` | T27 | קטלוג, המלצה לפי שפה, "ענה באותה שפה" | eval + בדיקת script | 5 | |
-| G3 | `feat/hebrew-spell` | T28 | מילון + כללים ב-worker, שפת פסקה ברקע | `hebrewSpell.test.ts` | 8 | |
+| F4 | `test/honest` | T23 | מחיקת `expect(true)`, `waitForTimeout` → תנאים, כיסוי, `retries` | CI ירוק 5 פעמים ברצף | 8 | ✅ **#169** |
+| F5 | `test/visual` | T24 | רגרסיה חזותית מקומית | `npm run preview:visual` | 4 | ✅ **#170** |
+| G1 | `feat/hebrew-core` | T26 | slug אחד, backlinks, tokenizer, גיבויים, ספירת מילים | `hebrew.test.ts`, e2e מתאר עברי | 8 | ✅ **#171** |
+| G2 | `feat/hebrew-models` | T27 | קטלוג, המלצה לפי שפה, "ענה באותה שפה" | eval + בדיקת script | 5 | ✅ **#173** |
+| G3 | `feat/hebrew-spell` | T28 | מילון + כללים ב-worker, שפת פסקה ברקע | `hebrewSpell.test.ts` | 8 | ✅ **#175** |
 | G4 | `feat/export-bidi` | T44 | DOCX/HTML/EPUB/LaTeX | `exports.test.ts` פותח את הקבצים ובודק `dir` / `w:bidi` | 5 | |
 | G5 | `feat/hebrew-content` | T45 | welcome, תבניות, תאריכים, toasts, שער ערכים | שער i18n | 6 | |
-| I1 | `feat/history-one` | T35 | מאגר היסטוריה אחד, תמונות מצב, גיבויים מחוץ לכספת, מכסה | `e2e/data-safety.spec.ts` חלק א | 8 | |
-| I2 | `feat/safe-files` | T46 | שינוי שם בטוח + קישורים, סל מחזור | חלק ב | 7 | |
-| I3 | `feat/export-import-all` | T47 | zip / תיקייה, ייבוא Obsidian/Notion | חלק ג | 6 | |
+| I1 | `feat/history-one` | T35 | מאגר היסטוריה אחד, תמונות מצב, גיבויים מחוץ לכספת, מכסה | `e2e/data-safety.spec.ts` חלק א | 8 | ✅ **#172** |
+| I2 | `feat/safe-files` | T46 | שינוי שם בטוח + קישורים, סל מחזור | חלק ב | 7 | ✅ **#174** |
+| I3 | `feat/export-import-all` | T47 | zip / תיקייה, ייבוא Obsidian/Notion | חלק ג | 6 | ✅ **#176** |
 | I4 | `feat/content-sandbox` | T48 | live-js בלחיצה ב-sandbox, sanitize, CSP, Vercel headers | `e2e/security.spec.ts` | 10 | |
 | I5 | `feat/secret-store` | T36 | סודות מוצפנים, keychain ב-Tauri | סריקת אחסון | 5 | |
 | I6 | `feat/privacy-ledger` | T37 | יומן + חסימה | `e2e/privacy.spec.ts` | 3 | |
