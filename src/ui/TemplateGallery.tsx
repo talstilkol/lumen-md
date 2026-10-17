@@ -291,7 +291,7 @@ export function TemplateGallery({ open, onClose }: Props) {
           {!loading && !error && filtered.length > 0 && (
             <ul style={{ listStyle: "none", margin: 0, padding: 0 }}>
               {filtered.map((tpl) => (
-                <li key={tpl.id}>
+                <li key={tpl.id} data-testid="template-card">
                   <TemplateRow
                     template={tpl}
                     installing={installing.has(tpl.id)}
