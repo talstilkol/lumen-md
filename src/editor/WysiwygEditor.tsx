@@ -123,7 +123,10 @@ function buildSlashItems(): SlashItem[] {
       run: (v) => {
         const node = v.state.schema.nodes.bullet_list;
         if (!node) return;
+        const before = v.state.doc;
         wrapInList(node)(v.state, v.dispatch);
+        // Wrapping can be refused (suggesting mode): then add no marker.
+        if (v.state.doc === before) return;
         // Inject a leading checkbox marker so the round-trip to markdown
         // produces `- [ ] ...` on the new line.
         const tr = v.state.tr.insertText("[ ] ", v.state.selection.from);

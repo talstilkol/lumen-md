@@ -240,6 +240,21 @@ describe("tracking edits while suggesting", () => {
     expect(e.md()).toBe("Hello world.");
   });
 
+  it("deleting own insertion plus a hard break keeps the break", async () => {
+    const e = await open("Hello world.", true);
+    e.select(e.at(" world"));
+    e.type("!!");
+    const at = e.at("!!");
+    const br = e.view.state.schema.nodes.hardbreak ?? e.view.state.schema.nodes.hard_break;
+    // Put an unmarked hard break right after the insertion (outside suggesting's tracking).
+    e.view.dispatch(e.view.state.tr.insert(at + 2, br.create()).setMeta("lumenSuggest", true));
+    e.view.dispatch(e.view.state.tr.delete(at, at + 3));
+    let breaks = 0;
+    e.view.state.doc.descendants((n) => void (n.type === br && breaks++));
+    expect(breaks).toBe(1);
+    expect(e.view.state.doc.textContent).toBe("Hello\n world."); // own "!!" goes, the break stays
+  });
+
   it("is off when suggesting is off", async () => {
     const e = await open("Hello world.", false);
     e.select(e.at(" world"));

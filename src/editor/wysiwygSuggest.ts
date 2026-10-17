@@ -527,7 +527,9 @@ export function trackChanges(
     const onlyOwnInsert = (() => {
       let own = !!text;
       c.deleted.content.descendants((n) => {
-        if (n.isText && !ins.isInSet(n.marks)) own = false;
+        // Unmarked text, or an inline atom (it can't carry the insertion
+        // mark), isn't one's own insertion: the slice must be restored.
+        if ((n.isText && !ins.isInSet(n.marks)) || (n.isInline && !n.isText)) own = false;
       });
       return own;
     })();
