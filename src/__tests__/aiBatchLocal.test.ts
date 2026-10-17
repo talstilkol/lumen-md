@@ -23,7 +23,7 @@ describe("local batch queue", () => {
     let release!: () => void;
     const gate = new Promise<void>((r) => (release = r));
     batch.__setLocalBatchDeps({
-      answer: async (system, user) => {
+      answer: async (_system, user) => {
         seen.push(user);
         await gate;
         if (user.includes("boom")) throw new Error("model failed");
