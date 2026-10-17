@@ -47,6 +47,16 @@ export function researchEndpoint(): string | null {
   return connectAllowedByCsp(url) ? url.replace(/\/+$/, "") : null;
 }
 
+/**
+ * Headers for research-service requests: the optional shared token the
+ * worker requires when its RESEARCH_TOKEN is set (see the worker README).
+ * Sent only when configured, so a plain GET stays a simple CORS request.
+ */
+function serviceHeaders(extra: Record<string, string> = {}): Record<string, string> {
+  const token = (import.meta.env?.VITE_RESEARCH_TOKEN as string | undefined)?.trim();
+  return token ? { ...extra, "X-Lumen-Research-Token": token } : extra;
+}
+
 export function getResearchSettings(): ResearchSettings {
   const p = ls("lumen.research.provider");
   return {
@@ -77,7 +87,7 @@ export class ResearchUnavailableError extends Error {
 export async function extractPage(url: string, signal?: AbortSignal, endpoint = researchEndpoint()): Promise<ExtractedPage> {
   if (!endpoint) throw new ResearchUnavailableError();
   try {
-    const res = await fetch(`${endpoint}/extract?url=${encodeURIComponent(url)}`, { signal });
+    const res = await fetch(`${endpoint}/extract?url=${encodeURIComponent(url)}`, { signal, headers: serviceHeaders() });
     const body = (await res.json().catch(() => ({}))) as Partial<ExtractedPage> & { error?: string };
     if (!res.ok && !body.status) return { url, finalUrl: url, status: 0, error: body.error ?? `service ${res.status}` };
     return { url, finalUrl: body.finalUrl ?? url, status: body.status ?? res.status, ...body } as ExtractedPage;
@@ -99,7 +109,7 @@ export async function searchWeb(
   if (!settings.key) throw new Error(`Add your ${settings.provider} API key (Research: Settings…).`);
   const res = await fetch(`${endpoint}/search`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: serviceHeaders({ "Content-Type": "application/json" }),
     body: JSON.stringify({ provider: settings.provider, query, key: settings.key, count }),
     signal,
   });

@@ -48,6 +48,23 @@ function checkRateLimit(): void {
   requestTimestamps.push(now);
 }
 
+/**
+ * Run one provider request under the same per-minute and concurrency limits
+ * as `chat()` — for calls that go to a provider outside `chatDirect`
+ * (Claude web research and its continuations).
+ */
+export async function withRequestLimit<T>(send: () => Promise<T>, charge?: () => void): Promise<T> {
+  checkRateLimit();
+  // Like chatDirect: the quota is charged only once the request may go out.
+  charge?.();
+  inflight++;
+  try {
+    return await send();
+  } finally {
+    inflight--;
+  }
+}
+
 export interface ChatMessage {
   role: "system" | "user" | "assistant";
   content: string;
