@@ -1,7 +1,7 @@
 # תוכנית אב — Lumen · גרסה 3: סוכנים מקומיים + סגירת החולשות
 
 > המסמך היחיד לתוכנית: מה בוצע, מה נשאר, מתי יסתיים ומה צריך מטל.
-> עודכן 17.10.2026, 21:30 (שעון ישראל). גרסה 2 (17.10 15:45) וגרסה 1 (16–17.10) נשמרות בהיסטוריה של git.
+> עודכן 17.10.2026, 21:35 (שעון ישראל). התכנון הושלם; §15 הוא סדר הביצוע. גרסה 2 (17.10 15:45) וגרסה 1 (16–17.10) נשמרות בהיסטוריה של git.
 
 ## 0. מה השתנה בגרסה הזו
 
@@ -12,6 +12,7 @@
 | "סוכנים מקומיים שיציעו שיפורים במידה ולא יהיה מענה" | **סוכן שיפור** לכל פקודה: כשאין תשובה, התשובה לא עוברת אימות, או שהמודל לא זמין — הוא מאבחן, מנסה שוב עם שינוי (עד פעמיים), ואם עדיין אין — מציג הצעות שאפשר ללחוץ עליהן (§5) |
 | "צור master plan חדשה ומפורטת עם כל הכלים החדשים" | המסמך הזה. הכלים ב-§3, מפת ההעברה ב-§4, לוח הזמנים ב-§7 |
 | "תן רשימה של כל החולשות… והוסף לתוכנית כלים מקומיים שיפתרו אותן… אם יש לך עוד רעיונות תוסיף, אני מאשר הכול" (17.10 20:38) | **§12** — ביקורת של 80 חולשות עם ראיות (קובץ:שורה), והפער מול Obsidian / Notion / Typora / Logseq. **§13** — 37 כלים מקומיים חדשים (T21–T58) + PR תיקונים מיידי, בשישה שלבים (F–K), ≈ 270 שעות. T22 כבר בוצע (#155) |
+| "סיים לתכנן את כל תוכניות האב והכלים ל-world class, ותגיד לי מתי לעבור ל-Opus 5.5" (17.10 21:12) | **§14** — יעדים מדידים לכל תחום (מה נחשב "הטובה בעולם" ואיך זה נבדק אוטומטית). **§15** — סדר ביצוע של 37 PR-ים עם בדיקת קבלה לכל אחד, ומסירה למודל המבצע. התכנון הושלם 17.10 21:30; מכאן ביצוע |
 
 ## 1. איפה אנחנו
 
@@ -420,3 +421,70 @@
 | **סה״כ** | 37 כלים + F1 | **≈ 270 שעות** (טווח 230–320) | ≈ 3.5–4 שבועות עבודה רציפה |
 
 הסדר נקבע לפי נזק: קודם מה שמאבד נתונים או פותח חור אבטחה ומה שמונע לדעת אם זה עובד (F, I), ואז מה שהמשתמש העברי רואה כל יום (G), מה שמבדיל מהמתחרים (H), מהירות ונגישות (J), ובסוף הרחבה ותחזוקה (K). כל כלי = PR נפרד עם בדיקות, review של Codex, ועדכון של המסמך הזה.
+
+## 14. "הטובה בעולם בתחומה" — יעדים מדידים
+
+"world class" הוא לא תחושה אלא מספרים. כל יעד כאן נבדק אוטומטית (CI או `npm run` מקומי), וכלי בתוכנית נחשב גמור רק כשהיעד שלו ירוק. המדדים נבחרו מול המובילים: Obsidian (מהירות, קבצים אמיתיים), Typora (עורך דו-כיווני), Notion (היסטוריה), iA Writer (נגישות וכתיבה).
+
+| תחום | יעד | איך נמדד | כלים |
+|---|---|---|---|
+| **עברית** | eval מקומי ≥ 90% על `gemma3:12b` ו-≥ 80% על `qwen2.5:7b`; e2e RTL ירוק ב-Chromium, Firefox ו-WebKit (שורה עברית → `direction: rtl` מחושב בעורך, ב-WYSIWYG ובתצוגה המקדימה); 0 מאפייני CSS פיזיים (`left/right`) בכללי `.prose-lumen` ו-`.cm-*`; `slug("שלום עולם")` = `"שלום-עולם"` ותואם ל-rehype-slug; DOCX/HTML/EPUB נפתחים ב-RTL | `npm run eval:agents`, `e2e/rtl.spec.ts`, בדיקת CSS ב-hygiene, `slug.test.ts`, `exports.test.ts` | T25–T28, T44, T45 |
+| **בטיחות נתונים** | 0 מסלולי איבוד נתונים מהרשימה (G1–G11): `persist()` מבוקש ומצבו מוצג; כל שמירה = גרסה בהיסטוריה; תמונת מצב כל 10 דק׳; `git pull` אף פעם לא דורס (מיזוג או קונפליקט); שינוי שם לא דורס; מחיקה = סל מחזור; ייצוא הכול בלחיצה; כתיבה שנכשלה = הודעה | `e2e/data-safety.spec.ts` שמשחזר כל מסלול G ומוודא שאין אובדן | T35, T46, T47, T56 |
+| **אבטחה** | live-js רק בלחיצה ובתוך sandbox בלי אחסון/רשת; HTML גולמי עובר allowlist; 0 סודות בטקסט גלוי (בדיקה שסורקת localStorage/IndexedDB אחרי הגדרת מפתח); CSP ברשת וב-Tauri בלי `unsafe-eval`; חדרי שיתוף עם סיסמה כברירת מחדל; worker המחקר דורש טוקן | `e2e/security.spec.ts`, `csp-violations.spec.ts` (קיים), בדיקת `secretStore` | T36, T48, T49, T43 |
+| **ביצועים** | Lighthouse ≥ 90 desktop / ≥ 80 mobile על בנייה אמיתית, LCP < 2.5s, TTI < 3.5s; קוד הפעלה ≤ 250KB gzip (סכום); כספת של 10,000 פתקים: פתיחה < 1s, שמירה → עדכון אינדקס < 50ms, חיפוש < 100ms; מסמך של 2MB: הקלדה בלי lag (< 16ms לפריים) | Lighthouse CI כ-`error`, `bundle-budget` על הסכום, `e2e/perf-vault.spec.ts` עם 10k פתקים | T38, T39 |
+| **אמינות** | `retries: 0` ב-CI עם 0 כישלונות ב-20 ריצות רצופות; 0 `expect(true)`; 0 `waitForTimeout`; כיסוי ≥ 60% כולל `ui/` ו-`editor/`; ESLint נקי כולל `rules-of-hooks`; 0 `catch` ריק בלי `// why:` | CI | T23, T42 |
+| **נגישות** | 0 ממצאי axe ברמת serious/critical על כל משטח (LTR ו-RTL, בהיר וכהה); כל 18 הדיאלוגים לוכדים ומחזירים פוקוס; מסע מקלדת בלבד עובר (פתיחה → כתיבה → חיפוש → שמירה → הגדרות); ניגודיות ≥ 4.5 לכל טקסט; `prefers-reduced-motion` מכובד | `e2e/a11y.spec.ts` | T40 |
+| **מובייל ו-offline** | e2e ב-iPhone 14 ו-Pixel 7 (Playwright devices, `hasTouch`) עובר מסע מלא; PWA מותקן ו-`share_target` מקבל טקסט; offline מלא (כולל הדגשת קוד ו-AI מקומי אחרי הורדת מודל) ב-e2e על בנייה אמיתית | `e2e/mobile.spec.ts`, `e2e/offline.spec.ts` | T41, T50 |
+| **i18n** | 0 ערכים לא מתורגמים בעברית, ≤ 5% ב-7 השפות האחרות; 0 מחרוזות קשיחות באנגלית בממשק (סריקה) | שער i18n שבודק ערכים | T45 |
+| **תוספים** | API מתועד עם הגדרות, פאנל, הרחבות עורך; 3 תוספים לדוגמה רצים מתוך sandbox; גלריה שקוראת רישום אמיתי; "מאומת" רק עם חתימה | `e2e/plugins.spec.ts` | T52 |
+| **שולחן עבודה** | ב-Tauri הכספת היא תיקייה אמיתית (נפתחת ב-Obsidian באותו רגע); עדכון אוטומטי; Windows ו-macOS חתומים | `tauri.yml` + בדיקה ידנית של טל | T57 |
+| **AI מקומי** | כל 14 הסוכנים עוברים את ה-eval על מודל מקומי אחד לפחות; `ai.doctor` ירוק על המחשב של טל; יומן הפרטיות מראה 0 בקשות למארח לא מקומי תחת `local-only` במסע e2e מלא | `eval/results/`, `e2e/privacy.spec.ts` | T21, T27, T37 |
+
+## 15. סדר הביצוע — PR אחרי PR
+
+כל PR: ענף משלו על ראש המחסנית, בדיקות שמכסות את היעד מ-§14, review של Codex נענה ונסגר, עדכון של המסמך הזה (§1 + הטבלה כאן) ושל דף ה-HTML. PR-ים באותו שלב שלא נוגעים באותם קבצים רצים במקביל.
+
+| # | PR | כלים | מה נכנס | בדיקת קבלה | שעות | מצב |
+|---|---|---|---|---|---|---|
+| F1 | `fix/immediate` | F1 | סדר hooks בגלריה, אייקוני manifest, `storage.persist()`, flush ב-`pagehide`, `dir` ב-HTML export, שמירת מסמכים ללא כותרת | e2e פותח את הגלריה (בלי `expect(true)`); בדיקת `persist()` נקרא | 3 | הבא בתור |
+| F2 | `feat/bidi` | T25 | כיוון לכל שורה/בלוק, גופנים עבריים, CSS לוגי | `e2e/rtl.spec.ts` ב-3 דפדפנים; בדיקת CSS | 12 | **בעבודה** (ענף `feat/agents-f1`, הקוד ל-CodeMirror / rehype / ProseMirror כתוב, בלי בדיקות) |
+| F3 | `feat/ai-doctor` | T21 | רופא AI + פאנל | בדיקה עם Ollama מזויף: כל שורה ירוקה; בלי Ollama: ההצעה הנכונה | 6 | |
+| F4 | `test/honest` | T23 | מחיקת `expect(true)`, `waitForTimeout` → תנאים, כיסוי, `retries` | CI ירוק 5 פעמים ברצף | 8 | |
+| F5 | `test/visual` | T24 | רגרסיה חזותית מקומית | `npm run preview:visual` | 4 | |
+| G1 | `feat/hebrew-core` | T26 | slug אחד, backlinks, tokenizer, גיבויים, ספירת מילים | `hebrew.test.ts`, e2e מתאר עברי | 8 | |
+| G2 | `feat/hebrew-models` | T27 | קטלוג, המלצה לפי שפה, "ענה באותה שפה" | eval + בדיקת script | 5 | |
+| G3 | `feat/hebrew-spell` | T28 | מילון + כללים ב-worker, שפת פסקה ברקע | `hebrewSpell.test.ts` | 8 | |
+| G4 | `feat/export-bidi` | T44 | DOCX/HTML/EPUB/LaTeX | `exports.test.ts` פותח את הקבצים ובודק `dir` / `w:bidi` | 5 | |
+| G5 | `feat/hebrew-content` | T45 | welcome, תבניות, תאריכים, toasts, שער ערכים | שער i18n | 6 | |
+| I1 | `feat/history-one` | T35 | מאגר היסטוריה אחד, תמונות מצב, גיבויים מחוץ לכספת, מכסה | `e2e/data-safety.spec.ts` חלק א | 8 | |
+| I2 | `feat/safe-files` | T46 | שינוי שם בטוח + קישורים, סל מחזור | חלק ב | 7 | |
+| I3 | `feat/export-import-all` | T47 | zip / תיקייה, ייבוא Obsidian/Notion | חלק ג | 6 | |
+| I4 | `feat/content-sandbox` | T48 | live-js בלחיצה ב-sandbox, sanitize, CSP, Vercel headers | `e2e/security.spec.ts` | 10 | |
+| I5 | `feat/secret-store` | T36 | סודות מוצפנים, keychain ב-Tauri | סריקת אחסון | 5 | |
+| I6 | `feat/privacy-ledger` | T37 | יומן + חסימה | `e2e/privacy.spec.ts` | 3 | |
+| I7 | `feat/secure-rooms` | T49 | סיסמה, שמות ארוכים, signaling, טוקן | בדיקות yjs | 6 | |
+| H1 | `feat/rerank-cite` | T29 | reranker + ציטוטים לפתקים | `askWorkspace.test.ts` | 6 | |
+| H2 | `feat/learning-critic` | T30 | outcomes | בדיקת דירוג | 4 | |
+| H3 | `feat/vision` | T31 | OCR + alt + תיאור | בדיקה עם תמונה עברית | 8 | |
+| H4 | `feat/tts-digest` | T32, T33 | הקראה, סיכום יומי | בדיקות יחידה | 6 | |
+| H5 | `feat/clipper` | T34 | קוצץ, ספרייה, הסכמה למחקר | `e2e/clipper.spec.ts` | 7 | |
+| H6 | `refactor/one-ai` | T55 | ביטול בכל מקום, מחיקת `ai/agents.ts` | כל קריאת AI עם signal (בדיקה) | 4 | |
+| J1 | `perf/startup` | T38 | פיצול פקודות, תקציב סכום, Lighthouse כ-error | Lighthouse ≥ 90 | 10 | |
+| J2 | `perf/big-vault` | T39 | אינדקס דלתאי ב-worker, 10k פתקים | `e2e/perf-vault.spec.ts` | 10 | |
+| J3 | `feat/pwa-real` | T50 | manifest, share_target, precache, offline e2e | `e2e/offline.spec.ts` | 6 | |
+| J4 | `feat/a11y` | T40 | axe, פוקוס, ניגודיות, reduced-motion | `e2e/a11y.spec.ts` | 8 | |
+| J5 | `feat/touch` | T41 | pointer events, יעדי מגע, מובייל e2e | `e2e/mobile.spec.ts` | 7 | |
+| K1 | `feat/settings-one` | T51 | סכמה + מסך אחד | e2e הגדרות | 8 | |
+| K2 | `feat/plugins-real` | T52 | API, sandbox, גלריה אמיתית, 3 דוגמאות | `e2e/plugins.spec.ts` | 14 | |
+| K3 | `feat/search-ops` | T54 | `#תגיות`, אופרטורים | `search.test.ts` | 5 | |
+| K4 | `feat/safe-sync` | T56 | pull מתמזג, קונפליקטים, clone ציבורי, proxy, Yjs עם התמדה | `e2e/data-safety.spec.ts` חלק ד | 12 | |
+| K5 | `feat/desktop-files` | T57 | קבצים אמיתיים ב-Tauri, updater, חתימה | בדיקה ידנית של טל | 10 | |
+| K6 | `chore/lint-split` | T42 | ESLint, גדר גודל, פיצול 8 קבצים | CI | 8 | |
+| K7 | `chore/cleanup` | T58 | קוד מת, עדכוני חבילות | CI | 10 | |
+| K8 | `docs/complete` | T53 | תיעוד | — | 6 | |
+| K9 | `fix/known-limits` | T43 | §11 | בדיקות לכל סעיף | 10 | |
+| | **סה״כ** | | 37 PR-ים | | **≈ 270** | |
+
+### מסירה למודל המבצע
+
+התכנון (§12–§15) הושלם ב-17.10 21:30. ההמשך הוא ביצוע PR אחרי PR לפי הטבלה למעלה, עם הכלים שכבר קיימים בסשן: worktrees `/home/claude/w*` (אחד לכל ענף, `node_modules` משותף ב-`/home/claude/wa4/node_modules` דרך symlink), `scripts/fake-ollama.mjs` לבדיקות AI בלי GPU, סקריפט `chain.py` ל-rebase של המחסנית, ו-`threads.py` לקריאת הערות Codex. כל PR נפתח עם `gh api -X POST …/pulls --input`, ו-review נענה ונסגר דרך מסלולי `ccr`. המיזוג עצמו תמיד אצל טל.
