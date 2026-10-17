@@ -16,9 +16,18 @@ import { startAutoBackup, startVaultSnapshots } from "./sync/autoBackup";
 import { requestPersistentStorage } from "./storage/persistentStorage";
 import { initLocale, t } from "./i18n";
 import { initSecretStore } from "./lib/secretStore";
+import { installPrivacyLedger } from "./ai/privacyLedger";
 import { adoptBootLocale } from "./store/useStore";
 import "./index.css";
 
+// Every AI network request is recorded; local-only blocks cloud ones (T37).
+const lastBlockToast = new Map<string, number>();
+installPrivacyLedger((entry) => {
+  // One toast per destination per 30 s — a retrying caller mustn't flood.
+  if (Date.now() - (lastBlockToast.get(entry.host) ?? 0) < 30_000) return;
+  lastBlockToast.set(entry.host, Date.now());
+  showAiToast(t("toast.privacyBlocked", { reason: entry.reason }), "error");
+});
 initTelemetry();
 void initAuth();
 startAutoBackup();
