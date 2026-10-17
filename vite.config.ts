@@ -100,6 +100,88 @@ const RUNTIME_CACHES = (
   ] as const
 ).map(([dir, pkg]) => ({ dir, cacheName: `lumen-runtime-${dir}-${runtimeVersion(pkg)}-${stagingRevision(dir)}` }));
 
+/**
+ * Vendor chunk for a module (null: automatic chunking). Used as Rolldown
+ * code-splitting groups; see build.rolldownOptions.output.codeSplitting.
+ */
+function vendorChunk(id: string): string | undefined {
+  // Vite's tiny preload helper (a VIRTUAL module — no node_modules in
+  // its id, so this must sit above the guard). Auto-placement parked
+  // it inside vendor-shiki, which made that 258KB chunk a STATIC dep
+  // of main; pin it to the always-eager react chunk instead.
+  if (id.includes("vite/preload-helper") || id.includes("vite/modulepreload-polyfill"))
+    return "vendor-react";
+  if (!id.includes("node_modules")) return undefined;
+  // ── Shared text-processing families get their own chunks ──
+  // The eager preview pipeline uses remark/micromark/unified and
+  // hast-util-to-html; the LAZY editors (milkdown, shiki) use them
+  // too. Without explicit homes Rollup co-located these shared
+  // modules inside vendor-milkdown / vendor-shiki, which made main
+  // statically import those chunks and EXECUTE all of milkdown +
+  // prosemirror + shiki at boot (~400KB gz) just to reach the
+  // helpers. (Diagnosed via sourcemap residents, 2026-06-10.)
+  if (/node_modules\/lodash(-es)?\//.test(id)) return "vendor-lodash";
+  if (
+    /node_modules\/(micromark|mdast-util-|remark-|rehype-(?!katex)|unified|vfile|unist-util-|hast-util-|html-void-elements|property-information|space-separated-tokens|comma-separated-tokens|web-namespaces|stringify-entities|character-entities|character-reference-invalid|is-(alphabetical|alphanumerical|decimal|hexadecimal|plain-obj)|bail|trough|devlop|extend|zwitch|ccount|longest-streak|markdown-table|escape-string-regexp|decode-named-character-reference)/.test(id)
+  ) return "vendor-unified";
+  if (id.includes("@floating-ui/")) return "vendor-floating";
+  if (id.includes("@codemirror") || id.includes("@lezer")) return "vendor-codemirror";
+  if (id.includes("@milkdown") || id.includes("prosemirror")) return "vendor-milkdown";
+  if (id.includes("mermaid")) return "vendor-mermaid";
+  if (id.includes("@hpcc-js/wasm")) return "vendor-graphviz";
+  if (id.includes("echarts") || id.includes("zrender")) return "vendor-echarts";
+  if (id.includes("leaflet")) return "vendor-leaflet";
+  // <model-viewer> web component + its three.js / lit runtime —
+  // lazy-loaded by Model3DBlock only when a 3D block is visible.
+  if (/node_modules\/(@google\/model-viewer|three|lit|lit-html|lit-element|@lit|@lit-labs|@monogrid)\//.test(id))
+    return "vendor-modelviewer";
+  // KaTeX + its mhchem extension + rehype-katex all share the
+  // same chunk. Without rehype-katex in the chunk, the
+  // production build hit a TDZ error ("Cannot access 'xn'
+  // before initialization") at the chunk boundary because
+  // rehype-katex re-exports katex internals that mhchem mutates.
+  if (
+    id.includes("katex") ||
+    id.includes("rehype-katex") ||
+    id.includes("mathml-tag-names")
+  ) return "vendor-katex";
+  // Shiki's per-language and per-theme grammars live in
+  // @shikijs/langs and @shikijs/themes and are imported dynamically
+  // by shiki's web-bundle; let Rollup keep each one as its own
+  // chunk so a doc that uses TypeScript+JSON only fetches those
+  // two grammar chunks instead of the entire 9 MB language pack.
+  if (id.includes("@shikijs/langs/")) return undefined;
+  if (id.includes("@shikijs/themes/")) return undefined;
+  if (id.includes("shiki") || id.includes("@shikijs")) return "vendor-shiki";
+  if (id.includes("isomorphic-git") || id.includes("lightning-fs")) return "vendor-git";
+  if (id.includes("tldraw") || id.includes("@tldraw")) return "vendor-tldraw";
+  // Anchor `y-*` to node_modules/y-… so we don't accidentally
+  // match lucide-react icon file paths that contain `y-` in
+  // the filename (e.g. "y-axis.js"). Previously this broad
+  // match pulled lucide-react into vendor-yjs, which then
+  // cross-imported into vendor-katex and caused a Temporal
+  // Dead Zone error at module init time.
+  if (
+    id.includes("/yjs/") ||
+    id.includes("node_modules/yjs") ||
+    /node_modules\/y-[a-z]/.test(id)
+  ) return "vendor-yjs";
+  // @sentry/react's path matches the "/react/" rule below; without
+  // this guard the lazily-imported SDK is merged back into the
+  // EAGER vendor-react chunk — and a dynamic import can't be
+  // tree-shaken, so the full SDK doubled that chunk. Keep Sentry
+  // in its own chunk: it loads lazily (or never, without a DSN).
+  if (id.includes("@sentry")) return "vendor-sentry";
+  // React and react-dom MUST live in the same chunk: they share
+  // internal helpers and have a circular dependency that
+  // breaks (TDZ "Cannot set properties of undefined") when
+  // rollup splits them. Both are small + always loaded
+  // together; splitting saves nothing in real-world apps.
+  // Anchored to node_modules/: `@use-gesture/react/` also contains "/react/".
+  if (/node_modules\/(react|react-dom|scheduler)\//.test(id)) return "vendor-react";
+  return undefined;
+}
+
 export default defineConfig({
   // The page deletes `lumen-runtime-*` caches of superseded versions
   // (src/lib/runtimeCaches.ts): Workbox only cleans its precache.
@@ -285,7 +367,7 @@ export default defineConfig({
     // Warn early if a single chunk crosses 500 KiB; the renderer pipeline
     // and editor frameworks split out as their own chunks today.
     chunkSizeWarningLimit: 500,
-    rollupOptions: {
+    rolldownOptions: {
       input: {
         main: path.resolve(__dirname, "index.html"),
         landing: path.resolve(__dirname, "public/landing.html"),
@@ -316,90 +398,23 @@ export default defineConfig({
           if (id.includes("node_modules/prettier/")) {
             return "assets/prettier-[name]-[hash].js";
           }
+          // The entries' shared startup code (strict execution order puts it
+          // in a common chunk) would be named after the checkout folder.
+          if (!id && chunkInfo.name === path.basename(__dirname)) return "assets/app-[hash].js";
           return "assets/[name]-[hash].js";
         },
-        // Manual chunking — keeps the initial JS small and lets the heavy
-        // visualization libraries lazy-load only when their blocks render.
-        manualChunks(id) {
-          // Vite's tiny preload helper (a VIRTUAL module — no node_modules in
-          // its id, so this must sit above the guard). Auto-placement parked
-          // it inside vendor-shiki, which made that 258KB chunk a STATIC dep
-          // of main; pin it to the always-eager react chunk instead.
-          if (id.includes("vite/preload-helper") || id.includes("vite/modulepreload-polyfill"))
-            return "vendor-react";
-          if (!id.includes("node_modules")) return undefined;
-          // ── Shared text-processing families get their own chunks ──
-          // The eager preview pipeline uses remark/micromark/unified and
-          // hast-util-to-html; the LAZY editors (milkdown, shiki) use them
-          // too. Without explicit homes Rollup co-located these shared
-          // modules inside vendor-milkdown / vendor-shiki, which made main
-          // statically import those chunks and EXECUTE all of milkdown +
-          // prosemirror + shiki at boot (~400KB gz) just to reach the
-          // helpers. (Diagnosed via sourcemap residents, 2026-06-10.)
-          if (/node_modules\/lodash(-es)?\//.test(id)) return "vendor-lodash";
-          if (
-            /node_modules\/(micromark|mdast-util-|remark-|rehype-(?!katex)|unified|vfile|unist-util-|hast-util-|html-void-elements|property-information|space-separated-tokens|comma-separated-tokens|web-namespaces|stringify-entities|character-entities|character-reference-invalid|is-(alphabetical|alphanumerical|decimal|hexadecimal|plain-obj)|bail|trough|devlop|extend|zwitch|ccount|longest-streak|markdown-table|escape-string-regexp|decode-named-character-reference)/.test(id)
-          ) return "vendor-unified";
-          if (id.includes("@floating-ui/")) return "vendor-floating";
-          if (id.includes("@codemirror") || id.includes("@lezer")) return "vendor-codemirror";
-          if (id.includes("@milkdown") || id.includes("prosemirror")) return "vendor-milkdown";
-          if (id.includes("mermaid")) return "vendor-mermaid";
-          if (id.includes("@hpcc-js/wasm")) return "vendor-graphviz";
-          if (id.includes("echarts") || id.includes("zrender")) return "vendor-echarts";
-          if (id.includes("leaflet")) return "vendor-leaflet";
-          // <model-viewer> web component + its three.js / lit runtime —
-          // lazy-loaded by Model3DBlock only when a 3D block is visible.
-          if (/node_modules\/(@google\/model-viewer|three|lit|lit-html|lit-element|@lit|@lit-labs|@monogrid)\//.test(id))
-            return "vendor-modelviewer";
-          // KaTeX + its mhchem extension + rehype-katex all share the
-          // same chunk. Without rehype-katex in the chunk, the
-          // production build hit a TDZ error ("Cannot access 'xn'
-          // before initialization") at the chunk boundary because
-          // rehype-katex re-exports katex internals that mhchem mutates.
-          if (
-            id.includes("katex") ||
-            id.includes("rehype-katex") ||
-            id.includes("mathml-tag-names")
-          ) return "vendor-katex";
-          // Shiki's per-language and per-theme grammars live in
-          // @shikijs/langs and @shikijs/themes and are imported dynamically
-          // by shiki's web-bundle; let Rollup keep each one as its own
-          // chunk so a doc that uses TypeScript+JSON only fetches those
-          // two grammar chunks instead of the entire 9 MB language pack.
-          if (id.includes("@shikijs/langs/")) return undefined;
-          if (id.includes("@shikijs/themes/")) return undefined;
-          if (id.includes("shiki") || id.includes("@shikijs")) return "vendor-shiki";
-          if (id.includes("isomorphic-git") || id.includes("lightning-fs")) return "vendor-git";
-          if (id.includes("tldraw") || id.includes("@tldraw")) return "vendor-tldraw";
-          // Anchor `y-*` to node_modules/y-… so we don't accidentally
-          // match lucide-react icon file paths that contain `y-` in
-          // the filename (e.g. "y-axis.js"). Previously this broad
-          // match pulled lucide-react into vendor-yjs, which then
-          // cross-imported into vendor-katex and caused a Temporal
-          // Dead Zone error at module init time.
-          if (
-            id.includes("/yjs/") ||
-            id.includes("node_modules/yjs") ||
-            /node_modules\/y-[a-z]/.test(id)
-          ) return "vendor-yjs";
-          // @sentry/react's path matches the "/react/" rule below; without
-          // this guard the lazily-imported SDK is merged back into the
-          // EAGER vendor-react chunk — and a dynamic import can't be
-          // tree-shaken, so the full SDK doubled that chunk. Keep Sentry
-          // in its own chunk: it loads lazily (or never, without a DSN).
-          if (id.includes("@sentry")) return "vendor-sentry";
-          // React and react-dom MUST live in the same chunk: they share
-          // internal helpers and have a circular dependency that
-          // breaks (TDZ "Cannot set properties of undefined") when
-          // rollup splits them. Both are small + always loaded
-          // together; splitting saves nothing in real-world apps.
-          if (
-            id.includes("/react-dom/") ||
-            id.includes("/react/") ||
-            id.includes("/scheduler/")
-          ) return "vendor-react";
-          return undefined;
+        // Vendor chunks as Rolldown code-splitting groups. Unlike Rollup's
+        // manualChunks, a group by default also captures its modules'
+        // dependencies: shared micromark / hast helpers then landed in
+        // vendor-milkdown / vendor-shiki / vendor-katex, and the preview
+        // pipeline pulled all of those into the startup graph. Each module
+        // goes to its own family's chunk instead (strict execution order
+        // keeps cross-chunk initialisation correct).
+        codeSplitting: {
+          includeDependenciesRecursively: false,
+          groups: [{ name: (id: string) => vendorChunk(id) ?? null, test: (id: string) => vendorChunk(id) !== undefined }],
         },
+        strictExecutionOrder: true,
       },
     },
   },

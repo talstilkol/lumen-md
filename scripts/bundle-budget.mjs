@@ -32,7 +32,9 @@ const BUDGETS = [
   //       fires when a doc contains inline HTML). Measured: 177.9 KB
   //       gzipped on macOS post-fix. Budget gives ~17 KB headroom for
   //       Linux gzip variance + future first-party growth.
-  { name: "main bundle",        pattern: /^main-/,                budgetKb: 195 },
+  // With Vite 8 the entry `main-*` is a stub; the startup code shared by the
+  // HTML entries lives in `app-*`.
+  { name: "main bundle",        pattern: /^(main|app)-/,          budgetKb: 195 },
   { name: "entry index",        pattern: /^index-/,               budgetKb: 220 },
   // mermaid: 800 → 860 (2026-10 dependency audit). mermaid 11.15 → 11.17.2
   //   fixes GHSA-6x64-9x62-f2gx (CSS injection), GHSA-c4c3-pg64-4m4v and
@@ -76,6 +78,11 @@ const BUDGETS = [
   // abcjs (music notation), lazy-loaded by the abc block. Same size as
   // before; Vite 6 named the chunk `index-*` (it fell under "entry index").
   { name: "lazy: abcjs",        pattern: /^abcjs-/,               budgetKb: 160 },
+  // tldraw canvas block (lazy): its radix-ui / tiptap dependencies now sit in
+  // this chunk instead of vendor-tldraw.
+  { name: "lazy: canvas",       pattern: /^CanvasTldraw-/,        budgetKb: 130 },
+  // cytoscape (mermaid's graph layouts), lazy, split out of vendor-mermaid.
+  { name: "lazy: cytoscape",    pattern: /^cytoscape/,            budgetKb: 150 },
   // TypeScript compiler + ES/DOM lib .d.ts files for the opt-in "TypeScript
   // checks in code blocks" (src/lsp). One worker file, fetched only after
   // the user enables the setting; excluded from the PWA precache. Measured
