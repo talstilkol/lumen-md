@@ -314,6 +314,16 @@ describe("accept / reject in WYSIWYG", () => {
     expect(jumpToChange(e.view, 1)).toBe(false);
   });
 
+  it("next / previous wrap around at the last / first change, as in source mode", async () => {
+    const e = await open("A {++one++} B {--two--} C", false);
+    e.select(e.at(" C"));
+    expect(jumpToChange(e.view, 1)).toBe(true);
+    expect(e.view.state.selection.head).toBe(e.at("one"));
+    e.select(e.at("A"));
+    expect(jumpToChange(e.view, -1)).toBe(true);
+    expect(e.view.state.selection.head).toBe(e.at("two"));
+  });
+
   it("resolves different authors' adjacent changes separately", async () => {
     const e = await open("Keep {--old--}{>>@Alice<<}{++new++}{>>@Bob<<} end.", false);
     e.select(e.at("old", 1));
@@ -326,7 +336,8 @@ describe("accept / reject in WYSIWYG", () => {
     expect(jump.view.state.selection.head).toBe(jump.at("new"));
     const same = await open("Keep {~~old~>new~~}{>>@Tal<<} end.", false);
     same.select(same.at("old", 1));
-    expect(jumpToChange(same.view, 1)).toBe(false); // one substitution, nothing after it
+    expect(jumpToChange(same.view, 1)).toBe(true); // one substitution: wraps to its own start
+    expect(same.view.state.selection.head).toBe(same.at("old"));
     same.select(same.at("old", 1));
     expect(resolveAtCursor(same.view, "accept")).toBe(true); // one substitution
     expect(same.md()).toBe("Keep new end.");

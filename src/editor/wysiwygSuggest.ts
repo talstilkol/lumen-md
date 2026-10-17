@@ -719,7 +719,7 @@ export function resolveAtCursor(
   return true;
 }
 
-/** Move the cursor to the next (dir 1) / previous (-1) change. */
+/** Move the cursor to the next (dir 1) / previous (-1) change, wrapping around. */
 export function jumpToChange(view: { state: EditorState; dispatch: (tr: Transaction) => void }, dir: 1 | -1): boolean {
   const { state } = view;
   const ins = state.schema.marks.critic_insert;
@@ -749,7 +749,12 @@ export function jumpToChange(view: { state: EditorState; dispatch: (tr: Transact
     if (!continues) starts.push(pos);
     prev = { kind, author, end: pos + n.nodeSize };
   });
-  const target = dir === 1 ? starts.find((p) => p > head) : [...starts].reverse().find((p) => p < head);
+  // Past the last (before the first) change, wrap around — as the source
+  // editor's nextSuggestion / prevSuggestion do.
+  const target =
+    dir === 1
+      ? (starts.find((p) => p > head) ?? starts[0])
+      : ([...starts].reverse().find((p) => p < head) ?? starts[starts.length - 1]);
   if (target === undefined) return false;
   view.dispatch(state.tr.setSelection(TextSelection.create(state.doc, target)).scrollIntoView());
   return true;
