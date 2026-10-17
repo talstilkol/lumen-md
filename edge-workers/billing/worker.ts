@@ -416,7 +416,7 @@ async function portal(req: Request, env: Env): Promise<{ url: string }> {
   if (!customer) throw new Error("No subscription on file. Subscribe first.");
   const session = await stripe<{ url: string }>(env, "/billing_portal/sessions", {
     customer,
-    return_url: req.headers.get("Referer") ?? "https://lumen.app/",
+    return_url: req.headers.get("Referer") ?? "https://lumen-md.vercel.app/",
   });
   return { url: session.url };
 }

@@ -9,7 +9,7 @@ import { AiToastContainer, showAiToast } from "../ui/AiToast";
 import { ToastContainer } from "../components/Toast";
 import { useToastStore, toast } from "../store/useToastStore";
 
-const URL = "https://docs.lumen.app/account/sign-in/";
+const URL = "https://lumen-md-docs.vercel.app/account/sign-in/";
 
 describe("AiToast learn-more link", () => {
   it("renders a new-tab link when learnMoreUrl is given", () => {

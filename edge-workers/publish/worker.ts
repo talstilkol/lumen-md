@@ -193,7 +193,7 @@ async function renderPage(slug: string, env: Env): Promise<Response> {
     hr { border-top-color: #2a2a3e; }
   }
 </style>
-</head><body>${html}<footer>Published with <a href="https://lumen.app">Lumen</a></footer></body></html>`;
+</head><body>${html}<footer>Published with <a href="https://lumen-md.vercel.app">Lumen</a></footer></body></html>`;
   return new Response(page, {
     headers: { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "public, max-age=300" },
   });

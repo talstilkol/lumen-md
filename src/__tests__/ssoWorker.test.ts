@@ -145,6 +145,22 @@ describe("GET /api/sso/authorize", () => {
     expect(res.status).toBe(403);
   });
 
+  it("accepts a same-origin GET proxied through the app host (no Origin header)", async () => {
+    // Behind the Vercel rewrite the browser sees a same-origin request and sends no Origin.
+    const headers = { "sec-fetch-site": "same-origin", referer: `${APP}/notes/a.md` };
+    const res = await worker.fetch(req("/api/sso/authorize?domain=bad", { origin: null, headers }), env);
+    expect(res.status).toBe(400); // past the origin check, stopped by domain validation
+  });
+
+  it("does not trust a Referer unless the browser marked the request same-origin", async () => {
+    const crossSite = { "sec-fetch-site": "cross-site", referer: `${APP}/` };
+    const r1 = await worker.fetch(req("/api/sso/authorize?domain=bad", { origin: null, headers: crossSite }), env);
+    expect(r1.status).toBe(403);
+    const evil = { "sec-fetch-site": "same-origin", referer: "https://evil.test/" };
+    const r2 = await worker.fetch(req("/api/sso/authorize?domain=bad", { origin: null, headers: evil }), env);
+    expect(r2.status).toBe(403);
+  });
+
   it("validates the domain", async () => {
     for (const d of ["", "not a domain", "acme", "acme.com/evil"]) {
       const res = await worker.fetch(req(`/api/sso/authorize?domain=${encodeURIComponent(d)}`), env);

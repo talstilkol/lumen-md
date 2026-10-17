@@ -11,7 +11,17 @@ code is done.
 
 ## 0. Prerequisites (one-time, ~30 min)
 
-- [ ] Buy `lumen.app` (or whichever domain) — Cloudflare Registrar / Namecheap.
+- [x] Hosting: **no custom domain** — decided 17.10.2026. Everything runs on the providers' free hostnames:
+  | Service | Hostname |
+  |---|---|
+  | Web app (Vercel, auto-deploys `main`) | `https://lumen-md.vercel.app` |
+  | User docs (`docs/`, a second Vercel project named `lumen-md-docs`) | `https://lumen-md-docs.vercel.app` |
+  | Signaling / collab server (`sync-server/`, Fly app `lumen-signal`) | `wss://lumen-signal.fly.dev` |
+  | Edge workers (auth, billing, research, publish, audit) | `https://lumen-<name>.<account>.workers.dev` |
+  - `<account>` is your Cloudflare workers.dev subdomain (Workers & Pages → Overview). After the first `wrangler deploy`, put each real URL into the matching `VITE_*` variable in Vercel (Project → Settings → Environment Variables) and redeploy.
+  - Workers that set cookies (auth, and billing's credentialed `/entitlements`) must look first-party to the app. Proxy them through the app's own host with a Vercel rewrite (see §5b) instead of calling `*.workers.dev` directly.
+  - A custom domain can be added later in Vercel (Project → Domains) without code changes beyond these URLs.
+  - Security reports go through GitHub private vulnerability reporting. Enable it once: repo Settings → Security → Private vulnerability reporting → Enable.
 - [ ] Cloudflare account (free) — used for DNS + Workers.
 - [ ] Stripe account (free until you start billing).
 - [ ] Apple Developer Program ($99/yr).
@@ -175,7 +185,7 @@ wrangler deploy
 #   VITE_BILLING_ENDPOINT=https://lumen-billing.<your>.workers.dev/checkout
 #   VITE_ENTITLEMENT_ENDPOINT=https://lumen-billing.<your>.workers.dev/entitlements
 # 4f. List every web origin that calls the worker (comma-separated) in
-#     wrangler.toml → [vars] ALLOWED_ORIGIN, e.g. "https://lumen.app,http://localhost:5173".
+#     wrangler.toml → [vars] ALLOWED_ORIGIN, e.g. "https://lumen-md.vercel.app,http://localhost:5173".
 #     The entitlement fetch uses credentials, so browsers need the exact origin
 #     echoed back — `*` is only returned to unlisted origins and won't work there.
 ```
@@ -228,7 +238,8 @@ local-only / Supabase auth. Details in `edge-workers/auth/README.md`.
 
 ```bash
 # 5b-1. WorkOS dashboard: API Keys → copy the secret key (sk_…) + client id.
-#       Redirects → add https://<worker host>/api/sso/callback
+#       Redirects → add https://lumen-md.vercel.app/api/sso/callback
+#       (the app host via the rewrite; WORKOS_REDIRECT_URI in wrangler.toml matches)
 #       Organizations → create one per customer, add its email domain(s)
 #       and attach an SSO connection (SAML or OIDC).
 cd edge-workers/auth
@@ -245,10 +256,13 @@ wrangler secret put BILLING_TOKEN_SECRET  # that value
 #       the worker a host on the SAME SITE as the app (see below), e.g. the
 #       `routes` example in edge-workers/auth/wrangler.toml.
 wrangler deploy
-# verify: GET https://auth.<your-domain>/health → configured:true
+# verify: GET https://lumen-auth.<account>.workers.dev/health → configured:true
 
-# Client env:
-#   VITE_WORKOS_ENDPOINT=https://auth.<your-domain>
+# Then proxy it through the app's host. In vercel.json, BEFORE the SPA rewrite:
+#   { "source": "/api/sso/:path*",
+#     "destination": "https://lumen-auth.<account>.workers.dev/api/sso/:path*" }
+# Client env (Vercel):
+#   VITE_WORKOS_ENDPOINT=https://lumen-md.vercel.app
 ```
 
 **Serve the SSO worker on the app's own site.** The nonce and session
@@ -271,7 +285,7 @@ warning when the configured endpoint is cross-site. Cookies are
 # 6a. Register a Dropbox app:
 # https://www.dropbox.com/developers/apps → Create app
 # Permissions: "App folder" + files.content.write + files.content.read
-# Redirect URIs: https://lumen.app/oauth/dropbox
+# Redirect URIs: https://lumen-md.vercel.app/oauth/dropbox
 
 # 6b. Set env:
 #   VITE_DROPBOX_APP_KEY=<your-app-key>
@@ -332,27 +346,22 @@ npm run android:open
 
 ---
 
-## 8. Web app deploy (Cloudflare Pages) — 15 min
+## 8. Web app deploy (Vercel) — already live
 
 ```bash
-# 8a. Connect repo to Cloudflare Pages:
-# https://dash.cloudflare.com → Workers & Pages → Create → Pages → Connect to Git
-
-# 8b. Build settings:
-#   Framework: Vite
-#   Build command: npm run build
-#   Output: dist
-#   Env vars: paste every VITE_* from steps 1–7
-
-# 8c. Custom domain:
-#   Pages → lumen-app → Custom domains → Add → lumen.app
+# The repo is connected to the Vercel project `lumen-md`; every push to main
+# deploys https://lumen-md.vercel.app (settings come from vercel.json:
+# Vite, `npm run build`, output `dist`).
+# Env vars: Vercel → lumen-md → Settings → Environment Variables → paste
+# every VITE_* from steps 1–7, then Deployments → Redeploy.
+# Free (Hobby) plan limit: 100 deployments a day, previews included.
 ```
 
 PWA service worker auto-updates clients on next visit.
 
 ### Marketing site (`/landing.html`) — same deploy
 
-The landing page lives at `public/landing.html` and ships in the same Pages
+The landing page lives at `public/landing.html` and ships in the same Vercel
 deploy. Audit:
 
 - [ ] Replace placeholder screenshots with real ones (use `npm run preview`
@@ -420,7 +429,7 @@ After every step above is green:
 - [ ] `npm run budget` passes — bundle still within targets.
 - [ ] Sentry receiving events from at least one production session.
 - [ ] First 10 users invited via TestFlight + Play Internal track.
-- [ ] `https://lumen.app/p/<test-slug>` returns a published note.
+- [ ] `https://lumen-publish.<account>.workers.dev/p/<test-slug>` returns a published note (the URL the Publish command shows).
 - [ ] Right-click → "Save selection to Lumen" creates a clip.
 - [ ] Subscribe → return to app → Pro features unlock.
 - [ ] `⌘K → "AI: Switch to local AI"` downloads + serves answers offline.

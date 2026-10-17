@@ -193,6 +193,55 @@ describe("CSP alignment", () => {
   });
 });
 
+describe("vercel.json (production host) mirrors public/_headers", () => {
+  type Rule = { source: string; headers: { key: string; value: string }[] };
+  const rules = (JSON.parse(read("vercel.json")) as { headers: Rule[] }).headers;
+  const global = rules.find((r) => r.source.includes("(?!playground-runner"))!;
+  const fileHeaders = new Map(
+    [...read("public/_headers").split("/*\n")[1].split("\n\n")[0].matchAll(/^\s+([\w-]+): (.+)$/gm)].map((m) => [m[1], m[2]]),
+  );
+
+  it("has a global rule that skips only the playground runner", () => {
+    expect(global, "global header rule").toBeDefined();
+    const re = new RegExp(`^${global.source}$`);
+    expect(re.test("/")).toBe(true);
+    expect(re.test("/notes/a")).toBe(true);
+    expect(re.test("/playground-runner.html")).toBe(false);
+  });
+
+  it("sends the same security headers as public/_headers", () => {
+    const keys = global.headers.map((h) => h.key).sort();
+    expect(keys).toEqual([...fileHeaders.keys()].sort());
+    for (const h of global.headers) {
+      if (h.key !== "Content-Security-Policy") expect(h.value, h.key).toBe(fileHeaders.get(h.key));
+    }
+  });
+
+  it("CSP equals public/_headers except a scheme-only connect-src", () => {
+    // A static header can't take the build-time origins (VITE_*_ENDPOINT,
+    // VITE_CSP_CONNECT_EXTRA), so its connect-src only bounds the schemes.
+    // Browsers enforce every policy: the exact host list stays in force
+    // through the <meta> CSP, which the build extends with those origins.
+    const vercel = parsePolicy(global.headers.find((h) => h.key === "Content-Security-Policy")!.value);
+    const file = cspFromHeadersFile();
+    expect([...vercel.keys()].sort()).toEqual([...file.keys()].sort());
+    for (const [name, values] of file) {
+      if (name === "connect-src") continue;
+      expect(sorted(vercel.get(name)!), name).toEqual(sorted(values));
+    }
+    const connect = vercel.get("connect-src")!;
+    expect(sorted(connect)).toEqual(
+      sorted(["'self'", "blob:", "data:", "ws:", "wss:", "https:", "http://localhost:11434", "http://127.0.0.1:11434"]),
+    );
+    // Everything the file policy allows is still allowed by the header.
+    for (const src of file.get("connect-src")!) {
+      if (/^https:\/\//.test(src)) expect(connect).toContain("https:");
+    }
+    // The meta policy keeps naming hosts explicitly (asserted above in (a)).
+    expect(POLICIES["index.html"].get("connect-src")).not.toContain("https:");
+  });
+});
+
 describe("CSP script-src / Trusted Types invariants", () => {
   it("script-src is identical everywhere and has no 'unsafe-inline'", () => {
     const ref = sorted(POLICIES["index.html"].get("script-src")!);

@@ -220,6 +220,11 @@ export default defineConfig({
         // Milkdown) are fetched lazily by the runtime cache when first used.
         // This keeps the initial SW install under ~2 MB instead of ~12 MB.
         maximumFileSizeToCacheInBytes: 1024 * 1024,
+        // Navigations the SPA must not answer from the cached index.html:
+        // /api/* reaches the auth worker through the host's rewrite (the SSO
+        // callback carries the authorization code), and the clean URLs of the
+        // static pages are rewritten to their .html files by the host.
+        navigateFallbackDenylist: [/^\/api\//, /^\/(roadmap|landing|benchmarks)\/?$/],
         // One self-contained sw.js. Production serves
         // `require-trusted-types-for 'script'` (public/_headers), which also
         // applies to the service worker: the default split build's

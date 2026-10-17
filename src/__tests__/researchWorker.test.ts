@@ -3,7 +3,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import worker, { TOKEN_HEADER, type Env } from "../../edge-workers/research/worker";
 
-const ORIGIN = "https://lumen-md.app";
+const ORIGIN = "https://lumen-md.vercel.app";
 const ctx = { waitUntil: () => {} };
 let ip = 0;
 

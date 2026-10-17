@@ -13,7 +13,7 @@ syncs to every peer in <30 ms.
 the share link to your clipboard:
 
 ```
-https://lumen.app/#room=lumen-bright-river-77
+https://lumen-md.vercel.app/#room=lumen-bright-river-77
 ```
 
 Anyone with the link enters the same Y.Doc. Their cursor + selection

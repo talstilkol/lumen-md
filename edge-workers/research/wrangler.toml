@@ -2,14 +2,12 @@ name = "lumen-research"
 main = "worker.ts"
 compatibility_date = "2026-04-27"
 
-# A sibling subdomain of the app, e.g.:
-# routes = [
-#   { pattern = "research.lumen-md.app/*", zone_name = "lumen-md.app" }
-# ]
-# Then build the app with VITE_RESEARCH_ENDPOINT=https://research.lumen-md.app
+# Served at the default https://lumen-research.<account>.workers.dev (no custom
+# domain). To use one later, add a routes = [...] entry for it.
+# Then build the app with VITE_RESEARCH_ENDPOINT=https://lumen-research.<account>.workers.dev
 # (the build adds it to the CSP connect-src).
 
 [vars]
 # Comma-separated app origins allowed to call the worker. Not an open
 # proxy: any other Origin gets 403.
-ALLOWED_ORIGINS = "https://lumen-md.app"
+ALLOWED_ORIGINS = "https://lumen-md.vercel.app"

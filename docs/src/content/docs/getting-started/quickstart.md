@@ -5,7 +5,7 @@ description: Get to your first beautiful Lumen document in 60 seconds.
 
 ## 1. Open Lumen
 
-Either visit [lumen.app](https://lumen.app) (the hosted PWA), install the
+Either visit [lumen-md.vercel.app](https://lumen-md.vercel.app) (the hosted PWA), install the
 [macOS .dmg](https://github.com/your-org/lumen/releases/latest), or run
 locally:
 

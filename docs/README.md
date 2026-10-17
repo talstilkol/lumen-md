@@ -16,8 +16,9 @@ npm run dev          # http://localhost:4321
 npm run build        # → dist/
 ```
 
-Deploy `dist/` to any static host. We point `docs.lumen.app` at Cloudflare
-Pages with `npm run build` as the build command.
+Deploy `dist/` to any static host. The hosted docs are a second Vercel project, `lumen-md-docs`
+(Root Directory `docs`, build `npm run build`, output `dist`), served at
+`https://lumen-md-docs.vercel.app`.
 
 ## Structure
 

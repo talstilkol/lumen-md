@@ -27,7 +27,7 @@
 import { charsetOf, htmlToText, isFetchableUrl } from "./extract";
 
 export interface Env {
-  /** Comma-separated app origins, e.g. "https://lumen-md.app,http://localhost:5173". */
+  /** Comma-separated app origins, e.g. "https://lumen-md.vercel.app,http://localhost:5173". */
   ALLOWED_ORIGINS: string;
   /** Optional shared token (a Worker secret) required in X-Lumen-Research-Token. */
   RESEARCH_TOKEN?: string;
@@ -48,7 +48,7 @@ const MAX_TEXT = 200_000;
 const TIMEOUT_MS = 10_000;
 const MAX_REDIRECTS = 5;
 const RATE_PER_MIN = 60;
-const UA = "LumenResearch/1.0 (+https://lumen-md.app)";
+const UA = "LumenResearch/1.0 (+https://lumen-md.vercel.app)";
 
 const hits = new Map<string, number[]>();
 function rateLimited(ip: string, now = Date.now()): boolean {

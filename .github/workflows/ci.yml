@@ -267,7 +267,7 @@ jobs:
     steps:
       - name: Healthcheck
         run: |
-          URL="${SIGNAL_URL:-https://signal.lumen.md}"
+          URL="${SIGNAL_URL:-https://lumen-signal.fly.dev}"
           echo "Checking $URL/healthz..."
           status=$(curl -s -o /dev/null -w '%{http_code}' -m 10 "$URL/healthz" || true)
           if [ "$status" = "200" ]; then
@@ -276,4 +276,4 @@ jobs:
             echo "::warning::Signaling server unreachable (HTTP $status). Deploy pending."
           fi
         env:
-          SIGNAL_URL: ${{ vars.SIGNAL_URL || 'https://signal.lumen.md' }}
+          SIGNAL_URL: ${{ vars.SIGNAL_URL || 'https://lumen-signal.fly.dev' }}

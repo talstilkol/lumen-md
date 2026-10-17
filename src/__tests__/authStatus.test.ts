@@ -26,8 +26,8 @@ describe("docsLinks", () => {
   });
 
   it("builds absolute URLs with optional anchors", () => {
-    expect(docsUrl("signIn")).toBe("https://docs.lumen.app/account/sign-in/");
-    expect(docsUrl("sso", "error-reasons")).toBe("https://docs.lumen.app/account/sso/#error-reasons");
+    expect(docsUrl("signIn")).toBe("https://lumen-md-docs.vercel.app/account/sign-in/");
+    expect(docsUrl("sso", "error-reasons")).toBe("https://lumen-md-docs.vercel.app/account/sso/#error-reasons");
   });
 });
 

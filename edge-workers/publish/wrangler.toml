@@ -3,9 +3,8 @@ main = "worker.ts"
 compatibility_date = "2026-04-01"
 account_id = "REPLACE_WITH_CLOUDFLARE_ACCOUNT_ID"
 
-# routes = [
-#   { pattern = "publish.lumen.app/*", zone_name = "lumen.app" }
-# ]
+# Served at the default https://lumen-publish.<account>.workers.dev (no custom
+# domain). To use one later, add a routes = [...] entry for it.
 
 # KV namespace — create with `wrangler kv:namespace create PUBLISHED`,
 # then paste the resulting id below.

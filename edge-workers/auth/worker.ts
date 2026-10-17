@@ -203,6 +203,27 @@ function isAllowedOrigin(origin: string | null, env: Env): origin is string {
   return !!origin && allowedOrigins(env).includes(origin);
 }
 
+/**
+ * The origin of the page that sent the request. Browsers omit `Origin` on
+ * same-origin GETs, which is what the worker receives when it is proxied
+ * through the app's own host (a Vercel rewrite of /api/sso/*). In that case
+ * fall back to the Referer's origin, but only when the browser itself
+ * marked the request same-origin: `Sec-Fetch-Site` is a forbidden header
+ * that page scripts cannot set.
+ */
+function requestOrigin(req: Request): string | null {
+  const origin = req.headers.get("origin");
+  if (origin) return origin;
+  if (req.headers.get("sec-fetch-site") !== "same-origin") return null;
+  const referer = req.headers.get("referer");
+  if (!referer) return null;
+  try {
+    return new URL(referer).origin;
+  } catch {
+    return null;
+  }
+}
+
 function corsHeaders(req: Request, env: Env): Record<string, string> {
   const origin = req.headers.get("origin");
   if (!isAllowedOrigin(origin, env)) return { Vary: "Origin" };
@@ -262,7 +283,7 @@ interface WorkOSOrganizationList {
 }
 
 async function handleAuthorize(req: Request, env: Env, url: URL, cors: Record<string, string>): Promise<Response> {
-  const origin = req.headers.get("origin");
+  const origin = requestOrigin(req);
   if (!isAllowedOrigin(origin, env)) {
     return errorJson(403, "origin_not_allowed", "This origin is not allowed to start SSO.", cors);
   }
@@ -391,7 +412,7 @@ async function handleSession(req: Request, env: Env, cors: Record<string, string
 
 async function handleToken(req: Request, env: Env, cors: Record<string, string>): Promise<Response> {
   // Only the app's own origins may read a bearer token minted from the cookie.
-  if (!isAllowedOrigin(req.headers.get("origin"), env)) {
+  if (!isAllowedOrigin(requestOrigin(req), env)) {
     return errorJson(403, "origin_not_allowed", "This origin is not allowed.", cors);
   }
   if (!env.BILLING_TOKEN_SECRET) {
@@ -422,7 +443,7 @@ async function handleToken(req: Request, env: Env, cors: Record<string, string>)
 
 function handleSignout(req: Request, env: Env, cors: Record<string, string>): Response {
   // CSRF: a cross-site form could POST here; only allowed origins may.
-  if (!isAllowedOrigin(req.headers.get("origin"), env)) {
+  if (!isAllowedOrigin(requestOrigin(req), env)) {
     return errorJson(403, "origin_not_allowed", "This origin is not allowed.", cors);
   }
   const h = new Headers({ ...cors, "Cache-Control": "no-store" });
