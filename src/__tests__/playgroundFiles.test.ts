@@ -122,11 +122,11 @@ describe("guardLoops", () => {
   it("guards while / for conditions and leaves for-of, strings and members alone", async () => {
     const { guardLoops } = await import("../playground/files");
     expect(guardLoops("while (x < 3) x++;")).toBe("while (__lumenLoop() && (x < 3)) x++;");
-    expect(guardLoops("for (let i = 0; i < n; i++) {}")).toBe("for (let i = 0; __lumenLoop() && ( i < n); i++) {}");
+    expect(guardLoops("for (let i = 0; i < n; i++) {}")).toBe("for (let i = 0; __lumenLoop() && (i < n); i++) {}");
     expect(guardLoops("for (;;) {}")).toBe("for (; __lumenLoop();) {}");
     expect(guardLoops("do { a() } while (f(g(1)))")).toBe("do { a() } while (__lumenLoop() && (f(g(1))))");
     expect(guardLoops('for (const x of xs) {} s = "while (1)"; o.while(1); o.for(2)')).toBe('for (const x of xs) {} s = "while (1)"; o.while(1); o.for(2)');
-    expect(guardLoops("for (let i = 0, j = (1, 2); i < j; i++) {}")).toBe("for (let i = 0, j = (1, 2); __lumenLoop() && ( i < j); i++) {}");
+    expect(guardLoops("for (let i = 0, j = (1, 2); i < j; i++) {}")).toBe("for (let i = 0, j = (1, 2); __lumenLoop() && (i < j); i++) {}");
   });
 
   it("leaves methods named while / for alone and still guards loops inside them", async () => {
@@ -199,5 +199,8 @@ describe("guardLoops in labeled blocks", () => {
     expect(guardLoops("function f() { outer: { for (;;) break outer; } }")).toContain("__lumenLoop()");
     expect(guardLoops("const o = { a: { while(x) { return x; } } };")).not.toContain("__lumenLoop");
     expect(guardLoops("function* g() { yield\n{ while (true) {} } }")).toContain("__lumenLoop()");
+    expect(guardLoops("if (ready) outer: { while (true) {} }")).toContain("__lumenLoop()");
+    expect(guardLoops("let async = 1; async\nwhile (true) {}")).toContain("__lumenLoop()");
+    expect(guardLoops("this is not js (")).toBe("this is not js (");
   });
 });

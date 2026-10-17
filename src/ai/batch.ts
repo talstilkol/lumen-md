@@ -435,7 +435,8 @@ export function planWrites(
       // already wrote by its markers instead of writing a `-2` copy.
       if (writtenByJob(want, item.path, job.id, read, exists)) continue;
       // The markers make later batches skip this note, however many there are.
-      let content = setFrontmatterField(answer.trim() + "\n", TRANSLATED_FROM, yamlString(item.path));
+      // The path is stored exactly (no whitespace folding): retries compare it.
+      let content = setFrontmatterField(answer.trim() + "\n", TRANSLATED_FROM, JSON.stringify(item.path));
       content = setFrontmatterField(content, TRANSLATION_JOB, yamlString(job.id));
       out.push({ path: freePath(want), content, created: true, source: item.path });
       continue;

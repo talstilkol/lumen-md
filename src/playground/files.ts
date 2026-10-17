@@ -16,6 +16,7 @@
  * for vue / vanilla. Pure: no DOM.
  */
 
+import { parse } from "acorn";
 import { tokenize } from "../plugins/liveJsScope";
 
 export type PlaygroundFramework = "vanilla" | "react" | "vue";
@@ -175,118 +176,59 @@ export const LOOP_GUARD = "__lumenLoop";
 
 /**
  * Loop conditions guarded: `while (c)` → `while (__lumenLoop() && (c))`,
- * `for (a; c; b)` likewise (`do … while` is covered by its `while`), so a
- * runaway loop throws instead of freezing the editor. `for … of / in`
- * loops are left alone.
+ * `for (a; c; b)` likewise, `do … while (c)` too, so a runaway loop throws
+ * instead of freezing the editor. Found with a real parser (acorn), so
+ * methods or properties named `for` / `while`, labels, ASI and every other
+ * statement position are read exactly as the browser reads them.
+ * `for … of / in` loops are left alone. Unparseable code is returned as is
+ * (the browser reports its syntax error).
  */
 export function guardLoops(code: string): string {
-  const tokens = tokenize(code);
-  const edits: Array<{ at: number; text: string }> = [];
-  for (let i = 0; i < tokens.length; i++) {
-    const t = tokens[i];
-    if (t.type !== "ident" || (t.value !== "while" && t.value !== "for")) continue;
-    // Only the loop statements: not `o.while(…)`, nor a method named
-    // `while` / `for` in a class body or object literal.
-    if (!inStatementPosition(tokens, i)) continue;
-    const open = tokens[i + 1];
-    if (!open || open.value !== "(") continue;
-    const d = open.depth;
-    let close = -1;
-    const semis: number[] = [];
-    for (let k = i + 2; k < tokens.length; k++) {
-      const x = tokens[k];
-      if (x.type === "punct" && x.value === ")" && x.depth === d) {
-        close = k;
-        break;
-      }
-      if (x.type === "punct" && x.value === ";" && x.depth === d + 1) semis.push(k);
-    }
-    if (close === -1) continue;
-    if (t.value === "while") {
-      edits.push({ at: open.end, text: `${LOOP_GUARD}() && (` }, { at: tokens[close].start, text: ")" });
-    } else if (semis.length === 2) {
-      const [a, b] = semis;
-      if (b === a + 1) edits.push({ at: tokens[a].end, text: ` ${LOOP_GUARD}()` });
-      else edits.push({ at: tokens[a].end, text: ` ${LOOP_GUARD}() && (` }, { at: tokens[b].start, text: ")" });
-    }
+  let ast: AcornNode;
+  try {
+    ast = parse(code, {
+      ecmaVersion: "latest",
+      sourceType: "module",
+      allowAwaitOutsideFunction: true,
+      allowReturnOutsideFunction: true,
+      allowHashBang: true,
+    }) as unknown as AcornNode;
+  } catch {
+    return code;
   }
+  const edits: Array<{ at: number; text: string }> = [];
+  const wrap = (test: AcornNode) =>
+    edits.push({ at: test.start, text: `${LOOP_GUARD}() && (` }, { at: test.end, text: ")" });
+  const visit = (n: AcornNode) => {
+    if (n.type === "WhileStatement" || n.type === "DoWhileStatement") wrap(n.test as AcornNode);
+    else if (n.type === "ForStatement") {
+      if (n.test) wrap(n.test as AcornNode);
+      else {
+        // `for (init;; update)`: the guard goes right after the first `;`.
+        const from = n.init ? (n.init as AcornNode).end : code.indexOf("(", n.start) + 1;
+        const semi = code.indexOf(";", from);
+        if (semi !== -1) edits.push({ at: semi + 1, text: ` ${LOOP_GUARD}()` });
+      }
+    }
+    for (const key in n) {
+      const v = (n as unknown as Record<string, unknown>)[key];
+      if (Array.isArray(v)) for (const c of v) isNode(c) && visit(c);
+      else if (isNode(v)) visit(v);
+    }
+  };
+  visit(ast);
   let out = code;
   for (const e of edits.sort((x, y) => y.at - x.at)) out = out.slice(0, e.at) + e.text + out.slice(e.at);
   return out;
 }
 
-type Tok = ReturnType<typeof tokenize>[number];
-
-/** Words before a method name: `static for()`, `get while()`, `async *for()`. */
-const METHOD_PREFIX = new Set(["static", "get", "set", "async", "*", "accessor"]);
-/** Keywords whose `{` that follows opens a block (never an object literal). */
-const BLOCK_AFTER = new Set(["else", "do", "try", "finally"]);
-
-/**
- * Whether the keyword at `i` starts a statement — rather than being a
- * property (`o.while`), a method name in a class body or object literal
- * (`{ while(x) {…} }`), or an object key.
- */
-function inStatementPosition(tokens: Tok[], i: number): boolean {
-  const prev = tokens[i - 1];
-  if (!prev) return true;
-  if (prev.value === "." || prev.value === "?." || prev.value === "," || METHOD_PREFIX.has(prev.value)) return false;
-  // Statement or member boundary: decide by the enclosing `{ … }`.
-  const depth = tokens[i].depth;
-  if (depth === 0) return true;
-  let b = i - 1;
-  while (b >= 0 && tokens[b].depth >= depth) b--;
-  const brace = tokens[b];
-  if (!brace || brace.value !== "{") return true; // inside ( … ) / [ … ]: not a member list
-  return !isClassBody(tokens, b) && !isObjectLiteral(tokens, b);
+interface AcornNode {
+  type: string;
+  start: number;
+  end: number;
+  [key: string]: unknown;
 }
-
-/** `class X extends Y {`: the `{` at `b` opens a class body. */
-function isClassBody(tokens: Tok[], b: number): boolean {
-  const d = tokens[b].depth;
-  for (let k = b - 1; k >= 0; k--) {
-    const t = tokens[k];
-    if (t.depth < d) return false;
-    if (t.depth > d) continue;
-    if (t.type === "ident" && t.value === "class") return true;
-    if (t.value === ";" || t.value === "{" || t.value === "}" || t.value === "=>" || t.value === "=") return false;
-    if (t.type === "ident" && (BLOCK_AFTER.has(t.value) || t.value === "function" || t.value === "if" || t.value === "while" || t.value === "for" || t.value === "switch" || t.value === "catch" || t.value === "with")) return false;
-  }
-  return false;
-}
-
-/** The `{` at `b` stands where an expression goes, so it opens an object literal. */
-function isObjectLiteral(tokens: Tok[], b: number): boolean {
-  const prev = tokens[b - 1];
-  if (!prev) return false;
-  if (prev.type === "ident") {
-    // `return` / `yield` end at a line break (ASI): a `{` on the next line
-    // opens a block.
-    if ((prev.value === "return" || prev.value === "yield") && tokens[b].nl) return false;
-    return ["return", "yield", "await", "typeof", "void", "in", "of", "case", "delete", "throw", "new"].includes(prev.value);
-  }
-  if (prev.type !== "punct") return false;
-  if (prev.value === ")" || prev.value === "]" || prev.value === "}" || prev.value === ";" || prev.value === "{" || prev.value === "=>") return false;
-  if (prev.value === ":") {
-    // `label: {` is a labeled block when the label starts a statement: at
-    // the start, after `;` / `}`, or inside a `{` that is itself a block.
-    const label = tokens[b - 2];
-    if (label?.type === "ident") {
-      const before = tokens[b - 3];
-      if (!before || before.value === ";" || before.value === "}") return false;
-      if (before.value === "{") return isObjectLiteral(tokens, b - 3);
-    }
-    // `case x: {` / `default: {` open a block.
-    for (let k = b - 2; k >= 0 && tokens[k].depth >= prev.depth; k--) {
-      const t = tokens[k];
-      if (t.depth > prev.depth) continue;
-      if (t.value === "case" || t.value === "default") return false;
-      if (t.value === ";" || t.value === "{" || t.value === "}" || t.value === "," || t.value === "?" || t.value === "(") break;
-    }
-  }
-  // `=`, `(`, `,`, `[`, `?`, `:`, `&&`, `||`, `...` and other operators.
-  return true;
-}
+const isNode = (v: unknown): v is AcornNode => !!v && typeof v === "object" && typeof (v as AcornNode).type === "string";
 
 /** The `${ … }` expressions of a template literal's source, with offsets into it. */
 function templateExpressions(tpl: string): Array<{ offset: number; code: string }> {
