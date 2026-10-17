@@ -150,20 +150,30 @@ export function quoteCoverage(quote: string, page: string): number {
   // spread over its whole length (head and tail always included), so a
   // fabricated tail lowers the score and a one-word difference doesn't.
   const SEG = 200;
-  const segs: string[][] = [];
-  if (all.length <= SEG) segs.push(all);
+  const segs: Array<{ words: string[]; offset: number }> = [];
+  if (all.length <= SEG) segs.push({ words: all, offset: 0 });
   else {
     const n = Math.min(5, Math.ceil(all.length / SEG));
     for (let k = 0; k < n; k++) {
       const at = Math.round(((all.length - SEG) * k) / Math.max(1, n - 1));
-      segs.push(all.slice(at, at + SEG));
+      segs.push({ words: all.slice(at, at + SEG), offset: at });
     }
   }
+  // The segments must come from one passage, in order: each one's page
+  // position has to follow the previous one's by about the same distance
+  // as in the quote; a segment found elsewhere counts as unmatched.
   let matched = 0;
   let compared = 0;
+  let prev: { at: number; offset: number } | null = null;
   for (const seg of segs) {
-    matched += matchSegment(seg, pw);
-    compared += seg.length;
+    const m = matchSegment(seg.words, pw);
+    compared += seg.words.length;
+    const gap = prev ? seg.offset - prev.offset : 0;
+    const ok = !prev || (m.at - prev.at >= gap * 0.7 - 5 && m.at - prev.at <= gap * 1.3 + 10);
+    if (ok && m.matched) {
+      matched += m.matched;
+      prev = { at: m.at, offset: seg.offset };
+    }
   }
   return matched / compared;
 }
@@ -179,8 +189,8 @@ export function quoteCoverage(quote: string, page: string): number {
  * word starts at most 2 alignments, and candidate starts are sampled evenly
  * across the page when there are too many (the check runs on the UI thread).
  */
-function matchSegment(qw: string[], pw: string[]): number {
-  if (!qw.length) return 0;
+function matchSegment(qw: string[], pw: string[]): { matched: number; at: number } {
+  if (!qw.length) return { matched: 0, at: 0 };
   const win = Math.ceil(qw.length * 1.3) + 2;
   const lead = Math.max(3, Math.ceil(qw.length * (1 - APPROXIMATE_AT)) + 1);
   const starts = new Map<string, number[]>(); // word → its indexes among the opening words
@@ -196,6 +206,7 @@ function matchSegment(qw: string[], pw: string[]): number {
     cand = Array.from({ length: MAX_CANDIDATES }, (_, k) => cand[Math.floor(k * step)]);
   }
   let best = 0;
+  let bestAt = 0;
   for (const i of cand) {
     if (best >= qw.length) break;
     for (const s of starts.get(pw[i]) ?? []) {
@@ -211,10 +222,13 @@ function matchSegment(qw: string[], pw: string[]): number {
           }
         }
       }
-      if (matched > best) best = matched;
+      if (matched > best) {
+        best = matched;
+        bestAt = i - s; // where the segment's first word would sit on the page
+      }
     }
   }
-  return best;
+  return { matched: best, at: bestAt };
 }
 
 export const APPROXIMATE_AT = 0.85;

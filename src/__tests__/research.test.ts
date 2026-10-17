@@ -28,6 +28,9 @@ describe("quoteCoverage bounds", () => {
     const changed = [...long];
     changed[150] = "different";
     expect(quoteCoverage(changed.join(" "), long.join(" "))).toBeGreaterThan(0.85);
+    // Segments found in unrelated places don't add up to support.
+    const scrambled = [...long.slice(100), "gap", "words", ...long.slice(0, 200)].join(" ");
+    expect(quoteCoverage(long.join(" "), scrambled)).toBeLessThan(0.85);
     const passage = ["the", ...Array.from({ length: 99 }, (_, k) => `real${k}`)];
     const page = [...Array.from({ length: 30_000 }, () => "the noise"), ...passage].join(" ");
     expect(quoteCoverage(passage.join(" ") + " extra", page)).toBeGreaterThan(0.85);
