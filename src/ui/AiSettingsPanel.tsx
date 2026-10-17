@@ -9,7 +9,7 @@
  * so nothing here is a second source of truth.
  */
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Cpu, X } from "lucide-react";
 import { t } from "../i18n";
 import type { AgentRun, ExecutorId } from "../agents/types";
@@ -78,8 +78,20 @@ export function AiSettingsPanel({ open, onClose }: Props) {
   const [runs, setRuns] = useState<AgentRun[]>([]);
   const [saved, setSaved] = useState(false);
 
+  // The availability probes are slow (network); a panel closed meanwhile
+  // must not receive their results (React warns, and test environments
+  // that are already torn down throw "window is not defined").
+  const mounted = useRef(true);
+  useEffect(() => {
+    mounted.current = true;
+    return () => {
+      mounted.current = false;
+    };
+  }, []);
+
   const refreshStatus = useCallback(async () => {
     const { getExecutor } = await import("../agents/executors");
+    if (!mounted.current) return;
     setStatus({ ollama: "checking", webllm: "checking", chat: "checking" });
     const next = {} as Record<RunnerId, Status>;
     await Promise.all(
@@ -92,12 +104,14 @@ export function AiSettingsPanel({ open, onClose }: Props) {
         }
       }),
     );
+    if (!mounted.current) return;
     setStatus(next);
     try {
       const { refreshOllama } = await import("../agents/executors/ollama");
-      setInstalled((await refreshOllama(true)).models.map((m) => m.name));
+      const models = (await refreshOllama(true)).models.map((m) => m.name);
+      if (mounted.current) setInstalled(models);
     } catch {
-      setInstalled(null);
+      if (mounted.current) setInstalled(null);
     }
   }, []);
 

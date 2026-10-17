@@ -1205,5 +1205,19 @@
   "versionHistory.reason.close": "beim Schließen",
   "versionHistory.reason.restore": "vor Wiederherstellung",
   "versionHistory.reason.manual": "manuell",
-  "ai.doctor.fix.pullHebrew": "Deine Notizen sind auf Hebräisch; dieses Modell kann gut Hebräisch:"
+  "ai.doctor.fix.pullHebrew": "Deine Notizen sind auf Hebräisch; dieses Modell kann gut Hebräisch:",
+  "tree.confirm.replace": "„{path}“ existiert bereits. Ersetzen? (Das Vorhandene kommt in den Papierkorb.)",
+  "tree.trashed": "{count} in den Papierkorb verschoben",
+  "tree.undo": "Rückgängig",
+  "tree.linksUpdated": "Links in {count} Notizen aktualisiert",
+  "trash.title": "Papierkorb",
+  "trash.close": "Schließen",
+  "trash.empty": "Der Papierkorb ist leer.",
+  "trash.emptyAll": "Papierkorb leeren",
+  "trash.restore": "Wiederherstellen",
+  "trash.deleteForever": "Endgültig löschen",
+  "trash.restored": "Wiederhergestellt nach {path}",
+  "trash.daysLeft": "wird in {n} Tagen endgültig gelöscht",
+  "cmd.file.trash": "Papierkorb…",
+  "cmd.file.trash.hint": "Gelöschte Notizen wiederherstellen (30 Tage)"
 }
