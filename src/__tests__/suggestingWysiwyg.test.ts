@@ -1,36 +1,62 @@
 /**
- * Suggesting mode only tracks edits in the source editor, so it must never
- * coexist with WYSIWYG (whose edits would bypass CriticMarkup).
+ * Suggesting mode tracks edits in WYSIWYG too (editor/wysiwygSuggest.ts),
+ * so the two coexist: no forced switch to Split any more, and the palette's
+ * cursor commands reach the WYSIWYG editor through the bridge.
  */
-import { describe, it, expect, beforeEach } from "vitest";
+import { describe, it, expect, beforeEach, vi } from "vitest";
 import { useAppStore } from "../store/useStore";
 import { useToastStore } from "../store/useToastStore";
+import { buildSuggestingCommands } from "../editor/suggestingCommands";
+import { setWysiwygSuggestActions } from "../editor/wysiwygSuggestBridge";
 
 beforeEach(() => {
   useAppStore.setState({ mode: "source", suggestingMode: false });
   useToastStore.setState({ toasts: [] } as never);
+  setWysiwygSuggestActions(null);
 });
 
 describe("suggesting mode × WYSIWYG", () => {
-  it("entering WYSIWYG while suggesting lands in Split and explains why", () => {
+  it("WYSIWYG can be entered while suggesting, and suggesting turned on in WYSIWYG", () => {
     useAppStore.setState({ suggestingMode: true });
     useAppStore.getState().setMode("wysiwyg");
-    expect(useAppStore.getState().mode).toBe("split");
-    expect(JSON.stringify(useToastStore.getState())).toMatch(/WYSIWYG/);
-  });
-
-  it("turning suggesting on from WYSIWYG switches to Split", () => {
-    useAppStore.setState({ mode: "wysiwyg" });
-    useAppStore.getState().toggleSuggestingMode();
-    expect(useAppStore.getState().suggestingMode).toBe(true);
-    expect(useAppStore.getState().mode).toBe("split");
-  });
-
-  it("WYSIWYG still works normally when suggesting is off", () => {
-    useAppStore.getState().setMode("wysiwyg");
     expect(useAppStore.getState().mode).toBe("wysiwyg");
-    useAppStore.getState().toggleSuggestingMode(); // on → split
-    useAppStore.getState().toggleSuggestingMode(); // off
-    expect(useAppStore.getState().suggestingMode).toBe(false);
+    useAppStore.setState({ suggestingMode: false });
+    useAppStore.getState().toggleSuggestingMode();
+    expect(useAppStore.getState()).toMatchObject({ suggestingMode: true, mode: "wysiwyg" });
+    expect(useToastStore.getState().toasts).toEqual([]);
+  });
+
+  it("a saved WYSIWYG + suggesting session is restored as is", async () => {
+    const persist = (useAppStore as unknown as { persist: { getOptions: () => { merge: (p: unknown, c: unknown) => { mode: string; suggestingMode: boolean } } } }).persist;
+    const merged = persist.getOptions().merge({ mode: "wysiwyg", suggestingMode: true }, useAppStore.getState());
+    expect([merged.mode, merged.suggestingMode]).toEqual(["wysiwyg", true]);
+  });
+
+  it("cursor commands go to the WYSIWYG editor when no source editor is mounted", () => {
+    const resolve = vi.fn(() => true);
+    const jump = vi.fn(() => true);
+    const resolveAll = vi.fn(() => true);
+    const setContent = vi.fn();
+    setWysiwygSuggestActions({ resolve, jump, resolveAll });
+    const cmds = buildSuggestingCommands({
+      getView: () => null,
+      getContent: () => "{++stale snapshot++}",
+      setContent,
+      suggesting: true,
+      toggle: () => {},
+    });
+    const run = (id: string) => cmds.find((c) => c.id === id)!.action();
+    run("edit.suggesting.accept");
+    run("edit.suggesting.reject");
+    run("edit.suggesting.next");
+    run("edit.suggesting.prev");
+    expect(resolve.mock.calls).toEqual([["accept"], ["reject"]]);
+    expect(jump.mock.calls).toEqual([[1], [-1]]);
+    // Accept / Reject All use the live editor, never the content snapshot.
+    run("edit.suggesting.acceptAll");
+    run("edit.suggesting.rejectAll");
+    expect(resolveAll.mock.calls).toEqual([["accept"], ["reject"]]);
+    expect(setContent).not.toHaveBeenCalled();
+    setWysiwygSuggestActions(null);
   });
 });

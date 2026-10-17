@@ -1,8 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { Locale } from "../i18n";
-import { applyLocale, isLocaleLoaded, loadLocale, t } from "../i18n";
-import { toast } from "./useToastStore";
+import { applyLocale, isLocaleLoaded, loadLocale } from "../i18n";
 import {
   DEFAULT_THEME_SETTINGS,
   applyThemeSettings,
@@ -150,7 +149,7 @@ const DEFAULT_DOC: DocFile = {
 
 export const useAppStore = create<AppState>()(
   persist(
-    (set, get) => ({
+    (set) => ({
       doc: DEFAULT_DOC,
       mode: "split",
       theme: "dark",
@@ -178,17 +177,9 @@ export const useAppStore = create<AppState>()(
       fineTunedModelId: null,
       tagFilter: null,
       openTabs: [],
-      // Suggesting mode records CriticMarkup through the source editor only;
-      // WYSIWYG edits would bypass it. Keep the two exclusive: entering
-      // WYSIWYG while suggesting lands in Split instead (and says why).
-      setMode: (m) => {
-        if (m === "wysiwyg" && get().suggestingMode) {
-          set({ mode: "split" });
-          toast.info(t("suggesting.noWysiwyg"));
-          return;
-        }
-        set({ mode: m });
-      },
+      // Suggesting mode tracks edits in the source editor and in WYSIWYG
+      // (editor/wysiwygSuggest.ts), so any view works while it is on.
+      setMode: (m) => set({ mode: m }),
       setTheme: (t) => {
         set({ theme: t });
         applyTheme(t);
@@ -280,12 +271,7 @@ export const useAppStore = create<AppState>()(
       toggleGrammarCheck: () => set((s) => ({ grammarCheck: !s.grammarCheck })),
       toggleSuggestingMode: () =>
         set((s) => {
-          const on = !s.suggestingMode;
-          if (on && s.mode === "wysiwyg") {
-            toast.info(t("suggesting.noWysiwyg"));
-            return { suggestingMode: true, mode: "split" as ViewMode };
-          }
-          return { suggestingMode: on };
+          return { suggestingMode: !s.suggestingMode };
         }),
       toggleFineTunedModel: () =>
         set((s) => {
@@ -434,8 +420,7 @@ export const useAppStore = create<AppState>()(
           ...p,
           themeSettings: sanitizeThemeSettings(p.themeSettings),
         };
-        // Never restore the WYSIWYG + suggesting combination (see setMode).
-        if (merged.suggestingMode && merged.mode === "wysiwyg") merged.mode = "split";
+        // WYSIWYG and suggesting work together now: restore both as saved.
         return merged;
       },
     },
