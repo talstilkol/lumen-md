@@ -109,6 +109,7 @@ const AI_PROMPT_COMMANDS = new Set([
   "tools.autoTag",
   "tools.suggestLinks",
   "research.ask",
+  "voice.memo",
 ]);
 
 export function isAiPromptCommand(id: string): boolean {

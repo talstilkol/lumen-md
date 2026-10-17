@@ -95,6 +95,9 @@ const BUDGETS = [
   // wasm and the TVM runtime: measured 2082 KB gzipped (0.2.82). Fetched
   // only on the first in-browser AI prompt, never precached.
   { name: "lazy: web-llm worker", pattern: /^webllm\.worker-/,    budgetKb: 2200 },
+  // transformers.js (local Whisper + embeddings) runs in its own worker;
+  // the ONNX Runtime wasm it loads is served from public/ort/, not bundled.
+  { name: "lazy: transformers worker", pattern: /^transformers\.worker-/, budgetKb: 700 },
   { name: "lazy plugin chunk",  pattern: /\.js$/,                 budgetKb: 100 },
 ];
 

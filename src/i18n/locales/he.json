@@ -661,6 +661,8 @@
   "cmd.view.plugins.hint": "עיון והתקנת תוספים",
   "cmd.tools.voice": "🎙 הקלטה קולית ל-Markdown",
   "cmd.tools.voice.hint": "זיהוי דיבור → טקסט",
+  "cmd.tools.voiceMemo": "🎙 תזכיר קולי (תמלול + סיכום)",
+  "cmd.tools.voiceMemo.hint": "הקלטה, תמלול במכשיר הזה עם Whisper, סיכום והכנסת בלוק תזכיר",
   "cmd.security.encrypt": "🔒 הצפנת מסמך",
   "cmd.security.encrypt.hint": "AES-256-GCM",
   "cmd.security.decrypt": "🔓 פענוח מסמך",

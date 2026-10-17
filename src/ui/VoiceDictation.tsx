@@ -9,9 +9,9 @@
  *     `MediaRecorder` captures the audio, on stop we Whisper-transcribe
  *     + AI-summarize and insert a `> 🎙 Voice memo` block at the cursor.
  *
- * The memo flow honours Privacy Mode — `useLocalAi=true` routes
- * Whisper through `@xenova/transformers` and the summary through
- * web-llm, so no audio bytes leave the browser.
+ * The memo flow follows the AI policy — by default Whisper runs on this
+ * device through transformers.js (src/ai/transformersEngine.ts) and the
+ * summary through the local model, so no audio bytes leave the browser.
  *
  * Backwards-compat: `startVoiceRecording(lang)` is the legacy entry
  * point and still defaults to quick mode. The new `startVoiceMemo()`

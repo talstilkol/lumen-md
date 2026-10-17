@@ -268,6 +268,8 @@
   "cmd.tools.suggestLinks.hint": "AI scans your workspace for relevant cross-links",
   "cmd.tools.voice": "🎙 Voice to Markdown",
   "cmd.tools.voice.hint": "Speech recognition → text",
+  "cmd.tools.voiceMemo": "🎙 Голосовая заметка (расшифровка + резюме)",
+  "cmd.tools.voiceMemo.hint": "Записать, расшифровать на этом устройстве через Whisper, кратко изложить и вставить блок заметки",
   "cmd.tools.writingGoal.hint": "A subtle progress banner above the editor",
   "cmd.tools.writingGoal.set": "✍️ Writing goal: {{words}} words/day",
   "cmd.tools.writingGoal.unset": "✍️ Set a daily writing goal",
