@@ -69,8 +69,13 @@ const BUDGETS = [
   { name: "lazy: pdfjs",        pattern: /^pdf-/,                 budgetKb: 165 },
   // Prettier (Format document / code block) — standalone core + one chunk
   // per language plugin, all dynamic-imported on first format. The
-  // TypeScript parser plugin is the largest at ~124 KB gz.
-  { name: "lazy: prettier",     pattern: /^prettier-/,            budgetKb: 140 },
+  // TypeScript parser plugin is the largest: ~124 KB gz with Vite 6, 204 KB
+  // with Vite 8 (Rolldown keeps the TypeScript diagnostics table that
+  // esbuild dropped). Only loaded when formatting TS / JS.
+  { name: "lazy: prettier",     pattern: /^prettier-/,            budgetKb: 215 },
+  // abcjs (music notation), lazy-loaded by the abc block. Same size as
+  // before; Vite 6 named the chunk `index-*` (it fell under "entry index").
+  { name: "lazy: abcjs",        pattern: /^abcjs-/,               budgetKb: 160 },
   // TypeScript compiler + ES/DOM lib .d.ts files for the opt-in "TypeScript
   // checks in code blocks" (src/lsp). One worker file, fetched only after
   // the user enables the setting; excluded from the PWA precache. Measured
