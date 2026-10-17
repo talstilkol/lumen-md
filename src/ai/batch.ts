@@ -33,7 +33,10 @@ export function textHash(text: string): string {
 }
 
 const TRANSLATIONS = "lumen.ai.batch.translations";
-/** Paths of translation files batches created (so later batches skip exactly those). */
+/**
+ * Paths of translation files older batches recorded (before translations
+ * carried a `translatedFrom` marker; see isBatchTranslation). Read-only.
+ */
 export function knownTranslations(): Set<string> {
   try {
     const v = JSON.parse(localStorage.getItem(TRANSLATIONS) ?? "[]");
@@ -42,13 +45,13 @@ export function knownTranslations(): Set<string> {
     return new Set();
   }
 }
-export function rememberTranslations(paths: readonly string[]): void {
-  try {
-    const all = [...knownTranslations(), ...paths].slice(-5000);
-    localStorage.setItem(TRANSLATIONS, JSON.stringify(all));
-  } catch {
-    /* */
-  }
+/** Front matter keys a batch translation carries: its source note and its job. */
+export const TRANSLATED_FROM = "translatedFrom";
+export const TRANSLATION_JOB = "translationJob";
+
+/** True for a note a translation batch generated (so later batches skip it). */
+export function isBatchTranslation(content: string): boolean {
+  return frontmatterField(content, TRANSLATED_FROM) !== null;
 }
 
 export interface BatchJob {
@@ -317,11 +320,48 @@ export interface PlannedWrite {
   source: string;
 }
 
+/** A YAML line without its trailing `# comment` (a `#` after whitespace, outside quoted scalars). */
+export function stripYamlComment(line: string): string {
+  let quote: string | null = null;
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i];
+    if (quote) {
+      if (quote === '"' && ch === "\\") i++;
+      else if (ch === quote) quote = null;
+    } else if ((ch === '"' || ch === "'") && (i === 0 || /[\s:[{,-]/.test(line[i - 1]))) quote = ch;
+    else if (ch === "#" && (i === 0 || /\s/.test(line[i - 1]))) return line.slice(0, i).trimEnd();
+  }
+  return line;
+}
+
+/** A plain or quoted YAML scalar's value (`'it''s'` → `it's`, `"a\"b"` → `a"b`). */
+function yamlScalar(raw: string): string {
+  const t = raw.trim();
+  if (t.length >= 2 && t.startsWith('"') && t.endsWith('"')) {
+    try {
+      return JSON.parse(t);
+    } catch {
+      return t.slice(1, -1);
+    }
+  }
+  if (t.length >= 2 && t.startsWith("'") && t.endsWith("'")) return t.slice(1, -1).replace(/''/g, "'");
+  return t;
+}
+
+/** A top-level scalar field of the front matter, or null when absent. */
+export function frontmatterField(content: string, key: string): string | null {
+  const fm = /^---\r?\n(?:([\s\S]*?)\r?\n)?---/.exec(content)?.[1];
+  if (!fm) return null;
+  const line = fm.split(/\r?\n/).find((l) => l.startsWith(key) && new RegExp(`^${key}\\s*:`).test(l));
+  return line === undefined ? null : yamlScalar(stripYamlComment(line.replace(/^[^:]+:/, "")));
+}
+
 /** Existing tags in the front matter: inline `[a, b]`, `a, b`, or a block list. */
 export function frontmatterTags(content: string): string[] {
   const fm = /^---\r?\n(?:([\s\S]*?)\r?\n)?---/.exec(content)?.[1];
   if (!fm) return [];
-  const lines = fm.split(/\r?\n/);
+  // Comments (`tags: [a, b] # note`) aren't part of the value.
+  const lines = fm.split(/\r?\n/).map(stripYamlComment);
   const at = lines.findIndex((l) => /^tags\s*:/.test(l));
   if (at === -1) return [];
   let inline = lines[at].replace(/^tags\s*:\s*/, "").trim();
@@ -336,20 +376,13 @@ export function frontmatterTags(content: string): string[] {
     const body = inline.replace(/^\[|\]$/g, "");
     const out: string[] = [];
     for (const m of body.matchAll(/\s*("(?:[^"\\]|\\.)*"|'(?:[^']|'')*'|[^,]+)\s*(?:,|$)/g)) {
-      let t = m[1].trim();
-      if (t.startsWith('"')) {
-        try {
-          t = JSON.parse(t);
-        } catch {
-          t = t.slice(1, -1);
-        }
-      } else if (t.startsWith("'")) t = t.slice(1, -1).replace(/''/g, "'");
+      const t = yamlScalar(m[1]);
       if (t) out.push(t);
     }
     return out;
   }
   const out: string[] = [];
-  for (let i = at + 1; i < lines.length && /^\s+-\s*/.test(lines[i]); i++) out.push(lines[i].replace(/^\s+-\s*/, "").trim().replace(/^["']|["']$/g, ""));
+  for (let i = at + 1; i < lines.length && /^\s+-\s*/.test(lines[i]); i++) out.push(yamlScalar(lines[i].replace(/^\s+-\s*/, "")));
   return out.filter(Boolean);
 }
 
@@ -395,7 +428,14 @@ export function planWrites(
     }
     if (job.op === "translate") {
       const code = (job.lang ?? "translated").toLowerCase().replace(/[^a-z0-9-]+/g, "-").slice(0, 20);
-      out.push({ path: freePath(item.path.replace(/(\.(md|markdown))?$/i, `.${code}.md`)), content: answer.trim() + "\n", created: true, source: item.path });
+      const want = item.path.replace(/(\.(md|markdown))?$/i, `.${code}.md`);
+      // A retry of this job (its state couldn't be saved) finds the file it
+      // already wrote by its markers instead of writing a `-2` copy.
+      if (writtenByJob(want, item.path, job.id, read, exists)) continue;
+      // The markers make later batches skip this note, however many there are.
+      let content = setFrontmatterField(answer.trim() + "\n", TRANSLATED_FROM, yamlString(item.path));
+      content = setFrontmatterField(content, TRANSLATION_JOB, yamlString(job.id));
+      out.push({ path: freePath(want), content, created: true, source: item.path });
       continue;
     }
     if (job.op === "tags") {
@@ -406,4 +446,13 @@ export function planWrites(
     }
   }
   return out;
+}
+
+/** Whether `want` (or one of its `-2`, `-3`… siblings) is the translation job `id` made of `source`. */
+function writtenByJob(want: string, source: string, id: string, read: (path: string) => string | null, exists: (path: string) => boolean): boolean {
+  for (let n = 2, p = want; exists(p); p = want.replace(/\.md$/i, `-${n++}.md`)) {
+    const text = read(p);
+    if (text !== null && frontmatterField(text, TRANSLATED_FROM) === source && frontmatterField(text, TRANSLATION_JOB) === id) return true;
+  }
+  return false;
 }
