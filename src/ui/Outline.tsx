@@ -67,7 +67,7 @@ export const Outline = React.memo(function Outline({ markdownText }: Props) {
     <aside
       className="
         outline-aside h-full overflow-y-auto py-3 px-1 bg-bg-subtle border-l border-border
-        w-[260px] flex-shrink-0
+        w-[260px] shrink-0
         max-md:hidden md:block
       "
     >
