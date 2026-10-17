@@ -145,7 +145,7 @@
     "@vitest/coverage-v8": "^4.1.8",
     "axe-core": "^4.11.3",
     "fake-indexeddb": "^6.2.5",
-    "jsdom": "^29.1.1",
+    "jsdom": "^30.1.2",
     "postcss": "^8.5.12",
     "tailwindcss": "^4.3.3",
     "tsx": "^4.22.4",
