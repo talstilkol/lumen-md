@@ -11,7 +11,7 @@
  *
  * ── Local dev ─────────────────────────────────────────────────────────────
  *   cd sync-server
- *   npm install y-websocket y-leveldb level    # one-time
+ *   npm install @y/websocket-server y-leveldb    # one-time
  *   PORT=4444 node persistent-server.js        # serves ws://localhost:4444
  *
  * ── Client wiring ─────────────────────────────────────────────────────────
@@ -40,17 +40,17 @@ const WebSocket = require("ws");
 const http = require("http");
 const path = require("path");
 
-// utils.js is exported by y-websocket and wires up doc lifecycle, awareness,
+// utils is exported by @y/websocket-server (moved out of y-websocket in v3) and wires up doc lifecycle, awareness,
 // and persistence. We require it lazily so this file still parses if the
 // dependency is missing (the operator gets a helpful error on startup).
 let setupWSConnection;
 let LeveldbPersistence;
 try {
-  ({ setupWSConnection } = require("y-websocket/bin/utils"));
+  ({ setupWSConnection } = require("@y/websocket-server/utils"));
   ({ LeveldbPersistence } = require("y-leveldb"));
 } catch (err) {
   console.error(
-    "Missing dependency. Run `npm install y-websocket y-leveldb level` first.",
+    "Missing dependency. Run `npm install @y/websocket-server y-leveldb` first.",
     err.message,
   );
   process.exit(1);
@@ -67,8 +67,8 @@ const STORAGE_DIR =
 // ── Persistence ──────────────────────────────────────────────────────────────
 const persistence = new LeveldbPersistence(STORAGE_DIR);
 
-// y-websocket calls these hooks on each document open/update/close.
-const yWebsocketUtils = require("y-websocket/bin/utils");
+// @y/websocket-server calls these hooks on each document open/update/close.
+const yWebsocketUtils = require("@y/websocket-server/utils");
 yWebsocketUtils.setPersistence({
   bindState: async (docName, ydoc) => {
     const persistedYdoc = await persistence.getYDoc(docName);
