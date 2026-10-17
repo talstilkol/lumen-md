@@ -129,8 +129,8 @@ describe("tracking edits while suggesting", () => {
     const to = e.at("Second") + 6;
     e.select(from, to);
     e.view.someProp("handleTextInput", (f) => f(e.view, from, to, "X", () => e.view.state.tr));
-    // Accepting can't remove a paragraph break, so the typed text isn't kept.
-    expect(e.md()).toBe("First {--para.--}{>>@Tal<<}\n\n{--Second--}{>>@Tal<<} para.");
+    // Accepting couldn't remove a paragraph break: the edit is refused.
+    expect(e.md()).toBe("First para.\n\nSecond para.");
   });
 
   it("refuses structure changes that can't be suggested (wrapping in a list)", async () => {
@@ -167,7 +167,7 @@ describe("tracking edits while suggesting", () => {
     const t = await open("```\ncode\n```\n\nAfter text.", true);
     t.view.dispatch(t.view.state.tr.delete(t.at("code") + 2, t.at("After") + 3));
     expect(t.view.state.doc.childCount).toBe(2);
-    expect(t.md()).toBe("```\ncode\n```\n\n{--Aft--}{>>@Tal<<}er text.");
+    expect(t.md()).toBe("```\ncode\n```\n\nAfter text."); // crosses a block boundary: refused
   });
 
   it("typing over a selection is a substitution", async () => {
@@ -273,6 +273,16 @@ describe("tracking edits while suggesting", () => {
     expect(isStructural(new Slice(Fragment.from(p("a")), 1, 1))).toBe(false);
     expect(isStructural(new Slice(Fragment.from([p("a"), p("b")]), 1, 1))).toBe(true);
     expect(isStructural(new Slice(Fragment.from(p("a")), 0, 0))).toBe(true);
+  });
+
+  it("refuses deleting a whole block and deletions that join into a delimiter", async () => {
+    const e = await open("First.\n\nSecond.", true);
+    const start = e.at("Second") - 1;
+    e.view.dispatch(e.view.state.tr.delete(start, start + e.view.state.doc.child(1).nodeSize));
+    expect(e.view.state.doc.childCount).toBe(2);
+    const t = await open("Say a+X+}b now.", true);
+    t.view.dispatch(t.view.state.tr.delete(t.at("X"), t.at("X") + 1));
+    expect(t.md()).toBe("Say a+X+}b now.");
   });
 
   it("is off when suggesting is off", async () => {

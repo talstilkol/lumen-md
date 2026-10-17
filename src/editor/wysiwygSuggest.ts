@@ -433,8 +433,21 @@ function untrackable(tr: Transaction): boolean {
     if ($from.parent.type.spec.code && $from.sameParent(before.resolve(to))) return false;
     if (slice.size > 0 && isStructural(slice) && !$from.parent.type.spec.code) return true;
     if (to > from) {
+      // A removed block (a whole paragraph or list item, or a boundary
+      // between two) can't be suggested: accepting couldn't remove it.
+      if (isStructural(before.slice(from, to))) return true;
       // `match` (not `test`) leaves the shared global regex's lastIndex alone.
       if (before.textBetween(from, to, "\n", "\ufffc").match(CRITIC_DELIM)) return true;
+      // Nor may the text left on both sides join into a delimiter
+      // (`+X+}` minus `X` would end the suggestion early).
+      const $to = before.resolve(to);
+      if ($from.sameParent($to) && $from.parent.isTextblock) {
+        const left = before.textBetween(Math.max($from.start(), from - 2), from, "", "\ufffc");
+        const right = before.textBetween(to, Math.min($to.end(), to + 2), "", "\ufffc");
+        for (const m of (left + right).matchAll(CRITIC_DELIM)) {
+          if (m.index! < left.length && m.index! + m[0].length > left.length) return true;
+        }
+      }
     }
     return false;
   });
