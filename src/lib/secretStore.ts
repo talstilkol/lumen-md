@@ -37,6 +37,7 @@ const EXACT_SECRETS = new Set([
   "lumen.cloud.gdrive.refresh",
   "lumen.cloud.github.token",
   "lumen.collab.password",
+  "lumen.collab.wsToken",
   "lumen.research.searchKey",
   "lumen.git.token.v1",
 ]);

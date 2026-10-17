@@ -1,7 +1,7 @@
 import * as Y from "yjs";
 import { WebrtcProvider } from "y-webrtc";
 import type { Awareness } from "y-protocols/awareness";
-import { randomChoice, randomInt } from "../lib/cryptoRandom";
+import { randomChoice, randomId, randomInt } from "../lib/cryptoRandom";
 import { log } from "../lib/logger";
 import { effectiveCapabilities, entitlementResolved, waitForEntitlement } from "../billing/gates";
 import { wireE2E, type E2EChannel, type E2EErrorReason } from "./e2e";
@@ -82,8 +82,26 @@ const getSignalingUrls = (): string[] => {
     ? (import.meta as ImportMeta & { env?: { VITE_WEBRTC_SIGNALING_URL?: string } }).env?.VITE_WEBRTC_SIGNALING_URL
     : undefined;
   if (envUrl) return envUrl.split(",").map((s) => s.trim()).filter(Boolean);
-  return PUBLIC_SIGNALING_FALLBACK;
+  // T49: by default only the project's own signaling server. The public
+  // third-party servers (yjs.dev, heroku) see who meets whom, so they are
+  // used only when the user opts in (Collab settings).
+  return publicSignalingAllowed() ? PUBLIC_SIGNALING_FALLBACK : PUBLIC_SIGNALING_FALLBACK.slice(0, 1);
 };
+
+export const PUBLIC_SIGNALING_KEY = "lumen.collab.publicSignaling";
+
+function publicSignalingAllowed(): boolean {
+  try {
+    return localStorage.getItem(PUBLIC_SIGNALING_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+
+/** Exported for tests: the signaling list the next session will use. */
+export function signalingUrls(): string[] {
+  return getSignalingUrls();
+}
 
 const NAMES = [
   "Aurora",
@@ -121,35 +139,22 @@ function randomUser(): CollabUser {
 }
 
 /** Generate a fresh, friendly room name. */
+/**
+ * A new room's name: 128 random bits (T49). The name is the room's address
+ * on the signaling and persistence servers, so it must not be guessable —
+ * the old "lumen-calm-river-42" had about 13 bits.
+ */
 export function makeRoomName(): string {
-  const adjectives = [
-    "calm",
-    "bright",
-    "swift",
-    "wild",
-    "pale",
-    "amber",
-    "hidden",
-    "lucky",
-    "open",
-    "kind",
-  ];
-  const nouns = [
-    "river",
-    "valley",
-    "comet",
-    "ember",
-    "cloud",
-    "harbor",
-    "meadow",
-    "summit",
-    "lantern",
-    "cipher",
-  ];
-  const a = randomChoice(adjectives);
-  const b = randomChoice(nouns);
-  const n = randomInt(90) + 10;
-  return `lumen-${a}-${b}-${n}`;
+  return `lumen-${randomId(16)}`;
+}
+
+/** A fresh room password: 128 random bits, URL-safe (T49). */
+export function makeRoomPassword(): string {
+  const bytes = new Uint8Array(16);
+  crypto.getRandomValues(bytes);
+  let bin = "";
+  for (const b of bytes) bin += String.fromCharCode(b);
+  return btoa(bin).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
 }
 
 /**
@@ -175,6 +180,13 @@ function configuredWebsocketUrl(): string | null {
       : undefined;
   // An empty build arg (Docker compose with LUMEN_COLLAB_URL unset) means "none".
   return envUrl?.trim() || null;
+}
+
+function configuredWebsocketToken(): string {
+  const env = typeof import.meta !== "undefined"
+    ? (import.meta as ImportMeta & { env?: { VITE_YJS_WEBSOCKET_TOKEN?: string } }).env?.VITE_YJS_WEBSOCKET_TOKEN
+    : undefined;
+  return env?.trim() ?? "";
 }
 
 /**
@@ -204,7 +216,10 @@ async function attachWebsocketProvider(
         opts?: Record<string, unknown>,
       ) => WebsocketLike;
     };
-    return new mod.WebsocketProvider(url, roomName, doc, { connect: true });
+    // A persistent server started with COLLAB_TOKEN only accepts clients
+    // that present it (T49); the token is kept in the secret store.
+    const token = getSecret("lumen.collab.wsToken") || configuredWebsocketToken();
+    return new mod.WebsocketProvider(url, roomName, doc, { connect: true, ...(token ? { params: { token } } : {}) });
   } catch (err) {
     log.warn("y-websocket attach failed", err);
     return null;
