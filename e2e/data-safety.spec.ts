@@ -65,11 +65,22 @@ test("a version is kept without saving, restores, and the restore is undoable", 
 });
 
 test("auto-backups no longer create files in the vault", async ({ page }) => {
+  // Let the auto-backup run once (it fires 30 s after the last edit; the
+  // pagehide flush forces it now).
+  await page.locator(".cm-content").first().click();
+  await page.keyboard.type(" edit");
+  await page.evaluate(() => window.dispatchEvent(new Event("pagehide")));
   const names = await page.evaluate(async () => {
-    const root = await navigator.storage.getDirectory();
-    const out: string[] = [];
-    for await (const [name] of (root as unknown as { entries(): AsyncIterable<[string, unknown]> }).entries()) out.push(name);
-    return out;
+    try {
+      const root = (await navigator.storage.getDirectory()) as unknown as { keys?: () => AsyncIterable<string>; entries?: () => AsyncIterable<[string, unknown]> };
+      const out: string[] = [];
+      if (root.keys) for await (const name of root.keys()) out.push(name);
+      else if (root.entries) for await (const [name] of root.entries()) out.push(name);
+      return out;
+    } catch {
+      // No OPFS in this engine: nothing can be written there either.
+      return [];
+    }
   });
   expect(names).not.toContain("backups");
 });
