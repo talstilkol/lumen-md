@@ -1226,5 +1226,19 @@
   "spell.he.installed": "ヘブライ語辞書をインストールしました（{n} 語）。",
   "spell.he.failed": "辞書をダウンロードできませんでした: {error}",
   "spell.he.removeConfirm": "この端末からヘブライ語辞書を削除しますか？",
-  "spell.he.removed": "ヘブライ語辞書を削除しました。"
+  "spell.he.removed": "ヘブライ語辞書を削除しました。",
+  "cmd.vault.export": "保管庫全体を書き出す…",
+  "cmd.vault.export.hint": "すべてのノートと添付をフォルダ構造ごと .zip かフォルダへ",
+  "cmd.vault.import": "ノートを読み込む（zip／フォルダ: Obsidian・Notion・Lumen）…",
+  "cmd.vault.import.hint": "新しいフォルダへ — 既存のものは上書きしません",
+  "vault.export.where": "書き出し方法…",
+  "vault.export.zip": "1つの .zip ファイル",
+  "vault.export.folder": "このコンピュータのフォルダへ",
+  "vault.export.done": "{n} 件のファイルを書き出しました。",
+  "vault.export.failed": "書き出しに失敗しました: {error}",
+  "vault.import.what": "読み込み元…",
+  "vault.import.zip": ".zip ファイル",
+  "vault.import.folder": "フォルダ",
+  "vault.import.done": "{notes} 件のノートと {files} 件のファイル（{source}）を「{folder}」に読み込みました。",
+  "vault.import.failed": "読み込みに失敗しました: {error}"
 }
