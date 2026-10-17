@@ -203,6 +203,7 @@ describe("guardLoops in labeled blocks", () => {
     expect(guardLoops("let async = 1; async\nwhile (true) {}")).toContain("__lumenLoop()");
     expect(guardLoops("this is not js (")).toBe("this is not js (");
     expect(guardLoops("for (let i = 0 /* ; */; ; ) {}")).toBe("for (let i = 0 /* ; */; __lumenLoop() ; ) {}");
+    expect(guardLoops("for /* (; */ (;;) {}")).toBe("for /* (; */ (; __lumenLoop();) {}");
   });
 });
 

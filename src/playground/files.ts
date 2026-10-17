@@ -206,8 +206,15 @@ export function guardLoops(code: string): string {
       else {
         // `for (init;; update)`: the guard goes right after the first `;`.
         // Found with acorn's tokenizer, so a `;` in a comment isn't taken.
-        const from = n.init ? (n.init as AcornNode).end : code.indexOf("(", n.start) + 1;
+        // Without an init, tokenize from `for` itself (its `(` may follow a
+        // comment that holds one too).
+        const from = n.init ? (n.init as AcornNode).end : n.start;
+        let inHead = !!n.init;
         for (const t of tokenizer(code.slice(from), { ecmaVersion: "latest" })) {
+          if (!inHead) {
+            inHead = t.type.label === "(";
+            continue;
+          }
           if (t.type.label === ";") {
             edits.push({ at: from + t.end, text: ` ${LOOP_GUARD}()` });
             break;
