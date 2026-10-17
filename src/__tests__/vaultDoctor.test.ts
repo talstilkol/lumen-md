@@ -214,7 +214,7 @@ describe("vault doctor", () => {
   });
 
   it("decodes character references in headings, but not in their code spans", () => {
-    expect(wikiFindings("## A &amp; B &#x41;\n\n## `&amp;` x\n\n[[#A & B A]] [[#&amp; x]] [[#& x]]\n")).toEqual(["#&amp; x", "#& x"]) // targets are decoded too, like remark does;
+    expect(wikiFindings("## A &amp; B &#x41;\n\n## `&amp;` x\n\n[[#A & B A]] [[#&amp; x]] [[#& x]]\n")).toEqual(["#&amp; x", "#& x"]); // targets are decoded too, like remark does
   });
 
   it("front matter links are neither reported nor rewritten", () => {
