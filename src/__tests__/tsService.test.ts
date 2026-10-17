@@ -528,6 +528,14 @@ describe("JavaScript blocks and shared scopes", () => {
     expect(first).toContain("ys.map(() => value$prev)");
   });
 
+  it("a repeated var declaration: the latest one before the use decides", () => {
+    const { units } = checkShared(
+      "const value = 1; const r = (function () { var xs; var xs = [0]; return xs.map(() => value); })();",
+      "const value = 'x';",
+    );
+    expect(units[1].code.split("\n;\n")[0]).toContain("xs.map(() => value$prev)");
+  });
+
   it("re-declarations are only allowed at top level of a shared block", () => {
     const { diags } = checkShared("// @ts-check\nfunction f() { let x = 1; let x = 2; }");
     expect(diags.map((d) => d.code)).toEqual([2451, 2451]);

@@ -345,10 +345,10 @@ function functionScopes(tokens: ReturnType<typeof tokenize>, match: Map<number, 
   // declaration of a name is kept with the brace range it is visible in, so
   // a receiver resolves to its own binding, not a same-named one elsewhere.
   // (Built lazily: `var` scoping needs every function body known.)
-  let literalDecls: Map<string, Array<{ from: number; to: number; kind?: "array" | "string" }>> | null = null;
+  let literalDecls: Map<string, Array<{ from: number; to: number; kind?: "array" | "string"; pos: number }>> | null = null;
   const literalDeclsFor = () => {
     if (literalDecls) return literalDecls;
-    const decls = new Map<string, Array<{ from: number; to: number; kind?: "array" | "string" }>>();
+    const decls = new Map<string, Array<{ from: number; to: number; kind?: "array" | "string"; pos: number }>>();
     const braces: number[] = [];
     for (let i = 0; i < tokens.length; i++) {
       if (isPunct(i, "{")) braces.push(i);
@@ -376,7 +376,7 @@ function functionScopes(tokens: ReturnType<typeof tokenize>, match: Map<number, 
         }
         for (const n of names) {
           const at = decls.get(n) ?? [];
-          at.push({ from, to, kind });
+          at.push({ from, to, kind, pos: d.at });
           decls.set(n, at);
         }
       }
@@ -385,9 +385,12 @@ function functionScopes(tokens: ReturnType<typeof tokenize>, match: Map<number, 
   };
   /** The literal kind of the binding `name` that the token at `use` sees. */
   const literalKindAt = (name: string, use: number): "array" | "string" | undefined => {
-    let best: { from: number; to: number; kind?: "array" | "string" } | undefined;
+    let best: { from: number; to: number; kind?: "array" | "string"; pos: number } | undefined;
     for (const d of literalDeclsFor().get(name) ?? []) {
-      if (d.from < use && use < d.to && (!best || d.from > best.from)) best = d;
+      if (!(d.from < use && use < d.to)) continue;
+      // Innermost scope wins; within one scope (`var xs; var xs = []`), the
+      // latest declaration before the use.
+      if (!best || d.from > best.from || (d.from === best.from && d.pos < use && (best.pos > use || d.pos > best.pos))) best = d;
     }
     return best?.kind;
   };
