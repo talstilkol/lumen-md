@@ -533,7 +533,8 @@ export function trackChanges(
       });
       return own;
     })();
-    if (onlyOwnInsert) continue;
+    // A block boundary in the range isn't anyone's insertion: restore it.
+    if (onlyOwnInsert && !c.deletesStructure) continue;
     // Re-insert the deleted slice with its openness, so a removed block
     // boundary (Backspace at a paragraph start) is restored, not inlined:
     // structural joins are blocked while the text is suggested deleted.

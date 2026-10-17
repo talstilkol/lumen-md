@@ -255,6 +255,15 @@ describe("tracking edits while suggesting", () => {
     expect(e.view.state.doc.textContent).toBe("Hello\n world."); // own "!!" goes, the break stays
   });
 
+  it("deleting own insertion across a paragraph boundary keeps the boundary", async () => {
+    const e = await open("First.\n\nSecond.", true);
+    e.select(e.at("First", 5));
+    e.type(" added");
+    const from = e.at(" added");
+    e.view.dispatch(e.view.state.tr.delete(from, e.at("Second")));
+    expect(e.view.state.doc.childCount).toBe(2);
+  });
+
   it("is off when suggesting is off", async () => {
     const e = await open("Hello world.", false);
     e.select(e.at(" world"));
