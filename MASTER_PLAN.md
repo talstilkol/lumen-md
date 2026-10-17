@@ -11,7 +11,7 @@
 | "העבר כל פקודות AI לסוכנים מקומיים שיבצעו אותן" | כל פקודת AI עוברת דרך **זמן ריצה אחד של סוכנים** שרץ על המכונה של המשתמש: Ollama, WebGPU בדפדפן (web-llm), או transformers.js. ספקי הענן נשארים רק כאפשרות שמדליקים במפורש (§2, §4) |
 | "סוכנים מקומיים שיציעו שיפורים במידה ולא יהיה מענה" | **סוכן שיפור** לכל פקודה: כשאין תשובה, התשובה לא עוברת אימות, או שהמודל לא זמין — הוא מאבחן, מנסה שוב עם שינוי (עד פעמיים), ואם עדיין אין — מציג הצעות שאפשר ללחוץ עליהן (§5) |
 | "צור master plan חדשה ומפורטת עם כל הכלים החדשים" | המסמך הזה. הכלים ב-§3, מפת ההעברה ב-§4, לוח הזמנים ב-§7 |
-| "תן רשימה של כל החולשות… והוסף לתוכנית כלים מקומיים שיפתרו אותן… אם יש לך עוד רעיונות תוסיף, אני מאשר הכול" (17.10 20:38) | **§12** — ביקורת החולשות (W1–W4x) עם ראיות, והפער מול Obsidian / Notion / Typora / Logseq. **§13** — 22 כלים מקומיים חדשים (T21–T43) בשישה שלבים (F–K), ≈ 126 שעות. T22 כבר בוצע (#155) |
+| "תן רשימה של כל החולשות… והוסף לתוכנית כלים מקומיים שיפתרו אותן… אם יש לך עוד רעיונות תוסיף, אני מאשר הכול" (17.10 20:38) | **§12** — ביקורת של 80 חולשות עם ראיות (קובץ:שורה), והפער מול Obsidian / Notion / Typora / Logseq. **§13** — 37 כלים מקומיים חדשים (T21–T58) + PR תיקונים מיידי, בשישה שלבים (F–K), ≈ 270 שעות. T22 כבר בוצע (#155) |
 
 ## 1. איפה אנחנו
 
@@ -21,7 +21,7 @@
 | PR-ים פתוחים, ממתינים למיזוג של טל (לפי הסדר) | **#109**, **#135**, **#136** (המסמך הזה), ואז המחסנית **#137 → #150, #155** (A1…E2), כל אחד על קודמו |
 | תוכנית הסוכנים המקומיים (§3–§7) | **100% כתוב** (A1–E2, 15 PR-ים), 2,637 בדיקות עוברות, כל הערות ה-review של Codex נענו ונסגרו (0 פתוחות) |
 | אומת חי על מודל אמיתי | **0%** — אין Ollama / GPU / docker בסביבה שלי. ב-CI רץ Ollama מזויף (T22) שמוכיח חיווט, לא איכות |
-| תוכנית סגירת החולשות (§12–§13) | **כלי אחד מ-22 בוצע** (T22). ≈ 126 שעות, ≈ 8–10 ימי עבודה רציפים אחרי המיזוג |
+| תוכנית סגירת החולשות (§12–§13) | 80 חולשות נמצאו, 12 מהן 🔴 לתיקון ראשון. **כלי אחד מ-37 בוצע** (T22); T25 בעבודה. ≈ 270 שעות, ≈ 3.5–4 שבועות עבודה רציפה |
 | פעולות של טל (§8) | ≈ 1 שעה (מיזוג + Ollama + הרצת eval); ≈ 22 שעות לחשבונות ולפריסה (לא חוסם) |
 
 ## 2. העיקרון: AI מקומי קודם
@@ -200,126 +200,223 @@
 
 ## 12. חולשות — ומה המובילים בתחום עושים טוב יותר
 
-> ביקורת שנעשתה 17.10 בערב על הקוד כפי שהוא ב-#155 (ראש המחסנית). כל שורה מצביעה על ראיה בקוד או על מדידה; מה שלא נמדד מסומן. ההשוואה למתחרים היא הערכה שלי, לא מדידה.
+> ביקורת שנעשתה 17.10 בערב על הקוד כפי שהוא בראש המחסנית (#155): סריקה של כל `src/`, `e2e/`, `docs/`, קבצי הפריסה וההיסטוריה ב-GitHub, עם אימות ידני של הממצאים החמורים. כל שורה מצביעה על ראיה (קובץ:שורה או מדידה). מה שלא שוחזר בזמן ריצה מסומן "לא אומת". ההשוואה למתחרים היא הערכה שלי, לא מדידה.
 
 ### 12.1 הפער מול המובילים
 
-| יכולת | Obsidian | Notion | Typora / iA | Logseq | **Lumen היום** | מה סוגר את הפער |
+| יכולת | Obsidian | Notion | Typora / iA | Logseq | **Lumen היום** | סוגר |
 |---|---|---|---|---|---|---|
-| עורך עברי / RTL | בינוני (כיוון לכל שורה) | חלש | חלש | חלש | **חלש**: העורך כפוי ל-LTR (`index.css:1382`), אין `dir` לפי פסקה | T25, T26 |
-| AI מקומי עם מאמתים וסוכן שיפור | אין (תוספים חיצוניים) | ענן בלבד | אין | אין | **ייחודי** (#137–#150), לא אומת חי | T21, T22 ✓, T27 |
-| מובייל | אפליקציות מקוריות | אפליקציות מקוריות | iOS | אפליקציות | PWA בלבד, לא נבדק במגע | T41 |
-| סנכרון | שירות בתשלום / git | ענן | iCloud | git / ענן | git (יש) · Yjs (שרת לא פרוס) | §8 פעולה 6 |
-| היסטוריה וגיבוי | היסטוריית קבצים + סנכרון | היסטוריה מלאה | — | — | היסטוריית גרסאות (יש), אין תמונות מצב אוטומטיות / ייצוא | T35 |
-| גרף, backlinks, canvas | כן | — | — | כן | כן (GraphView, backlinks, tldraw) | — |
-| מסדי נתונים / properties | Bases | חזק | — | חלש | תצוגות מסד נתונים (יש) | — |
-| חיפוש | מהיר, בלי סמנטי | סמנטי בענן | מקומי | מקומי | היברידי מקומי (יש) · בלי reranker · בלי עברית מנורמלת | T26, T29 |
+| עורך עברי / RTL | כיוון לכל שורה | חלש | כיוון לכל פסקה | חלש | **שבור**: העורך כפוי ל-LTR, כותרות עבריות בלי עוגן, backlinks עבריים שגויים, גיבויים מתנגשים | T25, T26, T44, T45 |
+| AI מקומי עם מאמתים וסוכן שיפור | תוספים חיצוניים | ענן בלבד | אין | אין | **ייחודי** (#137–#155), לא אומת חי | T21, T22 ✓, T27 |
+| בטיחות נתונים | היסטוריית קבצים, קבצים רגילים בדיסק | היסטוריה מלאה | קבצים רגילים | קבצים רגילים | **חלש**: הפתקים ב-OPFS סמוי, בלי `persist()`, היסטוריית גרסאות ריקה, אין ייצוא של הכול, `git pull` דורס | T35, T46, T47, T56, T57 |
+| מובייל | אפליקציות מקוריות | מקוריות | iOS | מקוריות | PWA, בלי מגע, manifest שבור | T41, T50 |
+| סנכרון | שירות / git / iCloud | ענן | iCloud | git / ענן | git (fast-forward בלבד, בלי מיזוג) · Yjs בלי שרת · Drive/Dropbox כתובים ולא מחוברים | T56 |
+| גרף, backlinks, canvas, מסדי נתונים | כן | חלקי / חזק | — | כן / חלש | כן (GraphView, backlinks, tldraw, תצוגות) | — |
+| חיפוש | מהיר, אופרטורים | סמנטי בענן | מקומי | מקומי | היברידי מקומי (יש) · בלי reranker · שובר עברית · בלי אופרטורים | T26, T29, T54 |
 | OCR / תמונות / הקראה | תוספים | OCR בענן | — | — | אין | T31, T32 |
 | קוצץ רשת | רשמי | רשמי | — | — | אין | T34 |
-| פרסום לרשת | Publish בתשלום | כן | — | — | מתוכנן (C8) | אחרי המחסנית |
-| תוספים | 2,000+ | — | — | מאות | API משלנו, מעט תוספים | שוק ערכות (C8) |
-| נגישות | בינוני | טוב | טוב | בינוני | **לא נמדד**: 323 `aria-*`, בלי בדיקת axe | T40 |
-| ביצועים בהפעלה | מהיר | בינוני | מהיר | בינוני | 7.0MB gzip סה״כ, 184KB ראשי, 480KB chunk תוספים עצל | T38 |
+| תוספים | 2,000+ | — | — | מאות | API מינימלי; הגלריה **מדומה** (התקנה = toast אחרי 400ms) וקורסת בפתיחה | T52 |
+| נגישות | בינוני | טוב | טוב | בינוני | לא נמדד; 3 מ-18 דיאלוגים לוכדים פוקוס | T40 |
+| ביצועים בהפעלה | מהיר | בינוני | מהיר | בינוני | Lighthouse אחרון: 55%, LCP 9.6s (desktop), 34.6s (mobile) | T38, T39 |
+| שולחן עבודה | מקורי, עדכון אוטומטי | מקורי | מקורי | מקורי | Tauri בלי עדכון אוטומטי, Windows לא חתום, פתקים ב-OPFS של ה-webview | T57 |
 
-### 12.2 רשימת החולשות
+### 12.2 רשימת החולשות (80 ממצאים, 14 תחומים)
 
-| # | תחום | חולשה | ראיה | חומרה | פותר |
-|---|---|---|---|---|---|
-| W1 | אימות | כל מחסנית ה-AI המקומי (#137–#150) לא רצה מעולם מול מודל אמיתי, WebGPU או docker | אין Ollama/GPU בסביבת הפיתוח; `eval/results/` ריק | **גבוהה** | T21, T22 ✓, פעולה של טל (§8) |
-| W2 | אימות | אין אבחון עצמי: משתמש שמשהו לא עובד אצלו לא יודע מה (CORS? מודל חסר? CSP? מכסת OPFS?) | הבדיקות מפוזרות: `available()` לכל executor בנפרד, אין `navigator.storage.estimate()` בקוד | גבוהה | T21 |
-| W3 | אימות | איכות העברית של מודלים קטנים לא ידועה; ברירת המחדל `qwen2.5:7b` נבחרה בלי מדידה | §9; `RECOMMENDED_OLLAMA_MODEL` קבוע ב-`executors/ollama.ts:17` | גבוהה | T19 ✓, T27 |
-| W4 | אמינות | e2e ב-Firefox נופל לסירוגין (3 מתוך 12 הריצות האחרונות שנכשלו), עם 2 ניסיונות חוזרים ב-CI שמסתירים את זה | `playwright.config.ts:22` (`retries: 2`), היסטוריית Actions | בינונית | T23 |
-| W5 | פריסה | Vercel חינמי מוגבל ל-100 פריסות ביום — ה-preview של כל PR נכשל ("retry in 24 hours") | סטטוס Vercel על #137–#155 | בינונית | T24, #135 ✓ |
-| W6 | עברית | העורך כפוי ל-LTR גם בממשק עברי; אין כיוון לפי פסקה בתצוגה המקדימה וב-WYSIWYG | `src/index.css:1382` (`.cm-editor { direction: ltr }`), אין `perLineTextDirection` / `dir="auto"` בקוד | **גבוהה** | T25 |
-| W7 | עברית | החיפוש לא מנרמל עברית: "ספרים" לא מוצא "הספרים", "סופר" ≠ "סופר" עם ניקוד, אותיות סופיות | `workspaceIndex.ts` — tokenizer כללי | גבוהה | T26 |
-| W8 | עברית | אין מודל מומלץ לעברית; קטלוג web-llm מסומן "multilingual" לפי הצהרת היצרן, לא לפי מדידה | `modelManager.ts` (`multilingual: true` בהערה "Hebrew not verified by us") | בינונית | T27 |
-| W9 | עברית | בדיקת איות ודקדוק בעברית תלויה ב-LanguageTool (תמיכה חלקית) או במודל (מנחש) | `grammar.ts` → `checkWithModel` | בינונית | T28 |
-| W10 | AI | "שאל את הכספת" עונה בלי ציטוטים מאומתים לפתקים; אין reranker | `askWorkspace` משתמש ב-`searchHybrid` בלבד | בינונית | T29 |
-| W11 | AI | סוכן השיפור מציע רשימה קבועה; לא לומד מה עזר על המכונה הזו | `critic.ts` — היוריסטיקות סטטיות | נמוכה | T30 |
-| W12 | ידע | תמונות הן "חור שחור": אין OCR, אין טקסט חלופי, לא נמצאות בחיפוש | 0 קבצים עם `tesseract`/OCR ב-`src` | בינונית | T31 |
-| W13 | נגישות | תמונות מודבקות מקבלות `alt` = שם הקובץ | `Editor.tsx:454` (`const alt = f.name…`) | בינונית | T31 |
-| W14 | ידע | אין הקראה | 0 קבצים עם `speechSynthesis` | נמוכה | T32 |
-| W15 | ידע | אין "מה השתנה" — חזרה לכספת אחרי יום דורשת לחפש ידנית | — | נמוכה | T33 |
-| W16 | ידע | אין קוצץ רשת / ספריית קריאה | 0 קבצים עם `clipper` | בינונית | T34 |
-| W17 | פרטיות | `research.ask` תחת `local-only` שולח את השאילתה ל-SearXNG שמעביר למנועי חיפוש חיצוניים — סותר את הבטחת §2.4 | ממצא Codex P1 ב-#136; `docker/local-ai.yml` | **גבוהה** | T34, T37 |
-| W18 | נתונים | אין תמונות מצב אוטומטיות של הכספת ואין ייצוא גיבוי בלחיצה; היסטוריית הגרסאות היא לכל קובץ | `VersionHistory.tsx` (קיים), אין `snapshots` | גבוהה | T35 |
-| W19 | נתונים | אין אזהרה לפני `git pull` שדורס עריכה לא שמורה | `src/sync/git.ts` | בינונית | T35 |
-| W20 | אבטחה | מפתחות ענן ב-`localStorage` גלוי (`lumen.ai.key.<provider>`) | `credentials.ts:7,50` | בינונית | T36 |
-| W21 | אבטחה | worker המחקר סומך על `Origin`; CSP של Tauri כולל `unsafe-inline` ו-`unsafe-eval` | `edge-workers/research/worker.ts:66`, `tauri.conf.json:27` | בינונית | T37, T43 |
-| W22 | ביצועים | 7.0MB gzip סה״כ (mermaid 800KB, graphviz 600KB, prettier 590KB, בודק TS 1.4MB), ותקציב הבנייה נבדק לכל קובץ ולא לסכום ההפעלה | הערת bundle-size ב-#123, ממצא Codex `scripts/bundle-budget.mjs:37` | בינונית | T38 |
-| W23 | קוד | קבצים ענקיים: `useCommands.ts` 2,268 שורות (116 פקודות), `fileFormats.ts` 1,306, `tsBlocks.ts` 1,046, `App.tsx` 1,033; 134 בלוקי `catch` שבולעים שגיאה בשקט ב-84 קבצים | `wc -l`, סריקת regex | בינונית | T38, T42 |
-| W24 | ביצועים | אינדקס הטקסט (backlinks, חיפוש) נבנה מחדש כולו אחרי כל שינוי בכספת; האינדקס הסמנטי כבר דלתאי לפי hash. לא נבדק עם אלפי פתקים | `workspaceIndex.ts:80` (`cache.builtAt = 0` על כל `lumen-workspace-changed`) | בינונית | T39 |
-| W25 | נגישות | אין בדיקת נגישות אוטומטית; 323 מופעי `aria-*` אבל בלי axe, בלי מסע מקלדת, בלי `prefers-reduced-motion` ב-e2e | `e2e/` — אין `a11y.spec.ts` | בינונית | T40 |
-| W26 | מובייל | PWA בלבד; יש `responsive-sweep` אבל אין בדיקת מגע/מקלדת וירטואלית | `e2e/responsive-sweep.spec.ts` | בינונית | T41 |
-| W27 | קוד | מגבלות ידועות שלא תוקנו (§11): אצווה כותבת עותק כפול, CriticMarkup חוצה בלוקים, worker בלי אימות | §11 | נמוכה–בינונית | T43 |
+**חומרה**: 🔴 גבוהה · 🟠 בינונית · 🟡 נמוכה. **12 הממצאים לתיקון ראשון**: G2, G4, G5, G1, F1, B1–B4, E2, J2, G7 (כולם 🔴, כולם ניתנים לפתרון מקומי).
 
-## 13. הכלים המקומיים החדשים (T21–T43)
+#### אימות ואמינות (A, E)
 
-כולם רצים על המחשב של המשתמש או בדפדפן. אין קריאה לענן בשום כלי, אלא אם המשתמש מדליק מדיניות ענן במפורש.
+| # | חולשה | ראיה | חומרה | כלי |
+|---|---|---|---|---|
+| E0 | כל מחסנית ה-AI המקומי לא רצה מעולם מול מודל אמיתי, WebGPU או docker | אין Ollama/GPU בסביבה שלי; `eval/results/` ריק | 🔴 | T21, T22 ✓, §8 |
+| E1 | 131 בלוקי `catch` ריקים + 35 `.catch(() => {})` בולעים שגיאות בשקט (`sync/git.ts` 6, `collab/yjs.ts` 5, `App.tsx` 4) | סריקה | 🟠 | T42 |
+| E2 | **גלריית התוספים קורסת בפתיחה**: `useMemo` אחרי `if (!open) return null` → "Rendered more hooks"; אין ESLint בפרויקט בכלל | `PluginGallery.tsx:233,239`; `App.tsx:933` (מורכב תמיד) | 🔴 | F1 מיידי, T42 |
+| E3 | flakes מוסתרים: 2 ניסיונות חוזרים ב-CI, 55 `waitForTimeout` קבועים ב-e2e, Firefox נופל לסירוגין | `playwright.config.ts:22`; היסטוריית Actions | 🟠 | T23 |
+| E4 | 5 בדיקות עם `expect(true).toBe(true)` (כולל e2e של הגלריה — לכן E2 עובר CI), `paste-html` מושבת לצמיתות, שער כיסוי 40% שמחריג `ui/`, `editor/`, `layouts/` | `screenshots-and-galleries.spec.ts:149,180`; `ci.yml:43-56` | 🟠 | T23 |
+| A1–A9 | מגבלות ידועות (§11): רופא כספת ×3, Playground מעגלי + Netlify, הסתרה ב-TS, ציטוט מקורב, worker בלי אימות, הצעות ב-WYSIWYG ×2, אצווה כפולה | §11 | 🟡–🟠 | T43 |
+| A10 | אחרי הפריסה: C7, D8, C8 לא נבנו; אין Sentry (אין ניטור שגיאות היום) | §8, §10 | 🔴 | §8 (טל) |
+
+#### עברית ו-RTL (B)
+
+| # | חולשה | ראיה | חומרה | כלי |
+|---|---|---|---|---|
+| B1 | העורך תמיד LTR: `.cm-editor { direction: ltr }`, 0 שימושים ב-`perLineTextDirection` / `dir="auto"` | `index.css:1381-1388` | 🔴 | T25 (בעבודה) |
+| B2 | כיוון אחד גלובלי (`documentElement.dir`); תצוגה מקדימה ו-WYSIWYG בלי כיוון לפי פסקה — מסמך מעורב לא קריא | `useStore.ts:486-488` | 🔴 | T25 |
+| B3 | **כותרות עבריות בלי עוגן**: 4 פונקציות `slug` שומרות רק ASCII — `slug("שלום עולם")` = `""` — אז לחיצה על פריט במתאר לא עושה כלום, scroll-sync וקישורי wiki לכותרת שבורים | `remarkLumen.ts:229`, `pipeline.ts:299`, `EditorLayout.tsx:155`, `workspaceIndex.ts:199`; `Outline.tsx:91` | 🔴 | T26 |
+| B4 | **backlinks שגויים לפתקים עבריים**: ההשוואה היא `slug(target) === slug(stem)`, וכל שם עברי נהיה `""` → כל קישור עברי "מצביע" לכל פתק עברי | `workspaceIndex.ts:102,110` | 🔴 | T26 |
+| B5 | גיבויים עבריים מתנגשים: `שלום.md` ו-`תודה.md` → `____.md`, חולקים מכסה של 100 גרסאות ומוחקים זה את זה | `autoBackup.ts:76` | 🔴 | T26, T35 |
+| B6 | חיפוש וספירת מילים: הניקוד מפרק מילים (`שָׁלוֹם` → `לו`), 2 מילים מנוקדות נספרות כ-6; אין אותיות שימוש; חיפוש מילות מפתח = substring | `neuralSearch.ts:41`, `StatusBar.tsx:318`, `workspaceIndex.ts:138-167` | 🟠 | T26 |
+| B7 | הבודק הדקדוקי ברקע תמיד `en-US`; רק הפקודה המפורשת מעבירה `he` | `grammarExtension.ts:115`, `Editor.tsx:620` | 🟠 | T28 |
+| B8 | אף גופן מצורף (Inter, Source Serif 4, JetBrains Mono) לא כולל עברית; הגופנים נטענים מ-Google (פרטיות, נכשל offline בפעם הראשונה) | `index.css:15-21`, `index.html:50` | 🟠 | T25 |
+| B9 | CSS פיזי במקום לוגי: `border-left`, `padding-left`, `margin-left` (27 פיזיים מול 22 לוגיים) — תבליטים וגבולות בצד הלא נכון ב-RTL | `index.css:356,365,382,507,514` | 🟠 | T25 |
+| B10 | ייצוא מתעלם מ-RTL: DOCX בלי `w:bidi`, HTML `lang="en"` בלי `dir`, LaTeX בלי polyglossia; רק PPTX והדפסה מטפלים | `exportDocx.ts`, `exportHtml.ts:41`, `exportFormats.ts:499` | 🟠 | T44 |
+| B11 | תוכן באנגלית בלבד: welcome (510 שורות), 10 תבניות, קיצורי ⌘ גם ב-Windows; תאריכים `en-US` קבועים | `welcome.ts`, `public/templates`, `templates.ts:49,148`, `VersionHistory.tsx:144` | 🟠 | T45 |
+
+#### ביצועים (C)
+
+| # | חולשה | ראיה | חומרה | כלי |
+|---|---|---|---|---|
+| C1 | Lighthouse אחרון: 55%, FCP 4.8s, LCP/TTI 9.6s (desktop); mobile FCP 29.7s, LCP 34.6s. לא נמדד מאז; האימות ב-CI הוא `warn` בלבד ורץ רק על main | `docs/audit/A7-lighthouse-baseline.md`; `ci.yml:145-163` | 🔴 | T38 |
+| C2 | תקציבי bundle גדולים: הפעלה app 195KB + index 220KB + react 160KB gzip; עצלים: codemirror 600KB, mermaid 860KB, graphviz 700KB, tldraw 420KB; התקציב לכל קובץ ולא לסכום | `scripts/bundle-budget.mjs:37-69` | 🟠 | T38 |
+| C3 | **כל שמירה אוטומטית סורקת את כל הכספת**: `lumen-workspace-changed` כל 600ms → עץ קבצים קורא כל קובץ, פאנל תגיות קורא כל קובץ, אינדקס backlinks נבנה מחדש עם `Promise.all` לא מוגבל | `App.tsx:448-453`, `FileTree.tsx:164`, `TagsPanel.tsx:64`, `workspaceIndex.ts:31-58` | 🔴 | T39 |
+| C4 | האינדקס הסמנטי = blob אחד ב-idb-keyval עם וקטורים ב-base64, נטען כולו בכל שאילתה, cosine בכוח גס | `semanticSearch.ts:43,186-194,292-305` | 🟠 | T39 |
+| C5 | רשימת הפקודות (≈120) נבנית מחדש בכל הקשה: `doc.content` בתלויות ה-`useMemo` | `useCommands.ts:189,2240-2267` | 🟠 | T38 |
+| C6 | מסמכים ארוכים לא נבדקו (ה-e2e הגדול ביותר: 14KB); התצוגה המקדימה והמתאר מפרסרים את כל המסמך בכל debounce | `edge-cases.spec.ts:57`, `Outline.tsx:17` | 🟠 | T39 |
+
+#### Offline / PWA (D)
+
+| # | חולשה | ראיה | חומרה | כלי |
+|---|---|---|---|---|
+| D1 | `vendor-shiki` ו-`shiki-langs` לא ב-precache ולא ב-runtime cache → הדגשת קוד נכשלת offline; אחרי עדכון SW ה-chunks החדשים של העורך לא במטמון עד שימוש ראשון (לא אומת) | `vite.config.ts:235-236,303` | 🟠 | T50 |
+| D2 | manifest שבור: `/icon-192.png`, `/icon-512.png`, `apple-touch-icon.png`, `og-image.png` לא קיימים; שני manifests עם צבע שונה | `index.html:27-28`, `public/manifest.json:18` | 🟠 | T50 |
+| D3 | ה-manifest מבטיח `share_target`, `file_handlers`, קיצורי `?action=` — ואין קוד לאף אחד מהם | `public/manifest.json:30-70` | 🟠 | T50 |
+| D4 | offline לא מכוסה ב-e2e (שרת dev בלי SW; בדיקת ה-SW מושבתת) | `live-exec.spec.ts:246` | 🟠 | T50 |
+
+#### אבטחה (F)
+
+| # | חולשה | ראיה | חומרה | כלי |
+|---|---|---|---|---|
+| F1 | **בלוקי live-js רצים אוטומטית בטעינת הפתק**, ב-Worker באותו origin, עם `fetch`/WebSocket/IndexedDB חופשיים — פתק משותף יכול לקרוא את טוקן ה-git ולשלוח אותו החוצה | `LiveJsBlock.tsx:48-60,225`; `git.ts:70-73`; CSP `connect-src ws: wss:` | 🔴 | T48 |
+| F2 | HTML גולמי בפתקים לא עובר sanitize (`rehype-raw` → `rehype-react`); ברשת ה-CSP מגן, ב-Tauri (`unsafe-inline unsafe-eval`) `javascript:` יכול לרוץ (לא אומת) | `pipeline.ts:205-216`, `tauri.conf.json` | 🔴 | T48 |
+| F3 | סודות בטקסט גלוי: מפתחות Anthropic/Gemini/Mistral ב-localStorage, טוקני Drive/Gist ב-localStorage, טוקן git ב-IndexedDB; `storage/vault.ts` המוצפן מיובא רק מבדיקה | `credentials.ts:50`, `gdrive.ts:58`, `githubGist.ts:14` | 🔴 | T36 |
+| F4 | CSP רחב: `script-src 'unsafe-eval'`, `connect-src ws: wss:` לכל מארח, `img-src https:` (פיקסלי מעקב בפתקים) | `index.html:5`, `public/_headers` | 🟠 | T48 |
+| F5 | ב-Vercel אין כותרות אבטחה: רק Cache-Control ו-CORS; אין `frame-ancestors`, `X-Frame-Options`, Trusted Types | `vercel.json` | 🟠 | #109 / T48 |
+| F6 | חדרי שיתוף ציבוריים כברירת מחדל: בלי סיסמה, 9,000 שמות אפשריים בלבד, שרתי signaling ציבוריים, `persistent-server.js` בלי אימות | `yjs.ts:70-72,123-151,214-265` | 🔴 | T49 |
+| F7 | שטח תקיפה מיותר: Tauri רושם plugin-fs עם הרשאות כתיבה שלא בשימוש; sourcemaps בייצור | `capabilities/default.json`, `vite.config.ts:379` | 🟠 | T57 |
+
+#### בטיחות נתונים (G)
+
+| # | חולשה | ראיה | חומרה | כלי |
+|---|---|---|---|---|
+| G1 | **האפליקציה לא מבקשת מהדפדפן לשמור את הנתונים**: 0 קריאות ל-`navigator.storage.persist()` — OPFS ו-IndexedDB ניתנים לפינוי (Safari: 7 ימים) | סריקה | 🔴 | T35 |
+| G2 | **`git pull` דורס בשקט עריכות לא שמורות ומוחק קבצים מקומיים חדשים**; מצב מעקב מושך כל 5 דק׳; המסמך הפתוח מוחלף עם `dirty:false` | `git.ts:318-361`, `gitWatch.ts:76-81`, `useCommands.ts:1919-1925` | 🔴 | T56 |
+| G3 | git מוגבל: fast-forward בלבד, בלי מיזוג או ממשק קונפליקטים, clone בעומק 1, טוקן חובה גם לריפו ציבורי, בלי `corsProxy` (clone מ-GitHub בדפדפן כנראה נכשל — לא אומת), בלי LFS | `git.ts:138-143,305` | 🔴 | T56 |
+| G4 | **פאנל היסטוריית הגרסאות תמיד ריק**: `saveSnapshot` של הפאנל ללא קוראים; הגיבויים האוטומטיים ב-OPFS `backups/` שאף ממשק לא קורא; 3 מאגרי היסטוריה נפרדים | `VersionHistory.tsx:36`, `collab/versionHistory.ts` | 🔴 | T35 |
+| G5 | **שינוי שם / העברה דורסים קובץ קיים בשקט** (`create:true` ואז מחיקת המקור); "דלג בקונפליקט" בהעברה מרובה לא מופעל; שינוי שם לא מעדכן קישורי wiki; אי אפשר לשנות שם לתיקייה | `workspace.ts:216-224`, `FileTree.tsx:107-115` | 🔴 | T46 |
+| G6 | מחיקה סופית: רקורסיבית, בלי סל מחזור או ביטול | `FileTree.tsx:294-296` | 🟠 | T46 |
+| G7 | **אין דרך לייצא את כל הפתקים**: הם ב-OPFS שהמשתמש לא רואה; `file.exportSite` מייצא מסמך אחד | `useCommands.ts:384-394` | 🔴 | T47 |
+| G8 | סנכרון Drive / Dropbox / Gist (1,621 שורות + ConflictDialog) כתוב ולא מחובר לשום מקום | `src/sync/cloud` | 🔴 | T56 |
+| G9 | שמירה אוטומטית: כתיבה שנכשלה (מכסה) נבלעת בלי הודעה; מסמכים מהדיסק נשמרים כל 30s; ללא כותרת לא נשמרים בכלל; אין flush ב-`pagehide` | `App.tsx:454-456`, `useStore.ts:197-198` | 🔴 | T35 |
+| G10 | הגיבויים מזהמים את הכספת: לפי שם ולא נתיב, נכתבים לשורש הגלוי → עד 100 עותקים לפתק בעץ, בחיפוש, בתגיות, ב-embeddings | `autoBackup.ts:76`, `semanticSearch.ts:208-211` | 🟠 | T35 |
+| G11 | ייבוא Obsidian / Notion ממזג את כל הפתקים למסמך אחד | `fileFormats.ts:653-660` | 🟠 | T47 |
+
+#### נגישות ומובייל (H, I)
+
+| # | חולשה | ראיה | חומרה | כלי |
+|---|---|---|---|---|
+| H1 | רק 3 מ-18 דיאלוגים לוכדים פוקוס; אין החזרת פוקוס | `CommandPalette.tsx:177`, `SearchDialog.tsx:76`, `PromptDialog.tsx:86` | 🟠 | T40 |
+| H2 | ל-WYSIWYG אין שם נגיש; מחלק הסרגל `role="separator"` בלי מקלדת | `SidebarResizer.tsx:47-60` | 🟡 | T40 |
+| H3 | ניגודיות טקסט משני בערכה הבהירה 3.99:1 (מתחת ל-4.5); גלילה חלקה מתעלמת מ-reduced-motion | `Outline.tsx:92` | 🟡 | T40 |
+| H4 | ≈29 תוויות `aria-label`/`title` באנגלית קשיחה | `MobileKeyboardBar.tsx:68`, `PageView.tsx:85` | 🟡 | T40 |
+| I1 | 0 מטפלי touch/pointer; ידיות גרירה רק ב-mousemove; המחלק עכבר בלבד | `dragHandles.ts:196-198` | 🟠 | T41 |
+| I2 | אין אמולציית מובייל בבדיקות (רק רוחב viewport, בלי `hasTouch`) | `playwright.config.ts:30-48` | 🟠 | T41 |
+| I3 | המתאר מוסתר מתחת ל-`md`; אין safe-area | `Outline.tsx:71`, `index.html:7,26` | 🟡 | T41 |
+| I4 | אין פרויקט `android/` למרות `@capacitor/android`; iOS/Android דורשים חשבונות בתשלום | — | 🟠 | §8 |
+
+#### חוויית משתמש, תוספים, AI, סנכרון, שולחן עבודה (J, K, L, M, N)
+
+| # | חולשה | ראיה | חומרה | כלי |
+|---|---|---|---|---|
+| J1 | הגדרות מפוזרות: ≈120 פקודות ב-2,268 שורות, 8+ דיאלוגי הגדרות, 31 שדות store + ≈56 מפתחות `lumen.*`, אין מסך הגדרות אחד | `useCommands.ts` | 🟠 | T51 |
+| J2 | **גלריית התוספים מדומה**: "התקנה" מרחוק = המתנה של 400ms ו-toast; `/plugins/*.js` לא קיימים; תג "מאומת" כברירת מחדל | `PluginGallery.tsx:214-218,257` | 🔴 | T52 |
+| J3 | התיעוד מתאר "כספת מוצפנת" ופקודות נעילה שלא קיימות | `docs/security/vault.md` | 🟠 | T53 |
+| J4 | 22 הודעות toast באנגלית קשיחה; ב-ar/de/ja 351–376 ערכים הם עותק של האנגלית; שער ה-i18n סופר מפתחות בלבד | `ai/commands.ts:90-104`, `ci.yml:96-110` | 🟡 | T45 |
+| J5 | אין `#תגיות` בגוף הטקסט (רק frontmatter), אין אופרטורי חיפוש / regex | `views/tagsIndex.ts:32-45` | 🟠 | T54 |
+| K1 | ה-eval מכסה רק את הסוכנים המקומיים, ידני, בלי baseline שמור; לפרומפטים של הענן אין eval | `fixtures.ts` | 🟠 | T19, T22 ✓ |
+| K2 | קלט עברי עלול לקבל תשובה באנגלית: אף פרומפט ב-`prompts.ts` לא אומר "ענה באותה שפה" | `src/ai/prompts.ts` | 🟠 | T27 |
+| K3 | קריאות AI בלי ביטול (שכתוב ב-WYSIWYG, refactor/template, שאל את הכספת); שתי מערכות AI חיות במקביל (`ai/agents.ts` הישן ו-`agents/`) | `WysiwygEditor.tsx:538`, `ai/agents.ts:53,99,146` | 🟡 | T55 |
+| L1 | שיתוף פעולה בלי התמדה: `y-websocket` מוחלף ב-stub → חדרים WebRTC בלבד ונעלמים כשהאחרון יוצא | `vite.config.ts:332-346` | 🟠 | T56 |
+| L2 | שרתי signaling ברירת מחדל: `wss://signal.lumen.md` (לא הדומיין שנבחר), yjs.dev, herokuapp (כנראה מת) | `yjs.ts:70-72` | 🟠 | T56 |
+| M1 | API תוספים מינימלי: פקודות, תוכן, change/save, toast; בלי הגדרות, פאנלים, הרחבות עורך, loader או sandbox | `pluginSystem.ts:47-60` | 🔴 | T52 |
+| N1 | תיעוד דק: 25 עמודים; כלום על git sync, ייצוא, עברית/RTL, קיצורים, התקנה | `docs/` | 🟠 | T53 |
+| N2 | כל אירוח עם חסרון: Netlify בלי Playground, Docker עם 130MB זמני ריצה, שני nginx שונים | `deploy/` מול `docker/` | 🟡 | T53 |
+| N3 | שולחן עבודה חלש: בלי auto-updater, Windows לא חתום, הפתקים ב-OPFS של ה-webview ולא בקבצים | `Cargo.toml`, `release.yml:84-89` | 🔴 | T57 |
+| N4 | דומיין: README ו-`index.html` מצביעים ל-`lumen.md`; §10 בחר "בלי דומיין" | `README:37`, `index.html:15,22` | 🟠 | #109 |
+| O1–O4 | קבצים ענקיים (8 קבצים > 900 שורות), ≈3,870 שורות קוד מת (`useAppHandlers`, `useGit`, `cryptoStorage`, `ConflictDialog`, `sync/cloud`), 4 עותקים של `slug`, 3 מאגרי היסטוריה, 69 חבילות מיושנות (16 גרסה ראשית) | `wc -l`, `npm outdated` | 🟠 | T42, T58 |
+
+## 13. הכלים המקומיים החדשים (T21–T58)
+
+כולם רצים על המחשב של המשתמש או בדפדפן. אין קריאה לענן בשום כלי, אלא אם המשתמש מדליק מדיניות ענן במפורש. "פותר" מצביע על הממצאים ב-§12.2.
 
 ### F. אימות ואמינות — "לא נבדק" הופך ל"נבדק בכל PR"
 
-| # | כלי | קבצים | מה הוא עושה | פותר חולשה | שעות |
+| # | כלי | קבצים | מה הוא עושה | פותר | שעות |
 |---|---|---|---|---|---|
-| T21 | **רופא AI** (`ai.doctor`) | `src/agents/doctor.ts`, `src/ui/AiDoctorPanel.tsx` | בודק בסדר: Ollama (גרסה, מודלים, `OLLAMA_ORIGINS`, תמיכה בכלים), WebGPU (f16, תקציב VRAM), transformers.js (wasm/webgpu), OPFS (מכסה ושימוש), service worker, CSP ל-11434/8787/8010, docker (SearXNG, LanguageTool). ואז מריץ מקרה זהב אחד לכל סוכן (מ-T19). כל ממצא = פעולה בלחיצה דרך לוח ההצעות (T12) | W1, W2, W3 | 6 |
-| T22 | **Ollama מזויף ב-CI** | `scripts/fake-ollama.mjs`, job `local-ai` ב-`ci.yml` | שרת HTTP שעונה ל-API של Ollama מתוך מקרי ה-eval. כל 12 הסוכנים רצים דרך זמן הריצה האמיתי בכל PR, בלי GPU. **בוצע ב-#155** | W1 | 3 ✓ |
-| T23 | **צייד flakes** | `scripts/e2e-flake.mjs`, `playwright.config.ts` | `npm run e2e:flake -- <spec> --times 10`: מריץ בדיקה N פעמים עם trace, מדווח אחוז הצלחה ואת ה-trace של הכישלון. ב-CI: trace לכל כישלון ב-firefox. מדיניות: לא משתיקים בדיקה, מתקנים את הסיבה | W4 | 4 |
-| T24 | **תצוגה מקדימה מקומית + רגרסיה חזותית** | `scripts/preview-visual.mjs`, `e2e/visual-smoke.spec.ts` (קיים) | בנייה מקומית + צילומי מסך של כל משטח בשני כיווני ממשק (LTR/RTL) ובשני ערכות נושא, השוואה לצילומים שבריפו. מבטל את התלות ב-preview של Vercel (100 פריסות ביום) | W5 | 4 |
+| T21 | **רופא AI** (`ai.doctor`) | `src/agents/doctor.ts`, `src/ui/AiDoctorPanel.tsx` | בודק בסדר: Ollama (גרסה, מודלים, `OLLAMA_ORIGINS`, כלים), WebGPU (f16, VRAM), transformers.js, OPFS (`storage.estimate`, `persisted`), service worker, CSP ל-11434/8787/8010, docker. ואז מקרה זהב אחד לכל סוכן (T19). כל ממצא = פעולה בלחיצה (T12) | E0 | 6 |
+| T22 | **Ollama מזויף ב-CI** | `scripts/fake-ollama.mjs`, job `local-ai` | שרת HTTP שעונה ל-API של Ollama מתוך מקרי ה-eval; כל 12 הסוכנים רצים דרך זמן הריצה האמיתי בכל PR. **בוצע ב-#155** | E0, K1 | 3 ✓ |
+| T23 | **אמת בבדיקות** | `scripts/e2e-flake.mjs`, `e2e/*`, `ci.yml` | `npm run e2e:flake -- <spec> --times 10` עם trace; מחיקת 5 ה-`expect(true)`, החלפת 55 `waitForTimeout` בהמתנות לתנאי, הפעלת `paste-html`, שער כיסוי שכולל `ui/` ו-`editor/`; `retries` יורד ל-1 ואז ל-0 | E3, E4 | 8 |
+| T24 | **תצוגה מקדימה מקומית + רגרסיה חזותית** | `scripts/preview-visual.mjs`, `e2e/visual-smoke.spec.ts` | בנייה מקומית + צילומי מסך של כל משטח ב-LTR/RTL ובשתי ערכות; מבטל את התלות ב-preview של Vercel | — | 4 |
+| F1 | **תיקונים מיידיים** (PR אחד, לפני הכול) | `PluginGallery.tsx`, `index.html`, `manifest.json` | סדר ה-hooks בגלריה (E2); אייקוני manifest חסרים (D2); `navigator.storage.persist()` בהפעלה (G1); `pagehide` flush לשמירה (G9); `dir` ב-`exportHtml` (B10 חלקית) | E2, D2, G1, G9 | 3 |
 
-### G. עברית ו-RTL — מהמקום החלש ביותר למקום החזק ביותר
+### G. עברית ו-RTL — מהמקום השבור ביותר למקום החזק ביותר
 
-| # | כלי | קבצים | מה הוא עושה | פותר חולשה | שעות |
+| # | כלי | קבצים | מה הוא עושה | פותר | שעות |
 |---|---|---|---|---|---|
-| T25 | **כיוון לכל פסקה בעורך** | `src/editor/bidi.ts`, `CodeMirrorEditor.tsx`, `WysiwygEditor.tsx`, `index.css` | מצב מקור: `EditorView.perLineTextDirection` + `dir="auto"` במקום `direction: ltr` כפוי; WYSIWYG ותצוגה מקדימה: `dir` לכל בלוק לפי התו החזק הראשון (UAX #9). קוד, מתמטיקה וטבלאות נשארים LTR. ממשק RTL מלא: קיצורי מקלדת, פאנלים, גרירה | W6 | 8 |
-| T26 | **חיפוש מודע לעברית** | `src/storage/workspaceIndex.ts`, `src/search/hebrew.ts` | נרמול אותיות סופיות (ך→כ…), הסרת ניקוד, הסרת אותיות שימוש (ו, ה, ב, ל, מ, ש, כ, וה, וב, ול, מה, שה…) כמילת חיפוש חלופית, התאמת תגיות וכותרות בעברית. דטרמיניסטי, בלי מודל | W7 | 5 |
-| T27 | **קטלוג מודלים לעברית** | `src/ai/modelCatalog.ts`, `modelManager.ts`, `eval/results/` | ציון עברית לכל מודל מתוך ה-eval (T19) שרץ על המחשב של טל; מנהל המודלים ממליץ לפי שפת הכספת (זוהתה מחלק האותיות העבריות בפתקים): `aya-expanse:8b`, `gemma3:12b`, `qwen3:8b`, `dictalm2.0` (Ollama); בדפדפן: Qwen3 / Llama 3.2 | W8 | 4 |
-| T28 | **איות ודקדוק עברי מקומי** | `src/ai/hebrewSpell.worker.ts`, `src/agents/defs/proofreader.ts` | מילון עברי ב-worker (hspell הוא GPL ולא מתאים לאפליקציית MIT כקוד — נטען כקובץ נתונים נפרד שהמשתמש מוריד, או מילון מוויקימילון CC BY-SA; ההחלטה בתחילת T28): שגיאות כתיב בעברית בלי רשת; כללי דקדוק דטרמיניסטיים (ה׳ הידיעה לפני מילת יחס, כפילות מילים, "את" לפני לא-מיודע); ה-proofreader מקבל את הרשימה כעובדות ולא מנחש | W9 | 8 |
+| T25 | **כיוון לכל פסקה + גופנים + CSS לוגי** | `src/editor/bidi.ts` (נכתב), `Editor.tsx`, `WysiwygEditor.tsx`, `renderer/`, `index.css` | מצב מקור: `perLineTextDirection` + `dir="auto"` לכל שורה (קוד ו-frontmatter ב-LTR; `dir:` ב-frontmatter מקבע). תצוגה מקדימה ו-WYSIWYG: `dir="auto"` לכל בלוק (rehype plugin + ProseMirror decorations). גופנים עם עברית מארחים עצמית (Noto Sans Hebrew / Heebo, Noto Sans Mono) בלי Google. כל `left/right` ב-CSS → `inline-start/end`. בדיקה ב-Chromium אימתה שהדפדפן פותר `dir="auto"` לכיוון מחושב | B1, B2, B8, B9 | 12 |
+| T26 | **ליבת טקסט עברית** | `src/text/hebrew.ts`, `slug` אחד ב-`src/lib/slug.ts`, `workspaceIndex.ts`, `neuralSearch.ts`, `autoBackup.ts`, `StatusBar.tsx` | פונקציית slug אחת מודעת ל-Unicode (מחליפה את 4 העותקים; תואמת ל-rehype-slug כדי שהעוגנים יתאימו); backlinks לפי שם מנורמל ולא לפי slug ריק; שמות גיבוי לפי hash של הנתיב; tokenizer ששומר ניקוד ומנרמל אותיות סופיות; הסרת אותיות שימוש (ו, ה, ב, ל, מ, ש, כ, וה, וב…) כצורת חיפוש נוספת; ספירת מילים נכונה | B3, B4, B5, B6 | 8 |
+| T27 | **קטלוג מודלים לעברית + "ענה באותה שפה"** | `src/ai/modelCatalog.ts`, `modelManager.ts`, `prompts.ts`, `eval/results/` | ציון עברית לכל מודל מה-eval שרץ אצל טל; המלצה לפי שפת הכספת: `aya-expanse:8b`, `gemma3:12b`, `qwen3:8b`, `dictalm2.0`; בדפדפן Qwen3 / Llama 3.2. כל פרומפט (גם ענן) מקבל "ענה בשפת הקלט" + בדיקת script על התשובה | B-כללי, K2 | 5 |
+| T28 | **איות ודקדוק עברי מקומי** | `src/ai/hebrewSpell.worker.ts`, `grammarExtension.ts`, `proofreader.ts` | מילון עברי ב-worker (hspell הוא GPL — נטען כקובץ נתונים שהמשתמש מוריד, או מילון מוויקימילון CC BY-SA; ההחלטה בתחילת T28): איות בלי רשת; כללים דטרמיניסטיים (ה׳ הידיעה לפני מילת יחס, כפילות מילים, "את" לפני לא-מיודע); הבודק ברקע מזהה את שפת הפסקה במקום `en-US` קבוע | B7 | 8 |
+| T44 | **ייצוא דו-כיווני** | `exportDocx.ts`, `exportHtml.ts`, `exportFormats.ts`, LaTeX | DOCX עם `w:bidi` ו-`w:rtl` לפסקאות עבריות, HTML עם `lang` ו-`dir` מהמסמך, LaTeX עם polyglossia/xelatex, EPUB עם `page-progression-direction` | B10 | 5 |
+| T45 | **תוכן עברי** | `welcome.ts`, `public/templates/he/`, `templates.ts`, locales | welcome ו-10 התבניות בעברית (לפי שפת הממשק), קיצורים לפי מערכת ההפעלה, תאריכים לפי locale, 22 ה-toasts הקשיחים → i18n, ושער i18n שבודק גם ערכים לא מתורגמים (לא רק מפתחות) | B11, J4 | 6 |
 
 ### H. ידע ואיכות AI — התשובות טובות יותר, והאפליקציה לומדת
 
-| # | כלי | קבצים | מה הוא עושה | פותר חולשה | שעות |
+| # | כלי | קבצים | מה הוא עושה | פותר | שעות |
 |---|---|---|---|---|---|
-| T29 | **Reranker מקומי + ציטוטים לפתקים** | `src/ai/reranker.ts`, `semanticSearch.ts`, `askWorkspace.ts` | `bge-reranker-v2-m3` ב-transformers.js מדרג מחדש את 30 התוצאות הראשונות; "שאל את הכספת" עונה עם ציטוטים לפתק ולשורה, ואימות `quoteCoverage` (קיים) על כל ציטוט. תשובה בלי ציטוט מאומת מסומנת | W10 | 6 |
-| T30 | **מבקר לומד** | `src/agents/outcomes.ts`, `critic.ts`, `suggestions.ts` | כל הצעה שנלחצה נרשמת עם התוצאה של הריצה החוזרת (IndexedDB). בפעם הבאה ההצעה שעבדה על המכונה הזו מופיעה ראשונה; הצעות שלא עזרו יורדות. "מה עבד בשבילך" במקום רשימה קבועה | W11 | 4 |
-| T31 | **ראייה מקומית: OCR וטקסט חלופי** | `src/ai/vision.worker.ts`, `src/agents/defs/captioner.ts`, `imagePaste.ts` | תמונה שמודבקת/מצורפת: OCR (tesseract.js, עברית+אנגלית) → טקסט לחיפוש ו-alt; תיאור קצר ממודל ראייה מקומי (Ollama: `qwen2.5vl`/`llava`; דפדפן: Florence-2 ב-transformers.js). סריקות PDF עוברות OCR לעמוד | W12, W13 | 8 |
-| T32 | **הקראה מקומית** (`note.read`) | `src/ai/tts.ts` | Web Speech API עם קולות המערכת (עברית ב-macOS/Windows), הדגשת המשפט הנקרא, מהירות; בלי רשת | W14 | 2 |
-| T33 | **סיכום יומי מקומי** (`vault.digest`) | `src/agents/defs/digester.ts` | בפתיחה: מה השתנה מאז הביקור הקודם (mtime / git diff) → פתק סיכום קצר עם קישורים ומשימות פתוחות (tasker + writer). רץ רק אם יש שינויים | W15 | 4 |
-| T34 | **קוצץ רשת וספריית קריאה** | `src/research/clipper.ts`, `extract.ts` (רץ בדפדפן), `library/` | שמירת דף אינטרנט כ-Markdown בכספת (חילוץ בצד הלקוח, בלי worker), עם מקור ותאריך; embeddings לספרייה. מחקר במצב `local-only` = חיפוש בספרייה שלך בלבד; חיפוש ברשת דורש הסכמה מפורשת פעם אחת ושולח **רק** את השאילתה, לא את המסמך (סוגר את ממצא Codex ב-#136) | W16, W17 | 7 |
+| T29 | **Reranker מקומי + ציטוטים לפתקים** | `src/ai/reranker.ts`, `semanticSearch.ts`, `SearchDialog.tsx` | `bge-reranker-v2-m3` ב-transformers.js מדרג מחדש 30 תוצאות; "שאל את הכספת" עונה עם ציטוטים לפתק ולשורה, ו-`quoteCoverage` (קיים) מאמת כל ציטוט; תשובה בלי ציטוט מאומת מסומנת | חיפוש | 6 |
+| T30 | **מבקר לומד** | `src/agents/outcomes.ts`, `critic.ts`, `suggestions.ts` | כל הצעה שנלחצה נרשמת עם תוצאת הריצה החוזרת (IndexedDB); ההצעה שעבדה על המכונה הזו עולה ראשונה | — | 4 |
+| T31 | **ראייה מקומית: OCR וטקסט חלופי** | `src/ai/vision.worker.ts`, `defs/captioner.ts`, `Editor.tsx` (הדבקה) | תמונה מודבקת/מצורפת: OCR (tesseract.js, עברית+אנגלית) → טקסט לחיפוש ו-`alt` אמיתי במקום שם הקובץ; תיאור ממודל ראייה מקומי (Ollama `qwen2.5vl`; דפדפן Florence-2); סריקות PDF עוברות OCR | תמונות, נגישות | 8 |
+| T32 | **הקראה** (`note.read`) | `src/ai/tts.ts` | Web Speech API עם קולות המערכת (עברית ב-macOS/Windows), הדגשת המשפט הנקרא | — | 2 |
+| T33 | **סיכום יומי** (`vault.digest`) | `defs/digester.ts` | מה השתנה מאז הביקור הקודם → פתק קצר עם קישורים ומשימות פתוחות | — | 4 |
+| T34 | **קוצץ רשת וספריית קריאה** | `src/research/clipper.ts`, `extract.ts` בצד הלקוח | שמירת דף כ-Markdown בכספת עם מקור ותאריך; embeddings לספרייה; מחקר ב-`local-only` = הספרייה בלבד; חיפוש ברשת דורש הסכמה פעם אחת ושולח רק את השאילתה (§2.4) | פרטיות המחקר | 7 |
+| T55 | **ביטול בכל מקום ומערכת AI אחת** | `ai/agents.ts` → `agents/defs`, `WysiwygEditor.tsx`, `SearchDialog.tsx` | `AbortSignal` לכל קריאת AI (Esc מבטל), מחיקת `ai/agents.ts` הישן אחרי שכל הקוראים עברו לסוכנים | K3 | 4 |
 
 ### I. בטיחות נתונים ופרטיות
 
-| # | כלי | קבצים | מה הוא עושה | פותר חולשה | שעות |
+| # | כלי | קבצים | מה הוא עושה | פותר | שעות |
 |---|---|---|---|---|---|
-| T35 | **תמונות מצב וגיבוי** | `src/storage/snapshots.ts`, `src/ui/SnapshotsPanel.tsx` | תמונת מצב של הכספת ל-OPFS כל 10 דק׳ ובסגירה (דלתא, דחוסה), שחזור של קובץ/כספת לנקודה, ייצוא zip. אזהרה לפני `git pull` שידרוס עריכה לא שמורה; "יש שינויים לא שמורים" בסגירת הלשונית | W18, W19 | 6 |
-| T36 | **סודות מוצפנים** | `src/ai/credentials.ts`, `src/lib/secretStore.ts`, Tauri keyring | מפתחות ענן מוצפנים ב-WebCrypto (AES-GCM, מפתח מ-passphrase או מ-`crypto.subtle` לא-ניתן-לייצוא ב-IndexedDB); ב-Tauri — keychain של המערכת. לא עוד `localStorage` גלוי | W20 | 4 |
-| T37 | **יומן פרטיות** | `src/ai/privacyLedger.ts`, לוח הגדרות AI | כל בקשת רשת של מחסנית ה-AI נרשמת (מארח, בייטים, סיבה, מדיניות); מוצג בלוח ההגדרות. "מקומי בלבד" הופך לניתן לביקורת. חריגה (מארח לא מקומי תחת local-only) = חסימה + הצעה | W17, W21 | 3 |
+| T35 | **היסטוריה, תמונות מצב וגיבוי אחד** | `src/storage/history.ts` (מאחד 3 מאגרים), `VersionHistory.tsx`, `autoBackup.ts`, `App.tsx` | מאגר היסטוריה אחד (IndexedDB, דלתות דחוסות) שהשמירה האוטומטית כותבת אליו — הפאנל מפסיק להיות ריק; תמונת מצב של כל הכספת כל 10 דק׳ ובסגירה; הגיבויים יוצאים מהשורש הגלוי (לא בעץ, לא בחיפוש, לא ב-embeddings) ונקראים לפי נתיב; `storage.persist()` + הודעה על מכסה; כתיבה שנכשלה = toast + ניסיון חוזר; flush ב-`pagehide`; מסמכים ללא כותרת נשמרים | G1, G4, G9, G10, B5 | 8 |
+| T36 | **סודות מוצפנים** | `src/lib/secretStore.ts`, `credentials.ts`, `gdrive.ts`, `githubGist.ts`, `git.ts`, Tauri keyring | כל מפתח וטוקן מוצפן ב-WebCrypto (AES-GCM; מפתח לא-ניתן-לייצוא ב-IndexedDB, או passphrase); ב-Tauri — keychain של המערכת. `storage/vault.ts` הקיים מתחבר, או נמחק יחד עם התיעוד שלו | F3, J3 | 5 |
+| T37 | **יומן פרטיות** | `src/ai/privacyLedger.ts`, לוח הגדרות AI | כל בקשת רשת של ה-AI נרשמת (מארח, בייטים, סיבה, מדיניות); חריגה תחת local-only = חסימה + הצעה | §2.4 | 3 |
+| T46 | **פעולות קבצים בטוחות** | `workspace.ts`, `FileTree.tsx`, `src/storage/trash.ts` | שינוי שם/העברה מסרבים לדרוס (או שואלים), מעדכנים קישורי wiki בכל הכספת, תומכים בתיקיות; מחיקה → `.trash/` עם שחזור ו-Ctrl+Z; ריקון אחרי 30 יום | G5, G6 | 7 |
+| T47 | **ייצוא ויבוא של הכול** | `src/storage/exportAll.ts`, `fileFormats.ts`, פקודות `vault.export`, `vault.import` | ייצוא כל הכספת כ-zip (Markdown + נכסים, שומר נתיבים) ול-File System Access API (תיקייה אמיתית); ייבוא תיקייה / zip של Obsidian ו-Notion קובץ-לקובץ עם המרת קישורים | G7, G11 | 6 |
+| T48 | **ארגז חול לתוכן** | `LiveJsBlock.tsx`, `pipeline.ts`, `index.html`, `public/_headers`, `vercel.json`, `tauri.conf.json` | live-js רץ רק בלחיצה ("הרץ") ובתוך iframe `sandbox` עם origin נפרד (`playground-runner`, קיים) בלי גישה ל-IndexedDB/טוקנים ועם CSP `connect-src 'none'`; HTML גולמי עובר `rehype-sanitize` (allowlist); CSP: `img-src` רק self/data/blob + מארחים שהמשתמש אישר, `connect-src` רק מארחים ידועים; כותרות אבטחה ב-`vercel.json`; Tauri בלי `unsafe-eval` | F1, F2, F4, F5 | 10 |
+| T49 | **חדרים מאובטחים** | `collab/yjs.ts`, `roomManager.ts`, `docker/collab.yml` | סיסמה אוטומטית (מוצפן E2E) בכל חדר, שם חדר 128 ביט, signaling ברירת מחדל = השרת של הפרויקט או LAN (docker), `persistent-server.js` עם טוקן | F6, L1, L2 | 6 |
 
-### J. ביצועים, נגישות, מובייל
+### J. ביצועים, Offline, נגישות, מובייל
 
-| # | כלי | קבצים | מה הוא עושה | פותר חולשה | שעות |
+| # | כלי | קבצים | מה הוא עושה | פותר | שעות |
 |---|---|---|---|---|---|
-| T38 | **תקציב הפעלה** | `scripts/bundle-budget.mjs`, `vite.config.ts`, `useCommands` → `src/commands/*` | תקציב על **סכום** ה-chunks הנטענים בהפעלה (ממצא Codex #123); פיצול `useCommands.ts` (2,268 שורות) למודולים לפי תחום עם טעינה עצלה; Lighthouse מקומי (`npm run perf`) עם סף TTI | W22, W23 | 8 |
-| T39 | **כספת גדולה** | `workspaceIndex.ts`, `semanticSearch.ts`, `FileTree.tsx` | אינדוקס ב-worker עם עדכון דלתא (לא אינדוקס מלא בכל שינוי), עץ קבצים וירטואלי, בדיקת ביצועים עם 10,000 פתקים ב-e2e | W24 | 6 |
-| T40 | **סוכן נגישות** | `e2e/a11y.spec.ts` (axe-core), `src/ui/*` | axe על כל משטח (LTR+RTL), מסע מקלדת בלבד, מלכודות פוקוס, `prefers-reduced-motion`, שמות נגישים לכל כפתור אייקון. הממצאים מתוקנים, לא רק מדווחים | W25 | 8 |
-| T41 | **מובייל ומגע** | `index.css`, `e2e/responsive-sweep.spec.ts` (קיים) | יעדי מגע ≥ 44px, סרגל כלים מתקפל, מקלדת וירטואלית לא מסתירה את הסמן, e2e באמולציית iPhone/Android, התקנת PWA | W26 | 6 |
+| T38 | **תקציב הפעלה ומדידה** | `scripts/bundle-budget.mjs`, `vite.config.ts`, `src/commands/*`, `lighthouserc`, `ci.yml` | תקציב על **סכום** ה-chunks של ההפעלה; `useCommands.ts` מפוצל ל-12 מודולים לפי תחום עם טעינה עצלה, ו-`doc.content` יוצא מתלויות ה-`useMemo`; Lighthouse ב-CI כ-`error` על כל PR עם סף (LCP < 2.5s desktop); `npm run perf` מקומי | C1, C2, C5 | 10 |
+| T39 | **כספת גדולה ומסמך ארוך** | `workspaceIndex.ts`, `FileTree.tsx`, `TagsPanel.tsx`, `semanticSearch.ts`, `Outline.tsx` | אינדקס אחד ב-worker עם עדכון דלתא לפי הקובץ שהשתנה (לא סריקה של הכספת בכל שמירה); עץ קבצים ותגיות קוראים מהאינדקס; וקטורים ב-`Float32Array` לפי קובץ; מתאר ותצוגה מקדימה מעבדים רק את הבלוקים שהשתנו; e2e עם 10,000 פתקים ומסמך של 2MB | C3, C4, C6 | 10 |
+| T50 | **PWA אמיתי** | `public/manifest.json`, `vite.config.ts`, `src/pwa/*`, `e2e/offline.spec.ts` | אייקונים קיימים, manifest אחד, `share_target` ו-`file_handlers` ממומשים (`launchQueue`), `?action=` עובד, shiki ו-workers ב-precache, e2e offline על בנייה אמיתית | D1–D4 | 6 |
+| T40 | **סוכן נגישות** | `e2e/a11y.spec.ts` (axe-core), `src/ui/*`, `index.css` | axe על כל משטח (LTR+RTL), מלכודת פוקוס + החזרה ב-18 הדיאלוגים (hook אחד), שם נגיש ל-WYSIWYG, מחלק סרגל במקלדת, ניגודיות ≥ 4.5, `prefers-reduced-motion`, 29 התוויות → i18n | H1–H4 | 8 |
+| T41 | **מובייל ומגע** | `dragHandles.ts`, `SidebarResizer.tsx`, `index.css`, `playwright.config.ts` | Pointer Events במקום mouse, יעדי מגע ≥ 44px, safe-area, מתאר במובייל כגיליון, פרויקט Playwright "mobile" עם `hasTouch` ומסע מלא | I1–I3 | 7 |
 
-### K. בריאות הקוד
+### K. חוויה, תוספים, סנכרון, שולחן עבודה, בריאות הקוד
 
-| # | כלי | קבצים | מה הוא עושה | פותר חולשה | שעות |
+| # | כלי | קבצים | מה הוא עושה | פותר | שעות |
 |---|---|---|---|---|---|
-| T42 | **גדר גודל קבצים** | `scripts/check-code-hygiene.mjs` | קובץ ייצור מעל 800 שורות נכשל ב-CI (רשימת חריגים מצטמצמת); `App.tsx`, `fileFormats.ts`, `tsBlocks.ts` מפוצלים | W23 | 5 |
-| T43 | **סגירת המעקבים** | §11 | המגבלות הידועות שניתנות לתיקון (אצווה כותבת עותק כפול, Accept/Reject All על CriticMarkup חוצה בלוקים ב-WYSIWYG, worker המחקר סומך על Origin → token חובה) | W27 | 10 |
+| T51 | **מסך הגדרות אחד** | `src/ui/Settings/*`, `src/settings/schema.ts` | סכמת הגדרות אחת (כל מפתח `lumen.*` ושדה store מתועד בה), מסך אחד עם חיפוש, קטגוריות וייצוא/ייבוא; הדיאלוגים הקיימים הופכים ללשוניות | J1 | 8 |
+| T52 | **תוספים אמיתיים** | `pluginSystem.ts`, `PluginGallery.tsx`, `src/plugins/sandbox/*`, `packages/create-lumen-plugin` | API: הגדרות, פאנל צד, הרחבות עורך (CodeMirror/ProseMirror), פקודות עם קיצורים, אחסון; טעינה מ-URL/קובץ ב-iframe sandbox עם הודעות; הגלריה קוראת רישום אמיתי (JSON בריפו) ומציגה "מאומת" רק עם חתימה; 3 תוספים לדוגמה | J2, M1 | 14 |
+| T53 | **תיעוד מלא** | `docs/` | git sync, ייצוא/ייבוא, עברית ו-RTL, קיצורים, התקנה (PWA/שולחן עבודה/מובייל), מודלים מקומיים; מחיקת דף ה-vault שלא קיים; אירוח: טבלת "מה עובד איפה" | J3, N1, N2 | 6 |
+| T54 | **תגיות בגוף וחיפוש עם אופרטורים** | `views/tagsIndex.ts`, `workspaceIndex.ts`, `SearchDialog.tsx` | `#תגית` בגוף הטקסט (גם עברית), אופרטורים `tag:`, `path:`, `-`, `"…"`, `/regex/`; ממומש על האינדקס של T39 | J5 | 5 |
+| T56 | **סנכרון בטוח** | `sync/git.ts`, `gitWatch.ts`, `sync/cloud/*`, `ConflictDialog.tsx`, `docker/sync.yml` | `git pull` מתמזג (three-way) ומציג קונפליקטים במקום לדרוס; לא מוחק קבצים מקומיים לא עקובים; לא מחליף מסמך פתוח עם עריכה; clone ציבורי בלי טוקן; proxy CORS מקומי ב-docker; Drive/Dropbox/Gist מתחברים לממשק או נמחקים; שרת Yjs עם התמדה ב-docker | G2, G3, G8, L1 | 12 |
+| T57 | **שולחן עבודה אמיתי** | `src-tauri/`, `src/storage/fsAdapter.ts`, `release.yml` | ב-Tauri הפתקים נשמרים כקבצים אמיתיים בתיקייה שהמשתמש בוחר (plugin-fs שכבר רשום) — תואם Obsidian; `tauri-plugin-updater`; חתימת Windows דרך Azure Trusted Signing (חינמי לפתוח) או SignPath; ללא sourcemaps בייצור | N3, F7 | 10 |
+| T42 | **גדר קוד** | `scripts/check-code-hygiene.mjs`, ESLint | ESLint עם `react-hooks/rules-of-hooks` (היה תופס את E2), קובץ ייצור מעל 800 שורות נכשל, `catch` ריק דורש `// why:`; 8 הקבצים הגדולים מפוצלים | E1, E2, O1 | 8 |
+| T58 | **ניקוי** | — | מחיקת ≈3,870 שורות קוד מת, איחוד 4 ה-slug ו-3 מאגרי ההיסטוריה (עם T26, T35), עדכון 16 החבילות בגרסה ראשית (React 19, Vitest 5…) אחת-אחת עם הבדיקות | O2–O4 | 10 |
+| T43 | **סגירת המגבלות הידועות** | §11 | מה שניתן לתיקון ב-§11 | A1–A9 | 10 |
 
 ### לוח זמנים לשלבים F–K
 
 | שלב | כלים | שעות | מתי |
 |---|---|---|---|
-| F אימות | T21, T23, T24 (T22 בוצע) | 14 | אחרי מיזוג #137–#155 |
-| G עברית | T25–T28 | 25 | אחרי F |
-| H ידע | T29–T34 | 31 | במקביל ל-G (קבצים שונים) |
-| I בטיחות | T35–T37 | 13 | אחרי H |
-| J ביצועים/נגישות | T38–T41 | 28 | אחרי I |
-| K קוד | T42–T43 | 15 | לאורך הדרך |
-| **סה״כ** | 22 כלים | **≈ 126 שעות** (טווח 110–150) | ≈ 8–10 ימי עבודה רציפים |
+| F אימות + תיקונים מיידיים | F1, T21, T23, T24 (T22 ✓) | 21 | מיד; F1 כ-PR ראשון אחרי המחסנית |
+| G עברית | T25–T28, T44, T45 | 44 | אחרי F |
+| I בטיחות נתונים ופרטיות | T35, T46, T47, T48, T36, T37, T49 | 45 | במקביל ל-G (קבצים שונים) |
+| H ידע | T29–T34, T55 | 35 | אחרי G |
+| J ביצועים / Offline / נגישות / מובייל | T38, T39, T50, T40, T41 | 41 | אחרי I |
+| K חוויה, תוספים, סנכרון, שולחן עבודה, קוד | T51, T52, T53, T54, T56, T57, T42, T58, T43 | 83 | אחרי J |
+| **סה״כ** | 37 כלים + F1 | **≈ 270 שעות** (טווח 230–320) | ≈ 3.5–4 שבועות עבודה רציפה |
 
-הסדר נקבע לפי כאב: קודם מה שמונע לדעת אם זה עובד (F), אחר כך מה שהמשתמש הראשון רואה כל יום (G), אחר כך מה שמבדיל מהמתחרים (H), ואז הגנה (I), מהירות ונגישות (J) ותחזוקה (K).
+הסדר נקבע לפי נזק: קודם מה שמאבד נתונים או פותח חור אבטחה ומה שמונע לדעת אם זה עובד (F, I), ואז מה שהמשתמש העברי רואה כל יום (G), מה שמבדיל מהמתחרים (H), מהירות ונגישות (J), ובסוף הרחבה ותחזוקה (K). כל כלי = PR נפרד עם בדיקות, review של Codex, ועדכון של המסמך הזה.
