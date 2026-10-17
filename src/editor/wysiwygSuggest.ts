@@ -84,9 +84,17 @@ export function getActiveWysiwygView(): typeof activeView {
 
 /* ─── Parse: markdown → sentinels → mdast nodes ─────────────────────── */
 
+/** A folded author tag in prepared markdown: a change's closer + `{>>@name<<}`. */
+const AUTHOR_TAG = new RegExp(`([${S.insClose}${S.delClose}${S.subClose}]${S.comOpen}@)([^@<>{}\n]+)(?=${S.comClose})`, "g");
+
 /** Prepare markdown for Milkdown: CriticMarkup delimiters → sentinels. */
 export function encodeCriticForWysiwyg(markdown: string): string {
-  return prepareCriticMarkup(markdown);
+  // An author name is plain text, but remark would parse markdown in it
+  // (`Jane *Doe*` → text + emphasis) and the tag would no longer be read
+  // as one: escape its punctuation so it arrives as a single text node.
+  return prepareCriticMarkup(markdown).replace(AUTHOR_TAG, (_m, head: string, name: string) =>
+    head + name.replace(/[!-/:-@[-`{-~]/g, "\\$&"),
+  );
 }
 
 interface CriticNode {

@@ -70,6 +70,16 @@ describe("CriticMarkup ↔ marks", () => {
     expect(e.view.dom.querySelector("ins.critic-ins")?.getAttribute("title")).toBe("@Tal");
   });
 
+  it("reads an author name containing markdown syntax as the author", async () => {
+    const src = "Say {++hi++}{>>@Jane *Doe*<<} and {--x--}{>>@a_b_c [d]<<} now.";
+    const e = await open(src);
+    expect(e.md()).toBe(src);
+    expect(e.view.dom.querySelector("ins.critic-ins")?.getAttribute("title")).toBe("@Jane *Doe*");
+    e.select(e.at("hi", 1));
+    expect(resolveAtCursor(e.view, "accept")).toBe(true);
+    expect(e.md()).toBe("Say hi and {--x--}{>>@a_b_c [d]<<} now.");
+  });
+
   it("keeps CriticMarkup in link destinations and titles as literal markup", async () => {
     const src = '[x](https://example.test/{++version++} "a {--b--}") and {++y++}.';
     const e = await open(src);
