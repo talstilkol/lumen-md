@@ -32,9 +32,11 @@ const BUDGETS = [
   //       fires when a doc contains inline HTML). Measured: 177.9 KB
   //       gzipped on macOS post-fix. Budget gives ~17 KB headroom for
   //       Linux gzip variance + future first-party growth.
-  // With Vite 8 the entry `main-*` is a stub; the startup code shared by the
-  // HTML entries lives in `app-*`.
-  { name: "main bundle",        pattern: /^(main|app)-/,          budgetKb: 195 },
+  // With Vite 8 the startup code shared by the HTML entries lives in
+  // `app-*`; the entry `main-*` is a stub and gets a tight budget of its own,
+  // so code moving back into it can't double the startup allowance.
+  { name: "main bundle",        pattern: /^app-/,                 budgetKb: 195 },
+  { name: "entry stub",         pattern: /^main-/,                budgetKb: 5 },
   { name: "entry index",        pattern: /^index-/,               budgetKb: 220 },
   // mermaid: 800 → 860 (2026-10 dependency audit). mermaid 11.15 → 11.17.2
   //   fixes GHSA-6x64-9x62-f2gx (CSS injection), GHSA-c4c3-pg64-4m4v and
