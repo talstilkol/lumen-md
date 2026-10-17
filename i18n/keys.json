@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-10-17T16:08:28.215Z",
+  "generated_at": "2026-10-17T16:19:58.645Z",
   "source": "src/i18n/index.ts (en bundle)",
-  "count": 1071,
+  "count": 1072,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -3469,6 +3469,14 @@
         "provider",
         "model",
         "cost"
+      ]
+    },
+    {
+      "key": "batch.confirmLocal",
+      "en": "Process {count} notes on this device with {model}? It runs in the background, one note at a time; use \"AI: Check Batch Jobs\" to apply the results.",
+      "vars": [
+        "count",
+        "model"
       ]
     },
     {
