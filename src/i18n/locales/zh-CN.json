@@ -992,7 +992,7 @@
   "ai.style.folder": "学习的文件夹（留空 = 整个工作区）：",
   "ai.style.building": "正在阅读你的笔记并描述你的风格…",
   "ai.style.built": "风格档案已就绪：来自 {notes} 条笔记的 {rules} 条规则。AI 现在会用你的风格写作。",
-  "ai.style.modelfileSaved": "已保存 lumen-style.Modelfile — 运行：ollama create my-style -f lumen-style.Modelfile",
+  "ai.style.modelfileSaved": "已保存 {path} — 运行：ollama create my-style -f {path}",
   "ai.style.cleared": "风格档案已删除。",
   "cmd.ai.policy": "AI：本地或云端策略",
   "cmd.ai.policy.hint": "AI 请求可以发往何处：仅本设备、本地优先，或云端",

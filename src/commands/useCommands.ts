@@ -1320,9 +1320,12 @@ export function useCommands({
               await uiAlert({ title: t("ai.style.title"), message: sp.styleInstruction(current) });
             } else if (choice === "modelfile" && current) {
               const { getOllamaConfigModel } = await import("../ai/ollamaProvider");
-              const { writeWorkspaceFile } = await import("../storage/workspace");
-              await writeWorkspaceFile("lumen-style.Modelfile", sp.styleModelfile(getOllamaConfigModel()));
-              showAiToast(t("ai.style.modelfileSaved"), "success");
+              const { writeWorkspaceFile, workspaceHasFile } = await import("../storage/workspace");
+              // Never overwrite: an earlier (maybe edited) export or another file keeps its name.
+              let path = "lumen-style.Modelfile";
+              for (let n = 2; await workspaceHasFile(path); n++) path = `lumen-style-${n}.Modelfile`;
+              await writeWorkspaceFile(path, sp.styleModelfile(getOllamaConfigModel()));
+              showAiToast(t("ai.style.modelfileSaved", { path }), "success");
             } else if (choice === "clear") {
               sp.clearStyleProfile();
               showAiToast(t("ai.style.cleared"), "success");

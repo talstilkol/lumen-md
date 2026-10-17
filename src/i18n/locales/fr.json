@@ -992,7 +992,7 @@
   "ai.style.folder": "Dossier à analyser (vide = tout l’espace de travail) :",
   "ai.style.building": "Lecture de vos notes et description de votre style…",
   "ai.style.built": "Profil de style prêt : {rules} règles tirées de {notes} notes. L’IA écrit maintenant dans votre style.",
-  "ai.style.modelfileSaved": "lumen-style.Modelfile enregistré — lancez : ollama create my-style -f lumen-style.Modelfile",
+  "ai.style.modelfileSaved": "{path} enregistré — lancez : ollama create my-style -f {path}",
   "ai.style.cleared": "Profil de style supprimé.",
   "cmd.ai.policy": "IA : politique locale ou cloud",
   "cmd.ai.policy.hint": "Où les requêtes IA peuvent aller : cet appareil seulement, local d’abord, ou le cloud",

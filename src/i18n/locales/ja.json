@@ -992,7 +992,7 @@
   "ai.style.folder": "学習するフォルダー（空 = ワークスペース全体）:",
   "ai.style.building": "ノートを読み、文体を分析しています…",
   "ai.style.built": "文体プロファイルの準備完了: {notes} 件のノートから {rules} 個のルール。AI はあなたの文体で書きます。",
-  "ai.style.modelfileSaved": "lumen-style.Modelfile を保存しました — 実行: ollama create my-style -f lumen-style.Modelfile",
+  "ai.style.modelfileSaved": "{path} を保存しました — 実行: ollama create my-style -f {path}",
   "ai.style.cleared": "文体プロファイルを削除しました。",
   "cmd.ai.policy": "AI: ローカル / クラウドのポリシー",
   "cmd.ai.policy.hint": "AI リクエストの送信先: このデバイスのみ、ローカル優先、またはクラウド",

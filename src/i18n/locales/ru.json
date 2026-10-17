@@ -992,7 +992,7 @@
   "ai.style.folder": "Папка для обучения (пусто = всё рабочее пространство):",
   "ai.style.building": "Читаю заметки и описываю ваш стиль…",
   "ai.style.built": "Профиль стиля готов: {rules} правил по {notes} заметкам. Теперь ИИ пишет в вашем стиле.",
-  "ai.style.modelfileSaved": "Сохранён lumen-style.Modelfile — запустите: ollama create my-style -f lumen-style.Modelfile",
+  "ai.style.modelfileSaved": "Сохранён {path} — запустите: ollama create my-style -f {path}",
   "ai.style.cleared": "Профиль стиля удалён.",
   "cmd.ai.policy": "ИИ: политика «локально или облако»",
   "cmd.ai.policy.hint": "Куда могут уходить запросы ИИ: только это устройство, сначала локально или в облако",

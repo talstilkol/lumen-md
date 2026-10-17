@@ -736,7 +736,7 @@ const en: Strings = {
   "ai.style.folder": "Folder to learn from (empty = the whole workspace):",
   "ai.style.building": "Reading your notes and describing your style…",
   "ai.style.built": "Style profile ready: {rules} rules from {notes} notes. The AI now writes in your style.",
-  "ai.style.modelfileSaved": "Saved lumen-style.Modelfile — run: ollama create my-style -f lumen-style.Modelfile",
+  "ai.style.modelfileSaved": "Saved {path} — run: ollama create my-style -f {path}",
   "ai.style.cleared": "Style profile deleted.",
   "cmd.ai.policy": "AI: Local or Cloud Policy",
   "cmd.ai.policy.hint": "Where AI requests may go: this device only, local first, or the cloud",

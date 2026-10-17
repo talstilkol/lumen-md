@@ -992,7 +992,7 @@
   "ai.style.folder": "المجلد للتعلم منه (فارغ = مساحة العمل كلها):",
   "ai.style.building": "قراءة ملاحظاتك ووصف أسلوبك…",
   "ai.style.built": "ملف الأسلوب جاهز: {rules} قاعدة من {notes} ملاحظة. يكتب الذكاء الاصطناعي الآن بأسلوبك.",
-  "ai.style.modelfileSaved": "تم حفظ lumen-style.Modelfile — شغّل: ollama create my-style -f lumen-style.Modelfile",
+  "ai.style.modelfileSaved": "تم حفظ {path} — شغّل: ollama create my-style -f {path}",
   "ai.style.cleared": "تم حذف ملف الأسلوب.",
   "cmd.ai.policy": "AI: سياسة محلي أو سحابي",
   "cmd.ai.policy.hint": "إلى أين يمكن أن تذهب طلبات الذكاء الاصطناعي: هذا الجهاز فقط، محلي أولاً، أو السحابة",

@@ -992,7 +992,7 @@
   "ai.style.folder": "תיקייה ללמוד ממנה (ריק = כל הכספת):",
   "ai.style.building": "קורא את הפתקים ומתאר את הסגנון…",
   "ai.style.built": "פרופיל הסגנון מוכן: {rules} כללים מ-{notes} פתקים. ה-AI כותב עכשיו בסגנון שלך.",
-  "ai.style.modelfileSaved": "נשמר lumen-style.Modelfile — להריץ: ollama create my-style -f lumen-style.Modelfile",
+  "ai.style.modelfileSaved": "נשמר {path} — להריץ: ollama create my-style -f {path}",
   "ai.style.cleared": "פרופיל הסגנון נמחק.",
   "cmd.ai.policy": "AI: מדיניות מקומי או ענן",
   "cmd.ai.policy.hint": "לאן בקשות AI רשאיות ללכת: רק למכשיר הזה, מקומי קודם, או לענן",

@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generated_at": "2026-10-17T16:33:15.191Z",
+  "generated_at": "2026-10-17T16:34:56.541Z",
   "source": "src/i18n/index.ts (en bundle)",
   "count": 1088,
   "entries": [
@@ -3341,8 +3341,10 @@
     },
     {
       "key": "ai.style.modelfileSaved",
-      "en": "Saved lumen-style.Modelfile — run: ollama create my-style -f lumen-style.Modelfile",
-      "vars": []
+      "en": "Saved {path} — run: ollama create my-style -f {path}",
+      "vars": [
+        "path"
+      ]
     },
     {
       "key": "ai.style.cleared",

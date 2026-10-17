@@ -992,7 +992,7 @@
   "ai.style.folder": "Ordner zum Lernen (leer = ganzer Arbeitsbereich):",
   "ai.style.building": "Lese deine Notizen und beschreibe deinen Stil…",
   "ai.style.built": "Stilprofil fertig: {rules} Regeln aus {notes} Notizen. Die KI schreibt jetzt in deinem Stil.",
-  "ai.style.modelfileSaved": "lumen-style.Modelfile gespeichert — ausführen: ollama create my-style -f lumen-style.Modelfile",
+  "ai.style.modelfileSaved": "{path} gespeichert — ausführen: ollama create my-style -f {path}",
   "ai.style.cleared": "Stilprofil gelöscht.",
   "cmd.ai.policy": "KI: Lokal- oder Cloud-Richtlinie",
   "cmd.ai.policy.hint": "Wohin KI-Anfragen gehen dürfen: nur dieses Gerät, lokal zuerst oder die Cloud",

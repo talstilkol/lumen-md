@@ -62,14 +62,39 @@ export function clearStyleProfile(): void {
   }
 }
 
-/** Body text of a note: no frontmatter, code blocks or bare links. */
+const TABLE_DELIMITER = /^\s*\|?\s*:?-{3,}:?\s*(\|\s*:?-{3,}:?\s*)*\|?\s*$/;
+
+/**
+ * Body text of a note — what a writing style can be learned from: no
+ * frontmatter, fenced code (``` or ~~~), tables (with or without outer
+ * pipes), image-only lines.
+ */
 export function proseOfNote(text: string): string {
-  return text
-    .replace(/^---\r?\n[\s\S]*?\r?\n---\r?\n/, "")
-    .replace(/```[\s\S]*?```/g, "")
-    .replace(/^\s*(\|.*\||!\[.*\]\(.*\))\s*$/gm, "")
-    .replace(/\n{3,}/g, "\n\n")
-    .trim();
+  const lines = text.replace(/^---\r?\n[\s\S]*?\r?\n---\r?\n/, "").split("\n");
+  const out: string[] = [];
+  let fence: string | null = null;
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    const m = /^\s*(`{3,}|~{3,})/.exec(line);
+    if (fence) {
+      if (m && m[1][0] === fence[0] && m[1].length >= fence.length) fence = null;
+      continue;
+    }
+    if (m) {
+      fence = m[1];
+      continue;
+    }
+    // A GFM table: a header row with a pipe, then a delimiter row; rows follow while they have a pipe.
+    if (line.includes("|") && i + 1 < lines.length && TABLE_DELIMITER.test(lines[i + 1]) && lines[i + 1].includes("-")) {
+      i += 2;
+      while (i < lines.length && lines[i].trim() && lines[i].includes("|")) i++;
+      i--;
+      continue;
+    }
+    if (/^\s*\|.*\|\s*$/.test(line) || /^\s*!\[.*\]\(.*\)\s*$/.test(line)) continue;
+    out.push(line);
+  }
+  return out.join("\n").replace(/\n{3,}/g, "\n\n").trim();
 }
 
 /** Excerpts for the stylist: longest notes first, a slice of each, bounded overall. */

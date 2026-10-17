@@ -48,9 +48,7 @@ export const templaterAgent: AgentDefinition<TemplaterInput, string> = registerA
   system: () =>
     ["You are a writing assistant inside a Markdown editor. Follow the instruction exactly and answer in Markdown, in the language the instruction asks for.", styleInstruction()]
       .filter(Boolean)
-      .join("
-
-"),
+      .join("\n\n"),
   // The whole template input goes out, as before the agents: improve /
   // translate / summarize must see the complete document.
   user: (input) => input.text,
