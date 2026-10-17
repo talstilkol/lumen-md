@@ -745,6 +745,8 @@ const en: Strings = {
   "research.provider.claude": "Claude web search (Anthropic provider; searches billed by Anthropic)",
   "research.provider.brave": "Brave Search (your API key)",
   "research.provider.tavily": "Tavily (your API key)",
+  "research.provider.searxng": "SearXNG on this machine (no key; local research service)",
+  "research.endpoint": "Research service URL (run it locally with docker/local-ai.yml — see the docs):",
   "research.key": "API key for {provider}:",
   "cmd.ai.batch": "AI: Batch over a Folder (half price)…",
   "cmd.ai.batch.hint": "Tag, summarise or translate many notes through the provider's batch API — results within 24 h",

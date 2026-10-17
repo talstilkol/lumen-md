@@ -1066,5 +1066,7 @@
   "research.provider.claude": "Claude 网络搜索（Anthropic 服务商；搜索由 Anthropic 计费）",
   "research.provider.brave": "Brave Search（你的 API 密钥）",
   "research.provider.tavily": "Tavily（你的 API 密钥）",
+  "research.provider.searxng": "本机上的 SearXNG（无需密钥；本地研究服务）",
+  "research.endpoint": "研究服务 URL（用 docker/local-ai.yml 在本地运行 — 见文档）：",
   "research.key": "{provider} 的 API 密钥："
 }

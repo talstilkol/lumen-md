@@ -964,10 +964,25 @@ export function useCommands({
               { value: "claude", label: t("research.provider.claude") },
               { value: "brave", label: t("research.provider.brave") },
               { value: "tavily", label: t("research.provider.tavily") },
+              { value: "searxng", label: t("research.provider.searxng") },
             ],
           });
-          if (choice !== "claude" && choice !== "brave" && choice !== "tavily") return;
-          if (choice !== "claude") {
+          if (choice !== "claude" && choice !== "brave" && choice !== "tavily" && choice !== "searxng") return;
+          if (choice === "searxng") {
+            // Keyless: the research service on this machine queries a local SearXNG.
+            const endpoint = await uiPrompt({ message: t("research.endpoint"), defaultValue: researchEndpoint() ?? "http://localhost:8787" });
+            if (endpoint === null || !endpoint.trim()) return;
+            try {
+              localStorage.setItem("lumen.research.endpoint", endpoint.trim().replace(/\/+$/, ""));
+            } catch {
+              /* storage denied */
+            }
+            if (!researchEndpoint()) {
+              showAiToast(t("research.noService"), "error");
+              return;
+            }
+            setResearchSettings({ provider: "searxng" });
+          } else if (choice !== "claude") {
             // Brave / Tavily go through the research service: without it the
             // choice can't work, so keep the current setting.
             if (!researchEndpoint()) {

@@ -1066,5 +1066,7 @@
   "research.provider.claude": "Веб-поиск Claude (провайдер Anthropic; поиски оплачиваются в Anthropic)",
   "research.provider.brave": "Brave Search (ваш API-ключ)",
   "research.provider.tavily": "Tavily (ваш API-ключ)",
+  "research.provider.searxng": "SearXNG на этой машине (без ключа; локальный сервис исследований)",
+  "research.endpoint": "URL сервиса исследований (запустите локально через docker/local-ai.yml — см. документацию):",
   "research.key": "API-ключ для {provider}:"
 }

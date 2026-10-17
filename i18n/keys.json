@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-10-17T14:37:13.110Z",
+  "generated_at": "2026-10-17T14:46:51.475Z",
   "source": "src/i18n/index.ts (en bundle)",
-  "count": 1068,
+  "count": 1070,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -3385,6 +3385,16 @@
     {
       "key": "research.provider.tavily",
       "en": "Tavily (your API key)",
+      "vars": []
+    },
+    {
+      "key": "research.provider.searxng",
+      "en": "SearXNG on this machine (no key; local research service)",
+      "vars": []
+    },
+    {
+      "key": "research.endpoint",
+      "en": "Research service URL (run it locally with docker/local-ai.yml — see the docs):",
       "vars": []
     },
     {

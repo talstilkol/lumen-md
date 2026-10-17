@@ -388,3 +388,19 @@ describe("research agent", () => {
     expect(c[0].quote).toBe('The article says "quoted words" are important.');
   });
 });
+
+describe("research settings — keyless SearXNG default under local-only", () => {
+  it("defaults to searxng on a fresh local-only install and to claude when cloud is in play", async () => {
+    const { getResearchSettings } = await import("../research/client");
+    localStorage.removeItem("lumen.research.provider");
+    localStorage.removeItem("lumen.ai.policy");
+    localStorage.removeItem("lumen.ai.key.anthropic");
+    expect(getResearchSettings().provider).toBe("searxng");
+    localStorage.setItem("lumen.ai.policy", "local-first");
+    expect(getResearchSettings().provider).toBe("claude");
+    localStorage.removeItem("lumen.ai.policy");
+    localStorage.setItem("lumen.research.provider", "tavily");
+    expect(getResearchSettings().provider).toBe("tavily");
+    localStorage.removeItem("lumen.research.provider");
+  });
+});

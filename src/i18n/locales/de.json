@@ -1066,5 +1066,7 @@
   "research.provider.claude": "Claude-Websuche (Anbieter Anthropic; Suchen rechnet Anthropic ab)",
   "research.provider.brave": "Brave Search (dein API-Schlüssel)",
   "research.provider.tavily": "Tavily (dein API-Schlüssel)",
+  "research.provider.searxng": "SearXNG auf diesem Rechner (ohne Schlüssel; lokaler Recherchedienst)",
+  "research.endpoint": "URL des Recherchedienstes (lokal mit docker/local-ai.yml starten — siehe Doku):",
   "research.key": "API-Schlüssel für {provider}:"
 }

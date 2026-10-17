@@ -1066,5 +1066,7 @@
   "research.provider.claude": "חיפוש הרשת של Claude (ספק Anthropic; החיפושים מחויבים ע״י Anthropic)",
   "research.provider.brave": "Brave Search (מפתח API שלך)",
   "research.provider.tavily": "Tavily (מפתח API שלך)",
+  "research.provider.searxng": "SearXNG במחשב הזה (בלי מפתח; שירות מחקר מקומי)",
+  "research.endpoint": "כתובת שירות המחקר (להרצה מקומית עם docker/local-ai.yml — ראו בתיעוד):",
   "research.key": "מפתח API עבור {provider}:"
 }

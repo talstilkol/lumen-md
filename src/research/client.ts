@@ -24,7 +24,10 @@ export interface SearchHit {
   snippet: string;
 }
 
-export type SearchProvider = "claude" | "brave" | "tavily";
+export type SearchProvider = "claude" | "brave" | "tavily" | "searxng";
+
+/** Providers that run behind the research service and need no API key. */
+export const KEYLESS_PROVIDERS: readonly SearchProvider[] = ["searxng"];
 
 export interface ResearchSettings {
   provider: SearchProvider;
@@ -59,10 +62,21 @@ function serviceHeaders(extra: Record<string, string> = {}): Record<string, stri
 
 export function getResearchSettings(): ResearchSettings {
   const p = ls("lumen.research.provider");
-  return {
-    provider: p === "brave" || p === "tavily" ? p : "claude",
-    key: ls("lumen.research.searchKey") ?? "",
-  };
+  let provider: SearchProvider;
+  if (p === "brave" || p === "tavily" || p === "searxng" || p === "claude") provider = p;
+  else {
+    // Nothing chosen yet: under the local-only policy Claude web search is
+    // not allowed, so the default is the keyless self-hosted SearXNG route.
+    let policy: string | null = null;
+    try {
+      policy = localStorage.getItem("lumen.ai.policy");
+    } catch {
+      policy = null;
+    }
+    const cloudy = policy === "cloud" || policy === "local-first" || !!ls("lumen.ai.key.anthropic");
+    provider = cloudy ? "claude" : "searxng";
+  }
+  return { provider, key: ls("lumen.research.searchKey") ?? "" };
 }
 
 export function setResearchSettings(s: Partial<ResearchSettings>): void {
@@ -106,7 +120,7 @@ export async function searchWeb(
 ): Promise<SearchHit[]> {
   if (!endpoint) throw new ResearchUnavailableError();
   if (settings.provider === "claude") throw new Error("Claude web search runs through the Anthropic API, not the research service.");
-  if (!settings.key) throw new Error(`Add your ${settings.provider} API key (Research: Settings…).`);
+  if (!settings.key && !KEYLESS_PROVIDERS.includes(settings.provider)) throw new Error(`Add your ${settings.provider} API key (Research: Settings…).`);
   const res = await fetch(`${endpoint}/search`, {
     method: "POST",
     headers: serviceHeaders({ "Content-Type": "application/json" }),
