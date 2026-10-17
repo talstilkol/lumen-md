@@ -19,6 +19,7 @@ import { log } from "../lib/logger";
 import { connectAllowedByCsp } from "../lib/cspConnect";
 import { isOPFSAvailable, listWorkspace, readWorkspaceFile, writeWorkspaceFile } from "./workspace";
 import { fetchWithRetry } from "../lib/fetchRetry";
+import { getLocale } from "../i18n";
 
 export interface MarketplaceTemplate {
   id: string;
@@ -32,6 +33,16 @@ export interface MarketplaceTemplate {
   rating: number;
   downloads: number;
   tags: string[];
+  /** Hebrew name / description / body (T45), used when the UI is Hebrew. */
+  name_he?: string;
+  description_he?: string;
+  url_he?: string;
+}
+
+/** The template as the current UI language should show it. */
+export function localizeTemplate(tpl: MarketplaceTemplate, locale: string = getLocale()): MarketplaceTemplate {
+  if (locale !== "he" || !tpl.url_he) return tpl;
+  return { ...tpl, name: tpl.name_he ?? tpl.name, description: tpl.description_he ?? tpl.description, url: tpl.url_he };
 }
 
 interface Registry {
@@ -49,7 +60,7 @@ export async function fetchTemplateRegistry(force = false): Promise<MarketplaceT
   const res = await fetchWithRetry("/templates/registry.json", { cache: "no-cache" }, { label: "templates.registry", maxRetries: 2, baseDelayMs: 600 });
   if (!res.ok) throw new Error(`Registry ${res.status}`);
   cache = (await res.json()) as Registry;
-  return mergeLocalDownloads(cache.templates);
+  return mergeLocalDownloads(cache.templates).map((tpl) => localizeTemplate(tpl));
 }
 
 /**

@@ -9,6 +9,7 @@ import { showAiToast } from "../ui/AiToast";
 import { Table2, BarChart3, Sparkles, RefreshCw } from "lucide-react";
 import { log } from "../lib/logger";
 import { useFetchSource } from "./useFetchSource";
+import { t } from "../i18n";
 
 interface Props {
   source: string;
@@ -128,7 +129,7 @@ export default function CsvBlock({ source, lang, meta }: Props) {
                 setAiOption(await runAgentOrThrow(charterAgent, { text: source }, { document: source, ownPrompt: true }));
               } catch (e) {
                 log.error("AI chart generation failed", e);
-                showAiToast("AI chart generation failed", "error");
+                showAiToast(t("toast.aiChartGenerationFailed"), "error");
                 setAiOption(null);
               } finally {
                 setAiLoading(false);

@@ -1,4 +1,4 @@
-import { t } from "../i18n";
+import { t, getLocale } from "../i18n";
 
 export interface Template {
   id: string;
@@ -46,7 +46,7 @@ export function getTemplates(): Template[] {
       name: t("template.journal") ?? "Daily journal",
       description: t("template.journal.desc") ?? "Gratitude, goals, reflections",
       emoji: "📓",
-      content: `# ${new Date().toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}
+      content: `# ${new Date().toLocaleDateString(getLocale(), { weekday: "long", year: "numeric", month: "long", day: "numeric" })}
 
 ## 🙏 Gratitude
 1. 
@@ -145,7 +145,7 @@ MIT
 Your Address
 City, ZIP
 
-${new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}
+${new Date().toLocaleDateString(getLocale(), { year: "numeric", month: "long", day: "numeric" })}
 
 **Recipient Name**
 Title

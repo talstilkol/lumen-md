@@ -77,7 +77,7 @@ import {
   writeWorkspaceBlob,
   writeWorkspaceFile,
 } from "./storage/workspace";
-import { WELCOME_DOC } from "./welcome";
+import { welcomeDoc } from "./welcomeDoc";
 import { ErrorBoundary } from "./ui/ErrorBoundary";
 import { KeyboardShortcuts } from "./ui/KeyboardShortcuts";
 import { FocusMode } from "./ui/FocusMode";
@@ -200,7 +200,7 @@ export default function App() {
       // Clear the pending note so we don't process it again.
       delete (window as unknown as Record<string, unknown>).__pendingSharedNote;
       openTabAction({ name: "Shared Note.md", content: pending, workspaceName: null });
-      showAiToast("Opened shared note from iOS.", "info");
+      showAiToast(t("toast.openedSharedNoteFromIos"), "info");
     }
   }, []);
 
@@ -208,7 +208,7 @@ export default function App() {
   useEffect(() => {
     if (!doc.content) {
       // Use openTab so the Welcome doc lands on the tab strip too.
-      openTabAction({ name: "Welcome.md", content: WELCOME_DOC, workspaceName: null });
+      openTabAction({ name: "Welcome.md", content: welcomeDoc(), workspaceName: null });
     } else if (openTabs.length === 0) {
       // Existing session before tabs existed — backfill a tab for the
       // currently active doc so the strip shows up immediately.
@@ -779,7 +779,7 @@ export default function App() {
           // to revisit the feature tour without scrubbing recents for it.
           setDoc({
             name: "Welcome.md",
-            content: WELCOME_DOC,
+            content: welcomeDoc(),
             handle: undefined,
             workspaceName: undefined,
             dirty: false,

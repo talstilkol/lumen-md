@@ -48,7 +48,7 @@ export async function refactorDocument(
 
   try {
     const content = await readWorkspaceFile(filePath);
-    showAiToast("Refactoring document...", "info");
+    showAiToast(t("toast.refactoringDocument"), "info");
 
     const refactored = await chat([
       { role: "system", content: REFACTOR_PROMPT },
@@ -59,7 +59,7 @@ export async function refactorDocument(
     ]);
 
     await writeWorkspaceFile(filePath, refactored);
-    showAiToast("Document refactored successfully!", "success");
+    showAiToast(t("toast.documentRefactoredSuccessfully"), "success");
 
     return {
       success: true,
@@ -69,7 +69,7 @@ export async function refactorDocument(
     };
   } catch (e) {
     const msg = e instanceof Error ? e.message : "Unknown error";
-    showAiToast(`Refactor failed: ${msg}`, "error");
+    showAiToast(t("toast.refactorFailed", { msg }), "error");
     return { success: false, summary: msg, modifiedFiles: [] };
   }
 }
@@ -94,7 +94,7 @@ export async function generateTemplate(
   }
 
   try {
-    showAiToast("Generating template...", "info");
+    showAiToast(t("toast.generatingTemplate"), "info");
 
     const content = await chat([
       { role: "system", content: TEMPLATE_PROMPT },
@@ -103,7 +103,7 @@ export async function generateTemplate(
 
     const path = fileName.endsWith(".md") ? fileName : `${fileName}.md`;
     await writeWorkspaceFile(path, content);
-    showAiToast(`Template "${path}" created!`, "success");
+    showAiToast(t("toast.templateCreated", { path }), "success");
 
     return {
       success: true,
@@ -113,7 +113,7 @@ export async function generateTemplate(
     };
   } catch (e) {
     const msg = e instanceof Error ? e.message : "Unknown error";
-    showAiToast(`Template failed: ${msg}`, "error");
+    showAiToast(t("toast.templateFailed", { msg }), "error");
     return { success: false, summary: msg, modifiedFiles: [] };
   }
 }
@@ -240,6 +240,7 @@ export function mergeTagsIntoFrontmatter(content: string, tags: string[]): strin
 
 export type { LinkSuggestion } from "../agents/defs/linker";
 import type { LinkSuggestion } from "../agents/defs/linker";
+import { t } from "../i18n";
 
 /** Build a compact catalogue of every note in the workspace for the prompt, and the list of titles. */
 async function collectNotesCatalog(currentPath: string): Promise<{ catalog: string; titles: string[] }> {

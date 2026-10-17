@@ -1,3 +1,4 @@
+import { getLocale } from "../i18n";
 /**
  * AI usage meter: tokens and an estimated cost per provider / model per
  * month, kept in localStorage on this device only.
@@ -255,7 +256,7 @@ export function usageSummary(month: string = monthOf()): UsageSummary {
 
 /** Plain-text report for the palette command. */
 export function formatUsageReport(s: UsageSummary): string {
-  const n = (x: number) => x.toLocaleString("en-US");
+  const n = (x: number) => x.toLocaleString(getLocale());
   const usd = (x: number) => (x < 0.01 && x > 0 ? "< $0.01" : `$${x.toFixed(2)}`);
   if (!s.rows.length) return `${s.month}: no AI requests on this device yet.`;
   const lines = [
