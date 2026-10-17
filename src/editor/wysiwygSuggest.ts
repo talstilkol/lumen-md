@@ -693,7 +693,8 @@ export function changeAt(state: EditorState, pos: number): { from: number; to: n
   const base = $pos.start();
   const ranges: Array<{ from: number; to: number; type: "insert" | "delete"; author: string | null }> = [];
   parent.forEach((child, offset) => {
-    if (!child.isText) return;
+    // Inline atoms (an image, a hard break) carry the marks too.
+    if (!child.isInline) return;
     const mark = ins.isInSet(child.marks) ?? del.isInSet(child.marks);
     if (!mark) return;
     const type = mark.type === ins ? "insert" : "delete";
@@ -729,7 +730,9 @@ export function resolveRange(state: EditorState, from: number, to: number, mode:
   const tr = state.tr.setMeta(SUGGEST_META, true);
   const drop: Array<[number, number]> = [];
   state.doc.nodesBetween(from, to, (n, pos) => {
-    if (!n.isText) return;
+    // Text and marked inline atoms (`{++![alt](img.png)++}` loads the image
+    // with the insertion mark): both are part of the change.
+    if (!n.isInline) return;
     const a = Math.max(pos, from);
     const b = Math.min(pos + n.nodeSize, to);
     const isIns = !!ins.isInSet(n.marks);
@@ -769,7 +772,7 @@ export function jumpToChange(view: { state: EditorState; dispatch: (tr: Transact
   const starts: number[] = [];
   let prev: { kind: "insert" | "delete"; author: string | null; end: number } | null = null;
   state.doc.descendants((n, pos) => {
-    if (!n.isText) {
+    if (!n.isInline) {
       prev = null;
       return;
     }

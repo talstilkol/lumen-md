@@ -16,6 +16,7 @@ import {
   encodeCriticForWysiwyg,
   jumpToChange,
   resolveAtCursor,
+  resolveRange,
   wysiwygSuggestPlugins,
 } from "../editor/wysiwygSuggest";
 
@@ -343,6 +344,19 @@ describe("accept / reject in WYSIWYG", () => {
     expect(resolveAtCursor(e.view, "accept")).toBe(true); // x → y
     expect(e.md()).toBe("A one B two C y D");
     expect(jumpToChange(e.view, 1)).toBe(false);
+  });
+
+  it("resolves suggestions holding inline atoms (a hard break) as a whole", async () => {
+    const src = "x {++a\\\nb++} y";
+    const all = await open(src, false);
+    const reject = resolveRange(all.view.state, 0, all.view.state.doc.content.size, "reject")!;
+    all.view.dispatch(reject);
+    expect(all.view.state.doc.textContent).toBe("x  y"); // the suggested break goes too
+    const cur = await open(src, false);
+    cur.select(cur.at("a", 1));
+    expect(resolveAtCursor(cur.view, "accept")).toBe(true); // one change across the break
+    expect(cur.md()).toBe("x a\\\nb y");
+    expect(jumpToChange(cur.view, 1)).toBe(false);
   });
 
   it("next / previous wrap around at the last / first change, as in source mode", async () => {
