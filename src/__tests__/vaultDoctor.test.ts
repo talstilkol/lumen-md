@@ -179,4 +179,63 @@ describe("vault doctor", () => {
     expect(f.filter((x) => x.kind === "broken-wiki-link" || x.kind === "missing-heading")).toEqual([]);
     expect(f.some((x) => x.kind === "empty-note" && x.path === "e.md")).toBe(true);
   });
+
+  const wikiFindings = (text: string) =>
+    runVaultDoctor([{ path: "a.md", text }, { path: "Project.md", text: "x" }])
+      .filter((x) => x.kind === "broken-wiki-link" || x.kind === "missing-heading")
+      .map((x) => x.detail);
+
+  it("an unclosed fence ends with its block quote or list item", () => {
+    expect(wikiFindings("> ```\n> example\n\n[[Missing]]\n")).toEqual(["Missing"]);
+    expect(wikiFindings("- ```\n  example\nnext [[Gone]]\n")).toEqual(["Gone"]);
+    // Blank lines inside a list item's fence don't end it.
+    expect(wikiFindings("- ```\n  a\n\n  [[In Code]]\n  ```\n")).toEqual([]);
+  });
+
+  it("container markers aren't stripped from lines of a top-level fence", () => {
+    expect(wikiFindings("```\n- ```\n[[In Code]]\n> ```\n[[Still Code]]\n```\n[[After]]\n")).toEqual(["After"]);
+  });
+
+  it("raw HTML blocks hide links; their <img> tags are still checked", () => {
+    const text = "<div>\n[[Projct]] [x](gone.md)\n# Not A Heading\n</div>\n\n<section class=\"x\">\n[[Nope]]\n\n[[Projct]] [[#Not A Heading]]\n\n<div>\n<img src=\"a.png\">\n</div>\n";
+    const f = runVaultDoctor([{ path: "a.md", text }, { path: "Project.md", text: "x" }]);
+    expect(f.filter((x) => x.kind === "broken-wiki-link").map((x) => [x.detail, x.line])).toEqual([["Projct", 9]]);
+    expect(f.filter((x) => x.kind === "missing-heading").map((x) => x.detail)).toEqual(["#Not A Heading"]);
+    expect(f.some((x) => x.kind === "broken-md-link")).toBe(false);
+    expect(f.filter((x) => x.kind === "missing-alt").map((x) => x.line)).toEqual([12]);
+    expect(applyLinkFixes(text, [{ from: "Projct", to: "Project" }])).toBe(text.replace("\n\n[[Projct]]", "\n\n[[Project]]"));
+    // A lone inline tag can't interrupt a paragraph: the line stays Markdown.
+    expect(wikiFindings("Para\n<span>\n[[Gone]]\n")).toEqual(["Gone"]);
+  });
+
+  it("an empty wiki-link label is plain text", () => {
+    expect(wikiFindings("[[Projct|]] [[Projct|ok]]\n")).toEqual(["Projct"]);
+    expect(applyLinkFixes("[[Projct|]] [[Projct|ok]]", [{ from: "Projct", to: "Project" }])).toBe("[[Projct|]] [[Project|ok]]");
+  });
+
+  it("decodes character references in headings, but not in their code spans", () => {
+    expect(wikiFindings("## A &amp; B &#x41;\n\n## `&amp;` x\n\n[[#A & B A]] [[#&amp; x]] [[#& x]]\n")).toEqual(["#& x"]);
+  });
+
+  it("front matter links are neither reported nor rewritten", () => {
+    const text = '---\ntitle: "[[Projct]]"\n---\n\n[[Projct]]\n';
+    const f = runVaultDoctor([{ path: "a.md", text }, { path: "Project.md", text: "x" }]);
+    expect(f.filter((x) => x.kind === "broken-wiki-link").map((x) => x.line)).toEqual([5]);
+    expect(applyLinkFixes(text, [{ from: "Projct", to: "Project" }])).toBe('---\ntitle: "[[Projct]]"\n---\n\n[[Project]]\n');
+  });
+
+  it("indexes ATX headings indented up to three spaces", () => {
+    const f = runVaultDoctor([
+      { path: "a.md", text: "   ## Overview\n\n    ## In Code\n\n[[#Overview]] [[Overview]] [[#In Code]]\n" },
+      { path: "Overview.md", text: "x" },
+    ]);
+    expect(f.filter((x) => x.kind === "missing-heading").map((x) => x.detail)).toEqual(["#In Code"]);
+    // [[Overview]] is this note's heading, so Overview.md gets no incoming link.
+    expect(f.some((x) => x.kind === "orphan" && x.path === "Overview.md")).toBe(true);
+  });
+
+  it("only a real alt attribute counts", () => {
+    const f = runVaultDoctor([{ path: "a.md", text: '<img src="x.png" data-alt="caption"> <img src="y.png"\nalt="ok">\n' }]);
+    expect(f.filter((x) => x.kind === "missing-alt").map((x) => x.detail)).toEqual(['<img src="x.png" data-alt="caption">']);
+  });
 });
