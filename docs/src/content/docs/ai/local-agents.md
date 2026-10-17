@@ -138,6 +138,11 @@ npm run eval:agents -- --model qwen2.5:7b
 npm run eval:agents -- --model llama3.1:8b --only tagger-he,tasker-he
 ```
 
+In CI the same cases run against a **fake Ollama server**
+(`npm run fake-ollama`, `scripts/fake-ollama.mjs`) over real HTTP: the
+runtime, the Ollama executor, the parsers and validators are exercised on
+every pull request without a GPU. Only model quality needs the live run.
+
 Every check is deterministic (Hebrew share of the letters, required and
 forbidden words, list lengths, length limits, a pattern), so two models
 or two prompt versions can be compared on the same numbers. The report
