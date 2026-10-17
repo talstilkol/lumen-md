@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-10-17T23:44:06.495Z",
+  "generated_at": "2026-10-17T23:51:51.139Z",
   "source": "src/i18n/index.ts (en bundle)",
-  "count": 1384,
+  "count": 1390,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -1691,6 +1691,36 @@
     {
       "key": "cmd.file.trash.hint",
       "en": "Restore deleted notes (kept 30 days)",
+      "vars": []
+    },
+    {
+      "key": "cmd.note.read",
+      "en": "Read aloud",
+      "vars": []
+    },
+    {
+      "key": "cmd.note.read.hint",
+      "en": "Reads this note with your system's voices (Hebrew included); run again to stop",
+      "vars": []
+    },
+    {
+      "key": "toast.tts.unavailable",
+      "en": "This browser can't read aloud",
+      "vars": []
+    },
+    {
+      "key": "toast.tts.noHebrewVoice",
+      "en": "No Hebrew voice is installed on this system — add one in the system's speech settings",
+      "vars": []
+    },
+    {
+      "key": "cmd.vault.digest",
+      "en": "Digest: what changed",
+      "vars": []
+    },
+    {
+      "key": "cmd.vault.digest.hint",
+      "en": "A note with every note changed since the last digest, and their open tasks",
       "vars": []
     },
     {

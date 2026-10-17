@@ -1382,5 +1382,11 @@
   "cmd.image.altText.hint": "Liest Text in den Bildern dieser Notiz auf dem Gerät (Hebräisch + Englisch); beschreibt den Rest mit einem lokalen Ollama-Bildmodell",
   "toast.imageAlt.none": "Keine Bilder ohne Alternativtext in dieser Notiz",
   "toast.imageAlt.working": "Bilder werden auf dem Gerät gelesen: {count} …",
-  "toast.imageAlt.done": "Alternativtext ergänzt: {done} von {count}"
+  "toast.imageAlt.done": "Alternativtext ergänzt: {done} von {count}",
+  "cmd.note.read": "Vorlesen",
+  "cmd.note.read.hint": "Liest diese Notiz mit den Systemstimmen vor (auch Hebräisch); erneut ausführen zum Stoppen",
+  "toast.tts.unavailable": "Dieser Browser kann nicht vorlesen",
+  "toast.tts.noHebrewVoice": "Keine hebräische Stimme installiert — in den Sprachausgabe-Einstellungen hinzufügen",
+  "cmd.vault.digest": "Zusammenfassung: was sich geändert hat",
+  "cmd.vault.digest.hint": "Eine Notiz mit allen seit der letzten Zusammenfassung geänderten Notizen und ihren offenen Aufgaben"
 }
