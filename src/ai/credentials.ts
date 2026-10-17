@@ -15,6 +15,7 @@
 import { useAppStore } from "../store/useStore";
 import { cloudAllowed, getAiPolicy, isCloudProvider, isLocalOrigin, providerAllowed } from "./policy";
 import { getBaseUrl, ollamaKnownAvailable } from "./ollamaProvider";
+import { getSecret } from "../lib/secretStore";
 
 const KEYED_PROVIDERS = new Set(["anthropic", "gemini", "mistral"]);
 
@@ -47,7 +48,7 @@ export function hasAiCredentials(): boolean {
   const state = useAppStore.getState();
   if (KEYED_PROVIDERS.has(provider)) {
     if (localRouteLikely(state)) return true;
-    return providerAllowed(provider) && Boolean(read(`lumen.ai.key.${provider}`));
+    return providerAllowed(provider) && Boolean(getSecret(`lumen.ai.key.${provider}`));
   }
   if (provider === "ollama") return getAiPolicy() !== "local-only" || isLocalOrigin(getBaseUrl());
   if ((provider === "local-webgpu" || state.useLocalAi) && hasWebGpu()) return true;

@@ -5,6 +5,7 @@ import { randomChoice, randomInt } from "../lib/cryptoRandom";
 import { log } from "../lib/logger";
 import { effectiveCapabilities, entitlementResolved, waitForEntitlement } from "../billing/gates";
 import { wireE2E, type E2EChannel, type E2EErrorReason } from "./e2e";
+import { getSecret } from "../lib/secretStore";
 
 export interface CollabUser {
   name: string;
@@ -231,7 +232,7 @@ function getRoomPassword(): string | null {
     }
   }
   if (typeof localStorage !== "undefined") {
-    const stored = localStorage.getItem("lumen.collab.password");
+    const stored = getSecret("lumen.collab.password");
     if (stored) return stored;
   }
   return null;
