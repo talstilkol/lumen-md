@@ -287,7 +287,7 @@ export function formatValue(value: unknown, max = 10_000): string {
         /* keep the object */
       }
     }
-    if (typeof v === "function") return write(JSON.stringify(`[Function ${(v as { name?: string }).name || "anonymous"}]`));
+    if (typeof v === "function") return write(str(`[Function ${String((v as { name?: string }).name || "anonymous").slice(0, max)}]`));
     if (typeof v === "bigint") return write(JSON.stringify(`${v}n`));
     if (v === undefined || typeof v === "symbol") return write(inArray ? "null" : String(v));
     if (typeof v === "number") return write(Number.isFinite(v) ? String(v) : "null");

@@ -215,6 +215,11 @@ describe("formatValue bounds strings", () => {
     const out = formatValue({ [big]: big }, 100);
     expect(out.length).toBeLessThanOrEqual(101);
     for (const call of spy.mock.calls) expect(String(call[0]).length).toBeLessThan(200);
+    spy.mockClear();
+    const fn = () => 0;
+    Object.defineProperty(fn, "name", { value: big });
+    expect(formatValue(fn, 100).length).toBeLessThanOrEqual(101);
+    for (const call of spy.mock.calls) expect(String(call[0]).length).toBeLessThan(200);
     spy.mockRestore();
   });
 });

@@ -25,8 +25,8 @@ const vendor = (file: string) => new URL(`${import.meta.env.BASE_URL}playground/
 let runId = 0;
 const post = (msg: RunnerMessage) => parent.postMessage(msg, "*");
 
-function show(value: unknown): string {
-  if (typeof value === "string") return value;
+function show(value: unknown, max = MAX_TEXT): string {
+  if (typeof value === "string") return value.slice(0, max);
   if (value instanceof Error) {
     const head = `${value.name}: ${value.message}`;
     // Firefox / Safari stacks don't start with the message.
@@ -34,7 +34,18 @@ function show(value: unknown): string {
     return value.stack.includes(value.message) ? value.stack : `${head}\n${value.stack}`;
   }
   // Bounded: a huge object stops being walked once the cap is reached.
-  return formatValue(value, MAX_TEXT);
+  return formatValue(value, max);
+}
+
+/** A console call's arguments, formatted within one shared character budget. */
+function showArgs(args: unknown[]): string {
+  let out = "";
+  for (const a of args) {
+    const left = MAX_TEXT - out.length;
+    if (left <= 0) break;
+    out += (out ? " " : "") + show(a, left);
+  }
+  return out.slice(0, MAX_TEXT);
 }
 
 const MAX_TEXT = 10_000;
@@ -44,7 +55,7 @@ for (const level of ["log", "info", "warn", "error"] as const) {
   const orig = console[level].bind(console);
   console[level] = (...args: unknown[]) => {
     orig(...args);
-    if (sent++ < MAX_CONSOLE) post({ type: "console", runId, level, text: args.map(show).join(" ").slice(0, MAX_TEXT) });
+    if (sent++ < MAX_CONSOLE) post({ type: "console", runId, level, text: showArgs(args) });
   };
 }
 // Errors share the console's budget and size cap, so a huge thrown value
