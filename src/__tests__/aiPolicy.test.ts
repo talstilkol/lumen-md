@@ -86,6 +86,16 @@ describe("AI policy", () => {
     await expect(gen.next()).rejects.toMatchObject({ code: "NO_LOCAL" });
   });
 
+  it("chatStream(): Ollama down + Privacy Mode + WebGPU → the in-browser model answers, as in chat()", async () => {
+    localStorage.setItem("lumen.ai.provider", "ollama");
+    setAiPolicy("local-only");
+    state.useLocalAi = true;
+    webgpu.available = true;
+    const gen = chatStream([{ role: "user", content: "hi" }]);
+    expect((await gen.next()).value).toBe("from webgpu");
+    await expect(chat([{ role: "user", content: "hi" }])).resolves.toBe("from webgpu");
+  });
+
   it("chat(): Ollama answers normally under local-only", async () => {
     localStorage.setItem("lumen.ai.provider", "ollama");
     ollamaUp.mockResolvedValue(true);

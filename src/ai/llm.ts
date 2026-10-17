@@ -678,7 +678,9 @@ async function* chatStreamDirect(
       return;
     }
     if (localFirst === "ollama") localFirst = await localRoute(provider);
-    else assertCloudFallback("Ollama");
+    // As in chat(): with Privacy Mode on, the in-browser model below may
+    // still answer; only without it is the cloud fallback checked here.
+    else if (!useAppStore.getState().useLocalAi) assertCloudFallback("Ollama");
   }
 
   // ── WebGPU local (in-browser) ──────────────────────────────────
