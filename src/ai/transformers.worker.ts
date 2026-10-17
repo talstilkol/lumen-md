@@ -6,6 +6,7 @@
  *
  *   → { id, type: "transcribe", model, device, audio: Float32Array (16 kHz mono), language?, task? }
  *   → { id, type: "embed",      model, device, texts: string[] }
+ *   → { id, type: "rerank",     model, device, query, passages: string[] }  → scores 0..1 (T29)
  *   → { id, type: "load",       task, model, device }
  *   → { id, type: "cancel",     target }         (skip a queued job, discard a running one's result)
  *   → { id, type: "unload" }
@@ -18,13 +19,23 @@
  * huggingface.co and are cached in the browser by the library.
  */
 
-import { env, pipeline, type AutomaticSpeechRecognitionPipeline, type FeatureExtractionPipeline } from "@huggingface/transformers";
+import {
+  AutoModelForSequenceClassification,
+  AutoTokenizer,
+  env,
+  pipeline,
+  type AutomaticSpeechRecognitionPipeline,
+  type FeatureExtractionPipeline,
+  type PreTrainedModel,
+  type PreTrainedTokenizer,
+} from "@huggingface/transformers";
 
 export type Device = "webgpu" | "wasm";
 
 export type WorkerIn =
   | { id: number; type: "transcribe"; model: string; device: Device; audio: Float32Array; language?: string; task?: "transcribe" | "translate" }
   | { id: number; type: "embed"; model: string; device: Device; texts: string[] }
+  | { id: number; type: "rerank"; model: string; device: Device; query: string; passages: string[] }
   | { id: number; type: "load"; task: "automatic-speech-recognition" | "feature-extraction"; model: string; device: Device }
   | { id: number; type: "cancel"; target: number }
   | { id: number; type: "unload" };
@@ -63,6 +74,7 @@ export function configureOrt(baseUrl: string, suffix: ".asyncify" | "" = ".async
 
 let asr: { key: string; pipe: AutomaticSpeechRecognitionPipeline } | null = null;
 let embedder: { key: string; pipe: FeatureExtractionPipeline } | null = null;
+let reranker: { key: string; tokenizer: PreTrainedTokenizer; model: PreTrainedModel } | null = null;
 let queue: Promise<unknown> = Promise.resolve();
 /** Jobs cancelled by the client: skipped when queued, their result discarded when running. */
 const cancelled = new Set<number>();
@@ -160,6 +172,31 @@ async function embed(id: number, msg: Extract<WorkerIn, { type: "embed" }>): Pro
   return { vectors, dims: vectors[0]?.length ?? 0 };
 }
 
+/** Cross-encoder reranking (bge-reranker-v2-m3): one relevance score per passage. */
+async function rerank(id: number, msg: Extract<WorkerIn, { type: "rerank" }>): Promise<number[]> {
+  const key = `${msg.model}@${msg.device}`;
+  if (reranker?.key !== key) {
+    if (reranker) await reranker.model.dispose();
+    reranker = null;
+    const opts = { device: msg.device, dtype: msg.device === "webgpu" ? "fp16" : "q8", progress_callback: progressFor(id) } as never;
+    const [tokenizer, model] = await Promise.all([
+      AutoTokenizer.from_pretrained(msg.model, { progress_callback: progressFor(id) } as never),
+      AutoModelForSequenceClassification.from_pretrained(msg.model, opts),
+    ]);
+    reranker = { key, tokenizer, model };
+  }
+  const scores: number[] = [];
+  // Small batches keep memory flat on long result lists.
+  for (let i = 0; i < msg.passages.length; i += 8) {
+    if (cancelled.has(id)) throw new DOMException("aborted", "AbortError");
+    const batch = msg.passages.slice(i, i + 8);
+    const inputs = reranker.tokenizer(new Array(batch.length).fill(msg.query), { text_pair: batch, padding: true, truncation: true, max_length: 512 } as never);
+    const { logits } = (await reranker.model(inputs)) as { logits: { sigmoid(): { tolist(): number[][] } } };
+    for (const row of logits.sigmoid().tolist()) scores.push(row[0] ?? 0);
+  }
+  return scores;
+}
+
 function serial<T>(fn: () => Promise<T>): Promise<T> {
   const p = queue.then(fn);
   queue = p.catch(() => undefined);
@@ -190,6 +227,9 @@ export async function handle(msg: WorkerIn): Promise<void> {
       case "embed":
         post({ id, type: "result", value: await job(id, () => embed(id, msg)) });
         return;
+      case "rerank":
+        post({ id, type: "result", value: await job(id, () => rerank(id, msg)) });
+        return;
       case "cancel":
         cancelled.add(msg.target);
         post({ id, type: "result", value: true });
@@ -201,10 +241,13 @@ export async function handle(msg: WorkerIn): Promise<void> {
       case "unload": {
         const a = asr;
         const e = embedder;
+        const r = reranker;
         asr = null;
         embedder = null;
+        reranker = null;
         await a?.pipe.dispose();
         await e?.pipe.dispose();
+        await r?.model.dispose();
         post({ id, type: "result", value: true });
         return;
       }

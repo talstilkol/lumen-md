@@ -1368,5 +1368,14 @@
   "collab.settings.publicSignaling.hint": "yjs.dev 等 — Lumen 服务器不可用时的备用。它们能看到谁连接了哪个房间（看不到内容）。",
   "collab.persistent.token": "服务器访问令牌（如服务器要求）",
   "collab.settings.cancel": "取消",
-  "collab.settings.save": "保存"
+  "collab.settings.save": "保存",
+  "vaultCite.unsupported": "没有经过验证的引用 — 请对照你的笔记核实此回答。",
+  "vaultCite.summary": "已对照你的笔记核对引用：{total} 条中 {ok} 条已验证",
+  "vaultCite.verified": "在笔记中找到引用",
+  "vaultCite.notVerified": "在笔记中未找到引用",
+  "vaultCite.noSource": "无此来源",
+  "cmd.ai.rerankModel": "AI：用本地模型重新排序搜索结果",
+  "cmd.ai.rerankModel.hint": "开：在本设备运行 bge-reranker-v2-m3（一次性下载约 570 MB）。关：快速词语匹配。",
+  "toast.rerankModelOn": "搜索排序：本地模型（首次使用时下载）",
+  "toast.rerankModelOff": "搜索排序：词语匹配"
 }
