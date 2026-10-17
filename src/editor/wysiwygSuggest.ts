@@ -13,7 +13,9 @@
  *    swaps every delimiter (outside code) for a private-use sentinel
  *    (the renderer's own `prepareCriticMarkup`); `remarkCriticMarkup`
  *    pairs the sentinels inside each phrasing parent into `criticInsert` /
- *    `criticDelete` mdast nodes, which the mark schemas turn into marks.
+ *    `criticDelete` mdast nodes, which the mark schemas turn into marks
+ *    (a suggestion spanning paragraphs is first split per block, where
+ *    that is lossless — see pairAcrossBlocks).
  *    Comments and highlights stay literal text.
  *  - serialize: the marks become those mdast nodes again, and the
  *    remark-stringify handlers write CriticMarkup — an adjacent
@@ -208,11 +210,129 @@ function unescapeTree(node: { type: string; children?: unknown[] } & Record<stri
 
 const PHRASING_PARENTS = new Set(["paragraph", "heading", "tableCell", "emphasis", "strong", "delete", "link", "linkReference"]);
 
+/* Suggestions spanning blocks (`{--first\n\nsecond--}`): their delimiters
+ * land in different paragraphs, so neither would pair. The suggestion is
+ * split into one piece per block — closed at the end of a block, reopened
+ * at the start of the next, every piece carrying the author — and is
+ * written back that way (`{--first--}\n\n{--second--}`).
+ *
+ * The pieces can't hold the paragraph breaks between them, which stay
+ * when they are resolved. So a suggestion is only split where that makes
+ * no difference: when nothing precedes it in its first block or nothing
+ * follows it in its last (a substitution: both), the breaks it would
+ * drop only leave empty paragraphs. And only for runs of sibling
+ * paragraphs / headings whose sentinels are all direct children. Anything
+ * else stays literal text, written back unchanged. */
+
+const TEXT_BLOCKS = new Set(["paragraph", "heading"]);
+type TextBlock = { type: string; children: PhrasingContent[] };
+type Open = "ins" | "del" | "sub" | "subNew"; // subNew: past the `~>`
+const OPENER: Record<Open, string> = { ins: S.insOpen, del: S.delOpen, sub: S.subOpen, subNew: S.subOpen };
+const CLOSER: Record<Open, string> = { ins: S.insClose, del: S.delClose, sub: S.subClose, subNew: S.subClose };
+
+const sentinelText = (ch: string): PhrasingContent => ({ type: "text", value: ch });
+
+function deepSentinels(nodes: PhrasingContent[], out: string[] = []): string[] {
+  for (const n of nodes) {
+    if (n.type === "text") for (const ch of n.value) isSentinelChar(ch) && out.push(ch);
+    else if ("children" in n) deepSentinels(n.children as PhrasingContent[], out);
+  }
+  return out;
+}
+
+/** Top-level sentinels of a text block, or null when one is nested in other markup. */
+function blockSentinels(block: TextBlock): string[] | null {
+  block.children = splitSentinels(block.children);
+  const top = block.children.flatMap((_, i) => sentinelAt(block.children, i) ?? []);
+  return deepSentinels(block.children).length === top.length ? top : null;
+}
+
+/** The change left open at the end of a block's sentinels, if any. */
+function openAtEnd(sentinels: string[]): Open | null {
+  let open: Open | null = null;
+  for (const ch of sentinels) {
+    if (ch === S.insOpen) open = "ins";
+    else if (ch === S.delOpen) open = "del";
+    else if (ch === S.subOpen) open = "sub";
+    else if (ch === S.subMid && open === "sub") open = "subNew";
+    else if (ch === S.insClose || ch === S.delClose || ch === S.subClose) open = null;
+  }
+  return open;
+}
+
+function pairAcrossBlocks(blocks: TextBlock[]): void {
+  for (let i = 0; i < blocks.length; i++) {
+    if (!TEXT_BLOCKS.has(blocks[i].type)) continue;
+    const first = blockSentinels(blocks[i]);
+    const start = first && openAtEnd(first);
+    if (!start) continue;
+    // Follow the open change to the block that closes it.
+    const roles: Array<{ block: TextBlock; open: Open; role: "middle" | "mid" | "close" }> = [];
+    let open: Open = start;
+    let end = -1;
+    for (let j = i + 1; j < blocks.length && end === -1; j++) {
+      const b = blocks[j];
+      const sen = TEXT_BLOCKS.has(b.type) ? blockSentinels(b) : null;
+      if (!sen) break;
+      const next = open === "sub" ? S.subMid : CLOSER[open];
+      if (sen.length === 0) roles.push({ block: b, open, role: "middle" });
+      else if (sen[0] !== next) break;
+      else if (open === "sub" && sen.length === 1) {
+        roles.push({ block: b, open, role: "mid" });
+        open = "subNew";
+      } else if (open !== "sub" || sen[1] === S.subClose) {
+        roles.push({ block: b, open, role: "close" });
+        end = j;
+      } else break;
+    }
+    if (end === -1) continue;
+    // The author tag after the final closer applies to every piece.
+    const last = roles[roles.length - 1];
+    const closer = last.block.children.findIndex((_, k) => sentinelAt(last.block.children, k) === CLOSER[last.open]);
+    const authorTag = authorTagAt(last.block.children, closer + 1);
+    const author = authorTag?.author;
+    const blank = (nodes: PhrasingContent[]) => nodes.every((n) => n.type === "text" && !n.value.trim());
+    const a = blocks[i];
+    const opener = a.children.map((_, n) => sentinelAt(a.children, n)).lastIndexOf(OPENER[start]);
+    const before = blank(a.children.slice(0, opener));
+    const after = blank(last.block.children.slice(authorTag ? authorTag.end : closer + 1));
+    if (start === "ins" || start === "del" ? !before && !after : !before || !after) continue;
+    const tag = (): PhrasingContent[] =>
+      author ? [sentinelText(S.comOpen), { type: "text", value: "@" + author }, sentinelText(S.comClose)] : [];
+    const asIns = (o: Open) => o === "ins" || o === "subNew";
+    if (start === "sub") {
+      // Only old text here: a deletion piece.
+      a.children[opener] = sentinelText(S.delOpen);
+      a.children.push(sentinelText(S.delClose), ...tag());
+    } else {
+      a.children.push(sentinelText(CLOSER[start]), ...tag());
+    }
+    for (const { block, open: o, role } of roles) {
+      if (role === "middle") {
+        block.children.unshift(sentinelText(asIns(o) ? S.insOpen : S.delOpen));
+        block.children.push(sentinelText(asIns(o) ? S.insClose : S.delClose), ...tag());
+      } else if (role === "mid") {
+        block.children.unshift(sentinelText(S.subOpen));
+        block.children.push(sentinelText(S.subClose), ...tag());
+      } else if (o === "subNew") {
+        // Only new text here: an insertion piece.
+        block.children[closer] = sentinelText(S.insClose);
+        block.children.unshift(sentinelText(S.insOpen));
+      } else {
+        block.children.unshift(sentinelText(OPENER[o]));
+      }
+    }
+    i = end;
+  }
+}
+
 function transformTree(node: Parents | Root): void {
   const kids = (node as { children?: unknown[] }).children as Array<Parents> | undefined;
   if (!kids) return;
   if (PHRASING_PARENTS.has(node.type)) {
     (node as { children: PhrasingContent[] }).children = wrapChildren(node.children as PhrasingContent[]);
+  } else {
+    pairAcrossBlocks(kids as unknown as TextBlock[]);
   }
   for (const c of (node as { children: Array<Parents> }).children) {
     if ((c as { children?: unknown }).children) transformTree(c);

@@ -84,6 +84,36 @@ describe("CriticMarkup ↔ marks", () => {
     expect(e.md()).toBe("Say hi and {--x--}{>>@a_b_c [d]<<} now.");
   });
 
+  it("splits suggestions spanning paragraphs into one operable piece per block", async () => {
+    const cases: Array<[string, string]> = [
+      ["{--first\n\nsecond--}{>>@Tal<<}", "{--first--}{>>@Tal<<}\n\n{--second--}{>>@Tal<<}"],
+      ["Say {++one\n\ntwo\n\nthree++}", "Say {++one++}\n\n{++two++}\n\n{++three++}"],
+      ["{++New para.\n\n++}Next text", "{++New para.++}\n\nNext text"],
+      ["{~~a\n\nb~>c~~}", "{--a--}\n\n{~~b~>c~~}"],
+      ["# {~~a~>b\n\nc~~}", "# {~~a~>b~~}\n\n{++c++}"],
+      ["{~~a\n\nb~>c\n\nd~~}{>>@Bo<<}", "{--a--}{>>@Bo<<}\n\n{~~b~>c~~}{>>@Bo<<}\n\n{++d++}{>>@Bo<<}"],
+    ];
+    for (const [src, written] of cases) {
+      const e = await open(src, false);
+      expect(e.md()).toBe(written);
+      expect(e.view.dom.textContent).not.toMatch(/\{--|\{\+\+|\{~~/);
+      for (const mode of ["accept", "reject"] as const) {
+        expect(resolveAll(e.md(), mode).trim()).toBe(resolveAll(src, mode).trim());
+      }
+    }
+    // Accept at the cursor resolves that block's piece.
+    const e = await open("{--first\n\nsecond--}", false);
+    e.select(e.at("second", 2));
+    expect(resolveAtCursor(e.view, "accept")).toBe(true);
+    expect(e.md()).toBe("{--first--}");
+    // Where the paragraph breaks would matter on resolving (text on both
+    // sides), or through other blocks (a quote), the suggestion stays
+    // literal and is written back unchanged.
+    for (const literal of ["Say {++one\n\ntwo++} end.", "A {--x\n\ny--} B", "{--a\n\n> b--}"]) {
+      expect((await open(literal, false)).md()).toBe(literal);
+    }
+  });
+
   it("keeps CriticMarkup in link destinations and titles as literal markup", async () => {
     const src = '[x](https://example.test/{++version++} "a {--b--}") and {++y++}.';
     const e = await open(src);
