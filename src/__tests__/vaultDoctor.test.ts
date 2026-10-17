@@ -214,7 +214,7 @@ describe("vault doctor", () => {
   });
 
   it("decodes character references in headings, but not in their code spans", () => {
-    expect(wikiFindings("## A &amp; B &#x41;\n\n## `&amp;` x\n\n[[#A & B A]] [[#&amp; x]] [[#& x]]\n")).toEqual(["#& x"]);
+    expect(wikiFindings("## A &amp; B &#x41;\n\n## `&amp;` x\n\n[[#A & B A]] [[#&amp; x]] [[#& x]]\n")).toEqual(["#&amp; x", "#& x"]) // targets are decoded too, like remark does;
   });
 
   it("front matter links are neither reported nor rewritten", () => {
@@ -237,5 +237,14 @@ describe("vault doctor", () => {
   it("only a real alt attribute counts", () => {
     const f = runVaultDoctor([{ path: "a.md", text: '<img src="x.png" data-alt="caption"> <img src="y.png"\nalt="ok">\n' }]);
     expect(f.filter((x) => x.kind === "missing-alt").map((x) => x.detail)).toEqual(['<img src="x.png" data-alt="caption">']);
+  });
+
+  it("CRLF closing fences; character references in wiki-link headings", () => {
+    const f = runVaultDoctor([
+      { path: "a.md", text: "```\r\ncode\r\n```\r\n\r\n[[Missing]]\r\n" },
+      { path: "b.md", text: "## A &amp; B\n\n[[#A &amp; B]]\n" },
+    ]);
+    expect(f.filter((x) => x.kind === "broken-wiki-link").map((x) => x.path)).toEqual(["a.md"]);
+    expect(f.filter((x) => x.kind === "missing-heading")).toEqual([]);
   });
 });

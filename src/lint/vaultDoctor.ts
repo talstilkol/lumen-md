@@ -82,7 +82,7 @@ function blankFences(text: string): string {
         // Only the container's own prefix is removed: a `- ```` inside a
         // top-level fence is code content, not a closer.
         const own = rest.slice(Math.min(lead, open.indent));
-        const c = /^ {0,3}(`{3,}|~{3,})[ \t]*$/.exec(own);
+        const c = /^ {0,3}(`{3,}|~{3,})[ \t]*\r?$/.exec(own); // CRLF notes keep a \r
         if (c && c[1][0] === open.ch && c[1].length >= open.len) open = null;
         lines[i] = " ".repeat(raw.length);
         continue;
@@ -297,7 +297,11 @@ function headingsOf(text: string): Set<string> {
   return out;
 }
 
-const hasHeading = (hs: Set<string> | undefined, h: string) => !!hs && (hs.has(headingSlug(h)) || hs.has(h.trim().toLowerCase()));
+// The wiki target's heading is decoded like the heading text (`[[#A &amp; B]]`).
+const hasHeading = (hs: Set<string> | undefined, raw: string) => {
+  const h = decodeCharacterReferences(raw);
+  return !!hs && (hs.has(headingSlug(h)) || hs.has(h.trim().toLowerCase()));
+};
 
 function frontMatterless(text: string): string {
   return text.replace(/^---[ \t]*\r?\n(?:[\s\S]*?\r?\n)?(?:---|\.\.\.)[ \t]*(?:\r?\n|$)\s*/, "");
