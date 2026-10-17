@@ -16,6 +16,7 @@ import { slashFactory, SlashProvider } from "@milkdown/plugin-slash";
 import { tooltipFactory, TooltipProvider } from "@milkdown/plugin-tooltip";
 import { setBlockType, toggleMark, wrapIn } from "@milkdown/prose/commands";
 import type { EditorView } from "@milkdown/prose/view";
+import { Plugin } from "@milkdown/prose/state";
 import { wrapInList } from "prosemirror-schema-list";
 import { dragHandlePlugin } from "./dragHandles";
 import { buildIndentKeymap } from "./keymapExtra";
@@ -662,6 +663,11 @@ export default function WysiwygEditor({ value, onChange }: Props) {
   // calls this before it switches, while the edit's own document is active.
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => registerPendingEdits(flushPending), []);
+  // Milkdown's listener debounces by 200 ms and can't be cancelled; its
+  // timer serializes the document, which throws once the editor is gone.
+  // When an emission is still pending, destroy only after it has run (its
+  // output is ignored by the generation guard).
+  const pendingSinceRef = useRef(0);
   const destroyCurrent = async () => {
     const ed = editorRef.current;
     editorRef.current = null;
@@ -669,6 +675,8 @@ export default function WysiwygEditor({ value, onChange }: Props) {
     if (registeredViewRef.current) unregisterWysiwygView(registeredViewRef.current);
     registeredViewRef.current = null;
     if (!ed) return;
+    const pending = Date.now() - pendingSinceRef.current;
+    if (pending < 260) await new Promise((r) => setTimeout(r, 260 - pending));
     try {
       await ed.destroy(true);
     } catch {
@@ -724,6 +732,12 @@ export default function WysiwygEditor({ value, onChange }: Props) {
           ctx.update(prosePluginsCtx, (plugins) => [
             ...plugins,
             dragHandlePlugin,
+            new Plugin({
+              appendTransaction: (trs) => {
+                if (trs.some((t) => t.docChanged || t.storedMarksSet)) pendingSinceRef.current = Date.now();
+                return null;
+              },
+            }),
             // γ.1.b — Tab / Shift-Tab indent / outdent inside lists.
             buildIndentKeymap(),
           ]);
