@@ -33,7 +33,7 @@ import type { Parents, PhrasingContent, Root } from "mdast";
 import { defaultHandlers } from "mdast-util-to-markdown";
 import { CRITIC_LITERAL, CRITIC_SENTINELS as S, prepareCriticMarkup, unescapeUserSentinels } from "../renderer/criticMarkup";
 import { parseSuggestions, sanitizeAuthor, type Resolution, type Suggestion } from "./suggesting";
-import { setWysiwygSuggestActions } from "./wysiwygSuggestBridge";
+import { setWysiwygSuggestActions, type WysiwygSuggestActions } from "./wysiwygSuggestBridge";
 
 /* ─── Configuration (set by the editor host) ────────────────────────── */
 
@@ -46,42 +46,66 @@ export function configureWysiwygSuggest(next: WysiwygSuggestConfig): void {
   config = next;
 }
 
-/** The mounted WYSIWYG view, for the palette's cursor commands. */
-let activeView: import("@milkdown/prose/view").EditorView | null = null;
-export function setActiveWysiwygView(view: typeof activeView): void {
-  activeView = view;
-  setWysiwygSuggestActions(
-    view
-      ? {
-          resolve: (mode) => {
-            const v = getActiveWysiwygView();
-            const ok = !!v && resolveAtCursor(v, mode);
-            if (ok) v!.focus();
-            return ok;
-          },
-          jump: (dir) => {
-            const v = getActiveWysiwygView();
-            const ok = !!v && jumpToChange(v, dir);
-            if (ok) v!.focus();
-            return ok;
-          },
-          // Against the live editor state, so edits the debounced listener
-          // hasn't emitted yet are neither lost nor missed.
-          resolveAll: (mode) => {
-            const v = getActiveWysiwygView();
-            if (!v) return false;
-            const tr = resolveAllChanges(v.state, mode);
-            if (!tr) return false;
-            v.dispatch(tr);
-            v.focus();
-            return true;
-          },
-        }
-      : null,
-  );
+type View = import("@milkdown/prose/view").EditorView;
+
+/**
+ * The mounted WYSIWYG views, for the palette's commands. More than one can
+ * be mounted at once (the main editor under the Focus Mode overlay), so
+ * each registers and unregisters itself by identity — one unmounting
+ * leaves the other in charge. The most recently focused one is last.
+ */
+const views: View[] = [];
+const toFront = (e: Event) => {
+  const i = views.findIndex((v) => v.dom === e.currentTarget);
+  if (i !== -1) views.push(...views.splice(i, 1));
+};
+
+const actions: WysiwygSuggestActions = {
+  resolve: (mode) => {
+    const v = getActiveWysiwygView();
+    const ok = !!v && resolveAtCursor(v, mode);
+    if (ok) v!.focus();
+    return ok;
+  },
+  jump: (dir) => {
+    const v = getActiveWysiwygView();
+    const ok = !!v && jumpToChange(v, dir);
+    if (ok) v!.focus();
+    return ok;
+  },
+  // Against the live editor state, so edits the debounced listener
+  // hasn't emitted yet are neither lost nor missed.
+  resolveAll: (mode) => {
+    const v = getActiveWysiwygView();
+    if (!v) return false;
+    const tr = resolveAllChanges(v.state, mode);
+    if (!tr) return false;
+    v.dispatch(tr);
+    v.focus();
+    return true;
+  },
+};
+
+export function registerWysiwygView(view: View): void {
+  if (!views.includes(view)) {
+    views.push(view);
+    view.dom.addEventListener("focusin", toFront);
+  }
+  setWysiwygSuggestActions(actions);
 }
-export function getActiveWysiwygView(): typeof activeView {
-  return activeView && activeView.dom.isConnected ? activeView : null;
+
+export function unregisterWysiwygView(view: View): void {
+  const i = views.indexOf(view);
+  if (i !== -1) {
+    views.splice(i, 1);
+    view.dom.removeEventListener("focusin", toFront);
+  }
+  if (views.length === 0) setWysiwygSuggestActions(null);
+}
+
+export function getActiveWysiwygView(): View | null {
+  for (let i = views.length - 1; i >= 0; i--) if (views[i].dom.isConnected) return views[i];
+  return null;
 }
 
 /* ─── Parse: markdown → sentinels → mdast nodes ─────────────────────── */

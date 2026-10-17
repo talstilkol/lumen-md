@@ -30,7 +30,8 @@ import { getMarkdown } from "@milkdown/utils";
 import {
   configureWysiwygSuggest,
   encodeCriticForWysiwyg,
-  setActiveWysiwygView,
+  registerWysiwygView,
+  unregisterWysiwygView,
   wysiwygSuggestPlugins,
 } from "./wysiwygSuggest";
 import { useAppStore } from "../store/useStore";
@@ -655,11 +656,16 @@ export default function WysiwygEditor({ value, onChange }: Props) {
   // The editor's markdown as of its creation / last emission: on unmount,
   // anything else is an edit the debounced listener hasn't emitted yet.
   const serializedRef = useRef<string | null>(null);
+  // This instance's view as registered for the palette's commands; another
+  // instance (Focus Mode over the main editor) may be registered too, so
+  // only this one is unregistered.
+  const registeredViewRef = useRef<EditorView | null>(null);
   const destroyCurrent = async () => {
     const ed = editorRef.current;
     editorRef.current = null;
     serializedRef.current = null;
-    setActiveWysiwygView(null);
+    if (registeredViewRef.current) unregisterWysiwygView(registeredViewRef.current);
+    registeredViewRef.current = null;
     if (!ed) return;
     try {
       await ed.destroy(true);
@@ -875,7 +881,8 @@ export default function WysiwygEditor({ value, onChange }: Props) {
       }
       editorRef.current = editor;
       lastEmittedRef.current = value;
-      setActiveWysiwygView(editor.action((ctx) => ctx.get(editorViewCtx)));
+      registeredViewRef.current = editor.action((ctx) => ctx.get(editorViewCtx));
+      registerWysiwygView(registeredViewRef.current);
       serializedRef.current = editor.action(getMarkdown());
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps

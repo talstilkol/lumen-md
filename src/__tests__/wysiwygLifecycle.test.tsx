@@ -13,6 +13,8 @@ import { StrictMode } from "react";
 import { act, cleanup, render } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import WysiwygEditor from "../editor/WysiwygEditor";
+import { getActiveWysiwygView } from "../editor/wysiwygSuggest";
+import { getWysiwygSuggestActions } from "../editor/wysiwygSuggestBridge";
 
 vi.mock("../ai/llm", () => ({
   chat: vi.fn(),
@@ -117,5 +119,19 @@ describe("WysiwygEditor lifecycle sequencing", () => {
     unmount();
     await settle(600);
     expect(onChange).not.toHaveBeenCalled();
+  });
+
+  it("closing a second instance (Focus Mode) keeps the remaining one registered", async () => {
+    const main = render(<WysiwygEditor value={"Main {++x++} doc"} onChange={() => {}} />);
+    const focus = render(<WysiwygEditor value={"Focus doc"} onChange={() => {}} />);
+    await settle();
+    expect(focus.container.contains(getActiveWysiwygView()!.dom)).toBe(true);
+    focus.unmount();
+    await settle();
+    expect(main.container.contains(getActiveWysiwygView()?.dom ?? null)).toBe(true);
+    expect(getWysiwygSuggestActions()?.jump(1)).toBe(true);
+    main.unmount();
+    await settle();
+    expect(getWysiwygSuggestActions()).toBeNull();
   });
 });

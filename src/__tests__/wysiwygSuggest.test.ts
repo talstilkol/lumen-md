@@ -17,7 +17,8 @@ import {
   jumpToChange,
   resolveAtCursor,
   resolveRange,
-  setActiveWysiwygView,
+  registerWysiwygView,
+  unregisterWysiwygView,
   wysiwygSuggestPlugins,
 } from "../editor/wysiwygSuggest";
 import { getWysiwygSuggestActions } from "../editor/wysiwygSuggestBridge";
@@ -383,17 +384,17 @@ describe("accept / reject in WYSIWYG", () => {
     const src = "Keep {==important `code`==} and {++x++}{>>review this<<} but `{>>literal<<}` {~~a~>b~~}.";
     for (const mode of ["accept", "reject"] as const) {
       const e = await open(src, false);
-      setActiveWysiwygView(e.view);
+      registerWysiwygView(e.view);
       expect(getWysiwygSuggestActions()!.resolveAll(mode)).toBe(true);
       expect(e.md()).toBe(resolveAll(src, mode));
-      setActiveWysiwygView(null);
+      unregisterWysiwygView(e.view);
     }
     const only = await open("Just {>>a note<<} here.", false);
-    setActiveWysiwygView(only.view);
+    registerWysiwygView(only.view);
     expect(getWysiwygSuggestActions()!.resolveAll("reject")).toBe(true);
     expect(only.md()).toBe("Just  here.");
     expect(getWysiwygSuggestActions()!.resolveAll("reject")).toBe(false);
-    setActiveWysiwygView(null);
+    unregisterWysiwygView(only.view);
   });
 
   it("resolves suggestions holding inline atoms (a hard break) as a whole", async () => {
