@@ -179,9 +179,13 @@ const LIVE_WRAP_CLOSE = "\n})();";
 function neutraliseTopLevelReturns(code: string): { text: string; edits: Array<{ from: number; to: number; len: number }> } {
   const tokens = tokenize(code);
   const scopes = functionScopes(tokens, matchBrackets(tokens));
+  // Only a function or method body owns a `return`; a statement block that
+  // declares a local (`if (stop) { const r = 1; return; }`) is a scope for
+  // binding analysis but leaves the return top-level.
+  const fns = scopes.filter((f) => !f.block);
   const edits: Array<{ from: number; to: number; len: number; text: string }> = [];
   tokens.forEach((t, i) => {
-    if (t.type !== "ident" || t.value !== "return" || scopes.some((f) => i >= f.from && i <= f.to)) return;
+    if (t.type !== "ident" || t.value !== "return" || fns.some((f) => i >= f.from && i <= f.to)) return;
     const next = tokens[i + 1];
     const bare = !next || next.nl || (next.type === "punct" && (next.value === ";" || next.value === "}"));
     edits.push({ from: t.start, to: t.end, len: bare ? 7 : 6, text: bare ? "throw 0" : "throw " });
@@ -240,6 +244,8 @@ interface FnScope {
    * initializers, static blocks, computed keys) — not late-bound.
    */
   eager?: Array<[number, number]>;
+  /** A statement block `{ … }` (not a function): scopes bindings, not `return`. */
+  block?: boolean;
 }
 
 /** Does the `{` at `i` open a class body (`class X [extends Y] {`)? */
@@ -297,28 +303,114 @@ function functionScopes(tokens: ReturnType<typeof tokenize>, match: Map<number, 
    * `new Promise(executor)`); anything else may keep it for later
    * (`callbacks.push(fn)`, `setTimeout`, event listeners, `.then`).
    */
-  // Names visibly initialised with an array / string literal (`const xs =
-  // [0]`, `let s = "a"`): their `.map` / `.replace` are the built-ins.
-  const literalKind = new Map<string, "array" | "string">();
-  for (let i = 0; i + 3 < tokens.length; i++) {
-    const kw = val(i);
-    if ((kw !== "const" && kw !== "let" && kw !== "var") || tokens[i + 1]?.type !== "ident" || !isPunct(i + 2, "=")) continue;
-    const init = tokens[i + 3];
-    if (isPunct(i + 3, "[")) literalKind.set(tokens[i + 1].value, "array");
-    else if (init?.type === "str" || init?.type === "tpl") literalKind.set(tokens[i + 1].value, "string");
-  }
+  /**
+   * The declarators of the `const` / `let` / `var` at `kw`: each binding's
+   * first token (an identifier or a pattern's `{` / `[`) and, when it has
+   * one, its initializer's first token.
+   */
+  const declarators = (kw: number): Array<{ at: number; init?: number }> => {
+    const out: Array<{ at: number; init?: number }> = [];
+    for (let j = kw + 1; j < tokens.length; ) {
+      const t = tokens[j];
+      if (!(t.type === "ident" || isPunct(j, "{") || isPunct(j, "["))) break;
+      const bindEnd = t.type === "ident" ? j : (match.get(j) ?? j);
+      if (!isPunct(bindEnd + 1, "=")) {
+        out.push({ at: j });
+        if (!isPunct(bindEnd + 1, ",")) break;
+        j = bindEnd + 2;
+        continue;
+      }
+      out.push({ at: j, init: bindEnd + 2 });
+      // Skip the initializer to a `,` at this level (the next declarator),
+      // or stop at its end: `;`, an enclosing closer, or a new line that
+      // starts with a word after a complete expression (ASI).
+      let e = bindEnd + 2;
+      for (; e < tokens.length; e++) {
+        const x = tokens[e];
+        if (e > bindEnd + 2 && x.nl && x.type === "ident" && !["in", "instanceof", "of"].includes(x.value)) {
+          const p = tokens[e - 1];
+          if (p.type !== "punct" || [")", "]", "}"].includes(p.value)) break;
+        }
+        if (x.type !== "punct") continue;
+        if (x.value === "(" || x.value === "[" || x.value === "{") e = match.get(e) ?? e;
+        else if (x.value === "," || x.value === ";" || x.value === ")" || x.value === "]" || x.value === "}") break;
+      }
+      if (!isPunct(e, ",")) break;
+      j = e + 1;
+    }
+    return out;
+  };
+  // Bindings visibly initialised with an array / string literal (`const xs
+  // = [0]`, `let s = "a"`): their `.map` / `.replace` are the built-ins. Each
+  // declaration of a name is kept with the brace range it is visible in, so
+  // a receiver resolves to its own binding, not a same-named one elsewhere.
+  // (Built lazily: `var` scoping needs every function body known.)
+  let literalDecls: Map<string, Array<{ from: number; to: number; kind?: "array" | "string"; pos: number }>> | null = null;
+  const literalDeclsFor = () => {
+    if (literalDecls) return literalDecls;
+    const decls = new Map<string, Array<{ from: number; to: number; kind?: "array" | "string"; pos: number }>>();
+    const braces: number[] = [];
+    for (let i = 0; i < tokens.length; i++) {
+      if (isPunct(i, "{")) braces.push(i);
+      else if (isPunct(i, "}")) braces.pop();
+      const kw = val(i);
+      if (tokens[i].type !== "ident" || (kw !== "const" && kw !== "let" && kw !== "var")) continue;
+      // `let` / `const`: the enclosing braces; `var`: the enclosing function body.
+      let from = -1;
+      let to = tokens.length;
+      if (kw === "var") {
+        for (const [a, b] of fnBodies) if (a < i && i < b && a > from) [from, to] = [a, b];
+      } else if (braces.length) {
+        from = braces[braces.length - 1];
+        to = match.get(from) ?? tokens.length;
+      }
+      for (const d of declarators(i)) {
+        const names = new Set<string>();
+        if (tokens[d.at].type === "ident") names.add(tokens[d.at].value);
+        else addPatternBindings(names, d.at);
+        let kind: "array" | "string" | undefined;
+        if (tokens[d.at].type === "ident" && d.init !== undefined) {
+          const init = tokens[d.init];
+          if (isPunct(d.init, "[")) kind = "array";
+          else if (init?.type === "str" || init?.type === "tpl") kind = "string";
+        }
+        for (const n of names) {
+          const at = decls.get(n) ?? [];
+          at.push({ from, to, kind, pos: d.at });
+          decls.set(n, at);
+        }
+      }
+    }
+    return (literalDecls = decls);
+  };
+  /** The literal kind of the binding `name` that the token at `use` sees. */
+  const literalKindAt = (name: string, use: number): "array" | "string" | undefined => {
+    let best: { from: number; to: number; kind?: "array" | "string"; pos: number } | undefined;
+    for (const d of literalDeclsFor().get(name) ?? []) {
+      if (!(d.from < use && use < d.to)) continue;
+      // Innermost scope wins; within one scope (`var xs; var xs = []`), the
+      // latest declaration before the use.
+      if (!best || d.from > best.from || (d.from === best.from && d.pos < use && (best.pos > use || d.pos > best.pos))) best = d;
+    }
+    return best?.kind;
+  };
   // Where each such name is assigned again (`xs = holder`, `xs += …`): from
-  // that point on it may no longer be the built-in.
-  const reassignedAt = new Map<string, number>();
-  for (let i = 1; i + 1 < tokens.length; i++) {
-    const t = tokens[i];
-    if (t.type !== "ident" || !literalKind.has(t.value) || reassignedAt.has(t.value)) continue;
-    const next = tokens[i + 1];
-    const prev = tokens[i - 1];
-    const declared = prev?.type === "ident" && (prev.value === "const" || prev.value === "let" || prev.value === "var");
-    if (declared || isPunct(i - 1, ".") || isPunct(i - 1, "?.")) continue;
-    if (next?.type === "punct" && /^(=|\+=|-=|\|\|=|&&=|\?\?=)$/.test(next.value)) reassignedAt.set(t.value, i);
-  }
+  // that point on it may no longer be the built-in. (Lazy, like the above.)
+  let reassigned: Map<string, number> | null = null;
+  const reassignedAt = () => {
+    if (reassigned) return reassigned;
+    reassigned = new Map<string, number>();
+    for (let i = 1; i + 1 < tokens.length; i++) {
+      const t = tokens[i];
+      if (t.type !== "ident" || !literalDeclsFor().get(t.value)?.some((d) => d.kind) || reassigned.has(t.value)) continue;
+      const next = tokens[i + 1];
+      const prev = tokens[i - 1];
+      const declared = prev?.type === "ident" && (prev.value === "const" || prev.value === "let" || prev.value === "var");
+      if (declared || isPunct(i - 1, ".") || isPunct(i - 1, "?.")) continue;
+      if (next?.type === "punct" && /^(=|\+=|-=|\|\|=|&&=|\?\?=)$/.test(next.value)) reassigned.set(t.value, i);
+    }
+    return reassigned;
+  };
   // `Array` / `Object` / `Promise` are the built-ins only when the code doesn't bind its own.
   const shadowed = new Set<string>();
   for (let i = 1; i < tokens.length; i++) {
@@ -331,28 +423,44 @@ function functionScopes(tokens: ReturnType<typeof tokenize>, match: Map<number, 
     const callee = tokens[open - 1];
     if (callee?.type !== "ident") return true;
     if (callee.value === "Promise" && val(open - 2) === "new" && !shadowed.has("Promise")) return false;
-    if (!SYNC_CALLBACK_METHODS.has(callee.value) || !isPunct(open - 2, ".")) return true;
+    // `xs.map(…)` and `xs?.map(…)` alike.
+    if (!SYNC_CALLBACK_METHODS.has(callee.value) || !(isPunct(open - 2, ".") || isPunct(open - 2, "?."))) return true;
     // Only when the receiver is known to be the built-in: an array literal
     // (`[…].map`), a string literal (`"…".replace`), `Array.from`,
     // `Object.fromEntries` / `Object.groupBy`. A user's own `holder.map`
     // may keep the callback.
-    const recv = tokens[open - 3];
+    let end = open - 3;
+    // Grouping parentheses (`([0]).map`, `(xs).map`) are transparent: the
+    // receiver is what they enclose, if that is a single operand. A call's
+    // parentheses (`f().map`) are not grouping.
+    let groupStart = -1;
+    while (isPunct(end, ")")) {
+      const lo = match.get(end);
+      if (lo === undefined) return true;
+      const b = tokens[lo - 1];
+      if (b && ((b.type === "ident" && !NOT_CALLEE.has(b.value)) || (b.type === "punct" && CALLEE_END.has(b.value)))) return true;
+      groupStart = lo + 1;
+      end--;
+    }
+    const recv = tokens[end];
     if (!recv) return true;
+    const recvStart = isPunct(end, "]") ? (match.get(end) ?? -1) : end;
+    if (groupStart !== -1 && recvStart !== groupStart) return true; // `(a + b).map`, …
     if (recv.type === "str" || recv.type === "tpl") return !(callee.value === "replace" || callee.value === "replaceAll");
     if (recv.type === "ident") {
       if (recv.value === "Array" && !shadowed.has("Array")) return callee.value !== "from";
       if (recv.value === "Object" && !shadowed.has("Object")) return !(callee.value === "fromEntries" || callee.value === "groupBy");
-      const again = reassignedAt.get(recv.value);
-      const kind = isPunct(open - 4, ".") || (again !== undefined && again < open) ? undefined : literalKind.get(recv.value);
+      const again = reassignedAt().get(recv.value);
+      const member = isPunct(end - 1, ".") || isPunct(end - 1, "?.");
+      const kind = member || (again !== undefined && again < open) ? undefined : literalKindAt(recv.value, end);
       if (kind === "string") return !(callee.value === "replace" || callee.value === "replaceAll");
       if (kind === "array") return callee.value === "replace" || callee.value === "replaceAll" || callee.value === "from" || callee.value === "fromEntries" || callee.value === "groupBy";
       return true;
     }
-    if (isPunct(open - 3, "]")) {
-      const lit = match.get(open - 3);
-      const before = lit !== undefined ? tokens[lit - 1] : undefined;
+    if (isPunct(end, "]")) {
+      const before = recvStart >= 0 ? tokens[recvStart - 1] : undefined;
       // `[…]` is a literal unless it indexes something (`a[0]`, `f()[0]`).
-      const indexes = before && (before.type === "ident" || (before.type === "punct" && CALLEE_END.has(before.value)));
+      const indexes = recvStart < 0 || (before && (before.type === "ident" || (before.type === "punct" && CALLEE_END.has(before.value))));
       return !!indexes;
     }
     return true;
@@ -487,9 +595,11 @@ function functionScopes(tokens: ReturnType<typeof tokenize>, match: Map<number, 
       if ((v === "const" || v === "let") && !here) continue;
       if (v === "var" && !fnLevel && !here) continue;
       if (v === "const" || v === "let" || v === "var") {
-        const j = i + 1;
-        if (tokens[j]?.type === "ident") into.add(tokens[j].value);
-        else if (isPunct(j, "{") || isPunct(j, "[")) addPatternBindings(into, j);
+        // Every declarator binds: `const x = 0, value = 1`.
+        for (const { at } of declarators(i)) {
+          if (tokens[at].type === "ident") into.add(tokens[at].value);
+          else addPatternBindings(into, at);
+        }
       } else if (here && (v === "function" || v === "class") && tokens[i + 1]?.type === "ident") {
         into.add(tokens[i + 1].value);
       }
@@ -627,7 +737,7 @@ function functionScopes(tokens: ReturnType<typeof tokenize>, match: Map<number, 
     }
     const locals = new Set<string>();
     addDeclarations(locals, i, close, false);
-    if (locals.size) scopes.push({ from: i, to: close, retained: false, locals });
+    if (locals.size) scopes.push({ from: i, to: close, retained: false, locals, block: true });
   });
   return scopes;
 }
