@@ -269,7 +269,7 @@
   "cmd.tools.voice": "🎙 Voice to Markdown",
   "cmd.tools.voice.hint": "Speech recognition → text",
   "cmd.tools.voiceMemo": "🎙 Mémo vocal (transcrire + résumer)",
-  "cmd.tools.voiceMemo.hint": "Enregistrer, transcrire sur cet appareil avec Whisper, résumer et insérer un bloc mémo",
+  "cmd.tools.voiceMemo.hint": "Enregistrer, transcrire avec Whisper (sur cet appareil sous une politique IA locale), résumer et insérer un bloc mémo",
   "cmd.tools.writingGoal.hint": "A subtle progress banner above the editor",
   "cmd.tools.writingGoal.set": "✍️ Writing goal: {{words}} words/day",
   "cmd.tools.writingGoal.unset": "✍️ Set a daily writing goal",

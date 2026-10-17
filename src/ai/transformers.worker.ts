@@ -7,6 +7,7 @@
  *   → { id, type: "transcribe", model, device, audio: Float32Array (16 kHz mono), language?, task? }
  *   → { id, type: "embed",      model, device, texts: string[] }
  *   → { id, type: "load",       task, model, device }
+ *   → { id, type: "cancel",     target }         (skip a queued job, discard a running one's result)
  *   → { id, type: "unload" }
  *   ← { id, type: "progress", file, progress, loaded, total }   (model download)
  *   ← { id, type: "result",   value }
@@ -25,6 +26,7 @@ export type WorkerIn =
   | { id: number; type: "transcribe"; model: string; device: Device; audio: Float32Array; language?: string; task?: "transcribe" | "translate" }
   | { id: number; type: "embed"; model: string; device: Device; texts: string[] }
   | { id: number; type: "load"; task: "automatic-speech-recognition" | "feature-extraction"; model: string; device: Device }
+  | { id: number; type: "cancel"; target: number }
   | { id: number; type: "unload" };
 
 export type WorkerOut =
@@ -62,6 +64,12 @@ export function configureOrt(baseUrl: string, suffix: ".asyncify" | "" = ".async
 let asr: { key: string; pipe: AutomaticSpeechRecognitionPipeline } | null = null;
 let embedder: { key: string; pipe: FeatureExtractionPipeline } | null = null;
 let queue: Promise<unknown> = Promise.resolve();
+/** Jobs cancelled by the client: skipped when queued, their result discarded when running. */
+const cancelled = new Set<number>();
+
+/** Whisper's window. Longer audio is cut into windows and transcribed one call at a time. */
+export const WINDOW_SECONDS = 30;
+const SAMPLE_RATE = 16_000;
 
 function progressFor(id: number) {
   return (info: { status?: string; file?: string; progress?: number; loaded?: number; total?: number }) => {
@@ -98,18 +106,51 @@ async function getEmbedder(id: number, model: string, device: Device): Promise<F
   return pipe;
 }
 
+/**
+ * Cut audio into Whisper-sized windows at the quietest sample near each
+ * boundary (within ±2 s), so a cut rarely lands mid-word. The library's
+ * own `chunk_length_s` path is avoided: with the WebGPU backend it leaks
+ * GPU memory per chunk (transformers.js #1739), and one call per window
+ * does not.
+ */
+export function windowsOf(audio: Float32Array, windowSeconds = WINDOW_SECONDS, sampleRate = SAMPLE_RATE): Float32Array[] {
+  const size = windowSeconds * sampleRate;
+  if (audio.length <= size) return [audio];
+  const out: Float32Array[] = [];
+  const slack = 2 * sampleRate;
+  let start = 0;
+  while (audio.length - start > size) {
+    const target = start + size;
+    let cut = target;
+    let quietest = Infinity;
+    for (let i = Math.max(start + size - slack, start + 1); i < Math.min(target + slack, audio.length); i += 160) {
+      let energy = 0;
+      for (let j = i; j < Math.min(i + 160, audio.length); j++) energy += audio[j] * audio[j];
+      if (energy < quietest) {
+        quietest = energy;
+        cut = i;
+      }
+    }
+    out.push(audio.subarray(start, cut));
+    start = cut;
+  }
+  out.push(audio.subarray(start));
+  return out;
+}
+
 async function transcribe(id: number, msg: Extract<WorkerIn, { type: "transcribe" }>): Promise<TranscribeResult> {
   const pipe = await getAsr(id, msg.model, msg.device);
-  const seconds = msg.audio.length / 16_000;
-  const out = (await pipe(msg.audio, {
-    ...(msg.language ? { language: msg.language } : {}),
-    task: msg.task ?? "transcribe",
-    // Whisper sees 30 s windows; longer memos are chunked with overlap.
-    ...(seconds > 30 ? { chunk_length_s: 30, stride_length_s: 5 } : {}),
-  })) as { text?: string; language?: string } | Array<{ text?: string }>;
-  const text = Array.isArray(out) ? out.map((o) => o.text ?? "").join(" ") : (out.text ?? "");
-  const language = Array.isArray(out) ? undefined : out.language;
-  return { text: text.trim(), ...(language ? { language } : {}) };
+  const kwargs = { ...(msg.language ? { language: msg.language } : {}), task: msg.task ?? "transcribe" };
+  const parts: string[] = [];
+  let language: string | undefined;
+  for (const window of windowsOf(msg.audio)) {
+    if (cancelled.has(id)) throw new DOMException("aborted", "AbortError");
+    const out = (await pipe(window, kwargs)) as { text?: string; language?: string } | Array<{ text?: string }>;
+    parts.push(Array.isArray(out) ? out.map((o) => o.text ?? "").join(" ") : (out.text ?? ""));
+    if (!Array.isArray(out) && out.language && !language) language = out.language;
+  }
+  const text = parts.map((p) => p.trim()).filter(Boolean).join(" ");
+  return { text, ...(language ? { language } : {}) };
 }
 
 async function embed(id: number, msg: Extract<WorkerIn, { type: "embed" }>): Promise<EmbedResult> {
@@ -125,15 +166,33 @@ function serial<T>(fn: () => Promise<T>): Promise<T> {
   return p;
 }
 
+/** Run a cancellable job: skipped if cancelled while queued; its result dropped if cancelled while running. */
+async function job<T>(id: number, fn: () => Promise<T>): Promise<T> {
+  return serial(async () => {
+    if (cancelled.delete(id)) throw new DOMException("aborted", "AbortError");
+    try {
+      const value = await fn();
+      if (cancelled.delete(id)) throw new DOMException("aborted", "AbortError");
+      return value;
+    } finally {
+      cancelled.delete(id);
+    }
+  });
+}
+
 export async function handle(msg: WorkerIn): Promise<void> {
   const { id } = msg;
   try {
     switch (msg.type) {
       case "transcribe":
-        post({ id, type: "result", value: await serial(() => transcribe(id, msg)) });
+        post({ id, type: "result", value: await job(id, () => transcribe(id, msg)) });
         return;
       case "embed":
-        post({ id, type: "result", value: await serial(() => embed(id, msg)) });
+        post({ id, type: "result", value: await job(id, () => embed(id, msg)) });
+        return;
+      case "cancel":
+        cancelled.add(msg.target);
+        post({ id, type: "result", value: true });
         return;
       case "load":
         await serial<unknown>(() => (msg.task === "automatic-speech-recognition" ? getAsr(id, msg.model, msg.device) : getEmbedder(id, msg.model, msg.device)));

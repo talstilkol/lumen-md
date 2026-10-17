@@ -41,6 +41,26 @@ interface Pending {
   reject: (e: Error) => void;
 }
 
+/** Safari / WebKit (not Chrome or Edge on iOS, which are WebKit too but report themselves). */
+export function isWebKit(ua: string = typeof navigator !== "undefined" ? navigator.userAgent : ""): boolean {
+  return /AppleWebKit/i.test(ua) && /Version\/[\d.]+.*Safari/i.test(ua) && !/Chrome|Chromium|CriOS|Edg|OPR|Firefox|FxiOS/i.test(ua);
+}
+
+/**
+ * ONNX Runtime build: the `.asyncify` build carries the WebGPU runtime;
+ * on WebKit it is known to balloon memory and kill the tab, so Safari
+ * gets the plain wasm build (and the wasm device).
+ */
+export function ortSuffixFor(webkit: boolean = isWebKit()): ".asyncify" | "" {
+  return webkit ? "" : ".asyncify";
+}
+
+/** Where the staged ONNX Runtime files are served from (public/ort/ under the Vite base). */
+export function ortBaseUrl(base: string = import.meta.env?.BASE_URL ?? "/"): string {
+  const origin = typeof location !== "undefined" ? location.origin : "http://localhost";
+  return new URL(`${base.endsWith("/") ? base : base + "/"}ort/`, origin).href;
+}
+
 let worker: Worker | null = null;
 let seq = 0;
 const pending = new Map<number, Pending>();
@@ -73,25 +93,51 @@ function getWorker(): Worker {
     if (m.type === "result") p.resolve(m.value);
     else p.reject(new Error(m.message));
   };
-  w.onerror = (ev) => failAll(`transformers worker error: ${ev.message || "unknown"}`);
+  w.onerror = (ev) => {
+    // A failed startup (module, ONNX runtime) leaves nothing to talk to:
+    // reject everything and let the next call create a fresh worker.
+    failAll(`transformers worker error: ${ev.message || "unknown"}`);
+    if (worker === w) worker = null;
+    w.terminate();
+  };
   worker = w;
   return w;
 }
 
 type WorkerCall = WorkerIn extends infer M ? (M extends { id: number } ? Omit<M, "id"> : never) : never;
 
-function call<T>(msg: WorkerCall, transfer: Transferable[] = []): Promise<T> {
+function call<T>(msg: WorkerCall, transfer: Transferable[] = [], signal?: AbortSignal): Promise<T> {
   const id = ++seq;
   return new Promise<T>((resolve, reject) => {
-    pending.set(id, { resolve: resolve as (v: unknown) => void, reject });
-    getWorker().postMessage({ ...msg, id, ortBase: `${location.origin}/ort/` }, transfer);
+    const entry: Pending = { resolve: resolve as (v: unknown) => void, reject };
+    pending.set(id, entry);
+    getWorker().postMessage({ ...msg, id, ortBase: ortBaseUrl(), ortSuffix: ortSuffixFor() }, transfer);
+    if (signal) {
+      const onAbort = () => {
+        // Reject now and tell the worker to skip (queued) or discard (running) this job.
+        if (pending.delete(id)) {
+          reject(new DOMException("aborted", "AbortError"));
+          getWorker().postMessage({ type: "cancel", id: ++seq, target: id, ortBase: ortBaseUrl(), ortSuffix: ortSuffixFor() });
+        }
+      };
+      signal.addEventListener("abort", onAbort, { once: true });
+      const done = () => signal.removeEventListener("abort", onAbort);
+      entry.resolve = (v) => {
+        done();
+        resolve(v as T);
+      };
+      entry.reject = (e) => {
+        done();
+        reject(e);
+      };
+    }
   });
 }
 
-/** WebGPU when the adapter is usable, else wasm (always available). */
+/** WebGPU when the adapter is usable (never on WebKit, see ortSuffixFor), else wasm (always available). */
 export async function transformersDevice(hw?: Hardware): Promise<Device> {
   const h = hw ?? (await detectHardware());
-  return h.webgpu ? "webgpu" : "wasm";
+  return h.webgpu && !isWebKit() ? "webgpu" : "wasm";
 }
 
 /** The Whisper model for this device: turbo needs a real GPU budget, small fits most laptops, tiny for wasm. */
@@ -107,7 +153,7 @@ export async function transcribeAudio(samples: Float32Array, opts: { language?: 
   const device = await transformersDevice(hw);
   const model = opts.model ?? whisperModelFor(hw, device);
   // The buffer is transferred, not copied; callers must not reuse it.
-  return call<TranscribeResult>({ type: "transcribe", model, device, audio: samples, language: opts.language, task: "transcribe" }, [samples.buffer]);
+  return call<TranscribeResult>({ type: "transcribe", model, device, audio: samples, language: opts.language, task: "transcribe" }, [samples.buffer], opts.signal);
 }
 
 /** Normalised embeddings (mean pooled) for `texts`. */

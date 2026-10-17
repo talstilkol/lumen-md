@@ -109,7 +109,8 @@ const AI_PROMPT_COMMANDS = new Set([
   "tools.autoTag",
   "tools.suggestLinks",
   "research.ask",
-  "voice.memo",
+  // voice.memo is NOT listed: recording and transcription are local; the
+  // summary pays for itself (ownPrompt) and the memo tolerates its absence.
 ]);
 
 export function isAiPromptCommand(id: string): boolean {

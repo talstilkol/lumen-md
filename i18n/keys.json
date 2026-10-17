@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generated_at": "2026-10-17T13:46:04.706Z",
+  "generated_at": "2026-10-17T14:37:13.110Z",
   "source": "src/i18n/index.ts (en bundle)",
   "count": 1068,
   "entries": [
@@ -4544,7 +4544,7 @@
     },
     {
       "key": "cmd.tools.voiceMemo.hint",
-      "en": "Record, transcribe on this device with Whisper, summarize, and insert a memo block",
+      "en": "Record, transcribe with Whisper (on this device under a local AI policy), summarize, and insert a memo block",
       "vars": []
     },
     {

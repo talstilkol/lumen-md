@@ -269,7 +269,7 @@
   "cmd.tools.voice": "🎙 Voice to Markdown",
   "cmd.tools.voice.hint": "Speech recognition → text",
   "cmd.tools.voiceMemo": "🎙 مذكرة صوتية (تفريغ + تلخيص)",
-  "cmd.tools.voiceMemo.hint": "تسجيل، تفريغ على هذا الجهاز عبر Whisper، تلخيص، وإدراج كتلة مذكرة",
+  "cmd.tools.voiceMemo.hint": "تسجيل، تفريغ عبر Whisper (على هذا الجهاز تحت سياسة ذكاء اصطناعي محلية)، تلخيص، وإدراج كتلة مذكرة",
   "cmd.tools.writingGoal.hint": "A subtle progress banner above the editor",
   "cmd.tools.writingGoal.set": "✍️ Writing goal: {{words}} words/day",
   "cmd.tools.writingGoal.unset": "✍️ Set a daily writing goal",

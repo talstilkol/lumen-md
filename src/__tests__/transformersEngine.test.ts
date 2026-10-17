@@ -17,6 +17,9 @@ import {
   whisperModelFor,
   transformersDevice,
   decodeAudioTo16k,
+  isWebKit,
+  ortSuffixFor,
+  ortBaseUrl,
   WHISPER_MODELS,
   EMBEDDING_MODEL,
   __resetTransformersEngine,
@@ -34,6 +37,7 @@ class FakeWorker {
   terminate = terminate;
   constructor(public url: URL) {
     created++;
+    (globalThis as unknown as { __lastWorker?: FakeWorker }).__lastWorker = this;
   }
   postMessage(msg: WorkerIn & { ortBase?: string }, transfer: Transferable[] = []) {
     received.push(msg);
@@ -101,6 +105,54 @@ describe("transformersEngine (worker client)", () => {
     await unloadTransformers();
     expect(terminate).toHaveBeenCalledTimes(1);
     expect(received.at(-1)?.type).toBe("unload");
+  });
+
+  it("aborting after dispatch rejects the call and tells the worker to cancel that job", async () => {
+    script = (msg, reply) => {
+      if (msg.type === "cancel") reply({ id: msg.id, type: "result", value: true });
+      // the transcribe job never answers
+    };
+    const ctrl = new AbortController();
+    const p = transcribeAudio(new Float32Array(16), { signal: ctrl.signal });
+    await new Promise((r) => setTimeout(r, 0));
+    ctrl.abort();
+    await expect(p).rejects.toMatchObject({ name: "AbortError" });
+    expect(received.map((m) => m.type)).toEqual(["transcribe", "cancel"]);
+    expect((received[1] as { target?: number }).target).toBe(received[0].id);
+  });
+
+  it("discards a worker that failed at the top level so the next call starts fresh", async () => {
+    script = () => {};
+    const p = embedTextsLocal(["x"]);
+    await new Promise((r) => setTimeout(r, 0));
+    const w = (globalThis as unknown as { __lastWorker?: FakeWorker }).__lastWorker;
+    w!.onerror?.({ message: "ort failed to load" });
+    await expect(p).rejects.toThrow(/ort failed to load/);
+    expect(terminate).toHaveBeenCalledTimes(1);
+    script = (msg, reply) => reply({ id: msg.id, type: "result", value: { vectors: [[1]], dims: 1 } });
+    await embedTextsLocal(["y"]);
+    expect(created).toBe(2);
+  });
+
+  it("uses the plain ONNX runtime and the wasm device on WebKit; ORT base follows the Vite base", async () => {
+    expect(isWebKit("Mozilla/5.0 (Macintosh) AppleWebKit/605.1.15 Version/26.0 Safari/605.1.15")).toBe(true);
+    expect(isWebKit("Mozilla/5.0 (Macintosh) AppleWebKit/537.36 Chrome/130 Safari/537.36")).toBe(false);
+    expect(isWebKit("Mozilla/5.0 (iPhone) AppleWebKit/605.1.15 CriOS/130 Mobile Safari")).toBe(false);
+    expect(ortSuffixFor(true)).toBe("");
+    expect(ortSuffixFor(false)).toBe(".asyncify");
+    expect(ortBaseUrl("/")).toMatch(/\/ort\/$/);
+    expect(ortBaseUrl("/app/")).toMatch(/\/app\/ort\/$/);
+    expect(ortBaseUrl("/app")).toMatch(/\/app\/ort\/$/);
+    const ua = navigator.userAgent;
+    Object.defineProperty(navigator, "userAgent", { value: "Mozilla/5.0 (Macintosh) AppleWebKit/605.1.15 Version/26.0 Safari/605.1.15", configurable: true });
+    try {
+      expect(await transformersDevice()).toBe("wasm");
+      script = (msg, reply) => reply({ id: msg.id, type: "result", value: { vectors: [], dims: 384 } });
+      await embedTextsLocal(["x"]);
+      expect((received[0] as { ortSuffix?: string }).ortSuffix).toBe("");
+    } finally {
+      Object.defineProperty(navigator, "userAgent", { value: ua, configurable: true });
+    }
   });
 
   it("decodeAudioTo16k reports a missing Web Audio API", async () => {
