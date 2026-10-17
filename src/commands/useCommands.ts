@@ -1591,6 +1591,17 @@ export function useCommands({
       }),
       // ── Voice-to-Markdown ─────────────────────────────────────────────────
       {
+        id: "voice.memo",
+        label: t("cmd.tools.voiceMemo"),
+        hint: t("cmd.tools.voiceMemo.hint"),
+        icon: cmdIcons.Sparkles,
+        group: t("group.tools"),
+        action: async () => {
+          const { startVoiceMemo } = await import("../ui/VoiceDictation");
+          await startVoiceMemo();
+        },
+      },
+      {
         id: "voice.dictate",
         label: t("cmd.tools.voice"),
         hint: t("cmd.tools.voice.hint"),

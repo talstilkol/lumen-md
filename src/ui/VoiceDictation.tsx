@@ -9,9 +9,9 @@
  *     `MediaRecorder` captures the audio, on stop we Whisper-transcribe
  *     + AI-summarize and insert a `> 🎙 Voice memo` block at the cursor.
  *
- * The memo flow honours Privacy Mode — `useLocalAi=true` routes
- * Whisper through `@xenova/transformers` and the summary through
- * web-llm, so no audio bytes leave the browser.
+ * The memo flow follows the AI policy — by default Whisper runs on this
+ * device through transformers.js (src/ai/transformersEngine.ts) and the
+ * summary through the local model, so no audio bytes leave the browser.
  *
  * Backwards-compat: `startVoiceRecording(lang)` is the legacy entry
  * point and still defaults to quick mode. The new `startVoiceMemo()`
@@ -155,6 +155,19 @@ export function startVoiceRecording(lang: string): void {
   recognition.start();
 }
 
+/** The first recording container this browser supports, or "" to let MediaRecorder choose. */
+export function pickRecordingMimeType(): string {
+  if (typeof MediaRecorder === "undefined" || typeof MediaRecorder.isTypeSupported !== "function") return "";
+  for (const type of ["audio/webm;codecs=opus", "audio/webm", "audio/mp4", "audio/ogg;codecs=opus", "audio/ogg"]) {
+    try {
+      if (MediaRecorder.isTypeSupported(type)) return type;
+    } catch {
+      /* some engines throw on unknown types */
+    }
+  }
+  return "";
+}
+
 /**
  * Memo mode — record audio, Whisper-transcribe, AI-summarize, insert
  * a formatted block. Requires `MediaRecorder` (every modern browser
@@ -175,11 +188,19 @@ export async function startVoiceMemo(): Promise<void> {
     return;
   }
 
-  // Use opus to keep memo bytes small. Whisper accepts webm.
-  const mimeType = MediaRecorder.isTypeSupported("audio/webm;codecs=opus")
-    ? "audio/webm;codecs=opus"
-    : "audio/webm";
-  const recorder = new MediaRecorder(stream, { mimeType });
+  // Opus in webm keeps memo bytes small; Safari records mp4. Whisper (and
+  // the local decoder) accept whatever the browser can produce, so the
+  // first supported container wins and none is forced.
+  const mimeType = pickRecordingMimeType();
+  let recorder: MediaRecorder;
+  try {
+    recorder = mimeType ? new MediaRecorder(stream, { mimeType }) : new MediaRecorder(stream);
+  } catch (err) {
+    stream.getTracks().forEach((t) => t.stop());
+    log.warn("voice memo: MediaRecorder unavailable", err);
+    showAiToast(`Recording is not supported in this browser: ${(err as Error).message}`, "error");
+    return;
+  }
   const chunks: Blob[] = [];
   recorder.addEventListener("dataavailable", (e) => {
     if (e.data.size > 0) chunks.push(e.data);
@@ -202,7 +223,7 @@ export async function startVoiceMemo(): Promise<void> {
   recorder.addEventListener("stop", async () => {
     teardown();
     if (chunks.length === 0) return;
-    const blob = new Blob(chunks, { type: mimeType });
+    const blob = new Blob(chunks, { type: mimeType || recorder.mimeType || "audio/webm" });
 
     showAiToast("🎙 Transcribing…", "info");
     let result;
