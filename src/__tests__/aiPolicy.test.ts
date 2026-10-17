@@ -13,10 +13,14 @@ vi.mock("../ai/ollamaProvider", () => ({
     yield "ollama-stream";
   },
   getBaseUrl: () => ollamaBase,
+  ollamaKnownAvailable: () => probe.ok,
 }));
+const probe = vi.hoisted(() => ({ ok: false }));
+const webgpu = { available: false };
+const chatLocal = vi.fn(async (_m: unknown, _o: unknown) => "from webgpu");
 vi.mock("../ai/localLlm", () => ({
-  localLlmAvailable: () => ({ available: false }),
-  chatLocal: vi.fn(),
+  localLlmAvailable: () => webgpu,
+  chatLocal: (m: unknown, o: unknown) => chatLocal(m, o),
   onLocalLlmProgress: () => () => {},
 }));
 vi.mock("../ai/anthropicProvider", () => ({ chatAnthropic: vi.fn().mockResolvedValue("from claude"), chatAnthropicStream: vi.fn() }));
@@ -36,6 +40,9 @@ describe("AI policy", () => {
     ollamaChat.mockClear();
     ollamaBase = "http://127.0.0.1:11434";
     localStorage.removeItem("lumen.ai.mode");
+    webgpu.available = false;
+    chatLocal.mockClear();
+    probe.ok = false;
   });
   afterEach(() => {
     for (const k of KEYS) localStorage.removeItem(k);
@@ -138,6 +145,53 @@ describe("AI policy", () => {
     // Under local-first a remote Ollama the user configured still answers.
     setAiPolicy("local-first");
     await expect(chat([{ role: "user", content: "hi" }])).resolves.toBe("from ollama");
+  });
+
+  it("streams through WebGPU (whole answer, once) when the local route picks it, never the cloud", async () => {
+    localStorage.setItem("lumen.ai.provider", "anthropic");
+    localStorage.setItem("lumen.ai.key.anthropic", "k");
+    setAiPolicy("local-only");
+    webgpu.available = true;
+    const chunks: string[] = [];
+    for await (const c of chatStream([{ role: "user", content: "hi" }])) chunks.push(c);
+    expect(chunks).toEqual(["from webgpu"]);
+    expect(await chat([{ role: "user", content: "hi" }])).toBe("from webgpu");
+    // local-first + Privacy Mode: WebGPU before Claude, in both chat and stream.
+    setAiPolicy("local-first");
+    state.useLocalAi = true;
+    chunks.length = 0;
+    for await (const c of chatStream([{ role: "user", content: "hi" }])) chunks.push(c);
+    expect(chunks).toEqual(["from webgpu"]);
+  });
+
+  it("falls back to the SELECTED provider when Ollama vanishes between the two probes", async () => {
+    localStorage.setItem("lumen.ai.provider", "anthropic");
+    localStorage.setItem("lumen.ai.key.anthropic", "k");
+    setAiPolicy("local-first");
+    // First probe (route) says up, second (dispatch) says down.
+    ollamaUp.mockResolvedValueOnce(true).mockResolvedValueOnce(false).mockResolvedValue(false);
+    await expect(chat([{ role: "user", content: "hi" }])).resolves.toBe("from claude");
+    expect(ollamaChat).not.toHaveBeenCalled();
+  });
+
+  it("hasAiCredentials recognises the local routes a selected cloud provider would take", async () => {
+    localStorage.setItem("lumen.ai.provider", "anthropic");
+    setAiPolicy("local-only");
+    // Nothing local seen yet → no usable provider (a silent background prompt is not spent).
+    expect(hasAiCredentials()).toBe(false);
+    probe.ok = true; // a probe saw Ollama
+    expect(hasAiCredentials()).toBe(true);
+    ollamaBase = "https://ollama.example.com"; // …but not on this machine
+    expect(hasAiCredentials()).toBe(false);
+    ollamaBase = "http://127.0.0.1:11434";
+    probe.ok = false;
+    const original = globalThis.navigator;
+    Object.defineProperty(globalThis, "navigator", { value: { ...original, gpu: {} }, configurable: true });
+    try {
+      expect(hasAiCredentials()).toBe(true);
+    } finally {
+      Object.defineProperty(globalThis, "navigator", { value: original, configurable: true });
+    }
   });
 
   it("direct cloud paths honour the policy: embeddings, transcription, batch, fine-tune, grammar, research", async () => {

@@ -410,7 +410,7 @@ async function chatDirect(
   const provider = getActiveProvider();
   // At the monthly limit nothing goes out — not even the local probe.
   if (!opts.prepaid && !aiQuotaStatus(new Date()).allowed) charge();
-  const localFirst = await localRoute(provider);
+  let localFirst = await localRoute(provider);
 
   // ── Ollama (local server) ──────────────────────────────────────
   if (provider === "ollama" || localFirst === "ollama") {
@@ -422,6 +422,9 @@ async function chatDirect(
       opts.onRoute?.("ollama", effectiveModel("ollama", local));
       return chatOllama(messages, local);
     }
+    // A transient failure between the two probes: the selected provider
+    // takes the request again (never a different cloud provider).
+    if (localFirst === "ollama") localFirst = await localRoute(provider);
     toast.warn(
       t("ai.toast.ollamaUnavailable.title"),
       t("ai.toast.ollamaUnavailable.body", { url: getBaseUrl() }),
@@ -433,6 +436,47 @@ async function chatDirect(
     // the OpenAI request at the end of this function, which throws NO_KEY
     // when no OpenAI key is configured.
     if (!useAppStore.getState().useLocalAi) assertCloudFallback("Ollama");
+  }
+
+  // ── WebGPU local (in-browser) ──────────────────────────────────
+  if (provider === "local-webgpu" || localFirst === "local-webgpu" || (!isCloudProvider(provider) && useAppStore.getState().useLocalAi)) {
+    const { chatLocal, localLlmAvailable, onLocalLlmProgress } = await import(
+      "./localLlm"
+    );
+    if (localLlmAvailable().available) {
+      let lastPct = -1;
+      const off = onLocalLlmProgress(({ progress, text }) => {
+        const pct = Math.round(progress * 100);
+        if (pct >= lastPct + 5 || pct === 100) {
+          lastPct = pct;
+          toast.info(
+            t("ai.toast.localLoading.title"),
+            t("ai.toast.localLoading.body", {
+              pct,
+              status: text || t("ai.toast.localLoading.preparing"),
+            }),
+          );
+        }
+      });
+      try {
+        charge();
+        const localModel = forLocal(opts).model;
+        const text = await chatLocal(messages, { model: localModel, maxTokens: opts.maxTokens, temperature: opts.temperature });
+        opts.onUsage?.({
+          provider: "local-webgpu",
+          model: localModel ?? PROVIDER_DEFAULT_MODELS["local-webgpu"],
+          inputTokens: estimateTokens(promptChars(messages)),
+          outputTokens: estimateTokens(text),
+          estimated: true,
+        });
+        return text;
+      } finally {
+        off();
+      }
+    }
+    toast.warn(t("ai.toast.localUnavailable.title"), t("ai.toast.localUnavailable.body"), docsUrl("localLlm"));
+    assertCloudFallback("Local WebGPU AI");
+    localFirst = null;
   }
 
   // ── Anthropic Claude (cloud) ───────────────────────────────────
@@ -478,46 +522,6 @@ async function chatDirect(
     } finally {
       inflight--;
     }
-  }
-
-  // ── WebGPU local (in-browser) ──────────────────────────────────
-  if (provider === "local-webgpu" || localFirst === "local-webgpu" || (!isCloudProvider(provider) && useAppStore.getState().useLocalAi)) {
-    const { chatLocal, localLlmAvailable, onLocalLlmProgress } = await import(
-      "./localLlm"
-    );
-    if (localLlmAvailable().available) {
-      let lastPct = -1;
-      const off = onLocalLlmProgress(({ progress, text }) => {
-        const pct = Math.round(progress * 100);
-        if (pct >= lastPct + 5 || pct === 100) {
-          lastPct = pct;
-          toast.info(
-            t("ai.toast.localLoading.title"),
-            t("ai.toast.localLoading.body", {
-              pct,
-              status: text || t("ai.toast.localLoading.preparing"),
-            }),
-          );
-        }
-      });
-      try {
-        charge();
-        const localModel = forLocal(opts).model;
-        const text = await chatLocal(messages, { model: localModel, maxTokens: opts.maxTokens, temperature: opts.temperature });
-        opts.onUsage?.({
-          provider: "local-webgpu",
-          model: localModel ?? PROVIDER_DEFAULT_MODELS["local-webgpu"],
-          inputTokens: estimateTokens(promptChars(messages)),
-          outputTokens: estimateTokens(text),
-          estimated: true,
-        });
-        return text;
-      } finally {
-        off();
-      }
-    }
-    toast.warn(t("ai.toast.localUnavailable.title"), t("ai.toast.localUnavailable.body"), docsUrl("localLlm"));
-    assertCloudFallback("Local WebGPU AI");
   }
 
   // ── OpenAI (cloud) ─────────────────────────────────────────────
@@ -661,7 +665,7 @@ async function* chatStreamDirect(
   };
   const provider = getActiveProvider();
   if (!opts.prepaid && !aiQuotaStatus(new Date()).allowed) charge();
-  const localFirst = await localRoute(provider);
+  let localFirst = await localRoute(provider);
 
   if (provider === "ollama" || localFirst === "ollama") {
     const { chatOllamaStream, isOllamaAvailable, getBaseUrl } = await import("./ollamaProvider");
@@ -673,16 +677,28 @@ async function* chatStreamDirect(
       yield* chatOllamaStream(messages, local);
       return;
     }
-    assertCloudFallback("Ollama");
+    if (localFirst === "ollama") localFirst = await localRoute(provider);
+    else assertCloudFallback("Ollama");
   }
 
-  // Streaming has no in-browser WebGPU path yet; under `local-only` that
-  // is a local failure, not a reason to reach a cloud provider.
-  if (provider === "local-webgpu" || (!isCloudProvider(provider) && useAppStore.getState().useLocalAi)) {
+  // ── WebGPU local (in-browser) ──────────────────────────────────
+  // No streaming engine yet: the local answer is produced whole and
+  // yielded once, so a local route never leaks a prompt to the cloud.
+  if (provider === "local-webgpu" || localFirst === "local-webgpu" || (!isCloudProvider(provider) && useAppStore.getState().useLocalAi)) {
+    const { chatLocal, localLlmAvailable } = await import("./localLlm");
+    if (localLlmAvailable().available) {
+      charge();
+      const local = forLocal(opts);
+      opts.onRoute?.("local-webgpu", local.model ?? PROVIDER_DEFAULT_MODELS["local-webgpu"]);
+      const text = await chatLocal(messages, { model: local.model, maxTokens: opts.maxTokens, temperature: opts.temperature });
+      yield text;
+      return;
+    }
     assertCloudFallback("Local WebGPU AI (streaming)");
+    localFirst = null;
   }
 
-  if (provider === "anthropic") {
+  if (provider === "anthropic" && !localFirst) {
     const { chatAnthropicStream } = await import("./anthropicProvider");
     assertCloudProvider("anthropic");
     getProviderKey("anthropic"); // NO_KEY before anything is charged
@@ -691,7 +707,7 @@ async function* chatStreamDirect(
     return;
   }
 
-  if (provider === "gemini") {
+  if (provider === "gemini" && !localFirst) {
     const { chatGeminiStream } = await import("./geminiProvider");
     assertCloudProvider("gemini");
     getProviderKey("gemini"); // NO_KEY before anything is charged
@@ -700,7 +716,7 @@ async function* chatStreamDirect(
     return;
   }
 
-  if (provider === "mistral") {
+  if (provider === "mistral" && !localFirst) {
     const { chatMistralStream } = await import("./mistralProvider");
     assertCloudProvider("mistral");
     getProviderKey("mistral"); // NO_KEY before anything is charged
