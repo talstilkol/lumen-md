@@ -54,6 +54,8 @@
   "block.liveJs.resetScope.hint": "丢弃此文档共享代码块定义的所有变量",
   "block.liveJs.scopeReset": "作用域已重置",
   "block.liveJs.run": "Run",
+  "block.liveJs.idle": "尚未运行",
+  "block.liveJs.idleHint": "文档中的代码只有在点击“运行”时才会执行，并在无法访问你的文件、密钥或网络的隔离沙箱中运行。",
   "block.liveJs.title": "Live JavaScript",
   "block.liveLua.title": "实时 Lua",
   "block.liveLua.run": "运行",

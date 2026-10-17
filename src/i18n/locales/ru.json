@@ -54,6 +54,8 @@
   "block.liveJs.resetScope.hint": "Удалить все переменные, определённые общими блоками этого документа",
   "block.liveJs.scopeReset": "Область сброшена",
   "block.liveJs.run": "Run",
+  "block.liveJs.idle": "Ещё не запускался",
+  "block.liveJs.idleHint": "Код в документе запускается только по кнопке «Запустить» — в изолированной песочнице без доступа к вашим файлам, ключам и сети.",
   "block.liveJs.title": "Live JavaScript",
   "block.liveLua.title": "Lua в реальном времени",
   "block.liveLua.run": "Запустить",
