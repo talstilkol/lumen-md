@@ -429,7 +429,7 @@ After every step above is green:
 - [ ] `npm run budget` passes — bundle still within targets.
 - [ ] Sentry receiving events from at least one production session.
 - [ ] First 10 users invited via TestFlight + Play Internal track.
-- [ ] `https://lumen-md.vercel.app/p/<test-slug>` returns a published note.
+- [ ] `https://lumen-publish.<account>.workers.dev/p/<test-slug>` returns a published note (the URL the Publish command shows).
 - [ ] Right-click → "Save selection to Lumen" creates a clip.
 - [ ] Subscribe → return to app → Pro features unlock.
 - [ ] `⌘K → "AI: Switch to local AI"` downloads + serves answers offline.

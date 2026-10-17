@@ -193,6 +193,43 @@ describe("CSP alignment", () => {
   });
 });
 
+describe("vercel.json (production host) mirrors public/_headers", () => {
+  type Rule = { source: string; headers: { key: string; value: string }[] };
+  const rules = (JSON.parse(read("vercel.json")) as { headers: Rule[] }).headers;
+  const global = rules.find((r) => r.source.includes("(?!playground-runner"))!;
+  const fileHeaders = new Map(
+    [...read("public/_headers").split("/*\n")[1].split("\n\n")[0].matchAll(/^\s+([\w-]+): (.+)$/gm)].map((m) => [m[1], m[2]]),
+  );
+
+  it("has a global rule that skips only the playground runner", () => {
+    expect(global, "global header rule").toBeDefined();
+    const re = new RegExp(`^${global.source}$`);
+    expect(re.test("/")).toBe(true);
+    expect(re.test("/notes/a")).toBe(true);
+    expect(re.test("/playground-runner.html")).toBe(false);
+  });
+
+  it("sends the same security headers as public/_headers", () => {
+    const keys = global.headers.map((h) => h.key).sort();
+    expect(keys).toEqual([...fileHeaders.keys()].sort());
+    for (const h of global.headers) {
+      if (h.key !== "Content-Security-Policy") expect(h.value, h.key).toBe(fileHeaders.get(h.key));
+    }
+  });
+
+  it("CSP equals public/_headers plus https://*.workers.dev in connect-src", () => {
+    // Static headers can't take the build-time worker origins, so the
+    // edge workers' default *.workers.dev hosts are allowed instead.
+    const vercel = parsePolicy(global.headers.find((h) => h.key === "Content-Security-Policy")!.value);
+    const file = cspFromHeadersFile();
+    expect([...vercel.keys()].sort()).toEqual([...file.keys()].sort());
+    for (const [name, values] of file) {
+      const extra = name === "connect-src" ? ["https://*.workers.dev"] : [];
+      expect(sorted(vercel.get(name)!), name).toEqual(sorted([...values, ...extra]));
+    }
+  });
+});
+
 describe("CSP script-src / Trusted Types invariants", () => {
   it("script-src is identical everywhere and has no 'unsafe-inline'", () => {
     const ref = sorted(POLICIES["index.html"].get("script-src")!);
