@@ -6,7 +6,6 @@
  */
 
 import { chat, chatStream } from "./llm";
-import { PROMPTS } from "./prompts";
 import { log } from "../lib/logger";
 import {
   readWorkspaceFile,
@@ -347,15 +346,15 @@ export function stripCodeFences(s: string): string {
 }
 
 /**
- * Turn prose into a Mermaid diagram. Returns a ready-to-insert fenced
- * ```mermaid block (fences the model may add are stripped first).
+ * Turn prose into a Mermaid diagram through the `diagrammer` agent (the
+ * diagram is compiled before it is accepted). Returns a ready-to-insert
+ * fenced ```mermaid block.
  */
 export async function generateDiagram(text: string): Promise<string> {
-  const out = await chat([
-    { role: "system", content: PROMPTS.diagram },
-    { role: "user", content: text },
-  ], { cache: true });
-  return "```mermaid\n" + stripCodeFences(out) + "\n```";
+  const { runAgentOrThrow } = await import("../agents/runtime");
+  const { diagrammerAgent } = await import("../agents/defs");
+  const mermaid = await runAgentOrThrow(diagrammerAgent, { text }, { document: text });
+  return "```mermaid\n" + mermaid + "\n```";
 }
 
 /** Extract action items from meeting notes as a Markdown task list (the `tasker` agent). */
@@ -366,38 +365,34 @@ export async function extractActionItems(text: string): Promise<string> {
 }
 
 /**
- * Translate a Markdown document into the target language, preserving
- * structure. The body may legitimately contain code fences, so the raw
- * output is only trimmed (not fence-stripped).
+ * Translate a Markdown document into the target language through the
+ * `translator` agent, chunk by chunk for long documents (code fences are
+ * never split). Each chunk must keep its fences and URLs and be written
+ * in the target language's script before it is accepted.
  */
 export async function translateMarkdown(text: string, targetLanguage: string): Promise<string> {
-  const out = await chat([
-    { role: "system", content: PROMPTS.translate },
-    { role: "user", content: `Target language: ${targetLanguage}\n\n---\n\n${text}` },
-  ], { cache: true });
-  return out.trim();
+  const { runAgentOrThrow } = await import("../agents/runtime");
+  const { translatorAgent, chunkMarkdown } = await import("../agents/defs");
+  const out: string[] = [];
+  for (const chunk of chunkMarkdown(text)) {
+    if (!chunk.trim()) {
+      out.push(chunk);
+      continue;
+    }
+    out.push(await runAgentOrThrow(translatorAgent, { text: chunk, extra: { targetLanguage } }, { document: text }));
+  }
+  return out.join("\n").trim();
 }
 
 /**
- * Turn CSV/table data into an ECharts spec. Returns a ready-to-insert fenced
- * ```chart block (any code fences the model adds are stripped first), which the
- * renderer's EChart block picks up.
+ * Turn CSV/table data into an ECharts option through the `charter` agent
+ * (series, data and axes are checked before it is accepted). Returns a
+ * ready-to-insert fenced ```chart block, which the renderer's EChart block
+ * picks up.
  */
 export async function generateChart(data: string): Promise<string> {
-  const out = await chat([
-    { role: "system", content: PROMPTS.visualization },
-    { role: "user", content: data },
-  ], {
-    cache: true,
-    // Cache only a chart spec that parses.
-    cacheIf: (r) => {
-      try {
-        JSON.parse(stripCodeFences(r));
-        return true;
-      } catch {
-        return false;
-      }
-    },
-  });
-  return "```chart\n" + stripCodeFences(out) + "\n```";
+  const { runAgentOrThrow } = await import("../agents/runtime");
+  const { charterAgent } = await import("../agents/defs");
+  const option = await runAgentOrThrow(charterAgent, { text: data }, { document: data });
+  return "```chart\n" + JSON.stringify(option, null, 2) + "\n```";
 }
