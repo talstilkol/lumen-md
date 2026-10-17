@@ -66,7 +66,7 @@ Same Fly.io flow with the y-websocket starter:
 
 ```bash
 cd sync-server
-npm install y-websocket y-leveldb level
+npm install @y/websocket-server y-leveldb
 fly launch --name lumen-collab --dockerfile  # generate Dockerfile
 fly volumes create yjs_data --region iad --size 1
 # Mount the volume in fly.toml:
