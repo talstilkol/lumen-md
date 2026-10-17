@@ -17,9 +17,10 @@ compatibility_date = "2026-04-27"
 # Comma-separated app origins allowed to start SSO / read the session.
 # Credentialed CORS never uses `*`, so every origin must be listed.
 ALLOWED_ORIGINS = "https://lumen-md.vercel.app"
-# Optional: explicit callback URL registered in the WorkOS dashboard.
-# Defaults to `<worker origin>/api/sso/callback`.
-# WORKOS_REDIRECT_URI = "https://lumen-md.vercel.app/api/sso/callback"
+# Callback URL registered in the WorkOS dashboard. It must be on the app's
+# host (the Vercel rewrite), not workers.dev: the nonce cookie is set there.
+# Without it the worker would default to `<worker origin>/api/sso/callback`.
+WORKOS_REDIRECT_URI = "https://lumen-md.vercel.app/api/sso/callback"
 # Optional: session lifetime in seconds (default 604800 = 7 days).
 # SESSION_TTL_SECONDS = "604800"
 

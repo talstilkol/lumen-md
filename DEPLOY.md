@@ -238,7 +238,8 @@ local-only / Supabase auth. Details in `edge-workers/auth/README.md`.
 
 ```bash
 # 5b-1. WorkOS dashboard: API Keys → copy the secret key (sk_…) + client id.
-#       Redirects → add https://<worker host>/api/sso/callback
+#       Redirects → add https://lumen-md.vercel.app/api/sso/callback
+#       (the app host via the rewrite; WORKOS_REDIRECT_URI in wrangler.toml matches)
 #       Organizations → create one per customer, add its email domain(s)
 #       and attach an SSO connection (SAML or OIDC).
 cd edge-workers/auth
