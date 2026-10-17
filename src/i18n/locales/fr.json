@@ -54,6 +54,8 @@
   "block.liveJs.resetScope.hint": "Supprimer toutes les variables définies par les blocs partagés de ce document",
   "block.liveJs.scopeReset": "Portée réinitialisée",
   "block.liveJs.run": "Run",
+  "block.liveJs.idle": "Pas encore exécuté",
+  "block.liveJs.idleHint": "Le code d’un document ne s’exécute que lorsque vous cliquez sur « Exécuter », dans un bac à sable isolé sans accès à vos fichiers, clés ou au réseau.",
   "block.liveJs.title": "Live JavaScript",
   "block.liveLua.title": "Lua en direct",
   "block.liveLua.run": "Exécuter",
