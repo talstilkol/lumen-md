@@ -42,6 +42,10 @@ describe("webllm executor", () => {
     localStorage.setItem("lumen.ai.provider", "local-webgpu");
     expect(await webllmExecutor.available()).toEqual({ available: true });
     localStorage.removeItem("lumen.ai.provider");
+    // Choosing "Model in the browser" in the AI settings is an opt-in too.
+    localStorage.setItem("lumen.ai.executor", "webllm");
+    expect(await webllmExecutor.available()).toEqual({ available: true });
+    localStorage.removeItem("lumen.ai.executor");
     state.useLocalAi = true;
     expect(await webllmExecutor.available()).toEqual({ available: true });
     localStorage.setItem("lumen.ai.policy", "cloud");

@@ -160,6 +160,8 @@ export function AiSettingsPanel({ open, onClose }: Props) {
     setPreferredExecutor(p === "auto" ? null : p);
     setPref(p);
     flash();
+    // Choosing the in-browser model is the opt-in it needs under local-first; show the new state.
+    void refreshStatus();
   };
 
   const saveOllama = async () => {
