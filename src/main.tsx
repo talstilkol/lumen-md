@@ -14,7 +14,7 @@ import { reportWebVitals } from "./lib/webVitals";
 import { log } from "./lib/logger";
 import { startAutoBackup, startVaultSnapshots } from "./sync/autoBackup";
 import { requestPersistentStorage } from "./storage/persistentStorage";
-import { initLocale } from "./i18n";
+import { initLocale, t } from "./i18n";
 import { adoptBootLocale } from "./store/useStore";
 import "./index.css";
 
@@ -37,7 +37,7 @@ const nativePrompt = window.prompt;
 window.prompt = function(message?: string, _defaultText?: string): string | null {
   if (message?.toLowerCase().includes("link") || message?.toLowerCase().includes("image") || message?.toLowerCase().includes("url")) {
     setTimeout(() => {
-      showAiToast("Use the floating (/) menu or text selection tooltip for media insertions.", "info");
+      showAiToast(t("toast.useTheFloatingMenuOr"), "info");
     }, 50);
     return null; // Aborts synchronous execution block
   }
