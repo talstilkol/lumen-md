@@ -112,7 +112,9 @@ export function grammarExtension(opts: GrammarOptions = {}): Extension {
         this.lastChecked = text;
         this.inFlight = true;
         try {
-          const matches = await checkGrammar(text, opts.language ?? "en-US");
+          // Hebrew paragraphs: local rules + dictionary; the rest: LanguageTool (T28).
+          const { checkByLanguage } = await import("../ai/hebrewSpellService");
+          const matches = await checkByLanguage(text, (latin) => checkGrammar(latin, opts.language ?? "en-US"));
           // Doc may have shifted while the request was in flight — clamp
           // by current length when we paint.
           const len = view.state.doc.length;

@@ -1219,5 +1219,12 @@
   "trash.restored": "Восстановлено в {path}",
   "trash.daysLeft": "удалится навсегда через {n} дн.",
   "cmd.file.trash": "Корзина…",
-  "cmd.file.trash.hint": "Восстановить удалённые заметки (30 дней)"
+  "cmd.file.trash.hint": "Восстановить удалённые заметки (30 дней)",
+  "cmd.spell.hebrewDictionary": "Иврит: словарь орфографии (скачать / удалить)",
+  "cmd.spell.hebrewDictionary.hint": "Проверка иврита офлайн (Hspell, 5,7 МБ, AGPL)",
+  "spell.he.downloadConfirm": "Скачать словарь иврита (Hspell, 5,7 МБ, AGPL-3.0) с GitHub на это устройство? Ваш текст никуда не отправляется.",
+  "spell.he.installed": "Словарь иврита установлен ({n} слов).",
+  "spell.he.failed": "Не удалось скачать словарь: {error}",
+  "spell.he.removeConfirm": "Удалить словарь иврита с этого устройства?",
+  "spell.he.removed": "Словарь иврита удалён."
 }
