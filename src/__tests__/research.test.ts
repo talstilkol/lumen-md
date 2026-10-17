@@ -365,6 +365,7 @@ describe("research agent", () => {
   it("reads a quote up to its own closing mark", () => {
     expect(parseCitations("  [^1]: https://indented.example/a").map((x) => x.url)).toEqual(["https://indented.example/a"]);
     expect(parseCitations("````md\n```\n[^1]: https://example.example/in-code\n```\n````\n[^2]: https://real.example/b").map((x) => x.url)).toEqual(["https://real.example/b"]);
+    expect(parseCitations('[^1]: [S](https://e.example "The \\"official\\" source") — “actual supporting passage here”')[0].quote).toBe("actual supporting passage here");
     const c = parseCitations('[^1]: [A](https://a.example) — “The article says "quoted words" are important.”');
     expect(c[0].quote).toBe('The article says "quoted words" are important.');
   });

@@ -62,7 +62,15 @@ function markdownLink(s: string): { title: string; url: string; end: number } | 
   while (s[j] === " " || s[j] === "\t") j++;
   const close = ({ '"': '"', "'": "'", "(": ")" } as Record<string, string>)[s[j]];
   if (close) {
-    const k = s.indexOf(close, j + 1);
+    // The title's closing delimiter, skipping backslash-escaped ones.
+    let k = -1;
+    for (let t = j + 1; t < s.length; t++) {
+      if (s[t] === "\\") t++;
+      else if (s[t] === close) {
+        k = t;
+        break;
+      }
+    }
     if (k !== -1) {
       j = k + 1;
       while (s[j] === " " || s[j] === "\t") j++;
