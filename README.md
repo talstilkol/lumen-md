@@ -5,7 +5,7 @@
 A production-grade markdown editor built on the open web platform: CodeMirror 6,
 unified/remark/rehype, Yjs, OPFS, and WebRTC. Zero server required by default.
 
-[![Tests](https://img.shields.io/badge/tests-1949%20passing-brightgreen)](PLAN_STATUS.md)
+[![Tests](https://img.shields.io/badge/tests-2196%20passing-brightgreen)](MASTER_PLAN.md)
 [![TypeScript](https://img.shields.io/badge/TypeScript-clean-blue)](tsconfig.json)
 [![E2E](https://img.shields.io/badge/e2e-33%2F33-brightgreen)](e2e/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
@@ -119,6 +119,8 @@ Or try the online version at [lumen-md.app](https://lumen-md.app) — no install
 | macOS / Windows / Linux | `npm run tauri:build` — Tauri 2 native app (23 MB) |
 | iOS | `npm run ios:open` — Capacitor 8 Xcode project |
 | Android | `npm run android:open` — Capacitor Android Studio project |
+
+**Minimum browser / WebView** (set by Tailwind CSS 4): Safari and iOS 16.4+, Chrome / Edge 111+, Firefox 128+. The iOS app targets iOS 16.4. On Linux the desktop app needs a WebKitGTK release with the same CSS support (2.40+).
 
 ---
 
@@ -270,16 +272,7 @@ Then set `VITE_WEBRTC_SIGNALING_URL=wss://signal.yourdomain.com` in `.env`.
 
 ## 🗺️ Roadmap
 
-See [ROADMAP.md](ROADMAP.md) for the full phased plan. Key upcoming milestones:
-
-| Milestone | Status |
-|---|---|
-| Stripe billing integration | 🔑 awaiting keys |
-| Persistent collab rooms (Fly.io) | 🔑 awaiting deploy |
-| iOS TestFlight + Android Play | 🔑 awaiting Apple/Google accounts |
-| npm publish `@lumen-md/mcp-server` | 🔑 awaiting npm org |
-| Locale translations (ar/ru/fr/de/ja/zh-CN) | 🔑 awaiting OpenAI key |
-| WorkOS SSO | 🔑 awaiting WorkOS account |
+The current plan, status and what's left live in one place: [MASTER_PLAN.md](MASTER_PLAN.md).
 
 ---
 

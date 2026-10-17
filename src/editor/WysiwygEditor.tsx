@@ -3,6 +3,7 @@ import {
   Editor as MilkdownEditor,
   rootCtx,
   defaultValueCtx,
+  editorViewCtx,
   prosePluginsCtx,
 } from "@milkdown/core";
 import { commonmark } from "@milkdown/preset-commonmark";
@@ -15,6 +16,7 @@ import { slashFactory, SlashProvider } from "@milkdown/plugin-slash";
 import { tooltipFactory, TooltipProvider } from "@milkdown/plugin-tooltip";
 import { setBlockType, toggleMark, wrapIn } from "@milkdown/prose/commands";
 import type { EditorView } from "@milkdown/prose/view";
+import { Plugin } from "@milkdown/prose/state";
 import { wrapInList } from "prosemirror-schema-list";
 import { dragHandlePlugin } from "./dragHandles";
 import { buildIndentKeymap } from "./keymapExtra";
@@ -24,6 +26,26 @@ import { PROMPTS } from "../ai/prompts";
 import { showAiToast } from "../ui/AiToast";
 import { openAiPrompt } from "../ui/AiInlinePrompt";
 import { log } from "../lib/logger";
+import { getMarkdown } from "@milkdown/utils";
+import {
+  configureWysiwygSuggest,
+  encodeCriticForWysiwyg,
+  registerWysiwygView,
+  unregisterWysiwygView,
+  wysiwygSuggestPlugins,
+} from "./wysiwygSuggest";
+import { registerPendingEdits, useAppStore } from "../store/useStore";
+import { useAuth } from "../auth/useAuth";
+
+// Suggesting mode (track changes) works in WYSIWYG too: CriticMarkup ↔
+// marks, edits tracked while the store's suggestingMode is on.
+configureWysiwygSuggest({
+  enabled: () => useAppStore.getState().suggestingMode,
+  author: () => {
+    const user = useAuth.getState().user;
+    return user?.name?.trim() || user?.email?.split("@")[0] || null;
+  },
+});
 
 interface Props {
   value: string;
@@ -102,7 +124,10 @@ function buildSlashItems(): SlashItem[] {
       run: (v) => {
         const node = v.state.schema.nodes.bullet_list;
         if (!node) return;
+        const before = v.state.doc;
         wrapInList(node)(v.state, v.dispatch);
+        // Wrapping can be refused (suggesting mode): then add no marker.
+        if (v.state.doc === before) return;
         // Inject a leading checkbox marker so the round-trip to markdown
         // produces `- [ ] ...` on the new line.
         const tr = v.state.tr.insertText("[ ] ", v.state.selection.from);
@@ -607,10 +632,51 @@ export default function WysiwygEditor({ value, onChange }: Props) {
       .then(op)
       .catch((e) => log.warn("[wysiwyg] lifecycle op threw", e));
   };
+  // The editor's markdown as of its creation / last emission: on unmount,
+  // anything else is an edit the debounced listener hasn't emitted yet.
+  const serializedRef = useRef<string | null>(null);
+  // This instance's view as registered for the palette's commands; another
+  // instance (Focus Mode over the main editor) may be registered too, so
+  // only this one is unregistered.
+  const registeredViewRef = useRef<EditorView | null>(null);
+  // Emit, synchronously, an edit the debounced listener hasn't emitted yet.
+  const flushPending = () => {
+    const ed = editorRef.current;
+    if (!ed || serializedRef.current === null) return;
+    let md: string;
+    try {
+      md = ed.action(getMarkdown());
+    } catch {
+      return; // editor already torn down
+    }
+    if (md === serializedRef.current) return;
+    serializedRef.current = md;
+    const full = frontmatterRef.current + md;
+    if (full !== lastEmittedRef.current) {
+      lastEmittedRef.current = full;
+      onChangeRef.current(full);
+    }
+  };
+  // Switching or closing the active tab inside the debounce window: the
+  // `[value]` rebuild below would drop the edit (its generation guard), and
+  // by then `onChange` already writes the NEW active document. The store
+  // calls this before it switches, while the edit's own document is active.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => registerPendingEdits(flushPending), []);
+  // Milkdown's listener debounces by 200 ms and can't be cancelled; its
+  // timer serializes the document, which throws once the editor is gone.
+  // When an emission is still pending, destroy only after it has run (its
+  // output is ignored by the generation guard).
+  const pendingSinceRef = useRef(0);
   const destroyCurrent = async () => {
     const ed = editorRef.current;
     editorRef.current = null;
+    serializedRef.current = null;
+    if (registeredViewRef.current) unregisterWysiwygView(registeredViewRef.current);
+    registeredViewRef.current = null;
     if (!ed) return;
+    const pending = Date.now() - pendingSinceRef.current;
+    if (pending < 260) await new Promise((r) => setTimeout(r, 260 - pending));
     try {
       await ed.destroy(true);
     } catch {
@@ -646,13 +712,15 @@ export default function WysiwygEditor({ value, onChange }: Props) {
       const editor = await MilkdownEditor.make()
         .config((ctx) => {
           ctx.set(rootCtx, host);
-          ctx.set(defaultValueCtx, body);
+          ctx.set(defaultValueCtx, encodeCriticForWysiwyg(body));
           ctx.get(listenerCtx).markdownUpdated((_, md) => {
             // The listener plugin debounces emissions by 200ms and
             // nothing cancels that timer on destroy, so a torn-down (or
             // superseded) editor can still fire here. Forwarding it would
             // overwrite the store with stale content after a mode switch.
             if (gen !== genRef.current) return;
+            if (md === serializedRef.current) return; // already flushed
+            serializedRef.current = md;
             const full = frontmatterRef.current + md;
             lastEmittedRef.current = full;
             onChangeRef.current(full);
@@ -664,6 +732,12 @@ export default function WysiwygEditor({ value, onChange }: Props) {
           ctx.update(prosePluginsCtx, (plugins) => [
             ...plugins,
             dragHandlePlugin,
+            new Plugin({
+              appendTransaction: (trs) => {
+                if (trs.some((t) => t.docChanged || t.storedMarksSet)) pendingSinceRef.current = Date.now();
+                return null;
+              },
+            }),
             // γ.1.b — Tab / Shift-Tab indent / outdent inside lists.
             buildIndentKeymap(),
           ]);
@@ -800,6 +874,8 @@ export default function WysiwygEditor({ value, onChange }: Props) {
               };
           }
         })
+        // First, so suggestion marks wrap other marks (`{++**b**++}`).
+        .use(wysiwygSuggestPlugins)
         .use(commonmark)
         .use(gfm)
         .use(history)
@@ -822,6 +898,9 @@ export default function WysiwygEditor({ value, onChange }: Props) {
       }
       editorRef.current = editor;
       lastEmittedRef.current = value;
+      registeredViewRef.current = editor.action((ctx) => ctx.get(editorViewCtx));
+      registerWysiwygView(registeredViewRef.current);
+      serializedRef.current = editor.action(getMarkdown());
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [value]);
@@ -830,6 +909,10 @@ export default function WysiwygEditor({ value, onChange }: Props) {
   // menu DOM is only removed once no plugin view can still reference it.
   useEffect(() => {
     return () => {
+      // Leaving WYSIWYG (mode switch): the listener debounces emissions
+      // by 200 ms, so the last edits would be dropped by the generation
+      // guard below. Flush them now, synchronously.
+      flushPending();
       genRef.current++;
       enqueue(async () => {
         await destroyCurrent();

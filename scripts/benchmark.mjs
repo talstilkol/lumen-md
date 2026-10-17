@@ -12,7 +12,7 @@
  */
 
 import { execSync } from "child_process";
-import { createReadStream, readFileSync, writeFileSync } from "fs";
+import { createReadStream, lstatSync, readFileSync, readdirSync, writeFileSync } from "fs";
 import { createInterface } from "readline";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -27,21 +27,28 @@ const REPORT = {
   metrics: {},
 };
 
+function* regularFiles(dir) {
+  const entries = readdirSync(dir, { withFileTypes: true }).sort((a, b) =>
+    a.name < b.name ? -1 : a.name > b.name ? 1 : 0,
+  );
+  for (const entry of entries) {
+    if (entry.isSymbolicLink()) continue;
+    const file = path.join(dir, entry.name);
+    if (entry.isDirectory()) yield* regularFiles(file);
+    else if (entry.isFile()) yield file;
+  }
+}
+
 // ── 1. Bundle size ────────────────────────────────────────────────────────────
 function measureBundle() {
-  const statsPath = path.join(ROOT, "dist", "assets", "index-*.js");
-  // Approximate: use ls to find largest JS chunk
   try {
-    const out = execSync(`find ${path.join(ROOT, "dist/assets")} -name "*.js" -exec ls -la {} +`, {
-      encoding: "utf-8",
-    });
-    const lines = out.split("\n").filter(Boolean);
     let total = 0;
     let largest = { file: "", size: 0 };
-    for (const line of lines) {
-      const parts = line.trim().split(/\s+/);
-      const size = parseInt(parts[4], 10);
-      const file = parts[parts.length - 1];
+    for (const file of regularFiles(path.join(ROOT, "dist", "assets"))) {
+      if (!file.endsWith(".js")) continue;
+      const info = lstatSync(file);
+      if (!info.isFile()) continue;
+      const size = info.size;
       total += size;
       if (size > largest.size) largest = { file: path.basename(file), size };
     }
@@ -51,8 +58,10 @@ function measureBundle() {
       largestChunk: largest.file,
       largestChunkKb: Math.round(largest.size / 1024),
     };
-  } catch {
-    REPORT.metrics.bundle = { note: "Run `npm run build` first" };
+  } catch (err) {
+    REPORT.metrics.bundle = {
+      note: err?.code === "ENOENT" ? "Run `npm run build` first" : "Could not measure bundle size",
+    };
   }
 }
 
@@ -61,12 +70,13 @@ async function measureSloc() {
   const srcDir = path.join(ROOT, "src");
   let ts = 0, tsx = 0, css = 0;
   try {
-    const files = execSync(`find ${srcDir} -type f`, { encoding: "utf-8" }).split("\n").filter(Boolean);
-    for (const f of files) {
+    for (const f of regularFiles(srcDir)) {
+      const ext = path.extname(f);
+      if (ext !== ".ts" && ext !== ".tsx" && ext !== ".css") continue;
       const lines = await countLines(f);
-      if (f.endsWith(".ts")) ts += lines;
-      else if (f.endsWith(".tsx")) tsx += lines;
-      else if (f.endsWith(".css")) css += lines;
+      if (ext === ".ts") ts += lines;
+      else if (ext === ".tsx") tsx += lines;
+      else css += lines;
     }
     REPORT.metrics.sloc = { ts, tsx, css, total: ts + tsx + css };
   } catch {
@@ -75,12 +85,14 @@ async function measureSloc() {
 }
 
 function countLines(file) {
-  return new Promise((resolve) => {
+  return new Promise((resolve, reject) => {
     let n = 0;
-    const rl = createInterface({ input: createReadStream(file), crlfDelay: Infinity });
+    const input = createReadStream(file);
+    const rl = createInterface({ input, crlfDelay: Infinity });
+    input.on("error", reject);
     rl.on("line", () => n++);
     rl.on("close", () => resolve(n));
-    rl.on("error", () => resolve(0));
+    rl.on("error", reject);
   });
 }
 

@@ -203,7 +203,7 @@ function ghostTextExtension(): Extension {
                   { role: "system", content: PROMPTS.autocomplete },
                   { role: "user", content: textBefore },
                 ],
-                { maxTokens: 15, signal: controller.signal, ownPrompt: true },
+                { maxTokens: 15, signal: controller.signal, ownPrompt: true, tier: "light" },
               );
               if (text && view.state.selection.main.head === pos) {
                 view.dispatch({ effects: setGhostText.of({ pos, text }) });

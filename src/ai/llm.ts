@@ -9,6 +9,7 @@ import { toast } from "../store/useToastStore";
 import { fetchWithRetry } from "../lib/fetchRetry";
 import { t } from "../i18n";
 import { docsUrl } from "../lib/docsLinks";
+import { estimateTokens, recordCacheHit, recordUsage, type Usage } from "./usage";
 
 // ── Rate limiting ───────────────────────────────────────────────────────
 // Token bucket — protects the user's API key against runaway loops.
@@ -47,6 +48,23 @@ function checkRateLimit(): void {
   requestTimestamps.push(now);
 }
 
+/**
+ * Run one provider request under the same per-minute and concurrency limits
+ * as `chat()` — for calls that go to a provider outside `chatDirect`
+ * (Claude web research and its continuations).
+ */
+export async function withRequestLimit<T>(send: () => Promise<T>, charge?: () => void): Promise<T> {
+  checkRateLimit();
+  // Like chatDirect: the quota is charged only once the request may go out.
+  charge?.();
+  inflight++;
+  try {
+    return await send();
+  } finally {
+    inflight--;
+  }
+}
+
 export interface ChatMessage {
   role: "system" | "user" | "assistant";
   content: string;
@@ -74,9 +92,42 @@ export interface ChatOptions {
    * callers); the request just doesn't go out.
    */
   ownPrompt?: boolean | "silent";
+  /**
+   * Reuse an identical earlier answer from the local response cache (and
+   * store this one). Only for deterministic transformations of the given
+   * text; ignored when the user turned the cache off.
+   */
+  cache?: boolean;
+  /**
+   * "light": a small task (tags, titles, outline, completions). In the
+   * economy / balanced AI modes it goes to the provider's small model
+   * unless `model` pins one. Economy mode routes every unpinned request.
+   */
+  tier?: "light" | "heavy";
+  /**
+   * With `cache`: store the answer only when this accepts it (e.g. it
+   * parses), so a malformed answer is retried next time, not replayed.
+   */
+  cacheIf?: (text: string) => boolean;
+  /**
+   * Internal: providers report token usage here (exact where the API
+   * returns it). `provider` overrides the selected one when the request
+   * was routed elsewhere (fallbacks, local WebGPU).
+   */
+  onUsage?: (u: Omit<Usage, "provider"> & { provider?: string }) => void;
+  /** Internal: the provider a fallback actually sent the request to. */
+  onRoute?: (provider: AiProvider, model: string) => void;
 }
 
 const DEFAULT_MODEL = "gpt-4o-mini";
+/** Each cloud provider's model when the user hasn't picked one (the provider modules use these). */
+export const PROVIDER_DEFAULT_MODELS = {
+  "local-webgpu": "Llama-3-8B-Instruct-q4f16_1-MLC",
+  // Sonnet 4.5 is deprecated (retires 30 Nov 2026); Sonnet 5.5 is the current general model.
+  anthropic: "claude-sonnet-5-5",
+  gemini: "gemini-1.5-flash",
+  mistral: "mistral-small-latest",
+} as const;
 const API_URL = "https://api.openai.com/v1/chat/completions";
 const MAX_RETRIES = 2;
 
@@ -160,7 +211,118 @@ export function getProviderKey(provider: AiProvider): string {
   return key;
 }
 
+/**
+ * The model a request to `provider` will use, for cache keys and the usage
+ * meter (the provider modules resolve it the same way).
+ */
+export function effectiveModel(provider: AiProvider, opts: ChatOptions = {}): string {
+  if (opts.model) return opts.model;
+  if (provider === "openai") {
+    const s = useAppStore.getState();
+    return (s.useFineTunedModel && s.fineTunedModelId) || DEFAULT_MODEL;
+  }
+  try {
+    // Ollama keeps its model where the Ollama picker writes it.
+    if (provider === "ollama") return localStorage.getItem("lumen.ollama.model") || "llama3.1";
+    const fallback = (PROVIDER_DEFAULT_MODELS as Record<string, string>)[provider] ?? "default";
+    return localStorage.getItem(`lumen.ai.model.${provider}`) || fallback;
+  } catch {
+    return "default";
+  }
+}
+
+/** Each cloud provider's small, cheap model for light tasks. */
+export const LIGHT_MODELS: Partial<Record<AiProvider, string>> = {
+  openai: "gpt-4o-mini",
+  anthropic: "claude-haiku-5-5",
+  gemini: "gemini-2.5-flash",
+  mistral: "mistral-small-latest",
+};
+
+/**
+ * Model router (Plan D: D4): picks the small model for light tasks (and,
+ * in economy mode, for everything) unless the caller pinned a model.
+ * Local providers are never rerouted.
+ */
+export function routeOptions(provider: AiProvider, opts: ChatOptions, mode: "economy" | "balanced" | "quality"): ChatOptions {
+  if (opts.model || mode === "quality") return opts;
+  const light = LIGHT_MODELS[provider];
+  if (!light) return opts;
+  if (opts.tier === "light" || mode === "economy") return { ...opts, model: light };
+  return opts;
+}
+
+async function routed(provider: AiProvider, opts: ChatOptions): Promise<ChatOptions> {
+  const { getAiMode } = await import("./contextPacker");
+  return routeOptions(provider, opts, getAiMode());
+}
+
+const promptChars = (messages: ChatMessage[]) => messages.map((m) => m.content).join("\n");
+
+/**
+ * Send a chat completion request. Returns the full text response.
+ * Answers may come from the local response cache (`opts.cache`); every
+ * request that goes out is recorded in the usage meter.
+ */
 export async function chat(
+  messages: ChatMessage[],
+  options: ChatOptions = {},
+): Promise<string> {
+  const provider = getActiveProvider();
+  const opts = await routed(provider, options);
+  const model = effectiveModel(provider, opts);
+  const { aiCacheEnabled, cacheKey, getCached, putCached } = await import("./responseCache");
+  const key =
+    opts.cache && aiCacheEnabled()
+      ? await cacheKey({
+          v: 1,
+          provider,
+          model,
+          // Two Ollama servers can serve different weights under one name.
+          endpoint: provider === "ollama" ? (localStorage.getItem("lumen.ollama.baseUrl") ?? "default") : null,
+          messages,
+          maxTokens: opts.maxTokens ?? null,
+          temperature: opts.temperature ?? null,
+        }).catch(() => null)
+      : null;
+  if (key) {
+    const hit = await getCached(key);
+    if (hit) {
+      recordCacheHit(provider, model);
+      return hit.text;
+    }
+  }
+  let reported = false;
+  // Fallbacks (Ollama / WebGPU unavailable → OpenAI) answer under another
+  // provider: such an answer must not be cached under the selected one.
+  let answeredBy: string = provider;
+  let sentModel = model;
+  const text = await chatDirect(messages, {
+    ...opts,
+    onRoute: (p, m) => {
+      answeredBy = p;
+      sentModel = m;
+    },
+    onUsage: (u) => {
+      reported = true;
+      answeredBy = u.provider ?? provider;
+      recordUsage({ ...u, provider: answeredBy });
+    },
+  });
+  if (text && !reported) {
+    recordUsage({
+      provider: answeredBy,
+      model: sentModel,
+      inputTokens: estimateTokens(promptChars(messages)),
+      outputTokens: estimateTokens(text),
+      estimated: true,
+    });
+  }
+  if (key && text && answeredBy === provider && (!opts.cacheIf || opts.cacheIf(text))) await putCached(key, text, model);
+  return text;
+}
+
+async function chatDirect(
   messages: ChatMessage[],
   opts: ChatOptions = {},
 ): Promise<string> {
@@ -261,7 +423,15 @@ export async function chat(
       });
       try {
         charge();
-        return await chatLocal(messages, { model: opts.model, maxTokens: opts.maxTokens, temperature: opts.temperature });
+        const text = await chatLocal(messages, { model: opts.model, maxTokens: opts.maxTokens, temperature: opts.temperature });
+        opts.onUsage?.({
+          provider: "local-webgpu",
+          model: opts.model ?? PROVIDER_DEFAULT_MODELS["local-webgpu"],
+          inputTokens: estimateTokens(promptChars(messages)),
+          outputTokens: estimateTokens(text),
+          estimated: true,
+        });
+        return text;
       } finally {
         off();
       }
@@ -270,6 +440,7 @@ export async function chat(
   }
 
   // ── OpenAI (cloud) ─────────────────────────────────────────────
+  // Also the fallback when Ollama / WebGPU isn't available.
   const key = getAiKey();
   checkRateLimit();
   charge();
@@ -283,6 +454,7 @@ export async function chat(
       ? storeState.fineTunedModelId
       : null;
   const model = opts.model ?? fineTuneOverride ?? DEFAULT_MODEL;
+  opts.onRoute?.("openai", model);
 
   try {
     const res = await fetchWithRetry(
@@ -308,6 +480,8 @@ export async function chat(
       throw new AiError("API_ERROR", `API ${res.status}: ${body.slice(0, 200)}`);
     }
     const data = await res.json();
+    // Metered even when the answer turns out empty (it was billed).
+    reportOpenAiUsage(data.usage, data.model ?? model, opts);
     const text = data.choices?.[0]?.message?.content?.trim();
     if (!text) throw new AiError("PARSE_ERROR", "Empty AI response.");
     return text;
@@ -325,7 +499,70 @@ export async function chat(
  * Stream a chat completion. Yields text chunks as they arrive.
  * Routes through the active provider (Ollama / OpenAI / WebGPU).
  */
+/** OpenAI-shaped `usage` (OpenAI, Mistral) → the usage meter. */
+export function reportOpenAiUsage(
+  usage: { prompt_tokens?: number; completion_tokens?: number; prompt_tokens_details?: { cached_tokens?: number } } | undefined,
+  model: string,
+  opts: ChatOptions,
+  provider = "openai",
+): void {
+  if (!usage || typeof usage.prompt_tokens !== "number") return;
+  // OpenAI caches long prompt prefixes automatically (billed at a discount).
+  const cached = usage.prompt_tokens_details?.cached_tokens ?? 0;
+  opts.onUsage?.({
+    provider,
+    model,
+    inputTokens: usage.prompt_tokens - cached,
+    outputTokens: usage.completion_tokens ?? 0,
+    ...(cached ? { cacheReadTokens: cached } : {}),
+  });
+}
+
+/**
+ * Stream a chat completion. Yields text chunks as they arrive. Usage is
+ * recorded when the stream ends (exact when the provider reports it).
+ */
 export async function* chatStream(
+  messages: ChatMessage[],
+  options: ChatOptions = {},
+): AsyncGenerator<string, void, undefined> {
+  const provider = getActiveProvider();
+  const opts = await routed(provider, options);
+  let reported = false;
+  let out = "";
+  let routedTo: AiProvider = provider;
+  let sentModel = effectiveModel(provider, opts);
+  try {
+    for await (const chunk of chatStreamDirect(messages, {
+      ...opts,
+      onRoute: (p, m) => {
+        routedTo = p;
+        sentModel = m;
+      },
+      onUsage: (u) => {
+        reported = true;
+        recordUsage({ ...u, provider: u.provider ?? provider });
+      },
+    })) {
+      out += chunk;
+      yield chunk;
+    }
+  } finally {
+    // Also on abort, a read error or the consumer stopping early: the
+    // final usage event never arrived, but the generated text was billed.
+    if (out && !reported) {
+      recordUsage({
+        provider: routedTo,
+        model: sentModel,
+        inputTokens: estimateTokens(promptChars(messages)),
+        outputTokens: estimateTokens(out),
+        estimated: true,
+      });
+    }
+  }
+}
+
+async function* chatStreamDirect(
   messages: ChatMessage[],
   opts: ChatOptions = {},
 ): AsyncGenerator<string, void, undefined> {
@@ -374,11 +611,13 @@ export async function* chatStream(
     return;
   }
 
+  // OpenAI — also the fallback when Ollama isn't available.
   const key = getAiKey();
   checkRateLimit();
   charge();
   inflight++;
   const model = opts.model ?? DEFAULT_MODEL;
+  opts.onRoute?.("openai", model);
 
   try {
     const res = await fetchWithRetry(
@@ -393,6 +632,8 @@ export async function* chatStream(
           model,
           messages,
           stream: true,
+          // The last chunk then carries `usage` (empty `choices`).
+          stream_options: { include_usage: true },
           ...(opts.maxTokens ? { max_tokens: opts.maxTokens } : {}),
         }),
         signal: opts.signal,
@@ -425,6 +666,7 @@ export async function* chatStream(
         if (!trimmed.startsWith("data: ")) continue;
         try {
           const json = JSON.parse(trimmed.slice(6));
+          if (json.usage) reportOpenAiUsage(json.usage, json.model ?? model, opts);
           const delta = json.choices?.[0]?.delta?.content;
           if (delta) yield delta;
         } catch {

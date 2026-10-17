@@ -24,6 +24,9 @@ Lumen's killer feature is **dynamic blocks**: write a fenced code block in markd
 | ` ```svg ` / ` ```live-svg ` | Sanitized inline SVG preview | Same hardening as HTML |
 | ` ```live-js ` | JS sandbox (Worker isolate) with console output | Stdout/stderr/error states; timeout-protected; `shared` = one REPL scope per document (see below) |
 | ` ```live-lua ` / ` ```lua-live ` | Lua 5.4 (wasmoon WASM) in a Web Worker, with `print`/`io.write` output and return values | Loads on Run; self-hosted wasm (no CDN); `timeout=` ms (default 5000) |
+| ` ```live-r ` / ` ```r-live ` | R (webR, WebAssembly): printed output, messages, warnings, errors and base-graphics plots | Loads on first Run (~45 MB, self-hosted, cached); `timeout=` ms (default 30000); base R + bundled recommended packages, no CRAN installs |
+| ` ```live-ruby ` / ` ```ruby-live ` | Ruby 3.4 (ruby.wasm) in a sandboxed Web Worker: `puts`/`warn` output, the last value (`=> …`), errors with `block:<line>` | Loads on first Run (~30 MB, self-hosted, cached); `timeout=` ms (default 10000; a runaway loop is killed); full stdlib (`require "json"`, `set`, …), no gems; fresh VM per run; no network, storage or JS bridge |
+| ` ```playground [react\|vue] ` / ` ```web-playground ` | A small multi-file web project run live: files separated by `--- name.ext ---` lines (HTML, CSS, JS, JSX, TS, JSON); Preview, a tab per file, and a Console | Runs in a sandboxed iframe on its own origin (no access to your documents); JSX / TypeScript via Sucrase; `react` / `react-dom` (18) and `vue` (3, with the template compiler) are provided offline — other packages aren't; entry is `main.*`; `height=` px |
 | ` ```live-css ` | Sandboxed iframe HTML+CSS preview | `srcdoc` + sandbox flags |
 | ` ```live-glsl ` / ` ```glsl ` / ` ```shader ` | GLSL fragment shader on a quad | Hot-reloads on edit |
 | ` ```bibtex ` / ` ```bib ` | Citation list (formatted from BibTeX) | Click → copy citation |
@@ -93,3 +96,26 @@ Every block is `React.lazy`-imported. The block's vendor (Mermaid 718 KB, EChart
 ## Authoring a new block
 
 See [Plugin SDK](/plugins/sdk/) — every block is a React component registered with `registerPlugin`. The `pluginSystem` wires its fence language to a tag, mounts via `Suspense`, and routes it through the renderer pipeline.
+
+## Web Playground
+
+````markdown
+```playground react height=260
+--- App.jsx ---
+import { useState } from "react";
+export default function App() {
+  const [n, setN] = useState(0);
+  return <button onClick={() => setN(n + 1)}>Clicked {n} times</button>;
+}
+--- main.jsx ---
+import { createRoot } from "react-dom/client";
+import App from "./App.jsx";
+createRoot(document.getElementById("root")).render(<App />);
+--- style.css ---
+button { font: 16px system-ui; }
+```
+````
+
+- **Files:** `--- name.ext ---` starts a file. A body without markers is one file (`main.jsx` for React, `main.js` otherwise). `index.html` is the page body (default `<div id="root">`, or `<div id="app">` for Vue); its `<script>` tags don't run, so put code in files.
+- **Imports:** relative imports between files (with or without the extension), CSS / JSON files, and the provided `react`, `react-dom`, `react-dom/client`, `react/jsx-runtime` and `vue`.
+- **Isolation:** each Run loads a fresh runner document in a sandboxed iframe with an opaque origin and its own Content-Security-Policy. The project can't read the app's storage, cookies or page.

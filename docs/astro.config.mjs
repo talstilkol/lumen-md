@@ -45,6 +45,7 @@ export default defineConfig({
           items: [
             { label: "Database views", slug: "workspace/database-views" },
             { label: "Search (BM25 + Smart)", slug: "workspace/search" },
+            { label: "Vault Doctor", slug: "workspace/doctor" },
           ],
         },
         {
@@ -59,6 +60,8 @@ export default defineConfig({
           items: [
             { label: "Auto-tag + link suggestions", slug: "ai/agents" },
             { label: "Local LLM (web-llm)", slug: "ai/local-llm" },
+            { label: "AI cost: usage meter + answer cache", slug: "ai/cost" },
+            { label: "Research + citation checks", slug: "ai/research" },
             { label: "MCP integration (Claude Desktop, Cursor)", slug: "ai/mcp" },
           ],
         },

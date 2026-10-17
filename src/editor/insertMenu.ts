@@ -196,6 +196,27 @@ const ENTRIES: MenuEntry[] = [
     template: '```live-lua height=200\nlocal function fib(n) return n < 2 and n or fib(n - 1) + fib(n - 2) end\nfor i = 1, 10 do io.write(fib(i), " ") end\nprint()\nprint(_VERSION, "says", 1 + 1)\n```',
   },
   {
+    id: "live-r",
+    label: "Live R",
+    hint: "Run R via webR (WASM) — output and plots",
+    group: "Media",
+    template: '```live-r height=320\nx <- c(3, 1, 4, 1, 5, 9, 2, 6)\nsummary(x)\nplot(x, type = "b", main = "Live R")\n```',
+  },
+  {
+    id: "playground",
+    label: "Web Playground (React)",
+    hint: "Multi-file HTML / CSS / JSX, run live",
+    group: "Media",
+    template: '```playground react height=260\n--- App.jsx ---\nimport { useState } from "react";\nexport default function App() {\n  const [n, setN] = useState(0);\n  return <button onClick={() => setN(n + 1)}>Clicked {n} times</button>;\n}\n--- main.jsx ---\nimport { createRoot } from "react-dom/client";\nimport App from "./App.jsx";\ncreateRoot(document.getElementById("root")).render(<App />);\n--- style.css ---\nbutton { font: 16px system-ui; padding: 8px 14px; }\n```',
+  },
+  {
+    id: "live-ruby",
+    label: "Live Ruby",
+    hint: "Run Ruby 3.4 via ruby.wasm (WASM)",
+    group: "Media",
+    template: '```live-ruby height=220\nwords = %w[ruby runs in the browser]\nputs words.map(&:capitalize).join(" ")\nputs RUBY_VERSION\nwords.group_by(&:size)\n```',
+  },
+  {
     id: "live-svg",
     label: "Live SVG",
     hint: "Inline vector graphics",

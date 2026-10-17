@@ -263,6 +263,19 @@ function statementEnd(tokens: Token[], idx: number): { end: number; semi: boolea
  * declarations so they persist on the worker's global object.
  */
 export function hoistTopLevelBindings(src: string): string {
+  return analyzeTopLevel(src).output;
+}
+
+/**
+ * Names a block binds at top level (`const`/`let`/`var` patterns, classes,
+ * functions), in source order — the names a `shared` run publishes.
+ */
+export function topLevelNames(src: string): string[] {
+  const { declaredNames, functionNames } = analyzeTopLevel(src);
+  return [...new Set([...declaredNames, ...functionNames])];
+}
+
+function analyzeTopLevel(src: string): { output: string; declaredNames: string[]; functionNames: string[] } {
   const tokens = tokenize(src);
   const edits: Array<{ from: number; to: number; text: string }> = [];
   const functionNames: string[] = [];
@@ -367,7 +380,7 @@ export function hoistTopLevelBindings(src: string): string {
     const { from, to, text } = edits[e];
     out = out.slice(0, from) + text + out.slice(to);
   }
-  return out;
+  return { output: out, declaredNames, functionNames };
 }
 
 /**

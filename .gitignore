@@ -56,3 +56,8 @@ coverage/
 .vercel
 public/pyodide/
 public/webr/
+public/ruby/
+public/playground/vendor/
+bundle-sizes.json
+bundle-diff.md
+.bundle-base/

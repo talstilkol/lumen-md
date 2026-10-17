@@ -7,7 +7,7 @@ import { getGitIdentity, setGitIdentity, setGitToken, cloneRepo, pullRepo, commi
 import { getRecents, removeRecent } from "../storage/recent";
 import type { RecentFile } from "../storage/recent";
 import { BLOCK_SNIPPETS } from "../snippets";
-import { uiAlert, uiPrompt, uiSelect } from "../ui/PromptDialog";
+import { uiAlert, uiConfirm, uiPrompt, uiSelect } from "../ui/PromptDialog";
 import { generateAiCommitMessage } from "../ai/commands";
 import { buildAiSettingsCommand, buildAiOutlineCommand } from "../ai/commands";
 import type { CollabSession } from "../collab/yjs";
@@ -92,6 +92,32 @@ export function openTemplateDoc(base: string, content: string): void {
   for (let i = 2; taken.has(tabIdOf({ workspaceName: null, name })); i++) name = `${base} ${i}.md`;
   useAppStore.getState().openTab({ name, content, workspaceName: null });
   useAppStore.getState().setDoc({ dirty: true });
+}
+
+/** Every Markdown note in the workspace, for Vault Doctor (null when there is none). */
+async function loadDoctorNotes(): Promise<Array<{ path: string; text: string }> | null> {
+  if (!isOPFSAvailable()) {
+    showAiToast(t("doctor.noWorkspace"), "error");
+    return null;
+  }
+  const { listWorkspace } = await import("../storage/workspace");
+  const notes: Array<{ path: string; text: string }> = [];
+  for (const f of await listWorkspace({ includeAssets: false })) {
+    if (!/\.(md|markdown)$/i.test(f.path)) continue;
+    try {
+      notes.push({ path: f.path, text: await readWorkspaceFile(f.path) });
+    } catch {
+      // A missing note would look like a broken link target (and "fix"
+      // links to it): stop rather than scan an incomplete workspace.
+      showAiToast(t("doctor.readFailed", { path: f.path }), "error");
+      return null;
+    }
+  }
+  if (!notes.length) {
+    showAiToast(t("doctor.noWorkspace"), "error");
+    return null;
+  }
+  return notes;
 }
 
 export function useCommands({
@@ -597,6 +623,62 @@ export function useCommands({
         },
       },
       {
+        id: "tools.vaultDoctor",
+        label: t("cmd.tools.vaultDoctor"),
+        hint: t("cmd.tools.vaultDoctor.hint"),
+        icon: cmdIcons.Sparkles,
+        group: t("group.tools"),
+        action: async () => {
+          const notes = await loadDoctorNotes();
+          if (!notes) return;
+          showAiToast(t("doctor.checking", { count: notes.length }), "info");
+          const { runVaultDoctor, formatDoctorReport } = await import("../lint/vaultDoctor");
+          const findings = runVaultDoctor(notes);
+          openTemplateDoc("Vault Doctor report", formatDoctorReport(findings, notes.length));
+          showAiToast(t("doctor.done", { count: findings.length }), findings.length ? "info" : "success");
+        },
+      },
+      {
+        id: "tools.vaultDoctorFix",
+        label: t("cmd.tools.vaultDoctorFix"),
+        hint: t("cmd.tools.vaultDoctorFix.hint"),
+        icon: cmdIcons.Sparkles,
+        group: t("group.tools"),
+        action: async () => {
+          const notes = await loadDoctorNotes();
+          if (!notes) return;
+          const { runVaultDoctor, applyLinkFixes } = await import("../lint/vaultDoctor");
+          // Notes open in a tab may hold unsaved edits: never rewrite them.
+          const open = new Set(useAppStore.getState().openTabs.map((tab) => tab.workspaceName).filter(Boolean));
+          const current = useAppStore.getState().doc.workspaceName;
+          if (current) open.add(current);
+          const byFile = new Map<string, Array<{ from: string; to: string }>>();
+          for (const f of runVaultDoctor(notes)) {
+            if (f.kind !== "broken-wiki-link" || !f.suggestion || !f.detail || open.has(f.path)) continue;
+            byFile.set(f.path, [...(byFile.get(f.path) ?? []), { from: f.detail, to: f.suggestion }]);
+          }
+          const links = [...byFile.values()].reduce((n, l) => n + l.length, 0);
+          if (!links) {
+            showAiToast(t("doctor.noFixes"), "info");
+            return;
+          }
+          const list = [...byFile]
+            .flatMap(([path, fixes]) => fixes.map((x) => `${path}: [[${x.from}]] → [[${x.to}]]`))
+            .slice(0, 15)
+            .join("\n");
+          const ok = await uiConfirm({ message: t("doctor.confirmFix", { links, files: byFile.size, list }) });
+          if (!ok) return;
+          const { writeWorkspaceFile } = await import("../storage/workspace");
+          for (const [path, fixes] of byFile) {
+            const note = notes.find((n) => n.path === path)!;
+            await writeWorkspaceFile(path, applyLinkFixes(note.text, fixes));
+          }
+          // Backlinks, tags, file tree and database views refresh on this.
+          window.dispatchEvent(new CustomEvent("lumen-workspace-changed"));
+          showAiToast(t("doctor.fixed", { links, files: byFile.size }), "success");
+        },
+      },
+      {
         id: "tools.autoTag",
         label: t("cmd.tools.autoTag"),
         hint: t("cmd.tools.autoTag.hint"),
@@ -804,6 +886,322 @@ export function useCommands({
           setOllamaConfig({ model: choice.trim() });
           setActiveProvider("ollama");
           showAiToast(`✅ Switched to Ollama: ${choice.trim()}`, "success");
+        },
+      },
+      {
+        id: "ai.usage",
+        label: t("cmd.ai.usage"),
+        hint: t("cmd.ai.usage.hint"),
+        icon: cmdIcons.Sparkles,
+        group: t("group.tools"),
+        action: async () => {
+          const { usageSummary, formatUsageReport } = await import("../ai/usage");
+          await uiAlert({ title: t("ai.usage.title"), message: formatUsageReport(usageSummary()) });
+        },
+      },
+      {
+        id: "research.ask",
+        label: t("cmd.research.ask"),
+        hint: t("cmd.research.ask.hint"),
+        icon: cmdIcons.Sparkles,
+        group: t("group.ai"),
+        action: async () => {
+          const question = await uiPrompt({ message: t("research.question"), defaultValue: "" });
+          if (!question?.trim()) return;
+          try {
+            const { runResearch } = await import("../research/agent");
+            const result = await runResearch({ question: question.trim(), onProgress: (m) => showAiToast(m, "info") });
+            openTemplateDoc(`Research — ${question.trim().slice(0, 60).replace(/[\\/:*?"<>|]+/g, " ")}`, result.markdown);
+            showAiToast(t("research.done", { sources: result.sources }), "success");
+            if (result.unverified) showAiToast(t("research.unverified", { count: result.unverified }), "error");
+          } catch (e) {
+            showAiToast(t("research.failed", { message: (e as Error).message }), "error");
+          }
+        },
+      },
+      {
+        id: "research.verify",
+        label: t("cmd.research.verify"),
+        hint: t("cmd.research.verify.hint"),
+        icon: cmdIcons.Sparkles,
+        group: t("group.ai"),
+        action: async () => {
+          const { parseCitations, verifyCitations, formatCitationReport } = await import("../research/citations");
+          const { extractPage, researchEndpoint } = await import("../research/client");
+          const citations = parseCitations(doc.content);
+          if (!citations.length) {
+            showAiToast(t("research.noCitations"), "info");
+            return;
+          }
+          if (!researchEndpoint()) {
+            showAiToast(t("research.noService"), "error");
+            return;
+          }
+          const checks = await verifyCitations(citations, (u) => extractPage(u), {
+            onProgress: (done, total) => {
+              if (done === total || done % 5 === 0) showAiToast(t("research.checking", { done, total }), "info");
+            },
+          });
+          // A tab name, not a path: the note's base name only.
+          const base = (doc.name.split("/").pop() ?? doc.name).replace(/\.(md|markdown)$/i, "");
+          openTemplateDoc(`Citation check — ${base}`, formatCitationReport(base, checks));
+        },
+      },
+      {
+        id: "research.settings",
+        label: t("cmd.research.settings"),
+        hint: t("cmd.research.settings.hint"),
+        icon: cmdIcons.Sparkles,
+        group: t("group.ai"),
+        action: async () => {
+          const { getResearchSettings, setResearchSettings, researchEndpoint } = await import("../research/client");
+          const cur = getResearchSettings();
+          const choice = await uiSelect({
+            title: t("cmd.research.settings"),
+            message: t("cmd.research.settings.hint"),
+            defaultValue: cur.provider,
+            choices: [
+              { value: "claude", label: t("research.provider.claude") },
+              { value: "brave", label: t("research.provider.brave") },
+              { value: "tavily", label: t("research.provider.tavily") },
+            ],
+          });
+          if (choice !== "claude" && choice !== "brave" && choice !== "tavily") return;
+          if (choice !== "claude") {
+            // Brave / Tavily go through the research service: without it the
+            // choice can't work, so keep the current setting.
+            if (!researchEndpoint()) {
+              showAiToast(t("research.noService"), "error");
+              return;
+            }
+            const key = await uiPrompt({ message: t("research.key", { provider: choice === "brave" ? "Brave Search" : "Tavily" }), defaultValue: cur.provider === choice ? cur.key : "" });
+            // Cancelled (or no key): keep the previous provider and key.
+            if (key === null || !key.trim()) return;
+            setResearchSettings({ provider: choice, key: key.trim() });
+          } else setResearchSettings({ provider: choice });
+          showAiToast(t(`research.provider.${choice}`), "success");
+        },
+      },
+      {
+        id: "ai.batch",
+        label: t("cmd.ai.batch"),
+        hint: t("cmd.ai.batch.hint"),
+        icon: cmdIcons.Sparkles,
+        group: t("group.tools"),
+        action: async () => {
+          const batch = await import("../ai/batch");
+          const { getActiveProvider, effectiveModel } = await import("../ai/llm");
+          const provider = batch.batchProviderFor(getActiveProvider());
+          if (!provider) {
+            showAiToast(t("batch.provider"), "error");
+            return;
+          }
+          const op = await uiSelect({
+            title: t("cmd.ai.batch"),
+            message: t("batch.op"),
+            defaultValue: "tags",
+            choices: [
+              { value: "tags", label: t("batch.op.tags") },
+              { value: "summary", label: t("batch.op.summary") },
+              { value: "translate", label: t("batch.op.translate") },
+            ],
+          });
+          if (op !== "tags" && op !== "summary" && op !== "translate") return;
+          let lang: string | undefined;
+          if (op === "translate") {
+            lang = (await uiPrompt({ message: t("batch.lang"), defaultValue: "English" }))?.trim();
+            if (!lang) return;
+          }
+          const folder = await uiPrompt({ message: t("batch.folder"), defaultValue: "" });
+          if (folder === null) return;
+          const prefix = folder.trim().replace(/^\/+|\/+$/g, "");
+          const { readAllNotes } = await import("../storage/workspaceNotes");
+          const all = await readAllNotes();
+          // Skip translations earlier batches created (by their
+          // `translatedFrom` marker, or the older recorded paths — not by
+          // file-name shape) so a re-run doesn't translate them.
+          const made = batch.knownTranslations();
+          const notes = all.filter(
+            (n) => (!prefix || n.path.startsWith(prefix + "/")) && !(op === "translate" && (made.has(n.path) || batch.isBatchTranslation(n.text))),
+          );
+          if (!notes.length) {
+            showAiToast(t("batch.noNotes"), "error");
+            return;
+          }
+          const { aiQuotaStatus, recordAiPrompt } = await import("../billing/aiQuota");
+          const quota = aiQuotaStatus();
+          if (Number.isFinite(quota.limit) && quota.remaining < notes.length) {
+            showAiToast(t("batch.quota", { count: notes.length }), "error");
+            return;
+          }
+          const { estimateTokens, costOf } = await import("../ai/usage");
+          const model = effectiveModel(provider);
+          let input = 0;
+          let output = 0;
+          for (const n of notes) {
+            const r = batch.requestFor(op, n.text, lang);
+            input += estimateTokens(r.system + r.user);
+            // A translation is about as long as the (possibly truncated) text sent.
+            output += op === "translate" ? Math.min(r.maxTokens, estimateTokens(r.user)) : r.maxTokens / 2;
+          }
+          const usd = costOf({ provider, model, inputTokens: input, outputTokens: output, batch: true });
+          const ok = await uiConfirm({
+            message: t("batch.confirm", { count: notes.length, provider, model, cost: usd === null ? "?" : `~$${usd.toFixed(2)}` }),
+          });
+          if (!ok) return;
+          try {
+            const job = await batch.submitBatch(op, notes, { lang });
+            if (Number.isFinite(quota.limit)) for (let i = 0; i < notes.length; i++) recordAiPrompt();
+            showAiToast(t("batch.submitted", { count: job.items.length }), "success");
+          } catch (e) {
+            showAiToast((e as Error).message, "error");
+          }
+        },
+      },
+      {
+        id: "ai.batchCheck",
+        label: t("cmd.ai.batchCheck"),
+        hint: t("cmd.ai.batchCheck.hint"),
+        icon: cmdIcons.Sparkles,
+        group: t("group.tools"),
+        action: async () => {
+          const batch = await import("../ai/batch");
+          const jobs = batch.loadJobs();
+          const pending = jobs.filter((j) => j.status === "submitted" || j.status === "ended");
+          if (!pending.length) {
+            showAiToast(t("batch.none"), "info");
+            return;
+          }
+          const { writeWorkspaceFile } = await import("../storage/workspace");
+          let processing = 0;
+          let wroteAny = false;
+          for (const job of pending) {
+            let results;
+            try {
+              results = await batch.fetchBatchResults(job);
+            } catch (e) {
+              showAiToast((e as Error).message, "error");
+              continue;
+            }
+            if (results.state === "processing") {
+              processing++;
+              continue;
+            }
+            if (results.state !== "ended") {
+              // Tell the user before the job leaves the pending list.
+              job.status = results.state;
+              showAiToast(t("batch.terminal", { op: job.op, id: job.id, state: t(`batch.state.${results.state}`) }), "error");
+              continue;
+            }
+            job.status = "ended";
+            // Record the metering now: if the state can't be saved, stop
+            // before writing anything (a later check would meter again).
+            if (!batch.saveJobs(jobs)) {
+              showAiToast(t("batch.saveFailed", { id: job.id }), "error");
+              return;
+            }
+            const { readAllNotes } = await import("../storage/workspaceNotes");
+            const notes = await readAllNotes();
+            const open = new Set(useAppStore.getState().openTabs.map((tab) => tab.workspaceName).filter(Boolean));
+            const current = useAppStore.getState().doc.workspaceName;
+            if (current) open.add(current);
+            const changed: string[] = [];
+            const writes = batch
+              .planWrites(
+                job,
+                results.answers,
+                (p) => notes.find((n) => n.path === p)?.text ?? null,
+                (p) => notes.some((n) => n.path.toLowerCase() === p.toLowerCase()),
+                changed,
+              )
+              // A note open in a tab may have unsaved edits: skip it (and
+              // translations made from it).
+              .filter((w) => !open.has(w.path) && !open.has(w.source));
+            const created = writes.filter((w) => w.created).length;
+            const notes2 = [results.failed ? `${results.failed} failed` : "", changed.length ? `${changed.length} edited since — skipped` : ""].filter(Boolean).join(", ");
+            const ok = await uiConfirm({
+              message: t("batch.apply", { op: job.op, changes: writes.length - created, created, failed: notes2 ? ` (${notes2})` : "" }),
+            });
+            if (!ok) continue;
+            // Write one by one; a failure keeps what was written and leaves
+            // the job retryable without duplicating finished translations.
+            const done: string[] = [];
+            let failedWrites = 0;
+            for (const w of writes) {
+              try {
+                await writeWorkspaceFile(w.path, w.content);
+                done.push(w.path);
+                job.done = [...(job.done ?? []), w.source];
+              } catch {
+                failedWrites++;
+              }
+            }
+            if (done.length) wroteAny = true;
+            job.status = failedWrites ? "ended" : "applied";
+            // A retry after a failed save is safe (translations carry their
+            // job's marker; tags merge; summaries replace), but say so.
+            if (!batch.saveJobs(jobs)) {
+              showAiToast(t("batch.saveFailed", { id: job.id }), "error");
+              if (wroteAny) window.dispatchEvent(new CustomEvent("lumen-workspace-changed"));
+              return;
+            }
+            showAiToast(t("batch.applied", { count: done.length }), failedWrites ? "error" : "success");
+          }
+          if (!batch.saveJobs(jobs)) showAiToast(t("batch.saveFailed", { id: pending.map((j) => j.id).join(", ") }), "error");
+          // File tree, tags, backlinks and database views refresh on this.
+          if (wroteAny) window.dispatchEvent(new CustomEvent("lumen-workspace-changed"));
+          if (processing) showAiToast(t("batch.processing", { count: processing }), "info");
+        },
+      },
+      {
+        id: "ai.mode",
+        label: t("cmd.ai.mode"),
+        hint: t("cmd.ai.mode.hint"),
+        icon: cmdIcons.Sparkles,
+        group: t("group.tools"),
+        action: async () => {
+          const { getAiMode, setAiMode } = await import("../ai/contextPacker");
+          const choice = await uiSelect({
+            title: t("ai.mode.title"),
+            message: t("cmd.ai.mode.hint"),
+            defaultValue: getAiMode(),
+            choices: [
+              { value: "economy", label: t("ai.mode.economy") },
+              { value: "balanced", label: t("ai.mode.balanced") },
+              { value: "quality", label: t("ai.mode.quality") },
+            ],
+          });
+          if (choice !== "economy" && choice !== "balanced" && choice !== "quality") return;
+          setAiMode(choice);
+          showAiToast(t(`ai.mode.${choice}`), "success");
+        },
+      },
+      {
+        id: "ai.cache",
+        label: t("cmd.ai.cache"),
+        hint: t("cmd.ai.cache.hint"),
+        icon: cmdIcons.Sparkles,
+        group: t("group.tools"),
+        action: async () => {
+          const { aiCacheEnabled, setAiCacheEnabled, clearAiCache } = await import("../ai/responseCache");
+          const choice = await uiSelect({
+            title: t("ai.cache.title"),
+            message: t("cmd.ai.cache.hint"),
+            defaultValue: aiCacheEnabled() ? "on" : "off",
+            choices: [
+              { value: "on", label: t("ai.cache.on") },
+              { value: "off", label: t("ai.cache.off") },
+              { value: "clear", label: t("ai.cache.clear") },
+            ],
+          });
+          if (!choice) return;
+          if (choice === "clear") {
+            const count = await clearAiCache();
+            showAiToast(t("ai.cache.cleared", { count }), "success");
+            return;
+          }
+          setAiCacheEnabled(choice === "on");
+          showAiToast(choice === "on" ? t("ai.cache.on") : t("ai.cache.off"), "success");
         },
       },
       {

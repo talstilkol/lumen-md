@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-10-16T08:37:22.362Z",
+  "generated_at": "2026-10-17T03:38:18.020Z",
   "source": "src/i18n/index.ts (en bundle)",
-  "count": 928,
+  "count": 1041,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -826,7 +826,7 @@
     },
     {
       "key": "cmd.view.tsChecks.hint",
-      "en": "Type errors and completions in ```ts blocks (downloads the TypeScript compiler, ~2 MB)",
+      "en": "Type errors and completions in ```ts blocks (downloads the TypeScript compiler, ~1.3 MB)",
       "vars": []
     },
     {
@@ -882,6 +882,74 @@
       "key": "cmd.tools.autoTag.hint",
       "en": "AI proposes tags from your existing vocabulary",
       "vars": []
+    },
+    {
+      "key": "cmd.tools.vaultDoctor",
+      "en": "🩺 Vault Doctor: Check Workspace",
+      "vars": []
+    },
+    {
+      "key": "cmd.tools.vaultDoctor.hint",
+      "en": "Broken links, orphans, near-duplicates, missing alt text — no AI, nothing leaves your device",
+      "vars": []
+    },
+    {
+      "key": "cmd.tools.vaultDoctorFix",
+      "en": "🩺 Vault Doctor: Apply Suggested Link Fixes",
+      "vars": []
+    },
+    {
+      "key": "cmd.tools.vaultDoctorFix.hint",
+      "en": "Rewrite broken [[links]] that have exactly one close match",
+      "vars": []
+    },
+    {
+      "key": "doctor.noWorkspace",
+      "en": "Open a workspace folder first",
+      "vars": []
+    },
+    {
+      "key": "doctor.readFailed",
+      "en": "Couldn't read {path}: Vault Doctor stopped so it won't report or fix links against an incomplete workspace",
+      "vars": [
+        "path"
+      ]
+    },
+    {
+      "key": "doctor.checking",
+      "en": "Checking {count} notes…",
+      "vars": [
+        "count"
+      ]
+    },
+    {
+      "key": "doctor.done",
+      "en": "{count} findings",
+      "vars": [
+        "count"
+      ]
+    },
+    {
+      "key": "doctor.noFixes",
+      "en": "No broken links with a single clear suggestion",
+      "vars": []
+    },
+    {
+      "key": "doctor.confirmFix",
+      "en": "Fix {links} links in {files} notes?\\n\\n{list}\\n\\nNotes open in a tab are skipped.",
+      "vars": [
+        "links",
+        "files",
+        "list"
+      ]
+    },
+    {
+      "key": "doctor.fixed",
+      "en": "Fixed {links} links in {files} notes",
+      "vars": [
+        "links",
+        "files"
+      ]
     },
     {
       "key": "cmd.tools.suggestLinks",
@@ -1700,6 +1768,237 @@
     {
       "key": "block.liveLua.state.timeout",
       "en": "Timed out",
+      "vars": []
+    },
+    {
+      "key": "block.liveR.title",
+      "en": "Live R",
+      "vars": []
+    },
+    {
+      "key": "block.liveR.run",
+      "en": "Run",
+      "vars": []
+    },
+    {
+      "key": "block.liveR.stop",
+      "en": "Stop",
+      "vars": []
+    },
+    {
+      "key": "block.liveR.clear",
+      "en": "Clear output",
+      "vars": []
+    },
+    {
+      "key": "block.liveR.prompt",
+      "en": "Click Run to execute this R block. The first run downloads R (~45 MB, cached afterwards).",
+      "vars": []
+    },
+    {
+      "key": "block.liveR.loading",
+      "en": "Loading R…",
+      "vars": []
+    },
+    {
+      "key": "block.liveR.loadFailed",
+      "en": "Failed to load the R runtime.",
+      "vars": []
+    },
+    {
+      "key": "block.liveR.loadTimeout",
+      "en": "R took too long to load.",
+      "vars": []
+    },
+    {
+      "key": "block.liveR.timedOut",
+      "en": "Execution timed out after {ms} ms.",
+      "vars": [
+        "ms"
+      ]
+    },
+    {
+      "key": "block.liveR.stopped",
+      "en": "Stopped.",
+      "vars": []
+    },
+    {
+      "key": "block.liveR.plot",
+      "en": "R plot",
+      "vars": []
+    },
+    {
+      "key": "block.liveR.state.idle",
+      "en": "Not run",
+      "vars": []
+    },
+    {
+      "key": "block.liveR.state.loading",
+      "en": "Loading…",
+      "vars": []
+    },
+    {
+      "key": "block.liveR.state.running",
+      "en": "Running…",
+      "vars": []
+    },
+    {
+      "key": "block.liveR.state.success",
+      "en": "Completed",
+      "vars": []
+    },
+    {
+      "key": "block.liveR.state.error",
+      "en": "Error",
+      "vars": []
+    },
+    {
+      "key": "block.liveR.state.timeout",
+      "en": "Timed out",
+      "vars": []
+    },
+    {
+      "key": "block.liveRuby.title",
+      "en": "Live Ruby",
+      "vars": []
+    },
+    {
+      "key": "block.liveRuby.run",
+      "en": "Run",
+      "vars": []
+    },
+    {
+      "key": "block.liveRuby.stop",
+      "en": "Stop",
+      "vars": []
+    },
+    {
+      "key": "block.liveRuby.clear",
+      "en": "Clear output",
+      "vars": []
+    },
+    {
+      "key": "block.liveRuby.prompt",
+      "en": "Click Run to execute this Ruby block. The first run downloads Ruby (~30 MB, cached afterwards).",
+      "vars": []
+    },
+    {
+      "key": "block.liveRuby.loading",
+      "en": "Loading Ruby…",
+      "vars": []
+    },
+    {
+      "key": "block.liveRuby.loadFailed",
+      "en": "Failed to load the Ruby runtime.",
+      "vars": []
+    },
+    {
+      "key": "block.liveRuby.loadTimeout",
+      "en": "Ruby took too long to load.",
+      "vars": []
+    },
+    {
+      "key": "block.liveRuby.timedOut",
+      "en": "Execution timed out after {ms} ms.",
+      "vars": [
+        "ms"
+      ]
+    },
+    {
+      "key": "block.liveRuby.stopped",
+      "en": "Stopped.",
+      "vars": []
+    },
+    {
+      "key": "block.liveRuby.state.idle",
+      "en": "Not run",
+      "vars": []
+    },
+    {
+      "key": "block.liveRuby.state.loading",
+      "en": "Loading…",
+      "vars": []
+    },
+    {
+      "key": "block.liveRuby.state.running",
+      "en": "Running…",
+      "vars": []
+    },
+    {
+      "key": "block.liveRuby.state.success",
+      "en": "Completed",
+      "vars": []
+    },
+    {
+      "key": "block.liveRuby.state.error",
+      "en": "Error",
+      "vars": []
+    },
+    {
+      "key": "block.liveRuby.state.timeout",
+      "en": "Timed out",
+      "vars": []
+    },
+    {
+      "key": "block.playground.title",
+      "en": "Web Playground",
+      "vars": []
+    },
+    {
+      "key": "block.playground.run",
+      "en": "Run",
+      "vars": []
+    },
+    {
+      "key": "block.playground.reset",
+      "en": "Reset",
+      "vars": []
+    },
+    {
+      "key": "block.playground.preview",
+      "en": "Preview",
+      "vars": []
+    },
+    {
+      "key": "block.playground.console",
+      "en": "Console",
+      "vars": []
+    },
+    {
+      "key": "block.playground.prompt",
+      "en": "Click Run to start this project (files are separated by --- name.ext --- lines).",
+      "vars": []
+    },
+    {
+      "key": "block.playground.frameTitle",
+      "en": "Web Playground preview",
+      "vars": []
+    },
+    {
+      "key": "block.playground.errors",
+      "en": "{n} errors",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "block.playground.state.idle",
+      "en": "Not run",
+      "vars": []
+    },
+    {
+      "key": "block.playground.state.running",
+      "en": "Running…",
+      "vars": []
+    },
+    {
+      "key": "block.playground.state.success",
+      "en": "Running",
+      "vars": []
+    },
+    {
+      "key": "block.playground.state.error",
+      "en": "Error",
       "vars": []
     },
     {
@@ -2948,6 +3247,328 @@
       "key": "cmd.ai.provider.hint",
       "en": "Switch AI provider: OpenAI, Claude, Gemini, Mistral, Ollama, or local WebGPU",
       "vars": []
+    },
+    {
+      "key": "cmd.ai.usage",
+      "en": "AI: Usage & Cost This Month",
+      "vars": []
+    },
+    {
+      "key": "cmd.ai.usage.hint",
+      "en": "Requests, tokens and estimated cost per provider on this device",
+      "vars": []
+    },
+    {
+      "key": "cmd.ai.cache",
+      "en": "AI: Answer Cache…",
+      "vars": []
+    },
+    {
+      "key": "cmd.ai.cache.hint",
+      "en": "Reuse identical answers (tags, translation, diagrams) instead of paying again",
+      "vars": []
+    },
+    {
+      "key": "cmd.research.ask",
+      "en": "🔎 Research: Ask a Question…",
+      "vars": []
+    },
+    {
+      "key": "cmd.research.ask.hint",
+      "en": "Searches the web, reads sources and writes a note with a quoted footnote for every claim",
+      "vars": []
+    },
+    {
+      "key": "cmd.research.verify",
+      "en": "🔎 Research: Verify Citations in This Note",
+      "vars": []
+    },
+    {
+      "key": "cmd.research.verify.hint",
+      "en": "Checks every footnote link is alive and its quote really appears on the page",
+      "vars": []
+    },
+    {
+      "key": "cmd.research.settings",
+      "en": "🔎 Research: Settings…",
+      "vars": []
+    },
+    {
+      "key": "cmd.research.settings.hint",
+      "en": "Claude web search, or Brave / Tavily with your own key",
+      "vars": []
+    },
+    {
+      "key": "research.question",
+      "en": "What should I research?",
+      "vars": []
+    },
+    {
+      "key": "research.done",
+      "en": "Research done: {sources} sources",
+      "vars": [
+        "sources"
+      ]
+    },
+    {
+      "key": "research.unverified",
+      "en": "{count} quotes could not be verified — marked ⚠️ in the note",
+      "vars": [
+        "count"
+      ]
+    },
+    {
+      "key": "research.failed",
+      "en": "Research failed: {message}",
+      "vars": [
+        "message"
+      ]
+    },
+    {
+      "key": "research.noCitations",
+      "en": "No footnotes with web links in this note",
+      "vars": []
+    },
+    {
+      "key": "research.checking",
+      "en": "Checking citations {done}/{total}…",
+      "vars": [
+        "done",
+        "total"
+      ]
+    },
+    {
+      "key": "research.noService",
+      "en": "Citation checks and Brave / Tavily search need the research service (VITE_RESEARCH_ENDPOINT) on this deployment",
+      "vars": []
+    },
+    {
+      "key": "research.provider.claude",
+      "en": "Claude web search (Anthropic provider; searches billed by Anthropic)",
+      "vars": []
+    },
+    {
+      "key": "research.provider.brave",
+      "en": "Brave Search (your API key)",
+      "vars": []
+    },
+    {
+      "key": "research.provider.tavily",
+      "en": "Tavily (your API key)",
+      "vars": []
+    },
+    {
+      "key": "research.key",
+      "en": "API key for {provider}:",
+      "vars": [
+        "provider"
+      ]
+    },
+    {
+      "key": "cmd.ai.batch",
+      "en": "AI: Batch over a Folder (half price)…",
+      "vars": []
+    },
+    {
+      "key": "cmd.ai.batch.hint",
+      "en": "Tag, summarise or translate many notes through the provider's batch API — results within 24 h",
+      "vars": []
+    },
+    {
+      "key": "cmd.ai.batchCheck",
+      "en": "AI: Check Batch Jobs",
+      "vars": []
+    },
+    {
+      "key": "cmd.ai.batchCheck.hint",
+      "en": "Fetch finished batch results and apply them to your notes",
+      "vars": []
+    },
+    {
+      "key": "batch.op",
+      "en": "What should the batch do?",
+      "vars": []
+    },
+    {
+      "key": "batch.op.tags",
+      "en": "Tag each note (front matter tags)",
+      "vars": []
+    },
+    {
+      "key": "batch.op.summary",
+      "en": "Summarise each note (front matter summary)",
+      "vars": []
+    },
+    {
+      "key": "batch.op.translate",
+      "en": "Translate each note (new file next to it)",
+      "vars": []
+    },
+    {
+      "key": "batch.folder",
+      "en": "Folder to process (empty = whole workspace):",
+      "vars": []
+    },
+    {
+      "key": "batch.lang",
+      "en": "Translate into which language?",
+      "vars": []
+    },
+    {
+      "key": "batch.confirm",
+      "en": "Send {count} notes to {provider} ({model}) as one batch?\\n\\nEstimated cost: {cost} (batch price). Results arrive within 24 hours; run \"AI: Check Batch Jobs\" to apply them. Counts as {count} AI prompts.",
+      "vars": [
+        "count",
+        "provider",
+        "model",
+        "cost"
+      ]
+    },
+    {
+      "key": "batch.submitted",
+      "en": "Batch submitted: {count} notes",
+      "vars": [
+        "count"
+      ]
+    },
+    {
+      "key": "batch.provider",
+      "en": "Batch jobs need the OpenAI or Anthropic provider",
+      "vars": []
+    },
+    {
+      "key": "batch.quota",
+      "en": "Not enough AI prompts left this month for {count} notes",
+      "vars": [
+        "count"
+      ]
+    },
+    {
+      "key": "batch.noNotes",
+      "en": "No notes found in that folder of the workspace",
+      "vars": []
+    },
+    {
+      "key": "batch.none",
+      "en": "No batch jobs waiting",
+      "vars": []
+    },
+    {
+      "key": "batch.processing",
+      "en": "{count} batch jobs still processing",
+      "vars": [
+        "count"
+      ]
+    },
+    {
+      "key": "batch.apply",
+      "en": "Batch \"{op}\" finished: {changes} notes to update, {created} new files{failed}.\\n\\nApply now? Notes open in a tab are skipped.",
+      "vars": [
+        "op",
+        "changes",
+        "created",
+        "failed"
+      ]
+    },
+    {
+      "key": "batch.applied",
+      "en": "Applied {count} batch results",
+      "vars": [
+        "count"
+      ]
+    },
+    {
+      "key": "batch.terminal",
+      "en": "Batch \"{op}\" ({id}) {state} — no results were applied",
+      "vars": [
+        "op",
+        "id",
+        "state"
+      ]
+    },
+    {
+      "key": "batch.state.failed",
+      "en": "failed",
+      "vars": []
+    },
+    {
+      "key": "batch.state.expired",
+      "en": "expired",
+      "vars": []
+    },
+    {
+      "key": "batch.state.cancelled",
+      "en": "was cancelled",
+      "vars": []
+    },
+    {
+      "key": "batch.saveFailed",
+      "en": "Couldn't save the batch job state for {id} (storage full or blocked). Free some space, then run \"AI: Check Batch Jobs\" again — already-applied results won't be duplicated.",
+      "vars": [
+        "id"
+      ]
+    },
+    {
+      "key": "cmd.ai.mode",
+      "en": "AI: Cost Mode (Economy / Balanced / Quality)…",
+      "vars": []
+    },
+    {
+      "key": "cmd.ai.mode.hint",
+      "en": "Route small tasks to cheaper models and send only the relevant parts of your notes",
+      "vars": []
+    },
+    {
+      "key": "ai.mode.title",
+      "en": "AI cost mode",
+      "vars": []
+    },
+    {
+      "key": "ai.mode.economy",
+      "en": "Economy — small model for everything, ~2K tokens of context",
+      "vars": []
+    },
+    {
+      "key": "ai.mode.balanced",
+      "en": "Balanced — small model for small tasks, ~5K tokens of context (default)",
+      "vars": []
+    },
+    {
+      "key": "ai.mode.quality",
+      "en": "Quality — your chosen model for everything, ~12K tokens of context",
+      "vars": []
+    },
+    {
+      "key": "ai.usage.title",
+      "en": "AI usage",
+      "vars": []
+    },
+    {
+      "key": "ai.cache.title",
+      "en": "AI answer cache",
+      "vars": []
+    },
+    {
+      "key": "ai.cache.on",
+      "en": "On — identical requests are answered locally",
+      "vars": []
+    },
+    {
+      "key": "ai.cache.off",
+      "en": "Off — always ask the model",
+      "vars": []
+    },
+    {
+      "key": "ai.cache.clear",
+      "en": "Clear cached answers",
+      "vars": []
+    },
+    {
+      "key": "ai.cache.cleared",
+      "en": "Cleared {count} cached answers",
+      "vars": [
+        "count"
+      ]
     },
     {
       "key": "cmd.ai.settings",

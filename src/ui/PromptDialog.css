@@ -26,11 +26,18 @@
   font-weight: 600;
   color: hsl(var(--fg));
   line-height: 1.4;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
 }
 .prompt-message {
   font-size: 13px;
   color: hsl(var(--fg-muted));
   line-height: 1.5;
+  /* Multi-line messages (reports, lists) keep their line breaks. */
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  max-height: 60vh;
+  overflow-y: auto;
 }
 .prompt-input {
   width: 100%;

@@ -24,6 +24,9 @@ const LiveCssBlock = lazy(() => import("../plugins/LiveCssBlock"));
 const LiveJsBlock = lazy(() => import("../plugins/LiveJsBlock"));
 const LivePyBlock = lazy(() => import("../plugins/LivePyBlock"));
 const LiveLuaBlock = lazy(() => import("../plugins/LiveLuaBlock"));
+const LiveRBlock = lazy(() => import("../plugins/LiveRBlock"));
+const LiveRubyBlock = lazy(() => import("../plugins/LiveRubyBlock"));
+const PlaygroundBlock = lazy(() => import("../plugins/PlaygroundBlock"));
 const LiveSqlBlock = lazy(() => import("../plugins/LiveSqlBlock"));
 const LiveSvgBlock = lazy(() => import("../plugins/LiveSvgBlock"));
 const LiveGlslBlock = lazy(() => import("../plugins/LiveGlslBlock"));
@@ -332,6 +335,18 @@ const LiveLua = withSuspense<BlockProps>(
   (props) => <LiveLuaBlock source={getText(props.children)} meta={props.meta} />,
   "live-lua",
 );
+const LiveR = withSuspense<BlockProps>(
+  (props) => <LiveRBlock source={getText(props.children)} meta={props.meta} />,
+  "live-r",
+);
+const Playground = withSuspense<BlockProps>(
+  (props) => <PlaygroundBlock source={getText(props.children)} meta={props.meta} />,
+  "playground",
+);
+const LiveRuby = withSuspense<BlockProps>(
+  (props) => <LiveRubyBlock source={getText(props.children)} meta={props.meta} />,
+  "live-ruby",
+);
 const LiveSql = withSuspense<BlockProps>(
   (props) => <LiveSqlBlock source={getText(props.children)} meta={props.meta} />,
   "live-sql",
@@ -482,6 +497,9 @@ export const components: Record<string, LumenBlock> = {
   "lumen-livepython": LivePy as unknown as LumenBlock,
   "lumen-livesql": LiveSql as unknown as LumenBlock,
   "lumen-livelua": LiveLua as unknown as LumenBlock,
+  "lumen-liver": LiveR as unknown as LumenBlock,
+  "lumen-liveruby": LiveRuby as unknown as LumenBlock,
+  "lumen-playground": Playground as unknown as LumenBlock,
   // Asset-resolving <img> override.
   img: LumenImg as unknown as LumenBlock,
   // GFM task-list checkboxes get an aria-label so they aren't announced bare.

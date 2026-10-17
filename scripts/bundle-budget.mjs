@@ -9,6 +9,9 @@
  * The budgets reflect what Lumen ships *today* with a small headroom, so we
  * catch rgressions without rewriting the file every time we add a feature.
  * Update the table when an intentional new feature lands.
+ *
+ * `--json <file>` also writes the gzipped size per budget class (summed
+ * over its files) and in total, for scripts/bundle-diff.mjs.
  */
 
 import { promises as fs } from "node:fs";
@@ -29,7 +32,11 @@ const BUDGETS = [
   //       fires when a doc contains inline HTML). Measured: 177.9 KB
   //       gzipped on macOS post-fix. Budget gives ~17 KB headroom for
   //       Linux gzip variance + future first-party growth.
-  { name: "main bundle",        pattern: /^main-/,                budgetKb: 195 },
+  // With Vite 8 the startup code shared by the HTML entries lives in
+  // `app-*`; the entry `main-*` is a stub and gets a tight budget of its own,
+  // so code moving back into it can't double the startup allowance.
+  { name: "main bundle",        pattern: /^app-/,                 budgetKb: 195 },
+  { name: "entry stub",         pattern: /^main-/,                budgetKb: 5 },
   { name: "entry index",        pattern: /^index-/,               budgetKb: 220 },
   // mermaid: 800 → 860 (2026-10 dependency audit). mermaid 11.15 → 11.17.2
   //   fixes GHSA-6x64-9x62-f2gx (CSS injection), GHSA-c4c3-pg64-4m4v and
@@ -66,8 +73,18 @@ const BUDGETS = [
   { name: "lazy: pdfjs",        pattern: /^pdf-/,                 budgetKb: 165 },
   // Prettier (Format document / code block) — standalone core + one chunk
   // per language plugin, all dynamic-imported on first format. The
-  // TypeScript parser plugin is the largest at ~124 KB gz.
-  { name: "lazy: prettier",     pattern: /^prettier-/,            budgetKb: 140 },
+  // TypeScript parser plugin is the largest: ~124 KB gz with Vite 6, 204 KB
+  // with Vite 8 (Rolldown keeps the TypeScript diagnostics table that
+  // esbuild dropped). Only loaded when formatting TS / JS.
+  { name: "lazy: prettier",     pattern: /^prettier-/,            budgetKb: 215 },
+  // abcjs (music notation), lazy-loaded by the abc block. Same size as
+  // before; Vite 6 named the chunk `index-*` (it fell under "entry index").
+  { name: "lazy: abcjs",        pattern: /^abcjs-/,               budgetKb: 160 },
+  // tldraw canvas block (lazy): its radix-ui / tiptap dependencies now sit in
+  // this chunk instead of vendor-tldraw.
+  { name: "lazy: canvas",       pattern: /^CanvasTldraw-/,        budgetKb: 130 },
+  // cytoscape (mermaid's graph layouts), lazy, split out of vendor-mermaid.
+  { name: "lazy: cytoscape",    pattern: /^cytoscape/,            budgetKb: 150 },
   // TypeScript compiler + ES/DOM lib .d.ts files for the opt-in "TypeScript
   // checks in code blocks" (src/lsp). One worker file, fetched only after
   // the user enables the setting; excluded from the PWA precache. Measured
@@ -96,6 +113,8 @@ async function main() {
 
   let failed = 0;
   let total = 0;
+  /** Gzipped KB per budget class, for --json. */
+  const classes = {};
   console.log(
     "\n  Budget                  Actual          File\n" +
       "  ─────────               ─────────       ────",
@@ -108,6 +127,9 @@ async function main() {
     total += kb;
     const rule = BUDGETS.find((r) => r.pattern.test(file));
     if (!rule) continue;
+    const c = (classes[rule.name] ??= { kb: 0, files: 0 });
+    c.kb += kb;
+    c.files++;
     const ok = kb <= rule.budgetKb;
     if (!ok) failed++;
     const mark = ok ? "✓" : "✗";
@@ -117,6 +139,12 @@ async function main() {
   }
 
   console.log(`\n  Total gzipped: ${format(total)}`);
+  const jsonAt = process.argv.indexOf("--json");
+  if (jsonAt !== -1 && process.argv[jsonAt + 1]) {
+    const round = (x) => Math.round(x * 10) / 10;
+    const out = { totalKb: round(total), classes: Object.fromEntries(Object.entries(classes).map(([k, v]) => [k, { kb: round(v.kb), files: v.files }])) };
+    await fs.writeFile(process.argv[jsonAt + 1], JSON.stringify(out, null, 2) + "\n");
+  }
   if (failed > 0) {
     console.error(
       `\n✗ ${failed} chunk${failed === 1 ? "" : "s"} exceeded its budget. ` +
