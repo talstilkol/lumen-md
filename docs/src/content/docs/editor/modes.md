@@ -59,7 +59,7 @@ your preferred view automatically.
 
 Turn it on from the command palette ("Turn on suggesting mode") or with
 the **Editing / Suggesting** pill in the status bar. While it is on, edits
-in the Source / Split editor are recorded as
+in the Source / Split editor and in WYSIWYG are recorded as
 [CriticMarkup](https://github.com/CriticMarkup/CriticMarkup-toolkit), so
 the file stays plain markdown:
 
@@ -78,8 +78,14 @@ the file stays plain markdown:
   through in red and comments highlighted; the preview renders them as
   `<ins>`, `<del>` and `<mark>`.
 - Palette commands: accept / reject the suggestion at the cursor, accept
-  all, reject all, next / previous suggestion. Accept all / reject all
-  also work from Preview and WYSIWYG.
+  all, reject all, next / previous suggestion. All of them work in
+  WYSIWYG too; accept all / reject all also work from Preview.
+- **In WYSIWYG** suggestions show as underlined insertions and struck-out
+  deletions (hover for the author). Typing is recorded as an insertion,
+  Backspace / Delete leave the text struck out and step over it, and
+  typing over a selection becomes a substitution. Structural edits —
+  joining two paragraphs with Backspace — aren't recorded as a
+  suggestion and are undone; turn suggesting off for those.
 - The status-bar pill shows how many suggestions the document contains.
 - **Who suggested it.** When you are signed in, each new suggestion is
   followed by an author tag — a comment holding only `@name`, e.g.

@@ -22,7 +22,8 @@
 import type { Element, ElementContent, Root, RootContent, Text } from "hast";
 import { mayContainCriticMarkup, parseSuggestions } from "../editor/suggesting";
 
-const S = {
+/** Private-use sentinels standing in for each CriticMarkup delimiter. */
+export const CRITIC_SENTINELS = {
   insOpen: "",
   insClose: "",
   delOpen: "",
@@ -35,6 +36,7 @@ const S = {
   hlOpen: "",
   hlClose: "",
 } as const;
+const S = CRITIC_SENTINELS;
 
 const LITERAL: Record<string, string> = {
   [S.insOpen]: "{++",
@@ -49,6 +51,9 @@ const LITERAL: Record<string, string> = {
   [S.hlOpen]: "{==",
   [S.hlClose]: "==}",
 };
+
+/** Each sentinel → the literal delimiter it stands for. */
+export const CRITIC_LITERAL: Readonly<Record<string, string>> = LITERAL;
 
 const SENTINEL_RE = /[-]/;
 const SENTINEL_SPLIT_RE = /([-])/;
