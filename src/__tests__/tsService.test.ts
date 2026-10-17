@@ -490,6 +490,51 @@ describe("JavaScript blocks and shared scopes", () => {
     expect(service.quickInfo(input, units[1].id, at + 1)?.text).toBe("(property) value: number");
   });
 
+  it("a return inside a statement block that declares a local is still top-level", () => {
+    const { units, diags } = checkShared("// @ts-check\nconst stop = !!document.title;\nif (stop) { const reason = 'x'; return; }\nstop;");
+    expect(units[0].code).toContain("{ const reason = 'x'; throw 0; }");
+    expect(diags).toEqual([]);
+  });
+
+  it("optional-chain and parenthesized built-in receivers run their callback now", () => {
+    const { units, diags } = checkShared(
+      "const value = 1; const xs = [0]; const a = xs?.map(() => value)[0]; const b = ([0]).map(() => value)[0]; const c = (xs).map(() => value)[0]; const d = (f()).map(() => value);",
+      "// @ts-check\nconst value = 'x';\na?.toFixed(); b.toFixed(); c.toFixed();",
+    );
+    const first = units[1].code.split("\n;\n")[0];
+    expect(first).toContain("xs?.map(() => value$prev)");
+    expect(first).toContain("([0]).map(() => value$prev)");
+    expect(first).toContain("(xs).map(() => value$prev)");
+    expect(first).toContain("(f()).map(() => value)"); // a call's result: unknown receiver
+    expect(diags).toEqual([]);
+  });
+
+  it("every declarator of a function-local declaration is a local", () => {
+    const { units, diags } = checkShared(
+      "const value = 0; const saved = (() => { const x = 0, value = 1; return () => value; })();",
+      "// @ts-check\nconst value = 'x';\nsaved().toFixed();",
+    );
+    expect(units[1].code.split("\n;\n")[0]).toContain("const x = 0, value = 1; return () => value;");
+    expect(diags).toEqual([]);
+  });
+
+  it("a nested declaration of the same name doesn't make the outer receiver a built-in", () => {
+    const { units } = checkShared(
+      "const value = 1; const xs = custom; function f() { const xs = []; } const saved = xs.map(() => value); const r = (() => { const ys = [0]; return ys.map(() => value); })();",
+      "const value = 'x';",
+    );
+    const first = units[1].code.split("\n;\n")[0];
+    expect(first).toContain("saved = xs.map(() => value)");
+    expect(first).toContain("ys.map(() => value$prev)");
+  });
+
+  it("re-declarations are only allowed at top level of a shared block", () => {
+    const { diags } = checkShared("// @ts-check\nfunction f() { let x = 1; let x = 2; }");
+    expect(diags.map((d) => d.code)).toEqual([2451, 2451]);
+    // Top-level re-declarations (across and within blocks) stay allowed.
+    expect(checkShared("// @ts-check\nlet a = 1; function g() {}", "// @ts-check\nlet a = 2; let a = 3; function g() {} function g() {}").diags).toEqual([]);
+  });
+
   it("describes the symbol under the cursor", () => {
     const code = "/** The answer. */\nconst answer = 42;\nanswer;";
     const info = service.quickInfo([{ id: "q0", code, tsx: false }], "q0", code.lastIndexOf("answer") + 2);
