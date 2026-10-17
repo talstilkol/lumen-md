@@ -44,14 +44,14 @@ export async function checkGrammar(
   text: string,
   language = "en-US",
 ): Promise<GrammarMatch[]> {
-  // A self-hosted LanguageTool on this machine or network is fine under
-  // every policy; the public API is a third party.
-  if (!isLocalOrigin(endpoint())) assertCloudAllowed("the public LanguageTool API");
   const trimmed = text.trim();
   if (trimmed.length < 40) return [];
   const cacheKey = `${language}\n${trimmed}`;
   const cached = RECENT.get(cacheKey);
   if (cached) return cached;
+  // A self-hosted LanguageTool on this machine or network is fine under
+  // every policy; the public API is a third party.
+  if (!isLocalOrigin(endpoint())) assertCloudAllowed("the public LanguageTool API");
 
   const body = new URLSearchParams({
     text: trimmed,
