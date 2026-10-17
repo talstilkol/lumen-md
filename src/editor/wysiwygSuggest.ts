@@ -13,7 +13,9 @@
  *    swaps every delimiter (outside code) for a private-use sentinel
  *    (the renderer's own `prepareCriticMarkup`); `remarkCriticMarkup`
  *    pairs the sentinels inside each phrasing parent into `criticInsert` /
- *    `criticDelete` mdast nodes, which the mark schemas turn into marks.
+ *    `criticDelete` mdast nodes, which the mark schemas turn into marks
+ *    (a suggestion spanning paragraphs is first split per block, where
+ *    that is lossless — see pairAcrossBlocks).
  *    Comments and highlights stay literal text.
  *  - serialize: the marks become those mdast nodes again, and the
  *    remark-stringify handlers write CriticMarkup — an adjacent
@@ -24,14 +26,14 @@
  *    deletes it); structural deletions (joining blocks) are undone.
  */
 import { $markSchema, $prose, $remark } from "@milkdown/utils";
-import type { Mark, Schema, Slice } from "@milkdown/prose/model";
+import type { Mark, Node as ProseNode, Schema, Slice } from "@milkdown/prose/model";
 import { Plugin, PluginKey, TextSelection, type EditorState, type Transaction } from "@milkdown/prose/state";
 import { ReplaceStep, type Mapping } from "@milkdown/prose/transform";
 import type { Parents, PhrasingContent, Root } from "mdast";
 import { defaultHandlers } from "mdast-util-to-markdown";
 import { CRITIC_LITERAL, CRITIC_SENTINELS as S, prepareCriticMarkup, unescapeUserSentinels } from "../renderer/criticMarkup";
-import { sanitizeAuthor } from "./suggesting";
-import { setWysiwygSuggestActions } from "./wysiwygSuggestBridge";
+import { parseSuggestions, sanitizeAuthor, type Resolution, type Suggestion } from "./suggesting";
+import { setWysiwygSuggestActions, type WysiwygSuggestActions } from "./wysiwygSuggestBridge";
 
 /* ─── Configuration (set by the editor host) ────────────────────────── */
 
@@ -44,49 +46,81 @@ export function configureWysiwygSuggest(next: WysiwygSuggestConfig): void {
   config = next;
 }
 
-/** The mounted WYSIWYG view, for the palette's cursor commands. */
-let activeView: import("@milkdown/prose/view").EditorView | null = null;
-export function setActiveWysiwygView(view: typeof activeView): void {
-  activeView = view;
-  setWysiwygSuggestActions(
-    view
-      ? {
-          resolve: (mode) => {
-            const v = getActiveWysiwygView();
-            const ok = !!v && resolveAtCursor(v, mode);
-            if (ok) v!.focus();
-            return ok;
-          },
-          jump: (dir) => {
-            const v = getActiveWysiwygView();
-            const ok = !!v && jumpToChange(v, dir);
-            if (ok) v!.focus();
-            return ok;
-          },
-          // Against the live editor state, so edits the debounced listener
-          // hasn't emitted yet are neither lost nor missed.
-          resolveAll: (mode) => {
-            const v = getActiveWysiwygView();
-            if (!v) return false;
-            const tr = resolveRange(v.state, 0, v.state.doc.content.size, mode);
-            if (!tr) return false;
-            v.dispatch(tr);
-            v.focus();
-            return true;
-          },
-        }
-      : null,
-  );
+type View = import("@milkdown/prose/view").EditorView;
+
+/**
+ * The mounted WYSIWYG views, for the palette's commands. More than one can
+ * be mounted at once (the main editor under the Focus Mode overlay), so
+ * each registers and unregisters itself by identity — one unmounting
+ * leaves the other in charge. The most recently focused one is last.
+ */
+const views: View[] = [];
+const toFront = (e: Event) => {
+  const i = views.findIndex((v) => v.dom === e.currentTarget);
+  if (i !== -1) views.push(...views.splice(i, 1));
+};
+
+const actions: WysiwygSuggestActions = {
+  resolve: (mode) => {
+    const v = getActiveWysiwygView();
+    const ok = !!v && resolveAtCursor(v, mode);
+    if (ok) v!.focus();
+    return ok;
+  },
+  jump: (dir) => {
+    const v = getActiveWysiwygView();
+    const ok = !!v && jumpToChange(v, dir);
+    if (ok) v!.focus();
+    return ok;
+  },
+  // Against the live editor state, so edits the debounced listener
+  // hasn't emitted yet are neither lost nor missed.
+  resolveAll: (mode) => {
+    const v = getActiveWysiwygView();
+    if (!v) return false;
+    const tr = resolveAllChanges(v.state, mode);
+    if (!tr) return false;
+    v.dispatch(tr);
+    v.focus();
+    return true;
+  },
+};
+
+export function registerWysiwygView(view: View): void {
+  if (!views.includes(view)) {
+    views.push(view);
+    view.dom.addEventListener("focusin", toFront);
+  }
+  setWysiwygSuggestActions(actions);
 }
-export function getActiveWysiwygView(): typeof activeView {
-  return activeView && activeView.dom.isConnected ? activeView : null;
+
+export function unregisterWysiwygView(view: View): void {
+  const i = views.indexOf(view);
+  if (i !== -1) {
+    views.splice(i, 1);
+    view.dom.removeEventListener("focusin", toFront);
+  }
+  if (views.length === 0) setWysiwygSuggestActions(null);
+}
+
+export function getActiveWysiwygView(): View | null {
+  for (let i = views.length - 1; i >= 0; i--) if (views[i].dom.isConnected) return views[i];
+  return null;
 }
 
 /* ─── Parse: markdown → sentinels → mdast nodes ─────────────────────── */
 
+/** A folded author tag in prepared markdown: a change's closer + `{>>@name<<}`. */
+const AUTHOR_TAG = new RegExp(`([${S.insClose}${S.delClose}${S.subClose}]${S.comOpen}@)([^@<>{}\n]+)(?=${S.comClose})`, "g");
+
 /** Prepare markdown for Milkdown: CriticMarkup delimiters → sentinels. */
 export function encodeCriticForWysiwyg(markdown: string): string {
-  return prepareCriticMarkup(markdown);
+  // An author name is plain text, but remark would parse markdown in it
+  // (`Jane *Doe*` → text + emphasis) and the tag would no longer be read
+  // as one: escape its punctuation so it arrives as a single text node.
+  return prepareCriticMarkup(markdown).replace(AUTHOR_TAG, (_m, head: string, name: string) =>
+    head + name.replace(/[!-/:-@[-`{-~]/g, "\\$&"),
+  );
 }
 
 interface CriticNode {
@@ -179,21 +213,153 @@ function wrapChildren(children: PhrasingContent[]): PhrasingContent[] {
   return mergeText(out);
 }
 
-function unescapeTree(node: { type: string; value?: string; children?: unknown[] }): void {
-  if (node.type === "text" && typeof node.value === "string") node.value = unescapeUserSentinels(node.value);
-  if (node.type === "inlineCode" || node.type === "code") {
-    if (typeof node.value === "string") node.value = unescapeUserSentinels(node.value);
+const GENERATED_SENTINEL = /[\uE000-\uE00A]/g;
+
+/**
+ * Restore the original characters in every string property: escaped user
+ * sentinels everywhere, and generated sentinels that pairing didn't consume
+ * — CriticMarkup inside a link destination or title, an image's alt, raw
+ * HTML or math lives in a property (`url`, `title`, `alt`, `value`), not in
+ * child text, so it stays literal markup there instead of leaking
+ * private-use characters into the document.
+ */
+function unescapeTree(node: { type: string; children?: unknown[] } & Record<string, unknown>): void {
+  for (const key of Object.keys(node)) {
+    const v = node[key];
+    if (key === "type" || typeof v !== "string") continue;
+    node[key] = unescapeUserSentinels(v.replace(GENERATED_SENTINEL, (c) => CRITIC_LITERAL[c] ?? c));
   }
-  for (const c of (node.children ?? []) as Array<{ type: string; value?: string; children?: unknown[] }>) unescapeTree(c);
+  for (const c of (node.children ?? []) as Array<{ type: string; children?: unknown[] } & Record<string, unknown>>) unescapeTree(c);
 }
 
 const PHRASING_PARENTS = new Set(["paragraph", "heading", "tableCell", "emphasis", "strong", "delete", "link", "linkReference"]);
+
+/* Suggestions spanning blocks (`{--first\n\nsecond--}`): their delimiters
+ * land in different paragraphs, so neither would pair. The suggestion is
+ * split into one piece per block — closed at the end of a block, reopened
+ * at the start of the next, every piece carrying the author — and is
+ * written back that way (`{--first--}\n\n{--second--}`).
+ *
+ * The pieces can't hold the paragraph breaks between them, which stay
+ * when they are resolved. So a suggestion is only split where that makes
+ * no difference: when nothing precedes it in its first block or nothing
+ * follows it in its last (a substitution: both), the breaks it would
+ * drop only leave empty paragraphs. And only for runs of sibling
+ * paragraphs (a heading may start the run, where its `#` is outside the
+ * change in source mode too) whose sentinels are all direct children. Anything
+ * else stays literal text, written back unchanged. */
+
+const TEXT_BLOCKS = new Set(["paragraph", "heading"]);
+type TextBlock = { type: string; children: PhrasingContent[] };
+type Open = "ins" | "del" | "sub" | "subNew"; // subNew: past the `~>`
+const OPENER: Record<Open, string> = { ins: S.insOpen, del: S.delOpen, sub: S.subOpen, subNew: S.subOpen };
+const CLOSER: Record<Open, string> = { ins: S.insClose, del: S.delClose, sub: S.subClose, subNew: S.subClose };
+
+const sentinelText = (ch: string): PhrasingContent => ({ type: "text", value: ch });
+
+function deepSentinels(nodes: PhrasingContent[], out: string[] = []): string[] {
+  for (const n of nodes) {
+    if (n.type === "text") for (const ch of n.value) isSentinelChar(ch) && out.push(ch);
+    else if ("children" in n) deepSentinels(n.children as PhrasingContent[], out);
+  }
+  return out;
+}
+
+/** Top-level sentinels of a text block, or null when one is nested in other markup. */
+function blockSentinels(block: TextBlock): string[] | null {
+  block.children = splitSentinels(block.children);
+  const top = block.children.flatMap((_, i) => sentinelAt(block.children, i) ?? []);
+  return deepSentinels(block.children).length === top.length ? top : null;
+}
+
+/** The change left open at the end of a block's sentinels, if any. */
+function openAtEnd(sentinels: string[]): Open | null {
+  let open: Open | null = null;
+  for (const ch of sentinels) {
+    if (ch === S.insOpen) open = "ins";
+    else if (ch === S.delOpen) open = "del";
+    else if (ch === S.subOpen) open = "sub";
+    else if (ch === S.subMid && open === "sub") open = "subNew";
+    else if (ch === S.insClose || ch === S.delClose || ch === S.subClose) open = null;
+  }
+  return open;
+}
+
+function pairAcrossBlocks(blocks: TextBlock[]): void {
+  for (let i = 0; i < blocks.length; i++) {
+    if (!TEXT_BLOCKS.has(blocks[i].type)) continue;
+    const first = blockSentinels(blocks[i]);
+    const start = first && openAtEnd(first);
+    if (!start) continue;
+    // Follow the open change to the block that closes it.
+    const roles: Array<{ block: TextBlock; open: Open; role: "middle" | "mid" | "close" }> = [];
+    let open: Open = start;
+    let end = -1;
+    for (let j = i + 1; j < blocks.length && end === -1; j++) {
+      const b = blocks[j];
+      // Only paragraphs continue a run: a later heading's `#` would stay
+      // outside the mark (accepting `{--a\n\n# b--}` must not leave `#`).
+      const sen = b.type === "paragraph" ? blockSentinels(b) : null;
+      if (!sen) break;
+      const next = open === "sub" ? S.subMid : CLOSER[open];
+      if (sen.length === 0) roles.push({ block: b, open, role: "middle" });
+      else if (sen[0] !== next) break;
+      else if (open === "sub" && sen.length === 1) {
+        roles.push({ block: b, open, role: "mid" });
+        open = "subNew";
+      } else if (open !== "sub" || sen[1] === S.subClose) {
+        roles.push({ block: b, open, role: "close" });
+        end = j;
+      } else break;
+    }
+    if (end === -1) continue;
+    // The author tag after the final closer applies to every piece.
+    const last = roles[roles.length - 1];
+    const closer = last.block.children.findIndex((_, k) => sentinelAt(last.block.children, k) === CLOSER[last.open]);
+    const authorTag = authorTagAt(last.block.children, closer + 1);
+    const author = authorTag?.author;
+    const blank = (nodes: PhrasingContent[]) => nodes.every((n) => n.type === "text" && !n.value.trim());
+    const a = blocks[i];
+    const opener = a.children.map((_, n) => sentinelAt(a.children, n)).lastIndexOf(OPENER[start]);
+    const before = blank(a.children.slice(0, opener));
+    const after = blank(last.block.children.slice(authorTag ? authorTag.end : closer + 1));
+    if (start === "ins" || start === "del" ? !before && !after : !before || !after) continue;
+    const tag = (): PhrasingContent[] =>
+      author ? [sentinelText(S.comOpen), { type: "text", value: "@" + author }, sentinelText(S.comClose)] : [];
+    const asIns = (o: Open) => o === "ins" || o === "subNew";
+    if (start === "sub") {
+      // Only old text here: a deletion piece.
+      a.children[opener] = sentinelText(S.delOpen);
+      a.children.push(sentinelText(S.delClose), ...tag());
+    } else {
+      a.children.push(sentinelText(CLOSER[start]), ...tag());
+    }
+    for (const { block, open: o, role } of roles) {
+      if (role === "middle") {
+        block.children.unshift(sentinelText(asIns(o) ? S.insOpen : S.delOpen));
+        block.children.push(sentinelText(asIns(o) ? S.insClose : S.delClose), ...tag());
+      } else if (role === "mid") {
+        block.children.unshift(sentinelText(S.subOpen));
+        block.children.push(sentinelText(S.subClose), ...tag());
+      } else if (o === "subNew") {
+        // Only new text here: an insertion piece.
+        block.children[closer] = sentinelText(S.insClose);
+        block.children.unshift(sentinelText(S.insOpen));
+      } else {
+        block.children.unshift(sentinelText(OPENER[o]));
+      }
+    }
+    i = end;
+  }
+}
 
 function transformTree(node: Parents | Root): void {
   const kids = (node as { children?: unknown[] }).children as Array<Parents> | undefined;
   if (!kids) return;
   if (PHRASING_PARENTS.has(node.type)) {
     (node as { children: PhrasingContent[] }).children = wrapChildren(node.children as PhrasingContent[]);
+  } else {
+    pairAcrossBlocks(kids as unknown as TextBlock[]);
   }
   for (const c of (node as { children: Array<Parents> }).children) {
     if ((c as { children?: unknown }).children) transformTree(c);
@@ -302,7 +468,7 @@ export function remarkCriticMarkup(this: { data: (key?: string) => Record<string
   });
   return (tree: Root) => {
     transformTree(tree);
-    unescapeTree(tree as unknown as { type: string; children?: unknown[] });
+    unescapeTree(tree as unknown as Parameters<typeof unescapeTree>[0]);
   };
 }
 
@@ -414,6 +580,27 @@ export function isStructural(slice: Slice): boolean {
   return block;
 }
 
+/** Inline code: text with a `code` mark (CriticMarkup is literal there). */
+const isCodeText = (n: ProseNode | null | undefined) => !!n && n.isText && n.marks.some((m) => m.type.spec.code);
+
+/**
+ * True when a replace step lies wholly in code, where source mode leaves
+ * edits untracked: inside one code block, or inside an inline code span —
+ * which in ProseMirror is a mark on paragraph text, not a code node, so the
+ * removed and the inserted inline content must all be code-marked text,
+ * next to existing code.
+ */
+function stepInCode(before: ProseNode, from: number, to: number, slice: Slice): boolean {
+  const $from = before.resolve(from);
+  if (!$from.sameParent(before.resolve(to))) return false;
+  if ($from.parent.type.spec.code) return true;
+  if (!isCodeText($from.nodeBefore) && !isCodeText($from.nodeAfter)) return false;
+  let code = true;
+  if (to > from) before.nodesBetween(from, to, (n) => void (n.isInline && !isCodeText(n) && (code = false)));
+  slice.content.descendants((n) => void (n.isInline && !isCodeText(n) && (code = false)));
+  return code;
+}
+
 /**
  * A user transaction suggesting mode can't track:
  *  - any step other than a plain replace: formatting (mark steps), block
@@ -422,7 +609,7 @@ export function isStructural(slice: Slice): boolean {
  *    paste, a dragged block);
  *  - a deletion whose text contains a CriticMarkup delimiter, which
  *    couldn't be read back as one suggestion.
- * Edits wholly inside a code block are exempt (they pass untracked).
+ * Edits wholly inside a code block or code span are exempt (they pass untracked).
  */
 function untrackable(tr: Transaction): boolean {
   return tr.steps.some((st, i) => {
@@ -430,7 +617,7 @@ function untrackable(tr: Transaction): boolean {
     const { from, to, slice } = st as unknown as { from: number; to: number; slice: Slice };
     const before = tr.docs[i];
     const $from = before.resolve(from);
-    if ($from.parent.type.spec.code && $from.sameParent(before.resolve(to))) return false;
+    if (stepInCode(before, from, to, slice)) return false;
     if (slice.size > 0 && isStructural(slice) && !$from.parent.type.spec.code) return true;
     // The text the step leaves behind — two characters each side, plus any
     // inserted text — mustn't form a CriticMarkup delimiter across the edit
@@ -503,10 +690,7 @@ export function trackChanges(
         insertedSize: s.slice.size,
         deleted: before.slice(s.from, s.to),
         structural: s.slice.size > 0 && isStructural(s.slice),
-        inCode: (() => {
-          const $from = before.resolve(s.from);
-          return !!$from.parent.type.spec.code && $from.sameParent(before.resolve(s.to));
-        })(),
+        inCode: stepInCode(before, s.from, s.to, s.slice),
         deletesStructure: s.to > s.from && (!before.resolve(s.from).sameParent(before.resolve(s.to)) || hasAtom(before.slice(s.from, s.to))),
         toEnd,
       });
@@ -522,9 +706,9 @@ export function trackChanges(
   for (const c of changes) {
     const at = tr.mapping.map(c.toEnd.map(c.from, -1), -1);
     const insertedEnd = tr.mapping.map(c.toEnd.map(c.from + c.insertedSize, 1), 1);
-    // Code blocks can't carry marks: edits there pass untracked, as in
+    // Code can't carry suggestions: edits there pass untracked, as in
     // source mode (CriticMarkup inside code is literal text).
-    // Only edits wholly inside one code block (judged before the edit).
+    // Only edits wholly inside one code block or span (judged before the edit).
     if (c.inCode) continue;
     // 1. Insertions are suggested. Structural ones (a new paragraph, a
     //    multi-block paste) can't be expressed as CriticMarkup or undone
@@ -656,7 +840,8 @@ export function changeAt(state: EditorState, pos: number): { from: number; to: n
   const base = $pos.start();
   const ranges: Array<{ from: number; to: number; type: "insert" | "delete"; author: string | null }> = [];
   parent.forEach((child, offset) => {
-    if (!child.isText) return;
+    // Inline atoms (an image, a hard break) carry the marks too.
+    if (!child.isInline) return;
     const mark = ins.isInSet(child.marks) ?? del.isInSet(child.marks);
     if (!mark) return;
     const type = mark.type === ins ? "insert" : "delete";
@@ -692,7 +877,9 @@ export function resolveRange(state: EditorState, from: number, to: number, mode:
   const tr = state.tr.setMeta(SUGGEST_META, true);
   const drop: Array<[number, number]> = [];
   state.doc.nodesBetween(from, to, (n, pos) => {
-    if (!n.isText) return;
+    // Text and marked inline atoms (`{++![alt](img.png)++}` loads the image
+    // with the insertion mark): both are part of the change.
+    if (!n.isInline) return;
     const a = Math.max(pos, from);
     const b = Math.min(pos + n.nodeSize, to);
     const isIns = !!ins.isInSet(n.marks);
@@ -703,6 +890,62 @@ export function resolveRange(state: EditorState, from: number, to: number, mode:
     else tr.removeMark(a, b, isIns ? ins : del);
   });
   for (const [a, b] of drop.reverse()) tr.delete(a, b);
+  return tr.docChanged ? tr : null;
+}
+
+/** The ranges of `s` to delete so that it collapses to its resolved text. */
+function literalDrops(s: Suggestion, mode: Resolution): Array<[number, number]> {
+  const keep = (a: number, b: number): Array<[number, number]> => [
+    [s.from, a],
+    [b, s.to],
+  ];
+  switch (s.kind) {
+    case "insert":
+      return mode === "accept" ? keep(s.contentFrom, s.contentTo) : [[s.from, s.to]];
+    case "delete":
+      return mode === "accept" ? [[s.from, s.to]] : keep(s.contentFrom, s.contentTo);
+    case "substitute":
+      return mode === "accept" ? keep(s.newFrom!, s.newTo!) : keep(s.contentFrom, s.contentTo);
+    case "comment":
+      return [[s.from, s.to]];
+    case "highlight":
+      return keep(s.contentFrom, s.contentTo);
+  }
+}
+
+/**
+ * Accept or reject everything in the document, as the source editor's
+ * resolveAll does on the text: the marked changes, and the CriticMarkup
+ * WYSIWYG keeps as literal text — comments, highlights, markup whose
+ * delimiters couldn't be paired — found per textblock with the source
+ * parser (code and marked text masked out) and resolved with its semantics.
+ */
+export function resolveAllChanges(state: EditorState, mode: Resolution): Transaction | null {
+  const ins = state.schema.marks.critic_insert;
+  const del = state.schema.marks.critic_delete;
+  if (!ins || !del) return null;
+  const tr = resolveRange(state, 0, state.doc.content.size, mode) ?? state.tr.setMeta(SUGGEST_META, true);
+  const drops: Array<[number, number]> = [];
+  state.doc.descendants((block, pos) => {
+    if (!block.isTextblock) return true;
+    if (block.type.spec.code) return false;
+    // One character per position, so offsets map straight to the block.
+    let text = "";
+    block.forEach((child) => {
+      const masked = !child.isText || child.marks.some((m) => m.type.spec.code || m.type === ins || m.type === del);
+      text += masked ? "\ufffc".repeat(child.nodeSize) : child.text!;
+    });
+    for (const sg of parseSuggestions(text, [])) {
+      for (const [a, b] of literalDrops(sg, mode)) if (b > a) drops.push([pos + 1 + a, pos + 1 + b]);
+    }
+    return false;
+  });
+  // Positions are in `state.doc`; map each through what's been done so far.
+  for (const [a, b] of drops) {
+    const from = tr.mapping.map(a, 1);
+    const to = tr.mapping.map(b, -1);
+    if (to > from) tr.delete(from, to);
+  }
   return tr.docChanged ? tr : null;
 }
 
@@ -719,7 +962,7 @@ export function resolveAtCursor(
   return true;
 }
 
-/** Move the cursor to the next (dir 1) / previous (-1) change. */
+/** Move the cursor to the next (dir 1) / previous (-1) change, wrapping around. */
 export function jumpToChange(view: { state: EditorState; dispatch: (tr: Transaction) => void }, dir: 1 | -1): boolean {
   const { state } = view;
   const ins = state.schema.marks.critic_insert;
@@ -732,7 +975,7 @@ export function jumpToChange(view: { state: EditorState; dispatch: (tr: Transact
   const starts: number[] = [];
   let prev: { kind: "insert" | "delete"; author: string | null; end: number } | null = null;
   state.doc.descendants((n, pos) => {
-    if (!n.isText) {
+    if (!n.isInline) {
       prev = null;
       return;
     }
@@ -749,7 +992,12 @@ export function jumpToChange(view: { state: EditorState; dispatch: (tr: Transact
     if (!continues) starts.push(pos);
     prev = { kind, author, end: pos + n.nodeSize };
   });
-  const target = dir === 1 ? starts.find((p) => p > head) : [...starts].reverse().find((p) => p < head);
+  // Past the last (before the first) change, wrap around — as the source
+  // editor's nextSuggestion / prevSuggestion do.
+  const target =
+    dir === 1
+      ? (starts.find((p) => p > head) ?? starts[0])
+      : ([...starts].reverse().find((p) => p < head) ?? starts[starts.length - 1]);
   if (target === undefined) return false;
   view.dispatch(state.tr.setSelection(TextSelection.create(state.doc, target)).scrollIntoView());
   return true;

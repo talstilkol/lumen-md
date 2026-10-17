@@ -147,6 +147,40 @@ const DEFAULT_DOC: DocFile = {
   dirty: false,
 };
 
+/**
+ * Editors holding edits they haven't emitted yet (the WYSIWYG editor
+ * debounces its listener). Before the active document is switched or
+ * replaced, each flushes them synchronously, so they still reach the
+ * document they were made in: once the switch has happened, the editor's
+ * `onChange` (setContent) would write them into the newly active one.
+ */
+const pendingEditFlushers = new Set<() => void>();
+export function registerPendingEdits(flush: () => void): () => void {
+  pendingEditFlushers.add(flush);
+  return () => void pendingEditFlushers.delete(flush);
+}
+let flushingEdits = false;
+/** `action`, run after every editor has flushed its pending edits. */
+function afterPendingEdits<A extends unknown[]>(action: (...args: A) => void): (...args: A) => void {
+  return (...args) => {
+    if (!flushingEdits) {
+      flushingEdits = true;
+      try {
+        for (const flush of [...pendingEditFlushers]) {
+          try {
+            flush();
+          } catch {
+            /* an editor mid-teardown: nothing to flush */
+          }
+        }
+      } finally {
+        flushingEdits = false;
+      }
+    }
+    action(...args);
+  };
+}
+
 export const useAppStore = create<AppState>()(
   persist(
     (set) => ({
@@ -223,7 +257,7 @@ export const useAppStore = create<AppState>()(
           );
           return { doc: nextDoc, openTabs: nextTabs };
         }),
-      setDoc: (d) =>
+      setDoc: afterPendingEdits((d) =>
         set((state) => {
           const nextDoc = {
             ...state.doc,
@@ -245,7 +279,7 @@ export const useAppStore = create<AppState>()(
               : t,
           );
           return { doc: nextDoc, openTabs: nextTabs };
-        }),
+        })),
       toggleOutline: () => set((s) => ({ showOutline: !s.showOutline })),
       toggleWorkspace: () => set((s) => ({ showWorkspace: !s.showWorkspace })),
       toggleBacklinks: () => set((s) => ({ showBacklinks: !s.showBacklinks })),
@@ -281,7 +315,7 @@ export const useAppStore = create<AppState>()(
         }),
       setFineTunedModelId: (id) => set({ fineTunedModelId: id }),
       setTagFilter: (filter) => set({ tagFilter: filter }),
-      openTab: (input) =>
+      openTab: afterPendingEdits((input) =>
         set((state) => {
           const id = tabIdOf({
             workspaceName: input.workspaceName ?? null,
@@ -329,8 +363,8 @@ export const useAppStore = create<AppState>()(
               dirty: false,
             },
           };
-        }),
-      closeTab: (id) =>
+        })),
+      closeTab: afterPendingEdits((id) =>
         set((state) => {
           const idx = state.openTabs.findIndex((t) => t.id === id);
           if (idx === -1) return state;
@@ -361,7 +395,7 @@ export const useAppStore = create<AppState>()(
               dirty: fallback.dirty,
             },
           };
-        }),
+        })),
       reorderTabs: (fromIndex, toIndex) =>
         set((state) => {
           if (fromIndex === toIndex) return state;

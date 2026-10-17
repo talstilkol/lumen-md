@@ -16,6 +16,7 @@ import { slashFactory, SlashProvider } from "@milkdown/plugin-slash";
 import { tooltipFactory, TooltipProvider } from "@milkdown/plugin-tooltip";
 import { setBlockType, toggleMark, wrapIn } from "@milkdown/prose/commands";
 import type { EditorView } from "@milkdown/prose/view";
+import { Plugin } from "@milkdown/prose/state";
 import { wrapInList } from "prosemirror-schema-list";
 import { dragHandlePlugin } from "./dragHandles";
 import { buildIndentKeymap } from "./keymapExtra";
@@ -25,15 +26,15 @@ import { PROMPTS } from "../ai/prompts";
 import { showAiToast } from "../ui/AiToast";
 import { openAiPrompt } from "../ui/AiInlinePrompt";
 import { log } from "../lib/logger";
-import { findCodeRanges } from "./suggesting";
 import { getMarkdown } from "@milkdown/utils";
 import {
   configureWysiwygSuggest,
   encodeCriticForWysiwyg,
-  setActiveWysiwygView,
+  registerWysiwygView,
+  unregisterWysiwygView,
   wysiwygSuggestPlugins,
 } from "./wysiwygSuggest";
-import { useAppStore } from "../store/useStore";
+import { registerPendingEdits, useAppStore } from "../store/useStore";
 import { useAuth } from "../auth/useAuth";
 
 // Suggesting mode (track changes) works in WYSIWYG too: CriticMarkup ↔
@@ -581,27 +582,6 @@ function buildTooltip(getView: () => EditorView | null): HTMLDivElement {
  * for inline formatting.
  */
 /**
- * Undo the one escape Milkdown's serializer adds that breaks CriticMarkup:
- * it writes the `~>` of a substitution as `\~>` (GFM strikethrough safety),
- * so `{~~old~>new~~}` would come back as `{~~old\~>new~~}` and stop being
- * a suggestion after any WYSIWYG edit. Other escapes it adds (`\*`, `\_`)
- * are markdown-equivalent and left alone.
- */
-export function repairCriticMarkup(md: string): string {
-  if (md.indexOf("\\~>") === -1) return md;
-  // Code is literal: a `{~~a\~>b~~}` inside a code span or fence is kept
-  // byte for byte (suggestions are never parsed there either).
-  const code = findCodeRanges(md);
-  // Only a COMPLETE substitution (`{~~old\~>new~~}`) is repaired; text that
-  // merely starts with `{~~` keeps its backslash.
-  return md.replace(/\{~~((?:[^~]|~(?!~\}))*?)\\~>((?:[^~]|~(?!~\}))*?)~~\}/g, (m, old: string, neu: string, at: number) =>
-    // Only a substitution that STARTS inside code is literal; one whose old
-    // text merely contains an inline-code span is real markup.
-    code.some((c) => at >= c.from && at < c.to) ? m : `{~~${old}~>${neu}~~}`,
-  );
-}
-
-/**
  * Split a leading YAML frontmatter block off a markdown document. Milkdown
  * has no frontmatter concept — fed raw, `---\ntitle: …\n---` renders as a
  * thematic break + loose text (ugly, and editing it corrupts the metadata).
@@ -655,12 +635,48 @@ export default function WysiwygEditor({ value, onChange }: Props) {
   // The editor's markdown as of its creation / last emission: on unmount,
   // anything else is an edit the debounced listener hasn't emitted yet.
   const serializedRef = useRef<string | null>(null);
+  // This instance's view as registered for the palette's commands; another
+  // instance (Focus Mode over the main editor) may be registered too, so
+  // only this one is unregistered.
+  const registeredViewRef = useRef<EditorView | null>(null);
+  // Emit, synchronously, an edit the debounced listener hasn't emitted yet.
+  const flushPending = () => {
+    const ed = editorRef.current;
+    if (!ed || serializedRef.current === null) return;
+    let md: string;
+    try {
+      md = ed.action(getMarkdown());
+    } catch {
+      return; // editor already torn down
+    }
+    if (md === serializedRef.current) return;
+    serializedRef.current = md;
+    const full = frontmatterRef.current + md;
+    if (full !== lastEmittedRef.current) {
+      lastEmittedRef.current = full;
+      onChangeRef.current(full);
+    }
+  };
+  // Switching or closing the active tab inside the debounce window: the
+  // `[value]` rebuild below would drop the edit (its generation guard), and
+  // by then `onChange` already writes the NEW active document. The store
+  // calls this before it switches, while the edit's own document is active.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => registerPendingEdits(flushPending), []);
+  // Milkdown's listener debounces by 200 ms and can't be cancelled; its
+  // timer serializes the document, which throws once the editor is gone.
+  // When an emission is still pending, destroy only after it has run (its
+  // output is ignored by the generation guard).
+  const pendingSinceRef = useRef(0);
   const destroyCurrent = async () => {
     const ed = editorRef.current;
     editorRef.current = null;
     serializedRef.current = null;
-    setActiveWysiwygView(null);
+    if (registeredViewRef.current) unregisterWysiwygView(registeredViewRef.current);
+    registeredViewRef.current = null;
     if (!ed) return;
+    const pending = Date.now() - pendingSinceRef.current;
+    if (pending < 260) await new Promise((r) => setTimeout(r, 260 - pending));
     try {
       await ed.destroy(true);
     } catch {
@@ -703,8 +719,9 @@ export default function WysiwygEditor({ value, onChange }: Props) {
             // superseded) editor can still fire here. Forwarding it would
             // overwrite the store with stale content after a mode switch.
             if (gen !== genRef.current) return;
+            if (md === serializedRef.current) return; // already flushed
             serializedRef.current = md;
-            const full = frontmatterRef.current + repairCriticMarkup(md);
+            const full = frontmatterRef.current + md;
             lastEmittedRef.current = full;
             onChangeRef.current(full);
           });
@@ -715,6 +732,12 @@ export default function WysiwygEditor({ value, onChange }: Props) {
           ctx.update(prosePluginsCtx, (plugins) => [
             ...plugins,
             dragHandlePlugin,
+            new Plugin({
+              appendTransaction: (trs) => {
+                if (trs.some((t) => t.docChanged || t.storedMarksSet)) pendingSinceRef.current = Date.now();
+                return null;
+              },
+            }),
             // γ.1.b — Tab / Shift-Tab indent / outdent inside lists.
             buildIndentKeymap(),
           ]);
@@ -875,7 +898,8 @@ export default function WysiwygEditor({ value, onChange }: Props) {
       }
       editorRef.current = editor;
       lastEmittedRef.current = value;
-      setActiveWysiwygView(editor.action((ctx) => ctx.get(editorViewCtx)));
+      registeredViewRef.current = editor.action((ctx) => ctx.get(editorViewCtx));
+      registerWysiwygView(registeredViewRef.current);
       serializedRef.current = editor.action(getMarkdown());
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -885,24 +909,10 @@ export default function WysiwygEditor({ value, onChange }: Props) {
   // menu DOM is only removed once no plugin view can still reference it.
   useEffect(() => {
     return () => {
-      // Leaving WYSIWYG (mode switch, tab close): the listener debounces
-      // emissions by 200 ms, so the last edits would be dropped by the
-      // generation guard below. Flush them now, synchronously.
-      const ed = editorRef.current;
-      if (ed && serializedRef.current !== null) {
-        try {
-          const md = ed.action(getMarkdown());
-          if (md === serializedRef.current) throw new Error("no pending edit");
-          serializedRef.current = md;
-          const full = frontmatterRef.current + repairCriticMarkup(md);
-          if (full !== lastEmittedRef.current) {
-            lastEmittedRef.current = full;
-            onChangeRef.current(full);
-          }
-        } catch {
-          /* editor already torn down */
-        }
-      }
+      // Leaving WYSIWYG (mode switch): the listener debounces emissions
+      // by 200 ms, so the last edits would be dropped by the generation
+      // guard below. Flush them now, synchronously.
+      flushPending();
       genRef.current++;
       enqueue(async () => {
         await destroyCurrent();

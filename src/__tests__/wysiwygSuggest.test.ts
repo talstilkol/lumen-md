@@ -16,8 +16,13 @@ import {
   encodeCriticForWysiwyg,
   jumpToChange,
   resolveAtCursor,
+  resolveRange,
+  registerWysiwygView,
+  unregisterWysiwygView,
   wysiwygSuggestPlugins,
 } from "../editor/wysiwygSuggest";
+import { getWysiwygSuggestActions } from "../editor/wysiwygSuggestBridge";
+import { resolveAll } from "../editor/suggesting";
 
 let editors: Editor[] = [];
 afterEach(async () => {
@@ -68,6 +73,56 @@ describe("CriticMarkup ↔ marks", () => {
     expect(e.md()).toBe(src);
     expect(e.view.dom.querySelectorAll("ins.critic-ins").length).toBe(2);
     expect(e.view.dom.querySelector("ins.critic-ins")?.getAttribute("title")).toBe("@Tal");
+  });
+
+  it("reads an author name containing markdown syntax as the author", async () => {
+    const src = "Say {++hi++}{>>@Jane *Doe*<<} and {--x--}{>>@a_b_c [d]<<} now.";
+    const e = await open(src);
+    expect(e.md()).toBe(src);
+    expect(e.view.dom.querySelector("ins.critic-ins")?.getAttribute("title")).toBe("@Jane *Doe*");
+    e.select(e.at("hi", 1));
+    expect(resolveAtCursor(e.view, "accept")).toBe(true);
+    expect(e.md()).toBe("Say hi and {--x--}{>>@a_b_c [d]<<} now.");
+  });
+
+  it("splits suggestions spanning paragraphs into one operable piece per block", async () => {
+    const cases: Array<[string, string]> = [
+      ["{--first\n\nsecond--}{>>@Tal<<}", "{--first--}{>>@Tal<<}\n\n{--second--}{>>@Tal<<}"],
+      ["Say {++one\n\ntwo\n\nthree++}", "Say {++one++}\n\n{++two++}\n\n{++three++}"],
+      ["{++New para.\n\n++}Next text", "{++New para.++}\n\nNext text"],
+      ["{~~a\n\nb~>c~~}", "{--a--}\n\n{~~b~>c~~}"],
+      ["# {~~a~>b\n\nc~~}", "# {~~a~>b~~}\n\n{++c++}"],
+      ["{~~a\n\nb~>c\n\nd~~}{>>@Bo<<}", "{--a--}{>>@Bo<<}\n\n{~~b~>c~~}{>>@Bo<<}\n\n{++d++}{>>@Bo<<}"],
+    ];
+    for (const [src, written] of cases) {
+      const e = await open(src, false);
+      expect(e.md()).toBe(written);
+      expect(e.view.dom.textContent).not.toMatch(/\{--|\{\+\+|\{~~/);
+      for (const mode of ["accept", "reject"] as const) {
+        expect(resolveAll(e.md(), mode).trim()).toBe(resolveAll(src, mode).trim());
+      }
+    }
+    // A heading inside the run isn't split (its `#` would survive accepting):
+    // the markup stays literal and is written back unchanged.
+    expect((await open("{--first\n\n# second--}", false)).md()).toBe("{--first\n\n# second--}");
+    // Accept at the cursor resolves that block's piece.
+    const e = await open("{--first\n\nsecond--}", false);
+    e.select(e.at("second", 2));
+    expect(resolveAtCursor(e.view, "accept")).toBe(true);
+    expect(e.md()).toBe("{--first--}");
+    // Where the paragraph breaks would matter on resolving (text on both
+    // sides), or through other blocks (a quote), the suggestion stays
+    // literal and is written back unchanged.
+    for (const literal of ["Say {++one\n\ntwo++} end.", "A {--x\n\ny--} B", "{--a\n\n> b--}"]) {
+      expect((await open(literal, false)).md()).toBe(literal);
+    }
+  });
+
+  it("keeps CriticMarkup in link destinations and titles as literal markup", async () => {
+    const src = '[x](https://example.test/{++version++} "a {--b--}") and {++y++}.';
+    const e = await open(src);
+    expect(e.md()).toBe(src);
+    expect(e.md()).not.toMatch(/[\uE000-\uE00B]/);
   });
 
   it("leaves CriticMarkup in code alone", async () => {
@@ -168,6 +223,20 @@ describe("tracking edits while suggesting", () => {
     t.view.dispatch(t.view.state.tr.delete(t.at("code") + 2, t.at("After") + 3));
     expect(t.view.state.doc.childCount).toBe(2);
     expect(t.md()).toBe("```\ncode\n```\n\nAfter text."); // crosses a block boundary: refused
+  });
+
+  it("edits inside an inline code span pass untracked, delimiter-like text included", async () => {
+    const e = await open("Run `npm test` now.", true);
+    e.select(e.at(" test"));
+    e.type("++}");
+    expect(e.md()).toBe("Run `npm++} test` now.");
+    e.select(e.at("test"), e.at("test", 4));
+    e.backspace();
+    expect(e.md()).toBe("Run `npm++} ` now.");
+    // Outside the span: tracked as usual.
+    e.select(e.at("now"));
+    e.type("!");
+    expect(e.md()).toBe("Run `npm++} ` {++!++}{>>@Tal<<}now.");
   });
 
   it("typing over a selection is a substitution", async () => {
@@ -314,6 +383,46 @@ describe("accept / reject in WYSIWYG", () => {
     expect(jumpToChange(e.view, 1)).toBe(false);
   });
 
+  it("Accept / Reject All also resolve literal comments and highlights, as in source mode", async () => {
+    const src = "Keep {==important `code`==} and {++x++}{>>review this<<} but `{>>literal<<}` {~~a~>b~~}.";
+    for (const mode of ["accept", "reject"] as const) {
+      const e = await open(src, false);
+      registerWysiwygView(e.view);
+      expect(getWysiwygSuggestActions()!.resolveAll(mode)).toBe(true);
+      expect(e.md()).toBe(resolveAll(src, mode));
+      unregisterWysiwygView(e.view);
+    }
+    const only = await open("Just {>>a note<<} here.", false);
+    registerWysiwygView(only.view);
+    expect(getWysiwygSuggestActions()!.resolveAll("reject")).toBe(true);
+    expect(only.md()).toBe("Just  here.");
+    expect(getWysiwygSuggestActions()!.resolveAll("reject")).toBe(false);
+    unregisterWysiwygView(only.view);
+  });
+
+  it("resolves suggestions holding inline atoms (a hard break) as a whole", async () => {
+    const src = "x {++a\\\nb++} y";
+    const all = await open(src, false);
+    const reject = resolveRange(all.view.state, 0, all.view.state.doc.content.size, "reject")!;
+    all.view.dispatch(reject);
+    expect(all.view.state.doc.textContent).toBe("x  y"); // the suggested break goes too
+    const cur = await open(src, false);
+    cur.select(cur.at("a", 1));
+    expect(resolveAtCursor(cur.view, "accept")).toBe(true); // one change across the break
+    expect(cur.md()).toBe("x a\\\nb y");
+    expect(jumpToChange(cur.view, 1)).toBe(false);
+  });
+
+  it("next / previous wrap around at the last / first change, as in source mode", async () => {
+    const e = await open("A {++one++} B {--two--} C", false);
+    e.select(e.at(" C"));
+    expect(jumpToChange(e.view, 1)).toBe(true);
+    expect(e.view.state.selection.head).toBe(e.at("one"));
+    e.select(e.at("A"));
+    expect(jumpToChange(e.view, -1)).toBe(true);
+    expect(e.view.state.selection.head).toBe(e.at("two"));
+  });
+
   it("resolves different authors' adjacent changes separately", async () => {
     const e = await open("Keep {--old--}{>>@Alice<<}{++new++}{>>@Bob<<} end.", false);
     e.select(e.at("old", 1));
@@ -326,7 +435,8 @@ describe("accept / reject in WYSIWYG", () => {
     expect(jump.view.state.selection.head).toBe(jump.at("new"));
     const same = await open("Keep {~~old~>new~~}{>>@Tal<<} end.", false);
     same.select(same.at("old", 1));
-    expect(jumpToChange(same.view, 1)).toBe(false); // one substitution, nothing after it
+    expect(jumpToChange(same.view, 1)).toBe(true); // one substitution: wraps to its own start
+    expect(same.view.state.selection.head).toBe(same.at("old"));
     same.select(same.at("old", 1));
     expect(resolveAtCursor(same.view, "accept")).toBe(true); // one substitution
     expect(same.md()).toBe("Keep new end.");
