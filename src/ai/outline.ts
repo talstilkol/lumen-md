@@ -6,28 +6,16 @@
  * heading objects. Each heading is inserted at the appropriate line.
  */
 
-import { chat } from "./llm";
 import { log } from "../lib/logger";
 
-export interface OutlineHeading {
-  level: 1 | 2 | 3 | 4;
-  title: string;
-  line: number; // 0-based line index where heading should be inserted
-}
-
-const SYSTEM_PROMPT = `You are an expert document outliner. Given markdown text with no headings, propose a logical heading structure.
-
-Output ONLY a JSON array. Each element: {"level": 1|2|3, "title": "Heading text", "line": <0-based index where heading should be inserted (start of a paragraph)>}.
-
-Rules:
-- Use H2 (level:2) for main sections, H3 (level:3) for subsections. Rarely H1.
-- "line" must be the index of an existing non-empty paragraph start, not the middle of a sentence.
-- Maximum 8 headings for a typical document.
-- Do NOT wrap in markdown code blocks. Raw JSON only.`;
+export type { OutlineHeading } from "../agents/defs/outliner";
+import type { OutlineHeading } from "../agents/defs/outliner";
 
 /**
- * Generate outline headings for the given markdown text.
- * Returns an array of heading insertions sorted by line ascending.
+ * Generate outline headings for the given markdown text through the
+ * `outliner` agent. Returns heading insertions sorted by line ascending;
+ * an empty array for very short text or when the agent has no usable
+ * answer (the failure is logged; the command shows its own message).
  */
 export async function generateOutline(
   text: string,
@@ -36,43 +24,11 @@ export async function generateOutline(
   if (lines.length < 5) {
     return [];
   }
-
   try {
-    const response = await chat(
-      [
-        { role: "system", content: SYSTEM_PROMPT },
-        {
-          role: "user",
-          content: `Propose headings for this markdown document (\${lines.length} lines):\n\n${text.slice(0, 4000)}`,
-        },
-      ],
-      { maxTokens: 600, temperature: 0.2, cache: true, tier: "light", cacheIf: (r) => !!extractJsonArray(r)?.length },
-    );
-
-    const json = extractJsonArray(response);
-    if (!json) {
-      log.debug("outline", "No JSON array found in response");
-      return [];
-    }
-
-    const headings: OutlineHeading[] = json
-      .filter(
-        (h: unknown): h is Record<string, unknown> =>
-          !!h &&
-          typeof h === "object" &&
-          "level" in h &&
-          "title" in h &&
-          "line" in h,
-      )
-      .map((h) => ({
-        level: Math.min(Math.max(Number(h.level) || 2, 1), 4) as 1 | 2 | 3 | 4,
-        title: String(h.title).trim(),
-        line: Math.min(Math.max(Number(h.line) || 0, 0), lines.length - 1),
-      }))
-      .filter((h) => h.title.length > 0)
-      .sort((a, b) => a.line - b.line);
-
-    return headings;
+    const { runAgentOrThrow } = await import("../agents/runtime");
+    const { outlinerAgent, normalizeHeadings } = await import("../agents/defs");
+    const out = await runAgentOrThrow(outlinerAgent, { text }, { document: text });
+    return normalizeHeadings(out.headings, text);
   } catch (err) {
     log.warn("outline generation failed", err);
     return [];
@@ -96,15 +52,4 @@ export function applyOutline(
     offset++;
   }
   return lines.join("\n");
-}
-
-function extractJsonArray(text: string): unknown[] | null {
-  // Try to find JSON array in the response, handling markdown code blocks
-  const match = text.match(/\[.*\]/s);
-  if (!match) return null;
-  try {
-    return JSON.parse(match[0]) as unknown[];
-  } catch {
-    return null;
-  }
 }

@@ -52,8 +52,6 @@ export async function generateAiCommitMessage(
   repoFolder: string,
 ): Promise<string> {
   try {
-    const { chat } = await import("./llm");
-    const { PROMPTS } = await import("./prompts");
     const summary = await gitStatusSummary(repoFolder);
     const changes = summary.entries
       .filter((e) => e.state !== "unmodified")
@@ -62,15 +60,12 @@ export async function generateAiCommitMessage(
 
     if (!changes) return "";
 
-    // Pays for itself when sent (ownPrompt), never billed to a palette
-    // command that may be waiting in a dialog at the same time.
-    return await chat(
-      [
-        { role: "system", content: PROMPTS.commitMessage },
-        { role: "user", content: `Changes:\n${changes}` },
-      ],
-      { maxTokens: 30, ownPrompt: true, tier: "light" },
-    );
+    // The `committer` agent on a light local model. Pays for itself when
+    // sent (ownPrompt), never billed to a palette command that may be
+    // waiting in a dialog at the same time.
+    const { runAgentOrThrow } = await import("../agents/runtime");
+    const { committerAgent } = await import("../agents/defs");
+    return await runAgentOrThrow(committerAgent, { text: changes }, { ownPrompt: true });
   } catch (e) {
     log.warn("AI commit generation skipped", e);
     showAiToast("AI commit suggestion unavailable", "info");
