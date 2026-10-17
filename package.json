@@ -87,7 +87,7 @@
     "github-slugger": "^2.0.0",
     "idb-keyval": "^6.2.2",
     "isomorphic-git": "^1.37.5",
-    "katex": "^0.16.11",
+    "katex": "^0.18.2",
     "leaflet": "^1.9.4",
     "lucide-react": "^1.58.0",
     "mdast-util-to-markdown": "^2.1.2",
