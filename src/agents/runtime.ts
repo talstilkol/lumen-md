@@ -149,20 +149,31 @@ export async function runAgent<I extends AgentInput, O = string>(def: AgentDefin
       }
       if (output !== undefined) {
         step({ kind: "cache", ms: 0, label: "hit", ok: true });
-        return finish("ok", { output, model: hit.model });
+        return finish("ok", { output, model: hit.model, executor: executor.id });
       }
     }
   }
 
   // One user action = one prompt against the monthly quota, however many
-  // model calls, tools and retries the run takes. Executors run prepaid.
-  try {
+  // model calls, tools and retries the run takes. It is charged right before
+  // the first request actually goes out — the chat adapter defers it past
+  // its own key / rate-limit checks — so a run that fails locally (or is
+  // cancelled first) spends nothing. At the limit nothing goes out at all.
+  let charged = false;
+  const chargeOnce = (): void => {
+    if (charged) return;
     if (opts.ownPrompt) {
       if (!consumeAiPrompt(new Date(), { silent: opts.ownPrompt === "silent" })) throw new AiQuotaExceededError(aiQuotaStatus(new Date()).limit);
     } else chargeAiCommandDispatch();
-  } catch (e) {
-    if (e instanceof AiQuotaExceededError) return finish("failed", { errorCode: "quota", error: e.message });
-    throw e;
+    charged = true;
+  };
+  if (!aiQuotaStatus(new Date()).allowed) {
+    try {
+      chargeOnce();
+    } catch (e) {
+      if (e instanceof AiQuotaExceededError) return finish("failed", { errorCode: "quota", error: e.message });
+      throw e;
+    }
   }
 
   for (let attempt = 1; attempt <= maxRetries + 1; attempt++) {
@@ -190,8 +201,11 @@ export async function runAgent<I extends AgentInput, O = string>(def: AgentDefin
     try {
       for (let i = 0; i < maxSteps && finalText === null; i++) {
         if (opts.signal?.aborted) throw new DOMException("aborted", "AbortError");
+        // The chat adapter charges at dispatch, after its own checks.
+        if (executor.id !== "chat") chargeOnce();
         const t0 = Date.now();
         const res = await executor.chat({
+          charge: chargeOnce,
           messages,
           tools: nativeTools ? def.tools : undefined,
           schema: nativeSchema ? def.outputSchema : undefined,
@@ -240,6 +254,7 @@ export async function runAgent<I extends AgentInput, O = string>(def: AgentDefin
       }
     } catch (e) {
       if (isAbort(e, opts.signal)) return finish("aborted", { errorCode: "aborted", error: "aborted" });
+      if (e instanceof AiQuotaExceededError) return finish("failed", { errorCode: "quota", error: e.message });
       const msg = (e as Error)?.message ?? String(e);
       step({ kind: "model", ms: 0, label: executor.id, ok: false, detail: truncate(msg, 300) });
       failure = { kind: "error", attempt, maxRetries, tier, executor: executor.id, reason: msg, inputChars };

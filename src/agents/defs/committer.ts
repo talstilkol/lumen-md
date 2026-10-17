@@ -1,7 +1,8 @@
 /**
  * committer — `git.commit`. One conventional-commit subject line from the
- * repository's change list. Light model; the validator trims it to one
- * line of at most 72 characters.
+ * repository's change list. Light model; the parser takes the first
+ * line that starts with a conventional type (skipping any preamble), and
+ * the validator requires one.
  */
 
 import type { AgentDefinition, AgentInput } from "../types";
@@ -13,13 +14,20 @@ export interface CommitterInput extends AgentInput {
   text: string;
 }
 
-/** First non-empty line, without quotes/backticks, trimmed to 72 chars. */
+export const CONVENTIONAL = /^(feat|fix|docs|chore|refactor|test|perf|style|build|ci|revert)(\([^)\s]+\))?!?: \S/;
+
+/**
+ * The subject line: the first line in conventional-commit form (else the
+ * first non-empty line), without quotes/backticks or a trailing period,
+ * trimmed to 72 chars.
+ */
 export function cleanSubject(text: string): string {
-  const first = stripFences(text)
+  const lines = stripFences(text)
     .split("\n")
-    .map((l) => l.trim())
-    .find((l) => l.length > 0) ?? "";
-  return first.replace(/^["'`]+|["'`]+$/g, "").trim().slice(0, 72);
+    .map((l) => l.trim().replace(/^["'`]+|["'`]+$/g, "").trim())
+    .filter((l) => l.length > 0);
+  const subject = lines.find((l) => CONVENTIONAL.test(l)) ?? lines[0] ?? "";
+  return subject.replace(/\.+$/, "").slice(0, 72).trim();
 }
 
 export const committerAgent: AgentDefinition<CommitterInput, string> = registerAgent({
@@ -35,7 +43,10 @@ export const committerAgent: AgentDefinition<CommitterInput, string> = registerA
   validators: [
     {
       name: "subject",
-      check: (out) => (out.length >= 8 && !/\n/.test(out) ? ok : fail("subject too short", "One line, at least a few words.")),
+      check: (out) =>
+        CONVENTIONAL.test(out) && out.length >= 8
+          ? ok
+          : fail("not a conventional-commit subject", "Answer with one line like `feat: add X` or `fix(scope): correct Y`, nothing else."),
     },
   ],
   tier: "tiny",

@@ -106,7 +106,7 @@ describe("B1 agents end to end (fake executor)", () => {
   it("committer: one subject line on the tiny tier, paid as its own prompt", async () => {
     const ex = fakeExecutor(sequence('"feat: add the agent runtime."\nExplanation here'));
     registerExecutor(ex);
-    expect(await generateAiCommitMessage("/repo")).toBe("feat: add the agent runtime.");
+    expect(await generateAiCommitMessage("/repo")).toBe("feat: add the agent runtime");
     expect(ex.calls[0].tier).toBe("tiny");
     expect(ex.calls[0].messages[1].content).toContain("MODIFIED: src/a.ts");
     expect(consumeAiPrompt).toHaveBeenCalled();

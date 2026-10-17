@@ -94,6 +94,11 @@ export interface ChatOptions {
    */
   ownPrompt?: boolean | "silent";
   /**
+   * Charges the quota instead of `prepaid` / `ownPrompt` — the agent
+   * runtime's once-per-run charge, called at dispatch like the others.
+   */
+  chargeHook?: () => void;
+  /**
    * Reuse an identical earlier answer from the local response cache (and
    * store this one). Only for deterministic transformations of the given
    * text; ignored when the user turned the cache off.
@@ -400,6 +405,7 @@ async function chatDirect(
   // (after availability, key and rate-limit checks), so a request that
   // fails locally never spends a prompt.
   const charge = () => {
+    if (opts.chargeHook) return opts.chargeHook();
     if (opts.prepaid) return;
     if (opts.ownPrompt) {
       if (!consumeAiPrompt(new Date(), { silent: opts.ownPrompt === "silent" })) {
@@ -411,7 +417,7 @@ async function chatDirect(
   };
   const provider = getActiveProvider();
   // At the monthly limit nothing goes out — not even the local probe.
-  if (!opts.prepaid && !aiQuotaStatus(new Date()).allowed) charge();
+  if (!opts.prepaid && !opts.chargeHook && !aiQuotaStatus(new Date()).allowed) charge();
   let localFirst = await localRoute(provider);
 
   // ── Ollama (local server) ──────────────────────────────────────
@@ -656,6 +662,7 @@ async function* chatStreamDirect(
   opts: ChatOptions = {},
 ): AsyncGenerator<string, void, undefined> {
   const charge = () => {
+    if (opts.chargeHook) return opts.chargeHook();
     if (opts.prepaid) return;
     if (opts.ownPrompt) {
       if (!consumeAiPrompt(new Date(), { silent: opts.ownPrompt === "silent" })) {
@@ -666,7 +673,7 @@ async function* chatStreamDirect(
     chargeAiCommandDispatch();
   };
   const provider = getActiveProvider();
-  if (!opts.prepaid && !aiQuotaStatus(new Date()).allowed) charge();
+  if (!opts.prepaid && !opts.chargeHook && !aiQuotaStatus(new Date()).allowed) charge();
   let localFirst = await localRoute(provider);
 
   if (provider === "ollama" || localFirst === "ollama") {

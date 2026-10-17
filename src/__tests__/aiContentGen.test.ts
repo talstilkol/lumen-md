@@ -65,7 +65,7 @@ describe("extractActionItems (tasker agent)", () => {
     registerExecutor(ex);
     expect(await extractActionItems("notes...")).toBe("- [ ] Ship it (Bob)");
     expect(ex.calls).toHaveLength(2);
-    expect(ex.calls[1].messages[1].content).toContain("no `- [ ]` task line");
+    expect(ex.calls[1].messages[1].content).toContain("not a \"- [ ]\" task line");
   });
 });
 
