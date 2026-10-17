@@ -450,7 +450,7 @@
 | F1 | `fix/immediate` | F1 | סדר hooks בגלריה, אייקוני manifest, `storage.persist()`, flush ב-`pagehide`, `dir` ב-HTML export, שמירת מסמכים ללא כותרת | e2e פותח את הגלריה (בלי `expect(true)`); בדיקת `persist()` נקרא | 3 | ✅ **#156** — CI ירוק ב-GitHub (3 דפדפנים) |
 | F2 | `feat/agents-f1` | T25 | כיוון לכל שורה/בלוק, גופנים עבריים, CSS לוגי | `e2e/rtl.spec.ts` ב-3 דפדפנים; בדיקת CSS | 12 | ✅ **#157** — `rtl.spec.ts` ירוק ב-Chromium/Firefox/WebKit ב-GitHub; ריצת build ייצור תוקנה (93fd4926) ו-CI הופעל מחדש אחרי שההעברה לארגון ביטלה אותו |
 | F3 | `feat/ai-doctor` | T21 | רופא AI + פאנל | בדיקה עם Ollama מזויף: כל שורה ירוקה; בלי Ollama: ההצעה הנכונה | 6 | ✅ **#158** — `aiDoctor.test.ts` (10, Ollama מזויף ב-fetch), `AiDoctorPanelRender` (4), `e2e/ai-doctor.spec.ts`; 2,683 ירוקות; CI הופעל מחדש |
-| F4 | `test/honest` | T23 | מחיקת `expect(true)`, `waitForTimeout` → תנאים, כיסוי, `retries` | CI ירוק 5 פעמים ברצף | 8 | **בעבודה** — ענף `test/honest` (97366e4c, על `feat/ai-doctor`): 0 `waitForTimeout`, 0 `expect(true)`, `paste-html` רץ, 2 באגים תוקנו; `scripts/e2e-flake.mjs` כתוב (לא בקומיט). חסר: שער כיסוי, `retries: 1`, ריצה מלאה, PR |
+| F4 | `test/honest` | T23 | מחיקת `expect(true)`, `waitForTimeout` → תנאים, כיסוי, `retries` | CI ירוק 5 פעמים ברצף | 8 | **בעבודה** — ענף `test/honest` (7e61a504, על `feat/ai-doctor`): 0 `waitForTimeout`, 0 `expect(true)`, `paste-html` רץ, 2 באגים תוקנו, `e2e:flake` עובד. חסר: שער כיסוי, `retries: 1`, ריצה מלאה, PR |
 | F5 | `test/visual` | T24 | רגרסיה חזותית מקומית | `npm run preview:visual` | 4 | |
 | G1 | `feat/hebrew-core` | T26 | slug אחד, backlinks, tokenizer, גיבויים, ספירת מילים | `hebrew.test.ts`, e2e מתאר עברי | 8 | |
 | G2 | `feat/hebrew-models` | T27 | קטלוג, המלצה לפי שפה, "ענה באותה שפה" | eval + בדיקת script | 5 | |
@@ -496,10 +496,10 @@
 | `fix/immediate` | `/home/claude/wf1` | 06ecef45 | #156 | #155 | ✅ CI ירוק ב-GitHub |
 | `feat/agents-f1` | — (היה wc5) | 93fd4926 | #157 | #156 | e2e 3 דפדפנים ירוק; re-run אחרי ההעברה |
 | `feat/ai-doctor` | — (היה wc5) | b059aac7 | #158 | #157 | 2,683 ירוקות מקומית; re-run אחרי ההעברה |
-| `test/honest` | `/home/claude/wc5` | 97366e4c + קבצים לא בקומיט | **אין עדיין** | `feat/ai-doctor` | F4 ≈ 70% |
+| `test/honest` | `/home/claude/wc5` | 7e61a504 | **אין עדיין** | `feat/ai-doctor` | F4 ≈ 75% |
 
 **מה נשאר ב-F4 (`test/honest`, ב-`/home/claude/wc5`)** — לפי הסדר:
-1. לקמט את `scripts/e2e-flake.mjs` + `package.json` (`e2e:flake`) + `.gitignore` (`flake-results/`) שכבר כתובים ב-worktree (`git status`). לאמת: `node scripts/e2e-flake.mjs e2e/rtl.spec.ts --times 3 --config playwright.local.config.ts` (בלי `PLAYWRIGHT_BASE_URL` בסביבה).
+1. (בוצע, 7e61a504) `scripts/e2e-flake.mjs` + `npm run e2e:flake`; אומת 11 בדיקות × 3 ריצות, 0 flaky. שימוש: `node scripts/e2e-flake.mjs <spec> --times 10 --config playwright.local.config.ts` (בלי `PLAYWRIGHT_BASE_URL` בסביבה — ערך ריק שובר את ה-config).
 2. `vite.config.ts` → `test.coverage.exclude`: להסיר `src/ui/**` ו-`src/editor/**` מההחרגה, להריץ `npm run test:coverage`, ולכתוב ב-`ci.yml` את המספר **האמיתי** שיצא כשער (לא 40 מומצא; צפוי ≈ 30–35%). להעלות את השער רק עם בדיקות אמיתיות.
 3. `playwright.config.ts`: `retries: process.env.CI ? 1 : 0` (היה 2). ל-0 רק אחרי ש-`e2e:flake --times 10` ירוק על כל הסוויטה.
 4. להריץ את כל ה-e2e ב-Chromium מקומית: `npx playwright test --config playwright.local.config.ts --reporter=line` (הקובץ `playwright.local.config.ts` מצביע ל-`/opt/pw-browsers/chromium-1194/chrome-linux/chrome`; הוא ב-`.git/info/exclude`, **לא** לקמט אותו).
