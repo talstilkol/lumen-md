@@ -81,10 +81,19 @@ test("wysiwyg: each block takes its own direction, code stays ltr", async ({ pag
 
 test("export: a Hebrew note is written as <html dir=\"rtl\" lang=\"he\">", async ({ page }) => {
   await loadNote(page);
-  const html = await page.evaluate(async (md) => {
-    const { renderHtmlDocument } = await import("/src/storage/exportHtml.ts");
-    return renderHtmlDocument(md, { title: "t" });
-  }, NOTE);
+  // The real export command (a download), so this also holds for the
+  // production bundle, which has no /src to import from.
+  const downloadPromise = page.waitForEvent("download", { timeout: 15_000 });
+  await page.evaluate(() => window.dispatchEvent(new CustomEvent("lumen-run-command", { detail: { id: "file.exportHtml" } })));
+  const download = await downloadPromise;
+  const stream = await download.createReadStream();
+  const html = await new Promise<string>((resolve, reject) => {
+    const chunks: Buffer[] = [];
+    stream.on("data", (c: Buffer) => chunks.push(c));
+    stream.on("end", () => resolve(Buffer.concat(chunks).toString("utf8")));
+    stream.on("error", reject);
+  });
+  expect(download.suggestedFilename()).toMatch(/\.html$/);
   expect(html).toMatch(/<html lang="he" dir="rtl"/);
   expect(html).toMatch(/<p dir="auto">An English paragraph/);
 });
