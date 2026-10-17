@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-10-17T20:55:24.222Z",
+  "generated_at": "2026-10-17T21:12:46.057Z",
   "source": "src/i18n/index.ts (en bundle)",
-  "count": 1221,
+  "count": 1228,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -1491,6 +1491,45 @@
     {
       "key": "versionHistory.noVersions",
       "en": "No versions yet. A version is kept every couple of minutes while you type, on every save and when you close the tab.",
+      "vars": []
+    },
+    {
+      "key": "cmd.spell.hebrewDictionary",
+      "en": "Hebrew spelling: dictionary (download / remove)",
+      "vars": []
+    },
+    {
+      "key": "cmd.spell.hebrewDictionary.hint",
+      "en": "Offline Hebrew spell check (Hspell, 5.7 MB, AGPL)",
+      "vars": []
+    },
+    {
+      "key": "spell.he.downloadConfirm",
+      "en": "Download the Hebrew dictionary (Hspell word list, 5.7 MB, AGPL-3.0) from GitHub to this device? Your text is never sent anywhere; spelling is checked here.",
+      "vars": []
+    },
+    {
+      "key": "spell.he.installed",
+      "en": "Hebrew dictionary installed ({n} words). Turn on the grammar check to see it.",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "spell.he.failed",
+      "en": "Could not download the dictionary: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "spell.he.removeConfirm",
+      "en": "Remove the Hebrew dictionary from this device?",
+      "vars": []
+    },
+    {
+      "key": "spell.he.removed",
+      "en": "Hebrew dictionary removed.",
       "vars": []
     },
     {

@@ -1219,5 +1219,12 @@
   "trash.restored": "تمت الاستعادة إلى {path}",
   "trash.daysLeft": "سيُحذف نهائيًا خلال {n} أيام",
   "cmd.file.trash": "سلة المهملات…",
-  "cmd.file.trash.hint": "استعادة الملاحظات المحذوفة (تُحفظ 30 يومًا)"
+  "cmd.file.trash.hint": "استعادة الملاحظات المحذوفة (تُحفظ 30 يومًا)",
+  "cmd.spell.hebrewDictionary": "التدقيق الإملائي العبري: القاموس (تنزيل / إزالة)",
+  "cmd.spell.hebrewDictionary.hint": "تدقيق عبري دون اتصال (Hspell، 5.7MB، AGPL)",
+  "spell.he.downloadConfirm": "تنزيل القاموس العبري (قائمة Hspell، 5.7MB، AGPL-3.0) من GitHub إلى هذا الجهاز؟ لا يُرسل نصك إلى أي مكان.",
+  "spell.he.installed": "تم تثبيت القاموس العبري ({n} كلمة).",
+  "spell.he.failed": "تعذّر تنزيل القاموس: {error}",
+  "spell.he.removeConfirm": "إزالة القاموس العبري من هذا الجهاز؟",
+  "spell.he.removed": "تمت إزالة القاموس العبري."
 }

@@ -1219,5 +1219,12 @@
   "trash.restored": "שוחזר אל {path}",
   "trash.daysLeft": "יימחק לצמיתות בעוד {n} ימים",
   "cmd.file.trash": "סל המחזור…",
-  "cmd.file.trash.hint": "שחזור פתקים שנמחקו (נשמרים 30 יום)"
+  "cmd.file.trash.hint": "שחזור פתקים שנמחקו (נשמרים 30 יום)",
+  "cmd.spell.hebrewDictionary": "איות עברי: מילון (הורדה / הסרה)",
+  "cmd.spell.hebrewDictionary.hint": "בדיקת איות עברית בלי רשת (Hspell, ‏5.7MB, AGPL)",
+  "spell.he.downloadConfirm": "להוריד את המילון העברי (רשימת המילים של Hspell, ‏5.7MB, ‏AGPL-3.0) מ-GitHub למכשיר הזה? הטקסט שלך לא נשלח לשום מקום; האיות נבדק כאן.",
+  "spell.he.installed": "המילון העברי הותקן ({n} מילים). הפעל את בדיקת הדקדוק כדי לראות אותו.",
+  "spell.he.failed": "לא הצלחתי להוריד את המילון: {error}",
+  "spell.he.removeConfirm": "להסיר את המילון העברי מהמכשיר?",
+  "spell.he.removed": "המילון העברי הוסר."
 }
