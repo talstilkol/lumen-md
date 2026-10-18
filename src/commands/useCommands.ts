@@ -218,6 +218,9 @@ export function useCommands({
   const installedTemplates = useInstalledTemplates();
 
     return useMemo<Command[]>(() => {
+    // Actions read the document when they run, not when the list was built:
+    // the command list no longer rebuilds on every keystroke (C5).
+    const liveDoc = () => useAppStore.getState().doc;
     const setMode = useAppStore.getState().setMode;
     const setTheme = useAppStore.getState().setTheme;
     const toggleOutline = useAppStore.getState().toggleOutline;
@@ -295,7 +298,7 @@ export function useCommands({
         group: t("group.file"),
         action: async () => {
           const { exportToDocx } = await import("../storage/exportDocx");
-          await exportToDocx(doc.content, doc.name);
+          await exportToDocx(liveDoc().content, liveDoc().name);
         },
       },
       {
@@ -306,8 +309,8 @@ export function useCommands({
         group: t("group.file"),
         action: async () => {
           const { markdownToRtf, downloadText } = await import("../storage/exportFormats");
-          const baseName = doc.name.replace(/\.[^.]+$/, "");
-          downloadText(`${baseName}.rtf`, markdownToRtf(doc.content), "application/rtf");
+          const baseName = liveDoc().name.replace(/\.[^.]+$/, "");
+          downloadText(`${baseName}.rtf`, markdownToRtf(liveDoc().content), "application/rtf");
         },
       },
       {
@@ -318,8 +321,8 @@ export function useCommands({
         group: t("group.file"),
         action: async () => {
           const { markdownToLatex, downloadText } = await import("../storage/exportFormats");
-          const baseName = doc.name.replace(/\.[^.]+$/, "");
-          downloadText(`${baseName}.tex`, markdownToLatex(doc.content), "application/x-latex");
+          const baseName = liveDoc().name.replace(/\.[^.]+$/, "");
+          downloadText(`${baseName}.tex`, markdownToLatex(liveDoc().content), "application/x-latex");
         },
       },
       {
@@ -330,8 +333,8 @@ export function useCommands({
         group: t("group.file"),
         action: async () => {
           const { markdownToRst, downloadText } = await import("../storage/exportFormats");
-          const baseName = doc.name.replace(/\.[^.]+$/, "");
-          downloadText(`${baseName}.rst`, markdownToRst(doc.content), "text/x-rst");
+          const baseName = liveDoc().name.replace(/\.[^.]+$/, "");
+          downloadText(`${baseName}.rst`, markdownToRst(liveDoc().content), "text/x-rst");
         },
       },
       {
@@ -342,8 +345,8 @@ export function useCommands({
         group: t("group.file"),
         action: async () => {
           const { markdownToAdoc, downloadText } = await import("../storage/exportFormats");
-          const baseName = doc.name.replace(/\.[^.]+$/, "");
-          downloadText(`${baseName}.adoc`, markdownToAdoc(doc.content), "text/asciidoc");
+          const baseName = liveDoc().name.replace(/\.[^.]+$/, "");
+          downloadText(`${baseName}.adoc`, markdownToAdoc(liveDoc().content), "text/asciidoc");
         },
       },
       {
@@ -354,8 +357,8 @@ export function useCommands({
         group: t("group.file"),
         action: async () => {
           const { markdownToOrg, downloadText } = await import("../storage/exportFormats");
-          const baseName = doc.name.replace(/\.[^.]+$/, "");
-          downloadText(`${baseName}.org`, markdownToOrg(doc.content), "text/x-org");
+          const baseName = liveDoc().name.replace(/\.[^.]+$/, "");
+          downloadText(`${baseName}.org`, markdownToOrg(liveDoc().content), "text/x-org");
         },
       },
       {
@@ -366,8 +369,8 @@ export function useCommands({
         group: t("group.file"),
         action: async () => {
           const { markdownToOpml, downloadText } = await import("../storage/exportFormats");
-          const baseName = doc.name.replace(/\.[^.]+$/, "");
-          downloadText(`${baseName}.opml`, markdownToOpml(doc.content, baseName), "text/x-opml");
+          const baseName = liveDoc().name.replace(/\.[^.]+$/, "");
+          downloadText(`${baseName}.opml`, markdownToOpml(liveDoc().content, baseName), "text/x-opml");
         },
       },
       {
@@ -378,10 +381,10 @@ export function useCommands({
         group: t("group.file"),
         action: async () => {
           const { markdownToRevealHtml, downloadText } = await import("../storage/exportFormats");
-          const baseName = doc.name.replace(/\.[^.]+$/, "");
+          const baseName = liveDoc().name.replace(/\.[^.]+$/, "");
           downloadText(
             `${baseName}.slides.html`,
-            markdownToRevealHtml(doc.content, baseName),
+            markdownToRevealHtml(liveDoc().content, baseName),
             "text/html",
           );
         },
@@ -394,8 +397,8 @@ export function useCommands({
         group: t("group.file"),
         action: async () => {
           const { markdownToEpubBytes, downloadBytes } = await import("../storage/exportFormats");
-          const baseName = doc.name.replace(/\.[^.]+$/, "");
-          const bytes = await markdownToEpubBytes(doc.content, baseName);
+          const baseName = liveDoc().name.replace(/\.[^.]+$/, "");
+          const bytes = await markdownToEpubBytes(liveDoc().content, baseName);
           downloadBytes(`${baseName}.epub`, bytes, "application/epub+zip");
         },
       },
@@ -407,8 +410,8 @@ export function useCommands({
         group: t("group.file"),
         action: async () => {
           const { markdownToIpynb, downloadText } = await import("../storage/exportFormats");
-          const baseName = doc.name.replace(/\.[^.]+$/, "");
-          downloadText(`${baseName}.ipynb`, markdownToIpynb(doc.content), "application/x-ipynb+json");
+          const baseName = liveDoc().name.replace(/\.[^.]+$/, "");
+          downloadText(`${baseName}.ipynb`, markdownToIpynb(liveDoc().content), "application/x-ipynb+json");
         },
       },
       {
@@ -419,8 +422,8 @@ export function useCommands({
         group: t("group.file"),
         action: async () => {
           const { markdownToStaticSiteBytes, downloadBytes } = await import("../storage/exportFormats");
-          const baseName = doc.name.replace(/\.[^.]+$/, "");
-          const bytes = await markdownToStaticSiteBytes(doc.content, baseName);
+          const baseName = liveDoc().name.replace(/\.[^.]+$/, "");
+          const bytes = await markdownToStaticSiteBytes(liveDoc().content, baseName);
           downloadBytes(`${baseName}-site.zip`, bytes, "application/zip");
         },
       },
@@ -433,8 +436,8 @@ export function useCommands({
         action: async () => {
           const { markdownToPptxBytes, PPTX_MIME } = await import("../storage/exportPptx");
           const { downloadBytes } = await import("../storage/exportFormats");
-          const baseName = doc.name.replace(/\.[^.]+$/, "");
-          const bytes = await markdownToPptxBytes(doc.content, baseName);
+          const baseName = liveDoc().name.replace(/\.[^.]+$/, "");
+          const bytes = await markdownToPptxBytes(liveDoc().content, baseName);
           downloadBytes(`${baseName}.pptx`, bytes, PPTX_MIME);
         },
       },
@@ -446,7 +449,7 @@ export function useCommands({
         group: t("group.file"),
         action: async () => {
           const { printDocument } = await import("../ui/PrintExport");
-          await printDocument(doc.content, doc.name);
+          await printDocument(liveDoc().content, liveDoc().name);
         },
       },
       {
@@ -717,7 +720,7 @@ export function useCommands({
           try {
             showAiToast(t("toast.suggestingTags"), "info");
             const { suggestTags, mergeTagsIntoFrontmatter } = await import("../agents/commands");
-            const tags = await cancellable((signal) => suggestTags(doc.content, signal));
+            const tags = await cancellable((signal) => suggestTags(liveDoc().content, signal));
             if (tags.length === 0) {
               showAiToast(t("toast.noTagSuggestionsReturned"), "info");
               return;
@@ -732,7 +735,7 @@ export function useCommands({
               .map((s) => s.trim().toLowerCase())
               .filter((s) => s.length > 1);
             if (final.length === 0) return;
-            setContent(mergeTagsIntoFrontmatter(doc.content, final));
+            setContent(mergeTagsIntoFrontmatter(liveDoc().content, final));
             showAiToast(t("toast.addedTag", { count: final.length }), "success");
           } catch (e) {
             if (isAbort(e)) return;
@@ -748,14 +751,14 @@ export function useCommands({
         icon: cmdIcons.Link,
         group: t("group.tools"),
         action: async () => {
-          if (!doc.workspaceName) {
+          if (!liveDoc().workspaceName) {
             await uiAlert({ message: "Open the file from your workspace first — the link agent reads neighboring notes." });
             return;
           }
           try {
             showAiToast(t("toast.scanningWorkspaceForLinkSuggestions"), "info");
             const { suggestLinks, applyLinkSuggestion } = await import("../agents/commands");
-            const suggestions = await cancellable((signal) => suggestLinks(doc.workspaceName!, doc.content, signal));
+            const suggestions = await cancellable((signal) => suggestLinks(liveDoc().workspaceName!, liveDoc().content, signal));
             if (suggestions.length === 0) {
               showAiToast(t("toast.noLinkSuggestions"), "info");
               return;
@@ -768,7 +771,7 @@ export function useCommands({
               defaultValue: "yes",
             });
             if (!accept || accept.toLowerCase().startsWith("n")) return;
-            let next = doc.content;
+            let next = liveDoc().content;
             let applied = 0;
             for (const s of suggestions) {
               const updated = applyLinkSuggestion(next, s);
@@ -827,8 +830,8 @@ export function useCommands({
           try {
             showAiToast(t("toast.generatingDiagram"), "info");
             const { generateDiagram } = await import("../agents/commands");
-            const block = await cancellable((signal) => generateDiagram(doc.content, signal));
-            setContent(`${doc.content.trimEnd()}\n\n${block}\n`);
+            const block = await cancellable((signal) => generateDiagram(liveDoc().content, signal));
+            setContent(`${liveDoc().content.trimEnd()}\n\n${block}\n`);
             showAiToast(t("toast.diagramInserted"), "success");
           } catch (e) {
             if (isAbort(e)) return;
@@ -847,8 +850,8 @@ export function useCommands({
           try {
             showAiToast(t("toast.extractingActionItems"), "info");
             const { extractActionItems } = await import("../agents/commands");
-            const list = await cancellable((signal) => extractActionItems(doc.content, signal));
-            setContent(`${doc.content.trimEnd()}\n\n## Action Items\n\n${list}\n`);
+            const list = await cancellable((signal) => extractActionItems(liveDoc().content, signal));
+            setContent(`${liveDoc().content.trimEnd()}\n\n## Action Items\n\n${list}\n`);
             showAiToast(t("toast.actionItemsAdded"), "success");
           } catch (e) {
             if (isAbort(e)) return;
@@ -872,7 +875,7 @@ export function useCommands({
           try {
             showAiToast(t("toast.translatingTo", { target }), "info");
             const { translateMarkdown } = await import("../agents/commands");
-            const translated = await cancellable((signal) => translateMarkdown(doc.content, target.trim(), signal));
+            const translated = await cancellable((signal) => translateMarkdown(liveDoc().content, target.trim(), signal));
             setContent(translated);
             showAiToast(t("toast.documentTranslated"), "success");
           } catch (e) {
@@ -892,8 +895,8 @@ export function useCommands({
           try {
             showAiToast(t("toast.generatingChart"), "info");
             const { generateChart } = await import("../agents/commands");
-            const block = await cancellable((signal) => generateChart(doc.content, signal));
-            setContent(`${doc.content.trimEnd()}\n\n${block}\n`);
+            const block = await cancellable((signal) => generateChart(liveDoc().content, signal));
+            setContent(`${liveDoc().content.trimEnd()}\n\n${block}\n`);
             showAiToast(t("toast.chartInserted"), "success");
           } catch (e) {
             if (isAbort(e)) return;
@@ -1021,7 +1024,7 @@ export function useCommands({
         action: async () => {
           const { parseCitations, verifyCitations, formatCitationReport } = await import("../research/citations");
           const { extractPage, researchEndpoint } = await import("../research/client");
-          const citations = parseCitations(doc.content);
+          const citations = parseCitations(liveDoc().content);
           if (!citations.length) {
             showAiToast(t("research.noCitations"), "info");
             return;
@@ -1036,7 +1039,7 @@ export function useCommands({
             },
           });
           // A tab name, not a path: the note's base name only.
-          const base = (doc.name.split("/").pop() ?? doc.name).replace(/\.(md|markdown)$/i, "");
+          const base = (liveDoc().name.split("/").pop() ?? liveDoc().name).replace(/\.(md|markdown)$/i, "");
           openTemplateDoc(`Citation check — ${base}`, formatCitationReport(base, checks));
         },
       },
@@ -1798,7 +1801,7 @@ export function useCommands({
           const { checkGrammar } = await import("../ai/grammar");
           try {
             showAiToast(t("toast.checkingGrammar"), "info");
-            const matches = await checkGrammar(doc.content, locale === "he" ? "he" : "en-US", { allowModel: true });
+            const matches = await checkGrammar(liveDoc().content, locale === "he" ? "he" : "en-US", { allowModel: true });
             if (matches.length === 0) {
               showAiToast(t("toast.noGrammarIssuesFound"), "success");
               return;
@@ -2065,7 +2068,7 @@ export function useCommands({
         action: async () => {
           const password = await uiPrompt({ message: "Enter encryption password:" });
           if (!password) return;
-          const encrypted = await encryptDocument(doc.content, password);
+          const encrypted = await encryptDocument(liveDoc().content, password);
           setContent(encrypted);
           showAiToast(t("toast.documentEncrypted"), "info");
         },
@@ -2077,14 +2080,14 @@ export function useCommands({
         icon: cmdIcons.Save,
         group: t("group.security"),
         action: async () => {
-          if (!isEncrypted(doc.content)) {
+          if (!isEncrypted(liveDoc().content)) {
             showAiToast(t("toast.documentIsNotEncrypted"), "error");
             return;
           }
           const password = await uiPrompt({ message: "Enter decryption password:" });
           if (!password) return;
           try {
-            const decrypted = await decryptDocument(doc.content, password);
+            const decrypted = await decryptDocument(liveDoc().content, password);
             setContent(decrypted);
             showAiToast(t("toast.documentDecrypted"), "info");
           } catch {
@@ -2100,13 +2103,13 @@ export function useCommands({
         icon: cmdIcons.Sparkles,
         group: t("group.ai"),
         action: async () => {
-          const prompt = applyTemplate(tpl, doc.content);
+          const prompt = applyTemplate(tpl, liveDoc().content);
           try {
             showAiToast(t("toast.processing", { name: tpl.label }), "info");
             const { runAgentOrThrow } = await import("../agents/runtime");
             const { templaterAgent } = await import("../agents/defs");
-            const result = await runAgentOrThrow(templaterAgent, { text: prompt, extra: { templateId: tpl.id } }, { document: doc.content });
-            setContent(doc.content + "\n\n---\n\n" + result);
+            const result = await runAgentOrThrow(templaterAgent, { text: prompt, extra: { templateId: tpl.id } }, { document: liveDoc().content });
+            setContent(liveDoc().content + "\n\n---\n\n" + result);
             showAiToast(t("toast.completed", { name: tpl.label }), "success");
           } catch (e) {
             if (isAbort(e)) return;
@@ -2185,11 +2188,11 @@ export function useCommands({
         icon: cmdIcons.Save,
         group: t("group.git"),
         action: async () => {
-          if (!doc.workspaceName) {
+          if (!liveDoc().workspaceName) {
             await uiAlert({ message: t("git.prompt.openFileFirst") });
             return;
           }
-          const repoFolder = doc.workspaceName.split("/")[0];
+          const repoFolder = liveDoc().workspaceName!.split("/")[0];
           
           let aiSuggestion = "";
           
@@ -2222,11 +2225,11 @@ export function useCommands({
         icon: cmdIcons.Download,
         group: t("group.git"),
         action: async () => {
-          if (!doc.workspaceName) {
+          if (!liveDoc().workspaceName) {
             await uiAlert({ message: t("git.prompt.openFileFirst") });
             return;
           }
-          const repoFolder = doc.workspaceName.split("/")[0];
+          const repoFolder = liveDoc().workspaceName!.split("/")[0];
           try {
             const result = await pullRepo(repoFolder);
             window.dispatchEvent(new Event("lumen-workspace-changed"));
@@ -2234,10 +2237,10 @@ export function useCommands({
               message: t("git.alert.pulled", { changed: result.changedFiles }),
             });
             // If the active file's content changed on disk, reload it.
-            if (doc.workspaceName) {
+            if (liveDoc().workspaceName) {
               try {
-                const fresh = await readWorkspaceFile(doc.workspaceName);
-                if (fresh !== doc.content) {
+                const fresh = await readWorkspaceFile(liveDoc().workspaceName!);
+                if (fresh !== liveDoc().content) {
                   setDoc({ content: fresh, dirty: false });
                 }
               } catch {
@@ -2257,11 +2260,11 @@ export function useCommands({
         icon: cmdIcons.Link,
         group: t("group.git"),
         action: async () => {
-          if (!doc.workspaceName) {
+          if (!liveDoc().workspaceName) {
             await uiAlert({ message: t("git.prompt.openFileFirst") });
             return;
           }
-          const repoFolder = doc.workspaceName.split("/")[0];
+          const repoFolder = liveDoc().workspaceName!.split("/")[0];
           try {
             const summary = await gitStatusSummary(repoFolder);
             const total = summary.added + summary.modified + summary.deleted;
@@ -2293,11 +2296,11 @@ export function useCommands({
             showAiToast(t("toast.gitWatchPaused"), "info");
             return;
           }
-          if (!doc.workspaceName) {
+          if (!liveDoc().workspaceName) {
             await uiAlert({ message: t("git.prompt.openFileFirst") });
             return;
           }
-          const repoFolder = doc.workspaceName.split("/")[0];
+          const repoFolder = liveDoc().workspaceName!.split("/")[0];
           setWatching(true);
           startGitWatch({
             repoFolder,
@@ -2575,7 +2578,6 @@ export function useCommands({
     toggleWorkspace,
     setDoc,
     doc.workspaceName,
-    doc.content,
     theme,
     setRuntimeMetricsOpen,
     installedTemplates,
