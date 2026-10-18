@@ -183,6 +183,14 @@ if (self.trustedTypes && !self.trustedTypes.defaultPolicy) {
       post({ type: "done", runId: runId });
     };
 
+    // Emitted as a plain message, not thrown: Firefox's and WebKit's
+    // err.stack has only the frames, so the reason would not be shown.
+    if (hasImportWord(source)) {
+      emit("error", ["live-js has no import(): code that contains the word \\"import\\" does not run (the sandbox has no network)"], runId);
+      finish();
+      return;
+    }
+
     try {
       var safeConsole = {
         log: function() { emit("log", arguments, runId); },
@@ -195,9 +203,6 @@ if (self.trustedTypes && !self.trustedTypes.defaultPolicy) {
       // unhandled rejection in the worker, which propagates as a worker
       // error and surfaces as pageerror in the parent. With "return", the
       // outer .then(_, errHandler) catches it cleanly.
-      if (hasImportWord(source)) {
-        throw new TypeError("live-js has no import(): code that contains the word \\"import\\" does not run (the sandbox has no network)");
-      }
       var runner = new MakeFunction(
         "console",
         "return (async function() {\\n" + source + "\\n})();"
