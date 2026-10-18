@@ -1,3 +1,4 @@
+import { DEFAULT_DAILY, type DailySettings } from "../daily/defaults";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { Locale } from "../i18n";
@@ -69,6 +70,10 @@ interface AppState {
   typewriterMode: boolean;
   /** Type-check ```ts blocks in the source editor (loads the TS compiler). */
   tsChecks: boolean;
+  /** Daily notes: folder, file pattern, template (plan 4.12). */
+  dailyNotes: DailySettings;
+  /** The month calendar under the file tree. */
+  showCalendar: boolean;
   /** Daily writing goal (words). 0 disables the banner. */
   writingGoalWords: number;
   /** Toggle LanguageTool-powered grammar/style checking in the editor. */
@@ -121,6 +126,8 @@ interface AppState {
   toggleTypewriter: () => void;
   toggleTsChecks: () => void;
   setWritingGoal: (words: number) => void;
+  setDailyNotes: (patch: Partial<DailySettings>) => void;
+  toggleCalendar: () => void;
   /** Toggle the LanguageTool grammar checker. */
   toggleGrammarCheck: () => void;
   /** Toggle suggesting mode (track changes). */
@@ -232,6 +239,8 @@ export const useAppStore = create<AppState>()(
       typewriterMode: false,
       tsChecks: false,
       writingGoalWords: 0,
+      dailyNotes: { ...DEFAULT_DAILY },
+      showCalendar: false,
       grammarCheck: false,
       suggestingMode: false,
       useFineTunedModel: false,
@@ -331,6 +340,9 @@ export const useAppStore = create<AppState>()(
       toggleTypewriter: () => set((s) => ({ typewriterMode: !s.typewriterMode })),
       toggleTsChecks: () => set((s) => ({ tsChecks: !s.tsChecks })),
       setWritingGoal: (words) => set({ writingGoalWords: Math.max(0, Math.floor(words)) }),
+      setDailyNotes: (patch) => set((s) => ({ dailyNotes: { ...s.dailyNotes, ...patch } })),
+      // The calendar lives in the file sidebar: showing it shows the sidebar too.
+      toggleCalendar: () => set((s) => (s.showCalendar && s.showWorkspace ? { showCalendar: false } : { showCalendar: true, showWorkspace: true })),
       toggleGrammarCheck: () => set((s) => ({ grammarCheck: !s.grammarCheck })),
       toggleSuggestingMode: () =>
         set((s) => {
@@ -469,6 +481,8 @@ export const useAppStore = create<AppState>()(
         typewriterMode: s.typewriterMode,
         tsChecks: s.tsChecks,
         writingGoalWords: s.writingGoalWords,
+        dailyNotes: s.dailyNotes,
+        showCalendar: s.showCalendar,
         grammarCheck: s.grammarCheck,
         suggestingMode: s.suggestingMode,
         useFineTunedModel: s.useFineTunedModel,
@@ -493,6 +507,13 @@ export const useAppStore = create<AppState>()(
           ...current,
           ...p,
           themeSettings: sanitizeThemeSettings(p.themeSettings),
+          // A hand-edited or older store: keep only string fields, fall back per field.
+          dailyNotes: {
+            folder: typeof p.dailyNotes?.folder === "string" ? p.dailyNotes.folder : DEFAULT_DAILY.folder,
+            pattern: typeof p.dailyNotes?.pattern === "string" && p.dailyNotes.pattern.trim() ? p.dailyNotes.pattern : DEFAULT_DAILY.pattern,
+            template: typeof p.dailyNotes?.template === "string" ? p.dailyNotes.template : DEFAULT_DAILY.template,
+          },
+          showCalendar: p.showCalendar === true,
         };
         // WYSIWYG and suggesting work together now: restore both as saved.
         return merged;
