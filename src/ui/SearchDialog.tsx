@@ -129,12 +129,16 @@ export function SearchDialog({ open, onClose, onOpenFile }: Props) {
       return;
     }
     let cancelled = false;
+    // Abort a stale model rerank on the next keystroke: the worker runs jobs
+    // one at a time, so obsolete inferences would delay the current query.
+    const abort = new AbortController();
     setLoading(true);
     const handle = setTimeout(async () => {
       try {
         const fused = await searchHybrid(query, 30);
+        if (cancelled) return;
         // T29: reorder the 30 candidates by relevance (local reranker).
-        const ranked = await rerank(query, fused.map((h) => ({ ...h, text: `${h.path}\n${h.snippet}` })));
+        const ranked = await rerank(query, fused.map((h) => ({ ...h, text: `${h.path}\n${h.snippet}` })), { signal: abort.signal });
         const results = ranked.slice(0, 20).map(({ text: _text, rerankScore: _r, ...h }) => h);
         if (cancelled) return;
         setSmartHits(results);
@@ -150,6 +154,7 @@ export function SearchDialog({ open, onClose, onOpenFile }: Props) {
     return () => {
       cancelled = true;
       clearTimeout(handle);
+      abort.abort();
     };
   }, [open, query, mode, smartAllowed]);
 
