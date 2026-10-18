@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-10-18T02:07:46.694Z",
+  "generated_at": "2026-10-18T02:11:30.369Z",
   "source": "src/i18n/index.ts (en bundle)",
-  "count": 1408,
+  "count": 1409,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -1533,6 +1533,14 @@
       "en": "Exported {n} files.",
       "vars": [
         "n"
+      ]
+    },
+    {
+      "key": "vault.export.doneFolder",
+      "en": "Exported {n} files into the folder “{folder}”.",
+      "vars": [
+        "n",
+        "folder"
       ]
     },
     {

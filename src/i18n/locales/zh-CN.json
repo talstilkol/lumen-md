@@ -1238,6 +1238,7 @@
   "vault.export.zip": "一个 .zip 文件",
   "vault.export.folder": "到此电脑上的文件夹",
   "vault.export.done": "已导出 {n} 个文件。",
+  "vault.export.doneFolder": "已将 {n} 个文件导出到文件夹“{folder}”。",
   "vault.export.failed": "导出失败：{error}",
   "vault.import.what": "导入自…",
   "vault.import.zip": ".zip 文件",

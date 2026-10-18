@@ -35,11 +35,19 @@ describe("export", () => {
     expect(ok).toBe(true);
   });
 
-  it("writes the tree into a picked folder", async () => {
+  it("writes the tree into a new subfolder of the picked folder, never over its files", async () => {
     await writeWorkspaceFile("a/b/c.md", "C");
+    await writeWorkspaceFile("README.md", "vault readme");
     const target = new FakeDir("out");
-    expect(await exportVaultToFolder(target as unknown as Parameters<typeof exportVaultToFolder>[0])).toBe(1);
-    const a = await target.getDirectoryHandle("a");
+    const mine = await target.getFileHandle("README.md", { create: true });
+    const w = await mine.createWritable();
+    await w.write("my own readme");
+    await w.close();
+    await target.getDirectoryHandle("lumen-vault", { create: true });
+    const r = await exportVaultToFolder(target as unknown as Parameters<typeof exportVaultToFolder>[0], "lumen-vault");
+    expect(r).toEqual({ files: 2, folder: "lumen-vault 2" });
+    expect(await (await (await target.getFileHandle("README.md")).getFile()).text()).toBe("my own readme");
+    const a = await (await target.getDirectoryHandle("lumen-vault 2")).getDirectoryHandle("a");
     const b = await a.getDirectoryHandle("b");
     expect(await (await (await b.getFileHandle("c.md")).getFile()).text()).toBe("C");
   });

@@ -381,6 +381,7 @@ const en: Strings = {
   "vault.export.zip": "One .zip file",
   "vault.export.folder": "Into a folder on this computer",
   "vault.export.done": "Exported {n} files.",
+  "vault.export.doneFolder": "Exported {n} files into the folder “{folder}”.",
   "vault.export.failed": "Export failed: {error}",
   "vault.import.what": "Import from…",
   "vault.import.zip": "A .zip file",

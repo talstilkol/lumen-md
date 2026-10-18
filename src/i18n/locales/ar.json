@@ -1238,6 +1238,7 @@
   "vault.export.zip": "ملف zip واحد",
   "vault.export.folder": "إلى مجلد على هذا الحاسوب",
   "vault.export.done": "تم تصدير {n} ملفات.",
+  "vault.export.doneFolder": "تم تصدير {n} ملفات إلى المجلد “{folder}”.",
   "vault.export.failed": "فشل التصدير: {error}",
   "vault.import.what": "استيراد من…",
   "vault.import.zip": "ملف zip",

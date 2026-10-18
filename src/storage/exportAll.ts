@@ -44,20 +44,31 @@ export async function exportVaultZip(): Promise<{ bytes: Uint8Array; files: numb
 
 type DirHandle = FileSystemDirectoryHandle & { getDirectoryHandle(n: string, o?: { create?: boolean }): Promise<DirHandle> };
 
-/** Write the vault into a real folder the user picked. */
-export async function exportVaultToFolder(dir: DirHandle): Promise<number> {
+/**
+ * Write the vault into a real folder the user picked — inside a new
+ * subfolder (`lumen-vault-<date>`, numbered when taken), so files already
+ * in the picked folder are never overwritten.
+ */
+export async function exportVaultToFolder(dir: DirHandle, name = `lumen-vault-${new Date().toISOString().slice(0, 10)}`): Promise<{ files: number; folder: string }> {
+  const exists = async (n: string) => {
+    for await (const [key] of dir.entries()) if (key === n) return true;
+    return false;
+  };
+  let folder = name;
+  for (let n = 2; await exists(folder); n++) folder = `${name} ${n}`;
+  const out = await dir.getDirectoryHandle(folder, { create: true });
   const files = await collectVault();
   for (const f of files) {
     const parts = f.path.split("/");
     const name = parts.pop()!;
-    let d = dir;
+    let d = out;
     for (const p of parts) d = await d.getDirectoryHandle(p, { create: true });
     const fh = await d.getFileHandle(name, { create: true });
     const w = await fh.createWritable();
     await w.write(f.data as unknown as BlobPart);
     await w.close();
   }
-  return files.length;
+  return { files: files.length, folder };
 }
 
 /* ─── Import ─────────────────────────────────────────────────────────── */

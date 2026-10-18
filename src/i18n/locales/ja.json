@@ -1238,6 +1238,7 @@
   "vault.export.zip": "1つの .zip ファイル",
   "vault.export.folder": "このコンピュータのフォルダへ",
   "vault.export.done": "{n} 件のファイルを書き出しました。",
+  "vault.export.doneFolder": "{n} 件のファイルをフォルダー「{folder}」に書き出しました。",
   "vault.export.failed": "書き出しに失敗しました: {error}",
   "vault.import.what": "読み込み元…",
   "vault.import.zip": ".zip ファイル",

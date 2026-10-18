@@ -1238,6 +1238,7 @@
   "vault.export.zip": "Eine .zip-Datei",
   "vault.export.folder": "In einen Ordner auf diesem Computer",
   "vault.export.done": "{n} Dateien exportiert.",
+  "vault.export.doneFolder": "{n} Dateien in den Ordner „{folder}“ exportiert.",
   "vault.export.failed": "Export fehlgeschlagen: {error}",
   "vault.import.what": "Importieren aus…",
   "vault.import.zip": "Einer .zip-Datei",
