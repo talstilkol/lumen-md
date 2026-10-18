@@ -421,6 +421,10 @@ export default defineConfig({
     port: 5173,
     cors: { origin: playgroundCorsOrigin },
   },
+  // The live-js runner's CSP allows its scripts by this nonce (WebKit doesn't match
+  // 'self' inside an opaque-origin sandboxed frame). Vite stamps it on every script
+  // and modulepreload tag it writes; other pages' policies simply ignore it.
+  html: { cspNonce: "lumen-livejs-runner" },
   build: {
     target: "es2022",
     sourcemap: true,
