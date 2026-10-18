@@ -1,0 +1,20 @@
+{
+  "canvas.autoSaved": "Canvas · automatisch gespeichert",
+  "canvas.close": "Schließen",
+  "canvas.dialogLabel": "Whiteboard",
+  "canvas.legacy.convert": "{name} → tldraw konvertieren",
+  "canvas.legacy.convertFailed": "Konvertierung fehlgeschlagen: {error}",
+  "canvas.legacy.converted": "✅ {name} konvertiert ({count} Formen)",
+  "canvas.legacy.converting": "{name} wird konvertiert…",
+  "canvas.legacy.found": "{count} alte(r) Canvas gefunden",
+  "canvas.new": "Neu",
+  "canvas.new.prompt": "Canvas-Name:",
+  "canvas.picker": "Canvas wählen",
+  "canvas.switch": "Wechseln canvas",
+  "canvas.title": "Canvas",
+  "graphView.empty": "Keine Dateien gefunden. Öffne den Arbeitsbereich und füge Dateien hinzu, um den Wissensgraphen zu sehen.",
+  "graphView.renderFailed": "Graph konnte nicht gerendert werden",
+  "graphView.renderFailedDetail": "Die Daten des Arbeitsbereichs ergaben eine ungültige Knotenstruktur, die den Renderer zum Absturz brachte.",
+  "graphView.stats": "{nodes} Knoten · {edges} Verbindungen",
+  "graphView.title": "Wissensgraph"
+}

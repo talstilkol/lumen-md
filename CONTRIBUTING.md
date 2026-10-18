@@ -143,7 +143,7 @@ per-platform (`…-chromium-linux.png`).
 
 - **Current:** 131 test files, 1074 passing tests, 97% line coverage.
 - The CI gate requires `npm run typecheck && npm run test` to pass on every push.
-- The i18n drift gate (`i18nDrift.test.ts`) ensures every key in the `en` bundle exists in all 8 locale files.
+- The i18n drift gate (`i18nDrift.test.ts`) ensures every key in the `en` bundle exists in all 8 locales.
 
 ## Internationalization (i18n)
 
@@ -151,10 +151,12 @@ per-platform (`…-chromium-linux.png`).
 
 ### Adding a new string
 
-1. Add the English key to the `en` object in `src/i18n/index.ts`.
-2. Add the Hebrew translation to the `he` object in the same file.
-3. Add the key (with English fallback) to all 6 lazy locale files in `src/i18n/locales/*.json`.
-4. Run `npm run test` — the `i18nDrift.test.ts` gate will fail if any locale is missing the key.
+Strings live in one JSON file per language and domain: `src/i18n/locales/<lang>/<domain>.json`
+(a key's domain is its first segment; see [`src/i18n/locales/README.md`](src/i18n/locales/README.md)).
+
+1. Add the English key to `src/i18n/locales/en/<domain>.json` and the Hebrew to `src/i18n/locales/he/<domain>.json`.
+2. Run `npm run i18n:fix` (sorts the files, refreshes `i18n/keys/`) and `node scripts/generate-all-locales.mjs` for the other 6 locales.
+3. Run `npm run i18n:check` and `npm run test` — the `i18nDrift.test.ts` gate will fail if any locale is missing the key.
 
 ### RTL support
 

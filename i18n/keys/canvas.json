@@ -1,0 +1,111 @@
+{
+  "version": 2,
+  "domain": "canvas",
+  "source": "src/i18n/locales/en/canvas.json",
+  "entries": [
+    {
+      "key": "canvas.autoSaved",
+      "en": "Canvas · auto-saved",
+      "vars": []
+    },
+    {
+      "key": "canvas.close",
+      "en": "Close",
+      "vars": []
+    },
+    {
+      "key": "canvas.dialogLabel",
+      "en": "Whiteboard",
+      "vars": []
+    },
+    {
+      "key": "canvas.legacy.convert",
+      "en": "Convert {name} → tldraw",
+      "vars": [
+        "name"
+      ]
+    },
+    {
+      "key": "canvas.legacy.convertFailed",
+      "en": "Convert failed: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "canvas.legacy.converted",
+      "en": "✅ Converted {name} ({count} shapes)",
+      "vars": [
+        "name",
+        "count"
+      ]
+    },
+    {
+      "key": "canvas.legacy.converting",
+      "en": "Converting {name}…",
+      "vars": [
+        "name"
+      ]
+    },
+    {
+      "key": "canvas.legacy.found",
+      "en": "{count} legacy canvas(es) found",
+      "vars": [
+        "count"
+      ]
+    },
+    {
+      "key": "canvas.new",
+      "en": "New",
+      "vars": []
+    },
+    {
+      "key": "canvas.new.prompt",
+      "en": "Canvas name:",
+      "vars": []
+    },
+    {
+      "key": "canvas.picker",
+      "en": "Pick canvas",
+      "vars": []
+    },
+    {
+      "key": "canvas.switch",
+      "en": "Switch canvas",
+      "vars": []
+    },
+    {
+      "key": "canvas.title",
+      "en": "Canvas",
+      "vars": []
+    },
+    {
+      "key": "graphView.empty",
+      "en": "No workspace files found. Open the workspace panel and add files to see the knowledge graph.",
+      "vars": []
+    },
+    {
+      "key": "graphView.renderFailed",
+      "en": "Graph Render Failed",
+      "vars": []
+    },
+    {
+      "key": "graphView.renderFailedDetail",
+      "en": "The workspace data resulted in an invalid node structure that crashed the renderer.",
+      "vars": []
+    },
+    {
+      "key": "graphView.stats",
+      "en": "{nodes} nodes · {edges} connections",
+      "vars": [
+        "nodes",
+        "edges"
+      ]
+    },
+    {
+      "key": "graphView.title",
+      "en": "Knowledge Graph",
+      "vars": []
+    }
+  ]
+}

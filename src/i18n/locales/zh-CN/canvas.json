@@ -1,0 +1,20 @@
+{
+  "canvas.autoSaved": "画布 · 已自动保存",
+  "canvas.close": "关闭",
+  "canvas.dialogLabel": "白板",
+  "canvas.legacy.convert": "将 {name} 转换为 tldraw",
+  "canvas.legacy.convertFailed": "转换失败:{error}",
+  "canvas.legacy.converted": "✅ 已转换 {name}({count} 个形状)",
+  "canvas.legacy.converting": "正在转换 {name}…",
+  "canvas.legacy.found": "发现 {count} 个旧版画布",
+  "canvas.new": "新建",
+  "canvas.new.prompt": "画布名称:",
+  "canvas.picker": "选择画布",
+  "canvas.switch": "切换 canvas",
+  "canvas.title": "画布",
+  "graphView.empty": "未找到文件。打开工作区并添加文件以查看知识图谱。",
+  "graphView.renderFailed": "图谱渲染失败",
+  "graphView.renderFailedDetail": "工作区数据产生了无效的节点结构,导致渲染器崩溃。",
+  "graphView.stats": "{nodes} 个节点 · {edges} 条连接",
+  "graphView.title": "知识图谱"
+}

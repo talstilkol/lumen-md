@@ -1,0 +1,20 @@
+{
+  "canvas.autoSaved": "Холст · автосохранение",
+  "canvas.close": "Закрыть",
+  "canvas.dialogLabel": "Доска",
+  "canvas.legacy.convert": "Преобразовать {name} → tldraw",
+  "canvas.legacy.convertFailed": "Не удалось преобразовать: {error}",
+  "canvas.legacy.converted": "✅ {name} преобразован (фигур: {count})",
+  "canvas.legacy.converting": "Преобразование {name}…",
+  "canvas.legacy.found": "Найдено устаревших холстов: {count}",
+  "canvas.new": "Новый",
+  "canvas.new.prompt": "Название холста:",
+  "canvas.picker": "Выбрать холст",
+  "canvas.switch": "Переключить canvas",
+  "canvas.title": "Холст",
+  "graphView.empty": "Файлы не найдены. Откройте рабочую область и добавьте файлы, чтобы увидеть граф знаний.",
+  "graphView.renderFailed": "Не удалось отрисовать граф",
+  "graphView.renderFailedDetail": "Данные рабочего пространства привели к недопустимой структуре узлов, из-за чего отрисовщик завершился с ошибкой.",
+  "graphView.stats": "{nodes} узлов · {edges} связей",
+  "graphView.title": "Граф знаний"
+}

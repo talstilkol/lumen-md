@@ -1,6 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { readFileSync } from "fs";
-import { join } from "path";
+import { readLocale } from "../../scripts/lib/i18n-files.mjs";
 
 /**
  * T45 — the i18n gate checks values, not only keys: a locale that copies
@@ -8,11 +7,8 @@ import { join } from "path";
  * that are the same in every language (product and format names, symbols).
  * The other locales: at most 5 %.
  */
-const indexPath = join(__dirname, "..", "i18n", "index.ts");
-const content = readFileSync(indexPath, "utf8");
-const enBlock = content.slice(content.indexOf("const en: Strings = {"), content.indexOf("\n};\n", content.indexOf("const en: Strings = {")));
-const en: Record<string, string> = {};
-for (const m of enBlock.matchAll(/^\s+"([^"]+)":\s*"((?:[^"\\]|\\.)*)",?\s*$/gm)) en[m[1]] = JSON.parse(`"${m[2]}"`);
+// src/i18n/locales/<lang>/<domain>.json (plan 0.3).
+const en: Record<string, string> = readLocale("en");
 
 /** Strings that are rightly identical in Hebrew. */
 const SAME_IN_HEBREW = new Set([
@@ -25,7 +21,7 @@ const SAME_IN_HEBREW = new Set([
 const words = (s: string) => /[A-Za-z]{3}/.test(s);
 
 function untranslated(locale: string): string[] {
-  const data = JSON.parse(readFileSync(join(__dirname, "..", "i18n", "locales", `${locale}.json`), "utf8")) as Record<string, string>;
+  const data = readLocale(locale);
   return Object.keys(en).filter((k) => data[k] === en[k] && words(en[k]));
 }
 

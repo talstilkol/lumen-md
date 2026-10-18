@@ -1,0 +1,20 @@
+{
+  "canvas.autoSaved": "اللوحة · حُفظت تلقائيًا",
+  "canvas.close": "إغلاق",
+  "canvas.dialogLabel": "السبّورة",
+  "canvas.legacy.convert": "تحويل {name} → tldraw",
+  "canvas.legacy.convertFailed": "فشل التحويل: {error}",
+  "canvas.legacy.converted": "✅ تم تحويل {name} ({count} أشكال)",
+  "canvas.legacy.converting": "جارٍ تحويل {name}…",
+  "canvas.legacy.found": "تم العثور على {count} لوحة قديمة",
+  "canvas.new": "جديد",
+  "canvas.new.prompt": "اسم اللوحة:",
+  "canvas.picker": "اختر لوحة",
+  "canvas.switch": "تبديل canvas",
+  "canvas.title": "اللوحة",
+  "graphView.empty": "لم يتم العثور على ملفات. افتح مساحة العمل وأضف ملفات لرؤية رسم المعرفة.",
+  "graphView.renderFailed": "فشل عرض الرسم البياني",
+  "graphView.renderFailedDetail": "أدت بيانات مساحة العمل إلى بنية عقد غير صالحة تسببت في تعطل المُعرِّض.",
+  "graphView.stats": "{nodes} عقد · {edges} روابط",
+  "graphView.title": "الرسم البياني للمعرفة"
+}
