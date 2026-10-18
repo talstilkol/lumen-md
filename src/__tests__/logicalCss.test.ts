@@ -31,6 +31,36 @@ describe("hygiene: physical CSS in .prose-lumen / .cm-* rules", () => {
     expect(v.every((x) => x.rule === "physical-css" && x.line >= 1)).toBe(true);
   });
 
+  it("flags shorthands that set left and right differently, not symmetric ones (review: #219)", () => {
+    const v = css(
+      [
+        ".prose-lumen blockquote { border-radius: 0 0.5rem 0.5rem 0; }",
+        ".prose-lumen aside { border-radius: 4px 0; }",
+        ".prose-lumen dl { border-radius: 2px 4px 6px; }",
+        ".prose-lumen dd { margin: 0 1rem 0 2rem; }",
+        ".cm-panel { padding: 1px calc(2px + 1px) 3px 0; }",
+        ".prose-lumen figure { border-width: 1px 2px 1px 0; }",
+      ].join("\n"),
+    );
+    expect(v).toHaveLength(6);
+    expect(v[0].text).toContain("border-start-end-radius");
+    expect(v[3].text).toContain("margin-inline-start");
+    expect(
+      css(
+        [
+          ".prose-lumen img { border-radius: 0.5rem; }",
+          ".prose-lumen .a { border-radius: 4px 4px 0 0; }", // top corners only: symmetric
+          ".prose-lumen .b { border-radius: 2px 2px 6px 6px; }",
+          ".prose-lumen .c { border-radius: 4px / 2px; }",
+          ".prose-lumen table { margin: 0 auto; }",
+          ".cm-line { padding: 0 0.5rem; }",
+          ".prose-lumen .d { margin: 1px 2px 3px 2px; }",
+          ".prose-lumen .e { padding: 0 var(--gap) 0 var(--gap); }",
+        ].join("\n"),
+      ),
+    ).toEqual([]);
+  });
+
   it("leaves logical properties and rules outside the preview and editor alone", () => {
     expect(
       css(

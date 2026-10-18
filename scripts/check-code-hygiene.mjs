@@ -103,6 +103,50 @@ const PHYSICAL_PROPS = [
 ];
 const PHYSICAL_VALUES = { "text-align": /^(left|right)$/i, float: /^(left|right)$/i, clear: /^(left|right)$/i };
 const LOGICAL_SCOPE = /\.prose-lumen|\.cm-/;
+
+/** Split a CSS value on top-level whitespace (not inside `calc(...)`, `var(...)`). */
+function cssWords(value) {
+  const out = [];
+  let depth = 0;
+  let cur = "";
+  for (const ch of String(value).trim()) {
+    if (ch === "(") depth++;
+    if (ch === ")") depth--;
+    if (/\s/.test(ch) && depth === 0) {
+      if (cur) out.push(cur);
+      cur = "";
+    } else cur += ch;
+  }
+  if (cur) out.push(cur);
+  return out;
+}
+
+const BOX_SHORTHANDS = /^(margin|padding|inset|scroll-margin|scroll-padding|border-width|border-style|border-color)$/;
+
+/**
+ * A shorthand that sets left and right (or the left and right corners)
+ * differently does not mirror in RTL: `margin: 0 1rem 0 2rem`,
+ * `border-radius: 0 0.5rem 0.5rem 0`. Symmetric ones (`margin: 0 auto`) are fine.
+ */
+function physicalShorthand(prop, value) {
+  if (BOX_SHORTHANDS.test(prop)) {
+    const v = cssWords(value);
+    if (v.length === 4 && v[1] !== v[3]) {
+      const base = prop.startsWith("border-") ? `border-inline-start-${prop.slice(7)} / border-inline-end-${prop.slice(7)}` : `${prop}-block + ${prop}-inline-start / ${prop}-inline-end`;
+      return base;
+    }
+    return null;
+  }
+  if (prop === "border-radius") {
+    for (const part of String(value).split("/")) {
+      const v = cssWords(part);
+      // corners in order: top-left, top-right, bottom-right, bottom-left
+      const [tl, tr, br, bl] = v.length === 1 ? [v[0], v[0], v[0], v[0]] : v.length === 2 ? [v[0], v[1], v[0], v[1]] : v.length === 3 ? [v[0], v[1], v[2], v[1]] : v;
+      if (tl !== tr || br !== bl) return "border-start-start-radius / border-start-end-radius / border-end-end-radius / border-end-start-radius";
+    }
+  }
+  return null;
+}
 const CSS_ALLOW_RE = /hygiene-allow:\s*[^\s*/]/; // a justification, not just the comment's closing */
 
 /** Physical properties in `.prose-lumen` / `.cm-*` rules of one stylesheet: `{ line, rule, text }`. */
@@ -118,6 +162,7 @@ export function findCssViolations(fileName, text) {
       const m = re.exec(d.prop);
       if (m) use = fix(m);
     }
+    if (!use) use = physicalShorthand(d.prop, d.value);
     const valRe = PHYSICAL_VALUES[d.prop];
     if (!use && valRe && valRe.test(String(d.value).trim())) use = `${d.prop}: ${/left/i.test(d.value) ? "start" : "end"}` + (d.prop === "text-align" ? "" : " (inline-start / inline-end)");
     if (!use) return;

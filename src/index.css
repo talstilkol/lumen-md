@@ -360,7 +360,10 @@
     color: hsl(var(--fg-subtle));
     font-style: italic;
     background: hsl(var(--bg-subtle));
-    border-radius: 0 0.5rem 0.5rem 0;
+    /* square on the side of the accent border, rounded on the other — mirrors in RTL */
+    border-radius: 0;
+    border-start-end-radius: 0.5rem;
+    border-end-end-radius: 0.5rem;
   }
   .prose-lumen ul,
   .prose-lumen ol {
