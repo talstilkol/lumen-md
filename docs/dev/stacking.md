@@ -114,7 +114,10 @@ node scripts/stack.mjs restack feat/hebrew-core --push      # …and run them
 - `--old-base` is honoured by the `git rebase --onto` fallback only: with it,
   `gh stack` is not used (it has no equivalent). `--remote` goes to both
   `gh stack rebase` and `gh stack push`.
-- An amended top PR (nothing stacked on it) still gets its push.
+- An amended top PR (nothing stacked on it) still gets its push; `--push`
+  on a top PR whose branch is not local is an error.
+- gh stack stacks are linear: when a PR above the branch has more than one
+  PR on top, the fallback restacks the whole tree instead.
 - **Worktrees.** A branch checked out in another worktree is rebased in that
   worktree (`git -C <path> rebase …`), which must be clean. Other branches
   are checked out in the current worktree, which must be clean too

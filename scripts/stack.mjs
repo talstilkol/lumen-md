@@ -214,9 +214,17 @@ async function restack() {
     process.exit(1);
   }
 
+  const forest = buildForest(await openPrs(repoName()));
+  const { start, steps, foreign } = restackPlan(forest, branch);
+  // gh stack stacks are linear (one child per branch): a PR tree that forks
+  // above `branch` would be only partly rebased by it, so the fallback takes it.
+  const forks = [start, ...steps.map((s) => forest.byHead.get(s.branch)?.[0])].filter((n) => n && n.children.filter((c) => c.sameRepo).length > 1);
+  const linear = forks.length === 0;
+  const useGhStack = !dry && ghStackAvailable();
   // gh stack has no old-base override: an explicit --old-base is honoured by the fallback only.
-  if (opt("--old-base") && !dry && ghStackAvailable()) console.log("--old-base: gh stack has no equivalent; using git rebase --onto.\n");
-  if (!opt("--old-base") && ghStackAvailable() && !dry) {
+  if (opt("--old-base") && useGhStack) console.log("--old-base: gh stack has no equivalent; using git rebase --onto.\n");
+  else if (!linear && useGhStack) console.log(`${forks.map((n) => n.head).join(", ")} ${forks.length > 1 ? "have" : "has"} more than one PR on top; gh stack stacks are linear, so using git rebase --onto.\n`);
+  if (!opt("--old-base") && linear && useGhStack) {
     const env = { ...process.env, GH_STACK_NO_UPDATE_NOTIFIER: "1" };
     // The same remote for the fetch the rebase starts from as for the push.
     const r = spawnSync("gh", ["stack", "rebase", "--upstack", "--remote", remote, branch], { stdio: "inherit", env });
@@ -230,13 +238,16 @@ async function restack() {
     console.log(`gh stack does not track "${branch}" (run \`gh stack init\` to adopt the branches); using git rebase --onto.\n`);
   }
 
-  const forest = buildForest(await openPrs(repoName()));
-  const { start, steps, foreign } = restackPlan(forest, branch);
   for (const f of foreign) console.log(`  #${f.number} ${f.branch} (from ${f.repo || "a fork"}): a fork's PR on ${f.parent}, not restacked here; its author rebases it.`);
   if (!steps.length) {
     console.log(`Nothing is stacked on ${branch} (#${start.number})${foreign.length ? " in this repository" : ""}.`);
     // An amended top branch still has its own push to make (below).
-    const amended = start.headSha && gitOk("rev-parse", "--verify", "-q", `refs/heads/${start.head}`) && git("rev-parse", start.head) !== start.headSha;
+    const local = gitOk("rev-parse", "--verify", "-q", `refs/heads/${start.head}`);
+    if (!local && doPush) {
+      console.error(`stack: --push: branch ${start.head} is not local, so there is nothing to push. Fetch it first: git fetch ${remote} ${start.head}:${start.head}`);
+      process.exit(1);
+    }
+    const amended = start.headSha && local && git("rev-parse", start.head) !== start.headSha;
     if (!amended) return;
   }
   for (const b of [start.head, ...steps.map((s) => s.branch)]) {

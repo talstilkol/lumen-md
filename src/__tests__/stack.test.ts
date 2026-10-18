@@ -389,6 +389,40 @@ describe("scripts/stack.mjs restack (fallback, local repo)", () => {
     }
   });
 
+  it("gh stack is not used when the PRs above fork (its stacks are linear)", () => {
+    const { dir, g, old, runOn } = setup();
+    try {
+      g("branch", "d", old.b);
+      const pr = (number: number, head: string, base: string, sha: string) => ({ number, head: { ref: head, sha }, base: { ref: base } });
+      writeFileSync(join(dir, "prs.json"), JSON.stringify([pr(1, "a", "main", old.a), pr(2, "b", "a", old.b), pr(3, "c", "b", old.c), pr(4, "d", "b", old.b)]));
+      const bin = join(dir, "bin");
+      mkdirSync(bin);
+      writeFileSync(join(bin, "gh"), `#!/bin/sh\necho "$@" >> "${join(dir, "gh.log")}"\nexit 0\n`);
+      chmodSync(join(bin, "gh"), 0o755);
+      const r = runOn("a", { PATH: `${bin}:${process.env.PATH}`, LUMEN_STACK_NO_GH_STACK: "" });
+      expect(r.status).toBe(0);
+      expect(r.stdout).toContain("b has more than one PR on top; gh stack stacks are linear, so using git rebase --onto.");
+      expect(readFileSync(join(dir, "gh.log"), "utf8")).not.toContain("stack rebase");
+      expect(g("log", "--format=%s", "main..d").split("\n")).toEqual(["b", "a2"]);
+      expect(g("log", "--format=%s", "main..c").split("\n")).toEqual(["c", "b", "a2"]);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it("--push on a top PR whose branch is not local is an error, not a silent success", () => {
+    const { dir, old, runOn } = setup();
+    try {
+      const pr = (number: number, head: string, base: string, sha: string) => ({ number, head: { ref: head, sha }, base: { ref: base } });
+      writeFileSync(join(dir, "prs.json"), JSON.stringify([pr(1, "a", "main", old.a), pr(9, "remote-only", "a", "f".repeat(40))]));
+      const r = runOn("remote-only", {}, "--push");
+      expect(r.status).toBe(1);
+      expect(r.stderr).toContain("stack: --push: branch remote-only is not local");
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
   it("does not rebase a local branch that shares a fork PR's head name", () => {
     const { dir, g, old, run } = setup();
     try {
