@@ -6,7 +6,7 @@
  */
 import { beforeAll, describe, expect, it, vi } from "vitest";
 import { EditorState } from "@codemirror/state";
-import { EditorView } from "@codemirror/view";
+import { EditorView, runScopeHandlers } from "@codemirror/view";
 import { CompletionContext, type Completion, type CompletionResult } from "@codemirror/autocomplete";
 import { markdown } from "@codemirror/lang-markdown";
 import { installFakeOpfs } from "./helpers/fakeOpfs";
@@ -100,6 +100,12 @@ describe("source editor [[ completion", () => {
     expect(await complete(viewOf("```\n[[proj"))).toBeNull();
     expect(await complete(viewOf("Use `[[proj"))).not.toBeNull(); // an unclosed backtick is no code span
     expect(await complete(viewOf("Use `x` and `[[proj`", "Use `x` and `[[proj".length))).toBeNull();
+  });
+
+  it("Ctrl-Space reopens the list inside [[ and is left to the AI ghost text elsewhere", () => {
+    const ctrlSpace = (v: EditorView) => runScopeHandlers(v, new KeyboardEvent("keydown", { key: " ", code: "Space", ctrlKey: true }), "editor");
+    expect(ctrlSpace(viewOf("plain text"))).toBe(false);
+    expect(ctrlSpace(viewOf("See [[pro"))).toBe(true);
   });
 
   it("lives next to the TypeScript checks' completions", () => {

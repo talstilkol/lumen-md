@@ -11,9 +11,9 @@
  * the same way, so both work at once.
  */
 
-import { autocompletion, type CompletionSource } from "@codemirror/autocomplete";
-import { EditorState, type Extension } from "@codemirror/state";
-import { EditorView } from "@codemirror/view";
+import { autocompletion, completionKeymap, startCompletion, type CompletionSource } from "@codemirror/autocomplete";
+import { EditorState, Prec, type Extension } from "@codemirror/state";
+import { EditorView, keymap } from "@codemirror/view";
 
 const OPEN_LINK = /\[\[[^[\]|\n]*$/;
 
@@ -36,6 +36,26 @@ const theme = EditorView.baseTheme({
   ".cm-completionIcon-wiki-create:after": { content: "'+'" },
 });
 
+/**
+ * The list's keys (↑ ↓ PageUp PageDown Enter Esc — each passes when no list
+ * is open) without the default Ctrl-Space: that is the AI ghost text's
+ * (Editor.tsx). Here it only reopens the list inside `[[`; the TypeScript
+ * checks bind it inside ts blocks.
+ */
+const keys = Prec.highest(
+  keymap.of([
+    {
+      key: "Ctrl-Space",
+      run: (view) => {
+        const { head } = view.state.selection.main;
+        const line = view.state.doc.lineAt(head);
+        return OPEN_LINK.test(line.text.slice(0, head - line.from)) && startCompletion(view);
+      },
+    },
+    ...completionKeymap.filter((b) => b.run !== startCompletion),
+  ]),
+);
+
 export function wikiLinkAutocomplete(): Extension {
-  return [autocompletion(), EditorState.languageData.of(() => [{ autocomplete: wikiLinkSource }]), theme];
+  return [autocompletion({ defaultKeymap: false }), keys, EditorState.languageData.of(() => [{ autocomplete: wikiLinkSource }]), theme];
 }

@@ -100,8 +100,8 @@ class WikiMenu {
     if (!items.length) return this.hide();
     this.render();
     this.el.dataset.show = "true";
+    // aria-expanded isn't allowed on the editor's textbox role; these are.
     this.view.dom.setAttribute("aria-controls", this.id);
-    this.view.dom.setAttribute("aria-expanded", "true");
     this.place(at);
   }
 
@@ -110,7 +110,7 @@ class WikiMenu {
     this.el.dataset.show = "false";
     this.shownFor = "";
     this.view.dom.removeAttribute("aria-activedescendant");
-    this.view.dom.setAttribute("aria-expanded", "false");
+    this.view.dom.removeAttribute("aria-controls");
   }
 
   /** Under the `[[`, kept inside the window. */
