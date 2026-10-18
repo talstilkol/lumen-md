@@ -1,0 +1,40 @@
+name: Keychain
+
+# The OS keychain store for API keys and tokens (T36, plan 2.5) is only
+# compiled on macOS and Windows, so its tests run there. The crate is
+# src-tauri/keychain on its own: this job builds keyring and the tests, not
+# Tauri, and stays cheap.
+on:
+  push:
+    branches: [main]
+    paths: ['src-tauri/keychain/**', 'src-tauri/Cargo.toml', 'src-tauri/Cargo.lock', '.github/workflows/keychain.yml']
+  pull_request:
+    paths: ['src-tauri/keychain/**', 'src-tauri/Cargo.toml', 'src-tauri/Cargo.lock', '.github/workflows/keychain.yml']
+
+concurrency:
+  group: keychain-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  keychain:
+    name: keychain tests (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        # Pinned images, not -latest: a runner upgrade must not change what passes.
+        os: [macos-14, windows-2022]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri
+          key: keychain
+      - name: cargo test (lumen-keychain only)
+        # One test thread: the tests share the user's keychain / credential store.
+        run: cargo test --manifest-path src-tauri/Cargo.toml -p lumen-keychain --locked -- --test-threads=1
