@@ -17,6 +17,8 @@
  */
 import { getAiPolicy, isLocalOrigin, type AiPolicy } from "./policy";
 import { getBaseUrl } from "./ollamaProvider";
+import { grammarEndpoint } from "./grammar";
+import { researchEndpoint } from "../research/client";
 
 export type LedgerCategory = "cloud-ai" | "cloud-text" | "local-ai" | "model-download" | "research";
 
@@ -106,13 +108,34 @@ function emit(): void {
   for (const fn of [...listeners]) fn();
 }
 
-function record(e: Omit<LedgerEntry, "id" | "ts">): LedgerEntry {
+// `entries` is an immutable snapshot (useSyncExternalStore compares by
+// reference): every change replaces the array and the changed entry.
+function record(e: Omit<LedgerEntry, "id" | "ts">): number {
   const entry: LedgerEntry = { ...e, id: nextId++, ts: Date.now() };
-  entries.push(entry);
-  if (entries.length > MAX_ENTRIES) entries = entries.slice(-MAX_ENTRIES);
+  entries = [...entries, entry].slice(-MAX_ENTRIES);
   save();
   emit();
-  return entry;
+  return entry.id;
+}
+
+function patch(id: number, change: Partial<LedgerEntry>): void {
+  entries = entries.map((x) => (x.id === id ? { ...x, ...change } : x));
+  save();
+  emit();
+}
+
+/** Is `u` one of the configured endpoint's request URLs (same origin, exact path)? */
+function atEndpoint(u: URL, endpoint: string | null | undefined, suffixes: readonly string[] = [""]): boolean {
+  if (!endpoint) return false;
+  let e: URL;
+  try {
+    e = new URL(endpoint, typeof location !== "undefined" ? location.href : "http://localhost/");
+  } catch {
+    return false;
+  }
+  if (e.origin !== u.origin) return false;
+  const base = e.pathname.replace(/\/+$/, "");
+  return suffixes.some((sfx) => u.pathname === `${base}${sfx}` || (base === "" && sfx === "" && u.pathname === "/"));
 }
 
 /** How a URL is treated, or null for traffic the ledger doesn't track. */
@@ -136,6 +159,30 @@ export function classify(url: string): { host: string; category: LedgerCategory;
     return isLocalOrigin(u.href)
       ? { host, category: "local-ai", reason: "Ollama (this machine / LAN)" }
       : { host, category: "cloud-ai", reason: "Ollama on a remote server" };
+  }
+  // The configured endpoints, wherever they are hosted (a self-hosted
+  // LanguageTool, a research worker on any domain).
+  let grammar: string | null = null;
+  try {
+    grammar = grammarEndpoint();
+  } catch {
+    /* not configured */
+  }
+  if (atEndpoint(u, grammar)) {
+    return isLocalOrigin(u.href)
+      ? { host, category: "local-ai", reason: "LanguageTool (this machine / LAN)" }
+      : { host, category: "cloud-text", reason: "LanguageTool grammar check" };
+  }
+  let research: string | null = null;
+  try {
+    research = researchEndpoint();
+  } catch {
+    /* not configured */
+  }
+  if (atEndpoint(u, research, ["/extract", "/search"])) {
+    return isLocalOrigin(u.href)
+      ? { host, category: "local-ai", reason: "Research (local service)" }
+      : { host, category: "research", reason: "Research service" };
   }
   if (/\/(search|extract)(\?|$)/.test(u.pathname) && /research|searx/i.test(u.href)) {
     return isLocalOrigin(u.href)
@@ -178,17 +225,18 @@ export function withLedger(inner: typeof fetch): typeof fetch {
     const method = (init?.method ?? (input instanceof Request ? input.method : "GET")).toUpperCase();
     const bytesOut = bodySize(init?.body);
     if (blockedByPolicy(hit.category, policy)) {
-      const entry = record({ ...hit, method, bytesOut: 0, bytesIn: null, policy, decision: "blocked" });
-      onBlocked?.(entry);
+      const id = record({ ...hit, method, bytesOut: 0, bytesIn: null, policy, decision: "blocked" });
+      const entry = entries.find((x) => x.id === id);
+      if (entry) onBlocked?.(entry);
       throw new PrivacyBlockedError(hit.host, hit.reason);
     }
-    const entry = record({ ...hit, method, bytesOut, bytesIn: null, policy, decision: "allowed" });
+    const id = record({ ...hit, method, bytesOut, bytesIn: null, policy, decision: "allowed" });
     const res = await inner(input, init);
     const len = Number(res.headers.get("content-length"));
-    entry.bytesIn = Number.isFinite(len) && res.headers.has("content-length") ? len : null;
-    entry.status = res.status;
-    save();
-    emit();
+    patch(id, {
+      bytesIn: Number.isFinite(len) && res.headers.has("content-length") ? len : null,
+      status: res.status,
+    });
     return res;
   };
 }
@@ -220,6 +268,14 @@ export function clearLedger(): void {
     /* ignore */
   }
   emit();
+}
+
+/**
+ * Did this request actually leave the device? Local traffic stays, and a
+ * blocked attempt never reached the network.
+ */
+export function leftDevice(e: LedgerEntry): boolean {
+  return e.decision === "allowed" && e.category !== "local-ai";
 }
 
 /** Totals for the panel header. */
