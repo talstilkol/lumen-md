@@ -8,6 +8,9 @@ import { FakeDir, installFakeOpfs } from "./helpers/fakeOpfs";
 import { listWorkspace, readWorkspaceFile, renameWorkspaceFile, WorkspaceConflictError, workspaceHasEntry, writeWorkspaceFile } from "../storage/workspace";
 import { rewriteLinks } from "../storage/linkRewrite";
 import { safeMove, trashPaths, undoTrash } from "../storage/fileOps";
+import { renderToStaticMarkup } from "react-dom/server";
+import { renderMarkdownFast } from "../renderer/pipeline";
+import { createEmbedContext } from "../renderer/embeds";
 import { emptyTrash, listTrash, purgeExpiredTrash, restoreFromTrash, TRASH_KEEP_MS } from "../storage/trash";
 
 beforeEach(() => {
@@ -142,6 +145,43 @@ describe("link rewriting", () => {
     const r = await safeMove("Target.md", "Renamed.md");
     expect(r?.linksUpdated).toEqual(["a.md"]);
     expect(await readWorkspaceFile("a.md")).toBe("→ [[Renamed]]");
+  });
+
+  it("rewrites ![[embeds]] like links, keeping the heading, block and alias parts", () => {
+    const md = "![[Old]] ![[Old#Intro|x]] ![[old.md#^b]] ![[folder/Old#A#B]] ![[#Old]] `![[Old]]`";
+    expect(rewriteLinks(md, "n.md", "folder/Old.md", "notes/New.md")).toBe(
+      "![[New]] ![[New#Intro|x]] ![[New#^b]] ![[notes/New#A#B]] ![[#Old]] `![[Old]]`",
+    );
+    expect(rewriteLinks("![[pic.png|300]] ![[img/pic.png]]", "n.md", "img/pic.png", "img/photo.png")).toBe(
+      "![[photo.png|300]] ![[img/photo.png]]",
+    );
+  });
+
+  it("a short image embed is only rewritten when it named the moved file", () => {
+    const vault = ["b/pic.png", "a/pic.png", "n.md"];
+    expect(rewriteLinks("![[pic.png]]", "n.md", "a/pic.png", "a/photo.png", { vault })).toBe("![[pic.png]]");
+    expect(rewriteLinks("![[pic.png]]", "n.md", "b/pic.png", "b/photo.png", { vault })).toBe("![[photo.png]]");
+    // A note name still only matches notes.
+    expect(rewriteLinks("![[pic]]", "n.md", "pic.md", "pics.md", { vault: ["pic.png", "pic.md"] })).toBe("![[pics]]");
+  });
+
+  it("embeds keep working after their note and image are renamed", async () => {
+    await writeWorkspaceFile("Target.md", "# Target\n\n## Intro\n\nintro text\n\n## Other\n\nother text");
+    await writeWorkspaceFile("attachments/pic.png", "png");
+    await writeWorkspaceFile("host.md", "![[Target#Intro|the intro]]\n\n![[pic.png|300]]");
+    await safeMove("Target.md", "notes/Renamed.md");
+    await safeMove("attachments/pic.png", "attachments/photo.png");
+    const host = await readWorkspaceFile("host.md");
+    expect(host).toBe("![[Renamed#Intro|the intro]]\n\n![[photo.png|300]]");
+    const files = await Promise.all((await listWorkspace()).map(async (f) => ({ path: f.path, content: await readWorkspaceFile(f.path) })));
+    const embeds = createEmbedContext({ hostPath: "host.md", hostText: host, files, notice: (k) => k });
+    const root = document.createElement("div");
+    root.innerHTML = renderToStaticMarkup(renderMarkdownFast(host, { embeds }));
+    expect(root.querySelector<HTMLElement>(".lumen-embed")?.dataset.embedPath).toBe("notes/Renamed.md");
+    expect(root.querySelector(".lumen-embed-body")?.textContent).toContain("intro text");
+    expect(root.querySelector(".lumen-embed-body")?.textContent).not.toContain("other text");
+    expect(root.querySelector("img")?.getAttribute("data-lumen-path")).toBe("attachments/photo.png");
+    expect(root.querySelector(".lumen-embed-notice")).toBeNull();
   });
 
   it("safeMove asks before replacing, and an accepted replace is undoable", async () => {
