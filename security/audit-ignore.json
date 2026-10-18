@@ -1,0 +1,4 @@
+{
+  "$comment": "Time-limited exceptions to the npm audit gate (plan 2.8, scripts/audit-gate.mjs). Each entry: the advisory id (GHSA-...), the lockfile directory it applies to, why it cannot be fixed yet, who owns it and an expiry date (YYYY-MM-DD) at most 90 days out. An expired entry fails the gate. Empty means no exceptions.",
+  "ignore": []
+}
