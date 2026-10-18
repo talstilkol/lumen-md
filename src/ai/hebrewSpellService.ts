@@ -9,6 +9,12 @@ import { HEBREW_DICT_URL, hebrewRules } from "./hebrewSpell";
 import { hebrewRatio } from "../text/hebrew";
 
 const DICT_KEY = "lumen.dict.he.v1";
+/** Window event after the dictionary is installed or removed: open editors re-check. */
+export const DICTIONARY_CHANGED_EVENT = "lumen-hebrew-dictionary-changed";
+
+function announceDictionaryChange(): void {
+  if (typeof window !== "undefined") window.dispatchEvent(new Event(DICTIONARY_CHANGED_EVENT));
+}
 
 export async function hebrewDictionaryInstalled(): Promise<boolean> {
   try {
@@ -29,26 +35,38 @@ export async function downloadHebrewDictionary(fetchImpl: typeof fetch = fetch):
   if (!/^\d+\r?\n/.test(text)) throw new Error("not a hunspell .dic file");
   await set(DICT_KEY, text);
   resetWorker();
+  announceDictionaryChange();
   return Number.parseInt(text, 10);
 }
 
 export async function removeHebrewDictionary(): Promise<void> {
   await del(DICT_KEY);
   resetWorker();
+  announceDictionaryChange();
 }
 
 let worker: Worker | null = null;
 let ready: Promise<Worker | null> | null = null;
+/** The worker failed (load error, crash): check on the main thread from now on. */
+let broken = false;
 let seq = 0;
-const pending = new Map<number, (m: GrammarMatch[]) => void>();
+const pending = new Map<number, { text: string; resolve: (m: GrammarMatch[]) => void }>();
+
+/** Settle every outstanding check with the dictionary-free rules: a caller must never wait forever. */
+function settlePending(): void {
+  for (const { text, resolve } of pending.values()) resolve(hebrewRules(text));
+  pending.clear();
+}
 
 function resetWorker(): void {
   worker?.terminate();
   worker = null;
   ready = null;
+  settlePending();
 }
 
 function startWorker(): Promise<Worker | null> {
+  if (broken) return Promise.resolve(null);
   if (ready) return ready;
   ready = (async () => {
     const dic = await get<string>(DICT_KEY).catch(() => undefined);
@@ -56,9 +74,13 @@ function startWorker(): Promise<Worker | null> {
     const w = new Worker(new URL("./hebrewSpell.worker.ts", import.meta.url), { type: "module" });
     w.onmessage = (e: MessageEvent<{ type: string; id?: number; matches?: GrammarMatch[] }>) => {
       if (e.data.type === "result" && e.data.id !== undefined) {
-        pending.get(e.data.id)?.(e.data.matches ?? []);
+        pending.get(e.data.id)?.resolve(e.data.matches ?? []);
         pending.delete(e.data.id);
       }
+    };
+    w.onerror = () => {
+      broken = true;
+      resetWorker();
     };
     if (dic) w.postMessage({ type: "load", dic });
     worker = w;
@@ -73,7 +95,7 @@ export async function checkHebrew(text: string): Promise<GrammarMatch[]> {
   if (!w) return hebrewRules(text);
   const id = ++seq;
   return new Promise((resolve) => {
-    pending.set(id, resolve);
+    pending.set(id, { text, resolve });
     w.postMessage({ type: "check", id, text });
   });
 }
