@@ -264,6 +264,9 @@ describe("flushOpenDocsUnder", () => {
       const doc = useAppStore.getState().doc;
       expect(doc.dirty).toBe(true); // the newest text is still held, not cleared
       expect(doc.content).toMatch(/^typed \d+$/);
+      // Detached from the trashed path, so autosave can't recreate it.
+      expect(doc.workspaceName).toBeNull();
+      expect(useAppStore.getState().openTabs.some((t) => t.workspaceName?.startsWith("proj/"))).toBe(false);
     } finally {
       restore();
     }

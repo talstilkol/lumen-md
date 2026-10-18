@@ -126,7 +126,7 @@ export function FileTree({
     try {
       // Unsaved edits of every open note inside go with it (and come back on Undo / Ctrl+Z).
       const { items, settled } = await trashWithOpenEdits(paths, Object.fromEntries(paths.map((p) => [p, kindOf(p)])));
-      // Not settled: the open note's newest text is only in memory; keep it.
+      // Not settled: the open note was kept, detached, as an unsaved note with its newest text.
       if (settled && activePath && paths.some((p) => activePath === p || activePath.startsWith(p + "/"))) onActiveDeleted();
       announceTrash(items);
     } catch (e) {
@@ -345,7 +345,7 @@ export function FileTree({
       // included, and edits typed while it moves (they come back on Undo / Ctrl+Z).
       const { items, settled } = await trashWithOpenEdits([node.path], { [node.path]: node.kind === "directory" ? "directory" : "file" });
       announceTrash(items);
-      // Not settled: the open note's newest text is only in memory; keep it.
+      // Not settled: the open note was kept, detached, as an unsaved note with its newest text.
       if (
         settled &&
         activePath &&

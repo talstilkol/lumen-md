@@ -121,7 +121,28 @@ export async function trashWithOpenEdits(
       }
     }
   });
+  // Its text kept changing: keep it in memory as an unsaved note, detached from
+  // the trashed path, so autosave does not recreate the deleted file.
+  if (!settled) detachActiveUnder(paths);
   return { items, settled };
+}
+
+/** The active note under `paths` becomes an ad-hoc note (same text, no workspace path). */
+function detachActiveUnder(paths: string[]): void {
+  useAppStore.setState((state) => {
+    const ws = state.doc.workspaceName;
+    if (!ws || !paths.some((p) => ws === p || ws.startsWith(p + "/"))) return state;
+    const file = ws.split("/").pop() || ws;
+    const stem = file.replace(/(\.[^./]+)$/, "");
+    const ext = file.slice(stem.length) || ".md";
+    let name = file;
+    for (let i = 2; state.openTabs.some((t) => t.id === name); i++) name = `${stem} ${i}${ext}`;
+    moveTabRuntimes([[ws, name]]);
+    return {
+      doc: { ...state.doc, name, workspaceName: null, handle: undefined },
+      openTabs: state.openTabs.map((t) => (t.id === ws ? { ...t, id: name, name, workspaceName: null } : t)),
+    };
+  });
 }
 
 /**
