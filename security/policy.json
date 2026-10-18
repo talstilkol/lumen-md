@@ -1,0 +1,282 @@
+{
+  "about": "The one source of Lumen's Content-Security-Policy and security headers. Edit this file, then run `npm run headers:write` (rewrites the policy values in every file listed under `sources`) and commit both. `npm run headers` (CI) fails when any source differs. Why each value is what it is: docs/security/headers.md.",
+  "routes": {
+    "app": {
+      "kind": "document",
+      "why": "The editor: index.html and every SPA route. No eval on the page (Graphviz, ruby.wasm and the TypeScript checker run in workers with their own policy); WebAssembly compiles ('wasm-unsafe-eval'). Trusted Types guard every DOM sink (src/lib/trustedTypes.ts).",
+      "samples": ["/", "/index.html", "/notes/some-doc"],
+      "csp": {
+        "default-src": ["'self'"],
+        "script-src": ["'self'", "'wasm-unsafe-eval'"],
+        "style-src": ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+        "font-src": ["'self'", "data:", "https://fonts.gstatic.com", "https://cdn.tldraw.com"],
+        "img-src": ["'self'", "data:", "blob:", "https:"],
+        "media-src": ["'self'", "blob:", "https:"],
+        "connect-src": [
+          "'self'",
+          "blob:",
+          "data:",
+          "ws:",
+          "wss:",
+          "https://api.openai.com",
+          "https://api.anthropic.com",
+          "https://generativelanguage.googleapis.com",
+          "https://api.mistral.ai",
+          "http://localhost:11434",
+          "http://127.0.0.1:11434",
+          "http://localhost:8787",
+          "http://127.0.0.1:8787",
+          "http://localhost:8010",
+          "http://127.0.0.1:8010",
+          "https://api.languagetool.org",
+          "https://kroki.io",
+          "https://oauth2.googleapis.com",
+          "https://www.googleapis.com",
+          "https://api.dropboxapi.com",
+          "https://content.dropboxapi.com",
+          "https://github.com",
+          "https://api.github.com",
+          "https://huggingface.co",
+          "https://*.huggingface.co",
+          "https://cdn-lfs.huggingface.co",
+          "https://*.hf.co",
+          "https://raw.githubusercontent.com",
+          "https://cdn.tldraw.com",
+          "https://www.gstatic.com",
+          "https://fonts.googleapis.com",
+          "https://fonts.gstatic.com",
+          "https://*.supabase.co",
+          "https://*.sentry.io"
+        ],
+        "worker-src": ["'self'", "blob:"],
+        "frame-src": [
+          "'self'",
+          "data:",
+          "https://www.youtube.com",
+          "https://www.youtube-nocookie.com",
+          "https://player.vimeo.com",
+          "https://www.loom.com",
+          "https://codepen.io",
+          "https://codesandbox.io",
+          "https://www.figma.com",
+          "https://open.spotify.com",
+          "https://www.google.com",
+          "https://maps.google.com",
+          "https://www.openstreetmap.org",
+          "https://platform.twitter.com",
+          "https://www.facebook.com",
+          "https://www.instagram.com",
+          "https://www.tiktok.com",
+          "https://www.redditmedia.com",
+          "https://www.reddit.com",
+          "https://www.linkedin.com",
+          "https://gist.github.com",
+          "https://w.soundcloud.com"
+        ],
+        "object-src": ["'none'"],
+        "base-uri": ["'self'"],
+        "form-action": ["'self'"],
+        "frame-ancestors": ["'none'"],
+        "require-trusted-types-for": ["'script'"],
+        "trusted-types": ["lumen", "default", "dompurify", "lit-html", "iconify", "ProseMirrorClipboard", "'allow-duplicates'"]
+      }
+    },
+    "playground-runner": {
+      "kind": "document",
+      "frameable": true,
+      "why": "Web Playground runner: the page inside the playground block's sandboxed iframe (sandbox=\"allow-scripts\", opaque origin). Runs the user's own project: blob: modules (the linked project files) and eval (Vue's template compiler); framed by the app only.",
+      "samples": ["/playground-runner.html"],
+      "csp": {
+        "default-src": ["'none'"],
+        "script-src": ["'self'", "blob:", "'unsafe-eval'"],
+        "style-src": ["'self'", "'unsafe-inline'"],
+        "img-src": ["*", "data:", "blob:"],
+        "media-src": ["*", "data:", "blob:"],
+        "font-src": ["'self'", "data:"],
+        "connect-src": ["'self'"],
+        "frame-ancestors": ["'self'"],
+        "base-uri": ["'none'"],
+        "form-action": ["'none'"]
+      }
+    },
+    "livejs-runner": {
+      "kind": "document",
+      "frameable": true,
+      "why": "live-js runner (T48): hidden sandboxed iframe (opaque origin). The user's code runs in a blob: worker that inherits this policy: eval for the code itself and no network at all. The fixed public nonce is for WebKit, which does not match 'self' in an opaque-origin frame (vite.config.ts html.cspNonce adds it to the page's script tags).",
+      "samples": ["/livejs-runner.html"],
+      "csp": {
+        "default-src": ["'none'"],
+        "script-src": ["'self'", "'nonce-lumen-livejs-runner'", "blob:", "'unsafe-eval'"],
+        "worker-src": ["blob:"],
+        "connect-src": ["'none'"],
+        "img-src": ["'none'"],
+        "style-src": ["'none'"],
+        "frame-ancestors": ["'self'"],
+        "base-uri": ["'none'"],
+        "form-action": ["'none'"]
+      }
+    },
+    "tesseract": {
+      "kind": "worker",
+      "why": "On-device OCR (T31): the tesseract.js worker and its wasm cores. A dedicated worker takes the policy of its own response; the app's Trusted Types requirement would block the worker's importScripts() of the core. Language models come from raw.githubusercontent.com on first use.",
+      "samples": ["/tesseract/worker.min.js"],
+      "csp": {
+        "default-src": ["'none'"],
+        "script-src": ["'self'", "'wasm-unsafe-eval'"],
+        "connect-src": ["'self'", "https://raw.githubusercontent.com"],
+        "worker-src": ["'self'", "blob:"],
+        "base-uri": ["'none'"],
+        "form-action": ["'none'"]
+      }
+    },
+    "eval-workers": {
+      "kind": "worker",
+      "why": "Worker scripts that need eval, each served with its own policy so the page allows none: Graphviz (Emscripten embind builds its bindings with new Function), ruby.wasm, the TypeScript checker, and webR's worker under /webr/ (R.js evaluates EM_ASM code of side modules and webr::eval_js with eval). Their network is the app's own origin only.",
+      "samples": [
+        "/assets/graphviz.worker-AbC123.js",
+        "/assets/ruby.worker-AbC123.js",
+        "/assets/tsCheck.worker-AbC123.js",
+        "/webr/webr-worker.js"
+      ],
+      "csp": {
+        "default-src": ["'self'"],
+        "script-src": ["'self'", "'unsafe-eval'", "'wasm-unsafe-eval'"],
+        "connect-src": ["'self'", "blob:", "data:"],
+        "worker-src": ["'self'", "blob:"],
+        "object-src": ["'none'"],
+        "base-uri": ["'none'"]
+      }
+    }
+  },
+  "headers": {
+    "X-Content-Type-Options": {
+      "value": "nosniff",
+      "required": { "kinds": ["document", "worker"] }
+    },
+    "X-Frame-Options": {
+      "value": "DENY",
+      "why": "Legacy twin of frame-ancestors 'none'. Nothing frames the app; the two runner pages are framed by the app and must not carry it (they use frame-ancestors 'self').",
+      "required": { "kinds": ["document"], "notFrameable": true }
+    },
+    "Referrer-Policy": {
+      "value": "strict-origin-when-cross-origin",
+      "required": { "kinds": ["document"] }
+    },
+    "Permissions-Policy": {
+      "value": "interest-cohort=(), geolocation=(), microphone=(self), camera=()",
+      "why": "Microphone for dictation and voice memos (getUserMedia({ audio: true }) in src/ui/VoiceDictation.tsx). Nothing in the app uses the camera or geolocation, so both are off.",
+      "required": { "kinds": ["document"] }
+    },
+    "Strict-Transport-Security": {
+      "value": "max-age=63072000; includeSubDomains; preload",
+      "hosts": ["cloudflare", "vercel"],
+      "why": "Only the managed HTTPS hosts send it. The nginx images listen on plain HTTP behind the operator's TLS terminator; includeSubDomains + preload on someone else's domain is their decision.",
+      "required": { "kinds": ["document"] }
+    },
+    "Cross-Origin-Opener-Policy": {
+      "value": "same-origin",
+      "hosts": ["deploy-nginx"],
+      "why": "Only the root Dockerfile image (deploy/nginx.conf) opts into cross-origin isolation (multi-threaded WebAssembly). See docs/security/headers.md for its cost.",
+      "required": { "kinds": ["document"] }
+    },
+    "Cross-Origin-Embedder-Policy": {
+      "value": "credentialless",
+      "hosts": ["deploy-nginx"],
+      "why": "Pairs with Cross-Origin-Opener-Policy on the deploy image; every document and worker it serves carries it so nested frames and workers stay loadable.",
+      "required": { "kinds": ["document", "worker"] }
+    }
+  },
+  "hosts": {
+    "cloudflare": {
+      "why": "public/_headers: Cloudflare Pages (and Netlify, which applies dist/_headers but cannot detach headers). The build copies it to dist/_headers and adds the deployment's endpoint origins to every connect-src (src/build/cspEndpoints.ts)."
+    },
+    "vercel": {
+      "why": "vercel.json headers."
+    },
+    "docker-nginx": {
+      "why": "docker/nginx.conf: the on-prem web shell (docker/Dockerfile.web, docker-compose.yml).",
+      "csp": [
+        {
+          "routes": ["app"],
+          "add": { "connect-src": ["__CSP_CONNECT_EXTRA__"] },
+          "why": "Placeholder that docker/Dockerfile.web replaces with the deployment's endpoint origins (dist/.csp-connect-extra, written by the Vite CSP plugin)."
+        }
+      ]
+    },
+    "deploy-nginx": {
+      "why": "deploy/nginx.conf + deploy/lumen-runtime-headers.conf: the root Dockerfile image (fly.toml).",
+      "csp": [
+        {
+          "routes": ["app"],
+          "add": { "connect-src": ["__CSP_CONNECT_EXTRA__"] },
+          "why": "Placeholder that the root Dockerfile replaces with the deployment's endpoint origins (dist/.csp-connect-extra, written by the Vite CSP plugin). Without it the header, enforced next to the meta CSP, blocks the configured endpoints."
+        }
+      ]
+    },
+    "meta": {
+      "why": "<meta http-equiv> copies in the HTML pages. They also cover the contexts that send no header (Vite dev, Tauri, Capacitor) and are enforced next to the header everywhere else.",
+      "csp": [
+        {
+          "routes": "*",
+          "omit": ["frame-ancestors"],
+          "why": "Ignored in <meta> (CSP3); browsers log an error for it."
+        },
+        {
+          "routes": "*",
+          "omit": ["require-trusted-types-for", "trusted-types"],
+          "why": "Trusted Types are enforced by the production response headers only; the dev server, Tauri and Capacitor webviews have not been verified under them."
+        }
+      ]
+    },
+    "tauri": {
+      "why": "src-tauri/tauri.conf.json app.security.csp. Tauri sends it only with .html assets (tauri crate: manager get_asset), so workers keep their own needs; index.html's meta policy is enforced next to it.",
+      "csp": [
+        {
+          "routes": ["app"],
+          "omit": ["frame-ancestors", "require-trusted-types-for", "trusted-types"],
+          "why": "A top-level desktop window is never framed (and on Linux Tauri injects the policy as <meta>); Trusted Types as for meta."
+        },
+        {
+          "routes": ["app"],
+          "add": { "connect-src": ["ipc:", "http://ipc.localhost", "https:"] },
+          "why": "ipc: / http://ipc.localhost are Tauri 2's IPC protocol (macOS and Linux / Windows). https: because this policy is compiled from tauri.conf.json and cannot receive the deployment's endpoint origins at build time; the meta policy, which does, still holds the page to the explicit list."
+        }
+      ]
+    }
+  },
+  "sources": {
+    "public/_headers": { "format": "headers-file", "host": "cloudflare" },
+    "vercel.json": { "format": "vercel", "host": "vercel" },
+    "docker/nginx.conf": {
+      "format": "nginx",
+      "host": "docker-nginx",
+      "blocks": {
+        "location /": "app",
+        "location ~ ^/(webr|ruby|pyodide|playground)/": "eval-workers",
+        "location = /playground-runner.html": "playground-runner",
+        "location = /livejs-runner.html": "livejs-runner",
+        "location ^~ /tesseract/": "tesseract",
+        "location ~ ^/assets/(graphviz|ruby|tsCheck)\\.worker-": "eval-workers"
+      }
+    },
+    "deploy/nginx.conf": {
+      "format": "nginx",
+      "host": "deploy-nginx",
+      "blocks": {
+        "http": "app",
+        "location = /playground-runner.html": "playground-runner",
+        "location = /livejs-runner.html": "livejs-runner",
+        "location ^~ /tesseract/": "tesseract",
+        "location ~ ^/assets/(graphviz|ruby|tsCheck)\\.worker-": "eval-workers"
+      }
+    },
+    "deploy/lumen-runtime-headers.conf": {
+      "format": "nginx",
+      "host": "deploy-nginx",
+      "blocks": { "(file)": "eval-workers" }
+    },
+    "index.html": { "format": "meta", "host": "meta", "route": "app" },
+    "livejs-runner.html": { "format": "meta", "host": "meta", "route": "livejs-runner" },
+    "src-tauri/tauri.conf.json": { "format": "tauri", "host": "tauri", "route": "app" }
+  }
+}

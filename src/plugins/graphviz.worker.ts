@@ -2,8 +2,8 @@
  * Graphviz layout in a Worker (F4 / P3). @hpcc-js/wasm's Emscripten embind
  * builds its bindings with `new Function`, which needs 'unsafe-eval'. Off
  * the main thread, that permission is granted to this worker's own script
- * only (its response carries its own CSP: public/_headers, vercel.json,
- * docker/nginx.conf), so the app's page CSP no longer allows eval at all.
+ * only (its response carries its own CSP: route eval-workers in
+ * security/policy.json), so the app's page CSP no longer allows eval at all.
  *
  *   → { id, dot, engine }   ← { id, svg } | { id, error }
  */
