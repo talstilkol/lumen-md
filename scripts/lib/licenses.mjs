@@ -357,6 +357,9 @@ const escapeRe = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 /** A model token inside source text: not glued to more letters/digits on either side. */
 export const tokenRegex = (token) => new RegExp(`(?<![A-Za-z0-9])${escapeRe(token)}(?![A-Za-z0-9])`, "i");
 
+/** A model id for exact comparison: case, surrounding space and a `:latest` tag do not count. */
+export const normalizeModelId = (id) => String(id).trim().toLowerCase().replace(/:latest$/, "");
+
 /** Where any of the entry's tokens (its id and `match`) occurs → [{ file, line }]. */
 export function findReferences(entry, sources) {
   const res = [entry.id, ...(entry.match ?? [])].map(tokenRegex);
@@ -429,8 +432,11 @@ export function checkModels(registry, sources) {
     findings.push({ area: "model", name: e.id, license: e.license, class: e.class, kind: e.kind, runs: e.runs, level, reason, refs });
   }
   const valid = entries.filter((e) => validateEntry(e).length === 0);
+  // Coverage is by exact id: a fine-tune named after a registered model
+  // ("Qwen3-4B-Proprietary-Finetune") can carry another licence. Only an
+  // entry's explicit `match` aliases cover a family.
   for (const { id, file } of discoverCatalogIds(sources)) {
-    const covered = valid.some((e) => [e.id, ...(e.match ?? [])].some((t) => tokenRegex(t).test(id)));
+    const covered = valid.some((e) => normalizeModelId(e.id) === normalizeModelId(id) || (e.match ?? []).some((t) => tokenRegex(t).test(id)));
     if (!covered) findings.push({ area: "model", name: id, license: "", class: "unknown", level: "warn", reason: `in an app catalog (${file}) but not in models/registry.json`, refs: [{ file, line: 0 }] });
   }
   return findings;

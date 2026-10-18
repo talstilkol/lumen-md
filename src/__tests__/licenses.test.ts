@@ -218,6 +218,22 @@ describe("model registry", () => {
     expect(r["Brand-New-2B"].reason).toMatch(/not in models\/registry\.json/);
   });
 
+  it("covers a catalog id only by its exact id or an explicit `match` alias", () => {
+    const catalog = [
+      {
+        file: "src/ai/modelManager.ts",
+        text: ['{ base: "Qwen2.5-3B-Proprietary-Finetune" }', '{ base: "good-model-1b-uncensored" }', '{ base: "GOOD-MODEL-1B" }', '{ base: "nc-model:70b" }'].join(",\n"),
+      },
+    ];
+    const r = byName(checkModels(clone(registryFixture), catalog));
+    // A fine-tune named after a registered model can carry another licence.
+    expect(r["Qwen2.5-3B-Proprietary-Finetune"]).toMatchObject({ level: "warn", reason: expect.stringMatching(/not in models\/registry\.json/) });
+    expect(r["good-model-1b-uncensored"]).toMatchObject({ level: "warn" });
+    // Case-insensitive exact id, and the family alias `match: ["nc-model"]`, still cover.
+    expect(r["GOOD-MODEL-1B"]).toBeUndefined();
+    expect(r["nc-model:70b"]).toBeUndefined();
+  });
+
   it("the committed registry is valid and covers every model in the app catalogs", () => {
     const registry = JSON.parse(readFileSync(join(repo, "models/registry.json"), "utf8"));
     const catalogSources = CATALOG_PATTERNS.map((p: { file: string }) => ({ file: p.file, text: readFileSync(join(repo, p.file), "utf8") }));
