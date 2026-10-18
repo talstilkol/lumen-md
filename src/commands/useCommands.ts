@@ -1614,14 +1614,19 @@ export function useCommands({
             return;
           }
           const content = useAppStore.getState().doc.content;
+          // why: claim the reading before any await — a second press while voices load or the prompt is open stops it, never starts a second one
+          const run = tts.beginSpeaking();
           await tts.voicesReady(); // why: the list is empty until voiceschanged on a fresh page
+          if (!tts.isCurrentRun(run)) return;
           // No voice on this device, but the browser offers network voices: ask once (never under local-only).
           if (!tts.hasLocalVoiceFor(content, getLocale()) && tts.offersNetworkVoices() && !tts.networkVoicesAllowed() && getAiPolicy() !== "local-only") {
             const yes = await uiConfirm({ title: t("tts.networkVoice.title"), message: t("tts.networkVoice.body"), okLabel: t("tts.networkVoice.ok") });
             if (yes) tts.allowNetworkVoices();
+            if (!tts.isCurrentRun(run)) return;
           }
           const ok = await tts
             .speak(content, {
+              run,
               uiLang: getLocale(),
               onSentence: (s) => window.dispatchEvent(new CustomEvent("lumen-speech-range", { detail: { from: s.from, to: s.to } })),
             })
