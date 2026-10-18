@@ -1,53 +1,36 @@
 ---
-title: Vault + recovery phrase
-description: Encrypt your secrets at rest, recover without losing access.
+title: Secrets and encryption
+description: How Lumen stores API keys and tokens, and how to encrypt a document.
 ---
 
-Lumen's **Vault** stores the secrets the app needs (OpenAI key, Git
-token, Dropbox / Google Drive refresh tokens, signing keys) encrypted
-with a single user-chosen password. The encrypted blob lives in
-IndexedDB; only the in-memory decrypted copy is ever visible to the
-running session.
+Lumen keeps the secrets it needs — AI provider keys, Git and cloud tokens,
+the collaboration room password, the research search key — out of plain
+browser storage. There is **no password-protected vault and no recovery
+phrase**; an earlier draft of these docs described one that was never shipped.
 
-## First run
+## Where secrets live
 
-When you create the vault Lumen shows you a **12-word recovery phrase**
-generated from BIP-39 wordlist. Two things to know:
+| Where Lumen runs | How secrets are stored |
+|---|---|
+| Browser / installed web app | Each secret is encrypted with AES-GCM-256 under a WebCrypto key that is **non-extractable** and lives only in IndexedDB. A copied browser profile or a storage export does not reveal the secrets. |
+| Desktop app on macOS / Windows | The operating system's keychain (Keychain / Credential Manager). Lumen keeps only the secret names, so it knows what to load. |
+| Old engines without IndexedDB or WebCrypto | Plain localStorage, as before. Lumen reports this mode instead of hiding it. |
 
-1. Lumen never stores the phrase itself — only its hash. You're the only
-   one who can present the phrase later.
-2. **Write it down somewhere off-device.** Lose both the password AND
-   the phrase and the encrypted secrets are unrecoverable.
+**Honest limit:** this protects data at rest. Code running inside Lumen's own
+origin could still ask WebCrypto to decrypt; the Content Security Policy and
+the HTML sanitizer are what keep foreign code out.
 
-## Daily use
+Plain-text secrets left by older versions are encrypted and moved at startup.
 
-- The first action of a session that needs a secret prompts for your
-  password. The decrypted secret stays in memory until the tab is closed.
-- `⌘K → Lock vault` clears the in-memory copy without closing the tab.
+## Encrypting a document
 
-## Forgot password?
+`⌘K → 🔒 Encrypt Document` encrypts the open note with AES-256-GCM under a
+password you type. The note is replaced by an encrypted block; `Decrypt
+Document` restores it. Lumen does not keep the password — lose it and the
+note cannot be recovered.
 
-`⌘K → Vault: Recover with phrase` flow:
+## What is not encrypted
 
-1. Type your 12-word recovery phrase.
-2. Lumen verifies the hash matches.
-3. Set a new password.
-4. Existing secrets are re-wrapped under the new key — no data lost.
-
-## What's NOT in the vault
-
-- Your notes themselves (they live in OPFS as plain markdown).
-- Per-document encryption (`⌘K → Encrypt document` is a separate flow:
-  AES-GCM-256 with a per-document password, output as a fenced block at
-  the top of the file).
-
-## Rotation
-
-Rotate the password monthly:
-
-1. `⌘K → Vault: Change password`.
-2. Type old → new.
-3. The recovery phrase stays the same (it's the source of truth).
-
-Rotating the recovery phrase is irreversible — make sure you have the
-new phrase written down before confirming.
+Your notes themselves are plain Markdown files (in the browser's private
+file system, or a folder on desktop). Encrypting the whole vault at rest is
+planned as an option (plan task 11.4).
