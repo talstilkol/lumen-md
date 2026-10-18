@@ -73,10 +73,13 @@ describe("SandboxedWorker", () => {
 
 describe("live-js worker lockdown", () => {
   it("removes network and storage APIs before user code runs", () => {
-    for (const api of ["fetch", "XMLHttpRequest", "WebSocket", "WebSocketStream", "EventSource", "WebTransport", "importScripts", "indexedDB", "caches"]) {
+    for (const api of ["fetch", "XMLHttpRequest", "WebSocket", "WebSocketStream", "EventSource", "WebTransport", "importScripts", "indexedDB", "caches", "FontFace", "ShadowRealm"]) {
       expect(WORKER_SOURCE).toContain(`"${api}"`);
     }
-    expect(WORKER_SOURCE.indexOf("Object.getPrototypeOf(o)")).toBeLessThan(WORKER_SOURCE.indexOf("var runner = new Function("));
+    expect(WORKER_SOURCE.indexOf("Object.getPrototypeOf(o)")).toBeLessThan(WORKER_SOURCE.indexOf("var runner = new MakeFunction("));
+    // The import-word check runs before the source is compiled.
+    expect(WORKER_SOURCE.indexOf("hasImportWord(source)")).toBeGreaterThan(0);
+    expect(WORKER_SOURCE.indexOf("hasImportWord(source)")).toBeLessThan(WORKER_SOURCE.indexOf("var runner = new MakeFunction("));
   });
 });
 
