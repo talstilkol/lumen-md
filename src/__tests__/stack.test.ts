@@ -6,7 +6,7 @@
  */
 import { describe, it, expect } from "vitest";
 import { execFileSync, spawnSync } from "node:child_process";
-import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { chmodSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import prsFixture from "./fixtures/stack/prs.json";
@@ -64,6 +64,13 @@ describe("buildForest", () => {
     const f = buildForest([pr(12, "q", "p"), pr(11, "p", "q"), pr(13, "r", "q")]);
     expect(nums(f.roots)).toEqual([11]);
     expect(flatten(f.roots[0]).map((r: { node: Node }) => r.node.number)).toEqual([11, 12, 13]);
+  });
+
+  it("finds the chain-carrying (oldest) PR by its head branch, whatever the API order", () => {
+    const pr = (number: number, head: string, base: string) => ({ number, head: { ref: head, sha: head }, base: { ref: base } });
+    const f = buildForest([pr(31, "b", "release"), pr(30, "b", "main"), pr(32, "c", "b")]);
+    expect(findNode(f, "b").number).toBe(30);
+    expect(restackPlan(f, "b").steps.map((s: { number: number }) => s.number)).toEqual([32]);
   });
 
   it("uses the oldest of two open PRs from one branch as the parent", () => {
@@ -191,7 +198,10 @@ describe("scripts/stack.mjs restack (fallback, local repo)", () => {
     const prs = join(dir, "prs.json");
     writeFileSync(prs, JSON.stringify([pr(1, "a", "main", old.a), pr(2, "b", "a", old.b), pr(3, "c", "b", old.c)]));
     const run = (...a: string[]) => spawnSync(process.execPath, [join(repo, "scripts/stack.mjs"), "restack", "a", "--prs", prs, ...a], { cwd: work, env: e, encoding: "utf8" });
-    return { dir, work, g, old, run };
+    // Any branch, any env (e.g. a fake gh on PATH).
+    const runOn = (branch: string, extraEnv: Record<string, string | undefined>, ...a: string[]) =>
+      spawnSync(process.execPath, [join(repo, "scripts/stack.mjs"), "restack", branch, "--prs", prs, ...a], { cwd: work, env: { ...e, ...extraEnv }, encoding: "utf8" });
+    return { dir, work, g, old, run, runOn };
   }
 
   it("--dry-run prints the plan and changes nothing", () => {
@@ -320,6 +330,60 @@ describe("scripts/stack.mjs restack (fallback, local repo)", () => {
       // The amend itself (GitHub has the pre-amend tip, which a's reflog holds) is still fine.
       prs(old.a);
       expect(run("--dry-run").status).toBe(0);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it("a moving parent amended after its child branched: the child's old base comes from the child", () => {
+    const { dir, g, old, run } = setup();
+    try {
+      // b is amended too (after c was made from the old b), then a's restack moves both.
+      g("checkout", "-q", "b");
+      writeFileSync(join(dir, "repo", "b.txt"), "b2\n");
+      g("commit", "-q", "-a", "--amend", "-m", "b2");
+      g("checkout", "-q", "main");
+      const plan = run("--dry-run");
+      expect(plan.stdout).toContain(`#3 git -C ${join(dir, "wt-c")} rebase --onto b ${old.b}   # old base: PR #2 head on GitHub`);
+      const r = run();
+      expect(r.status).toBe(0);
+      expect(g("log", "--format=%s", "main..c").split("\n")).toEqual(["c", "b2", "a2"]);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it("an amended top branch is still pushed when nothing is stacked on it", () => {
+    const { dir, g, old, runOn } = setup();
+    try {
+      execFileSync("git", ["-C", join(dir, "wt-c"), "commit", "-q", "--amend", "-m", "c2"], { env: { ...process.env, ...env(dir) } });
+      const r = runOn("c", {});
+      expect(r.status).toBe(0);
+      expect(r.stdout).toContain("Nothing is stacked on c (#3)");
+      expect(r.stdout).toContain(`git push --force-with-lease=c:${old.c} origin c`);
+      expect(g("log", "--format=%s", "-1", "c")).toBe("c2");
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it("gh stack: gets the same --remote as the push; --old-base is honoured by the fallback, not dropped", () => {
+    const { dir, g, old, runOn } = setup();
+    try {
+      const bin = join(dir, "bin");
+      mkdirSync(bin);
+      writeFileSync(join(bin, "gh"), `#!/bin/sh\necho "$@" >> "${join(dir, "gh.log")}"\nexit 0\n`);
+      chmodSync(join(bin, "gh"), 0o755);
+      const ghEnv = { PATH: `${bin}:${process.env.PATH}`, LUMEN_STACK_NO_GH_STACK: "" };
+      const r = runOn("a", ghEnv, "--remote", "upstream");
+      expect(r.status).toBe(0);
+      expect(readFileSync(join(dir, "gh.log"), "utf8")).toContain("stack rebase --upstack --remote upstream a");
+      writeFileSync(join(dir, "gh.log"), "");
+      const withBase = runOn("a", ghEnv, "--old-base", old.a);
+      expect(withBase.status).toBe(0);
+      expect(withBase.stdout).toContain("--old-base: gh stack has no equivalent; using git rebase --onto.");
+      expect(readFileSync(join(dir, "gh.log"), "utf8")).not.toContain("stack rebase");
+      expect(g("log", "--format=%s", "main..b").split("\n")).toEqual(["b", "a2"]);
     } finally {
       rmSync(dir, { recursive: true, force: true });
     }

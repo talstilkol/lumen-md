@@ -107,7 +107,14 @@ node scripts/stack.mjs restack feat/hebrew-core --push      # …and run them
   PR's head on GitHub is in the child's history and closest to it (a stale
   `origin/<branch>` would replay the parent's newer commits as the child's),
   else the fork point from the reflog, else the merge base. For higher
-  layers it is the tip recorded before the run, which is exact.
+  layers it is the parent's tip recorded before the run, when the child
+  contains it; a parent amended after its child branched is not in the
+  child's history, so its old base is then found the same way as for the
+  first layer.
+- `--old-base` is honoured by the `git rebase --onto` fallback only: with it,
+  `gh stack` is not used (it has no equivalent). `--remote` goes to both
+  `gh stack rebase` and `gh stack push`.
+- An amended top PR (nothing stacked on it) still gets its push.
 - **Worktrees.** A branch checked out in another worktree is rebased in that
   worktree (`git -C <path> rebase …`), which must be clean. Other branches
   are checked out in the current worktree, which must be clean too

@@ -34,10 +34,12 @@ export function buildForest(prs) {
     if (!byHead.has(n.head)) byHead.set(n.head, []);
     byHead.get(n.head).push(n);
   }
+  // Two open PRs from one branch is unusual; the oldest one carries the
+  // chain, so every lookup by head (findNode, the CLI) takes the first.
+  for (const list of byHead.values()) list.sort((a, b) => a.number - b.number);
   for (const n of nodes) {
     const candidates = (byHead.get(n.base) ?? []).filter((p) => p !== n);
-    // Two open PRs from one branch is unusual; the oldest one carries the chain.
-    const parent = candidates.sort((a, b) => a.number - b.number)[0];
+    const parent = candidates[0];
     if (parent) n.parent = parent;
   }
   // A cycle (a → b → a) has no root; break it at its lowest-numbered PR.

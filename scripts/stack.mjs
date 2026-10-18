@@ -214,9 +214,12 @@ async function restack() {
     process.exit(1);
   }
 
-  if (ghStackAvailable() && !dry) {
+  // gh stack has no old-base override: an explicit --old-base is honoured by the fallback only.
+  if (opt("--old-base") && !dry && ghStackAvailable()) console.log("--old-base: gh stack has no equivalent; using git rebase --onto.\n");
+  if (!opt("--old-base") && ghStackAvailable() && !dry) {
     const env = { ...process.env, GH_STACK_NO_UPDATE_NOTIFIER: "1" };
-    const r = spawnSync("gh", ["stack", "rebase", "--upstack", branch], { stdio: "inherit", env });
+    // The same remote for the fetch the rebase starts from as for the push.
+    const r = spawnSync("gh", ["stack", "rebase", "--upstack", "--remote", remote, branch], { stdio: "inherit", env });
     if (r.status === 0) {
       if (doPush) process.exit(spawnSync("gh", ["stack", "push", "--remote", remote], { stdio: "inherit", env }).status ?? 1);
       console.log("\nRebased with gh stack. To push: gh stack push");
@@ -232,7 +235,9 @@ async function restack() {
   for (const f of foreign) console.log(`  #${f.number} ${f.branch} (from ${f.repo || "a fork"}): a fork's PR on ${f.parent}, not restacked here; its author rebases it.`);
   if (!steps.length) {
     console.log(`Nothing is stacked on ${branch} (#${start.number})${foreign.length ? " in this repository" : ""}.`);
-    return;
+    // An amended top branch still has its own push to make (below).
+    const amended = start.headSha && gitOk("rev-parse", "--verify", "-q", `refs/heads/${start.head}`) && git("rev-parse", start.head) !== start.headSha;
+    if (!amended) return;
   }
   for (const b of [start.head, ...steps.map((s) => s.branch)]) {
     if (!gitOk("rev-parse", "--verify", "-q", `refs/heads/${b}`)) {
@@ -241,7 +246,7 @@ async function restack() {
     }
   }
   const here = git("rev-parse", "--show-toplevel");
-  if (!dry && !clean(here)) {
+  if (steps.length && !dry && !clean(here)) {
     console.error(`stack: this worktree has uncommitted changes or untracked files (${dirtyList(here)}); commit, move or remove them first (the restack checks branches out here).`);
     process.exit(1);
   }
@@ -261,7 +266,7 @@ async function restack() {
   };
   const command = (p) => `git ${argsOf(p.s, p.oldBase).map(sh).join(" ")}`;
 
-  console.log(`Restack ${steps.length} PR(s) above ${start.head} (#${start.number})${dry ? " — dry run" : ""}:`);
+  if (steps.length) console.log(`Restack ${steps.length} PR(s) above ${start.head} (#${start.number})${dry ? " — dry run" : ""}:`);
   // The whole plan first, before anything moves: a layer's old base is
   // known up front (branches this run moves were built on the tip recorded
   // above), so every worktree can be checked and every recovery command is exact.
@@ -273,7 +278,14 @@ async function restack() {
       console.log(`  #${s.number} ${s.branch}: already on ${s.parent}`);
       continue;
     }
-    const { sha: oldBase, how } = parentMoves ? { sha: oldTip.get(s.parent), how: `old tip of ${s.parent}` } : oldBaseFor(nodeOf(s.parent), s.branch, remote, s.parent === start.head ? opt("--old-base") : undefined);
+    // A moving parent's recorded tip is the old base only if the child was
+    // built on it: a parent amended after the child branched is not in the
+    // child's history, so the old base is found from the child as for the first layer.
+    const tip = oldTip.get(s.parent);
+    const { sha: oldBase, how } =
+      parentMoves && isAncestor(tip, s.branch)
+        ? { sha: tip, how: `old tip of ${s.parent}` }
+        : oldBaseFor(nodeOf(s.parent), s.branch, remote, s.parent === start.head ? opt("--old-base") : undefined);
     const p = { s, oldBase, owner: ownerOf(s.branch) };
     console.log(`  #${s.number} ${command(p)}   # old base: ${how}`);
     moving.add(s.branch);
