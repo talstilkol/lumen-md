@@ -243,6 +243,27 @@ describe("LiveJS worker: no import() and no way to compile one", () => {
     for (const [k, v] of Object.entries(outcome)) expect(v, k).toContain("does not compile strings");
   });
 
+  it("a replaced apply/call/bind/Reflect cannot reach the native timer", async () => {
+    const source = [
+      "let leaked = null;",
+      "const keep = { apply: Function.prototype.apply, call: Function.prototype.call, bind: Function.prototype.bind };",
+      "for (const k of ['apply', 'call', 'bind']) Function.prototype[k] = function () { if (this !== keep[k]) leaked = leaked || this; return 1; };",
+      "globalThis.Reflect = { apply(f) { leaked = leaked || f; } };",
+      "setTimeout(() => {}, 0); setTimeout(() => {}, 0, 'x', 'y'); setInterval && clearInterval;",
+      "for (const k of ['apply', 'call', 'bind']) Function.prototype[k] = keep[k];",
+      "let ran = 'not called';",
+      "if (leaked) { try { leaked('1'); ran = 'native timer took a string'; } catch (e) { ran = 'threw'; } }",
+      "console.log(String(ran));",
+    ].join("\n");
+    const { logs } = await runRaw(new VmWorker(), source);
+    expect(logs).toEqual([["log", "not called"]]);
+  });
+
+  it("forwards extra timer arguments", async () => {
+    const { logs } = await runRaw(new VmWorker(), "await new Promise((r) => setTimeout((a, b) => { console.log(a + b); r(); }, 1, 2, 3));");
+    expect(logs).toEqual([["log", "5"]]);
+  });
+
   it("keeps the rest working: function timers, instanceof Function, call/apply, plain .setTimeout props", async () => {
     const { logs } = await runRaw(
       new VmWorker(),

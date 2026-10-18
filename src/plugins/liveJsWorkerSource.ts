@@ -93,10 +93,20 @@ if (self.trustedTypes && !self.trustedTypes.defaultPolicy) {
       Object.getPrototypeOf(MakeFunction("return async function*() {}")()),
     ];
     protos.forEach(function(p) { if (p) lock(p, "constructor", refuse); });
+    // The native timer is bound now, before any user code, and then only
+    // called directly — never through .apply/.call/spread, which user code
+    // can replace and would hand it the native timer as \`this\`. All it
+    // ever receives is the user's function or our own wrapper around it;
+    // extra arguments are passed by that wrapper (user code calling user
+    // code, so a replaced apply/slice there only affects the user's own run).
     var timer = function(real) {
+      var callReal = real.bind(self);
       return function(handler) {
         if (typeof handler !== "function") refuse();
-        return real.apply(self, arguments);
+        var a = arguments;
+        if (a.length <= 2) return callReal(handler, a[1]);
+        var withArgs = function() { return handler.apply(self, Array.prototype.slice.call(a, 2)); };
+        return callReal(withArgs, a[1]);
       };
     };
     var safeTimeout = timer(setT);
