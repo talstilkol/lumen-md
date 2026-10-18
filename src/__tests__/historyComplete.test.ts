@@ -262,7 +262,12 @@ describe("old backups/ folder", () => {
     await ws.writeWorkspaceFile("backups/Notes.md/1700000000000.md", "then");
     await ws.writeWorkspaceFile("backups/Old_Plan.md/1700000000000.md", "plan then");
     await ws.writeWorkspaceFile("backups/Gone.md/1700000000000.md", "gone");
-    expect(await migrateLegacyBackups()).toBe(3);
+    // Hashed from the basename (a note opened by name, e.g. from Graph View).
+    await ws.writeWorkspaceFile("deep/Graph Note.md", "now");
+    const { backupDirName } = await import("../sync/autoBackup");
+    await ws.writeWorkspaceFile(`backups/${backupDirName("Graph Note.md")}/1700000000000.md`, "graph then");
+    expect(await migrateLegacyBackups()).toBe(4);
+    expect((await history.listSnapshots("deep/Graph Note.md")).map((s) => s.content)).toEqual(["graph then"]);
     expect((await history.listSnapshots("Notes.md")).map((s) => s.content)).toEqual(["then"]);
     expect((await history.listSnapshots("Old Plan.md")).map((s) => s.content)).toEqual(["plan then"]);
     expect((await history.listSnapshots("Gone.md")).map((s) => s.content)).toEqual(["gone"]);

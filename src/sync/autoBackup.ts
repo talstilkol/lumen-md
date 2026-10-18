@@ -191,7 +191,9 @@ export async function migrateLegacyBackups(): Promise<number> {
   // extension included: match it against the notes' paths and names too.
   const legacyName = (s: string) => s.replace(/[^\w.-]/g, "_");
   for (const p of notes) {
-    for (const k of [legacyName(p), legacyName(p.split("/").pop() ?? p)]) if (!byFolder.has(k)) byFolder.set(k, p);
+    const base = p.split("/").pop() ?? p;
+    // A note opened by name (Graph View) was backed up under its basename's hash.
+    for (const k of [backupDirName(base), legacyName(p), legacyName(base)]) if (!byFolder.has(k)) byFolder.set(k, p);
   }
   const keyFor = (folder: string) => {
     const known = byFolder.get(folder);
