@@ -98,9 +98,11 @@ async function execTool(tools: AgentTool[], call: ToolCall, env: ToolEnv): Promi
       callCtx.fetch = gate.fetch;
       note = gate.consented ? "network: sent on the user's consent (local-only)" : "network: allowed by the AI policy";
     } else if (tool.scope === "write") {
-      const { stageChange, receiptOf } = await import("./staging");
+      const { stageChange, receiptOf, textFingerprint } = await import("./staging");
       callCtx.stage = (proposal) => {
-        const change = stageChange(proposal, { tool: tool.name, runId: env.runId, agentId: env.agentId });
+        // A range's offsets refer to the document the run received: record which text that was.
+        const staged = proposal.kind === "range" && proposal.basis === undefined ? { ...proposal, basis: textFingerprint(env.ctx.document ?? "") } : proposal;
+        const change = stageChange(staged, { tool: tool.name, runId: env.runId, agentId: env.agentId });
         stagedHere.push(change.id);
         env.staged.push(change.id);
         return receiptOf(change);
