@@ -1401,5 +1401,9 @@
   "clip.failed": "ページをクリップできませんでした: {message}。必要な部分をコピーして「クリップボードからクリップ」を使ってください。",
   "research.consent.title": "Web で調べますか？",
   "research.consent.body": "質問（質問のみ、ノートは送信されません）が選択した検索サービスに送信され、見つかったページはそのサービスが読み込みます。「ローカルのみ」ではライブラリ内で調べます。",
-  "research.consent.ok": "許可（今後も）"
+  "research.consent.ok": "許可（今後も）",
+  "cmd.ai.cancel": "AI: キャンセル",
+  "cmd.ai.cancel.hint": "実行中の AI リクエストをすべて停止します（Esc でも可）",
+  "toast.aiCancelled": "AI リクエストをキャンセルしました（{count}）",
+  "toast.aiNothingRunning": "実行中の AI リクエストはありません"
 }

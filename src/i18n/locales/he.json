@@ -1401,5 +1401,9 @@
   "clip.failed": "לא ניתן לגזור את הדף: {message}. אפשר להעתיק את החלק הרצוי ולהשתמש ב\"גזירה מהלוח\".",
   "research.consent.title": "מחקר ברשת?",
   "research.consent.body": "השאלה שלך (רק השאלה — לא הפתקים) נשלחת לשירות החיפוש שבחרת, והוא קורא את הדפים שנמצאו. במדיניות \"מקומי בלבד\" המחקר נעשה בספרייה שלך במקום.",
-  "research.consent.ok": "לאשר (פעם אחת לתמיד)"
+  "research.consent.ok": "לאשר (פעם אחת לתמיד)",
+  "cmd.ai.cancel": "AI: ביטול",
+  "cmd.ai.cancel.hint": "עוצר כל בקשת AI שרצה (גם Esc עושה זאת)",
+  "toast.aiCancelled": "בקשת ה-AI בוטלה ({count})",
+  "toast.aiNothingRunning": "אין בקשת AI שרצה"
 }
