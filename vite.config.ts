@@ -2,6 +2,10 @@
 import { defineConfig as defineViteConfig } from "vite";
 import type { UserConfig as ViteUserConfig } from "vite";
 import { cspEndpointsPlugin } from "./src/build/cspEndpoints";
+import { prerenderIntro } from "./src/build/prerenderWelcome";
+import { BOOT_JS } from "./src/build/bootScript";
+import { WELCOME_DOC } from "./src/welcome";
+import { platformKeys } from "./src/lib/platformKeys";
 
 interface VitestConfig {
   test?: {
@@ -192,6 +196,16 @@ export default defineConfig({
   },
   plugins: [
     react(),
+    // C1: the welcome intro as real text in index.html (production only —
+    // the dev server keeps the skeleton so edits to welcome.ts don't lie).
+    {
+      name: "lumen-prerender-welcome",
+      apply: "build",
+      transformIndexHtml: (html: string) =>
+        html
+          .replace("<!--lumen:welcome-->", prerenderIntro(platformKeys(WELCOME_DOC, false)))
+          .replace("<!--lumen:boot-->", `<script>${BOOT_JS}</script>`),
+    },
     cleanUrlAliases,
     // Adds the deployment's own worker origins (VITE_*_ENDPOINT …) to the
     // CSP connect-src of index.html, dist/_headers and the nginx image.
