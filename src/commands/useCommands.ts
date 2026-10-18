@@ -1444,6 +1444,68 @@ export function useCommands({
         },
       },
       {
+        id: "note.read",
+        label: t("cmd.note.read"),
+        hint: t("cmd.note.read.hint"),
+        icon: cmdIcons.Sparkles,
+        group: t("group.tools"),
+        action: async () => {
+          const tts = await import("../ai/tts");
+          if (tts.isSpeaking()) {
+            tts.stopSpeaking();
+            return;
+          }
+          if (!tts.ttsAvailable()) {
+            showAiToast(t("toast.tts.unavailable"), "error");
+            return;
+          }
+          const content = useAppStore.getState().doc.content;
+          const ok = await tts.speak(content, {
+            uiLang: getLocale(),
+            onSentence: (s) => window.dispatchEvent(new CustomEvent("lumen-select-range", { detail: { from: s.from, to: s.to } })),
+          });
+          if (!ok) showAiToast(t("toast.tts.noHebrewVoice"), "info");
+        },
+      },
+      {
+        id: "vault.digest",
+        label: t("cmd.vault.digest"),
+        hint: t("cmd.vault.digest.hint"),
+        icon: cmdIcons.Sparkles,
+        group: t("group.tools"),
+        action: async () => {
+          const { listWorkspace, readWorkspaceFile, writeWorkspaceFile, isOPFSAvailable } = await import("../storage/workspace");
+          if (!isOPFSAvailable()) return;
+          const { buildDigest } = await import("../agents/defs/digester");
+          const KEY = "lumen.digest.last";
+          const now = Date.now();
+          let since = now - 24 * 3600_000;
+          try {
+            since = Number(localStorage.getItem(KEY)) || since;
+          } catch {
+            /* default: last 24 h */
+          }
+          const lang = getLocale();
+          const folder = lang === "he" ? "סיכומים" : "Digests";
+          const entries = (await listWorkspace({ includeAssets: false })).filter(
+            (e) => e.modified > since && /\.md$/i.test(e.path) && !e.path.startsWith(".") && !e.path.startsWith(`${folder}/`),
+          );
+          const notes = await Promise.all(entries.map(async (entry) => ({ entry, content: await readWorkspaceFile(entry.path).catch(() => "") })));
+          const fmtDate = (ms: number) => new Date(ms).toLocaleString(getLocale(), { dateStyle: "medium", timeStyle: "short" });
+          const body = buildDigest({ since, now, notes, lang, formatDate: fmtDate });
+          const d = new Date(now);
+          const path = `${folder}/${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}.md`;
+          await writeWorkspaceFile(path, body);
+          try {
+            localStorage.setItem(KEY, String(now));
+          } catch {
+            /* next digest covers 24 h again */
+          }
+          window.dispatchEvent(new Event("lumen-workspace-changed"));
+          useAppStore.getState().openTab({ name: path.split("/").pop()!, content: body, workspaceName: path });
+        },
+      },
+      {
         id: "image.altText",
         label: t("cmd.image.altText"),
         hint: t("cmd.image.altText.hint"),
