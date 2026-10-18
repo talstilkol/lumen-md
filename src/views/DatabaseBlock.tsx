@@ -36,6 +36,7 @@ import {
   applyQuery,
   displayValue,
   groupRows,
+  NO_VALUE,
   loadDatabaseRows,
   parseDatabaseSpec,
   parseSort,
@@ -59,7 +60,7 @@ interface Props {
   meta?: string;
 }
 
-const NONE = "_";
+const NONE = NO_VALUE;
 
 const titleOf = (row: DatabaseRow) => (typeof row.fm.title === "string" && row.fm.title) || row.basename;
 

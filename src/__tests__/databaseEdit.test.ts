@@ -80,6 +80,24 @@ describe("writeCell", () => {
     expect(out).toContain("rating: 1");
   });
 
+  it("a note open in an inactive tab gets the change in its copy too, keeping its unsaved edits", async () => {
+    await writeWorkspaceFile("books/a.md", NOTE);
+    const unsaved = NOTE + "An unsaved line.\r\n";
+    useAppStore.setState((s) => ({
+      doc: { ...s.doc, workspaceName: "other.md" },
+      openTabs: [
+        { id: "other", name: "other.md", content: "x", workspaceName: "other.md", dirty: false },
+        { id: "books/a.md", name: "a.md", content: unsaved, workspaceName: "books/a.md", dirty: true },
+      ],
+    }));
+    await writeCell("books/a.md", "status", "done");
+    const tab = useAppStore.getState().openTabs.find((t) => t.workspaceName === "books/a.md")!;
+    expect(tab.content).toBe(unsaved.replace("status: reading", "status: done"));
+    expect(tab.dirty).toBe(true);
+    expect(await readWorkspaceFile("books/a.md")).toBe(NOTE.replace("status: reading", "status: done"));
+    useAppStore.setState({ openTabs: [] });
+  });
+
   it("the open note is edited through the app (its editor), not behind it", async () => {
     await writeWorkspaceFile("open.md", NOTE);
     useAppStore.setState((s) => ({ doc: { ...s.doc, workspaceName: "open.md" } }));

@@ -180,8 +180,12 @@ function compareValue(v: unknown): string | number {
 
 /**
  * Group rows by the `groupBy` column. Empty / missing values land in the
- * special "_" bucket so the Kanban view can render them under "(none)".
+ * `NO_VALUE` bucket so the Kanban view can render them under "(none)". It
+ * can't be a frontmatter value (`_` is one), so moving a card there removes
+ * the property and moving it to a real `_` column writes `_`.
  */
+export const NO_VALUE = "\uFDD0none";
+
 export function groupRows(
   rows: DatabaseRow[],
   groupBy: string,
@@ -189,7 +193,7 @@ export function groupRows(
   const out = new Map<string, DatabaseRow[]>();
   for (const r of rows) {
     const v = r.fm[groupBy];
-    const key = v == null || v === "" ? "_" : String(v);
+    const key = v == null || v === "" ? NO_VALUE : String(v);
     if (!out.has(key)) out.set(key, []);
     out.get(key)!.push(r);
   }

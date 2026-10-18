@@ -54,9 +54,25 @@ export function editNote(path: string, edit: (text: string) => string): Promise<
       if (answer !== null) return answer;
       // No app to take it (tests, a page without the editor): the file it is.
     }
+    // The note may also be open in a tab that isn't active: its copy (and
+    // any unsaved edits in it) takes the change too, or switching back to it
+    // would restore the old value and its next save would undo this one.
+    // Computed first, so a frontmatter that doesn't parse there writes nothing.
+    const { openTabs, doc } = useAppStore.getState();
+    const activeTab = openTabs.find((t) => t.workspaceName === doc.workspaceName && t.workspaceName !== null)?.id;
+    const tabEdits = openTabs.filter((t) => t.workspaceName === path && t.id !== activeTab).map((t) => ({ id: t.id, from: t.content, to: edit(t.content) }));
     const text = await readWorkspaceFile(path);
     const next = edit(text);
-    if (next === text) return false;
+    if (tabEdits.some((e) => e.to !== e.from)) {
+      useAppStore.setState((st) => ({
+        openTabs: st.openTabs.map((t) => {
+          const e = tabEdits.find((x) => x.id === t.id);
+          // Only if the tab still holds what the edit was made from.
+          return e && t.content === e.from ? { ...t, content: e.to } : t;
+        }),
+      }));
+    }
+    if (next === text) return tabEdits.some((e) => e.to !== e.from);
     await writeWorkspaceFile(path, next);
     notifyWorkspaceChanged({ kind: "content", paths: [path] });
     return true;

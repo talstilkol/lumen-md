@@ -64,6 +64,16 @@ describe("DatabaseBlock", () => {
     await waitFor(() => expect(screen.getAllByRole("rowheader").map((h) => h.textContent?.replace(/\d+$/, "").trim())).toEqual(["doing", "todo"]));
   });
 
+  it("kanban: a real `_` value is its own column, apart from the notes without one", async () => {
+    await writeWorkspaceFile("tasks/Delta.md", note("_", 2));
+    await writeWorkspaceFile("tasks/Epsilon.md", "---\ntype: task\nrating: 2\n---\n");
+    render(<DatabaseBlock source={SPEC.replace("source:", "view: kanban\nsource:")} />);
+    const board = await screen.findByTestId("database-kanban");
+    await waitFor(() => expect(within(board).getAllByRole("region").map((c) => c.getAttribute("aria-label"))).toEqual(["todo", "doing", "done", "_", "(none)"]));
+    expect(within(within(board).getByRole("region", { name: "_" })).getAllByRole("link").map((a) => a.textContent)).toEqual(["Delta"]);
+    expect(within(within(board).getByRole("region", { name: "(none)" })).getAllByRole("link").map((a) => a.textContent)).toEqual(["Epsilon"]);
+  });
+
   it("kanban: a column per value and per listed column, a move handle per card", async () => {
     render(<DatabaseBlock source={SPEC.replace("source:", "view: kanban\nsource:")} />);
     const board = await screen.findByTestId("database-kanban");
