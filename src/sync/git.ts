@@ -260,10 +260,11 @@ async function mirrorWorkspaceToGit(fs: Fs, dir: string, repoFolder: string, sig
     if (txt !== null) await fs.promises.writeFile(full, txt);
   }
   // Files deleted (or renamed away) in the workspace leave the checkout too, so
-  // status and diffs show the deletion. Only when the listing really has this
-  // repo's files: an empty or failed listing must never empty the checkout.
+  // status and diffs show the deletion — also when every file of the repo was
+  // deleted. Only an entirely empty listing is not trusted (it cannot be told
+  // apart from storage that failed to list): it never empties the checkout.
   const present = new Set(all.filter((f) => f.path.startsWith(prefix)).map((f) => f.path.slice(prefix.length)));
-  if (!present.size || !fs.promises.unlink) return;
+  if (!all.length || !fs.promises.unlink) return;
   const prune = async (rel: string): Promise<void> => {
     let names: string[] = [];
     try {
