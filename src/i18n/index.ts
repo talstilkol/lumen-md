@@ -471,6 +471,7 @@ const en: Strings = {
   "privacy.cloudRequests": "Left this device: {n} ({size} sent)",
   "privacy.localRequests": "Local: {n}",
   "privacy.downloads": "Model downloads: {n}",
+  "privacy.staticAssets": "Static files: {n}",
   "privacy.blocked": "Blocked: {n}",
   "privacy.onlyLeaving": "Only what left this device",
   "privacy.clear": "Clear",

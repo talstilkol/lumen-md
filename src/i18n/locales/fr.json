@@ -1354,6 +1354,7 @@
   "privacy.cloudRequests": "Sorties de l’appareil : {n} ({size} envoyés)",
   "privacy.localRequests": "Locales : {n}",
   "privacy.downloads": "Téléchargements de modèles : {n}",
+  "privacy.staticAssets": "Fichiers statiques : {n}",
   "privacy.blocked": "Bloquées : {n}",
   "privacy.onlyLeaving": "Seulement ce qui a quitté l’appareil",
   "privacy.clear": "Effacer",

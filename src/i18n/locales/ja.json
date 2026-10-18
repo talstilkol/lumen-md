@@ -1354,6 +1354,7 @@
   "privacy.cloudRequests": "端末外へ: {n} 件（送信 {size}）",
   "privacy.localRequests": "ローカル: {n}",
   "privacy.downloads": "モデルのダウンロード: {n}",
+  "privacy.staticAssets": "静的ファイル: {n}",
   "privacy.blocked": "ブロック: {n}",
   "privacy.onlyLeaving": "端末外への通信のみ",
   "privacy.clear": "消去",
