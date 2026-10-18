@@ -1388,5 +1388,18 @@
   "toast.tts.unavailable": "Dieser Browser kann nicht vorlesen",
   "toast.tts.noHebrewVoice": "Keine hebräische Stimme installiert — in den Sprachausgabe-Einstellungen hinzufügen",
   "cmd.vault.digest": "Zusammenfassung: was sich geändert hat",
-  "cmd.vault.digest.hint": "Eine Notiz mit allen seit der letzten Zusammenfassung geänderten Notizen und ihren offenen Aufgaben"
+  "cmd.vault.digest.hint": "Eine Notiz mit allen seit der letzten Zusammenfassung geänderten Notizen und ihren offenen Aufgaben",
+  "cmd.clip.url": "Webseite ausschneiden…",
+  "cmd.clip.url.hint": "Speichert den lesbaren Teil einer Seite mit Quelle und Datum in deiner Bibliothek",
+  "cmd.clip.clipboard": "Aus der Zwischenablage ausschneiden",
+  "cmd.clip.clipboard.hint": "Kopiere einen Teil einer Seite im Browser und speichere ihn in der Bibliothek",
+  "clip.url.prompt": "Adresse der Seite",
+  "clip.source.prompt": "Woher stammt das? (Adresse, optional)",
+  "clip.source.unknown": "Zwischenablage",
+  "clip.empty": "Die Zwischenablage enthält keinen Text",
+  "clip.saved": "In der Bibliothek gespeichert: {path}",
+  "clip.failed": "Seite konnte nicht ausgeschnitten werden: {message}. Kopiere den Teil und nutze „Aus der Zwischenablage ausschneiden“.",
+  "research.consent.title": "Im Web recherchieren?",
+  "research.consent.body": "Deine Frage (nur die Frage, nicht deine Notizen) geht an den gewählten Suchdienst, der die Seiten liest. Mit „nur lokal“ recherchiert Lumen stattdessen in deiner Bibliothek.",
+  "research.consent.ok": "Erlauben (einmalig für immer)"
 }

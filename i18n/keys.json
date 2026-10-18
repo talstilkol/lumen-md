@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-10-17T23:51:51.139Z",
+  "generated_at": "2026-10-18T00:00:33.775Z",
   "source": "src/i18n/index.ts (en bundle)",
-  "count": 1390,
+  "count": 1403,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -1691,6 +1691,75 @@
     {
       "key": "cmd.file.trash.hint",
       "en": "Restore deleted notes (kept 30 days)",
+      "vars": []
+    },
+    {
+      "key": "cmd.clip.url",
+      "en": "Clip a web page…",
+      "vars": []
+    },
+    {
+      "key": "cmd.clip.url.hint",
+      "en": "Saves the readable part of a page into your library, with source and date",
+      "vars": []
+    },
+    {
+      "key": "cmd.clip.clipboard",
+      "en": "Clip from clipboard",
+      "vars": []
+    },
+    {
+      "key": "cmd.clip.clipboard.hint",
+      "en": "Copy part of a page in the browser, then save it to the library",
+      "vars": []
+    },
+    {
+      "key": "clip.url.prompt",
+      "en": "Page address to clip",
+      "vars": []
+    },
+    {
+      "key": "clip.source.prompt",
+      "en": "Where is this from? (address, optional)",
+      "vars": []
+    },
+    {
+      "key": "clip.source.unknown",
+      "en": "clipboard",
+      "vars": []
+    },
+    {
+      "key": "clip.empty",
+      "en": "The clipboard has no text",
+      "vars": []
+    },
+    {
+      "key": "clip.saved",
+      "en": "Saved to the library: {path}",
+      "vars": [
+        "path"
+      ]
+    },
+    {
+      "key": "clip.failed",
+      "en": "Couldn't clip the page: {message}. Copy the part you want and use \"Clip from clipboard\".",
+      "vars": [
+        "message"
+      ]
+    },
+    {
+      "key": "research.consent.title",
+      "en": "Research on the web?",
+      "vars": []
+    },
+    {
+      "key": "research.consent.body",
+      "en": "Your question (only the question — not your notes) is sent to the search service you chose. Pages it finds are read by that service. Under the \"local only\" policy research uses your library instead.",
+      "vars": []
+    },
+    {
+      "key": "research.consent.ok",
+      "en": "Allow (once for all)",
       "vars": []
     },
     {
