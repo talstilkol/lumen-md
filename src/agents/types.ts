@@ -14,8 +14,74 @@
 /** A JSON Schema object (draft 7 subset is enough for every executor). */
 export type JsonSchema = Record<string, unknown>;
 
-/** What a tool may touch. Write and network tools need an explicit grant. */
-export type ToolScope = "read" | "write" | "net";
+/**
+ * What a tool may touch. `read` is always granted. `write` and `network`
+ * need an explicit grant for the run, and the runtime adds its own rules:
+ * a write tool only *stages* a change the user approves (`staging.ts`), a
+ * network tool goes through the AI policy, the per-call consent and the
+ * privacy ledger (`network.ts`).
+ */
+export type ToolScope = "read" | "write" | "network";
+
+/** A change a write tool proposes; the runtime stages it, it is never applied directly. */
+export type ChangeProposal =
+  | {
+      /** Create or overwrite a workspace file. `before` is the content the change was computed from (null: the file did not exist). */
+      kind: "file";
+      path: string;
+      before: string | null;
+      after: string;
+      summary: string;
+    }
+  | {
+      /** Replace [from, to) of the open document (UTF-16 offsets into the text the run received). */
+      kind: "range";
+      path: string | null;
+      from: number;
+      to: number;
+      before: string;
+      after: string;
+      summary: string;
+    };
+
+/** A staged change as the queue keeps it (see `staging.ts`). */
+export type StagedChange = ChangeProposal & {
+  id: string;
+  tool: string;
+  runId?: string;
+  agentId?: string;
+  createdAt: number;
+  status: "pending" | "applied" | "rejected" | "conflict";
+  /** Why it could not be applied (status `conflict`). */
+  error?: string;
+};
+
+/** What a write tool returns: the receipt of the staged change, never the write itself. */
+export interface StagedReceipt {
+  staged: true;
+  changeId: string;
+  kind: ChangeProposal["kind"];
+  path: string | null;
+  summary: string;
+}
+
+/** A page `fetch_page` read in this run (so `extract_quotes` can quote it without resending the text). */
+export interface FetchedPage {
+  url: string;
+  finalUrl: string;
+  title?: string;
+  text: string;
+}
+
+/** What a network tool is about to send, for the consent prompt and the ledger. */
+export interface NetworkConsentRequest {
+  tool: string;
+  /** Host the request goes to (the research service, or the page host for fetch_page). */
+  host: string;
+  /** What leaves the device, in plain words ("the search query", "the page address"). */
+  sends: string;
+  args: Record<string, unknown>;
+}
 
 export interface ToolContext {
   signal?: AbortSignal;
@@ -27,6 +93,19 @@ export interface ToolContext {
   selection?: string;
   /** Scopes the caller granted for this run. */
   grants: ReadonlySet<ToolScope>;
+  /**
+   * Write tools only, set by the runtime for the call: stages a proposal
+   * and returns its receipt. Without it a write tool refuses to run.
+   */
+  stage?: (proposal: ChangeProposal) => StagedReceipt;
+  /**
+   * Network tools only, set by the runtime once the policy / consent gate
+   * passed for this call: a fetch that the privacy ledger records. Without
+   * it a network tool refuses to run.
+   */
+  fetch?: typeof fetch;
+  /** Pages fetched in this run, by URL (runtime-owned scratch). */
+  pages?: Map<string, FetchedPage>;
 }
 
 export interface AgentTool<A = Record<string, unknown>, R = unknown> {
@@ -245,12 +324,21 @@ export interface AgentRun<O = unknown> {
   tokens: { input: number; output: number; estimated: boolean };
   /** Key of the input (agent + user prompt): a retry picked in the panel applies to this input. */
   inputKey?: string;
+  /** Ids of the changes this run's write tools staged (waiting for approval in `staging.ts`). */
+  staged?: string[];
 }
 
 export interface RunOptions {
   signal?: AbortSignal;
   /** Scopes granted for this run (`read` is always granted). */
   grants?: ToolScope[];
+  /**
+   * Per-call consent for a network tool under the `local-only` policy
+   * (asked before anything is sent). Default: the one-time web-research
+   * consent the user gave in `research.ask` (`research/consent.ts`).
+   * Outside `local-only` the policy already allows the network.
+   */
+  consentNetwork?: (request: NetworkConsentRequest) => boolean | Promise<boolean>;
   /** Editor context for the editor tools. */
   document?: string;
   selection?: string;

@@ -1,0 +1,122 @@
+/**
+ * Line diff (Myers, O((N+M)·D)) and unified-diff formatting — what
+ * `git_diff` shows a model, in the format every model has seen in
+ * training. Bounded: past `maxEdits` differing lines the diff gives up and
+ * reports the file as rewritten rather than spending unbounded time.
+ */
+
+export type DiffOp = { op: "eq" | "add" | "del"; line: string };
+
+/** The edit script turning `a` into `b`, or null when it would need more than `maxEdits` edits. */
+export function diffLines(a: readonly string[], b: readonly string[], maxEdits = 2000): DiffOp[] | null {
+  const n = a.length;
+  const m = b.length;
+  const max = Math.min(n + m, maxEdits);
+  const offset = max + 1;
+  const v = new Int32Array(2 * max + 3);
+  const trace: Int32Array[] = [];
+  let found = n === 0 && m === 0;
+  for (let d = 0; d <= max && !found; d++) {
+    // Only diagonals -(d+1)..d+1 matter for backtracking step d: O(D²) memory, not O(D·(N+M)).
+    trace.push(v.slice(offset - d - 1, offset + d + 2));
+    for (let k = -d; k <= d; k += 2) {
+      let x = k === -d || (k !== d && v[offset + k - 1] < v[offset + k + 1]) ? v[offset + k + 1] : v[offset + k - 1] + 1;
+      let y = x - k;
+      while (x < n && y < m && a[x] === b[y]) {
+        x++;
+        y++;
+      }
+      v[offset + k] = x;
+      if (x >= n && y >= m) {
+        found = true;
+        break;
+      }
+    }
+  }
+  if (!found) return null;
+  // Backtrack through the saved frontiers.
+  const ops: DiffOp[] = [];
+  let x = n;
+  let y = m;
+  for (let d = trace.length - 1; d >= 0; d--) {
+    const vd = trace[d];
+    const at = (kk: number) => vd[d + 1 + kk];
+    const k = x - y;
+    const prevK = k === -d || (k !== d && at(k - 1) < at(k + 1)) ? k + 1 : k - 1;
+    const prevX = at(prevK);
+    const prevY = prevX - prevK;
+    while (x > prevX && y > prevY) {
+      ops.push({ op: "eq", line: a[--x] });
+      y--;
+    }
+    if (d > 0) {
+      if (x === prevX) ops.push({ op: "add", line: b[--y] });
+      else ops.push({ op: "del", line: a[--x] });
+    }
+  }
+  while (x > 0 && y > 0) {
+    ops.push({ op: "eq", line: a[--x] });
+    y--;
+  }
+  return ops.reverse();
+}
+
+export function splitLines(text: string): string[] {
+  if (!text) return [];
+  const lines = text.split(/\r?\n/);
+  if (lines[lines.length - 1] === "") lines.pop();
+  return lines;
+}
+
+/**
+ * A unified diff of one file (`--- a/path`, `+++ b/path`, `@@` hunks with
+ * `context` lines around each change). `before` / `after` null mean the
+ * file did not exist on that side. Empty string when nothing changed.
+ */
+export function unifiedDiff(path: string, before: string | null, after: string | null, context = 3): string {
+  const a = splitLines(before ?? "");
+  const b = splitLines(after ?? "");
+  const head = [`--- ${before === null ? "/dev/null" : `a/${path}`}`, `+++ ${after === null ? "/dev/null" : `b/${path}`}`];
+  const ops = diffLines(a, b);
+  if (!ops) {
+    return [...head, `@@ -1,${a.length} +1,${b.length} @@`, `[too many changes to show line by line: ${a.length} → ${b.length} lines]`].join("\n");
+  }
+  if (!ops.some((o) => o.op !== "eq")) return "";
+  const out = [...head];
+  // Positions (1-based) of each op on both sides.
+  let ai = 1;
+  let bi = 1;
+  const pos = ops.map((o) => {
+    const p = { a: ai, b: bi };
+    if (o.op !== "add") ai++;
+    if (o.op !== "del") bi++;
+    return p;
+  });
+  let i = 0;
+  while (i < ops.length) {
+    if (ops[i].op === "eq") {
+      i++;
+      continue;
+    }
+    // A hunk: from `context` lines before this change to `context` lines
+    // after the last change that is within 2·context of the previous one.
+    const start = Math.max(0, i - context);
+    let end = i;
+    let lastChange = i;
+    while (end < ops.length) {
+      if (ops[end].op !== "eq") lastChange = end;
+      else if (end - lastChange > 2 * context) break;
+      end++;
+    }
+    const stop = Math.min(ops.length, lastChange + context + 1);
+    const slice = ops.slice(start, stop);
+    const aLen = slice.filter((o) => o.op !== "add").length;
+    const bLen = slice.filter((o) => o.op !== "del").length;
+    const aStart = aLen ? pos[start].a : pos[start].a - 1;
+    const bStart = bLen ? pos[start].b : pos[start].b - 1;
+    out.push(`@@ -${aStart},${aLen} +${bStart},${bLen} @@`);
+    for (const o of slice) out.push((o.op === "eq" ? " " : o.op === "add" ? "+" : "-") + o.line);
+    i = stop;
+  }
+  return out.join("\n");
+}

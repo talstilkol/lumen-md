@@ -36,6 +36,8 @@ export interface LedgerEntry {
   policy: AiPolicy;
   decision: "allowed" | "blocked";
   status?: number;
+  /** Allowed under `local-only` because the user consented to this request (an agent network tool). */
+  consent?: boolean;
 }
 
 /** Thrown (as the fetch rejection) when the policy forbids a request. */
@@ -217,22 +219,42 @@ function bodySize(body: BodyInit | null | undefined): number {
   return 0;
 }
 
+export interface LedgerOptions {
+  /**
+   * Record every request, also traffic `classify` doesn't track, with this
+   * category and reason (an agent network tool: its requests always count).
+   */
+  force?: { category: LedgerCategory; reason: string };
+  /** The user consented to these requests: `local-only` does not block them (they are still recorded). */
+  consent?: boolean;
+}
+
+function hostOf(url: string): string {
+  try {
+    return new URL(url, typeof location !== "undefined" ? location.href : "http://localhost/").hostname.toLowerCase();
+  } catch {
+    return url;
+  }
+}
+
 /** Wrap a fetch implementation with the ledger. Exported for tests. */
-export function withLedger(inner: typeof fetch): typeof fetch {
+export function withLedger(inner: typeof fetch, opts: LedgerOptions = {}): typeof fetch {
   return async function ledgerFetch(input: RequestInfo | URL, init?: RequestInit): Promise<Response> {
     const url = typeof input === "string" ? input : input instanceof URL ? input.href : input.url;
-    const hit = classify(url);
+    const classified = classify(url);
+    const hit = opts.force ? { host: classified?.host ?? hostOf(url), category: opts.force.category, reason: opts.force.reason } : classified;
     if (!hit) return inner(input, init);
     const policy = getAiPolicy();
     const method = (init?.method ?? (input instanceof Request ? input.method : "GET")).toUpperCase();
     const bytesOut = bodySize(init?.body);
-    if (blockedByPolicy(hit.category, policy)) {
+    if (!opts.consent && blockedByPolicy(hit.category, policy)) {
       const id = record({ ...hit, method, bytesOut: 0, bytesIn: null, policy, decision: "blocked" });
       const entry = entries.find((x) => x.id === id);
       if (entry) onBlocked?.(entry);
       throw new PrivacyBlockedError(hit.host, hit.reason);
     }
-    const id = record({ ...hit, method, bytesOut, bytesIn: null, policy, decision: "allowed" });
+    const consented = !!opts.consent && blockedByPolicy(hit.category, policy);
+    const id = record({ ...hit, method, bytesOut, bytesIn: null, policy, decision: "allowed", ...(consented ? { consent: true } : {}) });
     const res = await inner(input, init);
     const len = Number(res.headers.get("content-length"));
     patch(id, {
@@ -255,6 +277,32 @@ export function recordWorkerRequest(url: string, method = "GET"): LedgerEntry | 
   return entries.find((x) => x.id === id) ?? null;
 }
 
+/**
+ * Record a request that was refused before it was made (an agent network
+ * tool under `local-only` without consent) and return the error to throw.
+ */
+export function recordBlockedRequest(url: string, category: LedgerCategory, reason: string, method = "GET"): PrivacyBlockedError {
+  const host = hostOf(url);
+  const id = record({ host, category, reason, method, bytesOut: 0, bytesIn: null, policy: getAiPolicy(), decision: "blocked" });
+  const entry = entries.find((x) => x.id === id);
+  if (entry) onBlocked?.(entry);
+  return new PrivacyBlockedError(host, reason);
+}
+
+/** The page's own fetch before the ledger wrapped it (so a ledger fetch built on it records each request once). */
+let unwrappedFetch: typeof fetch | null = null;
+
+/**
+ * A fetch that records every request in the ledger under `opts` — for a
+ * caller that already decided the request may go (the agent network-tool
+ * gate). Built on the unwrapped fetch, so the global wrapper neither
+ * records it twice nor blocks a request the user consented to.
+ */
+export function ledgerFetch(opts: LedgerOptions): typeof fetch {
+  const base: typeof fetch = unwrappedFetch ?? ((input, init) => globalThis.fetch(input, init));
+  return withLedger(base, opts);
+}
+
 /** Install once at startup. `blocked` is called for every blocked request. */
 export function installPrivacyLedger(blocked?: (entry: LedgerEntry) => void): void {
   if (installed || typeof window === "undefined" || typeof window.fetch !== "function") return;
@@ -262,6 +310,7 @@ export function installPrivacyLedger(blocked?: (entry: LedgerEntry) => void): vo
   onBlocked = blocked ?? null;
   load();
   const original = window.fetch.bind(window);
+  unwrappedFetch = original;
   window.fetch = withLedger(original);
 }
 
@@ -311,5 +360,6 @@ export function __resetLedger(): void {
   nextId = 1;
   installed = false;
   onBlocked = null;
+  unwrappedFetch = null;
   listeners.clear();
 }
