@@ -3,12 +3,13 @@
  *
  * The model is asked to back each claim with a source number and a short
  * verbatim quote: `[2] "the exact words"`. Here each citation is checked
- * against the note it names — the quote must really be there
- * (`quoteCoverage` ≥ 0.8, the same check the research agent uses) — and is
+ * against the note it names — the quote must really be there, word for word
+ * (`quoteContained`: the prompt promises an exact quote, and an approximate
+ * match would pass a quote that drops a "not") — and is
  * resolved to the line it sits on, so the answer links to note + line.
  * An answer with no verified citation is flagged as unsupported.
  */
-import { quoteCoverage } from "../research/citations";
+import { quoteContained } from "../research/citations";
 import { normalizeForMatch } from "../text/hebrew";
 
 export interface VaultSource {
@@ -71,7 +72,7 @@ export function verifyVaultCitations(answer: string, sources: readonly VaultSour
       citations.push({ n, path: null, quote, line: null, verified: false });
       continue;
     }
-    const verified = !!quote && quoteCoverage(quote, src.content) >= 0.8;
+    const verified = !!quote && quoteContained(quote, src.content);
     citations.push({ n, path: src.path, quote, line: quote ? lineOfQuote(src.content, quote) : null, verified });
   }
   return { citations, verifiedCount: citations.filter((c) => c.verified).length };
