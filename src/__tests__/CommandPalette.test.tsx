@@ -1,6 +1,7 @@
 /**
  * Component tests for CommandPalette.
  */
+import { useLayoutEffect } from "react";
 import { describe, it, expect, vi } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { CommandPalette } from "../ui/CommandPalette";
@@ -126,5 +127,34 @@ describe("CommandPalette", () => {
       expect(screen.getByText("↵")).toBeTruthy();
       expect(screen.getByText("Esc")).toBeTruthy();
     });
+  });
+
+  it("a reopened palette is empty from its first frame (plan 0.5)", () => {
+    // Reads the input after every commit, before passive effects run: the
+    // frame a user (or Playwright) can see and type into.
+    const frames: string[] = [];
+    function Probe() {
+      useLayoutEffect(() => {
+        const input = document.querySelector<HTMLInputElement>(".cmd-palette-search input");
+        if (input) frames.push(input.value);
+      });
+      return null;
+    }
+    const ui = (open: boolean) => (
+      <>
+        <CommandPalette open={open} onClose={vi.fn()} commands={makeCommands()} />
+        <Probe />
+      </>
+    );
+    const { rerender } = render(ui(true));
+    fireEvent.change(screen.getByRole("textbox"), { target: { value: "chart" } });
+    rerender(ui(false));
+    frames.length = 0;
+    rerender(ui(true));
+    expect(frames[0]).toBe("");
+    // What is typed straight after opening stays typed.
+    fireEvent.change(screen.getByRole("textbox"), { target: { value: "open" } });
+    expect((screen.getByRole("textbox") as HTMLInputElement).value).toBe("open");
+    expect(screen.getByText("Open file")).toBeTruthy();
   });
 });

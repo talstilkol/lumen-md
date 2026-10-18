@@ -12,13 +12,15 @@ const BASE_URL = process.env.PLAYWRIGHT_BASE_URL ?? `http://localhost:${PORT}`;
 
 export default defineConfig({
   testDir: "./e2e",
+  // Compiles the app on the dev server before the first test (e2e/_warmup.ts).
+  globalSetup: "./e2e/_warmup.ts",
   timeout: 30_000,
   expect: { timeout: 5_000 },
   fullyParallel: true,
-  // Every wait in e2e/ is a condition now (T23), so CI gets one retry,
-  // not two; a test that needs it shows up in `npm run e2e:flake` and is
-  // fixed there. Goes to 0 once e2e:flake --times 10 is green on CI.
-  retries: process.env.CI ? 1 : 0,
+  // No retries, on CI either (plan 0.5): a retry turns a flake into a pass
+  // nobody looks at. A test that fails once is a bug to fix; the nightly
+  // e2e-flake workflow runs the suite 5× per browser to find them first.
+  retries: 0,
   reporter: process.env.CI ? "github" : "list",
   use: {
     baseURL: BASE_URL,

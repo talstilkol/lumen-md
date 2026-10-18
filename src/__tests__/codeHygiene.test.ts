@@ -4,6 +4,7 @@ import { findViolations } from "../../scripts/check-code-hygiene.mjs";
 
 type Violation = { line: number; rule: string; text: string };
 const check = (src: string, name = "x.ts"): Violation[] => findViolations(name, src);
+const checkE2e = (src: string): Violation[] => findViolations("e2e/x.spec.ts", src, { e2e: true });
 
 describe("scripts/check-code-hygiene", () => {
   it("flags `as any` casts and console.log calls", () => {
@@ -29,6 +30,15 @@ describe("scripts/check-code-hygiene", () => {
     expect(check(`console.log(1); // hygiene-allow: reason`)).toEqual([]);
     // A bare marker without justification does not count.
     expect(check(`// hygiene-allow:\nconsole.log(1);`)).toHaveLength(1);
+  });
+
+  it("flags a fixed sleep in an e2e file, and only there", () => {
+    const sleep = `await page.waitForTimeout(500);\nawait expect(x).toBeVisible();\n`;
+    expect(checkE2e(sleep).map((v) => [v.rule, v.line])).toEqual([["e2e-sleep", 1]]);
+    // e2e files are not held to the production rules, nor src to the e2e one.
+    expect(checkE2e(`const a = b as any; console.log(a);`)).toEqual([]);
+    expect(check(sleep)).toEqual([]);
+    expect(checkE2e(`// hygiene-allow: asserts nothing happens for 1 s\nawait page.waitForTimeout(1000);`)).toEqual([]);
   });
 
   it("parses TSX", () => {
