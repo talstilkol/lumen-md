@@ -270,6 +270,15 @@ export function addSpeechVoiceBytes(id: number, bytes: number): void {
   if (e) patch(id, { bytesOut: e.bytesOut + bytes });
 }
 
+/**
+ * Record use of the browser's speech recognition service (Chrome sends the audio
+ * to Google). "blocked" when local-only refused it.
+ */
+export function recordSpeechRecognition(decision: "allowed" | "blocked"): LedgerEntry | null {
+  const id = record({ host: "browser speech recognition", method: "AUDIO", bytesOut: 0, bytesIn: null, category: "cloud-text", reason: "Dictation through the browser's speech service", policy: getAiPolicy(), decision });
+  return entries.find((x) => x.id === id) ?? null;
+}
+
 /** Install once at startup. `blocked` is called for every blocked request. */
 export function installPrivacyLedger(blocked?: (entry: LedgerEntry) => void): void {
   if (installed || typeof window === "undefined" || typeof window.fetch !== "function") return;

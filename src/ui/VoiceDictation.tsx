@@ -2,9 +2,10 @@
  * Voice memo capture (F2 / γ.4).
  *
  * Two flows live behind the same UI:
- *   - **Quick mode** (default): Browser-native `SpeechRecognition`,
- *     interim results streamed straight into the editor. Same as the
- *     old behaviour — fast, no AI cost, no audio recording.
+ *   - **Dictation** (`startVoiceRecording`): Whisper on this device in
+ *     ~5-second segments (plan 1.3). The browser's `SpeechRecognition` sends
+ *     audio to its vendor, so it is used only outside local-only and only
+ *     after the user agrees; every use is in the privacy ledger.
  *   - **Memo mode** (when `aiKey` is set OR Privacy Mode is on):
  *     `MediaRecorder` captures the audio, on stop we Whisper-transcribe
  *     + AI-summarize and insert a `> 🎙 Voice memo` block at the cursor.
@@ -13,9 +14,7 @@
  * device through transformers.js (src/ai/transformersEngine.ts) and the
  * summary through the local model, so no audio bytes leave the browser.
  *
- * Backwards-compat: `startVoiceRecording(lang)` is the legacy entry
- * point and still defaults to quick mode. The new `startVoiceMemo()`
- * wraps the AI flow.
+ * `startVoiceMemo()` wraps the memo flow.
  */
 
 import { createRoot } from "react-dom/client";
@@ -25,6 +24,9 @@ import { t } from "../i18n";
 import { transcribe, summarizeMemo, formatVoiceMemo } from "../ai/transcribe";
 import { aiOperation, isAbort } from "../ai/aiAbort";
 import { log } from "../lib/logger";
+import { getAiPolicy } from "../ai/policy";
+import { recordSpeechRecognition } from "../ai/privacyLedger";
+import { chooseDictationEngine, webSpeechOptedIn, WEB_SPEECH_KEY, Segmenter, SerialQueue } from "../ai/dictation";
 
 // SpeechRecognition is poorly + inconsistently typed across DOM lib
 // variants; keep the surface deliberately loose so we don't fight the
@@ -47,113 +49,216 @@ interface SpeechRecognitionLike {
   onend: (() => void) | null;
 }
 
-export function startVoiceRecording(lang: string): void {
-  const SpeechRecognition =
-    (window as Window & { SpeechRecognition?: unknown; webkitSpeechRecognition?: unknown })
-      .SpeechRecognition ??
-    (window as Window & { SpeechRecognition?: unknown; webkitSpeechRecognition?: unknown })
-      .webkitSpeechRecognition;
-
-  if (!SpeechRecognition) {
-    showAiToast(t("toast.speechRecognitionNotSupportedIn"), "error");
-    return;
-  }
-
-  const Ctor = SpeechRecognition as new () => SpeechRecognitionLike;
-  const recognition = new Ctor();
-  recognition.lang = lang;
-  recognition.interimResults = false;
-  recognition.continuous = true;
-
+/** The floating "recording" pill with a Stop button. Returns its teardown. */
+function showRecordingPill(label: string, onStop: () => void): () => void {
   const host = document.createElement("div");
   host.id = "voice-recording-root";
   document.body.appendChild(host);
   const root = createRoot(host);
-
-  const cleanup = () => {
+  root.render(
+      <div
+        style={{
+          position: "fixed",
+          bottom: 20,
+          right: 20,
+          zIndex: 9999,
+          display: "flex",
+          alignItems: "center",
+          gap: 8,
+          background: "hsl(var(--bg))",
+          border: "1px solid hsl(var(--border-strong))",
+          borderRadius: 12,
+          padding: "10px 16px",
+          boxShadow: "0 8px 32px hsl(0 0% 0%/0.3)",
+          fontSize: 13,
+          color: "hsl(var(--fg))",
+        }}
+      >
+        <div
+          style={{
+            width: 10,
+            height: 10,
+            borderRadius: "50%",
+            background: "#ef4444",
+            animation: "pulse 1s infinite",
+          }}
+        />
+        <span>{label}</span>
+        <button
+          onClick={onStop}
+          style={{
+            background: "#ef4444",
+            color: "white",
+            border: "none",
+            borderRadius: 6,
+            padding: "4px 12px",
+            cursor: "pointer",
+            fontSize: 11,
+            fontWeight: 600,
+          }}
+        >
+          ⏹ Stop
+        </button>
+        <style>{`@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}`}</style>
+      </div>,
+  );
+  return () => {
     try {
       root.unmount();
     } catch {
-      /* ignore */
+      // why: already unmounted by an earlier stop
     }
     host.remove();
   };
+}
 
-  const stopRecording = () => {
+type SpeechCtor = new () => SpeechRecognitionLike;
+function webSpeechCtor(): SpeechCtor | null {
+  const w = window as Window & { SpeechRecognition?: unknown; webkitSpeechRecognition?: unknown };
+  return ((w.SpeechRecognition ?? w.webkitSpeechRecognition) as SpeechCtor | undefined) ?? null;
+}
+
+function localDictationSupported(): boolean {
+  const w = window as Window & { webkitAudioContext?: unknown };
+  return !!navigator.mediaDevices?.getUserMedia && (typeof AudioContext !== "undefined" || !!w.webkitAudioContext);
+}
+
+function appendDictated(text: string): void {
+  const words = text.trim();
+  if (!words) return;
+  const current = useAppStore.getState().doc.content;
+  useAppStore.getState().setContent(current + (current.endsWith("\n\n") || !current ? "" : "\n\n") + words);
+  showAiToast(t("toast.addedWords", { count: words.split(/\s+/).length }), "info");
+}
+
+/**
+ * Dictate into the open note (plan 1.3). Default: Whisper on this device, in
+ * ~5-second segments. The browser speech service (which sends the audio to
+ * the vendor) is used only when the policy is not local-only AND the user
+ * agreed — never silently; each use is recorded in the privacy ledger.
+ */
+export function startVoiceRecording(lang: string): void {
+  const Ctor = webSpeechCtor();
+  const policy = getAiPolicy();
+  const engine = chooseDictationEngine(policy, !!Ctor, webSpeechOptedIn());
+  if (engine === "webspeech" && Ctor) {
+    startWebSpeech(Ctor, lang);
+    return;
+  }
+  if (localDictationSupported()) {
+    void startLocalDictation(lang).catch((err) => {
+      log.warn("local dictation failed", err);
+      void offerWebSpeech(Ctor, lang, policy);
+    });
+    return;
+  }
+  if (!Ctor) {
+    showAiToast(t("toast.speechRecognitionNotSupportedIn"), "error");
+    return;
+  }
+  void offerWebSpeech(Ctor, lang, policy);
+}
+
+/** Local dictation is impossible here: under local-only say so (and log the block); otherwise ask. */
+async function offerWebSpeech(Ctor: SpeechCtor | null, lang: string, policy: ReturnType<typeof getAiPolicy>): Promise<void> {
+  if (!Ctor) {
+    showAiToast(t("toast.speechRecognitionNotSupportedIn"), "error");
+    return;
+  }
+  if (policy === "local-only") {
+    recordSpeechRecognition("blocked");
+    showAiToast(t("toast.dictate.localOnlyBlocked"), "error");
+    return;
+  }
+  const { uiConfirm } = await import("./PromptDialog");
+  const yes = await uiConfirm({ title: t("dictate.webSpeech.title"), message: t("dictate.webSpeech.body"), okLabel: t("dictate.webSpeech.ok") });
+  if (!yes) return;
+  try {
+    localStorage.setItem(WEB_SPEECH_KEY, "1");
+  } catch {
+    // why: storage blocked — the consent then lasts for this dictation only
+  }
+  startWebSpeech(Ctor, lang);
+}
+
+function startWebSpeech(Ctor: SpeechCtor, lang: string): void {
+  recordSpeechRecognition("allowed");
+  showAiToast(t("toast.dictate.webSpeechActive"), "info");
+  const recognition = new Ctor();
+  recognition.lang = lang;
+  recognition.interimResults = false;
+  recognition.continuous = true;
+  let cleanup = () => {};
+  const stop = () => {
     recognition.stop();
     cleanup();
     showAiToast(t("toast.recordingStopped"), "info");
   };
-
   recognition.onresult = (event) => {
     let transcript = "";
     for (let i = event.resultIndex; i < event.results.length; i++) {
-      if (event.results[i].isFinal) {
-        transcript += event.results[i][0].transcript + " ";
-      }
+      if (event.results[i].isFinal) transcript += event.results[i][0].transcript + " ";
     }
-    if (transcript.trim()) {
-      const current = useAppStore.getState().doc.content;
-      useAppStore.getState().setContent(current + "\n\n" + transcript.trim());
-      showAiToast(t("toast.addedWords", { count: transcript.trim().split(/\s+/).length }), "info");
-    }
+    appendDictated(transcript);
   };
-
   recognition.onerror = () => {
     cleanup();
     showAiToast(t("toast.speechRecognitionErrorCheckMicrophone"), "error");
   };
   recognition.onend = () => cleanup();
-
-  root.render(
-    <div
-      style={{
-        position: "fixed",
-        bottom: 20,
-        right: 20,
-        zIndex: 9999,
-        display: "flex",
-        alignItems: "center",
-        gap: 8,
-        background: "hsl(var(--bg))",
-        border: "1px solid hsl(var(--border-strong))",
-        borderRadius: 12,
-        padding: "10px 16px",
-        boxShadow: "0 8px 32px hsl(0 0% 0%/0.3)",
-        fontSize: 13,
-        color: "hsl(var(--fg))",
-      }}
-    >
-      <div
-        style={{
-          width: 10,
-          height: 10,
-          borderRadius: "50%",
-          background: "#ef4444",
-          animation: "pulse 1s infinite",
-        }}
-      />
-      <span>{t("voice.recording", { lang })}</span>
-      <button
-        onClick={stopRecording}
-        style={{
-          background: "#ef4444",
-          color: "white",
-          border: "none",
-          borderRadius: 6,
-          padding: "4px 12px",
-          cursor: "pointer",
-          fontSize: 11,
-          fontWeight: 600,
-        }}
-      >
-        ⏹ Stop
-      </button>
-      <style>{`@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}`}</style>
-    </div>,
-  );
-
+  cleanup = showRecordingPill(t("voice.recording", { lang }), stop);
   recognition.start();
+}
+
+/** Microphone → 5-second 16 kHz segments → Whisper in the worker → the note. Nothing leaves the device. */
+async function startLocalDictation(lang: string): Promise<void> {
+  const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+  const w = window as Window & { webkitAudioContext?: typeof AudioContext };
+  const Ctx = typeof AudioContext !== "undefined" ? AudioContext : (w.webkitAudioContext as typeof AudioContext);
+  const ctx = new Ctx();
+  const source = ctx.createMediaStreamSource(stream);
+  // ScriptProcessor works everywhere without a worklet module (which the CSP would have to allow).
+  const proc = ctx.createScriptProcessor(4096, 1, 1);
+  const op = aiOperation(); // Esc / "AI: Cancel" stops transcription
+  const queue = new SerialQueue();
+  const language = lang.split(/[-_]/)[0].toLowerCase();
+  const { transcribeAudio } = await import("../ai/transformersEngine");
+  const segmenter = new Segmenter({
+    rate: ctx.sampleRate,
+    onSegment: (seg) => {
+      void queue.add(async () => {
+        if (op.signal.aborted) return;
+        try {
+          const out = await transcribeAudio(seg, { language, signal: op.signal });
+          if (typeof out.text === "string") appendDictated(out.text);
+        } catch (err) {
+          if (!isAbort(err)) log.warn("dictation segment failed", err);
+        }
+      });
+    },
+  });
+  proc.onaudioprocess = (e) => segmenter.push(e.inputBuffer.getChannelData(0));
+  source.connect(proc);
+  proc.connect(ctx.destination);
+  let stopped = false;
+  let cleanup = () => {};
+  const stop = () => {
+    if (stopped) return;
+    stopped = true;
+    proc.disconnect();
+    source.disconnect();
+    stream.getTracks().forEach((tr) => tr.stop());
+    segmenter.flush();
+    cleanup();
+    void queue.idle().finally(() => {
+      op.end();
+      void ctx.close();
+      showAiToast(t("toast.recordingStopped"), "info");
+    });
+  };
+  op.signal.addEventListener("abort", stop);
+  cleanup = showRecordingPill(t("voice.recording", { lang }), stop);
+  showAiToast(t("toast.dictate.onDevice"), "info");
 }
 
 /** The first recording container this browser supports, or "" to let MediaRecorder choose. */

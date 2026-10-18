@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-10-18T03:38:01.411Z",
+  "generated_at": "2026-10-18T04:30:23.785Z",
   "source": "src/i18n/index.ts (en bundle)",
-  "count": 1415,
+  "count": 1421,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -2480,6 +2480,36 @@
     {
       "key": "toast.speechRecognitionNotSupportedIn",
       "en": "Speech recognition not supported in this browser",
+      "vars": []
+    },
+    {
+      "key": "toast.dictate.onDevice",
+      "en": "Dictating on this device — text appears every few seconds (the first time downloads the speech model)",
+      "vars": []
+    },
+    {
+      "key": "toast.dictate.localOnlyBlocked",
+      "en": "On-device dictation isn't available here, and the browser's speech service is blocked under local-only (it sends audio out)",
+      "vars": []
+    },
+    {
+      "key": "toast.dictate.webSpeechActive",
+      "en": "Dictating through the browser's speech service — the audio is sent to its provider",
+      "vars": []
+    },
+    {
+      "key": "dictate.webSpeech.title",
+      "en": "Use the browser's speech service?",
+      "vars": []
+    },
+    {
+      "key": "dictate.webSpeech.body",
+      "en": "Dictation on this device couldn't start. Your browser's speech service works, but it sends the audio to its provider (Google in Chrome). The privacy ledger records each use.",
+      "vars": []
+    },
+    {
+      "key": "dictate.webSpeech.ok",
+      "en": "Use the browser service",
       "vars": []
     },
     {
