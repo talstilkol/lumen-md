@@ -36,6 +36,7 @@ import {
   applyQuery,
   displayValue,
   groupRows,
+  kanbanColumnValue,
   NO_VALUE,
   loadDatabaseRows,
   parseDatabaseSpec,
@@ -551,13 +552,7 @@ function KanbanView({ rows, allRows, spec, fields, groupBy, edit }: ViewProps) {
   };
   homeRef.current = columnOf;
   /** The value a column stands for, in the type its notes use (`3`, not `"3"`). */
-  const valueFor = (col: string): PropertyValue | undefined => {
-    if (col === NONE) return undefined;
-    const sample = groups.get(col)?.[0]?.fm[groupBy];
-    if (typeof sample === "number" || typeof sample === "boolean") return sample;
-    const type = columnType(allRows.map((r) => r.fm[groupBy]), groupBy);
-    return type === "number" && Number.isFinite(Number(col)) ? Number(col) : col;
-  };
+  const valueFor = (col: string) => kanbanColumnValue(col, groups.get(col)?.[0]?.fm[groupBy], columnType(allRows.map((r) => r.fm[groupBy]), groupBy));
   const noteName = (id: unknown) => {
     const r = byPath.get(String(id));
     return r ? titleOf(r) : String(id);

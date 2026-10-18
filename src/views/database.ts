@@ -31,6 +31,7 @@ import {
 } from "../storage/workspace";
 import { extractFrontmatter } from "../renderer/pipeline";
 import { matchesFilter, parseFilter, type FilterNode } from "./databaseFilter";
+import type { PropertyType, PropertyValue } from "../properties/frontmatter";
 
 export type DatabaseView = "table" | "cards" | "kanban" | "list" | "calendar";
 
@@ -185,6 +186,20 @@ function compareValue(v: unknown): string | number {
  * the property and moving it to a real `_` column writes `_`.
  */
 export const NO_VALUE = "\uFDD0none";
+
+/**
+ * The value a kanban column stands for, to write when a card is dropped
+ * there: what a note in it already holds, in its type — a list stays a list
+ * (`tags: [fav, sci-fi]`, not `"fav,sci-fi"`), `3` stays a number. An empty
+ * column (from `columns:`) gets the column's type. `NO_VALUE`: remove it.
+ */
+export function kanbanColumnValue(col: string, sample: unknown, type: PropertyType): PropertyValue | undefined {
+  if (col === NO_VALUE) return undefined;
+  if (typeof sample === "number" || typeof sample === "boolean") return sample;
+  if (Array.isArray(sample)) return sample.map((x) => String(x));
+  if (type === "list") return [col];
+  return type === "number" && Number.isFinite(Number(col)) ? Number(col) : col;
+}
 
 export function groupRows(
   rows: DatabaseRow[],

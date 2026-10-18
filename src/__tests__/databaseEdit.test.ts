@@ -8,7 +8,7 @@ import { installFakeOpfs } from "./helpers/fakeOpfs";
 import { readWorkspaceFile, writeWorkspaceFile } from "../storage/workspace";
 import * as ws from "../storage/workspace";
 import { NOTE_EDIT_EVENT, cellInputText, columnType, editNote, parseCellInput, writeCell, type NoteEditDetail } from "../views/databaseEdit";
-import { applyQuery, loadDatabaseRows, parseSort, runDatabaseQuery, specView, type DatabaseRow } from "../views/database";
+import { NO_VALUE, applyQuery, groupRows, kanbanColumnValue, loadDatabaseRows, parseSort, runDatabaseQuery, specView, type DatabaseRow } from "../views/database";
 import { parseFilter } from "../views/databaseFilter";
 import { FrontmatterError } from "../properties/frontmatter";
 import { useAppStore } from "../store/useStore";
@@ -126,6 +126,27 @@ describe("writeCell", () => {
     window.removeEventListener(NOTE_EDIT_EVENT, onEdit);
     expect(editorText).toContain("rating: 3");
     expect(await readWorkspaceFile("open.md")).toBe(NOTE);
+  });
+});
+
+describe("kanban moves", () => {
+  it("grouped by a list (tags), a move writes the column's list as a YAML list", async () => {
+    await writeWorkspaceFile("t/one.md", "---\ntype: task\ntags: [todo]\n---\nbody\n");
+    await writeWorkspaceFile("t/two.md", "---\ntype: task\ntags: [fav, sci-fi]\n---\n");
+    const rows = await loadDatabaseRows({ source: "t", type: "task" });
+    const groups = groupRows(rows, "tags");
+    expect([...groups.keys()]).toEqual(["todo", "fav,sci-fi"]);
+    const type = columnType(rows.map((r) => r.fm.tags), "tags");
+    const value = kanbanColumnValue("fav,sci-fi", groups.get("fav,sci-fi")![0].fm.tags, type);
+    expect(value).toEqual(["fav", "sci-fi"]);
+    await writeCell("t/one.md", "tags", value);
+    expect(await readWorkspaceFile("t/one.md")).toBe("---\ntype: task\ntags: [fav, sci-fi]\n---\nbody\n");
+    // An empty listed column of a list property: a one-item list.
+    expect(kanbanColumnValue("later", undefined, type)).toEqual(["later"]);
+    // Numbers stay numbers, NO_VALUE removes.
+    expect(kanbanColumnValue("3", 3, "number")).toBe(3);
+    expect(kanbanColumnValue("4", undefined, "number")).toBe(4);
+    expect(kanbanColumnValue(NO_VALUE, undefined, "text")).toBeUndefined();
   });
 });
 
