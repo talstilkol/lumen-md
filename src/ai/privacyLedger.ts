@@ -264,10 +264,16 @@ export function recordSpeechVoice(voice: string, lang: string, bytes: number): L
   return entries.find((x) => x.id === id) ?? null;
 }
 
-/** Add the size of another sentence sent through the same network voice (one entry per voice per reading). */
-export function addSpeechVoiceBytes(id: number, bytes: number): void {
+/**
+ * Add the size of another sentence sent through the same network voice (one
+ * entry per voice per reading). Returns false when the entry is gone (the
+ * ledger was cleared, or the entry was evicted), so the caller records a new one.
+ */
+export function addSpeechVoiceBytes(id: number, bytes: number): boolean {
   const e = entries.find((x) => x.id === id);
-  if (e) patch(id, { bytesOut: e.bytesOut + bytes });
+  if (!e) return false;
+  patch(id, { bytesOut: e.bytesOut + bytes });
+  return true;
 }
 
 /** Install once at startup. `blocked` is called for every blocked request. */

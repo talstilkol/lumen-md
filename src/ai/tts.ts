@@ -154,6 +154,8 @@ export function voiceFor(lang: string, allowNetwork = networkVoicesAllowed()): S
 }
 
 let speaking = false;
+/** Bumped by every stop: a reading whose run is no longer current stops at its next step. */
+let currentRun = 0;
 
 export function isSpeaking(): boolean {
   return speaking;
@@ -163,11 +165,30 @@ export function isSpeaking(): boolean {
 export function __resetTts(): void {
   sessionOptIn = false;
   speaking = false;
+  currentRun = 0;
 }
 
 export function stopSpeaking(): void {
   speaking = false;
+  currentRun++;
   if (ttsAvailable()) window.speechSynthesis.cancel();
+}
+
+/**
+ * Claim read-aloud for a new reading before anything is awaited: stops an
+ * earlier reading, and `isSpeaking()` is true from here on. So a second "Read
+ * aloud" while the voice list loads or the opt-in prompt is open stops this
+ * reading instead of starting a second one. Pass the run to `speak()`.
+ */
+export function beginSpeaking(): number {
+  stopSpeaking();
+  speaking = true;
+  return currentRun;
+}
+
+/** Is `run` still the reading in progress (not stopped, not replaced by a newer one)? */
+export function isCurrentRun(run: number): boolean {
+  return speaking && run === currentRun;
 }
 
 /**
@@ -176,46 +197,52 @@ export function stopSpeaking(): void {
  * local-only (or without the opt-in) only voices that run on this device count.
  * A network voice, when allowed, is recorded in the privacy ledger.
  */
-export async function speak(markdown: string, opts: { uiLang: string; rate?: number; onSentence?: (s: Sentence) => void }): Promise<boolean> {
+export async function speak(markdown: string, opts: { uiLang: string; rate?: number; onSentence?: (s: Sentence) => void; run?: number }): Promise<boolean> {
   if (!ttsAvailable()) return false;
-  stopSpeaking();
-  const sentences = speakableSentences(markdown);
-  if (!sentences.length) return true;
-  speaking = true;
-  await voicesReady();
-  let hadVoice = true;
-  const allowNetwork = networkVoicesAllowed();
-  /** Ledger entry per network voice; every sentence sent through it adds its UTF-8 size. */
-  const logged = new Map<string, number>();
-  const utf8 = new TextEncoder();
-  for (const s of sentences) {
-    if (!speaking) break;
-    const lang = langFor(s.text, opts.uiLang === "he" ? "he-IL" : opts.uiLang);
-    const u = new SpeechSynthesisUtterance(s.text);
-    u.lang = lang;
-    const v = voiceFor(lang, allowNetwork);
-    if (!v) {
-      // A missing local voice: say so instead of letting the browser pick a network one.
-      hadVoice = false;
-      continue;
+  // A run claimed with beginSpeaking() and stopped meanwhile speaks nothing.
+  if (opts.run !== undefined && !isCurrentRun(opts.run)) return true;
+  const run = opts.run ?? beginSpeaking();
+  try {
+    const sentences = speakableSentences(markdown);
+    if (!sentences.length) return true;
+    await voicesReady();
+    let hadVoice = true;
+    const allowNetwork = networkVoicesAllowed();
+    /** Ledger entry per network voice; every sentence sent through it adds its UTF-8 size. */
+    const logged = new Map<string, number>();
+    const utf8 = new TextEncoder();
+    for (const s of sentences) {
+      // why: a stop, or a newer reading, ends this one — two readings never interleave
+      if (!isCurrentRun(run)) break;
+      const lang = langFor(s.text, opts.uiLang === "he" ? "he-IL" : opts.uiLang);
+      const u = new SpeechSynthesisUtterance(s.text);
+      u.lang = lang;
+      const v = voiceFor(lang, allowNetwork);
+      if (!v) {
+        // A missing local voice: say so instead of letting the browser pick a network one.
+        hadVoice = false;
+        continue;
+      }
+      u.voice = v;
+      if (!v.localService) {
+        const bytes = utf8.encode(s.text).length;
+        const id = logged.get(v.name);
+        // why: the ledger may have been cleared (or the entry evicted) mid-reading — start a new entry then
+        if (id === undefined || !addSpeechVoiceBytes(id, bytes)) {
+          const entry = recordSpeechVoice(v.name, lang, bytes);
+          if (entry) logged.set(v.name, entry.id);
+        }
+      }
+      u.rate = opts.rate ?? 1;
+      opts.onSentence?.(s);
+      await new Promise<void>((resolve) => {
+        u.onend = () => resolve();
+        u.onerror = () => resolve();
+        window.speechSynthesis.speak(u);
+      });
     }
-    u.voice = v;
-    if (!v.localService) {
-      const bytes = utf8.encode(s.text).length;
-      const id = logged.get(v.name);
-      if (id === undefined) {
-        const entry = recordSpeechVoice(v.name, lang, bytes);
-        if (entry) logged.set(v.name, entry.id);
-      } else addSpeechVoiceBytes(id, bytes);
-    }
-    u.rate = opts.rate ?? 1;
-    opts.onSentence?.(s);
-    await new Promise<void>((resolve) => {
-      u.onend = () => resolve();
-      u.onerror = () => resolve();
-      window.speechSynthesis.speak(u);
-    });
+    return hadVoice;
+  } finally {
+    if (run === currentRun) speaking = false;
   }
-  speaking = false;
-  return hadVoice;
 }
