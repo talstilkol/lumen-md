@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { connectAllowedByCsp } from "../lib/cspConnect";
+import { endpointOrigins } from "../build/cspEndpoints";
 
 const SRC = ["'self'", "blob:", "wss:", "https://api.openai.com", "http://localhost:11434", "https://*.supabase.co"];
 
@@ -33,6 +34,35 @@ describe("connectAllowedByCsp", () => {
     expect(connectAllowedByCsp("wss://signal.lumen.md:8443", list)).toBe(false);
     expect(connectAllowedByCsp("ws://signal.lumen.md", list)).toBe(false);
     expect(connectAllowedByCsp("wss://my-signal.example.org", list)).toBe(false);
+  });
+
+  it("a bracketed IPv6 source allows nothing, as in browsers (Chromium ignores it as invalid)", () => {
+    const list = ["'self'", "ws://[::1]:4444", "wss://[2001:db8::1]", "ws://127.0.0.1:4444"];
+    expect(connectAllowedByCsp("ws://[::1]:4444/room", list)).toBe(false);
+    expect(connectAllowedByCsp("wss://[2001:db8::1]/", list)).toBe(false);
+    // An IPv4 address and names still work, and a bracket never bleeds into a name match.
+    expect(connectAllowedByCsp("ws://127.0.0.1:4444/room", list)).toBe(true);
+    expect(connectAllowedByCsp("ws://[::1]:4444", ["ws://[::1"])).toBe(false);
+  });
+
+  it("every origin the build adds is allowed at runtime; IPv6 ones are skipped with a reason", () => {
+    const skipped: string[] = [];
+    const origins = endpointOrigins(
+      {
+        VITE_WEBRTC_SIGNALING_URL: "ws://[::1]:4444, wss://signal.acme.dev, ws://127.0.0.1:4444",
+        VITE_YJS_WEBSOCKET_URL: "wss://[2001:db8::7]:8443/rooms",
+        VITE_WORKOS_ENDPOINT: "https://auth.acme.dev",
+        VITE_CSP_CONNECT_EXTRA: "http://[fe80::1]:11434",
+      },
+      (value, reason) => skipped.push(`${value}: ${reason}`),
+    );
+    expect(origins).toEqual(["https://auth.acme.dev", "ws://127.0.0.1:4444", "wss://signal.acme.dev"]);
+    expect(skipped).toHaveLength(3);
+    expect(skipped.join("\n")).toMatch(/ws:\/\/\[::1\]:4444: .*IPv6.*use a hostname/);
+    const list = ["'self'", ...origins];
+    for (const url of ["ws://127.0.0.1:4444", "wss://signal.acme.dev", "https://auth.acme.dev/x"]) {
+      expect(connectAllowedByCsp(url, list), url).toBe(true);
+    }
   });
 
   it("allows everything when no policy is present", () => {

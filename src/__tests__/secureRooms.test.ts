@@ -62,6 +62,10 @@ describe("secure rooms", () => {
       expect(signalingUrls()).toEqual(["wss://signal.acme.dev"]);
       localStorage.setItem("lumen.collab.signaling", "wss://unlisted.example.org");
       expect(signalingUrls()).toEqual(["wss://signal.lumen.md"]);
+      // An IPv6 literal can't be listed at all; it falls back the same way.
+      meta.content += " ws://[::1]:4444";
+      localStorage.setItem("lumen.collab.signaling", "ws://[::1]:4444");
+      expect(signalingUrls()).toEqual(["wss://signal.lumen.md"]);
     } finally {
       meta.remove();
       localStorage.removeItem("lumen.collab.signaling");

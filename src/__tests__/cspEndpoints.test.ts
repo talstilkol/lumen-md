@@ -59,6 +59,21 @@ describe("collab WebSocket servers (plan 2.2: no bare ws: / wss: in the policies
     expect(endpointOrigins({ VITE_YJS_WEBSOCKET_URL: "wss://collab.example.com", VITE_WEBRTC_SIGNALING_URL: "" })).toEqual([]);
   });
 
+  it("the plugin warns about an IPv6 collab server instead of adding an invalid source", () => {
+    const warnings: string[] = [];
+    const plugin = cspEndpointsPlugin();
+    plugin.configResolved({
+      env: { VITE_YJS_WEBSOCKET_URL: "ws://[::1]:1234" },
+      build: { outDir: "dist" },
+      root: ROOT,
+      command: "build",
+      logger: { warn: (m) => warnings.push(m) },
+    });
+    const html = plugin.transformIndexHtml(readFileSync(resolve(ROOT, "index.html"), "utf8"));
+    expect(html).not.toContain("[::1]");
+    expect(warnings).toEqual([expect.stringContaining("ws://[::1]:1234")]);
+  });
+
   it("the dev server's page names its HMR socket; a build never does", () => {
     expect(devServerOrigins({ port: 5173 })).toEqual(["ws://*:5173", "wss://*:5173"]);
     expect(devServerOrigins({ port: 5173, hmr: { clientPort: 443 } })).toEqual(["ws://*:443", "wss://*:443"]);

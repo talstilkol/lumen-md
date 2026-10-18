@@ -185,6 +185,11 @@ WebSockets the app opens:
 | A server the user types into Collab settings | `localStorage` `lumen.collab.signaling` / `lumen.collab.ws` | only when the build lists it (`VITE_CSP_CONNECT_EXTRA`). Otherwise `yjs.ts` skips it with a warning, and the dialog says so |
 | Vite's dev server (HMR) | `npm run dev` | the dev page alone gets `ws://*:<port>` / `wss://*:<port>`. CSP3 `'self'` covers the same host too. No build carries it |
 
+IPv6 addresses cannot be named: CSP source lists have no IPv6 literal, and Chromium ignores
+`ws://[::1]:4444` as an invalid source. The build skips such a URL with a warning, and the
+runtime check (`src/lib/cspConnect.ts`) treats one as allowing nothing, as the browser does.
+Give an IPv6-only server a hostname.
+
 A search of `src/` found no other socket: no `EventSource`, no Supabase realtime channel,
 and `WebSocketStream` / `WebTransport` appear only in the live-js and Ruby blocklists.
 Checked in Chromium: `wss://signal.lumen.md` is allowed, an unlisted `wss://` host is

@@ -56,9 +56,23 @@ export const EXTRA_ORIGINS_FILE = ".csp-connect-extra";
  * Origins (scheme://host[:port]) of the configured endpoints, deduplicated
  * and sorted. Empty, placeholder (`example.com`, `your-…`, `…placeholder…`)
  * and non-HTTP(S) values are ignored.
+ *
+ * An IPv6 literal host (`ws://[::1]:4444`) is skipped and reported through
+ * `onSkip`: CSP source lists cannot name one (browsers ignore it as an
+ * invalid source), so adding it would allow nothing. Use a hostname.
  */
-export function endpointOrigins(env: Record<string, string | undefined>): string[] {
+export function endpointOrigins(
+  env: Record<string, string | undefined>,
+  onSkip?: (value: string, reason: string) => void,
+): string[] {
   const out = new Set<string>();
+  const addOrigin = (url: URL, raw: string) => {
+    if (url.hostname.startsWith("[")) {
+      onSkip?.(raw, "a CSP source list can't name an IPv6 address (browsers ignore it); use a hostname");
+      return;
+    }
+    out.add(url.origin);
+  };
   const add = (raw: string, schemes: readonly string[]) => {
     let url: URL;
     try {
@@ -68,7 +82,7 @@ export function endpointOrigins(env: Record<string, string | undefined>): string
     }
     if (!schemes.includes(url.protocol)) return;
     if (/(^|\.)example\.(com|org|net)$/i.test(url.hostname) || /placeholder|your-/i.test(raw)) return;
-    out.add(url.origin);
+    addOrigin(url, raw);
   };
   for (const key of ENDPOINT_ENV_VARS) {
     const raw = env[key]?.trim();
@@ -81,7 +95,7 @@ export function endpointOrigins(env: Record<string, string | undefined>): string
     if (!raw) continue;
     try {
       const u = new URL(raw);
-      if (["https:", "http:", "wss:", "ws:"].includes(u.protocol)) out.add(u.origin);
+      if (["https:", "http:", "wss:", "ws:"].includes(u.protocol)) addOrigin(u, raw);
     } catch {
       /* not an origin — ignore */
     }
@@ -132,6 +146,7 @@ interface MinimalPlugin {
     root: string;
     command?: "build" | "serve";
     server?: { port?: number; hmr?: boolean | { port?: number; clientPort?: number } };
+    logger?: { warn(msg: string): void };
   }): void;
   transformIndexHtml(html: string): string;
   closeBundle(): Promise<void>;
@@ -163,7 +178,9 @@ export function cspEndpointsPlugin(): MinimalPlugin {
   return {
     name: "lumen-csp-endpoints",
     configResolved(config) {
-      origins = endpointOrigins({ ...process.env, ...config.env });
+      origins = endpointOrigins({ ...process.env, ...config.env }, (value, reason) =>
+        config.logger?.warn(`[lumen-csp-endpoints] not added to connect-src: ${value} (${reason})`),
+      );
       pageOrigins = config.command === "serve" ? [...origins, ...devServerOrigins(config.server)] : origins;
       const path = config.build.outDir;
       outDir = path.startsWith("/") ? path : `${config.root}/${path}`;
