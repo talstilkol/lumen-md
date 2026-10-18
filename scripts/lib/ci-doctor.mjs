@@ -77,8 +77,10 @@ export function parseAnnotations(annotations) {
   const flaky = new Set();
   const summaryFailed = new Set();
   const fullTitle = new Map(); // summary key → the summary's own line (keeps file:line)
+  let summary = false; // Playwright got to the end of the run and reported it
   for (const a of annotations ?? []) {
     if (/Playwright Run Summary/i.test(a.title ?? "")) {
+      summary = true;
       let section = "";
       for (const raw of String(a.message ?? "").split("\n")) {
         const head = /^\s*\d+\s+(failed|flaky|skipped|passed|interrupted|did not run)\b/i.exec(raw);
@@ -111,7 +113,7 @@ export function parseAnnotations(annotations) {
     const full = [...summaryFailed].find((f) => f.length > t.key.length && sameTest(f, t.key));
     if (full) t.title = fullTitle.get(full) ?? full;
   }
-  return { tests, other: [...other.values()], flaky: [...flaky], summaryFailed: [...summaryFailed] };
+  return { tests, other: [...other.values()], flaky: [...flaky], summaryFailed: [...summaryFailed], summary };
 }
 
 /**
@@ -153,9 +155,13 @@ export function observe(item, peerJob, peerParsed, opts = {}) {
   if (c === "success") return pass;
   if (!isFailed(c)) return null;
   if (peerParsed?.tests?.some((t) => sameTest(t.key, item.key))) return "failed";
-  // The peer job failed elsewhere: the tests only count if its failure is in the same step.
+  // The peer job failed elsewhere: the tests only count if its failure is in
+  // the same step, and the reporter got far enough to say so (the run
+  // summary, or other tests' failures). A step that crashed before
+  // reporting anything is no evidence that this test passed.
   const peerStep = failedSteps(peerJob)[0]?.name;
-  return peerStep && peerStep === item.step && peerParsed ? pass : null;
+  const reported = Boolean(peerParsed && (peerParsed.summary || peerParsed.tests?.length));
+  return peerStep && peerStep === item.step && reported ? pass : null;
 }
 
 /**

@@ -72,7 +72,7 @@ describe("parseAnnotations", () => {
   });
   it("is empty for a job with only runner annotations", () => {
     const p = parseAnnotations([{ path: ".github", annotation_level: "failure", title: "", message: "Process completed with exit code 1." }]);
-    expect(p).toEqual({ tests: [], other: [], flaky: [], summaryFailed: [] });
+    expect(p).toEqual({ tests: [], other: [], flaky: [], summaryFailed: [], summary: false });
   });
 });
 
@@ -137,6 +137,15 @@ describe("observe", () => {
   });
   it("a red peer job failing on other tests in the same step passed it", () => {
     expect(observe(item, peerJob("e2e (chromium)", "failure"), firefox)).toBe("passed");
+  });
+  it("a peer whose test step failed without reporting anything says nothing", () => {
+    // Playwright crashed in "Run E2E": no failures, no run summary.
+    expect(observe(item, peerJob("e2e (chromium)", "failure"), parseAnnotations([]))).toBeNull();
+    expect(observe(item, peerJob("e2e (chromium)", "failure"), parseAnnotations([{ path: ".github", annotation_level: "failure", title: "", message: "Process completed with exit code 1." }]))).toBeNull();
+    // A run summary that does not list this test: it passed there.
+    const summaryOnly = parseAnnotations([{ path: ".github", annotation_level: "notice", title: "🎭 Playwright Run Summary", message: "  1 failed\n    [chromium] › e2e/other.spec.ts:3:1 › other\n  40 passed (1.2m)" }]);
+    expect(summaryOnly.summary).toBe(true);
+    expect(observe(item, peerJob("e2e (chromium)", "failure"), summaryOnly)).toBe("passed");
   });
   it("a peer that failed before the tests ran, was skipped, or is missing says nothing", () => {
     const early = peerJob("e2e (chromium)", "failure", ["Run E2E (chromium)", "skipped"]);
