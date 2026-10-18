@@ -4,8 +4,9 @@
  */
 
 /**
- * `git worktree list --porcelain` → [{ path, branch, head, prunable? }].
- * `prunable` (git's reason) marks a worktree whose directory is gone.
+ * `git worktree list --porcelain` → [{ path, branch, head, prunable?, locked? }].
+ * `prunable` (git's reason) marks a worktree whose directory is gone; a
+ * locked one is never prunable, so the CLI also checks that the path exists.
  */
 export function parseWorktrees(text) {
   const out = [];
@@ -17,6 +18,7 @@ export function parseWorktrees(text) {
     } else if (cur && line.startsWith("HEAD ")) cur.head = line.slice(5, 13);
     else if (cur && line.startsWith("branch ")) cur.branch = line.slice(7).replace(/^refs\/heads\//, "");
     else if (cur && (line === "prunable" || line.startsWith("prunable "))) cur.prunable = line.slice(9).trim() || "prunable";
+    else if (cur && (line === "locked" || line.startsWith("locked "))) cur.locked = line.slice(7).trim() || true;
   }
   return out;
 }

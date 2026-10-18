@@ -12,7 +12,7 @@
  * names does not exist, after writing the file (the problems are listed in it).
  */
 import { spawnSync } from "node:child_process";
-import { mkdirSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { missingRefs, parseWorktrees, renderHandoff } from "./lib/handoff.mjs";
@@ -32,7 +32,21 @@ function sh(cmd, args) {
   if (r.status !== 0) throw new Error(`${cmd} ${args.join(" ")}: ${(r.stderr || "").trim().slice(0, 300)}`);
   return r.stdout;
 }
-const ghJson = (path) => JSON.parse(sh("gh", ["api", "--paginate", "--slurp", path])).flat();
+/**
+ * Every item of an array endpoint, page by page on the same repos/… path
+ * until a short page. Not `gh api --paginate`: it follows the Link header's
+ * repositories/<id>/… URLs, which some API proxies refuse (scripts/ci-doctor.mjs does the same).
+ */
+function ghJson(path, perPage = 100, maxPages = 30) {
+  const out = [];
+  for (let page = 1; page <= maxPages; page++) {
+    const items = JSON.parse(sh("gh", ["api", `${path}${path.includes("?") ? "&" : "?"}page=${page}`]));
+    if (!Array.isArray(items)) throw new Error(`${path}: expected an array`);
+    out.push(...items);
+    if (items.length < perPage) break;
+  }
+  return out;
+}
 
 function repoName() {
   const url = sh("git", ["remote", "get-url", "origin"]).trim();
@@ -42,6 +56,8 @@ function repoName() {
 
 const repo = repoName();
 const worktrees = parseWorktrees(sh("git", ["worktree", "list", "--porcelain"]));
+// A locked worktree whose directory is gone (an unmounted disk) is "locked", not "prunable".
+for (const w of worktrees) if (!w.prunable && !existsSync(w.path)) w.prunable = w.locked ? "locked, and its directory is missing" : "its directory is missing";
 const branches = sh("git", ["for-each-ref", "--format=%(refname)", "refs/heads", "refs/remotes/origin"])
   .split("\n")
   .filter(Boolean)

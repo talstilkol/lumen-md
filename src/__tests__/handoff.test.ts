@@ -1,7 +1,7 @@
 /** 0.13 — the handoff document: PR stack, worktrees, and a check that every name in it exists. */
 import { describe, it, expect } from "vitest";
 import { execFileSync, spawnSync } from "node:child_process";
-import { cpSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { chmodSync, cpSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 // @ts-expect-error — plain .mjs helper without types
@@ -66,6 +66,7 @@ describe("handoff review fixes", () => {
     const wts = parseWorktrees(text);
     expect(wts[0]).toEqual({ path: "/a", head: "12345678", branch: "fix/x", prunable: "gitdir file points to non-existent location" });
     expect(wts[1].prunable).toBeUndefined();
+    expect(parseWorktrees("worktree /u\nHEAD 1234567890abcdef\nbranch refs/heads/u\nlocked on a USB disk\n")[0].locked).toBe("on a USB disk");
     expect(missingRefs({ prs: [], worktrees: wts, branches: ["fix/x", "fix/y"], repo: "o/r" })).toEqual([
       "worktree /a: the directory is gone (gitdir file points to non-existent location); git worktree prune",
     ]);
@@ -89,11 +90,57 @@ describe("handoff review fixes", () => {
       g("commit", "-q", "-m", "base");
       g("worktree", "add", "-q", "-b", "fix/w", join(dir, "w"));
       rmSync(join(dir, "w"), { recursive: true, force: true });
+      // A locked worktree on an unmounted disk: git says "locked", never "prunable".
+      g("worktree", "add", "-q", "-b", "fix/locked", join(dir, "usb"));
+      g("worktree", "lock", "--reason", "on a USB disk", join(dir, "usb"));
+      rmSync(join(dir, "usb"), { recursive: true, force: true });
       const r = spawnSync(process.execPath, [join(work, "scripts/handoff.mjs"), "--no-github", "--stdout"], { cwd: dir, env, encoding: "utf8" });
       expect(r.stderr).not.toMatch(/ENOENT|no such file/i);
       expect(r.stdout).toContain("# Handoff — o/r");
       expect(r.stdout).toContain(`worktree ${join(dir, "w")}: the directory is gone`);
+      expect(r.stdout).toContain(`worktree ${join(dir, "usb")}: the directory is gone (locked, and its directory is missing)`);
       expect(r.status).toBe(1);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it("reads every page of review comments without `gh api --paginate`", () => {
+    const dir = mkdtempSync(join(tmpdir(), "lumen-handoff-gh-"));
+    try {
+      writeFileSync(join(dir, "gitconfig"), "");
+      const env = { ...process.env, GIT_CONFIG_GLOBAL: join(dir, "gitconfig"), GIT_CONFIG_NOSYSTEM: "1", GIT_AUTHOR_NAME: "t", GIT_AUTHOR_EMAIL: "t@example.com", GIT_COMMITTER_NAME: "t", GIT_COMMITTER_EMAIL: "t@example.com" };
+      const work = join(dir, "repo");
+      execFileSync("git", ["init", "-q", "-b", "main", work], { env });
+      const g = (...a: string[]) => execFileSync("git", a, { cwd: work, env, encoding: "utf8" });
+      g("remote", "add", "origin", "https://github.com/o/r.git");
+      mkdirSync(join(work, "scripts/lib"), { recursive: true });
+      const repo = resolve(__dirname, "../..");
+      cpSync(join(repo, "scripts/handoff.mjs"), join(work, "scripts/handoff.mjs"));
+      cpSync(join(repo, "scripts/lib/handoff.mjs"), join(work, "scripts/lib/handoff.mjs"));
+      g("add", ".");
+      g("commit", "-q", "-m", "base");
+      // A fake gh that pages by per_page/page like the API, and (like an API
+      // proxy that refuses repositories/<id> Link URLs) never follows --paginate.
+      const comments = Array.from({ length: 120 }, (_, i) => ({ id: i + 1, in_reply_to_id: null }));
+      const routes = { pulls: [{ number: 7, title: "t", head: { ref: "main", repo: { full_name: "o/r" } }, base: { ref: "main" } }], comments, runs: { workflow_runs: [] } };
+      writeFileSync(join(dir, "routes.json"), JSON.stringify(routes));
+      mkdirSync(join(dir, "bin"));
+      writeFileSync(
+        join(dir, "bin", "gh"),
+        `#!/usr/bin/env node
+const r = JSON.parse(require("fs").readFileSync(${JSON.stringify(join(dir, "routes.json"))}, "utf8"));
+const route = process.argv[process.argv.length - 1];
+const q = new URLSearchParams(route.split("?")[1] || "");
+const page = (list) => { const per = Number(q.get("per_page") || 30), p = Number(q.get("page") || 1); return list.slice((p - 1) * per, p * per); };
+const body = route.includes("/comments") ? page(r.comments) : route.includes("/pulls?") ? page(r.pulls) : r.runs;
+process.stdout.write(JSON.stringify(body));
+`,
+      );
+      chmodSync(join(dir, "bin", "gh"), 0o755);
+      const res = spawnSync(process.execPath, [join(work, "scripts/handoff.mjs"), "--stdout"], { cwd: dir, env: { ...env, PATH: `${join(dir, "bin")}:${process.env.PATH}` }, encoding: "utf8" });
+      expect(res.stderr).toBe("");
+      expect(res.stdout).toMatch(/\| #7 \| `main` → `main` \| — \| 120 \|/);
     } finally {
       rmSync(dir, { recursive: true, force: true });
     }
