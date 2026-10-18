@@ -50,6 +50,13 @@ describe("rules without a dictionary", () => {
     expect(ids).toContain("HE_DOUBLE_WORD");
     expect(ids).toContain("HE_SPACE_BEFORE_PUNCT");
   });
+  it("treats a maqaf as a word separator, not a mark", () => {
+    expect(hebrewRules("יום־יום הלכתי לבית־ספר")).toEqual([]);
+    const d = buildDictionary(["3", "יום", "בית", "ספר"].join("\n"));
+    expect(hebrewSpelling(d, "יום־יום בית־ספר")).toEqual([]);
+    // Niqqud is still ignored.
+    expect(isKnown(d, "יוֹם")).toBe(true);
+  });
   it("is quiet on clean text", () => {
     expect(hebrewRules("שלום עולם, טוב מאוד. צה״ל ו-וכו'")).toEqual([]);
   });

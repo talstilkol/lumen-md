@@ -14,6 +14,7 @@
  */
 
 import type { GrammarMatch } from "./grammar";
+import { HEBREW_MARK_CHARS as M } from "../text/hebrew";
 
 export const HEBREW_DICT_URL = "https://raw.githubusercontent.com/wooorm/dictionaries/main/dictionaries/he/index.dic";
 export const HEBREW_DICT_LICENSE = "AGPL-3.0 (Hspell, hspell.ivrix.org.il)";
@@ -37,8 +38,11 @@ export function buildDictionary(dic: string): Set<string> {
   return set;
 }
 
+// Combining marks only: a maqaf (U+05BE) separates the two words of a compound.
+const MARKS = new RegExp(`[${M}]`, "g");
+
 function stripMarks(word: string): string {
-  return word.normalize("NFD").replace(/[֑-ׇ]/g, "").normalize("NFC").replace(/״/g, '"').replace(/׳/g, "'");
+  return word.normalize("NFD").replace(MARKS, "").normalize("NFC").replace(/״/g, '"').replace(/׳/g, "'");
 }
 
 /**
@@ -97,7 +101,9 @@ function fixFinal(w: string): string {
   return chars.join("");
 }
 
-const HEB_WORD = /[א-ת֑-ׇ]+(?:["״'׳][א-ת]+)?/g;
+const HEB_WORD = new RegExp(`[\u05D0-\u05EA${M}]+(?:["״'׳][\u05D0-\u05EA]+)?`, "g");
+
+const MISSING_FINAL = new RegExp(`(?<![\u05D0-\u05EA${M}])[\u05D0-\u05EA${M}]*[כמנפצ](?![\u05D0-\u05EA${M}"״'׳])`, "g");
 
 /** Rules that need no dictionary. Offsets are into `text`. */
 export function hebrewRules(text: string): GrammarMatch[] {
@@ -115,7 +121,7 @@ export function hebrewRules(text: string): GrammarMatch[] {
     }
   }
   // The regular form where the final one belongs ("שלומ" → "שלום").
-  for (const m of text.matchAll(/(?<![\u05D0-\u05EA\u0591-\u05C7])[\u05D0-\u05EA\u0591-\u05C7]*[כמנפצ](?![\u05D0-\u05EA\u0591-\u05C7"״'׳])/g)) {
+  for (const m of text.matchAll(MISSING_FINAL)) {
     const w = m[0];
     if ([...stripMarks(w)].length < 2) continue;
     out.push({ offset: m.index!, length: w.length, message: "חסרה אות סופית", replacements: [fixFinal(stripMarks(w))], rule: { id: "HE_MISSING_FINAL_LETTER", category: "TYPOS" } });
