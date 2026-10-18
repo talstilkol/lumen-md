@@ -5,7 +5,8 @@
 import { useCallback, useEffect, useState } from "react";
 import { Trash2, X } from "lucide-react";
 import { t, getLocale } from "../i18n";
-import { emptyTrash, listTrash, restoreFromTrash, TRASH_KEEP_MS, type TrashItem } from "../storage/trash";
+import { emptyTrash, listTrash, restoreFromTrashIfPresent, TRASH_KEEP_MS, type TrashItem } from "../storage/trash";
+import { onWorkspaceChanged } from "../storage/workspaceEvents";
 import { toast } from "../store/useToastStore";
 
 interface Props {
@@ -23,6 +24,15 @@ export function TrashPanel({ open, onClose }: Props) {
     if (open) void reload();
   }, [open, reload]);
 
+  // Ctrl+Z outside the editor (or a delete) can change the trash while the
+  // panel is open: show what is in it now, not what was when it opened.
+  useEffect(() => {
+    if (!open) return;
+    return onWorkspaceChanged((c) => {
+      if (c.kind === "structure") void reload();
+    }, { debounceMs: 100 });
+  }, [open, reload]);
+
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {
@@ -38,9 +48,12 @@ export function TrashPanel({ open, onClose }: Props) {
   if (!open) return null;
 
   const restore = async (i: TrashItem) => {
-    const where = await restoreFromTrash(i.id);
-    window.dispatchEvent(new Event("lumen-workspace-changed"));
-    toast.success(t("trash.restored", { path: where }));
+    // Null when it was restored meanwhile (e.g. by Ctrl+Z): just show the list as it is.
+    const where = await restoreFromTrashIfPresent(i.id);
+    if (where !== null) {
+      window.dispatchEvent(new Event("lumen-workspace-changed"));
+      toast.success(t("trash.restored", { path: where }));
+    }
     await reload();
   };
   const forever = async (i: TrashItem) => {
