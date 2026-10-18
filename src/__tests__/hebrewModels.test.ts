@@ -1,5 +1,7 @@
 /** T27 — Hebrew model catalog, Hebrew-aware picks, and the answer-language rule. */
 import { describe, it, expect } from "vitest";
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 import { autoPickable, hebrewSupportOf, licenceClassOf, prefersHebrew, recommendOllamaModel } from "../ai/modelCatalog";
 import { pickModel, pickToolModel } from "../agents/executors/ollama";
 import { recommendWebLlmModel, type Hardware } from "../ai/modelManager";
@@ -76,8 +78,31 @@ describe("custom-licence models are never picked on their own (plan 1.7)", () =>
     expect(licenceClassOf("hf.co/bartowski/Llama-3.2-3B-Instruct-GGUF:Q4_K_M")).toBe("conditional");
     expect(licenceClassOf("aya-expanse:32b")).toBe("forbidden");
     expect(licenceClassOf("mistral:7b")).toBeNull();
+    // Sizes of an open family under another licence do not inherit it.
+    expect(licenceClassOf("qwen2.5:72b")).toBe("forbidden");
+    expect(licenceClassOf("qwen2.5:72b-instruct-q4_K_M")).toBe("forbidden");
+    expect(licenceClassOf("qwen2.5:3b")).toBe("forbidden");
+    expect(licenceClassOf("qwen2.5:32b")).toBe("allowed");
+    expect(licenceClassOf("qwen2.5:14b")).toBe("allowed");
     expect(autoPickable("mistral:7b")).toBe(true);
     expect(autoPickable("llama3.1:8b")).toBe(false);
+  });
+
+  it("agrees with models/registry.json on every Ollama name it lists", () => {
+    const registry = JSON.parse(readFileSync(resolve(__dirname, "../../models/registry.json"), "utf8")) as { models: Array<{ id: string; class: string; runs: string; match?: string[] }> };
+    const names = registry.models
+      .filter((m) => m.runs === "ollama")
+      .flatMap((m) => [m.id, ...(m.match ?? [])].filter((n) => n.includes(":") || n.startsWith("hf.co/")).map((n) => [n, m.class] as const));
+    expect(names.length).toBeGreaterThan(8);
+    for (const [name, cls] of names) expect([name, autoPickable(name)]).toEqual([name, cls === "allowed"]);
+  });
+
+  it("a large-tier agent never auto-picks the forbidden qwen2.5:72b", () => {
+    const big = [
+      { name: "qwen2.5:72b", params: 72.7, family: "qwen2" },
+      { name: "qwen2.5:7b", params: 7.6, family: "qwen2" },
+    ];
+    expect(pickModel("large", big, null)).toBe("qwen2.5:7b");
   });
 
   const llamaAndQwen = [

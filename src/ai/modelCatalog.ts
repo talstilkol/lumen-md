@@ -63,11 +63,21 @@ const FAMILY_LICENCE: Array<{ re: RegExp; class: LicenceClass }> = [
   { re: /^aya/i, class: "forbidden" },
 ];
 
-/** The licence class of an installed (possibly tagged) model name: the catalog entry, its family, then the name. null = unknown. */
+/**
+ * Sizes of an open-licence family that are under another licence
+ * (models/registry.json): Qwen2.5 3B is the Qwen Research License
+ * (non-commercial) and 72B the Qwen License, while the other Qwen2.5 sizes
+ * are Apache-2.0. Checked before a tag inherits its family's licence.
+ */
+const SIZE_EXCEPTIONS: Array<{ re: RegExp; class: LicenceClass }> = [{ re: /^qwen2\.5:(3b|72b)(-|$)/i, class: "forbidden" }];
+
+/** The licence class of an installed (possibly tagged) model name: the catalog entry, a size exception, its family, then the name. null = unknown. */
 export function licenceClassOf(name: string): LicenceClass | null {
   const base = name.replace(/:latest$/, "");
   const exact = OLLAMA_CATALOG.find((e) => e.name === base);
   if (exact?.licence) return exact.licence.class;
+  const size = SIZE_EXCEPTIONS.find((x) => x.re.test(base));
+  if (size) return size.class;
   const family = base.split(":")[0];
   const fam = OLLAMA_CATALOG.find((e) => e.name.split(":")[0] === family && e.licence);
   if (fam?.licence) return fam.licence.class;
