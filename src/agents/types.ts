@@ -41,8 +41,19 @@ export type ChangeProposal =
       to: number;
       before: string;
       after: string;
+      /** The text around the range when it was proposed, so a moved range (or an insertion) is found again or refused. */
+      context?: RangeContext;
       summary: string;
     };
+
+/** Up to 40 characters on each side of a proposed range (`staging.rangeContext`). */
+export interface RangeContext {
+  before: string;
+  after: string;
+  /** The context reaches the start / end of the document. */
+  atStart: boolean;
+  atEnd: boolean;
+}
 
 /** A staged change as the queue keeps it (see `staging.ts`). */
 export type StagedChange = ChangeProposal & {
@@ -76,10 +87,16 @@ export interface FetchedPage {
 /** What a network tool is about to send, for the consent prompt and the ledger. */
 export interface NetworkConsentRequest {
   tool: string;
-  /** Host the request goes to (the research service, or the page host for fetch_page). */
+  /** Host that receives the data: always the research service. */
   host: string;
-  /** What leaves the device, in plain words ("the search query", "the page address"). */
+  /** What leaves the device, in plain words ("the search query", "the page address") — for logs; the prompt uses `what`. */
   sends: string;
+  /** The same, as a key the prompt translates. */
+  what: "search-query" | "page-address" | "tool-args";
+  /** A search provider whose API key goes along with the query (Brave, Tavily). */
+  credential?: string;
+  /** The page's host, which the research service then visits (fetch_page). */
+  visits?: string;
   args: Record<string, unknown>;
 }
 

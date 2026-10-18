@@ -40,12 +40,20 @@ export async function describeNetworkCall(tool: AgentTool, call: ToolCall): Prom
       return "";
     }
   };
+  const service = hostOf(endpoint);
   if (tool.name === "fetch_page") {
-    // The research service fetches the page: the page's host learns of the visit.
+    // The address goes to the research service (in its query string), which then visits the page.
     const page = typeof call.args.url === "string" ? call.args.url : "";
-    return { tool: tool.name, host: hostOf(page) || hostOf(endpoint), sends: "the page address", args: call.args, url: `${endpoint}/extract` };
+    return { tool: tool.name, host: service, sends: "the page address", what: "page-address", visits: hostOf(page) || undefined, args: call.args, url: `${endpoint}/extract` };
   }
-  return { tool: tool.name, host: hostOf(endpoint), sends: tool.name === "search_web" ? "the search query" : "the tool's arguments", args: call.args, url: `${endpoint}/search` };
+  if (tool.name === "search_web") {
+    // Brave and Tavily need the user's API key, which the service forwards: say so.
+    const { getResearchSettings } = await import("../research/client");
+    const s = getResearchSettings();
+    const credential = s.key && (s.provider === "brave" || s.provider === "tavily") ? (s.provider === "brave" ? "Brave Search" : "Tavily") : undefined;
+    return { tool: tool.name, host: service, sends: credential ? `the search query and your ${credential} API key` : "the search query", what: "search-query", credential, args: call.args, url: `${endpoint}/search` };
+  }
+  return { tool: tool.name, host: service, sends: "the tool's arguments", what: "tool-args", args: call.args, url: `${endpoint}/search` };
 }
 
 /**
@@ -55,11 +63,14 @@ export async function describeNetworkCall(tool: AgentTool, call: ToolCall): Prom
  */
 async function defaultConsent(req: NetworkConsentRequest): Promise<boolean> {
   const [{ uiConfirm }, { t }] = await Promise.all([import("../ui/PromptDialog"), import("../i18n")]);
-  return uiConfirm({
-    title: t("agents.netConsent.title"),
-    message: t("agents.netConsent.body", { tool: req.tool, host: req.host, sends: req.sends }),
-    okLabel: t("agents.netConsent.ok"),
-  });
+  const what = t(`agents.netConsent.what.${req.what}`);
+  const parts = [
+    t("agents.netConsent.body", { tool: req.tool, host: req.host, sends: what }),
+    req.credential ? t("agents.netConsent.credential", { provider: req.credential }) : "",
+    req.visits ? t("agents.netConsent.visits", { host: req.visits }) : "",
+    t("agents.netConsent.perCall"),
+  ];
+  return uiConfirm({ title: t("agents.netConsent.title"), message: parts.filter(Boolean).join(" "), okLabel: t("agents.netConsent.ok") });
 }
 
 /**

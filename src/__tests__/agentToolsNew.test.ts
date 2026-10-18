@@ -134,6 +134,7 @@ import {
   onStagedChanges,
   receiptOf,
   rejectStagedChange,
+  rangeContext,
   setDocumentApplier,
   stageChange,
 } from "../agents/staging";
@@ -273,6 +274,19 @@ describe("git_diff", () => {
     expect(only.files.map((f) => f.path)).toEqual(["repo/a.md"]);
   });
 
+  it("shows a file deleted or renamed in the workspace (review: #205)", async () => {
+    files.delete("repo/keep.md");
+    files.delete("repo/a.md");
+    files.set("repo/b.md", "one\n2\nthree\n"); // a.md renamed to b.md, with an edit
+    const r = await gitDiffTool.run({}, ctx({ path: "repo/b.md" }));
+    expect(r.files.map((f: { path: string; state: string }) => `${f.state} ${f.path}`).sort()).toEqual([
+      "added repo/b.md",
+      "added repo/new.md",
+      "deleted repo/a.md",
+      "deleted repo/keep.md",
+    ]);
+  });
+
   it("names the repositories when the one asked for does not exist, and stops when cancelled", async () => {
     await expect(gitDiffTool.run({ repo: "other" }, ctx())).rejects.toMatchObject({ code: "not-found", message: expect.stringContaining("repo") });
     const ctrl = new AbortController();
@@ -284,6 +298,15 @@ describe("git_diff", () => {
     });
     await expect(gitDiffTool.run({}, ctx({ signal: ctrl.signal }))).rejects.toMatchObject({ name: "AbortError" });
     vi.restoreAllMocks();
+  });
+});
+
+describe("line diff — end of file", () => {
+  it("a change of only the final newline shows, with git's marker (review: #205)", () => {
+    const d = unifiedDiff("a.md", "one\ntwo\n", "one\ntwo");
+    expect(d).toContain("-two\n+two\n\\ No newline at end of file");
+    expect(unifiedDiff("a.md", "one\ntwo", "one\ntwo\n")).toContain("-two\n\\ No newline at end of file\n+two");
+    expect(unifiedDiff("a.md", "one\ntwo", "one\ntwo")).toBe("");
   });
 });
 
@@ -406,6 +429,38 @@ describe("the staged-change queue", () => {
     expect(applyRangeToText("abc abc", { from: 9, to: 12, before: "abc", after: "X" })).toBeNull(); // ambiguous
     const unsaved = stageChange({ kind: "range", path: null, from: 0, to: 0, before: "", after: "x", summary: "s" }, { tool: "replace_range" });
     expect(await approveStagedChange(unsaved.id)).toMatchObject({ status: "conflict", error: expect.stringContaining("no editor") });
+  });
+
+  it("an insertion is located by its surroundings: shifted text is followed, a lost anchor is a conflict (review: #205)", () => {
+    const doc = "# Title\n\nIntro paragraph.\n\nBody text here.\n";
+    const at = doc.indexOf("Body");
+    const change = { from: at, to: at, before: "", after: "NEW ", context: rangeContext(doc, at, at) };
+    expect(applyRangeToText(doc, change)).toBe(doc.replace("Body", "NEW Body"));
+    const shifted = "Added line.\n" + doc; // edited after the proposal: the offset is stale
+    expect(applyRangeToText(shifted, change)).toBe(shifted.replace("Body", "NEW Body"));
+    expect(applyRangeToText(doc.replace("Intro paragraph.", "Intro."), change)).toBeNull(); // the context changed: refuse
+    expect(applyRangeToText(doc, { from: at, to: at, before: "", after: "x" })).toBeNull(); // no context, empty before: cannot locate
+  });
+
+  it("new frontmatter is refused when the document gained frontmatter meanwhile", () => {
+    const doc = "Some text.\n";
+    const r = updateFrontmatter(doc, { tags: ["a"] });
+    const change = { ...r.block, context: rangeContext(doc, r.block.from, r.block.to) };
+    expect(applyRangeToText(doc, change)).toBe(r.text);
+    const meanwhile = "---\ntitle: T\n---\n" + doc;
+    expect(applyRangeToText(meanwhile, change)).toBeNull(); // not a second frontmatter block
+  });
+
+  it("never drops a pending proposal at the cap: a new one is refused instead (review: #205)", () => {
+    clearStagedChanges();
+    for (let i = 0; i < 200; i++) stageChange({ kind: "file", path: `f${i}.md`, before: null, after: "x", summary: "s" }, { tool: "write_file" });
+    expect(() => stageChange({ kind: "file", path: "over.md", before: null, after: "x", summary: "s" }, { tool: "write_file" })).toThrow(/waiting for review/);
+    expect(listStagedChanges()).toHaveLength(200);
+    rejectStagedChange(listStagedChanges()[0].id); // a settled entry may go
+    const ok = stageChange({ kind: "file", path: "over.md", before: null, after: "x", summary: "s" }, { tool: "write_file" });
+    expect(getStagedChange(ok.id)?.status).toBe("pending");
+    expect(listStagedChanges()).toHaveLength(200);
+    clearStagedChanges();
   });
 
   it("rejects, and withdraws a cancelled run's proposals", () => {

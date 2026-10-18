@@ -26,7 +26,7 @@
  * withdraws its pending proposals (`discardRunChanges`).
  */
 
-import type { ChangeProposal, StagedChange, StagedReceipt } from "./types";
+import type { ChangeProposal, RangeContext, StagedChange, StagedReceipt } from "./types";
 
 const MAX_CHANGES = 200;
 
@@ -54,11 +54,13 @@ function update(id: string, patch: Partial<StagedChange>): StagedChange | undefi
 
 export function stageChange(proposal: ChangeProposal, meta: { tool: string; runId?: string; agentId?: string }): StagedChange {
   const change = { ...proposal, ...meta, id: `chg_${Date.now().toString(36)}_${(++seq).toString(36)}`, createdAt: Date.now(), status: "pending" } as StagedChange;
-  // Settled changes go first when the cap is reached; pending ones are kept.
+  // Settled changes go first when the cap is reached. A pending one is never dropped:
+  // when every entry is pending, the new proposal is refused instead.
   const next = [...changes, change];
   while (next.length > MAX_CHANGES) {
     const i = next.findIndex((c) => c.status !== "pending");
-    next.splice(i >= 0 ? i : 0, 1);
+    if (i < 0) throw new Error(`${MAX_CHANGES} proposed changes are waiting for review: approve or reject some before an agent proposes more`);
+    next.splice(i, 1);
   }
   changes = next;
   emit();
@@ -92,16 +94,43 @@ export function setDocumentApplier(fn: DocumentApplier | null): void {
   documentApplier = fn;
 }
 
+const CONTEXT = 40;
+
+/** The text around [from, to) when a change is proposed; `atStart` / `atEnd` when it reaches the document's edge. */
+export function rangeContext(doc: string, from: number, to: number): RangeContext {
+  const start = Math.max(0, from - CONTEXT);
+  const end = Math.min(doc.length, to + CONTEXT);
+  return { before: doc.slice(start, from), after: doc.slice(to, end), atStart: start === 0, atEnd: end === doc.length };
+}
+
 /**
  * Apply a range change to `text`: at its offsets when they still hold
- * `before`, else at the single occurrence of `before`. Null when neither.
+ * `before` (and its surroundings, when known), else at the single place
+ * where surroundings + `before` occur. Null when neither — an insertion
+ * (empty `before`) without surroundings cannot be located safely.
  */
-export function applyRangeToText(text: string, change: { from: number; to: number; before: string; after: string }): string | null {
-  if (text.slice(change.from, change.to) === change.before) return text.slice(0, change.from) + change.after + text.slice(change.to);
-  if (!change.before) return null;
-  const at = text.indexOf(change.before);
-  if (at < 0 || text.indexOf(change.before, at + 1) >= 0) return null;
-  return text.slice(0, at) + change.after + text.slice(at + change.before.length);
+export function applyRangeToText(text: string, change: { from: number; to: number; before: string; after: string; context?: RangeContext }): string | null {
+  const ctx = change.context;
+  const fits = (at: number) => {
+    const end = at + change.before.length;
+    if (text.slice(at, end) !== change.before) return false;
+    if (!ctx) return true;
+    const pre = text.slice(Math.max(0, at - ctx.before.length), at);
+    const post = text.slice(end, end + ctx.after.length);
+    if (pre !== ctx.before || post !== ctx.after) return false;
+    // A range proposed at the very start (or end) must still be there: new frontmatter goes at 0, not after other text.
+    if (ctx.atStart && !ctx.before && at !== 0) return false;
+    if (ctx.atEnd && !ctx.after && end !== text.length) return false;
+    return true;
+  };
+  const apply = (at: number) => text.slice(0, at) + change.after + text.slice(at + change.before.length);
+  if ((ctx || change.before) && fits(change.from)) return apply(change.from);
+  const needle = (ctx?.before ?? "") + change.before + (ctx?.after ?? "");
+  if (!needle) return null;
+  const hit = text.indexOf(needle);
+  if (hit < 0 || text.indexOf(needle, hit + 1) >= 0) return null;
+  const at = hit + (ctx?.before.length ?? 0);
+  return fits(at) ? apply(at) : null;
 }
 
 async function workspace() {

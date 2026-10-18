@@ -73,9 +73,18 @@ export function splitLines(text: string): string[] {
  * `context` lines around each change). `before` / `after` null mean the
  * file did not exist on that side. Empty string when nothing changed.
  */
+/** Marks a last line that has no newline after it, so a change of only the final newline is a change. */
+const NO_EOL = "\u0000no-eol";
+
+function linesWithEol(text: string | null): string[] {
+  const lines = splitLines(text ?? "");
+  if (text && lines.length && !/\n$/.test(text)) lines[lines.length - 1] += NO_EOL;
+  return lines;
+}
+
 export function unifiedDiff(path: string, before: string | null, after: string | null, context = 3): string {
-  const a = splitLines(before ?? "");
-  const b = splitLines(after ?? "");
+  const a = linesWithEol(before);
+  const b = linesWithEol(after);
   const head = [`--- ${before === null ? "/dev/null" : `a/${path}`}`, `+++ ${after === null ? "/dev/null" : `b/${path}`}`];
   const ops = diffLines(a, b);
   if (!ops) {
@@ -115,7 +124,11 @@ export function unifiedDiff(path: string, before: string | null, after: string |
     const aStart = aLen ? pos[start].a : pos[start].a - 1;
     const bStart = bLen ? pos[start].b : pos[start].b - 1;
     out.push(`@@ -${aStart},${aLen} +${bStart},${bLen} @@`);
-    for (const o of slice) out.push((o.op === "eq" ? " " : o.op === "add" ? "+" : "-") + o.line);
+    for (const o of slice) {
+      const noEol = o.line.endsWith(NO_EOL);
+      out.push((o.op === "eq" ? " " : o.op === "add" ? "+" : "-") + (noEol ? o.line.slice(0, -NO_EOL.length) : o.line));
+      if (noEol) out.push("\\ No newline at end of file");
+    }
     i = stop;
   }
   return out.join("\n");

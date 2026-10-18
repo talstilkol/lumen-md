@@ -9,6 +9,7 @@
 
 import YAML from "yaml";
 import { defineTool, optionalNumber, requireString, safeWorkspacePath, stageChange, throwIfAborted, ToolError } from "./define";
+import { rangeContext } from "../staging";
 import type { StagedReceipt } from "../types";
 import {
   isOPFSAvailable,
@@ -244,6 +245,7 @@ export const setFrontmatterTool = defineTool<
         kind: "range",
         path: ctx.path ?? null,
         ...r.block,
+        context: rangeContext(ctx.document!, r.block.from, r.block.to),
         summary: `Frontmatter: ${[...Object.keys(set).map((k) => `set ${k}`), ...remove.map((k) => `remove ${k}`)].join(", ")}`,
       });
       return { ...receipt, frontmatter: r.frontmatter };

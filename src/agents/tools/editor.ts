@@ -6,6 +6,7 @@
  */
 
 import { defineTool, optionalNumber, stageChange, ToolError } from "./define";
+import { rangeContext } from "../staging";
 import type { StagedReceipt } from "../types";
 
 export const getDocumentTool = defineTool<{ maxChars?: number }, { path: string | null; content: string; truncated: boolean; chars: number }>({
@@ -108,6 +109,7 @@ export const replaceRangeTool = defineTool<
       to: range.to,
       before,
       after: args.text,
+      context: rangeContext(doc, range.from, range.to),
       summary: `Replace ${lines(before)} line(s) with ${lines(args.text)} line(s) at ${range.from}–${range.to}`,
     });
     return { ...receipt, ...range };

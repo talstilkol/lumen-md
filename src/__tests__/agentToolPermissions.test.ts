@@ -176,7 +176,7 @@ describe("network tools", () => {
     registerExecutor(fakeExecutor((req, n) => (n === 1 ? call("search_web", { query: "lumen privacy" }) : ((toolResult = lastToolResult(req)), final("offline")))));
     const run = await runAgent(agent(["search_web"]), {}, { grants: ["network"], consentNetwork: consent, document: "SECRET DOC" });
     expect(run.status).toBe("ok");
-    expect(consent).toHaveBeenCalledWith({ tool: "search_web", host: "research.example.com", sends: "the search query", args: { query: "lumen privacy" } });
+    expect(consent).toHaveBeenCalledWith({ tool: "search_web", host: "research.example.com", sends: "the search query", what: "search-query", credential: undefined, args: { query: "lumen privacy" } });
     expect(net).not.toHaveBeenCalled();
     expect(toolResult.error).toMatch(/^blocked: Blocked by the local-only AI policy/);
     expect(run.steps.find((s) => s.kind === "tool")).toMatchObject({ label: "search_web", ok: false });
@@ -316,5 +316,29 @@ describe("cancellation", () => {
     expect(getStagedChange(run.staged![0])).toMatchObject({ status: "rejected", error: "the run was cancelled" });
     expect(listStagedChanges()).toHaveLength(0);
     expect(files.has("a.md")).toBe(false);
+  });
+
+  it("the consent names the research service as recipient, the visited page, and a forwarded search key (review: #205)", async () => {
+    setAiPolicy("local-only");
+    const { describeNetworkCall } = await import("../agents/network");
+    const { getTool } = await import("../agents/tools");
+    const page = await describeNetworkCall(getTool("fetch_page")!, { name: "fetch_page", args: { url: "https://lumen.example/docs" } } as never);
+    expect(page).toMatchObject({ host: "research.example.com", visits: "lumen.example", what: "page-address" });
+    localStorage.setItem("lumen.research.provider", "brave");
+    const { setSecret } = await import("../lib/secretStore");
+    setSecret("lumen.research.searchKey", "BSA-test");
+    const search = await describeNetworkCall(getTool("search_web")!, { name: "search_web", args: { query: "q" } } as never);
+    expect(search).toMatchObject({ host: "research.example.com", credential: "Brave Search", sends: expect.stringContaining("API key") });
+    const { uiConfirm } = await import("../ui/PromptDialog");
+    const ask = vi.mocked(uiConfirm);
+    ask.mockClear();
+    ask.mockResolvedValueOnce(false);
+    registerExecutor(fakeExecutor((_req, n) => (n % 2 === 1 ? call("search_web", { query: "q" }) : final("x"))));
+    await runAgent(agent(["search_web"]), {}, { grants: ["network"] });
+    const message = ask.mock.calls[0][0].message as string;
+    expect(message).toContain("research.example.com");
+    expect(message).toContain("Brave Search");
+    setSecret("lumen.research.searchKey", "");
+    localStorage.removeItem("lumen.research.provider");
   });
 });

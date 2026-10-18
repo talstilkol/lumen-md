@@ -259,6 +259,28 @@ async function mirrorWorkspaceToGit(fs: Fs, dir: string, repoFolder: string, sig
     const txt = await readWorkspaceFile(f.path).catch(() => null);
     if (txt !== null) await fs.promises.writeFile(full, txt);
   }
+  // Files deleted (or renamed away) in the workspace leave the checkout too, so
+  // status and diffs show the deletion. Only when the listing really has this
+  // repo's files: an empty or failed listing must never empty the checkout.
+  const present = new Set(all.filter((f) => f.path.startsWith(prefix)).map((f) => f.path.slice(prefix.length)));
+  if (!present.size || !fs.promises.unlink) return;
+  const prune = async (rel: string): Promise<void> => {
+    let names: string[] = [];
+    try {
+      names = await fs.promises.readdir(rel ? `${dir}/${rel}` : dir);
+    } catch {
+      return; // why: a folder that vanished meanwhile has nothing to prune
+    }
+    for (const name of names) {
+      if (signal?.aborted) throw new DOMException("aborted", "AbortError");
+      if (!rel && name === ".git") continue;
+      const path = rel ? `${rel}/${name}` : name;
+      const st = await fs.promises.stat(`${dir}/${path}`).catch(() => null);
+      if (st?.isDirectory()) await prune(path);
+      else if (st?.isFile() && !present.has(path)) await fs.promises.unlink!(`${dir}/${path}`).catch(() => undefined);
+    }
+  };
+  await prune("");
 }
 
 export async function gitStatus(repoFolder: string): Promise<GitStatusEntry[]> {
