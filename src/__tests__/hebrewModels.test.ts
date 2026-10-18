@@ -7,8 +7,15 @@ import { sameScript } from "../agents/runtime";
 
 describe("model catalog", () => {
   it("recommends the best Hebrew model that fits the RAM", () => {
-    expect(recommendOllamaModel({ hebrew: true, ramGB: 16 }).name).toBe("gemma3:12b");
-    expect(recommendOllamaModel({ hebrew: true, ramGB: 8 }).name).toBe("aya-expanse:8b");
+    // Only open-licence models are suggested (plan 1.7): no Aya (NC), no Gemma/Llama by default.
+    expect(recommendOllamaModel({ hebrew: true, ramGB: 16 }).name).toBe("qwen3:14b");
+    expect(recommendOllamaModel({ hebrew: true, ramGB: 8 }).name).toBe("qwen3:8b");
+    expect(recommendOllamaModel({ hebrew: true, ramGB: 4 }).name).toBe("qwen3:4b");
+    for (const ram of [2, 4, 8, 12, 16, 64]) for (const hebrew of [true, false]) {
+      const r = recommendOllamaModel({ hebrew, ramGB: ram });
+      expect(r.licence?.class).toBe("allowed");
+      expect(r.recommend).not.toBe(false);
+    }
     expect(recommendOllamaModel({ hebrew: true, ramGB: 4 }).hebrew).not.toBe("none");
     expect(recommendOllamaModel({ hebrew: false, ramGB: 16 }).name).toBe("qwen2.5:7b");
     expect(recommendOllamaModel({ hebrew: true, ramGB: 16, tools: true }).tools).toBe(true);

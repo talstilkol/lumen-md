@@ -146,7 +146,7 @@ export function AiSettingsPanel({ open, onClose }: Props) {
       setHw(h);
       setBudget(mm.vramBudgetMB(h));
       setCatalog(
-        mm.WEBLLM_CATALOG.map((e) => ({ id: mm.webLlmModelId(e, h.f16), label: e.label, vram: h.f16 ? e.vramMB.f16 : e.vramMB.f32 })),
+        mm.WEBLLM_CATALOG.map((e) => ({ id: mm.webLlmModelId(e, h.f16), label: e.licence ? `${e.label} — ${e.licence}` : e.label, vram: h.f16 ? e.vramMB.f16 : e.vramMB.f32 })),
       );
     })();
     void refreshStatus();

@@ -294,7 +294,7 @@ export function effectiveModel(provider: AiProvider, opts: ChatOptions = {}): st
   }
   try {
     // Ollama keeps its model where the Ollama picker writes it.
-    if (provider === "ollama") return localStorage.getItem("lumen.ollama.model") || "llama3.1";
+    if (provider === "ollama") return localStorage.getItem("lumen.ollama.model") || "qwen2.5:7b"; // open licence (plan 1.7)
     const fallback = (PROVIDER_DEFAULT_MODELS as Record<string, string>)[provider] ?? "default";
     return localStorage.getItem(`lumen.ai.model.${provider}`) || fallback;
   } catch {

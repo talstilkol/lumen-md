@@ -24,17 +24,30 @@ export interface OllamaCatalogEntry {
   /** Hebrew eval score 0–1 from a real run, when there is one. */
   measured: number | null;
   note?: string;
+  /**
+   * Licence class (models/registry.json, plan 1.7). "conditional" = a custom licence
+   * (Llama Community License, Gemma Terms): usable, shown with its notice, never
+   * recommended by default.
+   */
+  licence?: { class: "allowed" | "conditional"; name: string };
+  /** false = offered in lists but never picked by recommendOllamaModel (e.g. untested). */
+  recommend?: boolean;
 }
 
 export const OLLAMA_CATALOG: OllamaCatalogEntry[] = [
-  { name: "aya-expanse:8b", label: "Aya Expanse 8B", params: 8, ramGB: 8, hebrew: "strong", tools: false, measured: null, note: "Cohere; Hebrew is one of its 23 training languages" },
-  { name: "gemma3:12b", label: "Gemma 3 12B", params: 12, ramGB: 12, hebrew: "strong", tools: false, measured: null, note: "140+ languages; best quality that fits 16 GB" },
-  { name: "qwen3:8b", label: "Qwen3 8B", params: 8, ramGB: 8, hebrew: "good", tools: true, measured: null, note: "119 languages, tool calling" },
-  { name: "qwen2.5:7b", label: "Qwen2.5 7B", params: 7.6, ramGB: 8, hebrew: "good", tools: true, measured: null, note: "the default: tool calling, decent Hebrew" },
-  { name: "gemma3:4b", label: "Gemma 3 4B", params: 4, ramGB: 5, hebrew: "good", tools: false, measured: null, note: "for 8 GB machines" },
-  { name: "llama3.1:8b", label: "Llama 3.1 8B", params: 8, ramGB: 8, hebrew: "basic", tools: true, measured: null },
-  { name: "llama3.2:3b", label: "Llama 3.2 3B", params: 3.2, ramGB: 4, hebrew: "basic", tools: true, measured: null },
+  { name: "qwen3:14b", label: "Qwen3 14B", params: 14.8, ramGB: 12, hebrew: "good", tools: true, measured: null, note: "119 languages, tool calling; best open-licence quality that fits 16 GB", licence: { class: "allowed", name: "Apache-2.0" } },
+  { name: "qwen3:8b", label: "Qwen3 8B", params: 8, ramGB: 8, hebrew: "good", tools: true, measured: null, note: "119 languages, tool calling", licence: { class: "allowed", name: "Apache-2.0" } },
+  { name: "qwen2.5:7b", label: "Qwen2.5 7B", params: 7.6, ramGB: 8, hebrew: "good", tools: true, measured: null, note: "the default: tool calling, decent Hebrew", licence: { class: "allowed", name: "Apache-2.0" } },
+  { name: "qwen3:4b", label: "Qwen3 4B", params: 4, ramGB: 4, hebrew: "good", tools: true, measured: null, note: "for 8 GB machines", licence: { class: "allowed", name: "Apache-2.0" } },
+  { name: "hf.co/dicta-il/DictaLM-3.0-1.7B-Thinking-GGUF", label: "DictaLM 3.0 1.7B (Hebrew)", params: 1.7, ramGB: 2, hebrew: "strong", tools: false, measured: null, note: "Dicta's Hebrew model; a reasoning ('thinking') variant — not yet tested in Lumen", licence: { class: "allowed", name: "Apache-2.0" }, recommend: false },
+  { name: "gemma3:12b", label: "Gemma 3 12B", params: 12, ramGB: 12, hebrew: "strong", tools: false, measured: null, note: "140+ languages", licence: { class: "conditional", name: "Gemma Terms of Use" } },
+  { name: "gemma3:4b", label: "Gemma 3 4B", params: 4, ramGB: 5, hebrew: "good", tools: false, measured: null, licence: { class: "conditional", name: "Gemma Terms of Use" } },
+  { name: "llama3.1:8b", label: "Llama 3.1 8B", params: 8, ramGB: 8, hebrew: "basic", tools: true, measured: null, licence: { class: "conditional", name: "Llama 3.1 Community License" } },
+  { name: "llama3.2:3b", label: "Llama 3.2 3B", params: 3.2, ramGB: 4, hebrew: "basic", tools: true, measured: null, licence: { class: "conditional", name: "Llama 3.2 Community License" } },
 ];
+
+/** Only open-licence, recommendable models are suggested; conditional ones stay opt-in. */
+const recommendable = (e: OllamaCatalogEntry) => e.recommend !== false && e.licence?.class !== "conditional";
 
 const RANK: Record<HebrewSupport, number> = { strong: 3, good: 2, basic: 1, none: 0 };
 
@@ -52,13 +65,14 @@ export function hebrewSupportOf(name: string): HebrewSupport | null {
 
 /**
  * The model to suggest pulling. For Hebrew notes: the best Hebrew model
- * that fits the RAM (measured score first when there is one); otherwise
+ * with an open licence that fits the RAM (measured score first when there is one); otherwise
  * the default tool-calling model. `ramGB` unknown → assume 8 GB.
  */
 export function recommendOllamaModel(opts: { hebrew: boolean; ramGB?: number | null; tools?: boolean }): OllamaCatalogEntry {
   const ram = opts.ramGB ?? 8;
-  const fits = OLLAMA_CATALOG.filter((e) => e.ramGB <= Math.max(ram, 4) && (!opts.tools || e.tools));
-  const pool = fits.length ? fits : OLLAMA_CATALOG.filter((e) => !opts.tools || e.tools);
+  const offer = OLLAMA_CATALOG.filter(recommendable);
+  const fits = offer.filter((e) => e.ramGB <= Math.max(ram, 4) && (!opts.tools || e.tools));
+  const pool = fits.length ? fits : offer.filter((e) => !opts.tools || e.tools);
   if (!opts.hebrew) return pool.find((e) => e.name === "qwen2.5:7b") ?? pool[0];
   return [...pool].sort(
     (a, b) => (b.measured ?? -1) - (a.measured ?? -1) || RANK[b.hebrew] - RANK[a.hebrew] || b.params - a.params,
