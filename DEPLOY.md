@@ -112,7 +112,10 @@ variables (see `src/build/cspEndpoints.ts`): set them before
 `npm run build`. For the Docker web image pass them as build args, e.g.
 `docker build -f docker/Dockerfile.web --build-arg VITE_WORKOS_ENDPOINT=https://auth.example.org .`
 Verify after deploy: the response header and the meta tag both list your
-worker origins in `connect-src`.
+worker origins in `connect-src`. A desktop build with these variables also
+passes them to the Tauri CLI, because `tauri.conf.json` holds the public
+list only: `npm run tauri:build -- --config "$(node scripts/headers.mjs --tauri-config dist/.csp-connect-extra)"`
+after `npm run build` (see "Desktop (Tauri)" in `docs/security/headers.md`).
 
 `connect-src` is an explicit allowlist, so endpoints users set at
 **runtime** (a LAN Ollama host in `lumen.ollama.baseUrl`, a marketplace

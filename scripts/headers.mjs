@@ -18,6 +18,9 @@
  *
  *   node scripts/headers.mjs [--check]   exit 1 + a readable diff when a source differs
  *   node scripts/headers.mjs --write     rewrite the policy values in place
+ *   node scripts/headers.mjs --tauri-config dist/.csp-connect-extra
+ *                                        print `tauri build --config` JSON whose CSP adds
+ *                                        the deployment's endpoint origins (desktop builds)
  *
  * --write replaces only the header values (each file keeps its structure,
  * comments and formatting). What it cannot fix — a route with no block in a
@@ -60,7 +63,11 @@ function ruleApplies(rule, route) {
   return rule.routes === "*" || (Array.isArray(rule.routes) && rule.routes.includes(route));
 }
 
-/** Directives of `route` as served by `host`, after the host's documented exceptions. */
+/**
+ * Directives of `route` as served by `host`, after the host's documented
+ * exceptions: `omit` drops whole directives, `remove` drops single sources
+ * from a directive, `add` appends sources (in that order).
+ */
 export function directivesFor(policy, route, host) {
   const def = policy.routes[route];
   if (!def) throw new Error(`security/policy.json: unknown route "${route}"`);
@@ -68,6 +75,10 @@ export function directivesFor(policy, route, host) {
   for (const rule of policy.hosts?.[host]?.csp ?? []) {
     if (!ruleApplies(rule, route)) continue;
     for (const name of rule.omit ?? []) map.delete(name);
+    for (const [name, values] of Object.entries(rule.remove ?? {})) {
+      const list = map.get(name);
+      if (list) map.set(name, list.filter((v) => !values.includes(v)));
+    }
     for (const [name, values] of Object.entries(rule.add ?? {})) {
       const list = map.get(name);
       if (!list) {
@@ -98,6 +109,20 @@ export const renderNginx = (policy, route, host = "docker-nginx") =>
 export const renderVercel = (policy, route) => ({ key: CSP, value: renderCsp(policy, route, "vercel") });
 /** tauri.conf.json app.security.csp. */
 export const renderTauri = (policy) => renderCsp(policy, "app", "tauri");
+
+/**
+ * `tauri build --config` JSON for a desktop build with deployment endpoints.
+ * tauri.conf.json holds the explicit public list only; the origins the Vite
+ * build added to index.html (`dist/.csp-connect-extra`, one space-separated
+ * line) join its connect-src here, so the compiled policy matches the meta.
+ */
+export function tauriConfigWithOrigins(policy, origins) {
+  const map = directivesFor(policy, "app", "tauri");
+  const connect = map.get("connect-src");
+  for (const o of origins) if (connect && !connect.includes(o)) connect.push(o);
+  const csp = [...map].map(([name, values]) => (values.length ? `${name} ${values.join(" ")}` : name)).join("; ");
+  return { app: { security: { csp } } };
+}
 
 /** Canonical value of a non-CSP security header on `host`, or undefined when that host does not send it. */
 export function headerValue(policy, name, host) {
@@ -522,6 +547,18 @@ function main(argv) {
   const write = argv.includes("--write");
   const rootArg = argv.indexOf("--root");
   const root = rootArg >= 0 ? resolve(argv[rootArg + 1]) : ROOT;
+  const tauriArg = argv.indexOf("--tauri-config");
+  if (tauriArg >= 0) {
+    // node scripts/headers.mjs --tauri-config dist/.csp-connect-extra
+    const file = argv[tauriArg + 1];
+    if (file && !existsSync(file)) {
+      process.stderr.write(`headers: ${file} not found (run the Vite build first; it writes dist/.csp-connect-extra)\n`);
+      return 1;
+    }
+    const origins = file ? readFileSync(file, "utf8").split(/\s+/).filter(Boolean) : [];
+    process.stdout.write(JSON.stringify(tauriConfigWithOrigins(loadPolicy(root), origins)));
+    return 0;
+  }
   let result = run({ root, write });
   if (write && result.fixes) {
     process.stdout.write(`headers: rewrote ${result.fixes} value(s) from ${POLICY_FILE}\n`);

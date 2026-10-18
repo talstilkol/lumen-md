@@ -88,6 +88,26 @@ describe("Tauri CSP", () => {
     const connect = (/connect-src ([^;]*)/.exec(csp)?.[1] ?? "").split(/\s+/);
     expect(connect).toEqual(expect.arrayContaining(["ipc:", "http://ipc.localhost"]));
   });
+  const directive = (policy: string, name: string) =>
+    (new RegExp(`(?:^|;)\\s*${name} ([^;]*)`).exec(policy)?.[1] ?? "").split(/\s+/).filter(Boolean);
+  it("no open scheme in any fetch directive (plan 2.1): self plus known hosts only", () => {
+    for (const d of ["default-src", "connect-src", "img-src", "media-src", "frame-src", "font-src", "style-src", "script-src", "worker-src"]) {
+      const open = directive(csp, d).filter((s) => ["https:", "http:", "*", "ws:", "wss:"].includes(s));
+      // ws: / wss: leave connect-src in plan 2.2; until then only https:/http:/* are checked there.
+      expect(d === "connect-src" ? open.filter((s) => s !== "ws:" && s !== "wss:") : open, d).toEqual([]);
+    }
+  });
+  it("connect-src is the page's explicit list plus the IPC protocol", () => {
+    const html = readFileSync(join(root, "index.html"), "utf8");
+    const meta = /<meta\s+http-equiv="Content-Security-Policy"\s+content="([^"]+)"/.exec(html)![1];
+    expect(directive(csp, "connect-src")).toEqual([...directive(meta, "connect-src"), "ipc:", "http://ipc.localhost"]);
+  });
+  it("img-src keeps the hosts the app itself loads images from", () => {
+    expect(directive(csp, "img-src")).toEqual(
+      expect.arrayContaining(["'self'", "data:", "blob:", "https://cdn.tldraw.com", "https://*.tile.openstreetmap.org"]),
+    );
+    expect(directive(csp, "media-src")).toEqual(["'self'", "blob:"]);
+  });
 });
 
 describe("no eval on the page (F4 / P3)", () => {
