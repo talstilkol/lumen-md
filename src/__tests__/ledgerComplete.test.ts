@@ -114,6 +114,28 @@ describe("the web clipper goes through the ledger", () => {
     f.mockRestore();
   });
 
+  it("after a cross-site redirect the entry names the site the page came from", async () => {
+    const r = new Response("<html></html>", { status: 200 });
+    Object.defineProperty(r, "redirected", { value: true });
+    Object.defineProperty(r, "url", { value: "https://www.news.example/2026/story" });
+    const f = vi.spyOn(globalThis, "fetch").mockResolvedValue(r);
+    await guardedFetch("https://short.example/abc", { credentials: "omit" }, { category: "third-party", reason: "Web clipper" });
+    expect(ledgerEntries()).toEqual([
+      expect.objectContaining({ host: "www.news.example", reason: "Web clipper (redirected from short.example)", status: 200 }),
+    ]);
+    f.mockRestore();
+  });
+
+  it("a same-site redirect keeps the entry as it was", async () => {
+    const r = new Response("<html></html>", { status: 200 });
+    Object.defineProperty(r, "redirected", { value: true });
+    Object.defineProperty(r, "url", { value: "https://news.example/story/" });
+    const f = vi.spyOn(globalThis, "fetch").mockResolvedValue(r);
+    await guardedFetch("https://news.example/story", { credentials: "omit" }, { category: "third-party", reason: "Web clipper" });
+    expect(ledgerEntries()).toEqual([expect.objectContaining({ host: "news.example", reason: "Web clipper" })]);
+    f.mockRestore();
+  });
+
   it("clipUrl under local-only refuses before fetching", async () => {
     setAiPolicy("local-only");
     const { clipUrl } = await import("../research/clipper");

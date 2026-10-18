@@ -363,7 +363,13 @@ export async function guardedFetch(url: string, init: RequestInit, as: { categor
   // why: the raw fetch, so a host the rules also know is not recorded twice
   const res = await (rawFetch ?? fetch)(url, init);
   const len = res.headers.get("content-length");
-  patch(id, { status: res.status, bytesIn: len != null && Number.isFinite(Number(len)) ? Number(len) : null });
+  // why: after a redirect the page came from `res.url`'s site; record that host, keeping where it started
+  const finalHost = res.redirected && res.url ? hostOf(res.url) : host;
+  patch(id, {
+    status: res.status,
+    bytesIn: len != null && Number.isFinite(Number(len)) ? Number(len) : null,
+    ...(finalHost !== host ? { host: finalHost, reason: `${as.reason} (redirected from ${host})` } : {}),
+  });
   return res;
 }
 
