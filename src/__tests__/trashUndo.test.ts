@@ -152,6 +152,26 @@ describe("flushOpenDocsUnder", () => {
     expect(s.openTabs.find((t) => t.id === "project/x.md")?.dirty).toBe(true);
   });
 
+  it("an edit typed while the delete is in flight lands in the trashed copy, so Ctrl+Z brings it back (review: #218)", async () => {
+    const { trashWithOpenEdits } = await import("../store/openDocs");
+    await writeWorkspaceFile("proj/a.md", "A saved");
+    await writeWorkspaceFile("proj/b.md", "B saved");
+    open("proj/a.md", "A saved");
+    useAppStore.getState().setContent("A edit");
+    open("proj/b.md", "B saved");
+    useAppStore.getState().setContent("B edit");
+    const deleting = trashWithOpenEdits(["proj"], { proj: "directory" });
+    // The flush has taken its snapshot and is writing: the user keeps typing.
+    useAppStore.getState().setContent("B edit, typed during the delete");
+    const items = await deleting;
+    expect(items.map((i) => i.originalPath)).toEqual(["proj"]);
+    expect(useAppStore.getState().doc.dirty).toBe(false);
+    expect(await workspaceHasEntry("proj")).toBe(false);
+    expect(await undoLastTrash()).toEqual(["proj"]);
+    expect(await readWorkspaceFile("proj/b.md")).toBe("B edit, typed during the delete");
+    expect(await readWorkspaceFile("proj/a.md")).toBe("A edit");
+  });
+
   it("deleting a single file saves that file's inactive tab", async () => {
     await writeWorkspaceFile("n.md", "saved");
     open("n.md", "saved");

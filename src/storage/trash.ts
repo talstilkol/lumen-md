@@ -42,6 +42,14 @@ async function writeIndex(items: TrashItem[]): Promise<void> {
   await writeWorkspaceFile(INDEX, JSON.stringify(items, null, 1));
 }
 
+/** Where `path` (the trashed entry itself or something inside it) sits in the trash now, or null. */
+export function trashedPathOf(item: TrashItem, path: string): string | null {
+  const at = `${TRASH_DIR}/${item.id}/${basename(item.originalPath)}`;
+  if (path === item.originalPath) return at;
+  if (path.startsWith(item.originalPath + "/")) return at + path.slice(item.originalPath.length);
+  return null;
+}
+
 /** Items in the trash, newest first. */
 export async function listTrash(): Promise<TrashItem[]> {
   return (await readIndex()).sort((a, b) => b.trashedAt - a.trashedAt);

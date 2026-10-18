@@ -6,7 +6,8 @@
 import { flushPendingEdits, moveTabRuntimes, tabIdOf, useAppStore } from "./useStore";
 import { writeWorkspaceFile } from "../storage/workspace";
 import { notifyWorkspaceChanged } from "../storage/workspaceEvents";
-import { movedPath } from "../storage/fileOps";
+import { movedPath, trashPaths } from "../storage/fileOps";
+import { trashedPathOf, type TrashItem } from "../storage/trash";
 
 /**
  * Write the active workspace note now if it has edits the debounced
@@ -25,31 +26,31 @@ export async function flushActiveWorkspaceDoc(): Promise<void> {
 }
 
 /**
- * Write every open note at or under `paths` whose edits are not on disk yet
- * (the active one and inactive tabs alike) before those paths go to the
- * trash, so Undo / Ctrl+Z brings back the latest text (plan 3.1). Only the
- * active note has a debounced autosave; a tab left within that window keeps
- * its edits in memory until it is selected again. Throws when a write fails,
- * so the caller does not trash a note whose edits were not saved.
+ * Write the unsaved text of open notes (the active one and inactive tabs
+ * alike) to where `target` maps their workspace path, skipping notes it maps
+ * to null. Notes whose text is still what was written are marked clean.
+ * Throws when a write fails.
  */
-export async function flushOpenDocsUnder(paths: string[]): Promise<void> {
+async function writeDirtyOpenDocs(target: (workspacePath: string) => string | null): Promise<void> {
   flushPendingEdits();
-  const under = (ws: string) => paths.some((p) => ws === p || ws.startsWith(p + "/"));
   const st = useAppStore.getState();
   const activeId = tabIdOf(st.doc);
-  const pending = new Map<string, string>(); // workspace path → text to write
-  if (st.doc.dirty && st.doc.workspaceName && under(st.doc.workspaceName)) pending.set(st.doc.workspaceName, st.doc.content);
+  const pending = new Map<string, { to: string; content: string }>(); // workspace path → write
+  const add = (ws: string, content: string) => {
+    const to = target(ws);
+    if (to !== null && !pending.has(ws)) pending.set(ws, { to, content });
+  };
+  if (st.doc.dirty && st.doc.workspaceName) add(st.doc.workspaceName, st.doc.content);
   for (const tab of st.openTabs) {
     // The active document is the source of truth for its own tab.
-    if (tab.id === activeId || !tab.dirty || !tab.workspaceName || !under(tab.workspaceName)) continue;
-    if (!pending.has(tab.workspaceName)) pending.set(tab.workspaceName, tab.content);
+    if (tab.id !== activeId && tab.dirty && tab.workspaceName) add(tab.workspaceName, tab.content);
   }
   if (!pending.size) return;
-  const written = new Map<string, string>();
+  const written = new Map<string, string>(); // workspace path → text written
   try {
-    for (const [name, content] of pending) {
-      await writeWorkspaceFile(name, content);
-      written.set(name, content);
+    for (const [ws, { to, content }] of pending) {
+      await writeWorkspaceFile(to, content);
+      written.set(ws, content);
     }
   } finally {
     if (written.size) {
@@ -59,9 +60,42 @@ export async function flushOpenDocsUnder(paths: string[]): Promise<void> {
         doc: s.doc.dirty && saved(s.doc.workspaceName, s.doc.content) ? { ...s.doc, dirty: false } : s.doc,
         openTabs: s.openTabs.map((t) => (t.dirty && saved(t.workspaceName, t.content) ? { ...t, dirty: false } : t)),
       }));
-      notifyWorkspaceChanged({ kind: "content", paths: [...written.keys()] });
+      notifyWorkspaceChanged({ kind: "content", paths: [...pending.values()].map((w) => w.to) });
     }
   }
+}
+
+/**
+ * Write every open note at or under `paths` whose edits are not on disk yet
+ * (the active one and inactive tabs alike) before those paths go to the
+ * trash, so Undo / Ctrl+Z brings back the latest text (plan 3.1). Only the
+ * active note has a debounced autosave; a tab left within that window keeps
+ * its edits in memory until it is selected again. Throws when a write fails,
+ * so the caller does not trash a note whose edits were not saved.
+ */
+export async function flushOpenDocsUnder(paths: string[]): Promise<void> {
+  const under = (ws: string) => paths.some((p) => ws === p || ws.startsWith(p + "/"));
+  await writeDirtyOpenDocs((ws) => (under(ws) ? ws : null));
+}
+
+/**
+ * Delete from the file tree with the open notes' latest text kept: write
+ * their unsaved edits, move the paths to the trash, then write any edit made
+ * while that was in flight (the user kept typing in the open note) into the
+ * trashed copy, so Undo / Ctrl+Z still brings back the newest text
+ * (plan 3.1, review: #218). Returns the trash entries.
+ */
+export async function trashWithOpenEdits(paths: string[], kinds: Record<string, "file" | "directory"> = {}): Promise<TrashItem[]> {
+  await flushOpenDocsUnder(paths);
+  const items = await trashPaths(paths, kinds);
+  await writeDirtyOpenDocs((ws) => {
+    for (const item of items) {
+      const at = trashedPathOf(item, ws);
+      if (at) return at;
+    }
+    return null;
+  });
+  return items;
 }
 
 /**
