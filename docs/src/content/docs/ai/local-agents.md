@@ -26,9 +26,12 @@ cloud provider may ever be contacted. The default on a fresh install is
    executor cannot call them natively, the prompt teaches the JSON-ReAct
    protocol: the model answers `{"tool": …, "args": …}` or
    `{"final": …}`, one JSON object per turn.
-3. Executes each tool call. Tools that write or reach the network need a
-   permission the command grants explicitly; a model can never write
-   where you did not expect.
+3. Executes each tool call. The arguments are checked against the tool's
+   JSON Schema first. Tools that write or reach the network need a
+   permission the command grants explicitly, and even then a write tool
+   only **proposes** a change you approve, and a network tool goes out
+   only when the AI policy or your consent allows it (see
+   [Tools](#tools)).
 4. Parses the final answer (JSON when the agent declares a schema) and
    runs the agent's **validators** — a Mermaid diagram must compile, an
    ECharts option needs series and axes, tags must exist, offsets must
@@ -49,6 +52,28 @@ cloud provider may ever be contacted. The default on a fresh install is
 Every run is recorded on this device: `⌘K → "AI: Recent Agent Runs"`
 shows the executor, model, tool calls, retries and failures of the last
 50 runs.
+
+## Tools
+
+Every tool declares a JSON Schema for its arguments and a scope. The
+runtime refuses a call whose arguments do not match (numbers and
+booleans sent as strings are accepted), and every call — with its
+outcome — is in the run's trace.
+
+| Scope | Tools | What the runtime does |
+|---|---|---|
+| read | `read_file`, `list_files`, `file_exists`, `search_workspace`, `get_frontmatter`, `list_tags`, `get_document`, `get_selection`, `get_headings`, `validate_mermaid`, `validate_echarts`, `validate_json`, `git_diff`, `extract_quotes`, `csv_parse` | Always allowed. |
+| write | `write_file`, `set_frontmatter`, `replace_range` | Needs the run's `write` grant. The tool never writes: it **stages** the change (`src/agents/staging.ts`) and the run lists the staged ids. Only approving a change writes it — and only if the file or the text it was computed from has not changed since; otherwise it is marked as a conflict. A cancelled run withdraws what it staged. |
+| network | `search_web`, `fetch_page` | Needs the run's `network` grant. Both go through the research service (a local SearXNG or the research worker) — never a direct request to a web page — and send only the query or the page address, never your document. Under **local only** a call goes out only on your consent (the one-time web-research consent, or a per-call prompt when the command asks); without it the call is refused before anything is sent and the refusal is recorded. Every request is recorded in the privacy ledger, marked when it went out on consent. |
+
+`git_diff` shows the unified diff of a cloned repository: HEAD against
+the working copy by default (what the next commit records), or against
+the index with `staged`. `set_frontmatter` edits YAML frontmatter
+through the `yaml` document model, so comments and the other keys stay
+as they were. `extract_quotes` checks quotes word for word against a
+page read in the same run, a workspace file or the open document, and
+returns the exact text with its offsets. All tools stop when the run is
+cancelled.
 
 ## AI settings
 
