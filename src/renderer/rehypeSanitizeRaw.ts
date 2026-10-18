@@ -11,9 +11,16 @@
  * or data:text/html.
  * Iframes (embeds written as HTML) keep an https src and always get a
  * sandbox without same-origin powers over the app.
+ * Other-site loads (plan 2.2): <img> stays and is held back by the
+ * preview's placeholder (src/lib/remoteImages.ts). Everything else that
+ * would fetch from another site on its own is removed here: <source srcset>
+ * (a <picture> falls back to its <img>), video posters, the legacy
+ * `background` attribute and SVG `href`s. <video> / <audio> lose autoplay
+ * and get preload="none", so they fetch nothing until the user presses play.
  */
 import { visit, SKIP } from "unist-util-visit";
 import type { Element, Root, Parent } from "hast";
+import { remoteImageHost, srcSetUrls } from "../lib/remoteImages";
 
 const DROP_ELEMENTS = new Set([
   "script", "style", "noscript", "template", "object", "embed", "applet",
@@ -68,6 +75,21 @@ function cleanSrcSet(value: string, tag: string): string | null {
   return ok.length ? ok.join(", ") : null;
 }
 
+/** Links navigate only when clicked; on any other element an href loads. */
+const LINK_TAGS = new Set(["a", "area"]);
+
+/** Remove the other-site loads that no placeholder guards (see header). */
+function dropRemoteLoads(el: Element, props: NonNullable<Element["properties"]>) {
+  const remote = (v: unknown) => remoteImageHost(Array.isArray(v) ? v.join(" ") : String(v ?? "")) !== null;
+  if (el.tagName === "source" && typeof props.srcSet === "string" && srcSetUrls(props.srcSet).some((u) => remoteImageHost(u))) delete props.srcSet;
+  for (const key of ["poster", "background"]) if (key in props && remote(props[key])) delete props[key];
+  if (!LINK_TAGS.has(el.tagName)) for (const key of ["href", "xLinkHref"]) if (key in props && remote(props[key])) delete props[key];
+  if (el.tagName === "video" || el.tagName === "audio") {
+    delete props.autoPlay;
+    props.preload = "none";
+  }
+}
+
 function cleanElement(el: Element) {
   const props = el.properties ?? {};
   // GFM task lists render as disabled checkboxes; no other input survives.
@@ -110,6 +132,7 @@ function cleanElement(el: Element) {
   if (el.tagName === "a" && typeof props.target === "string" && props.target !== "_self") {
     props.rel = ["noopener", "noreferrer"];
   }
+  dropRemoteLoads(el, props);
   if (el.tagName === "iframe") {
     if (typeof props.src !== "string") return false;
     props.sandbox = ["allow-scripts", "allow-popups", "allow-presentation", "allow-same-origin"];

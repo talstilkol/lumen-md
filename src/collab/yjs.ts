@@ -6,6 +6,7 @@ import { log } from "../lib/logger";
 import { effectiveCapabilities, entitlementResolved, waitForEntitlement } from "../billing/gates";
 import { wireE2E, type E2EChannel, type E2EErrorReason } from "./e2e";
 import { getSecret } from "../lib/secretStore";
+import { connectAllowedByCsp } from "../lib/cspConnect";
 
 export interface CollabUser {
   name: string;
@@ -86,7 +87,18 @@ const getSignalingUrls = (): string[] => {
   const envUrl = typeof import.meta !== "undefined"
     ? (import.meta as ImportMeta & { env?: { VITE_WEBRTC_SIGNALING_URL?: string } }).env?.VITE_WEBRTC_SIGNALING_URL
     : undefined;
-  const configured = (custom || envUrl || "").split(",").map((s) => s.trim()).filter(Boolean);
+  const listed = (custom || envUrl || "").split(",").map((s) => s.trim()).filter(Boolean);
+  // Plan 2.2: connect-src names its WebSocket hosts (no bare wss:). A server
+  // set at runtime that this deployment's policy does not list would only
+  // be blocked by the browser; skip it with a reason (Collab settings warns
+  // when it is entered). Build-time URLs are in the policy already.
+  const configured = listed.filter((u) => connectAllowedByCsp(u));
+  if (configured.length < listed.length) {
+    log.warn(
+      `Collab signaling ${listed.filter((u) => !configured.includes(u)).join(", ")} isn't in this deployment's CSP connect-src; ` +
+        "skipped. Add its origin with VITE_CSP_CONNECT_EXTRA (or VITE_WEBRTC_SIGNALING_URL) at build time.",
+    );
+  }
   // T49: by default only the configured / the project's own signaling
   // server. The public third-party servers (yjs.dev, heroku) see who meets
   // whom, so they are used only when the user opts in (Collab settings) —
@@ -180,7 +192,15 @@ function configuredWebsocketUrl(): string | null {
     typeof localStorage !== "undefined"
       ? localStorage.getItem("lumen.collab.ws")
       : null;
-  if (fromStorage) return fromStorage;
+  if (fromStorage) {
+    // As for signaling (plan 2.2): a runtime URL the policy blocks is skipped.
+    if (connectAllowedByCsp(fromStorage)) return fromStorage;
+    log.warn(
+      `Persistent collab server ${fromStorage} isn't in this deployment's CSP connect-src; not used. ` +
+        "Add its origin with VITE_CSP_CONNECT_EXTRA (or VITE_YJS_WEBSOCKET_URL) at build time.",
+    );
+    return null;
+  }
   const envUrl =
     typeof import.meta !== "undefined"
       ? (import.meta as ImportMeta & { env?: { VITE_YJS_WEBSOCKET_URL?: string } })

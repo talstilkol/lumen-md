@@ -1,8 +1,18 @@
-import { Component, createContext, lazy, Suspense, useContext, useEffect, useRef, useState, type ComponentType } from "react";
+import { Component, createContext, lazy, Suspense, useContext, useEffect, useRef, useState, useSyncExternalStore, type ComponentType } from "react";
 import type { JSX } from "react";
 import { isAssetName, readWorkspaceBlob } from "../storage/workspace";
 import { log } from "../lib/logger";
 import { scheduleIdle } from "../lib/idle";
+import { t } from "../i18n";
+import {
+  allowRemoteImageHosts,
+  loadRemoteImagesOnce,
+  remoteImageGate,
+  remoteImagesUnavailable,
+  remoteImagesVersion,
+  subscribeRemoteImages,
+  type RemoteImageGate,
+} from "../lib/remoteImages";
 
 const ChartBlock = lazy(() => import("../plugins/ChartBlock"));
 const MermaidBlock = lazy(() => import("../plugins/MermaidBlock"));
@@ -372,8 +382,48 @@ interface ImgProps extends React.ImgHTMLAttributes<HTMLImageElement> {
   src?: string;
 }
 
+/**
+ * An image from another site that the user has not allowed (plan 2.2): its
+ * alt text, the host, and "Load" (this image, this session) / "Always allow"
+ * (the host, in this browser). No request is made until one is clicked. In
+ * the desktop app nothing can load (its CSP, plan 2.1), so no buttons.
+ */
+function RemoteImagePlaceholder({ alt, gate }: { alt?: string; gate: RemoteImageGate }) {
+  const host = gate.hosts.join(", ");
+  const unavailable = remoteImagesUnavailable();
+  return (
+    <span
+      className="lumen-remote-image"
+      role="group"
+      aria-label={t("remoteImage.label", { host })}
+      data-remote-image={host}
+    >
+      <span className="lumen-remote-image-text">
+        <span className="lumen-remote-image-alt" dir="auto">{alt?.trim() || t("remoteImage.untitled")}</span>
+        <span className="lumen-remote-image-host" dir="auto">
+          {unavailable ? t("remoteImage.desktop", { host }) : t("remoteImage.blocked", { host })}
+        </span>
+      </span>
+      {!unavailable && (
+        <>
+          <button type="button" title={t("remoteImage.loadHint", { host })} onClick={() => loadRemoteImagesOnce(gate.urls)}>
+            {t("remoteImage.load")}
+          </button>
+          <button type="button" title={t("remoteImage.allowHint", { host })} onClick={() => allowRemoteImageHosts(gate.hosts)}>
+            {t("remoteImage.allowHost", { host })}
+          </button>
+        </>
+      )}
+    </span>
+  );
+}
+
 function LumenImg(props: ImgProps) {
-  const { src, ...rest } = props;
+  const { src, srcSet, ...rest } = props;
+  // Exports (static markup) keep the real image: the file is for others.
+  const isStatic = useContext(StaticRenderContext);
+  useSyncExternalStore(subscribeRemoteImages, remoteImagesVersion, remoteImagesVersion);
+  const gate = remoteImageGate(src, srcSet);
   const [resolved, setResolved] = useState<string | undefined>(() =>
     isOpfsAssetSrc(src) ? blobUrlCache.get(normalize(src!)) : src,
   );
@@ -409,7 +459,9 @@ function LumenImg(props: ImgProps) {
   const fallbackAlt = !rest.alt
     ? (src ?? "").split("/").pop()?.replace(/\.[^.]+$/, "") ?? "image"
     : undefined;
-  return <img alt={fallbackAlt} loading="lazy" {...rest} src={resolved} />;
+  if (isStatic) return <img alt={fallbackAlt} loading="lazy" {...rest} srcSet={srcSet} src={resolved} />;
+  if (gate.blocked) return <RemoteImagePlaceholder alt={rest.alt} gate={gate} />;
+  return <img alt={fallbackAlt} loading="lazy" {...rest} srcSet={gate.srcSet} src={resolved} />;
 }
 
 function normalize(src: string): string {

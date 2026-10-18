@@ -52,6 +52,22 @@ describe("secure rooms", () => {
     }
   });
 
+  it("a runtime signaling server this deployment's CSP does not list is skipped (plan 2.2)", () => {
+    const meta = document.createElement("meta");
+    meta.httpEquiv = "Content-Security-Policy";
+    meta.content = "default-src 'self'; connect-src 'self' wss://signal.lumen.md wss://signal.acme.dev";
+    document.head.append(meta);
+    try {
+      localStorage.setItem("lumen.collab.signaling", "wss://signal.acme.dev, wss://unlisted.example.org");
+      expect(signalingUrls()).toEqual(["wss://signal.acme.dev"]);
+      localStorage.setItem("lumen.collab.signaling", "wss://unlisted.example.org");
+      expect(signalingUrls()).toEqual(["wss://signal.lumen.md"]);
+    } finally {
+      meta.remove();
+      localStorage.removeItem("lumen.collab.signaling");
+    }
+  });
+
   it("the persistent server checks its access token in constant time", () => {
     expect(tokenOk("/room", "")).toBe(true);
     expect(tokenOk("/room?token=s3cret", "s3cret")).toBe(true);

@@ -12,6 +12,9 @@ import {
   extendHeadersFileCsp,
   ENDPOINT_ENV_VARS,
   EXTRA_CONNECT_ENV_VAR,
+  WEBSOCKET_ENV_VARS,
+  devServerOrigins,
+  cspEndpointsPlugin,
   NGINX_PLACEHOLDER,
 } from "../build/cspEndpoints";
 
@@ -42,6 +45,36 @@ describe("endpointOrigins", () => {
   });
 });
 
+describe("collab WebSocket servers (plan 2.2: no bare ws: / wss: in the policies)", () => {
+  it("adds the signaling list and the persistent server, ws/wss only", () => {
+    expect(
+      endpointOrigins({
+        VITE_WEBRTC_SIGNALING_URL: "wss://signal.acme.dev, ws://localhost:4444/ ,https://not-a-socket.acme.dev",
+        VITE_YJS_WEBSOCKET_URL: "wss://collab.acme.dev:8443/rooms",
+      }),
+    ).toEqual(["ws://localhost:4444", "wss://collab.acme.dev:8443", "wss://signal.acme.dev"]);
+  });
+
+  it("skips the example placeholders (.env.onprem.example)", () => {
+    expect(endpointOrigins({ VITE_YJS_WEBSOCKET_URL: "wss://collab.example.com", VITE_WEBRTC_SIGNALING_URL: "" })).toEqual([]);
+  });
+
+  it("the dev server's page names its HMR socket; a build never does", () => {
+    expect(devServerOrigins({ port: 5173 })).toEqual(["ws://*:5173", "wss://*:5173"]);
+    expect(devServerOrigins({ port: 5173, hmr: { clientPort: 443 } })).toEqual(["ws://*:443", "wss://*:443"]);
+    expect(devServerOrigins({ hmr: false })).toEqual([]);
+    const html = readFileSync(resolve(ROOT, "index.html"), "utf8");
+    const connect = (out: string) => out.match(/connect-src ([^;"]*)/)![1].split(" ");
+    const base = { env: {}, build: { outDir: "dist" }, root: ROOT, server: { port: 5173 } };
+    const dev = cspEndpointsPlugin();
+    dev.configResolved({ ...base, command: "serve" });
+    expect(connect(dev.transformIndexHtml(html))).toEqual(expect.arrayContaining(["ws://*:5173", "wss://*:5173"]));
+    const build = cspEndpointsPlugin();
+    build.configResolved({ ...base, command: "build" });
+    expect(connect(build.transformIndexHtml(html)).filter((s) => s.startsWith("ws://"))).toEqual([]);
+  });
+});
+
 describe("addConnectSrc", () => {
   it("appends to connect-src only, without duplicates", () => {
     const csp = "default-src 'self'; connect-src 'self' https://a.dev; img-src 'self'";
@@ -64,7 +97,7 @@ describe("applied to the real policy files", () => {
     expect(text).toMatch(/Content-Security-Policy:[^\n]*connect-src [^;]*https:\/\/lumen-auth\.acme\.workers\.dev/);
   });
   it("both images pass every endpoint variable to the build (.env* is not in the context)", () => {
-    const vars = [...ENDPOINT_ENV_VARS, EXTRA_CONNECT_ENV_VAR];
+    const vars = [...ENDPOINT_ENV_VARS, ...WEBSOCKET_ENV_VARS, EXTRA_CONNECT_ENV_VAR];
     for (const file of ["Dockerfile", "docker/Dockerfile.web"]) {
       const text = readFileSync(resolve(ROOT, file), "utf8");
       const build = text.slice(0, text.indexOf("RUN npm run build"));

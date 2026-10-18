@@ -106,7 +106,9 @@ header are both enforced. Cloudflare Pages **and Netlify** serve
 `dist/_headers`; `netlify.toml` deliberately sets no CSP of its own.
 
 Your own workers (SSO, billing/entitlements, publish, audit, marketplace,
-self-hosted LanguageTool, Supabase) are added to `connect-src`
+self-hosted LanguageTool, Supabase) and your collab servers
+(`VITE_WEBRTC_SIGNALING_URL`, `VITE_YJS_WEBSOCKET_URL`; the policies carry no
+bare `ws:` / `wss:`) are added to `connect-src`
 **automatically at build time** from the `VITE_*_ENDPOINT` / `VITE_*_URL`
 variables (see `src/build/cspEndpoints.ts`): set them before
 `npm run build`. For the Docker web image pass them as build args, e.g.
