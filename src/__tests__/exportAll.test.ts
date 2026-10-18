@@ -91,6 +91,34 @@ describe("import", () => {
     expect((await listWorkspace()).length).toBe(2);
   });
 
+  it("keeps a #heading or ?query when cleaning a Notion link", () => {
+    expect(rewriteNotionLinks("[s](Page%200123456789abcdef0123456789abcdef.md#section)")).toBe("[s](Page.md#section)");
+  });
+
+  it("links follow a Notion page renamed because another page has the same title", async () => {
+    const id1 = "0123456789abcdef0123456789abcdef", id2 = "89abcdef0123456789abcdef01234567";
+    const archive = await zip([
+      { name: `Export-x/Home.md`, data: `[one](Page%20${id1}.md) [two](Page%20${id2}.md#h)` },
+      { name: `Export-x/Page ${id1}.md`, data: "# one" },
+      { name: `Export-x/Page ${id2}.md`, data: "# two" },
+    ]);
+    const r = await importZip(archive.buffer as ArrayBuffer, "Export-x.zip");
+    expect(await readWorkspaceFile(`${r.folder}/Page.md`)).toBe("# one");
+    expect(await readWorkspaceFile(`${r.folder}/Page 2.md`)).toBe("# two");
+    expect(await readWorkspaceFile(`${r.folder}/Home.md`)).toBe("[one](Page.md) [two](Page%202.md#h)");
+  });
+
+  it("strips only the archive's wrapper folder, not a folder all notes share", async () => {
+    const files = new Map<string, Uint8Array>([
+      ["Vault/.obsidian/app.json", enc.encode("{}")],
+      ["Vault/Projects/a.md", enc.encode("A")],
+      ["Vault/Projects/b.md", enc.encode("B")],
+    ]);
+    const r = await importFiles(files, "Vault");
+    expect(await readWorkspaceFile(`${r.folder}/Projects/a.md`)).toBe("A");
+    expect(await readWorkspaceFile(`${r.folder}/Projects/b.md`)).toBe("B");
+  });
+
   it("imports a Notion zip with clean names and working links", async () => {
     const id1 = "0123456789abcdef0123456789abcdef", id2 = "89abcdef0123456789abcdef01234567";
     const archive = await zip([
