@@ -21,6 +21,14 @@ describe("dictionary", () => {
     expect(isKnown(dict, "בירושלים")).toBe(true);
     expect(isKnown(dict, "סיפריה")).toBe(false);
   });
+  it("peels only valid prefix sequences", () => {
+    expect(isKnown(dict, "ההבית")).toBe(false);
+    expect(isKnown(dict, "ובית")).toBe(true);
+    expect(isKnown(dict, "שבבית")).toBe(true);
+    expect(isKnown(dict, "מהבית")).toBe(true);
+    expect(isKnown(dict, "כשהלכתי")).toBe(true);
+    expect(isKnown(dict, "בבבית")).toBe(false);
+  });
   it("suggests the likeliest fixes first", () => {
     expect(suggest(dict, "שלומ")[0]).toBe("שלום");
     expect(suggest(dict, "סיפריה")).toContain("ספריה");

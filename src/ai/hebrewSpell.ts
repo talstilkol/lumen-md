@@ -41,12 +41,21 @@ function stripMarks(word: string): string {
   return word.normalize("NFD").replace(/[֑-ׇ]/g, "").normalize("NFC").replace(/״/g, '"').replace(/׳/g, "'");
 }
 
-/** Is the word in the dictionary, with up to three prefix letters peeled? */
+/**
+ * Which prefix letter may follow which: ו only first; ה, ב and ל end the
+ * prefix (ב/ל/כ absorb the article); כ only before ש (כש); מ before ה or ש;
+ * ש before the rest. So "ההבית" or "בבית" peeled twice are not words.
+ */
+const PREFIX_NEXT: Record<string, string> = { "ו": "שהבכלמ", "ש": "הבכלמ", "כ": "ש", "מ": "הש", "ה": "", "ב": "", "ל": "" };
+
+/** Is the word in the dictionary, with up to three valid prefix letters peeled? */
 export function isKnown(dict: Set<string>, raw: string): boolean {
   const word = stripMarks(raw);
   if (dict.has(word)) return true;
   let rest = word;
-  for (let i = 0; i < 3 && rest.length > 2 && PREFIX.has(rest[0]); i++) {
+  let prev: string | null = null;
+  for (let i = 0; i < 3 && rest.length > 2 && PREFIX.has(rest[0]) && (prev === null || PREFIX_NEXT[prev].includes(rest[0])); i++) {
+    prev = rest[0];
     rest = rest.slice(1);
     // Hspell writes the ו of a prefixed word doubled ("הוולד"); try both.
     if (dict.has(rest) || (rest.startsWith("ו") && dict.has(rest.slice(1))) || dict.has("ו" + rest)) return true;
