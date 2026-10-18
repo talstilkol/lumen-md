@@ -4,7 +4,7 @@
  * and come back.
  */
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { installFakeOpfs } from "./helpers/fakeOpfs";
+import { FakeDir, installFakeOpfs } from "./helpers/fakeOpfs";
 import { listWorkspace, readWorkspaceFile, renameWorkspaceFile, WorkspaceConflictError, workspaceHasEntry, writeWorkspaceFile } from "../storage/workspace";
 import { rewriteLinks } from "../storage/linkRewrite";
 import { safeMove, trashPaths, undoTrash } from "../storage/fileOps";
@@ -29,6 +29,22 @@ describe("rename / move", () => {
     await renameWorkspaceFile("proj", "archive/proj");
     expect(await workspaceHasEntry("proj")).toBe(false);
     expect(await readWorkspaceFile("archive/proj/sub/b.md")).toBe("B");
+  });
+
+  it("removes the partial copy when a folder move fails half way", async () => {
+    await writeWorkspaceFile("proj/a.md", "A");
+    await writeWorkspaceFile("proj/b.md", "B");
+    const real = FakeDir.prototype.getFileHandle;
+    const spy = vi.spyOn(FakeDir.prototype, "getFileHandle").mockImplementation(function (this: FakeDir, name, opts) {
+      if (name === "b.md" && opts?.create && this.name === "proj2") return Promise.reject(new DOMException("full", "QuotaExceededError"));
+      return real.call(this, name, opts);
+    });
+    await expect(renameWorkspaceFile("proj", "proj2")).rejects.toThrow("full");
+    spy.mockRestore();
+    expect(await workspaceHasEntry("proj2")).toBe(false);
+    expect(await readWorkspaceFile("proj/b.md")).toBe("B");
+    await renameWorkspaceFile("proj", "proj2");
+    expect(await readWorkspaceFile("proj2/b.md")).toBe("B");
   });
 
   it("refuses to move a folder into itself", async () => {

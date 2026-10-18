@@ -253,12 +253,21 @@ export async function renameWorkspaceFile(
 ): Promise<void> {
   if (oldPath === newPath) return;
   if (newPath.startsWith(oldPath + "/")) throw new Error(`Cannot move "${oldPath}" into itself`);
-  if (!opts.overwrite && (await workspaceHasEntry(newPath))) throw new WorkspaceConflictError(newPath);
-  if (await isDirectory(oldPath)) {
-    await copyTree(oldPath, newPath);
-  } else {
-    const original = await readWorkspaceBlob(oldPath);
-    await writeWorkspaceBlob(newPath, original);
+  const existed = await workspaceHasEntry(newPath);
+  if (!opts.overwrite && existed) throw new WorkspaceConflictError(newPath);
+  try {
+    if (await isDirectory(oldPath)) {
+      await copyTree(oldPath, newPath);
+    } else {
+      const original = await readWorkspaceBlob(oldPath);
+      await writeWorkspaceBlob(newPath, original);
+    }
+  } catch (e) {
+    // A copy that failed half way (quota, write error) must not leave a
+    // partial tree at the target: it would block a retry, or sit at the
+    // name of an original that a replace moved to the trash.
+    if (!existed) await deleteWorkspaceFile(newPath).catch(() => undefined);
+    throw e;
   }
   await deleteWorkspaceFile(oldPath);
 }
