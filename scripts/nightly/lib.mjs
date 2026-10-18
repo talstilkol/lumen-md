@@ -16,8 +16,14 @@ export function writeReport(name, content) {
   return path;
 }
 
-/** Append markdown to the GitHub job summary (and print it). */
+/**
+ * Append markdown to the GitHub job summary (and print it). In Actions the
+ * report's first heading also goes out as a ::notice annotation, which the
+ * REST API can read without downloading the artifact.
+ */
 export function summary(md) {
+  const head = md.split("\n").find((l) => l.startsWith("#"));
+  if (process.env.GITHUB_ACTIONS && head) process.stdout.write(`::notice title=report::${head.replace(/^#+\s*/, "")}\n`);
   process.stdout.write(md.endsWith("\n") ? md : md + "\n");
   if (process.env.GITHUB_STEP_SUMMARY) appendFileSync(process.env.GITHUB_STEP_SUMMARY, md.endsWith("\n") ? md : md + "\n");
 }
