@@ -7,7 +7,7 @@
  *   - the lazy import resolves
  */
 
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 
 describe("tldraw integration (γ.2)", () => {
   it("tldraw module exports the expected helpers", async () => {
@@ -20,5 +20,25 @@ describe("tldraw integration (γ.2)", () => {
   it("CanvasTldraw module exports the React component", async () => {
     const mod = await import("../ui/CanvasTldraw");
     expect(typeof mod.CanvasTldraw).toBe("function");
+  });
+
+  it("closing within the debounce flushes the pending save instead of dropping it", async () => {
+    vi.useFakeTimers();
+    try {
+      const { debouncedSave } = await import("../ui/CanvasTldraw");
+      const save = vi.fn();
+      const s = debouncedSave(save, 500);
+      s.schedule();
+      s.schedule();
+      vi.advanceTimersByTime(200);
+      s.flush(); // unmount 200 ms after the last stroke
+      expect(save).toHaveBeenCalledTimes(1);
+      vi.advanceTimersByTime(1000);
+      expect(save).toHaveBeenCalledTimes(1);
+      s.flush(); // nothing pending: no extra write
+      expect(save).toHaveBeenCalledTimes(1);
+    } finally {
+      vi.useRealTimers();
+    }
   });
 });
