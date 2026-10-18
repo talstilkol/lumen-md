@@ -108,6 +108,30 @@ describe("trash", () => {
     expect(await readWorkspaceFile("p/x.md")).toBe("X");
   });
 
+  it("trashing a folder together with a note inside it moves only the folder", async () => {
+    await writeWorkspaceFile("p/x.md", "X");
+    await writeWorkspaceFile("p/sub/y.md", "Y");
+    const items = await trashPaths(["p/x.md", "p", "p/sub/y.md"], { p: "directory" });
+    expect(items.map((i) => i.originalPath)).toEqual(["p"]);
+    expect((await listTrash()).map((i) => i.originalPath)).toEqual(["p"]);
+    await undoTrash(items);
+    expect(await readWorkspaceFile("p/sub/y.md")).toBe("Y");
+  });
+
+  it("records the moves that succeeded when a later one fails", async () => {
+    await writeWorkspaceFile("a.md", "A");
+    await expect(trashPaths(["a.md", "missing.md"])).rejects.toThrow();
+    expect((await listTrash()).map((i) => i.originalPath)).toEqual(["a.md"]);
+  });
+
+  it("restores a note beside a folder that took its name", async () => {
+    await writeWorkspaceFile("a.md", "old");
+    const [item] = await trashPaths(["a.md"]);
+    await writeWorkspaceFile("a.md/inner.md", "folder now");
+    expect(await restoreFromTrash(item.id)).toBe("a 2.md");
+    expect(await readWorkspaceFile("a 2.md")).toBe("old");
+  });
+
   it("purges only items older than 30 days; empty removes for good", async () => {
     await writeWorkspaceFile("old.md", "o");
     await writeWorkspaceFile("new.md", "n");

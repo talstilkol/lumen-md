@@ -306,7 +306,8 @@ export async function uniqueWorkspaceName(base: string): Promise<string> {
   while (true) {
     const candidateName = i === 0 ? `${stem}${ext}` : `${stem} ${i + 1}${ext}`;
     const candidate = dir ? `${dir}/${candidateName}` : candidateName;
-    if (!(await workspaceHasFile(candidate))) return candidate;
+    // A folder of that name blocks the file as much as a file does.
+    if (!(await workspaceHasEntry(candidate))) return candidate;
     i++;
     if (i > 999) {
       const fallback = `${stem}-${Date.now()}${ext}`;
