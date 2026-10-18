@@ -9,7 +9,7 @@
  */
 
 import { t } from "../i18n";
-import { createEmbedContext, hasEmbeds, type EmbedContext, type EmbedNoticeKind } from "./embeds";
+import { createEmbedContext, embeddedTexts, hasEmbeds, type EmbedContext, type EmbedNoticeKind } from "./embeds";
 
 /** The workspace path a preview doc key (./previewDoc) names, or null. */
 export function hostPathOf(docKey: string | null | undefined): string | null {
@@ -36,7 +36,7 @@ export function embedNotice(kind: EmbedNoticeKind, vars: Record<string, string |
  */
 export async function loadEmbedContext(markdownText: string, docKey: string | null): Promise<EmbedContext | undefined> {
   if (!hasEmbeds(markdownText)) return undefined;
-  let files: { path: string; content: string }[] = [];
+  let files: { path: string; content: string; modified?: number }[] = [];
   try {
     const { ensureIndex, indexedFiles } = await import("../storage/workspaceIndex");
     await ensureIndex();
@@ -44,5 +44,26 @@ export async function loadEmbedContext(markdownText: string, docKey: string | nu
   } catch {
     /* no workspace */
   }
-  return createEmbedContext({ hostPath: hostPathOf(docKey), hostText: markdownText, files, notice: embedNotice });
+  const make = (extra: typeof files = []) =>
+    createEmbedContext({ hostPath: hostPathOf(docKey), hostText: markdownText, files: extra.length ? [...files, ...extra] : files, notice: embedNotice });
+  const ctx = make();
+  // Pasted images (`lumen-asset-*`, at the vault root) are left out of the
+  // index: look up the ones these notes embed, so a missing one is reported.
+  const assets = await existingAssets([markdownText, ...embeddedTexts(markdownText, ctx)]);
+  return assets.length ? make(assets) : ctx;
+}
+
+const ASSET_EMBED = /!\[\[\s*(?:\.?\/)?([^\]|#\r\n]*lumen-asset-[^\]|#\r\n]*?)\s*(?:[|#][^\]\r\n]*)?\]\]/g;
+
+async function existingAssets(texts: string[]): Promise<{ path: string; content: string }[]> {
+  const names = new Set<string>();
+  for (const text of texts) for (const m of text.matchAll(ASSET_EMBED)) names.add(m[1]);
+  if (!names.size) return [];
+  try {
+    const { workspaceHasFile } = await import("../storage/workspace");
+    const found = await Promise.all([...names].map(async (path) => ((await workspaceHasFile(path)) ? path : null)));
+    return found.filter((p): p is string => !!p).map((path) => ({ path, content: "" }));
+  } catch {
+    return [];
+  }
 }

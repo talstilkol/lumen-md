@@ -342,6 +342,34 @@ describe("embeds — pipeline", () => {
     expect([...ctx.used].sort()).toEqual(["A.md", "B.md", "attachments/pic.png"]);
   });
 
+  it("a note met deep in one branch is scanned again where it is embedded higher up", async () => {
+    // host → X1 → X2 → C: C's own embed is past the depth limit there. host → C:
+    // C's embed of D renders, so D's math must select KaTeX.
+    const vault = { "X1.md": "![[X2]]", "X2.md": "![[C]]", "C.md": "![[D]]", "D.md": "math: $x^2$" };
+    const md = "![[X1]]\n\n![[C]]";
+    const ctx = ctxFor(md, "host.md", vault);
+    expect(embeddedTexts(md, ctx)).toContain("math: $x^2$");
+    const html = renderToStaticMarkup(await renderMarkdown(md, () => false, { embeds: ctxFor(md, "host.md", vault) }));
+    expect(html).toContain("katex");
+  });
+
+  it("a pasted asset the context does not list is missing, one it lists is shown", () => {
+    const md = "![[lumen-asset-gone.png]]";
+    expect(dom(md).querySelector<HTMLElement>(".lumen-embed-notice")?.dataset.embedStatus).toBe("notFound");
+    const ctx = createEmbedContext({ hostPath: "h.md", hostText: md, files: [{ path: "lumen-asset-gone.png", content: "" }], notice: embedNotice });
+    const root = document.createElement("div");
+    root.innerHTML = renderToStaticMarkup(renderMarkdownFast(md, { embeds: ctx }));
+    expect(root.querySelector("img")?.getAttribute("data-lumen-path")).toBe("lumen-asset-gone.png");
+  });
+
+  it("an embedded image carries its file's version, so a saved-over image is read again", () => {
+    const md = "![[pic.png]]";
+    const ctx = createEmbedContext({ hostPath: "h.md", hostText: md, files: [{ path: "pic.png", content: "", modified: 1234 }], notice: embedNotice });
+    const root = document.createElement("div");
+    root.innerHTML = renderToStaticMarkup(renderMarkdownFast(md, { embeds: ctx }));
+    expect(root.querySelector("img")?.getAttribute("data-lumen-version")).toBe("1234");
+  });
+
   it("collects embedded sources transitively for the pipeline's raw / math choice", () => {
     expect(embeddedTexts("![[L1]]", ctxFor("![[L1]]"))).toEqual([VAULT["L1.md"], VAULT["L2.md"], VAULT["L3.md"]]);
     expect(embeddedTexts("![[Self]]", ctxFor("![[Self]]", "Self.md"))).toEqual([]);

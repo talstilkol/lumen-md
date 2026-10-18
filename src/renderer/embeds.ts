@@ -57,22 +57,25 @@ export interface EmbedContext extends EmbedExpander {
   notice(kind: EmbedNoticeKind, vars: Record<string, string | number>): string;
   /** Paths the render embedded: the preview re-renders when one of them changes. */
   used: Set<string>;
+  /** When a file last changed, if known — part of an embedded image's cache key. */
+  version(path: string): number | undefined;
 }
 
-/** Build a context from `{path, content}` pairs (the workspace index). */
+/** Build a context from `{path, content, modified?}` entries (the workspace index). */
 export function createEmbedContext(opts: {
   hostPath: string | null;
   hostText: string;
-  files: Iterable<{ path: string; content: string }>;
+  files: Iterable<{ path: string; content: string; modified?: number }>;
   notice: EmbedContext["notice"];
 }): EmbedContext {
-  const byPath = new Map<string, string>();
-  for (const f of opts.files) byPath.set(f.path, f.content);
+  const byPath = new Map<string, { content: string; modified?: number }>();
+  for (const f of opts.files) byPath.set(f.path, f);
   const ctx: EmbedContext = {
     hostPath: opts.hostPath,
     hostText: opts.hostText,
     paths: [...byPath.keys()],
-    read: (p) => (p === opts.hostPath ? opts.hostText : byPath.get(p)),
+    read: (p) => (p === opts.hostPath ? opts.hostText : byPath.get(p)?.content),
+    version: (p) => byPath.get(p)?.modified,
     notice: opts.notice,
     used: new Set(),
     expand: (tree, parse) => {
@@ -181,18 +184,23 @@ export function resolveEmbedTarget(
  */
 export function embeddedTexts(markdown: string, ctx: EmbedContext): string[] {
   const out: string[] = [];
-  const seen = new Set<string>();
+  // The shallowest depth each note was reached at: a note met first deep in
+  // one branch (its own embeds cut off by the depth limit) is walked again
+  // when another branch embeds it higher up, where its embeds do render.
+  const shallowest = new Map<string, number>();
   const visit = (text: string, from: string | null, depth: number) => {
     if (depth >= MAX_EMBED_DEPTH) return;
     for (const m of text.matchAll(embedRe())) {
       const e = parseEmbed(m[1]);
       if (!e.note || embedKind(e.note) !== "note") continue;
       const path = resolveEmbedTarget(e.note, ctx.paths, from, "note");
-      if (!path || path === ctx.hostPath || seen.has(path)) continue;
-      seen.add(path);
+      if (!path || path === ctx.hostPath) continue;
+      const before = shallowest.get(path);
+      if (before !== undefined && before <= depth) continue;
       const t = ctx.read(path);
       if (t === undefined) continue;
-      out.push(t);
+      if (before === undefined) out.push(t);
+      shallowest.set(path, depth);
       visit(t, path, depth + 1);
     }
   };
@@ -357,11 +365,17 @@ function buildEmbed(inner: string, env: Env, blockAllowed: boolean): Item {
   const from = env.current === HOST ? ctx.hostPath : env.current;
 
   if (kind === "image") {
-    const path = resolveEmbedTarget(e.note, ctx.paths, from, "image") ?? (baseOf(e.note).startsWith("lumen-asset-") ? e.note : null);
+    // Pasted `lumen-asset-*` files are not in the workspace index; the
+    // context lists the ones that exist (./embedContext), so a deleted asset
+    // is reported missing like any other file.
+    const path = resolveEmbedTarget(e.note, ctx.paths, from, "image");
     if (!path) return notice(env, "notFound", e.target, { target: e.target }, false);
     ctx.used.add(path);
     const { alt, width, height } = imageAlias(e.alias);
     const props: Record<string, unknown> = { className: ["lumen-embed-image"], "data-lumen-path": path };
+    // A new version is a new cache key: an image saved over keeps no stale bytes.
+    const version = ctx.version(path);
+    if (version !== undefined) props["data-lumen-version"] = String(version);
     if (width) props.width = width;
     if (height) props.height = height;
     return {

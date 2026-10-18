@@ -358,9 +358,16 @@ const LiveSql = withSuspense<BlockProps>(
  * or `./lumen-asset-*`), resolve it to a blob URL on first render. Cached blob
  * URLs survive across re-renders within the page lifetime (no revoke); OPFS
  * assets are tiny relative to a long-lived editor session, so this is a fair
- * trade.
+ * trade. `![[image.png]]` embeds carry the file's version (mtime): an image
+ * saved over at the same path is read again.
  */
-const blobUrlCache = new Map<string, string>();
+const blobUrlCache = new Map<string, { url: string; version: string }>();
+
+/** The cached URL for `key`, if it was made from this version of the file. */
+function cachedBlobUrl(key: string, version: string): string | undefined {
+  const c = blobUrlCache.get(key);
+  return c && c.version === version ? c.url : undefined;
+}
 
 function isOpfsAssetSrc(src: string | undefined): src is string {
   if (!src) return false;
@@ -373,6 +380,8 @@ interface ImgProps extends React.ImgHTMLAttributes<HTMLImageElement> {
   src?: string;
   /** Workspace path of an `![[image.png]]` embed (./embeds) — read from OPFS. */
   "data-lumen-path"?: string;
+  /** When that file last changed: a new version is read again, not served from the cache. */
+  "data-lumen-version"?: string;
 }
 
 /** OPFS hands back files without a type; an SVG `<img>` needs one to render. */
@@ -386,13 +395,14 @@ function LumenImg(props: ImgProps) {
   // Never the raw path as `src` — the browser would ask the server for it.
   const wsPath = props["data-lumen-path"];
   const key = wsPath ? normalize(wsPath) : isOpfsAssetSrc(src) ? normalize(src) : null;
-  const [resolved, setResolved] = useState<string | undefined>(() => (key ? blobUrlCache.get(key) : src));
+  const version = props["data-lumen-version"] ?? "";
+  const [resolved, setResolved] = useState<string | undefined>(() => (key ? cachedBlobUrl(key, version) : src));
   useEffect(() => {
     if (!key) {
       setResolved(src);
       return;
     }
-    const cached = blobUrlCache.get(key);
+    const cached = cachedBlobUrl(key, version);
     if (cached) {
       setResolved(cached);
       return;
@@ -402,7 +412,7 @@ function LumenImg(props: ImgProps) {
       .then((blob) => {
         if (cancelled) return;
         const url = URL.createObjectURL(imageBlob(blob, key));
-        blobUrlCache.set(key, url);
+        blobUrlCache.set(key, { url, version });
         setResolved(url);
       })
       .catch(() => {
@@ -411,7 +421,7 @@ function LumenImg(props: ImgProps) {
     return () => {
       cancelled = true;
     };
-  }, [src, key]);
+  }, [src, key, version]);
   // The author-supplied `alt` is forwarded via {...rest}. We default to
   // the basename of the src when nothing is provided so screen-readers
   // get something descriptive instead of "image".
