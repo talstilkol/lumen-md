@@ -457,6 +457,22 @@ describe("directory-handle backend specifics", () => {
     expect(await v.readText("p/b.md")).toBe("B");
   });
 
+  it("a file that exists but cannot be read right now still exists for stat", async () => {
+    const dir = new FakeDir();
+    const v = createDirectoryHandleBackend({ id: "t", root: async () => dir as unknown as FileSystemDirectoryHandle });
+    await v.write("busy.md", "x");
+    const plain = dir.getFileHandle.bind(dir);
+    dir.getFileHandle = (async (name: string, opts?: { create?: boolean }) => {
+      const h = await plain(name, opts);
+      h.getFile = async () => {
+        throw new DOMException("locked", "NoModificationAllowedError");
+      };
+      return h;
+    }) as typeof dir.getFileHandle;
+    expect(await v.stat("busy.md")).toEqual({ kind: "file", size: 0, mtime: 0 });
+    expect(await v.stat("gone.md")).toBeNull();
+  });
+
   it("the OPFS backend says so when the browser has no OPFS", async () => {
     Object.defineProperty(navigator, "storage", { configurable: true, value: {} });
     const v = createOpfsBackend();

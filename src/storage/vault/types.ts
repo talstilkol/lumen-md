@@ -27,7 +27,7 @@ export type VaultEntryKind = "file" | "directory";
 
 export interface VaultStat {
   kind: VaultEntryKind;
-  /** Size in bytes; 0 for a directory. */
+  /** Size in bytes; 0 for a directory (and for a file that cannot be read right now). */
   size: number;
   /** Last modification, ms since the epoch; 0 when the backend cannot tell (directories on OPFS). */
   mtime: number;

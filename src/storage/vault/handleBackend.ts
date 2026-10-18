@@ -175,8 +175,15 @@ export function createDirectoryHandleBackend(o: DirectoryHandleBackendOptions): 
       const found = await lookup(vaultSegments(path));
       if (!found) return null;
       if (found.kind === "directory") return { kind: "directory", size: 0, mtime: 0 };
-      const file = await found.handle.getFile();
-      return { kind: "file", size: file.size, mtime: file.lastModified };
+      try {
+        const file = await found.handle.getFile();
+        return { kind: "file", size: file.size, mtime: file.lastModified };
+      } catch (e) {
+        if (isMissing(e)) return null; // deleted in between
+        // The file is there but cannot be read right now (e.g. a writer
+        // holds it): it still exists — an existence check must not say no.
+        return { kind: "file", size: 0, mtime: 0 };
+      }
     },
 
     async read(path) {
