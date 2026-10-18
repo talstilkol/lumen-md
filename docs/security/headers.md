@@ -9,6 +9,10 @@ npm run headers         # check (CI): exit 1 + a directive-level diff when any c
 npm run headers:write   # rewrite the policy values in place in every source
 ```
 
+A host's exceptions (`hosts.<host>.csp` in the policy) are rules on a route's directives:
+`omit` drops whole directives, `remove` drops single sources from a directive, and `add`
+appends sources. They apply in that order.
+
 `--write` replaces header **values** only. Each file keeps its own structure, comments and
 formatting. The check also fails on problems `--write` cannot fix, and these need a hand
 edit once:
@@ -106,8 +110,8 @@ to it as well. So the effective policy is always the intersection of the two.
   - `frame-src https:` replaced by the embed list. The meta enforced that list anyway.
   - `font-src https://cdn.tldraw.com` added (tldraw, as D1).
   - `connect-src` gets the full app list, plus `ipc:` and `http://ipc.localhost` (Tauri 2
-    IPC on macOS/Linux and on Windows). It keeps `https:` as a documented exception, see
-    the per-host table.
+    IPC on macOS/Linux and on Windows). 0.17 kept `https:` there as an exception; plan 2.1
+    removed it (see "Desktop (Tauri)" below).
 - **D6 · webR's worker lost eval on Cloudflare and Vercel.** The F4/P3 change gave eval to
   `/assets/*.worker-*` only. `/webr/webr-worker.js` fell under the app policy (no eval,
   Trusted Types). R.js evaluates side modules' EM_ASM code and `webr::eval_js()`
@@ -140,10 +144,45 @@ These are written in `policy.json` under `hosts`.
 | meta | no `frame-ancestors` | ignored in `<meta>` (CSP3), and browsers log an error |
 | meta | no Trusted Types | enforced by the production response headers only. The dev server, Tauri and Capacitor have not been verified under them |
 | Tauri | no `frame-ancestors`, no Trusted Types | a top-level window is never framed (on Linux Tauri injects the policy as `<meta>`). Trusted Types as for meta |
-| Tauri | `connect-src` + `ipc:` `http://ipc.localhost` `https:` | Tauri 2 IPC. `https:` because this policy is compiled from tauri.conf.json and cannot receive the deployment's endpoint origins at build time. The meta policy, which does, keeps the page on the explicit list |
+| Tauri | `connect-src` + `ipc:` `http://ipc.localhost` | Tauri 2 IPC. No `https:`: the list is the app's explicit one. A build with deployment endpoints adds them with `--tauri-config` (below) |
+| Tauri | `img-src` and `media-src` without `https:` | the desktop app loads images only from itself and the hosts the app needs. Images and media inside notes stay unloaded there (below) |
 | docker nginx | `connect-src` + `__CSP_CONNECT_EXTRA__` | filled by `docker/Dockerfile.web` from `dist/.csp-connect-extra` |
 | nginx (both) | no HSTS | plain-HTTP listener behind the operator's TLS terminator. `includeSubDomains; preload` on someone else's domain is their call |
 | deploy nginx | COOP `same-origin`, COEP `credentialless` | cross-origin isolation (D9). COEP goes on every document and worker it serves |
+
+## Desktop (Tauri)
+
+Plan 2.1 leaves no open scheme in the desktop policy. It has no `unsafe-eval`, and
+`connect-src`, `img-src`, `media-src` and `frame-src` allow only `'self'` (plus `data:` /
+`blob:` where the app makes them) and named hosts.
+
+- **`connect-src`** is the app's list plus Tauri's IPC. Tauri enforces index.html's meta
+  policy next to its own, so the `https:` that 0.17 kept there never allowed anything the
+  meta did not. Its only purpose was build-time endpoint origins. These origins come from
+  `VITE_*_ENDPOINT` and `VITE_CSP_CONNECT_EXTRA`. The Vite build adds them to the meta but
+  cannot add them to `tauri.conf.json`, which the Rust build compiles in. The release
+  workflow sets none of them. A desktop build that does set them passes the matching policy
+  to the Tauri CLI:
+
+  ```sh
+  npm run build    # with the deployment's VITE_* variables; writes dist/.csp-connect-extra
+  npm run tauri:build -- --config "$(node scripts/headers.mjs --tauri-config dist/.csp-connect-extra)"
+  ```
+
+  `tauri build --config` merges the JSON over `tauri.conf.json`. `headersPolicy.test.ts`
+  checks what the script prints. The desktop build itself has not been run with it.
+- **`img-src`** is `'self' data: blob:` plus the hosts the app itself loads images from:
+  - tldraw's icons and embed icons, from `cdn.tldraw.com` (also CSS `mask-image`);
+  - the map block's tiles, from `*.tile.openstreetmap.org`;
+  - account avatars, from `avatars.githubusercontent.com` and `*.googleusercontent.com`.
+  
+  The web policies list the same hosts and keep a trailing `https:` for images inside
+  notes. The desktop policy drops that `https:`, so images from other sites in a note do
+  not load on desktop.
+- **`media-src`** is `'self' blob:`. `<video>` / `<audio>` from other sites in a note do
+  not play on desktop.
+- **Not checked here:** rendering inside the desktop app (Graphviz, Python, OCR, the
+  canvas icons, map tiles). It is the owner's manual check in plan 15.8.
 
 ## Not covered, and open items for the owner
 
@@ -170,3 +209,9 @@ These are written in `policy.json` under `hosts`.
 6. **The extension and VS Code webview policies** (`extension/`, `packages/vscode-lumen`)
    and the srcdoc sandboxes' inline policies are separate surfaces, and are not part of
    this policy.
+7. **Images and media inside notes on desktop.** Since plan 2.1 the desktop app loads none
+   from other sites. If they should load on desktop as they do on the web, remove the
+   Tauri rule that drops `https:` from `img-src` / `media-src`. The renderer's own gate
+   (plan 2.2) still holds them back until the user allows them.
+8. **Desktop builds with deployment endpoints** use `--tauri-config` (see "Desktop
+   (Tauri)"). This has not been tried in a real desktop build.

@@ -19,6 +19,7 @@ import {
   renderNginx,
   renderVercel,
   renderTauri,
+  tauriConfigWithOrigins,
   parseCsp,
   cspDiff,
   run,
@@ -37,6 +38,7 @@ const fixture = {
       csp: {
         "default-src": ["'self'"],
         "script-src": ["'self'", "'wasm-unsafe-eval'"],
+        "img-src": ["'self'", "https://tiles.example", "https:"],
         "connect-src": ["'self'", "https://api.example"],
         "frame-ancestors": ["'none'"],
         "require-trusted-types-for": ["'script'"],
@@ -53,7 +55,10 @@ const fixture = {
   hosts: {
     meta: { csp: [{ routes: "*", omit: ["frame-ancestors"] }] },
     tauri: {
-      csp: [{ routes: ["app"], omit: ["frame-ancestors", "require-trusted-types-for"], add: { "connect-src": ["ipc:"] } }],
+      csp: [
+        { routes: ["app"], omit: ["frame-ancestors", "require-trusted-types-for"], add: { "connect-src": ["ipc:"] } },
+        { routes: ["app"], remove: { "img-src": ["https:"], "media-src": ["https:"] } },
+      ],
     },
     "docker-nginx": { csp: [{ routes: ["app"], add: { "connect-src": ["__CSP_CONNECT_EXTRA__"] } }] },
   },
@@ -62,7 +67,7 @@ const fixture = {
 
 describe("renderers", () => {
   const app =
-    "default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; connect-src 'self' https://api.example; frame-ancestors 'none'; require-trusted-types-for 'script'";
+    "default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; img-src 'self' https://tiles.example https:; connect-src 'self' https://api.example; frame-ancestors 'none'; require-trusted-types-for 'script'";
 
   it("header text: directives in policy order, `; `-separated, no trailing separator", () => {
     expect(renderCsp(fixture, "app", "cloudflare")).toBe(app);
@@ -71,14 +76,14 @@ describe("renderers", () => {
 
   it("meta: no frame-ancestors (ignored in <meta>)", () => {
     expect(renderMeta(fixture, "app")).toBe(
-      "default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; connect-src 'self' https://api.example; require-trusted-types-for 'script'",
+      "default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; img-src 'self' https://tiles.example https:; connect-src 'self' https://api.example; require-trusted-types-for 'script'",
     );
     expect(renderMeta(fixture, "runner")).toBe("default-src 'none'; connect-src 'none'");
   });
 
   it("nginx add_header, with the docker image's build-time placeholder", () => {
     expect(renderNginx(fixture, "app")).toBe(
-      `add_header Content-Security-Policy "default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; connect-src 'self' https://api.example __CSP_CONNECT_EXTRA__; frame-ancestors 'none'; require-trusted-types-for 'script'" always;`,
+      `add_header Content-Security-Policy "default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; img-src 'self' https://tiles.example https:; connect-src 'self' https://api.example __CSP_CONNECT_EXTRA__; frame-ancestors 'none'; require-trusted-types-for 'script'" always;`,
     );
     expect(renderNginx(fixture, "app", "deploy-nginx")).toBe(`add_header Content-Security-Policy "${app}" always;`);
   });
@@ -91,8 +96,20 @@ describe("renderers", () => {
     expect(JSON.parse(JSON.stringify(renderVercel(fixture, "app"))).value).toBe(app);
   });
 
-  it("Tauri: host exceptions omit and add", () => {
-    expect(renderTauri(fixture)).toBe("default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; connect-src 'self' https://api.example ipc:");
+  it("Tauri: host exceptions omit, remove single sources, and add", () => {
+    expect(renderTauri(fixture)).toBe(
+      "default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; img-src 'self' https://tiles.example; connect-src 'self' https://api.example ipc:",
+    );
+  });
+
+  it("Tauri: --tauri-config adds the build's endpoint origins to connect-src only", () => {
+    expect(tauriConfigWithOrigins(fixture, ["https://sso.acme.example", "https://api.example"])).toEqual({
+      app: {
+        security: {
+          csp: "default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; img-src 'self' https://tiles.example; connect-src 'self' https://api.example ipc: https://sso.acme.example",
+        },
+      },
+    });
   });
 
   it("parse ↔ render round trip and a readable directive diff", () => {
@@ -147,6 +164,26 @@ describe("scripts/headers.mjs on the repo", () => {
     const r = spawnSync(process.execPath, [join(ROOT, "scripts/headers.mjs"), "--check"], { encoding: "utf8" });
     expect(r.stderr).toBe("");
     expect(r.status).toBe(0);
+  });
+
+  it("--tauri-config prints the checked-in desktop policy plus the build's endpoint origins", () => {
+    const dir = mkdtempSync(join(tmpdir(), "lumen-tauri-cfg-"));
+    try {
+      const extra = join(dir, ".csp-connect-extra");
+      writeFileSync(extra, "https://sso.acme.example wss://collab.acme.example\n");
+      const r = spawnSync(process.execPath, [join(ROOT, "scripts/headers.mjs"), "--tauri-config", extra], { encoding: "utf8" });
+      expect(r.status).toBe(0);
+      const csp: string = JSON.parse(r.stdout).app.security.csp;
+      const checkedIn: string = JSON.parse(readFileSync(join(ROOT, "src-tauri/tauri.conf.json"), "utf8")).app.security.csp;
+      const connect = (c: string) => parseCsp(c).get("connect-src");
+      expect(connect(csp)).toEqual([...connect(checkedIn)!, "https://sso.acme.example", "wss://collab.acme.example"]);
+      const rest = (c: string) => [...parseCsp(c)].filter(([d]) => d !== "connect-src");
+      expect(rest(csp)).toEqual(rest(checkedIn));
+      const missing = spawnSync(process.execPath, [join(ROOT, "scripts/headers.mjs"), "--tauri-config", join(dir, "nope")], { encoding: "utf8" });
+      expect(missing.status).toBe(1);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
   });
 });
 
