@@ -56,11 +56,12 @@ export type LicenceClass = "allowed" | "conditional" | "forbidden";
 /**
  * Installed models the catalog does not list by name or family: every Llama
  * and Gemma release (and fine-tunes named after them, e.g. Hermes) is under a
- * custom licence; Aya is CC-BY-NC (models/registry.json, plan 1.7).
+ * custom licence; Cohere's open weights — Aya, Command R / R+ / R7B /
+ * A (c4ai-* on Hugging Face) — are CC-BY-NC (models/registry.json, plan 1.7).
  */
 const FAMILY_LICENCE: Array<{ re: RegExp; class: LicenceClass }> = [
   { re: /^(llama|codellama|hermes|gemma|codegemma)/i, class: "conditional" },
-  { re: /^aya/i, class: "forbidden" },
+  { re: /^(aya|command-[ar]|c4ai-)/i, class: "forbidden" },
 ];
 
 /**

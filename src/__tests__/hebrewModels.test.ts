@@ -85,6 +85,9 @@ describe("custom-licence models are never picked on their own (plan 1.7)", () =>
     expect(licenceClassOf("qwen2.5:32b")).toBe("allowed");
     expect(licenceClassOf("qwen2.5:14b")).toBe("allowed");
     expect(licenceClassOf("qwen2.5-coder:3b")).toBe("forbidden");
+    // Cohere's Command models are CC-BY-NC, like Aya.
+    for (const n of ["command-r:latest", "command-r:35b", "command-r-plus:104b", "command-r7b:7b", "command-a:111b", "hf.co/CohereForAI/c4ai-command-r-v01-GGUF:Q4_K_M"]) expect([n, licenceClassOf(n)]).toEqual([n, "forbidden"]);
+    expect(pickModel("medium", [{ name: "command-r:35b", params: 35, family: "command-r" }, { name: "qwen2.5:7b", params: 7.6, family: "qwen2" }], null)).toBe("qwen2.5:7b");
     expect(autoPickable("qwen2.5-coder:3b-instruct-q4_K_M")).toBe(false);
     expect(autoPickable("mistral:7b")).toBe(true);
     expect(autoPickable("llama3.1:8b")).toBe(false);
