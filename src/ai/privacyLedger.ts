@@ -251,7 +251,8 @@ export function withLedger(inner: typeof fetch): typeof fetch {
 export function recordWorkerRequest(url: string, method = "GET"): LedgerEntry | null {
   const hit = classify(url);
   if (!hit) return null;
-  return record({ ...hit, method, bytesOut: 0, bytesIn: null, policy: getAiPolicy(), decision: "allowed" });
+  const id = record({ ...hit, method, bytesOut: 0, bytesIn: null, policy: getAiPolicy(), decision: "allowed" });
+  return entries.find((x) => x.id === id) ?? null;
 }
 
 /** Install once at startup. `blocked` is called for every blocked request. */
