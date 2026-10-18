@@ -52,6 +52,13 @@ export type ChangeProposal =
        * same text can be approved in any order.
        */
       basis?: string;
+      /**
+       * Which open document the run worked on (an opaque key from the
+       * editor, `agents/docKey.ts`, set by the runtime when the run starts).
+       * A change with no `path` is applied only to that document — the
+       * active one or another tab — never to whichever document is active.
+       */
+      docKey?: string;
     };
 
 /** Up to 40 characters on each side of a proposed range (`staging.rangeContext`). */
@@ -100,6 +107,12 @@ export type StagedChange = ChangeProposal & {
    * tab (unsaved), or a workspace file written directly.
    */
   appliedTo?: "document" | "tab" | "file";
+  /**
+   * Status `applied` to the document: the edit went in without an undo
+   * history (the source editor was not showing it: Preview, WYSIWYG), so
+   * Undo cannot take it back.
+   */
+  noUndo?: true;
   /** Applied as a tracked change (CriticMarkup) because suggesting mode was on. */
   asSuggestion?: true;
 };
@@ -397,6 +410,11 @@ export interface RunOptions {
   document?: string;
   selection?: string;
   path?: string | null;
+  /**
+   * The open document the run works on (`agents/docKey.ts`). Default: the
+   * active document's key when the run starts.
+   */
+  docKey?: string;
   onDelta?: (chunk: string) => void;
   onStep?: (step: AgentStep) => void;
   /** Force an executor (the suggestions panel uses it). */

@@ -355,6 +355,13 @@ export const useAppStore = create<AppState>()(
           // and back. Then either focus the existing tab for `id` or push a
           // new one onto the strip.
           const currentId = tabIdOf(state.doc);
+          // Focusing a tab that is open with this very text shows that tab's
+          // document: it keeps its unsaved marker (edits made while it was in
+          // the background — an approved agent change, plan 5.11 — included),
+          // so autosave still writes them.
+          const existing = state.openTabs.find((t) => t.id === id);
+          const held = id === currentId ? state.doc : existing;
+          const dirty = !!held && held.content === input.content && held.dirty;
           const baseTabs = state.openTabs.some((t) => t.id === currentId)
             ? state.openTabs.map((t) =>
                 t.id === currentId
@@ -389,7 +396,7 @@ export const useAppStore = create<AppState>()(
               content: input.content,
               workspaceName: input.workspaceName ?? null,
               handle: input.handle,
-              dirty: false,
+              dirty,
               loadId: ++nextLoadId,
             },
           };

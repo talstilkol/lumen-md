@@ -5,8 +5,9 @@
  * goes to its live text, unsaved edits included, instead of the file
  * underneath it (writing the file would be clobbered by the next save of
  * the open buffer). On the active document it goes through the editor
- * when CodeMirror is mounted, so Undo takes it back, and the document
- * becomes unsaved like after any edit. With suggesting mode on, it is
+ * when CodeMirror shows it, so Undo takes it back; otherwise (Preview,
+ * WYSIWYG) it has no undo history, and the result says so (`undoable`).
+ * The document becomes unsaved like after any edit. With suggesting mode on, it is
  * recorded as a tracked change (CriticMarkup) attributed to the agent, so
  * it can still be accepted or rejected in place.
  *
@@ -16,6 +17,13 @@
  * and mapped through, so several changes from one run can be approved in
  * any order), otherwise the replaced text with its surroundings, found
  * again exactly once, or a refusal.
+ *
+ * Which document: a change with a workspace path goes to the open
+ * document with that path. One without (an untitled or imported
+ * document) goes only to the document the run worked on, by the key the
+ * runtime recorded (`docKey`) — the active one or another tab; when that
+ * document is no longer open, or the change carries no key, it is refused
+ * (`not-open`), never applied to whichever document happens to be active.
  *
  * Pure logic over a `DocumentHost` (App wires it to the store and the
  * CodeMirror view), so it is tested without a browser.
@@ -36,6 +44,8 @@ export interface LiveDocument {
   path: string | null;
   /** The text as the editor holds it (unsaved edits included). */
   text: string;
+  /** The document's key while it is open (`docKey.ts`), when known. */
+  key?: string;
 }
 
 export interface DocumentHost {
@@ -43,8 +53,11 @@ export interface DocumentHost {
   active(): LiveDocument | null;
   /** The other open tabs. */
   tabs(): Array<LiveDocument & { id: string }>;
-  /** Apply an edit to the active document's live text (through the editor when it is mounted). */
-  editActive(edit: TextEdit): void;
+  /**
+   * Apply an edit to the active document's live text (through the editor
+   * when it is mounted). True when an undo history took it (Undo reverts it).
+   */
+  editActive(edit: TextEdit): boolean;
   /** Replace a background tab's text (it becomes unsaved). */
   setTab(id: string, text: string): void;
   /** Suggesting mode: record approved changes as tracked changes. */
@@ -72,11 +85,18 @@ export function agentAuthor(change: Pick<StagedChange, "agentId">): string {
 }
 
 export function createDocumentApplier(host: DocumentHost): DocumentApplier {
-  function target(change: StagedChange): { doc: LiveDocument; tab?: string } | null {
+  /** The open document the change is for; null: none is (the change goes to its workspace file); "gone": refused. */
+  function target(change: StagedChange): { doc: LiveDocument; tab?: string } | null | "gone" {
     const active = host.active();
-    // No path: a document outside the workspace — the one in the editor
-    // (it may have been saved into the workspace since; the text decides).
-    if (change.path === null) return active ? { doc: active } : null;
+    if (change.path === null) {
+      // No path: only the document the run worked on (it may have been
+      // saved into the workspace since; its key stays the same).
+      const key = change.kind === "range" ? change.docKey : undefined;
+      if (!key) return "gone";
+      if (active && active.key === key) return { doc: active };
+      const tab = host.tabs().find((t) => t.key === key);
+      return tab ? { doc: tab, tab: tab.id } : "gone";
+    }
     if (active && active.path === change.path) return { doc: active };
     const tab = host.tabs().find((t) => t.path === change.path);
     return tab ? { doc: tab, tab: tab.id } : null;
@@ -97,14 +117,16 @@ export function createDocumentApplier(host: DocumentHost): DocumentApplier {
       }
     }
     const next = doc.text.slice(0, edit.from) + edit.insert + doc.text.slice(edit.to);
-    if (tab === undefined) host.editActive(edit);
+    let undoable: boolean | undefined;
+    if (tab === undefined) undoable = host.editActive(edit);
     else host.setTab(tab, next);
     recordEdit(doc.text, next, edit);
-    return { ok: true, to: tab === undefined ? "document" : "tab", ...(asSuggestion ? { asSuggestion: true } : {}) };
+    return { ok: true, to: tab === undefined ? "document" : "tab", ...(asSuggestion ? { asSuggestion: true } : {}), ...(undoable === false ? { undoable } : {}) };
   }
 
   return (change) => {
     const t = target(change);
+    if (t === "gone") return { ok: false, conflict: "not-open" };
     if (!t) return null;
     if (change.kind === "file") {
       // The file is open: its live text must be what the change was computed from.

@@ -63,6 +63,32 @@ describe("openTab", () => {
     expect(aTab?.content).toBe("dirty-A");
     expect(aTab?.dirty).toBe(true);
   });
+
+  it("keeps a tab's unsaved marker when the tab is focused with the text it holds", () => {
+    useAppStore.getState().openTab({ name: "a.md", content: "A", workspaceName: "a.md" });
+    useAppStore.getState().setContent("A edited");
+    useAppStore.getState().openTab({ name: "b.md", content: "B", workspaceName: "b.md" });
+    // The tab strip focuses a tab with the text the tab holds.
+    useAppStore.getState().openTab({ name: "a.md", content: "A edited", workspaceName: "a.md" });
+    expect(useAppStore.getState().doc).toMatchObject({ content: "A edited", dirty: true });
+  });
+
+  it("keeps the marker of a tab restored from the last session, or changed while in the background", () => {
+    // As after a reload: the tabs come back from storage with their unsaved marker.
+    useAppStore.setState({
+      doc: { name: "a.md", content: "A", workspaceName: "a.md", dirty: false },
+      openTabs: [
+        { id: "a.md", name: "a.md", content: "A", workspaceName: "a.md", dirty: false },
+        { id: "b.md", name: "b.md", content: "B unsaved", workspaceName: "b.md", dirty: true },
+      ],
+    });
+    useAppStore.getState().openTab({ name: "b.md", content: "B unsaved", workspaceName: "b.md" });
+    expect(useAppStore.getState().doc).toMatchObject({ content: "B unsaved", dirty: true });
+    // Opened with other text (the file on disk): that text is not the unsaved one.
+    useAppStore.getState().openTab({ name: "a.md", content: "A", workspaceName: "a.md" });
+    useAppStore.getState().openTab({ name: "b.md", content: "B on disk", workspaceName: "b.md" });
+    expect(useAppStore.getState().doc.dirty).toBe(false);
+  });
 });
 
 describe("closeTab", () => {

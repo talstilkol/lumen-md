@@ -10,7 +10,7 @@
  * pending list as they are withdrawn.
  */
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { Fragment, useCallback, useEffect, useMemo, useState } from "react";
 import { FileDiff, X } from "lucide-react";
 import { getLocale, t } from "../i18n";
 import { approveStagedChange, listStagedChanges, onStagedChanges, rejectStagedChange } from "../agents/staging";
@@ -59,7 +59,10 @@ function target(c: StagedChange): string {
 function outcomeText(c: StagedChange): string {
   if (c.status === "applied") {
     if (c.asSuggestion) return t("agentReview.status.suggestion");
-    return t(c.appliedTo === "tab" ? "agentReview.status.tab" : c.appliedTo === "file" ? "agentReview.status.file" : "agentReview.status.document");
+    if (c.appliedTo === "tab") return t("agentReview.status.tab");
+    if (c.appliedTo === "file") return t("agentReview.status.file");
+    // No undo history took the edit (Preview / WYSIWYG): don't promise Undo.
+    return t(c.noUndo ? "agentReview.status.documentNoUndo" : "agentReview.status.document");
   }
   if (c.status === "rejected") return c.withdrawn ? t("agentReview.status.withdrawn") : t("agentReview.status.rejected");
   if (c.status === "conflict") {
@@ -97,23 +100,29 @@ function LineDiff({ before, after }: { before: string | null; after: string }) {
             {t("agentReview.gap", { count: r.skipped })}
           </div>
         ) : (
-          <div
-            key={i}
-            data-op={r.op}
-            style={{
-              display: "flex",
-              gap: 8,
-              padding: "0 8px",
-              background: r.op === "add" ? "hsl(145 60% 45% / 0.14)" : r.op === "del" ? "hsl(0 75% 55% / 0.12)" : undefined,
-            }}
-          >
-            <span aria-hidden style={{ width: 12, flexShrink: 0, color: r.op === "add" ? "hsl(145 60% 40%)" : r.op === "del" ? "hsl(0 75% 55%)" : "hsl(var(--fg-muted))" }}>
-              {r.op === "add" ? "+" : r.op === "del" ? "−" : " "}
-            </span>
-            <span dir="auto" style={{ whiteSpace: "pre-wrap", wordBreak: "break-word", flex: 1, textDecoration: r.op === "del" ? "line-through" : undefined, textDecorationColor: "hsl(0 75% 55% / 0.6)" }}>
-              {r.text || " "}
-            </span>
-          </div>
+          <Fragment key={i}>
+            <div
+              data-op={r.op}
+              style={{
+                display: "flex",
+                gap: 8,
+                padding: "0 8px",
+                background: r.op === "add" ? "hsl(145 60% 45% / 0.14)" : r.op === "del" ? "hsl(0 75% 55% / 0.12)" : undefined,
+              }}
+            >
+              <span aria-hidden style={{ width: 12, flexShrink: 0, color: r.op === "add" ? "hsl(145 60% 40%)" : r.op === "del" ? "hsl(0 75% 55%)" : "hsl(var(--fg-muted))" }}>
+                {r.op === "add" ? "+" : r.op === "del" ? "−" : " "}
+              </span>
+              <span dir="auto" style={{ whiteSpace: "pre-wrap", wordBreak: "break-word", flex: 1, textDecoration: r.op === "del" ? "line-through" : undefined, textDecorationColor: "hsl(0 75% 55% / 0.6)" }}>
+                {r.text || " "}
+              </span>
+            </div>
+            {r.noEol && (
+              <div data-testid="agent-change-no-eol" style={{ ...muted, padding: "0 8px 0 28px", fontStyle: "italic" }}>
+                {t("agentReview.noEol")}
+              </div>
+            )}
+          </Fragment>
         ),
       )}
     </div>

@@ -2,7 +2,7 @@
   "version": 1,
   "generated_at": "2026-10-18T05:18:24.525Z",
   "source": "src/i18n/index.ts (en bundle)",
-  "count": 1458,
+  "count": 1460,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -1881,7 +1881,7 @@
     },
     {
       "key": "agentReview.intro",
-      "en": "Nothing is written until you approve it. Changes to an open document go into the editor, where Undo takes them back.",
+      "en": "Nothing is written until you approve it. Changes to an open document go into the editor, not straight to the file.",
       "vars": []
     },
     {
@@ -1960,6 +1960,11 @@
       "vars": []
     },
     {
+      "key": "agentReview.noEol",
+      "en": "No newline at end of file",
+      "vars": []
+    },
+    {
       "key": "agentReview.gap",
       "en": "{count} unchanged lines",
       "vars": [
@@ -1974,6 +1979,11 @@
     {
       "key": "agentReview.status.document",
       "en": "Applied in the editor, not saved yet (Undo takes it back).",
+      "vars": []
+    },
+    {
+      "key": "agentReview.status.documentNoUndo",
+      "en": "Applied to the document, not saved yet. Undo can't take it back in this view.",
       "vars": []
     },
     {

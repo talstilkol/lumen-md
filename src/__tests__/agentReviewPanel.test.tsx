@@ -37,27 +37,55 @@ import { clearStagedChanges, discardRunChanges, getStagedChange, rangeContext, s
 import { createDocumentApplier } from "../agents/documentApplier";
 import { approvalOrder, approveAll, inlineDiff, lineDiffRows, rejectAll, reviewModel } from "../agents/review";
 import { useAgentReview } from "../hooks/useAgentReview";
-import { editorDocumentHost } from "../agents/reviewBridge";
+import { editorDocumentHost, trackDocumentKeys } from "../agents/reviewBridge";
+import { currentDocumentKey, setDocumentKeyProvider } from "../agents/docKey";
+import { createDocumentKeys } from "../agents/documentKeys";
 import { useAppStore } from "../store/useStore";
 import { showAiToast } from "../ui/AiToast";
 import type { EditorHandle } from "../editor/Editor";
 import type { StagedChange } from "../agents/types";
 
-/** The store's active document (no editor mounted unless a view is given). */
-function openDocument(content: string, workspaceName: string | null = null, view: EditorView | null = null) {
+let keys: ReturnType<typeof trackDocumentKeys> | null = null;
+
+/** The store's active document (no editor mounted unless a view is given), wired the way the review bridge wires it. */
+function openDocument(content: string, workspaceName: string | null = null, view: EditorView | null = null, extraTabs: Array<{ id: string; content: string; workspaceName?: string | null; dirty?: boolean }> = []) {
+  keys?.stop();
   useAppStore.setState({
     doc: { name: workspaceName ?? "Untitled.md", content, workspaceName, dirty: true },
-    openTabs: [{ id: workspaceName ?? "Untitled.md", name: workspaceName ?? "Untitled.md", content, workspaceName, dirty: true }],
+    openTabs: [
+      { id: workspaceName ?? "Untitled.md", name: workspaceName ?? "Untitled.md", content, workspaceName, dirty: true },
+      ...extraTabs.map((t) => ({ id: t.id, name: t.id, content: t.content, workspaceName: t.workspaceName ?? null, dirty: t.dirty ?? false })),
+    ],
     suggestingMode: false,
   });
+  keys = trackDocumentKeys();
+  setDocumentKeyProvider(keys.active);
   const ref = { current: view ? ({ getView: () => view, insertText: () => {}, focus: () => {} } as EditorHandle) : null } as RefObject<EditorHandle | null>;
-  setDocumentApplier(createDocumentApplier(editorDocumentHost(ref)));
+  setDocumentApplier(createDocumentApplier(editorDocumentHost(ref, keys)));
   return ref;
 }
 
+/** Select a tab the way the tab strip does (App.tsx `onSelect`). */
+function selectTab(id: string) {
+  const target = useAppStore.getState().openTabs.find((t) => t.id === id)!;
+  useAppStore.getState().openTab({ name: target.name, content: target.content, workspaceName: target.workspaceName ?? null });
+}
+
+/** What replace_range + the runtime stage on `doc`: surroundings, fingerprint and the active document's key. */
 function proposeRange(doc: string, from: number, to: number, after: string, meta: { runId?: string; agentId?: string; path?: string | null } = {}) {
   return stageChange(
-    { kind: "range", path: meta.path ?? null, from, to, before: doc.slice(from, to), after, summary: `Replace “${doc.slice(from, to)}”`, context: rangeContext(doc, from, to), basis: textFingerprint(doc) },
+    {
+      kind: "range",
+      path: meta.path ?? null,
+      from,
+      to,
+      before: doc.slice(from, to),
+      after,
+      summary: `Replace “${doc.slice(from, to)}”`,
+      context: rangeContext(doc, from, to),
+      basis: textFingerprint(doc),
+      docKey: currentDocumentKey(),
+    },
     { tool: "replace_range", runId: meta.runId ?? "run_a", agentId: meta.agentId ?? "proofreader" },
   );
 }
@@ -71,7 +99,12 @@ beforeEach(() => {
   writes.length = 0;
   vi.mocked(showAiToast).mockClear();
 });
-afterEach(() => setDocumentApplier(null));
+afterEach(() => {
+  setDocumentApplier(null);
+  setDocumentKeyProvider(null);
+  keys?.stop();
+  keys = null;
+});
 
 describe("AgentReviewPanel", () => {
   it("lists proposals by run with their diffs; nothing is written until Approve, which applies to the unsaved document", async () => {
@@ -98,9 +131,19 @@ describe("AgentReviewPanel", () => {
     await waitFor(() => expect(card(range).getAttribute("data-status")).toBe("applied"));
     expect(content()).toBe("Hello world.\n");
     expect(useAppStore.getState().doc.dirty).toBe(true);
-    expect(within(card(range)).getByTestId("agent-change-outcome").textContent).toBe("Applied in the editor, not saved yet (Undo takes it back).");
+    // No source editor is mounted (Preview / WYSIWYG): the panel does not promise Undo.
+    expect(within(card(range)).getByTestId("agent-change-outcome").textContent).toBe("Applied to the document, not saved yet. Undo can't take it back in this view.");
     expect(files.get("notes/b.md")).toBe("one\ntwo\n"); // the other proposal is still waiting
     expect(card(file).getAttribute("data-status")).toBe("pending");
+  });
+
+  it("shows a change that only removes the final newline, with git's marker", () => {
+    openDocument("open\n", "open.md");
+    const c = stageChange({ kind: "file", path: "notes/eol.md", before: "last line\n", after: "last line", summary: "s" }, { tool: "write_file" });
+    render(<AgentReviewPanel open onClose={() => {}} />);
+    const lines = within(card(c)).getByTestId("agent-change-lines");
+    expect([...lines.querySelectorAll("[data-op]")].map((el) => el.getAttribute("data-op"))).toEqual(["del", "add"]);
+    expect(within(lines).getByTestId("agent-change-no-eol").textContent).toBe("No newline at end of file");
   });
 
   it("Reject writes nothing and says so", async () => {
@@ -178,7 +221,9 @@ describe("editorDocumentHost (the store and the editor)", () => {
     openDocument(doc, null, view);
     const { approveStagedChange } = await import("../agents/staging");
     const c = proposeRange(doc, 0, 3, "the");
-    expect(await approveStagedChange(c.id)).toMatchObject({ status: "applied", appliedTo: "document" });
+    const done = await approveStagedChange(c.id);
+    expect(done).toMatchObject({ status: "applied", appliedTo: "document" });
+    expect(done.noUndo).toBeUndefined();
     expect(view.state.doc.toString()).toBe("the end\n");
     expect(content()).toBe("the end\n");
     undo(view);
@@ -196,17 +241,82 @@ describe("editorDocumentHost (the store and the editor)", () => {
     expect(content()).toBe("active\n");
     expect(writes).toEqual([]);
   });
+
+  it("keeps a background tab's approved change unsaved when the tab is selected, so autosave writes it", async () => {
+    openDocument("active\n", "a.md", null, [{ id: "b.md", workspaceName: "b.md", content: "x y\n" }]);
+    const { approveStagedChange } = await import("../agents/staging");
+    const c = proposeRange("x y\n", 2, 3, "z", { path: "b.md" });
+    expect(await approveStagedChange(c.id)).toMatchObject({ status: "applied", appliedTo: "tab" });
+    selectTab("b.md");
+    expect(useAppStore.getState().doc).toMatchObject({ workspaceName: "b.md", content: "x z\n", dirty: true });
+    selectTab("a.md");
+    expect(useAppStore.getState().openTabs.find((t) => t.id === "b.md")).toMatchObject({ content: "x z\n", dirty: true });
+  });
+
+  it("applies a change for an untitled document to that document after switching to another one made from the same template", async () => {
+    const template = "# Weekly notes\nTODO: fill in\n";
+    openDocument(template, null, null, [{ id: "Untitled 2.md", content: template }]);
+    const { approveStagedChange } = await import("../agents/staging");
+    const c = proposeRange(template, 15, 28, "Shipped the review panel"); // the run worked on "Untitled.md"
+    selectTab("Untitled 2.md");
+    expect(await approveStagedChange(c.id)).toMatchObject({ status: "applied", appliedTo: "tab" });
+    expect(content()).toBe(template); // the active document is untouched
+    selectTab("Untitled.md");
+    expect(useAppStore.getState().doc).toMatchObject({ content: "# Weekly notes\nShipped the review panel\n", dirty: true });
+    // Switching away and back does not lose the document: a second change still lands.
+    const again = proposeRange(content(), 0, 1, "##");
+    selectTab("Untitled 2.md");
+    selectTab("Untitled.md");
+    expect(await approveStagedChange(again.id)).toMatchObject({ status: "applied", appliedTo: "document" });
+    expect(content()).toBe("## Weekly notes\nShipped the review panel\n");
+  });
+
+  it("refuses a change for an untitled document that was closed, even when one with the same name and text is open now", async () => {
+    const template = "# Draft\n";
+    openDocument(template, null, null, [{ id: "other.md", workspaceName: "other.md", content: "other\n" }]);
+    const { approveStagedChange } = await import("../agents/staging");
+    const c = proposeRange(template, 2, 7, "Plan");
+    selectTab("other.md");
+    useAppStore.getState().closeTab("Untitled.md");
+    useAppStore.getState().openTab({ name: "Untitled.md", content: template, workspaceName: null });
+    expect(await approveStagedChange(c.id)).toMatchObject({ status: "conflict", conflict: "not-open" });
+    expect(content()).toBe(template);
+  });
+});
+
+describe("document keys", () => {
+  const state = (doc: { name: string; content: string; loadId?: number; workspaceName?: string | null }, tabs: Array<{ id: string; content: string }>) => ({ doc, openTabs: tabs });
+
+  it("follow a document across tab switches and saving it into the workspace; a new document gets a new key", () => {
+    const k = createDocumentKeys();
+    k.observe(state({ name: "Untitled.md", content: "a", loadId: 1 }, [{ id: "Untitled.md", content: "a" }, { id: "b.md", content: "b" }]));
+    const a = k.active();
+    k.observe(state({ name: "Untitled.md", content: "a!", loadId: 1 }, [{ id: "Untitled.md", content: "a!" }, { id: "b.md", content: "b" }])); // typing
+    expect(k.active()).toBe(a);
+    k.observe(state({ name: "b.md", workspaceName: "b.md", content: "b", loadId: 2 }, [{ id: "Untitled.md", content: "a!" }, { id: "b.md", content: "b" }])); // switch to b
+    const b = k.active();
+    expect(b).not.toBe(a);
+    expect(k.tab("Untitled.md")).toBe(a);
+    k.observe(state({ name: "Untitled.md", content: "a!", loadId: 3 }, [{ id: "Untitled.md", content: "a!" }, { id: "b.md", content: "b" }])); // back: a new load of the same tab
+    expect(k.active()).toBe(a);
+    k.observe(state({ name: "notes/a.md", workspaceName: "notes/a.md", content: "a!", loadId: 3 }, [{ id: "notes/a.md", content: "a!" }, { id: "b.md", content: "b" }])); // saved into the workspace
+    expect(k.active()).toBe(a);
+    k.observe(state({ name: "notes/a.md", workspaceName: "notes/a.md", content: "", loadId: 4 }, [{ id: "notes/a.md", content: "" }, { id: "b.md", content: "b" }])); // a different document loaded in place
+    expect(k.active()).not.toBe(a);
+    expect(k.tab("b.md")).toBe(b);
+  });
 });
 
 describe("useAgentReview", () => {
   it("registers the applier, counts what waits, and announces a burst once with a Review action", async () => {
     openDocument("abc\n");
     setDocumentApplier(null);
+    setDocumentKeyProvider(null);
     const open = vi.fn();
     const ref = { current: null } as RefObject<EditorHandle | null>;
     const { result } = renderHook(() => useAgentReview(ref, open));
-    // The hook loads staging on its own and reads the queue when it does,
-    // so proposals staged before or after that are counted alike.
+    // The hook loads the bridge on its own; it then gives runs the active document's key.
+    await waitFor(() => expect(currentDocumentKey()).toBeDefined());
     act(() => {
       proposeRange("abc\n", 0, 1, "A", { runId: "r1", agentId: "writer" });
       proposeRange("abc\n", 2, 3, "C", { runId: "r1", agentId: "writer" });
@@ -259,6 +369,19 @@ describe("review logic", () => {
       { op: "gap", skipped: 2 },
     ]);
     expect(lineDiffRows(null, "new\n")).toEqual([{ op: "add", text: "new", a: undefined, b: 1 }]);
+  });
+
+  it("lineDiffRows shows a change of only the final newline, marked like git's \"No newline at end of file\"", () => {
+    expect(lineDiffRows("abc\n", "abc")).toEqual([
+      { op: "del", text: "abc", a: 1, b: undefined },
+      { op: "add", text: "abc", a: undefined, b: 1, noEol: true },
+    ]);
+    expect(lineDiffRows("x\nabc", "x\nabc\n")).toEqual([
+      { op: "eq", text: "x", a: 1, b: 1 },
+      { op: "del", text: "abc", a: 2, b: undefined, noEol: true },
+      { op: "add", text: "abc", a: undefined, b: 2 },
+    ]);
+    expect(lineDiffRows("same\n", "same\n")).toEqual([{ op: "gap", skipped: 1 }]); // nothing changed
   });
 
   it("inlineDiff reads like a tracked change: removed words, then added ones", () => {

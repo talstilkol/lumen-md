@@ -54,7 +54,7 @@ const listeners = new Set<(list: readonly StagedChange[]) => void>();
 export type DocumentApplyResult =
   | boolean
   | null
-  | { ok: true; to?: "document" | "tab"; asSuggestion?: boolean }
+  | { ok: true; to?: "document" | "tab"; asSuggestion?: boolean; undoable?: boolean }
   | { ok: false; conflict: StagedConflict; error?: string };
 export type DocumentApplier = (change: StagedChange) => DocumentApplyResult | Promise<DocumentApplyResult>;
 let documentApplier: DocumentApplier | null = null;
@@ -256,7 +256,12 @@ export async function approveStagedChange(id: string): Promise<StagedChange> {
     const res = documentApplier ? await documentApplier(change) : null;
     if (res === true) return update(id, { status: "applied", appliedTo: "document" })!;
     if (res === false) return conflict("doc-changed");
-    if (res && res.ok) return update(id, { status: "applied", appliedTo: res.to ?? "document", ...(res.asSuggestion ? { asSuggestion: true as const } : {}) })!;
+    if (res && res.ok) {
+      const patch: Partial<StagedChange> = { status: "applied", appliedTo: res.to ?? "document" };
+      if (res.asSuggestion) patch.asSuggestion = true;
+      if (res.undoable === false) patch.noUndo = true;
+      return update(id, patch)!;
+    }
     if (res) return conflict(res.conflict, res.error ?? CONFLICT_TEXT[res.conflict]);
     if (change.kind === "file") {
       const ws = await workspace();

@@ -14,7 +14,7 @@
  *    document, and the approval applies it to the live document.
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { EditorState } from "@codemirror/state";
+import { EditorState, Transaction } from "@codemirror/state";
 import { EditorView } from "@codemirror/view";
 import { history, undo } from "@codemirror/commands";
 import type { AgentDefinition, ChangeProposal, Executor, ExecutorRequest, ExecutorResponse } from "../agents/types";
@@ -52,19 +52,23 @@ import { runAgent } from "../agents/runtime";
 import { registerExecutor, resetExecutors } from "../agents/executors";
 import { clearTrace } from "../agents/trace";
 import { pickTools } from "../agents/tools";
+import { setDocumentKeyProvider } from "../agents/docKey";
 
 const views: EditorView[] = [];
 
+/** The document key of the active document in `editor()` (`docKey.ts`). */
+const ACTIVE = "doc-active";
+
 /** The open document in a real CodeMirror view (with history), plus other tabs. */
-function editor(initial: string, opts: { path?: string | null; suggesting?: boolean; tabs?: Array<{ id: string; path: string | null; text: string }> } = {}) {
+function editor(initial: string, opts: { path?: string | null; suggesting?: boolean; tabs?: Array<{ id: string; path: string | null; text: string; key?: string }> } = {}) {
   const view = new EditorView({ state: EditorState.create({ doc: initial, extensions: [history()] }) });
   views.push(view);
   const tabs = opts.tabs ?? [];
-  const state = { suggesting: !!opts.suggesting };
+  const state = { suggesting: !!opts.suggesting, key: ACTIVE, undoable: true };
   const host: DocumentHost = {
-    active: () => ({ path: opts.path ?? null, text: view.state.doc.toString() }),
+    active: () => ({ path: opts.path ?? null, text: view.state.doc.toString(), key: state.key }),
     tabs: () => tabs,
-    editActive: (e) => view.dispatch({ changes: e, userEvent: "agent.apply" }),
+    editActive: (e) => (view.dispatch({ changes: e, userEvent: state.undoable ? "agent.apply" : "agent.apply.noHistory", annotations: state.undoable ? [] : [Transaction.addToHistory.of(false)] }), state.undoable),
     setTab: (id, text) => {
       tabs.find((t) => t.id === id)!.text = text;
     },
@@ -77,9 +81,10 @@ function editor(initial: string, opts: { path?: string | null; suggesting?: bool
   return { view, host, tabs, text, type, state };
 }
 
-/** Stage a range change the way replace_range + the runtime do it on `doc` (surroundings and fingerprint). */
-function proposeRange(doc: string, from: number, to: number, after: string, meta: { path?: string | null; runId?: string; agentId?: string } = {}) {
-  const proposal: ChangeProposal = { kind: "range", path: meta.path ?? null, from, to, before: doc.slice(from, to), after, summary: "s", context: rangeContext(doc, from, to), basis: textFingerprint(doc) };
+/** Stage a range change the way replace_range + the runtime do it on `doc` (surroundings, fingerprint, document key). */
+function proposeRange(doc: string, from: number, to: number, after: string, meta: { path?: string | null; runId?: string; agentId?: string; docKey?: string | null } = {}) {
+  const docKey = meta.docKey === null ? undefined : (meta.docKey ?? ACTIVE);
+  const proposal: ChangeProposal = { kind: "range", path: meta.path ?? null, from, to, before: doc.slice(from, to), after, summary: "s", context: rangeContext(doc, from, to), basis: textFingerprint(doc), docKey };
   return stageChange(proposal, { tool: "replace_range", runId: meta.runId ?? "run1", agentId: meta.agentId ?? "proofreader" });
 }
 
@@ -93,6 +98,7 @@ beforeEach(async () => {
 afterEach(() => {
   for (const v of views.splice(0)) v.destroy();
   resetExecutors();
+  setDocumentKeyProvider(null);
 });
 
 describe("approving a change to the open document", () => {
@@ -193,6 +199,39 @@ describe("approving a change to the open document", () => {
     expect(writes).toEqual([]);
   });
 
+  it("applies a change for an untitled document only to that document, even when another one holds the same text", async () => {
+    // Two untitled documents made from the same template; the run worked on the one now in a background tab.
+    const template = "# Weekly notes\nTODO: fill in\n";
+    const ed = editor(template, { tabs: [{ id: "Untitled 2.md", path: null, text: template, key: "doc-source" }] });
+    const c = proposeRange(template, 15, 28, "Shipped the review panel", { docKey: "doc-source" });
+    expect(await approveStagedChange(c.id)).toMatchObject({ status: "applied", appliedTo: "tab" });
+    expect(ed.tabs[0].text).toBe("# Weekly notes\nShipped the review panel\n");
+    expect(ed.text()).toBe(template); // the active document is not the one the run worked on
+  });
+
+  it("refuses a change for an untitled document that is no longer open, or that does not say which document it was for", async () => {
+    const doc = "same text\n";
+    const ed = editor(doc);
+    const closed = proposeRange(doc, 0, 4, "SAME", { docKey: "doc-closed" });
+    expect(await approveStagedChange(closed.id)).toMatchObject({ status: "conflict", conflict: "not-open" });
+    const unbound = proposeRange(doc, 0, 4, "SAME", { docKey: null });
+    expect(await approveStagedChange(unbound.id)).toMatchObject({ status: "conflict", conflict: "not-open" });
+    expect(ed.text()).toBe(doc);
+  });
+
+  it("says when the edit went in without an undo history (Preview / WYSIWYG)", async () => {
+    const doc = "Hello wrld.\n";
+    const ed = editor(doc);
+    ed.state.undoable = false;
+    const c = proposeRange(doc, 6, 10, "world");
+    const done = await approveStagedChange(c.id);
+    expect(done).toMatchObject({ status: "applied", appliedTo: "document", noUndo: true });
+    expect(ed.text()).toBe("Hello world.\n");
+    ed.state.undoable = true;
+    const next = proposeRange(ed.text(), 0, 5, "Hi");
+    expect((await approveStagedChange(next.id)).noUndo).toBeUndefined();
+  });
+
   it("writes a change for a document that is not open to its workspace file", async () => {
     editor("active\n", { path: "a.md" });
     files.set("other.md", "abc\n");
@@ -236,10 +275,15 @@ describe("a real run", () => {
       ),
     );
     const def: AgentDefinition = { id: "proofreader", description: "t", system: "s", user: () => "go", tools: pickTools("replace_range"), requires: ["write"], language: "any", maxRetries: 0 };
-    const run = await runAgent(def, { text: doc }, { grants: ["write"], document: doc });
+    // The editor's key for the active document when the run starts.
+    setDocumentKeyProvider(() => ed.state.key);
+    const pending = runAgent(def, { text: doc }, { grants: ["write"], document: doc });
+    ed.state.key = "doc-switched-to-mid-run"; // the run keeps the document it started on
+    const run = await pending;
+    ed.state.key = ACTIVE;
     expect(run.status).toBe("ok");
     const [change] = listStagedChanges({ runId: run.id });
-    expect(change).toMatchObject({ kind: "range", basis: textFingerprint(doc), agentId: "proofreader", status: "pending" });
+    expect(change).toMatchObject({ kind: "range", basis: textFingerprint(doc), docKey: ACTIVE, agentId: "proofreader", status: "pending" });
     expect(ed.text()).toBe(doc); // the run proposed; nothing changed
     expect(await approveStagedChange(change.id)).toMatchObject({ status: "applied", appliedTo: "document" });
     expect(ed.text()).toBe("# Title\nSome text here.\n");

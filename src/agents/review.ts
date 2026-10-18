@@ -9,7 +9,7 @@
  * underlined in green, deletions struck through in red).
  */
 
-import { diffLines, splitLines } from "../lib/lineDiff";
+import { diffLines, linesWithEol, NO_EOL } from "../lib/lineDiff";
 import { approveStagedChange, rejectStagedChange } from "./staging";
 import type { StagedChange } from "./types";
 
@@ -46,25 +46,30 @@ export function reviewModel(list: readonly StagedChange[], settledLimit = 20): R
 }
 
 export type DiffRow =
-  | { op: "eq" | "add" | "del"; text: string; a?: number; b?: number }
+  /** `noEol`: the line is the file's last and has no newline after it (git's "\ No newline at end of file"). */
+  | { op: "eq" | "add" | "del"; text: string; a?: number; b?: number; noEol?: true }
   /** Unchanged lines left out between hunks. */
   | { op: "gap"; skipped: number };
 
 /**
  * A file change as diff rows: changed lines with `context` unchanged lines
  * around them; longer unchanged runs collapse into a gap. Null when the
- * diff is too large to show line by line (the panel says so).
+ * diff is too large to show line by line (the panel says so). The final
+ * newline counts, as in `unifiedDiff`: adding or removing only it changes
+ * the last line, which is then marked `noEol` on the side that lacks it.
  */
 export function lineDiffRows(before: string | null, after: string, context = 2, maxEdits = 2000): DiffRow[] | null {
-  const a = splitLines(before ?? "");
-  const b = splitLines(after);
+  const a = linesWithEol(before);
+  const b = linesWithEol(after);
   const ops = diffLines(a, b, maxEdits);
   if (!ops) return null;
   const rows: DiffRow[] = [];
   let ai = 1;
   let bi = 1;
   const numbered = ops.map((o) => {
-    const row = { op: o.op, text: o.line, a: o.op !== "add" ? ai : undefined, b: o.op !== "del" ? bi : undefined };
+    const noEol = o.line.endsWith(NO_EOL);
+    const row: Exclude<DiffRow, { op: "gap" }> = { op: o.op, text: noEol ? o.line.slice(0, -NO_EOL.length) : o.line, a: o.op !== "add" ? ai : undefined, b: o.op !== "del" ? bi : undefined };
+    if (noEol) row.noEol = true;
     if (o.op !== "add") ai++;
     if (o.op !== "del") bi++;
     return row;

@@ -85,8 +85,14 @@ with the agent and the run that proposed it. Approve or reject each one,
 or all of them at once; nothing is written before you approve.
 
 - A change to a document that is open (saved or not) goes into its text
-  in the editor, not into the file underneath: Undo takes it back, and
-  saving writes it. Changes to other files are written to the workspace.
+  in the editor, not into the file underneath, and saving writes it. In
+  the source editor Undo takes it back; in Preview or WYSIWYG it can't,
+  and the panel says so. Changes to other files are written to the
+  workspace.
+- A change to a document that isn't in the workspace (an untitled or
+  imported one) only ever goes to the document the agent worked on, even
+  after you switch tabs; if that document was closed, the change is
+  refused.
 - With **suggesting mode** on, an approved change is added as a tracked
   change attributed to the agent (`{~~old~>new~~}{>>@AI proofreader<<}`),
   so you can still accept or reject it in place.
