@@ -78,6 +78,32 @@ describe("undoLastTrash: a stack of deletes", () => {
     expect(await undoLastTrash()).toEqual(["a.md"]);
   });
 
+  it("a toast Undo that fails leaves what is still in the trash on the Ctrl+Z stack (review: #218)", async () => {
+    const root = installFakeOpfs();
+    await writeWorkspaceFile("a.md", "A");
+    const items = await trashPaths(["a.md"]);
+    const handle = await root.getFileHandle("__probe", { create: true });
+    await root.removeEntry("__probe");
+    const proto = Object.getPrototypeOf(handle) as { createWritable: (this: { name: string }) => Promise<unknown> };
+    const original = proto.createWritable;
+    let failed = false;
+    proto.createWritable = async function (this: { name: string }) {
+      if (this.name === "a.md" && !failed) {
+        failed = true;
+        throw new DOMException("transient", "QuotaExceededError");
+      }
+      return original.call(this);
+    };
+    try {
+      await expect(undoTrash(items)).rejects.toThrow("transient");
+    } finally {
+      proto.createWritable = original;
+    }
+    expect(trashUndoDepth()).toBe(1);
+    expect(await undoLastTrash()).toEqual(["a.md"]);
+    expect(await readWorkspaceFile("a.md")).toBe("A");
+  });
+
   it("skips what the Trash panel already restored, and Undo on it again is a no-op", async () => {
     await writeWorkspaceFile("a.md", "A");
     await writeWorkspaceFile("b.md", "B");
@@ -278,6 +304,37 @@ describe("flushOpenDocsUnder", () => {
     } finally {
       restore();
     }
+  });
+
+  it("a post-trash write that fails detaches the open note, so autosave does not recreate the deleted file (review: #218)", async () => {
+    const root = installFakeOpfs();
+    const { trashWithOpenEdits } = await import("../store/openDocs");
+    await writeWorkspaceFile("proj/b.md", "B saved");
+    open("proj/b.md", "B saved");
+    useAppStore.getState().setContent("B edit");
+    const handle = await root.getFileHandle("__probe", { create: true });
+    await root.removeEntry("__probe");
+    const proto = Object.getPrototypeOf(handle) as { createWritable: (this: { name: string }) => Promise<unknown> };
+    const original = proto.createWritable;
+    let writes = 0;
+    proto.createWritable = async function (this: { name: string }) {
+      // 1: the pre-trash flush (the user keeps typing); 2: the move's copy; 3: the post-trash write.
+      if (this.name === "b.md" && ++writes === 1) useAppStore.getState().setContent("B typed during the delete");
+      else if (this.name === "b.md" && writes === 3) throw new DOMException("quota", "QuotaExceededError");
+      return original.call(this);
+    };
+    try {
+      await expect(trashWithOpenEdits(["proj"], { proj: "directory" })).rejects.toThrow("quota");
+    } finally {
+      proto.createWritable = original;
+    }
+    const doc = useAppStore.getState().doc;
+    expect(doc).toMatchObject({ content: "B typed during the delete", dirty: true, workspaceName: null });
+    expect(useAppStore.getState().openTabs.some((t) => t.workspaceName?.startsWith("proj/"))).toBe(false);
+    expect(await workspaceHasEntry("proj")).toBe(false);
+    // What moved is still undoable.
+    expect(await undoLastTrash()).toEqual(["proj"]);
+    expect(await readWorkspaceFile("proj/b.md")).toBe("B edit"); // the pre-trash flush
   });
 
   it("deleting a single file saves that file's inactive tab", async () => {

@@ -7,7 +7,7 @@ import { flushPendingEdits, moveTabRuntimes, tabIdOf, useAppStore } from "./useS
 import { writeWorkspaceFile } from "../storage/workspace";
 import { notifyWorkspaceChanged } from "../storage/workspaceEvents";
 import { movedPath, trashPaths } from "../storage/fileOps";
-import { trashedPathOf, type TrashItem } from "../storage/trash";
+import { PartialTrashError, trashedPathOf, type TrashItem } from "../storage/trash";
 
 /**
  * Write the active workspace note now if it has edits the debounced
@@ -103,44 +103,74 @@ export async function trashWithOpenEdits(
 ): Promise<{ items: TrashItem[]; settled: boolean }> {
   await flushOpenDocsUnder(paths);
   let settled = true;
-  // Inside the trash queue (afterMove): a Ctrl+Z or Trash-panel restore of
-  // these entries waits until the trashed copies hold the newest text.
-  const items = await trashPaths(paths, kinds, async (moved) => {
-    const inTrash = (ws: string) => {
-      for (const item of moved) {
-        const at = trashedPathOf(item, ws);
-        if (at) return at;
+  let movedItems: TrashItem[] = [];
+  let items: TrashItem[];
+  try {
+    // Inside the trash queue (afterMove): a Ctrl+Z or Trash-panel restore of
+    // these entries waits until the trashed copies hold the newest text.
+    items = await trashPaths(paths, kinds, async (moved) => {
+      movedItems = moved;
+      const inTrash = (ws: string) => {
+        for (const item of moved) {
+          const at = trashedPathOf(item, ws);
+          if (at) return at;
+        }
+        return null;
+      };
+      settled = false;
+      for (let pass = 0; pass < SETTLE_PASSES; pass++) {
+        if ((await writeDirtyOpenDocs(inTrash)) === 0) {
+          settled = true;
+          return;
+        }
       }
-      return null;
-    };
-    settled = false;
-    for (let pass = 0; pass < SETTLE_PASSES; pass++) {
-      if ((await writeDirtyOpenDocs(inTrash)) === 0) {
-        settled = true;
-        return;
-      }
-    }
-  });
+    });
+  } catch (e) {
+    // Something moved before the failure (a post-trash write rejected, or a
+    // bulk delete stopped part way): open notes still bound to a moved path
+    // are detached, or their autosave recreates the deleted file (review: #218).
+    const moved = movedItems.length ? movedItems : e instanceof PartialTrashError ? e.items : [];
+    if (moved.length) detachUnder(moved.map((i) => i.originalPath), { dirtyTabs: true });
+    throw e;
+  }
   // Its text kept changing: keep it in memory as an unsaved note, detached from
   // the trashed path, so autosave does not recreate the deleted file.
-  if (!settled) detachActiveUnder(paths);
+  if (!settled) detachUnder(paths);
   return { items, settled };
 }
 
-/** The active note under `paths` becomes an ad-hoc note (same text, no workspace path). */
-function detachActiveUnder(paths: string[]): void {
+/**
+ * The active note under `paths` becomes an ad-hoc note (same text, no
+ * workspace path); with `dirtyTabs`, so does every inactive tab there with
+ * unsaved edits.
+ */
+function detachUnder(paths: string[], opts: { dirtyTabs?: boolean } = {}): void {
+  const under = (ws: string | null | undefined): ws is string => !!ws && paths.some((p) => ws === p || ws.startsWith(p + "/"));
   useAppStore.setState((state) => {
-    const ws = state.doc.workspaceName;
-    if (!ws || !paths.some((p) => ws === p || ws.startsWith(p + "/"))) return state;
-    const file = ws.split("/").pop() || ws;
-    const stem = file.replace(/(\.[^./]+)$/, "");
-    const ext = file.slice(stem.length) || ".md";
-    let name = file;
-    for (let i = 2; state.openTabs.some((t) => t.id === name); i++) name = `${stem} ${i}${ext}`;
-    moveTabRuntimes([[ws, name]]);
+    const activeWs = under(state.doc.workspaceName) ? state.doc.workspaceName : null;
+    const detach = new Set<string>();
+    if (activeWs) detach.add(activeWs);
+    if (opts.dirtyTabs) for (const t of state.openTabs) if (t.dirty && under(t.workspaceName)) detach.add(t.workspaceName);
+    if (!detach.size) return state;
+    const taken = new Set<string>();
+    const names = new Map<string, string>(); // workspace path → ad-hoc name
+    for (const ws of detach) {
+      const file = ws.split("/").pop() || ws;
+      const stem = file.replace(/(\.[^./]+)$/, "");
+      const ext = file.slice(stem.length) || ".md";
+      let name = file;
+      for (let i = 2; taken.has(name) || state.openTabs.some((t) => t.id === name); i++) name = `${stem} ${i}${ext}`;
+      taken.add(name);
+      names.set(ws, name);
+    }
+    moveTabRuntimes([...names]);
+    const activeName = activeWs ? names.get(activeWs) : undefined;
     return {
-      doc: { ...state.doc, name, workspaceName: null, handle: undefined },
-      openTabs: state.openTabs.map((t) => (t.id === ws ? { ...t, id: name, name, workspaceName: null } : t)),
+      doc: activeName ? { ...state.doc, name: activeName, workspaceName: null, handle: undefined } : state.doc,
+      openTabs: state.openTabs.map((t) => {
+        const name = t.workspaceName && t.id === t.workspaceName ? names.get(t.id) : undefined;
+        return name ? { ...t, id: name, name, workspaceName: null } : t;
+      }),
     };
   });
 }

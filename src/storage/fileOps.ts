@@ -159,7 +159,25 @@ export async function trashPaths(
 /** Undo a delete: restore every given entry still in the trash. Returns where they went. */
 export async function undoTrash(items: TrashItem[]): Promise<string[]> {
   forgetUndo(items);
-  return oneAtATime(() => restoreItems(items));
+  return oneAtATime(async () => {
+    try {
+      return await restoreItems(items);
+    } catch (e) {
+      // The toast is gone after its click: what is still in the trash goes
+      // back on the stack, so Ctrl+Z can retry it (review: #218).
+      await requeueLeftInTrash(items);
+      throw e;
+    }
+  });
+}
+
+/** After a failed restore: put the given entries still in the trash back on top of the Ctrl+Z stack. */
+async function requeueLeftInTrash(items: TrashItem[]): Promise<void> {
+  const left = new Set((await listTrash().catch(() => [])).map((i) => i.id));
+  const keep = items.filter((i) => left.has(i.id));
+  if (!keep.length) return;
+  undoStack.push(keep);
+  if (undoStack.length > TRASH_UNDO_LIMIT) undoStack.splice(0, undoStack.length - TRASH_UNDO_LIMIT);
 }
 
 /**
@@ -178,9 +196,7 @@ export function undoLastTrash(): Promise<string[] | null> {
         // Nothing of it was left in the trash: undo the delete before it.
         if (restored.length) return restored;
       } catch (e) {
-        const left = new Set((await listTrash().catch(() => [])).map((i) => i.id));
-        const keep = entry.filter((i) => left.has(i.id));
-        if (keep.length) undoStack.push(keep);
+        await requeueLeftInTrash(entry);
         throw e;
       }
     }
