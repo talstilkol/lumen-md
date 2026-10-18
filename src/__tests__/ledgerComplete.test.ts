@@ -1,7 +1,7 @@
 /** 2.4 — the privacy ledger sees worker downloads and the web clipper; local-only refuses the clipper. */
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { __resetLedger, guardedFetch, ledgerEntries, listenToWorkerLedger, PrivacyBlockedError } from "../ai/privacyLedger";
-import { installWorkerLedger, type WorkerLedgerMessage } from "../ai/workerLedger";
+import { installWorkerLedger, reportWorkerDownload, __resetWorkerLedger, type WorkerLedgerMessage } from "../ai/workerLedger";
 import { setAiPolicy } from "../ai/policy";
 
 /** One in-memory channel: what the worker posts, the window hears. */
@@ -16,6 +16,7 @@ function pipe() {
 beforeEach(() => {
   localStorage.clear();
   __resetLedger();
+  __resetWorkerLedger();
   setAiPolicy("local-first");
 });
 
@@ -42,6 +43,27 @@ describe("worker requests reach the ledger", () => {
     installWorkerLedger(scope, ch);
     await scope.fetch("/assets/ort-wasm.wasm");
     expect(ledgerEntries()).toEqual([]);
+  });
+
+  it("a download the worker's fetch cannot see (web-llm's Cache.add) is reported by the worker itself", async () => {
+    expect(reportWorkerDownload("https://huggingface.co/mlc-ai/x/resolve/main/")).toBe(false); // not installed
+    const ch = pipe();
+    listenToWorkerLedger(ch);
+    installWorkerLedger({ fetch: (async () => new Response("")) as unknown as typeof fetch, name: "webllm" }, ch);
+    expect(reportWorkerDownload("https://huggingface.co/mlc-ai/Qwen3-4B-q4f16_1-MLC/resolve/main/")).toBe(true);
+    expect(ledgerEntries()).toEqual([
+      expect.objectContaining({ host: "huggingface.co", category: "model-download", decision: "allowed", status: 200, bytesIn: null, reason: expect.stringContaining("worker: webllm") }),
+    ]);
+  });
+
+  it("the web-llm worker reports an uncached model before loading it, and the window adds no probe round trip", async () => {
+    const { readFileSync } = await import("node:fs");
+    const { join } = await import("node:path");
+    const worker = readFileSync(join(__dirname, "../ai/webllm.worker.ts"), "utf8");
+    const load = worker.slice(worker.indexOf("async function ensureLoaded"), worker.indexOf("CreateMLCEngine(modelId"));
+    expect(load).toMatch(/hasModelInCache\(modelId\)[\s\S]*reportWorkerDownload\(/);
+    const client = readFileSync(join(__dirname, "../ai/webllmEngine.ts"), "utf8");
+    expect(client).not.toMatch(/noteModelDownload|recordWorkerRequest/);
   });
 
   it("the transformers and web-llm workers install the bridge before anything else", async () => {
@@ -89,5 +111,21 @@ describe("the web clipper goes through the ledger", () => {
       meta.remove();
       f.mockRestore();
     }
+  });
+
+  it("clipUrl under local-only refuses before the research service's extractor too", async () => {
+    setAiPolicy("local-only");
+    const { clipUrl } = await import("../research/clipper");
+    const extract = vi.fn(async () => ({ title: "t", text: "body" }));
+    await expect(clipUrl("https://news.example/story", { extract })).rejects.toMatchObject({ name: "PrivacyBlockedError" });
+    expect(extract).not.toHaveBeenCalled();
+    expect(ledgerEntries()).toEqual([expect.objectContaining({ host: "news.example", category: "third-party", decision: "blocked" })]);
+  });
+
+  it("otherwise the extractor route still clips", async () => {
+    const { clipUrl } = await import("../research/clipper");
+    const clip = await clipUrl("https://news.example/story", { extract: async () => ({ title: "Story", text: "Body text", finalUrl: "https://news.example/story" }) });
+    expect(clip.title).toBe("Story");
+    expect(clip.markdown).toContain("Body text");
   });
 });

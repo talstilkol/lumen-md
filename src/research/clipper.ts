@@ -145,9 +145,16 @@ export function clipFileName(title: string): string {
  * is configured (no CORS limits), else straight from the browser — only
  * where the page's CSP admits that origin (connect-src is an allowlist, so
  * for ordinary article sites it doesn't, and the fetch would just fail).
- * Without a usable route: `ResearchUnavailableError`.
+ * Without a usable route: `ResearchUnavailableError`. Under the local-only
+ * policy neither route runs — both make the page's site see a visit — and
+ * the refusal is a `PrivacyBlockedError`, recorded in the ledger.
  */
 export async function clipUrl(url: string, deps: { extract?: (u: string) => Promise<{ title?: string; text?: string; finalUrl?: string; error?: string }> } = {}): Promise<Clip> {
+  // Either route makes the page's site see a visit (the research service
+  // fetches it for us), so local-only refuses here, before both (plan 2.4).
+  const { guardedFetch, refuseIfBlocked } = await import("../ai/privacyLedger");
+  const clipper = { category: "third-party" as const, reason: "Web clipper — fetches the page you clip" };
+  refuseIfBlocked(url, clipper);
   const { researchEndpoint, extractPage, ResearchUnavailableError } = await import("./client");
   const extract = deps.extract ?? (researchEndpoint() ? (u: string) => extractPage(u) : null);
   let extractError: string | undefined;
@@ -164,9 +171,8 @@ export async function clipUrl(url: string, deps: { extract?: (u: string) => Prom
     if (extractError) throw new Error(extractError);
     throw new ResearchUnavailableError();
   }
-  // The page's site sees the visit: logged as third-party traffic, refused under local-only (plan 2.4).
-  const { guardedFetch } = await import("../ai/privacyLedger");
-  const res = await guardedFetch(url, { credentials: "omit" }, { category: "third-party", reason: "Web clipper — fetches the page you clip" });
+  // The page's site sees the visit: logged as third-party traffic (plan 2.4).
+  const res = await guardedFetch(url, { credentials: "omit" }, clipper);
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   return clipFromHtml(await res.text(), res.url || url);
 }

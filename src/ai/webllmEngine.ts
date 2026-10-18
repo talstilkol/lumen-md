@@ -116,27 +116,8 @@ function call<T>(msg: WorkerCall, onDelta?: (text: string) => void, signal?: Abo
   });
 }
 
-const noted = new Set<string>();
-
-/**
- * web-llm downloads weights with `Cache.add()`, which bypasses the worker's
- * fetch and so the ledger bridge (workerLedger.ts): record the download
- * here, once per model, when the model is not cached yet (plan 2.4).
- * Prebuilt models live under huggingface.co/mlc-ai/<id>; the model library
- * (wasm) comes from raw.githubusercontent.com and is recorded by its rule
- * when the worker fetches it.
- */
-async function noteModelDownload(modelId: string): Promise<void> {
-  if (noted.has(modelId) || loadedModel === modelId) return;
-  noted.add(modelId);
-  if (await webLlmModelCached(modelId)) return;
-  const { recordWorkerRequest } = await import("./privacyLedger");
-  recordWorkerRequest(`https://huggingface.co/mlc-ai/${encodeURIComponent(modelId)}/resolve/main/`);
-}
-
 /** Load (download, compile) `modelId`; progress goes to `onWebLlmProgress` listeners. */
 export async function loadWebLlmModel(modelId: string): Promise<void> {
-  await noteModelDownload(modelId);
   await call<string>({ type: "load", modelId });
   loadedModel = modelId;
 }
@@ -148,7 +129,6 @@ export async function webLlmChat(
   opts: { onDelta?: (text: string) => void; signal?: AbortSignal } = {},
 ): Promise<WorkerChatResult> {
   if (opts.signal?.aborted) throw new DOMException("aborted", "AbortError");
-  await noteModelDownload(modelId); // a chat on a model not loaded yet loads (downloads) it
   const res = await call<WorkerChatResult>({ type: "chat", modelId, request, stream: !!opts.onDelta }, opts.onDelta, opts.signal);
   loadedModel = modelId;
   return res;
@@ -166,7 +146,6 @@ export async function webLlmModelCached(modelId: string): Promise<boolean> {
 /** Remove a model's weights, wasm and config from Cache Storage. */
 export async function deleteWebLlmModel(modelId: string): Promise<void> {
   await call<boolean>({ type: "deleteModel", modelId });
-  noted.delete(modelId); // a later load downloads it again
   if (loadedModel === modelId) loadedModel = null;
 }
 

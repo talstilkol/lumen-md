@@ -19,6 +19,7 @@
  */
 
 import "./workerLedgerInstall"; // first: libraries below must see the ledger's fetch (plan 2.4)
+import { reportWorkerDownload } from "./workerLedger";
 import type { ChatCompletionMessageParam, ChatCompletionTool, MLCEngineInterface, ResponseFormat } from "@mlc-ai/web-llm";
 
 export interface WorkerChatRequest {
@@ -63,6 +64,16 @@ const cancelled = new Set<number>();
 async function ensureLoaded(id: number, modelId: string): Promise<MLCEngineInterface> {
   if (engine && loadedModel === modelId) return engine;
   const mod = await import("@mlc-ai/web-llm");
+  // web-llm stores weights with Cache.add(), which the ledger's fetch never
+  // sees: report the download here when the model is not cached yet. Prebuilt
+  // weights live under huggingface.co/mlc-ai/<id> (plan 2.4).
+  // why: a failed probe counts as "not cached" — better an extra ledger line than a missing one
+  const cached = await Promise.resolve()
+    .then(() => mod.hasModelInCache(modelId))
+    .catch(() => false);
+  if (!cached) {
+    reportWorkerDownload(`https://huggingface.co/mlc-ai/${encodeURIComponent(modelId)}/resolve/main/`);
+  }
   const initProgressCallback = (r: { progress: number; text: string }) => post({ id, type: "progress", progress: r.progress, text: r.text });
   if (!engine) {
     engine = await mod.CreateMLCEngine(modelId, { initProgressCallback });

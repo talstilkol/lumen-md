@@ -13,8 +13,9 @@
  * Limits, stated: the worker only reports — it does not block. Workers only
  * download models (a category the policy never blocks), and the CSP still
  * bounds where they can connect. Requests made by `Cache.add()` (web-llm's
- * cache) bypass `fetch` entirely; those downloads are recorded by the window
- * before it asks the worker to load a model (webllmEngine.ts).
+ * cache) bypass `fetch` entirely; the worker reports those itself with
+ * `reportWorkerDownload` before it loads a model that is not cached
+ * (webllm.worker.ts).
  */
 
 export const LEDGER_CHANNEL = "lumen-privacy-ledger";
@@ -24,6 +25,9 @@ export type WorkerLedgerMessage =
   | { kind: "end"; id: string; status: number; bytesIn: number | null };
 
 type FetchScope = { fetch: typeof fetch; name?: string; location?: { pathname?: string } };
+
+/** The channel and worker name `installWorkerLedger` set up, for `reportWorkerDownload`. */
+let installed: { post: (m: WorkerLedgerMessage) => void; worker: string; next: () => string } | null = null;
 
 function bodySize(body: BodyInit | null | undefined): number {
   if (body == null) return 0;
@@ -57,10 +61,12 @@ export function installWorkerLedger(scope: FetchScope, channel?: Pick<BroadcastC
       // why: a closed channel must never break the worker's own request
     }
   };
+  const next = () => `${worker}:${++seq}:${Date.now().toString(36)}`;
+  installed = { post, worker, next };
   scope.fetch = async function ledgerWorkerFetch(input: RequestInfo | URL, init?: RequestInit): Promise<Response> {
     const url = typeof input === "string" ? input : input instanceof URL ? input.href : input.url;
     const method = (init?.method ?? (typeof Request !== "undefined" && input instanceof Request ? input.method : "GET")).toUpperCase();
-    const id = `${worker}:${++seq}:${Date.now().toString(36)}`;
+    const id = next();
     post({ kind: "start", id, url, method, bytesOut: bodySize(init?.body), worker });
     const res = await inner(input, init);
     const len = res.headers?.get?.("content-length");
@@ -68,4 +74,22 @@ export function installWorkerLedger(scope: FetchScope, channel?: Pick<BroadcastC
     return res;
   } as typeof fetch;
   return true;
+}
+
+/**
+ * Report a download the worker's `fetch` does not see (web-llm's
+ * `Cache.add()`). Size unknown, so recorded with no byte count. Returns false
+ * when the ledger is not installed in this worker.
+ */
+export function reportWorkerDownload(url: string): boolean {
+  if (!installed) return false;
+  const id = installed.next();
+  installed.post({ kind: "start", id, url, method: "GET", bytesOut: 0, worker: installed.worker });
+  installed.post({ kind: "end", id, status: 200, bytesIn: null });
+  return true;
+}
+
+/** Tests only. */
+export function __resetWorkerLedger(): void {
+  installed = null;
 }

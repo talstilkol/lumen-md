@@ -319,26 +319,41 @@ export function listenToWorkerLedger(channel: Pick<BroadcastChannel, "addEventLi
   });
 }
 
+function hostOf(url: string): string {
+  try {
+    return new URL(url).hostname;
+  } catch {
+    return url; // recorded as given
+  }
+}
+
+/**
+ * Throw `PrivacyBlockedError` (and record the block) when the policy forbids
+ * `as.category` — for a request that goes out some other way than this
+ * window's fetch, such as the research service fetching a page for the
+ * clipper. Returns normally when allowed; recording the allowed request is
+ * the caller's job (`guardedFetch` does it).
+ */
+export function refuseIfBlocked(url: string, as: { category: LedgerCategory; reason: string }, method = "GET"): void {
+  const policy = getAiPolicy();
+  if (!blockedByPolicy(as.category, policy)) return;
+  const host = hostOf(url);
+  const id = record({ host, category: as.category, reason: as.reason, method, bytesOut: 0, bytesIn: null, policy, decision: "blocked" });
+  const entry = entries.find((x) => x.id === id);
+  if (entry) onBlocked?.(entry);
+  throw new PrivacyBlockedError(host, as.reason);
+}
+
 /**
  * A request the app makes on the user's behalf to an address the rules
  * cannot know in advance (the web clipper fetching a page): recorded under
  * the given category and blocked when the policy forbids that category.
  */
 export async function guardedFetch(url: string, init: RequestInit, as: { category: LedgerCategory; reason: string }): Promise<Response> {
-  let host = url;
-  try {
-    host = new URL(url).hostname;
-  } catch {
-    /* recorded as given */
-  }
-  const policy = getAiPolicy();
   const method = (init.method ?? "GET").toUpperCase();
-  if (blockedByPolicy(as.category, policy)) {
-    const id = record({ host, category: as.category, reason: as.reason, method, bytesOut: 0, bytesIn: null, policy, decision: "blocked" });
-    const entry = entries.find((x) => x.id === id);
-    if (entry) onBlocked?.(entry);
-    throw new PrivacyBlockedError(host, as.reason);
-  }
+  refuseIfBlocked(url, as, method);
+  const host = hostOf(url);
+  const policy = getAiPolicy();
   const id = record({ host, category: as.category, reason: as.reason, method, bytesOut: bodySize(init.body), bytesIn: null, policy, decision: "allowed" });
   // why: the raw fetch, so a host the rules also know is not recorded twice
   const res = await (rawFetch ?? fetch)(url, init);
