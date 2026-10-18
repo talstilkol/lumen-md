@@ -1373,7 +1373,7 @@
   "privacy.cat.static-asset": "Fichiers statiques (polices, icônes) — aucun texte envoyé",
   "privacy.cat.research": "Service de recherche — votre requête est envoyée",
   "privacy.cat.third-party": "Service tiers — l'adresse de la page est envoyée",
-  "privacy.footer": "Enregistré : heure, destination, taille, raison. Jamais le texte des invites ou des réponses. Les requêtes des workers de modèles (téléchargements) ne sont pas listées.",
+  "privacy.footer": "Enregistré : heure, destination, taille, raison. Jamais le texte des invites ou des réponses. Les téléchargements de modèles faits dans les workers sont aussi listés ; leur taille peut être inconnue.",
   "toast.privacyBlocked": "Bloqué par la politique « local uniquement » : {reason}. Utilisez un modèle local ou changez la politique dans les réglages IA.",
   "collab.settings.title": "Paramètres de collaboration",
   "collab.settings.signalingHint": "Serveur de signalisation (comment les participants se trouvent). Vide = serveur de Lumen. Chaque nouvelle salle est chiffrée de bout en bout avec son propre mot de passe : le serveur ne voit que du texte chiffré.",

@@ -491,7 +491,7 @@ const en: Strings = {
   "privacy.cat.static-asset": "Static files (fonts, icons) — no text sent",
   "privacy.cat.research": "Research service — your query is sent",
   "privacy.cat.third-party": "Third-party service — the page address is sent",
-  "privacy.footer": "Recorded: time, host, size, reason. Never the text of prompts or answers. Requests from inside model workers (downloads) are not listed.",
+  "privacy.footer": "Recorded: time, host, size, reason. Never the text of prompts or answers. Model downloads made inside workers are listed too; their size may show as unknown.",
   "toast.privacyBlocked": "Blocked by the local-only policy: {reason}. Use a local model, or change the policy in AI settings.",
   "doc.save.failedRetrying": "Could not save “{name}” to the vault — retrying. Your text is still in this browser.",
   "doc.save.quota": "The browser's storage for this site is full — “{name}” was not saved. Free space or export your notes.",

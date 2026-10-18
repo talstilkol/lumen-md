@@ -150,4 +150,15 @@ describe("the web clipper goes through the ledger", () => {
     expect(clip.title).toBe("Story");
     expect(clip.markdown).toContain("Body text");
   });
+
+  it("the panel's footer no longer says worker downloads are missing, in any language", async () => {
+    const { readFileSync } = await import("node:fs");
+    const { join } = await import("node:path");
+    const { en } = await import("../i18n").then((m) => ({ en: (m as unknown as { t: (k: string) => string }).t("privacy.footer") }));
+    expect(en).toMatch(/workers are listed/);
+    for (const loc of ["he", "ar", "de", "fr", "ja", "ru", "zh-CN"]) {
+      const d = JSON.parse(readFileSync(join(__dirname, "../i18n/locales", `${loc}.json`), "utf8")) as Record<string, string>;
+      expect(d["privacy.footer"], loc).not.toMatch(/לא מופיעות|غير مدرجة|fehlen|ne sont pas listées|含まれません|не показаны|不在列表中/);
+    }
+  });
 });
