@@ -4,7 +4,8 @@
  * Under the `local-only` AI policy nothing may leave the device — with one
  * explicit exception (plan §2.4): web research, which by its nature asks
  * the web. A network tool call therefore goes out only when the user
- * consented to it; otherwise it is refused before any request is made,
+ * consented to that call (asked per call — plan 15.10 (8)); otherwise it is
+ * refused before any request is made,
  * the refusal is recorded in the privacy ledger and the call fails with
  * the ledger's `PrivacyBlockedError`. Under `local-first` / `cloud` the
  * policy itself allows the network.
@@ -47,9 +48,18 @@ export async function describeNetworkCall(tool: AgentTool, call: ToolCall): Prom
   return { tool: tool.name, host: hostOf(endpoint), sends: tool.name === "search_web" ? "the search query" : "the tool's arguments", args: call.args, url: `${endpoint}/search` };
 }
 
-async function defaultConsent(): Promise<boolean> {
-  const { hasWebConsent } = await import("../research/consent");
-  return hasWebConsent();
+/**
+ * The owner's decision (plan 15.10 (8), 18.10): under local-only every agent
+ * network call is asked for on its own — the one-time research consent does
+ * not count. The prompt names the tool, the host and exactly what is sent.
+ */
+async function defaultConsent(req: NetworkConsentRequest): Promise<boolean> {
+  const [{ uiConfirm }, { t }] = await Promise.all([import("../ui/PromptDialog"), import("../i18n")]);
+  return uiConfirm({
+    title: t("agents.netConsent.title"),
+    message: t("agents.netConsent.body", { tool: req.tool, host: req.host, sends: req.sends }),
+    okLabel: t("agents.netConsent.ok"),
+  });
 }
 
 /**

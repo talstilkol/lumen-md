@@ -17,6 +17,7 @@ vi.mock("../store/useStore", () => ({ useAppStore: { getState: () => storeState 
 vi.mock("../ai/ollamaProvider", () => ({ isOllamaAvailable: async () => false, getBaseUrl: () => "http://localhost:11434", chatOllama: vi.fn(), chatOllamaStream: vi.fn() }));
 vi.mock("../ai/localLlm", () => ({ localLlmAvailable: () => ({ available: false }), chatLocal: vi.fn(), chatLocalStream: vi.fn(), onLocalLlmProgress: () => () => {} }));
 vi.mock("../store/useToastStore", () => ({ toast: { info: vi.fn(), warn: vi.fn(), error: vi.fn() } }));
+vi.mock("../ui/PromptDialog", () => ({ uiConfirm: vi.fn(async () => false) }));
 vi.mock("../billing/aiQuota", () => ({ chargeAiCommandDispatch: vi.fn(), consumeAiPrompt: vi.fn(() => true), aiQuotaStatus: () => ({ allowed: true, limit: Infinity }), AiQuotaExceededError: class extends Error {} }));
 
 const files = new Map<string, string>();
@@ -199,20 +200,28 @@ describe("network tools", () => {
     expect(ledgerEntries()[0].bytesOut).toBeGreaterThan(0);
   });
 
-  it("count the one-time research consent when the caller does not ask per call", async () => {
+  it("ask for every call under local-only — the one-time research consent does not count (owner's decision, plan 15.10 (8))", async () => {
     setAiPolicy("local-only");
-    revokeWebConsent();
+    grantWebConsent(); // given earlier to research.ask: not consent for agents
+    const { uiConfirm } = await import("../ui/PromptDialog");
+    const ask = vi.mocked(uiConfirm);
+    ask.mockClear();
     registerExecutor(fakeExecutor((_req, n) => (n % 2 === 1 ? call("fetch_page", { url: "https://lumen.example/docs" }) : final("x"))));
+    ask.mockResolvedValueOnce(false);
     await runAgent(agent(["fetch_page"]), {}, { grants: ["network"] });
     expect(net).not.toHaveBeenCalled();
-    expect(ledgerEntries().map((e) => e.decision)).toEqual(["blocked"]);
-    grantWebConsent();
+    expect(ask).toHaveBeenCalledTimes(1);
+    expect(ask.mock.calls[0][0].message).toContain("lumen.example");
+    expect(ask.mock.calls[0][0].message).toContain("fetch_page");
+    ask.mockResolvedValueOnce(true);
     await runAgent(agent(["fetch_page"]), {}, { grants: ["network"] });
+    expect(ask).toHaveBeenCalledTimes(2); // asked again: a yes is for one call
     expect(net).toHaveBeenCalledWith(`${ENDPOINT}/extract?url=${encodeURIComponent("https://lumen.example/docs")}`, expect.anything());
     expect(ledgerEntries().map((e) => [e.decision, e.consent ?? false])).toEqual([
       ["blocked", false],
       ["allowed", true],
     ]);
+    revokeWebConsent();
   });
 
   it("need no consent when the policy allows the cloud, and are still recorded", async () => {

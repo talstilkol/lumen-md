@@ -1,9 +1,10 @@
 /**
  * The one-time web-research consent (T34): the first research that would
  * reach the web asks once, and only the query (or a page address) is sent.
- * `research.ask` asks for it; agent network tools (`search_web`,
- * `fetch_page`) count it as consent under the `local-only` policy unless
- * the caller asks per call (`RunOptions.consentNetwork`).
+ * It covers `research.ask` only. Agent network tools (`search_web`,
+ * `fetch_page`) ask for every call under the `local-only` policy (the
+ * owner's decision, plan 15.10 (8)); a caller can supply its own prompt
+ * through `RunOptions.consentNetwork`.
  */
 
 const WEB_CONSENT_KEY = "lumen.research.webConsent";
