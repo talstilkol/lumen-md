@@ -21,8 +21,8 @@ import {
   type Editor as TldrawEditor,
 } from "tldraw";
 import "tldraw/tldraw.css";
-import { useCallback, useEffect, useState } from "react";
-import { uiPrompt } from "./PromptDialog";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { uiConfirm, uiPrompt } from "./PromptDialog";
 import { showAiToast } from "./AiToast";
 import { isOPFSAvailable } from "../storage/workspace";
 import { t } from "../i18n";
@@ -39,6 +39,8 @@ const DEFAULT_CANVAS_NAME = "untitled";
 /** Read the tldraw blob for a canvas. Returns null when the file isn't there. */
 async function loadCanvasFile(name: string): Promise<unknown | null> {
   if (!isOPFSAvailable()) return null;
+  // Read what was last asked to be written, not what was there before a write still in flight.
+  await afterCanvasWrites(name);
   try {
     const root = await navigator.storage.getDirectory();
     const dir = await root.getDirectoryHandle(CANVAS_DIR, { create: true });
@@ -46,12 +48,44 @@ async function loadCanvasFile(name: string): Promise<unknown | null> {
     const blob = await file.getFile();
     const text = await blob.text();
     return JSON.parse(text);
-  } catch {
-    return null;
+  } catch (err) {
+    // why: only a missing file means a blank canvas; an unreadable one must not be overwritten
+    if ((err as { name?: string } | null)?.name === "NotFoundError") return null;
+    throw err;
   }
 }
 
-async function saveCanvasFile(name: string, snapshot: unknown): Promise<void> {
+/** The last write to each canvas file: writes to one file run in the order they were asked for. */
+const canvasWrites = new Map<string, Promise<void>>();
+
+/**
+ * Queue `write` after every earlier write to the same canvas, so a late
+ * flush of the old drawing can never land after the blank page that
+ * replaces it. Exported for tests.
+ */
+export function queueCanvasWrite(name: string, write: () => Promise<void>): Promise<void> {
+  const prev = canvasWrites.get(name) ?? Promise.resolve();
+  const next = prev.catch(() => undefined).then(write);
+  canvasWrites.set(name, next);
+  void next.finally(() => {
+    if (canvasWrites.get(name) === next) canvasWrites.delete(name);
+  }).catch(() => undefined);
+  return next;
+}
+
+/** Resolves once every write already queued for this canvas has settled (failed ones included). Exported for tests. */
+export function afterCanvasWrites(name: string): Promise<void> {
+  return (canvasWrites.get(name) ?? Promise.resolve()).then(
+    () => undefined,
+    () => undefined,
+  );
+}
+
+function saveCanvasFile(name: string, snapshot: unknown): Promise<void> {
+  return queueCanvasWrite(name, () => writeCanvasFile(name, snapshot));
+}
+
+async function writeCanvasFile(name: string, snapshot: unknown): Promise<void> {
   if (!isOPFSAvailable()) return;
   const root = await navigator.storage.getDirectory();
   const dir = await root.getDirectoryHandle(CANVAS_DIR, { create: true });
@@ -62,6 +96,83 @@ async function saveCanvasFile(name: string, snapshot: unknown): Promise<void> {
   } finally {
     await writable.close();
   }
+}
+
+/** Is there a saved canvas with this name on disk right now? (The picker's list may not have loaded yet.) Exported for tests. */
+export async function canvasFileExists(name: string): Promise<boolean> {
+  if (!isOPFSAvailable()) return false;
+  await afterCanvasWrites(name);
+  try {
+    const root = await navigator.storage.getDirectory();
+    const dir = await root.getDirectoryHandle(CANVAS_DIR, { create: true });
+    await dir.getFileHandle(`${name}.tldr`);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Restore a saved snapshot unless the user edited the canvas while it was
+ * loading: a stroke drawn during a slow read must not be replaced by the file
+ * (nor saved over by it). Exported for tests.
+ */
+export async function restoreUnlessEdited(o: {
+  listenUserEdits: (onEdit: () => void) => () => void;
+  load: () => Promise<unknown | null>;
+  apply: (snapshot: unknown) => void;
+  cancelled: () => boolean;
+}): Promise<"applied" | "edited" | "empty" | "cancelled"> {
+  let edited = false;
+  const off = o.listenUserEdits(() => {
+    edited = true;
+  });
+  try {
+    const snap = await o.load();
+    if (o.cancelled()) return "cancelled";
+    if (edited) return "edited";
+    if (!snap) return "empty";
+    o.apply(snap);
+    return "applied";
+  } finally {
+    off();
+  }
+}
+
+/**
+ * Switch the shared editor to a canvas without ever mixing two drawings: the
+ * editor is read-only and the canvas's saver is held (`lock`) until the saved
+ * snapshot is in, so neither a stroke nor a camera-move save can write the
+ * previous canvas's drawing under the new name. A canvas with no saved file
+ * starts blank; one whose file cannot be read stays read-only, so nothing
+ * overwrites it. Exported for tests.
+ */
+export async function switchCanvas(o: {
+  name: string;
+  lock: { current: string | null };
+  setReadonly: (readonly: boolean) => void;
+  restore: () => Promise<"applied" | "edited" | "empty" | "cancelled">;
+  clear: () => void;
+  cancelled: () => boolean;
+  onUnreadable: (err: unknown) => void;
+}): Promise<"applied" | "edited" | "empty" | "cancelled" | "unreadable"> {
+  o.lock.current = o.name;
+  o.setReadonly(true);
+  let result: "applied" | "edited" | "empty" | "cancelled";
+  try {
+    result = await o.restore();
+  } catch (err) {
+    if (o.cancelled()) return "cancelled";
+    // stays read-only with the saver held: saving now would overwrite the file we could not read
+    o.onUnreadable(err);
+    return "unreadable";
+  }
+  // a newer switch owns the lock and the read-only state now
+  if (o.cancelled() || result === "cancelled") return "cancelled";
+  if (o.lock.current === o.name) o.lock.current = null;
+  o.setReadonly(false);
+  if (result === "empty") o.clear();
+  return result;
 }
 
 async function listCanvases(): Promise<string[]> {
@@ -201,12 +312,70 @@ export function debouncedSave(save: () => void, ms: number): { schedule(): void;
   };
 }
 
+/**
+ * Save a canvas on every store change (debounced) until `detach()`, which
+ * writes any pending change and stops listening — once. Changes made after
+ * detach (clearing the editor for a new canvas) never reach this canvas's
+ * file. Exported for tests.
+ */
+export function bindCanvasSaver(
+  listen: (onChange: () => void) => () => void,
+  save: () => void,
+  ms: number,
+  opts: { fresh?: boolean } = {},
+): { detach(): void } {
+  const saver = debouncedSave(save, ms);
+  const off = listen(() => saver.schedule());
+  // A canvas New just cleared: save it now, even if nothing is drawn before close.
+  if (opts.fresh) save();
+  let detached = false;
+  return {
+    detach() {
+      if (detached) return;
+      detached = true;
+      off();
+      saver.flush();
+    },
+  };
+}
+
+/**
+ * New canvas, in the order that loses nothing: confirm before replacing a
+ * canvas that already has that name, save and stop the current canvas's
+ * saver, then clear the editor. Nothing is awaited between the clear and the
+ * caller re-binding the saver, so a stroke drawn right after New is never
+ * missed; the re-bound saver writes the (blank) page at once (`fresh`), and
+ * writes to one file are queued (`queueCanvasWrite`), so the old canvas's
+ * flush cannot land after it. Returns false when the user kept the existing
+ * canvas. Exported for tests.
+ */
+export async function startNewCanvas(o: {
+  name: string;
+  exists: boolean;
+  confirmReplace: (name: string) => Promise<boolean>;
+  detach: () => void;
+  clear: () => void;
+}): Promise<boolean> {
+  if (o.exists && !(await o.confirmReplace(o.name))) return false;
+  o.detach();
+  o.clear();
+  return true;
+}
+
 export function CanvasTldraw({ open, onClose }: Props) {
   const [editor, setEditor] = useState<TldrawEditor | null>(null);
   const [canvasName, setCanvasName] = useState<string>(DEFAULT_CANVAS_NAME);
   const [savedList, setSavedList] = useState<string[]>([]);
   const [legacyList, setLegacyList] = useState<string[]>([]);
   const [converting, setConverting] = useState<string | null>(null);
+  /** Bumped by New so the saver re-binds even when the name did not change. */
+  const [saverEpoch, setSaverEpoch] = useState(0);
+  /** Stops the current canvas's saver (flushing it); New calls it before clearing the editor. */
+  const detachSaver = useRef<(() => void) | null>(null);
+  /** The canvas New just cleared: not restored from its (replaced) file, saved as soon as the saver binds. */
+  const freshCanvas = useRef<string | null>(null);
+  /** The canvas being restored: its saver writes nothing until the restore is in (see switchCanvas). */
+  const restoring = useRef<string | null>(null);
 
   // Load the canvas list (and any legacy `.canvas.json` files) on open
   // so the picker shows everything the user has + a convert affordance.
@@ -219,14 +388,31 @@ export function CanvasTldraw({ open, onClose }: Props) {
   // When the editor mounts (or canvas name changes), restore from OPFS.
   useEffect(() => {
     if (!editor) return;
+    // why: New cleared this canvas on purpose; loading its old file would bring back the drawing it replaces
+    if (freshCanvas.current === canvasName) return;
     let cancelled = false;
-    void loadCanvasFile(canvasName).then((snap) => {
-      if (cancelled || !editor || !snap) return;
-      try {
-        loadSnapshot(editor.store, snap as Parameters<typeof loadSnapshot>[1]);
-      } catch (err) {
-        log.warn("tldraw loadSnapshot failed", err);
-      }
+    void switchCanvas({
+      name: canvasName,
+      lock: restoring,
+      setReadonly: (readonly) => editor.updateInstanceState({ isReadonly: readonly }),
+      restore: () =>
+        restoreUnlessEdited({
+          // only the user's own document edits count (not camera moves or the load itself)
+          listenUserEdits: (onEdit) => editor.store.listen(onEdit, { source: "user", scope: "document" }),
+          load: () => loadCanvasFile(canvasName),
+          // a snapshot tldraw can't load is "unreadable": rethrown, so switchCanvas keeps the canvas read-only and its saver held
+          apply: (snap) => loadSnapshot(editor.store, snap as Parameters<typeof loadSnapshot>[1]),
+          cancelled: () => cancelled,
+        }),
+      clear: () => {
+        editor.selectAll();
+        editor.deleteShapes(editor.getSelectedShapeIds());
+      },
+      cancelled: () => cancelled,
+      onUnreadable: (err) => {
+        log.warn("tldraw canvas read failed", err);
+        showAiToast(t("canvas.unreadable", { name: canvasName }), "error");
+      },
     });
     return () => {
       cancelled = true;
@@ -236,22 +422,33 @@ export function CanvasTldraw({ open, onClose }: Props) {
   // Subscribe to store changes; debounced save.
   useEffect(() => {
     if (!editor) return;
-    const saver = debouncedSave(() => {
-      try {
-        const snap = getSnapshot(editor.store);
-        void saveCanvasFile(canvasName, snap).catch((err) =>
-          log.warn("tldraw save failed", err),
-        );
-      } catch (err) {
-        log.warn("tldraw getSnapshot failed", err);
-      }
-    }, 500);
-    const off = editor.store.listen(() => saver.schedule());
+    let lastWrite: Promise<void> = Promise.resolve();
+    const fresh = freshCanvas.current === canvasName;
+    const binding = bindCanvasSaver(
+      (onChange) => editor.store.listen(onChange),
+      () => {
+        // why: until this canvas's snapshot is restored the editor still shows the previous one
+        if (restoring.current === canvasName) return;
+        try {
+          const snap = getSnapshot(editor.store);
+          lastWrite = saveCanvasFile(canvasName, snap).catch((err) => log.warn("tldraw save failed", err));
+        } catch (err) {
+          log.warn("tldraw getSnapshot failed", err);
+        }
+      },
+      500,
+      { fresh },
+    );
+    // The blank page is on disk: from now on the file is this canvas (kept until then, so a re-run of the restore effect still skips it).
+    if (fresh) void lastWrite.finally(() => {
+      if (freshCanvas.current === canvasName) freshCanvas.current = null;
+    });
+    detachSaver.current = () => binding.detach();
     return () => {
-      off();
-      saver.flush(); // the last strokes before close / canvas switch
+      binding.detach(); // the last strokes before close / canvas switch
+      if (detachSaver.current) detachSaver.current = null;
     };
-  }, [editor, canvasName]);
+  }, [editor, canvasName, saverEpoch]);
 
   const handleNew = useCallback(async () => {
     const name = await uiPrompt({
@@ -261,16 +458,38 @@ export function CanvasTldraw({ open, onClose }: Props) {
     if (!name) return;
     const trimmed = name.trim().replace(/[/\\]/g, "-");
     if (!trimmed) return;
-    setCanvasName(trimmed);
     if (editor) {
-      // Clear and start fresh.
-      editor.selectAll();
-      editor.deleteShapes(editor.getSelectedShapeIds());
+      // Ask the disk, not only the picker's list: it may not have loaded yet when New was clicked.
+      const exists = trimmed === canvasName || savedList.includes(trimmed) || (await canvasFileExists(trimmed));
+      // Save the old canvas and stop its saver before clearing: clearing the
+      // editor while it still listens would write the empty page over the old file.
+      const ok = await startNewCanvas({
+        name: trimmed,
+        exists,
+        confirmReplace: (n) =>
+          uiConfirm({
+            title: t("canvas.new.replaceTitle"),
+            message: t("canvas.new.replaceBody", { name: n }),
+            okLabel: t("canvas.new.replaceOk"),
+          }),
+        detach: () => detachSaver.current?.(),
+        clear: () => {
+          editor.selectAll();
+          editor.deleteShapes(editor.getSelectedShapeIds());
+        },
+      });
+      if (!ok) return;
+      freshCanvas.current = trimmed;
     }
+    setCanvasName(trimmed);
+    // why: New with the current name changes no state, so without this the detached saver is never replaced
+    setSaverEpoch((n) => n + 1);
     setSavedList((prev) => Array.from(new Set([...prev, trimmed])).sort());
-  }, [editor]);
+  }, [editor, canvasName, savedList]);
 
   const handlePick = useCallback((name: string) => {
+    // why: a pending "fresh" mark would make a later reselect skip the restore and save the other canvas's drawing under this name
+    freshCanvas.current = null;
     setCanvasName(name);
   }, []);
 
@@ -286,6 +505,7 @@ export function CanvasTldraw({ open, onClose }: Props) {
         ]);
         setSavedList(tldrs);
         setLegacyList(legacies);
+        freshCanvas.current = null;
         setCanvasName(legacyName);
         showAiToast(
           t("canvas.legacy.converted", { name: legacyName, count: String(nodeCount) }),

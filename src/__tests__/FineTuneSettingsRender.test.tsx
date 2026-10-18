@@ -3,7 +3,8 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 // FineTuneSettings uses the store; we test the rendering states
 // by mocking the store + the AI modules.
 
-vi.mock("../ai/fineTune", () => ({
+vi.mock("../ai/fineTune", async (importOriginal) => ({
+  fineTuneJobActive: (await importOriginal<typeof import("../ai/fineTune")>()).fineTuneJobActive,
   startFineTune: vi.fn(),
   getFineTuneJob: vi.fn(),
 }));
@@ -71,7 +72,7 @@ describe("FineTuneSettings", () => {
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 
-  it("a queued job survives closing the dialog: reopening resumes polling and saves the model", async () => {
+  it("a validating (or queued) job survives closing the dialog: reopening resumes polling and saves the model", async () => {
     const { render, waitFor, cleanup } = await import("@testing-library/react");
     const { FineTuneSettings } = await import("../ui/FineTuneSettings");
     const ft = await import("../ai/fineTune");
@@ -79,7 +80,8 @@ describe("FineTuneSettings", () => {
     const { uiConfirm } = await import("../ui/PromptDialog");
     useAppStore.setState({ aiKey: "sk-test", fineTunedModelId: null });
     vi.mocked(uiConfirm).mockResolvedValueOnce(true);
-    vi.mocked(ft.startFineTune).mockResolvedValueOnce({ id: "ftjob-1", status: "queued", createdAt: 1, chunks: 3, estimatedTokens: 900 });
+    // OpenAI's first status for a new job: still active, so the id must be kept (review: #194)
+    vi.mocked(ft.startFineTune).mockResolvedValueOnce({ id: "ftjob-1", status: "validating_files", createdAt: 1, chunks: 3, estimatedTokens: 900 });
     cleanup();
     const { getAllByRole, unmount } = render(<FineTuneSettings open={true} onClose={() => {}} />);
     getAllByRole("button")[0].click(); // Train on my style

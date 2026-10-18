@@ -141,3 +141,56 @@ describe("reorderTabs", () => {
     expect(useAppStore.getState().openTabs).toEqual(before);
   });
 });
+
+describe("switching back to an open tab keeps that load (review: #194)", () => {
+  beforeEach(reset);
+  const select = (id: string) => {
+    const tab = useAppStore.getState().openTabs.find((x) => x.id === id)!;
+    useAppStore.getState().openTab({ name: tab.name, content: tab.content, workspaceName: tab.workspaceName });
+  };
+
+  it("keeps the load id, so docIdentity (live-JS approval, worker scope) survives a tab switch", async () => {
+    const { docIdentity } = await import("../renderer/previewDoc");
+    useAppStore.getState().openTab({ name: "a.md", content: "A", workspaceName: null });
+    const first = docIdentity(useAppStore.getState().doc);
+    useAppStore.getState().openTab({ name: "b.md", content: "B", workspaceName: null });
+    select("a.md");
+    expect(docIdentity(useAppStore.getState().doc)).toBe(first);
+  });
+
+  it("keeps the disk handle of a launched file, so Save still writes back", () => {
+    const handle = { kind: "file", name: "x.md" } as unknown as FileSystemFileHandle;
+    useAppStore.getState().openTab({ name: "x.md", content: "X", workspaceName: null, handle });
+    useAppStore.getState().openTab({ name: "y.md", content: "Y", workspaceName: null });
+    expect(useAppStore.getState().doc.handle).toBeUndefined();
+    select("x.md");
+    expect(useAppStore.getState().doc.handle).toBe(handle);
+  });
+
+  it("keeps the unsaved marker of the tab it returns to", () => {
+    useAppStore.getState().openTab({ name: "a.md", content: "A", workspaceName: null });
+    useAppStore.getState().setContent("A edited");
+    useAppStore.getState().openTab({ name: "b.md", content: "B", workspaceName: null });
+    select("a.md");
+    expect(useAppStore.getState().doc).toMatchObject({ content: "A edited", dirty: true });
+  });
+
+  it("a different text under the same name is a new load", async () => {
+    const { docIdentity } = await import("../renderer/previewDoc");
+    useAppStore.getState().openTab({ name: "a.md", content: "A", workspaceName: null });
+    const first = docIdentity(useAppStore.getState().doc);
+    useAppStore.getState().openTab({ name: "b.md", content: "B", workspaceName: null });
+    useAppStore.getState().openTab({ name: "a.md", content: "another file", workspaceName: null });
+    expect(docIdentity(useAppStore.getState().doc)).not.toBe(first);
+    expect(useAppStore.getState().doc.dirty).toBe(false);
+  });
+
+  it("closing the active tab restores the neighbour's handle and load", () => {
+    const handle = { kind: "file", name: "x.md" } as unknown as FileSystemFileHandle;
+    useAppStore.getState().openTab({ name: "x.md", content: "X", workspaceName: null, handle });
+    const loadId = useAppStore.getState().doc.loadId;
+    useAppStore.getState().openTab({ name: "y.md", content: "Y", workspaceName: null });
+    useAppStore.getState().closeTab("y.md");
+    expect(useAppStore.getState().doc).toMatchObject({ name: "x.md", handle, loadId });
+  });
+});

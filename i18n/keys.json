@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-10-18T03:18:44.238Z",
+  "generated_at": "2026-10-18T06:31:06.884Z",
   "source": "src/i18n/index.ts (en bundle)",
-  "count": 1411,
+  "count": 1415,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -4406,6 +4406,30 @@
       "key": "canvas.new.prompt",
       "en": "Canvas name:",
       "vars": []
+    },
+    {
+      "key": "canvas.new.replaceTitle",
+      "en": "Replace this canvas?",
+      "vars": []
+    },
+    {
+      "key": "canvas.new.replaceBody",
+      "en": "A canvas named “{name}” already exists. Starting a new one with this name replaces its drawing with a blank page.",
+      "vars": [
+        "name"
+      ]
+    },
+    {
+      "key": "canvas.new.replaceOk",
+      "en": "Replace with blank",
+      "vars": []
+    },
+    {
+      "key": "canvas.unreadable",
+      "en": "Couldn’t read the canvas “{name}”. It stays read-only so its saved drawing isn’t overwritten.",
+      "vars": [
+        "name"
+      ]
     },
     {
       "key": "canvas.picker",
