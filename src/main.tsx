@@ -5,6 +5,8 @@ import React, { Suspense } from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App";
 import { UpdateBanner } from "./ui/UpdateBanner";
+import { VaultFolderBanner } from "./ui/VaultFolderBanner";
+import { restoreVaultLocation } from "./storage/vault/location";
 import { ErrorBoundary } from "./ui/ErrorBoundary";
 import { showAiToast } from "./ui/AiToast";
 import { ToastContainer } from "./components/Toast";
@@ -79,7 +81,10 @@ initShareExtension();
 // Secrets (API keys, tokens) are decrypted into memory before the first
 // render so synchronous reads see them (T36); never blocks boot for long.
 const secretsReady = Promise.race([initSecretStore(), new Promise((r) => setTimeout(r, 1500))]);
-void Promise.all([initLocale(), secretsReady])
+// Where the vault lives (OPFS or a real folder, plan 4.2) is restored before
+// the first render, so nothing reads the wrong store; bounded like secrets.
+const vaultReady = Promise.race([restoreVaultLocation(), new Promise((r) => setTimeout(r, 3000))]);
+void Promise.all([initLocale(), secretsReady, vaultReady])
   .then(([applied]) => {
     // initLocale falls back to English when the saved locale's chunk can't
     // load; the store was already rehydrated with the saved locale, and
@@ -125,6 +130,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
       </Suspense>
     </ErrorBoundary>
     <UpdateBanner />
+    <VaultFolderBanner />
     <ToastContainer />
   </React.StrictMode>,
 );
