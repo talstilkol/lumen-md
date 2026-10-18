@@ -3,7 +3,7 @@
  * consistent with file operations on the vault (T46 review fixes).
  */
 
-import { flushPendingEdits, moveTabRuntime, tabIdOf, useAppStore } from "./useStore";
+import { flushPendingEdits, moveTabRuntimes, tabIdOf, useAppStore } from "./useStore";
 import { writeWorkspaceFile } from "../storage/workspace";
 import { notifyWorkspaceChanged } from "../storage/workspaceEvents";
 import { movedPath } from "../storage/fileOps";
@@ -61,20 +61,22 @@ export function syncOpenDocsAfterMove(
       return name;
     };
     const detached = new Map<string, string>(); // old path → ad-hoc name
+    const remaps: [string, string][] = []; // applied together below: ids can collide mid-map
     const openTabs = state.openTabs.map((t) => {
       if (t.workspaceName && wasReplaced(t.workspaceName)) {
         // Kept as an ad-hoc note: its text (unsaved edits included) is not lost; the file itself is in the trash.
         const name = detachedName(t.workspaceName);
         detached.set(t.workspaceName, name);
-        moveTabRuntime(t.id, name);
+        remaps.push([t.id, name]);
         return { ...t, id: name, name, workspaceName: null };
       }
       const f = fix(t.workspaceName, t.content);
       if (!f) return t;
       const id = tabIdOf({ workspaceName: f.path, name: f.path });
-      moveTabRuntime(t.id, id);
+      remaps.push([t.id, id]);
       return { ...t, id, name: t.name === t.workspaceName ? f.path : t.name, workspaceName: f.path, content: f.text };
     });
+    moveTabRuntimes(remaps);
     const d = state.doc;
     let doc = d;
     if (d.workspaceName && wasReplaced(d.workspaceName)) {

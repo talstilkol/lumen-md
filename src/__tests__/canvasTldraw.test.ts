@@ -68,4 +68,52 @@ describe("tldraw integration (γ.2)", () => {
       vi.useRealTimers();
     }
   });
+
+  describe("startNewCanvas (review: #206)", () => {
+    type Start = typeof import("../ui/CanvasTldraw").startNewCanvas;
+    function harness(startNewCanvas: Start, exists: boolean, confirm: boolean) {
+      const calls: string[] = [];
+      let page = "drawing";
+      const files = new Map<string, unknown>();
+      const run = () =>
+        startNewCanvas({
+          name: "plan",
+          exists,
+          confirmReplace: async (n) => {
+            calls.push(`confirm:${n}`);
+            return confirm;
+          },
+          detach: () => calls.push("detach"),
+          clear: () => {
+            calls.push("clear");
+            page = "blank";
+          },
+          snapshot: () => page,
+          save: async (n, snap) => {
+            calls.push(`save:${n}`);
+            files.set(n, snap);
+          },
+        });
+      return { calls, files, run };
+    }
+
+    it("writes the blank page under the new name right away, after saving the old canvas", async () => {
+      const { startNewCanvas } = await import("../ui/CanvasTldraw");
+      const h = harness(startNewCanvas, false, true);
+      expect(await h.run()).toBe(true);
+      expect(h.calls).toEqual(["detach", "clear", "save:plan"]);
+      expect(h.files.get("plan")).toBe("blank"); // closing now reopens the blank canvas, not the old drawing
+    });
+
+    it("asks before replacing a canvas with that name, and changes nothing when declined", async () => {
+      const { startNewCanvas } = await import("../ui/CanvasTldraw");
+      const declined = harness(startNewCanvas, true, false);
+      expect(await declined.run()).toBe(false);
+      expect(declined.calls).toEqual(["confirm:plan"]);
+      expect(declined.files.size).toBe(0);
+      const accepted = harness(startNewCanvas, true, true);
+      expect(await accepted.run()).toBe(true);
+      expect(accepted.calls).toEqual(["confirm:plan", "detach", "clear", "save:plan"]);
+    });
+  });
 });

@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-10-18T03:18:44.238Z",
+  "generated_at": "2026-10-18T05:33:13.885Z",
   "source": "src/i18n/index.ts (en bundle)",
-  "count": 1411,
+  "count": 1414,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -4405,6 +4405,23 @@
     {
       "key": "canvas.new.prompt",
       "en": "Canvas name:",
+      "vars": []
+    },
+    {
+      "key": "canvas.new.replaceTitle",
+      "en": "Replace this canvas?",
+      "vars": []
+    },
+    {
+      "key": "canvas.new.replaceBody",
+      "en": "A canvas named “{name}” already exists. Starting a new one with this name replaces its drawing with a blank page.",
+      "vars": [
+        "name"
+      ]
+    },
+    {
+      "key": "canvas.new.replaceOk",
+      "en": "Replace with blank",
       "vars": []
     },
     {

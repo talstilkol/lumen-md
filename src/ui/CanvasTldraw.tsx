@@ -22,7 +22,7 @@ import {
 } from "tldraw";
 import "tldraw/tldraw.css";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { uiPrompt } from "./PromptDialog";
+import { uiConfirm, uiPrompt } from "./PromptDialog";
 import { showAiToast } from "./AiToast";
 import { isOPFSAvailable } from "../storage/workspace";
 import { t } from "../i18n";
@@ -221,6 +221,34 @@ export function bindCanvasSaver(listen: (onChange: () => void) => () => void, sa
   };
 }
 
+/**
+ * New canvas, in the order that loses nothing: confirm before replacing a
+ * canvas that already has that name, save and stop the current canvas's
+ * saver, clear the editor, then write the blank page under the new name at
+ * once — so closing right away still leaves the blank canvas saved, not the
+ * old drawing. Returns false when the user kept the existing canvas.
+ * Exported for tests.
+ */
+export async function startNewCanvas(o: {
+  name: string;
+  exists: boolean;
+  confirmReplace: (name: string) => Promise<boolean>;
+  detach: () => void;
+  clear: () => void;
+  snapshot: () => unknown;
+  save: (name: string, snapshot: unknown) => Promise<void>;
+}): Promise<boolean> {
+  if (o.exists && !(await o.confirmReplace(o.name))) return false;
+  o.detach();
+  o.clear();
+  try {
+    await o.save(o.name, o.snapshot());
+  } catch (err) {
+    log.warn("tldraw save of the new canvas failed", err);
+  }
+  return true;
+}
+
 export function CanvasTldraw({ open, onClose }: Props) {
   const [editor, setEditor] = useState<TldrawEditor | null>(null);
   const [canvasName, setCanvasName] = useState<string>(DEFAULT_CANVAS_NAME);
@@ -290,17 +318,32 @@ export function CanvasTldraw({ open, onClose }: Props) {
     const trimmed = name.trim().replace(/[/\\]/g, "-");
     if (!trimmed) return;
     if (editor) {
-      // Save the old canvas and stop its saver first: clearing the editor
-      // while it still listens would write the empty page over the old file.
-      detachSaver.current?.();
-      editor.selectAll();
-      editor.deleteShapes(editor.getSelectedShapeIds());
+      // Save the old canvas and stop its saver before clearing: clearing the
+      // editor while it still listens would write the empty page over the old file.
+      const ok = await startNewCanvas({
+        name: trimmed,
+        exists: trimmed === canvasName || savedList.includes(trimmed),
+        confirmReplace: (n) =>
+          uiConfirm({
+            title: t("canvas.new.replaceTitle"),
+            message: t("canvas.new.replaceBody", { name: n }),
+            okLabel: t("canvas.new.replaceOk"),
+          }),
+        detach: () => detachSaver.current?.(),
+        clear: () => {
+          editor.selectAll();
+          editor.deleteShapes(editor.getSelectedShapeIds());
+        },
+        snapshot: () => getSnapshot(editor.store),
+        save: saveCanvasFile,
+      });
+      if (!ok) return;
     }
     setCanvasName(trimmed);
     // why: New with the current name changes no state, so without this the detached saver is never replaced
     setSaverEpoch((n) => n + 1);
     setSavedList((prev) => Array.from(new Set([...prev, trimmed])).sort());
-  }, [editor]);
+  }, [editor, canvasName, savedList]);
 
   const handlePick = useCallback((name: string) => {
     setCanvasName(name);

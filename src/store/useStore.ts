@@ -59,11 +59,20 @@ export function __tabRuntime(): ReadonlyMap<string, { loadId?: number; handle?: 
 
 /** A tab's id changed (rename, move, detach): its runtime state follows it. */
 export function moveTabRuntime(fromId: string, toId: string): void {
-  if (fromId === toId) return;
-  const rt = tabRuntime.get(fromId);
-  if (!rt) return;
-  tabRuntime.delete(fromId);
-  tabRuntime.set(toId, rt);
+  moveTabRuntimes([[fromId, toId]]);
+}
+
+/**
+ * Several id changes at once, collision-safe: every source entry is read
+ * before any is written, so a move into an id that is itself moving away in
+ * the same batch (a moved note landing where an overwritten tab was) does not
+ * carry the wrong runtime along.
+ */
+export function moveTabRuntimes(moves: ReadonlyArray<readonly [string, string]>): void {
+  const real = moves.filter(([from, to]) => from !== to);
+  const taken = real.map(([from, to]) => [to, tabRuntime.get(from)] as const);
+  for (const [from] of real) tabRuntime.delete(from);
+  for (const [to, rt] of taken) if (rt) tabRuntime.set(to, rt);
 }
 
 interface AppState {

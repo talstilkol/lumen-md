@@ -115,6 +115,45 @@ describe("tab runtime follows id changes (review: #206)", () => {
     expect(__tabRuntime().get(detached.id)).toEqual(before);
   });
 
+  it("remaps colliding ids atomically: the moved tab and the overwritten one each keep their own runtime (review: #206)", async () => {
+    const { __tabRuntime } = await import("../store/useStore");
+    await writeWorkspaceFile("a.md", "A");
+    await writeWorkspaceFile("b.md", "B");
+    await writeWorkspaceFile("c.md", "C");
+    open("a.md", "A"); // the source comes before the target in openTabs
+    useAppStore.getState().setContent("A edited"); // unsaved
+    open("b.md", "B");
+    open("c.md", "C"); // both a.md and b.md are inactive, their runtimes stored
+    const rtA = __tabRuntime().get("a.md");
+    const rtB = __tabRuntime().get("b.md");
+    expect(rtA?.loadId).toBeDefined();
+    expect(rtA).not.toEqual(rtB);
+    const r = await safeMove("a.md", "b.md", { confirmReplace: async () => true });
+    syncOpenDocsAfterMove("a.md", r!.path, r!.rewrite, r!.replaced?.originalPath);
+    const tabs = useAppStore.getState().openTabs;
+    const moved = tabs.find((t) => t.content === "A edited")!;
+    const detached = tabs.find((t) => t.content === "B")!;
+    expect(moved.id).toBe("b.md");
+    expect(__tabRuntime().get("b.md")).toEqual(rtA);
+    expect(__tabRuntime().get(detached.id)).toEqual(rtB);
+    // Selecting the moved tab keeps its unsaved state (the sameLoad check passes).
+    useAppStore.getState().openTab({ name: "b.md", content: moved.content, workspaceName: "b.md" });
+    expect(useAppStore.getState().doc).toMatchObject({ workspaceName: "b.md", content: "A edited", dirty: true });
+  });
+
+  it("moveTabRuntimes reads every source before writing any target", async () => {
+    const { __tabRuntime, moveTabRuntimes } = await import("../store/useStore");
+    useAppStore.getState().openTab({ name: "x.md", content: "X", workspaceName: null });
+    useAppStore.getState().openTab({ name: "y.md", content: "Y", workspaceName: null });
+    useAppStore.getState().openTab({ name: "z.md", content: "Z", workspaceName: null });
+    const rx = __tabRuntime().get("x.md");
+    const ry = __tabRuntime().get("y.md");
+    moveTabRuntimes([["x.md", "y.md"], ["y.md", "w.md"]]);
+    expect(__tabRuntime().get("y.md")).toEqual(rx);
+    expect(__tabRuntime().get("w.md")).toEqual(ry);
+    expect(__tabRuntime().has("x.md")).toBe(false);
+  });
+
   it("adopting an ad-hoc note into the workspace moves its runtime entry", async () => {
     const { __tabRuntime } = await import("../store/useStore");
     useAppStore.getState().openTab({ name: "Scratch.md", content: "S", workspaceName: null });
