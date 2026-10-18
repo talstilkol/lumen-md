@@ -93,11 +93,13 @@ export type { LinkSuggestion } from "./defs/linker";
 import type { LinkSuggestion } from "./defs/linker";
 
 /** Build a compact catalogue of every note in the workspace for the prompt, and the list of titles. */
-async function collectNotesCatalog(currentPath: string): Promise<{ catalog: string; titles: string[] }> {
-  if (!isOPFSAvailable()) return { catalog: "", titles: [] };
+async function collectNotesCatalog(currentPath: string): Promise<{ catalog: string; titles: string[]; untrusted: string[] }> {
+  if (!isOPFSAvailable()) return { catalog: "", titles: [], untrusted: [] };
   const list = await listWorkspace({ includeAssets: false });
+  const { guardUntrusted, untrustedSourcesOfNote } = await import("./untrusted");
   const lines: string[] = [];
   const titles: string[] = [];
+  const untrusted: string[] = [];
   for (const f of list) {
     if (f.path === currentPath) continue;
     if (!/\.(md|markdown)$/i.test(f.path)) continue;
@@ -112,10 +114,13 @@ async function collectNotesCatalog(currentPath: string): Promise<{ catalog: stri
     const firstSentence = (stripped.split(/\n\n/)[0] ?? "").replace(/\s+/g, " ").trim().slice(0, 160);
     const title = f.name.replace(/\.(md|markdown)$/i, "");
     titles.push(title);
-    lines.push(`- ${title} — ${firstSentence}`);
+    // Plan 2.7: an entry from outside content (clipped, imported, pulled) is cleaned and delimited, and taints the run.
+    const from = untrustedSourcesOfNote(f.path, body);
+    if (from.length) untrusted.push(...from);
+    lines.push(from.length ? guardUntrusted(`- ${title} — ${firstSentence}`, from).text : `- ${title} — ${firstSentence}`);
     if (lines.length >= 60) break;
   }
-  return { catalog: lines.join("\n"), titles };
+  return { catalog: lines.join("\n"), titles, untrusted };
 }
 
 /**
@@ -128,11 +133,11 @@ export async function suggestLinks(
   content: string,
   signal?: AbortSignal,
 ): Promise<LinkSuggestion[]> {
-  const { catalog, titles } = await collectNotesCatalog(currentPath);
+  const { catalog, titles, untrusted } = await collectNotesCatalog(currentPath);
   if (!catalog) return [];
   const { runAgentOrThrow } = await import("./runtime");
   const { linkerAgent, filterLinks } = await import("./defs");
-  const out = await runAgentOrThrow(linkerAgent, { text: content, path: currentPath, extra: { catalog, titles } }, { document: content, path: currentPath, signal });
+  const out = await runAgentOrThrow(linkerAgent, { text: content, path: currentPath, extra: { catalog, titles } }, { document: content, path: currentPath, signal, untrusted });
   return filterLinks(out.links, content, titles);
 }
 
