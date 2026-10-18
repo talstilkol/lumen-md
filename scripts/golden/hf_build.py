@@ -138,10 +138,12 @@ def tree_hash(split_dir: Path, part_id: str) -> str:
 # ── Downloads ───────────────────────────────────────────────────────────
 
 
-def http_get(url: str, name: str | None = None, retries: int = 4) -> Path:
+def http_get(url: str, name: str | None = None, retries: int = 4, max_age: float | None = None) -> Path:
+    """A cached download. `max_age` (seconds): refetch a cached copy older than that, for exports that change
+    under a fixed name (Tatoeba's are weekly); None = immutable, cached forever."""
     CACHE.mkdir(parents=True, exist_ok=True)
     path = CACHE / (name or hashlib.sha256(url.encode()).hexdigest()[:24])
-    if path.exists():
+    if path.exists() and (max_age is None or time.time() - path.stat().st_mtime < max_age):
         return path
     last = None
     for attempt in range(retries):
@@ -388,8 +390,13 @@ TATOEBA = "https://downloads.tatoeba.org/exports/per_language/"
 LANGS = {"heb": "he", "eng": "en", "ara": "ar", "rus": "ru", "fra": "fr", "deu": "de", "jpn": "ja", "cmn": "zh"}
 
 
+# The exports are rebuilt weekly under the same names: a cached copy older than a day is fetched again, so the
+# test build's drift check compares against the current export, not the first one the CI cache ever saw.
+TATOEBA_MAX_AGE = 24 * 3600
+
+
 def tsv_bz2(url, name):
-    with bz2.open(http_get(url, name), "rt", encoding="utf-8", newline="") as f:
+    with bz2.open(http_get(url, name, max_age=TATOEBA_MAX_AGE), "rt", encoding="utf-8", newline="") as f:
         return [line.rstrip("\n").split("\t") for line in f if line.strip()]
 
 

@@ -9,12 +9,13 @@
  *   score({ items, manifest }) → { <metric>: number, … }
  * (items as loadSet returns them). Only those numbers are published — to
  * scores.json and the job summary; no item, input or output is printed. A
- * test part whose sha256 does not match the manifest fails the set.
+ * test part whose sha256 does not match the manifest fails the set; a set
+ * with a part below its declared test count is "partial" and not scored.
  */
 import { appendFileSync, existsSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { pathToFileURL } from "node:url";
-import { loadSet, validateAll } from "../lib/golden.mjs";
+import { incompleteParts, loadSet, validateAll } from "../lib/golden.mjs";
 import { GOLDEN, ROOT } from "./common.mjs";
 
 const args = process.argv.slice(2);
@@ -37,6 +38,13 @@ for (const { name, manifest } of validateAll(GOLDEN)) {
       sets[name] = { status: "not-built", parts };
       continue;
     }
+    // Every part at its declared size, or no score: a metric over a partial
+    // set (say FLEURS only, without Common Voice) would be published as the set's.
+    const missing = incompleteParts(manifest, items);
+    if (missing.length) {
+      sets[name] = { status: "partial", parts, note: `not scored: ${missing.map((m) => `${m.part} ${m.have}/${m.want}`).join(", ")}` };
+      continue;
+    }
     if (!existsSync(harness)) {
       sets[name] = { status: "no-harness", parts, unverified, note: `scripts/golden/evals/${name}.mjs is written by the feature task (${manifest.capability})` };
       continue;
@@ -54,7 +62,7 @@ for (const { name, manifest } of validateAll(GOLDEN)) {
 const report = { generatedAt: new Date().toISOString(), split: "test", sets };
 writeFileSync(outFile, JSON.stringify(report, null, 2) + "\n");
 const lines = ["## Golden sets — test split", "", "| Set | Status | Items per part | Scores |", "|---|---|---|---|"];
-for (const [name, r] of Object.entries(sets)) lines.push(`| ${name} | ${r.status}${r.unverified?.length ? ` (sha256 not recorded: ${r.unverified.join(", ")})` : ""} | ${r.parts ? Object.entries(r.parts).map(([p, n]) => `${p} ${n}`).join(", ") : ""} | ${r.scores ? Object.entries(r.scores).map(([k, v]) => `${k} ${v}`).join(", ") : (r.error ?? "")} |`);
+for (const [name, r] of Object.entries(sets)) lines.push(`| ${name} | ${r.status}${r.unverified?.length ? ` (sha256 not recorded: ${r.unverified.join(", ")})` : ""} | ${r.parts ? Object.entries(r.parts).map(([p, n]) => `${p} ${n}`).join(", ") : ""} | ${r.scores ? Object.entries(r.scores).map(([k, v]) => `${k} ${v}`).join(", ") : (r.error ?? (r.status === "partial" ? r.note : ""))} |`);
 const md = lines.join("\n") + "\n";
 if (process.env.GITHUB_STEP_SUMMARY) appendFileSync(process.env.GITHUB_STEP_SUMMARY, md);
 console.log(md);

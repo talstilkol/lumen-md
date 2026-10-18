@@ -23,6 +23,7 @@ import {
   canaryGuid,
   contentHash,
   freezeSet,
+  incompleteParts,
   loadSet,
   newCanary,
   partHash,
@@ -219,6 +220,20 @@ describe("the rules (scripts/lib/golden.mjs) on a fixture set", () => {
   });
 });
 
+describe("run-evals: only complete sets are scored", () => {
+  it("lists the parts below their declared test count", () => {
+    const manifest = { parts: [{ id: "fleurs", test: 22 }, { id: "common-voice", test: 22 }, { id: "owner", test: 20 }, { id: "free" }] };
+    const items = [...Array.from({ length: 22 }, () => ({ part: "fleurs" })), ...Array.from({ length: 5 }, () => ({ part: "owner" }))];
+    expect(incompleteParts(manifest, items)).toEqual([
+      { part: "common-voice", have: 0, want: 22 },
+      { part: "owner", have: 5, want: 20 },
+    ]);
+    const full = [...items, ...Array.from({ length: 22 }, () => ({ part: "common-voice" })), ...Array.from({ length: 15 }, () => ({ part: "owner" }))];
+    expect(incompleteParts(manifest, full)).toEqual([]);
+    expect(readFileSync(join(repo, "scripts/golden/run-evals.mjs"), "utf8")).toMatch(/incompleteParts\(manifest, items\)[\s\S]*status: "partial"[\s\S]*mod\.score/);
+  });
+});
+
 describe("samplers are deterministic for a (dummy) seed", () => {
   const opts = (part: string, nDev: number, nTest: number, secret = DUMMY) => ({ set: "t", part, nDev, nTest, secret });
   const ids = (xs: Item[]) => xs.map((x) => x.id);
@@ -324,6 +339,35 @@ describe("samplers are deterministic for a (dummy) seed", () => {
     const png: Buffer = pngWithText(Buffer.from("89504e470d0a1a0a0000000d49484452000000010000000108000000003a7e9b55", "hex"), "canary-x");
     expect(png.subarray(37, 41).toString("latin1")).toBe("tEXt");
     expect(png.toString("latin1")).toContain("canary-x");
+  });
+
+  it("hf_build.py refetches a cached mutable export (Tatoeba) once it is older than its max age", () => {
+    if (spawnSync("python3", ["--version"]).status !== 0) return; // CI images have python3
+    const cache = mkdtempSync(join(tmpdir(), "lumen-golden-cache-"));
+    try {
+      const code = [
+        "import importlib.util, json, os, time",
+        `os.environ['GOLDEN_CACHE'] = ${JSON.stringify(cache)}`,
+        `spec = importlib.util.spec_from_file_location('hb', ${JSON.stringify(join(repo, "scripts/golden/hf_build.py"))})`,
+        "hb = importlib.util.module_from_spec(spec); spec.loader.exec_module(hb)",
+        "p = hb.CACHE / 'x.tsv.bz2'; hb.CACHE.mkdir(parents=True, exist_ok=True); p.write_text('old')",
+        "fetched = []",
+        "class R:\n  def __init__(s): s.d = [b'new', b'']\n  def read(s, n): return s.d.pop(0)\n  def __enter__(s): return s\n  def __exit__(s, *a): pass",
+        "hb.urllib.request.urlopen = lambda req, timeout=0: (fetched.append(req.full_url), R())[1]",
+        "hb.http_get('https://e/x', 'x.tsv.bz2', max_age=3600)",
+        "fresh = p.read_text()",
+        "os.utime(p, (time.time() - 7200, time.time() - 7200))",
+        "hb.http_get('https://e/x', 'x.tsv.bz2', max_age=3600)",
+        "stale = p.read_text()",
+        "print(json.dumps({'fresh': fresh, 'stale': stale, 'fetched': len(fetched), 'tatoeba': hb.TATOEBA_MAX_AGE}))",
+      ].join("\n");
+      const r = spawnSync("python3", ["-I", "-B", "-c", code], { encoding: "utf8" });
+      expect(r.stderr).toBe("");
+      // A young copy is reused; an old one is fetched again. Tatoeba's exports use a one-day max age.
+      expect(JSON.parse(r.stdout)).toEqual({ fresh: "old", stale: "new", fetched: 1, tatoeba: 86400 });
+    } finally {
+      rmSync(cache, { recursive: true, force: true });
+    }
   });
 
   it("Python (scripts/golden/hf_build.py) samples and hashes exactly like Node", () => {

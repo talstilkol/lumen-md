@@ -497,6 +497,18 @@ export function writeSplitPart(splitDir, { manifest, partId, split, items, meta 
  * measures against a tampered or drifted set. `unverified` lists test parts
  * whose sha256 is not recorded yet.
  */
+/**
+ * Parts of a set whose test items are fewer than the manifest declares
+ * (`parts[].test`): a builder failed or a gated part was skipped. A score
+ * over the rest would be published as the set's metric. → [{ part, have, want }]
+ */
+export function incompleteParts(manifest, items) {
+  return (manifest.parts ?? [])
+    .filter((p) => typeof p.test === "number" && p.test > 0)
+    .map((p) => ({ part: p.id, have: items.filter((it) => it.part === p.id).length, want: p.test }))
+    .filter((x) => x.have < x.want);
+}
+
 export function loadSet(root, name, { split = "dev", testDir, parts, local = false } = {}) {
   const dir = join(root, name);
   const { manifest, problems } = validateSet(dir, name);
