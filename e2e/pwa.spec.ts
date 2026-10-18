@@ -37,6 +37,9 @@ test("production build opens offline after the first visit", async ({ page, cont
   // A second load lets the worker control the page and fill the chunk cache.
   await page.reload();
   await expect.poll(() => page.evaluate(() => !!navigator.serviceWorker.controller), { timeout: 20_000 }).toBe(true);
+  // The load event comes before the lazy editor chunks are even requested:
+  // let the app finish loading them, or the cache check below sees none.
+  await expect(page.locator(".cm-content").first()).toBeVisible({ timeout: 15_000 });
   // The runtime cache stores a lazily-fetched chunk after answering for it,
   // so wait until every script and stylesheet this load used is in a cache:
   // that is what the offline reload needs (this was a fixed 1.5 s sleep).
