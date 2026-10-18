@@ -11,6 +11,11 @@ describe("read aloud", () => {
     expect(s.map((x) => x.text)).toEqual(["כותרת", "שלום עולם.", "מה נשמע?", "See the docs now!"]);
     expect(md.slice(s[1].from, s[1].to)).toBe("שלום עולם.");
   });
+  it("skips tilde-fenced code and CRLF frontmatter too", () => {
+    const md = "---\r\ntitle: secret\r\n---\r\nHello there.\r\n\r\n~~~python\r\nprint(1)\r\n~~~\r\nBye now.";
+    expect(speakableSentences(md).map((x) => x.text)).toEqual(["Hello there.", "Bye now."]);
+    expect(speakableSentences("Intro.\n````\n```\nnot code end\n````\nOut.").map((x) => x.text)).toEqual(["Intro.", "Out."]);
+  });
   it("picks the Hebrew voice for Hebrew sentences", () => {
     expect(langFor("שלום עולם", "en")).toBe("he-IL");
     expect(langFor("Hello", "en")).toBe("en");
