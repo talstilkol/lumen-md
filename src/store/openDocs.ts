@@ -3,7 +3,7 @@
  * consistent with file operations on the vault (T46 review fixes).
  */
 
-import { flushPendingEdits, tabIdOf, useAppStore } from "./useStore";
+import { flushPendingEdits, notifyTabIdChange, tabIdOf, useAppStore } from "./useStore";
 import { writeWorkspaceFile } from "../storage/workspace";
 import { notifyWorkspaceChanged } from "../storage/workspaceEvents";
 import { movedPath } from "../storage/fileOps";
@@ -38,14 +38,20 @@ export function syncOpenDocsAfterMove(from: string, to: string, rewrite: (conten
     const text = /\.(md|markdown)$/i.test(ws) ? rewrite(content, ws) : content;
     return path === ws && text === content ? null : { path, text };
   };
+  const renamed = new Map<string, string>();
   useAppStore.setState((state) => {
     const openTabs = state.openTabs.map((t) => {
       const f = fix(t.workspaceName, t.content);
-      return f ? { ...t, id: tabIdOf({ workspaceName: f.path, name: f.path }), name: t.name === t.workspaceName ? f.path : t.name, workspaceName: f.path, content: f.text } : t;
+      if (!f) return t;
+      const id = tabIdOf({ workspaceName: f.path, name: f.path });
+      renamed.set(t.id, id);
+      return { ...t, id, name: t.name === t.workspaceName ? f.path : t.name, workspaceName: f.path, content: f.text };
     });
     const d = state.doc;
     const f = fix(d.workspaceName, d.content);
     const doc = f ? { ...d, name: d.name === d.workspaceName ? f.path : d.name, workspaceName: f.path, content: f.text } : d;
+    if (f) renamed.set(tabIdOf(d), tabIdOf(doc));
     return { doc, openTabs };
   });
+  for (const [from, to] of renamed) notifyTabIdChange(from, to);
 }

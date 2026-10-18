@@ -1271,6 +1271,8 @@
   "toast.dictate.noteClosed": "La note dans laquelle vous dictiez a été fermée ; la suite est dans une nouvelle note : {name}",
   "toast.dictate.localFailed": "Dictée sur l’appareil arrêtée : {error}",
   "toast.dictate.localOnlyBlocked": "La dictée sur l'appareil n'est pas disponible ici, et le service vocal du navigateur est bloqué en mode local uniquement (il envoie l'audio à l'extérieur)",
+  "toast.dictate.stoppedLocalOnly": "Dictée arrêtée : la politique d'IA est maintenant « Local seulement », et le service vocal du navigateur envoie l'audio à l'extérieur",
+  "dictate.audioSuspended": "le navigateur a laissé l'audio du micro en pause — relancez la dictée",
   "toast.dictate.webSpeechActive": "Dictée via le service vocal du navigateur — l'audio est envoyé à son fournisseur",
   "dictate.webSpeech.title": "Utiliser le service vocal du navigateur ?",
   "dictate.webSpeech.body": "La dictée sur cet appareil n'a pas pu démarrer. Le service vocal du navigateur fonctionne, mais il envoie l'audio à son fournisseur (Google dans Chrome). Le journal de confidentialité enregistre chaque utilisation.",

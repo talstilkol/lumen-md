@@ -562,6 +562,8 @@ const en: Strings = {
   "toast.dictate.noteClosed": "The note you were dictating into was closed, so the rest went to a new note: {name}",
   "toast.dictate.localFailed": "On-device dictation stopped: {error}",
   "toast.dictate.localOnlyBlocked": "On-device dictation isn't available here, and the browser's speech service is blocked under local-only (it sends audio out)",
+  "toast.dictate.stoppedLocalOnly": "Dictation stopped: the AI policy is now local-only, and the browser's speech service sends audio out",
+  "dictate.audioSuspended": "the browser kept the microphone audio paused — start dictation again",
   "toast.dictate.webSpeechActive": "Dictating through the browser's speech service — the audio is sent to its provider",
   "dictate.webSpeech.title": "Use the browser's speech service?",
   "dictate.webSpeech.body": "Dictation on this device couldn't start. Your browser's speech service works, but it sends the audio to its provider (Google in Chrome). The privacy ledger records each use.",
