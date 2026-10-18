@@ -27,7 +27,8 @@ export const isTestStep = (name) => /^test\b|\b(e2e|playwright|vitest)\b/i.test(
  * ("[chromium] › e2e/x.spec.ts:12:3 › …") or a test file's path. A compiler
  * diagnostic from setup-node's tsc problem matcher (src/foo.ts) is not one.
  */
-const isTestAnnotation = (a) => /^\s*\[[\w-]+\]\s+›/.test(a.title ?? "") || /(^|\/)(e2e|__tests__|tests?)\/|\.(spec|test)\.[cm]?[jt]sx?$/.test(a.path ?? "");
+const PLAYWRIGHT_TITLE = /^\s*\[[\w-]+\]\s+›/;
+const isTestAnnotation = (a) => PLAYWRIGHT_TITLE.test(a.title ?? "") || /(^|\/)(e2e|__tests__|tests?)\/|\.(spec|test)\.[cm]?[jt]sx?$/.test(a.path ?? "");
 
 /** The failed steps of a job, in order. */
 export const failedSteps = (job) => (job?.steps ?? []).filter((s) => isFailed(s.conclusion));
@@ -124,7 +125,10 @@ export function parseAnnotations(annotations) {
 export function failureItems(job, parsed) {
   const steps = failedSteps(job);
   const step = steps[0]?.name ?? null;
-  const tests = [...(parsed?.tests ?? []), ...(isTestStep(step) ? (parsed?.other ?? []) : [])];
+  // Outside a test step (Typecheck…), even a test file's annotation is a compiler diagnostic
+  // (tsconfig covers src/__tests__): only Playwright's own "[project] ›" titles still count.
+  const testStep = isTestStep(step);
+  const tests = testStep ? [...(parsed?.tests ?? []), ...(parsed?.other ?? [])] : (parsed?.tests ?? []).filter((t) => PLAYWRIGHT_TITLE.test(t.title ?? ""));
   if (tests.length) return tests.map((t) => ({ kind: "test", job: job.name, step, ...t }));
   if (steps.length) return steps.map((s) => ({ kind: "step", job: job.name, step: s.name, key: s.name }));
   return [{ kind: "job", job: job.name, step: null, key: job.name }];

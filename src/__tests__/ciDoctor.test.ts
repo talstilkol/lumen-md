@@ -103,6 +103,11 @@ describe("annotations that are not tests", () => {
       ["test", "src/ai/llm.ts"],
     ]);
   });
+  it("a compiler diagnostic in a test file from a failed Typecheck is still the step", () => {
+    const tscInTest = { annotation_level: "failure", path: "src/__tests__/llm.test.ts", start_line: 3, title: "", message: "TS2345: Argument of type 'string' is not assignable" };
+    expect(failureItems(job("Typecheck"), parseAnnotations([tscInTest]))).toEqual([{ kind: "step", job: "typecheck • test • build", step: "Typecheck", key: "Typecheck" }]);
+    expect(failureItems(job("Test"), parseAnnotations([tscInTest]))[0].kind).toBe("test");
+  });
   it("a cache or artifact step that failed on the same commit elsewhere is flaky, not real", () => {
     const restore: Item = { kind: "step", job: "typecheck • test • build", step: "Restore main's bundle sizes", key: "Restore main's bundle sizes" };
     expect(classify(restore, [{ outcome: "passed", distance: 0, sameSha: true, branch: "feat/y" }]).verdict).toBe("flaky");
