@@ -71,7 +71,7 @@ describe("moving the vault into a folder", () => {
     const f = folder();
     const seen: number[] = [];
     const r = await moveVault(loc(f), { onProgress: (p) => seen.push(p.done) });
-    expect(r).toEqual({ files: 4, bytes: 4 + 3 + new TextEncoder().encode("שלום עולם").byteLength + 2, unchanged: 0 });
+    expect(r).toEqual({ files: 4, bytes: 4 + 3 + new TextEncoder().encode("שלום עולם").byteLength + 2, unchanged: 0, trashed: 0 });
     expect(seen.at(-1)).toBe(4);
     expect(getVaultStatus()).toEqual({ location: "folder", name: "My Vault" });
     expect(await bytesAt(f.dir, "img/lumen-asset-1.png")).toEqual([0, 255, 7]);
@@ -154,6 +154,76 @@ describe("moving the vault into a folder", () => {
     expect(err).toBeInstanceOf(VaultMoveConflictError);
     expect((err as VaultMoveConflictError).paths).toEqual(["a.md"]);
     expect(await bytesAt(f.dir, "a.md")).toEqual([...new TextEncoder().encode("edited in the folder")]);
+  });
+
+  it("stops when a target file changes while the copy runs (another app editing the folder)", async () => {
+    await seed();
+    const f = folder();
+    const edit = async () => {
+      const w = await (await f.dir.getFileHandle("a.md", { create: true })).createWritable();
+      await w.write("written by another app");
+      await w.close();
+    };
+    let edited = false;
+    // ".trash/index.json" is copied first; then another app writes a.md.
+    const err = await moveVault(loc(f), {
+      onProgress: (p) => {
+        if (p.done === 1 && !edited) {
+          edited = true;
+          void edit();
+        }
+      },
+    }).catch((e: unknown) => e);
+    expect(err).toBeInstanceOf(VaultMoveConflictError);
+    expect(await bytesAt(f.dir, "a.md")).toEqual([...new TextEncoder().encode("written by another app")]);
+    expect(getVaultStatus()).toEqual({ location: "opfs" });
+  });
+
+  it("a note added to the source during the move stops the switch (resumable)", async () => {
+    await seed();
+    const f = folder();
+    let added = false;
+    await expect(
+      moveVault(loc(f), {
+        onProgress: (p) => {
+          if (p.done === 1 && !added) {
+            added = true;
+            void createOpfsBackend().write("new during move.md", "N");
+          }
+        },
+      }),
+    ).rejects.toThrow(/added or removed/);
+    expect(getVaultStatus()).toEqual({ location: "opfs" });
+    expect(getPendingMove()).not.toBeNull();
+    const r = await moveVault(loc(f));
+    expect(r.files).toBe(5);
+    expect(await bytesAt(f.dir, "new during move.md")).toEqual([78]);
+  });
+
+  it("moving back to browser storage replaces the copies the first move left there, and trashes deleted ones", async () => {
+    await seed();
+    const opfs = createOpfsBackend();
+    await moveVault(loc(folder()));
+    // In the folder: a.md edited, the Hebrew note deleted.
+    await writeWorkspaceFile("a.md", "# A, edited in the folder\n");
+    const { deleteWorkspaceFile } = await import("../storage/workspace");
+    await deleteWorkspaceFile("פרויקטים/סיכום.md");
+    const r = await moveVault({ kind: "opfs" });
+    expect(r.trashed).toBe(1);
+    expect(getVaultStatus()).toEqual({ location: "opfs" });
+    expect(await opfs.readText("a.md")).toBe("# A, edited in the folder\n");
+    expect(await opfs.stat("פרויקטים/סיכום.md")).toBeNull();
+    const { listTrash } = await import("../storage/trash");
+    expect((await listTrash()).map((t) => t.originalPath)).toEqual(["פרויקטים/סיכום.md"]);
+  });
+
+  it("a no-copy switch drops an interrupted move (its source is no longer the vault)", async () => {
+    store.set("lumen-vault-move", { from: { kind: "opfs" }, to: loc(folder("A")), startedAt: 1, written: { "a.md": "x" }, total: 1 });
+    await restoreVaultLocation();
+    expect(getPendingMove()).not.toBeNull();
+    await openFolderAsVault(folder("B").handle);
+    expect(getPendingMove()).toBeNull();
+    expect(store.has("lumen-vault-move")).toBe(false);
   });
 
   it("refuses a folder without permission, before reading anything", async () => {

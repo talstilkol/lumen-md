@@ -52,6 +52,14 @@ interface KV {
 
 const LOCATION_KEY = "lumen-vault-location";
 const MOVE_KEY = "lumen-vault-move";
+const LAST_MOVE_KEY = "lumen-vault-last-move";
+
+/** The last completed move: what it copied (path → SHA-256) from where to where. */
+interface LastMove {
+  from: StoredLocation;
+  to: StoredLocation;
+  copied: Record<string, string>;
+}
 
 let kv: KV = { get: (k) => idbGet(k), set: (k, v) => idbSet(k, v), del: (k) => idbDel(k) };
 
@@ -266,6 +274,7 @@ export async function reconnectVaultFolder(): Promise<boolean> {
 /** Work in browser storage (OPFS) from now on, without copying anything. */
 export async function switchToBrowserStorage(): Promise<void> {
   await kv.set(LOCATION_KEY, { kind: "opfs" } satisfies StoredLocation);
+  await cancelPendingMove(); // its source is no longer the vault
   onVaultReplaced();
   activate({ kind: "opfs" }, createOpfsBackend());
 }
@@ -275,6 +284,7 @@ export async function openFolderAsVault(handle: FileSystemDirectoryHandle): Prom
   if (!(await ensureFolderPermission(handle, true))) return false;
   const loc: StoredLocation = { kind: "folder", handle, name: handle.name };
   await kv.set(LOCATION_KEY, loc);
+  await cancelPendingMove(); // its source is no longer the vault
   onVaultReplaced();
   activate(loc, createFolderBackend(handle));
   return true;
@@ -303,6 +313,11 @@ export interface MoveReport {
   bytes: number;
   /** Files already identical at the target (a resume, or a merge into an existing folder). */
   unchanged: number;
+  /**
+   * Moving back: copies an earlier move left at the target whose notes were
+   * deleted since, put in the trash (restorable) instead of reappearing.
+   */
+  trashed: number;
 }
 
 /** Every file path of `b`, dot entries (the trash) included. */
@@ -355,9 +370,14 @@ export async function moveVault(
   if (!source.available()) throw new Error("The current vault is not available.");
   if (await sameLocation(fromLoc, to)) throw new Error("The vault is already there.");
   const target = backendFor(to);
-  const resuming = pending && (await sameLocation(pending.to, to)) ? pending : null;
+  // A resume continues the same move: same target *and* same source.
+  const resuming = pending && (await sameLocation(pending.to, to)) && (await sameLocation(pending.from, fromLoc)) ? pending : null;
   const written: Record<string, string> = { ...(resuming?.written ?? {}) };
-  const ours = async (path: string, there: Uint8Array) => path in written && written[path] === (await sha256(there));
+  // Moving back to where the vault came from: the copies left there by
+  // that move are known (same hash) and may be replaced, not conflicts.
+  const last = await kv.get<LastMove>(LAST_MOVE_KEY);
+  const leftBehind = last && (await sameLocation(last.from, to)) && (await sameLocation(last.to, fromLoc)) ? last.copied : {};
+  const known = (path: string, hash: string) => written[path] === hash || leftBehind[path] === hash;
   const report = (done: number, total: number) => {
     progress = { done, total, to: nameOf(to) };
     opts.onProgress?.(progress);
@@ -369,14 +389,22 @@ export async function moveVault(
     report(0, files.length);
 
     // 1. Nothing is written while any target file differs and is not ours.
+    //    What each target path holds now is remembered: if it changes while
+    //    the copy runs (another app editing the folder), the move stops.
     const conflicts: string[] = [];
+    const before = new Map<string, string | null>();
     for (const path of files) {
       const there = await targetBytes(target, path).catch((e) => {
         if (e instanceof VaultMoveConflictError) return "conflict" as const;
         throw e;
       });
-      if (there === "conflict") conflicts.push(path);
-      else if (there && !same(there, await bytes(source, path)) && !(await ours(path, there))) conflicts.push(path);
+      if (there === "conflict") {
+        conflicts.push(path);
+        continue;
+      }
+      const hash = there ? await sha256(there) : null;
+      before.set(path, hash);
+      if (there && hash && !same(there, await bytes(source, path)) && !known(path, hash)) conflicts.push(path);
     }
     if (conflicts.length) throw new VaultMoveConflictError(conflicts);
 
@@ -387,32 +415,57 @@ export async function moveVault(
     // 2. Copy each file and read it back.
     let total = 0;
     let unchanged = 0;
+    const copied: Record<string, string> = {};
     for (const [i, path] of files.entries()) {
       const data = await bytes(source, path);
       total += data.byteLength;
+      copied[path] = await sha256(data);
       const there = await targetBytes(target, path);
+      if ((there ? await sha256(there) : null) !== before.get(path)) throw new VaultMoveConflictError([path]);
       if (there && same(there, data)) {
         unchanged++;
       } else {
         await target.write(path, data);
         if (!same(await bytes(target, path), data)) throw new Error(`The copy of “${path}” does not match the original.`);
-        written[path] = await sha256(data);
+        written[path] = copied[path];
         await kv.set(MOVE_KEY, record);
       }
       report(i + 1, files.length);
     }
 
-    // 3. The whole set once more, then switch.
+    // 3. The whole set once more — and no file added to the source meanwhile
+    //    (a note saved during the move) — then switch.
+    const now = (await allFiles(source)).sort();
+    if (now.length !== files.length || now.some((p, i) => p !== files[i])) {
+      throw new Error("Files were added or removed while the vault was moving; resume to copy them too.");
+    }
     for (const path of files) {
       const there = await targetBytes(target, path);
       if (!there || !same(there, await bytes(source, path))) throw new Error(`“${path}” changed or went missing during the move; resume to copy it again.`);
     }
     await kv.set(LOCATION_KEY, to);
+    await kv.set(LAST_MOVE_KEY, { from: fromLoc, to, copied } satisfies LastMove);
     await kv.del(MOVE_KEY);
     pending = null;
     progress = null;
     activate(to, target);
-    return { files: files.length, bytes: total, unchanged };
+
+    // Copies this vault left here earlier and that were deleted since (they
+    // are not in the source any more) would come back to life: they go to
+    // the trash of the vault that is now active — restorable, not deleted.
+    const stale: string[] = [];
+    for (const [path, hash] of Object.entries(leftBehind)) {
+      if (copied[path]) continue;
+      const there = await targetBytes(target, path).catch(() => null);
+      if (there && (await sha256(there)) === hash) stale.push(path);
+    }
+    let trashed = 0;
+    if (stale.length) {
+      const { moveToTrash } = await import("../trash");
+      trashed = (await moveToTrash(stale, Object.fromEntries(stale.map((p) => [p, "file" as const])))).length;
+      notifyWorkspaceChanged({ kind: "structure" });
+    }
+    return { files: files.length, bytes: total, unchanged, trashed };
   } catch (e) {
     progress = null;
     changed();
