@@ -204,7 +204,14 @@
       ]
     },
     "deploy-nginx": {
-      "why": "deploy/nginx.conf + deploy/lumen-runtime-headers.conf: the root Dockerfile image (fly.toml)."
+      "why": "deploy/nginx.conf + deploy/lumen-runtime-headers.conf: the root Dockerfile image (fly.toml).",
+      "csp": [
+        {
+          "routes": ["app"],
+          "add": { "connect-src": ["__CSP_CONNECT_EXTRA__"] },
+          "why": "Placeholder that the root Dockerfile replaces with the deployment's endpoint origins (dist/.csp-connect-extra, written by the Vite CSP plugin). Without it the header, enforced next to the meta CSP, blocks the configured endpoints."
+        }
+      ]
     },
     "meta": {
       "why": "<meta http-equiv> copies in the HTML pages. They also cover the contexts that send no header (Vite dev, Tauri, Capacitor) and are enforced next to the header everywhere else.",

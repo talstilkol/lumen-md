@@ -27,6 +27,12 @@ COPY deploy/lumen-runtime-headers.conf /etc/nginx/lumen-runtime-headers.conf
 # Copy the built assets from the builder stage
 COPY --from=builder /app/dist /usr/share/nginx/html
 
+# Fill in the deployment's endpoint origins (VITE_*_ENDPOINT / _URL at build
+# time, written by the Vite CSP plugin) — the header must allow them too.
+RUN extra="$(cat /usr/share/nginx/html/.csp-connect-extra 2>/dev/null | tr -d '\n')"; \
+    sed -i "s#__CSP_CONNECT_EXTRA__#${extra}#" /etc/nginx/nginx.conf /etc/nginx/lumen-runtime-headers.conf && \
+    rm -f /usr/share/nginx/html/.csp-connect-extra
+
 # Healthcheck for orchestrators (Docker Compose, Fly.io, K8s)
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s \
   CMD wget -qO- http://localhost:8080/favicon.svg || exit 1
