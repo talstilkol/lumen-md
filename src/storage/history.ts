@@ -240,12 +240,25 @@ function writeSnapshot(name: string, content: string, reason: SnapshotReason, no
 async function writeSnapshotNow(name: string, content: string, reason: SnapshotReason, now: number, author?: string): Promise<boolean> {
   const rows = await readRows(name);
   const newest = rows[rows.length - 1];
+  const backdated = !!newest && now < newest.timestamp;
   let prev: string | null = null;
-  if (newest) {
+  if (backdated) {
+    // An imported backup older than the history: compare it with the
+    // versions around its own time, not the newest — `A → B → A` keeps its
+    // first `A` — and skip an exact re-import (same time, same text), so a
+    // migration that runs again adds nothing.
+    const texts = await reconstruct(rows);
+    let before = -1;
+    for (let i = 0; i < rows.length; i++) {
+      if (rows[i].timestamp === now && texts[i] === content) return false;
+      if (rows[i].timestamp <= now) before = i;
+    }
+    if (before >= 0 && texts[before] === content) return false;
+  } else if (newest) {
     const cached = latestText.get(name);
     prev = cached && cached.id === newest.id ? cached.content : (await reconstruct(rows))[rows.length - 1];
+    if (prev === content) return false;
   }
-  if (prev === content) return false;
   // A full text every FULL_EVERY versions bounds how many deltas a read applies.
   let sinceFull = 0;
   for (let i = rows.length - 1; i >= 0 && typeof rows[i].content !== "string"; i--) sinceFull++;
@@ -253,7 +266,7 @@ async function writeSnapshotNow(name: string, content: string, reason: SnapshotR
   if (author) row.author = author;
   // A backdated version (an imported backup older than the history) sorts
   // before rows it can't be a delta for: it is stored whole.
-  if (prev === null || sinceFull >= FULL_EVERY - 1 || (newest && now < newest.timestamp)) row.content = content;
+  if (prev === null || sinceFull >= FULL_EVERY - 1 || backdated) row.content = content;
   else {
     const mod = await deltas();
     const payload = await mod.encodeDelta(mod.diff(prev, content));
@@ -268,9 +281,9 @@ async function writeSnapshotNow(name: string, content: string, reason: SnapshotR
   const tx = db.transaction(STORE, "readwrite");
   const req = tx.objectStore(STORE).add(row);
   await done(tx);
-  latestText.set(name, { id: req.result as number, content });
+  if (!backdated) latestText.set(name, { id: req.result as number, content });
   if (rows.length + 1 > maxPerDoc) {
-    const all = [...rows, { ...row, id: req.result as number } as Row];
+    const all = [...rows, { ...row, id: req.result as number } as Row].sort((x, y) => x.timestamp - y.timestamp || x.id - y.id);
     const victims = new Set(all.slice(0, all.length - maxPerDoc).map((r) => r.id));
     await dropRows(new Map([[name, all]]), victims);
   }

@@ -170,6 +170,30 @@ describe("history store with deltas", () => {
     expect((await history.listSnapshots("r.md")).map((s) => s.content)).toEqual(["base\nthree\n", "base\none\ntwo\n", "base\none\n", "base\n"]);
   });
 
+  it("backdated imports dedupe against their own time: A → B → A survives, a re-import adds nothing", async () => {
+    await history.recordSnapshot("t.md", "A", "save", 9000); // the current text
+    expect(await history.recordSnapshot("t.md", "A", "migrated", 1000)).toBe(true);
+    expect(await history.recordSnapshot("t.md", "B", "migrated", 2000)).toBe(true);
+    // The same backups again (a migration that runs after a partial one).
+    expect(await history.recordSnapshot("t.md", "A", "migrated", 1000)).toBe(false);
+    expect(await history.recordSnapshot("t.md", "B", "migrated", 2000)).toBe(false);
+    expect((await history.listSnapshots("t.md")).map((s) => s.content)).toEqual(["A", "B", "A"]);
+  });
+
+  it("re-running a migration that kept the folder adds no duplicates", async () => {
+    const { installFakeOpfs } = await import("./helpers/fakeOpfs");
+    installFakeOpfs();
+    const ws = await import("../storage/workspace");
+    const { backupDirName, migrateLegacyBackups } = await import("../sync/autoBackup");
+    await ws.writeWorkspaceFile("n.md", "now");
+    await history.recordSnapshot("n.md", "now", "save", 9_000_000_000_000);
+    await ws.writeWorkspaceFile("backups/keep me.md", "user file"); // keeps the folder
+    await ws.writeWorkspaceFile(`backups/${backupDirName("n.md")}/1700000000000.md`, "old");
+    expect(await migrateLegacyBackups()).toBe(1);
+    expect(await migrateLegacyBackups()).toBe(0);
+    expect((await history.listSnapshots("n.md")).map((s) => s.content)).toEqual(["now", "old"]);
+  });
+
   it("a version older than the history is stored whole and every version still reads", async () => {
     await history.recordSnapshot("m.md", "today\n", "save", 5000);
     await history.recordSnapshot("m.md", "today\nmore\n", "save", 6000);
