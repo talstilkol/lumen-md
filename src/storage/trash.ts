@@ -95,6 +95,14 @@ export function moveToTrash(
   });
 }
 
+/** A delete that moved some paths to the trash before another failed. `items` are the ones that moved. */
+export class PartialTrashError extends Error {
+  constructor(readonly items: TrashItem[], readonly cause: unknown) {
+    super(cause instanceof Error ? cause.message : String(cause));
+    this.name = "PartialTrashError";
+  }
+}
+
 async function moveToTrashNow(paths: string[], kinds: Record<string, "file" | "directory">, now: number): Promise<TrashItem[]> {
   const items = await readIndex();
   const added: TrashItem[] = [];
@@ -110,6 +118,9 @@ async function moveToTrashNow(paths: string[], kinds: Record<string, "file" | "d
       items.push(item);
       added.push(item);
     }
+  } catch (e) {
+    // The caller still gets what did move (to keep it undoable).
+    throw added.length ? new PartialTrashError([...added], e) : e;
   } finally {
     // Record whatever did move even when a later move fails, so nothing
     // sits in `.trash/` without an entry the Trash panel can restore.

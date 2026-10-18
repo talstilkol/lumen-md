@@ -4,7 +4,7 @@
  * trash with an Undo.
  */
 
-import { listTrash, moveToTrash, restoreFromTrash, restoreFromTrashIfPresent, type TrashItem } from "./trash";
+import { listTrash, moveToTrash, PartialTrashError, restoreFromTrash, restoreFromTrashIfPresent, type TrashItem } from "./trash";
 import { rewriteLinks, updateLinksAfterMove } from "./linkRewrite";
 import { listWorkspace, renameWorkspaceFile, WorkspaceConflictError, workspaceHasEntry } from "./workspace";
 
@@ -142,6 +142,10 @@ export async function trashPaths(
       if (afterMove) await afterMove(items);
     });
     return moved;
+  } catch (e) {
+    // Part of a bulk delete moved before a later path failed: that part is undoable too.
+    if (e instanceof PartialTrashError && !moved.length) moved = e.items;
+    throw e;
   } finally {
     // Even when `afterMove` failed, what moved is in the trash: keep it undoable.
     if (moved.length) {

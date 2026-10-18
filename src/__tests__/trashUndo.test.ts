@@ -60,6 +60,14 @@ describe("undoLastTrash: a stack of deletes", () => {
     expect((await listTrash()).map((i) => i.originalPath).sort()).toEqual(["n0.md", "n1.md"]);
   });
 
+  it("a bulk delete that fails part way keeps what moved undoable (review: #218)", async () => {
+    await writeWorkspaceFile("a.md", "A");
+    await expect(trashPaths(["a.md", "missing.md"])).rejects.toThrow();
+    expect(trashUndoDepth()).toBe(1);
+    expect(await undoLastTrash()).toEqual(["a.md"]);
+    expect(await readWorkspaceFile("a.md")).toBe("A");
+  });
+
   it("the toast's Undo takes its entry off the stack", async () => {
     await writeWorkspaceFile("a.md", "A");
     await writeWorkspaceFile("b.md", "B");
