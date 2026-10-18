@@ -44,20 +44,31 @@ export async function exportVaultZip(): Promise<{ bytes: Uint8Array; files: numb
 
 type DirHandle = FileSystemDirectoryHandle & { getDirectoryHandle(n: string, o?: { create?: boolean }): Promise<DirHandle> };
 
-/** Write the vault into a real folder the user picked. */
-export async function exportVaultToFolder(dir: DirHandle): Promise<number> {
+/**
+ * Write the vault into a real folder the user picked — inside a new
+ * subfolder (`lumen-vault-<date>`, numbered when taken), so files already
+ * in the picked folder are never overwritten.
+ */
+export async function exportVaultToFolder(dir: DirHandle, name = `lumen-vault-${new Date().toISOString().slice(0, 10)}`): Promise<{ files: number; folder: string }> {
+  const exists = async (n: string) => {
+    for await (const [key] of dir.entries()) if (key === n) return true;
+    return false;
+  };
+  let folder = name;
+  for (let n = 2; await exists(folder); n++) folder = `${name} ${n}`;
+  const out = await dir.getDirectoryHandle(folder, { create: true });
   const files = await collectVault();
   for (const f of files) {
     const parts = f.path.split("/");
     const name = parts.pop()!;
-    let d = dir;
+    let d = out;
     for (const p of parts) d = await d.getDirectoryHandle(p, { create: true });
     const fh = await d.getFileHandle(name, { create: true });
     const w = await fh.createWritable();
     await w.write(f.data as unknown as BlobPart);
     await w.close();
   }
-  return files.length;
+  return { files: files.length, folder };
 }
 
 /* ─── Import ─────────────────────────────────────────────────────────── */
@@ -91,35 +102,66 @@ export function stripNotionIds(path: string): string {
     .join("/");
 }
 
+/** Split `href` into its path and its `?query` / `#fragment` suffix. */
+function splitSuffix(href: string): [string, string] {
+  const cut = href.search(/[?#]/);
+  return cut < 0 ? [href, ""] : [href.slice(0, cut), href.slice(cut)];
+}
+
+function resolveRel(fromDir: string, rel: string): string {
+  const out: string[] = [];
+  for (const p of [...(fromDir ? fromDir.split("/") : []), ...rel.split("/")]) {
+    if (!p || p === ".") continue;
+    if (p === "..") out.pop();
+    else out.push(p);
+  }
+  return out.join("/");
+}
+
+function relativeTo(fromDir: string, to: string): string {
+  const a = fromDir ? fromDir.split("/") : [];
+  const b = to.split("/");
+  let i = 0;
+  while (i < a.length && i < b.length - 1 && a[i] === b[i]) i++;
+  return [...a.slice(i).map(() => ".."), ...b.slice(i)].join("/");
+}
+
+const dirOf = (p: string) => p.split("/").slice(0, -1).join("/");
+
 /**
  * Notion links are relative, URL-encoded paths that carry the IDs:
- * `[Page](Sub%201a2b…%20.md)`. Rewrite them to the cleaned names.
+ * `[Page](Sub%201a2b…%20.md)`. Rewrite them to the cleaned names, keeping a
+ * `#heading` / `?query` suffix. With `from` (the note's archive path) and
+ * `finalOf` (archive path → imported path), a link follows its page even
+ * when a same-titled page made the import rename it (`Page 2.md`).
  */
-export function rewriteNotionLinks(md: string): string {
+export function rewriteNotionLinks(md: string, ctx?: { from: string; finalOf: (archivePath: string) => string | undefined }): string {
   return md.replace(/\]\(([^)\s]+)\)/g, (m, href: string) => {
     if (/^[a-z]+:/i.test(href) || href.startsWith("#")) return m;
-    let decoded = href;
+    const [path, suffix] = splitSuffix(href);
+    let decoded = path;
     try {
-      decoded = decodeURIComponent(href);
+      decoded = decodeURIComponent(path);
     } catch {
       return m;
     }
-    const cleaned = stripNotionIds(decoded);
-    return cleaned === decoded ? m : `](${encodeURI(cleaned)})`;
+    const final = ctx?.finalOf(resolveRel(dirOf(ctx.from), decoded));
+    const self = ctx?.finalOf(ctx.from);
+    const cleaned = final !== undefined && self !== undefined ? relativeTo(dirOf(self), final) : stripNotionIds(decoded);
+    return cleaned === decoded ? m : `](${encodeURI(cleaned)}${suffix})`;
   });
 }
 
-/** Common leading folder of all paths (an archive usually has one). */
-function commonRoot(paths: string[]): string {
+/**
+ * The archive's own top folder ("MyVault/…", "Export-…/…"): the first path
+ * segment, when every path shares it. Only that wrapper — a deeper folder
+ * all the notes happen to share (`Vault/Projects/`) is real structure.
+ */
+function wrapperRoot(paths: string[]): string {
   const first = paths[0]?.split("/") ?? [];
-  let n = first.length - 1;
-  for (const p of paths) {
-    const parts = p.split("/");
-    let i = 0;
-    while (i < n && parts[i] === first[i]) i++;
-    n = i;
-  }
-  return n > 0 ? first.slice(0, n).join("/") + "/" : "";
+  if (first.length < 2) return "";
+  const top = first[0] + "/";
+  return paths.every((p) => p.startsWith(top)) ? top : "";
 }
 
 /**
@@ -132,7 +174,7 @@ export async function importFiles(files: Map<string, Uint8Array>, name: string):
   const base = name.replace(/\.zip$/i, "");
   // Drop the archive's own top folder ("MyVault/…", "Export-…/…") but never
   // a real folder of a Lumen export that happens to be the only one.
-  const common = commonRoot(paths.filter((p) => !SKIP.test(p)));
+  const common = wrapperRoot(paths.filter((p) => !SKIP.test(p)));
   const root = common && (source !== "lumen" || common === `${base}/`) ? common : "";
   let folder = `Imported/${base.replace(/[/\\]/g, "_") || "import"}`;
   if (await workspaceHasEntry(folder)) {
@@ -142,19 +184,37 @@ export async function importFiles(files: Map<string, Uint8Array>, name: string):
   }
   await createWorkspaceFolder(folder);
   const report: ImportReport = { source, folder, notes: 0, attachments: 0, skipped: [] };
+  // First pass: where every file goes. Two Notion pages with the same title
+  // (different IDs) clean to the same name; the later one gets "Page 2.md",
+  // and links to it must follow (archive path → final path).
+  const finalOf = new Map<string, string>();
+  const taken = new Set<string>();
+  for (const path of files.keys()) {
+    if (SKIP.test(path)) continue;
+    const rel = path.startsWith(root) ? path.slice(root.length) : path;
+    let target = source === "notion" ? stripNotionIds(rel) : rel;
+    if (taken.has(target)) {
+      const ext = target.match(/\.[^./]+$/)?.[0] ?? "";
+      const stem = target.slice(0, target.length - ext.length);
+      let n = 2;
+      while (taken.has(`${stem} ${n}${ext}`)) n++;
+      target = `${stem} ${n}${ext}`;
+    }
+    taken.add(target);
+    finalOf.set(rel, target);
+  }
   const dec = new TextDecoder();
   for (const [path, data] of files) {
     if (SKIP.test(path)) {
       report.skipped.push(path);
       continue;
     }
-    let rel = path.startsWith(root) ? path.slice(root.length) : path;
-    if (source === "notion") rel = stripNotionIds(rel);
-    let target = `${folder}/${rel}`;
+    const rel = path.startsWith(root) ? path.slice(root.length) : path;
+    let target = `${folder}/${finalOf.get(rel) ?? rel}`;
     if (await workspaceHasEntry(target)) target = await uniqueWorkspaceName(target);
     if (/\.(md|markdown|txt)$/i.test(rel)) {
       let text = dec.decode(data);
-      if (source === "notion") text = rewriteNotionLinks(text);
+      if (source === "notion") text = rewriteNotionLinks(text, { from: rel, finalOf: (p) => finalOf.get(p) });
       await writeWorkspaceFile(target, text);
       report.notes++;
     } else {

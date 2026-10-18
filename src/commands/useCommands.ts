@@ -1474,16 +1474,21 @@ export function useCommands({
         group: t("group.file"),
         action: async () => {
           const { exportVaultZip, exportVaultToFolder } = await import("../storage/exportAll");
+          const { flushActiveWorkspaceDoc } = await import("../store/openDocs");
           try {
             const picker = (window as unknown as { showDirectoryPicker?: (o?: object) => Promise<unknown> }).showDirectoryPicker;
             const choice = picker
               ? await uiSelect({ message: t("vault.export.where"), choices: [{ value: "zip", label: t("vault.export.zip") }, { value: "folder", label: t("vault.export.folder") }] })
               : "zip";
             if (!choice) return;
+            // The export reads the vault from disk: include edits the
+            // debounced autosave has not written yet.
+            await flushActiveWorkspaceDoc();
             if (choice === "folder" && picker) {
-              const dir = await picker({ mode: "readwrite" });
-              const n = await exportVaultToFolder(dir as Parameters<typeof exportVaultToFolder>[0]);
-              showAiToast(t("vault.export.done", { n: String(n) }), "info");
+              // A WebIDL method: it must be called on `window` (Illegal invocation otherwise).
+              const dir = await picker.call(window, { mode: "readwrite" });
+              const r = await exportVaultToFolder(dir as Parameters<typeof exportVaultToFolder>[0]);
+              showAiToast(t("vault.export.doneFolder", { n: String(r.files), folder: r.folder }), "info");
               return;
             }
             const { bytes, files } = await exportVaultZip();

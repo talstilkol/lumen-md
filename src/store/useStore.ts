@@ -166,23 +166,26 @@ export function registerPendingEdits(flush: () => void): () => void {
   return () => void pendingEditFlushers.delete(flush);
 }
 let flushingEdits = false;
+/** Make every editor emit the edits it is still holding (into the active document). */
+export function flushPendingEdits(): void {
+  if (flushingEdits) return;
+  flushingEdits = true;
+  try {
+    for (const flush of [...pendingEditFlushers]) {
+      try {
+        flush();
+      } catch {
+        /* an editor mid-teardown: nothing to flush */
+      }
+    }
+  } finally {
+    flushingEdits = false;
+  }
+}
 /** `action`, run after every editor has flushed its pending edits. */
 function afterPendingEdits<A extends unknown[]>(action: (...args: A) => void): (...args: A) => void {
   return (...args) => {
-    if (!flushingEdits) {
-      flushingEdits = true;
-      try {
-        for (const flush of [...pendingEditFlushers]) {
-          try {
-            flush();
-          } catch {
-            /* an editor mid-teardown: nothing to flush */
-          }
-        }
-      } finally {
-        flushingEdits = false;
-      }
-    }
+    flushPendingEdits();
     action(...args);
   };
 }

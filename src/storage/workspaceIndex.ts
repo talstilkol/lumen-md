@@ -28,7 +28,16 @@ const cache = {
   dirty: new Set<string>(),
   /** Files were added / removed / renamed: rebuild on next use. */
   stale: false,
+  /** When the index was last checked against the vault listing. */
+  checkedAt: 0,
 };
+
+/**
+ * Not every writer announces its writes (agent tools, the page-hide flush,
+ * sync): at most this often, a use of the index re-lists the vault and
+ * re-reads only the files whose mtime changed — or that appeared.
+ */
+export const REVALIDATE_MS = 30_000;
 const WIKI_RE = /\[\[([^\]\r\n|]+?)(?:\|[^\]\r\n]+?)?\]\]/g;
 
 /** Read one file into an index entry, or null if unreadable. */
@@ -57,6 +66,10 @@ async function mapLimit<T>(items: T[], limit: number, fn: (x: T) => Promise<void
 /** Build the whole index from OPFS (first use, or after files were added / removed). */
 async function build(): Promise<void> {
   if (!isOPFSAvailable()) return;
+  // Clear before reading: a change announced while the build runs (it may
+  // have read that file already) must survive for the next ensureIndex.
+  cache.dirty.clear();
+  cache.stale = false;
   const list = await listWorkspace({ includeAssets: false });
   const next = new Map<string, IndexedFile>();
   await mapLimit(
@@ -68,9 +81,24 @@ async function build(): Promise<void> {
     },
   );
   cache.byPath = next;
-  cache.builtAt = Date.now();
-  cache.dirty.clear();
-  cache.stale = false;
+  cache.builtAt = cache.checkedAt = Date.now();
+}
+
+/** Fallback for unannounced writes: re-read what the listing says changed. */
+async function revalidate(): Promise<void> {
+  cache.checkedAt = Date.now();
+  const list = (await listWorkspace({ includeAssets: false })).filter((e) => !isAssetName(e.path));
+  const seen = new Set(list.map((e) => e.path));
+  for (const path of [...cache.byPath.keys()]) if (!seen.has(path)) cache.byPath.delete(path);
+  await mapLimit(
+    list.filter((e) => cache.byPath.get(e.path)?.modified !== e.modified),
+    16,
+    async (e) => {
+      const f = await indexFile(e);
+      if (f) cache.byPath.set(e.path, f);
+      else cache.byPath.delete(e.path);
+    },
+  );
 }
 
 /**
@@ -104,6 +132,10 @@ export async function ensureIndex(force = false): Promise<void> {
     cache.inflight = refreshDirty().finally(() => {
       cache.inflight = null;
     });
+  } else if (Date.now() - cache.checkedAt >= REVALIDATE_MS) {
+    cache.inflight = revalidate().finally(() => {
+      cache.inflight = null;
+    });
   } else return;
   await cache.inflight;
 }
@@ -133,6 +165,7 @@ export function __resetWorkspaceIndex(): void {
   cache.inflight = null;
   cache.dirty.clear();
   cache.stale = false;
+  cache.checkedAt = 0;
 }
 
 export interface BacklinkHit {

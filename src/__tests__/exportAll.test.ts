@@ -35,11 +35,19 @@ describe("export", () => {
     expect(ok).toBe(true);
   });
 
-  it("writes the tree into a picked folder", async () => {
+  it("writes the tree into a new subfolder of the picked folder, never over its files", async () => {
     await writeWorkspaceFile("a/b/c.md", "C");
+    await writeWorkspaceFile("README.md", "vault readme");
     const target = new FakeDir("out");
-    expect(await exportVaultToFolder(target as unknown as Parameters<typeof exportVaultToFolder>[0])).toBe(1);
-    const a = await target.getDirectoryHandle("a");
+    const mine = await target.getFileHandle("README.md", { create: true });
+    const w = await mine.createWritable();
+    await w.write("my own readme");
+    await w.close();
+    await target.getDirectoryHandle("lumen-vault", { create: true });
+    const r = await exportVaultToFolder(target as unknown as Parameters<typeof exportVaultToFolder>[0], "lumen-vault");
+    expect(r).toEqual({ files: 2, folder: "lumen-vault 2" });
+    expect(await (await (await target.getFileHandle("README.md")).getFile()).text()).toBe("my own readme");
+    const a = await (await target.getDirectoryHandle("lumen-vault 2")).getDirectoryHandle("a");
     const b = await a.getDirectoryHandle("b");
     expect(await (await (await b.getFileHandle("c.md")).getFile()).text()).toBe("C");
   });
@@ -81,6 +89,34 @@ describe("import", () => {
     expect(r.source).toBe("lumen");
     expect(await readWorkspaceFile(`${r.folder}/x/y.md`)).toBe("Y");
     expect((await listWorkspace()).length).toBe(2);
+  });
+
+  it("keeps a #heading or ?query when cleaning a Notion link", () => {
+    expect(rewriteNotionLinks("[s](Page%200123456789abcdef0123456789abcdef.md#section)")).toBe("[s](Page.md#section)");
+  });
+
+  it("links follow a Notion page renamed because another page has the same title", async () => {
+    const id1 = "0123456789abcdef0123456789abcdef", id2 = "89abcdef0123456789abcdef01234567";
+    const archive = await zip([
+      { name: `Export-x/Home.md`, data: `[one](Page%20${id1}.md) [two](Page%20${id2}.md#h)` },
+      { name: `Export-x/Page ${id1}.md`, data: "# one" },
+      { name: `Export-x/Page ${id2}.md`, data: "# two" },
+    ]);
+    const r = await importZip(archive.buffer as ArrayBuffer, "Export-x.zip");
+    expect(await readWorkspaceFile(`${r.folder}/Page.md`)).toBe("# one");
+    expect(await readWorkspaceFile(`${r.folder}/Page 2.md`)).toBe("# two");
+    expect(await readWorkspaceFile(`${r.folder}/Home.md`)).toBe("[one](Page.md) [two](Page%202.md#h)");
+  });
+
+  it("strips only the archive's wrapper folder, not a folder all notes share", async () => {
+    const files = new Map<string, Uint8Array>([
+      ["Vault/.obsidian/app.json", enc.encode("{}")],
+      ["Vault/Projects/a.md", enc.encode("A")],
+      ["Vault/Projects/b.md", enc.encode("B")],
+    ]);
+    const r = await importFiles(files, "Vault");
+    expect(await readWorkspaceFile(`${r.folder}/Projects/a.md`)).toBe("A");
+    expect(await readWorkspaceFile(`${r.folder}/Projects/b.md`)).toBe("B");
   });
 
   it("imports a Notion zip with clean names and working links", async () => {
