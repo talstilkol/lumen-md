@@ -19,7 +19,7 @@
 # textual merge can still miss entries the merged package.json needs).
 #
 # Afterwards: npx tsc --noEmit -p . and npx vitest run, then a summary. If
-# the merged lanes changed dependencies, the checks need them installed
+# dependencies changed since node_modules was last installed (also by an earlier, interrupted run), the checks need them installed
 # first (lanes only touch the lockfile, docs/dev/lanes.md rule 4): the run
 # stops before the checks (exit 2) so you can `npm install` and rerun the
 # same command (merged branches are skipped), or installs them itself with
@@ -91,7 +91,6 @@ print_merges() {
   done
 }
 
-start=$(git rev-parse HEAD)
 summary=()
 i=0
 for b in "${branches[@]}"; do
@@ -171,14 +170,28 @@ for b in "${branches[@]}"; do
 done
 
 # Lanes add packages to the lockfile only: the checks need them installed.
-if ! git diff --quiet "$start" HEAD -- package.json package-lock.json; then
+# "Installed" = node_modules was (re)installed after the last commit on this
+# branch that changed package.json / package-lock.json (npm rewrites
+# node_modules/.package-lock.json on every install). This holds across runs:
+# a run resumed after a conflict still sees a dependency change merged by
+# the earlier one.
+mtime() { stat -c %Y "$1" 2>/dev/null || stat -f %m "$1" 2>/dev/null; }
+deps_stale() {
+  [ -f package-lock.json ] || [ -f package.json ] || return 1
+  local changed installed
+  changed=$(git log -1 --first-parent --format=%ct HEAD -- package.json package-lock.json)
+  [ -n "$changed" ] || return 1
+  installed=$(mtime node_modules/.package-lock.json)
+  [ -z "$installed" ] || [ "$changed" -gt "$installed" ]
+}
+if deps_stale; then
   if [ "${LANE_INSTALL:-}" = 1 ]; then
-    echo "== the merges changed dependencies: npm install (LANE_INSTALL=1)"
+    echo "== dependencies changed since the last install: npm install (LANE_INSTALL=1)"
     npm install --no-audit --no-fund >/dev/null 2>&1 || die "npm install failed; fix it, then rerun this command (merged branches are skipped)"
   else
     print_merges
     echo >&2
-    echo "lane-merge: STOP before the checks — the merged lanes change dependencies (package.json / package-lock.json), which node_modules may not have yet. Run npm install (or rerun with LANE_INSTALL=1), then rerun this same command: merged branches are skipped and the checks run." >&2
+    echo "lane-merge: STOP before the checks — dependencies (package.json / package-lock.json) changed on $target after node_modules was last installed. Run npm install (or rerun with LANE_INSTALL=1), then rerun this same command: merged branches are skipped and the checks run." >&2
     exit 2
   fi
 fi

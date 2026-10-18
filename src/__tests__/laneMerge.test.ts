@@ -7,7 +7,7 @@
  */
 import { describe, it, expect } from "vitest";
 import { execFileSync, spawnSync } from "node:child_process";
-import { chmodSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { chmodSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, utimesSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 
@@ -21,10 +21,10 @@ function setup({ laneAddsDep = false } = {}) {
   // npx and npm are stubs that log their arguments.
   const calls = join(dir, "calls.log");
   writeFileSync(calls, "");
-  for (const tool of ["npx", "npm"]) {
-    writeFileSync(join(bin, tool), `#!/bin/sh\necho "${tool} $*" >> "${calls}"\nexit 0\n`);
-    chmodSync(join(bin, tool), 0o755);
-  }
+  writeFileSync(join(bin, "npx"), `#!/bin/sh\necho "npx $*" >> "${calls}"\nexit 0\n`);
+  // npm install (not --package-lock-only) rewrites node_modules/.package-lock.json, as the real one does.
+  writeFileSync(join(bin, "npm"), `#!/bin/sh\necho "npm $*" >> "${calls}"\ncase "$*" in *package-lock-only*) ;; install*) mkdir -p node_modules && touch node_modules/.package-lock.json ;; esac\nexit 0\n`);
+  for (const tool of ["npx", "npm"]) chmodSync(join(bin, tool), 0o755);
   writeFileSync(join(dir, "gitconfig"), "");
   const env = {
     ...process.env,
@@ -43,12 +43,16 @@ function setup({ laneAddsDep = false } = {}) {
   mkdirSync(join(work, "src"));
   // The i18n check the script runs: always up to date here.
   writeFileSync(join(work, "scripts/extract-i18n-keys.mjs"), "process.exit(0);\n");
-  writeFileSync(join(work, ".gitignore"), "ignored/\n");
+  writeFileSync(join(work, ".gitignore"), "ignored/\nnode_modules\n");
   writeFileSync(join(work, "src/app.ts"), "export const a = 1;\n");
   writeFileSync(join(work, "package.json"), JSON.stringify({ name: "t", version: "1.0.0" }) + "\n");
   writeFileSync(join(work, "package-lock.json"), JSON.stringify({ name: "t", lockfileVersion: 3, packages: {} }) + "\n");
   g("add", ".");
-  g("commit", "-q", "-m", "base");
+  // The base is two hours old and node_modules was installed after it, an hour ago.
+  execFileSync("git", ["commit", "-q", "-m", "base"], { cwd: work, env: { ...env, GIT_COMMITTER_DATE: `@${Math.floor(Date.now() / 1000) - 7200} +0000` } });
+  mkdirSync(join(work, "node_modules"));
+  writeFileSync(join(work, "node_modules/.package-lock.json"), "{}");
+  utimesSync(join(work, "node_modules/.package-lock.json"), Date.now() / 1000 - 3600, Date.now() / 1000 - 3600);
   g("branch", "target");
   g("checkout", "-q", "-b", "lane");
   writeFileSync(join(work, "src/feature.ts"), 'import { helper } from "./helper";\nexport const f = helper;\n');
@@ -59,7 +63,8 @@ function setup({ laneAddsDep = false } = {}) {
   g("checkout", "-q", "main");
   const run = (extra: Record<string, string> = {}) => spawnSync("bash", [script, "target", "lane"], { cwd: work, env: { ...env, ...extra }, encoding: "utf8" });
   const log = () => readFileSync(calls, "utf8");
-  return { dir, work, g, run, log };
+  const install = () => utimesSync(join(work, "node_modules/.package-lock.json"), Date.now() / 1000 + 5, Date.now() / 1000 + 5);
+  return { dir, work, g, run, log, install };
 }
 
 describe("scripts/lane-merge.sh", () => {
@@ -95,16 +100,22 @@ describe("scripts/lane-merge.sh", () => {
   });
 
   it("a merge that changes dependencies settles the lockfile, then stops before the checks until they are installed", () => {
-    const { dir, g, run, log } = setup({ laneAddsDep: true });
+    const { dir, g, run, log, install } = setup({ laneAddsDep: true });
     try {
       const r = run();
       expect(r.status).toBe(2);
-      expect(r.stderr).toContain("lane-merge: STOP before the checks — the merged lanes change dependencies");
+      expect(r.stderr).toContain("lane-merge: STOP before the checks — dependencies (package.json / package-lock.json) changed on target after node_modules was last installed");
       expect(r.stdout).toMatch(/lane\s+\w+\s+clean/); // the merge itself is committed
       expect(g("log", "--format=%s", "-1", "target")).toBe("Merge branch 'lane' into target");
       expect(log()).toContain("npm install --package-lock-only --no-audit --no-fund");
       expect(log()).not.toContain("npx tsc");
+      // A resumed run (after a conflict, say) that merges nothing new still knows the deps are not installed.
+      const resumed = run();
+      expect(resumed.status).toBe(2);
+      expect(resumed.stdout).toMatch(/lane\s+-\s+already merged/);
+      expect(log()).not.toContain("npx tsc");
       // After `npm install`, the same command skips the merged branch and runs the checks.
+      install();
       const again = run();
       expect(again.status).toBe(0);
       expect(again.stdout).toMatch(/lane\s+-\s+already merged/);
