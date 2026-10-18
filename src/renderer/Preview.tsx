@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { renderMarkdown, renderMarkdownFast, extractFrontmatter } from "./pipeline";
 import { PreviewDocKeyContext } from "./previewDoc";
 import { handleWikiLinkClick } from "./wikiLinks";
+import { wikiHoverHandlers } from "./hoverTrigger";
 import { hasEmbeds } from "./remarkEmbeds";
 import { onWorkspaceChanged } from "../storage/workspaceEvents";
 import { wikiFragmentId } from "../lib/slug";
@@ -142,6 +143,8 @@ export function Preview({ markdownText, docKey = null }: Props) {
       // newly opened note renders) — lets callers wait for the right one.
       data-preview-doc={treeDocKey ?? ""}
       style={{ contain: "layout" }}
+      // Hover / focus on a [[link]] previews the note (4.6; loaded on first use).
+      {...wikiHoverHandlers}
       onClick={(e) => {
         // [[Wiki links]] without a matching heading here open the note.
         handleWikiLinkClick(

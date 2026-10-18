@@ -1,8 +1,11 @@
-import { useEffect, useState } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 import { Link2 } from "lucide-react";
 import { findBacklinks, type BacklinkHit } from "../storage/workspaceIndex";
 import { t } from "../i18n";
 import { onWorkspaceChanged } from "../storage/workspaceEvents";
+
+// Unlinked mentions (4.6): its scan and Link action load with the section.
+const UnlinkedMentions = lazy(() => import("./UnlinkedMentions"));
 
 interface Props {
   /** Active workspace path. */
@@ -90,6 +93,11 @@ export function BacklinksPanel({ filePath, onOpen }: Props) {
             </li>
           ))}
         </ul>
+      )}
+      {filePath && (
+        <Suspense fallback={null}>
+          <UnlinkedMentions filePath={filePath} onOpen={onOpen} />
+        </Suspense>
       )}
     </aside>
   );

@@ -1735,3 +1735,34 @@
     /* size: A4; — leave default so the user's printer dialog picks. */
   }
 }
+
+/* Hover preview of a [[link]] (4.6): a floating, scrollable card. */
+.lumen-hover-card {
+  position: fixed;
+  z-index: var(--z-dropdown, 50);
+  inline-size: min(420px, calc(100vw - 16px));
+  max-block-size: 320px;
+  overflow: auto;
+  padding: 10px 14px;
+  font-size: 13px;
+  line-height: 1.5;
+  background: hsl(var(--bg));
+  color: hsl(var(--fg));
+  border: 1px solid hsl(var(--border-strong, var(--border)));
+  border-radius: 8px;
+  box-shadow: 0 12px 40px -10px hsl(0 0% 0% / 0.35);
+}
+.lumen-hover-card[data-show="false"] {
+  display: none;
+}
+.lumen-hover-card > * > :first-child {
+  margin-block-start: 0;
+}
+/* Inside the source editor's tooltip, CodeMirror places it. */
+.lumen-hover-card.lumen-hover-card-cm {
+  position: static;
+}
+.lumen-hover-card-empty {
+  color: hsl(var(--fg-muted));
+  font-size: 12px;
+}

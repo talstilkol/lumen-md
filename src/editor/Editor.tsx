@@ -38,6 +38,7 @@ import { PROMPTS } from "../ai/prompts";
 import { embedHintExtension } from "./embedHintExtension";
 import { insertSlashMenuExtension } from "./insertMenu";
 import { wikiLinkAutocomplete } from "./wikiLinkAutocomplete";
+import { wikiHover } from "./wikiHover";
 import { collabAwarenessExtension } from "./collabAwareness";
 import { t as i18nT, getLocale } from "../i18n";
 // y-codemirror.next (and the yjs stack behind it) is loaded on demand inside
@@ -386,6 +387,8 @@ export const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
       // `[[` → notes, `[[Note#` → headings, `[[Note#^` → blocks (4.5); the
       // source itself loads on the first `[[`.
       wikiLinkAutocomplete(),
+      // Hover over [[Note]] previews it (4.6).
+      wikiHover,
       EditorView.lineWrapping,
       // Hebrew and English lines each read in their own direction (T25).
       bidiExtension(),
