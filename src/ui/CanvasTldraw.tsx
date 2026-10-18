@@ -400,13 +400,8 @@ export function CanvasTldraw({ open, onClose }: Props) {
           // only the user's own document edits count (not camera moves or the load itself)
           listenUserEdits: (onEdit) => editor.store.listen(onEdit, { source: "user", scope: "document" }),
           load: () => loadCanvasFile(canvasName),
-          apply: (snap) => {
-            try {
-              loadSnapshot(editor.store, snap as Parameters<typeof loadSnapshot>[1]);
-            } catch (err) {
-              log.warn("tldraw loadSnapshot failed", err);
-            }
-          },
+          // a snapshot tldraw can't load is "unreadable": rethrown, so switchCanvas keeps the canvas read-only and its saver held
+          apply: (snap) => loadSnapshot(editor.store, snap as Parameters<typeof loadSnapshot>[1]),
           cancelled: () => cancelled,
         }),
       clear: () => {

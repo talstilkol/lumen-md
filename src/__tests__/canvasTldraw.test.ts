@@ -231,6 +231,32 @@ describe("tldraw integration (γ.2)", () => {
       expect(r.lock.current).toBe("B");
     });
 
+    it("a snapshot that fails to apply is unreadable: read-only and saver held (review: #206)", async () => {
+      const { switchCanvas, restoreUnlessEdited } = await import("../ui/CanvasTldraw");
+      const log: string[] = [];
+      const lock = { current: null as string | null };
+      const out = await switchCanvas({
+        name: "B",
+        lock,
+        setReadonly: (r) => log.push(`readonly:${r}`),
+        restore: () =>
+          restoreUnlessEdited({
+            listenUserEdits: () => () => {},
+            load: async () => ({ schema: "incompatible" }),
+            apply: () => {
+              throw new Error("bad snapshot");
+            },
+            cancelled: () => false,
+          }),
+        clear: () => log.push("clear"),
+        cancelled: () => false,
+        onUnreadable: () => log.push("unreadable"),
+      });
+      expect(out).toBe("unreadable");
+      expect(log).toEqual(["readonly:true", "unreadable"]);
+      expect(lock.current).toBe("B");
+    });
+
     it("a newer switch keeps the lock and read-only state", async () => {
       const r = await run("applied", true);
       expect(r.out).toBe("cancelled");
