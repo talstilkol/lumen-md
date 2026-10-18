@@ -151,4 +151,42 @@ describe("tldraw integration (γ.2)", () => {
     const convert = src.slice(src.indexOf("const handleConvertLegacy"));
     expect(convert).toMatch(/freshCanvas\.current = null;\s*setCanvasName\(legacyName\)/);
   });
+
+  describe("restore and New against the disk (review: #206)", () => {
+    it("does not restore over a stroke drawn while the file was loading", async () => {
+      const { restoreUnlessEdited } = await import("../ui/CanvasTldraw");
+      let edit: (() => void) | null = null;
+      let release!: (v: unknown) => void;
+      const applied: unknown[] = [];
+      const p = restoreUnlessEdited({
+        listenUserEdits: (f) => ((edit = f), () => (edit = null)),
+        load: () => new Promise((r) => (release = r)),
+        apply: (s) => applied.push(s),
+        cancelled: () => false,
+      });
+      edit!(); // the user draws before the read finishes
+      release({ old: true });
+      expect(await p).toBe("edited");
+      expect(applied).toEqual([]);
+      expect(edit).toBeNull(); // unsubscribed
+      // without an edit the snapshot is applied
+      const q = await restoreUnlessEdited({ listenUserEdits: () => () => {}, load: async () => ({ s: 1 }), apply: (s) => applied.push(s), cancelled: () => false });
+      expect(q).toBe("applied");
+      expect(applied).toEqual([{ s: 1 }]);
+    });
+
+    it("New asks the disk whether the name is taken, not only the picker's list", async () => {
+      const { installFakeOpfs } = await import("./helpers/fakeOpfs");
+      installFakeOpfs();
+      const { canvasFileExists } = await import("../ui/CanvasTldraw");
+      expect(await canvasFileExists("plan")).toBe(false);
+      const root = await navigator.storage.getDirectory();
+      const dir = await root.getDirectoryHandle("canvases", { create: true });
+      const fh = await dir.getFileHandle("plan.tldr", { create: true });
+      const w = await fh.createWritable();
+      await w.write("{}");
+      await w.close();
+      expect(await canvasFileExists("plan")).toBe(true);
+    });
+  });
 });

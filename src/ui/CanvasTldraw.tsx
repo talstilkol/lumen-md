@@ -96,6 +96,47 @@ async function writeCanvasFile(name: string, snapshot: unknown): Promise<void> {
   }
 }
 
+/** Is there a saved canvas with this name on disk right now? (The picker's list may not have loaded yet.) Exported for tests. */
+export async function canvasFileExists(name: string): Promise<boolean> {
+  if (!isOPFSAvailable()) return false;
+  await afterCanvasWrites(name);
+  try {
+    const root = await navigator.storage.getDirectory();
+    const dir = await root.getDirectoryHandle(CANVAS_DIR, { create: true });
+    await dir.getFileHandle(`${name}.tldr`);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Restore a saved snapshot unless the user edited the canvas while it was
+ * loading: a stroke drawn during a slow read must not be replaced by the file
+ * (nor saved over by it). Exported for tests.
+ */
+export async function restoreUnlessEdited(o: {
+  listenUserEdits: (onEdit: () => void) => () => void;
+  load: () => Promise<unknown | null>;
+  apply: (snapshot: unknown) => void;
+  cancelled: () => boolean;
+}): Promise<"applied" | "edited" | "empty" | "cancelled"> {
+  let edited = false;
+  const off = o.listenUserEdits(() => {
+    edited = true;
+  });
+  try {
+    const snap = await o.load();
+    if (o.cancelled()) return "cancelled";
+    if (edited) return "edited";
+    if (!snap) return "empty";
+    o.apply(snap);
+    return "applied";
+  } finally {
+    off();
+  }
+}
+
 async function listCanvases(): Promise<string[]> {
   if (!isOPFSAvailable()) return [];
   try {
@@ -310,13 +351,18 @@ export function CanvasTldraw({ open, onClose }: Props) {
     // why: New cleared this canvas on purpose; loading its old file would bring back the drawing it replaces
     if (freshCanvas.current === canvasName) return;
     let cancelled = false;
-    void loadCanvasFile(canvasName).then((snap) => {
-      if (cancelled || !editor || !snap) return;
-      try {
-        loadSnapshot(editor.store, snap as Parameters<typeof loadSnapshot>[1]);
-      } catch (err) {
-        log.warn("tldraw loadSnapshot failed", err);
-      }
+    void restoreUnlessEdited({
+      // only the user's own document edits count (not camera moves or the load itself)
+      listenUserEdits: (onEdit) => editor.store.listen(onEdit, { source: "user", scope: "document" }),
+      load: () => loadCanvasFile(canvasName),
+      apply: (snap) => {
+        try {
+          loadSnapshot(editor.store, snap as Parameters<typeof loadSnapshot>[1]);
+        } catch (err) {
+          log.warn("tldraw loadSnapshot failed", err);
+        }
+      },
+      cancelled: () => cancelled,
     });
     return () => {
       cancelled = true;
@@ -361,11 +407,13 @@ export function CanvasTldraw({ open, onClose }: Props) {
     const trimmed = name.trim().replace(/[/\\]/g, "-");
     if (!trimmed) return;
     if (editor) {
+      // Ask the disk, not only the picker's list: it may not have loaded yet when New was clicked.
+      const exists = trimmed === canvasName || savedList.includes(trimmed) || (await canvasFileExists(trimmed));
       // Save the old canvas and stop its saver before clearing: clearing the
       // editor while it still listens would write the empty page over the old file.
       const ok = await startNewCanvas({
         name: trimmed,
-        exists: trimmed === canvasName || savedList.includes(trimmed),
+        exists,
         confirmReplace: (n) =>
           uiConfirm({
             title: t("canvas.new.replaceTitle"),
