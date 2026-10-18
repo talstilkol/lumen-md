@@ -95,7 +95,8 @@ function splitWikiText(value: string): MdastTextLike[] {
     const label = (m[2] ?? target).trim();
     out.push({
       type: "link",
-      url: `#${slug(target)}`,
+      // `[[#^id]]` points at the block's own id; anything else at a heading slug.
+      url: `#${target.startsWith("#^") ? target.slice(1) : slug(target)}`,
       title: null,
       data: {
         hProperties: { className: ["wiki-link"], "data-wiki-target": target },

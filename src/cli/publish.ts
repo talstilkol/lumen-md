@@ -31,6 +31,7 @@ import {
 import { basename, dirname, isAbsolute, join, relative, resolve, sep } from "node:path";
 import { renderHtmlDocument, escapeHtml } from "../storage/exportHtml";
 import { slug as headingSlug } from "github-slugger";
+import { wikiFragmentId } from "../lib/slug";
 import { resolveWikiTarget, splitWikiTarget } from "../renderer/wikiLinks";
 
 const MD_RE = /\.(md|markdown)$/i;
@@ -149,7 +150,7 @@ export function rewriteWikiLinks(
     let common = 0;
     while (common < fromDir.length && common < to.length - 1 && fromDir[common] === to[common]) common++;
     const rel = [...Array(fromDir.length - common).fill(".."), ...to.slice(common)].join("/");
-    const url = encodePath(rel) + (heading ? `#${encodeURIComponent(headingSlug(heading))}` : "");
+    const url = encodePath(rel) + (heading ? `#${encodeURIComponent(wikiFragmentId(heading))}` : "");
     return tag.replace(/\shref="[^"]*"/, ` href="${escapeHtml(url)}"`);
   });
 }

@@ -19,6 +19,14 @@ export function headingSlug(text: string): string {
   return githubSlug(text);
 }
 
+/**
+ * The element id a wiki link's `#fragment` names: a block reference (`^id`,
+ * plan 4.8) is the block's own id; anything else is a heading, by its slug.
+ */
+export function wikiFragmentId(fragment: string): string {
+  return fragment.startsWith("^") ? fragment : headingSlug(fragment);
+}
+
 /** A slugger that numbers repeats (`a`, `a-1`, …) the way the preview does. */
 export function headingSlugger(): { slug: (text: string) => string } {
   const s = new GithubSlugger();

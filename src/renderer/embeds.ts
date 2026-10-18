@@ -32,6 +32,7 @@
  * embed; so does a missing note, file or section.
  */
 
+import { BLOCK_MARK } from "./remarkBlockIds";
 import type { Root as MdastRoot } from "mdast";
 import { headingSlug, headingSlugger, noteKey } from "../lib/slug";
 import { firstStrongDirection, markdownBaseDirection } from "../lib/textDirection";
@@ -284,7 +285,6 @@ function sectionOf(children: Node[], fragment: string): Node[] | null {
   return sel ? children.slice(sel[0], sel[1]) : null;
 }
 
-const BLOCK_MARK = /(^|\s)\^([A-Za-z0-9-]+)\s*$/;
 
 /**
  * The block an Obsidian block id names: a paragraph (in a list item, the

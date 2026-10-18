@@ -2,7 +2,7 @@
   "version": 1,
   "generated_at": "2026-10-18T05:56:17.413Z",
   "source": "src/i18n/index.ts (en bundle)",
-  "count": 1416,
+  "count": 1427,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -5659,6 +5659,72 @@
     {
       "key": "editor.ariaLabel",
       "en": "Markdown source editor",
+      "vars": []
+    },
+    {
+      "key": "cmd.copyBlockLink",
+      "en": "Copy link to block",
+      "vars": []
+    },
+    {
+      "key": "cmd.copyBlockLink.hint",
+      "en": "Gives the block at the cursor a ^id and copies [[Note#^id]]",
+      "vars": []
+    },
+    {
+      "key": "blockLink.copied",
+      "en": "Copied {link}",
+      "vars": [
+        "link"
+      ]
+    },
+    {
+      "key": "blockLink.noBlock",
+      "en": "Put the cursor in a paragraph, list item, table, quote or code block first.",
+      "vars": []
+    },
+    {
+      "key": "blockLink.sourceOnly",
+      "en": "Copy link to block works in the source editor (⌘1).",
+      "vars": []
+    },
+    {
+      "key": "blockLink.copyFailed",
+      "en": "Couldn't copy the link; the block has its id now.",
+      "vars": []
+    },
+    {
+      "key": "wikiComplete.create",
+      "en": "Create note «{name}»",
+      "vars": [
+        "name"
+      ]
+    },
+    {
+      "key": "wikiComplete.aliasOf",
+      "en": "alias of {name}",
+      "vars": [
+        "name"
+      ]
+    },
+    {
+      "key": "wikiComplete.created",
+      "en": "Created note «{name}»",
+      "vars": [
+        "name"
+      ]
+    },
+    {
+      "key": "wikiComplete.createFailed",
+      "en": "Couldn't create the note «{name}»: {error}",
+      "vars": [
+        "name",
+        "error"
+      ]
+    },
+    {
+      "key": "wikiComplete.listLabel",
+      "en": "Link suggestions",
       "vars": []
     },
     {
