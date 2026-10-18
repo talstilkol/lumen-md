@@ -446,18 +446,21 @@ function LumenImg(props: ImgProps) {
   const isStatic = useContext(StaticRenderContext);
   useSyncExternalStore(subscribeRemoteImages, remoteImagesVersion, remoteImagesVersion);
   const gate = remoteImageGate(src, srcSet);
-  const [resolved, setResolved] = useState<string | undefined>(() =>
-    isOpfsAssetSrc(src) ? blobUrlCache.get(normalize(src!)) : src,
-  );
+  // The blob URL of an OPFS asset, tagged with the src it belongs to: a
+  // retained element whose src changed must never render the old value — not
+  // even for the one render before the effect runs (it may be another
+  // site's image the gate has since stopped judging). Other srcs render
+  // straight from the prop.
+  const [resolved, setResolved] = useState<{ for: string | undefined; url: string | undefined }>(() => ({
+    for: src,
+    url: isOpfsAssetSrc(src) ? blobUrlCache.get(normalize(src!)) : undefined,
+  }));
   useEffect(() => {
-    if (!isOpfsAssetSrc(src)) {
-      setResolved(src);
-      return;
-    }
+    if (!isOpfsAssetSrc(src)) return;
     const key = normalize(src);
     const cached = blobUrlCache.get(key);
     if (cached) {
-      setResolved(cached);
+      setResolved({ for: src, url: cached });
       return;
     }
     let cancelled = false;
@@ -466,24 +469,25 @@ function LumenImg(props: ImgProps) {
         if (cancelled) return;
         const url = URL.createObjectURL(blob);
         blobUrlCache.set(key, url);
-        setResolved(url);
+        setResolved({ for: src, url });
       })
       .catch(() => {
-        if (!cancelled) setResolved(undefined);
+        if (!cancelled) setResolved({ for: src, url: undefined });
       });
     return () => {
       cancelled = true;
     };
   }, [src]);
+  const shown = !isOpfsAssetSrc(src) ? src : resolved.for === src ? resolved.url : blobUrlCache.get(normalize(src));
   // The author-supplied `alt` is forwarded via {...rest}. We default to
   // the basename of the src when nothing is provided so screen-readers
   // get something descriptive instead of "image".
   const fallbackAlt = !rest.alt
     ? (src ?? "").split("/").pop()?.replace(/\.[^.]+$/, "") ?? "image"
     : undefined;
-  if (isStatic) return <img alt={fallbackAlt} loading="lazy" {...rest} srcSet={srcSet} src={resolved} />;
+  if (isStatic) return <img alt={fallbackAlt} loading="lazy" {...rest} srcSet={srcSet} src={shown} />;
   if (gate.blocked) return <RemoteImagePlaceholder alt={rest.alt} gate={gate} />;
-  return <img alt={fallbackAlt} loading="lazy" {...rest} srcSet={gate.srcSet} src={resolved} />;
+  return <img alt={fallbackAlt} loading="lazy" {...rest} srcSet={gate.srcSet} src={shown} />;
 }
 
 function normalize(src: string): string {
