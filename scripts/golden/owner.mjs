@@ -115,8 +115,11 @@ const PARTS = {
         const audio = fileFor(dir, id, [...AUDIO, ".m4a"]);
         const summaryPath = join(dir, `${id}.summary.md`);
         if (!audio || !existsSync(summaryPath)) throw new Error(`meetings/owner: ${id} needs an audio file, a transcript and a summary`);
+        const transcript = readFileSync(join(dir, `${id}.transcript.txt`), "utf8").trim();
+        const summary = readFileSync(summaryPath, "utf8").trim();
+        if (!transcript || !summary) throw new Error(`meetings/owner: ${id} has an empty transcript or summary`);
         assets[`owner/${audio}`] = join(dir, audio);
-        items.push({ id: `meet-${id}`, audio: `owner/${audio}`, transcript: readFileSync(join(dir, `${id}.transcript.txt`), "utf8"), summary: readFileSync(summaryPath, "utf8") });
+        items.push({ id: `meet-${id}`, audio: `owner/${audio}`, transcript, summary });
       }
       return { items, assets };
     },
