@@ -1,0 +1,20 @@
+{
+  "canvas.autoSaved": "Canvas · auto-saved",
+  "canvas.close": "Close",
+  "canvas.dialogLabel": "Whiteboard",
+  "canvas.legacy.convert": "Convert {name} → tldraw",
+  "canvas.legacy.convertFailed": "Convert failed: {error}",
+  "canvas.legacy.converted": "✅ Converted {name} ({count} shapes)",
+  "canvas.legacy.converting": "Converting {name}…",
+  "canvas.legacy.found": "{count} legacy canvas(es) found",
+  "canvas.new": "New",
+  "canvas.new.prompt": "Canvas name:",
+  "canvas.picker": "Pick canvas",
+  "canvas.switch": "Switch canvas",
+  "canvas.title": "Canvas",
+  "graphView.empty": "No workspace files found. Open the workspace panel and add files to see the knowledge graph.",
+  "graphView.renderFailed": "Graph Render Failed",
+  "graphView.renderFailedDetail": "The workspace data resulted in an invalid node structure that crashed the renderer.",
+  "graphView.stats": "{nodes} nodes · {edges} connections",
+  "graphView.title": "Knowledge Graph"
+}

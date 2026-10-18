@@ -1,0 +1,20 @@
+{
+  "canvas.autoSaved": "Canevas · enregistrement automatique",
+  "canvas.close": "Fermer",
+  "canvas.dialogLabel": "Tableau blanc",
+  "canvas.legacy.convert": "Convertir {name} → tldraw",
+  "canvas.legacy.convertFailed": "Échec de la conversion : {error}",
+  "canvas.legacy.converted": "✅ {name} converti ({count} formes)",
+  "canvas.legacy.converting": "Conversion de {name}…",
+  "canvas.legacy.found": "{count} ancien(s) canevas trouvé(s)",
+  "canvas.new": "Nouveau",
+  "canvas.new.prompt": "Nom du canevas :",
+  "canvas.picker": "Choisir un canevas",
+  "canvas.switch": "Changer canvas",
+  "canvas.title": "Canevas",
+  "graphView.empty": "Aucun fichier trouvé. Ouvrez l'espace de travail et ajoutez des fichiers pour voir le graphe de connaissances.",
+  "graphView.renderFailed": "Échec du rendu du graphe",
+  "graphView.renderFailedDetail": "Les données de l'espace de travail ont produit une structure de nœuds invalide qui a fait planter le moteur de rendu.",
+  "graphView.stats": "{nodes} nœuds · {edges} liens",
+  "graphView.title": "Graphe de connaissances"
+}

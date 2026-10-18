@@ -1,0 +1,619 @@
+{
+  "version": 2,
+  "domain": "common",
+  "source": "src/i18n/locales/en/common.json",
+  "entries": [
+    {
+      "key": "a11y.skipToContent",
+      "en": "Skip to content",
+      "vars": []
+    },
+    {
+      "key": "dialog.cancel",
+      "en": "Cancel",
+      "vars": []
+    },
+    {
+      "key": "dialog.ok",
+      "en": "OK",
+      "vars": []
+    },
+    {
+      "key": "errorBoundary.heading",
+      "en": "Rendering Error",
+      "vars": []
+    },
+    {
+      "key": "errorBoundary.renderDetail",
+      "en": "One of the embedded visualizations crashed during render. The rest of the editor is kept safe.",
+      "vars": []
+    },
+    {
+      "key": "loading.generic",
+      "en": "Loading…",
+      "vars": []
+    },
+    {
+      "key": "pwa.dismiss",
+      "en": "Dismiss",
+      "vars": []
+    },
+    {
+      "key": "pwa.offlineReady",
+      "en": "Lumen is ready to work offline.",
+      "vars": []
+    },
+    {
+      "key": "pwa.reload",
+      "en": "Reload",
+      "vars": []
+    },
+    {
+      "key": "pwa.updateAvailable",
+      "en": "A new version is available",
+      "vars": []
+    },
+    {
+      "key": "status.chars",
+      "en": "{n} chars",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "status.grammar.off",
+      "en": "Grammar",
+      "vars": []
+    },
+    {
+      "key": "status.grammar.on",
+      "en": "Grammar",
+      "vars": []
+    },
+    {
+      "key": "status.grammar.tooltip.off",
+      "en": "Grammar check is OFF. Click to enable LanguageTool checking.",
+      "vars": []
+    },
+    {
+      "key": "status.grammar.tooltip.on",
+      "en": "Grammar check is ON. Click to disable.",
+      "vars": []
+    },
+    {
+      "key": "status.leave",
+      "en": "leave",
+      "vars": []
+    },
+    {
+      "key": "status.live",
+      "en": "● live",
+      "vars": []
+    },
+    {
+      "key": "status.privacyMode",
+      "en": "PRIVATE",
+      "vars": []
+    },
+    {
+      "key": "status.privacyMode.tooltip",
+      "en": "Privacy Mode — AI runs entirely on this device via WebGPU. No prompts leave your browser.",
+      "vars": []
+    },
+    {
+      "key": "status.reading",
+      "en": "~{n} min read",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "status.roadmap",
+      "en": "Roadmap",
+      "vars": []
+    },
+    {
+      "key": "status.roadmap.tooltip",
+      "en": "View Lumen's public roadmap",
+      "vars": []
+    },
+    {
+      "key": "status.runtimeMetrics",
+      "en": "Runtime metrics",
+      "vars": []
+    },
+    {
+      "key": "status.runtimeMetrics.tooltip",
+      "en": "Open runtime metrics and transport diagnostics",
+      "vars": []
+    },
+    {
+      "key": "status.suggesting.off",
+      "en": "Editing",
+      "vars": []
+    },
+    {
+      "key": "status.suggesting.on",
+      "en": "Suggesting",
+      "vars": []
+    },
+    {
+      "key": "status.suggesting.tooltip.off",
+      "en": "Editing directly. Click to turn on suggesting mode (track changes).",
+      "vars": []
+    },
+    {
+      "key": "status.suggesting.tooltip.on",
+      "en": "Suggesting mode is ON: your edits are recorded as tracked changes (CriticMarkup). Click to edit directly.",
+      "vars": []
+    },
+    {
+      "key": "status.telemetry.off",
+      "en": "Telemetry",
+      "vars": []
+    },
+    {
+      "key": "status.telemetry.on",
+      "en": "Telemetry",
+      "vars": []
+    },
+    {
+      "key": "status.telemetry.tooltip.off",
+      "en": "Error telemetry is OFF. Click to enable anonymous crash reports.",
+      "vars": []
+    },
+    {
+      "key": "status.telemetry.tooltip.on",
+      "en": "Error telemetry is ON. Crash reports are sent to help improve Lumen. Click to opt out.",
+      "vars": []
+    },
+    {
+      "key": "status.words",
+      "en": "{n} words",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "time.daysAgo",
+      "en": "{n}d ago",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "time.hoursAgo",
+      "en": "{n}h ago",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "time.justNow",
+      "en": "just now",
+      "vars": []
+    },
+    {
+      "key": "time.minutesAgo",
+      "en": "{n}m ago",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "toolbar.appearance",
+      "en": "Appearance",
+      "vars": []
+    },
+    {
+      "key": "toolbar.commandPalette",
+      "en": "Command palette",
+      "vars": []
+    },
+    {
+      "key": "toolbar.copy",
+      "en": "Copy",
+      "vars": []
+    },
+    {
+      "key": "toolbar.cut",
+      "en": "Cut",
+      "vars": []
+    },
+    {
+      "key": "toolbar.darkMode",
+      "en": "Dark Mode",
+      "vars": []
+    },
+    {
+      "key": "toolbar.delete",
+      "en": "Delete",
+      "vars": []
+    },
+    {
+      "key": "toolbar.editMenu",
+      "en": "Edit",
+      "vars": []
+    },
+    {
+      "key": "toolbar.exportHtml",
+      "en": "Export to HTML…",
+      "vars": []
+    },
+    {
+      "key": "toolbar.exportPdf",
+      "en": "Export to PDF",
+      "vars": []
+    },
+    {
+      "key": "toolbar.fileMenu",
+      "en": "File",
+      "vars": []
+    },
+    {
+      "key": "toolbar.files",
+      "en": "Files",
+      "vars": []
+    },
+    {
+      "key": "toolbar.focusMode",
+      "en": "Focus mode",
+      "vars": []
+    },
+    {
+      "key": "toolbar.helpMenu",
+      "en": "Help",
+      "vars": []
+    },
+    {
+      "key": "toolbar.insertMenu",
+      "en": "Insert",
+      "vars": []
+    },
+    {
+      "key": "toolbar.insertSmart",
+      "en": "Insert anything…",
+      "vars": []
+    },
+    {
+      "key": "toolbar.insertText",
+      "en": "Insert text…",
+      "vars": []
+    },
+    {
+      "key": "toolbar.lightMode",
+      "en": "Light Mode",
+      "vars": []
+    },
+    {
+      "key": "toolbar.ltr",
+      "en": "LTR ←",
+      "vars": []
+    },
+    {
+      "key": "toolbar.menu",
+      "en": "Menu",
+      "vars": []
+    },
+    {
+      "key": "toolbar.menuTooltip.edit",
+      "en": "Editing actions: undo, redo, copy, paste",
+      "vars": []
+    },
+    {
+      "key": "toolbar.menuTooltip.file",
+      "en": "Document operations: new, open, save, export",
+      "vars": []
+    },
+    {
+      "key": "toolbar.menuTooltip.help",
+      "en": "Focus mode, shortcuts, tour, command palette",
+      "vars": []
+    },
+    {
+      "key": "toolbar.menuTooltip.insert",
+      "en": "Insert charts, diagrams, media, math, references",
+      "vars": []
+    },
+    {
+      "key": "toolbar.menuTooltip.view",
+      "en": "View modes, appearance, panels",
+      "vars": []
+    },
+    {
+      "key": "toolbar.new",
+      "en": "New",
+      "vars": []
+    },
+    {
+      "key": "toolbar.open",
+      "en": "Open file",
+      "vars": []
+    },
+    {
+      "key": "toolbar.openWelcome",
+      "en": "Show Welcome.md",
+      "vars": []
+    },
+    {
+      "key": "toolbar.outline",
+      "en": "Outline",
+      "vars": []
+    },
+    {
+      "key": "toolbar.outline.hide",
+      "en": "Hide outline",
+      "vars": []
+    },
+    {
+      "key": "toolbar.outline.show",
+      "en": "Show outline",
+      "vars": []
+    },
+    {
+      "key": "toolbar.pageView.off",
+      "en": "📄 Page View: OFF",
+      "vars": []
+    },
+    {
+      "key": "toolbar.pageView.on",
+      "en": "📄 Page View: ON",
+      "vars": []
+    },
+    {
+      "key": "toolbar.panels",
+      "en": "Panels",
+      "vars": []
+    },
+    {
+      "key": "toolbar.paste",
+      "en": "Paste",
+      "vars": []
+    },
+    {
+      "key": "toolbar.print",
+      "en": "Print",
+      "vars": []
+    },
+    {
+      "key": "toolbar.redo",
+      "en": "Redo",
+      "vars": []
+    },
+    {
+      "key": "toolbar.rtl",
+      "en": "RTL →",
+      "vars": []
+    },
+    {
+      "key": "toolbar.save",
+      "en": "Save",
+      "vars": []
+    },
+    {
+      "key": "toolbar.saveAs",
+      "en": "Save as…",
+      "vars": []
+    },
+    {
+      "key": "toolbar.scrollIndependent",
+      "en": "Scroll: Independent",
+      "vars": []
+    },
+    {
+      "key": "toolbar.scrollLinked",
+      "en": "Scroll: Linked",
+      "vars": []
+    },
+    {
+      "key": "toolbar.section.clipboard",
+      "en": "Clipboard",
+      "vars": []
+    },
+    {
+      "key": "toolbar.section.diagrams",
+      "en": "Diagrams",
+      "vars": []
+    },
+    {
+      "key": "toolbar.section.documents",
+      "en": "Documents",
+      "vars": []
+    },
+    {
+      "key": "toolbar.section.export",
+      "en": "Export",
+      "vars": []
+    },
+    {
+      "key": "toolbar.section.history",
+      "en": "History",
+      "vars": []
+    },
+    {
+      "key": "toolbar.section.mathRefs",
+      "en": "Math & References",
+      "vars": []
+    },
+    {
+      "key": "toolbar.section.media",
+      "en": "Media",
+      "vars": []
+    },
+    {
+      "key": "toolbar.section.selection",
+      "en": "Selection",
+      "vars": []
+    },
+    {
+      "key": "toolbar.section.specific",
+      "en": "Or pick a specific block",
+      "vars": []
+    },
+    {
+      "key": "toolbar.section.tablesCharts",
+      "en": "Tables & Charts",
+      "vars": []
+    },
+    {
+      "key": "toolbar.section.tools",
+      "en": "Tools",
+      "vars": []
+    },
+    {
+      "key": "toolbar.section.workspace",
+      "en": "Workspace",
+      "vars": []
+    },
+    {
+      "key": "toolbar.selectAll",
+      "en": "Select all",
+      "vars": []
+    },
+    {
+      "key": "toolbar.settings",
+      "en": "Settings",
+      "vars": []
+    },
+    {
+      "key": "toolbar.shareMenu",
+      "en": "Share",
+      "vars": []
+    },
+    {
+      "key": "toolbar.shortcuts",
+      "en": "Keyboard shortcuts",
+      "vars": []
+    },
+    {
+      "key": "toolbar.splitAxis",
+      "en": "Scroll orientation",
+      "vars": []
+    },
+    {
+      "key": "toolbar.splitAxis.auto",
+      "en": "Auto (responsive)",
+      "vars": []
+    },
+    {
+      "key": "toolbar.splitAxis.horizontal",
+      "en": "Side by side ↔",
+      "vars": []
+    },
+    {
+      "key": "toolbar.splitAxis.vertical",
+      "en": "Stacked ↕",
+      "vars": []
+    },
+    {
+      "key": "toolbar.tagline",
+      "en": "Markdown, illuminated",
+      "vars": []
+    },
+    {
+      "key": "toolbar.theme",
+      "en": "Toggle theme",
+      "vars": []
+    },
+    {
+      "key": "toolbar.tour",
+      "en": "Guided tour",
+      "vars": []
+    },
+    {
+      "key": "toolbar.undo",
+      "en": "Undo",
+      "vars": []
+    },
+    {
+      "key": "toolbar.viewMode",
+      "en": "View Mode",
+      "vars": []
+    },
+    {
+      "key": "toolbar.workspace",
+      "en": "Toggle workspace",
+      "vars": []
+    },
+    {
+      "key": "tour.action.openRuntimeMetrics",
+      "en": "Open runtime metrics now",
+      "vars": []
+    },
+    {
+      "key": "tour.done",
+      "en": "✓ Done",
+      "vars": []
+    },
+    {
+      "key": "tour.next",
+      "en": "→ Next",
+      "vars": []
+    },
+    {
+      "key": "tour.step.editor.body",
+      "en": "Write Markdown with full syntax highlighting, live preview, and AI assistance.",
+      "vars": []
+    },
+    {
+      "key": "tour.step.editor.title",
+      "en": "✍️ Editor",
+      "vars": []
+    },
+    {
+      "key": "tour.step.menu.body",
+      "en": "Access File, Edit, Insert, View, and Help — each menu has clear sections, hover tooltips, and per-action descriptions.",
+      "vars": []
+    },
+    {
+      "key": "tour.step.menu.title",
+      "en": "📋 Menu Bar",
+      "vars": []
+    },
+    {
+      "key": "tour.step.statusBar.body",
+      "en": "Word count, character count, reading time — always visible.",
+      "vars": []
+    },
+    {
+      "key": "tour.step.statusBar.title",
+      "en": "📊 Status Bar",
+      "vars": []
+    },
+    {
+      "key": "tour.step.viewModes.body",
+      "en": "Switch between Source, Split, Preview, and WYSIWYG anytime (⌘1-4).",
+      "vars": []
+    },
+    {
+      "key": "tour.step.viewModes.title",
+      "en": "👁️ View Modes",
+      "vars": []
+    },
+    {
+      "key": "tour.step.workspace.body",
+      "en": "Manage files in your local workspace. Everything is stored in-browser.",
+      "vars": []
+    },
+    {
+      "key": "tour.step.workspace.title",
+      "en": "📁 Workspace",
+      "vars": []
+    },
+    {
+      "key": "update.available",
+      "en": "A new version of Lumen is available.",
+      "vars": []
+    },
+    {
+      "key": "update.dismiss",
+      "en": "Dismiss",
+      "vars": []
+    },
+    {
+      "key": "update.reload",
+      "en": "Reload",
+      "vars": []
+    }
+  ]
+}

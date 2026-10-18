@@ -1,0 +1,20 @@
+{
+  "canvas.autoSaved": "קנבס · נשמר אוטומטית",
+  "canvas.close": "סגור",
+  "canvas.dialogLabel": "לוח לבן",
+  "canvas.legacy.convert": "המר {name} ל-tldraw",
+  "canvas.legacy.convertFailed": "ההמרה נכשלה: {error}",
+  "canvas.legacy.converted": "✅ הומר {name} ({count} צורות)",
+  "canvas.legacy.converting": "ממיר {name}…",
+  "canvas.legacy.found": "נמצאו {count} קנבסים ישנים",
+  "canvas.new": "חדש",
+  "canvas.new.prompt": "שם הקנבס:",
+  "canvas.picker": "בחר קנבס",
+  "canvas.switch": "החלפת קנבס",
+  "canvas.title": "קנבס",
+  "graphView.empty": "לא נמצאו קבצים. פתח את מרחב העבודה והוסף קבצים כדי לראות את גרף הידע.",
+  "graphView.renderFailed": "רינדור הגרף נכשל",
+  "graphView.renderFailedDetail": "נתוני מרחב העבודה גרמו למבנה צמתים לא תקין שגרם לקריסת המרנדר.",
+  "graphView.stats": "{nodes} צמתים · {edges} חיבורים",
+  "graphView.title": "גרף ידע"
+}

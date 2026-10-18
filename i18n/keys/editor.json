@@ -1,0 +1,1081 @@
+{
+  "version": 2,
+  "domain": "editor",
+  "source": "src/i18n/locales/en/editor.json",
+  "entries": [
+    {
+      "key": "bibtex.link",
+      "en": "link",
+      "vars": []
+    },
+    {
+      "key": "bibtex.noEntries",
+      "en": "No BibTeX entries detected.",
+      "vars": []
+    },
+    {
+      "key": "bibtex.references",
+      "en": "References ({n})",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "block.htmlPreview.exitFullscreen",
+      "en": "Exit fullscreen",
+      "vars": []
+    },
+    {
+      "key": "block.htmlPreview.fullscreen",
+      "en": "Fullscreen",
+      "vars": []
+    },
+    {
+      "key": "block.htmlPreview.openFullscreen",
+      "en": "Fullscreen preview",
+      "vars": []
+    },
+    {
+      "key": "block.htmlPreview.scriptsOff",
+      "en": "Scripts off",
+      "vars": []
+    },
+    {
+      "key": "block.htmlPreview.scriptsOn",
+      "en": "Enable scripts",
+      "vars": []
+    },
+    {
+      "key": "block.htmlPreview.source",
+      "en": "Source",
+      "vars": []
+    },
+    {
+      "key": "block.htmlPreview.title",
+      "en": "HTML preview",
+      "vars": []
+    },
+    {
+      "key": "block.htmlPreview.toggleScripts",
+      "en": "Toggle unsafe script execution",
+      "vars": []
+    },
+    {
+      "key": "block.htmlPreview.toggleSource",
+      "en": "Toggle source view",
+      "vars": []
+    },
+    {
+      "key": "block.liveCss.title",
+      "en": "Live CSS",
+      "vars": []
+    },
+    {
+      "key": "block.liveJs.clear",
+      "en": "Clear console",
+      "vars": []
+    },
+    {
+      "key": "block.liveJs.idle",
+      "en": "Not run yet",
+      "vars": []
+    },
+    {
+      "key": "block.liveJs.idleHint",
+      "en": "Code in a document runs only when you press Run. It runs in an isolated sandbox with no access to your files, keys or the network.",
+      "vars": []
+    },
+    {
+      "key": "block.liveJs.noOutput",
+      "en": "(no output yet)",
+      "vars": []
+    },
+    {
+      "key": "block.liveJs.resetScope",
+      "en": "Reset scope",
+      "vars": []
+    },
+    {
+      "key": "block.liveJs.resetScope.hint",
+      "en": "Discard every variable defined by this document's shared blocks",
+      "vars": []
+    },
+    {
+      "key": "block.liveJs.run",
+      "en": "Run",
+      "vars": []
+    },
+    {
+      "key": "block.liveJs.scopeReset",
+      "en": "Scope reset",
+      "vars": []
+    },
+    {
+      "key": "block.liveJs.shared",
+      "en": "shared scope",
+      "vars": []
+    },
+    {
+      "key": "block.liveJs.sharedHint",
+      "en": "Runs in this document's shared worker: top-level variables and functions stay available to later runs and other shared blocks.",
+      "vars": []
+    },
+    {
+      "key": "block.liveJs.title",
+      "en": "Live JavaScript",
+      "vars": []
+    },
+    {
+      "key": "block.liveLua.clear",
+      "en": "Clear output",
+      "vars": []
+    },
+    {
+      "key": "block.liveLua.loadFailed",
+      "en": "Failed to load the Lua runtime.",
+      "vars": []
+    },
+    {
+      "key": "block.liveLua.prompt",
+      "en": "Click Run to execute this Lua block.",
+      "vars": []
+    },
+    {
+      "key": "block.liveLua.run",
+      "en": "Run",
+      "vars": []
+    },
+    {
+      "key": "block.liveLua.state.error",
+      "en": "Error",
+      "vars": []
+    },
+    {
+      "key": "block.liveLua.state.idle",
+      "en": "Not run",
+      "vars": []
+    },
+    {
+      "key": "block.liveLua.state.running",
+      "en": "Running…",
+      "vars": []
+    },
+    {
+      "key": "block.liveLua.state.success",
+      "en": "Completed",
+      "vars": []
+    },
+    {
+      "key": "block.liveLua.state.timeout",
+      "en": "Timed out",
+      "vars": []
+    },
+    {
+      "key": "block.liveLua.stop",
+      "en": "Stop",
+      "vars": []
+    },
+    {
+      "key": "block.liveLua.stopped",
+      "en": "Stopped.",
+      "vars": []
+    },
+    {
+      "key": "block.liveLua.timedOut",
+      "en": "Execution timed out after {ms} ms.",
+      "vars": [
+        "ms"
+      ]
+    },
+    {
+      "key": "block.liveLua.title",
+      "en": "Live Lua",
+      "vars": []
+    },
+    {
+      "key": "block.liveLua.workerUnavailable",
+      "en": "Web Workers are unavailable in this browser.",
+      "vars": []
+    },
+    {
+      "key": "block.liveR.clear",
+      "en": "Clear output",
+      "vars": []
+    },
+    {
+      "key": "block.liveR.loadFailed",
+      "en": "Failed to load the R runtime.",
+      "vars": []
+    },
+    {
+      "key": "block.liveR.loadTimeout",
+      "en": "R took too long to load.",
+      "vars": []
+    },
+    {
+      "key": "block.liveR.loading",
+      "en": "Loading R…",
+      "vars": []
+    },
+    {
+      "key": "block.liveR.plot",
+      "en": "R plot",
+      "vars": []
+    },
+    {
+      "key": "block.liveR.prompt",
+      "en": "Click Run to execute this R block. The first run downloads R (~45 MB, cached afterwards).",
+      "vars": []
+    },
+    {
+      "key": "block.liveR.run",
+      "en": "Run",
+      "vars": []
+    },
+    {
+      "key": "block.liveR.state.error",
+      "en": "Error",
+      "vars": []
+    },
+    {
+      "key": "block.liveR.state.idle",
+      "en": "Not run",
+      "vars": []
+    },
+    {
+      "key": "block.liveR.state.loading",
+      "en": "Loading…",
+      "vars": []
+    },
+    {
+      "key": "block.liveR.state.running",
+      "en": "Running…",
+      "vars": []
+    },
+    {
+      "key": "block.liveR.state.success",
+      "en": "Completed",
+      "vars": []
+    },
+    {
+      "key": "block.liveR.state.timeout",
+      "en": "Timed out",
+      "vars": []
+    },
+    {
+      "key": "block.liveR.stop",
+      "en": "Stop",
+      "vars": []
+    },
+    {
+      "key": "block.liveR.stopped",
+      "en": "Stopped.",
+      "vars": []
+    },
+    {
+      "key": "block.liveR.timedOut",
+      "en": "Execution timed out after {ms} ms.",
+      "vars": [
+        "ms"
+      ]
+    },
+    {
+      "key": "block.liveR.title",
+      "en": "Live R",
+      "vars": []
+    },
+    {
+      "key": "block.liveRuby.clear",
+      "en": "Clear output",
+      "vars": []
+    },
+    {
+      "key": "block.liveRuby.loadFailed",
+      "en": "Failed to load the Ruby runtime.",
+      "vars": []
+    },
+    {
+      "key": "block.liveRuby.loadTimeout",
+      "en": "Ruby took too long to load.",
+      "vars": []
+    },
+    {
+      "key": "block.liveRuby.loading",
+      "en": "Loading Ruby…",
+      "vars": []
+    },
+    {
+      "key": "block.liveRuby.prompt",
+      "en": "Click Run to execute this Ruby block. The first run downloads Ruby (~30 MB, cached afterwards).",
+      "vars": []
+    },
+    {
+      "key": "block.liveRuby.run",
+      "en": "Run",
+      "vars": []
+    },
+    {
+      "key": "block.liveRuby.state.error",
+      "en": "Error",
+      "vars": []
+    },
+    {
+      "key": "block.liveRuby.state.idle",
+      "en": "Not run",
+      "vars": []
+    },
+    {
+      "key": "block.liveRuby.state.loading",
+      "en": "Loading…",
+      "vars": []
+    },
+    {
+      "key": "block.liveRuby.state.running",
+      "en": "Running…",
+      "vars": []
+    },
+    {
+      "key": "block.liveRuby.state.success",
+      "en": "Completed",
+      "vars": []
+    },
+    {
+      "key": "block.liveRuby.state.timeout",
+      "en": "Timed out",
+      "vars": []
+    },
+    {
+      "key": "block.liveRuby.stop",
+      "en": "Stop",
+      "vars": []
+    },
+    {
+      "key": "block.liveRuby.stopped",
+      "en": "Stopped.",
+      "vars": []
+    },
+    {
+      "key": "block.liveRuby.timedOut",
+      "en": "Execution timed out after {ms} ms.",
+      "vars": [
+        "ms"
+      ]
+    },
+    {
+      "key": "block.liveRuby.title",
+      "en": "Live Ruby",
+      "vars": []
+    },
+    {
+      "key": "block.playground.console",
+      "en": "Console",
+      "vars": []
+    },
+    {
+      "key": "block.playground.errors",
+      "en": "{n} errors",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "block.playground.frameTitle",
+      "en": "Web Playground preview",
+      "vars": []
+    },
+    {
+      "key": "block.playground.preview",
+      "en": "Preview",
+      "vars": []
+    },
+    {
+      "key": "block.playground.prompt",
+      "en": "Click Run to start this project (files are separated by --- name.ext --- lines).",
+      "vars": []
+    },
+    {
+      "key": "block.playground.reset",
+      "en": "Reset",
+      "vars": []
+    },
+    {
+      "key": "block.playground.run",
+      "en": "Run",
+      "vars": []
+    },
+    {
+      "key": "block.playground.state.error",
+      "en": "Error",
+      "vars": []
+    },
+    {
+      "key": "block.playground.state.idle",
+      "en": "Not run",
+      "vars": []
+    },
+    {
+      "key": "block.playground.state.running",
+      "en": "Running…",
+      "vars": []
+    },
+    {
+      "key": "block.playground.state.success",
+      "en": "Running",
+      "vars": []
+    },
+    {
+      "key": "block.playground.title",
+      "en": "Web Playground",
+      "vars": []
+    },
+    {
+      "key": "chart.alternatives",
+      "en": "Chart suggestions",
+      "vars": []
+    },
+    {
+      "key": "chart.label.bar",
+      "en": "{y} by {x}",
+      "vars": [
+        "y",
+        "x"
+      ]
+    },
+    {
+      "key": "chart.label.barTop",
+      "en": "Top {n} {x} by {y}",
+      "vars": [
+        "n",
+        "x",
+        "y"
+      ]
+    },
+    {
+      "key": "chart.label.histogram",
+      "en": "Distribution of {x}",
+      "vars": [
+        "x"
+      ]
+    },
+    {
+      "key": "chart.label.line",
+      "en": "{y} over {x}",
+      "vars": [
+        "y",
+        "x"
+      ]
+    },
+    {
+      "key": "chart.label.lineBy",
+      "en": "{y} over {x} by {by}",
+      "vars": [
+        "y",
+        "x",
+        "by"
+      ]
+    },
+    {
+      "key": "chart.label.map",
+      "en": "Map of {n} points",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "chart.label.pie",
+      "en": "{y} share by {x}",
+      "vars": [
+        "y",
+        "x"
+      ]
+    },
+    {
+      "key": "chart.label.radar",
+      "en": "{y} per {x}",
+      "vars": [
+        "y",
+        "x"
+      ]
+    },
+    {
+      "key": "chart.label.scatter",
+      "en": "{y} vs {x}",
+      "vars": [
+        "y",
+        "x"
+      ]
+    },
+    {
+      "key": "chart.label.scatterBy",
+      "en": "{y} vs {x} by {by}",
+      "vars": [
+        "y",
+        "x",
+        "by"
+      ]
+    },
+    {
+      "key": "chart.label.stackedBar",
+      "en": "{y} by {x} (stacked)",
+      "vars": [
+        "y",
+        "x"
+      ]
+    },
+    {
+      "key": "chart.label.summary",
+      "en": "Average of numeric columns",
+      "vars": []
+    },
+    {
+      "key": "chart.reason.bar",
+      "en": "{n} categories compared on {y}.",
+      "vars": [
+        "n",
+        "y"
+      ]
+    },
+    {
+      "key": "chart.reason.barGrouped",
+      "en": "{n} categories × {k} measures, side by side.",
+      "vars": [
+        "n",
+        "k"
+      ]
+    },
+    {
+      "key": "chart.reason.barTop",
+      "en": "{total} categories is too many to read — showing the top {n}.",
+      "vars": [
+        "total",
+        "n"
+      ]
+    },
+    {
+      "key": "chart.reason.histogram",
+      "en": "{n} values of {x} — {k} bins show how they are distributed.",
+      "vars": [
+        "n",
+        "x",
+        "k"
+      ]
+    },
+    {
+      "key": "chart.reason.line",
+      "en": "{x} is a time axis with {n} points — a line shows the trend.",
+      "vars": [
+        "x",
+        "n"
+      ]
+    },
+    {
+      "key": "chart.reason.lineBy",
+      "en": "{x} is a time axis with {n} points; one line per {by} ({k} series).",
+      "vars": [
+        "x",
+        "n",
+        "by",
+        "k"
+      ]
+    },
+    {
+      "key": "chart.reason.map",
+      "en": "{lat} / {lon} look like coordinates — plot them on a map.",
+      "vars": [
+        "lat",
+        "lon"
+      ]
+    },
+    {
+      "key": "chart.reason.pie",
+      "en": "Only {n} categories — small enough to compare as slices.",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "chart.reason.piePercent",
+      "en": "{y} is a percentage across {n} slices.",
+      "vars": [
+        "y",
+        "n"
+      ]
+    },
+    {
+      "key": "chart.reason.pieSum",
+      "en": "{n} parts adding up to {total} — a whole split into shares.",
+      "vars": [
+        "n",
+        "total"
+      ]
+    },
+    {
+      "key": "chart.reason.radar",
+      "en": "{k} measures for {n} items — compare their profiles.",
+      "vars": [
+        "k",
+        "n"
+      ]
+    },
+    {
+      "key": "chart.reason.scatter",
+      "en": "Two numeric columns — see how {y} relates to {x}.",
+      "vars": [
+        "y",
+        "x"
+      ]
+    },
+    {
+      "key": "chart.reason.scatterCorr",
+      "en": "{x} and {y} are strongly correlated (r = {r}).",
+      "vars": [
+        "x",
+        "y",
+        "r"
+      ]
+    },
+    {
+      "key": "chart.reason.stackedBar",
+      "en": "{k} measures in the same unit — stacking shows each category’s total and its parts.",
+      "vars": [
+        "k"
+      ]
+    },
+    {
+      "key": "chart.reason.stackedBarMixed",
+      "en": "{k} measures stacked — their scales differ, so totals may mislead.",
+      "vars": [
+        "k"
+      ]
+    },
+    {
+      "key": "chart.reason.summary",
+      "en": "No category or time column — comparing column averages.",
+      "vars": []
+    },
+    {
+      "key": "comment.promptLabel",
+      "en": "Comment:",
+      "vars": []
+    },
+    {
+      "key": "comment.selectTextFirst",
+      "en": "Select some text first to anchor the comment.",
+      "vars": []
+    },
+    {
+      "key": "commentsPanel.close",
+      "en": "Close comments panel",
+      "vars": []
+    },
+    {
+      "key": "commentsPanel.delete",
+      "en": "Delete comment",
+      "vars": []
+    },
+    {
+      "key": "commentsPanel.empty",
+      "en": "No comments yet. Select text in the editor and run “Add comment” from the command palette.",
+      "vars": []
+    },
+    {
+      "key": "commentsPanel.hideResolved",
+      "en": "Hide resolved comments",
+      "vars": []
+    },
+    {
+      "key": "commentsPanel.jump",
+      "en": "Scroll to anchored text",
+      "vars": []
+    },
+    {
+      "key": "commentsPanel.reopen",
+      "en": "Re-open",
+      "vars": []
+    },
+    {
+      "key": "commentsPanel.reply",
+      "en": "Reply",
+      "vars": []
+    },
+    {
+      "key": "commentsPanel.replyPlaceholder",
+      "en": "Write a reply…",
+      "vars": []
+    },
+    {
+      "key": "commentsPanel.resolve",
+      "en": "Resolve",
+      "vars": []
+    },
+    {
+      "key": "commentsPanel.showResolved",
+      "en": "Show resolved comments",
+      "vars": []
+    },
+    {
+      "key": "commentsPanel.summary",
+      "en": "{{unresolved}} open · {{total}} total",
+      "vars": [
+        "unresolved",
+        "total"
+      ]
+    },
+    {
+      "key": "commentsPanel.title",
+      "en": "Comments",
+      "vars": []
+    },
+    {
+      "key": "commentsPanel.viewAll",
+      "en": "All",
+      "vars": []
+    },
+    {
+      "key": "commentsPanel.viewOpen",
+      "en": "Open only",
+      "vars": []
+    },
+    {
+      "key": "dnd.dropHint",
+      "en": "Drop a .md, .csv, .tsv or .json file",
+      "vars": []
+    },
+    {
+      "key": "docTabs.close",
+      "en": "Close tab",
+      "vars": []
+    },
+    {
+      "key": "docTabs.label",
+      "en": "Open documents",
+      "vars": []
+    },
+    {
+      "key": "editor.ariaLabel",
+      "en": "Markdown source editor",
+      "vars": []
+    },
+    {
+      "key": "findReplace.caseSensitive",
+      "en": "Case sensitive",
+      "vars": []
+    },
+    {
+      "key": "findReplace.close",
+      "en": "Close find & replace",
+      "vars": []
+    },
+    {
+      "key": "findReplace.next",
+      "en": "Next match",
+      "vars": []
+    },
+    {
+      "key": "findReplace.prev",
+      "en": "Previous match",
+      "vars": []
+    },
+    {
+      "key": "findReplace.regex",
+      "en": "Regular expression",
+      "vars": []
+    },
+    {
+      "key": "findReplace.replace",
+      "en": "Replace",
+      "vars": []
+    },
+    {
+      "key": "findReplace.replaceAll",
+      "en": "Replace All",
+      "vars": []
+    },
+    {
+      "key": "findReplace.replaceInput",
+      "en": "Replacement text",
+      "vars": []
+    },
+    {
+      "key": "findReplace.replacePlaceholder",
+      "en": "Replace with…",
+      "vars": []
+    },
+    {
+      "key": "findReplace.searchInput",
+      "en": "Search query",
+      "vars": []
+    },
+    {
+      "key": "findReplace.toggleReplace",
+      "en": "Toggle replace row",
+      "vars": []
+    },
+    {
+      "key": "focusMode.exit",
+      "en": "Exit Focus Mode (Esc)",
+      "vars": []
+    },
+    {
+      "key": "focusMode.exitShort",
+      "en": "✕ Exit Focus",
+      "vars": []
+    },
+    {
+      "key": "format.failed",
+      "en": "Formatting failed: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "format.needsSource",
+      "en": "Switch to Source or Split view to format a code block",
+      "vars": []
+    },
+    {
+      "key": "format.noBlock",
+      "en": "Place the cursor inside a fenced code block",
+      "vars": []
+    },
+    {
+      "key": "format.noFormatter",
+      "en": "No formatter for {lang}",
+      "vars": [
+        "lang"
+      ]
+    },
+    {
+      "key": "format.unchanged",
+      "en": "Already formatted",
+      "vars": []
+    },
+    {
+      "key": "insertText.auto",
+      "en": "Auto",
+      "vars": []
+    },
+    {
+      "key": "insertText.cancel",
+      "en": "Cancel",
+      "vars": []
+    },
+    {
+      "key": "insertText.codeLang",
+      "en": "Language",
+      "vars": []
+    },
+    {
+      "key": "insertText.confirm",
+      "en": "Insert",
+      "vars": []
+    },
+    {
+      "key": "insertText.detect",
+      "en": "Detect as",
+      "vars": []
+    },
+    {
+      "key": "insertText.detectedAs",
+      "en": "Detected as",
+      "vars": []
+    },
+    {
+      "key": "insertText.help",
+      "en": "Paste any markdown, HTML, or code. The detected type is shown below — switch manually if needed.",
+      "vars": []
+    },
+    {
+      "key": "insertText.hintCancel",
+      "en": "to cancel",
+      "vars": []
+    },
+    {
+      "key": "insertText.hintInsert",
+      "en": "to insert",
+      "vars": []
+    },
+    {
+      "key": "insertText.kind.code",
+      "en": "Code block",
+      "vars": []
+    },
+    {
+      "key": "insertText.kind.html",
+      "en": "HTML → markdown",
+      "vars": []
+    },
+    {
+      "key": "insertText.kind.markdown",
+      "en": "Markdown",
+      "vars": []
+    },
+    {
+      "key": "insertText.mode",
+      "en": "Insert as",
+      "vars": []
+    },
+    {
+      "key": "insertText.mode.append",
+      "en": "Append to document",
+      "vars": []
+    },
+    {
+      "key": "insertText.mode.atCursor",
+      "en": "At cursor position",
+      "vars": []
+    },
+    {
+      "key": "insertText.mode.replace",
+      "en": "Replace document",
+      "vars": []
+    },
+    {
+      "key": "insertText.placeholder",
+      "en": "Paste here. Try HTML like <h1>Hi</h1> or code like function() { … }",
+      "vars": []
+    },
+    {
+      "key": "insertText.preview",
+      "en": "Markdown preview",
+      "vars": []
+    },
+    {
+      "key": "insertText.previewEmpty",
+      "en": "(nothing yet — start typing)",
+      "vars": []
+    },
+    {
+      "key": "insertText.smartHelp",
+      "en": "Paste a URL, CSV, JSON, SQL, Mermaid, GeoJSON, math, code — anything. Lumen detects the type and wraps it in the right block.",
+      "vars": []
+    },
+    {
+      "key": "insertText.smartPlaceholder",
+      "en": "Paste anything: a YouTube link, CSV rows, SQL query, Mermaid diagram, GeoJSON, code, math…",
+      "vars": []
+    },
+    {
+      "key": "insertText.title",
+      "en": "Insert anything",
+      "vars": []
+    },
+    {
+      "key": "mdTable.addCol",
+      "en": "Add Column",
+      "vars": []
+    },
+    {
+      "key": "mdTable.addRow",
+      "en": "Add Row",
+      "vars": []
+    },
+    {
+      "key": "mdTable.removeCol",
+      "en": "Remove Column",
+      "vars": []
+    },
+    {
+      "key": "mdTable.removeRow",
+      "en": "Remove Row",
+      "vars": []
+    },
+    {
+      "key": "mdTable.title",
+      "en": "Table Editor",
+      "vars": []
+    },
+    {
+      "key": "mode.preview",
+      "en": "Preview",
+      "vars": []
+    },
+    {
+      "key": "mode.source",
+      "en": "Source",
+      "vars": []
+    },
+    {
+      "key": "mode.split",
+      "en": "Split",
+      "vars": []
+    },
+    {
+      "key": "mode.wysiwyg",
+      "en": "WYSIWYG",
+      "vars": []
+    },
+    {
+      "key": "outline.empty",
+      "en": "No headings yet. Start typing # to add one.",
+      "vars": []
+    },
+    {
+      "key": "outline.title",
+      "en": "Outline",
+      "vars": []
+    },
+    {
+      "key": "suggesting.byAuthor",
+      "en": "Suggested by {name}",
+      "vars": [
+        "name"
+      ]
+    },
+    {
+      "key": "suggesting.noWysiwyg",
+      "en": "Suggesting mode tracks changes in the source editor, so WYSIWYG is unavailable while it is on — showing Split view instead.",
+      "vars": []
+    },
+    {
+      "key": "suggesting.untrackable",
+      "en": "That text contains suggestion markup ({++, ++}, ~>, …) and can't be tracked. Turn off suggesting mode to insert it.",
+      "vars": []
+    },
+    {
+      "key": "vaultCite.noSource",
+      "en": "no such source",
+      "vars": []
+    },
+    {
+      "key": "vaultCite.notVerified",
+      "en": "Quote not found in the note",
+      "vars": []
+    },
+    {
+      "key": "vaultCite.summary",
+      "en": "Citations checked against your notes: {ok} of {total} verified",
+      "vars": [
+        "ok",
+        "total"
+      ]
+    },
+    {
+      "key": "vaultCite.unsupported",
+      "en": "No verified citation — check this answer against your notes.",
+      "vars": []
+    },
+    {
+      "key": "vaultCite.verified",
+      "en": "Quote found in the note",
+      "vars": []
+    },
+    {
+      "key": "writingGoal.done",
+      "en": "🎉 Daily goal reached — {{words}} / {{goal}}",
+      "vars": [
+        "words",
+        "goal"
+      ]
+    },
+    {
+      "key": "writingGoal.progress",
+      "en": "{{words}} / {{goal}} words · {{pct}}%",
+      "vars": [
+        "words",
+        "goal",
+        "pct"
+      ]
+    }
+  ]
+}
