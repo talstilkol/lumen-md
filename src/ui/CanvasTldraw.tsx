@@ -39,6 +39,8 @@ const DEFAULT_CANVAS_NAME = "untitled";
 /** Read the tldraw blob for a canvas. Returns null when the file isn't there. */
 async function loadCanvasFile(name: string): Promise<unknown | null> {
   if (!isOPFSAvailable()) return null;
+  // Read what was last asked to be written, not what was there before a write still in flight.
+  await afterCanvasWrites(name);
   try {
     const root = await navigator.storage.getDirectory();
     const dir = await root.getDirectoryHandle(CANVAS_DIR, { create: true });
@@ -67,6 +69,14 @@ export function queueCanvasWrite(name: string, write: () => Promise<void>): Prom
     if (canvasWrites.get(name) === next) canvasWrites.delete(name);
   }).catch(() => undefined);
   return next;
+}
+
+/** Resolves once every write already queued for this canvas has settled (failed ones included). Exported for tests. */
+export function afterCanvasWrites(name: string): Promise<void> {
+  return (canvasWrites.get(name) ?? Promise.resolve()).then(
+    () => undefined,
+    () => undefined,
+  );
 }
 
 function saveCanvasFile(name: string, snapshot: unknown): Promise<void> {
@@ -378,6 +388,8 @@ export function CanvasTldraw({ open, onClose }: Props) {
   }, [editor, canvasName, savedList]);
 
   const handlePick = useCallback((name: string) => {
+    // why: a pending "fresh" mark would make a later reselect skip the restore and save the other canvas's drawing under this name
+    freshCanvas.current = null;
     setCanvasName(name);
   }, []);
 
@@ -393,6 +405,7 @@ export function CanvasTldraw({ open, onClose }: Props) {
         ]);
         setSavedList(tldrs);
         setLegacyList(legacies);
+        freshCanvas.current = null;
         setCanvasName(legacyName);
         showAiToast(
           t("canvas.legacy.converted", { name: legacyName, count: String(nodeCount) }),

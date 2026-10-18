@@ -125,4 +125,30 @@ describe("tldraw integration (γ.2)", () => {
       expect(landed.at(-1)).toBe("after failure");
     });
   });
+
+  it("a load waits for writes already queued to the same canvas (review: #206)", async () => {
+    const { queueCanvasWrite, afterCanvasWrites } = await import("../ui/CanvasTldraw");
+    const order: string[] = [];
+    let release!: () => void;
+    void queueCanvasWrite("a", () => new Promise<void>((r) => (release = () => (order.push("blank written"), r()))));
+    const read = afterCanvasWrites("a").then(() => order.push("read"));
+    await afterCanvasWrites("b"); // nothing queued for b: immediate
+    expect(order).toEqual([]);
+    release();
+    await read;
+    expect(order).toEqual(["blank written", "read"]);
+    // a failed write does not block the read
+    void queueCanvasWrite("a", async () => Promise.reject(new Error("quota"))).catch(() => undefined);
+    await expect(afterCanvasWrites("a")).resolves.toBeUndefined();
+  });
+
+  it("switching canvases clears the fresh mark (source check: the component is not mountable in jsdom)", async () => {
+    const { readFileSync } = await import("node:fs");
+    const { join } = await import("node:path");
+    const src = readFileSync(join(__dirname, "../ui/CanvasTldraw.tsx"), "utf8");
+    const pick = src.slice(src.indexOf("const handlePick"), src.indexOf("const handleConvertLegacy"));
+    expect(pick).toMatch(/freshCanvas\.current = null;[\s\S]*setCanvasName\(name\)/);
+    const convert = src.slice(src.indexOf("const handleConvertLegacy"));
+    expect(convert).toMatch(/freshCanvas\.current = null;\s*setCanvasName\(legacyName\)/);
+  });
 });
