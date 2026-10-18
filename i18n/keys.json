@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-10-18T04:31:22.318Z",
+  "generated_at": "2026-10-18T05:31:33.474Z",
   "source": "src/i18n/index.ts (en bundle)",
-  "count": 1426,
+  "count": 1427,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -2034,6 +2034,13 @@
     {
       "key": "privacy.downloads",
       "en": "Model downloads: {n}",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "privacy.staticAssets",
+      "en": "Static files: {n}",
       "vars": [
         "n"
       ]

@@ -1354,6 +1354,7 @@
   "privacy.cloudRequests": "Ушло с устройства: {n} (отправлено {size})",
   "privacy.localRequests": "Локально: {n}",
   "privacy.downloads": "Загрузки моделей: {n}",
+  "privacy.staticAssets": "Статические файлы: {n}",
   "privacy.blocked": "Заблокировано: {n}",
   "privacy.onlyLeaving": "Только то, что ушло с устройства",
   "privacy.clear": "Очистить",
