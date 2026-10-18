@@ -85,12 +85,14 @@ async function getFileHandleAt(
 async function readDirInto(
   dir: FileSystemDirectoryHandle,
   prefix: string,
-  opts: { includeAssets: boolean },
+  opts: { includeAssets: boolean; includeHidden: boolean },
 ): Promise<WorkspaceNode[]> {
   const out: WorkspaceNode[] = [];
   for await (const [name, handle] of dir.entries()) {
-    // Dot entries are app data (".trash", ".obsidian"), not notes (T46).
-    if (name.startsWith(".")) continue;
+    // Dot entries are app data (".trash", ".obsidian"), not notes (T46):
+    // hidden from the tree, search and the index. Sync callers still need
+    // real repository content such as `.github/` — only the trash stays out.
+    if (name.startsWith(".") && (!opts.includeHidden || (!prefix && name === ".trash"))) continue;
     const path = prefix ? `${prefix}/${name}` : name;
     if (handle.kind === "directory") {
       const children = await readDirInto(
@@ -125,17 +127,18 @@ async function readDirInto(
 
 /** Recursive tree of all entries in the workspace. */
 export async function listWorkspaceTree(
-  opts: { includeAssets?: boolean } = {},
+  opts: { includeAssets?: boolean; includeHidden?: boolean } = {},
 ): Promise<WorkspaceNode[]> {
-  return readDirInto(await root(), "", { includeAssets: !!opts.includeAssets });
+  return readDirInto(await root(), "", { includeAssets: !!opts.includeAssets, includeHidden: !!opts.includeHidden });
 }
 
 /**
  * Backwards-compatible flat listing — recurses through every directory and
- * returns a flat array of files only.
+ * returns a flat array of files only. `includeHidden` keeps dot entries
+ * (except the root `.trash/`) for callers that mirror the vault (git, cloud sync).
  */
 export async function listWorkspace(
-  opts: { includeAssets?: boolean } = {},
+  opts: { includeAssets?: boolean; includeHidden?: boolean } = {},
 ): Promise<WorkspaceEntry[]> {
   const tree = await listWorkspaceTree(opts);
   const out: WorkspaceEntry[] = [];

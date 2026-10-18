@@ -124,6 +124,14 @@ describe("trash", () => {
     expect(await readWorkspaceFile("p/x.md")).toBe("X");
   });
 
+  it("sync callers still see dot entries other than the trash", async () => {
+    await writeWorkspaceFile("repo/.github/workflows/release.yml", "on: push");
+    await writeWorkspaceFile("gone.md", "x");
+    await trashPaths(["gone.md"]);
+    expect((await listWorkspace()).map((f) => f.path)).toEqual([]);
+    expect((await listWorkspace({ includeHidden: true })).map((f) => f.path)).toEqual(["repo/.github/workflows/release.yml"]);
+  });
+
   it("trashing a folder together with a note inside it moves only the folder", async () => {
     await writeWorkspaceFile("p/x.md", "X");
     await writeWorkspaceFile("p/sub/y.md", "Y");
