@@ -20,13 +20,14 @@ two files that conflict mechanically every time (`i18n/keys.json`,
 
 | Lane | Area | Paths it owns |
 | --- | --- | --- |
-| **D** | Dev tooling, CI, build | `scripts/`, `.github/`, `playwright.config.ts`, `lighthouserc.json`, `vite.config.ts` (build side), `docs/dev/` |
+| **D** | Dev tooling, CI, build | `scripts/`, `.github/`, `e2e/`, `src/build/`, `docs/dev/`, `vite.config.ts`, `playwright.config.ts`, `lighthouserc.json`, `package.json` + lockfile, `Dockerfile` |
 | **S** | Storage and sync | `src/storage/`, `src/sync/`, `src/collab/`, `src/store/`, `sync-server/` |
-| **A** | AI and agents | `src/ai/`, `src/agents/`, `src/research/`, `scripts/agent-eval.mjs`, `scripts/fake-ollama.mjs` |
-| **U** | UI and i18n | `src/ui/`, `src/components/`, `src/layouts/`, `src/views/`, `src/i18n/`, `src/editor/`, `src/renderer/`, `src/plugins/` |
+| **A** | AI and agents | `src/ai/`, `src/agents/`, `src/research/` |
+| **U** | UI and i18n | `src/ui/`, `src/components/`, `src/layouts/`, `src/views/`, `src/editor/`, `src/renderer/`, `src/plugins/`, `src/i18n/`, `i18n/` |
 
-`scripts/review-triage.mjs --lanes` suggests a lane for each review finding
-from its path with the same split.
+Everything else (`src/App.tsx`, `src/pwa/`, `src/lib/`, top-level docs) has no
+default lane; the coordinator assigns it. `scripts/review-triage.mjs --lanes`
+suggests a lane for each review finding from its path with this same split.
 
 ## Rules
 
@@ -111,7 +112,9 @@ LANE_TRAILER="$(printf 'Co-Authored-By: …\nClaude-Session: …')" \
 
 For each branch, in order: `git merge --no-ff`. If the only conflicts are in
 `i18n/keys.json` or `package-lock.json`, they are regenerated from the merged
-sources and the merge commits ("Regenerated on conflict: …" in its message).
+sources and the merge commits (with a "Generated files: …" line in its
+message). A keys.json that merged cleanly but went stale — both sides bumped
+`count` to the same number — is regenerated inside the merge as well.
 Any other conflict stops the run with the merge left in progress and prints
 the command to continue with the remaining branches. At the end it runs
 `npx tsc --noEmit -p .`, the i18n staleness check and `npx vitest run`, and

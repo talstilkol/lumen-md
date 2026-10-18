@@ -10,7 +10,8 @@
 #   i18n/keys.json     node scripts/extract-i18n-keys.mjs
 #   package-lock.json  npm install --package-lock-only   (from the merged package.json)
 # Any other conflict stops the run with the merge left in progress, so you can
-# resolve it by hand and rerun with the branches that are left.
+# resolve it by hand and rerun with the branches that are left. A keys.json that
+# merged cleanly but no longer matches the strings is regenerated in the merge too.
 #
 # Afterwards: npx tsc --noEmit -p . and npx vitest run, then a summary.
 #
@@ -19,6 +20,14 @@
 #                      Co-Authored-By / Claude-Session lines)
 #   LANE_SKIP_TESTS=1  skip vitest (tsc still runs)
 set -uo pipefail
+
+# Checking out and merging can rewrite this very file: run from a copy.
+if [ -z "${LANE_MERGE_SELF:-}" ]; then
+  self=$(mktemp)
+  cp "$0" "$self"
+  LANE_MERGE_SELF=$self exec bash "$self" "$@"
+fi
+trap 'rm -f "$LANE_MERGE_SELF"' EXIT
 
 die() { echo "lane-merge: $*" >&2; exit 1; }
 
@@ -64,58 +73,63 @@ for b in "${branches[@]}"; do
     continue
   fi
   msg="Merge branch '$b' into $target"
-  trailer=()
-  [ -n "${LANE_TRAILER:-}" ] && trailer=(-m "$LANE_TRAILER")
-  if git merge --quiet --no-ff --no-edit -m "$msg" "${trailer[@]}" "$b" >/dev/null 2>&1; then
-    summary+=("$b|$(git rev-parse --short HEAD)|clean")
-    continue
-  fi
-
-  mapfile -t conflicted < <(git diff --name-only --diff-filter=U)
-  if [ ${#conflicted[@]} -eq 0 ]; then
-    git merge --abort 2>/dev/null
-    die "merging $b failed before any conflict (untracked files in the way?): run git merge --no-ff $b to see why"
-  fi
-  other=()
-  for f in "${conflicted[@]}"; do is_generated "$f" || other+=("$f"); done
-  if [ ${#other[@]} -gt 0 ]; then
-    echo >&2
-    echo "lane-merge: STOP — $b conflicts with $target in files a person has to resolve:" >&2
-    printf '    %s\n' "${other[@]}" >&2
-    echo "The merge is left in progress. Resolve those files (generated ones too: rerun" >&2
-    echo "node scripts/extract-i18n-keys.mjs / npm install --package-lock-only), git add, git commit," >&2
-    rest=("${branches[@]:$i}")
-    if [ ${#rest[@]} -gt 0 ]; then
-      echo "then continue with:  scripts/lane-merge.sh $target ${rest[*]}" >&2
-    else
-      echo "then rerun the checks: npx tsc --noEmit -p . && npx vitest run" >&2
+  notes=()
+  # Stop before committing, so generated files can be fixed inside the merge itself.
+  if ! git merge --quiet --no-ff --no-commit "$b" >/dev/null 2>&1; then
+    mapfile -t conflicted < <(git diff --name-only --diff-filter=U)
+    if [ ${#conflicted[@]} -eq 0 ]; then
+      git merge --abort 2>/dev/null
+      die "merging $b failed before any conflict (untracked files in the way?): run git merge --no-ff $b to see why"
     fi
-    echo "Or give up on this branch: git merge --abort" >&2
-    [ ${#summary[@]} -gt 0 ] && { echo "Merged before the stop:" >&2; printf '    %s\n' "${summary[@]}" >&2; }
-    exit 1
-  fi
-
-  regenerated=()
-  for f in "${conflicted[@]}"; do
-    if ! regenerate "$f"; then
-      echo "lane-merge: STOP — could not regenerate $f while merging $b (merge left in progress; git merge --abort to undo)" >&2
+    other=()
+    for f in "${conflicted[@]}"; do is_generated "$f" || other+=("$f"); done
+    if [ ${#other[@]} -gt 0 ]; then
+      echo >&2
+      echo "lane-merge: STOP — $b conflicts with $target in files a person has to resolve:" >&2
+      printf '    %s\n' "${other[@]}" >&2
+      echo "The merge is left in progress. Resolve those files (generated ones too: rerun" >&2
+      echo "node scripts/extract-i18n-keys.mjs / npm install --package-lock-only), git add, git commit," >&2
+      rest=("${branches[@]:$i}")
+      if [ ${#rest[@]} -gt 0 ]; then
+        echo "then continue with:  scripts/lane-merge.sh $target ${rest[*]}" >&2
+      else
+        echo "then rerun the checks: npx tsc --noEmit -p . && npx vitest run" >&2
+      fi
+      echo "Or give up on this branch: git merge --abort" >&2
+      [ ${#summary[@]} -gt 0 ] && { echo "Merged before the stop:" >&2; printf '    %s\n' "${summary[@]%%|*}" >&2; }
       exit 1
     fi
-    regenerated+=("$f")
-  done
+    for f in "${conflicted[@]}"; do
+      if ! regenerate "$f"; then
+        echo "lane-merge: STOP — could not regenerate $f while merging $b (merge left in progress; git merge --abort to undo)" >&2
+        exit 1
+      fi
+    done
+    notes+=("regenerated ${conflicted[*]} (conflict)")
+  fi
+  # Both sides can make the same textual change (say, the same new "count")
+  # and merge cleanly into a keys.json that no longer matches the strings.
+  if ! node scripts/extract-i18n-keys.mjs --check >/dev/null 2>&1; then
+    regenerate i18n/keys.json || die "could not regenerate i18n/keys.json while merging $b (merge left in progress)"
+    notes+=("refreshed i18n/keys.json (stale after the merge)")
+  fi
+
   msgfile=$(mktemp)
   {
     echo "$msg"
-    echo
-    echo "Regenerated on conflict: ${regenerated[*]}"
-    [ -n "${LANE_TRAILER:-}" ] && { echo; echo "$LANE_TRAILER"; }
+    if [ ${#notes[@]} -gt 0 ]; then echo; printf '%s\n' "${notes[@]/#/Generated files: }"; fi
+    if [ -n "${LANE_TRAILER:-}" ]; then echo; echo "$LANE_TRAILER"; fi
   } >"$msgfile"
   if ! git commit --quiet --cleanup=strip -F "$msgfile" >/dev/null; then
     rm -f "$msgfile"
     die "commit of the merge of $b failed (merge left in progress)"
   fi
   rm -f "$msgfile"
-  summary+=("$b|$(git rev-parse --short HEAD)|regenerated ${regenerated[*]}")
+  if [ ${#notes[@]} -gt 0 ]; then
+    summary+=("$b|$(git rev-parse --short HEAD)|$(IFS=';'; echo "${notes[*]}")")
+  else
+    summary+=("$b|$(git rev-parse --short HEAD)|clean")
+  fi
 done
 
 echo "== checks on $target @ $(git rev-parse --short HEAD)"
