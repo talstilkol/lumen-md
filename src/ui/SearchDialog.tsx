@@ -233,9 +233,20 @@ export function SearchDialog({ open, onClose, onOpenFile }: Props) {
     }
   }
 
+  // T55: closing the dialog (or Esc anywhere) cancels a running answer.
+  const askOp = useRef<{ end(): void; abort(): void } | null>(null);
+  useEffect(() => {
+    if (!open) askOp.current?.abort();
+  }, [open]);
+
   async function askAi() {
     // Each question is one LLM prompt against the monthly AI quota, counted
     // when it is actually sent (ownPrompt).
+    const { aiOperation, isAbort } = await import("../ai/aiAbort");
+    const op = aiOperation();
+    const local = new AbortController();
+    op.signal.addEventListener("abort", () => local.abort(op.signal.reason), { once: true });
+    askOp.current = { end: op.end, abort: () => local.abort(new DOMException("closed", "AbortError")) };
     setAiLoading(true);
     setAiAnswer(t("searchDialog.searching"));
     setAiSources([]);
@@ -298,7 +309,7 @@ export function SearchDialog({ open, onClose, onOpenFile }: Props) {
         { role: "user", content: `Context Files:\n${contextStr}\n\nQuestion: ${query}` },
       ];
 
-      const answer = await chat(messages, { ownPrompt: true });
+      const answer = await chat(messages, { ownPrompt: true, signal: local.signal });
       setAiAnswer(answer);
       // Check every citation against the note it names (T29).
       setAiCitations(verifyVaultCitations(answer, results.map((r) => ({ path: r.path, content: r.content }))));
@@ -314,6 +325,10 @@ export function SearchDialog({ open, onClose, onOpenFile }: Props) {
       const rendered = await renderMarkdown(answer, isDark);
       setAiRendered(rendered);
     } catch (e) {
+      if (isAbort(e) || local.signal.aborted) {
+        setAiAnswer(t("toast.aiCancelled", { count: 1 }));
+        return;
+      }
       if (e instanceof AiError && e.code === "NO_KEY") {
         setAiAnswer("⚠️ Please configure your AI Key (⌘K → AI Settings).");
         showAiToast(t("toast.pleaseConfigureYourAiKey"), "error");
@@ -325,6 +340,8 @@ export function SearchDialog({ open, onClose, onOpenFile }: Props) {
         showAiToast(t("toast.aiWorkspaceSearchFailed"), "error");
       }
     } finally {
+      op.end();
+      askOp.current = null;
       setAiLoading(false);
     }
   }
