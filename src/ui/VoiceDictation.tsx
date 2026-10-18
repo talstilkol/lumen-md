@@ -18,7 +18,7 @@
  */
 
 import { createRoot } from "react-dom/client";
-import { useAppStore } from "../store/useStore";
+import { tabIdOf, useAppStore } from "../store/useStore";
 import { showAiToast } from "./AiToast";
 import { t } from "../i18n";
 import { transcribe, summarizeMemo, formatVoiceMemo } from "../ai/transcribe";
@@ -123,12 +123,44 @@ function localDictationSupported(): boolean {
   return !!navigator.mediaDevices?.getUserMedia && (typeof AudioContext !== "undefined" || !!w.webkitAudioContext);
 }
 
-function appendDictated(text: string): void {
-  const words = text.trim();
-  if (!words) return;
-  const current = useAppStore.getState().doc.content;
-  useAppStore.getState().setContent(current + (current.endsWith("\n\n") || !current ? "" : "\n\n") + words);
-  showAiToast(t("toast.addedWords", { count: words.split(/\s+/).length }), "info");
+const joinDictated = (current: string, words: string) => current + (current.endsWith("\n\n") || !current ? "" : "\n\n") + words;
+
+/**
+ * Where dictated text goes: the note that was open when dictation started,
+ * even if the user switched tabs while Whisper was still working. If that
+ * note was closed, the rest goes to a new note instead of whatever is open.
+ * Exported for tests.
+ */
+export function dictationSink(): (text: string) => void {
+  const origin = tabIdOf(useAppStore.getState().doc);
+  let orphan: string | null = null; // name of the note that took over, once created
+  return (text) => {
+    const words = text.trim();
+    if (!words) return;
+    const s = useAppStore.getState();
+    if (tabIdOf(s.doc) === origin) {
+      s.setContent(joinDictated(s.doc.content, words));
+    } else if (s.openTabs.some((tab) => tab.id === origin)) {
+      useAppStore.setState({
+        openTabs: s.openTabs.map((tab) => (tab.id === origin ? { ...tab, content: joinDictated(tab.content, words), dirty: true } : tab)),
+      });
+    } else if (orphan && s.openTabs.some((tab) => tab.id === orphan)) {
+      const id = orphan;
+      if (tabIdOf(s.doc) === id) s.setContent(joinDictated(s.doc.content, words));
+      else useAppStore.setState({ openTabs: s.openTabs.map((tab) => (tab.id === id ? { ...tab, content: joinDictated(tab.content, words), dirty: true } : tab)) });
+    } else {
+      const taken = new Set(s.openTabs.map((tab) => tab.id));
+      taken.add(tabIdOf(s.doc));
+      let name = `${t("dictate.newNoteName")}.md`;
+      for (let i = 2; taken.has(name); i++) name = `${t("dictate.newNoteName")} ${i}.md`;
+      orphan = name;
+      s.openTab({ name, content: words, workspaceName: null });
+      useAppStore.getState().setDoc({ dirty: true });
+      showAiToast(t("toast.dictate.noteClosed", { name }), "info");
+      return;
+    }
+    showAiToast(t("toast.addedWords", { count: words.split(/\s+/).length }), "info");
+  };
 }
 
 /**
@@ -146,9 +178,12 @@ export function startVoiceRecording(lang: string): void {
     return;
   }
   if (localDictationSupported()) {
-    void startLocalDictation(lang).catch((err) => {
+    void startLocalDictation(lang, () => {
+      // why: under local-only there is no fallback to offer; the failure toast already said what happened
+      if (Ctor && getAiPolicy() !== "local-only") void offerWebSpeech(Ctor, lang);
+    }).catch((err) => {
       log.warn("local dictation failed", err);
-      void offerWebSpeech(Ctor, lang, policy);
+      void offerWebSpeech(Ctor, lang);
     });
     return;
   }
@@ -156,20 +191,16 @@ export function startVoiceRecording(lang: string): void {
     showAiToast(t("toast.speechRecognitionNotSupportedIn"), "error");
     return;
   }
-  void offerWebSpeech(Ctor, lang, policy);
+  void offerWebSpeech(Ctor, lang);
 }
 
 /** Local dictation is impossible here: under local-only say so (and log the block); otherwise ask. */
-async function offerWebSpeech(Ctor: SpeechCtor | null, lang: string, policy: ReturnType<typeof getAiPolicy>): Promise<void> {
+async function offerWebSpeech(Ctor: SpeechCtor | null, lang: string): Promise<void> {
   if (!Ctor) {
     showAiToast(t("toast.speechRecognitionNotSupportedIn"), "error");
     return;
   }
-  if (policy === "local-only") {
-    recordSpeechRecognition("blocked");
-    showAiToast(t("toast.dictate.localOnlyBlocked"), "error");
-    return;
-  }
+  if (refuseUnderLocalOnly()) return;
   const { uiConfirm } = await import("./PromptDialog");
   const yes = await uiConfirm({ title: t("dictate.webSpeech.title"), message: t("dictate.webSpeech.body"), okLabel: t("dictate.webSpeech.ok") });
   if (!yes) return;
@@ -181,7 +212,18 @@ async function offerWebSpeech(Ctor: SpeechCtor | null, lang: string, policy: Ret
   startWebSpeech(Ctor, lang);
 }
 
+/** Read the policy now (it may have changed in another tab): under local-only, log the block and say so. */
+function refuseUnderLocalOnly(): boolean {
+  if (getAiPolicy() !== "local-only") return false;
+  recordSpeechRecognition("blocked");
+  showAiToast(t("toast.dictate.localOnlyBlocked"), "error");
+  return true;
+}
+
 function startWebSpeech(Ctor: SpeechCtor, lang: string): void {
+  // why: the single gate in front of the network service — re-checked after any await
+  if (refuseUnderLocalOnly()) return;
+  const appendDictated = dictationSink();
   recordSpeechRecognition("allowed");
   showAiToast(t("toast.dictate.webSpeechActive"), "info");
   const recognition = new Ctor();
@@ -210,55 +252,83 @@ function startWebSpeech(Ctor: SpeechCtor, lang: string): void {
   recognition.start();
 }
 
-/** Microphone → 5-second 16 kHz segments → Whisper in the worker → the note. Nothing leaves the device. */
-async function startLocalDictation(lang: string): Promise<void> {
+/**
+ * Microphone → 5-second 16 kHz segments → Whisper in the worker → the note.
+ * Nothing leaves the device. `onFailure` runs once if transcription fails
+ * (worker, model download or inference), after the microphone is released.
+ */
+async function startLocalDictation(lang: string, onFailure: () => void): Promise<void> {
   const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-  const w = window as Window & { webkitAudioContext?: typeof AudioContext };
-  const Ctx = typeof AudioContext !== "undefined" ? AudioContext : (w.webkitAudioContext as typeof AudioContext);
-  const ctx = new Ctx();
-  const source = ctx.createMediaStreamSource(stream);
-  // ScriptProcessor works everywhere without a worklet module (which the CSP would have to allow).
-  const proc = ctx.createScriptProcessor(4096, 1, 1);
-  const op = aiOperation(); // Esc / "AI: Cancel" stops transcription
-  const queue = new SerialQueue();
-  const language = lang.split(/[-_]/)[0].toLowerCase();
-  const { transcribeAudio } = await import("../ai/transformersEngine");
-  const segmenter = new Segmenter({
-    rate: ctx.sampleRate,
-    onSegment: (seg) => {
-      void queue.add(async () => {
-        if (op.signal.aborted) return;
-        try {
-          const out = await transcribeAudio(seg, { language, signal: op.signal });
-          if (typeof out.text === "string") appendDictated(out.text);
-        } catch (err) {
-          if (!isAbort(err)) log.warn("dictation segment failed", err);
-        }
-      });
-    },
-  });
-  proc.onaudioprocess = (e) => segmenter.push(e.inputBuffer.getChannelData(0));
-  source.connect(proc);
-  proc.connect(ctx.destination);
-  let stopped = false;
-  let cleanup = () => {};
-  const stop = () => {
-    if (stopped) return;
-    stopped = true;
-    proc.disconnect();
-    source.disconnect();
-    stream.getTracks().forEach((tr) => tr.stop());
-    segmenter.flush();
-    cleanup();
-    void queue.idle().finally(() => {
-      op.end();
-      void ctx.close();
-      showAiToast(t("toast.recordingStopped"), "info");
-    });
+  const release: Array<() => void> = [() => stream.getTracks().forEach((tr) => tr.stop())];
+  const releaseAll = () => {
+    for (const r of release.splice(0).reverse()) {
+      try {
+        r();
+      } catch {
+        // why: best-effort teardown; one failure must not keep the mic open
+      }
+    }
   };
-  op.signal.addEventListener("abort", stop);
-  cleanup = showRecordingPill(t("voice.recording", { lang }), stop);
-  showAiToast(t("toast.dictate.onDevice"), "info");
+  try {
+    const w = window as Window & { webkitAudioContext?: typeof AudioContext };
+    const Ctx = typeof AudioContext !== "undefined" ? AudioContext : (w.webkitAudioContext as typeof AudioContext);
+    const ctx = new Ctx();
+    release.push(() => void ctx.close());
+    const source = ctx.createMediaStreamSource(stream);
+    // ScriptProcessor works everywhere without a worklet module (which the CSP would have to allow).
+    const proc = ctx.createScriptProcessor(4096, 1, 1);
+    const { transcribeAudio } = await import("../ai/transformersEngine");
+    const op = aiOperation(); // Esc / "AI: Cancel" stops transcription
+    release.push(() => op.end());
+    const queue = new SerialQueue();
+    const language = lang.split(/[-_]/)[0].toLowerCase();
+    const appendDictated = dictationSink();
+    let failed = false;
+    let stopped = false;
+    let cleanup = () => {};
+    const stop = (quiet = false) => {
+      if (stopped) return;
+      stopped = true;
+      proc.disconnect();
+      source.disconnect();
+      stream.getTracks().forEach((tr) => tr.stop());
+      segmenter.flush();
+      cleanup();
+      void queue.idle().finally(() => {
+        releaseAll();
+        if (!quiet) showAiToast(t("toast.recordingStopped"), "info");
+      });
+    };
+    const segmenter = new Segmenter({
+      rate: ctx.sampleRate,
+      onSegment: (seg) => {
+        void queue.add(async () => {
+          if (op.signal.aborted || failed) return;
+          try {
+            const out = await transcribeAudio(seg, { language, signal: op.signal });
+            if (typeof out.text === "string") appendDictated(out.text);
+          } catch (err) {
+            if (isAbort(err) || failed) return;
+            // why: one failure means the worker or model is unusable — say so once, release the mic, offer the fallback
+            failed = true;
+            log.warn("dictation segment failed", err);
+            showAiToast(t("toast.dictate.localFailed", { error: (err as Error)?.message ?? String(err) }), "error");
+            stop(true);
+            onFailure();
+          }
+        });
+      },
+    });
+    proc.onaudioprocess = (e) => segmenter.push(e.inputBuffer.getChannelData(0));
+    source.connect(proc);
+    proc.connect(ctx.destination);
+    op.signal.addEventListener("abort", () => stop());
+    cleanup = showRecordingPill(t("voice.recording", { lang }), () => stop());
+    showAiToast(t("toast.dictate.onDevice"), "info");
+  } catch (err) {
+    releaseAll();
+    throw err;
+  }
 }
 
 /** The first recording container this browser supports, or "" to let MediaRecorder choose. */

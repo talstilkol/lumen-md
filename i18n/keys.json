@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-10-18T04:30:23.785Z",
+  "generated_at": "2026-10-18T04:30:30.207Z",
   "source": "src/i18n/index.ts (en bundle)",
-  "count": 1421,
+  "count": 1424,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -2486,6 +2486,25 @@
       "key": "toast.dictate.onDevice",
       "en": "Dictating on this device — text appears every few seconds (the first time downloads the speech model)",
       "vars": []
+    },
+    {
+      "key": "dictate.newNoteName",
+      "en": "Dictation",
+      "vars": []
+    },
+    {
+      "key": "toast.dictate.noteClosed",
+      "en": "The note you were dictating into was closed, so the rest went to a new note: {name}",
+      "vars": [
+        "name"
+      ]
+    },
+    {
+      "key": "toast.dictate.localFailed",
+      "en": "On-device dictation stopped: {error}",
+      "vars": [
+        "error"
+      ]
     },
     {
       "key": "toast.dictate.localOnlyBlocked",

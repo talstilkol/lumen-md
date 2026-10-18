@@ -104,3 +104,144 @@ describe("startVoiceRecording and the privacy policy", () => {
     document.getElementById("voice-recording-root")?.remove();
   });
 });
+
+describe("dictated text stays with its note (review: #197)", () => {
+  beforeEach(() => {
+    localStorage.clear();
+    vi.resetModules();
+  });
+
+  it("goes to the note dictation started in, even after a tab switch; to a new note once that one is closed", async () => {
+    const { useAppStore, tabIdOf } = await import("../store/useStore");
+    const { dictationSink } = await import("../ui/VoiceDictation");
+    const s = () => useAppStore.getState();
+    s().openTab({ name: "a.md", content: "A", workspaceName: null });
+    const sink = dictationSink();
+    s().openTab({ name: "b.md", content: "B", workspaceName: null });
+    sink("hello");
+    expect(s().doc.content).toBe("B");
+    expect(s().openTabs.find((x) => x.id === "a.md")).toMatchObject({ content: "A\n\nhello", dirty: true });
+    s().closeTab("a.md");
+    sink("more");
+    expect(tabIdOf(s().doc)).not.toBe("b.md");
+    expect(s().doc.content).toBe("more");
+    const taker = tabIdOf(s().doc);
+    s().openTab({ name: "b.md", content: "B", workspaceName: null });
+    sink("again"); // keeps using the note that took over
+    expect(s().doc.content).toBe("B");
+    expect(s().openTabs.find((x) => x.id === taker)?.content).toBe("more\n\nagain");
+  });
+});
+
+describe("dictation setup and failures (review: #197)", () => {
+  beforeEach(() => {
+    localStorage.clear();
+    vi.resetModules();
+  });
+
+  function fakeMic() {
+    const stop = vi.fn();
+    const stream = { getTracks: () => [{ stop }] };
+    Object.defineProperty(navigator, "mediaDevices", { configurable: true, value: { getUserMedia: vi.fn(async () => stream) } });
+    return stop;
+  }
+  class FakeSR {
+    static made = 0;
+    lang = "";
+    interimResults = false;
+    continuous = false;
+    onresult = null;
+    onerror = null;
+    onend = null;
+    constructor() {
+      FakeSR.made++;
+    }
+    start() {}
+    stop() {}
+  }
+  it("releases the microphone when the audio graph cannot be built, then offers the fallback", async () => {
+    localStorage.setItem("lumen.ai.policy", "local-first");
+    const stopTrack = fakeMic();
+    const close = vi.fn(async () => {});
+    (globalThis as unknown as { AudioContext: unknown }).AudioContext = class {
+      sampleRate = 48000;
+      close = close;
+      createMediaStreamSource() {
+        throw new Error("no audio graph");
+      }
+    };
+    (window as unknown as { SpeechRecognition: unknown }).SpeechRecognition = FakeSR;
+    const { startVoiceRecording } = await import("../ui/VoiceDictation");
+    const { uiConfirm } = await import("../ui/PromptDialog");
+    (uiConfirm as unknown as ReturnType<typeof vi.fn>).mockResolvedValueOnce(false);
+    startVoiceRecording("en-US");
+    await vi.waitFor(() => expect(uiConfirm).toHaveBeenCalled());
+    expect(stopTrack).toHaveBeenCalled();
+    expect(close).toHaveBeenCalled();
+    delete (globalThis as unknown as { AudioContext?: unknown }).AudioContext;
+    delete (window as unknown as { SpeechRecognition?: unknown }).SpeechRecognition;
+  });
+
+  it("re-reads the policy after the consent dialog: a switch to local-only in the meantime blocks the browser service", async () => {
+    localStorage.setItem("lumen.ai.policy", "local-first");
+    FakeSR.made = 0;
+    (window as unknown as { SpeechRecognition: unknown }).SpeechRecognition = FakeSR;
+    Object.defineProperty(navigator, "mediaDevices", { configurable: true, value: undefined });
+    const { ledgerEntries } = await import("../ai/privacyLedger");
+    const before = ledgerEntries().length;
+    const { startVoiceRecording } = await import("../ui/VoiceDictation");
+    const { uiConfirm } = await import("../ui/PromptDialog");
+    (uiConfirm as unknown as ReturnType<typeof vi.fn>).mockImplementationOnce(async () => {
+      localStorage.setItem("lumen.ai.policy", "local-only"); // e.g. from another tab
+      return true;
+    });
+    startVoiceRecording("en-US");
+    await vi.waitFor(() => expect(ledgerEntries().length).toBeGreaterThan(before));
+    expect(FakeSR.made).toBe(0);
+    expect(ledgerEntries().slice(before)).toEqual([expect.objectContaining({ decision: "blocked" })]);
+    delete (window as unknown as { SpeechRecognition?: unknown }).SpeechRecognition;
+  });
+
+  it("a failed transcription is reported once, releases the mic and offers the fallback", async () => {
+    localStorage.setItem("lumen.ai.policy", "local-first");
+    const stopTrack = fakeMic();
+    let proc: { onaudioprocess: ((e: unknown) => void) | null } | null = null;
+    (globalThis as unknown as { AudioContext: unknown }).AudioContext = class {
+      sampleRate = 16000;
+      destination = {};
+      close = vi.fn(async () => {});
+      createMediaStreamSource() {
+        return { connect() {}, disconnect() {} };
+      }
+      createScriptProcessor() {
+        proc = { onaudioprocess: null, connect() {}, disconnect() {} } as never;
+        return proc;
+      }
+    };
+    (window as unknown as { SpeechRecognition: unknown }).SpeechRecognition = FakeSR;
+    vi.doMock("../ai/transformersEngine", () => ({ transcribeAudio: vi.fn(async () => Promise.reject(new Error("model download failed"))) }));
+    const { showAiToast } = await import("./../ui/AiToast");
+    const { startVoiceRecording } = await import("../ui/VoiceDictation");
+    const { uiConfirm } = await import("../ui/PromptDialog");
+    const confirms = (uiConfirm as unknown as ReturnType<typeof vi.fn>);
+    const toasts = showAiToast as unknown as ReturnType<typeof vi.fn>;
+    const confirmsBefore = confirms.mock.calls.length;
+    const toastsBefore = toasts.mock.calls.length;
+    confirms.mockResolvedValueOnce(false);
+    startVoiceRecording("en-US");
+    await vi.waitFor(() => expect(proc?.onaudioprocess).toBeTruthy());
+    const loud = new Float32Array(16000 * 5).fill(0.3);
+    for (let i = 0; i < 3; i++) proc!.onaudioprocess!({ inputBuffer: { getChannelData: () => loud } }); // three segments, all fail
+    await vi.waitFor(() => expect(confirms.mock.calls.length).toBe(confirmsBefore + 1));
+    await new Promise((r) => setTimeout(r, 20)); // the other two segments settle
+    expect(confirms.mock.calls.length).toBe(confirmsBefore + 1);
+    const errors = toasts.mock.calls.slice(toastsBefore).filter((c) => c[1] === "error");
+    expect(errors).toHaveLength(1);
+    expect(String(errors[0][0])).toContain("model download failed");
+    expect(stopTrack).toHaveBeenCalled();
+    vi.doUnmock("../ai/transformersEngine");
+    delete (globalThis as unknown as { AudioContext?: unknown }).AudioContext;
+    delete (window as unknown as { SpeechRecognition?: unknown }).SpeechRecognition;
+    document.getElementById("voice-recording-root")?.remove();
+  });
+});
