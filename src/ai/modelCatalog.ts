@@ -67,7 +67,7 @@ const QWEN_LICENSE: ModelLicence = { class: "forbidden", name: "Qwen License" };
 
 /**
  * Installed models the catalog does not list by name or family: every Llama
- * and Gemma release (and fine-tunes named after them, e.g. Hermes) is under a
+ * and Gemma release (and fine-tunes named after them, e.g. a Llama-based Hermes) is under a
  * custom licence; Cohere's open weights — Aya, Command R / R+ / R7B /
  * A (c4ai-* on Hugging Face) — are CC-BY-NC (models/registry.json, plan 1.7).
  * Matched at the start of a name part, so vendor-prefixed Hugging Face names
@@ -75,7 +75,8 @@ const QWEN_LICENSE: ModelLicence = { class: "forbidden", name: "Qwen License" };
  * "tinyllama" (Apache-2.0).
  */
 const FAMILY_LICENCE: Array<{ re: RegExp; licence: ModelLicence }> = [
-  { re: /(^|[-_.])(llama|codellama|hermes)/i, licence: LLAMA },
+  // Hermes is a fine-tune: Llama's licence only on a Llama base (Hermes-2-Pro-Mistral-7B is Apache-2.0).
+  { re: /(^|[-_.])(llama|codellama|hermes(?!.*(mistral|mixtral|qwen|yi-)))/i, licence: LLAMA },
   { re: /(^|[-_.])(gemma|codegemma)/i, licence: GEMMA },
   { re: /(^|[-_.])(aya|command-[ar]|c4ai)/i, licence: COHERE },
 ];

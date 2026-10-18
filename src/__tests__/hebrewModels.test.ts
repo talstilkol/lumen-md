@@ -99,6 +99,11 @@ describe("custom-licence models are never picked on their own (plan 1.7)", () =>
     expect(licenceClassOf("hf.co/Qwen/Qwen2.5-Coder-3B-Instruct-GGUF:Q4_K_M")).toBe("forbidden");
     expect(licenceClassOf("hf.co/unsloth/gemma-3-4b-it-GGUF:Q4_K_M")).toBe("conditional");
     expect(licenceClassOf("dolphin-llama3:8b")).toBe("conditional");
+    // Hermes takes its base's licence: Llama-based is conditional, Mistral-based is open.
+    expect(licenceClassOf("hf.co/NousResearch/Hermes-3-Llama-3.1-8B-GGUF:Q4_K_M")).toBe("conditional");
+    expect(licenceClassOf("hermes3:8b")).toBe("conditional");
+    expect(licenceClassOf("hf.co/NousResearch/Hermes-2-Pro-Mistral-7B-GGUF:Q4_K_M")).toBeNull();
+    expect(autoPickable("hf.co/NousResearch/Hermes-2-Pro-Mistral-7B-GGUF:Q4_K_M")).toBe(true);
     expect(licenceClassOf("hf.co/Qwen/Qwen2.5-7B-Instruct-GGUF:Q4_K_M")).toBeNull();
     expect(licenceClassOf("tinyllama:1.1b")).toBeNull(); // Apache-2.0
     expect(autoPickable("hf.co/bartowski/Meta-Llama-3.1-8B-Instruct-GGUF:Q4_K_M")).toBe(false);
