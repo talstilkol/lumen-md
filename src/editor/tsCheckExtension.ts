@@ -6,7 +6,7 @@
  * scope are checked together, as they run. Opt-in ("Enable TypeScript checks in code blocks") because
  * the compiler is a multi-MB download, loaded in a worker on first use.
  */
-import { StateEffect, StateField } from "@codemirror/state";
+import { EditorState, StateEffect, StateField } from "@codemirror/state";
 import type { Extension, Range } from "@codemirror/state";
 import { Decoration, EditorView, ViewPlugin, hoverTooltip } from "@codemirror/view";
 import type { DecorationSet, ViewUpdate } from "@codemirror/view";
@@ -162,7 +162,10 @@ export function tsCheckExtension(client: TsClient, opts: { debounceMs?: number }
     };
   });
 
-  return [tsDiagnosticsField, checker, theme, hover, autocompletion({ override: [source] })];
+  // A language-data source, not `autocompletion({ override })`: overrides
+  // can't be combined, and the `[[` link completion (4.5) is one too. The
+  // source answers only inside ts blocks.
+  return [tsDiagnosticsField, checker, theme, hover, autocompletion(), EditorState.languageData.of(() => [{ autocomplete: source }])];
 }
 
 function completionType(kind: string): string {
