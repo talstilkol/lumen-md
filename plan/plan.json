@@ -1,0 +1,4076 @@
+{
+ "$comment": "The plan's single source (plan 0.6). Edit this file, then `npm run plan` regenerates the board in MASTER_PLAN.md and plan/board.html; CI (`npm run plan:check`) fails when they differ. A task's status is one line: phases[].tasks[].status.",
+ "updated": "2026-10-18T15:20",
+ "start": "2026-10-18T08:00",
+ "buffer": 0.35,
+ "ownerWindow": [
+  20,
+  23
+ ],
+ "lanes": {
+  "D": "תשתית וביצועים",
+  "S": "נתונים ואבטחה",
+  "A": "AI וסוכנים",
+  "U": "ממשק, עברית וידע"
+ },
+ "schedule": {
+  "laneFirst": [
+   "0.1",
+   "1.1"
+  ],
+  "ownerFirst": [
+   "15.1",
+   "15.9",
+   "15.10",
+   "15.11"
+  ],
+  "ownerInputsFirst": [
+   "15.9",
+   "15.10",
+   "15.11"
+  ],
+  "ownerAlwaysP0": [
+   "15.1"
+  ],
+  "defaultDep": "0.1",
+  "noDefaultDep": [
+   "0.1",
+   "1.1"
+  ],
+  "cutLineExempt": [
+   "13.6"
+  ],
+  "releaseTask": "13.5"
+ },
+ "milestones": [
+  {
+   "title": "כל הממצאים סגורים וכלי ה-P0 של שלב 0 עובדים",
+   "at": [
+    "task:1.1",
+    "phase:0:P0"
+   ]
+  },
+  {
+   "title": "שלב 1 גמור — כל ✅ עובר DoD",
+   "at": [
+    "task:1.8"
+   ]
+  },
+  {
+   "title": "יסודות ניהול הידע (P0 של שלב 4)",
+   "at": [
+    "phase:4:P0"
+   ]
+  },
+  {
+   "title": "גרסה ראשונה לשחרור — כל ה-P0 + ביקורת עצמאית",
+   "at": [
+    "release"
+   ]
+  },
+  {
+   "title": "הכול גמור + ביקורת מול יעדי §14",
+   "at": [
+    "end"
+   ]
+  }
+ ],
+ "done": [
+  {
+   "part": "תשתית הסוכנים המקומיים",
+   "prs": "#135–#150, #155",
+   "start": "שבת 17.10 15:00",
+   "end": "שבת 17.10 20:53"
+  },
+  {
+   "part": "תיקונים מיידיים ואבחון",
+   "prs": "#156, #157, #158",
+   "start": "שבת 17.10 20:53",
+   "end": "שבת 17.10 22:31"
+  },
+  {
+   "part": "בדיקות אמיתיות",
+   "prs": "#169, #170",
+   "start": "שבת 17.10 22:31",
+   "end": "שבת 17.10 23:35"
+  },
+  {
+   "part": "עברית",
+   "prs": "#171, #173, #175, #177, #179",
+   "start": "שבת 17.10 23:35",
+   "end": "א׳ 18.10 01:26"
+  },
+  {
+   "part": "בטיחות נתונים",
+   "prs": "#172, #174, #176",
+   "start": "שבת 17.10 23:36",
+   "end": "א׳ 18.10 01:00"
+  },
+  {
+   "part": "אבטחה ופרטיות",
+   "prs": "#178, #180, #181, #182",
+   "start": "א׳ 18.10 00:42",
+   "end": "א׳ 18.10 02:12"
+  },
+  {
+   "part": "AI חכם יותר",
+   "prs": "#183–#189",
+   "start": "א׳ 18.10 02:15",
+   "end": "א׳ 18.10 03:23"
+  },
+  {
+   "part": "ביצועים ו-offline",
+   "prs": "#190–#193",
+   "start": "א׳ 18.10 03:23",
+   "end": "א׳ 18.10 04:23"
+  },
+  {
+   "part": "ביקורת כנה (נספח 16) + 13 שרשורי review על התוכנית",
+   "prs": "#136",
+   "start": "א׳ 18.10 04:45",
+   "end": "א׳ 18.10 05:15"
+  },
+  {
+   "part": "תיקון 91 ממצאי קוד ב-4 מסלולים (53 commits, עוד לא ממוזג — 1.1)",
+   "prs": "#194",
+   "start": "א׳ 18.10 04:55",
+   "end": "א׳ 18.10 05:40"
+  },
+  {
+   "part": "ביצוע v5: 44 משימות + 8 סבבי review של Codex (עוד לא ממוזג)",
+   "prs": "#195–#245",
+   "start": "א׳ 18.10 05:40",
+   "end": "א׳ 18.10 15:20"
+  }
+ ],
+ "phases": [
+  {
+   "title": "יסודות ואוטומציה שחוסכים זמן",
+   "goal": "4 מסלולים במקביל בלי התנגשויות; סטטוס התוכנית מתעדכן מהקוד; CI יציב בלי ניסיונות חוזרים; אף ✅ בלי בדיקת סיום ירוקה",
+   "why": "כל משימה אחרי השלב הזה זולה ובטוחה יותר. החיסכון המשוער (נספח 17) גדול פי 9 מהמאמץ.",
+   "tasks": [
+    {
+     "id": "0.1",
+     "title": "כלי מסלולים מקבילים ופרוטוקול",
+     "branch": "chore/lanes",
+     "lane": "U",
+     "minutes": 45,
+     "dep": [],
+     "priority": "P0",
+     "status": "✅ #202",
+     "new": true,
+     "was": "0.1",
+     "source": "תהליך",
+     "steps": [
+      "`scripts/lane.sh <name> <base>`: worktree, symlink ל-node_modules, `playwright.local.config.ts`, tsc ראשוני",
+      "`docs/dev/lanes.md`: גבולות קבצים לכל מסלול (קבוצות קונפליקט), פורמט commit, טבלת החלטות לדוח",
+      "חבילות חדשות: במסלול רק `npm install <pkg> --package-lock-only`; ההתקנה האמיתית אצל המתאם אחרי מיזוג",
+      "`scripts/lane-merge.sh`: מיזוג ענפים לענף אחד, יצירה מחדש של package-lock בקונפליקט, ואז tsc + vitest"
+     ],
+     "acceptance": [
+      "מסלול חדש מוכן בפקודה אחת",
+      "מיזוג 4 ענפים כולל lockfile בלי התערבות ידנית"
+     ]
+    },
+    {
+     "id": "0.2",
+     "title": "לפצל את useCommands.ts לפי תחומים",
+     "branch": "refactor/commands-domains",
+     "lane": "D",
+     "minutes": 180,
+     "dep": [
+      "1.1"
+     ],
+     "groups": [
+      "commands"
+     ],
+     "priority": "P0",
+     "status": "✅ #208",
+     "was": "0.2",
+     "source": "C2, O1, T38",
+     "steps": [
+      "snapshot של מזהי הפקודות, כותרות ו-keybindings (`commandIds.snapshot.json`)",
+      "12 קובצי תחום ב-`src/commands/domains/` (file, edit, view, ai, research, vault, git, collab, export, voice, tools, settings)",
+      "`useCommands.ts` = רכב של עד 150 שורות; תחומים כבדים בעצלות",
+      "בדיקה: סט המזהים זהה ל-snapshot",
+      "מדידת chunk ההפעלה לפני/אחרי"
+     ],
+     "acceptance": [
+      "אין קובץ ב-`src/commands` מעל 500 שורות",
+      "snapshot זהה",
+      "סכום chunks ההפעלה לא גדל"
+     ]
+    },
+    {
+     "id": "0.3",
+     "title": "לפצל את קובצי התרגום לפי תחום",
+     "branch": "refactor/i18n-namespaces",
+     "lane": "D",
+     "minutes": 150,
+     "dep": [
+      "0.2"
+     ],
+     "groups": [
+      "i18n"
+     ],
+     "priority": "P0",
+     "new": true,
+     "source": "חיסכון בזמן",
+     "steps": [
+      "`locales/<lang>/<domain>.json` במקום קובץ אחד לשפה",
+      "טעינה עצלה לפי תחום",
+      "extract-i18n-keys ושער הערכים עובדים על המבנה החדש",
+      "האנגלית שיושבת היום inline ב-`src/i18n/index.ts` (1,672 שורות) עוברת ל-`locales/en/<domain>.json` שנטען סינכרונית ב-bundle; רק שאר השפות בעצלות — כך `t()` נשאר סינכרוני"
+     ],
+     "acceptance": [
+      "שני מסלולים שמוסיפים מפתחות בתחומים שונים — 0 קונפליקטים"
+     ]
+    },
+    {
+     "id": "0.4",
+     "title": "ESLint עם baseline",
+     "branch": "chore/eslint",
+     "lane": "D",
+     "minutes": 120,
+     "dep": [
+      "0.2"
+     ],
+     "groups": [
+      "ci"
+     ],
+     "priority": "P0",
+     "was": "0.3",
+     "source": "E1, E2, O4",
+     "steps": [
+      "flat config: typescript-eslint, react-hooks (rules-of-hooks = error), no-floating-promises",
+      "כלל: catch ריק חייב `// why:`",
+      "baseline לקיים; קוד חדש/משתנה נקי (בדיקה על diff)",
+      "`npm run lint` + job ב-CI"
+     ],
+     "acceptance": [
+      "rules-of-hooks: 0 הפרות",
+      "PR עם catch ריק בלי הסבר נכשל"
+     ]
+    },
+    {
+     "id": "0.5",
+     "title": "CI יציב: retries 0",
+     "branch": "chore/ci-stable",
+     "lane": "D",
+     "minutes": 180,
+     "dep": [
+      "0.1"
+     ],
+     "groups": [
+      "ci"
+     ],
+     "priority": "P0",
+     "status": "✅ #234 (3 לילות רצופים — אחרי המיזוג)",
+     "was": "0.4",
+     "source": "E3, P2, P4",
+     "steps": [
+      "להסיר את ה-`waitForTimeout` האחרון",
+      "לשורש את ה-flakes הידועים (zip, גלריה ב-Firefox, live-ruby ב-WebKit, OPFS ב-WebKit)",
+      "`e2e:flake --all --times 5` בכל לילה ב-3 דפדפנים (0.11)",
+      "`retries: 0` ב-CI"
+     ],
+     "acceptance": [
+      "0 `waitForTimeout`",
+      "`retries: 0`",
+      "3 לילות רצופים: 0 flakes (נמדד אחרי המשימה — עד אז ⏳)"
+     ]
+    },
+    {
+     "id": "0.6",
+     "title": "התוכנית כנתונים בריפו",
+     "branch": "chore/plan-data",
+     "lane": "D",
+     "minutes": 90,
+     "dep": [
+      "0.1"
+     ],
+     "priority": "P0",
+     "new": true,
+     "was": "0.5",
+     "source": "תהליך",
+     "steps": [
+      "מחולל ב-`scripts/plan/build.mjs`, מקור יחיד `plan/plan.json`",
+      "`npm run plan` מייצר את הלוח ב-MASTER_PLAN.md ואת ה-HTML",
+      "שעות אמת מ-commit ראשון/אחרון של הענף",
+      "בדיקת CI שהמסמך תואם"
+     ],
+     "acceptance": [
+      "עדכון סטטוס = שורה אחת",
+      "CI נכשל כשהמסמך לא תואם"
+     ]
+    },
+    {
+     "id": "0.7",
+     "title": "בודק סיום (DoD)",
+     "branch": "chore/dod",
+     "lane": "D",
+     "minutes": 90,
+     "dep": [
+      "0.6"
+     ],
+     "groups": [
+      "ci"
+     ],
+     "priority": "P0",
+     "new": true,
+     "was": "0.6",
+     "source": "נספח 16",
+     "steps": [
+      "`scripts/dod.mjs <task>` מריץ את פקודות הקבלה מ-plan.json",
+      "✅ רק עם DoD ירוק; ✅* = ירוק מול mocks בלבד",
+      "תבנית PR עם רשימת DoD שמתמלאת אוטומטית",
+      "job ב-CI לכל משימה מסומנת ✅"
+     ],
+     "acceptance": [
+      "אי אפשר לסמן ✅ בלי DoD ירוק",
+      "15 ה-✅ הקיימים עוברים DoD או יורדים ל-⏳"
+     ]
+    },
+    {
+     "id": "0.8",
+     "title": "סוכן review-triage ומענה",
+     "branch": "chore/review-tools",
+     "lane": "U",
+     "minutes": 75,
+     "dep": [
+      "0.1"
+     ],
+     "priority": "P0",
+     "status": "✅ #203",
+     "new": true,
+     "was": "0.7",
+     "source": "נספח 16.1",
+     "steps": [
+      "`scripts/review-triage.mjs`: כל השרשורים הפתוחים בכל ה-PR-ים, P1/P2, קובץ, outdated",
+      "חלוקה מוצעת למסלולים",
+      "`scripts/review-reply.mjs <decisions.tsv>`: מענה + סגירה; dry-run כברירת מחדל"
+     ],
+     "acceptance": [
+      "הרצה אחת מחזירה את כל הממצאים הפתוחים",
+      "מענה וסגירה של 90 שרשורים בפקודה אחת"
+     ]
+    },
+    {
+     "id": "0.9",
+     "title": "סוכן ci-doctor",
+     "branch": "chore/ci-doctor",
+     "lane": "U",
+     "minutes": 45,
+     "dep": [
+      "0.1"
+     ],
+     "priority": "P0",
+     "status": "✅ #204",
+     "new": true,
+     "was": "0.8",
+     "source": "תהליך",
+     "steps": [
+      "`scripts/ci-doctor.mjs <branch|pr>`: ריצה אחרונה, jobs/steps שנכשלו, annotations",
+      "היסטוריית אותה בדיקה בענפים אחרים → flake או אמיתי",
+      "הצעת פעולה"
+     ],
+     "acceptance": [
+      "על כשל ה-zip של #189 מזהה ״עבר ב-#191 באותו קוד״"
+     ]
+    },
+    {
+     "id": "0.10",
+     "title": "שער רישיונות למודלים, נתונים וחבילות",
+     "branch": "chore/license-gate",
+     "lane": "S",
+     "minutes": 120,
+     "dep": [
+      "0.1"
+     ],
+     "priority": "P0",
+     "status": "✅ #199",
+     "new": true,
+     "was": "0.9",
+     "source": "T28, נספח 18 R3, נספח 19",
+     "steps": [
+      "`models/registry.json`: מקור, רישיון, גודל, שפות, מסחרי?, איפה רץ",
+      "`scripts/licenses.mjs`: license-checker + registry + סטים ב-`eval/golden`",
+      "חסימה ב-CI: NC, AGPL, GPL שנכנס ל-bundle, רישיונות מחקר (למשל Qwen2.5 3B)",
+      "סריקת tarballs לרכיבים נסתרים: `phonemizer` מתויג Apache אבל כולל eSpeak NG (GPL-3.0); citeproc = CPAL / AGPL",
+      "מראה ONNX בלי רישיון → נרשם רישיון מודל הבסיס + קישור",
+      "חריגות מתועדות (Hspell = הורדה ביוזמת המשתמש, החלטה 15.10)"
+     ],
+     "acceptance": [
+      "כל מודל, סט וחבילה רשומים",
+      "רישיון אסור נחסם ב-CI, כולל תלות עקיפה"
+     ]
+    },
+    {
+     "id": "0.11",
+     "title": "ריצות לילה אוטונומיות",
+     "branch": "chore/nightly",
+     "lane": "D",
+     "minutes": 60,
+     "dep": [
+      "0.5",
+      "0.8"
+     ],
+     "groups": [
+      "ci"
+     ],
+     "priority": "P1",
+     "status": "✅ #245 (הריצות המתוזמנות — אחרי המיזוג)",
+     "new": true,
+     "was": "0.10",
+     "source": "תהליך",
+     "steps": [
+      "e2e ×5 ב-3 דפדפנים → דוח flakes",
+      "Lighthouse desktop + mobile (חציון של 3) → מגמה",
+      "review-triage → דוח",
+      "שבועי: audit, outdated, רישיונות, mutation",
+      "דוחות ל-`reports/` ותקציר אחד לטל"
+     ],
+     "acceptance": [
+      "4 ריצות מתוזמנות מייצרות דוח בלי התערבות"
+     ]
+    },
+    {
+     "id": "0.12",
+     "title": "restack אוטומטי",
+     "branch": "chore/stack",
+     "lane": "S",
+     "minutes": 45,
+     "dep": [
+      "0.1"
+     ],
+     "priority": "P0",
+     "status": "✅ #201",
+     "new": true,
+     "was": "0.11",
+     "source": "תהליך",
+     "steps": [
+      "GitHub stacked PRs (GA מ-6.10.2026 לפי ה-Changelog של GitHub): `gh extension install github/gh-stack` + `gh skill install github/gh-stack` לסוכנים",
+      "`scripts/stack.mjs` רק עוטף את `gh stack` (list / sync / submit) ובודק שה-CI הופעל לכל שכבה",
+      "אחרי מיזוג המחסנית (15.1) — כל שלב רב-PR עובר דרך `gh stack`"
+     ],
+     "acceptance": [
+      "תיקון בשכבה אמצעית מתגלגל לכל השכבות שמעליה בפקודה אחת"
+     ]
+    },
+    {
+     "id": "0.13",
+     "title": "מחולל מסירה (handoff)",
+     "branch": "chore/handoff",
+     "lane": "D",
+     "minutes": 45,
+     "dep": [
+      "0.1"
+     ],
+     "priority": "P0",
+     "status": "✅ #211",
+     "new": true,
+     "was": "0.12",
+     "source": "נספח 18 R9",
+     "steps": [
+      "`scripts/handoff.mjs`: ענפים, worktrees, PR-ים + CI + ממצאים, המשימה הנוכחית, פקודות להמשך",
+      "נכתב ל-`docs/dev/HANDOFF.md` ולמסמך הפרויקט בסוף כל PR",
+      "בודק שכל ענף ו-worktree שמוזכרים קיימים"
+     ],
+     "acceptance": [
+      "סוכן חדש מבצע את הצעד הבא נכון מהמסמך בלבד"
+     ]
+    },
+    {
+     "id": "0.14",
+     "title": "CI מקומי בפקודה אחת",
+     "branch": "chore/ci-local",
+     "lane": "D",
+     "minutes": 60,
+     "dep": [
+      "0.1"
+     ],
+     "priority": "P0",
+     "status": "✅ #210",
+     "new": true,
+     "was": "0.13",
+     "source": "תהליך",
+     "steps": [
+      "`npm run ci:local`: tsc, lint, vitest, budget, i18n, hygiene, e2e Chromium על build — כמו ב-CI",
+      "`--changed`: רק מה שמושפע מה-diff",
+      "hook לפני push (רשות)"
+     ],
+     "acceptance": [
+      "ב-20 ה-PR-ים הבאים: 0 כישלונות CI שה-CI המקומי היה תופס (נמדד אחרי המשימה — ⏳ עד אז)"
+     ]
+    },
+    {
+     "id": "0.15",
+     "title": "mutation testing למודולים קריטיים",
+     "branch": "chore/mutation",
+     "lane": "D",
+     "minutes": 180,
+     "dep": [
+      "0.5"
+     ],
+     "priority": "P1",
+     "new": true,
+     "was": "0.14",
+     "source": "איכות הבדיקות",
+     "steps": [
+      "Stryker על storage/, agents/runtime, text/hebrew, lib/secretStore, renderer/rehypeSanitizeRaw",
+      "ריצה שבועית (0.11)",
+      "בדיקות חדשות לכל מוטציה ששורדת במודול אבטחה"
+     ],
+     "acceptance": [
+      "mutation score ≥ 70% במודולים הקריטיים"
+     ]
+    },
+    {
+     "id": "0.16",
+     "title": "knip: קוד מת ותלויות מיותרות",
+     "branch": "chore/knip",
+     "lane": "D",
+     "minutes": 30,
+     "dep": [
+      "0.4"
+     ],
+     "groups": [
+      "ci"
+     ],
+     "priority": "P1",
+     "new": true,
+     "was": "0.15",
+     "source": "O2",
+     "steps": [
+      "knip על קבצים, exports ותלויות",
+      "baseline; חדש = כישלון"
+     ],
+     "acceptance": [
+      "קובץ חדש שאיש לא מייבא נכשל ב-CI"
+     ]
+    },
+    {
+     "id": "0.17",
+     "title": "כותרות אבטחה ממקור אחד",
+     "branch": "chore/headers-one",
+     "lane": "S",
+     "minutes": 90,
+     "dep": [
+      "1.1"
+     ],
+     "groups": [
+      "csp"
+     ],
+     "priority": "P0",
+     "status": "✅ #207",
+     "new": true,
+     "was": "12.2",
+     "source": "N2, P3",
+     "steps": [
+      "`security/policy.json`: טבלת מדיניות אחת",
+      "`scripts/headers.mjs` מייצר _headers, vercel.json, `deploy/nginx.conf`, `docker/nginx.conf`, tauri CSP ו-meta ב-index.html — 6 מקורות",
+      "CI נכשל על סטייה"
+     ],
+     "acceptance": [
+      "6 מקורות = טבלה אחת (בדיקה); דפי ה-runner — חריגה מתועדת (unsafe-eval בתוך sandbox)"
+     ]
+    },
+    {
+     "id": "0.18",
+     "title": "docs-sync ו-README אמיתי",
+     "branch": "chore/docs-sync",
+     "lane": "D",
+     "minutes": 45,
+     "dep": [
+      "0.1"
+     ],
+     "priority": "P0",
+     "status": "✅ #227",
+     "new": true,
+     "was": "12.1",
+     "source": "J3, N1",
+     "steps": [
+      "בדיקה: כל פקודה שהתיעוד מזכיר קיימת ברישום",
+      "מספרי הבדיקות ב-README ובתג מגיעים מה-CI (היום 2196 מול 992)"
+     ],
+     "acceptance": [
+      "docs-sync ירוק",
+      "README בלי מספרים ידניים"
+     ]
+    },
+    {
+     "id": "0.19",
+     "title": "שער PR עם Danger.js ו-size-limit",
+     "branch": "chore/danger",
+     "lane": "D",
+     "minutes": 120,
+     "dep": [
+      "0.4"
+     ],
+     "groups": [
+      "ci"
+     ],
+     "priority": "P1",
+     "new": true,
+     "source": "מחקר הקוד הפתוח",
+     "steps": [
+      "Danger.js (MIT): שינוי גודל bundle, קוד בלי בדיקות, תווית ״נכתב ב-AI״, הפרש רישיונות, וכל קריאת רשת חדשה חייבת להיות רשומה ב-endpoints של יומן הפרטיות",
+      "size-limit לכל chunk ראשי",
+      "Renovate (GitHub App, טל מתקין — 15.2): עדכונים שבועיים מקובצים, patch אוטומטי כש-CI ירוק"
+     ],
+     "acceptance": [
+      "PR שמוסיף fetch לא רשום נכשל",
+      "תגובת Danger בכל PR"
+     ]
+    },
+    {
+     "id": "0.20",
+     "title": "המשכי כותרות האבטחה",
+     "branch": "fix/headers-followups",
+     "lane": "S",
+     "minutes": 150,
+     "dep": [
+      "0.17"
+     ],
+     "groups": [
+      "ci"
+     ],
+     "priority": "P1",
+     "status": "✅ #239 (בדיקה ב-preview אמיתי — אחרי שמכסת Vercel מתאפסת)",
+     "new": true,
+     "source": "דוח 0.17 (#207)",
+     "steps": [
+      "playground-runner.html: meta CSP + nonce כמו ה-Live JS runner (WebKit חוסם בלי זה) + e2e ב-WebKit",
+      "Vercel: מקורות ה-endpoints (`VITE_*_ENDPOINT`) נכנסים ל-vercel.json בבנייה מ-security/policy.json",
+      "nginx: CSP גם ל-workers אחרים תחת /assets ול-sw.js",
+      "בלוק R שקורא ל-`webr::eval_js()` רץ ב-preview deploy (אימות D6)"
+     ],
+     "acceptance": [
+      "`headers --check` ירוק",
+      "e2e של ה-playground עובר ב-WebKit",
+      "worker עם endpoint מוגדר לא נחסם ב-Vercel"
+     ]
+    },
+    {
+     "id": "0.21",
+     "title": "רשימת הפקודות מתעדכנת עם ה-store",
+     "branch": "fix/commands-deps",
+     "lane": "D",
+     "minutes": 30,
+     "dep": [
+      "0.2"
+     ],
+     "groups": [
+      "commands"
+     ],
+     "priority": "P1",
+     "status": "✅ #209",
+     "new": true,
+     "source": "נמצא בפיצול 0.2",
+     "steps": [
+      "כל ערך store שתווית או פעולה קוראות — ב-deps של ה-useMemo (בלי המסמך עצמו, C5)",
+      "`ai.localToggle` קורא את המצב בזמן ההרצה"
+     ],
+     "acceptance": [
+      "בדיקה: היפוך כל מתג משנה את התווית שלו (נכשלת בלי התיקון)"
+     ]
+    }
+   ]
+  },
+  {
+   "title": "לסגור את מה שסומן ✅ ולא היה גמור",
+   "goal": "0 ממצאי review פתוחים; 0 דליפות פרטיות ב-local-only; כל ✅ עובר DoD",
+   "why": "נספח 16 מצא 11 טענות שגויות ו-104 ממצאים פתוחים. קודם סוגרים אותם.",
+   "tasks": [
+    {
+     "id": "1.1",
+     "title": "104 ממצאי Codex — מיזוג, מענה וסגירה",
+     "branch": "fix/codex-backlog",
+     "lane": "D",
+     "minutes": 120,
+     "dep": [],
+     "priority": "P0",
+     "status": "✅ #194 + #206",
+     "was": "1.1",
+     "source": "נספח 16.1 (1)",
+     "steps": [
+      "13 השרשורים על המסמך (#136) — נענו ונסגרו ✓ (05:00)",
+      "נתונים — 22/22 ✓ (8 commits)",
+      "עברית — 16/17 + B6 ✓ (11 commits); 1 נשאר בכוונה (יישור DOCX → 9.8)",
+      "אבטחה — 24/24 ✓ (15 commits; 2,862 בדיקות ירוקות)",
+      "AI/ממשק — 28/28 + באג רשימת הריצות ✓ (19 commits; 2,875 בדיקות ירוקות)",
+      "מיזוג 4 הענפים (53 commits) על `feat/pwa-real`; lockfile; tsc + vitest + e2e מקומי",
+      "בדיקות build שהסוכנים לא הריצו: `theme-boot.js` (תקציב, precache, אזהרת Vite, CSP); ה-runner עם meta CSP בכל אירוח",
+      "תיעוד מגבלה ידועה: hot-reload חסום בתוך ה-runner ב-dev (מחיר ה-CSP)",
+      "PR + CI ירוק בכל ה-jobs",
+      "מענה + סגירה לכל שרשור (commit או סיבה) עם `scripts/review-reply` הזמני",
+      "ממצאים חדשים על ה-PR עצמו נסגרים באותו מחזור"
+     ],
+     "acceptance": [
+      "0 שרשורים פתוחים בכל ה-PR-ים",
+      "CI ירוק",
+      "B6: מילה מנוקדת = מילה אחת בחיפוש"
+     ]
+    },
+    {
+     "id": "1.2",
+     "title": "eval: לתייג את ה-baseline המזויף בכנות",
+     "branch": "fix/eval-labels",
+     "lane": "U",
+     "minutes": 20,
+     "dep": [
+      "1.1"
+     ],
+     "priority": "P0",
+     "status": "✅ #195 + #213",
+     "was": "1.2",
+     "source": "16.1 (2), K1",
+     "steps": [
+      "`model: fake-ollama`, `kind: wiring`",
+      "eval-compare מסרב להשוות fake מול real",
+      "README של eval"
+     ],
+     "acceptance": [
+      "אין קובץ שמציג מודל אמיתי בלי ריצה אמיתית"
+     ]
+    },
+    {
+     "id": "1.3",
+     "title": "הכתבה בלי דליפה",
+     "branch": "fix/dictate-local",
+     "lane": "A",
+     "minutes": 75,
+     "dep": [
+      "1.1"
+     ],
+     "groups": [
+      "editor",
+      "commands"
+     ],
+     "priority": "P0",
+     "status": "✅ #197 + #215",
+     "was": "1.3",
+     "source": "16.1 (10)",
+     "steps": [
+      "חסימת `SpeechRecognition` ב-local-only + רישום ביומן",
+      "`voice.dictate` במקטעים של 5 שניות ל-Whisper ב-worker",
+      "במדיניות ענן: תווית ״האודיו נשלח ל-Google״",
+      "בדיקות"
+     ],
+     "acceptance": [
+      "0 שימוש ב-Web Speech ב-local-only (בדיקה)",
+      "הכתבה offline אחרי הורדת Whisper"
+     ]
+    },
+    {
+     "id": "1.4",
+     "title": "Esc מבטל באמת כל קריאת AI",
+     "branch": "fix/abort-all",
+     "lane": "A",
+     "minutes": 60,
+     "dep": [
+      "1.1"
+     ],
+     "groups": [
+      "agents",
+      "commands"
+     ],
+     "priority": "P0",
+     "status": "✅ #196 + #214",
+     "was": "1.4",
+     "source": "K3, T55",
+     "steps": [
+      "1.1 כבר סגר: מוצר, פרופיל סגנון, דקדוק, תבניות, ראשי פרקים, commit, 2 ההשלמות בעורך, Ask Workspace, המבקר. נשארו: CSV, תמלול, משימות אצווה",
+      "בדיקה סטטית: כל קריאה ל-`chat`/`chatStream`/`runAgent` מעבירה `signal`",
+      "e2e: Esc בתבנית → אין טקסט במסמך"
+     ],
+     "acceptance": [
+      "הבדיקה הסטטית: 0 קריאות בלי signal",
+      "e2e הביטול ירוק"
+     ]
+    },
+    {
+     "id": "1.5",
+     "title": "הקראה רק בקולות מקומיים ב-local-only",
+     "branch": "fix/tts-local",
+     "lane": "U",
+     "minutes": 30,
+     "dep": [
+      "1.1"
+     ],
+     "priority": "P0",
+     "status": "✅ #195 + #213",
+     "was": "1.5",
+     "source": "T32, review #136",
+     "steps": [
+      "`voice.localService === true` ב-local-only",
+      "קול רשת = הסכמה + רישום ביומן",
+      "הודעה כשאין קול עברי מקומי"
+     ],
+     "acceptance": [
+      "בדיקה: ב-local-only לא נבחר קול רשת"
+     ]
+    },
+    {
+     "id": "1.6",
+     "title": "הכספת המוצפנת: למחוק את המת, לתעד את האמת",
+     "branch": "fix/vault-doc",
+     "lane": "S",
+     "minutes": 45,
+     "dep": [
+      "1.1"
+     ],
+     "priority": "P0",
+     "status": "✅ #195 + #213",
+     "was": "1.7",
+     "source": "J3, T36",
+     "steps": [
+      "מחיקת `storage/vault.ts` והבדיקה שלו",
+      "שכתוב `docs/src/content/docs/security/vault.md` לפי מה שקיים",
+      "הצפנת כספת מלאה → 11.4"
+     ],
+     "acceptance": [
+      "0 קוד מת בנושא",
+      "התיעוד תואם לקוד (נבדק ב-1.8)"
+     ]
+    },
+    {
+     "id": "1.7",
+     "title": "קטלוג המודלים: רישיונות ומודל עברי",
+     "branch": "fix/model-catalog",
+     "lane": "A",
+     "minutes": 90,
+     "dep": [
+      "1.1",
+      "0.10"
+     ],
+     "priority": "P0",
+     "status": "✅ #200",
+     "new": true,
+     "source": "ביקורת התוכנית §4",
+     "steps": [
+      "לסווג כל מודל שבקוד (`modelCatalog.ts`, `modelManager.ts`, e5-small, Whisper, קובצי tesseract) לפי נספח 19: מותר / מותנה / אסור",
+      "מותנה: Llama 3.x ו-Hermes-3 (Llama Community License — הודעה + AUP), Gemma 2/3 (Gemma Terms) — נשארים רק עם הודעת רישיון בממשק, לא כברירת מחדל",
+      "להסיר את Aya Expanse (CC-BY-NC); לנעול גדלי Qwen2.5 מותרים (0.5B / 1.5B / 7B; לא 3B — רישיון מחקר); Qwen3 (Apache) מותר",
+      "להוסיף DictaLM 3.0 1.7B (Apache-2.0 לפי כרטיס המודל) כברירת המחדל העברית ב-Ollama; 12B / 24B — רק אחרי בדיקת רישיון",
+      "מסך ״קרדיטים למודלים״ עם ייחוס (CC BY: ivrit.ai, Dicta)",
+      "שער 0.10 על הקטלוג — NLLB, jina, mms-tts וקולות SASPEECH לא ייכנסו"
+     ],
+     "acceptance": [
+      "כל מודל בקוד מסווג (בדיקה)",
+      "0 מודלים אסורים",
+      "מודל מותנה מציג הודעת רישיון"
+     ]
+    },
+    {
+     "id": "1.9",
+     "title": "רישיון tldraw: אסור בייצור בלי מפתח",
+     "branch": "fix/tldraw-licence",
+     "lane": "U",
+     "minutes": 60,
+     "dep": [
+      "0.1"
+     ],
+     "priority": "P0",
+     "status": "✅ #198 + #216",
+     "new": true,
+     "owner": "15.10",
+     "source": "מחקר הקוד הפתוח (18.10)",
+     "steps": [
+      "tldraw 4.5.10 (`src/ui/CanvasTldraw.tsx`) תחת ״tldraw license״: ״Not to use the Software in Production Environments״ בלי מפתח מסחרי או ניסיון; הספרייה בודקת את המפתח ועשויה לשלוח נתוני שימוש",
+      "למדוד ב-e2e עם יומן הפרטיות: האם הקנבס שולח בקשות רשת (בדיקת רישיון / טלמטריה) — סותר את local-only",
+      "החלטה 15.10: רישיון מסחרי מ-tldraw, או מעבר ל-Excalidraw (MIT) — ברירת המחדל בתוכנית היא מעבר (4.19)",
+      "עד ההחלטה: הקנבס מסומן ״ניסיוני״ בפריסה הציבורית"
+     ],
+     "acceptance": [
+      "מדידת הרשת מתועדת",
+      "החלטה 15.10 רשומה בתוכנית"
+     ]
+    },
+    {
+     "id": "1.8",
+     "title": "ביקורת חוזרת עצמאית של שלב 1",
+     "branch": "—",
+     "lane": "D",
+     "minutes": 30,
+     "dep": [
+      "1.1",
+      "1.2",
+      "1.3",
+      "1.4",
+      "1.5",
+      "1.6",
+      "1.7",
+      "0.7",
+      "0.18",
+      "1.9"
+     ],
+     "priority": "P0",
+     "new": true,
+     "was": "1.8",
+     "source": "נספח 16",
+     "steps": [
+      "סוכן נפרד בודק כל פריט מול ה-DoD",
+      "עדכון סטטוסים ב-plan.json ובנספח 16"
+     ],
+     "acceptance": [
+      "0 פערים בין סטטוס ל-DoD"
+     ]
+    }
+   ]
+  },
+  {
+   "title": "אבטחה ופרטיות",
+   "goal": "CSP בלי unsafe-eval (חוץ מדפי ה-runner שבתוך sandbox, מתועד) ובלי מארחים פתוחים בכל אירוח; 0 בקשות לא מקומיות במסע e2e מלא ב-local-only; 0 סודות גלויים",
+   "why": "חורים באבטחה ובפרטיות קודמים לפיצ'רים — כל פיצ'ר AI חדש נשען על השער הזה.",
+   "tasks": [
+    {
+     "id": "2.1",
+     "title": "Tauri CSP הדוק",
+     "branch": "fix/tauri-csp",
+     "lane": "S",
+     "minutes": 90,
+     "dep": [
+      "0.17"
+     ],
+     "groups": [
+      "csp"
+     ],
+     "priority": "P0",
+     "status": "✅ #220",
+     "owner": "15.8",
+     "was": "2.1",
+     "source": "F4, T48",
+     "steps": [
+      "הסרת `unsafe-eval` (Graphviz כבר ב-worker); `wasm-unsafe-eval` נשאר (Pyodide, ORT, tesseract, Graphviz)",
+      "connect / img / media / frame — רק self + מארחים ידועים",
+      "נוצר מטבלת המדיניות (0.17)",
+      "בדיקת רינדור ב-Tauri: Graphviz, Python, OCR (טל, 15.8)"
+     ],
+     "acceptance": [
+      "0 `unsafe-eval` ו-0 `https:` פתוח",
+      "בדיקת המדיניות ירוקה"
+     ]
+    },
+    {
+     "id": "2.2",
+     "title": "תמונות מרוחקות: חסימה ברנדרר",
+     "branch": "feat/remote-images",
+     "lane": "S",
+     "minutes": 90,
+     "dep": [
+      "0.17"
+     ],
+     "groups": [
+      "render",
+      "csp"
+     ],
+     "priority": "P0",
+     "status": "✅ #221",
+     "was": "2.2",
+     "source": "F4",
+     "steps": [
+      "`<img>` חיצוני → placeholder + ״טען״ + ״אשר תמיד למארח״ — האכיפה ברנדרר (CSP סטטי לא יכול להיות אישי)",
+      "רשימת מארחים מאושרים מקומית; ״טען תמיד״",
+      "connect-src בלי `ws:`/`wss:` חשופים",
+      "e2e: פיקסל מעקב = 0 בקשות עד אישור"
+     ],
+     "acceptance": [
+      "0 בקשות לתמונה חיצונית לפני אישור",
+      "0 `ws:` חשוף"
+     ]
+    },
+    {
+     "id": "2.3",
+     "title": "e2e/security.spec.ts",
+     "branch": "test/security-spec",
+     "lane": "S",
+     "minutes": 60,
+     "dep": [
+      "1.1",
+      "0.17"
+     ],
+     "groups": [
+      "render",
+      "csp"
+     ],
+     "priority": "P0",
+     "status": "✅ #222",
+     "was": "2.3",
+     "source": "T48",
+     "steps": [
+      "1.1 כבר סגר: meta CSP בתוך `livejs-runner.html` ו-`WebSocketStream` ברשימת החסימה",
+      "`e2e/security.spec.ts`: live-js בלי רשת, sanitize (רק מחלקות של Lumen), iframe בלי סכמה נחסם, 0 הפרות CSP, סריקת סודות"
+     ],
+     "acceptance": [
+      "security.spec ירוק ב-3 דפדפנים"
+     ]
+    },
+    {
+     "id": "2.4",
+     "title": "יומן פרטיות מלא (כולל workers)",
+     "branch": "feat/ledger-complete",
+     "lane": "S",
+     "minutes": 120,
+     "dep": [
+      "1.1"
+     ],
+     "priority": "P0",
+     "status": "✅ #212",
+     "was": "2.4",
+     "source": "T37",
+     "steps": [
+      "1.1 כבר סגר: סיווג מדויק של endpoints מחקר ודקדוק, `leftDevice()`, הורדות OCR מה-worker",
+      "bootstrap כללי ל-workers שעוטף `self.fetch` ומדווח לחלון הראשי (embeddings, Whisper, web-llm, Pyodide)",
+      "רישום קוצץ, הקראה, הכתבה",
+      "e2e מסע מלא ב-local-only: 0 בקשות לא מקומיות"
+     ],
+     "acceptance": [
+      "הורדה מתוך worker מופיעה ביומן",
+      "מסע מלא: 0 בקשות לא מקומיות"
+     ]
+    },
+    {
+     "id": "2.5",
+     "title": "סודות: לסגור את הפינות",
+     "branch": "fix/secrets-complete",
+     "lane": "S",
+     "minutes": 120,
+     "dep": [
+      "1.1"
+     ],
+     "groups": [
+      "ci"
+     ],
+     "priority": "P0",
+     "status": "✅ #230",
+     "was": "2.5",
+     "source": "T36",
+     "steps": [
+      "1.1 כבר סגר: keychain בלי נפילה שקטה ל-IndexedDB, `setSecret` מחזיר שגיאה",
+      "Supabase session → secretStore",
+      "בלי מצב plain שקט",
+      "CI על macOS ו-Windows שמקמפל ומריץ את בדיקות ה-keychain ב-Rust",
+      "סריקת אחסון אחרי התחברות: 0 סודות גלויים"
+     ],
+     "acceptance": [
+      "סריקת האחסון: 0 טוקנים גלויים",
+      "בדיקות keychain ירוקות ב-macOS וב-Windows"
+     ]
+    },
+    {
+     "id": "2.6",
+     "title": "סוכן הסתרת מידע אישי לפני ענן",
+     "branch": "feat/pii-redactor",
+     "lane": "S",
+     "minutes": 180,
+     "dep": [
+      "7.1",
+      "6.0"
+     ],
+     "priority": "P1",
+     "new": true,
+     "was": "2.6",
+     "source": "פרטיות, נספח 19",
+     "steps": [
+      "כשהמדיניות מתירה ענן: הסתרה מקומית לפני שליחה — אימייל, טלפון, ת״ז (ספרת ביקורת), כרטיס (Luhn), IBAN ישראלי",
+      "NER לשמות: DictaBERT-NER (עברית, CC BY 4.0, המרה ב-6.0) + bert-base-NER (אנגלית, MIT); בלי הורדה = תבניות בלבד; GLiNER-PII (349MB) כחלופה",
+      "טוקנים (`⟨EMAIL_1⟩`) והחזרה בתשובה",
+      "תצוגה מקדימה של מה שנשלח; ספירה ביומן"
+     ],
+     "acceptance": [
+      "סט PII (250, 7.1): recall ≥ 98% בתבניות, ≥ 85% בשמות עם NER",
+      "0 פריטים מהסט בבקשות ענן שנלכדו ב-e2e"
+     ]
+    },
+    {
+     "id": "2.7",
+     "title": "סוכן הגנה מ-prompt injection",
+     "branch": "feat/injection-guard",
+     "lane": "S",
+     "minutes": 150,
+     "dep": [
+      "5.1",
+      "7.1"
+     ],
+     "groups": [
+      "agents"
+     ],
+     "priority": "P1",
+     "new": true,
+     "owner": "15.11",
+     "was": "2.7",
+     "source": "אבטחת AI",
+     "steps": [
+      "תוכן חיצוני מסומן ״לא אמין״ ועטוף במפרידים",
+      "ניקוי דטרמיניסטי: טקסט מוסתר, Unicode tags, bidi override, ״התעלם מההוראות״",
+      "כלים שכותבים מחייבים אישור כשהתוכן הגיע ממקור לא אמין",
+      "מסווג ProtectAI v2 (Apache, אנגלית בלבד, הפרויקט בארכיון, 739MB → כימות) — רק כשכבה נוספת לאנגלית בשולחן העבודה; בעברית — הכללים הדטרמיניסטיים"
+     ],
+     "acceptance": [
+      "סט injection (130, כולל 30 בעברית): 0 כתיבות לא מאושרות"
+     ]
+    },
+    {
+     "id": "2.8",
+     "title": "סורקי אבטחה ב-CI",
+     "branch": "chore/security-ci",
+     "lane": "D",
+     "minutes": 60,
+     "dep": [
+      "0.17"
+     ],
+     "groups": [
+      "ci"
+     ],
+     "priority": "P0",
+     "status": "✅ #236 (CodeQL/Scorecard ירוצו רק על main)",
+     "new": true,
+     "was": "2.8",
+     "source": "אבטחה",
+     "steps": [
+      "gitleaks",
+      "npm audit high/critical = כישלון",
+      "dependency-review",
+      "CodeQL (JS/TS) ו-OSSF Scorecard Action"
+     ],
+     "acceptance": [
+      "3 בדיקות בכל PR"
+     ]
+    }
+   ]
+  },
+  {
+   "title": "בטיחות נתונים וסנכרון",
+   "goal": "0 מסלולי איבוד נתונים (G1–G11) — כל מסלול ב-e2e; סנכרון מוצפן בין מכשירים בלי שרת שלנו",
+   "why": "Obsidian ו-Notion לא מאבדים מילה. זה התנאי לפני ששולחים למשתמשים אמיתיים.",
+   "tasks": [
+    {
+     "id": "3.1",
+     "title": "Ctrl+Z אמיתי למחיקה",
+     "branch": "feat/trash-undo",
+     "lane": "S",
+     "minutes": 60,
+     "dep": [
+      "1.1"
+     ],
+     "groups": [
+      "tree"
+     ],
+     "priority": "P0",
+     "status": "✅ #218",
+     "was": "3.1",
+     "source": "T46",
+     "steps": [
+      "Ctrl+Z גלובלי משחזר את המחיקה האחרונה (מחסנית 20)",
+      "שמירת עריכות לא שמורות בכל הלשוניות הפתוחות שבתוך תיקייה שנמחקת (לא רק הפעילה)",
+      "e2e"
+     ],
+     "acceptance": [
+      "מחיקה → Ctrl+Z → התוכן האחרון חוזר, כולל לשונית לא פעילה"
+     ]
+    },
+    {
+     "id": "3.2",
+     "title": "היסטוריה שלמה",
+     "branch": "feat/history-complete",
+     "lane": "S",
+     "minutes": 180,
+     "dep": [
+      "1.1"
+     ],
+     "groups": [
+      "history"
+     ],
+     "priority": "P0",
+     "status": "✅ #229",
+     "was": "3.2",
+     "source": "T35, G4, G1",
+     "steps": [
+      "דלתות דחוסות + צילום מלא כל 20 גרסאות",
+      "צילום כספת כל 10 דק׳ ובסגירה (best-effort)",
+      "היסטוריית collab באותו מאגר ובפאנל",
+      "הגירת `backups/` ישנות",
+      "מכסה: התראה ב-80%; מצב `persist()` מוצג למשתמש"
+     ],
+     "acceptance": [
+      "גודל ממוצע לגרסה ≤ 10% מטקסט מלא על פני 1,000 גרסאות",
+      "עריכת collab מופיעה בפאנל",
+      "מצב persist מוצג"
+     ]
+    },
+    {
+     "id": "3.3",
+     "title": "git בטוח",
+     "branch": "feat/safe-git",
+     "lane": "S",
+     "minutes": 360,
+     "dep": [
+      "0.2",
+      "4.1"
+     ],
+     "groups": [
+      "sync"
+     ],
+     "priority": "P0",
+     "owner": "15.4",
+     "was": "3.3",
+     "source": "G2, G3",
+     "steps": [
+      "pull = fetch + merge תלת-כיווני; קונפליקט → סימונים + מסך פתרון",
+      "לא מוחק קבצים לא עקובים; לא מחליף מסמך פתוח עם עריכה",
+      "clone ציבורי בלי טוקן; CORS proxy: docker מקומי או worker מתארח (15.4)",
+      "clone מלא כשצריך merge-base",
+      "LFS — לא נתמך, מתועד",
+      "e2e קונפליקט"
+     ],
+     "acceptance": [
+      "data-safety חלק ד׳ ירוק",
+      "0 קבצים נמחקים ב-pull"
+     ]
+    },
+    {
+     "id": "3.4",
+     "title": "פרוטוקול סנכרון מוצפן (E2EE)",
+     "branch": "feat/e2ee-sync-core",
+     "lane": "S",
+     "minutes": 1080,
+     "dep": [
+      "4.1"
+     ],
+     "groups": [
+      "sync"
+     ],
+     "priority": "P1",
+     "new": true,
+     "source": "G8, מחקר פערים #6",
+     "steps": [
+      "manifest עם גרסה לכל קובץ, פרוטוקול עם מספר גרסה מהיום הראשון",
+      "AES-GCM לכל קובץ, מפתח מ-passphrase (Argon2id)",
+      "יישוב קונפליקטים דרך ConflictDialog",
+      "ממשק `SyncProvider`",
+      "בדיקות: שני מכשירים מדומים, קונפליקט, הפסקה באמצע",
+      "ספריות: `@noble/ciphers` (MIT, נבדק, TS טהור) ל-AES-GCM / XChaCha20-Poly1305 + `hash-wasm` (MIT) ל-Argon2id; גיבוי מוצפן לייצוא בפורמט age (typage)",
+      "גם ה-manifest מוצפן ומאומת (AEAD), ושמות האובייקטים אצל הספק אטומים (HMAC של הנתיב) — הספק לא רואה נתיבים, גרסאות או שמות",
+      "הגנה מ-rollback / replay: מונה גרסאות מונוטוני חתום בתוך ה-manifest; לקוח מסרב ל-manifest ישן מזה שכבר ראה",
+      "עיגון המונה להתקן חדש או לשחזור: ההתקן מקבל את המונה האחרון מהתקן קיים בצימוד חתום (QR / קוד); בלי התקן קיים — מצב ״עדכניות לא מאומתת״ גלוי עד אישור, והערבות מתועדת כ-TOFU",
+      "כתיבה מותנית של ה-manifest: `SyncProvider.put` מקבל את ה-revision / ETag שנקרא (CAS); כישלון → משיכה, מיזוג ונסיון חוזר. שני מכשירים שמסנכרנים במקביל מגרסה N לא דורסים זה את זה"
+     ],
+     "acceptance": [
+      "10,000 סבבי סנכרון אקראיים בבדיקה: 0 אובדן",
+      "הספק רואה רק ciphertext ושמות אטומים — גם לא נתיבים או מספר גרסה (בדיקה על התיקייה המדומה)",
+      "manifest ישן שמוחזר מהספק נדחה (בדיקה)",
+      "התקן חדש: manifest ישן נדחה אחרי צימוד; בלי צימוד מוצגת אזהרה ולא מוצהרת הגנה (בדיקת replay)",
+      "שני מכשירים כותבים במקביל מאותה גרסה N: שני השינויים נשמרים (בדיקת מרוץ)"
+     ]
+    },
+    {
+     "id": "3.5",
+     "title": "ספקי אחסון מוצפנים: הקיימים + WebDAV ו-S3",
+     "branch": "feat/e2ee-sync-providers",
+     "lane": "S",
+     "minutes": 840,
+     "dep": [
+      "3.4",
+      "2.5"
+     ],
+     "groups": [
+      "sync",
+      "settings"
+     ],
+     "priority": "P1",
+     "owner": "15.5",
+     "was": "3.4",
+     "source": "G8",
+     "steps": [
+      "Dropbox ו-Google Drive הקיימים (`src/sync/cloud/`) עוברים מעל `SyncProvider`; WebDAV ו-S3 חדשים",
+      "OAuth רק כשיש client ID (15.5); WebDAV / S3 בלי שרת שלנו",
+      "Gist נמחק",
+      "טוקנים ב-secretStore",
+      "e2e עם שרתים מדומים",
+      "הגירה של נתונים קיימים בטקסט גלוי אצל הספק → מוצפן, עם גיבוי ואפשרות חזרה",
+      "ספריות: `webdav` (MIT) ו-`aws4fetch` (MIT, במקום ה-SDK הכבד של AWS)",
+      "כל ספק מממש את הכתיבה המותנית: WebDAV `If-Match`, Dropbox `mode: update` עם rev, S3 `If-Match`; ספק בלי תמיכה — manifest append-only (קובץ לכל גרסה)"
+     ],
+     "acceptance": [
+      "סנכרון בין 2 דפדפנים דרך WebDAV מדומה: 0 אובדן"
+     ]
+    },
+    {
+     "id": "3.6",
+     "title": "שיתוף בזמן אמת עם התמדה ואימות",
+     "branch": "feat/collab-persist",
+     "lane": "S",
+     "minutes": 180,
+     "dep": [
+      "1.1"
+     ],
+     "groups": [
+      "settings"
+     ],
+     "priority": "P0",
+     "status": "✅ #237 (פריסה — 15.4)",
+     "owner": "15.4",
+     "was": "3.5",
+     "source": "L1, T49",
+     "steps": [
+      "שרת Hocuspocus (MIT): `onAuthenticate` בודק טוקן חדר, `onStoreDocument` שומר ל-SQLite + גיבוי (`docker/collab.yml`)",
+      "טוקן קצר-מועד לכל חדר מהשרת (HMAC) — לא ב-bundle",
+      "בדיקת בריאות ה-signaling נכשלת ב-CI אחרי הפריסה (15.4)",
+      "e2e: שני דפדפנים, יציאה וחזרה — התוכן נשמר"
+     ],
+     "acceptance": [
+      "חדר שנסגר וחוזר — התוכן נשמר",
+      "0 סודות ב-bundle"
+     ]
+    },
+    {
+     "id": "3.7",
+     "title": "מטריצת e2e לכל מסלולי איבוד הנתונים",
+     "branch": "test/data-safety-matrix",
+     "lane": "S",
+     "minutes": 120,
+     "dep": [
+      "3.1",
+      "3.2",
+      "3.3",
+      "4.4"
+     ],
+     "priority": "P0",
+     "was": "3.6",
+     "source": "G1–G11",
+     "steps": [
+      "תרחיש לכל G1–G11 (G8 על ספקי הסנכרון הקיימים; 3.5 מוסיף את החדשים למטריצה)",
+      "3 דפדפנים",
+      "חיבור ל-DoD"
+     ],
+     "acceptance": [
+      "11/11 ירוקים"
+     ]
+    }
+   ]
+  },
+  {
+   "title": "יסודות ניהול ידע (מה שמשתמשים נוגעים בו מאות פעמים ביום)",
+   "goal": "כספת = תיקייה אמיתית בשולחן העבודה ובדפדפני Chromium (Safari / Firefox: OPFS + ייצוא וסנכרון; מובייל: 4.20); `[[` עם השלמה, הטמעות, פתק יומי, מאפיינים ומסד נתונים שאפשר לערוך — ברמת Obsidian",
+   "why": "מחקר הפערים: ל-Lumen יש עומק נדיר אבל חסרים הבסיסים היומיומיים. בעדיפות הם קודמים לכל יכולת AI חדשה: ה-P0 של שלב 4 לפני ה-P1 של שלב 6. מסלול ה-AI ממשיך במקביל רק במה שלא מעכב אותם.",
+   "tasks": [
+    {
+     "id": "4.1",
+     "title": "שכבת כספת אחת (VaultBackend)",
+     "branch": "refactor/vault-backend",
+     "lane": "S",
+     "minutes": 360,
+     "dep": [
+      "0.2",
+      "1.1"
+     ],
+     "groups": [
+      "store",
+      "tree"
+     ],
+     "priority": "P0",
+     "status": "✅ #226",
+     "new": true,
+     "source": "מחקר פערים #1",
+     "steps": [
+      "ממשק `VaultBackend` (list, read, write, rename, delete, stat, watch)",
+      "OPFS כמימוש ראשון; כל הקוראים (index, git, embeddings, export) עוברים דרכו",
+      "בדיקות חוזה שרצות על כל מימוש"
+     ],
+     "acceptance": [
+      "0 גישות ישירות ל-OPFS מחוץ למימוש (בדיקה)",
+      "בדיקות החוזה ירוקות"
+     ]
+    },
+    {
+     "id": "4.2",
+     "title": "כספת בתיקייה אמיתית בדפדפן",
+     "branch": "feat/vault-folder-web",
+     "lane": "S",
+     "minutes": 360,
+     "dep": [
+      "4.1"
+     ],
+     "groups": [
+      "store"
+     ],
+     "priority": "P0",
+     "status": "✅ #235 (Obsidian — 15.8)",
+     "new": true,
+     "owner": "15.8",
+     "source": "מחקר פערים #1",
+     "steps": [
+      "מימוש `FileSystemDirectoryHandle` (Chromium); handle נשמר ב-IndexedDB, הרשאה מחדש בפתיחה",
+      "בחירה: OPFS / תיקייה; העברה בטוחה ביניהם",
+      "הודעה ברורה בדפדפנים בלי התמיכה"
+     ],
+     "acceptance": [
+      "הקבצים בתיקייה זהים בייט-לבייט למה שנשמר (e2e קורא את התיקייה); פתיחה ב-Obsidian — בדיקה ידנית (15.8)",
+      "בדיקות החוזה ירוקות"
+     ]
+    },
+    {
+     "id": "4.3",
+     "title": "שולחן עבודה: הכספת כתיקייה + הגירה",
+     "branch": "feat/vault-folder-desktop",
+     "lane": "S",
+     "minutes": 360,
+     "dep": [
+      "4.1",
+      "2.1"
+     ],
+     "groups": [
+      "store"
+     ],
+     "priority": "P0",
+     "owner": "15.8",
+     "was": "10.4",
+     "source": "N3, T57",
+     "steps": [
+      "מימוש Tauri `plugin-fs` עם הרשאה מצומצמת לתיקיית הכספת",
+      "הגירה חד-פעמית, בטוחה והפיכה מה-OPFS של ה-webview (גיבוי לפני)",
+      "בחירת תיקייה ראשונה בהתקנה"
+     ],
+     "acceptance": [
+      "הגירה של 1,000 פתקים: 0 אובדן (בדיקה)",
+      "טל: עריכה ב-Lumen נראית ב-Obsidian (15.8)"
+     ]
+    },
+    {
+     "id": "4.4",
+     "title": "שינויים מבחוץ: מעקב ויישוב",
+     "branch": "feat/vault-watch",
+     "lane": "S",
+     "minutes": 300,
+     "dep": [
+      "4.2",
+      "4.3"
+     ],
+     "groups": [
+      "store"
+     ],
+     "priority": "P0",
+     "new": true,
+     "source": "מחקר פערים #1",
+     "steps": [
+      "FileSystemObserver כשקיים, polling לפי mtime כגיבוי; Tauri `watch`",
+      "קובץ שהשתנה מבחוץ → אינדקס, embeddings, לשונית פתוחה (בלי לדרוס עריכה — קונפליקט)",
+      "שינוי שם/מחיקה מבחוץ"
+     ],
+     "acceptance": [
+      "עריכה בעורך חיצוני מופיעה תוך 2 שניות",
+      "עריכה מקבילה = קונפליקט, 0 אובדן"
+     ]
+    },
+    {
+     "id": "4.5",
+     "title": "`[[` עם השלמה",
+     "branch": "feat/link-autocomplete",
+     "lane": "U",
+     "minutes": 360,
+     "dep": [
+      "1.1"
+     ],
+     "groups": [
+      "editor"
+     ],
+     "priority": "P0",
+     "status": "✅ #217",
+     "new": true,
+     "source": "מחקר פערים #2",
+     "steps": [
+      "CompletionSource ב-CodeMirror + מקבילה ב-Milkdown מעל האינדקס",
+      "התאמה לפי `noteKey` (בלי תלות בניקוד ובאותיות)",
+      "השלמת `#כותרת` ו-`^בלוק`",
+      "יצירת פתק חדש מההשלמה",
+      "מבוסס `@codemirror/autocomplete`; תוספי live-preview של SilverBullet (MIT) כמקור השראה"
+     ],
+     "acceptance": [
+      "10,000 פתקים: הצעות < 50ms",
+      "e2e בעברית ובאנגלית"
+     ]
+    },
+    {
+     "id": "4.6",
+     "title": "תצוגה מקדימה בריחוף ואזכורים לא מקושרים",
+     "branch": "feat/hover-unlinked",
+     "lane": "U",
+     "minutes": 300,
+     "dep": [
+      "4.5",
+      "7.10"
+     ],
+     "groups": [
+      "editor",
+      "search"
+     ],
+     "priority": "P1",
+     "new": true,
+     "source": "מחקר פערים #2",
+     "steps": [
+      "ריחוף על קישור → 20 שורות ראשונות מרונדרות",
+      "פאנל backlinks: ״לא מקושרים״ עם כפתור ״קשר״",
+      "נגיש במקלדת",
+      "`hoverTooltip` של CodeMirror; התצוגה מרונדרת ב-worker ונשמרת במטמון"
+     ],
+     "acceptance": [
+      "ריחוף < 150ms",
+      "אזכורים לא מקושרים נכונים על 30 מקרי זהב"
+     ]
+    },
+    {
+     "id": "4.7",
+     "title": "הטמעות (`![[פתק]]`)",
+     "branch": "feat/embeds",
+     "lane": "U",
+     "minutes": 420,
+     "dep": [
+      "1.1"
+     ],
+     "groups": [
+      "render"
+     ],
+     "priority": "P0",
+     "status": "✅ #224",
+     "new": true,
+     "source": "מחקר פערים #3",
+     "steps": [
+      "remark plugin: `![[פתק]]`, `![[פתק#כותרת]]`, תמונות ו-PDF",
+      "עומק מקסימלי 3 + שומר מחזוריות",
+      "עדכון בזמן אמת כשהמקור משתנה",
+      "linkRewrite מכסה הטמעות",
+      "port של `ofm.ts` מ-Quartz (MIT, עם ייחוס): wikilinks, הטמעות, callouts, הפניות לבלוקים — ומשמש גם ב-4.18"
+     ],
+     "acceptance": [
+      "תאימות לתחביר Obsidian על 20 קבצי בדיקה",
+      "מחזור = הודעה, לא קריסה"
+     ]
+    },
+    {
+     "id": "4.8",
+     "title": "הפניות לבלוקים (`^id`)",
+     "branch": "feat/block-refs",
+     "lane": "U",
+     "minutes": 360,
+     "dep": [
+      "4.7"
+     ],
+     "groups": [
+      "render",
+      "editor"
+     ],
+     "priority": "P1",
+     "status": "✅ #238",
+     "new": true,
+     "source": "מחקר פערים #3",
+     "steps": [
+      "״העתק קישור לבלוק״ מוסיף `^id`",
+      "`[[פתק#^id]]` ו-`![[פתק#^id]]`",
+      "שינוי שם/העברה שומרים את ההפניות"
+     ],
+     "acceptance": [
+      "הפניה שורדת שינוי שם והעברה (e2e)"
+     ]
+    },
+    {
+     "id": "4.9",
+     "title": "עורך מאפיינים (frontmatter)",
+     "branch": "feat/properties",
+     "lane": "U",
+     "minutes": 360,
+     "dep": [
+      "1.1"
+     ],
+     "priority": "P1",
+     "status": "✅ #228",
+     "new": true,
+     "source": "מחקר פערים #4",
+     "steps": [
+      "פאנל עריכה עם טיפוסים (טקסט, מספר, תאריך, רשימה, checkbox, קישור)",
+      "כתיבה דרך yaml Document API (שומר הערות)",
+      "השלמה לערכים קיימים",
+      "`parseDocument` של `yaml` (כבר בתלויות) — לא `parse`, כדי לשמור הערות"
+     ],
+     "acceptance": [
+      "עריכה לא משנה שום דבר אחר בקובץ (בדיקת round-trip)"
+     ]
+    },
+    {
+     "id": "4.10",
+     "title": "מסד נתונים שאפשר לערוך",
+     "branch": "feat/database-edit",
+     "lane": "U",
+     "minutes": 600,
+     "dep": [
+      "4.9"
+     ],
+     "priority": "P1",
+     "status": "✅ #231",
+     "new": true,
+     "source": "מחקר פערים #4",
+     "steps": [
+      "עריכת תא כותבת ל-frontmatter (4.9)",
+      "סינון AND/OR, מיון, קיבוץ",
+      "תצוגות: טבלה, כרטיסים, kanban, רשימה",
+      "TanStack Table + TanStack Virtual (MIT) לתאים ניתנים לעריכה עם RTL; dnd-kit (MIT) ל-kanban נגיש במקלדת; react-big-calendar (MIT, `rtl`) לתצוגת לוח שנה",
+      "הדקדוק של Dataview (MIT) כמקור לעץ הסינון (AND / OR)"
+     ],
+     "acceptance": [
+      "עריכה ב-100 פתקים ב-kanban: 0 שינויים לא רצויים בקבצים"
+     ]
+    },
+    {
+     "id": "4.11",
+     "title": "נוסחאות ותצוגת מפה",
+     "branch": "feat/database-formulas",
+     "lane": "A",
+     "minutes": 600,
+     "dep": [
+      "4.10",
+      "7.10"
+     ],
+     "priority": "P1",
+     "new": true,
+     "source": "מחקר פערים #4",
+     "steps": [
+      "פרסור: jsep (MIT) → עץ; הערכה: מפרש עם רשימה סגורה של צמתים ופונקציות; פונקציות: formula.js (MIT)",
+      "אסור: expr-eval (CVE-2025-12735, CVSS 9.8, לא מתוחזק) ו-HyperFormula (GPLv3) — שער 0.10 חוסם",
+      "fuzz test + הגבלת זמן לכל הערכה; נוסחאות מתוספים רצות ב-QuickJS (11.2)",
+      "תצוגת מפה (Leaflet קיים)",
+      "סוכן שכותב נוסחה משפה טבעית (מקומי)"
+     ],
+     "acceptance": [
+      "30 נוסחאות זהב נכונות",
+      "0 eval בקוד (בדיקה)"
+     ]
+    },
+    {
+     "id": "4.12",
+     "title": "פתק יומי ולוח שנה",
+     "branch": "feat/daily-notes",
+     "lane": "U",
+     "minutes": 420,
+     "dep": [
+      "1.1",
+      "7.10"
+     ],
+     "priority": "P0",
+     "new": true,
+     "source": "מחקר פערים #5",
+     "steps": [
+      "`note.today` + קיצור — `journal/YYYY-MM-DD.md` (ניתן להגדרה)",
+      "תבניות עם `{{date}}` ו-`{{hebrewDate}}` (Intl, בלי ספרייה)",
+      "לוח שנה בסרגל: ימים עם פתקים, קודם/הבא",
+      "תאריך עברי רק דרך `Intl` — לא `@hebcal/core` (GPL); חגים ופרשות — מחוץ להיקף"
+     ],
+     "acceptance": [
+      "e2e: פתק היום נוצר ונפתח",
+      "תאריך עברי נכון על 20 תאריכי זהב"
+     ]
+    },
+    {
+     "id": "4.13",
+     "title": "משימות בכל הכספת",
+     "branch": "feat/vault-tasks",
+     "lane": "S",
+     "minutes": 480,
+     "dep": [
+      "8.4"
+     ],
+     "priority": "P1",
+     "new": true,
+     "source": "מחקר פערים #7",
+     "steps": [
+      "port של המפענח ומודולי השאילתות של obsidian-tasks (MIT, עם ייחוס): `- [ ]` עם תאריכים ותחביר תואם",
+      "בלוק ```tasks``` עם שאילתה מעל האינדקס",
+      "פאנל היום / בקרוב",
+      "תזכורות (Notification API / Tauri)"
+     ],
+     "acceptance": [
+      "1,000 משימות: שאילתה < 100ms",
+      "תאימות לתחביר על 20 קבצים"
+     ]
+    },
+    {
+     "id": "4.14",
+     "title": "קורא PDF עם הערות",
+     "branch": "feat/pdf-reader",
+     "lane": "A",
+     "minutes": 660,
+     "dep": [
+      "1.1"
+     ],
+     "priority": "P1",
+     "new": true,
+     "source": "מחקר פערים #8",
+     "steps": [
+      "EmbedPDF v2 (MIT; PDFium WASM, וירטואליזציה, הדגשה / פתק / דיו / חיפוש) עם WASM מקומי (`wasmUrl`) — לא `cloudpdf/server` (FCL) ולא ענף v3",
+      "הדגשות כ-W3C Web Annotation (TextQuoteSelector + עמוד / מלבן) לקובץ `file.pdf.md` עם קישורי `#page=3`",
+      "גיבוי: react-pdf-highlighter-extended (MIT) על pdf.js הקיים",
+      "OCR לעמודים סרוקים (קיים)"
+     ],
+     "acceptance": [
+      "הדגשה → קישור שפותח את העמוד הנכון (e2e)"
+     ]
+    },
+    {
+     "id": "4.15",
+     "title": "קוצץ רשת v2 (התוסף הקיים, עובד באמת)",
+     "branch": "feat/clipper-v2",
+     "lane": "S",
+     "minutes": 600,
+     "dep": [
+      "2.7",
+      "7.10"
+     ],
+     "priority": "P1",
+     "was": "5.11",
+     "source": "T34, מחקר פערים #9",
+     "steps": [
+      "fork של Obsidian Web Clipper (MIT; סימני המסחר לא כלולים → מיתוג מחדש): תבניות, טריגרים ו-highlighter; Defuddle (MIT) לחילוץ, Readability כגיבוי",
+      "העברה מהתוסף: content script שרץ על דומיין האפליקציה מקבל את הקיצוץ ב-`postMessage` (תוסף לא יכול להפעיל share_target); בשולחן העבודה — deep link `lumen://clip`; במקום `/api/clip` שלא קיים",
+      "Readability 0.6 (Apache) ב-main thread (צריך DOM) + Turndown (MIT) → Markdown + מקור + תאריך + שומר injection (2.7)",
+      "הדגשות לפי URL וחזרה אליהן",
+      "תבניות לפי אתר (ויקיפדיה, ynet, הארץ — אתרי חדשות נבדקים חי ומקומית בלבד, לא נשמרים כנתוני זהב)"
+     ],
+     "acceptance": [
+      "קיצוץ 20 דפי זהב (7.10: ויקיפדיה CC BY-SA, נחלת הכלל, דפים שלנו): כותרת + גוף נכונים ב-≥ 90%"
+     ]
+    },
+    {
+     "id": "4.16",
+     "title": "לכידה מהירה (inbox)",
+     "branch": "feat/quick-capture",
+     "lane": "D",
+     "minutes": 360,
+     "dep": [
+      "4.12"
+     ],
+     "priority": "P1",
+     "new": true,
+     "source": "מחקר פערים #10",
+     "steps": [
+      "קיצור גלובלי בשולחן העבודה",
+      "שיתוף ל-PWA מותקנת (Android) → `inbox.md`; שיתוף מהאפליקציה הנייטיב — אחרי 13.3",
+      "קיצור PWA ״פתק חדש״ (קיים) + הוספה מהירה"
+     ],
+     "acceptance": [
+      "לכידה ב-2 לחיצות בכל פלטפורמה"
+     ]
+    },
+    {
+     "id": "4.17",
+     "title": "תאימות JSON Canvas",
+     "branch": "feat/json-canvas",
+     "lane": "D",
+     "minutes": 240,
+     "dep": [
+      "1.1",
+      "4.19"
+     ],
+     "priority": "P2",
+     "new": true,
+     "source": "תאימות",
+     "steps": [
+      "ייבוא/ייצוא JSON Canvas (הפורמט הפתוח של Obsidian, MIT) ↔ Excalidraw (אחרי 4.19)"
+     ],
+     "acceptance": [
+      "round-trip של 10 קנבסים"
+     ]
+    },
+    {
+     "id": "4.18",
+     "title": "פרסום לאתר סטטי משלך",
+     "branch": "feat/publish-own",
+     "lane": "D",
+     "minutes": 300,
+     "dep": [
+      "3.3"
+     ],
+     "priority": "P2",
+     "new": true,
+     "source": "מחקר פערים #17",
+     "steps": [
+      "`file.exportSite` → push ל-GitHub Pages / Netlify של המשתמש",
+      "בחירת פתקים, ניווט, חיפוש, RTL",
+      "Quartz (MIT) כמקור לפרסום: אותם טרנספורמרים מ-4.7"
+     ],
+     "acceptance": [
+      "אתר של 50 פתקים נפרס ונבדק בדפדפן"
+     ]
+    },
+    {
+     "id": "4.19",
+     "title": "קנבס: מעבר ל-Excalidraw (MIT)",
+     "branch": "feat/canvas-excalidraw",
+     "lane": "A",
+     "minutes": 600,
+     "dep": [
+      "1.9",
+      "15.10"
+     ],
+     "priority": "P0",
+     "new": true,
+     "source": "מחקר הקוד הפתוח: tldraw דורש מפתח בייצור",
+     "steps": [
+      "`@excalidraw/excalidraw` (MIT) בעצלות במקום `CanvasTldraw.tsx`; שמירה ל-`canvases/<name>.excalidraw` (JSON פתוח)",
+      "ממיר חד-פעמי מ-`.tldr` קיים: מלבנים, טקסט, חצים, פתקים, מסגרות, תמונות; המקור נשמר כגיבוי",
+      "גופנים ונכסים מקומיים (`EXCALIDRAW_ASSET_PATH`) — בלי CDN; טקסט עברי RTL",
+      "להסיר את tldraw מ-package.json; 4.17 ממפה Excalidraw ↔ JSON Canvas"
+     ],
+     "acceptance": [
+      "0 בקשות רשת מהקנבס ב-local-only (יומן הפרטיות)",
+      "20 קנבסים של tldraw מומרים בלי לאבד צורה",
+      "tldraw לא ב-bundle"
+     ]
+    },
+    {
+     "id": "4.20",
+     "title": "כספת בתיקייה במובייל",
+     "branch": "feat/vault-folder-mobile",
+     "lane": "S",
+     "minutes": 480,
+     "dep": [
+      "4.1",
+      "4.4",
+      "13.3"
+     ],
+     "priority": "P2",
+     "new": true,
+     "owner": "15.13",
+     "source": "Codex על התוכנית (#136)",
+     "steps": [
+      "iOS: Capacitor Filesystem בתיקיית Documents של האפליקציה, גלויה באפליקציית ״קבצים״ (`UIFileSharingEnabled`, `LSSupportsOpeningDocumentsInPlace`)",
+      "Android: Storage Access Framework (תיקייה שהמשתמש בוחר) דרך plugin; גיבוי: תיקיית האפליקציה",
+      "מימוש `VaultBackend` + בדיקות החוזה; שינויים מבחוץ (4.4)"
+     ],
+     "acceptance": [
+      "בדיקות החוזה ירוקות על שני המימושים",
+      "קובץ שנערך באפליקציית ״קבצים״ מופיע ב-Lumen (בדיקה ידנית, 15.13)"
+     ]
+    }
+   ]
+  },
+  {
+   "title": "סוכנים אמיתיים — המודל מציע, הכלים מבצעים",
+   "goal": "13 הסוכנים רצים עם הכלים שלהם; 100% מפקודות ה-AI דרך זמן הריצה (מאמת + מבקר + trace + ביטול)",
+   "why": "הליבה של התוכנית המקורית — היום אף סוכן לא מקבל כלים.",
+   "tasks": [
+    {
+     "id": "5.1",
+     "title": "הכלים החסרים",
+     "branch": "feat/agent-tools",
+     "lane": "A",
+     "minutes": 180,
+     "dep": [
+      "1.1"
+     ],
+     "priority": "P1",
+     "status": "✅ #205",
+     "was": "4.1",
+     "source": "T2",
+     "steps": [
+      "`git_diff`, `set_frontmatter`, `replace_range` (כתיבה מאושרת, ב-trace)",
+      "`search_web` + `fetch_page` דרך שער המדיניות והיומן",
+      "`extract_quotes`, `csv_parse`",
+      "JSON Schema והיקף הרשאה (read / write / network) לכל כלי"
+     ],
+     "acceptance": [
+      "16/16 הכלים מ-§3 קיימים ונבדקים",
+      "כלי רשת נחסם ב-local-only בלי הסכמה"
+     ]
+    },
+    {
+     "id": "5.2",
+     "title": "BM25 אמיתי",
+     "branch": "feat/bm25",
+     "lane": "A",
+     "minutes": 120,
+     "dep": [
+      "1.1",
+      "7.1"
+     ],
+     "groups": [
+      "search",
+      "store"
+     ],
+     "priority": "P1",
+     "status": "✅ #232 (own BM25 1.000 vs Orama 0.597 on HeQ dev)",
+     "owner": "15.11",
+     "was": "4.2",
+     "source": "T2, J5",
+     "steps": [
+      "spike: Orama (Apache-2.0) עם תוסף טוקנים עברי מול BM25 משלנו — נבחר לפי nDCG וגודל; אם Orama — אינדקס אחד לחיפוש, לסוכנים ולהשלמה",
+      "BM25 מעל האינדקס המשותף (דלתא לפי קובץ)",
+      "טוקנים עבריים: ניקוד, סופיות, אותיות שימוש",
+      "search_workspace + דיאלוג החיפוש"
+     ],
+     "acceptance": [
+      "nDCG@10 על HeQ + השאילתות של טל (7.1): בסיס נמדד על החיפוש הנוכחי, BM25 ≥ בסיס + 10 נקודות",
+      "החלק הבין-לשוני (Belebele) נמדד ב-7.6 בחיפוש היברידי, לא ב-BM25",
+      "10,000 פתקים: < 100ms"
+     ]
+    },
+    {
+     "id": "5.3",
+     "title": "לחבר כלים לכל 13 הסוכנים",
+     "branch": "feat/agents-use-tools",
+     "lane": "A",
+     "minutes": 300,
+     "dep": [
+      "5.1",
+      "5.2"
+     ],
+     "groups": [
+      "agents"
+     ],
+     "priority": "P0",
+     "was": "4.3",
+     "source": "T8, §4",
+     "steps": [
+      "tagger: list_tags · linker: search_workspace + list_files · outliner: get_document · diagrammer: validate_mermaid · tasker: get_document · translator: get_document",
+      "charter: csv_parse + validate_echarts · committer: git_diff (נושא + גוף) · writer / templater: get_selection · builder: write_file מבוים ואטומי",
+      "proofreader: get_document · stylist: read_file + list_files · digester: list_files + read_file",
+      "maxSteps לכל סוכן; JSON-ReAct למודלים בלי tools",
+      "פלט מוגבל ב-JSON Schema למודלים קטנים: `format` של Ollama, XGrammar ב-web-llm"
+     ],
+     "acceptance": [
+      "כל סוכן מבצע לפחות קריאת כלי אחת ב-eval — ✅* מול Ollama מזויף, ✅ מול המודל האמיתי ב-CI (7.2)",
+      "builder שנכשל באמצע = 0 קבצים"
+     ]
+    },
+    {
+     "id": "5.4",
+     "title": "סוכן מחקר אמיתי",
+     "branch": "feat/researcher-agent",
+     "lane": "A",
+     "minutes": 180,
+     "dep": [
+      "5.3",
+      "2.7"
+     ],
+     "groups": [
+      "agents"
+     ],
+     "priority": "P1",
+     "owner": "15.3",
+     "was": "4.4",
+     "source": "T14",
+     "steps": [
+      "def `researcher`: search_web → fetch_page → extract_quotes בלולאה + מבקר",
+      "local-only: ספרייה מקומית; רשת רק בהסכמה ורק השאילתה",
+      "שומר injection (2.7)",
+      "`research.ask` עובר לסוכן",
+      "מקרה eval בעברית ובאנגלית"
+     ],
+     "acceptance": [
+      "≥ 90% מהטענות עם ציטוט מאומת (מודל אמיתי, טל 15.3)",
+      "local-only: 0 בקשות בלי הסכמה"
+     ]
+    },
+    {
+     "id": "5.5",
+     "title": "כל פקודת AI דרך זמן הריצה",
+     "branch": "refactor/all-through-runtime",
+     "lane": "A",
+     "minutes": 300,
+     "dep": [
+      "5.3",
+      "5.4"
+     ],
+     "groups": [
+      "agents",
+      "editor",
+      "commands"
+     ],
+     "priority": "P0",
+     "was": "4.5",
+     "source": "§4, T17",
+     "steps": [
+      "12 הפקודות שעוקפות היום: ghost text, הצעה אוטומטית, AI Rewrite, Ask Workspace (answerer), משימות אצווה, 3 שלבי builder, tools.autoTag (8 תגיות), suggestLinks (BM25), ai.outline (2 רמות), ai.actionItems (רמזים), ai.chart (עמודות), git.commit (diff)",
+      "פרופיל הסגנון חל על writer, templater ו-Rewrite (T17)",
+      "בדיקה סטטית: 0 קריאות `chat()` ישירות מחוץ ל-executors"
+     ],
+     "acceptance": [
+      "0 קריאות עוקפות",
+      "כל ריצה ב-trace"
+     ]
+    },
+    {
+     "id": "5.6",
+     "title": "מבקר שלם",
+     "branch": "feat/critic-complete",
+     "lane": "A",
+     "minutes": 180,
+     "dep": [
+      "5.5"
+     ],
+     "groups": [
+      "agents"
+     ],
+     "priority": "P1",
+     "was": "4.6",
+     "source": "T7, T12, §5",
+     "steps": [
+      "אבחון במודל מחזיר retry שמבוצע",
+      "״פצל מסמך״ באמת",
+      "כפתור ״לא טוב״",
+      "כל כשל → לוח ההצעות",
+      "״הפעל Ollama״ עם בדיקה חיה"
+     ],
+     "acceptance": [
+      "כל הצעה מבצעת פעולה (בדיקה לכל סוג)",
+      "״לא טוב״ → ריצה חוזרת מתועדת"
+     ]
+    },
+    {
+     "id": "5.7",
+     "title": "מנהל מודלים מלא",
+     "branch": "feat/model-manager",
+     "lane": "A",
+     "minutes": 120,
+     "dep": [
+      "1.7"
+     ],
+     "groups": [
+      "settings"
+     ],
+     "priority": "P1",
+     "was": "4.7",
+     "source": "T4, T6, T11",
+     "steps": [
+      "web-llm דרך `CreateWebWorkerMLCEngine`, עדכון 0.2.82 → 0.2.86",
+      "רשימת מודלי Ollama + pull עם התקדמות",
+      "שכבות לשני המבצעים + מצבי economy / balanced / quality בלוח",
+      "ניקוי מטמון ומכסה",
+      "אין WebGPU ב-Firefox ל-Linux ול-Android → WASM / Ollama, עם הודעה"
+     ],
+     "acceptance": [
+      "pull מהלוח עם התקדמות (Ollama מדומה)",
+      "מצב בלוח משנה את המודל בריצה הבאה"
+     ]
+    },
+    {
+     "id": "5.8",
+     "title": "אצווה: השהיה, המשך והתקדמות חיה",
+     "branch": "feat/batch-ui",
+     "lane": "A",
+     "minutes": 90,
+     "dep": [
+      "5.5"
+     ],
+     "priority": "P1",
+     "was": "4.8",
+     "source": "T16",
+     "steps": [
+      "השהה / המשך / בטל",
+      "פס התקדמות ו-ETA",
+      "מאמת ומבקר לכל עבודה"
+     ],
+     "acceptance": [
+      "השהיה → המשך אחרי רענון (e2e)"
+     ]
+    },
+    {
+     "id": "5.9",
+     "title": "סימון טקסט שנכתב ב-AI",
+     "branch": "feat/ai-authorship",
+     "lane": "U",
+     "minutes": 300,
+     "dep": [
+      "5.5"
+     ],
+     "groups": [
+      "editor"
+     ],
+     "priority": "P1",
+     "new": true,
+     "source": "מחקר פערים §3",
+     "steps": [
+      "כל טקסט שה-AI הכניס מסומן (כמו iA Writer)",
+      "החלפה לסימון רגיל אחרי עריכה ידנית",
+      "הצגה/הסתרה; נשמר בייצוא כאופציה"
+     ],
+     "acceptance": [
+      "100% מההכנסות של AI מסומנות (בדיקה)"
+     ]
+    },
+    {
+     "id": "5.10",
+     "title": "מילוי מאפיינים ב-AI עם תור אישור",
+     "branch": "feat/ai-autofill",
+     "lane": "A",
+     "minutes": 240,
+     "dep": [
+      "4.9",
+      "5.5"
+     ],
+     "priority": "P2",
+     "new": true,
+     "source": "מחקר פערים §3",
+     "steps": [
+      "סוכן שממלא מאפיינים לפתקים נבחרים",
+      "תור diff לאישור לפני כתיבה",
+      "פלט מוגבל ב-JSON Schema"
+     ],
+     "acceptance": [
+      "0 כתיבות בלי אישור"
+     ]
+    },
+    {
+     "id": "5.11",
+     "title": "מסך אישור לשינויים שסוכנים מציעים",
+     "branch": "feat/agent-review-ui",
+     "lane": "A",
+     "minutes": 240,
+     "dep": [
+      "5.1"
+     ],
+     "groups": [
+      "agents",
+      "editor"
+     ],
+     "priority": "P1",
+     "status": "✅ #223",
+     "new": true,
+     "source": "דוח 5.1 (#205)",
+     "steps": [
+      "כלי כתיבה רק מציעים (5.1, `staging.ts`); כאן פאנל שמראה diff לכל שינוי עם אישור / דחייה, אחד-אחד או הכול",
+      "העורך רושם `setDocumentApplier` — אישור על מסמך שלא נשמר מוחל על הטקסט החי ולא נגמר ב-conflict",
+      "שימוש חוזר במצב ההצעות (CriticMarkup) של העורך כתצוגה",
+      "ביטול ריצה מסיר את ההצעות שלה (כבר ב-5.1)"
+     ],
+     "acceptance": [
+      "שינוי של סוכן לא נכתב בלי אישור (e2e)",
+      "אישור על מסמך לא שמור מוחל",
+      "שינוי שהקובץ זז מתחתיו נדחה עם הסבר"
+     ]
+    }
+   ]
+  },
+  {
+   "title": "סוכנים מקומיים שמחליפים יכולות AI חיצוניות",
+   "goal": "לכל יכולת שדורשת ענן — כאן או אצל מתחרים — חלופה מקומית עם איכות שנמדדה על סט מוחזק; ענן רק בבחירה",
+   "why": "היתרון האמיתי: Notion ו-Capacities מריצים AI בענן. המודלים נבחרו במחקר (נספח 19) — כל אחד עם רישיון מסחרי מאומת או מסומן ״תלוי החלטה״. כל משימה עדיין מתחילה ב-spike: נטען בדפדפן? גודל? איכות על הסט המוחזק?",
+   "tasks": [
+    {
+     "id": "6.0",
+     "title": "צינור המרת מודלים ל-ONNX ואירוח",
+     "branch": "ci/model-convert",
+     "lane": "D",
+     "minutes": 240,
+     "dep": [
+      "0.10"
+     ],
+     "groups": [
+      "ci"
+     ],
+     "priority": "P1",
+     "new": true,
+     "owner": "15.9",
+     "source": "נספח 19",
+     "steps": [
+      "workflow ידני ב-GitHub Actions (יש שם רשת ל-Hugging Face; בסביבה שלי אין): Optimum export + כימות q8 / q4f16",
+      "מודלים: Opus-MT en→he (Apache), opus-mt-tc-big-he-en (CC BY 4.0), DictaBERT-NER (CC BY 4.0), SigLIP multilingual אם המראה החיצוני לא תקין",
+      "אירוח: GitHub Releases אם הריפו ציבורי, אחרת Hugging Face (15.9); checksum ורישיון + ייחוס לכל קובץ ב-`models/registry.json`",
+      "הורדה בהסכמה בלבד, מטמון ב-OPFS, הצגת גודל לפני ההורדה (560–630MB למודלים הכבדים)"
+     ],
+     "acceptance": [
+      "4 מודלים מומרים נטענים ב-transformers.js 4.3 בדפדפן ב-CI",
+      "לכל קובץ: checksum + רישיון + ייחוס"
+     ]
+    },
+    {
+     "id": "6.1",
+     "title": "הכתבה חיה מקומית",
+     "branch": "feat/live-dictation",
+     "lane": "A",
+     "minutes": 600,
+     "dep": [
+      "1.3",
+      "7.1"
+     ],
+     "groups": [
+      "editor"
+     ],
+     "priority": "P1",
+     "new": true,
+     "owner": "15.3",
+     "was": "5.1",
+     "source": "מחליף Google Web Speech / whisper-1, נספח 19",
+     "steps": [
+      "Silero VAD v5 (`@ricky0123/vad-web`, ISC + MIT, 2.3MB)",
+      "חי בדפדפן: ivrit.ai Zipformer2 streaming (CC BY 4.0, int8 72MB) על build ה-WASM של sherpa-onnx (Apache), שכבר כולל פענוח זורם; ייחוס במסך הקרדיטים",
+      "שולחן עבודה: whisper.cpp עם ה-ggml הרשמי של ivrit.ai Whisper large-v3-turbo (Apache) דרך Tauri",
+      "קבצים בדפדפן: ivrit.ai Whisper turbo ONNX (q4f16 ≈ 563MB, WebGPU, `language=he` כפוי) — spike טעינה קודם; גיבוי whisper-base (MIT, 77MB)",
+      "פיסוק: אין מודל פיסוק עברי פתוח → כללים + מעבר LLM מקומי לבחירה",
+      "טקסט זמני → סופי; פקודות קוליות בסיסיות; בחירת מנוע לפי חומרה ושפה"
+     ],
+     "acceptance": [
+      "WER על 30 קטעי FLEURS ו-30 של Common Voice (7.1), נרמול: בלי פיסוק וניקוד, NFC — נמדד ב-CI (WASM), כל מקור בנפרד; יעד ראשון ≤ 15% על FLEURS",
+      "השהיה < 1.5 שניות ב-WASM",
+      "Whisper-turbo נמדד אצל טל (15.3)"
+     ]
+    },
+    {
+     "id": "6.2",
+     "title": "הקראה מקומית: החלטת רישוי וקול אנגלי",
+     "branch": "feat/neural-tts",
+     "lane": "A",
+     "minutes": 240,
+     "dep": [
+      "1.5",
+      "0.10"
+     ],
+     "groups": [
+      "editor"
+     ],
+     "priority": "P2",
+     "new": true,
+     "owner": "15.10, 15.13",
+     "was": "5.2",
+     "source": "מחליף TTS בענן, נספח 19",
+     "steps": [
+      "עברית: אין היום קול עברי שמותר מסחרית — כל הקולות הציבוריים אומנו על SASPEECH (אסור מסחרית); mms-tts-heb הוא NC → קולות מערכת בלבד, מתועד בממשק",
+      "אנגלית: Kokoro-82M (Apache, q8 92MB) — אבל `phonemizer` כולל eSpeak NG (GPL-3.0); לפי החלטה 15.10: worker נפרד שמורד ביוזמת המשתמש, או phonemizer בלי GPL, או רק קולות מערכת",
+      "BlueTTS (MIT, נתוני האימון בלי רישיון) — רק אחרי אישור בכתב מהמחבר (15.10)",
+      "הדגשה כקישוט (לא שינוי הבחירה)",
+      "0 בקשות רשת אחרי הורדה",
+      "Phonikud (G2P ל-IPA) מייתר את eSpeak בעברית — אבל עדיין אין קול מותר; מנוע: Piper הישן (rhasspy, MIT, בארכיון), לא piper1-gpl; קול משלנו מנתונים מורשים — מחוץ לתוכנית, נבדק ב-13.6"
+     ],
+     "acceptance": [
+      "החלטה 15.10 מיושמת ומתועדת",
+      "0 רכיבי GPL ב-bundle (שער 0.10)",
+      "0 בקשות רשת"
+     ]
+    },
+    {
+     "id": "6.3",
+     "title": "סוכן ניקוד עברי מקומי",
+     "branch": "feat/nikud",
+     "lane": "A",
+     "minutes": 360,
+     "dep": [
+      "7.1"
+     ],
+     "priority": "P1",
+     "new": true,
+     "owner": "15.11",
+     "was": "5.3",
+     "source": "מחליף Dicta Nakdan, נספח 19",
+     "steps": [
+      "שלב 1: Nakdimon (MIT, ONNX קטן) — ניצחון מהיר שעובד בכל מכשיר",
+      "שלב 2: phonikud-onnx או DictaBERT-large-char-menaked (CC BY 4.0, יש ייצוא ONNX int8) — עדיף, כי לכרטיס של phonikud-onnx יש רישיון סותר (MIT מול CC BY) (308MB; נגזר מ-Dicta, CC BY 4.0 + ייחוס) כהורדת ״איכות גבוהה״ — לכתוב מחדש ב-TS את עיבוד הקלט והפלט (היום Python בלבד)",
+      "״הוסף ניקוד״ / ״הסר ניקוד״ על בחירה",
+      "מאמת: שלד העיצורים זהה",
+      "ניקוד חלקי (רק מילים דו-משמעיות)"
+     ],
+     "acceptance": [
+      "על הסט המודרני (Nakdimon, 40 משפטים מקומיים, 7.1): ≥ 90% ברמת מילה במודל ״איכות גבוהה״; בן-יהודה מדווח בנפרד",
+      "שלד: 100%"
+     ]
+    },
+    {
+     "id": "6.4",
+     "title": "תרגום מקומי בשלוש שכבות",
+     "branch": "feat/local-mt",
+     "lane": "A",
+     "minutes": 240,
+     "dep": [
+      "6.5",
+      "7.1",
+      "6.0"
+     ],
+     "priority": "P1",
+     "new": true,
+     "was": "5.4",
+     "source": "מחליף Google Translate / DeepL, נספח 19",
+     "steps": [
+      "שכבה 1: Translator API המובנה ב-Chrome (על המכשיר, תומך עברית; main thread בלבד) כשקיים",
+      "שכבה 2: Opus-MT en→he (Apache) ו-tc-big-he-en (CC BY 4.0), מומרים ב-6.0, ב-transformers.js",
+      "שכבה 3: M2M100-418M (MIT, ≈ 632MB) או LLM מקומי לשאר הזוגות; NLLB-200 אסור (NC)",
+      "שימור קוד, קישורים ו-frontmatter; תבניות תרגום פטורות מ״אותה שפה״"
+     ],
+     "acceptance": [
+      "chrF על NTREX-128 (7.1) נמדד לכל שכבה; היעד = ה-baseline של Opus-MT מה-spike, ושכבה מתחתיו לא נבחרת אוטומטית",
+      "100% שימור קוד וקישורים"
+     ]
+    },
+    {
+     "id": "6.5",
+     "title": "זיהוי שפה מקומי",
+     "branch": "feat/lang-id",
+     "lane": "A",
+     "minutes": 45,
+     "dep": [
+      "1.1",
+      "7.1"
+     ],
+     "priority": "P0",
+     "new": true,
+     "was": "5.5",
+     "source": "review #136, #173",
+     "steps": [
+      "כתב (regex) + franc-min (MIT, 127KB) כ-util משותף; eld (Apache, 9MB) כחלופה מדויקת",
+      "משמש: תרגום, דקדוק, OCR, קול",
+      "החלפת sameScript בבדיקת שפה כשהכתב זהה"
+     ],
+     "acceptance": [
+      "דיוק ≥ 95% על Tatoeba (8 שפות, 7.1)"
+     ]
+    },
+    {
+     "id": "6.6",
+     "title": "תיאור תמונות מקומי",
+     "branch": "feat/local-vision",
+     "lane": "A",
+     "minutes": 240,
+     "dep": [
+      "6.4"
+     ],
+     "priority": "P1",
+     "new": true,
+     "owner": "15.11, 15.15",
+     "was": "5.6",
+     "source": "T31, נספח 19",
+     "steps": [
+      "Florence-2 base-ft (MIT, q4f16 ≈ 224MB) ב-WebGPU worker → תרגום לשפת המסמך (6.4); גיבוי SmolVLM-256M (Apache, 189MB)",
+      "Ollama vision כשזמין, עם AbortSignal",
+      "מאמת: לא ריק, לא שם קובץ"
+     ],
+     "acceptance": [
+      "על כל 50 התמונות של סט התיאורים (30 Crossmodal-3600 עם הפניות בעברית + 20 מ-Commons עם ההפניות שטל הכין ב-15.11): ≥ 80% מקבלים ≥ 4 מתוך 5 בדירוג טל (15.15)"
+     ]
+    },
+    {
+     "id": "6.7",
+     "title": "חיפוש תמונות לפי טקסט",
+     "branch": "feat/image-search",
+     "lane": "A",
+     "minutes": 180,
+     "dep": [
+      "6.4",
+      "8.4",
+      "6.0",
+      "7.10"
+     ],
+     "groups": [
+      "search"
+     ],
+     "priority": "P2",
+     "new": true,
+     "was": "5.7",
+     "source": "יכולת חדשה, נספח 19",
+     "steps": [
+      "SigLIP base multilingual (Apache) — איכות עברית לא ידועה, נמדדת קודם; גיבוי multilingual-CLIP; jina-clip-v2 אסור (NC)",
+      "אם העברית חלשה: שאילתה מתורגמת (6.4)",
+      "לשונית ״תמונות״",
+      "אינדוקס דלתאי ב-worker"
+     ],
+     "acceptance": [
+      "recall@5 ≥ 80% על 30 שאילתות זהב בעברית"
+     ]
+    },
+    {
+     "id": "6.8",
+     "title": "שיחה עם PDF מקומית",
+     "branch": "feat/pdf-chat",
+     "lane": "A",
+     "minutes": 240,
+     "dep": [
+      "5.5",
+      "4.14",
+      "7.10"
+     ],
+     "priority": "P1",
+     "new": true,
+     "owner": "15.17",
+     "was": "5.8",
+     "source": "מחליף ChatPDF",
+     "steps": [
+      "טקסט מ-pdf.js + OCR לעמודים סרוקים",
+      "chunks + embeddings + BM25",
+      "answerer עם ציטוט לעמוד ולשורה (quoteCoverage)",
+      "פתיחת העמוד המצוטט (4.14)"
+     ],
+     "acceptance": [
+      "≥ 85% תשובות עם ציטוט נכון על 3 PDF ו-30 שאלות (מודל אמיתי, טל 15.17)"
+     ]
+    },
+    {
+     "id": "6.9",
+     "title": "השלמה אוטומטית מקומית (FIM)",
+     "branch": "feat/local-fim",
+     "lane": "A",
+     "minutes": 180,
+     "dep": [
+      "5.5",
+      "5.7"
+     ],
+     "groups": [
+      "editor"
+     ],
+     "priority": "P1",
+     "new": true,
+     "owner": "15.17",
+     "was": "5.9",
+     "source": "מחליף Copilot",
+     "steps": [
+      "Ollama `/api/generate` עם `suffix` (qwen2.5-coder 1.5B / 7B — Apache; לא 3B)",
+      "web-llm fallback",
+      "ביטול בכל הקשה, debounce, מטמון",
+      "latency ב-trace",
+      "`npm run bench:fim`: מודד p50 / p95 של השלמה על Ollama מקומי — הכלי שטל מריץ ב-15.17"
+     ],
+     "acceptance": [
+      "p50 < 300ms על Ollama מקומי (טל, 15.17)",
+      "0 קריאות ענן ב-local-only"
+     ]
+    },
+    {
+     "id": "6.10",
+     "title": "איות אנגלית מקומי",
+     "branch": "feat/local-spell-en",
+     "lane": "U",
+     "minutes": 90,
+     "dep": [
+      "6.5",
+      "7.10"
+     ],
+     "priority": "P0",
+     "new": true,
+     "was": "5.10",
+     "source": "מחליף LanguageTool ציבורי",
+     "steps": [
+      "nspell + dictionary-en 4.0 (MIT AND BSD, SCOWL, 575KB) ב-worker; גיבוי typo-js (BSD-3)",
+      "local-only: LanguageTool ציבורי חסום; LT מקומי אם מוגדר; אחרת nspell + proofreader",
+      "ניתוב לפי שפת הפסקה (6.5)"
+     ],
+     "acceptance": [
+      "local-only: 0 בקשות ל-api.languagetool.org",
+      "recall ≥ 90% על סט שגיאות באנגלית"
+     ]
+    },
+    {
+     "id": "6.11",
+     "title": "סיכום מקומי בשכבות",
+     "branch": "feat/local-summarize",
+     "lane": "A",
+     "minutes": 120,
+     "dep": [
+      "5.5",
+      "7.10"
+     ],
+     "priority": "P2",
+     "new": true,
+     "source": "מחקר פערים §3",
+     "steps": [
+      "Summarizer API של Chrome — לאנגלית בלבד (לא תומך עברית)",
+      "עברית: LLM מקומי (DictaLM 3.0 1.7B ב-Ollama, Qwen3 ב-web-llm)",
+      "משמש: סיכום יומי, פגישה, שיחה עם PDF"
+     ],
+     "acceptance": [
+      "על 20 מסמכי זהב (7.10): ≥ 95% מהמשפטים בסיכום עוברים בדיקת עיגון אוטומטית במקור (`quoteContained`)"
+     ]
+    },
+    {
+     "id": "6.12",
+     "title": "fine-tune מקומי (LoRA)",
+     "branch": "feat/local-lora",
+     "lane": "S",
+     "minutes": 240,
+     "dep": [
+      "5.5"
+     ],
+     "priority": "P2",
+     "new": true,
+     "owner": "15.13",
+     "was": "5.12",
+     "source": "מחליף OpenAI fine-tune",
+     "steps": [
+      "ייצוא dataset (JSONL) מפרופיל הסגנון ומפתקים נבחרים",
+      "Mac: `mlx_lm.lora` על Mistral 7B (Apache) → `mlx_lm.fuse --export-gguf` → `FROM` ב-Modelfile (MLX מייצא GGUF רק ל-Llama / Mistral / Mixtral)",
+      "NVIDIA: PEFT (Unsloth core, Apache — לא Unsloth Studio, AGPL) → `convert_lora_to_gguf.py` → `ADAPTER`",
+      "`ai.fineTune` מציג קודם את המסלול המקומי"
+     ],
+     "acceptance": [
+      "דמיון סגנון (cosine של embeddings לפתקים מוחזקים של המשתמש) גבוה ב-≥ 10% מהבסיס",
+      "טל מריץ על Mac (15.13)"
+     ]
+    },
+    {
+     "id": "6.13",
+     "title": "ציטוטים: להרחיב את BibtexBlock הקיים",
+     "branch": "feat/citations",
+     "lane": "U",
+     "minutes": 180,
+     "dep": [
+      "8.1",
+      "0.10",
+      "7.10"
+     ],
+     "groups": [
+      "render"
+     ],
+     "priority": "P2",
+     "new": true,
+     "owner": "15.10",
+     "was": "5.13",
+     "source": "מחליף כלי ציטוט, נספח 19",
+     "steps": [
+      "`@citation-js/core` + plugin-bibtex (MIT) לפרסור",
+      "עיצוב: `plugin-csl` תלוי ב-citeproc (CPAL-1.0 או AGPL) — לפי החלטה 15.10: citeproc עם ייחוס, או תבניות משלנו ל-APA / Chicago / MLA",
+      "locale עברי (`locales-he-IL.xml`, CC BY-SA) offline",
+      "DOI → נתונים רק ברשת ובהסכמה",
+      "תשובות המחקר מייצרות רשימת מקורות",
+      "סגנונות: apa מגיע עם plugin-csl; chicago-author-date ו-mla נוספים כקובצי CSL (CC BY-SA, עם ייחוס)"
+     ],
+     "acceptance": [
+      "20 רשומות זהב מעוצבות נכון ב-3 סגנונות offline, בעברית ובאנגלית"
+     ]
+    },
+    {
+     "id": "6.14",
+     "title": "כלי `run_python` לסוכנים (על Pyodide הקיים)",
+     "branch": "feat/agent-python",
+     "lane": "A",
+     "minutes": 60,
+     "dep": [
+      "5.1"
+     ],
+     "priority": "P2",
+     "new": true,
+     "was": "5.14",
+     "source": "יכולת חדשה",
+     "steps": [
+      "LivePyBlock קיים — חושפים אותו ככלי לסוכנים בקריאה בלבד",
+      "sandbox בלי רשת"
+     ],
+     "acceptance": [
+      "כלי רץ offline; 0 גישת רשת"
+     ]
+    },
+    {
+     "id": "6.15",
+     "title": "סוכן ניתוח נתונים",
+     "branch": "feat/data-analyst",
+     "lane": "A",
+     "minutes": 180,
+     "dep": [
+      "6.14",
+      "5.3",
+      "7.10"
+     ],
+     "priority": "P2",
+     "new": true,
+     "owner": "15.13",
+     "was": "5.15",
+     "source": "מחליף ChatGPT Data Analysis",
+     "steps": [
+      "שאלה על טבלה → קוד → sandbox → תוצאה + תרשים",
+      "המאמת מריץ שוב ובודק עקביות",
+      "התוצאה כבלוק חי בפתק"
+     ],
+     "acceptance": [
+      "≥ 85% תשובות מספריות נכונות על 20 שאלות זהב (מודל אמיתי, טל 15.13)"
+     ]
+    },
+    {
+     "id": "6.16",
+     "title": "סיכום פגישה מקומי",
+     "branch": "feat/meeting-notes",
+     "lane": "A",
+     "minutes": 90,
+     "dep": [
+      "6.1",
+      "5.5",
+      "4.13",
+      "7.10"
+     ],
+     "priority": "P2",
+     "new": true,
+     "owner": "15.11",
+     "was": "5.16",
+     "source": "מחליף Otter",
+     "steps": [
+      "voice.memo → writer: החלטות, משימות + אחראי + תאריך, שאלות פתוחות",
+      "משימות ל-checkboxes ולפאנל המשימות (4.13)",
+      "ICS לתאריכים"
+     ],
+     "acceptance": [
+      "≥ 90% מהמשימות זוהו ב-5 הקלטות זהב"
+     ]
+    },
+    {
+     "id": "6.17",
+     "title": "ענן רק בבחירה — ביקורת כל המסלולים",
+     "branch": "chore/no-cloud-defaults",
+     "lane": "A",
+     "minutes": 90,
+     "dep": [
+      "6.1",
+      "5.4",
+      "6.4",
+      "6.10",
+      "2.4"
+     ],
+     "priority": "P0",
+     "new": true,
+     "was": "5.17",
+     "source": "§2",
+     "steps": [
+      "כל מסלול ענן (embeddings, Batch, fine-tune, whisper-1, LanguageTool, Gemini / Anthropic / Mistral) — מאחורי מדיניות + חלופה מקומית",
+      "טבלה בתיעוד: יכולת → מנוע מקומי → אפשרות ענן",
+      "המסע מ-2.4 מורחב לכל הפקודות"
+     ],
+     "acceptance": [
+      "local-only: 0 מסלולים לענן במסע המלא"
+     ]
+    }
+   ]
+  },
+  {
+   "title": "אימות ואיכות מודלים",
+   "goal": "סטים מוחזקים ומורשים לכל יכולת; מודל אמיתי זעיר ב-CI בכל לילה; eval ≥ 90% על gemma3:12b ו-≥ 80% על qwen2.5:7b",
+   "why": "עד היום 0% אומת מול מודל אמיתי. השלב הזה הופך ✅* ל-✅ — ומונע את הטעות של ״ציון מזויף״.",
+   "tasks": [
+    {
+     "id": "7.1",
+     "title": "סטי זהב מוחזקים ומורשים",
+     "branch": "feat/golden-sets",
+     "lane": "D",
+     "minutes": 720,
+     "dep": [
+      "0.10"
+     ],
+     "priority": "P0",
+     "status": "✅ #225 (החלק הציבורי; ה-test נבנה ב-CI אחרי 15.9)",
+     "new": true,
+     "owner": "15.11, 15.9",
+     "source": "מחקר סטי הזהב, נספח 20",
+     "steps": [
+      "נבנים על ידי סוכן נפרד ומוקפאים לפני המימוש (מי שמממש לא כותב את הסט); רץ כ-workflow ב-GitHub Actions (בסביבה שלי אין גישה ל-Hugging Face); סטים פתוחים — בלי טוקן; סטים שדורשים אישור תנאים (FLORES+, Common Voice) — אחרי שטל מאשר ומוסיף טוקן (15.9, 15.11)",
+      "דיבור: FLEURS he (CC BY) + Common Voice (CC0) + 20 הקלטות של טל · תרגום: NTREX-128 (CC BY-SA) · ניקוד: בן-יהודה (נחלת הכלל)",
+      "OCR: תמונות סינתטיות בגופני OFL + 15 עמודים מצולמים · איות: רעש עברי סינתטי + תיקוני ויקיפדיה · אחזור: HeQ + Belebele",
+      "PII: IAHLTwiki + Faker he_IL · תיאורי תמונות: Crossmodal-3600 · injection: deepset + Gandalf + BIPIA + 30 בעברית · שפה: Tatoeba (CC0)",
+      "בריפו רק פיצול dev (`eval/golden/<task>/dev/`) + SOURCES.md, LICENSE, sampler, manifest של sha256 ו-canary GUID; פיצול ה-test (המוחזק) לא נכנס לריפו — ה-workflow בונה אותו ב-CI מהמקורות עם seed סודי (`GOLDEN_SEED`, 15.9), מריץ שם את ה-eval ומפרסם רק ציונים, כך שסוכן שמממש לא רואה את התשובות; FLORES+, Belebele, Nakdimon ו-ivrit.ai רק בסקריפט הורדה, לא בריפו",
+      "קודם החלק הציבורי (מוקפא ומסומן ״חלקי״); החלק של טל (15.11) מצטרף כשמוכן ואז הסט ננעל"
+     ],
+     "acceptance": [
+      "10 סטים, כל אחד עובר שער רישיונות (0.10)",
+      "גדלים: 80 / 250 / 100 / 150 / 200 / 130 / 250 / 50 / 130 / 240",
+      "אף קובץ test בריפו (בדיקה); אותו seed → אותו sha256 (sampler דטרמיניסטי)"
+     ]
+    },
+    {
+     "id": "7.2",
+     "title": "מודל אמיתי זעיר ב-CI",
+     "branch": "ci/real-tiny-model",
+     "lane": "D",
+     "minutes": 180,
+     "dep": [
+      "0.11",
+      "5.3",
+      "5.4"
+     ],
+     "groups": [
+      "ci"
+     ],
+     "priority": "P0",
+     "new": true,
+     "source": "E0, T15",
+     "steps": [
+      "כל 14 הסוכנים (13 + researcher מ-5.4) — Ollama ב-CI עם qwen3:0.6b (Apache, תגית tools, 523MB): temperature 0, seed קבוע, ≤ 64 טוקנים, בדיקות מבנה (שם כלי, ארגומנטים מול JSON Schema) — לא נוסח",
+      "בלילה: qwen3:1.7b לתרחישים מרובי צעדים + DictaLM 3.0 1.7B לבדיקת עשן בעברית",
+      "מטמון `~/.ollama/models` לפי digest; מדידת מהירות ב-runner (אין נתון מפורסם)",
+      "service containers: LanguageTool (פורט 8010; אנגלית בלבד — אין עברית) ו-SearXNG (`search.formats: json`, `limiter: false`; AGPL — שירות בדיקה חיצוני בלבד)",
+      "רץ בלילה (0.11) + ידני ב-PR שנוגע ב-agents"
+     ],
+     "acceptance": [
+      "14/14 סוכנים (כולל researcher) מחזירים פלט שעובר סכמה מול מודל אמיתי",
+      "LanguageTool ו-SearXNG נבדקים באמת (T15)"
+     ]
+    },
+    {
+     "id": "7.3",
+     "title": "eval לכל 14 הסוכנים",
+     "branch": "feat/eval-complete",
+     "lane": "A",
+     "minutes": 180,
+     "dep": [
+      "5.3",
+      "7.1",
+      "5.4"
+     ],
+     "priority": "P0",
+     "was": "6.1",
+     "source": "T19",
+     "steps": [
+      "מקרי זהב לכל אחד מ-14 הסוכנים (≥ 5, עברית ואנגלית), מהסטים המוחזקים; ל-researcher גם רשת, ציטוטים ו-injection",
+      "Mermaid מתקמפל באמת; תגיות מתוך הכספת",
+      "דוח HTML מקומי"
+     ],
+     "acceptance": [
+      "כל סוכן עם ≥ 5 מקרים",
+      "`npm run eval:agents` מייצר דוח"
+     ]
+    },
+    {
+     "id": "7.4",
+     "title": "רופא AI שלם",
+     "branch": "feat/doctor-complete",
+     "lane": "U",
+     "minutes": 120,
+     "dep": [
+      "6.1",
+      "6.3",
+      "6.4",
+      "6.6"
+     ],
+     "priority": "P1",
+     "owner": "15.3",
+     "was": "6.2",
+     "source": "T21",
+     "steps": [
+      "CSP ל-8787 / 8010, docker, כל המנועים משלב 6",
+      "תיקון בלחיצה כשאפשר",
+      "מקרה זהב לכל סוכן"
+     ],
+     "acceptance": [
+      "מכונה ריקה: כל שורה עם הצעה נכונה",
+      "אצל טל: הכול ירוק"
+     ]
+    },
+    {
+     "id": "7.5",
+     "title": "OCR ב-CI",
+     "branch": "feat/ocr-ci",
+     "lane": "S",
+     "minutes": 120,
+     "dep": [
+      "7.1"
+     ],
+     "groups": [
+      "ci"
+     ],
+     "priority": "P1",
+     "owner": "15.11",
+     "was": "6.3",
+     "source": "T31",
+     "steps": [
+      "traineddata (Apache) ב-`public/tesseract/lang`",
+      "e2e על בניית ייצור עם תמונות OCR מ-7.1",
+      "CER עברית ואנגלית"
+     ],
+     "acceptance": [
+      "CER בנפרד: מודפס נקי ≤ 5%, מושפל ≤ 12%, שורות מנוקדות — מדווח בלבד",
+      "רץ בכל PR"
+     ]
+    },
+    {
+     "id": "7.6",
+     "title": "ה-reranker הקיים: למדוד ולהחליט, וספריית קריאה",
+     "branch": "feat/rerank-library",
+     "lane": "A",
+     "minutes": 150,
+     "dep": [
+      "5.2",
+      "8.4",
+      "7.1"
+     ],
+     "priority": "P1",
+     "was": "6.4",
+     "source": "T29, T34, נספח 19",
+     "steps": [
+      "bge-reranker-v2-m3 כבר מחובר (`transformersEngine.ts` RERANK_MODEL, ב-SearchDialog וב-research/agent) — מודדים אותו על סט האחזור, כולל החלק הבין-לשוני בחיפוש היברידי",
+      "שיפור < 5 נקודות → מסירים או מכבים כברירת מחדל; אחרת — רק ב-WebGPU / שולחן עבודה, הורדה בהסכמה (int8 571MB)",
+      "jina-reranker-v2 אסור (NC); mMiniLM לא תומך עברית",
+      "ספרייה עם embeddings משלה; אינדוקס בקיצוץ",
+      "סינון לפני top-k (כבר ב-1.1)"
+     ],
+     "acceptance": [
+      "nDCG@10 עם reranker ≥ +5 נקודות, או החלטה מתועדת להסיר / לכבות"
+     ]
+    },
+    {
+     "id": "7.7",
+     "title": "סיכום יומי: אימות שהתיקונים מ-1.1 סוגרים את T33",
+     "branch": "fix/digest",
+     "lane": "A",
+     "minutes": 15,
+     "dep": [
+      "1.1"
+     ],
+     "priority": "P1",
+     "was": "6.5",
+     "source": "T33",
+     "steps": [
+      "1.1 כבר סגר: אין דריסה (הוספה), checkpoint שנשמר בכשל, נתיבים מלאים, `.markdown`, דילוג על קוד",
+      "לבדוק את מה שנשאר: ״מאז הביקור האחרון״ ותיקייה קבועה"
+     ],
+     "acceptance": [
+      "שתי הרצות ביום = שני חלקים באותו קובץ",
+      "T33 ✅ או משימה פתוחה עם סיבה"
+     ]
+    },
+    {
+     "id": "7.8",
+     "title": "רתמת מדידה בדפדפן אמיתי",
+     "branch": "feat/model-bench",
+     "lane": "D",
+     "minutes": 120,
+     "dep": [
+      "6.1",
+      "6.3",
+      "6.4",
+      "6.6",
+      "6.9",
+      "7.6",
+      "2.6"
+     ],
+     "priority": "P1",
+     "new": true,
+     "owner": "15.14",
+     "was": "6.6",
+     "source": "E0",
+     "steps": [
+      "`npm run bench:models`: Playwright עם WebGPU, כל מנוע על הסטים",
+      "זמן, זיכרון, איכות → `models/registry.json`",
+      "רץ אצל טל (GPU)"
+     ],
+     "acceptance": [
+      "registry עם מדדים אמיתיים לכל מנוע"
+     ]
+    },
+    {
+     "id": "7.9",
+     "title": "עיבוד ה-eval האמיתי של טל",
+     "branch": "feat/eval-real",
+     "lane": "A",
+     "minutes": 180,
+     "dep": [
+      "7.3",
+      "15.3"
+     ],
+     "priority": "P0",
+     "owner": "15.3",
+     "was": "6.7",
+     "source": "E0, T27",
+     "steps": [
+      "קליטת `eval/results` (15.3)",
+      "`measured` בקטלוג; כולל DictaLM 3.0 אם הוכנס (1.7)",
+      "ברירות מחדל לפי התוצאות",
+      "תיקון הסוכנים שנכשלו"
+     ],
+     "acceptance": [
+      "≥ 90% gemma3:12b, ≥ 80% qwen2.5:7b — או משימת תיקון פתוחה לכל כישלון"
+     ]
+    },
+    {
+     "id": "7.10",
+     "title": "סטי זהב קטנים לפיצ'רים",
+     "branch": "feat/golden-small",
+     "lane": "D",
+     "minutes": 420,
+     "dep": [
+      "0.10"
+     ],
+     "priority": "P1",
+     "status": "✅ #240 (11/12 סטים; פגישות — 15.11)",
+     "new": true,
+     "owner": "15.11",
+     "source": "ביקורת v5 #16",
+     "steps": [
+      "סוכן נפרד בונה ומקפיא לפני המימוש, כמו 7.1",
+      "איות אנגלית: 100 זוגות רעש סינתטי על טקסט בנחלת הכלל · חיפוש תמונות: 30 שאילתות מתיאורי XM3600 · קוצץ: 20 דפים (ויקיפדיה CC BY-SA + נחלת הכלל + דפים שלנו)",
+      "PDF: 3 מסמכים בנחלת הכלל + 30 שאלות · ניתוח נתונים: 20 שאלות על CSV פתוח · סיכום: 20 מסמכים · פגישות: 5 הקלטות של טל (15.11)",
+      "נוסחאות: 30 · אזכורים לא מקושרים: 30 · שורות דו-כיווניות: 30 · תאריכים עבריים: 20 · ציטוטים: 20 רשומות"
+     ],
+     "acceptance": [
+      "12 סטים קטנים מוקפאים עם sha256 ורישיון"
+     ]
+    }
+   ]
+  },
+  {
+   "title": "ביצועים",
+   "goal": "Lighthouse ≥ 90 / ≥ 80 (חציון של 3) על כל PR; LCP < 2.5s, TTI < 3.5s; הפעלה ≤ 250KB; 10,000 פתקים ומסמך 2MB",
+   "why": "היום 72 / 45. השורש: עבודת main thread (TBT 2.3s בנייד), לא גודל ההורדה. ניסיון רינדור מפוצל כבר נכשל — לכן מתחילים בפרופיל.",
+   "tasks": [
+    {
+     "id": "8.1",
+     "title": "צינור ה-markdown ב-worker",
+     "branch": "perf/render-worker",
+     "lane": "D",
+     "minutes": 600,
+     "dep": [
+      "0.2",
+      "4.7"
+     ],
+     "groups": [
+      "render"
+     ],
+     "priority": "P0",
+     "was": "7.1",
+     "source": "C1",
+     "steps": [
+      "פרופיל: איפה בדיוק ה-TBT (React, unified, Shiki, KaTeX) — לפני שכותבים קוד",
+      "unified/rehype ב-worker → HAST; ה-main מרנדר בלבד",
+      "Shiki ו-KaTeX ב-worker",
+      "רינדור מדורג (viewport קודם)"
+     ],
+     "acceptance": [
+      "TBT בנייד < 300ms",
+      "פלט זהה (snapshot של 50 מסמכים)"
+     ]
+    },
+    {
+     "id": "8.2",
+     "title": "הפעלה ≤ 250KB",
+     "branch": "perf/startup-2",
+     "lane": "D",
+     "minutes": 240,
+     "dep": [
+      "8.1"
+     ],
+     "priority": "P1",
+     "was": "7.2",
+     "source": "C2, T38",
+     "steps": [
+      "לוחות ודיאלוגים בעצלות מלאה",
+      "חיתוך תלויות כבדות",
+      "prerender של מעטפת הקבלה (מהניסוי `perf/prerender`)",
+      "סקריפט אתחול אחד: לאחד את `public/theme-boot.js` (מ-1.1) עם BOOT_JS + hash של הניסוי — לא שני מנגנונים"
+     ],
+     "acceptance": [
+      "סכום chunks ההפעלה ≤ 250KB gzip"
+     ]
+    },
+    {
+     "id": "8.3",
+     "title": "שער Lighthouse על כל PR",
+     "branch": "ci/lighthouse-gate",
+     "lane": "D",
+     "minutes": 60,
+     "dep": [
+      "8.1",
+      "8.2"
+     ],
+     "groups": [
+      "ci"
+     ],
+     "priority": "P0",
+     "was": "7.3",
+     "source": "C1",
+     "steps": [
+      "desktop + mobile: `numberOfRuns: 5` ו-`aggregationMethod: median-run` במפורש (ברירת המחדל של LHCI היא optimistic)",
+      "ספים 0.9 / 0.8, LCP < 2.5s, TTI < 3.5s",
+      "מדידת frame-time במסמך 2MB בלילה בלבד (לא ב-PR)"
+     ],
+     "acceptance": [
+      "השער פעיל וירוק ב-3 ריצות לילה רצופות (תנאי ה-P0 לשחרור); שבוע שלם בלי flakes נמדד אחרי השחרור ונרשם ב-13.6"
+     ]
+    },
+    {
+     "id": "8.4",
+     "title": "כספת גדולה ומסמך ארוך",
+     "branch": "perf/vault-worker",
+     "lane": "D",
+     "minutes": 300,
+     "dep": [
+      "4.1"
+     ],
+     "groups": [
+      "store"
+     ],
+     "priority": "P1",
+     "was": "7.4",
+     "source": "C4, C6, T39",
+     "steps": [
+      "האינדקס ב-worker מעל VaultBackend (4.1); עץ הקבצים מהאינדקס",
+      "Float32Array לפי קובץ",
+      "מתאר ותצוגה אינקרמנטליים (פרסור מחדש מהבלוק שהשתנה כשגדר / הגדרת הפניה משתנה)",
+      "`e2e/perf-vault.spec.ts`: 10,000 פתקים ומסמך 2MB"
+     ],
+     "acceptance": [
+      "פתיחה < 1s, שמירה → אינדקס < 50ms, חיפוש < 100ms",
+      "הקלדה ב-2MB < 16ms לפריים (לילה)"
+     ]
+    },
+    {
+     "id": "8.5",
+     "title": "PWA offline מלא",
+     "branch": "fix/pwa-offline",
+     "lane": "D",
+     "minutes": 90,
+     "dep": [
+      "1.1"
+     ],
+     "priority": "P1",
+     "was": "7.5",
+     "source": "D1, D4, B8",
+     "steps": [
+      "shiki ו-workers ב-precache",
+      "גופנים עבריים offline בטעינה הראשונה (B8)",
+      "e2e: הדגשה, OCR, share_target עם טקסט, פתיחת קובץ, AI מקומי (מבצע מדומה ב-CI, אמיתי אצל טל)"
+     ],
+     "acceptance": [
+      "offline e2e מכסה הדגשה, גופנים, שיתוף וקבצים"
+     ]
+    }
+   ]
+  },
+  {
+   "title": "עברית ו-i18n",
+   "goal": "0 מחרוזות קשיחות (סריקה ב-CI); ≤ 5% לא מתורגם (טיוטות נחשבות לא מתורגמות); איות עברי בלי רשת; עריכה דו-כיוונית נכונה",
+   "why": "RTL לבד כבר לא מבדל (Obsidian 1.14, Notion). מנצחים בעומק: bidi מעורב, ניקוד, איות, תאריכים עבריים, ייצוא נכון.",
+   "tasks": [
+    {
+     "id": "9.1",
+     "title": "אפס מחרוזות קשיחות",
+     "branch": "fix/i18n-labels",
+     "lane": "U",
+     "minutes": 90,
+     "dep": [
+      "0.3"
+     ],
+     "groups": [
+      "i18n"
+     ],
+     "priority": "P0",
+     "was": "8.1",
+     "source": "H4, P6, T45",
+     "steps": [
+      "≈18 תוויות + 3 שורות בגלריה → i18n",
+      "סריקת AST ב-CI"
+     ],
+     "acceptance": [
+      "הסריקה: 0"
+     ]
+    },
+    {
+     "id": "9.2",
+     "title": "איות עברי בלי רשת",
+     "branch": "feat/hebrew-spell-2",
+     "lane": "U",
+     "minutes": 180,
+     "dep": [
+      "7.1",
+      "1.1"
+     ],
+     "priority": "P1",
+     "owner": "15.10, 15.11",
+     "was": "8.2",
+     "source": "T28",
+     "steps": [
+      "שכבה 1: בודק האיות של הדפדפן / מערכת ההפעלה (`spellcheck`) — בלי מילון ב-bundle",
+      "2 הכללים החסרים (ה׳ הידיעה לפני מילת יחס, ״את״ לפני לא-מיודע)",
+      "רשימה מצורפת: FrequencyWords he_50k (CC BY-SA 4.0, 0.8MB) עם סף תדירות + הסרת אותיות שימוש (ו ה ב כ ל מ ש) — המלצה בלבד, כי הרשימה מכתוביות ויש בה שגיאות",
+      "Hspell (AGPL) נשאר הורדה ביוזמת המשתמש — או רישיון מסחרי מהמחברים (15.10)",
+      "בדיקות מול הרשימה האמיתית"
+     ],
+     "acceptance": [
+      "על סט השגיאות (7.1): recall ≥ 70% לשגיאות שאינן מילה; false positive ≤ 5% על טקסט נקי (פרוזה מודרנית + ויקיפדיה)",
+      "עובד offline מההתקנה"
+     ]
+    },
+    {
+     "id": "9.3",
+     "title": "CSS לוגי ו-slug עברי",
+     "branch": "fix/css-slug",
+     "lane": "U",
+     "minutes": 30,
+     "dep": [
+      "1.1"
+     ],
+     "priority": "P1",
+     "status": "✅ #219",
+     "was": "8.3",
+     "source": "T25, T26",
+     "steps": [
+      "בדיקת hygiene: 0 מאפיינים פיזיים ב-`.prose-lumen` ו-`.cm-*` (חריגה לסמן)",
+      "slug עברי בייצוא אתר",
+      "stylelint-use-logical (CC0) ב-CI"
+     ],
+     "acceptance": [
+      "hygiene ירוק"
+     ]
+    },
+    {
+     "id": "9.4",
+     "title": "סוכן ביקורת תרגומים",
+     "branch": "feat/i18n-review-agent",
+     "lane": "A",
+     "minutes": 60,
+     "dep": [
+      "6.4"
+     ],
+     "priority": "P2",
+     "was": "8.4",
+     "source": "P5",
+     "steps": [
+      "תרגום חוזר מקומי של 7 השפות",
+      "סימון סטיות / משתנים חסרים / אורך חריג",
+      "דוח"
+     ],
+     "acceptance": [
+      "0 משתנים חסרים"
+     ]
+    },
+    {
+     "id": "9.5",
+     "title": "מטריצת RTL מורחבת",
+     "branch": "test/rtl-matrix",
+     "lane": "U",
+     "minutes": 120,
+     "dep": [
+      "10.2",
+      "10.3"
+     ],
+     "priority": "P1",
+     "was": "8.5",
+     "source": "B1–B11",
+     "steps": [
+      "טבלאות, רשימות, קוד, ציטוטים ב-WYSIWYG, תצוגה וייצוא",
+      "נייד",
+      "baseline חזותי (10.3)"
+     ],
+     "acceptance": [
+      "ירוק ב-3 דפדפנים + 2 מכשירים"
+     ]
+    },
+    {
+     "id": "9.6",
+     "title": "סוכן טיוטות תרגום",
+     "branch": "feat/i18n-draft-agent",
+     "lane": "U",
+     "minutes": 45,
+     "dep": [
+      "6.4",
+      "0.3"
+     ],
+     "groups": [
+      "i18n"
+     ],
+     "priority": "P1",
+     "new": true,
+     "was": "8.6",
+     "source": "חיסכון בזמן",
+     "steps": [
+      "`npm run i18n:draft`: מפתחות חדשים → טיוטה ב-7 שפות (6.4 / Ollama)",
+      "`needs-review` עד אישור; נחשב לא מתורגם בשער"
+     ],
+     "acceptance": [
+      "10 מפתחות → 70 טיוטות בפקודה אחת"
+     ]
+    },
+    {
+     "id": "9.7",
+     "title": "עריכה דו-כיוונית נכונה",
+     "branch": "feat/bidi-editing",
+     "lane": "U",
+     "minutes": 360,
+     "dep": [
+      "1.1",
+      "7.10"
+     ],
+     "groups": [
+      "editor"
+     ],
+     "priority": "P1",
+     "new": true,
+     "source": "ביקורת התוכנית §6",
+     "steps": [
+      "תנועת סמן וחצים בשורות מעורבות (logical), בחירה, סוגריים ומספרים",
+      "CodeMirror ו-ProseMirror",
+      "e2e מקלדת על 30 שורות זהב מעורבות",
+      "`perLineTextDirection` של CodeMirror + bidi-js (MIT) לאלגוריתם הדו-כיווני"
+     ],
+     "acceptance": [
+      "30/30 תרחישים נכונים ב-3 דפדפנים"
+     ]
+    },
+    {
+     "id": "9.8",
+     "title": "יישור טבלאות RTL ב-DOCX",
+     "branch": "fix/docx-rtl-align",
+     "lane": "U",
+     "minutes": 90,
+     "dep": [
+      "1.1"
+     ],
+     "priority": "P1",
+     "new": true,
+     "owner": "15.12",
+     "source": "review #177",
+     "steps": [
+      "ערך יישור תלת-מצבי (start / center / end) במקום left/right",
+      "בדיקה ב-Word אמיתי (טל, 15.12)"
+     ],
+     "acceptance": [
+      "טבלה עברית נפתחת ב-Word מיושרת נכון"
+     ]
+    },
+    {
+     "id": "9.9",
+     "title": "RTL ברמת Obsidian 1.14",
+     "branch": "feat/rtl-parity",
+     "lane": "U",
+     "minutes": 360,
+     "dep": [
+      "4.10",
+      "10.2",
+      "10.3"
+     ],
+     "priority": "P1",
+     "new": true,
+     "source": "Obsidian 1.14 (המחקר המורחב, 18.10)",
+     "steps": [
+      "כל סביבת העבודה מתהפכת: סרגלים, פאנלים, לשוניות, תפריטים — והפקודות שומרות על המשמעות החזותית",
+      "מחוות במובייל מתהפכות (החלקה, אנימציות דף)",
+      "מסד הנתונים (4.10): ניווט מקלדת, בחירה וגלילה אופקית נכונים ב-RTL",
+      "baselines חזותיים ב-he (10.3)",
+      "react-aria (Apache) / `DirectionProvider` של Radix לרכיבים חדשים"
+     ],
+     "acceptance": [
+      "20 תרחישי ממשק ומחוות ב-RTL ירוקים ב-e2e",
+      "axe ירוק ב-RTL"
+     ]
+    }
+   ]
+  },
+  {
+   "title": "בדיקות, נגישות ומובייל",
+   "goal": "0 ממצאי axe חמורים בכל משטח; מסע מלא באייפון ובפיקסל; baselines חזותיים ב-CI; כיסוי ≥ 60%",
+   "why": "",
+   "tasks": [
+    {
+     "id": "10.1",
+     "title": "נגישות מלאה",
+     "branch": "feat/a11y",
+     "lane": "U",
+     "minutes": 480,
+     "dep": [
+      "3.2",
+      "3.3",
+      "4.10"
+     ],
+     "priority": "P0",
+     "was": "9.1",
+     "source": "H1–H3",
+     "steps": [
+      "`useFocusTrap` אחד ל-24 הדיאלוגים",
+      "שמות נגישים; מחלק הסרגל במקלדת",
+      "ניגודיות ≥ 4.5",
+      "reduced-motion",
+      "`e2e/a11y.spec.ts` × LTR/RTL × בהיר/כהה",
+      "מסע מקלדת"
+     ],
+     "acceptance": [
+      "axe: 0 serious / critical",
+      "מסע מקלדת ירוק"
+     ]
+    },
+    {
+     "id": "10.2",
+     "title": "מגע ומובייל",
+     "branch": "feat/touch",
+     "lane": "U",
+     "minutes": 420,
+     "dep": [
+      "3.1",
+      "4.4"
+     ],
+     "groups": [
+      "tree"
+     ],
+     "priority": "P0",
+     "was": "9.2",
+     "source": "I1–I3",
+     "steps": [
+      "Pointer Events ב-5 קבצי הגרירה",
+      "יעדי מגע ≥ 44px",
+      "safe-area",
+      "מתאר כגיליון תחתון",
+      "Playwright: iPhone 14, Pixel 7 + מסע מלא"
+     ],
+     "acceptance": [
+      "מסע מלא ירוק בשני המכשירים"
+     ]
+    },
+    {
+     "id": "10.3",
+     "title": "רגרסיה חזותית ב-CI",
+     "branch": "test/visual-ci",
+     "lane": "D",
+     "minutes": 90,
+     "dep": [
+      "0.5"
+     ],
+     "groups": [
+      "ci"
+     ],
+     "priority": "P1",
+     "was": "9.3",
+     "source": "T24",
+     "steps": [
+      "baselines ל-10 משטחים × he/en × בהיר/כהה",
+      "השוואה ב-CI",
+      "חסר baseline = כישלון"
+     ],
+     "acceptance": [
+      "שינוי פיקסלים לא מכוון נתפס"
+     ]
+    },
+    {
+     "id": "10.4",
+     "title": "כיסוי ≥ 60%",
+     "branch": "test/coverage-all",
+     "lane": "D",
+     "minutes": 240,
+     "dep": [
+      "0.5"
+     ],
+     "groups": [
+      "ci"
+     ],
+     "priority": "P1",
+     "was": "9.4",
+     "source": "E4",
+     "steps": [
+      "layouts, components ו-App.tsx בכיסוי",
+      "בדיקות עד 60%",
+      "שער לפי המספר האמיתי"
+     ],
+     "acceptance": [
+      "כיסוי ≥ 60%, 0 תיקיות מוחרגות"
+     ]
+    }
+   ]
+  },
+  {
+   "title": "מוצר שלם",
+   "goal": "הגדרות במקום אחד; תוספים אמיתיים ובטוחים; חיפוש עם אופרטורים; שולחן עבודה מתעדכן וחתום; הצפנה במנוחה כאופציה",
+   "why": "",
+   "tasks": [
+    {
+     "id": "11.1",
+     "title": "מסך הגדרות אחד",
+     "branch": "feat/settings-one",
+     "lane": "U",
+     "minutes": 480,
+     "dep": [
+      "3.5",
+      "3.6",
+      "5.4",
+      "5.7",
+      "6.1"
+     ],
+     "groups": [
+      "settings"
+     ],
+     "priority": "P1",
+     "was": "10.1",
+     "source": "J1",
+     "steps": [
+      "`src/settings/schema.ts`: כל מפתח ושדה",
+      "מסך אחד: קטגוריות, חיפוש, ייצוא / ייבוא",
+      "הדיאלוגים הקיימים → לשוניות"
+     ],
+     "acceptance": [
+      "100% מהמפתחות בסכמה",
+      "e2e: חיפוש ושינוי"
+     ]
+    },
+    {
+     "id": "11.2",
+     "title": "תוספים אמיתיים ובטוחים",
+     "branch": "feat/plugins-real",
+     "lane": "U",
+     "minutes": 960,
+     "dep": [
+      "2.3"
+     ],
+     "groups": [
+      "editor"
+     ],
+     "priority": "P1",
+     "was": "10.2",
+     "source": "J2, M1",
+     "steps": [
+      "API: הגדרות, פאנל צד, פקודות + קיצורים, אחסון, הרחבות עורך דרך API הודעות",
+      "לוגיקה ב-QuickJS (`quickjs-emscripten` + `-sync`, MIT) עם הגבלת זיכרון ו-CPU; ממשק ב-iframe sandbox עם CSP `default-src 'none'` — גם בלי img / media / font / style / frame חיצוניים, `form-action 'none'`, בלי `allow-top-navigation` ו-`allow-popups`; רק משאבי הממשק של התוסף מ-blob:; Comlink / Penpal ל-RPC",
+      "manifest של יכולות והרשאות לפני גישה לתוכן (דפוס ה-plugs של SilverBullet ו-extension host של VS Code)",
+      "רישום אמיתי (JSON בריפו) + חתימת ed25519",
+      "`create-lumen-plugin` + 3 דוגמאות + תיעוד API",
+      "מחיקת ההתקנה המזויפת"
+     ],
+     "acceptance": [
+      "`e2e/plugins.spec.ts`: 3 תוספים רצים",
+      "תוסף שמנסה להוציא תוכן — fetch, WebSocket, תמונה, CSS, טופס, iframe או ניווט לכתובת חיצונית — נכשל בכל ערוץ (בדיקה לכל אחד)",
+      "תיעוד API מלא"
+     ]
+    },
+    {
+     "id": "11.3",
+     "title": "#תגיות בגוף ואופרטורי חיפוש",
+     "branch": "feat/search-ops",
+     "lane": "U",
+     "minutes": 120,
+     "dep": [
+      "5.2",
+      "8.4"
+     ],
+     "groups": [
+      "search"
+     ],
+     "priority": "P1",
+     "was": "10.3",
+     "source": "J5",
+     "steps": [
+      "`#תגית` בגוף באינדקס",
+      "`tag:`, `path:`, `-`, `\"…\"`, `/regex/`"
+     ],
+     "acceptance": [
+      "30 שאילתות אופרטור נכונות"
+     ]
+    },
+    {
+     "id": "11.4",
+     "title": "הצפנת כספת במנוחה (אופציה)",
+     "branch": "feat/vault-encryption",
+     "lane": "S",
+     "minutes": 360,
+     "dep": [
+      "3.2",
+      "2.5",
+      "8.4",
+      "4.3",
+      "3.4",
+      "4.2",
+      "4.4"
+     ],
+     "priority": "P2",
+     "new": true,
+     "was": "10.5",
+     "source": "J3 (החלטה ב-1.6)",
+     "steps": [
+      "AES-GCM לכל קובץ, Argon2id, מילות שחזור, נעילה אוטומטית",
+      "אינדקס ו-embeddings מוצפנים",
+      "מוסבר במפורש: כספת מוצפנת לא נקראת ב-Obsidian / git בטקסט גלוי",
+      "גם trace-ים של סוכנים (T10, 50 האחרונים ב-IndexedDB — כוללים קטעי פתקים) בתוך גבול ההצפנה: מוצפנים בהפעלה, מוגרים בהפעלה הראשונה, נמחקים בביטול"
+     ],
+     "acceptance": [
+      "רק ciphertext באחסון, בכל `VaultBackend` (4.1): IndexedDB ו-OPFS, תיקייה אמיתית בדפדפן (`FileSystemDirectoryHandle`, 4.2), תיקייה בשולחן העבודה (Tauri, 4.3) ובהמשך מובייל (4.20) — כולל trace-ים, אינדקס, embeddings וגיבויים",
+      "סריקה ושחזור (e2e) רצים על כל backend"
+     ]
+    },
+    {
+     "id": "11.5",
+     "title": "שולחן עבודה: עדכון, חתימה, צמצום",
+     "branch": "feat/desktop-release",
+     "lane": "S",
+     "minutes": 240,
+     "dep": [
+      "4.3"
+     ],
+     "priority": "P1",
+     "owner": "15.7, 15.12",
+     "was": "10.4",
+     "source": "N3, F7",
+     "steps": [
+      "tauri-plugin-updater",
+      "חתימה (15.7)",
+      "בלי sourcemaps; הרשאות fs מצומצמות"
+     ],
+     "acceptance": [
+      "0 sourcemaps ב-build",
+      "עדכון אוטומטי עובד (טל)"
+     ]
+    }
+   ]
+  },
+  {
+   "title": "בריאות הקוד",
+   "goal": "0 catch ריק בלי הסבר; אין קובץ ייצור מעל 800 שורות; 0 קוד מת; חבילות עדכניות; המגבלות הידועות סגורות",
+   "why": "מבוצע מאוחר בכוונה — פיצול קבצים גדולים מוקדם היה מתנגש עם כל המסלולים.",
+   "tasks": [
+    {
+     "id": "12.1",
+     "title": "catch ריקים וקבצים גדולים",
+     "branch": "chore/catch-split",
+     "lane": "D",
+     "minutes": 480,
+     "dep": [
+      "0.4",
+      "11.5",
+      "12.3"
+     ],
+     "priority": "P1",
+     "was": "11.1",
+     "source": "E1, O1",
+     "steps": [
+      "192 ה-catch: טיפול / לוג / `// why:`",
+      "פיצול 9 הקבצים מעל 800 שורות"
+     ],
+     "acceptance": [
+      "lint ירוק בלי baseline לכללים האלה"
+     ]
+    },
+    {
+     "id": "12.2",
+     "title": "ניקוי ועדכוני חבילות",
+     "branch": "chore/cleanup",
+     "lane": "D",
+     "minutes": 600,
+     "dep": [
+      "0.10",
+      "6.8"
+     ],
+     "priority": "P1",
+     "was": "11.2",
+     "source": "O2–O4",
+     "steps": [
+      "מחיקת ≈2,600 שורות מתות",
+      "slug אחד",
+      "גרסה ראשית אחת לכל PR (React 19…) עם כל הבדיקות"
+     ],
+     "acceptance": [
+      "0 קבצים בלי מייבאים",
+      "0 גרסאות ראשיות מאחור"
+     ]
+    },
+    {
+     "id": "12.3",
+     "title": "סגירת המגבלות הידועות A1–A9",
+     "branch": "fix/known-limits",
+     "lane": "U",
+     "minutes": 600,
+     "dep": [
+      "1.1"
+     ],
+     "priority": "P1",
+     "was": "11.3",
+     "source": "A1–A9",
+     "steps": [
+      "בדיקה לכל סעיף לפני התיקון",
+      "worker המחקר דורש טוקן (יעד §14)",
+      "תיקון או החלטה מתועדת"
+     ],
+     "acceptance": [
+      "9/9 עם בדיקה"
+     ]
+    },
+    {
+     "id": "12.4",
+     "title": "ניטור בהסכמה",
+     "branch": "feat/monitoring",
+     "lane": "S",
+     "minutes": 90,
+     "dep": [
+      "2.4"
+     ],
+     "priority": "P1",
+     "owner": "15.6",
+     "was": "11.4",
+     "source": "A10, P7",
+     "steps": [
+      "web-vitals מקומי",
+      "Sentry / GlitchTip בהסכמה (15.6)",
+      "שקוף ביומן"
+     ],
+     "acceptance": [
+      "כבוי כברירת מחדל"
+     ]
+    }
+   ]
+  },
+  {
+   "title": "תיעוד, אירוח, מובייל ושחרור",
+   "goal": "תיעוד מדויק לכל פיצ'ר; אירוח אחד שעובד הכול; Android ו-iOS נבנים ב-CI; שחרור חתום וחוזר",
+   "why": "",
+   "tasks": [
+    {
+     "id": "13.1",
+     "title": "תיעוד: ביקורת שלמות (כל משימה כותבת את העמוד שלה כחלק מה-DoD)",
+     "branch": "docs/complete",
+     "lane": "U",
+     "minutes": 360,
+     "dep": [
+      "0.18",
+      "4.4",
+      "4.12",
+      "3.6"
+     ],
+     "priority": "P0",
+     "was": "12.1",
+     "source": "N1",
+     "steps": [
+      "git sync, סנכרון מוצפן, ייצוא/ייבוא, עברית, קיצורים, התקנה, מודלים מקומיים, פרטיות, תוספים",
+      "docs-sync (0.18) ירוק"
+     ],
+     "acceptance": [
+      "כל פיצ'ר עם עמוד; docs-sync ירוק"
+     ]
+    },
+    {
+     "id": "13.2",
+     "title": "אירוח אחיד",
+     "branch": "chore/hosting",
+     "lane": "D",
+     "minutes": 120,
+     "dep": [
+      "0.17"
+     ],
+     "priority": "P1",
+     "was": "12.2",
+     "source": "N2",
+     "steps": [
+      "Playground ב-Netlify",
+      "Docker בלי 130MB זמני ריצה מיותרים",
+      "nginx אחד"
+     ],
+     "acceptance": [
+      "אותן יכולות בכל אירוח (טבלה)"
+     ]
+    },
+    {
+     "id": "13.3",
+     "title": "Android ו-iOS ב-CI",
+     "branch": "feat/mobile-builds",
+     "lane": "D",
+     "minutes": 240,
+     "dep": [
+      "1.1"
+     ],
+     "groups": [
+      "ci"
+     ],
+     "priority": "P2",
+     "owner": "15.7",
+     "was": "12.3",
+     "source": "I4",
+     "steps": [
+      "Capacitor android/ + build ב-CI",
+      "iOS (ios/ קיים) — build ב-CI של macOS",
+      "Safari מפנה אחסון אחרי 7 ימים: persist + תזכורת ייצוא",
+      "חתימה כשיש חשבונות (15.7)"
+     ],
+     "acceptance": [
+      "APK ו-IPA נבנים בכל PR"
+     ]
+    },
+    {
+     "id": "13.4",
+     "title": "צינור שחרור",
+     "branch": "chore/release",
+     "lane": "D",
+     "minutes": 120,
+     "dep": [
+      "11.5"
+     ],
+     "priority": "P1",
+     "new": true,
+     "owner": "15.7",
+     "was": "12.4",
+     "source": "תהליך",
+     "steps": [
+      "semver + changelog אוטומטי",
+      "ארטיפקטים חתומים (web, desktop, mobile)",
+      "rollback",
+      "ארטיפקטים למובייל מצטרפים כש-13.3 מוכן",
+      "release-please (Apache) + Tauri updater"
+     ],
+     "acceptance": [
+      "תג → שחרור בלי צעד ידני"
+     ]
+    },
+    {
+     "id": "13.5",
+     "title": "ביקורת שחרור עצמאית (כל ה-P0)",
+     "branch": "—",
+     "lane": "D",
+     "minutes": 120,
+     "depRule": "allP0",
+     "priority": "P0",
+     "new": true,
+     "was": "12.5",
+     "source": "נספח 16",
+     "steps": [
+      "סוכן נפרד מריץ DoD לכל P0",
+      "מסע משתמש מלא he/en, web + desktop",
+      "פערים → תיקון לפני התג"
+     ],
+     "acceptance": [
+      "כל ה-P0 ירוקים",
+      "`v1.0.0-rc` רק אחרי הביקורת"
+     ]
+    },
+    {
+     "id": "13.6",
+     "title": "ביקורת סופית מול כל יעדי §14",
+     "branch": "—",
+     "lane": "D",
+     "minutes": 90,
+     "depRule": "all",
+     "priority": "P1",
+     "new": true,
+     "was": "12.6",
+     "source": "נספח 14",
+     "steps": [
+      "כל יעד: ✅ נמדד או משימה פתוחה עם סיבה",
+      "עדכון נספח 16"
+     ],
+     "acceptance": [
+      "0 יעדים בלי סטטוס מדוד"
+     ]
+    },
+    {
+     "id": "13.7",
+     "title": "הגשה לחנויות",
+     "branch": "chore/store-submit",
+     "lane": "D",
+     "minutes": 360,
+     "dep": [
+      "13.3",
+      "13.4"
+     ],
+     "priority": "P2",
+     "new": true,
+     "owner": "15.7",
+     "source": "מחקר פערים #10",
+     "steps": [
+      "Google Play: רישום, צילומי מסך בעברית ובאנגלית, מדיניות פרטיות, מסלול בדיקה פנימי",
+      "App Store: TestFlight, סקירה, הצהרות פרטיות",
+      "שולחן עבודה: Microsoft Store / winget ו-Homebrew cask",
+      "הסקירה של החנויות (ימים, 15.7) לא נכנסת לתאריך הסיום — המשימה נסגרת בהגשה, והזמינות נרשמת בנפרד כשהחנות מאשרת"
+     ],
+     "acceptance": [
+      "build נשלח לסקירה לפחות בחנות אחת (מספר build / קישור TestFlight / internal track)",
+      "זמינות בחנות — אבן דרך מותנית באישור החנות, לא חלק מתאריך הסיום"
+     ]
+    }
+   ]
+  },
+  {
+   "title": "השקה ולולאת משוב",
+   "goal": "משתמש חדש מגיע לפתק ראשון ב-60 שניות; משוב ובאגים מגיעים אליי בלי שרת; גרסת בטא נפרדת",
+   "why": "",
+   "tasks": [
+    {
+     "id": "14.1",
+     "title": "חוויית התחלה",
+     "branch": "feat/onboarding",
+     "lane": "U",
+     "minutes": 240,
+     "dep": [
+      "4.2",
+      "4.12"
+     ],
+     "priority": "P1",
+     "new": true,
+     "source": "השקה",
+     "steps": [
+      "בחירת כספת (OPFS / תיקייה), שפה וסגנון",
+      "כספת לדוגמה בעברית ובאנגלית",
+      "ייבוא מ-Obsidian / Notion בהצעה",
+      "סיור קצר"
+     ],
+     "acceptance": [
+      "משתמש חדש לפתק ראשון < 60s (e2e)"
+     ]
+    },
+    {
+     "id": "14.2",
+     "title": "משוב בלי שרת",
+     "branch": "feat/feedback",
+     "lane": "D",
+     "minutes": 180,
+     "dep": [
+      "7.4"
+     ],
+     "priority": "P1",
+     "new": true,
+     "source": "השקה",
+     "steps": [
+      "טופס שמכין issue ב-GitHub או טקסט להעתקה",
+      "צירוף דוח רופא AI (בהסכמה, בלי תוכן פתקים)",
+      "צילום מסך אופציונלי"
+     ],
+     "acceptance": [
+      "0 נתונים יוצאים בלי אישור"
+     ]
+    },
+    {
+     "id": "14.3",
+     "title": "סוכן מיון issues",
+     "branch": "chore/issue-triage",
+     "lane": "D",
+     "minutes": 180,
+     "dep": [
+      "0.11",
+      "0.6"
+     ],
+     "priority": "P1",
+     "new": true,
+     "source": "חיסכון בזמן",
+     "steps": [
+      "ריצה מתוזמנת: תוויות, כפילויות, בקשת שחזור, קישור למשימה ב-plan.json",
+      "דוח יומי"
+     ],
+     "acceptance": [
+      "issue חדש ממוין תוך 24 שעות"
+     ]
+    },
+    {
+     "id": "14.4",
+     "title": "ערוץ בטא ודגלי פיצ'רים",
+     "branch": "feat/beta-channel",
+     "lane": "D",
+     "minutes": 240,
+     "dep": [
+      "13.4"
+     ],
+     "priority": "P1",
+     "new": true,
+     "source": "השקה",
+     "steps": [
+      "פריסת בטא נפרדת",
+      "ערוץ עדכון בטא בשולחן העבודה",
+      "דגלי פיצ'רים מקומיים"
+     ],
+     "acceptance": [
+      "פיצ'ר חדש מגיע לבטא לפני היציב"
+     ]
+    },
+    {
+     "id": "14.5",
+     "title": "מפת דרכים ציבורית",
+     "branch": "feat/public-roadmap",
+     "lane": "D",
+     "minutes": 90,
+     "dep": [
+      "0.6"
+     ],
+     "priority": "P2",
+     "new": true,
+     "source": "השקה",
+     "steps": [
+      "דף מ-plan.json (רק כותרות וסטטוס)"
+     ],
+     "acceptance": [
+      "מתעדכן אוטומטית"
+     ]
+    },
+    {
+     "id": "14.6",
+     "title": "״מה חדש״ באפליקציה",
+     "branch": "feat/whats-new",
+     "lane": "U",
+     "minutes": 90,
+     "dep": [
+      "13.4"
+     ],
+     "priority": "P2",
+     "new": true,
+     "source": "השקה",
+     "steps": [
+      "מה-changelog (13.4) בשפת הממשק"
+     ],
+     "acceptance": [
+      "מוצג פעם אחת לכל גרסה"
+     ]
+    }
+   ]
+  }
+ ],
+ "owner": [
+  {
+   "id": "15.1",
+   "title": "למזג את המחסנית",
+   "details": "#109, #135, #136, #137–#150, #155–#158, #169–#193, ואחריהם המחסנית של הסבב הזה #194–#245 (סדר המיזוג: #194 → #206 → #218; #195 → #213; #196 → #214; #197 → #215; #198 → #216 ו-#212; #207 → #220 → #221 → #222; #208 → #209 → #226 → #235; #222 → #233; #207 → #236, #239; #199 → #200 → #225 → #240; על #194: #201, #202 (→ #210, #211, #227, #234 → #245), #218, #229, #230, #237, #203, #204, #205 (→ #223), #217, #219, #224 → #238, #228 → #231, #225 → #232. כל PR ״r2״ (#206, #213–#216) מתמזג מיד אחרי ה-PR שהוא תיקון שלו). אחר כך אני עובר ל-PR-ים מקבילים מ-main",
+   "time": "15 דק׳",
+   "minutes": 15,
+   "dep": [
+    "1.1"
+   ],
+   "priority": "P1",
+   "opens": [
+    "כל ה-PR-ים הבאים"
+   ]
+  },
+  {
+   "id": "15.2",
+   "title": "קרדיט ל-Codex + Renovate",
+   "details": "review חיצוני על כל PR חדש (רשות); התקנת Renovate כ-GitHub App על lumen-md",
+   "time": "10 דק׳",
+   "minutes": 10,
+   "dep": [],
+   "priority": "P1"
+  },
+  {
+   "id": "15.3",
+   "title": "הרצת מודלים אמיתיים",
+   "details": "Ollama + `npm run eval:agents` (gemma3:12b, qwen2.5:7b) על מחשב עם GPU; שולח לי את `eval/results`. מדידת המנועים בדפדפן היא פעולה נפרדת (15.14), אחרי שהרתמה קיימת",
+   "time": "≈ 2 ש׳",
+   "minutes": 120,
+   "dep": [
+    "7.3"
+   ],
+   "priority": "P1"
+  },
+  {
+   "id": "15.11",
+   "title": "החלק שלך בסטי הזהב",
+   "details": "20 הקלטות + הסכמת CC0 (30 דק׳) · קבלת תנאים: FLORES+, Common Voice (15 דק׳) · הגהת 60 משפטי ניקוד + 50 זוגות שגיאות (1.5 ש׳) · 20 תיאורי תמונות כהפניה (45 דק׳; הדירוג של הפלט — 15.15, אחרי 6.6) · 30 שאילתות אישיות עם תיוג (1 ש׳) · 30 התקפות injection בעברית (45 דק׳) · 15 עמודים מצולמים (20 דק׳) · דירוג 50 תרגומים (45 דק׳) · 5 הקלטות פגישה קצרות (20 דק׳)",
+   "time": "≈ 6 ש׳",
+   "minutes": 360,
+   "dep": [],
+   "priority": "P1"
+  },
+  {
+   "id": "15.4",
+   "title": "פריסת שרתים",
+   "details": "signaling + collab (`fly deploy`), CORS proxy ל-git",
+   "time": "≈ 2 ש׳",
+   "minutes": 120,
+   "dep": [
+    "3.6",
+    "3.3"
+   ],
+   "priority": "P1"
+  },
+  {
+   "id": "15.5",
+   "title": "client IDs ל-Drive ו-Dropbox",
+   "details": "רק אם רוצים את הספקים האלה",
+   "time": "30 דק׳",
+   "minutes": 30,
+   "dep": [
+    "3.5"
+   ],
+   "priority": "P1"
+  },
+  {
+   "id": "15.6",
+   "title": "DSN לניטור",
+   "details": "רק אם רוצים",
+   "time": "10 דק׳",
+   "minutes": 10,
+   "dep": [
+    "12.4"
+   ],
+   "priority": "P1"
+  },
+  {
+   "id": "15.7",
+   "title": "חשבונות חתימה",
+   "details": "Windows, macOS, Google Play, App Store",
+   "time": "≈ 2 ש׳ שלך + ימים של אימות אצל החנויות",
+   "minutes": 120,
+   "dep": [],
+   "priority": "P1"
+  },
+  {
+   "id": "15.8",
+   "title": "בדיקות ידניות לשחרור",
+   "details": "שולחן העבודה: CSP, Graphviz / Python / OCR, כספת בתיקייה, ופתיחת הכספת ב-Obsidian",
+   "time": "≈ 1 ש׳",
+   "minutes": 60,
+   "dep": [
+    "2.1",
+    "4.2",
+    "4.3"
+   ],
+   "priority": "P1"
+  },
+  {
+   "id": "15.12",
+   "title": "שאר הבדיקות הידניות",
+   "details": "Safari, Word (RTL), עדכון אוטומטי",
+   "time": "≈ 2 ש׳",
+   "minutes": 120,
+   "dep": [
+    "9.8",
+    "11.5"
+   ],
+   "priority": "P1"
+  },
+  {
+   "id": "15.13",
+   "title": "בדיקות ידניות של P2",
+   "details": "כשהם מוכנים: LoRA על Mac (6.12), דירוג הקראה (6.2), כספת בתיקייה במובייל — קובץ שנערך באפליקציית ״קבצים״ מופיע ב-Lumen (4.20) · ניתוח נתונים מול מודל אמיתי (6.15, 20 שאלות זהב)",
+   "time": "≈ 1 ש׳",
+   "minutes": 75,
+   "dep": [
+    "6.12",
+    "6.2",
+    "4.20",
+    "6.15"
+   ],
+   "priority": "P2"
+  },
+  {
+   "id": "15.15",
+   "title": "דירוג תיאורי תמונות",
+   "details": "דירוג 1–5 לתיאורים שהמודל המקומי (6.6) הפיק על כל 50 התמונות (30 Crossmodal-3600 + 20 Commons), מול ההפניות — כולל אלה שהכנת ב-15.11",
+   "time": "≈ 30 דק׳",
+   "minutes": 45,
+   "dep": [
+    "6.6"
+   ],
+   "priority": "P1"
+  },
+  {
+   "id": "15.14",
+   "title": "מדידת מנועים בדפדפן",
+   "details": "`npm run bench:models` על מחשב עם GPU, אחרי שהרתמה (7.8) קיימת; שולח לי את `eval/bench`",
+   "time": "≈ 1 ש׳",
+   "minutes": 60,
+   "dep": [
+    "7.8"
+   ],
+   "priority": "P1"
+  },
+  {
+   "id": "15.9",
+   "title": "החלטה: הריפו ציבורי? + טוקן Hugging Face",
+   "details": "קובע איך שומרים את FLORES ואיפה מארחים מודלים מומרים (GitHub Releases או Hugging Face). טוקן HF כ-secret ב-GitHub — ה-workflow של סטי הזהב וההמרה רץ שם, כי בסביבה שלי אין גישה ל-HF; וגם `GOLDEN_SEED` — מחרוזת אקראית כ-secret, שבוחרת את פיצולי ה-test המוחזקים (7.1) כך שרק ה-CI רואה אותם",
+   "time": "≈ 20 דק׳",
+   "minutes": 20,
+   "dep": [],
+   "priority": "P1"
+  },
+  {
+   "id": "15.17",
+   "title": "בדיקת מודל אמיתי לפיצ׳רים של שלב 6",
+   "details": "אחרי ש-6.8 ו-6.9 נבנו: `npm run eval:agents -- --suite pdf-chat` ו-`npm run bench:fim` (p50 / p95 של השלמה מקומית) על Ollama במחשב עם GPU; שולח לי את הדוחות",
+   "time": "≈ 45 דק׳",
+   "minutes": 45,
+   "dep": [
+    "6.8",
+    "6.9"
+   ],
+   "priority": "P1"
+  },
+  {
+   "id": "15.16",
+   "title": "החלטות מוצר מה-PR-ים של 18.10",
+   "details": "(1) **#221:** שרת collab שמוקלד בזמן ריצה מתחבר רק אם הבנייה מכירה אותו (קודם — תמיד). מקובל? (2) **#221:** אין עדיין מסך לביטול ״תמיד לאפשר״ לשרתי תמונות — לבנות עכשיו או אחר כך? (3) **#223:** להשאיר את ה-commit שמוריד 19 KB מהטעינה הראשונה (ההמלצה שלי: כן) (4) **#223:** במצב הצעות (suggesting) שינוי מאושר של סוכן נכנס כשינוי מסומן ולא כעריכה ישירה — מקובל? (5) **#223:** `window.__lumen.agentReview` (רק מציע / מושך, לא מחיל) קיים גם בבנייה לייצור — להשאיר או רק בפיתוח ובבדיקות? (6) **#223:** שינוי של סוכן לקובץ פתוח נכנס לעורך ולא ישר לדיסק (השמירה כותבת אותו) — מקובל? (7) **#199:** האם לשער הרישיונות להכשיל מודלים ״מותנים״ (Llama, Gemma)? היום הם רק לא ברירת מחדל ומוצגים עם הרישיון שלהם (8) **#233 (Live JS):** כדי לסגור דליפת רשת ב-WebKit, קוד Live JS לא יכול יותר להשתמש ב-eval / new Function / timers עם מחרוזת, ולא במילה import בכלל (גם בהערה) — מקובל, או לחפש פתרון רך יותר? (9) **#239 — לבדוק ב-preview הראשון:** `vercel.json` הוחלף ב-`vercel.ts`; אם Vercel מתעלם ממנו לא יהיו כותרות אבטחה. בדיקה: `curl -sI <preview>/ | grep -i content-security` (10) **Dependabot ״high״ ב-main** — לא נמצא ב-npm audit ולא ב-cargo audit; לבדוק בלשונית Security (אולי glib 0.18.5) (11) **ממצאי Codex P2 שנשארו פתוחים בכוונה** (כלי פיתוח, לא מוצר; אחרי 3 סבבים): #199 ×2, #201 ×2, #202 ×2, #204 ×2, #210 ×2, #211 ×2, #225 ×2 — לתקן אחרי המיזוג או לסגור; ועוד 5 שנדחו כי דורשים PR-ים מ-fork (#201, #204, #211); P2 שנשארו מסבב 3 במוצר: #218 ×1 (החזרה שמרנית לרשימת הביטול), #231 ×2 (עמודת boolean ריקה, רשימות שמתאחדות בעמודה אחת), #232 ×1 (השלמה בזמן הקלדה שומרת רק 30 השלמות נפוצות), #235 ×3 (שמירה בין הבדיקה למעבר, כפילות בסל, פתיחה מחדש של אותה תיקייה) — אף אחד לא מאבד נתונים; ובדיקה ידנית: פתקים עם שם בעברית בתיקייה ב-Chrome רגיל; #238 ×3 (fence שלא נסגר, escapes ב-WYSIWYG, כותרת setext על כמה שורות)",
+   "time": "≈ 20 דק׳",
+   "minutes": 30,
+   "dep": [],
+   "priority": "P1"
+  },
+  {
+   "id": "15.10",
+   "title": "החלטות רישוי",
+   "details": "(1) eSpeak NG (GPL) כ-worker נפרד שמורד ביוזמת המשתמש — מותר? (2) citeproc (CPAL / AGPL) עם ייחוס, או תבניות ציטוט משלנו? (3) Hspell: להשאיר הורדה ביוזמת המשתמש או לבקש רישיון מסחרי במייל? (4) מייל למחבר BlueTTS על רישיון נתוני האימון (5) **קנבס:** לקנות רישיון מסחרי מ-tldraw, או לעבור ל-Excalidraw (MIT) — ההמלצה שלי: לעבור (6) **R חי (webR):** הבינארים GPL-3.0 ונשלחים בבנייה — להפוך להורדה ביוזמת המשתמש, או להסיר בלוקי R (חריגה בשער עד 15.11) (7) **COOP/COEP בתמונת ה-deploy:** להשאיר (חוסם הטמעות בלי COEP) או להוריד? (#207) (8) ✅ **הסכמת רשת לכלי סוכנים — הוחלט 18.10: לכל קריאה** (מיושם ב-#205) (9) **״מקומי בלבד״ ושירות המחקר שמתארח אצלך:** כרגע הקליפר מסרב לכל כתובת תחת מקומי-בלבד (גם דרך ה-extractor, #212), אבל חיפוש SearXNG מקומי עדיין מותר — ושניהם שולחים בקשה לאתר חיצוני. לחסום גם את החיפוש, או להתיר את שניהם כשהשירות שלך?",
+   "time": "≈ 40 דק׳ + מיילים",
+   "minutes": 40,
+   "dep": [],
+   "priority": "P1"
+  }
+ ]
+}

@@ -1,0 +1,1139 @@
+<title>לוח משימות Lumen</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+:root{--bg:#f6f7f4;--card:#fff;--fg:#1c2421;--muted:#5d6a64;--line:#dfe4df;--accent:#1f7a4d;--accent-bg:#e3f3ea;--now:#b4610b;--now-bg:#fdf0dd;--new:#2f5fb3;--new-bg:#e6eefb;--tal:#8a3fa0;--tal-bg:#f4e8f7;--soft:#f1f3f0;color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#121715;--card:#1a211e;--fg:#e8eeea;--muted:#9aa8a1;--line:#2b3531;--accent:#5fd39a;--accent-bg:#173226;--now:#f2a54a;--now-bg:#3a2a14;--new:#8db4ff;--new-bg:#1b2a45;--tal:#dba3ec;--tal-bg:#33203a;--soft:#161c19;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#121715;--card:#1a211e;--fg:#e8eeea;--muted:#9aa8a1;--line:#2b3531;--accent:#5fd39a;--accent-bg:#173226;--now:#f2a54a;--now-bg:#3a2a14;--new:#8db4ff;--new-bg:#1b2a45;--tal:#dba3ec;--tal-bg:#33203a;--soft:#161c19;color-scheme:dark}
+body{background:var(--bg);color:var(--fg);font-family:Heebo,"Segoe UI",Arial,sans-serif;font-size:15px;line-height:1.55;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:24px 48px}
+.wrap{max-width:1000px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
+h1{font-size:28px;font-weight:800;margin:0;text-wrap:balance}
+.sub{color:var(--muted);margin:4px 0 0;max-width:72ch}
+code,.mono{font-family:"JetBrains Mono",ui-monospace,monospace;font-size:12px;direction:ltr;unicode-bidi:isolate}
+code{background:var(--soft);border:1px solid var(--line);border-radius:5px;padding:0 4px;overflow-wrap:anywhere}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px;min-width:0}
+.stat b{display:block;font-size:22px;font-weight:800}
+.stat span{color:var(--muted);font-size:13px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.card>header{display:flex;flex-wrap:wrap;align-items:center;gap:6px 14px;padding:14px 18px;border-bottom:1px solid var(--line)}
+.card h2{font-size:18px;margin:0;font-weight:700;flex:1 1 260px;min-width:0;text-wrap:balance}
+.num{display:inline-grid;place-items:center;min-width:30px;height:30px;padding:0 4px;border-radius:8px;background:var(--fg);color:var(--bg);font-weight:800;margin-inline-end:8px}
+.when{color:var(--muted);font-size:13px}
+.target{padding:10px 18px;background:var(--accent-bg);font-size:13.5px;border-bottom:1px solid var(--line)}
+.target b{color:var(--accent)}
+.why{padding:8px 18px;color:var(--muted);font-size:13px;border-bottom:1px solid var(--line)}
+.rules{margin:0;padding:12px 18px 16px;padding-inline-start:36px;display:flex;flex-direction:column;gap:6px;font-size:14px}
+details.task{border-bottom:1px solid var(--line)}
+details.task:last-child{border-bottom:0}
+details.task>summary{list-style:none;cursor:pointer;display:grid;grid-template-columns:52px minmax(0,1fr) auto;gap:4px 12px;padding:10px 18px;align-items:start}
+details.task>summary::-webkit-details-marker{display:none}
+details.task>summary:hover,details.task[open]>summary{background:var(--soft)}
+.tid{font-weight:800}
+.tt{min-width:0}
+.meta{display:block;color:var(--muted);font-size:12px;margin-top:2px}
+.est{font-weight:700;white-space:nowrap;text-align:end}
+.dt{display:block;color:var(--muted);font-size:12px;font-weight:400}
+.body{padding:4px 18px 14px;padding-inline-start:70px;display:flex;flex-direction:column;gap:10px;min-width:0}
+ol.steps{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:5px;font-size:14px}
+ol.steps li{display:grid;grid-template-columns:48px minmax(0,1fr);gap:4px}
+ol.steps b{color:var(--muted);font-weight:600}
+.ok{background:var(--accent-bg);border-radius:10px;padding:8px 12px;font-size:13.5px}
+.ok b{color:var(--accent)}
+.ok ul{margin:4px 0 0;padding-inline-start:18px}
+.pill{font-size:11px;font-weight:700;padding:1px 7px;border-radius:999px;margin-inline-start:6px;white-space:nowrap}
+.p-now{background:var(--now-bg);color:var(--now)}
+.p-new{background:var(--new-bg);color:var(--new)}
+.p-tal{background:var(--tal-bg);color:var(--tal)}
+.p-p0{background:var(--fg);color:var(--bg)}
+.p-p1{background:var(--accent-bg);color:var(--accent)}
+.p-p2{background:var(--soft);color:var(--muted);border:1px solid var(--line)}
+.tbl{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+th,td{text-align:start;padding:8px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:12px;color:var(--muted);font-weight:600}
+tr:last-child td{border-bottom:0}
+td.ids{font-family:"JetBrains Mono",ui-monospace,monospace;font-size:12px;line-height:1.7;min-width:220px}
+.ms td:first-child{font-weight:800}
+@media (max-width:600px){h1{font-size:23px}details.task>summary{grid-template-columns:44px minmax(0,1fr)}.est{grid-column:2;text-align:start}.body{padding-inline-start:18px}}
+</style>
+<div class="wrap" dir="rtl" lang="he">
+<div><h1>לוח משימות Lumen — תוכנית v5</h1><p class="sub">עודכן א׳ 18.10 15:20 · שעון ישראל · כל משימה נפתחת לתתי-שלבים ולקריטריוני קבלה מדידים. ✅ רק כשהקריטריונים נמדדו. שעות לכל משימה = תזמון רציף של 4 מסלולים; אבני הדרך גם עם מרווח 35%.</p></div>
+<div class="stats">
+<div class="stat"><b>144</b><span>משימות ב-15 שלבים · 43 חדשות ב-v5</span></div>
+<div class="stat"><b>430 ש׳</b><span>עבודה שנותרה, ב-4 מסלולים מקבילים · 44 משימות בוצעו</span></div>
+<div class="stat"><b>ה׳ 22.10 22:15</b><span>גרסה ראשונה לשחרור (כל ה-P0) · עם מרווח: שבת 24.10 12:50</span></div>
+<div class="stat"><b>ב׳ 26.10 05:45</b><span>הכול גמור · עם מרווח: ה׳ 29.10 00:09</span></div>
+<div class="stat"><b>17 פעולות · 21 ש׳ 20 דק׳</b><span>מחכות לך (שלב 15) · 7 מהן לפני השחרור</span></div>
+</div>
+<section class="card"><header><h2>אבני דרך</h2></header><div class="tbl"><table class="ms"><thead><tr><th>#</th><th>אבן דרך</th><th>בתזמון</th><th>עם מרווח 35%</th></tr></thead><tbody>
+<tr><td>1</td><td>כל הממצאים סגורים וכלי ה-P0 של שלב 0 עובדים</td><td>א׳ 18.10 15:30</td><td>א׳ 18.10 18:07</td></tr>
+<tr><td>2</td><td>שלב 1 גמור — כל ✅ עובר DoD</td><td>א׳ 18.10 16:00</td><td>א׳ 18.10 18:48</td></tr>
+<tr><td>3</td><td>יסודות ניהול הידע (P0 של שלב 4)</td><td>ב׳ 19.10 16:00</td><td>ג׳ 20.10 03:12</td></tr>
+<tr><td>4</td><td>גרסה ראשונה לשחרור — כל ה-P0 + ביקורת עצמאית</td><td>ה׳ 22.10 22:15</td><td>שבת 24.10 12:50</td></tr>
+<tr><td>5</td><td>הכול גמור + ביקורת מול יעדי §14</td><td>ב׳ 26.10 05:45</td><td>ה׳ 29.10 00:09</td></tr>
+</tbody></table></div></section>
+<section class="card"><header><h2>איך התוכנית רצה</h2></header><ol class="rules">
+<li><b>4 מסלולים במקביל</b> — D תשתית וביצועים · S נתונים ואבטחה · A AI וסוכנים · U ממשק, עברית וידע. כל מסלול רץ ב-worktree משלו; אני ממזג, בודק, פותח PR ועונה ל-review.</li>
+<li><b>קבוצות קונפליקט</b> — משימות שנוגעות באותם קבצים חמים לא רצות במקביל, גם במסלולים שונים.</li>
+<li><b>הגדרת סיום</b> — קוד + בדיקות, כל קריטריון קבלה נמדד אוטומטית, CI ירוק, כל ממצא review סגור, עמוד תיעוד לפיצ'ר חדש, המסמכים עודכנו.</li>
+<li><b>הערכות</b> — 0.45 × אמצע הטווח של מפתח אנושי (מחקר הפערים); מכויל מחדש אחרי שלב 0 לפי שעות אמת.</li>
+<li><b>הפעולות שלך מתוזמנות</b> — בהנחה של ערבים 20:00–23:00 (תגיד אם אחרת). השחרור מחכה ל-15.1, 15.3, 15.4, 15.8, 15.9, 15.10, 15.11.</li>
+<li><b>✅ / ✅* / ⏳ / ⬜</b> — ✅* = עובד מול mocks בלבד; הופך ל-✅ אחרי מודל אמיתי (זעיר ב-CI או אצלך).</li>
+<li><b>מודלים</b> — רק עם רישיון מסחרי מאומת. spike לפני כל מודל: נטען? גודל? איכות על סט מוחזק? אחרת — החלופה הרשומה.</li>
+<li><b>סטי זהב מוחזקים</b> — נבנים ומוקפאים על ידי סוכן שלא מממש, לפני המימוש.</li>
+<li><b>קו חיתוך</b> — אבן דרך 4 מאחרת ביותר מ-12 שעות → כל ה-P2 לאחרי השחרור הראשון. שום P0/P1 לא תלויה ב-P2 (נבדק בסקריפט).</li></ol></section>
+<section class="card"><header><h2>ציר זמן לפי מסלול</h2></header><div class="tbl"><table><thead><tr><th>מסלול</th><th>סדר המשימות</th><th>עבודה</th><th>סיום</th></tr></thead><tbody>
+<tr><td><b>D</b> · תשתית וביצועים</td><td class="ids">0.2 ← 0.3 ← 1.1 ← 0.4 ← 0.5 ← 0.6 ← 0.7 ← 0.11 ← 0.13 ← 0.14 ← 0.18 ← 1.8 ← 2.8 ← 6.0 ← 7.1 ← 7.10 ← 8.1 ← 8.2 ← 8.3 ← 7.2 ← 13.5 ← 0.15 ← 0.16 ← 0.19 ← 0.21 ← 4.16 ← 4.17 ← 4.18 ← 8.4 ← 8.5 ← 10.3 ← 10.4 ← 12.1 ← 12.2 ← 7.8 ← 13.2 ← 13.3 ← 13.4 ← 13.7 ← 14.2 ← 14.3 ← 14.4 ← 14.5 ← 13.6</td><td>111 ש׳ 30 דק׳</td><td>ב׳ 26.10 05:45</td></tr>
+<tr><td><b>S</b> · נתונים ואבטחה</td><td class="ids">0.10 ← 0.12 ← 0.17 ← 1.6 ← 2.1 ← 2.2 ← 2.3 ← 2.4 ← 2.5 ← 3.1 ← 3.2 ← 3.3 ← 3.6 ← 4.1 ← 4.2 ← 4.3 ← 4.4 ← 2.7 ← 3.7 ← 2.6 ← 3.4 ← 3.5 ← 0.20 ← 4.15 ← 6.12 ← 7.5 ← 11.5 ← 12.4 ← 4.13 ← 11.4 ← 4.20</td><td>100 ש׳ 00 דק׳</td><td>א׳ 25.10 16:45</td></tr>
+<tr><td><b>A</b> · AI וסוכנים</td><td class="ids">1.3 ← 1.4 ← 1.7 ← 5.1 ← 6.1 ← 4.19 ← 5.2 ← 5.3 ← 5.4 ← 5.5 ← 6.5 ← 6.4 ← 6.17 ← 7.3 ← 7.9 ← 4.11 ← 4.14 ← 5.6 ← 5.7 ← 5.8 ← 5.10 ← 5.11 ← 6.2 ← 6.3 ← 6.6 ← 6.8 ← 6.9 ← 6.7 ← 6.11 ← 6.14 ← 6.15 ← 6.16 ← 7.6 ← 7.7 ← 9.4</td><td>112 ש׳ 00 דק׳</td><td>שבת 24.10 18:00</td></tr>
+<tr><td><b>U</b> · ממשק, עברית וידע</td><td class="ids">0.1 ← 0.8 ← 0.9 ← 1.2 ← 1.5 ← 1.9 ← 4.5 ← 4.7 ← 4.9 ← 4.10 ← 9.1 ← 10.1 ← 4.12 ← 10.2 ← 13.1 ← 6.10 ← 4.6 ← 4.8 ← 5.9 ← 6.13 ← 9.2 ← 9.3 ← 9.6 ← 9.7 ← 9.8 ← 11.2 ← 12.3 ← 14.1 ← 11.1 ← 7.4 ← 11.3 ← 9.5 ← 9.9 ← 14.6</td><td>106 ש׳ 45 דק׳</td><td>א׳ 25.10 12:15</td></tr>
+</tbody></table></div></section>
+<section class="card" id="p0"><header><h2><span class="num">0</span>יסודות ואוטומציה שחוסכים זמן</h2><span class="when">21 משימות · 13 ש׳ 00 דק׳ · א׳ 18.10 08:00 ← ו׳ 23.10 03:45</span></header>
+<div class="target"><b>יעד world class:</b> 4 מסלולים במקביל בלי התנגשויות; סטטוס התוכנית מתעדכן מהקוד; CI יציב בלי ניסיונות חוזרים; אף ✅ בלי בדיקת סיום ירוקה</div>
+<div class="why">כל משימה אחרי השלב הזה זולה ובטוחה יותר. החיסכון המשוער (נספח 17) גדול פי 9 מהמאמץ.</div>
+<details class="task"><summary><span class="tid">0.1</span><span class="tt">כלי מסלולים מקבילים ופרוטוקול<span class="pill p-now">✅ #202</span><span class="pill p-new">חדש</span><span class="pill p-p0">P0</span><span class="meta">U · ממשק, עברית וידע · <span class="mono">chore/lanes</span></span></span><span class="est">בוצע (הוערך 45 דק׳)<span class="dt"></span></span></summary>
+<div class="body"><ol class="steps">
+<li><b>0.1.1</b><span><code>scripts/lane.sh &lt;name&gt; &lt;base&gt;</code>: worktree, symlink ל-node_modules, <code>playwright.local.config.ts</code>, tsc ראשוני</span></li>
+<li><b>0.1.2</b><span><code>docs/dev/lanes.md</code>: גבולות קבצים לכל מסלול (קבוצות קונפליקט), פורמט commit, טבלת החלטות לדוח</span></li>
+<li><b>0.1.3</b><span>חבילות חדשות: במסלול רק <code>npm install &lt;pkg&gt; --package-lock-only</code>; ההתקנה האמיתית אצל המתאם אחרי מיזוג</span></li>
+<li><b>0.1.4</b><span><code>scripts/lane-merge.sh</code>: מיזוג ענפים לענף אחד, יצירה מחדש של package-lock בקונפליקט, ואז tsc + vitest</span></li>
+</ol><div class="ok"><b>קבלה (נמדד):</b><ul><li>מסלול חדש מוכן בפקודה אחת</li><li>מיזוג 4 ענפים כולל lockfile בלי התערבות ידנית</li></ul></div><div class="meta">מקור: תהליך</div></div></details>
+<details class="task"><summary><span class="tid">0.2</span><span class="tt">לפצל את useCommands.ts לפי תחומים<span class="pill p-now">✅ #208</span><span class="pill p-p0">P0</span><span class="meta">D · תשתית וביצועים · תלוי ב-1.1 · <span class="mono">refactor/commands-domains</span></span></span><span class="est">בוצע (הוערך 3 ש׳ 00 דק׳)<span class="dt"></span></span></summary>
+<div class="body"><ol class="steps">
+<li><b>0.2.1</b><span>snapshot של מזהי הפקודות, כותרות ו-keybindings (<code>commandIds.snapshot.json</code>)</span></li>
+<li><b>0.2.2</b><span>12 קובצי תחום ב-<code>src/commands/domains/</code> (file, edit, view, ai, research, vault, git, collab, export, voice, tools, settings)</span></li>
+<li><b>0.2.3</b><span><code>useCommands.ts</code> = רכב של עד 150 שורות; תחומים כבדים בעצלות</span></li>
+<li><b>0.2.4</b><span>בדיקה: סט המזהים זהה ל-snapshot</span></li>
+<li><b>0.2.5</b><span>מדידת chunk ההפעלה לפני/אחרי</span></li>
+</ol><div class="ok"><b>קבלה (נמדד):</b><ul><li>אין קובץ ב-<code>src/commands</code> מעל 500 שורות</li><li>snapshot זהה</li><li>סכום chunks ההפעלה לא גדל</li></ul></div><div class="meta">מקור: C2, O1, T38</div></div></details>
+<details class="task"><summary><span class="tid">0.3</span><span class="tt">לפצל את קובצי התרגום לפי תחום<span class="pill p-new">חדש</span><span class="pill p-p0">P0</span><span class="meta">D · תשתית וביצועים · תלוי ב-0.2 · <span class="mono">refactor/i18n-namespaces</span></span></span><span class="est">2 ש׳ 30 דק׳<span class="dt">א׳ 18.10 08:00 – 10:30</span></span></summary>
+<div class="body"><ol class="steps">
+<li><b>0.3.1</b><span><code>locales/&lt;lang&gt;/&lt;domain&gt;.json</code> במקום קובץ אחד לשפה</span></li>
+<li><b>0.3.2</b><span>טעינה עצלה לפי תחום</span></li>
+<li><b>0.3.3</b><span>extract-i18n-keys ושער הערכים עובדים על המבנה החדש</span></li>
+<li><b>0.3.4</b><span>האנגלית שיושבת היום inline ב-<code>src/i18n/index.ts</code> (1,672 שורות) עוברת ל-<code>locales/en/&lt;domain&gt;.json</code> שנטען סינכרונית ב-bundle; רק שאר השפות בעצלות — כך <code>t()</code> נשאר סינכרוני</span></li>
+</ol><div class="ok"><b>קבלה (נמדד):</b><ul><li>שני מסלולים שמוסיפים מפתחות בתחומים שונים — 0 קונפליקטים</li></ul></div><div class="meta">מקור: חיסכון בזמן</div></div></details>
+<details class="task"><summary><span class="tid">0.4</span><span class="tt">ESLint עם baseline<span class="pill p-p0">P0</span><span class="meta">D · תשתית וביצועים · תלוי ב-0.2 · <span class="mono">chore/eslint</span></span></span><span class="est">2 ש׳ 00 דק׳<span class="dt">א׳ 18.10 10:30 – 12:30</span></span></summary>
+<div class="body"><ol class="steps">
+<li><b>0.4.1</b><span>flat config: typescript-eslint, react-hooks (rules-of-hooks = error), no-floating-promises</span></li>
+<li><b>0.4.2</b><span>כלל: catch ריק חייב <code>// why:</code></span></li>
+<li><b>0.4.3</b><span>baseline לקיים; קוד חדש/משתנה נקי (בדיקה על diff)</span></li>
+<li><b>0.4.4</b><span><code>npm run lint</code> + job ב-CI</span></li>
+</ol><div class="ok"><b>קבלה (נמדד):</b><ul><li>rules-of-hooks: 0 הפרות</li><li>PR עם catch ריק בלי הסבר נכשל</li></ul></div><div class="meta">מקור: E1, E2, O4 · היה 0.3</div></div></details>
+<details class="task"><summary><span class="tid">0.5</span><span class="tt">CI יציב: retries 0<span class="pill p-now">✅ #234 (3 לילות רצופים — אחרי המיזוג)</span><span class="pill p-p0">P0</span><span class="meta">D · תשתית וביצועים · תלוי ב-0.1 · <span class="mono">chore/ci-stable</span></span></span><span class="est">בוצע (הוערך 3 ש׳ 00 דק׳)<span class="dt"></span></span></summary>
+<div class="body"><ol class="steps">
+<li><b>0.5.1</b><span>להסיר את ה-<code>waitForTimeout</code> האחרון</span></li>
+<li><b>0.5.2</b><span>לשורש את ה-flakes הידועים (zip, גלריה ב-Firefox, live-ruby ב-WebKit, OPFS ב-WebKit)</span></li>
+<li><b>0.5.3</b><span><code>e2e:flake --all --times 5</code> בכל לילה ב-3 דפדפנים (0.11)</span></li>
+<li><b>0.5.4</b><span><code>retries: 0</code> ב-CI</span></li>
+</ol><div class="ok"><b>קבלה (נמדד):</b><ul><li>0 <code>waitForTimeout</code></li><li><code>retries: 0</code></li><li>3 לילות רצופים: 0 flakes (נמדד אחרי המשימה — עד אז ⏳)</li></ul></div><div class="meta">מקור: E3, P2, P4 · היה 0.4</div></div></details>
+<details class="task"><summary><span class="tid">0.6</span><span class="tt">התוכנית כנתונים בריפו<span class="pill p-new">חדש</span><span class="pill p-p0">P0</span><span class="meta">D · תשתית וביצועים · תלוי ב-0.1 · <span class="mono">chore/plan-data</span></span></span><span class="est">1 ש׳ 30 דק׳<span class="dt">א׳ 18.10 12:30 – 14:00</span></span></summary>
+<div class="body"><ol class="steps">
+<li><b>0.6.1</b><span>מחולל ב-<code>scripts/plan/build.mjs</code>, מקור יחיד <code>plan/plan.json</code></span></li>
+<li><b>0.6.2</b><span><code>npm run plan</code> מייצר את הלוח ב-MASTER_PLAN.md ואת ה-HTML</span></li>
+<li><b>0.6.3</b><span>שעות אמת מ-commit ראשון/אחרון של הענף</span></li>
+<li><b>0.6.4</b><span>בדיקת CI שהמסמך תואם</span></li>
+</ol><div class="ok"><b>קבלה (נמדד):</b><ul><li>עדכון סטטוס = שורה אחת</li><li>CI נכשל כשהמסמך לא תואם</li></ul></div><div class="meta">מקור: תהליך · היה 0.5</div></div></details>
+<details class="task"><summary><span class="tid">0.7</span><span class="tt">בודק סיום (DoD)<span class="pill p-new">חדש</span><span class="pill p-p0">P0</span><span class="meta">D · תשתית וביצועים · תלוי ב-0.6 · <span class="mono">chore/dod</span></span></span><span class="est">1 ש׳ 30 דק׳<span class="dt">א׳ 18.10 14:00 – 15:30</span></span></summary>
+<div class="body"><ol class="steps">
+<li><b>0.7.1</b><span><code>scripts/dod.mjs &lt;task&gt;</code> מריץ את פקודות הקבלה מ-plan.json</span></li>
+<li><b>0.7.2</b><span>✅ רק עם DoD ירוק; ✅* = ירוק מול mocks בלבד</span></li>
+<li><b>0.7.3</b><span>תבנית PR עם רשימת DoD שמתמלאת אוטומטית</span></li>
+<li><b>0.7.4</b><span>job ב-CI לכל משימה מסומנת ✅</span></li>
+</ol><div class="ok"><b>קבלה (נמדד):</b><ul><li>אי אפשר לסמן ✅ בלי DoD ירוק</li><li>15 ה-✅ הקיימים עוברים DoD או יורדים ל-⏳</li></ul></div><div class="meta">מקור: נספח 16 · היה 0.6</div></div></details>
+<details class="task"><summary><span class="tid">0.8</span><span class="tt">סוכן review-triage ומענה<span class="pill p-now">✅ #203</span><span class="pill p-new">חדש</span><span class="pill p-p0">P0</span><span class="meta">U · ממשק, עברית וידע · תלוי ב-0.1 · <span class="mono">chore/review-tools</span></span></span><span class="est">בוצע (הוערך 1 ש׳ 15 דק׳)<span class="dt"></span></span></summary>
+<div class="body"><ol class="steps">
+<li><b>0.8.1</b><span><code>scripts/review-triage.mjs</code>: כל השרשורים הפתוחים בכל ה-PR-ים, P1/P2, קובץ, outdated</span></li>
+<li><b>0.8.2</b><span>חלוקה מוצעת למסלולים</span></li>
+<li><b>0.8.3</b><span><code>scripts/review-reply.mjs &lt;decisions.tsv&gt;</code>: מענה + סגירה; dry-run כברירת מחדל</span></li>
+</ol><div class="ok"><b>קבלה (נמדד):</b><ul><li>הרצה אחת מחזירה את כל הממצאים הפתוחים</li><li>מענה וסגירה של 90 שרשורים בפקודה אחת</li></ul></div><div class="meta">מקור: נספח 16.1 · היה 0.7</div></div></details>
+<details class="task"><summary><span class="tid">0.9</span><span class="tt">סוכן ci-doctor<span class="pill p-now">✅ #204</span><span class="pill p-new">חדש</span><span class="pill p-p0">P0</span><span class="meta">U · ממשק, עברית וידע · תלוי ב-0.1 · <span class="mono">chore/ci-doctor</span></span></span><span class="est">בוצע (הוערך 45 דק׳)<span class="dt"></span></span></summary>
+<div class="body"><ol class="steps">
+<li><b>0.9.1</b><span><code>scripts/ci-doctor.mjs &lt;branch|pr&gt;</code>: ריצה אחרונה, jobs/steps שנכשלו, annotations</span></li>
+<li><b>0.9.2</b><span>היסטוריית אותה בדיקה בענפים אחרים → flake או אמיתי</span></li>
+<li><b>0.9.3</b><span>הצעת פעולה</span></li>
+</ol><div class="ok"><b>קבלה (נמדד):</b><ul><li>על כשל ה-zip של #189 מזהה ״עבר ב-#191 באותו קוד״</li></ul></div><div class="meta">מקור: תהליך · היה 0.8</div></div></details>
+<details class="task"><summary><span class="tid">0.10</span><span class="tt">שער רישיונות למודלים, נתונים וחבילות<span class="pill p-now">✅ #199</span><span class="pill p-new">חדש</span><span class="pill p-p0">P0</span><span class="meta">S · נתונים ואבטחה · תלוי ב-0.1 · <span class="mono">chore/license-gate</span></span></span><span class="est">בוצע (הוערך 2 ש׳ 00 דק׳)<span class="dt"></span></span></summary>
+<div class="body"><ol class="steps">
+<li><b>0.10.1</b><span><code>models/registry.json</code>: מקור, רישיון, גודל, שפות, מסחרי?, איפה רץ</span></li>
+<li><b>0.10.2</b><span><code>scripts/licenses.mjs</code>: license-checker + registry + סטים ב-<code>eval/golden</code></span></li>
+<li><b>0.10.3</b><span>חסימה ב-CI: NC, AGPL, GPL שנכנס ל-bundle, רישיונות מחקר (למשל Qwen2.5 3B)</span></li>
+<li><b>0.10.4</b><span>סריקת tarballs לרכיבים נסתרים: <code>phonemizer</code> מתויג Apache אבל כולל eSpeak NG (GPL-3.0); citeproc = CPAL / AGPL</span></li>
+<li><b>0.10.5</b><span>מראה ONNX בלי רישיון → נרשם רישיון מודל הבסיס + קישור</span></li>
+<li><b>0.10.6</b><span>חריגות מתועדות (Hspell = הורדה ביוזמת המשתמש, החלטה 15.10)</span></li>
+</ol><div class="ok"><b>קבלה (נמדד):</b><ul><li>כל מודל, סט וחבילה רשומים</li><li>רישיון אסור נחסם ב-CI, כולל תלות עקיפה</li></ul></div><div class="meta">מקור: T28, נספח 18 R3, נספח 19 · היה 0.9</div></div></details>
+<details class="task"><summary><span class="tid">0.11</span><span class="tt">ריצות לילה אוטונומיות<span class="pill p-now">✅ #245 (הריצות המתוזמנות — אחרי המיזוג)</span><span class="pill p-new">חדש</span><span class="pill p-p0">P0 (נדרש ל-P0)</span><span class="meta">D · תשתית וביצועים · תלוי ב-0.5, 0.8 · <span class="mono">chore/nightly</span></span></span><span class="est">בוצע (הוערך 1 ש׳ 00 דק׳)<span class="dt"></span></span></summary>
+<div class="body"><ol class="steps">
+<li><b>0.11.1</b><span>e2e ×5 ב-3 דפדפנים → דוח flakes</span></li>
+<li><b>0.11.2</b><span>Lighthouse desktop + mobile (חציון של 3) → מגמה</span></li>
+<li><b>0.11.3</b><span>review-triage → דוח</span></li>
+<li><b>0.11.4</b><span>שבועי: audit, outdated, רישיונות, mutation</span></li>
+<li><b>0.11.5</b><span>דוחות ל-<code>reports/</code> ותקציר אחד לטל</span></li>
+</ol><div class="ok"><b>קבלה (נמדד):</b><ul><li>4 ריצות מתוזמנות מייצרות דוח בלי התערבות</li></ul></div><div class="meta">מקור: תהליך · היה 0.10</div></div></details>
+<details class="task"><summary><span class="tid">0.12</span><span class="tt">restack אוטומטי<span class="pill p-now">✅ #201</span><span class="pill p-new">חדש</span><span class="pill p-p0">P0</span><span class="meta">S · נתונים ואבטחה · תלוי ב-0.1 · <span class="mono">chore/stack</span></span></span><span class="est">בוצע (הוערך 45 דק׳)<span class="dt"></span></span></summary>
+<div class="body"><ol class="steps">
+<li><b>0.12.1</b><span>GitHub stacked PRs (GA מ-6.10.2026 לפי ה-Changelog של GitHub): <code>gh extension install github/gh-stack</code> + <code>gh skill install github/gh-stack</code> לסוכנים</span></li>
+<li><b>0.12.2</b><span><code>scripts/stack.mjs</code> רק עוטף את <code>gh stack</code> (list / sync / submit) ובודק שה-CI הופעל לכל שכבה</span></li>
+<li><b>0.12.3</b><span>אחרי מיזוג המחסנית (15.1) — כל שלב רב-PR עובר דרך <code>gh stack</code></span></li>
+</ol><div class="ok"><b>קבלה (נמדד):</b><ul><li>תיקון בשכבה אמצעית מתגלגל לכל השכבות שמעליה בפקודה אחת</li></ul></div><div class="meta">מקור: תהליך · היה 0.11</div></div></details>
+<details class="task"><summary><span class="tid">0.13</span><span class="tt">מחולל מסירה (handoff)<span class="pill p-now">✅ #211</span><span class="pill p-new">חדש</span><span class="pill p-p0">P0</span><span class="meta">D · תשתית וביצועים · תלוי ב-0.1 · <span class="mono">chore/handoff</span></span></span><span class="est">בוצע (הוערך 45 דק׳)<span class="dt"></span></span></summary>
+<div class="body"><ol class="steps">
+<li><b>0.13.1</b><span><code>scripts/handoff.mjs</code>: ענפים, worktrees, PR-ים + CI + ממצאים, המשימה הנוכחית, פקודות להמשך</span></li>
+<li><b>0.13.2</b><span>נכתב ל-<code>docs/dev/HANDOFF.md</code> ולמסמך הפרויקט בסוף כל PR</span></li>
+<li><b>0.13.3</b><span>בודק שכל ענף ו-worktree שמוזכרים קיימים</span></li>
+</ol><div class="ok"><b>קבלה (נמדד):</b><ul><li>סוכן חדש מבצע את הצעד הבא נכון מהמסמך בלבד</li></ul></div><div class="meta">מקור: נספח 18 R9 · היה 0.12</div></div></details>
+<details class="task"><summary><span class="tid">0.14</span><span class="tt">CI מקומי בפקודה אחת<span class="pill p-now">✅ #210</span><span class="pill p-new">חדש</span><span class="pill p-p0">P0</span><span class="meta">D · תשתית וביצועים · תלוי ב-0.1 · <span class="mono">chore/ci-local</span></span></span><span class="est">בוצע (הוערך 1 ש׳ 00 דק׳)<span class="dt"></span></span></summary>
+<div class="body"><ol class="steps">
+<li><b>0.14.1</b><span><code>npm run ci:local</code>: tsc, lint, vitest, budget, i18n, hygiene, e2e Chromium על build — כמו ב-CI</span></li>
+<li><b>0.14.2</b><span><code>--changed</code>: רק מה שמושפע מה-diff</span></li>
+<li><b>0.14.3</b><span>hook לפני push (רשות)</span></li>
+</ol><div class="ok"><b>קבלה (נמדד):</b><ul><li>ב-20 ה-PR-ים הבאים: 0 כישלונות CI שה-CI המקומי היה תופס (נמדד אחרי המשימה — ⏳ עד אז)</li></ul></div><div class="meta">מקור: תהליך · היה 0.13</div></div></details>
+<details class="task"><summary><span class="tid">0.15</span><span class="tt">mutation testing למודולים קריטיים<span class="pill p-new">חדש</span><span class="pill p-p1">P1</span><span class="meta">D · תשתית וביצועים · תלוי ב-0.5 · <span class="mono">chore/mutation</span></span></span><span class="est">3 ש׳ 00 דק׳<span class="dt">ה׳ 22.10 22:15 – ו׳ 23.10 01:15</span></span></summary>
+<div class="body"><ol class="steps">
+<li><b>0.15.1</b><span>Stryker על storage/, agents/runtime, text/hebrew, lib/secretStore, renderer/rehypeSanitizeRaw</span></li>
+<li><b>0.15.2</b><span>ריצה שבועית (0.11)</span></li>
+<li><b>0.15.3</b><span>בדיקות חדשות לכל מוטציה ששורדת במודול אבטחה</span></li>
+</ol><div class="ok"><b>קבלה (נמדד):</b><ul><li>mutation score ≥ 70% במודולים הקריטיים</li></ul></div><div class="meta">מקור: איכות הבדיקות · היה 0.14</div></div></details>
+<details class="task"><summary><span class="tid">0.16</span><span class="tt">knip: קוד מת ותלויות מיותרות<span class="pill p-new">חדש</span><span class="pill p-p1">P1</span><span class="meta">D · תשתית וביצועים · תלוי ב-0.4 · <span class="mono">chore/knip</span></span></span><span class="est">30 דק׳<span class="dt">ו׳ 23.10 01:15 – 01:45</span></span></summary>
+<div class="body"><ol class="steps">
+<li><b>0.16.1</b><span>knip על קבצים, exports ותלויות</span></li>
+<li><b>0.16.2</b><span>baseline; חדש = כישלון</span></li>
+</ol><div class="ok"><b>קבלה (נמדד):</b><ul><li>קובץ חדש שאיש לא מייבא נכשל ב-CI</li></ul></div><div class="meta">מקור: O2 · היה 0.15</div></div></details>
+<details class="task"><summary><span class="tid">0.17</span><span class="tt">כותרות אבטחה ממקור אחד<span class="pill p-now">✅ #207</span><span class="pill p-new">חדש</span><span class="pill p-p0">P0</span><span class="meta">S · נתונים ואבטחה · תלוי ב-1.1 · <span class="mono">chore/headers-one</span></span></span><span class="est">בוצע (הוערך 1 ש׳ 30 דק׳)<span class="dt"></span></span></summary>
+<div class="body"><ol class="steps">
+<li><b>0.17.1</b><span><code>security/policy.json</code>: טבלת מדיניות אחת</span></li>
+<li><b>0.17.2</b><span><code>scripts/headers.mjs</code> מייצר _headers, vercel.json, <code>deploy/nginx.conf</code>, <code>docker/nginx.conf</code>, tauri CSP ו-meta ב-index.html — 6 מקורות</span></li>
+<li><b>0.17.3</b><span>CI נכשל על סטייה</span></li>
+</ol><div class="ok"><b>קבלה (נמדד):</b><ul><li>6 מקורות = טבלה אחת (בדיקה); דפי ה-runner — חריגה מתועדת (unsafe-eval בתוך sandbox)</li></ul></div><div class="meta">מקור: N2, P3 · היה 12.2</div></div></details>
+<details class="task"><summary><span class="tid">0.18</span><span class="tt">docs-sync ו-README אמיתי<span class="pill p-now">✅ #227</span><span class="pill p-new">חדש</span><span class="pill p-p0">P0</span><span class="meta">D · תשתית וביצועים · תלוי ב-0.1 · <span class="mono">chore/docs-sync</span></span></span><span class="est">בוצע (הוערך 45 דק׳)<span class="dt"></span></span></summary>
+<div class="body"><ol class="steps">
+<li><b>0.18.1</b><span>בדיקה: כל פקודה שהתיעוד מזכיר קיימת ברישום</span></li>
+<li><b>0.18.2</b><span>מספרי הבדיקות ב-README ובתג מגיעים מה-CI (היום 2196 מול 992)</span></li>
+</ol><div class="ok"><b>קבלה (נמדד):</b><ul><li>docs-sync ירוק</li><li>README בלי מספרים ידניים</li></ul></div><div class="meta">מקור: J3, N1 · היה 12.1</div></div></details>
+<details class="task"><summary><span class="tid">0.19</span><span class="tt">שער PR עם Danger.js ו-size-limit<span class="pill p-new">חדש</span><span class="pill p-p1">P1</span><span class="meta">D · תשתית וביצועים · תלוי ב-0.4 · <span class="mono">chore/danger</span></span></span><span class="est">2 ש׳ 00 דק׳<span class="dt">ו׳ 23.10 01:45 – 03:45</span></span></summary>
+<div class="body"><ol class="steps">
+<li><b>0.19.1</b><span>Danger.js (MIT): שינוי גודל bundle, קוד בלי בדיקות, תווית ״נכתב ב-AI״, הפרש רישיונות, וכל קריאת רשת חדשה חייבת להיות רשומה ב-endpoints של יומן הפרטיות</span></li>
+<li><b>0.19.2</b><span>size-limit לכל chunk ראשי</span></li>
+<li><b>0.19.3</b><span>Renovate (GitHub App, טל מתקין — 15.2): עדכונים שבועיים מקובצים, patch אוטומטי כש-CI ירוק</span></li>
+</ol><div class="ok"><b>קבלה (נמדד):</b><ul><li>PR שמוסיף fetch לא רשום נכשל</li><li>תגובת Danger בכל PR</li></ul></div><div class="meta">מקור: מחקר הקוד הפתוח</div></div></details>
+<details class="task"><summary><span class="tid">0.20</span><span class="tt">המשכי כותרות האבטחה<span class="pill p-now">✅ #239 (בדיקה ב-preview אמיתי — אחרי שמכסת Vercel מתאפסת)</span><span class="pill p-new">חדש</span><span class="pill p-p1">P1</span><span class="meta">S · נתונים ואבטחה · תלוי ב-0.17 · <span class="mono">fix/headers-followups</span></span></span><span class="est">בוצע (הוערך 2 ש׳ 30 דק׳)<span class="dt"></span></span></summary>
+<div class="body"><ol class="steps">
+<li><b>0.20.1</b><span>playground-runner.html: meta CSP + nonce כמו ה-Live JS runner (WebKit חוסם בלי זה) + e2e ב-WebKit</span></li>
+<li><b>0.20.2</b><span>Vercel: מקורות ה-endpoints (<code>VITE_*_ENDPOINT</code>) נכנסים ל-vercel.json בבנייה מ-security/policy.json</span></li>
+<li><b>0.20.3</b><span>nginx: CSP גם ל-workers אחרים תחת /assets ול-sw.js</span></li>
+<li><b>0.20.4</b><span>בלוק R שקורא ל-<code>webr::eval_js()</code> רץ ב-preview deploy (אימות D6)</span></li>
+</ol><div class="ok"><b>קבלה (נמדד):</b><ul><li><code>headers --check</code> ירוק</li><li>e2e של ה-playground עובר ב-WebKit</li><li>worker עם endpoint מוגדר לא נחסם ב-Vercel</li></ul></div><div class="meta">מקור: דוח 0.17 (#207)</div></div></details>
+<details class="task"><summary><span class="tid">0.21</span><span class="tt">רשימת הפקודות מתעדכנת עם ה-store<span class="pill p-now">✅ #209</span><span class="pill p-new">חדש</span><span class="pill p-p1">P1</span><span class="meta">D · תשתית וביצועים · תלוי ב-0.2 · <span class="mono">fix/commands-deps</span></span></span><span class="est">בוצע (הוערך 30 דק׳)<span class="dt"></span></span></summary>
+<div class="body"><ol class="steps">
+<li><b>0.21.1</b><span>כל ערך store שתווית או פעולה קוראות — ב-deps של ה-useMemo (בלי המסמך עצמו, C5)</span></li>
+<li><b>0.21.2</b><span><code>ai.localToggle</code> קורא את המצב בזמן ההרצה</span></li>
+</ol><div class="ok"><b>קבלה (נמדד):</b><ul><li>בדיקה: היפוך כל מתג משנה את התווית שלו (נכשלת בלי התיקון)</li></ul></div><div class="meta">מקור: נמצא בפיצול 0.2</div></div></details>
+</section>
+<section class="card" id="p1"><header><h2><span class="num">1</span>לסגור את מה שסומן ✅ ולא היה גמור</h2><span class="when">9 משימות · 30 דק׳ · א׳ 18.10 08:00 ← א׳ 18.10 16:00</span></header>
+<div class="target"><b>יעד world class:</b> 0 ממצאי review פתוחים; 0 דליפות פרטיות ב-local-only; כל ✅ עובר DoD</div>
+<div class="why">נספח 16 מצא 11 טענות שגויות ו-104 ממצאים פתוחים. קודם סוגרים אותם.</div>
+<details class="task"><summary><span class="tid">1.1</span><span class="tt">104 ממצאי Codex — מיזוג, מענה וסגירה<span class="pill p-now">✅ #194 + #206</span><span class="pill p-p0">P0</span><span class="meta">D · תשתית וביצועים · <span class="mono">fix/codex-backlog</span></span></span><span class="est">בוצע (הוערך 2 ש׳ 00 דק׳)<span class="dt"></span></span></summary>
+<div class="body"><ol class="steps">
+<li><b>1.1.1</b><span>13 השרשורים על המסמך (#136) — נענו ונסגרו ✓ (05:00)</span></li>
+<li><b>1.1.2</b><span>נתונים — 22/22 ✓ (8 commits)</span></li>
+<li><b>1.1.3</b><span>עברית — 16/17 + B6 ✓ (11 commits); 1 נשאר בכוונה (יישור DOCX → 9.8)</span></li>
+<li><b>1.1.4</b><span>אבטחה — 24/24 ✓ (15 commits; 2,862 בדיקות ירוקות)</span></li>
+<li><b>1.1.5</b><span>AI/ממשק — 28/28 + באג רשימת הריצות ✓ (19 commits; 2,875 בדיקות ירוקות)</span></li>
+<li><b>1.1.6</b><span>מיזוג 4 הענפים (53 commits) על <code>feat/pwa-real</code>; lockfile; tsc + vitest + e2e מקומי</span></li>
+<li><b>1.1.7</b><span>בדיקות build שהסוכנים לא הריצו: <code>theme-boot.js</code> (תקציב, precache, אזהרת Vite, CSP); ה-runner עם meta CSP בכל אירוח</span></li>
+<li><b>1.1.8</b><span>תיעוד מגבלה ידועה: hot-reload חסום בתוך ה-runner ב-dev (מחיר ה-CSP)</span></li>
+<li><b>1.1.9</b><span>PR + CI ירוק בכל ה-jobs</span></li>
+<li><b>1.1.10</b><span>מענה + סגירה לכל שרשור (commit או סיבה) עם <code>scripts/review-reply</code> הזמני</span></li>
+<li><b>1.1.11</b><span>ממצאים חדשים על ה-PR עצמו נסגרים באותו מחזור</span></li>
+</ol><div class="ok"><b>קבלה (נמדד):</b><ul><li>0 שרשורים פתוחים בכל ה-PR-ים</li><li>CI ירוק</li><li>B6: מילה מנוקדת = מילה אחת בחיפוש</li></ul></div><div class="meta">מקור: נספח 16.1 (1)</div></div></details>
+<details class="task"><summary><span class="tid">1.2</span><span class="tt">eval: לתייג את ה-baseline המזויף בכנות<span class="pill p-now">✅ #195 + #213</span><span class="pill p-p0">P0</span><span class="meta">U · ממשק, עברית וידע · תלוי ב-1.1 · <span class="mono">fix/eval-labels</span></span></span><span class="est">בוצע (הוערך 20 דק׳)<span class="dt"></span></span></summary>
+<div class="body"><ol class="steps">
+<li><b>1.2.1</b><span><code>model: fake-ollama</code>, <code>kind: wiring</code></span></li>
+<li><b>1.2.2</b><span>eval-compare מסרב להשוות fake מול real</span></li>
+<li><b>1.2.3</b><span>README של eval</span></li>
+</ol><div class="ok"><b>קבלה (נמדד):</b><ul><li>אין קובץ שמציג מודל אמיתי בלי ריצה אמיתית</li></ul></div><div class="meta">מקור: 16.1 (2), K1</div></div></details>
+<details class="task"><summary><span class="tid">1.3</span><span class="tt">הכתבה בלי דליפה<span class="pill p-now">✅ #197 + #215</span><span class="pill p-p0">P0</span><span class="meta">A · AI וסוכנים · תלוי ב-1.1 · <span class="mono">fix/dictate-local</span></span></span><span class="est">בוצע (הוערך 1 ש׳ 15 דק׳)<span class="dt"></span></span></summary>
+<div class="body"><ol class="steps">
+<li><b>1.3.1</b><span>חסימת <code>SpeechRecognition</code> ב-local-only + רישום ביומן</span></li>
+<li><b>1.3.2</b><span><code>voice.dictate</code> במקטעים של 5 שניות ל-Whisper ב-worker</span></li>
+<li><b>1.3.3</b><span>במדיניות ענן: תווית ״האודיו נשלח ל-Google״</span></li>
+<li><b>1.3.4</b><span>בדיקות</span></li>
+</ol><div class="ok"><b>קבלה (נמדד):</b><ul><li>0 שימוש ב-Web Speech ב-local-only (בדיקה)</li><li>הכתבה offline אחרי הורדת Whisper</li></ul></div><div class="meta">מקור: 16.1 (10)</div></div></details>
+<details class="task"><summary><span class="tid">1.4</span><span class="tt">Esc מבטל באמת כל קריאת AI<span class="pill p-now">✅ #196 + #214</span><span class="pill p-p0">P0</span><span class="meta">A · AI וסוכנים · תלוי ב-1.1 · <span class="mono">fix/abort-all</span></span></span><span class="est">בוצע (הוערך 1 ש׳ 00 דק׳)<span class="dt"></span></span></summary>
+<div class="body"><ol class="steps">
+<li><b>1.4.1</b><span>1.1 כבר סגר: מוצר, פרופיל סגנון, דקדוק, תבניות, ראשי פרקים, commit, 2 ההשלמות בעורך, Ask Workspace, המבקר. נשארו: CSV, תמלול, משימות אצווה</span></li>
+<li><b>1.4.2</b><span>בדיקה סטטית: כל קריאה ל-<code>chat</code>/<code>chatStream</code>/<code>runAgent</code> מעבירה <code>signal</code></span></li>
+<li><b>1.4.3</b><span>e2e: Esc בתבנית → אין טקסט במסמך</span></li>
+</ol><div class="ok"><b>קבלה (נמדד):</b><ul><li>הבדיקה הסטטית: 0 קריאות בלי signal</li><li>e2e הביטול ירוק</li></ul></div><div class="meta">מקור: K3, T55</div></div></details>
+<details class="task"><summary><span class="tid">1.5</span><span class="tt">הקראה רק בקולות מקומיים ב-local-only<span class="pill p-now">✅ #195 + #213</span><span class="pill p-p0">P0</span><span class="meta">U · ממשק, עברית וידע · תלוי ב-1.1 · <span class="mono">fix/tts-local</span></span></span><span class="est">בוצע (הוערך 30 דק׳)<span class="dt"></span></span></summary>
+<div class="body"><ol class="steps">
+<li><b>1.5.1</b><span><code>voice.localService === true</code> ב-local-only</span></li>
+<li><b>1.5.2</b><span>קול רשת = הסכמה + רישום ביומן</span></li>
+<li><b>1.5.3</b><span>הודעה כשאין קול עברי מקומי</span></li>
+</ol><div class="ok"><b>קבלה (נמדד):</b><ul><li>בדיקה: ב-local-only לא נבחר קול רשת</li></ul></div><div class="meta">מקור: T32, review #136</div></div></details>
+<details class="task"><summary><span class="tid">1.6</span><span class="tt">הכספת המוצפנת: למחוק את המת, לתעד את האמת<span class="pill p-now">✅ #195 + #213</span><span class="pill p-p0">P0</span><span class="meta">S · נתונים ואבטחה · תלוי ב-1.1 · <span class="mono">fix/vault-doc</span></span></span><span class="est">בוצע (הוערך 45 דק׳)<span class="dt"></span></span></summary>
+<div class="body"><ol class="steps">
+<li><b>1.6.1</b><span>מחיקת <code>storage/vault.ts</code> והבדיקה שלו</span></li>
+<li><b>1.6.2</b><span>שכתוב <code>docs/src/content/docs/security/vault.md</code> לפי מה שקיים</span></li>
+<li><b>1.6.3</b><span>הצפנת כספת מלאה → 11.4</span></li>
+</ol><div class="ok"><b>קבלה (נמדד):</b><ul><li>0 קוד מת בנושא</li><li>התיעוד תואם לקוד (נבדק ב-1.8)</li></ul></div><div class="meta">מקור: J3, T36 · היה 1.7</div></div></details>
+<details class="task"><summary><span class="tid">1.7</span><span class="tt">קטלוג המודלים: רישיונות ומודל עברי<span class="pill p-now">✅ #200</span><span class="pill p-new">חדש</span><span class="pill p-p0">P0</span><span class="meta">A · AI וסוכנים · תלוי ב-1.1, 0.10 · <span class="mono">fix/model-catalog</span></span></span><span class="est">בוצע (הוערך 1 ש׳ 30 דק׳)<span class="dt"></span></span></summary>
+<div class="body"><ol class="steps">
+<li><b>1.7.1</b><span>לסווג כל מודל שבקוד (<code>modelCatalog.ts</code>, <code>modelManager.ts</code>, e5-small, Whisper, קובצי tesseract) לפי נספח 19: מותר / מותנה / אסור</span></li>
+<li><b>1.7.2</b><span>מותנה: Llama 3.x ו-Hermes-3 (Llama Community License — הודעה + AUP), Gemma 2/3 (Gemma Terms) — נשארים רק עם הודעת רישיון בממשק, לא כברירת מחדל</span></li>
+<li><b>1.7.3</b><span>להסיר את Aya Expanse (CC-BY-NC); לנעול גדלי Qwen2.5 מותרים (0.5B / 1.5B / 7B; לא 3B — רישיון מחקר); Qwen3 (Apache) מותר</span></li>
+<li><b>1.7.4</b><span>להוסיף DictaLM 3.0 1.7B (Apache-2.0 לפי כרטיס המודל) כברירת המחדל העברית ב-Ollama; 12B / 24B — רק אחרי בדיקת רישיון</span></li>
+<li><b>1.7.5</b><span>מסך ״קרדיטים למודלים״ עם ייחוס (CC BY: ivrit.ai, Dicta)</span></li>
+<li><b>1.7.6</b><span>שער 0.10 על הקטלוג — NLLB, jina, mms-tts וקולות SASPEECH לא ייכנסו</span></li>
+</ol><div class="ok"><b>קבלה (נמדד):</b><ul><li>כל מודל בקוד מסווג (בדיקה)</li><li>0 מודלים אסורים</li><li>מודל מותנה מציג הודעת רישיון</li></ul></div><div class="meta">מקור: ביקורת התוכנית §4</div></div></details>
+<details class="task"><summary><span class="tid">1.9</span><span class="tt">רישיון tldraw: אסור בייצור בלי מפתח<span class="pill p-now">✅ #198 + #216</span><span class="pill p-new">חדש</span><span class="pill p-p0">P0</span><span class="pill p-tal">מחכה לך: 15.10</span><span class="meta">U · ממשק, עברית וידע · תלוי ב-0.1 · <span class="mono">fix/tldraw-licence</span></span></span><span class="est">בוצע (הוערך 1 ש׳ 00 דק׳)<span class="dt"></span></span></summary>
+<div class="body"><ol class="steps">
+<li><b>1.9.1</b><span>tldraw 4.5.10 (<code>src/ui/CanvasTldraw.tsx</code>) תחת ״tldraw license״: ״Not to use the Software in Production Environments״ בלי מפתח מסחרי או ניסיון; הספרייה בודקת את המפתח ועשויה לשלוח נתוני שימוש</span></li>
+<li><b>1.9.2</b><span>למדוד ב-e2e עם יומן הפרטיות: האם הקנבס שולח בקשות רשת (בדיקת רישיון / טלמטריה) — סותר את local-only</span></li>
+<li><b>1.9.3</b><span>החלטה 15.10: רישיון מסחרי מ-tldraw, או מעבר ל-Excalidraw (MIT) — ברירת המחדל בתוכנית היא מעבר (4.19)</span></li>
+<li><b>1.9.4</b><span>עד ההחלטה: הקנבס מסומן ״ניסיוני״ בפריסה הציבורית</span></li>
+</ol><div class="ok"><b>קבלה (נמדד):</b><ul><li>מדידת הרשת מתועדת</li><li>החלטה 15.10 רשומה בתוכנית</li></ul></div><div class="meta">מקור: מחקר הקוד הפתוח (18.10)</div></div></details>
+<details class="task"><summary><span class="tid">1.8</span><span class="tt">ביקורת חוזרת עצמאית של שלב 1<span class="pill p-new">חדש</span><span class="pill p-p0">P0</span><span class="meta">D · תשתית וביצועים · תלוי ב-1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 0.7, 0.18, 1.9</span></span><span class="est">30 דק׳<span class="dt">א׳ 18.10 15:30 – 16:00</span></span></summary>
+<div class="body"><ol class="steps">
+<li><b>1.8.1</b><span>סוכן נפרד בודק כל פריט מול ה-DoD</span></li>
+<li><b>1.8.2</b><span>עדכון סטטוסים ב-plan.json ובנספח 16</span></li>
+</ol><div class="ok"><b>קבלה (נמדד):</b><ul><li>0 פערים בין סטטוס ל-DoD</li></ul></div><div class="meta">מקור: נספח 16</div></div></details>
+</section>
+<section class="card" id="p2"><header><h2><span class="num">2</span>אבטחה ופרטיות</h2><span class="when">8 משימות · 5 ש׳ 30 דק׳ · א׳ 18.10 08:00 ← ב׳ 19.10 08:30</span></header>
+<div class="target"><b>יעד world class:</b> CSP בלי unsafe-eval (חוץ מדפי ה-runner שבתוך sandbox, מתועד) ובלי מארחים פתוחים בכל אירוח; 0 בקשות לא מקומיות במסע e2e מלא ב-local-only; 0 סודות גלויים</div>
+<div class="why">חורים באבטחה ובפרטיות קודמים לפיצ&#x27;רים — כל פיצ&#x27;ר AI חדש נשען על השער הזה.</div>
+<details class="task"><summary><span class="tid">2.1</span><span class="tt">Tauri CSP הדוק<span class="pill p-now">✅ #220</span><span class="pill p-p0">P0</span><span class="pill p-tal">מחכה לך: 15.8</span><span class="meta">S · נתונים ואבטחה · תלוי ב-0.17 · <span class="mono">fix/tauri-csp</span></span></span><span class="est">בוצע (הוערך 1 ש׳ 30 דק׳)<span class="dt"></span></span></summary>
+<div class="body"><ol class="steps">
+<li><b>2.1.1</b><span>הסרת <code>unsafe-eval</code> (Graphviz כבר ב-worker); <code>wasm-unsafe-eval</code> נשאר (Pyodide, ORT, tesseract, Graphviz)</span></li>
+<li><b>2.1.2</b><span>connect / img / media / frame — רק self + מארחים ידועים</span></li>
+<li><b>2.1.3</b><span>נוצר מטבלת המדיניות (0.17)</span></li>
+<li><b>2.1.4</b><span>בדיקת רינדור ב-Tauri: Graphviz, Python, OCR (טל, 15.8)</span></li>
+</ol><div class="ok"><b>קבלה (נמדד):</b><ul><li>0 <code>unsafe-eval</code> ו-0 <code>https:</code> פתוח</li><li>בדיקת המדיניות ירוקה</li></ul></div><div class="meta">מקור: F4, T48</div></div></details>
+<details class="task"><summary><span class="tid">2.2</span><span class="tt">תמונות מרוחקות: חסימה ברנדרר<span class="pill p-now">✅ #221</span><span class="pill p-p0">P0</span><span class="meta">S · נתונים ואבטחה · תלוי ב-0.17 · <span class="mono">feat/remote-images</span></span></span><span class="est">בוצע (הוערך 1 ש׳ 30 דק׳)<span class="dt"></span></span></summary>
+<div class="body"><ol class="steps">
+<li><b>2.2.1</b><span><code>&lt;img&gt;</code> חיצוני → placeholder + ״טען״ + ״אשר תמיד למארח״ — האכיפה ברנדרר (CSP סטטי לא יכול להיות אישי)</span></li>
+<li><b>2.2.2</b><span>רשימת מארחים מאושרים מקומית; ״טען תמיד״</span></li>
+<li><b>2.2.3</b><span>connect-src בלי <code>ws:</code>/<code>wss:</code> חשופים</span></li>
+<li><b>2.2.4</b><span>e2e: פיקסל מעקב = 0 בקשות עד אישור</span></li>
+</ol><div class="ok"><b>קבלה (נמדד):</b><ul><li>0 בקשות לתמונה חיצונית לפני אישור</li><li>0 <code>ws:</code> חשוף</li></ul></div><div class="meta">מקור: F4</div></div></details>
+<details class="task"><summary><span class="tid">2.3</span><span class="tt">e2e/security.spec.ts<span class="pill p-now">✅ #222</span><span class="pill p-p0">P0</span><span class="meta">S · נתונים ואבטחה · תלוי ב-1.1, 0.17 · <span class="mono">test/security-spec</span></span></span><span class="est">בוצע (הוערך 1 ש׳ 00 דק׳)<span class="dt"></span></span></summary>
+<div class="body"><ol class="steps">
+<li><b>2.3.1</b><span>1.1 כבר סגר: meta CSP בתוך <code>livejs-runner.html</code> ו-<code>WebSocketStream</code> ברשימת החסימה</span></li>
+<li><b>2.3.2</b><span><code>e2e/security.spec.ts</code>: live-js בלי רשת, sanitize (רק מחלקות של Lumen), iframe בלי סכמה נחסם, 0 הפרות CSP, סריקת סודות</span></li>
+</ol><div class="ok"><b>קבלה (נמדד):</b><ul><li>security.spec ירוק ב-3 דפדפנים</li></ul></div><div class="meta">מקור: T48</div></div></details>
+<details class="task"><summary><span class="tid">2.4</span><span class="tt">יומן פרטיות מלא (כולל workers)<span class="pill p-now">✅ #212</span><span class="pill p-p0">P0</span><span class="meta">S · נתונים ואבטחה · תלוי ב-1.1 · <span class="mono">feat/ledger-complete</span></span></span><span class="est">בוצע (הוערך 2 ש׳ 00 דק׳)<span class="dt"></span></span></summary>
+<div class="body"><ol class="steps">
+<li><b>2.4.1</b><span>1.1 כבר סגר: סיווג מדויק של endpoints מחקר ודקדוק, <code>leftDevice()</code>, הורדות OCR מה-worker</span></li>
+<li><b>2.4.2</b><span>bootstrap כללי ל-workers שעוטף <code>self.fetch</code> ומדווח לחלון הראשי (embeddings, Whisper, web-llm, Pyodide)</span></li>
+<li><b>2.4.3</b><span>רישום קוצץ, הקראה, הכתבה</span></li>
+<li><b>2.4.4</b><span>e2e מסע מלא ב-local-only: 0 בקשות לא מקומיות</span></li>
+</ol><div class="ok"><b>קבלה (נמדד):</b><ul><li>הורדה מתוך worker מופיעה ביומן</li><li>מסע מלא: 0 בקשות לא מקומיות</li></ul></div><div class="meta">מקור: T37</div></div></details>
+<details class="task"><summary><span class="tid">2.5</span><span class="tt">סודות: לסגור את הפינות<span class="pill p-now">✅ #230</span><span class="pill p-p0">P0</span><span class="meta">S · נתונים ואבטחה · תלוי ב-1.1 · <span class="mono">fix/secrets-complete</span></span></span><span class="est">בוצע (הוערך 2 ש׳ 00 דק׳)<span class="dt"></span></span></summary>
+<div class="body"><ol class="steps">
+<li><b>2.5.1</b><span>1.1 כבר סגר: keychain בלי נפילה שקטה ל-IndexedDB, <code>setSecret</code> מחזיר שגיאה</span></li>
+<li><b>2.5.2</b><span>Supabase session → secretStore</span></li>
+<li><b>2.5.3</b><span>בלי מצב plain שקט</span></li>
+<li><b>2.5.4</b><span>CI על macOS ו-Windows שמקמפל ומריץ את בדיקות ה-keychain ב-Rust</span></li>
+<li><b>2.5.5</b><span>סריקת אחסון אחרי התחברות: 0 סודות גלויים</span></li>
+</ol><div class="ok"><b>קבלה (נמדד):</b><ul><li>סריקת האחסון: 0 טוקנים גלויים</li><li>בדיקות keychain ירוקות ב-macOS וב-Windows</li></ul></div><div class="meta">מקור: T36</div></div></details>
+<details class="task"><summary><span class="tid">2.6</span><span class="tt">סוכן הסתרת מידע אישי לפני ענן<span class="pill p-new">חדש</span><span class="pill p-p1">P1</span><span class="meta">S · נתונים ואבטחה · תלוי ב-7.1, 6.0 · <span class="mono">feat/pii-redactor</span></span></span><span class="est">3 ש׳ 00 דק׳<span class="dt">ב׳ 19.10 05:30 – 08:30</span></span></summary>
+<div class="body"><ol class="steps">
+<li><b>2.6.1</b><span>כשהמדיניות מתירה ענן: הסתרה מקומית לפני שליחה — אימייל, טלפון, ת״ז (ספרת ביקורת), כרטיס (Luhn), IBAN ישראלי</span></li>
+<li><b>2.6.2</b><span>NER לשמות: DictaBERT-NER (עברית, CC BY 4.0, המרה ב-6.0) + bert-base-NER (אנגלית, MIT); בלי הורדה = תבניות בלבד; GLiNER-PII (349MB) כחלופה</span></li>
+<li><b>2.6.3</b><span>טוקנים (<code>⟨EMAIL_1⟩</code>) והחזרה בתשובה</span></li>
+<li><b>2.6.4</b><span>תצוגה מקדימה של מה שנשלח; ספירה ביומן</span></li>
+</ol><div class="ok"><b>קבלה (נמדד):</b><ul><li>סט PII (250, 7.1): recall ≥ 98% בתבניות, ≥ 85% בשמות עם NER</li><li>0 פריטים מהסט בבקשות ענן שנלכדו ב-e2e</li></ul></div><div class="meta">מקור: פרטיות, נספח 19</div></div></details>
+<details class="task"><summary><span class="tid">2.7</span><span class="tt">סוכן הגנה מ-prompt injection<span class="pill p-new">חדש</span><span class="pill p-p0">P0 (נדרש ל-P0)</span><span class="pill p-tal">מחכה לך: 15.11</span><span class="meta">S · נתונים ואבטחה · תלוי ב-5.1, 7.1 · <span class="mono">feat/injection-guard</span></span></span><span class="est">2 ש׳ 30 דק׳<span class="dt">ב׳ 19.10 01:00 – 03:30</span></span></summary>
+<div class="body"><ol class="steps">
+<li><b>2.7.1</b><span>תוכן חיצוני מסומן ״לא אמין״ ועטוף במפרידים</span></li>
+<li><b>2.7.2</b><span>ניקוי דטרמיניסטי: טקסט מוסתר, Unicode tags, bidi override, ״התעלם מההוראות״</span></li>
+<li><b>2.7.3</b><span>כלים שכותבים מחייבים אישור כשהתוכן הגיע ממקור לא אמין</span></li>
+<li><b>2.7.4</b><span>מסווג ProtectAI v2 (Apache, אנגלית בלבד, הפרויקט בארכיון, 739MB → כימות) — רק כשכבה נוספת לאנגלית בשולחן העבודה; בעברית — הכללים הדטרמיניסטיים</span></li>
+</ol><div class="ok"><b>קבלה (נמדד):</b><ul><li>סט injection (130, כולל 30 בעברית): 0 כתיבות לא מאושרות</li></ul></div><div class="meta">מקור: אבטחת AI</div></div></details>
+<details class="task"><summary><span class="tid">2.8</span><span class="tt">סורקי אבטחה ב-CI<span class="pill p-now">✅ #236 (CodeQL/Scorecard ירוצו רק על main)</span><span class="pill p-new">חדש</span><span class="pill p-p0">P0</span><span class="meta">D · תשתית וביצועים · תלוי ב-0.17 · <span class="mono">chore/security-ci</span></span></span><span class="est">בוצע (הוערך 1 ש׳ 00 דק׳)<span class="dt"></span></span></summary>
+<div class="body"><ol class="steps">
+<li><b>2.8.1</b><span>gitleaks</span></li>
+<li><b>2.8.2</b><span>npm audit high/critical = כישלון</span></li>
+<li><b>2.8.3</b><span>dependency-review</span></li>
+<li><b>2.8.4</b><span>CodeQL (JS/TS) ו-OSSF Scorecard Action</span></li>
+</ol><div class="ok"><b>קבלה (נמדד):</b><ul><li>3 בדיקות בכל PR</li></ul></div><div class="meta">מקור: אבטחה</div></div></details>
+</section>
+<section class="card" id="p3"><header><h2><span class="num">3</span>בטיחות נתונים וסנכרון</h2><span class="when">7 משימות · 40 ש׳ 00 דק׳ · א׳ 18.10 08:00 ← ג׳ 20.10 16:30</span></header>
+<div class="target"><b>יעד world class:</b> 0 מסלולי איבוד נתונים (G1–G11) — כל מסלול ב-e2e; סנכרון מוצפן בין מכשירים בלי שרת שלנו</div>
+<div class="why">Obsidian ו-Notion לא מאבדים מילה. זה התנאי לפני ששולחים למשתמשים אמיתיים.</div>
+<details class="task"><summary><span class="tid">3.1</span><span class="tt">Ctrl+Z אמיתי למחיקה<span class="pill p-now">✅ #218</span><span class="pill p-p0">P0</span><span class="meta">S · נתונים ואבטחה · תלוי ב-1.1 · <span class="mono">feat/trash-undo</span></span></span><span class="est">בוצע (הוערך 1 ש׳ 00 דק׳)<span class="dt"></span></span></summary>
+<div class="body"><ol class="steps">
+<li><b>3.1.1</b><span>Ctrl+Z גלובלי משחזר את המחיקה האחרונה (מחסנית 20)</span></li>
+<li><b>3.1.2</b><span>שמירת עריכות לא שמורות בכל הלשוניות הפתוחות שבתוך תיקייה שנמחקת (לא רק הפעילה)</span></li>
+<li><b>3.1.3</b><span>e2e</span></li>
+</ol><div class="ok"><b>קבלה (נמדד):</b><ul><li>מחיקה → Ctrl+Z → התוכן האחרון חוזר, כולל לשונית לא פעילה</li></ul></div><div class="meta">מקור: T46</div></div></details>
+<details class="task"><summary><span class="tid">3.2</span><span class="tt">היסטוריה שלמה<span class="pill p-now">✅ #229</span><span class="pill p-p0">P0</span><span class="meta">S · נתונים ואבטחה · תלוי ב-1.1 · <span class="mono">feat/history-complete</span></span></span><span class="est">בוצע (הוערך 3 ש׳ 00 דק׳)<span class="dt"></span></span></summary>
+<div class="body"><ol class="steps">
+<li><b>3.2.1</b><span>דלתות דחוסות + צילום מלא כל 20 גרסאות</span></li>
+<li><b>3.2.2</b><span>צילום כספת כל 10 דק׳ ובסגירה (best-effort)</span></li>
+<li><b>3.2.3</b><span>היסטוריית collab באותו מאגר ובפאנל</span></li>
+<li><b>3.2.4</b><span>הגירת <code>backups/</code> ישנות</span></li>
+<li><b>3.2.5</b><span>מכסה: התראה ב-80%; מצב <code>persist()</code> מוצג למשתמש</span></li>
+</ol><div class="ok"><b>קבלה (נמדד):</b><ul><li>גודל ממוצע לגרסה ≤ 10% מטקסט מלא על פני 1,000 גרסאות</li><li>עריכת collab מופיעה בפאנל</li><li>מצב persist מוצג</li></ul></div><div class="meta">מקור: T35, G4, G1</div></div></details>
+<details class="task"><summary><span class="tid">3.3</span><span class="tt">git בטוח<span class="pill p-p0">P0</span><span class="pill p-tal">מחכה לך: 15.4</span><span class="meta">S · נתונים ואבטחה · תלוי ב-0.2, 4.1 · <span class="mono">feat/safe-git</span></span></span><span class="est">6 ש׳ 00 דק׳<span class="dt">א׳ 18.10 08:00 – 14:00</span></span></summary>
+<div class="body"><ol class="steps">
+<li><b>3.3.1</b><span>pull = fetch + merge תלת-כיווני; קונפליקט → סימונים + מסך פתרון</span></li>
+<li><b>3.3.2</b><span>לא מוחק קבצים לא עקובים; לא מחליף מסמך פתוח עם עריכה</span></li>
+<li><b>3.3.3</b><span>clone ציבורי בלי טוקן; CORS proxy: docker מקומי או worker מתארח (15.4)</span></li>
+<li><b>3.3.4</b><span>clone מלא כשצריך merge-base</span></li>
+<li><b>3.3.5</b><span>LFS — לא נתמך, מתועד</span></li>
+<li><b>3.3.6</b><span>e2e קונפליקט</span></li>
+</ol><div class="ok"><b>קבלה (נמדד):</b><ul><li>data-safety חלק ד׳ ירוק</li><li>0 קבצים נמחקים ב-pull</li></ul></div><div class="meta">מקור: G2, G3</div></div></details>
+<details class="task"><summary><span class="tid">3.4</span><span class="tt">פרוטוקול סנכרון מוצפן (E2EE)<span class="pill p-new">חדש</span><span class="pill p-p1">P1</span><span class="meta">S · נתונים ואבטחה · תלוי ב-4.1 · <span class="mono">feat/e2ee-sync-core</span></span></span><span class="est">18 ש׳ 00 דק׳<span class="dt">ב׳ 19.10 08:30 – ג׳ 20.10 02:30</span></span></summary>
+<div class="body"><ol class="steps">
+<li><b>3.4.1</b><span>manifest עם גרסה לכל קובץ, פרוטוקול עם מספר גרסה מהיום הראשון</span></li>
+<li><b>3.4.2</b><span>AES-GCM לכל קובץ, מפתח מ-passphrase (Argon2id)</span></li>
+<li><b>3.4.3</b><span>יישוב קונפליקטים דרך ConflictDialog</span></li>
+<li><b>3.4.4</b><span>ממשק <code>SyncProvider</code></span></li>
+<li><b>3.4.5</b><span>בדיקות: שני מכשירים מדומים, קונפליקט, הפסקה באמצע</span></li>
+<li><b>3.4.6</b><span>ספריות: <code>@noble/ciphers</code> (MIT, נבדק, TS טהור) ל-AES-GCM / XChaCha20-Poly1305 + <code>hash-wasm</code> (MIT) ל-Argon2id; גיבוי מוצפן לייצוא בפורמט age (typage)</span></li>
+<li><b>3.4.7</b><span>גם ה-manifest מוצפן ומאומת (AEAD), ושמות האובייקטים אצל הספק אטומים (HMAC של הנתיב) — הספק לא רואה נתיבים, גרסאות או שמות</span></li>
+<li><b>3.4.8</b><span>הגנה מ-rollback / replay: מונה גרסאות מונוטוני חתום בתוך ה-manifest; לקוח מסרב ל-manifest ישן מזה שכבר ראה</span></li>
+<li><b>3.4.9</b><span>עיגון המונה להתקן חדש או לשחזור: ההתקן מקבל את המונה האחרון מהתקן קיים בצימוד חתום (QR / קוד); בלי התקן קיים — מצב ״עדכניות לא מאומתת״ גלוי עד אישור, והערבות מתועדת כ-TOFU</span></li>
+<li><b>3.4.10</b><span>כתיבה מותנית של ה-manifest: <code>SyncProvider.put</code> מקבל את ה-revision / ETag שנקרא (CAS); כישלון → משיכה, מיזוג ונסיון חוזר. שני מכשירים שמסנכרנים במקביל מגרסה N לא דורסים זה את זה</span></li>
+</ol><div class="ok"><b>קבלה (נמדד):</b><ul><li>10,000 סבבי סנכרון אקראיים בבדיקה: 0 אובדן</li><li>הספק רואה רק ciphertext ושמות אטומים — גם לא נתיבים או מספר גרסה (בדיקה על התיקייה המדומה)</li><li>manifest ישן שמוחזר מהספק נדחה (בדיקה)</li><li>התקן חדש: manifest ישן נדחה אחרי צימוד; בלי צימוד מוצגת אזהרה ולא מוצהרת הגנה (בדיקת replay)</li><li>שני מכשירים כותבים במקביל מאותה גרסה N: שני השינויים נשמרים (בדיקת מרוץ)</li></ul></div><div class="meta">מקור: G8, מחקר פערים #6</div></div></details>
+<details class="task"><summary><span class="tid">3.5</span><span class="tt">ספקי אחסון מוצפנים: הקיימים + WebDAV ו-S3<span class="pill p-p1">P1</span><span class="pill p-tal">מחכה לך: 15.5</span><span class="meta">S · נתונים ואבטחה · תלוי ב-3.4, 2.5 · <span class="mono">feat/e2ee-sync-providers</span></span></span><span class="est">14 ש׳ 00 דק׳<span class="dt">ג׳ 20.10 02:30 – 16:30</span></span></summary>
+<div class="body"><ol class="steps">
+<li><b>3.5.1</b><span>Dropbox ו-Google Drive הקיימים (<code>src/sync/cloud/</code>) עוברים מעל <code>SyncProvider</code>; WebDAV ו-S3 חדשים</span></li>
+<li><b>3.5.2</b><span>OAuth רק כשיש client ID (15.5); WebDAV / S3 בלי שרת שלנו</span></li>
+<li><b>3.5.3</b><span>Gist נמחק</span></li>
+<li><b>3.5.4</b><span>טוקנים ב-secretStore</span></li>
+<li><b>3.5.5</b><span>e2e עם שרתים מדומים</span></li>
+<li><b>3.5.6</b><span>הגירה של נתונים קיימים בטקסט גלוי אצל הספק → מוצפן, עם גיבוי ואפשרות חזרה</span></li>
+<li><b>3.5.7</b><span>ספריות: <code>webdav</code> (MIT) ו-<code>aws4fetch</code> (MIT, במקום ה-SDK הכבד של AWS)</span></li>
+<li><b>3.5.8</b><span>כל ספק מממש את הכתיבה המותנית: WebDAV <code>If-Match</code>, Dropbox <code>mode: update</code> עם rev, S3 <code>If-Match</code>; ספק בלי תמיכה — manifest append-only (קובץ לכל גרסה)</span></li>
+</ol><div class="ok"><b>קבלה (נמדד):</b><ul><li>סנכרון בין 2 דפדפנים דרך WebDAV מדומה: 0 אובדן</li></ul></div><div class="meta">מקור: G8 · היה 3.4</div></div></details>
+<details class="task"><summary><span class="tid">3.6</span><span class="tt">שיתוף בזמן אמת עם התמדה ואימות<span class="pill p-now">✅ #237 (פריסה — 15.4)</span><span class="pill p-p0">P0</span><span class="pill p-tal">מחכה לך: 15.4</span><span class="meta">S · נתונים ואבטחה · תלוי ב-1.1 · <span class="mono">feat/collab-persist</span></span></span><span class="est">בוצע (הוערך 3 ש׳ 00 דק׳)<span class="dt"></span></span></summary>
+<div class="body"><ol class="steps">
+<li><b>3.6.1</b><span>שרת Hocuspocus (MIT): <code>onAuthenticate</code> בודק טוקן חדר, <code>onStoreDocument</code> שומר ל-SQLite + גיבוי (<code>docker/collab.yml</code>)</span></li>
+<li><b>3.6.2</b><span>טוקן קצר-מועד לכל חדר מהשרת (HMAC) — לא ב-bundle</span></li>
+<li><b>3.6.3</b><span>בדיקת בריאות ה-signaling נכשלת ב-CI אחרי הפריסה (15.4)</span></li>
+<li><b>3.6.4</b><span>e2e: שני דפדפנים, יציאה וחזרה — התוכן נשמר</span></li>
+</ol><div class="ok"><b>קבלה (נמדד):</b><ul><li>חדר שנסגר וחוזר — התוכן נשמר</li><li>0 סודות ב-bundle</li></ul></div><div class="meta">מקור: L1, T49 · היה 3.5</div></div></details>
+<details class="task"><summary><span class="tid">3.7</span><span class="tt">מטריצת e2e לכל מסלולי איבוד הנתונים<span class="pill p-p0">P0</span><span class="meta">S · נתונים ואבטחה · תלוי ב-3.1, 3.2, 3.3, 4.4 · <span class="mono">test/data-safety-matrix</span></span></span><span class="est">2 ש׳ 00 דק׳<span class="dt">ב׳ 19.10 03:30 – 05:30</span></span></summary>
+<div class="body"><ol class="steps">
+<li><b>3.7.1</b><span>תרחיש לכל G1–G11 (G8 על ספקי הסנכרון הקיימים; 3.5 מוסיף את החדשים למטריצה)</span></li>
+<li><b>3.7.2</b><span>3 דפדפנים</span></li>
+<li><b>3.7.3</b><span>חיבור ל-DoD</span></li>
+</ol><div class="ok"><b>קבלה (נמדד):</b><ul><li>11/11 ירוקים</li></ul></div><div class="meta">מקור: G1–G11 · היה 3.6</div></div></details>
+</section>
+<section class="card" id="p4"><header><h2><span class="num">4</span>יסודות ניהול ידע (מה שמשתמשים נוגעים בו מאות פעמים ביום)</h2><span class="when">20 משימות · 95 ש׳ 00 דק׳ · א׳ 18.10 08:00 ← א׳ 25.10 16:45</span></header>
+<div class="target"><b>יעד world class:</b> כספת = תיקייה אמיתית בשולחן העבודה ובדפדפני Chromium (Safari / Firefox: OPFS + ייצוא וסנכרון; מובייל: 4.20); <code>[[</code> עם השלמה, הטמעות, פתק יומי, מאפיינים ומסד נתונים שאפשר לערוך — ברמת Obsidian</div>
+<div class="why">מחקר הפערים: ל-Lumen יש עומק נדיר אבל חסרים הבסיסים היומיומיים. בעדיפות הם קודמים לכל יכולת AI חדשה: ה-P0 של שלב 4 לפני ה-P1 של שלב 6. מסלול ה-AI ממשיך במקביל רק במה שלא מעכב אותם.</div>
+<details class="task"><summary><span class="tid">4.1</span><span class="tt">שכבת כספת אחת (VaultBackend)<span class="pill p-now">✅ #226</span><span class="pill p-new">חדש</span><span class="pill p-p0">P0</span><span class="meta">S · נתונים ואבטחה · תלוי ב-0.2, 1.1 · <span class="mono">refactor/vault-backend</span></span></span><span class="est">בוצע (הוערך 6 ש׳ 00 דק׳)<span class="dt"></span></span></summary>
+<div class="body"><ol class="steps">
+<li><b>4.1.1</b><span>ממשק <code>VaultBackend</code> (list, read, write, rename, delete, stat, watch)</span></li>
+<li><b>4.1.2</b><span>OPFS כמימוש ראשון; כל הקוראים (index, git, embeddings, export) עוברים דרכו</span></li>
+<li><b>4.1.3</b><span>בדיקות חוזה שרצות על כל מימוש</span></li>
+</ol><div class="ok"><b>קבלה (נמדד):</b><ul><li>0 גישות ישירות ל-OPFS מחוץ למימוש (בדיקה)</li><li>בדיקות החוזה ירוקות</li></ul></div><div class="meta">מקור: מחקר פערים #1</div></div></details>
+<details class="task"><summary><span class="tid">4.2</span><span class="tt">כספת בתיקייה אמיתית בדפדפן<span class="pill p-now">✅ #235 (Obsidian — 15.8)</span><span class="pill p-new">חדש</span><span class="pill p-p0">P0</span><span class="pill p-tal">מחכה לך: 15.8</span><span class="meta">S · נתונים ואבטחה · תלוי ב-4.1 · <span class="mono">feat/vault-folder-web</span></span></span><span class="est">בוצע (הוערך 6 ש׳ 00 דק׳)<span class="dt"></span></span></summary>
+<div class="body"><ol class="steps">
+<li><b>4.2.1</b><span>מימוש <code>FileSystemDirectoryHandle</code> (Chromium); handle נשמר ב-IndexedDB, הרשאה מחדש בפתיחה</span></li>
+<li><b>4.2.2</b><span>בחירה: OPFS / תיקייה; העברה בטוחה ביניהם</span></li>
+<li><b>4.2.3</b><span>הודעה ברורה בדפדפנים בלי התמיכה</span></li>
+</ol><div class="ok"><b>קבלה (נמדד):</b><ul><li>הקבצים בתיקייה זהים בייט-לבייט למה שנשמר (e2e קורא את התיקייה); פתיחה ב-Obsidian — בדיקה ידנית (15.8)</li><li>בדיקות החוזה ירוקות</li></ul></div><div class="meta">מקור: מחקר פערים #1</div></div></details>
+<details class="task"><summary><span class="tid">4.3</span><span class="tt">שולחן עבודה: הכספת כתיקייה + הגירה<span class="pill p-p0">P0</span><span class="pill p-tal">מחכה לך: 15.8</span><span class="meta">S · נתונים ואבטחה · תלוי ב-4.1, 2.1 · <span class="mono">feat/vault-folder-desktop</span></span></span><span class="est">6 ש׳ 00 דק׳<span class="dt">א׳ 18.10 14:00 – 20:00</span></span></summary>
+<div class="body"><ol class="steps">
+<li><b>4.3.1</b><span>מימוש Tauri <code>plugin-fs</code> עם הרשאה מצומצמת לתיקיית הכספת</span></li>
+<li><b>4.3.2</b><span>הגירה חד-פעמית, בטוחה והפיכה מה-OPFS של ה-webview (גיבוי לפני)</span></li>
+<li><b>4.3.3</b><span>בחירת תיקייה ראשונה בהתקנה</span></li>
+</ol><div class="ok"><b>קבלה (נמדד):</b><ul><li>הגירה של 1,000 פתקים: 0 אובדן (בדיקה)</li><li>טל: עריכה ב-Lumen נראית ב-Obsidian (15.8)</li></ul></div><div class="meta">מקור: N3, T57 · היה 10.4</div></div></details>
+<details class="task"><summary><span class="tid">4.4</span><span class="tt">שינויים מבחוץ: מעקב ויישוב<span class="pill p-new">חדש</span><span class="pill p-p0">P0</span><span class="meta">S · נתונים ואבטחה · תלוי ב-4.2, 4.3 · <span class="mono">feat/vault-watch</span></span></span><span class="est">5 ש׳ 00 דק׳<span class="dt">א׳ 18.10 20:00 – ב׳ 19.10 01:00</span></span></summary>
+<div class="body"><ol class="steps">
+<li><b>4.4.1</b><span>FileSystemObserver כשקיים, polling לפי mtime כגיבוי; Tauri <code>watch</code></span></li>
+<li><b>4.4.2</b><span>קובץ שהשתנה מבחוץ → אינדקס, embeddings, לשונית פתוחה (בלי לדרוס עריכה — קונפליקט)</span></li>
+<li><b>4.4.3</b><span>שינוי שם/מחיקה מבחוץ</span></li>
+</ol><div class="ok"><b>קבלה (נמדד):</b><ul><li>עריכה בעורך חיצוני מופיעה תוך 2 שניות</li><li>עריכה מקבילה = קונפליקט, 0 אובדן</li></ul></div><div class="meta">מקור: מחקר פערים #1</div></div></details>
+<details class="task"><summary><span class="tid">4.5</span><span class="tt"><code>[[</code> עם השלמה<span class="pill p-now">✅ #217</span><span class="pill p-new">חדש</span><span class="pill p-p0">P0</span><span class="meta">U · ממשק, עברית וידע · תלוי ב-1.1 · <span class="mono">feat/link-autocomplete</span></span></span><span class="est">בוצע (הוערך 6 ש׳ 00 דק׳)<span class="dt"></span></span></summary>
+<div class="body"><ol class="steps">
+<li><b>4.5.1</b><span>CompletionSource ב-CodeMirror + מקבילה ב-Milkdown מעל האינדקס</span></li>
+<li><b>4.5.2</b><span>התאמה לפי <code>noteKey</code> (בלי תלות בניקוד ובאותיות)</span></li>
+<li><b>4.5.3</b><span>השלמת <code>#כותרת</code> ו-<code>^בלוק</code></span></li>
+<li><b>4.5.4</b><span>יצירת פתק חדש מההשלמה</span></li>
+<li><b>4.5.5</b><span>מבוסס <code>@codemirror/autocomplete</code>; תוספי live-preview של SilverBullet (MIT) כמקור השראה</span></li>
+</ol><div class="ok"><b>קבלה (נמדד):</b><ul><li>10,000 פתקים: הצעות &lt; 50ms</li><li>e2e בעברית ובאנגלית</li></ul></div><div class="meta">מקור: מחקר פערים #2</div></div></details>
+<details class="task"><summary><span class="tid">4.6</span><span class="tt">תצוגה מקדימה בריחוף ואזכורים לא מקושרים<span class="pill p-new">חדש</span><span class="pill p-p1">P1</span><span class="meta">U · ממשק, עברית וידע · תלוי ב-4.5, 7.10 · <span class="mono">feat/hover-unlinked</span></span></span><span class="est">5 ש׳ 00 דק׳<span class="dt">ג׳ 20.10 07:15 – 12:15</span></span></summary>
+<div class="body"><ol class="steps">
+<li><b>4.6.1</b><span>ריחוף על קישור → 20 שורות ראשונות מרונדרות</span></li>
+<li><b>4.6.2</b><span>פאנל backlinks: ״לא מקושרים״ עם כפתור ״קשר״</span></li>
+<li><b>4.6.3</b><span>נגיש במקלדת</span></li>
+<li><b>4.6.4</b><span><code>hoverTooltip</code> של CodeMirror; התצוגה מרונדרת ב-worker ונשמרת במטמון</span></li>
+</ol><div class="ok"><b>קבלה (נמדד):</b><ul><li>ריחוף &lt; 150ms</li><li>אזכורים לא מקושרים נכונים על 30 מקרי זהב</li></ul></div><div class="meta">מקור: מחקר פערים #2</div></div></details>
+<details class="task"><summary><span class="tid">4.7</span><span class="tt">הטמעות (<code>![[פתק]]</code>)<span class="pill p-now">✅ #224</span><span class="pill p-new">חדש</span><span class="pill p-p0">P0</span><span class="meta">U · ממשק, עברית וידע · תלוי ב-1.1 · <span class="mono">feat/embeds</span></span></span><span class="est">בוצע (הוערך 7 ש׳ 00 דק׳)<span class="dt"></span></span></summary>
+<div class="body"><ol class="steps">
+<li><b>4.7.1</b><span>remark plugin: <code>![[פתק]]</code>, <code>![[פתק#כותרת]]</code>, תמונות ו-PDF</span></li>
+<li><b>4.7.2</b><span>עומק מקסימלי 3 + שומר מחזוריות</span></li>
+<li><b>4.7.3</b><span>עדכון בזמן אמת כשהמקור משתנה</span></li>
+<li><b>4.7.4</b><span>linkRewrite מכסה הטמעות</span></li>
+<li><b>4.7.5</b><span>port של <code>ofm.ts</code> מ-Quartz (MIT, עם ייחוס): wikilinks, הטמעות, callouts, הפניות לבלוקים — ומשמש גם ב-4.18</span></li>
+</ol><div class="ok"><b>קבלה (נמדד):</b><ul><li>תאימות לתחביר Obsidian על 20 קבצי בדיקה</li><li>מחזור = הודעה, לא קריסה</li></ul></div><div class="meta">מקור: מחקר פערים #3</div></div></details>
+<details class="task"><summary><span class="tid">4.8</span><span class="tt">הפניות לבלוקים (<code>^id</code>)<span class="pill p-now">✅ #238</span><span class="pill p-new">חדש</span><span class="pill p-p1">P1</span><span class="meta">U · ממשק, עברית וידע · תלוי ב-4.7 · <span class="mono">feat/block-refs</span></span></span><span class="est">בוצע (הוערך 6 ש׳ 00 דק׳)<span class="dt"></span></span></summary>
+<div class="body"><ol class="steps">
+<li><b>4.8.1</b><span>״העתק קישור לבלוק״ מוסיף <code>^id</code></span></li>
+<li><b>4.8.2</b><span><code>[[פתק#^id]]</code> ו-<code>![[פתק#^id]]</code></span></li>
+<li><b>4.8.3</b><span>שינוי שם/העברה שומרים את ההפניות</span></li>
+</ol><div class="ok"><b>קבלה (נמדד):</b><ul><li>הפניה שורדת שינוי שם והעברה (e2e)</li></ul></div><div class="meta">מקור: מחקר פערים #3</div></div></details>
+<details class="task"><summary><span class="tid">4.9</span><span class="tt">עורך מאפיינים (frontmatter)<span class="pill p-now">✅ #228</span><span class="pill p-new">חדש</span><span class="pill p-p0">P0 (נדרש ל-P0)</span><span class="meta">U · ממשק, עברית וידע · תלוי ב-1.1 · <span class="mono">feat/properties</span></span></span><span class="est">בוצע (הוערך 6 ש׳ 00 דק׳)<span class="dt"></span></span></summary>
+<div class="body"><ol class="steps">
+<li><b>4.9.1</b><span>פאנל עריכה עם טיפוסים (טקסט, מספר, תאריך, רשימה, checkbox, קישור)</span></li>
+<li><b>4.9.2</b><span>כתיבה דרך yaml Document API (שומר הערות)</span></li>
+<li><b>4.9.3</b><span>השלמה לערכים קיימים</span></li>
+<li><b>4.9.4</b><span><code>parseDocument</code> של <code>yaml</code> (כבר בתלויות) — לא <code>parse</code>, כדי לשמור הערות</span></li>
+</ol><div class="ok"><b>קבלה (נמדד):</b><ul><li>עריכה לא משנה שום דבר אחר בקובץ (בדיקת round-trip)</li></ul></div><div class="meta">מקור: מחקר פערים #4</div></div></details>
+<details class="task"><summary><span class="tid">4.10</span><span class="tt">מסד נתונים שאפשר לערוך<span class="pill p-now">✅ #231</span><span class="pill p-new">חדש</span><span class="pill p-p0">P0 (נדרש ל-P0)</span><span class="meta">U · ממשק, עברית וידע · תלוי ב-4.9 · <span class="mono">feat/database-edit</span></span></span><span class="est">בוצע (הוערך 10 ש׳ 00 דק׳)<span class="dt"></span></span></summary>
+<div class="body"><ol class="steps">
+<li><b>4.10.1</b><span>עריכת תא כותבת ל-frontmatter (4.9)</span></li>
+<li><b>4.10.2</b><span>סינון AND/OR, מיון, קיבוץ</span></li>
+<li><b>4.10.3</b><span>תצוגות: טבלה, כרטיסים, kanban, רשימה</span></li>
+<li><b>4.10.4</b><span>TanStack Table + TanStack Virtual (MIT) לתאים ניתנים לעריכה עם RTL; dnd-kit (MIT) ל-kanban נגיש במקלדת; react-big-calendar (MIT, <code>rtl</code>) לתצוגת לוח שנה</span></li>
+<li><b>4.10.5</b><span>הדקדוק של Dataview (MIT) כמקור לעץ הסינון (AND / OR)</span></li>
+</ol><div class="ok"><b>קבלה (נמדד):</b><ul><li>עריכה ב-100 פתקים ב-kanban: 0 שינויים לא רצויים בקבצים</li></ul></div><div class="meta">מקור: מחקר פערים #4</div></div></details>
+<details class="task"><summary><span class="tid">4.11</span><span class="tt">נוסחאות ותצוגת מפה<span class="pill p-new">חדש</span><span class="pill p-p1">P1</span><span class="meta">A · AI וסוכנים · תלוי ב-4.10, 7.10 · <span class="mono">feat/database-formulas</span></span></span><span class="est">10 ש׳ 00 דק׳<span class="dt">ד׳ 21.10 23:15 – ה׳ 22.10 09:15</span></span></summary>
+<div class="body"><ol class="steps">
+<li><b>4.11.1</b><span>פרסור: jsep (MIT) → עץ; הערכה: מפרש עם רשימה סגורה של צמתים ופונקציות; פונקציות: formula.js (MIT)</span></li>
+<li><b>4.11.2</b><span>אסור: expr-eval (CVE-2025-12735, CVSS 9.8, לא מתוחזק) ו-HyperFormula (GPLv3) — שער 0.10 חוסם</span></li>
+<li><b>4.11.3</b><span>fuzz test + הגבלת זמן לכל הערכה; נוסחאות מתוספים רצות ב-QuickJS (11.2)</span></li>
+<li><b>4.11.4</b><span>תצוגת מפה (Leaflet קיים)</span></li>
+<li><b>4.11.5</b><span>סוכן שכותב נוסחה משפה טבעית (מקומי)</span></li>
+</ol><div class="ok"><b>קבלה (נמדד):</b><ul><li>30 נוסחאות זהב נכונות</li><li>0 eval בקוד (בדיקה)</li></ul></div><div class="meta">מקור: מחקר פערים #4</div></div></details>
+<details class="task"><summary><span class="tid">4.12</span><span class="tt">פתק יומי ולוח שנה<span class="pill p-new">חדש</span><span class="pill p-p0">P0</span><span class="meta">U · ממשק, עברית וידע · תלוי ב-1.1, 7.10 · <span class="mono">feat/daily-notes</span></span></span><span class="est">7 ש׳ 00 דק׳<span class="dt">א׳ 18.10 22:00 – ב׳ 19.10 05:00</span></span></summary>
+<div class="body"><ol class="steps">
+<li><b>4.12.1</b><span><code>note.today</code> + קיצור — <code>journal/YYYY-MM-DD.md</code> (ניתן להגדרה)</span></li>
+<li><b>4.12.2</b><span>תבניות עם <code>{{date}}</code> ו-<code>{{hebrewDate}}</code> (Intl, בלי ספרייה)</span></li>
+<li><b>4.12.3</b><span>לוח שנה בסרגל: ימים עם פתקים, קודם/הבא</span></li>
+<li><b>4.12.4</b><span>תאריך עברי רק דרך <code>Intl</code> — לא <code>@hebcal/core</code> (GPL); חגים ופרשות — מחוץ להיקף</span></li>
+</ol><div class="ok"><b>קבלה (נמדד):</b><ul><li>e2e: פתק היום נוצר ונפתח</li><li>תאריך עברי נכון על 20 תאריכי זהב</li></ul></div><div class="meta">מקור: מחקר פערים #5</div></div></details>
+<details class="task"><summary><span class="tid">4.13</span><span class="tt">משימות בכל הכספת<span class="pill p-new">חדש</span><span class="pill p-p1">P1</span><span class="meta">S · נתונים ואבטחה · תלוי ב-8.4 · <span class="mono">feat/vault-tasks</span></span></span><span class="est">8 ש׳ 00 דק׳<span class="dt">ו׳ 23.10 23:45 – שבת 24.10 07:45</span></span></summary>
+<div class="body"><ol class="steps">
+<li><b>4.13.1</b><span>port של המפענח ומודולי השאילתות של obsidian-tasks (MIT, עם ייחוס): <code>- [ ]</code> עם תאריכים ותחביר תואם</span></li>
+<li><b>4.13.2</b><span>בלוק ``<code>tasks</code>`` עם שאילתה מעל האינדקס</span></li>
+<li><b>4.13.3</b><span>פאנל היום / בקרוב</span></li>
+<li><b>4.13.4</b><span>תזכורות (Notification API / Tauri)</span></li>
+</ol><div class="ok"><b>קבלה (נמדד):</b><ul><li>1,000 משימות: שאילתה &lt; 100ms</li><li>תאימות לתחביר על 20 קבצים</li></ul></div><div class="meta">מקור: מחקר פערים #7</div></div></details>
+<details class="task"><summary><span class="tid">4.14</span><span class="tt">קורא PDF עם הערות<span class="pill p-new">חדש</span><span class="pill p-p1">P1</span><span class="meta">A · AI וסוכנים · תלוי ב-1.1 · <span class="mono">feat/pdf-reader</span></span></span><span class="est">11 ש׳ 00 דק׳<span class="dt">ה׳ 22.10 09:15 – 20:15</span></span></summary>
+<div class="body"><ol class="steps">
+<li><b>4.14.1</b><span>EmbedPDF v2 (MIT; PDFium WASM, וירטואליזציה, הדגשה / פתק / דיו / חיפוש) עם WASM מקומי (<code>wasmUrl</code>) — לא <code>cloudpdf/server</code> (FCL) ולא ענף v3</span></li>
+<li><b>4.14.2</b><span>הדגשות כ-W3C Web Annotation (TextQuoteSelector + עמוד / מלבן) לקובץ <code>file.pdf.md</code> עם קישורי <code>#page=3</code></span></li>
+<li><b>4.14.3</b><span>גיבוי: react-pdf-highlighter-extended (MIT) על pdf.js הקיים</span></li>
+<li><b>4.14.4</b><span>OCR לעמודים סרוקים (קיים)</span></li>
+</ol><div class="ok"><b>קבלה (נמדד):</b><ul><li>הדגשה → קישור שפותח את העמוד הנכון (e2e)</li></ul></div><div class="meta">מקור: מחקר פערים #8</div></div></details>
+<details class="task"><summary><span class="tid">4.15</span><span class="tt">קוצץ רשת v2 (התוסף הקיים, עובד באמת)<span class="pill p-p1">P1</span><span class="meta">S · נתונים ואבטחה · תלוי ב-2.7, 7.10 · <span class="mono">feat/clipper-v2</span></span></span><span class="est">10 ש׳ 00 דק׳<span class="dt">ג׳ 20.10 16:30 – ד׳ 21.10 02:30</span></span></summary>
+<div class="body"><ol class="steps">
+<li><b>4.15.1</b><span>fork של Obsidian Web Clipper (MIT; סימני המסחר לא כלולים → מיתוג מחדש): תבניות, טריגרים ו-highlighter; Defuddle (MIT) לחילוץ, Readability כגיבוי</span></li>
+<li><b>4.15.2</b><span>העברה מהתוסף: content script שרץ על דומיין האפליקציה מקבל את הקיצוץ ב-<code>postMessage</code> (תוסף לא יכול להפעיל share_target); בשולחן העבודה — deep link <code>lumen://clip</code>; במקום <code>/api/clip</code> שלא קיים</span></li>
+<li><b>4.15.3</b><span>Readability 0.6 (Apache) ב-main thread (צריך DOM) + Turndown (MIT) → Markdown + מקור + תאריך + שומר injection (2.7)</span></li>
+<li><b>4.15.4</b><span>הדגשות לפי URL וחזרה אליהן</span></li>
+<li><b>4.15.5</b><span>תבניות לפי אתר (ויקיפדיה, ynet, הארץ — אתרי חדשות נבדקים חי ומקומית בלבד, לא נשמרים כנתוני זהב)</span></li>
+</ol><div class="ok"><b>קבלה (נמדד):</b><ul><li>קיצוץ 20 דפי זהב (7.10: ויקיפדיה CC BY-SA, נחלת הכלל, דפים שלנו): כותרת + גוף נכונים ב-≥ 90%</li></ul></div><div class="meta">מקור: T34, מחקר פערים #9 · היה 5.11</div></div></details>
+<details class="task"><summary><span class="tid">4.16</span><span class="tt">לכידה מהירה (inbox)<span class="pill p-new">חדש</span><span class="pill p-p1">P1</span><span class="meta">D · תשתית וביצועים · תלוי ב-4.12 · <span class="mono">feat/quick-capture</span></span></span><span class="est">6 ש׳ 00 דק׳<span class="dt">ו׳ 23.10 03:45 – 09:45</span></span></summary>
+<div class="body"><ol class="steps">
+<li><b>4.16.1</b><span>קיצור גלובלי בשולחן העבודה</span></li>
+<li><b>4.16.2</b><span>שיתוף ל-PWA מותקנת (Android) → <code>inbox.md</code>; שיתוף מהאפליקציה הנייטיב — אחרי 13.3</span></li>
+<li><b>4.16.3</b><span>קיצור PWA ״פתק חדש״ (קיים) + הוספה מהירה</span></li>
+</ol><div class="ok"><b>קבלה (נמדד):</b><ul><li>לכידה ב-2 לחיצות בכל פלטפורמה</li></ul></div><div class="meta">מקור: מחקר פערים #10</div></div></details>
+<details class="task"><summary><span class="tid">4.17</span><span class="tt">תאימות JSON Canvas<span class="pill p-new">חדש</span><span class="pill p-p2">P2</span><span class="meta">D · תשתית וביצועים · תלוי ב-1.1, 4.19 · <span class="mono">feat/json-canvas</span></span></span><span class="est">4 ש׳ 00 דק׳<span class="dt">ו׳ 23.10 09:45 – 13:45</span></span></summary>
+<div class="body"><ol class="steps">
+<li><b>4.17.1</b><span>ייבוא/ייצוא JSON Canvas (הפורמט הפתוח של Obsidian, MIT) ↔ Excalidraw (אחרי 4.19)</span></li>
+</ol><div class="ok"><b>קבלה (נמדד):</b><ul><li>round-trip של 10 קנבסים</li></ul></div><div class="meta">מקור: תאימות</div></div></details>
+<details class="task"><summary><span class="tid">4.18</span><span class="tt">פרסום לאתר סטטי משלך<span class="pill p-new">חדש</span><span class="pill p-p2">P2</span><span class="meta">D · תשתית וביצועים · תלוי ב-3.3 · <span class="mono">feat/publish-own</span></span></span><span class="est">5 ש׳ 00 דק׳<span class="dt">ו׳ 23.10 13:45 – 18:45</span></span></summary>
+<div class="body"><ol class="steps">
+<li><b>4.18.1</b><span><code>file.exportSite</code> → push ל-GitHub Pages / Netlify של המשתמש</span></li>
+<li><b>4.18.2</b><span>בחירת פתקים, ניווט, חיפוש, RTL</span></li>
+<li><b>4.18.3</b><span>Quartz (MIT) כמקור לפרסום: אותם טרנספורמרים מ-4.7</span></li>
+</ol><div class="ok"><b>קבלה (נמדד):</b><ul><li>אתר של 50 פתקים נפרס ונבדק בדפדפן</li></ul></div><div class="meta">מקור: מחקר פערים #17</div></div></details>
+<details class="task"><summary><span class="tid">4.19</span><span class="tt">קנבס: מעבר ל-Excalidraw (MIT)<span class="pill p-new">חדש</span><span class="pill p-p0">P0</span><span class="meta">A · AI וסוכנים · תלוי ב-1.9, 15.10 · <span class="mono">feat/canvas-excalidraw</span></span></span><span class="est">10 ש׳ 00 דק׳<span class="dt">ב׳ 19.10 06:00 – 16:00</span></span></summary>
+<div class="body"><ol class="steps">
+<li><b>4.19.1</b><span><code>@excalidraw/excalidraw</code> (MIT) בעצלות במקום <code>CanvasTldraw.tsx</code>; שמירה ל-<code>canvases/&lt;name&gt;.excalidraw</code> (JSON פתוח)</span></li>
+<li><b>4.19.2</b><span>ממיר חד-פעמי מ-<code>.tldr</code> קיים: מלבנים, טקסט, חצים, פתקים, מסגרות, תמונות; המקור נשמר כגיבוי</span></li>
+<li><b>4.19.3</b><span>גופנים ונכסים מקומיים (<code>EXCALIDRAW_ASSET_PATH</code>) — בלי CDN; טקסט עברי RTL</span></li>
+<li><b>4.19.4</b><span>להסיר את tldraw מ-package.json; 4.17 ממפה Excalidraw ↔ JSON Canvas</span></li>
+</ol><div class="ok"><b>קבלה (נמדד):</b><ul><li>0 בקשות רשת מהקנבס ב-local-only (יומן הפרטיות)</li><li>20 קנבסים של tldraw מומרים בלי לאבד צורה</li><li>tldraw לא ב-bundle</li></ul></div><div class="meta">מקור: מחקר הקוד הפתוח: tldraw דורש מפתח בייצור</div></div></details>
+<details class="task"><summary><span class="tid">4.20</span><span class="tt">כספת בתיקייה במובייל<span class="pill p-new">חדש</span><span class="pill p-p2">P2</span><span class="pill p-tal">מחכה לך: 15.13</span><span class="meta">S · נתונים ואבטחה · תלוי ב-4.1, 4.4, 13.3 · <span class="mono">feat/vault-folder-mobile</span></span></span><span class="est">8 ש׳ 00 דק׳<span class="dt">א׳ 25.10 08:45 – 16:45</span></span></summary>
+<div class="body"><ol class="steps">
+<li><b>4.20.1</b><span>iOS: Capacitor Filesystem בתיקיית Documents של האפליקציה, גלויה באפליקציית ״קבצים״ (<code>UIFileSharingEnabled</code>, <code>LSSupportsOpeningDocumentsInPlace</code>)</span></li>
+<li><b>4.20.2</b><span>Android: Storage Access Framework (תיקייה שהמשתמש בוחר) דרך plugin; גיבוי: תיקיית האפליקציה</span></li>
+<li><b>4.20.3</b><span>מימוש <code>VaultBackend</code> + בדיקות החוזה; שינויים מבחוץ (4.4)</span></li>
+</ol><div class="ok"><b>קבלה (נמדד):</b><ul><li>בדיקות החוזה ירוקות על שני המימושים</li><li>קובץ שנערך באפליקציית ״קבצים״ מופיע ב-Lumen (בדיקה ידנית, 15.13)</li></ul></div><div class="meta">מקור: Codex על התוכנית (#136)</div></div></details>
+</section>
+<section class="card" id="p5"><header><h2><span class="num">5</span>סוכנים אמיתיים — המודל מציע, הכלים מבצעים</h2><span class="when">11 משימות · 28 ש׳ 30 דק׳ · א׳ 18.10 08:00 ← ו׳ 23.10 06:45</span></header>
+<div class="target"><b>יעד world class:</b> 13 הסוכנים רצים עם הכלים שלהם; 100% מפקודות ה-AI דרך זמן הריצה (מאמת + מבקר + trace + ביטול)</div>
+<div class="why">הליבה של התוכנית המקורית — היום אף סוכן לא מקבל כלים.</div>
+<details class="task"><summary><span class="tid">5.1</span><span class="tt">הכלים החסרים<span class="pill p-now">✅ #205</span><span class="pill p-p0">P0 (נדרש ל-P0)</span><span class="meta">A · AI וסוכנים · תלוי ב-1.1 · <span class="mono">feat/agent-tools</span></span></span><span class="est">בוצע (הוערך 3 ש׳ 00 דק׳)<span class="dt"></span></span></summary>
+<div class="body"><ol class="steps">
+<li><b>5.1.1</b><span><code>git_diff</code>, <code>set_frontmatter</code>, <code>replace_range</code> (כתיבה מאושרת, ב-trace)</span></li>
+<li><b>5.1.2</b><span><code>search_web</code> + <code>fetch_page</code> דרך שער המדיניות והיומן</span></li>
+<li><b>5.1.3</b><span><code>extract_quotes</code>, <code>csv_parse</code></span></li>
+<li><b>5.1.4</b><span>JSON Schema והיקף הרשאה (read / write / network) לכל כלי</span></li>
+</ol><div class="ok"><b>קבלה (נמדד):</b><ul><li>16/16 הכלים מ-§3 קיימים ונבדקים</li><li>כלי רשת נחסם ב-local-only בלי הסכמה</li></ul></div><div class="meta">מקור: T2 · היה 4.1</div></div></details>
+<details class="task"><summary><span class="tid">5.2</span><span class="tt">BM25 אמיתי<span class="pill p-now">✅ #232 (own BM25 1.000 vs Orama 0.597 on HeQ dev)</span><span class="pill p-p0">P0 (נדרש ל-P0)</span><span class="pill p-tal">מחכה לך: 15.11</span><span class="meta">A · AI וסוכנים · תלוי ב-1.1, 7.1 · <span class="mono">feat/bm25</span></span></span><span class="est">בוצע (הוערך 2 ש׳ 00 דק׳)<span class="dt"></span></span></summary>
+<div class="body"><ol class="steps">
+<li><b>5.2.1</b><span>spike: Orama (Apache-2.0) עם תוסף טוקנים עברי מול BM25 משלנו — נבחר לפי nDCG וגודל; אם Orama — אינדקס אחד לחיפוש, לסוכנים ולהשלמה</span></li>
+<li><b>5.2.2</b><span>BM25 מעל האינדקס המשותף (דלתא לפי קובץ)</span></li>
+<li><b>5.2.3</b><span>טוקנים עבריים: ניקוד, סופיות, אותיות שימוש</span></li>
+<li><b>5.2.4</b><span>search_workspace + דיאלוג החיפוש</span></li>
+</ol><div class="ok"><b>קבלה (נמדד):</b><ul><li>nDCG@10 על HeQ + השאילתות של טל (7.1): בסיס נמדד על החיפוש הנוכחי, BM25 ≥ בסיס + 10 נקודות</li><li>החלק הבין-לשוני (Belebele) נמדד ב-7.6 בחיפוש היברידי, לא ב-BM25</li><li>10,000 פתקים: &lt; 100ms</li></ul></div><div class="meta">מקור: T2, J5 · היה 4.2</div></div></details>
+<details class="task"><summary><span class="tid">5.3</span><span class="tt">לחבר כלים לכל 13 הסוכנים<span class="pill p-p0">P0</span><span class="meta">A · AI וסוכנים · תלוי ב-5.1, 5.2 · <span class="mono">feat/agents-use-tools</span></span></span><span class="est">5 ש׳ 00 דק׳<span class="dt">ב׳ 19.10 16:00 – 21:00</span></span></summary>
+<div class="body"><ol class="steps">
+<li><b>5.3.1</b><span>tagger: list_tags · linker: search_workspace + list_files · outliner: get_document · diagrammer: validate_mermaid · tasker: get_document · translator: get_document</span></li>
+<li><b>5.3.2</b><span>charter: csv_parse + validate_echarts · committer: git_diff (נושא + גוף) · writer / templater: get_selection · builder: write_file מבוים ואטומי</span></li>
+<li><b>5.3.3</b><span>proofreader: get_document · stylist: read_file + list_files · digester: list_files + read_file</span></li>
+<li><b>5.3.4</b><span>maxSteps לכל סוכן; JSON-ReAct למודלים בלי tools</span></li>
+<li><b>5.3.5</b><span>פלט מוגבל ב-JSON Schema למודלים קטנים: <code>format</code> של Ollama, XGrammar ב-web-llm</span></li>
+</ol><div class="ok"><b>קבלה (נמדד):</b><ul><li>כל סוכן מבצע לפחות קריאת כלי אחת ב-eval — ✅* מול Ollama מזויף, ✅ מול המודל האמיתי ב-CI (7.2)</li><li>builder שנכשל באמצע = 0 קבצים</li></ul></div><div class="meta">מקור: T8, §4 · היה 4.3</div></div></details>
+<details class="task"><summary><span class="tid">5.4</span><span class="tt">סוכן מחקר אמיתי<span class="pill p-p0">P0 (נדרש ל-P0)</span><span class="pill p-tal">מחכה לך: 15.3</span><span class="meta">A · AI וסוכנים · תלוי ב-5.3, 2.7 · <span class="mono">feat/researcher-agent</span></span></span><span class="est">3 ש׳ 00 דק׳<span class="dt">ב׳ 19.10 21:00 – ג׳ 20.10 00:00</span></span></summary>
+<div class="body"><ol class="steps">
+<li><b>5.4.1</b><span>def <code>researcher</code>: search_web → fetch_page → extract_quotes בלולאה + מבקר</span></li>
+<li><b>5.4.2</b><span>local-only: ספרייה מקומית; רשת רק בהסכמה ורק השאילתה</span></li>
+<li><b>5.4.3</b><span>שומר injection (2.7)</span></li>
+<li><b>5.4.4</b><span><code>research.ask</code> עובר לסוכן</span></li>
+<li><b>5.4.5</b><span>מקרה eval בעברית ובאנגלית</span></li>
+</ol><div class="ok"><b>קבלה (נמדד):</b><ul><li>≥ 90% מהטענות עם ציטוט מאומת (מודל אמיתי, טל 15.3)</li><li>local-only: 0 בקשות בלי הסכמה</li></ul></div><div class="meta">מקור: T14 · היה 4.4</div></div></details>
+<details class="task"><summary><span class="tid">5.5</span><span class="tt">כל פקודת AI דרך זמן הריצה<span class="pill p-p0">P0</span><span class="meta">A · AI וסוכנים · תלוי ב-5.3, 5.4 · <span class="mono">refactor/all-through-runtime</span></span></span><span class="est">5 ש׳ 00 דק׳<span class="dt">ג׳ 20.10 00:00 – 05:00</span></span></summary>
+<div class="body"><ol class="steps">
+<li><b>5.5.1</b><span>12 הפקודות שעוקפות היום: ghost text, הצעה אוטומטית, AI Rewrite, Ask Workspace (answerer), משימות אצווה, 3 שלבי builder, tools.autoTag (8 תגיות), suggestLinks (BM25), ai.outline (2 רמות), ai.actionItems (רמזים), ai.chart (עמודות), git.commit (diff)</span></li>
+<li><b>5.5.2</b><span>פרופיל הסגנון חל על writer, templater ו-Rewrite (T17)</span></li>
+<li><b>5.5.3</b><span>בדיקה סטטית: 0 קריאות <code>chat()</code> ישירות מחוץ ל-executors</span></li>
+</ol><div class="ok"><b>קבלה (נמדד):</b><ul><li>0 קריאות עוקפות</li><li>כל ריצה ב-trace</li></ul></div><div class="meta">מקור: §4, T17 · היה 4.5</div></div></details>
+<details class="task"><summary><span class="tid">5.6</span><span class="tt">מבקר שלם<span class="pill p-p1">P1</span><span class="meta">A · AI וסוכנים · תלוי ב-5.5 · <span class="mono">feat/critic-complete</span></span></span><span class="est">3 ש׳ 00 דק׳<span class="dt">ה׳ 22.10 20:15 – 23:15</span></span></summary>
+<div class="body"><ol class="steps">
+<li><b>5.6.1</b><span>אבחון במודל מחזיר retry שמבוצע</span></li>
+<li><b>5.6.2</b><span>״פצל מסמך״ באמת</span></li>
+<li><b>5.6.3</b><span>כפתור ״לא טוב״</span></li>
+<li><b>5.6.4</b><span>כל כשל → לוח ההצעות</span></li>
+<li><b>5.6.5</b><span>״הפעל Ollama״ עם בדיקה חיה</span></li>
+</ol><div class="ok"><b>קבלה (נמדד):</b><ul><li>כל הצעה מבצעת פעולה (בדיקה לכל סוג)</li><li>״לא טוב״ → ריצה חוזרת מתועדת</li></ul></div><div class="meta">מקור: T7, T12, §5 · היה 4.6</div></div></details>
+<details class="task"><summary><span class="tid">5.7</span><span class="tt">מנהל מודלים מלא<span class="pill p-p1">P1</span><span class="meta">A · AI וסוכנים · תלוי ב-1.7 · <span class="mono">feat/model-manager</span></span></span><span class="est">2 ש׳ 00 דק׳<span class="dt">ה׳ 22.10 23:15 – ו׳ 23.10 01:15</span></span></summary>
+<div class="body"><ol class="steps">
+<li><b>5.7.1</b><span>web-llm דרך <code>CreateWebWorkerMLCEngine</code>, עדכון 0.2.82 → 0.2.86</span></li>
+<li><b>5.7.2</b><span>רשימת מודלי Ollama + pull עם התקדמות</span></li>
+<li><b>5.7.3</b><span>שכבות לשני המבצעים + מצבי economy / balanced / quality בלוח</span></li>
+<li><b>5.7.4</b><span>ניקוי מטמון ומכסה</span></li>
+<li><b>5.7.5</b><span>אין WebGPU ב-Firefox ל-Linux ול-Android → WASM / Ollama, עם הודעה</span></li>
+</ol><div class="ok"><b>קבלה (נמדד):</b><ul><li>pull מהלוח עם התקדמות (Ollama מדומה)</li><li>מצב בלוח משנה את המודל בריצה הבאה</li></ul></div><div class="meta">מקור: T4, T6, T11 · היה 4.7</div></div></details>
+<details class="task"><summary><span class="tid">5.8</span><span class="tt">אצווה: השהיה, המשך והתקדמות חיה<span class="pill p-p1">P1</span><span class="meta">A · AI וסוכנים · תלוי ב-5.5 · <span class="mono">feat/batch-ui</span></span></span><span class="est">1 ש׳ 30 דק׳<span class="dt">ו׳ 23.10 01:15 – 02:45</span></span></summary>
+<div class="body"><ol class="steps">
+<li><b>5.8.1</b><span>השהה / המשך / בטל</span></li>
+<li><b>5.8.2</b><span>פס התקדמות ו-ETA</span></li>
+<li><b>5.8.3</b><span>מאמת ומבקר לכל עבודה</span></li>
+</ol><div class="ok"><b>קבלה (נמדד):</b><ul><li>השהיה → המשך אחרי רענון (e2e)</li></ul></div><div class="meta">מקור: T16 · היה 4.8</div></div></details>
+<details class="task"><summary><span class="tid">5.9</span><span class="tt">סימון טקסט שנכתב ב-AI<span class="pill p-new">חדש</span><span class="pill p-p1">P1</span><span class="meta">U · ממשק, עברית וידע · תלוי ב-5.5 · <span class="mono">feat/ai-authorship</span></span></span><span class="est">5 ש׳ 00 דק׳<span class="dt">ג׳ 20.10 12:15 – 17:15</span></span></summary>
+<div class="body"><ol class="steps">
+<li><b>5.9.1</b><span>כל טקסט שה-AI הכניס מסומן (כמו iA Writer)</span></li>
+<li><b>5.9.2</b><span>החלפה לסימון רגיל אחרי עריכה ידנית</span></li>
+<li><b>5.9.3</b><span>הצגה/הסתרה; נשמר בייצוא כאופציה</span></li>
+</ol><div class="ok"><b>קבלה (נמדד):</b><ul><li>100% מההכנסות של AI מסומנות (בדיקה)</li></ul></div><div class="meta">מקור: מחקר פערים §3</div></div></details>
+<details class="task"><summary><span class="tid">5.10</span><span class="tt">מילוי מאפיינים ב-AI עם תור אישור<span class="pill p-new">חדש</span><span class="pill p-p2">P2</span><span class="meta">A · AI וסוכנים · תלוי ב-4.9, 5.5 · <span class="mono">feat/ai-autofill</span></span></span><span class="est">4 ש׳ 00 דק׳<span class="dt">ו׳ 23.10 02:45 – 06:45</span></span></summary>
+<div class="body"><ol class="steps">
+<li><b>5.10.1</b><span>סוכן שממלא מאפיינים לפתקים נבחרים</span></li>
+<li><b>5.10.2</b><span>תור diff לאישור לפני כתיבה</span></li>
+<li><b>5.10.3</b><span>פלט מוגבל ב-JSON Schema</span></li>
+</ol><div class="ok"><b>קבלה (נמדד):</b><ul><li>0 כתיבות בלי אישור</li></ul></div><div class="meta">מקור: מחקר פערים §3</div></div></details>
+<details class="task"><summary><span class="tid">5.11</span><span class="tt">מסך אישור לשינויים שסוכנים מציעים<span class="pill p-now">✅ #223</span><span class="pill p-new">חדש</span><span class="pill p-p1">P1</span><span class="meta">A · AI וסוכנים · תלוי ב-5.1 · <span class="mono">feat/agent-review-ui</span></span></span><span class="est">בוצע (הוערך 4 ש׳ 00 דק׳)<span class="dt"></span></span></summary>
+<div class="body"><ol class="steps">
+<li><b>5.11.1</b><span>כלי כתיבה רק מציעים (5.1, <code>staging.ts</code>); כאן פאנל שמראה diff לכל שינוי עם אישור / דחייה, אחד-אחד או הכול</span></li>
+<li><b>5.11.2</b><span>העורך רושם <code>setDocumentApplier</code> — אישור על מסמך שלא נשמר מוחל על הטקסט החי ולא נגמר ב-conflict</span></li>
+<li><b>5.11.3</b><span>שימוש חוזר במצב ההצעות (CriticMarkup) של העורך כתצוגה</span></li>
+<li><b>5.11.4</b><span>ביטול ריצה מסיר את ההצעות שלה (כבר ב-5.1)</span></li>
+</ol><div class="ok"><b>קבלה (נמדד):</b><ul><li>שינוי של סוכן לא נכתב בלי אישור (e2e)</li><li>אישור על מסמך לא שמור מוחל</li><li>שינוי שהקובץ זז מתחתיו נדחה עם הסבר</li></ul></div><div class="meta">מקור: דוח 5.1 (#205)</div></div></details>
+</section>
+<section class="card" id="p6"><header><h2><span class="num">6</span>סוכנים מקומיים שמחליפים יכולות AI חיצוניות</h2><span class="when">18 משימות · 60 ש׳ 15 דק׳ · א׳ 18.10 16:00 ← שבת 24.10 14:15</span></header>
+<div class="target"><b>יעד world class:</b> לכל יכולת שדורשת ענן — כאן או אצל מתחרים — חלופה מקומית עם איכות שנמדדה על סט מוחזק; ענן רק בבחירה</div>
+<div class="why">היתרון האמיתי: Notion ו-Capacities מריצים AI בענן. המודלים נבחרו במחקר (נספח 19) — כל אחד עם רישיון מסחרי מאומת או מסומן ״תלוי החלטה״. כל משימה עדיין מתחילה ב-spike: נטען בדפדפן? גודל? איכות על הסט המוחזק?</div>
+<details class="task"><summary><span class="tid">6.0</span><span class="tt">צינור המרת מודלים ל-ONNX ואירוח<span class="pill p-new">חדש</span><span class="pill p-p0">P0 (נדרש ל-P0)</span><span class="pill p-tal">מחכה לך: 15.9</span><span class="meta">D · תשתית וביצועים · תלוי ב-0.10 · <span class="mono">ci/model-convert</span></span></span><span class="est">4 ש׳ 00 דק׳<span class="dt">א׳ 18.10 16:00 – 20:00</span></span></summary>
+<div class="body"><ol class="steps">
+<li><b>6.0.1</b><span>workflow ידני ב-GitHub Actions (יש שם רשת ל-Hugging Face; בסביבה שלי אין): Optimum export + כימות q8 / q4f16</span></li>
+<li><b>6.0.2</b><span>מודלים: Opus-MT en→he (Apache), opus-mt-tc-big-he-en (CC BY 4.0), DictaBERT-NER (CC BY 4.0), SigLIP multilingual אם המראה החיצוני לא תקין</span></li>
+<li><b>6.0.3</b><span>אירוח: GitHub Releases אם הריפו ציבורי, אחרת Hugging Face (15.9); checksum ורישיון + ייחוס לכל קובץ ב-<code>models/registry.json</code></span></li>
+<li><b>6.0.4</b><span>הורדה בהסכמה בלבד, מטמון ב-OPFS, הצגת גודל לפני ההורדה (560–630MB למודלים הכבדים)</span></li>
+</ol><div class="ok"><b>קבלה (נמדד):</b><ul><li>4 מודלים מומרים נטענים ב-transformers.js 4.3 בדפדפן ב-CI</li><li>לכל קובץ: checksum + רישיון + ייחוס</li></ul></div><div class="meta">מקור: נספח 19</div></div></details>
+<details class="task"><summary><span class="tid">6.1</span><span class="tt">הכתבה חיה מקומית<span class="pill p-new">חדש</span><span class="pill p-p0">P0 (נדרש ל-P0)</span><span class="pill p-tal">מחכה לך: 15.3</span><span class="meta">A · AI וסוכנים · תלוי ב-1.3, 7.1 · <span class="mono">feat/live-dictation</span></span></span><span class="est">10 ש׳ 00 דק׳<span class="dt">א׳ 18.10 20:00 – ב׳ 19.10 06:00</span></span></summary>
+<div class="body"><ol class="steps">
+<li><b>6.1.1</b><span>Silero VAD v5 (<code>@ricky0123/vad-web</code>, ISC + MIT, 2.3MB)</span></li>
+<li><b>6.1.2</b><span>חי בדפדפן: ivrit.ai Zipformer2 streaming (CC BY 4.0, int8 72MB) על build ה-WASM של sherpa-onnx (Apache), שכבר כולל פענוח זורם; ייחוס במסך הקרדיטים</span></li>
+<li><b>6.1.3</b><span>שולחן עבודה: whisper.cpp עם ה-ggml הרשמי של ivrit.ai Whisper large-v3-turbo (Apache) דרך Tauri</span></li>
+<li><b>6.1.4</b><span>קבצים בדפדפן: ivrit.ai Whisper turbo ONNX (q4f16 ≈ 563MB, WebGPU, <code>language=he</code> כפוי) — spike טעינה קודם; גיבוי whisper-base (MIT, 77MB)</span></li>
+<li><b>6.1.5</b><span>פיסוק: אין מודל פיסוק עברי פתוח → כללים + מעבר LLM מקומי לבחירה</span></li>
+<li><b>6.1.6</b><span>טקסט זמני → סופי; פקודות קוליות בסיסיות; בחירת מנוע לפי חומרה ושפה</span></li>
+</ol><div class="ok"><b>קבלה (נמדד):</b><ul><li>WER על 30 קטעי FLEURS ו-30 של Common Voice (7.1), נרמול: בלי פיסוק וניקוד, NFC — נמדד ב-CI (WASM), כל מקור בנפרד; יעד ראשון ≤ 15% על FLEURS</li><li>השהיה &lt; 1.5 שניות ב-WASM</li><li>Whisper-turbo נמדד אצל טל (15.3)</li></ul></div><div class="meta">מקור: מחליף Google Web Speech / whisper-1, נספח 19 · היה 5.1</div></div></details>
+<details class="task"><summary><span class="tid">6.2</span><span class="tt">הקראה מקומית: החלטת רישוי וקול אנגלי<span class="pill p-new">חדש</span><span class="pill p-p2">P2</span><span class="pill p-tal">מחכה לך: 15.10, 15.13</span><span class="meta">A · AI וסוכנים · תלוי ב-1.5, 0.10 · <span class="mono">feat/neural-tts</span></span></span><span class="est">4 ש׳ 00 דק׳<span class="dt">ו׳ 23.10 06:45 – 10:45</span></span></summary>
+<div class="body"><ol class="steps">
+<li><b>6.2.1</b><span>עברית: אין היום קול עברי שמותר מסחרית — כל הקולות הציבוריים אומנו על SASPEECH (אסור מסחרית); mms-tts-heb הוא NC → קולות מערכת בלבד, מתועד בממשק</span></li>
+<li><b>6.2.2</b><span>אנגלית: Kokoro-82M (Apache, q8 92MB) — אבל <code>phonemizer</code> כולל eSpeak NG (GPL-3.0); לפי החלטה 15.10: worker נפרד שמורד ביוזמת המשתמש, או phonemizer בלי GPL, או רק קולות מערכת</span></li>
+<li><b>6.2.3</b><span>BlueTTS (MIT, נתוני האימון בלי רישיון) — רק אחרי אישור בכתב מהמחבר (15.10)</span></li>
+<li><b>6.2.4</b><span>הדגשה כקישוט (לא שינוי הבחירה)</span></li>
+<li><b>6.2.5</b><span>0 בקשות רשת אחרי הורדה</span></li>
+<li><b>6.2.6</b><span>Phonikud (G2P ל-IPA) מייתר את eSpeak בעברית — אבל עדיין אין קול מותר; מנוע: Piper הישן (rhasspy, MIT, בארכיון), לא piper1-gpl; קול משלנו מנתונים מורשים — מחוץ לתוכנית, נבדק ב-13.6</span></li>
+</ol><div class="ok"><b>קבלה (נמדד):</b><ul><li>החלטה 15.10 מיושמת ומתועדת</li><li>0 רכיבי GPL ב-bundle (שער 0.10)</li><li>0 בקשות רשת</li></ul></div><div class="meta">מקור: מחליף TTS בענן, נספח 19 · היה 5.2</div></div></details>
+<details class="task"><summary><span class="tid">6.3</span><span class="tt">סוכן ניקוד עברי מקומי<span class="pill p-new">חדש</span><span class="pill p-p1">P1</span><span class="pill p-tal">מחכה לך: 15.11</span><span class="meta">A · AI וסוכנים · תלוי ב-7.1 · <span class="mono">feat/nikud</span></span></span><span class="est">6 ש׳ 00 דק׳<span class="dt">ו׳ 23.10 10:45 – 16:45</span></span></summary>
+<div class="body"><ol class="steps">
+<li><b>6.3.1</b><span>שלב 1: Nakdimon (MIT, ONNX קטן) — ניצחון מהיר שעובד בכל מכשיר</span></li>
+<li><b>6.3.2</b><span>שלב 2: phonikud-onnx או DictaBERT-large-char-menaked (CC BY 4.0, יש ייצוא ONNX int8) — עדיף, כי לכרטיס של phonikud-onnx יש רישיון סותר (MIT מול CC BY) (308MB; נגזר מ-Dicta, CC BY 4.0 + ייחוס) כהורדת ״איכות גבוהה״ — לכתוב מחדש ב-TS את עיבוד הקלט והפלט (היום Python בלבד)</span></li>
+<li><b>6.3.3</b><span>״הוסף ניקוד״ / ״הסר ניקוד״ על בחירה</span></li>
+<li><b>6.3.4</b><span>מאמת: שלד העיצורים זהה</span></li>
+<li><b>6.3.5</b><span>ניקוד חלקי (רק מילים דו-משמעיות)</span></li>
+</ol><div class="ok"><b>קבלה (נמדד):</b><ul><li>על הסט המודרני (Nakdimon, 40 משפטים מקומיים, 7.1): ≥ 90% ברמת מילה במודל ״איכות גבוהה״; בן-יהודה מדווח בנפרד</li><li>שלד: 100%</li></ul></div><div class="meta">מקור: מחליף Dicta Nakdan, נספח 19 · היה 5.3</div></div></details>
+<details class="task"><summary><span class="tid">6.4</span><span class="tt">תרגום מקומי בשלוש שכבות<span class="pill p-new">חדש</span><span class="pill p-p0">P0 (נדרש ל-P0)</span><span class="meta">A · AI וסוכנים · תלוי ב-6.5, 7.1, 6.0 · <span class="mono">feat/local-mt</span></span></span><span class="est">4 ש׳ 00 דק׳<span class="dt">ג׳ 20.10 05:45 – 09:45</span></span></summary>
+<div class="body"><ol class="steps">
+<li><b>6.4.1</b><span>שכבה 1: Translator API המובנה ב-Chrome (על המכשיר, תומך עברית; main thread בלבד) כשקיים</span></li>
+<li><b>6.4.2</b><span>שכבה 2: Opus-MT en→he (Apache) ו-tc-big-he-en (CC BY 4.0), מומרים ב-6.0, ב-transformers.js</span></li>
+<li><b>6.4.3</b><span>שכבה 3: M2M100-418M (MIT, ≈ 632MB) או LLM מקומי לשאר הזוגות; NLLB-200 אסור (NC)</span></li>
+<li><b>6.4.4</b><span>שימור קוד, קישורים ו-frontmatter; תבניות תרגום פטורות מ״אותה שפה״</span></li>
+</ol><div class="ok"><b>קבלה (נמדד):</b><ul><li>chrF על NTREX-128 (7.1) נמדד לכל שכבה; היעד = ה-baseline של Opus-MT מה-spike, ושכבה מתחתיו לא נבחרת אוטומטית</li><li>100% שימור קוד וקישורים</li></ul></div><div class="meta">מקור: מחליף Google Translate / DeepL, נספח 19 · היה 5.4</div></div></details>
+<details class="task"><summary><span class="tid">6.5</span><span class="tt">זיהוי שפה מקומי<span class="pill p-new">חדש</span><span class="pill p-p0">P0</span><span class="meta">A · AI וסוכנים · תלוי ב-1.1, 7.1 · <span class="mono">feat/lang-id</span></span></span><span class="est">45 דק׳<span class="dt">ג׳ 20.10 05:00 – 05:45</span></span></summary>
+<div class="body"><ol class="steps">
+<li><b>6.5.1</b><span>כתב (regex) + franc-min (MIT, 127KB) כ-util משותף; eld (Apache, 9MB) כחלופה מדויקת</span></li>
+<li><b>6.5.2</b><span>משמש: תרגום, דקדוק, OCR, קול</span></li>
+<li><b>6.5.3</b><span>החלפת sameScript בבדיקת שפה כשהכתב זהה</span></li>
+</ol><div class="ok"><b>קבלה (נמדד):</b><ul><li>דיוק ≥ 95% על Tatoeba (8 שפות, 7.1)</li></ul></div><div class="meta">מקור: review #136, #173 · היה 5.5</div></div></details>
+<details class="task"><summary><span class="tid">6.6</span><span class="tt">תיאור תמונות מקומי<span class="pill p-new">חדש</span><span class="pill p-p1">P1</span><span class="pill p-tal">מחכה לך: 15.11, 15.15</span><span class="meta">A · AI וסוכנים · תלוי ב-6.4 · <span class="mono">feat/local-vision</span></span></span><span class="est">4 ש׳ 00 דק׳<span class="dt">ו׳ 23.10 16:45 – 20:45</span></span></summary>
+<div class="body"><ol class="steps">
+<li><b>6.6.1</b><span>Florence-2 base-ft (MIT, q4f16 ≈ 224MB) ב-WebGPU worker → תרגום לשפת המסמך (6.4); גיבוי SmolVLM-256M (Apache, 189MB)</span></li>
+<li><b>6.6.2</b><span>Ollama vision כשזמין, עם AbortSignal</span></li>
+<li><b>6.6.3</b><span>מאמת: לא ריק, לא שם קובץ</span></li>
+</ol><div class="ok"><b>קבלה (נמדד):</b><ul><li>על כל 50 התמונות של סט התיאורים (30 Crossmodal-3600 עם הפניות בעברית + 20 מ-Commons עם ההפניות שטל הכין ב-15.11): ≥ 80% מקבלים ≥ 4 מתוך 5 בדירוג טל (15.15)</li></ul></div><div class="meta">מקור: T31, נספח 19 · היה 5.6</div></div></details>
+<details class="task"><summary><span class="tid">6.7</span><span class="tt">חיפוש תמונות לפי טקסט<span class="pill p-new">חדש</span><span class="pill p-p2">P2</span><span class="meta">A · AI וסוכנים · תלוי ב-6.4, 8.4, 6.0, 7.10 · <span class="mono">feat/image-search</span></span></span><span class="est">3 ש׳ 00 דק׳<span class="dt">שבת 24.10 03:45 – 06:45</span></span></summary>
+<div class="body"><ol class="steps">
+<li><b>6.7.1</b><span>SigLIP base multilingual (Apache) — איכות עברית לא ידועה, נמדדת קודם; גיבוי multilingual-CLIP; jina-clip-v2 אסור (NC)</span></li>
+<li><b>6.7.2</b><span>אם העברית חלשה: שאילתה מתורגמת (6.4)</span></li>
+<li><b>6.7.3</b><span>לשונית ״תמונות״</span></li>
+<li><b>6.7.4</b><span>אינדוקס דלתאי ב-worker</span></li>
+</ol><div class="ok"><b>קבלה (נמדד):</b><ul><li>recall@5 ≥ 80% על 30 שאילתות זהב בעברית</li></ul></div><div class="meta">מקור: יכולת חדשה, נספח 19 · היה 5.7</div></div></details>
+<details class="task"><summary><span class="tid">6.8</span><span class="tt">שיחה עם PDF מקומית<span class="pill p-new">חדש</span><span class="pill p-p1">P1</span><span class="pill p-tal">מחכה לך: 15.17</span><span class="meta">A · AI וסוכנים · תלוי ב-5.5, 4.14, 7.10 · <span class="mono">feat/pdf-chat</span></span></span><span class="est">4 ש׳ 00 דק׳<span class="dt">ו׳ 23.10 20:45 – שבת 24.10 00:45</span></span></summary>
+<div class="body"><ol class="steps">
+<li><b>6.8.1</b><span>טקסט מ-pdf.js + OCR לעמודים סרוקים</span></li>
+<li><b>6.8.2</b><span>chunks + embeddings + BM25</span></li>
+<li><b>6.8.3</b><span>answerer עם ציטוט לעמוד ולשורה (quoteCoverage)</span></li>
+<li><b>6.8.4</b><span>פתיחת העמוד המצוטט (4.14)</span></li>
+</ol><div class="ok"><b>קבלה (נמדד):</b><ul><li>≥ 85% תשובות עם ציטוט נכון על 3 PDF ו-30 שאלות (מודל אמיתי, טל 15.17)</li></ul></div><div class="meta">מקור: מחליף ChatPDF · היה 5.8</div></div></details>
+<details class="task"><summary><span class="tid">6.9</span><span class="tt">השלמה אוטומטית מקומית (FIM)<span class="pill p-new">חדש</span><span class="pill p-p1">P1</span><span class="pill p-tal">מחכה לך: 15.17</span><span class="meta">A · AI וסוכנים · תלוי ב-5.5, 5.7 · <span class="mono">feat/local-fim</span></span></span><span class="est">3 ש׳ 00 דק׳<span class="dt">שבת 24.10 00:45 – 03:45</span></span></summary>
+<div class="body"><ol class="steps">
+<li><b>6.9.1</b><span>Ollama <code>/api/generate</code> עם <code>suffix</code> (qwen2.5-coder 1.5B / 7B — Apache; לא 3B)</span></li>
+<li><b>6.9.2</b><span>web-llm fallback</span></li>
+<li><b>6.9.3</b><span>ביטול בכל הקשה, debounce, מטמון</span></li>
+<li><b>6.9.4</b><span>latency ב-trace</span></li>
+<li><b>6.9.5</b><span><code>npm run bench:fim</code>: מודד p50 / p95 של השלמה על Ollama מקומי — הכלי שטל מריץ ב-15.17</span></li>
+</ol><div class="ok"><b>קבלה (נמדד):</b><ul><li>p50 &lt; 300ms על Ollama מקומי (טל, 15.17)</li><li>0 קריאות ענן ב-local-only</li></ul></div><div class="meta">מקור: מחליף Copilot · היה 5.9</div></div></details>
+<details class="task"><summary><span class="tid">6.10</span><span class="tt">איות אנגלית מקומי<span class="pill p-new">חדש</span><span class="pill p-p0">P0</span><span class="meta">U · ממשק, עברית וידע · תלוי ב-6.5, 7.10 · <span class="mono">feat/local-spell-en</span></span></span><span class="est">1 ש׳ 30 דק׳<span class="dt">ג׳ 20.10 05:45 – 07:15</span></span></summary>
+<div class="body"><ol class="steps">
+<li><b>6.10.1</b><span>nspell + dictionary-en 4.0 (MIT AND BSD, SCOWL, 575KB) ב-worker; גיבוי typo-js (BSD-3)</span></li>
+<li><b>6.10.2</b><span>local-only: LanguageTool ציבורי חסום; LT מקומי אם מוגדר; אחרת nspell + proofreader</span></li>
+<li><b>6.10.3</b><span>ניתוב לפי שפת הפסקה (6.5)</span></li>
+</ol><div class="ok"><b>קבלה (נמדד):</b><ul><li>local-only: 0 בקשות ל-api.languagetool.org</li><li>recall ≥ 90% על סט שגיאות באנגלית</li></ul></div><div class="meta">מקור: מחליף LanguageTool ציבורי · היה 5.10</div></div></details>
+<details class="task"><summary><span class="tid">6.11</span><span class="tt">סיכום מקומי בשכבות<span class="pill p-new">חדש</span><span class="pill p-p2">P2</span><span class="meta">A · AI וסוכנים · תלוי ב-5.5, 7.10 · <span class="mono">feat/local-summarize</span></span></span><span class="est">2 ש׳ 00 דק׳<span class="dt">שבת 24.10 06:45 – 08:45</span></span></summary>
+<div class="body"><ol class="steps">
+<li><b>6.11.1</b><span>Summarizer API של Chrome — לאנגלית בלבד (לא תומך עברית)</span></li>
+<li><b>6.11.2</b><span>עברית: LLM מקומי (DictaLM 3.0 1.7B ב-Ollama, Qwen3 ב-web-llm)</span></li>
+<li><b>6.11.3</b><span>משמש: סיכום יומי, פגישה, שיחה עם PDF</span></li>
+</ol><div class="ok"><b>קבלה (נמדד):</b><ul><li>על 20 מסמכי זהב (7.10): ≥ 95% מהמשפטים בסיכום עוברים בדיקת עיגון אוטומטית במקור (<code>quoteContained</code>)</li></ul></div><div class="meta">מקור: מחקר פערים §3</div></div></details>
+<details class="task"><summary><span class="tid">6.12</span><span class="tt">fine-tune מקומי (LoRA)<span class="pill p-new">חדש</span><span class="pill p-p2">P2</span><span class="pill p-tal">מחכה לך: 15.13</span><span class="meta">S · נתונים ואבטחה · תלוי ב-5.5 · <span class="mono">feat/local-lora</span></span></span><span class="est">4 ש׳ 00 דק׳<span class="dt">ד׳ 21.10 02:30 – 06:30</span></span></summary>
+<div class="body"><ol class="steps">
+<li><b>6.12.1</b><span>ייצוא dataset (JSONL) מפרופיל הסגנון ומפתקים נבחרים</span></li>
+<li><b>6.12.2</b><span>Mac: <code>mlx_lm.lora</code> על Mistral 7B (Apache) → <code>mlx_lm.fuse --export-gguf</code> → <code>FROM</code> ב-Modelfile (MLX מייצא GGUF רק ל-Llama / Mistral / Mixtral)</span></li>
+<li><b>6.12.3</b><span>NVIDIA: PEFT (Unsloth core, Apache — לא Unsloth Studio, AGPL) → <code>convert_lora_to_gguf.py</code> → <code>ADAPTER</code></span></li>
+<li><b>6.12.4</b><span><code>ai.fineTune</code> מציג קודם את המסלול המקומי</span></li>
+</ol><div class="ok"><b>קבלה (נמדד):</b><ul><li>דמיון סגנון (cosine של embeddings לפתקים מוחזקים של המשתמש) גבוה ב-≥ 10% מהבסיס</li><li>טל מריץ על Mac (15.13)</li></ul></div><div class="meta">מקור: מחליף OpenAI fine-tune · היה 5.12</div></div></details>
+<details class="task"><summary><span class="tid">6.13</span><span class="tt">ציטוטים: להרחיב את BibtexBlock הקיים<span class="pill p-new">חדש</span><span class="pill p-p2">P2</span><span class="pill p-tal">מחכה לך: 15.10</span><span class="meta">U · ממשק, עברית וידע · תלוי ב-8.1, 0.10, 7.10 · <span class="mono">feat/citations</span></span></span><span class="est">3 ש׳ 00 דק׳<span class="dt">ג׳ 20.10 17:15 – 20:15</span></span></summary>
+<div class="body"><ol class="steps">
+<li><b>6.13.1</b><span><code>@citation-js/core</code> + plugin-bibtex (MIT) לפרסור</span></li>
+<li><b>6.13.2</b><span>עיצוב: <code>plugin-csl</code> תלוי ב-citeproc (CPAL-1.0 או AGPL) — לפי החלטה 15.10: citeproc עם ייחוס, או תבניות משלנו ל-APA / Chicago / MLA</span></li>
+<li><b>6.13.3</b><span>locale עברי (<code>locales-he-IL.xml</code>, CC BY-SA) offline</span></li>
+<li><b>6.13.4</b><span>DOI → נתונים רק ברשת ובהסכמה</span></li>
+<li><b>6.13.5</b><span>תשובות המחקר מייצרות רשימת מקורות</span></li>
+<li><b>6.13.6</b><span>סגנונות: apa מגיע עם plugin-csl; chicago-author-date ו-mla נוספים כקובצי CSL (CC BY-SA, עם ייחוס)</span></li>
+</ol><div class="ok"><b>קבלה (נמדד):</b><ul><li>20 רשומות זהב מעוצבות נכון ב-3 סגנונות offline, בעברית ובאנגלית</li></ul></div><div class="meta">מקור: מחליף כלי ציטוט, נספח 19 · היה 5.13</div></div></details>
+<details class="task"><summary><span class="tid">6.14</span><span class="tt">כלי <code>run_python</code> לסוכנים (על Pyodide הקיים)<span class="pill p-new">חדש</span><span class="pill p-p2">P2</span><span class="meta">A · AI וסוכנים · תלוי ב-5.1 · <span class="mono">feat/agent-python</span></span></span><span class="est">1 ש׳ 00 דק׳<span class="dt">שבת 24.10 08:45 – 09:45</span></span></summary>
+<div class="body"><ol class="steps">
+<li><b>6.14.1</b><span>LivePyBlock קיים — חושפים אותו ככלי לסוכנים בקריאה בלבד</span></li>
+<li><b>6.14.2</b><span>sandbox בלי רשת</span></li>
+</ol><div class="ok"><b>קבלה (נמדד):</b><ul><li>כלי רץ offline; 0 גישת רשת</li></ul></div><div class="meta">מקור: יכולת חדשה · היה 5.14</div></div></details>
+<details class="task"><summary><span class="tid">6.15</span><span class="tt">סוכן ניתוח נתונים<span class="pill p-new">חדש</span><span class="pill p-p2">P2</span><span class="pill p-tal">מחכה לך: 15.13</span><span class="meta">A · AI וסוכנים · תלוי ב-6.14, 5.3, 7.10 · <span class="mono">feat/data-analyst</span></span></span><span class="est">3 ש׳ 00 דק׳<span class="dt">שבת 24.10 09:45 – 12:45</span></span></summary>
+<div class="body"><ol class="steps">
+<li><b>6.15.1</b><span>שאלה על טבלה → קוד → sandbox → תוצאה + תרשים</span></li>
+<li><b>6.15.2</b><span>המאמת מריץ שוב ובודק עקביות</span></li>
+<li><b>6.15.3</b><span>התוצאה כבלוק חי בפתק</span></li>
+</ol><div class="ok"><b>קבלה (נמדד):</b><ul><li>≥ 85% תשובות מספריות נכונות על 20 שאלות זהב (מודל אמיתי, טל 15.13)</li></ul></div><div class="meta">מקור: מחליף ChatGPT Data Analysis · היה 5.15</div></div></details>
+<details class="task"><summary><span class="tid">6.16</span><span class="tt">סיכום פגישה מקומי<span class="pill p-new">חדש</span><span class="pill p-p2">P2</span><span class="pill p-tal">מחכה לך: 15.11</span><span class="meta">A · AI וסוכנים · תלוי ב-6.1, 5.5, 4.13, 7.10 · <span class="mono">feat/meeting-notes</span></span></span><span class="est">1 ש׳ 30 דק׳<span class="dt">שבת 24.10 12:45 – 14:15</span></span></summary>
+<div class="body"><ol class="steps">
+<li><b>6.16.1</b><span>voice.memo → writer: החלטות, משימות + אחראי + תאריך, שאלות פתוחות</span></li>
+<li><b>6.16.2</b><span>משימות ל-checkboxes ולפאנל המשימות (4.13)</span></li>
+<li><b>6.16.3</b><span>ICS לתאריכים</span></li>
+</ol><div class="ok"><b>קבלה (נמדד):</b><ul><li>≥ 90% מהמשימות זוהו ב-5 הקלטות זהב</li></ul></div><div class="meta">מקור: מחליף Otter · היה 5.16</div></div></details>
+<details class="task"><summary><span class="tid">6.17</span><span class="tt">ענן רק בבחירה — ביקורת כל המסלולים<span class="pill p-new">חדש</span><span class="pill p-p0">P0</span><span class="meta">A · AI וסוכנים · תלוי ב-6.1, 5.4, 6.4, 6.10, 2.4 · <span class="mono">chore/no-cloud-defaults</span></span></span><span class="est">1 ש׳ 30 דק׳<span class="dt">ג׳ 20.10 09:45 – 11:15</span></span></summary>
+<div class="body"><ol class="steps">
+<li><b>6.17.1</b><span>כל מסלול ענן (embeddings, Batch, fine-tune, whisper-1, LanguageTool, Gemini / Anthropic / Mistral) — מאחורי מדיניות + חלופה מקומית</span></li>
+<li><b>6.17.2</b><span>טבלה בתיעוד: יכולת → מנוע מקומי → אפשרות ענן</span></li>
+<li><b>6.17.3</b><span>המסע מ-2.4 מורחב לכל הפקודות</span></li>
+</ol><div class="ok"><b>קבלה (נמדד):</b><ul><li>local-only: 0 מסלולים לענן במסע המלא</li></ul></div><div class="meta">מקור: §2 · היה 5.17</div></div></details>
+</section>
+<section class="card" id="p7"><header><h2><span class="num">7</span>אימות ואיכות מודלים</h2><span class="when">10 משימות · 17 ש׳ 45 דק׳ · א׳ 18.10 20:00 ← א׳ 25.10 02:45</span></header>
+<div class="target"><b>יעד world class:</b> סטים מוחזקים ומורשים לכל יכולת; מודל אמיתי זעיר ב-CI בכל לילה; eval ≥ 90% על gemma3:12b ו-≥ 80% על qwen2.5:7b</div>
+<div class="why">עד היום 0% אומת מול מודל אמיתי. השלב הזה הופך ✅* ל-✅ — ומונע את הטעות של ״ציון מזויף״.</div>
+<details class="task"><summary><span class="tid">7.1</span><span class="tt">סטי זהב מוחזקים ומורשים<span class="pill p-now">✅ #225 (החלק הציבורי; ה-test נבנה ב-CI אחרי 15.9)</span><span class="pill p-new">חדש</span><span class="pill p-p0">P0</span><span class="pill p-tal">מחכה לך: 15.11, 15.9</span><span class="meta">D · תשתית וביצועים · תלוי ב-0.10 · <span class="mono">feat/golden-sets</span></span></span><span class="est">בוצע (הוערך 12 ש׳ 00 דק׳)<span class="dt"></span></span></summary>
+<div class="body"><ol class="steps">
+<li><b>7.1.1</b><span>נבנים על ידי סוכן נפרד ומוקפאים לפני המימוש (מי שמממש לא כותב את הסט); רץ כ-workflow ב-GitHub Actions (בסביבה שלי אין גישה ל-Hugging Face); סטים פתוחים — בלי טוקן; סטים שדורשים אישור תנאים (FLORES+, Common Voice) — אחרי שטל מאשר ומוסיף טוקן (15.9, 15.11)</span></li>
+<li><b>7.1.2</b><span>דיבור: FLEURS he (CC BY) + Common Voice (CC0) + 20 הקלטות של טל · תרגום: NTREX-128 (CC BY-SA) · ניקוד: בן-יהודה (נחלת הכלל)</span></li>
+<li><b>7.1.3</b><span>OCR: תמונות סינתטיות בגופני OFL + 15 עמודים מצולמים · איות: רעש עברי סינתטי + תיקוני ויקיפדיה · אחזור: HeQ + Belebele</span></li>
+<li><b>7.1.4</b><span>PII: IAHLTwiki + Faker he_IL · תיאורי תמונות: Crossmodal-3600 · injection: deepset + Gandalf + BIPIA + 30 בעברית · שפה: Tatoeba (CC0)</span></li>
+<li><b>7.1.5</b><span>בריפו רק פיצול dev (<code>eval/golden/&lt;task&gt;/dev/</code>) + SOURCES.md, LICENSE, sampler, manifest של sha256 ו-canary GUID; פיצול ה-test (המוחזק) לא נכנס לריפו — ה-workflow בונה אותו ב-CI מהמקורות עם seed סודי (<code>GOLDEN_SEED</code>, 15.9), מריץ שם את ה-eval ומפרסם רק ציונים, כך שסוכן שמממש לא רואה את התשובות; FLORES+, Belebele, Nakdimon ו-ivrit.ai רק בסקריפט הורדה, לא בריפו</span></li>
+<li><b>7.1.6</b><span>קודם החלק הציבורי (מוקפא ומסומן ״חלקי״); החלק של טל (15.11) מצטרף כשמוכן ואז הסט ננעל</span></li>
+</ol><div class="ok"><b>קבלה (נמדד):</b><ul><li>10 סטים, כל אחד עובר שער רישיונות (0.10)</li><li>גדלים: 80 / 250 / 100 / 150 / 200 / 130 / 250 / 50 / 130 / 240</li><li>אף קובץ test בריפו (בדיקה); אותו seed → אותו sha256 (sampler דטרמיניסטי)</li></ul></div><div class="meta">מקור: מחקר סטי הזהב, נספח 20</div></div></details>
+<details class="task"><summary><span class="tid">7.2</span><span class="tt">מודל אמיתי זעיר ב-CI<span class="pill p-new">חדש</span><span class="pill p-p0">P0</span><span class="meta">D · תשתית וביצועים · תלוי ב-0.11, 5.3, 5.4 · <span class="mono">ci/real-tiny-model</span></span></span><span class="est">3 ש׳ 00 דק׳<span class="dt">ג׳ 20.10 00:00 – 03:00</span></span></summary>
+<div class="body"><ol class="steps">
+<li><b>7.2.1</b><span>כל 14 הסוכנים (13 + researcher מ-5.4) — Ollama ב-CI עם qwen3:0.6b (Apache, תגית tools, 523MB): temperature 0, seed קבוע, ≤ 64 טוקנים, בדיקות מבנה (שם כלי, ארגומנטים מול JSON Schema) — לא נוסח</span></li>
+<li><b>7.2.2</b><span>בלילה: qwen3:1.7b לתרחישים מרובי צעדים + DictaLM 3.0 1.7B לבדיקת עשן בעברית</span></li>
+<li><b>7.2.3</b><span>מטמון <code>~/.ollama/models</code> לפי digest; מדידת מהירות ב-runner (אין נתון מפורסם)</span></li>
+<li><b>7.2.4</b><span>service containers: LanguageTool (פורט 8010; אנגלית בלבד — אין עברית) ו-SearXNG (<code>search.formats: json</code>, <code>limiter: false</code>; AGPL — שירות בדיקה חיצוני בלבד)</span></li>
+<li><b>7.2.5</b><span>רץ בלילה (0.11) + ידני ב-PR שנוגע ב-agents</span></li>
+</ol><div class="ok"><b>קבלה (נמדד):</b><ul><li>14/14 סוכנים (כולל researcher) מחזירים פלט שעובר סכמה מול מודל אמיתי</li><li>LanguageTool ו-SearXNG נבדקים באמת (T15)</li></ul></div><div class="meta">מקור: E0, T15</div></div></details>
+<details class="task"><summary><span class="tid">7.3</span><span class="tt">eval לכל 14 הסוכנים<span class="pill p-p0">P0</span><span class="meta">A · AI וסוכנים · תלוי ב-5.3, 7.1, 5.4 · <span class="mono">feat/eval-complete</span></span></span><span class="est">3 ש׳ 00 דק׳<span class="dt">ג׳ 20.10 11:15 – 14:15</span></span></summary>
+<div class="body"><ol class="steps">
+<li><b>7.3.1</b><span>מקרי זהב לכל אחד מ-14 הסוכנים (≥ 5, עברית ואנגלית), מהסטים המוחזקים; ל-researcher גם רשת, ציטוטים ו-injection</span></li>
+<li><b>7.3.2</b><span>Mermaid מתקמפל באמת; תגיות מתוך הכספת</span></li>
+<li><b>7.3.3</b><span>דוח HTML מקומי</span></li>
+</ol><div class="ok"><b>קבלה (נמדד):</b><ul><li>כל סוכן עם ≥ 5 מקרים</li><li><code>npm run eval:agents</code> מייצר דוח</li></ul></div><div class="meta">מקור: T19 · היה 6.1</div></div></details>
+<details class="task"><summary><span class="tid">7.4</span><span class="tt">רופא AI שלם<span class="pill p-p1">P1</span><span class="pill p-tal">מחכה לך: 15.3</span><span class="meta">U · ממשק, עברית וידע · תלוי ב-6.1, 6.3, 6.4, 6.6 · <span class="mono">feat/doctor-complete</span></span></span><span class="est">2 ש׳ 00 דק׳<span class="dt">ו׳ 23.10 20:45 – 22:45</span></span></summary>
+<div class="body"><ol class="steps">
+<li><b>7.4.1</b><span>CSP ל-8787 / 8010, docker, כל המנועים משלב 6</span></li>
+<li><b>7.4.2</b><span>תיקון בלחיצה כשאפשר</span></li>
+<li><b>7.4.3</b><span>מקרה זהב לכל סוכן</span></li>
+</ol><div class="ok"><b>קבלה (נמדד):</b><ul><li>מכונה ריקה: כל שורה עם הצעה נכונה</li><li>אצל טל: הכול ירוק</li></ul></div><div class="meta">מקור: T21 · היה 6.2</div></div></details>
+<details class="task"><summary><span class="tid">7.5</span><span class="tt">OCR ב-CI<span class="pill p-p1">P1</span><span class="pill p-tal">מחכה לך: 15.11</span><span class="meta">S · נתונים ואבטחה · תלוי ב-7.1 · <span class="mono">feat/ocr-ci</span></span></span><span class="est">2 ש׳ 00 דק׳<span class="dt">ד׳ 21.10 06:30 – 08:30</span></span></summary>
+<div class="body"><ol class="steps">
+<li><b>7.5.1</b><span>traineddata (Apache) ב-<code>public/tesseract/lang</code></span></li>
+<li><b>7.5.2</b><span>e2e על בניית ייצור עם תמונות OCR מ-7.1</span></li>
+<li><b>7.5.3</b><span>CER עברית ואנגלית</span></li>
+</ol><div class="ok"><b>קבלה (נמדד):</b><ul><li>CER בנפרד: מודפס נקי ≤ 5%, מושפל ≤ 12%, שורות מנוקדות — מדווח בלבד</li><li>רץ בכל PR</li></ul></div><div class="meta">מקור: T31 · היה 6.3</div></div></details>
+<details class="task"><summary><span class="tid">7.6</span><span class="tt">ה-reranker הקיים: למדוד ולהחליט, וספריית קריאה<span class="pill p-p1">P1</span><span class="meta">A · AI וסוכנים · תלוי ב-5.2, 8.4, 7.1 · <span class="mono">feat/rerank-library</span></span></span><span class="est">2 ש׳ 30 דק׳<span class="dt">שבת 24.10 14:15 – 16:45</span></span></summary>
+<div class="body"><ol class="steps">
+<li><b>7.6.1</b><span>bge-reranker-v2-m3 כבר מחובר (<code>transformersEngine.ts</code> RERANK_MODEL, ב-SearchDialog וב-research/agent) — מודדים אותו על סט האחזור, כולל החלק הבין-לשוני בחיפוש היברידי</span></li>
+<li><b>7.6.2</b><span>שיפור &lt; 5 נקודות → מסירים או מכבים כברירת מחדל; אחרת — רק ב-WebGPU / שולחן עבודה, הורדה בהסכמה (int8 571MB)</span></li>
+<li><b>7.6.3</b><span>jina-reranker-v2 אסור (NC); mMiniLM לא תומך עברית</span></li>
+<li><b>7.6.4</b><span>ספרייה עם embeddings משלה; אינדוקס בקיצוץ</span></li>
+<li><b>7.6.5</b><span>סינון לפני top-k (כבר ב-1.1)</span></li>
+</ol><div class="ok"><b>קבלה (נמדד):</b><ul><li>nDCG@10 עם reranker ≥ +5 נקודות, או החלטה מתועדת להסיר / לכבות</li></ul></div><div class="meta">מקור: T29, T34, נספח 19 · היה 6.4</div></div></details>
+<details class="task"><summary><span class="tid">7.7</span><span class="tt">סיכום יומי: אימות שהתיקונים מ-1.1 סוגרים את T33<span class="pill p-p1">P1</span><span class="meta">A · AI וסוכנים · תלוי ב-1.1 · <span class="mono">fix/digest</span></span></span><span class="est">15 דק׳<span class="dt">שבת 24.10 16:45 – 17:00</span></span></summary>
+<div class="body"><ol class="steps">
+<li><b>7.7.1</b><span>1.1 כבר סגר: אין דריסה (הוספה), checkpoint שנשמר בכשל, נתיבים מלאים, <code>.markdown</code>, דילוג על קוד</span></li>
+<li><b>7.7.2</b><span>לבדוק את מה שנשאר: ״מאז הביקור האחרון״ ותיקייה קבועה</span></li>
+</ol><div class="ok"><b>קבלה (נמדד):</b><ul><li>שתי הרצות ביום = שני חלקים באותו קובץ</li><li>T33 ✅ או משימה פתוחה עם סיבה</li></ul></div><div class="meta">מקור: T33 · היה 6.5</div></div></details>
+<details class="task"><summary><span class="tid">7.8</span><span class="tt">רתמת מדידה בדפדפן אמיתי<span class="pill p-new">חדש</span><span class="pill p-p1">P1</span><span class="pill p-tal">מחכה לך: 15.14</span><span class="meta">D · תשתית וביצועים · תלוי ב-6.1, 6.3, 6.4, 6.6, 6.9, 7.6, 2.6 · <span class="mono">feat/model-bench</span></span></span><span class="est">2 ש׳ 00 דק׳<span class="dt">א׳ 25.10 00:45 – 02:45</span></span></summary>
+<div class="body"><ol class="steps">
+<li><b>7.8.1</b><span><code>npm run bench:models</code>: Playwright עם WebGPU, כל מנוע על הסטים</span></li>
+<li><b>7.8.2</b><span>זמן, זיכרון, איכות → <code>models/registry.json</code></span></li>
+<li><b>7.8.3</b><span>רץ אצל טל (GPU)</span></li>
+</ol><div class="ok"><b>קבלה (נמדד):</b><ul><li>registry עם מדדים אמיתיים לכל מנוע</li></ul></div><div class="meta">מקור: E0 · היה 6.6</div></div></details>
+<details class="task"><summary><span class="tid">7.9</span><span class="tt">עיבוד ה-eval האמיתי של טל<span class="pill p-p0">P0</span><span class="pill p-tal">מחכה לך: 15.3</span><span class="meta">A · AI וסוכנים · תלוי ב-7.3, 15.3 · <span class="mono">feat/eval-real</span></span></span><span class="est">3 ש׳ 00 דק׳<span class="dt">ד׳ 21.10 20:15 – 23:15</span></span></summary>
+<div class="body"><ol class="steps">
+<li><b>7.9.1</b><span>קליטת <code>eval/results</code> (15.3)</span></li>
+<li><b>7.9.2</b><span><code>measured</code> בקטלוג; כולל DictaLM 3.0 אם הוכנס (1.7)</span></li>
+<li><b>7.9.3</b><span>ברירות מחדל לפי התוצאות</span></li>
+<li><b>7.9.4</b><span>תיקון הסוכנים שנכשלו</span></li>
+</ol><div class="ok"><b>קבלה (נמדד):</b><ul><li>≥ 90% gemma3:12b, ≥ 80% qwen2.5:7b — או משימת תיקון פתוחה לכל כישלון</li></ul></div><div class="meta">מקור: E0, T27 · היה 6.7</div></div></details>
+<details class="task"><summary><span class="tid">7.10</span><span class="tt">סטי זהב קטנים לפיצ&#x27;רים<span class="pill p-now">✅ #240 (11/12 סטים; פגישות — 15.11)</span><span class="pill p-new">חדש</span><span class="pill p-p0">P0 (נדרש ל-P0)</span><span class="pill p-tal">מחכה לך: 15.11</span><span class="meta">D · תשתית וביצועים · תלוי ב-0.10 · <span class="mono">feat/golden-small</span></span></span><span class="est">בוצע (הוערך 7 ש׳ 00 דק׳)<span class="dt"></span></span></summary>
+<div class="body"><ol class="steps">
+<li><b>7.10.1</b><span>סוכן נפרד בונה ומקפיא לפני המימוש, כמו 7.1</span></li>
+<li><b>7.10.2</b><span>איות אנגלית: 100 זוגות רעש סינתטי על טקסט בנחלת הכלל · חיפוש תמונות: 30 שאילתות מתיאורי XM3600 · קוצץ: 20 דפים (ויקיפדיה CC BY-SA + נחלת הכלל + דפים שלנו)</span></li>
+<li><b>7.10.3</b><span>PDF: 3 מסמכים בנחלת הכלל + 30 שאלות · ניתוח נתונים: 20 שאלות על CSV פתוח · סיכום: 20 מסמכים · פגישות: 5 הקלטות של טל (15.11)</span></li>
+<li><b>7.10.4</b><span>נוסחאות: 30 · אזכורים לא מקושרים: 30 · שורות דו-כיווניות: 30 · תאריכים עבריים: 20 · ציטוטים: 20 רשומות</span></li>
+</ol><div class="ok"><b>קבלה (נמדד):</b><ul><li>12 סטים קטנים מוקפאים עם sha256 ורישיון</li></ul></div><div class="meta">מקור: ביקורת v5 #16</div></div></details>
+</section>
+<section class="card" id="p8"><header><h2><span class="num">8</span>ביצועים</h2><span class="when">5 משימות · 21 ש׳ 30 דק׳ · א׳ 18.10 20:00 ← שבת 24.10 01:15</span></header>
+<div class="target"><b>יעד world class:</b> Lighthouse ≥ 90 / ≥ 80 (חציון של 3) על כל PR; LCP &lt; 2.5s, TTI &lt; 3.5s; הפעלה ≤ 250KB; 10,000 פתקים ומסמך 2MB</div>
+<div class="why">היום 72 / 45. השורש: עבודת main thread (TBT 2.3s בנייד), לא גודל ההורדה. ניסיון רינדור מפוצל כבר נכשל — לכן מתחילים בפרופיל.</div>
+<details class="task"><summary><span class="tid">8.1</span><span class="tt">צינור ה-markdown ב-worker<span class="pill p-p0">P0</span><span class="meta">D · תשתית וביצועים · תלוי ב-0.2, 4.7 · <span class="mono">perf/render-worker</span></span></span><span class="est">10 ש׳ 00 דק׳<span class="dt">א׳ 18.10 20:00 – ב׳ 19.10 06:00</span></span></summary>
+<div class="body"><ol class="steps">
+<li><b>8.1.1</b><span>פרופיל: איפה בדיוק ה-TBT (React, unified, Shiki, KaTeX) — לפני שכותבים קוד</span></li>
+<li><b>8.1.2</b><span>unified/rehype ב-worker → HAST; ה-main מרנדר בלבד</span></li>
+<li><b>8.1.3</b><span>Shiki ו-KaTeX ב-worker</span></li>
+<li><b>8.1.4</b><span>רינדור מדורג (viewport קודם)</span></li>
+</ol><div class="ok"><b>קבלה (נמדד):</b><ul><li>TBT בנייד &lt; 300ms</li><li>פלט זהה (snapshot של 50 מסמכים)</li></ul></div><div class="meta">מקור: C1 · היה 7.1</div></div></details>
+<details class="task"><summary><span class="tid">8.2</span><span class="tt">הפעלה ≤ 250KB<span class="pill p-p0">P0 (נדרש ל-P0)</span><span class="meta">D · תשתית וביצועים · תלוי ב-8.1 · <span class="mono">perf/startup-2</span></span></span><span class="est">4 ש׳ 00 דק׳<span class="dt">ב׳ 19.10 06:00 – 10:00</span></span></summary>
+<div class="body"><ol class="steps">
+<li><b>8.2.1</b><span>לוחות ודיאלוגים בעצלות מלאה</span></li>
+<li><b>8.2.2</b><span>חיתוך תלויות כבדות</span></li>
+<li><b>8.2.3</b><span>prerender של מעטפת הקבלה (מהניסוי <code>perf/prerender</code>)</span></li>
+<li><b>8.2.4</b><span>סקריפט אתחול אחד: לאחד את <code>public/theme-boot.js</code> (מ-1.1) עם BOOT_JS + hash של הניסוי — לא שני מנגנונים</span></li>
+</ol><div class="ok"><b>קבלה (נמדד):</b><ul><li>סכום chunks ההפעלה ≤ 250KB gzip</li></ul></div><div class="meta">מקור: C2, T38 · היה 7.2</div></div></details>
+<details class="task"><summary><span class="tid">8.3</span><span class="tt">שער Lighthouse על כל PR<span class="pill p-p0">P0</span><span class="meta">D · תשתית וביצועים · תלוי ב-8.1, 8.2 · <span class="mono">ci/lighthouse-gate</span></span></span><span class="est">1 ש׳ 00 דק׳<span class="dt">ב׳ 19.10 10:00 – 11:00</span></span></summary>
+<div class="body"><ol class="steps">
+<li><b>8.3.1</b><span>desktop + mobile: <code>numberOfRuns: 5</code> ו-<code>aggregationMethod: median-run</code> במפורש (ברירת המחדל של LHCI היא optimistic)</span></li>
+<li><b>8.3.2</b><span>ספים 0.9 / 0.8, LCP &lt; 2.5s, TTI &lt; 3.5s</span></li>
+<li><b>8.3.3</b><span>מדידת frame-time במסמך 2MB בלילה בלבד (לא ב-PR)</span></li>
+</ol><div class="ok"><b>קבלה (נמדד):</b><ul><li>השער פעיל וירוק ב-3 ריצות לילה רצופות (תנאי ה-P0 לשחרור); שבוע שלם בלי flakes נמדד אחרי השחרור ונרשם ב-13.6</li></ul></div><div class="meta">מקור: C1 · היה 7.3</div></div></details>
+<details class="task"><summary><span class="tid">8.4</span><span class="tt">כספת גדולה ומסמך ארוך<span class="pill p-p1">P1</span><span class="meta">D · תשתית וביצועים · תלוי ב-4.1 · <span class="mono">perf/vault-worker</span></span></span><span class="est">5 ש׳ 00 דק׳<span class="dt">ו׳ 23.10 18:45 – 23:45</span></span></summary>
+<div class="body"><ol class="steps">
+<li><b>8.4.1</b><span>האינדקס ב-worker מעל VaultBackend (4.1); עץ הקבצים מהאינדקס</span></li>
+<li><b>8.4.2</b><span>Float32Array לפי קובץ</span></li>
+<li><b>8.4.3</b><span>מתאר ותצוגה אינקרמנטליים (פרסור מחדש מהבלוק שהשתנה כשגדר / הגדרת הפניה משתנה)</span></li>
+<li><b>8.4.4</b><span><code>e2e/perf-vault.spec.ts</code>: 10,000 פתקים ומסמך 2MB</span></li>
+</ol><div class="ok"><b>קבלה (נמדד):</b><ul><li>פתיחה &lt; 1s, שמירה → אינדקס &lt; 50ms, חיפוש &lt; 100ms</li><li>הקלדה ב-2MB &lt; 16ms לפריים (לילה)</li></ul></div><div class="meta">מקור: C4, C6, T39 · היה 7.4</div></div></details>
+<details class="task"><summary><span class="tid">8.5</span><span class="tt">PWA offline מלא<span class="pill p-p1">P1</span><span class="meta">D · תשתית וביצועים · תלוי ב-1.1 · <span class="mono">fix/pwa-offline</span></span></span><span class="est">1 ש׳ 30 דק׳<span class="dt">ו׳ 23.10 23:45 – שבת 24.10 01:15</span></span></summary>
+<div class="body"><ol class="steps">
+<li><b>8.5.1</b><span>shiki ו-workers ב-precache</span></li>
+<li><b>8.5.2</b><span>גופנים עבריים offline בטעינה הראשונה (B8)</span></li>
+<li><b>8.5.3</b><span>e2e: הדגשה, OCR, share_target עם טקסט, פתיחת קובץ, AI מקומי (מבצע מדומה ב-CI, אמיתי אצל טל)</span></li>
+</ol><div class="ok"><b>קבלה (נמדד):</b><ul><li>offline e2e מכסה הדגשה, גופנים, שיתוף וקבצים</li></ul></div><div class="meta">מקור: D1, D4, B8 · היה 7.5</div></div></details>
+</section>
+<section class="card" id="p9"><header><h2><span class="num">9</span>עברית ו-i18n</h2><span class="when">9 משימות · 21 ש׳ 45 דק׳ · א׳ 18.10 10:30 ← שבת 24.10 18:00</span></header>
+<div class="target"><b>יעד world class:</b> 0 מחרוזות קשיחות (סריקה ב-CI); ≤ 5% לא מתורגם (טיוטות נחשבות לא מתורגמות); איות עברי בלי רשת; עריכה דו-כיוונית נכונה</div>
+<div class="why">RTL לבד כבר לא מבדל (Obsidian 1.14, Notion). מנצחים בעומק: bidi מעורב, ניקוד, איות, תאריכים עבריים, ייצוא נכון.</div>
+<details class="task"><summary><span class="tid">9.1</span><span class="tt">אפס מחרוזות קשיחות<span class="pill p-p0">P0</span><span class="meta">U · ממשק, עברית וידע · תלוי ב-0.3 · <span class="mono">fix/i18n-labels</span></span></span><span class="est">1 ש׳ 30 דק׳<span class="dt">א׳ 18.10 10:30 – 12:00</span></span></summary>
+<div class="body"><ol class="steps">
+<li><b>9.1.1</b><span>≈18 תוויות + 3 שורות בגלריה → i18n</span></li>
+<li><b>9.1.2</b><span>סריקת AST ב-CI</span></li>
+</ol><div class="ok"><b>קבלה (נמדד):</b><ul><li>הסריקה: 0</li></ul></div><div class="meta">מקור: H4, P6, T45 · היה 8.1</div></div></details>
+<details class="task"><summary><span class="tid">9.2</span><span class="tt">איות עברי בלי רשת<span class="pill p-p1">P1</span><span class="pill p-tal">מחכה לך: 15.10, 15.11</span><span class="meta">U · ממשק, עברית וידע · תלוי ב-7.1, 1.1 · <span class="mono">feat/hebrew-spell-2</span></span></span><span class="est">3 ש׳ 00 דק׳<span class="dt">ג׳ 20.10 20:15 – 23:15</span></span></summary>
+<div class="body"><ol class="steps">
+<li><b>9.2.1</b><span>שכבה 1: בודק האיות של הדפדפן / מערכת ההפעלה (<code>spellcheck</code>) — בלי מילון ב-bundle</span></li>
+<li><b>9.2.2</b><span>2 הכללים החסרים (ה׳ הידיעה לפני מילת יחס, ״את״ לפני לא-מיודע)</span></li>
+<li><b>9.2.3</b><span>רשימה מצורפת: FrequencyWords he_50k (CC BY-SA 4.0, 0.8MB) עם סף תדירות + הסרת אותיות שימוש (ו ה ב כ ל מ ש) — המלצה בלבד, כי הרשימה מכתוביות ויש בה שגיאות</span></li>
+<li><b>9.2.4</b><span>Hspell (AGPL) נשאר הורדה ביוזמת המשתמש — או רישיון מסחרי מהמחברים (15.10)</span></li>
+<li><b>9.2.5</b><span>בדיקות מול הרשימה האמיתית</span></li>
+</ol><div class="ok"><b>קבלה (נמדד):</b><ul><li>על סט השגיאות (7.1): recall ≥ 70% לשגיאות שאינן מילה; false positive ≤ 5% על טקסט נקי (פרוזה מודרנית + ויקיפדיה)</li><li>עובד offline מההתקנה</li></ul></div><div class="meta">מקור: T28 · היה 8.2</div></div></details>
+<details class="task"><summary><span class="tid">9.3</span><span class="tt">CSS לוגי ו-slug עברי<span class="pill p-now">✅ #219</span><span class="pill p-p1">P1</span><span class="meta">U · ממשק, עברית וידע · תלוי ב-1.1 · <span class="mono">fix/css-slug</span></span></span><span class="est">בוצע (הוערך 30 דק׳)<span class="dt"></span></span></summary>
+<div class="body"><ol class="steps">
+<li><b>9.3.1</b><span>בדיקת hygiene: 0 מאפיינים פיזיים ב-<code>.prose-lumen</code> ו-<code>.cm-*</code> (חריגה לסמן)</span></li>
+<li><b>9.3.2</b><span>slug עברי בייצוא אתר</span></li>
+<li><b>9.3.3</b><span>stylelint-use-logical (CC0) ב-CI</span></li>
+</ol><div class="ok"><b>קבלה (נמדד):</b><ul><li>hygiene ירוק</li></ul></div><div class="meta">מקור: T25, T26 · היה 8.3</div></div></details>
+<details class="task"><summary><span class="tid">9.4</span><span class="tt">סוכן ביקורת תרגומים<span class="pill p-p2">P2</span><span class="meta">A · AI וסוכנים · תלוי ב-6.4 · <span class="mono">feat/i18n-review-agent</span></span></span><span class="est">1 ש׳ 00 דק׳<span class="dt">שבת 24.10 17:00 – 18:00</span></span></summary>
+<div class="body"><ol class="steps">
+<li><b>9.4.1</b><span>תרגום חוזר מקומי של 7 השפות</span></li>
+<li><b>9.4.2</b><span>סימון סטיות / משתנים חסרים / אורך חריג</span></li>
+<li><b>9.4.3</b><span>דוח</span></li>
+</ol><div class="ok"><b>קבלה (נמדד):</b><ul><li>0 משתנים חסרים</li></ul></div><div class="meta">מקור: P5 · היה 8.4</div></div></details>
+<details class="task"><summary><span class="tid">9.5</span><span class="tt">מטריצת RTL מורחבת<span class="pill p-p1">P1</span><span class="meta">U · ממשק, עברית וידע · תלוי ב-10.2, 10.3 · <span class="mono">test/rtl-matrix</span></span></span><span class="est">2 ש׳ 00 דק׳<span class="dt">שבת 24.10 02:45 – 04:45</span></span></summary>
+<div class="body"><ol class="steps">
+<li><b>9.5.1</b><span>טבלאות, רשימות, קוד, ציטוטים ב-WYSIWYG, תצוגה וייצוא</span></li>
+<li><b>9.5.2</b><span>נייד</span></li>
+<li><b>9.5.3</b><span>baseline חזותי (10.3)</span></li>
+</ol><div class="ok"><b>קבלה (נמדד):</b><ul><li>ירוק ב-3 דפדפנים + 2 מכשירים</li></ul></div><div class="meta">מקור: B1–B11 · היה 8.5</div></div></details>
+<details class="task"><summary><span class="tid">9.6</span><span class="tt">סוכן טיוטות תרגום<span class="pill p-new">חדש</span><span class="pill p-p1">P1</span><span class="meta">U · ממשק, עברית וידע · תלוי ב-6.4, 0.3 · <span class="mono">feat/i18n-draft-agent</span></span></span><span class="est">45 דק׳<span class="dt">ג׳ 20.10 23:15 – ד׳ 21.10 00:00</span></span></summary>
+<div class="body"><ol class="steps">
+<li><b>9.6.1</b><span><code>npm run i18n:draft</code>: מפתחות חדשים → טיוטה ב-7 שפות (6.4 / Ollama)</span></li>
+<li><b>9.6.2</b><span><code>needs-review</code> עד אישור; נחשב לא מתורגם בשער</span></li>
+</ol><div class="ok"><b>קבלה (נמדד):</b><ul><li>10 מפתחות → 70 טיוטות בפקודה אחת</li></ul></div><div class="meta">מקור: חיסכון בזמן · היה 8.6</div></div></details>
+<details class="task"><summary><span class="tid">9.7</span><span class="tt">עריכה דו-כיוונית נכונה<span class="pill p-new">חדש</span><span class="pill p-p1">P1</span><span class="meta">U · ממשק, עברית וידע · תלוי ב-1.1, 7.10 · <span class="mono">feat/bidi-editing</span></span></span><span class="est">6 ש׳ 00 דק׳<span class="dt">ד׳ 21.10 00:00 – 06:00</span></span></summary>
+<div class="body"><ol class="steps">
+<li><b>9.7.1</b><span>תנועת סמן וחצים בשורות מעורבות (logical), בחירה, סוגריים ומספרים</span></li>
+<li><b>9.7.2</b><span>CodeMirror ו-ProseMirror</span></li>
+<li><b>9.7.3</b><span>e2e מקלדת על 30 שורות זהב מעורבות</span></li>
+<li><b>9.7.4</b><span><code>perLineTextDirection</code> של CodeMirror + bidi-js (MIT) לאלגוריתם הדו-כיווני</span></li>
+</ol><div class="ok"><b>קבלה (נמדד):</b><ul><li>30/30 תרחישים נכונים ב-3 דפדפנים</li></ul></div><div class="meta">מקור: ביקורת התוכנית §6</div></div></details>
+<details class="task"><summary><span class="tid">9.8</span><span class="tt">יישור טבלאות RTL ב-DOCX<span class="pill p-new">חדש</span><span class="pill p-p1">P1</span><span class="pill p-tal">מחכה לך: 15.12</span><span class="meta">U · ממשק, עברית וידע · תלוי ב-1.1 · <span class="mono">fix/docx-rtl-align</span></span></span><span class="est">1 ש׳ 30 דק׳<span class="dt">ד׳ 21.10 06:00 – 07:30</span></span></summary>
+<div class="body"><ol class="steps">
+<li><b>9.8.1</b><span>ערך יישור תלת-מצבי (start / center / end) במקום left/right</span></li>
+<li><b>9.8.2</b><span>בדיקה ב-Word אמיתי (טל, 15.12)</span></li>
+</ol><div class="ok"><b>קבלה (נמדד):</b><ul><li>טבלה עברית נפתחת ב-Word מיושרת נכון</li></ul></div><div class="meta">מקור: review #177</div></div></details>
+<details class="task"><summary><span class="tid">9.9</span><span class="tt">RTL ברמת Obsidian 1.14<span class="pill p-new">חדש</span><span class="pill p-p1">P1</span><span class="meta">U · ממשק, עברית וידע · תלוי ב-4.10, 10.2, 10.3 · <span class="mono">feat/rtl-parity</span></span></span><span class="est">6 ש׳ 00 דק׳<span class="dt">שבת 24.10 04:45 – 10:45</span></span></summary>
+<div class="body"><ol class="steps">
+<li><b>9.9.1</b><span>כל סביבת העבודה מתהפכת: סרגלים, פאנלים, לשוניות, תפריטים — והפקודות שומרות על המשמעות החזותית</span></li>
+<li><b>9.9.2</b><span>מחוות במובייל מתהפכות (החלקה, אנימציות דף)</span></li>
+<li><b>9.9.3</b><span>מסד הנתונים (4.10): ניווט מקלדת, בחירה וגלילה אופקית נכונים ב-RTL</span></li>
+<li><b>9.9.4</b><span>baselines חזותיים ב-he (10.3)</span></li>
+<li><b>9.9.5</b><span>react-aria (Apache) / <code>DirectionProvider</code> של Radix לרכיבים חדשים</span></li>
+</ol><div class="ok"><b>קבלה (נמדד):</b><ul><li>20 תרחישי ממשק ומחוות ב-RTL ירוקים ב-e2e</li><li>axe ירוק ב-RTL</li></ul></div><div class="meta">מקור: Obsidian 1.14 (המחקר המורחב, 18.10)</div></div></details>
+</section>
+<section class="card" id="p10"><header><h2><span class="num">10</span>בדיקות, נגישות ומובייל</h2><span class="when">4 משימות · 20 ש׳ 30 דק׳ · א׳ 18.10 14:00 ← שבת 24.10 06:45</span></header>
+<div class="target"><b>יעד world class:</b> 0 ממצאי axe חמורים בכל משטח; מסע מלא באייפון ובפיקסל; baselines חזותיים ב-CI; כיסוי ≥ 60%</div>
+<details class="task"><summary><span class="tid">10.1</span><span class="tt">נגישות מלאה<span class="pill p-p0">P0</span><span class="meta">U · ממשק, עברית וידע · תלוי ב-3.2, 3.3, 4.10 · <span class="mono">feat/a11y</span></span></span><span class="est">8 ש׳ 00 דק׳<span class="dt">א׳ 18.10 14:00 – 22:00</span></span></summary>
+<div class="body"><ol class="steps">
+<li><b>10.1.1</b><span><code>useFocusTrap</code> אחד ל-24 הדיאלוגים</span></li>
+<li><b>10.1.2</b><span>שמות נגישים; מחלק הסרגל במקלדת</span></li>
+<li><b>10.1.3</b><span>ניגודיות ≥ 4.5</span></li>
+<li><b>10.1.4</b><span>reduced-motion</span></li>
+<li><b>10.1.5</b><span><code>e2e/a11y.spec.ts</code> × LTR/RTL × בהיר/כהה</span></li>
+<li><b>10.1.6</b><span>מסע מקלדת</span></li>
+</ol><div class="ok"><b>קבלה (נמדד):</b><ul><li>axe: 0 serious / critical</li><li>מסע מקלדת ירוק</li></ul></div><div class="meta">מקור: H1–H3 · היה 9.1</div></div></details>
+<details class="task"><summary><span class="tid">10.2</span><span class="tt">מגע ומובייל<span class="pill p-p0">P0</span><span class="meta">U · ממשק, עברית וידע · תלוי ב-3.1, 4.4 · <span class="mono">feat/touch</span></span></span><span class="est">7 ש׳ 00 דק׳<span class="dt">ב׳ 19.10 05:00 – 12:00</span></span></summary>
+<div class="body"><ol class="steps">
+<li><b>10.2.1</b><span>Pointer Events ב-5 קבצי הגרירה</span></li>
+<li><b>10.2.2</b><span>יעדי מגע ≥ 44px</span></li>
+<li><b>10.2.3</b><span>safe-area</span></li>
+<li><b>10.2.4</b><span>מתאר כגיליון תחתון</span></li>
+<li><b>10.2.5</b><span>Playwright: iPhone 14, Pixel 7 + מסע מלא</span></li>
+</ol><div class="ok"><b>קבלה (נמדד):</b><ul><li>מסע מלא ירוק בשני המכשירים</li></ul></div><div class="meta">מקור: I1–I3 · היה 9.2</div></div></details>
+<details class="task"><summary><span class="tid">10.3</span><span class="tt">רגרסיה חזותית ב-CI<span class="pill p-p1">P1</span><span class="meta">D · תשתית וביצועים · תלוי ב-0.5 · <span class="mono">test/visual-ci</span></span></span><span class="est">1 ש׳ 30 דק׳<span class="dt">שבת 24.10 01:15 – 02:45</span></span></summary>
+<div class="body"><ol class="steps">
+<li><b>10.3.1</b><span>baselines ל-10 משטחים × he/en × בהיר/כהה</span></li>
+<li><b>10.3.2</b><span>השוואה ב-CI</span></li>
+<li><b>10.3.3</b><span>חסר baseline = כישלון</span></li>
+</ol><div class="ok"><b>קבלה (נמדד):</b><ul><li>שינוי פיקסלים לא מכוון נתפס</li></ul></div><div class="meta">מקור: T24 · היה 9.3</div></div></details>
+<details class="task"><summary><span class="tid">10.4</span><span class="tt">כיסוי ≥ 60%<span class="pill p-p1">P1</span><span class="meta">D · תשתית וביצועים · תלוי ב-0.5 · <span class="mono">test/coverage-all</span></span></span><span class="est">4 ש׳ 00 דק׳<span class="dt">שבת 24.10 02:45 – 06:45</span></span></summary>
+<div class="body"><ol class="steps">
+<li><b>10.4.1</b><span>layouts, components ו-App.tsx בכיסוי</span></li>
+<li><b>10.4.2</b><span>בדיקות עד 60%</span></li>
+<li><b>10.4.3</b><span>שער לפי המספר האמיתי</span></li>
+</ol><div class="ok"><b>קבלה (נמדד):</b><ul><li>כיסוי ≥ 60%, 0 תיקיות מוחרגות</li></ul></div><div class="meta">מקור: E4 · היה 9.4</div></div></details>
+</section>
+<section class="card" id="p11"><header><h2><span class="num">11</span>מוצר שלם</h2><span class="when">5 משימות · 36 ש׳ 00 דק׳ · ד׳ 21.10 07:30 ← שבת 24.10 13:45</span></header>
+<div class="target"><b>יעד world class:</b> הגדרות במקום אחד; תוספים אמיתיים ובטוחים; חיפוש עם אופרטורים; שולחן עבודה מתעדכן וחתום; הצפנה במנוחה כאופציה</div>
+<details class="task"><summary><span class="tid">11.1</span><span class="tt">מסך הגדרות אחד<span class="pill p-p1">P1</span><span class="meta">U · ממשק, עברית וידע · תלוי ב-3.5, 3.6, 5.4, 5.7, 6.1 · <span class="mono">feat/settings-one</span></span></span><span class="est">8 ש׳ 00 דק׳<span class="dt">ו׳ 23.10 01:15 – 09:15</span></span></summary>
+<div class="body"><ol class="steps">
+<li><b>11.1.1</b><span><code>src/settings/schema.ts</code>: כל מפתח ושדה</span></li>
+<li><b>11.1.2</b><span>מסך אחד: קטגוריות, חיפוש, ייצוא / ייבוא</span></li>
+<li><b>11.1.3</b><span>הדיאלוגים הקיימים → לשוניות</span></li>
+</ol><div class="ok"><b>קבלה (נמדד):</b><ul><li>100% מהמפתחות בסכמה</li><li>e2e: חיפוש ושינוי</li></ul></div><div class="meta">מקור: J1 · היה 10.1</div></div></details>
+<details class="task"><summary><span class="tid">11.2</span><span class="tt">תוספים אמיתיים ובטוחים<span class="pill p-p1">P1</span><span class="meta">U · ממשק, עברית וידע · תלוי ב-2.3 · <span class="mono">feat/plugins-real</span></span></span><span class="est">16 ש׳ 00 דק׳<span class="dt">ד׳ 21.10 07:30 – 23:30</span></span></summary>
+<div class="body"><ol class="steps">
+<li><b>11.2.1</b><span>API: הגדרות, פאנל צד, פקודות + קיצורים, אחסון, הרחבות עורך דרך API הודעות</span></li>
+<li><b>11.2.2</b><span>לוגיקה ב-QuickJS (<code>quickjs-emscripten</code> + <code>-sync</code>, MIT) עם הגבלת זיכרון ו-CPU; ממשק ב-iframe sandbox עם CSP <code>default-src &#x27;none&#x27;</code> — גם בלי img / media / font / style / frame חיצוניים, <code>form-action &#x27;none&#x27;</code>, בלי <code>allow-top-navigation</code> ו-<code>allow-popups</code>; רק משאבי הממשק של התוסף מ-blob:; Comlink / Penpal ל-RPC</span></li>
+<li><b>11.2.3</b><span>manifest של יכולות והרשאות לפני גישה לתוכן (דפוס ה-plugs של SilverBullet ו-extension host של VS Code)</span></li>
+<li><b>11.2.4</b><span>רישום אמיתי (JSON בריפו) + חתימת ed25519</span></li>
+<li><b>11.2.5</b><span><code>create-lumen-plugin</code> + 3 דוגמאות + תיעוד API</span></li>
+<li><b>11.2.6</b><span>מחיקת ההתקנה המזויפת</span></li>
+</ol><div class="ok"><b>קבלה (נמדד):</b><ul><li><code>e2e/plugins.spec.ts</code>: 3 תוספים רצים</li><li>תוסף שמנסה להוציא תוכן — fetch, WebSocket, תמונה, CSS, טופס, iframe או ניווט לכתובת חיצונית — נכשל בכל ערוץ (בדיקה לכל אחד)</li><li>תיעוד API מלא</li></ul></div><div class="meta">מקור: J2, M1 · היה 10.2</div></div></details>
+<details class="task"><summary><span class="tid">11.3</span><span class="tt">#תגיות בגוף ואופרטורי חיפוש<span class="pill p-p1">P1</span><span class="meta">U · ממשק, עברית וידע · תלוי ב-5.2, 8.4 · <span class="mono">feat/search-ops</span></span></span><span class="est">2 ש׳ 00 דק׳<span class="dt">ו׳ 23.10 23:45 – שבת 24.10 01:45</span></span></summary>
+<div class="body"><ol class="steps">
+<li><b>11.3.1</b><span><code>#תגית</code> בגוף באינדקס</span></li>
+<li><b>11.3.2</b><span><code>tag:</code>, <code>path:</code>, <code>-</code>, <code>&quot;…&quot;</code>, <code>/regex/</code></span></li>
+</ol><div class="ok"><b>קבלה (נמדד):</b><ul><li>30 שאילתות אופרטור נכונות</li></ul></div><div class="meta">מקור: J5 · היה 10.3</div></div></details>
+<details class="task"><summary><span class="tid">11.4</span><span class="tt">הצפנת כספת במנוחה (אופציה)<span class="pill p-new">חדש</span><span class="pill p-p2">P2</span><span class="meta">S · נתונים ואבטחה · תלוי ב-3.2, 2.5, 8.4, 4.3, 3.4, 4.2, 4.4 · <span class="mono">feat/vault-encryption</span></span></span><span class="est">6 ש׳ 00 דק׳<span class="dt">שבת 24.10 07:45 – 13:45</span></span></summary>
+<div class="body"><ol class="steps">
+<li><b>11.4.1</b><span>AES-GCM לכל קובץ, Argon2id, מילות שחזור, נעילה אוטומטית</span></li>
+<li><b>11.4.2</b><span>אינדקס ו-embeddings מוצפנים</span></li>
+<li><b>11.4.3</b><span>מוסבר במפורש: כספת מוצפנת לא נקראת ב-Obsidian / git בטקסט גלוי</span></li>
+<li><b>11.4.4</b><span>גם trace-ים של סוכנים (T10, 50 האחרונים ב-IndexedDB — כוללים קטעי פתקים) בתוך גבול ההצפנה: מוצפנים בהפעלה, מוגרים בהפעלה הראשונה, נמחקים בביטול</span></li>
+</ol><div class="ok"><b>קבלה (נמדד):</b><ul><li>רק ciphertext באחסון, בכל <code>VaultBackend</code> (4.1): IndexedDB ו-OPFS, תיקייה אמיתית בדפדפן (<code>FileSystemDirectoryHandle</code>, 4.2), תיקייה בשולחן העבודה (Tauri, 4.3) ובהמשך מובייל (4.20) — כולל trace-ים, אינדקס, embeddings וגיבויים</li><li>סריקה ושחזור (e2e) רצים על כל backend</li></ul></div><div class="meta">מקור: J3 (החלטה ב-1.6) · היה 10.5</div></div></details>
+<details class="task"><summary><span class="tid">11.5</span><span class="tt">שולחן עבודה: עדכון, חתימה, צמצום<span class="pill p-p1">P1</span><span class="pill p-tal">מחכה לך: 15.7, 15.12</span><span class="meta">S · נתונים ואבטחה · תלוי ב-4.3 · <span class="mono">feat/desktop-release</span></span></span><span class="est">4 ש׳ 00 דק׳<span class="dt">ד׳ 21.10 08:30 – 12:30</span></span></summary>
+<div class="body"><ol class="steps">
+<li><b>11.5.1</b><span>tauri-plugin-updater</span></li>
+<li><b>11.5.2</b><span>חתימה (15.7)</span></li>
+<li><b>11.5.3</b><span>בלי sourcemaps; הרשאות fs מצומצמות</span></li>
+</ol><div class="ok"><b>קבלה (נמדד):</b><ul><li>0 sourcemaps ב-build</li><li>עדכון אוטומטי עובד (טל)</li></ul></div><div class="meta">מקור: N3, F7 · היה 10.4</div></div></details>
+</section>
+<section class="card" id="p12"><header><h2><span class="num">12</span>בריאות הקוד</h2><span class="when">4 משימות · 29 ש׳ 30 דק׳ · ד׳ 21.10 12:30 ← א׳ 25.10 00:45</span></header>
+<div class="target"><b>יעד world class:</b> 0 catch ריק בלי הסבר; אין קובץ ייצור מעל 800 שורות; 0 קוד מת; חבילות עדכניות; המגבלות הידועות סגורות</div>
+<div class="why">מבוצע מאוחר בכוונה — פיצול קבצים גדולים מוקדם היה מתנגש עם כל המסלולים.</div>
+<details class="task"><summary><span class="tid">12.1</span><span class="tt">catch ריקים וקבצים גדולים<span class="pill p-p1">P1</span><span class="meta">D · תשתית וביצועים · תלוי ב-0.4, 11.5, 12.3 · <span class="mono">chore/catch-split</span></span></span><span class="est">8 ש׳ 00 דק׳<span class="dt">שבת 24.10 06:45 – 14:45</span></span></summary>
+<div class="body"><ol class="steps">
+<li><b>12.1.1</b><span>192 ה-catch: טיפול / לוג / <code>// why:</code></span></li>
+<li><b>12.1.2</b><span>פיצול 9 הקבצים מעל 800 שורות</span></li>
+</ol><div class="ok"><b>קבלה (נמדד):</b><ul><li>lint ירוק בלי baseline לכללים האלה</li></ul></div><div class="meta">מקור: E1, O1 · היה 11.1</div></div></details>
+<details class="task"><summary><span class="tid">12.2</span><span class="tt">ניקוי ועדכוני חבילות<span class="pill p-p1">P1</span><span class="meta">D · תשתית וביצועים · תלוי ב-0.10, 6.8 · <span class="mono">chore/cleanup</span></span></span><span class="est">10 ש׳ 00 דק׳<span class="dt">שבת 24.10 14:45 – א׳ 25.10 00:45</span></span></summary>
+<div class="body"><ol class="steps">
+<li><b>12.2.1</b><span>מחיקת ≈2,600 שורות מתות</span></li>
+<li><b>12.2.2</b><span>slug אחד</span></li>
+<li><b>12.2.3</b><span>גרסה ראשית אחת לכל PR (React 19…) עם כל הבדיקות</span></li>
+</ol><div class="ok"><b>קבלה (נמדד):</b><ul><li>0 קבצים בלי מייבאים</li><li>0 גרסאות ראשיות מאחור</li></ul></div><div class="meta">מקור: O2–O4 · היה 11.2</div></div></details>
+<details class="task"><summary><span class="tid">12.3</span><span class="tt">סגירת המגבלות הידועות A1–A9<span class="pill p-p1">P1</span><span class="meta">U · ממשק, עברית וידע · תלוי ב-1.1 · <span class="mono">fix/known-limits</span></span></span><span class="est">10 ש׳ 00 דק׳<span class="dt">ד׳ 21.10 23:30 – ה׳ 22.10 09:30</span></span></summary>
+<div class="body"><ol class="steps">
+<li><b>12.3.1</b><span>בדיקה לכל סעיף לפני התיקון</span></li>
+<li><b>12.3.2</b><span>worker המחקר דורש טוקן (יעד §14)</span></li>
+<li><b>12.3.3</b><span>תיקון או החלטה מתועדת</span></li>
+</ol><div class="ok"><b>קבלה (נמדד):</b><ul><li>9/9 עם בדיקה</li></ul></div><div class="meta">מקור: A1–A9 · היה 11.3</div></div></details>
+<details class="task"><summary><span class="tid">12.4</span><span class="tt">ניטור בהסכמה<span class="pill p-p1">P1</span><span class="pill p-tal">מחכה לך: 15.6</span><span class="meta">S · נתונים ואבטחה · תלוי ב-2.4 · <span class="mono">feat/monitoring</span></span></span><span class="est">1 ש׳ 30 דק׳<span class="dt">ד׳ 21.10 12:30 – 14:00</span></span></summary>
+<div class="body"><ol class="steps">
+<li><b>12.4.1</b><span>web-vitals מקומי</span></li>
+<li><b>12.4.2</b><span>Sentry / GlitchTip בהסכמה (15.6)</span></li>
+<li><b>12.4.3</b><span>שקוף ביומן</span></li>
+</ol><div class="ok"><b>קבלה (נמדד):</b><ul><li>כבוי כברירת מחדל</li></ul></div><div class="meta">מקור: A10, P7 · היה 11.4</div></div></details>
+</section>
+<section class="card" id="p13"><header><h2><span class="num">13</span>תיעוד, אירוח, מובייל ושחרור</h2><span class="when">7 משימות · 23 ש׳ 30 דק׳ · ב׳ 19.10 12:00 ← ב׳ 26.10 05:45</span></header>
+<div class="target"><b>יעד world class:</b> תיעוד מדויק לכל פיצ&#x27;ר; אירוח אחד שעובד הכול; Android ו-iOS נבנים ב-CI; שחרור חתום וחוזר</div>
+<details class="task"><summary><span class="tid">13.1</span><span class="tt">תיעוד: ביקורת שלמות (כל משימה כותבת את העמוד שלה כחלק מה-DoD)<span class="pill p-p0">P0</span><span class="meta">U · ממשק, עברית וידע · תלוי ב-0.18, 4.4, 4.12, 3.6 · <span class="mono">docs/complete</span></span></span><span class="est">6 ש׳ 00 דק׳<span class="dt">ב׳ 19.10 12:00 – 18:00</span></span></summary>
+<div class="body"><ol class="steps">
+<li><b>13.1.1</b><span>git sync, סנכרון מוצפן, ייצוא/ייבוא, עברית, קיצורים, התקנה, מודלים מקומיים, פרטיות, תוספים</span></li>
+<li><b>13.1.2</b><span>docs-sync (0.18) ירוק</span></li>
+</ol><div class="ok"><b>קבלה (נמדד):</b><ul><li>כל פיצ&#x27;ר עם עמוד; docs-sync ירוק</li></ul></div><div class="meta">מקור: N1 · היה 12.1</div></div></details>
+<details class="task"><summary><span class="tid">13.2</span><span class="tt">אירוח אחיד<span class="pill p-p1">P1</span><span class="meta">D · תשתית וביצועים · תלוי ב-0.17 · <span class="mono">chore/hosting</span></span></span><span class="est">2 ש׳ 00 דק׳<span class="dt">א׳ 25.10 02:45 – 04:45</span></span></summary>
+<div class="body"><ol class="steps">
+<li><b>13.2.1</b><span>Playground ב-Netlify</span></li>
+<li><b>13.2.2</b><span>Docker בלי 130MB זמני ריצה מיותרים</span></li>
+<li><b>13.2.3</b><span>nginx אחד</span></li>
+</ol><div class="ok"><b>קבלה (נמדד):</b><ul><li>אותן יכולות בכל אירוח (טבלה)</li></ul></div><div class="meta">מקור: N2 · היה 12.2</div></div></details>
+<details class="task"><summary><span class="tid">13.3</span><span class="tt">Android ו-iOS ב-CI<span class="pill p-p2">P2</span><span class="pill p-tal">מחכה לך: 15.7</span><span class="meta">D · תשתית וביצועים · תלוי ב-1.1 · <span class="mono">feat/mobile-builds</span></span></span><span class="est">4 ש׳ 00 דק׳<span class="dt">א׳ 25.10 04:45 – 08:45</span></span></summary>
+<div class="body"><ol class="steps">
+<li><b>13.3.1</b><span>Capacitor android/ + build ב-CI</span></li>
+<li><b>13.3.2</b><span>iOS (ios/ קיים) — build ב-CI של macOS</span></li>
+<li><b>13.3.3</b><span>Safari מפנה אחסון אחרי 7 ימים: persist + תזכורת ייצוא</span></li>
+<li><b>13.3.4</b><span>חתימה כשיש חשבונות (15.7)</span></li>
+</ol><div class="ok"><b>קבלה (נמדד):</b><ul><li>APK ו-IPA נבנים בכל PR</li></ul></div><div class="meta">מקור: I4 · היה 12.3</div></div></details>
+<details class="task"><summary><span class="tid">13.4</span><span class="tt">צינור שחרור<span class="pill p-new">חדש</span><span class="pill p-p1">P1</span><span class="pill p-tal">מחכה לך: 15.7</span><span class="meta">D · תשתית וביצועים · תלוי ב-11.5 · <span class="mono">chore/release</span></span></span><span class="est">2 ש׳ 00 דק׳<span class="dt">א׳ 25.10 08:45 – 10:45</span></span></summary>
+<div class="body"><ol class="steps">
+<li><b>13.4.1</b><span>semver + changelog אוטומטי</span></li>
+<li><b>13.4.2</b><span>ארטיפקטים חתומים (web, desktop, mobile)</span></li>
+<li><b>13.4.3</b><span>rollback</span></li>
+<li><b>13.4.4</b><span>ארטיפקטים למובייל מצטרפים כש-13.3 מוכן</span></li>
+<li><b>13.4.5</b><span>release-please (Apache) + Tauri updater</span></li>
+</ol><div class="ok"><b>קבלה (נמדד):</b><ul><li>תג → שחרור בלי צעד ידני</li></ul></div><div class="meta">מקור: תהליך · היה 12.4</div></div></details>
+<details class="task"><summary><span class="tid">13.5</span><span class="tt">ביקורת שחרור עצמאית (כל ה-P0)<span class="pill p-new">חדש</span><span class="pill p-p0">P0</span><span class="meta">D · תשתית וביצועים · תלוי ב-כל ה-P0 + הפעולות שלך 15.1, 15.3, 15.4, 15.8, 15.9, 15.10, 15.11</span></span><span class="est">2 ש׳ 00 דק׳<span class="dt">ה׳ 22.10 20:15 – 22:15</span></span></summary>
+<div class="body"><ol class="steps">
+<li><b>13.5.1</b><span>סוכן נפרד מריץ DoD לכל P0</span></li>
+<li><b>13.5.2</b><span>מסע משתמש מלא he/en, web + desktop</span></li>
+<li><b>13.5.3</b><span>פערים → תיקון לפני התג</span></li>
+</ol><div class="ok"><b>קבלה (נמדד):</b><ul><li>כל ה-P0 ירוקים</li><li><code>v1.0.0-rc</code> רק אחרי הביקורת</li></ul></div><div class="meta">מקור: נספח 16 · היה 12.5</div></div></details>
+<details class="task"><summary><span class="tid">13.6</span><span class="tt">ביקורת סופית מול כל יעדי §14<span class="pill p-new">חדש</span><span class="pill p-p1">P1</span><span class="meta">D · תשתית וביצועים · תלוי ב-כל השאר</span></span><span class="est">1 ש׳ 30 דק׳<span class="dt">ב׳ 26.10 04:15 – 05:45</span></span></summary>
+<div class="body"><ol class="steps">
+<li><b>13.6.1</b><span>כל יעד: ✅ נמדד או משימה פתוחה עם סיבה</span></li>
+<li><b>13.6.2</b><span>עדכון נספח 16</span></li>
+</ol><div class="ok"><b>קבלה (נמדד):</b><ul><li>0 יעדים בלי סטטוס מדוד</li></ul></div><div class="meta">מקור: נספח 14 · היה 12.6</div></div></details>
+<details class="task"><summary><span class="tid">13.7</span><span class="tt">הגשה לחנויות<span class="pill p-new">חדש</span><span class="pill p-p2">P2</span><span class="pill p-tal">מחכה לך: 15.7</span><span class="meta">D · תשתית וביצועים · תלוי ב-13.3, 13.4 · <span class="mono">chore/store-submit</span></span></span><span class="est">6 ש׳ 00 דק׳<span class="dt">א׳ 25.10 10:45 – 16:45</span></span></summary>
+<div class="body"><ol class="steps">
+<li><b>13.7.1</b><span>Google Play: רישום, צילומי מסך בעברית ובאנגלית, מדיניות פרטיות, מסלול בדיקה פנימי</span></li>
+<li><b>13.7.2</b><span>App Store: TestFlight, סקירה, הצהרות פרטיות</span></li>
+<li><b>13.7.3</b><span>שולחן עבודה: Microsoft Store / winget ו-Homebrew cask</span></li>
+<li><b>13.7.4</b><span>הסקירה של החנויות (ימים, 15.7) לא נכנסת לתאריך הסיום — המשימה נסגרת בהגשה, והזמינות נרשמת בנפרד כשהחנות מאשרת</span></li>
+</ol><div class="ok"><b>קבלה (נמדד):</b><ul><li>build נשלח לסקירה לפחות בחנות אחת (מספר build / קישור TestFlight / internal track)</li><li>זמינות בחנות — אבן דרך מותנית באישור החנות, לא חלק מתאריך הסיום</li></ul></div><div class="meta">מקור: מחקר פערים #10</div></div></details>
+</section>
+<section class="card" id="p14"><header><h2><span class="num">14</span>השקה ולולאת משוב</h2><span class="when">6 משימות · 17 ש׳ 00 דק׳ · ה׳ 22.10 09:30 ← ב׳ 26.10 04:15</span></header>
+<div class="target"><b>יעד world class:</b> משתמש חדש מגיע לפתק ראשון ב-60 שניות; משוב ובאגים מגיעים אליי בלי שרת; גרסת בטא נפרדת</div>
+<details class="task"><summary><span class="tid">14.1</span><span class="tt">חוויית התחלה<span class="pill p-new">חדש</span><span class="pill p-p1">P1</span><span class="meta">U · ממשק, עברית וידע · תלוי ב-4.2, 4.12 · <span class="mono">feat/onboarding</span></span></span><span class="est">4 ש׳ 00 דק׳<span class="dt">ה׳ 22.10 09:30 – 13:30</span></span></summary>
+<div class="body"><ol class="steps">
+<li><b>14.1.1</b><span>בחירת כספת (OPFS / תיקייה), שפה וסגנון</span></li>
+<li><b>14.1.2</b><span>כספת לדוגמה בעברית ובאנגלית</span></li>
+<li><b>14.1.3</b><span>ייבוא מ-Obsidian / Notion בהצעה</span></li>
+<li><b>14.1.4</b><span>סיור קצר</span></li>
+</ol><div class="ok"><b>קבלה (נמדד):</b><ul><li>משתמש חדש לפתק ראשון &lt; 60s (e2e)</li></ul></div><div class="meta">מקור: השקה</div></div></details>
+<details class="task"><summary><span class="tid">14.2</span><span class="tt">משוב בלי שרת<span class="pill p-new">חדש</span><span class="pill p-p1">P1</span><span class="meta">D · תשתית וביצועים · תלוי ב-7.4 · <span class="mono">feat/feedback</span></span></span><span class="est">3 ש׳ 00 דק׳<span class="dt">א׳ 25.10 16:45 – 19:45</span></span></summary>
+<div class="body"><ol class="steps">
+<li><b>14.2.1</b><span>טופס שמכין issue ב-GitHub או טקסט להעתקה</span></li>
+<li><b>14.2.2</b><span>צירוף דוח רופא AI (בהסכמה, בלי תוכן פתקים)</span></li>
+<li><b>14.2.3</b><span>צילום מסך אופציונלי</span></li>
+</ol><div class="ok"><b>קבלה (נמדד):</b><ul><li>0 נתונים יוצאים בלי אישור</li></ul></div><div class="meta">מקור: השקה</div></div></details>
+<details class="task"><summary><span class="tid">14.3</span><span class="tt">סוכן מיון issues<span class="pill p-new">חדש</span><span class="pill p-p1">P1</span><span class="meta">D · תשתית וביצועים · תלוי ב-0.11, 0.6 · <span class="mono">chore/issue-triage</span></span></span><span class="est">3 ש׳ 00 דק׳<span class="dt">א׳ 25.10 19:45 – 22:45</span></span></summary>
+<div class="body"><ol class="steps">
+<li><b>14.3.1</b><span>ריצה מתוזמנת: תוויות, כפילויות, בקשת שחזור, קישור למשימה ב-plan.json</span></li>
+<li><b>14.3.2</b><span>דוח יומי</span></li>
+</ol><div class="ok"><b>קבלה (נמדד):</b><ul><li>issue חדש ממוין תוך 24 שעות</li></ul></div><div class="meta">מקור: חיסכון בזמן</div></div></details>
+<details class="task"><summary><span class="tid">14.4</span><span class="tt">ערוץ בטא ודגלי פיצ&#x27;רים<span class="pill p-new">חדש</span><span class="pill p-p1">P1</span><span class="meta">D · תשתית וביצועים · תלוי ב-13.4 · <span class="mono">feat/beta-channel</span></span></span><span class="est">4 ש׳ 00 דק׳<span class="dt">א׳ 25.10 22:45 – ב׳ 26.10 02:45</span></span></summary>
+<div class="body"><ol class="steps">
+<li><b>14.4.1</b><span>פריסת בטא נפרדת</span></li>
+<li><b>14.4.2</b><span>ערוץ עדכון בטא בשולחן העבודה</span></li>
+<li><b>14.4.3</b><span>דגלי פיצ&#x27;רים מקומיים</span></li>
+</ol><div class="ok"><b>קבלה (נמדד):</b><ul><li>פיצ&#x27;ר חדש מגיע לבטא לפני היציב</li></ul></div><div class="meta">מקור: השקה</div></div></details>
+<details class="task"><summary><span class="tid">14.5</span><span class="tt">מפת דרכים ציבורית<span class="pill p-new">חדש</span><span class="pill p-p2">P2</span><span class="meta">D · תשתית וביצועים · תלוי ב-0.6 · <span class="mono">feat/public-roadmap</span></span></span><span class="est">1 ש׳ 30 דק׳<span class="dt">ב׳ 26.10 02:45 – 04:15</span></span></summary>
+<div class="body"><ol class="steps">
+<li><b>14.5.1</b><span>דף מ-plan.json (רק כותרות וסטטוס)</span></li>
+</ol><div class="ok"><b>קבלה (נמדד):</b><ul><li>מתעדכן אוטומטית</li></ul></div><div class="meta">מקור: השקה</div></div></details>
+<details class="task"><summary><span class="tid">14.6</span><span class="tt">״מה חדש״ באפליקציה<span class="pill p-new">חדש</span><span class="pill p-p2">P2</span><span class="meta">U · ממשק, עברית וידע · תלוי ב-13.4 · <span class="mono">feat/whats-new</span></span></span><span class="est">1 ש׳ 30 דק׳<span class="dt">א׳ 25.10 10:45 – 12:15</span></span></summary>
+<div class="body"><ol class="steps">
+<li><b>14.6.1</b><span>מה-changelog (13.4) בשפת הממשק</span></li>
+</ol><div class="ok"><b>קבלה (נמדד):</b><ul><li>מוצג פעם אחת לכל גרסה</li></ul></div><div class="meta">מקור: השקה</div></div></details>
+</section>
+<section class="card" id="p15"><header><h2><span class="num">15</span>מה צריך ממך</h2><span class="when">מתוזמן לערבים 20:00–23:00 · משימות שמחכות לך מסומנות בסגול</span></header><div class="tbl"><table><thead><tr><th>#</th><th>פעולה</th><th>פרטים</th><th>זמן</th><th>מתי</th><th>פותח את</th></tr></thead><tbody>
+<tr><td><b>15.1</b></td><td><b>למזג את המחסנית</b><span class="pill p-p0">P0</span></td><td>#109, #135, #136, #137–#150, #155–#158, #169–#193, ואחריהם המחסנית של הסבב הזה #194–#245 (סדר המיזוג: #194 → #206 → #218; #195 → #213; #196 → #214; #197 → #215; #198 → #216 ו-#212; #207 → #220 → #221 → #222; #208 → #209 → #226 → #235; #222 → #233; #207 → #236, #239; #199 → #200 → #225 → #240; על #194: #201, #202 (→ #210, #211, #227, #234 → #245), #218, #229, #230, #237, #203, #204, #205 (→ #223), #217, #219, #224 → #238, #228 → #231, #225 → #232. כל PR ״r2״ (#206, #213–#216) מתמזג מיד אחרי ה-PR שהוא תיקון שלו). אחר כך אני עובר ל-PR-ים מקבילים מ-main</td><td>15 דק׳</td><td>א׳ 18.10 20:00</td><td class="mono">כל ה-PR-ים הבאים</td></tr>
+<tr><td><b>15.9</b></td><td><b>החלטה: הריפו ציבורי? + טוקן Hugging Face</b><span class="pill p-p0">P0</span></td><td>קובע איך שומרים את FLORES ואיפה מארחים מודלים מומרים (GitHub Releases או Hugging Face). טוקן HF כ-secret ב-GitHub — ה-workflow של סטי הזהב וההמרה רץ שם, כי בסביבה שלי אין גישה ל-HF; וגם <code>GOLDEN_SEED</code> — מחרוזת אקראית כ-secret, שבוחרת את פיצולי ה-test המוחזקים (7.1) כך שרק ה-CI רואה אותם</td><td>≈ 20 דק׳</td><td>א׳ 18.10 20:15</td><td class="mono">6.0, 7.1</td></tr>
+<tr><td><b>15.10</b></td><td><b>החלטות רישוי</b><span class="pill p-p0">P0</span></td><td>(1) eSpeak NG (GPL) כ-worker נפרד שמורד ביוזמת המשתמש — מותר? (2) citeproc (CPAL / AGPL) עם ייחוס, או תבניות ציטוט משלנו? (3) Hspell: להשאיר הורדה ביוזמת המשתמש או לבקש רישיון מסחרי במייל? (4) מייל למחבר BlueTTS על רישיון נתוני האימון (5) **קנבס:** לקנות רישיון מסחרי מ-tldraw, או לעבור ל-Excalidraw (MIT) — ההמלצה שלי: לעבור (6) **R חי (webR):** הבינארים GPL-3.0 ונשלחים בבנייה — להפוך להורדה ביוזמת המשתמש, או להסיר בלוקי R (חריגה בשער עד 15.11) (7) **COOP/COEP בתמונת ה-deploy:** להשאיר (חוסם הטמעות בלי COEP) או להוריד? (#207) (8) ✅ **הסכמת רשת לכלי סוכנים — הוחלט 18.10: לכל קריאה** (מיושם ב-#205) (9) **״מקומי בלבד״ ושירות המחקר שמתארח אצלך:** כרגע הקליפר מסרב לכל כתובת תחת מקומי-בלבד (גם דרך ה-extractor, #212), אבל חיפוש SearXNG מקומי עדיין מותר — ושניהם שולחים בקשה לאתר חיצוני. לחסום גם את החיפוש, או להתיר את שניהם כשהשירות שלך?</td><td>≈ 40 דק׳ + מיילים</td><td>א׳ 18.10 20:35</td><td class="mono">1.9, 6.2, 6.13, 9.2</td></tr>
+<tr><td><b>15.11</b></td><td><b>החלק שלך בסטי הזהב</b><span class="pill p-p0">P0</span></td><td>20 הקלטות + הסכמת CC0 (30 דק׳) · קבלת תנאים: FLORES+, Common Voice (15 דק׳) · הגהת 60 משפטי ניקוד + 50 זוגות שגיאות (1.5 ש׳) · 20 תיאורי תמונות כהפניה (45 דק׳; הדירוג של הפלט — 15.15, אחרי 6.6) · 30 שאילתות אישיות עם תיוג (1 ש׳) · 30 התקפות injection בעברית (45 דק׳) · 15 עמודים מצולמים (20 דק׳) · דירוג 50 תרגומים (45 דק׳) · 5 הקלטות פגישה קצרות (20 דק׳)</td><td>≈ 6 ש׳</td><td>א׳ 18.10 21:15</td><td class="mono">2.7, 5.2, 6.3, 6.6, 6.16, 7.1, 7.5, 7.10, 9.2</td></tr>
+<tr><td><b>15.3</b></td><td><b>הרצת מודלים אמיתיים</b><span class="pill p-p0">P0</span></td><td>Ollama + <code>npm run eval:agents</code> (gemma3:12b, qwen2.5:7b) על מחשב עם GPU; שולח לי את <code>eval/results</code>. מדידת המנועים בדפדפן היא פעולה נפרדת (15.14), אחרי שהרתמה קיימת</td><td>≈ 2 ש׳</td><td>ג׳ 20.10 21:15</td><td class="mono">5.4, 6.1, 7.4, 7.9</td></tr>
+<tr><td><b>15.4</b></td><td><b>פריסת שרתים</b><span class="pill p-p0">P0</span></td><td>signaling + collab (<code>fly deploy</code>), CORS proxy ל-git</td><td>≈ 2 ש׳</td><td>ד׳ 21.10 20:15</td><td class="mono">3.3, 3.6</td></tr>
+<tr><td><b>15.8</b></td><td><b>בדיקות ידניות לשחרור</b><span class="pill p-p0">P0</span></td><td>שולחן העבודה: CSP, Graphviz / Python / OCR, כספת בתיקייה, ופתיחת הכספת ב-Obsidian</td><td>≈ 1 ש׳</td><td>ד׳ 21.10 22:15</td><td class="mono">2.1, 4.2, 4.3</td></tr>
+<tr><td><b>15.2</b></td><td><b>קרדיט ל-Codex + Renovate</b></td><td>review חיצוני על כל PR חדש (רשות); התקנת Renovate כ-GitHub App על lumen-md</td><td>10 דק׳</td><td>ה׳ 22.10 20:15</td><td class="mono">—</td></tr>
+<tr><td><b>15.5</b></td><td><b>client IDs ל-Drive ו-Dropbox</b></td><td>רק אם רוצים את הספקים האלה</td><td>30 דק׳</td><td>ה׳ 22.10 20:25</td><td class="mono">3.5</td></tr>
+<tr><td><b>15.6</b></td><td><b>DSN לניטור</b></td><td>רק אם רוצים</td><td>10 דק׳</td><td>ה׳ 22.10 20:55</td><td class="mono">12.4</td></tr>
+<tr><td><b>15.7</b></td><td><b>חשבונות חתימה</b></td><td>Windows, macOS, Google Play, App Store</td><td>≈ 2 ש׳ שלך + ימים של אימות אצל החנויות</td><td>ה׳ 22.10 21:05</td><td class="mono">11.5, 13.3, 13.4, 13.7</td></tr>
+<tr><td><b>15.12</b></td><td><b>שאר הבדיקות הידניות</b></td><td>Safari, Word (RTL), עדכון אוטומטי</td><td>≈ 2 ש׳</td><td>ו׳ 23.10 20:05</td><td class="mono">9.8, 11.5</td></tr>
+<tr><td><b>15.15</b></td><td><b>דירוג תיאורי תמונות</b></td><td>דירוג 1–5 לתיאורים שהמודל המקומי (6.6) הפיק על כל 50 התמונות (30 Crossmodal-3600 + 20 Commons), מול ההפניות — כולל אלה שהכנת ב-15.11</td><td>≈ 30 דק׳</td><td>ו׳ 23.10 22:05</td><td class="mono">6.6</td></tr>
+<tr><td><b>15.16</b></td><td><b>החלטות מוצר מה-PR-ים של 18.10</b></td><td>(1) **#221:** שרת collab שמוקלד בזמן ריצה מתחבר רק אם הבנייה מכירה אותו (קודם — תמיד). מקובל? (2) **#221:** אין עדיין מסך לביטול ״תמיד לאפשר״ לשרתי תמונות — לבנות עכשיו או אחר כך? (3) **#223:** להשאיר את ה-commit שמוריד 19 KB מהטעינה הראשונה (ההמלצה שלי: כן) (4) **#223:** במצב הצעות (suggesting) שינוי מאושר של סוכן נכנס כשינוי מסומן ולא כעריכה ישירה — מקובל? (5) **#223:** <code>window.__lumen.agentReview</code> (רק מציע / מושך, לא מחיל) קיים גם בבנייה לייצור — להשאיר או רק בפיתוח ובבדיקות? (6) **#223:** שינוי של סוכן לקובץ פתוח נכנס לעורך ולא ישר לדיסק (השמירה כותבת אותו) — מקובל? (7) **#199:** האם לשער הרישיונות להכשיל מודלים ״מותנים״ (Llama, Gemma)? היום הם רק לא ברירת מחדל ומוצגים עם הרישיון שלהם (8) **#233 (Live JS):** כדי לסגור דליפת רשת ב-WebKit, קוד Live JS לא יכול יותר להשתמש ב-eval / new Function / timers עם מחרוזת, ולא במילה import בכלל (גם בהערה) — מקובל, או לחפש פתרון רך יותר? (9) **#239 — לבדוק ב-preview הראשון:** <code>vercel.json</code> הוחלף ב-<code>vercel.ts</code>; אם Vercel מתעלם ממנו לא יהיו כותרות אבטחה. בדיקה: <code>curl -sI &lt;preview&gt;/ | grep -i content-security</code> (10) **Dependabot ״high״ ב-main** — לא נמצא ב-npm audit ולא ב-cargo audit; לבדוק בלשונית Security (אולי glib 0.18.5) (11) **ממצאי Codex P2 שנשארו פתוחים בכוונה** (כלי פיתוח, לא מוצר; אחרי 3 סבבים): #199 ×2, #201 ×2, #202 ×2, #204 ×2, #210 ×2, #211 ×2, #225 ×2 — לתקן אחרי המיזוג או לסגור; ועוד 5 שנדחו כי דורשים PR-ים מ-fork (#201, #204, #211); P2 שנשארו מסבב 3 במוצר: #218 ×1 (החזרה שמרנית לרשימת הביטול), #231 ×2 (עמודת boolean ריקה, רשימות שמתאחדות בעמודה אחת), #232 ×1 (השלמה בזמן הקלדה שומרת רק 30 השלמות נפוצות), #235 ×3 (שמירה בין הבדיקה למעבר, כפילות בסל, פתיחה מחדש של אותה תיקייה) — אף אחד לא מאבד נתונים; ובדיקה ידנית: פתקים עם שם בעברית בתיקייה ב-Chrome רגיל; #238 ×3 (fence שלא נסגר, escapes ב-WYSIWYG, כותרת setext על כמה שורות)</td><td>≈ 20 דק׳</td><td>ו׳ 23.10 22:50</td><td class="mono">—</td></tr>
+<tr><td><b>15.17</b></td><td><b>בדיקת מודל אמיתי לפיצ׳רים של שלב 6</b></td><td>אחרי ש-6.8 ו-6.9 נבנו: <code>npm run eval:agents -- --suite pdf-chat</code> ו-<code>npm run bench:fim</code> (p50 / p95 של השלמה מקומית) על Ollama במחשב עם GPU; שולח לי את הדוחות</td><td>≈ 45 דק׳</td><td>שבת 24.10 20:20</td><td class="mono">6.8, 6.9</td></tr>
+<tr><td><b>15.13</b></td><td><b>בדיקות ידניות של P2</b></td><td>כשהם מוכנים: LoRA על Mac (6.12), דירוג הקראה (6.2), כספת בתיקייה במובייל — קובץ שנערך באפליקציית ״קבצים״ מופיע ב-Lumen (4.20) · ניתוח נתונים מול מודל אמיתי (6.15, 20 שאלות זהב)</td><td>≈ 1 ש׳</td><td>א׳ 25.10 20:00</td><td class="mono">4.20, 6.2, 6.12, 6.15</td></tr>
+<tr><td><b>15.14</b></td><td><b>מדידת מנועים בדפדפן</b></td><td><code>npm run bench:models</code> על מחשב עם GPU, אחרי שהרתמה (7.8) קיימת; שולח לי את <code>eval/bench</code></td><td>≈ 1 ש׳</td><td>א׳ 25.10 21:15</td><td class="mono">7.8</td></tr>
+</tbody></table></div></section></div>
