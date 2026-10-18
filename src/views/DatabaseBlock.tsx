@@ -18,6 +18,7 @@ import {
   type DatabaseView,
 } from "./database";
 import { log } from "../lib/logger";
+import { onWorkspaceChanged } from "../storage/workspaceEvents";
 
 interface Props {
   source: string;
@@ -58,10 +59,10 @@ export default function DatabaseBlock({ source, meta }: Props) {
         .then((r) => !cancelled && setRows(r))
         .catch(() => {});
     }
-    window.addEventListener("lumen-workspace-changed", refresh);
+    const off = onWorkspaceChanged(refresh, { debounceMs: 500 });
     return () => {
       cancelled = true;
-      window.removeEventListener("lumen-workspace-changed", refresh);
+      off();
     };
   }, [spec]);
 
