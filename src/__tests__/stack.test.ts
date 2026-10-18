@@ -278,6 +278,53 @@ describe("scripts/stack.mjs restack (fallback, local repo)", () => {
     }
   });
 
+  it("counts untracked files: one a later layer would overwrite stops the run before anything moves", () => {
+    const { dir, g, old, run } = setup();
+    try {
+      // a's newest version adds extra.txt; wt-c has an untracked extra.txt that c's rebase would overwrite.
+      g("checkout", "-q", "a");
+      writeFileSync(join(dir, "repo", "extra.txt"), "from a\n");
+      g("add", "extra.txt");
+      g("commit", "-q", "--amend", "-m", "a2");
+      g("checkout", "-q", "main");
+      writeFileSync(join(dir, "wt-c", "extra.txt"), "mine, untracked\n");
+      const r = run();
+      expect(r.status).toBe(1);
+      expect(r.stderr).toContain(`stack: nothing was rebased. c is checked out in ${join(dir, "wt-c")} with uncommitted changes or untracked files (?? extra.txt)`);
+      expect(g("rev-parse", "b")).toBe(old.b);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it("refuses to force-push a branch that is behind, or diverged from, a GitHub head it never had", () => {
+    const { dir, g, old, run } = setup();
+    try {
+      const pr = (number: number, head: string, base: string, sha: string) => ({ number, head: { ref: head, sha }, base: { ref: base } });
+      const prs = (aHead: string) => writeFileSync(join(dir, "prs.json"), JSON.stringify([pr(1, "a", "main", aHead), pr(2, "b", "a", old.b), pr(3, "c", "b", old.c)]));
+      // GitHub has one more commit on top of the local a (pushed from elsewhere, fetched here).
+      const ahead = g("commit-tree", "a^{tree}", "-p", "a", "-m", "remote only");
+      prs(ahead);
+      let r = run("--push");
+      expect(r.status).toBe(1);
+      expect(r.stderr).toContain(`stack: nothing was rebased.\n  a is behind #1's head on GitHub (${ahead.slice(0, 8)}): a force-push would delete the commits only GitHub has.`);
+      expect(g("rev-parse", "b")).toBe(old.b);
+      // GitHub moved on from the version that was amended here: diverged, and that head was never a's tip.
+      const other = g("commit-tree", `${old.a}^{tree}`, "-p", old.a, "-m", "someone else's fix");
+      prs(other);
+      r = run();
+      expect(r.status).toBe(1);
+      expect(r.stderr).toContain(`a has diverged from #1's head on GitHub (${other.slice(0, 8)}), which was never its tip here`);
+      expect(r.stdout).not.toContain("git push");
+      expect(g("rev-parse", "b")).toBe(old.b);
+      // The amend itself (GitHub has the pre-amend tip, which a's reflog holds) is still fine.
+      prs(old.a);
+      expect(run("--dry-run").status).toBe(0);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
   it("does not rebase a local branch that shares a fork PR's head name", () => {
     const { dir, g, old, run } = setup();
     try {

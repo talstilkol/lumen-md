@@ -98,7 +98,10 @@ node scripts/stack.mjs restack feat/hebrew-core --push      # …and run them
 - **Pushing is opt-in.** Without `--push` it prints, and does not run,
   one `git push --force-with-lease=<branch>:<sha GitHub has> origin <branch>`
   per moved branch (and for `<branch>` itself when it differs from its PR).
-  The lease fails if someone else pushed in the meantime.
+  The lease fails if someone else pushed in the meantime. The lease does not
+  protect commits only GitHub has, so a branch that is behind its PR head,
+  or has diverged from a head it never had here (not in its reflog), stops
+  the run before anything moves; an amend or rebase of the PR head is fine.
 - **The old base** of the first layer is the commit the child was built on:
   `--old-base <sha>` if given, else whichever of `origin/<branch>` and the
   PR's head on GitHub is in the child's history and closest to it (a stale
@@ -107,7 +110,8 @@ node scripts/stack.mjs restack feat/hebrew-core --push      # …and run them
   layers it is the tip recorded before the run, which is exact.
 - **Worktrees.** A branch checked out in another worktree is rebased in that
   worktree (`git -C <path> rebase …`), which must be clean. Other branches
-  are checked out in the current worktree, which must be clean too. Every
+  are checked out in the current worktree, which must be clean too
+  (untracked files count: a rebase aborts on one it would overwrite). Every
   worktree is checked before the first rebase, so a dirty one stops the run
   with nothing changed. Your original checkout is restored at the end.
 - **Forks.** A PR from a fork that targets a stack branch is listed, not

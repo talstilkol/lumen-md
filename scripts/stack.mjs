@@ -137,9 +137,19 @@ function worktreeOwners() {
   return owners;
 }
 
-const clean = (dir) => {
-  const out = spawnSync("git", ["-C", dir, "status", "--porcelain", "--untracked-files=no"], { encoding: "utf8" });
-  return out.status === 0 && out.stdout.trim() === "";
+/**
+ * Uncommitted changes and untracked files of a worktree (porcelain lines;
+ * null when git fails). Untracked files count: a rebase or checkout aborts
+ * on one that a replayed commit would overwrite, halfway through the stack.
+ */
+const dirtyPaths = (dir) => {
+  const out = spawnSync("git", ["-C", dir, "status", "--porcelain", "--untracked-files=normal"], { encoding: "utf8" });
+  return out.status === 0 ? out.stdout.split("\n").filter(Boolean) : null;
+};
+const clean = (dir) => dirtyPaths(dir)?.length === 0;
+const dirtyList = (dir) => {
+  const lines = dirtyPaths(dir) ?? ["(git status failed)"];
+  return lines.slice(0, 5).join(", ") + (lines.length > 5 ? `, … ${lines.length - 5} more` : "");
 };
 const isCommit = (sha) => Boolean(sha) && gitOk("cat-file", "-e", `${sha}^{commit}`);
 const isAncestor = (a, b) => gitOk("merge-base", "--is-ancestor", a, b);
@@ -171,6 +181,26 @@ function oldBaseFor(parent, child, remote, explicit) {
   const fork = tryGit("merge-base", "--fork-point", parent.head, child);
   if (fork) return { sha: fork, how: "fork-point (reflog)" };
   return { sha: git("merge-base", parent.head, child), how: "merge-base" };
+}
+
+/** Did `branch` ever point at `sha` here (its reflog)? */
+const inReflog = (branch, sha) => (tryGit("reflog", "show", "--format=%H", `refs/heads/${branch}`) ?? "").split("\n").includes(sha);
+
+/**
+ * Why force-pushing local `branch` over GitHub's `remoteSha` would lose
+ * commits, or null when it is safe: the local branch contains that head, or
+ * was rewritten here from it. Behind GitHub, or diverged from a head it never
+ * had, is refused.
+ */
+function leaseProblem(branch, number, remoteSha) {
+  const local = git("rev-parse", branch);
+  if (!remoteSha || local === remoteSha) return null;
+  const head = `#${number}'s head on GitHub (${remoteSha.slice(0, 8)})`;
+  if (!isCommit(remoteSha)) return `${head} is not in this clone: fetch it (git fetch ${opt("--remote") ?? "origin"} ${branch}) and compare it with your ${branch} first.`;
+  if (isAncestor(remoteSha, local)) return null;
+  if (isAncestor(local, remoteSha)) return `${branch} is behind ${head}: a force-push would delete the commits only GitHub has. Update it first (git merge --ff-only ${remoteSha.slice(0, 8)} on ${branch}), then restack.`;
+  if (inReflog(branch, remoteSha)) return null;
+  return `${branch} has diverged from ${head}, which was never its tip here (pushed from elsewhere?): a force-push would delete it. Rebase ${branch} onto it first, then restack.`;
 }
 
 async function restack() {
@@ -212,7 +242,7 @@ async function restack() {
   }
   const here = git("rev-parse", "--show-toplevel");
   if (!dry && !clean(here)) {
-    console.error("stack: this worktree has uncommitted changes; commit or move them first (the restack checks branches out here).");
+    console.error(`stack: this worktree has uncommitted changes or untracked files (${dirtyList(here)}); commit, move or remove them first (the restack checks branches out here).`);
     process.exit(1);
   }
   const owners = worktreeOwners();
@@ -249,10 +279,21 @@ async function restack() {
     moving.add(s.branch);
     plan.push(p);
   }
+  // Every branch that will be force-pushed must contain its GitHub head, or
+  // have been rewritten here from it (amend, rebase): a lease on the sha
+  // GitHub has does not protect commits only GitHub has.
+  const problems = [
+    start.headSha && git("rev-parse", start.head) !== start.headSha ? leaseProblem(start.head, start.number, start.headSha) : null,
+    ...plan.map((p) => leaseProblem(p.s.branch, p.s.number, p.s.remoteSha)),
+  ].filter(Boolean);
+  if (problems.length) {
+    console.error(`\nstack: nothing was rebased.\n  ${problems.join("\n  ")}`);
+    process.exit(1);
+  }
   if (!dry) {
     const dirty = plan.filter((p) => p.owner && !clean(p.owner));
     if (dirty.length) {
-      console.error(`\nstack: nothing was rebased. ${dirty.map((p) => `${p.s.branch} is checked out in ${p.owner}`).join("; ")} with uncommitted changes: clean ${dirty.length > 1 ? "them" : "it"}, then run the restack again.`);
+      console.error(`\nstack: nothing was rebased. ${dirty.map((p) => `${p.s.branch} is checked out in ${p.owner} with uncommitted changes or untracked files (${dirtyList(p.owner)})`).join("; ")}: clean ${dirty.length > 1 ? "them" : "it"}, then run the restack again.`);
       process.exit(1);
     }
     for (let i = 0; i < plan.length; i++) {
