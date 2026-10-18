@@ -1562,10 +1562,12 @@ export function useCommands({
             return;
           }
           const content = useAppStore.getState().doc.content;
-          const ok = await tts.speak(content, {
-            uiLang: getLocale(),
-            onSentence: (s) => window.dispatchEvent(new CustomEvent("lumen-select-range", { detail: { from: s.from, to: s.to } })),
-          });
+          const ok = await tts
+            .speak(content, {
+              uiLang: getLocale(),
+              onSentence: (s) => window.dispatchEvent(new CustomEvent("lumen-speech-range", { detail: { from: s.from, to: s.to } })),
+            })
+            .finally(() => window.dispatchEvent(new CustomEvent("lumen-speech-range", { detail: null })));
           if (!ok) showAiToast(t("toast.tts.noHebrewVoice"), "info");
         },
       },

@@ -46,6 +46,7 @@ import { markdownLintExtension } from "./lintExtension";
 // commentDecorations imports yjs (comment anchors are Y.Map relative
 // positions) — loaded on demand in the collab effect, like ySync below.
 import { searchHighlightExtension } from "./searchHighlight";
+import { showSpokenRange, speechHighlightExtension } from "./speechHighlight";
 import { inlineSuggestion } from "./inlineSuggestion";
 import { formatKeymap } from "./formatKeymap";
 import { setSuggesting, suggestingAuthor, suggestingExtension, suggestingSkip } from "./suggestingExtension";
@@ -404,6 +405,7 @@ export const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
       // Workspace search → editor: when SearchDialog opens a hit, this
       // extension flashes the matches and scrolls the first one into view.
       searchHighlightExtension(),
+      speechHighlightExtension(),
       // Suggesting mode (track changes) — CriticMarkup decorations are
       // always on; the edit-rewriting filter only while the flag is set.
       suggestingExtension(suggesting),
@@ -686,20 +688,17 @@ export const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
     return () => window.removeEventListener("lumen-reveal-line", onReveal);
   }, []);
 
-  // `lumen-select-range` {from, to}: select and show a range — the sentence
-  // being read aloud (T32).
+  // `lumen-speech-range` {from, to} | null: highlight and show the sentence
+  // being read aloud (T32) — a decoration, not the selection, so typing
+  // during playback can't replace the sentence; null clears it.
   useEffect(() => {
     function onSelect(e: Event) {
-      const d = (e as CustomEvent<{ from: number; to: number }>).detail;
       const view = viewRef.current;
-      if (!view || !d) return;
-      const len = view.state.doc.length;
-      const from = Math.max(0, Math.min(d.from, len));
-      const to = Math.max(from, Math.min(d.to, len));
-      view.dispatch({ selection: { anchor: from, head: to }, effects: EditorView.scrollIntoView(from, { y: "center" }) });
+      if (!view) return;
+      showSpokenRange(view, (e as CustomEvent<{ from: number; to: number } | null>).detail ?? null);
     }
-    window.addEventListener("lumen-select-range", onSelect);
-    return () => window.removeEventListener("lumen-select-range", onSelect);
+    window.addEventListener("lumen-speech-range", onSelect);
+    return () => window.removeEventListener("lumen-speech-range", onSelect);
   }, []);
 
   return (
