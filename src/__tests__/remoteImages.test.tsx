@@ -153,6 +153,25 @@ describe("in the preview", () => {
     expect(container.querySelector(".lumen-remote-image")!.getAttribute("data-remote-image")).toBe("tracker.example.net, cdn.example.org");
   });
 
+  it("other-site <video> / <audio> are held back like images (WebKit ignores preload=none)", async () => {
+    const md = `<video src="https://media.example.org/v.mp4" controls></video>\n\n<audio controls><source src="https://media.example.org/a.mp3" type="audio/mpeg"></audio>\n\n<video src="./lumen-asset-clip.mp4"></video>`;
+    const { container } = render(await renderMarkdown(md, () => false));
+    const phs = [...container.querySelectorAll(".lumen-remote-image")];
+    expect(phs.map((p) => p.getAttribute("aria-label"))).toEqual(["Video or audio from media.example.org", "Video or audio from media.example.org"]);
+    expect(phs.map((p) => p.querySelector(".lumen-remote-image-alt")!.textContent)).toEqual(["v.mp4", "a.mp3"]);
+    // The local clip renders; no other-site media element or <source> exists.
+    expect([...container.querySelectorAll("video, audio")].map((m) => m.getAttribute("src"))).toEqual(["./lumen-asset-clip.mp4"]);
+    expect(container.querySelectorAll("source")).toHaveLength(0);
+    act(() => {
+      fireEvent.click(screen.getAllByRole("button", { name: "Always allow media.example.org" })[0]);
+    });
+    expect([...container.querySelectorAll("video, audio")].map((m) => m.getAttribute("src"))).toEqual([
+      "https://media.example.org/v.mp4",
+      "https://media.example.org/a.mp3",
+      "./lumen-asset-clip.mp4",
+    ]);
+  });
+
   it("on desktop the placeholder offers no Load (nothing could load)", async () => {
     (window as unknown as Record<string, unknown>).__TAURI_INTERNALS__ = {};
     const { container } = render(await renderMarkdown(`![a](${PIXEL})`, () => false));
@@ -198,6 +217,14 @@ describe("rehypeSanitizeRaw: other-site loads nothing guards are removed", () =>
     expect(video.properties.preload).toBe("none");
     expect(audio.properties.autoPlay).toBeUndefined();
     expect(audio.properties.preload).toBe("none");
+  });
+
+  it("media keep one other-site URL, their own src: the first <source src> is hoisted", async () => {
+    const t = await tree(`<video controls><source src="https://media.example.org/a.webm"><source src="https://media.example.org/a.mp4"><source src="./a.mp4"><track src="https://media.example.org/subs.vtt"></video>`);
+    const [video] = find(t, "video");
+    expect(video.properties.src).toBe("https://media.example.org/a.webm");
+    expect(find(t, "source").map((e) => e.properties.src)).toEqual(["./a.mp4"]);
+    expect(find(t, "track")).toHaveLength(0);
   });
 
   it("SVG <image href>, the legacy background attribute; links keep their href", async () => {

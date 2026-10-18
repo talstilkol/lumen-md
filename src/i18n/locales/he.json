@@ -1433,5 +1433,6 @@
   "remoteImage.loadHint": "טעינת התמונה הזו פעם אחת. {host} יראה שפתחת את הפתק.",
   "remoteImage.allowHost": "לאשר תמיד את {host}",
   "remoteImage.allowHint": "טעינת תמונות מ-{host} בכל הפתקים, בדפדפן הזה.",
-  "collab.settings.cspBlocked": "מדיניות האבטחה של הפריסה הזו חוסמת את {url}, ולכן לא ייעשה בו שימוש. אפשר להוסיף אותו בזמן הבנייה (VITE_CSP_CONNECT_EXTRA)."
+  "collab.settings.cspBlocked": "מדיניות האבטחה של הפריסה הזו חוסמת את {url}, ולכן לא ייעשה בו שימוש. אפשר להוסיף אותו בזמן הבנייה (VITE_CSP_CONNECT_EXTRA).",
+  "remoteMedia.label": "וידאו או שמע מ-{host}"
 }

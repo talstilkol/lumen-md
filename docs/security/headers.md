@@ -164,8 +164,10 @@ instead (`src/lib/remoteImages.ts`):
 - The raw-HTML sanitizer removes the other-site loads that no placeholder guards: a
   `<source srcset>` (the `<picture>` falls back to its `<img>`), video posters, the legacy
   `background` attribute, and `href` on anything but links (SVG `<image>`). `<video>` /
-  `<audio>` lose `autoplay` and get `preload="none"`, so they fetch nothing until the user
-  presses play.
+  `<audio>` lose `autoplay`, get `preload="none"`, and keep at most one other-site URL,
+  their own `src` (the first `<source src>` is hoisted, `<track>` dropped). The preview
+  holds that `src` back behind the same placeholder, because WebKit fetches a video `src`
+  despite `preload="none"` (seen in CI's Playwright WebKit).
 - HTML export keeps the real `<img>`, because the exported file is for its readers. Print
   shows what the preview shows.
 - Not covered: images inside Mermaid labels, the live-SVG block (DOMPurify, a separate

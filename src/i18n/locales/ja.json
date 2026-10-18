@@ -1433,5 +1433,6 @@
   "remoteImage.loadHint": "この画像を一度だけ読み込みます。このノートを開いたことが {host} に伝わります。",
   "remoteImage.allowHost": "{host} を常に許可",
   "remoteImage.allowHint": "このブラウザーで、すべてのノートの {host} の画像を読み込みます。",
-  "collab.settings.cspBlocked": "このデプロイのセキュリティポリシーは {url} をブロックするため、使用されません。ビルド時に追加してください（VITE_CSP_CONNECT_EXTRA）。"
+  "collab.settings.cspBlocked": "このデプロイのセキュリティポリシーは {url} をブロックするため、使用されません。ビルド時に追加してください（VITE_CSP_CONNECT_EXTRA）。",
+  "remoteMedia.label": "{host} の動画または音声"
 }

@@ -1433,5 +1433,6 @@
   "remoteImage.loadHint": "仅加载这张图片一次。{host} 会知道你打开了这篇笔记。",
   "remoteImage.allowHost": "始终允许 {host}",
   "remoteImage.allowHint": "在此浏览器中，所有笔记都加载来自 {host} 的图片。",
-  "collab.settings.cspBlocked": "此部署的安全策略阻止了 {url}，因此不会使用它。请在构建时添加（VITE_CSP_CONNECT_EXTRA）。"
+  "collab.settings.cspBlocked": "此部署的安全策略阻止了 {url}，因此不会使用它。请在构建时添加（VITE_CSP_CONNECT_EXTRA）。",
+  "remoteMedia.label": "来自 {host} 的视频或音频"
 }

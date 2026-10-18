@@ -1433,5 +1433,6 @@
   "remoteImage.loadHint": "Dieses Bild einmal laden. {host} sieht dann, dass du diese Notiz geöffnet hast.",
   "remoteImage.allowHost": "{host} immer erlauben",
   "remoteImage.allowHint": "Bilder von {host} in allen Notizen laden, in diesem Browser.",
-  "collab.settings.cspBlocked": "Die Sicherheitsrichtlinie dieser Installation blockiert {url}, daher wird es nicht verwendet. Füge es beim Build hinzu (VITE_CSP_CONNECT_EXTRA)."
+  "collab.settings.cspBlocked": "Die Sicherheitsrichtlinie dieser Installation blockiert {url}, daher wird es nicht verwendet. Füge es beim Build hinzu (VITE_CSP_CONNECT_EXTRA).",
+  "remoteMedia.label": "Video oder Audio von {host}"
 }

@@ -388,14 +388,14 @@ interface ImgProps extends React.ImgHTMLAttributes<HTMLImageElement> {
  * (the host, in this browser). No request is made until one is clicked. In
  * the desktop app nothing can load (its CSP, plan 2.1), so no buttons.
  */
-function RemoteImagePlaceholder({ alt, gate }: { alt?: string; gate: RemoteImageGate }) {
+function RemoteImagePlaceholder({ alt, gate, media }: { alt?: string; gate: RemoteImageGate; media?: boolean }) {
   const host = gate.hosts.join(", ");
   const unavailable = remoteImagesUnavailable();
   return (
     <span
       className="lumen-remote-image"
       role="group"
-      aria-label={t("remoteImage.label", { host })}
+      aria-label={t(media ? "remoteMedia.label" : "remoteImage.label", { host })}
       data-remote-image={host}
     >
       <span className="lumen-remote-image-text">
@@ -417,6 +417,28 @@ function RemoteImagePlaceholder({ alt, gate }: { alt?: string; gate: RemoteImage
     </span>
   );
 }
+
+type MediaProps = React.VideoHTMLAttributes<HTMLVideoElement>;
+
+/**
+ * <video> / <audio> from another site wait for the user like images (plan
+ * 2.2): WebKit fetches a media src even with preload="none". The sanitizer
+ * leaves other-site media at most one URL, its own src.
+ */
+function gatedMedia(Tag: "video" | "audio") {
+  return function LumenMedia(props: MediaProps) {
+    const isStatic = useContext(StaticRenderContext);
+    useSyncExternalStore(subscribeRemoteImages, remoteImagesVersion, remoteImagesVersion);
+    const gate = remoteImageGate(props.src);
+    if (!isStatic && gate.blocked) {
+      const name = (props.src ?? "").split(/[?#]/)[0].split("/").pop() || undefined;
+      return <RemoteImagePlaceholder alt={props.title || name} gate={gate} media />;
+    }
+    return <Tag {...(props as React.HTMLAttributes<HTMLElement>)} />;
+  };
+}
+const LumenVideo = gatedMedia("video");
+const LumenAudio = gatedMedia("audio");
 
 function LumenImg(props: ImgProps) {
   const { src, srcSet, ...rest } = props;
@@ -554,6 +576,8 @@ export const components: Record<string, LumenBlock> = {
   "lumen-playground": Playground as unknown as LumenBlock,
   // Asset-resolving <img> override.
   img: LumenImg as unknown as LumenBlock,
+  video: LumenVideo as unknown as LumenBlock,
+  audio: LumenAudio as unknown as LumenBlock,
   // GFM task-list checkboxes get an aria-label so they aren't announced bare.
   input: LumenInput as unknown as LumenBlock,
 };

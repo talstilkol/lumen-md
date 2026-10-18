@@ -52,7 +52,9 @@ test("a tracking pixel makes 0 requests until the user loads or allows it", asyn
 
   const preview = page.locator(".prose-lumen").first();
   const placeholders = preview.locator(".lumen-remote-image");
-  await expect(placeholders).toHaveCount(3, { timeout: 10_000 });
+  // md pixel, raw <img>, <picture>'s <img>, and the <video> (WebKit would
+  // fetch its src despite preload="none").
+  await expect(placeholders).toHaveCount(4, { timeout: 10_000 });
   await expect(placeholders.first()).toContainText(TRACKER);
   await page.waitForLoadState("networkidle");
   expect(requests.map((r) => r.url())).toEqual([]);
@@ -61,21 +63,21 @@ test("a tracking pixel makes 0 requests until the user loads or allows it", asyn
   // "Load": this image only.
   await placeholders.first().getByRole("button", { name: "Load" }).click();
   await expect(preview.locator(`img[src^="https://${TRACKER}/md.gif"]`)).toBeVisible();
-  await expect(placeholders).toHaveCount(2);
+  await expect(placeholders).toHaveCount(3);
   await expect.poll(() => requests.map((r) => new URL(r.url()).pathname)).toEqual(["/md.gif"]);
 
   // "Always allow": every image from the host, kept in this browser.
   await placeholders.first().getByRole("button", { name: `Always allow ${TRACKER}` }).click();
   await expect(placeholders).toHaveCount(0);
   await expect(preview.locator(`img[src="https://${TRACKER}/raw.gif"]`)).toBeVisible();
-  await expect.poll(() => new Set(requests.map((r) => new URL(r.url()).pathname))).toEqual(
-    new Set(["/md.gif", "/raw.gif", "/picture.gif"]),
-  );
-  // The other-site <source>, the poster and the video itself were removed or
-  // never fetched (preload="none", no autoplay).
+  await expect(preview.locator(`video[src="https://${TRACKER}/v.mp4"]`)).toHaveCount(1);
+  await expect
+    .poll(() => new Set(requests.map((r) => new URL(r.url()).pathname).filter((p) => p !== "/v.mp4")))
+    .toEqual(new Set(["/md.gif", "/raw.gif", "/picture.gif"]));
+  // The other-site <source> and the poster were removed: never fetched.
+  // (The video itself may load now: its host was allowed.)
   expect(requests.map((r) => new URL(r.url()).pathname)).not.toContain("/picture.webp");
   expect(requests.map((r) => new URL(r.url()).pathname)).not.toContain("/poster.gif");
-  expect(requests.map((r) => new URL(r.url()).pathname)).not.toContain("/v.mp4");
   expect(await page.evaluate(() => localStorage.getItem("lumen.remoteImages.allowedHosts"))).toBe(JSON.stringify([TRACKER]));
 });
 

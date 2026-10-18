@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-10-18T05:06:36.175Z",
+  "generated_at": "2026-10-18T08:57:26.027Z",
   "source": "src/i18n/index.ts (en bundle)",
-  "count": 1435,
+  "count": 1436,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -7706,6 +7706,13 @@
     {
       "key": "remoteImage.allowHint",
       "en": "Load images from {host} in every note, in this browser.",
+      "vars": [
+        "host"
+      ]
+    },
+    {
+      "key": "remoteMedia.label",
+      "en": "Video or audio from {host}",
       "vars": [
         "host"
       ]

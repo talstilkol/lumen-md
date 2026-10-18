@@ -1433,5 +1433,6 @@
   "remoteImage.loadHint": "تحميل هذه الصورة مرة واحدة. سيعرف {host} أنك فتحت هذه الملاحظة.",
   "remoteImage.allowHost": "السماح دائمًا لـ {host}",
   "remoteImage.allowHint": "تحميل الصور من {host} في كل الملاحظات، في هذا المتصفح.",
-  "collab.settings.cspBlocked": "سياسة الأمان في هذا النشر تحظر {url}، لذا لن يُستخدم. أضِفه وقت البناء (VITE_CSP_CONNECT_EXTRA)."
+  "collab.settings.cspBlocked": "سياسة الأمان في هذا النشر تحظر {url}، لذا لن يُستخدم. أضِفه وقت البناء (VITE_CSP_CONNECT_EXTRA).",
+  "remoteMedia.label": "فيديو أو صوت من {host}"
 }

@@ -1433,5 +1433,6 @@
   "remoteImage.loadHint": "Charger cette image une seule fois. {host} saura que vous avez ouvert cette note.",
   "remoteImage.allowHost": "Toujours autoriser {host}",
   "remoteImage.allowHint": "Charger les images de {host} dans toutes les notes, dans ce navigateur.",
-  "collab.settings.cspBlocked": "La politique de sécurité de ce déploiement bloque {url} ; il ne sera donc pas utilisé. Ajoutez-le à la compilation (VITE_CSP_CONNECT_EXTRA)."
+  "collab.settings.cspBlocked": "La politique de sécurité de ce déploiement bloque {url} ; il ne sera donc pas utilisé. Ajoutez-le à la compilation (VITE_CSP_CONNECT_EXTRA).",
+  "remoteMedia.label": "Vidéo ou audio de {host}"
 }

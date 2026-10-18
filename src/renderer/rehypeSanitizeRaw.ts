@@ -15,8 +15,9 @@
  * preview's placeholder (src/lib/remoteImages.ts). Everything else that
  * would fetch from another site on its own is removed here: <source srcset>
  * (a <picture> falls back to its <img>), video posters, the legacy
- * `background` attribute and SVG `href`s. <video> / <audio> lose autoplay
- * and get preload="none", so they fetch nothing until the user presses play.
+ * `background` attribute and SVG `href`s. <video> / <audio> lose autoplay,
+ * get preload="none", and keep at most one other-site URL (their own src),
+ * which the preview holds back like an image.
  */
 import { visit, SKIP } from "unist-util-visit";
 import type { Element, Root, Parent } from "hast";
@@ -87,6 +88,16 @@ function dropRemoteLoads(el: Element, props: NonNullable<Element["properties"]>)
   if (el.tagName === "video" || el.tagName === "audio") {
     delete props.autoPlay;
     props.preload = "none";
+    // The preview gates other-site media on the element's own src, like an
+    // <img> (WebKit fetches a video src despite preload="none"). Hoist the
+    // first other-site <source src> to it and drop other-site <source> /
+    // <track> children, so that one src is all a load can come from.
+    const kids = el.children ?? [];
+    const remoteKid = (k: (typeof kids)[number]): k is Element =>
+      k.type === "element" && (k.tagName === "source" || k.tagName === "track") && remote(k.properties?.src);
+    const first = kids.find((k): k is Element => remoteKid(k) && k.tagName === "source");
+    if (first && !props.src) props.src = String(first.properties!.src);
+    el.children = kids.filter((k) => !remoteKid(k));
   }
 }
 
