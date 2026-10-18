@@ -20,7 +20,7 @@ unified/remark/rehype, Yjs, OPFS, and WebRTC. Zero server required by default.
 | **Voice Dictation** | Two modes: Quick (Web Speech API, real-time) and AI Memo (MediaRecorder → Whisper transcription) |
 | **Live Collaboration** | Yjs CRDT over WebRTC — peer-to-peer, zero server required for P2P rooms |
 | **MCP Server** | `npx @lumen-md/mcp-server` gives Claude Desktop / Cursor direct access to your workspace |
-| **Privacy-first** | AES-256-GCM encrypted secrets (OS keychain on desktop), telemetry opt-out, full offline capability (PWA) |
+| **Privacy-first** | AES-256-GCM encrypted secrets (OS keychain in the macOS and Windows desktop apps), telemetry opt-out, full offline capability (PWA) |
 | **i18n + RTL** | 8 languages (en, he, ar, de, fr, ja, ru, zh-CN) with full key coverage; RTL-safe layout, LTR code/math islands; strict zero-drift CI guard |
 
 ---

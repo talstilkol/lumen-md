@@ -45,15 +45,33 @@ export function norm(s) {
 }
 
 /**
- * English UI strings, the `en` dictionary in src/i18n/index.ts, as a
- * matcher: a label with a placeholder ("Language: {label}") matches any
- * filling of it, including the docs' own "Language: …".
+ * Keys of strings that label a command: every `cmd.*` key, plus any key a
+ * `label:` property in src/ reads with `t("…")` (ternaries included). A UI
+ * string that is only a button elsewhere ("Copy command") is not a command.
  */
-export function englishStrings(src) {
+export function commandLabelKeys(sources) {
+  const keys = new Set();
+  for (const src of sources) {
+    for (const m of src.matchAll(/\blabel:\s*/g)) {
+      const expr = src.slice(m.index + m[0].length, m.index + m[0].length + 240).split(/\n\s*[a-zA-Z_]+:\s/)[0];
+      for (const k of expr.matchAll(/\bt\("([\w.:-]+)"/g)) keys.add(k[1]);
+    }
+  }
+  return keys;
+}
+
+/**
+ * English command labels from the `en` dictionary in src/i18n/index.ts, as
+ * a matcher: a label with a placeholder ("Language: {label}") matches any
+ * filling of it, including the docs' own "Language: …". Only `cmd.*` keys
+ * and keys in `labelKeys` count; without `labelKeys`, every string does.
+ */
+export function englishStrings(src, labelKeys) {
   const exact = new Set();
   const patterns = [];
-  for (const m of src.matchAll(/^\s*"[\w.:-]+":\s*"((?:[^"\\]|\\.)*)",?\s*$/gm)) {
-    const value = norm(JSON.parse(`"${m[1]}"`));
+  for (const m of src.matchAll(/^\s*"([\w.:-]+)":\s*"((?:[^"\\]|\\.)*)",?\s*$/gm)) {
+    if (labelKeys && !m[1].startsWith("cmd.") && !labelKeys.has(m[1])) continue;
+    const value = norm(JSON.parse(`"${m[2]}"`));
     if (!/\{[^}]+\}/.test(value)) {
       exact.add(value);
       continue;
@@ -79,8 +97,10 @@ export function commandMentions(line) {
     const name = s.split(/\s+→\s+/)[0].trim();
     if (name) out.push(name);
   };
-  // `⌘K → Name` or ⌘K → "Name" (inside or outside backticks)
-  for (const m of line.matchAll(/⌘K`?\s*→\s*(?:\*\*([^*]+)\*\*|"([^"]+)"|`([^`]+)`|([^`"*()\n]+?)(?=`|\)|$|\.\s|,|;))/g)) take(m[1] ?? m[2] ?? m[3] ?? m[4]);
+  // `⌘K → Name` inside one code span (parentheses and all), ⌘K → "Name", `⌘K` → **Name**
+  const seen = new Set();
+  for (const m of line.matchAll(/`⌘K\s*→\s*([^`]+)`/g)) { seen.add(m.index); take(m[1].replace(/^"|"(?=\s*(→|$))/g, "")); }
+  for (const m of line.matchAll(/⌘K`?\s*→\s*(?:\*\*([^*]+)\*\*|"([^"]+)")/g)) if (!seen.has(m.index - 1)) take(m[1] ?? m[2]);
   // Command: `Name` (`⌘K`)
   for (const m of line.matchAll(/Command:\s*`([^`]+)`/g)) take(m[1]);
   // Command palette → **Name**
@@ -113,7 +133,16 @@ export function staleCounts(line) {
 function main() {
   const ROOT = resolve(fileURLToPath(new URL("..", import.meta.url)));
   const problems = [];
-  const en = englishStrings(readFileSync(join(ROOT, "src/i18n/index.ts"), "utf8"));
+  const srcFiles = [];
+  const walkSrc = (dir) => {
+    for (const name of readdirSync(dir)) {
+      const p = join(dir, name);
+      if (statSync(p).isDirectory()) { if (name !== "__tests__") walkSrc(p); }
+      else if (/\.tsx?$/.test(name)) srcFiles.push(readFileSync(p, "utf8"));
+    }
+  };
+  walkSrc(join(ROOT, "src"));
+  const en = englishStrings(readFileSync(join(ROOT, "src/i18n/index.ts"), "utf8"), commandLabelKeys(srcFiles));
   const scripts = {
     root: Object.keys(JSON.parse(readFileSync(join(ROOT, "package.json"), "utf8")).scripts ?? {}),
     docs: Object.keys(JSON.parse(readFileSync(join(ROOT, "docs/package.json"), "utf8")).scripts ?? {}),

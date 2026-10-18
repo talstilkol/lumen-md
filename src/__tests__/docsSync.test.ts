@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 // @ts-expect-error — plain .mjs script without types
-import { commandMentions, englishStrings, norm, npmRuns, staleCounts } from "../../scripts/docs-sync.mjs";
+import { commandLabelKeys, commandMentions, englishStrings, norm, npmRuns, staleCounts } from "../../scripts/docs-sync.mjs";
 
 describe("docs-sync (plan 0.18)", () => {
   it("finds the command a doc line names, in each style the docs use", () => {
@@ -12,6 +12,9 @@ describe("docs-sync (plan 0.18)", () => {
     expect(commandMentions("Run **Enable TypeScript checks in code blocks** from the command palette.")).toEqual(["Enable TypeScript checks in code blocks"]);
     expect(commandMentions('Turn it on from the command palette ("Turn on suggesting mode") or with')).toEqual(["Turn on suggesting mode"]);
     expect(commandMentions("| `⌘K` | Command palette (everything is here) |")).toEqual([]);
+    // review #227: a label with parentheses inside the code span is still checked
+    expect(commandMentions("hybrid retrieval (`⌘K → Smart search (semantic + keyword)`)")).toEqual(["Smart search (semantic + keyword)"]);
+    expect(commandMentions('⌘K → "Switch to local AI (WebGPU)"')).toEqual(["Switch to local AI (WebGPU)"]);
   });
 
   it("matches labels ignoring case, emoji and the trailing ellipsis, and fills placeholders", () => {
@@ -25,6 +28,18 @@ describe("docs-sync (plan 0.18)", () => {
     expect(en.has(norm("Language: עברית"))).toBe(true);
     expect(en.has(norm("AI Settings"))).toBe(true);
     expect(en.has(norm("Lock vault"))).toBe(false);
+  });
+
+  it("only command labels count, not every UI string (review #227)", () => {
+    const keys = commandLabelKeys([`{ id: "x", label: useLocalAi ? t("ai.local.off") : t("ai.local.on"), run }`, `<button>{t("ai.doctor.copy")}</button>`]);
+    const en = englishStrings(`
+  "ai.local.on": "Switch to local AI",
+  "ai.doctor.copy": "Copy command",
+  "cmd.x": "Open thing",
+`, keys);
+    expect(en.has(norm("Switch to local AI"))).toBe(true);
+    expect(en.has(norm("Open thing"))).toBe(true);
+    expect(en.has(norm("Copy command"))).toBe(false);
   });
 
   it("finds npm scripts and hand-typed counts", () => {
