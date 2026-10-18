@@ -4,7 +4,7 @@
  * trash with an Undo.
  */
 
-import { moveToTrash, restoreFromTrash, type TrashItem } from "./trash";
+import { listTrash, moveToTrash, restoreFromTrash, type TrashItem } from "./trash";
 import { rewriteLinks, updateLinksAfterMove } from "./linkRewrite";
 import { listWorkspace, renameWorkspaceFile, WorkspaceConflictError, workspaceHasEntry } from "./workspace";
 
@@ -72,17 +72,94 @@ export async function safeMove(
   return { path: to, linksUpdated, replaced, linksError, rewrite };
 }
 
-/** Delete = move to the trash. Returns the trash entries for Undo. */
+/**
+ * The last deletes, oldest first, for Ctrl+Z outside the editor (plan 3.1).
+ * One entry per delete action (a bulk delete is one entry). Runtime only:
+ * after a reload the Trash panel still has everything.
+ */
+export const TRASH_UNDO_LIMIT = 20;
+const undoStack: TrashItem[][] = [];
+
+/** How many deletes Ctrl+Z can still undo (entries restored elsewhere are counted until the next undo skips them). */
+export function trashUndoDepth(): number {
+  return undoStack.length;
+}
+
+/** Test hook. */
+export function __resetTrashUndo(): void {
+  undoStack.length = 0;
+}
+
+/** These items are back (or being brought back): no stack entry may restore them again. */
+function forgetUndo(items: TrashItem[]): void {
+  const ids = new Set(items.map((i) => i.id));
+  for (let n = undoStack.length - 1; n >= 0; n--) {
+    const rest = undoStack[n].filter((i) => !ids.has(i.id));
+    if (rest.length) undoStack[n] = rest;
+    else undoStack.splice(n, 1);
+  }
+}
+
+// Restores run one at a time: each rewrites the trash index, and two
+// interleaved read-modify-writes would put a restored entry back in it.
+let restoring: Promise<unknown> = Promise.resolve();
+function oneAtATime<T>(fn: () => Promise<T>): Promise<T> {
+  const run = restoring.then(fn, fn);
+  restoring = run.catch(() => undefined);
+  return run;
+}
+
+/** Restore the given entries that are still in the trash (the Trash panel may have restored or purged some). */
+async function restoreItems(items: TrashItem[]): Promise<string[]> {
+  const inTrash = new Set((await listTrash()).map((i) => i.id));
+  const out: string[] = [];
+  try {
+    for (const i of items) if (inTrash.has(i.id)) out.push(await restoreFromTrash(i.id));
+  } finally {
+    window.dispatchEvent(new Event("lumen-workspace-changed"));
+  }
+  return out;
+}
+
+/** Delete = move to the trash. Returns the trash entries for Undo (and remembers them for Ctrl+Z). */
 export async function trashPaths(paths: string[], kinds: Record<string, "file" | "directory"> = {}): Promise<TrashItem[]> {
   const items = await moveToTrash(paths, kinds);
+  if (items.length) {
+    undoStack.push(items);
+    if (undoStack.length > TRASH_UNDO_LIMIT) undoStack.splice(0, undoStack.length - TRASH_UNDO_LIMIT);
+  }
   window.dispatchEvent(new Event("lumen-workspace-changed"));
   return items;
 }
 
-/** Undo a delete: restore every given entry. Returns where they went. */
+/** Undo a delete: restore every given entry still in the trash. Returns where they went. */
 export async function undoTrash(items: TrashItem[]): Promise<string[]> {
-  const out: string[] = [];
-  for (const i of items) out.push(await restoreFromTrash(i.id));
-  window.dispatchEvent(new Event("lumen-workspace-changed"));
-  return out;
+  forgetUndo(items);
+  return oneAtATime(() => restoreItems(items));
+}
+
+/**
+ * Ctrl+Z outside the editor: restore the most recent delete that is still
+ * in the trash and drop it from the stack, so the next call restores the one
+ * before. Resolves to where the entries went, or null when there is nothing
+ * left to undo. When a restore fails, what is still in the trash stays on
+ * the stack for another try.
+ */
+export function undoLastTrash(): Promise<string[] | null> {
+  return oneAtATime(async () => {
+    const inTrash = new Set((await listTrash()).map((i) => i.id));
+    while (undoStack.length) {
+      const entry = undoStack.pop()!.filter((i) => inTrash.has(i.id));
+      if (!entry.length) continue;
+      try {
+        return await restoreItems(entry);
+      } catch (e) {
+        const left = new Set((await listTrash().catch(() => [])).map((i) => i.id));
+        const keep = entry.filter((i) => left.has(i.id));
+        if (keep.length) undoStack.push(keep);
+        throw e;
+      }
+    }
+    return null;
+  });
 }

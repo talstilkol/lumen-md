@@ -28,7 +28,7 @@ import { uiAlert, uiConfirm, uiPrompt } from "./PromptDialog";
 import { FileContextMenu, buildFileActions } from "./FileContextMenu";
 import { useAppStore } from "../store/useStore";
 import { movedPath, safeMove, trashPaths, undoTrash, type MoveResult } from "../storage/fileOps";
-import { flushActiveWorkspaceDoc, syncOpenDocsAfterMove } from "../store/openDocs";
+import { flushActiveWorkspaceDoc, flushOpenDocsUnder, syncOpenDocsAfterMove } from "../store/openDocs";
 import type { TrashItem } from "../storage/trash";
 import { toast, useToastStore } from "../store/useToastStore";
 import { onWorkspaceChanged } from "../storage/workspaceEvents";
@@ -77,7 +77,10 @@ export function FileTree({
       action: {
         label: t("tree.undo"),
         run: () => {
-          void undoTrash(items).then(() => refresh());
+          void undoTrash(items).then(
+            () => refresh(),
+            (e: unknown) => toast.error(t("trash.restoreFailed", { error: e instanceof Error ? e.message : String(e) })),
+          );
         },
       },
     });
@@ -121,8 +124,8 @@ export function FileTree({
     const paths = [...selectedPaths];
     // No confirmation: it goes to the trash, and the toast offers Undo.
     try {
-      // Unsaved edits of the active note go with it (and come back on Undo).
-      await flushActiveWorkspaceDoc();
+      // Unsaved edits of every open note inside go with it (and come back on Undo / Ctrl+Z).
+      await flushOpenDocsUnder(paths);
       const items = await trashPaths(paths, Object.fromEntries(paths.map((p) => [p, kindOf(p)])));
       if (activePath && paths.some((p) => activePath === p || activePath.startsWith(p + "/"))) onActiveDeleted();
       announceTrash(items);
@@ -338,8 +341,9 @@ export function FileTree({
   async function remove(node: WorkspaceNode) {
     // Goes to the trash (Undo in the toast; restorable for 30 days).
     try {
-      // Unsaved edits of the active note go with it (and come back on Undo).
-      await flushActiveWorkspaceDoc();
+      // Unsaved edits of every open note inside go with it, inactive tabs
+      // included (and come back on Undo / Ctrl+Z).
+      await flushOpenDocsUnder([node.path]);
       const items = await trashPaths([node.path], { [node.path]: node.kind === "directory" ? "directory" : "file" });
       announceTrash(items);
       if (

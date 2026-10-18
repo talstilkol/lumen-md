@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-10-18T05:33:13.885Z",
+  "generated_at": "2026-10-18T05:44:37.517Z",
   "source": "src/i18n/index.ts (en bundle)",
-  "count": 1414,
+  "count": 1417,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -1697,6 +1697,25 @@
       "vars": [
         "n"
       ]
+    },
+    {
+      "key": "trash.restoredMany",
+      "en": "{count} restored from the trash",
+      "vars": [
+        "count"
+      ]
+    },
+    {
+      "key": "trash.restoreFailed",
+      "en": "Couldn't restore from the trash: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "trash.undoShortcut",
+      "en": "Restore the last deleted file or folder (when focus is outside the editor)",
+      "vars": []
     },
     {
       "key": "cmd.file.trash",

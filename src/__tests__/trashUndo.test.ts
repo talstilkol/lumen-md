@@ -1,0 +1,228 @@
+/**
+ * Plan 3.1: Ctrl+Z outside the editor restores the last delete (a stack of
+ * the last 20), and deleting a folder first writes the unsaved edits of
+ * every open tab inside it, inactive tabs included.
+ */
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { installFakeOpfs } from "./helpers/fakeOpfs";
+import { useAppStore } from "../store/useStore";
+import { readWorkspaceFile, workspaceHasEntry, writeWorkspaceFile } from "../storage/workspace";
+import { __resetTrashUndo, TRASH_UNDO_LIMIT, trashPaths, trashUndoDepth, undoLastTrash, undoTrash } from "../storage/fileOps";
+import { listTrash, restoreFromTrash } from "../storage/trash";
+import { flushOpenDocsUnder } from "../store/openDocs";
+import { handleTrashUndoKey, isEditingTarget, isUndoKey } from "../ui/trashUndoShortcut";
+
+beforeEach(() => {
+  installFakeOpfs();
+  __resetTrashUndo();
+  useAppStore.setState({ doc: { name: "Untitled.md", content: "", dirty: false, workspaceName: null }, openTabs: [] });
+});
+
+afterEach(() => {
+  document.body.innerHTML = "";
+});
+
+function open(path: string, content: string) {
+  useAppStore.getState().openTab({ name: path, content, workspaceName: path });
+}
+
+describe("undoLastTrash: a stack of deletes", () => {
+  it("restores the most recent delete first, then the one before, then nothing", async () => {
+    await writeWorkspaceFile("a.md", "A");
+    await writeWorkspaceFile("b.md", "B");
+    await trashPaths(["a.md"]);
+    await trashPaths(["b.md"]);
+    expect(trashUndoDepth()).toBe(2);
+    expect(await undoLastTrash()).toEqual(["b.md"]);
+    expect(await workspaceHasEntry("a.md")).toBe(false);
+    expect(await undoLastTrash()).toEqual(["a.md"]);
+    expect(await readWorkspaceFile("a.md")).toBe("A");
+    expect(await undoLastTrash()).toBeNull();
+    expect(trashUndoDepth()).toBe(0);
+  });
+
+  it("a bulk delete is one entry: one Ctrl+Z brings all of it back", async () => {
+    await writeWorkspaceFile("a.md", "A");
+    await writeWorkspaceFile("b.md", "B");
+    await trashPaths(["a.md", "b.md"]);
+    expect(trashUndoDepth()).toBe(1);
+    expect((await undoLastTrash())?.sort()).toEqual(["a.md", "b.md"]);
+  });
+
+  it(`keeps only the last ${TRASH_UNDO_LIMIT} deletes; older ones stay in the trash`, async () => {
+    for (let i = 0; i < TRASH_UNDO_LIMIT + 2; i++) {
+      await writeWorkspaceFile(`n${i}.md`, `#${i}`);
+      await trashPaths([`n${i}.md`]);
+    }
+    expect(trashUndoDepth()).toBe(TRASH_UNDO_LIMIT);
+    for (let i = TRASH_UNDO_LIMIT + 1; i >= 2; i--) expect(await undoLastTrash()).toEqual([`n${i}.md`]);
+    expect(await undoLastTrash()).toBeNull();
+    expect((await listTrash()).map((i) => i.originalPath).sort()).toEqual(["n0.md", "n1.md"]);
+  });
+
+  it("the toast's Undo takes its entry off the stack", async () => {
+    await writeWorkspaceFile("a.md", "A");
+    await writeWorkspaceFile("b.md", "B");
+    await trashPaths(["a.md"]);
+    const b = await trashPaths(["b.md"]);
+    await undoTrash(b);
+    expect(trashUndoDepth()).toBe(1);
+    expect(await undoLastTrash()).toEqual(["a.md"]);
+  });
+
+  it("skips what the Trash panel already restored, and Undo on it again is a no-op", async () => {
+    await writeWorkspaceFile("a.md", "A");
+    await writeWorkspaceFile("b.md", "B");
+    await trashPaths(["a.md"]);
+    const b = await trashPaths(["b.md"]);
+    await restoreFromTrash(b[0].id); // from the Trash panel
+    expect(await undoLastTrash()).toEqual(["a.md"]);
+    await expect(undoTrash(b)).resolves.toEqual([]);
+  });
+
+  it("two quick presses restore two deletes, newest first, without corrupting the trash index", async () => {
+    await writeWorkspaceFile("a.md", "A");
+    await writeWorkspaceFile("b.md", "B");
+    await trashPaths(["a.md"]);
+    await trashPaths(["b.md"]);
+    const [first, second] = await Promise.all([undoLastTrash(), undoLastTrash()]);
+    expect(first).toEqual(["b.md"]);
+    expect(second).toEqual(["a.md"]);
+    expect(await listTrash()).toEqual([]);
+  });
+});
+
+describe("flushOpenDocsUnder", () => {
+  it("deleting a folder saves every open tab inside it, inactive ones too, so Ctrl+Z brings back the latest text", async () => {
+    await writeWorkspaceFile("proj/a.md", "A saved");
+    await writeWorkspaceFile("proj/b.md", "B saved");
+    open("proj/a.md", "A saved");
+    useAppStore.getState().setContent("A unsaved edit"); // the debounced autosave has not run...
+    open("proj/b.md", "B saved"); // ...and the user switched away: a.md is now an inactive dirty tab
+    useAppStore.getState().setContent("B unsaved edit");
+    expect(useAppStore.getState().openTabs.find((t) => t.id === "proj/a.md")).toMatchObject({ dirty: true, content: "A unsaved edit" });
+
+    await flushOpenDocsUnder(["proj"]);
+    await trashPaths(["proj"], { proj: "directory" });
+    expect(await workspaceHasEntry("proj")).toBe(false);
+
+    expect(await undoLastTrash()).toEqual(["proj"]);
+    expect(await readWorkspaceFile("proj/a.md")).toBe("A unsaved edit");
+    expect(await readWorkspaceFile("proj/b.md")).toBe("B unsaved edit");
+    const s = useAppStore.getState();
+    expect(s.doc.dirty).toBe(false);
+    expect(s.openTabs.filter((t) => t.workspaceName?.startsWith("proj/")).every((t) => !t.dirty)).toBe(true);
+  });
+
+  it("leaves notes outside the deleted paths alone (a sibling with the same prefix included)", async () => {
+    await writeWorkspaceFile("proj/a.md", "A");
+    await writeWorkspaceFile("project/x.md", "X saved");
+    await writeWorkspaceFile("other.md", "O saved");
+    open("project/x.md", "X saved");
+    useAppStore.getState().setContent("X edit");
+    open("other.md", "O saved");
+    useAppStore.getState().setContent("O edit");
+    await flushOpenDocsUnder(["proj"]);
+    expect(await readWorkspaceFile("project/x.md")).toBe("X saved");
+    expect(await readWorkspaceFile("other.md")).toBe("O saved");
+    const s = useAppStore.getState();
+    expect(s.doc.dirty).toBe(true);
+    expect(s.openTabs.find((t) => t.id === "project/x.md")?.dirty).toBe(true);
+  });
+
+  it("deleting a single file saves that file's inactive tab", async () => {
+    await writeWorkspaceFile("n.md", "saved");
+    open("n.md", "saved");
+    useAppStore.getState().setContent("recent edit");
+    open("elsewhere.md", "");
+    await flushOpenDocsUnder(["n.md"]);
+    const items = await trashPaths(["n.md"]);
+    await undoTrash(items);
+    expect(await readWorkspaceFile("n.md")).toBe("recent edit");
+  });
+});
+
+describe("the Ctrl+Z key handler", () => {
+  function press(target: EventTarget, init: KeyboardEventInit = {}): { handled: boolean; event: KeyboardEvent } {
+    const event = new KeyboardEvent("keydown", { key: "z", code: "KeyZ", ctrlKey: true, bubbles: true, cancelable: true, ...init });
+    let handled = false;
+    const listener = (e: Event) => {
+      handled = handleTrashUndoKey(e as KeyboardEvent);
+    };
+    window.addEventListener("keydown", listener);
+    target.dispatchEvent(event);
+    window.removeEventListener("keydown", listener);
+    return { handled, event };
+  }
+
+  async function settle(): Promise<void> {
+    // undoLastTrash runs in the background; wait until the stack has drained.
+    for (let i = 0; i < 50 && (await listTrash()).length; i++) await new Promise((r) => setTimeout(r, 0));
+  }
+
+  it("outside an editor it restores the last delete", async () => {
+    await writeWorkspaceFile("a.md", "A");
+    await trashPaths(["a.md"]);
+    const tree = document.createElement("aside");
+    tree.className = "file-tree";
+    const btn = document.createElement("button");
+    tree.append(btn);
+    document.body.append(tree);
+    const { handled, event } = press(btn);
+    expect(handled).toBe(true);
+    expect(event.defaultPrevented).toBe(true);
+    await settle();
+    expect(await readWorkspaceFile("a.md")).toBe("A");
+  });
+
+  it("inside CodeMirror, the WYSIWYG editor, inputs, textareas and contenteditable it stays the editor's undo", async () => {
+    await writeWorkspaceFile("a.md", "A");
+    await trashPaths(["a.md"]);
+    const cm = document.createElement("div");
+    cm.className = "cm-editor";
+    const cmContent = document.createElement("div");
+    cm.append(cmContent);
+    const pm = document.createElement("div");
+    pm.className = "ProseMirror";
+    const pmChild = document.createElement("p");
+    pm.append(pmChild);
+    const input = document.createElement("input");
+    const textarea = document.createElement("textarea");
+    const editable = document.createElement("div");
+    editable.setAttribute("contenteditable", "true");
+    const inner = document.createElement("span");
+    editable.append(inner);
+    document.body.append(cm, pm, input, textarea, editable);
+    for (const el of [cmContent, pmChild, input, textarea, inner]) {
+      expect(isEditingTarget(el)).toBe(true);
+      const { handled, event } = press(el);
+      expect(handled).toBe(false);
+      expect(event.defaultPrevented).toBe(false);
+    }
+    expect(trashUndoDepth()).toBe(1);
+    expect(await workspaceHasEntry("a.md")).toBe(false);
+  });
+
+  it("leaves the key alone when there is nothing to undo, when it was handled already, and for Shift+Z", async () => {
+    expect(press(document.body).handled).toBe(false);
+    await writeWorkspaceFile("a.md", "A");
+    await trashPaths(["a.md"]);
+    expect(press(document.body, { shiftKey: true }).handled).toBe(false);
+    const stopper = (e: Event) => e.preventDefault();
+    document.body.addEventListener("keydown", stopper);
+    expect(press(document.body).handled).toBe(false);
+    document.body.removeEventListener("keydown", stopper);
+    expect(trashUndoDepth()).toBe(1);
+  });
+
+  it("matches ⌘Z and the physical Z key on a Hebrew layout, not AZERTY's W position", () => {
+    const ev = (init: KeyboardEventInit) => new KeyboardEvent("keydown", init);
+    expect(isUndoKey(ev({ key: "z", code: "KeyZ", metaKey: true }))).toBe(true);
+    expect(isUndoKey(ev({ key: "Z", code: "KeyZ", ctrlKey: true }))).toBe(true);
+    expect(isUndoKey(ev({ key: "ז", code: "KeyZ", ctrlKey: true }))).toBe(true);
+    expect(isUndoKey(ev({ key: "z", code: "KeyW", ctrlKey: true }))).toBe(true); // AZERTY's Z
+    expect(isUndoKey(ev({ key: "w", code: "KeyZ", ctrlKey: true }))).toBe(false); // AZERTY's W
+    expect(isUndoKey(ev({ key: "z", code: "KeyZ" }))).toBe(false);
+    expect(isUndoKey(ev({ key: "z", code: "KeyZ", ctrlKey: true, altKey: true }))).toBe(false);
+  });
+});
