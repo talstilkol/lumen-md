@@ -51,7 +51,29 @@ async function loadCanvasFile(name: string): Promise<unknown | null> {
   }
 }
 
-async function saveCanvasFile(name: string, snapshot: unknown): Promise<void> {
+/** The last write to each canvas file: writes to one file run in the order they were asked for. */
+const canvasWrites = new Map<string, Promise<void>>();
+
+/**
+ * Queue `write` after every earlier write to the same canvas, so a late
+ * flush of the old drawing can never land after the blank page that
+ * replaces it. Exported for tests.
+ */
+export function queueCanvasWrite(name: string, write: () => Promise<void>): Promise<void> {
+  const prev = canvasWrites.get(name) ?? Promise.resolve();
+  const next = prev.catch(() => undefined).then(write);
+  canvasWrites.set(name, next);
+  void next.finally(() => {
+    if (canvasWrites.get(name) === next) canvasWrites.delete(name);
+  }).catch(() => undefined);
+  return next;
+}
+
+function saveCanvasFile(name: string, snapshot: unknown): Promise<void> {
+  return queueCanvasWrite(name, () => writeCanvasFile(name, snapshot));
+}
+
+async function writeCanvasFile(name: string, snapshot: unknown): Promise<void> {
   if (!isOPFSAvailable()) return;
   const root = await navigator.storage.getDirectory();
   const dir = await root.getDirectoryHandle(CANVAS_DIR, { create: true });
@@ -207,9 +229,16 @@ export function debouncedSave(save: () => void, ms: number): { schedule(): void;
  * detach (clearing the editor for a new canvas) never reach this canvas's
  * file. Exported for tests.
  */
-export function bindCanvasSaver(listen: (onChange: () => void) => () => void, save: () => void, ms: number): { detach(): void } {
+export function bindCanvasSaver(
+  listen: (onChange: () => void) => () => void,
+  save: () => void,
+  ms: number,
+  opts: { fresh?: boolean } = {},
+): { detach(): void } {
   const saver = debouncedSave(save, ms);
   const off = listen(() => saver.schedule());
+  // A canvas New just cleared: save it now, even if nothing is drawn before close.
+  if (opts.fresh) save();
   let detached = false;
   return {
     detach() {
@@ -224,10 +253,12 @@ export function bindCanvasSaver(listen: (onChange: () => void) => () => void, sa
 /**
  * New canvas, in the order that loses nothing: confirm before replacing a
  * canvas that already has that name, save and stop the current canvas's
- * saver, clear the editor, then write the blank page under the new name at
- * once — so closing right away still leaves the blank canvas saved, not the
- * old drawing. Returns false when the user kept the existing canvas.
- * Exported for tests.
+ * saver, then clear the editor. Nothing is awaited between the clear and the
+ * caller re-binding the saver, so a stroke drawn right after New is never
+ * missed; the re-bound saver writes the (blank) page at once (`fresh`), and
+ * writes to one file are queued (`queueCanvasWrite`), so the old canvas's
+ * flush cannot land after it. Returns false when the user kept the existing
+ * canvas. Exported for tests.
  */
 export async function startNewCanvas(o: {
   name: string;
@@ -235,17 +266,10 @@ export async function startNewCanvas(o: {
   confirmReplace: (name: string) => Promise<boolean>;
   detach: () => void;
   clear: () => void;
-  snapshot: () => unknown;
-  save: (name: string, snapshot: unknown) => Promise<void>;
 }): Promise<boolean> {
   if (o.exists && !(await o.confirmReplace(o.name))) return false;
   o.detach();
   o.clear();
-  try {
-    await o.save(o.name, o.snapshot());
-  } catch (err) {
-    log.warn("tldraw save of the new canvas failed", err);
-  }
   return true;
 }
 
@@ -259,6 +283,8 @@ export function CanvasTldraw({ open, onClose }: Props) {
   const [saverEpoch, setSaverEpoch] = useState(0);
   /** Stops the current canvas's saver (flushing it); New calls it before clearing the editor. */
   const detachSaver = useRef<(() => void) | null>(null);
+  /** The canvas New just cleared: not restored from its (replaced) file, saved as soon as the saver binds. */
+  const freshCanvas = useRef<string | null>(null);
 
   // Load the canvas list (and any legacy `.canvas.json` files) on open
   // so the picker shows everything the user has + a convert affordance.
@@ -271,6 +297,8 @@ export function CanvasTldraw({ open, onClose }: Props) {
   // When the editor mounts (or canvas name changes), restore from OPFS.
   useEffect(() => {
     if (!editor) return;
+    // why: New cleared this canvas on purpose; loading its old file would bring back the drawing it replaces
+    if (freshCanvas.current === canvasName) return;
     let cancelled = false;
     void loadCanvasFile(canvasName).then((snap) => {
       if (cancelled || !editor || !snap) return;
@@ -288,20 +316,25 @@ export function CanvasTldraw({ open, onClose }: Props) {
   // Subscribe to store changes; debounced save.
   useEffect(() => {
     if (!editor) return;
+    let lastWrite: Promise<void> = Promise.resolve();
+    const fresh = freshCanvas.current === canvasName;
     const binding = bindCanvasSaver(
       (onChange) => editor.store.listen(onChange),
       () => {
         try {
           const snap = getSnapshot(editor.store);
-          void saveCanvasFile(canvasName, snap).catch((err) =>
-            log.warn("tldraw save failed", err),
-          );
+          lastWrite = saveCanvasFile(canvasName, snap).catch((err) => log.warn("tldraw save failed", err));
         } catch (err) {
           log.warn("tldraw getSnapshot failed", err);
         }
       },
       500,
+      { fresh },
     );
+    // The blank page is on disk: from now on the file is this canvas (kept until then, so a re-run of the restore effect still skips it).
+    if (fresh) void lastWrite.finally(() => {
+      if (freshCanvas.current === canvasName) freshCanvas.current = null;
+    });
     detachSaver.current = () => binding.detach();
     return () => {
       binding.detach(); // the last strokes before close / canvas switch
@@ -334,10 +367,9 @@ export function CanvasTldraw({ open, onClose }: Props) {
           editor.selectAll();
           editor.deleteShapes(editor.getSelectedShapeIds());
         },
-        snapshot: () => getSnapshot(editor.store),
-        save: saveCanvasFile,
       });
       if (!ok) return;
+      freshCanvas.current = trimmed;
     }
     setCanvasName(trimmed);
     // why: New with the current name changes no state, so without this the detached saver is never replaced

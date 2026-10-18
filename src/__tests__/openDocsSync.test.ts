@@ -141,6 +141,24 @@ describe("tab runtime follows id changes (review: #206)", () => {
     expect(useAppStore.getState().doc).toMatchObject({ workspaceName: "b.md", content: "A edited", dirty: true });
   });
 
+  it("a detached tab never takes the id of an active document that is outside openTabs (review: #206)", async () => {
+    await writeWorkspaceFile("a.md", "A");
+    await writeWorkspaceFile("dir/foo.md", "F");
+    open("dir/foo.md", "F");
+    useAppStore.getState().setContent("F edited"); // unsaved
+    open("a.md", "A");
+    // An ad-hoc foo.md opened with setDoc: active, but not in openTabs.
+    useAppStore.setState({ doc: { name: "foo.md", content: "external", dirty: false, workspaceName: null } });
+    expect(useAppStore.getState().openTabs.some((t) => t.id === "foo.md")).toBe(false);
+    const r = await safeMove("a.md", "dir/foo.md", { confirmReplace: async () => true });
+    syncOpenDocsAfterMove("a.md", r!.path, r!.rewrite, r!.replaced?.originalPath);
+    const detached = useAppStore.getState().openTabs.find((t) => t.content === "F edited")!;
+    expect(detached.workspaceName).toBeNull();
+    expect(detached.id).not.toBe("foo.md");
+    useAppStore.getState().setContent("external, edited");
+    expect(useAppStore.getState().openTabs.find((t) => t.id === detached.id)?.content).toBe("F edited");
+  });
+
   it("moveTabRuntimes reads every source before writing any target", async () => {
     const { __tabRuntime, moveTabRuntimes } = await import("../store/useStore");
     useAppStore.getState().openTab({ name: "x.md", content: "X", workspaceName: null });

@@ -69,51 +69,60 @@ describe("tldraw integration (γ.2)", () => {
     }
   });
 
-  describe("startNewCanvas (review: #206)", () => {
-    type Start = typeof import("../ui/CanvasTldraw").startNewCanvas;
-    function harness(startNewCanvas: Start, exists: boolean, confirm: boolean) {
+  describe("New canvas, in an order that loses nothing (review: #206)", () => {
+    it("asks before replacing a canvas with that name; declining changes nothing", async () => {
+      const { startNewCanvas } = await import("../ui/CanvasTldraw");
       const calls: string[] = [];
-      let page = "drawing";
-      const files = new Map<string, unknown>();
-      const run = () =>
+      const run = (exists: boolean, ok: boolean) =>
         startNewCanvas({
           name: "plan",
           exists,
-          confirmReplace: async (n) => {
-            calls.push(`confirm:${n}`);
-            return confirm;
-          },
+          confirmReplace: async (n) => (calls.push(`confirm:${n}`), ok),
           detach: () => calls.push("detach"),
-          clear: () => {
-            calls.push("clear");
-            page = "blank";
-          },
-          snapshot: () => page,
-          save: async (n, snap) => {
-            calls.push(`save:${n}`);
-            files.set(n, snap);
-          },
+          clear: () => calls.push("clear"),
         });
-      return { calls, files, run };
-    }
-
-    it("writes the blank page under the new name right away, after saving the old canvas", async () => {
-      const { startNewCanvas } = await import("../ui/CanvasTldraw");
-      const h = harness(startNewCanvas, false, true);
-      expect(await h.run()).toBe(true);
-      expect(h.calls).toEqual(["detach", "clear", "save:plan"]);
-      expect(h.files.get("plan")).toBe("blank"); // closing now reopens the blank canvas, not the old drawing
+      expect(await run(true, false)).toBe(false);
+      expect(calls).toEqual(["confirm:plan"]);
+      calls.length = 0;
+      expect(await run(true, true)).toBe(true);
+      expect(calls).toEqual(["confirm:plan", "detach", "clear"]);
+      calls.length = 0;
+      expect(await run(false, true)).toBe(true);
+      expect(calls).toEqual(["detach", "clear"]); // nothing awaited between the clear and the re-bind
     });
 
-    it("asks before replacing a canvas with that name, and changes nothing when declined", async () => {
-      const { startNewCanvas } = await import("../ui/CanvasTldraw");
-      const declined = harness(startNewCanvas, true, false);
-      expect(await declined.run()).toBe(false);
-      expect(declined.calls).toEqual(["confirm:plan"]);
-      expect(declined.files.size).toBe(0);
-      const accepted = harness(startNewCanvas, true, true);
-      expect(await accepted.run()).toBe(true);
-      expect(accepted.calls).toEqual(["confirm:plan", "detach", "clear", "save:plan"]);
+    it("a fresh binding saves the cleared page at once, so closing right away keeps it blank", async () => {
+      const { bindCanvasSaver } = await import("../ui/CanvasTldraw");
+      const saves: string[] = [];
+      let onChange: (() => void) | null = null;
+      const b = bindCanvasSaver(
+        (f) => ((onChange = f), () => (onChange = null)),
+        () => saves.push("blank"),
+        500,
+        { fresh: true },
+      );
+      expect(saves).toEqual(["blank"]);
+      b.detach(); // nothing pending: no second write
+      expect(saves).toEqual(["blank"]);
+      expect(onChange).toBeNull();
+    });
+
+    it("writes to one canvas file land in the order they were asked for, even when the first is slower", async () => {
+      const { queueCanvasWrite } = await import("../ui/CanvasTldraw");
+      const landed: string[] = [];
+      let releaseOld!: () => void;
+      const old = queueCanvasWrite("plan", () => new Promise<void>((r) => (releaseOld = () => (landed.push("old drawing"), r()))));
+      const blank = queueCanvasWrite("plan", async () => void landed.push("blank"));
+      const other = queueCanvasWrite("other", async () => void landed.push("other"));
+      await other;
+      expect(landed).toEqual(["other"]); // another file is not held up
+      releaseOld();
+      await Promise.all([old, blank]);
+      expect(landed).toEqual(["other", "old drawing", "blank"]);
+      // a failed write does not block the next one
+      await expect(queueCanvasWrite("plan", async () => Promise.reject(new Error("quota")))).rejects.toThrow("quota");
+      await queueCanvasWrite("plan", async () => void landed.push("after failure"));
+      expect(landed.at(-1)).toBe("after failure");
     });
   });
 });
