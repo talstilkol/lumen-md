@@ -22,8 +22,10 @@ import {
   CANARY_PREFIX,
   canaryGuid,
   contentHash,
+  applyTestHashes,
   freezeSet,
   incompleteParts,
+  publicHarnessError,
   loadSet,
   newCanary,
   partHash,
@@ -203,9 +205,11 @@ describe("the rules (scripts/lib/golden.mjs) on a fixture set", () => {
     const ci = mkdtempSync(join(tmpdir(), "lumen-golden-ci-"));
     try {
       const split = join(ci, "toy", "test");
-      writeSplitPart(split, { manifest, partId: "a", split: "test", items: Array.from({ length: 9 }, (_, i) => ({ id: `t${i}` })) });
+      writeSplitPart(split, { manifest, partId: "a", split: "test", items: Array.from({ length: 9 }, (_, i) => ({ id: `t${i}` })), extra: { corpus: [{ id: "d1", text: "passage" }] } });
       const loaded = loadSet(root, "toy", { split: "test", testDir: ci });
       expect(loaded.items).toHaveLength(9);
+      // A part's corpus (retrieval: the documents the items' ids point to) reaches the harness.
+      expect(loaded.corpus).toEqual({ a: [{ id: "d1", text: "passage" }] });
       expect(loaded.unverified).toEqual(["a"]);
       const m = JSON.parse(readFileSync(join(dir, "manifest.json"), "utf8"));
       m.test.parts.a = "0".repeat(64);
@@ -217,6 +221,27 @@ describe("the rules (scripts/lib/golden.mjs) on a fixture set", () => {
       rmSync(root, { recursive: true, force: true });
       rmSync(ci, { recursive: true, force: true });
     }
+  });
+});
+
+describe("recording test hashes and publishing harness errors", () => {
+  const sha = (c: string) => c.repeat(64);
+  const manifest = () => ({ parts: [{ id: "a" }, { id: "b" }], test: { parts: { a: sha("1"), b: sha("2") }, sha256: "old" } });
+  it("a part this run did not hash goes back to null, so a stale hash cannot complete the split", () => {
+    const partial = applyTestHashes(manifest(), { a: sha("3") });
+    expect(partial.test.parts).toEqual({ a: sha("3"), b: null });
+    expect(partial.test.sha256).toBeNull();
+    const full = applyTestHashes(manifest(), { a: sha("3"), b: sha("4") });
+    expect(full.test.sha256).toBe(splitHash({ a: sha("3"), b: sha("4") }));
+    expect(readFileSync(join(repo, "scripts/golden.mjs"), "utf8")).toMatch(/applyTestHashes\(readJson\(join\(dir, "manifest\.json"\)\), hashes\[name\]\)/);
+  });
+  it("publishes only the class of a harness error, never its message", () => {
+    const msg = publicHarnessError(new TypeError("expected 'שלום, הסיסמה היא 1234' got …"));
+    expect(msg).toContain("TypeError");
+    expect(msg).not.toMatch(/שלום|1234|expected/);
+    expect(publicHarnessError("raw string with secret-xyz")).not.toContain("secret-xyz");
+    const src = readFileSync(join(repo, "scripts/golden/run-evals.mjs"), "utf8");
+    expect(src).toMatch(/mod\.score\(\{ items, manifest, corpus \}\)[\s\S]*publicHarnessError\(e\)/);
   });
 });
 

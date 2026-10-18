@@ -18,7 +18,7 @@
  */
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
-import { checkTest, freezeSet, listFiles, partFiles, partHash, partWaitsFor, readJson, recordTest, scanForTestData, splitHash, validateAll, validateSet, writeJson } from "./lib/golden.mjs";
+import { checkTest, freezeSet, listFiles, partFiles, partHash, partWaitsFor, readJson, recordTest, scanForTestData, splitHash, validateAll, validateSet, writeJson, applyTestHashes } from "./lib/golden.mjs";
 import { GOLDEN, ROOT } from "./golden/common.mjs";
 import { setById } from "./golden/defs.mjs";
 import { writeDocs } from "./golden/docs.mjs";
@@ -152,10 +152,8 @@ switch (cmd) {
       const hashes = readJson(hashesFile);
       for (const name of setsArg().filter((n) => n in hashes)) {
         const dir = join(GOLDEN, name);
-        const m = readJson(join(dir, "manifest.json"));
-        for (const [part, sha] of Object.entries(hashes[name])) if (part in m.test.parts && /^[0-9a-f]{64}$/.test(sha)) m.test.parts[part] = sha;
-        const all = m.parts.every((p) => /^[0-9a-f]{64}$/.test(m.test.parts[p.id] ?? ""));
-        m.test.sha256 = all ? splitHash(Object.fromEntries(m.parts.map((p) => [p.id, m.test.parts[p.id]]))) : null;
+        // Parts this run did not hash go back to null (applyTestHashes): no stale hash completes the split.
+        const m = applyTestHashes(readJson(join(dir, "manifest.json")), hashes[name]);
         writeJson(join(dir, "manifest.json"), m);
         const def = setById(name);
         if (def) writeDocs(def, dir, cache ?? join(process.env.RUNNER_TEMP ?? "/tmp", "lumen-golden-cache"));
