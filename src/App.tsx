@@ -42,6 +42,7 @@ const SearchDialog = lazy(() =>
   import("./ui/SearchDialog").then((m) => ({ default: m.SearchDialog })),
 );
 import { AiToastContainer, showAiToast } from "./ui/AiToast";
+import { minimalChange, propertiesTransaction, trackedPropertiesText } from "./editor/propertiesEdit";
 import { AiSuggestionsPanel } from "./ui/AiSuggestionsPanel";
 import { MobileKeyboardBar } from "./ui/MobileKeyboardBar";
 import { TagsPanel } from "./ui/TagsPanel";
@@ -732,23 +733,24 @@ export default function App() {
   }, []);
   // Properties panel edits: applied to the source editor's live text as one
   // minimal change (cursor, undo history and collab stay intact); without a
-  // mounted source editor, to the store's text.
+  // mounted source editor, to the store's text. In suggesting mode either way
+  // the edit is recorded as a tracked change, not applied directly.
   const applyPropertiesEdit = useCallback((edit: (text: string) => string) => {
     const view = editorRef.current?.getView();
     if (view) {
       const cur = view.state.doc.toString();
-      const next = edit(cur);
-      if (next === cur) return;
-      let from = 0;
-      while (from < cur.length && from < next.length && cur[from] === next[from]) from++;
-      let end = 0;
-      while (end < cur.length - from && end < next.length - from && cur[cur.length - 1 - end] === next[next.length - 1 - end]) end++;
-      view.dispatch({ changes: { from, to: cur.length - end, insert: next.slice(from, next.length - end) } });
+      const change = minimalChange(cur, edit(cur));
+      if (change) view.dispatch(propertiesTransaction(change));
       return;
     }
     flushPendingEdits();
     const cur = useAppStore.getState().doc.content;
-    const next = edit(cur);
+    const change = minimalChange(cur, edit(cur));
+    if (!change) return;
+    if (!useAppStore.getState().suggestingMode) return setContent(cur.slice(0, change.from) + change.insert + cur.slice(change.to));
+    const user = useAuth.getState().user;
+    const next = trackedPropertiesText(cur, change, user?.name?.trim() || user?.email?.split("@")[0] || null);
+    if (next === null) return showAiToast(t("suggesting.untrackable"), "info");
     if (next !== cur) setContent(next);
   }, [setContent]);
   useEffect(() => {
