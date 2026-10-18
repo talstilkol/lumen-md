@@ -240,6 +240,7 @@ export async function startVoiceMemo(): Promise<void> {
         showAiToast(t("toast.transcribeFailed", { error: (err as Error).message }), "error");
         return;
       }
+      if (op.signal.aborted) return;
 
       showAiToast(t("toast.summarising"), "info");
       try {
@@ -248,6 +249,8 @@ export async function startVoiceMemo(): Promise<void> {
         if (op.signal.aborted || isAbort(err)) return;
         log.warn("voice memo summary failed; inserting transcript only", err);
       }
+      // why: chat() resolves an aborted request to "" instead of throwing, so a cancelled summary lands here
+      if (op.signal.aborted) return;
     } finally {
       op.end();
     }
