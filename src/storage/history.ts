@@ -113,8 +113,10 @@ interface Row {
   author?: string;
   /** Full text (every row written before plan 3.2 is one). */
   content?: string;
-  /** Delta from the previous row of the same document. */
+  /** Delta from the row `base` (else from the previous row) of the same document. */
   delta?: Uint8Array | string;
+  /** Id of the row the delta applies to. */
+  base?: number;
 }
 
 type DeltaModule = typeof import("./historyDelta");
@@ -135,18 +137,22 @@ async function readRows(name: string): Promise<Row[]> {
  */
 async function reconstruct(rows: Row[]): Promise<Array<string | null>> {
   const out: Array<string | null> = [];
+  const byId = new Map<number, string | null>();
   let cur: string | null = null;
   let mod: DeltaModule | null = null;
   for (const r of rows) {
+    // A delta names its base; rows from another tab may interleave.
+    const base = r.base !== undefined ? byId.get(r.base) ?? null : cur;
     if (typeof r.content === "string") cur = r.content;
-    else if (r.delta !== undefined && cur !== null) {
+    else if (r.delta !== undefined && base !== null) {
       mod ??= await deltas();
       try {
-        cur = mod.applyDelta(cur, await mod.decodeDelta(r.delta));
+        cur = mod.applyDelta(base, await mod.decodeDelta(r.delta));
       } catch {
         cur = null;
       }
     } else cur = null;
+    byId.set(r.id, cur);
     out.push(cur);
   }
   return out;
@@ -191,26 +197,47 @@ async function dropRows(byDoc: Map<string, Row[]>, victims: Set<number>): Promis
   for (const rows of byDoc.values()) {
     const keep = rows.filter((r) => !victims.has(r.id));
     if (!keep.length || keep.length === rows.length) continue;
-    const first = keep[0];
-    if (typeof first.content === "string") continue;
+    // Kept deltas whose base goes: the first kept row, and any naming a victim.
+    const orphans = keep.filter((r, i) => typeof r.content !== "string" && (i === 0 || (r.base !== undefined && victims.has(r.base))));
+    if (!orphans.length) continue;
     const texts = await reconstruct(rows);
-    const text = texts[rows.indexOf(first)];
-    if (text === null) victims.add(first.id);
-    else rebased.push({ ...first, content: text, delta: undefined });
+    for (const r of orphans) {
+      const text = texts[rows.indexOf(r)];
+      if (text === null) victims.add(r.id);
+      else rebased.push({ ...r, content: text, delta: undefined, base: undefined });
+    }
   }
   const db = await openDB();
   const tx = db.transaction(STORE, "readwrite");
   const store = tx.objectStore(STORE);
   for (const id of victims) store.delete(id);
   for (const r of rebased) {
-    const { delta: _drop, ...full } = r;
+    const { delta: _drop, base: _base, ...full } = r;
     void _drop;
+    void _base;
     store.put(full);
   }
   await done(tx);
 }
 
-async function writeSnapshot(name: string, content: string, reason: SnapshotReason, now: number, author?: string): Promise<boolean> {
+/** One write per document at a time: a delta must be encoded against the row it follows. */
+const writeQueue = new Map<string, Promise<unknown>>();
+function serialized<T>(name: string, fn: () => Promise<T>): Promise<T> {
+  const prev = writeQueue.get(name) ?? Promise.resolve();
+  const next = prev.then(fn, fn);
+  const tail = next.catch(() => undefined);
+  writeQueue.set(name, tail);
+  void tail.then(() => {
+    if (writeQueue.get(name) === tail) writeQueue.delete(name);
+  });
+  return next;
+}
+
+function writeSnapshot(name: string, content: string, reason: SnapshotReason, now: number, author?: string): Promise<boolean> {
+  return serialized(name, () => writeSnapshotNow(name, content, reason, now, author));
+}
+
+async function writeSnapshotNow(name: string, content: string, reason: SnapshotReason, now: number, author?: string): Promise<boolean> {
   const rows = await readRows(name);
   const newest = rows[rows.length - 1];
   let prev: string | null = null;
@@ -224,13 +251,18 @@ async function writeSnapshot(name: string, content: string, reason: SnapshotReas
   for (let i = rows.length - 1; i >= 0 && typeof rows[i].content !== "string"; i--) sinceFull++;
   const row: Omit<Row, "id"> = { name, timestamp: now, reason };
   if (author) row.author = author;
-  if (prev === null || sinceFull >= FULL_EVERY - 1) row.content = content;
+  // A backdated version (an imported backup older than the history) sorts
+  // before rows it can't be a delta for: it is stored whole.
+  if (prev === null || sinceFull >= FULL_EVERY - 1 || (newest && now < newest.timestamp)) row.content = content;
   else {
     const mod = await deltas();
     const payload = await mod.encodeDelta(mod.diff(prev, content));
     // A delta bigger than the text itself (a rewrite) is stored as the text.
     if (mod.payloadBytes(payload) >= content.length) row.content = content;
-    else row.delta = payload;
+    else {
+      row.delta = payload;
+      row.base = newest.id;
+    }
   }
   const db = await openDB();
   const tx = db.transaction(STORE, "readwrite");

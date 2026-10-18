@@ -134,17 +134,47 @@ describe("history store with deltas", () => {
     expect((await history.listSnapshots("old.md")).map((s) => s.content)).toEqual(["legacy text\nmore\n", "legacy text\n"]);
   });
 
-  it("records collab snapshots in the same store, with the author", async () => {
+  it("records collab snapshots in the same store, with the author, under the session's note", async () => {
     const { useAppStore } = await import("../store/useStore");
     useAppStore.getState().setDoc({ name: "Shared.md", content: "", workspaceName: "team/Shared.md", dirty: false });
-    const { recordCollabSnapshot, startSnapshotInterval } = await import("../collab/versionHistory");
-    expect(await recordCollabSnapshot("room-1", "peer edit", "Blue Fox", 5)).toBe(true);
-    const stop = startSnapshotInterval("room-1", () => "peer edit 2", () => ({ name: "Blue Fox", clientId: 1 }), 60_000);
-    stop(); // a session's end records the final text
+    const { startSnapshotInterval } = await import("../collab/versionHistory");
+    let text = "";
+    vi.useFakeTimers({ toFake: ["setInterval", "clearInterval"] });
+    const stop = startSnapshotInterval("room-1", () => text, () => ({ name: "Blue Fox", clientId: 1 }), 1000);
+    try {
+      vi.advanceTimersByTime(1000); // empty before the first sync: nothing
+      text = "peer edit";
+      vi.advanceTimersByTime(1000);
+    } finally {
+      vi.useRealTimers();
+    }
+    await vi.waitFor(async () => expect((await history.listSnapshots("team/Shared.md")).length).toBe(1));
+    // The user switches tabs; the session's text still goes to its own note.
+    useAppStore.getState().setDoc({ name: "Other.md", content: "x", workspaceName: "Other.md", dirty: false });
+    text = ""; // collaborators cleared the note: that is a version too
+    stop();
     await vi.waitFor(async () => expect((await history.listSnapshots("team/Shared.md")).length).toBe(2));
     const [latest, first] = await history.listSnapshots("team/Shared.md");
     expect(first).toMatchObject({ content: "peer edit", reason: "collab", author: "Blue Fox" });
-    expect(latest.content).toBe("peer edit 2");
+    expect(latest.content).toBe("");
+    expect(await history.listSnapshots("Other.md")).toEqual([]);
+  });
+
+  it("concurrent writes to one document each get their own correct base", async () => {
+    await history.recordSnapshot("r.md", "base\n", "save", 1);
+    await Promise.all([
+      history.recordSnapshot("r.md", "base\none\n", "save", 2),
+      history.recordSnapshot("r.md", "base\none\ntwo\n", "vault", 3),
+      history.recordSnapshot("r.md", "base\nthree\n", "close", 4),
+    ]);
+    expect((await history.listSnapshots("r.md")).map((s) => s.content)).toEqual(["base\nthree\n", "base\none\ntwo\n", "base\none\n", "base\n"]);
+  });
+
+  it("a version older than the history is stored whole and every version still reads", async () => {
+    await history.recordSnapshot("m.md", "today\n", "save", 5000);
+    await history.recordSnapshot("m.md", "today\nmore\n", "save", 6000);
+    await history.recordSnapshot("m.md", "long ago\n", "migrated", 1000);
+    expect((await history.listSnapshots("m.md")).map((s) => s.content)).toEqual(["today\nmore\n", "today\n", "long ago\n"]);
   });
 
   it("warns past 80 % of the quota", async () => {
@@ -196,6 +226,22 @@ describe("old backups/ folder", () => {
     await ws.writeWorkspaceFile("backups/x-12345678/1700000000000.md", "old");
     expect(await migrateLegacyBackups()).toBe(1);
     expect(await ws.readWorkspaceFile("backups/my plan.md")).toBe("mine");
+  });
+
+  it("matches pre-hash folders (the name with its extension) to their notes", async () => {
+    const { installFakeOpfs } = await import("./helpers/fakeOpfs");
+    installFakeOpfs();
+    const ws = await import("../storage/workspace");
+    const { migrateLegacyBackups } = await import("../sync/autoBackup");
+    await ws.writeWorkspaceFile("Notes.md", "now");
+    await ws.writeWorkspaceFile("Old Plan.md", "now");
+    await ws.writeWorkspaceFile("backups/Notes.md/1700000000000.md", "then");
+    await ws.writeWorkspaceFile("backups/Old_Plan.md/1700000000000.md", "plan then");
+    await ws.writeWorkspaceFile("backups/Gone.md/1700000000000.md", "gone");
+    expect(await migrateLegacyBackups()).toBe(3);
+    expect((await history.listSnapshots("Notes.md")).map((s) => s.content)).toEqual(["then"]);
+    expect((await history.listSnapshots("Old Plan.md")).map((s) => s.content)).toEqual(["plan then"]);
+    expect((await history.listSnapshots("Gone.md")).map((s) => s.content)).toEqual(["gone"]);
   });
 });
 

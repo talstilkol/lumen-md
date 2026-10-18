@@ -18,11 +18,10 @@ export function collabHistoryKey(roomId: string): string {
   return doc.name || doc.workspaceName ? historyKey(doc) : `collab:${roomId}`;
 }
 
-/** Record the shared text now (skipped when unchanged). */
-export async function recordCollabSnapshot(roomId: string, text: string, author: string, now = Date.now()): Promise<boolean> {
-  if (!text) return false;
+/** Record the shared text now under `key` (skipped when unchanged). Empty text counts: collaborators clearing a note is a version. */
+export async function recordCollabSnapshot(key: string, text: string, author: string, now = Date.now()): Promise<boolean> {
   try {
-    return await recordSnapshot(collabHistoryKey(roomId), text, "collab", now, author);
+    return await recordSnapshot(key, text, "collab", now, author);
   } catch (e) {
     log.warn("[collab] snapshot failed", e);
     return false;
@@ -39,7 +38,17 @@ export function startSnapshotInterval(
   getAuthor: () => { name: string; clientId: number },
   intervalMs = 300_000, // 5 minutes
 ): () => void {
-  const tick = () => void recordCollabSnapshot(roomId, getText(), getAuthor().name);
+  // The note the session belongs to, fixed now: switching tabs during the
+  // session must not file its text under another note.
+  const key = collabHistoryKey(roomId);
+  // Before anything was recorded, an empty text is the not-yet-synced doc, not a deletion.
+  let recorded = false;
+  const tick = () => {
+    const text = getText();
+    if (!text && !recorded) return;
+    recorded = true;
+    void recordCollabSnapshot(key, text, getAuthor().name);
+  };
   const timer = setInterval(tick, intervalMs);
   return () => {
     clearInterval(timer);

@@ -187,10 +187,19 @@ export async function migrateLegacyBackups(): Promise<number> {
   if (!legacy.length) return 0;
   const notes = all.map((e) => e.path).filter((p) => !p.startsWith("backups/") && /\.(md|markdown)$/i.test(p));
   const byFolder = new Map(notes.map((p) => [backupDirName(p), p]));
-  const keyFor = (folder: string) =>
-    byFolder.get(folder) ??
-    // Older backups had no hash; a hashed folder whose note is gone keeps its readable name.
-    `${folder.replace(/-[0-9a-f]{8}$/, "")}.md`;
+  // Before the hash (T26), the folder was the name with `[^\w.-]` → `_`,
+  // extension included: match it against the notes' paths and names too.
+  const legacyName = (s: string) => s.replace(/[^\w.-]/g, "_");
+  for (const p of notes) {
+    for (const k of [legacyName(p), legacyName(p.split("/").pop() ?? p)]) if (!byFolder.has(k)) byFolder.set(k, p);
+  }
+  const keyFor = (folder: string) => {
+    const known = byFolder.get(folder);
+    if (known) return known;
+    // A note that's gone: keep the folder's readable name, adding `.md` only when missing.
+    const readable = folder.replace(/-[0-9a-f]{8}$/, "");
+    return /\.(md|markdown)$/i.test(readable) ? readable : `${readable}.md`;
+  };
   const versions = legacy
     .map((e) => {
       const m = LEGACY_BACKUP.exec(e.path)!;
