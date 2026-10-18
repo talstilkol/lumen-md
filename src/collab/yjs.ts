@@ -83,15 +83,17 @@ const getSignalingUrls = (): string[] => {
   const custom = typeof localStorage !== "undefined"
     ? localStorage.getItem("lumen.collab.signaling")
     : null;
-  if (custom) return custom.split(",").map((s) => s.trim()).filter(Boolean);
   const envUrl = typeof import.meta !== "undefined"
     ? (import.meta as ImportMeta & { env?: { VITE_WEBRTC_SIGNALING_URL?: string } }).env?.VITE_WEBRTC_SIGNALING_URL
     : undefined;
-  if (envUrl) return envUrl.split(",").map((s) => s.trim()).filter(Boolean);
-  // T49: by default only the project's own signaling server. The public
-  // third-party servers (yjs.dev, heroku) see who meets whom, so they are
-  // used only when the user opts in (Collab settings).
-  return publicSignalingAllowed() ? PUBLIC_SIGNALING_FALLBACK : PUBLIC_SIGNALING_FALLBACK.slice(0, 1);
+  const configured = (custom || envUrl || "").split(",").map((s) => s.trim()).filter(Boolean);
+  // T49: by default only the configured / the project's own signaling
+  // server. The public third-party servers (yjs.dev, heroku) see who meets
+  // whom, so they are used only when the user opts in (Collab settings) —
+  // then also as a fallback behind a custom server.
+  const primary = configured.length ? configured : PUBLIC_SIGNALING_FALLBACK.slice(0, 1);
+  if (!publicSignalingAllowed()) return primary;
+  return [...new Set([...primary, ...PUBLIC_SIGNALING_FALLBACK.slice(1)])];
 };
 
 export const PUBLIC_SIGNALING_KEY = "lumen.collab.publicSignaling";
