@@ -82,7 +82,8 @@ export async function checkHebrew(text: string): Promise<GrammarMatch[]> {
  * Split a document by paragraph language (T28): Hebrew paragraphs are
  * checked here, on this device; the others go to `other` (LanguageTool)
  * as the same text with the Hebrew blanked out, so every offset still
- * points into the original. LanguageTool has no Hebrew, and the old
+ * points into the original (after the leading blank run `other` gets
+ * without). LanguageTool has no Hebrew, and the old
  * fixed `en-US` flagged every Hebrew word.
  */
 export async function checkByLanguage(
@@ -99,13 +100,18 @@ export async function checkByLanguage(
     if (hebrewRatio(p[0]) >= 0.5) {
       latinOnly += p[0].replace(/[^\n]/g, " ");
       hebrewJobs.push(checkHebrew(p[0]).then((ms) => ms.map((m) => ({ ...m, offset: m.offset + start }))));
-    } else latinOnly += p[0];
+    } else latinOnly += p[0].replace(/\p{Script=Hebrew}/gu, " "); // Hebrew words inside a Latin paragraph stay on this device too.
     cursor = start + p[0].length;
   }
   latinOnly += text.slice(cursor);
+  // `other` may trim its input (checkGrammar does): send it without the
+  // leading blank run and shift its offsets back.
+  const lead = latinOnly.length - latinOnly.trimStart().length;
   const [heb, rest] = await Promise.all([
     Promise.all(hebrewJobs).then((r) => r.flat()),
-    latinOnly.trim() ? other(latinOnly).catch(() => [] as GrammarMatch[]) : Promise.resolve([] as GrammarMatch[]),
+    latinOnly.trim()
+      ? other(latinOnly.slice(lead)).then((ms) => ms.map((m) => ({ ...m, offset: m.offset + lead })), () => [] as GrammarMatch[])
+      : Promise.resolve([] as GrammarMatch[]),
   ]);
   return [...rest, ...heb].sort((a, b) => a.offset - b.offset);
 }
