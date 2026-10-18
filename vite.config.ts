@@ -431,6 +431,12 @@ export default defineConfig({
     // Warn early if a single chunk crosses 500 KiB; the renderer pipeline
     // and editor frameworks split out as their own chunks today.
     chunkSizeWarningLimit: 500,
+    modulePreload: {
+      // A lazy translation chunk needs nothing the page has not loaded
+      // already; without this, each of the 56 locale loaders in the startup
+      // i18n chunk carried its own preload list (+1.3 KB gzipped, plan 0.3).
+      resolveDependencies: (filename, deps) => (/(^|\/)locale-[^/]+\.js$/.test(filename) ? [] : deps),
+    },
     rolldownOptions: {
       input: {
         main: path.resolve(__dirname, "index.html"),
@@ -464,6 +470,10 @@ export default defineConfig({
           if (id.includes("node_modules/prettier/")) {
             return "assets/prettier-[name]-[hash].js";
           }
+          // Lazy translations (plan 0.3): locale-<lang>-<domain>-<hash>.js, not
+          // eight anonymous "ai-<hash>.js" chunks per domain.
+          const locale = /\/src\/i18n\/locales\/([^/]+)\/([^/]+)\.json$/.exec(id);
+          if (locale) return `assets/locale-${locale[1]}-${locale[2]}-[hash].js`;
           // The entries' shared startup code (strict execution order puts it
           // in a common chunk) would be named after the checkout folder.
           if (!id && chunkInfo.name === path.basename(__dirname)) return "assets/app-[hash].js";
