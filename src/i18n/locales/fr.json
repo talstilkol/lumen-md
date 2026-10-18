@@ -1371,6 +1371,7 @@
   "privacy.cat.local-ai": "Sur cet appareil / réseau local",
   "privacy.cat.model-download": "Téléchargement de modèle — aucun texte envoyé",
   "privacy.cat.research": "Service de recherche — votre requête est envoyée",
+  "privacy.cat.third-party": "Service tiers — l'adresse de la page est envoyée",
   "privacy.footer": "Enregistré : heure, destination, taille, raison. Jamais le texte des invites ou des réponses. Les requêtes des workers de modèles (téléchargements) ne sont pas listées.",
   "toast.privacyBlocked": "Bloqué par la politique « local uniquement » : {reason}. Utilisez un modèle local ou changez la politique dans les réglages IA.",
   "collab.settings.title": "Paramètres de collaboration",

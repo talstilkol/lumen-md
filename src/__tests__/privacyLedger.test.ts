@@ -101,4 +101,18 @@ describe("privacy ledger", () => {
     await f("https://api.openai.com/v1/x");
     expect(ledgerEntries().map(leftDevice)).toEqual([false, false, true]);
   });
+
+  it("tracks tldraw's licence beacon (it carries the page address) and blocks it under local-only (plan 1.9)", async () => {
+    const beacon = "https://cdn.tldraw.com/4.5.10/watermarks/watermark-track.svg?license_type=unlicensed&url=https%3A%2F%2Flumen.example%2F";
+    expect(classify(beacon)).toMatchObject({ host: "cdn.tldraw.com", category: "third-party" });
+    const inner = vi.fn(async () => new Response("<svg/>", { status: 200 }));
+    const f = withLedger(inner as unknown as typeof fetch);
+    setAiPolicy("local-only");
+    await expect(f(beacon)).rejects.toBeInstanceOf(PrivacyBlockedError);
+    expect(inner).not.toHaveBeenCalled();
+    setAiPolicy("local-first");
+    await f(beacon);
+    expect(inner).toHaveBeenCalledTimes(1);
+    expect(ledgerEntries().map((e) => [e.category, e.decision])).toEqual([["third-party", "blocked"], ["third-party", "allowed"]]);
+  });
 });

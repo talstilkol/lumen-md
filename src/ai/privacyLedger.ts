@@ -22,7 +22,7 @@ import { getBaseUrl } from "./ollamaProvider";
 import { grammarEndpoint } from "./grammar";
 import { researchEndpoint } from "../research/client";
 
-export type LedgerCategory = "cloud-ai" | "cloud-text" | "local-ai" | "model-download" | "research";
+export type LedgerCategory = "cloud-ai" | "cloud-text" | "local-ai" | "model-download" | "research" | "third-party";
 
 export interface LedgerEntry {
   id: number;
@@ -63,6 +63,9 @@ const RULES: Rule[] = [
     category: "model-download",
     reason: "Model download (Hugging Face)",
   },
+  // tldraw (the canvas) calls its CDN in production: an unlicensed-use beacon that carries
+  // the page address, plus fonts/assets. Plan 1.9 / 4.19.
+  { test: (h) => h === "cdn.tldraw.com", category: "third-party", reason: "tldraw canvas — licence beacon (sends the page address) and assets" },
   {
     test: (h) => h === "raw.githubusercontent.com",
     category: "model-download",
@@ -197,7 +200,7 @@ export function classify(url: string): { host: string; category: LedgerCategory;
 /** Would the policy block this category? Model downloads carry no user data. */
 export function blockedByPolicy(category: LedgerCategory, policy: AiPolicy): boolean {
   if (policy !== "local-only") return false;
-  return category === "cloud-ai" || category === "cloud-text" || category === "research";
+  return category === "cloud-ai" || category === "cloud-text" || category === "research" || category === "third-party";
 }
 
 function bodySize(body: BodyInit | null | undefined): number {

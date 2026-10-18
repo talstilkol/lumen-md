@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-10-18T04:30:30.207Z",
+  "generated_at": "2026-10-18T04:31:22.043Z",
   "source": "src/i18n/index.ts (en bundle)",
-  "count": 1424,
+  "count": 1425,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -2123,6 +2123,11 @@
     {
       "key": "privacy.cat.research",
       "en": "Research service — your query is sent",
+      "vars": []
+    },
+    {
+      "key": "privacy.cat.third-party",
+      "en": "Third-party service — the page address is sent",
       "vars": []
     },
     {
