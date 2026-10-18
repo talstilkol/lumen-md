@@ -23,9 +23,19 @@ import { assertCloudAllowed } from "./policy";
 import { log } from "../lib/logger";
 import { fetchWithRetry } from "../lib/fetchRetry";
 
+/** OpenAI's job statuses; the first three are still in progress. */
+export type FineTuneStatus = "validating_files" | "queued" | "running" | "succeeded" | "failed" | "cancelled";
+
+const FINISHED: ReadonlySet<string> = new Set(["succeeded", "failed", "cancelled"]);
+
+/** Is the job still in progress? Anything not finished counts (an unknown new status too), so its id is never dropped early. */
+export function fineTuneJobActive(status: string | undefined | null): boolean {
+  return !!status && !FINISHED.has(status);
+}
+
 export interface FineTuneJob {
   id: string;
-  status: "queued" | "running" | "succeeded" | "failed" | "cancelled";
+  status: FineTuneStatus;
   /** Resulting model id when status === "succeeded". */
   fineTunedModel?: string;
   /** Created-at unix timestamp (ms). */

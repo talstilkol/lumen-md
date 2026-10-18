@@ -20,6 +20,38 @@ function open(path: string, content: string) {
 }
 
 describe("syncOpenDocsAfterMove", () => {
+  it("detaches an open note whose path a move overwrote, so it can't write over the moved note (review: #194)", async () => {
+    await writeWorkspaceFile("a.md", "A");
+    await writeWorkspaceFile("b.md", "B");
+    open("b.md", "B");
+    useAppStore.getState().setContent("B edited"); // unsaved, then the user switches away
+    open("a.md", "A");
+    const r = await safeMove("a.md", "b.md", { confirmReplace: async () => true });
+    expect(r?.replaced?.originalPath).toBe("b.md");
+    syncOpenDocsAfterMove("a.md", r!.path, r!.rewrite, r!.replaced?.originalPath);
+    const s = useAppStore.getState();
+    expect(s.doc).toMatchObject({ workspaceName: "b.md", content: "A" });
+    const ids = s.openTabs.map((t) => t.id);
+    expect(new Set(ids).size).toBe(ids.length); // no two tabs claim one path
+    const old = s.openTabs.find((t) => t.content === "B edited");
+    expect(old).toMatchObject({ workspaceName: null, dirty: true }); // kept, unsaved edits included
+    expect(old!.id).not.toBe("b.md");
+  });
+
+  it("detaches the active note when it is the one overwritten", async () => {
+    await writeWorkspaceFile("a.md", "A");
+    await writeWorkspaceFile("b.md", "B");
+    open("a.md", "A");
+    open("b.md", "B");
+    const r = await safeMove("a.md", "b.md", { confirmReplace: async () => true });
+    syncOpenDocsAfterMove("a.md", r!.path, r!.rewrite, r!.replaced?.originalPath);
+    const s = useAppStore.getState();
+    expect(s.doc.workspaceName).toBeNull();
+    expect(s.doc.content).toBe("B");
+    expect(s.openTabs.find((t) => t.workspaceName === "b.md")?.content).toBe("A");
+    expect(s.openTabs.filter((t) => t.id === s.doc.name)).toHaveLength(1);
+  });
+
   it("retargets the active note when its folder is renamed", async () => {
     await writeWorkspaceFile("proj/a.md", "A");
     open("proj/a.md", "A");

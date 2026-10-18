@@ -41,4 +41,31 @@ describe("tldraw integration (γ.2)", () => {
       vi.useRealTimers();
     }
   });
+
+  it("New saves the old canvas, then clearing the editor writes nothing to it (review: #194)", async () => {
+    vi.useFakeTimers();
+    try {
+      const { bindCanvasSaver } = await import("../ui/CanvasTldraw");
+      let onChange: (() => void) | null = null;
+      const listen = (f: () => void) => {
+        onChange = f;
+        return () => {
+          onChange = null;
+        };
+      };
+      const saves: string[] = [];
+      let page = "drawing";
+      const b = bindCanvasSaver(listen, () => saves.push(page), 500);
+      (onChange as (() => void) | null)!(); // a stroke, still inside the debounce
+      b.detach(); // New: flush the old canvas first
+      expect(saves).toEqual(["drawing"]);
+      page = "empty";
+      (onChange as (() => void) | null)?.(); // the clear — no longer listened to
+      vi.advanceTimersByTime(1000);
+      b.detach(); // the effect cleanup later: no second write
+      expect(saves).toEqual(["drawing"]);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
 });

@@ -21,7 +21,7 @@ import {
   type Editor as TldrawEditor,
 } from "tldraw";
 import "tldraw/tldraw.css";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { uiPrompt } from "./PromptDialog";
 import { showAiToast } from "./AiToast";
 import { isOPFSAvailable } from "../storage/workspace";
@@ -201,12 +201,34 @@ export function debouncedSave(save: () => void, ms: number): { schedule(): void;
   };
 }
 
+/**
+ * Save a canvas on every store change (debounced) until `detach()`, which
+ * writes any pending change and stops listening — once. Changes made after
+ * detach (clearing the editor for a new canvas) never reach this canvas's
+ * file. Exported for tests.
+ */
+export function bindCanvasSaver(listen: (onChange: () => void) => () => void, save: () => void, ms: number): { detach(): void } {
+  const saver = debouncedSave(save, ms);
+  const off = listen(() => saver.schedule());
+  let detached = false;
+  return {
+    detach() {
+      if (detached) return;
+      detached = true;
+      off();
+      saver.flush();
+    },
+  };
+}
+
 export function CanvasTldraw({ open, onClose }: Props) {
   const [editor, setEditor] = useState<TldrawEditor | null>(null);
   const [canvasName, setCanvasName] = useState<string>(DEFAULT_CANVAS_NAME);
   const [savedList, setSavedList] = useState<string[]>([]);
   const [legacyList, setLegacyList] = useState<string[]>([]);
   const [converting, setConverting] = useState<string | null>(null);
+  /** Stops the current canvas's saver (flushing it); New calls it before clearing the editor. */
+  const detachSaver = useRef<(() => void) | null>(null);
 
   // Load the canvas list (and any legacy `.canvas.json` files) on open
   // so the picker shows everything the user has + a convert affordance.
@@ -236,20 +258,24 @@ export function CanvasTldraw({ open, onClose }: Props) {
   // Subscribe to store changes; debounced save.
   useEffect(() => {
     if (!editor) return;
-    const saver = debouncedSave(() => {
-      try {
-        const snap = getSnapshot(editor.store);
-        void saveCanvasFile(canvasName, snap).catch((err) =>
-          log.warn("tldraw save failed", err),
-        );
-      } catch (err) {
-        log.warn("tldraw getSnapshot failed", err);
-      }
-    }, 500);
-    const off = editor.store.listen(() => saver.schedule());
+    const binding = bindCanvasSaver(
+      (onChange) => editor.store.listen(onChange),
+      () => {
+        try {
+          const snap = getSnapshot(editor.store);
+          void saveCanvasFile(canvasName, snap).catch((err) =>
+            log.warn("tldraw save failed", err),
+          );
+        } catch (err) {
+          log.warn("tldraw getSnapshot failed", err);
+        }
+      },
+      500,
+    );
+    detachSaver.current = () => binding.detach();
     return () => {
-      off();
-      saver.flush(); // the last strokes before close / canvas switch
+      binding.detach(); // the last strokes before close / canvas switch
+      if (detachSaver.current) detachSaver.current = null;
     };
   }, [editor, canvasName]);
 
@@ -261,12 +287,14 @@ export function CanvasTldraw({ open, onClose }: Props) {
     if (!name) return;
     const trimmed = name.trim().replace(/[/\\]/g, "-");
     if (!trimmed) return;
-    setCanvasName(trimmed);
     if (editor) {
-      // Clear and start fresh.
+      // Save the old canvas and stop its saver first: clearing the editor
+      // while it still listens would write the empty page over the old file.
+      detachSaver.current?.();
       editor.selectAll();
       editor.deleteShapes(editor.getSelectedShapeIds());
     }
+    setCanvasName(trimmed);
     setSavedList((prev) => Array.from(new Set([...prev, trimmed])).sort());
   }, [editor]);
 

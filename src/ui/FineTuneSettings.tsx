@@ -16,7 +16,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { Loader2, Sparkles, ShieldOff, Brain } from "lucide-react";
 import { useAppStore } from "../store/useStore";
 import { showAiToast } from "./AiToast";
-import { startFineTune, getFineTuneJob, type FineTuneJob } from "../ai/fineTune";
+import { startFineTune, getFineTuneJob, fineTuneJobActive, type FineTuneJob } from "../ai/fineTune";
 import { uiConfirm } from "./PromptDialog";
 import { log } from "../lib/logger";
 import { t } from "../i18n";
@@ -34,7 +34,8 @@ const POLL_INTERVAL_MS = 30_000;
  * resulting model id.
  */
 const ACTIVE_JOB_KEY = "lumen.fineTune.activeJob";
-const isActive = (j: FineTuneJob | null) => !!j && (j.status === "queued" || j.status === "running");
+// why: "validating_files" (and any status OpenAI adds later) is still a live, billable job
+const isActive = (j: FineTuneJob | null) => !!j && fineTuneJobActive(j.status);
 
 function loadActiveJob(): FineTuneJob | null {
   try {
@@ -71,7 +72,7 @@ export function FineTuneSettings({ open, onClose }: Props) {
   const [tokens, setTokens] = useState(0);
   const pollTimer = useRef<number | null>(null);
 
-  // Poll the job until it leaves "queued" / "running".
+  // Poll the job until it finishes (succeeded / failed / cancelled).
   const pollJob = useCallback(
     async (jobId: string) => {
       try {
