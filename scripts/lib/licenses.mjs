@@ -45,6 +45,22 @@ const ALIASES = {
   "public domain": "Public Domain",
 };
 
+/**
+ * Long-form, non-SPDX names ("GNU General Public License v3.0", "GNU AGPL",
+ * "Creative Commons Attribution-NonCommercial 4.0") → the SPDX family the
+ * rules below know. Order matters: "Lesser/Library" and "Affero" names also
+ * contain "General Public License".
+ */
+const LONG_FORMS = [
+  { re: /\b(lesser|library)\s+general\s+public\s+licen[cs]e\b|\bgnu\s+lgpl/i, id: "LGPL" },
+  { re: /\baffero\b|\bgnu\s+agpl/i, id: "AGPL" },
+  { re: /\bgeneral\s+public\s+licen[cs]e\b|\bgnu\s+gpl/i, id: "GPL" },
+  { re: /\bserver\s+side\s+public\s+licen[cs]e\b/i, id: "SSPL" },
+  { re: /\bcreative\s+commons\b.*\bnon-?\s*commercial\b/i, id: "CC-BY-NC" },
+];
+/** A linking exception spelled out inside a long-form GPL name. */
+const LONG_FORM_EXCEPTION = /\b(classpath|gcc|llvm|autoconf|bison|font|universal\s+foss|linking)\b[\s-]*(runtime\s+library\s+)?exception/i;
+
 /** One licence id (with an optional WITH exception) → level + reason. */
 export function classifyId(rawId, exception) {
   const id = ALIASES[rawId.toLowerCase()] ?? rawId;
@@ -62,6 +78,12 @@ export function classifyId(rawId, exception) {
   if (/^polyform-(noncommercial|strict)/i.test(id)) return { level: "fail", reason: "PolyForm non-commercial licence" };
   if (/^(cpal|eupl|osl|cc-by-sa|cc-by-nd|polyform)/i.test(id)) return { level: "warn", reason: "copyleft / restricted licence: needs a decision" };
   if (OK_IDS.has(lower)) return { level: "ok", reason: "" };
+  const long = LONG_FORMS.find((f) => f.re.test(id));
+  if (long) {
+    const spelled = exception === undefined && /GPL$/.test(long.id) ? id.match(LONG_FORM_EXCEPTION)?.[0] : undefined;
+    const r = spelled ? { level: "warn", reason: `GPL with a linking exception (${spelled})` } : classifyId(long.id, exception);
+    return { level: r.level, reason: `${r.reason} (non-SPDX name "${id}")` };
+  }
   return { level: "warn", reason: `unrecognised licence id "${id}"` };
 }
 
@@ -432,11 +454,20 @@ export function checkDatasets(dirs) {
 
 // ── Allowlist: licenses.allow.json ─────────────────────────────────────
 
+/** A real YYYY-MM-DD calendar day (not "2026/11/15", "never" or "2026-02-30"). */
+export function isCalendarDate(v) {
+  if (typeof v !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(v)) return false;
+  const d = new Date(`${v}T00:00:00Z`);
+  return !Number.isNaN(d.getTime()) && d.toISOString().slice(0, 10) === v;
+}
+
 /**
  * Documented exceptions. Each { area, name (trailing * = prefix), level
  * (the most it may report: warn | notice | ok; default warn), reason,
  * until? (YYYY-MM-DD) }. A matching finding is capped at that level and
- * carries the reason. Problems with the allowlist itself are findings too.
+ * carries the reason. Problems with the allowlist itself are findings too;
+ * a malformed `until` is a failure and the exception is not applied, so a
+ * typo cannot become a permanent waiver.
  */
 export function applyAllowlist(findings, allow, today = new Date().toISOString().slice(0, 10)) {
   const extra = [];
@@ -456,7 +487,11 @@ export function applyAllowlist(findings, allow, today = new Date().toISOString()
       extra.push({ area: "allowlist", name: label, license: "", level: "fail", reason: `level "${cap}" must be warn, notice or ok` });
       continue;
     }
-    if (ex.until && ex.until < today) {
+    if (ex.until != null && !isCalendarDate(ex.until)) {
+      extra.push({ area: "allowlist", name: label, license: "", level: "fail", reason: `until ${JSON.stringify(ex.until)} must be a YYYY-MM-DD date; not applied` });
+      continue;
+    }
+    if (ex.until != null && ex.until < today) {
       extra.push({ area: "allowlist", name: label, license: "", level: "warn", reason: `exception expired on ${ex.until}; not applied` });
       continue;
     }

@@ -69,6 +69,15 @@ describe("classifyLicense", () => {
     ["GPL-2.0-only WITH Classpath-exception-2.0", "warn"],
     ["Some-Custom-1.0", "warn"],
     ["(MIT", "warn"],
+    // Long-form, non-SPDX names must not fall through to the unknown-licence warning.
+    ["GNU General Public License v3.0", "fail"],
+    ["GNU Affero General Public License v3", "fail"],
+    ["GNU GPL v2", "fail"],
+    ["GNU Lesser General Public License v2.1", "warn"],
+    ["GNU General Public License v2.0 w/Classpath exception", "warn"],
+    ["Server Side Public License", "fail"],
+    ["Creative Commons Attribution-NonCommercial 4.0", "fail"],
+    [[{ type: "GNU General Public License" }], "fail"],
   ];
   it.each(cases)("%s → %s", (raw, level) => {
     expect(classifyLicense(raw).level).toBe(level);
@@ -283,6 +292,22 @@ describe("applyAllowlist", () => {
     expect(r["npm:left-pad"]).toMatchObject({ level: "warn", reason: "exception matches nothing: remove it" });
     expect(r["npm:x"]).toMatchObject({ level: "fail", reason: "exception without a documented reason" });
     expect(r["npm:y"].level).toBe("fail");
+  });
+});
+
+describe("applyAllowlist: until", () => {
+  const finding = (): Finding[] => [{ area: "npm", name: "webr", level: "fail", reason: "GPL binaries", license: "SEE LICENSE IN LICENSE.md" }];
+  it.each([["2026/11/15"], ["never"], ["2026-02-30"], [20261115], [""]])("a malformed until (%j) fails and does not cap the finding", (until) => {
+    const out: Finding[] = applyAllowlist(finding(), { exceptions: [{ area: "npm", name: "webr", reason: "pending the owner's decision", until }] }, "2026-10-18");
+    const r = byName(out);
+    expect(r.webr).toMatchObject({ level: "fail" });
+    expect(r.webr.allowed).toBeUndefined();
+    expect(r["npm:webr"]).toMatchObject({ level: "fail", reason: expect.stringMatching(/must be a YYYY-MM-DD date/) });
+  });
+
+  it("a valid future until still applies", () => {
+    const r = byName(applyAllowlist(finding(), { exceptions: [{ area: "npm", name: "webr", reason: "pending the owner's decision", until: "2026-11-15" }] }, "2026-10-18"));
+    expect(r.webr.level).toBe("warn");
   });
 });
 
