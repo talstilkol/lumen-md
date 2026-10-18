@@ -12,6 +12,8 @@ const BASE_URL = process.env.PLAYWRIGHT_BASE_URL ?? `http://localhost:${PORT}`;
 
 export default defineConfig({
   testDir: "./e2e",
+  // Compiles the app on the dev server before the first test (e2e/_warmup.ts).
+  globalSetup: "./e2e/_warmup.ts",
   timeout: 30_000,
   expect: { timeout: 5_000 },
   fullyParallel: true,

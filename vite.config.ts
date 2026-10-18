@@ -434,6 +434,17 @@ export default defineConfig({
     // ("optimized dependencies changed. reloading") — losing the user's
     // unsaved edits in dev and flaking the live-lua e2e. Pre-bundle them.
     include: ["wasmoon"],
+    // The dep scanner crawls the HTML entries and every import() they reach,
+    // but never a `new Worker(new URL("./x.worker.ts", import.meta.url))`.
+    // So @hpcc-js/wasm (graphviz), @ruby/wasm-wasi, transformers.js and the
+    // rest were found only when a worker first started — and that full reload
+    // hit every open page. With Playwright's parallel workers on a cold CI dev
+    // server, one graphviz or live-ruby test reloaded the pages of the tests
+    // next to it (the error-paths CSV and graphviz flakes, live-ruby, plan
+    // 0.5). Scanning the worker files too finds those deps before the first
+    // page loads. Setting `entries` replaces the default (the HTML inputs),
+    // so they are listed here as well.
+    entries: ["index.html", "playground-runner.html", "livejs-runner.html", "src/**/*.worker.ts"],
   },
   // ε.4.3 — clean-URL aliases for the auxiliary HTML pages so dev links
   // like `/roadmap` and `/landing` work without the `.html` suffix.
