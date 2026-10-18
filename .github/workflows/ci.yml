@@ -366,7 +366,11 @@ jobs:
           PLAYWRIGHT_BASE_URL: http://localhost:8088
         run: |
           npx playwright test e2e/playground.spec.ts e2e/csp-violations.spec.ts --project=chromium --project=webkit --reporter=line,github,html
-          npx playwright test e2e/live-exec.spec.ts -g "live-r |live-lua|offline" --project=chromium --project=webkit --reporter=line,github,html
+          npx playwright test e2e/live-exec.spec.ts -g "live-r |live-lua" --project=chromium --project=webkit --reporter=line,github,html
+          # The service worker under the app policy, offline. Chromium only:
+          # WebKit's offline emulation fails the reload itself ("WebKit
+          # encountered an internal error") after the online run passed.
+          npx playwright test e2e/live-exec.spec.ts -g "offline" --project=chromium --reporter=line,github,html
       - name: nginx error log
         if: failure()
         run: cat /tmp/tmp.*/logs/error.log 2>/dev/null | tail -50 || true
