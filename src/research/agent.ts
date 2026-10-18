@@ -400,9 +400,11 @@ export async function libraryResearch(o: ResearchOptions): Promise<ResearchResul
   const { rerank } = await import("../ai/reranker");
   const { readWorkspaceFile } = await import("../storage/workspace");
   const { isLibraryPath } = await import("./clipper");
-  const { CITE_INSTRUCTIONS, verifyVaultCitations } = await import("../ai/vaultCitations");
+  const { CITE_INSTRUCTIONS, markVaultCitations, verifyVaultCitations } = await import("../ai/vaultCitations");
   o.onProgress?.("Searching your library…");
-  const hits = (await searchHybrid(o.question, 40).catch(() => [])).filter((h) => isLibraryPath(h.path));
+  // Scope to the library before the limit: 40 ordinary notes ranking higher
+  // must not push every library page out of the results.
+  const hits = (await searchHybrid(o.question, 40, { filter: isLibraryPath }).catch(() => [])).filter((h) => isLibraryPath(h.path));
   if (!hits.length) throw new Error("Nothing in your library matches — clip some pages first (Clip a web page…), or allow web research in AI settings.");
   const withText = await Promise.all(hits.map(async (h) => ({ ...h, content: await readWorkspaceFile(h.path).catch(() => h.snippet) })));
   const top = (await rerank(o.question, withText.map((h) => ({ ...h, text: `${h.snippet}\n${h.content.slice(0, 1500)}` })))).slice(0, 6);
@@ -417,14 +419,18 @@ export async function libraryResearch(o: ResearchOptions): Promise<ResearchResul
   );
   const sources = top.map((h) => ({ path: h.path, content: h.content }));
   const { citations, verifiedCount } = verifyVaultCitations(answer, sources);
-  const unverified = citations.filter((c) => !c.verified).length;
+  // An answer that cites nothing wasn't checked at all: unsupported, not
+  // "0 unverified".
+  const uncited = citations.length === 0;
+  const unverified = uncited ? 1 : citations.filter((c) => !c.verified).length;
   const stemOf = (p: string) => p.replace(/^.*\//, "").replace(/\.md$/i, "");
   const markdown = [
     `# ${title(o.question)}`,
     "",
     `*From your library only (nothing left this device) · ${top.length} pages · ${verifiedCount} of ${citations.length} quotes verified.*`,
     "",
-    answer.trim(),
+    ...(uncited ? ["> ⚠️ **The answer cites no library page — nothing in it could be checked.**", ""] : []),
+    markVaultCitations(answer.trim(), citations),
     "",
     "## Sources",
     "",

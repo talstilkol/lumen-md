@@ -95,3 +95,44 @@ describe("research under local-only", () => {
     f.mockRestore();
   });
 });
+
+describe("library research checks", () => {
+  beforeEach(() => {
+    localStorage.clear();
+    localStorage.setItem("lumen.ai.policy", "local-only");
+  });
+
+  async function research(answer: string, hits?: Array<{ path: string; score: number; snippet: string }>) {
+    const all = hits ?? [{ path: "Library/launch.md", score: 1, snippet: "The launch moved to Tuesday." }];
+    vi.doMock("../ai/semanticSearch", () => ({
+      searchHybrid: async (_q: string, k: number, o?: { filter?: (p: string) => boolean }) =>
+        all.filter((h) => !o?.filter || o.filter(h.path)).slice(0, k),
+    }));
+    vi.doMock("../storage/workspace", async (o) => ({ ...(await o<object>()), readWorkspaceFile: async () => "# Launch\nThe launch moved to Tuesday.\n" }));
+    vi.doMock("../ai/llm", async (o) => ({ ...(await o<object>()), chat: async () => answer }));
+    vi.resetModules();
+    const { runResearch } = await import("../research/agent");
+    return runResearch({ question: "When is the launch?", deps: { settings: { provider: "claude", key: "" } } });
+  }
+
+  it("scopes retrieval to the library before the result limit", async () => {
+    const notes = Array.from({ length: 45 }, (_, i) => ({ path: `notes/n${i}.md`, score: 2, snippet: "launch" }));
+    const r = await research('Tuesday [1] "The launch moved to Tuesday".', [...notes, { path: "Library/launch.md", score: 1, snippet: "x" }]);
+    expect(r.sources).toBe(1);
+    expect(r.unverified).toBe(0);
+  });
+
+  it("an answer without citations counts as unsupported", async () => {
+    const r = await research("The launch is on Tuesday.");
+    expect(r.unverified).toBe(1);
+    expect(r.markdown).toContain("cites no library page");
+  });
+
+  it("marks each failed citation in the saved report", async () => {
+    const r = await research('Tuesday [1] "The launch moved to Tuesday". Budget doubled [1] "Budget doubled".');
+    expect(r.unverified).toBe(1);
+    expect(r.markdown).toContain('[1] "The launch moved to Tuesday".');
+    expect(r.markdown).toContain('[1] "Budget doubled" ⚠️ *quote not found in the page*');
+    expect(r.markdown).not.toContain('Tuesday" ⚠️');
+  });
+});

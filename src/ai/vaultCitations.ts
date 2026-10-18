@@ -77,3 +77,18 @@ export function verifyVaultCitations(answer: string, sources: readonly VaultSour
   }
   return { citations, verifiedCount: citations.filter((c) => c.verified).length };
 }
+
+/**
+ * The answer with every failed citation flagged in place, so a saved report
+ * still shows which quote didn't check out after the toast is gone.
+ */
+export function markVaultCitations(answer: string, citations: readonly VaultCitation[]): string {
+  const byKey = new Map(citations.map((c) => [`${c.n}\u0000${c.quote ?? ""}`, c]));
+  return answer.replace(CITE_RE, (m: string, num: string, quote: string | undefined) => {
+    const c = byKey.get(`${Number(num)}\u0000${quote?.trim() || ""}`);
+    if (!c || c.verified) return m;
+    if (!c.path) return `${m} ⚠️ *cites a page that wasn't given*`;
+    if (!c.quote) return `${m} ⚠️ *no supporting quote given*`;
+    return `${m} ⚠️ *quote not found in the page*`;
+  });
+}
