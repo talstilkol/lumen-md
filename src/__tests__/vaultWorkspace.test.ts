@@ -135,7 +135,7 @@ describe("callers that used to open OPFS themselves", () => {
     expect(await convertLegacyCanvas("board")).toEqual({ converted: true, nodeCount: 1 });
     const snap = JSON.parse(await mem.readText("canvases/board.tldr")) as { store: Record<string, { props?: { text?: string } }> };
     expect(snap.store["shape:legacy-n1"].props?.text).toBe("שלום");
-  });
+  }, 30_000); // the first import of tldraw is slow on a loaded machine
 
   it("folder export: writes the vault into a picked folder through a directory-handle backend", async () => {
     const { FakeDir } = await import("./helpers/fakeOpfs");

@@ -173,6 +173,13 @@ describe.each(backends)("VaultBackend contract — %s", (_label, make) => {
       expect(await names("p")).toEqual(["a.md"]);
     });
 
+    it("refuses to replace a folder with something inside it, even with overwrite", async () => {
+      await v.write("a/b/c.md", "C");
+      expect(await code(v.rename("a/b", "a", { overwrite: true }))).toBe("EINVAL");
+      expect(await code(v.rename("a/b/c.md", "a", { overwrite: true }))).toBe("EINVAL");
+      expect(await v.readText("a/b/c.md")).toBe("C");
+    });
+
     it("the same path is a no-op; a change of letter case is a rename", async () => {
       await v.write("Note.md", "N");
       await v.rename("Note.md", "Note.md");

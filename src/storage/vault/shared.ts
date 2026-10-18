@@ -59,6 +59,8 @@ export function checkRename(from: string, to: string): { src: string[]; dst: str
   const b = dst.join("/");
   if (a === b) return null;
   if (b.startsWith(a + "/")) throw new VaultError("EINVAL", to, `Cannot move "${from}" into itself`);
+  // Replacing a folder that contains the source would delete the source first.
+  if (a.startsWith(b + "/")) throw new VaultError("EINVAL", to, `Cannot replace "${to}" with "${from}", which is inside it`);
   return { src, dst };
 }
 
