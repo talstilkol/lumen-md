@@ -63,7 +63,9 @@ const LONG_FORM_EXCEPTION = /\b(classpath|gcc|llvm|autoconf|bison|font|universal
 
 /** One licence id (with an optional WITH exception) → level + reason. */
 export function classifyId(rawId, exception) {
-  const id = ALIASES[rawId.toLowerCase()] ?? rawId;
+  const aliased = ALIASES[rawId.toLowerCase()] ?? rawId;
+  // Spaced Creative Commons abbreviations ("CC BY-NC 4.0", "CC0 1.0") → their SPDX form ("CC-BY-NC-4.0").
+  const id = /^cc(0|[\s_]+by)\b/i.test(aliased.trim()) ? aliased.trim().replace(/[\s_]+/g, "-") : aliased;
   const lower = id.toLowerCase();
   if (/commons[\s-]*clause/i.test(id) || /commons[\s-]*clause/i.test(exception ?? "")) return { level: "fail", reason: "Commons Clause (no selling)" };
   if (/^lgpl/i.test(id)) return { level: "warn", reason: "weak copyleft (LGPL): must stay a separate, replaceable library" };

@@ -79,6 +79,13 @@ describe("classifyLicense", () => {
     ["Server Side Public License", "fail"],
     ["Creative Commons Attribution-NonCommercial 4.0", "fail"],
     [[{ type: "GNU General Public License" }], "fail"],
+    // Spaced Creative Commons abbreviations, as package.json files write them.
+    ["CC BY-NC 4.0", "fail"],
+    ["CC BY-NC-SA 4.0", "fail"],
+    ["cc by-nc", "fail"],
+    ["CC BY 4.0", "ok"],
+    ["CC0 1.0", "ok"],
+    ["CC BY-SA 4.0", "warn"],
   ];
   it.each(cases)("%s → %s", (raw, level) => {
     expect(classifyLicense(raw).level).toBe(level);
