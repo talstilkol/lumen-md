@@ -51,6 +51,9 @@ test.beforeEach(async ({ page }) => {
 test("malformed mermaid syntax shows error block, no pageerror", async ({
   page,
 }) => {
+  // Two 15 s render waits after the page load: more than the default 30 s
+  // test budget on a cold runner, by construction.
+  test.slow();
   const errs = captureErrors(page);
   await page.keyboard.press("Meta+2");
   const editor = page.locator(".cm-content").first();
@@ -67,6 +70,9 @@ test("malformed mermaid syntax shows error block, no pageerror", async ({
 test("malformed graphviz syntax doesn't crash the renderer", async ({
   page,
 }) => {
+  // Two 15 s render waits after the page load: more than the default 30 s
+  // test budget on a cold runner, by construction.
+  test.slow();
   const errs = captureErrors(page);
   await page.keyboard.press("Meta+2");
   const editor = page.locator(".cm-content").first();
@@ -78,6 +84,9 @@ test("malformed graphviz syntax doesn't crash the renderer", async ({
 });
 
 test("massive CSV (1000 rows) renders without freezing", async ({ page }) => {
+  // Two 15 s render waits after the page load: more than the default 30 s
+  // test budget on a cold runner, by construction.
+  test.slow();
   const errs = captureErrors(page);
   await page.keyboard.press("Meta+2");
   const editor = page.locator(".cm-content").first();
@@ -284,6 +293,9 @@ test("wiki-link cycle ([[a]] → [[b]] → [[a]]) doesn't infinite-loop", async 
 test("pasting >100 KB of plain text into the editor doesn't pageerror", async ({
   page,
 }) => {
+  // Filling 100 KB and a 20 s wait for the preview to catch up: a stress
+  // test that does not fit the default 30 s budget on a cold runner.
+  test.slow();
   const errs = captureErrors(page);
   await page.keyboard.press("Meta+2");
   const editor = page.locator(".cm-content").first();
