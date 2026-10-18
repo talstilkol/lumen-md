@@ -1415,5 +1415,6 @@
   "toast.aiNothingRunning": "لا يوجد طلب ذكاء اصطناعي جارٍ",
   "canvas.new.replaceTitle": "استبدال هذه اللوحة؟",
   "canvas.new.replaceBody": "توجد لوحة باسم “{name}” بالفعل. بدء لوحة جديدة بهذا الاسم يستبدل رسمها بصفحة فارغة.",
-  "canvas.new.replaceOk": "استبدال بصفحة فارغة"
+  "canvas.new.replaceOk": "استبدال بصفحة فارغة",
+  "canvas.unreadable": "تعذّرت قراءة اللوحة «{name}». ستبقى للقراءة فقط حتى لا يُستبدل رسمها المحفوظ."
 }

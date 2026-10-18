@@ -1415,5 +1415,6 @@
   "toast.aiNothingRunning": "Keine KI-Anfrage läuft",
   "canvas.new.replaceTitle": "Diese Leinwand ersetzen?",
   "canvas.new.replaceBody": "Es gibt bereits eine Leinwand namens „{name}“. Eine neue mit diesem Namen ersetzt ihre Zeichnung durch eine leere Seite.",
-  "canvas.new.replaceOk": "Durch leere ersetzen"
+  "canvas.new.replaceOk": "Durch leere ersetzen",
+  "canvas.unreadable": "Die Leinwand „{name}“ konnte nicht gelesen werden. Sie bleibt schreibgeschützt, damit ihre gespeicherte Zeichnung nicht überschrieben wird."
 }

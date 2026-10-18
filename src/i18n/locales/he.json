@@ -1415,5 +1415,6 @@
   "toast.aiNothingRunning": "אין בקשת AI שרצה",
   "canvas.new.replaceTitle": "להחליף את הקנבס?",
   "canvas.new.replaceBody": "כבר קיים קנבס בשם “{name}”. קנבס חדש בשם הזה יחליף את הציור שלו בדף ריק.",
-  "canvas.new.replaceOk": "החלף בדף ריק"
+  "canvas.new.replaceOk": "החלף בדף ריק",
+  "canvas.unreadable": "לא ניתן לקרוא את הקנבס ״{name}״. הוא נשאר לקריאה בלבד כדי שהציור השמור לא יידרס."
 }

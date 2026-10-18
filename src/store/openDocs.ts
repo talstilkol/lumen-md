@@ -201,7 +201,8 @@ export function syncOpenDocsAfterMove(
     return path === ws && text === content ? null : { path, text };
   };
   useAppStore.setState((state) => {
-    const taken = new Set<string>();
+    // The active document can be outside openTabs (opened with setDoc): its id is taken too.
+    const taken = new Set<string>([tabIdOf(state.doc)]);
     const detachedName = (ws: string) => {
       const file = ws.split("/").pop() || ws;
       const stem = file.replace(/(\.[^./]+)$/, "");

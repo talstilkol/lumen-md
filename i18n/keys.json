@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-10-18T05:44:37.517Z",
+  "generated_at": "2026-10-18T10:02:51.868Z",
   "source": "src/i18n/index.ts (en bundle)",
-  "count": 1417,
+  "count": 1418,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -4442,6 +4442,13 @@
       "key": "canvas.new.replaceOk",
       "en": "Replace with blank",
       "vars": []
+    },
+    {
+      "key": "canvas.unreadable",
+      "en": "Couldn’t read the canvas “{name}”. It stays read-only so its saved drawing isn’t overwritten.",
+      "vars": [
+        "name"
+      ]
     },
     {
       "key": "canvas.picker",
