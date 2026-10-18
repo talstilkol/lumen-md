@@ -185,13 +185,14 @@ describe("headings and blocks", () => {
     expect(labels(wikiSuggestions(parseWikiQuery("[[שלום עולם#")!, c, current))).toEqual(["שָׁלוֹם"]);
   });
 
-  it("offers no block links until 4.8 can take the reader to the block", () => {
+  it("offers block ids (4.8): of the named note, or of the open one for [[#^", () => {
     const c = vault();
-    // noteBlocks / suggestBlocks are ready; the links aren't followable yet.
     expect(labels(suggestBlocks(PROJECT, "sh"))).toEqual(["goal-1"]);
-    expect(wikiSuggestions(parseWikiQuery("[[Project Alpha#^sh")!, c)).toEqual([]);
-    expect(wikiSuggestions(parseWikiQuery("[[Project Alpha^li")!, c)).toEqual([]);
-    expect(wikiSuggestions(parseWikiQuery("[[#^")!, c, { content: PROJECT })).toEqual([]);
+    expect(labels(wikiSuggestions(parseWikiQuery("[[Project Alpha#^sh")!, c))).toEqual(["goal-1"]);
+    expect(wikiSuggestions(parseWikiQuery("[[Project Alpha^li")!, c)[0].insert).toBe("#^li");
+    expect(labels(wikiSuggestions(parseWikiQuery("[[#^")!, c, { content: PROJECT }))).toEqual(["goal-1", "li", "quote"]);
+    // The open note's live text, not the index's copy.
+    expect(labels(wikiSuggestions(parseWikiQuery("[[Project Alpha#^")!, c, { path: "Project Alpha.md", content: "New ^fresh\n" }))).toEqual(["fresh"]);
   });
 });
 

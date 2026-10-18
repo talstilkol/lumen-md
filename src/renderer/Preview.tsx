@@ -156,7 +156,8 @@ export function Preview({ markdownText, docKey = null }: Props) {
               new CustomEvent("lumen-open-file", {
                 // Same slugger rehype-slug gives the rendered headings
                 // (Unicode-aware: Hebrew / CJK headings keep their text).
-                detail: heading ? { path, heading: headingSlug(heading) } : { path },
+                // A block reference (`#^id`) is the block's own id (remarkBlockIds).
+                detail: heading ? { path, heading: heading.startsWith("^") ? heading : headingSlug(heading) } : { path },
               }),
             ),
         );

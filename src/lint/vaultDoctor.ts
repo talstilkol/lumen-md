@@ -294,6 +294,8 @@ export function noteHeadings(text: string): string[] {
 
 function headingsOf(text: string): Set<string> {
   const out = new Set<string>();
+  // Block ids count too: `[[Note#^id]]` (4.8) names a block, not a heading.
+  for (const m of stripCode(blankFrontmatter(text)).matchAll(/(?:^|[ \t])\^([A-Za-z0-9-]+)[ \t]*$/gm)) out.add(`^${m[1]}`.toLowerCase());
   // In document order, with a stateful slugger: a repeated heading gets
   // `-1`, `-2`… like rehype-slug, so `[[Note#setup-1]]` resolves.
   const slugger = new GithubSlugger();

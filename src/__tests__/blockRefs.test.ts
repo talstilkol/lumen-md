@@ -1,0 +1,127 @@
+/**
+ * Block references (4.8): `^id` blocks get a DOM id in the preview (and the
+ * marker is hidden); "Copy link to block" adds an id where there is none;
+ * renaming or moving a note keeps `[[Note#^id]]` and `![[Note#^id]]`.
+ */
+import { describe, expect, it } from "vitest";
+import { unified } from "unified";
+import remarkParse from "remark-parse";
+import remarkGfm from "remark-gfm";
+import remarkRehype from "remark-rehype";
+import { toHtml } from "hast-util-to-html";
+import type { Root as HastRoot } from "hast";
+import { remarkBlockIds } from "../renderer/remarkBlockIds";
+import { blockIdEdit, newBlockId } from "../editor/blockLink";
+import { rewriteLinks } from "../storage/linkRewrite";
+
+const html = (md: string) => {
+  const p = unified().use(remarkParse).use(remarkGfm).use(remarkBlockIds).use(remarkRehype);
+  return toHtml(p.runSync(p.parse(md)) as HastRoot);
+};
+
+describe("remarkBlockIds", () => {
+  it("a paragraph ending in ^id gets the id, without the marker", () => {
+    expect(html("Ship it. ^ship\n")).toBe('<p id="^ship">Ship it.</p>');
+    expect(html("Line one\nline two ^two-lines\n")).toBe('<p id="^two-lines">Line one\nline two</p>');
+  });
+
+  it("a list item is the block; a ^id line of its own names the block before it", () => {
+    expect(html("- first ^a\n- second\n")).toContain('<li id="^a">first</li>');
+    const t = html("| a | b |\n| - | - |\n| 1 | 2 |\n\n^tbl\n");
+    expect(t).toContain('<table id="^tbl">');
+    expect(t).not.toContain("^tbl</p>");
+    expect(html("> quoted\n\n^q\n")).toContain('<blockquote id="^q">');
+  });
+
+  it("leaves code and text that only looks like a marker", () => {
+    expect(html("```\ncode ^nope\n```\n")).toContain("code ^nope");
+    expect(html("a^b\n")).toBe("<p>a^b</p>");
+    expect(html("2^10 is 1024\n")).toBe("<p>2^10 is 1024</p>");
+  });
+});
+
+describe("blockIdEdit", () => {
+  const id = () => "abc123";
+  const apply = (text: string, pos: number) => {
+    const e = blockIdEdit(text, pos, id);
+    if (e.kind !== "block" || !e.change) return { e, text };
+    return { e, text: text.slice(0, e.change.from) + e.change.insert + text.slice(e.change.from) };
+  };
+
+  it("appends ^id to the paragraph's last line, or reuses its id", () => {
+    const md = "# Title\n\nFirst line\nsecond line\n\nNext.\n";
+    expect(apply(md, md.indexOf("First")).text).toBe("# Title\n\nFirst line\nsecond line ^abc123\n\nNext.\n");
+    const marked = "Done already ^old\n";
+    expect(blockIdEdit(marked, 2, id)).toEqual({ kind: "block", id: "old", change: null });
+  });
+
+  it("list items take it on their line; tables, quotes and code on a line of their own", () => {
+    expect(apply("- one\n- two\n", 8).text).toBe("- one\n- two ^abc123\n");
+    expect(apply("| a |\n| - |\n| 1 |\nAfter\n", 2).text).toBe("| a |\n| - |\n| 1 |\n\n^abc123\n\nAfter\n");
+    expect(apply("```js\nx()\n```\n", 7).text).toBe("```js\nx()\n```\n\n^abc123\n");
+    expect(apply("> q\n", 1).text).toBe("> q\n\n^abc123\n");
+    expect(blockIdEdit("> q\n\n^have\n", 1, id)).toEqual({ kind: "block", id: "have", change: null });
+  });
+
+  it("a heading gives its heading link; blank lines and front matter give nothing", () => {
+    expect(blockIdEdit("## Setup\n", 3, id)).toEqual({ kind: "heading", heading: "Setup" });
+    expect(blockIdEdit("a\n\nb\n", 2, id)).toEqual({ kind: "none" });
+    expect(blockIdEdit("---\ntitle: x\n---\nbody\n", 6, id)).toEqual({ kind: "none" });
+  });
+
+  it("keeps CRLF lines intact", () => {
+    expect(apply("Para\r\n\r\nNext\r\n", 1).text).toBe("Para ^abc123\r\n\r\nNext\r\n");
+  });
+
+  it("ids are short base36 and unique in the note", () => {
+    const seq = [0.5, 0.5, 0.25];
+    const taken = new Set([newBlockId(new Set(), () => 0.5)]);
+    expect(newBlockId(taken, () => seq.shift()!)).toMatch(/^[0-9a-z]{6}$/);
+    expect(taken.has(newBlockId(taken, () => 0.25))).toBe(false);
+  });
+});
+
+describe("block references survive a rename and a move", () => {
+  const note = "See [[Plans#^goal]] and ![[Plans#^goal]], [[folder/Plans#^goal|the goal]].\n";
+  it("rename", () => {
+    expect(rewriteLinks("See [[Plans#^goal]] and ![[Plans#^goal]] and [[Plans#^goal|the goal]].\n", "Hub.md", "Plans.md", "Roadmap.md")).toBe(
+      "See [[Roadmap#^goal]] and ![[Roadmap#^goal]] and [[Roadmap#^goal|the goal]].\n",
+    );
+  });
+  it("move into a folder, and with a path link", () => {
+    expect(rewriteLinks(note, "Hub.md", "folder/Plans.md", "archive/2026/Plans.md")).toBe(
+      "See [[Plans#^goal]] and ![[Plans#^goal]], [[archive/2026/Plans#^goal|the goal]].\n",
+    );
+    expect(rewriteLinks("[[Plans#^goal]]", "Hub.md", "Plans.md", "archive/Plans.md")).toBe("[[Plans#^goal]]");
+  });
+});
+
+describe("following a block link in the preview", () => {
+  it("[[#^id]] scrolls to the block of this note; [[Note#^id]] opens Note with the block id", async () => {
+    const { handleWikiLinkClick } = await import("../renderer/wikiLinks");
+    const root = document.createElement("div");
+    root.innerHTML = '<p id="^goal">Goal</p><a class="wiki-link" data-wiki-target="#^goal" href="#goal">x</a><a class="wiki-link" data-wiki-target="Plans#^goal" href="#plansgoal">y</a>';
+    const block = root.querySelector("p")!;
+    let scrolled = 0;
+    block.scrollIntoView = () => void scrolled++;
+    const [own, other] = root.querySelectorAll("a");
+    const ev = (target: Element) => ({ target, preventDefault() {} });
+    expect(handleWikiLinkClick(ev(own), root, async () => [], () => {})).toBe(true);
+    expect(scrolled).toBe(1);
+    const opened: Array<[string, string | undefined]> = [];
+    expect(handleWikiLinkClick(ev(other), root, async () => ["Plans.md"], (p, h) => opened.push([p, h]))).toBe(true);
+    await new Promise((r) => setTimeout(r, 0));
+    expect(opened).toEqual([["Plans.md", "^goal"]]);
+  });
+});
+
+describe("Vault Doctor and block references", () => {
+  it("a link to an existing ^id is fine; to a missing one it is reported", async () => {
+    const { runVaultDoctor } = await import("../lint/vaultDoctor");
+    const findings = runVaultDoctor([
+      { path: "Plans.md", text: "# Plans\n\nThe goal. ^goal\n" },
+      { path: "Hub.md", text: "See [[Plans#^goal]], ![[Plans#^goal]] and [[Plans#^gone]].\n" },
+    ]).filter((f) => f.kind === "missing-heading");
+    expect(findings.map((f) => f.detail)).toEqual(["Plans#^gone"]);
+  });
+});

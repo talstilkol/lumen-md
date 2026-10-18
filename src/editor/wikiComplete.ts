@@ -8,11 +8,9 @@
  *
  *   `[[que`                     → notes, and their front-matter aliases
  *   `[[Note#que`                → headings of Note (`[[#que`: of this note)
- *   `[[Note#^que`, `[[Note^que` → nothing yet: the preview neither renders
- *                                 `^id` anchors nor scrolls to them, so a
- *                                 block link would stop at the note. 4.8
- *                                 (block references) adds both and turns
- *                                 `suggestBlocks` on.
+ *   `[[Note#^que`, `[[Note^que` → block ids (`^id`) of Note; the preview
+ *                                 gives those blocks the id and scrolls to
+ *                                 them (4.8, renderer/remarkBlockIds)
  *
  * Names match by `noteKey` — the key wiki links resolve by — so case,
  * niqqud, final letters and spacing don't matter. When no note has the
@@ -382,7 +380,7 @@ export function noteBlocks(content: string): Array<{ id: string; text: string }>
   return out;
 }
 
-/** Block ids of a note for `[[Note#^typed` (or `[[Note^typed`). Not offered until 4.8 — see the top of the file. */
+/** Block ids of a note for `[[Note#^typed` (or `[[Note^typed`). */
 export function suggestBlocks(content: string, typed: string, bareCaret = false, limit = 50): WikiSuggestion[] {
   const q = noteKey(typed);
   const hits: Array<{ id: string; text: string; score: number; i: number }> = [];
@@ -405,12 +403,11 @@ export interface CurrentNote {
 /** Everything to offer for a parsed query. */
 export function wikiSuggestions(q: WikiQuery, catalog: NoteCatalog, current?: CurrentNote, opts: SuggestOptions = {}): WikiSuggestion[] {
   if (q.kind === "note") return suggestNotes(catalog, q.text, opts);
-  // Block links wait for 4.8: nothing would take the reader to the block.
-  if (q.kind === "block") return [];
   const e = q.note.trim() ? findNote(catalog, q.note) : undefined;
   const isCurrent = !q.note.trim() || (!!e && current?.path === e.path);
-  if (isCurrent && current?.headings) return suggestHeadingList(current.headings(), q.text, opts.limit);
   const content = isCurrent ? current?.content : e?.content;
+  if (q.kind === "block") return content === undefined ? [] : suggestBlocks(content, q.text, q.bareCaret, opts.limit);
+  if (isCurrent && current?.headings) return suggestHeadingList(current.headings(), q.text, opts.limit);
   return content === undefined ? [] : suggestHeadings(content, q.text, opts.limit);
 }
 

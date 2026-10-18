@@ -2175,6 +2175,25 @@ export function useCommands({
           }
         },
       })),
+      // ── Block references (4.8) ─────────────────────────────────────────
+      {
+        id: "editor.copyBlockLink",
+        label: t("cmd.copyBlockLink"),
+        hint: t("cmd.copyBlockLink.hint"),
+        icon: cmdIcons.Link,
+        group: t("group.insert"),
+        action: async () => {
+          const view = getEditorView?.() ?? null;
+          if (!view) return showAiToast(t("blockLink.sourceOnly"), "info");
+          const { copyBlockLink } = await import("../editor/blockLink");
+          try {
+            const link = await copyBlockLink(view);
+            showAiToast(link ? t("blockLink.copied", { link }) : t("blockLink.noBlock"), link ? "success" : "info");
+          } catch {
+            showAiToast(t("blockLink.copyFailed"), "error");
+          }
+        },
+      },
       // ── Formatting (Prettier, lazy) ───────────────────────────────────
       ...buildFormatCommands(
         {
