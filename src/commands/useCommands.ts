@@ -41,13 +41,15 @@ async function cancellable<T>(fn: (signal: AbortSignal) => Promise<T>): Promise<
   }
 }
 
-/** Save a clip into the library folder and open it (T34). */
-async function saveClip(clip: { title: string; markdown: string }): Promise<void> {
+/** Save a clip into the library folder and open it (T34). Exported for tests. */
+export async function saveClip(clip: { title: string; markdown: string }): Promise<void> {
   const { clipFileName, libraryDir } = await import("../research/clipper");
   const { writeWorkspaceFile, workspaceHasEntry, isOPFSAvailable } = await import("../storage/workspace");
   const name = clipFileName(clip.title);
   if (!isOPFSAvailable()) {
-    useAppStore.getState().openTab({ name, content: clip.markdown, workspaceName: null });
+    // Nothing was written: open it as an unsaved (dirty) document in its own
+    // tab, so closing the tab or the page warns instead of losing the clip.
+    openTemplateDoc(name.replace(/\.md$/, ""), clip.markdown);
     return;
   }
   const dir = libraryDir(getLocale());
