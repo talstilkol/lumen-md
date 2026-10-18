@@ -325,7 +325,7 @@ export function checkNpm(lock, { readPackage, readLicenseFile, hidden = HIDDEN_C
     byKey.set(key, { area: "npm", name: p.name, version: p.version, license: c.license, level, reason, via: p.via, optional: p.optional, paths: [p.path] });
   }
   const findings = [...byKey.values()];
-  for (const u of unresolved) findings.push({ area: "npm", name: u, version: "", license: "", level: "warn", reason: "required dependency missing from package-lock.json", via: "", optional: false, paths: [] });
+  for (const u of unresolved) findings.push({ area: "npm", name: u, version: "", license: "", level: "warn", reason: "required dependency missing from package-lock.json", via: "", optional: false, paths: [], structural: true });
   return findings;
 }
 
@@ -350,6 +350,14 @@ export function validateEntry(e) {
   if (!e.license.trim()) problems.push("empty license");
   if ((e.class === "allowed" || e.class === "conditional") && !e.attribution.trim()) problems.push("allowed/conditional models need attribution text");
   if (e.match !== undefined && !(Array.isArray(e.match) && e.match.every((m) => typeof m === "string" && m.length >= 3))) problems.push("match must be an array of strings (3+ chars)");
+  // The licence text must not contradict the class: a licence the npm rules
+  // fail (AGPL, CC-BY-NC, SSPL…) or one that says non-commercial is never
+  // allowed, conditional or unknown.
+  if (MODEL_CLASSES.includes(e.class) && e.class !== "forbidden" && e.license.trim()) {
+    const lic = classifyLicense(e.license);
+    if (lic.level === "fail") problems.push(`license "${e.license}" is forbidden (${lic.reason}) but class is "${e.class}"`);
+    else if (/\bnon-?\s*commercial\b/i.test(e.license)) problems.push(`license "${e.license}" is non-commercial but class is "${e.class}"`);
+  }
   return problems;
 }
 
@@ -400,14 +408,15 @@ export function discoverCatalogIds(sources, patterns = CATALOG_PATTERNS) {
 export function checkModels(registry, sources) {
   const findings = [];
   const entries = Array.isArray(registry?.models) ? registry.models : null;
-  if (!entries) return [{ area: "model", name: "models/registry.json", license: "", level: "fail", reason: "no `models` array", refs: [] }];
+  if (!entries) return [{ area: "model", name: "models/registry.json", license: "", level: "fail", reason: "no `models` array", refs: [], structural: true }];
   const ids = new Set();
   for (const e of entries) {
     const problems = validateEntry(e);
     if (e?.id && ids.has(e.id)) problems.push("duplicate id");
     if (e?.id) ids.add(e.id);
     if (problems.length) {
-      findings.push({ area: "model", name: e?.id ?? "(no id)", license: e?.license ?? "", class: e?.class, level: "fail", reason: `registry entry invalid: ${problems.join("; ")}`, refs: [] });
+      // structural: a broken entry is fixed, never waived by an allowlist exception.
+      findings.push({ area: "model", name: e?.id ?? "(no id)", license: e?.license ?? "", class: e?.class, level: "fail", reason: `registry entry invalid: ${problems.join("; ")}`, refs: [], structural: true });
       continue;
     }
     const refs = findReferences(e, sources);
@@ -471,7 +480,9 @@ export function isCalendarDate(v) {
  * Documented exceptions. Each { area, name (trailing * = prefix), level
  * (the most it may report: warn | notice | ok; default warn), reason,
  * until? (YYYY-MM-DD) }. A matching finding is capped at that level and
- * carries the reason. Problems with the allowlist itself are findings too;
+ * carries the reason. Only licence / policy findings can be capped: a
+ * structural one (an invalid registry entry, a broken lockfile) keeps its
+ * level. Problems with the allowlist itself are findings too;
  * a malformed `until` is a failure and the exception is not applied, so a
  * typo cannot become a permanent waiver.
  */
@@ -507,6 +518,10 @@ export function applyAllowlist(findings, allow, today = new Date().toISOString()
       continue;
     }
     for (const f of hits) {
+      if (f.structural) {
+        if (!/allowlist exception cannot waive/.test(f.reason)) f.reason += " (an allowlist exception cannot waive this: fix the entry)";
+        continue;
+      }
       f.allowed = ex.reason + (ex.decision ? ` (decision ${ex.decision})` : "");
       f.level = best(f.level, cap);
     }

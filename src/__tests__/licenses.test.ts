@@ -34,6 +34,7 @@ interface Finding {
   license: string;
   via?: string;
   allowed?: string;
+  structural?: boolean;
   refs?: Array<{ file: string; line: number }>;
 }
 
@@ -211,6 +212,24 @@ describe("model registry", () => {
     expect(checkModels(reg, []).some((f: Finding) => f.level === "fail" && /duplicate id/.test(f.reason))).toBe(true);
   });
 
+  it("rejects an entry whose licence contradicts its class", () => {
+    const good = clone(registryFixture.models[0]);
+    for (const license of ["AGPL-3.0-only", "CC-BY-NC-4.0", "GNU Affero General Public License v3", "SASPEECH (non-commercial)"]) {
+      for (const cls of ["allowed", "conditional", "unknown"]) {
+        const commercial = { allowed: "yes", conditional: "conditional", unknown: "unknown" }[cls];
+        const problems: string[] = validateEntry({ ...good, license, class: cls, commercial });
+        expect(problems.join("; ")).toMatch(/(is forbidden|is non-commercial) .*but class is/);
+      }
+    }
+    expect(validateEntry({ ...good, license: "CC-BY-NC-4.0", class: "forbidden", commercial: "no" })).toEqual([]);
+    expect(validateEntry({ ...good, license: "Llama 3.2 Community License", class: "conditional", commercial: "conditional" })).toEqual([]);
+    // Referenced by app code, such an entry fails the gate instead of passing as ok.
+    const reg = clone(registryFixture);
+    reg.models[0].license = "AGPL-3.0-only";
+    const r = byName(checkModels(reg, [{ file: "src/ai/catalog.ts", text: 'const A = "good-model-1b";' }]));
+    expect(r["good-model-1b"]).toMatchObject({ level: "fail", reason: expect.stringMatching(/registry entry invalid/) });
+  });
+
   it("warns on a catalog model that has no registry entry", () => {
     const catalog = [{ file: "src/ai/modelManager.ts", text: '{ base: "good-model-1b", tier: "tiny" },\n{ base: "Brand-New-2B", tier: "tiny" },' }];
     const r = byName(checkModels(clone(registryFixture), catalog));
@@ -308,6 +327,30 @@ describe("applyAllowlist", () => {
     expect(r["npm:left-pad"]).toMatchObject({ level: "warn", reason: "exception matches nothing: remove it" });
     expect(r["npm:x"]).toMatchObject({ level: "fail", reason: "exception without a documented reason" });
     expect(r["npm:y"].level).toBe("fail");
+  });
+});
+
+describe("applyAllowlist: structural failures", () => {
+  it("an exception caps the licence finding, never an invalid registry entry or a broken lockfile", () => {
+    const reg = clone(registryFixture);
+    reg.models[2].source = "http://example.com/nc"; // nc-model:8b: not https
+    const findings: Finding[] = checkModels(reg, []);
+    findings.push({ area: "npm", name: "left-pad (from root)", level: "warn", reason: "required dependency missing from package-lock.json", license: "", structural: true } as Finding);
+    const out: Finding[] = applyAllowlist(findings, {
+      exceptions: [
+        { area: "model", name: "nc-model:8b", reason: "user-initiated download, never bundled", level: "ok" },
+        { area: "npm", name: "left-pad*", reason: "documented exception for this package", level: "ok" },
+      ],
+    });
+    const r = byName(out);
+    expect(r["nc-model:8b"]).toMatchObject({ level: "fail", reason: expect.stringMatching(/registry entry invalid.*an allowlist exception cannot waive this/) });
+    expect(r["nc-model:8b"].allowed).toBeUndefined();
+    expect(r["left-pad (from root)"].level).toBe("warn");
+    // It does match: no "matches nothing" warning.
+    expect(r["model:nc-model:8b"]).toBeUndefined();
+    // The same exception still caps a licence finding of a valid entry.
+    const ok = byName(applyAllowlist(checkModels(clone(registryFixture), [{ file: "src/a.ts", text: '"nc-model:8b"' }]), { exceptions: [{ area: "model", name: "nc-model:8b", reason: "user-initiated download, never bundled" }] }));
+    expect(ok["nc-model:8b"]).toMatchObject({ level: "warn", allowed: "user-initiated download, never bundled" });
   });
 });
 
