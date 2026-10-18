@@ -43,12 +43,17 @@ function snapshot(page: Page, folder: string): Promise<Record<string, number[]>>
   }, folder);
 }
 
-async function saveNote(page: Page, text: string) {
+async function typeNote(page: Page, text: string) {
   await page.keyboard.press("Meta+1");
   const editor = page.locator(".cm-content").first();
   await editor.click();
   await editor.press("ControlOrMeta+a");
   await editor.fill(text);
+}
+
+/** Save the open note into the vault as a new file. */
+async function saveNote(page: Page, text: string) {
+  await typeNote(page, text);
   await run(page, "file.saveToWorkspace");
 }
 
@@ -56,10 +61,12 @@ test("moving the vault into a folder copies it byte for byte, then saves land in
   const note = "# שלום מהתיקייה\n\nnotes in a real folder";
   await saveNote(page, note);
   await expect(page.locator("aside.file-tree .file-tree-name", { hasText: "Welcome.md" })).toBeVisible({ timeout: 10_000 });
-  // An attachment with every byte value, and a nested Hebrew path.
+  // An attachment with every byte value, in a nested folder. (ASCII names:
+  // Playwright's Chromium crashes on non-ASCII OPFS names in its in-memory
+  // incognito file system; Hebrew names are covered by the contract tests.)
   await page.evaluate(async () => {
     const root = await navigator.storage.getDirectory();
-    const dir = await root.getDirectoryHandle("פרויקטים", { create: true });
+    const dir = await root.getDirectoryHandle("projects", { create: true });
     const w = await (await dir.getFileHandle("lumen-asset-all.bin", { create: true })).createWritable();
     await w.write(new Uint8Array(Array.from({ length: 256 }, (_, i) => i)));
     await w.close();
@@ -70,13 +77,13 @@ test("moving the vault into a folder copies it byte for byte, then saves land in
 
   const source = await snapshot(page, "app-vault");
   const folder = await snapshot(page, PICKED);
-  expect(Object.keys(source).sort()).toEqual(expect.arrayContaining(["Welcome.md", "פרויקטים/lumen-asset-all.bin"]));
+  expect(Object.keys(source).sort()).toEqual(expect.arrayContaining(["Welcome.md", "projects/lumen-asset-all.bin"]));
   expect(folder).toEqual(source);
   expect(Buffer.from(folder["Welcome.md"]).toString("utf8")).toBe(note);
 
-  // A save now goes to the folder; browser storage keeps the old copy.
+  // Editing the open note now autosaves into the folder; browser storage keeps the old copy.
   const edited = "# שלום מהתיקייה\n\nedited after the move";
-  await saveNote(page, edited);
+  await typeNote(page, edited);
   await expect.poll(async () => Buffer.from((await snapshot(page, PICKED))["Welcome.md"] ?? []).toString("utf8"), { timeout: 10_000 }).toBe(edited);
   expect(Buffer.from((await snapshot(page, "app-vault"))["Welcome.md"]).toString("utf8")).toBe(note);
 
@@ -84,8 +91,11 @@ test("moving the vault into a folder copies it byte for byte, then saves land in
   await page.reload();
   await expect(page.locator("aside.file-tree .file-tree-name", { hasText: "Welcome.md" })).toBeVisible({ timeout: 15_000 });
   await expect(page.locator(".vault-folder-banner")).toHaveCount(0);
-  await saveNote(page, "# after reload");
+  await page.locator("aside.file-tree .file-tree-name", { hasText: "Welcome.md" }).click();
+  await expect(page.locator(".cm-content").first()).toContainText("edited after the move", { timeout: 10_000 });
+  await typeNote(page, "# after reload");
   await expect.poll(async () => Buffer.from((await snapshot(page, PICKED))["Welcome.md"] ?? []).toString("utf8"), { timeout: 10_000 }).toBe("# after reload");
+  expect(Buffer.from((await snapshot(page, "app-vault"))["Welcome.md"]).toString("utf8")).toBe(note);
 });
 
 test("a folder with different files at the same paths is not touched", async ({ page }) => {
