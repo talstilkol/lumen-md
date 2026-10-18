@@ -1378,7 +1378,9 @@ export function useCommands({
               cached[i] ? t("ai.localModels.cached") : "",
               (hw.f16 ? e.vramMB.f16 : e.vramMB.f32) > budget ? t("ai.localModels.tooBig") : "",
             ].filter(Boolean);
-            return { value: id, label: `${e.label} · ${gb} GB · ${e.tier}${marks.length ? " — " + marks.join(", ") : ""}` };
+            // why: custom-licence models (Llama, Gemma…) are opt-in and named as such (plan 1.7)
+            const lic = e.licence ? ` · ${e.licence}` : "";
+            return { value: id, label: `${e.label} · ${gb} GB · ${e.tier}${lic}${marks.length ? " — " + marks.join(", ") : ""}` };
           });
           choices.push({ value: "__auto__", label: t("ai.localModels.auto") });
           const choice = await uiSelect({
@@ -1392,6 +1394,15 @@ export function useCommands({
             setWebLlmModel(null);
             showAiToast(t("ai.localModels.autoSet", { model: recommended }), "success");
             return;
+          }
+          const picked = WEBLLM_CATALOG.find((e) => webLlmModelId(e, hw.f16) === choice);
+          if (picked?.licence && choice !== selected) {
+            const ok = await uiConfirm({
+              title: t("ai.localModels.licenceTitle"),
+              message: t("ai.localModels.licenceBody", { model: picked.label, licence: picked.licence }),
+              okLabel: t("ai.localModels.licenceOk"),
+            });
+            if (!ok) return;
           }
           setWebLlmModel(choice);
           const idx = choices.findIndex((c) => c.value === choice);

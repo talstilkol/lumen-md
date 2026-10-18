@@ -51,6 +51,16 @@ describe("ollamaProvider", () => {
     expect(await listOllamaModels()).toEqual([]);
   });
 
+  it("with no model chosen, runs the same open-licence default that usage and the cache record (1.7)", async () => {
+    handler = () => json({ choices: [{ message: { content: "ok" } }] });
+    await chatOllama([{ role: "user", content: "hello" }]);
+    const { DEFAULT_OLLAMA_MODEL } = await import("../ai/ollamaProvider");
+    const { effectiveModel } = await import("../ai/llm");
+    expect(DEFAULT_OLLAMA_MODEL).toBe("qwen2.5:7b");
+    expect(calls[0].body).toMatchObject({ model: DEFAULT_OLLAMA_MODEL });
+    expect(effectiveModel("ollama")).toBe(DEFAULT_OLLAMA_MODEL);
+  });
+
   it("chats through the OpenAI-compatible endpoint with the configured model", async () => {
     setOllamaConfig({ model: "qwen2.5:7b" });
     handler = () => json({ choices: [{ message: { content: "  hi there " } }] });
