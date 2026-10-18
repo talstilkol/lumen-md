@@ -53,6 +53,12 @@ export interface CollabSession {
   /** Optional persistent provider (y-websocket) — null on WebRTC-only sessions. */
   websocketProvider: WebsocketLike | null;
   roomName: string;
+  /**
+   * The room-specific password a share link carries (the one generated for
+   * a new room, or the one from the join link) — never a stored default
+   * password. null when the room has none.
+   */
+  sharePassword: string | null;
   user: CollabUser;
   /** Tear down providers + free Yjs structures. */
   destroy: () => void;
@@ -233,19 +239,22 @@ async function attachWebsocketProvider(
  * (see `./e2e.ts`) — the WebRTC mesh, signaling servers and the optional
  * y-websocket server never see document content (P3-13).
  */
+function hashRoomPassword(): string | null {
+  if (typeof location === "undefined") return null;
+  const m = location.hash.match(/[#&]password=([^&]+)/);
+  if (!m) return null;
+  try {
+    return decodeURIComponent(m[1]);
+  } catch {
+    return m[1];
+  }
+}
+
 function getRoomPassword(): string | null {
   // The share link's password is specific to its room: it wins over a
   // stored default left from another session.
-  if (typeof location !== "undefined") {
-    const m = location.hash.match(/[#&]password=([^&]+)/);
-    if (m) {
-      try {
-        return decodeURIComponent(m[1]);
-      } catch {
-        return m[1];
-      }
-    }
-  }
+  const fromLink = hashRoomPassword();
+  if (fromLink) return fromLink;
   if (typeof localStorage !== "undefined") {
     const stored = getSecret("lumen.collab.password");
     if (stored) return stored;
@@ -279,6 +288,7 @@ export function connectCollab(
   const ytext = doc.getText("lumen");
 
   const password = opts.password ?? getRoomPassword();
+  const sharePassword = opts.password ?? hashRoomPassword();
 
   // E2E: with a room password, `doc` (plaintext) is never attached to a
   // provider. A separate transport doc carrying only ciphertext envelopes
@@ -491,6 +501,7 @@ export function connectCollab(
       return websocketProvider;
     },
     roomName,
+    sharePassword,
     user,
     destroy() {
       destroyed = true;

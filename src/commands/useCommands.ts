@@ -11,6 +11,7 @@ import { uiAlert, uiConfirm, uiPrompt, uiSelect } from "../ui/PromptDialog";
 import { generateAiCommitMessage } from "../ai/commands";
 import { buildAiSettingsCommand, buildAiOutlineCommand } from "../ai/commands";
 import type { CollabSession } from "../collab/yjs";
+import { roomShareLink } from "../collab/roomUrl";
 import { startVoiceRecording } from "../ui/VoiceDictation";
 import { TEMPLATES } from "../editor/templates";
 import { buildInstalledTemplateCommands, useInstalledTemplates } from "./installedTemplates";
@@ -2357,7 +2358,7 @@ export function useCommands({
               icon: cmdIcons.Link,
               group: t("group.collab"),
               action: () => {
-                const link = `${location.origin}${location.pathname}#room=${collab.roomName}`;
+                const link = roomShareLink(collab.roomName, collab.sharePassword);
                 navigator.clipboard?.writeText(link).catch(() => {});
               },
             },
