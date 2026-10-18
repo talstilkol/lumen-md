@@ -21,6 +21,7 @@ import { getAiPolicy, isLocalOrigin, type AiPolicy } from "./policy";
 import { getBaseUrl } from "./ollamaProvider";
 import { grammarEndpoint } from "./grammar";
 import { researchEndpoint } from "../research/client";
+import { LEDGER_CHANNEL, type WorkerLedgerMessage } from "./workerLedger";
 
 export type LedgerCategory = "cloud-ai" | "cloud-text" | "local-ai" | "model-download" | "static-asset" | "research" | "third-party";
 
@@ -292,6 +293,86 @@ export function recordSpeechRecognition(decision: "allowed" | "blocked"): Ledger
   return entries.find((x) => x.id === id) ?? null;
 }
 
+let rawFetch: typeof fetch | null = null;
+
+/**
+ * Requests that workers report (workerLedger.ts): recorded with the same
+ * rules as the window's own. Untracked traffic (same origin) is ignored.
+ * Exported for tests.
+ */
+export function listenToWorkerLedger(channel: Pick<BroadcastChannel, "addEventListener">): void {
+  const ids = new Map<string, number>();
+  channel.addEventListener("message", (ev: Event) => {
+    const m = (ev as MessageEvent<WorkerLedgerMessage>).data;
+    if (!m || typeof m !== "object") return;
+    if (m.kind === "start" && typeof m.url === "string") {
+      const hit = classify(m.url);
+      if (!hit) return;
+      const id = record({ ...hit, reason: `${hit.reason} (worker: ${m.worker})`, method: m.method || "GET", bytesOut: m.bytesOut || 0, bytesIn: null, policy: getAiPolicy(), decision: "allowed" });
+      ids.set(m.id, id);
+    } else if (m.kind === "end") {
+      const id = ids.get(m.id);
+      if (id === undefined) return;
+      ids.delete(m.id);
+      patch(id, { status: m.status, bytesIn: m.bytesIn });
+    }
+  });
+}
+
+function hostOf(url: string): string {
+  try {
+    return new URL(url).hostname;
+  } catch {
+    return url; // recorded as given
+  }
+}
+
+/**
+ * Throw `PrivacyBlockedError` (and record the block) when the policy forbids
+ * `as.category` — for a request that goes out some other way than this
+ * window's fetch, such as the research service fetching a page for the
+ * clipper. Returns normally when allowed; recording the allowed request is
+ * the caller's job (`guardedFetch` does it).
+ */
+export function refuseIfBlocked(
+  url: string,
+  as: { category: LedgerCategory; reason: string; quiet?: boolean },
+  method = "GET",
+): void {
+  const policy = getAiPolicy();
+  if (!blockedByPolicy(as.category, policy)) return;
+  const host = hostOf(url);
+  const id = record({ host, category: as.category, reason: as.reason, method, bytesOut: 0, bytesIn: null, policy, decision: "blocked" });
+  const entry = entries.find((x) => x.id === id);
+  // `quiet`: the caller shows its own, more specific message (the clipper's "clip from clipboard" hint)
+  if (entry && !as.quiet) onBlocked?.(entry);
+  throw new PrivacyBlockedError(host, as.reason);
+}
+
+/**
+ * A request the app makes on the user's behalf to an address the rules
+ * cannot know in advance (the web clipper fetching a page): recorded under
+ * the given category and blocked when the policy forbids that category.
+ */
+export async function guardedFetch(url: string, init: RequestInit, as: { category: LedgerCategory; reason: string }): Promise<Response> {
+  const method = (init.method ?? "GET").toUpperCase();
+  refuseIfBlocked(url, as, method);
+  const host = hostOf(url);
+  const policy = getAiPolicy();
+  const id = record({ host, category: as.category, reason: as.reason, method, bytesOut: bodySize(init.body), bytesIn: null, policy, decision: "allowed" });
+  // why: the raw fetch, so a host the rules also know is not recorded twice
+  const res = await (rawFetch ?? fetch)(url, init);
+  const len = res.headers.get("content-length");
+  // why: after a redirect the page came from `res.url`'s site; record that host, keeping where it started
+  const finalHost = res.redirected && res.url ? hostOf(res.url) : host;
+  patch(id, {
+    status: res.status,
+    bytesIn: len != null && Number.isFinite(Number(len)) ? Number(len) : null,
+    ...(finalHost !== host ? { host: finalHost, reason: `${as.reason} (redirected from ${host})` } : {}),
+  });
+  return res;
+}
+
 /** Install once at startup. `blocked` is called for every blocked request. */
 export function installPrivacyLedger(blocked?: (entry: LedgerEntry) => void): void {
   if (installed || typeof window === "undefined" || typeof window.fetch !== "function") return;
@@ -299,7 +380,9 @@ export function installPrivacyLedger(blocked?: (entry: LedgerEntry) => void): vo
   onBlocked = blocked ?? null;
   load();
   const original = window.fetch.bind(window);
+  rawFetch = original;
   window.fetch = withLedger(original);
+  if (typeof BroadcastChannel !== "undefined") listenToWorkerLedger(new BroadcastChannel(LEDGER_CHANNEL));
 }
 
 export function ledgerEntries(): readonly LedgerEntry[] {
@@ -345,6 +428,7 @@ export function ledgerSummary(list: readonly LedgerEntry[] = entries) {
 
 /** Test hook. */
 export function __resetLedger(): void {
+  rawFetch = null;
   entries = [];
   nextId = 1;
   installed = false;
