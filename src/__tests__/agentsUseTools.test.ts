@@ -30,7 +30,7 @@ import { registerExecutor, resetExecutors } from "../agents/executors";
 import { EVAL_CASES, type EvalCase } from "../agents/eval/fixtures";
 import { scoreCases } from "../agents/eval/score";
 import { toolCheck } from "../agents/eval/run";
-import { clearStagedChanges, listStagedChanges, stageChange } from "../agents/staging";
+import { clearStagedChanges, listStagedChanges } from "../agents/staging";
 import { writeWorkspaceFile } from "../storage/workspace";
 import type { AgentDefinition, AgentTool, ExecutorRequest, ExecutorResponse } from "../agents/types";
 import { fakeExecutor, reply } from "./helpers/fakeExecutor";
@@ -157,38 +157,55 @@ describe("builder: all files or none (5.3.2)", () => {
       const path = /File to generate: (\S+)/.exec(req.messages.map((m) => m.content).join("\n"))![1];
       return reply(path === broken ? "" : files[path], req.model);
     });
+  const projectFiles = () => [...vault.keys()].filter((p) => p.startsWith("pomodoro/")).sort();
 
-  it("a finished product is proposed as one batch of staged files; nothing is written", async () => {
+  it("a finished product is written to the workspace at once", async () => {
     registerExecutor(builder());
     const { createProduct } = await import("../ai/productAgent");
     const res = await createProduct("a pomodoro timer");
     expect(res.success).toBe(true);
-    const staged = listStagedChanges();
-    expect(staged.map((c) => c.path).sort()).toEqual([...res.files.keys()].sort());
-    expect(new Set(staged.map((c) => c.runId)).size).toBe(1);
-    expect(writeWorkspaceFile).not.toHaveBeenCalled();
+    expect(projectFiles()).toEqual([...res.files.keys()].sort());
+    expect(vault.get("pomodoro/app.js")).toBe(files["app.js"]);
   });
 
-  it("a builder that fails midway leaves 0 files", async () => {
+  it("a builder that fails midway leaves 0 files (review: #241 — written, not staged without a review screen)", async () => {
     registerExecutor(builder("app.js"));
     const { createProduct } = await import("../ai/productAgent");
     const res = await createProduct("a pomodoro timer");
     expect(res.success).toBe(false);
-    expect(listStagedChanges({ all: true })).toEqual([]);
+    expect(projectFiles()).toEqual([]);
     expect(writeWorkspaceFile).not.toHaveBeenCalled();
+    expect(listStagedChanges({ all: true })).toEqual([]);
   });
 
-  it("if staging stops partway, the files already staged are withdrawn", async () => {
+  it("if a write fails partway, the files already written are put back", async () => {
     registerExecutor(builder());
-    // Leave room for two proposals only: the third cannot be staged.
-    for (let i = 0; i < 198; i++) stageChange({ kind: "file", path: `filler/${i}.md`, before: null, after: "x", summary: "s" }, { tool: "write_file" });
+    vault.set("pomodoro/index.html", "the user's own page");
+    let n = 0;
+    vi.mocked(writeWorkspaceFile).mockImplementation(async (p: string, c: string) => {
+      if (p.startsWith("pomodoro/") && c !== "the user's own page" && ++n === 3) throw new Error("disk full");
+      vault.set(p, c);
+    });
     const { createProduct } = await import("../ai/productAgent");
     const res = await createProduct("a pomodoro timer");
+    vi.mocked(writeWorkspaceFile).mockReset();
     expect(res.success).toBe(false);
-    const mine = listStagedChanges({ all: true }).filter((c) => c.agentId === "builder");
-    expect(mine.length).toBe(2);
-    expect(mine.map((c) => c.status)).toEqual(["rejected", "rejected"]); // withdrawn: nothing waits for approval
-    expect(writeWorkspaceFile).not.toHaveBeenCalled();
+    expect(projectFiles()).toEqual(["pomodoro/index.html"]);
+    expect(vault.get("pomodoro/index.html")).toBe("the user's own page");
+  });
+});
+
+describe("digest through the tools", () => {
+  it("lists every changed note page by page and reads long notes whole (review: #241)", async () => {
+    const { toolDigestIO, writeDigest } = await import("../agents/defs/digester");
+    for (let i = 0; i < 1200; i++) vault.set(`many/n${String(i).padStart(4, "0")}.md`, `# Note ${i}\nbody`);
+    vault.set("long/big.md", `# Big\n${"x".repeat(60_000)}\n- [ ] the task at the very end`);
+    const io = toolDigestIO({ callTool: (n, a) => callTool(n, a), readOwn: async (p) => vault.get(p)!, write: async (p, b) => void vault.set(p, b), since: 500, now: Date.UTC(2026, 9, 18), folder: "Digests" });
+    expect((await io.list()).filter((e) => e.path.startsWith("many/"))).toHaveLength(1200);
+    expect(await io.read("long/big.md")).toBe(vault.get("long/big.md"));
+    const res = await writeDigest(io, { since: 500, now: Date.UTC(2026, 9, 18), lang: "en", folder: "Digests", formatDate: () => "d" });
+    expect(res.ok).toBe(true);
+    if (res.ok) expect(res.body).toContain("the task at the very end");
   });
 });
 

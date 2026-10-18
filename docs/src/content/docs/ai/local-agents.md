@@ -87,7 +87,7 @@ cancelled.
 | charter | `csv_parse`, `validate_echarts` |
 | committer | `git_diff` (subject and a short body) |
 | writer, templater | `get_selection` |
-| builder | `list_files`; the generated files go out together through `write_file` |
+| builder | `list_files` |
 | stylist | `list_files`, `read_file` |
 
 What an agent always needs — the workspace's tags for the tagger, the
@@ -102,8 +102,8 @@ with valid arguments, or the final answer in the agent's format. A
 streaming agent (writer, templater) gets its tools' results before it
 starts, and its answer still streams.
 
-The builder proposes the whole project at once: if any file fails, none
-is proposed.
+The builder writes the whole project at once, when every file is done:
+if one fails, none is written.
 
 ## AI settings
 

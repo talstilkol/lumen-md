@@ -27,14 +27,17 @@ function needWorkspace(): void {
   if (!isOPFSAvailable()) throw new ToolError("failed", "Workspace is not available in this browser");
 }
 
-export const readFileTool = defineTool<{ path: string; maxChars?: number }, { path: string; content: string; truncated: boolean }>({
+export const readFileTool = defineTool<{ path: string; maxChars?: number; offset?: number }, { path: string; content: string; truncated: boolean }>({
   name: "read_file",
-  description: "Read a markdown or text file from the workspace. Returns at most maxChars characters (default 24000).",
+  description:
+    "Read a markdown or text file from the workspace. Returns at most maxChars characters (default 24000), " +
+    "from character offset `offset` (default 0); `truncated` says more follows.",
   parameters: {
     type: "object",
     properties: {
       path: { type: "string", minLength: 1, description: "Workspace path, e.g. notes/todo.md" },
       maxChars: { type: "number", minimum: 1 },
+      offset: { type: "number", minimum: 0 },
     },
     required: ["path"],
     additionalProperties: false,
@@ -49,7 +52,8 @@ export const readFileTool = defineTool<{ path: string; maxChars?: number }, { pa
     } catch {
       throw new ToolError("not-found", `No such file: ${path}`);
     }
-    return { path, content: content.slice(0, max), truncated: content.length > max };
+    const from = Math.max(0, Math.floor(optionalNumber(args, "offset", 0)));
+    return { path, content: content.slice(from, from + max), truncated: content.length > from + max };
   },
 });
 
@@ -95,18 +99,19 @@ export const writeFileTool = defineTool<{ path: string; content: string }, Stage
 });
 
 export const listFilesTool = defineTool<
-  { prefix?: string; limit?: number; modifiedSince?: number; withModified?: boolean },
+  { prefix?: string; limit?: number; offset?: number; modifiedSince?: number; withModified?: boolean },
   { files: string[]; total: number; modified?: Record<string, number> }
 >({
   name: "list_files",
   description:
     "List markdown files in the workspace, optionally under a folder prefix, or only those modified since a time (ms since epoch). " +
-    "withModified adds each file's modification time.",
+    "withModified adds each file's modification time. `offset` skips that many files (paging: `total` is the full count).",
   parameters: {
     type: "object",
     properties: {
       prefix: { type: "string", description: "Folder prefix, e.g. projects/" },
       limit: { type: "number", minimum: 1 },
+      offset: { type: "number", minimum: 0 },
       modifiedSince: { type: "number", minimum: 0, description: "Only files modified after this time (ms since epoch)" },
       withModified: { type: "boolean" },
     },
@@ -120,7 +125,8 @@ export const listFilesTool = defineTool<
     const all = (await listWorkspace({ includeAssets: false }))
       .filter((f) => /\.(md|markdown|txt)$/i.test(f.path) && (!prefix || f.path.startsWith(prefix)) && (since === null || f.modified > since))
       .sort((a, b) => (a.path < b.path ? -1 : a.path > b.path ? 1 : 0));
-    const shown = all.slice(0, limit);
+    const from = Math.max(0, Math.floor(optionalNumber(args, "offset", 0)));
+    const shown = all.slice(from, from + limit);
     return {
       files: shown.map((f) => f.path),
       total: all.length,

@@ -190,8 +190,8 @@ export class ProductAgent {
       this.emit("deploying", "Creating deployment configuration...");
       await this.generateDeployConfig(signal);
 
-      // All or nothing (plan 5.3.2): only a finished product is proposed.
-      await this.stageAll(signal);
+      // All or nothing (plan 5.3.2): only a finished product reaches the workspace.
+      await this.writeAll(signal);
       this.emit("complete", `Product "${this.spec.name}" created with ${this.generatedFiles.size} files!`);
       return { success: true, files: this.generatedFiles };
 
@@ -357,39 +357,43 @@ export class ProductAgent {
     return related.join("\n");
   }
 
-  /** Keep a generated file; nothing reaches the workspace before the whole product is done (`stageAll`). */
+  /** Keep a generated file; nothing reaches the workspace before the whole product is done (`writeAll`). */
   private async saveFile(path: string, content: string): Promise<void> {
     this.generatedFiles.set(path, content);
   }
 
   /**
-   * Propose every generated file at once, through the agent runtime's
-   * write_file tool: each is staged for the user's approval, never written.
-   * If one cannot be staged, the ones already staged are withdrawn and the
-   * run fails — a builder that fails midway leaves 0 files (5.3.2).
+   * Write every generated file at once, after the whole product is done:
+   * a builder that fails midway leaves 0 files (5.3.2). If a write fails,
+   * the files already written are put back as they were (removed, or their
+   * earlier text restored), so a product is in the workspace whole or not at
+   * all.
+   *
+   * Written, not staged: proposals need the review screen to be approved
+   * (plan 5.11, #223), which this branch does not have yet. Once both are
+   * on the same branch, this becomes write_file through the runtime.
    */
-  private async stageAll(signal: AbortSignal): Promise<void> {
+  private async writeAll(signal: AbortSignal): Promise<void> {
     if (!isOPFSAvailable()) return;
-    const { callTool } = await import("../agents/runtime");
-    const { discardRunChanges } = await import("../agents/staging");
-    const runId = `builder_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
+    const ws = await import("../storage/workspace");
+    const done: Array<{ path: string; before: string | null }> = [];
     try {
       for (const [path, content] of this.generatedFiles) {
         if (signal.aborted) throw new DOMException("Cancelled by the user", "AbortError");
-        try {
-          await callTool("write_file", { path: this.projectDir + path, content }, { grants: ["write"], runId, agentId: "builder", signal });
-        } catch (e) {
-          // The file already holds exactly this: nothing to propose.
-          if (/already has exactly this content/.test((e as Error).message)) continue;
-          throw e;
-        }
+        const full = this.projectDir + path;
+        const before = (await ws.workspaceHasFile(full)) ? await ws.readWorkspaceFile(full) : null;
+        await ws.writeWorkspaceFile(full, content);
+        done.push({ path: full, before });
       }
     } catch (e) {
-      discardRunChanges(runId);
-      log.warn("productAgent", "Could not stage the product's files; none were proposed", e);
+      for (const w of done.reverse()) {
+        await (w.before === null ? ws.deleteWorkspaceFile(w.path) : ws.writeWorkspaceFile(w.path, w.before)).catch((err) => log.warn("productAgent", `Could not undo ${w.path}`, err));
+      }
+      log.warn("productAgent", "Could not write the product's files; none were kept", e);
       throw e;
     }
   }
+
 }
 
 /* ─── Convenience Functions ───────────────────────────────────────── */

@@ -24,6 +24,7 @@ export function workspaceModule(orig: object): object {
     },
     writeWorkspaceFile: async (p: string, c: string) => void vaultFiles.set(p, c),
     workspaceHasFile: async (p: string) => vaultFiles.has(p),
+    deleteWorkspaceFile: async (p: string) => void vaultFiles.delete(p),
     isAssetName: () => false,
   };
 }
