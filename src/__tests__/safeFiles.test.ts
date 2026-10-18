@@ -72,6 +72,69 @@ describe("link rewriting", () => {
     );
   });
 
+  it("leaves code spans and fenced code alone", () => {
+    const md = "[[Old]] `[[Old]]` ``a [[Old]] b``\n```md\n[[Old]] [x](Old.md)\n```\n~~~\n[[Old]]\n~~~\nafter [[Old]] [x](Old.md)";
+    expect(rewriteLinks(md, "x.md", "Old.md", "New.md")).toBe(
+      "[[New]] `[[Old]]` ``a [[Old]] b``\n```md\n[[Old]] [x](Old.md)\n```\n~~~\n[[Old]]\n~~~\nafter [[New]] [x](New.md)",
+    );
+  });
+
+  it("rewrites extension-qualified wiki links", () => {
+    expect(rewriteLinks("[[Old.md]] [[folder/Old.markdown#h|l]]", "x.md", "folder/Old.md", "folder/New.md")).toBe(
+      "[[New]] [[folder/New#h|l]]",
+    );
+  });
+
+  it("rewrites angle-bracket destinations and reference definitions", () => {
+    const md = "[a](<Old Note.md#top>) [b][r]\n\n[r]: Old%20Note.md\n[^1]: Old Note.md is a footnote";
+    expect(rewriteLinks(md, "x.md", "Old Note.md", "sub/New Note.md")).toBe(
+      "[a](<sub/New Note.md#top>) [b][r]\n\n[r]: sub/New%20Note.md\n[^1]: Old Note.md is a footnote",
+    );
+  });
+
+  it("only rewrites a short wiki link that resolved to the moved note", () => {
+    const vault = ["x/Old.md", "y/Old.md"];
+    expect(rewriteLinks("[[Old]] [[y/Old]]", "n.md", "y/Old.md", "y/New.md", { vault })).toBe("[[Old]] [[y/New]]");
+    expect(rewriteLinks("[[Old]]", "n.md", "x/Old.md", "x/New.md", { vault })).toBe("[[New]]");
+  });
+
+  it("a moved note keeps its relative links to notes that stayed", async () => {
+    await writeWorkspaceFile("notes/b.md", "B");
+    await writeWorkspaceFile("notes/a.md", "[B](b.md) [self](a.md#x)");
+    await safeMove("notes/a.md", "archive/a.md");
+    expect(await readWorkspaceFile("archive/a.md")).toBe("[B](../notes/b.md) [self](a.md#x)");
+  });
+
+  it("notes inside a moved folder keep their links to notes outside it", async () => {
+    await writeWorkspaceFile("out.md", "O");
+    await writeWorkspaceFile("proj/a.md", "[o](../out.md) [s](sub/b.md) [[proj/sub/b]]");
+    await writeWorkspaceFile("proj/sub/b.md", "[a](../a.md)");
+    await writeWorkspaceFile("index.md", "[b](proj/sub/b.md)");
+    await safeMove("proj", "archive/proj", { folder: true });
+    expect(await readWorkspaceFile("archive/proj/a.md")).toBe("[o](../../out.md) [s](sub/b.md) [[archive/proj/sub/b]]");
+    expect(await readWorkspaceFile("archive/proj/sub/b.md")).toBe("[a](../a.md)");
+    expect(await readWorkspaceFile("index.md")).toBe("[b](archive/proj/sub/b.md)");
+  });
+
+  it("safeMove reports the move even when rewriting links fails", async () => {
+    await writeWorkspaceFile("a.md", "A");
+    await writeWorkspaceFile("b.md", "[[a]]");
+    const lr = await import("../storage/linkRewrite");
+    const spy = vi.spyOn(lr, "updateLinksAfterMove").mockRejectedValueOnce(new Error("quota"));
+    const r = await safeMove("a.md", "c.md");
+    spy.mockRestore();
+    expect(r?.path).toBe("c.md");
+    expect(r?.linksError?.message).toBe("quota");
+    expect(await readWorkspaceFile("c.md")).toBe("A");
+  });
+
+  it("the returned rewrite applies the same change to text held in memory", async () => {
+    await writeWorkspaceFile("Target.md", "# T");
+    await writeWorkspaceFile("a.md", "→ [[Target]]");
+    const r = await safeMove("Target.md", "Renamed.md");
+    expect(r!.rewrite("unsaved → [[Target]]", "a.md")).toBe("unsaved → [[Renamed]]");
+  });
+
   it("safeMove updates every linking note and reports them", async () => {
     await writeWorkspaceFile("Target.md", "# T");
     await writeWorkspaceFile("a.md", "→ [[Target]]");
