@@ -424,6 +424,7 @@ const en: Strings = {
   "calendar.pattern": "File name pattern (YYYY, MM, DD)",
   "calendar.template": "Template for new notes",
   "calendar.templateHint": "Placeholders: {{date}}, {{hebrewDate}}, {{weekday}}, {{title}}",
+  "calendar.patternInvalid": "The pattern must contain YYYY, MM and DD, so that every day gets its own note.",
   "calendar.save": "Save",
   "daily.noWorkspace": "Daily notes need the workspace, which this browser can't provide.",
   "daily.failed": "Couldn't open the daily note: {error}",

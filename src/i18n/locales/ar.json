@@ -1240,6 +1240,7 @@
   "calendar.pattern": "نمط اسم الملف (YYYY، MM، DD)",
   "calendar.template": "قالب الملاحظات الجديدة",
   "calendar.templateHint": "العناصر النائبة: {{date}}، {{hebrewDate}}، {{weekday}}، {{title}}",
+  "calendar.patternInvalid": "يجب أن يتضمن النمط YYYY وMM وDD، حتى يكون لكل يوم ملاحظته الخاصة.",
   "calendar.save": "حفظ",
   "daily.noWorkspace": "تحتاج الملاحظات اليومية إلى مساحة العمل، وهذا المتصفح لا يوفرها.",
   "daily.failed": "تعذّر فتح الملاحظة اليومية: {error}",

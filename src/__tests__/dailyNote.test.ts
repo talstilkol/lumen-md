@@ -10,14 +10,14 @@ import { join, resolve } from "node:path";
 // @ts-expect-error — plain .mjs module without types
 import { loadSet } from "../../scripts/lib/golden.mjs";
 // @ts-expect-error — plain .mjs module without types
-import { score, toGregorian } from "../../scripts/golden/evals/hebrew-dates.mjs";
+import { parseHebrewText, score, toGregorian } from "../../scripts/golden/evals/hebrew-dates.mjs";
 import { installFakeOpfs } from "./helpers/fakeOpfs";
 import { useAppStore } from "../store/useStore";
 import { listWorkspace, readWorkspaceFile, writeWorkspaceFile } from "../storage/workspace";
-import { DEFAULT_DAILY, cleanFolder, dailyPath, dayOfPath, ensureDailyNote, fileNameFor, hebrewDate, hebrewParts, openDailyNote, parseIso, renderTemplate } from "../daily/dailyNote";
+import { DEFAULT_DAILY, cleanFolder, gematria, isValidDailyPattern, dailyPath, dayOfPath, ensureDailyNote, fileNameFor, hebrewDate, hebrewParts, openDailyNote, parseIso, renderTemplate } from "../daily/dailyNote";
 import { firstDayOfWeek, monthGrid } from "../ui/CalendarPanel";
 
-type DevItem = { id: string; direction: string; gregorian: string; hebrew: { day: number; month: string; monthHe: string; year: number } };
+type DevItem = { id: string; direction: string; gregorian: string; hebrewText: string; hebrew: { day: number; month: string; monthHe: string; year: number } };
 const golden = join(resolve(__dirname, "../.."), "eval", "golden");
 const devItems = (): DevItem[] => loadSet(golden, "hebrew-dates").items;
 
@@ -28,8 +28,8 @@ describe("Hebrew date (Intl he-u-ca-hebrew only)", () => {
     for (const it of items) {
       const day = parseIso(it.gregorian)!;
       expect(hebrewParts(day), it.id).toEqual({ day: it.hebrew.day, month: it.hebrew.monthHe, year: it.hebrew.year });
-      expect(hebrewDate(day), it.id).toBe(`${it.hebrew.day} ב${it.hebrew.monthHe} ${it.hebrew.year}`);
-      expect(toGregorian(it.hebrew), it.id).toBe(it.gregorian);
+      expect(hebrewDate(day), it.id).toBe(it.hebrewText);
+      expect(toGregorian(parseHebrewText(it.hebrewText)), it.id).toBe(it.gregorian);
     }
   });
 
@@ -40,7 +40,10 @@ describe("Hebrew date (Intl he-u-ca-hebrew only)", () => {
   it("leap-year Adar and the new year", () => {
     expect(hebrewParts({ y: 2024, m: 3, d: 15 })).toEqual({ day: 5, month: "אדר ב׳", year: 5784 });
     expect(hebrewParts({ y: 2026, m: 9, d: 12 })).toMatchObject({ day: 1, year: 5787 });
-    expect(hebrewDate({ y: 2026, m: 10, d: 18 })).toBe("7 בחשוון 5787");
+    expect(hebrewDate({ y: 2026, m: 10, d: 18 })).toBe("ז׳ בחשוון תשפ״ז");
+    expect(hebrewDate({ y: 1972, m: 10, d: 24 })).toBe("ט״ז בחשוון תשל״ג");
+    expect(gematria(15)).toBe("ט״ו");
+    expect(gematria(800)).toBe("ת״ת");
   });
 });
 
@@ -66,12 +69,22 @@ describe("paths", () => {
     expect(dayOfPath("notes/2026-10-18.md", s)).toBeNull();
     expect(dayOfPath("journal/2026-10-18 copy.md", s)).toBeNull();
   });
+  it("a pattern without YYYY, MM and DD is refused (days would share a file)", () => {
+    expect(isValidDailyPattern("YYYY-MM")).toBe(false);
+    expect(isValidDailyPattern("DD.MM.YYYY")).toBe(true);
+    expect(fileNameFor({ y: 2026, m: 10, d: 18 }, "YYYY-MM")).toBe("2026-10-18.md");
+    expect(dayOfPath("journal/2026-10-18.md", { folder: "journal", pattern: "YYYY-MM" })).toEqual({ y: 2026, m: 10, d: 18 });
+    useAppStore.getState().setDailyNotes({ pattern: "YYYY-MM-DD" });
+    useAppStore.getState().setDailyNotes({ pattern: "YYYY-MM", folder: "days" });
+    expect(useAppStore.getState().dailyNotes).toMatchObject({ pattern: "YYYY-MM-DD", folder: "days" });
+    useAppStore.getState().setDailyNotes({ ...DEFAULT_DAILY });
+  });
 });
 
 describe("template", () => {
   it("fills {{date}}, {{hebrewDate}}, {{weekday}} and {{title}}", () => {
     const out = renderTemplate("{{date}}|{{ hebrewDate }}|{{weekday}}|{{title}}|{{other}}", { y: 2026, m: 10, d: 18 }, "en");
-    expect(out).toBe("2026-10-18|\u20677 בחשוון 5787\u2069|Sunday|Sunday, October 18, 2026|{{other}}");
+    expect(out).toBe("2026-10-18|\u2067ז׳ בחשוון תשפ״ז\u2069|Sunday|Sunday, October 18, 2026|{{other}}");
     expect(renderTemplate("{{weekday}}", { y: 2026, m: 10, d: 18 }, "he")).toBe("יום ראשון");
   });
 });

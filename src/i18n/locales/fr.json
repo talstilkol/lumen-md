@@ -1240,6 +1240,7 @@
   "calendar.pattern": "Modèle du nom de fichier (YYYY, MM, DD)",
   "calendar.template": "Modèle des nouvelles notes",
   "calendar.templateHint": "Variables : {{date}}, {{hebrewDate}}, {{weekday}}, {{title}}",
+  "calendar.patternInvalid": "Le modèle doit contenir YYYY, MM et DD, pour que chaque jour ait sa propre note.",
   "calendar.save": "Enregistrer",
   "daily.noWorkspace": "Les notes quotidiennes ont besoin de l'espace de travail, que ce navigateur ne fournit pas.",
   "daily.failed": "Impossible d'ouvrir la note quotidienne : {error}",

@@ -1240,6 +1240,7 @@
   "calendar.pattern": "Шаблон имени файла (YYYY, MM, DD)",
   "calendar.template": "Шаблон новой заметки",
   "calendar.templateHint": "Подстановки: {{date}}, {{hebrewDate}}, {{weekday}}, {{title}}",
+  "calendar.patternInvalid": "Шаблон должен содержать YYYY, MM и DD, чтобы у каждого дня была своя заметка.",
   "calendar.save": "Сохранить",
   "daily.noWorkspace": "Ежедневным заметкам нужна рабочая область, а этот браузер её не поддерживает.",
   "daily.failed": "Не удалось открыть ежедневную заметку: {error}",

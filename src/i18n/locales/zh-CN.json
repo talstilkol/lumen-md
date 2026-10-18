@@ -1240,6 +1240,7 @@
   "calendar.pattern": "文件名格式（YYYY、MM、DD）",
   "calendar.template": "新笔记模板",
   "calendar.templateHint": "占位符：{{date}}、{{hebrewDate}}、{{weekday}}、{{title}}",
+  "calendar.patternInvalid": "模式必须包含 YYYY、MM 和 DD，这样每一天都有自己的笔记。",
   "calendar.save": "保存",
   "daily.noWorkspace": "每日笔记需要工作区，而此浏览器不支持。",
   "daily.failed": "无法打开每日笔记：{error}",

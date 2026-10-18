@@ -1240,6 +1240,7 @@
   "calendar.pattern": "Muster des Dateinamens (YYYY, MM, DD)",
   "calendar.template": "Vorlage für neue Notizen",
   "calendar.templateHint": "Platzhalter: {{date}}, {{hebrewDate}}, {{weekday}}, {{title}}",
+  "calendar.patternInvalid": "Das Muster muss YYYY, MM und DD enthalten, damit jeder Tag eine eigene Notiz bekommt.",
   "calendar.save": "Speichern",
   "daily.noWorkspace": "Tagesnotizen brauchen den Arbeitsbereich, den dieser Browser nicht bietet.",
   "daily.failed": "Die Tagesnotiz konnte nicht geöffnet werden: {error}",

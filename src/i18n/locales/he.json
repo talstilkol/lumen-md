@@ -1240,6 +1240,7 @@
   "calendar.pattern": "תבנית שם הקובץ (YYYY,‏ MM,‏ DD)",
   "calendar.template": "תבנית לפתק חדש",
   "calendar.templateHint": "ממלאי מקום: {{date}},‏ {{hebrewDate}},‏ {{weekday}},‏ {{title}}",
+  "calendar.patternInvalid": "התבנית חייבת לכלול YYYY,‏ MM ו־DD, כדי שלכל יום יהיה פתק משלו.",
   "calendar.save": "שמירה",
   "daily.noWorkspace": "פתקים יומיים צריכים את מרחב העבודה, והדפדפן הזה לא תומך בו.",
   "daily.failed": "לא ניתן לפתוח את הפתק היומי: {error}",

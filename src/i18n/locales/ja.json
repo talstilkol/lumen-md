@@ -1240,6 +1240,7 @@
   "calendar.pattern": "ファイル名のパターン（YYYY、MM、DD）",
   "calendar.template": "新しいノートのテンプレート",
   "calendar.templateHint": "プレースホルダー：{{date}}、{{hebrewDate}}、{{weekday}}、{{title}}",
+  "calendar.patternInvalid": "毎日が独自のノートになるよう、パターンには YYYY、MM、DD を含める必要があります。",
   "calendar.save": "保存",
   "daily.noWorkspace": "デイリーノートにはワークスペースが必要ですが、このブラウザーでは使えません。",
   "daily.failed": "デイリーノートを開けませんでした：{error}",

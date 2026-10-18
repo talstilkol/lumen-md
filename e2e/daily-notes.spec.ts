@@ -14,6 +14,41 @@ test.beforeEach(async ({ page }) => {
   await expect(page.locator(".cm-content").first()).toContainText("Welcome to", { timeout: 15_000 });
 });
 
+/**
+ * Can this engine write OPFS files at all here? Playwright's WebKit runs in
+ * an ephemeral context, where WebKit may refuse OPFS writes; the vault can't
+ * work there, so the vault tests skip (and say why) instead of failing.
+ */
+async function opfsWritable(page: Page): Promise<boolean> {
+  return page.evaluate(async () => {
+    try {
+      const root = await navigator.storage.getDirectory();
+      const fh = await root.getFileHandle("__probe", { create: true });
+      const h = fh as unknown as { createWritable?: () => Promise<{ write(d: string): Promise<void>; close(): Promise<void> }> };
+      if (typeof h.createWritable === "function") {
+        const w = await h.createWritable();
+        await w.write("x");
+        await w.close();
+      } else {
+        const src =
+          "self.onmessage=async()=>{try{const r=await navigator.storage.getDirectory();const f=await r.getFileHandle('__probe',{create:true});const a=await f.createSyncAccessHandle();a.write(new Uint8Array([120]),{at:0});a.flush();a.close();postMessage(true)}catch(e){postMessage(false)}}";
+        const ok = await new Promise<boolean>((res) => {
+          const w = new Worker(URL.createObjectURL(new Blob([src], { type: "application/javascript" })));
+          w.onmessage = (e) => res(e.data === true);
+          w.onerror = () => res(false);
+          w.postMessage(0);
+          setTimeout(() => res(false), 5000);
+        });
+        if (!ok) return false;
+      }
+      await root.removeEntry("__probe");
+      return true;
+    } catch {
+      return false;
+    }
+  });
+}
+
 const todayIso = (page: Page) =>
   page.evaluate(() => {
     const d = new Date();
@@ -35,6 +70,7 @@ const journalFiles = (page: Page) =>
   });
 
 test("today's note is created, opened, and not duplicated when opened again", async ({ page }) => {
+  test.skip(!(await opfsWritable(page)), "this engine refuses OPFS writes here, so there is no vault to keep daily notes in");
   const today = await todayIso(page);
   expect(await journalFiles(page)).toEqual([]);
 

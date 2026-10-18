@@ -1,4 +1,4 @@
-import { DEFAULT_DAILY, type DailySettings } from "../daily/defaults";
+import { DEFAULT_DAILY, isValidDailyPattern, type DailySettings } from "../daily/defaults";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { Locale } from "../i18n";
@@ -340,7 +340,13 @@ export const useAppStore = create<AppState>()(
       toggleTypewriter: () => set((s) => ({ typewriterMode: !s.typewriterMode })),
       toggleTsChecks: () => set((s) => ({ tsChecks: !s.tsChecks })),
       setWritingGoal: (words) => set({ writingGoalWords: Math.max(0, Math.floor(words)) }),
-      setDailyNotes: (patch) => set((s) => ({ dailyNotes: { ...s.dailyNotes, ...patch } })),
+      setDailyNotes: (patch) =>
+        set((s) => {
+          const next = { ...s.dailyNotes, ...patch };
+          // A pattern without YYYY, MM and DD would merge days into one file.
+          if (!isValidDailyPattern(next.pattern)) next.pattern = s.dailyNotes.pattern;
+          return { dailyNotes: next };
+        }),
       // The calendar lives in the file sidebar: showing it shows the sidebar too.
       toggleCalendar: () => set((s) => (s.showCalendar && s.showWorkspace ? { showCalendar: false } : { showCalendar: true, showWorkspace: true })),
       toggleGrammarCheck: () => set((s) => ({ grammarCheck: !s.grammarCheck })),
@@ -510,7 +516,7 @@ export const useAppStore = create<AppState>()(
           // A hand-edited or older store: keep only string fields, fall back per field.
           dailyNotes: {
             folder: typeof p.dailyNotes?.folder === "string" ? p.dailyNotes.folder : DEFAULT_DAILY.folder,
-            pattern: typeof p.dailyNotes?.pattern === "string" && p.dailyNotes.pattern.trim() ? p.dailyNotes.pattern : DEFAULT_DAILY.pattern,
+            pattern: typeof p.dailyNotes?.pattern === "string" && isValidDailyPattern(p.dailyNotes.pattern) ? p.dailyNotes.pattern : DEFAULT_DAILY.pattern,
             template: typeof p.dailyNotes?.template === "string" ? p.dailyNotes.template : DEFAULT_DAILY.template,
           },
           showCalendar: p.showCalendar === true,

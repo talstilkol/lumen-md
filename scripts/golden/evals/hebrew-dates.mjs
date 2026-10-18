@@ -7,9 +7,10 @@
  * in src/daily/dailyNote.ts, which this mirrors (a plain .mjs cannot import
  * the TypeScript source). No calendar library.
  *
- *   to-hebrew     Gregorian → { day, month (Hebrew name), year }
- *   to-gregorian  { day, month, year } → the Gregorian day, found by
- *                 searching the days around the year's approximate start
+ *   to-hebrew     Gregorian → { day, month (Hebrew name), year } and the
+ *                 text the app writes, `ז׳ בחשוון תשפ״ז` (hebrewDate())
+ *   to-gregorian  the Hebrew text → the Gregorian day, found by searching
+ *                 the days of that Hebrew year
  *
  * Returns accuracies only; no item, input or output is ever reported.
  */
@@ -28,6 +29,42 @@ function noonOf(iso) {
 }
 
 const isoOf = (ms) => new Date(ms).toISOString().slice(0, 10);
+
+const LETTERS = [[400, "ת"], [300, "ש"], [200, "ר"], [100, "ק"], [90, "צ"], [80, "פ"], [70, "ע"], [60, "ס"], [50, "נ"], [40, "מ"], [30, "ל"], [20, "כ"], [10, "י"], [9, "ט"], [8, "ח"], [7, "ז"], [6, "ו"], [5, "ה"], [4, "ד"], [3, "ג"], [2, "ב"], [1, "א"]];
+const VALUE = Object.fromEntries(LETTERS.map(([v, l]) => [l, v]));
+
+/** Hebrew numerals, as gematria() in src/daily/dailyNote.ts. */
+export function gematria(n) {
+  let s = "";
+  let rest = n;
+  while (rest > 0) {
+    if (rest === 15 || rest === 16) {
+      s += rest === 15 ? "טו" : "טז";
+      break;
+    }
+    const [v, l] = LETTERS.find(([v]) => v <= rest);
+    s += l;
+    rest -= v;
+  }
+  return s.length === 1 ? `${s}׳` : `${s.slice(0, -1)}״${s.slice(-1)}`;
+}
+
+const numeral = (s) => [...s.replace(/[׳״'"]/g, "")].reduce((a, c) => (VALUE[c] ? a + VALUE[c] : NaN), 0);
+
+/** As hebrewDate() in src/daily/dailyNote.ts. */
+export function hebrewText(iso) {
+  const p = toHebrew(iso);
+  return p ? `${gematria(p.day)} ב${p.month} ${gematria(p.year % 1000)}` : null;
+}
+
+/** `ז׳ בחשוון תשפ״ז` → { day: 7, monthHe: "חשוון", year: 5787 }, or null. */
+export function parseHebrewText(text) {
+  const m = /^(\S+) ב(.+) (\S+)$/.exec(String(text ?? "").trim());
+  if (!m) return null;
+  const day = numeral(m[1]);
+  const year = 5000 + numeral(m[3]);
+  return Number.isInteger(day) && Number.isInteger(year) ? { day, monthHe: m[2], year } : null;
+}
 
 export function toHebrew(iso) {
   const ms = noonOf(iso);
@@ -54,9 +91,10 @@ export async function score({ items }) {
     let ok = false;
     if (dir === "to-hebrew") {
       const got = toHebrew(it.gregorian);
-      ok = !!got && got.day === want.day && got.month === want.monthHe && got.year === want.year;
+      ok = !!got && got.day === want.day && got.month === want.monthHe && got.year === want.year && hebrewText(it.gregorian) === it.hebrewText;
     } else {
-      ok = toGregorian(want) === it.gregorian;
+      const parsed = parseHebrewText(it.hebrewText);
+      ok = !!parsed && toGregorian(parsed) === it.gregorian;
     }
     tally[dir][0] += ok ? 1 : 0;
     tally[dir][1] += 1;

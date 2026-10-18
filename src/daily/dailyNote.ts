@@ -13,9 +13,9 @@
 import { t } from "../i18n";
 import { useAppStore } from "../store/useStore";
 
-import { DEFAULT_DAILY, type DailySettings } from "./defaults";
+import { DEFAULT_DAILY, isValidDailyPattern, type DailySettings } from "./defaults";
 
-export { DEFAULT_DAILY, type DailySettings };
+export { DEFAULT_DAILY, isValidDailyPattern, type DailySettings };
 
 const pad2 = (n: number) => String(n).padStart(2, "0");
 
@@ -46,7 +46,7 @@ export function cleanFolder(folder: string): string {
 
 /** The file name a pattern gives a day (`YYYY-MM-DD` → `2026-10-18.md`). */
 export function fileNameFor(day: Day, pattern: string): string {
-  const base = (pattern.trim() || DEFAULT_DAILY.pattern).replace(/YYYY/g, String(day.y)).replace(/MM/g, pad2(day.m)).replace(/DD/g, pad2(day.d)).replace(/[\\/:*?"<>|]/g, "-");
+  const base = (isValidDailyPattern(pattern) ? pattern.trim() : DEFAULT_DAILY.pattern).replace(/YYYY/g, String(day.y)).replace(/MM/g, pad2(day.m)).replace(/DD/g, pad2(day.d)).replace(/[\\/:*?"<>|]/g, "-");
   return /\.(md|markdown)$/i.test(base) ? base : `${base}.md`;
 }
 
@@ -68,7 +68,7 @@ export function dayOfPath(path: string, s: Pick<DailySettings, "folder" | "patte
   if (name.includes("/")) return null;
   // Rebuild a regex from the pattern: tokens → digit groups, the rest literal.
   const tokens: Array<"y" | "m" | "d"> = [];
-  const source = (s.pattern.trim() || DEFAULT_DAILY.pattern).replace(/[\\/:*?"<>|]/g, "-");
+  const source = (isValidDailyPattern(s.pattern) ? s.pattern.trim() : DEFAULT_DAILY.pattern).replace(/[\\/:*?"<>|]/g, "-");
   let re = "^";
   for (let i = 0; i < source.length; ) {
     const rest = source.slice(i);
@@ -112,14 +112,41 @@ export function hebrewParts(day: Day): { day: number; month: string; year: numbe
   return { day: Number(p.day), month: p.month, year: Number(p.year) };
 }
 
-/** As the browser writes it in Hebrew: `7 בחשוון 5787`. */
-export const hebrewDate = (day: Day) => HE_PARTS.format(noonUtc(day));
+const LETTERS: Array<[number, string]> = [
+  [400, "ת"], [300, "ש"], [200, "ר"], [100, "ק"], [90, "צ"], [80, "פ"], [70, "ע"], [60, "ס"], [50, "נ"],
+  [40, "מ"], [30, "ל"], [20, "כ"], [10, "י"], [9, "ט"], [8, "ח"], [7, "ז"], [6, "ו"], [5, "ה"], [4, "ד"], [3, "ג"], [2, "ב"], [1, "א"],
+];
+
+/**
+ * A number in Hebrew numerals (1–999): 7 → ז׳, 16 → ט״ז, 787 → תשפ״ז. Only
+ * the digits are ours; the calendar itself is Intl's.
+ */
+export function gematria(n: number): string {
+  let s = "";
+  let rest = n;
+  while (rest > 0) {
+    if (rest === 15 || rest === 16) {
+      s += rest === 15 ? "טו" : "טז"; // never יה / יו
+      break;
+    }
+    const [v, l] = LETTERS.find(([v]) => v <= rest)!;
+    s += l;
+    rest -= v;
+  }
+  return s.length === 1 ? `${s}׳` : `${s.slice(0, -1)}״${s.slice(-1)}`;
+}
+
+/** The Hebrew date as it is written in Hebrew: `ז׳ בחשוון תשפ״ז` (year without the thousands). */
+export function hebrewDate(day: Day): string {
+  const p = hebrewParts(day);
+  return `${gematria(p.day)} ב${p.month} ${gematria(p.year % 1000)}`;
+}
 
 /**
  * The Hebrew date wrapped in a right-to-left isolate (U+2067 … U+2069), for
- * text that may sit in a left-to-right line ("Sunday · 7 בחשוון 5787"):
+ * text that may sit in a left-to-right line ("Sunday · ז׳ בחשוון תשפ״ז"):
  * without it the bidi algorithm pulls the year next to the month and the
- * line reads "7 5787 בחשוון".
+ * Hebrew date can be reordered against the Latin text around it.
  */
 export const isolatedHebrewDate = (day: Day) => `\u2067${hebrewDate(day)}\u2069`;
 

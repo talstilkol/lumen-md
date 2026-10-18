@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-10-18T11:50:10.802Z",
+  "generated_at": "2026-10-18T12:22:55.812Z",
   "source": "src/i18n/index.ts (en bundle)",
-  "count": 1431,
+  "count": 1432,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -1782,6 +1782,11 @@
         "weekday",
         "title"
       ]
+    },
+    {
+      "key": "calendar.patternInvalid",
+      "en": "The pattern must contain YYYY, MM and DD, so that every day gets its own note.",
+      "vars": []
     },
     {
       "key": "calendar.save",

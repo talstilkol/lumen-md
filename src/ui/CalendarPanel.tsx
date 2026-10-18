@@ -11,7 +11,7 @@ import { CalendarDays, ChevronLeft, ChevronRight, Settings2 } from "lucide-react
 import { t } from "../i18n";
 import { useAppStore } from "../store/useStore";
 import { onWorkspaceChanged } from "../storage/workspaceEvents";
-import { dayOf, dayOfPath, isoOf, isolatedHebrewDate, openDailyNote, type Day } from "../daily/dailyNote";
+import { dayOf, dayOfPath, isoOf, isolatedHebrewDate, isValidDailyPattern, openDailyNote, type Day } from "../daily/dailyNote";
 
 /** Monday = 1 … Sunday = 7, as Intl.Locale weekInfo has it. */
 const FIRST_DAY_FALLBACK: Record<string, number> = { he: 7, ar: 6, en: 7, ja: 7, ru: 1, fr: 1, de: 1, "zh-CN": 1, zh: 1 };
@@ -51,6 +51,7 @@ export function CalendarPanel() {
   const [month, setMonth] = useState({ y: today.y, m: today.m });
   const [withNotes, setWithNotes] = useState<Set<string>>(new Set());
   const [editing, setEditing] = useState(false);
+  const [patternError, setPatternError] = useState(false);
 
   const refresh = useCallback(async () => {
     try {
@@ -151,7 +152,11 @@ export function CalendarPanel() {
               aria-label={label}
               title={label}
               aria-current={isToday ? "date" : undefined}
-              onClick={() => void openDailyNote(day, settings, locale)}
+              onClick={() =>
+                openDailyNote(day, settings, locale).catch((e: unknown) =>
+                  void import("../store/useToastStore").then(({ toast }) => toast.error(t("daily.failed", { error: e instanceof Error ? e.message : String(e) }))),
+                )
+              }
               style={{
                 position: "relative",
                 paddingBlock: 3,
@@ -175,7 +180,13 @@ export function CalendarPanel() {
           onSubmit={(e) => {
             e.preventDefault();
             const f = new FormData(e.currentTarget);
-            setDailyNotes({ folder: String(f.get("folder") ?? ""), pattern: String(f.get("pattern") ?? "") || "YYYY-MM-DD", template: String(f.get("template") ?? "") });
+            const pattern = String(f.get("pattern") ?? "").trim() || "YYYY-MM-DD";
+            if (!isValidDailyPattern(pattern)) {
+              setPatternError(true);
+              return;
+            }
+            setPatternError(false);
+            setDailyNotes({ folder: String(f.get("folder") ?? ""), pattern, template: String(f.get("template") ?? "") });
             setEditing(false);
           }}
           style={{ display: "grid", gap: 4, marginBlockStart: 8 }}
@@ -186,8 +197,13 @@ export function CalendarPanel() {
           </label>
           <label style={{ display: "grid", gap: 2 }}>
             <span>{t("calendar.pattern")}</span>
-            <input name="pattern" dir="ltr" defaultValue={settings.pattern} style={input} />
+            <input name="pattern" dir="ltr" defaultValue={settings.pattern} style={input} aria-invalid={patternError || undefined} aria-describedby={patternError ? "daily-pattern-error" : undefined} onChange={() => setPatternError(false)} />
           </label>
+          {patternError && (
+            <span id="daily-pattern-error" role="alert" style={{ fontSize: 10, color: "hsl(var(--danger, 0 70% 50%))" }}>
+              {t("calendar.patternInvalid")}
+            </span>
+          )}
           <label style={{ display: "grid", gap: 2 }}>
             <span>{t("calendar.template")}</span>
             <textarea name="template" dir="auto" rows={4} defaultValue={settings.template} style={{ ...input, fontFamily: "var(--font-mono, monospace)" }} />
