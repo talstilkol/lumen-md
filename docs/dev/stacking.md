@@ -100,16 +100,22 @@ node scripts/stack.mjs restack feat/hebrew-core --push      # …and run them
   per moved branch (and for `<branch>` itself when it differs from its PR).
   The lease fails if someone else pushed in the meantime.
 - **The old base** of the first layer is the commit the child was built on:
-  `--old-base <sha>` if given, else `origin/<branch>` or the PR's head on
-  GitHub when it is still in the child's history, else the fork point from
-  the reflog, else the merge base. For higher layers it is the tip recorded
-  before the run, which is exact.
+  `--old-base <sha>` if given, else whichever of `origin/<branch>` and the
+  PR's head on GitHub is in the child's history and closest to it (a stale
+  `origin/<branch>` would replay the parent's newer commits as the child's),
+  else the fork point from the reflog, else the merge base. For higher
+  layers it is the tip recorded before the run, which is exact.
 - **Worktrees.** A branch checked out in another worktree is rebased in that
   worktree (`git -C <path> rebase …`), which must be clean. Other branches
-  are checked out in the current worktree, which must be clean too. Your
-  original checkout is restored at the end.
+  are checked out in the current worktree, which must be clean too. Every
+  worktree is checked before the first rebase, so a dirty one stops the run
+  with nothing changed. Your original checkout is restored at the end.
+- **Forks.** A PR from a fork that targets a stack branch is listed, not
+  restacked: its head is in another repository, and a local branch of the
+  same name is not it.
 - **Conflicts** stop the run with exit code 3, the worktree to fix it in,
-  and the exact commands for the layers that are left. Resolve, stage,
+  and the exact commands for the layers that are left (with `git -C <path>`
+  for branches checked out elsewhere). Resolve, stage,
   `git rebase --continue`, then run those commands.
 - Layers already on their parent are skipped, so running it twice is safe.
 - Branches must exist locally (`git fetch origin <b>:<b>` first).

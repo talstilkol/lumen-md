@@ -144,18 +144,30 @@ const clean = (dir) => {
 const isCommit = (sha) => Boolean(sha) && gitOk("cat-file", "-e", `${sha}^{commit}`);
 const isAncestor = (a, b) => gitOk("merge-base", "--is-ancestor", a, b);
 
+/** Commits in `to` that are not in `from`. */
+const distance = (from, to) => Number(git("rev-list", "--count", `${from}..${to}`));
+
+/** A path or ref as one shell word, for the commands printed to copy. */
+const sh = (w) => (/^[\w@%+=:,./-]+$/.test(w) ? w : `'${w.replace(/'/g, "'\\''")}'`);
+
 /**
  * The commit `child` was built on: its parent's tip before the parent
  * changed. Tried in order: --old-base (children of the restacked branch
- * only), the remote-tracking branch, the parent PR's head on GitHub, the
- * fork point in the parent's reflog, the plain merge base.
+ * only); of the remote-tracking branch and the parent PR's head on GitHub,
+ * the one closest to the child (rebase replays every commit after the base
+ * it is given, so a stale, older base would replay the parent's own newer
+ * commits as the child's); the fork point in the parent's reflog; the plain
+ * merge base.
  */
 function oldBaseFor(parent, child, remote, explicit) {
   const local = git("rev-parse", parent.head);
   if (explicit) return { sha: git("rev-parse", explicit), how: "--old-base" };
   const tracking = tryGit("rev-parse", "--verify", "-q", `refs/remotes/${remote}/${parent.head}`);
-  if (tracking && tracking !== local && isAncestor(tracking, child)) return { sha: tracking, how: `${remote}/${parent.head}` };
-  if (parent.headSha && parent.headSha !== local && isCommit(parent.headSha) && isAncestor(parent.headSha, child)) return { sha: parent.headSha, how: `PR #${parent.number} head on GitHub` };
+  const candidates = [
+    tracking ? { sha: tracking, how: `${remote}/${parent.head}` } : null,
+    parent.headSha && isCommit(parent.headSha) ? { sha: parent.headSha, how: `PR #${parent.number} head on GitHub` } : null,
+  ].filter((c) => c && c.sha !== local && isAncestor(c.sha, child));
+  if (candidates.length) return candidates.reduce((best, c) => (distance(c.sha, child) < distance(best.sha, child) ? c : best));
   const fork = tryGit("merge-base", "--fork-point", parent.head, child);
   if (fork) return { sha: fork, how: "fork-point (reflog)" };
   return { sha: git("merge-base", parent.head, child), how: "merge-base" };
@@ -186,9 +198,10 @@ async function restack() {
   }
 
   const forest = buildForest(await openPrs(repoName()));
-  const { start, steps } = restackPlan(forest, branch);
+  const { start, steps, foreign } = restackPlan(forest, branch);
+  for (const f of foreign) console.log(`  #${f.number} ${f.branch} (from ${f.repo || "a fork"}): a fork's PR on ${f.parent}, not restacked here; its author rebases it.`);
   if (!steps.length) {
-    console.log(`Nothing is stacked on ${branch} (#${start.number}).`);
+    console.log(`Nothing is stacked on ${branch} (#${start.number})${foreign.length ? " in this repository" : ""}.`);
     return;
   }
   for (const b of [start.head, ...steps.map((s) => s.branch)]) {
@@ -203,52 +216,59 @@ async function restack() {
     process.exit(1);
   }
   const owners = worktreeOwners();
+  /** The other worktree a branch is checked out in (it must be rebased there), or null. */
+  const ownerOf = (b) => {
+    const o = owners.get(b);
+    return o && o !== here ? o : null;
+  };
   const original = tryGit("symbolic-ref", "-q", "--short", "HEAD") ?? git("rev-parse", "HEAD");
   const oldTip = new Map(steps.map((s) => [s.branch, git("rev-parse", s.branch)]));
   const nodeOf = (head) => (forest.byHead.get(head) ?? [])[0];
+  // The new parent by name: it resolves to the parent's tip after its own rebase.
+  const argsOf = (s, base) => {
+    const o = ownerOf(s.branch);
+    return o ? ["-C", o, "rebase", "--onto", s.parent, base] : ["rebase", "--onto", s.parent, base, s.branch];
+  };
+  const command = (p) => `git ${argsOf(p.s, p.oldBase).map(sh).join(" ")}`;
 
   console.log(`Restack ${steps.length} PR(s) above ${start.head} (#${start.number})${dry ? " — dry run" : ""}:`);
-  // Branches this run moves (or, in a dry run, would move): their children
-  // were built on the tip recorded above, so that is their old base.
+  // The whole plan first, before anything moves: a layer's old base is
+  // known up front (branches this run moves were built on the tip recorded
+  // above), so every worktree can be checked and every recovery command is exact.
   const moving = new Set();
-  const moved = [];
-  const command = (t, base) => `git rebase --onto ${t.parent} ${base} ${t.branch}`;
-  const later = (from) => steps.slice(from).map((t) => command(t, moving.has(t.parent) ? oldTip.get(t.parent) : "<old base>"));
-  for (let i = 0; i < steps.length; i++) {
-    const s = steps[i];
+  const plan = [];
+  for (const s of steps) {
     const parentMoves = moving.has(s.parent);
     if (!parentMoves && isAncestor(s.parent, s.branch)) {
       console.log(`  #${s.number} ${s.branch}: already on ${s.parent}`);
       continue;
     }
     const { sha: oldBase, how } = parentMoves ? { sha: oldTip.get(s.parent), how: `old tip of ${s.parent}` } : oldBaseFor(nodeOf(s.parent), s.branch, remote, s.parent === start.head ? opt("--old-base") : undefined);
-    const owner = owners.get(s.branch);
-    const elsewhere = Boolean(owner && owner !== here);
-    // The new parent by name: it resolves to the parent's tip after its own rebase.
-    const args = elsewhere ? ["-C", owner, "rebase", "--onto", s.parent, oldBase] : ["rebase", "--onto", s.parent, oldBase, s.branch];
-    console.log(`  #${s.number} git ${args.join(" ")}   # old base: ${how}`);
+    const p = { s, oldBase, owner: ownerOf(s.branch) };
+    console.log(`  #${s.number} ${command(p)}   # old base: ${how}`);
     moving.add(s.branch);
-    if (dry) {
-      moved.push(s);
-      continue;
-    }
-    if (elsewhere && !clean(owner)) {
-      console.error(`\nstack: ${s.branch} is checked out in ${owner} with uncommitted changes. Clean it, then run:\n  ${[command(s, oldBase), ...later(i + 1)].join("\n  ")}`);
-      process.exit(1);
-    }
-    const r = spawnSync("git", args, { stdio: "inherit" });
-    if (r.status !== 0) {
-      const rest = later(i + 1);
-      console.error(`\nstack: the rebase of ${s.branch} stopped (conflict?). Resolve it in ${elsewhere ? owner : here}, run \`git rebase --continue\` (or --abort), then:`);
-      console.error(rest.length ? "  " + rest.join("\n  ") : "  (nothing else to rebase)");
-      process.exit(3);
-    }
-    moved.push(s);
+    plan.push(p);
   }
   if (!dry) {
+    const dirty = plan.filter((p) => p.owner && !clean(p.owner));
+    if (dirty.length) {
+      console.error(`\nstack: nothing was rebased. ${dirty.map((p) => `${p.s.branch} is checked out in ${p.owner}`).join("; ")} with uncommitted changes: clean ${dirty.length > 1 ? "them" : "it"}, then run the restack again.`);
+      process.exit(1);
+    }
+    for (let i = 0; i < plan.length; i++) {
+      const p = plan[i];
+      const r = spawnSync("git", argsOf(p.s, p.oldBase), { stdio: "inherit" });
+      if (r.status !== 0) {
+        const rest = plan.slice(i + 1).map(command);
+        console.error(`\nstack: the rebase of ${p.s.branch} stopped (conflict?). Resolve it in ${p.owner ?? here}, run \`git rebase --continue\` (or --abort), then:`);
+        console.error(rest.length ? "  " + rest.join("\n  ") : "  (nothing else to rebase)");
+        process.exit(3);
+      }
+    }
     const now = tryGit("symbolic-ref", "-q", "--short", "HEAD") ?? git("rev-parse", "HEAD");
     if (now !== original) spawnSync("git", ["checkout", "-q", original], { stdio: "inherit" });
   }
+  const moved = plan.map((p) => p.s);
 
   const startLocal = git("rev-parse", start.head);
   const toPush = [...(start.headSha && startLocal !== start.headSha ? [{ branch: start.head, remoteSha: start.headSha }] : []), ...moved.map((s) => ({ branch: s.branch, remoteSha: s.remoteSha }))];

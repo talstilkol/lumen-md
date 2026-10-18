@@ -124,6 +124,14 @@ describe("restack plan", () => {
     expect(() => restackPlan(buildForest(prsFixture), "nope")).toThrow(/no open PR/);
   });
 
+  it("leaves a fork's PR on a stack branch out of the plan (its head is not a local branch)", () => {
+    const pr = (number: number, head: string, base: string, headRepo = "o/r") => ({ number, head: { ref: head, sha: `${head}1`, repo: { full_name: headRepo } }, base: { ref: base, repo: { full_name: "o/r" } } });
+    const f = buildForest([pr(1, "a", "main"), pr(2, "b", "a"), pr(3, "c", "b"), pr(4, "c", "b", "someone/r")]);
+    const { steps, foreign } = restackPlan(f, "a");
+    expect(steps.map((s: { number: number }) => s.number)).toEqual([2, 3]);
+    expect(foreign).toEqual([{ branch: "c", parent: "b", number: 4, repo: "someone/r" }]);
+  });
+
   it("leases each push on the sha GitHub has", () => {
     expect(pushCommands([{ branch: "b", remoteSha: "bbbb" }, { branch: "c", remoteSha: "" }], "origin")).toEqual([
       "git push --force-with-lease=b:bbbb origin b",
@@ -145,7 +153,7 @@ describe("scripts/stack.mjs restack (fallback, local repo)", () => {
     LUMEN_STACK_NO_GH_STACK: "1",
   });
 
-  function setup({ conflict = false } = {}) {
+  function setup({ conflict = false, staleTracking = false } = {}) {
     const dir = mkdtempSync(join(tmpdir(), "lumen-stack-"));
     writeFileSync(join(dir, "gitconfig"), "");
     const work = join(dir, "repo");
@@ -160,6 +168,9 @@ describe("scripts/stack.mjs restack (fallback, local repo)", () => {
     commit("base.txt", "base\n", "base");
     g("checkout", "-q", "-b", "a");
     commit("a.txt", "a1\n", "a1");
+    const a1 = g("rev-parse", "a");
+    // a got a second commit on GitHub after this clone last fetched it: origin/a is stale.
+    if (staleTracking) commit("a.txt", "a1b\n", "a1b");
     g("checkout", "-q", "-b", "b");
     commit("b.txt", "b\n", "b");
     // b also edits a's line: replaying it on the amended a conflicts.
@@ -170,6 +181,7 @@ describe("scripts/stack.mjs restack (fallback, local repo)", () => {
     // c lives in a second worktree, as branches here often do.
     g("checkout", "-q", "main");
     g("worktree", "add", "-q", join(dir, "wt-c"), "c");
+    if (staleTracking) g("update-ref", "refs/remotes/origin/a", a1);
     // Change the bottom PR: amend a's commit.
     g("checkout", "-q", "a");
     writeFileSync(join(work, "a.txt"), "a2\n");
@@ -221,14 +233,63 @@ describe("scripts/stack.mjs restack (fallback, local repo)", () => {
     }
   });
 
-  it("stops on a conflict with the commands that are left", () => {
+  it("stops on a conflict with the commands that are left, in the worktree that owns each branch", () => {
     const { dir, old, run } = setup({ conflict: true });
     try {
       const r = run();
       expect(r.status).toBe(3);
       expect(r.stderr).toContain("stack: the rebase of b stopped (conflict?)");
       expect(r.stderr).toContain("git rebase --continue");
-      expect(r.stderr).toContain(`git rebase --onto b ${old.b} c`);
+      // c is checked out in wt-c: `git rebase … c` from here would be refused.
+      expect(r.stderr).toContain(`git -C ${join(dir, "wt-c")} rebase --onto b ${old.b}\n`);
+      expect(r.stderr).not.toContain(`git rebase --onto b ${old.b} c`);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it("takes the old base closest to the child when origin/<parent> is stale", () => {
+    const { dir, g, old, run } = setup({ staleTracking: true });
+    try {
+      const plan = run("--dry-run");
+      expect(plan.stdout).toContain(`#2 git rebase --onto a ${old.a} b   # old base: PR #1 head on GitHub`);
+      const r = run();
+      expect(r.status).toBe(0);
+      // a1b was amended into a2: it is not replayed onto a as if it were b's work.
+      expect(g("log", "--format=%s", "main..b").split("\n")).toEqual(["b", "a2", "a1"]);
+      expect(g("log", "--format=%s", "main..c").split("\n")).toEqual(["c", "b", "a2", "a1"]);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it("checks every worktree it will rebase in before moving any branch", () => {
+    const { dir, g, old, run } = setup();
+    try {
+      writeFileSync(join(dir, "wt-c", "c.txt"), "dirty\n");
+      const r = run();
+      expect(r.status).toBe(1);
+      expect(r.stderr).toContain(`stack: nothing was rebased. c is checked out in ${join(dir, "wt-c")} with uncommitted changes`);
+      // b comes before c in the plan and is untouched.
+      expect(g("rev-parse", "b")).toBe(old.b);
+      expect(g("rev-parse", "c")).toBe(old.c);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it("does not rebase a local branch that shares a fork PR's head name", () => {
+    const { dir, g, old, run } = setup();
+    try {
+      g("branch", "x", old.b);
+      const pr = (number: number, head: string, base: string, sha: string, headRepo = "o/r") => ({ number, head: { ref: head, sha, repo: { full_name: headRepo } }, base: { ref: base, repo: { full_name: "o/r" } } });
+      writeFileSync(join(dir, "prs.json"), JSON.stringify([pr(1, "a", "main", old.a), pr(2, "b", "a", old.b), pr(3, "c", "b", old.c), pr(4, "x", "b", "f0f0f0f0", "someone/r")]));
+      const r = run();
+      expect(r.status).toBe(0);
+      expect(r.stdout).toContain("#4 x (from someone/r): a fork's PR on b, not restacked here");
+      expect(r.stdout).not.toMatch(/--force-with-lease\S* origin x/);
+      expect(g("rev-parse", "x")).toBe(old.b);
+      expect(g("log", "--format=%s", "main..c").split("\n")).toEqual(["c", "b", "a2"]);
     } finally {
       rmSync(dir, { recursive: true, force: true });
     }

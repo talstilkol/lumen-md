@@ -16,6 +16,7 @@ const slim = (pr) => ({
   url: pr.html_url ?? "",
   // A fork's branch can never be the base of a PR in this repository.
   sameRepo: !pr.head?.repo || !pr.base?.repo || pr.head.repo.full_name === pr.base.repo.full_name,
+  headRepo: pr.head?.repo?.full_name ?? "",
   stack: pr.stack ?? null,
 });
 
@@ -144,11 +145,20 @@ export function formatChain(root, ci = new Map()) {
  * The restack of everything above `branch`: one step per descendant,
  * parents first. Each step rebases `branch` from its parent's old tip onto
  * the parent's new tip: `git rebase --onto <parent> <oldBase> <branch>`.
+ * A fork's PR can target a branch of the stack, but its head lives in
+ * another repository (a local branch of the same name is not it): it is
+ * listed in `foreign`, never a step. A fork's head is never a parent, so
+ * nothing sits above one.
  */
 export function restackPlan(forest, branch) {
   const start = findNode(forest, branch);
   if (!start) throw new Error(`no open PR has head "${branch}"`);
-  return { start, steps: descendants(start).map((n) => ({ branch: n.head, parent: n.parent.head, number: n.number, remoteSha: n.headSha })) };
+  const all = descendants(start);
+  return {
+    start,
+    steps: all.filter((n) => n.sameRepo).map((n) => ({ branch: n.head, parent: n.parent.head, number: n.number, remoteSha: n.headSha })),
+    foreign: all.filter((n) => !n.sameRepo).map((n) => ({ branch: n.head, parent: n.parent.head, number: n.number, repo: n.headRepo })),
+  };
 }
 
 /** `git push --force-with-lease` for each moved branch, leased on the sha GitHub has. */
