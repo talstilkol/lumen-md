@@ -102,4 +102,6 @@ else {
   writeFileSync(file, md);
   console.log(`handoff: wrote docs/dev/HANDOFF.md (${prs.length} PRs, ${worktrees.length} worktrees${problems.length ? `, ${problems.length} problems` : ""})`);
 }
-process.exit(problems.length ? 1 : 0);
+// exitCode, not an immediate exit: on a pipe that is asynchronous (macOS, Windows) exiting
+// at once can cut a long --stdout document short.
+process.exitCode = problems.length ? 1 : 0;

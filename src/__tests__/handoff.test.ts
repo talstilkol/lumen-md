@@ -1,7 +1,7 @@
 /** 0.13 — the handoff document: PR stack, worktrees, and a check that every name in it exists. */
 import { describe, it, expect } from "vitest";
 import { execFileSync, spawnSync } from "node:child_process";
-import { chmodSync, cpSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { chmodSync, cpSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 // @ts-expect-error — plain .mjs helper without types
@@ -103,6 +103,13 @@ describe("handoff review fixes", () => {
     } finally {
       rmSync(dir, { recursive: true, force: true });
     }
+  });
+
+  it("lets --stdout flush: no process.exit() after writing the document", () => {
+    const src = readFileSync(resolve(__dirname, "../../scripts/handoff.mjs"), "utf8");
+    const after = src.slice(src.indexOf("process.stdout.write(md)"));
+    expect(after).not.toMatch(/process\.exit\(/);
+    expect(after).toMatch(/process\.exitCode = problems\.length \? 1 : 0/);
   });
 
   it("reads every page of review comments without `gh api --paginate`", () => {
