@@ -92,15 +92,17 @@ jobs:
 
       - name: i18n drift gate
         # Vitest already runs the i18nStrings test — this step also asserts
-        # that en + he (src/i18n/locales/he.json) stay within 10 keys of each other (catches lazy
+        # that en + he (src/i18n/locales/{en,he}/*.json) stay within 10 keys of each other (catches lazy
         # ports of new keys to one bundle and not the other).
         run: |
-          # The committed manifest feeds translation tooling: it must match.
+          # Every string in its sorted domain file (plan 0.3), and the
+          # committed manifest (i18n/keys/) that feeds translation tooling.
+          node scripts/i18n-split.mjs --check
           node scripts/extract-i18n-keys.mjs --check
-          node scripts/extract-i18n-keys.mjs > /dev/null
-          en_count=$(node -e 'const j=JSON.parse(require("fs").readFileSync("i18n/keys.json","utf8")); console.log(j.entries.length)')
-          # Hebrew ships as a lazy JSON bundle like the other locales.
-          he_count=$(node -e 'console.log(Object.keys(JSON.parse(require("fs").readFileSync("src/i18n/locales/he.json","utf8"))).length)')
+          count() { node --input-type=module -e "import { readLocale } from './scripts/lib/i18n-files.mjs'; console.log(Object.keys(readLocale('$1')).length)"; }
+          en_count=$(count en)
+          # Hebrew ships as lazy JSON chunks like the other locales.
+          he_count=$(count he)
           diff=$(( en_count > he_count ? en_count - he_count : he_count - en_count ))
           echo "i18n keys — en: $en_count, he: $he_count, diff: $diff"
           if [ "$diff" -gt 10 ]; then
