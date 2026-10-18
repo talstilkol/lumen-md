@@ -82,5 +82,5 @@ against directories you'd be comfortable showing the agent.
 
 The MCP server is a Node process — it can't reach OPFS in your browser
 directly. The standard pattern: bind your Lumen workspace to a Git repo
-(`⌘K → Git: Clone`), clone the same repo to the path you set in
+(`⌘K → Git: clone repository…`), clone the same repo to the path you set in
 `LUMEN_WORKSPACE`, and use `git pull` / push to keep both sides in sync.
