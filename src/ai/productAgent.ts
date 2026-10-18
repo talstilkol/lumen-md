@@ -10,10 +10,7 @@
  */
 
 import { chat, type ChatMessage } from "./llm";
-import {
-  writeWorkspaceFile,
-  isOPFSAvailable,
-} from "../storage/workspace";
+import { isOPFSAvailable } from "../storage/workspace";
 import { log } from "../lib/logger";
 
 /* ─── Types ───────────────────────────────────────────────────────── */
@@ -193,6 +190,8 @@ export class ProductAgent {
       this.emit("deploying", "Creating deployment configuration...");
       await this.generateDeployConfig(signal);
 
+      // All or nothing (plan 5.3.2): only a finished product is proposed.
+      await this.stageAll(signal);
       this.emit("complete", `Product "${this.spec.name}" created with ${this.generatedFiles.size} files!`);
       return { success: true, files: this.generatedFiles };
 
@@ -358,14 +357,37 @@ export class ProductAgent {
     return related.join("\n");
   }
 
+  /** Keep a generated file; nothing reaches the workspace before the whole product is done (`stageAll`). */
   private async saveFile(path: string, content: string): Promise<void> {
     this.generatedFiles.set(path, content);
-    if (isOPFSAvailable()) {
-      try {
-        await writeWorkspaceFile(this.projectDir + path, content);
-      } catch (e) {
-        log.warn("productAgent", `Could not save to workspace: ${path}`, e);
+  }
+
+  /**
+   * Propose every generated file at once, through the agent runtime's
+   * write_file tool: each is staged for the user's approval, never written.
+   * If one cannot be staged, the ones already staged are withdrawn and the
+   * run fails — a builder that fails midway leaves 0 files (5.3.2).
+   */
+  private async stageAll(signal: AbortSignal): Promise<void> {
+    if (!isOPFSAvailable()) return;
+    const { callTool } = await import("../agents/runtime");
+    const { discardRunChanges } = await import("../agents/staging");
+    const runId = `builder_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
+    try {
+      for (const [path, content] of this.generatedFiles) {
+        if (signal.aborted) throw new DOMException("Cancelled by the user", "AbortError");
+        try {
+          await callTool("write_file", { path: this.projectDir + path, content }, { grants: ["write"], runId, agentId: "builder", signal });
+        } catch (e) {
+          // The file already holds exactly this: nothing to propose.
+          if (/already has exactly this content/.test((e as Error).message)) continue;
+          throw e;
+        }
       }
+    } catch (e) {
+      discardRunChanges(runId);
+      log.warn("productAgent", "Could not stage the product's files; none were proposed", e);
+      throw e;
     }
   }
 }

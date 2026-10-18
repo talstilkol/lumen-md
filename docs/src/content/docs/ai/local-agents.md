@@ -75,6 +75,36 @@ page read in the same run, a workspace file or the open document, and
 returns the exact text with its offsets. All tools stop when the run is
 cancelled.
 
+### Which agent uses which tools
+
+| Agent | Tools |
+|---|---|
+| tagger | `list_tags` |
+| linker | `list_files`, `search_workspace` |
+| outliner | `get_document`, `get_headings` |
+| tasker, translator, proofreader | `get_document` |
+| diagrammer | `validate_mermaid` |
+| charter | `csv_parse`, `validate_echarts` |
+| committer | `git_diff` (subject and a short body) |
+| writer, templater | `get_selection` |
+| builder | `list_files`; the generated files go out together through `write_file` |
+| stylist | `list_files`, `read_file` |
+
+What an agent always needs — the workspace's tags for the tagger, the
+note list for the linker, the parsed table for the charter, the diff
+for the committer — the runtime fetches through the same tool path
+before the model starts, so the model sees it as its own call and can
+ask for more. The daily digest reads the vault the same way.
+
+On a small model, every turn is held to a JSON Schema (Ollama's
+`format`, web-llm's grammar): a call to one of the agent's own tools
+with valid arguments, or the final answer in the agent's format. A
+streaming agent (writer, templater) gets its tools' results before it
+starts, and its answer still streams.
+
+The builder proposes the whole project at once: if any file fails, none
+is proposed.
+
 ## AI settings
 
 `⌘K → "AI: Settings (local agents)"` gathers everything in one panel:

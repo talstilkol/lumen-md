@@ -7,6 +7,7 @@
 
 import type { AgentDefinition, AgentInput } from "../types";
 import { registerAgent } from "../registry";
+import { pickTools } from "../tools";
 import { clip, fail, ok } from "./shared";
 
 export interface LinkSuggestion {
@@ -17,7 +18,8 @@ export interface LinkSuggestion {
 
 export interface LinkerInput extends AgentInput {
   text: string;
-  extra: { catalog: string; titles: string[] };
+  /** `titles`: the notes a link may target (checked after the run); `catalog`: an optional description of them. */
+  extra: { catalog?: string; titles: string[] };
 }
 
 export interface LinkerOutput {
@@ -48,13 +50,18 @@ export const linkerAgent: AgentDefinition<LinkerInput, LinkerOutput> = registerA
   commandId: "tools.suggestLinks",
   description: "Suggest wiki-links from the open note to other notes",
   system:
-    "You are a wiki-link suggestion assistant. The user shares the body of a markdown note and a list of OTHER notes " +
-    "in their workspace (title — first sentence). Identify up to 5 places in the body where a [[Note Title]] link would " +
+    "You are a wiki-link suggestion assistant. The user shares the body of a markdown note; the list_files result lists " +
+    "the OTHER notes in their workspace (a note's title is its file name without .md), and search_workspace finds the notes " +
+    "about a phrase. Identify up to 5 places in the body where a [[Note Title]] link would " +
     'help the reader. Output ONLY a JSON object: {"links": [{"phrase": "literal text copied from the body", ' +
     '"target": "exact title of one of the listed notes", "reason": "at most 12 words"}]}. The phrase MUST appear ' +
     "verbatim in the body and the target MUST be one of the listed titles. Skip anything you are not confident about; " +
     'an empty list {"links": []} is a valid answer.',
-  user: (input) => `Current note body:\n${clip(input.text, 5000)}\n\nOther notes:\n${input.extra.catalog}`,
+  user: (input) => `Current note body:\n${clip(input.text, 5000)}` + (input.extra.catalog ? `\n\nOther notes:\n${input.extra.catalog}` : ""),
+  tools: pickTools("search_workspace", "list_files"),
+  // The notes a link can point to, fetched through the runtime (5.3.1).
+  context: () => [{ tool: "list_files", args: { limit: 200 } }],
+  maxSteps: 5,
   outputSchema: {
     type: "object",
     properties: {

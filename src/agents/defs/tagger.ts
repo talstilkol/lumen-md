@@ -7,11 +7,13 @@
 
 import type { AgentDefinition, AgentInput } from "../types";
 import { registerAgent } from "../registry";
+import { pickTools } from "../tools";
 import { clip, fail, ok, scriptOf } from "./shared";
 
 export interface TaggerInput extends AgentInput {
   text: string;
-  extra: { existing: string[] };
+  /** Tags to show besides the workspace's (the runtime fetches those with list_tags). */
+  extra?: { existing?: string[] };
 }
 
 export interface TaggerOutput {
@@ -47,11 +49,16 @@ export const taggerAgent: AgentDefinition<TaggerInput, TaggerOutput> = registerA
   system: (input) =>
     "You are a tag-suggestion assistant. The user shares a markdown document and the tags they already use " +
     "across their notes. Suggest 3 to 7 concise lowercase kebab-case tags that capture the document's topics. " +
-    "Prefer tags from the existing pool when they fit. Write tags in the document's own language" +
+    "Prefer tags from the existing pool (the list_tags result: the workspace's tags, most used first) when they fit. " +
+    "Write tags in the document's own language" +
     (scriptOf(input.text) === "hebrew" ? " (Hebrew)" : "") +
     '. Output ONLY a JSON object of the form {"tags": ["tag-one", "tag-two"]}.',
   user: (input) =>
-    `Existing tags (most used first):\n${input.extra.existing.slice(0, 80).join(", ") || "(none yet)"}\n\nDocument:\n${clip(input.text, 6000)}`,
+    (input.extra?.existing?.length ? `Also consider these tags: ${input.extra.existing.slice(0, 80).join(", ")}\n\n` : "") + `Document:\n${clip(input.text, 6000)}`,
+  tools: pickTools("list_tags"),
+  // The workspace's vocabulary, fetched through the runtime (5.3.1).
+  context: () => [{ tool: "list_tags", args: { limit: 80 } }],
+  maxSteps: 3,
   outputSchema: {
     type: "object",
     properties: { tags: { type: "array", items: { type: "string", minLength: 1, maxLength: 60 }, minItems: 1, maxItems: 10 } },

@@ -94,14 +94,21 @@ export const writeFileTool = defineTool<{ path: string; content: string }, Stage
   },
 });
 
-export const listFilesTool = defineTool<{ prefix?: string; limit?: number }, { files: string[]; total: number }>({
+export const listFilesTool = defineTool<
+  { prefix?: string; limit?: number; modifiedSince?: number; withModified?: boolean },
+  { files: string[]; total: number; modified?: Record<string, number> }
+>({
   name: "list_files",
-  description: "List markdown files in the workspace, optionally under a folder prefix.",
+  description:
+    "List markdown files in the workspace, optionally under a folder prefix, or only those modified since a time (ms since epoch). " +
+    "withModified adds each file's modification time.",
   parameters: {
     type: "object",
     properties: {
       prefix: { type: "string", description: "Folder prefix, e.g. projects/" },
       limit: { type: "number", minimum: 1 },
+      modifiedSince: { type: "number", minimum: 0, description: "Only files modified after this time (ms since epoch)" },
+      withModified: { type: "boolean" },
     },
     additionalProperties: false,
   },
@@ -109,11 +116,16 @@ export const listFilesTool = defineTool<{ prefix?: string; limit?: number }, { f
     needWorkspace();
     const prefix = typeof args.prefix === "string" ? safeWorkspacePath(args.prefix) : "";
     const limit = Math.min(500, Math.max(1, optionalNumber(args, "limit", 200)));
+    const since = typeof args.modifiedSince === "number" ? args.modifiedSince : null;
     const all = (await listWorkspace({ includeAssets: false }))
-      .map((f) => f.path)
-      .filter((p) => /\.(md|markdown|txt)$/i.test(p) && (!prefix || p.startsWith(prefix)))
-      .sort();
-    return { files: all.slice(0, limit), total: all.length };
+      .filter((f) => /\.(md|markdown|txt)$/i.test(f.path) && (!prefix || f.path.startsWith(prefix)) && (since === null || f.modified > since))
+      .sort((a, b) => (a.path < b.path ? -1 : a.path > b.path ? 1 : 0));
+    const shown = all.slice(0, limit);
+    return {
+      files: shown.map((f) => f.path),
+      total: all.length,
+      ...(args.withModified ? { modified: Object.fromEntries(shown.map((f) => [f.path, f.modified])) } : {}),
+    };
   },
 });
 

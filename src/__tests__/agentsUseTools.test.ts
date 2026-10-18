@@ -1,0 +1,215 @@
+/**
+ * Plan 5.3: every agent uses its tools through the runtime.
+ *  - Each of the 13 agents declares the plan's tools, and a fake-model run
+ *    of its eval case makes the expected tool call, which the runtime
+ *    executes against an in-memory workspace (5.3.1–5.3.3).
+ *  - Context calls: the runtime fetches what an agent always needs through
+ *    the same tool path, once per run, and the model sees the results.
+ *  - Small models are held to a JSON Schema on every turn: the protocol's
+ *    (a call to one of the agent's tools, or the final answer) (5.3.5).
+ *  - A streaming agent's tools are context only; its answer still streams.
+ *  - callTool runs one tool under the same rules, for commands.
+ *  - The builder proposes all files at once, or none (5.3.2).
+ */
+import { describe, it, expect, vi, beforeEach } from "vitest";
+
+vi.mock("../storage/workspace", async (orig) => {
+  const m = (await import("./helpers/evalVault")).workspaceModule(await orig()) as { writeWorkspaceFile: (p: string, c: string) => Promise<void> };
+  return { ...m, writeWorkspaceFile: vi.fn(m.writeWorkspaceFile) };
+});
+vi.mock("../sync/git", async (orig) => (await import("./helpers/evalVault")).gitModule(await orig()));
+vi.mock("../store/useStore", () => ({ useAppStore: { getState: () => ({ aiKey: null, useLocalAi: false, useFineTunedModel: false, fineTunedModelId: null }) } }));
+vi.mock("../store/useToastStore", () => ({ toast: { info: vi.fn(), warn: vi.fn(), error: vi.fn() } }));
+vi.mock("../billing/aiQuota", () => ({ chargeAiCommandDispatch: vi.fn(), consumeAiPrompt: vi.fn(() => true), aiQuotaStatus: () => ({ allowed: true, limit: Infinity }), AiQuotaExceededError: class extends Error {} }));
+vi.mock("../ai/llm", async (orig) => ({ ...(await orig<object>()), chat: vi.fn(async () => "generated text") }));
+
+import "../agents/defs";
+import { getAgent } from "../agents/registry";
+import { callTool, runAgent } from "../agents/runtime";
+import { registerExecutor, resetExecutors } from "../agents/executors";
+import { EVAL_CASES, type EvalCase } from "../agents/eval/fixtures";
+import { scoreCases } from "../agents/eval/score";
+import { toolCheck } from "../agents/eval/run";
+import { clearStagedChanges, listStagedChanges, stageChange } from "../agents/staging";
+import { writeWorkspaceFile } from "../storage/workspace";
+import type { AgentDefinition, AgentTool, ExecutorRequest, ExecutorResponse } from "../agents/types";
+import { fakeExecutor, reply } from "./helpers/fakeExecutor";
+import { resetVault, vaultFiles as vault } from "./helpers/evalVault";
+import { scriptedAnswer } from "../agents/eval/scripted";
+
+beforeEach(() => {
+  resetExecutors();
+  clearStagedChanges();
+  resetVault();
+  vi.mocked(writeWorkspaceFile).mockClear();
+  localStorage.setItem("lumen.ai.cache", "off");
+});
+
+/** The plan's tools per agent (5.3.1–5.3.3). */
+const PLAN: Record<string, string[]> = {
+  tagger: ["list_tags"],
+  linker: ["search_workspace", "list_files"],
+  outliner: ["get_document"],
+  diagrammer: ["validate_mermaid"],
+  tasker: ["get_document"],
+  translator: ["get_document"],
+  charter: ["csv_parse", "validate_echarts"],
+  committer: ["git_diff"],
+  writer: ["get_selection"],
+  templater: ["get_selection"],
+  "builder-spec": ["list_files"],
+  proofreader: ["get_document"],
+  stylist: ["read_file", "list_files"],
+};
+
+const scriptedModel = (c: EvalCase) => (req: ExecutorRequest): ExecutorResponse => scriptedAnswer(c, req);
+
+describe("every agent declares the plan's tools", () => {
+  it.each(Object.entries(PLAN))("%s", (id, tools) => {
+    const def = getAgent(id)!;
+    expect(def, id).toBeTruthy();
+    expect(def.tools?.map((t) => t.name)).toEqual(expect.arrayContaining(tools));
+    expect(def.maxSteps, `${id} sets its own maxSteps (5.3.4)`).toBeGreaterThan(0);
+    for (const c of def.context?.({ text: "x", extra: { repo: "repo" } } as never) ?? []) expect(def.tools!.map((t) => t.name)).toContain(c.tool);
+  });
+
+  it("the eval covers all 13 agents, each with an expected tool call", () => {
+    const covered = new Set(EVAL_CASES.map((c) => c.agent));
+    for (const id of Object.keys(PLAN)) expect(covered, id).toContain(id);
+    for (const c of EVAL_CASES) expect(PLAN[c.agent], c.id).toContain(c.tool.name === "get_headings" ? "get_document" : c.tool.name);
+  });
+});
+
+describe("a fake-model run of each eval case makes its tool call through the runtime", () => {
+  it.each(EVAL_CASES.map((c) => [c.id, c] as const))("%s", async (_id, c) => {
+    const ex = fakeExecutor(scriptedModel(c), { supportsSchema: () => true, supportsTools: () => true });
+    registerExecutor(ex);
+    const def = getAgent(c.agent)!;
+    const run = await runAgent(def, c.input, { document: c.input.text, selection: c.input.selection });
+    expect(run.error ?? "", c.id).toBe("");
+    expect(run.status).toBe("ok");
+    const tool = toolCheck(c, run.steps);
+    expect(tool.detail, c.id).toBe(`called ${c.tool.name}`);
+    for (const check of scoreCases(run.output, c.checks)) expect(check.ok, `${c.id}: ${check.detail}`).toBe(true);
+    if (def.streaming) {
+      // Context only: the model is offered no tools and may stream.
+      expect(ex.calls.every((r) => !r.tools && !r.schema)).toBe(true);
+      expect(run.steps.find((s) => s.kind === "tool")?.detail).toMatch(/^context/);
+    } else if ((def.tier ?? "small") === "small" || def.tier === "tiny") {
+      // Every turn held to the protocol's schema; no native tools.
+      for (const r of ex.calls) {
+        expect(r.tools).toBeUndefined();
+        const names = ((r.schema as { anyOf: Array<{ properties: { tool?: { enum: string[] } } }> }).anyOf ?? []).flatMap((b) => b.properties.tool?.enum ?? []);
+        expect(names).toEqual(expect.arrayContaining(def.tools!.map((t) => t.name)));
+      }
+    } else {
+      expect(ex.calls[0].tools?.map((t) => t.name)).toEqual(def.tools!.map((t) => t.name));
+    }
+  });
+});
+
+describe("context calls", () => {
+  const upper: AgentTool = { name: "upper", description: "upper", scope: "read", parameters: { type: "object", properties: { text: { type: "string" } }, required: ["text"] }, run: vi.fn(async (a: Record<string, unknown>) => String(a.text).toUpperCase()) };
+
+  it("run once per run, through the tool path, and the model sees them as its own calls", async () => {
+    const ex = fakeExecutor((_req, n) => reply(n === 1 ? "not json" : '{"final": "done"}'), { supportsSchema: () => true });
+    registerExecutor(ex);
+    const def: AgentDefinition<{ text: string }, string> = { id: "ctx", description: "", system: "s", user: () => "u", tools: [upper], context: (i) => [{ tool: "upper", args: { text: i.text } }], maxRetries: 1, validators: [{ name: "v", check: (o) => (o === "done" ? { ok: true } : { ok: false, reason: "r" }) }] };
+    const run = await runAgent(def, { text: "abc" });
+    expect(run.status).toBe("ok");
+    expect(upper.run).toHaveBeenCalledTimes(1); // not again on the retry
+    for (const r of ex.calls) {
+      const res = r.messages.find((m) => m.role === "tool" && m.name === "upper");
+      expect(res?.content).toContain('"result":"ABC"');
+      expect(r.messages.find((m) => m.role === "assistant" && m.toolCalls?.[0]?.name === "upper")).toBeTruthy();
+    }
+    expect(run.steps.filter((s) => s.kind === "tool")).toEqual([expect.objectContaining({ label: "upper", ok: true, detail: expect.stringMatching(/^context/) })]);
+  });
+
+  it("a context call to a tool the agent does not have is refused like any other call", async () => {
+    registerExecutor(fakeExecutor(() => reply('{"final": "x"}')));
+    const run = await runAgent({ id: "bad", description: "", system: "s", user: () => "u", tools: [upper], context: () => [{ tool: "write_file", args: { path: "a.md", content: "x" } }] }, {});
+    expect(run.steps[0]).toMatchObject({ kind: "tool", label: "write_file", ok: false });
+    expect(listStagedChanges()).toEqual([]);
+  });
+});
+
+describe("callTool", () => {
+  it("runs one tool under the runtime's rules", async () => {
+    expect(await callTool<{ files: string[] }>("list_files", { prefix: "journal/" })).toMatchObject({ files: ["journal/a.md", "journal/b.md"], total: 2 });
+    expect(await callTool("list_files", { modifiedSince: 1500, withModified: true })).toMatchObject({ files: ["journal/a.md", "journal/b.md"], modified: { "journal/a.md": 2000 } });
+    await expect(callTool("read_file", { path: 7 })).rejects.toMatchObject({ code: "bad-args" });
+    // A write tool needs the scope, and then only stages.
+    await expect(callTool("write_file", { path: "x.md", content: "x" })).rejects.toMatchObject({ code: "denied" });
+    await callTool("write_file", { path: "x.md", content: "x" }, { grants: ["write"], agentId: "builder" });
+    expect(listStagedChanges()).toMatchObject([{ path: "x.md", agentId: "builder", status: "pending" }]);
+    expect(vault.has("x.md")).toBe(false);
+  });
+});
+
+describe("builder: all files or none (5.3.2)", () => {
+  const spec = { name: "pomodoro", description: "d", features: ["f"], techStack: ["js"], fileStructure: ["index.html", "app.js", "style.css"] };
+  const files: Record<string, string> = { "index.html": "<!doctype html>\n<html><body><p>hi</p></body></html>", "app.js": "console.log('hi');", "style.css": "body { margin: 0; }" };
+  const builder = (broken?: string) =>
+    fakeExecutor((req) => {
+      const sys = req.messages[0].content;
+      if (/product architect/i.test(sys)) return reply(JSON.stringify(spec), req.model);
+      const path = /File to generate: (\S+)/.exec(req.messages.map((m) => m.content).join("\n"))![1];
+      return reply(path === broken ? "" : files[path], req.model);
+    });
+
+  it("a finished product is proposed as one batch of staged files; nothing is written", async () => {
+    registerExecutor(builder());
+    const { createProduct } = await import("../ai/productAgent");
+    const res = await createProduct("a pomodoro timer");
+    expect(res.success).toBe(true);
+    const staged = listStagedChanges();
+    expect(staged.map((c) => c.path).sort()).toEqual([...res.files.keys()].sort());
+    expect(new Set(staged.map((c) => c.runId)).size).toBe(1);
+    expect(writeWorkspaceFile).not.toHaveBeenCalled();
+  });
+
+  it("a builder that fails midway leaves 0 files", async () => {
+    registerExecutor(builder("app.js"));
+    const { createProduct } = await import("../ai/productAgent");
+    const res = await createProduct("a pomodoro timer");
+    expect(res.success).toBe(false);
+    expect(listStagedChanges({ all: true })).toEqual([]);
+    expect(writeWorkspaceFile).not.toHaveBeenCalled();
+  });
+
+  it("if staging stops partway, the files already staged are withdrawn", async () => {
+    registerExecutor(builder());
+    // Leave room for two proposals only: the third cannot be staged.
+    for (let i = 0; i < 198; i++) stageChange({ kind: "file", path: `filler/${i}.md`, before: null, after: "x", summary: "s" }, { tool: "write_file" });
+    const { createProduct } = await import("../ai/productAgent");
+    const res = await createProduct("a pomodoro timer");
+    expect(res.success).toBe(false);
+    const mine = listStagedChanges({ all: true }).filter((c) => c.agentId === "builder");
+    expect(mine.length).toBe(2);
+    expect(mine.map((c) => c.status)).toEqual(["rejected", "rejected"]); // withdrawn: nothing waits for approval
+    expect(writeWorkspaceFile).not.toHaveBeenCalled();
+  });
+});
+
+describe("protocol schema and committer output", () => {
+  it("a JSON-ReAct turn is one of the agent's tools with its args, or the final answer", async () => {
+    const { protocolSchema } = await import("../agents/protocol");
+    const { validateSchema } = await import("../agents/schema");
+    const tools = getAgent("charter")!.tools!;
+    const schema = protocolSchema(tools, getAgent("charter")!.outputSchema);
+    expect(validateSchema({ tool: "csv_parse", args: { text: "a,b\n1,2" } }, schema)).toEqual([]);
+    expect(validateSchema({ final: { series: [{ type: "bar", data: [1] }] } }, schema)).toEqual([]);
+    expect(validateSchema({ tool: "write_file", args: { path: "x", content: "y" } }, schema).length).toBeGreaterThan(0); // not its tool
+    expect(validateSchema({ tool: "csv_parse", args: { text: "x", bogus: 1 } }, schema).length).toBeGreaterThan(0); // bad args
+    expect(validateSchema({ final: { series: [] } }, schema).length).toBeGreaterThan(0); // final must match the agent's schema
+    expect(validateSchema("prose", schema).length).toBeGreaterThan(0);
+  });
+
+  it("commitMessage keeps a clean subject and at most four short body lines", async () => {
+    const { commitMessage } = await import("../agents/defs");
+    expect(commitMessage("```\nfeat(x): add y.\n\nWhy: because.\n- detail one\n```")).toBe("feat(x): add y\n\nWhy: because.\n- detail one");
+    expect(commitMessage("fix: z")).toBe("fix: z");
+    expect(commitMessage(["fix: z", "", "1", "2", "3", "4", "5"].join("\n")).split("\n")).toHaveLength(6);
+  });
+});

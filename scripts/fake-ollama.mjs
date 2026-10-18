@@ -7,6 +7,9 @@
 //
 // Chat answers come from the eval fixtures: the first case whose input text
 // appears in the prompt wins; anything else gets a generic JSON/text answer.
+// When the agent may call tools (native `tools`, or JSON-ReAct under the
+// protocol's `format`), the first answer is the case's expected tool call
+// (plan 5.3) and the reference answer comes once its result is back.
 // Embeddings are deterministic hashes, so equal texts give equal vectors.
 import http from "node:http";
 import { readFileSync } from "node:fs";
@@ -25,7 +28,7 @@ const fixturesPath = opt("--fixtures", "src/agents/eval/fixtures.ts");
 let cases = [];
 try {
   const mod = await import(new URL(fixturesPath, `file://${process.cwd()}/`).href);
-  cases = (mod.EVAL_CASES ?? []).map((c) => ({ id: c.id, key: String(c.input.text ?? "").slice(0, 40), example: c.example }));
+  cases = (mod.EVAL_CASES ?? []).map((c) => ({ id: c.id, key: String(c.input.text ?? "").slice(0, 40), example: c.example, tool: c.tool }));
 } catch (e) {
   // hygiene-allow: a CLI fixture reporting its own startup problem
   console.error(`fake ollama: fixtures not loaded (${e?.message ?? e}); generic answers only`);
@@ -48,8 +51,57 @@ const AGENT_HINTS = {
   diagrammer: /mermaid/i,
   charter: /echarts/i,
   committer: /commit/i,
-  writer: /writing assistant|continue|ghostwriter/i,
+  writer: /ghostwriter|continue/i,
+  templater: /follow the instruction/i,
+  stylist: /writer's style/i,
+  builder: /product architect/i,
 };
+
+/** The case's own tool call is already in the conversation (a context call has other arguments). */
+function madeCall(messages, tool) {
+  const want = JSON.stringify(tool.args ?? {});
+  return messages.some((m) => (m.tool_calls ?? []).some((t) => t.function?.name === tool.name && JSON.stringify(t.function?.arguments ?? {}) === want));
+}
+
+/** The reply for one chat request: { content } or { tool_calls }. */
+function messageFor(messages, format, tools) {
+  const hit = caseFor(messages, format);
+  const protocol = !!format?.anyOf;
+  if (hit?.tool && (tools?.length || protocol) && !madeCall(messages, hit.tool)) {
+    if (tools?.length) return { content: "", tool_calls: [{ function: { name: hit.tool.name, arguments: hit.tool.args ?? {} } }] };
+    return { content: JSON.stringify({ tool: hit.tool.name, args: hit.tool.args ?? {} }) };
+  }
+  const content = hit ? hit.example : answerFor(messages, format);
+  if (!protocol) return { content };
+  let final = content;
+  try {
+    final = JSON.parse(content);
+  } catch {
+    /* a text answer */
+  }
+  return { content: JSON.stringify({ final }) };
+}
+
+function caseFor(messages, format) {
+  const all = messages.map((m) => m.content ?? "").join("\n");
+  const system = messages.find((m) => m.role === "system")?.content ?? "";
+  let hits = cases.filter((c) => all.includes(c.key));
+  if (hits.length > 1 && format && Array.isArray(format.required)) {
+    hits = hits.filter((c) => {
+      try {
+        const v = JSON.parse(c.example);
+        return format.required.every((k) => k in v);
+      } catch {
+        return false;
+      }
+    });
+  }
+  if (hits.length > 1) {
+    const byAgent = hits.filter((c) => AGENT_HINTS[c.id.split("-")[0]]?.test(system));
+    if (byAgent.length) hits = byAgent;
+  }
+  return hits[0] ?? null;
+}
 
 function answerFor(messages, format) {
   const all = messages.map((m) => m.content ?? "").join("\n");
@@ -102,14 +154,14 @@ const server = http.createServer((req, res) => {
     }
     if (url === "/api/chat") {
       const j = JSON.parse(body || "{}");
-      const content = answerFor(j.messages ?? [], j.format);
+      const message = { role: "assistant", ...messageFor(j.messages ?? [], j.format, j.tools) };
       const usage = { prompt_eval_count: 10, eval_count: 10 };
       if (j.stream) {
         res.setHeader("content-type", "application/x-ndjson");
-        res.write(JSON.stringify({ message: { role: "assistant", content } }) + "\n");
+        res.write(JSON.stringify({ message }) + "\n");
         return res.end(JSON.stringify({ done: true, ...usage }) + "\n");
       }
-      return res.end(JSON.stringify({ message: { role: "assistant", content }, done: true, ...usage }));
+      return res.end(JSON.stringify({ message, done: true, ...usage }));
     }
     res.statusCode = 404;
     res.end("{}");

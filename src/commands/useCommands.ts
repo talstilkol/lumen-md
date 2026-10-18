@@ -853,7 +853,8 @@ export function useCommands({
             );
             if (result.success) {
               showAiToast(t("toast.productCreatedFilesGenerated", { count: result.files.size }), "success");
-              const summary = `# Product Created\n\n${result.files.size} files generated:\n\n${[...result.files.keys()].map((f) => `- \`${f}\``).join("\n")}`;
+              // The files are staged for approval, not written (plan 5.3.2).
+              const summary = `# Product Created\n\n${result.files.size} files generated, waiting for your approval among the changes agents proposed:\n\n${[...result.files.keys()].map((f) => `- \`${f}\``).join("\n")}`;
               setContent(summary);
             } else {
               showAiToast(t("toast.productCreationFailed", { error: result.error ?? "" }), "error");
@@ -1657,8 +1658,11 @@ export function useCommands({
         icon: cmdIcons.Sparkles,
         group: t("group.tools"),
         action: async () => {
-          const { listWorkspace, readWorkspaceFile, writeWorkspaceFile, isOPFSAvailable } = await import("../storage/workspace");
+          const { readWorkspaceFile, writeWorkspaceFile, isOPFSAvailable } = await import("../storage/workspace");
           if (!isOPFSAvailable()) return;
+          // The digest reads the vault through the agent runtime's tools
+          // (list_files + read_file, plan 5.3.3); it writes its own note.
+          const { callTool } = await import("../agents/runtime");
           const { writeDigest } = await import("../agents/defs/digester");
           const KEY = "lumen.digest.last";
           const now = Date.now();
@@ -1671,10 +1675,21 @@ export function useCommands({
           const lang = getLocale();
           const folder = lang === "he" ? "סיכומים" : "Digests";
           const fmtDate = (ms: number) => new Date(ms).toLocaleString(getLocale(), { dateStyle: "medium", timeStyle: "short" });
-          const res = await writeDigest(
-            { list: () => listWorkspace({ includeAssets: false }), read: readWorkspaceFile, write: writeWorkspaceFile },
-            { since, now, lang, folder, formatDate: fmtDate },
-          );
+          const d = new Date(now);
+          const todayPath = `${folder}/${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}.md`;
+          const list = async () => {
+            const changed = await callTool<{ files: string[]; modified?: Record<string, number> }>("list_files", { modifiedSince: since, withModified: true, limit: 500 });
+            const entries = changed.files.map((path) => ({ path, name: path.split("/").pop()!, size: 0, modified: changed.modified?.[path] ?? now }));
+            // Today's digest note, changed or not: a second digest is appended to it.
+            if (!changed.files.includes(todayPath) && (await callTool<{ exists: boolean }>("file_exists", { path: todayPath })).exists) {
+              entries.push({ path: todayPath, name: todayPath.split("/").pop()!, size: 0, modified: 0 });
+            }
+            return entries;
+          };
+          // Its own note is read the way it is written, whole: it is rewritten
+          // as the old text plus today's part, so a truncated read would lose text.
+          const read = async (path: string) => (path === todayPath ? readWorkspaceFile(path) : (await callTool<{ content: string }>("read_file", { path })).content);
+          const res = await writeDigest({ list, read, write: writeWorkspaceFile }, { since, now, lang, folder, formatDate: fmtDate });
           if (!res.ok) {
             // The checkpoint stays, so these notes are in the next digest.
             showAiToast(t("toast.digest.readFailed", { count: res.failed.length }), "error");

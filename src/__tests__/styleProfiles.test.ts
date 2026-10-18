@@ -8,7 +8,17 @@ const notes = [
   { path: "j/b.md", text: "Another note with plenty of words to count as prose. ".repeat(6) + "\n```js\nconst code = 1;\n```" },
   { path: "other/c.md", text: "tiny" },
 ];
-vi.mock("../storage/workspaceNotes", () => ({ readAllNotes: async () => notes }));
+// The stylist reads the notes through the runtime's list_files + read_file (5.3.3).
+vi.mock("../storage/workspace", async (orig) => ({
+  ...(await orig<object>()),
+  isOPFSAvailable: () => true,
+  listWorkspace: async () => notes.map((n) => ({ path: n.path, name: n.path.split("/").pop()!, size: n.text.length, modified: 1 })),
+  readWorkspaceFile: async (p: string) => {
+    const n = notes.find((x) => x.path === p);
+    if (!n) throw new Error("ENOENT");
+    return n.text;
+  },
+}));
 
 import { registerExecutor, resetExecutors } from "../agents/executors";
 import { fakeExecutor, sequence } from "./helpers/fakeExecutor";
