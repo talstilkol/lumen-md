@@ -1401,6 +1401,7 @@
   "clip.empty": "Le presse-papiers ne contient pas de texte",
   "clip.saved": "Enregistré dans la bibliothèque : {path}",
   "clip.failed": "Impossible de capturer la page : {message}. Copiez la partie voulue et utilisez « Capturer depuis le presse-papiers ».",
+  "clip.needsService": "Cette page ne peut pas être récupérée depuis le navigateur sur ce déploiement : il faut le service de recherche (VITE_RESEARCH_ENDPOINT). Copiez la partie voulue et utilisez « Capturer depuis le presse-papiers ».",
   "research.consent.title": "Rechercher sur le web ?",
   "research.consent.body": "Votre question (seulement elle, pas vos notes) est envoyée au service de recherche choisi, qui lit les pages trouvées. Avec « local uniquement », la recherche se fait dans votre bibliothèque.",
   "research.consent.ok": "Autoriser (une fois pour toutes)",

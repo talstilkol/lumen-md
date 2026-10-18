@@ -42,6 +42,8 @@ cp .env.onprem.example .env.onprem
 $EDITOR .env.onprem
 #   set LUMEN_PG_PASSWORD to a strong value
 #   set LUMEN_BASE_URL to your domain
+#   set LUMEN_COLLAB_TOKEN (openssl rand -hex 32) — clients enter it in
+#   Collab settings → "Server access token"
 #   leave Stripe / Sentry / WorkOS empty for now
 
 # 3. Build + start

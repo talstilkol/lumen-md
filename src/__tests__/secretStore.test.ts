@@ -13,11 +13,16 @@ import {
 } from "../lib/secretStore";
 
 const tauriStore = new Map<string, string>();
+const faults = { gets: 0, sets: 0 };
 vi.mock("@tauri-apps/api/core", () => ({
   invoke: async (cmd: string, args?: { name?: string; value?: string | null }) => {
     if (cmd === "secret_available") return true;
-    if (cmd === "secret_get") return tauriStore.get(args!.name!) ?? null;
+    if (cmd === "secret_get") {
+      if (faults.gets > 0 && faults.gets--) throw new Error("keychain locked");
+      return tauriStore.get(args!.name!) ?? null;
+    }
     if (cmd === "secret_set") {
+      if (faults.sets > 0 && faults.sets--) throw new Error("access denied");
       if (args!.value == null) tauriStore.delete(args!.name!);
       else tauriStore.set(args!.name!, args!.value);
       return null;
@@ -37,6 +42,9 @@ describe("secretStore", () => {
   beforeEach(async () => {
     delete (window as unknown as Record<string, unknown>).__TAURI_INTERNALS__;
     tauriStore.clear();
+    faults.gets = 0;
+    faults.sets = 0;
+    vi.unstubAllGlobals();
     await freshDb();
   });
 
@@ -96,5 +104,51 @@ describe("secretStore", () => {
     __resetSecretStore();
     await initSecretStore();
     expect(getSecret("lumen.ai.key.mistral")).toBe("mk-1");
+  });
+
+  it("stays on the keychain after a transient read error", async () => {
+    (window as unknown as Record<string, unknown>).__TAURI_INTERNALS__ = {};
+    tauriStore.set("lumen.ai.key.a", "ka");
+    tauriStore.set("lumen.ai.key.b", "kb");
+    localStorage.setItem("lumen.secrets.index", JSON.stringify(["lumen.ai.key.a", "lumen.ai.key.b"]));
+    faults.gets = 1; // first read fails once, the retry succeeds
+    await initSecretStore();
+    expect(secretStoreMode()).toBe("keychain");
+    expect(getSecret("lumen.ai.key.a")).toBe("ka");
+    expect(getSecret("lumen.ai.key.b")).toBe("kb");
+
+    __resetSecretStore();
+    faults.gets = 100; // keychain locked for the whole start-up
+    await initSecretStore();
+    faults.gets = 0;
+    expect(secretStoreMode()).toBe("keychain");
+    setSecret("lumen.ai.key.c", "kc");
+    await flushSecrets();
+    expect(tauriStore.get("lumen.ai.key.c")).toBe("kc"); // not IndexedDB
+  });
+
+  it("moves the legacy git token to localStorage when WebCrypto is missing", async () => {
+    vi.stubGlobal("crypto", { getRandomValues: (a: Uint8Array) => a });
+    await set("lumen.git.token.v1", "ghp_old");
+    await initSecretStore();
+    expect(secretStoreMode()).toBe("plain");
+    expect(getSecret("lumen.git.token.v1")).toBe("ghp_old");
+    expect(await get("lumen.git.token.v1")).toBeUndefined();
+  });
+
+  it("reports a failed write and rolls the in-memory value back", async () => {
+    (window as unknown as Record<string, unknown>).__TAURI_INTERNALS__ = {};
+    await initSecretStore();
+    await setSecret("lumen.ai.key.x", "old");
+    faults.sets = 1;
+    const write = setSecret("lumen.ai.key.x", "new");
+    await expect(write).rejects.toThrow("access denied");
+    await expect(flushSecrets()).rejects.toThrow("access denied");
+    expect(getSecret("lumen.ai.key.x")).toBe("old");
+    expect(tauriStore.get("lumen.ai.key.x")).toBe("old");
+    // The queue still works afterwards, and the failure is reported once.
+    await setSecret("lumen.ai.key.x", "newer");
+    await expect(flushSecrets()).resolves.toBeUndefined();
+    expect(tauriStore.get("lumen.ai.key.x")).toBe("newer");
   });
 });

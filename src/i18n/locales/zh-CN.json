@@ -1401,6 +1401,7 @@
   "clip.empty": "剪贴板中没有文本",
   "clip.saved": "已保存到资料库：{path}",
   "clip.failed": "无法剪藏此页面：{message}。请复制所需部分并使用“从剪贴板剪藏”。",
+  "clip.needsService": "此部署无法直接从浏览器获取该页面——需要研究服务（VITE_RESEARCH_ENDPOINT）。请复制所需部分并使用“从剪贴板剪藏”。",
   "research.consent.title": "在网络上研究？",
   "research.consent.body": "你的问题（仅问题本身，不含笔记）会发送给所选搜索服务，由其读取找到的网页。“仅本地”策略下改为在资料库中研究。",
   "research.consent.ok": "允许（以后不再询问）",

@@ -1401,6 +1401,7 @@
   "clip.empty": "Die Zwischenablage enthält keinen Text",
   "clip.saved": "In der Bibliothek gespeichert: {path}",
   "clip.failed": "Seite konnte nicht ausgeschnitten werden: {message}. Kopiere den Teil und nutze „Aus der Zwischenablage ausschneiden“.",
+  "clip.needsService": "Diese Seite kann in dieser Installation nicht direkt im Browser geladen werden – dafür ist der Recherchedienst nötig (VITE_RESEARCH_ENDPOINT). Kopiere den Teil und nutze „Aus der Zwischenablage ausschneiden“.",
   "research.consent.title": "Im Web recherchieren?",
   "research.consent.body": "Deine Frage (nur die Frage, nicht deine Notizen) geht an den gewählten Suchdienst, der die Seiten liest. Mit „nur lokal“ recherchiert Lumen stattdessen in deiner Bibliothek.",
   "research.consent.ok": "Erlauben (einmalig für immer)",

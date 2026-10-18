@@ -225,7 +225,8 @@ export interface SearchHit {
 /** Cheap fuzzy + substring search across filenames, paths, and content. */
 export async function searchWorkspace(
   query: string,
-  opts: { limit?: number } = {},
+  /** `filter`: only these paths — applied before `limit`. */
+  opts: { limit?: number; filter?: (path: string) => boolean } = {},
 ): Promise<SearchHit[]> {
   await ensureIndex();
   const limit = opts.limit ?? 30;
@@ -238,6 +239,7 @@ export async function searchWorkspace(
   }
   const out: SearchHit[] = [];
   for (const file of cache.byPath.values()) {
+    if (opts.filter && !opts.filter(file.path)) continue;
     const nameLower = file.name.toLowerCase();
     const pathLower = file.path.toLowerCase();
     const contentLower = file.content.toLowerCase();

@@ -64,6 +64,26 @@ describe("rehypeSanitizeRaw (T48)", () => {
     expect(String(divs[1].properties.style)).toContain("position: static");
   });
 
+  it("drops host-app classes that would restore fixed positioning, keeps pipeline classes", async () => {
+    const t = await tree(
+      '<div class="lumen-slash-menu" style="inset:0;width:100vw;height:100vh">a</div>\n<div class="fixed inset-0 z-50 admonition warning">b</div>\n\n- [ ] todo\n\n```js\nx\n```\n',
+    );
+    const divs = elements(t).filter((e) => e.tagName === "div");
+    expect(divs[0].properties.className).toBeUndefined();
+    expect(divs[1].properties.className).toEqual(["admonition", "warning"]);
+    const li = elements(t).find((e) => e.tagName === "li");
+    expect(li?.properties.className).toEqual(["task-list-item"]);
+    const code = elements(t).find((e) => e.tagName === "code");
+    expect(code?.properties.className).toEqual(["language-js"]);
+  });
+
+  it("rejects scheme-less iframe sources (would be same-origin with the app)", async () => {
+    const t = await tree('<iframe src="/"></iframe>\n<iframe src="./x.html"></iframe>\n<iframe src="//evil.example/x"></iframe>\n');
+    expect(elements(t).filter((e) => e.tagName === "iframe")).toHaveLength(0);
+    expect(safeUrl("/", "iframe", "src")).toBe(false);
+    expect(safeUrl("/", "img", "src")).toBe(true);
+  });
+
   it("keeps GFM task-list checkboxes (disabled) and ordinary inline HTML", async () => {
     const t = await tree("- [x] done\n- [ ] todo\n\n<details><summary>More</summary>\n\n<kbd>Ctrl</kbd> <mark>hi</mark>\n\n</details>\n");
     const list = tags(t);

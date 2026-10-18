@@ -23,6 +23,13 @@ vi.mock("../ai/llm", async (orig) => ({
   chat: (...a: unknown[]) => chat(...(a as [])),
 }));
 vi.mock("../ui/AiToast", () => ({ showAiToast: vi.fn() }));
+type RerankItems = Array<Record<string, unknown>>;
+const rerankImpl = vi.fn(async (_q: string, items: RerankItems, _o?: { signal?: AbortSignal }) =>
+  items.map((i) => ({ ...i, rerankScore: 1 })),
+);
+vi.mock("../ai/reranker", () => ({
+  rerank: (...a: unknown[]) => rerankImpl(...(a as [string, RerankItems, { signal?: AbortSignal }])),
+}));
 
 import { SearchDialog } from "../ui/SearchDialog";
 import { useEntitlement, __setEntitlementEndpointForTesting } from "../billing/useEntitlement";
@@ -76,6 +83,30 @@ describe("Smart search gate", () => {
     fireEvent.change(screen.getByRole("textbox"), { target: { value: "quarterly plan" } });
     await waitFor(() => expect(searchHybrid).toHaveBeenCalled());
     expect(screen.queryByTestId("upgrade-notice")).toBeNull();
+  });
+});
+
+describe("Smart search rerank", () => {
+  it("aborts the stale model rerank when the query changes", async () => {
+    searchHybrid.mockImplementation((async () => [
+      { path: "a.md", snippet: "a", score: 1 },
+      { path: "b.md", snippet: "b", score: 0.5 },
+    ]) as unknown as () => Promise<never[]>);
+    const signals: AbortSignal[] = [];
+    rerankImpl.mockImplementationOnce((_q, _items, o) => {
+      signals.push(o!.signal!);
+      return new Promise(() => {}); // a long inference still in the worker
+    });
+    try {
+      openOn("smart");
+      fireEvent.change(screen.getByRole("textbox"), { target: { value: "first" } });
+      await waitFor(() => expect(signals).toHaveLength(1));
+      expect(signals[0].aborted).toBe(false);
+      fireEvent.change(screen.getByRole("textbox"), { target: { value: "first second" } });
+      expect(signals[0].aborted).toBe(true);
+    } finally {
+      searchHybrid.mockImplementation(async () => []);
+    }
   });
 });
 

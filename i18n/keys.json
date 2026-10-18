@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-10-18T02:11:30.369Z",
+  "generated_at": "2026-10-18T03:18:39.134Z",
   "source": "src/i18n/index.ts (en bundle)",
-  "count": 1409,
+  "count": 1410,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -1783,6 +1783,11 @@
       "vars": [
         "message"
       ]
+    },
+    {
+      "key": "clip.needsService",
+      "en": "This page can't be fetched from the browser on this deployment — it needs the research service (VITE_RESEARCH_ENDPOINT). Copy the part you want and use \"Clip from clipboard\".",
+      "vars": []
     },
     {
       "key": "research.consent.title",

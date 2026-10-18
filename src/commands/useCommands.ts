@@ -11,6 +11,7 @@ import { uiAlert, uiConfirm, uiPrompt, uiSelect } from "../ui/PromptDialog";
 import { generateAiCommitMessage } from "../ai/commands";
 import { buildAiSettingsCommand, buildAiOutlineCommand } from "../ai/commands";
 import type { CollabSession } from "../collab/yjs";
+import { roomShareLink } from "../collab/roomUrl";
 import { startVoiceRecording } from "../ui/VoiceDictation";
 import { TEMPLATES } from "../editor/templates";
 import { buildInstalledTemplateCommands, useInstalledTemplates } from "./installedTemplates";
@@ -40,13 +41,15 @@ async function cancellable<T>(fn: (signal: AbortSignal) => Promise<T>): Promise<
   }
 }
 
-/** Save a clip into the library folder and open it (T34). */
-async function saveClip(clip: { title: string; markdown: string }): Promise<void> {
+/** Save a clip into the library folder and open it (T34). Exported for tests. */
+export async function saveClip(clip: { title: string; markdown: string }): Promise<void> {
   const { clipFileName, libraryDir } = await import("../research/clipper");
   const { writeWorkspaceFile, workspaceHasEntry, isOPFSAvailable } = await import("../storage/workspace");
   const name = clipFileName(clip.title);
   if (!isOPFSAvailable()) {
-    useAppStore.getState().openTab({ name, content: clip.markdown, workspaceName: null });
+    // Nothing was written: open it as an unsaved (dirty) document in its own
+    // tab, so closing the tab or the page warns instead of losing the clip.
+    openTemplateDoc(name.replace(/\.md$/, ""), clip.markdown);
     return;
   }
   const dir = libraryDir(getLocale());
@@ -985,7 +988,8 @@ export function useCommands({
             const { clipUrl } = await import("../research/clipper");
             await saveClip(await clipUrl(url.trim()));
           } catch (e) {
-            showAiToast(t("clip.failed", { message: (e as Error).message }), "error");
+            if ((e as Error)?.name === "ResearchUnavailableError") showAiToast(t("clip.needsService"), "error");
+            else showAiToast(t("clip.failed", { message: (e as Error).message }), "error");
           }
         },
       },
@@ -2362,7 +2366,7 @@ export function useCommands({
               icon: cmdIcons.Link,
               group: t("group.collab"),
               action: () => {
-                const link = `${location.origin}${location.pathname}#room=${collab.roomName}`;
+                const link = roomShareLink(collab.roomName, collab.sharePassword);
                 navigator.clipboard?.writeText(link).catch(() => {});
               },
             },

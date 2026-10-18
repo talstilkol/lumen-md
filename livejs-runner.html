@@ -2,6 +2,11 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
+    <!-- Same policy as the deploy headers (public/_headers, vercel.json,
+         docker/nginx.conf), but also in contexts that serve no header for
+         this page: Vite dev, Tauri, Capacitor. The user's code runs in a
+         blob: worker, which inherits it: no network at all. -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' blob: 'unsafe-eval'; worker-src blob:; connect-src 'none'; img-src 'none'; style-src 'none'; base-uri 'none'; form-action 'none'" />
     <title>Lumen live-js runner</title>
     <meta name="robots" content="noindex" />
   </head>
