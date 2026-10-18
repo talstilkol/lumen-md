@@ -148,12 +148,25 @@ export function CommandPalette({ open, onClose, commands }: Props) {
     return false;
   }
 
-  useEffect(() => {
+  // A fresh palette on every open, reset while rendering the open itself.
+  // The palette stays mounted while closed, so this used to happen in the
+  // effect below: the first frame of a reopened palette still showed the
+  // last query, and when the effect ran late, its reset landed after
+  // the user's (or a test's) first keystrokes and wiped them (plan 0.5:
+  // the "Escape during palette typing" and "a version is kept" e2e flakes).
+  const [wasOpen, setWasOpen] = useState(open);
+  if (open !== wasOpen) {
+    setWasOpen(open);
     if (open) {
-      previousFocusRef.current = document.activeElement;
       setQuery("");
       setActive(0);
       setTab("main");
+    }
+  }
+
+  useEffect(() => {
+    if (open) {
+      previousFocusRef.current = document.activeElement;
       // focus next tick so React renders the input first
       setTimeout(() => inputRef.current?.focus(), 0);
     } else {
