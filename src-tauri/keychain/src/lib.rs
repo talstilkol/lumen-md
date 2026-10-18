@@ -18,8 +18,12 @@ pub fn available() -> bool {
 pub const CHUNK_CHARS: usize = 512;
 const HEADER: &str = "lumen-keychain-chunks:";
 
-fn chunk_name(name: &str, i: usize) -> String {
-    format!("{name}#chunk{i}")
+/// The parts of a value are written under a generation of their own
+/// (`name#g<gen>.<i>`), and the header `lumen-keychain-chunks:<gen>:<n>` is
+/// switched to them only after every part is stored. A failed write leaves
+/// the old header pointing at the old, untouched parts (plan 2.5).
+fn chunk_name(name: &str, gen: u64, i: usize) -> String {
+    format!("{name}#g{gen}.{i}")
 }
 
 /// The store the chunking is built on: one entry per name.
@@ -28,13 +32,24 @@ trait Backend {
     fn set(&self, name: &str, value: Option<&str>) -> Result<(), String>;
 }
 
-fn chunk_count(b: &dyn Backend, name: &str) -> Result<usize, String> {
-    Ok(match b.get(name)? {
-        Some(v) => v
-            .strip_prefix(HEADER)
-            .and_then(|n| n.parse().ok())
-            .unwrap_or(0),
-        None => 0,
+/// Where a chunked value's parts live.
+#[derive(Clone, Copy)]
+struct Chunks {
+    gen: u64,
+    count: usize,
+}
+
+impl Chunks {
+    fn names(self, name: &str) -> impl Iterator<Item = String> + '_ {
+        (1..=self.count).map(move |i| chunk_name(name, self.gen, i))
+    }
+}
+
+fn parse_header(v: &str) -> Option<Chunks> {
+    let (gen, count) = v.strip_prefix(HEADER)?.split_once(':')?;
+    Some(Chunks {
+        gen: gen.parse().ok()?,
+        count: count.parse().ok()?,
     })
 }
 
@@ -42,29 +57,33 @@ fn get_with(b: &dyn Backend, name: &str) -> Result<Option<String>, String> {
     let Some(v) = b.get(name)? else {
         return Ok(None);
     };
-    let Some(n) = v.strip_prefix(HEADER).and_then(|n| n.parse::<usize>().ok()) else {
+    let Some(c) = parse_header(&v) else {
         return Ok(Some(v));
     };
     let mut out = String::new();
-    for i in 1..=n {
-        match b.get(&chunk_name(name, i))? {
+    for (i, part_name) in c.names(name).enumerate() {
+        match b.get(&part_name)? {
             Some(part) => out.push_str(&part),
-            None => return Err(format!("{name}: chunk {i} of {n} is missing")),
+            None => return Err(format!("{name}: chunk {} of {} is missing", i + 1, c.count)),
         }
     }
     Ok(Some(out))
 }
 
+/// Delete parts, ignoring failures: they are only reachable through a header
+/// that no longer points at them, and a leftover never changes what is read.
+fn remove_parts(b: &dyn Backend, name: &str, c: Chunks) {
+    for part_name in c.names(name) {
+        let _ = b.set(&part_name, None);
+    }
+}
+
 fn set_with(b: &dyn Backend, name: &str, value: Option<&str>) -> Result<(), String> {
-    let old = chunk_count(b, name)?;
-    let new = match value {
-        None => {
-            b.set(name, None)?;
-            0
-        }
+    let old = b.get(name)?.as_deref().and_then(parse_header);
+    match value {
+        None => b.set(name, None)?,
         Some(v) if v.chars().count() <= CHUNK_CHARS && !v.starts_with(HEADER) => {
-            b.set(name, Some(v))?;
-            0
+            b.set(name, Some(v))?
         }
         Some(v) => {
             let chars: Vec<char> = v.chars().collect();
@@ -72,17 +91,28 @@ fn set_with(b: &dyn Backend, name: &str, value: Option<&str>) -> Result<(), Stri
                 .chunks(CHUNK_CHARS)
                 .map(|c| c.iter().collect())
                 .collect();
-            // The parts first, the header last: a reader never sees a header without its parts.
-            for (i, part) in parts.iter().enumerate() {
-                b.set(&chunk_name(name, i + 1), Some(part))?;
+            // A generation the current header does not point at, so no part
+            // the stored value is read from is ever overwritten.
+            let new = Chunks {
+                gen: old.map_or(1, |c| c.gen.wrapping_add(1)),
+                count: parts.len(),
+            };
+            let staged = new
+                .names(name)
+                .zip(&parts)
+                .try_for_each(|(n, p)| b.set(&n, Some(p)));
+            // The header last: only now does a reader see the new parts.
+            if let Err(e) = staged
+                .and_then(|()| b.set(name, Some(&format!("{HEADER}{}:{}", new.gen, new.count))))
+            {
+                remove_parts(b, name, new);
+                return Err(e);
             }
-            b.set(name, Some(&format!("{HEADER}{}", parts.len())))?;
-            parts.len()
         }
-    };
-    // Parts of an earlier, longer value.
-    for i in new + 1..=old {
-        b.set(&chunk_name(name, i), None)?;
+    }
+    // The parts of the value that was replaced.
+    if let Some(c) = old {
+        remove_parts(b, name, c);
     }
     Ok(())
 }
@@ -149,12 +179,25 @@ mod tests {
 
     /// An in-memory backend with the Windows size limit, so the chunking is
     /// tested on every platform.
-    struct Mem(RefCell<HashMap<String, String>>);
+    /// `fail_after`: how many more writes succeed before every write fails.
+    struct Mem(
+        RefCell<HashMap<String, String>>,
+        std::cell::Cell<Option<usize>>,
+    );
+    fn mem() -> Mem {
+        Mem(RefCell::new(HashMap::new()), std::cell::Cell::new(None))
+    }
     impl Backend for Mem {
         fn get(&self, name: &str) -> Result<Option<String>, String> {
             Ok(self.0.borrow().get(name).cloned())
         }
         fn set(&self, name: &str, value: Option<&str>) -> Result<(), String> {
+            if let Some(n) = self.1.get() {
+                if n == 0 {
+                    return Err("keychain write failed".into());
+                }
+                self.1.set(Some(n - 1));
+            }
             match value {
                 Some(v) if v.encode_utf16().count() * 2 > 2560 => {
                     Err("blob over 2560 bytes".into())
@@ -173,7 +216,7 @@ mod tests {
 
     #[test]
     fn long_values_are_chunked_and_cleaned_up() {
-        let m = Mem(RefCell::new(HashMap::new()));
+        let m = mem();
         let session = format!(
             r#"{{"access_token":"{}","user":{{"name":"טל","meta":"{}"}}}}"#,
             "a".repeat(1200),
@@ -205,10 +248,38 @@ mod tests {
 
     #[test]
     fn a_missing_part_is_an_error_not_a_truncated_secret() {
-        let m = Mem(RefCell::new(HashMap::new()));
+        let m = mem();
         set_with(&m, "k", Some(&"z".repeat(CHUNK_CHARS * 2 + 1))).unwrap();
-        m.0.borrow_mut().remove("k#chunk2");
+        m.0.borrow_mut().remove("k#g1.2");
         assert!(get_with(&m, "k").is_err());
+    }
+
+    #[test]
+    fn a_failed_rewrite_keeps_the_old_value_readable() {
+        let m = mem();
+        let old = format!("{}{}", "o".repeat(CHUNK_CHARS * 3), "1");
+        let new = format!("{}{}", "n".repeat(CHUNK_CHARS * 3), "2");
+        set_with(&m, "s", Some(&old)).unwrap();
+        // Every point a rewrite can fail at: after 0, 1, 2 or 3 of its 4 parts,
+        // or at the header.
+        for ok_writes in 0..=4 {
+            m.1.set(Some(ok_writes));
+            assert!(
+                set_with(&m, "s", Some(&new)).is_err(),
+                "fails after {ok_writes} writes"
+            );
+            m.1.set(None);
+            assert_eq!(get_with(&m, "s").unwrap().as_deref(), Some(old.as_str()));
+        }
+        // Shrinking to a short value that fails to store also keeps the old one.
+        m.1.set(Some(0));
+        assert!(set_with(&m, "s", Some("short")).is_err());
+        m.1.set(None);
+        assert_eq!(get_with(&m, "s").unwrap().as_deref(), Some(old.as_str()));
+        // And a later rewrite that succeeds leaves only the header and its parts.
+        set_with(&m, "s", Some(&new)).unwrap();
+        assert_eq!(get_with(&m, "s").unwrap().as_deref(), Some(new.as_str()));
+        assert_eq!(m.0.borrow().len(), 1 + 4);
     }
 
     #[cfg(not(any(target_os = "macos", target_os = "windows")))]

@@ -39,11 +39,11 @@ jobs:
         shell: bash
         # One test thread: the tests share the user's keychain / credential store.
         # The result line goes out as an annotation (readable from the API), and
-        # the job fails if fewer than the 6 tests ran (2 chunking + 4 real keychain): a cfg slip must
+        # the job fails if fewer than the 7 tests ran (3 chunking + 4 real keychain): a cfg slip must
         # not turn this into a green run of nothing.
         run: |
           set -o pipefail
           cargo test --manifest-path src-tauri/Cargo.toml -p lumen-keychain --locked -- --test-threads=1 2>&1 | tee test.log
           passed=$(grep -m1 -oE 'test result: ok\. [0-9]+ passed' test.log | grep -oE '[0-9]+' | head -1)
           echo "::notice title=keychain tests (${{ matrix.os }})::$(grep -m1 'test result' test.log); $(grep -cE '^test tests::.* ok$' test.log) keychain tests ok"
-          [ "${passed:-0}" -ge 6 ] || { echo "::error::only ${passed:-0} keychain tests ran (expected 6)"; exit 1; }
+          [ "${passed:-0}" -ge 7 ] || { echo "::error::only ${passed:-0} keychain tests ran (expected 7)"; exit 1; }
