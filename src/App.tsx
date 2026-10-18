@@ -84,6 +84,7 @@ import { KeyboardShortcuts } from "./ui/KeyboardShortcuts";
 import { FocusMode } from "./ui/FocusMode";
 import { OnboardingTour } from "./ui/OnboardingTour";
 import { scrollToHeadingWhenRendered } from "./renderer/wikiLinks";
+import { notifyWorkspaceChanged } from "./storage/workspaceEvents";
 
 export default function App() {
   const doc = useAppStore((s) => s.doc);
@@ -477,7 +478,8 @@ export default function App() {
       writeWorkspaceFile(name, content)
         .then(() => {
           markSaved();
-          window.dispatchEvent(new Event("lumen-workspace-changed"));
+          // Only this file's text changed: listeners skip the full rescan (C3).
+          notifyWorkspaceChanged({ kind: "content", paths: [name] });
           // Every save path feeds the one history store (T35).
           void recordSnapshot(name, content, "autosave").catch(() => false);
         })
