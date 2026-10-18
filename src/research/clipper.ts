@@ -154,7 +154,7 @@ export async function clipUrl(url: string, deps: { extract?: (u: string) => Prom
   // fetches it for us), so local-only refuses here, before both (plan 2.4).
   const { guardedFetch, refuseIfBlocked } = await import("../ai/privacyLedger");
   const clipper = { category: "third-party" as const, reason: "Web clipper — fetches the page you clip" };
-  refuseIfBlocked(url, clipper);
+  refuseIfBlocked(url, { ...clipper, quiet: true }); // the clip command shows its own local-only hint
   const { researchEndpoint, extractPage, ResearchUnavailableError } = await import("./client");
   const extract = deps.extract ?? (researchEndpoint() ? (u: string) => extractPage(u) : null);
   let extractError: string | undefined;

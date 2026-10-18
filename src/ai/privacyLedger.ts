@@ -334,13 +334,18 @@ function hostOf(url: string): string {
  * clipper. Returns normally when allowed; recording the allowed request is
  * the caller's job (`guardedFetch` does it).
  */
-export function refuseIfBlocked(url: string, as: { category: LedgerCategory; reason: string }, method = "GET"): void {
+export function refuseIfBlocked(
+  url: string,
+  as: { category: LedgerCategory; reason: string; quiet?: boolean },
+  method = "GET",
+): void {
   const policy = getAiPolicy();
   if (!blockedByPolicy(as.category, policy)) return;
   const host = hostOf(url);
   const id = record({ host, category: as.category, reason: as.reason, method, bytesOut: 0, bytesIn: null, policy, decision: "blocked" });
   const entry = entries.find((x) => x.id === id);
-  if (entry) onBlocked?.(entry);
+  // `quiet`: the caller shows its own, more specific message (the clipper's "clip from clipboard" hint)
+  if (entry && !as.quiet) onBlocked?.(entry);
   throw new PrivacyBlockedError(host, as.reason);
 }
 

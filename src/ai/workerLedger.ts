@@ -78,15 +78,22 @@ export function installWorkerLedger(scope: FetchScope, channel?: Pick<BroadcastC
 
 /**
  * Report a download the worker's `fetch` does not see (web-llm's
- * `Cache.add()`). Size unknown, so recorded with no byte count. Returns false
- * when the ledger is not installed in this worker.
+ * `Cache.add()`). Size unknown, so recorded with no byte count. Returns the
+ * function that settles it — call it with the outcome once the load is done
+ * (200 when the model loaded, 0 when it failed), so a failed download is never
+ * recorded as a success — or null when the ledger is not installed here.
  */
-export function reportWorkerDownload(url: string): boolean {
-  if (!installed) return false;
-  const id = installed.next();
-  installed.post({ kind: "start", id, url, method: "GET", bytesOut: 0, worker: installed.worker });
-  installed.post({ kind: "end", id, status: 200, bytesIn: null });
-  return true;
+export function reportWorkerDownload(url: string): ((status: number) => void) | null {
+  if (!installed) return null;
+  const { post, next, worker } = installed;
+  const id = next();
+  post({ kind: "start", id, url, method: "GET", bytesOut: 0, worker });
+  let settled = false;
+  return (status: number) => {
+    if (settled) return;
+    settled = true;
+    post({ kind: "end", id, status, bytesIn: null });
+  };
 }
 
 /** Tests only. */

@@ -46,14 +46,32 @@ describe("worker requests reach the ledger", () => {
   });
 
   it("a download the worker's fetch cannot see (web-llm's Cache.add) is reported by the worker itself", async () => {
-    expect(reportWorkerDownload("https://huggingface.co/mlc-ai/x/resolve/main/")).toBe(false); // not installed
+    expect(reportWorkerDownload("https://huggingface.co/mlc-ai/x/resolve/main/")).toBeNull(); // not installed
     const ch = pipe();
     listenToWorkerLedger(ch);
     installWorkerLedger({ fetch: (async () => new Response("")) as unknown as typeof fetch, name: "webllm" }, ch);
-    expect(reportWorkerDownload("https://huggingface.co/mlc-ai/Qwen3-4B-q4f16_1-MLC/resolve/main/")).toBe(true);
+    const settle = reportWorkerDownload("https://huggingface.co/mlc-ai/Qwen3-4B-q4f16_1-MLC/resolve/main/");
+    expect(settle).toBeTypeOf("function");
+    // Recorded at the start, with no status until the load settles.
     expect(ledgerEntries()).toEqual([
-      expect.objectContaining({ host: "huggingface.co", category: "model-download", decision: "allowed", status: 200, bytesIn: null, reason: expect.stringContaining("worker: webllm") }),
+      expect.objectContaining({ host: "huggingface.co", category: "model-download", decision: "allowed", bytesIn: null, reason: expect.stringContaining("worker: webllm") }),
     ]);
+    expect(ledgerEntries()[0].status ?? null).toBeNull();
+    settle!(200);
+    settle!(0); // settles once
+    expect(ledgerEntries()[0].status).toBe(200);
+  });
+
+  it("a failed model load is never recorded as a successful download", async () => {
+    const ch = pipe();
+    listenToWorkerLedger(ch);
+    installWorkerLedger({ fetch: (async () => new Response("")) as unknown as typeof fetch, name: "webllm" }, ch);
+    reportWorkerDownload("https://huggingface.co/mlc-ai/bad-model/resolve/main/")!(0);
+    expect(ledgerEntries()[0].status).toBe(0);
+    const { readFileSync } = await import("node:fs");
+    const { join } = await import("node:path");
+    const worker = readFileSync(join(__dirname, "../ai/webllm.worker.ts"), "utf8");
+    expect(worker).toMatch(/settle\?\.\(200\)[\s\S]*catch[\s\S]*settle\?\.\(0\)/);
   });
 
   it("the web-llm worker reports an uncached model before loading it, and the window adds no probe round trip", async () => {
@@ -113,13 +131,17 @@ describe("the web clipper goes through the ledger", () => {
     }
   });
 
-  it("clipUrl under local-only refuses before the research service's extractor too", async () => {
+  it("clipUrl under local-only refuses before the research service's extractor too, without the generic blocked toast", async () => {
     setAiPolicy("local-only");
+    const { installPrivacyLedger } = await import("../ai/privacyLedger");
+    const blocked = vi.fn();
+    installPrivacyLedger(blocked);
     const { clipUrl } = await import("../research/clipper");
     const extract = vi.fn(async () => ({ title: "t", text: "body" }));
     await expect(clipUrl("https://news.example/story", { extract })).rejects.toMatchObject({ name: "PrivacyBlockedError" });
     expect(extract).not.toHaveBeenCalled();
     expect(ledgerEntries()).toEqual([expect.objectContaining({ host: "news.example", category: "third-party", decision: "blocked" })]);
+    expect(blocked).not.toHaveBeenCalled(); // the clip command shows its own hint; one toast, not two
   });
 
   it("otherwise the extractor route still clips", async () => {

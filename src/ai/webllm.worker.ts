@@ -71,15 +71,19 @@ async function ensureLoaded(id: number, modelId: string): Promise<MLCEngineInter
   const cached = await Promise.resolve()
     .then(() => mod.hasModelInCache(modelId))
     .catch(() => false);
-  if (!cached) {
-    reportWorkerDownload(`https://huggingface.co/mlc-ai/${encodeURIComponent(modelId)}/resolve/main/`);
-  }
+  const settle = cached ? null : reportWorkerDownload(`https://huggingface.co/mlc-ai/${encodeURIComponent(modelId)}/resolve/main/`);
   const initProgressCallback = (r: { progress: number; text: string }) => post({ id, type: "progress", progress: r.progress, text: r.text });
-  if (!engine) {
-    engine = await mod.CreateMLCEngine(modelId, { initProgressCallback });
-  } else {
-    engine.setInitProgressCallback(initProgressCallback);
-    await engine.reload(modelId);
+  try {
+    if (!engine) {
+      engine = await mod.CreateMLCEngine(modelId, { initProgressCallback });
+    } else {
+      engine.setInitProgressCallback(initProgressCallback);
+      await engine.reload(modelId);
+    }
+    settle?.(200);
+  } catch (err) {
+    settle?.(0); // the download (or the load after it) failed: not a success in the ledger
+    throw err;
   }
   loadedModel = modelId;
   return engine;
