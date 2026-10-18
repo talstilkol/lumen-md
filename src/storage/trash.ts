@@ -47,6 +47,19 @@ export async function listTrash(): Promise<TrashItem[]> {
   return (await readIndex()).sort((a, b) => b.trashedAt - a.trashedAt);
 }
 
+/*
+ * Every change to the index is a read-modify-write (delete, restore, empty).
+ * They run one at a time, or a restore racing a delete (Ctrl+Z during a slow
+ * folder move, the Trash panel during a delete) writes the index back
+ * without the other's entry, leaving trashed data no panel can find.
+ */
+let indexQueue: Promise<unknown> = Promise.resolve();
+function serialized<T>(fn: () => Promise<T>): Promise<T> {
+  const run = indexQueue.then(fn, fn);
+  indexQueue = run.catch(() => undefined);
+  return run;
+}
+
 let lastTrashed: TrashItem[] = [];
 /** What the last `moveToTrash` call trashed (for "Undo"). */
 export function lastTrashedItems(): TrashItem[] {
@@ -54,7 +67,11 @@ export function lastTrashedItems(): TrashItem[] {
 }
 
 /** Move files / folders to the trash. Returns the trash entries. */
-export async function moveToTrash(paths: string[], kinds: Record<string, "file" | "directory"> = {}, now = Date.now()): Promise<TrashItem[]> {
+export function moveToTrash(paths: string[], kinds: Record<string, "file" | "directory"> = {}, now = Date.now()): Promise<TrashItem[]> {
+  return serialized(() => moveToTrashNow(paths, kinds, now));
+}
+
+async function moveToTrashNow(paths: string[], kinds: Record<string, "file" | "directory">, now: number): Promise<TrashItem[]> {
   const items = await readIndex();
   const added: TrashItem[] = [];
   // A folder and something inside it can both be selected: trashing the
@@ -84,10 +101,23 @@ export async function moveToTrash(paths: string[], kinds: Record<string, "file" 
  * Put a trashed item back at its original path, or next to it under a free
  * name when something new took that path. Returns where it went.
  */
-export async function restoreFromTrash(id: string): Promise<string> {
+export function restoreFromTrash(id: string): Promise<string> {
+  return serialized(async () => {
+    const where = await restoreNow(id);
+    if (where === null) throw new Error("Not in the trash");
+    return where;
+  });
+}
+
+/** Like `restoreFromTrash`, but null when the item is no longer in the trash (restored or purged meanwhile). */
+export function restoreFromTrashIfPresent(id: string): Promise<string | null> {
+  return serialized(() => restoreNow(id));
+}
+
+async function restoreNow(id: string): Promise<string | null> {
   const items = await readIndex();
   const item = items.find((i) => i.id === id);
-  if (!item) throw new Error("Not in the trash");
+  if (!item) return null;
   let target = item.originalPath;
   if (await workspaceHasEntry(target)) {
     if (item.kind === "file") target = await uniqueWorkspaceName(target);
@@ -105,12 +135,14 @@ export async function restoreFromTrash(id: string): Promise<string> {
 }
 
 /** Delete for good: one item, or everything older than `olderThanMs`. */
-export async function emptyTrash(opts: { id?: string; olderThanMs?: number } = {}, now = Date.now()): Promise<number> {
-  const items = await readIndex();
-  const doomed = items.filter((i) => (opts.id ? i.id === opts.id : now - i.trashedAt >= (opts.olderThanMs ?? 0)));
-  for (const i of doomed) await deleteWorkspaceFile(`${TRASH_DIR}/${i.id}`).catch(() => undefined);
-  await writeIndex(items.filter((i) => !doomed.includes(i)));
-  return doomed.length;
+export function emptyTrash(opts: { id?: string; olderThanMs?: number } = {}, now = Date.now()): Promise<number> {
+  return serialized(async () => {
+    const items = await readIndex();
+    const doomed = items.filter((i) => (opts.id ? i.id === opts.id : now - i.trashedAt >= (opts.olderThanMs ?? 0)));
+    for (const i of doomed) await deleteWorkspaceFile(`${TRASH_DIR}/${i.id}`).catch(() => undefined);
+    await writeIndex(items.filter((i) => !doomed.includes(i)));
+    return doomed.length;
+  });
 }
 
 /** Startup housekeeping: drop items older than 30 days. */

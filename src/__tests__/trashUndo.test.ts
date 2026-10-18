@@ -90,6 +90,28 @@ describe("undoLastTrash: a stack of deletes", () => {
     expect(second).toEqual(["a.md"]);
     expect(await listTrash()).toEqual([]);
   });
+
+  it("Ctrl+Z while a delete is still moving keeps both in the trash index (review: #218)", async () => {
+    await writeWorkspaceFile("a.md", "A");
+    for (let i = 0; i < 5; i++) await writeWorkspaceFile(`big/n${i}.md`, `#${i}`);
+    await trashPaths(["a.md"]);
+    // The folder move is still in flight when the restore starts.
+    const [deleted, restored] = await Promise.all([trashPaths(["big"], { big: "directory" }), undoLastTrash()]);
+    expect(restored).toEqual(["a.md"]);
+    expect(await readWorkspaceFile("a.md")).toBe("A");
+    expect((await listTrash()).map((i) => i.originalPath)).toEqual(["big"]);
+    // ...and the deleted folder is still restorable from the index.
+    expect(await undoTrash(deleted)).toEqual(["big"]);
+    expect(await readWorkspaceFile("big/n4.md")).toBe("#4");
+  });
+
+  it("the Trash panel's restore is queued with deletes too", async () => {
+    await writeWorkspaceFile("a.md", "A");
+    await writeWorkspaceFile("b.md", "B");
+    const [a] = await trashPaths(["a.md"]);
+    await Promise.all([trashPaths(["b.md"]), restoreFromTrash(a.id)]);
+    expect((await listTrash()).map((i) => i.originalPath)).toEqual(["b.md"]);
+  });
 });
 
 describe("flushOpenDocsUnder", () => {
