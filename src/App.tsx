@@ -1,4 +1,5 @@
 import { useCommands, openNewDoc } from "./commands/useCommands";
+import type { NoteEditDetail } from "./views/databaseEdit";
 import { lazy, Suspense, useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 import type { EditorHandle } from "./editor/Editor";
 
@@ -751,6 +752,24 @@ export default function App() {
     const next = edit(cur);
     if (next !== cur) setContent(next);
   }, [setContent]);
+  // The database view edits the open note through here too (4.10), so the
+  // editor, not the file behind it, takes the change. The event name is
+  // NOTE_EDIT_EVENT of views/databaseEdit (not imported: it stays lazy).
+  useEffect(() => {
+    const onEdit = (e: Event) => {
+      const d = (e as CustomEvent<NoteEditDetail>).detail;
+      if (!d || useAppStore.getState().doc.workspaceName !== d.path) return;
+      let changed = false;
+      applyPropertiesEdit((cur) => {
+        const next = d.edit(cur);
+        changed = next !== cur;
+        return next;
+      });
+      d.done(changed);
+    };
+    window.addEventListener("lumen-note-edit", onEdit);
+    return () => window.removeEventListener("lumen-note-edit", onEdit);
+  }, [applyPropertiesEdit]);
   useEffect(() => {
     const onOpen = () => setTrashOpen(true);
     window.addEventListener("lumen-open-trash", onOpen);

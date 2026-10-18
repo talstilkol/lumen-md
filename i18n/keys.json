@@ -2,7 +2,7 @@
   "version": 1,
   "generated_at": "2026-10-18T08:37:10.560Z",
   "source": "src/i18n/index.ts (en bundle)",
-  "count": 1437,
+  "count": 1473,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -5810,6 +5810,216 @@
       "key": "editor.ariaLabel",
       "en": "Markdown source editor",
       "vars": []
+    },
+    {
+      "key": "db.all",
+      "en": "All",
+      "vars": []
+    },
+    {
+      "key": "db.count",
+      "en": "{count} notes",
+      "vars": [
+        "count"
+      ]
+    },
+    {
+      "key": "db.loading",
+      "en": "loading…",
+      "vars": []
+    },
+    {
+      "key": "db.views",
+      "en": "Views",
+      "vars": []
+    },
+    {
+      "key": "db.view.table",
+      "en": "Table",
+      "vars": []
+    },
+    {
+      "key": "db.view.cards",
+      "en": "Cards",
+      "vars": []
+    },
+    {
+      "key": "db.view.kanban",
+      "en": "Kanban",
+      "vars": []
+    },
+    {
+      "key": "db.view.list",
+      "en": "List",
+      "vars": []
+    },
+    {
+      "key": "db.view.calendar",
+      "en": "Calendar",
+      "vars": []
+    },
+    {
+      "key": "db.specError",
+      "en": "Database spec error: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "db.empty",
+      "en": "No notes match this query.",
+      "vars": []
+    },
+    {
+      "key": "db.emptyHint",
+      "en": "Add YAML frontmatter “type: {type}” to notes under {source}.",
+      "vars": [
+        "type",
+        "source"
+      ]
+    },
+    {
+      "key": "db.workspaceRoot",
+      "en": "the workspace root",
+      "vars": []
+    },
+    {
+      "key": "db.filter.label",
+      "en": "Filter",
+      "vars": []
+    },
+    {
+      "key": "db.filter.placeholder",
+      "en": "status = \"done\" AND rating >= 4",
+      "vars": []
+    },
+    {
+      "key": "db.filter.error",
+      "en": "Filter: {error} (character {at})",
+      "vars": [
+        "error",
+        "at"
+      ]
+    },
+    {
+      "key": "db.sort.label",
+      "en": "Sort",
+      "vars": []
+    },
+    {
+      "key": "db.sort.none",
+      "en": "No sort",
+      "vars": []
+    },
+    {
+      "key": "db.sort.asc",
+      "en": "Ascending",
+      "vars": []
+    },
+    {
+      "key": "db.sort.desc",
+      "en": "Descending",
+      "vars": []
+    },
+    {
+      "key": "db.group.label",
+      "en": "Group",
+      "vars": []
+    },
+    {
+      "key": "db.group.none",
+      "en": "No grouping",
+      "vars": []
+    },
+    {
+      "key": "db.none",
+      "en": "(none)",
+      "vars": []
+    },
+    {
+      "key": "db.title",
+      "en": "Title",
+      "vars": []
+    },
+    {
+      "key": "db.cell.edit",
+      "en": "Edit {field} of {note}",
+      "vars": [
+        "field",
+        "note"
+      ]
+    },
+    {
+      "key": "db.readOnly",
+      "en": "This value can't be edited here",
+      "vars": []
+    },
+    {
+      "key": "db.saveFailed",
+      "en": "Couldn't save {note}: {error}",
+      "vars": [
+        "note",
+        "error"
+      ]
+    },
+    {
+      "key": "db.kanban.needGroup",
+      "en": "Pick a property to group by for the kanban view.",
+      "vars": []
+    },
+    {
+      "key": "db.kanban.move",
+      "en": "Move {note}",
+      "vars": [
+        "note"
+      ]
+    },
+    {
+      "key": "db.kanban.instructions",
+      "en": "To move a card, press Space or Enter, choose a column with the left and right arrow keys, and press Space or Enter again to drop it. Escape cancels.",
+      "vars": []
+    },
+    {
+      "key": "db.kanban.picked",
+      "en": "Picked up {note}.",
+      "vars": [
+        "note"
+      ]
+    },
+    {
+      "key": "db.kanban.over",
+      "en": "{note} is over {column}.",
+      "vars": [
+        "note",
+        "column"
+      ]
+    },
+    {
+      "key": "db.kanban.dropped",
+      "en": "{note} moved to {column}.",
+      "vars": [
+        "note",
+        "column"
+      ]
+    },
+    {
+      "key": "db.kanban.cancelled",
+      "en": "Move of {note} cancelled.",
+      "vars": [
+        "note"
+      ]
+    },
+    {
+      "key": "db.calendar.needDate",
+      "en": "The calendar needs a dateField: in the database spec.",
+      "vars": []
+    },
+    {
+      "key": "db.calendar.noDates",
+      "en": "No notes have a date in {field}.",
+      "vars": [
+        "field"
+      ]
     },
     {
       "key": "cmd.cmdPalette",

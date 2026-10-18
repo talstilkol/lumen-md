@@ -8,9 +8,11 @@
  *     ```database
  *     source: books/         # folder under workspace root, or "" for whole vault
  *     type: book             # filter rows where frontmatter.type === "book"
- *     view: kanban           # table | kanban | gallery | calendar
- *     groupBy: status        # column for kanban
- *     sortBy: rating         # column for sort (prefix '-' for descending)
+ *     view: kanban           # table | cards | kanban | list | calendar
+ *     where: status != "done" AND (rating >= 4 OR contains(tags, "fav"))
+ *     groupBy: status        # kanban columns; sections in the other views
+ *     sort: [-rating, title] # one or more columns ('-' or ' desc': descending)
+ *     sortBy: rating         # the older, single-column form of `sort`
  *     fields: [title, author, rating]   # which columns to show in table/gallery
  *     dateField: due         # which frontmatter key is the date for calendar
  *     ```
@@ -28,14 +30,21 @@ import {
   readWorkspaceFile,
 } from "../storage/workspace";
 import { extractFrontmatter } from "../renderer/pipeline";
+import { matchesFilter, parseFilter, type FilterNode } from "./databaseFilter";
 
-export type DatabaseView = "table" | "kanban" | "gallery" | "calendar";
+export type DatabaseView = "table" | "cards" | "kanban" | "list" | "calendar";
 
 export interface DatabaseSpec {
   source?: string;
   type?: string;
-  view?: DatabaseView;
+  /** `gallery` is the old name of `cards`. */
+  view?: DatabaseView | "gallery";
+  /** Filter expression (see databaseFilter.ts). */
+  where?: string;
   groupBy?: string;
+  /** Kanban columns to show even when no note is in them yet, in this order. */
+  columns?: Array<string | number>;
+  sort?: string | string[];
   sortBy?: string;
   fields?: string[];
   dateField?: string;
@@ -52,6 +61,53 @@ export interface DatabaseRow {
   basename: string;
   /** Parsed frontmatter; empty object when none. */
   fm: Record<string, unknown>;
+}
+
+/** The spec's view, with old names mapped (`gallery` → `cards`). */
+export function specView(spec: DatabaseSpec): DatabaseView {
+  const v = spec.view;
+  if (v === "gallery") return "cards";
+  return v === "table" || v === "cards" || v === "kanban" || v === "list" || v === "calendar" ? v : "table";
+}
+
+export interface SortKey {
+  key: string;
+  desc: boolean;
+}
+
+/** `[-rating, "title asc"]`, `"rating desc, title"` or `-rating` → sort keys. */
+export function parseSort(sort: string | string[] | undefined): SortKey[] {
+  if (!sort) return [];
+  const parts = (Array.isArray(sort) ? sort.map(String) : String(sort).split(",")).map((x) => x.trim()).filter(Boolean);
+  return parts.map((x) => {
+    const m = /^(.*?)\s+(asc|desc)$/i.exec(x);
+    if (m) return { key: m[1].trim(), desc: m[2].toLowerCase() === "desc" };
+    return x.startsWith("-") ? { key: x.slice(1).trim(), desc: true } : { key: x, desc: false };
+  });
+}
+
+const rowFilter = (r: DatabaseRow) => ({
+  fm: r.fm,
+  file: { name: r.basename, path: r.path, folder: r.path.includes("/") ? r.path.slice(0, r.path.lastIndexOf("/")) : "" },
+});
+
+/** Filter, then sort (ties: by name). Pure, so the toolbar can re-run it on every keystroke. */
+export function applyQuery(rows: readonly DatabaseRow[], q: { where?: FilterNode | null; sort?: SortKey[] }): DatabaseRow[] {
+  const out = q.where ? rows.filter((r) => matchesFilter(q.where ?? null, rowFilter(r))) : [...rows];
+  const keys = q.sort ?? [];
+  out.sort((a, b) => {
+    for (const { key, desc } of keys) {
+      const av = compareValue(a.fm[key]);
+      const bv = compareValue(b.fm[key]);
+      // Missing values last, either direction.
+      if (av === "" && bv !== "") return 1;
+      if (bv === "" && av !== "") return -1;
+      const d = typeof av === "number" && typeof bv === "number" ? av - bv : String(av).localeCompare(String(bv));
+      if (d) return desc ? -d : d;
+    }
+    return a.basename.localeCompare(b.basename);
+  });
+  return out;
 }
 
 export function parseDatabaseSpec(source: string): {
@@ -77,6 +133,13 @@ export function parseDatabaseSpec(source: string): {
  * block degrades gracefully in restricted environments.
  */
 export async function runDatabaseQuery(spec: DatabaseSpec): Promise<DatabaseRow[]> {
+  const where = parseFilter(spec.where ?? "");
+  if (!where.ok) throw new Error(`where: ${where.error} (at ${where.at + 1})`);
+  return applyQuery(await loadDatabaseRows(spec), { where: where.tree, sort: parseSort(spec.sort ?? spec.sortBy) });
+}
+
+/** The notes under `source` (of `type`, when set), by name — before `where` and `sort`. */
+export async function loadDatabaseRows(spec: DatabaseSpec): Promise<DatabaseRow[]> {
   if (!isOPFSAvailable()) return [];
   const sourceRoot = (spec.source ?? "").replace(/^\/+|\/+$/g, "");
   const all = await listWorkspace({ includeAssets: false });
@@ -105,20 +168,7 @@ export async function runDatabaseQuery(spec: DatabaseSpec): Promise<DatabaseRow[
     });
   }
 
-  // Sorting: prefix '-' means descending.
-  if (spec.sortBy) {
-    const desc = spec.sortBy.startsWith("-");
-    const key = desc ? spec.sortBy.slice(1) : spec.sortBy;
-    rows.sort((a, b) => {
-      const av = compareValue(a.fm[key]);
-      const bv = compareValue(b.fm[key]);
-      if (av < bv) return desc ? 1 : -1;
-      if (av > bv) return desc ? -1 : 1;
-      return a.basename.localeCompare(b.basename);
-    });
-  }
-
-  return rows;
+  return rows.sort((a, b) => a.basename.localeCompare(b.basename));
 }
 
 function compareValue(v: unknown): string | number {
