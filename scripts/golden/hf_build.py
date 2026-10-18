@@ -400,6 +400,11 @@ def tsv_bz2(url, name):
         return [line.rstrip("\n").split("\t") for line in f if line.strip()]
 
 
+# Pools built earlier in this process, by (set, part): a dev run that builds mt-he-en and langid in one job
+# must exclude the MT pool from langid before that pool is committed (pinned() still sees nothing then).
+BUILT_POOLS: dict = {}
+
+
 def words(t):
     return len(t.split())
 
@@ -419,12 +424,14 @@ def tatoeba_mt(ctx):
     for h, refs in pool_ids:
         if h in he and all(r in en for r in refs):
             pool.append({"id": f"tatoeba-{h}", "he": he[h], "en": [en[r] for r in refs], "tatoeba": {"he": int(h), "en": [int(r) for r in refs]}})
+    BUILT_POOLS[("mt-he-en", "tatoeba")] = pool_ids
     ctx["extra"] = {"pool": pool_ids} if ctx["split"] == "dev" else {}
     return {"items": pool, "source": {"exports": TATOEBA, "license": "CC BY 2.0 FR (tatoeba2 templates/Pages/downloads.php)", "sampling": "pool: Hebrew sentences of ≥ 4 words with ≥ 1 linked English sentence, frozen as ids in the dev file's `pool`; splitPool"}, "fields": {"he": "Hebrew source", "en": "every linked English translation (references)", "tatoeba": "sentence ids: https://tatoeba.org/sentences/show/<id>"}}
 
 
 def tatoeba_langid(ctx):
-    mt_pool = {h for h, _ in (pinned("mt-he-en", "tatoeba").get("pool") or [])}
+    # The committed MT pool, plus one this job just built (first dev run: not committed yet).
+    mt_pool = {h for h, _ in (pinned("mt-he-en", "tatoeba").get("pool") or []) + (BUILT_POOLS.get(("mt-he-en", "tatoeba")) or [])}
     pool_ids = ctx.get("pool")
     texts = {}
     for code in LANGS:

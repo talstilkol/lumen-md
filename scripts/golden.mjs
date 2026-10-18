@@ -18,7 +18,7 @@
  */
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
-import { checkTest, freezeSet, listFiles, partFiles, partHash, partWaitsFor, readJson, recordTest, scanForTestData, splitHash, validateAll, validateSet, writeJson, applyTestHashes } from "./lib/golden.mjs";
+import { checkTest, freezeSet, listFiles, partFiles, partHash, partWaitsFor, readJson, recordTest, scanForTestData, splitHash, validateAll, validateSet, writeJson, applyTestHashes, completeTestPart } from "./lib/golden.mjs";
 import { GOLDEN, ROOT } from "./golden/common.mjs";
 import { setById } from "./golden/defs.mjs";
 import { writeDocs } from "./golden/docs.mjs";
@@ -136,7 +136,9 @@ switch (cmd) {
     for (const name of setsArg()) {
       const testDir = join(dirArg, name, "test");
       if (!existsSync(testDir)) continue;
-      hashes[name] = Object.fromEntries(readJson(join(GOLDEN, name, "manifest.json")).parts.filter((p) => partFiles(testDir, p.id).length).map((p) => [p.id, partHash(testDir, p.id)]));
+      // Only complete parts (data file, declared item count, every asset): a half-built part gets no hash.
+      const m = readJson(join(GOLDEN, name, "manifest.json"));
+      hashes[name] = Object.fromEntries(m.parts.filter((p) => completeTestPart(testDir, m, p.id)).map((p) => [p.id, partHash(testDir, p.id)]));
     }
     writeJson(outFile, hashes);
     for (const [k, v] of Object.entries(hashes)) console.log(`${k}: ${Object.keys(v).length} part(s) hashed`);
@@ -150,10 +152,11 @@ switch (cmd) {
     if (cmd === "record-test" && hashesFile) {
       // From a hashes file (the CI record job: it never sees the split).
       const hashes = readJson(hashesFile);
-      for (const name of setsArg().filter((n) => n in hashes)) {
+      // Every requested set, also one this run built nothing for (absent from the file): its hashes reset.
+      for (const name of setsArg()) {
         const dir = join(GOLDEN, name);
         // Parts this run did not hash go back to null (applyTestHashes): no stale hash completes the split.
-        const m = applyTestHashes(readJson(join(dir, "manifest.json")), hashes[name]);
+        const m = applyTestHashes(readJson(join(dir, "manifest.json")), hashes[name] ?? {});
         writeJson(join(dir, "manifest.json"), m);
         const def = setById(name);
         if (def) writeDocs(def, dir, cache ?? join(process.env.RUNNER_TEMP ?? "/tmp", "lumen-golden-cache"));

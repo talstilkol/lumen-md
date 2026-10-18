@@ -23,6 +23,7 @@ import {
   canaryGuid,
   contentHash,
   applyTestHashes,
+  completeTestPart,
   freezeSet,
   incompleteParts,
   publicHarnessError,
@@ -233,8 +234,30 @@ describe("recording test hashes and publishing harness errors", () => {
     expect(partial.test.sha256).toBeNull();
     const full = applyTestHashes(manifest(), { a: sha("3"), b: sha("4") });
     expect(full.test.sha256).toBe(splitHash({ a: sha("3"), b: sha("4") }));
-    expect(readFileSync(join(repo, "scripts/golden.mjs"), "utf8")).toMatch(/applyTestHashes\(readJson\(join\(dir, "manifest\.json"\)\), hashes\[name\]\)/);
+    expect(readFileSync(join(repo, "scripts/golden.mjs"), "utf8")).toMatch(/applyTestHashes\(readJson\(join\(dir, "manifest\.json"\)\), hashes\[name\]/);
   });
+  it("a set absent from the hashes file is reset too, and only complete parts are hashed", () => {
+    const cli = readFileSync(join(repo, "scripts/golden.mjs"), "utf8");
+    expect(cli).toMatch(/for \(const name of setsArg\(\)\) \{[\s\S]{0,400}applyTestHashes\(readJson\(join\(dir, "manifest\.json"\)\), hashes\[name\] \?\? \{\}\)/);
+    expect(applyTestHashes(manifest(), {}).test.parts).toEqual({ a: null, b: null });
+    expect(cli).toMatch(/filter\(\(p\) => completeTestPart\(testDir, m, p\.id\)\)/);
+    const dir = mkdtempSync(join(tmpdir(), "lumen-golden-part-"));
+    try {
+      const m = { parts: [{ id: "cap", test: 2 }] };
+      // Images downloaded, data file never written (the builder died): not complete.
+      writeFileSync(join(dir, "img1.png"), "x");
+      expect(completeTestPart(dir, m, "cap")).toBe(false);
+      writeFileSync(join(dir, "cap.json"), JSON.stringify({ items: [{ id: "1", image: "img1.png" }] }));
+      expect(completeTestPart(dir, m, "cap")).toBe(false); // 1 of 2 items
+      writeFileSync(join(dir, "cap.json"), JSON.stringify({ items: [{ id: "1", image: "img1.png" }, { id: "2", image: "img2.png" }] }));
+      expect(completeTestPart(dir, m, "cap")).toBe(false); // an asset is missing
+      writeFileSync(join(dir, "img2.png"), "y");
+      expect(completeTestPart(dir, m, "cap")).toBe(true);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
   it("publishes only the class of a harness error, never its message", () => {
     const msg = publicHarnessError(new TypeError("expected 'שלום, הסיסמה היא 1234' got …"));
     expect(msg).toContain("TypeError");
@@ -364,6 +387,32 @@ describe("samplers are deterministic for a (dummy) seed", () => {
     const png: Buffer = pngWithText(Buffer.from("89504e470d0a1a0a0000000d49484452000000010000000108000000003a7e9b55", "hex"), "canary-x");
     expect(png.subarray(37, 41).toString("latin1")).toBe("tEXt");
     expect(png.toString("latin1")).toContain("canary-x");
+  });
+
+  it("hf_build.py: langid excludes the MT pool built earlier in the same job (not committed yet)", () => {
+    if (spawnSync("python3", ["--version"]).status !== 0) return;
+    const code = [
+      "import importlib.util, json",
+      `spec = importlib.util.spec_from_file_location('hb', ${JSON.stringify(join(repo, "scripts/golden/hf_build.py"))})`,
+      "hb = importlib.util.module_from_spec(spec); spec.loader.exec_module(hb)",
+      "hb.pinned = lambda set_, part: {}",
+      "he = [['10', 'heb', 'אחת שתיים שלוש ארבע'], ['11', 'heb', 'חמש שש שבע שמונה']]",
+      "def tsv(url, name):",
+      "  if 'heb-eng_links' in name: return [['10', '20']]",
+      "  if name == 'tatoeba-heb_sentences.tsv.bz2': return he",
+      "  if name == 'tatoeba-eng_sentences.tsv.bz2': return [['20', 'eng', 'one two three four']]",
+      "  if 'heb_sentences_CC0' in name: return he",
+      "  return []",
+      "hb.tsv_bz2 = tsv",
+      "hb.tatoeba_mt({'split': 'dev'})",
+      "ctx = {'split': 'dev'}",
+      "out = hb.tatoeba_langid(ctx)",
+      "print(json.dumps(sorted(x['tatoeba'] for x in out['items'] if x['lang'] == 'he')))",
+    ].join("\n");
+    const r = spawnSync("python3", ["-I", "-B", "-c", code], { encoding: "utf8" });
+    expect(r.stderr).toBe("");
+    // Sentence 10 is in the MT pool just built; only 11 may go to langid.
+    expect(JSON.parse(r.stdout)).toEqual([11]);
   });
 
   it("hf_build.py refetches a cached mutable export (Tatoeba) once it is older than its max age", () => {

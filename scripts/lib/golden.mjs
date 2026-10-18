@@ -561,6 +561,26 @@ export function loadSet(root, name, { split = "dev", testDir, parts, local = fal
 }
 
 /**
+ * Is a built test part complete enough to hash? Its <part>.json exists, has
+ * the manifest's test count of items, and every asset it names is there. A
+ * builder that died half way (clips extracted, images downloaded, no data
+ * file or fewer items) must not get a recorded hash.
+ */
+export function completeTestPart(testDir, manifest, partId) {
+  const p = manifest.parts.find((x) => x.id === partId);
+  const f = join(testDir, `${partId}.json`);
+  if (!p || !existsSync(f)) return false;
+  let data;
+  try {
+    data = readJson(f);
+  } catch {
+    return false;
+  }
+  if (!Array.isArray(data.items) || (typeof p.test === "number" && data.items.length !== p.test)) return false;
+  return data.items.every((it) => ASSET_FIELDS.every((k) => typeof it[k] !== "string" || existsSync(join(testDir, it[k]))));
+}
+
+/**
  * Record a CI hashes file into a manifest's test block. Parts the file does
  * not hash (their builder failed or was skipped in that run) are reset to
  * null, so an earlier run's hash cannot complete a split this run never built.
