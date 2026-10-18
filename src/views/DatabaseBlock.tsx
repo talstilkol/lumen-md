@@ -47,7 +47,7 @@ import {
   type DatabaseView,
   type SortKey,
 } from "./database";
-import { parseFilter } from "./databaseFilter";
+import { parseFilter, type FilterNode } from "./databaseFilter";
 import { cellInputText, columnType, parseCellInput, writeCell } from "./databaseEdit";
 import type { PropertyValue } from "../properties/frontmatter";
 import { log } from "../lib/logger";
@@ -61,6 +61,7 @@ interface Props {
 }
 
 const NONE = NO_VALUE;
+const MATCH_NOTHING: FilterNode = { kind: "lit", value: false };
 
 const titleOf = (row: DatabaseRow) => (typeof row.fm.title === "string" && row.fm.title) || row.basename;
 
@@ -111,7 +112,12 @@ export default function DatabaseBlock({ source, meta }: Props) {
   }, [spec]);
 
   const filter = useMemo(() => parseFilter(where), [where]);
-  const shown = useMemo(() => applyQuery(rows, { where: filter.ok ? filter.tree : null, sort }), [rows, filter, sort]);
+  // A filter that doesn't parse never shows more: the last one that did
+  // stays in force (none yet — a broken `where:` — shows nothing).
+  const lastValid = useRef<FilterNode | null | undefined>(undefined);
+  if (filter.ok) lastValid.current = filter.tree;
+  const tree = filter.ok ? filter.tree : (lastValid.current ?? MATCH_NOTHING);
+  const shown = useMemo(() => applyQuery(rows, { where: tree, sort }), [rows, tree, sort]);
   const fields = useMemo(() => (spec ? resolveFields(rows, spec) : []), [rows, spec]);
   const allKeys = useMemo(() => {
     const keys = new Set(fields);
@@ -146,7 +152,7 @@ export default function DatabaseBlock({ source, meta }: Props) {
   }
 
   const titleLabel = spec.title ?? `${spec.type ?? t("db.all")} · ${t("db.count", { count: shown.length })}`;
-  const props: ViewProps = { rows: shown, spec, fields, groupBy, edit };
+  const props: ViewProps = { rows: shown, allRows: rows, spec, fields, groupBy, edit };
 
   return (
     <div className="chart-block lumen-database" data-testid="database-block">
@@ -186,6 +192,8 @@ export default function DatabaseBlock({ source, meta }: Props) {
 
 interface ViewProps {
   rows: DatabaseRow[];
+  /** Every loaded row, before the filter: column types come from all of them. */
+  allRows: DatabaseRow[];
   spec: DatabaseSpec;
   fields: string[];
   groupBy: string;
@@ -388,8 +396,8 @@ type Item = { kind: "group"; key: string; count: number } | { kind: "row"; row: 
 /** Above this many lines the table renders only what is on screen. */
 const VIRTUAL_FROM = 60;
 
-function TableView({ rows, fields, groupBy, edit }: ViewProps) {
-  const types = useMemo(() => Object.fromEntries(fields.map((f) => [f, columnType(rows.map((r) => r.fm[f]), f)])), [rows, fields]);
+function TableView({ rows, allRows, fields, groupBy, edit }: ViewProps) {
+  const types = useMemo(() => Object.fromEntries(fields.map((f) => [f, columnType(allRows.map((r) => r.fm[f]), f)])), [allRows, fields]);
   const columns = useMemo<ColumnDef<DatabaseRow>[]>(
     () => [
       { id: "__title", header: () => t("db.title"), cell: (c) => <RowLink row={c.row.original} /> },
@@ -501,7 +509,7 @@ const cardStyle: CSSProperties = {
   alignItems: "flex-start",
 };
 
-function KanbanView({ rows, spec, fields, groupBy, edit }: ViewProps) {
+function KanbanView({ rows, allRows, spec, fields, groupBy, edit }: ViewProps) {
   const groups = useMemo(() => (groupBy ? groupRows(rows, groupBy) : new Map<string, DatabaseRow[]>()), [rows, groupBy]);
   // The spec's `columns:` come first and stay even when empty, so a card
   // can move into a status no note has yet.
@@ -547,7 +555,7 @@ function KanbanView({ rows, spec, fields, groupBy, edit }: ViewProps) {
     if (col === NONE) return undefined;
     const sample = groups.get(col)?.[0]?.fm[groupBy];
     if (typeof sample === "number" || typeof sample === "boolean") return sample;
-    const type = columnType(rows.map((r) => r.fm[groupBy]), groupBy);
+    const type = columnType(allRows.map((r) => r.fm[groupBy]), groupBy);
     return type === "number" && Number.isFinite(Number(col)) ? Number(col) : col;
   };
   const noteName = (id: unknown) => {

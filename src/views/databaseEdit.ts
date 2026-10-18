@@ -61,9 +61,10 @@ export function editNote(path: string, edit: (text: string) => string): Promise<
     const { openTabs, doc } = useAppStore.getState();
     const activeTab = openTabs.find((t) => t.workspaceName === doc.workspaceName && t.workspaceName !== null)?.id;
     const tabEdits = openTabs.filter((t) => t.workspaceName === path && t.id !== activeTab).map((t) => ({ id: t.id, from: t.content, to: edit(t.content) }));
-    const text = await readWorkspaceFile(path);
-    const next = edit(text);
-    if (tabEdits.some((e) => e.to !== e.from)) {
+    const tabsChange = tabEdits.some((e) => e.to !== e.from);
+    // Tabs take the change only once the file has it: a failed write leaves them as they were.
+    const updateTabs = () =>
+      tabsChange &&
       useAppStore.setState((st) => ({
         openTabs: st.openTabs.map((t) => {
           const e = tabEdits.find((x) => x.id === t.id);
@@ -71,9 +72,14 @@ export function editNote(path: string, edit: (text: string) => string): Promise<
           return e && t.content === e.from ? { ...t, content: e.to } : t;
         }),
       }));
+    const text = await readWorkspaceFile(path);
+    const next = edit(text);
+    if (next === text) {
+      updateTabs();
+      return tabsChange;
     }
-    if (next === text) return tabEdits.some((e) => e.to !== e.from);
     await writeWorkspaceFile(path, next);
+    updateTabs();
     notifyWorkspaceChanged({ kind: "content", paths: [path] });
     return true;
   });

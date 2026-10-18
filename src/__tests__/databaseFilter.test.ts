@@ -36,6 +36,11 @@ describe("parseFilter", () => {
     expect(test('meta.owner = "tal"', { meta: { owner: "tal" } })).toBe(true);
   });
 
+  it("file.name / path / folder are the note's own even when the frontmatter has a `file` key", () => {
+    expect(test('file.name = "Invisible Cities" and file.folder = "books"', { file: "scan.pdf" })).toBe(true);
+    expect(test('file.kind = "pdf"', { file: { kind: "pdf" } })).toBe(true);
+  });
+
   it("reports the error and where it is", () => {
     expect(parseFilter('status = "done')).toMatchObject({ ok: false, error: "unclosed string", at: 9 });
     expect(parseFilter("rating >= ")).toMatchObject({ ok: false, error: "expression ends too early" });

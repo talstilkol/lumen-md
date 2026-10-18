@@ -64,6 +64,35 @@ describe("DatabaseBlock", () => {
     await waitFor(() => expect(screen.getAllByRole("rowheader").map((h) => h.textContent?.replace(/\d+$/, "").trim())).toEqual(["doing", "todo"]));
   });
 
+  it("a broken filter never shows more: a bad where: shows nothing, a bad edit keeps the last good filter", async () => {
+    const { unmount } = render(<DatabaseBlock source={SPEC.replace("groupBy: status\n", "where: 'status ='\n")} />);
+    expect((await screen.findByRole("alert")).textContent).toContain("expression ends too early");
+    await act(async () => new Promise((r) => setTimeout(r, 50)));
+    expect(screen.queryAllByRole("link")).toHaveLength(0);
+    unmount();
+    render(<DatabaseBlock source={SPEC.replace("groupBy: status\n", "")} />);
+    await waitFor(() => expect(titles()).toHaveLength(3));
+    const filter = screen.getByTestId("database-filter");
+    fireEvent.change(filter, { target: { value: 'status = "doing"' } });
+    fireEvent.keyDown(filter, { key: "Enter" });
+    await waitFor(() => expect(titles()).toEqual(["Beta"]));
+    fireEvent.change(filter, { target: { value: 'status = "doing" AND' } });
+    fireEvent.keyDown(filter, { key: "Enter" });
+    await screen.findByRole("alert");
+    expect(titles()).toEqual(["Beta"]);
+  });
+
+  it("a column's type comes from every note, not just the ones the filter shows", async () => {
+    await writeWorkspaceFile("tasks/Delta.md", "---\ntype: task\nstatus: todo\n---\n");
+    render(<DatabaseBlock source={SPEC.replace("groupBy: status\n", "where: empty(rating)\n")} />);
+    await waitFor(() => expect(titles()).toEqual(["Delta"]));
+    fireEvent.click(screen.getByRole("button", { name: "Edit rating of Delta" }));
+    const input = screen.getByRole("textbox", { name: "Edit rating of Delta" });
+    fireEvent.change(input, { target: { value: "5" } });
+    fireEvent.keyDown(input, { key: "Enter" });
+    await waitFor(async () => expect(await readWorkspaceFile("tasks/Delta.md")).toBe("---\ntype: task\nstatus: todo\nrating: 5\n---\n"));
+  });
+
   it("kanban: a real `_` value is its own column, apart from the notes without one", async () => {
     await writeWorkspaceFile("tasks/Delta.md", note("_", 2));
     await writeWorkspaceFile("tasks/Epsilon.md", "---\ntype: task\nrating: 2\n---\n");

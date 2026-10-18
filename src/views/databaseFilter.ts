@@ -204,7 +204,8 @@ export interface FilterRow {
 }
 
 function lookup(row: FilterRow, path: string[]): unknown {
-  if (path[0] === "file" && path.length === 2 && !("file" in row.fm)) return row.file[path[1] as keyof FilterRow["file"]];
+  // `file.name` / `file.path` / `file.folder` are the note's own, whatever its frontmatter holds.
+  if (path[0] === "file" && path.length === 2 && Object.prototype.hasOwnProperty.call(row.file, path[1])) return row.file[path[1] as keyof FilterRow["file"]];
   let v: unknown = row.fm;
   for (const k of path) {
     if (v === null || typeof v !== "object" || Array.isArray(v)) return undefined;

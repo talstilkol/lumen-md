@@ -6,6 +6,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { installFakeOpfs } from "./helpers/fakeOpfs";
 import { readWorkspaceFile, writeWorkspaceFile } from "../storage/workspace";
+import * as ws from "../storage/workspace";
 import { NOTE_EDIT_EVENT, cellInputText, columnType, editNote, parseCellInput, writeCell, type NoteEditDetail } from "../views/databaseEdit";
 import { applyQuery, loadDatabaseRows, parseSort, runDatabaseQuery, specView, type DatabaseRow } from "../views/database";
 import { parseFilter } from "../views/databaseFilter";
@@ -95,6 +96,18 @@ describe("writeCell", () => {
     expect(tab.content).toBe(unsaved.replace("status: reading", "status: done"));
     expect(tab.dirty).toBe(true);
     expect(await readWorkspaceFile("books/a.md")).toBe(NOTE.replace("status: reading", "status: done"));
+    useAppStore.setState({ openTabs: [] });
+  });
+
+  it("a failed write leaves the inactive tab as it was", async () => {
+    await writeWorkspaceFile("books/a.md", NOTE);
+    useAppStore.setState((s) => ({
+      doc: { ...s.doc, workspaceName: "other.md" },
+      openTabs: [{ id: "books/a.md", name: "a.md", content: NOTE, workspaceName: "books/a.md", dirty: false }],
+    }));
+    vi.spyOn(ws, "writeWorkspaceFile").mockRejectedValueOnce(new Error("quota"));
+    await expect(writeCell("books/a.md", "status", "done")).rejects.toThrow("quota");
+    expect(useAppStore.getState().openTabs[0].content).toBe(NOTE);
     useAppStore.setState({ openTabs: [] });
   });
 
