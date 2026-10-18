@@ -207,7 +207,8 @@ export async function runAgent<I extends AgentInput, O = string>(def: AgentDefin
     const { aiCacheEnabled, cacheKey } = await import("../ai/responseCache");
     if (!aiCacheEnabled()) return null;
     const sys = typeof def.system === "function" ? def.system(input) : def.system;
-    return cacheKey({ v: 2, agent: def.id, executor: executor.id, model: executor.modelFor(patch.tier ?? def.tier ?? "small"), sys, user: def.user(input), patch }).catch(() => null);
+    // v3: answers cached before the language check (T27) are not reused.
+    return cacheKey({ v: 3, agent: def.id, executor: executor.id, model: executor.modelFor(patch.tier ?? def.tier ?? "small"), sys, user: def.user(input), patch }).catch(() => null);
   };
   const key = await cacheKeyOf();
   if (key) {
@@ -220,6 +221,8 @@ export async function runAgent<I extends AgentInput, O = string>(def: AgentDefin
       } catch {
         output = undefined;
       }
+      // A cached answer passes the same language check as a fresh one.
+      if (output !== undefined && languageMode(def, input) === "input" && !sameScript(inputTextOf(def, input), output).ok) output = undefined;
       if (output !== undefined) {
         step({ kind: "cache", ms: 0, label: "hit", ok: true });
         return finish("ok", { output, model: hit.model, executor: executor.id });
