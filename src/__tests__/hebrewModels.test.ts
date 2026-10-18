@@ -1,7 +1,7 @@
 /** T27 — Hebrew model catalog, Hebrew-aware picks, and the answer-language rule. */
 import { describe, it, expect } from "vitest";
 import { hebrewSupportOf, prefersHebrew, recommendOllamaModel } from "../ai/modelCatalog";
-import { pickModel } from "../agents/executors/ollama";
+import { pickModel, pickToolModel } from "../agents/executors/ollama";
 import { recommendWebLlmModel, type Hardware } from "../ai/modelManager";
 import { sameScript } from "../agents/runtime";
 
@@ -39,6 +39,12 @@ describe("Hebrew-aware picks", () => {
   it("prefers the model with better Hebrew in the same tier", () => {
     expect(pickModel("small", installed, null, { hebrew: true })).toBe("aya-expanse:8b");
     expect(pickModel("small", installed, null)).not.toBe("aya-expanse:8b");
+  });
+  it("keeps the Hebrew ranking when a tool agent falls back to a tool-capable model", () => {
+    const tools = (m: { name: string }) => !m.name.startsWith("aya");
+    expect(pickToolModel("small", installed, tools, { hebrew: true })).toBe("qwen2.5:7b");
+    expect(pickToolModel("small", installed, tools)).toBe("llama3.1:8b");
+    expect(pickToolModel("small", installed, () => false, { hebrew: true })).toBeNull();
   });
   it("still honours an explicitly configured model of the tier", () => {
     expect(pickModel("small", installed, "llama3.1:8b", { hebrew: true })).toBe("llama3.1:8b");
