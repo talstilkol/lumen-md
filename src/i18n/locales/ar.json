@@ -1212,6 +1212,7 @@
   "tree.trashed": "تم نقل {count} إلى سلة المهملات",
   "tree.undo": "تراجع",
   "tree.linksUpdated": "تم تحديث الروابط في {count} ملاحظات",
+  "tree.linksFailed": "تم النقل، لكن تعذّر تحديث بعض الروابط: {error}",
   "trash.title": "سلة المهملات",
   "trash.close": "إغلاق",
   "trash.empty": "سلة المهملات فارغة.",

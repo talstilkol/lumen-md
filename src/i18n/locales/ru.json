@@ -1212,6 +1212,7 @@
   "tree.trashed": "{count} перемещено в корзину",
   "tree.undo": "Отменить",
   "tree.linksUpdated": "Ссылки обновлены в {count} заметках",
+  "tree.linksFailed": "Перемещено, но некоторые ссылки не удалось обновить: {error}",
   "trash.title": "Корзина",
   "trash.close": "Закрыть",
   "trash.empty": "Корзина пуста.",

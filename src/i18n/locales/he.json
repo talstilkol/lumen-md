@@ -1212,6 +1212,7 @@
   "tree.trashed": "{count} הועברו לסל המחזור",
   "tree.undo": "ביטול",
   "tree.linksUpdated": "הקישורים עודכנו ב-{count} פתקים",
+  "tree.linksFailed": "הועבר, אך חלק מהקישורים לא עודכנו: {error}",
   "trash.title": "סל המחזור",
   "trash.close": "סגירה",
   "trash.empty": "סל המחזור ריק.",

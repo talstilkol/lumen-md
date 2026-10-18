@@ -1212,6 +1212,7 @@
   "tree.trashed": "{count} in den Papierkorb verschoben",
   "tree.undo": "Rückgängig",
   "tree.linksUpdated": "Links in {count} Notizen aktualisiert",
+  "tree.linksFailed": "Verschoben, aber einige Links konnten nicht aktualisiert werden: {error}",
   "trash.title": "Papierkorb",
   "trash.close": "Schließen",
   "trash.empty": "Der Papierkorb ist leer.",

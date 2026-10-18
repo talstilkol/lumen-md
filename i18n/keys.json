@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-10-18T00:09:36.217Z",
+  "generated_at": "2026-10-18T02:07:46.694Z",
   "source": "src/i18n/index.ts (en bundle)",
-  "count": 1407,
+  "count": 1408,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -1637,6 +1637,13 @@
       "en": "Links updated in {count} notes",
       "vars": [
         "count"
+      ]
+    },
+    {
+      "key": "tree.linksFailed",
+      "en": "Moved, but some links could not be updated: {error}",
+      "vars": [
+        "error"
       ]
     },
     {

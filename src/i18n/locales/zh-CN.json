@@ -1212,6 +1212,7 @@
   "tree.trashed": "已将 {count} 项移入回收站",
   "tree.undo": "撤销",
   "tree.linksUpdated": "已更新 {count} 篇笔记中的链接",
+  "tree.linksFailed": "已移动，但部分链接未能更新：{error}",
   "trash.title": "回收站",
   "trash.close": "关闭",
   "trash.empty": "回收站为空。",

@@ -1212,6 +1212,7 @@
   "tree.trashed": "{count} déplacé(s) dans la corbeille",
   "tree.undo": "Annuler",
   "tree.linksUpdated": "Liens mis à jour dans {count} notes",
+  "tree.linksFailed": "Déplacé, mais certains liens n’ont pas pu être mis à jour : {error}",
   "trash.title": "Corbeille",
   "trash.close": "Fermer",
   "trash.empty": "La corbeille est vide.",

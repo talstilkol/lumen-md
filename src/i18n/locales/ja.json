@@ -1212,6 +1212,7 @@
   "tree.trashed": "{count} 件をごみ箱へ移動しました",
   "tree.undo": "元に戻す",
   "tree.linksUpdated": "{count} 件のノートのリンクを更新しました",
+  "tree.linksFailed": "移動しましたが、一部のリンクを更新できませんでした: {error}",
   "trash.title": "ごみ箱",
   "trash.close": "閉じる",
   "trash.empty": "ごみ箱は空です。",

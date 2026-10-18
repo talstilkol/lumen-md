@@ -398,6 +398,7 @@ const en: Strings = {
   "tree.trashed": "{count} moved to the trash",
   "tree.undo": "Undo",
   "tree.linksUpdated": "Links updated in {count} notes",
+  "tree.linksFailed": "Moved, but some links could not be updated: {error}",
   "trash.title": "Trash",
   "trash.close": "Close",
   "trash.empty": "The trash is empty.",
