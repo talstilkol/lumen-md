@@ -93,6 +93,176 @@ fn build_menu(app: &tauri::AppHandle) -> tauri::Result<tauri::menu::Menu<tauri::
     Ok(menu)
 }
 
+// ── The vault folder (plan 4.3) ─────────────────────────────────────────
+//
+// The WebView reads and writes notes only through these commands, and only
+// inside the folder the user picked in the native dialog (lumen-vault checks
+// every path). There is no command that sets the folder from a path string:
+// the root comes from the dialog, or from the app's own config file that the
+// dialog wrote. No `fs:` permission is granted to the WebView.
+
+mod desktop_vault {
+    use lumen_vault::{Entry, Stat, Vault};
+    use std::path::PathBuf;
+    use std::sync::Mutex;
+    use tauri::{AppHandle, Manager, State};
+    use tauri_plugin_dialog::DialogExt;
+
+    #[derive(Default)]
+    pub struct VaultState(pub Mutex<Option<Vault>>);
+
+    fn config_file(app: &AppHandle) -> Option<PathBuf> {
+        app.path().app_config_dir().ok().map(|d| d.join("vault.json"))
+    }
+
+    /// The folder chosen earlier, if it still exists.
+    pub fn load(app: &AppHandle) -> Option<Vault> {
+        let text = std::fs::read_to_string(config_file(app)?).ok()?;
+        let v: serde_json::Value = serde_json::from_str(&text).ok()?;
+        Vault::open(v.get("root")?.as_str()?).ok()
+    }
+
+    fn save(app: &AppHandle, root: Option<&std::path::Path>) -> Result<(), String> {
+        let file = config_file(app).ok_or("EIO: no config folder")?;
+        match root {
+            Some(r) => {
+                std::fs::create_dir_all(file.parent().unwrap()).map_err(|e| format!("EIO: {e}"))?;
+                let body = serde_json::json!({ "root": r.display().to_string() }).to_string();
+                std::fs::write(&file, body).map_err(|e| format!("EIO: {e}"))
+            }
+            None => match std::fs::remove_file(&file) {
+                Ok(()) => Ok(()),
+                Err(e) if e.kind() == std::io::ErrorKind::NotFound => Ok(()),
+                Err(e) => Err(format!("EIO: {e}")),
+            },
+        }
+    }
+
+    fn with<T>(state: &State<VaultState>, f: impl FnOnce(&Vault) -> lumen_vault::Result<T>) -> Result<T, String> {
+        let guard = state.0.lock().map_err(|_| "EIO: vault lock poisoned".to_string())?;
+        let vault = guard.as_ref().ok_or_else(|| "ENOVAULT: no vault folder chosen".to_string())?;
+        f(vault).map_err(|e| e.to_string())
+    }
+
+    /// The vault folder's absolute path, or null when none is chosen.
+    #[tauri::command]
+    pub fn vault_root(state: State<VaultState>) -> Option<String> {
+        state.0.lock().ok()?.as_ref().map(|v| v.root().display().to_string())
+    }
+
+    /// Ask the user for the vault folder (native dialog). Null when cancelled.
+    #[tauri::command]
+    pub async fn vault_pick_folder(app: AppHandle, state: State<'_, VaultState>) -> Result<Option<String>, String> {
+        let Some(picked) = app.dialog().file().set_title("Choose the folder for your Lumen vault").blocking_pick_folder() else {
+            return Ok(None);
+        };
+        let path = picked.into_path().map_err(|e| format!("EINVAL: {e}"))?;
+        let vault = Vault::open(&path).map_err(|e| e.to_string())?;
+        save(&app, Some(vault.root()))?;
+        let root = vault.root().display().to_string();
+        *state.0.lock().map_err(|_| "EIO: vault lock poisoned".to_string())? = Some(vault);
+        Ok(Some(root))
+    }
+
+    /// Stop using the folder (the vault goes back to app storage). The folder is not touched.
+    #[tauri::command]
+    pub fn vault_forget(app: AppHandle, state: State<VaultState>) -> Result<(), String> {
+        save(&app, None)?;
+        *state.0.lock().map_err(|_| "EIO: vault lock poisoned".to_string())? = None;
+        Ok(())
+    }
+
+    #[tauri::command]
+    pub fn vault_list(state: State<VaultState>, dir: String) -> Result<Vec<Entry>, String> {
+        with(&state, |v| v.list(&dir))
+    }
+
+    #[tauri::command]
+    pub fn vault_stat(state: State<VaultState>, path: String) -> Result<Option<Stat>, String> {
+        with(&state, |v| v.stat(&path))
+    }
+
+    /// The file's bytes, as a raw IPC response (an ArrayBuffer in the WebView).
+    #[tauri::command]
+    pub fn vault_read(state: State<VaultState>, path: String) -> Result<tauri::ipc::Response, String> {
+        with(&state, |v| v.read(&path)).map(tauri::ipc::Response::new)
+    }
+
+    /// Percent-decode a header value (the path is sent `encodeURIComponent`-ed:
+    /// HTTP headers carry only ASCII, vault paths are Unicode).
+    fn percent_decode(s: &str) -> Result<String, String> {
+        let b = s.as_bytes();
+        let mut out = Vec::with_capacity(b.len());
+        let mut i = 0;
+        while i < b.len() {
+            if b[i] == b'%' {
+                let hex = s.get(i + 1..i + 3).ok_or("EINVAL: bad path encoding")?;
+                out.push(u8::from_str_radix(hex, 16).map_err(|_| "EINVAL: bad path encoding")?);
+                i += 3;
+            } else {
+                out.push(b[i]);
+                i += 1;
+            }
+        }
+        String::from_utf8(out).map_err(|_| "EINVAL: bad path encoding".into())
+    }
+
+    /// Write a file. The bytes are the raw request body (no JSON array of
+    /// numbers for a 5 MB image); the path is the `x-vault-path` header.
+    #[tauri::command]
+    pub fn vault_write(state: State<VaultState>, request: tauri::ipc::Request) -> Result<(), String> {
+        let tauri::ipc::InvokeBody::Raw(data) = request.body() else {
+            return Err("EINVAL: vault_write expects raw bytes".into());
+        };
+        let path = request
+            .headers()
+            .get("x-vault-path")
+            .and_then(|h| h.to_str().ok())
+            .ok_or("EINVAL: missing x-vault-path header")?;
+        let path = percent_decode(path)?;
+        with(&state, |v| v.write(&path, data))
+    }
+
+    #[tauri::command]
+    pub fn vault_mkdir(state: State<VaultState>, path: String) -> Result<(), String> {
+        with(&state, |v| v.mkdir(&path))
+    }
+
+    #[tauri::command]
+    pub fn vault_rename(state: State<VaultState>, from: String, to: String, overwrite: bool) -> Result<(), String> {
+        with(&state, |v| v.rename(&from, &to, overwrite))
+    }
+
+    #[tauri::command]
+    pub fn vault_remove(state: State<VaultState>, path: String) -> Result<(), String> {
+        with(&state, |v| v.remove(&path))
+    }
+
+    /// Keep a backup (e.g. a zip of the browser-storage vault before a
+    /// migration) in the app's data folder; returns where it went.
+    #[tauri::command]
+    pub fn vault_backup(app: AppHandle, request: tauri::ipc::Request) -> Result<String, String> {
+        let tauri::ipc::InvokeBody::Raw(data) = request.body() else {
+            return Err("EINVAL: vault_backup expects raw bytes".into());
+        };
+        let name = request
+            .headers()
+            .get("x-backup-name")
+            .and_then(|h| h.to_str().ok())
+            .ok_or("EINVAL: missing x-backup-name header")?;
+        let name = percent_decode(name)?;
+        let safe: String = name.chars().map(|c| if c.is_ascii_alphanumeric() || "-_.".contains(c) { c } else { '_' }).collect();
+        if safe.is_empty() || safe.starts_with('.') {
+            return Err("EINVAL: invalid backup name".into());
+        }
+        let dir = app.path().app_data_dir().map_err(|e| format!("EIO: {e}"))?.join("backups");
+        std::fs::create_dir_all(&dir).map_err(|e| format!("EIO: {e}"))?;
+        let file = dir.join(safe);
+        std::fs::write(&file, data).map_err(|e| format!("EIO: {e}"))?;
+        Ok(file.display().to_string())
+    }
+}
+
 const KEYCHAIN_SERVICE: &str = "app.lumen.secrets";
 
 /// Is the OS keychain available to `secret_get` / `secret_set` (T36)?
@@ -149,9 +319,30 @@ fn secret_set(name: String, value: Option<String>) -> Result<(), String> {
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_dialog::init())
-        .plugin(tauri_plugin_fs::init())
-        .invoke_handler(tauri::generate_handler![secret_available, secret_get, secret_set])
+        .manage(desktop_vault::VaultState::default())
+        .invoke_handler(tauri::generate_handler![
+            secret_available,
+            secret_get,
+            secret_set,
+            desktop_vault::vault_root,
+            desktop_vault::vault_pick_folder,
+            desktop_vault::vault_forget,
+            desktop_vault::vault_list,
+            desktop_vault::vault_stat,
+            desktop_vault::vault_read,
+            desktop_vault::vault_write,
+            desktop_vault::vault_mkdir,
+            desktop_vault::vault_rename,
+            desktop_vault::vault_remove,
+            desktop_vault::vault_backup,
+        ])
         .setup(|app| {
+            // The folder chosen on an earlier run (plan 4.3).
+            if let Some(v) = desktop_vault::load(app.handle()) {
+                if let Ok(mut slot) = app.state::<desktop_vault::VaultState>().0.lock() {
+                    *slot = Some(v);
+                }
+            }
             #[cfg(desktop)]
             {
                 let handle = app.handle().clone();
