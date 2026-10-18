@@ -10,6 +10,10 @@ test("OCR reads Hebrew and English text from an image on this device", async ({ 
   await page.addInitScript(() => localStorage.setItem("lumen-tour-done", "1"));
   await page.goto("/");
   await expect(page.locator(".cm-content").first()).toBeVisible({ timeout: 15_000 });
+  // Imports the module straight from the dev server; the production-bundle
+  // job has no /src/ to import from.
+  const dev = await page.evaluate(() => !!document.querySelector('script[src*="/@vite/client"]'));
+  test.skip(!dev, "runs against the dev server only");
   const reachable = await page.evaluate(() =>
     fetch("https://raw.githubusercontent.com/tesseract-ocr/tessdata_fast/main/heb.traineddata", { method: "HEAD" }).then((r) => r.ok, () => false),
   );
