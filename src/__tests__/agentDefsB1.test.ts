@@ -125,7 +125,8 @@ describe("B1 agents end to end (fake executor)", () => {
     const second = await runAgent(taggerAgent, { text: "doc to cache", extra: { existing: [] } });
     expect(second.status).toBe("ok");
     expect(second.output).toEqual({ tags: ["cached-tag"] });
-    expect(second.steps.map((s) => s.kind)).toEqual(["cache"]);
+    // The context call comes first: the answer is reused only for the same tags (5.3).
+    expect(second.steps.map((s) => s.kind)).toEqual(["tool", "cache"]);
     expect(ex.calls).toHaveLength(1);
     // A different input misses.
     await runAgent(taggerAgent, { text: "another doc", extra: { existing: [] } });

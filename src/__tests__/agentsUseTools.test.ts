@@ -230,3 +230,24 @@ describe("protocol schema and committer output", () => {
     expect(commitMessage(["fix: z", "", "1", "2", "3", "4", "5"].join("\n")).split("\n")).toHaveLength(6);
   });
 });
+
+describe("response cache and context", () => {
+  it("an answer is reused only while the context is the same (review: #241)", async () => {
+    localStorage.setItem("lumen.ai.cache", "on");
+    const ex = fakeExecutor(() => reply('{"tags": ["kubernetes", "devops"]}'), { supportsSchema: () => false });
+    registerExecutor(ex);
+    const tagger = getAgent("tagger")!;
+    const input = { text: "Kubernetes schedules containers across a cluster." };
+    expect((await runAgent(tagger, input)).status).toBe("ok");
+    const again = await runAgent(tagger, input);
+    expect(again.steps.some((s) => s.kind === "cache")).toBe(true);
+    expect(ex.calls).toHaveLength(1);
+    // A new tag in the workspace: list_tags returns something else, so the model is asked again.
+    vault.set("notes/new.md", "---\ntags: [platform-engineering]\n---\nnew");
+    window.dispatchEvent(new CustomEvent("lumen-workspace-changed", { detail: { kind: "structure" } })); // as a save announces it
+    const fresh = await runAgent(tagger, input);
+    expect(fresh.steps.some((s) => s.kind === "cache")).toBe(false);
+    expect(ex.calls).toHaveLength(2);
+    localStorage.setItem("lumen.ai.cache", "off");
+  });
+});

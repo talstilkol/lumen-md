@@ -283,6 +283,30 @@ export async function runAgent<I extends AgentInput, O = string>(def: AgentDefin
   let executor = pick.executor;
   let patch: RetryPatch = { ...(pending ?? {}), ...(opts.patch ?? {}) };
 
+  // The context the agent always needs, fetched once through the tool path
+  // (plan 5.3); every attempt starts from it. Before the cache lookup: an
+  // answer is only reused for the same context (the same tags, the same
+  // note list), not just the same prompt.
+  const context: ExecutorMessage[] = [];
+  for (const [i, c] of (def.context?.(input) ?? []).entries()) {
+    if (opts.signal?.aborted) return finish("aborted", { errorCode: "aborted", error: "aborted" });
+    const call: ToolCall = { id: `ctx_${run.id}_${i}`, name: c.tool, args: c.args ?? {} };
+    const t1 = Date.now();
+    let r: Awaited<ReturnType<typeof execTool>>;
+    try {
+      r = await execTool(def.tools ?? [], call, toolEnv);
+    } catch (e) {
+      if (isAbort(e, opts.signal)) return finish("aborted", { errorCode: "aborted", error: "aborted" });
+      throw e;
+    }
+    step({ kind: "tool", ms: Date.now() - t1, label: call.name, ok: r.error === undefined, detail: `context · ${r.error ?? truncate(JSON.stringify(call.args), 200)}` });
+    context.push(
+      { role: "assistant", content: "", toolCalls: [call] },
+      { role: "tool", content: r.error !== undefined ? toolResultMessage(call, undefined, r.error) : truncate(toolResultMessage(call, r.result), TOOL_RESULT_LIMIT), toolCallId: call.id, name: call.name },
+    );
+  }
+
+
   // A cached, already-validated answer costs nothing: no prompt, no model.
   const cacheKeyOf = async (): Promise<string | null> => {
     if (!def.cache) return null;
@@ -290,7 +314,8 @@ export async function runAgent<I extends AgentInput, O = string>(def: AgentDefin
     if (!aiCacheEnabled()) return null;
     const sys = typeof def.system === "function" ? def.system(input) : def.system;
     // v3: answers cached before the language check (T27) are not reused.
-    return cacheKey({ v: 3, agent: def.id, executor: executor.id, model: executor.modelFor(patch.tier ?? def.tier ?? "small"), sys, user: def.user(input), patch }).catch(() => null);
+    const ctx = context.filter((m) => m.role === "tool").map((m) => m.content);
+    return cacheKey({ v: 3, agent: def.id, executor: executor.id, model: executor.modelFor(patch.tier ?? def.tier ?? "small"), sys, user: def.user(input), patch, ...(ctx.length ? { context: ctx } : {}) }).catch(() => null);
   };
   const key = await cacheKeyOf();
   if (key) {
@@ -332,27 +357,6 @@ export async function runAgent<I extends AgentInput, O = string>(def: AgentDefin
       if (e instanceof AiQuotaExceededError) return finish("failed", { errorCode: "quota", error: e.message });
       throw e;
     }
-  }
-
-  // The context the agent always needs, fetched once through the tool path
-  // (plan 5.3); every attempt starts from it.
-  const context: ExecutorMessage[] = [];
-  for (const [i, c] of (def.context?.(input) ?? []).entries()) {
-    if (opts.signal?.aborted) return finish("aborted", { errorCode: "aborted", error: "aborted" });
-    const call: ToolCall = { id: `ctx_${run.id}_${i}`, name: c.tool, args: c.args ?? {} };
-    const t1 = Date.now();
-    let r: Awaited<ReturnType<typeof execTool>>;
-    try {
-      r = await execTool(def.tools ?? [], call, toolEnv);
-    } catch (e) {
-      if (isAbort(e, opts.signal)) return finish("aborted", { errorCode: "aborted", error: "aborted" });
-      throw e;
-    }
-    step({ kind: "tool", ms: Date.now() - t1, label: call.name, ok: r.error === undefined, detail: `context · ${r.error ?? truncate(JSON.stringify(call.args), 200)}` });
-    context.push(
-      { role: "assistant", content: "", toolCalls: [call] },
-      { role: "tool", content: r.error !== undefined ? toolResultMessage(call, undefined, r.error) : truncate(toolResultMessage(call, r.result), TOOL_RESULT_LIMIT), toolCallId: call.id, name: call.name },
-    );
   }
 
   for (let attempt = 1; attempt <= maxRetries + 1; attempt++) {
