@@ -10,6 +10,8 @@
 import type { EditorView } from "@codemirror/view";
 import { noteBlocks } from "./wikiComplete";
 import { BLOCK_MARK } from "../renderer/remarkBlockIds";
+import { noteHeadings } from "../lint/vaultDoctor";
+import { headingSlug, headingSlugger } from "../lib/slug";
 
 export type BlockIdEdit =
   | { kind: "block"; id: string; change: { from: number; insert: string } | null }
@@ -21,6 +23,8 @@ const LIST = /^\s*(?:[-*+]|\d+[.)])\s+/;
 const HEADING = /^ {0,3}#{1,6}[ \t]+(.*?)[ \t]*#*[ \t]*$/;
 const OWN_LINE = /^\s*\^([A-Za-z0-9-]+)\s*$/;
 const isTable = (l: string) => /^\s*\|/.test(l) || /^\s*[-:| ]+\|[-:| ]*$/.test(l);
+/** A GFM delimiter row (`--- | :-:`, with or without outer pipes). */
+const DELIMITER = /^\s*\|?\s*:?-+:?\s*(?:\|\s*:?-+:?\s*)*\|?\s*$/;
 const isQuote = (l: string) => /^\s{0,3}>/.test(l);
 
 /** A short id, unique among the note's block ids. */
@@ -97,9 +101,32 @@ export function blockIdEdit(text: string, pos: number, makeId: (taken: ReadonlyS
   if (!line.trim()) return { kind: "none" };
   if (OWN_LINE.test(line)) return { kind: "block", id: OWN_LINE.exec(line)![1], change: null };
   const h = HEADING.exec(line);
-  if (h) return { kind: "heading", heading: h[1] };
+  if (h) {
+    // A repeated heading is reached by its numbered slug (`setup-1`), as the
+    // preview ids it; the first by its text.
+    const hs = noteHeadings(text.slice(0, starts[at] + lines[at].length));
+    const slugger = headingSlugger();
+    let id = "";
+    for (const x of hs) id = slugger.slug(x);
+    const own = hs[hs.length - 1] ?? h[1];
+    return { kind: "heading", heading: id && id !== headingSlug(own) ? id : own };
+  }
 
-  // Tables and quotes: the run of their lines, then an id line of its own.
+  // A table — also one without outer pipes (`a | b` / `-- | --`): its header
+  // row, delimiter row and the rows after, then an id line of its own.
+  const l = (i: number) => clean(lines[i] ?? "");
+  let runStart = at;
+  while (runStart > 0 && l(runStart - 1).trim()) runStart--;
+  let runEnd = at;
+  while (runEnd + 1 < lines.length && l(runEnd + 1).trim()) runEnd++;
+  for (let d = runStart + 1; d <= runEnd; d++) {
+    if (!(DELIMITER.test(l(d)) && l(d).includes("|") && l(d - 1).includes("|"))) continue;
+    let end = d;
+    while (end + 1 <= runEnd && l(end + 1).includes("|")) end++;
+    if (at >= d - 1 && at <= end) return markOwnLine(end);
+  }
+
+  // Quotes (and pipe tables the scan above didn't take): the run of their lines, then an id line.
   for (const kind of [isTable, isQuote]) {
     if (!kind(line)) continue;
     let last = at;

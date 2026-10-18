@@ -125,3 +125,46 @@ describe("Vault Doctor and block references", () => {
     expect(findings.map((f) => f.detail)).toEqual(["Plans#^gone"]);
   });
 });
+
+describe("review fixes (PR #238)", () => {
+  const id = () => "abc123";
+  const apply = (text: string, pos: number) => {
+    const e = blockIdEdit(text, pos, id);
+    if (e.kind !== "block" || !e.change) return text;
+    return text.slice(0, e.change.from) + e.change.insert + text.slice(e.change.from);
+  };
+
+  it("a GFM table without outer pipes takes its id on a line after the table", () => {
+    const md = "Intro.\n\na | b\n-- | --\n1 | 2\n3 | 4\n\nAfter.\n";
+    for (const row of ["a | b", "-- | --", "3 | 4"]) expect(apply(md, md.indexOf(row) + 1)).toBe("Intro.\n\na | b\n-- | --\n1 | 2\n3 | 4\n\n^abc123\n\nAfter.\n");
+    expect(html(apply(md, md.indexOf("3 | 4")))).toContain('<table id="^abc123">');
+  });
+
+  it("a repeated heading copies its numbered slug", () => {
+    const md = "# Setup\n\ntext\n\n## Setup\n\n## Other\n";
+    expect(blockIdEdit(md, md.indexOf("## Setup") + 3, id)).toEqual({ kind: "heading", heading: "setup-1" });
+    expect(blockIdEdit(md, 2, id)).toEqual({ kind: "heading", heading: "Setup" });
+  });
+
+  it("a Lumen code block (mermaid, live code…) keeps its block id through the full pipeline", async () => {
+    const { renderMarkdown } = await import("../renderer/pipeline");
+    const { render } = await import("@testing-library/react");
+    const el = await renderMarkdown("```mermaid\ngraph TD; A-->B\n```\n\n^diagram\n\n```js\nx()\n```\n\n^code\n\n[[#^diagram]]\n", () => false);
+    const { container } = render(el);
+    expect(container.querySelector('[id="^diagram"]')?.textContent ?? null).not.toBeNull();
+    expect(container.querySelector('[id="^code"]')?.textContent).toContain("x()");
+    expect(container.textContent).not.toContain("^code");
+    expect(decodeURIComponent(container.querySelector("a.wiki-link")?.getAttribute("href") ?? "")).toBe("#^diagram");
+  });
+
+  it("published pages link to block ids, not heading slugs", async () => {
+    const { rewriteWikiLinks } = await import("../cli/publish");
+    const pages = [
+      { source: "Plans.md", output: "Plans.html" },
+      { source: "Hub.md", output: "Hub.html" },
+    ];
+    const out = rewriteWikiLinks('<p id="^own">x</p><a class="wiki-link" data-wiki-target="#^own" href="#^own">a</a> <a class="wiki-link" data-wiki-target="Plans#^goal" href="#plansgoal">b</a>', "Hub.html", pages);
+    expect(out).toContain('href="#^own"');
+    expect(out).toContain('href="Plans.html#%5Egoal"');
+  });
+});

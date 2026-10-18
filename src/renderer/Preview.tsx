@@ -4,7 +4,7 @@ import { PreviewDocKeyContext } from "./previewDoc";
 import { handleWikiLinkClick } from "./wikiLinks";
 import { hasEmbeds } from "./remarkEmbeds";
 import { onWorkspaceChanged } from "../storage/workspaceEvents";
-import { slug as headingSlug } from "github-slugger";
+import { wikiFragmentId } from "../lib/slug";
 import { scheduleIdle } from "../lib/idle";
 import { CopyButtonHandler } from "./components";
 import { Frontmatter } from "../ui/Frontmatter";
@@ -157,7 +157,7 @@ export function Preview({ markdownText, docKey = null }: Props) {
                 // Same slugger rehype-slug gives the rendered headings
                 // (Unicode-aware: Hebrew / CJK headings keep their text).
                 // A block reference (`#^id`) is the block's own id (remarkBlockIds).
-                detail: heading ? { path, heading: heading.startsWith("^") ? heading : headingSlug(heading) } : { path },
+                detail: heading ? { path, heading: wikiFragmentId(heading) } : { path },
               }),
             ),
         );

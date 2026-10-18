@@ -25,6 +25,20 @@ const setId = (n: Node, id: string) => {
   n.data.hProperties = { ...(n.data.hProperties ?? {}), id: `^${id}` };
 };
 
+/**
+ * Code (and display math) becomes a Lumen block, Shiki's `<pre>` or KaTeX
+ * later, and those drop an id put on the node: such a block is wrapped in a
+ * `<div>` that carries it.
+ */
+const REPLACED = new Set(["code", "math"]);
+const withId = (n: Node, id: string): Node => {
+  if (!REPLACED.has(n.type)) {
+    setId(n, id);
+    return n;
+  }
+  return { type: "lumenBlockRef", data: { hName: "div", hProperties: { id: `^${id}` } }, children: [n] };
+};
+
 function walk(parent: Node): void {
   const list = parent.children;
   if (!list) return;
@@ -37,8 +51,8 @@ function walk(parent: Node): void {
       const before = (last.value ?? "").slice(0, m.index);
       if (n.children!.length === 1 && !before.trim()) {
         // A `^id` line of its own names the block before it.
-        if (i > 0 && !list[i - 1].data?.hProperties?.id) {
-          setId(list[i - 1], m[2]);
+        if (i > 0 && !list[i - 1].data?.hProperties?.id && list[i - 1].type !== "lumenBlockRef") {
+          list[i - 1] = withId(list[i - 1], m[2]);
           list.splice(i--, 1);
         }
         continue;
