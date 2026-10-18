@@ -53,15 +53,31 @@ const RANK: Record<HebrewSupport, number> = { strong: 3, good: 2, basic: 1, none
 
 export type LicenceClass = "allowed" | "conditional" | "forbidden";
 
+/** A model's licence: its class and the name to show the user. */
+export interface ModelLicence {
+  class: LicenceClass;
+  name: string;
+}
+
+const LLAMA: ModelLicence = { class: "conditional", name: "Llama Community License" };
+const GEMMA: ModelLicence = { class: "conditional", name: "Gemma Terms of Use" };
+const COHERE: ModelLicence = { class: "forbidden", name: "CC-BY-NC-4.0 (non-commercial)" };
+const QWEN_RESEARCH: ModelLicence = { class: "forbidden", name: "Qwen Research License (non-commercial)" };
+const QWEN_LICENSE: ModelLicence = { class: "forbidden", name: "Qwen License" };
+
 /**
  * Installed models the catalog does not list by name or family: every Llama
  * and Gemma release (and fine-tunes named after them, e.g. Hermes) is under a
  * custom licence; Cohere's open weights — Aya, Command R / R+ / R7B /
  * A (c4ai-* on Hugging Face) — are CC-BY-NC (models/registry.json, plan 1.7).
+ * Matched at the start of a name part, so vendor-prefixed Hugging Face names
+ * count too ("Meta-Llama-3.1-8B-Instruct-GGUF", "dolphin-llama3"), but not
+ * "tinyllama" (Apache-2.0).
  */
-const FAMILY_LICENCE: Array<{ re: RegExp; class: LicenceClass }> = [
-  { re: /^(llama|codellama|hermes|gemma|codegemma)/i, class: "conditional" },
-  { re: /^(aya|command-[ar]|c4ai-)/i, class: "forbidden" },
+const FAMILY_LICENCE: Array<{ re: RegExp; licence: ModelLicence }> = [
+  { re: /(^|[-_.])(llama|codellama|hermes)/i, licence: LLAMA },
+  { re: /(^|[-_.])(gemma|codegemma)/i, licence: GEMMA },
+  { re: /(^|[-_.])(aya|command-[ar]|c4ai)/i, licence: COHERE },
 ];
 
 /**
@@ -69,25 +85,46 @@ const FAMILY_LICENCE: Array<{ re: RegExp; class: LicenceClass }> = [
  * (models/registry.json): Qwen2.5 3B and Qwen2.5-Coder 3B are the Qwen
  * Research License (non-commercial) and Qwen2.5 72B the Qwen License, while
  * the other sizes are Apache-2.0. Checked before a tag inherits its
- * family's licence.
+ * family's licence: `tag` for Ollama tags (name:size), `leaf` for the
+ * last part of a Hugging Face name (hf.co/<owner>/<Model-Size-…-GGUF>).
  */
-const SIZE_EXCEPTIONS: Array<{ re: RegExp; class: LicenceClass }> = [
-  { re: /^qwen2\.5:(3b|72b)(-|$)/i, class: "forbidden" },
-  { re: /^qwen2\.5-coder:3b(-|$)/i, class: "forbidden" },
+const SIZE_EXCEPTIONS: Array<{ tag: RegExp; leaf: RegExp; licence: ModelLicence }> = [
+  { tag: /^qwen2\.5:3b(-|$)/i, leaf: /(^|[-_.])qwen2\.5-3b([-_.]|$)/i, licence: QWEN_RESEARCH },
+  { tag: /^qwen2\.5:72b(-|$)/i, leaf: /(^|[-_.])qwen2\.5-72b([-_.]|$)/i, licence: QWEN_LICENSE },
+  { tag: /^qwen2\.5-coder:3b(-|$)/i, leaf: /(^|[-_.])qwen2\.5-coder-3b([-_.]|$)/i, licence: QWEN_RESEARCH },
 ];
 
-/** The licence class of an installed (possibly tagged) model name: the catalog entry, a size exception, its family, then the name. null = unknown. */
-export function licenceClassOf(name: string): LicenceClass | null {
+/**
+ * The licence of an installed (possibly tagged or namespaced) model name:
+ * the catalog entry, a size exception, its catalog family, then the name.
+ * null = unknown.
+ */
+export function ollamaLicence(name: string): ModelLicence | null {
   const base = name.replace(/:latest$/, "");
   const exact = OLLAMA_CATALOG.find((e) => e.name === base);
-  if (exact?.licence) return exact.licence.class;
-  const size = SIZE_EXCEPTIONS.find((x) => x.re.test(base));
-  if (size) return size.class;
+  if (exact?.licence) return exact.licence;
   const family = base.split(":")[0];
-  const fam = OLLAMA_CATALOG.find((e) => e.name.split(":")[0] === family && e.licence);
-  if (fam?.licence) return fam.licence.class;
   const leaf = family.split("/").pop() ?? family;
-  return FAMILY_LICENCE.find((f) => f.re.test(leaf))?.class ?? null;
+  const size = SIZE_EXCEPTIONS.find((x) => x.tag.test(base) || x.leaf.test(leaf));
+  if (size) return size.licence;
+  const fam = OLLAMA_CATALOG.find((e) => e.name.split(":")[0] === family && e.licence);
+  if (fam?.licence) return fam.licence;
+  return FAMILY_LICENCE.find((f) => f.re.test(leaf))?.licence ?? null;
+}
+
+/** The licence class of an installed model name (see ollamaLicence). null = unknown. */
+export function licenceClassOf(name: string): LicenceClass | null {
+  return ollamaLicence(name)?.class ?? null;
+}
+
+/**
+ * The licence to name before the user picks an installed Ollama model by
+ * hand, or null for an open-licence (or unknown) one: custom-licence and
+ * non-commercial models are shown with their licence and confirmed first.
+ */
+export function ollamaLicenceNotice(name: string): ModelLicence | null {
+  const l = ollamaLicence(name);
+  return l && l.class !== "allowed" ? l : null;
 }
 
 /**

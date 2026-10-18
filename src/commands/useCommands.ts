@@ -969,12 +969,28 @@ export function useCommands({
             await uiAlert({ message: t("ai.settings.ollama.none") });
             return;
           }
-          const modelList = models.map((m) => `${m.name} (${(m.size / 1e9).toFixed(1)}GB)`).join("\n");
+          const { ollamaLicenceNotice } = await import("../ai/modelCatalog");
+          // why: custom-licence and non-commercial models are named as such and confirmed (plan 1.7)
+          const modelList = models
+            .map((m) => {
+              const lic = ollamaLicenceNotice(m.name);
+              return `${m.name} (${(m.size / 1e9).toFixed(1)}GB)${lic ? ` · ${lic.name}` : ""}`;
+            })
+            .join("\n");
           const choice = await uiPrompt({
             message: `Available Ollama models:\n\n${modelList}\n\nType the model name to use:`,
             defaultValue: models[0].name,
           });
           if (!choice) return;
+          const lic = ollamaLicenceNotice(choice.trim());
+          if (lic) {
+            const ok = await uiConfirm({
+              title: t("ai.localModels.licenceTitle"),
+              message: t("ai.localModels.licenceBody", { model: choice.trim(), licence: lic.name }),
+              okLabel: t("ai.localModels.licenceOk"),
+            });
+            if (!ok) return;
+          }
           setOllamaConfig({ model: choice.trim() });
           setActiveProvider("ollama");
           showAiToast(t("toast.switchedToOllama", { model: choice.trim() }), "success");

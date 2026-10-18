@@ -2,7 +2,7 @@
 import { describe, it, expect } from "vitest";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
-import { autoPickable, hebrewSupportOf, licenceClassOf, prefersHebrew, recommendOllamaModel } from "../ai/modelCatalog";
+import { autoPickable, hebrewSupportOf, licenceClassOf, ollamaLicenceNotice, prefersHebrew, recommendOllamaModel } from "../ai/modelCatalog";
 import { pickModel, pickToolModel } from "../agents/executors/ollama";
 import { recommendWebLlmModel, type Hardware } from "../ai/modelManager";
 import { sameScript } from "../agents/runtime";
@@ -91,6 +91,25 @@ describe("custom-licence models are never picked on their own (plan 1.7)", () =>
     expect(autoPickable("qwen2.5-coder:3b-instruct-q4_K_M")).toBe(false);
     expect(autoPickable("mistral:7b")).toBe(true);
     expect(autoPickable("llama3.1:8b")).toBe(false);
+  });
+
+  it("classifies vendor-prefixed Hugging Face names too", () => {
+    expect(licenceClassOf("hf.co/bartowski/Meta-Llama-3.1-8B-Instruct-GGUF:Q4_K_M")).toBe("conditional");
+    expect(licenceClassOf("hf.co/bartowski/Qwen2.5-72B-Instruct-GGUF:Q4_K_M")).toBe("forbidden");
+    expect(licenceClassOf("hf.co/Qwen/Qwen2.5-Coder-3B-Instruct-GGUF:Q4_K_M")).toBe("forbidden");
+    expect(licenceClassOf("hf.co/unsloth/gemma-3-4b-it-GGUF:Q4_K_M")).toBe("conditional");
+    expect(licenceClassOf("dolphin-llama3:8b")).toBe("conditional");
+    expect(licenceClassOf("hf.co/Qwen/Qwen2.5-7B-Instruct-GGUF:Q4_K_M")).toBeNull();
+    expect(licenceClassOf("tinyllama:1.1b")).toBeNull(); // Apache-2.0
+    expect(autoPickable("hf.co/bartowski/Meta-Llama-3.1-8B-Instruct-GGUF:Q4_K_M")).toBe(false);
+  });
+
+  it("names the licence a hand-picked Ollama model needs a notice for", () => {
+    expect(ollamaLicenceNotice("llama3.1:8b")).toEqual({ class: "conditional", name: "Llama 3.1 Community License" });
+    expect(ollamaLicenceNotice("gemma2:9b")?.name).toBe("Gemma Terms of Use");
+    expect(ollamaLicenceNotice("command-r:35b")?.name).toMatch(/non-commercial/);
+    expect(ollamaLicenceNotice("qwen2.5:7b")).toBeNull();
+    expect(ollamaLicenceNotice("mistral:7b")).toBeNull();
   });
 
   it("agrees with models/registry.json on every Ollama name it lists", () => {
