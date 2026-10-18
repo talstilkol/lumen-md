@@ -15,7 +15,7 @@ import { resolveWikiTarget, splitWikiTarget } from "./wikiLinks";
 import { ensureIndex, indexedFiles } from "../storage/workspaceIndex";
 import { isOPFSAvailable } from "../storage/workspace";
 import { headingSlugger, wikiFragmentId } from "../lib/slug";
-import { noteHeadings } from "../lint/vaultDoctor";
+import { noteHeadingLines } from "../lint/vaultDoctor";
 import { BLOCK_MARK } from "./remarkBlockIds";
 import { t } from "../i18n";
 
@@ -46,14 +46,11 @@ export function previewMarkdown(text: string, fragment: string | null): string {
     }
   } else if (fragment) {
     // The heading whose slug (numbered like the preview's) is the fragment's.
+    // Its line comes from the same parse (code, quotes, HTML: as the preview sees them).
     const want = wikiFragmentId(fragment);
     const slugger = headingSlugger();
-    const target = noteHeadings(body).findIndex((h) => slugger.slug(h) === want);
-    if (target >= 0) {
-      let seen = -1;
-      const at = lines.findIndex((l, i) => (/^ {0,3}#{1,6}[ \t]/.test(l) || /^ {0,3}(=+|-+)[ \t]*$/.test(lines[i + 1] ?? "")) && ++seen === target);
-      if (at >= 0) from = at;
-    }
+    const hit = noteHeadingLines(body).find((h) => slugger.slug(h.text) === want);
+    if (hit) from = hit.line;
   }
   return lines.slice(from, from + PREVIEW_LINES).join("\n");
 }

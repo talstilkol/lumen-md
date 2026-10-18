@@ -72,3 +72,16 @@ describe("linkMention", () => {
     expect(linkMention("Tel Aviv", { start: 0, end: 8, target: "Tel Aviv" }, "places/Tel Aviv")).toBe("[[places/Tel Aviv|Tel Aviv]]");
   });
 });
+
+describe("review fixes (PR #250)", () => {
+  it("code in quotes, lists and indented blocks is not searched", () => {
+    const text = "> ```\n> Tel Aviv\n> ```\n\n    Tel Aviv indented code\n\n- item\n\n  ```\n  Tel Aviv\n  ```\n\nTel Aviv in prose.\n";
+    expect(findUnlinkedMentions(text, ["Tel Aviv"]).map((m) => text.slice(m.start, m.end + 9))).toEqual(["Tel Aviv in prose"]);
+  });
+  it("offsets are the text's own, even where lowercasing changes the length", () => {
+    const text = "İ API here";
+    const [m] = findUnlinkedMentions(text, ["API"]);
+    expect([m.start, m.end, m.text]).toEqual([2, 5, "API"]);
+    expect(linkMention(text, m)).toBe("İ [[API]] here");
+  });
+});

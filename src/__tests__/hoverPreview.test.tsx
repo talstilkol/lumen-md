@@ -103,3 +103,39 @@ describe("unlinked mentions", () => {
     await waitFor(async () => expect(await readWorkspaceFile("Trip.md")).toBe("We flew to [[Tel Aviv|tel aviv]], then [[Tel Aviv]] again. `Tel Aviv` in code.\n"));
   });
 });
+
+describe("review fixes (PR #250)", () => {
+  it("a heading-like line in code doesn't shift where a heading's card starts", () => {
+    const md = "# Top\n\n```\n# example\n```\n\n> ## Quoted\n\n## Actual\n\ntext\n";
+    expect(previewMarkdown(md, "Actual").startsWith("## Actual\n\ntext")).toBe(true);
+    expect(previewMarkdown(md, "Quoted").startsWith("> ## Quoted")).toBe(true);
+  });
+
+  it("the editor's hover skips [[links]] inside code", async () => {
+    const { EditorState } = await import("@codemirror/state");
+    const { EditorView } = await import("@codemirror/view");
+    const { markdown } = await import("@codemirror/lang-markdown");
+    const { wikiHoverSource } = await import("../editor/wikiHover");
+    const doc = "Real [[Plans]] and `[[Plans]]` in code.\n\n```\n[[Plans]]\n```\n";
+    const view = new EditorView({ state: EditorState.create({ doc, extensions: [markdown()] }) });
+    expect(await wikiHoverSource(view, doc.indexOf("[[Plans]]") + 3)).not.toBeNull();
+    expect(await wikiHoverSource(view, doc.indexOf("`[[Plans]]`") + 4)).toBeNull();
+    expect(await wikiHoverSource(view, doc.lastIndexOf("[[Plans]]") + 3)).toBeNull();
+    view.destroy();
+  });
+
+  it("Link also updates the note's copy in an inactive tab", async () => {
+    const { useAppStore } = await import("../store/useStore");
+    await writeWorkspaceFile("Tabbed.md", "Off to Tel Aviv soon.\n");
+    await ensureIndex(true);
+    useAppStore.setState((s) => ({
+      doc: { ...s.doc, workspaceName: "Tel Aviv.md", content: "# Tel Aviv\n" },
+      openTabs: [{ id: "Tabbed.md", name: "Tabbed.md", content: "Off to Tel Aviv soon.\n", workspaceName: "Tabbed.md", dirty: false }],
+    }));
+    render(<UnlinkedMentions filePath="Tel Aviv.md" onOpen={() => {}} />);
+    fireEvent.click(await screen.findByRole("button", { name: "Link “Tel Aviv” in Tabbed" }));
+    await waitFor(async () => expect(await readWorkspaceFile("Tabbed.md")).toBe("Off to [[Tel Aviv]] soon.\n"));
+    expect(useAppStore.getState().openTabs[0].content).toBe("Off to [[Tel Aviv]] soon.\n");
+    useAppStore.setState({ openTabs: [] });
+  });
+});

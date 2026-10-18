@@ -14,6 +14,8 @@
  *  - never the note's own title.
  */
 
+import { stripCode } from "../lint/vaultDoctor";
+
 export interface Mention {
   /** UTF-16 offsets of the title in the text (the prefix excluded). */
   start: number;
@@ -37,8 +39,17 @@ function excluded(text: string): Array<[number, number]> {
     for (const m of text.matchAll(re)) out.push([m.index ?? 0, (m.index ?? 0) + m[0].length]);
   };
   add(/^---[ \t]*\r?\n[\s\S]*?\r?\n(?:---|\.\.\.)[ \t]*(?:\r?\n|$)/g); // front matter
-  add(/^ {0,3}(`{3,}|~{3,})[^\n]*\n[\s\S]*?(?:\n {0,3}\1[`~]*[ \t]*(?=\n|$)|$)/gm); // fenced code
-  add(/(`+)[^`]*?\1/g); // code spans
+  // Code as the renderer sees it — fences (also in quotes and lists),
+  // indented code, code spans, HTML comments: Vault Doctor's stripCode
+  // blanks it to spaces, so every changed character is code.
+  const scan = stripCode(text);
+  for (let i = 0; i < text.length; i++) {
+    if (scan[i] === text[i]) continue;
+    let j = i;
+    while (j < text.length && scan[j] !== text[j]) j++;
+    out.push([i, j]);
+    i = j;
+  }
   add(/!?\[\[[^\]\n]*\]\]/g); // wiki links, embeds
   add(/!?\[[^\]\n]*\]\([^)\n]*\)/g); // Markdown links and images
   add(/\[[^\]\n]*\]\[[^\]\n]*\]/g); // reference links
@@ -48,21 +59,25 @@ function excluded(text: string): Array<[number, number]> {
 }
 
 const fold = (s: string) => s.toLowerCase();
+const escapeRe = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
 /** Every unlinked mention of `titles` in `text`, in text order. `ownTitle` (the note's own) never counts. */
 export function findUnlinkedMentions(text: string, titles: readonly string[], ownTitle?: string): Mention[] {
   const blocked = excluded(text);
   const taken: Array<[number, number]> = [];
   const overlaps = (a: number, b: number, list: Array<[number, number]>) => list.some(([x, y]) => a < y && b > x);
-  const lower = fold(text);
   const own = ownTitle === undefined ? null : fold(ownTitle.trim());
   const sorted = [...new Set(titles.map((t) => t.trim()).filter(Boolean))].sort((a, b) => b.length - a.length);
   const out: Mention[] = [];
   for (const title of sorted) {
     const isOwn = own !== null && fold(title) === own;
-    const want = fold(title);
-    for (let at = lower.indexOf(want); at >= 0; at = lower.indexOf(want, at + 1)) {
-      const end = at + title.length;
+    // A case-insensitive search on the text itself: offsets stay the text's
+    // (lowercasing the whole text can change its length: `İ`).
+    const re = new RegExp(escapeRe(title), "giu");
+    for (let hit = re.exec(text); hit; hit = re.exec(text)) {
+      const at = hit.index;
+      re.lastIndex = at + 1;
+      const end = at + hit[0].length;
       if (end < text.length && WORD.test(text[end])) continue;
       let prefix = "";
       if (at > 0 && WORD.test(text[at - 1])) {

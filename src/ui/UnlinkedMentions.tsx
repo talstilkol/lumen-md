@@ -82,15 +82,26 @@ export default function UnlinkedMentions({ filePath, onOpen }: { filePath: strin
   const link = async (hit: UnlinkedHit) => {
     const name = stem(hit.path);
     try {
+      const target = linkTargetFor(filePath);
+      // Only where the mention is still there as it was found.
+      const linked = (text: string) => {
+        if (text.slice(hit.mention.start, hit.mention.end) !== hit.mention.text) throw new Error(t("backlinks.changed"));
+        return linkMention(text, hit.mention, target);
+      };
       const store = useAppStore.getState();
-      const open = store.doc.workspaceName === hit.path;
-      const text = open ? store.doc.content : await readWorkspaceFile(hit.path);
-      // Only if the mention is still there as it was found.
-      if (text.slice(hit.mention.start, hit.mention.end) !== hit.mention.text) throw new Error(t("backlinks.changed"));
-      const next = linkMention(text, hit.mention, linkTargetFor(filePath));
-      if (open) store.setContent(next);
+      if (store.doc.workspaceName === hit.path) store.setContent(linked(store.doc.content));
       else {
-        await writeWorkspaceFile(hit.path, next);
+        // Open in a tab that isn't active: its copy (unsaved edits too) takes
+        // the link as well, or switching back would bring the old text back
+        // and its next save would undo the link. Computed before writing.
+        const tabs = store.openTabs.filter((tb) => tb.workspaceName === hit.path).map((tb) => ({ id: tb.id, from: tb.content, to: linked(tb.content) }));
+        await writeWorkspaceFile(hit.path, linked(await readWorkspaceFile(hit.path)));
+        useAppStore.setState((st) => ({
+          openTabs: st.openTabs.map((tb) => {
+            const e = tabs.find((x) => x.id === tb.id);
+            return e && tb.content === e.from ? { ...tb, content: e.to } : tb;
+          }),
+        }));
         notifyWorkspaceChanged({ kind: "content", paths: [hit.path] });
       }
       setHits((hs) => hs?.filter((h) => h !== hit) ?? hs);
