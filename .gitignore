@@ -11,6 +11,8 @@ tsconfig.tsbuildinfo
 test-results/
 playwright-report/
 playwright/.cache/
+# Per-lane Playwright config written by scripts/lane.sh (docs/dev/lanes.md)
+playwright.lane.config.ts
 
 # IDE
 .idea/
