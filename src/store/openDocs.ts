@@ -89,8 +89,9 @@ const SETTLE_PASSES = 5;
  * while that was in flight (the user kept typing in the open note) into the
  * trashed copy, so Undo / Ctrl+Z still brings back the newest text
  * (plan 3.1, review: #218). That pass repeats until one finds nothing left
- * to write. The final check runs with no await after it, so no keystroke
- * (a task) can slip in before the caller clears the document.
+ * to write, inside the trash queue, so nothing restores or purges the
+ * entries mid-write. The final check runs with no await after it, so no
+ * keystroke (a task) can slip in before the caller clears the document.
  *
  * `settled` is false when the text still changed during every pass. The
  * newest edits are then only in memory, and the caller must not clear the
@@ -101,18 +102,26 @@ export async function trashWithOpenEdits(
   kinds: Record<string, "file" | "directory"> = {},
 ): Promise<{ items: TrashItem[]; settled: boolean }> {
   await flushOpenDocsUnder(paths);
-  const items = await trashPaths(paths, kinds);
-  const inTrash = (ws: string) => {
-    for (const item of items) {
-      const at = trashedPathOf(item, ws);
-      if (at) return at;
+  let settled = true;
+  // Inside the trash queue (afterMove): a Ctrl+Z or Trash-panel restore of
+  // these entries waits until the trashed copies hold the newest text.
+  const items = await trashPaths(paths, kinds, async (moved) => {
+    const inTrash = (ws: string) => {
+      for (const item of moved) {
+        const at = trashedPathOf(item, ws);
+        if (at) return at;
+      }
+      return null;
+    };
+    settled = false;
+    for (let pass = 0; pass < SETTLE_PASSES; pass++) {
+      if ((await writeDirtyOpenDocs(inTrash)) === 0) {
+        settled = true;
+        return;
+      }
     }
-    return null;
-  };
-  for (let pass = 0; pass < SETTLE_PASSES; pass++) {
-    if ((await writeDirtyOpenDocs(inTrash)) === 0) return { items, settled: true };
-  }
-  return { items, settled: false };
+  });
+  return { items, settled };
 }
 
 /**

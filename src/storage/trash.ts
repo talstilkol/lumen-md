@@ -74,9 +74,25 @@ export function lastTrashedItems(): TrashItem[] {
   return lastTrashed;
 }
 
-/** Move files / folders to the trash. Returns the trash entries. */
-export function moveToTrash(paths: string[], kinds: Record<string, "file" | "directory"> = {}, now = Date.now()): Promise<TrashItem[]> {
-  return serialized(() => moveToTrashNow(paths, kinds, now));
+/**
+ * Move files / folders to the trash. Returns the trash entries.
+ *
+ * `afterMove` runs inside the same turn of the queue, once the entries are
+ * moved and indexed: no restore, empty or other delete can touch them
+ * before it finishes (the file tree writes edits typed during the delete
+ * into the trashed copies there).
+ */
+export function moveToTrash(
+  paths: string[],
+  kinds: Record<string, "file" | "directory"> = {},
+  now = Date.now(),
+  afterMove?: (items: TrashItem[]) => Promise<void>,
+): Promise<TrashItem[]> {
+  return serialized(async () => {
+    const items = await moveToTrashNow(paths, kinds, now);
+    if (afterMove && items.length) await afterMove(items);
+    return items;
+  });
 }
 
 async function moveToTrashNow(paths: string[], kinds: Record<string, "file" | "directory">, now: number): Promise<TrashItem[]> {

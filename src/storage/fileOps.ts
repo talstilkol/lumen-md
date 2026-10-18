@@ -124,15 +124,32 @@ async function restoreItems(items: TrashItem[]): Promise<string[]> {
   return out;
 }
 
-/** Delete = move to the trash. Returns the trash entries for Undo (and remembers them for Ctrl+Z). */
-export async function trashPaths(paths: string[], kinds: Record<string, "file" | "directory"> = {}): Promise<TrashItem[]> {
-  const items = await moveToTrash(paths, kinds);
-  if (items.length) {
-    undoStack.push(items);
-    if (undoStack.length > TRASH_UNDO_LIMIT) undoStack.splice(0, undoStack.length - TRASH_UNDO_LIMIT);
+/**
+ * Delete = move to the trash. Returns the trash entries for Undo (and
+ * remembers them for Ctrl+Z). `afterMove` runs inside the trash queue right
+ * after the move (see `moveToTrash`). The entries become undoable, and the
+ * change is announced, only once it is done.
+ */
+export async function trashPaths(
+  paths: string[],
+  kinds: Record<string, "file" | "directory"> = {},
+  afterMove?: (items: TrashItem[]) => Promise<void>,
+): Promise<TrashItem[]> {
+  let moved: TrashItem[] = [];
+  try {
+    await moveToTrash(paths, kinds, undefined, async (items) => {
+      moved = items;
+      if (afterMove) await afterMove(items);
+    });
+    return moved;
+  } finally {
+    // Even when `afterMove` failed, what moved is in the trash: keep it undoable.
+    if (moved.length) {
+      undoStack.push(moved);
+      if (undoStack.length > TRASH_UNDO_LIMIT) undoStack.splice(0, undoStack.length - TRASH_UNDO_LIMIT);
+    }
+    window.dispatchEvent(new Event("lumen-workspace-changed"));
   }
-  window.dispatchEvent(new Event("lumen-workspace-changed"));
-  return items;
 }
 
 /** Undo a delete: restore every given entry still in the trash. Returns where they went. */

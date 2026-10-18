@@ -208,6 +208,49 @@ describe("flushOpenDocsUnder", () => {
     expect(await readWorkspaceFile("proj/b.md")).toBe("typed 3");
   });
 
+  it("a Trash-panel restore during the post-trash write waits for it, so the restored copy has the newest text (review: #218)", async () => {
+    const root = installFakeOpfs();
+    const { trashWithOpenEdits } = await import("../store/openDocs");
+    await writeWorkspaceFile("proj/b.md", "B saved");
+    open("proj/b.md", "B saved");
+    useAppStore.getState().setContent("B edit");
+    const handle = await root.getFileHandle("__probe", { create: true });
+    await root.removeEntry("__probe");
+    const proto = Object.getPrototypeOf(handle) as { createWritable: (this: { name: string }) => Promise<unknown> };
+    const original = proto.createWritable;
+    let restoring: Promise<string> | null = null;
+    let typed = false;
+    proto.createWritable = async function (this: { name: string }) {
+      if (this.name === "b.md" && !typed) {
+        // The pre-trash flush: the user keeps typing, so a post-trash write follows.
+        typed = true;
+        useAppStore.getState().setContent("B typed during the delete");
+      } else if (this.name === "b.md" && !restoring) {
+        const [item] = await listTrash();
+        // The first write once the folder is indexed in the trash: the Trash panel restores it now.
+        if (item) {
+          restoring = restoreFromTrash(item.id);
+          // Give the restore its chance to run mid-write (it must wait for the queue instead).
+          await Promise.race([restoring.catch(() => ""), new Promise((r) => setTimeout(r, 20))]);
+        }
+      }
+      return original.call(this);
+    };
+    try {
+      const { settled } = await trashWithOpenEdits(["proj"], { proj: "directory" });
+      expect(settled).toBe(true);
+    } finally {
+      proto.createWritable = original;
+    }
+    expect(restoring).not.toBeNull();
+    expect(await restoring).toBe("proj");
+    expect(await readWorkspaceFile("proj/b.md")).toBe("B typed during the delete");
+    expect(await listTrash()).toEqual([]);
+    expect(await workspaceHasEntry(".trash")).toBe(true); // the index file
+    const leftovers = [...(root.dirs.get(".trash")?.dirs.keys() ?? [])];
+    expect(leftovers).toEqual([]); // no orphaned trashed copy
+  });
+
   it("reports unsettled when the note changes during every write, so the tree keeps the document", async () => {
     const root = installFakeOpfs();
     const { trashWithOpenEdits } = await import("../store/openDocs");
