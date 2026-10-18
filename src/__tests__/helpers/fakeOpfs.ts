@@ -1,6 +1,8 @@
 /**
  * In-memory Origin Private File System for unit tests: enough of
- * FileSystemDirectoryHandle / FileSystemFileHandle for src/storage/workspace.ts.
+ * FileSystemDirectoryHandle / FileSystemFileHandle for the vault's
+ * directory-handle backend (src/storage/vault/handleBackend.ts), which the
+ * OPFS backend behind src/storage/workspace.ts is.
  */
 class FakeFile {
   constructor(public name: string, public data: Blob = new Blob([""]), public lastModified = Date.now()) {}
