@@ -255,6 +255,15 @@ export function recordWorkerRequest(url: string, method = "GET"): LedgerEntry | 
   return entries.find((x) => x.id === id) ?? null;
 }
 
+/**
+ * Record speech sent to a network voice (Web Speech synthesis is not a fetch the
+ * ledger can see). Only called when the policy and the user's opt-in allow it.
+ */
+export function recordSpeechVoice(voice: string, lang: string, chars: number): LedgerEntry | null {
+  const id = record({ host: `speech voice: ${voice}`, method: "SPEAK", bytesOut: chars, bytesIn: null, category: "cloud-text", reason: `Read aloud (${lang}) with a network voice`, policy: getAiPolicy(), decision: "allowed" });
+  return entries.find((x) => x.id === id) ?? null;
+}
+
 /** Install once at startup. `blocked` is called for every blocked request. */
 export function installPrivacyLedger(blocked?: (entry: LedgerEntry) => void): void {
   if (installed || typeof window === "undefined" || typeof window.fetch !== "function") return;

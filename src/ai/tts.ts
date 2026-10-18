@@ -5,6 +5,22 @@
  * document is reported so the editor can highlight what is being read.
  */
 import { hebrewRatio } from "../text/hebrew";
+import { getAiPolicy } from "./policy";
+import { recordSpeechVoice } from "./privacyLedger";
+
+/** Opt-in for voices that synthesize on a server (Chrome's "Google …" voices send the text out). */
+export const NETWORK_VOICES_KEY = "lumen.tts.networkVoices";
+
+/** May a voice that is not `localService` be used? Never under local-only; otherwise only after opt-in. */
+export function networkVoicesAllowed(): boolean {
+  if (getAiPolicy() === "local-only") return false;
+  try {
+    return localStorage.getItem(NETWORK_VOICES_KEY) === "1";
+  } catch {
+    // why: storage blocked (private mode) — treat as not opted in
+    return false;
+  }
+}
 
 export interface Sentence {
   text: string;
@@ -71,8 +87,29 @@ export function ttsAvailable(): boolean {
   return typeof window !== "undefined" && "speechSynthesis" in window && typeof SpeechSynthesisUtterance !== "undefined";
 }
 
-function voiceFor(lang: string): SpeechSynthesisVoice | undefined {
-  const voices = window.speechSynthesis.getVoices();
+export function allowNetworkVoices(): void {
+  try {
+    localStorage.setItem(NETWORK_VOICES_KEY, "1");
+  } catch {
+    // why: storage blocked — the opt-in then lasts only until reload, which is acceptable
+  }
+}
+
+/** Does the browser list any voice that synthesizes on a server? */
+export function offersNetworkVoices(): boolean {
+  return ttsAvailable() && window.speechSynthesis.getVoices().some((v) => !v.localService);
+}
+
+/** Is there an on-device voice for every language the note's sentences need? */
+export function hasLocalVoiceFor(markdown: string, uiLang: string): boolean {
+  if (!ttsAvailable()) return false;
+  const langs = new Set(speakableSentences(markdown).map((s) => langFor(s.text, uiLang === "he" ? "he-IL" : uiLang)));
+  return [...langs].every((l) => voiceFor(l, false));
+}
+
+/** Best voice for `lang`; network voices only when `allowNetwork`. Exported for tests. */
+export function voiceFor(lang: string, allowNetwork = networkVoicesAllowed()): SpeechSynthesisVoice | undefined {
+  const voices = window.speechSynthesis.getVoices().filter((v) => allowNetwork || v.localService);
   const base = lang.split("-")[0].toLowerCase();
   return voices.find((v) => v.lang.toLowerCase() === lang.toLowerCase()) ?? voices.find((v) => v.lang.toLowerCase().startsWith(base)) ?? (base === "he" ? voices.find((v) => v.lang.toLowerCase().startsWith("iw")) : undefined);
 }
@@ -90,7 +127,9 @@ export function stopSpeaking(): void {
 
 /**
  * Speak `markdown`. `onSentence` gets each sentence as it starts; resolves
- * when done or stopped. Returns false when a needed voice is missing.
+ * when done or stopped. Returns false when a needed voice is missing — under
+ * local-only (or without the opt-in) only voices that run on this device count.
+ * A network voice, when allowed, is recorded in the privacy ledger.
  */
 export async function speak(markdown: string, opts: { uiLang: string; rate?: number; onSentence?: (s: Sentence) => void }): Promise<boolean> {
   if (!ttsAvailable()) return false;
@@ -99,14 +138,24 @@ export async function speak(markdown: string, opts: { uiLang: string; rate?: num
   if (!sentences.length) return true;
   speaking = true;
   let hadVoice = true;
+  const allowNetwork = networkVoicesAllowed();
+  const logged = new Set<string>();
   for (const s of sentences) {
     if (!speaking) break;
     const lang = langFor(s.text, opts.uiLang === "he" ? "he-IL" : opts.uiLang);
     const u = new SpeechSynthesisUtterance(s.text);
     u.lang = lang;
-    const v = voiceFor(lang);
-    if (v) u.voice = v;
-    else if (lang.startsWith("he")) hadVoice = false;
+    const v = voiceFor(lang, allowNetwork);
+    if (!v) {
+      // A missing local voice: say so instead of letting the browser pick a network one.
+      hadVoice = false;
+      continue;
+    }
+    u.voice = v;
+    if (!v.localService && !logged.has(v.name)) {
+      logged.add(v.name);
+      recordSpeechVoice(v.name, lang, s.text.length);
+    }
     u.rate = opts.rate ?? 1;
     opts.onSentence?.(s);
     await new Promise<void>((resolve) => {
