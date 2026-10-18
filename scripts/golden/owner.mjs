@@ -43,6 +43,27 @@ const AUDIO = [".wav", ".flac", ".opus", ".ogg", ".mp3"];
 const fileFor = (dir, id, exts) => exts.map((e) => `${id}${e}`).find((f) => existsSync(join(dir, f)));
 const VECTORS = ["html-comment", "image-alt", "frontmatter", "zero-width", "bidi-override"];
 
+/**
+ * A broken rule, worded by this script: names the part and the rule, never
+ * an ID, a filename or any of the owner's text. Only these messages reach
+ * the log; any other error (a JSON.parse error quotes the bad input, an fs
+ * error names the owner's file) is reported by its type alone.
+ */
+class OwnerRuleError extends Error {}
+const rule = (msg) => {
+  throw new OwnerRuleError(msg);
+};
+const json = (p) => {
+  try {
+    return readJson(p);
+  } catch (e) {
+    if (e instanceof SyntaxError) rule("a JSON file of the part is not valid JSON");
+    throw e;
+  }
+};
+/** What may be printed about a failure. */
+const safeFailure = (e) => (e instanceof OwnerRuleError ? e.message : `failed (${e?.name ?? "Error"}${typeof e?.code === "string" ? ` ${e.code}` : ""})`);
+
 /** set → part → (dir) → { items, assets: { pathInPart: sourceFile } } */
 const PARTS = {
   "asr-he": {
@@ -50,7 +71,7 @@ const PARTS = {
       const assets = {};
       const items = tsv(join(dir, "transcripts.tsv")).map(([id, text]) => {
         const f = fileFor(dir, id, AUDIO);
-        if (!f || !text?.trim()) throw new Error(`asr-he/owner: ${id} needs an audio file and a transcript`);
+        if (!f || !text?.trim()) rule("every transcript line needs an audio file and a transcript");
         assets[`owner/${f}`] = join(dir, f);
         return { id: `owner-${id}`, text: text.trim(), audio: `owner/${f}` };
       });
@@ -63,7 +84,7 @@ const PARTS = {
       const ids = readdirSync(dir).filter((f) => /\.(jpe?g|png)$/i.test(f)).map((f) => f.replace(/\.[^.]+$/, "")).sort();
       const items = ids.map((id) => {
         const img = fileFor(dir, id, [".jpg", ".jpeg", ".png", ".JPG"]);
-        if (!existsSync(join(dir, `${id}.txt`))) throw new Error(`ocr-he/owner: ${id} has no .txt`);
+        if (!existsSync(join(dir, `${id}.txt`))) rule("every image needs a .txt with the same name");
         assets[`owner/${id}${extname(img).toLowerCase()}`] = join(dir, img);
         return { id: `owner-${id}`, condition: "photo", text: readFileSync(join(dir, `${id}.txt`), "utf8").replace(/\r/g, "").trim(), image: `owner/${id}${extname(img).toLowerCase()}` };
       });
@@ -72,13 +93,14 @@ const PARTS = {
   },
   retrieval: {
     owner(dir) {
-      const queries = readJson(join(dir, "queries.json"));
+      const queries = json(join(dir, "queries.json"));
+      if (!Array.isArray(queries)) rule("queries.json must be an array");
       const notesDir = join(dir, "notes");
       const corpus = existsSync(notesDir) ? readdirSync(notesDir, { recursive: true }).filter((f) => /\.md$/.test(f)).sort().map((f) => ({ id: String(f).replace(/\\/g, "/"), text: readFileSync(join(notesDir, f), "utf8") })) : [];
       const ids = new Set(corpus.map((d) => d.id));
       const items = queries.map((q) => {
-        if (!q.id || !q.query || !Array.isArray(q.relevant) || !q.relevant.length) throw new Error("retrieval/owner: every query needs id, query and relevant[]");
-        for (const r of q.relevant) if (!ids.has(r)) throw new Error(`retrieval/owner: ${q.id} points to a note that is not in notes/`);
+        if (!q.id || !q.query || !Array.isArray(q.relevant) || !q.relevant.length) rule("every query needs id, query and relevant[]");
+        for (const r of q.relevant) if (!ids.has(r)) rule("a query points to a note that is not in notes/");
         return { id: `owner-${q.id}`, query: q.query, relevant: q.relevant };
       });
       return { items, assets: {}, extra: { corpus } };
@@ -89,7 +111,7 @@ const PARTS = {
       const assets = {};
       const items = tsv(join(dir, "descriptions.tsv")).map(([id, description, source]) => {
         const img = fileFor(dir, id, [".jpg", ".jpeg", ".png"]);
-        if (!img || !description?.trim()) throw new Error(`caption/owner: ${id} needs an image and a description`);
+        if (!img || !description?.trim()) rule("every description line needs an image and a description");
         assets[`owner/${img}`] = join(dir, img);
         return { id: `owner-${id}`, image: `owner/${img}`, refs_he: [description.trim()], source: source?.trim() || "the owner's photo (CC0)" };
       });
@@ -98,8 +120,10 @@ const PARTS = {
   },
   injection: {
     hebrew(dir) {
-      const items = readJson(join(dir, "hebrew.json")).map((x) => {
-        if (!x.id || !VECTORS.includes(x.vector) || !x.carrier || !x.user_task || !x.injected) throw new Error(`injection/hebrew: every case needs id, vector (${VECTORS.join(" | ")}), carrier, user_task, injected`);
+      const cases = json(join(dir, "hebrew.json"));
+      if (!Array.isArray(cases)) rule("hebrew.json must be an array");
+      const items = cases.map((x) => {
+        if (!x.id || !VECTORS.includes(x.vector) || !x.carrier || !x.user_task || !x.injected) rule(`every case needs id, vector (${VECTORS.join(" | ")}), carrier, user_task, injected`);
         return { id: `he-${x.id}`, vector: x.vector, user_task: x.user_task, carrier: x.carrier, injected: x.injected, label: "injection", expected: { follows_injection: false, unapproved_writes: 0 } };
       });
       return { items, assets: {} };
@@ -127,8 +151,8 @@ for (const [set, parts] of Object.entries(PARTS)) {
       console.log(`${set}/${partId}: test ${items.length} items sha256 ${partHash(splitDir, partId)}`);
     } catch (e) {
       failed = true;
-      // The message names the part and the rule, never the content.
-      console.error(`${set}/${partId}: ${e.message}`);
+      // Only this script's own rule text, or the error's type: never its message.
+      console.error(`${set}/${partId}: ${safeFailure(e)}`);
     }
   }
 }
