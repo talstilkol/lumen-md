@@ -138,7 +138,7 @@ import {
   setDocumentApplier,
   stageChange,
 } from "../agents/staging";
-import { diffLines, unifiedDiff } from "../lib/lineDiff";
+import { diffLines, fileDiff, unifiedDiff } from "../lib/lineDiff";
 
 /** A context whose `stage` is the real queue (what the runtime gives a write tool). */
 const ctx = (extra: Partial<ToolContext> = {}): ToolContext => ({
@@ -274,6 +274,13 @@ describe("git_diff", () => {
     expect(only.files.map((f) => f.path)).toEqual(["repo/a.md"]);
   });
 
+  it("counts a rewrite too large to diff line by line, and says so (review: #205)", async () => {
+    files.set("repo/a.md", Array.from({ length: 2100 }, (_, i) => `line ${i}`).join("\n") + "\n");
+    const r = await gitDiffTool.run({ paths: ["repo/a.md"] }, ctx());
+    expect(r.files).toEqual([{ path: "repo/a.md", state: "modified", binary: false, added: 2100, removed: 3, rewritten: true }]);
+    expect(r.diff).toContain("[too many changes to show line by line: 3 → 2100 lines]");
+  });
+
   it("shows a file deleted or renamed in the workspace (review: #205)", async () => {
     files.delete("repo/keep.md");
     files.delete("repo/a.md");
@@ -307,6 +314,20 @@ describe("line diff — end of file", () => {
     expect(d).toContain("-two\n+two\n\\ No newline at end of file");
     expect(unifiedDiff("a.md", "one\ntwo", "one\ntwo\n")).toContain("-two\n\\ No newline at end of file\n+two");
     expect(unifiedDiff("a.md", "one\ntwo", "one\ntwo")).toBe("");
+  });
+
+  it("a change of only the line endings (LF ↔ CRLF) shows, with the CR as ^M (review: #205)", () => {
+    expect(unifiedDiff("a.md", "one\ntwo\n", "one\r\ntwo\r\n")).toBe(["--- a/a.md", "+++ b/a.md", "@@ -1,2 +1,2 @@", "-one", "-two", "+one^M", "+two^M"].join("\n"));
+    expect(fileDiff("a.md", "x\r\ny\r\n", "x\r\ny\n")).toMatchObject({ added: 1, removed: 1, rewritten: false });
+    expect(unifiedDiff("a.md", "x\r\n", "x\r\n")).toBe("");
+  });
+
+  it("counts the lines of a change too large to diff line by line as a rewrite (review: #205)", () => {
+    const before = Array.from({ length: 1500 }, (_, i) => `old ${i}`).join("\n") + "\n";
+    const after = Array.from({ length: 1600 }, (_, i) => `new ${i}`).join("\n") + "\n";
+    const d = fileDiff("big.md", before, after);
+    expect(d).toMatchObject({ added: 1600, removed: 1500, rewritten: true });
+    expect(d.text).toContain("@@ -1,1500 +1,1600 @@");
   });
 });
 
@@ -490,7 +511,24 @@ describe("csv_parse", () => {
     expect(parseTable("a\tb\n1\t2").delimiter).toBe("\t");
     const md = parseTable("| city | n |\n|---|:---:|\n| Haifa | 3 |\n| Eilat | 4 |");
     expect(md).toMatchObject({ format: "markdown-table", rows: [["Haifa", 3], ["Eilat", 4]] });
+    // GFM's outer pipes are optional (review: #205).
+    const bare = parseTable("Name | Count\n--- | ---:\nA | 1\nB \\| C | 2");
+    expect(bare).toMatchObject({ format: "markdown-table", rowCount: 2, rows: [["A", 1], ["B | C", 2]] });
+    expect(bare.columns).toEqual([
+      { name: "Name", type: "string", filled: 2 },
+      { name: "Count", type: "number", filled: 2, min: 1, max: 2 },
+    ]);
+    // Not a table: no delimiter row, or a rule without pipes.
+    expect(parseTable("a | b\nc | d").format).toBe("csv");
+    expect(parseTable("title\n---\ntext").format).toBe("csv");
     expect(parseTable("1,2\n3,4", { header: false, maxRows: 1 })).toMatchObject({ columns: [{ name: "c1" }, { name: "c2" }], rows: [[1, 2]], rowCount: 2, truncated: true });
+  });
+
+  it("reports the range of a numeric column of any length, and caps only the rows returned (review: #205)", () => {
+    const text = "n\n" + Array.from({ length: 250_000 }, (_, i) => String(i - 1000)).join("\n");
+    const r = parseTable(text, { maxRows: 3 });
+    expect(r.columns).toEqual([{ name: "n", type: "number", filled: 250_000, min: -1000, max: 248_999 }]);
+    expect(r).toMatchObject({ rowCount: 250_000, truncated: true, rows: [[-1000], [-999], [-998]] });
   });
 
   it("parses the selection by default", async () => {

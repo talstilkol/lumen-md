@@ -341,4 +341,23 @@ describe("cancellation", () => {
     setSecret("lumen.research.searchKey", "");
     localStorage.removeItem("lumen.research.provider");
   });
+
+  it("shows exactly what a call sends, instead of promising that no note text leaves the device", async () => {
+    setAiPolicy("local-only");
+    const { uiConfirm } = await import("../ui/PromptDialog");
+    const ask = vi.mocked(uiConfirm);
+    ask.mockClear();
+    ask.mockResolvedValueOnce(false);
+    // A query the agent built from the open note.
+    const query = "Dr. Levi diagnosis March appointment notes";
+    registerExecutor(fakeExecutor((_req, n) => (n % 2 === 1 ? call("search_web", { query }) : final("x"))));
+    await runAgent(agent(["search_web"]), {}, { grants: ["network"] });
+    const message = ask.mock.calls[0][0].message as string;
+    expect(message).toContain(`“${query}”`);
+    expect(message).toContain("may have included text from your notes");
+    expect(message).not.toMatch(/Nothing from your notes/i);
+    const { sentValue } = await import("../agents/network");
+    expect(sentValue({ what: "page-address", args: { url: "https://x.example/p" } })).toBe("https://x.example/p");
+    expect(sentValue({ what: "search-query", args: { query: "a".repeat(400) } })).toHaveLength(301);
+  });
 });

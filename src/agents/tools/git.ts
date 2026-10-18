@@ -5,14 +5,15 @@
  */
 
 import { defineTool, optionalNumber, ToolError, throwIfAborted } from "./define";
-import { unifiedDiff } from "../../lib/lineDiff";
+import { fileDiff } from "../../lib/lineDiff";
 
 const MAX_DIFF = 16_000;
 
 export interface GitDiffResult {
   repo: string;
   staged: boolean;
-  files: Array<{ path: string; state: "added" | "modified" | "deleted"; binary: boolean; added: number; removed: number }>;
+  /** `rewritten`: too large to diff line by line; the counts are then the file's whole old / new length. */
+  files: Array<{ path: string; state: "added" | "modified" | "deleted"; binary: boolean; added: number; removed: number; rewritten?: true }>;
   diff: string;
   truncated: boolean;
 }
@@ -78,15 +79,8 @@ export const gitDiffTool = defineTool<
         parts.push(`Binary file ${rel} ${c.state}`);
         continue;
       }
-      const d = unifiedDiff(rel, c.state === "added" ? null : c.before, c.state === "deleted" ? null : c.after, context);
-      const lines = d.split("\n").slice(2);
-      files.push({
-        path: c.path,
-        state: c.state,
-        binary: false,
-        added: lines.filter((l) => l.startsWith("+")).length,
-        removed: lines.filter((l) => l.startsWith("-")).length,
-      });
+      const { text: d, added, removed, rewritten } = fileDiff(rel, c.state === "added" ? null : c.before, c.state === "deleted" ? null : c.after, context);
+      files.push({ path: c.path, state: c.state, binary: false, added, removed, ...(rewritten ? { rewritten: true as const } : {}) });
       if (d) parts.push(`diff --git a/${rel} b/${rel}\n${d}`);
     }
     const diff = parts.join("\n");

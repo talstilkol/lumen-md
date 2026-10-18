@@ -20,14 +20,31 @@ export interface CsvParseResult {
   errors: string[];
 }
 
-/** Cells of a Markdown pipe table, or null when the text is not one. */
+/** GFM's delimiter row (`|---|:---:|`, outer pipes optional; at least one pipe, else it is a rule). */
+const DELIMITER_ROW = /^\|?\s*:?-+:?\s*(\|\s*:?-+:?\s*)*\|?$/;
+
+/**
+ * Cells of a Markdown pipe table, or null when the text is not one: a
+ * header row, then the delimiter row, then data rows — with or without the
+ * optional outer pipes (`Name | Count` / `--- | ---` / `A | 1`).
+ */
 function markdownTable(text: string): string[][] | null {
   const lines = text.split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
-  if (lines.length < 2 || !lines.every((l) => l.startsWith("|"))) return null;
-  const cells = (l: string) => l.replace(/^\||\|$/g, "").split(/(?<!\\)\|/).map((c) => c.trim().replace(/\\\|/g, "|"));
-  const rows = lines.map(cells);
-  // The delimiter row (|---|:---:|) is not data.
-  return rows.filter((r) => !r.every((c) => /^:?-{3,}:?$/.test(c)));
+  if (lines.length < 2 || !lines[1].includes("|") || !DELIMITER_ROW.test(lines[1])) return null;
+  if (!lines.every((l) => /(?<!\\)\|/.test(l))) return null;
+  const cells = (l: string) => l.replace(/^\|/, "").replace(/(?<!\\)\|$/, "").split(/(?<!\\)\|/).map((c) => c.trim().replace(/\\\|/g, "|"));
+  return lines.filter((_, i) => i !== 1).map(cells);
+}
+
+/** Min and max without spreading the values into arguments (a large column exceeds the engine's argument limit). */
+function extent(values: readonly number[]): { min: number; max: number } {
+  let min = Infinity;
+  let max = -Infinity;
+  for (const v of values) {
+    if (v < min) min = v;
+    if (v > max) max = v;
+  }
+  return { min, max };
 }
 
 /** Parse CSV / TSV / a Markdown table; `header: false` names the columns c1, c2, … */
@@ -46,7 +63,7 @@ export function parseTable(text: string, opts: { delimiter?: string; header?: bo
     for (const e of r.errors.slice(0, 5)) errors.push(`row ${(e.row ?? 0) + 1}: ${e.message}`);
   }
   if (!grid.length) throw new ToolError("bad-args", "No rows found in the text");
-  const width = Math.max(...grid.map((r) => r.length));
+  const width = grid.reduce((w, r) => Math.max(w, r.length), 0);
   const names = header ? grid[0].map((h, i) => h || `c${i + 1}`) : Array.from({ length: width }, (_, i) => `c${i + 1}`);
   while (names.length < width) names.push(`c${names.length + 1}`);
   const body = header ? grid.slice(1) : grid;
@@ -59,7 +76,7 @@ export function parseTable(text: string, opts: { delimiter?: string; header?: bo
       name,
       type,
       filled: values.filter((v) => v !== null).length,
-      ...(nums.length ? { min: Math.min(...nums), max: Math.max(...nums) } : {}),
+      ...(nums.length ? extent(nums) : {}),
     };
   });
   const rows = body.slice(0, maxRows).map((r) =>

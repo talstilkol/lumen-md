@@ -68,29 +68,62 @@ export function splitLines(text: string): string[] {
   return lines;
 }
 
+/** Marks a last line that has no newline after it, so a change of only the final newline is a change. */
+export const NO_EOL = "\u0000no-eol";
+
+/**
+ * The lines of a file for diffing, with their line endings kept: a line
+ * ending in CRLF keeps its "\r" (so converting LF ↔ CRLF is a change, as
+ * in git), and a last line with no newline after it ends in `NO_EOL`.
+ */
+export function linesWithEol(text: string | null): string[] {
+  if (!text) return [];
+  const lines = text.split("\n");
+  const last = lines.pop()!;
+  if (last !== "") lines.push(last + NO_EOL);
+  return lines;
+}
+
+/** A diff line as printed: a trailing CR shows as `^M`, as `git diff` shows it in a terminal. */
+function printable(line: string): string {
+  return line.endsWith("\r") ? `${line.slice(0, -1)}^M` : line;
+}
+
+export interface FileDiff {
+  /** The unified diff; empty when nothing changed. */
+  text: string;
+  /** Lines added / removed. */
+  added: number;
+  removed: number;
+  /**
+   * The change was too large to diff line by line: `text` reports it as a
+   * rewrite of the whole file, and the counts are its whole old / new length.
+   */
+  rewritten: boolean;
+}
+
 /**
  * A unified diff of one file (`--- a/path`, `+++ b/path`, `@@` hunks with
  * `context` lines around each change). `before` / `after` null mean the
  * file did not exist on that side. Empty string when nothing changed.
  */
-/** Marks a last line that has no newline after it, so a change of only the final newline is a change. */
-const NO_EOL = "\u0000no-eol";
-
-function linesWithEol(text: string | null): string[] {
-  const lines = splitLines(text ?? "");
-  if (text && lines.length && !/\n$/.test(text)) lines[lines.length - 1] += NO_EOL;
-  return lines;
+export function unifiedDiff(path: string, before: string | null, after: string | null, context = 3): string {
+  return fileDiff(path, before, after, context).text;
 }
 
-export function unifiedDiff(path: string, before: string | null, after: string | null, context = 3): string {
+/** `unifiedDiff` with the counts of added and removed lines. */
+export function fileDiff(path: string, before: string | null, after: string | null, context = 3): FileDiff {
   const a = linesWithEol(before);
   const b = linesWithEol(after);
   const head = [`--- ${before === null ? "/dev/null" : `a/${path}`}`, `+++ ${after === null ? "/dev/null" : `b/${path}`}`];
   const ops = diffLines(a, b);
   if (!ops) {
-    return [...head, `@@ -1,${a.length} +1,${b.length} @@`, `[too many changes to show line by line: ${a.length} → ${b.length} lines]`].join("\n");
+    const text = [...head, `@@ -1,${a.length} +1,${b.length} @@`, `[too many changes to show line by line: ${a.length} → ${b.length} lines]`].join("\n");
+    return { text, added: b.length, removed: a.length, rewritten: true };
   }
-  if (!ops.some((o) => o.op !== "eq")) return "";
+  const added = ops.filter((o) => o.op === "add").length;
+  const removed = ops.filter((o) => o.op === "del").length;
+  if (!added && !removed) return { text: "", added, removed, rewritten: false };
   const out = [...head];
   // Positions (1-based) of each op on both sides.
   let ai = 1;
@@ -126,10 +159,10 @@ export function unifiedDiff(path: string, before: string | null, after: string |
     out.push(`@@ -${aStart},${aLen} +${bStart},${bLen} @@`);
     for (const o of slice) {
       const noEol = o.line.endsWith(NO_EOL);
-      out.push((o.op === "eq" ? " " : o.op === "add" ? "+" : "-") + (noEol ? o.line.slice(0, -NO_EOL.length) : o.line));
+      out.push((o.op === "eq" ? " " : o.op === "add" ? "+" : "-") + printable(noEol ? o.line.slice(0, -NO_EOL.length) : o.line));
       if (noEol) out.push("\\ No newline at end of file");
     }
     i = stop;
   }
-  return out.join("\n");
+  return { text: out.join("\n"), added, removed, rewritten: false };
 }

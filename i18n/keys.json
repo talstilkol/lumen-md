@@ -2,7 +2,7 @@
   "version": 1,
   "generated_at": "2026-10-18T05:18:24.525Z",
   "source": "src/i18n/index.ts (en bundle)",
-  "count": 1420,
+  "count": 1421,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -1811,11 +1811,18 @@
     },
     {
       "key": "agents.netConsent.body",
-      "en": "The {tool} tool wants to send {sends} to {host}. Nothing from your notes is sent.",
+      "en": "The {tool} tool wants to send {sends} to {host}.",
       "vars": [
         "tool",
         "sends",
         "host"
+      ]
+    },
+    {
+      "key": "agents.netConsent.exact",
+      "en": "Exactly this is sent: “{value}”. The agent wrote it and may have included text from your notes.",
+      "vars": [
+        "value"
       ]
     },
     {

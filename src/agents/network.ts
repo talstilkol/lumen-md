@@ -61,11 +61,23 @@ export async function describeNetworkCall(tool: AgentTool, call: ToolCall): Prom
  * network call is asked for on its own — the one-time research consent does
  * not count. The prompt names the tool, the host and exactly what is sent.
  */
+/**
+ * What the call sends, verbatim (shortened past 300 characters): the agent
+ * wrote it, possibly from the open note, so the prompt shows it rather
+ * than promising that no note text leaves the device.
+ */
+export function sentValue(req: Pick<NetworkConsentRequest, "what" | "args">): string {
+  const v = req.what === "search-query" ? req.args.query : req.what === "page-address" ? req.args.url : undefined;
+  const text = typeof v === "string" ? v : JSON.stringify(req.args);
+  return text.length > 300 ? `${text.slice(0, 300)}…` : text;
+}
+
 async function defaultConsent(req: NetworkConsentRequest): Promise<boolean> {
   const [{ uiConfirm }, { t }] = await Promise.all([import("../ui/PromptDialog"), import("../i18n")]);
   const what = t(`agents.netConsent.what.${req.what}`);
   const parts = [
     t("agents.netConsent.body", { tool: req.tool, host: req.host, sends: what }),
+    t("agents.netConsent.exact", { value: sentValue(req) }),
     req.credential ? t("agents.netConsent.credential", { provider: req.credential }) : "",
     req.visits ? t("agents.netConsent.visits", { host: req.visits }) : "",
     t("agents.netConsent.perCall"),
