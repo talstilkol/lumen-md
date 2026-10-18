@@ -19,7 +19,7 @@
  * typed name, the last option creates it.
  */
 
-import { noteKey } from "../lib/slug";
+import { headingSlug, headingSlugger, noteKey } from "../lib/slug";
 import { noteHeadings, stripCode } from "../lint/vaultDoctor";
 
 export type WikiQueryKind = "note" | "heading" | "block";
@@ -321,7 +321,11 @@ export function suggestNotes(catalog: NoteCatalog, typed: string, opts: SuggestO
   }
   const out = best.map((e): WikiSuggestion => {
     const alias = viaAlias.get(e);
-    return alias === undefined ? option(e) : { kind: "alias", label: alias, detail: e.stem, insert: `${linkTarget(e, catalog)}|${alias}` };
+    if (alias === undefined) return option(e);
+    // An alias with a bracket or bar can't be a link label (`[[T|a [b]]]`
+    // closes early): it still finds the note, which is linked without one.
+    const target = linkTarget(e, catalog);
+    return { kind: "alias", label: alias, detail: e.stem, insert: /[[\]|]/.test(alias) ? target : `${target}|${alias}` };
   });
   const path = opts.create && !exact ? newNotePath(typed) : null;
   if (path) out.push({ kind: "create", label: path.replace(MD, ""), insert: path.replace(MD, ""), createPath: path });
@@ -336,19 +340,27 @@ export function suggestHeadings(content: string, typed: string, limit = 50): Wik
   return suggestHeadingList(noteHeadings(content), typed, limit);
 }
 
-/** The same, from the headings' text (the WYSIWYG editor reads them off its live document). */
+/**
+ * The same, from the headings' text in document order (the WYSIWYG editor
+ * reads them off its live document). A heading is linked by its text — as
+ * in Obsidian — unless an earlier heading took its slug: the preview ids
+ * the second `## Setup` `setup-1`, and only `[[Note#setup-1]]` reaches it.
+ */
 export function suggestHeadingList(headings: readonly string[], typed: string, limit = 50): WikiSuggestion[] {
   const q = noteKey(typed);
-  const seen = new Set<string>();
-  const hits: Array<{ text: string; score: number; i: number }> = [];
+  const slugger = headingSlugger();
+  const hits: Array<{ text: string; slug: string | null; score: number; i: number }> = [];
   headings.forEach((text, i) => {
-    if (!text || seen.has(text)) return;
-    seen.add(text);
+    // Every heading counts for the numbering, as in rehype-slug.
+    const id = slugger.slug(text);
+    if (!text.trim()) return;
     const score = q ? rank(noteKey(text), q) : 1;
-    if (score > 0) hits.push({ text, score, i });
+    if (score > 0) hits.push({ text, slug: id === headingSlug(text) ? null : id, score, i });
   });
   hits.sort((a, b) => b.score - a.score || a.i - b.i);
-  return hits.slice(0, limit).map(({ text }) => ({ kind: "heading", label: text, insert: text.replace(LINK_CHARS, "") }));
+  return hits.slice(0, limit).map(({ text, slug }): WikiSuggestion =>
+    slug === null ? { kind: "heading", label: text, insert: text.replace(LINK_CHARS, "") } : { kind: "heading", label: text, detail: `#${slug}`, insert: slug },
+  );
 }
 
 /** The `^id` block ids of a note, with their block's text, in document order. */
@@ -428,7 +440,7 @@ export function wikiEdit(q: WikiQuery, before: string, after: string, s: WikiSug
   const tail = after.slice(ext);
   let insert = s.insert;
   // An alias picked inside `[[Old|label]]` keeps the label already there.
-  if (s.kind === "alias" && tail.startsWith("|")) insert = insert.slice(0, insert.indexOf("|"));
+  if (s.kind === "alias" && tail.startsWith("|") && insert.includes("|")) insert = insert.slice(0, insert.indexOf("|"));
   let end: number;
   if (tail.startsWith("]]")) end = q.from + insert.length + 2;
   else if (/^[|#^]/.test(tail)) end = q.from + insert.length;

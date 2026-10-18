@@ -13,10 +13,25 @@ const NOTES: Record<string, string> = {
   "work/Meeting notes.md": "# Meeting notes\n",
 };
 
-/** Write the notes into the origin's OPFS (the vault) and tell the index. */
-async function seedVault(page: Page): Promise<void> {
-  await page.evaluate(async (notes) => {
-    const root = await navigator.storage.getDirectory();
+/**
+ * Write the notes into the origin's OPFS (the vault) and tell the index.
+ * False when this engine's test context can't write OPFS files from the
+ * page (Playwright's WebKit has no `navigator.storage` there): no vault,
+ * nothing to complete — the test skips, as the data-safety vault tests do.
+ */
+async function seedVault(page: Page): Promise<boolean> {
+  return page.evaluate(async (notes) => {
+    const storage = navigator.storage as StorageManager | undefined;
+    let root: FileSystemDirectoryHandle;
+    try {
+      if (!storage?.getDirectory) return false;
+      root = await storage.getDirectory();
+      const probe = (await root.getFileHandle("__probe", { create: true })) as FileSystemFileHandle & { createWritable?: unknown };
+      await root.removeEntry("__probe");
+      if (typeof probe.createWritable !== "function") return false;
+    } catch {
+      return false;
+    }
     for (const [path, text] of Object.entries(notes)) {
       const parts = path.split("/");
       let dir = root;
@@ -27,6 +42,7 @@ async function seedVault(page: Page): Promise<void> {
       await w.close();
     }
     window.dispatchEvent(new CustomEvent("lumen-workspace-changed", { detail: { kind: "structure" } }));
+    return true;
   }, NOTES);
 }
 
@@ -48,7 +64,7 @@ test.beforeEach(async ({ page }) => {
   });
   await page.goto("/");
   await expect(page.locator(".cm-content").first()).toContainText("Welcome to", { timeout: 15_000 });
-  await seedVault(page);
+  test.skip(!(await seedVault(page)), "OPFS writes are unavailable in this engine's test context");
 });
 
 test("source editor: [[ completes notes, Hebrew and headings, and creates a note", async ({ page }) => {

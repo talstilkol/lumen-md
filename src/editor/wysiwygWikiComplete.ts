@@ -50,7 +50,8 @@ function liveHeadings(doc: ProseNode): string[] {
   const out: string[] = [];
   doc.descendants((n) => {
     if (n.type.name === "heading") {
-      if (n.textContent.trim()) out.push(n.textContent);
+      // Empty ones too: they take part in the slug numbering.
+      out.push(n.textContent);
       return false;
     }
     return !n.isTextblock;

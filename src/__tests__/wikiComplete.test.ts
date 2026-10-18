@@ -111,6 +111,13 @@ describe("notes", () => {
     expect(suggestNotes(vault(), "פרויקט")[0]).toMatchObject({ kind: "alias", label: "פרויקט אלפא" });
   });
 
+  it("an alias with a bracket or bar still finds the note, but isn't used as the label", () => {
+    const c = noteCatalog([file("Project Alpha.md", '---\naliases: ["Project [old]", "a|b", Fine]\n---\n')]);
+    expect(suggestNotes(c, "project [o")[0]).toMatchObject({ kind: "alias", label: "Project [old]", insert: "Project Alpha" });
+    expect(suggestNotes(c, "a|b")[0]).toMatchObject({ kind: "alias", label: "a|b", insert: "Project Alpha" });
+    expect(suggestNotes(c, "fine")[0]).toMatchObject({ kind: "alias", insert: "Project Alpha|Fine" });
+  });
+
   it("offers to create the note when none has the typed name", () => {
     const s = suggestNotes(vault(), "Brand New", { create: true });
     expect(s).toEqual([{ kind: "create", label: "Brand New", insert: "Brand New", createPath: "Brand New.md" }]);
@@ -137,6 +144,16 @@ describe("headings and blocks", () => {
     expect(labels(suggestHeadings(PROJECT, ""))).toEqual(["Project Alpha", "Goals"]);
     expect(labels(suggestHeadings(PROJECT, "go"))).toEqual(["Goals"]);
     expect(labels(suggestHeadings("# שָׁלוֹם רַב\n", "שלומ"))).toEqual(["שָׁלוֹם רַב"]);
+  });
+
+  it("a repeated heading is linked by its numbered slug, as the preview ids it", () => {
+    const md = "# Setup\n\ntext\n\n## Setup\n\n## setup\n\n## Other\n\n## סיכום\n\n## סיכום\n";
+    expect(suggestHeadings(md, "set")).toEqual([
+      { kind: "heading", label: "Setup", insert: "Setup" },
+      { kind: "heading", label: "Setup", detail: "#setup-1", insert: "setup-1" },
+      { kind: "heading", label: "setup", detail: "#setup-2", insert: "setup-2" },
+    ]);
+    expect(suggestHeadings(md, "סיכו").map((s) => s.insert)).toEqual(["סיכום", "סיכום-1"]);
   });
 
   it("a heading's link-breaking characters are left out of the insert", () => {
@@ -224,5 +241,9 @@ describe("wikiEdit", () => {
     const alias: WikiSuggestion = { kind: "alias", label: "Alpha", insert: "Project Alpha|Alpha" };
     expect(run("[[alp|", alias)).toBe("[[Project Alpha|Alpha]]|");
     expect(run("[[alp||mine]]", alias)).toBe("[[Project Alpha||mine]]");
+    // An alias inserted without a label (it can't be one) keeps the target whole.
+    const bare: WikiSuggestion = { kind: "alias", label: "Project [old]", insert: "Project Alpha" };
+    expect(run("[[pro|", bare)).toBe("[[Project Alpha]]|");
+    expect(run("[[pro||mine]]", bare)).toBe("[[Project Alpha||mine]]");
   });
 });
