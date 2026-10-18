@@ -15,7 +15,6 @@
  * Caps: searches, sources and answer length; the usage meter records
  * every model call.
  */
-import { guardUntrusted, UNTRUSTED_NOTICE } from "../agents/untrusted";
 import { anthropicWebResearch, type CitedBlock } from "../ai/anthropicProvider";
 import { CONTEXT_BUDGET, getAiMode, packContext } from "../ai/contextPacker";
 import { chat, getActiveProvider, getProviderKey, parseJsonResponse } from "../ai/llm";
@@ -269,6 +268,7 @@ async function proxyResearch(o: ResearchOptions, settings: ResearchSettings): Pr
     budget,
   );
   o.onProgress?.("Writing the answer…");
+  const { guardUntrusted, UNTRUSTED_NOTICE } = await import("../agents/untrusted");
   const raw = await chat(
     [
       {
@@ -399,6 +399,7 @@ export async function libraryResearch(o: ResearchOptions): Promise<ResearchResul
   const top = (await rerank(o.question, withText.map((h) => ({ ...h, text: `${h.snippet}\n${h.content.slice(0, 1500)}` })))).slice(0, 6);
   const packed = packContext(o.question, top.map((h) => ({ path: h.path, content: h.content })), CONTEXT_BUDGET[getAiMode()]);
   // Plan 2.7: clipped pages are outside content — cleaned and delimited.
+  const { guardUntrusted, UNTRUSTED_NOTICE } = await import("../agents/untrusted");
   const context = packed.map((p, i) => `---\n[${i + 1}] ${p.path}\n${guardUntrusted(p.text, [`clipped page ${p.path}`]).text}`).join("\n");
   const answer = await chat(
     [

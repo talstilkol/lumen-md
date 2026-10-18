@@ -33,7 +33,8 @@ import { coerceArgs, ToolError } from "./tools/define";
 import { review, type Failure } from "./critic";
 import { recordRun } from "./trace";
 import { AiQuotaExceededError, aiQuotaStatus, chargeAiCommandDispatch, consumeAiPrompt } from "../billing/aiQuota";
-import { guardUntrusted, sanitizeValue, untrustedSourcesOfNote, UNTRUSTED_NOTICE, wrapUntrusted, type Finding } from "./untrusted";
+// The injection guard (plan 2.7) loads with the first run: the runtime is on the startup path.
+const loadGuard = () => import("./untrusted");
 
 export const DEFAULT_MAX_STEPS = 8;
 export const DEFAULT_MAX_RETRIES = 2;
@@ -76,19 +77,9 @@ interface ToolEnv {
   consentUntrusted?: RunOptions["consentUntrusted"];
 }
 
-function addTaint(env: ToolEnv, sources: string[]): void {
-  for (const s of sources) if (!env.taint.includes(s)) env.taint.push(s);
-}
-
-/** Ask the user for a write / network call in a run with untrusted content. A failing prompt is a no. */
+/** Ask the user about a write / network call in a run with untrusted content (plan 2.7). */
 async function approveUntrusted(env: ToolEnv, tool: AgentTool, args: Record<string, unknown>): Promise<boolean> {
-  const req = { tool: tool.name, scope: tool.scope as "write" | "network", args, sources: [...env.taint] };
-  try {
-    const ask = env.consentUntrusted ?? (await import("./untrusted")).defaultUntrustedConsent;
-    return (await ask(req)) === true;
-  } catch {
-    return false;
-  }
+  return (await loadGuard()).askUntrusted(env.consentUntrusted, { tool: tool.name, scope: tool.scope as "write" | "network", args, sources: [...env.taint] });
 }
 
 /**
@@ -130,8 +121,7 @@ async function execTool(tools: AgentTool[], call: ToolCall, env: ToolEnv): Promi
       // waits for the user's explicit yes before it is even staged.
       if (tainted) {
         if (!(await approveUntrusted(env, tool, args))) {
-          const { UNTRUSTED_DENIED } = await import("./network");
-          return { error: `denied: ${UNTRUSTED_DENIED}` };
+          return { error: `denied: ${(await loadGuard()).UNTRUSTED_DENIED}` };
         }
         note = "approved by the user (untrusted content in the run)";
       }
@@ -305,16 +295,11 @@ export async function runAgent<I extends AgentInput, O = string>(def: AgentDefin
   // Plan 2.7: outside content in the input (a clipped page, an imported or
   // pulled note, or what the caller says is untrusted) is cleaned and
   // delimited before the model sees it, and taints the run from the start.
-  const inputUntrusted = [...new Set([...(opts.untrusted ?? []), ...untrustedSourcesOfNote(ctx.path, ctx.document)])];
+  const guard = await loadGuard();
+  const inputUntrusted = await guard.inputSources({ path: ctx.path, document: ctx.document, text: input.text, selection: input.selection, untrusted: opts.untrusted });
   if (inputUntrusted.length) ctx.documentUntrusted = inputUntrusted;
   const toolEnv: ToolEnv = { ctx, runId: run.id, agentId: def.id, consent: opts.consentNetwork, staged, taint: [...inputUntrusted], consentUntrusted: opts.consentUntrusted };
-  const modelInput: I = inputUntrusted.length
-    ? {
-        ...input,
-        ...(input.text !== undefined ? { text: guardUntrusted(input.text, inputUntrusted).text } : {}),
-        ...(input.selection !== undefined ? { selection: guardUntrusted(input.selection, inputUntrusted).text } : {}),
-      }
-    : input;
+  const modelInput: I = guard.guardInput(input, inputUntrusted);
   toolEnvRef.current = toolEnv;
   const inputChars = (input.text ?? "").length + (input.selection ?? "").length;
   const maxRetries = def.maxRetries ?? DEFAULT_MAX_RETRIES;
@@ -400,7 +385,7 @@ export async function runAgent<I extends AgentInput, O = string>(def: AgentDefin
     const nativeTools = !!def.tools?.length && executor.supportsTools(model);
     const nativeSchema = !!def.outputSchema && !def.tools?.length && executor.supportsSchema(model);
     const messages: ExecutorMessage[] = [
-      { role: "system", content: systemPrompt(def, modelInput, nativeTools, patch) + (toolEnv.taint.length ? `\n\n${UNTRUSTED_NOTICE}` : "") },
+      { role: "system", content: systemPrompt(def, modelInput, nativeTools, patch) + (toolEnv.taint.length ? `\n\n${guard.UNTRUSTED_NOTICE}` : "") },
       { role: "user", content: def.user(modelInput) + (patch.promptSuffix ? `\n\n${patch.promptSuffix}` : "") },
     ];
     run.model = model;
@@ -459,13 +444,7 @@ export async function runAgent<I extends AgentInput, O = string>(def: AgentDefin
           if (r.error !== undefined) body = toolResultMessage(call, undefined, r.error);
           else if (r.untrusted?.length) {
             // Outside content: cleaned, then delimited (after truncation, so the closing marker stays).
-            const findings: Finding[] = [];
-            const clean = sanitizeValue(r.result, findings).value;
-            body = wrapUntrusted(truncate(toolResultMessage(call, clean), TOOL_RESULT_LIMIT), r.untrusted, findings);
-            guardNote = `untrusted: ${r.untrusted.join("; ")}${findings.length ? ` (${findings.length} finding(s))` : ""}`;
-            const fresh = !toolEnv.taint.length;
-            addTaint(toolEnv, r.untrusted);
-            if (fresh && !messages[0].content.includes(UNTRUSTED_NOTICE)) messages[0] = { ...messages[0], content: `${messages[0].content}\n\n${UNTRUSTED_NOTICE}` };
+            ({ body, note: guardNote } = guard.guardToolResult((v) => truncate(toolResultMessage(call, v), TOOL_RESULT_LIMIT), r.result, r.untrusted, toolEnv.taint, messages));
           } else body = truncate(toolResultMessage(call, r.result), TOOL_RESULT_LIMIT);
           const argsText = truncate(JSON.stringify(call.args), 200);
           const detail = [r.note, guardNote, argsText].filter(Boolean).join(" · ");

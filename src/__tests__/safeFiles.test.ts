@@ -23,6 +23,19 @@ describe("rename / move", () => {
     expect(await readWorkspaceFile("a.md")).toBe("A");
   });
 
+  it("carries injection-guard provenance along (plan 2.7): a moved pulled note or clip stays outside content", async () => {
+    const { markUntrustedNote, untrustedSourcesOfNote } = await import("../agents/provenance");
+    localStorage.removeItem("lumen.agents.untrustedNotes");
+    await writeWorkspaceFile("repo/n.md", "x");
+    markUntrustedNote("repo", "cloned from git");
+    await renameWorkspaceFile("repo", "mine/repo");
+    expect(untrustedSourcesOfNote("mine/repo/n.md")).toEqual(["cloned from git (mine/repo/n.md)"]);
+    expect(untrustedSourcesOfNote("repo/n.md")).toEqual([]);
+    await writeWorkspaceFile("Library/clip.md", "c");
+    await renameWorkspaceFile("Library/clip.md", "notes/clip.md");
+    expect(untrustedSourcesOfNote("notes/clip.md")).toEqual(["clipped page (moved from Library/clip.md) (notes/clip.md)"]);
+  });
+
   it("moves folders with everything inside", async () => {
     await writeWorkspaceFile("proj/a.md", "A");
     await writeWorkspaceFile("proj/sub/b.md", "B");

@@ -21,10 +21,6 @@ import { getAiPolicy } from "../ai/policy";
 import { ledgerFetch, recordBlockedRequest } from "../ai/privacyLedger";
 import { ToolError } from "./tools/define";
 
-/** What the model reads when the user did not approve a call in a run with untrusted content. */
-export const UNTRUSTED_DENIED =
-  "The user did not approve this call. This run read outside content (web pages or notes from elsewhere), so every change and web request needs their approval. Do not retry it; answer with what you have and say what you would have done.";
-
 export type ConsentHook = (request: NetworkConsentRequest) => boolean | Promise<boolean>;
 
 /**
@@ -117,7 +113,7 @@ export async function openNetworkGate(
       }
       if (!ok) {
         recordBlockedRequest(url, "research", `${reason} (untrusted content in the run, not approved)`);
-        throw new ToolError("denied", UNTRUSTED_DENIED);
+        throw new ToolError("denied", (await import("./untrusted")).UNTRUSTED_DENIED);
       }
       return { fetch: ledgerFetch({ force: { category: "research", reason: `${reason} (approved: untrusted content in the run)` }, consent: true }), consented: true };
     }

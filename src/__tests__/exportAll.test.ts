@@ -80,6 +80,10 @@ describe("import", () => {
     expect(r.skipped).toEqual(["MyVault/.obsidian/workspace.json"]);
     expect(await readWorkspaceFile("Imported/MyVault 2/note.md")).toBe("see [[other]]");
     expect(await readWorkspaceFile("Imported/MyVault/note.md")).toBe("existing");
+    // Plan 2.7: agents treat the imported notes as outside content; the note that was already there is not touched.
+    const { untrustedSourcesOfNote } = await import("../agents/provenance");
+    expect(untrustedSourcesOfNote("Imported/MyVault 2/sub/other.md")).toEqual(["imported (obsidian) (Imported/MyVault 2/sub/other.md)"]);
+    expect(untrustedSourcesOfNote("Imported/MyVault/note.md")).toEqual([]);
   });
 
   it("round-trips: export → import gives the same notes", async () => {

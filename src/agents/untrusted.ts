@@ -37,78 +37,10 @@
  * service already turned into plain text (it drops markup before we see it).
  */
 
-/**
- * The clip library (`research/clipper.ts` LIBRARY_DIR), repeated here so
- * the runtime does not pull the clipper's HTML converter; a unit test keeps
- * the two in step.
- */
-export const isClipLibraryPath = (p: string) => p.startsWith("Library/") || p.startsWith("ספרייה/");
+import type { AgentInput, ExecutorMessage, UntrustedConsentRequest } from "./types";
+import { untrustedSourcesOfNote } from "./provenance";
 
-/* ─── Provenance ───────────────────────────────────────────────────────── */
-
-const REGISTRY_KEY = "lumen.agents.untrustedNotes";
-
-type Registry = Record<string, { reason: string; at: number }>;
-
-function loadRegistry(): Registry {
-  try {
-    const raw = localStorage.getItem(REGISTRY_KEY);
-    const v = raw ? (JSON.parse(raw) as unknown) : null;
-    return v && typeof v === "object" ? (v as Registry) : {};
-  } catch {
-    return {};
-  }
-}
-
-function saveRegistry(r: Registry): void {
-  try {
-    localStorage.setItem(REGISTRY_KEY, JSON.stringify(r));
-  } catch {
-    /* storage full or blocked: the note just isn't remembered */
-  }
-}
-
-/** Record that `path` was written from outside (an import, a git pull or clone). */
-export function markUntrustedNote(path: string, reason: string): void {
-  const r = loadRegistry();
-  r[path] = { reason, at: Date.now() };
-  // Keep the newest 5000 entries.
-  const keys = Object.keys(r);
-  if (keys.length > 5000) for (const k of keys.sort((a, b) => r[a].at - r[b].at).slice(0, keys.length - 5000)) delete r[k];
-  saveRegistry(r);
-}
-
-/** The user said a note is theirs now ("trust this note"). */
-export function clearUntrustedNote(path: string): void {
-  const r = loadRegistry();
-  if (!(path in r)) return;
-  delete r[path];
-  saveRegistry(r);
-}
-
-const FRONTMATTER = /^﻿?---\r?\n([\s\S]*?)\r?\n(?:---|\.\.\.)\s*(?:\r?\n|$)/;
-
-/**
- * Why a note counts as outside content (empty: it doesn't). `content` is
- * optional; without it only the path and the registry are checked.
- */
-export function untrustedSourcesOfNote(path: string | null | undefined, content?: string | null): string[] {
-  const out: string[] = [];
-  if (path) {
-    if (isClipLibraryPath(path)) out.push(`clipped page (${path})`);
-    const rec = loadRegistry()[path];
-    if (rec) out.push(`${rec.reason} (${path})`);
-  }
-  if (content) {
-    const fm = FRONTMATTER.exec(content)?.[1];
-    if (fm) {
-      const src = /^source:\s*["']?(https?:\/\/[^\s"']+)/im.exec(fm)?.[1];
-      if (src && !out.some((s) => s.startsWith("clipped page"))) out.push(`page from ${src}`);
-      if (/^(?:lumen-)?untrusted:\s*(?:true|yes)\s*$/im.test(fm)) out.push(`marked untrusted${path ? ` (${path})` : ""}`);
-    }
-  }
-  return out;
-}
+export { clearUntrustedNote, isClipLibraryPath, markUntrustedNote, moveUntrustedNotes, untrustedSourcesOfNote } from "./provenance";
 
 /* ─── Cleaning ─────────────────────────────────────────────────────────── */
 
@@ -379,11 +311,75 @@ export function actionValue(args: Record<string, unknown>): string {
 }
 
 /** The default approval prompt for a write / network call in a run with untrusted content. */
-export async function defaultUntrustedConsent(req: import("./types").UntrustedConsentRequest): Promise<boolean> {
+export async function defaultUntrustedConsent(req: UntrustedConsentRequest): Promise<boolean> {
   const [{ uiConfirm }, { t }] = await Promise.all([import("../ui/PromptDialog"), import("../i18n")]);
   const message = [
     t("agents.untrusted.body", { tool: req.tool, action: t(`agents.untrusted.action.${req.scope}`), sources: sourcesLabel(req.sources) }),
     t("agents.untrusted.args", { value: actionValue(req.args) }),
   ].join(" ");
   return uiConfirm({ title: t("agents.untrusted.title"), message, okLabel: t("agents.untrusted.ok") });
+}
+
+/** What the model reads when the user did not approve a call in a run with untrusted content. */
+export const UNTRUSTED_DENIED =
+  "The user did not approve this call. This run read outside content (web pages or notes from elsewhere), so every change and web request needs their approval. Do not retry it; answer with what you have and say what you would have done.";
+
+/** Ask through the run's hook (or the default dialog). A failing prompt is a no. */
+export async function askUntrusted(hook: ((r: UntrustedConsentRequest) => boolean | Promise<boolean>) | undefined, req: UntrustedConsentRequest): Promise<boolean> {
+  try {
+    return (await (hook ?? defaultUntrustedConsent)(req)) === true;
+  } catch {
+    return false;
+  }
+}
+
+/* ─── Runtime glue ─────────────────────────────────────────────────────── */
+
+/**
+ * The workspace file a run's text comes from when the caller passed no
+ * path (most editor commands pass only the text): the open document or an
+ * open tab whose content contains it. Used only to look up provenance.
+ */
+async function workspacePathOf(text: string | undefined): Promise<string | null> {
+  if (!text) return null;
+  try {
+    const { useAppStore } = await import("../store/useStore");
+    const s = useAppStore.getState() as { doc?: { content?: string; workspaceName?: string | null }; openTabs?: Array<{ content?: string; workspaceName?: string | null }> };
+    for (const d of [s.doc, ...(s.openTabs ?? [])]) if (d?.workspaceName && typeof d.content === "string" && d.content.includes(text)) return d.workspaceName;
+  } catch {
+    /* no store (tests, workers): no provenance from the path */
+  }
+  return null;
+}
+
+/** Why a run's input is outside content: the caller's word, the note's path (or the open tab holding the text) and its frontmatter. */
+export async function inputSources(i: { path?: string | null; document?: string; text?: string; selection?: string; untrusted?: string[] }): Promise<string[]> {
+  const found = workspacePathOf(i.document ?? i.text ?? i.selection);
+  const path = i.path ?? (await found);
+  return [...new Set([...(i.untrusted ?? []), ...untrustedSourcesOfNote(path, i.document)])];
+}
+
+/** The input as the model sees it: text and selection cleaned and delimited when the input is outside content. */
+export function guardInput<I extends AgentInput>(input: I, sources: string[]): I {
+  if (!sources.length) return input;
+  return {
+    ...input,
+    ...(input.text !== undefined ? { text: guardUntrusted(input.text, sources).text } : {}),
+    ...(input.selection !== undefined ? { selection: guardUntrusted(input.selection, sources).text } : {}),
+  };
+}
+
+/**
+ * A tool result from outside: cleaned, serialised (`serialize` truncates),
+ * then delimited, so the closing marker survives truncation. Adds the
+ * sources to the run's `taint` and, the first time, the rule to the
+ * system prompt (`messages[0]`).
+ */
+export function guardToolResult(serialize: (v: unknown) => string, result: unknown, sources: string[], taint: string[], messages: ExecutorMessage[]): { body: string; note: string } {
+  const findings: Finding[] = [];
+  const clean = sanitizeValue(result, findings).value;
+  const body = wrapUntrusted(serialize(clean), sources, findings);
+  for (const s of sources) if (!taint.includes(s)) taint.push(s);
+  if (messages[0] && !messages[0].content.includes(UNTRUSTED_NOTICE)) messages[0] = { ...messages[0], content: `${messages[0].content}\n\n${UNTRUSTED_NOTICE}` };
+  return { body, note: `untrusted: ${sources.join("; ")}${findings.length ? ` (${findings.length} finding(s))` : ""}` };
 }

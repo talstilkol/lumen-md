@@ -7,7 +7,6 @@
  * push pull the latest content back from OPFS into lightning-fs so users can
  * edit locally and push when ready.
  */
-import { markUntrustedNote } from "../agents/untrusted";
 import { get, set } from "idb-keyval";
 import {
   createWorkspaceFolder,
@@ -116,13 +115,14 @@ async function mirrorRepoToOPFS(repoDir: string, fs: Fs): Promise<number> {
       } else if (stat.isFile()) {
         const bytes = (await fs.promises.readFile(full)) as Uint8Array;
         await writeWorkspaceBlob(opfsPath, bytes);
-        // Plan 2.7: a cloned repo's notes may be other authors' — agents treat them as outside content.
-        markUntrustedNote(opfsPath, "cloned from git");
         count++;
       }
     }
   }
-  await walk(repoDir, repoNameFromUrl(repoDir.replace(/^\/git\//, "")));
+  const root = repoNameFromUrl(repoDir.replace(/^\/git\//, ""));
+  await walk(repoDir, root);
+  // Plan 2.7: a cloned repo's notes may be other authors' — agents treat the folder as outside content.
+  (await import("../agents/provenance")).markUntrustedNote(root, "cloned from git");
   return count;
 }
 
@@ -364,6 +364,7 @@ export async function pullRepo(
       .filter((p) => p === repoFolder || p.startsWith(`${repoFolder}/`)),
   );
   const seen = new Set<string>();
+  const pulled: string[] = [];
   let changed = 0;
   async function walk(currentDir: string, opfsPrefix: string) {
     const entries = await fs.promises.readdir(currentDir);
@@ -391,14 +392,15 @@ export async function pullRepo(
         }
         if (isDifferent) {
           await writeWorkspaceBlob(opfsPath, bytes);
-          // Plan 2.7: what a pull brings in may be another author's text.
-          markUntrustedNote(opfsPath, "pulled from git");
+          pulled.push(opfsPath);
           changed++;
         }
       }
     }
   }
   await walk(dir, repoFolder);
+  // Plan 2.7: what a pull brings in may be another author's text.
+  (await import("../agents/provenance")).markUntrustedNotes(pulled, "pulled from git");
   // Remove files that no longer exist upstream.
   for (const path of opfsBefore) {
     if (!seen.has(path)) {

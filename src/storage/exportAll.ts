@@ -183,6 +183,8 @@ export async function importFiles(files: Map<string, Uint8Array>, name: string):
     folder = `${folder} ${n}`;
   }
   await createWorkspaceFolder(folder);
+  // Plan 2.7: an imported archive may be someone else's notes — agents treat the folder as outside content.
+  (await import("../agents/provenance")).markUntrustedNote(folder, `imported (${source})`);
   const report: ImportReport = { source, folder, notes: 0, attachments: 0, skipped: [] };
   // First pass: where every file goes. Two Notion pages with the same title
   // (different IDs) clean to the same name; the later one gets "Page 2.md",

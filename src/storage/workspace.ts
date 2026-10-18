@@ -273,6 +273,8 @@ export async function renameWorkspaceFile(
     throw e;
   }
   await deleteWorkspaceFile(oldPath);
+  // Plan 2.7: outside content stays outside content under its new name.
+  (await import("../agents/provenance")).moveUntrustedNotes(oldPath, newPath);
 }
 
 async function copyTree(from: string, to: string): Promise<void> {
