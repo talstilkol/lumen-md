@@ -200,9 +200,14 @@ async function dropRows(byDoc: Map<string, Row[]>, victims: Set<number>): Promis
     // Kept deltas whose base goes: the first kept row, and any naming a victim.
     const orphans = keep.filter((r, i) => typeof r.content !== "string" && (i === 0 || (r.base !== undefined && victims.has(r.base))));
     if (!orphans.length) continue;
-    const texts = await reconstruct(rows);
+    // Rebuild only from the last full row before the first orphan — at the
+    // cap that is at most FULL_EVERY rows, not the whole history.
+    let from = rows.indexOf(orphans[0]);
+    while (from > 0 && typeof rows[from].content !== "string") from--;
+    const span = rows.slice(from);
+    const texts = await reconstruct(span);
     for (const r of orphans) {
-      const text = texts[rows.indexOf(r)];
+      const text = texts[span.indexOf(r)];
       if (text === null) victims.add(r.id);
       else rebased.push({ ...r, content: text, delta: undefined, base: undefined });
     }
