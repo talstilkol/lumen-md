@@ -114,5 +114,20 @@ describe("privacy ledger", () => {
     await f(beacon);
     expect(inner).toHaveBeenCalledTimes(1);
     expect(ledgerEntries().map((e) => [e.category, e.decision])).toEqual([["third-party", "blocked"], ["third-party", "allowed"]]);
+    // the beacon left the device with the page address: the header total counts it
+    expect(ledgerSummary().cloudRequests).toBe(1);
+  });
+
+  it("lets tldraw's fonts and icons load under local-only — only the beacon path is blocked", async () => {
+    const font = "https://cdn.tldraw.com/4.5.10/fonts/IBMPlexSans-Medium.woff2";
+    expect(classify(font)).toMatchObject({ host: "cdn.tldraw.com", category: "static-asset" });
+    const inner = vi.fn(async () => new Response("x", { status: 200 }));
+    const f = withLedger(inner as unknown as typeof fetch);
+    setAiPolicy("local-only");
+    await f(font);
+    expect(inner).toHaveBeenCalledTimes(1);
+    expect(ledgerEntries().map((e) => [e.category, e.decision])).toEqual([["static-asset", "allowed"]]);
+    expect(ledgerSummary()).toMatchObject({ cloudRequests: 0, downloads: 1 });
+    setAiPolicy("local-first");
   });
 });

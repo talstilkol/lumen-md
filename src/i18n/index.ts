@@ -487,6 +487,7 @@ const en: Strings = {
   "privacy.cat.cloud-text": "Cloud service — your text is sent",
   "privacy.cat.local-ai": "On this device / LAN",
   "privacy.cat.model-download": "Model download — no text sent",
+  "privacy.cat.static-asset": "Static files (fonts, icons) — no text sent",
   "privacy.cat.research": "Research service — your query is sent",
   "privacy.cat.third-party": "Third-party service — the page address is sent",
   "privacy.footer": "Recorded: time, host, size, reason. Never the text of prompts or answers. Requests from inside model workers (downloads) are not listed.",

@@ -1370,6 +1370,7 @@
   "privacy.cat.cloud-text": "Cloud-Dienst — dein Text wird gesendet",
   "privacy.cat.local-ai": "Auf diesem Gerät / im LAN",
   "privacy.cat.model-download": "Modell-Download — kein Text gesendet",
+  "privacy.cat.static-asset": "Statische Dateien (Schriften, Symbole) — kein Text gesendet",
   "privacy.cat.research": "Recherchedienst — deine Anfrage wird gesendet",
   "privacy.cat.third-party": "Drittanbieterdienst — die Seitenadresse wird gesendet",
   "privacy.footer": "Erfasst: Zeit, Ziel, Größe, Grund. Nie der Text von Prompts oder Antworten. Anfragen aus Modell-Workern (Downloads) fehlen.",

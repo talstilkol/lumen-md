@@ -1370,6 +1370,7 @@
   "privacy.cat.cloud-text": "クラウドサービス — テキストが送信されます",
   "privacy.cat.local-ai": "この端末 / LAN 内",
   "privacy.cat.model-download": "モデルのダウンロード — テキストは送信されません",
+  "privacy.cat.static-asset": "静的ファイル（フォント、アイコン）— テキストは送信されません",
   "privacy.cat.research": "リサーチサービス — 検索語が送信されます",
   "privacy.cat.third-party": "サードパーティーのサービス — ページのアドレスが送信されます",
   "privacy.footer": "記録内容: 時刻・宛先・サイズ・理由。プロンプトや回答の本文は記録しません。モデル Worker 内の通信（ダウンロード）は含まれません。",

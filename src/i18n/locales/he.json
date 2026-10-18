@@ -1370,6 +1370,7 @@
   "privacy.cat.cloud-text": "שירות בענן — הטקסט שלך נשלח",
   "privacy.cat.local-ai": "במכשיר / ברשת המקומית",
   "privacy.cat.model-download": "הורדת מודל — לא נשלח טקסט",
+  "privacy.cat.static-asset": "קבצים סטטיים (גופנים, סמלים) — לא נשלח טקסט",
   "privacy.cat.research": "שירות מחקר — השאילתה שלך נשלחת",
   "privacy.cat.third-party": "שירות צד שלישי — כתובת הדף נשלחת",
   "privacy.footer": "נרשם: שעה, יעד, גודל, סיבה. אף פעם לא תוכן הפרומפט או התשובה. בקשות מתוך ה-Workers של המודלים (הורדות) לא מופיעות.",

@@ -19,6 +19,8 @@ tldraw 4.5.10 (`src/ui/CanvasTldraw.tsx`) is under the *tldraw license*. Without
 
 ## Done in 1.9
 
-- The privacy ledger now tracks `cdn.tldraw.com` in a new category, `third-party`. The label reads "Third-party service — the page address is sent" and is translated into en plus 7 locales.
-- Local-only blocks it like other off-device traffic.
+- The privacy ledger now tracks `cdn.tldraw.com`:
+  - The beacon path (`…/watermark-track.svg`) is in a new category, `third-party`, labelled "Third-party service — the page address is sent". Local-only blocks it like other off-device traffic, and the panel's "left this device" total counts it.
+  - The other files on that host (fonts, icons, translations) carry no user data and the canvas needs them. They are logged as `static-asset` ("Static files (fonts, icons) — no text sent") and are not blocked, like model downloads.
+  - Both labels are translated into en plus 7 locales.
 - Remaining before release: either a licence key (15.10) or the move to Excalidraw (4.19). The second option also removes the CDN fonts and assets.
