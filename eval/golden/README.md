@@ -4,7 +4,7 @@ Held-out, licensed eval sets for Lumen's local AI (plan task 7.1, appendix 20). 
 
 **The repo holds only the dev split.** About a quarter of each part, inputs and answers, is in `<set>/dev/`, and implementers may tune on it. **The test split is never committed.** CI rebuilds it from the same public pools with the secret seed `GOLDEN_SEED`, runs the evals there and publishes scores only. The repo keeps a manifest of the test split instead: its item count, the sha256 of each part and of the whole split, and its own canary. The owner's material (plan 15.11) never enters the repo at all.
 
-## The ten sets
+## The ten sets (plan 7.1)
 
 | Set | For | Target | Dev in the repo now | Test (CI only) | Parts: source → status | Licence |
 |---|---|---|---|---|---|---|
@@ -19,7 +19,29 @@ Held-out, licensed eval sets for Lumen's local AI (plan task 7.1, appendix 20). 
 | injection | 2.7 | 130 | 8 of 26 | 104 | deepset 40 → workflow · Gandalf 30 → workflow · BIPIA 30 → **built** · Hebrew 30 → owner | Apache-2.0; MIT; CC0 |
 | langid | 6.5 | 240 | 10 of 58 | 182 | Tatoeba CC0 200 → workflow · hard cases 40 → **built** | CC0 |
 
-`node scripts/golden.mjs status` prints the live version of this table. Each `<set>/SOURCES.md` names every part's source, its pinned commit or version, the sha256 of each upstream file, the licence with the evidence it was checked against, and what the part is still waiting for.
+`node scripts/golden.mjs status` prints the live version of this table.
+
+## The twelve small sets (plan 7.10)
+
+Small sets for the feature tasks that come after 7.1, built and frozen before any of those features exists. They follow the same rules: dev split committed, test split rebuilt in CI with `GOLDEN_SEED`, sha256 in the manifest, a SOURCES.md licence table and a LICENSE. Sources are public-domain text in npm packages (@stdlib datasets, whose contents are CC0 1.0), the Crossmodal-3600 captions, and pools and generators written for these sets (CC0 1.0). Builders: `scripts/golden/sets/small.mjs`.
+
+| Set | Items (dev / test) | What | Source → status | Licence |
+|---|---|---|---|---|
+| spell-en | 100 (25 / 75) | English sentences with 1–2 synthetic non-word errors, offsets recorded | Moby-Dick (public domain) → **built** | CC0 |
+| image-search | 30 (8 / 22) | an English (and Hebrew) caption as the query, the image as the answer | Crossmodal-3600 → captions in, images via the workflow | CC BY 4.0 + CC BY 2.0 |
+| clipper | 20 (5 / 15) | static HTML pages: an article inside layouts with nav, ads, cookie banners, comments… | Moby-Dick chapters + Hebrew pages written for the set → **built** | CC0 |
+| pdf-qa | 30 (8 / 22) | questions over 3 public-domain documents as PDFs | State of the Union 1800 and 1932, Moby-Dick ch. 1 → **built** | CC0 |
+| data-analysis | 20 (5 / 15) | questions over a CSV, answers computed | Nightingale's rose (1854–56) → **built** | CC0 |
+| summarize | 20 (5 / 15) | openings of 20 addresses with reference summaries and key words | State of the Union 1790–2005 → **built** | CC0 |
+| formulas | 30 (8 / 22) | Notion-style formulas over a row, exact expected values | generated → **built** | CC0 |
+| unlinked | 30 (8 / 22) | notes with unlinked mentions of other titles (English and Hebrew) and hard negatives | generated → **built** | CC0 |
+| bidi | 30 (8 / 22) | the direction of mixed Hebrew / English / neutral Markdown lines | generated → **built** | CC0 |
+| hebrew-dates | 20 (5 / 15) | Gregorian ↔ Hebrew dates, Hebrew numerals | ICU, cross-checked with @hebcal/core → **built** | CC0 |
+| citations | 20 (5 / 15) | APA 7, in-text and BibTeX from a record | public-domain books and classic papers → **built** | CC0 |
+| meetings | 5 (0 / 5) | the owner's meeting recordings with transcript, summary and action items | ⏳ owner (15.11) | CC0 (owner's consent) |
+
+Where a pool is a short hand-written list (pdf-qa, summarize, citations), the test split is the rest of that list: the secret hides nothing there, and each SOURCES.md says so.
+ Each `<set>/SOURCES.md` names every part's source, its pinned commit or version, the sha256 of each upstream file, the licence with the evidence it was checked against, and what the part is still waiting for.
 
 ## Layout
 
@@ -133,6 +155,7 @@ golden-owner/
   retrieval/owner/notes/…          the notes the queries point to (or a shareable copy)
   caption/owner/<id>.jpg           20 CC0 images
   caption/owner/descriptions.tsv   <id><TAB><Hebrew description><TAB><source URL or "own photo">
+  meetings/owner/<id>.wav|flac|opus|m4a + <id>.transcript.txt + <id>.summary.md   5 meetings (5–30 min): audio, exact transcript, reference summary with action items (plan 7.10)
   injection/hebrew/hebrew.json     [{ "id", "vector", "carrier", "user_task", "injected" }]  (30; 6 per vector:
                                    html-comment, image-alt, frontmatter, zero-width, bidi-override)
 ```

@@ -105,6 +105,22 @@ const PARTS = {
       return { items, assets: {} };
     },
   },
+  // Plan 7.10: <id>.<audio> + <id>.transcript.txt + <id>.summary.md
+  meetings: {
+    owner(dir) {
+      const ids = [...new Set(readdirSync(dir).filter((f) => f.endsWith(".transcript.txt")).map((f) => f.slice(0, -".transcript.txt".length)))].sort();
+      const items = [];
+      const assets = {};
+      for (const id of ids) {
+        const audio = fileFor(dir, id, [...AUDIO, ".m4a"]);
+        const summaryPath = join(dir, `${id}.summary.md`);
+        if (!audio || !existsSync(summaryPath)) throw new Error(`meetings/owner: ${id} needs an audio file, a transcript and a summary`);
+        assets[`owner/${audio}`] = join(dir, audio);
+        items.push({ id: `meet-${id}`, audio: `owner/${audio}`, transcript: readFileSync(join(dir, `${id}.transcript.txt`), "utf8"), summary: readFileSync(summaryPath, "utf8") });
+      }
+      return { items, assets };
+    },
+  },
 };
 
 let failed = false;
