@@ -124,6 +124,14 @@ describe("ci:local review fixes", () => {
     expect(byId(plan(["e2e/rtl.spec.ts", "src/ai/tts.ts"])).test.cmd).toEqual(["npx", "vitest", "related", "--run", "--passWithNoTests", "src/ai/tts.ts"]);
   });
 
+  it("the PostCSS / Tailwind configs are app code; a changed e2e helper runs every spec", () => {
+    expect(isAppCode("postcss.config.js")).toBe(true);
+    expect(byId(plan(["postcss.config.js"])).build.skipReason).toBeUndefined();
+    const all = ["e2e/smoke.spec.ts", "e2e/error-paths.spec.ts", "e2e/rtl.spec.ts"];
+    expect(e2eSpecs(["e2e/_clear-state.ts"], all)).toEqual([]); // [] = the full suite
+    expect(e2eSpecs(["e2e/rtl.spec.ts"], all)).toEqual(["e2e/smoke.spec.ts", "e2e/rtl.spec.ts"]);
+  });
+
   it("rejects unknown flags and step ids instead of passing without the requested checks", () => {
     expect(argErrors(["--changed", "--base", "origin/main", "--only", "typecheck,test", "--coverage", "--bail"])).toEqual([]);
     expect(argErrors(["--covrage"])).toEqual(['unknown argument "--covrage"']);

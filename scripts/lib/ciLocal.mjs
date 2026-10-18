@@ -17,7 +17,7 @@ export const COVERAGE_MIN = 65;
  * public/, every root HTML file (each is a Vite entry: index.html,
  * playground-runner.html, livejs-runner.html…) and the build configs.
  */
-export const isAppCode = (f) => /^(src|e2e|scripts|public)\/|^[^/]+\.html$|^(vite\.config|tsconfig|package|playwright\.config)/.test(f);
+export const isAppCode = (f) => /^(src|e2e|scripts|public)\/|^[^/]+\.html$|^(vite\.config|tsconfig|package|playwright\.config|postcss\.config|tailwind\.config)/.test(f);
 
 const isCodeFile = (f) => /\.(m?[jt]sx?)$/.test(f);
 
@@ -140,6 +140,8 @@ export function argErrors(argv) {
 /** e2e specs for a run: every spec for a full run; with --changed, changed specs plus the smoke test. */
 export function e2eSpecs(changed, allSpecs) {
   if (changed === null) return [];
+  // A changed (or deleted) helper under e2e/ can break any spec that imports it: the whole suite.
+  if (changed.some((f) => /^e2e\//.test(f) && !/\.spec\.ts$/.test(f))) return [];
   const touched = changed.filter((f) => /^e2e\/.*\.spec\.ts$/.test(f) && allSpecs.includes(f));
   return [...new Set(["e2e/smoke.spec.ts", ...touched])].filter((f) => allSpecs.includes(f));
 }
