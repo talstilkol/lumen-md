@@ -494,8 +494,11 @@ export function isCalendarDate(v) {
 /**
  * Documented exceptions. Each { area, name (trailing * = prefix), level
  * (the most it may report: warn | notice | ok; default warn), reason,
- * until? (YYYY-MM-DD) }. A matching finding is capped at that level and
- * carries the reason. Only licence / policy findings can be capped: a
+ * license (the licence text the decision was about), until? (YYYY-MM-DD) }.
+ * A matching finding is capped at that level only while its licence is
+ * still that one: a dependency that changes licence (tldraw did, between
+ * majors) is reported again instead of waived by the old decision. A
+ * capped finding carries the reason. Only licence / policy findings can be capped: a
  * structural one (an invalid registry entry, a broken lockfile) keeps its
  * level. Problems with the allowlist itself are findings too;
  * a malformed `until` is a failure and the exception is not applied, so a
@@ -519,6 +522,11 @@ export function applyAllowlist(findings, allow, today = new Date().toISOString()
       extra.push({ area: "allowlist", name: label, license: "", level: "fail", reason: `level "${cap}" must be warn, notice or ok` });
       continue;
     }
+    if (ex.license !== undefined && (typeof ex.license !== "string" || !ex.license.trim())) {
+      extra.push({ area: "allowlist", name: label, license: "", level: "fail", reason: "license must be the licence text the exception was decided for" });
+      continue;
+    }
+    if (ex.license === undefined) extra.push({ area: "allowlist", name: label, license: "", level: "warn", reason: "exception without `license`: it would waive any licence this package or model gets later; add the one it was decided for" });
     if (ex.until != null && !isCalendarDate(ex.until)) {
       extra.push({ area: "allowlist", name: label, license: "", level: "fail", reason: `until ${JSON.stringify(ex.until)} must be a YYYY-MM-DD date; not applied` });
       continue;
@@ -532,14 +540,21 @@ export function applyAllowlist(findings, allow, today = new Date().toISOString()
       extra.push({ area: "allowlist", name: label, license: "", level: "warn", reason: "exception matches nothing: remove it" });
       continue;
     }
+    const drift = [];
     for (const f of hits) {
       if (f.structural) {
         if (!/allowlist exception cannot waive/.test(f.reason)) f.reason += " (an allowlist exception cannot waive this: fix the entry)";
         continue;
       }
+      if (ex.license !== undefined && f.license !== ex.license) {
+        if (RANK[f.level] > RANK[cap]) drift.push(f);
+        continue;
+      }
       f.allowed = ex.reason + (ex.decision ? ` (decision ${ex.decision})` : "");
       f.level = best(f.level, cap);
     }
+    if (drift.length)
+      extra.push({ area: "allowlist", name: label, license: ex.license, level: "warn", reason: `licence changed: ${drift.map((f) => `${f.name}${f.version ? `@${f.version}` : ""} is now "${f.license}"`).join(", ")}; the exception was decided for "${ex.license}" and is not applied: decide again` });
   }
   return [...findings, ...extra];
 }

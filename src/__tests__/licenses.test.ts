@@ -29,6 +29,7 @@ type Level = "ok" | "notice" | "warn" | "fail";
 interface Finding {
   area: string;
   name: string;
+  version?: string;
   level: Level;
   reason: string;
   license: string;
@@ -373,8 +374,8 @@ describe("applyAllowlist: structural failures", () => {
     findings.push({ area: "npm", name: "left-pad (from root)", level: "warn", reason: "required dependency missing from package-lock.json", license: "", structural: true } as Finding);
     const out: Finding[] = applyAllowlist(findings, {
       exceptions: [
-        { area: "model", name: "nc-model:8b", reason: "user-initiated download, never bundled", level: "ok" },
-        { area: "npm", name: "left-pad*", reason: "documented exception for this package", level: "ok" },
+        { area: "model", name: "nc-model:8b", license: "CC-BY-NC-4.0", reason: "user-initiated download, never bundled", level: "ok" },
+        { area: "npm", name: "left-pad*", license: "MIT", reason: "documented exception for this package", level: "ok" },
       ],
     });
     const r = byName(out);
@@ -384,8 +385,34 @@ describe("applyAllowlist: structural failures", () => {
     // It does match: no "matches nothing" warning.
     expect(r["model:nc-model:8b"]).toBeUndefined();
     // The same exception still caps a licence finding of a valid entry.
-    const ok = byName(applyAllowlist(checkModels(clone(registryFixture), [{ file: "src/a.ts", text: '"nc-model:8b"' }]), { exceptions: [{ area: "model", name: "nc-model:8b", reason: "user-initiated download, never bundled" }] }));
+    const ok = byName(applyAllowlist(checkModels(clone(registryFixture), [{ file: "src/a.ts", text: '"nc-model:8b"' }]), { exceptions: [{ area: "model", name: "nc-model:8b", license: "CC-BY-NC-4.0", reason: "user-initiated download, never bundled" }] }));
     expect(ok["nc-model:8b"]).toMatchObject({ level: "warn", allowed: "user-initiated download, never bundled" });
+  });
+});
+
+describe("applyAllowlist: an exception is bound to the licence it was decided for", () => {
+  const custom = "SEE LICENSE IN LICENSE.md";
+  const ex = { area: "npm", name: "tldraw", license: custom, reason: "custom tldraw licence: pending decision" };
+  const tldraw = (license: string, level: Level) => [{ area: "npm", name: "tldraw", version: "5.0.0", level, reason: "x", license } as Finding];
+  it("caps the finding while its licence is unchanged", () => {
+    expect(byName(applyAllowlist(tldraw(custom, "warn"), { exceptions: [ex] })).tldraw).toMatchObject({ level: "warn", allowed: ex.reason });
+  });
+  it("a changed licence is reported again, not waived by the old decision", () => {
+    const r = byName(applyAllowlist(tldraw("AGPL-3.0-only", "fail"), { exceptions: [{ ...ex, level: "ok" }] }));
+    expect(r.tldraw).toMatchObject({ level: "fail" });
+    expect(r.tldraw.allowed).toBeUndefined();
+    expect(r["npm:tldraw"]).toMatchObject({ level: "warn", reason: expect.stringMatching(/licence changed: tldraw@5\.0\.0 is now "AGPL-3\.0-only".*decide again/) });
+  });
+  it("a prefix exception says nothing about matching packages that need no waiver", () => {
+    const fs = [{ area: "npm", name: "@tldraw/store", level: "ok", reason: "", license: "MIT" } as Finding, { area: "npm", name: "@tldraw/editor", level: "warn", reason: "", license: custom } as Finding];
+    const r = byName(applyAllowlist(fs, { exceptions: [{ ...ex, name: "@tldraw/*" }] }));
+    expect(r["npm:@tldraw/*"]).toBeUndefined();
+    expect(r["@tldraw/editor"].allowed).toBe(ex.reason);
+  });
+  it("an exception without a licence warns; an empty one fails", () => {
+    const { license: _l, ...noLicense } = ex;
+    expect(byName(applyAllowlist(tldraw(custom, "warn"), { exceptions: [noLicense] }))["npm:tldraw"]).toMatchObject({ level: "warn", reason: expect.stringMatching(/without `license`/) });
+    expect(byName(applyAllowlist(tldraw(custom, "warn"), { exceptions: [{ ...ex, license: " " }] }))["npm:tldraw"]).toMatchObject({ level: "fail" });
   });
 });
 
