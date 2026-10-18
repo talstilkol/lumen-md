@@ -4,7 +4,8 @@
 #
 #   scripts/lane-merge.sh <target-branch> <branch...>
 #
-# Runs in the current checkout (it must be clean; <target> gets checked out).
+# Runs in the current checkout (it must be clean, untracked files included;
+# <target> gets checked out).
 # A conflict only in generated files — i18n/keys.json, package-lock.json — is
 # resolved by regenerating them from the merged sources:
 #   i18n/keys.json     node scripts/extract-i18n-keys.mjs
@@ -38,7 +39,11 @@ branches=("$@")
 
 top=$(git rev-parse --show-toplevel 2>/dev/null) || die "run this inside a lumen-md checkout"
 cd "$top" || exit 1
-[ -z "$(git status --porcelain --untracked-files=no)" ] || die "working tree has uncommitted changes; commit them or move them away first"
+# Untracked files count: one under src/ could satisfy a lane's import in the
+# checks below without being in the commits that get pushed.
+dirty=$(git status --porcelain --untracked-files=all)
+[ -z "$dirty" ] || die "working tree has uncommitted changes or untracked files; commit them or move them away first:
+$(echo "$dirty" | head -5 | sed 's/^/  /')"
 git rev-parse -q --verify MERGE_HEAD >/dev/null && die "a merge is already in progress (finish it or git merge --abort)"
 git rev-parse --verify --quiet "refs/heads/$target" >/dev/null || die "target branch '$target' does not exist (create it: git branch $target <base>)"
 for b in "${branches[@]}"; do
