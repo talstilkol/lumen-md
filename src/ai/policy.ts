@@ -80,9 +80,29 @@ export function getAiPolicy(): AiPolicy {
   return hasAnyCloudKey() ? "local-first" : "local-only";
 }
 
+const policyListeners = new Set<() => void>();
+
 export function setAiPolicy(policy: AiPolicy): void {
   if (!(AI_POLICIES as readonly string[]).includes(policy)) throw new Error(`Unknown AI policy: ${policy}`);
   localStorage.setItem(STORAGE_KEY, policy);
+  for (const fn of [...policyListeners]) fn();
+}
+
+/**
+ * Run `fn` whenever the stored policy may have changed: `setAiPolicy()` in
+ * this tab, or a write in another tab (the `storage` event). `fn` reads
+ * `getAiPolicy()` itself. Returns the unsubscribe.
+ */
+export function onAiPolicyChange(fn: () => void): () => void {
+  policyListeners.add(fn);
+  const onStorage = (e: StorageEvent) => {
+    if (e.key === STORAGE_KEY || e.key === null) fn(); // null: storage was cleared
+  };
+  if (typeof window !== "undefined") window.addEventListener("storage", onStorage);
+  return () => {
+    policyListeners.delete(fn);
+    if (typeof window !== "undefined") window.removeEventListener("storage", onStorage);
+  };
 }
 
 /** May a request go to a cloud provider under the current policy? */

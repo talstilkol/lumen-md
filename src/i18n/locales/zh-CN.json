@@ -1271,6 +1271,8 @@
   "toast.dictate.noteClosed": "你听写的笔记已关闭，其余内容已放入新笔记：{name}",
   "toast.dictate.localFailed": "设备上的听写已停止：{error}",
   "toast.dictate.localOnlyBlocked": "此处无法在设备上听写，且浏览器语音服务在仅本地模式下被阻止（它会把音频发送出去）",
+  "toast.dictate.stoppedLocalOnly": "听写已停止：AI 策略现在是仅本地，而浏览器语音服务会把音频发送出去",
+  "dictate.audioSuspended": "浏览器让麦克风音频一直处于暂停状态——请重新开始听写",
   "toast.dictate.webSpeechActive": "正在通过浏览器语音服务听写 — 音频会发送给其提供方",
   "dictate.webSpeech.title": "使用浏览器语音服务？",
   "dictate.webSpeech.body": "无法在此设备上开始听写。浏览器语音服务可用，但会把音频发送给其提供方（Chrome 中为 Google）。隐私记录会记下每次使用。",

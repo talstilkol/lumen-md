@@ -1271,6 +1271,8 @@
   "toast.dictate.noteClosed": "入力先のノートが閉じられたため、続きは新しいノートに入りました: {name}",
   "toast.dictate.localFailed": "端末での音声入力が停止しました: {error}",
   "toast.dictate.localOnlyBlocked": "ここではデバイス上の音声入力が使えず、ブラウザーの音声サービスはローカルのみモードでブロックされています（音声を外部に送るため）",
+  "toast.dictate.stoppedLocalOnly": "音声入力を停止しました: AI ポリシーがローカルのみになりました（ブラウザーの音声サービスは音声を外部に送ります）",
+  "dictate.audioSuspended": "ブラウザーがマイク音声を一時停止したままにしました。もう一度音声入力を開始してください",
   "toast.dictate.webSpeechActive": "ブラウザーの音声サービスで音声入力中 — 音声はその提供元に送信されます",
   "dictate.webSpeech.title": "ブラウザーの音声サービスを使いますか？",
   "dictate.webSpeech.body": "このデバイスでの音声入力を開始できませんでした。ブラウザーの音声サービスは使えますが、音声を提供元（Chrome では Google）に送信します。プライバシー記録に毎回記録されます。",

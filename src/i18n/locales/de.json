@@ -1271,6 +1271,8 @@
   "toast.dictate.noteClosed": "Die Notiz, in die du diktiert hast, wurde geschlossen; der Rest steht in einer neuen Notiz: {name}",
   "toast.dictate.localFailed": "Diktat auf dem Gerät gestoppt: {error}",
   "toast.dictate.localOnlyBlocked": "Diktat auf dem Gerät ist hier nicht verfügbar, und der Sprachdienst des Browsers ist im Nur-lokal-Modus gesperrt (er sendet Audio nach außen)",
+  "toast.dictate.stoppedLocalOnly": "Diktat gestoppt: Die KI-Richtlinie ist jetzt „Nur lokal“, und der Sprachdienst des Browsers sendet Audio nach außen",
+  "dictate.audioSuspended": "der Browser hat das Mikrofon-Audio pausiert gelassen – Diktat bitte neu starten",
   "toast.dictate.webSpeechActive": "Diktat über den Sprachdienst des Browsers — das Audio wird an dessen Anbieter gesendet",
   "dictate.webSpeech.title": "Sprachdienst des Browsers verwenden?",
   "dictate.webSpeech.body": "Das Diktat auf diesem Gerät konnte nicht starten. Der Sprachdienst des Browsers funktioniert, sendet das Audio aber an seinen Anbieter (Google in Chrome). Das Datenschutzprotokoll erfasst jede Nutzung.",

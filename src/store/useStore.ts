@@ -200,6 +200,21 @@ function afterPendingEdits<A extends unknown[]>(action: (...args: A) => void): (
   };
 }
 
+/**
+ * Told when an open note stays the same note under a new tab id: adopted
+ * into the workspace (autosave of an ad-hoc note), renamed, or moved. Code
+ * that remembers a tab id, such as dictation, follows the note with this.
+ */
+const tabIdChangeListeners = new Set<(from: string, to: string) => void>();
+export function onTabIdChange(fn: (from: string, to: string) => void): () => void {
+  tabIdChangeListeners.add(fn);
+  return () => void tabIdChangeListeners.delete(fn);
+}
+export function notifyTabIdChange(from: string, to: string): void {
+  if (from === to) return;
+  for (const fn of [...tabIdChangeListeners]) fn(from, to);
+}
+
 /** The first-run view: Preview on narrow screens, Split elsewhere. */
 export function defaultMode(width: number = typeof window !== "undefined" ? window.innerWidth : 1280): "split" | "preview" {
   return width < 768 ? "preview" : "split";
@@ -284,7 +299,8 @@ export const useAppStore = create<AppState>()(
           );
           return { doc: nextDoc, openTabs: nextTabs };
         }),
-      setDoc: afterPendingEdits((d) =>
+      setDoc: afterPendingEdits((d) => {
+        const renamed: Array<[string, string]> = [];
         set((state) => {
           const nextDoc = {
             ...state.doc,
@@ -292,8 +308,11 @@ export const useAppStore = create<AppState>()(
             dirty: d.dirty ?? state.doc.dirty,
           };
           // name + content together = a different document was loaded.
-          if ("name" in d && "content" in d) nextDoc.loadId = ++nextLoadId;
+          const loaded = "name" in d && "content" in d;
+          if (loaded) nextDoc.loadId = ++nextLoadId;
           const id = tabIdOf(nextDoc);
+          // A new name without new content is the same note renamed (rename, save to workspace).
+          if (!loaded) renamed.push([tabIdOf(state.doc), id]);
           // Keep the matching tab in sync with `setDoc` patches (e.g. rename,
           // markSaved) so the tab strip never lies.
           const nextTabs = state.openTabs.map((t) =>
@@ -308,7 +327,9 @@ export const useAppStore = create<AppState>()(
               : t,
           );
           return { doc: nextDoc, openTabs: nextTabs };
-        })),
+        });
+        for (const [from, to] of renamed) notifyTabIdChange(from, to);
+      }),
       toggleOutline: () => set((s) => ({ showOutline: !s.showOutline })),
       toggleWorkspace: () => set((s) => ({ showWorkspace: !s.showWorkspace })),
       toggleBacklinks: () => set((s) => ({ showBacklinks: !s.showBacklinks })),
@@ -394,16 +415,22 @@ export const useAppStore = create<AppState>()(
             },
           };
         })),
-      adoptWorkspaceName: (workspaceName) =>
+      adoptWorkspaceName: (workspaceName) => {
+        let from = "";
+        let to = "";
         set((state) => {
           const prevId = tabIdOf(state.doc);
           const doc: DocFile = { ...state.doc, name: workspaceName, workspaceName, handle: undefined, dirty: false };
           const id = tabIdOf(doc);
+          from = prevId;
+          to = id;
           const openTabs = state.openTabs.map((t) =>
             t.id === prevId ? { ...t, id, name: doc.name, content: doc.content, workspaceName, dirty: false } : t,
           );
           return { doc, openTabs };
-        }),
+        });
+        notifyTabIdChange(from, to);
+      },
       closeTab: afterPendingEdits((id) =>
         set((state) => {
           const idx = state.openTabs.findIndex((t) => t.id === id);
