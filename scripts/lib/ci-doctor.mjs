@@ -115,8 +115,11 @@ export function failureItems(job, parsed) {
  * @param {object} item from failureItems
  * @param {object|undefined} peerJob the peer run's job with the same name
  * @param {object|null} peerParsed parseAnnotations of that job (only needed when it failed)
+ * @param {{testPresent?: boolean}} [opts] testPresent: false = the test may not exist at the
+ *   peer's commit (its file differs there). Annotations list failures and flakes, never passes,
+ *   so a green job then proves nothing about it: no signal instead of "passed".
  */
-export function observe(item, peerJob, peerParsed) {
+export function observe(item, peerJob, peerParsed, opts = {}) {
   if (!peerJob || peerJob.status !== "completed") return null;
   const c = peerJob.conclusion;
   if (c === "skipped" || c === "cancelled" || c === "neutral" || c === null) return null;
@@ -126,20 +129,22 @@ export function observe(item, peerJob, peerParsed) {
     if (!s || s.conclusion === "skipped" || s.conclusion === "cancelled" || s.conclusion === null) return null;
     return isFailed(s.conclusion) ? "failed" : s.conclusion === "success" ? "passed" : null;
   }
-  // A test.
+  // A test. Named in the peer's annotations: it existed there.
   if (peerParsed?.flaky?.some((f) => sameTest(f, item.key))) return "flaky";
-  if (c === "success") return "passed";
+  const pass = opts.testPresent === false ? null : "passed";
+  if (c === "success") return pass;
   if (!isFailed(c)) return null;
   if (peerParsed?.tests?.some((t) => sameTest(t.key, item.key))) return "failed";
   // The peer job failed elsewhere: the tests only count if its failure is in the same step.
   const peerStep = failedSteps(peerJob)[0]?.name;
-  return peerStep && peerStep === item.step && peerParsed ? "passed" : null;
+  return peerStep && peerStep === item.step && peerParsed ? pass : null;
 }
 
 /**
  * Real or flaky?
  * @param {object} item
- * @param {Array<{outcome:string|null, distance:number|null, sameSha?:boolean, branch?:string}>} observations
+ * @param {Array<{outcome:string|null, distance:number|null, sameSha?:boolean, branch?:string, unproven?:boolean}>} observations
+ *   unproven: the job was green there, but the test may not have existed (see observe)
  * @param {{maxDistance?: number}} [opts] commits apart that still count as "a similar commit"
  * @returns {{verdict:"real"|"flaky"|"flake?"|"unknown", why:string, passed:number, failed:number, flaky:number}}
  */
@@ -156,6 +161,8 @@ export function classify(item, observations, opts = {}) {
   const res = (verdict, why) => ({ verdict, why, passed, failed, flaky });
 
   if (!near.length) {
+    const unproven = (observations ?? []).filter((o) => !o.outcome && o.unproven && (o.sameSha || (o.distance != null && o.distance <= maxDistance))).length;
+    if (unproven) return res("unknown", `green at ${unproven} similar commit(s), but the test's file differs there (a new or renamed test?): no comparison`);
     return res("unknown", seen.length ? `no run of this job at a similar commit (${seen.length} further away)` : "no other branch ran this job recently");
   }
   if (item.kind !== "test" && isDeterministicStep(item.step ?? item.job)) {

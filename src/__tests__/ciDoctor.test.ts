@@ -121,6 +121,14 @@ describe("observe", () => {
     expect(observe(item, peerJob("e2e (chromium)", "skipped"), null)).toBeNull();
     expect(observe(item, undefined, null)).toBeNull();
   });
+  it("a green peer says nothing about a test that may not exist there", () => {
+    const absent = { testPresent: false };
+    expect(observe(item, peerJob("e2e (chromium)", "success"), { tests: [], flaky: [] }, absent)).toBeNull();
+    expect(observe(item, peerJob("e2e (chromium)", "failure"), firefox, absent)).toBeNull();
+    // Named in the peer's annotations: it was there.
+    expect(observe(item, peerJob("e2e (chromium)", "success"), { tests: [], flaky: [ZIP] }, absent)).toBe("flaky");
+    expect(observe(item, peerJob("e2e (chromium)", "failure"), chromium, absent)).toBe("failed");
+  });
   it("step items compare the step itself", () => {
     const step: Item = { kind: "step", job: "typecheck • test • build", step: "Bundle-size budget", key: "Bundle-size budget" };
     expect(observe(step, peerJob("typecheck • test • build", "success"), null)).toBe("passed");
@@ -151,6 +159,11 @@ describe("classify", () => {
     const c = classify(test, [o("passed", 0, "push-run", true), o("failed", 0, "pr-run", true)]);
     expect(c.verdict).toBe("flaky");
     expect(c.why).toMatch(/same commit passed on push-run/);
+  });
+  it("green only where the test may not exist → unknown, and says why", () => {
+    const c = classify(test, [{ outcome: null, unproven: true, distance: 3, branch: "feat/y" }]);
+    expect(c.verdict).toBe("unknown");
+    expect(c.why).toMatch(/file differs there/);
   });
   it("nothing comparable → unknown", () => {
     expect(classify(test, []).verdict).toBe("unknown");

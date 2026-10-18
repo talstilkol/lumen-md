@@ -1,9 +1,10 @@
 #!/usr/bin/env node
 /**
- * Why is CI red here, and is it real? Takes the latest Actions run of a
- * branch (or of a PR's head branch), lists its failed jobs, steps and the
- * tests its check-run annotations name, then looks at the same job in the
- * last ~20 runs of that workflow on other branches:
+ * Why is CI red here, and is it real? Takes the latest run of the CI
+ * workflow (ci.yml; --workflow picks another) on a branch (or a PR's head
+ * branch), lists its failed jobs, steps and the tests its check-run
+ * annotations name, then looks at the same job in the last ~20 runs of that
+ * workflow on other branches:
  *
  *   real    fails consistently at similar commits (or a deterministic check —
  *           typecheck, build, budget, i18n… — that only code can change)
@@ -20,31 +21,40 @@
  *   node scripts/ci-doctor.mjs 190                 # PR number → its head branch
  *   node scripts/ci-doctor.mjs 190 --peers 30 --max-distance 50 --json
  *   node scripts/ci-doctor.mjs --run 39085293928   # one particular run, not the latest
+ *   node scripts/ci-doctor.mjs 190 --workflow tauri.yml
+ *
+ * A green peer job counts as a pass of a failing test only when the test is
+ * known to exist there: the same commit, or the test's file unchanged on
+ * both sides since the merge base. Annotations list failures and flakes,
+ * never passes, so a new or renamed test would otherwise "pass" on every
+ * branch that does not have it.
  */
 import { execFile, execFileSync } from "node:child_process";
 import { promisify } from "node:util";
 import { classify, failureItems, isFailed, nextAction, observe, parseAnnotations } from "./lib/ci-doctor.mjs";
 
-const usage = "usage: node scripts/ci-doctor.mjs <branch|pr-number> [--run ID] [--peers N] [--max-distance N] [--json]";
+const usage = "usage: node scripts/ci-doctor.mjs <branch|pr-number> [--run ID] [--workflow ci.yml] [--peers N] [--max-distance N] [--json]";
 const argv = process.argv.slice(2);
 let target = null;
 let peersWanted = 20;
 let maxDistance = 30;
 let asJson = false;
 let runId = null;
+let workflow = "ci.yml";
 for (let i = 0; i < argv.length; i++) {
   const a = argv[i];
   if (a === "--peers") peersWanted = Number(argv[++i]);
   else if (a === "--max-distance") maxDistance = Number(argv[++i]);
   else if (a === "--json") asJson = true;
   else if (a === "--run") runId = argv[++i];
+  else if (a === "--workflow") workflow = argv[++i];
   else if (!a.startsWith("--") && !target) target = a;
   else {
     console.error(`unknown argument: ${a}\n${usage}`);
     process.exit(2);
   }
 }
-if ((!target && !runId) || !(peersWanted > 0) || !(maxDistance >= 0) || (runId && !/^\d+$/.test(runId))) {
+if ((!target && !runId) || !(peersWanted > 0) || !(maxDistance >= 0) || (runId && !/^\d+$/.test(runId)) || !workflow) {
   console.error(usage);
   process.exit(2);
 }
@@ -56,6 +66,21 @@ async function api(route, jq) {
   const args = ["api", route, ...(jq ? ["--jq", jq] : [])];
   const { stdout } = await execP("gh", args, { maxBuffer: 64 << 20 });
   return JSON.parse(stdout);
+}
+/**
+ * Every item of an array endpoint, page by page on the same `repos/…` path
+ * until a short page (not `gh api --paginate`: it follows the Link header's
+ * `repositories/<id>/…` URLs, which some API proxies refuse).
+ */
+async function apiAll(route, perPage = 100, maxPages = 30) {
+  const out = [];
+  for (let page = 1; page <= maxPages; page++) {
+    const items = await api(`${route}${route.includes("?") ? "&" : "?"}per_page=${perPage}&page=${page}`);
+    if (!Array.isArray(items)) throw new Error(`${route}: expected an array`);
+    out.push(...items);
+    if (items.length < perPage) break;
+  }
+  return out;
 }
 /** Map with at most `n` requests in flight. */
 async function mapLimit(items, n, fn) {
@@ -77,8 +102,9 @@ const memo = (fn) => {
     return cache.get(k);
   };
 };
+// Paginated: a big e2e job (retries included) can emit more than 100.
 const annotationsOf = memo((jobId) =>
-  api(`repos/${repo}/check-runs/${jobId}/annotations?per_page=100`)
+  apiAll(`repos/${repo}/check-runs/${jobId}/annotations`)
     .then(parseAnnotations)
     .catch(() => null),
 );
@@ -91,6 +117,8 @@ const when = (iso) => String(iso ?? "").replace("T", " ").slice(0, 16) + " UTC";
 const short = (sha) => String(sha ?? "").slice(0, 8);
 
 // ── the run to diagnose ───────────────────────────────────────────────
+// Only the CI workflow's runs: the newest run of the branch may be another
+// workflow (tauri.yml runs on every PR label event) that says nothing about CI.
 let branch = target;
 let pr = null;
 if (/^\d+$/.test(target)) {
@@ -102,10 +130,13 @@ if (/^\d+$/.test(target)) {
 }
 const runs = runId
   ? [await api(`repos/${repo}/actions/runs/${runId}`)]
-  : (await api(`repos/${repo}/actions/runs?branch=${encodeURIComponent(branch)}&per_page=10`)).workflow_runs ?? [];
+  : (await api(`repos/${repo}/actions/workflows/${encodeURIComponent(workflow)}/runs?branch=${encodeURIComponent(branch)}&per_page=10`).catch((e) => {
+      console.error(`ci-doctor: no workflow ${workflow} in ${repo}: ${String(e.stderr || e.message).split("\n")[0]}`);
+      process.exit(1);
+    })).workflow_runs ?? [];
 if (runId) branch = runs[0].head_branch;
 if (!runs.length) {
-  console.log(`ci-doctor: no Actions runs for ${branch}${pr ? ` (PR #${pr.number})` : ""}.`);
+  console.log(`ci-doctor: no ${workflow} runs for ${branch}${pr ? ` (PR #${pr.number})` : ""}.`);
   process.exit(0);
 }
 const notes = [];
@@ -143,13 +174,23 @@ const retried = failedJobs.flatMap((j) => (parsedByJob.get(j.id)?.flaky ?? []).m
 // ── the same jobs on other branches ───────────────────────────────────
 const recent = (await api(`repos/${repo}/actions/workflows/${run.workflow_id}/runs?status=completed&per_page=60`)).workflow_runs ?? [];
 const peers = recent.filter((r) => r.head_branch !== branch && r.id !== run.id).slice(0, peersWanted);
-const distanceTo = memo((sha) =>
-  sha === run.head_sha
-    ? Promise.resolve(0)
-    : api(`repos/${repo}/compare/${sha}...${run.head_sha}`, "{a: .ahead_by, b: .behind_by}")
-        .then((d) => d.a + d.b)
-        .catch(() => null),
+/** `base...head`: commits apart and the files head changed since the merge base. */
+const compare = memo((basehead) =>
+  api(`repos/${repo}/compare/${basehead}`, "{a: .ahead_by, b: .behind_by, n: ((.files // []) | length), files: [(.files // [])[] | .filename, (.previous_filename // empty)]}").catch(() => null),
 );
+const distanceTo = (sha) => (sha === run.head_sha ? Promise.resolve(0) : compare(`${sha}...${run.head_sha}`).then((d) => (d ? d.a + d.b : null)));
+/**
+ * Did the peer commit have this test file exactly as here? True when neither
+ * side changed it since the merge base. The compare API lists at most 300
+ * files, so a full list proves nothing.
+ */
+async function sameTestFile(path, sha) {
+  if (sha === run.head_sha) return true;
+  if (!path) return false;
+  const [mine, theirs] = await Promise.all([compare(`${sha}...${run.head_sha}`), compare(`${run.head_sha}...${sha}`)]);
+  if (!mine || !theirs || mine.n >= 300 || theirs.n >= 300) return false;
+  return !mine.files.includes(path) && !theirs.files.includes(path);
+}
 const peerData = await mapLimit(peers, 6, async (p) => ({ run: p, jobs: await jobsOf(p.id), distance: await distanceTo(p.head_sha) }));
 const testJobs = new Set(items.filter((i) => i.kind === "test").map((i) => i.job));
 // Annotations of the peer jobs that ran the failing tests (flaky lists live there even when green).
@@ -165,8 +206,16 @@ for (const item of items) {
   for (const p of peerData) {
     const peerJob = (p.jobs ?? []).find((j) => j.name === item.job);
     const peerParsed = peerJob && item.kind === "test" ? await annotationsOf(peerJob.id) : null;
+    let outcome = observe(item, peerJob, peerParsed);
+    let unproven = false;
+    if (item.kind === "test" && outcome === "passed" && !(await sameTestFile(item.path, p.run.head_sha))) {
+      // A pass of a test that may not exist at that commit is no signal.
+      outcome = observe(item, peerJob, peerParsed, { testPresent: false });
+      unproven = outcome === null;
+    }
     observations.push({
-      outcome: observe(item, peerJob, peerParsed),
+      outcome,
+      unproven,
       distance: p.distance,
       sameSha: p.run.head_sha === run.head_sha,
       branch: p.run.head_branch,
