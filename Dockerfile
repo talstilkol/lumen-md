@@ -9,6 +9,26 @@ RUN npm ci --ignore-scripts
 
 # Copy source and build
 COPY . .
+# Deployment endpoints are baked in at build time (Vite) and added to the
+# CSP connect-src, in the meta policy and in .csp-connect-extra (filled into
+# the nginx header below). .dockerignore keeps .env* out of the context, so
+# they arrive only as build args: `--build-arg`, or `[build.args]` in
+# fly.toml. Keep in step with src/build/cspEndpoints.ts.
+ARG VITE_WORKOS_ENDPOINT
+ARG VITE_BILLING_ENDPOINT
+ARG VITE_ENTITLEMENT_ENDPOINT
+ARG VITE_PUBLISH_ENDPOINT
+ARG VITE_RESEARCH_ENDPOINT
+ARG VITE_AUDIT_ENDPOINT
+ARG VITE_MARKETPLACE_URL
+ARG VITE_LANGUAGETOOL_URL
+ARG VITE_SUPABASE_URL
+ARG VITE_SUPABASE_ANON_KEY
+# Collaboration servers (signaling, comma-separated; persistent y-websocket).
+ARG VITE_WEBRTC_SIGNALING_URL
+ARG VITE_YJS_WEBSOCKET_URL
+# Extra connect-src origins (runtime overrides: LAN Ollama, marketplace…).
+ARG VITE_CSP_CONNECT_EXTRA
 RUN npm run build
 
 # ── Stage 2: Serve ────────────────────────────────────────────────────────
