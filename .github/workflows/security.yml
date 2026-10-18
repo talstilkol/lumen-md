@@ -52,10 +52,14 @@ jobs:
           else
             range="$BASE..$HEAD"
           fi
-          echo "Scanning $range"
+          # The count goes out as an annotation (readable from the API), so a
+          # green run of nothing would show.
+          echo "::notice title=gitleaks::scanning $(git rev-list --count "$range") commits ($range)"
           ./gitleaks git . --log-opts="$range" --redact --no-banner --exit-code 1
       - name: Scan the checked-out tree
-        run: ./gitleaks dir . --redact --no-banner --exit-code 1
+        run: |
+          ./gitleaks dir . --redact --no-banner --exit-code 1
+          echo "::notice title=gitleaks::checked-out tree clean ($(git ls-files | wc -l) tracked files)"
 
   audit:
     name: npm audit (high)

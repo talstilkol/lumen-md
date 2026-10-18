@@ -54,6 +54,10 @@ if (report.error) {
 
 const counts = report.metadata?.vulnerabilities ?? {};
 console.log(`npm audit in ${dir}: ${JSON.stringify(counts)}`);
+// The counts as an annotation, readable from the API.
+if (process.env.GITHUB_ACTIONS) {
+  console.log(`::notice title=npm audit (${dir})::${counts.total ?? 0} advisories: ${counts.critical ?? 0} critical, ${counts.high ?? 0} high, ${counts.moderate ?? 0} moderate, ${counts.low ?? 0} low; ${active.size} active exception(s)`);
+}
 for (const [name, v] of Object.entries(report.vulnerabilities ?? {})) {
   for (const via of v.via) {
     if (typeof via !== "object" || !LEVELS.has(via.severity)) continue;
