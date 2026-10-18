@@ -42,35 +42,36 @@ test.beforeEach(async ({ page }) => {
 });
 
 interface FakeHostTraffic {
-  /** Requests to the fake hosts that got past the CSP (would have left the machine). */
+  /** Requests to the fake hosts that reached the network (routed or answered). */
   left(): string[];
-  /** Requests the browser refused under the CSP before sending them. */
-  blockedByCsp: string[];
+  /** Requests the page started that never got that far (e.g. refused by a CSP). */
+  stopped(): string[];
 }
 
 /**
  * Watch (and answer) every request to the fake hosts, from pages and
- * workers. Chromium reports a load the CSP refused as a request that failed
- * with "csp" before it was sent; those are counted apart.
+ * workers. A request "left" only if Playwright's route saw it or a response
+ * came back: a load the CSP refuses produces neither. Chromium reports one
+ * as failed with "csp" and WebKit with other wording, so the failure text
+ * is not relied on.
  */
 async function watchFakeHosts(page: Page): Promise<FakeHostTraffic> {
   const fake = (url: string) => new URL(url).hostname.endsWith(".lumen-e2e.test");
-  const requested: string[] = [];
-  const routed: string[] = [];
-  const blockedByCsp: string[] = [];
+  const started: string[] = [];
+  const reached = new Set<string>();
   page.context().on("request", (r) => {
-    if (fake(r.url())) requested.push(r.url());
+    if (fake(r.url())) started.push(r.url());
   });
-  page.context().on("requestfailed", (r) => {
-    if (fake(r.url()) && /csp/i.test(r.failure()?.errorText ?? "")) blockedByCsp.push(r.url());
+  page.context().on("response", (r) => {
+    if (fake(r.url())) reached.add(r.url());
   });
   await page.context().route(/\.lumen-e2e\.test\//, (route) => {
-    routed.push(route.request().url());
+    reached.add(route.request().url());
     return route.fulfill({ status: 204, body: "" });
   });
   return {
-    left: () => [...new Set([...routed, ...requested.filter((u) => !blockedByCsp.includes(u))])],
-    blockedByCsp,
+    left: () => [...reached],
+    stopped: () => started.filter((u) => !reached.has(u)),
   };
 }
 
