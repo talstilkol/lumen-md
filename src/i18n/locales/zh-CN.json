@@ -1412,5 +1412,6 @@
   "toast.aiNothingRunning": "没有正在运行的 AI 请求",
   "canvas.new.replaceTitle": "替换此画布？",
   "canvas.new.replaceBody": "已存在名为“{name}”的画布。用此名称新建会把它的绘图替换为空白页。",
-  "canvas.new.replaceOk": "替换为空白"
+  "canvas.new.replaceOk": "替换为空白",
+  "canvas.unreadable": "无法读取画布“{name}”。它将保持只读，以免覆盖已保存的绘图。"
 }

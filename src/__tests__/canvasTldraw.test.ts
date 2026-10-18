@@ -189,4 +189,61 @@ describe("tldraw integration (γ.2)", () => {
       expect(await canvasFileExists("plan")).toBe(true);
     });
   });
+
+  describe("switching canvases (review: #206)", () => {
+    async function run(result: "applied" | "edited" | "empty" | "cancelled" | Error, cancelledAfter = false) {
+      const { switchCanvas } = await import("../ui/CanvasTldraw");
+      const log: string[] = [];
+      const lock = { current: null as string | null };
+      let cancelled = false;
+      const out = await switchCanvas({
+        name: "B",
+        lock,
+        setReadonly: (r) => log.push(`readonly:${r}`),
+        restore: async () => {
+          log.push(`locked:${lock.current}`);
+          if (cancelledAfter) cancelled = true;
+          if (result instanceof Error) throw result;
+          return result;
+        },
+        clear: () => log.push("clear"),
+        cancelled: () => cancelled,
+        onUnreadable: () => log.push("unreadable"),
+      });
+      return { out, log, lock };
+    }
+
+    it("is read-only with the saver held until the snapshot is in", async () => {
+      const r = await run("applied");
+      expect(r.log).toEqual(["readonly:true", "locked:B", "readonly:false"]);
+      expect(r.lock.current).toBeNull();
+    });
+
+    it("a canvas with no saved file starts blank instead of keeping the previous drawing", async () => {
+      const r = await run("empty");
+      expect(r.log).toEqual(["readonly:true", "locked:B", "readonly:false", "clear"]);
+    });
+
+    it("an unreadable file stays read-only with the saver held, so it is not overwritten", async () => {
+      const r = await run(new SyntaxError("bad json"));
+      expect(r.out).toBe("unreadable");
+      expect(r.log).toEqual(["readonly:true", "locked:B", "unreadable"]);
+      expect(r.lock.current).toBe("B");
+    });
+
+    it("a newer switch keeps the lock and read-only state", async () => {
+      const r = await run("applied", true);
+      expect(r.out).toBe("cancelled");
+      expect(r.log).toEqual(["readonly:true", "locked:B"]);
+      expect(r.lock.current).toBe("B");
+    });
+
+    it("the saver writes nothing for a canvas that is still restoring (source check)", async () => {
+      const { readFileSync } = await import("node:fs");
+      const { join } = await import("node:path");
+      const src = readFileSync(join(__dirname, "../ui/CanvasTldraw.tsx"), "utf8");
+      const saver = src.slice(src.indexOf("const binding = bindCanvasSaver"));
+      expect(saver).toMatch(/if \(restoring\.current === canvasName\) return;[\s\S]*getSnapshot\(editor\.store\)/);
+    });
+  });
 });

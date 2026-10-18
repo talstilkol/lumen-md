@@ -929,6 +929,7 @@ const en: Strings = {
   "canvas.new.replaceTitle": "Replace this canvas?",
   "canvas.new.replaceBody": "A canvas named “{name}” already exists. Starting a new one with this name replaces its drawing with a blank page.",
   "canvas.new.replaceOk": "Replace with blank",
+  "canvas.unreadable": "Couldn’t read the canvas “{name}”. It stays read-only so its saved drawing isn’t overwritten.",
   "canvas.picker": "Pick canvas",
   "canvas.title": "Canvas",
   "cmd.ai.outline": "AI: Generate Outline",

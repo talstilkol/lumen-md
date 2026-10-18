@@ -48,8 +48,10 @@ async function loadCanvasFile(name: string): Promise<unknown | null> {
     const blob = await file.getFile();
     const text = await blob.text();
     return JSON.parse(text);
-  } catch {
-    return null;
+  } catch (err) {
+    // why: only a missing file means a blank canvas; an unreadable one must not be overwritten
+    if ((err as { name?: string } | null)?.name === "NotFoundError") return null;
+    throw err;
   }
 }
 
@@ -135,6 +137,42 @@ export async function restoreUnlessEdited(o: {
   } finally {
     off();
   }
+}
+
+/**
+ * Switch the shared editor to a canvas without ever mixing two drawings: the
+ * editor is read-only and the canvas's saver is held (`lock`) until the saved
+ * snapshot is in, so neither a stroke nor a camera-move save can write the
+ * previous canvas's drawing under the new name. A canvas with no saved file
+ * starts blank; one whose file cannot be read stays read-only, so nothing
+ * overwrites it. Exported for tests.
+ */
+export async function switchCanvas(o: {
+  name: string;
+  lock: { current: string | null };
+  setReadonly: (readonly: boolean) => void;
+  restore: () => Promise<"applied" | "edited" | "empty" | "cancelled">;
+  clear: () => void;
+  cancelled: () => boolean;
+  onUnreadable: (err: unknown) => void;
+}): Promise<"applied" | "edited" | "empty" | "cancelled" | "unreadable"> {
+  o.lock.current = o.name;
+  o.setReadonly(true);
+  let result: "applied" | "edited" | "empty" | "cancelled";
+  try {
+    result = await o.restore();
+  } catch (err) {
+    if (o.cancelled()) return "cancelled";
+    // stays read-only with the saver held: saving now would overwrite the file we could not read
+    o.onUnreadable(err);
+    return "unreadable";
+  }
+  // a newer switch owns the lock and the read-only state now
+  if (o.cancelled() || result === "cancelled") return "cancelled";
+  if (o.lock.current === o.name) o.lock.current = null;
+  o.setReadonly(false);
+  if (result === "empty") o.clear();
+  return result;
 }
 
 async function listCanvases(): Promise<string[]> {
@@ -336,6 +374,8 @@ export function CanvasTldraw({ open, onClose }: Props) {
   const detachSaver = useRef<(() => void) | null>(null);
   /** The canvas New just cleared: not restored from its (replaced) file, saved as soon as the saver binds. */
   const freshCanvas = useRef<string | null>(null);
+  /** The canvas being restored: its saver writes nothing until the restore is in (see switchCanvas). */
+  const restoring = useRef<string | null>(null);
 
   // Load the canvas list (and any legacy `.canvas.json` files) on open
   // so the picker shows everything the user has + a convert affordance.
@@ -351,18 +391,33 @@ export function CanvasTldraw({ open, onClose }: Props) {
     // why: New cleared this canvas on purpose; loading its old file would bring back the drawing it replaces
     if (freshCanvas.current === canvasName) return;
     let cancelled = false;
-    void restoreUnlessEdited({
-      // only the user's own document edits count (not camera moves or the load itself)
-      listenUserEdits: (onEdit) => editor.store.listen(onEdit, { source: "user", scope: "document" }),
-      load: () => loadCanvasFile(canvasName),
-      apply: (snap) => {
-        try {
-          loadSnapshot(editor.store, snap as Parameters<typeof loadSnapshot>[1]);
-        } catch (err) {
-          log.warn("tldraw loadSnapshot failed", err);
-        }
+    void switchCanvas({
+      name: canvasName,
+      lock: restoring,
+      setReadonly: (readonly) => editor.updateInstanceState({ isReadonly: readonly }),
+      restore: () =>
+        restoreUnlessEdited({
+          // only the user's own document edits count (not camera moves or the load itself)
+          listenUserEdits: (onEdit) => editor.store.listen(onEdit, { source: "user", scope: "document" }),
+          load: () => loadCanvasFile(canvasName),
+          apply: (snap) => {
+            try {
+              loadSnapshot(editor.store, snap as Parameters<typeof loadSnapshot>[1]);
+            } catch (err) {
+              log.warn("tldraw loadSnapshot failed", err);
+            }
+          },
+          cancelled: () => cancelled,
+        }),
+      clear: () => {
+        editor.selectAll();
+        editor.deleteShapes(editor.getSelectedShapeIds());
       },
       cancelled: () => cancelled,
+      onUnreadable: (err) => {
+        log.warn("tldraw canvas read failed", err);
+        showAiToast(t("canvas.unreadable", { name: canvasName }), "error");
+      },
     });
     return () => {
       cancelled = true;
@@ -377,6 +432,8 @@ export function CanvasTldraw({ open, onClose }: Props) {
     const binding = bindCanvasSaver(
       (onChange) => editor.store.listen(onChange),
       () => {
+        // why: until this canvas's snapshot is restored the editor still shows the previous one
+        if (restoring.current === canvasName) return;
         try {
           const snap = getSnapshot(editor.store);
           lastWrite = saveCanvasFile(canvasName, snap).catch((err) => log.warn("tldraw save failed", err));

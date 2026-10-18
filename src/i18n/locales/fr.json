@@ -1412,5 +1412,6 @@
   "toast.aiNothingRunning": "Aucune requête IA en cours",
   "canvas.new.replaceTitle": "Remplacer ce canevas ?",
   "canvas.new.replaceBody": "Un canevas nommé « {name} » existe déjà. En créer un nouveau sous ce nom remplace son dessin par une page vierge.",
-  "canvas.new.replaceOk": "Remplacer par une page vierge"
+  "canvas.new.replaceOk": "Remplacer par une page vierge",
+  "canvas.unreadable": "Impossible de lire le canevas « {name} ». Il reste en lecture seule pour que son dessin enregistré ne soit pas écrasé."
 }
