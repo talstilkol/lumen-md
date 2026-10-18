@@ -1,7 +1,7 @@
 name: Security
 
 # Security checks on every pull request (plan 2.8): secrets (gitleaks),
-# known-vulnerable npm dependencies (npm audit) and what a PR adds to the
+# known-vulnerable npm and Rust dependencies (npm audit, cargo audit) and what a PR adds to the
 # dependency tree (dependency-review). CodeQL and OSSF Scorecard run from
 # codeql.yml and scorecard.yml on main, since Scorecard only scores the default branch.
 #
@@ -84,6 +84,43 @@ jobs:
       - name: npm audit --audit-level=high
         working-directory: ${{ matrix.dir }}
         run: node "$GITHUB_WORKSPACE/scripts/audit-gate.mjs"
+
+  cargo-audit:
+    name: cargo audit (high)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        # Every Cargo.lock in the repo (the Tauri app and its keychain crate share one).
+        dir: [src-tauri]
+    env:
+      CARGO_AUDIT_VERSION: 0.22.2
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22
+      # The runner image's Rust builds the exact cargo-audit release from
+      # crates.io with its own lockfile; the binary is cached per version.
+      - uses: actions/cache@2c8a9bd7457de244a408f35966fab2fb45fda9c8 # v6.0.0
+        id: cache
+        with:
+          path: ~/.cargo-audit-bin
+          key: cargo-audit-${{ env.CARGO_AUDIT_VERSION }}-${{ runner.os }}
+      - name: Install cargo-audit
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: cargo install cargo-audit --version "$CARGO_AUDIT_VERSION" --locked --root ~/.cargo-audit-bin
+      # Fails on CVSS >= 7.0 or an unscored vulnerability. A time-limited
+      # exception goes in security/audit-ignore.json (RUSTSEC id, dir, reason, expiry).
+      - name: cargo audit
+        working-directory: ${{ matrix.dir }}
+        run: |
+          export PATH="$HOME/.cargo-audit-bin/bin:$PATH"
+          cargo audit --version
+          node "$GITHUB_WORKSPACE/scripts/audit-gate.mjs" --cargo
 
   dependency-review:
     name: dependency review
