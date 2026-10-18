@@ -142,6 +142,15 @@ describe("parseDecisions", () => {
     ]);
   });
 
+  it("finds the header after a leading blank line or comment, and only as the first row", () => {
+    const { rows, errors } = parseDecisions(["", "# decisions for #203", "comment_id\tverdict\tsha\treason", "4305258504\tfixed\t1a2b3c4\tunique tab names"].join("\n"));
+    expect(errors).toEqual([]);
+    expect(rows).toEqual([{ line: 4, comment_id: 4305258504, verdict: "fixed", sha: "1a2b3c4", reason: "unique tab names" }]);
+    // A header-like row after the first data row is data, and an error.
+    const late = parseDecisions(["4305258504\tfixed\t1a2b3c4\tok", "comment_id\tverdict\tsha\treason"].join("\n"));
+    expect(late.errors).toContain('line 2: comment_id "comment_id" is not a number');
+  });
+
   it("collects every problem with its line number", () => {
     const { errors } = parseDecisions(
       ["12\tfixd\t-\tx", "abc\tfixed\tzz\t", "1\tfixed\t1a2b3c4", "5\twontfix\tnot-a-sha\twhy", "7\tfixed\tabcdef1\ta", "7\tfixed\tabcdef1\tb"].join(

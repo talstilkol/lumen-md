@@ -112,20 +112,24 @@ export function groupByFile(rows) {
 
 /**
  * Parse a decisions table: `comment_id<TAB>verdict<TAB>sha<TAB>reason`, one per
- * line. Blank lines, `#` comments and a header row are skipped. Returns every
- * problem, so a bad table is fixed in one pass instead of posting half of it.
+ * line. Blank lines, `#` comments and a header row (the first row that is
+ * neither, wherever it sits) are skipped. Returns every problem, so a bad
+ * table is fixed in one pass instead of posting half of it.
  */
 export function parseDecisions(text) {
   const rows = [];
   const errors = [];
   const seen = new Set();
+  let first = true;
   String(text ?? "")
     .split(/\r?\n/)
     .forEach((raw, i) => {
       const n = i + 1;
       if (!raw.trim() || raw.trimStart().startsWith("#")) return;
       const cols = raw.split("\t");
-      if (n === 1 && /^comment_?id$/i.test(cols[0].trim())) return;
+      const header = first && /^comment_?id$/i.test(cols[0].trim());
+      first = false;
+      if (header) return;
       if (cols.length < 4) {
         errors.push(`line ${n}: expected 4 tab-separated columns, got ${cols.length}`);
         return;
