@@ -7,7 +7,7 @@
  * (`npx vitest run -u src/__tests__/commandIds.test.ts`).
  */
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { renderHook } from "@testing-library/react";
+import { act, renderHook } from "@testing-library/react";
 
 const flags = vi.hoisted(() => ({ full: false }));
 // Billing builds and installed plugins / marketplace templates add commands;
@@ -149,5 +149,26 @@ describe("command palette list (plan 0.2 split guard)", () => {
     await expect(JSON.stringify({ minimal, full, autoSaveOn, hebrewIds: hebrew }, null, 2) + "\n").toMatchFileSnapshot(
       "./__snapshots__/commandIds.snapshot.json",
     );
+  });
+
+  it("toggle labels follow the store without a rebuild from elsewhere (review: #208 follow-up)", () => {
+    const opts = options(false);
+    const { result, unmount } = renderHook(() => useCommands(opts));
+    const label = (id: string) => result.current.find((c) => c.id === id)?.label;
+    const toggles = [
+      ["useLocalAi", "ai.localToggle"],
+      ["spellCheck", "view.spellCheck"],
+      ["rtl", "view.rtl"],
+      ["typewriterMode", "view.typewriter"],
+      ["tsChecks", "view.tsChecks"],
+      ["grammarCheck", "view.grammarCheck"],
+    ] as const;
+    for (const [key, id] of toggles) {
+      const before = label(id);
+      expect(before, id).toBeDefined();
+      act(() => useAppStore.setState({ [key]: !useAppStore.getState()[key] } as never));
+      expect(label(id), `${id} after ${key} changed`).not.toBe(before);
+    }
+    unmount();
   });
 });
