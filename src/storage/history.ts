@@ -39,6 +39,11 @@ export interface Snapshot {
 const DB_NAME = "lumen-history";
 const STORE = "snapshots";
 export const MAX_PER_DOC = 1000;
+let maxPerDoc = MAX_PER_DOC;
+/** Tests: a smaller per-document cap, so a cap test doesn't write 1000 versions. */
+export function __setMaxPerDoc(n = MAX_PER_DOC): void {
+  maxPerDoc = n;
+}
 /** Every FULL_EVERY-th version is stored as the full text; the rest as deltas (plan 3.2). */
 export const FULL_EVERY = 20;
 export const AUTOSAVE_EVERY_MS = 2 * 60_000;
@@ -232,9 +237,9 @@ async function writeSnapshot(name: string, content: string, reason: SnapshotReas
   const req = tx.objectStore(STORE).add(row);
   await done(tx);
   latestText.set(name, { id: req.result as number, content });
-  if (rows.length + 1 > MAX_PER_DOC) {
+  if (rows.length + 1 > maxPerDoc) {
     const all = [...rows, { ...row, id: req.result as number } as Row];
-    const victims = new Set(all.slice(0, all.length - MAX_PER_DOC).map((r) => r.id));
+    const victims = new Set(all.slice(0, all.length - maxPerDoc).map((r) => r.id));
     await dropRows(new Map([[name, all]]), victims);
   }
   void checkQuota();
@@ -357,4 +362,5 @@ export function __resetHistoryDb(): void {
   lastAutosave.clear();
   latestText.clear();
   lastQuotaCheck = 0;
+  maxPerDoc = MAX_PER_DOC;
 }

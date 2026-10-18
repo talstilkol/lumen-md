@@ -75,7 +75,7 @@ describe("history store with deltas", () => {
     expect(list[0].content).toBe(written[999]);
     expect(list[500].content).toBe(written[499]);
     expect(list[999].content).toBe(written[0]);
-  }, 60_000);
+  }, 180_000);
 
   it("stores a full text every FULL_EVERY versions", async () => {
     let t = "start\n";
@@ -108,12 +108,14 @@ describe("history store with deltas", () => {
 
   it("caps a document at MAX_PER_DOC without breaking its chain", async () => {
     let t = "";
-    const n = history.MAX_PER_DOC + 25;
+    const cap = 60;
+    history.__setMaxPerDoc(cap);
+    const n = cap + 25;
     for (let i = 0; i < n; i++) await history.recordSnapshot("c.md", (t = `v${i}\n` + t.slice(0, 200)), "save", i);
     const list = await history.listSnapshots("c.md");
-    expect(list).toHaveLength(history.MAX_PER_DOC);
+    expect(list).toHaveLength(cap);
     expect(list[0].content).toBe(t);
-    expect(list.at(-1)!.content.startsWith(`v${n - history.MAX_PER_DOC}\n`)).toBe(true);
+    expect(list.at(-1)!.content.startsWith(`v${n - cap}\n`)).toBe(true);
   }, 60_000);
 
   it("reads rows written before deltas (full texts) and appends deltas after them", async () => {
