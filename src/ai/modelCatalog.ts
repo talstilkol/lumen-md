@@ -65,11 +65,15 @@ const FAMILY_LICENCE: Array<{ re: RegExp; class: LicenceClass }> = [
 
 /**
  * Sizes of an open-licence family that are under another licence
- * (models/registry.json): Qwen2.5 3B is the Qwen Research License
- * (non-commercial) and 72B the Qwen License, while the other Qwen2.5 sizes
- * are Apache-2.0. Checked before a tag inherits its family's licence.
+ * (models/registry.json): Qwen2.5 3B and Qwen2.5-Coder 3B are the Qwen
+ * Research License (non-commercial) and Qwen2.5 72B the Qwen License, while
+ * the other sizes are Apache-2.0. Checked before a tag inherits its
+ * family's licence.
  */
-const SIZE_EXCEPTIONS: Array<{ re: RegExp; class: LicenceClass }> = [{ re: /^qwen2\.5:(3b|72b)(-|$)/i, class: "forbidden" }];
+const SIZE_EXCEPTIONS: Array<{ re: RegExp; class: LicenceClass }> = [
+  { re: /^qwen2\.5:(3b|72b)(-|$)/i, class: "forbidden" },
+  { re: /^qwen2\.5-coder:3b(-|$)/i, class: "forbidden" },
+];
 
 /** The licence class of an installed (possibly tagged) model name: the catalog entry, a size exception, its family, then the name. null = unknown. */
 export function licenceClassOf(name: string): LicenceClass | null {

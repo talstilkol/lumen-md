@@ -84,16 +84,22 @@ describe("custom-licence models are never picked on their own (plan 1.7)", () =>
     expect(licenceClassOf("qwen2.5:3b")).toBe("forbidden");
     expect(licenceClassOf("qwen2.5:32b")).toBe("allowed");
     expect(licenceClassOf("qwen2.5:14b")).toBe("allowed");
+    expect(licenceClassOf("qwen2.5-coder:3b")).toBe("forbidden");
+    expect(autoPickable("qwen2.5-coder:3b-instruct-q4_K_M")).toBe(false);
     expect(autoPickable("mistral:7b")).toBe(true);
     expect(autoPickable("llama3.1:8b")).toBe(false);
   });
 
   it("agrees with models/registry.json on every Ollama name it lists", () => {
     const registry = JSON.parse(readFileSync(resolve(__dirname, "../../models/registry.json"), "utf8")) as { models: Array<{ id: string; class: string; runs: string; match?: string[] }> };
-    const names = registry.models
-      .filter((m) => m.runs === "ollama")
-      .flatMap((m) => [m.id, ...(m.match ?? [])].filter((n) => n.includes(":") || n.startsWith("hf.co/")).map((n) => [n, m.class] as const));
-    expect(names.length).toBeGreaterThan(8);
+    // Ollama names: the ids of `runs: ollama` entries, and any `name:tag` alias of any entry
+    // (browser entries list their Ollama tags in `match`, e.g. qwen2.5-coder:3b).
+    const names = registry.models.flatMap((m) =>
+      [m.id, ...(m.match ?? [])]
+        .filter((n) => n.includes(":") || n.startsWith("hf.co/") || (m.runs === "ollama" && n === m.id && !/^[A-Z]/.test(n)))
+        .map((n) => [n, m.class] as const),
+    );
+    expect(names.map(([n]) => n)).toEqual(expect.arrayContaining(["qwen2.5-coder:3b", "qwen2.5:3b", "qwen2.5:72b", "aya-expanse:8b", "llama3.1:8b"]));
     for (const [name, cls] of names) expect([name, autoPickable(name)]).toEqual([name, cls === "allowed"]);
   });
 

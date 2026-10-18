@@ -965,7 +965,8 @@ export function useCommands({
           }
           const models = await listOllamaModels();
           if (models.length === 0) {
-            await uiAlert({ message: "No models found.\n\nPull a model with: ollama pull llama3.1" });
+            // Names the open-licence default (DEFAULT_OLLAMA_MODEL), never a custom-licence model (plan 1.7).
+            await uiAlert({ message: t("ai.settings.ollama.none") });
             return;
           }
           const modelList = models.map((m) => `${m.name} (${(m.size / 1e9).toFixed(1)}GB)`).join("\n");
