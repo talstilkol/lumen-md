@@ -28,6 +28,25 @@ import { canPurchasePlans, manageBilling, upgradeTo } from "../billing/planActio
 import { detectIsMac } from "../ui/KeyboardShortcuts";
 import { getSecret, setSecret } from "../lib/secretStore";
 
+
+/** Save a clip into the library folder and open it (T34). */
+async function saveClip(clip: { title: string; markdown: string }): Promise<void> {
+  const { clipFileName, libraryDir } = await import("../research/clipper");
+  const { writeWorkspaceFile, workspaceHasEntry, isOPFSAvailable } = await import("../storage/workspace");
+  const name = clipFileName(clip.title);
+  if (!isOPFSAvailable()) {
+    useAppStore.getState().openTab({ name, content: clip.markdown, workspaceName: null });
+    return;
+  }
+  const dir = libraryDir(getLocale());
+  let path = `${dir}/${name}`;
+  for (let i = 2; await workspaceHasEntry(path); i++) path = `${dir}/${name.replace(/\.md$/, "")} (${i}).md`;
+  await writeWorkspaceFile(path, clip.markdown);
+  window.dispatchEvent(new Event("lumen-workspace-changed"));
+  useAppStore.getState().openTab({ name: path.split("/").pop()!, content: clip.markdown, workspaceName: path });
+  showAiToast(t("clip.saved", { path }), "success");
+}
+
 export interface UseCommandsOptions {
   handleNew: () => void;
   handleOpen: () => void;
@@ -915,13 +934,62 @@ export function useCommands({
           const question = await uiPrompt({ message: t("research.question"), defaultValue: "" });
           if (!question?.trim()) return;
           try {
-            const { runResearch } = await import("../research/agent");
+            const { runResearch, researchGoesOnline, hasWebConsent, grantWebConsent } = await import("../research/agent");
+            // T34: the first web research asks once; only the query is sent.
+            if (researchGoesOnline() && !hasWebConsent()) {
+              const ok = await uiConfirm({ title: t("research.consent.title"), message: t("research.consent.body"), okLabel: t("research.consent.ok") });
+              if (!ok) return;
+              grantWebConsent();
+            }
             const result = await runResearch({ question: question.trim(), onProgress: (m) => showAiToast(m, "info") });
             openTemplateDoc(`Research — ${question.trim().slice(0, 60).replace(/[\\/:*?"<>|]+/g, " ")}`, result.markdown);
             showAiToast(t("research.done", { sources: result.sources }), "success");
             if (result.unverified) showAiToast(t("research.unverified", { count: result.unverified }), "error");
           } catch (e) {
             showAiToast(t("research.failed", { message: (e as Error).message }), "error");
+          }
+        },
+      },
+      {
+        id: "clip.url",
+        label: t("cmd.clip.url"),
+        hint: t("cmd.clip.url.hint"),
+        icon: cmdIcons.Sparkles,
+        group: t("group.tools"),
+        action: async () => {
+          const url = await uiPrompt({ message: t("clip.url.prompt"), defaultValue: "https://" });
+          if (!url || !/^https?:\/\/\S+$/.test(url.trim())) return;
+          try {
+            const { clipUrl } = await import("../research/clipper");
+            await saveClip(await clipUrl(url.trim()));
+          } catch (e) {
+            showAiToast(t("clip.failed", { message: (e as Error).message }), "error");
+          }
+        },
+      },
+      {
+        id: "clip.clipboard",
+        label: t("cmd.clip.clipboard"),
+        hint: t("cmd.clip.clipboard.hint"),
+        icon: cmdIcons.Sparkles,
+        group: t("group.tools"),
+        action: async () => {
+          try {
+            const { clipFromHtml } = await import("../research/clipper");
+            let html = "";
+            let text = "";
+            for (const item of await navigator.clipboard.read()) {
+              if (item.types.includes("text/html")) html = await (await item.getType("text/html")).text();
+              else if (item.types.includes("text/plain")) text = await (await item.getType("text/plain")).text();
+            }
+            if (!html && !text) {
+              showAiToast(t("clip.empty"), "info");
+              return;
+            }
+            const source = (await uiPrompt({ message: t("clip.source.prompt"), defaultValue: "https://" }))?.trim() || t("clip.source.unknown");
+            await saveClip(clipFromHtml(html || `<pre>${text.replace(/[<&]/g, (c) => (c === "<" ? "&lt;" : "&amp;"))}</pre>`, source));
+          } catch (e) {
+            showAiToast(t("clip.failed", { message: (e as Error).message }), "error");
           }
         },
       },
