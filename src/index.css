@@ -235,7 +235,9 @@
     padding: 0 0.5rem;
   }
   .cm-editor .cm-cursor {
+    /* hygiene-allow: CodeMirror draws its caret with border-left in both directions (its base theme); a logical border would land on the wrong side in RTL */
     border-left-color: hsl(var(--accent));
+    /* hygiene-allow: see above — same CodeMirror caret border */
     border-left-width: 2px;
   }
   .cm-editor .cm-selectionBackground,
