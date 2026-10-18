@@ -1,0 +1,145 @@
+#!/usr/bin/env node
+/**
+ * Run what CI runs, here, in one command (plan 0.14).
+ *
+ *   npm run ci:local                     every step, like the `check` job + e2e on Chromium
+ *   npm run ci:local -- --changed        only what the diff can break (vs the upstream or --base)
+ *   npm run ci:local -- --base origin/fix/codex-backlog --changed
+ *   npm run ci:local -- --skip e2e,build --only typecheck,test --coverage --bail
+ *   npm run ci:local -- --install-hook   pre-push hook: `ci:local --changed --skip e2e`
+ *
+ * Steps run in order; a failure does not stop the rest unless --bail, and the
+ * exit code is 1 if any step failed. e2e builds once, serves dist/ with
+ * `vite preview` on a free port and runs the Chromium project; set
+ * PW_CHROMIUM to a Chromium executable when Playwright's own is not installed
+ * (a lane's playwright.lane.config.ts is used when present).
+ */
+import { spawn, spawnSync } from "node:child_process";
+import { existsSync, readFileSync, readdirSync, writeFileSync, chmodSync, mkdirSync } from "node:fs";
+import { createServer } from "node:net";
+import { join, resolve } from "node:path";
+import { planSteps, e2eSpecs, i18nDrift, summary } from "./lib/ciLocal.mjs";
+
+const root = resolve(new URL("..", import.meta.url).pathname);
+process.chdir(root);
+const argv = process.argv.slice(2);
+const flag = (name) => argv.includes(`--${name}`);
+const opt = (name) => {
+  const i = argv.indexOf(`--${name}`);
+  return i >= 0 && argv[i + 1] && !argv[i + 1].startsWith("--") ? argv[i + 1] : null;
+};
+const list = (name) => (opt(name) ?? "").split(",").map((s) => s.trim()).filter(Boolean);
+
+if (flag("help") || flag("h")) {
+  console.log(readFileSync(new URL(import.meta.url)).toString().split("*/")[0]);
+  process.exit(0);
+}
+
+if (flag("install-hook")) {
+  const hooks = spawnSync("git", ["rev-parse", "--git-path", "hooks"], { encoding: "utf8" }).stdout.trim();
+  mkdirSync(hooks, { recursive: true });
+  const file = join(hooks, "pre-push");
+  writeFileSync(file, "#!/bin/sh\n# installed by `npm run ci:local -- --install-hook` (plan 0.14); skip once with `git push --no-verify`\nexec npm run -s ci:local -- --changed --skip e2e --bail\n");
+  chmodSync(file, 0o755);
+  console.log(`pre-push hook written to ${file}`);
+  process.exit(0);
+}
+
+function git(...args) {
+  const r = spawnSync("git", args, { encoding: "utf8" });
+  return r.status === 0 ? r.stdout.trim() : null;
+}
+
+/** Files changed against the base (committed, staged and unstaged), or null for a full run. */
+function changedFiles() {
+  if (!flag("changed")) return null;
+  const base = opt("base") ?? (git("rev-parse", "--abbrev-ref", "--symbolic-full-name", "@{upstream}") ? "@{upstream}" : "origin/main");
+  const mergeBase = git("merge-base", "HEAD", base);
+  if (!mergeBase) {
+    console.error(`ci:local: cannot find a merge base with ${base}; pass --base <ref>`);
+    process.exit(2);
+  }
+  const files = new Set([
+    ...(git("diff", "--name-only", mergeBase, "HEAD") ?? "").split("\n"),
+    ...(git("diff", "--name-only") ?? "").split("\n"),
+    ...(git("diff", "--name-only", "--cached") ?? "").split("\n"),
+  ]);
+  files.delete("");
+  console.log(`ci:local --changed: ${files.size} files vs ${base} (${mergeBase.slice(0, 8)})`);
+  return [...files].filter((f) => existsSync(f));
+}
+
+function run(cmd, extraEnv = {}) {
+  return new Promise((resolveRun) => {
+    const child = spawn(cmd[0], cmd.slice(1), { stdio: "inherit", env: { ...process.env, ...extraEnv } });
+    child.on("close", (code) => resolveRun(code ?? 1));
+    child.on("error", () => resolveRun(1));
+  });
+}
+
+function freePort() {
+  return new Promise((res) => {
+    const s = createServer();
+    s.listen(0, () => {
+      const { port } = s.address();
+      s.close(() => res(port));
+    });
+  });
+}
+
+async function i18nDriftStep() {
+  const code = await run(["node", "scripts/extract-i18n-keys.mjs", "--check"]);
+  if (code !== 0) return code;
+  const en = JSON.parse(readFileSync("i18n/keys.json", "utf8")).entries.length;
+  const he = Object.keys(JSON.parse(readFileSync("src/i18n/locales/he.json", "utf8"))).length;
+  const d = i18nDrift(en, he);
+  console.log(`i18n keys — en: ${en}, he: ${he}, diff: ${d.diff}`);
+  if (!d.ok) console.error("i18n drift > 10 keys; run `node scripts/print-missing-i18n-keys.mjs` and fix.");
+  return d.ok ? 0 : 1;
+}
+
+async function e2eStep(changed) {
+  if (!existsSync("dist/index.html")) {
+    const b = await run(["npm", "run", "-s", "build"]);
+    if (b !== 0) return b;
+  }
+  const port = await freePort();
+  const preview = spawn("npx", ["vite", "preview", "--port", String(port), "--strictPort"], { stdio: "ignore", detached: false });
+  try {
+    const url = `http://localhost:${port}`;
+    for (let i = 0; i < 60; i++) {
+      try {
+        if ((await fetch(url)).ok) break;
+      } catch {
+        /* not up yet */
+      }
+      await new Promise((r) => setTimeout(r, 500));
+    }
+    const config = existsSync("playwright.lane.config.ts") ? "playwright.lane.config.ts" : "playwright.config.ts";
+    const all = readdirSync("e2e").filter((f) => f.endsWith(".spec.ts")).map((f) => `e2e/${f}`);
+    const specs = e2eSpecs(changed, all);
+    return await run(["npx", "playwright", "test", "-c", config, "--project=chromium", ...specs], { PLAYWRIGHT_BASE_URL: url });
+  } finally {
+    preview.kill();
+  }
+}
+
+const pkg = JSON.parse(readFileSync("package.json", "utf8"));
+const changed = changedFiles();
+const steps = planSteps({ pkg, exists: existsSync, changed, flags: { skip: list("skip"), only: list("only"), coverage: flag("coverage") } });
+const results = [];
+let failed = false;
+for (const s of steps) {
+  if (s.skipReason || (failed && flag("bail"))) {
+    results.push({ title: s.title, status: "skip", reason: s.skipReason ?? "after a failure (--bail)" });
+    continue;
+  }
+  console.log(`\n▶ ${s.title}`);
+  const t0 = Date.now();
+  const code = s.id === "i18n" ? await i18nDriftStep() : s.id === "e2e" ? await e2eStep(changed) : await run(s.cmd);
+  const status = code === 0 ? "pass" : "fail";
+  if (status === "fail") failed = true;
+  results.push({ title: s.title, status, ms: Date.now() - t0 });
+}
+console.log(`\nci:local ${failed ? "FAILED" : "passed"}\n${summary(results)}`);
+process.exit(failed ? 1 : 0);
