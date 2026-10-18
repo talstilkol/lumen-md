@@ -295,7 +295,8 @@ export function noteHeadings(text: string): string[] {
 function headingsOf(text: string): Set<string> {
   const out = new Set<string>();
   // Block ids count too: `[[Note#^id]]` (4.8) names a block, not a heading.
-  for (const m of stripCode(blankFrontmatter(text)).matchAll(/(?:^|[ \t])\^([A-Za-z0-9-]+)[ \t]*$/gm)) out.add(`^${m[1]}`.toLowerCase());
+  // Kept case-sensitive: the preview's ids are, so `[[Note#^foo]]` misses `^Foo`.
+  for (const m of stripCode(blankFrontmatter(text)).matchAll(/(?:^|[ \t])\^([A-Za-z0-9-]+)[ \t]*$/gm)) out.add(`^${m[1]}`);
   // In document order, with a stateful slugger: a repeated heading gets
   // `-1`, `-2`… like rehype-slug, so `[[Note#setup-1]]` resolves.
   const slugger = new GithubSlugger();
@@ -310,6 +311,8 @@ function headingsOf(text: string): Set<string> {
 // The wiki target's heading is decoded like the heading text (`[[#A &amp; B]]`).
 const hasHeading = (hs: Set<string> | undefined, raw: string) => {
   const h = decodeCharacterReferences(raw);
+  // A block id (`^id`) matches exactly; a heading by slug or text, in any case.
+  if (h.trim().startsWith("^")) return !!hs && hs.has(h.trim());
   return !!hs && (hs.has(headingSlug(h)) || hs.has(h.trim().toLowerCase()));
 };
 

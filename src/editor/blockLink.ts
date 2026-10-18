@@ -48,6 +48,7 @@ export function blockIdEdit(text: string, pos: number, makeId: (taken: ReadonlyS
   if (at < 0) at = lines.length - 1;
   const endOf = (i: number) => starts[i] + lines[i].length;
   const clean = (l: string) => l.replace(/\r$/, "");
+  const l = (i: number) => clean(lines[i] ?? "");
 
   // Front matter is no block.
   if (/^---\s*$/.test(clean(lines[0] ?? ""))) {
@@ -55,15 +56,17 @@ export function blockIdEdit(text: string, pos: number, makeId: (taken: ReadonlyS
     if (close >= 0 && at <= close) return { kind: "none" };
   }
   // Fenced code: where the fences are.
+  // A fence closes at a run of its character at least as long as the
+  // opening one, with nothing after it (CommonMark).
   let fenceOpen = -1;
   let fence: string | null = null;
   let inFence: [number, number] | null = null;
   for (let i = 0; i < lines.length; i++) {
     const m = FENCE.exec(lines[i]);
     if (fence === null && m) {
-      fence = m[1][0];
+      fence = m[1];
       fenceOpen = i;
-    } else if (fence !== null && m && m[1][0] === fence) {
+    } else if (fence !== null && m && m[1][0] === fence[0] && m[1].length >= fence.length && !clean(lines[i]).slice(m[0].length).trim()) {
       if (at >= fenceOpen && at <= i) inFence = [fenceOpen, i];
       fence = null;
     }
@@ -100,11 +103,22 @@ export function blockIdEdit(text: string, pos: number, makeId: (taken: ReadonlyS
   const line = clean(lines[at]);
   if (!line.trim()) return { kind: "none" };
   if (OWN_LINE.test(line)) return { kind: "block", id: OWN_LINE.exec(line)![1], change: null };
-  const h = HEADING.exec(line);
+  // An ATX heading, or a setext one (`Title` over `=====` / `-----`), cursor on either line.
+  const SETEXT = /^ {0,3}(=+|-+)[ \t]*$/;
+  const paragraphLine = (s: string) => !!s.trim() && !LIST.test(s) && !HEADING.test(s) && !FENCE.test(s) && !isQuote(s) && !SETEXT.test(s);
+  let setextAt = SETEXT.test(line) && at > 0 && paragraphLine(l(at - 1)) ? at : -1;
+  if (setextAt < 0 && paragraphLine(line)) {
+    // The underline may come a few lines down (a heading's text can wrap).
+    let pe = at;
+    while (pe + 1 < lines.length && paragraphLine(l(pe + 1))) pe++;
+    if (pe + 1 < lines.length && SETEXT.test(l(pe + 1))) setextAt = pe + 1;
+  }
+  const h = HEADING.exec(line) ?? (setextAt >= 0 ? [l(setextAt - 1), l(setextAt - 1).trim()] : null);
   if (h) {
     // A repeated heading is reached by its numbered slug (`setup-1`), as the
     // preview ids it; the first by its text.
-    const hs = noteHeadings(text.slice(0, starts[at] + lines[at].length));
+    const upTo = setextAt >= 0 ? setextAt : at;
+    const hs = noteHeadings(text.slice(0, starts[upTo] + lines[upTo].length));
     const slugger = headingSlugger();
     let id = "";
     for (const x of hs) id = slugger.slug(x);
@@ -114,7 +128,6 @@ export function blockIdEdit(text: string, pos: number, makeId: (taken: ReadonlyS
 
   // A table — also one without outer pipes (`a | b` / `-- | --`): its header
   // row, delimiter row and the rows after, then an id line of its own.
-  const l = (i: number) => clean(lines[i] ?? "");
   let runStart = at;
   while (runStart > 0 && l(runStart - 1).trim()) runStart--;
   let runEnd = at;

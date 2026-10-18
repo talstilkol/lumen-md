@@ -168,3 +168,30 @@ describe("review fixes (PR #238)", () => {
     expect(out).toContain('href="Plans.html#%5Egoal"');
   });
 });
+
+describe("review fixes, round 2 (PR #238)", () => {
+  const id = () => "abc123";
+  it("a long fence holding a shorter run of backticks is one code block", () => {
+    const md = "````md\n```\ninner\n```\nlater code\n````\n";
+    for (const at of [md.indexOf("inner") + 1, md.indexOf("later") + 1])
+      expect(blockIdEdit(md, at, id)).toEqual({ kind: "block", id: "abc123", change: { from: md.lastIndexOf("````") + 4, insert: "\n\n^abc123" } });
+  });
+
+  it("setext headings give their heading link, on the text or the underline", () => {
+    const md = "Title\n=====\n\nBody.\n\nTitle\n-----\n";
+    expect(blockIdEdit(md, 1, id)).toEqual({ kind: "heading", heading: "Title" });
+    expect(blockIdEdit(md, md.indexOf("=====") + 2, id)).toEqual({ kind: "heading", heading: "Title" });
+    expect(blockIdEdit(md, md.lastIndexOf("-----") + 1, id)).toEqual({ kind: "heading", heading: "title-1" });
+    // A wrapped setext title is still a heading, never given a block id.
+    expect(blockIdEdit("A wrapped\ntitle\n===\n", 1, id)).toMatchObject({ kind: "heading" });
+  });
+
+  it("Vault Doctor compares block ids case-sensitively, like the preview", async () => {
+    const { runVaultDoctor } = await import("../lint/vaultDoctor");
+    const missing = runVaultDoctor([
+      { path: "Plans.md", text: "Text ^Foo\n" },
+      { path: "Hub.md", text: "[[Plans#^Foo]] and [[Plans#^foo]]\n" },
+    ]).filter((f) => f.kind === "missing-heading");
+    expect(missing.map((f) => f.detail)).toEqual(["Plans#^foo"]);
+  });
+});
