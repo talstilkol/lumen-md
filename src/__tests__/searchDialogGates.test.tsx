@@ -93,6 +93,33 @@ describe("Ask Workspace spends the AI quota", () => {
   });
 });
 
+describe("Ask Workspace: overlapping questions", () => {
+  it("a second question aborts the first, and closing still aborts the second", async () => {
+    const signals: AbortSignal[] = [];
+    chat.mockImplementation(
+      (async (_m: unknown, o: { signal: AbortSignal }) =>
+        new Promise<string>((_, reject) => {
+          signals.push(o.signal);
+          o.signal.addEventListener("abort", () => reject(o.signal.reason));
+        })) as never,
+    );
+    (window as unknown as { __lumenSearchMode?: string }).__lumenSearchMode = "ai";
+    const { rerender } = render(<SearchDialog open onClose={() => {}} onOpenFile={() => {}} />);
+    const input = screen.getByRole("textbox");
+    fireEvent.change(input, { target: { value: "first?" } });
+    fireEvent.keyDown(input, { key: "Enter" });
+    await waitFor(() => expect(signals).toHaveLength(1));
+    fireEvent.change(input, { target: { value: "second?" } });
+    fireEvent.keyDown(input, { key: "Enter" });
+    await waitFor(() => expect(signals).toHaveLength(2));
+    expect(signals[0].aborted).toBe(true);
+    await new Promise((r) => setTimeout(r, 0)); // the first one's finally runs
+    rerender(<SearchDialog open={false} onClose={() => {}} onOpenFile={() => {}} />);
+    await waitFor(() => expect(signals[1].aborted).toBe(true));
+    chat.mockImplementation(async () => "answer");
+  });
+});
+
 describe("silent quota checks for background callers", () => {
   it("returns false without a toast when exhausted", () => {
     __setEntitlementEndpointForTesting("https://billing.lumen.test/entitlements");

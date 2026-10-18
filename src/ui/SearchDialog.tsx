@@ -243,10 +243,14 @@ export function SearchDialog({ open, onClose, onOpenFile }: Props) {
     // Each question is one LLM prompt against the monthly AI quota, counted
     // when it is actually sent (ownPrompt).
     const { aiOperation, isAbort } = await import("../ai/aiAbort");
+    // A new question replaces one still running: abort that one, so only
+    // this invocation owns the handle, the loading state and the answer.
+    askOp.current?.abort();
     const op = aiOperation();
     const local = new AbortController();
     op.signal.addEventListener("abort", () => local.abort(op.signal.reason), { once: true });
-    askOp.current = { end: op.end, abort: () => local.abort(new DOMException("closed", "AbortError")) };
+    const mine = { end: op.end, abort: () => local.abort(new DOMException("closed", "AbortError")) };
+    askOp.current = mine;
     setAiLoading(true);
     setAiAnswer(t("searchDialog.searching"));
     setAiSources([]);
@@ -285,6 +289,7 @@ export function SearchDialog({ open, onClose, onOpenFile }: Props) {
       )
         .slice(0, 8)
         .map(({ text: _text, rerankScore: _r, ...r }) => r as RagResult);
+      if (local.signal.aborted) throw local.signal.reason; // superseded or closed
       setAiSources(results);
       setAiCitations(null);
 
@@ -310,6 +315,7 @@ export function SearchDialog({ open, onClose, onOpenFile }: Props) {
       ];
 
       const answer = await chat(messages, { ownPrompt: true, signal: local.signal });
+      if (local.signal.aborted) throw local.signal.reason;
       setAiAnswer(answer);
       // Check every citation against the note it names (T29).
       setAiCitations(verifyVaultCitations(answer, results.map((r) => ({ path: r.path, content: r.content }))));
@@ -326,7 +332,7 @@ export function SearchDialog({ open, onClose, onOpenFile }: Props) {
       setAiRendered(rendered);
     } catch (e) {
       if (isAbort(e) || local.signal.aborted) {
-        setAiAnswer(t("toast.aiCancelled", { count: 1 }));
+        if (askOp.current === mine) setAiAnswer(t("toast.aiCancelled", { count: 1 }));
         return;
       }
       if (e instanceof AiError && e.code === "NO_KEY") {
@@ -341,8 +347,10 @@ export function SearchDialog({ open, onClose, onOpenFile }: Props) {
       }
     } finally {
       op.end();
-      askOp.current = null;
-      setAiLoading(false);
+      if (askOp.current === mine) {
+        askOp.current = null;
+        setAiLoading(false);
+      }
     }
   }
 
