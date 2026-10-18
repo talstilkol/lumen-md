@@ -1,18 +1,25 @@
 /**
- * A stand-in for the app's Rust vault commands (src-tauri/vault): the same
- * command names, argument shapes, raw byte transport and "CODE: message"
- * errors, over the in-memory vault backend. The Rust semantics themselves are
- * tested by `cargo test` in src-tauri/vault.
+ * A stand-in for the app's Rust vault commands (src-tauri/src/lib.rs over
+ * src-tauri/vault): the same command names and arguments, folders named by
+ * root and granted only by the "dialog", raw byte transport with
+ * percent-encoded headers, and "CODE: message" errors — over in-memory
+ * vaults. The Rust file-system semantics are tested by `cargo test`.
  */
 import { createMemoryBackend, VaultError, type VaultBackend } from "../../storage/vault";
 import type { TauriInvoke } from "../../storage/vault/tauri";
 
 export interface FakeTauriVault {
   invoke: TauriInvoke;
+  /** The disk: one in-memory vault per folder path. */
+  disk: Map<string, VaultBackend>;
+  /** The folder at "/home/tal/Notes" (the usual pick). */
   fs: VaultBackend;
   /** The folder the "native dialog" returns next (null = cancelled). */
   nextPick: string | null;
-  root: string | null;
+  /** Folders granted by the dialog this session (or the saved one). */
+  granted: Set<string>;
+  /** The saved vault folder (vault.json). */
+  active: string | null;
   backups: Map<string, Uint8Array>;
   calls: string[];
 }
@@ -22,53 +29,63 @@ function asRustError(e: unknown): string {
   return `EIO: ${(e as Error).message}`;
 }
 
-export function fakeTauriVault(root: string | null = null): FakeTauriVault {
+export function fakeTauriVault(active: string | null = null): FakeTauriVault {
+  const disk = new Map<string, VaultBackend>();
+  const folder = (root: string) => {
+    let f = disk.get(root);
+    if (!f) disk.set(root, (f = createMemoryBackend({ id: `disk:${root}` })));
+    return f;
+  };
   const self: FakeTauriVault = {
-    fs: createMemoryBackend({ id: "rust" }),
+    disk,
+    fs: folder("/home/tal/Notes"),
     nextPick: "/home/tal/Notes",
-    root,
+    granted: new Set(active ? [active] : []),
+    active,
     backups: new Map(),
     calls: [],
     invoke: (async (cmd: string, args?: Record<string, unknown> | Uint8Array, options?: { headers?: Record<string, string> }) => {
       self.calls.push(cmd);
       const a = (args ?? {}) as Record<string, string & boolean>;
-      const need = () => {
-        if (!self.root) throw "ENOVAULT: no vault folder chosen";
+      const h = (name: string) => decodeURIComponent(options?.headers?.[name] ?? "");
+      const vault = (root: string) => {
+        if (!self.granted.has(root)) throw "ENOVAULT: this folder was not chosen in the dialog";
+        return folder(root);
       };
       try {
         switch (cmd) {
           case "vault_root":
-            return self.root;
+            return self.active;
           case "vault_pick_folder":
-            if (self.nextPick) self.root = self.nextPick;
+            if (self.nextPick) self.granted.add(self.nextPick);
             return self.nextPick;
-          case "vault_forget":
-            self.root = null;
+          case "vault_use":
+            vault(a.root);
+            self.active = a.root;
             return null;
-          case "vault_backup": {
-            const name = decodeURIComponent(options?.headers?.["x-backup-name"] ?? "");
-            self.backups.set(name, args as Uint8Array);
-            return `/appdata/backups/${name}`;
-          }
-        }
-        need();
-        switch (cmd) {
+          case "vault_forget":
+            self.active = null;
+            self.granted.clear();
+            return null;
+          case "vault_backup":
+            if (!ArrayBuffer.isView(args)) throw "EINVAL: vault_backup expects raw bytes";
+            self.backups.set(h("x-backup-name"), args as Uint8Array);
+            return `/appdata/backups/${h("x-backup-name")}`;
           case "vault_list":
-            return await self.fs.list(a.dir);
+            return await vault(a.root).list(a.dir);
           case "vault_stat":
-            return await self.fs.stat(a.path);
+            return await vault(a.root).stat(a.path);
           case "vault_read":
-            return await (await self.fs.read(a.path)).arrayBuffer();
-          case "vault_write": {
+            return await (await vault(a.root).read(a.path)).arrayBuffer();
+          case "vault_write":
             if (!ArrayBuffer.isView(args)) throw "EINVAL: vault_write expects raw bytes";
-            return await self.fs.write(decodeURIComponent(options?.headers?.["x-vault-path"] ?? ""), args);
-          }
+            return await vault(h("x-vault-root")).write(h("x-vault-path"), args as Uint8Array);
           case "vault_mkdir":
-            return await self.fs.mkdir(a.path);
+            return await vault(a.root).mkdir(a.path);
           case "vault_rename":
-            return await self.fs.rename(a.from, a.to, { overwrite: a.overwrite });
+            return await vault(a.root).rename(a.from, a.to, { overwrite: a.overwrite });
           case "vault_remove":
-            return await self.fs.remove(a.path);
+            return await vault(a.root).remove(a.path);
         }
         throw `EINVAL: unknown command ${cmd}`;
       } catch (e) {

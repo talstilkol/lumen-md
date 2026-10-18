@@ -42,7 +42,7 @@ const backends: [string, () => VaultBackend][] = [
   ],
   [
     "desktop (plan 4.3, Rust vault commands faked)",
-    () => createTauriBackend(fakeTauriVault("/home/tal/Notes").invoke),
+    () => createTauriBackend(fakeTauriVault("/home/tal/Notes").invoke, "/home/tal/Notes"),
   ],
   ["memory", () => createMemoryBackend()],
 ];

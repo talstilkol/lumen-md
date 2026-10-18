@@ -55,7 +55,12 @@ function asVaultError(e: unknown, path: string): Error {
   return new Error(message);
 }
 
-export function createTauriBackend(invoke: TauriInvoke, opts: { available?: () => boolean } = {}): VaultBackend {
+/**
+ * The vault in folder `root` (an absolute path the native dialog granted).
+ * Every command names its folder, so a move can read one granted folder
+ * while writing another.
+ */
+export function createTauriBackend(invoke: TauriInvoke, root: string, opts: { available?: () => boolean } = {}): VaultBackend {
   const events = new VaultEmitter();
   const emit = (e: Omit<VaultEvent, "origin">) => events.emit({ ...e, origin: "self" });
   const call = async <T,>(path: string, cmd: string, args?: Record<string, unknown> | Uint8Array, o?: { headers?: Record<string, string> }) => {
@@ -72,17 +77,17 @@ export function createTauriBackend(invoke: TauriInvoke, opts: { available?: () =
     available: () => (opts.available ? opts.available() : true),
 
     async list(dir) {
-      const entries = await call<VaultEntry[]>(dir, "vault_list", { dir: norm(dir) });
+      const entries = await call<VaultEntry[]>(dir, "vault_list", { root, dir: norm(dir) });
       // Same order as every other backend (Rust sorts by bytes).
       return entries.sort(compareVaultEntries);
     },
 
     async stat(path) {
-      return (await call<VaultStat | null>(path, "vault_stat", { path: norm(path) })) ?? null;
+      return (await call<VaultStat | null>(path, "vault_stat", { root, path: norm(path) })) ?? null;
     },
 
     async read(path) {
-      const raw = await call<ArrayBuffer | number[]>(path, "vault_read", { path: norm(path) });
+      const raw = await call<ArrayBuffer | number[]>(path, "vault_read", { root, path: norm(path) });
       return new Blob([raw instanceof ArrayBuffer ? raw : new Uint8Array(raw)]);
     },
 
@@ -92,14 +97,14 @@ export function createTauriBackend(invoke: TauriInvoke, opts: { available?: () =
 
     async write(path, data) {
       const p = norm(path);
-      await call(path, "vault_write", await toBytes(data), { headers: { "x-vault-path": encodeURIComponent(p) } });
+      await call(path, "vault_write", await toBytes(data), { headers: { "x-vault-root": encodeURIComponent(root), "x-vault-path": encodeURIComponent(p) } });
       emit({ type: "write", path: p });
     },
 
     async mkdir(path) {
       const p = norm(path);
       if (!p) return;
-      await call(path, "vault_mkdir", { path: p });
+      await call(path, "vault_mkdir", { root, path: p });
       emit({ type: "mkdir", path: p });
     },
 
@@ -108,7 +113,7 @@ export function createTauriBackend(invoke: TauriInvoke, opts: { available?: () =
       if (!r) return;
       const [a, b] = [r.src.join("/"), r.dst.join("/")];
       try {
-        await invoke("vault_rename", { from: a, to: b, overwrite: !!o.overwrite });
+        await invoke("vault_rename", { root, from: a, to: b, overwrite: !!o.overwrite });
       } catch (e) {
         const err = asVaultError(e, from);
         // Rust says which side: EEXIST is the target, ENOENT the source.
@@ -119,7 +124,7 @@ export function createTauriBackend(invoke: TauriInvoke, opts: { available?: () =
 
     async remove(path) {
       const p = norm(path);
-      await call(path, "vault_remove", { path: p });
+      await call(path, "vault_remove", { root, path: p });
       emit({ type: "delete", path: p });
     },
 

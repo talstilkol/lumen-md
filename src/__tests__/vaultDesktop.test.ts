@@ -89,6 +89,7 @@ describe("first run of the desktop app", () => {
     expect(await rust.fs.readText("פרויקטים/7 תיקייה/פתק 997.md")).toBe("edited");
     expect(await opfs.readText("פרויקטים/7 תיקייה/פתק 997.md")).toBe("# פתק 997\n\nשלום 997\n");
     expect(store.get("lumen-vault-location")).toEqual({ kind: "desktop", root: "/home/tal/Notes", name: "Notes" });
+    expect(rust.active).toBe("/home/tal/Notes");
   }, 60_000);
 
   it("an empty app storage just switches to the folder (no backup, no copy)", async () => {
@@ -137,6 +138,19 @@ describe("migration safety", () => {
     expect(getVaultStatus()).toEqual({ location: "folder", name: "Notes" });
   }, 60_000);
 
+  it("moving from one desktop folder to another reads the old one and writes the new one", async () => {
+    await writeWorkspaceFile("a.md", "A");
+    await restoreVaultLocation();
+    await chooseDesktopVaultFolder(); // app storage → /home/tal/Notes
+    rust.nextPick = "/media/usb/Vault";
+    const r = await chooseDesktopVaultFolder(); // /home/tal/Notes → /media/usb/Vault
+    expect(r).toMatchObject({ files: 1 });
+    expect(await rust.disk.get("/media/usb/Vault")!.readText("a.md")).toBe("A");
+    expect(await rust.fs.readText("a.md")).toBe("A");
+    expect(rust.active).toBe("/media/usb/Vault");
+    expect(getVaultStatus()).toEqual({ location: "folder", name: "Vault" });
+  });
+
   it("is reversible: moving back to app storage brings the folder's edits", async () => {
     await writeWorkspaceFile("a.md", "A");
     await restoreVaultLocation();
@@ -146,12 +160,16 @@ describe("migration safety", () => {
     expect(getVaultStatus()).toEqual({ location: "opfs" });
     expect(await readWorkspaceFile("a.md")).toBe("A, edited on disk");
     expect(await rust.fs.readText("a.md")).toBe("A, edited on disk");
+    // The app no longer holds the folder.
+    expect(rust.active).toBeNull();
+    expect(rust.calls).toContain("vault_forget");
   });
 });
 
 describe("later launches", () => {
   it("reopens the stored folder when the app still holds it", async () => {
-    rust.root = "/home/tal/Notes";
+    rust = fakeTauriVault("/home/tal/Notes");
+    __setDesktopInvoke(rust.invoke);
     await rust.fs.write("n.md", "on disk");
     store.set("lumen-vault-location", { kind: "desktop", root: "/home/tal/Notes", name: "Notes" });
     expect(await restoreVaultLocation()).toEqual({ location: "folder", name: "Notes" });
