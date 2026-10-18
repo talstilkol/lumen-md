@@ -65,6 +65,36 @@ describe("BM25 on the HeQ dev split", () => {
   });
 });
 
+describe("searchWorkspace ranking", () => {
+  const vault = async (notes: Record<string, string>) => {
+    __resetWorkspaceIndex();
+    files.clear();
+    for (const [path, text] of Object.entries(notes)) files.set(path, text);
+  };
+
+  it("a note with the exact phrase is not pruned before its phrase bonus (review: #232)", async () => {
+    const filler = Array.from({ length: 60 }, (_, i) => `word${i}`).join(" ");
+    await vault({
+      "n1.md": "beta one alpha",
+      "n2.md": "beta two alpha",
+      "n3.md": `${filler} alpha beta ${filler}`,
+    });
+    const [top] = await searchWorkspace("alpha beta", { limit: 1 });
+    expect(top.path).toBe("n3.md");
+    expect(top.snippet).toContain("alpha beta");
+  });
+
+  it("finds a word that is still being typed, as the old substring search did", async () => {
+    await vault({ "a.md": "Notes about the garden", "b.md": "גינה ופרחים בחצר", "c.md": "nothing here" });
+    expect((await searchWorkspace("gard")).map((h) => h.path)).toEqual(["a.md"]);
+    expect((await searchWorkspace("about the gar")).map((h) => h.path)).toEqual(["a.md"]);
+    expect((await searchWorkspace("גינ")).map((h) => h.path)).toEqual(["b.md"]);
+    // A finished word still ranks a note that has it exactly above one that only extends it.
+    await vault({ "x.md": "the gardener came", "y.md": "the garden grows" });
+    expect((await searchWorkspace("garden"))[0].path).toBe("y.md");
+  });
+});
+
 describe("index freshness", () => {
   it("a search during a long first sync still sees a note saved meanwhile (review: #232)", async () => {
     __resetWorkspaceIndex();

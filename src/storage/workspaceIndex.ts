@@ -306,7 +306,7 @@ function hebrewNameHas(name: string, q: string): boolean {
   return queryForms.forms.some((f) => n!.includes(f));
 }
 
-/** The phrase is in the text as written (a few points on top of BM25). */
+/** The phrase (several words) is in the text as written: a few points on top of BM25. */
 const PHRASE_BONUS = 4;
 
 /**
@@ -332,25 +332,32 @@ export async function searchWorkspace(
       .map((f) => ({ path: f.path, name: f.name, score: 0, snippet: null }));
   }
   const index = await syncBm25();
-  const content = new Map<string, { score: number; matched: string[] }>();
-  for (const h of index.search(query, { limit: Math.max(limit * 3, 100), filter: opts.filter })) content.set(h.id, h);
-  // Rank on name + BM25 first; the phrase check and the snippet (both scan
-  // the note's text) run only for the leading candidates.
-  const ranked: Array<{ file: IndexedFile; score: number; matched: string[] }> = [];
+  // The last word may still be typed: it also matches the terms it starts.
+  const content = new Map<string, { score: number; matched: string[]; complete: boolean }>();
+  for (const h of index.search(query, { limit: Math.max(limit * 3, 100), filter: opts.filter, prefix: true })) content.set(h.id, h);
+  // The whole query as a phrase only means something for several words, and
+  // only in a note that has every one of them.
+  const multiWord = /\s/.test(q);
+  const ranked: Array<{ file: IndexedFile; score: number; matched: string[]; phraseable: boolean }> = [];
   for (const file of cache.byPath.values()) {
     if (opts.filter && !opts.filter(file.path)) continue;
     const c = content.get(file.path);
     let score = nameScore(file, q) + (c?.score ?? 0);
     if (!score && (fuzzyMatch(file.name.toLowerCase(), q) || fuzzyMatch(file.path.toLowerCase(), q))) score = 1;
-    if (score) ranked.push({ file, score, matched: c?.matched ?? [] });
+    if (score) ranked.push({ file, score, matched: c?.matched ?? [], phraseable: multiWord && !!c?.complete });
   }
   ranked.sort((a, b) => b.score - a.score || (a.file.path < b.file.path ? -1 : 1));
+  // The phrase check and the snippet scan a note's text, so they run only
+  // for the leading candidates — but for every one the phrase bonus could
+  // still lift into the first `limit`.
+  const cutoff = ranked.length > limit ? ranked[limit - 1].score : -Infinity;
+  const candidates = ranked.filter((r, i) => i < limit || (r.phraseable && r.score + PHRASE_BONUS >= cutoff));
   const out: SearchHit[] = [];
-  for (const { file, score: base, matched } of ranked.slice(0, limit * 2)) {
+  for (const { file, score: base, matched, phraseable } of candidates) {
     let score = base;
-    const phrase = base > 1 ? findIn(file.content, file.content.toLowerCase(), q) : null;
+    const phrase = phraseable ? findIn(file.content, file.content.toLowerCase(), q) : null;
     if (phrase) score += PHRASE_BONUS;
-    const at = phrase ?? (matched.length ? locateTerm(file.content, matched) : null);
+    const at = phrase ?? (matched.length ? locateTerm(file.content, matched) : base > 1 ? findIn(file.content, file.content.toLowerCase(), q) : null);
     let snippet: string | null = null;
     let match: SearchHit["match"];
     if (at) {

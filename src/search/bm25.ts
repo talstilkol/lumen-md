@@ -13,12 +13,16 @@
  * nothing here is in the startup bundle.
  */
 
-import { documentTerms, queryTerms, type QueryTerm } from "../text/searchTokens";
+import { documentTerms, queryTerms, STEM, type QueryTerm } from "../text/searchTokens";
 
 export const K1 = 1.2;
 export const B = 0.75;
 /** A term in the note's name counts this many times. */
 export const NAME_BOOST = 3;
+/** A term the last query word is the start of (typing ahead: "gard" → "garden") counts this much. */
+export const PREFIX_WEIGHT = 0.5;
+/** At most this many completions of the last word, the most frequent first. */
+const MAX_PREFIX_TERMS = 30;
 
 interface Doc {
   id: string;
@@ -38,6 +42,8 @@ export interface Bm25Hit {
   score: number;
   /** The query terms found in the document (exact or stem), best first. */
   matched: string[];
+  /** Every word of the query matched (only then can the query occur in it as a phrase). */
+  complete: boolean;
 }
 
 export class Bm25Index {
@@ -114,10 +120,26 @@ export class Bm25Index {
   }
 
   /** The best `limit` documents for `query` (or for pre-built weighted terms). */
-  search(query: string | QueryTerm[], opts: { limit?: number; filter?: (id: string) => boolean } = {}): Bm25Hit[] {
-    const terms = typeof query === "string" ? queryTerms(query) : query;
+  /**
+   * Terms the last query word is the start of, as weaker forms of that word
+   * (search as you type: the word may not be finished).
+   */
+  private completions(terms: QueryTerm[]): QueryTerm[] {
+    const last = Math.max(...terms.map((t) => t.group));
+    const base = terms.find((t) => t.group === last && t.weight === 1)?.term;
+    if (!base || base.length < 2 || base.startsWith(STEM)) return [];
+    const found: Array<[string, number]> = [];
+    for (const [term, p] of this.postings) if (term.length > base.length && term.startsWith(base)) found.push([term, p.size]);
+    found.sort((a, b) => b[1] - a[1]);
+    return found.slice(0, MAX_PREFIX_TERMS).map(([term]) => ({ term, weight: PREFIX_WEIGHT, group: last }));
+  }
+
+  search(query: string | QueryTerm[], opts: { limit?: number; filter?: (id: string) => boolean; prefix?: boolean } = {}): Bm25Hit[] {
+    const base = typeof query === "string" ? queryTerms(query) : query;
     const n = this.docs.size;
-    if (!n || !terms.length) return [];
+    if (!n || !base.length) return [];
+    const terms = opts.prefix ? [...base, ...this.completions(base)] : base;
+    const groups = new Set(base.map((t) => t.group)).size;
     const avg = this.totalLength / n || 1;
     // Per document, per query word: the best of its forms (see QueryTerm.group).
     const scores = new Map<Doc, { best: Map<number, [string, number]> }>();
@@ -145,7 +167,7 @@ export class Bm25Index {
     const hits: Bm25Hit[] = [];
     for (const [doc, e] of scores) {
       const parts = [...e.best.values()].sort((a, b) => b[1] - a[1]);
-      hits.push({ id: doc.id, score: parts.reduce((sum, [, v]) => sum + v, 0), matched: parts.map(([t]) => t) });
+      hits.push({ id: doc.id, score: parts.reduce((sum, [, v]) => sum + v, 0), matched: parts.map(([t]) => t), complete: e.best.size === groups });
     }
     hits.sort((a, b) => b.score - a.score || (a.id < b.id ? -1 : 1));
     return hits.slice(0, limit);
