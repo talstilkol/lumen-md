@@ -11,6 +11,9 @@ class FakeFile {
 class FakeFileHandle {
   readonly kind = "file";
   constructor(readonly name: string, private file: FakeFile) {}
+  async isSameEntry(other: unknown): Promise<boolean> {
+    return other instanceof FakeFileHandle && other.file === this.file;
+  }
   async getFile(): Promise<File> {
     return new File([this.file.data], this.name, { lastModified: this.file.lastModified });
   }
@@ -31,6 +34,9 @@ export class FakeDir {
   readonly dirs = new Map<string, FakeDir>();
   readonly files = new Map<string, FakeFile>();
   constructor(readonly name = "") {}
+  async isSameEntry(other: unknown): Promise<boolean> {
+    return other === this;
+  }
   async getDirectoryHandle(name: string, opts: { create?: boolean } = {}): Promise<FakeDir> {
     let d = this.dirs.get(name);
     if (!d) {

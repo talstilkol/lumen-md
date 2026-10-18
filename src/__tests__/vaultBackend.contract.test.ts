@@ -469,6 +469,38 @@ describe("directory-handle backend specifics", () => {
     expect(await v.readText("p/b.md")).toBe("B");
   });
 
+  it("a case-only rename on a case-insensitive folder goes through a temporary name instead of deleting the file", async () => {
+    // A picked folder on macOS / Windows: names match whatever their case.
+    class CaseInsensitiveDir extends FakeDir {
+      private key<T>(m: Map<string, T>, name: string): string {
+        for (const k of m.keys()) if (k.toLowerCase() === name.toLowerCase()) return k;
+        return name;
+      }
+      override async getDirectoryHandle(name: string, opts: { create?: boolean } = {}): Promise<FakeDir> {
+        if (!this.dirs.has(this.key(this.dirs, name)) && opts.create) this.dirs.set(name, new CaseInsensitiveDir(name));
+        return super.getDirectoryHandle(this.key(this.dirs, name), opts);
+      }
+      override async getFileHandle(name: string, opts: { create?: boolean } = {}) {
+        return super.getFileHandle(this.key(this.files, name), opts);
+      }
+      override async removeEntry(name: string): Promise<void> {
+        return super.removeEntry(this.files.has(this.key(this.files, name)) ? this.key(this.files, name) : this.key(this.dirs, name));
+      }
+    }
+    const dir = new CaseInsensitiveDir();
+    const v = createDirectoryHandleBackend({ id: "ci", root: async () => dir as unknown as FileSystemDirectoryHandle });
+    await v.write("Note.md", "keep me");
+    await v.write("Folder/inside.md", "in");
+    await v.rename("Note.md", "note.md");
+    await v.rename("Folder", "folder", { overwrite: true });
+    expect((await v.list("")).map((e) => e.name)).toEqual(["folder", "note.md"]);
+    expect(await v.readText("note.md")).toBe("keep me");
+    expect(await v.readText("folder/inside.md")).toBe("in");
+    // A real conflict (a different entry) is still refused.
+    await v.write("other.md", "o");
+    await expect(v.rename("other.md", "NOTE.md")).rejects.toBeInstanceOf(WorkspaceConflictError);
+  });
+
   it("a file that exists but cannot be read right now still exists for stat", async () => {
     const dir = new FakeDir();
     const v = createDirectoryHandleBackend({ id: "t", root: async () => dir as unknown as FileSystemDirectoryHandle });

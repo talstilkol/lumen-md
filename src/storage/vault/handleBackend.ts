@@ -140,6 +140,38 @@ export function createDirectoryHandleBackend(o: DirectoryHandleBackendOptions): 
     }
   }
 
+  /** Do two handles name the same entry? (Only real folders can alias; engines without isSameEntry say no.) */
+  async function sameEntry(a: FileSystemHandle, b: FileSystemHandle): Promise<boolean> {
+    const f = (a as { isSameEntry?: (other: FileSystemHandle) => Promise<boolean> }).isSameEntry;
+    return typeof f === "function" ? await f.call(a, b) : false;
+  }
+
+  /** Copy `source` to `dst` (replacing `target`, when set), then delete the source. No event. */
+  async function move(src: string[], dstParts: string[], source: Found, target: Found | null): Promise<void> {
+    const dst = dstParts.join("/");
+    // Replacing: a folder at the target (or a folder replacing a file)
+    // goes first, so nothing of the old entry merges into the new one.
+    // (A file replacing a file is written in place: an aborted write
+    // leaves the old content.)
+    let cleared = false;
+    if (target && (target.kind === "directory" || source.kind === "directory")) {
+      await removeAt(dstParts, dst);
+      cleared = true;
+    }
+    try {
+      if (source.kind === "directory") await copyTree(source.handle, dstParts);
+      else await writeAt(dstParts, await source.handle.getFile(), dst);
+    } catch (e) {
+      // A copy that failed half way (quota, write error) must not leave a
+      // partial tree at the target: it would block a retry, or sit at the
+      // name of an original that a replace moved to the trash. The source
+      // is untouched either way.
+      if (!target || cleared) await removeAt(dstParts, dst).catch(() => undefined);
+      throw e;
+    }
+    await removeAt(src, src.join("/"));
+  }
+
   return {
     id: o.id,
 
@@ -218,31 +250,24 @@ export function createDirectoryHandleBackend(o: DirectoryHandleBackendOptions): 
       const r = checkRename(from, to);
       if (!r) return;
       const target = await lookup(r.dst);
-      if (target && !opts.overwrite) throw new WorkspaceConflictError(to);
       const source = await lookup(r.src);
       if (!source) throw new VaultNotFoundError(from);
+      const alias = !!target && (await sameEntry(source.handle, target.handle));
+      if (target && !alias && !opts.overwrite) throw new WorkspaceConflictError(to);
       const dst = r.dst.join("/");
-      // Replacing: a folder at the target (or a folder replacing a file)
-      // goes first, so nothing of the old entry merges into the new one.
-      // (A file replacing a file is written in place: an aborted write
-      // leaves the old content.)
-      let cleared = false;
-      if (target && (target.kind === "directory" || source.kind === "directory")) {
-        await removeAt(r.dst, dst);
-        cleared = true;
+      if (alias) {
+        // Two spellings of one entry (a case-only or normalisation-only
+        // rename on a case-insensitive / normalising real folder): go
+        // through a temporary name, or "replacing" the target would delete
+        // the source itself.
+        const tmp = [...r.dst.slice(0, -1), `.lumen-rename-${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}`];
+        await move(r.src, tmp, source, null);
+        const staged = await lookup(tmp);
+        if (!staged) throw new VaultNotFoundError(tmp.join("/"));
+        await move(tmp, r.dst, staged, null);
+      } else {
+        await move(r.src, r.dst, source, target);
       }
-      try {
-        if (source.kind === "directory") await copyTree(source.handle, r.dst);
-        else await writeAt(r.dst, await source.handle.getFile(), dst);
-      } catch (e) {
-        // A copy that failed half way (quota, write error) must not leave a
-        // partial tree at the target: it would block a retry, or sit at the
-        // name of an original that a replace moved to the trash. The source
-        // is untouched either way.
-        if (!target || cleared) await removeAt(r.dst, dst).catch(() => undefined);
-        throw e;
-      }
-      await removeAt(r.src, r.src.join("/"));
       emit({ type: "rename", path: dst, from: r.src.join("/") });
     },
 
