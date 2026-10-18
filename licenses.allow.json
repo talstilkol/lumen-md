@@ -28,6 +28,14 @@
       "until": "2026-11-15",
       "reason": "webR's binaries are GPL-3.0 (its LICENSE.md) and scripts/copy-webr.mjs ships them for live R blocks. Pending the owner's decision (plan 15.10): make R a user-initiated download (like Hspell), or drop live R. Lapses on 2026-11-15 so it cannot stay silent.",
       "decision": "15.10"
+    },
+    {
+      "area": "model",
+      "name": "aya-expanse:8b",
+      "level": "warn",
+      "until": "2026-10-25",
+      "reason": "Aya Expanse is CC-BY-NC-4.0 (non-commercial), so it must leave the model catalog. The removal is plan 1.7, in the next PR of this stack (fix/model-catalog, #200), which also deletes this entry. Lapses on 2026-10-25 so it cannot linger.",
+      "decision": "1.7"
     }
   ]
 }
