@@ -358,6 +358,15 @@ describe("provenance", () => {
     expect(untrustedSourcesOfNote("archive/vault/sub/a.md")).toHaveLength(1);
     moveUntrustedNotes("Library/p.md", "notes/p.md");
     expect(untrustedSourcesOfNote("notes/p.md")).toEqual(["clipped page (moved from Library/p.md) (notes/p.md)"]);
+    // A note that only inherits its record from a folder keeps it when moved out of that folder.
+    markUntrustedNote("Imported/vault", "imported (obsidian)");
+    moveUntrustedNotes("Imported/vault/sub/n.md", "notes/n.md");
+    expect(untrustedSourcesOfNote("notes/n.md")).toEqual(["imported (obsidian) (notes/n.md)"]);
+    moveUntrustedNotes("Imported/vault/sub", "notes/sub");
+    expect(untrustedSourcesOfNote("notes/sub/m.md")).toHaveLength(1);
+    // A move inside the folder needs no new record.
+    moveUntrustedNotes("Imported/vault/a.md", "Imported/vault/b.md");
+    expect(untrustedSourcesOfNote("Imported/vault/b.md")).toHaveLength(1);
     moveUntrustedNotes("Library", "old-clips");
     expect(untrustedSourcesOfNote("old-clips/q.md")).toHaveLength(1);
   });

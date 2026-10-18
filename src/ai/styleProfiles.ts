@@ -117,7 +117,11 @@ export function sampleExcerpts(notes: ReadonlyArray<{ path: string; text: string
 export async function buildStyleProfile(prefix = "", signal?: AbortSignal): Promise<StyleProfile> {
   const { readAllNotes } = await import("../storage/workspaceNotes");
   const all = await readAllNotes();
-  const notes = all.filter((n) => !prefix || n.path.startsWith(prefix.replace(/\/+$/, "") + "/"));
+  // Plan 2.7: a style profile is the user's own voice, and it is saved and
+  // later put into writing agents' system prompts — so outside notes
+  // (clipped, imported, pulled from git) never go into the sample.
+  const { untrustedSourcesOfNote } = await import("../agents/provenance");
+  const notes = all.filter((n) => (!prefix || n.path.startsWith(prefix.replace(/\/+$/, "") + "/")) && !untrustedSourcesOfNote(n.path, n.text).length);
   const sample = sampleExcerpts(notes);
   if (sample.count < 2) throw new Error("Not enough writing to learn a style from: pick a folder with at least two notes of a few paragraphs.");
   const { runAgentOrThrow } = await import("../agents/runtime");

@@ -74,6 +74,19 @@ export function clearUntrustedNote(path: string): void {
 export function moveUntrustedNotes(from: string, to: string): void {
   const r = loadRegistry();
   let changed = false;
+  // A record inherited from a folder above `from` (an imported vault, a
+  // cloned repo) goes along when the move leaves that folder.
+  const parts = from.split("/");
+  for (let i = parts.length - 1; i > 0; i--) {
+    const anc = parts.slice(0, i).join("/");
+    const rec = r[anc];
+    if (!rec) continue;
+    if (to !== anc && !to.startsWith(`${anc}/`)) {
+      r[to] = { reason: rec.reason, at: Date.now() };
+      changed = true;
+    }
+    break;
+  }
   for (const k of Object.keys(r)) {
     if (k === from || k.startsWith(`${from}/`)) {
       r[to + k.slice(from.length)] = r[k];
