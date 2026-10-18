@@ -9,6 +9,7 @@
  */
 
 import { Plugin, PluginKey, TextSelection } from "@milkdown/prose/state";
+import type { Node as ProseNode } from "@milkdown/prose/model";
 import type { EditorView } from "@milkdown/prose/view";
 import { t } from "../i18n";
 import { parseWikiQuery, wikiEdit, wikiSuggestions, type WikiQuery, type WikiSuggestion } from "./wikiComplete";
@@ -38,6 +39,23 @@ function contextAt(view: EditorView): At | null {
   if (!q) return null;
   const after = block.textBetween($from.parentOffset, block.content.size, undefined, "￼");
   return { start: $from.start(), before, after, q };
+}
+
+/**
+ * The headings of the document being edited, as it is now. The store's copy
+ * lags the editor by Milkdown's 200 ms debounce, so a heading just typed or
+ * renamed would be missing from `[[#`.
+ */
+function liveHeadings(doc: ProseNode): string[] {
+  const out: string[] = [];
+  doc.descendants((n) => {
+    if (n.type.name === "heading") {
+      if (n.textContent.trim()) out.push(n.textContent);
+      return false;
+    }
+    return !n.isTextblock;
+  });
+  return out;
 }
 
 const ICONS: Record<WikiSuggestion["kind"], string> = { note: "▤", alias: "≈", heading: "#", block: "^", create: "+" };
@@ -89,7 +107,8 @@ class WikiMenu {
         if (seq !== this.seq) return;
         const now = contextAt(this.view);
         if (!now || `${now.start}:${now.before}` !== key) return;
-        this.show(now, wikiSuggestions(now.q, catalog, currentNote(), { create: canCreateNotes() }));
+        const doc = this.view.state.doc;
+        this.show(now, wikiSuggestions(now.q, catalog, { ...currentNote(), headings: () => liveHeadings(doc) }, { create: canCreateNotes() }));
       })
       .catch(() => undefined);
   }
@@ -103,6 +122,13 @@ class WikiMenu {
     // aria-expanded isn't allowed on the editor's textbox role; these are.
     this.view.dom.setAttribute("aria-controls", this.id);
     this.place(at);
+  }
+
+  /** Focus left the editor: hide, and drop an answer still on its way. */
+  blur(): void {
+    this.seq++;
+    this.shownFor = "";
+    this.hide();
   }
 
   hide(): void {
@@ -230,7 +256,12 @@ export function wysiwygWikiComplete(): Plugin {
       handleKeyDown: (view, e) => menus.get(view)?.key(e) ?? false,
       handleDOMEvents: {
         blur: (view) => {
-          menus.get(view)?.hide();
+          menus.get(view)?.blur();
+          return false;
+        },
+        // Back in the editor with the caret still in a `[[`: offer again.
+        focus: (view) => {
+          menus.get(view)?.update(view);
           return false;
         },
       },

@@ -13,10 +13,22 @@ import type { EditorView } from "@milkdown/prose/view";
 import { installFakeOpfs } from "./helpers/fakeOpfs";
 import { workspaceHasEntry, writeWorkspaceFile } from "../storage/workspace";
 import { __resetWorkspaceIndex } from "../storage/workspaceIndex";
+import { createElement } from "react";
+import { act, cleanup, render } from "@testing-library/react";
 import { keepWikiLinks, unescapeWikiLinks } from "../editor/wysiwygWikiLinks";
 import { wysiwygWikiComplete } from "../editor/wysiwygWikiComplete";
+import WysiwygEditor from "../editor/WysiwygEditor";
+import { getActiveWysiwygView } from "../editor/wysiwygSuggest";
+import { noteCatalog, type NoteCatalog } from "../editor/wikiComplete";
+import * as linkData from "../editor/wikiLinkData";
+import { useAppStore } from "../store/useStore";
 
 vi.mock("../ui/AiToast", () => ({ showAiToast: vi.fn() }));
+vi.mock("../ai/llm", () => ({
+  chat: vi.fn(),
+  chatStream: vi.fn(),
+  AiError: class AiError extends Error {},
+}));
 
 // jsdom has no layout; ProseMirror's scrollIntoView measures Range rects.
 const emptyRects = () => Object.assign([], { item: () => null }) as unknown as DOMRectList;
@@ -26,6 +38,7 @@ Range.prototype.getBoundingClientRect ??= zeroRect;
 
 let editors: Editor[] = [];
 afterEach(async () => {
+  cleanup();
   for (const e of editors) await e.destroy();
   editors = [];
   document.body.innerHTML = "";
@@ -59,6 +72,25 @@ describe("wiki links through the WYSIWYG serializer", () => {
     expect(out).toContain("`[[x]]`");
     expect(out).toContain("[[y]]");
     expect(out).toContain("| [[n]] |");
+  });
+});
+
+describe("escaped wiki links in the WYSIWYG editor", () => {
+  it("a deliberately escaped \\[\\[x]] stays escaped; real links and code stay as written", async () => {
+    const onChange = vi.fn();
+    const src = "Literal \\[\\[example]], real [[Note]], `\\[\\[code]]`, \\[[half]] and \\\\[[after a backslash]] end";
+    render(createElement(WysiwygEditor, { value: src, onChange }));
+    await act(async () => {
+      await new Promise((r) => setTimeout(r, 400));
+    });
+    const view = getActiveWysiwygView()!;
+    await act(async () => {
+      view.dispatch(view.state.tr.insertText("!", view.state.doc.content.size - 1));
+      await new Promise((r) => setTimeout(r, 400));
+    });
+    expect(onChange).toHaveBeenLastCalledWith(
+      "Literal \\[\\[example]], real [[Note]], `\\[\\[code]]`, \\[\\[half]] and \\\\[[after a backslash]] end!\n",
+    );
   });
 });
 
@@ -113,6 +145,28 @@ describe("[[ completion in WYSIWYG", () => {
     key(view, "Enter");
     expect(editor.action(getMarkdown())).toContain("[[Fresh Idea]]");
     await vi.waitFor(async () => expect(await workspaceHasEntry("Fresh Idea.md")).toBe(true));
+  });
+
+  it("[[# offers the headings in the editor now, not the store's older copy", async () => {
+    useAppStore.setState((st) => ({ doc: { ...st.doc, content: "# Stale\n", workspaceName: null } }));
+    const { view } = await make("# Fresh\n\ntext", { complete: true });
+    caretToEnd(view);
+    type(view, " [[#");
+    await vi.waitFor(() => expect(menu().dataset.show).toBe("true"));
+    expect([...menu().querySelectorAll(".slash-label")].map((n) => n.textContent)).toEqual(["Fresh"]);
+  });
+
+  it("a blur while the notes load drops the answer: no popup over an unfocused editor", async () => {
+    let release!: (c: NoteCatalog) => void;
+    const spy = vi.spyOn(linkData, "linkCatalog").mockImplementationOnce(() => new Promise<NoteCatalog>((r) => (release = r)));
+    const { view } = await make("", { complete: true });
+    type(view, "[[proj");
+    await vi.waitFor(() => expect(spy).toHaveBeenCalledTimes(1));
+    view.dom.dispatchEvent(new FocusEvent("blur"));
+    release(noteCatalog([{ path: "Project Alpha.md", content: "", modified: 0 }]));
+    await new Promise((r) => setTimeout(r, 30));
+    expect(menu().dataset.show).toBe("false");
+    spy.mockRestore();
   });
 
   it("not inside code", async () => {

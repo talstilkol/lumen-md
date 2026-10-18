@@ -36,7 +36,7 @@ import {
   unregisterWysiwygView,
   wysiwygSuggestPlugins,
 } from "./wysiwygSuggest";
-import { keepWikiLinks } from "./wysiwygWikiLinks";
+import { keepWikiLinks, protectEscapedWikiLinks } from "./wysiwygWikiLinks";
 import { wysiwygWikiComplete } from "./wysiwygWikiComplete";
 import { registerPendingEdits, useAppStore } from "../store/useStore";
 import { useAuth } from "../auth/useAuth";
@@ -718,7 +718,8 @@ export default function WysiwygEditor({ value, onChange }: Props) {
       const editor = await MilkdownEditor.make()
         .config((ctx) => {
           ctx.set(rootCtx, host);
-          ctx.set(defaultValueCtx, encodeCriticForWysiwyg(body));
+          // An escaped `\[\[x]]` stays escaped (not a wiki link) on the way out.
+          ctx.set(defaultValueCtx, encodeCriticForWysiwyg(protectEscapedWikiLinks(body)));
           // `[[Note]]` is written back as is, not as `\[\[Note]]`.
           ctx.update(remarkStringifyOptionsCtx, keepWikiLinks);
           ctx.get(listenerCtx).markdownUpdated((_, md) => {

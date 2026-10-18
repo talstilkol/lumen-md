@@ -9,6 +9,7 @@ import {
   noteBlocks,
   noteCatalog,
   parseWikiQuery,
+  suggestBlocks,
   suggestHeadings,
   suggestNotes,
   wikiEdit,
@@ -153,12 +154,27 @@ describe("headings and blocks", () => {
   it("resolves the note part, and [[# uses the open note", () => {
     const c = vault();
     expect(labels(wikiSuggestions(parseWikiQuery("[[project alpha#")!, c))).toEqual(["Project Alpha", "Goals"]);
-    expect(labels(wikiSuggestions(parseWikiQuery("[[Project Alpha#^sh")!, c))).toEqual(["goal-1"]);
-    expect(wikiSuggestions(parseWikiQuery("[[Project Alpha^li")!, c)[0].insert).toBe("#^li");
     expect(labels(wikiSuggestions(parseWikiQuery("[[#")!, c, { content: "# Here\n## There\n" }))).toEqual(["Here", "There"]);
     // The open note's unsaved text wins over the index.
     expect(labels(wikiSuggestions(parseWikiQuery("[[Project Alpha#")!, c, { path: "Project Alpha.md", content: "# Fresh\n" }))).toEqual(["Fresh"]);
     expect(wikiSuggestions(parseWikiQuery("[[Nope#")!, c)).toEqual([]);
+  });
+
+  it("the editor's live headings win over the note's text, for the open note only", () => {
+    const c = vault();
+    const current = { path: "Project Alpha.md", content: "# Stale\n", headings: () => ["Just typed"] };
+    expect(labels(wikiSuggestions(parseWikiQuery("[[#")!, c, current))).toEqual(["Just typed"]);
+    expect(labels(wikiSuggestions(parseWikiQuery("[[Project Alpha#")!, c, current))).toEqual(["Just typed"]);
+    expect(labels(wikiSuggestions(parseWikiQuery("[[שלום עולם#")!, c, current))).toEqual(["שָׁלוֹם"]);
+  });
+
+  it("offers no block links until 4.8 can take the reader to the block", () => {
+    const c = vault();
+    // noteBlocks / suggestBlocks are ready; the links aren't followable yet.
+    expect(labels(suggestBlocks(PROJECT, "sh"))).toEqual(["goal-1"]);
+    expect(wikiSuggestions(parseWikiQuery("[[Project Alpha#^sh")!, c)).toEqual([]);
+    expect(wikiSuggestions(parseWikiQuery("[[Project Alpha^li")!, c)).toEqual([]);
+    expect(wikiSuggestions(parseWikiQuery("[[#^")!, c, { content: PROJECT })).toEqual([]);
   });
 });
 

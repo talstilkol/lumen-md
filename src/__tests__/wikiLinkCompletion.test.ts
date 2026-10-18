@@ -67,9 +67,10 @@ describe("source editor [[ completion", () => {
     expect(await pick(view, "שלום עולם")).toBe("כתבתי [[שלום עולם]]| היום");
   });
 
-  it("headings, blocks and aliases", async () => {
+  it("headings and aliases; no block links until 4.8", async () => {
     expect(await pick(viewOf("[[Project Alpha#go"), "Goals")).toBe("[[Project Alpha#Goals]]|");
-    expect(await pick(viewOf("[[Project Alpha^sh"), "^ship")).toBe("[[Project Alpha#^ship]]|");
+    expect(await complete(viewOf("[[Project Alpha^sh"))).toBeNull();
+    expect(await complete(viewOf("[[Project Alpha#^sh"))).toBeNull();
     expect(await pick(viewOf("[[alph"), "Alpha")).toBe("[[Project Alpha|Alpha]]|");
     const res = await complete(viewOf("[[alph"));
     expect(res?.options.find((o) => o.label === "Alpha")?.detail).toBe("alias of Project Alpha");

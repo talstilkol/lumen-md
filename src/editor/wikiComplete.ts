@@ -8,7 +8,11 @@
  *
  *   `[[que`                     → notes, and their front-matter aliases
  *   `[[Note#que`                → headings of Note (`[[#que`: of this note)
- *   `[[Note#^que`, `[[Note^que` → block ids (`^id`) of Note
+ *   `[[Note#^que`, `[[Note^que` → nothing yet: the preview neither renders
+ *                                 `^id` anchors nor scrolls to them, so a
+ *                                 block link would stop at the note. 4.8
+ *                                 (block references) adds both and turns
+ *                                 `suggestBlocks` on.
  *
  * Names match by `noteKey` — the key wiki links resolve by — so case,
  * niqqud, final letters and spacing don't matter. When no note has the
@@ -329,10 +333,15 @@ const LINK_CHARS = /[[\]|#^]/g;
 
 /** Headings of a note for `[[Note#typed`, best first, then in document order. */
 export function suggestHeadings(content: string, typed: string, limit = 50): WikiSuggestion[] {
+  return suggestHeadingList(noteHeadings(content), typed, limit);
+}
+
+/** The same, from the headings' text (the WYSIWYG editor reads them off its live document). */
+export function suggestHeadingList(headings: readonly string[], typed: string, limit = 50): WikiSuggestion[] {
   const q = noteKey(typed);
   const seen = new Set<string>();
   const hits: Array<{ text: string; score: number; i: number }> = [];
-  noteHeadings(content).forEach((text, i) => {
+  headings.forEach((text, i) => {
     if (!text || seen.has(text)) return;
     seen.add(text);
     const score = q ? rank(noteKey(text), q) : 1;
@@ -361,7 +370,7 @@ export function noteBlocks(content: string): Array<{ id: string; text: string }>
   return out;
 }
 
-/** Block ids of a note for `[[Note#^typed` (or `[[Note^typed`). */
+/** Block ids of a note for `[[Note#^typed` (or `[[Note^typed`). Not offered until 4.8 — see the top of the file. */
 export function suggestBlocks(content: string, typed: string, bareCaret = false, limit = 50): WikiSuggestion[] {
   const q = noteKey(typed);
   const hits: Array<{ id: string; text: string; score: number; i: number }> = [];
@@ -377,19 +386,20 @@ export function suggestBlocks(content: string, typed: string, bareCaret = false,
 export interface CurrentNote {
   path?: string | null;
   content: string;
+  /** Its headings as the editor shows them now, when the editor knows better than `content`. */
+  headings?: () => string[];
 }
 
 /** Everything to offer for a parsed query. */
 export function wikiSuggestions(q: WikiQuery, catalog: NoteCatalog, current?: CurrentNote, opts: SuggestOptions = {}): WikiSuggestion[] {
   if (q.kind === "note") return suggestNotes(catalog, q.text, opts);
-  let content: string | undefined;
-  if (!q.note.trim()) content = current?.content;
-  else {
-    const e = findNote(catalog, q.note);
-    content = e && current?.path === e.path ? current.content : e?.content;
-  }
-  if (content === undefined) return [];
-  return q.kind === "heading" ? suggestHeadings(content, q.text, opts.limit) : suggestBlocks(content, q.text, q.bareCaret, opts.limit);
+  // Block links wait for 4.8: nothing would take the reader to the block.
+  if (q.kind === "block") return [];
+  const e = q.note.trim() ? findNote(catalog, q.note) : undefined;
+  const isCurrent = !q.note.trim() || (!!e && current?.path === e.path);
+  if (isCurrent && current?.headings) return suggestHeadingList(current.headings(), q.text, opts.limit);
+  const content = isCurrent ? current?.content : e?.content;
+  return content === undefined ? [] : suggestHeadings(content, q.text, opts.limit);
 }
 
 /* ─── Applying a suggestion ─────────────────────────────────────────── */
