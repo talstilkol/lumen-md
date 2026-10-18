@@ -21,6 +21,8 @@ const ThemeSettings = lazy(() => import("./ui/ThemeSettings").then(m => ({ defau
 const AiSettingsPanel = lazy(() => import("./ui/AiSettingsPanel").then(m => ({ default: m.AiSettingsPanel })));
 const PrivacyLedgerPanel = lazy(() => import("./ui/PrivacyLedgerPanel").then(m => ({ default: m.PrivacyLedgerPanel })));
 const TrashPanel = lazy(() => import("./ui/TrashPanel").then(m => ({ default: m.TrashPanel })));
+// Properties editor (plan 4.9) — lazy: the yaml-editing code is not in the startup bundle.
+const PropertiesPanel = lazy(() => import("./ui/PropertiesPanel").then(m => ({ default: m.PropertiesPanel })));
 const AiDoctorPanel = lazy(() => import("./ui/AiDoctorPanel").then(m => ({ default: m.AiDoctorPanel })));
 const FineTuneSettings = lazy(() => import("./ui/FineTuneSettings").then(m => ({ default: m.FineTuneSettings })));
 const VersionHistory = lazy(() => import("./ui/VersionHistory").then(m => ({ default: m.VersionHistory })));
@@ -60,7 +62,7 @@ import { useAuth } from "./auth/useAuth";
 import { docIdentity } from "./renderer/previewDoc";
 import { auditScope } from "./ui/auditScope";
 import { useEntitlement, watchAuthForEntitlements } from "./billing/useEntitlement";
-import { useAppStore, applyTheme } from "./store/useStore";
+import { useAppStore, applyTheme, flushPendingEdits } from "./store/useStore";
 import { applyLocale, t } from "./i18n";
 import { localLlmAvailable } from "./ai/localLlm";
 import { assessConfigHealth } from "./lib/configHealth";
@@ -143,6 +145,7 @@ export default function App() {
   const [aiSettingsOpen, setAiSettingsOpen] = useState(false);
   const [aiDoctorOpen, setAiDoctorOpen] = useState(false);
   const [trashOpen, setTrashOpen] = useState(false);
+  const [propertiesOpen, setPropertiesOpen] = useState(false);
   // The search dialog loads on first open and then stays mounted, so an
   // Ask Workspace conversation survives closing it (perf: not at startup).
   const [searchMounted, setSearchMounted] = useState(false);
@@ -723,6 +726,32 @@ export default function App() {
     return () => window.removeEventListener("lumen-open-privacy-ledger", onOpen);
   }, []);
   useEffect(() => {
+    const onOpen = () => setPropertiesOpen((v) => !v);
+    window.addEventListener("lumen-open-properties", onOpen);
+    return () => window.removeEventListener("lumen-open-properties", onOpen);
+  }, []);
+  // Properties panel edits: applied to the source editor's live text as one
+  // minimal change (cursor, undo history and collab stay intact); without a
+  // mounted source editor, to the store's text.
+  const applyPropertiesEdit = useCallback((edit: (text: string) => string) => {
+    const view = editorRef.current?.getView();
+    if (view) {
+      const cur = view.state.doc.toString();
+      const next = edit(cur);
+      if (next === cur) return;
+      let from = 0;
+      while (from < cur.length && from < next.length && cur[from] === next[from]) from++;
+      let end = 0;
+      while (end < cur.length - from && end < next.length - from && cur[cur.length - 1 - end] === next[next.length - 1 - end]) end++;
+      view.dispatch({ changes: { from, to: cur.length - end, insert: next.slice(from, next.length - end) } });
+      return;
+    }
+    flushPendingEdits();
+    const cur = useAppStore.getState().doc.content;
+    const next = edit(cur);
+    if (next !== cur) setContent(next);
+  }, [setContent]);
+  useEffect(() => {
     const onOpen = () => setTrashOpen(true);
     window.addEventListener("lumen-open-trash", onOpen);
     // Trash older than 30 days is deleted for good, once per start.
@@ -1067,6 +1096,7 @@ export default function App() {
           {aiDoctorOpen && <AiDoctorPanel open={aiDoctorOpen} onClose={() => setAiDoctorOpen(false)} />}
           {privacyOpen && <PrivacyLedgerPanel open={privacyOpen} onClose={() => setPrivacyOpen(false)} />}
           {trashOpen && <TrashPanel open={trashOpen} onClose={() => setTrashOpen(false)} />}
+          {propertiesOpen && <PropertiesPanel open={propertiesOpen} onClose={() => setPropertiesOpen(false)} text={doc.content} applyEdit={applyPropertiesEdit} />}
           {themeSettingsOpen && <ThemeSettings open={themeSettingsOpen} onClose={() => setThemeSettingsOpen(false)} />}
         </ErrorBoundary>
       </Suspense>
