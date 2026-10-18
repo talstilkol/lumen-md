@@ -202,6 +202,9 @@ function headerPolicy(): string {
 }
 
 test("a note with every kind of block causes 0 CSP / Trusted Types violations", async ({ page, baseURL }) => {
+  // The waits below add up to about 2 minutes in the worst case (15 + 45 +
+  // 15 + 20 + 15 s plus the page load), well past the 30 s default.
+  test.setTimeout(180_000);
   const traffic = await watchFakeHosts(page);
   if (BUILT) {
     const csp = headerPolicy();
@@ -271,21 +274,23 @@ test("a note with every kind of block causes 0 CSP / Trusted Types violations", 
     ].join("\n"),
   );
   await expect(preview(page).locator(".lumen-remote-image")).toHaveCount(1, { timeout: 15_000 });
-  await page.getByRole("button", { name: "Run", exact: true }).first().click();
-  await expect(page.locator("text=/\\[log\\] csp-ok/")).toBeVisible({ timeout: 15_000 });
-  // Heavy blocks mount when scrolled near; bring each one into view until
-  // none is pending, so every block really renders (a violation-free page
-  // that rendered nothing would prove little).
+  // Heavy blocks (live-js among them) mount when scrolled near; bring each
+  // one into view until none is pending, so every block really renders (a
+  // violation-free page that rendered nothing would prove little).
   const blocks = preview(page).locator(":scope > *");
   await expect(async () => {
     const n = await blocks.count();
     for (let i = 0; i < n; i++) await blocks.nth(i).scrollIntoViewIfNeeded();
     await expect(preview(page).locator("[data-lumen-block-pending]")).toHaveCount(0, { timeout: 2_000 });
-    await expect(preview(page).getByText(/Loading (diagram|chart)…|Scroll to render/)).toHaveCount(0, { timeout: 2_000 });
+    await expect(preview(page).getByText(/Loading (diagram|chart|live-js)…|Scroll to render/)).toHaveCount(0, { timeout: 2_000 });
   }).toPass({ timeout: 45_000 });
+  await page.getByRole("button", { name: "Run", exact: true }).first().click();
+  await expect(page.locator("text=/\\[log\\] csp-ok/")).toBeVisible({ timeout: 15_000 });
   await expect(preview(page).locator(".katex").first()).toBeVisible();
   await expect(preview(page).locator(".mermaid-block svg").first()).toBeAttached({ timeout: 20_000 });
-  await page.waitForLoadState("networkidle", { timeout: 30_000 });
+  // Let late loads land so their violations are recorded. A settle step,
+  // not an assertion: the dev server's page never reaches networkidle.
+  await page.waitForLoadState("networkidle", { timeout: 15_000 }).catch(() => {});
   const violations = await page.evaluate(() => (window as unknown as { __cspViolations?: string[] }).__cspViolations ?? []);
   expect(violations).toEqual([]);
   // The note's tracking pixel stayed a placeholder: nothing went out.
@@ -327,7 +332,9 @@ test("secrets scan: a key entered in the UI is nowhere in plain text; no env fil
       const dump: string[] = [];
       for (const s of [localStorage, sessionStorage]) for (const k of Object.keys(s)) dump.push(k, s.getItem(k) ?? "");
       dump.push(document.cookie);
-      let records = 0;
+      // The entry the key prompt wrote (src/lib/secretStore.ts: an AES-GCM
+      // { iv, data } under its own name; "__key__" is the CryptoKey).
+      let entry: { stored: string; ivBytes: number; dataBytes: number } | null = null;
       for (const { name } of (await indexedDB.databases?.()) ?? []) {
         if (!name) continue;
         const db = await new Promise<IDBDatabase>((res, rej) => {
@@ -336,32 +343,57 @@ test("secrets scan: a key entered in the UI is nowhere in plain text; no env fil
           r.onerror = () => rej(r.error);
         });
         for (const store of Array.from(db.objectStoreNames)) {
-          const all = await new Promise<unknown[]>((res) => {
-            const req = db.transaction(store).objectStore(store).getAll();
-            req.onsuccess = () => res(req.result);
-            req.onerror = () => res([]);
-          });
-          if (name === "lumen-secrets") records += all.length;
-          for (const v of all) walk(v, dump);
+          const read = <T,>(op: (s: IDBObjectStore) => IDBRequest<T[]>) =>
+            new Promise<T[]>((res) => {
+              const req = op(db.transaction(store).objectStore(store));
+              req.onsuccess = () => res(req.result);
+              req.onerror = () => res([]);
+            });
+          // getAll and getAllKeys return in the same (key) order.
+          const values = await read<unknown>((s) => s.getAll());
+          const ids = await read<IDBValidKey>((s) => s.getAllKeys());
+          for (const v of values) walk(v, dump);
+          const i = ids.indexOf("lumen.ai.key.anthropic");
+          if (name === "lumen-secrets" && i >= 0) {
+            const v = values[i] as { iv?: unknown; data?: unknown } | string;
+            entry = {
+              stored: typeof v === "string" ? "string" : v && v.iv instanceof Uint8Array && v.data instanceof ArrayBuffer ? "sealed" : "other",
+              ivBytes: typeof v === "object" && v?.iv instanceof Uint8Array ? v.iv.byteLength : 0,
+              dataBytes: typeof v === "object" && v?.data instanceof ArrayBuffer ? v.data.byteLength : 0,
+            };
+          }
         }
         db.close();
       }
       if (typeof caches !== "undefined") for (const n of await caches.keys()) for (const r of await (await caches.open(n)).keys()) dump.push(r.url);
-      return { text: dump.join("\n"), secretRecords: records };
+      return { text: dump.join("\n"), entry };
     });
-  // The key was stored (so the scan is not vacuous)…
-  await expect.poll(async () => (await scan()).secretRecords, { timeout: 10_000 }).toBeGreaterThan(0);
+  // The key was stored under its own name, sealed (so the scan is not
+  // vacuous: the "__key__" CryptoKey alone would not satisfy this)…
+  await expect.poll(async () => (await scan()).entry?.stored, { timeout: 10_000 }).toBe("sealed");
+  const { text, entry } = await scan();
+  expect(entry!.ivBytes).toBe(12);
+  // AES-GCM: the plaintext plus a 16-byte tag.
+  expect(entry!.dataBytes).toBe(new TextEncoder().encode(KEY).byteLength + 16);
   // …and is nowhere in plain text.
-  const { text } = await scan();
   expect(text).not.toContain(KEY);
   expect(text).not.toContain("SECRET-0123456789");
 
-  // A server that drops the connection (vite preview denies dotfiles) serves nothing either.
+  // No env file is served. Acceptable answers: an error status, the SPA's
+  // own index.html (a fallback), or a dropped connection (vite preview
+  // resets one for dotfiles). Anything else counts as served.
+  const index = await (await request.get("/")).text();
+  expect(index).toMatch(/<!doctype html>/i);
   for (const path of ["/.env", "/.env.local", "/.env.production", "/.env.onprem"]) {
-    const body = await request
-      .get(path, { failOnStatusCode: false })
-      .then((res) => (res.ok() ? res.text() : ""))
-      .catch(() => "");
-    expect(body, path).not.toMatch(/^\s*VITE_[A-Z_]+=/m);
+    let outcome: string;
+    try {
+      const res = await request.get(path, { failOnStatusCode: false, maxRedirects: 0 });
+      const body = await res.text();
+      outcome = !res.ok() ? "error status" : body === index ? "index fallback" : `served ${res.status()}: ${body.slice(0, 80)}`;
+      expect(body, path).not.toMatch(/^\s*[A-Z][A-Z0-9_]*=/m);
+    } catch (e) {
+      outcome = /socket hang up|ECONNRESET|ECONNREFUSED|closed/i.test(String(e)) ? "connection dropped" : `error: ${e}`;
+    }
+    expect(["error status", "index fallback", "connection dropped"], `${path}: ${outcome}`).toContain(outcome);
   }
 });
