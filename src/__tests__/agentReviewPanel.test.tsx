@@ -382,6 +382,11 @@ describe("review logic", () => {
       { op: "add", text: "abc", a: undefined, b: 2 },
     ]);
     expect(lineDiffRows("same\n", "same\n")).toEqual([{ op: "gap", skipped: 1 }]); // nothing changed
+    // Only the line endings changed (LF → CRLF): a change, with the CR shown as ^M.
+    expect(lineDiffRows("a\n", "a\r\n")).toEqual([
+      { op: "del", text: "a", a: 1, b: undefined },
+      { op: "add", text: "a^M", a: undefined, b: 1 },
+    ]);
   });
 
   it("inlineDiff reads like a tracked change: removed words, then added ones", () => {

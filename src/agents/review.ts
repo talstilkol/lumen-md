@@ -68,7 +68,10 @@ export function lineDiffRows(before: string | null, after: string, context = 2, 
   let bi = 1;
   const numbered = ops.map((o) => {
     const noEol = o.line.endsWith(NO_EOL);
-    const row: Exclude<DiffRow, { op: "gap" }> = { op: o.op, text: noEol ? o.line.slice(0, -NO_EOL.length) : o.line, a: o.op !== "add" ? ai : undefined, b: o.op !== "del" ? bi : undefined };
+    const line = noEol ? o.line.slice(0, -NO_EOL.length) : o.line;
+    // A CRLF line keeps its CR (LF ↔ CRLF is a change); shown as ^M, as unifiedDiff prints it.
+    const text = line.endsWith("\r") ? `${line.slice(0, -1)}^M` : line;
+    const row: Exclude<DiffRow, { op: "gap" }> = { op: o.op, text, a: o.op !== "add" ? ai : undefined, b: o.op !== "del" ? bi : undefined };
     if (noEol) row.noEol = true;
     if (o.op !== "add") ai++;
     if (o.op !== "del") bi++;
