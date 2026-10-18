@@ -85,6 +85,18 @@ function doctor(...args: string[]) {
 type Failure = { title: string; path: string; verdict: string; why: string };
 
 describe("scripts/ci-doctor.mjs (fake gh)", () => {
+  it("fails visibly when the diagnosed run's jobs cannot be read", () => {
+    const routes = join(dir, "routes-no-jobs.json");
+    writeFileSync(routes, JSON.stringify(ROUTES.filter(([re]) => !re.includes("runs/100/jobs"))));
+    const r = spawnSync(process.execPath, [cli, "--run", "100", "--json"], {
+      encoding: "utf8",
+      env: { ...process.env, PATH: `${dir}:${process.env.PATH}`, GH_REPO: "o/r", FAKE_GH_ROUTES: routes },
+    });
+    expect(r.status).toBe(3);
+    expect(r.stderr).toContain("ci-doctor: could not read the jobs of run 100");
+    expect(r.stdout).toBe("");
+  });
+
   it("diagnoses the CI workflow's run, not a newer run of another workflow", () => {
     const out = doctor("7");
     expect(out.run.id).toBe(100);

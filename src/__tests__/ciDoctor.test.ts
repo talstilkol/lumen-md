@@ -72,7 +72,7 @@ describe("parseAnnotations", () => {
   });
   it("is empty for a job with only runner annotations", () => {
     const p = parseAnnotations([{ path: ".github", annotation_level: "failure", title: "", message: "Process completed with exit code 1." }]);
-    expect(p).toEqual({ tests: [], flaky: [], summaryFailed: [] });
+    expect(p).toEqual({ tests: [], other: [], flaky: [], summaryFailed: [] });
   });
 });
 
@@ -81,6 +81,31 @@ describe("errorLine", () => {
     expect(errorLine("  1) [x] › a.spec.ts › t ───\n\n    Retry #1 ────\n    Error: boom\n    at foo")).toBe("Error: boom");
     expect(errorLine("  2) [x] › t\n    Test timeout of 240000ms exceeded.")).toBe("Test timeout of 240000ms exceeded.");
     expect(errorLine("")).toBe("");
+  });
+});
+
+describe("annotations that are not tests", () => {
+  // setup-node's tsc problem matcher annotates the source file, not a test.
+  const tsc = { annotation_level: "failure", path: "src/ai/llm.ts", start_line: 12, title: "", message: "TS2322: Type 'string' is not assignable to type 'number'." };
+  const vitest = { annotation_level: "failure", path: "src/__tests__/llm.test.ts", start_line: 40, title: "llm > retries", message: "AssertionError: expected 1 to be 2" };
+  const job = (step: string) => ({ id: 1, name: "typecheck • test • build", status: "completed", conclusion: "failure", steps: [{ number: 1, name: step, status: "completed", conclusion: "failure" }] });
+  it("a compiler diagnostic from a failed Typecheck is the step, not a test", () => {
+    const parsed = parseAnnotations([tsc]);
+    expect(parsed.tests).toEqual([]);
+    expect(failureItems(job("Typecheck"), parsed)).toEqual([{ kind: "step", job: "typecheck • test • build", step: "Typecheck", key: "Typecheck" }]);
+    expect(nextAction(failureItems(job("Typecheck"), parsed)[0], "real", { id: 1 })).toContain("npx tsc --noEmit -p .");
+  });
+  it("test-shaped annotations are tests; others only when a test step failed", () => {
+    expect(parseAnnotations([vitest]).tests.map((t: { path: string }) => t.path)).toEqual(["src/__tests__/llm.test.ts"]);
+    const items = failureItems(job("Test"), parseAnnotations([tsc, vitest]));
+    expect(items.map((i: Item) => [i.kind, i.path])).toEqual([
+      ["test", "src/__tests__/llm.test.ts"],
+      ["test", "src/ai/llm.ts"],
+    ]);
+  });
+  it("a cache or artifact step that failed on the same commit elsewhere is flaky, not real", () => {
+    const restore: Item = { kind: "step", job: "typecheck • test • build", step: "Restore main's bundle sizes", key: "Restore main's bundle sizes" };
+    expect(classify(restore, [{ outcome: "passed", distance: 0, sameSha: true, branch: "feat/y" }]).verdict).toBe("flaky");
   });
 });
 
@@ -190,6 +215,12 @@ describe("isDeterministicStep", () => {
     ["Run E2E (chromium)", false],
     ["Run E2E against prod bundle", false],
     ["Install", false],
+    // Cache / artifact steps talk to a service, whatever they are named after.
+    ["Restore main's bundle sizes", false],
+    ["Save bundle sizes (main)", false],
+    ["Upload bundle-size change", false],
+    ["Install Playwright browsers (chromium only — saves ~6 min)", false],
+    ["Build production bundle", true],
   ])("%s → %s", (name, want) => {
     expect(isDeterministicStep(name)).toBe(want);
   });

@@ -23,6 +23,9 @@
  *   node scripts/ci-doctor.mjs --run 39085293928   # one particular run, not the latest
  *   node scripts/ci-doctor.mjs 190 --workflow tauri.yml
  *
+ * Exit codes: 0 done (with --json: no real failure), 1 a real failure (--json)
+ * or a lookup error, 2 usage, 3 the diagnosed run's jobs could not be read.
+ *
  * A green peer job counts as a pass of a failing test only when the test is
  * known to exist there: the same commit, or the test's file unchanged on
  * both sides since the merge base. Annotations list failures and flakes,
@@ -152,7 +155,8 @@ if (latest.status !== "completed") {
 }
 if (pr && run.head_sha !== pr.head.sha) notes.push(`that run is for ${short(run.head_sha)}; the PR head is ${short(pr.head.sha)} (no CI on the newest push yet?)`);
 
-const header = [
+// A function: notes keep arriving until the report is printed.
+const header = () => [
   `ci-doctor · ${branch}${pr ? ` (PR #${pr.number})` : ""}`,
   `run ${run.id} · ${run.name} · ${run.conclusion} · ${short(run.head_sha)} · ${when(run.created_at)}`,
   run.html_url,
@@ -161,13 +165,22 @@ const header = [
 
 if (run.conclusion === "success") {
   if (asJson) console.log(JSON.stringify({ branch, pr: pr?.number ?? null, run: pick(run), verdict: "green", failures: [] }, null, 2));
-  else console.log([...header, "", "green — nothing to diagnose."].join("\n"));
+  else console.log([...header(), "", "green — nothing to diagnose."].join("\n"));
   process.exit(0);
 }
 
-const jobs = (await jobsOf(run.id)) ?? [];
+// The diagnosed run's own data must load: "no failed jobs" for a red run
+// because the API failed would be a false all-clear. (Peer data may degrade.)
+const jobs = await api(`repos/${repo}/actions/runs/${run.id}/jobs?per_page=100`)
+  .then((r) => r.jobs ?? [])
+  .catch((e) => {
+    console.error(`ci-doctor: could not read the jobs of run ${run.id}: ${String(e.stderr || e.message).split("\n")[0]}`);
+    process.exit(3);
+  });
 const failedJobs = jobs.filter((j) => isFailed(j.conclusion));
 const parsedByJob = new Map(await Promise.all(failedJobs.map(async (j) => [j.id, await annotationsOf(j.id)])));
+for (const j of failedJobs) if (parsedByJob.get(j.id) === null) notes.push(`could not read the annotations of "${j.name}": its failed steps are listed instead of its tests`);
+if (run.conclusion !== "success" && !failedJobs.length) notes.push(`run ${run.conclusion} but none of its ${jobs.length} job(s) failed (cancelled or skipped?)`);
 const items = failedJobs.flatMap((j) => failureItems(j, parsedByJob.get(j.id)));
 const retried = failedJobs.flatMap((j) => (parsedByJob.get(j.id)?.flaky ?? []).map((t) => ({ job: j.name, test: t })));
 
@@ -231,11 +244,11 @@ const counts = { real: 0, flaky: 0, "flake?": 0, unknown: 0 };
 for (const r of results) counts[r.verdict]++;
 
 if (asJson) {
-  console.log(JSON.stringify({ branch, pr: pr?.number ?? null, run: pick(run), peers: peers.length, near, failures: results, retried, counts }, null, 2));
+  console.log(JSON.stringify({ branch, pr: pr?.number ?? null, run: pick(run), notes, peers: peers.length, near, failures: results, retried, counts }, null, 2));
   process.exit(results.some((r) => r.verdict === "real") ? 1 : 0);
 }
 
-const out = [...header, `compared with ${peers.length} ${run.name} run(s) on other branches — ${near} at similar commits (≤${maxDistance} commits apart)`];
+const out = [...header(), `compared with ${peers.length} ${run.name} run(s) on other branches — ${near} at similar commits (≤${maxDistance} commits apart)`];
 if (!failedJobs.length) out.push("", `no failed jobs (run ${run.conclusion}).`);
 const LABEL = { real: "REAL   ", flaky: "FLAKY  ", "flake?": "FLAKE? ", unknown: "UNKNOWN" };
 for (const j of failedJobs) {

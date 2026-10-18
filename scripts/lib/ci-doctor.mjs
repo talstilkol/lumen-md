@@ -11,10 +11,23 @@ export const isFailed = (conclusion) => FAILED.has(conclusion);
 
 /**
  * Steps whose outcome depends only on the code, never on timing: if one of
- * them fails here and passes elsewhere, the difference is the code.
+ * them fails here and passes elsewhere, the difference is the code. Steps
+ * that talk to a service (cache, artifacts, checkout, installs, comments)
+ * never are, whatever they are named after ("Restore main's bundle sizes").
  */
-const DETERMINISTIC = /\b(typecheck|tsc|hygiene|lint|coverage|build|bundle|budget|i18n|format|audit)\b/i;
-export const isDeterministicStep = (name) => DETERMINISTIC.test(String(name ?? "")) && !/\b(e2e|playwright)\b/i.test(name);
+const DETERMINISTIC = /\b(typecheck|tsc|hygiene|lint|coverage|build|budget|i18n|format|audit)\b/i;
+const SERVICE_STEP = /\b(restore|save|upload|download|cache|artifacts?|checkout|setup|set up|install|comment|post|deploy|publish|e2e|playwright)\b/i;
+export const isDeterministicStep = (name) => DETERMINISTIC.test(String(name ?? "")) && !SERVICE_STEP.test(String(name ?? ""));
+
+/** A step that runs tests (vitest, Playwright): its failure annotations name tests. */
+export const isTestStep = (name) => /^test\b|\b(e2e|playwright|vitest)\b/i.test(String(name ?? "")) && !SERVICE_STEP.test(String(name ?? "").replace(/\b(e2e|playwright)\b/gi, ""));
+
+/**
+ * A failure annotation that names a test: Playwright's title
+ * ("[chromium] › e2e/x.spec.ts:12:3 › …") or a test file's path. A compiler
+ * diagnostic from setup-node's tsc problem matcher (src/foo.ts) is not one.
+ */
+const isTestAnnotation = (a) => /^\s*\[[\w-]+\]\s+›/.test(a.title ?? "") || /(^|\/)(e2e|__tests__|tests?)\/|\.(spec|test)\.[cm]?[jt]sx?$/.test(a.path ?? "");
 
 /** The failed steps of a job, in order. */
 export const failedSteps = (job) => (job?.steps ?? []).filter((s) => isFailed(s.conclusion));
@@ -55,10 +68,12 @@ export function errorLine(message) {
 
 /**
  * Check-run annotations of one job → failing tests, tests that passed on a
- * retry (Playwright's "flaky"), and whether any test-level annotation exists.
+ * retry (Playwright's "flaky"), and `other`: failure annotations with a path
+ * that do not look like tests (a test step's own may still be, see failureItems).
  */
 export function parseAnnotations(annotations) {
   const failed = new Map();
+  const other = new Map();
   const flaky = new Set();
   const summaryFailed = new Set();
   const fullTitle = new Map(); // summary key → the summary's own line (keeps file:line)
@@ -83,9 +98,10 @@ export function parseAnnotations(annotations) {
     if (!a.path || a.path === ".github") continue;
     const title = a.title || `${a.path}:${a.start_line}`;
     const key = testKey(title);
-    const prev = failed.get(key);
+    const bucket = isTestAnnotation(a) ? failed : other;
+    const prev = bucket.get(key);
     const msg = errorLine(a.message);
-    if (!prev) failed.set(key, { key, title: title.trim(), path: a.path, line: a.start_line || null, message: msg });
+    if (!prev) bucket.set(key, { key, title: title.trim(), path: a.path, line: a.start_line || null, message: msg });
     else if (!prev.message && msg) prev.message = msg;
   }
   // A test Playwright lists as flaky failed once and then passed: not a failure of this run.
@@ -95,17 +111,19 @@ export function parseAnnotations(annotations) {
     const full = [...summaryFailed].find((f) => f.length > t.key.length && sameTest(f, t.key));
     if (full) t.title = fullTitle.get(full) ?? full;
   }
-  return { tests, flaky: [...flaky], summaryFailed: [...summaryFailed] };
+  return { tests, other: [...other.values()], flaky: [...flaky], summaryFailed: [...summaryFailed] };
 }
 
 /**
- * What failed in one job: its failing tests when annotations name them,
+ * What failed in one job: its failing tests when annotations name them
+ * (other failure annotations count as tests only when a test step failed),
  * otherwise its failed steps (or the job itself).
  */
 export function failureItems(job, parsed) {
   const steps = failedSteps(job);
   const step = steps[0]?.name ?? null;
-  if (parsed?.tests?.length) return parsed.tests.map((t) => ({ kind: "test", job: job.name, step, ...t }));
+  const tests = [...(parsed?.tests ?? []), ...(isTestStep(step) ? (parsed?.other ?? []) : [])];
+  if (tests.length) return tests.map((t) => ({ kind: "test", job: job.name, step, ...t }));
   if (steps.length) return steps.map((s) => ({ kind: "step", job: job.name, step: s.name, key: s.name }));
   return [{ kind: "job", job: job.name, step: null, key: job.name }];
 }
