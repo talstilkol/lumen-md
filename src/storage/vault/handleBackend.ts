@@ -224,15 +224,22 @@ export function createDirectoryHandleBackend(o: DirectoryHandleBackendOptions): 
       const dst = r.dst.join("/");
       // Replacing: a folder at the target (or a folder replacing a file)
       // goes first, so nothing of the old entry merges into the new one.
-      if (target && (target.kind === "directory" || source.kind === "directory")) await removeAt(r.dst, dst);
+      // (A file replacing a file is written in place: an aborted write
+      // leaves the old content.)
+      let cleared = false;
+      if (target && (target.kind === "directory" || source.kind === "directory")) {
+        await removeAt(r.dst, dst);
+        cleared = true;
+      }
       try {
         if (source.kind === "directory") await copyTree(source.handle, r.dst);
         else await writeAt(r.dst, await source.handle.getFile(), dst);
       } catch (e) {
         // A copy that failed half way (quota, write error) must not leave a
         // partial tree at the target: it would block a retry, or sit at the
-        // name of an original that a replace moved to the trash.
-        if (!target) await removeAt(r.dst, dst).catch(() => undefined);
+        // name of an original that a replace moved to the trash. The source
+        // is untouched either way.
+        if (!target || cleared) await removeAt(r.dst, dst).catch(() => undefined);
         throw e;
       }
       await removeAt(r.src, r.src.join("/"));

@@ -99,7 +99,9 @@ export interface VaultBackend {
    * Rename or move a file or a folder (folders move with everything inside).
    * Refuses to replace what is at `to` (`WorkspaceConflictError`) unless
    * `overwrite` is set; refuses to move a folder into itself ("EINVAL").
-   * A move that fails half way leaves nothing behind at `to`.
+   * A move that fails half way leaves nothing partial at `to` and the
+   * source untouched (with `overwrite`, a replaced folder may already be
+   * gone by then — overwrite is destructive by request).
    * Rejects with `VaultNotFoundError` when nothing is at `from`.
    */
   rename(from: string, to: string, opts?: { overwrite?: boolean }): Promise<void>;

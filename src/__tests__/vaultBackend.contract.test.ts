@@ -431,11 +431,15 @@ describe("directory-handle backend specifics", () => {
     expect(events).toEqual([{ type: "write", path: "a.md", origin: "self" }]);
   });
 
-  it("a rename whose copy fails removes the partial target and keeps the source", async () => {
+  it.each([
+    ["into a new folder", false],
+    ["replacing an existing folder (overwrite)", true],
+  ])("a rename whose copy fails removes the partial target and keeps the source — %s", async (_l, overwrite) => {
     const dir = new FakeDir();
     const v = createDirectoryHandleBackend({ id: "t", root: async () => dir as unknown as FileSystemDirectoryHandle });
     await v.write("p/a.md", "A");
     await v.write("p/b.md", "B");
+    if (overwrite) await v.write("q/old.md", "old");
     const plain = dir.getDirectoryHandle.bind(dir);
     const patched = new WeakSet<object>();
     // The copy of the second file fails, as a full quota would.
@@ -451,7 +455,8 @@ describe("directory-handle backend specifics", () => {
       }
       return d;
     }) as typeof dir.getDirectoryHandle;
-    await expect(v.rename("p", "q")).rejects.toThrow(/quota/);
+    await expect(v.rename("p", "q", { overwrite })).rejects.toThrow(/quota/);
+    // Nothing half-copied at the target (the replaced folder was given up by request).
     expect(await v.stat("q")).toBeNull();
     expect(await v.readText("p/a.md")).toBe("A");
     expect(await v.readText("p/b.md")).toBe("B");
