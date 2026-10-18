@@ -98,6 +98,9 @@ const BUDGETS = [
   // transformers.js (local Whisper + embeddings) runs in its own worker;
   // the ONNX Runtime wasm it loads is served from public/ort/, not bundled.
   { name: "lazy: transformers worker", pattern: /^transformers\.worker-/, budgetKb: 700 },
+  // Graphviz (viz.js wasm) now runs in its own worker so the page CSP needs
+  // no unsafe-eval: the old vendor-graphviz chunk moved here (~608 KB gz).
+  { name: "lazy: graphviz worker", pattern: /^graphviz\.worker-/,  budgetKb: 700 },
   { name: "lazy plugin chunk",  pattern: /\.js$/,                 budgetKb: 100 },
 ];
 
