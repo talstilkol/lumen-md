@@ -297,8 +297,10 @@ export function useCommands({
         icon: cmdIcons.Download,
         group: t("group.file"),
         action: async () => {
+          // Snapshot before any await: a tab switch while the chunk loads must not export another note.
+          const doc = liveDoc();
           const { exportToDocx } = await import("../storage/exportDocx");
-          await exportToDocx(liveDoc().content, liveDoc().name);
+          await exportToDocx(doc.content, doc.name);
         },
       },
       {
@@ -308,9 +310,11 @@ export function useCommands({
         icon: cmdIcons.Download,
         group: t("group.file"),
         action: async () => {
+          // Snapshot before any await: a tab switch while the chunk loads must not export another note.
+          const doc = liveDoc();
           const { markdownToRtf, downloadText } = await import("../storage/exportFormats");
-          const baseName = liveDoc().name.replace(/\.[^.]+$/, "");
-          downloadText(`${baseName}.rtf`, markdownToRtf(liveDoc().content), "application/rtf");
+          const baseName = doc.name.replace(/\.[^.]+$/, "");
+          downloadText(`${baseName}.rtf`, markdownToRtf(doc.content), "application/rtf");
         },
       },
       {
@@ -320,9 +324,11 @@ export function useCommands({
         icon: cmdIcons.Download,
         group: t("group.file"),
         action: async () => {
+          // Snapshot before any await: a tab switch while the chunk loads must not export another note.
+          const doc = liveDoc();
           const { markdownToLatex, downloadText } = await import("../storage/exportFormats");
-          const baseName = liveDoc().name.replace(/\.[^.]+$/, "");
-          downloadText(`${baseName}.tex`, markdownToLatex(liveDoc().content), "application/x-latex");
+          const baseName = doc.name.replace(/\.[^.]+$/, "");
+          downloadText(`${baseName}.tex`, markdownToLatex(doc.content), "application/x-latex");
         },
       },
       {
@@ -332,9 +338,11 @@ export function useCommands({
         icon: cmdIcons.Download,
         group: t("group.file"),
         action: async () => {
+          // Snapshot before any await: a tab switch while the chunk loads must not export another note.
+          const doc = liveDoc();
           const { markdownToRst, downloadText } = await import("../storage/exportFormats");
-          const baseName = liveDoc().name.replace(/\.[^.]+$/, "");
-          downloadText(`${baseName}.rst`, markdownToRst(liveDoc().content), "text/x-rst");
+          const baseName = doc.name.replace(/\.[^.]+$/, "");
+          downloadText(`${baseName}.rst`, markdownToRst(doc.content), "text/x-rst");
         },
       },
       {
@@ -344,9 +352,11 @@ export function useCommands({
         icon: cmdIcons.Download,
         group: t("group.file"),
         action: async () => {
+          // Snapshot before any await: a tab switch while the chunk loads must not export another note.
+          const doc = liveDoc();
           const { markdownToAdoc, downloadText } = await import("../storage/exportFormats");
-          const baseName = liveDoc().name.replace(/\.[^.]+$/, "");
-          downloadText(`${baseName}.adoc`, markdownToAdoc(liveDoc().content), "text/asciidoc");
+          const baseName = doc.name.replace(/\.[^.]+$/, "");
+          downloadText(`${baseName}.adoc`, markdownToAdoc(doc.content), "text/asciidoc");
         },
       },
       {
@@ -356,9 +366,11 @@ export function useCommands({
         icon: cmdIcons.Download,
         group: t("group.file"),
         action: async () => {
+          // Snapshot before any await: a tab switch while the chunk loads must not export another note.
+          const doc = liveDoc();
           const { markdownToOrg, downloadText } = await import("../storage/exportFormats");
-          const baseName = liveDoc().name.replace(/\.[^.]+$/, "");
-          downloadText(`${baseName}.org`, markdownToOrg(liveDoc().content), "text/x-org");
+          const baseName = doc.name.replace(/\.[^.]+$/, "");
+          downloadText(`${baseName}.org`, markdownToOrg(doc.content), "text/x-org");
         },
       },
       {
@@ -368,9 +380,11 @@ export function useCommands({
         icon: cmdIcons.Download,
         group: t("group.file"),
         action: async () => {
+          // Snapshot before any await: a tab switch while the chunk loads must not export another note.
+          const doc = liveDoc();
           const { markdownToOpml, downloadText } = await import("../storage/exportFormats");
-          const baseName = liveDoc().name.replace(/\.[^.]+$/, "");
-          downloadText(`${baseName}.opml`, markdownToOpml(liveDoc().content, baseName), "text/x-opml");
+          const baseName = doc.name.replace(/\.[^.]+$/, "");
+          downloadText(`${baseName}.opml`, markdownToOpml(doc.content, baseName), "text/x-opml");
         },
       },
       {
@@ -380,11 +394,13 @@ export function useCommands({
         icon: cmdIcons.Download,
         group: t("group.file"),
         action: async () => {
+          // Snapshot before any await: a tab switch while the chunk loads must not export another note.
+          const doc = liveDoc();
           const { markdownToRevealHtml, downloadText } = await import("../storage/exportFormats");
-          const baseName = liveDoc().name.replace(/\.[^.]+$/, "");
+          const baseName = doc.name.replace(/\.[^.]+$/, "");
           downloadText(
             `${baseName}.slides.html`,
-            markdownToRevealHtml(liveDoc().content, baseName),
+            markdownToRevealHtml(doc.content, baseName),
             "text/html",
           );
         },
@@ -396,9 +412,11 @@ export function useCommands({
         icon: cmdIcons.Download,
         group: t("group.file"),
         action: async () => {
+          // Snapshot before any await: a tab switch while the chunk loads must not export another note.
+          const doc = liveDoc();
           const { markdownToEpubBytes, downloadBytes } = await import("../storage/exportFormats");
-          const baseName = liveDoc().name.replace(/\.[^.]+$/, "");
-          const bytes = await markdownToEpubBytes(liveDoc().content, baseName);
+          const baseName = doc.name.replace(/\.[^.]+$/, "");
+          const bytes = await markdownToEpubBytes(doc.content, baseName);
           downloadBytes(`${baseName}.epub`, bytes, "application/epub+zip");
         },
       },
@@ -409,9 +427,11 @@ export function useCommands({
         icon: cmdIcons.Download,
         group: t("group.file"),
         action: async () => {
+          // Snapshot before any await: a tab switch while the chunk loads must not export another note.
+          const doc = liveDoc();
           const { markdownToIpynb, downloadText } = await import("../storage/exportFormats");
-          const baseName = liveDoc().name.replace(/\.[^.]+$/, "");
-          downloadText(`${baseName}.ipynb`, markdownToIpynb(liveDoc().content), "application/x-ipynb+json");
+          const baseName = doc.name.replace(/\.[^.]+$/, "");
+          downloadText(`${baseName}.ipynb`, markdownToIpynb(doc.content), "application/x-ipynb+json");
         },
       },
       {
@@ -421,9 +441,11 @@ export function useCommands({
         icon: cmdIcons.Download,
         group: t("group.file"),
         action: async () => {
+          // Snapshot before any await: a tab switch while the chunk loads must not export another note.
+          const doc = liveDoc();
           const { markdownToStaticSiteBytes, downloadBytes } = await import("../storage/exportFormats");
-          const baseName = liveDoc().name.replace(/\.[^.]+$/, "");
-          const bytes = await markdownToStaticSiteBytes(liveDoc().content, baseName);
+          const baseName = doc.name.replace(/\.[^.]+$/, "");
+          const bytes = await markdownToStaticSiteBytes(doc.content, baseName);
           downloadBytes(`${baseName}-site.zip`, bytes, "application/zip");
         },
       },
@@ -434,10 +456,12 @@ export function useCommands({
         icon: cmdIcons.Download,
         group: t("group.file"),
         action: async () => {
+          // Snapshot before any await: a tab switch while the chunk loads must not export another note.
+          const doc = liveDoc();
           const { markdownToPptxBytes, PPTX_MIME } = await import("../storage/exportPptx");
           const { downloadBytes } = await import("../storage/exportFormats");
-          const baseName = liveDoc().name.replace(/\.[^.]+$/, "");
-          const bytes = await markdownToPptxBytes(liveDoc().content, baseName);
+          const baseName = doc.name.replace(/\.[^.]+$/, "");
+          const bytes = await markdownToPptxBytes(doc.content, baseName);
           downloadBytes(`${baseName}.pptx`, bytes, PPTX_MIME);
         },
       },
@@ -448,8 +472,10 @@ export function useCommands({
         icon: cmdIcons.Download,
         group: t("group.file"),
         action: async () => {
+          // Snapshot before any await: a tab switch while the chunk loads must not export another note.
+          const doc = liveDoc();
           const { printDocument } = await import("../ui/PrintExport");
-          await printDocument(liveDoc().content, liveDoc().name);
+          await printDocument(doc.content, doc.name);
         },
       },
       {
