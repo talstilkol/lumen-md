@@ -2,7 +2,7 @@ import { useMemo } from "react";
 import type { Command } from "../ui/CommandPalette";
 import { cmdIcons } from "../ui/CommandPalette";
 import { tabIdOf, useAppStore } from "../store/useStore";
-import { t, SUPPORTED_LOCALES } from "../i18n";
+import { t, SUPPORTED_LOCALES, getLocale } from "../i18n";
 import { getGitIdentity, setGitIdentity, setGitToken, cloneRepo, pullRepo, commitAndPush, gitStatusSummary } from "../sync/git";
 import { getRecents, removeRecent } from "../storage/recent";
 import type { RecentFile } from "../storage/recent";
@@ -1441,6 +1441,37 @@ export function useCommands({
         group: t("group.tools"),
         action: () => {
           window.dispatchEvent(new CustomEvent("lumen-open-trash"));
+        },
+      },
+      {
+        id: "image.altText",
+        label: t("cmd.image.altText"),
+        hint: t("cmd.image.altText.hint"),
+        icon: cmdIcons.Sparkles,
+        group: t("group.ai", { defaultValue: "AI Copilot" }),
+        action: async () => {
+          const { imageText, withImageText } = await import("../ai/vision");
+          const { readWorkspaceBlob } = await import("../storage/workspace");
+          const doc = useAppStore.getState().doc.content;
+          // Images still named after their file (no spaces) or with no alt.
+          const targets = [...doc.matchAll(/!\[([^\]\s]*)\]\(([^)\s"]+)\)/g)].filter((m) => !/^(https?:|data:)/.test(m[2]));
+          if (!targets.length) {
+            showAiToast(t("toast.imageAlt.none"), "info");
+            return;
+          }
+          showAiToast(t("toast.imageAlt.working", { count: targets.length }), "info");
+          let next = doc;
+          let done = 0;
+          for (const m of targets) {
+            const blob = await readWorkspaceBlob(m[2]).catch(() => null);
+            if (!blob) continue;
+            const res = await imageText(blob, getLocale()).catch(() => null);
+            if (!res || res.source === "none") continue;
+            next = withImageText(next, m[2], m[1], res);
+            done++;
+          }
+          if (next !== useAppStore.getState().doc.content && useAppStore.getState().doc.content === doc) useAppStore.getState().setContent(next);
+          showAiToast(t("toast.imageAlt.done", { done, count: targets.length }), done ? "success" : "info");
         },
       },
       {

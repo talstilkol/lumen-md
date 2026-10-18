@@ -1377,5 +1377,10 @@
   "cmd.ai.rerankModel": "AI: إعادة ترتيب البحث بالنموذج المحلي",
   "cmd.ai.rerankModel.hint": "مفعّل: bge-reranker-v2-m3 على هذا الجهاز (تنزيل لمرة واحدة ~570 ميغابايت). متوقف: مطابقة كلمات سريعة.",
   "toast.rerankModelOn": "ترتيب البحث: نموذج محلي (يُنزَّل عند أول استخدام)",
-  "toast.rerankModelOff": "ترتيب البحث: مطابقة الكلمات"
+  "toast.rerankModelOff": "ترتيب البحث: مطابقة الكلمات",
+  "cmd.image.altText": "الصور: نص بديل من OCR / رؤية محلية",
+  "cmd.image.altText.hint": "يقرأ النص في صور هذه الملاحظة على الجهاز (العبرية والإنجليزية)، ويصف الباقي بنموذج رؤية محلي في Ollama",
+  "toast.imageAlt.none": "لا توجد صور تحتاج نصاً بديلاً في هذه الملاحظة",
+  "toast.imageAlt.working": "قراءة الصور على الجهاز: {count}…",
+  "toast.imageAlt.done": "أُضيف نص بديل: {done} من {count}"
 }
