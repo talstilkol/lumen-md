@@ -29,7 +29,8 @@ const OK_IDS = new Set(
 );
 
 /** Exceptions that turn a GPL into something an app may link against. */
-const LINKING_EXCEPTIONS = /^(Classpath-exception-2\.0|GCC-exception-\d|LLVM-exception|Autoconf-exception|Bison-exception|Font-exception-2\.0|Universal-FOSS-exception)/i;
+/** Exact SPDX ids only: "Classpath-exception-2.0x" is a typo, not an exception. */
+const LINKING_EXCEPTIONS = /^(Classpath-exception-2\.0|GCC-exception-(2\.0|3\.1)|LLVM-exception|Autoconf-exception-(2\.0|3\.0|generic)|Bison-exception-(1\.24|2\.2)|Font-exception-2\.0|Universal-FOSS-exception-1\.0)$/i;
 
 /** Common non-SPDX spellings seen in package.json files. */
 const ALIASES = {
@@ -352,6 +353,8 @@ export function validateEntry(e) {
   if (!e.license.trim()) problems.push("empty license");
   if ((e.class === "allowed" || e.class === "conditional") && !e.attribution.trim()) problems.push("allowed/conditional models need attribution text");
   if (e.match !== undefined && !(Array.isArray(e.match) && e.match.every((m) => typeof m === "string" && m.length >= 3))) problems.push("match must be an array of strings (3+ chars)");
+  // verified: false means "classified from the model card only" (a notice); a missing or "false" string must not read as verified.
+  if (typeof e.verified !== "boolean") problems.push("verified must be true or false");
   // The licence text must not contradict the class: a licence the npm rules
   // fail (AGPL, CC-BY-NC, SSPL…) or one that says non-commercial is never
   // allowed, conditional or unknown.
@@ -394,6 +397,11 @@ export const CATALOG_PATTERNS = [
   { file: "src/agents/executors/webllm.ts", re: /"([A-Za-z0-9.-]+?)-q4f(?:16|32)_1-MLC"/g },
   { file: "src/agents/executors/ollama.ts", re: /RECOMMENDED_[A-Z_]*MODEL\s*=\s*"([^"]+)"/g },
   { file: "src/agents/doctor.ts", re: /RECOMMENDED_[A-Z_]*MODEL\s*=\s*"([^"]+)"/g },
+  // Downloads outside the model catalogs. `exact`: covered only by an entry
+  // whose id, a `match` alias or `source` is that exact name, since one alias
+  // ("tessdata_fast", "wooorm/dictionaries") spans files under other licences.
+  { file: "src/ai/ocr.ts", re: /\bLANGS\s*=\s*\[([^\]]*)\]/g, ids: (list) => [...list.matchAll(/"([\w-]+)"/g)].map((x) => `tessdata_fast/${x[1]}.traineddata`), exact: true },
+  { file: "src/ai/hebrewSpell.ts", re: /_DICT_URL\s*=\s*"([^"]+)"/g, exact: true },
 ];
 
 export function discoverCatalogIds(sources, patterns = CATALOG_PATTERNS) {
@@ -401,7 +409,7 @@ export function discoverCatalogIds(sources, patterns = CATALOG_PATTERNS) {
   for (const p of patterns) {
     const src = sources.find((s) => s.file === p.file);
     if (!src) continue;
-    for (const m of src.text.matchAll(p.re)) found.push({ id: m[1], file: p.file });
+    for (const m of src.text.matchAll(p.re)) for (const id of p.ids ? p.ids(m[1]) : [m[1]]) found.push({ id, file: p.file, ...(p.exact ? { exact: true } : {}) });
   }
   return found;
 }
@@ -446,8 +454,13 @@ export function checkModels(registry, sources) {
   // Coverage is by exact id: a fine-tune named after a registered model
   // ("Qwen3-4B-Proprietary-Finetune") can carry another licence. Only an
   // entry's explicit `match` aliases cover a family.
-  for (const { id, file } of discoverCatalogIds(sources)) {
-    const covered = valid.some((e) => normalizeModelId(e.id) === normalizeModelId(id) || (e.match ?? []).some((t) => tokenRegex(t).test(id)));
+  for (const { id, file, exact } of discoverCatalogIds(sources)) {
+    const n = normalizeModelId(id);
+    const covered = valid.some((e) =>
+      exact
+        ? [e.id, e.source, ...(e.match ?? [])].some((t) => normalizeModelId(t) === n)
+        : normalizeModelId(e.id) === n || (e.match ?? []).some((t) => tokenRegex(t).test(id)),
+    );
     if (!covered) findings.push({ area: "model", name: id, license: "", class: "unknown", level: "warn", reason: `in an app catalog (${file}) but not in models/registry.json`, refs: [{ file, line: 0 }] });
   }
   return findings;

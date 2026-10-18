@@ -86,6 +86,10 @@ describe("classifyLicense", () => {
     ["CC BY 4.0", "ok"],
     ["CC0 1.0", "ok"],
     ["CC BY-SA 4.0", "warn"],
+    // Only exact SPDX exception ids downgrade a GPL.
+    ["GPL-3.0-only WITH Classpath-exception-2.0x", "fail"],
+    ["GPL-2.0-only WITH LLVM-exception-junk", "fail"],
+    ["GPL-3.0-only WITH GCC-exception-3.1", "warn"],
   ];
   it.each(cases)("%s → %s", (raw, level) => {
     expect(classifyLicense(raw).level).toBe(level);
@@ -217,6 +221,30 @@ describe("model registry", () => {
     const reg = clone(registryFixture);
     reg.models.push(clone(good));
     expect(checkModels(reg, []).some((f: Finding) => f.level === "fail" && /duplicate id/.test(f.reason))).toBe(true);
+  });
+
+  it("requires `verified` to be a real boolean", () => {
+    const good = clone(registryFixture.models[0]);
+    expect(validateEntry(good)).toEqual([]);
+    expect(validateEntry({ ...good, verified: false })).toEqual([]);
+    const { verified: _v, ...noVerified } = good;
+    expect(validateEntry(noVerified)).toContain("verified must be true or false");
+    expect(validateEntry({ ...good, verified: "false" })).toContain("verified must be true or false");
+  });
+
+  it("discovers OCR languages and dictionary URLs, covered only by an exact registry name", () => {
+    const reg = clone(registryFixture);
+    const entry = (id: string, extra: Record<string, unknown>) => ({ ...clone(registryFixture.models[0]), id, kind: "ocr", ...extra });
+    const HE = "https://raw.githubusercontent.com/wooorm/dictionaries/main/dictionaries/he/index.dic";
+    reg.models.push(entry("tessdata_fast/heb.traineddata", { match: ["tessdata_fast"] }), entry("tessdata_fast/eng.traineddata", { match: ["tessdata_fast"] }), entry("he-dictionary", { kind: "other", source: HE, match: ["wooorm/dictionaries"] }));
+    const sources = [
+      { file: "src/ai/ocr.ts", text: 'const LANGS = ["heb", "eng", "ara"] as const;' },
+      { file: "src/ai/hebrewSpell.ts", text: `export const HEBREW_DICT_URL = "${HE}";\nexport const ARABIC_DICT_URL = "https://raw.githubusercontent.com/wooorm/dictionaries/main/dictionaries/ar/index.dic";` },
+    ];
+    expect(discoverCatalogIds(sources).map((d: { id: string }) => d.id)).toEqual(["tessdata_fast/heb.traineddata", "tessdata_fast/eng.traineddata", "tessdata_fast/ara.traineddata", HE, expect.stringContaining("/ar/index.dic")]);
+    const unknown = checkModels(reg, sources).filter((f: Finding) => /not in models\/registry/.test(f.reason)).map((f: Finding) => f.name);
+    // The "tessdata_fast" / "wooorm/dictionaries" aliases do not cover a new language.
+    expect(unknown).toEqual(["tessdata_fast/ara.traineddata", expect.stringContaining("/ar/index.dic")]);
   });
 
   it("rejects an entry whose licence contradicts its class", () => {
