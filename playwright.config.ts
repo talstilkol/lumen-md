@@ -9,6 +9,8 @@ import { defineConfig, devices } from "@playwright/test";
  */
 const PORT = 5173;
 const BASE_URL = process.env.PLAYWRIGHT_BASE_URL ?? `http://localhost:${PORT}`;
+/** A Chromium executable to use when Playwright's own is not installed (docs/dev/ci-local.md). */
+const CHROMIUM = process.env.PW_CHROMIUM;
 
 export default defineConfig({
   testDir: "./e2e",
@@ -27,7 +29,7 @@ export default defineConfig({
     video: "retain-on-failure",
   },
   projects: [
-    { name: "chromium", use: { ...devices["Desktop Chrome"] } },
+    { name: "chromium", use: { ...devices["Desktop Chrome"], ...(CHROMIUM ? { launchOptions: { executablePath: CHROMIUM } } : {}) } },
     {
       name: "firefox",
       use: {

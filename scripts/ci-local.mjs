@@ -7,18 +7,22 @@
  *   npm run ci:local -- --base origin/fix/codex-backlog --changed
  *   npm run ci:local -- --skip e2e,build --only typecheck,test --coverage --bail
  *   npm run ci:local -- --install-hook   pre-push hook: `ci:local --changed --skip e2e`
+ *                                         (an existing hook of yours is kept unless --force,
+ *                                         which saves it as pre-push.bak)
  *
  * Steps run in order; a failure does not stop the rest unless --bail, and the
- * exit code is 1 if any step failed. e2e builds once, serves dist/ with
- * `vite preview` on a free port and runs the Chromium project; set
- * PW_CHROMIUM to a Chromium executable when Playwright's own is not installed
- * (a lane's playwright.lane.config.ts is used when present).
+ * exit code is 1 if any step failed. --coverage applies CI's 65% lines gate
+ * to the full run. e2e serves a build of this checkout (the Build step's,
+ * else a fresh one: never a dist/ left from earlier) with `vite preview` on
+ * a free port and runs the Chromium project; set PW_CHROMIUM to a Chromium
+ * executable when Playwright's own is not installed (playwright.config.ts
+ * and a lane's playwright.lane.config.ts both read it).
  */
 import { spawn, spawnSync } from "node:child_process";
-import { existsSync, readFileSync, readdirSync, writeFileSync, chmodSync, mkdirSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync, writeFileSync, chmodSync, mkdirSync, renameSync } from "node:fs";
 import { createServer } from "node:net";
 import { join, resolve } from "node:path";
-import { planSteps, e2eSpecs, i18nDrift, summary } from "./lib/ciLocal.mjs";
+import { planSteps, e2eSpecs, i18nDrift, summary, coverageGate, hookPlan, e2eBuildFirst } from "./lib/ciLocal.mjs";
 
 const root = resolve(new URL("..", import.meta.url).pathname);
 process.chdir(root);
@@ -39,7 +43,16 @@ if (flag("install-hook")) {
   const hooks = spawnSync("git", ["rev-parse", "--git-path", "hooks"], { encoding: "utf8" }).stdout.trim();
   mkdirSync(hooks, { recursive: true });
   const file = join(hooks, "pre-push");
-  writeFileSync(file, "#!/bin/sh\n# installed by `npm run ci:local -- --install-hook` (plan 0.14); skip once with `git push --no-verify`\nexec npm run -s ci:local -- --changed --skip e2e --bail\n");
+  const plan = hookPlan(existsSync(file) ? readFileSync(file, "utf8") : null, { force: flag("force") });
+  if (plan.action === "refuse") {
+    console.error(`ci:local: ${file} already exists and is not ours; not replacing it. Add \`npm run -s ci:local -- --changed --skip e2e --bail\` to it yourself, or rerun with --force to save it as pre-push.bak and install ours.`);
+    process.exit(1);
+  }
+  if (plan.action === "backup") {
+    renameSync(file, `${file}.bak`);
+    console.log(`existing pre-push hook saved as ${file}.bak`);
+  }
+  writeFileSync(file, plan.content);
   chmodSync(file, 0o755);
   console.log(`pre-push hook written to ${file}`);
   process.exit(0);
@@ -50,7 +63,7 @@ function git(...args) {
   return r.status === 0 ? r.stdout.trim() : null;
 }
 
-/** Files changed against the base (committed, staged and unstaged), or null for a full run. */
+/** Files changed against the base (committed, staged and unstaged; deleted ones too), or null for a full run. */
 function changedFiles() {
   if (!flag("changed")) return null;
   const base = opt("base") ?? (git("rev-parse", "--abbrev-ref", "--symbolic-full-name", "@{upstream}") ? "@{upstream}" : "origin/main");
@@ -65,8 +78,10 @@ function changedFiles() {
     ...(git("diff", "--name-only", "--cached") ?? "").split("\n"),
   ]);
   files.delete("");
-  console.log(`ci:local --changed: ${files.size} files vs ${base} (${mergeBase.slice(0, 8)})`);
-  return [...files].filter((f) => existsSync(f));
+  const deleted = [...files].filter((f) => !existsSync(f)).length;
+  console.log(`ci:local --changed: ${files.size} files vs ${base} (${mergeBase.slice(0, 8)})${deleted ? `, ${deleted} deleted` : ""}`);
+  if (flag("coverage")) console.log("ci:local: --coverage needs a full run; with --changed the 65% gate is not checked");
+  return [...files];
 }
 
 function run(cmd, extraEnv = {}) {
@@ -98,8 +113,20 @@ async function i18nDriftStep() {
   return d.ok ? 0 : 1;
 }
 
-async function e2eStep(changed) {
-  if (!existsSync("dist/index.html")) {
+/** Vitest, then (with --coverage) CI's lines gate on the summary it wrote. */
+async function testStep(step) {
+  const code = await run(step.cmd);
+  if (code !== 0 || !step.coverageMin) return code;
+  const file = "coverage/coverage-summary.json";
+  const gate = coverageGate(existsSync(file) ? readFileSync(file, "utf8") : null, step.coverageMin);
+  (gate.ok ? console.log : console.error)(gate.message);
+  return gate.ok ? 0 : 1;
+}
+
+/** `buildFirst`: no Build step passed in this run (see e2eBuildFirst). */
+async function e2eStep(changed, buildFirst) {
+  if (buildFirst) {
+    console.log("e2e: building this checkout first (a dist/ from an earlier build may not match it)");
     const b = await run(["npm", "run", "-s", "build"]);
     if (b !== 0) return b;
   }
@@ -136,10 +163,10 @@ for (const s of steps) {
   }
   console.log(`\n▶ ${s.title}`);
   const t0 = Date.now();
-  const code = s.id === "i18n" ? await i18nDriftStep() : s.id === "e2e" ? await e2eStep(changed) : await run(s.cmd);
+  const code = s.id === "i18n" ? await i18nDriftStep() : s.id === "e2e" ? await e2eStep(changed, e2eBuildFirst(results)) : s.id === "test" ? await testStep(s) : await run(s.cmd);
   const status = code === 0 ? "pass" : "fail";
   if (status === "fail") failed = true;
-  results.push({ title: s.title, status, ms: Date.now() - t0 });
+  results.push({ id: s.id, title: s.title, status, ms: Date.now() - t0 });
 }
 console.log(`\nci:local ${failed ? "FAILED" : "passed"}\n${summary(results)}`);
 process.exit(failed ? 1 : 0);
