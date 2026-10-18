@@ -420,6 +420,24 @@ describe.each(backends)("VaultBackend contract — %s", (_label, make) => {
   });
 });
 
+// A picked folder on macOS / Windows: names match whatever their case.
+class CaseInsensitiveDir extends FakeDir {
+  private key<T>(m: Map<string, T>, name: string): string {
+    for (const k of m.keys()) if (k.toLowerCase() === name.toLowerCase()) return k;
+    return name;
+  }
+  override async getDirectoryHandle(name: string, opts: { create?: boolean } = {}): Promise<FakeDir> {
+    if (!this.dirs.has(this.key(this.dirs, name)) && opts.create) this.dirs.set(name, new CaseInsensitiveDir(name));
+    return super.getDirectoryHandle(this.key(this.dirs, name), opts);
+  }
+  override async getFileHandle(name: string, opts: { create?: boolean } = {}) {
+    return super.getFileHandle(this.key(this.files, name), opts);
+  }
+  override async removeEntry(name: string): Promise<void> {
+    return super.removeEntry(this.files.has(this.key(this.files, name)) ? this.key(this.files, name) : this.key(this.dirs, name));
+  }
+}
+
 describe("directory-handle backend specifics", () => {
   it("writes through the fallback when a file handle has no createWritable (OPFS on WebKit)", async () => {
     const dir = new FakeDir();
@@ -470,23 +488,6 @@ describe("directory-handle backend specifics", () => {
   });
 
   it("a case-only rename on a case-insensitive folder goes through a temporary name instead of deleting the file", async () => {
-    // A picked folder on macOS / Windows: names match whatever their case.
-    class CaseInsensitiveDir extends FakeDir {
-      private key<T>(m: Map<string, T>, name: string): string {
-        for (const k of m.keys()) if (k.toLowerCase() === name.toLowerCase()) return k;
-        return name;
-      }
-      override async getDirectoryHandle(name: string, opts: { create?: boolean } = {}): Promise<FakeDir> {
-        if (!this.dirs.has(this.key(this.dirs, name)) && opts.create) this.dirs.set(name, new CaseInsensitiveDir(name));
-        return super.getDirectoryHandle(this.key(this.dirs, name), opts);
-      }
-      override async getFileHandle(name: string, opts: { create?: boolean } = {}) {
-        return super.getFileHandle(this.key(this.files, name), opts);
-      }
-      override async removeEntry(name: string): Promise<void> {
-        return super.removeEntry(this.files.has(this.key(this.files, name)) ? this.key(this.files, name) : this.key(this.dirs, name));
-      }
-    }
     const dir = new CaseInsensitiveDir();
     const v = createDirectoryHandleBackend({ id: "ci", root: async () => dir as unknown as FileSystemDirectoryHandle });
     await v.write("Note.md", "keep me");
@@ -499,6 +500,31 @@ describe("directory-handle backend specifics", () => {
     // A real conflict (a different entry) is still refused.
     await v.write("other.md", "o");
     await expect(v.rename("other.md", "NOTE.md")).rejects.toBeInstanceOf(WorkspaceConflictError);
+  });
+
+  it("on a case-insensitive folder, aliases of the source's own folders are caught too", async () => {
+    const dir = new CaseInsensitiveDir();
+    const v = createDirectoryHandleBackend({ id: "ci", root: async () => dir as unknown as FileSystemDirectoryHandle });
+    await v.write("Folder/a.md", "A");
+    await expect(v.rename("Folder", "folder/sub")).rejects.toThrow(/into itself/);
+    await v.write("Box/inner/b.md", "B");
+    await expect(v.rename("Box/inner", "box", { overwrite: true })).rejects.toThrow(/inside it/);
+    expect(await v.readText("Folder/a.md")).toBe("A");
+    expect(await v.readText("Box/inner/b.md")).toBe("B");
+  });
+
+  it("a case-only rename whose second step fails puts the entry back under its original name", async () => {
+    const dir = new CaseInsensitiveDir();
+    const v = createDirectoryHandleBackend({ id: "ci", root: async () => dir as unknown as FileSystemDirectoryHandle });
+    await v.write("Note.md", "keep me");
+    const plain = dir.getFileHandle.bind(dir);
+    dir.getFileHandle = (async (name: string, opts?: { create?: boolean }) => {
+      if (opts?.create && name === "note.md") throw new DOMException("quota", "QuotaExceededError");
+      return plain(name, opts);
+    }) as typeof dir.getFileHandle;
+    await expect(v.rename("Note.md", "note.md")).rejects.toThrow(/quota/);
+    expect((await v.list("")).map((e) => e.name)).toEqual(["Note.md"]);
+    expect(await v.readText("Note.md")).toBe("keep me");
   });
 
   it("a file that exists but cannot be read right now still exists for stat", async () => {

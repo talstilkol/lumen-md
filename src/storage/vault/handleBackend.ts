@@ -146,6 +146,22 @@ export function createDirectoryHandleBackend(o: DirectoryHandleBackendOptions): 
     return typeof f === "function" ? await f.call(a, b) : false;
   }
 
+  /** The existing folders strictly above `parts` (root excluded), outermost first; stops at the first missing one. */
+  async function existingAncestors(parts: string[]): Promise<FileSystemDirectoryHandle[]> {
+    const out: FileSystemDirectoryHandle[] = [];
+    let cur = await o.root();
+    for (const part of parts.slice(0, -1)) {
+      try {
+        cur = await cur.getDirectoryHandle(part);
+      } catch (e) {
+        if (isMissing(e)) break;
+        throw e;
+      }
+      out.push(cur);
+    }
+    return out;
+  }
+
   /** Copy `source` to `dst` (replacing `target`, when set), then delete the source. No event. */
   async function move(src: string[], dstParts: string[], source: Found, target: Found | null): Promise<void> {
     const dst = dstParts.join("/");
@@ -255,6 +271,19 @@ export function createDirectoryHandleBackend(o: DirectoryHandleBackendOptions): 
       const alias = !!target && (await sameEntry(source.handle, target.handle));
       if (target && !alias && !opts.overwrite) throw new WorkspaceConflictError(to);
       const dst = r.dst.join("/");
+      // The textual checks (checkRename) miss aliases on a case-insensitive
+      // or normalising real folder: "Folder" → "folder/sub" is a move into
+      // itself, and replacing a folder that holds the source deletes it.
+      if (source.kind === "directory") {
+        for (const h of await existingAncestors(r.dst)) {
+          if (await sameEntry(source.handle, h)) throw new VaultError("EINVAL", to, `Cannot move "${from}" into itself`);
+        }
+      }
+      if (target && !alias && target.kind === "directory") {
+        for (const h of await existingAncestors(r.src)) {
+          if (await sameEntry(target.handle, h)) throw new VaultError("EINVAL", to, `Cannot replace "${to}" with "${from}", which is inside it`);
+        }
+      }
       if (alias) {
         // Two spellings of one entry (a case-only or normalisation-only
         // rename on a case-insensitive / normalising real folder): go
@@ -264,7 +293,15 @@ export function createDirectoryHandleBackend(o: DirectoryHandleBackendOptions): 
         await move(r.src, tmp, source, null);
         const staged = await lookup(tmp);
         if (!staged) throw new VaultNotFoundError(tmp.join("/"));
-        await move(tmp, r.dst, staged, null);
+        try {
+          await move(tmp, r.dst, staged, null);
+        } catch (e) {
+          // Put the entry back under its original name rather than leave it
+          // only under the hidden temporary one.
+          const left = await lookup(tmp).catch(() => null);
+          if (left) await move(tmp, r.src, left, null).catch(() => undefined);
+          throw e;
+        }
       } else {
         await move(r.src, r.dst, source, target);
       }
