@@ -1614,11 +1614,12 @@ export function useCommands({
         icon: cmdIcons.Sparkles,
         group: t("group.ai", { defaultValue: "AI Copilot" }),
         action: async () => {
-          const { imageText, withImageText } = await import("../ai/vision");
+          const { imageText, withImageText, imagesNeedingAlt } = await import("../ai/vision");
           const { readWorkspaceBlob } = await import("../storage/workspace");
           const doc = useAppStore.getState().doc.content;
-          // Images still named after their file (no spaces) or with no alt.
-          const targets = [...doc.matchAll(/!\[([^\]\s]*)\]\(([^)\s"]+)\)/g)].filter((m) => !/^(https?:|data:)/.test(m[2]));
+          // Images with no alt, or still named after their file — a real
+          // one-word description ("logo") is kept.
+          const targets = imagesNeedingAlt(doc);
           if (!targets.length) {
             showAiToast(t("toast.imageAlt.none"), "info");
             return;
@@ -1627,11 +1628,11 @@ export function useCommands({
           let next = doc;
           let done = 0;
           for (const m of targets) {
-            const blob = await readWorkspaceBlob(m[2]).catch(() => null);
+            const blob = await readWorkspaceBlob(m.url).catch(() => null);
             if (!blob) continue;
             const res = await imageText(blob, getLocale()).catch(() => null);
             if (!res || res.source === "none") continue;
-            next = withImageText(next, m[2], m[1], res);
+            next = withImageText(next, m.url, m.alt, res);
             done++;
           }
           if (next !== useAppStore.getState().doc.content && useAppStore.getState().doc.content === doc) useAppStore.getState().setContent(next);
