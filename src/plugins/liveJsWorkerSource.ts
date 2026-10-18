@@ -23,7 +23,7 @@ if (self.trustedTypes && !self.trustedTypes.defaultPolicy) {
 // worker as a second layer, also in dev where no CSP header is served.
 (function() {
   var names = ["fetch", "XMLHttpRequest", "WebSocket", "WebSocketStream", "EventSource", "WebTransport",
-    "importScripts", "indexedDB", "caches", "BroadcastChannel", "Worker", "SharedWorker"];
+    "importScripts", "indexedDB", "caches", "BroadcastChannel", "Worker", "SharedWorker", "FontFace"];
   var targets = [];
   for (var o = self; o; o = Object.getPrototypeOf(o)) targets.push(o);
   names.forEach(function(name) {
@@ -41,7 +41,58 @@ if (self.trustedTypes && !self.trustedTypes.defaultPolicy) {
   var post = self.postMessage.bind(self);
   var closeWorker = self.close.bind(self);
   var setT = setTimeout;
+  var setI = typeof setInterval === "function" ? setInterval : null;
   var clearT = clearTimeout;
+  var MakeFunction = Function;
+
+  // No import(), not even one built from a string. WebKit does not apply
+  // the runner's script-src to a dynamic import() from a worker (blob:,
+  // data: or module), and an opaque-origin frame cannot start a worker from
+  // a URL that would carry its own CSP (SecurityError in every engine), so
+  // the CSP cannot close this one (docs/security/headers.md, open item 11).
+  // Instead: (1) a run whose source contains the word "import" anywhere is
+  // refused before it is compiled. Conservative on purpose — strings and
+  // comments count too — because then no lexer can be fooled (an escaped
+  // keyword like \\u0069mport is a SyntaxError). (2) Every way to compile a
+  // string after that check is removed: eval, the Function / AsyncFunction /
+  // GeneratorFunction / AsyncGeneratorFunction constructors (also through
+  // .constructor) and string handlers of setTimeout / setInterval.
+  // Only ASCII identifier characters count as "part of a longer name":
+  // a non-ASCII one may be whitespace (U+00A0, U+2028, …) next to a real
+  // import. Treating a name like éimport as a match is the safe mistake.
+  var IMPORT_WORD = /(^|[^A-Za-z0-9_$])import(?![A-Za-z0-9_$])/;
+  (function() {
+    var refuse = function() { throw new TypeError("live-js does not compile strings (eval, Function and string timers are off)"); };
+    // Keeps \`x instanceof Function\` and Function.prototype.call working.
+    refuse.prototype = MakeFunction.prototype;
+    var lock = function(t, name, value) {
+      try { Object.defineProperty(t, name, { value: value, writable: false, configurable: false }); } catch (e) {}
+    };
+    var protos = [
+      MakeFunction.prototype,
+      Object.getPrototypeOf(MakeFunction("return async function() {}")()),
+      Object.getPrototypeOf(MakeFunction("return function*() {}")()),
+      Object.getPrototypeOf(MakeFunction("return async function*() {}")()),
+    ];
+    protos.forEach(function(p) { if (p) lock(p, "constructor", refuse); });
+    var timer = function(real) {
+      return function(handler) {
+        if (typeof handler !== "function") refuse();
+        return real.apply(self, arguments);
+      };
+    };
+    var safeTimeout = timer(setT);
+    var safeInterval = setI ? timer(setI) : undefined;
+    // Not on the last link (Object.prototype): a non-writable inherited name
+    // would make \`obj.setTimeout = …\` on plain objects fail silently, and
+    // the real functions never live there.
+    for (var o = self; o && Object.getPrototypeOf(o) !== null; o = Object.getPrototypeOf(o)) {
+      lock(o, "eval", refuse);
+      lock(o, "Function", refuse);
+      lock(o, "setTimeout", safeTimeout);
+      lock(o, "setInterval", safeInterval);
+    }
+  })();
 
   var toParts = function(args) {
     var list = Array.prototype.slice.call(args);
@@ -113,7 +164,10 @@ if (self.trustedTypes && !self.trustedTypes.defaultPolicy) {
       // unhandled rejection in the worker, which propagates as a worker
       // error and surfaces as pageerror in the parent. With "return", the
       // outer .then(_, errHandler) catches it cleanly.
-      var runner = new Function(
+      if (IMPORT_WORD.test(source)) {
+        throw new TypeError("live-js has no import(): code that contains the word \\"import\\" does not run (the sandbox has no network)");
+      }
+      var runner = new MakeFunction(
         "console",
         "return (async function() {\\n" + source + "\\n})();"
       );

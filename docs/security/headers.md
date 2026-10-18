@@ -272,13 +272,16 @@ Plan 2.1 leaves no open scheme in the desktop policy. It has no `unsafe-eval`, a
    few known self-hosting setups should be listed.
 10. **Managing allowed image hosts.** "Always allow" has no settings screen to undo it
     yet. `forgetRemoteImageHost()` exists, and clearing site data resets the list.
-11. **live-js in WebKit: a dynamic `import()` reaches the network.** In CI's Playwright
-    WebKit, `import("https://…")` from live-js code was requested and answered. fetch,
-    XHR, WebSocket, EventSource, importScripts, sendBeacon and nested workers stayed
-    blocked. Chromium and Firefox refuse the import under the runner's CSP; WebKit
-    apparently does not apply that CSP to the runner's blob: worker. The leak is limited:
-    the run happens only on a click, and the worker has an opaque origin with no storage,
-    so it can reveal the note's own code and that it ran. Fixing it means choosing a
-    sandbox change, for example refusing `import` in the code (eval and Function
-    included) or a runner whose worker gets its own CSP. `e2e/security.spec.ts` pins
-    the current WebKit behaviour.
+11. **Closed: live-js in WebKit, a dynamic `import()` reached the network.** WebKit
+    does not apply the runner's `script-src` to a dynamic `import()` from a worker. A CI
+    probe on #233 showed it for blob: and data: workers, classic and module alike; fetch
+    stayed blocked there, so `connect-src` does apply. Giving the worker its own CSP from a
+    same-origin URL is not possible: an opaque-origin frame cannot start a worker from a
+    URL (SecurityError in Chromium, an error event in Firefox and WebKit). So the worker
+    itself closes it (`src/plugins/liveJsWorkerSource.ts`): it refuses any run whose source
+    contains the word `import`, even in strings and comments, before compiling it, and it
+    removes every way to compile a string afterwards: `eval`, the `Function`,
+    `AsyncFunction`, `GeneratorFunction` and `AsyncGeneratorFunction` constructors (also
+    through `.constructor`), and string handlers of `setTimeout` / `setInterval`.
+    `FontFace` is removed too. `e2e/security.spec.ts` expects nothing to leave in all three
+    engines, including imports built from strings.

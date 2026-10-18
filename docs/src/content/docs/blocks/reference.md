@@ -56,7 +56,7 @@ console.log(total(prices))   // 49
 - Blocks share state in the order they **run**. Each block runs when it renders and when you click **Run**; runs are queued and execute one at a time.
 - `shared=name` (for example ` ```live-js shared=physics `) gives a separate named scope inside the same document. Different documents never share a scope.
 - **Reset scope** (shown on shared blocks) discards the worker and every global in it; the next run starts fresh. Re-run the blocks you depend on afterwards.
-- Sandboxing is unchanged: the worker has no DOM and no access to the page, shared mode adds no module or network-import support (the page CSP still applies inside the worker), and a run that exceeds the 8-second timeout is stopped. A timeout terminates the worker, which also resets the scope.
+- Sandboxing is unchanged: the worker has no DOM and no access to the page, shared mode adds no module or network-import support (code that contains the word `import` does not run, and `eval`, `new Function` and string timers are off), and a run that exceeds the 8-second timeout is stopped. A timeout terminates the worker, which also resets the scope.
 - An unused scope is disposed five minutes after the last shared block of that document unmounts.
 
 ## Live Lua
