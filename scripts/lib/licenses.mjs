@@ -181,6 +181,11 @@ export function classifyLicense(raw) {
     return { level: r.level, reason, license: text };
   } catch {
     const r = classifyId(text);
+    // A malformed expression ("(GPL-3.0-only", "MIT OR") must not hide a
+    // forbidden id inside it: its ids are classified one by one and the worst counts.
+    const ids = tokenize(text.replace(/[()]/g, " ")).filter((t) => !["AND", "OR", "WITH"].includes(t));
+    const worstId = ids.length > 1 || (ids.length === 1 && ids[0] !== text) ? ids.map((id) => ({ id, ...classifyId(id.replace(/\+$/, "-or-later")) })).reduce((a, b) => (RANK[b.level] > RANK[a.level] ? b : a)) : null;
+    if (worstId && worstId.level === "fail" && r.level !== "fail") return { level: worstId.level, reason: `malformed licence expression; it names ${worstId.id}: ${worstId.reason}`, license: text };
     return { level: r.level, reason: r.reason, license: text };
   }
 }
@@ -328,7 +333,8 @@ export function checkNpm(lock, { readPackage, readLicenseFile, hidden = HIDDEN_C
     byKey.set(key, { area: "npm", name: p.name, version: p.version, license: c.license, level, reason, via: p.via, optional: p.optional, paths: [p.path] });
   }
   const findings = [...byKey.values()];
-  for (const u of unresolved) findings.push({ area: "npm", name: u, version: "", license: "", level: "warn", reason: "required dependency missing from package-lock.json", via: "", optional: false, paths: [], structural: true });
+  // A required package the lock does not have was never classified: it fails until the lock is fixed (npm install).
+  for (const u of unresolved) findings.push({ area: "npm", name: u, version: "", license: "", level: "fail", reason: "required dependency missing from package-lock.json (never classified; regenerate the lock)", via: "", optional: false, paths: [], structural: true });
   return findings;
 }
 

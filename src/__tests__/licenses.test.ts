@@ -91,6 +91,9 @@ describe("classifyLicense", () => {
     ["GPL-3.0-only WITH Classpath-exception-2.0x", "fail"],
     ["GPL-2.0-only WITH LLVM-exception-junk", "fail"],
     ["GPL-3.0-only WITH GCC-exception-3.1", "warn"],
+    // A malformed expression still fails on a forbidden id inside it.
+    ["(GPL-3.0-only", "fail"],
+    ["MIT OR (AGPL-3.0", "fail"],
   ];
   it.each(cases)("%s → %s", (raw, level) => {
     expect(classifyLicense(raw).level).toBe(level);
@@ -157,6 +160,14 @@ describe("walkProduction", () => {
 
   it("refuses a v1 lockfile", () => {
     expect(() => walkProduction({ lockfileVersion: 1, dependencies: {} })).toThrow(/lockfileVersion 2/);
+  });
+});
+
+describe("checkNpm: an unresolved required dependency", () => {
+  it("fails: it was never classified", () => {
+    const lock = { packages: { "": { dependencies: { gone: "1.0.0" } } } };
+    const f: Finding[] = checkNpm(lock);
+    expect(f).toEqual([expect.objectContaining({ name: "gone (from root)", level: "fail", reason: expect.stringMatching(/missing from package-lock\.json/) })]);
   });
 });
 
