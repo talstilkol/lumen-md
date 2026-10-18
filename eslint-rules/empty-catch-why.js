@@ -24,7 +24,8 @@ export default {
         const block = node.body;
         if (block.body.length > 0) return;
         const comments = source.getCommentsInside(block);
-        if (comments.some((c) => WHY.test(c.value.replace(/^\*+/, "")))) return;
+        // Leading whitespace and block-comment stars ("/**", "/*\n * why: …") are not text.
+        if (comments.some((c) => WHY.test(c.value.replace(/^[\s*]+/, "")))) return;
         context.report({ node: block, messageId: "missing" });
       },
     };

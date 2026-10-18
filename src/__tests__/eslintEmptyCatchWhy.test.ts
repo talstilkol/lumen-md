@@ -17,6 +17,7 @@ new RuleTester({ languageOptions: { ecmaVersion: 2022, sourceType: "module" } })
     "try { f(); } catch { /* why: storage denied in private mode */ }",
     "try { f(); } catch (e) {\n  // why: best effort, the next save retries\n}",
     "try { f(); } catch { /** why: already closed */ }",
+    "try { f(); } catch {\n  /*\n   * why: storage may be unavailable\n   */\n}",
     "function h() { try { f(); } catch { return null; } }",
     "try { f(); } catch (e) { log(e); }",
   ],
@@ -24,5 +25,6 @@ new RuleTester({ languageOptions: { ecmaVersion: 2022, sourceType: "module" } })
     { code: "try { f(); } catch {}", errors: [{ messageId: "missing" }] },
     { code: "try { f(); } catch (e) { /* ignore */ }", errors: [{ messageId: "missing" }] },
     { code: "try { f(); } catch { // why:\n}", errors: [{ messageId: "missing" }] },
+    { code: "try { f(); } catch {\n  /*\n   * ignore\n   */\n}", errors: [{ messageId: "missing" }] },
   ],
 });
