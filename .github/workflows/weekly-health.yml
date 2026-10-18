@@ -71,11 +71,21 @@ jobs:
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with: { node-version: 22, cache: npm }
       - run: npm ci
-      # Exact versions, not in package.json: only this job needs them.
+      # Exact versions, not in package.json: only this job needs them. In a
+      # prefix of their own (npm install into this tree fails in arborist,
+      # "Cannot read properties of null (reading 'edgesOut')"); vitest and
+      # typescript are the project's own, linked in.
       - name: Install Stryker
-        run: npm install --no-save "@stryker-mutator/core@$STRYKER_VERSION" "@stryker-mutator/vitest-runner@$STRYKER_VERSION"
+        run: |
+          d="$RUNNER_TEMP/stryker"
+          mkdir -p "$d" && cd "$d"
+          npm init -y > /dev/null
+          npm install --legacy-peer-deps --ignore-scripts --no-audit --no-fund \
+            "@stryker-mutator/core@$STRYKER_VERSION" "@stryker-mutator/vitest-runner@$STRYKER_VERSION"
+          ln -sfn "$GITHUB_WORKSPACE/node_modules/vitest" node_modules/vitest
+          ln -sfn "$GITHUB_WORKSPACE/node_modules/typescript" node_modules/typescript
       - name: Stryker
-        run: npx stryker run stryker/stryker.config.json
+        run: node "$RUNNER_TEMP/stryker/node_modules/@stryker-mutator/core/bin/stryker.js" run stryker/stryker.config.json
       - name: Mutation score
         if: always()
         run: |
