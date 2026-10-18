@@ -636,7 +636,7 @@ export function SearchDialog({ open, onClose, onOpenFile }: Props) {
                           if (!src) return;
                           onClose();
                           onOpenFile(src.path, src.content);
-                          if (c.line) window.dispatchEvent(new CustomEvent("lumen-reveal-line", { detail: { line: c.line } }));
+                          if (c.line) window.dispatchEvent(new CustomEvent("lumen-reveal-line", { detail: { line: c.line, content: src.content } }));
                         }}
                         style={{ display: "flex", gap: 6, alignItems: "baseline", width: "100%", textAlign: "start", padding: "3px 0", background: "none", border: 0, color: "inherit", cursor: c.path ? "pointer" : "default" }}
                       >

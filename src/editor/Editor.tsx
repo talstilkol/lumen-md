@@ -9,6 +9,7 @@
  *   canonical example. Same rule applies to any code path inside
  *   `update(u: ViewUpdate)` that wants to dispatch synchronously.
  */
+import { readyToReveal } from "./revealLine";
 import { useEffect, useImperativeHandle, useRef, useState, forwardRef } from "react";
 import { Compartment, EditorState } from "@codemirror/state";
 import { EditorView, keymap, highlightActiveLine, Decoration, WidgetType } from "@codemirror/view";
@@ -676,17 +677,21 @@ export const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
   }, []);
 
   // `lumen-reveal-line` {line} (1-based): jump to and select that line —
-  // used by vault citations (T29). Retries briefly while a just-opened
-  // note is still loading into the editor.
+  // used by vault citations (T29). With `content` it waits until the
+  // just-opened note has actually loaded into the editor.
   useEffect(() => {
     function onReveal(e: Event) {
-      const line = (e as CustomEvent<{ line: number }>).detail?.line;
+      const detail = (e as CustomEvent<{ line: number; content?: string }>).detail;
+      const line = detail?.line;
       if (!line || line < 1) return;
       let tries = 0;
       const go = () => {
         const view = viewRef.current;
-        if (!view || view.state.doc.lines < line) {
-          if (tries++ < 10) setTimeout(go, 100);
+        // Wait for the opened note itself (not the previous one); after
+        // ~2 s fall back to whatever is shown.
+        const ready = !!view && readyToReveal(view.state.doc, line, tries < 20 ? detail.content : undefined);
+        if (!view || !ready) {
+          if (tries++ < 20) setTimeout(go, 100);
           return;
         }
         const l = view.state.doc.line(line);
