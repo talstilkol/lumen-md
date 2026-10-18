@@ -51,6 +51,40 @@ const recommendable = (e: OllamaCatalogEntry) => e.recommend !== false && e.lice
 
 const RANK: Record<HebrewSupport, number> = { strong: 3, good: 2, basic: 1, none: 0 };
 
+export type LicenceClass = "allowed" | "conditional" | "forbidden";
+
+/**
+ * Installed models the catalog does not list by name or family: every Llama
+ * and Gemma release (and fine-tunes named after them, e.g. Hermes) is under a
+ * custom licence; Aya is CC-BY-NC (models/registry.json, plan 1.7).
+ */
+const FAMILY_LICENCE: Array<{ re: RegExp; class: LicenceClass }> = [
+  { re: /^(llama|codellama|hermes|gemma|codegemma)/i, class: "conditional" },
+  { re: /^aya/i, class: "forbidden" },
+];
+
+/** The licence class of an installed (possibly tagged) model name: the catalog entry, its family, then the name. null = unknown. */
+export function licenceClassOf(name: string): LicenceClass | null {
+  const base = name.replace(/:latest$/, "");
+  const exact = OLLAMA_CATALOG.find((e) => e.name === base);
+  if (exact?.licence) return exact.licence.class;
+  const family = base.split(":")[0];
+  const fam = OLLAMA_CATALOG.find((e) => e.name.split(":")[0] === family && e.licence);
+  if (fam?.licence) return fam.licence.class;
+  const leaf = family.split("/").pop() ?? family;
+  return FAMILY_LICENCE.find((f) => f.re.test(leaf))?.class ?? null;
+}
+
+/**
+ * May an agent run this installed model without the user choosing it?
+ * Custom-licence (conditional) and forbidden models need an explicit pick
+ * (`lumen.ollama.model`), like the recommendation above (plan 1.7).
+ */
+export function autoPickable(name: string): boolean {
+  const c = licenceClassOf(name);
+  return c !== "conditional" && c !== "forbidden";
+}
+
 /** How well a (possibly tagged) installed model name handles Hebrew. */
 export function hebrewSupportOf(name: string): HebrewSupport | null {
   const base = name.replace(/:latest$/, "");

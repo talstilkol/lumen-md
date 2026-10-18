@@ -1,6 +1,6 @@
 /** T27 — Hebrew model catalog, Hebrew-aware picks, and the answer-language rule. */
 import { describe, it, expect } from "vitest";
-import { hebrewSupportOf, prefersHebrew, recommendOllamaModel } from "../ai/modelCatalog";
+import { autoPickable, hebrewSupportOf, licenceClassOf, prefersHebrew, recommendOllamaModel } from "../ai/modelCatalog";
 import { pickModel, pickToolModel } from "../agents/executors/ollama";
 import { recommendWebLlmModel, type Hardware } from "../ai/modelManager";
 import { sameScript } from "../agents/runtime";
@@ -39,26 +39,68 @@ describe("model catalog", () => {
 
 describe("Hebrew-aware picks", () => {
   const installed = [
+    { name: "granite3.3:8b", params: 8.2, family: "granite" },
     { name: "llama3.1:8b", params: 8, family: "llama" },
     { name: "aya-expanse:8b", params: 8, family: "cohere" },
     { name: "qwen2.5:7b", params: 7.6, family: "qwen2" },
   ];
   it("prefers the model with better Hebrew in the same tier", () => {
-    expect(pickModel("small", installed, null, { hebrew: true })).toBe("aya-expanse:8b");
-    expect(pickModel("small", installed, null)).not.toBe("aya-expanse:8b");
+    expect(pickModel("small", installed, null, { hebrew: true })).toBe("qwen2.5:7b");
+    expect(pickModel("small", installed, null)).toBe("granite3.3:8b");
   });
   it("keeps the Hebrew ranking when a tool agent falls back to a tool-capable model", () => {
-    const tools = (m: { name: string }) => !m.name.startsWith("aya");
+    const tools = (m: { name: string }) => !m.name.startsWith("granite");
     expect(pickToolModel("small", installed, tools, { hebrew: true })).toBe("qwen2.5:7b");
-    expect(pickToolModel("small", installed, tools)).toBe("llama3.1:8b");
+    expect(pickToolModel("small", installed, tools)).toBe("qwen2.5:7b");
     expect(pickToolModel("small", installed, () => false, { hebrew: true })).toBeNull();
   });
   it("still honours an explicitly configured model of the tier", () => {
     expect(pickModel("small", installed, "llama3.1:8b", { hebrew: true })).toBe("llama3.1:8b");
+    expect(pickModel("small", installed, "aya-expanse:8b")).toBe("aya-expanse:8b");
   });
   it("prefers a multilingual in-browser model", () => {
     const hw: Hardware = { webgpu: true, f16: true, maxBufferMB: 4096, deviceMemoryGB: 16, cores: 8, mobile: false };
     expect(recommendWebLlmModel("small", hw, { multilingual: true })).toMatch(/Qwen3-4B|Llama-3\.2-3B/);
+  });
+});
+
+describe("custom-licence models are never picked on their own (plan 1.7)", () => {
+  it("knows the licence class of installed names, tags and families", () => {
+    expect(licenceClassOf("qwen2.5:7b")).toBe("allowed");
+    expect(licenceClassOf("qwen3:30b")).toBe("allowed");
+    expect(licenceClassOf("llama3.1:70b")).toBe("conditional");
+    expect(licenceClassOf("gemma3:latest")).toBe("conditional");
+    expect(licenceClassOf("llama3.3:70b")).toBe("conditional");
+    expect(licenceClassOf("gemma2:9b")).toBe("conditional");
+    expect(licenceClassOf("hermes3:8b")).toBe("conditional");
+    expect(licenceClassOf("hf.co/bartowski/Llama-3.2-3B-Instruct-GGUF:Q4_K_M")).toBe("conditional");
+    expect(licenceClassOf("aya-expanse:32b")).toBe("forbidden");
+    expect(licenceClassOf("mistral:7b")).toBeNull();
+    expect(autoPickable("mistral:7b")).toBe(true);
+    expect(autoPickable("llama3.1:8b")).toBe(false);
+  });
+
+  const llamaAndQwen = [
+    { name: "llama3.1:8b", params: 8, family: "llama" },
+    { name: "qwen2.5:7b", params: 7.6, family: "qwen2" },
+  ];
+  const gemmaAndQwen = [
+    { name: "gemma3:12b", params: 12.2, family: "gemma3" },
+    { name: "qwen2.5:7b", params: 7.6, family: "qwen2" },
+  ];
+  it("with no model configured, the larger Llama / in-band Gemma is skipped for the open-licence model", () => {
+    expect(pickModel("small", llamaAndQwen, null)).toBe("qwen2.5:7b");
+    expect(pickModel("medium", gemmaAndQwen, null)).toBe("qwen2.5:7b");
+    expect(pickModel("large", gemmaAndQwen, null)).toBe("qwen2.5:7b");
+    expect(pickToolModel("small", llamaAndQwen, () => true)).toBe("qwen2.5:7b");
+  });
+  it("a configured model outside the requested tier does not open the door to other custom-licence models", () => {
+    expect(pickModel("medium", [...gemmaAndQwen, ...llamaAndQwen.slice(0, 1)], "qwen2.5:7b")).toBe("qwen2.5:7b");
+  });
+  it("the configured custom-licence model is still used, in or out of its tier", () => {
+    expect(pickModel("medium", gemmaAndQwen, "gemma3:12b")).toBe("gemma3:12b");
+    expect(pickModel("large", gemmaAndQwen, "gemma3:12b")).toBe("gemma3:12b");
+    expect(pickToolModel("small", llamaAndQwen, () => true, { configured: "llama3.1:8b" })).toBe("llama3.1:8b");
   });
 });
 
