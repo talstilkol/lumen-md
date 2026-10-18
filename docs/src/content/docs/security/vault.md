@@ -1,6 +1,6 @@
 ---
 title: How Lumen stores your secrets
-description: API keys and tokens are encrypted at rest; on desktop they go to the OS keychain.
+description: API keys and tokens are encrypted at rest; in the macOS and Windows desktop apps they go to the OS keychain.
 ---
 
 Lumen keeps the secrets it needs on your device: AI provider keys, cloud

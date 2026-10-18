@@ -102,7 +102,9 @@ export function commandMentions(line) {
   for (const m of line.matchAll(/`⌘K\s*→\s*([^`]+)`/g)) { seen.add(m.index); take(m[1].replace(/^"|"(?=\s*(→|$))/g, "")); }
   for (const m of line.matchAll(/⌘K`?\s*→\s*(?:\*\*([^*]+)\*\*|"([^"]+)")/g)) if (!seen.has(m.index - 1)) take(m[1] ?? m[2]);
   // Command: `Name` (`⌘K`)
-  for (const m of line.matchAll(/Command:\s*`([^`]+)`/g)) take(m[1]);
+  // and any further `Name` on that line joined by "and" / "or" / "," (e.g. "Command: `A` … and `B`")
+  const cmd = line.match(/Commands?:\s*(.*)$/);
+  if (cmd) for (const m of cmd[1].matchAll(/`([^`]+)`/g)) if (!/^⌘|^Ctrl|^Cmd/.test(m[1])) take(m[1]);
   // Command palette → **Name**
   for (const m of line.matchAll(/[Cc]ommand palette\s*→\s*\*\*([^*]+)\*\*/g)) take(m[1]);
   // run **Name** from the command palette / palette (…) and run **Name**

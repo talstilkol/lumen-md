@@ -8,6 +8,7 @@ describe("docs-sync (plan 0.18)", () => {
     expect(commandMentions('**AI policy** (`⌘K → "AI: Local or Cloud Policy"`):')).toEqual(["AI: Local or Cloud Policy"]);
     expect(commandMentions("Then `⌘K → Research: Settings → SearXNG on this machine` and enter")).toEqual(["Research: Settings"]);
     expect(commandMentions("Command: `AI: Usage & Cost This Month` (`⌘K`).")).toEqual(["AI: Usage & Cost This Month"]);
+    expect(commandMentions("Command: `AI: Batch over a Folder (half price)…`, then `AI: Check Batch Jobs`.")).toEqual(["AI: Batch over a Folder (half price)…", "AI: Check Batch Jobs"]);
     expect(commandMentions("Command palette → **Trusted plugin signing keys…**")).toEqual(["Trusted plugin signing keys…"]);
     expect(commandMentions("Run **Enable TypeScript checks in code blocks** from the command palette.")).toEqual(["Enable TypeScript checks in code blocks"]);
     expect(commandMentions('Turn it on from the command palette ("Turn on suggesting mode") or with')).toEqual(["Turn on suggesting mode"]);
