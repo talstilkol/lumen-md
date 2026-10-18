@@ -62,3 +62,22 @@ describe("answer in the input's language", () => {
     expect(sameScript("An English input sentence here.", "Whatever language answer is fine here").ok).toBe(true);
   });
 });
+
+describe("language check exemptions (review fixes)", () => {
+  const he = "כתוב לי פונקציית ג׳אווהסקריפט שמחברת שני מספרים ומחזירה את התוצאה, בבקשה.";
+  it("does not count code as Latin prose", () => {
+    expect(sameScript(he, "```js\nfunction add(a, b) {\n  return a + b; // returns the sum of both numbers\n}\n```").ok).toBe(true);
+    expect(sameScript(he, "הנה הפונקציה:\n```js\nfunction add(a, b) { return a + b; }\n```\nהיא מחזירה את הסכום.").ok).toBe(true);
+    expect(sameScript(he, "קראו ל־`computeTheTotalAmountOfEverything()` כדי לקבל סכום").ok).toBe(true);
+    // Prose outside the code still counts.
+    expect(sameScript(he, "Here is the function you asked for, it adds both numbers:\n```js\nadd()\n```").ok).toBe(false);
+  });
+
+  it("translation templates are language-independent", async () => {
+    const { templaterAgent } = await import("../agents/defs");
+    const lang = templaterAgent.language as (i: { text: string; extra: { templateId: string } }) => string;
+    expect(lang({ text: "x", extra: { templateId: "he.translate_to_en" } })).toBe("any");
+    expect(lang({ text: "x", extra: { templateId: "he.summarize" } })).toBe("input");
+  });
+});
+
