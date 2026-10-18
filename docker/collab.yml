@@ -23,6 +23,8 @@ services:
     environment:
       PORT: "4445"
       COLLAB_DATA_DIR: /data/collab
+      # Rooms the legacy y-websocket server left in /data/yjs are imported once at start.
+      COLLAB_LEGACY_LEVELDB_DIR: /data/yjs
       COLLAB_ACCESS_KEY: ${COLLAB_ACCESS_KEY:-}
       COLLAB_TOKEN_SECRET: ${COLLAB_TOKEN_SECRET:?set COLLAB_TOKEN_SECRET (at least 32 characters)}
       COLLAB_TOKEN_TTL_S: ${COLLAB_TOKEN_TTL_S:-600}

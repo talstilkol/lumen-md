@@ -14,6 +14,10 @@ import { requestRoomToken, RoomTokenError, roomTokenUrl } from "../collab/roomTo
 // @ts-expect-error -- plain ESM server module, no types
 import { createCollabServer } from "../../sync-server/collab-server.mjs";
 // @ts-expect-error -- plain ESM server module, no types
+import { importLegacyRooms } from "../../sync-server/collab/legacyImport.mjs";
+// @ts-expect-error -- plain ESM server module, no types
+import { openStore } from "../../sync-server/collab/sqliteStore.mjs";
+// @ts-expect-error -- plain ESM server module, no types
 import { issueRoomToken, signingKey, verifyRoomToken } from "../../sync-server/collab/roomToken.mjs";
 
 interface App {
@@ -95,6 +99,33 @@ describe("collab server", () => {
     const res = await fetch(url.replace("ws:", "http:") + "/healthz");
     expect(res.status).toBe(200);
     expect(await res.json()).toMatchObject({ ok: true, service: "lumen-collab", persistence: "sqlite" });
+    // Behind a path prefix too, like the token endpoint (review: #237).
+    expect((await fetch(url.replace("ws:", "http:") + "/collab/healthz")).status).toBe(200);
+  });
+
+  it("imports rooms left by the legacy LevelDB server once, never over a room it already has (review: #237)", async () => {
+    const dataDir = tempDir();
+    const legacy = new Map<string, Y.Doc>();
+    for (const [name, text] of [["room-old", "from leveldb"], ["room-both", "stale leveldb copy"]] as const) {
+      const d = new Y.Doc();
+      d.getText("t").insert(0, text);
+      legacy.set(name, d);
+    }
+    const source = { getAllDocNames: async () => [...legacy.keys()], getYDoc: async (n: string) => { const d = new Y.Doc(); Y.applyUpdate(d, Y.encodeStateAsUpdate(legacy.get(n)!)); return d; } };
+    const store = openStore(dataDir);
+    const current = new Y.Doc();
+    current.getText("t").insert(0, "newer sqlite copy");
+    store.save("room-both", Y.encodeStateAsUpdate(current));
+    expect(await importLegacyRooms(store, source, { marker: "leveldb-import:x" })).toEqual({ imported: 1, skipped: 1, already: false });
+    expect(await importLegacyRooms(store, source, { marker: "leveldb-import:x" })).toMatchObject({ already: true });
+    store.close();
+
+    // The imported room is served like any other.
+    const { url } = await start(dataDir);
+    const c = await join_(url, "room-old", async () => (await requestRoomToken(url, "room-old", ACCESS)).token);
+    expect(c.doc.getText("t").toString()).toBe("from leveldb");
+    const b = await join_(url, "room-both", async () => (await requestRoomToken(url, "room-both", ACCESS)).token);
+    expect(b.doc.getText("t").toString()).toBe("newer sqlite copy");
   });
 
   it("issues a room token only with the access key", async () => {

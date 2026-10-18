@@ -96,7 +96,10 @@ VITE_YJS_WEBSOCKET_URL=wss://lumen-collab.fly.dev
 ```
 
 The old y-websocket + LevelDB server (`persistent-server.js`) speaks a
-different protocol; the app no longer connects to it.
+different protocol; the app no longer connects to it. Its rooms are not
+lost: at start the new server imports, once, every room in
+`COLLAB_LEGACY_LEVELDB_DIR` (the image sets `/data/yjs`, where the old one
+stored them) without overwriting rooms SQLite already has.
 
 ---
 

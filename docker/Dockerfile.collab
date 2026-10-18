@@ -8,7 +8,8 @@ FROM node:22-alpine
 WORKDIR /app
 
 COPY sync-server/package.json sync-server/package-lock.json* ./
-RUN npm ci --omit=dev --omit=optional || npm install --omit=dev --omit=optional
+# Optional deps included: y-leveldb reads rooms left by the legacy server.
+RUN npm ci --omit=dev || npm install --omit=dev
 
 COPY sync-server/collab-server.mjs ./
 COPY sync-server/collab ./collab
@@ -20,6 +21,8 @@ EXPOSE 4445
 # collab.sqlite and backups/ live on the /data volume.
 VOLUME /data
 ENV COLLAB_DATA_DIR=/data/collab
+# Rooms stored by the legacy y-websocket server are imported once at start.
+ENV COLLAB_LEGACY_LEVELDB_DIR=/data/yjs
 
 HEALTHCHECK --interval=30s --timeout=5s --retries=3 \
   CMD wget -q -O - http://localhost:4445/healthz > /dev/null || exit 1

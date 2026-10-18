@@ -67,6 +67,8 @@ services:
       # Hocuspocus + SQLite (plan 3.6): collab.sqlite and backups/ on the
       # mounted volume. See docker/collab.yml to run it on its own.
       COLLAB_DATA_DIR: /data/collab
+      # Rooms the legacy y-websocket server left in /data/yjs are imported once at start.
+      COLLAB_LEGACY_LEVELDB_DIR: /data/yjs
       # The operator access key (Collab settings → "Server access token"):
       # it buys a short-lived per-room token. Empty = open server (warned).
       COLLAB_ACCESS_KEY: ${LUMEN_COLLAB_TOKEN:-}

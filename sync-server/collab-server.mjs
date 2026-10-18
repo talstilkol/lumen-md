@@ -25,6 +25,9 @@
  *   COLLAB_DATA_DIR (default ./.collab-data): collab.sqlite plus backups/.
  *   A backup is taken every COLLAB_BACKUP_INTERVAL_MS (default 1 h) and on
  *   shutdown; the newest COLLAB_BACKUP_KEEP (default 24) are kept.
+ *   Upgrading from persistent-server.js: rooms in the LevelDB directory
+ *   COLLAB_LEGACY_LEVELDB_DIR (the Docker image sets /data/yjs) are imported
+ *   once at start, never overwriting a room SQLite already has.
  *
  * ── Health ────────────────────────────────────────────────────────────────
  *   GET /healthz → 200 {"ok":true,"service":"lumen-collab","persistence":"sqlite"}
@@ -38,6 +41,7 @@ import * as Y from "yjs";
 import { fileURLToPath } from "node:url";
 import { resolve } from "node:path";
 import { openStore } from "./collab/sqliteStore.mjs";
+import { importLegacyDir } from "./collab/legacyImport.mjs";
 import { DEFAULT_TOKEN_TTL_S, accessKeyOk, issueRoomToken, signingKey, verifyRoomToken } from "./collab/roomToken.mjs";
 
 const ROOM_NAME = /^[\w-]{1,128}$/;
@@ -52,6 +56,7 @@ export function createCollabServer(opts = {}) {
     port = 4445,
     host,
     dataDir = resolve(".collab-data"),
+    legacyLeveldbDir = "",
     accessKey = "",
     tokenSecret = "",
     tokenTtlS = DEFAULT_TOKEN_TTL_S,
@@ -105,7 +110,8 @@ export function createCollabServer(opts = {}) {
     },
     async onRequest({ request, response }) {
       const pathname = (request.url || "/").split("?")[0];
-      if (pathname !== "/healthz" && pathname !== "/health") return;
+      // Also behind a path prefix (wss://host/collab → /collab/healthz), like /token.
+      if (!/\/health(z)?$/.test(pathname)) return;
       response.writeHead(200, { "Content-Type": "application/json", "Cache-Control": "no-store" });
       response.end(JSON.stringify({ ok: true, status: "ok", service: "lumen-collab", persistence: "sqlite" }));
       throw null;
@@ -146,6 +152,8 @@ export function createCollabServer(opts = {}) {
     store,
     backup,
     async listen() {
+      // Before accepting connections, so nobody opens an "empty" legacy room.
+      if (legacyLeveldbDir) await importLegacyDir(store, legacyLeveldbDir, { log });
       await server.listen();
       return server.address.port;
     },
@@ -169,6 +177,8 @@ function fromEnv(env) {
     port: num(env.PORT, 4445),
     host: env.HOST || undefined,
     dataDir: resolve(env.COLLAB_DATA_DIR || ".collab-data"),
+    // persistent-server.js used YJS_STORAGE_DIR / LEVELDB_PATH.
+    legacyLeveldbDir: env.COLLAB_LEGACY_LEVELDB_DIR || env.YJS_STORAGE_DIR || env.LEVELDB_PATH || "",
     // COLLAB_TOKEN is the access key's older name (T49, persistent-server.js).
     accessKey: env.COLLAB_ACCESS_KEY || env.COLLAB_TOKEN || "",
     tokenSecret: env.COLLAB_TOKEN_SECRET || "",

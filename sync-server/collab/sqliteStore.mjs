@@ -25,7 +25,10 @@ export function openStore(dir, { keepBackups = 24 } = {}) {
       state BLOB NOT NULL,
       updated_at INTEGER NOT NULL
     );
+    CREATE TABLE IF NOT EXISTS meta (key TEXT PRIMARY KEY, value TEXT NOT NULL);
   `);
+  const getMeta = db.prepare("SELECT value FROM meta WHERE key = ?");
+  const setMeta = db.prepare("INSERT INTO meta (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value");
   const select = db.prepare("SELECT state FROM documents WHERE name = ?");
   const upsert = db.prepare(
     "INSERT INTO documents (name, state, updated_at) VALUES (?, ?, ?) " +
@@ -41,6 +44,12 @@ export function openStore(dir, { keepBackups = 24 } = {}) {
     },
     save(name, state, nowMs = Date.now()) {
       upsert.run(name, state, nowMs);
+    },
+    getMeta(key) {
+      return getMeta.get(key)?.value ?? null;
+    },
+    setMeta(key, value) {
+      setMeta.run(key, value);
     },
     /** Write a consistent copy next to the database; returns its path. */
     backup(nowMs = Date.now()) {
