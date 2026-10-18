@@ -1,8 +1,10 @@
 /**
  * Build-time CSP extension for deployment-specific endpoints.
  *
- * The checked-in policies (index.html <meta>, public/_headers,
- * docker/nginx.conf) list every *public* host the app talks to. The
+ * The checked-in policies (rendered from security/policy.json into
+ * index.html <meta>, public/_headers, vercel.json, the nginx configs and
+ * tauri.conf.json by scripts/headers.mjs) list every *public* host the
+ * app talks to. The
  * workers a deployment runs itself — SSO, billing/entitlements, publish,
  * audit, marketplace, a self-hosted LanguageTool, Supabase — live on
  * origins only known at build time (`VITE_*` env vars, often

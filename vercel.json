@@ -27,12 +27,12 @@
         },
         {
           "key": "Permissions-Policy",
-          "value": "interest-cohort=(), geolocation=(self), microphone=(self), camera=(self)"
+          "value": "interest-cohort=(), geolocation=(), microphone=(self), camera=()"
         }
       ]
     },
     {
-      "source": "/((?!playground-runner\\.html|livejs-runner\\.html|tesseract/|assets/(?:graphviz|ruby|tsCheck)\\.worker-).*)",
+      "source": "/((?!playground-runner\\.html|livejs-runner\\.html|tesseract/|assets/(?:graphviz|ruby|tsCheck)\\.worker-|webr/).*)",
       "headers": [
         {
           "key": "X-Frame-Options",
@@ -109,6 +109,15 @@
     },
     {
       "source": "/assets/((?:graphviz|ruby|tsCheck)\\.worker-.*)",
+      "headers": [
+        {
+          "key": "Content-Security-Policy",
+          "value": "default-src 'self'; script-src 'self' 'unsafe-eval' 'wasm-unsafe-eval'; connect-src 'self' blob: data:; worker-src 'self' blob:; object-src 'none'; base-uri 'none'"
+        }
+      ]
+    },
+    {
+      "source": "/webr/(.*)",
       "headers": [
         {
           "key": "Content-Security-Policy",
