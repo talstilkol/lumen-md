@@ -150,6 +150,57 @@ These are written in `policy.json` under `hosts`.
 | nginx (both) | no HSTS | plain-HTTP listener behind the operator's TLS terminator. `includeSubDomains; preload` on someone else's domain is their call |
 | deploy nginx | COOP `same-origin`, COEP `credentialless` | cross-origin isolation (D9). COEP goes on every document and worker it serves |
 
+## Images in notes and WebSockets (plan 2.2)
+
+**Images from other sites.** The web policies keep `img-src https:` and `media-src https:`
+because a static policy cannot hold one user's choices. The renderer enforces the choice
+instead (`src/lib/remoteImages.ts`):
+
+- An `<img>` from another origin renders as a placeholder. This covers Markdown images and
+  raw HTML `<img>`, `srcset` included, in the preview, the fast first paint, search answers
+  and the WYSIWYG editor. The placeholder shows the alt text and the host, with **Load**
+  (this image, until the page reloads) and **Always allow _host_**. The allowed hosts are
+  kept in this browser (`localStorage["lumen.remoteImages.allowedHosts"]`).
+- The raw-HTML sanitizer removes the other-site loads that no placeholder guards: a
+  `<source srcset>` (the `<picture>` falls back to its `<img>`), video posters, the legacy
+  `background` attribute, and `href` on anything but links (SVG `<image>`). `<video>` /
+  `<audio>` lose `autoplay`, get `preload="none"`, and keep at most one other-site URL,
+  their own `src` (the first `<source src>` is hoisted, `<track>` dropped). The preview
+  holds that `src` back behind the same placeholder, because WebKit fetches a video `src`
+  despite `preload="none"` (seen in CI's Playwright WebKit).
+- HTML export keeps the real `<img>`, because the exported file is for its readers. Print
+  shows what the preview shows.
+- Not covered: images inside Mermaid labels, the live-SVG block (DOMPurify, a separate
+  surface), and the sandboxed playground runner (`img-src *`).
+
+`e2e/remote-images.spec.ts` counts the requests: a tracking pixel makes none until the
+user clicks.
+
+**WebSockets.** `connect-src` no longer has a bare `ws:` / `wss:`. These are the
+WebSockets the app opens:
+
+| Socket | Where it is set | How the policy allows it |
+|---|---|---|
+| Collab signaling, Lumen's server `wss://signal.lumen.md` | `src/collab/yjs.ts` (default) | listed |
+| Public signaling `wss://signaling.yjs.dev`, `wss://y-webrtc-signaling-eu.herokuapp.com` | same, only when the user opts in | listed |
+| The deployment's signaling / persistent collab server | `VITE_WEBRTC_SIGNALING_URL` (comma list), `VITE_YJS_WEBSOCKET_URL` | added at build time (`src/build/cspEndpoints.ts`, `WEBSOCKET_ENV_VARS`) |
+| A server the user types into Collab settings | `localStorage` `lumen.collab.signaling` / `lumen.collab.ws` | only when the build lists it (`VITE_CSP_CONNECT_EXTRA`). Otherwise `yjs.ts` skips it with a warning, and the dialog says so |
+| Vite's dev server (HMR) | `npm run dev` | the dev page alone gets `ws://*:<port>` / `wss://*:<port>`. CSP3 `'self'` covers the same host too. No build carries it |
+
+IPv6 addresses cannot be named: CSP source lists have no IPv6 literal, and Chromium ignores
+`ws://[::1]:4444` as an invalid source. The build skips such a URL with a warning, and the
+runtime check (`src/lib/cspConnect.ts`) treats one as allowing nothing, as the browser does.
+Give an IPv6-only server a hostname.
+
+A search of `src/` found no other socket: no `EventSource`, no Supabase realtime channel,
+and `WebSocketStream` / `WebTransport` appear only in the live-js and Ruby blocklists.
+Checked in Chromium: `wss://signal.lumen.md` is allowed, an unlisted `wss://` host is
+blocked, `ws://` on the page's own host is allowed through `'self'`, and `ws://*:5173`
+parses and matches only that port. Not checked: Firefox and WebKit (CI runs the e2e
+suite there against the dev server, whose HMR socket now relies on the explicit
+`ws://*:5173`), the y-websocket persistent server end to end, and Supabase realtime if a
+future feature subscribes to a channel (it would need `wss://*.supabase.co`).
+
 ## Desktop (Tauri)
 
 Plan 2.1 leaves no open scheme in the desktop policy. It has no `unsafe-eval`, and
@@ -178,7 +229,7 @@ Plan 2.1 leaves no open scheme in the desktop policy. It has no `unsafe-eval`, a
   
   The web policies list the same hosts and keep a trailing `https:` for images inside
   notes. The desktop policy drops that `https:`, so images from other sites in a note do
-  not load on desktop.
+  not load on desktop. The placeholder (plan 2.2) says so and offers no Load button.
 - **`media-src`** is `'self' blob:`. `<video>` / `<audio>` from other sites in a note do
   not play on desktop.
 - **Not checked here:** rendering inside the desktop app (Graphviz, Python, OCR, the
@@ -215,3 +266,9 @@ Plan 2.1 leaves no open scheme in the desktop policy. It has no `unsafe-eval`, a
    (plan 2.2) still holds them back until the user allows them.
 8. **Desktop builds with deployment endpoints** use `--tauri-config` (see "Desktop
    (Tauri)"). This has not been tried in a real desktop build.
+9. **Collab servers typed in at runtime** (plan 2.2). Before, the bare `wss:` let any
+   such server connect. Now it connects only when the build lists it, and otherwise the
+   default server is used. Decide whether that is right for the hosted app, or whether a
+   few known self-hosting setups should be listed.
+10. **Managing allowed image hosts.** "Always allow" has no settings screen to undo it
+    yet. `forgetRemoteImageHost()` exists, and clearing site data resets the list.

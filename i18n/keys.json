@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-10-18T04:31:22.318Z",
+  "generated_at": "2026-10-18T08:57:26.027Z",
   "source": "src/i18n/index.ts (en bundle)",
-  "count": 1426,
+  "count": 1436,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -7657,6 +7657,72 @@
       "key": "chart.alternatives",
       "en": "Chart suggestions",
       "vars": []
+    },
+    {
+      "key": "remoteImage.label",
+      "en": "Image from {host}",
+      "vars": [
+        "host"
+      ]
+    },
+    {
+      "key": "remoteImage.untitled",
+      "en": "Image",
+      "vars": []
+    },
+    {
+      "key": "remoteImage.blocked",
+      "en": "From {host}, not loaded",
+      "vars": [
+        "host"
+      ]
+    },
+    {
+      "key": "remoteImage.desktop",
+      "en": "From {host}. The desktop app doesn't load images from other sites.",
+      "vars": [
+        "host"
+      ]
+    },
+    {
+      "key": "remoteImage.load",
+      "en": "Load",
+      "vars": []
+    },
+    {
+      "key": "remoteImage.loadHint",
+      "en": "Load this image once. {host} will see that you opened this note.",
+      "vars": [
+        "host"
+      ]
+    },
+    {
+      "key": "remoteImage.allowHost",
+      "en": "Always allow {host}",
+      "vars": [
+        "host"
+      ]
+    },
+    {
+      "key": "remoteImage.allowHint",
+      "en": "Load images from {host} in every note, in this browser.",
+      "vars": [
+        "host"
+      ]
+    },
+    {
+      "key": "remoteMedia.label",
+      "en": "Video or audio from {host}",
+      "vars": [
+        "host"
+      ]
+    },
+    {
+      "key": "collab.settings.cspBlocked",
+      "en": "This deployment's security policy blocks {url}, so it won't be used. Add it at build time (VITE_CSP_CONNECT_EXTRA).",
+      "vars": [
+        "url"
+      ]
     }
   ]
 }

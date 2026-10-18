@@ -1424,5 +1424,15 @@
   "cmd.ai.cancel": "AI: إلغاء",
   "cmd.ai.cancel.hint": "يوقف كل طلبات الذكاء الاصطناعي الجارية (Esc يفعل ذلك أيضاً)",
   "toast.aiCancelled": "أُلغي طلب الذكاء الاصطناعي ({count})",
-  "toast.aiNothingRunning": "لا يوجد طلب ذكاء اصطناعي جارٍ"
+  "toast.aiNothingRunning": "لا يوجد طلب ذكاء اصطناعي جارٍ",
+  "remoteImage.label": "صورة من {host}",
+  "remoteImage.untitled": "صورة",
+  "remoteImage.blocked": "من {host}، لم تُحمَّل",
+  "remoteImage.desktop": "من {host}. تطبيق سطح المكتب لا يحمّل الصور من مواقع أخرى.",
+  "remoteImage.load": "تحميل",
+  "remoteImage.loadHint": "تحميل هذه الصورة مرة واحدة. سيعرف {host} أنك فتحت هذه الملاحظة.",
+  "remoteImage.allowHost": "السماح دائمًا لـ {host}",
+  "remoteImage.allowHint": "تحميل الصور من {host} في كل الملاحظات، في هذا المتصفح.",
+  "collab.settings.cspBlocked": "سياسة الأمان في هذا النشر تحظر {url}، لذا لن يُستخدم. أضِفه وقت البناء (VITE_CSP_CONNECT_EXTRA).",
+  "remoteMedia.label": "فيديو أو صوت من {host}"
 }

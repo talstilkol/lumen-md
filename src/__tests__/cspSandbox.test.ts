@@ -93,8 +93,7 @@ describe("Tauri CSP", () => {
   it("no open scheme in any fetch directive (plan 2.1): self plus known hosts only", () => {
     for (const d of ["default-src", "connect-src", "img-src", "media-src", "frame-src", "font-src", "style-src", "script-src", "worker-src"]) {
       const open = directive(csp, d).filter((s) => ["https:", "http:", "*", "ws:", "wss:"].includes(s));
-      // ws: / wss: leave connect-src in plan 2.2; until then only https:/http:/* are checked there.
-      expect(d === "connect-src" ? open.filter((s) => s !== "ws:" && s !== "wss:") : open, d).toEqual([]);
+      expect(open, d).toEqual([]);
     }
   });
   it("connect-src is the page's explicit list plus the IPC protocol", () => {

@@ -1424,5 +1424,15 @@
   "cmd.ai.cancel": "IA : annuler",
   "cmd.ai.cancel.hint": "Arrête toutes les requêtes IA en cours (Échap aussi)",
   "toast.aiCancelled": "Requête IA annulée ({count})",
-  "toast.aiNothingRunning": "Aucune requête IA en cours"
+  "toast.aiNothingRunning": "Aucune requête IA en cours",
+  "remoteImage.label": "Image de {host}",
+  "remoteImage.untitled": "Image",
+  "remoteImage.blocked": "De {host}, non chargée",
+  "remoteImage.desktop": "De {host}. L’application de bureau ne charge pas les images d’autres sites.",
+  "remoteImage.load": "Charger",
+  "remoteImage.loadHint": "Charger cette image une seule fois. {host} saura que vous avez ouvert cette note.",
+  "remoteImage.allowHost": "Toujours autoriser {host}",
+  "remoteImage.allowHint": "Charger les images de {host} dans toutes les notes, dans ce navigateur.",
+  "collab.settings.cspBlocked": "La politique de sécurité de ce déploiement bloque {url} ; il ne sera donc pas utilisé. Ajoutez-le à la compilation (VITE_CSP_CONNECT_EXTRA).",
+  "remoteMedia.label": "Vidéo ou audio de {host}"
 }

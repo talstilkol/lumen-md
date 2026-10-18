@@ -1424,5 +1424,15 @@
   "cmd.ai.cancel": "AI：取消",
   "cmd.ai.cancel.hint": "停止所有正在运行的 AI 请求（Esc 也可以）",
   "toast.aiCancelled": "已取消 AI 请求（{count}）",
-  "toast.aiNothingRunning": "没有正在运行的 AI 请求"
+  "toast.aiNothingRunning": "没有正在运行的 AI 请求",
+  "remoteImage.label": "来自 {host} 的图片",
+  "remoteImage.untitled": "图片",
+  "remoteImage.blocked": "来自 {host}，未加载",
+  "remoteImage.desktop": "来自 {host}。桌面应用不加载其他网站的图片。",
+  "remoteImage.load": "加载",
+  "remoteImage.loadHint": "仅加载这张图片一次。{host} 会知道你打开了这篇笔记。",
+  "remoteImage.allowHost": "始终允许 {host}",
+  "remoteImage.allowHint": "在此浏览器中，所有笔记都加载来自 {host} 的图片。",
+  "collab.settings.cspBlocked": "此部署的安全策略阻止了 {url}，因此不会使用它。请在构建时添加（VITE_CSP_CONNECT_EXTRA）。",
+  "remoteMedia.label": "来自 {host} 的视频或音频"
 }

@@ -11,9 +11,17 @@
  * or data:text/html.
  * Iframes (embeds written as HTML) keep an https src and always get a
  * sandbox without same-origin powers over the app.
+ * Other-site loads (plan 2.2): <img> stays and is held back by the
+ * preview's placeholder (src/lib/remoteImages.ts). Everything else that
+ * would fetch from another site on its own is removed here: <source srcset>
+ * (a <picture> falls back to its <img>), video posters, the legacy
+ * `background` attribute and SVG `href`s. <video> / <audio> lose autoplay,
+ * get preload="none", and keep at most one other-site URL (their own src),
+ * which the preview holds back like an image.
  */
 import { visit, SKIP } from "unist-util-visit";
 import type { Element, Root, Parent } from "hast";
+import { remoteImageHost, srcSetUrls } from "../lib/remoteImages";
 
 const DROP_ELEMENTS = new Set([
   "script", "style", "noscript", "template", "object", "embed", "applet",
@@ -68,6 +76,31 @@ function cleanSrcSet(value: string, tag: string): string | null {
   return ok.length ? ok.join(", ") : null;
 }
 
+/** Links navigate only when clicked; on any other element an href loads. */
+const LINK_TAGS = new Set(["a", "area"]);
+
+/** Remove the other-site loads that no placeholder guards (see header). */
+function dropRemoteLoads(el: Element, props: NonNullable<Element["properties"]>) {
+  const remote = (v: unknown) => remoteImageHost(Array.isArray(v) ? v.join(" ") : String(v ?? "")) !== null;
+  if (el.tagName === "source" && typeof props.srcSet === "string" && srcSetUrls(props.srcSet).some((u) => remoteImageHost(u))) delete props.srcSet;
+  for (const key of ["poster", "background"]) if (key in props && remote(props[key])) delete props[key];
+  if (!LINK_TAGS.has(el.tagName)) for (const key of ["href", "xLinkHref"]) if (key in props && remote(props[key])) delete props[key];
+  if (el.tagName === "video" || el.tagName === "audio") {
+    delete props.autoPlay;
+    props.preload = "none";
+    // The preview gates other-site media on the element's own src, like an
+    // <img> (WebKit fetches a video src despite preload="none"). Hoist the
+    // first other-site <source src> to it and drop other-site <source> /
+    // <track> children, so that one src is all a load can come from.
+    const kids = el.children ?? [];
+    const remoteKid = (k: (typeof kids)[number]): k is Element =>
+      k.type === "element" && (k.tagName === "source" || k.tagName === "track") && remote(k.properties?.src);
+    const first = kids.find((k): k is Element => remoteKid(k) && k.tagName === "source");
+    if (first && !props.src) props.src = String(first.properties!.src);
+    el.children = kids.filter((k) => !remoteKid(k));
+  }
+}
+
 function cleanElement(el: Element) {
   const props = el.properties ?? {};
   // GFM task lists render as disabled checkboxes; no other input survives.
@@ -110,6 +143,7 @@ function cleanElement(el: Element) {
   if (el.tagName === "a" && typeof props.target === "string" && props.target !== "_self") {
     props.rel = ["noopener", "noreferrer"];
   }
+  dropRemoteLoads(el, props);
   if (el.tagName === "iframe") {
     if (typeof props.src !== "string") return false;
     props.sandbox = ["allow-scripts", "allow-popups", "allow-presentation", "allow-same-origin"];

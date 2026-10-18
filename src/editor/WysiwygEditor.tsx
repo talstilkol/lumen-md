@@ -18,6 +18,7 @@ import { setBlockType, toggleMark, wrapIn } from "@milkdown/prose/commands";
 import type { EditorView } from "@milkdown/prose/view";
 import { Plugin } from "@milkdown/prose/state";
 import { wysiwygBidiPlugin } from "./wysiwygBidi";
+import { remoteImagePlugin } from "./remoteImageView";
 import { wrapInList } from "prosemirror-schema-list";
 import { dragHandlePlugin } from "./dragHandles";
 import { buildIndentKeymap } from "./keymapExtra";
@@ -747,6 +748,8 @@ export default function WysiwygEditor({ value, onChange }: Props) {
             dragHandlePlugin,
             // T25 — every block reads in the direction of its own text.
             wysiwygBidiPlugin(),
+            // Plan 2.2 — images from other sites wait for the user.
+            remoteImagePlugin(),
             new Plugin({
               appendTransaction: (trs) => {
                 if (trs.some((t) => t.docChanged || t.storedMarksSet)) pendingSinceRef.current = Date.now();

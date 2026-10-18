@@ -1535,6 +1535,17 @@ const en: Strings = {
   "chart.reason.radar": "{k} measures for {n} items — compare their profiles.",
   "chart.reason.summary": "No category or time column — comparing column averages.",
   "chart.alternatives": "Chart suggestions",
+  // Plan 2.2: images from other sites wait for the user.
+  "remoteImage.label": "Image from {host}",
+  "remoteImage.untitled": "Image",
+  "remoteImage.blocked": "From {host}, not loaded",
+  "remoteImage.desktop": "From {host}. The desktop app doesn't load images from other sites.",
+  "remoteImage.load": "Load",
+  "remoteImage.loadHint": "Load this image once. {host} will see that you opened this note.",
+  "remoteImage.allowHost": "Always allow {host}",
+  "remoteImage.allowHint": "Load images from {host} in every note, in this browser.",
+  "remoteMedia.label": "Video or audio from {host}",
+  "collab.settings.cspBlocked": "This deployment's security policy blocks {url}, so it won't be used. Add it at build time (VITE_CSP_CONNECT_EXTRA).",
 };
 
 
