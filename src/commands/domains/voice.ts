@@ -4,7 +4,6 @@ import { useAppStore } from "../../store/useStore";
 import { t, getLocale } from "../../i18n";
 import { uiConfirm, uiPrompt } from "../../ui/PromptDialog";
 import { getAiPolicy } from "../../ai/policy";
-import { startVoiceRecording } from "../../ui/VoiceDictation";
 import { showAiToast } from "../../ui/AiToast";
 
 /** Read the note aloud (text to speech). */
@@ -78,6 +77,9 @@ export function buildVoiceCommands(): Command[] {
         });
         const lang = langMap[langChoice ?? ""] ?? (useAppStore.getState().locale === "he" ? "he-IL" : "en-US");
 
+        // Loaded on use, as for the voice memo: dictation (and the
+        // transcription code it brings) stays out of the startup bundle.
+        const { startVoiceRecording } = await import("../../ui/VoiceDictation");
         startVoiceRecording(lang);
       },
     },
