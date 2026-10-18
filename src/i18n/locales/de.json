@@ -1383,6 +1383,7 @@
   "toast.imageAlt.none": "Keine Bilder ohne Alternativtext in dieser Notiz",
   "toast.imageAlt.working": "Bilder werden auf dem Gerät gelesen: {count} …",
   "toast.imageAlt.done": "Alternativtext ergänzt: {done} von {count}",
+  "toast.digest.readFailed": "Zusammenfassung nicht gespeichert: {count} geänderte Notizen konnten nicht gelesen werden. Bitte erneut versuchen.",
   "cmd.note.read": "Vorlesen",
   "cmd.note.read.hint": "Liest diese Notiz mit den Systemstimmen vor (auch Hebräisch); erneut ausführen zum Stoppen",
   "toast.tts.unavailable": "Dieser Browser kann nicht vorlesen",

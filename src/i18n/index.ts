@@ -436,6 +436,7 @@ const en: Strings = {
   "toast.imageAlt.none": "No images that need alt text in this note",
   "toast.imageAlt.working": "Reading images on this device: {count}…",
   "toast.imageAlt.done": "Alt text added: {done} of {count}",
+  "toast.digest.readFailed": "Digest not saved: {count} changed notes couldn't be read. Try again.",
   "vaultCite.unsupported": "No verified citation — check this answer against your notes.",
   "vaultCite.summary": "Citations checked against your notes: {ok} of {total} verified",
   "vaultCite.verified": "Quote found in the note",

@@ -1578,7 +1578,7 @@ export function useCommands({
         action: async () => {
           const { listWorkspace, readWorkspaceFile, writeWorkspaceFile, isOPFSAvailable } = await import("../storage/workspace");
           if (!isOPFSAvailable()) return;
-          const { buildDigest } = await import("../agents/defs/digester");
+          const { writeDigest } = await import("../agents/defs/digester");
           const KEY = "lumen.digest.last";
           const now = Date.now();
           let since = now - 24 * 3600_000;
@@ -1589,15 +1589,17 @@ export function useCommands({
           }
           const lang = getLocale();
           const folder = lang === "he" ? "סיכומים" : "Digests";
-          const entries = (await listWorkspace({ includeAssets: false })).filter(
-            (e) => e.modified > since && /\.md$/i.test(e.path) && !e.path.startsWith(".") && !e.path.startsWith(`${folder}/`),
-          );
-          const notes = await Promise.all(entries.map(async (entry) => ({ entry, content: await readWorkspaceFile(entry.path).catch(() => "") })));
           const fmtDate = (ms: number) => new Date(ms).toLocaleString(getLocale(), { dateStyle: "medium", timeStyle: "short" });
-          const body = buildDigest({ since, now, notes, lang, formatDate: fmtDate });
-          const d = new Date(now);
-          const path = `${folder}/${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}.md`;
-          await writeWorkspaceFile(path, body);
+          const res = await writeDigest(
+            { list: () => listWorkspace({ includeAssets: false }), read: readWorkspaceFile, write: writeWorkspaceFile },
+            { since, now, lang, folder, formatDate: fmtDate },
+          );
+          if (!res.ok) {
+            // The checkpoint stays, so these notes are in the next digest.
+            showAiToast(t("toast.digest.readFailed", { count: res.failed.length }), "error");
+            return;
+          }
+          const { path, body } = res;
           try {
             localStorage.setItem(KEY, String(now));
           } catch {

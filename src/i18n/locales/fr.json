@@ -1383,6 +1383,7 @@
   "toast.imageAlt.none": "Aucune image sans texte alternatif dans cette note",
   "toast.imageAlt.working": "Lecture des images sur l’appareil : {count}…",
   "toast.imageAlt.done": "Texte alternatif ajouté : {done} sur {count}",
+  "toast.digest.readFailed": "Résumé non enregistré : {count} notes modifiées n’ont pas pu être lues. Réessayez.",
   "cmd.note.read": "Lire à voix haute",
   "cmd.note.read.hint": "Lit cette note avec les voix du système (hébreu compris) ; relancer pour arrêter",
   "toast.tts.unavailable": "Ce navigateur ne peut pas lire à voix haute",

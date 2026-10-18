@@ -1383,6 +1383,7 @@
   "toast.imageAlt.none": "此笔记中没有需要替代文本的图片",
   "toast.imageAlt.working": "正在本设备读取图片：{count}…",
   "toast.imageAlt.done": "已添加替代文本：{count} 张中的 {done} 张",
+  "toast.digest.readFailed": "摘要未保存：有 {count} 篇已更改的笔记无法读取。请重试。",
   "cmd.note.read": "朗读",
   "cmd.note.read.hint": "用系统语音朗读此笔记（包括希伯来语）；再次运行可停止",
   "toast.tts.unavailable": "此浏览器不支持朗读",
