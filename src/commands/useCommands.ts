@@ -1614,6 +1614,7 @@ export function useCommands({
             return;
           }
           const content = useAppStore.getState().doc.content;
+          await tts.voicesReady(); // why: the list is empty until voiceschanged on a fresh page
           // No voice on this device, but the browser offers network voices: ask once (never under local-only).
           if (!tts.hasLocalVoiceFor(content, getLocale()) && tts.offersNetworkVoices() && !tts.networkVoicesAllowed() && getAiPolicy() !== "local-only") {
             const yes = await uiConfirm({ title: t("tts.networkVoice.title"), message: t("tts.networkVoice.body"), okLabel: t("tts.networkVoice.ok") });

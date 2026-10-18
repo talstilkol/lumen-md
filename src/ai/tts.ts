@@ -6,18 +6,22 @@
  */
 import { hebrewRatio } from "../text/hebrew";
 import { getAiPolicy } from "./policy";
-import { recordSpeechVoice } from "./privacyLedger";
+import { addSpeechVoiceBytes, recordSpeechVoice } from "./privacyLedger";
 
 /** Opt-in for voices that synthesize on a server (Chrome's "Google …" voices send the text out). */
 export const NETWORK_VOICES_KEY = "lumen.tts.networkVoices";
 
+/** The opt-in for this page session, kept even when storage refuses to save it. */
+let sessionOptIn = false;
+
 /** May a voice that is not `localService` be used? Never under local-only; otherwise only after opt-in. */
 export function networkVoicesAllowed(): boolean {
   if (getAiPolicy() === "local-only") return false;
+  if (sessionOptIn) return true;
   try {
     return localStorage.getItem(NETWORK_VOICES_KEY) === "1";
   } catch {
-    // why: storage blocked (private mode) — treat as not opted in
+    // why: storage blocked (private mode) — only this session's opt-in counts
     return false;
   }
 }
@@ -76,10 +80,23 @@ export function speakableSentences(markdown: string): Sentence[] {
   return out;
 }
 
-/** BCP-47 language for a sentence: Hebrew script → he-IL, else the UI's. */
+/** UI languages whose own script is not Latin: a Latin-script sentence there is not in the UI language. */
+const NON_LATIN_UI = /^(he|iw|ar|ja|zh|ru|uk|el|ko|hi|th)\b/i;
+
+/**
+ * BCP-47 language for a sentence, from its script: Hebrew → he-IL, Arabic →
+ * ar, Cyrillic → ru, kana → ja, Han → zh-CN (ja under a Japanese UI). Latin
+ * script takes the UI language when that language is written in Latin
+ * script, and English otherwise — so an English note under a Hebrew UI asks
+ * for an English voice, not a Hebrew one.
+ */
 export function langFor(text: string, fallback: string): string {
   if (hebrewRatio(text) > 0.3) return "he-IL";
-  if (/[؀-ۿ]/.test(text)) return "ar";
+  if (/[\u0600-\u06FF]/.test(text)) return "ar";
+  if (/[\u3040-\u30FF]/.test(text)) return "ja";
+  if (/[\u4E00-\u9FFF]/.test(text)) return /^ja\b/i.test(fallback) ? "ja" : "zh-CN";
+  if (/[\u0400-\u04FF]/.test(text)) return /^(ru|uk|bg|sr)\b/i.test(fallback) ? fallback : "ru";
+  if (/[A-Za-z\u00C0-\u024F]/.test(text) && NON_LATIN_UI.test(fallback)) return "en";
   return fallback;
 }
 
@@ -88,11 +105,33 @@ export function ttsAvailable(): boolean {
 }
 
 export function allowNetworkVoices(): void {
+  sessionOptIn = true;
   try {
     localStorage.setItem(NETWORK_VOICES_KEY, "1");
   } catch {
-    // why: storage blocked — the opt-in then lasts only until reload, which is acceptable
+    // why: storage blocked — sessionOptIn keeps the opt-in until reload
   }
+}
+
+/**
+ * The browser's voice list. It is often empty on a fresh page until
+ * `voiceschanged` fires, so wait for that (or `timeoutMs`) before deciding a
+ * voice is missing.
+ */
+export function voicesReady(timeoutMs = 1500): Promise<SpeechSynthesisVoice[]> {
+  if (!ttsAvailable()) return Promise.resolve([]);
+  const synth = window.speechSynthesis;
+  const now = synth.getVoices();
+  if (now.length) return Promise.resolve(now);
+  return new Promise((resolve) => {
+    const done = () => {
+      clearTimeout(timer);
+      synth.removeEventListener?.("voiceschanged", done);
+      resolve(synth.getVoices());
+    };
+    const timer = setTimeout(done, timeoutMs);
+    synth.addEventListener?.("voiceschanged", done);
+  });
 }
 
 /** Does the browser list any voice that synthesizes on a server? */
@@ -120,6 +159,12 @@ export function isSpeaking(): boolean {
   return speaking;
 }
 
+/** Test hook. */
+export function __resetTts(): void {
+  sessionOptIn = false;
+  speaking = false;
+}
+
 export function stopSpeaking(): void {
   speaking = false;
   if (ttsAvailable()) window.speechSynthesis.cancel();
@@ -137,9 +182,12 @@ export async function speak(markdown: string, opts: { uiLang: string; rate?: num
   const sentences = speakableSentences(markdown);
   if (!sentences.length) return true;
   speaking = true;
+  await voicesReady();
   let hadVoice = true;
   const allowNetwork = networkVoicesAllowed();
-  const logged = new Set<string>();
+  /** Ledger entry per network voice; every sentence sent through it adds its UTF-8 size. */
+  const logged = new Map<string, number>();
+  const utf8 = new TextEncoder();
   for (const s of sentences) {
     if (!speaking) break;
     const lang = langFor(s.text, opts.uiLang === "he" ? "he-IL" : opts.uiLang);
@@ -152,9 +200,13 @@ export async function speak(markdown: string, opts: { uiLang: string; rate?: num
       continue;
     }
     u.voice = v;
-    if (!v.localService && !logged.has(v.name)) {
-      logged.add(v.name);
-      recordSpeechVoice(v.name, lang, s.text.length);
+    if (!v.localService) {
+      const bytes = utf8.encode(s.text).length;
+      const id = logged.get(v.name);
+      if (id === undefined) {
+        const entry = recordSpeechVoice(v.name, lang, bytes);
+        if (entry) logged.set(v.name, entry.id);
+      } else addSpeechVoiceBytes(id, bytes);
     }
     u.rate = opts.rate ?? 1;
     opts.onSentence?.(s);

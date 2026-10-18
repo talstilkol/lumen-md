@@ -12,13 +12,23 @@ phrase**; an earlier draft of these docs described one that was never shipped.
 
 | Where Lumen runs | How secrets are stored |
 |---|---|
-| Browser / installed web app | Each secret is encrypted with AES-GCM-256 under a WebCrypto key that is **non-extractable** and lives only in IndexedDB. A copied browser profile or a storage export does not reveal the secrets. |
+| Browser / installed web app | Each secret is encrypted with AES-GCM-256 under a WebCrypto key that is **non-extractable**: no script can read out the raw key bytes. The secrets no longer sit in localStorage as plain text, so a glance in DevTools, a localStorage dump or a synced settings export shows only ciphertext. |
 | Desktop app on macOS / Windows | The operating system's keychain (Keychain / Credential Manager). Lumen keeps only the secret names, so it knows what to load. |
 | Old engines without IndexedDB or WebCrypto | Plain localStorage, as before. Lumen reports this mode instead of hiding it. |
 
-**Honest limit:** this protects data at rest. Code running inside Lumen's own
-origin could still ask WebCrypto to decrypt; the Content Security Policy and
-the HTML sanitizer are what keep foreign code out.
+**Honest limits:**
+
+- The key is stored in the same IndexedDB database as the encrypted
+  secrets, and Lumen decrypts them at startup without asking for a
+  password. Someone who copies the whole browser profile and opens it in
+  Lumen can therefore use the stored key and read the secrets.
+  Non-extractable stops the key from being *exported*, not from being
+  *used*. Protecting against a copied profile needs a password you type
+  (planned with whole-vault encryption, task 11.4) or the desktop app's
+  OS keychain.
+- Code running inside Lumen's own origin could also ask WebCrypto to
+  decrypt. The Content Security Policy and the HTML sanitizer are what
+  keep foreign code out.
 
 Plain-text secrets left by older versions are encrypted and moved at startup.
 

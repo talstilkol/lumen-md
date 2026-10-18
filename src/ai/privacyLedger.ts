@@ -259,9 +259,15 @@ export function recordWorkerRequest(url: string, method = "GET"): LedgerEntry | 
  * Record speech sent to a network voice (Web Speech synthesis is not a fetch the
  * ledger can see). Only called when the policy and the user's opt-in allow it.
  */
-export function recordSpeechVoice(voice: string, lang: string, chars: number): LedgerEntry | null {
-  const id = record({ host: `speech voice: ${voice}`, method: "SPEAK", bytesOut: chars, bytesIn: null, category: "cloud-text", reason: `Read aloud (${lang}) with a network voice`, policy: getAiPolicy(), decision: "allowed" });
+export function recordSpeechVoice(voice: string, lang: string, bytes: number): LedgerEntry | null {
+  const id = record({ host: `speech voice: ${voice}`, method: "SPEAK", bytesOut: bytes, bytesIn: null, category: "cloud-text", reason: `Read aloud (${lang}) with a network voice`, policy: getAiPolicy(), decision: "allowed" });
   return entries.find((x) => x.id === id) ?? null;
+}
+
+/** Add the size of another sentence sent through the same network voice (one entry per voice per reading). */
+export function addSpeechVoiceBytes(id: number, bytes: number): void {
+  const e = entries.find((x) => x.id === id);
+  if (e) patch(id, { bytesOut: e.bytesOut + bytes });
 }
 
 /** Install once at startup. `blocked` is called for every blocked request. */
