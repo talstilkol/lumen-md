@@ -33,9 +33,12 @@ export function planSteps({ pkg, exists, changed, flags }) {
   const only = flags.only?.length ? new Set(flags.only) : null;
   // A deleted file is a change too: what referenced it may break at build time or at run time.
   const codeChanged = changed === null || changed.some(isAppCode);
-  const changedCode = (changed ?? []).filter(isCodeFile);
-  // `vitest related` cannot trace a file that is gone: a deleted code file means the full suite.
+  // Unit-test inputs: e2e/ is Playwright's (no vitest test imports a spec).
+  const changedCode = (changed ?? []).filter((f) => isCodeFile(f) && !/^e2e\//.test(f));
+  // `vitest related` cannot trace a file that is gone, nor a JSON / HTML / CSS
+  // input (locales, public/_headers…) that tests read from disk: either means the full suite.
   const deletedCode = changedCode.filter((f) => !exists(f));
+  const otherInputs = (changed ?? []).filter((f) => !isCodeFile(f) && isAppCode(f) && !/^e2e\//.test(f));
   const coverage = flags.coverage && changed === null;
   /** @type {Step[]} */
   const steps = [
@@ -51,9 +54,13 @@ export function planSteps({ pkg, exists, changed, flags }) {
         : { id: "test", title: "Vitest", cmd: ["npx", "vitest", "run"], slow: true }
       : deletedCode.length
         ? { id: "test", title: `Vitest (full: ${deletedCode.length} code file(s) deleted)`, cmd: ["npx", "vitest", "run"], slow: true }
-        : { id: "test", title: "Vitest (related to the diff)", cmd: ["npx", "vitest", "related", "--run", ...changedCode], slow: true },
+        : otherInputs.length
+          ? { id: "test", title: `Vitest (full: non-code inputs changed, e.g. ${otherInputs[0]})`, cmd: ["npx", "vitest", "run"], slow: true }
+          : // --passWithNoTests: a changed file that no unit test covers is not a failure.
+            { id: "test", title: "Vitest (related to the diff)", cmd: ["npx", "vitest", "related", "--run", "--passWithNoTests", ...changedCode], slow: true, empty: changedCode.length === 0 },
     { id: "build", title: "Build", cmd: ["npm", "run", "-s", "build"], slow: true },
-    has(pkg, "budget") ? { id: "budget", title: "Bundle budget", cmd: ["npm", "run", "-s", "budget"], needs: ["dist"] } : { id: "budget", title: "Bundle budget", cmd: [], skipReason: "not here" },
+    // Measures this run's build (see buildState), never a dist/ left from earlier.
+    has(pkg, "budget") ? { id: "budget", title: "Bundle budget", cmd: ["npm", "run", "-s", "budget"] } : { id: "budget", title: "Bundle budget", cmd: [], skipReason: "not here" },
     { id: "e2e", title: "e2e (Chromium, production build)", cmd: ["e2e"], slow: true },
   ];
   for (const s of steps) {
@@ -61,7 +68,7 @@ export function planSteps({ pkg, exists, changed, flags }) {
     if (only && !only.has(s.id)) s.skipReason = "not selected";
     else if (skip.has(s.id)) s.skipReason = "skipped (--skip)";
     else if (s.needs?.some((p) => !exists(p))) s.skipReason = "not here";
-    else if (changed !== null && s.id === "test" && s.cmd.length === 4 && s.cmd[2] === "related") s.skipReason = "no code files in the diff";
+    else if (changed !== null && s.id === "test" && s.empty) s.skipReason = "no unit-test inputs in the diff";
     else if (changed !== null && (s.id === "build" || s.id === "budget" || s.id === "e2e") && !codeChanged) s.skipReason = "diff touches no app code";
   }
   return steps;
@@ -96,11 +103,39 @@ export function hookPlan(existing, { force = false } = {}) {
 }
 
 /**
- * Must e2e build first? Yes unless the Build step passed in this run: a
- * dist/ left from an earlier build (with --only e2e, or --skip build) may
- * not be this checkout.
+ * The build that budget and e2e use: "fresh" when the Build step passed in
+ * this run, "failed" when it failed (nothing to measure or serve), "none"
+ * when it did not run (--only budget, --skip build…): then they build first,
+ * since a dist/ left from earlier may not be this checkout.
  */
-export const e2eBuildFirst = (results) => !results.some((r) => r.id === "build" && r.status === "pass");
+export function buildState(results) {
+  const b = results.find((r) => r.id === "build" && r.status !== "skip");
+  return !b ? "none" : b.status === "pass" ? "fresh" : "failed";
+}
+
+/** Step ids, for --only / --skip. */
+export const STEP_IDS = ["typecheck", "hygiene", "lint", "i18n", "licenses", "headers", "test", "build", "budget", "e2e"];
+const BOOL_FLAGS = ["--help", "--h", "-h", "--changed", "--coverage", "--bail", "--install-hook", "--force"];
+const VALUE_FLAGS = ["--base", "--skip", "--only"];
+
+/** Problems with the command line: a typo must not turn into a green run without the requested checks. */
+export function argErrors(argv) {
+  const errors = [];
+  for (let i = 0; i < argv.length; i++) {
+    const a = argv[i];
+    if (VALUE_FLAGS.includes(a)) {
+      const v = argv[i + 1];
+      if (!v || v.startsWith("-")) {
+        errors.push(`${a} needs a value`);
+        continue;
+      }
+      i++;
+      if (a === "--base") continue;
+      for (const id of v.split(",").map((x) => x.trim()).filter(Boolean)) if (!STEP_IDS.includes(id)) errors.push(`${a}: unknown step "${id}" (steps: ${STEP_IDS.join(", ")})`);
+    } else if (!BOOL_FLAGS.includes(a)) errors.push(`unknown argument "${a}"`);
+  }
+  return errors;
+}
 
 /** e2e specs for a run: every spec for a full run; with --changed, changed specs plus the smoke test. */
 export function e2eSpecs(changed, allSpecs) {

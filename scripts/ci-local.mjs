@@ -22,11 +22,18 @@ import { spawn, spawnSync } from "node:child_process";
 import { existsSync, readFileSync, readdirSync, writeFileSync, chmodSync, mkdirSync, renameSync } from "node:fs";
 import { createServer } from "node:net";
 import { join, resolve } from "node:path";
-import { planSteps, e2eSpecs, i18nDrift, summary, coverageGate, hookPlan, e2eBuildFirst } from "./lib/ciLocal.mjs";
+import { fileURLToPath } from "node:url";
+import { planSteps, e2eSpecs, i18nDrift, summary, coverageGate, hookPlan, buildState, argErrors } from "./lib/ciLocal.mjs";
 
-const root = resolve(new URL("..", import.meta.url).pathname);
+// fileURLToPath, not `.pathname`: a checkout in "lumen md/" is "lumen%20md/" in the URL.
+const root = resolve(fileURLToPath(new URL("..", import.meta.url)));
 process.chdir(root);
 const argv = process.argv.slice(2);
+const badArgs = argErrors(argv);
+if (badArgs.length) {
+  console.error(`ci:local: ${badArgs.join("; ")}\nRun with --help for the usage.`);
+  process.exit(2);
+}
 const flag = (name) => argv.includes(`--${name}`);
 const opt = (name) => {
   const i = argv.indexOf(`--${name}`);
@@ -34,7 +41,7 @@ const opt = (name) => {
 };
 const list = (name) => (opt(name) ?? "").split(",").map((s) => s.trim()).filter(Boolean);
 
-if (flag("help") || flag("h")) {
+if (flag("help") || flag("h") || argv.includes("-h")) {
   console.log(readFileSync(new URL(import.meta.url)).toString().split("*/")[0]);
   process.exit(0);
 }
@@ -73,6 +80,8 @@ function changedFiles() {
     process.exit(2);
   }
   const files = new Set([
+    // New files not yet staged count too (untracked, not ignored).
+    ...(git("ls-files", "--others", "--exclude-standard") ?? "").split("\n"),
     ...(git("diff", "--name-only", mergeBase, "HEAD") ?? "").split("\n"),
     ...(git("diff", "--name-only") ?? "").split("\n"),
     ...(git("diff", "--name-only", "--cached") ?? "").split("\n"),
@@ -123,13 +132,25 @@ async function testStep(step) {
   return gate.ok ? 0 : 1;
 }
 
-/** `buildFirst`: no Build step passed in this run (see e2eBuildFirst). */
-async function e2eStep(changed, buildFirst) {
-  if (buildFirst) {
-    console.log("e2e: building this checkout first (a dist/ from an earlier build may not match it)");
-    const b = await run(["npm", "run", "-s", "build"]);
-    if (b !== 0) return b;
+/** Budget and e2e need this run's build (buildState): build first when there is none, never reuse an old dist/. */
+async function ensureBuild(step, state) {
+  if (state === "fresh") return 0;
+  if (state === "failed") {
+    console.error(`${step}: the Build step failed; nothing to ${step === "e2e" ? "serve" : "measure"}`);
+    return 1;
   }
+  console.log(`${step}: building this checkout first (a dist/ from an earlier build may not match it)`);
+  return run(["npm", "run", "-s", "build"]);
+}
+
+async function budgetStep(s, state) {
+  const b = await ensureBuild("budget", state);
+  return b !== 0 ? b : run(s.cmd);
+}
+
+async function e2eStep(changed, state) {
+  const b = await ensureBuild("e2e", state);
+  if (b !== 0) return b;
   const port = await freePort();
   const preview = spawn("npx", ["vite", "preview", "--port", String(port), "--strictPort"], { stdio: "ignore", detached: false });
   try {
@@ -163,10 +184,23 @@ for (const s of steps) {
   }
   console.log(`\n▶ ${s.title}`);
   const t0 = Date.now();
-  const code = s.id === "i18n" ? await i18nDriftStep() : s.id === "e2e" ? await e2eStep(changed, e2eBuildFirst(results)) : s.id === "test" ? await testStep(s) : await run(s.cmd);
+  const code =
+    s.id === "i18n" ? await i18nDriftStep()
+    : s.id === "e2e" ? await e2eStep(changed, buildState(results))
+    : s.id === "budget" ? await budgetStep(s, buildState(results))
+    : s.id === "test" ? await testStep(s)
+    : await run(s.cmd);
+  // A build made by budget or e2e serves the steps after it.
+  if ((s.id === "budget" || s.id === "e2e") && code === 0 && buildState(results) === "none") results.push({ id: "build", title: "Build (for " + s.id + ")", status: "pass", hidden: true });
   const status = code === 0 ? "pass" : "fail";
   if (status === "fail") failed = true;
   results.push({ id: s.id, title: s.title, status, ms: Date.now() - t0 });
 }
-console.log(`\nci:local ${failed ? "FAILED" : "passed"}\n${summary(results)}`);
+const shown = results.filter((r) => !r.hidden);
+// A gate that ran nothing (every selected step skipped or "not here") is not a pass.
+if (!failed && !shown.some((r) => r.status === "pass")) {
+  console.error(`\nci:local: no step ran\n${summary(shown)}`);
+  process.exit(1);
+}
+console.log(`\nci:local ${failed ? "FAILED" : "passed"}\n${summary(shown)}`);
 process.exit(failed ? 1 : 0);

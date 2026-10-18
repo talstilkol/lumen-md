@@ -1,7 +1,7 @@
 /** 0.14 — `npm run ci:local` runs what CI runs; --changed narrows it to what the diff can break. */
 import { describe, it, expect } from "vitest";
 // @ts-expect-error — plain .mjs helper without types
-import { planSteps, e2eSpecs, i18nDrift, summary, coverageGate, hookPlan, e2eBuildFirst, isAppCode, COVERAGE_MIN, HOOK_MARK } from "../../scripts/lib/ciLocal.mjs";
+import { planSteps, e2eSpecs, i18nDrift, summary, coverageGate, hookPlan, buildState, argErrors, isAppCode, COVERAGE_MIN, HOOK_MARK, STEP_IDS } from "../../scripts/lib/ciLocal.mjs";
 
 type Step = { id: string; cmd: string[]; skipReason?: string; coverageMin?: number };
 const pkg = { scripts: { hygiene: "x", budget: "x", licenses: "x" } };
@@ -29,14 +29,14 @@ describe("ci:local steps", () => {
 
   it("--changed runs the tests related to the changed code files", () => {
     const s = byId(plan(["src/ai/tts.ts", "docs/a.md"]));
-    expect(s.test.cmd).toEqual(["npx", "vitest", "related", "--run", "src/ai/tts.ts"]);
+    expect(s.test.cmd).toEqual(["npx", "vitest", "related", "--run", "--passWithNoTests", "src/ai/tts.ts"]);
     expect(s.build.skipReason).toBeUndefined();
   });
 
   it("a docs-only diff skips tests, build and e2e but still type-checks", () => {
     const s = byId(plan(["docs/a.md", "MASTER_PLAN.md"]));
     expect(s.typecheck.skipReason).toBeUndefined();
-    expect(s.test.skipReason).toMatch(/no code files/);
+    expect(s.test.skipReason).toMatch(/no unit-test inputs/);
     for (const id of ["build", "budget", "e2e"]) expect(s[id].skipReason, id).toMatch(/no app code/);
   });
 
@@ -93,11 +93,14 @@ describe("ci:local review fixes", () => {
     expect(isAppCode("docs/a.html")).toBe(false);
   });
 
-  it("e2e builds first unless the Build step passed in this run", () => {
-    expect(e2eBuildFirst([])).toBe(true); // --only e2e: never trust an old dist/
-    expect(e2eBuildFirst([{ id: "build", status: "skip" }])).toBe(true);
-    expect(e2eBuildFirst([{ id: "build", status: "fail" }])).toBe(true);
-    expect(e2eBuildFirst([{ id: "typecheck", status: "pass" }, { id: "build", status: "pass" }])).toBe(false);
+  it("budget and e2e use this run's build: build first when there is none, fail when it failed", () => {
+    expect(buildState([])).toBe("none"); // --only e2e / --only budget: never trust an old dist/
+    expect(buildState([{ id: "build", status: "skip" }])).toBe("none");
+    expect(buildState([{ id: "build", status: "fail" }])).toBe("failed");
+    expect(buildState([{ id: "typecheck", status: "pass" }, { id: "build", status: "pass" }])).toBe("fresh");
+    // The budget no longer needs a dist/ to exist (it builds first).
+    const noDist = (p: string) => p !== "dist" && exists(p);
+    expect(byId(planSteps({ pkg, exists: noDist, changed: null, flags: { only: ["budget"] } }) as Step[]).budget.skipReason).toBeUndefined();
   });
 
   it("--install-hook never replaces someone else's pre-push hook silently", () => {
@@ -106,5 +109,26 @@ describe("ci:local review fixes", () => {
     expect(hookPlan(hookPlan(null).content).action).toBe("write"); // reinstalling ours
     expect(hookPlan("#!/bin/sh\nnpx lint-staged\n").action).toBe("refuse");
     expect(hookPlan("#!/bin/sh\nnpx lint-staged\n", { force: true }).action).toBe("backup");
+  });
+
+  it("a non-code app input (a locale, public/_headers) runs the full suite; e2e specs are not vitest inputs", () => {
+    for (const f of ["src/i18n/locales/he.json", "public/_headers", "playground-runner.html"]) {
+      const t = byId(plan([f])).test;
+      expect([f, t.cmd]).toEqual([f, ["npx", "vitest", "run"]]);
+      expect(t.skipReason).toBeUndefined();
+    }
+    // An e2e-only diff: no unit tests to relate (and no failing `vitest related`), e2e still runs.
+    const e2e = byId(plan(["e2e/rtl.spec.ts"]));
+    expect(e2e.test.skipReason).toMatch(/no unit-test inputs/);
+    expect(e2e.e2e.skipReason).toBeUndefined();
+    expect(byId(plan(["e2e/rtl.spec.ts", "src/ai/tts.ts"])).test.cmd).toEqual(["npx", "vitest", "related", "--run", "--passWithNoTests", "src/ai/tts.ts"]);
+  });
+
+  it("rejects unknown flags and step ids instead of passing without the requested checks", () => {
+    expect(argErrors(["--changed", "--base", "origin/main", "--only", "typecheck,test", "--coverage", "--bail"])).toEqual([]);
+    expect(argErrors(["--covrage"])).toEqual(['unknown argument "--covrage"']);
+    expect(argErrors(["--only", "tests"])[0]).toMatch(/--only: unknown step "tests"/);
+    expect(argErrors(["--skip"])).toEqual(["--skip needs a value"]);
+    expect(STEP_IDS).toEqual(plan(null).map((s) => s.id));
   });
 });
