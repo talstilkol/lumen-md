@@ -474,22 +474,9 @@ export const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
         changes: { from, to, insert: text },
         selection: { anchor: from + text.length },
       });
-      // T31: real alt text in the background — OCR on this device (Hebrew +
-      // English), else a local vision model; the file name stays otherwise.
-      if (imageTextEnabled()) {
-        for (const p of placed) {
-          if (p.url.startsWith("data:")) continue;
-          void (async () => {
-            const { imageText, escapeAlt, escapeTitle } = await import("../ai/vision");
-            const res = await imageText(p.file, getLocale()).catch(() => null);
-            if (!res || res.source === "none") return;
-            const target = `![${p.alt}](${p.url})`;
-            const at = view.state.doc.toString().indexOf(target);
-            if (at < 0) return; // the user already changed it
-            const title = res.title ? ` "${escapeTitle(res.title)}"` : "";
-            view.dispatch({ changes: { from: at, to: at + target.length, insert: `![${escapeAlt(res.alt)}](${p.url}${title})` } });
-          })();
-        }
+      // T31: real alt text in the background (also for data-URL fallbacks).
+      if (imageTextEnabled() && placed.length) {
+        void import("./pastedImageText").then((m) => m.fillPastedImageText(view, placed, getLocale())).catch(() => undefined);
       }
     }
 
