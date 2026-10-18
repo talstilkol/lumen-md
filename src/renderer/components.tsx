@@ -3,6 +3,7 @@ import type { JSX } from "react";
 import { isAssetName, readWorkspaceBlob } from "../storage/workspace";
 import { log } from "../lib/logger";
 import { scheduleIdle } from "../lib/idle";
+import { t } from "../i18n";
 
 const ChartBlock = lazy(() => import("../plugins/ChartBlock"));
 const MermaidBlock = lazy(() => import("../plugins/MermaidBlock"));
@@ -370,19 +371,27 @@ function isOpfsAssetSrc(src: string | undefined): src is string {
 
 interface ImgProps extends React.ImgHTMLAttributes<HTMLImageElement> {
   src?: string;
+  /** Workspace path of an `![[image.png]]` embed (./embeds) — read from OPFS. */
+  "data-lumen-path"?: string;
+}
+
+/** OPFS hands back files without a type; an SVG `<img>` needs one to render. */
+function imageBlob(blob: Blob, path: string): Blob {
+  return /\.svg$/i.test(path) && blob.type !== "image/svg+xml" ? new Blob([blob], { type: "image/svg+xml" }) : blob;
 }
 
 function LumenImg(props: ImgProps) {
   const { src, ...rest } = props;
-  const [resolved, setResolved] = useState<string | undefined>(() =>
-    isOpfsAssetSrc(src) ? blobUrlCache.get(normalize(src!)) : src,
-  );
+  // The workspace file to show: an embed's path, or a pasted asset's name.
+  // Never the raw path as `src` — the browser would ask the server for it.
+  const wsPath = props["data-lumen-path"];
+  const key = wsPath ? normalize(wsPath) : isOpfsAssetSrc(src) ? normalize(src) : null;
+  const [resolved, setResolved] = useState<string | undefined>(() => (key ? blobUrlCache.get(key) : src));
   useEffect(() => {
-    if (!isOpfsAssetSrc(src)) {
+    if (!key) {
       setResolved(src);
       return;
     }
-    const key = normalize(src);
     const cached = blobUrlCache.get(key);
     if (cached) {
       setResolved(cached);
@@ -392,7 +401,7 @@ function LumenImg(props: ImgProps) {
     readWorkspaceBlob(key)
       .then((blob) => {
         if (cancelled) return;
-        const url = URL.createObjectURL(blob);
+        const url = URL.createObjectURL(imageBlob(blob, key));
         blobUrlCache.set(key, url);
         setResolved(url);
       })
@@ -402,7 +411,7 @@ function LumenImg(props: ImgProps) {
     return () => {
       cancelled = true;
     };
-  }, [src]);
+  }, [src, key]);
   // The author-supplied `alt` is forwarded via {...rest}. We default to
   // the basename of the src when nothing is provided so screen-readers
   // get something descriptive instead of "image".
@@ -410,6 +419,39 @@ function LumenImg(props: ImgProps) {
     ? (src ?? "").split("/").pop()?.replace(/\.[^.]+$/, "") ?? "image"
     : undefined;
   return <img alt={fallbackAlt} loading="lazy" {...rest} src={resolved} />;
+}
+
+/**
+ * `![[file.pdf]]` (./embeds): a card that opens the workspace PDF in a new
+ * tab. The app's CSP has no frame / object source for workspace files, and
+ * an in-page viewer (PDF.js) would be a heavy dependency for this.
+ */
+function LumenEmbedFile(props: { path?: string; name?: string; kind?: string; children?: React.ReactNode }) {
+  const isStatic = useContext(StaticRenderContext);
+  const path = props.path ?? "";
+  const name = props.name || path.split("/").pop() || path;
+  const open = () => {
+    readWorkspaceBlob(path)
+      .then((blob) => {
+        // Typed as a PDF whatever the file holds, so it can only open in
+        // the browser's PDF viewer.
+        const url = URL.createObjectURL(new Blob([blob], { type: "application/pdf" }));
+        window.open(url, "_blank", "noopener");
+        setTimeout(() => URL.revokeObjectURL(url), 60_000);
+      })
+      .catch((e: unknown) => log.warn("[embed] could not open", path, e));
+  };
+  return (
+    <span className="lumen-embed-file" data-embed-path={path}>
+      <span className="lumen-embed-file-badge" aria-hidden="true">PDF</span>
+      <span className="lumen-embed-file-name" dir="auto">{name}</span>
+      {!isStatic && path && (
+        <button type="button" className="lumen-embed-file-open" onClick={open}>
+          {t("embed.openPdf")}
+        </button>
+      )}
+    </span>
+  );
 }
 
 function normalize(src: string): string {
@@ -502,6 +544,8 @@ export const components: Record<string, LumenBlock> = {
   "lumen-playground": Playground as unknown as LumenBlock,
   // Asset-resolving <img> override.
   img: LumenImg as unknown as LumenBlock,
+  // `![[file.pdf]]` card.
+  "lumen-embed-file": LumenEmbedFile as unknown as LumenBlock,
   // GFM task-list checkboxes get an aria-label so they aren't announced bare.
   input: LumenInput as unknown as LumenBlock,
 };

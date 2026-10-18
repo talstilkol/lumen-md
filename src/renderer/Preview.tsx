@@ -2,6 +2,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { renderMarkdown, renderMarkdownFast, extractFrontmatter } from "./pipeline";
 import { PreviewDocKeyContext } from "./previewDoc";
 import { handleWikiLinkClick } from "./wikiLinks";
+import { hasEmbeds } from "./remarkEmbeds";
+import { onWorkspaceChanged } from "../storage/workspaceEvents";
 import { slug as headingSlug } from "github-slugger";
 import { scheduleIdle } from "../lib/idle";
 import { CopyButtonHandler } from "./components";
@@ -50,16 +52,29 @@ export function Preview({ markdownText, docKey = null }: Props) {
   const [themeVersion, setThemeVersion] = useState(0);
   const seqRef = useRef(0);
   const fastTextRef = useRef<string | null>(fullPipelineWarm ? null : markdownText);
+  // `![[embeds]]`: bumped when a note or file the displayed tree embeds
+  // changes in the workspace, so the embed shows the new text.
+  const [embedVersion, setEmbedVersion] = useState(0);
+  const embedWatchRef = useRef<{ active: boolean; paths: Set<string> }>({ active: false, paths: new Set() });
 
   useEffect(() => {
     const seq = ++seqRef.current;
     const isDark = () => document.documentElement.classList.contains("dark");
     const renderedFor = docKey;
     const run = () => {
-      renderMarkdown(markdownText, isDark)
-        .then((el) => {
+      // Only a note with `![[embeds]]` loads the embed code and waits for
+      // the workspace index; if that chunk fails, embeds render as links.
+      const rendered = hasEmbeds(markdownText)
+        ? import("./embedContext")
+            .then((m) => m.loadEmbedContext(markdownText, renderedFor))
+            .catch(() => undefined)
+            .then(async (embeds) => ({ el: await renderMarkdown(markdownText, isDark, { embeds }), embeds }))
+        : renderMarkdown(markdownText, isDark).then((el) => ({ el, embeds: undefined }));
+      rendered
+        .then(({ el, embeds }) => {
           if (seq !== seqRef.current) return;
           fullPipelineWarm = true;
+          embedWatchRef.current = { active: !!embeds, paths: embeds?.used ?? new Set() };
           setTree(el);
           setTreeDocKey(renderedFor);
           setError(null);
@@ -82,7 +97,24 @@ export function Preview({ markdownText, docKey = null }: Props) {
       setTreeDocKey(renderedFor);
     }
     return scheduleIdle(run, 1500);
-  }, [markdownText, themeVersion, docKey]);
+  }, [markdownText, themeVersion, docKey, embedVersion]);
+
+  // Live embeds: an autosave of an embedded note (or a rename / delete that
+  // may make a missing target appear) re-renders. The workspace index marks
+  // the saved file dirty on the same event, so the re-render reads its new
+  // text. Notes that embed nothing never re-render here.
+  useEffect(
+    () =>
+      onWorkspaceChanged(
+        (c) => {
+          const w = embedWatchRef.current;
+          if (!w.active) return;
+          if (c.kind === "structure" || !c.paths || c.paths.some((p) => w.paths.has(p))) setEmbedVersion((v) => v + 1);
+        },
+        { debounceMs: 250 },
+      ),
+    [],
+  );
 
   // Re-process when theme changes so Shiki picks up the right theme tokens.
   useEffect(() => {
