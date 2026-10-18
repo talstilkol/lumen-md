@@ -14,12 +14,24 @@
 # resolve it by hand and rerun with the branches that are left. A keys.json that
 # merged cleanly but no longer matches the strings is regenerated in the merge too.
 #
-# Afterwards: npx tsc --noEmit -p . and npx vitest run, then a summary.
+# A merge that touches package.json or package-lock.json gets its lockfile
+# settled by `npm install --package-lock-only` inside the merge (a clean
+# textual merge can still miss entries the merged package.json needs).
+#
+# Afterwards: npx tsc --noEmit -p . and npx vitest run, then a summary. If
+# the merged lanes changed dependencies, the checks need them installed
+# first (lanes only touch the lockfile, docs/dev/lanes.md rule 4): the run
+# stops before the checks (exit 2) so you can `npm install` and rerun the
+# same command (merged branches are skipped), or installs them itself with
+# LANE_INSTALL=1.
 #
 # Environment:
 #   LANE_TRAILER       text appended to every merge commit message (e.g. the
 #                      Co-Authored-By / Claude-Session lines)
 #   LANE_SKIP_TESTS=1  skip vitest (tsc still runs)
+#   LANE_INSTALL=1     run `npm install` before the checks when the merges
+#                      changed dependencies (it updates the node_modules that
+#                      lanes link to)
 set -uo pipefail
 
 # Checking out and merging can rewrite this very file: run from a copy.
@@ -69,6 +81,17 @@ regenerate() {
   git add -- "$1"
 }
 
+print_merges() {
+  echo
+  echo "== lane-merge into $target"
+  printf '%-40s %-10s %s\n' "branch" "merge" "result"
+  for row in "${summary[@]}"; do
+    IFS='|' read -r b sha res <<<"$row"
+    printf '%-40s %-10s %s\n' "$b" "$sha" "$res"
+  done
+}
+
+start=$(git rev-parse HEAD)
 summary=()
 i=0
 for b in "${branches[@]}"; do
@@ -118,6 +141,16 @@ for b in "${branches[@]}"; do
     regenerate i18n/keys.json || die "could not regenerate i18n/keys.json while merging $b (merge left in progress)"
     notes+=("refreshed i18n/keys.json (stale after the merge)")
   fi
+  # The same for the lockfile: one lane can drop a transitive entry the
+  # other's new package reuses, and the text still merges cleanly.
+  if ! git diff --cached --quiet HEAD -- package.json package-lock.json; then
+    lock_before=$(git hash-object package-lock.json 2>/dev/null || true)
+    npm install --package-lock-only --no-audit --no-fund >/dev/null 2>&1 || die "npm install --package-lock-only failed while merging $b (merge left in progress)"
+    if [ "$(git hash-object package-lock.json 2>/dev/null || true)" != "$lock_before" ]; then
+      git add -- package-lock.json
+      notes+=("normalised package-lock.json (npm install --package-lock-only)")
+    fi
+  fi
 
   msgfile=$(mktemp)
   {
@@ -136,6 +169,19 @@ for b in "${branches[@]}"; do
     summary+=("$b|$(git rev-parse --short HEAD)|clean")
   fi
 done
+
+# Lanes add packages to the lockfile only: the checks need them installed.
+if ! git diff --quiet "$start" HEAD -- package.json package-lock.json; then
+  if [ "${LANE_INSTALL:-}" = 1 ]; then
+    echo "== the merges changed dependencies: npm install (LANE_INSTALL=1)"
+    npm install --no-audit --no-fund >/dev/null 2>&1 || die "npm install failed; fix it, then rerun this command (merged branches are skipped)"
+  else
+    print_merges
+    echo >&2
+    echo "lane-merge: STOP before the checks — the merged lanes change dependencies (package.json / package-lock.json), which node_modules may not have yet. Run npm install (or rerun with LANE_INSTALL=1), then rerun this same command: merged branches are skipped and the checks run." >&2
+    exit 2
+  fi
+fi
 
 echo "== checks on $target @ $(git rev-parse --short HEAD)"
 ok=1
@@ -167,13 +213,7 @@ else
 fi
 rm -f "$log"
 
-echo
-echo "== lane-merge into $target"
-printf '%-40s %-10s %s\n' "branch" "merge" "result"
-for row in "${summary[@]}"; do
-  IFS='|' read -r b sha res <<<"$row"
-  printf '%-40s %-10s %s\n' "$b" "$sha" "$res"
-done
+print_merges
 echo
 echo "tsc:     $tsc_result"
 echo "i18n:    $i18n_result"

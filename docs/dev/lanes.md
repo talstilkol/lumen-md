@@ -117,12 +117,19 @@ For each branch, in order: `git merge --no-ff`. If the only conflicts are in
 `i18n/keys.json` or `package-lock.json`, they are regenerated from the merged
 sources and the merge commits (with a "Generated files: …" line in its
 message). A keys.json that merged cleanly but went stale — both sides bumped
-`count` to the same number — is regenerated inside the merge as well.
+`count` to the same number — is regenerated inside the merge as well, and a
+merge that touches `package.json` or `package-lock.json` gets
+`npm install --package-lock-only` before it commits (a clean textual merge
+of two dependency changes can still leave the lockfile incomplete).
 Any other conflict stops the run with the merge left in progress and prints
-the command to continue with the remaining branches. At the end it runs
-`npx tsc --noEmit -p .`, the i18n staleness check and `npx vitest run`, and
-prints one line per branch plus the check results. Then the coordinator runs
-`npm install` if any lane added packages, pushes, and opens or updates the PR.
+the command to continue with the remaining branches. If the merges changed
+dependencies, the run stops before the checks (exit 2): run `npm install`
+(lanes only touched the lockfile), then the same command again — merged
+branches are skipped and the checks run. `LANE_INSTALL=1` does the install
+itself (it changes the node_modules the lanes link to). The checks are
+`npx tsc --noEmit -p .`, the i18n staleness check and `npx vitest run`; the
+run prints one line per branch plus the check results. Then the coordinator
+pushes and opens or updates the PR.
 
 ## Answering review comments
 
