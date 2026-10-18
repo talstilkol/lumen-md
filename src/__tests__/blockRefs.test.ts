@@ -155,7 +155,7 @@ describe("review fixes (PR #238)", () => {
     expect(container.querySelector('[id="^code"]')?.textContent).toContain("x()");
     expect(container.textContent).not.toContain("^code");
     expect(decodeURIComponent(container.querySelector("a.wiki-link")?.getAttribute("href") ?? "")).toBe("#^diagram");
-  });
+  }, 30_000); // The first full render loads Shiki: slow on a busy machine.
 
   it("published pages link to block ids, not heading slugs", async () => {
     const { rewriteWikiLinks } = await import("../cli/publish");
