@@ -3,7 +3,10 @@
  * writing the Markdown, so they can be tested without git or GitHub.
  */
 
-/** `git worktree list --porcelain` → [{ path, branch, head }]. */
+/**
+ * `git worktree list --porcelain` → [{ path, branch, head, prunable? }].
+ * `prunable` (git's reason) marks a worktree whose directory is gone.
+ */
 export function parseWorktrees(text) {
   const out = [];
   let cur = null;
@@ -13,6 +16,7 @@ export function parseWorktrees(text) {
       out.push(cur);
     } else if (cur && line.startsWith("HEAD ")) cur.head = line.slice(5, 13);
     else if (cur && line.startsWith("branch ")) cur.branch = line.slice(7).replace(/^refs\/heads\//, "");
+    else if (cur && (line === "prunable" || line.startsWith("prunable "))) cur.prunable = line.slice(9).trim() || "prunable";
   }
   return out;
 }
@@ -41,12 +45,22 @@ export function prTree(prs) {
 
 const CI_MARK = { success: "✅", failure: "❌", cancelled: "⚪", null: "⏳", undefined: "—" };
 
-/** Names mentioned in the handoff that do not exist (a stale handoff is worse than none). */
-export function missingRefs({ prs, worktrees, branches }) {
+/** A PR whose head lives in another repository (a fork; `headRepo` null = a deleted fork). */
+export const isForkPr = (p, repo) => p.headRepo !== undefined && p.headRepo !== repo;
+
+/**
+ * Names mentioned in the handoff that do not exist (a stale handoff is worse
+ * than none). A fork PR's head is a branch of the fork, which GitHub just
+ * returned, never a local or origin ref, so it is not checked here.
+ */
+export function missingRefs({ prs, worktrees, branches, repo }) {
   const known = new Set(branches);
   const problems = [];
-  for (const p of prs) if (!known.has(p.head)) problems.push(`PR #${p.number}: branch ${p.head} is not here (git fetch?)`);
-  for (const w of worktrees) if (w.branch && !known.has(w.branch)) problems.push(`worktree ${w.path}: branch ${w.branch} is gone`);
+  for (const p of prs) if (!isForkPr(p, repo) && !known.has(p.head)) problems.push(`PR #${p.number}: branch ${p.head} is not here (git fetch?)`);
+  for (const w of worktrees) {
+    if (w.prunable) problems.push(`worktree ${w.path}: the directory is gone (${w.prunable}); git worktree prune`);
+    else if (w.branch && !known.has(w.branch)) problems.push(`worktree ${w.path}: branch ${w.branch} is gone`);
+  }
   return problems;
 }
 
@@ -60,11 +74,12 @@ export function renderHandoff({ now, repo, task, next, prs, worktrees, problems 
   for (const { depth, pr } of prTree(prs)) {
     const ci = `${CI_MARK[pr.ci] ?? pr.ci}${pr.ciSha ? ` \`${pr.ciSha}\`` : ""}`;
     const indent = depth === 0 ? "" : depth <= 3 ? "↳ ".repeat(depth) : `↳${depth} `;
-    o.push(`| ${indent}#${pr.number} | \`${pr.head}\` → \`${pr.base}\` | ${ci} | ${pr.unanswered ?? "?"} | ${String(pr.title).replace(/\|/g, "\\|")} |`);
+    const head = isForkPr(pr, repo) ? `${pr.headRepo ? pr.headRepo.split("/")[0] : "(deleted fork)"}:${pr.head}` : pr.head;
+    o.push(`| ${indent}#${pr.number} | \`${head}\` → \`${pr.base}\` | ${ci} | ${pr.unanswered ?? "?"} | ${String(pr.title).replace(/\|/g, "\\|")} |`);
   }
   o.push("", "\"Unanswered\" counts top-level review comments that have no reply yet. GitHub's REST API does not expose whether a thread is resolved, so this is an upper bound.", "");
   o.push(`## Worktrees (${worktrees.length})`, "", "| Path | Branch | HEAD |", "|---|---|---|");
-  for (const w of worktrees) o.push(`| \`${w.path}\` | ${w.branch ? `\`${w.branch}\`` : "(detached)"} | \`${w.head ?? ""}\` |`);
+  for (const w of worktrees) o.push(`| \`${w.path}\`${w.prunable ? " (directory gone)" : ""} | ${w.branch ? `\`${w.branch}\`` : "(detached)"} | \`${w.head ?? ""}\` |`);
   o.push("", "## To continue", "", "```sh", "git fetch origin", "gh pr checks <N>                      # CI of a PR", "npm run ci:local -- --changed       # if plan 0.14 is merged", "scripts/lane.sh <branch> <base>     # a new lane (docs/dev/lanes.md)", "```", "");
   o.push("## Checks", "");
   if (problems.length) for (const p of problems) o.push(`- ⚠️ ${p}`);

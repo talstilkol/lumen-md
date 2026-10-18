@@ -14,9 +14,11 @@
 import { spawnSync } from "node:child_process";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 import { missingRefs, parseWorktrees, renderHandoff } from "./lib/handoff.mjs";
 
-const root = resolve(new URL("..", import.meta.url).pathname);
+// fileURLToPath, not `.pathname`: a checkout in "lumen md/" is "lumen%20md/" in the URL.
+const root = resolve(fileURLToPath(new URL("..", import.meta.url)));
 process.chdir(root);
 const argv = process.argv.slice(2);
 const opt = (n) => {
@@ -47,11 +49,13 @@ const branches = sh("git", ["for-each-ref", "--format=%(refname)", "refs/heads",
 
 let prs = [];
 if (!flag("no-github")) {
-  prs = ghJson(`repos/${repo}/pulls?state=open&per_page=100`).map((p) => ({ number: p.number, title: p.title, head: p.head.ref, base: p.base.ref }));
+  // headRepo: a fork's head is a branch of the fork (null when the fork was deleted).
+  prs = ghJson(`repos/${repo}/pulls?state=open&per_page=100`).map((p) => ({ number: p.number, title: p.title, head: p.head.ref, headRepo: p.head.repo?.full_name ?? null, base: p.base.ref }));
   for (const p of prs) {
     try {
       const runs = JSON.parse(sh("gh", ["api", `repos/${repo}/actions/runs?branch=${encodeURIComponent(p.head)}&per_page=10`])).workflow_runs ?? [];
-      const ci = runs.find((r) => r.name === "CI");
+      // A same-named branch of this repository is not a fork PR's head.
+      const ci = runs.find((r) => r.name === "CI" && (r.head_repository?.full_name ?? repo) === (p.headRepo ?? repo));
       p.ci = ci ? (ci.status === "completed" ? ci.conclusion : null) : undefined;
       p.ciSha = ci?.head_sha?.slice(0, 8);
       const comments = ghJson(`repos/${repo}/pulls/${p.number}/comments?per_page=100`);
@@ -65,7 +69,7 @@ if (!flag("no-github")) {
   }
 }
 
-const problems = missingRefs({ prs, worktrees, branches });
+const problems = missingRefs({ prs, worktrees, branches, repo });
 const md = renderHandoff({
   now: new Date().toISOString().replace(/\.\d+Z$/, "Z"),
   repo,

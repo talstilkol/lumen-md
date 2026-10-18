@@ -1,5 +1,9 @@
 /** 0.13 — the handoff document: PR stack, worktrees, and a check that every name in it exists. */
 import { describe, it, expect } from "vitest";
+import { execFileSync, spawnSync } from "node:child_process";
+import { cpSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join, resolve } from "node:path";
 // @ts-expect-error — plain .mjs helper without types
 import { parseWorktrees, prTree, missingRefs, renderHandoff } from "../../scripts/lib/handoff.mjs";
 
@@ -43,5 +47,55 @@ describe("handoff", () => {
     const bad = renderHandoff({ now: "t", repo: "o/r", task: null, next: null, prs: [], worktrees: [], problems: ["x is gone"] });
     expect(bad).toContain("- ⚠️ x is gone");
     expect(bad).toContain("- **Current task:** —");
+  });
+});
+
+describe("handoff review fixes", () => {
+  it("a fork PR's head is not a local or origin branch, and is shown with its owner", () => {
+    const fork = { number: 300, head: "patch-1", headRepo: "someone/r", base: "main", title: "fork", ci: undefined, unanswered: 0 };
+    const deleted = { number: 301, head: "patch-2", headRepo: null, base: "main", title: "gone fork", ci: undefined, unanswered: 0 };
+    const own = { number: 302, head: "fix/x", headRepo: "o/r", base: "main", title: "own", ci: undefined, unanswered: 0 };
+    expect(missingRefs({ prs: [fork, deleted, own], worktrees: [], branches: [], repo: "o/r" })).toEqual(["PR #302: branch fix/x is not here (git fetch?)"]);
+    const md = renderHandoff({ now: "t", repo: "o/r", task: null, next: null, prs: [fork, deleted], worktrees: [], problems: [] });
+    expect(md).toContain("`someone:patch-1` → `main`");
+    expect(md).toContain("`(deleted fork):patch-2` → `main`");
+  });
+
+  it("a worktree whose directory is gone (prunable) is a problem even though its branch exists", () => {
+    const text = "worktree /a\nHEAD 1234567890abcdef\nbranch refs/heads/fix/x\nprunable gitdir file points to non-existent location\n\nworktree /b\nHEAD abcdef1234567890\nbranch refs/heads/fix/y\n";
+    const wts = parseWorktrees(text);
+    expect(wts[0]).toEqual({ path: "/a", head: "12345678", branch: "fix/x", prunable: "gitdir file points to non-existent location" });
+    expect(wts[1].prunable).toBeUndefined();
+    expect(missingRefs({ prs: [], worktrees: wts, branches: ["fix/x", "fix/y"], repo: "o/r" })).toEqual([
+      "worktree /a: the directory is gone (gitdir file points to non-existent location); git worktree prune",
+    ]);
+    expect(renderHandoff({ now: "t", repo: "o/r", task: null, next: null, prs: [], worktrees: wts, problems: [] })).toContain("| `/a` (directory gone) | `fix/x` |");
+  });
+
+  it("runs from a checkout whose path has a space, and reports a deleted worktree directory", () => {
+    const dir = mkdtempSync(join(tmpdir(), "lumen-handoff-"));
+    try {
+      writeFileSync(join(dir, "gitconfig"), "");
+      const env = { ...process.env, GIT_CONFIG_GLOBAL: join(dir, "gitconfig"), GIT_CONFIG_NOSYSTEM: "1", GIT_AUTHOR_NAME: "t", GIT_AUTHOR_EMAIL: "t@example.com", GIT_COMMITTER_NAME: "t", GIT_COMMITTER_EMAIL: "t@example.com" };
+      const work = join(dir, "lumen md");
+      execFileSync("git", ["init", "-q", "-b", "main", work], { env });
+      const g = (...a: string[]) => execFileSync("git", a, { cwd: work, env, encoding: "utf8" });
+      g("remote", "add", "origin", "https://github.com/o/r.git");
+      mkdirSync(join(work, "scripts/lib"), { recursive: true });
+      const repo = resolve(__dirname, "../..");
+      cpSync(join(repo, "scripts/handoff.mjs"), join(work, "scripts/handoff.mjs"));
+      cpSync(join(repo, "scripts/lib/handoff.mjs"), join(work, "scripts/lib/handoff.mjs"));
+      g("add", ".");
+      g("commit", "-q", "-m", "base");
+      g("worktree", "add", "-q", "-b", "fix/w", join(dir, "w"));
+      rmSync(join(dir, "w"), { recursive: true, force: true });
+      const r = spawnSync(process.execPath, [join(work, "scripts/handoff.mjs"), "--no-github", "--stdout"], { cwd: dir, env, encoding: "utf8" });
+      expect(r.stderr).not.toMatch(/ENOENT|no such file/i);
+      expect(r.stdout).toContain("# Handoff — o/r");
+      expect(r.stdout).toContain(`worktree ${join(dir, "w")}: the directory is gone`);
+      expect(r.status).toBe(1);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
   });
 });
