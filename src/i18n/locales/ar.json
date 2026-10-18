@@ -1262,6 +1262,7 @@
   "vault.folder.resume": "استئناف النقل",
   "vault.folder.cancelMove": "إلغاء النقل",
   "vault.folder.browserStorage": "تخزين المتصفح",
+  "vault.folder.restoring": "جارٍ فتح الخزنة…",
   "vault.import.what": "استيراد من…",
   "vault.import.zip": "ملف zip",
   "vault.import.folder": "مجلد",

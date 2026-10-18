@@ -6,7 +6,7 @@
  */
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { FakeDir, installFakeOpfs } from "./helpers/fakeOpfs";
-import { getVaultBackend, createOpfsBackend } from "../storage/vault";
+import { getVaultBackend, createMemoryBackend, createOpfsBackend, setVaultBackend } from "../storage/vault";
 import {
   __resetVaultLocation,
   __setLocationStore,
@@ -18,6 +18,8 @@ import {
   openFolderAsVault,
   reconnectVaultFolder,
   restoreVaultLocation,
+  restoreVaultLocationWithin,
+  setOnVaultReplaced,
   switchToBrowserStorage,
   VaultMoveConflictError,
   VaultPermissionError,
@@ -120,7 +122,7 @@ describe("moving the vault into a folder", () => {
     }) as typeof f.dir.getDirectoryHandle;
     await expect(moveVault(loc(f))).rejects.toThrow(/quota/);
     expect(getVaultStatus()).toEqual({ location: "opfs" });
-    expect(getPendingMove()?.written.length).toBeGreaterThan(0);
+    expect(Object.keys(getPendingMove()?.written ?? {}).length).toBeGreaterThan(0);
     // A file the move already wrote and that changed in the source since is
     // the move's own: the resume overwrites it instead of calling it a conflict.
     await writeWorkspaceFile(".trash/index.json", "[1]");
@@ -131,6 +133,27 @@ describe("moving the vault into a folder", () => {
     expect(await bytesAt(f.dir, ".trash/index.json")).toEqual([...new TextEncoder().encode("[1]")]);
     expect(getPendingMove()).toBeNull();
     expect(getVaultStatus()).toEqual({ location: "folder", name: "My Vault" });
+  });
+
+  it("a resume does not overwrite a copied file that was edited in the folder since", async () => {
+    await seed();
+    const f = folder();
+    const plain = f.dir.getDirectoryHandle.bind(f.dir);
+    let fail = true;
+    f.dir.getDirectoryHandle = (async (n: string, o?: { create?: boolean }) => {
+      if (fail && n === "פרויקטים" && o?.create) throw new DOMException("quota", "QuotaExceededError");
+      return plain(n, o);
+    }) as typeof f.dir.getDirectoryHandle;
+    await expect(moveVault(loc(f))).rejects.toThrow(/quota/);
+    // Someone edits the already-copied a.md in the folder before Resume.
+    const w = await (await f.dir.getFileHandle("a.md")).createWritable();
+    await w.write("edited in the folder");
+    await w.close();
+    fail = false;
+    const err = await moveVault(loc(f)).catch((e: unknown) => e);
+    expect(err).toBeInstanceOf(VaultMoveConflictError);
+    expect((err as VaultMoveConflictError).paths).toEqual(["a.md"]);
+    expect(await bytesAt(f.dir, "a.md")).toEqual([...new TextEncoder().encode("edited in the folder")]);
   });
 
   it("refuses a folder without permission, before reading anything", async () => {
@@ -151,7 +174,7 @@ describe("moving the vault into a folder", () => {
   });
 
   it("cancelling an interrupted move drops the record only", async () => {
-    store.set("lumen-vault-move", { from: { kind: "opfs" }, to: { kind: "opfs" }, startedAt: 1, written: ["a.md"], total: 1 });
+    store.set("lumen-vault-move", { from: { kind: "opfs" }, to: { kind: "opfs" }, startedAt: 1, written: {}, total: 1 });
     await restoreVaultLocation();
     expect(getPendingMove()).not.toBeNull();
     await cancelPendingMove();
@@ -161,6 +184,58 @@ describe("moving the vault into a folder", () => {
 });
 
 describe("start-up and permission", () => {
+  it("a slow restore keeps the vault closed (no store at all) until it knows, then opens the right one", async () => {
+    const f = folder();
+    store.set("lumen-vault-location", loc(f));
+    let release!: () => void;
+    const gate = new Promise<void>((r) => (release = r));
+    __setLocationStore({ ...kv, get: async <T,>(k: string) => (await gate, store.get(k) as T | undefined) });
+    const done = restoreVaultLocationWithin(20);
+    expect(await done).toEqual({ location: "restoring" });
+    expect(isOPFSAvailable()).toBe(false);
+    await expect(writeWorkspaceFile("x.md", "x")).rejects.toThrow(/still opening/);
+    expect(await createOpfsBackend().stat("x.md")).toBeNull();
+    release();
+    await vi.waitFor(() => expect(getVaultStatus()).toEqual({ location: "folder", name: "My Vault" }));
+    await writeWorkspaceFile("x.md", "x");
+    expect(await bytesAt(f.dir, "x.md")).toEqual([120]);
+  });
+
+  it("a closed start-up vault becomes OPFS when nothing is stored", async () => {
+    setVaultBackend(createMemoryBackend({ id: "restoring" }));
+    expect(await restoreVaultLocation()).toEqual({ location: "opfs" });
+    expect(getVaultBackend().id).toBe("opfs");
+  });
+
+  it("opening another vault without copying detaches the open notes instead of autosaving them over it", async () => {
+    const replaced = vi.fn();
+    setOnVaultReplaced(replaced);
+    await openFolderAsVault(folder().handle);
+    expect(replaced).toHaveBeenCalledTimes(1);
+    await switchToBrowserStorage();
+    expect(replaced).toHaveBeenCalledTimes(2);
+    // A move copies the same paths: open notes stay attached.
+    await moveVault(loc(folder("Other")));
+    expect(replaced).toHaveBeenCalledTimes(2);
+  });
+
+  it("detachWorkspaceDocs keeps the text, marks it unsaved and drops the vault path", async () => {
+    const { useAppStore } = await import("../store/useStore");
+    const { detachWorkspaceDocs } = await import("../store/vaultDocs");
+    useAppStore.setState({
+      doc: { name: "a.md", content: "A", workspaceName: "a.md", dirty: false },
+      openTabs: [
+        { id: "a.md", name: "a.md", content: "A", workspaceName: "a.md", dirty: false },
+        { id: "scratch", name: "scratch", content: "S", workspaceName: null, dirty: true },
+      ],
+    } as never);
+    detachWorkspaceDocs();
+    const st = useAppStore.getState();
+    expect(st.doc).toMatchObject({ content: "A", workspaceName: null, dirty: true });
+    expect(st.openTabs[0]).toMatchObject({ content: "A", workspaceName: null, dirty: true });
+    expect(st.openTabs[1]).toMatchObject({ id: "scratch", workspaceName: null });
+  });
+
   it("reopens a stored folder when the permission is still granted", async () => {
     const f = folder();
     await (await f.dir.getFileHandle("n.md", { create: true })).createWritable().then(async (w) => {

@@ -1262,6 +1262,7 @@
   "vault.folder.resume": "Verschieben fortsetzen",
   "vault.folder.cancelMove": "Verschieben abbrechen",
   "vault.folder.browserStorage": "Browserspeicher",
+  "vault.folder.restoring": "Tresor wird geöffnet…",
   "vault.import.what": "Importieren aus…",
   "vault.import.zip": "Einer .zip-Datei",
   "vault.import.folder": "Einem Ordner",

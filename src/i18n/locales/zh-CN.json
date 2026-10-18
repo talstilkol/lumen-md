@@ -1262,6 +1262,7 @@
   "vault.folder.resume": "继续移动",
   "vault.folder.cancelMove": "取消移动",
   "vault.folder.browserStorage": "浏览器存储",
+  "vault.folder.restoring": "正在打开库…",
   "vault.import.what": "导入自…",
   "vault.import.zip": ".zip 文件",
   "vault.import.folder": "文件夹",

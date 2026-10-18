@@ -35,6 +35,14 @@ export function VaultFolderBanner() {
     );
   }
 
+  if (status.location === "restoring") {
+    return (
+      <div className="vault-folder-banner" role="status" aria-live="polite">
+        <span>{t("vault.folder.restoring")}</span>
+      </div>
+    );
+  }
+
   if (status.location === "folder-disconnected") {
     return (
       <div className="vault-folder-banner" role="alert">

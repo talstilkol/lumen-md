@@ -1262,6 +1262,7 @@
   "vault.folder.resume": "המשך ההעברה",
   "vault.folder.cancelMove": "ביטול ההעברה",
   "vault.folder.browserStorage": "אחסון הדפדפן",
+  "vault.folder.restoring": "פותח את הכספת…",
   "vault.import.what": "לייבא מ…",
   "vault.import.zip": "קובץ zip",
   "vault.import.folder": "תיקייה",

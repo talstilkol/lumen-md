@@ -35,8 +35,12 @@ export interface MoveRecord {
   from: StoredLocation;
   to: StoredLocation;
   startedAt: number;
-  /** Files this move wrote to the target (a resume may overwrite these, nothing else). */
-  written: string[];
+  /**
+   * Files this move wrote to the target, with the SHA-256 of what it wrote.
+   * A resume may overwrite such a file only while it still holds exactly
+   * those bytes; one changed since (edited in the folder) is a conflict.
+   */
+  written: Record<string, string>;
   total: number;
 }
 
@@ -62,7 +66,9 @@ export type VaultStatus =
   | { location: "opfs" }
   | { location: "folder"; name: string }
   /** The vault is a folder the browser wants a click to reopen. */
-  | { location: "folder-disconnected"; name: string };
+  | { location: "folder-disconnected"; name: string }
+  /** Start-up is still finding out where the vault is: closed until then. */
+  | { location: "restoring" };
 
 export interface MoveProgress {
   done: number;
@@ -162,6 +168,16 @@ function nameOf(loc: StoredLocation): string {
   return loc.kind === "opfs" ? "" : loc.name;
 }
 
+let onVaultReplaced: () => void = () => {};
+/**
+ * Called when the vault is replaced by a different one without copying
+ * (open a folder, use browser storage): open notes belong to the old vault,
+ * so the app detaches them instead of autosaving them over the new one.
+ */
+export function setOnVaultReplaced(fn: () => void): void {
+  onVaultReplaced = fn;
+}
+
 function activate(loc: StoredLocation, backend: VaultBackend): void {
   disconnected = null;
   setVaultBackend(loc.kind === "opfs" ? null : backend);
@@ -182,7 +198,11 @@ export async function restoreVaultLocation(): Promise<VaultStatus> {
   try {
     pending = (await kv.get<MoveRecord>(MOVE_KEY)) ?? null;
     const loc = await kv.get<StoredLocation>(LOCATION_KEY);
-    if (!loc || loc.kind === "opfs") return status;
+    if (!loc || loc.kind === "opfs") {
+      // Replaces the closed start-up vault (if any) with OPFS.
+      if (getVaultBackend().id !== "opfs") activate({ kind: "opfs" }, createOpfsBackend());
+      return status;
+    }
     if (await ensureFolderPermission(loc.handle, false)) {
       activate(loc, createFolderBackend(loc.handle));
       return status;
@@ -195,7 +215,36 @@ export async function restoreVaultLocation(): Promise<VaultStatus> {
     changed();
   } catch (err) {
     log.warn("restoring the vault location failed; using browser storage", err);
+    if (getVaultBackend().id === "restoring") activate({ kind: "opfs" }, createOpfsBackend());
   } finally {
+    changed();
+  }
+  return status;
+}
+
+/**
+ * Start-up: restore the location, waiting at most `ms`. If that is not
+ * enough (a slow IndexedDB or permission check), the vault stays closed —
+ * an unavailable backend, status "restoring" — until the restore finishes,
+ * so nothing is read from or written to a store that may be the wrong one.
+ */
+export async function restoreVaultLocationWithin(ms: number): Promise<VaultStatus> {
+  let done = false;
+  const restoring = restoreVaultLocation().finally(() => (done = true));
+  const timedOut = await Promise.race([restoring.then(() => false), new Promise<boolean>((r) => setTimeout(() => r(true), ms))]);
+  if (timedOut && !done) {
+    if (getVaultBackend().id !== "restoring") {
+      setVaultBackend(
+        createDirectoryHandleBackend({
+          id: "restoring",
+          available: () => false,
+          root: async () => {
+            throw new Error("The vault is still opening.");
+          },
+        }),
+      );
+    }
+    status = { location: "restoring" };
     changed();
   }
   return status;
@@ -217,6 +266,7 @@ export async function reconnectVaultFolder(): Promise<boolean> {
 /** Work in browser storage (OPFS) from now on, without copying anything. */
 export async function switchToBrowserStorage(): Promise<void> {
   await kv.set(LOCATION_KEY, { kind: "opfs" } satisfies StoredLocation);
+  onVaultReplaced();
   activate({ kind: "opfs" }, createOpfsBackend());
 }
 
@@ -225,6 +275,7 @@ export async function openFolderAsVault(handle: FileSystemDirectoryHandle): Prom
   if (!(await ensureFolderPermission(handle, true))) return false;
   const loc: StoredLocation = { kind: "folder", handle, name: handle.name };
   await kv.set(LOCATION_KEY, loc);
+  onVaultReplaced();
   activate(loc, createFolderBackend(handle));
   return true;
 }
@@ -267,6 +318,11 @@ async function bytes(b: VaultBackend, path: string): Promise<Uint8Array> {
   return new Uint8Array(await (await b.read(path)).arrayBuffer());
 }
 
+async function sha256(data: Uint8Array): Promise<string> {
+  const digest = new Uint8Array(await crypto.subtle.digest("SHA-256", data as BufferSource));
+  return Array.from(digest, (b) => b.toString(16).padStart(2, "0")).join("");
+}
+
 function same(a: Uint8Array, b: Uint8Array): boolean {
   if (a.byteLength !== b.byteLength) return false;
   for (let i = 0; i < a.byteLength; i++) if (a[i] !== b[i]) return false;
@@ -300,7 +356,8 @@ export async function moveVault(
   if (await sameLocation(fromLoc, to)) throw new Error("The vault is already there.");
   const target = backendFor(to);
   const resuming = pending && (await sameLocation(pending.to, to)) ? pending : null;
-  const written = new Set(resuming?.written ?? []);
+  const written: Record<string, string> = { ...(resuming?.written ?? {}) };
+  const ours = async (path: string, there: Uint8Array) => path in written && written[path] === (await sha256(there));
   const report = (done: number, total: number) => {
     progress = { done, total, to: nameOf(to) };
     opts.onProgress?.(progress);
@@ -319,11 +376,11 @@ export async function moveVault(
         throw e;
       });
       if (there === "conflict") conflicts.push(path);
-      else if (there && !written.has(path) && !same(there, await bytes(source, path))) conflicts.push(path);
+      else if (there && !same(there, await bytes(source, path)) && !(await ours(path, there))) conflicts.push(path);
     }
     if (conflicts.length) throw new VaultMoveConflictError(conflicts);
 
-    const record: MoveRecord = { from: fromLoc, to, startedAt: resuming?.startedAt ?? Date.now(), written: [...written], total: files.length };
+    const record: MoveRecord = { from: fromLoc, to, startedAt: resuming?.startedAt ?? Date.now(), written, total: files.length };
     await kv.set(MOVE_KEY, record);
     pending = record;
 
@@ -339,8 +396,7 @@ export async function moveVault(
       } else {
         await target.write(path, data);
         if (!same(await bytes(target, path), data)) throw new Error(`The copy of “${path}” does not match the original.`);
-        written.add(path);
-        record.written = [...written];
+        written[path] = await sha256(data);
         await kv.set(MOVE_KEY, record);
       }
       report(i + 1, files.length);
@@ -380,6 +436,7 @@ async function sameLocation(a: StoredLocation, b: StoredLocation): Promise<boole
 
 /** @internal tests */
 export function __resetVaultLocation(): void {
+  onVaultReplaced = () => {};
   status = { location: "opfs" };
   pending = null;
   progress = null;

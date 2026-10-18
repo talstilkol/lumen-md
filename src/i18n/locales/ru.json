@@ -1262,6 +1262,7 @@
   "vault.folder.resume": "Продолжить перемещение",
   "vault.folder.cancelMove": "Отменить перемещение",
   "vault.folder.browserStorage": "память браузера",
+  "vault.folder.restoring": "Открываю хранилище…",
   "vault.import.what": "Импортировать из…",
   "vault.import.zip": "Файл .zip",
   "vault.import.folder": "Папка",

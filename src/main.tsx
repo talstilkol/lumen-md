@@ -5,8 +5,7 @@ import React, { Suspense } from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App";
 import { UpdateBanner } from "./ui/UpdateBanner";
-import { VaultFolderBanner } from "./ui/VaultFolderBanner";
-import { restoreVaultLocation } from "./storage/vault/location";
+import { setVaultBackend, createDirectoryHandleBackend } from "./storage/vault";
 import { ErrorBoundary } from "./ui/ErrorBoundary";
 import { showAiToast } from "./ui/AiToast";
 import { ToastContainer } from "./components/Toast";
@@ -83,7 +82,19 @@ initShareExtension();
 const secretsReady = Promise.race([initSecretStore(), new Promise((r) => setTimeout(r, 1500))]);
 // Where the vault lives (OPFS or a real folder, plan 4.2) is restored before
 // the first render, so nothing reads the wrong store; bounded like secrets.
-const vaultReady = Promise.race([restoreVaultLocation(), new Promise((r) => setTimeout(r, 3000))]);
+// Until it is known, the vault is closed (an unavailable backend), never the
+// default store by accident; the location module loads on demand.
+const VaultFolderBanner = React.lazy(() => import("./ui/VaultFolderBanner").then((m) => ({ default: m.VaultFolderBanner })));
+const closedVault = createDirectoryHandleBackend({ id: "restoring", available: () => false, root: async () => Promise.reject(new Error("The vault is still opening.")) });
+setVaultBackend(closedVault);
+const vaultReady = Promise.race([
+  import("./storage/vault/location").then(async (m) => {
+    const { detachWorkspaceDocs } = await import("./store/vaultDocs");
+    m.setOnVaultReplaced(detachWorkspaceDocs);
+    return m.restoreVaultLocationWithin(3000);
+  }),
+  new Promise((r) => setTimeout(r, 4000)),
+]).catch((err) => log.warn("vault location unavailable", err));
 void Promise.all([initLocale(), secretsReady, vaultReady])
   .then(([applied]) => {
     // initLocale falls back to English when the saved locale's chunk can't
@@ -130,7 +141,9 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
       </Suspense>
     </ErrorBoundary>
     <UpdateBanner />
-    <VaultFolderBanner />
+    <Suspense fallback={null}>
+      <VaultFolderBanner />
+    </Suspense>
     <ToastContainer />
   </React.StrictMode>,
 );

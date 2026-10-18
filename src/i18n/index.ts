@@ -405,6 +405,7 @@ const en: Strings = {
   "vault.folder.resume": "Resume move",
   "vault.folder.cancelMove": "Cancel move",
   "vault.folder.browserStorage": "browser storage",
+  "vault.folder.restoring": "Opening the vault…",
   "vault.import.what": "Import from…",
   "vault.import.zip": "A .zip file",
   "vault.import.folder": "A folder",

@@ -1262,6 +1262,7 @@
   "vault.folder.resume": "移動を再開",
   "vault.folder.cancelMove": "移動をキャンセル",
   "vault.folder.browserStorage": "ブラウザーストレージ",
+  "vault.folder.restoring": "保管庫を開いています…",
   "vault.import.what": "読み込み元…",
   "vault.import.zip": ".zip ファイル",
   "vault.import.folder": "フォルダ",

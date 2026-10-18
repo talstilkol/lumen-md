@@ -74,6 +74,7 @@ export function buildVaultLocationCommands(): Command[] {
         const status = loc.getVaultStatus();
         if (status.location === "opfs") return showAiToast(t("vault.folder.alreadyBrowser"), "info");
         if (status.location === "folder-disconnected") return showAiToast(t("vault.folder.reconnectBody", { folder: status.name }), "info");
+        if (status.location === "restoring") return showAiToast(t("vault.folder.restoring"), "info");
         try {
           await flushOpenNote();
           const r = await loc.moveVault({ kind: "opfs" });

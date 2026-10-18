@@ -1262,6 +1262,7 @@
   "vault.folder.resume": "Reprendre le déplacement",
   "vault.folder.cancelMove": "Annuler le déplacement",
   "vault.folder.browserStorage": "stockage du navigateur",
+  "vault.folder.restoring": "Ouverture du coffre…",
   "vault.import.what": "Importer depuis…",
   "vault.import.zip": "Un fichier .zip",
   "vault.import.folder": "Un dossier",
