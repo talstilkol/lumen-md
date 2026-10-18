@@ -98,8 +98,13 @@ function inputTextOf<I extends AgentInput>(def: AgentDefinition<I, unknown>, inp
  * local and cloud models alike, because small local models drift into
  * English on Hebrew input.
  */
+function languageMode<I extends AgentInput>(def: AgentDefinition<I, unknown>, input: I): "input" | "any" {
+  const l = def.language ?? "input";
+  return typeof l === "function" ? l(input) : l;
+}
+
 function languageInstruction<I extends AgentInput>(def: AgentDefinition<I, unknown>, input: I): string | null {
-  if ((def.language ?? "input") === "any") return null;
+  if (languageMode(def, input) === "any") return null;
   const text = inputTextOf(def, input);
   if (hebrewRatio(text) >= 0.5) return "The user's text is in Hebrew. Write every natural-language part of your answer in Hebrew (keep code, URLs, file names and JSON keys as they are).";
   return "Write every natural-language part of your answer in the same language as the user's text.";
@@ -108,11 +113,17 @@ function languageInstruction<I extends AgentInput>(def: AgentDefinition<I, unkno
 /**
  * The script check behind it: a mostly-Hebrew input must not get a
  * mostly-Latin answer. Short answers (under 20 letters) and non-Hebrew
- * inputs pass — they say too little to judge.
+ * inputs pass — they say too little to judge. Code (fenced blocks, inline
+ * code spans, HTML tags) is not prose and does not count.
  */
 export function sameScript(inputText: string, output: unknown): { ok: true } | { ok: false; reason: string; hint: string } {
   if (hebrewRatio(inputText) < 0.5) return { ok: true };
-  const text = typeof output === "string" ? output : JSON.stringify(output ?? "").replace(/"[\w$-]+":/g, " ");
+  const raw = typeof output === "string" ? output : JSON.stringify(output ?? "").replace(/"[\w$-]+":/g, " ");
+  const text = raw
+    .replace(/```[\s\S]*?(?:```|$)/g, " ")
+    .replace(/~~~[\s\S]*?(?:~~~|$)/g, " ")
+    .replace(/`[^`\n]*`/g, " ")
+    .replace(/<\/?[A-Za-z][^<>]*>/g, " ");
   const letters = text.match(/\p{L}/gu) ?? [];
   if (letters.length < 20) return { ok: true };
   const r = hebrewRatio(text);
@@ -196,7 +207,8 @@ export async function runAgent<I extends AgentInput, O = string>(def: AgentDefin
     const { aiCacheEnabled, cacheKey } = await import("../ai/responseCache");
     if (!aiCacheEnabled()) return null;
     const sys = typeof def.system === "function" ? def.system(input) : def.system;
-    return cacheKey({ v: 2, agent: def.id, executor: executor.id, model: executor.modelFor(patch.tier ?? def.tier ?? "small"), sys, user: def.user(input), patch }).catch(() => null);
+    // v3: answers cached before the language check (T27) are not reused.
+    return cacheKey({ v: 3, agent: def.id, executor: executor.id, model: executor.modelFor(patch.tier ?? def.tier ?? "small"), sys, user: def.user(input), patch }).catch(() => null);
   };
   const key = await cacheKeyOf();
   if (key) {
@@ -209,6 +221,8 @@ export async function runAgent<I extends AgentInput, O = string>(def: AgentDefin
       } catch {
         output = undefined;
       }
+      // A cached answer passes the same language check as a fresh one.
+      if (output !== undefined && languageMode(def, input) === "input" && !sameScript(inputTextOf(def, input), output).ok) output = undefined;
       if (output !== undefined) {
         step({ kind: "cache", ms: 0, label: "hit", ok: true });
         return finish("ok", { output, model: hit.model, executor: executor.id });
@@ -350,7 +364,7 @@ export async function runAgent<I extends AgentInput, O = string>(def: AgentDefin
           failure = { kind: "validation", attempt, maxRetries, tier, executor: executor.id, label: "schema", reason: `JSON does not match the required schema: ${formatSchemaErrors(errors)}`, hint: "Reply with JSON matching the schema exactly.", inputChars };
         }
       }
-      if (!failure && output !== undefined && (def.language ?? "input") === "input") {
+      if (!failure && output !== undefined && languageMode(def, input) === "input") {
         const r = sameScript(inputTextOf(def, input), output);
         step({ kind: "validate", ms: 0, label: "language", ok: r.ok, detail: r.ok ? undefined : r.reason });
         if (!r.ok) failure = { kind: "validation", attempt, maxRetries, tier, executor: executor.id, label: "language", reason: r.reason, hint: r.hint, inputChars };
