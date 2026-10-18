@@ -95,9 +95,11 @@ VITE_YJS_WEBSOCKET_URL=wss://lumen-collab.fly.dev
 ## 3. CSP + headers in production (DONE — verify only)
 
 Every policy is written once, in `security/policy.json`, and rendered into
-the files each host reads: the `<meta>` tags in `index.html` and
-`livejs-runner.html`, `public/_headers` (copied to `dist/_headers`),
-`vercel.json`, `docker/nginx.conf`, `deploy/nginx.conf` and
+the files each host reads: the `<meta>` tags in `index.html`,
+`livejs-runner.html` and `playground-runner.html`, `public/_headers`
+(copied to `dist/_headers`), `deploy/vercel.base.json` (read through
+`vercel.ts`, which adds the build's endpoint origins), `docker/nginx.conf`,
+`deploy/nginx.conf` and
 `src-tauri/tauri.conf.json`. Change the policy there and run
 `npm run headers:write`; CI (`npm run headers`) fails when any copy
 differs. Per-route decisions and per-host exceptions are explained in

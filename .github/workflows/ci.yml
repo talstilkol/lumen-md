@@ -312,6 +312,71 @@ jobs:
           name: playwright-report-prod
           path: playwright-report/
 
+  e2e-headers:
+    # The e2e above run on the dev server or a plain static server: no
+    # response headers. This job serves the production build with each nginx
+    # config (as its image does) and runs the specs the deploy policies can
+    # break (plan 0.20): the playground runner (WebKit needs its nonce), the
+    # app under its headers, a worker under /assets/ (Lua) and the service
+    # worker under the app policy, and webR's eval_js under the eval-workers
+    # policy that Cloudflare and Vercel serve /webr/ with too (D6).
+    name: e2e under deploy headers (${{ matrix.conf }} nginx)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    needs: check
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        conf: [docker, deploy]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with: { node-version: 22, cache: npm }
+      - run: npm ci
+      - name: Install Playwright browsers (chromium, webkit)
+        run: npx playwright install --with-deps chromium webkit
+      # A configured endpoint, so the nginx placeholder is filled for real.
+      - name: Build production bundle
+        env:
+          VITE_PUBLISH_ENDPOINT: https://publish.lumen-test.dev/v1
+        run: npm run build
+      - name: Serve dist with ${{ matrix.conf }}/nginx.conf
+        run: |
+          nginx -v
+          scripts/serve-dist-nginx.sh ${{ matrix.conf }} 8088
+      - name: Headers on the routes 0.20 covers
+        run: |
+          set -euo pipefail
+          csp() { curl -sfI "http://localhost:8088$1" | tr -d '\r' | sed -n 's/^content-security-policy: //Ip'; }
+          worker=$(ls dist/assets | grep -E '^(search|lua)\.worker-.*\.js$' | head -1)
+          for path in / "/assets/$worker" /sw.js; do
+            c=$(csp "$path"); echo "$path: ${c:0:80}…"
+            grep -q "https://publish.lumen-test.dev" <<<"$c" || { echo "::error::$path: endpoint origin missing from connect-src"; exit 1; }
+            ! grep -q "__CSP_CONNECT_EXTRA__" <<<"$c" || { echo "::error::$path: placeholder left"; exit 1; }
+          done
+          grep -q "'nonce-lumen-livejs-runner'" <<<"$(csp /playground-runner.html)" || { echo "::error::playground runner: no nonce"; exit 1; }
+          grep -q 'nonce="lumen-livejs-runner"' dist/playground-runner.html || { echo "::error::playground runner script has no nonce"; exit 1; }
+          grep -q "'unsafe-eval'" <<<"$(csp /webr/webr-worker.js)" || { echo "::error::webR worker: no eval policy"; exit 1; }
+      - name: Run E2E under the headers
+        env:
+          PLAYWRIGHT_BASE_URL: http://localhost:8088
+        run: |
+          npx playwright test e2e/playground.spec.ts e2e/csp-violations.spec.ts --project=chromium --project=webkit --reporter=line,github,html
+          npx playwright test e2e/live-exec.spec.ts -g "live-r |live-lua|offline" --project=chromium --project=webkit --reporter=line,github,html
+      - name: nginx error log
+        if: failure()
+        run: cat /tmp/tmp.*/logs/error.log 2>/dev/null | tail -50 || true
+      - name: Upload report
+        if: failure()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: playwright-report-headers-${{ matrix.conf }}
+          path: playwright-report/
+
   signal-health:
     name: signaling server health
     runs-on: ubuntu-latest

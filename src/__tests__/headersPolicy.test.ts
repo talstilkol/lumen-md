@@ -188,7 +188,7 @@ describe("drift is caught", () => {
 
   it("a route the Vercel catch-all no longer excludes is a conflict --write cannot paper over", () => {
     const dir = copy("vercel-route");
-    const path = join(dir, "vercel.json");
+    const path = join(dir, "deploy/vercel.base.json");
     writeFileSync(path, readFileSync(path, "utf8").replace("|webr/", ""));
     const { problems } = run({ root: dir, write: true });
     expect(problems.join("\n")).toMatch(/\/webr\/webr-worker\.js \(route eval-workers\) gets two Content-Security-Policy headers/);
@@ -212,11 +212,10 @@ describe("drift is caught", () => {
 
   it("a <meta> CSP in a page the policy does not list is flagged", () => {
     const dir = copy("unlisted-meta");
-    const path = join(dir, "playground-runner.html");
     writeFileSync(
-      path,
-      readFileSync(path, "utf8").replace("<head>", `<head>\n    <meta http-equiv="Content-Security-Policy" content="default-src 'none'" />`),
+      join(dir, "preview-runner.html"),
+      `<!doctype html><html><head>\n    <meta http-equiv="Content-Security-Policy" content="default-src 'none'" />\n</head></html>\n`,
     );
-    expect(run({ root: dir }).problems.join("\n")).toContain("playground-runner.html: has a <meta> Content-Security-Policy");
+    expect(run({ root: dir }).problems.join("\n")).toContain("preview-runner.html: has a <meta> Content-Security-Policy");
   });
 });
