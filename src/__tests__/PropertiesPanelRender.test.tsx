@@ -3,7 +3,7 @@
  * API: one field changed, the rest of the text untouched.
  */
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { useState } from "react";
 import { PropertiesPanel } from "../ui/PropertiesPanel";
 
@@ -55,6 +55,30 @@ describe("<PropertiesPanel>", () => {
     fireEvent.click(screen.getByLabelText("Add property"));
     expect(latest).toContain("\nstatus:\n---\nBody\n");
     expect(latest).toContain("# keep me");
+  });
+
+  it("edits timestamps with seconds or a time zone as text, keeping them whole", () => {
+    const note = "---\nwhen: 2026-10-18T12:34:56+02:00\nat: 2026-10-18 09:30\n---\n";
+    render(<Harness initial={note} />);
+    const when = screen.getByLabelText("Value of when") as HTMLInputElement;
+    expect(when.type).toBe("text");
+    expect(when.value).toBe("2026-10-18T12:34:56+02:00");
+    const at = screen.getByLabelText("Value of at") as HTMLInputElement;
+    expect(at.type).toBe("datetime-local");
+    fireEvent.change(at, { target: { value: "2026-10-19T10:00" } });
+    expect(latest).toBe(note.replace("at: 2026-10-18 09:30", "at: 2026-10-19 10:00"));
+  });
+
+  it("opens a link property at its heading", async () => {
+    vi.doMock("../storage/workspace", async (orig) => ({ ...(await orig<object>()), listWorkspace: async () => [{ path: "docs/Guide.md", name: "Guide.md", size: 0, modified: 0 }] }));
+    const seen: unknown[] = [];
+    const on = (e: Event) => seen.push((e as CustomEvent).detail);
+    window.addEventListener("lumen-open-file", on);
+    render(<Harness initial={"---\nsee: \"[[Guide#Getting Started]]\"\n---\n"} />);
+    fireEvent.click(screen.getByLabelText("Open Guide#Getting Started"));
+    await vi.waitFor(() => expect(seen).toEqual([{ path: "docs/Guide.md", heading: "getting-started" }]));
+    window.removeEventListener("lumen-open-file", on);
+    vi.doUnmock("../storage/workspace");
   });
 
   it("shows why an invalid frontmatter can't be edited, and offers to add to a note without one", () => {

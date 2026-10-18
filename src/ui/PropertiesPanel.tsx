@@ -15,6 +15,7 @@ import { ExternalLink, Plus, SlidersHorizontal, X } from "lucide-react";
 import { t } from "../i18n";
 import { toast } from "../store/useToastStore";
 import { onWorkspaceChanged } from "../storage/workspaceEvents";
+import { headingSlug } from "../lib/slug";
 import {
   collectPropertySuggestions,
   convertValue,
@@ -263,14 +264,21 @@ function ValueEditor({
         />
       );
     case "date": {
-      const s = typeof v === "string" ? v : "";
-      const withTime = /T|\s\d{2}:/.test(s);
+      const s = typeof v === "string" ? v.trim() : "";
+      // Pickers only for values they can show whole: a date, or a date and
+      // minutes. Seconds or a time zone would be cut off — edit those as text.
+      const dateOnly = s === "" || /^\d{4}-\d{2}-\d{2}$/.test(s);
+      const minutes = /^(\d{4}-\d{2}-\d{2})([T ])(\d{2}:\d{2})$/.exec(s);
+      if (!dateOnly && !minutes) {
+        return <CommitInput label={label} value={s} onCommit={(next) => onChange(next.trim() || null)} />;
+      }
       return (
         <CommitInput
-          type={withTime ? "datetime-local" : "date"}
+          type={minutes ? "datetime-local" : "date"}
           label={label}
-          value={withTime ? s.replace(" ", "T").slice(0, 16) : s.slice(0, 10)}
-          onCommit={(next) => onChange(next || null)}
+          value={minutes ? `${minutes[1]}T${minutes[3]}` : s}
+          // Keep the separator the value was written with.
+          onCommit={(next) => onChange(next ? (minutes ? next.replace("T", minutes[2]) : next) : null)}
         />
       );
     }
@@ -320,9 +328,10 @@ async function openNote(target: string) {
       import("../storage/workspace"),
       import("../renderer/wikiLinks"),
     ]);
-    const { note } = splitWikiTarget(target.split("|")[0]);
+    const { note, heading } = splitWikiTarget(target.split("|")[0]);
     const path = resolveWikiTarget(note, (await listWorkspace()).map((f) => f.path));
-    if (path) window.dispatchEvent(new CustomEvent("lumen-open-file", { detail: { path } }));
+    // `[[Guide#Setup]]` opens at that heading, like a wiki link in the preview.
+    if (path) window.dispatchEvent(new CustomEvent("lumen-open-file", { detail: heading ? { path, heading: headingSlug(heading) } : { path } }));
     else toast.error(t("props.linkMissing", { target: note }));
   } catch {
     /* no workspace */

@@ -49,8 +49,12 @@ interface Block {
   eol: string;
 }
 
-/** Locate the frontmatter block: `---` on the first line (after a BOM), up to the next `---` line. */
-function findBlock(text: string): Block | null {
+/**
+ * Locate the frontmatter block: `---` on the first line (after a BOM), up
+ * to the next `---` line. "unterminated" when the opening fence has no
+ * closing one — that note must not get a second block prepended.
+ */
+function findBlock(text: string): Block | null | "unterminated" {
   const open = /^(?:﻿)?---[ \t]*(\r?\n)/.exec(text);
   if (!open) return null;
   const bodyStart = open[0].length;
@@ -63,7 +67,7 @@ function findBlock(text: string): Block | null {
     }
     if (close.lastIndex === m.index) close.lastIndex++;
   }
-  return null;
+  return "unterminated";
 }
 
 type ParsedYaml = { block: Block; body: string; doc: Document.Parsed; pairs: Pair[] };
@@ -71,6 +75,7 @@ type ParsedYaml = { block: Block; body: string; doc: Document.Parsed; pairs: Pai
 function parse(text: string): ParsedYaml | null | { error: string } {
   const block = findBlock(text);
   if (!block) return null;
+  if (block === "unterminated") return { error: "the frontmatter has no closing ---" };
   const body = text.slice(block.bodyStart, block.closeStart);
   const doc = parseDocument(body, { uniqueKeys: false, keepSourceTokens: false });
   if (doc.errors.length) return { error: doc.errors[0].message.split("\n")[0] };

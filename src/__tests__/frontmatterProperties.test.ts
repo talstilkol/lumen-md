@@ -113,6 +113,11 @@ describe("setProperty — only the edited value changes", () => {
     expect(() => setProperty(bad, "a", 1)).toThrow(FrontmatterError);
     expect(parseProperties(bad).status).toBe("invalid");
     expect(() => setProperty("---\n{a: 1}\n---\n", "b", 1)).toThrow(FrontmatterError);
+    // An opening fence without a closing one: never prepend a second block.
+    const open = "---\ntitle: x\n\nbody without a closing fence\n";
+    expect(parseProperties(open).status).toBe("invalid");
+    expect(() => setProperty(open, "a", 1)).toThrow(FrontmatterError);
+    expect(() => removeProperty(open, "title")).toThrow(FrontmatterError);
   });
 });
 
