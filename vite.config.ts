@@ -2,6 +2,7 @@
 import { defineConfig as defineViteConfig, searchForWorkspaceRoot } from "vite";
 import type { UserConfig as ViteUserConfig } from "vite";
 import { cspEndpointsPlugin } from "./src/build/cspEndpoints";
+import { laneCacheDir } from "./src/build/laneCache";
 
 interface VitestConfig {
   test?: {
@@ -200,7 +201,11 @@ function vendorChunk(id: string): string | undefined {
   return undefined;
 }
 
+const viteCacheDir = laneCacheDir(__dirname);
+
 export default defineConfig({
+  // A lane's symlinked node_modules is shared: its Vite cache stays in the worktree (src/build/laneCache.ts).
+  ...(viteCacheDir ? { cacheDir: viteCacheDir } : {}),
   // The page deletes `lumen-runtime-*` caches of superseded versions
   // (src/lib/runtimeCaches.ts): Workbox only cleans its precache.
   define: {

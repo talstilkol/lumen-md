@@ -41,7 +41,10 @@ suggests a lane for each review finding from its path with this same split.
    ```
 
    `LUMEN_NODE_MODULES` picks the node_modules to link (default: the main
-   checkout's), `PW_CHROMIUM` a Chromium binary for e2e, `LANE_PORT` a fixed
+   checkout's). The link shares the installed packages only: with a
+   symlinked node_modules, vite.config.ts keeps Vite's cache (pre-bundled
+   deps, vitest results) in the lane's own `.vite/`, so two lanes' dev
+   servers never swap files under each other. `PW_CHROMIUM` a Chromium binary for e2e, `LANE_PORT` a fixed
    port. Run e2e in a lane with `npx playwright test -c playwright.lane.config.ts`.
    Note the baseline tsc result: errors it prints were there before you started.
 2. **Stay inside your conflict groups.** Before starting, the coordinator

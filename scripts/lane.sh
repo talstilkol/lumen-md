@@ -42,6 +42,10 @@ nm=${LUMEN_NODE_MODULES:-$main/node_modules}
 nm=$(cd "$nm" && pwd -P)
 
 git worktree add --quiet -b "$name" "$dir" "$base"
+# Shared, read-mostly deps. Vite's writable cache is not shared: with a
+# symlinked node_modules, vite.config.ts puts it in the lane's own .vite/
+# (src/build/laneCache.ts), so concurrent dev servers do not swap each
+# other's pre-bundled deps.
 ln -s "$nm" "$dir/node_modules"
 
 # A port nothing listens on right now. The lane config bakes it in (every
@@ -82,7 +86,7 @@ EOF
 
 echo "lane:   $name  (from $base @ $(git rev-parse --short "$base^{commit}"))"
 echo "dir:    $dir"
-echo "deps:   node_modules -> $nm"
+echo "deps:   node_modules -> $nm  (Vite cache: $dir/.vite)"
 echo "e2e:    port $port${PW_CHROMIUM:+, chromium $PW_CHROMIUM}  (npx playwright test -c playwright.lane.config.ts)"
 
 if [ "${LANE_SKIP_TSC:-}" = 1 ]; then
