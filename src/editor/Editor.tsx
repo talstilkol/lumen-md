@@ -32,6 +32,7 @@ import { tags as t } from "@lezer/highlight";
 import { StateField, StateEffect } from "@codemirror/state";
 import type { Extension } from "@codemirror/state";
 import { chat } from "../ai/llm";
+import { aiOperation } from "../ai/aiAbort";
 import { PROMPTS } from "../ai/prompts";
 import { embedHintExtension } from "./embedHintExtension";
 import { insertSlashMenuExtension } from "./insertMenu";
@@ -207,8 +208,11 @@ function ghostTextExtension(): Extension {
           debounceTimer = setTimeout(async () => {
             // Explicit Ctrl-Space request: counts against the AI quota when
             // it is actually sent (ownPrompt), not before chat()'s checks.
+            // T55: registered, so Esc / "AI: Cancel" stop it too.
+            const op = aiOperation();
             try {
-              controller = new AbortController();
+              const c = (controller = new AbortController());
+              op.signal.addEventListener("abort", () => c.abort(op.signal.reason), { once: true });
               const text = await chat(
                 [
                   { role: "system", content: PROMPTS.autocomplete },
@@ -221,6 +225,8 @@ function ghostTextExtension(): Extension {
               }
             } catch {
               // Silently ignore abort / API errors for completions
+            } finally {
+              op.end();
             }
           }, 150);
           return true;

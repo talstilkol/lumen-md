@@ -67,11 +67,11 @@ export function grammarEndpoint(): string {
 const endpoint = grammarEndpoint;
 
 /** Grammar through the local proofreader agent: issues mapped to LanguageTool-shaped matches. */
-async function checkWithModel(text: string, language: string): Promise<GrammarMatch[]> {
+async function checkWithModel(text: string, language: string, signal?: AbortSignal): Promise<GrammarMatch[]> {
   const { runAgentOrThrow } = await import("../agents/runtime");
   const { proofreaderAgent, locateIssues, PROOF_MAX_CHARS } = await import("../agents/defs");
   const slice = text.slice(0, PROOF_MAX_CHARS);
-  const out = await runAgentOrThrow(proofreaderAgent, { text: slice, extra: { language } }, { document: text });
+  const out = await runAgentOrThrow(proofreaderAgent, { text: slice, extra: { language } }, { document: text, signal });
   return locateIssues(out.issues, slice).map((i) => ({ ...i, rule: { id: "LOCAL_MODEL", category: "local" } }));
 }
 
@@ -83,7 +83,7 @@ async function checkWithModel(text: string, language: string): Promise<GrammarMa
 export async function checkGrammar(
   text: string,
   language = "en-US",
-  opts: { allowModel?: boolean } = {},
+  opts: { allowModel?: boolean; signal?: AbortSignal } = {},
 ): Promise<GrammarMatch[]> {
   const trimmed = text.trim();
   if (trimmed.length < 40) return [];
@@ -94,7 +94,7 @@ export async function checkGrammar(
   // every policy; the public API is a third party.
   if (!isLocalOrigin(endpoint()) && !cloudAllowed()) {
     if (!opts.allowModel) return [];
-    const matches = await checkWithModel(trimmed, language);
+    const matches = await checkWithModel(trimmed, language, opts.signal);
     remember(cacheKey, matches);
     return matches;
   }
@@ -110,6 +110,7 @@ export async function checkGrammar(
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
       body,
+      signal: opts.signal,
     },
     {
       label: "grammar.check",

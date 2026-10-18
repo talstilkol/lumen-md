@@ -803,9 +803,15 @@ export function useCommands({
           try {
             showAiToast(t("toast.productAgentStarting"), "info");
             const { createProduct } = await import("../ai/productAgent");
-            const result = await createProduct(idea, (progress) => {
-              showAiToast(`${progress.phase}: ${progress.message}`, "info");
-            });
+            const result = await cancellable((signal) =>
+              createProduct(
+                idea,
+                (progress) => {
+                  showAiToast(`${progress.phase}: ${progress.message}`, "info");
+                },
+                signal,
+              ),
+            );
             if (result.success) {
               showAiToast(t("toast.productCreatedFilesGenerated", { count: result.files.size }), "success");
               const summary = `# Product Created\n\n${result.files.size} files generated:\n\n${[...result.files.keys()].map((f) => `- \`${f}\``).join("\n")}`;
@@ -1407,7 +1413,7 @@ export function useCommands({
               const folder = await uiPrompt({ message: t("ai.style.folder"), defaultValue: "" });
               if (folder === null) return;
               showAiToast(t("ai.style.building"), "info");
-              const p = await sp.buildStyleProfile(folder.trim());
+              const p = await cancellable((signal) => sp.buildStyleProfile(folder.trim(), signal));
               showAiToast(t("ai.style.built", { notes: p.notes, rules: p.rules.length }), "success");
             } else if (choice === "on" || choice === "off") {
               sp.setStyleProfileActive(choice === "on");
@@ -1806,7 +1812,8 @@ export function useCommands({
           const { checkGrammar } = await import("../ai/grammar");
           try {
             showAiToast(t("toast.checkingGrammar"), "info");
-            const matches = await checkGrammar(liveDoc().content, locale === "he" ? "he" : "en-US", { allowModel: true });
+            const text = liveDoc().content;
+            const matches = await cancellable((signal) => checkGrammar(text, locale === "he" ? "he" : "en-US", { allowModel: true, signal }));
             if (matches.length === 0) {
               showAiToast(t("toast.noGrammarIssuesFound"), "success");
               return;
@@ -2113,7 +2120,7 @@ export function useCommands({
             showAiToast(t("toast.processing", { name: tpl.label }), "info");
             const { runAgentOrThrow } = await import("../agents/runtime");
             const { templaterAgent } = await import("../agents/defs");
-            const result = await runAgentOrThrow(templaterAgent, { text: prompt, extra: { templateId: tpl.id } }, { document: liveDoc().content });
+            const result = await cancellable((signal) => runAgentOrThrow(templaterAgent, { text: prompt, extra: { templateId: tpl.id } }, { document: liveDoc().content, signal }));
             setContent(liveDoc().content + "\n\n---\n\n" + result);
             showAiToast(t("toast.completed", { name: tpl.label }), "success");
           } catch (e) {
@@ -2202,7 +2209,7 @@ export function useCommands({
           let aiSuggestion = "";
           
           try {
-            aiSuggestion = await generateAiCommitMessage(repoFolder);
+            aiSuggestion = await cancellable((signal) => generateAiCommitMessage(repoFolder, signal));
           } catch (e) {
             log.warn("AI commit generation skipped", e);
           }

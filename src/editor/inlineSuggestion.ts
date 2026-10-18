@@ -97,8 +97,12 @@ const suggestionPlugin = ViewPlugin.fromClass(
       // (ownPrompt), and once the monthly quota is spent they just stop
       // (no toast per keystroke).
 
-      this.abort = new AbortController();
-      const signal = this.abort.signal;
+      const ctrl = (this.abort = new AbortController());
+      const signal = ctrl.signal;
+      // T55: registered, so Esc / "AI: Cancel" stop it too.
+      const { aiOperation } = await import("../ai/aiAbort");
+      const op = aiOperation();
+      op.signal.addEventListener("abort", () => ctrl.abort(op.signal.reason), { once: true });
 
       try {
         const { chat } = await import("../ai/llm");
@@ -116,7 +120,7 @@ const suggestionPlugin = ViewPlugin.fromClass(
               content: `Complete: "${context}"`,
             },
           ],
-          { maxTokens: 40, temperature: 0.3, ownPrompt: "silent", tier: "light" },
+          { maxTokens: 40, temperature: 0.3, ownPrompt: "silent", tier: "light", signal },
         );
 
         if (signal.aborted) return;
@@ -126,6 +130,8 @@ const suggestionPlugin = ViewPlugin.fromClass(
         this.view.dispatch({ effects: setSuggestion.of(trimmed) });
       } catch (err) {
         log.debug("inline-suggestion", err);
+      } finally {
+        op.end();
       }
     }
 
