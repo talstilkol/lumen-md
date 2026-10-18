@@ -20,23 +20,24 @@ edit once:
 - a framed runner page that gets `X-Frame-Options`;
 - a `<meta>` CSP in an HTML page the policy does not list.
 
-For `public/_headers` and `vercel.json`, the script emulates the host. It works out which
+For `public/_headers` and `deploy/vercel.base.json`, the script emulates the host. It works out which
 headers each route's sample paths (`routes.*.samples`) really receive and maps each CSP
 line to its route from that result. For nginx, `sources[file].blocks` names the route of
 each `location`.
 
 The build-time endpoint extension (`src/build/cspEndpoints.ts`) still runs on the
-**built** copies: `dist/index.html`, `dist/_headers` and the nginx
-`__CSP_CONNECT_EXTRA__` placeholder. It never touches the sources, so it and this check
+**built** copies: `dist/index.html`, `dist/_headers`, the nginx
+`__CSP_CONNECT_EXTRA__` placeholder, and the same placeholder in the Vercel config,
+which `vercel.ts` fills at build time (see below). It never touches the sources, so it and this check
 cannot conflict. It still leaves `connect-src 'none'` (the live-js runner) untouched,
 which `headersPolicy.test.ts` checks.
 
 ## Routes
 
-| Route | Kind | Paths | `_headers` | `vercel.json` | `docker/nginx.conf` | `deploy/nginx.conf` | meta | Tauri |
+| Route | Kind | Paths | `_headers` | `deploy/vercel.base.json` | `docker/nginx.conf` | `deploy/nginx.conf` | meta | Tauri |
 |---|---|---|---|---|---|---|---|---|
-| `app` | document | everything else | `/*` | catch-all regex | `location /` | `http` level | `index.html` | `app.security.csp` |
-| `playground-runner` | document, framed by the app | `/playground-runner.html` | own block | own entry | own location | own location | none (see open items) | n/a |
+| `app` | document; also the other workers under `/assets/` and the service worker | everything else | `/*` | catch-all regex | `location /`, `location /assets/`, the `sw.js` location (0.20) | `http` level, `location /assets/`, `location = /sw.js` (0.20) | `index.html` | `app.security.csp` |
+| `playground-runner` | document, framed by the app | `/playground-runner.html` | own block | own entry | own location | own location | `playground-runner.html` (0.20) | n/a |
 | `livejs-runner` | document, framed by the app | `/livejs-runner.html` | own block | own entry | own location | own location (new) | `livejs-runner.html` | n/a |
 | `tesseract` | worker | `/tesseract/*` | own block | own entry | own location | own location (new) | n/a | n/a |
 | `eval-workers` | worker | `/assets/{graphviz,ruby,tsCheck}.worker-*`, `/webr/*` | own blocks (`/webr/*` new) | own entries (`/webr/` new) | assets regex + runtimes location | assets regex (new) + runtime include | n/a | n/a |
@@ -145,28 +146,36 @@ These are written in `policy.json` under `hosts`.
 | nginx (both) | no HSTS | plain-HTTP listener behind the operator's TLS terminator. `includeSubDomains; preload` on someone else's domain is their call |
 | deploy nginx | COOP `same-origin`, COEP `credentialless` | cross-origin isolation (D9). COEP goes on every document and worker it serves |
 
+## Vercel: endpoint origins at build time (0.20)
+
+A static `vercel.json` is read from the repository, so it could not carry the origins of
+the `VITE_*_ENDPOINT` workers a deployment is built with: the header blocked them while
+the page's `<meta>` allowed them. Vercel now reads [`vercel.ts`](../../vercel.ts), which
+it runs at build time with the project's environment. It loads
+`deploy/vercel.base.json` (rendered from the policy and checked like every other source,
+with a `__CSP_CONNECT_EXTRA__` placeholder in the app policy's `connect-src`, from
+`hosts.vercel`) and replaces the placeholder with the configured origins, or removes it.
+The app policy also covers the other workers under `/assets/` and `sw.js` on Vercel, so
+their requests to those workers pass too. `vercel.ts` has no imports beyond Node's, and
+`src/__tests__/vercelConfig.test.ts` keeps its endpoint rules equal to
+`cspEndpoints.ts` and checks the generated config path by path.
+
 ## Not covered, and open items for the owner
 
-1. **The playground runner has no `<meta>` CSP**, so the Vite dev server, Tauri and
-   Capacitor run it unprotected. Its policy also lacks the WebKit nonce that the live-js
-   runner needed (`'self'` does not match in an opaque-origin frame), so it may be blocked
-   in Safari on the web hosts too. The build already stamps `nonce="lumen-livejs-runner"`
-   on every page's scripts. Adding `'nonce-lumen-livejs-runner'` to the route and a meta
-   copy is likely the fix, but it needs a Safari check first.
-2. **Vercel does not get the build-time endpoint origins.** `vercel.json` is read from
-   the repo, not from `dist/`. On a Vercel deployment with `VITE_*_ENDPOINT`, the header
-   blocks those workers while the meta allows them. The options are to list them in
-   `vercel.json`, or to move Vercel to a build-generated config.
-3. **The deploy image's COOP/COEP.** It buys threads for WebAssembly, but blocks
+1. **`vercel.ts` on a real deployment.** It follows Vercel's documented programmatic
+   configuration, and its output is tested, but no preview deployment has run it yet
+   (the preview deploys are rate-limited). Check the response headers of the first one:
+   `curl -sI <preview>/ | grep -i content-security` should list the endpoint origins.
+2. **The deploy image's COOP/COEP.** It buys threads for WebAssembly, but blocks
    YouTube, Vimeo and similar embeds, and severs `window.opener` for popups. Decide
    whether it should stay, become opt-in, or spread to the other hosts.
-4. **Other worker scripts and the service worker.** Cloudflare and Vercel give them the
-   app policy through the catch-all. On nginx, `location /assets/` and `sw.js` carry no
-   CSP, because their own `add_header` lines drop the inherited ones. Unify them after the
-   workers (transformers, webllm, search, lua, hebrewSpell, the service worker) are
-   verified under the app's Trusted Types.
-5. **webR on Cloudflare/Vercel (D6)** is decided from the runtime's code. Run an R block
-   that calls `webr::eval_js()` on a preview deployment to confirm.
-6. **The extension and VS Code webview policies** (`extension/`, `packages/vscode-lumen`)
+3. **webR on Cloudflare/Vercel (D6).** CI runs the `webr::eval_js()` e2e under the nginx
+   headers (job "e2e under deploy headers"), which serve `/webr/` the same eval-workers
+   policy as Cloudflare and Vercel. A run on a preview deployment is still to do.
+4. **The extension and VS Code webview policies** (`extension/`, `packages/vscode-lumen`)
    and the srcdoc sandboxes' inline policies are separate surfaces, and are not part of
    this policy.
+
+Done in 0.20: the playground runner's `<meta>` copy and WebKit nonce, the build-time
+endpoint origins on Vercel, and the CSP of the other workers and `sw.js` on both nginx
+images (the app policy, as Cloudflare and Vercel already served them).

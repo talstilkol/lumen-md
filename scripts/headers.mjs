@@ -10,10 +10,11 @@
  * that policy into every file that carries a copy:
  *
  *   public/_headers                      Cloudflare Pages / Netlify
- *   vercel.json                          Vercel
+ *   deploy/vercel.base.json              Vercel (read through vercel.ts)
  *   docker/nginx.conf                    on-prem web shell image
  *   deploy/nginx.conf (+ runtime include) root Dockerfile image
- *   index.html, livejs-runner.html       <meta http-equiv> copies
+ *   index.html, livejs-runner.html,      <meta http-equiv> copies
+ *   playground-runner.html
  *   src-tauri/tauri.conf.json            desktop app
  *
  *   node scripts/headers.mjs [--check]   exit 1 + a readable diff when a source differs
@@ -25,7 +26,7 @@
  * is reported and must be added by hand once.
  *
  * Build-time endpoint origins (src/build/cspEndpoints.ts) are added to the
- * built copies (dist/index.html, dist/_headers, the nginx placeholder), not
+ * built copies (dist/index.html, dist/_headers, the nginx and Vercel placeholders), not
  * to these sources, so this check and that extension never fight.
  */
 import { readFileSync, writeFileSync, existsSync, readdirSync } from "node:fs";
@@ -94,7 +95,7 @@ export const renderMeta = (policy, route) => renderCsp(policy, route, "meta");
 /** nginx directive. */
 export const renderNginx = (policy, route, host = "docker-nginx") =>
   `add_header ${CSP} "${renderCsp(policy, route, host)}" always;`;
-/** vercel.json header object. */
+/** deploy/vercel.base.json header object. */
 export const renderVercel = (policy, route) => ({ key: CSP, value: renderCsp(policy, route, "vercel") });
 /** tauri.conf.json app.security.csp. */
 export const renderTauri = (policy) => renderCsp(policy, "app", "tauri");

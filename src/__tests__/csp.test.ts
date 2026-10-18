@@ -3,7 +3,7 @@
  *
  * The page is served with BOTH the <meta> CSP in index.html and the
  * response-header CSP (public/_headers, served as dist/_headers by both
- * Cloudflare Pages and Netlify; vercel.json; the two nginx images;
+ * Cloudflare Pages and Netlify; deploy/vercel.base.json (Vercel, via vercel.ts); the two nginx images;
  * netlify.toml deliberately has no CSP). Browsers enforce every policy, so
  * a host has to be allowed in all of them — drift silently breaks shipped
  * features (this is how the AI providers, Drive sync and the WebGPU model
@@ -68,17 +68,21 @@ function cspFromNginx(file: string, block: RegExp): Policy {
 }
 
 function cspFromVercel(): Policy {
-  const vercel = JSON.parse(read("vercel.json")) as { headers: { source: string; headers: { key: string; value: string }[] }[] };
+  const vercel = JSON.parse(read("deploy/vercel.base.json")) as { headers: { source: string; headers: { key: string; value: string }[] }[] };
   const entry = vercel.headers.find((h) => h.headers.some((x) => x.key === "X-Frame-Options"));
   const value = entry?.headers.find((x) => x.key === "Content-Security-Policy")?.value;
-  if (!value) throw new Error("vercel.json: app CSP not found");
-  return parsePolicy(value);
+  if (!value) throw new Error("deploy/vercel.base.json: app CSP not found");
+  const policy = parsePolicy(value);
+  // The placeholder vercel.ts fills with the deployment's worker origins isn't a host.
+  const connect = policy.get("connect-src");
+  if (connect) policy.set("connect-src", connect.filter((t) => t !== "__CSP_CONNECT_EXTRA__"));
+  return policy;
 }
 
 const POLICIES: Record<string, Policy> = {
   "index.html": cspFromIndexHtml(),
   "public/_headers": cspFromHeadersFile(),
-  "vercel.json": cspFromVercel(),
+  "deploy/vercel.base.json": cspFromVercel(),
   "docker/nginx.conf": cspFromNginx("docker/nginx.conf", /^\s*location \/ \{/m),
   "deploy/nginx.conf": cspFromNginx("deploy/nginx.conf", /^http \{/m),
 };

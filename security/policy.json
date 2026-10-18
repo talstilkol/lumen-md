@@ -84,11 +84,11 @@
     "playground-runner": {
       "kind": "document",
       "frameable": true,
-      "why": "Web Playground runner: the page inside the playground block's sandboxed iframe (sandbox=\"allow-scripts\", opaque origin). Runs the user's own project: blob: modules (the linked project files) and eval (Vue's template compiler); framed by the app only.",
+      "why": "Web Playground runner: the page inside the playground block's sandboxed iframe (sandbox=\"allow-scripts\", opaque origin). Runs the user's own project: blob: modules (the linked project files) and eval (Vue's template compiler); framed by the app only. The nonce is the build's one public nonce (vite.config.ts html.cspNonce, shared with the live-js runner), for WebKit, which does not match 'self' in an opaque-origin frame: the entry script carries it, modules it imports inherit it, and the runner sets it on the vendor scripts it adds (src/playground/runner.ts).",
       "samples": ["/playground-runner.html"],
       "csp": {
         "default-src": ["'none'"],
-        "script-src": ["'self'", "blob:", "'unsafe-eval'"],
+        "script-src": ["'self'", "'nonce-lumen-livejs-runner'", "blob:", "'unsafe-eval'"],
         "style-src": ["'self'", "'unsafe-inline'"],
         "img-src": ["*", "data:", "blob:"],
         "media-src": ["*", "data:", "blob:"],
@@ -191,7 +191,14 @@
       "why": "public/_headers: Cloudflare Pages (and Netlify, which applies dist/_headers but cannot detach headers). The build copies it to dist/_headers and adds the deployment's endpoint origins to every connect-src (src/build/cspEndpoints.ts)."
     },
     "vercel": {
-      "why": "vercel.json headers."
+      "why": "deploy/vercel.base.json headers. Vercel reads vercel.ts, which runs at build time with the project's environment: it loads this file and fills the placeholder below with the deployment's endpoint origins (vercel.ts, src/build/cspEndpoints.ts).",
+      "csp": [
+        {
+          "routes": ["app"],
+          "add": { "connect-src": ["__CSP_CONNECT_EXTRA__"] },
+          "why": "Placeholder that vercel.ts replaces with the origins of the VITE_*_ENDPOINT workers (and VITE_CSP_CONNECT_EXTRA) the deployment is built with. The app policy also covers the other workers under /assets/ and sw.js there, so their requests to those workers pass too."
+        }
+      ]
     },
     "docker-nginx": {
       "why": "docker/nginx.conf: the on-prem web shell (docker/Dockerfile.web, docker-compose.yml).",
@@ -246,7 +253,7 @@
   },
   "sources": {
     "public/_headers": { "format": "headers-file", "host": "cloudflare" },
-    "vercel.json": { "format": "vercel", "host": "vercel" },
+    "deploy/vercel.base.json": { "format": "vercel", "host": "vercel" },
     "docker/nginx.conf": {
       "format": "nginx",
       "host": "docker-nginx",
@@ -256,7 +263,9 @@
         "location = /playground-runner.html": "playground-runner",
         "location = /livejs-runner.html": "livejs-runner",
         "location ^~ /tesseract/": "tesseract",
-        "location ~ ^/assets/(graphviz|ruby|tsCheck)\\.worker-": "eval-workers"
+        "location ~ ^/assets/(graphviz|ruby|tsCheck)\\.worker-": "eval-workers",
+        "location /assets/": "app",
+        "location ~ ^/(sw\\.js|manifest\\.webmanifest)$": "app"
       }
     },
     "deploy/nginx.conf": {
@@ -267,7 +276,9 @@
         "location = /playground-runner.html": "playground-runner",
         "location = /livejs-runner.html": "livejs-runner",
         "location ^~ /tesseract/": "tesseract",
-        "location ~ ^/assets/(graphviz|ruby|tsCheck)\\.worker-": "eval-workers"
+        "location ~ ^/assets/(graphviz|ruby|tsCheck)\\.worker-": "eval-workers",
+        "location /assets/": "app",
+        "location = /sw.js": "app"
       }
     },
     "deploy/lumen-runtime-headers.conf": {
@@ -277,6 +288,7 @@
     },
     "index.html": { "format": "meta", "host": "meta", "route": "app" },
     "livejs-runner.html": { "format": "meta", "host": "meta", "route": "livejs-runner" },
+    "playground-runner.html": { "format": "meta", "host": "meta", "route": "playground-runner" },
     "src-tauri/tauri.conf.json": { "format": "tauri", "host": "tauri", "route": "app" }
   }
 }
