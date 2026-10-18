@@ -192,6 +192,10 @@ describe.each(backends)("VaultBackend contract — %s", (_label, make) => {
     it("rejects with VaultNotFoundError when nothing is at the source", async () => {
       await expect(v.rename("missing.md", "x.md")).rejects.toBeInstanceOf(VaultNotFoundError);
       expect(await v.stat("x.md")).toBeNull();
+      // Even when something is at the target: a missing source is not a conflict.
+      await v.write("existing.md", "E");
+      await expect(v.rename("missing.md", "existing.md")).rejects.toBeInstanceOf(VaultNotFoundError);
+      expect(await v.readText("existing.md")).toBe("E");
     });
 
     it("refuses to move the root", async () => {

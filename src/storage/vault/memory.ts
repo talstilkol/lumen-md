@@ -125,10 +125,10 @@ export function createMemoryBackend(opts: { id?: string; now?: () => number } = 
     async rename(from, to, o = {}) {
       const r = checkRename(from, to);
       if (!r) return;
-      const target = nodeAt(r.dst);
-      if (target && !o.overwrite) throw new WorkspaceConflictError(to);
       const source = nodeAt(r.src);
       if (!source) throw new VaultNotFoundError(from);
+      const target = nodeAt(r.dst);
+      if (target && !o.overwrite) throw new WorkspaceConflictError(to);
       const toParent = dirAt(r.dst.slice(0, -1), true);
       if (!toParent) throw new VaultError("EKIND", to, `Cannot move to "${to}": a file is in the way`);
       const fromParent = dirAt(r.src.slice(0, -1), false)!;
