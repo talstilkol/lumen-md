@@ -125,8 +125,9 @@ export function FileTree({
     // No confirmation: it goes to the trash, and the toast offers Undo.
     try {
       // Unsaved edits of every open note inside go with it (and come back on Undo / Ctrl+Z).
-      const items = await trashWithOpenEdits(paths, Object.fromEntries(paths.map((p) => [p, kindOf(p)])));
-      if (activePath && paths.some((p) => activePath === p || activePath.startsWith(p + "/"))) onActiveDeleted();
+      const { items, settled } = await trashWithOpenEdits(paths, Object.fromEntries(paths.map((p) => [p, kindOf(p)])));
+      // Not settled: the open note's newest text is only in memory; keep it.
+      if (settled && activePath && paths.some((p) => activePath === p || activePath.startsWith(p + "/"))) onActiveDeleted();
       announceTrash(items);
     } catch (e) {
       await uiAlert({ message: t("tree.alert.deleteFailed", { error: (e as Error).message }) });
@@ -342,9 +343,11 @@ export function FileTree({
     try {
       // Unsaved edits of every open note inside go with it, inactive tabs
       // included, and edits typed while it moves (they come back on Undo / Ctrl+Z).
-      const items = await trashWithOpenEdits([node.path], { [node.path]: node.kind === "directory" ? "directory" : "file" });
+      const { items, settled } = await trashWithOpenEdits([node.path], { [node.path]: node.kind === "directory" ? "directory" : "file" });
       announceTrash(items);
+      // Not settled: the open note's newest text is only in memory; keep it.
       if (
+        settled &&
         activePath &&
         (activePath === node.path || activePath.startsWith(node.path + "/"))
       ) {

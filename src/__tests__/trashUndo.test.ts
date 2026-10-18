@@ -163,13 +163,67 @@ describe("flushOpenDocsUnder", () => {
     const deleting = trashWithOpenEdits(["proj"], { proj: "directory" });
     // The flush has taken its snapshot and is writing: the user keeps typing.
     useAppStore.getState().setContent("B edit, typed during the delete");
-    const items = await deleting;
+    const { items, settled } = await deleting;
+    expect(settled).toBe(true);
     expect(items.map((i) => i.originalPath)).toEqual(["proj"]);
     expect(useAppStore.getState().doc.dirty).toBe(false);
     expect(await workspaceHasEntry("proj")).toBe(false);
     expect(await undoLastTrash()).toEqual(["proj"]);
     expect(await readWorkspaceFile("proj/b.md")).toBe("B edit, typed during the delete");
     expect(await readWorkspaceFile("proj/a.md")).toBe("A edit");
+  });
+
+  /** Type into the open note while each of the next `times` writes of `file` is in flight. */
+  async function typeDuringWrites(root: Awaited<ReturnType<typeof installFakeOpfs>>, file: string, times: number) {
+    const handle = await root.getFileHandle("__probe", { create: true });
+    await root.removeEntry("__probe");
+    const proto = Object.getPrototypeOf(handle) as { createWritable: (this: { name: string }) => Promise<unknown> };
+    const original = proto.createWritable;
+    let n = 0;
+    proto.createWritable = async function (this: { name: string }) {
+      const w = await original.call(this);
+      if (this.name === file && n < times) useAppStore.getState().setContent(`typed ${++n}`);
+      return w;
+    };
+    return () => {
+      proto.createWritable = original;
+    };
+  }
+
+  it("keeps writing into the trash until the open note stops changing (review: #218)", async () => {
+    const root = installFakeOpfs();
+    const { trashWithOpenEdits } = await import("../store/openDocs");
+    await writeWorkspaceFile("proj/b.md", "B saved");
+    open("proj/b.md", "B saved");
+    useAppStore.getState().setContent("B edit");
+    const restore = await typeDuringWrites(root, "b.md", 3); // during the flush and two post-trash writes
+    try {
+      const { settled } = await trashWithOpenEdits(["proj"], { proj: "directory" });
+      expect(settled).toBe(true);
+      expect(useAppStore.getState().doc).toMatchObject({ content: "typed 3", dirty: false });
+    } finally {
+      restore();
+    }
+    expect(await undoLastTrash()).toEqual(["proj"]);
+    expect(await readWorkspaceFile("proj/b.md")).toBe("typed 3");
+  });
+
+  it("reports unsettled when the note changes during every write, so the tree keeps the document", async () => {
+    const root = installFakeOpfs();
+    const { trashWithOpenEdits } = await import("../store/openDocs");
+    await writeWorkspaceFile("proj/b.md", "B saved");
+    open("proj/b.md", "B saved");
+    useAppStore.getState().setContent("B edit");
+    const restore = await typeDuringWrites(root, "b.md", 1000);
+    try {
+      const { settled } = await trashWithOpenEdits(["proj"], { proj: "directory" });
+      expect(settled).toBe(false);
+      const doc = useAppStore.getState().doc;
+      expect(doc.dirty).toBe(true); // the newest text is still held, not cleared
+      expect(doc.content).toMatch(/^typed \d+$/);
+    } finally {
+      restore();
+    }
   });
 
   it("deleting a single file saves that file's inactive tab", async () => {

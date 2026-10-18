@@ -29,9 +29,10 @@ export async function flushActiveWorkspaceDoc(): Promise<void> {
  * Write the unsaved text of open notes (the active one and inactive tabs
  * alike) to where `target` maps their workspace path, skipping notes it maps
  * to null. Notes whose text is still what was written are marked clean.
- * Throws when a write fails.
+ * Returns how many notes it wrote; 0 means none was dirty, decided with no
+ * await after the check. Throws when a write fails.
  */
-async function writeDirtyOpenDocs(target: (workspacePath: string) => string | null): Promise<void> {
+async function writeDirtyOpenDocs(target: (workspacePath: string) => string | null): Promise<number> {
   flushPendingEdits();
   const st = useAppStore.getState();
   const activeId = tabIdOf(st.doc);
@@ -45,7 +46,7 @@ async function writeDirtyOpenDocs(target: (workspacePath: string) => string | nu
     // The active document is the source of truth for its own tab.
     if (tab.id !== activeId && tab.dirty && tab.workspaceName) add(tab.workspaceName, tab.content);
   }
-  if (!pending.size) return;
+  if (!pending.size) return 0;
   const written = new Map<string, string>(); // workspace path → text written
   try {
     for (const [ws, { to, content }] of pending) {
@@ -63,6 +64,7 @@ async function writeDirtyOpenDocs(target: (workspacePath: string) => string | nu
       notifyWorkspaceChanged({ kind: "content", paths: [...pending.values()].map((w) => w.to) });
     }
   }
+  return pending.size;
 }
 
 /**
@@ -78,24 +80,39 @@ export async function flushOpenDocsUnder(paths: string[]): Promise<void> {
   await writeDirtyOpenDocs((ws) => (under(ws) ? ws : null));
 }
 
+/** Post-trash passes before giving up on a note whose text keeps changing during its own write. */
+const SETTLE_PASSES = 5;
+
 /**
  * Delete from the file tree with the open notes' latest text kept: write
  * their unsaved edits, move the paths to the trash, then write any edit made
  * while that was in flight (the user kept typing in the open note) into the
  * trashed copy, so Undo / Ctrl+Z still brings back the newest text
- * (plan 3.1, review: #218). Returns the trash entries.
+ * (plan 3.1, review: #218). That pass repeats until one finds nothing left
+ * to write. The final check runs with no await after it, so no keystroke
+ * (a task) can slip in before the caller clears the document.
+ *
+ * `settled` is false when the text still changed during every pass. The
+ * newest edits are then only in memory, and the caller must not clear the
+ * document.
  */
-export async function trashWithOpenEdits(paths: string[], kinds: Record<string, "file" | "directory"> = {}): Promise<TrashItem[]> {
+export async function trashWithOpenEdits(
+  paths: string[],
+  kinds: Record<string, "file" | "directory"> = {},
+): Promise<{ items: TrashItem[]; settled: boolean }> {
   await flushOpenDocsUnder(paths);
   const items = await trashPaths(paths, kinds);
-  await writeDirtyOpenDocs((ws) => {
+  const inTrash = (ws: string) => {
     for (const item of items) {
       const at = trashedPathOf(item, ws);
       if (at) return at;
     }
     return null;
-  });
-  return items;
+  };
+  for (let pass = 0; pass < SETTLE_PASSES; pass++) {
+    if ((await writeDirtyOpenDocs(inTrash)) === 0) return { items, settled: true };
+  }
+  return { items, settled: false };
 }
 
 /**
