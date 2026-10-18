@@ -395,7 +395,8 @@ export async function runAgent<I extends AgentInput, O = string>(def: AgentDefin
     for (const ex of listExecutors()) {
       if (ex.id !== executor.id && preference.includes(ex.id) && (await ex.available()).available) alternatives.push(ex.id);
     }
-    const verdict = await review({ ...failure!, alternatives, agentId: def.id });
+    const verdict = await review({ ...failure!, alternatives, agentId: def.id, signal: opts.signal });
+    if (opts.signal?.aborted) return finish("aborted", { errorCode: "aborted", error: "aborted" });
     step({ kind: "critic", ms: 0, label: verdict.diagnosis, ok: !!verdict.retry, detail: failure!.reason });
     if (verdict.retry && attempt <= maxRetries) {
       patch = { ...patch, ...verdict.retry };

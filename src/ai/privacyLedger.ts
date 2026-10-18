@@ -13,7 +13,9 @@
  * policy, decision. Never the prompt, the response or any header.
  *
  * Not covered: requests made from inside Web Workers (web-llm and
- * transformers.js fetch model weights there — downloads, no user text).
+ * transformers.js fetch model weights there — downloads, no user text),
+ * unless the module that starts the worker reports them with
+ * `recordWorkerRequest` (the OCR language models do).
  */
 import { getAiPolicy, isLocalOrigin, type AiPolicy } from "./policy";
 import { getBaseUrl } from "./ollamaProvider";
@@ -239,6 +241,17 @@ export function withLedger(inner: typeof fetch): typeof fetch {
     });
     return res;
   };
+}
+
+/**
+ * Record a request a Web Worker is about to make (the wrapped `window.fetch`
+ * cannot see it). Only tracked traffic is recorded; model downloads are
+ * never blocked, so this only logs. Returns the entry, or null.
+ */
+export function recordWorkerRequest(url: string, method = "GET"): LedgerEntry | null {
+  const hit = classify(url);
+  if (!hit) return null;
+  return record({ ...hit, method, bytesOut: 0, bytesIn: null, policy: getAiPolicy(), decision: "allowed" });
 }
 
 /** Install once at startup. `blocked` is called for every blocked request. */

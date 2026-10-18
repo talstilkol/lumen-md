@@ -1385,6 +1385,7 @@
   "toast.imageAlt.none": "لا توجد صور تحتاج نصاً بديلاً في هذه الملاحظة",
   "toast.imageAlt.working": "قراءة الصور على الجهاز: {count}…",
   "toast.imageAlt.done": "أُضيف نص بديل: {done} من {count}",
+  "toast.digest.readFailed": "لم يُحفظ الملخص: تعذّرت قراءة {count} من الملاحظات المعدّلة. حاول مرة أخرى.",
   "cmd.note.read": "القراءة بصوت عالٍ",
   "cmd.note.read.hint": "يقرأ هذه الملاحظة بأصوات النظام (بما فيها العبرية)؛ شغّله مجدداً للإيقاف",
   "toast.tts.unavailable": "هذا المتصفح لا يدعم القراءة الصوتية",

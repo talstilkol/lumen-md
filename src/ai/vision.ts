@@ -89,6 +89,38 @@ export function escapeTitle(s: string): string {
   return s.replace(/"/g, "'").replace(/[\r\n]+/g, " · ").replace(/\s+/g, " ").trim();
 }
 
+const GENERIC_IMAGE_NAME = /^(?:image|img|dsc|dscn|dcim|pxl|photo|pic|picture|screenshot|screen[ _-]?shot|pasted[ _-]?image|untitled|צילום[ _-]?מסך|תמונה)(?=$|[\s_\-.:(),\d])/i;
+
+/**
+ * Whether an image's alt text is really missing: empty, the referenced
+ * file's own name, or a camera/clipboard file name ("image", "IMG_1234",
+ * "Screenshot 2026-10-18 at 10.00.00") that a paste left behind. A real
+ * one-word description ("logo", "cat") is kept.
+ */
+export function altIsPlaceholder(alt: string, url: string): boolean {
+  const a = alt.trim();
+  if (!a) return true;
+  let file = url.split(/[?#]/)[0].split("/").pop() ?? "";
+  try {
+    file = decodeURIComponent(file);
+  } catch {
+    /* keep it encoded */
+  }
+  const stem = file.replace(/\.[^.]+$/, "");
+  const lower = a.toLowerCase();
+  if (lower === file.toLowerCase() || lower === stem.toLowerCase()) return true;
+  if (/^[^\s/]+\.(?:png|jpe?g|gif|webp|bmp|svg|avif|heic|tiff?)$/i.test(a)) return true;
+  const generic = GENERIC_IMAGE_NAME.exec(a);
+  return !!generic && /^[\d\s_\-.:(),]*(?:(?:at|am|pm)[\d\s_\-.:(),]*)*$/i.test(a.slice(generic[0].length));
+}
+
+/** Local images in `markdown` whose alt text is a placeholder (see altIsPlaceholder). */
+export function imagesNeedingAlt(markdown: string): Array<{ alt: string; url: string }> {
+  return [...markdown.matchAll(/!\[([^\]]*)\]\(([^)\s"]+)\)/g)]
+    .filter((m) => !/^(https?:|data:)/.test(m[2]) && altIsPlaceholder(m[1], m[2]))
+    .map((m) => ({ alt: m[1], url: m[2] }));
+}
+
 /** Rewrite one image in the Markdown: same URL, new alt + optional title. */
 export function withImageText(markdown: string, url: string, oldAlt: string, t: ImageText): string {
   if (t.source === "none" || !t.alt) return markdown;

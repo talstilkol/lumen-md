@@ -1385,6 +1385,7 @@
   "toast.imageAlt.none": "אין בפתק תמונות שצריכות טקסט חלופי",
   "toast.imageAlt.working": "קורא תמונות במכשיר: {count}…",
   "toast.imageAlt.done": "נוסף טקסט חלופי: {done} מתוך {count}",
+  "toast.digest.readFailed": "הסיכום לא נשמר: לא ניתן היה לקרוא {count} פתקים שהשתנו. נסו שוב.",
   "cmd.note.read": "הקראה בקול",
   "cmd.note.read.hint": "מקריא את הפתק בקולות של המערכת (כולל עברית); הפעלה נוספת עוצרת",
   "toast.tts.unavailable": "הדפדפן הזה לא יכול להקריא",

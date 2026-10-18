@@ -33,6 +33,7 @@ import { tags as t } from "@lezer/highlight";
 import { StateField, StateEffect } from "@codemirror/state";
 import type { Extension } from "@codemirror/state";
 import { chat } from "../ai/llm";
+import { aiOperation } from "../ai/aiAbort";
 import { PROMPTS } from "../ai/prompts";
 import { embedHintExtension } from "./embedHintExtension";
 import { insertSlashMenuExtension } from "./insertMenu";
@@ -47,6 +48,7 @@ import { markdownLintExtension } from "./lintExtension";
 // commentDecorations imports yjs (comment anchors are Y.Map relative
 // positions) — loaded on demand in the collab effect, like ySync below.
 import { searchHighlightExtension } from "./searchHighlight";
+import { showSpokenRange, speechHighlightExtension } from "./speechHighlight";
 import { inlineSuggestion } from "./inlineSuggestion";
 import { formatKeymap } from "./formatKeymap";
 import { setSuggesting, suggestingAuthor, suggestingExtension, suggestingSkip } from "./suggestingExtension";
@@ -207,8 +209,11 @@ function ghostTextExtension(): Extension {
           debounceTimer = setTimeout(async () => {
             // Explicit Ctrl-Space request: counts against the AI quota when
             // it is actually sent (ownPrompt), not before chat()'s checks.
+            // T55: registered, so Esc / "AI: Cancel" stop it too.
+            const op = aiOperation();
             try {
-              controller = new AbortController();
+              const c = (controller = new AbortController());
+              op.signal.addEventListener("abort", () => c.abort(op.signal.reason), { once: true });
               const text = await chat(
                 [
                   { role: "system", content: PROMPTS.autocomplete },
@@ -221,6 +226,8 @@ function ghostTextExtension(): Extension {
               }
             } catch {
               // Silently ignore abort / API errors for completions
+            } finally {
+              op.end();
             }
           }, 150);
           return true;
@@ -405,6 +412,7 @@ export const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
       // Workspace search → editor: when SearchDialog opens a hit, this
       // extension flashes the matches and scrolls the first one into view.
       searchHighlightExtension(),
+      speechHighlightExtension(),
       // Suggesting mode (track changes) — CriticMarkup decorations are
       // always on; the edit-rewriting filter only while the flag is set.
       suggestingExtension(suggesting),
@@ -475,22 +483,9 @@ export const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
         changes: { from, to, insert: text },
         selection: { anchor: from + text.length },
       });
-      // T31: real alt text in the background — OCR on this device (Hebrew +
-      // English), else a local vision model; the file name stays otherwise.
-      if (imageTextEnabled()) {
-        for (const p of placed) {
-          if (p.url.startsWith("data:")) continue;
-          void (async () => {
-            const { imageText, escapeAlt, escapeTitle } = await import("../ai/vision");
-            const res = await imageText(p.file, getLocale()).catch(() => null);
-            if (!res || res.source === "none") return;
-            const target = `![${p.alt}](${p.url})`;
-            const at = view.state.doc.toString().indexOf(target);
-            if (at < 0) return; // the user already changed it
-            const title = res.title ? ` "${escapeTitle(res.title)}"` : "";
-            view.dispatch({ changes: { from: at, to: at + target.length, insert: `![${escapeAlt(res.alt)}](${p.url}${title})` } });
-          })();
-        }
+      // T31: real alt text in the background (also for data-URL fallbacks).
+      if (imageTextEnabled() && placed.length) {
+        void import("./pastedImageText").then((m) => m.fillPastedImageText(view, placed, getLocale())).catch(() => undefined);
       }
     }
 
@@ -704,20 +699,17 @@ export const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
     return () => window.removeEventListener("lumen-reveal-line", onReveal);
   }, []);
 
-  // `lumen-select-range` {from, to}: select and show a range — the sentence
-  // being read aloud (T32).
+  // `lumen-speech-range` {from, to} | null: highlight and show the sentence
+  // being read aloud (T32) — a decoration, not the selection, so typing
+  // during playback can't replace the sentence; null clears it.
   useEffect(() => {
     function onSelect(e: Event) {
-      const d = (e as CustomEvent<{ from: number; to: number }>).detail;
       const view = viewRef.current;
-      if (!view || !d) return;
-      const len = view.state.doc.length;
-      const from = Math.max(0, Math.min(d.from, len));
-      const to = Math.max(from, Math.min(d.to, len));
-      view.dispatch({ selection: { anchor: from, head: to }, effects: EditorView.scrollIntoView(from, { y: "center" }) });
+      if (!view) return;
+      showSpokenRange(view, (e as CustomEvent<{ from: number; to: number } | null>).detail ?? null);
     }
-    window.addEventListener("lumen-select-range", onSelect);
-    return () => window.removeEventListener("lumen-select-range", onSelect);
+    window.addEventListener("lumen-speech-range", onSelect);
+    return () => window.removeEventListener("lumen-speech-range", onSelect);
   }, []);
 
   return (

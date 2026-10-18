@@ -102,6 +102,16 @@ export interface UseCommandsOptions {
  * "Meeting notes.md" → "Meeting notes 2.md" → …
  */
 export function openTemplateDoc(base: string, content: string): void {
+  openNewDoc(base, content, true);
+}
+
+/**
+ * Open `content` as a new note in its own tab, under a name no open tab
+ * uses ("Shared.md" → "Shared 2.md"), so it never lands on — and later
+ * overwrites — an existing tab of that name. `dirty`: it holds unsaved
+ * content (a template, a shared note), unlike an empty new document.
+ */
+export function openNewDoc(base: string, content: string, dirty: boolean): void {
   const st = useAppStore.getState();
   const currentId = tabIdOf(st.doc);
   if (st.doc.content && !st.openTabs.some((tab) => tab.id === currentId)) {
@@ -125,7 +135,7 @@ export function openTemplateDoc(base: string, content: string): void {
   let name = `${base}.md`;
   for (let i = 2; taken.has(tabIdOf({ workspaceName: null, name })); i++) name = `${base} ${i}.md`;
   useAppStore.getState().openTab({ name, content, workspaceName: null });
-  useAppStore.getState().setDoc({ dirty: true });
+  if (dirty) useAppStore.getState().setDoc({ dirty: true });
 }
 
 /** Every Markdown note in the workspace, for Vault Doctor (null when there is none). */
@@ -300,8 +310,10 @@ export function useCommands({
         icon: cmdIcons.Download,
         group: t("group.file"),
         action: async () => {
+          // Snapshot before any await: a tab switch while the chunk loads must not export another note.
+          const doc = liveDoc();
           const { exportToDocx } = await import("../storage/exportDocx");
-          await exportToDocx(liveDoc().content, liveDoc().name);
+          await exportToDocx(doc.content, doc.name);
         },
       },
       {
@@ -311,9 +323,11 @@ export function useCommands({
         icon: cmdIcons.Download,
         group: t("group.file"),
         action: async () => {
+          // Snapshot before any await: a tab switch while the chunk loads must not export another note.
+          const doc = liveDoc();
           const { markdownToRtf, downloadText } = await import("../storage/exportFormats");
-          const baseName = liveDoc().name.replace(/\.[^.]+$/, "");
-          downloadText(`${baseName}.rtf`, markdownToRtf(liveDoc().content), "application/rtf");
+          const baseName = doc.name.replace(/\.[^.]+$/, "");
+          downloadText(`${baseName}.rtf`, markdownToRtf(doc.content), "application/rtf");
         },
       },
       {
@@ -323,9 +337,11 @@ export function useCommands({
         icon: cmdIcons.Download,
         group: t("group.file"),
         action: async () => {
+          // Snapshot before any await: a tab switch while the chunk loads must not export another note.
+          const doc = liveDoc();
           const { markdownToLatex, downloadText } = await import("../storage/exportFormats");
-          const baseName = liveDoc().name.replace(/\.[^.]+$/, "");
-          downloadText(`${baseName}.tex`, markdownToLatex(liveDoc().content), "application/x-latex");
+          const baseName = doc.name.replace(/\.[^.]+$/, "");
+          downloadText(`${baseName}.tex`, markdownToLatex(doc.content), "application/x-latex");
         },
       },
       {
@@ -335,9 +351,11 @@ export function useCommands({
         icon: cmdIcons.Download,
         group: t("group.file"),
         action: async () => {
+          // Snapshot before any await: a tab switch while the chunk loads must not export another note.
+          const doc = liveDoc();
           const { markdownToRst, downloadText } = await import("../storage/exportFormats");
-          const baseName = liveDoc().name.replace(/\.[^.]+$/, "");
-          downloadText(`${baseName}.rst`, markdownToRst(liveDoc().content), "text/x-rst");
+          const baseName = doc.name.replace(/\.[^.]+$/, "");
+          downloadText(`${baseName}.rst`, markdownToRst(doc.content), "text/x-rst");
         },
       },
       {
@@ -347,9 +365,11 @@ export function useCommands({
         icon: cmdIcons.Download,
         group: t("group.file"),
         action: async () => {
+          // Snapshot before any await: a tab switch while the chunk loads must not export another note.
+          const doc = liveDoc();
           const { markdownToAdoc, downloadText } = await import("../storage/exportFormats");
-          const baseName = liveDoc().name.replace(/\.[^.]+$/, "");
-          downloadText(`${baseName}.adoc`, markdownToAdoc(liveDoc().content), "text/asciidoc");
+          const baseName = doc.name.replace(/\.[^.]+$/, "");
+          downloadText(`${baseName}.adoc`, markdownToAdoc(doc.content), "text/asciidoc");
         },
       },
       {
@@ -359,9 +379,11 @@ export function useCommands({
         icon: cmdIcons.Download,
         group: t("group.file"),
         action: async () => {
+          // Snapshot before any await: a tab switch while the chunk loads must not export another note.
+          const doc = liveDoc();
           const { markdownToOrg, downloadText } = await import("../storage/exportFormats");
-          const baseName = liveDoc().name.replace(/\.[^.]+$/, "");
-          downloadText(`${baseName}.org`, markdownToOrg(liveDoc().content), "text/x-org");
+          const baseName = doc.name.replace(/\.[^.]+$/, "");
+          downloadText(`${baseName}.org`, markdownToOrg(doc.content), "text/x-org");
         },
       },
       {
@@ -371,9 +393,11 @@ export function useCommands({
         icon: cmdIcons.Download,
         group: t("group.file"),
         action: async () => {
+          // Snapshot before any await: a tab switch while the chunk loads must not export another note.
+          const doc = liveDoc();
           const { markdownToOpml, downloadText } = await import("../storage/exportFormats");
-          const baseName = liveDoc().name.replace(/\.[^.]+$/, "");
-          downloadText(`${baseName}.opml`, markdownToOpml(liveDoc().content, baseName), "text/x-opml");
+          const baseName = doc.name.replace(/\.[^.]+$/, "");
+          downloadText(`${baseName}.opml`, markdownToOpml(doc.content, baseName), "text/x-opml");
         },
       },
       {
@@ -383,11 +407,13 @@ export function useCommands({
         icon: cmdIcons.Download,
         group: t("group.file"),
         action: async () => {
+          // Snapshot before any await: a tab switch while the chunk loads must not export another note.
+          const doc = liveDoc();
           const { markdownToRevealHtml, downloadText } = await import("../storage/exportFormats");
-          const baseName = liveDoc().name.replace(/\.[^.]+$/, "");
+          const baseName = doc.name.replace(/\.[^.]+$/, "");
           downloadText(
             `${baseName}.slides.html`,
-            markdownToRevealHtml(liveDoc().content, baseName),
+            markdownToRevealHtml(doc.content, baseName),
             "text/html",
           );
         },
@@ -399,9 +425,11 @@ export function useCommands({
         icon: cmdIcons.Download,
         group: t("group.file"),
         action: async () => {
+          // Snapshot before any await: a tab switch while the chunk loads must not export another note.
+          const doc = liveDoc();
           const { markdownToEpubBytes, downloadBytes } = await import("../storage/exportFormats");
-          const baseName = liveDoc().name.replace(/\.[^.]+$/, "");
-          const bytes = await markdownToEpubBytes(liveDoc().content, baseName);
+          const baseName = doc.name.replace(/\.[^.]+$/, "");
+          const bytes = await markdownToEpubBytes(doc.content, baseName);
           downloadBytes(`${baseName}.epub`, bytes, "application/epub+zip");
         },
       },
@@ -412,9 +440,11 @@ export function useCommands({
         icon: cmdIcons.Download,
         group: t("group.file"),
         action: async () => {
+          // Snapshot before any await: a tab switch while the chunk loads must not export another note.
+          const doc = liveDoc();
           const { markdownToIpynb, downloadText } = await import("../storage/exportFormats");
-          const baseName = liveDoc().name.replace(/\.[^.]+$/, "");
-          downloadText(`${baseName}.ipynb`, markdownToIpynb(liveDoc().content), "application/x-ipynb+json");
+          const baseName = doc.name.replace(/\.[^.]+$/, "");
+          downloadText(`${baseName}.ipynb`, markdownToIpynb(doc.content), "application/x-ipynb+json");
         },
       },
       {
@@ -424,9 +454,11 @@ export function useCommands({
         icon: cmdIcons.Download,
         group: t("group.file"),
         action: async () => {
+          // Snapshot before any await: a tab switch while the chunk loads must not export another note.
+          const doc = liveDoc();
           const { markdownToStaticSiteBytes, downloadBytes } = await import("../storage/exportFormats");
-          const baseName = liveDoc().name.replace(/\.[^.]+$/, "");
-          const bytes = await markdownToStaticSiteBytes(liveDoc().content, baseName);
+          const baseName = doc.name.replace(/\.[^.]+$/, "");
+          const bytes = await markdownToStaticSiteBytes(doc.content, baseName);
           downloadBytes(`${baseName}-site.zip`, bytes, "application/zip");
         },
       },
@@ -437,10 +469,12 @@ export function useCommands({
         icon: cmdIcons.Download,
         group: t("group.file"),
         action: async () => {
+          // Snapshot before any await: a tab switch while the chunk loads must not export another note.
+          const doc = liveDoc();
           const { markdownToPptxBytes, PPTX_MIME } = await import("../storage/exportPptx");
           const { downloadBytes } = await import("../storage/exportFormats");
-          const baseName = liveDoc().name.replace(/\.[^.]+$/, "");
-          const bytes = await markdownToPptxBytes(liveDoc().content, baseName);
+          const baseName = doc.name.replace(/\.[^.]+$/, "");
+          const bytes = await markdownToPptxBytes(doc.content, baseName);
           downloadBytes(`${baseName}.pptx`, bytes, PPTX_MIME);
         },
       },
@@ -451,8 +485,10 @@ export function useCommands({
         icon: cmdIcons.Download,
         group: t("group.file"),
         action: async () => {
+          // Snapshot before any await: a tab switch while the chunk loads must not export another note.
+          const doc = liveDoc();
           const { printDocument } = await import("../ui/PrintExport");
-          await printDocument(liveDoc().content, liveDoc().name);
+          await printDocument(doc.content, doc.name);
         },
       },
       {
@@ -806,9 +842,15 @@ export function useCommands({
           try {
             showAiToast(t("toast.productAgentStarting"), "info");
             const { createProduct } = await import("../ai/productAgent");
-            const result = await createProduct(idea, (progress) => {
-              showAiToast(`${progress.phase}: ${progress.message}`, "info");
-            });
+            const result = await cancellable((signal) =>
+              createProduct(
+                idea,
+                (progress) => {
+                  showAiToast(`${progress.phase}: ${progress.message}`, "info");
+                },
+                signal,
+              ),
+            );
             if (result.success) {
               showAiToast(t("toast.productCreatedFilesGenerated", { count: result.files.size }), "success");
               const summary = `# Product Created\n\n${result.files.size} files generated:\n\n${[...result.files.keys()].map((f) => `- \`${f}\``).join("\n")}`;
@@ -1411,7 +1453,7 @@ export function useCommands({
               const folder = await uiPrompt({ message: t("ai.style.folder"), defaultValue: "" });
               if (folder === null) return;
               showAiToast(t("ai.style.building"), "info");
-              const p = await sp.buildStyleProfile(folder.trim());
+              const p = await cancellable((signal) => sp.buildStyleProfile(folder.trim(), signal));
               showAiToast(t("ai.style.built", { notes: p.notes, rules: p.rules.length }), "success");
             } else if (choice === "on" || choice === "off") {
               sp.setStyleProfileActive(choice === "on");
@@ -1571,10 +1613,12 @@ export function useCommands({
             return;
           }
           const content = useAppStore.getState().doc.content;
-          const ok = await tts.speak(content, {
-            uiLang: getLocale(),
-            onSentence: (s) => window.dispatchEvent(new CustomEvent("lumen-select-range", { detail: { from: s.from, to: s.to } })),
-          });
+          const ok = await tts
+            .speak(content, {
+              uiLang: getLocale(),
+              onSentence: (s) => window.dispatchEvent(new CustomEvent("lumen-speech-range", { detail: { from: s.from, to: s.to } })),
+            })
+            .finally(() => window.dispatchEvent(new CustomEvent("lumen-speech-range", { detail: null })));
           if (!ok) showAiToast(t("toast.tts.noHebrewVoice"), "info");
         },
       },
@@ -1587,7 +1631,7 @@ export function useCommands({
         action: async () => {
           const { listWorkspace, readWorkspaceFile, writeWorkspaceFile, isOPFSAvailable } = await import("../storage/workspace");
           if (!isOPFSAvailable()) return;
-          const { buildDigest } = await import("../agents/defs/digester");
+          const { writeDigest } = await import("../agents/defs/digester");
           const KEY = "lumen.digest.last";
           const now = Date.now();
           let since = now - 24 * 3600_000;
@@ -1598,15 +1642,17 @@ export function useCommands({
           }
           const lang = getLocale();
           const folder = lang === "he" ? "סיכומים" : "Digests";
-          const entries = (await listWorkspace({ includeAssets: false })).filter(
-            (e) => e.modified > since && /\.md$/i.test(e.path) && !e.path.startsWith(".") && !e.path.startsWith(`${folder}/`),
-          );
-          const notes = await Promise.all(entries.map(async (entry) => ({ entry, content: await readWorkspaceFile(entry.path).catch(() => "") })));
           const fmtDate = (ms: number) => new Date(ms).toLocaleString(getLocale(), { dateStyle: "medium", timeStyle: "short" });
-          const body = buildDigest({ since, now, notes, lang, formatDate: fmtDate });
-          const d = new Date(now);
-          const path = `${folder}/${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}.md`;
-          await writeWorkspaceFile(path, body);
+          const res = await writeDigest(
+            { list: () => listWorkspace({ includeAssets: false }), read: readWorkspaceFile, write: writeWorkspaceFile },
+            { since, now, lang, folder, formatDate: fmtDate },
+          );
+          if (!res.ok) {
+            // The checkpoint stays, so these notes are in the next digest.
+            showAiToast(t("toast.digest.readFailed", { count: res.failed.length }), "error");
+            return;
+          }
+          const { path, body } = res;
           try {
             localStorage.setItem(KEY, String(now));
           } catch {
@@ -1623,11 +1669,12 @@ export function useCommands({
         icon: cmdIcons.Sparkles,
         group: t("group.ai", { defaultValue: "AI Copilot" }),
         action: async () => {
-          const { imageText, withImageText } = await import("../ai/vision");
+          const { imageText, withImageText, imagesNeedingAlt } = await import("../ai/vision");
           const { readWorkspaceBlob } = await import("../storage/workspace");
           const doc = useAppStore.getState().doc.content;
-          // Images still named after their file (no spaces) or with no alt.
-          const targets = [...doc.matchAll(/!\[([^\]\s]*)\]\(([^)\s"]+)\)/g)].filter((m) => !/^(https?:|data:)/.test(m[2]));
+          // Images with no alt, or still named after their file — a real
+          // one-word description ("logo") is kept.
+          const targets = imagesNeedingAlt(doc);
           if (!targets.length) {
             showAiToast(t("toast.imageAlt.none"), "info");
             return;
@@ -1636,11 +1683,11 @@ export function useCommands({
           let next = doc;
           let done = 0;
           for (const m of targets) {
-            const blob = await readWorkspaceBlob(m[2]).catch(() => null);
+            const blob = await readWorkspaceBlob(m.url).catch(() => null);
             if (!blob) continue;
             const res = await imageText(blob, getLocale()).catch(() => null);
             if (!res || res.source === "none") continue;
-            next = withImageText(next, m[2], m[1], res);
+            next = withImageText(next, m.url, m.alt, res);
             done++;
           }
           if (next !== useAppStore.getState().doc.content && useAppStore.getState().doc.content === doc) useAppStore.getState().setContent(next);
@@ -1810,7 +1857,8 @@ export function useCommands({
           const { checkGrammar } = await import("../ai/grammar");
           try {
             showAiToast(t("toast.checkingGrammar"), "info");
-            const matches = await checkGrammar(liveDoc().content, locale === "he" ? "he" : "en-US", { allowModel: true });
+            const text = liveDoc().content;
+            const matches = await cancellable((signal) => checkGrammar(text, locale === "he" ? "he" : "en-US", { allowModel: true, signal }));
             if (matches.length === 0) {
               showAiToast(t("toast.noGrammarIssuesFound"), "success");
               return;
@@ -2117,7 +2165,7 @@ export function useCommands({
             showAiToast(t("toast.processing", { name: tpl.label }), "info");
             const { runAgentOrThrow } = await import("../agents/runtime");
             const { templaterAgent } = await import("../agents/defs");
-            const result = await runAgentOrThrow(templaterAgent, { text: prompt, extra: { templateId: tpl.id } }, { document: liveDoc().content });
+            const result = await cancellable((signal) => runAgentOrThrow(templaterAgent, { text: prompt, extra: { templateId: tpl.id } }, { document: liveDoc().content, signal }));
             setContent(liveDoc().content + "\n\n---\n\n" + result);
             showAiToast(t("toast.completed", { name: tpl.label }), "success");
           } catch (e) {
@@ -2206,7 +2254,7 @@ export function useCommands({
           let aiSuggestion = "";
           
           try {
-            aiSuggestion = await generateAiCommitMessage(repoFolder);
+            aiSuggestion = await cancellable((signal) => generateAiCommitMessage(repoFolder, signal));
           } catch (e) {
             log.warn("AI commit generation skipped", e);
           }

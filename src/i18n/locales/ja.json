@@ -1385,6 +1385,7 @@
   "toast.imageAlt.none": "代替テキストが必要な画像はありません",
   "toast.imageAlt.working": "端末上で画像を読み取り中: {count} 件…",
   "toast.imageAlt.done": "代替テキストを追加: {count} 件中 {done} 件",
+  "toast.digest.readFailed": "ダイジェストは保存されませんでした: 変更されたノート {count} 件を読み込めませんでした。もう一度お試しください。",
   "cmd.note.read": "読み上げ",
   "cmd.note.read.hint": "システムの音声でこのノートを読み上げます（ヘブライ語対応）。もう一度実行で停止",
   "toast.tts.unavailable": "このブラウザーは読み上げに対応していません",

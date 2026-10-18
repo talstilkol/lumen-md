@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-10-18T03:18:39.134Z",
+  "generated_at": "2026-10-18T03:18:44.238Z",
   "source": "src/i18n/index.ts (en bundle)",
-  "count": 1410,
+  "count": 1411,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -1861,6 +1861,13 @@
       "en": "Alt text added: {done} of {count}",
       "vars": [
         "done",
+        "count"
+      ]
+    },
+    {
+      "key": "toast.digest.readFailed",
+      "en": "Digest not saved: {count} changed notes couldn't be read. Try again.",
+      "vars": [
         "count"
       ]
     },
