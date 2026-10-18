@@ -164,7 +164,9 @@ export async function clipUrl(url: string, deps: { extract?: (u: string) => Prom
     if (extractError) throw new Error(extractError);
     throw new ResearchUnavailableError();
   }
-  const res = await fetch(url, { credentials: "omit" });
+  // The page's site sees the visit: logged as third-party traffic, refused under local-only (plan 2.4).
+  const { guardedFetch } = await import("../ai/privacyLedger");
+  const res = await guardedFetch(url, { credentials: "omit" }, { category: "third-party", reason: "Web clipper — fetches the page you clip" });
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   return clipFromHtml(await res.text(), res.url || url);
 }

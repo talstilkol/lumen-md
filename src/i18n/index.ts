@@ -425,6 +425,7 @@ const en: Strings = {
   "clip.saved": "Saved to the library: {path}",
   "clip.failed": "Couldn't clip the page: {message}. Copy the part you want and use \"Clip from clipboard\".",
   "clip.needsService": "This page can't be fetched from the browser on this deployment — it needs the research service (VITE_RESEARCH_ENDPOINT). Copy the part you want and use \"Clip from clipboard\".",
+  "clip.localOnly": "Under the local-only policy Lumen does not fetch web pages. Copy the page in your browser and use “Clip from clipboard” instead.",
   "research.consent.title": "Research on the web?",
   "research.consent.body": "Your question (only the question — not your notes) is sent to the search service you chose. Pages it finds are read by that service. Under the \"local only\" policy research uses your library instead.",
   "research.consent.ok": "Allow (once for all)",

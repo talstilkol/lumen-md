@@ -25,8 +25,11 @@ describe("clipper", () => {
     const c = await clipUrl("https://x.test/p", { extract: async () => ({ title: "T", text: "Body text", finalUrl: "https://x.test/p2" }) });
     expect(c.source).toBe("https://x.test/p2");
     expect(c.markdown).toContain("Body text");
+    // The direct fetch is third-party traffic: allowed outside local-only (plan 2.4; local-only is tested in ledgerComplete.test.ts).
+    localStorage.setItem("lumen.ai.policy", "local-first");
     const f = vi.spyOn(globalThis, "fetch").mockResolvedValue(new Response(page, { status: 200 }));
     const d = await clipUrl("https://x.test/q", { extract: async () => ({ error: "blocked-url" }) });
+    localStorage.removeItem("lumen.ai.policy");
     expect(d.title).toBe("מאמר על השקה");
     f.mockRestore();
   });

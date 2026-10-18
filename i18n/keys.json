@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-10-18T04:31:22.318Z",
+  "generated_at": "2026-10-18T05:09:26.019Z",
   "source": "src/i18n/index.ts (en bundle)",
-  "count": 1426,
+  "count": 1427,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -1787,6 +1787,11 @@
     {
       "key": "clip.needsService",
       "en": "This page can't be fetched from the browser on this deployment — it needs the research service (VITE_RESEARCH_ENDPOINT). Copy the part you want and use \"Clip from clipboard\".",
+      "vars": []
+    },
+    {
+      "key": "clip.localOnly",
+      "en": "Under the local-only policy Lumen does not fetch web pages. Copy the page in your browser and use “Clip from clipboard” instead.",
       "vars": []
     },
     {

@@ -18,6 +18,7 @@
  * Loads and chats are serialised; interrupt/unload run immediately.
  */
 
+import "./workerLedgerInstall"; // first: libraries below must see the ledger's fetch (plan 2.4)
 import type { ChatCompletionMessageParam, ChatCompletionTool, MLCEngineInterface, ResponseFormat } from "@mlc-ai/web-llm";
 
 export interface WorkerChatRequest {
