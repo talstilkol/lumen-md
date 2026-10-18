@@ -986,7 +986,8 @@ export function useCommands({
             const { clipUrl } = await import("../research/clipper");
             await saveClip(await clipUrl(url.trim()));
           } catch (e) {
-            showAiToast(t("clip.failed", { message: (e as Error).message }), "error");
+            if ((e as Error)?.name === "ResearchUnavailableError") showAiToast(t("clip.needsService"), "error");
+            else showAiToast(t("clip.failed", { message: (e as Error).message }), "error");
           }
         },
       },

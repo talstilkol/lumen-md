@@ -31,6 +31,41 @@ describe("clipper", () => {
     f.mockRestore();
   });
 
+  it("keeps a header inside the article (headline, byline, lead)", () => {
+    const html = `<body><header>Site chrome</header><article><header><h1>Headline</h1><p class="byline">By Dana</p><p>The lead.</p></header><p>Body.</p></article></body>`;
+    const r = readableHtml(html);
+    expect(r.html).toContain("By Dana");
+    expect(r.html).toContain("The lead.");
+    expect(r.html).not.toContain("Site chrome");
+  });
+
+  it("resolves relative links and images against the clipped page", () => {
+    const html = `<article><p><a href="/next">next</a> <a href="#s2">s2</a> <img src="../photo.jpg" srcset="a.jpg 1x, /b.jpg 2x"></p></article>`;
+    const c = clipFromHtml(html, "https://news.example/2026/10/story.html");
+    expect(c.markdown).toContain("(https://news.example/next)");
+    expect(c.markdown).toContain("(https://news.example/2026/10/story.html#s2)");
+    expect(c.markdown).toContain("https://news.example/2026/photo.jpg");
+    expect(readableHtml(html, "https://news.example/2026/10/story.html").html).toContain("https://news.example/b.jpg 2x");
+    // No usable source (clipboard without an address): left as is.
+    expect(clipFromHtml(html, "clipboard").markdown).toContain("(/next)");
+  });
+
+  it("doesn't try a direct fetch the CSP would block; says what is needed", async () => {
+    const meta = document.createElement("meta");
+    meta.setAttribute("http-equiv", "Content-Security-Policy");
+    meta.setAttribute("content", "default-src 'self'; connect-src 'self' https://api.openai.com");
+    document.head.appendChild(meta);
+    const f = vi.spyOn(globalThis, "fetch");
+    try {
+      await expect(clipUrl("https://blog.example/post")).rejects.toMatchObject({ name: "ResearchUnavailableError" });
+      await expect(clipUrl("https://blog.example/post", { extract: async () => ({ error: "blocked-url" }) })).rejects.toThrow("blocked-url");
+      expect(f).not.toHaveBeenCalled();
+    } finally {
+      f.mockRestore();
+      meta.remove();
+    }
+  });
+
   it("safe file names and library paths", () => {
     expect(clipFileName('a/b: "c"?')).toBe("a b c.md");
     expect(isLibraryPath("ספרייה/x.md")).toBe(true);
