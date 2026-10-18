@@ -1,6 +1,6 @@
 import { noteKey } from "../lib/slug";
 import { WORKSPACE_CHANGED, changeOf } from "./workspaceEvents";
-import { hasHebrew, hebrewFind } from "../text/hebrew";
+import { hasHebrew, hebrewFind, normalizeForMatch, prefixVariants } from "../text/hebrew";
 import {
   basename,
   isAssetName,
@@ -160,6 +160,8 @@ export function indexedFiles(): IndexedFile[] {
 
 /** Test hook. */
 export function __resetWorkspaceIndex(): void {
+  bm25 = null;
+  bm25Sync = null;
   cache.byPath = new Map();
   cache.builtAt = 0;
   cache.inflight = null;
@@ -222,7 +224,84 @@ export interface SearchHit {
   match?: { start: number; end: number };
 }
 
-/** Cheap fuzzy + substring search across filenames, paths, and content. */
+/* ── Content ranking: BM25 (plan 5.2) ─────────────────────────────────
+ * Loaded on the first search (a separate chunk, not in the startup
+ * bundle) and kept in step with the file cache one note at a time: a note
+ * whose text changed is re-indexed, a removed note leaves, nothing else is
+ * touched. A large first sync yields to the event loop every few dozen
+ * milliseconds, so the dialog stays responsive while 10 000 notes go in.
+ */
+type Bm25 = import("../search/bm25").Bm25Index;
+let bm25: Bm25 | null = null;
+let bm25Sync: Promise<Bm25> | null = null;
+
+const nameOf = (file: IndexedFile) => file.name.replace(/\.(md|markdown|txt)$/i, "");
+
+async function syncBm25(): Promise<Bm25> {
+  if (bm25Sync) return bm25Sync;
+  bm25Sync = (async () => {
+    if (!bm25) bm25 = new (await import("../search/bm25")).Bm25Index();
+    const index = bm25;
+    let slice = performance.now();
+    for (const file of cache.byPath.values()) {
+      if (index.isCurrent(file.path, file.content, nameOf(file))) continue;
+      index.set(file.path, file.content, nameOf(file));
+      if (performance.now() - slice > 30) {
+        await new Promise((r) => setTimeout(r, 0));
+        slice = performance.now();
+      }
+    }
+    for (const id of [...index.ids()]) if (!cache.byPath.has(id)) index.remove(id);
+    return index;
+  })().finally(() => {
+    bm25Sync = null;
+  });
+  return bm25Sync;
+}
+
+/** Points for the query in a note's name or path (file-name search stays first-class). */
+function nameScore(file: IndexedFile, q: string): number {
+  const nameLower = file.name.toLowerCase();
+  const pathLower = file.path.toLowerCase();
+  let score = 0;
+  if (nameLower.includes(q)) score += 10;
+  if (nameLower === q) score += 20;
+  if (nameLower.startsWith(q)) score += 5;
+  if (pathLower.includes(q) && pathLower !== nameLower) score += 6;
+  // Niqqud-, final-letter- and prefix-insensitive for Hebrew (T26).
+  if (!nameLower.includes(q) && hasHebrew(q) && hebrewNameHas(file.name, q)) score += 10;
+  return score;
+}
+
+/** Names in comparison form (`normalizeForMatch`), cached: the name check runs over every note per keystroke. */
+const normalizedNames = new Map<string, string>();
+let queryForms: { q: string; forms: string[] } | null = null;
+
+/** `hebrewFind(name, q) !== null`, without re-normalising the name each time. */
+function hebrewNameHas(name: string, q: string): boolean {
+  let n = normalizedNames.get(name);
+  if (n === undefined) {
+    n = normalizeForMatch(name);
+    if (normalizedNames.size > 50_000) normalizedNames.clear();
+    normalizedNames.set(name, n);
+  }
+  if (queryForms?.q !== q) {
+    const nq = normalizeForMatch(q.trim());
+    queryForms = { q, forms: !nq ? [] : /\s/.test(nq) ? [nq] : prefixVariants(nq) };
+  }
+  return queryForms.forms.some((f) => n!.includes(f));
+}
+
+/** The phrase is in the text as written (a few points on top of BM25). */
+const PHRASE_BONUS = 4;
+
+/**
+ * Search filenames, paths and content. Content is ranked by BM25 over
+ * Hebrew-aware terms (niqqud, final letters and prefix letters folded; the
+ * exact form counts more), the name and path add points of their own, and
+ * the whole query found as a phrase adds a few more. Each hit carries a
+ * snippet around the phrase, or around its best-matching word.
+ */
 export async function searchWorkspace(
   query: string,
   /** `filter`: only these paths — applied before `limit`. */
@@ -233,42 +312,53 @@ export async function searchWorkspace(
   const q = query.trim().toLowerCase();
   if (!q) {
     return [...cache.byPath.values()]
+      .filter((f) => !opts.filter || opts.filter(f.path))
       .sort((a, b) => b.modified - a.modified)
       .slice(0, limit)
       .map((f) => ({ path: f.path, name: f.name, score: 0, snippet: null }));
   }
-  const out: SearchHit[] = [];
+  const index = await syncBm25();
+  const content = new Map<string, { score: number; matched: string[] }>();
+  for (const h of index.search(query, { limit: Math.max(limit * 3, 100), filter: opts.filter })) content.set(h.id, h);
+  // Rank on name + BM25 first; the phrase check and the snippet (both scan
+  // the note's text) run only for the leading candidates.
+  const ranked: Array<{ file: IndexedFile; score: number; matched: string[] }> = [];
   for (const file of cache.byPath.values()) {
     if (opts.filter && !opts.filter(file.path)) continue;
-    const nameLower = file.name.toLowerCase();
-    const pathLower = file.path.toLowerCase();
-    const contentLower = file.content.toLowerCase();
-    let score = 0;
+    const c = content.get(file.path);
+    let score = nameScore(file, q) + (c?.score ?? 0);
+    if (!score && (fuzzyMatch(file.name.toLowerCase(), q) || fuzzyMatch(file.path.toLowerCase(), q))) score = 1;
+    if (score) ranked.push({ file, score, matched: c?.matched ?? [] });
+  }
+  ranked.sort((a, b) => b.score - a.score || (a.file.path < b.file.path ? -1 : 1));
+  const out: SearchHit[] = [];
+  for (const { file, score: base, matched } of ranked.slice(0, limit * 2)) {
+    let score = base;
+    const phrase = base > 1 ? findIn(file.content, file.content.toLowerCase(), q) : null;
+    if (phrase) score += PHRASE_BONUS;
+    const at = phrase ?? (matched.length ? locateTerm(file.content, matched) : null);
     let snippet: string | null = null;
     let match: SearchHit["match"];
-    if (nameLower.includes(q)) score += 10;
-    if (nameLower === q) score += 20;
-    if (nameLower.startsWith(q)) score += 5;
-    if (pathLower.includes(q) && pathLower !== nameLower) score += 6;
-    // Niqqud-, final-letter- and prefix-insensitive for Hebrew (T26):
-    // "והבית" finds "בית", "שָׁלוֹם" finds "שלום".
-    const found = findIn(file.content, contentLower, q);
-    if (!nameLower.includes(q) && hasHebrew(q) && hebrewFind(file.name, q)) score += 10;
-    if (found) {
-      score += 4;
-      const ctx = snippetAround(file.content, found.start, 80);
+    if (at) {
+      snippet = snippetAround(file.content, at.start, 80);
       // Re-locate the hit inside the (whitespace-collapsed, "…"-prefixed) snippet.
-      const local = findIn(ctx, ctx.toLowerCase(), file.content.slice(found.start, found.end).replace(/\s+/g, " ").toLowerCase());
-      snippet = ctx;
+      const local = findIn(snippet, snippet.toLowerCase(), file.content.slice(at.start, at.end).replace(/\s+/g, " ").toLowerCase());
       if (local) match = local;
-    } else if (fuzzyMatch(nameLower, q) || fuzzyMatch(pathLower, q)) {
-      score += 1;
     }
-    if (score > 0)
-      out.push({ path: file.path, name: file.name, score, snippet, match });
+    out.push({ path: file.path, name: file.name, score, snippet, match });
   }
-  out.sort((a, b) => b.score - a.score);
+  out.sort((a, b) => b.score - a.score || (a.path < b.path ? -1 : 1));
   return out.slice(0, limit);
+}
+
+/** Where the first of the matched terms (best first; a `~stem` without its marker) occurs in `text`. */
+function locateTerm(text: string, terms: string[]): { start: number; end: number } | null {
+  for (const t of terms) {
+    const bare = t.startsWith("~") ? t.slice(1) : t;
+    const at = hasHebrew(bare) ? hebrewFind(text, bare) : findIn(text, text.toLowerCase(), bare);
+    if (at) return at;
+  }
+  return null;
 }
 
 function findIn(text: string, lower: string, q: string): { start: number; end: number } | null {
