@@ -8,6 +8,7 @@ import { getRecents, removeRecent } from "../storage/recent";
 import type { RecentFile } from "../storage/recent";
 import { BLOCK_SNIPPETS } from "../snippets";
 import { uiAlert, uiConfirm, uiPrompt, uiSelect } from "../ui/PromptDialog";
+import { getAiPolicy } from "../ai/policy";
 import { generateAiCommitMessage } from "../ai/commands";
 import { buildAiSettingsCommand, buildAiOutlineCommand } from "../ai/commands";
 import type { CollabSession } from "../collab/yjs";
@@ -1613,13 +1614,19 @@ export function useCommands({
             return;
           }
           const content = useAppStore.getState().doc.content;
+          await tts.voicesReady(); // why: the list is empty until voiceschanged on a fresh page
+          // No voice on this device, but the browser offers network voices: ask once (never under local-only).
+          if (!tts.hasLocalVoiceFor(content, getLocale()) && tts.offersNetworkVoices() && !tts.networkVoicesAllowed() && getAiPolicy() !== "local-only") {
+            const yes = await uiConfirm({ title: t("tts.networkVoice.title"), message: t("tts.networkVoice.body"), okLabel: t("tts.networkVoice.ok") });
+            if (yes) tts.allowNetworkVoices();
+          }
           const ok = await tts
             .speak(content, {
               uiLang: getLocale(),
               onSentence: (s) => window.dispatchEvent(new CustomEvent("lumen-speech-range", { detail: { from: s.from, to: s.to } })),
             })
             .finally(() => window.dispatchEvent(new CustomEvent("lumen-speech-range", { detail: null })));
-          if (!ok) showAiToast(t("toast.tts.noHebrewVoice"), "info");
+          if (!ok) showAiToast(t(/[\u0590-\u05FF]/.test(content) ? "toast.tts.noHebrewVoice" : "toast.tts.noLocalVoice"), "info");
         },
       },
       {
