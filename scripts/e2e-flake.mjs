@@ -13,12 +13,13 @@
  *
  * Any other argument is passed through to `playwright test`.
  * Exit code 1 when any run failed. Reports land in flake-results/
- * (flake-results/<project>/ with --all).
+ * (flake-results/<project>/ with --all); a failed test's trace, screenshot
+ * and video are kept in run-<n>-failures/ next to that run's report.
  */
 
 import { spawnSync } from "node:child_process";
-import { mkdirSync, readFileSync, writeFileSync, existsSync } from "node:fs";
-import { join } from "node:path";
+import { cpSync, mkdirSync, readFileSync, writeFileSync, existsSync } from "node:fs";
+import { basename, dirname, join } from "node:path";
 
 /** The browser projects in playwright.config.ts, for --all. */
 const ALL_PROJECTS = ["chromium", "firefox", "webkit"];
@@ -44,6 +45,29 @@ for (const p of all ? ALL_PROJECTS : [project]) {
   if (hunt(p, all ? join(root, p) : root)) anyFail = true;
 }
 process.exit(anyFail ? 1 : 0);
+
+/**
+ * Copy a failed spec's trace, screenshot and video out of test-results/:
+ * the next run replaces that folder, and the nightly uploads flake-results/.
+ */
+function keepAttachments(spec, dest) {
+  for (const test of spec.tests ?? []) {
+    for (const result of test.results ?? []) {
+      if (result.status === "passed" || result.status === "skipped") continue;
+      for (const a of result.attachments ?? []) {
+        if (!a.path || !existsSync(a.path)) continue;
+        // test-results/<test dir>/<file>: keep the test dir so files stay apart.
+        const target = join(dest, basename(dirname(a.path)), basename(a.path));
+        try {
+          mkdirSync(dirname(target), { recursive: true });
+          cpSync(a.path, target);
+        } catch (e) {
+          console.error(`could not keep ${a.path}: ${e.message}`);
+        }
+      }
+    }
+  }
+}
 
 /** Runs the suite `times` times on one project; true when any run failed. */
 function hunt(project, outDir) {
@@ -83,6 +107,7 @@ function hunt(project, outDir) {
           t.fail++;
           t.runs.push(run);
           failedThisRun++;
+          keepAttachments(spec, join(outDir, `run-${run}-failures`));
         }
         tally.set(title, t);
       }
