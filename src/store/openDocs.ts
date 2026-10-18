@@ -3,7 +3,7 @@
  * consistent with file operations on the vault (T46 review fixes).
  */
 
-import { flushPendingEdits, tabIdOf, useAppStore } from "./useStore";
+import { flushPendingEdits, moveTabRuntime, tabIdOf, useAppStore } from "./useStore";
 import { writeWorkspaceFile } from "../storage/workspace";
 import { notifyWorkspaceChanged } from "../storage/workspaceEvents";
 import { movedPath } from "../storage/fileOps";
@@ -66,10 +66,14 @@ export function syncOpenDocsAfterMove(
         // Kept as an ad-hoc note: its text (unsaved edits included) is not lost; the file itself is in the trash.
         const name = detachedName(t.workspaceName);
         detached.set(t.workspaceName, name);
+        moveTabRuntime(t.id, name);
         return { ...t, id: name, name, workspaceName: null };
       }
       const f = fix(t.workspaceName, t.content);
-      return f ? { ...t, id: tabIdOf({ workspaceName: f.path, name: f.path }), name: t.name === t.workspaceName ? f.path : t.name, workspaceName: f.path, content: f.text } : t;
+      if (!f) return t;
+      const id = tabIdOf({ workspaceName: f.path, name: f.path });
+      moveTabRuntime(t.id, id);
+      return { ...t, id, name: t.name === t.workspaceName ? f.path : t.name, workspaceName: f.path, content: f.text };
     });
     const d = state.doc;
     let doc = d;

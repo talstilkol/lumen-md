@@ -57,6 +57,15 @@ export function __tabRuntime(): ReadonlyMap<string, { loadId?: number; handle?: 
   return tabRuntime;
 }
 
+/** A tab's id changed (rename, move, detach): its runtime state follows it. */
+export function moveTabRuntime(fromId: string, toId: string): void {
+  if (fromId === toId) return;
+  const rt = tabRuntime.get(fromId);
+  if (!rt) return;
+  tabRuntime.delete(fromId);
+  tabRuntime.set(toId, rt);
+}
+
 interface AppState {
   doc: DocFile;
   mode: ViewMode;
@@ -426,6 +435,7 @@ export const useAppStore = create<AppState>()(
           const openTabs = state.openTabs.map((t) =>
             t.id === prevId ? { ...t, id, name: doc.name, content: doc.content, workspaceName, dirty: false } : t,
           );
+          moveTabRuntime(prevId, id);
           return { doc, openTabs };
         }),
       closeTab: afterPendingEdits((id) =>

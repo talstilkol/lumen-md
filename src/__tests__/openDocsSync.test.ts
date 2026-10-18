@@ -98,3 +98,31 @@ describe("flushActiveWorkspaceDoc", () => {
     expect(useAppStore.getState().doc.dirty).toBe(true);
   });
 });
+
+describe("tab runtime follows id changes (review: #206)", () => {
+  it("a detached (overwritten) tab keeps its load id and disk handle under its new id", async () => {
+    const { __tabRuntime } = await import("../store/useStore");
+    await writeWorkspaceFile("a.md", "A");
+    await writeWorkspaceFile("b.md", "B");
+    open("b.md", "B");
+    open("a.md", "A"); // b.md's runtime is saved when switching away
+    const before = __tabRuntime().get("b.md");
+    expect(before?.loadId).toBeDefined();
+    const r = await safeMove("a.md", "b.md", { confirmReplace: async () => true });
+    syncOpenDocsAfterMove("a.md", r!.path, r!.rewrite, r!.replaced?.originalPath);
+    const detached = useAppStore.getState().openTabs.find((t) => t.content === "B")!;
+    expect(detached.id).not.toBe("b.md");
+    expect(__tabRuntime().get(detached.id)).toEqual(before);
+  });
+
+  it("adopting an ad-hoc note into the workspace moves its runtime entry", async () => {
+    const { __tabRuntime } = await import("../store/useStore");
+    useAppStore.getState().openTab({ name: "Scratch.md", content: "S", workspaceName: null });
+    useAppStore.getState().openTab({ name: "x.md", content: "X", workspaceName: null });
+    useAppStore.getState().openTab({ name: "Scratch.md", content: "S", workspaceName: null });
+    const rt = __tabRuntime().get("Scratch.md");
+    useAppStore.getState().adoptWorkspaceName("notes/Scratch.md");
+    expect(__tabRuntime().get("notes/Scratch.md")).toEqual(rt);
+    expect(__tabRuntime().has("Scratch.md")).toBe(false);
+  });
+});

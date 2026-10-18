@@ -227,6 +227,8 @@ export function CanvasTldraw({ open, onClose }: Props) {
   const [savedList, setSavedList] = useState<string[]>([]);
   const [legacyList, setLegacyList] = useState<string[]>([]);
   const [converting, setConverting] = useState<string | null>(null);
+  /** Bumped by New so the saver re-binds even when the name did not change. */
+  const [saverEpoch, setSaverEpoch] = useState(0);
   /** Stops the current canvas's saver (flushing it); New calls it before clearing the editor. */
   const detachSaver = useRef<(() => void) | null>(null);
 
@@ -277,7 +279,7 @@ export function CanvasTldraw({ open, onClose }: Props) {
       binding.detach(); // the last strokes before close / canvas switch
       if (detachSaver.current) detachSaver.current = null;
     };
-  }, [editor, canvasName]);
+  }, [editor, canvasName, saverEpoch]);
 
   const handleNew = useCallback(async () => {
     const name = await uiPrompt({
@@ -295,6 +297,8 @@ export function CanvasTldraw({ open, onClose }: Props) {
       editor.deleteShapes(editor.getSelectedShapeIds());
     }
     setCanvasName(trimmed);
+    // why: New with the current name changes no state, so without this the detached saver is never replaced
+    setSaverEpoch((n) => n + 1);
     setSavedList((prev) => Array.from(new Set([...prev, trimmed])).sort());
   }, [editor]);
 
