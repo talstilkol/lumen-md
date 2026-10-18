@@ -22,7 +22,7 @@ import { getBaseUrl } from "./ollamaProvider";
 import { grammarEndpoint } from "./grammar";
 import { researchEndpoint } from "../research/client";
 
-export type LedgerCategory = "cloud-ai" | "cloud-text" | "local-ai" | "model-download" | "research";
+export type LedgerCategory = "cloud-ai" | "cloud-text" | "local-ai" | "model-download" | "static-asset" | "research" | "third-party";
 
 export interface LedgerEntry {
   id: number;
@@ -47,7 +47,7 @@ export class PrivacyBlockedError extends Error {
 }
 
 interface Rule {
-  test: (host: string) => boolean;
+  test: (host: string, path: string) => boolean;
   category: LedgerCategory;
   reason: string;
 }
@@ -63,6 +63,16 @@ const RULES: Rule[] = [
     category: "model-download",
     reason: "Model download (Hugging Face)",
   },
+  // tldraw (the canvas) calls its CDN in production. The licence check fetches
+  // watermark-track.svg with the page address in the query: that beacon is
+  // third-party traffic. Fonts, icons and translations from the same host
+  // carry no user data and the canvas needs them. Plan 1.9 / 4.19.
+  {
+    test: (h, p) => h === "cdn.tldraw.com" && /watermark-track/i.test(p),
+    category: "third-party",
+    reason: "tldraw canvas — licence beacon (sends the page address)",
+  },
+  { test: (h) => h === "cdn.tldraw.com", category: "static-asset", reason: "tldraw canvas — fonts, icons and translations" },
   {
     test: (h) => h === "raw.githubusercontent.com",
     category: "model-download",
@@ -150,7 +160,7 @@ export function classify(url: string): { host: string; category: LedgerCategory;
   }
   if (u.protocol !== "http:" && u.protocol !== "https:") return null;
   const host = u.hostname.toLowerCase();
-  for (const r of RULES) if (r.test(host)) return { host, category: r.category, reason: r.reason };
+  for (const r of RULES) if (r.test(host, u.pathname)) return { host, category: r.category, reason: r.reason };
   let ollamaHost = "";
   try {
     ollamaHost = new URL(getBaseUrl()).host.toLowerCase();
@@ -194,10 +204,13 @@ export function classify(url: string): { host: string; category: LedgerCategory;
   return null;
 }
 
-/** Would the policy block this category? Model downloads carry no user data. */
+/** Categories whose requests carry the user's data (text, a query, the page address). */
+const CARRIES_DATA: ReadonlySet<LedgerCategory> = new Set(["cloud-ai", "cloud-text", "research", "third-party"]);
+
+/** Would the policy block this category? Model downloads and static assets carry no user data. */
 export function blockedByPolicy(category: LedgerCategory, policy: AiPolicy): boolean {
   if (policy !== "local-only") return false;
-  return category === "cloud-ai" || category === "cloud-text" || category === "research";
+  return CARRIES_DATA.has(category);
 }
 
 function bodySize(body: BodyInit | null | undefined): number {
@@ -318,14 +331,15 @@ export function leftDevice(e: LedgerEntry): boolean {
 
 /** Totals for the panel header. */
 export function ledgerSummary(list: readonly LedgerEntry[] = entries) {
-  const cloud = list.filter((e) => e.decision === "allowed" && (e.category === "cloud-ai" || e.category === "cloud-text" || e.category === "research"));
+  // why: the header says "left this device" — every allowed request that carried data counts, third-party included
+  const cloud = list.filter((e) => e.decision === "allowed" && CARRIES_DATA.has(e.category));
   return {
     total: list.length,
     blocked: list.filter((e) => e.decision === "blocked").length,
     cloudRequests: cloud.length,
     cloudBytesOut: cloud.reduce((n, e) => n + e.bytesOut, 0),
     local: list.filter((e) => e.category === "local-ai").length,
-    downloads: list.filter((e) => e.category === "model-download").length,
+    downloads: list.filter((e) => e.category === "model-download" || e.category === "static-asset").length,
   };
 }
 
