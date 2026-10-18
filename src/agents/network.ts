@@ -21,6 +21,10 @@ import { getAiPolicy } from "../ai/policy";
 import { ledgerFetch, recordBlockedRequest } from "../ai/privacyLedger";
 import { ToolError } from "./tools/define";
 
+/** What the model reads when the user did not approve a call in a run with untrusted content. */
+export const UNTRUSTED_DENIED =
+  "The user did not approve this call. This run read outside content (web pages or notes from elsewhere), so every change and web request needs their approval. Do not retry it; answer with what you have and say what you would have done.";
+
 export type ConsentHook = (request: NetworkConsentRequest) => boolean | Promise<boolean>;
 
 /**
@@ -80,6 +84,7 @@ async function defaultConsent(req: NetworkConsentRequest): Promise<boolean> {
     t("agents.netConsent.exact", { value: sentValue(req) }),
     req.credential ? t("agents.netConsent.credential", { provider: req.credential }) : "",
     req.visits ? t("agents.netConsent.visits", { host: req.visits }) : "",
+    req.untrusted?.length ? t("agents.netConsent.untrusted", { sources: (await import("./untrusted")).sourcesLabel(req.untrusted) }) : "",
     t("agents.netConsent.perCall"),
   ];
   return uiConfirm({ title: t("agents.netConsent.title"), message: parts.filter(Boolean).join(" "), okLabel: t("agents.netConsent.ok") });
@@ -90,10 +95,34 @@ async function defaultConsent(req: NetworkConsentRequest): Promise<boolean> {
  * rejects with `PrivacyBlockedError` (recorded as blocked) when the
  * `local-only` policy holds and the user did not consent to this call.
  */
-export async function openNetworkGate(tool: AgentTool, call: ToolCall, consent?: ConsentHook): Promise<{ fetch: typeof fetch; consented: boolean }> {
+export async function openNetworkGate(
+  tool: AgentTool,
+  call: ToolCall,
+  consent?: ConsentHook,
+  guard?: { untrusted: string[]; approve: () => Promise<boolean> },
+): Promise<{ fetch: typeof fetch; consented: boolean }> {
   const reason = `Agent tool ${tool.name}`;
-  const { url, ...req } = await describeNetworkCall(tool, call);
-  if (getAiPolicy() !== "local-only") return { fetch: ledgerFetch({ force: { category: "research", reason } }), consented: false };
+  const { url, ...described } = await describeNetworkCall(tool, call);
+  const req = guard?.untrusted.length ? { ...described, untrusted: guard.untrusted } : described;
+  if (getAiPolicy() !== "local-only") {
+    // Plan 2.7: with untrusted content in the run, the call needs the user's
+    // approval even where the policy allows the network (the page that was
+    // read may be what asks for this request).
+    if (guard?.untrusted.length) {
+      let ok = false;
+      try {
+        ok = await guard.approve();
+      } catch {
+        ok = false;
+      }
+      if (!ok) {
+        recordBlockedRequest(url, "research", `${reason} (untrusted content in the run, not approved)`);
+        throw new ToolError("denied", UNTRUSTED_DENIED);
+      }
+      return { fetch: ledgerFetch({ force: { category: "research", reason: `${reason} (approved: untrusted content in the run)` }, consent: true }), consented: true };
+    }
+    return { fetch: ledgerFetch({ force: { category: "research", reason } }), consented: false };
+  }
   let ok = false;
   try {
     ok = await (consent ?? defaultConsent)(req);

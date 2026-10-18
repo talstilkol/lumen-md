@@ -75,6 +75,39 @@ page read in the same run, a workspace file or the open document, and
 returns the exact text with its offsets. All tools stop when the run is
 cancelled.
 
+### Outside content (prompt injection)
+
+Web pages, search results, clipped pages (the `Library` / `ספרייה`
+folder or a `source: https://…` frontmatter), notes that came from a git
+clone or pull, and notes with `untrusted: true` in their frontmatter are
+**outside content**. Someone else wrote them, and they may contain
+instructions planted for the agent. The runtime (`src/agents/untrusted.ts`)
+handles them like this:
+
+- **Delimited.** The model gets such text between `⟪untrusted id=…⟫` and
+  `⟪/untrusted id=…⟫` markers. The id is random, so the content cannot
+  close the block itself. The system prompt says that text inside the
+  markers is data and never instructions.
+- **Cleaned, never silently.** Unicode tag characters (invisible ASCII)
+  are decoded and shown. Zero-width characters and bidi controls are
+  removed, and their count is printed on the block. HTML comments and
+  CSS-hidden elements are shown as hidden. Instruction-like passages in
+  English and Hebrew ("ignore previous instructions", "התעלם מכל
+  ההוראות", role tokens, "send this note to …") stay in the text inside
+  a visible `⟦flagged …⟧` marker.
+- **Approval.** Once a run has outside content in its context, every
+  write tool and every network call asks you first. The prompt names the
+  tool, what it would do and where the outside content came from. Under
+  **local only**, a network call's own prompt carries the same warning.
+  Without your yes nothing is staged or sent. Approving a staged change
+  is still a separate step.
+
+The rules are deterministic, so they work the same in Hebrew and English
+and need no model. They do not catch a politely worded request ("please
+also save a copy as …"). The approval step is what stops those. An
+optional English classifier (ProtectAI v2) for the desktop app is a
+follow-up.
+
 ## AI settings
 
 `⌘K → "AI: Settings (local agents)"` gathers everything in one panel:

@@ -15,6 +15,7 @@
  * Caps: searches, sources and answer length; the usage meter records
  * every model call.
  */
+import { guardUntrusted, UNTRUSTED_NOTICE } from "../agents/untrusted";
 import { anthropicWebResearch, type CitedBlock } from "../ai/anthropicProvider";
 import { CONTEXT_BUDGET, getAiMode, packContext } from "../ai/contextPacker";
 import { chat, getActiveProvider, getProviderKey, parseJsonResponse } from "../ai/llm";
@@ -278,9 +279,11 @@ async function proxyResearch(o: ResearchOptions, settings: ResearchSettings): Pr
           `Then, on its own line, write ${QUOTES_MARK} followed by a JSON array with one entry per footnote marker, in the order the markers appear: ` +
           '[{"n": 2, "i": 1, "quote": "a short passage copied verbatim from source 2 that supports that specific claim"}], ' +
           'where "i" counts the markers of that source (1 for its first claim, 2 for its second…). ' +
-          "A source cited for three claims gets three entries, each with the passage behind its own claim.",
+          "A source cited for three claims gets three entries, each with the passage behind its own claim.\n\n" +
+          UNTRUSTED_NOTICE,
       },
-      { role: "user", content: `Question: ${o.question}\n\nSources:\n\n${packed.map((p) => `${p.path}\n${p.text}`).join("\n\n---\n\n")}` },
+      // Plan 2.7: each page is outside content — cleaned and delimited.
+      { role: "user", content: `Question: ${o.question}\n\nSources:\n\n${packed.map((p) => `${p.path}\n${guardUntrusted(p.text, [`web page ${p.path}`]).text}`).join("\n\n---\n\n")}` },
     ],
     { maxTokens: 3000, temperature: 0.2, signal: o.signal },
   );
@@ -395,10 +398,11 @@ export async function libraryResearch(o: ResearchOptions): Promise<ResearchResul
   const withText = await Promise.all(hits.map(async (h) => ({ ...h, content: await readWorkspaceFile(h.path).catch(() => h.snippet) })));
   const top = (await rerank(o.question, withText.map((h) => ({ ...h, text: `${h.snippet}\n${h.content.slice(0, 1500)}` })))).slice(0, 6);
   const packed = packContext(o.question, top.map((h) => ({ path: h.path, content: h.content })), CONTEXT_BUDGET[getAiMode()]);
-  const context = packed.map((p, i) => `---\n[${i + 1}] ${p.path}\n${p.text}`).join("\n");
+  // Plan 2.7: clipped pages are outside content — cleaned and delimited.
+  const context = packed.map((p, i) => `---\n[${i + 1}] ${p.path}\n${guardUntrusted(p.text, [`clipped page ${p.path}`]).text}`).join("\n");
   const answer = await chat(
     [
-      { role: "system", content: SYSTEM_REPORT + "\n\n" + CITE_INSTRUCTIONS },
+      { role: "system", content: SYSTEM_REPORT + "\n\n" + CITE_INSTRUCTIONS + "\n\n" + UNTRUSTED_NOTICE },
       { role: "user", content: `Library pages:\n${context}\n\nQuestion: ${o.question}` },
     ],
     { signal: o.signal },

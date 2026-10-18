@@ -7,6 +7,7 @@
  * push pull the latest content back from OPFS into lightning-fs so users can
  * edit locally and push when ready.
  */
+import { markUntrustedNote } from "../agents/untrusted";
 import { get, set } from "idb-keyval";
 import {
   createWorkspaceFolder,
@@ -115,6 +116,8 @@ async function mirrorRepoToOPFS(repoDir: string, fs: Fs): Promise<number> {
       } else if (stat.isFile()) {
         const bytes = (await fs.promises.readFile(full)) as Uint8Array;
         await writeWorkspaceBlob(opfsPath, bytes);
+        // Plan 2.7: a cloned repo's notes may be other authors' — agents treat them as outside content.
+        markUntrustedNote(opfsPath, "cloned from git");
         count++;
       }
     }
@@ -388,6 +391,8 @@ export async function pullRepo(
         }
         if (isDifferent) {
           await writeWorkspaceBlob(opfsPath, bytes);
+          // Plan 2.7: what a pull brings in may be another author's text.
+          markUntrustedNote(opfsPath, "pulled from git");
           changed++;
         }
       }
