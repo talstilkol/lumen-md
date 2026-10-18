@@ -65,6 +65,24 @@ describe("BM25 on the HeQ dev split", () => {
   });
 });
 
+describe("index freshness", () => {
+  it("a search during a long first sync still sees a note saved meanwhile (review: #232)", async () => {
+    __resetWorkspaceIndex();
+    files.clear();
+    for (let i = 0; i < 3000; i++) files.set(`v/${String(i).padStart(4, "0")}.md`, corpus[i % corpus.length].text);
+    const first = [...files.keys()][0];
+    const a = searchWorkspace("עוגייה"); // reads the vault, starts the first BM25 pass (it yields)
+    // Let the pass get going (past the first note), then save that note.
+    const pass = new Promise((r) => setTimeout(r, 50));
+    await pass;
+    files.set(first, "טקסט חדש על אוקיינוס השקט");
+    window.dispatchEvent(new CustomEvent("lumen-workspace-changed", { detail: { kind: "content", paths: [first] } }));
+    const b = await searchWorkspace("אוקיינוס");
+    await a;
+    expect(b.map((h) => h.path)).toContain(first);
+  }, 120_000);
+});
+
 describe("10 000 notes", () => {
   it("answers a query in under 100 ms (index already built)", async () => {
     __resetWorkspaceIndex();

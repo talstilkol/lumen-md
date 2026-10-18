@@ -95,6 +95,18 @@ describe("Bm25Index", () => {
     for (const q of ["גינה", "שלום", "house", "בית"]) expect(ix.search(q)).toEqual(fresh.search(q));
   });
 
+  it("matches the parts of hyphenated words both ways (review: #232)", () => {
+    const ix = new Bm25Index();
+    ix.set("e.md", "send me an e-mail tomorrow", "e");
+    ix.set("h.md", "התאוצה מ-100 קמ״ש", "h");
+    ix.set("m.md", "the mail came late", "m");
+    expect(ix.search("mail").map((h) => h.id)).toEqual(expect.arrayContaining(["e.md", "m.md"]));
+    expect(ix.search("100").map((h) => h.id)).toEqual(["h.md"]);
+    // The hyphenated form itself ranks the note that has it first.
+    expect(ix.search("e-mail")[0].id).toBe("e.md");
+    expect(ix.search("e-mail").map((h) => h.id)).toContain("m.md");
+  });
+
   it("filters before the limit", () => {
     const ix = index();
     expect(ix.search("בית", { filter: (id) => id !== "b.md" }).map((h) => h.id)).toEqual(["a.md"]);

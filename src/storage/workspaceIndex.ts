@@ -162,6 +162,7 @@ export function indexedFiles(): IndexedFile[] {
 export function __resetWorkspaceIndex(): void {
   bm25 = null;
   bm25Sync = null;
+  bm25Next = null;
   cache.byPath = new Map();
   cache.builtAt = 0;
   cache.inflight = null;
@@ -233,13 +234,27 @@ export interface SearchHit {
  */
 type Bm25 = import("../search/bm25").Bm25Index;
 let bm25: Bm25 | null = null;
+/** The pass running now, and the one queued behind it (a change may arrive while a long pass yields). */
 let bm25Sync: Promise<Bm25> | null = null;
+let bm25Next: Promise<Bm25> | null = null;
 
 const nameOf = (file: IndexedFile) => file.name.replace(/\.(md|markdown|txt)$/i, "");
 
-async function syncBm25(): Promise<Bm25> {
-  if (bm25Sync) return bm25Sync;
-  bm25Sync = (async () => {
+/**
+ * Bring BM25 in step with the file cache. A call made while a pass runs
+ * waits for one more pass after it — the running pass may already have
+ * gone past a note that changed since — and calls in between share it.
+ */
+function syncBm25(): Promise<Bm25> {
+  if (!bm25Sync) return (bm25Sync = bm25Pass());
+  return (bm25Next ??= bm25Sync.then(() => {
+    bm25Next = null;
+    return syncBm25();
+  }));
+}
+
+function bm25Pass(): Promise<Bm25> {
+  return (async () => {
     if (!bm25) bm25 = new (await import("../search/bm25")).Bm25Index();
     const index = bm25;
     let slice = performance.now();
@@ -256,7 +271,6 @@ async function syncBm25(): Promise<Bm25> {
   })().finally(() => {
     bm25Sync = null;
   });
-  return bm25Sync;
 }
 
 /** Points for the query in a note's name or path (file-name search stays first-class). */

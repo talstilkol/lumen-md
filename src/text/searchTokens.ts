@@ -46,8 +46,7 @@ export function stemTerms(token: string): string[] {
     if (hasHebrew(token)) for (const v of prefixVariants(token)) out.add(STEM + v);
   } else {
     out.add(STEM + token);
-    for (const part of token.split("-")) {
-      if (!part || part.length < 2 && !/\d/.test(part)) continue;
+    for (const part of hyphenParts(token)) {
       out.add(STEM + part);
       if (hasHebrew(part)) for (const v of prefixVariants(part)) out.add(STEM + v);
     }
@@ -59,11 +58,22 @@ export function stemTerms(token: string): string[] {
 const stemCache = new Map<string, string[]>();
 const STEM_CACHE_MAX = 50_000;
 
-/** Every term of a document: surface forms, and the stems of its Hebrew words. */
+/** The parts of a hyphenated word worth a term of their own (a lone letter is not; a digit is). */
+export function hyphenParts(token: string): string[] {
+  if (!token.includes("-")) return [];
+  return token.split("-").filter((p) => p.length >= 2 || /\d/.test(p));
+}
+
+/**
+ * Every term of a document: surface forms, the parts of hyphenated words
+ * as surface forms too (so "mail" finds "e-mail", "100" finds "מ-100"),
+ * and the stems of its Hebrew words.
+ */
 export function documentTerms(text: string): string[] {
   const out: string[] = [];
   for (const t of surfaceTokens(text)) {
     out.push(t);
+    for (const p of hyphenParts(t)) out.push(p);
     let stems = stemCache.get(t);
     if (!stems) {
       stems = stemTerms(t);
@@ -119,7 +129,12 @@ export function queryTerms(query: string): QueryTerm[] {
   for (const t of tokens) {
     if (seen.has(t)) continue;
     seen.add(t);
-    out.push({ term: t, weight: 1, group }, ...stemTerms(t).map((s) => ({ term: s, weight: STEM_WEIGHT, group })));
+    out.push(
+      { term: t, weight: 1, group },
+      // A hyphenated query word also matches its parts, as a weaker form.
+      ...hyphenParts(t).map((p) => ({ term: p, weight: STEM_WEIGHT, group })),
+      ...stemTerms(t).map((s) => ({ term: s, weight: STEM_WEIGHT, group })),
+    );
     group++;
   }
   return out;
