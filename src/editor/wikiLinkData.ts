@@ -6,7 +6,7 @@
  */
 
 import { ensureIndex, indexVersion, indexedFiles } from "../storage/workspaceIndex";
-import { basename, isOPFSAvailable, workspaceHasEntry, writeWorkspaceFile } from "../storage/workspace";
+import { basename, createWorkspaceFile, isOPFSAvailable } from "../storage/workspace";
 import { notifyWorkspaceChanged } from "../storage/workspaceEvents";
 import { useAppStore } from "../store/useStore";
 import { showAiToast } from "../ui/AiToast";
@@ -42,13 +42,14 @@ export function currentNote(content?: string): CurrentNote {
 /**
  * Create the note a just-inserted link points at: `# Name` and a blank
  * line, like a new note from the file tree. Never overwrites — when the
- * path exists already (the index hadn't seen it yet), the link resolves to it.
+ * path exists already (the index hadn't seen it yet, or another tab / sync /
+ * agent created it a moment ago), the link resolves to it. The check and the
+ * write are one locked step (`createWorkspaceFile`), not check-then-write.
  */
 export async function createLinkedNote(path: string): Promise<boolean> {
   const name = basename(path).replace(/\.(md|markdown)$/i, "");
   try {
-    if (await workspaceHasEntry(path)) return false;
-    await writeWorkspaceFile(path, `# ${name}\n\n`);
+    if (!(await createWorkspaceFile(path, `# ${name}\n\n`))) return false;
     notifyWorkspaceChanged({ kind: "structure", paths: [path] });
     showAiToast(t("wikiComplete.created", { name }), "success");
     return true;
