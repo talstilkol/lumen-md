@@ -174,7 +174,8 @@ test("Template Gallery — opens, lists templates, screenshot", async ({
     .locator('[role="dialog"]')
     .filter({ hasNot: page.getByPlaceholder(/Type a command/i) })
     .first();
-  await expect(gallery).toBeVisible({ timeout: 10_000 });
+  // The gallery is a lazy chunk (opens on first use) — give a cold CI runner time.
+  await expect(gallery).toBeVisible({ timeout: 20_000 });
   // Without a marketplace backend the gallery falls back to the static
   // registry served from public/templates, so rows always render.
   await expect(gallery.getByTestId("template-card").first()).toBeVisible({ timeout: 10_000 });
