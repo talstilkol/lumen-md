@@ -65,8 +65,10 @@ export function firstStrong(text: string): LineDirection | null {
 const MARKERS = /^\s*(?:#{1,6}\s+|>\s*|[-*+]\s+(?:\[[ xX]\]\s+)?|\d+[.)]\s+)*/;
 
 /**
- * Drop `(destination)` after every `]`, with balanced parentheses and
- * backslash escapes, so no part of a URL like `(https://x/(a)/b)` is left.
+ * Drop `(destination "title")` after every `]`, so no part of a URL is left:
+ * an angle-bracketed destination runs to its unescaped `>`; a bare one
+ * balances parentheses; backslash escapes are skipped. An unclosed `(` is
+ * ordinary text.
  */
 function stripLinkDestinations(text: string): string {
   let out = "";
@@ -76,23 +78,69 @@ function stripLinkDestinations(text: string): string {
     out += ch;
     i++;
     if (ch !== "]" || text[i] !== "(") continue;
-    let depth = 0;
-    let j = i;
+    let j = i + 1;
+    while (text[j] === " " || text[j] === "\t") j++;
+    if (text[j] === "<") {
+      for (j++; j < text.length && text[j] !== ">"; j++) if (text[j] === "\\") j++;
+      if (j >= text.length) continue; // no closing ">": not a destination
+      j++;
+    }
+    let depth = 1;
     for (; j < text.length; j++) {
       const c = text[j];
       if (c === "\\") j++;
       else if (c === "(") depth++;
       else if (c === ")" && --depth === 0) break;
     }
-    if (j < text.length) i = j + 1; // a complete destination; an unclosed one is ordinary text
+    if (j < text.length) i = j + 1;
+  }
+  return out;
+}
+
+/**
+ * Remove code spans the CommonMark way: a run of n backticks opens a span
+ * that closes at the next run of exactly n backticks; an opening run
+ * without one is literal text.
+ */
+function stripCodeSpans(text: string): string {
+  let out = "";
+  let i = 0;
+  const runAt = (k: number) => {
+    let e = k;
+    while (text[e] === "`") e++;
+    return e - k;
+  };
+  while (i < text.length) {
+    if (text[i] !== "`") {
+      out += text[i++];
+      continue;
+    }
+    const n = runAt(i);
+    let k = i + n;
+    let close = -1;
+    while (k < text.length) {
+      if (text[k] !== "`") {
+        k++;
+        continue;
+      }
+      const m = runAt(k);
+      if (m === n) {
+        close = k;
+        break;
+      }
+      k += m;
+    }
+    if (close < 0) {
+      out += text.slice(i, i + n);
+      i += n;
+    } else i = close + n;
   }
   return out;
 }
 
 /** The part of a Markdown line its reader sees as text, for the direction rule. */
 export function visibleLineText(line: string): string {
-  return stripLinkDestinations(line.replace(MARKERS, ""))
-    .replace(/(`+)[^`][\s\S]*?\1(?!`)|(`+)\2(?!`)/g, ""); // code spans: a run of n backticks closes with n
+  return stripCodeSpans(stripLinkDestinations(line.replace(MARKERS, "")));
 }
 
 /** Direction of one Markdown line, or null for a neutral line (numbers, emoji, punctuation only). */

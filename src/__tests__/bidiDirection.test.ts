@@ -32,6 +32,13 @@ describe("markdownLineDirection rules", () => {
     // Balanced parentheses in a destination (review: #252).
     expect(markdownLineDirection("[42](https://x/(foo)/english) שלום")).toBe("rtl");
     expect(markdownLineDirection("[42](https://x/a\\)b/english) שלום")).toBe("rtl");
+    // An angle-bracketed destination may hold an unmatched parenthesis (review: #252).
+    expect(markdownLineDirection("[42](<https://x/foo(bar>) שלום")).toBe("rtl");
+    expect(markdownLineDirection('[42](https://x "English title") שלום')).toBe("rtl");
+    // A code span closes at a run of exactly its opening length (review: #252).
+    expect(markdownLineDirection("`a``b` שלום")).toBe("rtl");
+    expect(markdownLineDirection("`` a`b `` שלום")).toBe("rtl");
+    expect(markdownLineDirection("`unclosed שלום")).toBe("ltr");
     // An unclosed "(" is text, not a destination.
     expect(markdownLineDirection("[42](abc")).toBe("ltr");
   });

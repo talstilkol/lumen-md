@@ -61,8 +61,16 @@ async function loadLine(line: string): Promise<void> {
   const source = page.locator(".cm-content").first();
   await expect(source).toBeVisible();
   await source.click();
-  await source.press("ControlOrMeta+a");
-  await source.fill(line);
+  // Through CodeMirror itself, not select-all + typing: WebKit sometimes
+  // kept a line break from the select-all (the scenario is the arrows,
+  // not loading the line).
+  await page.evaluate((text) => {
+    type View = { state: { doc: { length: number } }; dispatch(tr: unknown): void; focus(): void };
+    const el = document.querySelector(".cm-content") as (HTMLElement & { cmTile?: { root?: { view?: View } } }) | null;
+    const view = el?.cmTile?.root?.view;
+    view?.dispatch({ changes: { from: 0, to: view.state.doc.length, insert: text }, selection: { anchor: 0 }, userEvent: "input" });
+    view?.focus();
+  }, line);
   await expect.poll(() => sourceState().then((s) => s.text)).toBe(line);
 }
 
@@ -84,7 +92,19 @@ function sourceState(): Promise<{ text: string; anchor: number; head: number; di
 }
 
 /** The WYSIWYG textblock around the caret: its text, the caret's offset in it, its direction and the selected text. */
-function wysiwygState(): Promise<{ text: string; offset: number; dir: string; selected: string; html: string }> {
+async function wysiwygState(): Promise<{ text: string; offset: number; dir: string; selected: string; html: string }> {
+  // WebKit can report no DOM selection for a moment after a key event while
+  // ProseMirror re-applies it: wait (a condition, bounded) until there is one in the editor.
+  await page
+    .waitForFunction(() => {
+      const n = getSelection()?.focusNode;
+      return !!n && !!document.querySelector(".ProseMirror")?.contains(n);
+    }, null, { timeout: 2000 })
+    .catch(() => undefined);
+  return readWysiwygState();
+}
+
+function readWysiwygState(): Promise<{ text: string; offset: number; dir: string; selected: string; html: string }> {
   return page.evaluate(() => {
     const sel = getSelection();
     const pm = document.querySelector(".ProseMirror");
