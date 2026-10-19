@@ -28,7 +28,9 @@ export interface DictationSession {
 /** 1024 samples at 16 kHz: what the eval harness feeds too (scripts/golden/evals/asr-he.mjs). */
 export const BLOCK = 1024;
 
-export async function startDictationSession(files: DictationFiles, cb: DictationCallbacks, opts: { commands?: boolean } = {}): Promise<DictationSession> {
+export async function startDictationSession(files: DictationFiles, cb: DictationCallbacks, opts: { commands?: boolean; signal?: AbortSignal } = {}): Promise<DictationSession> {
+  const aborted = () => new DOMException("aborted", "AbortError");
+  if (opts.signal?.aborted) throw aborted();
   const worker = new Worker(new URL("./dictation.worker.ts", import.meta.url), { type: "module" });
   const send = (m: DictationIn, transfer: Transferable[] = []) => worker.postMessage(m, transfer);
   let stopped: (() => void) | null = null;
@@ -71,50 +73,70 @@ export async function startDictationSession(files: DictationFiles, cb: Dictation
   const vad = files.vad?.slice() ?? null;
   send({ type: "load", ortBase: ortBaseUrl(), encoder: enc, decoder: dec, joiner: join, tokens: files.tokens, vad }, [enc.buffer, dec.buffer, join.buffer, ...(vad ? [vad.buffer] : [])]);
 
-  let media: MediaStream;
-  try {
-    media = await navigator.mediaDevices.getUserMedia({ audio: { channelCount: 1, echoCancellation: true, noiseSuppression: true, autoGainControl: true } });
-  } catch (e) {
+  // Until the session handle is returned, a cancel (signal) or any failure
+  // releases what was acquired so far: the worker, the microphone, the audio graph.
+  let media: MediaStream | null = null;
+  let ctx: AudioContext | null = null;
+  const release = () => {
+    media?.getTracks().forEach((t) => t.stop());
+    void ctx?.close().catch(() => undefined);
     worker.terminate();
-    throw e;
-  }
-  try {
-    await ready;
-  } catch (e) {
-    media.getTracks().forEach((t) => t.stop());
-    worker.terminate();
-    throw e;
-  }
-
-  const ctx = new AudioContext();
-  const source = ctx.createMediaStreamSource(media);
-  // ScriptProcessorNode: no worklet module to load (CSP / Trusted Types),
-  // and the work per callback is a copy. AudioWorklet is a follow-up.
-  const proc = ctx.createScriptProcessor(2048, 1, 1);
-  const resampler = new Resampler(ctx.sampleRate, 16000);
-  let pending = new Float32Array(0);
-  proc.onaudioprocess = (e) => {
-    const x = resampler.push(e.inputBuffer.getChannelData(0));
-    const all = new Float32Array(pending.length + x.length);
-    all.set(pending);
-    all.set(x, pending.length);
-    let at = 0;
-    for (; at + BLOCK <= all.length; at += BLOCK) {
-      const block = all.slice(at, at + BLOCK);
-      send({ type: "audio", samples: block }, [block.buffer]);
-    }
-    pending = all.slice(at);
   };
-  source.connect(proc);
-  // Some engines only pull a processor that reaches the destination; it outputs silence.
-  proc.connect(ctx.destination);
+  let onAbort: (() => void) | null = null;
+  const cancelled = new Promise<never>((_, reject) => {
+    onAbort = () => reject(aborted());
+    opts.signal?.addEventListener("abort", onAbort, { once: true });
+  });
+  cancelled.catch(() => undefined);
+  const orCancel = <T,>(p: Promise<T>) => Promise.race([p, cancelled]);
+
+  let proc: ScriptProcessorNode;
+  let source: MediaStreamAudioSourceNode;
+  let gum: Promise<MediaStream> | null = null;
+  try {
+    gum = navigator.mediaDevices.getUserMedia({ audio: { channelCount: 1, echoCancellation: true, noiseSuppression: true, autoGainControl: true } });
+    media = await orCancel(gum);
+    await orCancel(ready);
+
+    ctx = new AudioContext();
+    source = ctx.createMediaStreamSource(media);
+    // ScriptProcessorNode: no worklet module to load (CSP / Trusted Types),
+    // and the work per callback is a copy. AudioWorklet is a follow-up.
+    proc = ctx.createScriptProcessor(2048, 1, 1);
+    const resampler = new Resampler(ctx.sampleRate, 16000);
+    let pending = new Float32Array(0);
+    proc.onaudioprocess = (e) => {
+      const x = resampler.push(e.inputBuffer.getChannelData(0));
+      const all = new Float32Array(pending.length + x.length);
+      all.set(pending);
+      all.set(x, pending.length);
+      let at = 0;
+      for (; at + BLOCK <= all.length; at += BLOCK) {
+        const block = all.slice(at, at + BLOCK);
+        send({ type: "audio", samples: block }, [block.buffer]);
+      }
+      pending = all.slice(at);
+    };
+    source.connect(proc);
+    // Some engines only pull a processor that reaches the destination; it outputs silence.
+    proc.connect(ctx.destination);
+  } catch (e) {
+    release();
+    // Cancelled while the permission prompt was open: the stream may still arrive — stop it then.
+    void gum?.then((m) => m.getTracks().forEach((t) => t.stop()), () => undefined);
+    throw e;
+  } finally {
+    if (onAbort) opts.signal?.removeEventListener("abort", onAbort);
+  }
+  const mic = media;
+  const audio = ctx;
 
   return {
     async stop() {
       proc.disconnect();
       source.disconnect();
-      media.getTracks().forEach((t) => t.stop());
-      await ctx.close().catch(() => undefined);
+      mic.getTracks().forEach((t) => t.stop());
+      await audio.close().catch(() => undefined);
       await new Promise<void>((resolve) => {
         stopped = resolve;
         send({ type: "stop" });

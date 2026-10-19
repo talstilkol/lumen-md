@@ -85,7 +85,7 @@ function Panel({ initial, onBrowser, onClose }: { initial: Phase; onBrowser: () 
           showAiToast(t("dictation.error", { error: message }), "error");
           void stop();
         },
-      });
+      }, { signal: ctl.signal });
       // Cancelled or closed while the model loaded: never leave a hidden session holding the microphone.
       if (ctl.signal.aborted) {
         await started.stop();
