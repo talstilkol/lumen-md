@@ -261,6 +261,7 @@ jobs:
         run: |
           npx playwright install chromium
           npx vite preview --port 4747 --strictPort > /dev/null 2>&1 &
+          PREVIEW=$!
           for i in $(seq 1 30); do curl -sf -o /dev/null http://localhost:4747/ && break; sleep 1; done
           { echo "<!-- lumen-perf-startup -->"; echo "## Mobile startup profile (plan 8.1) — $(git rev-parse --short HEAD), GitHub runner"; echo; } > perf.md
           node scripts/perf/profile-startup.mjs --url http://localhost:4747/ --runs 5 --settle 15000 --out reports/perf-startup.json >> perf.md
@@ -269,6 +270,8 @@ jobs:
             npx -y lighthouse@12.8.2 http://localhost:4747/ --only-categories=performance --chrome-flags="--headless=new --no-sandbox" --output=json --output-path="lh-mobile-$r.json" --quiet || continue
             node -e 'const j=require("./lh-mobile-'$r'.json"),a=j.audits,v=(k)=>Math.round(a[k].numericValue);console.log(`| '$r' | ${v("total-blocking-time")} | ${v("first-contentful-paint")} | ${v("largest-contentful-paint")} | ${v("interactive")} | ${j.categories.performance.score} |`)' >> perf.md
           done
+          # Nothing of this step stays alive while Lighthouse CI measures.
+          kill "$PREVIEW" 2>/dev/null || true
           cat perf.md >> "$GITHUB_STEP_SUMMARY"
           if [ -n "${PR:-}" ]; then
             id=$(gh api "repos/$REPO/issues/$PR/comments" --paginate --jq '.[] | select(.user.login == "github-actions[bot]" and (.body | contains("<!-- lumen-perf-startup -->"))) | .id' | tail -1)
