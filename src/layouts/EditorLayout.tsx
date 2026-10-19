@@ -404,7 +404,7 @@ export function EditorLayout({
                 <p style={{ fontSize: 12, opacity: 0.8 }}>Try switching to Source mode.</p>
               </div>
             }>
-              <WysiwygEditor value={docContent} onChange={setContent} />
+              <WysiwygEditor value={docContent} onChange={setContent} spellCheck={spellCheck} />
             </ErrorBoundary>
           </Suspense>
         </section>

@@ -52,6 +52,8 @@ configureWysiwygSuggest({
 interface Props {
   value: string;
   onChange: (next: string) => void;
+  /** The browser / OS spellchecker (plan 9.2 layer 1), as in the source editor. */
+  spellCheck?: boolean;
 }
 
 const slash = slashFactory("wysiwyg-slash");
@@ -597,8 +599,10 @@ export function splitFrontmatter(md: string): { fm: string; body: string } {
   return { fm: m[0], body: md.slice(m[0].length) };
 }
 
-export default function WysiwygEditor({ value, onChange }: Props) {
+export default function WysiwygEditor({ value, onChange, spellCheck = true }: Props) {
   const hostRef = useRef<HTMLDivElement | null>(null);
+  const spellCheckRef = useRef(spellCheck);
+  spellCheckRef.current = spellCheck;
   const editorRef = useRef<MilkdownEditor | null>(null);
   const onChangeRef = useRef(onChange);
   onChangeRef.current = onChange;
@@ -612,6 +616,11 @@ export default function WysiwygEditor({ value, onChange }: Props) {
   const tooltipElRef = useRef<HTMLDivElement | null>(null);
   const viewRef = useRef<EditorView | null>(null);
   const getView = () => viewRef.current;
+  // Re-read the spellcheck attribute when the setting changes (attributes are evaluated on each view update).
+  useEffect(() => {
+    const view = viewRef.current;
+    if (view) view.dispatch(view.state.tr.setMeta("addToHistory", false));
+  }, [spellCheck]);
 
   // ── Lifecycle sequencing ─────────────────────────────────────────
   // Milkdown's `create()` and `destroy()` are both async, and
@@ -737,6 +746,8 @@ export default function WysiwygEditor({ value, onChange }: Props) {
             dragHandlePlugin,
             // T25 — every block reads in the direction of its own text.
             wysiwygBidiPlugin(),
+            // 9.2 layer 1 — the browser / OS spellchecker, Hebrew included, no dictionary in the bundle.
+            new Plugin({ props: { attributes: () => ({ spellcheck: spellCheckRef.current ? "true" : "false" }) } }),
             new Plugin({
               appendTransaction: (trs) => {
                 if (trs.some((t) => t.docChanged || t.storedMarksSet)) pendingSinceRef.current = Date.now();
