@@ -14,6 +14,7 @@ on:
       - "scripts/golden/evals/asr-he.mjs"
       - "scripts/asr/**"
       - "src/__tests__/asr-he-eval.test.ts"
+      - "src/ai/dictation/**"
       - ".github/workflows/asr.yml"
   workflow_dispatch:
 
@@ -91,9 +92,15 @@ jobs:
       - name: Wider FLEURS sample (validation split, disjoint from the set's test pool)
         run: python -I scripts/asr/fleurs_spike.py --out "$RUNNER_TEMP/asr-spike" --n 30
 
-      - name: Score (numbers only)
+      - name: Score — sherpa-onnx WASM (reference)
+        env:
+          LUMEN_ASR_ENGINE: sherpa
+        run: node scripts/asr/eval.mjs --split dev=eval/golden/asr-he/dev --split test="$RUNNER_TEMP/golden/asr-he/test" --split fleurs-validation="$RUNNER_TEMP/asr-spike" --out asr-scores-sherpa.json
+      - name: Score — Lumen engine on onnxruntime-web WASM (what the browser runs)
+        env:
+          LUMEN_ASR_ENGINE: lumen
         run: node scripts/asr/eval.mjs --split dev=eval/golden/asr-he/dev --split test="$RUNNER_TEMP/golden/asr-he/test" --split fleurs-validation="$RUNNER_TEMP/asr-spike" --out asr-scores.json --show fleurs-validation
       - uses: actions/upload-artifact@v7
         with:
           name: asr-scores
-          path: asr-scores.json
+          path: asr-scores*.json

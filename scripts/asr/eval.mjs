@@ -42,7 +42,9 @@ const run = (it) => {
   return done.get(it.audio);
 };
 const loadT0 = performance.now();
-const report = { engine: "sherpa-onnx WASM (npm sherpa-onnx), ivrit-ai/zipformer2-66m-streaming-he int8, greedy, 1 thread", modelLoadMs, splits: {} };
+const ENGINES = { lumen: "Lumen's Zipformer2 port on onnxruntime-web WASM", sherpa: "sherpa-onnx WASM (npm sherpa-onnx 1.13.8)" };
+const engine = process.env.LUMEN_ASR_ENGINE ?? "lumen";
+const report = { engine: `${ENGINES[engine] ?? engine}, ivrit-ai/zipformer2-66m-streaming-he int8, greedy, 1 thread`, modelLoadMs, splits: {} };
 const all = [];
 for (const [name, dir] of splits) {
   const items = load(dir);
@@ -58,7 +60,7 @@ for (const [name, dir] of splits) {
     const rows = [];
     for (const it of items) {
       const ref = normalizeAsr(it.text);
-      const hyp = normalizeAsr(run(it).text);
+      const hyp = normalizeAsr((await run(it)).text);
       const e = errors(ref, hyp);
       (/[a-z]/.test(ref) ? byKind.latin : /\d/.test(ref) ? byKind.digits : byKind.hebrewOnly).push(e);
       // Order-free word errors: what WER would be if only the word order were wrong.
@@ -68,10 +70,11 @@ for (const [name, dir] of splits) {
       rows.push(`${it.id} wer=${(e.wordErrors / Math.max(1, e.words)).toFixed(2)}`);
     }
     const fmt = (l) => (l.length ? `${l.length} clips wer=${rates(l).wer.toFixed(3)}` : "0 clips");
-    console.log(`::notice title=asr ${name} breakdown::latin ${fmt(byKind.latin)}; digits ${fmt(byKind.digits)}; hebrew-only ${fmt(byKind.hebrewOnly)}; order-free wer=${rates(bag).wer.toFixed(3)}`);
+    console.log(`::notice title=asr ${engine} ${name} breakdown::latin ${fmt(byKind.latin)}; digits ${fmt(byKind.digits)}; hebrew-only ${fmt(byKind.hebrewOnly)}; order-free wer=${rates(bag).wer.toFixed(3)}`);
     for (let i = 0; i < items.length; i += 6) {
-      const chunk = items.slice(i, i + 6).map((it) => `${it.id} ${rows[items.indexOf(it)].split(" ")[1]}%0A  ref: ${normalizeAsr(it.text)}%0A  hyp: ${normalizeAsr(run(it).text)}`);
-      console.log(`::notice title=asr ${name} transcripts ${i / 6 + 1}::${chunk.join("%0A")}`);
+      const chunk = [];
+      for (const it of items.slice(i, i + 6)) chunk.push(`${it.id} ${rows[items.indexOf(it)].split(" ")[1]}%0A  ref: ${normalizeAsr(it.text)}%0A  hyp: ${normalizeAsr((await run(it)).text)}`);
+      console.log(`::notice title=asr ${engine} ${name} transcripts ${i / 6 + 1}::${chunk.join("%0A")}`);
     }
   }
   all.push(...items);
@@ -85,7 +88,7 @@ const lines = ["## asr-he — live dictation spike (plan 6.1)", "", `${report.en
 for (const [name, s] of Object.entries(report.splits)) lines.push(`| ${name} | ${keys.map((k) => s[k] ?? "").join(" | ")} |`);
 const md = lines.join("\n") + "\n";
 if (process.env.GITHUB_STEP_SUMMARY) appendFileSync(process.env.GITHUB_STEP_SUMMARY, md);
-if (process.env.GITHUB_ACTIONS) console.log(`::notice title=asr model::load ${modelLoadMs} ms, eval ${report.evalSeconds} s`);
+if (process.env.GITHUB_ACTIONS) console.log(`::notice title=asr ${engine} model::load ${modelLoadMs} ms, eval ${report.evalSeconds} s`);
 // Also as annotations: readable from the checks API (numbers only).
-if (process.env.GITHUB_ACTIONS) for (const [name, s] of Object.entries(report.splits)) console.log(`::notice title=asr ${name}::${Object.entries(s).map(([k, v]) => `${k}=${v}`).join(" ")}`);
+if (process.env.GITHUB_ACTIONS) for (const [name, s] of Object.entries(report.splits)) console.log(`::notice title=asr ${engine} ${name}::${Object.entries(s).map(([k, v]) => `${k}=${v}`).join(" ")}`);
 console.log(md);

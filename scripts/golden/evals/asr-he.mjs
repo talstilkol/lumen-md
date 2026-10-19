@@ -2,9 +2,10 @@
  * Harness for the Hebrew speech-recognition golden set (plan 6.1, 7.1):
  * WER and CER per part (FLEURS, Common Voice, the owner's), after the set's
  * normalisation — NFC, no punctuation, no niqqud — and the latency of live
- * dictation, all on the engine the browser runs: sherpa-onnx's WebAssembly
- * build (the `sherpa-onnx` npm package is that build for Node) with the
- * ivrit.ai Zipformer2 streaming model (int8).
+ * dictation, on the engine the browser runs — the app's Zipformer2 port on
+ * onnxruntime-web's WebAssembly build — or on sherpa-onnx's WebAssembly
+ * build as the reference (LUMEN_ASR_ENGINE=sherpa), with the ivrit.ai
+ * Zipformer2 streaming model (int8).
  *
  *   score({ items }) → { "wer.fleurs": 0.1, "cer.fleurs": …, "wer": …, "latency.p95Ms": …, "rtf": … }
  *
@@ -90,13 +91,23 @@ export const MODEL = {
   files: ["sherpa-onnx/encoder.int8.onnx", "sherpa-onnx/decoder.int8.onnx", "sherpa-onnx/joiner.int8.onnx", "sherpa-onnx/tokens.txt"],
 };
 
-/** The recognizer on sherpa-onnx's WebAssembly build, from a model folder. */
-export async function createRecognizer(modelDir = process.env.LUMEN_ASR_MODEL_DIR) {
+/**
+ * The recognizer, on WebAssembly either way, behind sherpa-onnx's
+ * interface (createStream / acceptWaveform / isReady / decode / getResult):
+ *   - "lumen" (default): the app's own engine, src/ai/dictation/zipformer.ts
+ *     on onnxruntime-web's wasm build — what the browser runs;
+ *   - "sherpa": sherpa-onnx's WebAssembly build (npm `sherpa-onnx`), the reference.
+ */
+export async function createRecognizer(modelDir = process.env.LUMEN_ASR_MODEL_DIR, engine = process.env.LUMEN_ASR_ENGINE ?? "lumen") {
   if (!modelDir || !existsSync(join(modelDir, "encoder.int8.onnx"))) throw new Error("the streaming model is not downloaded (LUMEN_ASR_MODEL_DIR; scripts/asr/fetch-model.sh)");
+  return engine === "sherpa" ? sherpaRecognizer(modelDir) : lumenRecognizer(modelDir);
+}
+
+async function sherpaRecognizer(modelDir) {
   // Not a dependency of the app: the ASR workflow installs it (npm i --no-save sherpa-onnx@1.13.8).
   const pkg = process.env.LUMEN_SHERPA_ONNX ?? "sherpa-onnx";
   const sherpa = (await import(/* @vite-ignore */ pkg)).default;
-  return sherpa.createOnlineRecognizer({
+  const r = sherpa.createOnlineRecognizer({
     featConfig: { sampleRate: 16000, featureDim: 80 },
     modelConfig: {
       transducer: { encoder: join(modelDir, "encoder.int8.onnx"), decoder: join(modelDir, "decoder.int8.onnx"), joiner: join(modelDir, "joiner.int8.onnx") },
@@ -109,6 +120,41 @@ export async function createRecognizer(modelDir = process.env.LUMEN_ASR_MODEL_DI
     decodingMethod: "greedy_search",
     enableEndpoint: 0,
   });
+  return {
+    createStream: () => {
+      const s = r.createStream();
+      return { acceptWaveform: (x) => s.acceptWaveform(16000, x), inputFinished: () => s.inputFinished(), free: () => s.free?.(), raw: s };
+    },
+    isReady: (s) => r.isReady(s.raw),
+    decode: (s) => r.decode(s.raw),
+    getResult: (s) => r.getResult(s.raw),
+  };
+}
+
+/** The app's engine, bundled from src/ with rolldown (Vite's bundler) for Node. */
+export async function lumenRecognizer(modelDir) {
+  const bundler = "rolldown";
+  const { rolldown } = await import(/* @vite-ignore */ bundler);
+  const { mkdtempSync, readFileSync } = await import("node:fs");
+  const { tmpdir } = await import("node:os");
+  const { pathToFileURL, fileURLToPath } = await import("node:url");
+  const root = join(fileURLToPath(import.meta.url), "..", "..", "..", "..");
+  const out = join(mkdtempSync(join(tmpdir(), "lumen-asr-")), "zipformer.mjs");
+  const bundle = await rolldown({ input: join(root, "src/ai/dictation/zipformer.ts"), platform: "node", external: ["onnxruntime-web"], logLevel: "silent" });
+  await bundle.write({ file: out, format: "esm" });
+  await bundle.close();
+  const { ZipformerModel } = await import(pathToFileURL(out).href);
+  const ortPkg = "onnxruntime-web";
+  const ort = await import(/* @vite-ignore */ ortPkg);
+  ort.env.wasm.numThreads = 1;
+  const read = (f) => new Uint8Array(readFileSync(join(modelDir, f)));
+  const model = await ZipformerModel.load(ort, { encoder: read("encoder.int8.onnx"), decoder: read("decoder.int8.onnx"), joiner: read("joiner.int8.onnx"), tokens: readFileSync(join(modelDir, "tokens.txt"), "utf8") });
+  return {
+    createStream: () => model.createStream(),
+    isReady: (s) => s.isReady(),
+    decode: (s) => s.decode(),
+    getResult: (s) => s.result(),
+  };
 }
 
 const SLICE = 0.16; // seconds of audio per feed, as a microphone delivers it
@@ -119,7 +165,7 @@ const TAIL = 1.5; // seconds of silence that flush the last chunk (the model car
  * whenever a chunk is ready. Returns the text, each word's latency (s) and
  * the compute time.
  */
-export function transcribeLive(recognizer, samples, now = () => performance.now() / 1000) {
+export async function transcribeLive(recognizer, samples, now = () => performance.now() / 1000) {
   const stream = recognizer.createStream();
   let clock = 0; // wall time since the clip started, in seconds
   let compute = 0;
@@ -137,9 +183,9 @@ export function transcribeLive(recognizer, samples, now = () => performance.now(
     seen = Math.max(seen, tokens.length);
     return r;
   };
-  const decode = () => {
+  const decode = async () => {
     const t0 = now();
-    while (recognizer.isReady(stream)) recognizer.decode(stream);
+    while (recognizer.isReady(stream)) await recognizer.decode(stream);
     const dt = now() - t0;
     compute += dt;
     clock += dt;
@@ -147,13 +193,13 @@ export function transcribeLive(recognizer, samples, now = () => performance.now(
   for (let at = 0; at < samples.length; at += step) {
     const slice = samples.subarray(at, Math.min(samples.length, at + step));
     clock = Math.max(clock, (at + slice.length) / 16000); // the audio arrives in real time
-    stream.acceptWaveform(16000, slice);
-    decode();
+    stream.acceptWaveform(slice);
+    await decode();
     collect();
   }
-  stream.acceptWaveform(16000, new Float32Array(Math.round(TAIL * 16000)));
+  stream.acceptWaveform(new Float32Array(Math.round(TAIL * 16000)));
   stream.inputFinished();
-  decode();
+  await decode();
   const r = collect();
   stream.free?.();
   return { text: r.text ?? "", latencies, compute, duration: samples.length / 16000 };

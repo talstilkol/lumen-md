@@ -51,7 +51,7 @@ function fakeRecognizer(decodeCost = 0.05) {
     let decoded = 0;
     let finished = false;
     return {
-      acceptWaveform: (_sr: number, s: Float32Array) => void (fed += s.length),
+      acceptWaveform: (s: Float32Array) => void (fed += s.length),
       inputFinished: () => void (finished = true),
       get ready() {
         return fed - decoded >= 16000 || (finished && fed > decoded);
@@ -81,9 +81,9 @@ function fakeRecognizer(decodeCost = 0.05) {
 }
 
 describe("transcribeLive", () => {
-  it("feeds real-time slices and measures each word's delay from when it was spoken", () => {
+  it("feeds real-time slices and measures each word's delay from when it was spoken", async () => {
     const { rec, now } = fakeRecognizer(0.05);
-    const out = transcribeLive(rec, new Float32Array(3 * 16000), now);
+    const out = await transcribeLive(rec, new Float32Array(3 * 16000), now);
     // The recogniser also decodes the 1.5 s tail, as the real one does with silence.
     expect(out.text.startsWith("w0 w1 w2")).toBe(true);
     expect(out.duration).toBe(3);
