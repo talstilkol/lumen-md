@@ -1281,6 +1281,8 @@
   "external.reloaded": "“{path}”在 Lumen 之外被修改，已重新载入。",
   "external.renamed": "“{from}”在 Lumen 之外被重命名为“{to}”；打开的笔记已跟随。",
   "external.deleted": "“{path}”在 Lumen 之外被删除。打开的笔记仍保留，未保存。",
+  "external.conflict.keptTyping": "冲突对话框打开时你继续输入了，因此保留了你最新的文本（未保存，稍后保存）。在 Lumen 之外修改的版本在“{path}”中。",
+  "external.conflict.notSaved": "“{path}”未保存：它在 Lumen 之外被修改。没有做任何更改；请先处理该更改。",
   "vault.import.what": "导入自…",
   "vault.import.zip": ".zip 文件",
   "vault.import.folder": "文件夹",

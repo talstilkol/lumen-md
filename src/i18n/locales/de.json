@@ -1281,6 +1281,8 @@
   "external.reloaded": "„{path}“ wurde außerhalb von Lumen geändert und neu geladen.",
   "external.renamed": "„{from}“ wurde außerhalb von Lumen in „{to}“ umbenannt; die offene Notiz folgt.",
   "external.deleted": "„{path}“ wurde außerhalb von Lumen gelöscht. Die offene Notiz bleibt erhalten, ungespeichert.",
+  "external.conflict.keptTyping": "Du hast weitergetippt, während der Konflikt offen war; dein neuester Text bleibt erhalten (ungespeichert, wird als Nächstes gespeichert). Die außerhalb von Lumen geänderte Fassung liegt in „{path}“.",
+  "external.conflict.notSaved": "„{path}“ wurde nicht gespeichert: Die Datei wurde außerhalb von Lumen geändert. Nichts wurde verändert; löse die Änderung zuerst.",
   "vault.import.what": "Importieren aus…",
   "vault.import.zip": "Einer .zip-Datei",
   "vault.import.folder": "Einem Ordner",

@@ -1281,6 +1281,8 @@
   "external.reloaded": "「{path}」が Lumen の外で変更されたので再読み込みしました。",
   "external.renamed": "「{from}」が Lumen の外で「{to}」に名前変更されました。開いているノートも追従します。",
   "external.deleted": "「{path}」が Lumen の外で削除されました。開いているノートは未保存のまま残ります。",
+  "external.conflict.keptTyping": "競合の表示中も入力が続いたため、最新のテキストを残しました（未保存、次に保存されます）。Lumen の外で変更された版は「{path}」にあります。",
+  "external.conflict.notSaved": "「{path}」は保存されませんでした。Lumen の外で変更されています。何も変更していません。先に変更を解決してください。",
   "vault.import.what": "読み込み元…",
   "vault.import.zip": ".zip ファイル",
   "vault.import.folder": "フォルダ",

@@ -147,6 +147,83 @@ describe("changes while Lumen was closed", () => {
   });
 });
 
+describe("review round 2", () => {
+  it("a closed vault (start-up, a folder waiting for a click) does not make restored notes look deleted", async () => {
+    const closed = createMemoryBackend({ id: "restoring" });
+    closed.available = () => false;
+    setVaultBackend(closed);
+    open("note.md", "unsaved", true);
+    const { reconcileOpenNotes } = await import("../store/externalChanges");
+    await reconcileOpenNotes();
+    expect(doc()).toMatchObject({ workspaceName: "note.md", content: "unsaved", dirty: true });
+    expect(resolver).not.toHaveBeenCalled();
+  });
+
+  it("a note opened after start-up gets a persisted base at once, so a change made while Lumen is closed is caught", async () => {
+    await writeWorkspaceFile("later.md", "L");
+    open("later.md", "L");
+    await vi.waitFor(() => expect(localStorage.getItem("lumen-vault-known") ?? "").toContain("later.md"));
+    // The user edits, closes before autosave; another program edits; Lumen restarts.
+    stop();
+    await vault.write("later.md", "edited while closed");
+    open("later.md", "my unsaved edit", true);
+    stop = startExternalChanges();
+    await vi.waitFor(() => expect(resolver).toHaveBeenCalledTimes(1));
+    await settle();
+    expect(await readWorkspaceFile("later.md")).toBe("my unsaved edit");
+    const copy = (await listWorkspace()).map((f) => f.path).find((p) => p.startsWith("later ("))!;
+    expect(await readWorkspaceFile(copy)).toBe("edited while closed");
+  });
+
+  it("text typed while the conflict dialog is open is kept, not replaced by the merge", async () => {
+    let answer!: (v: { kind: "merged"; content: string }) => void;
+    resolver.mockImplementationOnce(() => new Promise((r) => (answer = r)));
+    useAppStore.getState().setContent("mine");
+    await outside("note.md", "theirs");
+    await vi.waitFor(() => expect(resolver).toHaveBeenCalled());
+    useAppStore.getState().setContent("mine, and more typed behind the dialog");
+    answer({ kind: "merged", content: "merge of the older text" });
+    await settle();
+    expect(doc()).toMatchObject({ content: "mine, and more typed behind the dialog", dirty: true });
+    expect(await readWorkspaceFile("note.md")).toBe("theirs"); // untouched until the next save
+    expect(toasts.some((m) => /kept typing|latest text/i.test(m))).toBe(true);
+    // The next save goes through: the disk still holds what Lumen now knows.
+    expect(await saveOpenNote("note.md", "mine, and more typed behind the dialog")).toBe(true);
+  });
+
+  it("trash / move / export (flushActiveWorkspaceDoc) wait for the conflict's answer and then save, or stop", async () => {
+    const { flushActiveWorkspaceDoc } = await import("../store/openDocs");
+    useAppStore.getState().setContent("mine");
+    await vault.write("note.md", "theirs, unnoticed");
+    let answer!: (v: { kind: "local" }) => void;
+    resolver.mockImplementationOnce(() => new Promise((r) => (answer = r)));
+    let done = false;
+    const flush = flushActiveWorkspaceDoc().then(() => (done = true));
+    await vi.waitFor(() => expect(resolver).toHaveBeenCalled());
+    await settle();
+    expect(done).toBe(false); // not "completed" while unresolved
+    expect(await readWorkspaceFile("note.md")).toBe("theirs, unnoticed");
+    answer({ kind: "local" });
+    await flush;
+    expect(await readWorkspaceFile("note.md")).toBe("mine");
+    expect(doc().dirty).toBe(false);
+
+    // Still unsaved after the answer (the user typed during the dialog and
+    // the file changed outside once more): the caller is stopped, not told
+    // the note is on disk.
+    useAppStore.getState().setContent("mine 2");
+    await vault.write("note.md", "theirs 2");
+    resolver.mockImplementationOnce(async () => {
+      useAppStore.getState().setContent("mine 2, typed behind the dialog");
+      await vault.write("note.md", "changed again outside");
+      return { kind: "local" };
+    });
+    await expect(flushActiveWorkspaceDoc()).rejects.toThrow(/not saved/);
+    expect(doc()).toMatchObject({ content: "mine 2, typed behind the dialog", dirty: true });
+    await settle();
+  });
+});
+
 describe("a concurrent edit (unsaved text in Lumen, a change on disk)", () => {
   it("becomes a conflict: the other version is kept as a file first; 'keep mine' loses nothing", async () => {
     useAppStore.getState().setContent("mine, unsaved");

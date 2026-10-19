@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-10-19T06:33:47.255Z",
+  "generated_at": "2026-10-19T07:33:42.684Z",
   "source": "src/i18n/index.ts (en bundle)",
-  "count": 1467,
+  "count": 1469,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -1789,6 +1789,20 @@
     {
       "key": "external.deleted",
       "en": "“{path}” was deleted outside Lumen. The open note is kept, unsaved.",
+      "vars": [
+        "path"
+      ]
+    },
+    {
+      "key": "external.conflict.keptTyping",
+      "en": "You kept typing while the conflict was open, so your latest text is kept (unsaved, saved next). The version changed outside Lumen is in “{path}”.",
+      "vars": [
+        "path"
+      ]
+    },
+    {
+      "key": "external.conflict.notSaved",
+      "en": "“{path}” was not saved: it changed outside Lumen. Nothing was changed; resolve the change first.",
       "vars": [
         "path"
       ]

@@ -424,6 +424,8 @@ const en: Strings = {
   "external.reloaded": "“{path}” was changed outside Lumen and reloaded.",
   "external.renamed": "“{from}” was renamed outside Lumen to “{to}”; the open note follows it.",
   "external.deleted": "“{path}” was deleted outside Lumen. The open note is kept, unsaved.",
+  "external.conflict.keptTyping": "You kept typing while the conflict was open, so your latest text is kept (unsaved, saved next). The version changed outside Lumen is in “{path}”.",
+  "external.conflict.notSaved": "“{path}” was not saved: it changed outside Lumen. Nothing was changed; resolve the change first.",
   "vault.import.what": "Import from…",
   "vault.import.zip": "A .zip file",
   "vault.import.folder": "A folder",

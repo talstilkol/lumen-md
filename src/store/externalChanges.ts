@@ -26,7 +26,7 @@
 import { log } from "../lib/logger";
 import { t } from "../i18n";
 import { readWorkspaceFile, uniqueWorkspaceName, workspaceHasFile, writeWorkspaceFile, deleteWorkspaceFile } from "../storage/workspace";
-import { watchVault, type VaultEvent } from "../storage/vault";
+import { getVaultBackend, watchVault, type VaultEvent } from "../storage/vault";
 import { notifyWorkspaceChanged } from "../storage/workspaceEvents";
 import { flushPendingEdits, tabIdOf, useAppStore } from "./useStore";
 import { syncOpenDocsAfterMove } from "./openDocs";
@@ -105,6 +105,13 @@ function forgetDisk(prefix: string, movedTo?: string): void {
 }
 /** Notes whose saving waits for a conflict to be resolved. */
 const conflicted = new Set<string>();
+/** The running resolution of each conflict. */
+const resolving = new Map<string, Promise<void>>();
+
+/** Resolves once no conflict is pending for `path`. */
+export function whenResolved(path: string): Promise<void> {
+  return resolving.get(path) ?? Promise.resolve();
+}
 
 export type ConflictResolver = (o: { path: string; base: string; local: string; remote: string }) => Promise<
   { kind: "merged"; content: string } | { kind: "local" } | { kind: "remote" } | null
@@ -187,17 +194,37 @@ async function conflictCopyPath(path: string): Promise<string> {
  * The note at `path` has `local` unsaved text and `remote` on disk. Keep the
  * disk version as a copy first (0 loss), then let the user choose.
  */
-async function conflict(path: string, local: string, remote: string): Promise<void> {
-  if (conflicted.has(path)) return;
+function conflict(path: string, local: string, remote: string): Promise<void> {
+  if (conflicted.has(path)) return whenResolved(path);
   conflicted.add(path);
+  const run = resolveOne(path, local, remote).finally(() => {
+    conflicted.delete(path);
+    resolving.delete(path);
+  });
+  resolving.set(path, run);
+  return run;
+}
+
+async function resolveOne(path: string, local: string, remote: string): Promise<void> {
   try {
+    // Typing must not go on behind the dialog.
+    (globalThis.document?.activeElement as HTMLElement | null)?.blur?.();
     const copy = await conflictCopyPath(path);
     await writeWorkspaceFile(copy, remote);
     notifyWorkspaceChanged({ kind: "structure", paths: [copy] });
     const base = known.get(path) ?? "";
     const choice = await resolveConflict({ path, base, local, remote });
-    // What is in the editor now (the user may have kept typing).
+    // What is in the editor now. If the user kept typing during the dialog,
+    // the answer was given about older text: keep the newer text (unsaved;
+    // the next save writes it, the other version stays in the copy).
+    flushPendingEdits();
     const current = openPaths().get(path)?.content ?? local;
+    if (current !== local) {
+      noteDisk(path, remote);
+      setLocal(path, current, true);
+      toast(t("external.conflict.keptTyping", { path: copy }));
+      return;
+    }
     if (choice?.kind === "remote") {
       noteDisk(path, remote);
       showFromDisk(path, remote);
@@ -214,8 +241,6 @@ async function conflict(path: string, local: string, remote: string): Promise<vo
   } catch (err) {
     log.warn("resolving an external change failed", err);
     toast(t("external.conflict.failed", { path }), "error");
-  } finally {
-    conflicted.delete(path);
   }
 }
 
@@ -255,9 +280,18 @@ export async function saveOpenNote(path: string, content: string): Promise<boole
  * detached.
  */
 export async function reconcileOpenNotes(): Promise<void> {
+  const vault = getVaultBackend();
+  // A closed vault (start-up, a folder waiting for a click) tells nothing.
+  if (!vault.available()) return;
   for (const [path, note] of openPaths()) {
     const stored = diskHashes()[path];
-    if (!(await workspaceHasFile(path))) {
+    let st;
+    try {
+      st = await vault.stat(path);
+    } catch {
+      continue; // unreadable now: not evidence of a delete
+    }
+    if (!st) {
       if (stored !== undefined) await onExternal({ type: "delete", path, origin: "external" });
       continue;
     }
@@ -340,7 +374,10 @@ export function startExternalChanges(): () => void {
   if (started) return started;
   // A clean note's text is what is on disk: remember it as the base.
   const remember = () => {
-    for (const [path, v] of openPaths()) if (!v.dirty && !conflicted.has(path)) known.set(path, v.content);
+    for (const [path, v] of openPaths()) {
+      if (v.dirty || conflicted.has(path) || known.get(path) === v.content) continue;
+      noteDisk(path, v.content);
+    }
   };
   remember();
   const unsub = useAppStore.subscribe(remember);
