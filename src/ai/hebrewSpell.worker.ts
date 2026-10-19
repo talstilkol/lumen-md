@@ -18,21 +18,25 @@ let freq: FrequencyList | null = null;
 let freqLoad: Promise<void> | null = null;
 
 type In = { type: "load"; dic: string } | { type: "freq"; url: string } | { type: "check"; id: number; text: string };
-type Out = { type: "loaded"; words: number } | { type: "result"; id: number; matches: GrammarMatch[] };
+type Out = { type: "loaded"; words: number } | { type: "freq-loaded"; words: number } | { type: "result"; id: number; matches: GrammarMatch[] };
 
-self.onmessage = async (e: MessageEvent<In>) => {
+self.onmessage = (e: MessageEvent<In>) => {
   const msg = e.data;
   if (msg.type === "load") {
     dict = buildDictionary(msg.dic);
     (self as unknown as Worker).postMessage({ type: "loaded", words: dict.size } satisfies Out);
   } else if (msg.type === "freq") {
-    // A missing list (an old cache, a failed fetch) only costs the hints: the rules still run.
+    // A missing list (an old cache, a failed fetch) only costs the hints: the
+    // rules still run. No check waits for it: checks made before it arrives
+    // go out without hints, and "freq-loaded" asks the page to check again.
     freqLoad ??= fetch(msg.url)
       .then((r) => (r.ok ? r.text() : Promise.reject(new Error(`HTTP ${r.status}`))))
-      .then((text) => void (freq = parseFrequencyList(text)))
+      .then((text) => {
+        freq = parseFrequencyList(text);
+        (self as unknown as Worker).postMessage({ type: "freq-loaded", words: freq.counts.size } satisfies Out);
+      })
       .catch(() => undefined);
   } else if (msg.type === "check") {
-    await freqLoad;
     const d = dict;
     const matches = offlineHebrewChecks(freq, msg.text, hebrewRules, d ? (t) => hebrewSpelling(d, t) : undefined);
     (self as unknown as Worker).postMessage({ type: "result", id: msg.id, matches } satisfies Out);

@@ -14,6 +14,7 @@ import {
   frequencyKnown,
   frequencyRules,
   frequencySpelling,
+  frequencySuggestions,
   lonePrefixRule,
   offlineHebrewChecks,
   parseFrequencyList,
@@ -76,6 +77,10 @@ describe("spelling hints (suggestion-only)", () => {
     expect(m.replacements[0]).toBe("חקירה");
     expect(m.message).toMatch(/FrequencyWords.*CC BY-SA 4\.0/);
   });
+  it("a frequent neighbour is found even behind many rare ones (#257 review)", () => {
+    // "יודן" has a dozen rare one-edit neighbours in the list; "יודע" (count 621k) must still come up.
+    expect(frequencySuggestions(list, "יודן")).toContain("יודע");
+  });
   it("leaves names and rare forms with no frequent neighbour alone", () => {
     expect(frequencySpelling(list, "קאוורדרקוב")).toEqual([]);
   });
@@ -111,4 +116,13 @@ describe("7.1 acceptance on the dev split (the CI test split is scored by the sa
     expect(s.recall_nonword).toBeGreaterThanOrEqual(0.7);
     expect(s.fp_per_token).toBeLessThanOrEqual(0.05);
   }, 60_000);
+});
+
+describe("the worker never waits for the list (#257 review)", () => {
+  it("answers a check before the list arrives, then announces the list", async () => {
+    const src = readFileSync("src/ai/hebrewSpell.worker.ts", "utf8");
+    expect(src).not.toMatch(/await freqLoad/);
+    expect(src).toMatch(/type: "freq-loaded"/);
+    expect(readFileSync("src/ai/hebrewSpellService.ts", "utf8")).toMatch(/"freq-loaded"[\s\S]*announceDictionaryChange\(\)/);
+  });
 });

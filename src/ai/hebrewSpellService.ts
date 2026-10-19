@@ -88,6 +88,9 @@ function startWorker(): Promise<Worker | null> {
       if (e.data.type === "result" && e.data.id !== undefined) {
         pending.get(e.data.id)?.resolve(e.data.matches ?? []);
         pending.delete(e.data.id);
+      } else if (e.data.type === "freq-loaded") {
+        // Checks answered before the list arrived had no hints: open editors check again.
+        announceDictionaryChange();
       }
     };
     w.onerror = () => {

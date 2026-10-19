@@ -74,9 +74,13 @@ export function frequencyKnown(list: FrequencyList, raw: string): boolean {
   return false;
 }
 
-/** Frequent words one edit away, by edit cost and then by frequency. */
+/**
+ * Frequent words one edit away, by edit cost and then by frequency. Every
+ * one-edit neighbour is considered before the threshold cuts (a rare
+ * neighbour must not crowd out a frequent one: "יודן" → "יודע").
+ */
 export function frequencySuggestions(list: FrequencyList, raw: string, max = 5): string[] {
-  const ranked = suggest(list.words, raw, 12);
+  const ranked = suggest(list.words, raw, Number.POSITIVE_INFINITY);
   return ranked
     .map((w, rank) => ({ w, rank, n: count(list, w) }))
     .filter((x) => x.n >= SUGGEST_MIN_COUNT)
