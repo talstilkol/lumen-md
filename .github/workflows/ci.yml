@@ -278,6 +278,21 @@ jobs:
         run: npx -y @lhci/cli@0.13.x autorun --config=./lighthouserc.json
         env:
           LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
+      # Job logs can't be read from everywhere the PR is worked on: the desktop
+      # assertions (lighthouserc.json) go into the same PR comment.
+      - name: Lighthouse CI assertions → PR comment
+        if: always() && github.event_name == 'pull_request'
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR: ${{ github.event.pull_request.number }}
+          REPO: ${{ github.repository }}
+        run: |
+          [ -f .lighthouseci/assertion-results.json ] || { echo "no assertion results"; exit 0; }
+          { echo; echo "### Lighthouse CI desktop assertions (lighthouserc.json)"; echo; echo "| audit | level | expected | actual | passed |"; echo "|---|---|---:|---:|---|"; } >> perf.md
+          node -e 'const r=require("./.lighthouseci/assertion-results.json");for(const a of r)console.log(`| ${a.auditId}${a.auditProperty?" ("+a.auditProperty+")":""} | ${a.level} | ${a.operator} ${a.expected} | ${Math.round(a.actual*1000)/1000} | ${a.passed?"yes":"**no**"} |`)' >> perf.md
+          id=$(gh api "repos/$REPO/issues/$PR/comments" --paginate --jq '.[] | select(.user.login == "github-actions[bot]" and (.body | contains("<!-- lumen-perf-startup -->"))) | .id' | tail -1)
+          if [ -n "$id" ]; then gh api -X PATCH "repos/$REPO/issues/comments/$id" -F body=@perf.md > /dev/null; else gh api "repos/$REPO/issues/$PR/comments" -F body=@perf.md > /dev/null; fi
 
   e2e:
     # Per-browser matrix: each browser runs in its own runner so the
