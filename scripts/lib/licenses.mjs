@@ -361,6 +361,24 @@ export function validateEntry(e) {
   if (e.match !== undefined && !(Array.isArray(e.match) && e.match.every((m) => typeof m === "string" && m.length >= 3))) problems.push("match must be an array of strings (3+ chars)");
   // verified: false means "classified from the model card only" (a notice); a missing or "false" string must not read as verified.
   if (typeof e.verified !== "boolean") problems.push("verified must be true or false");
+  // Published files (plan 6.0): each has a checksum, a size, and the model's
+  // licence and attribution, so a mirror or a cache can be verified and
+  // credited file by file.
+  if (e.files !== undefined) {
+    if (!Array.isArray(e.files) || e.files.length === 0) problems.push("files must be a non-empty array");
+    else {
+      for (const [i, f] of e.files.entries()) {
+        const at = `files[${i}]${typeof f?.path === "string" ? ` (${f.path})` : ""}`;
+        if (typeof f?.path !== "string" || !f.path || f.path.startsWith("/") || f.path.split("/").includes("..")) problems.push(`${at}: path must be a relative path inside the model`);
+        if (typeof f?.sha256 !== "string" || !/^[0-9a-f]{64}$/.test(f.sha256)) problems.push(`${at}: sha256 must be 64 lowercase hex digits`);
+        if (!Number.isInteger(f?.bytes) || f.bytes <= 0) problems.push(`${at}: bytes must be a positive integer`);
+        if (f?.license !== e.license) problems.push(`${at}: license must be the model's ("${e.license}")`);
+        if (typeof f?.attribution !== "string" || !f.attribution.trim()) problems.push(`${at}: attribution text missing`);
+      }
+      const paths = e.files.map((f) => f?.path);
+      if (new Set(paths).size !== paths.length) problems.push("files: duplicate path");
+    }
+  }
   // The licence text must not contradict the class: a licence the npm rules
   // fail (AGPL, CC-BY-NC, SSPL…) or one that says non-commercial is never
   // allowed, conditional or unknown.
@@ -400,6 +418,8 @@ export const CATALOG_PATTERNS = [
   { file: "src/ai/modelManager.ts", re: /\bbase:\s*"([^"]+)"/g },
   { file: "src/ai/modelCatalog.ts", re: /\{\s*name:\s*"([^"]+)"/g },
   { file: "src/ai/transformersEngine.ts", re: /"([A-Za-z][\w-]*\/[\w.-]+)"/g },
+  // Models Lumen converts and hosts itself (plan 6.0).
+  { file: "src/ai/convertedModels.ts", re: /\bid:\s*"([^"]+)"/g, exact: true },
   { file: "src/agents/executors/webllm.ts", re: /"([A-Za-z0-9.-]+?)-q4f(?:16|32)_1-MLC"/g },
   { file: "src/agents/executors/ollama.ts", re: /RECOMMENDED_[A-Z_]*MODEL\s*=\s*"([^"]+)"/g },
   { file: "src/agents/doctor.ts", re: /RECOMMENDED_[A-Z_]*MODEL\s*=\s*"([^"]+)"/g },

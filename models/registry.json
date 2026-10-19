@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated": "2026-10-18",
+  "updated": "2026-10-19",
   "about": "Every model or data file Lumen can download or ships, with its licence. Checked by `npm run licenses` (scripts/licenses.mjs). class: allowed = may be a default; conditional = may be offered with a licence notice in the UI, never as a default; forbidden = must not be referenced by app code; unknown = licence not established yet (warns). `verified: false` marks a classification read from the model card by us, not from the verified licence research. Deny-list entries (delivery: none) exist so the gate catches the model if someone adds it. Runtime code (webR, ruby.wasm, ONNX Runtime, tesseract core) comes from npm and is checked by the npm part of the gate; Pyodide is listed here as well because it is shipped as a data bundle.",
   "models": [
     {
@@ -643,6 +643,66 @@
       "catalog": "deny-list",
       "verified": true,
       "notes": "Hebrew TTS voices trained on SASPEECH. (The phonikud nikud/phonemizer code is a separate question: add it as its own entry before using it.)"
+    },
+    {
+      "id": "opus-mt-en-he",
+      "kind": "mt",
+      "source": "https://huggingface.co/Helsinki-NLP/opus-mt-en-he",
+      "license": "Apache-2.0",
+      "class": "allowed",
+      "commercial": "yes",
+      "attribution": "OPUS-MT en→he © Language Technology Research Group at the University of Helsinki (Helsinki-NLP, Jörg Tiedemann et al.), licensed under the Apache License 2.0. Converted to ONNX and quantised by Lumen.",
+      "size": "set from the first conversion run (q8 / q4f16)",
+      "runs": "browser",
+      "delivery": "download",
+      "catalog": "CONVERTED_MODELS (src/ai/convertedModels.ts)",
+      "verified": true,
+      "notes": "Converted to ONNX by .github/workflows/model-convert.yml (plan 6.0). Downloaded only with consent, size shown first, cached in OPFS; not downloadable until the host is chosen (15.9)."
+    },
+    {
+      "id": "opus-mt-tc-big-he-en",
+      "kind": "mt",
+      "source": "https://huggingface.co/Helsinki-NLP/opus-mt-tc-big-he-en",
+      "license": "CC-BY-4.0",
+      "class": "allowed",
+      "commercial": "yes",
+      "attribution": "OPUS-MT tc-big he→en © Language Technology Research Group at the University of Helsinki (Helsinki-NLP; Tiedemann & Thottingal, “OPUS-MT — Building open translation services for the World”, EAMT 2020), licensed under CC BY 4.0. Converted to ONNX and quantised by Lumen.",
+      "size": "set from the first conversion run (q8 / q4f16)",
+      "runs": "browser",
+      "delivery": "download",
+      "catalog": "CONVERTED_MODELS (src/ai/convertedModels.ts)",
+      "verified": true,
+      "notes": "Converted to ONNX by .github/workflows/model-convert.yml (plan 6.0). Downloaded only with consent, size shown first, cached in OPFS; not downloadable until the host is chosen (15.9). CC BY 4.0: the attribution must be shown where the model is offered."
+    },
+    {
+      "id": "dictabert-ner",
+      "kind": "other",
+      "source": "https://huggingface.co/dicta-il/dictabert-ner",
+      "license": "CC-BY-4.0",
+      "class": "allowed",
+      "commercial": "yes",
+      "attribution": "DictaBERT-NER © DICTA: The Israel Center for Text Analysis (Shmidman et al., “DictaBERT: A State-of-the-Art BERT Suite for Modern Hebrew”, 2023), licensed under CC BY 4.0. Converted to ONNX and quantised by Lumen.",
+      "size": "set from the first conversion run (q8 / q4f16)",
+      "runs": "browser",
+      "delivery": "download",
+      "catalog": "CONVERTED_MODELS (src/ai/convertedModels.ts)",
+      "verified": true,
+      "notes": "Converted to ONNX by .github/workflows/model-convert.yml (plan 6.0). Downloaded only with consent, size shown first, cached in OPFS; not downloadable until the host is chosen (15.9). CC BY 4.0: the attribution must be shown where the model is offered."
+    },
+    {
+      "id": "siglip-base-patch16-256-multilingual",
+      "kind": "vision",
+      "source": "https://huggingface.co/google/siglip-base-patch16-256-multilingual",
+      "license": "Apache-2.0",
+      "class": "allowed",
+      "commercial": "yes",
+      "attribution": "SigLIP base multilingual © Google LLC (Zhai et al., “Sigmoid Loss for Language Image Pre-Training”, 2023), licensed under the Apache License 2.0.",
+      "size": "set from the first conversion run (q8 / q4f16)",
+      "runs": "browser",
+      "delivery": "download",
+      "catalog": "CONVERTED_MODELS (src/ai/convertedModels.ts)",
+      "verified": true,
+      "notes": "Converted to ONNX by .github/workflows/model-convert.yml (plan 6.0). Downloaded only with consent, size shown first, cached in OPFS; not downloadable until the host is chosen (15.9)."
     }
   ]
 }
