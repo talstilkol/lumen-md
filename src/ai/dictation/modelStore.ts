@@ -95,7 +95,9 @@ export async function loadDictationFiles(onProgress?: Progress, signal?: AbortSi
   let vad: Uint8Array | null = null;
   try {
     vad = await fetchFile({ ...VAD_FILE, bytes: 0 }, cache, tick, signal);
-  } catch {
+  } catch (e) {
+    // The user cancelled: stop here. Any other failure: segment on energy instead.
+    if (signal?.aborted || (e as Error)?.name === "AbortError") throw e;
     vad = null;
   }
   return { encoder, decoder, joiner, tokens: new TextDecoder().decode(tokens), vad };

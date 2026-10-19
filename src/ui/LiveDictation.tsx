@@ -57,12 +57,14 @@ function Panel({ initial, onBrowser, onClose }: { initial: Phase; onBrowser: () 
   };
 
   const start = async () => {
-    abort.current = new AbortController();
+    const ctl = new AbortController();
+    abort.current = ctl;
     try {
       setPhase({ kind: "downloading", percent: 0 });
-      const files = await loadDictationFiles((loaded, total) => setPhase({ kind: "downloading", percent: Math.floor((loaded / total) * 100) }), abort.current.signal);
+      const files = await loadDictationFiles((loaded, total) => setPhase({ kind: "downloading", percent: Math.floor((loaded / total) * 100) }), ctl.signal);
+      if (ctl.signal.aborted) return;
       setPhase({ kind: "loading" });
-      session.current = await startDictationSession(files, {
+      const started = await startDictationSession(files, {
         onReady: (info) => {
           log.info(`dictation ready: vad=${info.vad} load=${info.loadMs}ms`);
           setPhase({ kind: "listening", speaking: false, interim: "" });
@@ -84,9 +86,15 @@ function Panel({ initial, onBrowser, onClose }: { initial: Phase; onBrowser: () 
           void stop();
         },
       });
+      // Cancelled or closed while the model loaded: never leave a hidden session holding the microphone.
+      if (ctl.signal.aborted) {
+        await started.stop();
+        return;
+      }
+      session.current = started;
       setPhase((p) => (p.kind === "loading" ? { kind: "listening", speaking: false, interim: "" } : p));
     } catch (e) {
-      if ((e as Error).name !== "AbortError") showAiToast(t("dictation.error", { error: (e as Error).message }), "error");
+      if ((e as Error).name !== "AbortError" && !ctl.signal.aborted) showAiToast(t("dictation.error", { error: (e as Error).message }), "error");
       await stop();
     }
   };
@@ -127,7 +135,12 @@ function Panel({ initial, onBrowser, onClose }: { initial: Phase; onBrowser: () 
           <div>{button(t("dictation.download.cancel"), () => void stop())}</div>
         </>
       )}
-      {phase.kind === "loading" && <span>{t("dictation.loading")}</span>}
+      {phase.kind === "loading" && (
+        <>
+          <span>{t("dictation.loading")}</span>
+          <div>{button(t("dictation.download.cancel"), () => void stop())}</div>
+        </>
+      )}
       {phase.kind === "listening" && (
         <>
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
