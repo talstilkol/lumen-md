@@ -138,4 +138,23 @@ describe("review fixes (PR #250)", () => {
     expect(useAppStore.getState().openTabs[0].content).toBe("Off to [[Tel Aviv]] soon.\n");
     useAppStore.setState({ openTabs: [] });
   });
+
+  it("a block id: not one in code, and just the list item it marks", () => {
+    const md = "Intro.\n\n```\nexample ^b1\n```\n\nUses `x ^b1` inline.\n\nThe real one. ^b1\n\n- first\n- second\n- third ^li\n- fourth\n";
+    expect(previewMarkdown(md, "^b1")).toBe("The real one. ^b1");
+    expect(previewMarkdown(md, "^li")).toBe("- third ^li");
+  });
+
+  it("a note saved since the last hover shows its new text", async () => {
+    const { notifyWorkspaceChanged } = await import("../storage/workspaceEvents");
+    await writeWorkspaceFile("Fresh.md", "# Old\n");
+    await ensureIndex(true);
+    const { container: a } = render((await renderPreview("Fresh"))!);
+    expect(a.textContent).toContain("Old");
+    cleanup();
+    await writeWorkspaceFile("Fresh.md", "# New\n");
+    notifyWorkspaceChanged({ kind: "content", paths: ["Fresh.md"] });
+    const { container: b } = render((await renderPreview("Fresh"))!);
+    expect(b.textContent).toContain("New");
+  });
 });
