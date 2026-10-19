@@ -60,6 +60,8 @@ jobs:
       - name: Model
         run: bash scripts/asr/fetch-model.sh "$LUMEN_ASR_MODEL_DIR"
       - name: Model revisions and the ivrit.ai ONNX exports (names, licences, sizes)
+        # Information only (pins and sizes in src/ai/dictation/models.ts, models/registry.json).
+        continue-on-error: true
         run: |
           curl -fsS "https://huggingface.co/api/models/ivrit-ai/zipformer2-66m-streaming-he" | jq -r '"zipformer2 sha=\(.sha) license=\(.cardData.license // "?")"' | sed 's/^/::notice title=asr hf::/'
           curl -fsS "https://huggingface.co/api/models?author=ivrit-ai&limit=200" | jq -r '[.[] | select(.id|test("onnx|turbo|ggml|ct2|zipformer";"i")) | .id] | join(" ")' | sed 's/^/::notice title=asr hf ivrit-ai::/'
