@@ -7,8 +7,9 @@
  *   multiples of 10 ms, the signal reflected at its edges), no dither, DC
  *   removed, pre-emphasis 0.97, Povey window, 512-point FFT, power spectrum,
  *   80 triangular mel bins over 20 Hz – 7600 Hz, natural log floored at
- *   FLT_EPSILON. Samples in [-1, 1] are scaled by 32768 first (sherpa's
- *   `normalize_samples`).
+ *   FLT_EPSILON. Samples stay in [-1, 1] (sherpa's `normalize_samples =
+ *   true`; icefall trains on lhotse features of unscaled audio) — scaling them
+ *   by 32768 shifts every bin by 20.8 and the model mostly hears silence.
  *
  * Online: `accept()` audio as it arrives, `frames()` returns every frame
  * whose window is complete; after `finish()` the last frames (whose window
@@ -188,7 +189,7 @@ export class OnlineFbank {
     const start = firstSample(m);
     let mean = 0;
     for (let i = 0; i < FRAME_LENGTH; i++) {
-      x[i] = this.sample(start + i) * 32768;
+      x[i] = this.sample(start + i);
       mean += x[i];
     }
     mean /= FRAME_LENGTH;
