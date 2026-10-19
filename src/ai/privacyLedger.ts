@@ -255,6 +255,18 @@ export function recordWorkerRequest(url: string, method = "GET"): LedgerEntry | 
   return entries.find((x) => x.id === id) ?? null;
 }
 
+/**
+ * Record a cloud service the browser itself talks to, which no fetch shows
+ * (the Web Speech API streams the microphone to the browser's vendor).
+ * Under local-only it is recorded as blocked and the caller must not start it.
+ */
+export function recordBrowserService(host: string, reason: string): LedgerEntry {
+  const policy = getAiPolicy();
+  const decision = blockedByPolicy("cloud-ai", policy) ? "blocked" : "allowed";
+  const id = record({ host, category: "cloud-ai", reason, method: "STREAM", bytesOut: 0, bytesIn: null, policy, decision });
+  return entries.find((x) => x.id === id)!;
+}
+
 /** Install once at startup. `blocked` is called for every blocked request. */
 export function installPrivacyLedger(blocked?: (entry: LedgerEntry) => void): void {
   if (installed || typeof window === "undefined" || typeof window.fetch !== "function") return;
