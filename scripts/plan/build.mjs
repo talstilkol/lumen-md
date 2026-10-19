@@ -12,10 +12,12 @@
  *   npm run plan:check       exit 1 when either differs from plan.json (CI)
  *   npm run plan -- --hours  also print actual hours per task branch (git)
  *
- * The scheduler is a port of the earlier Python generator (plan5.py /
- * gen5.py): 4 agent lanes plus the owner's lane, conflict groups that never
+ * The scheduler started as a port of the earlier Python generator (plan5.py
+ * / gen5.py): 4 agent lanes plus the owner's lane, conflict groups that never
  * run at once, P0 closure over dependencies, and the cut-line check that
- * nothing outside P2 waits on a P2 task. Times are local wall-clock (Israel)
+ * nothing outside P2 waits on a P2 task. Since the port, remaining work starts
+ * at the plan's update (never in the past) and non-P0 work backfills idle
+ * gaps in its lane instead of queueing behind the P0 reservations. Times are local wall-clock (Israel)
  * without a zone, computed in UTC so the machine's zone never matters.
  */
 import { readFileSync, writeFileSync, existsSync } from "node:fs";
@@ -61,7 +63,9 @@ const stretch = (start, t, factor) => start + Math.round((t - start) * 1000 * fa
  */
 export function buildModel(plan) {
   const cfg = plan.schedule;
-  const START = parseTime(plan.start);
+  // Remaining work starts at the update, never in the past (the plan's own
+  // start stays in plan.json as its history).
+  const START = Math.max(parseTime(plan.start), parseTime(plan.updated));
   const lanes = plan.lanes;
   const agent = [];
   const phases = plan.phases.map((p, pi) => ({
@@ -127,6 +131,17 @@ export function buildModel(plan) {
   for (const t of agent.filter((t) => t.depRule === "all")) t.dep = agent.filter((x) => x.id !== t.id).map((x) => x.id);
   checkDeps(all);
 
+  // A dependency cycle (done tasks included: their dependencies are data too).
+  const state = new Map();
+  const visit = (t, path) => {
+    if (state.get(t.id) === "done") return;
+    if (state.get(t.id) === "open") throw new Error(`plan: dependency cycle ${[...path, t.id].join(" → ")}`);
+    state.set(t.id, "open");
+    for (const d of t.dep) visit(BYID.get(d), [...path, t.id]);
+    state.set(t.id, "done");
+  };
+  for (const t of all) visit(t, []);
+
   // Cut line: if the release slips, every P2 moves out; nothing else may wait on one.
   const cut = [];
   for (const t of all) {
@@ -158,30 +173,53 @@ export function buildModel(plan) {
       cur = at(cur + DAY, W0);
     }
   };
-  const laneFree = new Map([...Object.keys(lanes), "T"].map((k) => [k, START]));
-  const groupFree = new Map();
-  const schedule = (batch) => {
-    const pending = [...batch];
+  // Busy intervals per lane and per conflict group.
+  const busy = new Map();
+  const intervals = (key) => busy.get(key) ?? [];
+  const reserve = (key, a, b) => busy.set(key, [...intervals(key), [a, b]].sort((x, y) => x[0] - y[0]));
+  const lastEnd = (keys) => Math.max(START, ...keys.flatMap((k) => intervals(k).map((iv) => iv[1])));
+  /** The earliest start ≥ ready where `m` minutes fit between the intervals of `keys`. */
+  const firstGap = (keys, ready, m) => {
+    const ivs = keys.flatMap(intervals).sort((x, y) => x[0] - y[0]);
+    let cur = ready;
+    for (const [a, b] of ivs) {
+      if (cur + m * MIN <= a) return cur;
+      if (b > cur) cur = b;
+    }
+    return cur;
+  };
+  // Done tasks take no time: they end at the update.
+  for (const t of all) if (t.done) [t.start, t.end] = [START, START];
+  /**
+   * The P0 batch reserves its slots in order, each after the last work of
+   * its lane and groups. The rest backfills: a task takes the earliest gap
+   * in its lane and groups that it fits in, so a lane waiting on another
+   * lane's P0 work is not left idle, and no P0 slot moves.
+   */
+  const schedule = (batch, backfill) => {
+    const pending = batch.filter((t) => !t.done);
     while (pending.length) {
       let best = null;
       for (const t of pending) {
         if (t.dep.some((d) => BYID.get(d).end === undefined)) continue;
-        let st = Math.max(laneFree.get(t.lane), ...t.dep.map((d) => BYID.get(d).end), ...t.g.map((g) => groupFree.get(g) ?? START));
-        if (t.lane === "T") st = ownerFit(st, t.m)[0];
+        const keys = [`lane:${t.lane}`, ...t.g.map((g) => `group:${g}`)];
+        const ready = Math.max(START, ...t.dep.map((d) => BYID.get(d).end));
+        let st;
+        if (t.lane === "T") st = ownerFit(Math.max(ready, lastEnd(keys)), t.m)[0];
+        else st = backfill ? firstGap(keys, ready, t.m) : Math.max(ready, lastEnd(keys));
         const key = [st, PRIO.get(t.id)];
-        if (!best || key[0] < best.key[0] || (key[0] === best.key[0] && key[1] < best.key[1])) best = { key, t, st };
+        if (!best || key[0] < best.key[0] || (key[0] === best.key[0] && key[1] < best.key[1])) best = { key, t, st, keys };
       }
       if (!best) throw new Error(`plan: dependency cycle among ${pending.map((t) => t.id).join(", ")}`);
-      const { t, st } = best;
+      const { t, st, keys } = best;
       [t.start, t.end] = t.lane === "T" ? ownerFit(st, t.m) : [st, st + t.m * MIN];
-      laneFree.set(t.lane, t.end);
-      for (const g of t.g) groupFree.set(g, Math.max(groupFree.get(g) ?? START, t.end));
+      for (const k of keys) reserve(k, t.start, t.end);
       pending.splice(pending.indexOf(t), 1);
     }
   };
   const FIRST = all.filter((t) => t.eff === "P0" || cfg.ownerInputsFirst.includes(t.id));
-  schedule(FIRST);
-  schedule(all.filter((t) => !FIRST.includes(t)));
+  schedule(FIRST, false);
+  schedule(all.filter((t) => !FIRST.includes(t)), true);
 
   const END = Math.max(...agent.map((t) => t.end));
   const P0_END = BYID.get(cfg.releaseTask).end;

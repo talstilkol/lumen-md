@@ -124,6 +124,31 @@ describe("plan build", () => {
     expect(board).toContain("`curl -sI <preview>/ \\| grep -i content-security`");
   });
 
+  it("the schedule: no overlap in a lane or a conflict group, dependencies first, nothing in the past", () => {
+    const M = buildModel(plan());
+    const work = M.all.filter((t: { done?: boolean }) => !t.done);
+    for (const t of work) {
+      expect(t.start, t.id).toBeGreaterThanOrEqual(M.START);
+      for (const d of t.dep) expect(t.start, `${t.id} after ${d}`).toBeGreaterThanOrEqual(M.BYID.get(d).end);
+    }
+    const keys = (t: { lane: string; g: string[] }) => [`lane:${t.lane}`, ...t.g.map((g) => `group:${g}`)];
+    for (const a of work)
+      for (const b of work) {
+        if (a === b || !keys(a).some((k) => keys(b).includes(k))) continue;
+        expect(a.end <= b.start || b.end <= a.start, `${a.id} and ${b.id} overlap`).toBe(true);
+      }
+    // The plan's start is history: remaining work begins at the update.
+    expect(M.START).toBe(parseTime(plan().updated));
+  });
+
+  it("non-P0 work backfills a lane that waits on P0 work elsewhere", () => {
+    const M = buildModel(plan());
+    const release = M.BYID.get("13.5");
+    const lane = M.agent.filter((t: { lane: string; done?: boolean }) => t.lane === release.lane && !t.done);
+    const before = lane.filter((t: { eff: string; end: number }) => t.eff !== "P0" && t.end <= release.start);
+    expect(before.length).toBeGreaterThan(0);
+  });
+
   it("P0 spreads to what P0 work waits on, and the release waits on every P0 item", () => {
     const M = buildModel(plan());
     const release = M.BYID.get("13.5");
