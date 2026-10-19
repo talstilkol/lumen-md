@@ -245,22 +245,31 @@ export default defineConfig({
         launch_handler: { client_mode: "navigate-existing" },
       },
       workbox: {
-        // Only precache small core files at install time. Heavy on-demand
-        // vendor chunks (Mermaid, tldraw, ECharts, Graphviz, CodeMirror,
-        // Milkdown) are fetched lazily by the runtime cache when first used.
-        // This keeps the initial SW install under ~2 MB instead of ~12 MB.
-        maximumFileSizeToCacheInBytes: 1024 * 1024,
+        // Precache what offline use needs from the first visit (plan 8.5):
+        // the app's chunks, the self-hosted fonts (Hebrew included, B8),
+        // Shiki's core and its two themes, and the small workers (search,
+        // Hebrew spelling, Graphviz, Lua, Ruby glue, PDF.js). Heavy
+        // on-demand vendor chunks (Mermaid, tldraw, ECharts, CodeMirror,
+        // Milkdown…) are cached by the runtime cache when first used.
+        // The precache is ~16 MB; `npm run budget` prints it.
+        // 1.4 MB: PDF.js's worker (pdf.worker.min.mjs, ~1.3 MB) is the
+        // largest file that must be in it; everything bigger is either in
+        // globIgnores below or a vendor chunk the runtime cache takes.
+        maximumFileSizeToCacheInBytes: 1.4 * 1024 * 1024,
         // One self-contained sw.js. Production serves
         // `require-trusted-types-for 'script'` (public/_headers), which also
         // applies to the service worker: the default split build's
         // importScripts("workbox-*.js") is blocked there, leaving an
         // "activated" worker with no precache and no routes (no offline).
         inlineWorkboxRuntime: true,
-        globPatterns: ["**/*.{js,css,html,svg,wasm,woff2}"],
+        globPatterns: ["**/*.{js,mjs,css,html,svg,wasm,woff2}"],
         // Exclude heavy vendor chunks that are loaded on-demand via dynamic
         // import — these will be cached at runtime when first fetched.
         globIgnores: [
-          "**/vendor-shiki-*.js",
+          // Shiki's core (vendor-shiki, with its wasm engine) IS precached:
+          // code highlighting works offline from the first visit. Its ~220
+          // rarer grammars stay out (14 MB); the common ones and the two
+          // themes in use are emitted outside shiki-langs/ (see output).
           "**/shiki-langs/**",
           "**/vendor-mermaid-*.js",
           "**/vendor-tldraw-*.js",
@@ -456,6 +465,8 @@ export default defineConfig({
         // service-worker runtime cache when the user opens a code block.
         chunkFileNames(chunkInfo) {
           const id = chunkInfo.facadeModuleId ?? "";
+          // The two themes the highlighter always loads stay precached (8.5).
+          if (/@shikijs\/themes\/dist\/github-(dark|light)-default\./.test(id)) return "assets/[name]-[hash].js";
           if (id.includes("@shikijs/langs/") || id.includes("@shikijs/themes/")) {
             return "assets/shiki-langs/[name]-[hash].js";
           }
