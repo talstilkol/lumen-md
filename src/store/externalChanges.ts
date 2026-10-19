@@ -34,6 +34,75 @@ import { movedPath } from "../storage/fileOps";
 
 /** What Lumen last saw in each open note's file (read or written). */
 const known = new Map<string, string>();
+
+/**
+ * A hash of what Lumen last saw on disk per note, kept across restarts
+ * (localStorage): a note restored with unsaved edits, or changed by another
+ * program while Lumen was closed, is checked against it instead of being
+ * saved over blindly.
+ */
+const HASH_KEY = "lumen-vault-known";
+let hashes: Record<string, string> | null = null;
+let persistTimer: ReturnType<typeof setTimeout> | null = null;
+
+/** FNV-1a (32-bit) — change detection, not security. */
+export function textHash(s: string): string {
+  let h = 0x811c9dc5;
+  for (let i = 0; i < s.length; i++) {
+    h ^= s.charCodeAt(i);
+    h = Math.imul(h, 0x01000193) >>> 0;
+  }
+  return h.toString(16);
+}
+
+function diskHashes(): Record<string, string> {
+  if (hashes) return hashes;
+  try {
+    const raw = localStorage.getItem(HASH_KEY);
+    hashes = raw ? (JSON.parse(raw) as Record<string, string>) : {};
+  } catch {
+    hashes = {};
+  }
+  return hashes;
+}
+
+function persistHashes(): void {
+  if (persistTimer) return;
+  persistTimer = setTimeout(() => {
+    persistTimer = null;
+    try {
+      localStorage.setItem(HASH_KEY, JSON.stringify(diskHashes()));
+    } catch {
+      /* storage full / blocked: the in-memory base still works this session */
+    }
+  }, 300);
+}
+
+/** `content` is what the file at `path` holds now. */
+function noteDisk(path: string, content: string): void {
+  known.set(path, content);
+  diskHashes()[path] = textHash(content);
+  persistHashes();
+}
+
+/** Forget (or move) what is known about `prefix` and everything under it. */
+function forgetDisk(prefix: string, movedTo?: string): void {
+  const h = diskHashes();
+  const under = (p: string) => p === prefix || p.startsWith(prefix + "/");
+  for (const p of [...known.keys()]) {
+    if (!under(p)) continue;
+    const v = known.get(p)!;
+    known.delete(p);
+    if (movedTo) known.set(movedTo + p.slice(prefix.length), v);
+  }
+  for (const p of Object.keys(h)) {
+    if (!under(p)) continue;
+    const v = h[p];
+    delete h[p];
+    if (movedTo) h[movedTo + p.slice(prefix.length)] = v;
+  }
+  persistHashes();
+}
 /** Notes whose saving waits for a conflict to be resolved. */
 const conflicted = new Set<string>();
 
@@ -73,6 +142,12 @@ export function __setConflictUi(r: ConflictResolver, notify?: typeof toast): voi
 export function __resetExternalChanges(): void {
   known.clear();
   conflicted.clear();
+  hashes = {};
+  try {
+    localStorage.removeItem(HASH_KEY);
+  } catch {
+    /* */
+  }
 }
 
 /** The open notes (the active one and every tab) bound to a vault path. */
@@ -124,7 +199,7 @@ async function conflict(path: string, local: string, remote: string): Promise<vo
     // What is in the editor now (the user may have kept typing).
     const current = openPaths().get(path)?.content ?? local;
     if (choice?.kind === "remote") {
-      known.set(path, remote);
+      noteDisk(path, remote);
       showFromDisk(path, remote);
       await deleteWorkspaceFile(copy).catch(() => undefined); // the file holds it again
       notifyWorkspaceChanged({ kind: "structure", paths: [copy] });
@@ -132,7 +207,7 @@ async function conflict(path: string, local: string, remote: string): Promise<vo
     }
     const text = choice?.kind === "merged" ? choice.content : current;
     await writeWorkspaceFile(path, text);
-    known.set(path, text);
+    noteDisk(path, text);
     setLocal(path, text, false);
     notifyWorkspaceChanged({ kind: "content", paths: [path] });
     toast(t("external.conflict.keptCopy", { path: copy }));
@@ -152,16 +227,55 @@ async function conflict(path: string, local: string, remote: string): Promise<vo
 export async function saveOpenNote(path: string, content: string): Promise<boolean> {
   if (conflicted.has(path)) return false;
   const base = known.get(path);
-  if (base !== undefined && base !== content) {
-    const disk = (await workspaceHasFile(path)) ? await readWorkspaceFile(path).catch(() => null) : null;
-    if (disk !== null && disk !== base && disk !== content) {
-      void conflict(path, content, disk);
+  const stored = diskHashes()[path];
+  if ((base !== undefined && base !== content) || (base === undefined && stored !== undefined)) {
+    if (!(await workspaceHasFile(path))) {
+      // The file Lumen knew is gone: deleted or renamed outside Lumen. The
+      // watcher's event decides (detach / follow) — never recreate it here.
       return false;
+    }
+    const disk = await readWorkspaceFile(path).catch(() => null);
+    if (disk !== null && disk !== content) {
+      const changed = base !== undefined ? disk !== base : textHash(disk) !== stored;
+      if (changed) {
+        void conflict(path, content, disk);
+        return false;
+      }
     }
   }
   await writeWorkspaceFile(path, content);
-  known.set(path, content);
+  noteDisk(path, content);
   return true;
+}
+
+/**
+ * Start-up: compare the open notes (restored from the last session) with
+ * what is on disk now. A note changed outside Lumen while it was closed is
+ * reloaded, or becomes a conflict if it has unsaved edits; one deleted is
+ * detached.
+ */
+export async function reconcileOpenNotes(): Promise<void> {
+  for (const [path, note] of openPaths()) {
+    const stored = diskHashes()[path];
+    if (!(await workspaceHasFile(path))) {
+      if (stored !== undefined) await onExternal({ type: "delete", path, origin: "external" });
+      continue;
+    }
+    const disk = await readWorkspaceFile(path).catch(() => null);
+    if (disk === null) continue;
+    if (stored === undefined) {
+      // Nothing recorded yet (first run): a clean note shows the disk.
+      if (!note.dirty && disk !== note.content) showFromDisk(path, disk);
+      if (!note.dirty || disk === note.content) noteDisk(path, disk);
+      continue;
+    }
+    if (textHash(disk) !== stored) {
+      known.delete(path);
+      await onExternal({ type: "write", path, origin: "external" });
+    } else {
+      noteDisk(path, disk);
+    }
+  }
 }
 
 async function onExternal(e: VaultEvent): Promise<void> {
@@ -169,7 +283,7 @@ async function onExternal(e: VaultEvent): Promise<void> {
   if (e.type === "write") {
     const tab = open.get(e.path);
     if (!tab) {
-      known.delete(e.path);
+      forgetDisk(e.path);
       return;
     }
     const disk = await readWorkspaceFile(e.path).catch(() => null);
@@ -177,12 +291,12 @@ async function onExternal(e: VaultEvent): Promise<void> {
     flushPendingEdits();
     const now = openPaths().get(e.path) ?? tab;
     if (disk === now.content) {
-      known.set(e.path, disk);
+      noteDisk(e.path, disk);
       if (now.dirty) showFromDisk(e.path, disk);
       return;
     }
     if (!now.dirty) {
-      known.set(e.path, disk);
+      noteDisk(e.path, disk);
       showFromDisk(e.path, disk);
       toast(t("external.reloaded", { path: e.path }));
       return;
@@ -193,13 +307,7 @@ async function onExternal(e: VaultEvent): Promise<void> {
   if (e.type === "rename" && e.from) {
     const from = e.from;
     const affected = [...open.keys()].some((p) => movedPath(p, from, e.path) !== null);
-    for (const [p, v] of [...known]) {
-      const to = movedPath(p, from, e.path);
-      if (to) {
-        known.delete(p);
-        known.set(to, v);
-      }
-    }
+    forgetDisk(from, e.path);
     if (affected) {
       syncOpenDocsAfterMove(from, e.path, (c) => c);
       toast(t("external.renamed", { from, to: e.path }));
@@ -208,7 +316,7 @@ async function onExternal(e: VaultEvent): Promise<void> {
   }
   if (e.type === "delete") {
     const gone = [...open.keys()].filter((p) => p === e.path || p.startsWith(e.path + "/"));
-    for (const p of [...known.keys()]) if (p === e.path || p.startsWith(e.path + "/")) known.delete(p);
+    forgetDisk(e.path);
     if (!gone.length) return;
     // Keep the text open and unsaved, not tied to the deleted path.
     flushPendingEdits();
@@ -237,9 +345,15 @@ export function startExternalChanges(): () => void {
   remember();
   const unsub = useAppStore.subscribe(remember);
   const off = watchVault((e) => {
-    if (e.origin !== "external") return;
+    if (e.origin !== "external") {
+      // Lumen's own deletes and renames: what was known moves with them.
+      if (e.type === "delete") forgetDisk(e.path);
+      else if (e.type === "rename" && e.from) forgetDisk(e.from, e.path);
+      return;
+    }
     void onExternal(e).catch((err) => log.warn("external change failed", err));
   });
+  void reconcileOpenNotes().catch((err) => log.warn("checking open notes against the disk failed", err));
   started = () => {
     unsub();
     off();

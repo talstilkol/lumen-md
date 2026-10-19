@@ -4,7 +4,8 @@
  * file before anything is asked, and saving never overwrites it.
  */
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { createMemoryBackend, setVaultBackend, type VaultBackend } from "../storage/vault";
+import { createDirectoryHandleBackend, createMemoryBackend, setVaultBackend, type VaultBackend } from "../storage/vault";
+import { FakeDir } from "./helpers/fakeOpfs";
 import { useAppStore } from "../store/useStore";
 import {
   __resetExternalChanges,
@@ -80,6 +81,69 @@ describe("a note without unsaved edits", () => {
     await vi.waitFor(() => expect(doc().workspaceName).toBeNull());
     expect(doc()).toMatchObject({ content: "base", dirty: true });
     expect(await vault.stat("note.md")).toBeNull();
+  });
+});
+
+describe("changes while Lumen was closed", () => {
+  it("a note restored with unsaved edits is not saved over a change made while Lumen was closed", async () => {
+    stop();
+    __resetExternalChanges();
+    // Last session: Lumen saw "base" on disk (hash persisted), the tab kept unsaved text.
+    stop = startExternalChanges();
+    await vi.waitFor(() => expect(localStorage.getItem("lumen-vault-known") ?? "").toContain("note.md"));
+    stop();
+    // Lumen closed; another program edits; Lumen restarts with the dirty tab.
+    await vault.write("note.md", "edited while Lumen was closed");
+    open("note.md", "unsaved from last session", true);
+    stop = startExternalChanges();
+    await vi.waitFor(() => expect(resolver).toHaveBeenCalledTimes(1));
+    expect(resolver.mock.calls[0][0]).toMatchObject({ local: "unsaved from last session", remote: "edited while Lumen was closed" });
+    await settle();
+    const files = (await listWorkspace()).map((f) => f.path);
+    expect(files).toHaveLength(2);
+    const copy = files.find((p) => p !== "note.md")!;
+    expect(await readWorkspaceFile(copy)).toBe("edited while Lumen was closed");
+  });
+
+  it("a clean restored note shows what is on disk now; a deleted one is detached", async () => {
+    stop();
+    await writeWorkspaceFile("gone.md", "g");
+    useAppStore.setState({
+      doc: { name: "note.md", content: "base", workspaceName: "note.md", dirty: false },
+      openTabs: [
+        { id: "note.md", name: "note.md", content: "base", workspaceName: "note.md", dirty: false },
+        { id: "gone.md", name: "gone.md", content: "g", workspaceName: "gone.md", dirty: false },
+      ],
+    } as never);
+    stop = startExternalChanges();
+    await vi.waitFor(() => expect(localStorage.getItem("lumen-vault-known") ?? "").toContain("gone.md"));
+    stop();
+    await vault.write("note.md", "newer on disk");
+    await vault.remove("gone.md");
+    stop = startExternalChanges();
+    await vi.waitFor(() => expect(doc().content).toBe("newer on disk"));
+    await vi.waitFor(() => expect(useAppStore.getState().openTabs.find((t) => t.name === "gone.md")?.workspaceName).toBeNull());
+  });
+
+  it("a note whose file vanished (deleted or renamed outside, not yet reported) is not recreated by a save", async () => {
+    // A folder vault whose file another program removes (no Lumen event).
+    stop();
+    const dir = new FakeDir("V");
+    const folder = createDirectoryHandleBackend({ id: "folder", root: async () => dir as unknown as FileSystemDirectoryHandle });
+    setVaultBackend(folder);
+    await writeWorkspaceFile("note.md", "base");
+    open("note.md", "base");
+    stop = startExternalChanges();
+    await vi.waitFor(() => expect(localStorage.getItem("lumen-vault-known") ?? "").toContain("note.md"));
+    useAppStore.getState().setContent("mine");
+    await dir.removeEntry("note.md");
+    expect(await saveOpenNote("note.md", "mine")).toBe(false);
+    expect(await folder.stat("note.md")).toBeNull();
+    // Lumen's own delete is different: what was known goes with it.
+    open("other.md", "o", true);
+    expect(await saveOpenNote("other.md", "o")).toBe(true);
+    await folder.remove("other.md");
+    expect(await saveOpenNote("other.md", "o, typed on")).toBe(true);
   });
 });
 

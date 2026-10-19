@@ -36,6 +36,14 @@ describe("diffSnapshots", () => {
     ]);
   });
 
+  it("two vanished files with the same size and mtime and one new file are deletes and a write", () => {
+    expect(diffSnapshots(snap({ "a.md": [5, 100], "b.md": [5, 100] }), snap({ "c.md": [5, 100] }))).toEqual([
+      { type: "delete", path: "a.md" },
+      { type: "delete", path: "b.md" },
+      { type: "write", path: "c.md" },
+    ]);
+  });
+
   it("nothing changed, nothing reported", () => {
     expect(diffSnapshots(snap({ "a.md": [1, 1] }), snap({ "a.md": [1, 1] }))).toEqual([]);
   });
@@ -93,6 +101,26 @@ describe("the folder watcher", () => {
         { type: "delete", path: "b.md" },
       ]),
     );
+  });
+});
+
+describe("own writes and external writes to the same path", () => {
+  it("an edit by another program right after Lumen's own write is still reported", async () => {
+    const dir = new FakeDir("V");
+    const backend = createDirectoryHandleBackend({ id: "folder", root: async () => dir as unknown as FileSystemDirectoryHandle });
+    await backend.write("a.md", "one");
+    const got: VaultEvent[] = [];
+    backend.watch((e) => got.push(e));
+    const stop = watchExternalChanges(backend, { intervalMs: 300 });
+    try {
+      await new Promise((r) => setTimeout(r, 350)); // baseline
+      await backend.write("a.md", "two, by Lumen");
+      await new Promise((r) => setTimeout(r, 30));
+      await writeOutside(dir, "a.md", "three — another program, same poll window");
+      await until(() => got.some((e) => e.origin === "external" && e.path === "a.md"), 2000);
+    } finally {
+      stop();
+    }
   });
 });
 

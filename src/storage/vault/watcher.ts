@@ -67,11 +67,18 @@ export function diffSnapshots(prev: Snapshot, next: Snapshot): Omit<VaultEvent, 
     const k = key(next.get(p)!);
     addedByKey.set(k, [...(addedByKey.get(k) ?? []), p]);
   }
+  const goneByKey = new Map<string, number>();
+  for (const p of gone) {
+    const k = key(prev.get(p)!);
+    goneByKey.set(k, (goneByKey.get(k) ?? 0) + 1);
+  }
   const pairedAdded = new Set<string>();
   for (const from of gone) {
-    const candidates = addedByKey.get(key(prev.get(from)!));
-    // Only an unambiguous pair is a rename.
-    if (candidates && candidates.length === 1 && !pairedAdded.has(candidates[0]) && prev.get(from)!.mtime > 0) {
+    const k = key(prev.get(from)!);
+    const candidates = addedByKey.get(k);
+    // Only an unambiguous pair — one vanished and one new file with that
+    // size and mtime — is a rename.
+    if (candidates && candidates.length === 1 && goneByKey.get(k) === 1 && prev.get(from)!.mtime > 0) {
       pairedAdded.add(candidates[0]);
       events.push({ type: "rename", from, path: candidates[0] });
     } else {
@@ -106,18 +113,31 @@ export function watchExternalChanges(backend: VaultBackend, opts: WatchOptions =
   let stopped = false;
   /** Own deletes / renames / mkdirs since the last comparison (path prefixes). */
   const ownPrefixes = new Set<string>();
+  /**
+   * Own writes whose resulting stat is still being read: a comparison
+   * leaves these paths for the next round instead of guessing. Once the stat
+   * is known it is the baseline, so only a later, different stat (another
+   * program writing the same path) is reported.
+   */
+  const pendingOwn = new Map<string, number>();
 
   const offOwn = backend.watch((e) => {
     if (e.origin !== "self" || !baseline) return;
     if (e.type === "write") {
       // The new baseline for this file is what Lumen just wrote.
+      const path = e.path;
+      pendingOwn.set(path, (pendingOwn.get(path) ?? 0) + 1);
       void backend
-        .stat(e.path)
+        .stat(path)
         .then((st) => {
-          if (st && st.kind === "file" && baseline) baseline.set(e.path, { size: st.size, mtime: st.mtime });
+          if (st && st.kind === "file" && baseline) baseline.set(path, { size: st.size, mtime: st.mtime });
         })
-        .catch(() => undefined);
-      ownPrefixes.add(e.path);
+        .catch(() => undefined)
+        .finally(() => {
+          const n = (pendingOwn.get(path) ?? 1) - 1;
+          if (n > 0) pendingOwn.set(path, n);
+          else pendingOwn.delete(path);
+        });
     } else {
       ownPrefixes.add(e.path);
       if (e.from) ownPrefixes.add(e.from);
@@ -135,10 +155,17 @@ export function watchExternalChanges(backend: VaultBackend, opts: WatchOptions =
       const next = await take();
       if (stopped) return;
       if (baseline) {
+        const prev = baseline;
         const own = new Set(ownPrefixes);
         ownPrefixes.clear();
         const ownMatch = (p: string) => [...own].some((o) => p === o || p.startsWith(o + "/"));
-        for (const ev of diffSnapshots(baseline, next)) {
+        // Paths with an own write in flight are compared next round.
+        for (const p of pendingOwn.keys()) {
+          const old = prev.get(p);
+          if (old) next.set(p, old);
+          else next.delete(p);
+        }
+        for (const ev of diffSnapshots(prev, next)) {
           if (ownMatch(ev.path) || (ev.from && ownMatch(ev.from))) continue;
           backend.notifyExternal(ev);
         }
