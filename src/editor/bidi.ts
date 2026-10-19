@@ -75,18 +75,37 @@ function ltrRanges(state: EditorState, from: number, to: number): Array<[number,
 
 /**
  * The note's own direction, for lines without a strong character: the
- * first line outside code and the frontmatter that has one. LTR otherwise.
+ * first line outside fenced code and the frontmatter that has one, over
+ * the whole note (fences are tracked textually: the syntax tree of a long
+ * note may not be parsed that far yet). LTR otherwise. Cached per document.
  */
-function noteDirection(state: EditorState, fm: number): "ltr" | "rtl" {
+const noteDirCache = new WeakMap<object, "ltr" | "rtl">();
+export function noteDirection(state: EditorState, fm: number): "ltr" | "rtl" {
   const doc = state.doc;
-  const code = ltrRanges(state, 0, Math.min(doc.length, 20_000));
-  for (let n = 1; n <= Math.min(doc.lines, 400); n++) {
+  const cached = noteDirCache.get(doc);
+  if (cached) return cached;
+  let fence: string | null = null;
+  let found: "ltr" | "rtl" = "ltr";
+  for (let n = 1; n <= doc.lines; n++) {
     const line = doc.line(n);
-    if (line.from < fm || code.some(([a, b]) => line.from >= a && line.from < b)) continue;
+    if (line.from < fm) continue;
+    const open = /^\s{0,3}(`{3,}|~{3,})/.exec(line.text);
+    if (fence) {
+      if (open && open[1][0] === fence[0] && open[1].length >= fence.length && !line.text.trim().slice(open[1].length).length) fence = null;
+      continue;
+    }
+    if (open) {
+      fence = open[1];
+      continue;
+    }
     const d = markdownLineDirection(line.text);
-    if (d) return d;
+    if (d) {
+      found = d;
+      break;
+    }
   }
-  return "ltr";
+  noteDirCache.set(doc, found);
+  return found;
 }
 
 function build(view: EditorView): DecorationSet {

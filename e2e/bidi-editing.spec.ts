@@ -36,7 +36,8 @@ const ITEMS = lines();
 
 const SELECT_STEPS = 4;
 
-test.describe.configure({ mode: "serial" });
+// One page per worker, lines in order; a failing line does not skip the others.
+test.describe.configure({ mode: "default" });
 
 let page: Page;
 
@@ -170,7 +171,25 @@ for (const it of ITEMS) {
     const word = it.line.replace(/\]\([^)]*\)/g, "]").match(/[\p{L}\p{N}]{2,}/u)?.[0] ?? "";
     await expect(pm).toContainText(word, { timeout: 10_000 });
     await pm.focus();
-    await page.keyboard.press("ControlOrMeta+Home");
+    // The caret at the start of the first block's text. Set through the DOM
+    // selection: WebKit does not place a caret on focus() and its
+    // Ctrl+Home is not reliable in contenteditable.
+    await page.evaluate(() => {
+      const root = document.querySelector(".ProseMirror");
+      const block = root?.querySelector("p, h1, h2, h3, h4, h5, h6");
+      if (!block) return;
+      const walker = document.createTreeWalker(block, NodeFilter.SHOW_TEXT);
+      for (let n = walker.nextNode(); n; n = walker.nextNode()) {
+        if (n.parentElement?.closest('[contenteditable="false"]')) continue;
+        const r = document.createRange();
+        r.setStart(n, 0);
+        r.collapse(true);
+        getSelection()?.removeAllRanges();
+        getSelection()?.addRange(r);
+        return;
+      }
+    });
+    await expect.poll(() => wysiwygState().then((st) => st.offset)).toBe(0);
     const s0 = await wysiwygState();
     expect(s0.offset, `the caret starts at the block's start: ${s0.html}`).toBe(0);
     const dir = expectedDir(it);

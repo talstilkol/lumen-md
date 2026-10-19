@@ -29,6 +29,11 @@ describe("markdownLineDirection rules", () => {
     expect(markdownLineDirection("1. [שלום](https://example.com/a)")).toBe("rtl");
     expect(markdownLineDirection("[](https://example.com) שלום")).toBe("rtl");
     expect(markdownLineDirection("``a`b`` עברית")).toBe("rtl");
+    // Balanced parentheses in a destination (review: #252).
+    expect(markdownLineDirection("[42](https://x/(foo)/english) שלום")).toBe("rtl");
+    expect(markdownLineDirection("[42](https://x/a\\)b/english) שלום")).toBe("rtl");
+    // An unclosed "(" is text, not a destination.
+    expect(markdownLineDirection("[42](abc")).toBe("ltr");
   });
 
   it("treats RLM / LRM as strong and numbers, emoji and punctuation as neutral", () => {

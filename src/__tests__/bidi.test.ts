@@ -67,6 +67,15 @@ describe("bidiExtension", () => {
     view.destroy();
   });
 
+  it("takes a neutral line's direction from the whole note, past fenced code (review: #252)", async () => {
+    const { noteDirection } = await import("../editor/bidi");
+    const { EditorState } = await import("@codemirror/state");
+    const neutral = Array.from({ length: 600 }, (_, i) => `${i}.`).join("\n");
+    expect(noteDirection(EditorState.create({ doc: `${neutral}\nשורה בעברית` }), -1)).toBe("rtl");
+    expect(noteDirection(EditorState.create({ doc: "10:30\n```\nEnglish code\n```\nשלום" }), -1)).toBe("rtl");
+    expect(noteDirection(EditorState.create({ doc: "10:30\n42" }), -1)).toBe("ltr");
+  });
+
   it("turns on CodeMirror's per-line direction so cursor motion follows each line", () => {
     const view = mount("שלום\nhello", host);
     expect(view.state.facet(EditorView.perLineTextDirection)).toBe(true);

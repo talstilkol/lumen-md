@@ -64,11 +64,34 @@ export function firstStrong(text: string): LineDirection | null {
 
 const MARKERS = /^\s*(?:#{1,6}\s+|>\s*|[-*+]\s+(?:\[[ xX]\]\s+)?|\d+[.)]\s+)*/;
 
+/**
+ * Drop `(destination)` after every `]`, with balanced parentheses and
+ * backslash escapes, so no part of a URL like `(https://x/(a)/b)` is left.
+ */
+function stripLinkDestinations(text: string): string {
+  let out = "";
+  let i = 0;
+  while (i < text.length) {
+    const ch = text[i];
+    out += ch;
+    i++;
+    if (ch !== "]" || text[i] !== "(") continue;
+    let depth = 0;
+    let j = i;
+    for (; j < text.length; j++) {
+      const c = text[j];
+      if (c === "\\") j++;
+      else if (c === "(") depth++;
+      else if (c === ")" && --depth === 0) break;
+    }
+    if (j < text.length) i = j + 1; // a complete destination; an unclosed one is ordinary text
+  }
+  return out;
+}
+
 /** The part of a Markdown line its reader sees as text, for the direction rule. */
 export function visibleLineText(line: string): string {
-  return line
-    .replace(MARKERS, "")
-    .replace(/\]\([^)]*\)/g, "]") // link and image URLs
+  return stripLinkDestinations(line.replace(MARKERS, ""))
     .replace(/(`+)[^`][\s\S]*?\1(?!`)|(`+)\2(?!`)/g, ""); // code spans: a run of n backticks closes with n
 }
 
