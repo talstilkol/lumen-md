@@ -13,6 +13,7 @@ on:
     paths:
       - "scripts/golden/evals/asr-he.mjs"
       - "scripts/asr/**"
+      - "src/__tests__/asr-he-eval.test.ts"
       - ".github/workflows/asr.yml"
   workflow_dispatch:
 
@@ -87,8 +88,11 @@ jobs:
             python -I scripts/golden/hf_build.py build --job common-voice --split test --out "$RUNNER_TEMP/golden" > /dev/null || echo "::warning::Common Voice test not built"
           fi
 
+      - name: Wider FLEURS sample (validation split, disjoint from the set's test pool)
+        run: python -I scripts/asr/fleurs_spike.py --out "$RUNNER_TEMP/asr-spike" --n 30
+
       - name: Score (numbers only)
-        run: node scripts/asr/eval.mjs --split dev=eval/golden/asr-he/dev --split test="$RUNNER_TEMP/golden/asr-he/test" --out asr-scores.json
+        run: node scripts/asr/eval.mjs --split dev=eval/golden/asr-he/dev --split test="$RUNNER_TEMP/golden/asr-he/test" --split fleurs-validation="$RUNNER_TEMP/asr-spike" --out asr-scores.json
       - uses: actions/upload-artifact@v7
         with:
           name: asr-scores

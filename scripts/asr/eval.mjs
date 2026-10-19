@@ -29,14 +29,16 @@ function load(dir) {
   return items;
 }
 
+const createT0 = performance.now();
 const recognizer = await createRecognizer();
+const modelLoadMs = Math.round(performance.now() - createT0);
 const done = new Map(); // audio path → result, so "all" does not decode twice
 const run = (it) => {
   if (!done.has(it.audio)) done.set(it.audio, transcribeLive(recognizer, decodeAudio(it.audio)));
   return done.get(it.audio);
 };
 const loadT0 = performance.now();
-const report = { engine: "sherpa-onnx WASM (npm sherpa-onnx), ivrit-ai/zipformer2-66m-streaming-he int8, greedy, 1 thread", splits: {} };
+const report = { engine: "sherpa-onnx WASM (npm sherpa-onnx), ivrit-ai/zipformer2-66m-streaming-he int8, greedy, 1 thread", modelLoadMs, splits: {} };
 const all = [];
 for (const [name, dir] of splits) {
   const items = load(dir);
@@ -52,8 +54,11 @@ report.evalSeconds = Math.round((performance.now() - loadT0) / 100) / 10;
 
 writeFileSync(outFile, JSON.stringify(report, null, 2) + "\n");
 const keys = [...new Set(Object.values(report.splits).flatMap((s) => Object.keys(s)))];
-const lines = ["## asr-he — live dictation spike (plan 6.1)", "", report.engine, "", `| Split | ${keys.join(" | ")} |`, `|---|${keys.map(() => "---").join("|")}|`];
+const lines = ["## asr-he — live dictation spike (plan 6.1)", "", `${report.engine}; model load ${modelLoadMs} ms`, "", `| Split | ${keys.join(" | ")} |`, `|---|${keys.map(() => "---").join("|")}|`];
 for (const [name, s] of Object.entries(report.splits)) lines.push(`| ${name} | ${keys.map((k) => s[k] ?? "").join(" | ")} |`);
 const md = lines.join("\n") + "\n";
 if (process.env.GITHUB_STEP_SUMMARY) appendFileSync(process.env.GITHUB_STEP_SUMMARY, md);
+if (process.env.GITHUB_ACTIONS) console.log(`::notice title=asr model::load ${modelLoadMs} ms, eval ${report.evalSeconds} s`);
+// Also as annotations: readable from the checks API (numbers only).
+if (process.env.GITHUB_ACTIONS) for (const [name, s] of Object.entries(report.splits)) console.log(`::notice title=asr ${name}::${Object.entries(s).map(([k, v]) => `${k}=${v}`).join(" ")}`);
 console.log(md);
