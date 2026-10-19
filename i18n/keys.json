@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-10-18T04:10:51.194Z",
+  "generated_at": "2026-10-18T12:22:55.812Z",
   "source": "src/i18n/index.ts (en bundle)",
-  "count": 1414,
+  "count": 1432,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -1707,6 +1707,103 @@
       "key": "cmd.file.trash.hint",
       "en": "Restore deleted notes (kept 30 days)",
       "vars": []
+    },
+    {
+      "key": "cmd.note.today",
+      "en": "Today's note",
+      "vars": []
+    },
+    {
+      "key": "cmd.note.today.hint",
+      "en": "Open or create the daily note for today (journal/YYYY-MM-DD.md)",
+      "vars": []
+    },
+    {
+      "key": "cmd.view.calendar",
+      "en": "Show / hide the calendar",
+      "vars": []
+    },
+    {
+      "key": "cmd.view.calendar.hint",
+      "en": "Month calendar of daily notes under the file tree",
+      "vars": []
+    },
+    {
+      "key": "calendar.title",
+      "en": "Calendar",
+      "vars": []
+    },
+    {
+      "key": "calendar.prev",
+      "en": "Previous month",
+      "vars": []
+    },
+    {
+      "key": "calendar.next",
+      "en": "Next month",
+      "vars": []
+    },
+    {
+      "key": "calendar.today",
+      "en": "Today",
+      "vars": []
+    },
+    {
+      "key": "calendar.hasNote",
+      "en": "has a note",
+      "vars": []
+    },
+    {
+      "key": "calendar.settings",
+      "en": "Daily note settings",
+      "vars": []
+    },
+    {
+      "key": "calendar.folder",
+      "en": "Folder",
+      "vars": []
+    },
+    {
+      "key": "calendar.pattern",
+      "en": "File name pattern (YYYY, MM, DD)",
+      "vars": []
+    },
+    {
+      "key": "calendar.template",
+      "en": "Template for new notes",
+      "vars": []
+    },
+    {
+      "key": "calendar.templateHint",
+      "en": "Placeholders: {{date}}, {{hebrewDate}}, {{weekday}}, {{title}}",
+      "vars": [
+        "date",
+        "hebrewDate",
+        "weekday",
+        "title"
+      ]
+    },
+    {
+      "key": "calendar.patternInvalid",
+      "en": "The pattern must contain YYYY, MM and DD, so that every day gets its own note.",
+      "vars": []
+    },
+    {
+      "key": "calendar.save",
+      "en": "Save",
+      "vars": []
+    },
+    {
+      "key": "daily.noWorkspace",
+      "en": "Daily notes need the workspace, which this browser can't provide.",
+      "vars": []
+    },
+    {
+      "key": "daily.failed",
+      "en": "Couldn't open the daily note: {error}",
+      "vars": [
+        "error"
+      ]
     },
     {
       "key": "cmd.ai.cancel",
