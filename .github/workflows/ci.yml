@@ -265,6 +265,36 @@ jobs:
           name: playwright-report-${{ matrix.browser }}
           path: playwright-report/
 
+  visual:
+    # Plan 10.3: every main surface × en / he × dark / light against the
+    # baselines committed in e2e-visual/baselines/ (chromium only). An
+    # unintended pixel change — or a missing baseline — fails here; the
+    # artifact holds expected / actual / diff for each failing shot. To
+    # change the baselines on purpose run the "visual baselines" workflow.
+    name: visual regression (chromium)
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    needs: check
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with: { node-version: 22, cache: npm }
+      - run: npm ci || npm install
+      - run: npx playwright install --with-deps chromium
+      - name: Compare with the committed baselines
+        run: npm run visual
+      - name: Upload expected / actual / diff
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: visual-diffs
+          path: |
+            test-results/visual/
+            playwright-report/
+          retention-days: 14
+
   e2e-prod:
     name: e2e against production build
     runs-on: ubuntu-latest

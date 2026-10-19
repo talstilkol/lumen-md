@@ -131,6 +131,38 @@ per-platform (`…-chromium-linux.png`).
   and commit the updated PNG together with the change. Generate Linux
   baselines on Linux (or in CI) — macOS font rendering differs.
 
+### Visual regression in CI (the matrix, plan 10.3)
+
+The same ten surfaces × English / Hebrew × dark / light are a CI gate:
+`e2e-visual/visual-matrix.spec.ts` (its own config,
+`playwright.visual.config.ts`, chromium only, one worker) compares every
+shot with the baseline committed in `e2e-visual/baselines/`
+(`<surface>--<locale>-<theme>.png`, 640×400 — a 1280×800 layout at half
+resolution, so each PNG stays around 80 KB). The `visual` job in
+`ci.yml` runs it on every pull request.
+
+- **An unintended change fails the job.** The `visual-diffs` artifact
+  holds `…-expected.png`, `…-actual.png` and `…-diff.png` for every
+  failing shot (`test-results/visual/`) and the HTML report.
+- **A missing baseline is a failure too**, never a skip: a new surface
+  needs its baseline before the job is green.
+- **Changing the baselines on purpose** (a UI change): the baselines are
+  rendered by CI's chromium and fonts, so a local run cannot produce
+  them. Run the "visual baselines" workflow on your branch:
+
+  ```bash
+  gh workflow run visual-baselines.yml --ref <branch> -f reason="why the UI changed"
+  ```
+
+  It renders the matrix with `--update-snapshots`, commits the changed
+  PNGs to the branch and uploads the previous and new shot of each one as
+  the `visual-baselines-changed` artifact. Review that diff in the PR like
+  code. The bot's commit does not start CI; your next push does.
+- **Locally**, `npm run visual` compares against the committed baselines
+  with your own chromium (expect a few shots to differ by fonts), and
+  `npm run visual:update` rewrites them for a look — do not commit a
+  locally rendered baseline.
+
 ### Guidelines
 
 - Add a test for any non-trivial change.
@@ -187,6 +219,7 @@ The GitHub Actions workflow (`.github/workflows/ci.yml`) runs on every push:
 1. **`npm run typecheck`** — Zero TypeScript errors required.
 2. **`npm run test`** — All unit tests must pass (including the i18n drift gate).
 3. **`npm run build`** — Production bundle must build without errors.
+4. **`npm run visual`** (the `visual` job) — every surface × locale × theme must match its committed baseline; see "Visual regression in CI".
 
 ## Security
 

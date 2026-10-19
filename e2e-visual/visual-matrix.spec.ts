@@ -1,0 +1,79 @@
+import { test, expect, type Page } from "@playwright/test";
+
+/**
+ * Plan 10.3: the visual matrix of scripts/preview-visual.mjs (T24) as a CI
+ * gate. Ten surfaces × English / Hebrew × dark / light = 40 screenshots,
+ * each compared with its committed baseline (e2e-visual/baselines/) by
+ * Playwright's pixel diff. An unintended change fails the "visual" job and
+ * its artifact holds expected / actual / diff for every failing shot.
+ *
+ * A missing baseline fails too (playwright.visual.config.ts). Baselines
+ * are refreshed on purpose by the "visual baselines" workflow, which runs
+ * this file with --update-snapshots on CI's own chromium and commits the
+ * result (CONTRIBUTING.md, "Visual baselines").
+ */
+
+type Surface = { id: string; open: (p: Page) => Promise<unknown>; ready: string };
+
+const runCommand = (page: Page, id: string) =>
+  page.evaluate((cmd) => window.dispatchEvent(new CustomEvent("lumen-run-command", { detail: { id: cmd } })), id);
+
+/** The surfaces of scripts/preview-visual.mjs, reached the same way. */
+const SURFACES: Surface[] = [
+  { id: "split", open: (p) => p.keyboard.press("Meta+2"), ready: ".prose-lumen h1" },
+  { id: "source", open: (p) => p.keyboard.press("Meta+1"), ready: ".cm-content" },
+  { id: "preview", open: (p) => p.keyboard.press("Meta+3"), ready: ".prose-lumen h1" },
+  { id: "wysiwyg", open: (p) => p.keyboard.press("Meta+4"), ready: ".ProseMirror" },
+  { id: "palette", open: (p) => p.keyboard.press("Meta+K"), ready: '[role="dialog"][aria-modal="true"] input' },
+  { id: "shortcuts", open: (p) => p.keyboard.press("Meta+/"), ready: '[role="dialog"][aria-label="Keyboard Shortcuts"]' },
+  { id: "plugins", open: (p) => runCommand(p, "view.plugins"), ready: '[data-testid="plugin-card"]' },
+  { id: "templates", open: (p) => runCommand(p, "templates.open"), ready: '[data-testid="template-card"]' },
+  { id: "ai-settings", open: (p) => p.evaluate(() => window.dispatchEvent(new CustomEvent("lumen-open-ai-settings"))), ready: '[data-testid="exec-status-ollama"]' },
+  { id: "ai-doctor", open: (p) => p.evaluate(() => window.dispatchEvent(new CustomEvent("lumen-open-ai-doctor"))), ready: '[data-testid="doctor-summary"]' },
+];
+
+const VARIANTS = [
+  { id: "en-dark", locale: "en", theme: "dark" as const },
+  { id: "en-light", locale: "en", theme: "light" as const },
+  { id: "he-dark", locale: "he", theme: "dark" as const },
+  { id: "he-light", locale: "he", theme: "light" as const },
+];
+
+/** Parts of a surface that depend on the machine, not the code: hidden under a flat mask. */
+const VOLATILE = ['[data-testid="hw-card"]'];
+
+for (const v of VARIANTS) {
+  test.describe(v.id, () => {
+    test.use({ colorScheme: v.theme });
+
+    test.beforeEach(async ({ page }) => {
+      await page.addInitScript(({ locale, theme }) => {
+        localStorage.clear();
+        localStorage.setItem("lumen-tour-done", "1");
+        localStorage.setItem("lumen-md", JSON.stringify({ state: { locale, theme }, version: 0 }));
+      }, v);
+      await page.goto("/");
+      await page.locator(".cm-content, .ProseMirror").first().waitFor({ timeout: 30_000 });
+      await expect(page.locator("html")).toHaveAttribute("dir", v.locale === "he" ? "rtl" : "ltr");
+    });
+
+    for (const s of SURFACES) {
+      test(`${s.id} (${v.id})`, async ({ page }) => {
+        await s.open(page);
+        await page.locator(s.ready).first().waitFor({ state: "visible", timeout: 30_000 });
+        await page.waitForLoadState("networkidle", { timeout: 15_000 }).catch(() => undefined);
+        await page.evaluate(() => document.fonts.ready);
+        // The commonest RTL layout bug, checked on every shot: nothing wider than the viewport.
+        expect(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth), "horizontal overflow").toBeLessThanOrEqual(1);
+        await expect(page).toHaveScreenshot(`${s.id}--${v.id}.png`, {
+          mask: VOLATILE.map((sel) => page.locator(sel)),
+          maskColor: "#808080",
+          // Identical runner, chromium and fonts give identical pixels; this
+          // absorbs rasteriser noise only (≈ 250 px of 640×400). A one-line
+          // CSS change moves far more.
+          maxDiffPixelRatio: 0.001,
+        });
+      });
+    }
+  });
+}

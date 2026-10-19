@@ -1,0 +1,91 @@
+name: visual baselines
+
+# Refreshes the visual-regression baselines on purpose (plan 10.3).
+#
+# Baselines are rendered by CI's own chromium and fonts, so a local run
+# cannot produce them: this workflow runs the matrix with
+# --update-snapshots on the given branch and commits the new PNGs to it.
+# Run it after a deliberate UI change, then review the diff of
+# e2e-visual/baselines/ in the PR like any other change:
+#
+#   gh workflow run visual-baselines.yml --ref <branch>
+#
+# The run's artifact holds the previous and the new shot of every baseline
+# that changed, so the review can look at the pictures, not only the bytes.
+# The commit it pushes does not start CI by itself (GITHUB_TOKEN pushes
+# never do): the next push to the branch runs the "visual" job against the
+# new baselines.
+
+on:
+  workflow_dispatch:
+    inputs:
+      reason:
+        description: "Why the baselines change (goes into the commit message)"
+        required: true
+        type: string
+
+concurrency:
+  group: visual-baselines-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    name: rewrite and commit the baselines
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.ref }}
+      - uses: actions/setup-node@v7
+        with: { node-version: 22, cache: npm }
+      - run: npm ci || npm install
+      - run: npx playwright install --with-deps chromium
+
+      - name: Keep the previous baselines for the artifact
+        run: |
+          mkdir -p "$RUNNER_TEMP/previous"
+          cp e2e-visual/baselines/*.png "$RUNNER_TEMP/previous/" 2>/dev/null || true
+
+      - name: Render the matrix and rewrite every baseline
+        env:
+          CI: "true"
+        run: npm run visual:update -- --reporter=line
+
+      - name: What changed
+        id: diff
+        run: |
+          mkdir -p "$RUNNER_TEMP/changed/previous" "$RUNNER_TEMP/changed/new"
+          changed=0
+          for f in e2e-visual/baselines/*.png; do
+            n=$(basename "$f")
+            if [ ! -f "$RUNNER_TEMP/previous/$n" ] || ! cmp -s "$f" "$RUNNER_TEMP/previous/$n"; then
+              changed=$((changed + 1))
+              cp "$f" "$RUNNER_TEMP/changed/new/$n"
+              [ -f "$RUNNER_TEMP/previous/$n" ] && cp "$RUNNER_TEMP/previous/$n" "$RUNNER_TEMP/changed/previous/$n"
+              echo "- $n"
+            fi
+          done | tee -a "$GITHUB_STEP_SUMMARY"
+          echo "changed=$(ls "$RUNNER_TEMP/changed/new" | wc -l)" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: visual-baselines-changed
+          path: ${{ runner.temp }}/changed/
+          retention-days: 30
+          if-no-files-found: ignore
+
+      - name: Commit the new baselines to ${{ github.ref_name }}
+        if: steps.diff.outputs.changed != '0'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add e2e-visual/baselines
+          git commit -m "test(visual): refresh ${{ steps.diff.outputs.changed }} baseline(s) — ${{ inputs.reason }}" \
+            -m "Rendered by the visual-baselines workflow (run ${{ github.run_id }}) on CI's chromium."
+          git push origin "HEAD:${{ github.ref_name }}"
+          echo "Pushed the new baselines to ${{ github.ref_name }}." >> "$GITHUB_STEP_SUMMARY"
+      - if: steps.diff.outputs.changed == '0'
+        run: echo "No baseline changed." >> "$GITHUB_STEP_SUMMARY"
