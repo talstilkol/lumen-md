@@ -144,15 +144,11 @@ fn list_order() {
 fn paths_cannot_leave_the_vault() {
     let (t, v) = vault();
     v.write("a.md", b"a").unwrap();
-    for p in [
-        "../x.md",
-        "a/../../x.md",
-        "./a.md",
-        "..",
-        "a\\..\\x",
-        "C:/x",
-        "a\0b",
-    ] {
+    let mut bad = vec!["../x.md", "a/../../x.md", "./a.md", "..", "a\0b"];
+    if cfg!(windows) {
+        bad.extend(["a\\..\\x", "C:/x"]);
+    }
+    for p in bad {
         assert_eq!(code(v.read(p)), "EINVAL", "{p}");
         assert_eq!(code(v.write(p, b"x")), "EINVAL", "{p}");
     }
@@ -209,4 +205,48 @@ fn a_thousand_notes_round_trip() {
         }
     }
     assert_eq!(n, 1000);
+}
+
+#[cfg(unix)]
+#[test]
+fn unix_names_with_colon_and_backslash_stay_addressable() {
+    let (_t, v) = vault();
+    for name in ["a:b.md", "x\\y.md", "meeting 10:30.md"] {
+        v.write(name, b"n").unwrap();
+        assert_eq!(v.read(name).unwrap(), b"n");
+        assert!(names(&v, "").contains(&name.to_string()));
+    }
+    v.rename("a:b.md", "c:d.md", false).unwrap();
+    v.remove("c:d.md").unwrap();
+}
+
+#[cfg(unix)]
+#[test]
+fn a_folder_symlink_is_not_listed_so_walks_end() {
+    let (t, v) = vault();
+    v.write("notes/a.md", b"A").unwrap();
+    std::os::unix::fs::symlink(&t.0, t.0.join("notes/loop")).unwrap();
+    std::os::unix::fs::symlink(t.0.join("notes/a.md"), t.0.join("notes/alias.md")).unwrap();
+    assert_eq!(names(&v, "notes"), vec!["a.md", "alias.md"]);
+}
+
+#[cfg(unix)]
+#[test]
+fn a_planted_temp_symlink_is_never_followed() {
+    let (t, v) = vault();
+    let outside = t.0.with_extension("victim");
+    fs::write(&outside, b"keep me").unwrap();
+    // Plant symlinks at the next temporary names this process would use
+    // (other tests run in parallel and take numbers too: plant plenty).
+    let next = TMP.load(Ordering::Relaxed);
+    for n in next..next + 40 {
+        let _ = std::os::unix::fs::symlink(
+            &outside,
+            t.0.join(format!(".lumen-tmp-{}-{n}", std::process::id())),
+        );
+    }
+    v.write("note.md", b"saved").unwrap();
+    assert_eq!(v.read("note.md").unwrap(), b"saved");
+    assert_eq!(fs::read(&outside).unwrap(), b"keep me");
+    let _ = fs::remove_file(&outside);
 }

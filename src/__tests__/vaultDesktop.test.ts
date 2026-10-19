@@ -100,6 +100,21 @@ describe("first run of the desktop app", () => {
     expect(getVaultBackend().id).toBe("desktop");
   });
 
+  it("an unreadable app storage stops the migration instead of counting as empty", async () => {
+    await writeWorkspaceFile("a.md", "A");
+    await restoreVaultLocation();
+    const opfs = getVaultBackend();
+    const list = opfs.list.bind(opfs);
+    opfs.list = async () => {
+      throw new Error("I/O error");
+    };
+    await expect(chooseDesktopVaultFolder()).rejects.toThrow(/I\/O error/);
+    opfs.list = list;
+    expect(getVaultStatus()).toEqual({ location: "opfs" });
+    expect(rust.active).toBeNull();
+    expect(await readWorkspaceFile("a.md")).toBe("A");
+  });
+
   it("cancelling the dialog changes nothing", async () => {
     await writeWorkspaceFile("a.md", "A");
     await restoreVaultLocation();

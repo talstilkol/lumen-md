@@ -354,7 +354,10 @@ export async function chooseDesktopVaultFolder(): Promise<(MoveReport & { backup
   if (!root) return null;
   const to: StoredLocation = { kind: "desktop", root, name: folderName(root) };
   const source = getVaultBackend();
-  const hasNotes = source.available() && (await source.list("").catch(() => [])).length > 0;
+  // Only a listing that succeeds and is empty skips the migration: a source
+  // that cannot be read stops here, it is not "empty".
+  if (!source.available()) throw new Error("The current vault is not available.");
+  const hasNotes = (await source.list("")).length > 0;
   if (!hasNotes) {
     await inv("vault_use", { root });
     await kv.set(LOCATION_KEY, to);

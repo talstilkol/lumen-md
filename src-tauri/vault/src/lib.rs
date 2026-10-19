@@ -92,11 +92,10 @@ fn mtime_ms(m: &fs::Metadata) -> u64 {
 pub fn segments(path: &str) -> Result<Vec<String>> {
     let mut out = Vec::new();
     for seg in path.split('/').filter(|s| !s.is_empty()) {
-        let bad = seg == "."
-            || seg == ".."
-            || seg.contains('\\')
-            || seg.contains('\0')
-            || seg.contains(':');
+        // `\` and `:` are separators / drive markers only on Windows; on Unix
+        // they are ordinary filename characters and must stay addressable.
+        let windows_only = cfg!(windows) && (seg.contains('\\') || seg.contains(':'));
+        let bad = seg == "." || seg == ".." || seg.contains('\0') || windows_only;
         if bad {
             return Err(VaultError::new(
                 "EINVAL",
@@ -179,7 +178,12 @@ impl Vault {
             let mut child = segs.clone();
             child.push(name.clone());
             let path = Self::join(&child);
+            // A symlink to a folder is not listed: one pointing at the root or
+            // an ancestor would make every recursive walk endless. (Links to
+            // files are listed; `resolve` keeps reads of them inside the root.)
+            let is_link = item.file_type().map(|t| t.is_symlink()).unwrap_or(false);
             match fs::metadata(item.path()) {
+                Ok(m) if m.is_dir() && is_link => continue,
                 Ok(m) if m.is_dir() => out.push(Entry {
                     name,
                     path,
@@ -273,13 +277,26 @@ impl Vault {
             ));
         }
         self.make_parents(&segs, path)?;
-        let n = TMP.fetch_add(1, Ordering::Relaxed);
-        let tmp = p.with_file_name(format!(".lumen-tmp-{}-{n}", std::process::id()));
+        // The temporary file is created exclusively (O_CREAT|O_EXCL): it never
+        // follows a symlink planted at that name, and a taken name is retried.
+        let mut attempt = 0;
+        let (tmp, mut file) = loop {
+            let n = TMP.fetch_add(1, Ordering::Relaxed);
+            let tmp = p.with_file_name(format!(".lumen-tmp-{}-{n}", std::process::id()));
+            match fs::OpenOptions::new()
+                .write(true)
+                .create_new(true)
+                .open(&tmp)
+            {
+                Ok(f) => break (tmp, f),
+                Err(e) if e.kind() == io::ErrorKind::AlreadyExists && attempt < 64 => attempt += 1,
+                Err(e) => return Err(VaultError::io(path, e)),
+            }
+        };
         let result = (|| {
-            let mut f = fs::File::create(&tmp)?;
-            f.write_all(data)?;
-            f.sync_all()?;
-            drop(f);
+            file.write_all(data)?;
+            file.sync_all()?;
+            drop(file);
             fs::rename(&tmp, &p)
         })();
         if let Err(e) = result {
