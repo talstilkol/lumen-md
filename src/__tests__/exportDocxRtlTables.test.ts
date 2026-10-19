@@ -19,8 +19,12 @@ async function documentXml(md: string): Promise<string> {
   return dec.decode(files.get("word/document.xml"));
 }
 
-/** The <w:tbl> elements of the document, in order. */
-const tables = (doc: string) => doc.match(/<w:tbl>[^]*?<\/w:tbl>/g) ?? [];
+/** The <w:tbl> elements of the document, in order; `n` of them are expected. */
+function tables(doc: string, n: number): string[] {
+  const all = doc.match(/<w:tbl>[^]*?<\/w:tbl>/g) ?? [];
+  expect(all).toHaveLength(n);
+  return all;
+}
 
 /** The cell paragraph holding `text`: its `<w:pPr>` content, or "" when it has none. */
 function pPrOf(xml: string, text: string): string {
@@ -48,7 +52,7 @@ describe("DOCX: an RTL table", () => {
   const RTL = "| מוצר | מחיר | הערה | כמות |\n|---|--:|:--|:-:|\n| חלב | 5.90 | טרי | 2 |\n| Bread | 12 | fresh | 1 |\n";
 
   it("is laid out from the right (bidiVisual) and its cells follow the table when they have no strong text", async () => {
-    const [tbl] = tables(await documentXml(RTL));
+    const tbl = tables(await documentXml(RTL), 1)[0]!;
     expect(tbl).toMatch(/<w:tblPr><w:bidiVisual\/><w:tblW /);
     // A Hebrew cell: bidi, natural (start = right) alignment, nothing written.
     expect(pPrOf(tbl, "חלב")).toBe("<w:bidi/>");
@@ -61,7 +65,7 @@ describe("DOCX: an RTL table", () => {
   });
 
   it("resolves an English cell of the same table against its own LTR paragraph, so both land on the same side", async () => {
-    const [tbl] = tables(await documentXml(RTL));
+    const tbl = tables(await documentXml(RTL), 1)[0]!;
     expect(pPrOf(tbl, "Bread")).toBe("");
     // Note column, physically left: the leading edge of an LTR paragraph → start, nothing written.
     expect(pPrOf(tbl, "fresh")).toBe("");
@@ -72,7 +76,7 @@ describe("DOCX: an RTL table", () => {
 
   it("a table of numbers follows the note's direction", async () => {
     const doc = await documentXml("# דוח\n\n| 1 | 2 |\n|---|--:|\n| 10 | 20 |\n");
-    const [tbl] = tables(doc);
+    const tbl = tables(doc, 1)[0]!;
     expect(tbl).toContain("<w:bidiVisual/>");
     expect(pPrOf(tbl, "10")).toBe("<w:bidi/>");
     expect(pPrOf(tbl, "20")).toBe("<w:bidi/>"); // `--:` is the leading edge of an RTL cell
@@ -86,7 +90,7 @@ describe("DOCX: an RTL table", () => {
 
 describe("DOCX: an LTR table", () => {
   it("is not bidiVisual and resolves `:--` to start and `--:` to end", async () => {
-    const [tbl] = tables(await documentXml("| Item | Price | Note |\n|:--|--:|:-:|\n| Milk | 5.90 | fresh |\n"));
+    const tbl = tables(await documentXml("| Item | Price | Note |\n|:--|--:|:-:|\n| Milk | 5.90 | fresh |\n"), 1)[0]!;
     expect(tbl).not.toContain("<w:bidiVisual/>");
     expect(tbl).not.toContain("<w:bidi/>");
     expect(pPrOf(tbl, "Milk")).toBe("");
@@ -98,7 +102,7 @@ describe("DOCX: an LTR table", () => {
 describe("DOCX: a mixed document", () => {
   it("gives each table its own direction, and each cell its own", async () => {
     const md = "# Notes\n\n| Item | Price |\n|:--|--:|\n| Milk | 5 |\n\nטבלה בעברית:\n\n| מוצר | מחיר |\n|:--|--:|\n| חלב | 5 |\n";
-    const [en, he] = tables(await documentXml(md));
+    const [en, he] = tables(await documentXml(md), 2) as [string, string];
     expect(en).not.toContain("<w:bidiVisual/>");
     expect(he).toContain("<w:bidiVisual/>");
     // The same `--:` price column: end in the English table, start (omitted) in the Hebrew one.
