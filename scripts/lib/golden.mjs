@@ -541,13 +541,13 @@ export function loadSet(root, name, { split = "dev", testDir, parts, local = fal
       base = join(dir, "dev");
       file = f.replace(/^dev\//, "");
     } else {
-      if (!testDir) throw new Error("loadSet: the test split needs testDir (built in CI)");
+      if (!testDir) throw new GoldenPublicError("loadSet: the test split needs testDir (built in CI)");
       base = join(testDir, name, "test");
       file = `${p.id}.json`;
       if (!existsSync(join(base, file))) continue;
       const want = manifest.test.parts[p.id];
       if (!want) unverified.push(p.id);
-      else if (partHash(base, p.id) !== want) throw new Error(`${name}/${p.id}: the test split does not match its recorded sha256`);
+      else if (partHash(base, p.id) !== want) throw new GoldenPublicError(`${name}/${p.id}: the test split does not match its recorded sha256`);
     }
     const data = readJson(join(base, file));
     if (Array.isArray(data.corpus)) corpus[p.id] = data.corpus;
@@ -600,6 +600,25 @@ export function applyTestHashes(manifest, partHashes) {
  * Its message can quote a held-out prompt, a model output or owner text, and
  * the report goes to the Actions log and the job summary (scores only).
  */
+/**
+ * An error whose message names only public things (set and part ids from the
+ * committed manifest) and never any item: it may be printed as is.
+ */
+export class GoldenPublicError extends Error {}
+
+/**
+ * What the public log may say about a test split that failed to load: the
+ * message of a GoldenPublicError, otherwise only the error's type. A
+ * JSON.parse error quotes the text around the bad token, and other loader
+ * errors name items — both can be held-out data.
+ */
+export function publicLoaderError(e) {
+  if (e instanceof GoldenPublicError) return String(e.message).split("\n")[0].slice(0, 200);
+  const kind = e && typeof e === "object" && typeof e.constructor?.name === "string" ? e.constructor.name : typeof e;
+  const code = e && typeof e === "object" && typeof e.code === "string" && /^[A-Z_]{1,40}$/.test(e.code) ? ` ${e.code}` : "";
+  return `the test split failed to load: ${/^[A-Za-z]\w{0,40}$/.test(kind) ? kind : "an error"}${code} (message withheld: it may quote test data)`;
+}
+
 export function publicHarnessError(e) {
   const kind = e && typeof e === "object" && typeof e.constructor?.name === "string" ? e.constructor.name : typeof e;
   return `the harness threw ${/^[A-Za-z]\w{0,40}$/.test(kind) ? kind : "an error"} (message withheld: it may quote test data; run the harness locally on the dev split)`;

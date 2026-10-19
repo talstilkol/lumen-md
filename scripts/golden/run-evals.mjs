@@ -15,7 +15,7 @@
 import { appendFileSync, existsSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { pathToFileURL } from "node:url";
-import { incompleteParts, loadSet, publicHarnessError, validateAll } from "../lib/golden.mjs";
+import { incompleteParts, loadSet, publicHarnessError, publicLoaderError, validateAll } from "../lib/golden.mjs";
 import { GOLDEN, ROOT } from "./common.mjs";
 
 const args = process.argv.slice(2);
@@ -63,7 +63,8 @@ for (const { name, manifest } of validateAll(GOLDEN)) {
     sets[name] = { status: "scored", parts, unverified, scores };
   } catch (e) {
     failed = true;
-    sets[name] = { status: "error", error: String(e.message).split("\n")[0].slice(0, 200) };
+    // Never the loader's raw message: a JSON.parse error quotes held-out text.
+    sets[name] = { status: "error", error: publicLoaderError(e) };
   }
 }
 
