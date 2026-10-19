@@ -108,6 +108,22 @@ describe("plan build", () => {
     expect(() => buildModel(q)).toThrow(/dependency cycle/);
   });
 
+  it("every Markdown table row has as many cells as its header (pipes in the data are escaped)", () => {
+    const board: string = renderBoard(buildModel(plan()));
+    const cols = (row: string) => row.replace(/\\\|/g, "").split("|").length;
+    const lines = board.split("\n");
+    let header = 0;
+    for (const [i, l] of lines.entries()) {
+      if (!l.startsWith("|")) {
+        header = 0;
+        continue;
+      }
+      if (!header) header = cols(l);
+      else expect(cols(l), `line ${i + 1}: ${l.slice(0, 80)}`).toBe(header);
+    }
+    expect(board).toContain("`curl -sI <preview>/ \\| grep -i content-security`");
+  });
+
   it("P0 spreads to what P0 work waits on, and the release waits on every P0 item", () => {
     const M = buildModel(plan());
     const release = M.BYID.get("13.5");

@@ -222,6 +222,8 @@ function depsTxt(M, t) {
 const E = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#x27;");
 const codeHtml = (s) => E(s).replace(/`([^`]+)`/g, "<code>$1</code>");
 const sum = (ts) => ts.reduce((n, t) => n + t.m, 0);
+/** A Markdown table cell: a literal pipe (even inside `code`) must be escaped, or it starts a new column. */
+const cell = (s) => String(s).replace(/\|/g, "\\|");
 const laneTasks = (M, k) => M.agent.filter((t) => t.lane === k).sort((a, b) => a.start - b.start);
 
 // ───────────────────────────── Markdown ─────────────────────────────
@@ -239,13 +241,13 @@ export function renderBoard(M) {
   o.push("הלוח הזה הוא המקור היחיד ללו״ז. v5 מאחדת: את v4, ביקורת עצמאית על v4 (תלויות, הערכות, רישיונות, הנחות), מחקר פערים מול Obsidian / Notion / Logseq / Tana / Capacities, מחקר מודלים מקומיים עם רישיונות מאומתים (נספח 19), מחקר סטי זהב (נספח 20), מחקר מורחב על מודלים עבריים, כלי פיתוח ו-Obsidian 1.14, ביקורת עצמאית שנייה על v5 (נספח 23) ומחקר קוד פתוח בגיטהאב (נספח 24). נספחים 17–24 — הפרטים.\n");
   o.push("### מה כבר הושלם (שעות אמת)\n");
   o.push("| חלק | PR-ים | התחלה | סיום |\n|---|---|---|---|");
-  for (const r of plan.done) o.push(`| ${[r.part, r.prs, r.start, r.end].join(" | ")} |`);
+  for (const r of plan.done) o.push(`| ${[r.part, r.prs, r.start, r.end].map(cell).join(" | ")} |`);
   o.push("");
   o.push(`### התוכנית קדימה — ${M.agent.length} משימות ב-15 שלבים; ${DONE_N} בוצעו (ממתינות למיזוג), נותרו ${Math.floor(M.EFFORT / 60)} ש׳ עבודה (${NEW_V5} חדשות ב-v5, ${NEW} חדשות מאז תוכנית האב המקורית)\n`);
   o.push(`**${fmt(M.START)} → ${fmt(M.END)}** בתזמון רציף של 4 מסלולים · **עם מרווח ${B}%: ${fmt(M.END_BUF)}**\n`);
   o.push("#### אבני דרך\n");
   o.push(`| # | אבן דרך | בתזמון | עם מרווח ${B}% |\n|---|---|---|---|`);
-  M.milestones.forEach((m, k) => o.push(`| ${k + 1} | ${m.title} | ${fmt(m.at)} | ${fmt(M.stretch(m.at))} |`));
+  M.milestones.forEach((m, k) => o.push(`| ${k + 1} | ${cell(m.title)} | ${fmt(m.at)} | ${fmt(M.stretch(m.at))} |`));
   o.push("");
   o.push("#### איך התוכנית רצה\n");
   o.push(`1. **4 מסלולים במקביל** — ${Object.entries(lanes).map(([k, v]) => `${k} = ${v}`).join(" · ")}. כל מסלול = סוכן ב-worktree משלו (0.1). אני מתאם: ממזג, מריץ את כל הבדיקות, פותח PR ועונה ל-review.`);
@@ -263,14 +265,14 @@ export function renderBoard(M) {
   o.push("| # | שלב | יעד world class (נמדד) | משימות | מאמץ | התחלה | סיום |\n|---|---|---|---|---|---|---|");
   M.phases.forEach((p, i) => {
     const [a, b] = M.span(p.tasks);
-    o.push(`| ${i} | ${p.title} | ${p.goal} | ${p.tasks.length} | ${dur(sum(p.tasks))} | ${fmt(a)} | ${fmt(b)} |`);
+    o.push(`| ${i} | ${cell(p.title)} | ${cell(p.goal)} | ${p.tasks.length} | ${dur(sum(p.tasks))} | ${fmt(a)} | ${fmt(b)} |`);
   });
   o.push(`| 15 | מה צריך ממך | — | ${M.owner.length} | ${dur(sum(M.owner))} שלך | ${fmt(Math.min(...M.owner.map((t) => t.start)))} | ${fmt(Math.max(...M.owner.map((t) => t.end)))} |\n`);
   o.push("#### ציר זמן לפי מסלול\n");
   o.push("| מסלול | סדר המשימות | עבודה | סיום |\n|---|---|---|---|");
   for (const [k, v] of Object.entries(lanes)) {
     const ts = laneTasks(M, k);
-    o.push(`| ${k} · ${v} | ${ts.map((t) => t.id).join(" → ")} | ${dur(sum(ts))} | ${fmt(ts[ts.length - 1].end)} |`);
+    o.push(`| ${k} · ${cell(v)} | ${ts.map((t) => t.id).join(" → ")} | ${dur(sum(ts))} | ${fmt(ts[ts.length - 1].end)} |`);
   }
   o.push("");
   M.phases.forEach((p, i) => {
@@ -279,7 +281,7 @@ export function renderBoard(M) {
     o.push("| # | משימה | עדיפות | מסלול | הערכה | תלוי ב- | התחלה | סיום | מצב |\n|---|---|---|---|---|---|---|---|---|");
     for (const t of p.tasks) {
       const tag = t.new ? " 🆕" : "";
-      o.push(`| ${t.id} | ${t.t}${tag} | ${priTxt(t)} | ${t.lane} | ${est(t)} | ${depsTxt(M, t) || "—"} | ${t.done ? "—" : fmt(t.start)} | ${t.done ? "—" : fmt(t.end)} | ${t.status ?? "⬜"} |`);
+      o.push(`| ${t.id} | ${cell(t.t)}${tag} | ${priTxt(t)} | ${t.lane} | ${est(t)} | ${cell(depsTxt(M, t) || "—")} | ${t.done ? "—" : fmt(t.start)} | ${t.done ? "—" : fmt(t.end)} | ${cell(t.status ?? "⬜")} |`);
     }
     o.push("");
     for (const t of p.tasks) {
@@ -294,7 +296,7 @@ export function renderBoard(M) {
   o.push(`בהנחה של ערבים ${W0}:00–${W1}:00. P0 = השחרור מחכה לזה.\n`);
   o.push("| # | פעולה | פרטים | זמן | מתי (מתוזמן) | עדיפות | פותח את |\n|---|---|---|---|---|---|---|");
   for (const t of M.owner) {
-    o.push(`| ${t.id} | ${t.t} | ${t.steps[0]} | ${t.time} | ${fmt(t.start)} – ${fmt(t.end)} | ${t.eff} | ${M.OPENS.get(t.id).join(", ") || "—"} |`);
+    o.push(`| ${t.id} | ${cell(t.t)} | ${cell(t.steps[0])} | ${cell(t.time)} | ${fmt(t.start)} – ${fmt(t.end)} | ${t.eff} | ${cell(M.OPENS.get(t.id).join(", ") || "—")} |`);
   }
   o.push("");
   return o.join("\n");
