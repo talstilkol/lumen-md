@@ -13,7 +13,7 @@
  * folder with encoder/decoder/joiner .int8.onnx and tokens.txt
  * (scripts/asr/fetch-model.sh downloads it). Audio is decoded with ffmpeg.
  *
- * Latency is measured, not assumed: the audio is fed in 160 ms slices at
+ * Latency is measured, not assumed: the audio is fed in 64 ms slices at
  * real time (a clock that advances with the audio and with every
  * millisecond of decoding), and each word's latency is the time it appears
  * minus the time it was spoken (sherpa-onnx's token timestamps). Reported
@@ -157,7 +157,8 @@ export async function lumenRecognizer(modelDir) {
   };
 }
 
-const SLICE = 0.16; // seconds of audio per feed, as a microphone delivers it
+// Seconds of audio per feed: the app's capture worklet posts 1024-sample blocks (64 ms).
+const SLICE = 1024 / 16000;
 const TAIL = 1.5; // seconds of silence that flush the last chunk (the model card's recipe)
 
 /**
@@ -177,8 +178,9 @@ export async function transcribeLive(recognizer, samples, now = () => performanc
     const ts = r.timestamps ?? [];
     const tokens = r.tokens ?? [];
     for (let i = seen; i < tokens.length; i++) {
-      // A word starts at a token that begins with the SentencePiece word marker.
-      if (/^▁/.test(tokens[i]) || i === 0) latencies.push(Math.max(0, clock - (ts[i] ?? clock)));
+      // A word starts at a token that begins with the SentencePiece word
+      // marker (sherpa-onnx returns it as a space already).
+      if (/^[▁ ]/.test(tokens[i]) || i === 0) latencies.push(Math.max(0, clock - (ts[i] ?? clock)));
     }
     seen = Math.max(seen, tokens.length);
     return r;
@@ -190,14 +192,17 @@ export async function transcribeLive(recognizer, samples, now = () => performanc
     compute += dt;
     clock += dt;
   };
-  for (let at = 0; at < samples.length; at += step) {
-    const slice = samples.subarray(at, Math.min(samples.length, at + step));
+  // The trailing silence arrives in real time too, as it would from a
+  // microphone: the last words wait for their chunk like every other word.
+  const audio = new Float32Array(samples.length + Math.round(TAIL * 16000));
+  audio.set(samples);
+  for (let at = 0; at < audio.length; at += step) {
+    const slice = audio.subarray(at, Math.min(audio.length, at + step));
     clock = Math.max(clock, (at + slice.length) / 16000); // the audio arrives in real time
     stream.acceptWaveform(slice);
     await decode();
     collect();
   }
-  stream.acceptWaveform(new Float32Array(Math.round(TAIL * 16000)));
   stream.inputFinished();
   await decode();
   const r = collect();

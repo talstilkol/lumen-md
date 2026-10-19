@@ -74,7 +74,8 @@ function fakeRecognizer(decodeCost = 0.05) {
       decode: (s: S) => s.decode(),
       getResult: (s: S) => {
         const n = s.words;
-        return { text: Array.from({ length: n }, (_, i) => `w${i}`).join(" "), tokens: Array.from({ length: n }, (_, i) => `▁w${i}`), timestamps: Array.from({ length: n }, (_, i) => i) };
+        // sherpa-onnx returns the word marker as a space; Lumen's engine keeps "▁". Both count.
+        return { text: Array.from({ length: n }, (_, i) => `w${i}`).join(" "), tokens: Array.from({ length: n }, (_, i) => `${i % 2 ? " " : "▁"}w${i}`), timestamps: Array.from({ length: n }, (_, i) => i) };
       },
     },
   };
@@ -88,9 +89,11 @@ describe("transcribeLive", () => {
     expect(out.text.startsWith("w0 w1 w2")).toBe(true);
     expect(out.duration).toBe(3);
     // Word i is spoken at i s and decoded once its second of audio is in — at the end of the
-    // first 160 ms slice that completes it — plus the decode cost: 1.12 + 0.05 − 0, 2.08 + 0.05 − 1.
-    expect(out.latencies[0]).toBeCloseTo(1.17, 2);
-    expect(out.latencies[1]).toBeCloseTo(1.13, 2);
+    // first 64 ms slice that completes it — plus the decode cost: 1.024 + 0.05 − 0, 2.048 + 0.05 − 1.
+    expect(out.latencies[0]).toBeCloseTo(1.074, 3);
+    expect(out.latencies[1]).toBeCloseTo(1.098, 3);
+    // Every word is counted, the 1.5 s tail (fed in real time as well) adds the 4th second.
+    expect(out.latencies).toHaveLength(4);
     expect(out.compute).toBeGreaterThan(0);
   });
   it("scores per part, overall, with latency percentiles and the real-time factor", async () => {

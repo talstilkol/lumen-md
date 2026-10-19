@@ -92,8 +92,6 @@ jobs:
       - name: Wider FLEURS sample (validation split, disjoint from the set's test pool)
         run: python -I scripts/asr/fleurs_spike.py --out "$RUNNER_TEMP/asr-spike" --n 30
 
-      - name: Engine diagnostics (public clips)
-        run: node scripts/asr/compare.mjs "$RUNNER_TEMP/asr-spike" 2
       - name: Score — sherpa-onnx WASM (reference)
         env:
           LUMEN_ASR_ENGINE: sherpa
