@@ -190,6 +190,26 @@ for (const it of ITEMS) {
     // The note reaches the WYSIWYG editor once it has parsed it: wait for a word of the line.
     const word = it.line.replace(/\]\([^)]*\)/g, "]").match(/[\p{L}\p{N}]{2,}/u)?.[0] ?? "";
     await expect(pm).toContainText(word, { timeout: 10_000 });
+    // The dev server runs React StrictMode, which builds the editor, drops it
+    // and builds it again: wait until one editor element has stayed in place
+    // for three polls in a row, or the caret lands in the one being dropped.
+    let stable = 0;
+    await expect
+      .poll(
+        async () => {
+          const same = await page.evaluate(() => {
+            const el = document.querySelector(".ProseMirror");
+            const w = window as unknown as { __bidiProbe?: Element | null };
+            const kept = !!el && w.__bidiProbe === el && (el.textContent ?? "").length > 0;
+            w.__bidiProbe = el;
+            return kept;
+          });
+          stable = same ? stable + 1 : 0;
+          return stable;
+        },
+        { intervals: [100], timeout: 10_000 },
+      )
+      .toBeGreaterThanOrEqual(3);
     await pm.focus();
     // The caret at the start of the first block's text. Set through the DOM
     // selection: WebKit does not place a caret on focus() and its
