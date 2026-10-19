@@ -63,11 +63,12 @@ jobs:
         run: |
           curl -fsS "https://huggingface.co/api/models/ivrit-ai/zipformer2-66m-streaming-he" | jq -r '"zipformer2 sha=\(.sha) license=\(.cardData.license // "?")"' | sed 's/^/::notice title=asr hf::/'
           curl -fsS "https://huggingface.co/api/models?author=ivrit-ai&limit=200" | jq -r '[.[] | select(.id|test("onnx|turbo|ggml|ct2|zipformer";"i")) | .id] | join(" ")' | sed 's/^/::notice title=asr hf ivrit-ai::/'
-          for r in $(curl -fsS "https://huggingface.co/api/models?author=ivrit-ai&limit=200" | jq -r '.[] | select(.id|test("onnx";"i")) | .id'); do
-            curl -fsS "https://huggingface.co/api/models/$r?blobs=true" | jq -r '"\(.id) sha=\(.sha) license=\(.cardData.license // "?") " + ([.siblings[] | select(.rfilename|test("onnx"))| "\(.rfilename)=\((.size // 0)/1e6|floor)MB"] | join(" "))' | sed 's/^/::notice title=asr hf onnx::/' || true
+          for r in ivrit-ai/whisper-large-v3-turbo-onnx ivrit-ai/whisper-large-v3-turbo; do
+            curl -fsS "https://huggingface.co/api/models/$r?blobs=true" | jq -r '"\(.id) sha=\(.sha) license=\(.cardData.license // .tags // "?" | tostring) " + ([.siblings[] | select(.rfilename|test("encoder_model(_q4f16|_q4|_fp16)?\\.onnx|decoder_model_merged_q4f16|config.json|LICENSE";"i"))| "\(.rfilename)=\((.size // 0)/1e6|floor)MB"] | join(" "))' | sed 's/^/::notice title=asr hf turbo::/' || true
           done
+          curl -fsSL "https://huggingface.co/ivrit-ai/whisper-large-v3-turbo-onnx/raw/main/README.md" | head -c 600 | tr '\n' ' ' | sed 's/^/::notice title=asr hf turbo-onnx readme::/' || true
           curl -fsS "https://huggingface.co/api/models/onnx-community/whisper-base?blobs=true" | jq -r '"whisper-base sha=\(.sha) license=\(.cardData.license // "?") " + ([.siblings[] | select(.rfilename|test("onnx/(encoder|decoder)_model(_merged)?(_q4|_quantized|_fp16)?\\.onnx"))| "\(.rfilename)=\((.size // 0)/1e6|floor)MB"] | join(" "))' | sed 's/^/::notice title=asr hf whisper-base::/'
-          curl -fsS "https://huggingface.co/api/models/ivrit-ai/zipformer2-66m-streaming-he?blobs=true" | jq -r '[.siblings[] | select(.rfilename|test("sherpa-onnx/"))| "\(.rfilename)=\(.size)"] | join(" ")' | sed 's/^/::notice title=asr hf zipformer files::/' 
+          curl -fsS "https://huggingface.co/api/models/ivrit-ai/zipformer2-66m-streaming-he/revision/ee769a2a13b887f91572eec349458bfb0fe79e7a?blobs=true" | jq -r '[.siblings[] | select(.rfilename|test("sherpa-onnx/"))| "\(.rfilename)=\(.size):\(.lfs.sha256 // "-")"] | join(" ")' | sed 's/^/::notice title=asr hf zipformer files::/' 
 
       - name: Dev clips (public seed; not pushed)
         env:
