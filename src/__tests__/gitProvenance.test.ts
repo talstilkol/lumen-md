@@ -78,6 +78,22 @@ describe("git provenance", () => {
     vi.unstubAllGlobals();
   });
 
+  it("fails closed: when the record can't be stored, the clone stops before writing anything", async () => {
+    const spy = vi.spyOn(Storage.prototype, "setItem").mockImplementation(() => {
+      throw new DOMException("full", "QuotaExceededError");
+    });
+    const { cloneRepo } = await import("../sync/git");
+    await expect(cloneRepo("https://github.com/someone/team-notes.git", { token: "t" })).rejects.toThrow(/Can't record where these notes came from/);
+    spy.mockRestore();
+    expect(writes).toEqual([]);
+  });
+
+  it("fails closed: unreadable records make every note outside content", async () => {
+    localStorage.setItem("lumen.agents.untrustedNotes", "{damaged");
+    const { untrustedSourcesOfNote } = await import("../agents/provenance");
+    expect(untrustedSourcesOfNote("notes/mine.md")).toEqual(["unknown origin: provenance records unreadable (notes/mine.md)"]);
+  });
+
   it("imports made before the guard: everything under Imported/ is outside content by its path", async () => {
     const { untrustedSourcesOfNote } = await import("../agents/provenance");
     expect(untrustedSourcesOfNote("Imported/Old vault/n.md")).toEqual(["imported (Imported/Old vault/n.md)"]);

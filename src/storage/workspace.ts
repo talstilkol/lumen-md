@@ -258,6 +258,11 @@ export async function renameWorkspaceFile(
   if (newPath.startsWith(oldPath + "/")) throw new Error(`Cannot move "${oldPath}" into itself`);
   const existed = await workspaceHasEntry(newPath);
   if (!opts.overwrite && existed) throw new WorkspaceConflictError(newPath);
+  // Plan 2.7: outside content stays outside content under its new name. The
+  // records move first: if they can't be stored, nothing is moved.
+  const prov = await import("../agents/provenance");
+  const before = prov.snapshotRecords();
+  prov.moveUntrustedNotes(oldPath, newPath);
   try {
     if (await isDirectory(oldPath)) {
       await copyTree(oldPath, newPath);
@@ -270,11 +275,14 @@ export async function renameWorkspaceFile(
     // partial tree at the target: it would block a retry, or sit at the
     // name of an original that a replace moved to the trash.
     if (!existed) await deleteWorkspaceFile(newPath).catch(() => undefined);
+    try {
+      prov.restoreRecords(before);
+    } catch {
+      /* the records stay on the new name as well: outside content is never lost */
+    }
     throw e;
   }
   await deleteWorkspaceFile(oldPath);
-  // Plan 2.7: outside content stays outside content under its new name.
-  (await import("../agents/provenance")).moveUntrustedNotes(oldPath, newPath);
 }
 
 async function copyTree(from: string, to: string): Promise<void> {

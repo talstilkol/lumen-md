@@ -36,6 +36,18 @@ describe("rename / move", () => {
     expect(untrustedSourcesOfNote("notes/clip.md")).toEqual(["clipped page (moved from Library/clip.md) (notes/clip.md)"]);
   });
 
+  it("refuses to move when the provenance records can't be stored, and moves nothing (plan 2.7, fail closed)", async () => {
+    localStorage.removeItem("lumen.agents.untrustedNotes");
+    await writeWorkspaceFile("Imported/v/n.md", "x");
+    const spy = vi.spyOn(Storage.prototype, "setItem").mockImplementation(() => {
+      throw new DOMException("full", "QuotaExceededError");
+    });
+    await expect(renameWorkspaceFile("Imported/v/n.md", "notes/n.md")).rejects.toThrow(/Can't record/);
+    spy.mockRestore();
+    expect(await readWorkspaceFile("Imported/v/n.md")).toBe("x");
+    expect(await workspaceHasEntry("notes/n.md")).toBe(false);
+  });
+
   it("moves folders with everything inside", async () => {
     await writeWorkspaceFile("proj/a.md", "A");
     await writeWorkspaceFile("proj/sub/b.md", "B");

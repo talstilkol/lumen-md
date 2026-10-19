@@ -367,6 +367,11 @@ describe("provenance", () => {
     // A move inside the folder needs no new record.
     moveUntrustedNotes("Imported/vault/a.md", "Imported/vault/b.md");
     expect(untrustedSourcesOfNote("Imported/vault/b.md")).toHaveLength(1);
+    // An import from before the guard has no record, only its Imported/ path: a move out of it writes one.
+    moveUntrustedNotes("Imported/Old vault/n.md", "notes/old-n.md");
+    expect(untrustedSourcesOfNote("notes/old-n.md")).toEqual(["imported (moved from Imported/Old vault/n.md) (notes/old-n.md)"]);
+    moveUntrustedNotes("Imported/Old vault", "vaults/old");
+    expect(untrustedSourcesOfNote("vaults/old/x.md")).toHaveLength(1);
     moveUntrustedNotes("Library", "old-clips");
     expect(untrustedSourcesOfNote("old-clips/q.md")).toHaveLength(1);
   });

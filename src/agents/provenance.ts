@@ -25,28 +25,52 @@ export const isClipLibraryPath = (p: string) => p.startsWith("Library/") || p.st
 /** Where every archive import writes (`storage/exportAll.ts`), also imports made before the guard existed. */
 const isImportedPath = (p: string) => p.startsWith("Imported/");
 
+/** An origin known from the path alone. */
+function pathOrigin(p: string): string | null {
+  if (isClipLibraryPath(p)) return "clipped page";
+  if (isImportedPath(p)) return "imported";
+  return null;
+}
+
 const REGISTRY_KEY = "lumen.agents.untrustedNotes";
 const MAX_ENTRIES = 5000;
 
 type Registry = Record<string, { reason: string; at: number }>;
 
-function loadRegistry(): Registry {
-  try {
-    const raw = localStorage.getItem(REGISTRY_KEY);
-    const v = raw ? (JSON.parse(raw) as unknown) : null;
-    return v && typeof v === "object" ? (v as Registry) : {};
-  } catch {
-    return {};
+/** Thrown when a record can't be stored: the write it guards must not happen (fail closed). */
+export class ProvenanceStorageError extends Error {
+  constructor(cause: unknown) {
+    super(`Can't record where these notes came from (${(cause as Error)?.message ?? cause}), so they are not written: free some browser storage and try again`);
+    this.name = "ProvenanceStorageError";
   }
 }
 
+/** The records, or null when they can't be read (blocked storage, a damaged value): then every note counts as outside content. */
+function readRegistry(): Registry | null {
+  try {
+    const raw = localStorage.getItem(REGISTRY_KEY);
+    if (!raw) return {};
+    const v = JSON.parse(raw) as unknown;
+    return v && typeof v === "object" && !Array.isArray(v) ? (v as Registry) : null;
+  } catch {
+    return null;
+  }
+}
+
+function loadRegistry(): Registry {
+  const r = readRegistry();
+  if (!r) throw new ProvenanceStorageError("the stored records can't be read");
+  return r;
+}
+
+/** Store the records or throw `ProvenanceStorageError`: callers record before they write, so a failure stops the write. */
 function saveRegistry(r: Registry): void {
   const keys = Object.keys(r);
   if (keys.length > MAX_ENTRIES) for (const k of keys.sort((a, b) => r[a].at - r[b].at).slice(0, keys.length - MAX_ENTRIES)) delete r[k];
   try {
     localStorage.setItem(REGISTRY_KEY, JSON.stringify(r));
-  } catch {
-    /* storage full or blocked: the note just isn't remembered */
+  } catch (e) {
+    throw new ProvenanceStorageError(e);
   }
 }
 
@@ -61,6 +85,16 @@ export function markUntrustedNotes(paths: string[], reason: string): void {
   const at = Date.now();
   for (const p of paths) r[p] = { reason, at };
   saveRegistry(r);
+}
+
+/** The records as they are now (to undo a move whose files did not move). */
+export function snapshotRecords(): Readonly<Registry> {
+  return { ...loadRegistry() };
+}
+
+/** Put a snapshot's records back, keeping any added since: undoing never drops a record (fail closed). */
+export function restoreRecords(snapshot: Readonly<Registry>): void {
+  saveRegistry({ ...loadRegistry(), ...snapshot });
 }
 
 /** The user said a note is theirs now ("trust this note"). */
@@ -99,11 +133,11 @@ export function moveUntrustedNotes(from: string, to: string): void {
       changed = true;
     }
   }
-  if (isClipLibraryPath(from) && !isClipLibraryPath(to)) {
-    r[to] = { reason: `clipped page (moved from ${from})`, at: Date.now() };
-    changed = true;
-  } else if ((from === "Library" || from === "ספרייה") && !isClipLibraryPath(`${to}/`)) {
-    r[to] = { reason: `clipped pages (moved from ${from})`, at: Date.now() };
+  // Origins known by path alone (the clip library, Imported/) are written
+  // down when the move leaves them, unless a record above already says so.
+  const origin = pathOrigin(from) ?? pathOrigin(`${from}/`);
+  if (origin && !pathOrigin(to) && !pathOrigin(`${to}/`) && !r[to]) {
+    r[to] = { reason: `${origin} (moved from ${from})`, at: Date.now() };
     changed = true;
   }
   if (changed) saveRegistry(r);
@@ -119,7 +153,8 @@ export function untrustedSourcesOfNote(path: string | null | undefined, content?
   const out: string[] = [];
   if (path) {
     if (isClipLibraryPath(path)) out.push(`clipped page (${path})`);
-    const r = loadRegistry();
+    const r = readRegistry();
+    if (!r) return [...out, `unknown origin: provenance records unreadable (${path})`];
     // The note itself, or a folder above it (a cloned repo, an imported folder, a moved library).
     const parts = path.split("/");
     let recorded = false;
@@ -174,8 +209,11 @@ export function ensureProvenanceBackfill(): Promise<void> {
         markUntrustedNotes(repos, "cloned from git");
       }
       localStorage.setItem(BACKFILL_KEY, "1");
-    } catch {
+    } catch (e) {
+      // Fail closed: without the backfill an old clone would pass as the
+      // user's own notes, so whatever awaited it stops too (and retries next time).
       backfill = null;
+      throw e;
     }
   })();
   return backfill;
