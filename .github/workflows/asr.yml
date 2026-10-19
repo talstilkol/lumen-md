@@ -92,7 +92,7 @@ jobs:
         run: python -I scripts/asr/fleurs_spike.py --out "$RUNNER_TEMP/asr-spike" --n 30
 
       - name: Score (numbers only)
-        run: node scripts/asr/eval.mjs --split dev=eval/golden/asr-he/dev --split test="$RUNNER_TEMP/golden/asr-he/test" --split fleurs-validation="$RUNNER_TEMP/asr-spike" --out asr-scores.json
+        run: node scripts/asr/eval.mjs --split dev=eval/golden/asr-he/dev --split test="$RUNNER_TEMP/golden/asr-he/test" --split fleurs-validation="$RUNNER_TEMP/asr-spike" --out asr-scores.json --show fleurs-validation
       - uses: actions/upload-artifact@v7
         with:
           name: asr-scores

@@ -11,13 +11,17 @@
  */
 import { appendFileSync, existsSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { createRecognizer, decodeAudio, scoreWith, transcribeLive } from "../golden/evals/asr-he.mjs";
+import { createRecognizer, decodeAudio, normalizeAsr, scoreWith, transcribeLive } from "../golden/evals/asr-he.mjs";
 
 const args = process.argv.slice(2);
 const splits = [];
 for (let i = 0; i < args.length; i++) if (args[i] === "--split") splits.push(args[++i].split("="));
 const outFile = args.includes("--out") ? args[args.indexOf("--out") + 1] : "asr-scores.json";
 const PARTS = ["fleurs", "common-voice"];
+// --show NAME: also print the normalised reference / hypothesis of that split's clips —
+// only for a public split (the FLEURS validation sample), never the held-out test.
+const show = args.includes("--show") ? args[args.indexOf("--show") + 1] : null;
+if (show === "test") throw new Error("--show never prints the held-out test split");
 
 function load(dir) {
   const items = [];
@@ -47,6 +51,10 @@ for (const [name, dir] of splits) {
     continue;
   }
   report.splits[name] = await scoreWith(run, items);
+  if (name === show) {
+    const rows = items.map((it) => `${it.id}%0A  ref: ${normalizeAsr(it.text)}%0A  hyp: ${normalizeAsr(run(it).text)}`);
+    console.log(`::notice title=asr ${name} transcripts::${rows.join("%0A")}`);
+  }
   all.push(...items);
 }
 if (splits.length > 1 && all.length) report.splits.all = await scoreWith(run, all);
