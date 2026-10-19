@@ -43,18 +43,27 @@ export async function startDictationSession(files: DictationFiles, cb: Dictation
     } else if (m.type === "error") cb.onError?.(m.message);
     else if (m.type === "stopped") stopped?.();
   };
-  worker.onerror = (e) => cb.onError?.(e.message || "dictation worker failed");
+  let failLoad: ((e: Error) => void) | null = null;
+  worker.onerror = (e) => {
+    const message = e.message || "dictation worker failed";
+    // Before "ready" (the module or ONNX Runtime failed to start) the load fails; after it, the session.
+    if (failLoad) failLoad(new Error(message));
+    else cb.onError?.(message);
+  };
 
   const ready = new Promise<void>((resolve, reject) => {
+    failLoad = reject;
     const prev = worker.onmessage;
     worker.onmessage = (ev: MessageEvent<DictationOut>) => {
-      prev?.call(worker, ev);
+      if (ev.data.type !== "error") prev?.call(worker, ev);
       if (ev.data.type === "ready") {
         worker.onmessage = prev;
+        failLoad = null;
         resolve();
       } else if (ev.data.type === "error") reject(new Error(ev.data.message));
     };
   });
+  ready.catch(() => undefined); // awaited below, after the microphone prompt
   // Copies: the cached bytes stay usable for the next session.
   const enc = files.encoder.slice();
   const dec = files.decoder.slice();
