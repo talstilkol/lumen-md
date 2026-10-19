@@ -155,5 +155,9 @@ describe("plan build", () => {
     for (const t of M.all) if (t.eff === "P0" && t.id !== "13.5" && t.lane !== "T") expect(release.dep).toContain(t.id);
     for (const t of M.all) if (t.eff === "P0") for (const d of t.dep) expect(M.BYID.get(d).eff).toBe("P0");
     expect(renderBoard(M)).toContain("#### 15. מה צריך ממך");
+    // The final audit waits on everything, the owner's checks included.
+    const audit = M.agent.find((t: { depRule?: string }) => t.depRule === "all");
+    for (const o of M.owner) expect(audit.dep).toContain(o.id);
+    expect(audit.start).toBeGreaterThanOrEqual(Math.max(...M.owner.map((o: { end: number }) => o.end)));
   });
 });

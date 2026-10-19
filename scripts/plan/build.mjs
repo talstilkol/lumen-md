@@ -128,7 +128,8 @@ export function buildModel(plan) {
   for (const x of TAL_P0) BYID.get(x).eff = "P0";
   for (const t of agent.filter((t) => t.depRule === "allP0")) t.dep = [...agent.filter((x) => x.eff === "P0" && x.id !== t.id).map((x) => x.id), ...TAL_P0];
   closeP0();
-  for (const t of agent.filter((t) => t.depRule === "all")) t.dep = agent.filter((x) => x.id !== t.id).map((x) => x.id);
+  // "all": every other task and every owner item (the final audit waits on the owner's checks too).
+  for (const t of agent.filter((t) => t.depRule === "all")) t.dep = all.filter((x) => x.id !== t.id).map((x) => x.id);
   checkDeps(all);
 
   // A dependency cycle (done tasks included: their dependencies are data too).
