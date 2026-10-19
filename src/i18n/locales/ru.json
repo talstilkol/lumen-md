@@ -1430,5 +1430,12 @@
   "cmd.ai.cancel": "ИИ: отменить",
   "cmd.ai.cancel.hint": "Останавливает все запросы ИИ (то же делает Esc)",
   "toast.aiCancelled": "Запрос ИИ отменён ({count})",
-  "toast.aiNothingRunning": "Нет активных запросов ИИ"
+  "toast.aiNothingRunning": "Нет активных запросов ИИ",
+  "models.consent.title": "Скачать модель на это устройство?",
+  "models.consent.body": "{purpose}\n\n{name} · {size}. Модель скачивается один раз, проверяется по опубликованной контрольной сумме и хранится в хранилище этого браузера. Ничего из того, что вы пишете, никуда не отправляется.\n\nЛицензия: {license}. {attribution}",
+  "models.consent.ok": "Скачать ({size})",
+  "models.purpose.translateEnHe": "Перевод с английского на иврит",
+  "models.purpose.translateHeEn": "Перевод с иврита на английский",
+  "models.purpose.nerHe": "Поиск имён, мест и организаций в тексте на иврите",
+  "models.purpose.imageSearch": "Поиск изображений по тексту"
 }

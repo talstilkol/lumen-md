@@ -1430,5 +1430,12 @@
   "cmd.ai.cancel": "KI: Abbrechen",
   "cmd.ai.cancel.hint": "Stoppt alle laufenden KI-Anfragen (auch mit Esc)",
   "toast.aiCancelled": "KI-Anfrage abgebrochen ({count})",
-  "toast.aiNothingRunning": "Keine KI-Anfrage läuft"
+  "toast.aiNothingRunning": "Keine KI-Anfrage läuft",
+  "models.consent.title": "Ein Modell auf dieses Gerät laden?",
+  "models.consent.body": "{purpose}\n\n{name} · {size}. Es wird einmal geladen, mit seiner veröffentlichten Prüfsumme verglichen und im Speicher dieses Browsers behalten. Nichts von dem, was Sie schreiben, wird irgendwohin gesendet.\n\nLizenz: {license}. {attribution}",
+  "models.consent.ok": "Laden ({size})",
+  "models.purpose.translateEnHe": "Übersetzung von Englisch nach Hebräisch",
+  "models.purpose.translateHeEn": "Übersetzung von Hebräisch nach Englisch",
+  "models.purpose.nerHe": "Namen, Orte und Organisationen in hebräischem Text finden",
+  "models.purpose.imageSearch": "Bilder per Text suchen"
 }
