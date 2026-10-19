@@ -180,7 +180,7 @@ export function ensureDailyNote(day: Day, settings: DailySettings, locale: strin
   const job = (async () => {
     const ws = await import("../storage/workspace");
     if (!(await ws.workspaceHasEntry(path))) {
-      await ws.writeWorkspaceFile(path, renderTemplate(settings.template || DEFAULT_DAILY.template, day, locale));
+      await ws.writeWorkspaceFile(path, renderTemplate(settings.template, day, locale));
       const { notifyWorkspaceChanged } = await import("../storage/workspaceEvents");
       notifyWorkspaceChanged({ kind: "structure", paths: [path] });
     }

@@ -15,7 +15,7 @@ import { installFakeOpfs } from "./helpers/fakeOpfs";
 import { useAppStore } from "../store/useStore";
 import { listWorkspace, readWorkspaceFile, writeWorkspaceFile } from "../storage/workspace";
 import { DEFAULT_DAILY, cleanFolder, gematria, isValidDailyPattern, dailyPath, dayOfPath, ensureDailyNote, fileNameFor, hebrewDate, hebrewParts, openDailyNote, parseIso, renderTemplate } from "../daily/dailyNote";
-import { firstDayOfWeek, monthGrid } from "../ui/CalendarPanel";
+import { firstDayOfWeek, hebrewMonthsOf, monthGrid } from "../ui/CalendarPanel";
 
 type DevItem = { id: string; direction: string; gregorian: string; hebrewText: string; hebrew: { day: number; month: string; monthHe: string; year: number } };
 const golden = join(resolve(__dirname, "../.."), "eval", "golden");
@@ -105,6 +105,11 @@ describe("open or create", () => {
     expect(await readWorkspaceFile(a)).toBe("# 2026-10-18\n");
   });
 
+  it("an empty template gives an empty note (not the default)", async () => {
+    const p = await ensureDailyNote(day, { ...settings, template: "" }, "en");
+    expect(await readWorkspaceFile(p)).toBe("");
+  });
+
   it("never overwrites an existing note", async () => {
     await writeWorkspaceFile("journal/2026-10-18.md", "mine");
     await ensureDailyNote(day, settings, "en");
@@ -143,6 +148,10 @@ describe("calendar grid", () => {
     expect(useAppStore.getState()).toMatchObject({ showWorkspace: true, showCalendar: true });
     useAppStore.getState().toggleCalendar();
     expect(useAppStore.getState()).toMatchObject({ showWorkspace: true, showCalendar: false });
+  });
+  it("lists every Hebrew month a Gregorian month touches", () => {
+    expect(hebrewMonthsOf(2022, 5)).toEqual(["ניסן 5782", "אייר 5782", "סיוון 5782"]);
+    expect(hebrewMonthsOf(2026, 10).length).toBe(2);
   });
   it("week start by locale", () => {
     expect(firstDayOfWeek("he")).toBe(7);

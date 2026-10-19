@@ -43,6 +43,18 @@ export function monthGrid(y: number, m: number, firstDay: number): Array<Array<D
 
 const utcNoon = (day: Day) => new Date(Date.UTC(day.y, day.m - 1, day.d, 12));
 
+/** Every Hebrew month (with its year) that a Gregorian month touches, in order — up to three (May 2022: Nisan, Iyar, Sivan). */
+export function hebrewMonthsOf(y: number, m: number): string[] {
+  const f = new Intl.DateTimeFormat("he-u-ca-hebrew", { month: "long", year: "numeric", timeZone: "UTC" });
+  const last = new Date(Date.UTC(y, m, 0)).getUTCDate();
+  const out: string[] = [];
+  for (let d = 1; d <= last; d++) {
+    const s = f.format(utcNoon({ y, m, d }));
+    if (out[out.length - 1] !== s) out.push(s);
+  }
+  return out;
+}
+
 export function CalendarPanel() {
   const locale = useAppStore((s) => s.locale) as string;
   const settings = useAppStore((s) => s.dailyNotes);
@@ -88,13 +100,7 @@ export function CalendarPanel() {
     });
   }, [locale, firstDay]);
   const title = new Intl.DateTimeFormat(locale, { month: "long", year: "numeric", timeZone: "UTC" }).format(utcNoon({ ...month, d: 1 }));
-  const heMonths = useMemo(() => {
-    const f = new Intl.DateTimeFormat("he-u-ca-hebrew", { month: "long", year: "numeric", timeZone: "UTC" });
-    const last = new Date(Date.UTC(month.y, month.m, 0)).getUTCDate();
-    const a = f.format(utcNoon({ ...month, d: 1 }));
-    const b = f.format(utcNoon({ ...month, d: last }));
-    return a === b ? a : `${a} – ${b}`;
-  }, [month]);
+  const heMonths = useMemo(() => hebrewMonthsOf(month.y, month.m).join(" – "), [month]);
   const dayLabel = new Intl.DateTimeFormat(locale, { dateStyle: "full", timeZone: "UTC" });
   const dayNumber = new Intl.DateTimeFormat(locale, { day: "numeric", timeZone: "UTC" });
   const rtl = typeof document !== "undefined" && document.documentElement.dir === "rtl";
