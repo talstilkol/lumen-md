@@ -2,7 +2,7 @@
   "version": 1,
   "generated_at": "2026-10-18T05:56:17.413Z",
   "source": "src/i18n/index.ts (en bundle)",
-  "count": 1427,
+  "count": 1435,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -5660,6 +5660,56 @@
       "key": "editor.ariaLabel",
       "en": "Markdown source editor",
       "vars": []
+    },
+    {
+      "key": "backlinks.unlinked",
+      "en": "Unlinked mentions",
+      "vars": []
+    },
+    {
+      "key": "backlinks.unlinkedEmpty",
+      "en": "No unlinked mentions.",
+      "vars": []
+    },
+    {
+      "key": "backlinks.link",
+      "en": "Link",
+      "vars": []
+    },
+    {
+      "key": "backlinks.linkAria",
+      "en": "Link “{text}” in {note}",
+      "vars": [
+        "text",
+        "note"
+      ]
+    },
+    {
+      "key": "backlinks.linked",
+      "en": "Linked in {note}",
+      "vars": [
+        "note"
+      ]
+    },
+    {
+      "key": "backlinks.linkFailed",
+      "en": "Couldn't link in {note}: {error}",
+      "vars": [
+        "note",
+        "error"
+      ]
+    },
+    {
+      "key": "backlinks.changed",
+      "en": "the note changed; look again",
+      "vars": []
+    },
+    {
+      "key": "hover.notFound",
+      "en": "No note named “{target}” yet",
+      "vars": [
+        "target"
+      ]
     },
     {
       "key": "cmd.copyBlockLink",
