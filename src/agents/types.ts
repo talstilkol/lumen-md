@@ -112,6 +112,8 @@ export interface UntrustedConsentRequest {
   args: Record<string, unknown>;
   /** Where the untrusted content came from (pages, clipped / imported notes). */
   sources: string[];
+  /** Network calls: exactly what is sent and where, as the network consent shows it. */
+  network?: NetworkConsentRequest;
 }
 
 export interface ToolContext {

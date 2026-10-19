@@ -254,6 +254,23 @@ describe("injection set (130 cases): a fooled model makes no unapproved write", 
     expect(user).toContain("⟦flagged");
   });
 
+  it("the default approval of a web request in a tainted run shows the host and the whole value sent (review P1)", async () => {
+    setAiPolicy("local-first");
+    const { uiConfirm } = await import("../ui/PromptDialog");
+    const ask = vi.mocked(uiConfirm);
+    ask.mockClear();
+    const query = `harmless looking start ${"x".repeat(330)} SECRET-TAIL-1234`;
+    registerExecutor(fakeExecutor((_r, n) => (n === 1 ? call("search_web", { query }) : reply(JSON.stringify({ final: "ok" })))));
+    await runAgent(agent(), { text: "clip" }, { grants: ["write", "network"], document: "clip", path: "Library/c.md" });
+    expect(ask).toHaveBeenCalledTimes(1);
+    const { message } = ask.mock.calls[0][0] as { message: string };
+    expect(message).toContain(query);
+    expect(message).toContain("research.example.com");
+    expect(message).toContain("Library/c.md");
+    expect(message).not.toContain("local only");
+    expect(net).not.toHaveBeenCalled();
+  });
+
   it("a run without outside content asks nothing extra", async () => {
     setAiPolicy("local-first");
     files.set("notes/mine.md", MY_NOTE);

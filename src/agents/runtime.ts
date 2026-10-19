@@ -18,6 +18,7 @@ import type {
   ExecutorMessage,
   ExecutorId,
   ModelTier,
+  NetworkConsentRequest,
   RetryPatch,
   RunOptions,
   ToolCall,
@@ -78,8 +79,8 @@ interface ToolEnv {
 }
 
 /** Ask the user about a write / network call in a run with untrusted content (plan 2.7). */
-async function approveUntrusted(env: ToolEnv, tool: AgentTool, args: Record<string, unknown>): Promise<boolean> {
-  return (await loadGuard()).askUntrusted(env.consentUntrusted, { tool: tool.name, scope: tool.scope as "write" | "network", args, sources: [...env.taint] });
+async function approveUntrusted(env: ToolEnv, tool: AgentTool, args: Record<string, unknown>, network?: NetworkConsentRequest): Promise<boolean> {
+  return (await loadGuard()).askUntrusted(env.consentUntrusted, { tool: tool.name, scope: tool.scope as "write" | "network", args, sources: [...env.taint], ...(network ? { network } : {}) });
 }
 
 /**
@@ -112,7 +113,7 @@ async function execTool(tools: AgentTool[], call: ToolCall, env: ToolEnv): Promi
       // With untrusted content in the run the gate always asks: the
       // local-only per-call consent (which then carries the warning) or,
       // under the other policies, the untrusted-content approval.
-      const guard = tainted ? { untrusted: [...env.taint], approve: () => approveUntrusted(env, tool, args) } : undefined;
+      const guard = tainted ? { untrusted: [...env.taint], approve: (req: NetworkConsentRequest) => approveUntrusted(env, tool, args, req) } : undefined;
       const gate = await openNetworkGate(tool, { ...call, args }, env.consent, guard);
       callCtx.fetch = gate.fetch;
       callCtx.network = gate.bound;

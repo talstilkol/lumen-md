@@ -81,6 +81,17 @@ export function sentValue(req: Pick<NetworkConsentRequest, "what" | "args">): st
 }
 
 async function defaultConsent(req: NetworkConsentRequest): Promise<boolean> {
+  return askNetworkConsent(req, { perCall: true });
+}
+
+/**
+ * The network consent prompt: tool, host, the whole value that is sent,
+ * the credential and the visited host, and (plan 2.7) the warning when the
+ * run has read outside content. `perCall`: say that local-only asks for
+ * every call (the prompt is also the untrusted-content approval under the
+ * other policies, where that line would be wrong).
+ */
+export async function askNetworkConsent(req: NetworkConsentRequest, opts: { perCall: boolean }): Promise<boolean> {
   const [{ uiConfirm }, { t }] = await Promise.all([import("../ui/PromptDialog"), import("../i18n")]);
   const what = t(`agents.netConsent.what.${req.what}`);
   const parts = [
@@ -89,7 +100,7 @@ async function defaultConsent(req: NetworkConsentRequest): Promise<boolean> {
     req.credential ? t("agents.netConsent.credential", { provider: req.credential }) : "",
     req.visits ? t("agents.netConsent.visits", { host: req.visits }) : "",
     req.untrusted?.length ? t("agents.netConsent.untrusted", { sources: (await import("./untrusted")).sourcesLabel(req.untrusted) }) : "",
-    t("agents.netConsent.perCall"),
+    opts.perCall ? t("agents.netConsent.perCall") : "",
   ];
   return uiConfirm({ title: t("agents.netConsent.title"), message: parts.filter(Boolean).join(" "), okLabel: t("agents.netConsent.ok") });
 }
@@ -103,7 +114,7 @@ export async function openNetworkGate(
   tool: AgentTool,
   call: ToolCall,
   consent?: ConsentHook,
-  guard?: { untrusted: string[]; approve: () => Promise<boolean> },
+  guard?: { untrusted: string[]; approve: (req: NetworkConsentRequest) => Promise<boolean> },
 ): Promise<{ fetch: typeof fetch; consented: boolean; bound: NetworkBinding }> {
   const reason = `Agent tool ${tool.name}`;
   const { url, bound, ...described } = await describeNetworkCall(tool, call);
@@ -115,7 +126,7 @@ export async function openNetworkGate(
     if (guard?.untrusted.length) {
       let ok = false;
       try {
-        ok = await guard.approve();
+        ok = await guard.approve(req);
       } catch {
         ok = false;
       }

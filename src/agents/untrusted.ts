@@ -303,19 +303,22 @@ export function sourcesLabel(sources: string[]): string {
 }
 
 /** What a write / network call would do, shortened, for the approval prompt. */
-export function actionValue(args: Record<string, unknown>): string {
+export function actionValue(args: Record<string, unknown>, scope: "write" | "network" = "write"): string {
   const pick = ["path", "url", "query", "text", "content", "set"].find((k) => args[k] !== undefined);
   const v = pick ? args[pick] : args;
   const text = typeof v === "string" ? `${pick}: ${v}` : JSON.stringify(v);
-  return text.length > 300 ? `${text.slice(0, 300)}…` : text;
+  // What leaves the device is shown whole; a change is only a preview (it is staged and reviewed in full).
+  return scope === "write" && text.length > 300 ? `${text.slice(0, 300)}…` : text;
 }
 
 /** The default approval prompt for a write / network call in a run with untrusted content. */
 export async function defaultUntrustedConsent(req: UntrustedConsentRequest): Promise<boolean> {
+  // A web request: the network consent prompt, which shows the host and the whole value sent, with the warning.
+  if (req.network) return (await import("./network")).askNetworkConsent({ ...req.network, untrusted: req.sources }, { perCall: false });
   const [{ uiConfirm }, { t }] = await Promise.all([import("../ui/PromptDialog"), import("../i18n")]);
   const message = [
     t("agents.untrusted.body", { tool: req.tool, action: t(`agents.untrusted.action.${req.scope}`), sources: sourcesLabel(req.sources) }),
-    t("agents.untrusted.args", { value: actionValue(req.args) }),
+    t("agents.untrusted.args", { value: actionValue(req.args, req.scope) }),
   ].join(" ");
   return uiConfirm({ title: t("agents.untrusted.title"), message, okLabel: t("agents.untrusted.ok") });
 }
