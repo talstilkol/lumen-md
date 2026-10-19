@@ -42,6 +42,8 @@ describe("detectLanguage", () => {
     expect(detectLanguage("Thanks!").lang).toBe("en");
     expect(detectLanguage("Привіт, як справи?").lang).toBe("uk");
     expect(detectLanguage("Привет, как дела?").lang).toBe("ru");
+    expect(detectLanguage("Добры дзень, як справы? Сёння ў нас вельмі прыгожае надвор'е.").lang).toBe("be");
+    expect(detectLanguage("Беларуская мова мае свае асаблівасці і гісторыю, якую варта ведаць кожнаму.").lang).toBe("be"); // ы, і — no ў
     expect(detectLanguage("سلام، حالت چطور است؟").lang).toBe("fa");
     expect(detectLanguage("یہ ایک امتحان ہے").lang).toBe("ur");
     expect(detectLanguage("صباح الخير").lang).toBe("ar");

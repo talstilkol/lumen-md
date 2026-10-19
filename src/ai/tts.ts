@@ -92,6 +92,8 @@ function voiceFor(lang: string): SpeechSynthesisVoice | undefined {
 }
 
 let speaking = false;
+/** Bumped by every speak() and stopSpeaking(): a run whose token is stale stops. */
+let runToken = 0;
 
 export function isSpeaking(): boolean {
   return speaking;
@@ -99,6 +101,7 @@ export function isSpeaking(): boolean {
 
 export function stopSpeaking(): void {
   speaking = false;
+  runToken++;
   if (ttsAvailable()) window.speechSynthesis.cancel();
 }
 
@@ -109,10 +112,9 @@ export function stopSpeaking(): void {
 export async function speak(markdown: string, opts: { uiLang: string; rate?: number; onSentence?: (s: Sentence) => void }): Promise<boolean> {
   if (!ttsAvailable()) return false;
   stopSpeaking();
+  const token = runToken;
   const sentences = speakableSentences(markdown);
   if (!sentences.length) return true;
-  speaking = true;
-  let hadVoice = true;
   // Local language detection (plan 6.5): each sentence gets the voice of
   // its own language; short or unclear ones the document's language.
   let detect: Detect | undefined;
@@ -121,11 +123,15 @@ export async function speak(markdown: string, opts: { uiLang: string; rate?: num
   } catch {
     detect = undefined;
   }
+  // A newer speak() or a stop while the detector loaded: this run is over.
+  if (token !== runToken) return true;
+  speaking = true;
+  let hadVoice = true;
   const ui = opts.uiLang === "he" ? "he-IL" : opts.uiLang;
   const whole = detect?.(sentences.map((x) => x.text).join(" "));
   const docLang = whole && whole.confident && whole.lang !== "und" ? voiceTag(whole.lang) : ui;
   for (const s of sentences) {
-    if (!speaking) break;
+    if (!speaking || token !== runToken) break;
     const lang = langFor(s.text, docLang, detect);
     const u = new SpeechSynthesisUtterance(s.text);
     u.lang = lang;

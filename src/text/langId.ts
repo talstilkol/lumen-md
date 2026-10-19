@@ -46,9 +46,12 @@ export const UI_LANGUAGES = ["he", "en", "ar", "ru", "fr", "de", "ja", "zh"];
 /** Letters that only one language of a script uses (among the common ones). */
 function byLetters(script: string, text: string): string | null {
   if (script === "cyrillic") {
-    if (/[іїєґІЇЄҐ]/.test(text)) return "uk";
+    // Only letters one language owns: ў Belarusian; ї є ґ Ukrainian; ђ ћ џ љ њ ј
+    // Serbian. (і is Ukrainian and Belarusian, ы э ё Russian and Belarusian,
+    // ъ Russian and Bulgarian: those are left to the narrowed model below.)
+    if (/[ўЎ]/.test(text)) return "be";
+    if (/[їєґЇЄҐ]/.test(text)) return "uk";
     if (/[ђћџљњјЂЋЏЉЊЈ]/.test(text)) return "sr";
-    if (/[ыэёЫЭЁ]/.test(text)) return "ru"; // not ъ: Bulgarian uses it constantly
   }
   if (script === "arabic") {
     if (/[ٹڈڑںےۓ]/.test(text)) return "ur";
@@ -110,6 +113,13 @@ export function detectLanguage(text: string, opts: { prefer?: string[]; margin?:
 
   const marked = byLetters(script, prose);
   if (marked) return { lang: marked, script, confident: letters >= 4 };
+  // Cyrillic with a letter Russian lacks (і) or one Ukrainian lacks (ы э ё):
+  // the model chooses within that pair; a short text takes the first.
+  if (script === "cyrillic" && (/[іІ]/.test(prose) || /[ыэёЫЭЁ]/.test(prose))) {
+    const pair = /[іІ]/.test(prose) ? ["ukr", "bel"] : ["rus", "bel"];
+    const lang = letters < (opts.shortLetters ?? 30) ? toTag(pair[0]) : (trigramGuesses(prose, pair)[0]?.[0] ?? toTag(pair[0]));
+    return { lang, script, confident: letters >= 30 };
+  }
 
   // Only the letters of the dominant script go to the model ("PDF" in a
   // Russian sentence is not Russian evidence).
