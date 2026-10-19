@@ -23,6 +23,11 @@ on:
         description: "Why the baselines change (goes into the commit message)"
         required: true
         type: string
+  # BOOTSTRAP ONLY (removed in the next commit): workflow_dispatch cannot
+  # reach a workflow that has never been on the default branch, so the first
+  # baselines are rendered on a push to this branch.
+  push:
+    branches: [test/visual-ci]
 
 concurrency:
   group: visual-baselines-${{ github.ref }}
@@ -83,7 +88,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add e2e-visual/baselines
-          git commit -m "test(visual): refresh ${{ steps.diff.outputs.changed }} baseline(s) — ${{ inputs.reason }}" \
+          git commit -m "test(visual): refresh ${{ steps.diff.outputs.changed }} baseline(s) — ${{ inputs.reason || 'first render of the matrix' }}" \
             -m "Rendered by the visual-baselines workflow (run ${{ github.run_id }}) on CI's chromium."
           git push origin "HEAD:${{ github.ref_name }}"
           echo "Pushed the new baselines to ${{ github.ref_name }}." >> "$GITHUB_STEP_SUMMARY"
