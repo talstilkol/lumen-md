@@ -141,6 +141,18 @@ describe("digest note", () => {
     expect(digestFolder(".hidden", "en")).toBe("Digests");
   });
 
+  it("in the other language's default folder only its day notes are skipped, the user's own notes count (#254 review)", async () => {
+    const v = vault({
+      "סיכומים/2026-10-17.md": { body: "- [ ] old digest task", modified: 20 },
+      "סיכומים/רעיונות.md": { body: "- [ ] my own task", modified: 20 },
+      "סיכומים/sub/2026-10-17.md": { body: "nested note", modified: 20 },
+    });
+    const r = await writeDigest(v.io, { since: 10, now, lang: "en", folder: "Digests", formatDate: fmt });
+    expect(r.ok && r.body).not.toContain("old digest task");
+    expect(r.ok && r.body).toContain("my own task");
+    expect(r.ok && r.body).toContain("[[סיכומים/sub/2026-10-17|2026-10-17]]");
+  });
+
   it("digests left in the other language's default folder are not counted as changed notes", async () => {
     const v = vault({ "סיכומים/2026-10-17.md": { body: "- [ ] old digest task", modified: 20 }, "a.md": { body: "x", modified: 20 } });
     const r = await writeDigest(v.io, { since: 10, now, lang: "en", folder: "Digests", formatDate: fmt });

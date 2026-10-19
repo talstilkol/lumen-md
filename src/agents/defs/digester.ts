@@ -123,10 +123,12 @@ export async function writeDigest(
   const all = await io.list();
   const d = new Date(o.now);
   const path = `${o.folder}/${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}.md`;
-  // Digests are never "changed notes" — the current folder's, nor ones an
-  // older version wrote to the other language's default folder.
-  const digestDirs = [o.folder, ...DEFAULT_DIGEST_FOLDERS].map((f) => `${f}/`);
-  const entries = all.filter((e) => e.modified > o.since && MD_EXT.test(e.path) && !e.path.startsWith(".") && !digestDirs.some((f) => e.path.startsWith(f)));
+  // Digests are never "changed notes": nothing in the digest folder, and in
+  // the other language's default folder only the day notes an older version
+  // wrote there (`<folder>/YYYY-MM-DD.md`) — the user's own notes in a folder
+  // of that name still count.
+  const isOldDigest = (p: string) => DEFAULT_DIGEST_FOLDERS.some((f) => f !== o.folder && new RegExp(`^${f}/\\d{4}-\\d{2}-\\d{2}\\.md$`).test(p));
+  const entries = all.filter((e) => e.modified > o.since && MD_EXT.test(e.path) && !e.path.startsWith(".") && !e.path.startsWith(`${o.folder}/`) && !isOldDigest(e.path));
   const failed: string[] = [];
   const notes = await Promise.all(
     entries.map(async (entry) => ({
