@@ -164,6 +164,9 @@ const defuseMarkers = (s: string) => s.replace(/[⟪⟫]/g, (c) => (c === "⟪" 
 
 const HIDDEN_CSS = /display\s*:\s*none|visibility\s*:\s*hidden|font-size\s*:\s*0(?:\.0*)?(?:px|em|rem|pt|%)?\s*(?:;|"|'|$)|opacity\s*:\s*0(?:\.0*)?\s*(?:;|"|'|$)|(?:height|width)\s*:\s*0(?:px)?\s*(?:;|"|'|$)|color\s*:\s*(?:transparent|white|#fff(?:fff)?)\b|left\s*:\s*-\d{3,}|text-indent\s*:\s*-\d{3,}|clip\s*:\s*rect\(\s*0/i;
 
+/** Trim spaces but keep every line break, so cleaning never changes line numbers. */
+const keepLines = (s: string) => s.replace(/^[ \t]+|[ \t]+$/g, "");
+
 /**
  * Clean untrusted text for a model. Never deletes silently: what is
  * removed is counted in `findings` (and `wrapUntrusted` prints the count),
@@ -199,13 +202,13 @@ export function sanitizeUntrusted(input: string): Sanitized {
   // HTML comments and CSS-hidden elements (clips and notes keep raw HTML).
   text = text.replace(/<!--([\s\S]*?)(?:-->|$)/g, (_m, body: string) => {
     findings.push({ kind: "hidden-html", text: short(body) });
-    return ` ⟦hidden HTML comment: ${body.trim()}⟧ `;
+    return ` ⟦hidden HTML comment: ${keepLines(body)}⟧ `;
   });
   text = text.replace(/<([a-z][a-z0-9-]*)\b([^<>]*)>([\s\S]*?)<\/\1\s*>/gi, (m, _tag: string, attrs: string, body: string) => {
     const hidden = /\shidden(?:\s|=|$)|aria-hidden\s*=\s*["']?true/i.test(` ${attrs}`) || HIDDEN_CSS.test(attrs);
     if (!hidden) return m;
     findings.push({ kind: "hidden-html", text: short(body) });
-    return ` ⟦hidden HTML: ${body.trim()}⟧ `;
+    return ` ⟦hidden HTML: ${keepLines(body)}⟧ `;
   });
 
   // Instruction-like passages: kept, but visibly flagged.
@@ -273,11 +276,10 @@ export function summarizeFindings(findings: Finding[]): string {
 export function wrapUntrusted(cleaned: string, sources: string[], findings: Finding[] = []): string {
   const id = randomId();
   const from = sources.length ? sources.map((s) => short(s, 120)).join("; ") : "outside content";
-  return [
-    `⟪untrusted id=${id} from="${defuseMarkers(from)}" cleaning="${summarizeFindings(findings)}"⟫`,
-    cleaned,
-    `⟪/untrusted id=${id}⟫`,
-  ].join("\n");
+  // The opening marker shares the first line, so line N of the content is
+  // still line N: agents that answer with line numbers (the outliner) stay
+  // aligned with the original text. The closing marker goes after the end.
+  return `⟪untrusted id=${id} from="${defuseMarkers(from)}" cleaning="${summarizeFindings(findings)}"⟫ ${cleaned}\n⟪/untrusted id=${id}⟫`;
 }
 
 /** Clean and wrap in one go. */
