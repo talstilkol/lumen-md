@@ -1409,5 +1409,12 @@
   "cmd.ai.cancel": "AI: ביטול",
   "cmd.ai.cancel.hint": "עוצר כל בקשת AI שרצה (גם Esc עושה זאת)",
   "toast.aiCancelled": "בקשת ה-AI בוטלה ({count})",
-  "toast.aiNothingRunning": "אין בקשת AI שרצה"
+  "toast.aiNothingRunning": "אין בקשת AI שרצה",
+  "models.consent.title": "להוריד מודל למכשיר הזה?",
+  "models.consent.body": "{purpose}\n\n{name} · {size}. המודל יורד פעם אחת, נבדק מול ה-checksum שפורסם ונשמר באחסון של הדפדפן הזה. שום דבר ממה שאתם כותבים לא נשלח לשום מקום.\n\nרישיון: {license}. {attribution}",
+  "models.consent.ok": "הורדה ({size})",
+  "models.purpose.translateEnHe": "תרגום מאנגלית לעברית",
+  "models.purpose.translateHeEn": "תרגום מעברית לאנגלית",
+  "models.purpose.nerHe": "זיהוי שמות, מקומות וארגונים בטקסט עברי",
+  "models.purpose.imageSearch": "חיפוש תמונות לפי טקסט"
 }
