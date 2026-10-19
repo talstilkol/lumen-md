@@ -1257,6 +1257,8 @@
   "vault.folder.alreadyBrowser": "الخزنة موجودة بالفعل في تخزين المتصفح.",
   "vault.folder.reconnectBody": "خزنتك هي المجلد «{folder}». يحتاج Lumen إلى إذنك لفتحه مرة أخرى.",
   "vault.folder.reconnect": "إعادة الاتصال بالمجلد",
+  "vault.boot.failed": "لا يمكن فتح ملاحظاتك بعد: لم يُحمَّل جزء من Lumen (هل أنت غير متصل؟).",
+  "vault.boot.retry": "إعادة المحاولة",
   "vault.folder.useBrowser": "استخدام تخزين المتصفح",
   "vault.folder.interrupted": "انقطع نقل الخزنة إلى «{folder}». لم يُحذف أي شيء.",
   "vault.folder.resume": "استئناف النقل",

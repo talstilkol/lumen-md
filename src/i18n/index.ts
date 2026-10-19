@@ -400,6 +400,8 @@ const en: Strings = {
   "vault.folder.alreadyBrowser": "The vault is already in browser storage.",
   "vault.folder.reconnectBody": "Your vault is the folder “{folder}”. Lumen needs your permission to open it again.",
   "vault.folder.reconnect": "Reconnect folder",
+  "vault.boot.failed": "Your notes can't be opened yet: part of Lumen didn't load (are you offline?).",
+  "vault.boot.retry": "Try again",
   "vault.folder.useBrowser": "Use browser storage",
   "vault.folder.interrupted": "Moving the vault to “{folder}” was interrupted. Nothing was deleted.",
   "vault.folder.resume": "Resume move",

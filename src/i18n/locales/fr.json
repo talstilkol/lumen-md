@@ -1257,6 +1257,8 @@
   "vault.folder.alreadyBrowser": "Le coffre est déjà dans le stockage du navigateur.",
   "vault.folder.reconnectBody": "Votre coffre est le dossier « {folder} ». Lumen a besoin de votre autorisation pour le rouvrir.",
   "vault.folder.reconnect": "Reconnecter le dossier",
+  "vault.boot.failed": "Vos notes ne peuvent pas encore être ouvertes : une partie de Lumen n'a pas été chargée (êtes-vous hors ligne ?).",
+  "vault.boot.retry": "Réessayer",
   "vault.folder.useBrowser": "Utiliser le stockage du navigateur",
   "vault.folder.interrupted": "Le déplacement du coffre vers « {folder} » a été interrompu. Rien n'a été supprimé.",
   "vault.folder.resume": "Reprendre le déplacement",
