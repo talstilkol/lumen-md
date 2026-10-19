@@ -1,0 +1,59 @@
+#!/usr/bin/env node
+/**
+ * The plan 6.1 spike: WER / CER and live latency of the streaming engine on
+ * the asr-he clips, per split and per source.
+ *
+ *   node scripts/asr/eval.mjs --split dev=eval/golden/asr-he/dev --split test=$RUNNER_TEMP/golden/asr-he/test [--out asr-scores.json]
+ *
+ * Each --split names a folder with <part>.json files as hf_build.py writes
+ * them. Only numbers are printed (and appended to the job summary): never a
+ * transcript, since the test split is held out.
+ */
+import { appendFileSync, existsSync, readFileSync, writeFileSync } from "node:fs";
+import { join } from "node:path";
+import { createRecognizer, decodeAudio, scoreWith, transcribeLive } from "../golden/evals/asr-he.mjs";
+
+const args = process.argv.slice(2);
+const splits = [];
+for (let i = 0; i < args.length; i++) if (args[i] === "--split") splits.push(args[++i].split("="));
+const outFile = args.includes("--out") ? args[args.indexOf("--out") + 1] : "asr-scores.json";
+const PARTS = ["fleurs", "common-voice"];
+
+function load(dir) {
+  const items = [];
+  for (const part of PARTS) {
+    const f = join(dir, `${part}.json`);
+    if (!existsSync(f)) continue;
+    for (const it of JSON.parse(readFileSync(f, "utf8")).items) items.push({ ...it, part, audio: join(dir, it.audio) });
+  }
+  return items;
+}
+
+const recognizer = await createRecognizer();
+const done = new Map(); // audio path → result, so "all" does not decode twice
+const run = (it) => {
+  if (!done.has(it.audio)) done.set(it.audio, transcribeLive(recognizer, decodeAudio(it.audio)));
+  return done.get(it.audio);
+};
+const loadT0 = performance.now();
+const report = { engine: "sherpa-onnx WASM (npm sherpa-onnx), ivrit-ai/zipformer2-66m-streaming-he int8, greedy, 1 thread", splits: {} };
+const all = [];
+for (const [name, dir] of splits) {
+  const items = load(dir);
+  if (!items.length) {
+    report.splits[name] = { status: "not-built" };
+    continue;
+  }
+  report.splits[name] = await scoreWith(run, items);
+  all.push(...items);
+}
+if (splits.length > 1 && all.length) report.splits.all = await scoreWith(run, all);
+report.evalSeconds = Math.round((performance.now() - loadT0) / 100) / 10;
+
+writeFileSync(outFile, JSON.stringify(report, null, 2) + "\n");
+const keys = [...new Set(Object.values(report.splits).flatMap((s) => Object.keys(s)))];
+const lines = ["## asr-he — live dictation spike (plan 6.1)", "", report.engine, "", `| Split | ${keys.join(" | ")} |`, `|---|${keys.map(() => "---").join("|")}|`];
+for (const [name, s] of Object.entries(report.splits)) lines.push(`| ${name} | ${keys.map((k) => s[k] ?? "").join(" | ")} |`);
+const md = lines.join("\n") + "\n";
+if (process.env.GITHUB_STEP_SUMMARY) appendFileSync(process.env.GITHUB_STEP_SUMMARY, md);
+console.log(md);
