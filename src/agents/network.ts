@@ -23,14 +23,20 @@ import { ToolError } from "./tools/define";
 
 export type ConsentHook = (request: NetworkConsentRequest) => boolean | Promise<boolean>;
 
+/** The research service and settings a network call was described (and approved) with; the tool uses exactly these. */
+export interface NetworkBinding {
+  endpoint: string;
+  settings: import("../research/client").ResearchSettings;
+}
+
 /**
  * What the call would send and where, for the consent prompt and the
  * ledger. Every network tool goes through the research service (SearXNG /
  * the research worker); without one configured nothing could be sent, so
  * the call fails here, before any consent is asked.
  */
-export async function describeNetworkCall(tool: AgentTool, call: ToolCall): Promise<NetworkConsentRequest & { url: string }> {
-  const { researchEndpoint } = await import("../research/client");
+export async function describeNetworkCall(tool: AgentTool, call: ToolCall): Promise<NetworkConsentRequest & { url: string; bound: NetworkBinding }> {
+  const { researchEndpoint, getResearchSettings } = await import("../research/client");
   const endpoint = researchEndpoint();
   if (!endpoint) throw new ToolError("failed", "The research service isn't configured (VITE_RESEARCH_ENDPOINT or a local SearXNG in AI settings), so there is no way to reach the web");
   const hostOf = (u: string) => {
@@ -41,19 +47,21 @@ export async function describeNetworkCall(tool: AgentTool, call: ToolCall): Prom
     }
   };
   const service = hostOf(endpoint);
+  // What the prompt describes is what the call will use: settings changed
+  // while the dialog is open (another tab, a hook) do not reach this call.
+  const bound: NetworkBinding = { endpoint, settings: getResearchSettings() };
   if (tool.name === "fetch_page") {
     // The address goes to the research service (in its query string), which then visits the page.
     const page = typeof call.args.url === "string" ? call.args.url : "";
-    return { tool: tool.name, host: service, sends: "the page address", what: "page-address", visits: hostOf(page) || undefined, args: call.args, url: `${endpoint}/extract` };
+    return { tool: tool.name, host: service, sends: "the page address", what: "page-address", visits: hostOf(page) || undefined, args: call.args, url: `${endpoint}/extract`, bound };
   }
   if (tool.name === "search_web") {
     // Brave and Tavily need the user's API key, which the service forwards: say so.
-    const { getResearchSettings } = await import("../research/client");
-    const s = getResearchSettings();
+    const s = bound.settings;
     const credential = s.key && (s.provider === "brave" || s.provider === "tavily") ? (s.provider === "brave" ? "Brave Search" : "Tavily") : undefined;
-    return { tool: tool.name, host: service, sends: credential ? `the search query and your ${credential} API key` : "the search query", what: "search-query", credential, args: call.args, url: `${endpoint}/search` };
+    return { tool: tool.name, host: service, sends: credential ? `the search query and your ${credential} API key` : "the search query", what: "search-query", credential, args: call.args, url: `${endpoint}/search`, bound };
   }
-  return { tool: tool.name, host: service, sends: "the tool's arguments", what: "tool-args", args: call.args, url: `${endpoint}/search` };
+  return { tool: tool.name, host: service, sends: "the tool's arguments", what: "tool-args", args: call.args, url: `${endpoint}/search`, bound };
 }
 
 /**
@@ -62,14 +70,14 @@ export async function describeNetworkCall(tool: AgentTool, call: ToolCall): Prom
  * not count. The prompt names the tool, the host and exactly what is sent.
  */
 /**
- * What the call sends, verbatim (shortened past 300 characters): the agent
- * wrote it, possibly from the open note, so the prompt shows it rather
- * than promising that no note text leaves the device.
+ * What the call sends, verbatim and whole: the agent wrote it, possibly
+ * from the open note, so the prompt shows all of it (a query is at most 400
+ * characters, a page address 2 000) rather than a part, or a promise that
+ * no note text leaves the device.
  */
 export function sentValue(req: Pick<NetworkConsentRequest, "what" | "args">): string {
   const v = req.what === "search-query" ? req.args.query : req.what === "page-address" ? req.args.url : undefined;
-  const text = typeof v === "string" ? v : JSON.stringify(req.args);
-  return text.length > 300 ? `${text.slice(0, 300)}…` : text;
+  return typeof v === "string" ? v : JSON.stringify(req.args);
 }
 
 async function defaultConsent(req: NetworkConsentRequest): Promise<boolean> {
@@ -90,10 +98,10 @@ async function defaultConsent(req: NetworkConsentRequest): Promise<boolean> {
  * rejects with `PrivacyBlockedError` (recorded as blocked) when the
  * `local-only` policy holds and the user did not consent to this call.
  */
-export async function openNetworkGate(tool: AgentTool, call: ToolCall, consent?: ConsentHook): Promise<{ fetch: typeof fetch; consented: boolean }> {
+export async function openNetworkGate(tool: AgentTool, call: ToolCall, consent?: ConsentHook): Promise<{ fetch: typeof fetch; consented: boolean; bound: NetworkBinding }> {
   const reason = `Agent tool ${tool.name}`;
-  const { url, ...req } = await describeNetworkCall(tool, call);
-  if (getAiPolicy() !== "local-only") return { fetch: ledgerFetch({ force: { category: "research", reason } }), consented: false };
+  const { url, bound, ...req } = await describeNetworkCall(tool, call);
+  if (getAiPolicy() !== "local-only") return { fetch: boundFetch(ledgerFetch({ force: { category: "research", reason } }), bound.endpoint), consented: false, bound };
   let ok = false;
   try {
     ok = await (consent ?? defaultConsent)(req);
@@ -101,5 +109,16 @@ export async function openNetworkGate(tool: AgentTool, call: ToolCall, consent?:
     ok = false;
   }
   if (!ok) throw recordBlockedRequest(url, "research", `${reason} (local-only, no consent)`);
-  return { fetch: ledgerFetch({ force: { category: "research", reason: `${reason} (user consent)` }, consent: true }), consented: true };
+  return { fetch: boundFetch(ledgerFetch({ force: { category: "research", reason: `${reason} (user consent)` }, consent: true }), bound.endpoint), consented: true, bound };
+}
+
+/** A fetch that reaches only the research service the call was approved for. */
+function boundFetch(inner: typeof fetch, endpoint: string): typeof fetch {
+  return (input, init) => {
+    const target = typeof input === "string" ? input : input instanceof URL ? input.href : input.url;
+    if (target !== endpoint && !target.startsWith(`${endpoint}/`) && !target.startsWith(`${endpoint}?`)) {
+      return Promise.reject(new ToolError("denied", `This call was approved for ${endpoint} only`));
+    }
+    return inner(input, init);
+  };
 }

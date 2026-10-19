@@ -96,6 +96,7 @@ async function execTool(tools: AgentTool[], call: ToolCall, env: ToolEnv): Promi
       const { openNetworkGate } = await import("./network");
       const gate = await openNetworkGate(tool, { ...call, args }, env.consent);
       callCtx.fetch = gate.fetch;
+      callCtx.network = gate.bound;
       note = gate.consented ? "network: sent on the user's consent (local-only)" : "network: allowed by the AI policy";
     } else if (tool.scope === "write") {
       const { stageChange, receiptOf } = await import("./staging");
