@@ -59,6 +59,15 @@ jobs:
           key: asr-zipformer2-66m-streaming-he-int8-v1
       - name: Model
         run: bash scripts/asr/fetch-model.sh "$LUMEN_ASR_MODEL_DIR"
+      - name: Model revisions and the ivrit.ai ONNX exports (names, licences, sizes)
+        run: |
+          curl -fsS "https://huggingface.co/api/models/ivrit-ai/zipformer2-66m-streaming-he" | jq -r '"zipformer2 sha=\(.sha) license=\(.cardData.license // "?")"' | sed 's/^/::notice title=asr hf::/'
+          curl -fsS "https://huggingface.co/api/models?author=ivrit-ai&limit=200" | jq -r '[.[] | select(.id|test("onnx|turbo|ggml|ct2|zipformer";"i")) | .id] | join(" ")' | sed 's/^/::notice title=asr hf ivrit-ai::/'
+          for r in $(curl -fsS "https://huggingface.co/api/models?author=ivrit-ai&limit=200" | jq -r '.[] | select(.id|test("onnx";"i")) | .id'); do
+            curl -fsS "https://huggingface.co/api/models/$r?blobs=true" | jq -r '"\(.id) sha=\(.sha) license=\(.cardData.license // "?") " + ([.siblings[] | select(.rfilename|test("onnx"))| "\(.rfilename)=\((.size // 0)/1e6|floor)MB"] | join(" "))' | sed 's/^/::notice title=asr hf onnx::/' || true
+          done
+          curl -fsS "https://huggingface.co/api/models/onnx-community/whisper-base?blobs=true" | jq -r '"whisper-base sha=\(.sha) license=\(.cardData.license // "?") " + ([.siblings[] | select(.rfilename|test("onnx/(encoder|decoder)_model(_merged)?(_q4|_quantized|_fp16)?\\.onnx"))| "\(.rfilename)=\((.size // 0)/1e6|floor)MB"] | join(" "))' | sed 's/^/::notice title=asr hf whisper-base::/'
+          curl -fsS "https://huggingface.co/api/models/ivrit-ai/zipformer2-66m-streaming-he?blobs=true" | jq -r '[.siblings[] | select(.rfilename|test("sherpa-onnx/"))| "\(.rfilename)=\(.size)"] | join(" ")' | sed 's/^/::notice title=asr hf zipformer files::/' 
 
       - name: Dev clips (public seed; not pushed)
         env:

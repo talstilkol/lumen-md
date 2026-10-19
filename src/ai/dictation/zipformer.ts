@@ -38,6 +38,8 @@ export interface Hypothesis {
 
 /** Seconds per encoder output frame: 10 ms features, subsampled 4×. */
 const OUTPUT_FRAME_S = 0.04;
+/** icefall's padding value for features (log 1e-10). */
+const LOG_EPS = Math.log(1e-10);
 
 export function parseTokens(text: string): string[] {
   const out: string[] = [];
@@ -186,7 +188,6 @@ export class ZipformerStream {
 
   private async decodeChunk(): Promise<void> {
     const { T, decodeChunkLen } = this.m.layout;
-    const { Tensor } = this.m.ort;
     const x = new Float32Array(T * NUM_BINS);
     for (let i = 0; i < T; i++) x.set(this.features[this.processed - this.featBase + i], i * NUM_BINS);
     this.processed += decodeChunkLen;
@@ -194,49 +195,85 @@ export class ZipformerStream {
     this.features.splice(0, drop);
     this.featBase += drop;
 
+    const { encoderOut, states } = await this.runEncoder(x);
+    const old = this.states;
+    this.states = states;
+    for (const s of old) s.dispose?.();
+    const search = { context: this.context, decoderOut: this.decoderOut ?? (await this.runDecoder(this.context)), ids: this.ids, times: this.times };
+    await this.greedy(encoderOut, search, Infinity, true);
+    this.context = search.context;
+    this.decoderOut = search.decoderOut;
+    this.outFrames += encoderOut.dims[1] as number;
+    encoderOut.dispose?.();
+  }
+
+  private async runEncoder(x: Float32Array): Promise<{ encoderOut: Tensor; states: Tensor[] }> {
+    const { T } = this.m.layout;
+    const { Tensor } = this.m.ort;
     const enc = this.m.encoder;
     const feeds: Record<string, Tensor> = { [enc.inputNames[0]]: new Tensor("float32", x, [1, T, NUM_BINS]) };
     this.states.forEach((s, i) => (feeds[enc.inputNames[i + 1]] = s));
     const out = await enc.run(feeds);
-    const encoderOut = out[enc.outputNames[0]];
-    const old = this.states;
-    this.states = enc.outputNames.slice(1).map((n) => out[n]);
-    for (const s of old) s.dispose?.();
-    await this.greedy(encoderOut);
-    encoderOut.dispose?.();
+    return { encoderOut: out[enc.outputNames[0]], states: enc.outputNames.slice(1).map((n) => out[n]) };
   }
 
-  private async runDecoder(): Promise<Tensor> {
+  private async runDecoder(context: number[]): Promise<Tensor> {
     const { Tensor } = this.m.ort;
     const dec = this.m.decoder;
-    const y = new Tensor("int64", BigInt64Array.from(this.context.map(BigInt)), [1, this.m.contextSize]);
+    const y = new Tensor("int64", BigInt64Array.from(context.map(BigInt)), [1, this.m.contextSize]);
     const out = await dec.run({ [dec.inputNames[0]]: y });
     return out[dec.outputNames[0]];
   }
 
-  private async greedy(encoderOut: Tensor): Promise<void> {
+  /** Greedy search over `frames` encoder frames; `commit` = the search state is the stream's own. */
+  private async greedy(encoderOut: Tensor, st: { context: number[]; decoderOut: Tensor; ids: number[]; times: number[] }, maxFrames: number, commit: boolean): Promise<void> {
     const { Tensor } = this.m.ort;
-    const [, frames, dim] = encoderOut.dims as number[];
+    const [, total, dim] = encoderOut.dims as number[];
+    const frames = Math.min(total, maxFrames);
     const data = encoderOut.data as Float32Array;
-    this.decoderOut ??= await this.runDecoder();
     const join = this.m.joiner;
+    const [encName, decName] = join.inputNames.includes("encoder_out") ? ["encoder_out", "decoder_out"] : join.inputNames;
+    let owned = false; // a decoder output this search created (never the stream's committed one, when peeking)
     for (let t = 0; t < frames; t++) {
       const e = new Tensor("float32", data.slice(t * dim, (t + 1) * dim), [1, dim]);
-      const [encName, decName] = join.inputNames.includes("encoder_out") ? ["encoder_out", "decoder_out"] : join.inputNames;
-      const out = await join.run({ [encName]: e, [decName]: this.decoderOut });
+      const out = await join.run({ [encName]: e, [decName]: st.decoderOut });
       e.dispose?.();
       const logits = out[join.outputNames[0]].data as Float32Array;
       let best = 0;
       for (let k = 1; k < logits.length; k++) if (logits[k] > logits[best]) best = k;
       if (best !== 0 && this.m.symbols[best] !== "<unk>") {
-        this.ids.push(best);
-        this.times.push((this.outFrames + t) * OUTPUT_FRAME_S);
-        this.context = [...this.context.slice(1), best];
-        this.decoderOut.dispose?.();
-        this.decoderOut = await this.runDecoder();
+        st.ids.push(best);
+        st.times.push((this.outFrames + t) * OUTPUT_FRAME_S);
+        st.context = [...st.context.slice(1), best];
+        if (commit || owned) st.decoderOut.dispose?.();
+        st.decoderOut = await this.runDecoder(st.context);
+        owned = true;
       }
     }
-    this.outFrames += frames;
+    if (!commit && owned) st.decoderOut.dispose?.();
+  }
+
+  /**
+   * An interim hypothesis before the next chunk is complete: the encoder
+   * runs on the frames received so far, padded with silence (log 1e-10, as
+   * icefall pads), from the committed states — which are left untouched —
+   * and the search continues only over frames backed by real audio. Costs
+   * one encoder run; the committed result is unchanged.
+   */
+  async peek(): Promise<Hypothesis> {
+    const { T } = this.m.layout;
+    const have = this.featBase + this.features.length - this.processed;
+    if (have < 16) return this.result();
+    const x = new Float32Array(T * NUM_BINS).fill(LOG_EPS);
+    for (let i = 0; i < Math.min(have, T); i++) x.set(this.features[this.processed - this.featBase + i], i * NUM_BINS);
+    const { encoderOut, states } = await this.runEncoder(x);
+    for (const s of states) s.dispose?.();
+    const search = { context: this.context, decoderOut: this.decoderOut ?? (await this.runDecoder(this.context)), ids: [...this.ids], times: [...this.times] };
+    if (!this.decoderOut) this.decoderOut = search.decoderOut;
+    await this.greedy(encoderOut, search, Math.floor(have / 4), false);
+    encoderOut.dispose?.();
+    const tokens = search.ids.map((i) => this.m.symbols[i] ?? "");
+    return { text: detokenize(tokens), tokens, timestamps: search.times };
   }
 
   result(): Hypothesis {

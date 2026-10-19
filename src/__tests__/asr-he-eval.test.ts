@@ -5,7 +5,7 @@
  */
 import { describe, it, expect } from "vitest";
 // @ts-expect-error — plain .mjs module without types
-import { editDistance, errors, normalizeAsr, percentile, rates, scoreWith, transcribeLive } from "../../scripts/golden/evals/asr-he.mjs";
+import { editDistance, errors, normalizeAsr, percentile, rates, scoreWith, transcribeLive, wordLatencies, wordSpans } from "../../scripts/golden/evals/asr-he.mjs";
 
 describe("normalizeAsr", () => {
   it("drops niqqud, cantillation and punctuation, keeps letters", () => {
@@ -88,7 +88,7 @@ describe("transcribeLive", () => {
     // The recogniser also decodes the 1.5 s tail, as the real one does with silence.
     expect(out.text.startsWith("w0 w1 w2")).toBe(true);
     expect(out.duration).toBe(3);
-    // Word i is spoken at i s and decoded once its second of audio is in — at the end of the
+    // Word i is stamped at i s and decoded once its second of audio is in — at the end of the
     // first 64 ms slice that completes it — plus the decode cost: 1.024 + 0.05 − 0, 2.048 + 0.05 − 1.
     expect(out.latencies[0]).toBeCloseTo(1.074, 3);
     expect(out.latencies[1]).toBeCloseTo(1.098, 3);
@@ -108,5 +108,38 @@ describe("transcribeLive", () => {
     expect(s["latency.p50Ms"]).toBe(400);
     expect(s["latency.p95Ms"]).toBe(800);
     expect(s.rtf).toBe(0.25);
+  });
+});
+
+describe("word latency", () => {
+  it("splits tokens into words at the SentencePiece marker or a leading space", () => {
+    expect(wordSpans(["▁של", "ום", "▁עו", "לם", " x"])).toEqual([[0, 1], [2, 3], [4, 4]]);
+  });
+  it("counts a word as shown from the first hypothesis that agrees with the final text through it", () => {
+    const final = { tokens: ["▁a", "b", "▁c"], timestamps: [0.1, 0.3, 0.9] };
+    const snaps = [
+      { clock: 0.5, tokens: ["▁a"] }, // word 1 incomplete
+      { clock: 0.7, tokens: ["▁a", "b", "▁x"] }, // word 1 right, word 2 wrong
+      { clock: 1.6, tokens: ["▁a", "b", "▁c"] },
+    ];
+    const l = wordLatencies(final, snaps);
+    expect(l[0]).toBeCloseTo(0.4, 6); // 0.7 − 0.3
+    expect(l[1]).toBeCloseTo(0.7, 6); // 1.6 − 0.9
+  });
+  it("uses interim hypotheses when the engine can peek", async () => {
+    let decoded = 0;
+    let fed = 0;
+    let clock = 0;
+    const rec = {
+      createStream: () => ({ acceptWaveform: (x: Float32Array) => void (fed += x.length), inputFinished: () => undefined }),
+      isReady: () => fed - decoded >= 32000,
+      decode: () => void ((decoded += 32000), (clock += 0.01)),
+      getResult: () => ({ text: "", tokens: Array.from({ length: Math.floor(decoded / 16000) }, (_, i) => `▁w${i}`), timestamps: Array.from({ length: Math.floor(decoded / 16000) }, (_, i) => i + 1) }),
+      peek: () => ({ text: "", tokens: Array.from({ length: Math.floor(fed / 16000) }, (_, i) => `▁w${i}`), timestamps: [] }),
+    };
+    const out = await transcribeLive(rec, new Float32Array(4 * 16000), () => clock);
+    // Word 0 ends at 1 s: committed with the 2 s chunk (at 2.048 s), shown by the first peek after 1 s.
+    expect(out.latencies[0]).toBeCloseTo(1.058, 3);
+    expect(out.shownLatencies[0]).toBeLessThan(0.4);
   });
 });

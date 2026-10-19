@@ -15,9 +15,10 @@
  *
  * Latency is measured, not assumed: the audio is fed in 64 ms slices at
  * real time (a clock that advances with the audio and with every
- * millisecond of decoding), and each word's latency is the time it appears
- * minus the time it was spoken (sherpa-onnx's token timestamps). Reported
- * as p50 / p95 over every word.
+ * millisecond of decoding), and each word's latency is when it is on screen
+ * — committed (latency.*) or already in an interim hypothesis that the
+ * final text confirms (shown.*) — minus when it was spoken (the token
+ * timestamps). Reported as p50 / p95 over every word.
  */
 import { spawnSync } from "node:child_process";
 import { existsSync } from "node:fs";
@@ -154,6 +155,7 @@ export async function lumenRecognizer(modelDir) {
     isReady: (s) => s.isReady(),
     decode: (s) => s.decode(),
     getResult: (s) => s.result(),
+    peek: (s) => s.peek(),
   };
 }
 
@@ -161,53 +163,89 @@ export async function lumenRecognizer(modelDir) {
 const SLICE = 1024 / 16000;
 const TAIL = 1.5; // seconds of silence that flush the last chunk (the model card's recipe)
 
+/** How often the app asks for an interim hypothesis between chunks (s). */
+export const PEEK = 0.32;
+
+/** Index ranges [first, last] of each word in a token list (a word starts at "▁" or, from sherpa-onnx, " "). */
+export function wordSpans(tokens) {
+  const spans = [];
+  tokens.forEach((t, i) => {
+    if (i === 0 || /^[▁ ]/.test(t)) spans.push([i, i]);
+    else spans[spans.length - 1][1] = i;
+  });
+  return spans;
+}
+
 /**
- * Transcribe one clip as live dictation would: real-time slices, decoding
- * whenever a chunk is ready. Returns the text, each word's latency (s) and
- * the compute time.
+ * Per word of the final text, how long after it was spoken it was on
+ * screen: the first hypothesis (interim or committed) whose tokens agree
+ * with the final ones up to the word's end, minus the word's last token
+ * timestamp. `snapshots` = [{ clock, tokens }] in time order.
+ */
+export function wordLatencies(final, snapshots) {
+  const out = [];
+  const same = (a, upto) => a.length > upto && a.slice(0, upto + 1).every((t, k) => t === final.tokens[k]);
+  for (const [, last] of wordSpans(final.tokens)) {
+    const hit = snapshots.find((s) => same(s.tokens, last));
+    if (hit) out.push(Math.max(0, hit.clock - (final.timestamps[last] ?? hit.clock)));
+  }
+  return out;
+}
+
+/**
+ * Transcribe one clip as live dictation would: 64 ms slices in real time
+ * (the trailing silence too), a chunk decoded as soon as it is complete,
+ * and — when the engine can (`peek`) — an interim hypothesis every 320 ms
+ * in between. Returns the text, per-word latencies (committed, and shown
+ * incl. interim), the compute time and the duration.
  */
 export async function transcribeLive(recognizer, samples, now = () => performance.now() / 1000) {
   const stream = recognizer.createStream();
   let clock = 0; // wall time since the clip started, in seconds
   let compute = 0;
-  let seen = 0;
-  const latencies = [];
+  const committed = [];
+  const shown = [];
   const step = Math.round(SLICE * 16000);
-  const collect = () => {
-    const r = recognizer.getResult(stream);
-    const ts = r.timestamps ?? [];
-    const tokens = r.tokens ?? [];
-    for (let i = seen; i < tokens.length; i++) {
-      // A word starts at a token that begins with the SentencePiece word
-      // marker (sherpa-onnx returns it as a space already).
-      if (/^[▁ ]/.test(tokens[i]) || i === 0) latencies.push(Math.max(0, clock - (ts[i] ?? clock)));
-    }
-    seen = Math.max(seen, tokens.length);
-    return r;
-  };
-  const decode = async () => {
+  const timed = async (fn) => {
     const t0 = now();
-    while (recognizer.isReady(stream)) await recognizer.decode(stream);
+    const r = await fn();
     const dt = now() - t0;
     compute += dt;
     clock += dt;
+    return r;
   };
-  // The trailing silence arrives in real time too, as it would from a
-  // microphone: the last words wait for their chunk like every other word.
+  const snap = (list, r) => list.push({ clock, tokens: [...(r.tokens ?? [])] });
+  let lastPeek = 0;
   const audio = new Float32Array(samples.length + Math.round(TAIL * 16000));
   audio.set(samples);
   for (let at = 0; at < audio.length; at += step) {
     const slice = audio.subarray(at, Math.min(audio.length, at + step));
     clock = Math.max(clock, (at + slice.length) / 16000); // the audio arrives in real time
     stream.acceptWaveform(slice);
-    await decode();
-    collect();
+    if (recognizer.isReady(stream)) {
+      await timed(async () => {
+        while (recognizer.isReady(stream)) await recognizer.decode(stream);
+      });
+      const r = recognizer.getResult(stream);
+      snap(committed, r);
+      snap(shown, r);
+      lastPeek = clock;
+    } else if (recognizer.peek && clock - lastPeek >= PEEK) {
+      const r = await timed(() => recognizer.peek(stream));
+      snap(shown, r);
+      lastPeek = clock;
+    }
   }
   stream.inputFinished();
-  await decode();
-  const r = collect();
+  await timed(async () => {
+    while (recognizer.isReady(stream)) await recognizer.decode(stream);
+  });
+  const r = recognizer.getResult(stream);
+  snap(committed, r);
+  snap(shown, r);
   stream.free?.();
-  return { text: r.text ?? "", latencies, compute, duration: samples.length / 16000 };
+  const final = { tokens: r.tokens ?? [], timestamps: r.timestamps ?? [] };
+  return { text: r.text ?? "", latencies: wordLatencies(final, committed), shownLatencies: wordLatencies(final, shown), compute, duration: samples.length / 16000 };
 }
 
 /* ── The harness ──────────────────────────────────────────────────────── */
@@ -216,6 +254,7 @@ export async function transcribeLive(recognizer, samples, now = () => performanc
 export async function scoreWith(transcribe, items) {
   const parts = new Map();
   const latencies = [];
+  const shown = [];
   let compute = 0;
   let duration = 0;
   for (const it of items) {
@@ -223,6 +262,7 @@ export async function scoreWith(transcribe, items) {
     if (!parts.has(it.part)) parts.set(it.part, []);
     parts.get(it.part).push(errors(it.text, out.text));
     latencies.push(...(out.latencies ?? []));
+    shown.push(...(out.shownLatencies ?? []));
     compute += out.compute ?? 0;
     duration += out.duration ?? 0;
   }
@@ -241,6 +281,11 @@ export async function scoreWith(transcribe, items) {
   if (latencies.length) {
     scores["latency.p50Ms"] = Math.round(percentile(latencies, 50) * 1000);
     scores["latency.p95Ms"] = Math.round(percentile(latencies, 95) * 1000);
+  }
+  // With interim hypotheses (engines that can peek): when the word was first on screen, correct.
+  if (shown.length) {
+    scores["shown.p50Ms"] = Math.round(percentile(shown, 50) * 1000);
+    scores["shown.p95Ms"] = Math.round(percentile(shown, 95) * 1000);
   }
   if (duration) scores.rtf = round(compute / duration);
   return scores;
