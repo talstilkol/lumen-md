@@ -417,7 +417,7 @@ SETS.push(
   {
     id: "bidi",
     title: "Line direction (bidi)",
-    capability: "7.10",
+    capability: "9.7",
     metric: "accuracy of the line's direction (rtl / ltr / neutral)",
     target: 30,
     license: "CC0-1.0",

@@ -1,7 +1,7 @@
 /**
  * T25 — per-line direction in the source editor.
  *
- * The extension puts a `dir` attribute on every rendered line: `auto`
+ * The extension puts a `dir` attribute on every rendered line: its own direction (plan 9.7; was `auto`)
  * for prose (the browser resolves it from the line's own text), `ltr`
  * inside fenced code and the frontmatter, and the frontmatter's own
  * `dir:` for every line when the note pins one.
@@ -46,9 +46,16 @@ describe("bidiExtension", () => {
   });
   afterEach(() => host.remove());
 
-  it("gives every prose line dir=auto and every code line dir=ltr", () => {
+  it("gives every prose line its own direction, empty lines the note's, and code ltr (plan 9.7)", () => {
     const view = mount("# כותרת\n\nEnglish paragraph\n\n```js\nconst x = 1;\n```\n\nשורה בעברית", host);
-    expect(dirs(view)).toEqual(["auto", "auto", "auto", "auto", "ltr", "ltr", "ltr", "auto", "auto"]);
+    expect(dirs(view)).toEqual(["rtl", "rtl", "ltr", "rtl", "ltr", "ltr", "ltr", "rtl", "rtl"]);
+    view.destroy();
+  });
+
+  it("decides by the text after Markdown markers, without code spans and link URLs (plan 9.7)", () => {
+    const view = mount("> `iPhone` הפגישה נדחתה\n- [ ] Hello everyone\n[שלום](https://example.com/a)\n10:30 42%\n\u200F10:30 PDF", host);
+    // dir="auto" would have made the first line ltr (the code span's "i").
+    expect(dirs(view)).toEqual(["rtl", "ltr", "rtl", "rtl", "rtl"]);
     view.destroy();
   });
 
@@ -68,7 +75,7 @@ describe("bidiExtension", () => {
 
   it("follows edits: a line that becomes code turns ltr", () => {
     const view = mount("שלום\nhello\n", host);
-    expect(dirs(view)).toEqual(["auto", "auto", "auto"]);
+    expect(dirs(view)).toEqual(["rtl", "ltr", "rtl"]);
     view.dispatch({ changes: { from: 0, insert: "```\n" } });
     view.dispatch({ changes: { from: view.state.doc.length, insert: "```" } });
     expect(dirs(view)).toEqual(["ltr", "ltr", "ltr", "ltr"]);

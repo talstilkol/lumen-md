@@ -159,6 +159,7 @@
     "@vitejs/plugin-react": "^6.1.1",
     "@vitest/coverage-v8": "^4.1.8",
     "axe-core": "^4.11.3",
+    "bidi-js": "1.1.0",
     "fake-indexeddb": "^6.2.5",
     "jsdom": "^29.1.1",
     "postcss": "^8.5.12",

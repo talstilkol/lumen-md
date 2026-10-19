@@ -31,7 +31,7 @@ test.beforeEach(async ({ page }) => {
 test("source editor: each line takes its own direction, code stays ltr", async ({ page }) => {
   await loadNote(page);
   const lines = page.locator(".cm-content .cm-line");
-  await expect(lines.first()).toHaveAttribute("dir", "auto");
+  await expect(lines.first()).toHaveAttribute("dir", "rtl");
   const dirs = await lines.evaluateAll((els) => els.map((el) => [el.textContent?.trim().slice(0, 12) ?? "", getComputedStyle(el).direction]));
   const by = (prefix: string) => dirs.find(([t]) => t.startsWith(prefix))?.[1];
   expect(by("# כותרת")).toBe("rtl");
