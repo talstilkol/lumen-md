@@ -6,10 +6,10 @@
  * later. Loaded lazily, only on a first visit or from ⌘K.
  */
 import { useEffect, useRef, useState } from "react";
-import { SUPPORTED_LOCALES, getLocale, t, type Locale } from "../i18n";
+import { SUPPORTED_LOCALES, getLocale, isLocaleLoaded, loadLocale, t, type Locale } from "../i18n";
 import { useAppStore, type Theme } from "../store/useStore";
 import { PRESET_IDS, type PresetId } from "../lib/themeSettings";
-import { createFirstNote, currentVaultFolder, importInto, markSetupDone, openBrowserVault, openFolderVault, type StartChoice } from "./setup";
+import { createFirstNote, currentVault, importInto, markSetupDone, openBrowserVault, openFolderVault, reconnectFolderVault, type StartChoice } from "./setup";
 import "./FirstRun.css";
 
 const STEPS = ["lang", "vault", "look", "start"] as const;
@@ -38,6 +38,8 @@ export default function FirstRun({ onDone }: Props) {
   const shownLocale = pickedLocale ?? locale;
   const [step, setStep] = useState(0);
   const [folder, setFolder] = useState<string | null>(null);
+  /** The folder vault needs permission again (browser restart): it can't be written until reconnected. */
+  const [disconnected, setDisconnected] = useState(false);
   const [start, setStart] = useState<StartChoice>("sample");
   const [status, setStatus] = useState("");
   const [busy, setBusy] = useState(false);
@@ -48,7 +50,11 @@ export default function FirstRun({ onDone }: Props) {
   // Reopened from ⌘K: the vault may already be in a folder.
   useEffect(() => {
     let live = true;
-    void currentVaultFolder().then((name) => live && name !== null && setFolder(name));
+    void currentVault().then((v) => {
+      if (!live || v.folder === null) return;
+      setFolder(v.folder);
+      setDisconnected(v.disconnected);
+    });
     return () => {
       live = false;
     };
@@ -80,6 +86,7 @@ export default function FirstRun({ onDone }: Props) {
       const handle = await picker.call(window, { mode: "readwrite" });
       if (await openFolderVault(handle)) {
         setFolder(handle.name);
+        setDisconnected(false);
         setStatus(t("onboard.vault.folder.chosen", { folder: handle.name }));
       } else setStatus(t("onboard.vault.folder.denied", { folder: handle.name }));
     } catch {
@@ -91,7 +98,19 @@ export default function FirstRun({ onDone }: Props) {
     if (folder === null) return;
     await openBrowserVault();
     setFolder(null);
+    setDisconnected(false);
     setStatus("");
+  };
+
+  /** Permission again for the folder vault; false (with a message) when refused. */
+  const reconnect = async (): Promise<boolean> => {
+    if (await reconnectFolderVault()) {
+      setDisconnected(false);
+      setStatus(t("onboard.vault.folder.chosen", { folder: folder ?? "" }));
+      return true;
+    }
+    setStatus(t("onboard.vault.folder.denied", { folder: folder ?? "" }));
+    return false;
   };
 
   const startImport = (kind: "obsidian" | "notion") => {
@@ -120,9 +139,16 @@ export default function FirstRun({ onDone }: Props) {
   };
 
   const finish = async () => {
+    // A folder vault the browser closed: ask first (this click is the user gesture it needs).
+    if (folder !== null && disconnected && !(await reconnect())) return;
     setBusy(true);
     setStatus(t("onboard.working"));
     try {
+      // The language picked may still be loading: the first note is in the one that actually applies.
+      const chosen = pickedLocale ?? locale;
+      await loadLocale(chosen).catch(() => undefined);
+      if (isLocaleLoaded(chosen) && getLocale() !== chosen) useAppStore.getState().setLocale(chosen);
+      setPickedLocale(null);
       const note = await createFirstNote(start, getLocale());
       window.dispatchEvent(new Event("lumen-workspace-changed"));
       markSetupDone();
@@ -165,6 +191,10 @@ export default function FirstRun({ onDone }: Props) {
                       onChange={() => {
                         setPickedLocale(l.code);
                         useAppStore.getState().setLocale(l.code);
+                        // Once loading settles the store holds what applied (English if the strings failed to load).
+                        void loadLocale(l.code)
+                          .catch(() => undefined)
+                          .then(() => setPickedLocale((p) => (p === l.code ? null : p)));
                       }}
                     />
                     <span lang={l.code} dir={l.dir}>{l.label}</span>
@@ -188,9 +218,20 @@ export default function FirstRun({ onDone }: Props) {
                 <input type="radio" name="fr-vault" checked={folder !== null} disabled={!folderSupported()} onChange={() => void chooseFolder()} />
                 <span>
                   <strong>{t("onboard.vault.folder")}</strong>
-                  <small>{folderSupported() ? t("onboard.vault.folder.desc") : t("onboard.vault.folder.unsupported")}</small>
+                  <small>
+                    {folder !== null && disconnected
+                      ? t("vault.folder.reconnectBody", { folder })
+                      : folderSupported()
+                        ? t("onboard.vault.folder.desc")
+                        : t("onboard.vault.folder.unsupported")}
+                  </small>
                 </span>
               </label>
+              {folder !== null && disconnected && (
+                <button type="button" className="lumen-firstrun-btn" onClick={() => void reconnect()}>
+                  {t("vault.folder.reconnect")}
+                </button>
+              )}
             </fieldset>
           )}
 

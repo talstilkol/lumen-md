@@ -42,11 +42,19 @@ export async function openFolderVault(handle: FileSystemDirectoryHandle): Promis
   return openFolderAsVault(handle);
 }
 
-/** The folder the vault is in now (reopening setup from ⌘K), or null for browser storage. */
-export async function currentVaultFolder(): Promise<string | null> {
+/** Where the vault is now (reopening setup from ⌘K): its folder, if any, and whether that folder needs permission again. */
+export async function currentVault(): Promise<{ folder: string | null; disconnected: boolean }> {
   const { getVaultStatus } = await import("../storage/vault/location");
   const status = getVaultStatus();
-  return status.location === "folder" || status.location === "folder-disconnected" ? status.name : null;
+  if (status.location === "folder") return { folder: status.name, disconnected: false };
+  if (status.location === "folder-disconnected") return { folder: status.name, disconnected: true };
+  return { folder: null, disconnected: false };
+}
+
+/** Ask again for the folder vault the browser closed (after a restart); false when refused. */
+export async function reconnectFolderVault(): Promise<boolean> {
+  const { reconnectVaultFolder } = await import("../storage/vault/location");
+  return reconnectVaultFolder();
 }
 
 /** The vault in browser storage (the default; a no-op unless a folder was chosen earlier in this setup). */

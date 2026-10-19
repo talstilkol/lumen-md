@@ -17,12 +17,17 @@ import { useAppStore } from "../store/useStore";
 
 vi.mock("../ui/AiToast", () => ({ showAiToast: vi.fn() }));
 // The vault's place, settable per test (reopening setup with a folder vault).
-const vaultState = vi.hoisted(() => ({ status: null as null | { location: string; name?: string }, toBrowser: 0 }));
+const vaultState = vi.hoisted(() => ({ status: null as null | { location: string; name?: string }, toBrowser: 0, reconnects: 0, allowReconnect: false }));
 vi.mock("../storage/vault/location", async (orig) => {
   const real = await orig<typeof import("../storage/vault/location")>();
   return {
     ...real,
     getVaultStatus: () => (vaultState.status ?? real.getVaultStatus()) as ReturnType<typeof real.getVaultStatus>,
+    reconnectVaultFolder: async () => {
+      vaultState.reconnects++;
+      if (vaultState.allowReconnect) vaultState.status = { location: "folder", name: vaultState.status?.name };
+      return vaultState.allowReconnect;
+    },
     switchToBrowserStorage: async () => {
       vaultState.toBrowser++;
       vaultState.status = { location: "opfs" };
@@ -168,5 +173,57 @@ describe("FirstRun", () => {
       vaultState.status = null;
       delete (window as { showDirectoryPicker?: unknown }).showDirectoryPicker;
     }
+  });
+
+  it("a folder that needs permission again is offered for reconnecting, and Start writing asks before writing", async () => {
+    vaultState.status = { location: "folder-disconnected", name: "Notes" };
+    vaultState.reconnects = 0;
+    vaultState.allowReconnect = false;
+    Object.assign(window, { showDirectoryPicker: async () => ({}) });
+    const onDone = vi.fn();
+    try {
+      render(<FirstRun onDone={onDone} />);
+      fireEvent.click(screen.getByRole("button", { name: "Next" }));
+      const again = await screen.findByRole("button", { name: "Reconnect folder" });
+      expect(screen.getByText(/Lumen needs your permission to open it again/)).toBeTruthy();
+      await act(async () => {
+        fireEvent.click(again);
+      });
+      expect(vaultState.reconnects).toBe(1);
+      expect(screen.getByRole("status").textContent).toContain("wasn't allowed to use “Notes”");
+      // Refused again at Start writing: nothing is created.
+      fireEvent.click(screen.getByRole("button", { name: "Next" }));
+      fireEvent.click(screen.getByRole("button", { name: "Next" }));
+      await act(async () => {
+        fireEvent.click(screen.getByRole("button", { name: "Start writing" }));
+      });
+      expect(vaultState.reconnects).toBe(2);
+      expect(onDone).not.toHaveBeenCalled();
+      // Allowed: the folder is back and setup goes on.
+      vaultState.allowReconnect = true;
+      fireEvent.click(screen.getByRole("radio", { name: /An empty vault/ }));
+      fireEvent.click(screen.getByRole("button", { name: "Start writing" }));
+      await waitFor(() => expect(onDone).toHaveBeenCalledTimes(1));
+      expect(vaultState.reconnects).toBe(3);
+    } finally {
+      vaultState.status = null;
+      delete (window as { showDirectoryPicker?: unknown }).showDirectoryPicker;
+    }
+  });
+
+  it("Start writing right after picking a language that is still loading writes the note in that language", async () => {
+    const onDone = vi.fn();
+    render(<FirstRun onDone={onDone} />);
+    // French hasn't been loaded in this file yet: picking it starts the fetch.
+    fireEvent.click(screen.getByRole("radio", { name: "Français" }));
+    expect(screen.getByRole("radio", { name: "Français" })).toHaveProperty("checked", true);
+    for (let i = 0; i < 3; i++) fireEvent.click(screen.getAllByRole("button").at(-1)!);
+    fireEvent.click(screen.getAllByRole("radio").at(-1)!); // the empty vault (labels may still be English or French)
+    fireEvent.click(screen.getAllByRole("button").at(-1)!);
+    await waitFor(() => expect(onDone).toHaveBeenCalledTimes(1));
+    expect(onDone.mock.calls[0][0].note.path).toMatch(/^Première note( \d+)?\.md$/);
+    await act(async () => {
+      useAppStore.getState().setLocale("en");
+    });
   });
 });
