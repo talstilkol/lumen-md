@@ -256,7 +256,7 @@ export default defineConfig({
         // importScripts("workbox-*.js") is blocked there, leaving an
         // "activated" worker with no precache and no routes (no offline).
         inlineWorkboxRuntime: true,
-        globPatterns: ["**/*.{js,css,html,svg,wasm,woff2}"],
+        globPatterns: ["**/*.{js,css,html,svg,wasm,woff2}", "dict/*.txt"],
         // Exclude heavy vendor chunks that are loaded on-demand via dynamic
         // import — these will be cached at runtime when first fetched.
         globIgnores: [

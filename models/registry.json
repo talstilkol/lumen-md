@@ -502,6 +502,26 @@
       "notes": "Must never be bundled. The app downloads it from upstream only after an explicit user action and shows its licence first (HEBREW_DICT_LICENSE); that exception is recorded in licenses.allow.json."
     },
     {
+      "id": "frequencywords-he-50k",
+      "kind": "other",
+      "source": "https://github.com/hermitdave/FrequencyWords/blob/525f9b560de45753a5ea01069454e72e9aa541c6/content/2018/he/he_50k.txt",
+      "license": "CC-BY-SA-4.0",
+      "class": "allowed",
+      "commercial": "yes",
+      "attribution": "Hebrew word frequencies: FrequencyWords he_50k by Hermit Dave (github.com/hermitdave/FrequencyWords), built from OpenSubtitles 2018 (opus.nlpl.eu), licensed CC BY-SA 4.0.",
+      "size": "0.8 MB (792 853 bytes, sha256 0069e931eb1ca0aaf638ea806b0d9d5810d787c51ada944da564a2fb213af41d)",
+      "runs": "browser",
+      "delivery": "bundled",
+      "catalog": "HEBREW_FREQ_PATH (src/ai/hebrewFreq.ts) → public/dict/he_50k.txt, fetched lazily by src/ai/hebrewSpell.worker.ts",
+      "match": [
+        "he_50k",
+        "FrequencyWords",
+        "dict/he_50k.txt"
+      ],
+      "verified": true,
+      "notes": "Plan 9.2. Shipped unmodified next to its licence (public/dict/LICENSE.md), so ShareAlike binds only the list itself, not the app; every spelling hint names the list and its licence (HEBREW_FREQ_CREDIT). Suggestion-only: the list comes from subtitles and has typos of its own. Content licence from the repo README (\"CC-by-sa-4.0 for content\"; code is MIT), checked 2026-10-19 at commit 525f9b5."
+    },
+    {
       "id": "DictaLM-3.0-1.7B",
       "kind": "llm",
       "source": "https://huggingface.co/dicta-il",

@@ -6,6 +6,7 @@
 import { get, set, del } from "idb-keyval";
 import type { GrammarMatch } from "./grammar";
 import { HEBREW_DICT_URL, hebrewRules } from "./hebrewSpell";
+import { HEBREW_FREQ_PATH, lonePrefixRule } from "./hebrewFreq";
 import { hebrewRatio } from "../text/hebrew";
 
 const DICT_KEY = "lumen.dict.he.v1";
@@ -53,8 +54,19 @@ let seq = 0;
 const pending = new Map<number, { text: string; resolve: (m: GrammarMatch[]) => void }>();
 
 /** Settle every outstanding check with the dictionary-free rules: a caller must never wait forever. */
+/** What runs on the main thread when there is no worker: the rules that need no list. */
+function mainThreadRules(text: string): GrammarMatch[] {
+  return [...hebrewRules(text), ...lonePrefixRule(text)].sort((a, b) => a.offset - b.offset);
+}
+
+/** The bundled frequency list's address (public/dict/, served with the app and precached). */
+function frequencyListUrl(): string {
+  const base = (import.meta.env?.BASE_URL as string | undefined) ?? "/";
+  return new URL(`${base.replace(/\/?$/, "/")}${HEBREW_FREQ_PATH}`, typeof location !== "undefined" ? location.href : "http://localhost/").href;
+}
+
 function settlePending(): void {
-  for (const { text, resolve } of pending.values()) resolve(hebrewRules(text));
+  for (const { text, resolve } of pending.values()) resolve(mainThreadRules(text));
   pending.clear();
 }
 
@@ -83,16 +95,20 @@ function startWorker(): Promise<Worker | null> {
       resetWorker();
     };
     if (dic) w.postMessage({ type: "load", dic });
+    w.postMessage({ type: "freq", url: frequencyListUrl() });
     worker = w;
     return w;
   })();
   return ready;
 }
 
-/** Check Hebrew text: rules always, spelling once the dictionary is installed. */
+/**
+ * Check Hebrew text: rules always; spelling hints and two more rules from
+ * the bundled frequency list; Hspell's spelling once the user installed it.
+ */
 export async function checkHebrew(text: string): Promise<GrammarMatch[]> {
   const w = await startWorker().catch(() => null);
-  if (!w) return hebrewRules(text);
+  if (!w) return mainThreadRules(text);
   const id = ++seq;
   return new Promise((resolve) => {
     pending.set(id, { text, resolve });

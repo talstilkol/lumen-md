@@ -35,6 +35,8 @@ const CATEGORY_COLOR: Record<string, string> = {
   STYLE: "hsl(220 14% 60%)",
   PUNCTUATION: "hsl(280 65% 65%)",
   TYPOGRAPHY: "hsl(220 14% 60%)",
+  // A suggestion from the bundled word list (plan 9.2), not a certain error.
+  HINT: "hsl(200 70% 60%)",
 };
 
 function colorFor(m: GrammarMatch): string {
