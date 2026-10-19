@@ -6,6 +6,7 @@
  */
 import { describe, it, expect } from "vitest";
 import { readFileSync } from "node:fs";
+// @ts-expect-error — plain .mjs module without type declarations
 import { GoldenPublicError, publicLoaderError } from "../../scripts/lib/golden.mjs";
 
 describe("run-evals withholds loader messages", () => {
