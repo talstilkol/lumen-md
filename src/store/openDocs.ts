@@ -4,7 +4,6 @@
  */
 
 import { flushPendingEdits, tabIdOf, useAppStore } from "./useStore";
-import { writeWorkspaceFile } from "../storage/workspace";
 import { notifyWorkspaceChanged } from "../storage/workspaceEvents";
 import { movedPath } from "../storage/fileOps";
 
@@ -18,7 +17,9 @@ export async function flushActiveWorkspaceDoc(): Promise<void> {
   const d = useAppStore.getState().doc;
   if (!d.dirty || !d.workspaceName) return;
   const { workspaceName: name, content } = d;
-  await writeWorkspaceFile(name, content);
+  // Compare-and-swap (plan 4.4): never over a change made outside Lumen.
+  const { saveOpenNote } = await import("./externalChanges");
+  if (!(await saveOpenNote(name, content))) return;
   const now = useAppStore.getState().doc;
   if (now.workspaceName === name && now.content === content) useAppStore.getState().markSaved();
   notifyWorkspaceChanged({ kind: "content", paths: [name] });

@@ -91,6 +91,8 @@ const vaultReady = Promise.race([
   import("./storage/vault/location").then(async (m) => {
     const { detachWorkspaceDocs } = await import("./store/vaultDocs");
     m.setOnVaultReplaced(detachWorkspaceDocs);
+    // Changes made outside Lumen reach the open tabs (plan 4.4).
+    void import("./store/externalChanges").then((x) => x.startExternalChanges());
     return m.restoreVaultLocationWithin(3000);
   }),
   new Promise((r) => setTimeout(r, 4000)),
