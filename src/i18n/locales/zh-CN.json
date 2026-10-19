@@ -1317,6 +1317,8 @@
   "vault.folder.alreadyBrowser": "库已经在浏览器存储中。",
   "vault.folder.reconnectBody": "你的库是文件夹“{folder}”。Lumen 需要你的许可才能再次打开它。",
   "vault.folder.reconnect": "重新连接文件夹",
+  "vault.boot.failed": "暂时无法打开笔记：Lumen 的部分内容未能加载（是否处于离线状态？）。",
+  "vault.boot.retry": "重试",
   "vault.folder.useBrowser": "使用浏览器存储",
   "vault.folder.interrupted": "将库移动到“{folder}”的过程被中断。没有删除任何内容。",
   "vault.folder.resume": "继续移动",

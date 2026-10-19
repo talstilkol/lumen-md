@@ -6,6 +6,7 @@ import ReactDOM from "react-dom/client";
 import App from "./App";
 import { UpdateBanner } from "./ui/UpdateBanner";
 import { setVaultBackend, createDirectoryHandleBackend } from "./storage/vault";
+import { openVaultAtBoot } from "./storage/vault/boot";
 import { ErrorBoundary } from "./ui/ErrorBoundary";
 import { showAiToast } from "./ui/AiToast";
 import { ToastContainer } from "./components/Toast";
@@ -87,14 +88,19 @@ const secretsReady = Promise.race([initSecretStore(), new Promise((r) => setTime
 const VaultFolderBanner = React.lazy(() => import("./ui/VaultFolderBanner").then((m) => ({ default: m.VaultFolderBanner })));
 const closedVault = createDirectoryHandleBackend({ id: "restoring", available: () => false, root: async () => Promise.reject(new Error("The vault is still opening.")) });
 setVaultBackend(closedVault);
+// If the location chunk can't load (offline after an update), openVaultAtBoot
+// retries it when the browser is back online and shows a "Try again" bar.
 const vaultReady = Promise.race([
-  import("./storage/vault/location").then(async (m) => {
-    const { detachWorkspaceDocs } = await import("./store/vaultDocs");
-    m.setOnVaultReplaced(detachWorkspaceDocs);
-    return m.restoreVaultLocationWithin(3000);
+  openVaultAtBoot({
+    load: () =>
+      import("./storage/vault/location").then(async (m) => {
+        const { detachWorkspaceDocs } = await import("./store/vaultDocs");
+        m.setOnVaultReplaced(detachWorkspaceDocs);
+        return m.restoreVaultLocationWithin(3000);
+      }),
   }),
   new Promise((r) => setTimeout(r, 4000)),
-]).catch((err) => log.warn("vault location unavailable", err));
+]);
 void Promise.all([initLocale(), secretsReady, vaultReady])
   .then(([applied]) => {
     // initLocale falls back to English when the saved locale's chunk can't

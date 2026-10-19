@@ -1317,6 +1317,8 @@
   "vault.folder.alreadyBrowser": "הכספת כבר נמצאת באחסון הדפדפן.",
   "vault.folder.reconnectBody": "הכספת שלך היא התיקייה „{folder}”. Lumen צריך את ההרשאה שלך כדי לפתוח אותה שוב.",
   "vault.folder.reconnect": "חיבור מחדש לתיקייה",
+  "vault.boot.failed": "אי אפשר לפתוח את הפתקים עדיין: חלק מ-Lumen לא נטען (אולי אין חיבור לרשת?).",
+  "vault.boot.retry": "לנסות שוב",
   "vault.folder.useBrowser": "שימוש באחסון הדפדפן",
   "vault.folder.interrupted": "העברת הכספת אל „{folder}” נקטעה. שום דבר לא נמחק.",
   "vault.folder.resume": "המשך ההעברה",

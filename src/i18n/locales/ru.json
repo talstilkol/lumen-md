@@ -1317,6 +1317,8 @@
   "vault.folder.alreadyBrowser": "Хранилище уже в памяти браузера.",
   "vault.folder.reconnectBody": "Ваше хранилище — папка «{folder}». Lumen нужно ваше разрешение, чтобы снова открыть её.",
   "vault.folder.reconnect": "Подключить папку снова",
+  "vault.boot.failed": "Заметки пока нельзя открыть: часть Lumen не загрузилась (нет подключения к сети?).",
+  "vault.boot.retry": "Повторить",
   "vault.folder.useBrowser": "Использовать память браузера",
   "vault.folder.interrupted": "Перемещение хранилища в «{folder}» было прервано. Ничего не удалено.",
   "vault.folder.resume": "Продолжить перемещение",

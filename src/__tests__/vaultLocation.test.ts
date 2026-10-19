@@ -306,6 +306,31 @@ describe("start-up and permission", () => {
     expect(st.openTabs[1]).toMatchObject({ id: "scratch", workspaceName: null });
   });
 
+  it("detached notes that share a name (or an unsaved tab's) get names of their own; the open note follows its tab", async () => {
+    const { useAppStore, tabIdOf } = await import("../store/useStore");
+    const { detachWorkspaceDocs } = await import("../store/vaultDocs");
+    useAppStore.setState({
+      doc: { name: "Clip.md", content: "HE", workspaceName: "he/Clip.md", dirty: false },
+      openTabs: [
+        { id: "Clip.md", name: "Clip.md", content: "unsaved", workspaceName: null, dirty: true },
+        { id: "es/Clip.md", name: "Clip.md", content: "ES", workspaceName: "es/Clip.md", dirty: false },
+        { id: "he/Clip.md", name: "Clip.md", content: "HE", workspaceName: "he/Clip.md", dirty: false },
+      ],
+    } as never);
+    detachWorkspaceDocs();
+    const st = useAppStore.getState();
+    const ids = st.openTabs.map((t) => t.id);
+    expect(new Set(ids).size).toBe(3);
+    expect(st.openTabs.map((t) => [t.id, t.content])).toEqual([
+      ["Clip.md", "unsaved"],
+      ["Clip (2).md", "ES"],
+      ["Clip (3).md", "HE"],
+    ]);
+    // The active note is the tab it was: same id, same text.
+    expect(tabIdOf(st.doc)).toBe("Clip (3).md");
+    expect(st.doc).toMatchObject({ content: "HE", workspaceName: null, dirty: true });
+  });
+
   it("reopens a stored folder when the permission is still granted", async () => {
     const f = folder();
     await (await f.dir.getFileHandle("n.md", { create: true })).createWritable().then(async (w) => {

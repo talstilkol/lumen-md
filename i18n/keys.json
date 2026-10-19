@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-10-19T07:00:28.076Z",
+  "generated_at": "2026-10-19T08:04:02.431Z",
   "source": "src/i18n/index.ts (en bundle)",
-  "count": 1509,
+  "count": 1511,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -1654,6 +1654,16 @@
     {
       "key": "vault.folder.reconnect",
       "en": "Reconnect folder",
+      "vars": []
+    },
+    {
+      "key": "vault.boot.failed",
+      "en": "Your notes can't be opened yet: part of Lumen didn't load (are you offline?).",
+      "vars": []
+    },
+    {
+      "key": "vault.boot.retry",
+      "en": "Try again",
       "vars": []
     },
     {

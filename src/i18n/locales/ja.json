@@ -1317,6 +1317,8 @@
   "vault.folder.alreadyBrowser": "保管庫はすでにブラウザーストレージにあります。",
   "vault.folder.reconnectBody": "保管庫はフォルダー「{folder}」です。もう一度開くには、あなたの許可が必要です。",
   "vault.folder.reconnect": "フォルダーに再接続",
+  "vault.boot.failed": "ノートをまだ開けません: Lumen の一部が読み込まれませんでした（オフラインですか？）。",
+  "vault.boot.retry": "再試行",
   "vault.folder.useBrowser": "ブラウザーストレージを使う",
   "vault.folder.interrupted": "「{folder}」への保管庫の移動が中断されました。何も削除されていません。",
   "vault.folder.resume": "移動を再開",

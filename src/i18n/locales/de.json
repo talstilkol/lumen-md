@@ -1317,6 +1317,8 @@
   "vault.folder.alreadyBrowser": "Der Tresor ist bereits im Browserspeicher.",
   "vault.folder.reconnectBody": "Dein Tresor ist der Ordner „{folder}“. Lumen braucht deine Erlaubnis, um ihn wieder zu öffnen.",
   "vault.folder.reconnect": "Ordner neu verbinden",
+  "vault.boot.failed": "Ihre Notizen lassen sich noch nicht öffnen: Ein Teil von Lumen wurde nicht geladen (sind Sie offline?).",
+  "vault.boot.retry": "Erneut versuchen",
   "vault.folder.useBrowser": "Browserspeicher verwenden",
   "vault.folder.interrupted": "Das Verschieben des Tresors nach „{folder}“ wurde unterbrochen. Nichts wurde gelöscht.",
   "vault.folder.resume": "Verschieben fortsetzen",
