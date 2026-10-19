@@ -16,6 +16,19 @@ import FirstRun from "../onboarding/FirstRun";
 import { useAppStore } from "../store/useStore";
 
 vi.mock("../ui/AiToast", () => ({ showAiToast: vi.fn() }));
+// The vault's place, settable per test (reopening setup with a folder vault).
+const vaultState = vi.hoisted(() => ({ status: null as null | { location: string; name?: string }, toBrowser: 0 }));
+vi.mock("../storage/vault/location", async (orig) => {
+  const real = await orig<typeof import("../storage/vault/location")>();
+  return {
+    ...real,
+    getVaultStatus: () => (vaultState.status ?? real.getVaultStatus()) as ReturnType<typeof real.getVaultStatus>,
+    switchToBrowserStorage: async () => {
+      vaultState.toBrowser++;
+      vaultState.status = { location: "opfs" };
+    },
+  };
+});
 
 beforeAll(() => installFakeOpfs());
 beforeEach(() => localStorage.clear());
@@ -136,5 +149,24 @@ describe("FirstRun", () => {
     render(<FirstRun onDone={again} />);
     fireEvent.click(screen.getByRole("button", { name: "Skip setup" }));
     expect(again).toHaveBeenCalledWith(null);
+  });
+
+  it("reopened with the vault in a folder, it shows the folder and can move back to browser storage", async () => {
+    vaultState.status = { location: "folder", name: "Notes" };
+    vaultState.toBrowser = 0;
+    Object.assign(window, { showDirectoryPicker: async () => ({}) });
+    try {
+      render(<FirstRun onDone={() => {}} />);
+      fireEvent.click(screen.getByRole("button", { name: "Next" }));
+      await waitFor(() => expect(screen.getByRole("radio", { name: /A folder on this computer/ })).toHaveProperty("checked", true));
+      await act(async () => {
+        fireEvent.click(screen.getByRole("radio", { name: /In this browser/ }));
+      });
+      expect(vaultState.toBrowser).toBe(1);
+      expect(screen.getByRole("radio", { name: /In this browser/ })).toHaveProperty("checked", true);
+    } finally {
+      vaultState.status = null;
+      delete (window as { showDirectoryPicker?: unknown }).showDirectoryPicker;
+    }
   });
 });

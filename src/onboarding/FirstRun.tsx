@@ -9,7 +9,7 @@ import { useEffect, useRef, useState } from "react";
 import { SUPPORTED_LOCALES, getLocale, t, type Locale } from "../i18n";
 import { useAppStore, type Theme } from "../store/useStore";
 import { PRESET_IDS, type PresetId } from "../lib/themeSettings";
-import { createFirstNote, importInto, markSetupDone, openBrowserVault, openFolderVault, type StartChoice } from "./setup";
+import { createFirstNote, currentVaultFolder, importInto, markSetupDone, openBrowserVault, openFolderVault, type StartChoice } from "./setup";
 import "./FirstRun.css";
 
 const STEPS = ["lang", "vault", "look", "start"] as const;
@@ -44,6 +44,15 @@ export default function FirstRun({ onDone }: Props) {
   const panel = useRef<HTMLDivElement>(null);
   const importKind = useRef<"obsidian" | "notion">("obsidian");
   const fileInput = useRef<HTMLInputElement>(null);
+
+  // Reopened from ⌘K: the vault may already be in a folder.
+  useEffect(() => {
+    let live = true;
+    void currentVaultFolder().then((name) => live && name !== null && setFolder(name));
+    return () => {
+      live = false;
+    };
+  }, []);
 
   // Each step starts at its first control (keyboard and screen readers).
   useEffect(() => {
