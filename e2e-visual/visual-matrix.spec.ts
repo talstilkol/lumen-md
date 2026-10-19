@@ -39,8 +39,16 @@ const VARIANTS = [
   { id: "he-light", locale: "he", theme: "light" as const },
 ];
 
-/** Parts of a surface that depend on the machine, not the code: hidden under a flat mask. */
-const VOLATILE = ['[data-testid="hw-card"]'];
+/**
+ * Parts of a surface that depend on the machine or the moment, not the
+ * code, hidden under a flat mask: the hardware card of AI settings, the
+ * storage quota of the AI doctor, and every "N ms" probe timing.
+ */
+const volatile = (page: Page) => [
+  page.locator('[data-testid="hw-card"]'),
+  page.locator('[data-testid="doctor-storage"]'),
+  page.locator("span", { hasText: /^\d+ ms$/ }),
+];
 
 for (const v of VARIANTS) {
   test.describe(v.id, () => {
@@ -66,7 +74,7 @@ for (const v of VARIANTS) {
         // The commonest RTL layout bug, checked on every shot: nothing wider than the viewport.
         expect(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth), "horizontal overflow").toBeLessThanOrEqual(1);
         await expect(page).toHaveScreenshot(`${s.id}--${v.id}.png`, {
-          mask: VOLATILE.map((sel) => page.locator(sel)),
+          mask: volatile(page),
           maskColor: "#808080",
           // Identical runner, chromium and fonts give identical pixels; this
           // absorbs rasteriser noise only (≈ 250 px of 640×400). A one-line
