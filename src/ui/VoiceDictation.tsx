@@ -97,7 +97,7 @@ function showRecordingPill(label: string, onStop: () => void): () => void {
             fontWeight: 600,
           }}
         >
-          ⏹ Stop
+          {t("voice.stop")}
         </button>
         <style>{`@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}`}</style>
       </div>,
@@ -471,7 +471,7 @@ export async function startVoiceMemo(): Promise<void> {
           animation: "pulse 1s infinite",
         }}
       />
-      <span>🎙 {t("voice.memo.recording") ?? "Recording memo…"}</span>
+      <span>🎙 {t("voice.memo.recording")}</span>
       <button
         type="button"
         onClick={() => recorder.stop()}
@@ -486,7 +486,7 @@ export async function startVoiceMemo(): Promise<void> {
           fontWeight: 600,
         }}
       >
-        {t("voice.memo.stop") ?? "⏹ Stop & insert"}
+        {t("voice.memo.stop")}
       </button>
       <style>{`@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}`}</style>
     </div>,

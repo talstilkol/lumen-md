@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { sanitizeSvgMarkup } from "../lib/markupSanitizer";
 import { safeSetHtml } from "../lib/trustedTypes";
+import { t } from "../i18n";
 
 // Layout runs in ./graphviz.worker (F4): the only code that needs eval
 // lives there, under its own CSP; the page itself allows none.
@@ -126,20 +127,20 @@ export default function GraphvizBlock({ source, meta }: Props) {
   if (error) {
     return (
       <div className="mermaid-block">
-        <div className="mermaid-error">⚠︎ Graphviz error:{"\n"}{error}</div>
+        <div className="mermaid-error">{t("block.graphviz.error")}{"\n"}{error}</div>
       </div>
     );
   }
   const statusText =
     state === "rendering"
-      ? "Rendering…"
+      ? t("block.diagram.rendering")
       : state === "ready"
         ? durationMs == null
-          ? "Rendered (cache)"
-          : `Rendered in ${durationMs} ms`
+          ? t("block.diagram.renderedCache")
+          : t("block.diagram.renderedIn", { ms: durationMs })
         : inView
-          ? "Queued"
-          : "Scroll to render";
+          ? t("block.diagram.queued")
+          : t("block.diagram.scrollToRender");
   return (
     <div className="mermaid-block" ref={containerRef}>
       <div
@@ -166,7 +167,7 @@ export default function GraphvizBlock({ source, meta }: Props) {
             textAlign: "center",
           }}
         >
-          Graphviz diagram (scroll to render)
+          {t("block.graphviz.placeholder")}
         </div>
       )}
     </div>

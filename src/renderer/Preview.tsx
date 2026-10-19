@@ -145,7 +145,7 @@ export function Preview({ markdownText, docKey = null }: Props) {
             whiteSpace: "pre-wrap",
           }}
         >
-          ⚠︎ Render error: {error}
+          {t("block.renderError", { error })}
         </div>
       )}
       <div className="prose-lumen">

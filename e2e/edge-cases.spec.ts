@@ -121,7 +121,7 @@ test("Escape closes any open menu / dialog reliably", async ({ page }) => {
   await expect(palette).not.toBeVisible({ timeout: 2000 });
   // Open shortcuts dialog, then Escape.
   await page.keyboard.press("Meta+/");
-  const shortcuts = page.locator('[role="dialog"][aria-label="Keyboard Shortcuts"]');
+  const shortcuts = page.locator('[role="dialog"][aria-label="Keyboard shortcuts"]');
   await expect(shortcuts).toBeVisible({ timeout: 3000 });
   await page.keyboard.press("Escape");
   await expect(shortcuts).toBeHidden({ timeout: 3000 });

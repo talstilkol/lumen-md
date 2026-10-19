@@ -74,21 +74,21 @@ export const StatusBar = React.memo(function StatusBar({
         : "hsl(12 90% 58%)";
   return (
     <footer className="status-bar">
-      <span className="sb-item" title="Document">
+      <span className="sb-item" title={t("status.document")}>
         {dirty ? "●" : "○"} {filename}
       </span>
       {syncState !== "idle" && (
-        <span className="sb-item" title={`Sync: ${syncState}`} style={{ gap: 4 }}>
+        <span className="sb-item" title={t("status.sync.title", { state: t(`status.sync.${syncState}`) })} style={{ gap: 4 }}>
           {syncState === "syncing" && <CloudCog size={10} className="spin" />}
           {syncState === "error" && <AlertCircle size={10} style={{ color: "hsl(12 90% 58%)" }} />}
           {syncState === "offline" && <CloudOff size={10} style={{ color: "hsl(var(--fg-muted))" }} />}
-          <span style={{ fontSize: 10, textTransform: "capitalize" }}>{syncState}</span>
+          <span style={{ fontSize: 10, textTransform: "capitalize" }}>{t(`status.sync.${syncState}`)}</span>
         </span>
       )}
       {collab && (
         <span
           className="sb-item"
-          title={`Collab room: ${collab.roomName}\n${collab.peers.length} peer(s)`}
+          title={t("status.collab.title", { room: collab.roomName, n: collab.peers.length })}
           style={{ gap: 6 }}
         >
           <span className="sb-accent" style={{ fontWeight: 600 }}>{t("status.live")}</span>
@@ -116,7 +116,7 @@ export const StatusBar = React.memo(function StatusBar({
           <button
             type="button"
             onClick={collab.onLeave}
-            title="Leave collaboration"
+            title={t("cmd.collab.leave")}
             style={{
               marginLeft: 4,
               padding: "0 6px",
@@ -144,7 +144,7 @@ export const StatusBar = React.memo(function StatusBar({
             gap: 4,
           }}
         >
-          <span>{`Health ${configHealth.score}%`}</span>
+          <span>{t("status.health", { score: configHealth.score })}</span>
           {healthIssues.length > 0 && (
             <span style={{ color: "hsl(var(--fg-muted))", fontWeight: 400 }}>
               ·
@@ -157,13 +157,13 @@ export const StatusBar = React.memo(function StatusBar({
           )}
         </span>
       ) : null}
-      <span className="sb-item" title="Word count">
+      <span className="sb-item" title={t("status.words.title")}>
         {t("status.words", { n: stats.words.toLocaleString(getLocale()) })}
       </span>
-      <span className="sb-item" title="Characters (without spaces)">
+      <span className="sb-item" title={t("status.chars.title")}>
         {t("status.chars", { n: stats.chars.toLocaleString(getLocale()) })}
       </span>
-      <span className="sb-item" title="Reading time at ~220 wpm">
+      <span className="sb-item" title={t("status.reading.title")}>
         {t("status.reading", { n: stats.readingMin })}
       </span>
       <button
@@ -283,7 +283,7 @@ export const StatusBar = React.memo(function StatusBar({
         </span>
       )}
       {aiKey && !useLocalAi && (
-        <span className="sb-item" title="AI Copilot Active" style={{ gap: 4 }}>
+        <span className="sb-item" title={t("status.aiActive")} style={{ gap: 4 }}>
           <Sparkles size={10} style={{ color: "hsl(var(--accent))", animation: "pulse 2s ease-in-out infinite" }} />
           <span style={{ color: "hsl(var(--accent))", fontSize: 10 }}>AI</span>
         </span>

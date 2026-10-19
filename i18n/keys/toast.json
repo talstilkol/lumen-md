@@ -412,6 +412,11 @@
       "vars": []
     },
     {
+      "key": "toast.pasteText.placeholder",
+      "en": "<h1>Hello</h1>\n<p>Paste your HTML here…</p>",
+      "vars": []
+    },
+    {
       "key": "toast.pasteText.prompt",
       "en": "Paste HTML or rich text below:",
       "vars": []

@@ -843,7 +843,7 @@ export default function App() {
         onPasteText={async () => {
           const text = await uiPrompt({
             message: t("toast.pasteText.prompt"),
-            placeholder: "<h1>Hello</h1>\n<p>Paste your HTML here...</p>",
+            placeholder: t("toast.pasteText.placeholder"),
           });
           if (!text) return;
           const md = text.trim().startsWith("<") ? htmlToMarkdown(text) : text;

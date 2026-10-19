@@ -69,6 +69,7 @@
   "toast.noTagSuggestionsReturned": "לא התקבלו הצעות לתגיות",
   "toast.openedSharedNoteFromIos": "הערה משותפת נפתחה מ-iOS.",
   "toast.outlineGenerationFailed": "יצירת המבנה נכשלה",
+  "toast.pasteText.placeholder": "<h1>שלום</h1>\n<p>הדביקו כאן את ה-HTML…</p>",
   "toast.pasteText.prompt": "הדבק HTML או טקסט עשיר למטה:",
   "toast.pasteText.success": "הטקסט הודבק והומר",
   "toast.pleaseConfigureYourAiKey": "יש להגדיר מפתח AI (⌘K → AI Settings)",

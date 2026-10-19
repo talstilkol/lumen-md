@@ -325,8 +325,8 @@ function buildSlashItems(): SlashItem[] {
           }
           showAiToast(
             e instanceof AiError && e.code === "NO_KEY"
-              ? "Please configure your AI Key (⌘K → AI Settings)"
-              : `AI Ghostwriter failed: ${(e as Error)?.message ?? "unknown error"} (⌘K → AI: Recent Agent Runs)`,
+              ? t("toast.pleaseConfigureYourAiKey")
+              : t("ai.ghostwriter.failed", { error: (e as Error)?.message ?? t("ai.error.unknown") }),
             "error",
           );
         } finally {

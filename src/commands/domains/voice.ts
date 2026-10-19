@@ -72,7 +72,7 @@ export function buildVoiceCommands(): Command[] {
           "German": "de-DE", "Chinese (中文)": "zh-CN", "Japanese (日本語)": "ja-JP",
         };
         const langChoice = await uiPrompt({
-          message: "Select language for voice recognition:",
+          message: t("voice.languagePrompt"),
           placeholder: "English",
         });
         const lang = langMap[langChoice ?? ""] ?? (useAppStore.getState().locale === "he" ? "he-IL" : "en-US");

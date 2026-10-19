@@ -15,11 +15,10 @@ export function buildPrivacyModeCommands({ useLocalAi, toggleLocalAi }: CommandC
     {
       id: "ai.localToggle",
       label: useLocalAi
-        ? (t("cmd.ai.privacy.off") ?? "Privacy Mode: turn off (use cloud AI)")
-        : (t("cmd.ai.privacy.on") ?? "Privacy Mode: run AI on this device (WebGPU)"),
+        ? (t("cmd.ai.privacy.off"))
+        : (t("cmd.ai.privacy.on")),
       hint:
-        t("cmd.ai.privacy.hint") ??
-        "When ON, every AI prompt runs locally via @mlc-ai/web-llm. No data leaves your browser.",
+        t("cmd.ai.privacy.hint"),
       icon: cmdIcons.Sparkles,
       group: t("group.ai"),
       action: async () => {
@@ -58,17 +57,17 @@ export function buildAiProviderCommands(): Command[] {
         const { listOllamaModels, isOllamaAvailable, setOllamaConfig } = await import("../../ai/ollamaProvider");
         const { setActiveProvider } = await import("../../ai/llm");
         if (!(await isOllamaAvailable())) {
-          await uiAlert({ message: "Ollama is not running.\n\nStart it with: ollama serve\nThen try again." });
+          await uiAlert({ message: t("ai.ollama.notRunning") });
           return;
         }
         const models = await listOllamaModels();
         if (models.length === 0) {
-          await uiAlert({ message: "No models found.\n\nPull a model with: ollama pull llama3.1" });
+          await uiAlert({ message: t("ai.ollama.noModels") });
           return;
         }
         const modelList = models.map((m) => `${m.name} (${(m.size / 1e9).toFixed(1)}GB)`).join("\n");
         const choice = await uiPrompt({
-          message: `Available Ollama models:\n\n${modelList}\n\nType the model name to use:`,
+          message: t("ai.ollama.pickModel", { models: modelList }),
           defaultValue: models[0].name,
         });
         if (!choice) return;
@@ -389,7 +388,7 @@ export function buildAiControlCommands(): Command[] {
         const current = getActiveProvider();
         const choice = await uiSelect({
           title: t("cmd.ai.provider", { defaultValue: "AI: Switch Provider" }),
-          message: "Choose your AI provider:",
+          message: t("ai.provider.choose"),
           defaultValue: current,
           choices: [
             { value: "openai", label: "OpenAI \u2014 cloud (API key)" },
@@ -404,7 +403,7 @@ export function buildAiControlCommands(): Command[] {
         const valid = choice.trim().toLowerCase();
         const known = ["openai", "anthropic", "gemini", "mistral", "ollama", "local-webgpu"];
         if (!known.includes(valid)) {
-          await uiAlert({ message: `Invalid provider. Choose: ${known.join(", ")}` });
+          await uiAlert({ message: t("ai.provider.invalid", { list: known.join(", ") }) });
           return;
         }
         setActiveProvider(
@@ -422,7 +421,7 @@ export function buildAiControlCommands(): Command[] {
                   ? "Google Gemini"
                   : "Mistral";
             const key = await uiPrompt({
-              message: `Enter your ${label} API key:`,
+              message: t("ai.provider.enterKey", { provider: label }),
               defaultValue: "",
             });
             if (key && key.trim()) setSecret(`lumen.ai.key.${valid}`, key.trim());

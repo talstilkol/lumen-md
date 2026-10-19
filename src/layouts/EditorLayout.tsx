@@ -24,6 +24,7 @@ import { WritingGoalBanner } from "../ui/WritingGoalBanner";
 import { useAppStore } from "../store/useStore";
 import type { ViewMode, SplitAxis } from "../store/useStore";
 import type { CollabSession } from "../collab/yjs";
+import { t } from "../i18n";
 
 const WysiwygEditor = lazy(() => import("../editor/WysiwygEditor"));
 const PageView = lazy(() => import("../ui/PageView").then(m => ({ default: m.PageView })));
@@ -375,7 +376,7 @@ export function EditorLayout({
           }
         >
           {pageView ? (
-            <Suspense fallback={<div style={{padding:'2rem',color:'hsl(var(--fg-muted))'}}>Loading page view…</div>}>
+            <Suspense fallback={<div style={{padding:'2rem',color:'hsl(var(--fg-muted))'}}>{t("editor.loadingPageView")}</div>}>
               <PageView markdownText={deferredContent} docKey={deferredDocKey} />
             </Suspense>
           ) : (
@@ -394,14 +395,14 @@ export function EditorLayout({
                   fontSize: 13,
                 }}
               >
-                Loading WYSIWYG editor…
+                {t("editor.loadingWysiwyg")}
               </div>
             }
           >
             <ErrorBoundary fallback={
               <div style={{ padding: "2rem", color: "hsl(0 80% 60%)" }}>
-                <strong>WYSIWYG editor failed</strong>
-                <p style={{ fontSize: 12, opacity: 0.8 }}>Try switching to Source mode.</p>
+                <strong>{t("editor.wysiwygFailed")}</strong>
+                <p style={{ fontSize: 12, opacity: 0.8 }}>{t("editor.wysiwygFailedHint")}</p>
               </div>
             }>
               <WysiwygEditor value={docContent} onChange={setContent} />

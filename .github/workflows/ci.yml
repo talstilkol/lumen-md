@@ -39,6 +39,12 @@ jobs:
       - name: Code hygiene (no `as any` / console.log in production src)
         run: npm run hygiene
 
+      - name: No hard-coded UI strings (plan 9.1)
+        # AST scan of src/: JSX text, user-visible props (aria-label, title,
+        # placeholder, alt…) and messages passed to toasts and dialogs must
+        # go through t(). Exceptions carry `i18n-allow: <reason>`.
+        run: npm run -s i18n:hardcoded
+
       - name: Test
         run: npm run test
 

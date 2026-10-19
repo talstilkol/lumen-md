@@ -69,6 +69,7 @@
   "toast.noTagSuggestionsReturned": "لم يتم إرجاع أي اقتراحات للوسوم",
   "toast.openedSharedNoteFromIos": "تم فتح الملاحظة المشتركة من iOS.",
   "toast.outlineGenerationFailed": "فشل إنشاء المخطط",
+  "toast.pasteText.placeholder": "<h1>مرحباً</h1>\n<p>الصق HTML هنا…</p>",
   "toast.pasteText.prompt": "لصق HTML or rich text below:",
   "toast.pasteText.success": "تم لصق النص وتحويله",
   "toast.pleaseConfigureYourAiKey": "يرجى ضبط مفتاح AI (⌘K → AI Settings)",

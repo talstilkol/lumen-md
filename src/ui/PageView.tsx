@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Preview } from "../renderer/Preview";
+import { t } from "../i18n";
 
 /**
  * Word-style paginated page view with page numbers and navigation.
@@ -82,8 +83,8 @@ export function PageView({ markdownText, docKey = null }: Props) {
           className="icon-btn"
           onClick={() => goToPage(currentPage - 1)}
           disabled={currentPage <= 1}
-          aria-label="Previous page"
-          title="Previous page"
+          aria-label={t("pageView.prev")}
+          title={t("pageView.prev")}
           style={{ padding: "2px 8px", fontSize: 11 }}
         >
           <span aria-hidden>◀</span>
@@ -91,7 +92,7 @@ export function PageView({ markdownText, docKey = null }: Props) {
         <select
           value={currentPage}
           onChange={(e) => goToPage(Number(e.target.value))}
-          aria-label="Jump to page"
+          aria-label={t("pageView.jump")}
           style={{
             background: "hsl(var(--bg-subtle))",
             color: "hsl(var(--fg))",
@@ -103,17 +104,17 @@ export function PageView({ markdownText, docKey = null }: Props) {
         >
           {pageNumbers.map((p) => (
             <option key={p} value={p}>
-              Page {p}
+              {t("pageView.page", { n: p })}
             </option>
           ))}
         </select>
-        <span>of {totalPages}</span>
+        <span>{t("pageView.of", { total: totalPages })}</span>
         <button
           className="icon-btn"
           onClick={() => goToPage(currentPage + 1)}
           disabled={currentPage >= totalPages}
-          aria-label="Next page"
-          title="Next page"
+          aria-label={t("pageView.next")}
+          title={t("pageView.next")}
           style={{ padding: "2px 8px", fontSize: 11 }}
         >
           <span aria-hidden>▶</span>

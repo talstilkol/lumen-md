@@ -47,7 +47,7 @@ export const DocTabs = React.memo(function DocTabs({
       // Each tab includes a sibling close button that ARIA spec doesn't
       // count as a tab; `group` keeps the semantic without that constraint.
       role="group"
-      aria-label={t("docTabs.label") ?? "Open documents"}
+      aria-label={t("docTabs.label")}
       style={{
         display: "flex",
         alignItems: "stretch",
@@ -169,8 +169,8 @@ export const DocTabs = React.memo(function DocTabs({
             </button>
             <button
               type="button"
-              title={t("docTabs.close") ?? "Close"}
-              aria-label={t("docTabs.close") ?? "Close tab"}
+              title={t("docTabs.close")}
+              aria-label={t("docTabs.close")}
               onClick={(e) => {
                 e.stopPropagation();
                 onClose(tab.id);
