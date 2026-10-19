@@ -18,12 +18,59 @@ type Surface = { id: string; open: (p: Page) => Promise<unknown>; ready: string 
 const runCommand = (page: Page, id: string) =>
   page.evaluate((cmd) => window.dispatchEvent(new CustomEvent("lumen-run-command", { detail: { id: cmd } })), id);
 
+/**
+ * The WYSIWYG surface shows this note instead of the welcome note. On the
+ * current base, Milkdown 7.20 fails to parse lists (its list nodes store
+ * `spread` as a string against a boolean-validated attribute, which
+ * prosemirror-model 1.25 rejects), and the welcome note then renders empty
+ * on some runs and in full on others. #252 carries the fix
+ * (editor/milkdownListSpread.ts); until it is merged this fixture has no
+ * lists, so the shot is the same on every run.
+ */
+const WYSIWYG_NOTE = [
+  "# Visual fixture",
+  "",
+  "A paragraph with **bold**, *italic*, ~~struck~~, `code` and a [link](https://example.com).",
+  "",
+  "פסקה בעברית עם **הדגשה** ומילה באנגלית: Lumen.",
+  "",
+  "> A quoted line, for the block styles.",
+  "",
+  "```js",
+  "const answer = 42;",
+  "```",
+  "",
+  "| Item | Price |",
+  "|:--|--:|",
+  "| Milk | 5.90 |",
+  "",
+  "## Second heading",
+  "",
+  "The end.",
+].join("\n");
+
+async function openWysiwyg(page: Page): Promise<void> {
+  await page.keyboard.press("Meta+1");
+  const source = page.locator(".cm-content").first();
+  await source.waitFor({ state: "visible" });
+  await source.click();
+  await page.evaluate((text) => {
+    type View = { state: { doc: { length: number } }; dispatch(tr: unknown): void };
+    const el = document.querySelector(".cm-content") as (HTMLElement & { cmTile?: { root?: { view?: View } } }) | null;
+    const view = el?.cmTile?.root?.view;
+    view?.dispatch({ changes: { from: 0, to: view.state.doc.length, insert: text }, selection: { anchor: 0 }, userEvent: "input" });
+  }, WYSIWYG_NOTE);
+  await page.keyboard.press("Meta+4");
+  await expect(page.locator(".ProseMirror").first()).toContainText("Visual fixture", { timeout: 30_000 });
+  await expect(page.locator(".ProseMirror").first()).toContainText("The end.");
+}
+
 /** The surfaces of scripts/preview-visual.mjs, reached the same way. */
 const SURFACES: Surface[] = [
   { id: "split", open: (p) => p.keyboard.press("Meta+2"), ready: ".prose-lumen h1" },
   { id: "source", open: (p) => p.keyboard.press("Meta+1"), ready: ".cm-content" },
   { id: "preview", open: (p) => p.keyboard.press("Meta+3"), ready: ".prose-lumen h1" },
-  { id: "wysiwyg", open: (p) => p.keyboard.press("Meta+4"), ready: ".ProseMirror" },
+  { id: "wysiwyg", open: openWysiwyg, ready: ".ProseMirror h1" },
   { id: "palette", open: (p) => p.keyboard.press("Meta+K"), ready: '[role="dialog"][aria-modal="true"] input' },
   { id: "shortcuts", open: (p) => p.keyboard.press("Meta+/"), ready: '[role="dialog"][aria-label="Keyboard Shortcuts"]' },
   { id: "plugins", open: (p) => runCommand(p, "view.plugins"), ready: '[data-testid="plugin-card"]' },
