@@ -10,12 +10,14 @@
  * links are REAL hyperlink relationships (<w:hyperlink r:id> + external rel),
  * horizontal rules are a real paragraph border, fenced code is a shaded
  * monospace block, and pipe-table column alignment (`:--`, `--:`, `:--:`) is
- * honoured. Headings/Hyperlink/Code/Quote all carry defined styles so they
+ * honoured — resolved against each cell's direction, since Word reads
+ * `w:jc` as leading / trailing edge (plan 9.8); a Hebrew table is laid
+ * out from the right (`w:bidiVisual`). Headings/Hyperlink/Code/Quote all carry defined styles so they
  * render identically in Word, LibreOffice, Pages and Google Docs.
  *
  * Not handled: embedded images (noted, not embedded) and footnotes.
  */
-import { firstStrongDirection } from "../lib/textDirection";
+import { firstStrongDirection, markdownBaseDirection, type BaseDirection } from "../lib/textDirection";
 import { zip } from "./zip";
 
 const DOCX_MIME =
@@ -47,6 +49,8 @@ interface Run {
 
 /** Mutable state accumulated while rendering the body, consumed by the parts. */
 interface DocxCtx {
+  /** The note's base direction (frontmatter `dir:` or first strong character): what a table of numbers inherits. */
+  baseDir: BaseDirection;
   /** External hyperlink relationships, in document order. */
   hyperlinks: { id: string; target: string }[];
   /** Ordered-list <w:num> instances allocated so each list restarts at 1. */
@@ -55,8 +59,9 @@ interface DocxCtx {
   nextOrderedNumId: number;
 }
 
-function newCtx(): DocxCtx {
+function newCtx(baseDir: BaseDirection = "ltr"): DocxCtx {
   return {
+    baseDir,
     hyperlinks: [],
     orderedNumIds: [],
     // rId1 = styles, rId2 = numbering (fixed below); hyperlinks start at rId3.
@@ -159,7 +164,13 @@ function hrXml(): string {
   );
 }
 
-type Align = "left" | "center" | "right";
+/**
+ * A pipe-table column's alignment as written: `:--` and `--:` are explicit
+ * (physical, the side the reader sees — the same as the preview's
+ * `align` attribute), `---` is unspecified and takes the column's natural
+ * side, which depends on the text direction.
+ */
+type Align = "none" | "left" | "center" | "right";
 
 function parseAlign(cell: string): Align {
   const c = cell.trim();
@@ -167,7 +178,32 @@ function parseAlign(cell: string): Align {
   const right = c.endsWith(":");
   if (left && right) return "center";
   if (right) return "right";
-  return "left";
+  if (left) return "left";
+  return "none";
+}
+
+/**
+ * WordprocessingML paragraph justification (plan 9.8). Word reads `w:jc`
+ * relative to the paragraph's direction: in a `<w:bidi/>` paragraph
+ * `start` is the RIGHT edge and `end` the LEFT one (ISO/IEC 29500-1
+ * §17.18.44; the transitional `left` / `right` are the same leading /
+ * trailing edges, which is why writing `right` for a Hebrew cell put it
+ * on the left). So a column's physical alignment is resolved against the
+ * direction of each cell's paragraph. `start` is the default and is not
+ * written.
+ */
+type Jc = "start" | "center" | "end";
+
+export function resolveJc(align: Align, dir: BaseDirection): Jc {
+  if (align === "center") return "center";
+  if (align === "none") return "start";
+  const trailing = dir === "rtl" ? "left" : "right";
+  return align === trailing ? "end" : "start";
+}
+
+/** The direction of a table: its first strong character, else the note's. */
+function tableDirection(rows: string[][], ctx: DocxCtx): BaseDirection {
+  return firstStrongDirection(rows.map((r) => r.join(" ")).join("\n")) ?? ctx.baseDir;
 }
 
 function isTableSep(line: string): boolean {
@@ -197,6 +233,11 @@ function splitRow(line: string): string[] {
 
 function tableXml(rows: string[][], aligns: Align[], ctx: DocxCtx): string {
   const cols = Math.max(...rows.map((r) => r.length), aligns.length);
+  const tableDir = tableDirection(rows, ctx);
+  // A right-to-left table: Word lays its columns out from the right
+  // (<w:bidiVisual/>), so the first column is the rightmost, as in the
+  // preview. CT_TblPr order: bidiVisual before tblW.
+  const bidiVisual = tableDir === "rtl" ? "<w:bidiVisual/>" : "";
   const border =
     "<w:tblBorders>" +
     ["top", "left", "bottom", "right", "insideH", "insideV"]
@@ -210,10 +251,14 @@ function tableXml(rows: string[][], aligns: Align[], ctx: DocxCtx): string {
     const runs = parseInline(text).map((r) =>
       header ? { ...r, bold: true } : r,
     );
-    const align = aligns[col] ?? "left";
-    const jc = align === "left" ? "" : `<w:jc w:val="${align}"/>`;
+    // The cell's paragraph follows its own text; a cell with no strong
+    // character (a number, a date) follows the table, so a column of
+    // prices in a Hebrew table aligns like its Hebrew header.
+    const cellDir = firstStrongDirection(runs.map((r) => r.text).join("")) ?? tableDir;
+    const bidi = cellDir === "rtl" ? "<w:bidi/>" : "";
+    const resolved = resolveJc(aligns[col] ?? "none", cellDir);
+    const jc = resolved === "start" ? "" : `<w:jc w:val="${resolved}"/>`;
     const shd = header ? '<w:shd w:val="clear" w:color="auto" w:fill="F2F2F2"/>' : "";
-    const bidi = bidiOf(runs);
     // CT_PPr order: bidi before jc.
     const pPr = jc || bidi ? `<w:pPr>${bidi}${jc}</w:pPr>` : "";
     return (
@@ -228,7 +273,7 @@ function tableXml(rows: string[][], aligns: Align[], ctx: DocxCtx): string {
   };
 
   const body = rows.map((r, i) => rowXml(r, i === 0)).join("");
-  return `<w:tbl><w:tblPr><w:tblW w:w="0" w:type="auto"/>${border}</w:tblPr>${grid}${body}</w:tbl>`;
+  return `<w:tbl><w:tblPr>${bidiVisual}<w:tblW w:w="0" w:type="auto"/>${border}</w:tblPr>${grid}${body}</w:tbl>`;
 }
 
 const listMarker = /^(\s*)([-*+]|\d+[.)])\s+(.*)$/;
@@ -441,7 +486,7 @@ function buildDocumentRels(hyperlinks: { id: string; target: string }[]): string
 }
 
 function buildDocxParts(content: string): { name: string; data: string }[] {
-  const ctx = newCtx();
+  const ctx = newCtx(markdownBaseDirection(content));
   const body = markdownToBody(content, ctx);
 
   const documentXml =
