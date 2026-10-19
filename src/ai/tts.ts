@@ -60,9 +60,23 @@ export function speakableSentences(markdown: string): Sentence[] {
   return out;
 }
 
-/** BCP-47 language for a sentence: Hebrew script → he-IL, else the UI's. */
-export function langFor(text: string, fallback: string): string {
+type Detect = (text: string) => { lang: string; confident: boolean; script: string | null };
+/** Scripts that settle the language even for a short sentence (no shared-script guess). */
+const SCRIPT_DECIDES = new Set(["hebrew", "kana", "han", "hangul", "greek", "thai"]);
+const voiceTag = (lang: string) => (lang === "he" ? "he-IL" : lang);
+
+/**
+ * BCP-47 language for a sentence: Hebrew script → he-IL; with the local
+ * detector (plan 6.5) any language it is sure of, or that the script alone
+ * settles; otherwise `fallback` (the document's language, else the UI's).
+ */
+export function langFor(text: string, fallback: string, detect?: Detect): string {
   if (hebrewRatio(text) > 0.3) return "he-IL";
+  if (detect) {
+    const g = detect(text);
+    if (g.lang !== "und" && (g.confident || (g.script && SCRIPT_DECIDES.has(g.script)))) return voiceTag(g.lang);
+    return fallback;
+  }
   if (/[؀-ۿ]/.test(text)) return "ar";
   return fallback;
 }
@@ -99,9 +113,20 @@ export async function speak(markdown: string, opts: { uiLang: string; rate?: num
   if (!sentences.length) return true;
   speaking = true;
   let hadVoice = true;
+  // Local language detection (plan 6.5): each sentence gets the voice of
+  // its own language; short or unclear ones the document's language.
+  let detect: Detect | undefined;
+  try {
+    detect = (await import("../text/langId")).detectLanguage;
+  } catch {
+    detect = undefined;
+  }
+  const ui = opts.uiLang === "he" ? "he-IL" : opts.uiLang;
+  const whole = detect?.(sentences.map((x) => x.text).join(" "));
+  const docLang = whole && whole.confident && whole.lang !== "und" ? voiceTag(whole.lang) : ui;
   for (const s of sentences) {
     if (!speaking) break;
-    const lang = langFor(s.text, opts.uiLang === "he" ? "he-IL" : opts.uiLang);
+    const lang = langFor(s.text, docLang, detect);
     const u = new SpeechSynthesisUtterance(s.text);
     u.lang = lang;
     const v = voiceFor(lang);

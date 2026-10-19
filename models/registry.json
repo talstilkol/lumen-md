@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated": "2026-10-18",
+  "updated": "2026-10-19",
   "about": "Every model or data file Lumen can download or ships, with its licence. Checked by `npm run licenses` (scripts/licenses.mjs). class: allowed = may be a default; conditional = may be offered with a licence notice in the UI, never as a default; forbidden = must not be referenced by app code; unknown = licence not established yet (warns). `verified: false` marks a classification read from the model card by us, not from the verified licence research. Deny-list entries (delivery: none) exist so the gate catches the model if someone adds it. Runtime code (webR, ruby.wasm, ONNX Runtime, tesseract core) comes from npm and is checked by the npm part of the gate; Pyodide is listed here as well because it is shipped as a data bundle.",
   "models": [
     {
@@ -714,6 +714,42 @@
       "catalog": "OLLAMA_CATALOG (src/ai/modelCatalog.ts)",
       "verified": true,
       "notes": "Licence tag apache-2.0 on dicta-il/DictaLM-3.0-1.7B-Instruct (checked 18.10.2026). Only the Thinking variant has an official GGUF. Not recommended by default until measured (plan 7.9)."
+    },
+    {
+      "id": "franc-min",
+      "kind": "other",
+      "source": "https://www.npmjs.com/package/franc-min",
+      "license": "MIT",
+      "class": "allowed",
+      "commercial": "yes",
+      "attribution": "franc-min © Titus Wormer, licensed under the MIT License; trigram data from the Universal Declaration of Human Rights.",
+      "size": "~127 KB unpacked (trigram profiles of 82 languages)",
+      "runs": "browser",
+      "delivery": "bundled",
+      "catalog": "src/text/langId.ts (lazy chunk; plan 6.5)",
+      "match": [
+        "franc-min"
+      ],
+      "verified": true,
+      "notes": "Local language identification for translation, grammar, OCR and read-aloud. Loaded on demand, never in the startup chunk. Also checked by the npm part of the gate (MIT, with its MIT dependencies trigram-utils, n-gram and collapse-white-space)."
+    },
+    {
+      "id": "eld",
+      "kind": "other",
+      "source": "https://github.com/nitotm/efficient-language-detector-js",
+      "license": "Apache-2.0",
+      "class": "allowed",
+      "commercial": "yes",
+      "attribution": "eld (Efficient Language Detector) © Nito T.M., licensed under the Apache License 2.0.",
+      "size": "~9 MB unpacked",
+      "runs": "browser",
+      "delivery": "none",
+      "catalog": "not shipped (plan 6.5: noted as the more accurate fallback for short texts)",
+      "match": [
+        "eld/"
+      ],
+      "verified": true,
+      "notes": "Apache-2.0 per the repository's LICENSE (nitotm/efficient-language-detector-js, main, checked 19.10.2026) and the npm metadata. Not a dependency: ~9 MB is too large for the gain on Lumen's eight UI languages; the noted fallback if franc-min falls short on Tatoeba (plan 6.5)."
     }
   ]
 }

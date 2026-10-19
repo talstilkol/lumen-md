@@ -6,7 +6,8 @@
  * survive unchanged, and the
  * output must be written in the target language's script when that
  * script is distinctive (Hebrew, Arabic, Cyrillic, CJK) — the most common
- * local-model failure is answering in English.
+ * local-model failure is answering in English — and, where the script is
+ * shared, in the target language by local language identification.
  */
 
 import type { AgentDefinition, AgentInput, ValidationResult } from "../types";
@@ -117,6 +118,25 @@ export function checkTranslation(output: string, source: string, targetLanguage:
   return ok;
 }
 
+/**
+ * Where the script cannot tell (English → French, Russian → Ukrainian),
+ * local language identification (plan 6.5) does: a confident guess that is
+ * neither the target language nor different from an untranslated source
+ * fails the chunk. Unknown target names and short or unclear text pass.
+ */
+export async function checkTranslationLanguage(output: string, source: string, targetLanguage: string): Promise<ValidationResult> {
+  const { detectLanguage, languageCode } = await import("../../text/langId");
+  const target = languageCode(targetLanguage);
+  if (!target) return ok;
+  const got = detectLanguage(proseOf(output));
+  if (!got.confident || got.lang === "und" || got.lang === target) return ok;
+  const src = detectLanguage(proseOf(source));
+  if (src.confident && src.lang === got.lang) return fail(`output is still in the source language (${got.lang}), not ${targetLanguage}`, `Translate every sentence into ${targetLanguage}; do not copy the source.`);
+  // Same script, another language (Spanish instead of French).
+  if (scriptOf(proseOf(output)) === scriptOf(proseOf(source)) || expectedScript(targetLanguage) === scriptOf(proseOf(output))) return fail(`output is in ${got.lang}, not ${targetLanguage}`, `Write the whole translation in ${targetLanguage}.`);
+  return ok;
+}
+
 export const translatorAgent: AgentDefinition<TranslatorInput, string> = registerAgent({
   id: "translator",
   language: "any",
@@ -129,7 +149,10 @@ export const translatorAgent: AgentDefinition<TranslatorInput, string> = registe
     "do not add notes. Output ONLY the translated Markdown.",
   user: (input) => input.text,
   parse: (text) => text.trim(),
-  validators: [{ name: "translation", check: (out, input) => checkTranslation(out, input.text ?? "", (input as TranslatorInput).extra.targetLanguage) }],
+  validators: [
+    { name: "translation", check: (out, input) => checkTranslation(out, input.text ?? "", (input as TranslatorInput).extra.targetLanguage) },
+    { name: "target language", check: (out, input) => checkTranslationLanguage(out, input.text ?? "", (input as TranslatorInput).extra.targetLanguage) },
+  ],
   tier: "small",
   temperature: 0.2,
   maxTokens: 4000,

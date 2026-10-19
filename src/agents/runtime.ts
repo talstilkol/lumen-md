@@ -131,6 +131,31 @@ export function sameScript(inputText: string, output: unknown): { ok: true } | {
   return { ok: false, reason: `the input is Hebrew but the answer is ${Math.round(r * 100)}% Hebrew`, hint: "Answer in Hebrew, the language of the user's text." };
 }
 
+const LANGUAGE_NAMES: Record<string, string> = { he: "Hebrew", en: "English", ar: "Arabic", ru: "Russian", fr: "French", de: "German", ja: "Japanese", zh: "Chinese", es: "Spanish", it: "Italian", pt: "Portuguese", nl: "Dutch", uk: "Ukrainian", fa: "Persian", tr: "Turkish", pl: "Polish" };
+const languageName = (tag: string) => LANGUAGE_NAMES[tag] ?? tag;
+
+/**
+ * The language check (plan 6.5): `sameScript` first; then, where input and
+ * answer share a script (French in, English out), local language
+ * identification decides. It acts only when both texts are long enough for
+ * a confident guess, so a short or mixed answer is never rejected on it.
+ */
+export async function sameLanguage(inputText: string, output: unknown): Promise<{ ok: true } | { ok: false; reason: string; hint: string }> {
+  const script = sameScript(inputText, output);
+  if (!script.ok || hebrewRatio(inputText) >= 0.5) return script;
+  const raw = typeof output === "string" ? output : JSON.stringify(output ?? "").replace(/"[\w$-]+":/g, " ");
+  let detect: typeof import("../text/langId").detectLanguage;
+  try {
+    ({ detectLanguage: detect } = await import("../text/langId"));
+  } catch {
+    return { ok: true }; // the detector chunk failed to load: keep the script check only
+  }
+  const a = detect(inputText);
+  const b = detect(raw);
+  if (!a.confident || !b.confident || a.lang === "und" || b.lang === "und" || a.lang === b.lang || a.script !== b.script) return { ok: true };
+  return { ok: false, reason: `the input is ${languageName(a.lang)} but the answer is ${languageName(b.lang)}`, hint: `Answer in ${languageName(a.lang)}, the language of the user's text.` };
+}
+
 /** A short stable key of an agent's input: a retry patch is bound to it. */
 export function inputKeyOf<I extends AgentInput>(def: AgentDefinition<I, unknown>, input: I): string {
   let text: string;
@@ -222,7 +247,7 @@ export async function runAgent<I extends AgentInput, O = string>(def: AgentDefin
         output = undefined;
       }
       // A cached answer passes the same language check as a fresh one.
-      if (output !== undefined && languageMode(def, input) === "input" && !sameScript(inputTextOf(def, input), output).ok) output = undefined;
+      if (output !== undefined && languageMode(def, input) === "input" && !(await sameLanguage(inputTextOf(def, input), output)).ok) output = undefined;
       if (output !== undefined) {
         step({ kind: "cache", ms: 0, label: "hit", ok: true });
         return finish("ok", { output, model: hit.model, executor: executor.id });
@@ -365,8 +390,9 @@ export async function runAgent<I extends AgentInput, O = string>(def: AgentDefin
         }
       }
       if (!failure && output !== undefined && languageMode(def, input) === "input") {
-        const r = sameScript(inputTextOf(def, input), output);
-        step({ kind: "validate", ms: 0, label: "language", ok: r.ok, detail: r.ok ? undefined : r.reason });
+        const t1 = Date.now();
+        const r = await sameLanguage(inputTextOf(def, input), output);
+        step({ kind: "validate", ms: Date.now() - t1, label: "language", ok: r.ok, detail: r.ok ? undefined : r.reason });
         if (!r.ok) failure = { kind: "validation", attempt, maxRetries, tier, executor: executor.id, label: "language", reason: r.reason, hint: r.hint, inputChars };
       }
       if (!failure && output !== undefined) {
