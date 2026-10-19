@@ -8,22 +8,7 @@ import { cmdIcons, type Command } from "../../ui/CommandPalette";
 import { t } from "../../i18n";
 import { showAiToast } from "../../ui/AiToast";
 
-async function flushOpenNote(): Promise<void> {
-  const { flushActiveWorkspaceDoc } = await import("../../store/openDocs");
-  await flushActiveWorkspaceDoc();
-}
-
-/** Toast for a failed move: conflicts, permission, or anything else. */
-async function reportMoveError(e: unknown, folder: string): Promise<void> {
-  const { VaultMoveConflictError, VaultPermissionError } = await import("../../storage/vault/location");
-  if (e instanceof VaultMoveConflictError) {
-    showAiToast(t("vault.folder.conflict", { n: String(e.paths.length), folder, path: e.paths[0] }), "error");
-  } else if (e instanceof VaultPermissionError) {
-    showAiToast(t("vault.folder.permissionDenied", { folder }), "error");
-  } else {
-    showAiToast(t("vault.folder.failed", { error: (e as Error).message }), "error");
-  }
-}
+const actions = () => import("../../ui/vaultFolderActions");
 
 export function buildVaultLocationCommands(): Command[] {
   return [
@@ -35,15 +20,17 @@ export function buildVaultLocationCommands(): Command[] {
       group: t("group.file"),
       action: async () => {
         const loc = await import("../../storage/vault/location");
+        const { isDesktopApp } = await import("../../storage/vault/tauri");
+        if (isDesktopApp()) return (await actions()).chooseDesktopFolder();
         if (!loc.isFolderVaultSupported()) return showAiToast(t("vault.folder.unsupported"), "info");
         const handle = await loc.pickVaultFolder();
         if (!handle) return;
         try {
-          await flushOpenNote();
+          await (await actions()).flushOpenNote();
           const r = await loc.moveVault({ kind: "folder", handle, name: handle.name });
           showAiToast(t("vault.folder.moved", { folder: handle.name, n: String(r.files) }), "info");
         } catch (e) {
-          await reportMoveError(e, handle.name);
+          await (await actions()).reportMoveError(e, handle.name);
         }
       },
     },
@@ -55,10 +42,17 @@ export function buildVaultLocationCommands(): Command[] {
       group: t("group.file"),
       action: async () => {
         const loc = await import("../../storage/vault/location");
+        const { isDesktopApp } = await import("../../storage/vault/tauri");
+        if (isDesktopApp()) {
+          await (await actions()).flushOpenNote();
+          const name = await loc.openDesktopFolderAsVault();
+          if (name) showAiToast(t("vault.folder.opened", { folder: name }), "info");
+          return;
+        }
         if (!loc.isFolderVaultSupported()) return showAiToast(t("vault.folder.unsupported"), "info");
         const handle = await loc.pickVaultFolder();
         if (!handle) return;
-        await flushOpenNote();
+        await (await actions()).flushOpenNote();
         if (await loc.openFolderAsVault(handle)) showAiToast(t("vault.folder.opened", { folder: handle.name }), "info");
         else showAiToast(t("vault.folder.permissionDenied", { folder: handle.name }), "error");
       },
@@ -76,11 +70,11 @@ export function buildVaultLocationCommands(): Command[] {
         if (status.location === "folder-disconnected") return showAiToast(t("vault.folder.reconnectBody", { folder: status.name }), "info");
         if (status.location === "restoring") return showAiToast(t("vault.folder.restoring"), "info");
         try {
-          await flushOpenNote();
+          await (await actions()).flushOpenNote();
           const r = await loc.moveVault({ kind: "opfs" });
           showAiToast(t("vault.folder.movedBack", { folder: status.name, n: String(r.files) }), "info");
         } catch (e) {
-          await reportMoveError(e, status.name);
+          await (await actions()).reportMoveError(e, status.name);
         }
       },
     },
