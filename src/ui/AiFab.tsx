@@ -144,8 +144,8 @@ export function AiFab({ commands }: Props) {
                 type="text"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder={`${t("group.ai")} — search…`}
-                aria-label={`${t("group.ai")} search`}
+                placeholder={t("ai.fab.searchPlaceholder")}
+                aria-label={t("ai.fab.searchLabel")}
                 autoFocus
                 style={{
                   width: "100%",

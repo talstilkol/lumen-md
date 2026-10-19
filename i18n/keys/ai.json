@@ -4,6 +4,46 @@
   "source": "src/i18n/locales/en/ai.json",
   "entries": [
     {
+      "key": "agent.grammar.found.one",
+      "en": "Found {n} issue:\n\n{list}",
+      "vars": [
+        "n",
+        "list"
+      ]
+    },
+    {
+      "key": "agent.grammar.found.other",
+      "en": "Found {n} issues:\n\n{list}",
+      "vars": [
+        "n",
+        "list"
+      ]
+    },
+    {
+      "key": "agent.links.needWorkspace",
+      "en": "Open the file from your workspace first — the link agent reads neighboring notes.",
+      "vars": []
+    },
+    {
+      "key": "agent.links.no",
+      "en": "no",
+      "vars": []
+    },
+    {
+      "key": "agent.links.prompt",
+      "en": "Found {n} link suggestions:\n\n{summary}\n\nApply all? (Type '{no}' to skip)",
+      "vars": [
+        "n",
+        "summary",
+        "no"
+      ]
+    },
+    {
+      "key": "agent.links.yes",
+      "en": "yes",
+      "vars": []
+    },
+    {
       "key": "agent.panel.close",
       "en": "Close",
       "vars": []
@@ -36,6 +76,11 @@
     {
       "key": "agent.panel.trace",
       "en": "Recent agent runs",
+      "vars": []
+    },
+    {
+      "key": "agent.product.prompt",
+      "en": "Describe the product you want to create:\n(e.g. 'A todo app with drag-and-drop, dark mode and local storage')",
       "vars": []
     },
     {
@@ -129,6 +174,18 @@
     {
       "key": "agent.suggest.webgpuBrowser.detail",
       "en": "Chrome or Edge 113+, Safari 26 or Firefox 141+ run models in the browser.",
+      "vars": []
+    },
+    {
+      "key": "agent.tags.prompt",
+      "en": "Suggested tags:\n  {tags}\n\nPress OK to merge them into the frontmatter, or edit the list (comma-separated):",
+      "vars": [
+        "tags"
+      ]
+    },
+    {
+      "key": "agent.translate.prompt",
+      "en": "Translate the document into which language?\n(e.g. Spanish, עברית, 日本語, Français)",
       "vars": []
     },
     {
@@ -416,6 +473,33 @@
       "vars": []
     },
     {
+      "key": "ai.error.unknown",
+      "en": "unknown error",
+      "vars": []
+    },
+    {
+      "key": "ai.fab.searchLabel",
+      "en": "Search AI commands",
+      "vars": []
+    },
+    {
+      "key": "ai.fab.searchPlaceholder",
+      "en": "Search AI commands…",
+      "vars": []
+    },
+    {
+      "key": "ai.ghostwriter.failed",
+      "en": "AI Ghostwriter failed: {error} (⌘K → AI: Recent Agent Runs)",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "ai.inline.submit",
+      "en": "Submit",
+      "vars": []
+    },
+    {
       "key": "ai.localModels.auto",
       "en": "Automatic — pick by hardware and task",
       "vars": []
@@ -514,6 +598,23 @@
       "vars": []
     },
     {
+      "key": "ai.ollama.noModels",
+      "en": "No models found.\n\nPull a model with: ollama pull llama3.1",
+      "vars": []
+    },
+    {
+      "key": "ai.ollama.notRunning",
+      "en": "Ollama is not running.\n\nStart it with: ollama serve\nThen try again.",
+      "vars": []
+    },
+    {
+      "key": "ai.ollama.pickModel",
+      "en": "Available Ollama models:\n\n{models}\n\nType the model name to use:",
+      "vars": [
+        "models"
+      ]
+    },
+    {
       "key": "ai.policy.cloud",
       "en": "Cloud — use the selected cloud provider",
       "vars": []
@@ -552,6 +653,25 @@
       "key": "ai.prompt.submit",
       "en": "Go",
       "vars": []
+    },
+    {
+      "key": "ai.provider.choose",
+      "en": "Choose your AI provider:",
+      "vars": []
+    },
+    {
+      "key": "ai.provider.enterKey",
+      "en": "Enter your {provider} API key:",
+      "vars": [
+        "provider"
+      ]
+    },
+    {
+      "key": "ai.provider.invalid",
+      "en": "Invalid provider. Choose: {list}",
+      "vars": [
+        "list"
+      ]
     },
     {
       "key": "ai.settings.available",
@@ -1366,6 +1486,11 @@
       "vars": []
     },
     {
+      "key": "voice.languagePrompt",
+      "en": "Select language for voice recognition:",
+      "vars": []
+    },
+    {
       "key": "voice.memo.recording",
       "en": "Recording memo…",
       "vars": []
@@ -1381,6 +1506,11 @@
       "vars": [
         "lang"
       ]
+    },
+    {
+      "key": "voice.stop",
+      "en": "⏹ Stop",
+      "vars": []
     }
   ]
 }

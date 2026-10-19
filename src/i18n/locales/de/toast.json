@@ -69,6 +69,7 @@
   "toast.noTagSuggestionsReturned": "Keine Tag-Vorschläge erhalten",
   "toast.openedSharedNoteFromIos": "Geteilte Notiz aus iOS geöffnet.",
   "toast.outlineGenerationFailed": "Gliederung konnte nicht erstellt werden",
+  "toast.pasteText.placeholder": "<h1>Hallo</h1>\n<p>HTML hier einfügen…</p>",
   "toast.pasteText.prompt": "Einfügen HTML or rich text below:",
   "toast.pasteText.success": "Text eingefügt und konvertiert",
   "toast.pleaseConfigureYourAiKey": "Bitte richte deinen AI-Schlüssel ein (⌘K → AI Settings)",

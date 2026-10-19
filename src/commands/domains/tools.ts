@@ -19,7 +19,7 @@ export function buildWritingGoalCommands({ writingGoalWords, setWritingGoal }: C
       group: t("group.tools"),
       action: async () => {
         const ans = await uiPrompt({
-          message: "Daily writing goal in words (0 to disable):",
+          message: t("writingGoal.prompt"),
           defaultValue: String(writingGoalWords || 500),
         });
         if (ans === null) return;

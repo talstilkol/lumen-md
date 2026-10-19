@@ -9,6 +9,26 @@
       "vars": []
     },
     {
+      "key": "boot.crashBody",
+      "en": "Lumen encountered an unexpected error.",
+      "vars": []
+    },
+    {
+      "key": "boot.crashTitle",
+      "en": "Something went wrong",
+      "vars": []
+    },
+    {
+      "key": "boot.loading",
+      "en": "Loading Lumen…",
+      "vars": []
+    },
+    {
+      "key": "boot.reload",
+      "en": "Reload Lumen",
+      "vars": []
+    },
+    {
       "key": "dialog.cancel",
       "en": "Cancel",
       "vars": []
@@ -29,8 +49,57 @@
       "vars": []
     },
     {
+      "key": "errorBoundary.unexpected",
+      "en": "An unexpected error occurred.",
+      "vars": []
+    },
+    {
+      "key": "frontmatter.by",
+      "en": "by",
+      "vars": []
+    },
+    {
+      "key": "frontmatter.label",
+      "en": "Document",
+      "vars": []
+    },
+    {
       "key": "loading.generic",
       "en": "Loading…",
+      "vars": []
+    },
+    {
+      "key": "mobileBar.label",
+      "en": "Markdown shortcuts",
+      "vars": []
+    },
+    {
+      "key": "pageView.jump",
+      "en": "Jump to page",
+      "vars": []
+    },
+    {
+      "key": "pageView.next",
+      "en": "Next page",
+      "vars": []
+    },
+    {
+      "key": "pageView.of",
+      "en": "of {total}",
+      "vars": [
+        "total"
+      ]
+    },
+    {
+      "key": "pageView.page",
+      "en": "Page {n}",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "pageView.prev",
+      "en": "Previous page",
       "vars": []
     },
     {
@@ -54,11 +123,42 @@
       "vars": []
     },
     {
+      "key": "scroll.page",
+      "en": "page {current}/{total}",
+      "vars": [
+        "current",
+        "total"
+      ]
+    },
+    {
+      "key": "status.aiActive",
+      "en": "AI Copilot Active",
+      "vars": []
+    },
+    {
       "key": "status.chars",
       "en": "{n} chars",
       "vars": [
         "n"
       ]
+    },
+    {
+      "key": "status.chars.title",
+      "en": "Characters (without spaces)",
+      "vars": []
+    },
+    {
+      "key": "status.collab.title",
+      "en": "Collab room: {room}\nPeers: {n}",
+      "vars": [
+        "room",
+        "n"
+      ]
+    },
+    {
+      "key": "status.document",
+      "en": "Document",
+      "vars": []
     },
     {
       "key": "status.grammar.off",
@@ -79,6 +179,13 @@
       "key": "status.grammar.tooltip.on",
       "en": "Grammar check is ON. Click to disable.",
       "vars": []
+    },
+    {
+      "key": "status.health",
+      "en": "Health {score}%",
+      "vars": [
+        "score"
+      ]
     },
     {
       "key": "status.leave",
@@ -106,6 +213,11 @@
       "vars": [
         "n"
       ]
+    },
+    {
+      "key": "status.reading.title",
+      "en": "Reading time at ~220 words per minute",
+      "vars": []
     },
     {
       "key": "status.roadmap",
@@ -148,6 +260,28 @@
       "vars": []
     },
     {
+      "key": "status.sync.error",
+      "en": "error",
+      "vars": []
+    },
+    {
+      "key": "status.sync.offline",
+      "en": "offline",
+      "vars": []
+    },
+    {
+      "key": "status.sync.syncing",
+      "en": "syncing",
+      "vars": []
+    },
+    {
+      "key": "status.sync.title",
+      "en": "Sync: {state}",
+      "vars": [
+        "state"
+      ]
+    },
+    {
       "key": "status.telemetry.off",
       "en": "Telemetry",
       "vars": []
@@ -172,6 +306,58 @@
       "en": "{n} words",
       "vars": [
         "n"
+      ]
+    },
+    {
+      "key": "status.words.title",
+      "en": "Word count",
+      "vars": []
+    },
+    {
+      "key": "sync.conflict.apply",
+      "en": "Apply merge",
+      "vars": []
+    },
+    {
+      "key": "sync.conflict.body",
+      "en": "Both sides changed since the last sync. Pick what to keep, or take one side wholesale.",
+      "vars": []
+    },
+    {
+      "key": "sync.conflict.both",
+      "en": "both",
+      "vars": []
+    },
+    {
+      "key": "sync.conflict.empty",
+      "en": "(empty)",
+      "vars": []
+    },
+    {
+      "key": "sync.conflict.local",
+      "en": "local",
+      "vars": []
+    },
+    {
+      "key": "sync.conflict.remote",
+      "en": "remote",
+      "vars": []
+    },
+    {
+      "key": "sync.conflict.takeLocal",
+      "en": "Take local",
+      "vars": []
+    },
+    {
+      "key": "sync.conflict.takeRemote",
+      "en": "Take remote",
+      "vars": []
+    },
+    {
+      "key": "sync.conflict.title",
+      "en": "Sync conflict — {path}",
+      "vars": [
+        "path"
       ]
     },
     {

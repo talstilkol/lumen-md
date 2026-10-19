@@ -255,7 +255,7 @@ export function CanvasTldraw({ open, onClose }: Props) {
 
   const handleNew = useCallback(async () => {
     const name = await uiPrompt({
-      message: t("canvas.new.prompt") ?? "Canvas name:",
+      message: t("canvas.new.prompt"),
       defaultValue: `canvas-${Date.now().toString(36)}`,
     });
     if (!name) return;
@@ -310,7 +310,7 @@ export function CanvasTldraw({ open, onClose }: Props) {
     <div
       role="dialog"
       aria-modal="true"
-      aria-label={t("canvas.dialogLabel") ?? "Whiteboard"}
+      aria-label={t("canvas.dialogLabel")}
       style={{
         position: "fixed",
         inset: 0,
@@ -331,11 +331,11 @@ export function CanvasTldraw({ open, onClose }: Props) {
           background: "hsl(var(--bg-subtle))",
         }}
       >
-        <strong style={{ fontSize: 13 }}>{t("canvas.title") ?? "Canvas"}</strong>
+        <strong style={{ fontSize: 13 }}>{t("canvas.title")}</strong>
         <select
           value={canvasName}
           onChange={(e) => handlePick(e.target.value)}
-          aria-label={t("canvas.picker") ?? "Pick canvas"}
+          aria-label={t("canvas.picker")}
           style={{
             padding: "3px 6px",
             border: "1px solid hsl(var(--border))",
@@ -346,7 +346,7 @@ export function CanvasTldraw({ open, onClose }: Props) {
           }}
         >
           {!savedList.includes(canvasName) && (
-            <option value={canvasName}>{canvasName} (unsaved)</option>
+            <option value={canvasName}>{t("canvas.unsaved", { name: canvasName })}</option>
           )}
           {savedList.map((n) => (
             <option key={n} value={n}>
@@ -367,7 +367,7 @@ export function CanvasTldraw({ open, onClose }: Props) {
             cursor: "pointer",
           }}
         >
-          + {t("canvas.new") ?? "New"}
+          + {t("canvas.new")}
         </button>
         {legacyList.length > 0 && (
           <details
@@ -427,7 +427,7 @@ export function CanvasTldraw({ open, onClose }: Props) {
         <button
           type="button"
           onClick={onClose}
-          aria-label={t("canvas.close") ?? "Close"}
+          aria-label={t("canvas.close")}
           style={{
             padding: "3px 9px",
             fontSize: 12,
@@ -438,7 +438,7 @@ export function CanvasTldraw({ open, onClose }: Props) {
             cursor: "pointer",
           }}
         >
-          {t("canvas.close") ?? "Close"}
+          {t("canvas.close")}
         </button>
       </div>
 

@@ -454,15 +454,15 @@ export function FileTree({
             {t("tree.tagFilter", {
               tag: tagFilter.tag,
               count: String(tagFilter.paths.length),
-            }) ?? `# ${tagFilter.tag} · ${tagFilter.paths.length}`}
+            })}
           </span>
           <button
             type="button"
             onClick={() => setTagFilter(null)}
             aria-label={
-              t("tree.tagFilter.clear") ?? "Clear tag filter"
+              t("tree.tagFilter.clear")
             }
-            title={t("tree.tagFilter.clear") ?? "Clear tag filter"}
+            title={t("tree.tagFilter.clear")}
             style={{
               marginInlineStart: "auto",
               padding: "2px 6px",
@@ -487,7 +487,7 @@ export function FileTree({
           }}
         >
           {tagFilter
-            ? (t("tree.tagFilter.empty") ?? "No notes match this tag.")
+            ? (t("tree.tagFilter.empty"))
             : t("tree.emptyHint")}
         </div>
       ) : (
@@ -690,7 +690,7 @@ function renderNode(
           <input
             ref={ctx.inputRef as React.RefObject<HTMLInputElement>}
             className="file-tree-input"
-            aria-label={`Rename ${node.name}`}
+            aria-label={t("tree.renameItem", { name: node.name })}
             value={ctx.editValue}
             onChange={(ev) => ctx.setEditValue(ev.target.value)}
             onBlur={() => ctx.commitRename(node.path)}

@@ -140,11 +140,10 @@ export function buildViewCommands({ setSearchOpen, setRuntimeMetricsOpen, vimEna
     {
       id: "view.grammarCheck",
       label: grammarCheck
-        ? t("cmd.view.grammarCheck.off") ?? "Disable grammar check"
-        : t("cmd.view.grammarCheck.on") ?? "Enable grammar check (LanguageTool)",
+        ? t("cmd.view.grammarCheck.off")
+        : t("cmd.view.grammarCheck.on"),
       hint:
-        t("cmd.view.grammarCheck.hint") ??
-        "Underlines grammar / style / typo issues. Calls LanguageTool — set VITE_LANGUAGETOOL_URL to self-host.",
+        t("cmd.view.grammarCheck.hint"),
       icon: cmdIcons.Pencil,
       group: t("group.view"),
       action: toggleGrammarCheck,

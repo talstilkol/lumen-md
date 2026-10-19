@@ -69,6 +69,7 @@
   "toast.noTagSuggestionsReturned": "タグの提案はありませんでした",
   "toast.openedSharedNoteFromIos": "iOS から共有されたノートを開きました。",
   "toast.outlineGenerationFailed": "アウトラインの生成に失敗しました",
+  "toast.pasteText.placeholder": "<h1>こんにちは</h1>\n<p>ここに HTML を貼り付け…</p>",
   "toast.pasteText.prompt": "貼り付け HTML or rich text below:",
   "toast.pasteText.success": "テキストを変換して貼り付けました",
   "toast.pleaseConfigureYourAiKey": "AI キーを設定してください(⌘K → AI Settings)",

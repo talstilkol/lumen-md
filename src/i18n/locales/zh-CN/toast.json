@@ -69,6 +69,7 @@
   "toast.noTagSuggestionsReturned": "未返回标签建议",
   "toast.openedSharedNoteFromIos": "已打开来自 iOS 的共享笔记。",
   "toast.outlineGenerationFailed": "大纲生成失败",
+  "toast.pasteText.placeholder": "<h1>你好</h1>\n<p>在此粘贴 HTML…</p>",
   "toast.pasteText.prompt": "粘贴 HTML or rich text below:",
   "toast.pasteText.success": "文本已转换并粘贴",
   "toast.pleaseConfigureYourAiKey": "请配置 AI 密钥（⌘K → AI Settings）",

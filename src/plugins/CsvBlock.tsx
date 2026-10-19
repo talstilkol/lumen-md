@@ -47,7 +47,7 @@ export default function CsvBlock({ source, lang, meta }: Props) {
     return (
       <div className="chart-block" style={{ padding: "1rem" }}>
         <div style={{ color: "hsl(0 80% 60%)", fontSize: 13 }}>
-          ⚠︎ {lang.toUpperCase()} fetch failed: {fetchError}
+          {t("block.data.fetchFailed", { lang: lang.toUpperCase(), error: fetchError })}
         </div>
       </div>
     );
@@ -56,7 +56,7 @@ export default function CsvBlock({ source, lang, meta }: Props) {
     return (
       <div className="chart-block" style={{ padding: "1rem" }}>
         <div style={{ color: "hsl(0 80% 60%)", fontSize: 13 }}>
-          ⚠︎ Could not parse {lang.toUpperCase()} data.
+          {t("block.data.parseFailed", { lang: lang.toUpperCase() })}
         </div>
       </div>
     );
@@ -69,17 +69,17 @@ export default function CsvBlock({ source, lang, meta }: Props) {
       <div className="chart-block-header">
         <span style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
           <Sparkles size={13} style={{ opacity: 0.7 }} />
-          {titleMatch?.[1] ?? `${lang.toUpperCase()} • ${data.rows.length} rows × ${data.columns.length} cols`}
+          {titleMatch?.[1] ?? t("block.data.summary", { lang: lang.toUpperCase(), rows: data.rows.length, cols: data.columns.length })}
           {remote && (
             <span style={{ fontSize: 10, color: "hsl(var(--accent))", marginInlineStart: 4 }}>
-              · live
+              {t("block.common.live")}
             </span>
           )}
           {url && (
             <button
               type="button"
               onClick={refetch}
-              title={`Refetch ${url}`}
+              title={t("block.common.refetchUrl", { url })}
               style={{
                 marginInlineStart: 4,
                 border: "none",
@@ -90,7 +90,7 @@ export default function CsvBlock({ source, lang, meta }: Props) {
                 borderRadius: 6,
               }}
               disabled={fetching}
-              aria-label="Refetch CSV data"
+              aria-label={t("block.csv.refetch")}
             >
               <RefreshCw
                 size={11}
@@ -105,7 +105,7 @@ export default function CsvBlock({ source, lang, meta }: Props) {
             onClick={() => setView("table")}
           >
             <Table2 size={12} style={{ display: "inline", marginRight: 4 }} />
-            Table
+            {t("block.data.table")}
           </button>
           {suggestions.length > 0 && (
             <button
@@ -113,7 +113,7 @@ export default function CsvBlock({ source, lang, meta }: Props) {
               onClick={() => setView("chart")}
             >
               <BarChart3 size={12} style={{ display: "inline", marginRight: 4 }} />
-              Chart
+              {t("block.data.chart")}
             </button>
           )}
           <button
@@ -145,7 +145,7 @@ export default function CsvBlock({ source, lang, meta }: Props) {
             }}
           >
             <Sparkles size={12} style={{ display: "inline", marginRight: 4 }} />
-            AI Chart
+            {t("block.data.aiChart")}
           </button>
         </div>
       </div>
@@ -160,13 +160,13 @@ export default function CsvBlock({ source, lang, meta }: Props) {
         <div style={{ padding: "0.5rem" }}>
           {aiLoading ? (
             <div style={{ color: "hsl(var(--fg-muted))", fontSize: 13 }}>
-              🤖 Generating AI visualization...
+              {t("block.data.aiGenerating")}
             </div>
           ) : aiOption ? (
             <EChart option={aiOption} height={360} />
           ) : (
             <div style={{ color: "hsl(var(--fg-muted))", fontSize: 13 }}>
-              No AI visualization available.
+              {t("block.data.aiNone")}
             </div>
           )}
         </div>

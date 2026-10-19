@@ -63,14 +63,14 @@ function buildSections(mod: string) {
         { keys: `${mod}+2`, label: () => t("cmd.split") },
         { keys: `${mod}+3`, label: () => t("cmd.preview") },
         { keys: `${mod}+4`, label: () => "WYSIWYG" },
-        { keys: `${mod}+Shift+F`, label: () => t("cmd.focusMode") ?? "Focus Mode" },
+        { keys: `${mod}+Shift+F`, label: () => t("cmd.focusMode") },
       ],
     },
     {
       title: () => "Navigation",
       items: [
         { keys: `${mod}+K`, label: () => t("cmd.cmdPalette") },
-        { keys: `${mod}+/`, label: () => t("cmd.shortcuts") ?? "Keyboard Shortcuts" },
+        { keys: `${mod}+/`, label: () => t("cmd.shortcuts") },
         { keys: "Esc", label: () => t("palette.close") },
       ],
     },
@@ -107,7 +107,7 @@ export function KeyboardShortcuts({ open, onClose }: Props) {
       onClick={onClose}
       role="dialog"
       aria-modal="true"
-      aria-label="Keyboard Shortcuts"
+      aria-label={t("toolbar.shortcuts")}
     >
       <div
         ref={dialogRef}
@@ -134,7 +134,7 @@ export function KeyboardShortcuts({ open, onClose }: Props) {
             alignItems: "center",
           }}
         >
-          ⌨️ {t("cmd.shortcuts") ?? "Keyboard Shortcuts"}
+          ⌨️ {t("cmd.shortcuts")}
           <button
             onClick={onClose}
             style={{

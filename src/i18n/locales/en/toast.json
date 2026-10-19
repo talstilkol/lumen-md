@@ -69,6 +69,7 @@
   "toast.noTagSuggestionsReturned": "No tag suggestions returned",
   "toast.openedSharedNoteFromIos": "Opened shared note from iOS.",
   "toast.outlineGenerationFailed": "Outline generation failed",
+  "toast.pasteText.placeholder": "<h1>Hello</h1>\n<p>Paste your HTML here…</p>",
   "toast.pasteText.prompt": "Paste HTML or rich text below:",
   "toast.pasteText.success": "Text pasted and converted",
   "toast.pleaseConfigureYourAiKey": "Please configure your AI Key (⌘K → AI Settings)",

@@ -19,6 +19,8 @@ import {
 } from "./database";
 import { log } from "../lib/logger";
 import { onWorkspaceChanged } from "../storage/workspaceEvents";
+import { t } from "../i18n";
+import { tRich } from "../i18n/rich";
 
 interface Props {
   source: string;
@@ -71,7 +73,7 @@ export default function DatabaseBlock({ source, meta }: Props) {
       <div className="chart-block" style={{ padding: "1rem" }}>
         <div style={{ color: "hsl(0 80% 60%)", fontSize: 13, display: "flex", alignItems: "center", gap: 8 }}>
           <AlertCircle size={14} />
-          Database spec error: {parseError ?? "invalid"}
+          {t("block.database.specError", { error: parseError ?? t("block.database.invalid") })}
         </div>
       </div>
     );
@@ -85,13 +87,13 @@ export default function DatabaseBlock({ source, meta }: Props) {
       <div className="chart-block-header">
         <span style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
           <span style={{ fontWeight: 600 }}>{titleLabel}</span>
-          {loading && <span style={{ fontSize: 11, color: "hsl(var(--fg-muted))" }}>· loading…</span>}
+          {loading && <span style={{ fontSize: 11, color: "hsl(var(--fg-muted))" }}>{t("block.database.loading")}</span>}
         </span>
         <div className="chart-block-tabs">
-          <ViewTab cur={view} v="table" set={setView}><Table2 size={12} /> Table</ViewTab>
-          <ViewTab cur={view} v="kanban" set={setView}><Columns3 size={12} /> Kanban</ViewTab>
-          <ViewTab cur={view} v="gallery" set={setView}><LayoutGrid size={12} /> Gallery</ViewTab>
-          <ViewTab cur={view} v="calendar" set={setView}><CalendarIcon size={12} /> Calendar</ViewTab>
+          <ViewTab cur={view} v="table" set={setView}><Table2 size={12} /> {t("block.database.view.table")}</ViewTab>
+          <ViewTab cur={view} v="kanban" set={setView}><Columns3 size={12} /> {t("block.database.view.kanban")}</ViewTab>
+          <ViewTab cur={view} v="gallery" set={setView}><LayoutGrid size={12} /> {t("block.database.view.gallery")}</ViewTab>
+          <ViewTab cur={view} v="calendar" set={setView}><CalendarIcon size={12} /> {t("block.database.view.calendar")}</ViewTab>
         </div>
       </div>
       <div style={{ padding: 8 }}>
@@ -100,11 +102,13 @@ export default function DatabaseBlock({ source, meta }: Props) {
         )}
         {!error && rows.length === 0 && !loading && (
           <div style={{ padding: 24, textAlign: "center", color: "hsl(var(--fg-muted))", fontSize: 13 }}>
-            No notes match this query.
+            {t("block.database.noMatch")}
             <br />
             <span style={{ fontSize: 11, opacity: 0.7 }}>
-              Add YAML frontmatter <code>type: {spec.type ?? "…"}</code> to notes under{" "}
-              <code>{spec.source ?? "the workspace root"}</code>.
+              {tRich("block.database.addFrontmatter", {
+                code: <code>type: {spec.type ?? "…"}</code>,
+                source: <code>{spec.source ?? t("block.database.workspaceRoot")}</code>,
+              })}
             </span>
           </div>
         )}
@@ -174,7 +178,7 @@ function TableView({ rows, fields }: { rows: DatabaseRow[]; fields: string[] }) 
       <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
         <thead>
           <tr>
-            <th style={thStyle}>Title</th>
+            <th style={thStyle}>{t("block.database.title")}</th>
             {fields.map((f) => (
               <th key={f} style={thStyle}>
                 {f}
@@ -230,7 +234,7 @@ function KanbanView({
   if (!groupBy) {
     return (
       <div style={{ padding: 12, color: "hsl(var(--fg-muted))", fontSize: 12 }}>
-        Kanban needs a <code>groupBy:</code> column. Add one to the database spec.
+        {tRich("block.database.kanbanNeeds", { field: <code>groupBy:</code> })}
       </div>
     );
   }
@@ -272,7 +276,7 @@ function KanbanView({
               padding: "0 4px",
             }}
           >
-            {col === "_" ? "(none)" : col}
+            {col === "_" ? t("block.database.none") : col}
             <span style={{ marginInlineStart: 6, fontWeight: 400, opacity: 0.7 }}>
               {groups.get(col)!.length}
             </span>
@@ -388,7 +392,7 @@ function CalendarView({ rows, spec }: { rows: DatabaseRow[]; spec: DatabaseSpec 
   if (!dateField) {
     return (
       <div style={{ padding: 12, color: "hsl(var(--fg-muted))", fontSize: 12 }}>
-        Calendar needs a <code>dateField:</code> column. Add one to the database spec.
+        {tRich("block.database.calendarNeeds", { field: <code>dateField:</code> })}
       </div>
     );
   }
@@ -406,7 +410,7 @@ function CalendarView({ rows, spec }: { rows: DatabaseRow[]; spec: DatabaseSpec 
   if (buckets.size === 0) {
     return (
       <div style={{ padding: 12, color: "hsl(var(--fg-muted))", fontSize: 12 }}>
-        No notes have a parseable <code>{dateField}</code> value.
+        {tRich("block.database.noDates", { field: <code>{dateField}</code> })}
       </div>
     );
   }

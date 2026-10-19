@@ -279,9 +279,23 @@
       ]
     },
     {
+      "key": "git.alert.pushFailed",
+      "en": "Push failed: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
       "key": "git.alert.pushed",
       "en": "Pushed.",
       "vars": []
+    },
+    {
+      "key": "git.alert.statusFailed",
+      "en": "Status failed: {error}",
+      "vars": [
+        "error"
+      ]
     },
     {
       "key": "git.alert.tokenCleared",
@@ -294,6 +308,16 @@
       "vars": []
     },
     {
+      "key": "git.defaultCommitMessage",
+      "en": "Update files",
+      "vars": []
+    },
+    {
+      "key": "git.placeholder.name",
+      "en": "Your name",
+      "vars": []
+    },
+    {
       "key": "git.prompt.cloneUrl",
       "en": "Repository URL (https://… or git@…):",
       "vars": []
@@ -301,6 +325,16 @@
     {
       "key": "git.prompt.commitMessage",
       "en": "Commit message:",
+      "vars": []
+    },
+    {
+      "key": "git.prompt.commitMessageAi",
+      "en": "Commit message (AI suggested):",
+      "vars": []
+    },
+    {
+      "key": "git.prompt.email",
+      "en": "Git email:",
       "vars": []
     },
     {
@@ -316,6 +350,11 @@
     {
       "key": "git.prompt.message",
       "en": "Commit message:",
+      "vars": []
+    },
+    {
+      "key": "git.prompt.name",
+      "en": "Git name:",
       "vars": []
     },
     {
@@ -409,13 +448,97 @@
       "vars": []
     },
     {
+      "key": "searchDialog.buildHint",
+      "en": "Click “Build index” to enable Smart search.",
+      "vars": []
+    },
+    {
+      "key": "searchDialog.buildIndex",
+      "en": "Build index",
+      "vars": []
+    },
+    {
+      "key": "searchDialog.forget",
+      "en": "Forget search \"{q}\"",
+      "vars": [
+        "q"
+      ]
+    },
+    {
+      "key": "searchDialog.hitTitle",
+      "en": "{path} — score {score}",
+      "vars": [
+        "path",
+        "score"
+      ]
+    },
+    {
+      "key": "searchDialog.indexing",
+      "en": "Indexing…",
+      "vars": []
+    },
+    {
+      "key": "searchDialog.mode.ai",
+      "en": "Ask Workspace",
+      "vars": []
+    },
+    {
+      "key": "searchDialog.mode.search",
+      "en": "Search",
+      "vars": []
+    },
+    {
+      "key": "searchDialog.mode.smart",
+      "en": "Smart",
+      "vars": []
+    },
+    {
       "key": "searchDialog.noRelevant",
       "en": "No relevant files found in workspace.",
       "vars": []
     },
     {
+      "key": "searchDialog.rebuildIndex",
+      "en": "Rebuild the embedding index",
+      "vars": []
+    },
+    {
+      "key": "searchDialog.recent",
+      "en": "Recent searches",
+      "vars": []
+    },
+    {
+      "key": "searchDialog.recentLabel",
+      "en": "Recent",
+      "vars": []
+    },
+    {
+      "key": "searchDialog.reindex",
+      "en": "Re-index",
+      "vars": []
+    },
+    {
+      "key": "searchDialog.relevance",
+      "en": "Relevance: {pct}%",
+      "vars": [
+        "pct"
+      ]
+    },
+    {
+      "key": "searchDialog.rerun",
+      "en": "Re-run search \"{q}\"",
+      "vars": [
+        "q"
+      ]
+    },
+    {
       "key": "searchDialog.searching",
       "en": "Searching workspace…",
+      "vars": []
+    },
+    {
+      "key": "searchDialog.smartHint",
+      "en": "Hybrid semantic + keyword search (uses your AI key for embeddings)",
       "vars": []
     },
     {
@@ -427,6 +550,20 @@
       "key": "searchDialog.thinking",
       "en": "Thinking…",
       "vars": []
+    },
+    {
+      "key": "searchDialog.turns.one",
+      "en": "{n} turn in this conversation",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "searchDialog.turns.other",
+      "en": "{n} turns in this conversation",
+      "vars": [
+        "n"
+      ]
     },
     {
       "key": "tagsPanel.close",
@@ -868,6 +1005,13 @@
       "vars": []
     },
     {
+      "key": "tree.renameItem",
+      "en": "Rename {name}",
+      "vars": [
+        "name"
+      ]
+    },
+    {
       "key": "tree.selectedCount",
       "en": "{{count}} selected",
       "vars": [
@@ -976,6 +1120,16 @@
     {
       "key": "vault.import.zip",
       "en": "A .zip file",
+      "vars": []
+    },
+    {
+      "key": "vault.prompt.decryptPassword",
+      "en": "Enter decryption password:",
+      "vars": []
+    },
+    {
+      "key": "vault.prompt.encryptPassword",
+      "en": "Enter encryption password:",
       "vars": []
     },
     {

@@ -69,6 +69,7 @@
   "toast.noTagSuggestionsReturned": "Теги не предложены",
   "toast.openedSharedNoteFromIos": "Открыта общая заметка из iOS.",
   "toast.outlineGenerationFailed": "Не удалось создать структуру",
+  "toast.pasteText.placeholder": "<h1>Привет</h1>\n<p>Вставьте HTML сюда…</p>",
   "toast.pasteText.prompt": "Вставить HTML or rich text below:",
   "toast.pasteText.success": "Текст вставлен и преобразован",
   "toast.pleaseConfigureYourAiKey": "Настройте ключ AI (⌘K → AI Settings)",

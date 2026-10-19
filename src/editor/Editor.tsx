@@ -741,7 +741,7 @@ export const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
           zIndex: 5,
         }}
       >
-        Line {currentLine}
+        {i18nT("editor.line", { n: currentLine })}
       </div>
     </div>
   );
