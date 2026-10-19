@@ -38,9 +38,9 @@
  */
 
 import type { AgentInput, ExecutorMessage, UntrustedConsentRequest } from "./types";
-import { untrustedSourcesOfNote } from "./provenance";
+import { ensureProvenanceBackfill, untrustedSourcesOfNote } from "./provenance";
 
-export { clearUntrustedNote, isClipLibraryPath, markUntrustedNote, moveUntrustedNotes, untrustedSourcesOfNote } from "./provenance";
+export { clearUntrustedNote, ensureProvenanceBackfill, isClipLibraryPath, markUntrustedNote, moveUntrustedNotes, untrustedSourcesOfNote } from "./provenance";
 
 /* ─── Cleaning ─────────────────────────────────────────────────────────── */
 
@@ -354,6 +354,7 @@ async function workspacePathOf(text: string | undefined): Promise<string | null>
 
 /** Why a run's input is outside content: the caller's word, the note's path (or the open tab holding the text) and its frontmatter. */
 export async function inputSources(i: { path?: string | null; document?: string; text?: string; selection?: string; untrusted?: string[] }): Promise<string[]> {
+  await ensureProvenanceBackfill();
   const found = workspacePathOf(i.document ?? i.text ?? i.selection);
   const path = i.path ?? (await found);
   return [...new Set([...(i.untrusted ?? []), ...untrustedSourcesOfNote(path, i.document)])];

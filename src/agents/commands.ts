@@ -96,7 +96,8 @@ import type { LinkSuggestion } from "./defs/linker";
 async function collectNotesCatalog(currentPath: string): Promise<{ catalog: string; titles: string[]; untrusted: string[] }> {
   if (!isOPFSAvailable()) return { catalog: "", titles: [], untrusted: [] };
   const list = await listWorkspace({ includeAssets: false });
-  const { guardUntrusted, untrustedSourcesOfNote } = await import("./untrusted");
+  const { ensureProvenanceBackfill, guardUntrusted, untrustedSourcesOfNote } = await import("./untrusted");
+  await ensureProvenanceBackfill();
   const lines: string[] = [];
   const titles: string[] = [];
   const untrusted: string[] = [];

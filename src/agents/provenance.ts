@@ -7,8 +7,10 @@
  *  - it is in the clip library (`Library/`, `ספרייה/`);
  *  - its frontmatter has `source: https://…` (a clipped page) or
  *    `untrusted: true`;
+ *  - it is under `Imported/`, where every archive import writes;
  *  - it, or a folder above it, was recorded by `markUntrustedNote` (git
- *    clone / pull, archive import). Renames and moves carry the record
+ *    clone / pull, archive import). Clones made before the guard existed
+ *    are recorded once by `ensureProvenanceBackfill`. Renames and moves carry the record
  *    along (`moveUntrustedNotes`), and a note moved out of the library
  *    keeps that provenance.
  */
@@ -19,6 +21,9 @@
  * test keeps the two in step.
  */
 export const isClipLibraryPath = (p: string) => p.startsWith("Library/") || p.startsWith("ספרייה/");
+
+/** Where every archive import writes (`storage/exportAll.ts`), also imports made before the guard existed. */
+const isImportedPath = (p: string) => p.startsWith("Imported/");
 
 const REGISTRY_KEY = "lumen.agents.untrustedNotes";
 const MAX_ENTRIES = 5000;
@@ -117,13 +122,16 @@ export function untrustedSourcesOfNote(path: string | null | undefined, content?
     const r = loadRegistry();
     // The note itself, or a folder above it (a cloned repo, an imported folder, a moved library).
     const parts = path.split("/");
+    let recorded = false;
     for (let i = parts.length; i > 0; i--) {
       const rec = r[parts.slice(0, i).join("/")];
       if (rec) {
         out.push(`${rec.reason} (${path})`);
+        recorded = true;
         break;
       }
     }
+    if (!recorded && isImportedPath(path)) out.push(`imported (${path})`);
   }
   if (content) {
     const fm = FRONTMATTER.exec(content)?.[1];
@@ -134,4 +142,41 @@ export function untrustedSourcesOfNote(path: string | null | undefined, content?
     }
   }
   return out;
+}
+
+/* ─── Backfill ─────────────────────────────────────────────────────────── */
+
+const BACKFILL_KEY = "lumen.agents.provenanceBackfill.v1";
+let backfill: Promise<void> | null = null;
+
+/**
+ * Once per browser: record the git clones made before the guard existed
+ * (the folders under the `lumen-git` volume, which are also their workspace
+ * folders). Imports need nothing: `Imported/` is recognised by its path.
+ * Awaited before provenance is first used (agent runs, the link catalogue,
+ * style profiles); a failure is retried next time.
+ */
+export function ensureProvenanceBackfill(): Promise<void> {
+  try {
+    if (localStorage.getItem(BACKFILL_KEY)) return Promise.resolve();
+  } catch {
+    return Promise.resolve();
+  }
+  backfill ??= (async () => {
+    try {
+      // Only open the git volume when it exists (it pulls isomorphic-git).
+      let hasGit = typeof indexedDB !== "undefined";
+      if (hasGit && typeof indexedDB.databases === "function") hasGit = (await indexedDB.databases()).some((d) => d.name === "lumen-git");
+      if (hasGit) {
+        const { listGitRepos } = await import("../sync/git");
+        const r = loadRegistry();
+        const repos = (await listGitRepos()).filter((p) => !r[p]);
+        markUntrustedNotes(repos, "cloned from git");
+      }
+      localStorage.setItem(BACKFILL_KEY, "1");
+    } catch {
+      backfill = null;
+    }
+  })();
+  return backfill;
 }

@@ -120,7 +120,8 @@ export async function buildStyleProfile(prefix = "", signal?: AbortSignal): Prom
   // Plan 2.7: a style profile is the user's own voice, and it is saved and
   // later put into writing agents' system prompts — so outside notes
   // (clipped, imported, pulled from git) never go into the sample.
-  const { untrustedSourcesOfNote } = await import("../agents/provenance");
+  const { ensureProvenanceBackfill, untrustedSourcesOfNote } = await import("../agents/provenance");
+  await ensureProvenanceBackfill();
   const notes = all.filter((n) => (!prefix || n.path.startsWith(prefix.replace(/\/+$/, "") + "/")) && !untrustedSourcesOfNote(n.path, n.text).length);
   const sample = sampleExcerpts(notes);
   if (sample.count < 2) throw new Error("Not enough writing to learn a style from: pick a folder with at least two notes of a few paragraphs.");
