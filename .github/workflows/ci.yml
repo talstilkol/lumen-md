@@ -263,7 +263,7 @@ jobs:
           npx vite preview --port 4747 --strictPort > /dev/null 2>&1 &
           for i in $(seq 1 30); do curl -sf -o /dev/null http://localhost:4747/ && break; sleep 1; done
           { echo "<!-- lumen-perf-startup -->"; echo "## Mobile startup profile (plan 8.1) — $(git rev-parse --short HEAD), GitHub runner"; echo; } > perf.md
-          node scripts/perf/profile-startup.mjs --url http://localhost:4747/ --runs 5 --out reports/perf-startup.json >> perf.md
+          node scripts/perf/profile-startup.mjs --url http://localhost:4747/ --runs 5 --settle 15000 --out reports/perf-startup.json >> perf.md
           { echo; echo "### Lighthouse mobile (default preset: simulated 4× CPU, slow 4G)"; echo; echo "| run | TBT (ms) | FCP | LCP | TTI | score |"; echo "|---|---:|---:|---:|---:|---:|"; } >> perf.md
           for r in 1 2 3; do
             npx -y lighthouse@12.8.2 http://localhost:4747/ --only-categories=performance --chrome-flags="--headless=new --no-sandbox" --output=json --output-path="lh-mobile-$r.json" --quiet || continue

@@ -7,10 +7,15 @@
  *
  * Chromium on a phone viewport (412×823, Preview mode, as phones start)
  * with 4× CPU throttling — Lighthouse's mobile factor — and a V8 CPU
- * profile over load + 8 s. For each scenario it reports TBT (long tasks
- * after first contentful paint, the part over 50 ms each), the longest
- * task, and self time by bundle (React, unified, Shiki + its regex WASM,
- * KaTeX, CodeMirror, app, native work):
+ * profile over load + the settle time. For each scenario it reports TBT as
+ * Lighthouse defines it — the part over 50 ms of every long task between
+ * first contentful paint and time to interactive, where TTI is the end of
+ * the last long task before a 5 s window with none (the network half of
+ * Lighthouse's TTI rule is not modelled) — plus TTI, the longest task, and
+ * self time by bundle (React, unified, Shiki + its regex WASM, KaTeX,
+ * CodeMirror, app, native work). When no 5 s quiet window fits in the
+ * settle time, TTI is "not reached" and TBT is the whole window, marked
+ * with a "+".
  *
  *   welcome  the default document (what a first visit renders)
  *   tiny     a two-line document: the app shell's own floor, which a
@@ -21,7 +26,7 @@
  * them; compare scenarios within one run, and use a quiet runner (the
  * `lighthouse` label's CI job) for absolute values.
  */
-import { appendFileSync, mkdirSync, writeFileSync } from "node:fs";
+import { mkdirSync, writeFileSync } from "node:fs";
 import { dirname } from "node:path";
 import { chromium } from "playwright";
 
@@ -32,7 +37,8 @@ const arg = (name, dflt) => {
 const url = arg("--url", "http://localhost:4747/");
 const runs = Number(arg("--runs", "3"));
 const out = arg("--out", "reports/perf-startup.json");
-const settle = Number(arg("--settle", "8000"));
+const settle = Number(arg("--settle", "10000"));
+const QUIET_MS = 5000; // Lighthouse's TTI quiet window
 const executablePath = process.env.CHROMIUM_PATH || undefined;
 
 const TINY = { name: "tiny.md", content: "# Hello\n\nOne short paragraph.\n", dirty: false, workspaceName: null };
@@ -74,8 +80,22 @@ async function once(state) {
     await page.waitForTimeout(settle);
     const { profile } = await cdp.send("Profiler.stop");
     const { lt, fcp } = await page.evaluate(() => ({ lt: window.__lt, fcp: performance.getEntriesByName("first-contentful-paint")[0]?.startTime ?? 0 }));
-    const after = lt.filter(([s]) => s >= fcp);
-    const tbt = after.reduce((a, [, d]) => a + Math.max(0, d - 50), 0);
+    const after = lt.filter(([s, d]) => s + d > fcp).sort((a, b) => a[0] - b[0]);
+    // TTI: the end of the last long task that is followed by QUIET_MS without one.
+    const profileEnd = fcp + settle;
+    let tti = fcp;
+    let reached = after.length === 0 ? profileEnd - fcp >= QUIET_MS : false;
+    for (let i = 0; i < after.length; i++) {
+      const end = after[i][0] + after[i][1];
+      const nextStart = i + 1 < after.length ? after[i + 1][0] : profileEnd;
+      if (nextStart - end >= QUIET_MS) {
+        tti = end;
+        reached = true;
+        break;
+      }
+    }
+    const window = after.filter(([s]) => reached ? s < tti : true);
+    const tbt = window.reduce((a, [s, d]) => a + Math.max(0, Math.min(s + d, reached ? tti : Infinity) - Math.max(s, fcp) - 50), 0);
     const nodes = new Map(profile.nodes.map((n) => [n.id, n]));
     const self = {};
     profile.samples.forEach((id, i) => {
@@ -85,7 +105,7 @@ async function once(state) {
       const b = bucketOf(u);
       self[b] = (self[b] ?? 0) + (profile.timeDeltas[i] ?? 0) / 1000;
     });
-    return { fcp, tbt, longest: Math.max(0, ...lt.map(([, d]) => d)), longTasks: after.length, self };
+    return { fcp, tti: reached ? tti : NaN, ttiReached: reached, tbt, longest: Math.max(0, ...lt.map(([, d]) => d)), longTasks: window.length, self };
   } finally {
     await browser.close();
   }
@@ -109,6 +129,8 @@ for (const [name, rs] of Object.entries(results)) {
     fcp: Math.round(median(rs.map((r) => r.fcp))),
     tbt: Math.round(median(rs.map((r) => r.tbt))),
     tbtAll: rs.map((r) => Math.round(r.tbt)),
+    tti: Math.round(median(rs.filter((r) => r.ttiReached).map((r) => r.tti))) || null,
+    ttiReached: rs.filter((r) => r.ttiReached).length,
     longest: Math.round(median(rs.map((r) => r.longest))),
     longTasks: median(rs.map((r) => r.longTasks)),
     selfMs: Object.fromEntries(buckets.map((b) => [b, Math.round(median(rs.map((r) => r.self[b] ?? 0)))]).sort((a, b) => b[1] - a[1])),
@@ -122,13 +144,15 @@ const rows = [...new Set(names.flatMap((n) => Object.keys(summary[n].selfMs)))];
 const md = [
   "### Startup profile (4× CPU throttling, 412×823, medians of " + runs + ")",
   "",
+  "TBT as Lighthouse defines it: long tasks between FCP and TTI (TTI = the end of the last long task before a 5 s quiet window; network not modelled). A \"+\" means some run never reached TTI within the " + settle / 1000 + " s window, so its TBT counts the whole window.",
+  "",
   "| | " + names.join(" | ") + " |",
   "|---|" + names.map(() => "---:").join("|") + "|",
-  "| **TBT (ms)** | " + names.map((n) => `**${summary[n].tbt}** (${summary[n].tbtAll.join(", ")})`).join(" | ") + " |",
+  "| **TBT, FCP → TTI (ms)** | " + names.map((n) => `**${summary[n].tbt}${summary[n].ttiReached < summary[n].runs ? "+" : ""}** (${summary[n].tbtAll.join(", ")})`).join(" | ") + " |",
+  "| TTI (ms; runs that reached it) | " + names.map((n) => `${summary[n].tti ?? "not reached"} (${summary[n].ttiReached}/${summary[n].runs})`).join(" | ") + " |",
   "| longest task (ms) | " + names.map((n) => summary[n].longest).join(" | ") + " |",
   "| FCP (ms) | " + names.map((n) => summary[n].fcp).join(" | ") + " |",
   ...rows.map((b) => `| ${b} (self ms) | ` + names.map((n) => summary[n].selfMs[b] ?? 0).join(" | ") + " |"),
   "",
 ].join("\n");
-process.stdout.write(md);
-if (process.env.GITHUB_STEP_SUMMARY) appendFileSync(process.env.GITHUB_STEP_SUMMARY, md);
+process.stdout.write(md); // the CI step pipes this into its summary and PR comment
