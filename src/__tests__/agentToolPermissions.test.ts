@@ -362,6 +362,45 @@ describe("cancellation", () => {
     expect(message).not.toMatch(/Nothing from your notes/i);
     const { sentValue } = await import("../agents/network");
     expect(sentValue({ what: "page-address", args: { url: "https://x.example/p" } })).toBe("https://x.example/p");
-    expect(sentValue({ what: "search-query", args: { query: "a".repeat(400) } })).toHaveLength(301);
+    // The whole value, however long (review on #241 / #205): nothing is sent that the prompt did not show.
+    expect(sentValue({ what: "search-query", args: { query: "a".repeat(400) } })).toBe("a".repeat(400));
+    const longUrl = `https://x.example/p?${"q=1&".repeat(400)}secret=yes`;
+    expect(sentValue({ what: "page-address", args: { url: longUrl } })).toBe(longUrl);
+  });
+
+  it("sends with exactly the service and settings the prompt described, even if they change while it is open (review on #205)", async () => {
+    setAiPolicy("local-only");
+    localStorage.setItem("lumen.research.provider", "searxng");
+    const shown: string[] = [];
+    // While the dialog is open, another tab switches to Brave with a key and to another service.
+    const consent = vi.fn(async (req: { host: string; credential?: string }) => {
+      shown.push(`${req.host} ${req.credential ?? "no key"}`);
+      localStorage.setItem("lumen.research.endpoint", "https://evil.example");
+      localStorage.setItem("lumen.research.provider", "brave");
+      const { setSecret } = await import("../lib/secretStore");
+      setSecret("lumen.research.searchKey", "BSA-undisclosed");
+      return true;
+    });
+    registerExecutor(fakeExecutor((_req, n) => (n === 1 ? call("search_web", { query: "lumen" }) : final("x"))));
+    await runAgent(agent(["search_web"]), {}, { grants: ["network"], consentNetwork: consent });
+    expect(shown).toEqual(["research.example.com no key"]);
+    expect(net).toHaveBeenCalledTimes(1);
+    const [url, init] = net.mock.calls[0] as [string, RequestInit];
+    expect(url).toBe(`${ENDPOINT}/search`);
+    expect(String(init.body)).not.toContain("BSA-undisclosed");
+    expect(String(init.body)).toContain("searxng");
+    const { setSecret } = await import("../lib/secretStore");
+    setSecret("lumen.research.searchKey", "");
+  });
+
+  it("an approved call's fetch reaches only that research service", async () => {
+    setAiPolicy("local-only");
+    const { openNetworkGate } = await import("../agents/network");
+    const { getTool } = await import("../agents/tools");
+    const gate = await openNetworkGate(getTool("search_web")!, { id: "c", name: "search_web", args: { query: "q" } }, () => true);
+    expect(gate.bound.endpoint).toBe(ENDPOINT);
+    await expect(gate.fetch("https://evil.example/search")).rejects.toMatchObject({ code: "denied" });
+    await gate.fetch(`${ENDPOINT}/search`, { method: "POST", body: "{}" });
+    expect(net).toHaveBeenCalledWith(`${ENDPOINT}/search`, expect.anything());
   });
 });

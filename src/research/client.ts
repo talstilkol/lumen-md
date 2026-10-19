@@ -143,7 +143,10 @@ export async function searchWeb(
   const res = await fetchImpl(`${endpoint}/search`, {
     method: "POST",
     headers: serviceHeaders({ "Content-Type": "application/json" }),
-    body: JSON.stringify({ provider: settings.provider, query, key: settings.key, count }),
+    // A keyless provider (SearXNG) never gets the key: one saved for Brave /
+    // Tavily stays in the store after a switch, and the consent prompt for a
+    // keyless search promises that only the query is sent.
+    body: JSON.stringify(KEYLESS_PROVIDERS.includes(settings.provider) ? { provider: settings.provider, query, count } : { provider: settings.provider, query, key: settings.key, count }),
     signal,
   });
   const body = (await res.json().catch(() => ({}))) as { results?: SearchHit[]; error?: string };

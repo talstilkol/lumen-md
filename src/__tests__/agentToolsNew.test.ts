@@ -294,6 +294,18 @@ describe("git_diff", () => {
     ]);
   });
 
+  it("shows every file deleted when the repository's folder was emptied (review: #241)", async () => {
+    await gitDiffTool.run({}, ctx()); // mirrors the workspace into the checkout
+    for (const p of [...files.keys()]) if (p.startsWith("repo/")) files.delete(p);
+    files.set("elsewhere.md", "other notes stay");
+    const r = await gitDiffTool.run({ repo: "repo" }, ctx());
+    expect(r.files.map((f: { path: string; state: string }) => `${f.state} ${f.path}`).sort()).toEqual(["deleted repo/a.md", "deleted repo/keep.md"]);
+    // An entirely empty listing is not trusted: the checkout stays.
+    files.clear();
+    const empty = await gitDiffTool.run({ repo: "repo" }, ctx());
+    expect(empty.files.map((f: { path: string; state: string }) => f.state)).not.toContain("added");
+  });
+
   it("names the repositories when the one asked for does not exist, and stops when cancelled", async () => {
     await expect(gitDiffTool.run({ repo: "other" }, ctx())).rejects.toMatchObject({ code: "not-found", message: expect.stringContaining("repo") });
     const ctrl = new AbortController();

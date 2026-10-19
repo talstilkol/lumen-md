@@ -115,6 +115,7 @@ async function execTool(tools: AgentTool[], call: ToolCall, env: ToolEnv): Promi
       const guard = tainted ? { untrusted: [...env.taint], approve: () => approveUntrusted(env, tool, args) } : undefined;
       const gate = await openNetworkGate(tool, { ...call, args }, env.consent, guard);
       callCtx.fetch = gate.fetch;
+      callCtx.network = gate.bound;
       note = gate.consented ? (tainted ? "network: sent on the user's approval (untrusted content in the run)" : "network: sent on the user's consent (local-only)") : "network: allowed by the AI policy";
     } else if (tool.scope === "write") {
       // Plan 2.7: a change proposed while outside content is in the run
