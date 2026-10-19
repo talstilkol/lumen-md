@@ -23,7 +23,13 @@ import { test, expect, type Page, type BrowserContext } from "@playwright/test";
 const SHARED = ["שלום עולם — טקסט בעברית", "", "```python", "def greet(name):", "    return f\"hi {name}\"", "```"].join("\n");
 
 async function installOffline(page: Page, context: BrowserContext, browserName: string) {
-  await page.addInitScript(() => localStorage.setItem("lumen-tour-done", "1"));
+  await page.addInitScript(() => {
+    localStorage.setItem("lumen-tour-done", "1");
+    // Source mode for the online visit: the Welcome note's code fences are
+    // never highlighted while online, so nothing Shiki needs can reach the
+    // runtime or HTTP cache before the offline check (only the precache can serve it).
+    if (!localStorage.getItem("lumen-md")) localStorage.setItem("lumen-md", JSON.stringify({ state: { mode: "source" }, version: 0 }));
+  });
   await page.goto("/");
   await expect(page.locator(".cm-content").first()).toBeVisible({ timeout: 15_000 });
   const dev = await page.evaluate(() => !!document.querySelector('script[src*="/@vite/client"]'));
@@ -42,10 +48,18 @@ async function installOffline(page: Page, context: BrowserContext, browserName: 
   });
   expect(precached.some((u) => /\/assets\/vendor-shiki-.+\.js$/.test(u)), "Shiki core precached").toBe(true);
   expect(precached.some((u) => /\/assets\/github-dark-default-.+\.js$/.test(u)), "Shiki theme precached").toBe(true);
+  expect(precached.some((u) => /\/assets\/python-.+\.js$/.test(u)), "Python grammar precached").toBe(true);
   expect(precached.some((u) => /heebo-hebrew-400-normal.*\.woff2$/.test(u)), "Hebrew font precached").toBe(true);
   expect(precached.some((u) => /\/assets\/pdf\.worker\.min-.+\.mjs$/.test(u)), "PDF.js worker precached").toBe(true);
   await page.reload();
   await expect.poll(() => page.evaluate(() => !!navigator.serviceWorker.controller), { timeout: 20_000 }).toBe(true);
+  // Nothing fetched on demand while online may stand in for the precache.
+  const dropped = await page.evaluate(async () => {
+    const names = (await caches.keys()).filter((n) => !n.includes("precache"));
+    for (const n of names) await caches.delete(n);
+    return names;
+  });
+  expect(dropped.every((n) => !n.includes("precache"))).toBe(true);
   await context.setOffline(true);
 }
 
@@ -56,9 +70,13 @@ test.afterEach(async ({ context }) => {
 test("offline: a shared note opens, its code is highlighted and its Hebrew uses the bundled font", async ({ page, context, browserName }) => {
   test.setTimeout(120_000);
   await installOffline(page, context, browserName);
+  // A font request that could not be served (offline, nothing in the
+  // precache). net::ERR_ABORTED is the renderer withdrawing a speculative
+  // subset request it no longer needs, not a failure to serve.
   const failedFonts: string[] = [];
   page.on("requestfailed", (r) => {
-    if (/\.woff2($|\?)/.test(r.url())) failedFonts.push(r.url());
+    const why = r.failure()?.errorText ?? "";
+    if (/\.woff2($|\?)/.test(r.url()) && why !== "net::ERR_ABORTED") failedFonts.push(`${r.url()} ${why}`);
   });
   await page.goto("/?title=" + encodeURIComponent("Offline share") + "&text=" + encodeURIComponent(SHARED));
   await expect(page.locator(".cm-content").first()).toContainText("# Offline share", { timeout: 20_000 });
@@ -108,11 +126,8 @@ test("offline: a file opened with the app (file_handlers) opens as a tab", async
 test("offline: the local AI on loopback is still reachable (fake Ollama)", async ({ page, context, browserName }) => {
   test.setTimeout(120_000);
   await installOffline(page, context, browserName);
-  // Being offline cuts the network, not loopback: everything but the local
-  // Ollama port fails (the app itself comes from the service worker, which
-  // routes don't see), and a fake Ollama answers on 11434.
-  await context.setOffline(false);
-  await context.route(/^(?!https?:\/\/(localhost|127\.0\.0\.1):11434\/)/, (r) => r.abort("internetdisconnected"));
+  // Still offline (the app comes from the service worker); only the local
+  // Ollama port answers, as a loopback server would, through a fulfilled route.
   await context.route(/\/\/(localhost|127\.0\.0\.1):11434\//, (r) => {
     const path = new URL(r.request().url()).pathname;
     if (path === "/api/version") return r.fulfill({ json: { version: "0.12.0" } });
