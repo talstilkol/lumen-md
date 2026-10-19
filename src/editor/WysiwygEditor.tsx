@@ -18,6 +18,7 @@ import { setBlockType, toggleMark, wrapIn } from "@milkdown/prose/commands";
 import type { EditorView } from "@milkdown/prose/view";
 import { Plugin } from "@milkdown/prose/state";
 import { wysiwygBidiPlugin } from "./wysiwygBidi";
+import { listSpreadFix } from "./milkdownListSpread";
 import { wrapInList } from "prosemirror-schema-list";
 import { dragHandlePlugin } from "./dragHandles";
 import { buildIndentKeymap } from "./keymapExtra";
@@ -883,6 +884,8 @@ export default function WysiwygEditor({ value, onChange }: Props) {
         .use(wysiwygSuggestPlugins)
         .use(commonmark)
         .use(gfm)
+        // After both presets: their list schemas, without the spread check that broke every list.
+        .use(listSpreadFix)
         .use(history)
         .use(listener)
         .use(clipboard)
