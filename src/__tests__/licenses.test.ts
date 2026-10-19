@@ -319,17 +319,48 @@ describe("model registry", () => {
 });
 
 describe("datasets", () => {
+  const table = (...rows: string[]) => ["# x — sources", "", "| Part | Items | Status | Licence | Licence verified |", "|---|---|---|---|---|", ...rows, ""].join("\n");
+  const SA = "CC-BY-SA-4.0 — Attribution-ShareAlike 4.0 International";
+
   it("needs SOURCES.md and a LICENSE in every eval/golden set", () => {
     const r = byName(
       checkDatasets([
-        { name: "ok", files: ["SOURCES.md", "LICENSE", "cases.json"] },
-        { name: "md", files: ["SOURCES.md", "LICENSE.md"] },
+        { name: "ok", files: ["SOURCES.md", "LICENSE", "cases.json"], sources: table("| a | 10 | built | CC0-1.0 | 2026 |"), license: "CC0-1.0 …" },
+        { name: "md", files: ["SOURCES.md", "LICENSE.md"], sources: table("| a | 10 | built | MIT | 2026 |"), license: "MIT License" },
         { name: "bare", files: ["cases.json"] },
       ]),
     );
     expect(r["eval/golden/ok"].level).toBe("ok");
     expect(r["eval/golden/md"].level).toBe("ok");
     expect(r["eval/golden/bare"]).toMatchObject({ level: "fail", reason: "missing SOURCES.md and LICENSE" });
+  });
+
+  it("reads every licence in the parts table of SOURCES.md (7.1)", () => {
+    const files = ["SOURCES.md", "LICENSE"];
+    const r = byName(
+      checkDatasets([
+        { name: "sa", files, sources: table("| a | 10 | built | CC-BY-SA-4.0 | x |", "| b | 5 | built | CC-BY-4.0 AND CC0-1.0 | x |"), license: `${SA}\nCC-BY-4.0\nCC0-1.0` },
+        { name: "sa-wrong-folder", files, sources: table("| a | 10 | built | CC-BY-SA-4.0 | x |"), license: "CC-BY-4.0 Attribution 4.0" },
+        { name: "nc", files, sources: table("| a | 10 | built | CC-BY-NC-4.0 | x |"), license: "CC-BY-NC-4.0" },
+        { name: "nd", files, sources: table("| a | 10 | built | CC-BY-ND-4.0 | x |"), license: "CC-BY-ND-4.0" },
+        { name: "none", files, sources: table("| a | 10 | built | NOASSERTION | x |"), license: "?" },
+        { name: "local", files, sources: table("| a | 10 | built | LicenseRef-PublicDomain | x |", "| b | 4 | local-only | NOASSERTION | x |"), license: "LicenseRef-PublicDomain" },
+        { name: "odd", files, sources: table("| a | 10 | built | WTF-1.0 | x |"), license: "WTF-1.0" },
+        { name: "unnamed", files, sources: table("| a | 10 | built | MIT | x |"), license: "Apache-2.0 only" },
+        { name: "no-table", files, sources: "# sources\nSome prose and no table.\n", license: "CC0-1.0" },
+      ]),
+    );
+    expect(r["eval/golden/sa"]).toMatchObject({ level: "ok", license: "CC-BY-SA-4.0 AND CC-BY-4.0 AND CC0-1.0" });
+    expect(r["eval/golden/sa-wrong-folder"]).toMatchObject({ level: "fail" });
+    expect(r["eval/golden/sa-wrong-folder"].reason).toMatch(/ShareAlike data in a folder whose LICENSE is not ShareAlike/);
+    expect(r["eval/golden/nc"].reason).toMatch(/NonCommercial/);
+    expect(r["eval/golden/nc"].level).toBe("fail");
+    expect(r["eval/golden/nd"]).toMatchObject({ level: "fail" });
+    expect(r["eval/golden/none"]).toMatchObject({ level: "fail" });
+    expect(r["eval/golden/local"]).toMatchObject({ level: "notice" });
+    expect(r["eval/golden/odd"].reason).toMatch(/unrecognised dataset licence/);
+    expect(r["eval/golden/unnamed"]).toMatchObject({ level: "warn" });
+    expect(r["eval/golden/no-table"]).toMatchObject({ level: "fail", reason: "SOURCES.md has no parts table with a Licence column" });
   });
 });
 
