@@ -89,6 +89,8 @@ export function grammarExtension(opts: GrammarOptions = {}): Extension {
       decorations: DecorationSet = Decoration.none;
       private timer: number | null = null;
       private inFlight = false;
+      /** A run was asked for while one was in flight: run again when it ends. */
+      private rerun = false;
       private lastChecked = "";
       private readonly onDictionaryChange: () => void;
 
@@ -118,7 +120,13 @@ export function grammarExtension(opts: GrammarOptions = {}): Extension {
       }
 
       async run(view: EditorView): Promise<void> {
-        if (this.inFlight) return;
+        if (this.inFlight) {
+          // The in-flight check may be painting results made before this
+          // request's reason (a list or dictionary that just arrived, an
+          // edit): run once more when it ends.
+          this.rerun = true;
+          return;
+        }
         const text = view.state.doc.toString();
         if (text === this.lastChecked) return;
         this.lastChecked = text;
@@ -141,6 +149,10 @@ export function grammarExtension(opts: GrammarOptions = {}): Extension {
           opts.onMatches?.([]);
         } finally {
           this.inFlight = false;
+          if (this.rerun) {
+            this.rerun = false;
+            this.schedule(view, false);
+          }
         }
       }
 
