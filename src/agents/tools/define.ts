@@ -62,6 +62,12 @@ export function networkFetch(ctx: ToolContext, tool: string): typeof fetch {
   return ctx.fetch;
 }
 
+/** The research service and settings the runtime approved this call with (set together with `fetch`). */
+export function networkBinding(ctx: ToolContext, tool: string): NonNullable<ToolContext["network"]> {
+  if (!ctx.network) throw new ToolError("denied", `"${tool}" reaches the network only through the agent runtime (AI policy, consent and the privacy ledger)`);
+  return ctx.network;
+}
+
 export function requireString(args: Record<string, unknown>, key: string): string {
   const v = args[key];
   if (typeof v !== "string" || !v.trim()) throw new ToolError("bad-args", `"${key}" must be a non-empty string`);

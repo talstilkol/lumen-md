@@ -121,6 +121,12 @@ export interface ToolContext {
    * it a network tool refuses to run.
    */
   fetch?: typeof fetch;
+  /**
+   * Network tools only, set with `fetch`: the research service and settings
+   * the call was described with (and, under local-only, approved with). The
+   * tool uses exactly these, never the settings as they are now.
+   */
+  network?: { endpoint: string; settings: import("../research/client").ResearchSettings };
   /** Pages fetched in this run, by URL (runtime-owned scratch). */
   pages?: Map<string, FetchedPage>;
 }

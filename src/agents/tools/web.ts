@@ -13,7 +13,7 @@
  * source.
  */
 
-import { defineTool, networkFetch, optionalNumber, requireString, safeWorkspacePath, throwIfAborted, ToolError } from "./define";
+import { defineTool, networkBinding, networkFetch, optionalNumber, requireString, safeWorkspacePath, throwIfAborted, ToolError } from "./define";
 import { quoteContained } from "../../research/citations";
 
 const PAGE_LIMIT = 12_000;
@@ -38,12 +38,13 @@ export const searchWebTool = defineTool<
     const fetchImpl = networkFetch(ctx, "search_web");
     const query = requireString(args, "query").trim().slice(0, 400);
     const count = Math.min(10, Math.max(1, Math.round(optionalNumber(args, "count", 5))));
-    const { getResearchSettings, researchEndpoint, searchWeb } = await import("../../research/client");
-    const settings = getResearchSettings();
+    // The service and settings the call was approved with, not as they are now (review on #205).
+    const { endpoint, settings } = networkBinding(ctx, "search_web");
+    const { searchWeb } = await import("../../research/client");
     // Claude web search is a server-side tool of the Anthropic API (research.ask's cloud route), not a search the agent can call.
     if (settings.provider === "claude") throw new ToolError("failed", "Web search is set to Claude (a cloud route); pick SearXNG, Brave or Tavily in Research: Settings for agent searches");
     try {
-      const results = await searchWeb(query, settings, count, ctx.signal, researchEndpoint(), fetchImpl);
+      const results = await searchWeb(query, settings, count, ctx.signal, endpoint, fetchImpl);
       return { query, provider: settings.provider, results: results.slice(0, count).map((r) => ({ title: r.title, url: r.url, snippet: r.snippet })) };
     } catch (e) {
       if (ctx.signal?.aborted || (e as Error)?.name === "AbortError") throw e;
@@ -73,8 +74,9 @@ export const fetchPageTool = defineTool<
     const url = requireString(args, "url").trim();
     if (!/^https?:\/\/\S+$/i.test(url)) throw new ToolError("bad-args", "Only http(s) addresses can be read");
     const max = Math.min(PAGE_LIMIT, Math.max(200, optionalNumber(args, "maxChars", PAGE_LIMIT)));
-    const { extractPage, researchEndpoint } = await import("../../research/client");
-    const page = await extractPage(url, ctx.signal, researchEndpoint(), fetchImpl);
+    const { endpoint } = networkBinding(ctx, "fetch_page");
+    const { extractPage } = await import("../../research/client");
+    const page = await extractPage(url, ctx.signal, endpoint, fetchImpl);
     throwIfAborted(ctx.signal);
     if (page.error) return { url, finalUrl: page.finalUrl, status: page.status, text: "", truncated: false, error: page.error };
     const text = page.text ?? "";
