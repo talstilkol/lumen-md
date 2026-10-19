@@ -231,7 +231,7 @@ jobs:
   lighthouse:
     name: Lighthouse CI
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 30
     needs: check
     # Lighthouse runs are slow + flaky on cold runners. Only required on
     # explicit triggers — main pushes and `lighthouse` PR labels — so day-to-day
@@ -245,6 +245,22 @@ jobs:
         with: { node-version: 22, cache: npm }
       - run: npm ci || npm install
       - run: npm run build
+      # Plan 8.1: mobile numbers on a quiet runner (a shared dev machine
+      # inflates them). Informational: they never fail the job.
+      - name: Mobile startup profile and Lighthouse mobile TBT (plan 8.1)
+        continue-on-error: true
+        run: |
+          npx playwright install chromium
+          npx vite preview --port 4747 --strictPort > /dev/null 2>&1 &
+          for i in $(seq 1 30); do curl -sf -o /dev/null http://localhost:4747/ && break; sleep 1; done
+          node scripts/perf/profile-startup.mjs --url http://localhost:4747/ --runs 5 --out reports/perf-startup.json
+          echo "### Lighthouse mobile (default preset: simulated 4× CPU, slow 4G)" >> "$GITHUB_STEP_SUMMARY"
+          echo "| run | TBT (ms) | FCP | LCP | TTI | score |" >> "$GITHUB_STEP_SUMMARY"
+          echo "|---|---:|---:|---:|---:|---:|" >> "$GITHUB_STEP_SUMMARY"
+          for r in 1 2 3; do
+            npx -y lighthouse@12.8.2 http://localhost:4747/ --only-categories=performance --chrome-flags="--headless=new --no-sandbox" --output=json --output-path="lh-mobile-$r.json" --quiet || continue
+            node -e 'const j=require("./lh-mobile-'$r'.json"),a=j.audits,v=(k)=>Math.round(a[k].numericValue);console.log(`| '$r' | ${v("total-blocking-time")} | ${v("first-contentful-paint")} | ${v("largest-contentful-paint")} | ${v("interactive")} | ${j.categories.performance.score} |`)' >> "$GITHUB_STEP_SUMMARY"
+          done
       - name: Lighthouse CI
         run: npx -y @lhci/cli@0.13.x autorun --config=./lighthouserc.json
         env:
