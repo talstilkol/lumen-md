@@ -132,6 +132,9 @@ describe("where the app uses it", () => {
     expect((await checkTranslationLanguage(es, en, "fr")).ok).toBe(false); // Spanish, not French
     expect(await checkTranslationLanguage(es, en, "Klingon")).toEqual({ ok: true }); // unknown target: no opinion
     expect(await checkTranslationLanguage("Oui.", en, "French")).toEqual({ ok: true }); // too short to judge
+    const ru = "Всем привет, вот протокол встречи прошлого вторника со всей нашей командой проекта.";
+    expect((await checkTranslationLanguage(ru, "皆さん、こんにちは。先週の火曜日の会議の議事録です。", "en-US")).ok).toBe(false); // another script, still not the target
+    expect(await checkTranslationLanguage("Hei alle sammen, her er referatet fra møtet forrige tirsdag med hele teamet.", en, "Norwegian Bokmål")).toEqual({ ok: true }); // a target the detector cannot report
   });
 
   it("grammar: LanguageTool gets the detected language", async () => {

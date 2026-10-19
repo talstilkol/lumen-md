@@ -37,6 +37,9 @@ const ISO3: Record<string, string> = {
 };
 const toTag = (iso3: string): string => ISO3[iso3] ?? iso3;
 
+/** Every language detectLanguage() can report (besides "und"). */
+export const DETECTABLE = new Set([...Object.values(ISO3), "he", "yi", "ja", "zh", "ko", "el", "th"]);
+
 /** Lumen's UI languages: the prior for short, ambiguous text. */
 export const UI_LANGUAGES = ["he", "en", "ar", "ru", "fr", "de", "ja", "zh"];
 

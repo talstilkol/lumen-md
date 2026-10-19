@@ -120,21 +120,26 @@ export function checkTranslation(output: string, source: string, targetLanguage:
 
 /**
  * Where the script cannot tell (English → French, Russian → Ukrainian),
- * local language identification (plan 6.5) does: a confident guess that is
- * neither the target language nor different from an untranslated source
- * fails the chunk. Unknown target names and short or unclear text pass.
+ * local language identification (plan 6.5) does: a confident guess other
+ * than the target language fails the chunk. Targets the detector cannot
+ * report (unknown names, languages franc-min lacks), short or unclear text,
+ * and a detector that failed to load all pass: the structural and script
+ * checks still apply.
  */
 export async function checkTranslationLanguage(output: string, source: string, targetLanguage: string): Promise<ValidationResult> {
-  const { detectLanguage, languageCode } = await import("../../text/langId");
-  const target = languageCode(targetLanguage);
-  if (!target) return ok;
-  const got = detectLanguage(proseOf(output));
+  let lang: typeof import("../../text/langId");
+  try {
+    lang = await import("../../text/langId");
+  } catch {
+    return ok;
+  }
+  const target = lang.languageCode(targetLanguage);
+  if (!target || !lang.DETECTABLE.has(target)) return ok;
+  const got = lang.detectLanguage(proseOf(output));
   if (!got.confident || got.lang === "und" || got.lang === target) return ok;
-  const src = detectLanguage(proseOf(source));
+  const src = lang.detectLanguage(proseOf(source));
   if (src.confident && src.lang === got.lang) return fail(`output is still in the source language (${got.lang}), not ${targetLanguage}`, `Translate every sentence into ${targetLanguage}; do not copy the source.`);
-  // Same script, another language (Spanish instead of French).
-  if (scriptOf(proseOf(output)) === scriptOf(proseOf(source)) || expectedScript(targetLanguage) === scriptOf(proseOf(output))) return fail(`output is in ${got.lang}, not ${targetLanguage}`, `Write the whole translation in ${targetLanguage}.`);
-  return ok;
+  return fail(`output is in ${got.lang}, not ${targetLanguage}`, `Write the whole translation in ${targetLanguage}.`);
 }
 
 export const translatorAgent: AgentDefinition<TranslatorInput, string> = registerAgent({
