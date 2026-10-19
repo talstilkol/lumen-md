@@ -11,7 +11,7 @@
  */
 import { appendFileSync, existsSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { createRecognizer, decodeAudio, normalizeAsr, scoreWith, transcribeLive } from "../golden/evals/asr-he.mjs";
+import { createRecognizer, decodeAudio, editDistance, errors, normalizeAsr, rates, scoreWith, transcribeLive } from "../golden/evals/asr-he.mjs";
 
 const args = process.argv.slice(2);
 const splits = [];
@@ -52,8 +52,27 @@ for (const [name, dir] of splits) {
   }
   report.splits[name] = await scoreWith(run, items);
   if (name === show) {
-    const rows = items.map((it) => `${it.id}%0A  ref: ${normalizeAsr(it.text)}%0A  hyp: ${normalizeAsr(run(it).text)}`);
-    console.log(`::notice title=asr ${name} transcripts::${rows.join("%0A")}`);
+    // Error analysis (public split only): which clips carry the errors.
+    const byKind = { latin: [], digits: [], hebrewOnly: [] };
+    const bag = [];
+    const rows = [];
+    for (const it of items) {
+      const ref = normalizeAsr(it.text);
+      const hyp = normalizeAsr(run(it).text);
+      const e = errors(ref, hyp);
+      (/[a-z]/.test(ref) ? byKind.latin : /\d/.test(ref) ? byKind.digits : byKind.hebrewOnly).push(e);
+      // Order-free word errors: what WER would be if only the word order were wrong.
+      const rw = ref.split(" ").sort();
+      const hw = hyp.split(" ").sort();
+      bag.push({ ...e, wordErrors: editDistance(rw, hw) });
+      rows.push(`${it.id} wer=${(e.wordErrors / Math.max(1, e.words)).toFixed(2)}`);
+    }
+    const fmt = (l) => (l.length ? `${l.length} clips wer=${rates(l).wer.toFixed(3)}` : "0 clips");
+    console.log(`::notice title=asr ${name} breakdown::latin ${fmt(byKind.latin)}; digits ${fmt(byKind.digits)}; hebrew-only ${fmt(byKind.hebrewOnly)}; order-free wer=${rates(bag).wer.toFixed(3)}`);
+    for (let i = 0; i < items.length; i += 6) {
+      const chunk = items.slice(i, i + 6).map((it) => `${it.id} ${rows[items.indexOf(it)].split(" ")[1]}%0A  ref: ${normalizeAsr(it.text)}%0A  hyp: ${normalizeAsr(run(it).text)}`);
+      console.log(`::notice title=asr ${name} transcripts ${i / 6 + 1}::${chunk.join("%0A")}`);
+    }
   }
   all.push(...items);
 }
