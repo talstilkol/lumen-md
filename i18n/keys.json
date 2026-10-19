@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-10-18T03:18:44.238Z",
+  "generated_at": "2026-10-19T06:51:14.218Z",
   "source": "src/i18n/index.ts (en bundle)",
-  "count": 1411,
+  "count": 1418,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -1590,6 +1590,49 @@
     {
       "key": "cmd.spell.hebrewDictionary.hint",
       "en": "Offline Hebrew spell check (Hspell, 5.7 MB, AGPL)",
+      "vars": []
+    },
+    {
+      "key": "models.consent.title",
+      "en": "Download a model to this device?",
+      "vars": []
+    },
+    {
+      "key": "models.consent.body",
+      "en": "{purpose}\\n\\n{name} · {size}. It is downloaded once, checked against its published checksum and kept in this browser's storage. Nothing you write is sent anywhere.\\n\\nLicence: {license}. {attribution}",
+      "vars": [
+        "purpose",
+        "name",
+        "size",
+        "license",
+        "attribution"
+      ]
+    },
+    {
+      "key": "models.consent.ok",
+      "en": "Download {size}",
+      "vars": [
+        "size"
+      ]
+    },
+    {
+      "key": "models.purpose.translateEnHe",
+      "en": "Translation from English to Hebrew",
+      "vars": []
+    },
+    {
+      "key": "models.purpose.translateHeEn",
+      "en": "Translation from Hebrew to English",
+      "vars": []
+    },
+    {
+      "key": "models.purpose.nerHe",
+      "en": "Finding names, places and organisations in Hebrew text",
+      "vars": []
+    },
+    {
+      "key": "models.purpose.imageSearch",
+      "en": "Searching images by text",
       "vars": []
     },
     {

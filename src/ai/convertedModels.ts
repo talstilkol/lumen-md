@@ -80,3 +80,44 @@ export async function loadConvertedRegistry(): Promise<Map<string, RegistryModel
   const ids = new Set(CONVERTED_MODELS.map((m) => m.id));
   return new Map(models.filter((m) => ids.has(m.id)).map((m) => [m.id, m]));
 }
+
+export type ModelRequest = "ready" | "declined" | "unavailable";
+
+export interface ConsentDeps {
+  /** Ask the user (uiConfirm). */
+  confirm: (o: { title: string; message: string; okLabel: string }) => Promise<boolean>;
+  /** Already fully downloaded and verified? Then there is nothing to ask. */
+  isCached: (entry: RegistryModel, dtype: ConvertedDtype) => Promise<boolean>;
+  t: (key: string, vars?: Record<string, string | number>) => string;
+  locale?: string;
+  registry?: Map<string, RegistryModel>;
+  base?: string | null;
+}
+
+/**
+ * The only way a converted model gets downloaded: say what it is for, how
+ * big it is, under which licence, and ask. "ready" means the caller may load
+ * it (transformers.js then downloads into the verified OPFS cache);
+ * "unavailable" means there is no host yet (15.9) or no checksums.
+ */
+export async function requestConvertedModel(id: string, dtype: ConvertedDtype, deps: ConsentDeps): Promise<ModelRequest> {
+  const model = CONVERTED_MODELS.find((m) => m.id === id);
+  const base = deps.base === undefined ? CONVERTED_MODELS_BASE : deps.base;
+  const registry = deps.registry ?? (await loadConvertedRegistry());
+  const entry = registry.get(id);
+  if (!model || !base || !entry || !(entry.files ?? []).some((f) => f.dtype === dtype)) return "unavailable";
+  if (await deps.isCached(entry, dtype)) return "ready";
+  const size = formatSize(downloadBytes(entry, dtype), deps.locale);
+  const ok = await deps.confirm({
+    title: deps.t("models.consent.title"),
+    message: deps.t("models.consent.body", {
+      purpose: deps.t(model.purposeKey),
+      name: id,
+      size,
+      license: entry.license,
+      attribution: entry.attribution,
+    }),
+    okLabel: deps.t("models.consent.ok", { size }),
+  });
+  return ok ? "ready" : "declined";
+}

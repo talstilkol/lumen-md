@@ -1409,5 +1409,12 @@
   "cmd.ai.cancel": "AI: キャンセル",
   "cmd.ai.cancel.hint": "実行中の AI リクエストをすべて停止します（Esc でも可）",
   "toast.aiCancelled": "AI リクエストをキャンセルしました（{count}）",
-  "toast.aiNothingRunning": "実行中の AI リクエストはありません"
+  "toast.aiNothingRunning": "実行中の AI リクエストはありません",
+  "models.consent.title": "このデバイスにモデルをダウンロードしますか？",
+  "models.consent.body": "{purpose}\n\n{name} · {size}。一度だけダウンロードし、公開されたチェックサムで検証して、このブラウザーのストレージに保存します。あなたが書いた内容はどこにも送信されません。\n\nライセンス: {license}。{attribution}",
+  "models.consent.ok": "ダウンロード（{size}）",
+  "models.purpose.translateEnHe": "英語からヘブライ語への翻訳",
+  "models.purpose.translateHeEn": "ヘブライ語から英語への翻訳",
+  "models.purpose.nerHe": "ヘブライ語テキスト中の人名・地名・組織名の検出",
+  "models.purpose.imageSearch": "テキストによる画像検索"
 }

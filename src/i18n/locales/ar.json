@@ -1409,5 +1409,12 @@
   "cmd.ai.cancel": "AI: إلغاء",
   "cmd.ai.cancel.hint": "يوقف كل طلبات الذكاء الاصطناعي الجارية (Esc يفعل ذلك أيضاً)",
   "toast.aiCancelled": "أُلغي طلب الذكاء الاصطناعي ({count})",
-  "toast.aiNothingRunning": "لا يوجد طلب ذكاء اصطناعي جارٍ"
+  "toast.aiNothingRunning": "لا يوجد طلب ذكاء اصطناعي جارٍ",
+  "models.consent.title": "تنزيل نموذج إلى هذا الجهاز؟",
+  "models.consent.body": "{purpose}\n\n{name} · {size}. يُنزَّل مرة واحدة، ويُتحقق منه مقابل المجموع الاختباري المنشور، ويُحفظ في تخزين هذا المتصفح. لا يُرسل شيء مما تكتبه إلى أي مكان.\n\nالترخيص: {license}. {attribution}",
+  "models.consent.ok": "تنزيل ({size})",
+  "models.purpose.translateEnHe": "الترجمة من الإنجليزية إلى العبرية",
+  "models.purpose.translateHeEn": "الترجمة من العبرية إلى الإنجليزية",
+  "models.purpose.nerHe": "العثور على الأسماء والأماكن والمنظمات في النص العبري",
+  "models.purpose.imageSearch": "البحث عن الصور بالنص"
 }
