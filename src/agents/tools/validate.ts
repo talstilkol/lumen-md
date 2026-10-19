@@ -40,10 +40,11 @@ export const validateJsonTool = defineTool<{ text: string; requiredKeys?: string
   parameters: {
     type: "object",
     properties: {
-      text: { type: "string" },
+      text: { type: "string", minLength: 1 },
       requiredKeys: { type: "array", items: { type: "string" } },
     },
     required: ["text"],
+    additionalProperties: false,
   },
   run: async (args) => {
     const keys = Array.isArray(args.requiredKeys) ? args.requiredKeys.filter((k) => typeof k === "string") : [];
@@ -84,7 +85,7 @@ export async function checkMermaid(code: string): Promise<MermaidCheck> {
 export const validateMermaidTool = defineTool<{ code: string }, MermaidCheck>({
   name: "validate_mermaid",
   description: "Compile a Mermaid diagram and return the parser error if it is invalid. Always check your diagram before answering.",
-  parameters: { type: "object", properties: { code: { type: "string" } }, required: ["code"] },
+  parameters: { type: "object", properties: { code: { type: "string", minLength: 1 } }, required: ["code"], additionalProperties: false },
   run: async (args) => checkMermaid(requireString(args, "code")),
 });
 
@@ -123,7 +124,7 @@ export function checkECharts(text: string): EChartsCheck {
 export const validateEChartsTool = defineTool<{ option: string }, EChartsCheck>({
   name: "validate_echarts",
   description: "Check an ECharts option JSON: non-empty series with types and data, axes for bar/line charts.",
-  parameters: { type: "object", properties: { option: { type: "string" } }, required: ["option"] },
+  parameters: { type: "object", properties: { option: { type: "string", minLength: 1 } }, required: ["option"], additionalProperties: false },
   run: async (args) => checkECharts(requireString(args, "option")),
 });
 

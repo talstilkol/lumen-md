@@ -1,6 +1,6 @@
 /** T37 — the privacy ledger records AI requests and enforces local-only. */
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { __resetLedger, classify, leftDevice, ledgerEntries, ledgerSummary, PrivacyBlockedError, subscribeLedger, withLedger } from "../ai/privacyLedger";
+import { __resetLedger, classify, installPrivacyLedger, ledgerFetch, leftDevice, ledgerEntries, ledgerSummary, PrivacyBlockedError, recordBlockedRequest, subscribeLedger, withLedger } from "../ai/privacyLedger";
 import { setAiPolicy } from "../ai/policy";
 
 function fakeFetch() {
@@ -100,5 +100,47 @@ describe("privacy ledger", () => {
     setAiPolicy("cloud");
     await f("https://api.openai.com/v1/x");
     expect(ledgerEntries().map(leftDevice)).toEqual([false, false, true]);
+  });
+
+  it("records consented and forced requests (agent network tools), and refusals made before a request", async () => {
+    setAiPolicy("local-only");
+    const inner = fakeFetch();
+    const force = { category: "research" as const, reason: "Agent tool fetch_page" };
+    // Forced: recorded even for a URL classify() does not track; still blocked without consent.
+    await expect(withLedger(inner as unknown as typeof fetch, { force })("https://pages.example.net/x")).rejects.toBeInstanceOf(PrivacyBlockedError);
+    await withLedger(inner as unknown as typeof fetch, { force, consent: true })("https://pages.example.net/x");
+    expect(inner).toHaveBeenCalledTimes(1);
+    const err = recordBlockedRequest("https://r.example.com/search", "research", "Agent tool search_web (local-only, no consent)");
+    expect(err).toBeInstanceOf(PrivacyBlockedError);
+    expect(ledgerEntries().map((e) => [e.host, e.decision, e.consent ?? false])).toEqual([
+      ["pages.example.net", "blocked", false],
+      ["pages.example.net", "allowed", true],
+      ["r.example.com", "blocked", false],
+    ]);
+    // Consent only matters where the policy would block: outside local-only nothing is flagged.
+    setAiPolicy("local-first");
+    await withLedger(inner as unknown as typeof fetch, { force, consent: true })("https://pages.example.net/y");
+    expect(ledgerEntries()[3].consent).toBeUndefined();
+  });
+
+  it("builds a consented fetch on the unwrapped fetch, so it is recorded once and not blocked by the global wrapper", async () => {
+    setAiPolicy("local-only");
+    localStorage.setItem("lumen.research.endpoint", "https://worker.example.com");
+    const original = window.fetch;
+    const inner = fakeFetch();
+    window.fetch = inner as unknown as typeof fetch;
+    try {
+      installPrivacyLedger();
+      await expect(window.fetch("https://worker.example.com/search", { method: "POST", body: "{}" })).rejects.toBeInstanceOf(PrivacyBlockedError);
+      await ledgerFetch({ force: { category: "research", reason: "Agent tool search_web (user consent)" }, consent: true })("https://worker.example.com/search", { method: "POST", body: "{}" });
+      expect(inner).toHaveBeenCalledTimes(1);
+      expect(ledgerEntries().map((e) => [e.decision, e.consent ?? false, e.reason])).toEqual([
+        ["blocked", false, "Research service"],
+        ["allowed", true, "Agent tool search_web (user consent)"],
+      ]);
+    } finally {
+      window.fetch = original;
+      __resetLedger();
+    }
   });
 });

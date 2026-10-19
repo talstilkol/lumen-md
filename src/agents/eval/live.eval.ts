@@ -16,6 +16,9 @@ import { mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
 vi.mock("../../billing/aiQuota", () => ({ chargeAiCommandDispatch: vi.fn(), consumeAiPrompt: vi.fn(() => true), aiQuotaStatus: () => ({ allowed: true, limit: Infinity }), AiQuotaExceededError: class extends Error {} }));
+// The agents' tools work on the eval vault (plan 5.3): notes with tags and links, one git repository.
+vi.mock("../../storage/workspace", async (orig) => (await import("../../__tests__/helpers/evalVault")).workspaceModule(await orig()));
+vi.mock("../../sync/git", async (orig) => (await import("../../__tests__/helpers/evalVault")).gitModule(await orig()));
 
 import { EVAL_CASES } from "./fixtures";
 import { runEvalCase } from "./run";

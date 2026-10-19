@@ -63,7 +63,7 @@ export function useGit({ setDoc: _setDoc, showWorkspace, toggleWorkspace, active
     if (!message) {
       try {
         showAiToast(t("toast.generatingCommitMessage"), "info");
-        message = await generateAiCommitMessage("");
+        message = await generateAiCommitMessage(repoFolder);
       } catch {
         message = "Update files";
       }

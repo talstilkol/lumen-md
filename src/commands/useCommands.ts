@@ -1657,9 +1657,12 @@ export function useCommands({
         icon: cmdIcons.Sparkles,
         group: t("group.tools"),
         action: async () => {
-          const { listWorkspace, readWorkspaceFile, writeWorkspaceFile, isOPFSAvailable } = await import("../storage/workspace");
+          const { readWorkspaceFile, writeWorkspaceFile, isOPFSAvailable } = await import("../storage/workspace");
           if (!isOPFSAvailable()) return;
-          const { writeDigest } = await import("../agents/defs/digester");
+          // The digest reads the vault through the agent runtime's tools
+          // (list_files + read_file, plan 5.3.3); it writes its own note.
+          const { callTool } = await import("../agents/runtime");
+          const { writeDigest, toolDigestIO } = await import("../agents/defs/digester");
           const KEY = "lumen.digest.last";
           const now = Date.now();
           let since = now - 24 * 3600_000;
@@ -1672,7 +1675,7 @@ export function useCommands({
           const folder = lang === "he" ? "סיכומים" : "Digests";
           const fmtDate = (ms: number) => new Date(ms).toLocaleString(getLocale(), { dateStyle: "medium", timeStyle: "short" });
           const res = await writeDigest(
-            { list: () => listWorkspace({ includeAssets: false }), read: readWorkspaceFile, write: writeWorkspaceFile },
+            toolDigestIO({ callTool, readOwn: readWorkspaceFile, write: writeWorkspaceFile, since, now, folder }),
             { since, now, lang, folder, formatDate: fmtDate },
           );
           if (!res.ok) {

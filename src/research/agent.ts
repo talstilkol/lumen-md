@@ -374,21 +374,7 @@ export function researchGoesOnline(settings: ResearchSettings = getResearchSetti
   return !!endpoint && !isLocalOrigin(endpoint);
 }
 
-const WEB_CONSENT_KEY = "lumen.research.webConsent";
-export function hasWebConsent(): boolean {
-  try {
-    return localStorage.getItem(WEB_CONSENT_KEY) === "1";
-  } catch {
-    return false;
-  }
-}
-export function grantWebConsent(): void {
-  try {
-    localStorage.setItem(WEB_CONSENT_KEY, "1");
-  } catch {
-    /* asked again next time */
-  }
-}
+export { hasWebConsent, grantWebConsent } from "./consent";
 
 /**
  * Answer from the library (Library/ · ספרייה/) only: the best passages by
