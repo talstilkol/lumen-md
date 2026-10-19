@@ -5,7 +5,7 @@ import { t } from "../../i18n";
 import { BLOCK_SNIPPETS } from "../../snippets";
 import { buildFormatCommands } from "../../editor/formatCommands";
 import { buildSuggestingCommands } from "../../editor/suggestingCommands";
-import { detectIsMac } from "../../ui/KeyboardShortcuts";
+import { detectIsMac } from "../../lib/detectIsMac";
 import type { CommandContext } from "./context";
 
 /** Format (Prettier, lazy) and suggesting mode (track changes, CriticMarkup). */

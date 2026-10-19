@@ -150,6 +150,14 @@ export function buildWorkspaceFileCommands({ handleSaveToWorkspace, toggleWorksp
       },
     },
     {
+      id: "help.setup",
+      label: t("cmd.help.setup"),
+      hint: t("cmd.help.setup.hint"),
+      icon: cmdIcons.Sparkles,
+      group: t("group.file"),
+      action: () => window.dispatchEvent(new CustomEvent("lumen-open-setup")),
+    },
+    {
       id: "file.saveToWorkspace",
       label: t("cmd.file.saveToWorkspace"),
       hint: t("cmd.file.saveToWorkspace.hint"),

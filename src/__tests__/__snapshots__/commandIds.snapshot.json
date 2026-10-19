@@ -942,6 +942,13 @@
       "icon": "FolderOpen"
     },
     {
+      "id": "help.setup",
+      "label": "Set up Lumen…",
+      "group": "File",
+      "hint": "Language, vault location, look and a sample vault: the first-run setup again",
+      "icon": "Sparkles"
+    },
+    {
       "id": "file.saveToWorkspace",
       "label": "Save to workspace",
       "group": "File",
@@ -2134,6 +2141,13 @@
       "icon": "FolderOpen"
     },
     {
+      "id": "help.setup",
+      "label": "Set up Lumen…",
+      "group": "File",
+      "hint": "Language, vault location, look and a sample vault: the first-run setup again",
+      "icon": "Sparkles"
+    },
+    {
       "id": "file.saveToWorkspace",
       "label": "Save to workspace",
       "group": "File",
@@ -2391,6 +2405,7 @@
     "collab.start",
     "collab.join",
     "file.openSampleWorkspace",
+    "help.setup",
     "file.saveToWorkspace",
     "theme.toggle",
     "insert.chart",

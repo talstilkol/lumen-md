@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-10-19T06:19:57.379Z",
+  "generated_at": "2026-10-19T07:00:28.076Z",
   "source": "src/i18n/index.ts (en bundle)",
-  "count": 1470,
+  "count": 1509,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -6572,6 +6572,217 @@
     {
       "key": "tour.action.openRuntimeMetrics",
       "en": "Open runtime metrics now",
+      "vars": []
+    },
+    {
+      "key": "onboard.title",
+      "en": "Welcome to Lumen",
+      "vars": []
+    },
+    {
+      "key": "onboard.subtitle",
+      "en": "A few quick choices, then you're writing. You can change any of them later.",
+      "vars": []
+    },
+    {
+      "key": "onboard.step",
+      "en": "Step {n} of {total}",
+      "vars": [
+        "n",
+        "total"
+      ]
+    },
+    {
+      "key": "onboard.skip",
+      "en": "Skip setup",
+      "vars": []
+    },
+    {
+      "key": "onboard.back",
+      "en": "Back",
+      "vars": []
+    },
+    {
+      "key": "onboard.next",
+      "en": "Next",
+      "vars": []
+    },
+    {
+      "key": "onboard.finish",
+      "en": "Start writing",
+      "vars": []
+    },
+    {
+      "key": "onboard.working",
+      "en": "Setting up…",
+      "vars": []
+    },
+    {
+      "key": "onboard.failed",
+      "en": "Setup failed: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "onboard.lang.title",
+      "en": "Language",
+      "vars": []
+    },
+    {
+      "key": "onboard.lang.body",
+      "en": "The interface language. Hebrew and Arabic switch the layout to right-to-left.",
+      "vars": []
+    },
+    {
+      "key": "onboard.vault.title",
+      "en": "Where your notes live",
+      "vars": []
+    },
+    {
+      "key": "onboard.vault.opfs",
+      "en": "In this browser",
+      "vars": []
+    },
+    {
+      "key": "onboard.vault.opfs.desc",
+      "en": "Private to this browser, works everywhere, nothing to set up.",
+      "vars": []
+    },
+    {
+      "key": "onboard.vault.folder",
+      "en": "A folder on this computer",
+      "vars": []
+    },
+    {
+      "key": "onboard.vault.folder.desc",
+      "en": "Plain .md files in a folder you pick; other apps can open them too.",
+      "vars": []
+    },
+    {
+      "key": "onboard.vault.folder.unsupported",
+      "en": "This browser can't open folders (Chrome and Edge can). Your notes stay in browser storage; you can move them later.",
+      "vars": []
+    },
+    {
+      "key": "onboard.vault.folder.chosen",
+      "en": "Folder: {folder}",
+      "vars": [
+        "folder"
+      ]
+    },
+    {
+      "key": "onboard.vault.folder.denied",
+      "en": "Lumen wasn't allowed to use “{folder}”. Pick it again or keep browser storage.",
+      "vars": [
+        "folder"
+      ]
+    },
+    {
+      "key": "onboard.style.theme",
+      "en": "Theme",
+      "vars": []
+    },
+    {
+      "key": "onboard.style.light",
+      "en": "Light",
+      "vars": []
+    },
+    {
+      "key": "onboard.style.dark",
+      "en": "Dark",
+      "vars": []
+    },
+    {
+      "key": "onboard.style.system",
+      "en": "Match system",
+      "vars": []
+    },
+    {
+      "key": "onboard.style.palette",
+      "en": "Palette",
+      "vars": []
+    },
+    {
+      "key": "onboard.start.title",
+      "en": "Start with",
+      "vars": []
+    },
+    {
+      "key": "onboard.start.sample",
+      "en": "A sample vault",
+      "vars": []
+    },
+    {
+      "key": "onboard.start.sample.desc",
+      "en": "A few linked notes showing links, a board, a chart and a template, in {language}.",
+      "vars": [
+        "language"
+      ]
+    },
+    {
+      "key": "onboard.start.empty",
+      "en": "An empty vault",
+      "vars": []
+    },
+    {
+      "key": "onboard.start.empty.desc",
+      "en": "Just your first note.",
+      "vars": []
+    },
+    {
+      "key": "onboard.import.title",
+      "en": "Coming from another app? (optional)",
+      "vars": []
+    },
+    {
+      "key": "onboard.import.obsidian",
+      "en": "Import an Obsidian vault (folder)",
+      "vars": []
+    },
+    {
+      "key": "onboard.import.notion",
+      "en": "Import a Notion export (.zip)",
+      "vars": []
+    },
+    {
+      "key": "onboard.import.done",
+      "en": "Imported {notes} notes into “{folder}”.",
+      "vars": [
+        "notes",
+        "folder"
+      ]
+    },
+    {
+      "key": "onboard.import.failed",
+      "en": "Import failed: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "onboard.firstNote.name",
+      "en": "First note",
+      "vars": []
+    },
+    {
+      "key": "onboard.firstNote.body",
+      "en": "# My first note\\n\\nStart writing here. Type [[ to link to another note.",
+      "vars": []
+    },
+    {
+      "key": "onboard.tour.skip",
+      "en": "Skip tour",
+      "vars": []
+    },
+    {
+      "key": "cmd.help.setup",
+      "en": "Set up Lumen…",
+      "vars": []
+    },
+    {
+      "key": "cmd.help.setup.hint",
+      "en": "Language, vault location, look and a sample vault: the first-run setup again",
       "vars": []
     },
     {
