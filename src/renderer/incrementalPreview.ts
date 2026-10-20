@@ -52,9 +52,13 @@ export function canRenderInBlocks(markdown: string): boolean {
   return !/^ {0,3}\[[^\]]+\]:/m.test(text);
 }
 
-/** `markdown` with fenced code blocks and code spans removed (an approximation that only ever removes code). */
+/**
+ * `markdown` without what Markdown never reads as syntax: fenced and
+ * indented code, code spans, HTML comments (an approximation that only
+ * ever removes such regions).
+ */
 export function withoutCode(markdown: string): string {
-  if (!markdown.includes("`") && !markdown.includes("~~~")) return markdown;
+  if (!/`|~~~|<!--|(?:^|\n)(?: {4}|\t)/.test(markdown)) return markdown;
   const out: string[] = [];
   /** An open fence: its marker and the column it started at (inside a list item or quote: > 0). */
   let fence: { marker: string; column: number } | null = null;
@@ -79,12 +83,20 @@ export function withoutCode(markdown: string): string {
     }
     out.push(line);
   }
-  // Code spans may cross lines, not paragraphs.
-  return out
-    .join("\n")
-    .split(/(\n[ \t]*\n)/)
-    .map((chunk) => chunk.replace(/(`+)(?:(?!\1)[\s\S])*?\1/g, ""))
-    .join("");
+  // Code spans may cross lines, not paragraphs. Indented code is a chunk
+  // of 4-space lines after a chunk that is neither a list nor indented (so
+  // never list-item content).
+  const chunks = out.join("\n").split(/(\n[ \t]*\n)/);
+  let prev = "";
+  const kept = chunks.map((chunk, i) => {
+    if (i % 2) return chunk; // a separator
+    const indentedCode =
+      prev !== "" && chunk.split("\n").every((l) => /^(?: {4}|\t)/.test(l)) && !/^(?:[ \t]|[ \t]{0,3}(?:[-+*]|\d{1,9}[.)])(?:[ \t]|$))/.test(prev);
+    prev = chunk;
+    return indentedCode ? "" : chunk.replace(/(`+)(?:(?!\1)[\s\S])*?\1/g, "");
+  });
+  // HTML comments are opaque too.
+  return kept.join("").replace(/<!--[\s\S]*?-->/g, "");
 }
 
 interface Rendered {

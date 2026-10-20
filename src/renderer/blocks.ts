@@ -42,6 +42,13 @@ const MATH_OPEN = /^ {0,3}(\${2,})[^$]*$/;
 const CONTAINER = /^ {0,3}(:{3,})[ \t]*([A-Za-z][\w-]*)?/;
 const VOID_TAGS = new Set(["area", "base", "br", "col", "embed", "hr", "img", "input", "link", "meta", "param", "source", "track", "wbr"]);
 /** An HTML tag; the name must end at a space, `/` or `>`, so autolinks (`<https://…>`, `<a@b.c>`) are not tags. */
+/**
+ * Elements whose end tag may be left out (`<p>` closes the paragraph
+ * before it): neither their start nor end tag is counted, so they cannot
+ * leave the depth open — the element around them (`<ul>`, `<table>`)
+ * still is counted.
+ */
+const OPTIONAL_END = new Set(["p", "li", "dt", "dd", "tr", "td", "th", "thead", "tbody", "tfoot", "option", "optgroup", "colgroup", "caption", "rt", "rp", "rb", "rtc"]);
 const TAG = /<(\/?)([A-Za-z][\w-]*)(?=[\s/>])[^<>]*?(\/?)>/g;
 
 /** CommonMark HTML block 6: a block-level tag; runs until a blank line, and can interrupt a paragraph. */
@@ -85,7 +92,8 @@ function countTags(line: string, depth: number): number {
   TAG.lastIndex = 0;
   let t: RegExpExecArray | null;
   while ((t = TAG.exec(line)) !== null) {
-    if (t[3] || VOID_TAGS.has(t[2].toLowerCase())) continue;
+    const name = t[2].toLowerCase();
+    if (t[3] || VOID_TAGS.has(name) || OPTIONAL_END.has(name)) continue;
     depth = t[1] ? Math.max(0, depth - 1) : depth + 1;
   }
   return depth;

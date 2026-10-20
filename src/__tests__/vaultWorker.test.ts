@@ -394,6 +394,14 @@ describe("blocks and the incremental outline", () => {
     expect(splitBlocks(doc, { preview: true }).blocks).toHaveLength(3);
   });
 
+  it("elements with optional end tags (<p>, <li>) do not leave the depth open", () => {
+    const doc = "<div>\n<p>one\n<p>two\n</div>\n\n# Next\n\nText\n";
+    expect(splitBlocks(doc, { preview: true }).blocks).toHaveLength(3);
+    // …while the element around them is still followed.
+    const nested = "<ul>\n<li>a\n\n# inside\n\n</ul>\n\nAfter\n";
+    expect(splitBlocks(nested, { preview: true }).blocks.map((b) => nested.slice(b.start, b.end))[0]).toBe("<ul>\n<li>a\n\n# inside\n\n</ul>\n\n");
+  });
+
   it("a comment opened after text is opaque too", () => {
     const doc = "Text <!--\n<div>\n-->\n\n# Next\n\nText\n";
     expect(splitBlocks(doc, { preview: true }).blocks).toHaveLength(3);
@@ -491,6 +499,10 @@ describe("the block-by-block preview", () => {
     expect(withoutCode("- ```md\n  Text[^1]\n  ```\n- next")).toBe("- next");
     expect(withoutCode("> ```\n> [x]: y\n> ```\nafter")).toBe("after");
     expect(withoutCode("- ```\n  code\nText[^1]")).toBe("Text[^1]");
+    // Indented code after a paragraph, and comments; not list-item content.
+    expect(withoutCode("Para\n\n    Text[^1]\n\nend")).toBe("Para\n\n\n\nend");
+    expect(withoutCode("a <!--\n[x]: y\n--> b")).toBe("a  b");
+    expect(withoutCode("- item\n\n    Text[^1]")).toBe("- item\n\n    Text[^1]");
   });
 
   it("stops when a newer text is on its way", async () => {
