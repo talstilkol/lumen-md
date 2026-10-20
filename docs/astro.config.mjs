@@ -46,6 +46,7 @@ export default defineConfig({
             { label: "Database views", slug: "workspace/database-views" },
             { label: "Search (BM25 + Smart)", slug: "workspace/search" },
             { label: "Vault Doctor", slug: "workspace/doctor" },
+            { label: "Canvas: tldraw → Excalidraw", slug: "workspace/canvas", translations: { he: "קנבס: מעבר מ-tldraw ל-Excalidraw" } },
           ],
         },
         {
