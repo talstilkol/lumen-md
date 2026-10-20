@@ -67,12 +67,14 @@ export function researchEndpoint(): string | null {
 const RESEARCH_TOKEN_SECRET = "lumen.research.token";
 
 /**
- * The shared token the research worker requires (its RESEARCH_TOKEN, A8):
- * the one set in the AI settings (for a self-run service), else the build's
- * VITE_RESEARCH_TOKEN. Empty when neither is set.
+ * The shared token the research worker requires (its RESEARCH_TOKEN, A8).
+ * The token set in the AI settings belongs to the endpoint set there: it is
+ * sent only while that override is in use. The build's endpoint gets the
+ * build's VITE_RESEARCH_TOKEN. Empty when the active endpoint has none.
  */
-function researchToken(): string {
-  return getSecret(RESEARCH_TOKEN_SECRET)?.trim() || (import.meta.env?.VITE_RESEARCH_TOKEN as string | undefined)?.trim() || "";
+export function researchToken(build = (import.meta.env?.VITE_RESEARCH_TOKEN as string | undefined)?.trim() ?? ""): string {
+  if (!ls("lumen.research.endpoint")?.trim()) return build;
+  return getSecret(RESEARCH_TOKEN_SECRET)?.trim() || build;
 }
 
 /** Headers for research-service requests, with the token when one is configured. */

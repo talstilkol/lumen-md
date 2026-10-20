@@ -2,6 +2,8 @@
 /** Research worker (edge-workers/research): who may call it, decoding, and the extraction deadline. */
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import worker, { TOKEN_HEADER, type Env } from "../../edge-workers/research/worker";
+import { researchToken } from "../research/client";
+import { setSecret } from "../lib/secretStore";
 
 const ORIGIN = "https://lumen-md.app";
 const TOKEN = "test-token";
@@ -59,6 +61,24 @@ describe("research worker access", () => {
     // …while the health check and the CORS preflight still answer.
     expect((await call("/healthz", {}, open)).status).toBe(200);
     expect((await call("/extract", { method: "OPTIONS", headers: { Origin: ORIGIN } }, open)).status).toBe(204);
+  });
+});
+
+describe("research client token (A8)", () => {
+  const store = new Map<string, string>();
+  beforeEach(() => {
+    store.clear();
+    vi.stubGlobal("localStorage", { getItem: (k: string) => store.get(k) ?? null, setItem: (k: string, v: string) => void store.set(k, v), removeItem: (k: string) => void store.delete(k) });
+  });
+
+  it("A8: sends the settings token only with the settings endpoint, else the build token", async () => {
+    await setSecret("lumen.research.token", "local-token");
+    expect(researchToken("build-token")).toBe("build-token"); // the build's endpoint: the build's token
+    store.set("lumen.research.endpoint", "http://localhost:8787");
+    expect(researchToken("build-token")).toBe("local-token");
+    store.delete("lumen.research.endpoint"); // the override removed: back to the build's pair
+    expect(researchToken("build-token")).toBe("build-token");
+    await setSecret("lumen.research.token", null);
   });
 });
 
