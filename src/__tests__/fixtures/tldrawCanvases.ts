@@ -36,7 +36,8 @@ export function richText(text: string): unknown {
 let indexCounter = 0;
 function nextIndex(): string {
   indexCounter++;
-  return `a${indexCounter.toString(36).padStart(3, "0")}`;
+  // A valid tldraw index key: integer part "a0", a fraction that never ends in "0".
+  return `a0${indexCounter.toString(36).padStart(3, "0")}V`;
 }
 
 function shape(

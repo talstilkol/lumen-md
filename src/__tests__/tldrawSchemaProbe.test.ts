@@ -7,71 +7,29 @@ import { it, expect } from "vitest";
 import * as tldraw from "tldraw";
 import { buildFixtureCanvases } from "./fixtures/tldrawCanvases";
 
-it("probe: tldraw 4.5 record shapes", () => {
+it("probe: tldraw 4.5 draw-point encoding", () => {
   const m = tldraw as unknown as Record<string, unknown>;
   const out: Record<string, unknown> = {};
-  out.b64Vecs = typeof m.b64Vecs;
-  if (m.b64Vecs && typeof m.b64Vecs === "object") {
-    out.b64src = Object.entries(m.b64Vecs as Record<string, unknown>).map(([k, v]) => `${k}=${String(v).slice(0, 1500)}`);
-    const enc = (m.b64Vecs as { encodePoints?: (p: unknown) => unknown }).encodePoints;
-    if (enc) out.b64sample = enc([{ x: 0, y: 0, z: 0.5 }, { x: 10, y: 4, z: 0.5 }, { x: -3, y: 7.5, z: 0.25 }, { x: 1000.25, y: -2000.5, z: 1 }]);
-  }
-  for (const U of tldraw.defaultShapeUtils) {
-    try {
-      out[`props:${U.type}`] = (U.prototype as unknown as { getDefaultProps(): unknown }).getDefaultProps.call({ editor: {} });
-    } catch (e) {
-      out[`props:${U.type}`] = `ERR ${String(e)}`;
+  const B = m.b64Vecs as Record<string, unknown> | undefined;
+  if (B) {
+    for (const k of Object.getOwnPropertyNames(B)) {
+      const v = (B as Record<string, unknown>)[k];
+      if (typeof v === "function") out[`fn:${k}`] = String(v).slice(0, 2200);
     }
+    const enc = B.encodePoints as ((p: unknown) => unknown) | undefined;
+    if (enc) out.sample = enc([{ x: 0, y: 0, z: 0.5 }, { x: 10, y: 4, z: 0.5 }, { x: -3, y: 7.5, z: 0.25 }, { x: 1000.25, y: -2000.5, z: 1 }]);
   }
-  for (const U of tldraw.defaultBindingUtils) {
-    try {
-      out[`binding:${U.type}`] = (U.prototype as unknown as { getDefaultProps(): unknown }).getDefaultProps.call({ editor: {} });
-    } catch (e) {
-      out[`binding:${U.type}`] = `ERR ${String(e)}`;
-    }
-  }
-  try {
-    out.richText = (m.toRichText as (s: string) => unknown)("שלום\nworld");
-  } catch (e) {
-    out.richText = `ERR ${String(e)}`;
-  }
-  const store = tldraw.createTLStore({ shapeUtils: tldraw.defaultShapeUtils, bindingUtils: tldraw.defaultBindingUtils });
-  out.schema = store.schema.serialize();
-  const errors: string[] = [];
-  for (const c of buildFixtureCanvases()) {
-    for (const r of c.records) {
-      try {
-        store.put([r as never]);
-      } catch (e) {
-        errors.push(`${c.name} ${r.id}: ${String((e as Error).message).slice(0, 300)}`);
-      }
-    }
-  }
-  out.putErrors = errors;
-  try {
-    out.snapshotKeys = Object.keys(tldraw.getSnapshot(store) as object);
-    const snap = tldraw.getSnapshot(store) as { document: { store: Record<string, unknown> } };
-    out.sampleDraw = Object.values(snap.document.store).find((r) => (r as { type?: string }).type === "draw");
-    out.sampleArrow = Object.values(snap.document.store).find((r) => (r as { type?: string }).type === "arrow");
-  } catch (e) {
-    out.snapshot = `ERR ${String(e)}`;
-  }
-  // An old-format draw shape through tldraw's own migrations.
   try {
     const s2 = tldraw.createTLStore({ shapeUtils: tldraw.defaultShapeUtils, bindingUtils: tldraw.defaultBindingUtils });
     const schema = s2.schema.serialize() as { sequences: Record<string, number> };
-    const old = { ...schema, sequences: { ...schema.sequences, "com.tldraw.shape.draw": 1 } };
+    const old = { ...schema, sequences: { ...schema.sequences, "com.tldraw.shape.draw": 3, "com.tldraw.shape.highlight": 2 } };
     const c13 = buildFixtureCanvases().find((c) => c.name === "13-draw")!;
     tldraw.loadSnapshot(s2, { store: Object.fromEntries(c13.records.map((r) => [r.id, r])), schema: old } as never);
-    const snap2 = tldraw.getSnapshot(s2) as { document: { store: Record<string, unknown> } };
-    out.migratedDraw = snap2.document.store["shape:d2"];
+    const snap2 = s2.getStoreSnapshot() as { store: Record<string, unknown> };
+    out.migratedD2 = snap2.store["shape:d2"];
   } catch (e) {
-    out.migratedDraw = `ERR ${String(e)}`;
+    out.migratedD2 = `ERR ${String(e)}`;
   }
-  // CI job logs aren't readable from where this was written; annotations are.
-  delete out.schema;
-  const sv = store.schema.serialize() as { sequences?: Record<string, number> };
-  out.versions = Object.entries(sv.sequences ?? {}).filter(([k]) => /shape|binding|asset/.test(k)).map(([k, v]) => `${k.replace("com.tldraw.", "")}=${v}`).join(",");
   const text = JSON.stringify(out);
   const esc = (x: string) => x.replace(/%/g, "%25").replace(/\r/g, "%0D").replace(/\n/g, "%0A");
   for (let i = 0, n = 0; i < text.length && n < 9; i += 3800, n++) {
