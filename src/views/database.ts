@@ -277,6 +277,11 @@ export function compileFormulas(formulas: unknown): CompiledFormula[] {
     }
     // `blank: null` in YAML is the formula `null` (YAML already turned it into a value, as it does 3 and true).
     if (raw !== null && typeof raw !== "string" && typeof raw !== "number" && typeof raw !== "boolean") continue;
+    // An unquoted `value: 1e309` reaches us as Infinity, which would parse as a field name: say why instead (review #267).
+    if (typeof raw === "number" && !Number.isFinite(raw)) {
+      out.push({ name, source: String(raw), tree: null, error: { message: "the number is too large — put the formula in quotes", at: 0 } });
+      continue;
+    }
     const source = raw === null ? "null" : String(raw);
     const p = parseFormula(source);
     out.push(p.ok ? { name, source, tree: p.tree } : { name, source, tree: null, error: { message: p.error.message, at: p.error.at } });

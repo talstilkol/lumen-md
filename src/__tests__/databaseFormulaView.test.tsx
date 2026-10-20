@@ -80,6 +80,10 @@ describe("formulas — engine glue", () => {
     const list = compileFormulas({ pair: ["price", "qty"] });
     expect(list.map((f) => [f.name, f.tree])).toEqual([["pair", null]]);
     expect(list[0].error?.message).toMatch(/quotes/);
+    // An unquoted 1e309 is Infinity after YAML: a broken entry, not a field named "Infinity".
+    const inf = compileFormulas({ value: Infinity });
+    expect(inf.map((f) => [f.name, f.tree])).toEqual([["value", null]]);
+    expect(inf[0].error?.message).toMatch(/too large/);
   });
 
   it("adds formula columns per row, in order, with errors per cell", () => {
