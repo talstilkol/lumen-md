@@ -51,6 +51,18 @@ jobs:
           npm run test:coverage
           pct=$(node -e 'console.log(require("./coverage/coverage-summary.json").total.lines.pct)')
           echo "Coverage lines: $pct%"
+          echo "::notice title=coverage::total lines $pct%"
+          node -e '
+            const s = require("./coverage/coverage-summary.json");
+            for (const part of ["/src/layouts/", "/src/components/", "/src/App.tsx", "/src/i18n/", "/src/plugins/", "/src/renderer/", "/src/views/"]) {
+              let total = 0, covered = 0;
+              for (const [file, m] of Object.entries(s)) {
+                if (file !== "total" && file.includes(part)) { total += m.lines.total; covered += m.lines.covered; }
+              }
+              const pct = total ? ((100 * covered) / total).toFixed(2) : "n/a";
+              console.log(`::notice title=coverage ${part}::${pct}% (${covered}/${total} lines)`);
+            }
+          '
           awk -v p="$pct" 'BEGIN { exit (p < 65) }' || (echo "::error::Lines coverage $pct% < 65% gate" && exit 1)
 
       - name: Build
