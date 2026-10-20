@@ -122,6 +122,8 @@ describe("known limitations A1–A9", () => {
     const elsewhere = firstPart("const value = 1; const saved = Array.from([0], () => value); const p = new Promise((r) => r(value)); const g = (Array, Promise) => [Array, Promise];", "const value = 'x';");
     expect(elsewhere).toContain("Array.from([0], () => value$prev)");
     expect(elsewhere).toContain("r(value$prev)");
+    // A type annotation binds nothing: `Array` there is a type, the call is the built-in's.
+    expect(firstPart("const value = 1; const r = ((xs: Array<number>) => Array.from(xs, () => value))([1]);", "const value = 'x';")).toContain("Array.from(xs, () => value$prev)");
     // Without the parameter, the outer literal still decides.
     expect(firstPart("const value = 1; const xs = [0]; const r = (() => xs.map(() => value))();", "const value = 'x';")).toContain("xs.map(() => value$prev)");
   });

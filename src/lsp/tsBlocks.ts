@@ -633,6 +633,8 @@ function functionScopes(tokens: ReturnType<typeof tokenize>, match: Map<number, 
   /** Identifiers a parameter list binds (defaults and computed keys are references). */
   const paramBindings = (paramsFrom: number, paramsTo: number) => {
     const locals = new Set<string>();
+    /** Bracket depth inside the list: 1 directly inside its `(`. */
+    let level = 0;
     for (let i = paramsFrom; i <= paramsTo; i++) {
       const t = tokens[i];
       // `x = value`: the default expression references, it doesn't bind.
@@ -646,6 +648,7 @@ function functionScopes(tokens: ReturnType<typeof tokenize>, match: Map<number, 
             depth--;
           } else if (v === "," && depth === 0) break;
         }
+        i--; // the `,` / closer that ends it is handled next
         continue;
       }
       // `{ [key]: v }`: a computed key is an expression (a reference).
@@ -655,6 +658,25 @@ function functionScopes(tokens: ReturnType<typeof tokenize>, match: Map<number, 
           i = close;
           continue;
         }
+      }
+      if (isPunct(i, "(") || isPunct(i, "[") || isPunct(i, "{")) level++;
+      else if (isPunct(i, ")") || isPunct(i, "]") || isPunct(i, "}")) level--;
+      // `x: Array<number>`: a type annotation names types, it binds nothing.
+      // (Inside a pattern, `{ key: value }`, the `:` is a level deeper.)
+      if (isPunct(i, ":") && level === 1 && isPunct(paramsFrom, "(")) {
+        let depth = 0;
+        let angle = 0;
+        for (i++; i <= paramsTo; i++) {
+          const v = tokens[i].type === "punct" ? tokens[i].value : "";
+          if (/^[<>]+$/.test(v)) angle += [...v].reduce((a, c) => a + (c === "<" ? 1 : -1), 0);
+          else if (v === "(" || v === "[" || v === "{") depth++;
+          else if (v === ")" || v === "]" || v === "}") {
+            if (depth === 0) break;
+            depth--;
+          } else if ((v === "," || v === "=") && depth === 0 && angle <= 0) break;
+        }
+        i--; // the `,` / `=` / `)` that ends the type is handled next
+        continue;
       }
       if (t?.type !== "ident") continue;
       if (isPunct(i - 1, ".") || (isPunct(i + 1, ":") && (isPunct(i - 1, "{") || isPunct(i - 1, ",")))) continue;
