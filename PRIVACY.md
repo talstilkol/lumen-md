@@ -14,7 +14,8 @@ Lumen is a local-first markdown editor. **By default, no data leaves your device
 | Onboarding state | `localStorage["lumen-tour-done"]` | **No** |
 | OAuth tokens (Google Drive, Dropbox) | `localStorage["lumen.gdrive.token"]`, `localStorage["lumen.dropbox.token"]` | Only when **you** opt-in to cloud sync |
 | AI API key | In-memory only (never persisted) | Sent to the AI provider you configured (e.g. OpenAI) on each request |
-| Telemetry | Disabled by default. Opt-in via Sentry DSN environment variable. | Only if your operator configured `VITE_SENTRY_DSN` |
+| Error reports | Off by default. | Only if **you** turn them on (status bar) **and** your operator configured `VITE_SENTRY_DSN`; note text, titles and paths are removed, and each report is listed in the privacy ledger |
+| Web vitals (page-speed metrics) | In memory on your device | **No**, never |
 | Collab session state | Peer-to-peer over WebRTC | Only between you and your collab peers |
 
 ## Local storage breakdown
@@ -54,7 +55,7 @@ When you join a collab room:
 
 ## Telemetry
 
-Off by default. Lumen ships a Sentry integration point but requires the operator to set `VITE_SENTRY_DSN` at build time to enable it. End-users can also opt out at runtime via the Privacy Mode toggle in the StatusBar.
+Off by default. Error reports are sent only when **you** turn them on with the Telemetry pill in the status bar **and** the build sets `VITE_SENTRY_DSN` (Sentry or a self-hosted GlitchTip). Without both, the Sentry SDK is never loaded. Before a report leaves the browser, note text, titles, file paths, the page address, breadcrumbs and user data are removed. There is no session replay. Every report is listed in the privacy ledger, and the local-only policy blocks them. Web vitals are measured on your device and never sent. Details: `docs/src/content/docs/security/monitoring.md`.
 
 ## GDPR / CCPA rights
 

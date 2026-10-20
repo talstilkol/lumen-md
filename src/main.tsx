@@ -10,8 +10,6 @@ import { showAiToast } from "./ui/AiToast";
 import { ToastContainer } from "./components/Toast";
 import { initTelemetry } from "./lib/telemetry";
 import { initAuth } from "./auth/useAuth";
-import { reportWebVitals } from "./lib/webVitals";
-import { log } from "./lib/logger";
 import { startAutoBackup, startVaultSnapshots } from "./sync/autoBackup";
 import { requestPersistentStorage } from "./storage/persistentStorage";
 import { initLocale, t } from "./i18n";
@@ -31,18 +29,19 @@ installPrivacyLedger((entry) => {
 });
 // Esc cancels any running AI request (T55).
 installAiEscape((n) => showAiToast(t("toast.aiCancelled", { count: n }), "info"));
-initTelemetry();
+// Error reports: only when the user turned them on AND the build has a DSN (12.4).
+void initTelemetry();
 void initAuth();
 startAutoBackup();
 startVaultSnapshots();
 // The vault lives in OPFS/IndexedDB; without this the browser may evict it.
 void requestPersistentStorage();
 
-// Core Web Vitals — opt-out gates inside; sink writes to the structured
-// log so Sentry (when configured) picks them up alongside other events.
-// No-op in browsers without PerformanceObserver.
-reportWebVitals((sample) => {
-  log.info("[web-vitals]", sample);
+// Web Vitals, measured on this device and never sent (12.4): shown in the
+// Runtime metrics panel. Loaded off the startup path; the observers are
+// buffered, so the page-load entries are still seen.
+void import("./lib/webVitals").then((m) => m.startLocalVitals()).catch(() => {
+  /* chunk failed to load — no local vitals this session */
 });
 
 // ─── Native Sync Dialog Capture (Milkdown overrides) ────────────────────

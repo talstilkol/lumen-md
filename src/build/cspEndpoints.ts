@@ -25,6 +25,10 @@ export const ENDPOINT_ENV_VARS = [
   "VITE_MARKETPLACE_URL",
   "VITE_LANGUAGETOOL_URL",
   "VITE_SUPABASE_URL",
+  // The error tracker (Sentry / GlitchTip, plan 12.4). Its origin is the
+  // DSN's host; the key in the DSN's user part is dropped by URL.origin.
+  // No DSN, no ingest host in the policy — never a wildcard.
+  "VITE_SENTRY_DSN",
 ] as const;
 
 /**

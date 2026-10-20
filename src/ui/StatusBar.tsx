@@ -4,7 +4,7 @@ import { Sparkles, ShieldCheck, SpellCheck, FileDiff, Activity, BarChart3, Cloud
 import type { CollabPeer } from "../collab/yjs";
 import { t, getLocale } from "../i18n";
 import { useAppStore } from "../store/useStore";
-import { getTelemetryOptOut, setTelemetryOptOut } from "../lib/telemetry";
+import { getMonitoringConsent, setMonitoringConsent } from "../lib/telemetry";
 import type { ConfigHealthReport } from "../lib/configHealth";
 import { subscribeSyncStatus } from "../sync/syncStatus";
 import { parseSuggestions, mayContainCriticMarkup } from "../editor/suggesting";
@@ -53,11 +53,12 @@ export const StatusBar = React.memo(function StatusBar({
   const suggestingMode = useAppStore((s) => s.suggestingMode);
   const toggleSuggestingMode = useAppStore((s) => s.toggleSuggestingMode);
   const suggestionCount = useMemo(() => countCriticMarkup(text), [text]);
-  const [telemetryOff, setTelemetryOff] = useState(getTelemetryOptOut);
+  // Error reports are off until the user turns them on (plan 12.4).
+  const [telemetryOff, setTelemetryOff] = useState(() => !getMonitoringConsent());
   const toggleTelemetry = useCallback(() => {
-    const next = !telemetryOff;
-    setTelemetryOptOut(next);
-    setTelemetryOff(next);
+    const nextOff = !telemetryOff;
+    setMonitoringConsent(!nextOff);
+    setTelemetryOff(nextOff);
   }, [telemetryOff]);
   const healthIssues = configHealth
     ? [

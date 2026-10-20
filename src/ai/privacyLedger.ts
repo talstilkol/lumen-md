@@ -22,8 +22,12 @@ import { getBaseUrl } from "./ollamaProvider";
 import { grammarEndpoint } from "./grammar";
 import { researchEndpoint } from "../research/client";
 import { LEDGER_CHANNEL, type WorkerLedgerMessage } from "./workerLedger";
+import { monitoringOrigin } from "../lib/telemetry";
 
-export type LedgerCategory = "cloud-ai" | "cloud-text" | "local-ai" | "model-download" | "static-asset" | "research" | "third-party";
+export type LedgerCategory = "cloud-ai" | "cloud-text" | "local-ai" | "model-download" | "static-asset" | "research" | "third-party" | "monitoring";
+
+/** How an error report is listed (plan 12.4: sent only with consent and a DSN). */
+export const MONITORING_REASON = "Error report (Sentry / GlitchTip), content removed";
 
 export interface LedgerEntry {
   id: number;
@@ -161,6 +165,8 @@ export function classify(url: string): { host: string; category: LedgerCategory;
   }
   if (u.protocol !== "http:" && u.protocol !== "https:") return null;
   const host = u.hostname.toLowerCase();
+  // why: the error tracker named by the build's DSN, wherever it is hosted (Sentry, a self-hosted GlitchTip)
+  if (u.origin === monitoringOrigin()) return { host, category: "monitoring", reason: MONITORING_REASON };
   for (const r of RULES) if (r.test(host, u.pathname)) return { host, category: r.category, reason: r.reason };
   let ollamaHost = "";
   try {
@@ -205,8 +211,8 @@ export function classify(url: string): { host: string; category: LedgerCategory;
   return null;
 }
 
-/** Categories whose requests carry the user's data (text, a query, the page address). */
-const CARRIES_DATA: ReadonlySet<LedgerCategory> = new Set(["cloud-ai", "cloud-text", "research", "third-party"]);
+/** Categories whose requests carry the user's data (text, a query, the page address, an error report). */
+const CARRIES_DATA: ReadonlySet<LedgerCategory> = new Set(["cloud-ai", "cloud-text", "research", "third-party", "monitoring"]);
 
 /** Would the policy block this category? Model downloads and static assets carry no user data. */
 export function blockedByPolicy(category: LedgerCategory, policy: AiPolicy): boolean {
