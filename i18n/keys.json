@@ -2,7 +2,7 @@
   "version": 1,
   "generated_at": "2026-10-18T05:18:24.525Z",
   "source": "src/i18n/index.ts (en bundle)",
-  "count": 1421,
+  "count": 1460,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -1862,6 +1862,222 @@
     {
       "key": "agents.netConsent.perCall",
       "en": "Under the \"local only\" policy you are asked for every call.",
+      "vars": []
+    },
+    {
+      "key": "cmd.ai.reviewChanges",
+      "en": "AI: Review changes proposed by agents",
+      "vars": []
+    },
+    {
+      "key": "cmd.ai.reviewChanges.hint",
+      "en": "Each change an agent proposed, as a diff, to approve or reject",
+      "vars": []
+    },
+    {
+      "key": "agentReview.title",
+      "en": "Changes proposed by agents",
+      "vars": []
+    },
+    {
+      "key": "agentReview.intro",
+      "en": "Nothing is written until you approve it. Changes to an open document go into the editor, not straight to the file.",
+      "vars": []
+    },
+    {
+      "key": "agentReview.empty",
+      "en": "No changes are waiting.",
+      "vars": []
+    },
+    {
+      "key": "agentReview.close",
+      "en": "Close",
+      "vars": []
+    },
+    {
+      "key": "agentReview.approve",
+      "en": "Approve",
+      "vars": []
+    },
+    {
+      "key": "agentReview.reject",
+      "en": "Reject",
+      "vars": []
+    },
+    {
+      "key": "agentReview.approveAll",
+      "en": "Approve all ({count})",
+      "vars": [
+        "count"
+      ]
+    },
+    {
+      "key": "agentReview.rejectAll",
+      "en": "Reject all",
+      "vars": []
+    },
+    {
+      "key": "agentReview.proposedBy",
+      "en": "Proposed by {agent}",
+      "vars": [
+        "agent"
+      ]
+    },
+    {
+      "key": "agentReview.unknownAgent",
+      "en": "an agent",
+      "vars": []
+    },
+    {
+      "key": "agentReview.run",
+      "en": "run {run}",
+      "vars": [
+        "run"
+      ]
+    },
+    {
+      "key": "agentReview.target.document",
+      "en": "The open document",
+      "vars": []
+    },
+    {
+      "key": "agentReview.target.documentPath",
+      "en": "The open document · {path}",
+      "vars": [
+        "path"
+      ]
+    },
+    {
+      "key": "agentReview.target.newFile",
+      "en": "{path} (new file)",
+      "vars": [
+        "path"
+      ]
+    },
+    {
+      "key": "agentReview.tooBig",
+      "en": "Too many changes to show line by line.",
+      "vars": []
+    },
+    {
+      "key": "agentReview.noEol",
+      "en": "No newline at end of file",
+      "vars": []
+    },
+    {
+      "key": "agentReview.gap",
+      "en": "{count} unchanged lines",
+      "vars": [
+        "count"
+      ]
+    },
+    {
+      "key": "agentReview.done",
+      "en": "Done",
+      "vars": []
+    },
+    {
+      "key": "agentReview.status.document",
+      "en": "Applied in the editor, not saved yet (Undo takes it back).",
+      "vars": []
+    },
+    {
+      "key": "agentReview.status.documentNoUndo",
+      "en": "Applied to the document, not saved yet. Undo can't take it back in this view.",
+      "vars": []
+    },
+    {
+      "key": "agentReview.status.tab",
+      "en": "Applied in another tab, not saved yet.",
+      "vars": []
+    },
+    {
+      "key": "agentReview.status.file",
+      "en": "Written to the file.",
+      "vars": []
+    },
+    {
+      "key": "agentReview.status.suggestion",
+      "en": "Added as a tracked change (suggesting mode is on).",
+      "vars": []
+    },
+    {
+      "key": "agentReview.status.rejected",
+      "en": "Rejected — nothing was written.",
+      "vars": []
+    },
+    {
+      "key": "agentReview.status.withdrawn",
+      "en": "Withdrawn: the run was cancelled.",
+      "vars": []
+    },
+    {
+      "key": "agentReview.conflict.file-changed",
+      "en": "Not written: the file changed after the agent proposed this.",
+      "vars": []
+    },
+    {
+      "key": "agentReview.conflict.file-created",
+      "en": "Not written: a file with this name was created since.",
+      "vars": []
+    },
+    {
+      "key": "agentReview.conflict.doc-changed",
+      "en": "Not applied: the text it changes was edited after the proposal.",
+      "vars": []
+    },
+    {
+      "key": "agentReview.conflict.overlap",
+      "en": "Not applied: it overlaps a change approved before it.",
+      "vars": []
+    },
+    {
+      "key": "agentReview.conflict.open-unsaved",
+      "en": "Not applied: the file is open with edits the agent did not see.",
+      "vars": []
+    },
+    {
+      "key": "agentReview.conflict.not-open",
+      "en": "Not applied: its document is no longer open.",
+      "vars": []
+    },
+    {
+      "key": "agentReview.conflict.failed",
+      "en": "Not applied: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "agentReview.badge",
+      "en": "Review {count}",
+      "vars": [
+        "count"
+      ]
+    },
+    {
+      "key": "agentReview.badge.tooltip",
+      "en": "Changes proposed by agents are waiting for your approval",
+      "vars": []
+    },
+    {
+      "key": "agentReview.toast.one",
+      "en": "{agent} proposed a change. Nothing is written until you approve it.",
+      "vars": [
+        "agent"
+      ]
+    },
+    {
+      "key": "agentReview.toast.other",
+      "en": "{agent} proposed {n} changes. Nothing is written until you approve them.",
+      "vars": [
+        "agent",
+        "n"
+      ]
+    },
+    {
+      "key": "agentReview.toast.review",
+      "en": "Review",
       "vars": []
     },
     {

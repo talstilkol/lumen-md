@@ -22,6 +22,7 @@ const AiSettingsPanel = lazy(() => import("./ui/AiSettingsPanel").then(m => ({ d
 const PrivacyLedgerPanel = lazy(() => import("./ui/PrivacyLedgerPanel").then(m => ({ default: m.PrivacyLedgerPanel })));
 const TrashPanel = lazy(() => import("./ui/TrashPanel").then(m => ({ default: m.TrashPanel })));
 const AiDoctorPanel = lazy(() => import("./ui/AiDoctorPanel").then(m => ({ default: m.AiDoctorPanel })));
+const AgentReviewPanel = lazy(() => import("./ui/AgentReviewPanel").then(m => ({ default: m.AgentReviewPanel })));
 const FineTuneSettings = lazy(() => import("./ui/FineTuneSettings").then(m => ({ default: m.FineTuneSettings })));
 const VersionHistory = lazy(() => import("./ui/VersionHistory").then(m => ({ default: m.VersionHistory })));
 const MarkdownTableEditor = lazy(() => import("./ui/MarkdownTableEditor").then(m => ({ default: m.MarkdownTableEditor })));
@@ -55,6 +56,7 @@ import { RuntimeMetricsPanel } from "./ui/RuntimeMetricsPanel";
 import { useFileDragDrop } from "./hooks/useFileDragDrop";
 import { useCollab } from "./hooks/useCollab";
 import { useTauriMenu } from "./hooks/useTauriMenu";
+import { useAgentReview } from "./hooks/useAgentReview";
 import { EditorLayout } from "./layouts/EditorLayout";
 import { useAuth } from "./auth/useAuth";
 import { docIdentity } from "./renderer/previewDoc";
@@ -142,6 +144,8 @@ export default function App() {
   const [themeSettingsOpen, setThemeSettingsOpen] = useState(false);
   const [aiSettingsOpen, setAiSettingsOpen] = useState(false);
   const [aiDoctorOpen, setAiDoctorOpen] = useState(false);
+  const [agentReviewOpen, setAgentReviewOpen] = useState(false);
+  const openAgentReview = useCallback(() => setAgentReviewOpen(true), []);
   const [trashOpen, setTrashOpen] = useState(false);
   // The search dialog loads on first open and then stays mounted, so an
   // Ask Workspace conversation survives closing it (perf: not at startup).
@@ -190,6 +194,7 @@ export default function App() {
     // the test suite needs.
     (window as unknown as { __lumen?: unknown }).__lumen = {
       htmlToMarkdown,
+      // `agentReview` (plan 5.11 e2e) is added by agents/reviewBridge once it loads.
     };
     return () => {
       unregisterPlugin(wordCountPlugin.id);
@@ -739,6 +744,13 @@ export default function App() {
     window.addEventListener("lumen-open-ai-doctor", onOpen);
     return () => window.removeEventListener("lumen-open-ai-doctor", onOpen);
   }, []);
+  // Changes agents proposed (plan 5.11): the editor applies approved ones,
+  // the status bar counts the waiting ones, a toast announces new ones.
+  const agentReviewPending = useAgentReview(editorRef, openAgentReview);
+  useEffect(() => {
+    window.addEventListener("lumen-open-agent-review", openAgentReview);
+    return () => window.removeEventListener("lumen-open-agent-review", openAgentReview);
+  }, [openAgentReview]);
   // Stage 2 of the improvement agent (a small local model proposes suggestions).
   useEffect(() => {
     void import("./agents/modelCritic").then((m) => m.installModelCritic());
@@ -965,6 +977,8 @@ export default function App() {
         filename={doc.name}
         configHealth={configHealth}
         onOpenRuntimeMetrics={() => setRuntimeMetricsOpen(true)}
+        agentReviewPending={agentReviewPending}
+        onOpenAgentReview={openAgentReview}
         collab={
           collab
             ? {
@@ -1065,6 +1079,7 @@ export default function App() {
           {trustedKeysOpen && <TrustedKeysSettings open={trustedKeysOpen} onClose={() => setTrustedKeysOpen(false)} />}
           {aiSettingsOpen && <AiSettingsPanel open={aiSettingsOpen} onClose={() => setAiSettingsOpen(false)} />}
           {aiDoctorOpen && <AiDoctorPanel open={aiDoctorOpen} onClose={() => setAiDoctorOpen(false)} />}
+          {agentReviewOpen && <AgentReviewPanel open={agentReviewOpen} onClose={() => setAgentReviewOpen(false)} />}
           {privacyOpen && <PrivacyLedgerPanel open={privacyOpen} onClose={() => setPrivacyOpen(false)} />}
           {trashOpen && <TrashPanel open={trashOpen} onClose={() => setTrashOpen(false)} />}
           {themeSettingsOpen && <ThemeSettings open={themeSettingsOpen} onClose={() => setThemeSettingsOpen(false)} />}
