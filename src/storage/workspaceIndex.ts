@@ -304,25 +304,29 @@ function pendingChanges(): boolean {
 
 export async function ensureIndex(force = false): Promise<void> {
   if (!isOPFSAvailable()) return;
-  if (cache.inflight) {
+  // Wait for whatever runs now, whole (a build and its follow-up rounds):
+  // a second caller must not query the worker between two of its steps.
+  let waited = false;
+  while (cache.inflight) {
+    waited = true;
     await cache.inflight;
-    if (!force && !pendingChanges()) return;
   }
-  if (force || !cache.builtAt) {
-    cache.inflight = build();
-  } else if (pendingChanges() || Date.now() - cache.checkedAt >= REVALIDATE_MS) {
-    cache.inflight = refresh();
-  } else return;
-  try {
-    await cache.inflight;
+  if (waited && !force && !pendingChanges()) return;
+  let first: () => Promise<void>;
+  if (force || !cache.builtAt) first = build;
+  else if (pendingChanges() || Date.now() - cache.checkedAt >= REVALIDATE_MS) first = refresh;
+  else return;
+  const run = (async () => {
+    await first();
     // Changes that arrived while that ran (a save during the first build)
     // are in the answer too — a few rounds at most, then the next call.
-    for (let round = 0; round < 3 && pendingChanges(); round++) {
-      cache.inflight = refresh();
-      await cache.inflight;
-    }
+    for (let round = 0; round < 3 && pendingChanges(); round++) await refresh();
+  })();
+  cache.inflight = run;
+  try {
+    await run;
   } finally {
-    cache.inflight = null;
+    if (cache.inflight === run) cache.inflight = null;
   }
 }
 

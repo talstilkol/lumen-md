@@ -49,7 +49,37 @@ export function canRenderInBlocks(markdown: string): boolean {
   const text = withoutCode(markdown);
   if (mayContainCriticMarkup(text)) return false;
   if (/\[\^[^\]\s]+\]/.test(text)) return false;
-  return !/^ {0,3}\[[^\]]+\]:/m.test(text);
+  return !hasDefinitionLine(text);
+}
+
+/**
+ * A line that may hold a reference definition (`[label]: …`), at top level
+ * or after quote / list-item prefixes (a definition counts document-wide
+ * from inside them too). A linear scan: regexes over nested prefixes
+ * backtrack badly on long whitespace runs.
+ */
+function hasDefinitionLine(text: string): boolean {
+  if (!text.includes("]:")) return false;
+  for (const line of text.split("\n")) {
+    if (!line.includes("]:")) continue;
+    if (/^\[[^\]]+\]:/.test(line.slice(containerPrefix(line)))) return true;
+  }
+  return false;
+}
+
+/**
+ * Length of `line`'s container prefix: indentation, `>` quote markers and
+ * list markers, in any nesting. A linear scan: regexes over nested
+ * prefixes backtrack badly on long whitespace runs.
+ */
+function containerPrefix(line: string): number {
+  let i = 0;
+  for (;;) {
+    while (i < line.length && (line[i] === " " || line[i] === "\t" || line[i] === ">")) i++;
+    const marker = /^(?:[-+*]|\d{1,9}[.)])[ \t]/.exec(line.slice(i, i + 11));
+    if (!marker) return i;
+    i += marker[0].length;
+  }
 }
 
 /**
@@ -64,7 +94,11 @@ export function withoutCode(markdown: string): string {
   let fence: { marker: string; column: number } | null = null;
   for (const line of markdown.split("\n")) {
     // A fence may follow list markers and `>` (nested in a list item or a quote).
-    const m = /^((?:[ \t]*(?:[-+*]|\d{1,9}[.)]|>)[ \t]+|[ \t]*>)*[ \t]{0,3})(`{3,}|~{3,})/.exec(line);
+    const at = containerPrefix(line);
+    // Without a container, 4+ spaces make it indented code, not a fence.
+    const bare = /^[ \t]*$/.test(line.slice(0, at));
+    const f = bare && at > 3 ? null : /^(`{3,}|~{3,})/.exec(line.slice(at));
+    const m = f ? ([line.slice(0, at) + f[1], line.slice(0, at), f[1]] as const) : null;
     if (fence) {
       const closes =
         m && m[2][0] === fence.marker[0] && m[2].length >= fence.marker.length && /^[`~]+[ \t]*\r?$/.test(line.slice(m[1].length));
@@ -84,14 +118,14 @@ export function withoutCode(markdown: string): string {
     out.push(line);
   }
   // Code spans may cross lines, not paragraphs. Indented code is a chunk
-  // of 4-space lines after a chunk that is neither a list nor indented (so
-  // never list-item content).
+  // of 4-space lines at the start or after a chunk that is neither a list
+  // nor indented (so never list-item content).
   const chunks = out.join("\n").split(/(\n[ \t]*\n)/);
   let prev = "";
   const kept = chunks.map((chunk, i) => {
     if (i % 2) return chunk; // a separator
     const indentedCode =
-      prev !== "" && chunk.split("\n").every((l) => /^(?: {4}|\t)/.test(l)) && !/^(?:[ \t]|[ \t]{0,3}(?:[-+*]|\d{1,9}[.)])(?:[ \t]|$))/.test(prev);
+      chunk.split("\n").every((l) => /^(?: {4}|\t)/.test(l)) && !/^(?:[ \t]|[ \t]{0,3}(?:[-+*]|\d{1,9}[.)])(?:[ \t]|$))/.test(prev);
     prev = chunk;
     return indentedCode ? "" : chunk.replace(/(`+)(?:(?!\1)[\s\S])*?\1/g, "");
   });

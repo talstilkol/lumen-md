@@ -174,6 +174,16 @@ describe("the workspace index over a 10,000-note vault (worker protocol)", () =>
     expect((await searchWorkspace("midrefresh")).map((h) => h.path)).toEqual([notePath(11)]);
   });
 
+  it("two callers waiting on one build both see a save made during it", async () => {
+    worker = new FakeWorker();
+    __resetWorkspaceIndex(() => workerEngine(worker));
+    const first = ensureIndex();
+    await writeWorkspaceFile(notePath(12), "# Note 12\nduringbuild\n");
+    const [a, b] = await Promise.all([searchWorkspace("duringbuild"), first.then(() => searchWorkspace("duringbuild"))]);
+    expect(a.map((h) => h.path)).toEqual([notePath(12)]);
+    expect(b.map((h) => h.path)).toEqual([notePath(12)]);
+  }, 120_000);
+
   it("moves queued in a chain (A → B → C, then a delete) leave only the final paths", async () => {
     await vault.backend.rename(notePath(6), "chain/b.md");
     await vault.backend.rename("chain/b.md", "chain/c.md");
@@ -489,6 +499,9 @@ describe("the block-by-block preview", () => {
     expect(canRenderInBlocks("Text[^1]\n\n[^1]: note")).toBe(false);
     expect(canRenderInBlocks("[x]\n\n[x]: https://example.com")).toBe(false);
     expect(canRenderInBlocks("a {++b++} c")).toBe(false);
+    // A definition inside a quote or a list item is document-wide too.
+    expect(canRenderInBlocks("[ref]\n\n> [ref]: https://example.com")).toBe(false);
+    expect(canRenderInBlocks("[ref]\n\n- [ref]: https://example.com")).toBe(false);
     // …but not when they are only examples in code.
     expect(canRenderInBlocks("Use `[^1]` and `{++x++}`.\n\n```md\n[x]: https://example.com\nText[^1]\n```\n")).toBe(true);
     expect(withoutCode("a `b` c\n```\nd\n```\ne")).toBe("a  c\ne");
@@ -503,6 +516,7 @@ describe("the block-by-block preview", () => {
     expect(withoutCode("Para\n\n    Text[^1]\n\nend")).toBe("Para\n\n\n\nend");
     expect(withoutCode("a <!--\n[x]: y\n--> b")).toBe("a  b");
     expect(withoutCode("- item\n\n    Text[^1]")).toBe("- item\n\n    Text[^1]");
+    expect(withoutCode("    Text[^1]\n\nend")).toBe("\n\nend");
   });
 
   it("stops when a newer text is on its way", async () => {
