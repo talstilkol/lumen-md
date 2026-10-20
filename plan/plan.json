@@ -1,6 +1,6 @@
 {
  "$comment": "The plan's single source (plan 0.6). Edit this file, then `npm run plan` regenerates the board in MASTER_PLAN.md and plan/board.html; CI (`npm run plan:check`) fails when they differ. A task's status is one line: phases[].tasks[].status.",
- "updated": "2026-10-20T16:20",
+ "updated": "2026-10-20T20:05",
  "note": "**המצב ב-ג׳ 20.10 16:20:** היום: (א) **#256** — בדיקת ה-e2e של הפתק היומי (4.12) מול build ייצור תוקנה: מסננת את קובץ ה-`.crswap` הזמני של Chromium ועושה polling במקום המתנות קבועות; CI ירוק (Lighthouse רץ שם רק בגלל תווית ה-bisect). (ב) **#265** — בודק הסיום של 0.7: `npm run dod`, `dodGrandfathered` עם 60 המשימות שסומנו ✅ לפני 0.7, צעד CI ״Definition of done for every ✅ task״ ותבנית PR; 0.7 נשאר ⏳ עד שה-60 מקבלות `dod` אחרי המיזוג (המיפוי של 56 מהן לבדיקות יחידה — הערה ב-#265). (ג) **#259** — סף ה-LCP בשולחן העבודה הועלה 2800 → 3700 ms לפי החלטה 15.16 (20); Lighthouse שם עדיין אדום, עכשיו על FCP 1083 > 1000 ms — אותו שער מ-#190, אותה החלטה (15.16 (21)); התווית `lighthouse` על #190, #194, #256 היא ה-bisect שהראה שאין רגרסיה במחסנית. (ד) **#136** נסגר בלי מיזוג (#251 מכיל את התוכנית כנתונים). **15.1 (המיזוג) עדיין לא בוצע** — 116 PR-ים שלי + 14 dependabot, כולם mergeable; כל תאריך כאן מניח שהמיזוג קורה היום, ואבני הדרך זזות יום על כל יום שהוא מתאחר. 0.5, 0.11, 0.14, 0.20 ו-7.1 נמדדים רק אחרי המיזוג. **הביצוע ממשיך עם Opus 5.5** לפי ״מסירה למודל המבצע״ בסוף המסמך (אחרי נספח 15): ראשי המסלולים, סדר הביצוע לכל מסלול, כללי הסיום ומה צריך מטל.",
  "start": "2026-10-18T08:00",
  "buffer": 0.35,
@@ -407,7 +407,7 @@
       "ci"
      ],
      "priority": "P0",
-     "status": "⏳ #265 (הבודק, צעד ה-CI ותבנית ה-PR בפנים, CI ירוק; 2 ממצאי Codex P1 על רשימת ה-grandfather ממתינים למענה; 60 המשימות שסומנו ✅ לפני 0.7 מקבלות dod אחרי המיזוג 15.1 — המיפוי של 56 מהן לבדיקות יחידה בהערה ב-#265; עד אז קובצי הבדיקה שלהן בענפים אחרים בעץ)",
+     "status": "⏳ #265 (הבודק, צעד ה-CI ותבנית ה-PR; 2 ממצאי Codex P1 תוקנו ב-21fb05d8 — רשימת ה-grandfather קפואה בקוד (DOD_GRANDFATHER_BASELINE, 60) ומשימה שנפתחה מחדש יוצאת ממנה; CI ירוק על bead92e6; ה-dod של 60 המשימות אחרי המיזוג 15.1)",
      "new": true,
      "was": "0.6",
      "source": "נספח 16",
@@ -633,6 +633,7 @@
       "ci"
      ],
      "priority": "P1",
+     "status": "⏳ #266 (שער קבצים יתומים בלי תלות: 376 קובצי ייצור, 11 ב-baseline, קובץ חדש שאיש לא מייבא נכשל; CI ירוק על ae930f52; חסר: חבילת knip ל-exports ותלויות — דורש lockfile על ה-Mac)",
      "new": true,
      "was": "0.15",
      "source": "O2",
@@ -642,6 +643,10 @@
      ],
      "acceptance": [
       "קובץ חדש שאיש לא מייבא נכשל ב-CI"
+     ],
+     "dod": [
+      "node scripts/check-unused-files.mjs",
+      "npx vitest run src/__tests__/unusedFiles.test.ts"
      ]
     },
     {
@@ -1850,6 +1855,7 @@
       "4.12"
      ],
      "priority": "P1",
+     "status": "⏳ #268 (inbox.md: חלון לכידה ⌥⌘N, share target, קיצור PWA, תפריט; CI ירוק על c52a2c71, startup 459.9/460 KB; 15 שרשורי review — 14 תוקנו, 1 P2 נשאר לטל (נעילת autosave בין חלונות); ✅* אחרי המיזוג; בדיקה במכשיר — Android share ו-⌥⌘N גלובלי ב-macOS — 15.12)",
      "new": true,
      "source": "מחקר פערים #10",
      "steps": [
@@ -1859,6 +1865,10 @@
      ],
      "acceptance": [
       "לכידה ב-2 לחיצות בכל פלטפורמה"
+     ],
+     "dod": [
+      "npx vitest run src/__tests__/quickCapture.test.ts src/__tests__/pwaLaunch.test.ts",
+      "npx playwright test e2e/quick-capture.spec.ts e2e/pwa.spec.ts"
      ]
     },
     {
