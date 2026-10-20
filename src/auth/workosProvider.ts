@@ -28,7 +28,7 @@ import { fetchWithRetry } from "../lib/fetchRetry";
 import { log } from "../lib/logger";
 
 interface WorkOSConfig {
-  /** Edge worker base URL, e.g. `https://auth.lumen.md`. */
+  /** Edge worker base URL, e.g. `https://auth.example.com`. */
   endpoint: string;
 }
 
