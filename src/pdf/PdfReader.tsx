@@ -127,6 +127,8 @@ export function PdfReader({ path, fragment = null, openSeq = 0, onClose, onOpenN
   const pageEls = useRef(new Map<number, HTMLDivElement>());
   const pageTexts = useRef(new Map<number, string>());
   const writeQueue = useRef<Promise<void>>(Promise.resolve());
+  /** The last note write failed: the highlights in the reader are not saved. */
+  const writeFailed = useRef(false);
   const annotationsRef = useRef<PdfAnnotation[]>([]);
   annotationsRef.current = annotations;
   const searchRef = useRef<HTMLInputElement>(null);
@@ -310,8 +312,10 @@ export function PdfReader({ path, fragment = null, openSeq = 0, onClose, onOpenN
           ),
         }));
         notifyWorkspaceChanged(existing === null ? { kind: "structure" } : { kind: "content", paths: [notePath] });
+        writeFailed.current = false;
       });
       writeQueue.current = job.catch((e: unknown) => {
+        writeFailed.current = true;
         showAiToast(t("pdf.saveFailed", { error: e instanceof Error ? e.message : String(e) }), "error");
       });
     },
@@ -394,10 +398,26 @@ export function PdfReader({ path, fragment = null, openSeq = 0, onClose, onOpenN
     if (w) zoom((width - 48) / w);
   }, [sizes, current, zoom]);
 
-  /** Close once the queued note writes are done, so a closed reader means saved highlights. */
-  const close = useCallback(() => {
-    void writeQueue.current.then(onClose);
-  }, [onClose]);
+  /**
+   * Run `then` (close the reader, open the note) once the queued note writes
+   * are done, so leaving the reader means the highlights are saved. After a
+   * failed write the save is tried once more; if that fails too the reader
+   * stays open (the error toast says why) instead of dropping the changes.
+   */
+  const whenSaved = useCallback(
+    (then: () => void) => {
+      void writeQueue.current.then(() => {
+        if (!writeFailed.current) return then();
+        persist(annotationsRef.current);
+        void writeQueue.current.then(() => {
+          if (!writeFailed.current) then();
+        });
+      });
+    },
+    [persist],
+  );
+
+  const close = useCallback(() => whenSaved(onClose), [whenSaved, onClose]);
 
   // Keyboard: Esc closes, ⌘F / Ctrl+F searches, H highlights the selection.
   // The reader is modal: the keys it handles don't reach the app underneath.
@@ -571,7 +591,7 @@ export function PdfReader({ path, fragment = null, openSeq = 0, onClose, onOpenN
             className="icon-btn pdf-text-btn"
             data-testid="pdf-open-notes"
             // After the pending highlight writes (a note just edited is saved on blur, before this click).
-            onClick={() => void writeQueue.current.then(() => onOpenNotes(notePath))}
+            onClick={() => whenSaved(() => onOpenNotes(notePath))}
           >
             {t("pdf.openNotes")}
           </button>

@@ -59,6 +59,8 @@ vi.mock("../pdf/pdfjs", () => {
 });
 
 import { PdfReader } from "../pdf/PdfReader";
+import * as ws from "../storage/workspace";
+import { createPdfAnnotation, upsertAnnotationsNote } from "../pdf/annotations";
 
 afterEach(() => cleanup());
 
@@ -95,5 +97,35 @@ describe("PdfReader", () => {
     fireEvent.click(screen.getByRole("button", { name: "Previous match" }));
     await waitFor(() => expect(screen.getByTestId("pdf-search-count").textContent).toBe("2 of 2"));
     await waitFor(() => expect(reader().getAttribute("data-current-page")).toBe("3"));
+  });
+
+  it("stays open when the highlights couldn't be saved, and closes once a retry saves them", async () => {
+    const ann = createPdfAnnotation({ id: "123e4567-e89b-42d3-a456-426614174000", source: "a.pdf", page: 2, text: "alpha two", start: 0, end: 5 });
+    const note = upsertAnnotationsNote(null, "a.pdf", [ann], { title: "Highlights — a.pdf", page: (n) => `p. ${n}`, empty: "none" });
+    const read = vi.mocked(ws.readWorkspaceFile);
+    const write = vi.mocked(ws.writeWorkspaceFile);
+    read.mockImplementation(async () => note);
+    write.mockClear();
+    write.mockRejectedValueOnce(new Error("quota"));
+    const onClose = vi.fn();
+    render(<PdfReader path="a.pdf" openSeq={1} onClose={onClose} onOpenNotes={() => undefined} />);
+    fireEvent.click(await screen.findByRole("button", { name: "Delete" }));
+    // The delete's write fails…
+    await waitFor(() => expect(write).toHaveBeenCalledTimes(1));
+    write.mockRejectedValueOnce(new Error("quota"));
+    fireEvent.click(screen.getByTestId("pdf-close"));
+    // …and so does the retry on Close: the reader stays, nothing is dropped.
+    await waitFor(() => expect(write).toHaveBeenCalledTimes(2));
+    await new Promise((r) => setTimeout(r, 0));
+    expect(onClose).not.toHaveBeenCalled();
+    expect(screen.getByTestId("pdf-reader")).toBeTruthy();
+    // The next Close retries again, the write succeeds, the reader closes.
+    fireEvent.click(screen.getByTestId("pdf-close"));
+    await waitFor(() => expect(onClose).toHaveBeenCalledTimes(1));
+    expect(write).toHaveBeenCalledTimes(3);
+    expect(String(write.mock.calls[2][1])).not.toContain("alpha");
+    read.mockImplementation(async () => {
+      throw new Error("no note");
+    });
   });
 });
