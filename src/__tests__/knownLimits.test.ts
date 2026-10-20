@@ -38,6 +38,8 @@ describe("known limitations A1–A9", () => {
     // and an ordered item's wider column counts the same way.
     expect(linkFindings("- item\n\n     ```\n     [[Gone]]\n  ```\n\n[[Outside]]\n")).toEqual(["Outside"]);
     expect(linkFindings("1. item\n\n     ```\n     [[Gone]]\n   ```\n\n[[Outside]]\n")).toEqual(["Outside"]);
+    // The item's column holds across its continuation lines.
+    expect(linkFindings("1. item\n    continued\n\n        ```\n        [[Gone]]\n        ```\n        [[After]]\n\n[[Outside]]\n")).toEqual(["Outside"]);
   });
 
   it("A2: a type 7 HTML tag after a line of only inline code can't interrupt that paragraph", () => {

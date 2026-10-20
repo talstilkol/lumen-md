@@ -70,8 +70,18 @@ function blankFences(text: string): string {
     for (let q: RegExpExecArray | null; depth < n && (q = /^ {0,3}>[ ]?/.exec(rest)); depth++) rest = rest.slice(q[0].length);
     return { rest, depth };
   };
+  /** Content column of the list item the lines so far belong to, or -1 (continuation lines keep it). */
+  let listCol = -1;
   for (let i = 0; i < lines.length; i++) {
     const raw = lines[i];
+    // The item this line may continue: the one open after the lines above.
+    const item = listCol;
+    const own = unquote(raw).rest;
+    if (own.trim()) {
+      const col = itemColumn(own);
+      if (col >= 0) listCol = col;
+      else if (!own.startsWith(" ")) listCol = -1;
+    }
     if (itemCode) {
       // Blank lines and lines indented 4+ past the item's content column
       // stay in the code block; anything else ends it.
@@ -107,7 +117,6 @@ function blankFences(text: string): string {
     // indented code block); inside a container its content offset applies.
     const { rest: quoted, depth } = unquote(raw);
     const listed = quoted.replace(/^[ \t]*(?:[-*+]|\d+[.)])[ \t]+/, "");
-    const item = i > 0 ? itemColumn(unquote(lines.slice(0, i).reverse().find((l) => l.trim()) ?? "").rest) : -1;
     const continuation = /^ {2,}\S/.test(quoted) && item >= 0;
     const inContainer: boolean = depth > 0 || listed !== quoted || continuation;
     const m: RegExpExecArray | null = (inContainer ? /^[ \t]*(`{3,}|~{3,})(.*)$/ : /^ {0,3}(`{3,}|~{3,})(.*)$/).exec(listed);
