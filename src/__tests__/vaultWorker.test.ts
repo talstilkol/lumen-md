@@ -165,10 +165,25 @@ describe("the workspace index over a 10,000-note vault (worker protocol)", () =>
     expect((await searchWorkspace("word9999"))[0].path).toBe("archive/19/n9999.md");
   });
 
+  it("moves queued in a chain (A → B → C, then a delete) leave only the final paths", async () => {
+    await vault.backend.rename(notePath(6), "chain/b.md");
+    await vault.backend.rename("chain/b.md", "chain/c.md");
+    await vault.backend.rename(notePath(7), "chain/d.md");
+    await vault.backend.remove("chain/d.md");
+    await ensureIndex();
+    const chain = indexedFiles()
+      .map((f) => f.path)
+      .filter((p) => p.startsWith("chain/"));
+    expect(chain).toEqual(["chain/c.md"]);
+    const hits = (await searchWorkspace("chain/", { limit: 1000 })).map((h) => h.path).filter((p) => p.startsWith("chain/"));
+    expect(hits).toEqual(["chain/c.md"]);
+    expect((await indexStats()).files).toBe(indexedFiles().length);
+  });
+
   it("a structural event re-lists once for the tree and the index, and re-reads only changed mtimes", async () => {
     notifyWorkspaceChanged(); // e.g. a folder created in the tree
     const tree = await workspaceTree();
-    expect(tree.map((n) => n.name)).toEqual(["archive", "notes"]);
+    expect(tree.map((n) => n.name)).toEqual(["archive", "chain", "notes"]);
     const before = vault.reads();
     let lists = 0;
     const list = vault.backend.list;
@@ -363,6 +378,11 @@ describe("blocks and the incremental outline", () => {
       "<div>\n\nin\n\n</div>\n\n",
       "Text\n",
     ]);
+  });
+
+  it("a code span crossing a line is not HTML either", () => {
+    const doc = "Use `<div>\nstill code` here.\n\n# Next\n\nText\n";
+    expect(splitBlocks(doc, { preview: true }).blocks).toHaveLength(3);
   });
 
   it("an HTML comment is opaque: a tag inside it opens nothing", () => {

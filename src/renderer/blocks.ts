@@ -123,10 +123,25 @@ export function splitBlocks(text: string, opts: SplitOptions = {}, from = 0, sto
   let htmlDepth = 0;
   /** An opening tag spans lines: its `>` is still to come. */
   let tagOpen = false;
+  /** The backticks of a code span still open at the end of the last line. */
+  let openTicks: string | null = null;
   /** Follow the HTML elements a line opens and closes (preview). */
   const trackHtml = (raw: string) => {
-    if (!opts.preview || (!tagOpen && !raw.includes("<"))) return;
-    let line = htmlOnly(raw);
+    if (!opts.preview || (!tagOpen && !openTicks && !raw.includes("<") && !raw.includes("`"))) return;
+    let rest = raw;
+    // A code span can cross lines (not a blank one): its text is not HTML.
+    if (openTicks) {
+      const close = rest.search(new RegExp(`(?<!\`)${openTicks}(?!\`)`));
+      if (close < 0) return;
+      rest = rest.slice(close + openTicks.length);
+      openTicks = null;
+    }
+    let line = htmlOnly(rest);
+    const tick = /`+/.exec(line);
+    if (tick) {
+      openTicks = tick[0];
+      line = line.slice(0, tick.index);
+    }
     if (tagOpen) {
       const gt = line.indexOf(">");
       if (gt < 0) return;
@@ -200,6 +215,7 @@ export function splitBlocks(text: string, opts: SplitOptions = {}, from = 0, sto
       itemEmpty = false;
       itemHtml = false;
       htmlToBlank = false;
+      openTicks = null;
       paragraph = false;
     } else {
       const canSplit =

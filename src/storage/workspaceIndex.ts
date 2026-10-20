@@ -291,8 +291,9 @@ async function refresh(): Promise<void> {
   if (!removedNow.length && !toWrite.length) return;
   await withEngine(async (eng) => {
     if (removedNow.length) await eng.remove(removedNow);
-    // Last write wins when a path was moved and then re-read.
-    const latest = new Map(toWrite.map((f) => [f.path, f]));
+    // Only what the index holds now: a path moved again (A → B → C) or
+    // deleted after a move is not sent; last write wins for a re-read.
+    const latest = new Map(toWrite.filter((f) => cache.byPath.get(f.path) === f).map((f) => [f.path, f]));
     if (latest.size) await upsertAll(eng, [...latest.values()]);
   });
 }
