@@ -8,6 +8,7 @@ import {
   createPdfAnnotation,
   createTextQuoteSelector,
   describeAnnotation,
+  encodeWikiPath,
   findAll,
   highlightLinkTarget,
   normalizeWithMap,
@@ -101,6 +102,12 @@ describe("anchorTextQuote", () => {
     expect(pointed.slice(a!.start, a!.end)).toBe("בְּעִבְרִית ‏לסימון");
     const upper = PAGE.toUpperCase();
     expect(upper.slice(anchorTextQuote(upper, q)!.start, anchorTextQuote(upper, q)!.end)).toBe("PASSAGE TO HIGHLIGHT");
+  });
+
+  it("doesn't match a short quote approximately (one edit would match almost anything)", () => {
+    const text = "a b c d e f";
+    expect(anchorTextQuote(text, { type: "TextQuoteSelector", exact: "x" })).toBeNull();
+    expect(anchorTextQuote(text, { type: "TextQuoteSelector", exact: "a b c x" })).toBeNull();
   });
 
   it("gives up when the quote isn't on the page", () => {
@@ -290,6 +297,16 @@ describe("text layer ↔ offsets", () => {
 });
 
 describe("wiki links to a PDF", () => {
+  it("encode the characters that are wiki-link syntax, and resolve back", () => {
+    const ann = createPdfAnnotation({ id: UUID, source: "a/draft#2 [v|1].pdf", page: 1, text: "hello", start: 0, end: 5 });
+    const target = highlightLinkTarget("a/draft#2 [v|1].pdf", ann);
+    expect(target).toBe("a/draft%232 %5Bv%7C1%5D.pdf#page=1&highlight=123e4567");
+    expect(encodeWikiPath("100%.pdf")).toBe("100%25.pdf");
+    const note = target.slice(0, target.indexOf("#"));
+    expect(resolveWikiTarget(note, ["a/draft#2 [v|1].pdf.md", "a/draft#2 [v|1].pdf"])).toBe("a/draft#2 [v|1].pdf");
+    expect(resolveWikiTarget("100%25.pdf", ["100%.pdf"])).toBe("100%.pdf");
+  });
+
   it("resolve to the PDF, not to its companion note", () => {
     const paths = ["bilingual.pdf.md", "bilingual.pdf", "papers/x.pdf.md", "papers/x.pdf"];
     expect(resolveWikiTarget("bilingual.pdf", paths)).toBe("bilingual.pdf");

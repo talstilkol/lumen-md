@@ -526,7 +526,13 @@ export function PdfReader({ path, fragment = null, openSeq = 0, onClose, onOpenN
           >
             {t("pdf.highlight")}
           </button>
-          <button type="button" className="icon-btn pdf-text-btn" data-testid="pdf-open-notes" onClick={() => onOpenNotes(notePath)}>
+          <button
+            type="button"
+            className="icon-btn pdf-text-btn"
+            data-testid="pdf-open-notes"
+            // After the pending highlight writes (a note just edited is saved on blur, before this click).
+            onClick={() => void writeQueue.current.then(() => onOpenNotes(notePath))}
+          >
             {t("pdf.openNotes")}
           </button>
           <button type="button" className="icon-btn pdf-text-btn" data-testid="pdf-close" onClick={onClose}>

@@ -25,6 +25,18 @@ export function splitWikiTarget(target: string): { note: string; heading: string
  * companion note `paper.pdf.md` (plan 4.14).
  */
 export function resolveWikiTarget(target: string, paths: readonly string[]): string | null {
+  const found = resolveExact(target, paths);
+  if (found || !/%[0-9a-f]{2}/i.test(target)) return found;
+  // Generated links percent-encode the characters that are wiki syntax
+  // (`draft%232.pdf` for `draft#2.pdf`, plan 4.14).
+  try {
+    return resolveExact(decodeURIComponent(target), paths);
+  } catch {
+    return null;
+  }
+}
+
+function resolveExact(target: string, paths: readonly string[]): string | null {
   const raw = target.trim().toLowerCase();
   const want = raw.replace(/\.(md|markdown)$/, "");
   if (!want) return null;

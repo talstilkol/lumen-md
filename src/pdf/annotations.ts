@@ -364,6 +364,9 @@ function approxStart(text: string, pattern: string, end: number, maxErr: number)
   return Math.max(0, end - bestEnd);
 }
 
+/** Shortest quote (normalised characters) that may be matched approximately. */
+const FUZZY_MIN = 8;
+
 /** Longest quote the approximate search runs on (it is O(text × quote)). */
 const FUZZY_MAX = 256;
 
@@ -398,7 +401,9 @@ export function anchorTextQuote(text: string, quote: TextQuoteSelector, hint?: n
     if (pick) return { ...toOrig(pick.start, pick.end), match: "normalized" };
   }
 
-  // 3. Approximately: up to about 15% of the quote's characters edited (at least 1).
+  // 3. Approximately: up to about 15% of the quote's characters edited. Not
+  // for short quotes — one edit in a few characters matches almost anything.
+  if (nExact.length < FUZZY_MIN) return null;
   if (nExact.length > FUZZY_MAX) {
     // A long quote: anchor its two ends separately.
     const head = anchorTextQuote(text, { type: "TextQuoteSelector", exact: quote.exact.slice(0, 64), prefix }, hint);
@@ -469,9 +474,17 @@ export function companionNotePath(pdfPath: string): string {
   return `${pdfPath}.md`;
 }
 
+/**
+ * A vault path made safe inside `[[…]]`: `#`, `|`, `[`, `]` (and `%`) are
+ * wiki-link syntax, so they are percent-encoded; link resolution decodes them.
+ */
+export function encodeWikiPath(path: string): string {
+  return path.replace(/[%#|[\]\r\n]/g, (c) => `%${c.charCodeAt(0).toString(16).toUpperCase().padStart(2, "0")}`);
+}
+
 /** Wiki-link target that opens `pdfPath` at the highlight. */
 export function highlightLinkTarget(pdfPath: string, a: PdfAnnotation): string {
-  return `${pdfPath}#page=${describeAnnotation(a).page}&highlight=${shortId(a.id)}`;
+  return `${encodeWikiPath(pdfPath)}#page=${describeAnnotation(a).page}&highlight=${shortId(a.id)}`;
 }
 
 /** One line of Markdown, with the characters that would start syntax escaped. */
