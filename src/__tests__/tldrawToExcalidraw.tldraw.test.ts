@@ -9,7 +9,7 @@
  */
 
 import { describe, it, expect } from "vitest";
-import { createTLStore, defaultBindingUtils, defaultShapeUtils, loadSnapshot } from "tldraw";
+import { createTLStore, defaultBindingUtils, defaultShapeUtils, Editor, loadSnapshot, type TLShapeId } from "tldraw";
 import { tldrawToExcalidraw, type ExcalidrawElement } from "../canvas/tldrawToExcalidraw";
 import { buildFixtureCanvases } from "./fixtures/tldrawCanvases";
 
@@ -56,5 +56,39 @@ describe("converter vs. real tldraw 4.5 snapshots", () => {
       });
       r.pressures.forEach((p, j) => expect(Math.abs(p - e.pressures[j])).toBeLessThanOrEqual(0.01));
     });
+  });
+});
+
+describe("geometry vs. tldraw's own editor", () => {
+  it("scaled and unscaled boxes and arrows land where tldraw draws them", () => {
+    const c = buildFixtureCanvases().find((x) => x.name === "15-rotation")!;
+    const store = createTLStore({ shapeUtils: defaultShapeUtils, bindingUtils: defaultBindingUtils });
+    store.put(c.records as never);
+    const editor = new Editor({
+      store,
+      shapeUtils: defaultShapeUtils,
+      bindingUtils: defaultBindingUtils,
+      tools: [],
+      getContainer: () => document.body,
+    });
+    try {
+      const { elements } = tldrawToExcalidraw(c.data).file;
+      for (const id of ["faded", "big", "sarr"]) {
+        const b = editor.getShapePageBounds(`shape:${id}` as TLShapeId)!;
+        const e = elements.find((x) => x.id === id)!;
+        const box =
+          e.type === "arrow"
+            ? {
+                x: e.x + Math.min(...e.points.map((p) => p[0])),
+                y: e.y + Math.min(...e.points.map((p) => p[1])),
+                w: e.width,
+                h: e.height,
+              }
+            : { x: e.x, y: e.y, w: e.width, h: e.height };
+        expect([box.x, box.y, box.w, box.h].map(Math.round), id).toEqual([b.x, b.y, b.w, b.h].map(Math.round));
+      }
+    } finally {
+      editor.dispose();
+    }
   });
 });

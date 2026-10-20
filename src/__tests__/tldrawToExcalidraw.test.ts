@@ -220,9 +220,10 @@ describe("tldraw → Excalidraw: 20 canvases without losing a shape (4.19)", () 
         close(e.x, chain.reduce((n, s) => n + Number(s.x), 0));
         close(e.y, chain.reduce((n, s) => n + Number(s.y), 0));
         const p = propsOf(r);
+        const scale = Number(p.scale ?? 1);
         if (r.type !== "note") {
-          close(e.width, Number(p.w));
-          close(e.height, Number(p.h) + Number(p.growY ?? 0));
+          close(e.width, Number(p.w) * (r.type === "geo" ? scale : 1));
+          close(e.height, (Number(p.h) + Number(p.growY ?? 0)) * (r.type === "geo" ? scale : 1));
         }
       }
     });
@@ -251,6 +252,9 @@ describe("tldraw → Excalidraw: details", () => {
     const { elements } = conv("01-geo-basic").file;
     expect((el(elements, "d1-label") as ExTextElement).text).toBe("החלטה?\nכן / לא");
     expect(el(elements, "r2").link).toBe("https://example.com");
+    // tldraw's crossed fill names: "solid" = the colour's pale tint, "semi" = near-white.
+    expect(el(elements, "r1")).toMatchObject({ backgroundColor: "#dce1f8", fillStyle: "solid" });
+    expect(el(elements, "e1").backgroundColor).toBe("#fcfffe");
     expect(el(elements, "r2").strokeStyle).toBe("dotted");
     expect(el(elements, "d1").strokeStyle).toBe("dashed");
     const t = conv("03-text").file.elements as ExTextElement[];
@@ -360,6 +364,13 @@ describe("tldraw → Excalidraw: details", () => {
     const ra = el(r, "ra") as ExLinearElement;
     close(ra.points[1][0], 0);
     close(ra.points[1][1], 100);
+    // Scaled shapes: tldraw draws w / h / terminals / bend at `scale` times.
+    expect(el(r, "big")).toMatchObject({ x: 900, y: 0, width: 200, height: 120 });
+    expect((el(r, "big-label") as ExTextElement).fontSize).toBe(44);
+    expect((el(r, "sarr") as ExLinearElement).points).toEqual([[0, 0], [200, 100]]);
+    const bent = el(r, "sbent") as ExLinearElement;
+    expect(bent.points[2]).toEqual([200, 0]);
+    close(Math.abs(bent.points[1][1]), 40);
   });
 
   it("places a second page to the right of the first, with a warning", () => {
@@ -396,6 +407,7 @@ describe("tldraw → Excalidraw: details", () => {
     }
     expect((el(r.file.elements, "custom-label") as ExTextElement).text).toBe("[lumen-card] כרטיס");
     expect(el(r.file.elements, "emb").link).toBe("https://example.com/embed");
+    expect(el(r.file.elements, "vid").link).toBe("https://example.com/clip.mp4");
   });
 
   it("gives derived ids a suffix instead of colliding with a real shape id", () => {

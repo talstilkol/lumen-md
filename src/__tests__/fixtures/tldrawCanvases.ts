@@ -468,6 +468,10 @@ export function buildFixtureCanvases(): FixtureCanvas[] {
       geo("rfc", 50, 50, { w: 100, h: 50 }, { parentId: "shape:rf" }),
       geo("faded", 600, 100, {}, { opacity: 0.4, isLocked: true }),
       arrow("ra", 600, 400, { x: 100, y: 0 }, {}, { rotation: Math.PI / 2 }),
+      // `scale` (tldraw's dynamic size / scale-resize): w, h and arrow terminals are unscaled.
+      geo("big", 900, 0, { w: 100, h: 50, growY: 10, scale: 2, richText: richText("גדול") }),
+      arrow("sarr", 900, 300, { x: 100, y: 50 }, { scale: 2 }),
+      arrow("sbent", 900, 500, { x: 100, y: 0 }, { scale: 2, bend: 20 }),
     ]),
   );
 
@@ -520,10 +524,18 @@ export function buildFixtureCanvases(): FixtureCanvas[] {
   // 19. Shapes with no Excalidraw element: video, embed, bookmark, a custom shape.
   out.push(
     canvas("19-unsupported", [
-      shape("vid", "video", 0, 0, { w: 320, h: 180, assetId: null, url: "", time: 0, playing: false, autoplay: false, altText: "" }),
+      shape("vid", "video", 0, 0, { w: 320, h: 180, assetId: "asset:clip", url: "", time: 0, playing: false, autoplay: false, altText: "" }),
       shape("emb", "embed", 400, 0, { w: 320, h: 180, url: "https://example.com/embed" }),
       shape("bm", "bookmark", 0, 300, { w: 300, h: 320, url: "https://example.com/article", assetId: null }),
       shape("custom", "lumen-card", 400, 300, { w: 200, h: 100, text: "כרטיס" }),
+    ], [
+      {
+        id: "asset:clip",
+        typeName: "asset",
+        type: "video",
+        props: { name: "clip.mp4", src: "https://example.com/clip.mp4", w: 320, h: 180, mimeType: "video/mp4", isAnimated: true, fileSize: 1000 },
+        meta: {},
+      },
     ]),
   );
 

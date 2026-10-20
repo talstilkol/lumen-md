@@ -28,6 +28,44 @@ export interface CanvasStore {
   write(fileName: string, text: string): Promise<void>;
   /** Create the file; rejects with `CanvasFileExistsError` when it already exists. */
   create(fileName: string, text: string): Promise<void>;
+  /** Delete a file. Only used to take back a `.excalidraw` file the migration itself just created. */
+  remove(fileName: string): Promise<void>;
+}
+
+const localLocks = new Map<string, Promise<unknown>>();
+
+/**
+ * Run `fn` holding the lock for one canvas file: the Web Locks API when
+ * present (exclusive across tabs), else a per-page queue. OPFS has no
+ * exclusive create, so the "exists?" check and the write must not interleave
+ * with another create or save of the same file.
+ */
+export function withCanvasLock<T>(fileName: string, fn: () => Promise<T>): Promise<T> {
+  if (typeof navigator !== "undefined" && "locks" in navigator && navigator.locks?.request) {
+    const locks = navigator.locks;
+    return new Promise<T>((resolve, reject) => {
+      locks
+        .request(`lumen-canvas:${CANVAS_DIR}/${fileName}`, async () => {
+          try {
+            resolve(await fn());
+          } catch (err) {
+            reject(err);
+          }
+        })
+        .catch(reject);
+    });
+  }
+  const prev = localLocks.get(fileName) ?? Promise.resolve();
+  const run = prev.then(fn, fn);
+  const settled = run.then(
+    () => undefined,
+    () => undefined,
+  );
+  localLocks.set(fileName, settled);
+  void settled.then(() => {
+    if (localLocks.get(fileName) === settled) localLocks.delete(fileName);
+  });
+  return run;
 }
 
 export class CanvasFileExistsError extends Error {
@@ -76,20 +114,30 @@ export function opfsCanvasStore(): CanvasStore | null {
         return null;
       }
     },
-    async write(fileName, text) {
-      const handle = await (await dir()).getFileHandle(fileName, { create: true });
-      await writeTo(handle, text);
+    write(fileName, text) {
+      return withCanvasLock(fileName, async () => {
+        const handle = await (await dir()).getFileHandle(fileName, { create: true });
+        await writeTo(handle, text);
+      });
     },
-    async create(fileName, text) {
-      const d = await dir();
-      let exists = true;
-      try {
-        await d.getFileHandle(fileName);
-      } catch {
-        exists = false;
-      }
-      if (exists) throw new CanvasFileExistsError(fileName);
-      await writeTo(await d.getFileHandle(fileName, { create: true }), text);
+    create(fileName, text) {
+      return withCanvasLock(fileName, async () => {
+        const d = await dir();
+        let exists = true;
+        try {
+          await d.getFileHandle(fileName);
+        } catch {
+          exists = false;
+        }
+        if (exists) throw new CanvasFileExistsError(fileName);
+        await writeTo(await d.getFileHandle(fileName, { create: true }), text);
+      });
+    },
+    remove(fileName) {
+      if (!fileName.endsWith(EXCALIDRAW_EXT)) return Promise.reject(new ExcalidrawFileError(`refusing to delete ${fileName}`));
+      return withCanvasLock(fileName, async () => {
+        await (await dir()).removeEntry(fileName);
+      });
     },
   };
 }

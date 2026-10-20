@@ -51,6 +51,10 @@ function memoryStore(initial: Record<string, string> = {}): CanvasStore & { file
       writes.push(name);
       files.set(name, text);
     },
+    async remove(name) {
+      writes.push(`-${name}`);
+      files.delete(name);
+    },
   };
 }
 
@@ -156,6 +160,22 @@ describe("migrating tldraw canvases", () => {
     expect(store.files).toEqual(after);
   });
 
+  it("takes back an output that doesn't read back, so the next run retries it", async () => {
+    const store = vault();
+    const read = store.read.bind(store);
+    let corrupt = true;
+    store.read = async (name) => (corrupt && name === "01-geo-basic.excalidraw" ? "truncated" : read(name));
+    const first = await migrateTldrawCanvases(store, { updated: 1 });
+    expect(first.failed.map((f) => f.name)).toEqual(["01-geo-basic", "broken"]);
+    expect(store.files.has("01-geo-basic.excalidraw")).toBe(false);
+    expect(store.files.has("01-geo-basic.tldr")).toBe(true);
+    corrupt = false;
+    const second = await migrateTldrawCanvases(store, { updated: 1 });
+    expect(second.converted.map((c) => c.name)).toEqual(["01-geo-basic"]);
+    // Only this run's own .excalidraw output was ever removed.
+    expect(store.writes.filter((w) => w.startsWith("-"))).toEqual(["-01-geo-basic.excalidraw"]);
+  });
+
   it("lists warnings per canvas and failures", async () => {
     const report = await migrateTldrawCanvases(vault(), { updated: 1 });
     const lines = warningLines(report);
@@ -201,9 +221,14 @@ describe("OPFS canvas store", () => {
     });
     const dir = {
       async getFileHandle(name: string, opts?: { create?: boolean }) {
+        // Yield first, so an unserialised check-then-create would race.
+        await new Promise((r) => setTimeout(r, 0));
         if (!files.has(name) && !opts?.create) throw new DOMException("missing", "NotFoundError");
         if (!files.has(name)) files.set(name, "");
         return fileHandle(name);
+      },
+      async removeEntry(name: string) {
+        files.delete(name);
       },
       async *[Symbol.asyncIterator]() {
         for (const name of [...files.keys()]) yield [name, fileHandle(name)];
@@ -225,6 +250,19 @@ describe("OPFS canvas store", () => {
     expect(await store.read("a.tldr")).toBe("old");
     expect(await store.read("nope")).toBeNull();
     expect(parseExcalidrawFile(files.get("a.excalidraw")!)).toEqual(scene);
+  });
+
+  it("serialises creates of the same file: exactly one wins, nothing is overwritten", async () => {
+    const files = fakeOpfs();
+    const store = opfsCanvasStore()!;
+    const results = await Promise.allSettled([store.create("x.excalidraw", "first"), store.create("x.excalidraw", "second")]);
+    expect(results.map((r) => r.status).sort()).toEqual(["fulfilled", "rejected"]);
+    expect(files.get("x.excalidraw")).toBe("first");
+    await store.remove("x.excalidraw");
+    expect(files.has("x.excalidraw")).toBe(false);
+    await store.write("y.tldr", "backup");
+    await expect(store.remove("y.tldr")).rejects.toThrow(ExcalidrawFileError);
+    expect(files.get("y.tldr")).toBe("backup");
   });
 
   it("is null without OPFS", () => {

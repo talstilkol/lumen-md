@@ -304,7 +304,7 @@ const COLORS: Record<string, string> = {
   red: "#e03131",
   white: "#ffffff",
 };
-/** tldraw's light-theme semi (fill) colours. */
+/** tldraw's light-theme `semi` colours — what `fill: "solid"` paints. */
 const TINTS: Record<string, string> = {
   black: "#e8e8e8",
   grey: "#eceef0",
@@ -320,6 +320,8 @@ const TINTS: Record<string, string> = {
   red: "#f4dadb",
   white: "#f5f5f5",
 };
+/** tldraw light theme `solid` — what `fill: "semi"` paints. */
+const SEMI_FILL = "#fcfffe";
 /** Sticky-note paper colours (tldraw light theme `note.fill`). */
 const NOTE_FILLS: Record<string, string> = {
   black: "#2c2c2c",
@@ -377,7 +379,10 @@ function strokeStyle(dash: unknown): { strokeStyle: ExStrokeStyle; roughness: nu
 
 function fill(fillName: unknown, colorName: unknown): { backgroundColor: string; fillStyle: ExFillStyle } {
   switch (fillName) {
+    // tldraw's naming is crossed: "semi" paints the near-white theme
+    // background, "solid" the colour's pale tint, "fill" the full colour.
     case "semi":
+      return { backgroundColor: SEMI_FILL, fillStyle: "solid" };
     case "solid":
       return { backgroundColor: tint(colorName), fillStyle: "solid" };
     case "fill":
@@ -877,8 +882,9 @@ export function tldrawToExcalidraw(input: unknown, options: ConvertOptions = {})
 
     switch (type) {
       case "geo": {
-        const w = num(p.w, 100);
-        const h = num(p.h, 100) + num(p.growY, 0);
+        // w / h / growY are unscaled: tldraw draws the shape at `scale` times them.
+        const w = num(p.w, 100) * scale;
+        const h = (num(p.h, 100) + num(p.growY, 0)) * scale;
         const geo = str(p.geo, "rectangle");
         const text = shapeText(p);
         const fontSize = (LABEL_FONT_SIZES[str(p.size, "m")] ?? 22) * scale;
@@ -1157,7 +1163,10 @@ export function tldrawToExcalidraw(input: unknown, options: ConvertOptions = {})
       case "embed":
       case "bookmark": {
         warn("unsupported-shape", r, type);
-        const url = str(p.url, "");
+        // A video's source lives in its asset; an embedded (data:) video is not carried over.
+        const asset = typeof p.assetId === "string" ? byId.get(p.assetId) : undefined;
+        const assetSrc = asset ? str(props(asset).src, "") : "";
+        const url = str(p.url, "") || (/^https?:/i.test(assetSrc) ? assetSrc : "");
         placeholder(r, ctx, url ? `[${type}] ${url}` : `[${type}]`);
         if (url) {
           const el = elements.find((e) => e.id === id);
@@ -1237,21 +1246,23 @@ export function tldrawToExcalidraw(input: unknown, options: ConvertOptions = {})
     for (const { r, el, ctx } of pendingArrows.splice(0)) {
       const p = props(r);
       const bindings = bindingsByArrow.get(r.id) ?? [];
+      // Terminals and bend are unscaled, like a geo shape's w / h.
+      const arrowScale = num(p.scale, 1);
       const terminal = (which: "start" | "end"): ExPoint => {
         const v = p[which];
-        if (isObj(v) && typeof v.x === "number" && typeof v.y === "number") return toPage(ctx.t, v.x, v.y);
+        if (isObj(v) && typeof v.x === "number" && typeof v.y === "number") return toPage(ctx.t, v.x * arrowScale, v.y * arrowScale);
         // tldraw 2.x stored the binding inside the terminal: { type: "binding", boundShapeId, normalizedAnchor }.
         if (isObj(v) && typeof v.boundShapeId === "string") {
           const target = placed.get(v.boundShapeId);
           const a = isObj(v.normalizedAnchor) ? v.normalizedAnchor : {};
           if (target) return toPage(target.t, num(a.x, 0.5) * target.w, num(a.y, 0.5) * target.h);
         }
-        return toPage(ctx.t, which === "start" ? 0 : 100, 0);
+        return toPage(ctx.t, which === "start" ? 0 : 100 * arrowScale, 0);
       };
       const s = terminal("start");
       const e = terminal("end");
       const abs: ExPoint[] = [s];
-      const bend = num(p.bend, 0);
+      const bend = num(p.bend, 0) * arrowScale;
       if (p.kind === "elbow") warn("elbow-arrow", r);
       else if (Math.abs(bend) > 0.5) {
         const dx = e[0] - s[0];
