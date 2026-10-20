@@ -17,12 +17,14 @@ import type { MenuActions } from "../hooks/useTauriMenu";
 type Props = Record<string, unknown>;
 type AnyFn = (...args: unknown[]) => unknown;
 
-const h = vi.hoisted(() => {
+const h = await vi.hoisted(async () => {
+  const { createElement } = await import("react");
   const props: Record<string, Props> = {};
+  // Each stub is its own element, so `getByText("[Name]")` finds it.
   const stub = (name: string) =>
     function Stub(p: Props) {
       props[name] = p;
-      return `[${name}]`;
+      return createElement("div", { "data-stub": name }, `[${name}]`);
     };
   return {
     props,
