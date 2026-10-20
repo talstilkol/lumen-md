@@ -419,6 +419,13 @@ export function PdfReader({ path, fragment = null, openSeq = 0, onClose, onOpenN
 
   const close = useCallback(() => whenSaved(onClose), [whenSaved, onClose]);
 
+  /** Open the companion note — creating it first when the PDF has no highlights yet. */
+  const openNotes = useCallback(async () => {
+    const ws = await import("../storage/workspace");
+    if (!(await ws.workspaceHasEntry(notePath).catch(() => false))) persist(annotationsRef.current);
+    whenSaved(() => onOpenNotes(notePath));
+  }, [notePath, persist, whenSaved, onOpenNotes]);
+
   // Keyboard: Esc closes, ⌘F / Ctrl+F searches, H highlights the selection.
   // The reader is modal: the keys it handles don't reach the app underneath.
   useEffect(() => {
@@ -591,7 +598,7 @@ export function PdfReader({ path, fragment = null, openSeq = 0, onClose, onOpenN
             className="icon-btn pdf-text-btn"
             data-testid="pdf-open-notes"
             // After the pending highlight writes (a note just edited is saved on blur, before this click).
-            onClick={() => whenSaved(() => onOpenNotes(notePath))}
+            onClick={() => void openNotes()}
           >
             {t("pdf.openNotes")}
           </button>

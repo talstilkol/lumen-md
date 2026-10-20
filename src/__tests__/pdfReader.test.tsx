@@ -19,6 +19,7 @@ vi.mock("../storage/workspace", () => ({
     throw new Error("no note");
   }),
   writeWorkspaceFile: vi.fn(async () => undefined),
+  workspaceHasEntry: vi.fn(async () => false),
 }));
 
 vi.mock("../ai/ocr", () => ({
@@ -127,5 +128,18 @@ describe("PdfReader", () => {
     read.mockImplementation(async () => {
       throw new Error("no note");
     });
+  });
+
+  it("Open the notes creates the highlights note first when the PDF has none", async () => {
+    const write = vi.mocked(ws.writeWorkspaceFile);
+    write.mockClear();
+    const onOpenNotes = vi.fn();
+    render(<PdfReader path="a.pdf" openSeq={1} onClose={() => undefined} onOpenNotes={onOpenNotes} />);
+    await waitFor(() => expect(reader().getAttribute("data-page-count")).toBe("3"));
+    fireEvent.click(screen.getByTestId("pdf-open-notes"));
+    await waitFor(() => expect(onOpenNotes).toHaveBeenCalledWith("a.pdf.md"));
+    expect(write).toHaveBeenCalledTimes(1);
+    expect(write.mock.calls[0][0]).toBe("a.pdf.md");
+    expect(String(write.mock.calls[0][1])).toContain("<!-- lumen:pdf-annotations:start -->");
   });
 });
