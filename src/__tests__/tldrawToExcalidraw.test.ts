@@ -25,8 +25,6 @@ import {
   type ExImageElement,
 } from "../canvas/tldrawToExcalidraw";
 import { buildFixtureCanvases, richText, type Rec } from "./fixtures/tldrawCanvases";
-import { annotateFailures } from "./ghaFailures";
-annotateFailures();
 
 const canvases = buildFixtureCanvases();
 
