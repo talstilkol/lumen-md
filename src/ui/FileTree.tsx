@@ -27,8 +27,8 @@ import { t } from "../i18n";
 import { uiAlert, uiConfirm, uiPrompt } from "./PromptDialog";
 import { FileContextMenu, buildFileActions } from "./FileContextMenu";
 import { useAppStore } from "../store/useStore";
-import { movedPath, safeMove, trashPaths, undoTrash, type MoveResult } from "../storage/fileOps";
-import { flushActiveWorkspaceDoc, syncOpenDocsAfterMove } from "../store/openDocs";
+import { movedPath, safeMove, undoTrash, type MoveResult } from "../storage/fileOps";
+import { flushActiveWorkspaceDoc, syncOpenDocsAfterMove, trashWithOpenEdits } from "../store/openDocs";
 import type { TrashItem } from "../storage/trash";
 import { toast, useToastStore } from "../store/useToastStore";
 import { onWorkspaceChanged } from "../storage/workspaceEvents";
@@ -77,7 +77,10 @@ export function FileTree({
       action: {
         label: t("tree.undo"),
         run: () => {
-          void undoTrash(items).then(() => refresh());
+          void undoTrash(items).then(
+            () => refresh(),
+            (e: unknown) => toast.error(t("trash.restoreFailed", { error: e instanceof Error ? e.message : String(e) })),
+          );
         },
       },
     });
@@ -121,10 +124,10 @@ export function FileTree({
     const paths = [...selectedPaths];
     // No confirmation: it goes to the trash, and the toast offers Undo.
     try {
-      // Unsaved edits of the active note go with it (and come back on Undo).
-      await flushActiveWorkspaceDoc();
-      const items = await trashPaths(paths, Object.fromEntries(paths.map((p) => [p, kindOf(p)])));
-      if (activePath && paths.some((p) => activePath === p || activePath.startsWith(p + "/"))) onActiveDeleted();
+      // Unsaved edits of every open note inside go with it (and come back on Undo / Ctrl+Z).
+      const { items, settled } = await trashWithOpenEdits(paths, Object.fromEntries(paths.map((p) => [p, kindOf(p)])));
+      // Not settled: the open note was kept, detached, as an unsaved note with its newest text.
+      if (settled && activePath && paths.some((p) => activePath === p || activePath.startsWith(p + "/"))) onActiveDeleted();
       announceTrash(items);
     } catch (e) {
       await uiAlert({ message: t("tree.alert.deleteFailed", { error: (e as Error).message }) });
@@ -338,11 +341,13 @@ export function FileTree({
   async function remove(node: WorkspaceNode) {
     // Goes to the trash (Undo in the toast; restorable for 30 days).
     try {
-      // Unsaved edits of the active note go with it (and come back on Undo).
-      await flushActiveWorkspaceDoc();
-      const items = await trashPaths([node.path], { [node.path]: node.kind === "directory" ? "directory" : "file" });
+      // Unsaved edits of every open note inside go with it, inactive tabs
+      // included, and edits typed while it moves (they come back on Undo / Ctrl+Z).
+      const { items, settled } = await trashWithOpenEdits([node.path], { [node.path]: node.kind === "directory" ? "directory" : "file" });
       announceTrash(items);
+      // Not settled: the open note was kept, detached, as an unsaved note with its newest text.
       if (
+        settled &&
         activePath &&
         (activePath === node.path || activePath.startsWith(node.path + "/"))
       ) {
