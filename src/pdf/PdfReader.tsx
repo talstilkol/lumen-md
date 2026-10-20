@@ -129,6 +129,8 @@ export function PdfReader({ path, fragment = null, openSeq = 0, onClose, onOpenN
   const annotationsRef = useRef<PdfAnnotation[]>([]);
   annotationsRef.current = annotations;
   const searchRef = useRef<HTMLInputElement>(null);
+  /** Bumped per search and per query edit: a slower, older search must not commit its results. */
+  const searchSeq = useRef(0);
   const rootRef = useRef<HTMLDivElement>(null);
 
   // Take focus from the editor underneath, so keys go to the reader.
@@ -139,14 +141,14 @@ export function PdfReader({ path, fragment = null, openSeq = 0, onClose, onOpenN
   // Open the PDF and read its highlights.
   useEffect(() => {
     let cancelled = false;
-    let close: (() => Promise<void>) | null = null;
+    let closeDoc: (() => Promise<void>) | null = null;
     setDoc(null);
     setError(null);
     (async () => {
       const ws = await import("../storage/workspace");
       const blob = await ws.readWorkspaceBlob(path);
       const opened = await openPdf(new Uint8Array(await blob.arrayBuffer()));
-      close = opened.close;
+      closeDoc = opened.close;
       if (cancelled) {
         void opened.close();
         return;
@@ -178,7 +180,7 @@ export function PdfReader({ path, fragment = null, openSeq = 0, onClose, onOpenN
     });
     return () => {
       cancelled = true;
-      void close?.().catch(() => undefined);
+      void closeDoc?.().catch(() => undefined);
       pageTexts.current.clear();
     };
   }, [path, notePath]);
@@ -330,6 +332,7 @@ export function PdfReader({ path, fragment = null, openSeq = 0, onClose, onOpenN
   const runSearch = useCallback(
     async (q: string, step: 1 | -1 | 0) => {
       if (!doc) return;
+      const seq = ++searchSeq.current;
       if (!q.trim()) {
         setHits([]);
         setHitIndex(-1);
@@ -343,6 +346,7 @@ export function PdfReader({ path, fragment = null, openSeq = 0, onClose, onOpenN
           if (text === undefined) {
             text = pageTextFromItems((await (await doc.getPage(p)).getTextContent()).items);
             pageTexts.current.set(p, text);
+            if (seq !== searchSeq.current) return;
           }
           findAll(text, q).forEach((_, occurrence) => found.push({ page: p, occurrence }));
         }
@@ -377,6 +381,11 @@ export function PdfReader({ path, fragment = null, openSeq = 0, onClose, onOpenN
     if (w) zoom((width - 48) / w);
   }, [sizes, current, zoom]);
 
+  /** Close once the queued note writes are done, so a closed reader means saved highlights. */
+  const close = useCallback(() => {
+    void writeQueue.current.then(onClose);
+  }, [onClose]);
+
   // Keyboard: Esc closes, ⌘F / Ctrl+F searches, H highlights the selection.
   // The reader is modal: the keys it handles don't reach the app underneath.
   useEffect(() => {
@@ -390,7 +399,7 @@ export function PdfReader({ path, fragment = null, openSeq = 0, onClose, onOpenN
       // Esc leaves a note being edited alone (it may be undoing there).
       if (e.key === "Escape" && !(el && el.closest("textarea"))) {
         handled();
-        onClose();
+        close();
       } else if ((e.metaKey || e.ctrlKey) && !e.altKey && e.key.toLowerCase() === "f") {
         handled();
         searchRef.current?.focus();
@@ -402,7 +411,7 @@ export function PdfReader({ path, fragment = null, openSeq = 0, onClose, onOpenN
     };
     window.addEventListener("keydown", onKey, true);
     return () => window.removeEventListener("keydown", onKey, true);
-  }, [onClose, highlightSelection]);
+  }, [close, highlightSelection]);
 
   const byPage = useMemo(() => {
     const m = new Map<number, PdfAnnotation[]>();
@@ -508,6 +517,7 @@ export function PdfReader({ path, fragment = null, openSeq = 0, onClose, onOpenN
             aria-label={t("pdf.search.placeholder")}
             data-testid="pdf-search"
             onChange={(e) => {
+              searchSeq.current++;
               setQuery(e.target.value);
               setHits([]);
               setHitIndex(-1);
@@ -552,7 +562,7 @@ export function PdfReader({ path, fragment = null, openSeq = 0, onClose, onOpenN
           >
             {t("pdf.openNotes")}
           </button>
-          <button type="button" className="icon-btn pdf-text-btn" data-testid="pdf-close" onClick={onClose}>
+          <button type="button" className="icon-btn pdf-text-btn" data-testid="pdf-close" onClick={close}>
             {t("privacy.close")}
           </button>
         </div>

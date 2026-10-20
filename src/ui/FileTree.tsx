@@ -20,6 +20,7 @@ import {
   listWorkspaceTree,
   readWorkspaceFile,
   uniqueWorkspaceName,
+  workspaceHasEntry,
   writeWorkspaceFile,
 } from "../storage/workspace";
 import type { WorkspaceNode } from "../storage/workspace";
@@ -91,6 +92,18 @@ export function FileTree({
   }
 
   /**
+   * A PDF's highlights note (`<file>.pdf.md`, plan 4.14) moves with the PDF,
+   * unless it is part of the same move. Returns the note's move, if any.
+   */
+  async function moveCompanion(from: string, to: string, alsoMoving: ReadonlySet<string> = new Set()): Promise<MoveResult | null> {
+    const note = `${from}.md`;
+    if (!/\.pdf$/i.test(from) || alsoMoving.has(note) || !(await workspaceHasEntry(note))) return null;
+    const r = await safeMove(note, `${to}.md`, { confirmReplace });
+    if (r) afterMove(note, r);
+    return r;
+  }
+
+  /**
    * `from` is now at `r.path`: open notes follow (a note inside a moved
    * folder too) and get the same link rewrite as the files on disk.
    */
@@ -155,6 +168,7 @@ export function FileTree({
         if (!r) continue;
         r.linksUpdated.forEach((x) => updated.add(x));
         afterMove(p, r);
+        (await moveCompanion(p, r.path, selectedPaths))?.linksUpdated.forEach((x) => updated.add(x));
       } catch (e) {
         await uiAlert({ message: t("tree.alert.renameFailed", { error: (e as Error).message }) });
       }
@@ -307,7 +321,8 @@ export function FileTree({
       const r = await safeMove(oldPath, isFolder ? joinPath(dirname(oldPath), next) : target, { confirmReplace, folder: isFolder });
       if (!r) return;
       afterMove(oldPath, r);
-      announceMove(r.linksUpdated);
+      const note = isFolder ? null : await moveCompanion(oldPath, r.path);
+      announceMove([...r.linksUpdated, ...(note?.linksUpdated ?? [])]);
       await refresh();
     } catch (e) {
       await uiAlert({
