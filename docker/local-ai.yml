@@ -15,9 +15,11 @@
 # (that replaces the default list — include every origin you use).
 #
 # The research service requires a shared token (it refuses every request
-# without one): pick any long random value, pass it as RESEARCH_TOKEN and
-# enter the same value in Lumen → AI settings → Research token:
-#   RESEARCH_TOKEN=$(openssl rand -hex 24) docker compose -f docker/local-ai.yml up -d
+# without one): pick any long random value, keep it, pass it as
+# RESEARCH_TOKEN and enter the same value in Lumen → AI settings → Research
+# token:
+#   export RESEARCH_TOKEN=$(openssl rand -hex 24); echo "$RESEARCH_TOKEN"
+#   docker compose -f docker/local-ai.yml up -d
 #
 # Ports: 8787 research service (search + page extraction), 8888 SearXNG,
 # 8010 LanguageTool. Lumen's CSP allows localhost/127.0.0.1 on 8787 and 8010.
