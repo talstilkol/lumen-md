@@ -83,6 +83,13 @@ describe("formulas — engine glue", () => {
     expect(rows[0].fm).toEqual({ price: 2, qty: 3 });
   });
 
+  it("a column named __proto__ is an ordinary column", () => {
+    const { rows: out } = applyFormulas(rows, compileFormulas(JSON.parse('{"__proto__": "[price]", "next": "len(prop(\\"__proto__\\"))"}')));
+    expect(Object.getPrototypeOf(out[0].fm)).toBe(Object.prototype);
+    expect(Object.prototype.hasOwnProperty.call(out[0].fm, "__proto__")).toBe(true);
+    expect(out[0].fm.next).toBe(1);
+  });
+
   it("runDatabaseQuery filters and sorts on formula columns", async () => {
     const out = await runDatabaseQuery({ source: "shop", type: "item", formulas: { total: "price * qty" }, where: "total > 0", sort: "-total" });
     expect(out.map((r) => [r.basename, r.fm.total])).toEqual([["Bread", 15], ["Apple", 10]]);

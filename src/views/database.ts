@@ -294,15 +294,17 @@ export function applyFormulas(rows: readonly DatabaseRow[], formulas: readonly C
   const out = rows.map((r) => {
     const fm: Record<string, unknown> = { ...r.fm };
     const file = rowFilter(r).file;
+    // An own data property even for a name like `__proto__` (plain assignment would hit the prototype setter).
+    const put = (name: string, v: unknown) => Object.defineProperty(fm, name, { value: v, writable: true, enumerable: true, configurable: true });
     for (const f of formulas) {
       if (!f.tree) {
-        fm[f.name] = null;
+        put(f.name, null);
         continue;
       }
       const res = evaluate(f.tree, { fm, file }, { now });
-      if (res.ok) fm[f.name] = res.value;
+      if (res.ok) put(f.name, res.value);
       else {
-        fm[f.name] = null;
+        put(f.name, null);
         if (!errors.has(r.path)) errors.set(r.path, new Map());
         errors.get(r.path)!.set(f.name, res.error.message);
       }
