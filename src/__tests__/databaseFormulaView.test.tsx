@@ -176,6 +176,12 @@ describe("DatabaseBlock — formulas", () => {
     expect(screen.getAllByTestId("database-formula-cell").map((c) => c.textContent)).toEqual(["10", "4", "2"]);
   });
 
+  it("with fields: in the spec, the spec's formulas: columns show after them, once", async () => {
+    render(<DatabaseBlock source={"source: shop\ntype: item\nfields: [price, total]\nformulas:\n  total: price * qty\n  half: price / 2\n"} />);
+    await waitFor(() => expect(titles()).toHaveLength(3));
+    expect(screen.getAllByRole("columnheader").map((h) => h.textContent)).toEqual(["Title", "price", "total", "half"]);
+  });
+
   it("“Write with AI” runs the formulator agent with the database's properties", async () => {
     render(<DatabaseBlock source={"source: shop\ntype: item\n"} />);
     await waitFor(() => expect(titles()).toHaveLength(3));

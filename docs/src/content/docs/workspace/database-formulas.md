@@ -17,7 +17,9 @@ formulas:
   שנה: year(תאריך)
 ```
 
-Formula cells are read-only (they are not written to the notes). A note a
+Every formula column is shown: with `fields:` in the spec, the formula
+columns not listed there come after the listed fields (list one in
+`fields:` to put it elsewhere). Formula cells are read-only (they are not written to the notes). A note a
 formula can't compute — say `price: "n/a"` in `price * qty` — shows
 **error** in that cell, with the reason on hover; the other notes are
 unaffected.
