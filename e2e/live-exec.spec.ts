@@ -272,7 +272,7 @@ test("live-ruby runs offline once the runtime was loaded (service-worker runtime
 
 /**
  * Plan 6.14: the `run_python` agent tool on the same self-hosted Pyodide,
- * called the way the agent runtime calls it (window.__lumen.agentTool, the
+ * called the way the agent runtime calls it (window.__lumen.runPython, the
  * read scope only). It computes from `inputs`; every way to the network
  * from Python fails inside the worker, nothing reaches the probe host, and
  * each attempt is in the privacy ledger. A second call is stopped by its
@@ -289,7 +289,7 @@ test("run_python agent tool computes offline and every network path fails", asyn
   context.on("request", (req) => {
     if (/^(https?|wss?):\/\/example\.com\//.test(req.url())) probeHits.push(req.url());
   });
-  await page.waitForFunction(() => typeof (window as unknown as { __lumen?: { agentTool?: unknown } }).__lumen?.agentTool === "function", null, { timeout: 15_000 });
+  await page.waitForFunction(() => typeof (window as unknown as { __lumen?: { runPython?: unknown } }).__lumen?.runPython === "function", null, { timeout: 15_000 });
 
   const P = "https://example.com/lumen-sandbox-probe/";
   const code = [
@@ -320,7 +320,7 @@ test("run_python agent tool computes offline and every network path fails", asyn
   type Result = { ok: boolean; stdout: string; result: unknown; error: string | null; timedOut: boolean; blocked: Array<{ api: string }> };
   const callTool = (args: Record<string, unknown>) =>
     page.evaluate(
-      (a) => (window as unknown as { __lumen: { agentTool: (n: string, x: Record<string, unknown>) => Promise<unknown> } }).__lumen.agentTool("run_python", a),
+      (a) => (window as unknown as { __lumen: { runPython: (x: Record<string, unknown>) => Promise<unknown> } }).__lumen.runPython(a),
       args,
     ) as Promise<Result>;
 

@@ -191,13 +191,10 @@ export default function App() {
     // the test suite needs.
     (window as unknown as { __lumen?: unknown }).__lumen = {
       htmlToMarkdown,
-      // live-exec spec: a read-scope agent tool called as the runtime
-      // calls it (run_python), and the privacy ledger it reports to.
-      agentTool: async (name: string, args: Record<string, unknown>) => {
-        const tool = (await import("./agents/tools")).getTool(name);
-        if (!tool || tool.scope !== "read") throw new Error(`No read-scope agent tool "${name}"`);
-        return tool.run(args, { grants: new Set(["read" as const]) });
-      },
+      // live-exec spec: the run_python agent tool, called as the runtime
+      // calls it (read scope), and the privacy ledger it reports to.
+      runPython: async (args: { code: string; inputs?: Record<string, unknown>; timeoutMs?: number }) =>
+        (await import("./agents/tools/python")).runPythonTool.run(args, { grants: new Set(["read" as const]) }),
       ledger: () => ledgerEntries(),
     };
     return () => {
