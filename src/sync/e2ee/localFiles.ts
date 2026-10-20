@@ -95,9 +95,20 @@ export function memoryFiles(): MemoryFiles {
   };
 }
 
-/** Dot-folders (`.trash/`, `.lumen/`, `.git/`) are app data, not notes: they are not synced. */
+/**
+ * Top-level folders the encrypted sync leaves out: the trash (as every sync
+ * caller does, src/storage/workspace.ts) and git's own internals, which git
+ * sync (plan 3.3) moves and which would corrupt a repository if two devices
+ * merged them file by file. Other hidden content — `.github/`, `.gitignore`,
+ * `.obsidian/` — is the user's and is synced.
+ */
+const UNSYNCED_ROOTS = new Set([".trash", ".git"]);
+
+/** Whether `path` takes part in the encrypted sync; also refuses empty, `.` and `..` segments. */
 export function isSyncedPath(path: string): boolean {
-  return path.split("/").every((seg) => seg !== "" && !seg.startsWith("."));
+  const segs = path.split("/");
+  if (segs.some((seg) => seg === "" || seg === "." || seg === "..")) return false;
+  return !UNSYNCED_ROOTS.has(segs[0]);
 }
 
 /**

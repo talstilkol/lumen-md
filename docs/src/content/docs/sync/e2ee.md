@@ -14,6 +14,10 @@ a passphrase that never leaves your devices.
 > and will replace it for new vaults once its library is added. The `age`
 > backup export is not available yet.
 
+Everything in the vault is synced — hidden content such as `.github/` or
+`.gitignore` included — except the top-level `.trash/` and `.git/` (git's
+own internals travel through git sync, not file by file).
+
 ## What the sync service sees
 
 | It sees | It does not see |

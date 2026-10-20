@@ -68,16 +68,26 @@ describe("e2ee sync: two devices", () => {
     await expect(unlockVault(provider, "not it", TEST_POLICY)).rejects.toBeInstanceOf(WrongPassphraseError);
   });
 
-  it("does not sync dot-folders", async () => {
+  it("syncs hidden repository content but not the trash or git internals", async () => {
     expect(isSyncedPath("notes/a.md")).toBe(true);
+    expect(isSyncedPath(".github/workflows/ci.yml")).toBe(true);
+    expect(isSyncedPath(".gitignore")).toBe(true);
+    expect(isSyncedPath("notes/.trash/a.md")).toBe(true);
     expect(isSyncedPath(".trash/a.md")).toBe(false);
+    expect(isSyncedPath(".git/HEAD")).toBe(false);
     expect(isSyncedPath("a/../b")).toBe(false);
+    expect(isSyncedPath("./b")).toBe(false);
     expect(isSyncedPath("a//b")).toBe(false);
     const provider = memoryProvider();
     const a = await newVault(provider);
-    a.files.set(".lumen/state.json", "{}");
+    a.files.set(".trash/old.md", "gone");
+    a.files.set(".git/HEAD", "ref: refs/heads/main");
+    a.files.set(".github/ci.yml", "on: push");
     a.files.set("n.md", "x");
-    expect((await a.sync.sync()).uploaded).toBe(1);
+    expect((await a.sync.sync()).uploaded).toBe(2);
+    const b = await joinVault("B", provider);
+    await b.sync.sync();
+    expect(snapshot(b).map(([p]) => p)).toEqual([".github/ci.yml", "n.md"]);
   });
 });
 
@@ -587,7 +597,7 @@ describe("e2ee sync: conflicts", () => {
 });
 
 describe("e2ee sync: the vault as the local side", () => {
-  it("syncs a VaultBackend folder tree, skipping dot-folders", async () => {
+  it("syncs a VaultBackend folder tree, skipping the trash", async () => {
     const provider = memoryProvider();
     const { keys, anchor } = await createVault(provider, PASSPHRASE, { pbkdf2Iterations: TEST_ITERATIONS });
     const vault = createMemoryBackend();
