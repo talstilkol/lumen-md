@@ -56,15 +56,25 @@ export function canRenderInBlocks(markdown: string): boolean {
 export function withoutCode(markdown: string): string {
   if (!markdown.includes("`") && !markdown.includes("~~~")) return markdown;
   const out: string[] = [];
-  let fence: string | null = null;
+  /** An open fence: its marker and the column it started at (inside a list item or quote: > 0). */
+  let fence: { marker: string; column: number } | null = null;
   for (const line of markdown.split("\n")) {
-    const m = /^ {0,3}(`{3,}|~{3,})/.exec(line);
+    // A fence may follow list markers and `>` (nested in a list item or a quote).
+    const m = /^((?:[ \t]*(?:[-+*]|\d{1,9}[.)]|>)[ \t]+|[ \t]*>)*[ \t]{0,3})(`{3,}|~{3,})/.exec(line);
     if (fence) {
-      if (m && m[1][0] === fence[0] && m[1].length >= fence.length && /^ {0,3}[`~]+[ \t]*\r?$/.test(line)) fence = null;
-      continue;
+      const closes =
+        m && m[2][0] === fence.marker[0] && m[2].length >= fence.marker.length && /^[`~]+[ \t]*\r?$/.test(line.slice(m[1].length));
+      // A nested fence also ends when its list item or quote does.
+      const left = fence.column > 0 && line.trim() !== "" && !/^[ \t]*>/.test(line) && /^[ \t]*/.exec(line)![0].length < fence.column;
+      if (closes) {
+        fence = null;
+        continue;
+      }
+      if (!left) continue;
+      fence = null;
     }
-    if (m && !(m[1][0] === "`" && line.slice(line.indexOf(m[1]) + m[1].length).includes("`"))) {
-      fence = m[1];
+    if (m && !(m[2][0] === "`" && line.slice(m[0].length).includes("`"))) {
+      fence = { marker: m[2], column: m[1].length };
       continue;
     }
     out.push(line);

@@ -125,9 +125,11 @@ export function splitBlocks(text: string, opts: SplitOptions = {}, from = 0, sto
   let tagOpen = false;
   /** The backticks of a code span still open at the end of the last line. */
   let openTicks: string | null = null;
+  /** An HTML comment opened after text on an earlier line, its `-->` still to come. */
+  let openComment = false;
   /** Follow the HTML elements a line opens and closes (preview). */
   const trackHtml = (raw: string) => {
-    if (!opts.preview || (!tagOpen && !openTicks && !raw.includes("<") && !raw.includes("`"))) return;
+    if (!opts.preview || (!tagOpen && !openTicks && !openComment && !raw.includes("<") && !raw.includes("`"))) return;
     let rest = raw;
     // A code span can cross lines (not a blank one): its text is not HTML.
     if (openTicks) {
@@ -136,11 +138,23 @@ export function splitBlocks(text: string, opts: SplitOptions = {}, from = 0, sto
       rest = rest.slice(close + openTicks.length);
       openTicks = null;
     }
+    // So can a comment that opens after text (`Text <!--`).
+    if (openComment) {
+      const end = rest.indexOf("-->");
+      if (end < 0) return;
+      rest = rest.slice(end + 3);
+      openComment = false;
+    }
     let line = htmlOnly(rest);
     const tick = /`+/.exec(line);
     if (tick) {
       openTicks = tick[0];
       line = line.slice(0, tick.index);
+    }
+    const comment = line.indexOf("<!--");
+    if (comment >= 0) {
+      openComment = true;
+      line = line.slice(0, comment);
     }
     if (tagOpen) {
       const gt = line.indexOf(">");
@@ -215,7 +229,9 @@ export function splitBlocks(text: string, opts: SplitOptions = {}, from = 0, sto
       itemEmpty = false;
       itemHtml = false;
       htmlToBlank = false;
+      // Inline code and inline comments end with the paragraph.
       openTicks = null;
+      openComment = false;
       paragraph = false;
     } else {
       const canSplit =

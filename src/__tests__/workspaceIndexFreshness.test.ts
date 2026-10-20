@@ -29,7 +29,7 @@ beforeEach(() => {
 afterEach(() => vi.restoreAllMocks());
 
 describe("workspace index freshness", () => {
-  it("keeps a change announced while the full build is reading", async () => {
+  it("keeps a change announced while the full build is reading, and applies it before returning", async () => {
     await ws.writeWorkspaceFile("a.md", "old");
     const real = ws.readWorkspaceFile;
     let once = true;
@@ -43,8 +43,10 @@ describe("workspace index freshness", () => {
       }
       return got;
     });
+    // Plan 8.4: the change announced mid-build is in the index before
+    // ensureIndex returns (it used to wait for the next call).
     await ensureIndex();
-    expect(text("a.md")).toBe("old");
+    expect(text("a.md")).toBe("new");
     await ensureIndex();
     expect(text("a.md")).toBe("new");
   });

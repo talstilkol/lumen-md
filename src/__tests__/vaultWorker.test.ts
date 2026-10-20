@@ -165,6 +165,15 @@ describe("the workspace index over a 10,000-note vault (worker protocol)", () =>
     expect((await searchWorkspace("word9999"))[0].path).toBe("archive/19/n9999.md");
   });
 
+  it("a save that lands while the index is being refreshed is in the answer", async () => {
+    await writeWorkspaceFile(notePath(10), "# Note 10\nfirst\n");
+    const pending = ensureIndex();
+    // Announced after the refresh above has taken its snapshot of the work.
+    await writeWorkspaceFile(notePath(11), "# Note 11\nmidrefresh\n");
+    await pending;
+    expect((await searchWorkspace("midrefresh")).map((h) => h.path)).toEqual([notePath(11)]);
+  });
+
   it("moves queued in a chain (A → B → C, then a delete) leave only the final paths", async () => {
     await vault.backend.rename(notePath(6), "chain/b.md");
     await vault.backend.rename("chain/b.md", "chain/c.md");
@@ -385,6 +394,11 @@ describe("blocks and the incremental outline", () => {
     expect(splitBlocks(doc, { preview: true }).blocks).toHaveLength(3);
   });
 
+  it("a comment opened after text is opaque too", () => {
+    const doc = "Text <!--\n<div>\n-->\n\n# Next\n\nText\n";
+    expect(splitBlocks(doc, { preview: true }).blocks).toHaveLength(3);
+  });
+
   it("an HTML comment is opaque: a tag inside it opens nothing", () => {
     const doc = "<!--\n<div>\n-->\n\n# Next\n\nText\n";
     expect(splitBlocks(doc, { preview: true }).blocks.map((b) => doc.slice(b.start, b.end))).toEqual([
@@ -473,6 +487,10 @@ describe("the block-by-block preview", () => {
     // A code span may cross a line, not a paragraph.
     expect(withoutCode("a `x\n[^1] y` b")).toBe("a  b");
     expect(withoutCode("a `x\n\n[^1] y` b")).toBe("a `x\n\n[^1] y` b");
+    // Fences nested in a list item or a quote are code too, until they close or the item ends.
+    expect(withoutCode("- ```md\n  Text[^1]\n  ```\n- next")).toBe("- next");
+    expect(withoutCode("> ```\n> [x]: y\n> ```\nafter")).toBe("after");
+    expect(withoutCode("- ```\n  code\nText[^1]")).toBe("Text[^1]");
   });
 
   it("stops when a newer text is on its way", async () => {

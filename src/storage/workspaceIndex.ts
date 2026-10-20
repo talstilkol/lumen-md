@@ -315,6 +315,12 @@ export async function ensureIndex(force = false): Promise<void> {
   } else return;
   try {
     await cache.inflight;
+    // Changes that arrived while that ran (a save during the first build)
+    // are in the answer too — a few rounds at most, then the next call.
+    for (let round = 0; round < 3 && pendingChanges(); round++) {
+      cache.inflight = refresh();
+      await cache.inflight;
+    }
   } finally {
     cache.inflight = null;
   }
