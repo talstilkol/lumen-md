@@ -134,6 +134,20 @@ export function PdfReader({ path, fragment = null, openSeq = 0, onClose, onOpenN
   const writeQueue = useRef<Promise<void>>(Promise.resolve());
   /** The last note write failed: the highlights in the reader are not saved. */
   const writeFailed = useRef(false);
+  /** Note writes queued and not finished yet. */
+  const pendingWrites = useRef(0);
+
+  // Leaving the page (closing the tab or window) with highlights not saved
+  // yet — queued, or after a failed write — asks first, like unsaved notes do.
+  useEffect(() => {
+    const onBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (pendingWrites.current === 0 && !writeFailed.current) return;
+      e.preventDefault();
+      e.returnValue = "";
+    };
+    window.addEventListener("beforeunload", onBeforeUnload);
+    return () => window.removeEventListener("beforeunload", onBeforeUnload);
+  }, []);
   const annotationsRef = useRef<PdfAnnotation[]>([]);
   annotationsRef.current = annotations;
   const searchRef = useRef<HTMLInputElement>(null);
@@ -284,6 +298,7 @@ export function PdfReader({ path, fragment = null, openSeq = 0, onClose, onOpenN
       // Two changes before the next render must not drop the first one.
       annotationsRef.current = next;
       setAnnotations(next);
+      pendingWrites.current++;
       const job = writeQueue.current.then(async () => {
         const [ws, { flushActiveWorkspaceDoc }, { notifyWorkspaceChanged }] = await Promise.all([
           import("../storage/workspace"),
@@ -323,10 +338,14 @@ export function PdfReader({ path, fragment = null, openSeq = 0, onClose, onOpenN
         notifyWorkspaceChanged(existing === null ? { kind: "structure" } : { kind: "content", paths: [notePath] });
         writeFailed.current = false;
       });
-      writeQueue.current = job.catch((e: unknown) => {
-        writeFailed.current = true;
-        showAiToast(t("pdf.saveFailed", { error: e instanceof Error ? e.message : String(e) }), "error");
-      });
+      writeQueue.current = job
+        .finally(() => {
+          pendingWrites.current--;
+        })
+        .catch((e: unknown) => {
+          writeFailed.current = true;
+          showAiToast(t("pdf.saveFailed", { error: e instanceof Error ? e.message : String(e) }), "error");
+        });
     },
     [path, notePath],
   );

@@ -160,4 +160,30 @@ describe("PdfReader", () => {
       throw new DOMException("a.pdf.md not found", "NotFoundError");
     });
   });
+
+  it("asks before the page unloads while highlights aren't saved yet", async () => {
+    const ann = createPdfAnnotation({ id: "123e4567-e89b-42d3-a456-426614174000", source: "a.pdf", page: 2, text: "alpha two", start: 0, end: 5 });
+    const note = upsertAnnotationsNote(null, "a.pdf", [ann], { title: "Highlights — a.pdf", page: (n) => `p. ${n}`, empty: "none" });
+    const read = vi.mocked(ws.readWorkspaceFile);
+    const write = vi.mocked(ws.writeWorkspaceFile);
+    read.mockImplementation(async () => note);
+    let finish: () => void = () => undefined;
+    write.mockClear();
+    write.mockImplementationOnce(() => new Promise<void>((r) => (finish = () => r())));
+    const unload = () => {
+      const e = new Event("beforeunload", { cancelable: true });
+      window.dispatchEvent(e);
+      return e.defaultPrevented;
+    };
+    render(<PdfReader path="a.pdf" openSeq={1} onClose={() => undefined} onOpenNotes={() => undefined} />);
+    fireEvent.click(await screen.findByRole("button", { name: "Delete" }));
+    await waitFor(() => expect(write).toHaveBeenCalledTimes(1));
+    // The write is still running: leaving now would lose the change.
+    expect(unload()).toBe(true);
+    finish();
+    await waitFor(() => expect(unload()).toBe(false));
+    read.mockImplementation(async () => {
+      throw new DOMException("a.pdf.md not found", "NotFoundError");
+    });
+  });
 });
