@@ -30,6 +30,7 @@ import { canPurchasePlans, manageBilling, upgradeTo } from "../billing/planActio
 import { detectIsMac } from "../ui/KeyboardShortcuts";
 import { getSecret, setSecret } from "../lib/secretStore";
 import { aiOperation, cancelAllAi, isAbort } from "../ai/aiAbort";
+import { EXCALIDRAW_CANVAS_ENABLED } from "../canvas/engine";
 
 
 /** Run an AI call as a cancellable operation (Esc / "Cancel AI", T55). */
@@ -1949,6 +1950,23 @@ export function useCommands({
         group: t("group.view"),
         action: () => setCanvasOpen(true),
       },
+      // Plan 4.19: offered once the Excalidraw canvas lands (src/canvas/engine.ts).
+      ...(EXCALIDRAW_CANVAS_ENABLED
+        ? [
+            {
+              id: "canvas.migrateToExcalidraw",
+              label: t("cmd.canvas.migrate"),
+              hint: t("cmd.canvas.migrate.hint"),
+              icon: cmdIcons.Sparkles,
+              group: t("group.view"),
+              action: () => {
+                void import("../canvas/migrateCommand")
+                  .then((m) => m.runCanvasMigration())
+                  .catch((err: unknown) => log.error("canvas migration failed", err));
+              },
+            },
+          ]
+        : []),
       {
         id: "view.plugins",
         label: t("cmd.view.plugins"),
