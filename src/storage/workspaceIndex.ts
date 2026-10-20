@@ -182,10 +182,17 @@ function flatten(nodes: WorkspaceNode[], out: WorkspaceEntry[] = []): WorkspaceE
   return out;
 }
 
-/** The vault's notes: the file tree's listing when it is current, else a fresh one. */
-async function listNotes(): Promise<WorkspaceEntry[]> {
+/**
+ * The vault's notes. After a structural event (`reuseTree`), the file
+ * tree's listing of that same change, when it has one; it is used once.
+ * Otherwise — the first build, the timed check for changes nobody
+ * announced (another tab) — a fresh listing: a cached one would hide them.
+ */
+async function listNotes(reuseTree: boolean): Promise<WorkspaceEntry[]> {
   const l = cache.listing;
-  const list = l && l.generation === cache.generation ? flatten(l.tree) : await listWorkspace({ includeAssets: false });
+  cache.listing = null;
+  const list =
+    reuseTree && l && l.generation === cache.generation ? flatten(l.tree) : await listWorkspace({ includeAssets: false });
   return list.filter((e) => !isAssetName(e.path));
 }
 
@@ -200,7 +207,7 @@ async function build(): Promise<void> {
   cache.removed.clear();
   cache.moved = [];
   cache.stale = false;
-  const list = await listNotes();
+  const list = await listNotes(false);
   const next = new Map<string, IndexedFile>();
   await mapLimit(list, 16, async (e) => {
     const f = await indexFile(e);
@@ -253,9 +260,10 @@ async function refresh(): Promise<void> {
 
   const toRead = new Map<string, { path: string; name: string; modified: number | null }>();
   if (cache.stale || Date.now() - cache.checkedAt >= REVALIDATE_MS) {
+    const structural = cache.stale;
     cache.stale = false;
     cache.checkedAt = Date.now();
-    const list = await listNotes();
+    const list = await listNotes(structural);
     const seen = new Set(list.map((e) => e.path));
     for (const path of [...cache.byPath.keys()]) {
       if (!seen.has(path)) {

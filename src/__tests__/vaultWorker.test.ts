@@ -12,7 +12,7 @@
  * The incremental outline and preview are checked against the one-pass
  * versions they replace, on random documents and random edits.
  */
-import { describe, it, expect, beforeAll, afterAll } from "vitest";
+import { describe, it, expect, beforeAll, afterAll, vi } from "vitest";
 import type { ReactElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { createMemoryBackend, setVaultBackend, type VaultBackend } from "../storage/vault";
@@ -24,6 +24,7 @@ import {
   findBacklinks,
   indexedFiles,
   indexStats,
+  REVALIDATE_MS,
   searchWorkspace,
   workspaceTree,
 } from "../storage/workspaceIndex";
@@ -173,9 +174,20 @@ describe("the workspace index over a 10,000-note vault (worker protocol)", () =>
       return list(dir);
     };
     await ensureIndex();
-    vault.backend.list = list;
     expect(lists).toBe(0); // the tree's listing was reused
     expect(vault.reads() - before).toBe(0); // nothing changed on disk
+    // The timed check for unannounced changes (another tab) lists afresh:
+    // the tree's snapshot would hide them.
+    await workspaceTree();
+    lists = 0;
+    const clock = vi.spyOn(Date, "now").mockReturnValue(Date.now() + REVALIDATE_MS + 1000);
+    try {
+      await ensureIndex();
+    } finally {
+      clock.mockRestore();
+      vault.backend.list = list;
+    }
+    expect(lists).toBeGreaterThan(0);
   });
 
   it("falls back to an in-thread index when the worker dies, with the same results", async () => {

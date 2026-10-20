@@ -24,9 +24,6 @@ import { BlockTracker } from "./blocks";
 import { prepareCriticMarkup } from "./criticMarkup";
 import { buildBlockProcessor, pipelineOptions, type BlockSlugs } from "./pipeline";
 
-/** Documents shorter than this render with the full pipeline (it is fast enough there). */
-export const INCREMENTAL_PREVIEW_MIN_CHARS = 50_000;
-
 /** Footnotes, reference definitions and CriticMarkup need the whole document. */
 export function canRenderInBlocks(markdown: string): boolean {
   if (mayContainCriticMarkup(markdown)) return false;
