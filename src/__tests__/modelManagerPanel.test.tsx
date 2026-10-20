@@ -148,7 +148,7 @@ describe("model manager — Ollama pull from the panel", () => {
     fireEvent.click(screen.getByRole("button", { name: "Download" }));
     await waitFor(() => expect(confirm.fn).toHaveBeenCalledTimes(1));
     expect(JSON.stringify(confirm.fn.mock.calls[0])).toContain("Llama 3.1 Community License");
-    expect(f.fetchMock).not.toHaveBeenCalled();
+    expect(f.requests).toHaveLength(0);
     confirm.fn.mockResolvedValueOnce(true);
     fireEvent.click(screen.getByRole("button", { name: "Download" }));
     await waitFor(() => expect(f.requests).toHaveLength(1));
