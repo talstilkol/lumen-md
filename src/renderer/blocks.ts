@@ -78,6 +78,8 @@ function indentOf(line: string): number {
 /** Open-element depth after the tags on `line` (preview: rehype-raw nests elements across blocks). */
 function countTags(line: string, depth: number): number {
   if (!line.includes("<")) return depth;
+  // Not HTML to Markdown: code spans, comments, escaped `\<`.
+  line = line.replace(/(`+)(?:(?!\1)[\s\S])*?\1/g, "").replace(/<!--.*?-->/g, "").replace(/\\</g, "");
   TAG.lastIndex = 0;
   let t: RegExpExecArray | null;
   while ((t = TAG.exec(line)) !== null) {

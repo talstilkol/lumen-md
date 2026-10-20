@@ -26,9 +26,31 @@ import { buildBlockProcessor, pipelineOptions, type BlockSlugs } from "./pipelin
 
 /** Footnotes, reference definitions and CriticMarkup need the whole document. */
 export function canRenderInBlocks(markdown: string): boolean {
-  if (mayContainCriticMarkup(markdown)) return false;
-  if (/\[\^[^\]\s]+\]/.test(markdown)) return false;
-  return !/^ {0,3}\[[^\]]+\]:/m.test(markdown);
+  // Examples inside code (`[^1]` in a fence, a `[label]: x` code span) are not Markdown.
+  const text = withoutCode(markdown);
+  if (mayContainCriticMarkup(text)) return false;
+  if (/\[\^[^\]\s]+\]/.test(text)) return false;
+  return !/^ {0,3}\[[^\]]+\]:/m.test(text);
+}
+
+/** `markdown` with fenced code blocks and code spans removed (an approximation that only ever removes code). */
+export function withoutCode(markdown: string): string {
+  if (!markdown.includes("`") && !markdown.includes("~~~")) return markdown;
+  const out: string[] = [];
+  let fence: string | null = null;
+  for (const line of markdown.split("\n")) {
+    const m = /^ {0,3}(`{3,}|~{3,})/.exec(line);
+    if (fence) {
+      if (m && m[1][0] === fence[0] && m[1].length >= fence.length && /^ {0,3}[`~]+[ \t]*\r?$/.test(line)) fence = null;
+      continue;
+    }
+    if (m && !(m[1][0] === "`" && line.slice(line.indexOf(m[1]) + m[1].length).includes("`"))) {
+      fence = m[1];
+      continue;
+    }
+    out.push(line.replace(/(`+)(?:(?!\1)[\s\S])*?\1/g, ""));
+  }
+  return out.join("\n");
 }
 
 interface Rendered {

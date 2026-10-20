@@ -32,6 +32,7 @@ import type { TrashItem } from "../storage/trash";
 import { toast, useToastStore } from "../store/useToastStore";
 import { onWorkspaceChanged } from "../storage/workspaceEvents";
 import { workspaceTree } from "../storage/workspaceIndex";
+import { scheduleIdle } from "../lib/idle";
 
 /**
  * A vault with more notes than this opens with its folders collapsed
@@ -42,27 +43,27 @@ export const LARGE_VAULT_FILES = 1000;
 
 /**
  * In a large vault each folder (the root too) shows at most this many
- * notes until the user asks for the rest: a flat vault of 10,000 notes has
+ * rows until the user asks for the rest: a flat vault of 10,000 notes has
  * no folders to collapse.
  */
 export const LARGE_VAULT_FOLDER_ROWS = 200;
 
 /**
- * The children of one folder to render: every subfolder, the first
- * `limit` files and the active file; `hidden` is how many files are left
- * out. `limit` null: everything.
+ * The children of one folder to render: the first `limit` rows (folders
+ * first, as listed) plus the active note and its folder; `hidden` is how
+ * many are left out. `limit` null: everything. A vault of 10,000 root
+ * folders is as limited as one of 10,000 root notes.
  */
 export function visibleChildren(
   nodes: WorkspaceNode[],
   limit: number | null,
   activePath: string | null,
 ): { shown: WorkspaceNode[]; hidden: number } {
-  if (limit === null) return { shown: nodes, hidden: 0 };
-  let files = 0;
+  if (limit === null || nodes.length <= limit) return { shown: nodes, hidden: 0 };
   let hidden = 0;
-  const shown = nodes.filter((n) => {
-    if (n.kind === "directory") return true;
-    if (files++ < limit || n.path === activePath) return true;
+  const shown = nodes.filter((n, i) => {
+    // The active note, and the folder on its way, always stay.
+    if (i < limit || n.path === activePath || (activePath?.startsWith(n.path + "/") ?? false)) return true;
     hidden++;
     return false;
   });
@@ -270,9 +271,9 @@ export function FileTree({
     [available],
   );
 
-  useEffect(() => {
-    refresh();
-  }, [refresh]);
+  // First listing once the page is idle (plan 8.4): listing a 10,000-note
+  // vault must not compete with opening the app.
+  useEffect(() => scheduleIdle(() => void refresh(), 1000), [refresh]);
 
   useEffect(() => {
     // A save that only changed a file's text leaves the tree as it is (C3).

@@ -34,7 +34,7 @@ import { hasHebrew, hebrewFind, normalizeWithMap } from "../text/hebrew";
 import { noteKey } from "../lib/slug";
 import { BlockTracker, splitBlocks } from "../renderer/blocks";
 import { IncrementalToc } from "../renderer/incrementalToc";
-import { IncrementalPreview, canRenderInBlocks } from "../renderer/incrementalPreview";
+import { IncrementalPreview, canRenderInBlocks, withoutCode } from "../renderer/incrementalPreview";
 import { extractToc, renderMarkdown } from "../renderer/pipeline";
 import { bestChunk, packVectors } from "../ai/semanticSearch";
 import { LARGE_VAULT_FOLDER_ROWS, visibleChildren } from "../ui/FileTree";
@@ -354,10 +354,10 @@ describe("blocks and the incremental outline", () => {
     }
   });
 
-  it("an autolink is not an open HTML element: preview blocks still split after it", () => {
-    const doc = "See <https://example.com> and <a@b.co>.\n\n# Next\n\n<div>\n\nin\n\n</div>\n\nText\n";
+  it("autolinks and code spans are not open HTML elements: preview blocks still split after them", () => {
+    const doc = "See <https://example.com>, <a@b.co> and `<div>`.\n\n# Next\n\n<div>\n\nin\n\n</div>\n\nText\n";
     expect(splitBlocks(doc, { preview: true }).blocks.map((b) => doc.slice(b.start, b.end))).toEqual([
-      "See <https://example.com> and <a@b.co>.\n\n",
+      "See <https://example.com>, <a@b.co> and `<div>`.\n\n",
       "# Next\n\n",
       "<div>\n\nin\n\n</div>\n\n",
       "Text\n",
@@ -429,6 +429,9 @@ describe("the block-by-block preview", () => {
     expect(canRenderInBlocks("Text[^1]\n\n[^1]: note")).toBe(false);
     expect(canRenderInBlocks("[x]\n\n[x]: https://example.com")).toBe(false);
     expect(canRenderInBlocks("a {++b++} c")).toBe(false);
+    // …but not when they are only examples in code.
+    expect(canRenderInBlocks("Use `[^1]` and `{++x++}`.\n\n```md\n[x]: https://example.com\nText[^1]\n```\n")).toBe(true);
+    expect(withoutCode("a `b` c\n```\nd\n```\ne")).toBe("a  c\ne");
   });
 
   it("stops when a newer text is on its way", async () => {
@@ -439,16 +442,28 @@ describe("the block-by-block preview", () => {
   });
 });
 
-describe("the file tree of a flat large vault", () => {
-  it("shows every folder, the first notes of a folder and the active note — not 10,000 rows", () => {
+describe("the file tree of a large vault", () => {
+  it("a flat vault: the first rows of a folder and the active note — not 10,000 rows", () => {
     const nodes: WorkspaceNode[] = [
       { path: "a", name: "a", kind: "directory", children: [] },
       ...Array.from({ length: N }, (_, i): WorkspaceNode => ({ path: `n${i}.md`, name: `n${i}.md`, kind: "file" })),
     ];
     const { shown, hidden } = visibleChildren(nodes, LARGE_VAULT_FOLDER_ROWS, "n9000.md");
-    expect(shown.map((n) => n.path)).toEqual(["a", ...Array.from({ length: LARGE_VAULT_FOLDER_ROWS }, (_, i) => `n${i}.md`), "n9000.md"]);
-    expect(hidden).toBe(N - LARGE_VAULT_FOLDER_ROWS - 1);
+    expect(shown.map((n) => n.path)).toEqual([
+      "a",
+      ...Array.from({ length: LARGE_VAULT_FOLDER_ROWS - 1 }, (_, i) => `n${i}.md`),
+      "n9000.md",
+    ]);
+    expect(hidden).toBe(nodes.length - LARGE_VAULT_FOLDER_ROWS - 1);
     expect(visibleChildren(nodes, null, null)).toEqual({ shown: nodes, hidden: 0 });
+  });
+
+  it("a wide vault: 10,000 folders are limited too, the active note's folder kept", () => {
+    const nodes = Array.from({ length: N }, (_, i): WorkspaceNode => ({ path: `d${i}`, name: `d${i}`, kind: "directory", children: [] }));
+    const { shown, hidden } = visibleChildren(nodes, LARGE_VAULT_FOLDER_ROWS, "d5000/x.md");
+    expect(shown).toHaveLength(LARGE_VAULT_FOLDER_ROWS + 1);
+    expect(shown[shown.length - 1].path).toBe("d5000");
+    expect(hidden).toBe(N - LARGE_VAULT_FOLDER_ROWS - 1);
   });
 });
 

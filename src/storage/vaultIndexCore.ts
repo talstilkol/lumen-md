@@ -91,6 +91,8 @@ interface Entry {
   /** Insertion order: a re-indexed note keeps its place, like a Map entry. */
   order: number;
   nameLower: string;
+  /** The name folded like `folded`, for Hebrew name matches without normalising per query. */
+  nameFolded: string | null;
   pathLower: string;
   lower: string;
   /**
@@ -204,6 +206,7 @@ export class VaultIndex {
       modified: input.modified,
       order: prev ? prev.order : this.nextOrder++,
       nameLower: input.name.toLowerCase(),
+      nameFolded: MAY_FOLD_TO_HEBREW.test(input.name) ? foldForSearch(input.name) : null,
       pathLower: input.path.toLowerCase(),
       lower: content.toLowerCase(),
       folded: MAY_FOLD_TO_HEBREW.test(content) ? foldForSearch(content) : null,
@@ -289,7 +292,8 @@ export class VaultIndex {
       // Niqqud-, final-letter- and prefix-insensitive for Hebrew (T26).
       const found =
         e.lower.includes(q) || (hebrewQuery && e.folded !== null && candidates.some((c) => e.folded!.includes(c)));
-      if (!inName && hebrewQuery && hebrewFind(e.name, q)) score += 10;
+      // = `hebrewFind(e.name, q)`, against the name folded at index time.
+      if (!inName && hebrewQuery && e.nameFolded !== null && candidates.some((c) => e.nameFolded!.includes(c))) score += 10;
       if (found) score += 4;
       else if (fuzzyMatch(e.nameLower, q) || fuzzyMatch(e.pathLower, q)) score += 1;
       if (score > 0) scored.push({ e, score, found });
