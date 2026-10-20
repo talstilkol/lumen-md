@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-10-19T07:33:42.684Z",
+  "generated_at": "2026-10-20T19:38:54.326Z",
   "source": "src/i18n/index.ts (en bundle)",
-  "count": 1469,
+  "count": 1472,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -1806,6 +1806,23 @@
       "vars": [
         "path"
       ]
+    },
+    {
+      "key": "e2ee.conflict.title",
+      "en": "Sync conflict — {path}",
+      "vars": [
+        "path"
+      ]
+    },
+    {
+      "key": "e2ee.conflict.body",
+      "en": "This note was also changed on another device. Choose what to keep; it is not synced until you decide.",
+      "vars": []
+    },
+    {
+      "key": "e2ee.conflict.later",
+      "en": "Decide later",
+      "vars": []
     },
     {
       "key": "vault.import.what",
