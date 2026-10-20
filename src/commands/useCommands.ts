@@ -570,6 +570,15 @@ export function useCommands({
         action: () => window.dispatchEvent(new CustomEvent("lumen-open-today")),
       },
       {
+        id: "note.capture",
+        label: t("cmd.note.capture"),
+        hint: t("cmd.note.capture.hint"),
+        shortcut: "⌥⌘N",
+        icon: cmdIcons.FileText,
+        group: t("group.file"),
+        action: () => window.dispatchEvent(new CustomEvent("lumen-open-capture")),
+      },
+      {
         id: "view.calendar",
         label: t("cmd.view.calendar"),
         hint: t("cmd.view.calendar.hint"),

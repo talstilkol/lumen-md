@@ -9,9 +9,12 @@ test.beforeEach(async ({ page }) => {
   await page.addInitScript(() => localStorage.setItem("lumen-tour-done", "1"));
 });
 
-test("share target opens the shared text and link as a new note", async ({ page }) => {
+test("share target shows the shared text and link", async ({ page }) => {
   await page.goto("/?title=" + encodeURIComponent("Shared page") + "&text=hello&url=" + encodeURIComponent("https://example.com/a"));
-  await expect(page.locator(".cm-content").first()).toContainText("# Shared page", { timeout: 15_000 });
+  // Appended to inbox.md and the inbox shown (plan 4.16, e2e/quick-capture.spec.ts);
+  // a new "# Shared page" note where the vault can't be written.
+  await expect(page.locator(".cm-content").first()).toContainText("Shared page", { timeout: 15_000 });
+  await expect(page.locator(".cm-content").first()).toContainText("hello");
   await expect(page.locator(".cm-content").first()).toContainText("<https://example.com/a>");
   // The parameters are removed so a reload doesn't share twice.
   await expect.poll(() => new URL(page.url()).search).toBe("");
