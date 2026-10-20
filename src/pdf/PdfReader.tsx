@@ -51,6 +51,12 @@ interface Props {
   onClose: () => void;
   /** Open the companion note in the editor. */
   onOpenNotes: (notePath: string) => void;
+  /**
+   * Receives the reader's save gate (null on unmount): whoever replaces the
+   * reader (another PDF opened) runs through it, so pending or failed
+   * highlight writes are saved first.
+   */
+  registerSaveGate?: (gate: ((then: () => void) => void) | null) => void;
 }
 
 /**
@@ -110,7 +116,7 @@ function baseName(p: string): string {
   return p.split("/").pop() ?? p;
 }
 
-export function PdfReader({ path, fragment = null, openSeq = 0, onClose, onOpenNotes }: Props) {
+export function PdfReader({ path, fragment = null, openSeq = 0, onClose, onOpenNotes, registerSaveGate }: Props) {
   const notePath = companionNotePath(path);
   const [doc, setDoc] = useState<PdfDocument | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -446,6 +452,11 @@ export function PdfReader({ path, fragment = null, openSeq = 0, onClose, onOpenN
   );
 
   const close = useCallback(() => whenSaved(onClose), [whenSaved, onClose]);
+
+  useEffect(() => {
+    registerSaveGate?.(whenSaved);
+    return () => registerSaveGate?.(null);
+  }, [registerSaveGate, whenSaved]);
 
   /** Open the companion note — creating it first when the PDF has no highlights yet. */
   const openNotes = useCallback(async () => {

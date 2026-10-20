@@ -136,6 +136,11 @@ export default function App() {
   const [graphOpen, setGraphOpen] = useState(false);
   /** The PDF open in the reader, with the link fragment that opened it (`page=N&highlight=ID`). */
   const [pdfView, setPdfView] = useState<{ path: string; fragment: string | null; seq: number } | null>(null);
+  /** The open reader's save gate: replacing the reader waits until its highlights are saved. */
+  const pdfSaveGate = useRef<((then: () => void) => void) | null>(null);
+  const registerPdfSaveGate = useCallback((gate: ((then: () => void) => void) | null) => {
+    pdfSaveGate.current = gate;
+  }, []);
   const [historyOpen, setHistoryOpen] = useState(false);
   const [tableEditorOpen, setTableEditorOpen] = useState(false);
   const [canvasOpen, setCanvasOpen] = useState(false);
@@ -436,7 +441,10 @@ export default function App() {
       if (!detail?.path) return;
       // A PDF opens in the reader, at the page / highlight the link names.
       if (/\.pdf$/i.test(detail.path)) {
-        setPdfView((prev) => ({ path: detail.path, fragment: detail.fragment ?? null, seq: (prev?.seq ?? 0) + 1 }));
+        const open = () => setPdfView((prev) => ({ path: detail.path, fragment: detail.fragment ?? null, seq: (prev?.seq ?? 0) + 1 }));
+        // Another PDF replaces the open reader: only once its highlights are saved.
+        if (pdfSaveGate.current) pdfSaveGate.current(open);
+        else open();
         return;
       }
       try {
@@ -1057,7 +1065,7 @@ export default function App() {
       {pdfView && (
         <Suspense fallback={null}>
           {/* A new PDF gets a fresh reader: no page, search or OCR state carries over. */}
-          <PdfReader key={pdfView.path} path={pdfView.path} fragment={pdfView.fragment} openSeq={pdfView.seq} onClose={() => setPdfView(null)} />
+          <PdfReader key={pdfView.path} path={pdfView.path} fragment={pdfView.fragment} openSeq={pdfView.seq} onClose={() => setPdfView(null)} registerSaveGate={registerPdfSaveGate} />
         </Suspense>
       )}
 

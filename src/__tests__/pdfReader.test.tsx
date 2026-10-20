@@ -186,4 +186,33 @@ describe("PdfReader", () => {
       throw new DOMException("a.pdf.md not found", "NotFoundError");
     });
   });
+
+  it("hands its save gate to the app: opening another PDF waits for the highlights to be saved", async () => {
+    const ann = createPdfAnnotation({ id: "123e4567-e89b-42d3-a456-426614174000", source: "a.pdf", page: 2, text: "alpha two", start: 0, end: 5 });
+    const note = upsertAnnotationsNote(null, "a.pdf", [ann], { title: "Highlights — a.pdf", page: (n) => `p. ${n}`, empty: "none" });
+    const read = vi.mocked(ws.readWorkspaceFile);
+    const write = vi.mocked(ws.writeWorkspaceFile);
+    read.mockImplementation(async () => note);
+    let finish: () => void = () => undefined;
+    write.mockClear();
+    write.mockImplementationOnce(() => new Promise<void>((r) => (finish = () => r())));
+    const held: { gate: ((then: () => void) => void) | null } = { gate: null };
+    const view = render(
+      <PdfReader path="a.pdf" openSeq={1} onClose={() => undefined} onOpenNotes={() => undefined} registerSaveGate={(g) => (held.gate = g)} />,
+    );
+    await waitFor(() => expect(held.gate).not.toBeNull());
+    fireEvent.click(await screen.findByRole("button", { name: "Delete" }));
+    await waitFor(() => expect(write).toHaveBeenCalledTimes(1));
+    const replace = vi.fn();
+    held.gate!(replace);
+    await new Promise((r) => setTimeout(r, 0));
+    expect(replace).not.toHaveBeenCalled();
+    finish();
+    await waitFor(() => expect(replace).toHaveBeenCalledTimes(1));
+    view.unmount();
+    expect(held.gate).toBeNull();
+    read.mockImplementation(async () => {
+      throw new DOMException("a.pdf.md not found", "NotFoundError");
+    });
+  });
 });
