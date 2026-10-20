@@ -12,6 +12,7 @@
  */
 
 import type { ModelTier } from "../agents/types";
+import type { AiMode } from "./aiMode";
 
 export interface WebLlmCatalogEntry {
   /** Model id without the quantisation suffix, e.g. "Qwen3-4B". */
@@ -186,6 +187,37 @@ export function webLlmModelFor(tier: ModelTier, hw: Hardware, opts: { tools?: bo
     }
   }
   return recommendWebLlmModel(tier, hw, opts);
+}
+
+const TIERS: readonly ModelTier[] = ["tiny", "small", "medium", "large"];
+
+/**
+ * The tier a local executor (Ollama, web-llm) runs for an agent, by the
+ * user's AI mode (plan 5.7): economy one tier down, quality one tier up,
+ * balanced as the agent declares. The cloud chat executor keeps its own
+ * routing (llm.ts `routeOptions`), so it is not shifted here. The device
+ * budget still applies afterwards: "quality" on a small GPU gets the
+ * largest model that fits.
+ */
+export function tierForMode(tier: ModelTier, mode: AiMode): ModelTier {
+  const i = TIERS.indexOf(tier);
+  if (mode === "economy") return TIERS[Math.max(0, i - 1)];
+  if (mode === "quality") return TIERS[Math.min(TIERS.length - 1, i + 1)];
+  return tier;
+}
+
+/**
+ * Why there is no WebGPU on this browser, when it is a known gap rather
+ * than a broken driver: Firefox ships WebGPU on Windows and macOS but not
+ * yet on Linux or Android, and Android browsers in general vary (plan 5.7).
+ * The in-browser model is then off; speech and search models run on WASM,
+ * and agents go to Ollama. null = WebGPU works, or the gap is unknown.
+ */
+export function webGpuGap(hw: Pick<Hardware, "webgpu">, ua: string = typeof navigator !== "undefined" ? navigator.userAgent ?? "" : ""): "firefox-linux" | "android" | null {
+  if (hw.webgpu) return null;
+  if (/Android/i.test(ua)) return "android";
+  if (/Firefox\//i.test(ua) && /Linux/i.test(ua)) return "firefox-linux";
+  return null;
 }
 
 /** Tests. */

@@ -33,6 +33,8 @@ import { ToolError } from "./tools/define";
 import { review, type Failure } from "./critic";
 import { recordRun } from "./trace";
 import { AiQuotaExceededError, aiQuotaStatus, chargeAiCommandDispatch, consumeAiPrompt } from "../billing/aiQuota";
+import { getAiMode } from "../ai/aiMode";
+import { tierForMode } from "../ai/modelManager";
 
 export const DEFAULT_MAX_STEPS = 8;
 export const DEFAULT_MAX_RETRIES = 2;
@@ -225,6 +227,11 @@ export async function runAgent<I extends AgentInput, O = string>(def: AgentDefin
   }
   let executor = pick.executor;
   let patch: RetryPatch = { ...(pending ?? {}), ...(opts.patch ?? {}) };
+  // The AI mode is read once per run (plan 5.7): switching it in the
+  // settings changes the local model of the next run, never of one under
+  // way. A retry patch's tier is explicit and is not shifted again.
+  const mode = getAiMode();
+  const tierOf = (id: ExecutorId): ModelTier => (id === "chat" ? def.tier ?? "small" : tierForMode(def.tier ?? "small", mode));
 
   // A cached, already-validated answer costs nothing: no prompt, no model.
   const cacheKeyOf = async (): Promise<string | null> => {
@@ -233,7 +240,7 @@ export async function runAgent<I extends AgentInput, O = string>(def: AgentDefin
     if (!aiCacheEnabled()) return null;
     const sys = typeof def.system === "function" ? def.system(input) : def.system;
     // v3: answers cached before the language check (T27) are not reused.
-    return cacheKey({ v: 3, agent: def.id, executor: executor.id, model: executor.modelFor(patch.tier ?? def.tier ?? "small"), sys, user: def.user(input), patch }).catch(() => null);
+    return cacheKey({ v: 3, agent: def.id, executor: executor.id, model: executor.modelFor(patch.tier ?? tierOf(executor.id)), sys, user: def.user(input), patch }).catch(() => null);
   };
   const key = await cacheKeyOf();
   if (key) {
@@ -284,7 +291,7 @@ export async function runAgent<I extends AgentInput, O = string>(def: AgentDefin
       if (forced && (await forced.available()).available) executor = forced;
     }
     run.executor = executor.id;
-    const tier: ModelTier = patch.tier ?? def.tier ?? "small";
+    const tier: ModelTier = patch.tier ?? tierOf(executor.id);
     // The model is resolved once here and pinned on the request, so the
     // capability decision (native tools / schema) and the call agree.
     const model = patch.model ?? executor.modelFor(tier, { tools: !!def.tools?.length });

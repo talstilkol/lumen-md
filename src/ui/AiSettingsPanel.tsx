@@ -3,7 +3,10 @@
  * (MASTER_PLAN v2, D2): the AI policy, the preferred executor with live
  * availability, the Ollama server and model, the in-browser model and the
  * device it runs on, the grammar and research endpoints, the personal style
- * profile, and the recent agent runs.
+ * profile, and the recent agent runs. The model manager (plan 5.7) adds the
+ * AI mode (economy / balanced / quality → the local model tier of the next
+ * run), Ollama downloads with progress, and the storage the in-browser
+ * models use, with clearing.
  *
  * Every field writes the same localStorage keys the runtime already reads,
  * so nothing here is a second source of truth.
@@ -16,6 +19,9 @@ import { ollamaLicenceNotice } from "../ai/modelCatalog";
 import type { AgentRun, ExecutorId } from "../agents/types";
 import type { AiPolicy } from "../ai/policy";
 import type { Hardware } from "../ai/modelManager";
+import type { AiMode } from "../ai/aiMode";
+import type { PullProgress } from "../ai/ollamaPull";
+import type { ModelCacheKind, StorageEstimateResult } from "../ai/modelStorage";
 
 interface Props {
   open: boolean;
@@ -59,6 +65,14 @@ function setLs(key: string, value: string): void {
 }
 
 const EXECUTORS: RunnerId[] = ["ollama", "webllm", "chat"];
+const MODES: AiMode[] = ["economy", "balanced", "quality"];
+const GAP_LABEL = { "firefox-linux": "Firefox · Linux", android: "Android" } as const;
+
+function bytes(n: number): string {
+  if (n >= 1024 ** 3) return `${(n / 1024 ** 3).toFixed(1)} GB`;
+  if (n >= 1024 ** 2) return `${Math.round(n / 1024 ** 2)} MB`;
+  return `${Math.round(n / 1024)} KB`;
+}
 
 export function AiSettingsPanel({ open, onClose }: Props) {
   const [policy, setPolicyState] = useState<AiPolicy>("local-only");
@@ -78,6 +92,15 @@ export function AiSettingsPanel({ open, onClose }: Props) {
   const [hasStyle, setHasStyle] = useState(false);
   const [runs, setRuns] = useState<AgentRun[]>([]);
   const [saved, setSaved] = useState(false);
+  const [mode, setMode] = useState<AiMode>("balanced");
+  const [gap, setGap] = useState<keyof typeof GAP_LABEL | null>(null);
+  const [pullName, setPullName] = useState("");
+  const [pull, setPull] = useState<{ model: string; progress: PullProgress | null } | null>(null);
+  const [pullMsg, setPullMsg] = useState<{ ok: boolean; text: string } | null>(null);
+  const pullAbort = useRef<AbortController | null>(null);
+  // undefined = still asking; null = the browser can't tell.
+  const [storage, setStorage] = useState<StorageEstimateResult | null | undefined>(undefined);
+  const [storageMsg, setStorageMsg] = useState("");
 
   // The availability probes are slow (network); a panel closed meanwhile
   // must not receive their results (React warns, and test environments
@@ -87,7 +110,14 @@ export function AiSettingsPanel({ open, onClose }: Props) {
     mounted.current = true;
     return () => {
       mounted.current = false;
+      pullAbort.current?.abort();
     };
+  }, []);
+
+  const refreshStorage = useCallback(async () => {
+    const { storageEstimate } = await import("../ai/modelStorage");
+    const s = await storageEstimate();
+    if (mounted.current) setStorage(s);
   }, []);
 
   const refreshStatus = useCallback(async () => {
@@ -120,7 +150,7 @@ export function AiSettingsPanel({ open, onClose }: Props) {
     if (!open) return;
     let alive = true;
     void (async () => {
-      const [{ getAiPolicy }, { preferredExecutor }, mm, style, trace, { getBaseUrl, getOllamaConfigModel }, { grammarEndpoint }] = await Promise.all([
+      const [{ getAiPolicy }, { preferredExecutor }, mm, style, trace, { getBaseUrl, getOllamaConfigModel }, { grammarEndpoint }, { getAiMode }] = await Promise.all([
         import("../ai/policy"),
         import("../agents/executors"),
         import("../ai/modelManager"),
@@ -128,9 +158,11 @@ export function AiSettingsPanel({ open, onClose }: Props) {
         import("../agents/trace"),
         import("../ai/ollamaProvider"),
         import("../ai/grammar"),
+        import("../ai/aiMode"),
       ]);
       if (!alive) return;
       setPolicyState(getAiPolicy());
+      setMode(getAiMode());
       setPref(preferredExecutor() ?? "auto");
       setOllamaUrl(getBaseUrl());
       setOllamaModel(ls("lumen.ollama.model") || getOllamaConfigModel());
@@ -145,16 +177,18 @@ export function AiSettingsPanel({ open, onClose }: Props) {
       const h = await mm.detectHardware();
       if (!alive) return;
       setHw(h);
+      setGap(mm.webGpuGap(h));
       setBudget(mm.vramBudgetMB(h));
       setCatalog(
         mm.WEBLLM_CATALOG.map((e) => ({ id: mm.webLlmModelId(e, h.f16), label: e.licence ? `${e.label} — ${e.licence}` : e.label, vram: h.f16 ? e.vramMB.f16 : e.vramMB.f32 })),
       );
     })();
     void refreshStatus();
+    void refreshStorage();
     return () => {
       alive = false;
     };
-  }, [open, refreshStatus]);
+  }, [open, refreshStatus, refreshStorage]);
 
   if (!open) return null;
 
@@ -195,6 +229,51 @@ export function AiSettingsPanel({ open, onClose }: Props) {
     setLs("lumen.ollama.model", ollamaModel);
     flash();
     void refreshStatus();
+  };
+
+  const changeMode = async (m: AiMode) => {
+    const { setAiMode } = await import("../ai/aiMode");
+    setAiMode(m);
+    setMode(m);
+    flash();
+  };
+
+  const startPull = async () => {
+    const model = pullName.trim();
+    if (!model || pull) return;
+    const [{ pullOllamaModel }, { getBaseUrl }] = await Promise.all([import("../ai/ollamaPull"), import("../ai/ollamaProvider")]);
+    const ctrl = new AbortController();
+    pullAbort.current = ctrl;
+    setPullMsg(null);
+    setPull({ model, progress: null });
+    try {
+      await pullOllamaModel(getBaseUrl(), model, {
+        signal: ctrl.signal,
+        onProgress: (p) => {
+          if (mounted.current) setPull({ model, progress: p });
+        },
+      });
+      if (!mounted.current) return;
+      setPullMsg({ ok: true, text: t("ai.settings.ollama.pulled", { model }) });
+      setPullName("");
+      void refreshStatus();
+    } catch (e) {
+      if (!mounted.current || (e as Error)?.name === "AbortError") return;
+      setPullMsg({ ok: false, text: t("ai.settings.ollama.pullFailed", { error: (e as Error)?.message ?? String(e) }) });
+    } finally {
+      if (pullAbort.current === ctrl) pullAbort.current = null;
+      if (mounted.current) setPull(null);
+    }
+  };
+
+  const cancelPull = () => pullAbort.current?.abort();
+
+  const clearCaches = async (kind: ModelCacheKind) => {
+    const { clearModelCaches } = await import("../ai/modelStorage");
+    const n = await clearModelCaches(kind);
+    if (!mounted.current) return;
+    setStorageMsg(t("ai.settings.storage.cleared", { n: String(n) }));
+    void refreshStorage();
   };
 
   const changeWebModel = async (id: string) => {
@@ -287,6 +366,17 @@ export function AiSettingsPanel({ open, onClose }: Props) {
             </div>
           </section>
 
+          <section style={box} aria-labelledby="ai-set-mode">
+            <div id="ai-set-mode" style={caption}>{t("ai.mode.title")}</div>
+            {MODES.map((m) => (
+              <label key={m} style={row}>
+                <input type="radio" name="ai-mode" checked={mode === m} onChange={() => void changeMode(m)} />
+                <span>{t(`ai.mode.${m}`)}</span>
+              </label>
+            ))}
+            <div style={muted}>{t("ai.settings.mode.hint")}</div>
+          </section>
+
           <section style={box} aria-labelledby="ai-set-ollama">
             <div id="ai-set-ollama" style={caption}>Ollama</div>
             <label style={row}>
@@ -310,6 +400,49 @@ export function AiSettingsPanel({ open, onClose }: Props) {
             <div style={row}>
               <button type="button" style={primary} onClick={() => void saveOllama()}>{t("ai.settings.save")}</button>
             </div>
+            <div style={row}>
+              <input
+                style={input}
+                value={pullName}
+                onChange={(e) => setPullName(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") void startPull();
+                }}
+                placeholder="qwen3:4b"
+                aria-label={t("ai.settings.ollama.pull")}
+                disabled={!!pull}
+              />
+              {pull ? (
+                <button type="button" style={ghost} onClick={cancelPull}>{t("dialog.cancel")}</button>
+              ) : (
+                <button type="button" style={ghost} onClick={() => void startPull()} disabled={!pullName.trim()}>{t("ai.settings.ollama.pull")}</button>
+              )}
+            </div>
+            {pull && (
+              <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                <progress
+                  data-testid="ollama-pull-progress"
+                  max={1}
+                  value={pull.progress?.fraction ?? undefined}
+                  aria-label={pull.model}
+                  style={{ width: "100%" }}
+                />
+                <div style={muted} data-testid="ollama-pull-status" aria-live="polite">
+                  {t("ai.settings.ollama.pulling", {
+                    model: pull.model,
+                    status:
+                      pull.progress && pull.progress.fraction !== null && pull.progress.total > 0
+                        ? `${Math.round(pull.progress.fraction * 100)}% · ${bytes(pull.progress.completed)} / ${bytes(pull.progress.total)}`
+                        : pull.progress?.status || "…",
+                  })}
+                </div>
+              </div>
+            )}
+            {pullMsg && (
+              <div role={pullMsg.ok ? "status" : "alert"} style={pullMsg.ok ? muted : { fontSize: 12, color: "hsl(var(--danger, 0 72% 51%))" }}>
+                {pullMsg.text}
+              </div>
+            )}
           </section>
 
           <section style={box} aria-labelledby="ai-set-web">
@@ -319,8 +452,9 @@ export function AiSettingsPanel({ open, onClose }: Props) {
                 ? t("ai.settings.checking")
                 : hw.webgpu
                   ? t("ai.settings.hw.ok", { budget: String(budget), f16: hw.f16 ? "f16" : "f32", cores: String(hw.cores ?? "?"), memory: String(hw.deviceMemoryGB ?? "?") })
-                  : t("ai.settings.hw.none", { reason: hw.reason ?? "" })}
+                  : t("ai.settings.hw.none", { reason: gap ? GAP_LABEL[gap] : hw.reason ?? "" })}
             </div>
+            {gap && <div style={muted} data-testid="hw-gap">{t("ai.settings.hw.wasm")}</div>}
             {hw?.webgpu && (
               <label style={row}>
                 <span style={{ minWidth: 90 }}>{t("ai.settings.browser.model")}</span>
@@ -337,6 +471,20 @@ export function AiSettingsPanel({ open, onClose }: Props) {
             <div style={row}>
               <button type="button" style={ghost} onClick={() => runCommand("ai.localModels")}>{t("cmd.ai.localModels")}</button>
             </div>
+          </section>
+
+          <section style={box} aria-labelledby="ai-set-storage">
+            <div id="ai-set-storage" style={caption}>{t("ai.settings.storage")}</div>
+            {storage !== null && (
+              <div style={muted} data-testid="storage-usage">
+                {storage === undefined ? t("ai.settings.checking") : t("ai.settings.storage.usage", { usage: bytes(storage.usage), quota: bytes(storage.quota) })}
+              </div>
+            )}
+            <div style={row}>
+              <button type="button" style={ghost} onClick={() => void clearCaches("webllm")}>{t("ai.settings.storage.clearWebllm")}</button>
+              <button type="button" style={ghost} onClick={() => void clearCaches("transformers")}>{t("ai.settings.storage.clearWasm")}</button>
+            </div>
+            {storageMsg && <div style={muted} role="status">{storageMsg}</div>}
           </section>
 
           <section style={box} aria-labelledby="ai-set-endpoints">
