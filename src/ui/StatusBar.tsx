@@ -1,4 +1,5 @@
 import { countWords } from "../text/hebrew";
+import { useSettledText } from "../hooks/useSettledText";
 import React, { useMemo, useState, useCallback, useSyncExternalStore } from "react";
 import { Sparkles, ShieldCheck, SpellCheck, FileDiff, Activity, BarChart3, CloudCog, CloudOff, AlertCircle } from "lucide-react";
 import type { CollabPeer } from "../collab/yjs";
@@ -40,7 +41,9 @@ export const StatusBar = React.memo(function StatusBar({
   configHealth,
   onOpenRuntimeMetrics,
 }: Props) {
-  const stats = useMemo(() => computeStats(text), [text]);
+  // A long document is counted once typing pauses (plan 8.4).
+  const settledText = useSettledText(text);
+  const stats = useMemo(() => computeStats(settledText), [settledText]);
   const syncState = useSyncExternalStore(
     subscribeSyncStatus,
     () => "idle" as const,
@@ -52,7 +55,7 @@ export const StatusBar = React.memo(function StatusBar({
   const toggleGrammarCheck = useAppStore((s) => s.toggleGrammarCheck);
   const suggestingMode = useAppStore((s) => s.suggestingMode);
   const toggleSuggestingMode = useAppStore((s) => s.toggleSuggestingMode);
-  const suggestionCount = useMemo(() => countCriticMarkup(text), [text]);
+  const suggestionCount = useMemo(() => countCriticMarkup(settledText), [settledText]);
   const [telemetryOff, setTelemetryOff] = useState(getTelemetryOptOut);
   const toggleTelemetry = useCallback(() => {
     const next = !telemetryOff;

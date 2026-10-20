@@ -1,5 +1,7 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { extractToc } from "../renderer/pipeline";
+import { LARGE_DOC_CHARS } from "../renderer/previewDoc";
+import type { IncrementalToc, TocEntry } from "../renderer/incrementalToc";
 import { t } from "../i18n";
 
 interface Props {
@@ -14,7 +16,25 @@ export const Outline = React.memo(function Outline({ markdownText }: Props) {
     return () => clearTimeout(h);
   }, [markdownText]);
 
-  const toc = useMemo(() => extractToc(debounced), [debounced]);
+  // A long document re-parses only the blocks that changed (plan 8.4);
+  // the result is the same as extractToc's.
+  const large = debounced.length >= LARGE_DOC_CHARS;
+  const smallToc = useMemo(() => (large ? null : extractToc(debounced)), [debounced, large]);
+  const incrementalRef = useRef<IncrementalToc | null>(null);
+  const [largeToc, setLargeToc] = useState<TocEntry[]>([]);
+  useEffect(() => {
+    if (!large) return;
+    let cancelled = false;
+    void import("../renderer/incrementalToc").then((m) => {
+      if (cancelled) return;
+      const inc = (incrementalRef.current ??= new m.IncrementalToc());
+      setLargeToc(inc.update(debounced));
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [debounced, large]);
+  const toc = smallToc ?? largeToc;
 
   // Scroll-spy: track which heading is currently in view within the preview pane.
   const [activeId, setActiveId] = useState<string | null>(null);

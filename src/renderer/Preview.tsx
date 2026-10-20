@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { renderMarkdown, renderMarkdownFast, extractFrontmatter } from "./pipeline";
-import { PreviewDocKeyContext } from "./previewDoc";
+import { LARGE_DOC_CHARS, PreviewDocKeyContext } from "./previewDoc";
+import type { IncrementalPreview } from "./incrementalPreview";
 import { handleWikiLinkClick } from "./wikiLinks";
 import { slug as headingSlug } from "github-slugger";
 import { scheduleIdle } from "../lib/idle";
@@ -40,8 +41,10 @@ export function Preview({ markdownText, docKey = null }: Props) {
   // or a vendor chunk. Heavy blocks hydrate on their own (see
   // DeferredBlock in ./components). The full pipeline runs once the
   // browser is idle and swaps in highlighted code + math.
+  // A long document skips the synchronous pass: it renders in blocks,
+  // yielding to the browser (plan 8.4).
   const [tree, setTree] = useState<React.ReactElement | null>(() =>
-    fullPipelineWarm ? null : safeFastRender(markdownText),
+    fullPipelineWarm || markdownText.length >= LARGE_DOC_CHARS ? null : safeFastRender(markdownText),
   );
   // The document the *displayed* tree was rendered from — it lags `docKey`
   // until the async render for the new document lands.
@@ -50,26 +53,36 @@ export function Preview({ markdownText, docKey = null }: Props) {
   const [themeVersion, setThemeVersion] = useState(0);
   const seqRef = useRef(0);
   const fastTextRef = useRef<string | null>(fullPipelineWarm ? null : markdownText);
+  /** Block-by-block renderer for long documents, loaded on first need. */
+  const incrementalRef = useRef<IncrementalPreview | null>(null);
 
   useEffect(() => {
     const seq = ++seqRef.current;
     const isDark = () => document.documentElement.classList.contains("dark");
     const renderedFor = docKey;
+    const stale = () => seq !== seqRef.current;
+    const render = async (): Promise<React.ReactElement | null> => {
+      if (markdownText.length < LARGE_DOC_CHARS) return renderMarkdown(markdownText, isDark);
+      const m = await import("./incrementalPreview");
+      if (!m.canRenderInBlocks(markdownText)) return renderMarkdown(markdownText, isDark);
+      const inc = (incrementalRef.current ??= new m.IncrementalPreview());
+      return inc.render(markdownText, isDark, stale);
+    };
     const run = () => {
-      renderMarkdown(markdownText, isDark)
+      render()
         .then((el) => {
-          if (seq !== seqRef.current) return;
+          if (!el || stale()) return;
           fullPipelineWarm = true;
           setTree(el);
           setTreeDocKey(renderedFor);
           setError(null);
         })
         .catch((e: Error) => {
-          if (seq !== seqRef.current) return;
+          if (stale()) return;
           setError(e.message);
         });
     };
-    if (fullPipelineWarm) {
+    if (fullPipelineWarm || markdownText.length >= LARGE_DOC_CHARS) {
       run();
       return;
     }

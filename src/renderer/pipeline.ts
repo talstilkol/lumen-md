@@ -202,6 +202,19 @@ async function getFullProcessor(
   const key = `${opts.raw ? 1 : 0}${opts.math ? 1 : 0}`;
   const cached = fullProcessors.get(key);
   if (cached) return cached;
+  const proc = await buildFullProcessor(isDark, opts);
+  fullProcessors.set(key, proc);
+  return proc;
+}
+
+/** A rehype transformer that gives the headings of one block their ids (./incrementalPreview.ts). */
+export type BlockSlugPlugin = () => (tree: HastRoot) => void;
+
+async function buildFullProcessor(
+  isDark: () => boolean,
+  opts: { raw: boolean; math: boolean },
+  blockSlugs?: BlockSlugPlugin,
+): Promise<LumenProcessor> {
   // rehype-raw pulls in parse5 (~40 KB gz); only docs with inline HTML
   // pay for it (M12-followup-2).
   const [rehypeRaw, rehypeKatex] = await Promise.all([
@@ -213,11 +226,29 @@ async function getFullProcessor(
   if (rehypeRaw) p = p.use(rehypeRaw).use(rehypeSanitizeRaw);
   // CriticMarkup (suggesting mode) → <ins>/<del>/<mark>; before rehypeSlug
   // so heading ids are computed from the rendered text.
-  p = p.use(rehypeCriticMarkup).use(rehypeSlug).use(rehypeDirAuto);
+  p = p.use(rehypeCriticMarkup);
+  p = blockSlugs ? p.use(blockSlugs) : p.use(rehypeSlug);
+  p = p.use(rehypeDirAuto);
   if (rehypeKatex) p = p.use(rehypeKatex);
-  const proc = toReact(p.use(rehypeShiki, { isDark }));
-  fullProcessors.set(key, proc);
-  return proc;
+  return toReact(p.use(rehypeShiki, { isDark }));
+}
+
+/**
+ * The full pipeline for rendering a long document block by block
+ * (./incrementalPreview.ts): one processor per document, whose heading
+ * ids come from `blockSlugs` in place of rehype-slug.
+ */
+export function buildBlockProcessor(
+  isDark: () => boolean,
+  opts: { raw: boolean; math: boolean },
+  blockSlugs: BlockSlugPlugin,
+): Promise<LumenProcessor> {
+  return buildFullProcessor(isDark, opts, blockSlugs);
+}
+
+/** Which lazy parts (rehype-raw, KaTeX) the full pipeline needs for `source`. */
+export function pipelineOptions(source: string): { raw: boolean; math: boolean } {
+  return { raw: hasRawHtml(source), math: hasMath(source) };
 }
 
 /**
@@ -240,10 +271,7 @@ export async function renderMarkdown(
   markdownText: string,
   isDark: () => boolean,
 ): Promise<ReactElement> {
-  const proc = await getFullProcessor(isDark, {
-    raw: hasRawHtml(markdownText),
-    math: hasMath(markdownText),
-  });
+  const proc = await getFullProcessor(isDark, pipelineOptions(markdownText));
   const file = await proc.process(prepareCriticMarkup(markdownText));
   return file.result as ReactElement;
 }

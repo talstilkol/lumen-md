@@ -1424,5 +1424,6 @@
   "cmd.ai.cancel": "KI: Abbrechen",
   "cmd.ai.cancel.hint": "Stoppt alle laufenden KI-Anfragen (auch mit Esc)",
   "toast.aiCancelled": "KI-Anfrage abgebrochen ({count})",
-  "toast.aiNothingRunning": "Keine KI-Anfrage läuft"
+  "toast.aiNothingRunning": "Keine KI-Anfrage läuft",
+  "tree.showMore": "{count} weitere anzeigen"
 }
