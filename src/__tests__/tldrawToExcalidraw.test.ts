@@ -377,7 +377,7 @@ describe("tldraw → Excalidraw: details", () => {
     expect(el(r, "big").strokeWidth).toBe(4); // size m (2) × scale 2
     expect((el(r, "sline") as ExLinearElement).points).toEqual([[0, 0], [100, 50]]);
     // A dragged label on a bent arrow stays at its labelPosition along the arc.
-    const lab = el(r, "sbent-label");
+    const lab = el(r, "lbent-label");
     const lx = lab.x + lab.width / 2;
     expect(lx).toBeGreaterThan(900 + 15);
     expect(lx).toBeLessThan(900 + 40);
