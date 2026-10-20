@@ -1,8 +1,11 @@
 /** Git commands for a repository cloned into the workspace. */
 import { cmdIcons, type Command } from "../../ui/CommandPalette";
 import { t } from "../../i18n";
-import { getGitIdentity, setGitIdentity, setGitToken, cloneRepo, pullRepo, commitAndPush, gitStatusSummary, UnresolvedConflictsError } from "../../sync/git";
-import { getStoredCorsProxy, LOCAL_GIT_PROXY, looksLikeCorsFailure, setStoredCorsProxy } from "../../sync/gitProxy";
+// The git modules (and isomorphic-git behind them) load on first use: the
+// palette lists these commands at start-up, so nothing here may pull them
+// into the startup bundle.
+const gitApi = () => import("../../sync/git");
+const proxyApi = () => import("../../sync/gitProxy");
 import { uiAlert, uiPrompt } from "../../ui/PromptDialog";
 import { generateAiCommitMessage } from "../../ai/commands";
 import { log } from "../../lib/logger";
@@ -10,8 +13,9 @@ import { showAiToast } from "../../ui/AiToast";
 import { cancellable, type CommandContext } from "./context";
 
 /** A failed clone / pull: add a hint when the request never reached the git host (CORS). */
-function netError(e: unknown): string {
+async function netError(e: unknown): Promise<string> {
   const msg = (e as Error).message;
+  const { looksLikeCorsFailure } = await proxyApi();
   return looksLikeCorsFailure(e) ? `${msg}\n\n${t("git.alert.corsHint")}` : msg;
 }
 
@@ -29,6 +33,7 @@ export function buildGitCommands({ showWorkspace, toggleWorkspace, liveDoc }: Co
         if (!url) return;
         if (!showWorkspace) toggleWorkspace();
         try {
+          const { cloneRepo } = await gitApi();
           const result = await cloneRepo(url.trim());
           window.dispatchEvent(new Event("lumen-workspace-changed"));
           const lines = [t("git.alert.cloned", { folder: result.workspaceFolder, count: result.fileCount })];
@@ -37,7 +42,7 @@ export function buildGitCommands({ showWorkspace, toggleWorkspace, liveDoc }: Co
           await uiAlert({ message: lines.join("\n\n") });
         } catch (e) {
           await uiAlert({
-            message: t("git.alert.cloneFailed", { error: netError(e) }),
+            message: t("git.alert.cloneFailed", { error: await netError(e) }),
           });
         }
       },
@@ -68,6 +73,7 @@ export function buildGitCommands({ showWorkspace, toggleWorkspace, liveDoc }: Co
            defaultValue: aiSuggestion 
         }))?.trim();
         if (!message) return;
+        const { getGitIdentity, commitAndPush, UnresolvedConflictsError } = await gitApi();
         const identity = await getGitIdentity();
         try {
           await commitAndPush(repoFolder, message, identity);
@@ -98,13 +104,14 @@ export function buildGitCommands({ showWorkspace, toggleWorkspace, liveDoc }: Co
         try {
           // Safe pull (plan 3.3): merges into the vault, never deletes, never
           // overwrites a note with unsaved edits; the open notes are updated by it.
+          const { pullRepo } = await gitApi();
           const result = await pullRepo(repoFolder);
           window.dispatchEvent(new Event("lumen-workspace-changed"));
           const { reportPull } = await import("../../store/gitPullDocs");
           await reportPull(result);
         } catch (e) {
           await uiAlert({
-            message: t("git.alert.pullFailed", { error: netError(e) }),
+            message: t("git.alert.pullFailed", { error: await netError(e) }),
           });
         }
       },
@@ -121,6 +128,7 @@ export function buildGitCommands({ showWorkspace, toggleWorkspace, liveDoc }: Co
         }
         const repoFolder = liveDoc().workspaceName!.split("/")[0];
         try {
+          const { gitStatusSummary } = await gitApi();
           const summary = await gitStatusSummary(repoFolder);
           const total = summary.added + summary.modified + summary.deleted;
           await uiAlert({
@@ -175,6 +183,7 @@ export function buildGitCommands({ showWorkspace, toggleWorkspace, liveDoc }: Co
       action: async () => {
         const token = await uiPrompt({ message: t("git.prompt.token") });
         if (token === null) return;
+        const { setGitToken } = await gitApi();
         await setGitToken(token.trim() || null);
         await uiAlert({
           message: token.trim()
@@ -190,12 +199,23 @@ export function buildGitCommands({ showWorkspace, toggleWorkspace, liveDoc }: Co
       icon: cmdIcons.Link,
       group: t("group.git"),
       action: async () => {
+        const { getStoredCorsProxy, LOCAL_GIT_PROXY, normaliseProxyUrl, setStoredCorsProxy } = await proxyApi();
         const value = await uiPrompt({
           message: t("git.prompt.corsProxy"),
           defaultValue: getStoredCorsProxy() ?? "",
           placeholder: LOCAL_GIT_PROXY,
         });
         if (value === null) return;
+        // A proxy the page's CSP does not allow would be blocked before
+        // the request leaves: say so instead of saving a setting that fails.
+        const url = normaliseProxyUrl(value);
+        if (url) {
+          const { connectAllowedByCsp } = await import("../../lib/cspConnect");
+          if (!connectAllowedByCsp(url)) {
+            await uiAlert({ message: t("git.alert.corsProxyBlocked", { origin: new URL(url).origin }) });
+            return;
+          }
+        }
         try {
           setStoredCorsProxy(value);
         } catch {
@@ -211,6 +231,7 @@ export function buildGitCommands({ showWorkspace, toggleWorkspace, liveDoc }: Co
       icon: cmdIcons.Link,
       group: t("group.git"),
       action: async () => {
+        const { getGitIdentity, setGitIdentity } = await gitApi();
         const current = await getGitIdentity();
         const name = (await uiPrompt({
           message: t("git.prompt.identityName"),
