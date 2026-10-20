@@ -33,7 +33,7 @@ services:
       - ../:/app
     command: >
       npx --yes wrangler@4 dev --ip 0.0.0.0 --port 8787
-      --var ALLOWED_ORIGINS:${LUMEN_ORIGINS:-https://lumen-md.vercel.app,https://lumen.md,tauri://localhost,http://tauri.localhost,https://tauri.localhost,http://localhost:5173,http://localhost:4173,http://localhost:8080}
+      --var ALLOWED_ORIGINS:${LUMEN_ORIGINS:-https://lumen-md.vercel.app,tauri://localhost,http://tauri.localhost,https://tauri.localhost,http://localhost:5173,http://localhost:4173,http://localhost:8080}
       --var SEARXNG_URL:http://searxng:8080
     ports: ["8787:8787"]
     depends_on: [searxng]
