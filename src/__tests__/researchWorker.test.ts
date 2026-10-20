@@ -2,7 +2,7 @@
 /** Research worker (edge-workers/research): who may call it, decoding, and the extraction deadline. */
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import worker, { TOKEN_HEADER, type Env } from "../../edge-workers/research/worker";
-import { researchToken } from "../research/client";
+import { researchToken, saveResearchToken } from "../research/client";
 import { setSecret } from "../lib/secretStore";
 
 const ORIGIN = "https://lumen-md.app";
@@ -71,17 +71,29 @@ describe("research client token (A8)", () => {
     vi.stubGlobal("localStorage", { getItem: (k: string) => store.get(k) ?? null, setItem: (k: string, v: string) => void store.set(k, v), removeItem: (k: string) => void store.delete(k) });
   });
 
-  it("A8: sends the settings token only with the settings endpoint, else the build token", async () => {
-    // An override without its own token gets none, never the build's.
-    store.set("lumen.research.endpoint", "http://localhost:8787");
-    expect(researchToken("build-token")).toBe("");
+  it("A8: a token goes only to the endpoint it belongs to", async () => {
+    const built = "https://research.example";
+    const local = "http://localhost:8787";
+    // The build's endpoint gets the build's token; an override without its own token gets none.
+    expect(researchToken("build-token", built)).toBe("build-token");
+    store.set("lumen.research.endpoint", local);
+    expect(researchToken("build-token", built)).toBe("");
+    // A token saved for the override goes only to it…
+    expect(saveResearchToken("local-token", true, built)).toBe("local-token");
+    expect(researchToken("build-token", built)).toBe("local-token");
+    // …not to another override saved later with the token untouched (it is dropped)…
+    store.set("lumen.research.endpoint", "http://localhost:9999");
+    expect(researchToken("build-token", built)).toBe("");
+    expect(saveResearchToken("local-token", false, built)).toBe("");
+    expect(researchToken("build-token", built)).toBe("");
+    // …and with the override cleared the build's pair applies again.
     store.delete("lumen.research.endpoint");
-    await setSecret("lumen.research.token", "local-token");
-    expect(researchToken("build-token")).toBe("build-token"); // the build's endpoint: the build's token
-    store.set("lumen.research.endpoint", "http://localhost:8787");
-    expect(researchToken("build-token")).toBe("local-token");
-    store.delete("lumen.research.endpoint"); // the override removed: back to the build's pair
-    expect(researchToken("build-token")).toBe("build-token");
+    expect(researchToken("build-token", built)).toBe("build-token");
+    // A token entered for the build's endpoint itself (no override) is used there.
+    expect(saveResearchToken("runtime-token", true, built)).toBe("runtime-token");
+    expect(researchToken("", built)).toBe("runtime-token");
+    store.set("lumen.research.endpoint", local);
+    expect(researchToken("", built)).toBe("");
     await setSecret("lumen.research.token", null);
   });
 });

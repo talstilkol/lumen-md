@@ -62,8 +62,9 @@ your deployment runs (`edge-workers/research`, set with
 - It only answers your app's own origins.
 - It requires a shared token (`RESEARCH_TOKEN`). Your deployment builds
   it into the app (`VITE_RESEARCH_TOKEN`), or you enter it under AI
-  settings → Research token. Without a token configured, the service
-  refuses every request.
+  settings → Research token. A token entered there is sent only to the
+  research address that was in use when you saved it. Without a token
+  configured, the service refuses every request.
 
 Claude web search doesn't need the service.
 
