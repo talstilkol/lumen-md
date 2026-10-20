@@ -26,7 +26,7 @@ const FineTuneSettings = lazy(() => import("./ui/FineTuneSettings").then(m => ({
 const VersionHistory = lazy(() => import("./ui/VersionHistory").then(m => ({ default: m.VersionHistory })));
 const MarkdownTableEditor = lazy(() => import("./ui/MarkdownTableEditor").then(m => ({ default: m.MarkdownTableEditor })));
 // PDF reader (plan 4.14): pdf.js and the reader load only when a PDF is opened.
-const PdfReader = lazy(() => import("./pdf/PdfReader").then(m => ({ default: m.PdfReader })));
+const PdfReader = lazy(() => import("./pdf/PdfReader").then(m => ({ default: m.PdfReaderOverlay })));
 import { htmlToMarkdown } from "./storage/fileFormats";
 import { wirePluginAPI, registerPlugin, unregisterPlugin, wordCountPlugin } from "./plugins/pluginSystem";
 import { CommandPalette } from "./ui/CommandPalette";
@@ -34,7 +34,9 @@ import { AiFab } from "./ui/AiFab";
 import { FileTree } from "./ui/FileTree";
 import { SidebarResizer } from "./ui/SidebarResizer";
 import { uiAlert, uiConfirm, uiPrompt } from "./ui/PromptDialog";
-import { openInsertTextDialog } from "./ui/InsertTextDialog";
+// The Insert-text dialog (and its smart detector) loads on first use, off the
+// startup path — it made room in the startup budget for the PDF reader (4.14).
+const openInsertTextDialog = () => import("./ui/InsertTextDialog").then((m) => m.openInsertTextDialog());
 import { BacklinksPanel } from "./ui/BacklinksPanel";
 // SearchDialog imports the CodeMirror search-highlight extension; lazy so
 // the boot path stays CodeMirror-free (the dialog opens on ⌘⇧F).
@@ -1053,24 +1055,8 @@ export default function App() {
 
       {/* PDF reader overlay (plan 4.14) */}
       {pdfView && (
-        <Suspense fallback={<div style={{ position: "fixed", inset: 0, zIndex: 9999, padding: "2rem", background: "hsl(var(--bg))", color: "hsl(var(--fg-muted))" }}>{t("loading.generic")}</div>}>
-          <ErrorBoundary fallback={
-            <div style={{ position: "fixed", inset: 0, zIndex: 9999, padding: "3rem", textAlign: "center", background: "hsl(var(--bg))", color: "hsl(0 80% 60%)" }}>
-              <strong>{t("pdf.crashed")}</strong>
-              <p><button className="icon-btn" style={{ width: "auto", padding: "4px 12px" }} onClick={() => setPdfView(null)}>{t("pdf.close")}</button></p>
-            </div>
-          }>
-            <PdfReader
-              path={pdfView.path}
-              fragment={pdfView.fragment}
-              openSeq={pdfView.seq}
-              onClose={() => setPdfView(null)}
-              onOpenNotes={(notePath) => {
-                setPdfView(null);
-                window.dispatchEvent(new CustomEvent("lumen-open-file", { detail: { path: notePath } }));
-              }}
-            />
-          </ErrorBoundary>
+        <Suspense fallback={null}>
+          <PdfReader path={pdfView.path} fragment={pdfView.fragment} openSeq={pdfView.seq} onClose={() => setPdfView(null)} />
         </Suspense>
       )}
 

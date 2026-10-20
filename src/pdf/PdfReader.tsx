@@ -20,6 +20,7 @@
 import { memo, useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import { t } from "../i18n";
 import { showAiToast } from "../ui/AiToast";
+import { ErrorBoundary } from "../ui/ErrorBoundary";
 import {
   anchorAnnotation,
   companionNotePath,
@@ -49,6 +50,34 @@ interface Props {
   onClose: () => void;
   /** Open the companion note in the editor. */
   onOpenNotes: (notePath: string) => void;
+}
+
+/**
+ * What the app mounts: the reader in an error boundary; "Open the notes"
+ * closes it and opens the companion note through the app's open-file hub.
+ */
+export function PdfReaderOverlay(props: Omit<Props, "onOpenNotes">) {
+  const { onClose } = props;
+  return (
+    <ErrorBoundary
+      fallback={
+        <div className="pdf-reader pdf-message pdf-error" role="alert">
+          <p>{t("errorBoundary.heading")}</p>
+          <button type="button" className="icon-btn pdf-text-btn" onClick={onClose}>
+            {t("privacy.close")}
+          </button>
+        </div>
+      }
+    >
+      <PdfReader
+        {...props}
+        onOpenNotes={(notePath) => {
+          onClose();
+          window.dispatchEvent(new CustomEvent("lumen-open-file", { detail: { path: notePath } }));
+        }}
+      />
+    </ErrorBoundary>
+  );
 }
 
 interface PageSize {
@@ -224,6 +253,8 @@ export function PdfReader({ path, fragment = null, openSeq = 0, onClose, onOpenN
 
   const persist = useCallback(
     (next: PdfAnnotation[]) => {
+      // Two changes before the next render must not drop the first one.
+      annotationsRef.current = next;
       setAnnotations(next);
       const job = writeQueue.current.then(async () => {
         const [ws, { flushActiveWorkspaceDoc }, { notifyWorkspaceChanged }] = await Promise.all([
@@ -411,7 +442,7 @@ export function PdfReader({ path, fragment = null, openSeq = 0, onClose, onOpenN
       data-ready={doc ? "true" : undefined}
       role="dialog"
       aria-modal="true"
-      aria-label={t("pdf.reader.title")}
+      aria-label={name}
     >
       <div className="pdf-toolbar">
         <strong className="pdf-title" title={path} dir="auto">
@@ -423,7 +454,7 @@ export function PdfReader({ path, fragment = null, openSeq = 0, onClose, onOpenN
             min={1}
             max={Math.max(1, sizes.length)}
             value={current}
-            aria-label={t("pdf.page.input")}
+            aria-label={t("pdf.page.label", { n: current })}
             onChange={(e) => {
               const n = Number(e.target.value);
               if (Number.isFinite(n) && n >= 1 && n <= sizes.length) goToPage(n);
@@ -472,14 +503,14 @@ export function PdfReader({ path, fragment = null, openSeq = 0, onClose, onOpenN
               }
             }}
           />
-          <button type="button" className="icon-btn" onClick={() => void runSearch(query, -1)} aria-label={t("pdf.search.prev")} title={t("pdf.search.prev")}>
+          <button type="button" className="icon-btn" onClick={() => void runSearch(query, -1)} aria-label={t("findReplace.prev")} title={t("findReplace.prev")}>
             ↑
           </button>
-          <button type="submit" className="icon-btn" aria-label={t("pdf.search.next")} title={t("pdf.search.next")}>
+          <button type="submit" className="icon-btn" aria-label={t("findReplace.next")} title={t("findReplace.next")}>
             ↓
           </button>
           <span className="pdf-count" aria-live="polite" data-testid="pdf-search-count">
-            {hitIndex >= 0 ? t("pdf.search.count", { i: hitIndex + 1, n: hits.length }) : searched ? t("pdf.search.none") : ""}
+            {hitIndex >= 0 ? t("pdf.search.count", { i: hitIndex + 1, n: hits.length }) : searched ? t("search.noMatches") : ""}
           </span>
         </form>
         <div className="pdf-group pdf-end">
@@ -499,7 +530,7 @@ export function PdfReader({ path, fragment = null, openSeq = 0, onClose, onOpenN
             {t("pdf.openNotes")}
           </button>
           <button type="button" className="icon-btn pdf-text-btn" data-testid="pdf-close" onClick={onClose}>
-            {t("pdf.close")}
+            {t("privacy.close")}
           </button>
         </div>
       </div>
@@ -510,7 +541,7 @@ export function PdfReader({ path, fragment = null, openSeq = 0, onClose, onOpenN
               {t("pdf.failed", { error })}
             </p>
           )}
-          {!doc && !error && <p className="pdf-message">{t("pdf.loading")}</p>}
+          {!doc && !error && <p className="pdf-message">{t("loading.generic")}</p>}
           {doc &&
             sizes.map((size, i) => (
               <PdfPageView
@@ -558,7 +589,7 @@ export function PdfReader({ path, fragment = null, openSeq = 0, onClose, onOpenN
                     dir="auto"
                     defaultValue={d.note}
                     placeholder={t("pdf.note.placeholder")}
-                    aria-label={t("pdf.note.label")}
+                    aria-label={t("pdf.note.placeholder")}
                     rows={2}
                     onBlur={(e) => {
                       const v = e.target.value.trim();
@@ -567,7 +598,7 @@ export function PdfReader({ path, fragment = null, openSeq = 0, onClose, onOpenN
                     }}
                   />
                   <button type="button" className="icon-btn pdf-text-btn" onClick={() => persist(annotationsRef.current.filter((x) => x.id !== a.id))}>
-                    {t("pdf.delete")}
+                    {t("toolbar.delete")}
                   </button>
                 </li>
               );
@@ -741,7 +772,7 @@ const PdfPageView = memo(function PdfPageView({
       onOcr(page, text);
       setReady((n) => n + 1);
     } catch (e) {
-      showAiToast(t("pdf.ocr.failed", { error: e instanceof Error ? e.message : String(e) }), "error");
+      showAiToast(t("pdf.failed", { error: e instanceof Error ? e.message : String(e) }), "error");
     } finally {
       setOcrBusy(false);
     }
@@ -812,7 +843,7 @@ const PdfPageView = memo(function PdfPageView({
         <div className="pdf-ocr-wrap" style={{ width: `${size.w * scale}px` }}>
           <div className="pdf-hl-layer">{marks(true)}</div>
           <div ref={ocrRef} className="pdf-ocr" data-pdf-text="ocr" dir="auto">
-            {ocrText || t("pdf.ocr.none")}
+            {ocrText || t("pdf.ocr.scanned")}
           </div>
         </div>
       )}

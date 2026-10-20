@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-10-20T18:16:21.182Z",
+  "generated_at": "2026-10-20T18:37:10.508Z",
   "source": "src/i18n/index.ts (en bundle)",
-  "count": 1469,
+  "count": 1457,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -1812,17 +1812,7 @@
     },
     {
       "key": "cmd.pdf.open.hint",
-      "en": "Copies it into the workspace; highlights are saved to a .pdf.md note",
-      "vars": []
-    },
-    {
-      "key": "pdf.reader.title",
-      "en": "PDF reader",
-      "vars": []
-    },
-    {
-      "key": "pdf.loading",
-      "en": "Opening the PDF…",
+      "en": "Highlights go to a .pdf.md note",
       "vars": []
     },
     {
@@ -1833,13 +1823,8 @@
       ]
     },
     {
-      "key": "pdf.crashed",
-      "en": "The PDF reader stopped working.",
-      "vars": []
-    },
-    {
       "key": "pdf.noWorkspace",
-      "en": "Reading PDFs needs the workspace, which this browser can't provide.",
+      "en": "PDFs need the workspace, which this browser can't provide.",
       "vars": []
     },
     {
@@ -1849,11 +1834,6 @@
         "n",
         "total"
       ]
-    },
-    {
-      "key": "pdf.page.input",
-      "en": "Page number",
-      "vars": []
     },
     {
       "key": "pdf.page.label",
@@ -1883,16 +1863,6 @@
       "vars": []
     },
     {
-      "key": "pdf.search.next",
-      "en": "Next match",
-      "vars": []
-    },
-    {
-      "key": "pdf.search.prev",
-      "en": "Previous match",
-      "vars": []
-    },
-    {
       "key": "pdf.search.count",
       "en": "{i} of {n}",
       "vars": [
@@ -1901,18 +1871,13 @@
       ]
     },
     {
-      "key": "pdf.search.none",
-      "en": "No matches",
-      "vars": []
-    },
-    {
       "key": "pdf.highlight",
       "en": "Highlight",
       "vars": []
     },
     {
       "key": "pdf.highlight.hint",
-      "en": "Select text on a page, then highlight it (H)",
+      "en": "Select text, then press H",
       "vars": []
     },
     {
@@ -1922,7 +1887,7 @@
     },
     {
       "key": "pdf.highlights.empty",
-      "en": "No highlights yet. Select text on a page and press Highlight.",
+      "en": "Select text and press Highlight.",
       "vars": []
     },
     {
@@ -1931,28 +1896,13 @@
       "vars": []
     },
     {
-      "key": "pdf.note.label",
-      "en": "Note for this highlight",
-      "vars": []
-    },
-    {
-      "key": "pdf.delete",
-      "en": "Delete",
-      "vars": []
-    },
-    {
       "key": "pdf.unanchored",
-      "en": "This highlight's text wasn't found on the page.",
+      "en": "Text not found on the page.",
       "vars": []
     },
     {
       "key": "pdf.openNotes",
       "en": "Open the notes",
-      "vars": []
-    },
-    {
-      "key": "pdf.close",
-      "en": "Close",
       "vars": []
     },
     {
@@ -1995,18 +1945,6 @@
       "key": "pdf.ocr.running",
       "en": "Recognising text on this device…",
       "vars": []
-    },
-    {
-      "key": "pdf.ocr.none",
-      "en": "No text found on this page.",
-      "vars": []
-    },
-    {
-      "key": "pdf.ocr.failed",
-      "en": "Text recognition failed: {error}",
-      "vars": [
-        "error"
-      ]
     },
     {
       "key": "cmd.ai.cancel",
