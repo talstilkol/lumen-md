@@ -208,7 +208,7 @@ export default function App() {
   // Launched from the installed app: share target, shortcut, or a file
   // opened with Lumen (D3).
   useEffect(() => {
-    void import("./pwa/launch").then(({ parseLaunch, sharedItem, clearLaunchParams, onLaunchFiles }) => {
+    void import("./pwa/launch").then(({ parseLaunch, sharedItem, clearLaunchParams, onLaunchFiles, onDesktopCapture }) => {
       const l = parseLaunch(location.search);
       const shared = sharedItem(location.search);
       if (l.kind === "share") {
@@ -217,11 +217,8 @@ export default function App() {
         const asNote = () => openNewDoc(l.title.replace(/[\\/:*?"<>|]+/g, " ").slice(0, 60).trim() || "Shared", l.body, true);
         // Plan 4.16: shares go to the end of inbox.md; a new note only where
         // the vault can't be written.
-        if (shared && isOPFSAvailable()) {
-          void import("./capture/quickCapture")
-            .then((m) => m.captureShared(shared))
-            .then(() => showAiToast(t("capture.sharedSaved"), "success"), asNote);
-        } else asNote();
+        if (shared && isOPFSAvailable()) void import("./capture/quickCapture").then((m) => m.captureShared(shared)).catch(asNote);
+        else asNote();
       } else if (l.kind === "action" && l.action === "capture") {
         setCaptureOpen(true);
       } else if (l.kind === "action" && l.action === "new") {
@@ -230,6 +227,7 @@ export default function App() {
         setPaletteOpen(true);
       }
       if (l.kind !== "none") clearLaunchParams();
+      onDesktopCapture();
       // With the file's handle, so Save writes back to the file that was opened.
       onLaunchFiles((name, content, handle) => openTabAction({ name, content, workspaceName: null, handle }));
     });
@@ -472,15 +470,11 @@ export default function App() {
     return () => window.removeEventListener("lumen-open-today", onToday);
   }, []);
 
-  // Quick capture (plan 4.16): the command, ⌥⌘N, the menu item — and on the
-  // desktop app the same keys system-wide, when the shell has the
-  // global-shortcut plugin (a feature check; see src/capture/desktopShortcut.ts).
+  // Quick capture (plan 4.16): the command palette and the desktop
+  // global shortcut (src/pwa/launch.ts) send this event.
   useEffect(() => {
     const onCapture = () => setCaptureOpen(true);
     window.addEventListener("lumen-open-capture", onCapture);
-    if ("__TAURI_INTERNALS__" in window) {
-      void import("./capture/desktopShortcut").then((m) => m.registerGlobalCapture(onCapture)).catch(() => false);
-    }
     return () => window.removeEventListener("lumen-open-capture", onCapture);
   }, []);
 
@@ -582,7 +576,8 @@ export default function App() {
         return;
       }
       // ⌥⌘N → quick capture to inbox.md (plan 4.16).
-      if (e.altKey && e.code === "KeyN") {
+      // Not AltGr (reported as Ctrl+Alt on Windows / Linux): AltGr+N types a letter (ń).
+      if (e.altKey && e.code === "KeyN" && !e.getModifierState("AltGraph")) {
         e.preventDefault();
         setCaptureOpen(true);
         return;

@@ -10,7 +10,9 @@
  * The inbox is created (with a heading) when it is missing; what is already
  * in it is never rewritten — an entry only ever goes after the last byte.
  * When the inbox is open in a tab, its unsaved edits are kept: the entry is
- * added to the open text, not to the older copy on disk.
+ * added to the open text, not to the older copy on disk. The day's daily
+ * note is created too (from its template, never overwritten), so the link
+ * opens it.
  *
  * Loaded on demand (the capture box, the share target and the desktop
  * shortcut import it), so none of this is in the startup bundle.
@@ -18,9 +20,10 @@
 
 import { t } from "../i18n";
 import { flushPendingEdits, useAppStore } from "../store/useStore";
+import { toast } from "../store/useToastStore";
 import { readWorkspaceFile, workspaceHasFile, writeWorkspaceFile } from "../storage/workspace";
 import { notifyWorkspaceChanged } from "../storage/workspaceEvents";
-import { dayOf, fileNameFor, type DailySettings } from "../daily/dailyNote";
+import { dayOf, ensureDailyNote, fileNameFor, type DailySettings } from "../daily/dailyNote";
 import type { SharedItem } from "../pwa/launch";
 
 /** The inbox note, at the root of the vault. */
@@ -78,7 +81,8 @@ export function captureToInbox(text: string, when: Date = new Date()): Promise<s
 }
 
 async function capture(text: string, when: Date): Promise<string | null> {
-  const entry = formatEntry(text, when, useAppStore.getState().dailyNotes);
+  const { dailyNotes, locale } = useAppStore.getState();
+  const entry = formatEntry(text, when, dailyNotes);
   if (!entry) return null;
   // Edits the editor has not handed to the store yet belong to the base too.
   flushPendingEdits();
@@ -88,25 +92,37 @@ async function capture(text: string, when: Date): Promise<string | null> {
   const base = s.doc.workspaceName === INBOX_PATH ? s.doc.content : tab ? tab.content : exists ? await readWorkspaceFile(INBOX_PATH) : null;
   const next = appendEntry(base, entry);
   await writeWorkspaceFile(INBOX_PATH, next);
-  // The open copy follows the file. Typed into while we wrote: keep that
-  // text and add the entry to it; autosave writes it.
+  // The open copy follows the file. The active inbox stays dirty, so the
+  // editor's autosave writes it once more after any older autosave still in
+  // flight — that one can't leave the file without the entry. Typed into
+  // while we wrote: keep that text and add the entry to it.
   useAppStore.setState((st) => {
     const active = st.doc.workspaceName === INBOX_PATH;
     const typed = active && st.doc.content !== (base ?? "") && st.doc.content !== next;
-    const doc = !active ? st.doc : typed ? { ...st.doc, content: appendEntry(st.doc.content, entry), dirty: true } : { ...st.doc, content: next, dirty: false };
-    const openTabs = st.openTabs.map((x) => (x.workspaceName !== INBOX_PATH ? x : active ? { ...x, content: doc.content, dirty: doc.dirty } : { ...x, content: next, dirty: false }));
+    const doc = active ? { ...st.doc, content: typed ? appendEntry(st.doc.content, entry) : next, dirty: true } : st.doc;
+    const openTabs = st.openTabs.map((x) => (x.workspaceName !== INBOX_PATH ? x : active ? { ...x, content: doc.content, dirty: true } : { ...x, content: next, dirty: false }));
     return { doc, openTabs };
   });
   notifyWorkspaceChanged(exists ? { kind: "content", paths: [INBOX_PATH] } : { kind: "structure", paths: [INBOX_PATH] });
+  // The entry links to the day's note: make sure it is there to open.
+  await ensureDailyNote(dayOf(when), dailyNotes, locale).catch(() => undefined);
   return INBOX_PATH;
 }
 
-/** Show the inbox: its open tab (with any unsaved edits), or a new tab from disk. */
+/** Show the inbox: its open tab (with any unsaved edits), or a new tab from disk (created when missing). */
 export async function openInbox(): Promise<void> {
   const s = useAppStore.getState();
   if (s.doc.workspaceName === INBOX_PATH) return;
   const tab = s.openTabs.find((x) => x.workspaceName === INBOX_PATH);
-  const content = tab ? tab.content : await readWorkspaceFile(INBOX_PATH);
+  let content = tab?.content;
+  if (content === undefined) {
+    if (await workspaceHasFile(INBOX_PATH)) content = await readWorkspaceFile(INBOX_PATH);
+    else {
+      content = `# ${t("capture.inboxHeading")}\n\n`;
+      await writeWorkspaceFile(INBOX_PATH, content);
+      notifyWorkspaceChanged({ kind: "structure", paths: [INBOX_PATH] });
+    }
+  }
   s.openTab({ name: INBOX_PATH, content, workspaceName: INBOX_PATH });
 }
 
@@ -117,6 +133,9 @@ export async function openInbox(): Promise<void> {
  */
 export async function captureShared(item: SharedItem): Promise<string | null> {
   const path = await captureToInbox(sharedText(item));
-  if (path) await openInbox().catch(() => undefined);
+  if (path) {
+    toast.success(t("capture.saved", { path }));
+    await openInbox().catch(() => undefined);
+  }
   return path;
 }

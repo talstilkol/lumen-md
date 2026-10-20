@@ -90,3 +90,15 @@ export function onLaunchFiles(open: (name: string, content: string, handle: File
     }
   });
 }
+
+/**
+ * Desktop app only: the system-wide quick-capture shortcut (plan 4.16),
+ * when the shell has Tauri's global-shortcut plugin (a feature check — see
+ * src/capture/desktopShortcut.ts). A press opens the capture box.
+ */
+export function onDesktopCapture(): void {
+  if (typeof window === "undefined" || !("__TAURI_INTERNALS__" in window)) return;
+  void import("../capture/desktopShortcut")
+    .then((m) => m.registerGlobalCapture(() => window.dispatchEvent(new CustomEvent("lumen-open-capture"))))
+    .catch(() => false);
+}

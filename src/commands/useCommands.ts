@@ -571,8 +571,7 @@ export function useCommands({
       },
       {
         id: "note.capture",
-        label: t("cmd.note.capture"),
-        hint: t("cmd.note.capture.hint"),
+        label: t("capture.title"),
         shortcut: "⌥⌘N",
         icon: cmdIcons.FileText,
         group: t("group.file"),

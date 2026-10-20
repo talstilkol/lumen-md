@@ -5,7 +5,8 @@ description: Add a thought, task or link to inbox.md in two steps, from the keyb
 
 Quick capture adds one entry to the end of `inbox.md`, at the root of
 your workspace. It takes two steps: open the capture box, type and press
-Enter. You stay in the note you were working on.
+Enter. You stay in the note you were working on. (Sharing is the
+exception: it opens the inbox afterwards.)
 
 Each entry is a list item that links to that day's
 [daily note](#how-an-entry-looks) and records the time:
@@ -57,8 +58,10 @@ feature, planned with the native apps (plan 13.3).
 ## How an entry looks
 
 - `[[…]]` is the name of that day's daily note, built from your
-  daily-note file pattern (**Calendar ▸ Daily note settings**). The link
-  works even before the daily note exists, and opening it creates the note.
+  daily-note file pattern (**Calendar ▸ Daily note settings**). If that
+  note doesn't exist yet, the capture creates it from your daily-note
+  template, so the link always opens it. An existing daily note is never
+  changed.
 - The time is your device's local time, as `HH:MM`.
 - Blank lines before and after the text are removed, as are spaces at
   the ends of lines. All other lines are indented by two spaces so they

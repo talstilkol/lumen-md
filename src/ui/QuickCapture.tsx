@@ -96,7 +96,7 @@ export function QuickCapture({ open, onClose }: Props) {
             className="prompt-btn prompt-btn-cancel"
             onClick={() => {
               onClose();
-              void openInbox().catch(() => toast.info(t("capture.inboxEmpty")));
+              void openInbox().catch((e: unknown) => toast.error(t("capture.failed", { error: e instanceof Error ? e.message : String(e) })));
             }}
           >
             {t("capture.openInbox")}

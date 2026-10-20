@@ -60,10 +60,16 @@ describe("captureToInbox", () => {
     useAppStore.setState({ doc: { name: "Untitled.md", content: "", dirty: false, workspaceName: null }, openTabs: [], dailyNotes: { ...DEFAULT_DAILY } });
   });
 
-  it("creates inbox.md when it is missing", async () => {
+  it("creates inbox.md when it is missing, and the linked daily note", async () => {
     expect(await captureToInbox("first", at)).toBe(INBOX_PATH);
-    expect((await listWorkspace()).map((f) => f.path)).toEqual(["inbox.md"]);
+    expect((await listWorkspace()).map((f) => f.path).sort()).toEqual(["inbox.md", "journal/2026-10-20.md"]);
     expect(await readWorkspaceFile(INBOX_PATH)).toBe("# Inbox\n\n- [[2026-10-20]] 09:05 first\n");
+  });
+
+  it("an existing daily note is left alone", async () => {
+    await writeWorkspaceFile("journal/2026-10-20.md", "my day");
+    await captureToInbox("x", at);
+    expect(await readWorkspaceFile("journal/2026-10-20.md")).toBe("my day");
   });
 
   it("never overwrites what is already there", async () => {
@@ -97,6 +103,8 @@ describe("captureToInbox", () => {
     expect(await readWorkspaceFile(INBOX_PATH)).toBe(want);
     const s = useAppStore.getState();
     expect(s.doc.content).toBe(want);
+    // Still dirty: autosave writes it after any older autosave in flight.
+    expect(s.doc.dirty).toBe(true);
     expect(s.openTabs.find((x) => x.workspaceName === INBOX_PATH)?.content).toBe(want);
   });
 
@@ -109,6 +117,12 @@ describe("captureToInbox", () => {
     expect(await readWorkspaceFile(INBOX_PATH)).toBe(want);
     expect(useAppStore.getState().openTabs.find((x) => x.workspaceName === INBOX_PATH)?.content).toBe(want);
     expect(useAppStore.getState().doc.name).toBe("other.md");
+  });
+
+  it("openInbox creates a missing inbox", async () => {
+    await openInbox();
+    expect(await readWorkspaceFile(INBOX_PATH)).toBe("# Inbox\n\n");
+    expect(useAppStore.getState().doc.workspaceName).toBe(INBOX_PATH);
   });
 
   it("openInbox shows the inbox in one tab", async () => {

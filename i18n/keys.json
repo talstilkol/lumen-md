@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-10-20T14:46:30.140Z",
+  "generated_at": "2026-10-20T15:07:05.383Z",
   "source": "src/i18n/index.ts (en bundle)",
-  "count": 1445,
+  "count": 1441,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -1806,28 +1806,18 @@
       ]
     },
     {
-      "key": "cmd.note.capture",
-      "en": "Quick capture",
-      "vars": []
-    },
-    {
-      "key": "cmd.note.capture.hint",
-      "en": "Add a line to the end of inbox.md, from anywhere (⌥⌘N)",
-      "vars": []
-    },
-    {
       "key": "capture.title",
       "en": "Quick capture",
       "vars": []
     },
     {
       "key": "capture.placeholder",
-      "en": "A thought, a task, a link…",
+      "en": "A thought, a task, a link",
       "vars": []
     },
     {
       "key": "capture.hint",
-      "en": "Enter adds it to the end of inbox.md · Shift+Enter for a new line · Esc to close",
+      "en": "Enter: add · Shift+Enter: new line · Esc: close",
       "vars": []
     },
     {
@@ -1848,11 +1838,6 @@
       ]
     },
     {
-      "key": "capture.sharedSaved",
-      "en": "Shared to inbox.md",
-      "vars": []
-    },
-    {
       "key": "capture.failed",
       "en": "Couldn't add to the inbox: {error}",
       "vars": [
@@ -1862,11 +1847,6 @@
     {
       "key": "capture.noWorkspace",
       "en": "Quick capture needs the workspace, which this browser can't provide.",
-      "vars": []
-    },
-    {
-      "key": "capture.inboxEmpty",
-      "en": "The inbox is empty — nothing has been captured yet.",
       "vars": []
     },
     {
