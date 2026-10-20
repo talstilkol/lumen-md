@@ -17,7 +17,6 @@ import {
   dirname,
   isOPFSAvailable,
   joinPath,
-  listWorkspaceTree,
   readWorkspaceFile,
   uniqueWorkspaceName,
   writeWorkspaceFile,
@@ -32,6 +31,26 @@ import { flushActiveWorkspaceDoc, syncOpenDocsAfterMove } from "../store/openDoc
 import type { TrashItem } from "../storage/trash";
 import { toast, useToastStore } from "../store/useToastStore";
 import { onWorkspaceChanged } from "../storage/workspaceEvents";
+import { workspaceTree } from "../storage/workspaceIndex";
+
+/**
+ * A vault with more notes than this opens with its folders collapsed
+ * (plan 8.4): rendering 10,000 rows at once is what made a big vault slow
+ * to open, and nobody scrolls through them all.
+ */
+export const LARGE_VAULT_FILES = 1000;
+
+/** Every folder path of `nodes`, and how many files they hold in all. */
+function folderStats(nodes: WorkspaceNode[], dirs: string[] = []): { dirs: string[]; files: number } {
+  let files = 0;
+  for (const n of nodes) {
+    if (n.kind === "directory") {
+      dirs.push(n.path);
+      files += folderStats(n.children ?? [], dirs).files;
+    } else files++;
+  }
+  return { dirs, files };
+}
 
 interface Props {
   /** Currently active workspace path (if any). */
@@ -63,6 +82,10 @@ export function FileTree({
     node: WorkspaceNode;
   } | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
+  /** The large-vault collapse happens once, on the first listing. */
+  const autoCollapsed = useRef(false);
+  const activePathRef = useRef(activePath);
+  activePathRef.current = activePath;
 
   /** Ask before replacing anything (moves never overwrite silently — T46). */
   const confirmReplace = (path: string) => uiConfirm({ message: t("tree.confirm.replace", { path }) });
@@ -189,7 +212,20 @@ export function FileTree({
     () => async () => {
       if (!available) return;
       try {
-        const list = await listWorkspaceTree();
+        // The index's listing: after a structural change the vault is
+        // listed once for the tree and the index together.
+        const list = await workspaceTree();
+        if (!autoCollapsed.current) {
+          autoCollapsed.current = true;
+          const { dirs, files } = folderStats(list);
+          if (files > LARGE_VAULT_FILES) {
+            // The active note's folders stay open (the effect below).
+            const keep = new Set<string>();
+            const active = activePathRef.current;
+            for (let p = active ? dirname(active) : ""; p; p = dirname(p)) keep.add(p);
+            setCollapsed(new Set(dirs.filter((d) => !keep.has(d))));
+          }
+        }
         setTree(list);
       } catch {
         setTree([]);

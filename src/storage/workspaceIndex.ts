@@ -1,13 +1,39 @@
-import { noteKey } from "../lib/slug";
+/**
+ * The workspace index: search, backlinks, the tags panel and the file
+ * tree read the vault through it.
+ *
+ * Plan 8.4 (large vault): the index itself — lower-cased text, Hebrew
+ * comparison forms, the backlinks map — lives in a Web Worker
+ * (./vaultIndex.worker.ts over ./vaultIndexCore.ts), so a query over
+ * 10,000 notes never blocks typing. This module stays on the main thread:
+ * it reads notes through the VaultBackend (./vault) and keeps the worker in
+ * step, one changed file at a time.
+ *
+ * What keeps it fresh, cheapest first:
+ *   - vault events (`watchVault`): a write marks that file dirty, a delete
+ *     or a rename moves / drops its entries without reading anything;
+ *   - `lumen-workspace-changed` "content" events mark the saved files dirty;
+ *   - a structural event (or every REVALIDATE_MS) re-lists the vault and
+ *     re-reads only the files whose mtime changed or that appeared — never
+ *     the whole vault again after the first build.
+ */
+
 import { WORKSPACE_CHANGED, changeOf } from "./workspaceEvents";
-import { hasHebrew, hebrewFind } from "../text/hebrew";
 import {
-  basename,
   isAssetName,
   isOPFSAvailable,
   listWorkspace,
+  listWorkspaceTree,
   readWorkspaceFile,
+  type WorkspaceEntry,
+  type WorkspaceNode,
 } from "./workspace";
+import { watchVault, type VaultEvent } from "./vault";
+import { wikiTargetsOf, type BacklinkHit, type IndexInput, type IndexStats, type SearchHit } from "./vaultIndexCore";
+import { localEngine, workerEngine, type IndexEngine } from "./vaultIndexProtocol";
+import { log } from "../lib/logger";
+
+export type { BacklinkHit, SearchHit } from "./vaultIndexCore";
 
 export interface IndexedFile {
   /** Full workspace path. */
@@ -26,29 +52,92 @@ const cache = {
   inflight: null as Promise<void> | null,
   /** Files whose text changed since they were indexed (C3). */
   dirty: new Set<string>(),
-  /** Files were added / removed / renamed: rebuild on next use. */
+  /** Deleted paths (files or folders) not yet dropped from the index. */
+  removed: new Set<string>(),
+  /** Renames / moves not yet applied to the index. */
+  moved: [] as { from: string; to: string }[],
+  /** Files may have appeared / disappeared behind the events: re-list on next use. */
   stale: false,
   /** When the index was last checked against the vault listing. */
   checkedAt: 0,
+  /** Bumped on every structural event; a listing is reusable only within one generation. */
+  generation: 0,
+  /** The file tree's last listing (`workspaceTree`), which the index reuses when nothing moved since. */
+  listing: null as { generation: number; tree: WorkspaceNode[] } | null,
 };
 
 /**
- * Not every writer announces its writes (agent tools, the page-hide flush,
- * sync): at most this often, a use of the index re-lists the vault and
- * re-reads only the files whose mtime changed — or that appeared.
+ * Not every change reaches the index as an event (another tab writing
+ * the same OPFS, a folder edited behind a watcher's back): at most this
+ * often, a use of the index re-lists the vault and re-reads only the
+ * files whose mtime changed — or that appeared.
  */
 export const REVALIDATE_MS = 30_000;
-const WIKI_RE = /\[\[([^\]\r\n|]+?)(?:\|[^\]\r\n]+?)?\]\]/g;
+/** Notes sent to the worker per message while building. */
+const UPSERT_BATCH = 500;
+
+// ── The engine (worker, or this thread) ─────────────────────────────────
+
+let engine: Promise<IndexEngine> | null = null;
+let engineOverride: (() => IndexEngine) | null = null;
+
+async function createEngine(): Promise<IndexEngine> {
+  if (engineOverride) return engineOverride();
+  if (typeof Worker !== "undefined") {
+    try {
+      const w = new Worker(new URL("./vaultIndex.worker.ts", import.meta.url), { type: "module" });
+      return workerEngine(w);
+    } catch (err) {
+      log.warn("vault index worker unavailable; indexing on the main thread", err);
+    }
+  }
+  return localIndexEngine();
+}
+
+/** The core is only loaded on the main thread when there is no worker. */
+async function localIndexEngine(): Promise<IndexEngine> {
+  const { VaultIndex } = await import("./vaultIndexCore");
+  return localEngine(new VaultIndex());
+}
+
+function getEngine(): Promise<IndexEngine> {
+  return (engine ??= createEngine());
+}
+
+/**
+ * Run `fn` on the engine. If the worker died, switch to an in-thread
+ * engine, give it every indexed note again, and retry once.
+ */
+async function withEngine<T>(fn: (e: IndexEngine) => Promise<T>): Promise<T> {
+  const e = await getEngine();
+  try {
+    return await fn(e);
+  } catch (err) {
+    if (e.kind !== "worker") throw err;
+    log.warn("vault index worker failed; indexing on the main thread", err);
+    e.dispose();
+    const local = await localIndexEngine();
+    engine = Promise.resolve(local);
+    await upsertAll(local, [...cache.byPath.values()]);
+    return fn(local);
+  }
+}
+
+function toInput(f: IndexedFile): IndexInput {
+  return { path: f.path, name: f.name, content: f.content, modified: f.modified };
+}
+
+async function upsertAll(e: IndexEngine, files: IndexedFile[]): Promise<void> {
+  for (let i = 0; i < files.length; i += UPSERT_BATCH) await e.upsert(files.slice(i, i + UPSERT_BATCH).map(toInput));
+}
+
+// ── Reading notes ───────────────────────────────────────────────────────
 
 /** Read one file into an index entry, or null if unreadable. */
 async function indexFile(e: { path: string; name: string; modified: number }): Promise<IndexedFile | null> {
   try {
     const content = await readWorkspaceFile(e.path);
-    const wikiTargets: string[] = [];
-    let m: RegExpExecArray | null;
-    WIKI_RE.lastIndex = 0;
-    while ((m = WIKI_RE.exec(content)) !== null) wikiTargets.push(m[1].trim());
-    return { path: e.path, name: e.name, content, modified: e.modified, wikiTargets };
+    return { path: e.path, name: e.name, content, modified: e.modified, wikiTargets: wikiTargetsOf(content) };
   } catch {
     return null;
   }
@@ -63,163 +152,209 @@ async function mapLimit<T>(items: T[], limit: number, fn: (x: T) => Promise<void
   await Promise.all(workers);
 }
 
-/** Build the whole index from OPFS (first use, or after files were added / removed). */
+const nameOf = (path: string) => path.split("/").pop() ?? path;
+
+/** Hidden from the tree, search and the index: dot entries at any depth (T46) and pasted assets. */
+function indexable(path: string): boolean {
+  return !!path && !path.split("/").some((s) => s.startsWith(".")) && !isAssetName(path);
+}
+
+function flatten(nodes: WorkspaceNode[], out: WorkspaceEntry[] = []): WorkspaceEntry[] {
+  for (const n of nodes) {
+    if (n.kind === "file") out.push({ path: n.path, name: n.name, size: n.size ?? 0, modified: n.modified ?? 0 });
+    else if (n.children) flatten(n.children, out);
+  }
+  return out;
+}
+
+/** The vault's notes: the file tree's listing when it is current, else a fresh one. */
+async function listNotes(): Promise<WorkspaceEntry[]> {
+  const l = cache.listing;
+  const list = l && l.generation === cache.generation ? flatten(l.tree) : await listWorkspace({ includeAssets: false });
+  return list.filter((e) => !isAssetName(e.path));
+}
+
+// ── Keeping the index in step ───────────────────────────────────────────
+
+/** Build the whole index (first use, or `ensureIndex(true)`). */
 async function build(): Promise<void> {
   if (!isOPFSAvailable()) return;
   // Clear before reading: a change announced while the build runs (it may
   // have read that file already) must survive for the next ensureIndex.
   cache.dirty.clear();
+  cache.removed.clear();
+  cache.moved = [];
   cache.stale = false;
-  const list = await listWorkspace({ includeAssets: false });
+  const list = await listNotes();
   const next = new Map<string, IndexedFile>();
-  await mapLimit(
-    list.filter((e) => !isAssetName(e.path)),
-    16,
-    async (e) => {
-      const f = await indexFile(e);
-      if (f) next.set(e.path, f);
-    },
-  );
+  await mapLimit(list, 16, async (e) => {
+    const f = await indexFile(e);
+    if (f) next.set(e.path, f);
+  });
   cache.byPath = next;
+  await withEngine(async (eng) => {
+    await eng.clear();
+    await upsertAll(eng, [...next.values()]);
+  });
   cache.builtAt = cache.checkedAt = Date.now();
 }
 
-/** Fallback for unannounced writes: re-read what the listing says changed. */
-async function revalidate(): Promise<void> {
-  cache.checkedAt = Date.now();
-  const list = (await listWorkspace({ includeAssets: false })).filter((e) => !isAssetName(e.path));
-  const seen = new Set(list.map((e) => e.path));
-  for (const path of [...cache.byPath.keys()]) if (!seen.has(path)) cache.byPath.delete(path);
-  await mapLimit(
-    list.filter((e) => cache.byPath.get(e.path)?.modified !== e.modified),
-    16,
-    async (e) => {
-      const f = await indexFile(e);
-      if (f) cache.byPath.set(e.path, f);
-      else cache.byPath.delete(e.path);
-    },
-  );
+/** Every indexed path at or under `path` (a deleted / moved folder takes its notes with it). */
+function under(path: string): string[] {
+  if (cache.byPath.has(path)) return [path];
+  const prefix = path + "/";
+  return [...cache.byPath.keys()].filter((p) => p.startsWith(prefix));
 }
 
 /**
- * C3: after an autosave only the saved files are re-read — not the whole
- * vault. Returns false when a full rebuild is needed instead.
+ * C3 / 8.4: apply what changed since the last use — moves and deletes
+ * without reading, then re-read only the dirty files (plus, after a
+ * structural change, the ones whose mtime differs from the listing).
  */
-async function refreshDirty(): Promise<void> {
-  const paths = [...cache.dirty];
+async function refresh(): Promise<void> {
+  const gone: string[] = [];
+  const toWrite: IndexedFile[] = [];
+  for (const { from, to } of cache.moved.splice(0)) {
+    for (const p of under(from)) {
+      const f = cache.byPath.get(p)!;
+      cache.byPath.delete(p);
+      gone.push(p);
+      const dest = to + p.slice(from.length);
+      if (!indexable(dest)) continue;
+      const moved = { ...f, path: dest, name: nameOf(dest) };
+      cache.byPath.set(dest, moved);
+      toWrite.push(moved);
+    }
+    // Moved out of a hidden folder (e.g. restored from the trash): read it.
+    if (indexable(to) && !under(to).length) cache.stale = true;
+  }
+  for (const path of cache.removed) {
+    for (const p of under(path)) {
+      cache.byPath.delete(p);
+      gone.push(p);
+    }
+  }
+  cache.removed.clear();
+
+  const toRead = new Map<string, { path: string; name: string; modified: number }>();
+  if (cache.stale || Date.now() - cache.checkedAt >= REVALIDATE_MS) {
+    cache.stale = false;
+    cache.checkedAt = Date.now();
+    const list = await listNotes();
+    const seen = new Set(list.map((e) => e.path));
+    for (const path of [...cache.byPath.keys()]) {
+      if (!seen.has(path)) {
+        cache.byPath.delete(path);
+        gone.push(path);
+      }
+    }
+    for (const e of list) if (cache.byPath.get(e.path)?.modified !== e.modified) toRead.set(e.path, e);
+  }
+  const dirty = [...cache.dirty];
   cache.dirty.clear();
-  await Promise.all(
-    paths.map(async (path) => {
-      const prev = cache.byPath.get(path);
-      const f = await indexFile({ path, name: prev?.name ?? path.split("/").pop() ?? path, modified: Date.now() });
-      if (f) cache.byPath.set(path, f);
-      else cache.byPath.delete(path);
-    }),
-  );
+  for (const path of dirty) {
+    if (!indexable(path) || toRead.has(path)) continue;
+    // The saved file's mtime is not in the event: stamp it now, so the next
+    // listing check sees a difference only if it changed again.
+    toRead.set(path, { path, name: cache.byPath.get(path)?.name ?? nameOf(path), modified: Date.now() });
+  }
+  await mapLimit([...toRead.values()], 16, async (e) => {
+    const f = await indexFile(e);
+    if (f) {
+      cache.byPath.set(e.path, f);
+      toWrite.push(f);
+    } else if (cache.byPath.delete(e.path)) gone.push(e.path);
+  });
+  const written = new Set(toWrite.map((f) => f.path));
+  const removedNow = gone.filter((p) => !written.has(p) && !cache.byPath.has(p));
+  if (!removedNow.length && !toWrite.length) return;
+  await withEngine(async (eng) => {
+    if (removedNow.length) await eng.remove(removedNow);
+    // Last write wins when a path was moved and then re-read.
+    const latest = new Map(toWrite.map((f) => [f.path, f]));
+    if (latest.size) await upsertAll(eng, [...latest.values()]);
+  });
+}
+
+function pendingChanges(): boolean {
+  return cache.stale || cache.dirty.size > 0 || cache.removed.size > 0 || cache.moved.length > 0;
 }
 
 export async function ensureIndex(force = false): Promise<void> {
   if (!isOPFSAvailable()) return;
   if (cache.inflight) {
     await cache.inflight;
-    if (!force && !cache.stale && !cache.dirty.size) return;
+    if (!force && !pendingChanges()) return;
   }
-  if (force || cache.stale || !cache.builtAt) {
-    cache.inflight = build().finally(() => {
-      cache.inflight = null;
-    });
-  } else if (cache.dirty.size) {
-    cache.inflight = refreshDirty().finally(() => {
-      cache.inflight = null;
-    });
-  } else if (Date.now() - cache.checkedAt >= REVALIDATE_MS) {
-    cache.inflight = revalidate().finally(() => {
-      cache.inflight = null;
-    });
+  if (force || !cache.builtAt) {
+    cache.inflight = build();
+  } else if (pendingChanges() || Date.now() - cache.checkedAt >= REVALIDATE_MS) {
+    cache.inflight = refresh();
   } else return;
-  await cache.inflight;
+  try {
+    await cache.inflight;
+  } finally {
+    cache.inflight = null;
+  }
 }
 
-/** Listen for workspace changes: content changes mark files dirty, anything else forces a rebuild. */
+function onVaultEvent(e: VaultEvent): void {
+  if (e.type === "write") {
+    if (indexable(e.path)) cache.dirty.add(e.path);
+  } else if (e.type === "delete") {
+    cache.removed.add(e.path);
+    cache.dirty.delete(e.path);
+  } else if (e.type === "rename" && e.from) {
+    cache.moved.push({ from: e.from, to: e.path });
+    if (cache.dirty.delete(e.from) && indexable(e.path)) cache.dirty.add(e.path);
+  }
+}
+
+/** Listen for changes: content changes mark files dirty, anything else re-checks the listing. */
 let listenerAttached = false;
 function attachInvalidator() {
   if (listenerAttached || typeof window === "undefined") return;
   listenerAttached = true;
+  watchVault(onVaultEvent);
   window.addEventListener(WORKSPACE_CHANGED, (e) => {
     const c = changeOf(e);
-    if (c.kind === "content" && c.paths) for (const p of c.paths) cache.dirty.add(p);
-    else cache.stale = true;
+    if (c.kind === "content" && c.paths) {
+      for (const p of c.paths) cache.dirty.add(p);
+      return;
+    }
+    cache.stale = true;
+    cache.generation++;
+    // A structural event that names its paths (an external change) also
+    // says which files to re-read, whatever their mtime.
+    for (const p of c.paths ?? []) if (indexable(p)) cache.dirty.add(p);
   });
 }
 attachInvalidator();
+
+// ── Queries ─────────────────────────────────────────────────────────────
 
 /** Every indexed note (after ensureIndex) — for the tags panel and other views. */
 export function indexedFiles(): IndexedFile[] {
   return [...cache.byPath.values()];
 }
 
-/** Test hook. */
-export function __resetWorkspaceIndex(): void {
-  cache.byPath = new Map();
-  cache.builtAt = 0;
-  cache.inflight = null;
-  cache.dirty.clear();
-  cache.stale = false;
-  cache.checkedAt = 0;
-}
-
-export interface BacklinkHit {
-  /** Full path of the source file. */
-  fromPath: string;
-  /** Basename for display. */
-  fromName: string;
-  /** A short snippet of the surrounding text (one line). */
-  snippet: string;
-  /** Char offset in the source file where the wiki-link starts. */
-  offset: number;
+/**
+ * The file tree (directories first, then files, by name) — the same
+ * listing the index re-validates against, so after a structural change the
+ * vault is listed once for both.
+ */
+export async function workspaceTree(): Promise<WorkspaceNode[]> {
+  const generation = cache.generation;
+  const tree = await listWorkspaceTree();
+  if (generation === cache.generation) cache.listing = { generation, tree };
+  return tree;
 }
 
 /** Find files whose wiki-links point at the given target (path or basename). */
 export async function findBacklinks(targetPath: string): Promise<BacklinkHit[]> {
   await ensureIndex();
-  const targetName = basename(targetPath);
-  const stem = targetName.replace(/\.md$/i, "");
-  // By normalized name, not slug: the old ASCII slug made every Hebrew
-  // target "" and so every Hebrew link a backlink of every Hebrew note.
-  const wanted = noteKey(stem);
-  const out: BacklinkHit[] = [];
-  for (const file of cache.byPath.values()) {
-    if (file.path === targetPath) continue;
-    let m: RegExpExecArray | null;
-    WIKI_RE.lastIndex = 0;
-    while ((m = WIKI_RE.exec(file.content)) !== null) {
-      // `[[target#heading|label]]` → the note part only.
-      const target = m[1].split("#")[0].trim();
-      if (target && noteKey(basename(target)) === wanted) {
-        const offset = m.index;
-        out.push({
-          fromPath: file.path,
-          fromName: file.name,
-          offset,
-          snippet: snippetAround(file.content, offset),
-        });
-      }
-    }
-  }
-  return out;
-}
-
-export interface SearchHit {
-  /** Full workspace path. */
-  path: string;
-  /** Basename for display. */
-  name: string;
-  /** Match score; higher is better. */
-  score: number;
-  /** First-content match (or null when matched by name only). */
-  snippet: string | null;
-  /** Highlight range inside the snippet for the matched substring. */
-  match?: { start: number; end: number };
+  if (!cache.byPath.size) return [];
+  return withEngine((e) => e.backlinks(targetPath));
 }
 
 /** Cheap fuzzy + substring search across filenames, paths, and content. */
@@ -229,70 +364,31 @@ export async function searchWorkspace(
   opts: { limit?: number; filter?: (path: string) => boolean } = {},
 ): Promise<SearchHit[]> {
   await ensureIndex();
-  const limit = opts.limit ?? 30;
-  const q = query.trim().toLowerCase();
-  if (!q) {
-    return [...cache.byPath.values()]
-      .sort((a, b) => b.modified - a.modified)
-      .slice(0, limit)
-      .map((f) => ({ path: f.path, name: f.name, score: 0, snippet: null }));
-  }
-  const out: SearchHit[] = [];
-  for (const file of cache.byPath.values()) {
-    if (opts.filter && !opts.filter(file.path)) continue;
-    const nameLower = file.name.toLowerCase();
-    const pathLower = file.path.toLowerCase();
-    const contentLower = file.content.toLowerCase();
-    let score = 0;
-    let snippet: string | null = null;
-    let match: SearchHit["match"];
-    if (nameLower.includes(q)) score += 10;
-    if (nameLower === q) score += 20;
-    if (nameLower.startsWith(q)) score += 5;
-    if (pathLower.includes(q) && pathLower !== nameLower) score += 6;
-    // Niqqud-, final-letter- and prefix-insensitive for Hebrew (T26):
-    // "והבית" finds "בית", "שָׁלוֹם" finds "שלום".
-    const found = findIn(file.content, contentLower, q);
-    if (!nameLower.includes(q) && hasHebrew(q) && hebrewFind(file.name, q)) score += 10;
-    if (found) {
-      score += 4;
-      const ctx = snippetAround(file.content, found.start, 80);
-      // Re-locate the hit inside the (whitespace-collapsed, "…"-prefixed) snippet.
-      const local = findIn(ctx, ctx.toLowerCase(), file.content.slice(found.start, found.end).replace(/\s+/g, " ").toLowerCase());
-      snippet = ctx;
-      if (local) match = local;
-    } else if (fuzzyMatch(nameLower, q) || fuzzyMatch(pathLower, q)) {
-      score += 1;
-    }
-    if (score > 0)
-      out.push({ path: file.path, name: file.name, score, snippet, match });
-  }
-  out.sort((a, b) => b.score - a.score);
-  return out.slice(0, limit);
+  if (!cache.byPath.size) return [];
+  const filter = opts.filter;
+  // A function cannot cross into the worker: send the paths it allows.
+  const paths = filter ? [...cache.byPath.keys()].filter((p) => filter(p)) : undefined;
+  return withEngine((e) => e.search(query, { limit: opts.limit ?? 30, paths }));
 }
 
-function findIn(text: string, lower: string, q: string): { start: number; end: number } | null {
-  const at = lower.indexOf(q);
-  if (at >= 0) return { start: at, end: at + q.length };
-  return hasHebrew(q) ? hebrewFind(text, q) : null;
+/** Work counters of the index (files, notes indexed so far…) — for tests and the perf spec. */
+export async function indexStats(): Promise<IndexStats & { engine: IndexEngine["kind"] }> {
+  const stats = await withEngine((e) => e.stats());
+  return { ...stats, engine: (await getEngine()).kind };
 }
 
-function snippetAround(content: string, offset: number, radius = 60): string {
-  const start = Math.max(0, offset - radius);
-  const end = Math.min(content.length, offset + radius);
-  let s = content.slice(start, end).replace(/\s+/g, " ").trim();
-  if (start > 0) s = "…" + s;
-  if (end < content.length) s = s + "…";
-  return s;
+/** Test hook. `engineFactory` replaces the worker (e.g. with a fake one). */
+export function __resetWorkspaceIndex(engineFactory?: () => IndexEngine): void {
+  cache.byPath = new Map();
+  cache.builtAt = 0;
+  cache.inflight = null;
+  cache.dirty.clear();
+  cache.removed.clear();
+  cache.moved = [];
+  cache.stale = false;
+  cache.checkedAt = 0;
+  cache.listing = null;
+  void engine?.then((e) => e.dispose(), () => undefined);
+  engine = null;
+  engineOverride = engineFactory ?? null;
 }
-
-function fuzzyMatch(haystack: string, needle: string): boolean {
-  let i = 0;
-  for (const ch of needle) {
-    const found = haystack.indexOf(ch, i);
-    if (found < 0) return false;
-    i = found + 1;
-  }
-  return true;
-}
-
