@@ -365,14 +365,13 @@ describe("tldraw → Excalidraw: details", () => {
     const ra = el(r, "ra") as ExLinearElement;
     close(ra.points[1][0], 0);
     close(ra.points[1][1], 100);
-    // Scaled shapes: a geo's w / h are page units (scale sizes the label);
-    // arrow terminals and bend are drawn at `scale` times.
+    // Scaled shapes: w / h, arrow terminals and bend are page units; scale sizes the label.
     expect(el(r, "big")).toMatchObject({ x: 900, y: 0, width: 100, height: 60 });
     expect((el(r, "big-label") as ExTextElement).fontSize).toBe(44);
-    expect((el(r, "sarr") as ExLinearElement).points).toEqual([[0, 0], [200, 100]]);
+    expect((el(r, "sarr") as ExLinearElement).points).toEqual([[0, 0], [100, 50]]);
     const bent = el(r, "sbent") as ExLinearElement;
-    expect(bent.points[2]).toEqual([200, 0]);
-    close(Math.abs(bent.points[1][1]), 40);
+    expect(bent.points[2]).toEqual([100, 0]);
+    close(Math.abs(bent.points[1][1]), 20);
   });
 
   it("places a second page to the right of the first, with a warning", () => {

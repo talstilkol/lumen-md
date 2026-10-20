@@ -468,7 +468,7 @@ export function buildFixtureCanvases(): FixtureCanvas[] {
       geo("rfc", 50, 50, { w: 100, h: 50 }, { parentId: "shape:rf" }),
       geo("faded", 600, 100, {}, { opacity: 0.4, isLocked: true }),
       arrow("ra", 600, 400, { x: 100, y: 0 }, {}, { rotation: Math.PI / 2 }),
-      // `scale` (tldraw's dynamic size / scale-resize): w, h and arrow terminals are unscaled.
+      // `scale` (tldraw's dynamic size): sizes labels and strokes; w, h and arrow terminals are page units.
       geo("big", 900, 0, { w: 100, h: 50, growY: 10, scale: 2, richText: richText("גדול") }),
       arrow("sarr", 900, 300, { x: 100, y: 50 }, { scale: 2 }),
       arrow("sbent", 900, 500, { x: 100, y: 0 }, { scale: 2, bend: 20 }),

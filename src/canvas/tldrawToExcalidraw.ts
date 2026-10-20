@@ -1247,23 +1247,23 @@ export function tldrawToExcalidraw(input: unknown, options: ConvertOptions = {})
     for (const { r, el, ctx } of pendingArrows.splice(0)) {
       const p = props(r);
       const bindings = bindingsByArrow.get(r.id) ?? [];
-      // Terminals and bend are unscaled, like a geo shape's w / h.
-      const arrowScale = num(p.scale, 1);
+      // Terminals and bend are page units; `scale` only sizes the label,
+      // stroke and heads (checked against tldraw's own editor).
       const terminal = (which: "start" | "end"): ExPoint => {
         const v = p[which];
-        if (isObj(v) && typeof v.x === "number" && typeof v.y === "number") return toPage(ctx.t, v.x * arrowScale, v.y * arrowScale);
+        if (isObj(v) && typeof v.x === "number" && typeof v.y === "number") return toPage(ctx.t, v.x, v.y);
         // tldraw 2.x stored the binding inside the terminal: { type: "binding", boundShapeId, normalizedAnchor }.
         if (isObj(v) && typeof v.boundShapeId === "string") {
           const target = placed.get(v.boundShapeId);
           const a = isObj(v.normalizedAnchor) ? v.normalizedAnchor : {};
           if (target) return toPage(target.t, num(a.x, 0.5) * target.w, num(a.y, 0.5) * target.h);
         }
-        return toPage(ctx.t, which === "start" ? 0 : 100 * arrowScale, 0);
+        return toPage(ctx.t, which === "start" ? 0 : 100, 0);
       };
       const s = terminal("start");
       const e = terminal("end");
       const abs: ExPoint[] = [s];
-      const bend = num(p.bend, 0) * arrowScale;
+      const bend = num(p.bend, 0);
       if (p.kind === "elbow") warn("elbow-arrow", r);
       else if (Math.abs(bend) > 0.5) {
         const dx = e[0] - s[0];
