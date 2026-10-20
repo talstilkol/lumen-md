@@ -31,9 +31,10 @@ export function truthy(v: FormulaValue): boolean {
 export function asDate(v: FormulaValue): Date | null {
   if (v instanceof Date) return v;
   if (typeof v === "string" && ISO_DATE.test(v.trim())) {
-    const s = v.trim();
-    // A bare date is midnight UTC (Date.parse does that too, but be explicit).
-    const t = Date.parse(s.length === 10 ? `${s}T00:00:00Z` : s);
+    const s = v.trim().replace(" ", "T");
+    // A bare date is midnight UTC, and a time without an offset is UTC too:
+    // Date.parse would read "2026-10-20T12:00" in the machine's time zone.
+    const t = Date.parse(s.length === 10 ? `${s}T00:00:00Z` : /(?:Z|[+-]\d{2}:?\d{2})$/.test(s) ? s : `${s}Z`);
     return Number.isNaN(t) ? null : new Date(t);
   }
   return null;

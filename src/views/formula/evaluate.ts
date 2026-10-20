@@ -107,6 +107,19 @@ class Interpreter {
     this.now = now;
   }
 
+  /** A value read from the note obeys the same text / list limits, and costs steps by its size. */
+  checkValue(v: FormulaValue, at: number): FormulaValue {
+    if (typeof v === "string") {
+      this.textLimit(v, at);
+      this.budget.tick(Math.ceil(v.length / 64), at);
+    } else if (Array.isArray(v)) {
+      if (v.length > this.budget.limits.maxList) throw new FormulaError("limit", `list longer than ${this.budget.limits.maxList} items`, at);
+      this.budget.tick(v.length, at);
+      for (const x of v) this.checkValue(x, at);
+    }
+    return v;
+  }
+
   textLimit(s: string, at: number): string {
     if (s.length > this.budget.limits.maxText) throw new FormulaError("limit", `text longer than ${this.budget.limits.maxText} characters`, at);
     return s;
@@ -124,7 +137,7 @@ class Interpreter {
       case "null":
         return null;
       case "field":
-        return lookup(this.row, n.path);
+        return this.checkValue(lookup(this.row, n.path), n.at);
       case "list": {
         if (n.items.length > this.budget.limits.maxList) throw new FormulaError("limit", `list longer than ${this.budget.limits.maxList} items`, n.at);
         return n.items.map((x) => this.run(x));
@@ -199,7 +212,7 @@ class Interpreter {
       }
       case "prop": {
         const a = this.run(n.args[0]);
-        return lookup(this.row, [toText(a)]);
+        return this.checkValue(lookup(this.row, [toText(a)]), n.at);
       }
     }
     if (!f.call) throw new FormulaError("unknown-function", `"${n.name}" cannot be called here`, n.at);

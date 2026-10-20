@@ -60,7 +60,8 @@ An empty property makes arithmetic empty (`price * qty` with no `qty` is
 empty, not an error). `0.1 + 0.2` is `0.3`.
 
 **Dates** are in UTC, so a formula gives the same answer in every time
-zone. `date + 7` and `date - 7` move by days; `date - date` is the number
+zone: `2026-10-20` is midnight UTC, and a time written without an offset
+(`2026-10-20T12:00`) is read as UTC too. `date + 7` and `date - 7` move by days; `date - date` is the number
 of days between them.
 
 ## Functions

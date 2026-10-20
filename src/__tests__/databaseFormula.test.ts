@@ -114,6 +114,12 @@ describe("formula — semantics", () => {
     expect(value('tags != "romance"')).toBe(true);
   });
 
+  it("a time without an offset is UTC, whatever the machine's time zone", () => {
+    expect((value('date("2026-10-20T12:00")') as Date).toISOString()).toBe("2026-10-20T12:00:00.000Z");
+    expect((value('date("2026-10-20 23:30")') as Date).toISOString()).toBe("2026-10-20T23:30:00.000Z");
+    expect((value('date("2026-10-20T12:00+02:00")') as Date).toISOString()).toBe("2026-10-20T10:00:00.000Z");
+  });
+
   it("today() and now() come from the evaluation, in UTC", () => {
     expect(iso(value("today()"))).toBe("2026-10-20");
     expect((value("now()") as Date).toISOString()).toBe(NOW.toISOString());
@@ -193,6 +199,14 @@ describe("formula — deterministic limits", () => {
     const r = evaluateFormula("sum([1,2,3]) + sum([1,2,3])", ROW, { limits: { maxSteps: 10 } });
     expect(r.ok ? "ok" : r.error.code).toBe("limit");
     expect(errorOf('len(split(repeat("a,", 5000), ","))').code).toBe("limit");
+  });
+
+  it("values read from the note obey the same limits", () => {
+    const big: FormulaRow = { fm: { list: Array.from({ length: 5000 }, (_, i) => i), text: "x".repeat(30000), nested: [Array.from({ length: 1990 }, () => "y".repeat(10))] } };
+    expect(errorOf("list", big).code).toBe("limit");
+    expect(errorOf('prop("text")', big).code).toBe("limit");
+    const r = evaluateFormula("nested", big, { limits: { maxSteps: 500 } });
+    expect(r.ok ? "ok" : r.error.code).toBe("limit");
   });
 
   it("the same formula fails at the same step every time (no clock)", () => {
