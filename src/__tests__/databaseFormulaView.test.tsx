@@ -72,6 +72,9 @@ describe("formulas — engine glue", () => {
     expect(fs.map((f) => [f.name, f.tree !== null])).toEqual([["total", true], ["broken", false], ["n", true]]);
     expect(fs[1].error?.at).toBe(7);
     expect(compileFormulas(["x"])).toEqual([]);
+    // YAML `blank: null` is the null literal, a column like any other.
+    const nul = compileFormulas({ blank: null });
+    expect(nul.map((f) => [f.name, f.source, f.tree?.kind])).toEqual([["blank", "null", "null"]]);
     expect(compileFormulas(undefined)).toEqual([]);
   });
 
@@ -112,6 +115,10 @@ describe("map — coordinates", () => {
     expect(rowLatLng(r({ location: "3, 4" }), {})).toEqual({ lat: 3, lng: 4 });
     expect(rowLatLng(r({ lat: 5, lng: 6 }), {})).toEqual({ lat: 5, lng: 6 });
     expect(rowLatLng(r({ lat: 5 }), {})).toBeNull();
+    // A place name in `location` falls back to `coordinates`, then to lat + lng.
+    expect(rowLatLng(r({ location: "Tel Aviv", coordinates: "32.08, 34.78" }), {})).toEqual({ lat: 32.08, lng: 34.78 });
+    expect(rowLatLng(r({ location: "Tel Aviv", lat: 1, lng: 2 }), {})).toEqual({ lat: 1, lng: 2 });
+    expect(rowLatLng(r({ lat: "", latitude: 3, lng: 4 }), {})).toEqual({ lat: 3, lng: 4 });
     expect(mapPoints([r({ location: "1, 1" }), r({})], {})).toHaveLength(1);
     expect(specView({ view: "map" })).toBe("map");
   });

@@ -269,8 +269,9 @@ export function compileFormulas(formulas: unknown): CompiledFormula[] {
   if (!formulas || typeof formulas !== "object" || Array.isArray(formulas)) return [];
   const out: CompiledFormula[] = [];
   for (const [name, raw] of Object.entries(formulas as Record<string, unknown>)) {
-    if (typeof raw !== "string" && typeof raw !== "number" && typeof raw !== "boolean") continue;
-    const source = String(raw);
+    // `blank: null` in YAML is the formula `null` (YAML already turned it into a value, as it does 3 and true).
+    if (raw !== null && typeof raw !== "string" && typeof raw !== "number" && typeof raw !== "boolean") continue;
+    const source = raw === null ? "null" : String(raw);
     const p = parseFormula(source);
     out.push(p.ok ? { name, source, tree: p.tree } : { name, source, tree: null, error: { message: p.error.message, at: p.error.at } });
   }
@@ -353,9 +354,17 @@ export function parseLatLng(v: unknown): LatLng | null {
 /** A row's coordinates: the spec's `location:` column, else `location`, else `lat` + `lng` columns. */
 export function rowLatLng(row: DatabaseRow, spec: Pick<DatabaseSpec, "location">): LatLng | null {
   if (spec.location) return parseLatLng(row.fm[spec.location]);
-  const direct = parseLatLng(row.fm.location ?? row.fm.coordinates);
-  if (direct) return direct;
-  const lat = row.fm.lat ?? row.fm.latitude;
-  const lng = row.fm.lng ?? row.fm.lon ?? row.fm.longitude;
-  return lat === undefined || lng === undefined ? null : parseLatLng([lat, lng]);
+  // Each alias on its own: `location: Tel Aviv` (a place name) must not hide valid `coordinates`.
+  for (const key of ["location", "coordinates"]) {
+    const p = parseLatLng(row.fm[key]);
+    if (p) return p;
+  }
+  for (const latKey of ["lat", "latitude"]) {
+    for (const lngKey of ["lng", "lon", "longitude"]) {
+      if (row.fm[latKey] === undefined || row.fm[lngKey] === undefined) continue;
+      const p = parseLatLng([row.fm[latKey], row.fm[lngKey]]);
+      if (p) return p;
+    }
+  }
+  return null;
 }
