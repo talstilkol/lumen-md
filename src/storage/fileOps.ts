@@ -104,6 +104,16 @@ export function companionNoteOf(path: string): string | null {
 }
 
 /**
+ * The entries of a multi-file move, minus each highlights note whose PDF is
+ * in the move too: the PDF's `safeMoveWithCompanion` moves the pair as one
+ * unit, both destinations checked first.
+ */
+export function withoutCompanions(paths: readonly string[]): string[] {
+  const set = new Set(paths);
+  return paths.filter((p) => !(/\.pdf\.md$/i.test(p) && set.has(p.slice(0, -3))));
+}
+
+/**
  * `safeMove` for a file that has a companion note (a PDF and its
  * `<file>.pdf.md`): both move together. Both destinations are checked first,
  * so a declined replace leaves both files where they were; if the note's

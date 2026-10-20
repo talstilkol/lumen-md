@@ -27,7 +27,7 @@ import { t } from "../i18n";
 import { uiAlert, uiConfirm, uiPrompt } from "./PromptDialog";
 import { FileContextMenu, buildFileActions } from "./FileContextMenu";
 import { useAppStore } from "../store/useStore";
-import { movedPath, renamedFileName, safeMoveWithCompanion, trashPaths, undoTrash, type MoveResult } from "../storage/fileOps";
+import { movedPath, renamedFileName, safeMoveWithCompanion, trashPaths, undoTrash, withoutCompanions, type MoveResult } from "../storage/fileOps";
 import { flushActiveWorkspaceDoc, syncOpenDocsAfterMove } from "../store/openDocs";
 import type { TrashItem } from "../storage/trash";
 import { toast, useToastStore } from "../store/useToastStore";
@@ -146,13 +146,14 @@ export function FileTree({
     if (target === null) return;
     const dir = target.trim().replace(/^\/+|\/+$/g, "");
     const updated = new Set<string>();
-    for (const p of selectedPaths) {
+    // A selected PDF and its selected highlights note move as one unit.
+    for (const p of withoutCompanions([...selectedPaths])) {
       const name = basename(p);
       const newPath = dir ? `${dir}/${name}` : name;
       try {
         await flushActiveWorkspaceDoc();
         // A PDF's highlights note moves with it (plan 4.14).
-        const m = await safeMoveWithCompanion(p, newPath, { confirmReplace, folder: kindOf(p) === "directory", alsoMoving: selectedPaths });
+        const m = await safeMoveWithCompanion(p, newPath, { confirmReplace, folder: kindOf(p) === "directory" });
         if (!m) continue;
         for (const [from, r] of [[p, m.main], [`${p}.md`, m.companion]] as const) {
           if (!r) continue;

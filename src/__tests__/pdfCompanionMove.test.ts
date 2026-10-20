@@ -6,7 +6,7 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { installFakeOpfs } from "./helpers/fakeOpfs";
 import { readWorkspaceFile, workspaceHasEntry, writeWorkspaceFile } from "../storage/workspace";
-import { companionNoteOf, renamedFileName, safeMoveWithCompanion } from "../storage/fileOps";
+import { companionNoteOf, renamedFileName, safeMoveWithCompanion, withoutCompanions } from "../storage/fileOps";
 import { listTrash } from "../storage/trash";
 
 beforeEach(() => {
@@ -81,5 +81,25 @@ describe("safeMoveWithCompanion", () => {
     expect(await readWorkspaceFile("paper.pdf.md")).toBe("notes");
     await writeWorkspaceFile("lone.pdf", "%PDF");
     expect((await safeMoveWithCompanion("lone.pdf", "x.pdf"))?.main.path).toBe("x.pdf");
+  });
+});
+
+describe("a multi-file move with a PDF and its note both selected", () => {
+  it("moves them as one unit: the note is left to the PDF's move", () => {
+    expect(withoutCompanions(["b.md", "paper.pdf.md", "paper.pdf", "x/other.pdf.md"])).toEqual(["b.md", "paper.pdf", "x/other.pdf.md"]);
+  });
+
+  it("so a declined replace of the note's destination keeps the pair together", async () => {
+    await writeWorkspaceFile("paper.pdf", "%PDF");
+    await writeWorkspaceFile("paper.pdf.md", "mine");
+    await writeWorkspaceFile("dir/paper.pdf.md", "theirs");
+    const confirmReplace = vi.fn(async () => false);
+    for (const p of withoutCompanions(["paper.pdf.md", "paper.pdf"])) {
+      expect(await safeMoveWithCompanion(p, `dir/${p}`, { confirmReplace })).toBeNull();
+    }
+    expect(await readWorkspaceFile("paper.pdf")).toBe("%PDF");
+    expect(await readWorkspaceFile("paper.pdf.md")).toBe("mine");
+    expect(await readWorkspaceFile("dir/paper.pdf.md")).toBe("theirs");
+    expect(await workspaceHasEntry("dir/paper.pdf")).toBe(false);
   });
 });
