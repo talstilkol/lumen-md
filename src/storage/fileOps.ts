@@ -6,7 +6,18 @@
 
 import { moveToTrash, restoreFromTrash, type TrashItem } from "./trash";
 import { rewriteLinks, updateLinksAfterMove } from "./linkRewrite";
-import { listWorkspace, renameWorkspaceFile, WorkspaceConflictError, workspaceHasEntry } from "./workspace";
+import {
+  basename,
+  dirname,
+  joinPath,
+  listWorkspace,
+  readWorkspaceBlob,
+  renameWorkspaceFile,
+  uniqueWorkspaceName,
+  WorkspaceConflictError,
+  workspaceHasEntry,
+  writeWorkspaceBlob,
+} from "./workspace";
 
 export interface MoveResult {
   /** Where the entry is now. */
@@ -31,6 +42,51 @@ export function movedPath(path: string, from: string, to: string): string | null
   return null;
 }
 
+/** The entry is at its new path; links not rewritten yet. */
+interface Moved {
+  replaced?: TrashItem;
+  /** Note paths before the move (short `[[Name]]` links resolve against them). */
+  vault: string[];
+}
+
+/** Rename `from` → `to` (asking before replacing), without touching links. Null: cancelled. */
+async function moveEntry(from: string, to: string, confirmReplace?: (path: string) => Promise<boolean>): Promise<Moved | null> {
+  let replaced: TrashItem | undefined;
+  // Short `[[Name]]` links resolve against the vault as it was.
+  const vault = (await listWorkspace()).map((f) => f.path).filter((p) => /\.(md|markdown)$/i.test(p));
+  if (await workspaceHasEntry(to)) {
+    if (!confirmReplace || !(await confirmReplace(to))) return null;
+    [replaced] = await moveToTrash([to]);
+  }
+  try {
+    await renameWorkspaceFile(from, to);
+  } catch (e) {
+    if (replaced) await restoreFromTrash(replaced.id).catch(() => undefined);
+    if (e instanceof WorkspaceConflictError) return null;
+    throw e;
+  }
+  return { replaced, vault };
+}
+
+/** Rewrite the links after a move that `moveEntry` made. */
+async function relink(from: string, to: string, folder: boolean | undefined, moved: Moved): Promise<MoveResult> {
+  // The entry has moved: report that even when a link rewrite fails, so
+  // the caller still retargets the open note instead of autosaving it back
+  // to the old path.
+  let linksUpdated: string[] = [];
+  let linksError: Error | undefined;
+  try {
+    linksUpdated = await updateLinksAfterMove(from, to, { folder, vault: moved.vault });
+  } catch (e) {
+    linksError = e instanceof Error ? e : new Error(String(e));
+  }
+  window.dispatchEvent(new Event("lumen-workspace-changed"));
+  const vault = moved.vault;
+  const rewrite = (content: string, notePrevPath: string) =>
+    rewriteLinks(content, movedPath(notePrevPath, from, to) ?? notePrevPath, from, to, { folder, notePrevPath, vault });
+  return { path: to, linksUpdated, replaced: moved.replaced, linksError, rewrite };
+}
+
 /**
  * Move `from` to `to`. When something is already at `to`, asks
  * `confirmReplace(to)`; on yes the existing entry goes to the trash (so even
@@ -42,34 +98,23 @@ export async function safeMove(
   opts: { folder?: boolean; confirmReplace?: (path: string) => Promise<boolean> } = {},
 ): Promise<MoveResult | null> {
   if (from === to) return { path: to, linksUpdated: [], rewrite: (c) => c };
-  let replaced: TrashItem | undefined;
-  // Short `[[Name]]` links resolve against the vault as it was.
-  const vault = (await listWorkspace()).map((f) => f.path).filter((p) => /\.(md|markdown)$/i.test(p));
-  if (await workspaceHasEntry(to)) {
-    if (!opts.confirmReplace || !(await opts.confirmReplace(to))) return null;
-    [replaced] = await moveToTrash([to]);
-  }
-  try {
-    await renameWorkspaceFile(from, to);
-  } catch (e) {
-    if (replaced) await restoreFromTrash(replaced.id).catch(() => undefined);
-    if (e instanceof WorkspaceConflictError) return null;
-    throw e;
-  }
-  // The entry has moved: report that even when a link rewrite fails, so
-  // the caller still retargets the open note instead of autosaving it back
-  // to the old path.
-  let linksUpdated: string[] = [];
-  let linksError: Error | undefined;
-  try {
-    linksUpdated = await updateLinksAfterMove(from, to, { folder: opts.folder, vault });
-  } catch (e) {
-    linksError = e instanceof Error ? e : new Error(String(e));
-  }
-  window.dispatchEvent(new Event("lumen-workspace-changed"));
-  const rewrite = (content: string, notePrevPath: string) =>
-    rewriteLinks(content, movedPath(notePrevPath, from, to) ?? notePrevPath, from, to, { folder: opts.folder, notePrevPath, vault });
-  return { path: to, linksUpdated, replaced, linksError, rewrite };
+  const moved = await moveEntry(from, to, opts.confirmReplace);
+  return moved ? relink(from, to, opts.folder, moved) : null;
+}
+
+/**
+ * Copy a file byte for byte to `<name> copy.<ext>` (a free name) next to it.
+ * Through blobs, not text: a PDF or an image read as text and written back
+ * would come out corrupted. Returns the copy's path.
+ */
+export async function duplicateFile(path: string): Promise<string> {
+  const name = basename(path);
+  const dot = name.lastIndexOf(".");
+  const stem = dot > 0 ? name.slice(0, dot) : name;
+  const ext = dot > 0 ? name.slice(dot) : "";
+  const target = await uniqueWorkspaceName(joinPath(dirname(path), `${stem} copy${ext}`));
+  await writeWorkspaceBlob(target, await readWorkspaceBlob(path));
+  return target;
 }
 
 /** Delete = move to the trash. Returns the trash entries for Undo. */
@@ -140,19 +185,25 @@ export async function safeMoveWithCompanion(
     confirmed.add(target);
   }
   const already = (p: string) => Promise.resolve(confirmed.has(p));
-  const main = await safeMove(from, to, { confirmReplace: already });
-  if (!main) return null;
-  let companion: MoveResult | null = null;
+  // Both renames first; links are rewritten only once both are done, so a
+  // failed second move never leaves links pointing at the wrong file.
+  const pdfMoved = await moveEntry(from, to, already);
+  if (!pdfMoved) return null;
+  let noteMoved: Moved | null = null;
   let failure: unknown = null;
   try {
-    companion = await safeMove(note, noteTo, { confirmReplace: already });
+    noteMoved = await moveEntry(note, noteTo, already);
   } catch (e) {
     failure = e;
   }
-  if (companion) return { main, companion };
-  // Put the file back where it was, next to its note.
-  await safeMove(to, from);
-  if (main.replaced) await restoreFromTrash(main.replaced.id).catch(() => undefined);
-  if (failure) throw failure;
-  return null;
+  if (!noteMoved) {
+    // Put the file back where it was, next to its note; nothing was relinked.
+    await renameWorkspaceFile(to, from);
+    if (pdfMoved.replaced) await restoreFromTrash(pdfMoved.replaced.id).catch(() => undefined);
+    if (failure) throw failure;
+    return null;
+  }
+  const main = await relink(from, to, false, pdfMoved);
+  const companion = await relink(note, noteTo, false, noteMoved);
+  return { main, companion };
 }

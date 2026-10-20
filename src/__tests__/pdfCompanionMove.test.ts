@@ -4,9 +4,10 @@
  * stays a PDF.
  */
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { installFakeOpfs } from "./helpers/fakeOpfs";
-import { readWorkspaceFile, workspaceHasEntry, writeWorkspaceFile } from "../storage/workspace";
-import { companionNoteOf, renamedFileName, safeMoveWithCompanion, withoutCompanions } from "../storage/fileOps";
+import { FakeDir, installFakeOpfs } from "./helpers/fakeOpfs";
+import { readWorkspaceBlob, readWorkspaceFile, workspaceHasEntry, writeWorkspaceBlob, writeWorkspaceFile } from "../storage/workspace";
+import { companionNoteOf, duplicateFile, renamedFileName, safeMoveWithCompanion, withoutCompanions } from "../storage/fileOps";
+import { rewriteLinks } from "../storage/linkRewrite";
 import { listTrash } from "../storage/trash";
 
 beforeEach(() => {
@@ -101,5 +102,54 @@ describe("a multi-file move with a PDF and its note both selected", () => {
     expect(await readWorkspaceFile("paper.pdf.md")).toBe("mine");
     expect(await readWorkspaceFile("dir/paper.pdf.md")).toBe("theirs");
     expect(await workspaceHasEntry("dir/paper.pdf")).toBe(false);
+  });
+});
+
+describe("duplicating a binary file", () => {
+  it("copies the bytes exactly (a PDF isn't read and rewritten as text)", async () => {
+    const bytes = new Uint8Array([0x25, 0x50, 0x44, 0x46, 0xff, 0xfe, 0x00, 0x80, 0xc3, 0x28]);
+    await writeWorkspaceBlob("docs/paper.pdf", bytes);
+    const copy = await duplicateFile("docs/paper.pdf");
+    expect(copy).toBe("docs/paper copy.pdf");
+    expect(Array.from(new Uint8Array(await (await readWorkspaceBlob(copy)).arrayBuffer()))).toEqual(Array.from(bytes));
+    expect(await duplicateFile("docs/paper.pdf")).toBe("docs/paper copy 2.pdf");
+  });
+});
+
+describe("links when a PDF and its note move", () => {
+  it("are rewritten in percent-encoded form for paths with wiki syntax", () => {
+    const md = "- [[draft%232.pdf#page=1&highlight=abcd1234|p. 1]] and [[a/draft%232.pdf#page=2&highlight=ef|p. 2]]";
+    expect(rewriteLinks(md, "x.md", "draft#2.pdf", "final [v|3].pdf")).toBe(
+      "- [[final %5Bv%7C3%5D.pdf#page=1&highlight=abcd1234|p. 1]] and [[a/draft%232.pdf#page=2&highlight=ef|p. 2]]",
+    );
+    expect(rewriteLinks("[[a/draft%232.pdf#page=2|p. 2]]", "x.md", "a/draft#2.pdf", "b/draft#2.pdf")).toBe("[[b/draft%232.pdf#page=2|p. 2]]");
+    // Hand-written links without escapes stay as they were written.
+    expect(rewriteLinks("[[paper.pdf]]", "x.md", "paper.pdf", "draft.pdf")).toBe("[[draft.pdf]]");
+  });
+
+  it("follow a PDF whose name needs escaping, in its moved note too", async () => {
+    await writeWorkspaceFile("draft#2.pdf", "%PDF");
+    await writeWorkspaceFile("draft#2.pdf.md", "- [[draft%232.pdf#page=1&highlight=abcd1234|p. 1]]");
+    const m = await safeMoveWithCompanion("draft#2.pdf", "final.pdf");
+    expect(m?.companion?.path).toBe("final.pdf.md");
+    expect(await readWorkspaceFile("final.pdf.md")).toBe("- [[final.pdf#page=1&highlight=abcd1234|p. 1]]");
+  });
+
+  it("are left alone when the note's move fails after the PDF moved", async () => {
+    await writeWorkspaceFile("A.pdf", "%PDF A");
+    await writeWorkspaceFile("A.pdf.md", "notes on A");
+    await writeWorkspaceFile("B.pdf", "%PDF B");
+    await writeWorkspaceFile("other.md", "[[A.pdf]] and [[B.pdf]]");
+    const real = FakeDir.prototype.getFileHandle;
+    const spy = vi.spyOn(FakeDir.prototype, "getFileHandle").mockImplementation(function (this: FakeDir, name, opts) {
+      if (name === "B.pdf.md" && opts?.create) return Promise.reject(new DOMException("full", "QuotaExceededError"));
+      return real.call(this, name, opts);
+    });
+    await expect(safeMoveWithCompanion("A.pdf", "B.pdf", { confirmReplace: async () => true })).rejects.toThrow("full");
+    spy.mockRestore();
+    expect(await readWorkspaceFile("A.pdf")).toBe("%PDF A");
+    expect(await readWorkspaceFile("A.pdf.md")).toBe("notes on A");
+    expect(await readWorkspaceFile("B.pdf")).toBe("%PDF B");
+    expect(await readWorkspaceFile("other.md")).toBe("[[A.pdf]] and [[B.pdf]]");
   });
 });

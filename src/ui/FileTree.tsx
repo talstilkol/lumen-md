@@ -27,7 +27,7 @@ import { t } from "../i18n";
 import { uiAlert, uiConfirm, uiPrompt } from "./PromptDialog";
 import { FileContextMenu, buildFileActions } from "./FileContextMenu";
 import { useAppStore } from "../store/useStore";
-import { movedPath, renamedFileName, safeMoveWithCompanion, trashPaths, undoTrash, withoutCompanions, type MoveResult } from "../storage/fileOps";
+import { duplicateFile, movedPath, renamedFileName, safeMoveWithCompanion, trashPaths, undoTrash, withoutCompanions, type MoveResult } from "../storage/fileOps";
 import { flushActiveWorkspaceDoc, syncOpenDocsAfterMove } from "../store/openDocs";
 import type { TrashItem } from "../storage/trash";
 import { toast, useToastStore } from "../store/useToastStore";
@@ -321,18 +321,11 @@ export function FileTree({
     }
   }
 
-  /** Duplicate a single file as `<name> copy.<ext>` (folders skipped). */
+  /** Duplicate a single file as `<name> copy.<ext>` (folders skipped), byte for byte. */
   async function duplicate(node: WorkspaceNode): Promise<void> {
     if (node.kind !== "file") return;
     try {
-      const body = await readWorkspaceFile(node.path);
-      const dotIdx = node.name.lastIndexOf(".");
-      const stem = dotIdx >= 0 ? node.name.slice(0, dotIdx) : node.name;
-      const ext = dotIdx >= 0 ? node.name.slice(dotIdx) : "";
-      const dirPart = dirname(node.path);
-      const candidate = joinPath(dirPart, `${stem} copy${ext}`);
-      const newPath = await uniqueWorkspaceName(candidate);
-      await writeWorkspaceFile(newPath, body);
+      await duplicateFile(node.path);
       await refresh();
     } catch (e) {
       await uiAlert({ message: (e as Error).message });

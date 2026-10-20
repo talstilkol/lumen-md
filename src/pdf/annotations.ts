@@ -18,6 +18,10 @@
  * Everything here is pure (no DOM, no pdf.js) so it is unit-tested directly.
  */
 
+import { encodeWikiPath } from "../lib/wikiPath";
+
+export { encodeWikiPath };
+
 export const ANNO_CONTEXT = "http://www.w3.org/ns/anno.jsonld";
 export const RFC3778 = "http://tools.ietf.org/rfc/rfc3778";
 
@@ -485,13 +489,6 @@ export function companionNotePath(pdfPath: string): string {
   return `${pdfPath}.md`;
 }
 
-/**
- * A vault path made safe inside `[[…]]`: `#`, `|`, `[`, `]` (and `%`) are
- * wiki-link syntax, so they are percent-encoded; link resolution decodes them.
- */
-export function encodeWikiPath(path: string): string {
-  return path.replace(/[%#|[\]\r\n]/g, (c) => `%${c.charCodeAt(0).toString(16).toUpperCase().padStart(2, "0")}`);
-}
 
 /** Wiki-link target that opens `pdfPath` at the highlight. */
 export function highlightLinkTarget(pdfPath: string, a: PdfAnnotation): string {

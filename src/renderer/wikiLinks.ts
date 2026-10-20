@@ -6,6 +6,7 @@
  */
 
 import { slug as headingSlug } from "github-slugger";
+import { decodeWikiPath } from "../lib/wikiPath";
 
 /**
  * Split `Note#Heading` into the note and the heading fragment. A target
@@ -26,14 +27,10 @@ export function splitWikiTarget(target: string): { note: string; heading: string
  */
 export function resolveWikiTarget(target: string, paths: readonly string[]): string | null {
   const found = resolveExact(target, paths);
-  if (found || !/%[0-9a-f]{2}/i.test(target)) return found;
   // Generated links percent-encode the characters that are wiki syntax
   // (`draft%232.pdf` for `draft#2.pdf`, plan 4.14).
-  try {
-    return resolveExact(decodeURIComponent(target), paths);
-  } catch {
-    return null;
-  }
+  const decoded = decodeWikiPath(target);
+  return found ?? (decoded === target ? null : resolveExact(decoded, paths));
 }
 
 function resolveExact(target: string, paths: readonly string[]): string | null {
