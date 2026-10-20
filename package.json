@@ -13,6 +13,8 @@
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
     "hygiene": "node scripts/check-code-hygiene.mjs",
+    "plan": "node scripts/plan/build.mjs",
+    "plan:check": "node scripts/plan/build.mjs --check",
     "tauri": "tauri",
     "tauri:dev": "tauri dev",
     "tauri:build": "tauri build",

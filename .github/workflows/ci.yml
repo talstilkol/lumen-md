@@ -39,6 +39,11 @@ jobs:
       - name: Code hygiene (no `as any` / console.log in production src)
         run: npm run hygiene
 
+      # plan/plan.json is the plan's source (plan 0.6): the board in
+      # MASTER_PLAN.md and plan/board.html must be what it generates.
+      - name: Plan matches plan/plan.json
+        run: npm run plan:check
+
       - name: Test
         run: npm run test
 
