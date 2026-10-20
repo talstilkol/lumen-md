@@ -9,7 +9,8 @@
  *   plan/board.html  the board as an HTML page (an Artifact fragment)
  *
  *   npm run plan             regenerate both
- *   npm run plan:check       exit 1 when either differs from plan.json (CI)
+ *   npm run plan:check       exit 1 when either differs from plan.json (CI),
+ *                            or a ✅ task has no `dod` (plan 0.7, scripts/dod.mjs)
  *   npm run plan -- --hours  also print actual hours per task branch (git)
  *
  * The scheduler started as a port of the earlier Python generator (plan5.py
@@ -24,6 +25,8 @@ import { readFileSync, writeFileSync, existsSync } from "node:fs";
 import { execFileSync } from "node:child_process";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
+
+import { checkDod } from "../dod.mjs";
 
 export const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..", "..");
 export const PLAN_FILE = "plan/plan.json";
@@ -522,6 +525,9 @@ export function actualHours(M, { root = ROOT, base = "origin/main", remote = "or
 
 export function run({ root = ROOT, check = false } = {}) {
   const plan = JSON.parse(readFileSync(join(root, PLAN_FILE), "utf8"));
+  // Plan 0.7: no ✅ without the commands that prove it.
+  const dodProblems = checkDod(plan);
+  if (dodProblems.length) throw new Error(`plan: definition of done —\n  ${dodProblems.join("\n  ")}`);
   const M = buildModel(plan);
   const docPath = join(root, DOC_FILE);
   const htmlPath = join(root, HTML_FILE);
