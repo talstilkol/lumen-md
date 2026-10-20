@@ -40,10 +40,20 @@
  */
 
 export type CerScript = "he" | "en";
-export type OcrCondition = "clean" | "degraded" | "nikud";
+/**
+ * Conditions of the golden set ocr-he: rendered clean / degraded / nikud
+ * lines and pages (plan 7.1), and the owner's phone photos of printed pages
+ * (scripts/golden/owner.mjs, plan 15.11).
+ */
+export const OCR_CONDITIONS = ["clean", "degraded", "nikud", "photo"] as const;
+export type OcrCondition = (typeof OCR_CONDITIONS)[number];
+export type GatedCondition = "clean" | "degraded";
 
-/** Gated maximum CER per condition (plan 7.5). Nikud lines are reported only. */
-export const OCR_CER_GATES: Readonly<Record<Exclude<OcrCondition, "nikud">, number>> = { clean: 0.05, degraded: 0.12 };
+/**
+ * Gated maximum CER per condition (plan 7.5). Nikud lines and the owner's
+ * photos are reported only: plan 7.5 sets no threshold for them.
+ */
+export const OCR_CER_GATES: Readonly<Record<GatedCondition, number>> = { clean: 0.05, degraded: 0.12 };
 
 export interface CerOptions {
   /** Remove Hebrew points and cantillation marks before comparing. */
@@ -221,9 +231,11 @@ export interface CerReport {
 
 export function buildReport(inputs: readonly CerItemInput[]): CerReport {
   const blank = (): Record<CerMetric, CerCount> => ({ all: emptyCount(), allNikud: emptyCount(), he: emptyCount(), en: emptyCount() });
-  const byCondition: CerReport["byCondition"] = { clean: blank(), degraded: blank(), nikud: blank() };
+  const byCondition: CerReport["byCondition"] = { clean: blank(), degraded: blank(), nikud: blank(), photo: blank() };
   const items: CerReport["items"] = [];
   for (const it of inputs) {
+    // An item of a condition the report does not know is an error, never dropped.
+    if (!(OCR_CONDITIONS as readonly string[]).includes(it.condition)) throw new Error(`OCR CER: item ${it.id} has an unknown condition "${String(it.condition)}"`);
     const m = measureItem(it.reference, it.hypothesis);
     items.push({ id: it.id, condition: it.condition, cer: m });
     const agg = byCondition[it.condition];
@@ -233,7 +245,7 @@ export function buildReport(inputs: readonly CerItemInput[]): CerReport {
 }
 
 export interface GateResult {
-  condition: Exclude<OcrCondition, "nikud">;
+  condition: GatedCondition;
   script: CerScript;
   cer: number | null;
   max: number;
@@ -278,5 +290,21 @@ export function formatReport(report: CerReport, title: string): string {
     row("clean"),
     row("degraded"),
     row("nikud"),
+    row("photo"),
   ].join("\n");
+}
+
+/**
+ * Why a held-out split may not be scored: a part with fewer items than the
+ * manifest's test count (a builder failed, or the owner's bundle is absent —
+ * golden-sets.yml continues past both), or a part whose sha256 is not
+ * recorded yet. A partial or unverified split is never reported as the test
+ * score. `incomplete` is scripts/lib/golden.mjs incompleteParts();
+ * `unverified` is loadSet()'s list.
+ */
+export function heldOutGaps(incomplete: ReadonlyArray<{ part: string; have: number; want: number }>, unverified: readonly string[]): string[] {
+  return [
+    ...incomplete.map((x) => `part ${x.part}: ${x.have} of ${x.want} test items`),
+    ...unverified.map((p) => `part ${p}: no recorded sha256 (record it with golden-sets.yml task=test record=true)`),
+  ];
 }

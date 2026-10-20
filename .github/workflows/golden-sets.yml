@@ -218,7 +218,10 @@ jobs:
 
       # Plan 7.5: the app's OCR (production build) on the ocr-he test split.
       # e2e/ocr-cer.spec.ts prints aggregates only for the test split and
-      # turns traces, videos and screenshots off. Gate failures fail the job.
+      # turns traces, videos and screenshots off. Gate failures fail the job,
+      # and so does a partial or unverified split (a part short of its
+      # manifest count, the owner's photos included, or no recorded sha256):
+      # it is never reported as the test score.
       - name: OCR CER on the test split (aggregates only)
         if: steps.seed.outputs.ok == 'true'
         env:

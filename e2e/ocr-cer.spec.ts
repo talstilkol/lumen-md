@@ -2,8 +2,8 @@ import { test, expect } from "@playwright/test";
 import { appendFileSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { loadSet } from "../scripts/lib/golden.mjs";
-import { buildReport, checkGates, formatReport, type CerItemInput, type OcrCondition } from "../src/ai/ocrCer";
+import { incompleteParts, loadSet } from "../scripts/lib/golden.mjs";
+import { OCR_CONDITIONS, buildReport, checkGates, formatReport, heldOutGaps, type CerItemInput, type OcrCondition } from "../src/ai/ocrCer";
 
 /**
  * Plan 7.5 — OCR measured in CI. Runs the app's own OCR path
@@ -11,7 +11,7 @@ import { buildReport, checkGates, formatReport, type CerItemInput, type OcrCondi
  * tessdata_fast heb+eng models) in the production build on the golden set
  * ocr-he (plan 7.1), and gates the character error rate, Hebrew and English
  * separately, nikud removed (src/ai/ocrCer.ts): clean print ≤ 5 %, degraded
- * ≤ 12 %; nikud lines are reported only.
+ * ≤ 12 %; nikud lines and the owner's photos (15.11) are reported only.
  *
  * Which split:
  *  - GOLDEN_TEST=<dir> (golden-sets.yml, where GOLDEN_SEED lives): the
@@ -46,11 +46,26 @@ test("OCR CER on the golden set ocr-he (Hebrew and English, per condition)", asy
   test.setTimeout(20 * 60_000);
 
   const set = loadSet(join(ROOT, "eval", "golden"), "ocr-he", testDir ? { split: "test", testDir } : {}) as {
+    manifest: unknown;
     items: GoldenItem[];
     unverified: string[];
   };
-  const items = set.items.filter((it) => typeof it.image === "string" && typeof it.text === "string");
-  expect(items.length, `no ${split} items with an image in eval/golden/ocr-he`).toBeGreaterThan(0);
+  // The held-out score is the whole split or nothing: every part at its
+  // manifest count (the owner's photos included) and every part's sha256
+  // recorded. golden-sets.yml continues past a failed builder or a missing
+  // owner bundle, so a partial split must stop here.
+  if (split === "test") {
+    const gaps = heldOutGaps(incompleteParts(set.manifest, set.items), set.unverified);
+    expect(gaps, `the ocr-he test split is incomplete or unverified, so no test score is reported: ${gaps.join("; ")}`).toEqual([]);
+  }
+  // Every item is measured; one without an image, a text or a known condition is an error.
+  const items = set.items;
+  const malformed = items.filter((it) => typeof it.image !== "string" || typeof it.text !== "string" || !(OCR_CONDITIONS as readonly string[]).includes(it.condition));
+  expect(
+    malformed.map((it) => (split === "dev" ? `${it.id} (${String(it.condition)})` : String(it.condition))),
+    "ocr-he items without an image, a text or a known condition",
+  ).toEqual([]);
+  expect(items.length, `no ${split} items in eval/golden/ocr-he`).toBeGreaterThan(0);
 
   await page.addInitScript(() => localStorage.setItem("lumen-tour-done", "1"));
   await page.goto("/");

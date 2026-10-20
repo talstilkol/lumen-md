@@ -7,12 +7,14 @@
 import { describe, it, expect } from "vitest";
 import {
   OCR_CER_GATES,
+  type CerItemInput,
   alignEdits,
   buildReport,
   cer,
   checkGates,
   formatReport,
   graphemes,
+  heldOutGaps,
   levenshtein,
   measureItem,
   normalizeForCer,
@@ -161,5 +163,34 @@ describe("report and gates", () => {
     expect(md).toMatch(/\| clean \| 0\.00% · 0\/4 in 1 \(≤ 5%: PASS\) \| 0\.00% · 0\/5 in 1 \(≤ 5%: PASS\)/);
     expect(md).toMatch(/\| degraded \| — · 0\/0 in 0 \(≤ 12%: no text\)/);
     expect(md).toMatch(/\| nikud \| .*\(reported only\)/);
+  });
+
+  it("reports the owner's photos as their own condition, ungated", () => {
+    const r = buildReport([
+      { id: "owner-1", condition: "photo", reference: "שלום עולם", hypothesis: "שלומ עולם" },
+      { id: "c", condition: "clean", reference: "שלום", hypothesis: "שלום" },
+    ]);
+    expect(r.byCondition.photo.he).toEqual({ edits: 1, length: 8, items: 1 });
+    expect(checkGates(r).some((g) => (g.condition as string) === "photo")).toBe(false);
+    expect(formatReport(r, "t")).toMatch(/\| photo \| 12\.50% · 1\/8 in 1 \(reported only\)/);
+  });
+
+  it("throws on an item of an unknown condition instead of dropping it", () => {
+    const bad = { id: "x", condition: "scan", reference: "א", hypothesis: "א" } as unknown as CerItemInput;
+    expect(() => buildReport([bad])).toThrow(/unknown condition "scan"/);
+  });
+});
+
+describe("heldOutGaps", () => {
+  it("is empty only for a complete, recorded split", () => {
+    expect(heldOutGaps([], [])).toEqual([]);
+  });
+
+  it("names every short part and every part without a recorded sha256", () => {
+    const g = heldOutGaps([{ part: "owner", have: 0, want: 15 }, { part: "pages", have: 9, want: 11 }], ["lines"]);
+    expect(g).toHaveLength(3);
+    expect(g[0]).toBe("part owner: 0 of 15 test items");
+    expect(g[1]).toBe("part pages: 9 of 11 test items");
+    expect(g[2]).toMatch(/^part lines: no recorded sha256/);
   });
 });
