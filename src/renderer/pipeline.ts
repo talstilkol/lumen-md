@@ -22,8 +22,7 @@ import { visit } from "unist-util-visit";
 import { Fragment, jsx, jsxs } from "react/jsx-runtime";
 import YAML from "yaml";
 import type { Root as MdastRoot, Code } from "mdast";
-import type { Element, Root as HastRoot } from "hast";
-import { toString as hastToString } from "hast-util-to-string";
+import type { Root as HastRoot } from "hast";
 import { components } from "./components";
 import { rehypeShiki } from "./shiki";
 import { prepareCriticMarkup, rehypeCriticMarkup, stripCriticDelimiters } from "./criticMarkup";
@@ -208,31 +207,13 @@ async function getFullProcessor(
   return proc;
 }
 
-/** Heading ids for one block of a long document, numbered across the blocks before it. */
-export interface BlockSlugs {
-  slug(text: string): string;
-}
-
-/**
- * rehype-slug for a block (plan 8.4): the same id rule (github-slugger
- * over the heading's text, headings that already have an id skipped), but
- * the slugger is the document's, so a repeated heading in a later block
- * still gets `-1`.
- */
-function rehypeSlugAcrossBlocks(slugs: BlockSlugs) {
-  return (tree: HastRoot) => {
-    visit(tree, "element", (node: Element) => {
-      if (!/^h[1-6]$/.test(node.tagName)) return;
-      const props = (node.properties ??= {});
-      if (!props.id) props.id = slugs.slug(hastToString(node));
-    });
-  };
-}
+/** A rehype transformer that gives the headings of one block their ids (./incrementalPreview.ts). */
+export type BlockSlugPlugin = () => (tree: HastRoot) => void;
 
 async function buildFullProcessor(
   isDark: () => boolean,
   opts: { raw: boolean; math: boolean },
-  blockSlugs?: BlockSlugs,
+  blockSlugs?: BlockSlugPlugin,
 ): Promise<LumenProcessor> {
   // rehype-raw pulls in parse5 (~40 KB gz); only docs with inline HTML
   // pay for it (M12-followup-2).
@@ -246,7 +227,7 @@ async function buildFullProcessor(
   // CriticMarkup (suggesting mode) → <ins>/<del>/<mark>; before rehypeSlug
   // so heading ids are computed from the rendered text.
   p = p.use(rehypeCriticMarkup);
-  p = blockSlugs ? p.use(rehypeSlugAcrossBlocks, blockSlugs) : p.use(rehypeSlug);
+  p = blockSlugs ? p.use(blockSlugs) : p.use(rehypeSlug);
   p = p.use(rehypeDirAuto);
   if (rehypeKatex) p = p.use(rehypeKatex);
   return toReact(p.use(rehypeShiki, { isDark }));
@@ -255,12 +236,12 @@ async function buildFullProcessor(
 /**
  * The full pipeline for rendering a long document block by block
  * (./incrementalPreview.ts): one processor per document, whose heading
- * ids come from `blockSlugs`.
+ * ids come from `blockSlugs` in place of rehype-slug.
  */
 export function buildBlockProcessor(
   isDark: () => boolean,
   opts: { raw: boolean; math: boolean },
-  blockSlugs: BlockSlugs,
+  blockSlugs: BlockSlugPlugin,
 ): Promise<LumenProcessor> {
   return buildFullProcessor(isDark, opts, blockSlugs);
 }

@@ -31,7 +31,7 @@ import {
 import { getVaultBackend, watchVault, type VaultEvent } from "./vault";
 import type { BacklinkHit, IndexInput, IndexStats, SearchHit } from "./vaultIndexCore";
 import { wikiTargetsOf } from "./wikiTargets";
-import { localEngine, workerEngine, type IndexEngine } from "./vaultIndexProtocol";
+import { workerEngine, type IndexEngine } from "./vaultIndexProtocol";
 import { log } from "../lib/logger";
 
 export type { BacklinkHit, SearchHit } from "./vaultIndexCore";
@@ -97,7 +97,7 @@ async function createEngine(): Promise<IndexEngine> {
 
 /** The core is only loaded on the main thread when there is no worker. */
 async function localIndexEngine(): Promise<IndexEngine> {
-  const { VaultIndex } = await import("./vaultIndexCore");
+  const { VaultIndex, localEngine } = await import("./vaultIndexLocal");
   return localEngine(new VaultIndex());
 }
 

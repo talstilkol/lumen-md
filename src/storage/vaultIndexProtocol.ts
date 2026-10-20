@@ -1,12 +1,13 @@
 /**
  * The messages between the workspace index (main thread,
  * ./workspaceIndex.ts) and the index core it drives (./vaultIndexCore.ts),
- * plus the two ways to drive it: in the index worker
- * (./vaultIndex.worker.ts) or, where there is no Worker, in this thread.
- * Both go through `handleIndexRequest`, so they answer the same.
+ * and the engine that drives it in the index worker
+ * (./vaultIndex.worker.ts). The in-thread engine, for when there is no
+ * Worker, is ./vaultIndexLocal.ts — loaded only then, off the startup path.
+ * Both answer through `handleIndexRequest`, so they answer the same.
  */
 
-import type { BacklinkHit, IndexInput, IndexStats, SearchHit, SearchOptions, VaultIndex } from "./vaultIndexCore";
+import type { BacklinkHit, IndexInput, IndexStats, SearchHit, SearchOptions } from "./vaultIndexCore";
 
 export type IndexRequestBody =
   | { op: "upsert"; files: IndexInput[] }
@@ -20,33 +21,6 @@ export type IndexRequest = IndexRequestBody & { id: number };
 
 export type IndexResponse = { id: number; ok: true; result: unknown } | { id: number; ok: false; error: string };
 
-/** Apply one request to `index`. Never throws: a failure is an `ok: false` answer. */
-export function handleIndexRequest(index: VaultIndex, req: IndexRequest): IndexResponse {
-  try {
-    switch (req.op) {
-      case "upsert":
-        for (const f of req.files) index.upsert(f);
-        return { id: req.id, ok: true, result: req.files.length };
-      case "remove": {
-        let n = 0;
-        for (const p of req.paths) if (index.remove(p)) n++;
-        return { id: req.id, ok: true, result: n };
-      }
-      case "clear":
-        index.clear();
-        return { id: req.id, ok: true, result: 0 };
-      case "search":
-        return { id: req.id, ok: true, result: index.search(req.query, req.opts) };
-      case "backlinks":
-        return { id: req.id, ok: true, result: index.backlinks(req.target) };
-      case "stats":
-        return { id: req.id, ok: true, result: index.stats() };
-    }
-  } catch (err) {
-    return { id: req.id, ok: false, error: err instanceof Error ? err.message : String(err) };
-  }
-}
-
 export interface IndexEngine {
   /** "worker": the index lives in the index worker; "local": in this thread. */
   readonly kind: "worker" | "local";
@@ -59,7 +33,7 @@ export interface IndexEngine {
   dispose(): void;
 }
 
-function engineOver(kind: IndexEngine["kind"], send: (req: IndexRequestBody) => Promise<unknown>, dispose: () => void): IndexEngine {
+export function engineOver(kind: IndexEngine["kind"], send: (req: IndexRequestBody) => Promise<unknown>, dispose: () => void): IndexEngine {
   return {
     kind,
     upsert: async (files) => void (await send({ op: "upsert", files })),
@@ -70,20 +44,6 @@ function engineOver(kind: IndexEngine["kind"], send: (req: IndexRequestBody) => 
     stats: () => send({ op: "stats" }) as Promise<IndexStats>,
     dispose,
   };
-}
-
-/** The index in this thread. */
-export function localEngine(index: VaultIndex): IndexEngine {
-  let id = 0;
-  return engineOver(
-    "local",
-    async (body) => {
-      const res = handleIndexRequest(index, { ...body, id: ++id } as IndexRequest);
-      if (!res.ok) throw new Error(res.error);
-      return res.result;
-    },
-    () => index.clear(),
-  );
 }
 
 /** What `workerEngine` needs of a Worker (a fake one in tests). */

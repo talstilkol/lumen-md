@@ -75,11 +75,13 @@ function indentOf(line: string): number {
   return n;
 }
 
-/** Open-element depth after the tags on `line` (preview: rehype-raw nests elements across blocks). */
+/** `line` without what Markdown does not read as HTML: code spans, comments, escaped `\<`. */
+function htmlOnly(line: string): string {
+  return line.replace(/(`+)(?:(?!\1)[\s\S])*?\1/g, "").replace(/<!--.*?-->/g, "").replace(/\\</g, "");
+}
+
+/** Open-element depth after the complete tags on `line` (preview: rehype-raw nests elements across blocks). */
 function countTags(line: string, depth: number): number {
-  if (!line.includes("<")) return depth;
-  // Not HTML to Markdown: code spans, comments, escaped `\<`.
-  line = line.replace(/(`+)(?:(?!\1)[\s\S])*?\1/g, "").replace(/<!--.*?-->/g, "").replace(/\\</g, "");
   TAG.lastIndex = 0;
   let t: RegExpExecArray | null;
   while ((t = TAG.exec(line)) !== null) {
@@ -88,6 +90,9 @@ function countTags(line: string, depth: number): number {
   }
   return depth;
 }
+
+/** An opening tag still open at the end of the line (`<div` + attributes on the next lines). */
+const UNTERMINATED_TAG = /<([A-Za-z][\w-]*)(?=[\s/]|$)[^<>]*$/;
 
 interface Scan {
   blocks: Block[];
@@ -114,6 +119,27 @@ export function splitBlocks(text: string, opts: SplitOptions = {}, from = 0, sto
   /** The previous line is paragraph text (an HTML block 7 cannot interrupt it). */
   let paragraph = false;
   let htmlDepth = 0;
+  /** An opening tag spans lines: its `>` is still to come. */
+  let tagOpen = false;
+  /** Follow the HTML elements a line opens and closes (preview). */
+  const trackHtml = (raw: string) => {
+    if (!opts.preview || (!tagOpen && !raw.includes("<"))) return;
+    let line = htmlOnly(raw);
+    if (tagOpen) {
+      const gt = line.indexOf(">");
+      if (gt < 0) return;
+      tagOpen = false;
+      // `<br\n/>`-style self-closing: it never opened.
+      if (line[gt - 1] === "/") htmlDepth = Math.max(0, htmlDepth - 1);
+      line = line.slice(gt + 1);
+    }
+    htmlDepth = countTags(line, htmlDepth);
+    const u = UNTERMINATED_TAG.exec(line);
+    if (u && !VOID_TAGS.has(u[1].toLowerCase())) {
+      htmlDepth++;
+      tagOpen = true;
+    }
+  };
   /** Columns of the current top-level list item's content. */
   let itemIndent = Infinity;
   /** A fence open inside the current list item. */
@@ -161,7 +187,7 @@ export function splitBlocks(text: string, opts: SplitOptions = {}, from = 0, sto
       paragraph = false;
     } else if (rawEnd) {
       if (rawEnd.test(line)) rawEnd = null;
-      if (opts.preview) htmlDepth = countTags(line, htmlDepth);
+      trackHtml(line);
       paragraph = false;
     } else if (BLANK.test(line)) {
       if (hasContent) blankSeen = true;
@@ -196,7 +222,7 @@ export function splitBlocks(text: string, opts: SplitOptions = {}, from = 0, sto
       const indent = indentOf(line);
       // Inside an HTML block 6 / 7 every line is HTML, list markers too.
       if (htmlToBlank) {
-        if (opts.preview) htmlDepth = countTags(line, htmlDepth);
+        trackHtml(line);
         paragraph = false;
         pos = next;
         continue;
@@ -225,7 +251,7 @@ export function splitBlocks(text: string, opts: SplitOptions = {}, from = 0, sto
           const f = FENCE_OPEN.exec(content);
           if (f) itemFence = { ch: (f[1] ?? f[2])[0], len: (f[1] ?? f[2]).length };
           paragraph = !f && !NOT_PARAGRAPH.test(content) && !BLANK.test(content);
-          if (opts.preview) htmlDepth = countTags(line, htmlDepth);
+          trackHtml(line);
           pos = next;
           continue;
         }
@@ -236,7 +262,7 @@ export function splitBlocks(text: string, opts: SplitOptions = {}, from = 0, sto
         if (!itemFence && !itemHtml && paragraph && HTML_BLOCK_7.test(line) && !HTML_BLOCK_6.test(line)) {
           itemHtml = true;
           paragraph = false;
-          if (opts.preview) htmlDepth = countTags(line, htmlDepth);
+          trackHtml(line);
           pos = next;
           continue;
         }
@@ -250,7 +276,7 @@ export function splitBlocks(text: string, opts: SplitOptions = {}, from = 0, sto
           !HTML_BLOCK_6.test(line) &&
           !RAW_HTML.some(([open]) => open.test(line));
         if (lazy) {
-          if (opts.preview) htmlDepth = countTags(line, htmlDepth);
+          trackHtml(line);
           pos = next;
           continue;
         }
@@ -275,7 +301,7 @@ export function splitBlocks(text: string, opts: SplitOptions = {}, from = 0, sto
           if (f) itemFence = { ch: (f[1] ?? f[2])[0], len: (f[1] ?? f[2]).length };
           paragraph = !f && !NOT_PARAGRAPH.test(content) && !(paragraph && SETEXT_EQ.test(content));
         }
-        if (opts.preview) htmlDepth = countTags(line, htmlDepth);
+        trackHtml(line);
         pos = next;
         continue;
       }
@@ -300,7 +326,7 @@ export function splitBlocks(text: string, opts: SplitOptions = {}, from = 0, sto
         if (c?.[2]) containers.push(c[1].length);
         else if (c && containers.length && c[1].length >= containers[containers.length - 1]) containers.pop();
       }
-      if (opts.preview) htmlDepth = countTags(line, htmlDepth);
+      trackHtml(line);
       paragraph = !opened && !NOT_PARAGRAPH.test(line) && !(paragraph && SETEXT_EQ.test(line));
     }
     pos = next;

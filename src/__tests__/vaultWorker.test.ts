@@ -29,7 +29,8 @@ import {
   workspaceTree,
 } from "../storage/workspaceIndex";
 import { VaultIndex, foldForSearch, fuzzyMatch, snippetAround, type IndexInput } from "../storage/vaultIndexCore";
-import { handleIndexRequest, localEngine, workerEngine, type IndexRequest, type IndexResponse, type WorkerLike } from "../storage/vaultIndexProtocol";
+import { workerEngine, type IndexRequest, type IndexResponse, type WorkerLike } from "../storage/vaultIndexProtocol";
+import { handleIndexRequest, localEngine } from "../storage/vaultIndexLocal";
 import { hasHebrew, hebrewFind, normalizeWithMap } from "../text/hebrew";
 import { noteKey } from "../lib/slug";
 import { BlockTracker, splitBlocks } from "../renderer/blocks";
@@ -361,6 +362,14 @@ describe("blocks and the incremental outline", () => {
       "# Next\n\n",
       "<div>\n\nin\n\n</div>\n\n",
       "Text\n",
+    ]);
+  });
+
+  it("an opening tag spread over lines keeps its element in one preview block", () => {
+    const doc = '<div\nclass="note">\n\nInside\n\n</div>\n\nAfter\n';
+    expect(splitBlocks(doc, { preview: true }).blocks.map((b) => doc.slice(b.start, b.end))).toEqual([
+      '<div\nclass="note">\n\nInside\n\n</div>\n\n',
+      "After\n",
     ]);
   });
 

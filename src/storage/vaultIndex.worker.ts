@@ -6,7 +6,8 @@
  * back as plain results. See ./vaultIndexProtocol.ts.
  */
 import { VaultIndex } from "./vaultIndexCore";
-import { handleIndexRequest, type IndexRequest } from "./vaultIndexProtocol";
+import { handleIndexRequest } from "./vaultIndexLocal";
+import type { IndexRequest } from "./vaultIndexProtocol";
 
 const index = new VaultIndex();
 

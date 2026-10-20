@@ -22,7 +22,26 @@ import { headingSlugger } from "../lib/slug";
 import { mayContainCriticMarkup } from "../editor/suggesting";
 import { BlockTracker } from "./blocks";
 import { prepareCriticMarkup } from "./criticMarkup";
-import { buildBlockProcessor, pipelineOptions, type BlockSlugs } from "./pipeline";
+import type { Element, Root as HastRoot } from "hast";
+import { toString as hastToString } from "hast-util-to-string";
+import { visit } from "unist-util-visit";
+import { buildBlockProcessor, pipelineOptions } from "./pipeline";
+
+/**
+ * rehype-slug for one block: the same id rule (github-slugger over the
+ * heading's text, headings that already have an id skipped), but numbered
+ * with the document's slugger, so a repeated heading in a later block
+ * still gets `-1`.
+ */
+function rehypeSlugAcrossBlocks(slug: (text: string) => string) {
+  return () => (tree: HastRoot) => {
+    visit(tree, "element", (node: Element) => {
+      if (!/^h[1-6]$/.test(node.tagName)) return;
+      const props = (node.properties ??= {});
+      if (!props.id) props.id = slug(hastToString(node));
+    });
+  };
+}
 
 /** Footnotes, reference definitions and CriticMarkup need the whole document. */
 export function canRenderInBlocks(markdown: string): boolean {
@@ -81,15 +100,13 @@ export class IncrementalPreview {
   /** Blocks rendered since this preview was created (a test counter). */
   rendered = 0;
 
-  private readonly blockSlugs: BlockSlugs = {
-    slug: (text) => {
-      const s = this.slugs!;
-      const id = s.slugger.slug(text);
-      s.texts.push(text);
-      s.ids.push(id);
-      return id;
-    },
-  };
+  private readonly blockSlugs = rehypeSlugAcrossBlocks((text) => {
+    const s = this.slugs!;
+    const id = s.slugger.slug(text);
+    s.texts.push(text);
+    s.ids.push(id);
+    return id;
+  });
 
   /**
    * The preview of `markdown`, or null when `isStale()` turned true while
