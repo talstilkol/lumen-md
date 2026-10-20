@@ -308,9 +308,9 @@ test("git pull merges three ways, opens the conflict screen, keeps unsaved edits
     (window as unknown as { __pull: unknown }).__pull = result;
     void docs.reportPull(result);
   }, repo);
-  const summary = page.getByRole("dialog").filter({ hasText: /Nothing was deleted/ });
+  const summary = page.getByRole("dialog").filter({ hasText: /Nothing deleted/ });
   await expect(summary).toBeVisible({ timeout: 10_000 });
-  await expect(summary).toContainText(/deleted upstream and kept here/);
+  await expect(summary).toContainText(/Deleted upstream, kept here/);
   await summary.getByRole("button", { name: "OK" }).click();
 
   const conflict = page.getByRole("dialog").filter({ hasText: `Git conflict — ${repo}/c.md` });

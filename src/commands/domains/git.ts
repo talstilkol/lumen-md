@@ -1,23 +1,19 @@
 /** Git commands for a repository cloned into the workspace. */
 import { cmdIcons, type Command } from "../../ui/CommandPalette";
 import { t } from "../../i18n";
-// The git modules (and isomorphic-git behind them) load on first use: the
-// palette lists these commands at start-up, so nothing here may pull them
-// into the startup bundle.
-const gitApi = () => import("../../sync/git");
-const proxyApi = () => import("../../sync/gitProxy");
 import { uiAlert, uiPrompt } from "../../ui/PromptDialog";
 import { generateAiCommitMessage } from "../../ai/commands";
 import { log } from "../../lib/logger";
 import { showAiToast } from "../../ui/AiToast";
 import { cancellable, type CommandContext } from "./context";
 
-/** A failed clone / pull: add a hint when the request never reached the git host (CORS). */
-async function netError(e: unknown): Promise<string> {
-  const msg = (e as Error).message;
-  const { looksLikeCorsFailure } = await proxyApi();
-  return looksLikeCorsFailure(e) ? `${msg}\n\n${t("git.alert.corsHint")}` : msg;
-}
+// The git modules (and isomorphic-git behind them) load on first use: the
+// palette lists these commands at start-up, so nothing here may pull them
+// into the startup bundle.
+const gitApi = () => import("../../sync/git");
+
+/** A failed clone / pull, with a hint when it looks like CORS (loaded on use). */
+const netError = async (e: unknown) => (await import("../../store/gitPullDocs")).netError(e);
 
 /** Clone, commit & push, pull, status, watch, token, identity. */
 export function buildGitCommands({ showWorkspace, toggleWorkspace, liveDoc }: CommandContext): Command[] {
@@ -198,32 +194,7 @@ export function buildGitCommands({ showWorkspace, toggleWorkspace, liveDoc }: Co
       hint: t("cmd.git.corsProxy.hint"),
       icon: cmdIcons.Link,
       group: t("group.git"),
-      action: async () => {
-        const { getStoredCorsProxy, LOCAL_GIT_PROXY, normaliseProxyUrl, setStoredCorsProxy } = await proxyApi();
-        const value = await uiPrompt({
-          message: t("git.prompt.corsProxy"),
-          defaultValue: getStoredCorsProxy() ?? "",
-          placeholder: LOCAL_GIT_PROXY,
-        });
-        if (value === null) return;
-        // A proxy the page's CSP does not allow would be blocked before
-        // the request leaves: say so instead of saving a setting that fails.
-        const url = normaliseProxyUrl(value);
-        if (url) {
-          const { connectAllowedByCsp } = await import("../../lib/cspConnect");
-          if (!connectAllowedByCsp(url)) {
-            await uiAlert({ message: t("git.alert.corsProxyBlocked", { origin: new URL(url).origin }) });
-            return;
-          }
-        }
-        try {
-          setStoredCorsProxy(value);
-        } catch {
-          await uiAlert({ message: t("git.alert.corsProxyInvalid") });
-          return;
-        }
-        await uiAlert({ message: value.trim() ? t("git.alert.corsProxySaved") : t("git.alert.corsProxyCleared") });
-      },
+      action: async () => (await import("../../store/gitPullDocs")).promptCorsProxy(),
     },
     {
       id: "git.identity",

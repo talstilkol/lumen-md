@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generated_at": "2026-10-20T17:35:18.609Z",
+  "generated_at": "2026-10-20T17:45:38.616Z",
   "source": "src/i18n/index.ts (en bundle)",
   "count": 1498,
   "entries": [
@@ -7932,7 +7932,7 @@
     },
     {
       "key": "git.prompt.corsProxy",
-      "en": "CORS proxy URL for git (empty: connect directly). A local one: docker compose -f docker/git-proxy.yml up -d",
+      "en": "CORS proxy URL for git (empty: direct):",
       "vars": []
     },
     {
@@ -7952,7 +7952,7 @@
     },
     {
       "key": "git.alert.corsHint",
-      "en": "The request did not reach the git host. Most hosts (GitHub too) need a CORS proxy in the browser: ⌘K → “Git: set CORS proxy…”.",
+      "en": "The git host was not reached. In a browser it needs a CORS proxy: ⌘K → “Git: set CORS proxy…”.",
       "vars": []
     },
     {
@@ -7962,7 +7962,7 @@
     },
     {
       "key": "git.pull.summary",
-      "en": "Pulled — {changed} files updated, {conflicts} conflicts. Nothing was deleted.",
+      "en": "Pulled: {changed} files updated, {conflicts} conflicts. Nothing deleted.",
       "vars": [
         "changed",
         "conflicts"
@@ -7970,7 +7970,7 @@
     },
     {
       "key": "git.pull.keptDeleted",
-      "en": "{count} files were deleted upstream and kept here: {files}",
+      "en": "Deleted upstream, kept here ({count}): {files}",
       "vars": [
         "count",
         "files"
@@ -7978,7 +7978,7 @@
     },
     {
       "key": "git.pull.mergedIntoOpen",
-      "en": "Open notes with unsaved edits got the merge in the editor (not overwritten, saved next): {files}",
+      "en": "Merged into open notes with unsaved edits (not overwritten): {files}",
       "vars": [
         "files"
       ]
@@ -7992,21 +7992,21 @@
     },
     {
       "key": "git.lfs.unsupported",
-      "en": "Git LFS is not supported: these files are LFS pointers, and real files here are never replaced by them: {files}",
+      "en": "Git LFS is not supported; these are LFS pointers: {files}",
       "vars": [
         "files"
       ]
     },
     {
       "key": "git.clone.kept",
-      "en": "{count} files already in this folder were kept as they are (not overwritten).",
+      "en": "{count} existing files were kept (not overwritten).",
       "vars": [
         "count"
       ]
     },
     {
       "key": "git.commit.unresolved",
-      "en": "Not committed: these files still have conflict markers from a pull. Resolve them first: {files}",
+      "en": "Not committed: resolve the conflicts first: {files}",
       "vars": [
         "files"
       ]
@@ -8020,7 +8020,7 @@
     },
     {
       "key": "git.conflict.body",
-      "en": "You and the remote changed the same lines. The file holds both versions between conflict markers until you choose; nothing is lost.",
+      "en": "Both sides changed the same lines. Until you choose, the file keeps both between markers.",
       "vars": []
     },
     {
@@ -8055,7 +8055,7 @@
     },
     {
       "key": "git.conflict.left",
-      "en": "{count} conflicts left: their files keep the conflict markers. Pull again to resolve them.",
+      "en": "{count} conflicts left, still marked in their files.",
       "vars": [
         "count"
       ]
@@ -8067,21 +8067,21 @@
     },
     {
       "key": "git.watch.conflicts",
-      "en": "Auto-pull found {count} conflicts; they are marked in the files. Run “Git: pull current repo” to resolve them.",
+      "en": "Auto-pull: {count} conflicts marked in the files. Pull to resolve them.",
       "vars": [
         "count"
       ]
     },
     {
       "key": "git.pull.kindClashes",
-      "en": "Upstream turned these into folders or files where this vault has the other kind; they were left as they are here: {files}",
+      "en": "File/folder changed upstream, kept as is here: {files}",
       "vars": [
         "files"
       ]
     },
     {
       "key": "git.alert.corsProxyBlocked",
-      "en": "This app's security policy does not allow {origin}, so the browser would block the proxy. Use http://localhost:9999, or have the deployment add it (VITE_GIT_CORS_PROXY or VITE_CSP_CONNECT_EXTRA). Nothing was changed.",
+      "en": "The app's security policy blocks {origin}. Use http://localhost:9999 or a proxy the deployment allows.",
       "vars": [
         "origin"
       ]

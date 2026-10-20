@@ -18,7 +18,7 @@ import { notifyWorkspaceChanged } from "../storage/workspaceEvents";
 import type { PendingConflict } from "../sync/gitPull";
 import type { PullEditorHooks, PullResult } from "../sync/git";
 import { showAiToast } from "../ui/AiToast";
-import { uiAlert } from "../ui/PromptDialog";
+import { uiAlert, uiPrompt } from "../ui/PromptDialog";
 import { flushPendingEdits, useAppStore } from "./useStore";
 
 /** The open note (active document or a tab) at a vault path. */
@@ -140,4 +140,39 @@ export async function reportPull(result: PullResult): Promise<void> {
   }
   if (left.length) showAiToast(t("git.conflict.left", { count: left.length }), "info");
   else showAiToast(t("git.conflict.allResolved"), "success");
+}
+
+/** A failed clone / pull: add a hint when the request never reached the git host (CORS). */
+export async function netError(e: unknown): Promise<string> {
+  const msg = (e as Error).message;
+  const { looksLikeCorsFailure } = await import("../sync/gitProxy");
+  return looksLikeCorsFailure(e) ? `${msg}\n\n${t("git.alert.corsHint")}` : msg;
+}
+
+/** ⌘K → "Git: set CORS proxy…". */
+export async function promptCorsProxy(): Promise<void> {
+  const { getStoredCorsProxy, LOCAL_GIT_PROXY, normaliseProxyUrl, setStoredCorsProxy } = await import("../sync/gitProxy");
+  const value = await uiPrompt({
+    message: t("git.prompt.corsProxy"),
+    defaultValue: getStoredCorsProxy() ?? "",
+    placeholder: LOCAL_GIT_PROXY,
+  });
+  if (value === null) return;
+  // A proxy the page's CSP does not allow would be blocked before the
+  // request leaves: say so instead of saving a setting that fails.
+  const url = normaliseProxyUrl(value);
+  if (url) {
+    const { connectAllowedByCsp } = await import("../lib/cspConnect");
+    if (!connectAllowedByCsp(url)) {
+      await uiAlert({ message: t("git.alert.corsProxyBlocked", { origin: new URL(url).origin }) });
+      return;
+    }
+  }
+  try {
+    setStoredCorsProxy(value);
+  } catch {
+    await uiAlert({ message: t("git.alert.corsProxyInvalid") });
+    return;
+  }
+  await uiAlert({ message: value.trim() ? t("git.alert.corsProxySaved") : t("git.alert.corsProxyCleared") });
 }
