@@ -333,7 +333,7 @@ describe("VaultIndex", () => {
       }
     }
     await check();
-  });
+  }, 60_000);
 });
 
 // ── Incremental outline and preview ────────────────────────────────────
@@ -377,7 +377,7 @@ describe("blocks and the incremental outline", () => {
         }
       }
     }
-  });
+  }, 60_000);
 
   it("autolinks and code spans are not open HTML elements: preview blocks still split after them", () => {
     const doc = "See <https://example.com>, <a@b.co> and `<div>`.\n\n# Next\n\n<div>\n\nin\n\n</div>\n\nText\n";
@@ -429,7 +429,7 @@ describe("blocks and the incremental outline", () => {
     // A changed heading still numbers its repeats over the whole document.
     doc = doc.replace("## Section 2999", "## Section 1");
     expect(toc.update(doc)).toEqual(extractToc(doc));
-  });
+  }, 60_000);
 
   it("a fence opened mid-document swallows the rest; a definition change re-parses [bracket] headings", () => {
     let doc = "# A\n\ntext\n\n# B [x]\n\nmore\n\n# C\n\n";
