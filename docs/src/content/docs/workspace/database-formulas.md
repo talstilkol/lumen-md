@@ -55,7 +55,9 @@ Precedence, loosest first: `or`, `and`, `not`, comparison, `&`, `+ -`,
 
 **Values** follow the filter's rules: numbers stay numbers, numeric text
 (`"12"`) counts as a number, `YYYY-MM-DD` text compares as a date, a list
-equals a value it holds (`tags = "fav"`), and text compares ignoring case.
+equals a value it holds (`tags = "fav"`), `=` compares text ignoring case,
+and `<` / `>` order text by character code — the same result in every
+language setting (alphabetical for Hebrew; capitals before small letters).
 An empty property makes arithmetic empty (`price * qty` with no `qty` is
 empty, not an error). `0.1 + 0.2` is `0.3`.
 

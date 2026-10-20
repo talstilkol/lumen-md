@@ -109,6 +109,12 @@ describe("formula — semantics", () => {
     expect(value('"a" & 1 & true')).toBe("a1true");
   });
 
+  it("text order is the same in every locale (code points)", () => {
+    expect(value('"ä" < "z"')).toBe(false);
+    expect(value('"א" < "ב" and "ב" < "ת"')).toBe(true);
+    expect(value('"B" < "a"')).toBe(true);
+  });
+
   it("a list equals a value it holds, as in the filter", () => {
     expect(value('tags = "sci-fi"')).toBe(true);
     expect(value('tags != "romance"')).toBe(true);

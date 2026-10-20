@@ -124,6 +124,8 @@ export function order(a: FormulaValue, b: FormulaValue): number | null {
   const y = comparable(b);
   if (x === null || y === null) return null;
   if (typeof x === "number" && typeof y === "number") return x < y ? -1 : x > y ? 1 : 0;
-  const d = String(x).localeCompare(String(y));
-  return d < 0 ? -1 : d > 0 ? 1 : 0;
+  // Code-point order, not localeCompare: the same answer in every locale (and alphabetical for Hebrew).
+  const a2 = String(x);
+  const b2 = String(y);
+  return a2 < b2 ? -1 : a2 > b2 ? 1 : 0;
 }
