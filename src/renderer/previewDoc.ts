@@ -1,6 +1,14 @@
 import { createContext } from "react";
 
 /**
+ * From this length on (plan 8.4) the preview renders block by block
+ * (./incrementalPreview.ts), the outline re-parses only changed blocks
+ * (./incrementalToc.ts) and the status bar counts words once typing
+ * pauses. Shorter documents keep the one-pass paths, which are fast there.
+ */
+export const LARGE_DOC_CHARS = 50_000;
+
+/**
  * Identity of the document whose markdown the surrounding preview tree was
  * rendered from. The preview renders asynchronously, so while switching tabs
  * it briefly still shows the previous document's tree; blocks that keep

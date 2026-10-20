@@ -22,7 +22,8 @@ import { visit } from "unist-util-visit";
 import { Fragment, jsx, jsxs } from "react/jsx-runtime";
 import YAML from "yaml";
 import type { Root as MdastRoot, Code } from "mdast";
-import type { Root as HastRoot } from "hast";
+import type { Element, Root as HastRoot } from "hast";
+import { toString as hastToString } from "hast-util-to-string";
 import { components } from "./components";
 import { rehypeShiki } from "./shiki";
 import { prepareCriticMarkup, rehypeCriticMarkup, stripCriticDelimiters } from "./criticMarkup";
@@ -202,6 +203,37 @@ async function getFullProcessor(
   const key = `${opts.raw ? 1 : 0}${opts.math ? 1 : 0}`;
   const cached = fullProcessors.get(key);
   if (cached) return cached;
+  const proc = await buildFullProcessor(isDark, opts);
+  fullProcessors.set(key, proc);
+  return proc;
+}
+
+/** Heading ids for one block of a long document, numbered across the blocks before it. */
+export interface BlockSlugs {
+  slug(text: string): string;
+}
+
+/**
+ * rehype-slug for a block (plan 8.4): the same id rule (github-slugger
+ * over the heading's text, headings that already have an id skipped), but
+ * the slugger is the document's, so a repeated heading in a later block
+ * still gets `-1`.
+ */
+function rehypeSlugAcrossBlocks(slugs: BlockSlugs) {
+  return (tree: HastRoot) => {
+    visit(tree, "element", (node: Element) => {
+      if (!/^h[1-6]$/.test(node.tagName)) return;
+      const props = (node.properties ??= {});
+      if (!props.id) props.id = slugs.slug(hastToString(node));
+    });
+  };
+}
+
+async function buildFullProcessor(
+  isDark: () => boolean,
+  opts: { raw: boolean; math: boolean },
+  blockSlugs?: BlockSlugs,
+): Promise<LumenProcessor> {
   // rehype-raw pulls in parse5 (~40 KB gz); only docs with inline HTML
   // pay for it (M12-followup-2).
   const [rehypeRaw, rehypeKatex] = await Promise.all([
@@ -213,11 +245,29 @@ async function getFullProcessor(
   if (rehypeRaw) p = p.use(rehypeRaw).use(rehypeSanitizeRaw);
   // CriticMarkup (suggesting mode) → <ins>/<del>/<mark>; before rehypeSlug
   // so heading ids are computed from the rendered text.
-  p = p.use(rehypeCriticMarkup).use(rehypeSlug).use(rehypeDirAuto);
+  p = p.use(rehypeCriticMarkup);
+  p = blockSlugs ? p.use(rehypeSlugAcrossBlocks, blockSlugs) : p.use(rehypeSlug);
+  p = p.use(rehypeDirAuto);
   if (rehypeKatex) p = p.use(rehypeKatex);
-  const proc = toReact(p.use(rehypeShiki, { isDark }));
-  fullProcessors.set(key, proc);
-  return proc;
+  return toReact(p.use(rehypeShiki, { isDark }));
+}
+
+/**
+ * The full pipeline for rendering a long document block by block
+ * (./incrementalPreview.ts): one processor per document, whose heading
+ * ids come from `blockSlugs`.
+ */
+export function buildBlockProcessor(
+  isDark: () => boolean,
+  opts: { raw: boolean; math: boolean },
+  blockSlugs: BlockSlugs,
+): Promise<LumenProcessor> {
+  return buildFullProcessor(isDark, opts, blockSlugs);
+}
+
+/** Which lazy parts (rehype-raw, KaTeX) the full pipeline needs for `source`. */
+export function pipelineOptions(source: string): { raw: boolean; math: boolean } {
+  return { raw: hasRawHtml(source), math: hasMath(source) };
 }
 
 /**
@@ -240,10 +290,7 @@ export async function renderMarkdown(
   markdownText: string,
   isDark: () => boolean,
 ): Promise<ReactElement> {
-  const proc = await getFullProcessor(isDark, {
-    raw: hasRawHtml(markdownText),
-    math: hasMath(markdownText),
-  });
+  const proc = await getFullProcessor(isDark, pipelineOptions(markdownText));
   const file = await proc.process(prepareCriticMarkup(markdownText));
   return file.result as ReactElement;
 }
