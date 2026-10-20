@@ -137,6 +137,23 @@ describe("formula — semantics", () => {
     expect(value('year("0050-06-01T12:00+02:00")')).toBe(50);
   });
 
+  it("month differences only flip sign when the dates swap (review #267)", () => {
+    // Jan 31 + 1 month is Feb 28 (as dateadd clamps it), so that is one month either way.
+    expect(value('datediff("2026-02-28", "2026-01-31", "months")')).toBe(1);
+    expect(value('datediff("2026-01-31", "2026-02-28", "months")')).toBe(-1);
+    expect(value('datediff("2026-03-31", "2026-01-31", "months")')).toBe(2);
+    expect(value('datediff("2026-01-31", "2026-03-31", "months")')).toBe(-2);
+    expect(value('datediff("2025-01-15", "2027-03-14", "years")')).toBe(-2);
+  });
+
+  it("round() works on numbers written with an exponent (review #267)", () => {
+    expect(value("round(1e308, 1)")).toBe(1e308);
+    expect(value("round(0.000123456, 5)")).toBe(0.00012);
+    expect(value("round(1.5e-7, 7)")).toBe(2e-7);
+    expect(value("round(-2.5)")).toBe(-3);
+    expect(value("round(1234.5678, -2)")).toBe(1200);
+  });
+
   it("a day that does not exist is not a date", () => {
     expect(errorOf('date("2026-02-30")').code).toBe("type");
     expect(errorOf('year("2026-13-01")').code).toBe("type");

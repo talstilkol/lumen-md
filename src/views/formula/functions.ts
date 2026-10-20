@@ -256,10 +256,18 @@ const BUILTINS: Record<string, FormulaFunction> = {
       if (n === null) return null;
       const d = int(b, "round", ctx, 0);
       if (d < -15 || d > 15) throw new FormulaError("type", "round() digits must be between -15 and 15", ctx.at);
-      const f = 10 ** d;
-      // Shift by the decimal string, not by multiplying, so 1.005 rounds to 1.01.
-      const shifted = Number(`${Math.abs(n)}e${d}`);
-      const r = Number.isFinite(shifted) ? Number(`${Math.round(shifted)}e${-d}`) : Math.round(Math.abs(n) * f) / f;
+      // A whole number has nothing to round to the right of the point.
+      if (Number.isInteger(n) && d >= 0) return n;
+      // Shift by the decimal exponent, not by multiplying, so 1.005 rounds to 1.01. The value is
+      // written in exponential form first, so 1e308 shifts its exponent instead of getting a
+      // second one ("1e+308e1") (review #267).
+      const shift = (v: number, k: number) => {
+        const [m, e] = v.toExponential().split("e");
+        return Number(`${m}e${Number(e) + k}`);
+      };
+      const shifted = shift(Math.abs(n), d);
+      if (!Number.isFinite(shifted)) throw new FormulaError("math", "round(): the number is too large", ctx.at);
+      const r = shift(Math.round(shifted), -d);
       return clean(Math.sign(n) * r, ctx.at);
     },
   },
@@ -376,11 +384,14 @@ const BUILTINS: Record<string, FormulaFunction> = {
       if (x === null || y === null) return null;
       const u = unit(c, "datediff", ctx);
       if (u === "months" || u === "years") {
-        let months = (x.getUTCFullYear() - y.getUTCFullYear()) * 12 + (x.getUTCMonth() - y.getUTCMonth());
+        // Counted from the earlier date to the later, then signed: swapping the dates only
+        // flips the sign (month-end clamping made it depend on the order — review #267).
+        const [lo, hi, sign] = x.getTime() >= y.getTime() ? [y, x, 1] : [x, y, -1];
+        let months = (hi.getUTCFullYear() - lo.getUTCFullYear()) * 12 + (hi.getUTCMonth() - lo.getUTCMonth());
         // A month is complete only when the day of the month has been reached.
-        if (months > 0 && addMonths(y, months).getTime() > x.getTime()) months--;
-        if (months < 0 && addMonths(y, months).getTime() < x.getTime()) months++;
-        return u === "years" ? Math.trunc(months / 12) : months;
+        if (months > 0 && addMonths(lo, months).getTime() > hi.getTime()) months--;
+        const signed = sign * months;
+        return u === "years" ? Math.trunc(signed / 12) : signed;
       }
       const ms = u === "weeks" ? 7 * DAY : u === "hours" ? 3_600_000 : u === "minutes" ? 60_000 : DAY;
       return Math.trunc((x.getTime() - y.getTime()) / ms);
