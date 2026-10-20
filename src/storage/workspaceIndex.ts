@@ -150,8 +150,10 @@ async function mtimeOf(path: string): Promise<number> {
  */
 async function indexFile(e: { path: string; name: string; modified: number | null }): Promise<IndexedFile | null> {
   try {
-    const content = await readWorkspaceFile(e.path);
+    // The mtime before the read: a write landing in between then looks
+    // newer than what was read, and the next listing check reads it again.
     const modified = e.modified ?? (await mtimeOf(e.path));
+    const content = await readWorkspaceFile(e.path);
     return { path: e.path, name: e.name, content, modified, wikiTargets: wikiTargetsOf(content) };
   } catch {
     return null;
@@ -339,7 +341,14 @@ function onVaultEvent(e: VaultEvent): void {
     cache.dirty.delete(e.path);
   } else if (e.type === "rename" && e.from) {
     cache.ops.push({ type: "move", from: e.from, to: e.path });
-    if (cache.dirty.delete(e.from) && indexable(e.path)) cache.dirty.add(e.path);
+    // Saved notes in the moved folder are to be read at their new path.
+    const prefix = e.from + "/";
+    for (const p of [...cache.dirty]) {
+      if (p !== e.from && !p.startsWith(prefix)) continue;
+      cache.dirty.delete(p);
+      const dest = e.path + p.slice(e.from.length);
+      if (indexable(dest)) cache.dirty.add(dest);
+    }
   }
 }
 
