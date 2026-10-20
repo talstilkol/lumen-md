@@ -76,6 +76,10 @@ describe("formulas — engine glue", () => {
     const nul = compileFormulas({ blank: null });
     expect(nul.map((f) => [f.name, f.source, f.tree?.kind])).toEqual([["blank", "null", "null"]]);
     expect(compileFormulas(undefined)).toEqual([]);
+    // An unquoted `[a, b]` is a YAML list: a broken entry that says to quote it, not a silent skip.
+    const list = compileFormulas({ pair: ["price", "qty"] });
+    expect(list.map((f) => [f.name, f.tree])).toEqual([["pair", null]]);
+    expect(list[0].error?.message).toMatch(/quotes/);
   });
 
   it("adds formula columns per row, in order, with errors per cell", () => {

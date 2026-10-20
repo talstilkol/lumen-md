@@ -269,6 +269,12 @@ export function compileFormulas(formulas: unknown): CompiledFormula[] {
   if (!formulas || typeof formulas !== "object" || Array.isArray(formulas)) return [];
   const out: CompiledFormula[] = [];
   for (const [name, raw] of Object.entries(formulas as Record<string, unknown>)) {
+    // `pair: [price, qty]` unquoted is a YAML list, not a formula: show it as a broken entry
+    // with the fix, instead of dropping the column without a word (review #267).
+    if (Array.isArray(raw)) {
+      out.push({ name, source: JSON.stringify(raw), tree: null, error: { message: "this is a YAML list — put the formula in quotes", at: 0 } });
+      continue;
+    }
     // `blank: null` in YAML is the formula `null` (YAML already turned it into a value, as it does 3 and true).
     if (raw !== null && typeof raw !== "string" && typeof raw !== "number" && typeof raw !== "boolean") continue;
     const source = raw === null ? "null" : String(raw);

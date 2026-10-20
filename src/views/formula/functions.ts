@@ -231,13 +231,15 @@ const BUILTINS: Record<string, FormulaFunction> = {
   number: {
     min: 1,
     max: 1,
-    doc: "number(x) — x as a number (text like \"12.5\", true → 1, a date → milliseconds); empty when it is not one",
+    doc: "number(x) — x as a number (text like \"12.5\", true → 1, a date → milliseconds); empty when it is not one, a math error when it is too large",
     call: ([a]) => {
       if (a instanceof Date) return a.getTime();
       if (Array.isArray(a)) return null;
       try {
         return toNumber(a, "number()", -1);
-      } catch {
+      } catch (e) {
+        // Too large to be a number is a math error, as in arithmetic — not "empty" (review #267).
+        if (e instanceof FormulaError && e.code === "math") throw e;
         return null;
       }
     },

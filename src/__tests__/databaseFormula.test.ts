@@ -215,6 +215,7 @@ describe("formula — errors are typed and placed", () => {
     expect(errorOf("price + 1e999").code).toBe("math");
     expect(errorOf('+"1e999"').code).toBe("math");
     expect(errorOf('-"1e999"').code).toBe("math");
+    expect(errorOf('number("1e999")').code).toBe("math");
     // Numeric text that overflows is a number error in + too, not text to join.
     expect(errorOf("huge + 1", { fm: { huge: "1e999" } }).code).toBe("math");
     expect(value('"abc" + 1')).toBe("abc1");
