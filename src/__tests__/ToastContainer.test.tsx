@@ -26,7 +26,7 @@ describe("ToastContainer", () => {
     act(() => {
       toast.info("Saved locally");
       toast.success("Exported", "notes.html");
-      toast.warning("Offline");
+      toast.warn("Offline");
       toast.error("Sync failed");
     });
     const region = screen.getByLabelText(t("toast.region"));
