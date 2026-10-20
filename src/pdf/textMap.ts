@@ -121,7 +121,8 @@ export function rangePageRects(range: Range, pageBox: { left: number; top: numbe
     sub.selectNodeContents(t);
     if (t === range.startContainer) sub.setStart(t, range.startOffset);
     if (t === range.endContainer) sub.setEnd(t, range.endOffset);
-    if (sub.collapsed) continue;
+    // No layout (a DOM without rendering, e.g. jsdom): nothing to measure.
+    if (sub.collapsed || typeof sub.getClientRects !== "function") continue;
     for (const r of Array.from(sub.getClientRects())) {
       if (r.width < 0.5 || r.height < 0.5) continue;
       out.push({
