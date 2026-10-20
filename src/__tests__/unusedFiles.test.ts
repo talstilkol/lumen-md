@@ -15,6 +15,7 @@ import {
   globToRegExp,
   resolveSpecifier,
   isProduction,
+  isEntryFile,
   BASELINE,
   // @ts-expect-error — plain .mjs script without type declarations
 } from "../../scripts/check-unused-files.mjs";
@@ -56,6 +57,22 @@ describe("findOrphans", () => {
       "src/c.ts": "export const c = 1;\n",
     });
     expect(findOrphans({ root: dir }).orphans).toEqual(["src/c.ts"]);
+  });
+
+  it("executables and packages outside src/ are roots too (bin/, api-server/, packages/ …)", () => {
+    const dir = repo("roots", {
+      "bin/lumen.ts": 'import { cli } from "../src/cli/run";\n',
+      "api-server/server.ts": 'import { api } from "../src/api/handler";\n',
+      "packages/vscode/src/extension.ts": 'import { x } from "../../../src/shared/x";\n',
+      "src/cli/run.ts": "export const cli = 1;\n",
+      "src/api/handler.ts": "export const api = 1;\n",
+      "src/shared/x.ts": "export const x = 1;\n",
+      "src/dead.ts": "export const dead = 1;\n",
+    });
+    expect(findOrphans({ root: dir }).orphans).toEqual(["src/dead.ts"]);
+    expect(isEntryFile("bin/lumen.ts")).toBe(true);
+    expect(isEntryFile("src/a.ts")).toBe(false);
+    expect(isEntryFile("src/__tests__/a.test.ts")).toBe(true);
   });
 
   it("import.meta.glob marks every match as used", () => {

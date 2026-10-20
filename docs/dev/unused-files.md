@@ -4,8 +4,9 @@ CI step **"Unused files"** (`npm run unused` = `node scripts/check-unused-files.
 fails when a production file under `src/` is not reachable from any entry point.
 
 **Entry points:** the module scripts of the root `*.html` pages and `public/*.html`,
-plus every test (`__tests__/`, `*.test.*`, `*.spec.*`, `*.eval.*`), `e2e/`, `scripts/`,
-`eval/` and the root config files. **Edges:** static and dynamic imports, re-exports,
+plus every test in `src/` (`__tests__/`, `*.test.*`, `*.spec.*`, `*.eval.*`) and every code
+file outside `src/` — `e2e/`, `scripts/`, `eval/`, the root configs, and the executables and
+packages that reuse `src/` (`bin/`, `api-server/`, `mcp-server/`, `packages/`, `extension/` …). **Edges:** static and dynamic imports, re-exports,
 `require`, `vi.mock`, `new URL("…", import.meta.url)` workers and `import.meta.glob`,
 resolved relative to the file or through the `@/` alias.
 

@@ -5,9 +5,10 @@
  * Walks the import graph from every entry point and reports production files
  * under src/ that nothing reaches. Entry points:
  *   - <script type="module" src="/src/…"> in the root *.html and public/*.html pages
- *   - every test (src/**\/__tests__, *.test.*, *.spec.*, *.eval.*), e2e/, scripts/, eval/
- *     and the root config files (vite / vitest / playwright) — anything they import
- *     is used
+ *   - every test in src/ (__tests__, *.test.*, *.spec.*, *.eval.*)
+ *   - every code file outside src/: e2e/, scripts/, eval/, the root configs, and the
+ *     other executables and packages that reuse src/ (bin/, api-server/, mcp-server/,
+ *     packages/, extension/ …) — anything they import is used
  * Edges: static `import … from`, `export … from`, side-effect `import "…"`,
  * `import("…")`, `require("…")`, `new URL("…", import.meta.url)` (workers) and
  * `import.meta.glob("…")`. Specifiers resolve relative to the file or through the
@@ -40,7 +41,7 @@ export const BASELINE = "scripts/unused-files.baseline.json";
 
 const CODE_RE = /\.(ts|tsx|js|jsx|mjs|cjs|mts|cts)$/;
 const EXTS = [".ts", ".tsx", ".js", ".jsx", ".mjs", ".cjs", ".mts", ".cts"];
-const SKIP_DIRS = new Set(["node_modules", ".git", "dist", "coverage", ".vite", "playwright-report", "test-results"]);
+const SKIP_DIRS = new Set(["node_modules", ".git", "dist", "target", "coverage", ".vite", "playwright-report", "test-results"]);
 
 const toPosix = (p) => p.split(sep).join("/");
 
@@ -135,12 +136,8 @@ export function resolveSpecifier(spec, fromRel, files) {
   return null;
 }
 
-const isEntryFile = (rel) =>
-  CODE_RE.test(rel) &&
-  !/\.d\.[cm]?ts$/.test(rel) &&
-  (/^(e2e|scripts|eval)\//.test(rel) ||
-    (rel.startsWith("src/") && !isProduction(rel)) ||
-    /^[^/]+\.config\.[cm]?[jt]s$/.test(rel));
+/** Every code file outside src/ (bin/, api-server/, packages/, extension/, e2e/, scripts/, configs …) and every test in src/. */
+export const isEntryFile = (rel) => CODE_RE.test(rel) && !/\.d\.[cm]?ts$/.test(rel) && (!rel.startsWith("src/") || !isProduction(rel));
 
 /**
  * @param {{ root?: string }} [opts]
