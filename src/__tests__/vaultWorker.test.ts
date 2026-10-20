@@ -184,6 +184,18 @@ describe("the workspace index over a 10,000-note vault (worker protocol)", () =>
     expect(b.map((h) => h.path)).toEqual([notePath(12)]);
   }, 120_000);
 
+  it("a delete then a move of its folder, queued, stay deleted", async () => {
+    await vault.backend.write("seq/x.md", "# x\nseqnote\n");
+    await vault.backend.write("seq/y.md", "# y\n");
+    await ensureIndex();
+    await vault.backend.remove("seq/x.md");
+    await vault.backend.rename("seq", "seq2");
+    await ensureIndex();
+    const paths = indexedFiles().map((f) => f.path).filter((p) => p.startsWith("seq"));
+    expect(paths).toEqual(["seq2/y.md"]);
+    expect((await searchWorkspace("seqnote")).map((h) => h.path)).toEqual([]);
+  });
+
   it("moves queued in a chain (A → B → C, then a delete) leave only the final paths", async () => {
     await vault.backend.rename(notePath(6), "chain/b.md");
     await vault.backend.rename("chain/b.md", "chain/c.md");
@@ -202,7 +214,7 @@ describe("the workspace index over a 10,000-note vault (worker protocol)", () =>
   it("a structural event re-lists once for the tree and the index, and re-reads only changed mtimes", async () => {
     notifyWorkspaceChanged(); // e.g. a folder created in the tree
     const tree = await workspaceTree();
-    expect(tree.map((n) => n.name)).toEqual(["archive", "chain", "notes"]);
+    expect(tree.map((n) => n.name)).toEqual(["archive", "chain", "notes", "seq2"]);
     const before = vault.reads();
     let lists = 0;
     const list = vault.backend.list;

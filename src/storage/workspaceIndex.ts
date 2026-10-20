@@ -31,7 +31,7 @@ import {
 import { getVaultBackend, watchVault, type VaultEvent } from "./vault";
 import type { BacklinkHit, IndexInput, IndexStats, SearchHit } from "./vaultIndexCore";
 import { wikiTargetsOf } from "./wikiTargets";
-import { workerEngine, type IndexEngine } from "./vaultIndexProtocol";
+import type { IndexEngine } from "./vaultIndexProtocol";
 import { log } from "../lib/logger";
 
 export type { BacklinkHit, SearchHit } from "./vaultIndexCore";
@@ -53,10 +53,8 @@ const cache = {
   inflight: null as Promise<void> | null,
   /** Files whose text changed since they were indexed (C3). */
   dirty: new Set<string>(),
-  /** Deleted paths (files or folders) not yet dropped from the index. */
-  removed: new Set<string>(),
-  /** Renames / moves not yet applied to the index. */
-  moved: [] as { from: string; to: string }[],
+  /** Deletes and moves (files or folders) not yet applied to the index, in the order they happened. */
+  ops: [] as ({ type: "remove"; path: string } | { type: "move"; from: string; to: string })[],
   /** Files may have appeared / disappeared behind the events: re-list on next use. */
   stale: false,
   /** When the index was last checked against the vault listing. */
@@ -87,6 +85,8 @@ async function createEngine(): Promise<IndexEngine> {
   if (typeof Worker !== "undefined") {
     try {
       const w = new Worker(new URL("./vaultIndex.worker.ts", import.meta.url), { type: "module" });
+      // The message plumbing is a lazy chunk too: nothing of the index is on the startup path.
+      const { workerEngine } = await import("./vaultIndexProtocol");
       return workerEngine(w);
     } catch (err) {
       log.warn("vault index worker unavailable; indexing on the main thread", err);
@@ -204,8 +204,7 @@ async function build(): Promise<void> {
   // Clear before reading: a change announced while the build runs (it may
   // have read that file already) must survive for the next ensureIndex.
   cache.dirty.clear();
-  cache.removed.clear();
-  cache.moved = [];
+  cache.ops = [];
   cache.stale = false;
   const list = await listNotes(false);
   const next = new Map<string, IndexedFile>();
@@ -236,7 +235,16 @@ function under(path: string): string[] {
 async function refresh(): Promise<void> {
   const gone: string[] = [];
   const toWrite: IndexedFile[] = [];
-  for (const { from, to } of cache.moved.splice(0)) {
+  // In order: deleting A/x.md and then moving A to B must not bring x back as B/x.md.
+  for (const op of cache.ops.splice(0)) {
+    if (op.type === "remove") {
+      for (const p of under(op.path)) {
+        cache.byPath.delete(p);
+        gone.push(p);
+      }
+      continue;
+    }
+    const { from, to } = op;
     for (const p of under(from)) {
       const f = cache.byPath.get(p)!;
       cache.byPath.delete(p);
@@ -250,13 +258,6 @@ async function refresh(): Promise<void> {
     // Moved out of a hidden folder (e.g. restored from the trash): read it.
     if (indexable(to) && !under(to).length) cache.stale = true;
   }
-  for (const path of cache.removed) {
-    for (const p of under(path)) {
-      cache.byPath.delete(p);
-      gone.push(p);
-    }
-  }
-  cache.removed.clear();
 
   const toRead = new Map<string, { path: string; name: string; modified: number | null }>();
   if (cache.stale || Date.now() - cache.checkedAt >= REVALIDATE_MS) {
@@ -299,7 +300,7 @@ async function refresh(): Promise<void> {
 }
 
 function pendingChanges(): boolean {
-  return cache.stale || cache.dirty.size > 0 || cache.removed.size > 0 || cache.moved.length > 0;
+  return cache.stale || cache.dirty.size > 0 || cache.ops.length > 0;
 }
 
 export async function ensureIndex(force = false): Promise<void> {
@@ -334,10 +335,10 @@ function onVaultEvent(e: VaultEvent): void {
   if (e.type === "write") {
     if (indexable(e.path)) cache.dirty.add(e.path);
   } else if (e.type === "delete") {
-    cache.removed.add(e.path);
+    cache.ops.push({ type: "remove", path: e.path });
     cache.dirty.delete(e.path);
   } else if (e.type === "rename" && e.from) {
-    cache.moved.push({ from: e.from, to: e.path });
+    cache.ops.push({ type: "move", from: e.from, to: e.path });
     if (cache.dirty.delete(e.from) && indexable(e.path)) cache.dirty.add(e.path);
   }
 }
@@ -415,8 +416,7 @@ export function __resetWorkspaceIndex(engineFactory?: () => IndexEngine): void {
   cache.builtAt = 0;
   cache.inflight = null;
   cache.dirty.clear();
-  cache.removed.clear();
-  cache.moved = [];
+  cache.ops = [];
   cache.stale = false;
   cache.checkedAt = 0;
   cache.listing = null;
