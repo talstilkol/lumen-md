@@ -66,7 +66,7 @@ function fakeWorker(behaviour: Behaviour, opts: { bootMs?: number; bootError?: s
     WebSocket: class { constructor() { void scopeNetwork(); } },
     importScripts: () => void scopeNetwork(),
     indexedDB: { open: () => scopeNetwork() },
-    navigator: { storage: { getDirectory: () => scopeNetwork() }, serial: { requestPort: () => scopeNetwork() }, usb: { getDevices: () => scopeNetwork() }, hid: { getDevices: () => scopeNetwork() } },
+    navigator: { storage: { getDirectory: () => scopeNetwork() }, storageBuckets: { open: () => scopeNetwork() }, serial: { requestPort: () => scopeNetwork() }, usb: { getDevices: () => scopeNetwork() }, hid: { getDevices: () => scopeNetwork() } },
     eval: () => scopeNetwork(),
     setTimeout: globalThis.setTimeout,
     Function,
@@ -339,6 +339,7 @@ describe("run_python: no network", () => {
       await attempt("Function", () => (js.Function as unknown as (s: string) => unknown)("return 1"));
       await attempt("vault", () => (js.indexedDB as unknown as { open: () => unknown }).open());
       await attempt("opfs", () => (js.navigator.storage as { getDirectory: () => unknown }).getDirectory());
+      await attempt("buckets", () => (js.navigator.storageBuckets as { open: () => unknown }).open());
       await attempt("serial", () => (js.navigator.serial as { requestPort: () => unknown }).requestPort());
       await attempt("usb", () => (js.navigator.usb as { getDevices: () => unknown }).getDevices());
       await attempt("hid", () => (js.navigator.hid as { getDevices: () => unknown }).getDevices());
@@ -360,6 +361,7 @@ describe("run_python: no network", () => {
       "Function:blocked",
       "vault:blocked",
       "opfs:blocked",
+      "buckets:blocked",
       "serial:blocked",
       "usb:blocked",
       "hid:blocked",

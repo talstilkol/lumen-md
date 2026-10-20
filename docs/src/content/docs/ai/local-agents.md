@@ -78,7 +78,9 @@ cancelled.
 ### `run_python`: Python on this device, offline
 
 `run_python` runs a short Python 3 program on the same self-hosted
-Pyodide as the `live-python` block (standard library only) and returns
+Pyodide as the `live-python` block (the standard library, without the
+modules Pyodide ships as separate packages, such as `ssl`, `sqlite3` and
+`lzma`, and without third-party packages) and returns
 what it printed (`stdout`, `stderr`), the value of its last expression
 (`result`) or the error, with the Pyodide frames removed from the
 traceback. It is a **read** tool, and it makes no requests at all, so it
@@ -87,7 +89,8 @@ needs no grant and asks no network consent:
 - It runs in a Web Worker made for that one call and terminated after
   it, so nothing carries over from one call to the next. The worker has
   no DOM, and no way to reach your vault: IndexedDB, Cache Storage,
-  `navigator.storage` (OPFS) and `BroadcastChannel` are removed before
+  `navigator.storage` (OPFS), `navigator.storageBuckets` and
+  `BroadcastChannel` are removed before
   the code runs, and so are the device APIs (`navigator.serial`, `usb`,
   `hid`, `bluetooth`, `geolocation`, `mediaDevices`). If the code needs a note, the agent passes the text in
   `inputs` (a JSON object of at most 64 KB, which the code reads as the

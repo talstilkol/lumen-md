@@ -16,9 +16,12 @@ async function loadPyodide(): Promise<PyodideLike> {
   // absolute specifier alone in dev, and the build keeps the import).
   const url = index + "pyodide.mjs";
   const mod = (await import(/* @vite-ignore */ url)) as {
-    loadPyodide: (opts: { indexURL: string; fullStdLib?: boolean }) => Promise<PyodideLike>;
+    loadPyodide: (opts: { indexURL: string }) => Promise<PyodideLike>;
   };
-  return mod.loadPyodide({ indexURL: index, fullStdLib: false });
+  // python_stdlib.zip (most of the standard library) comes with the core;
+  // the modules Pyodide ships as separate packages (ssl, sqlite3, lzma, …)
+  // would need loadPackage, i.e. the network, and are not available.
+  return mod.loadPyodide({ indexURL: index });
 }
 
 const handle = createPythonHandler({

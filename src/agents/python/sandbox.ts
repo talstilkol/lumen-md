@@ -51,6 +51,7 @@ export const STORAGE_GLOBALS = [
   "CacheStorage",
   "cookieStore",
   "BroadcastChannel",
+  "StorageBucketManager",
   "FileSystemHandle",
   "FileSystemDirectoryHandle",
   "FileSystemFileHandle",
@@ -63,7 +64,7 @@ export const STORAGE_GLOBALS = [
  * can see Web Serial / WebUSB / WebHID devices the user already authorised
  * for the app; agent code must not read from or write to them.
  */
-export const NAVIGATOR_PROPS = ["storage", "locks", "serviceWorker", "sendBeacon", "serial", "usb", "hid", "bluetooth", "geolocation", "mediaDevices", "xr"] as const;
+export const NAVIGATOR_PROPS = ["storage", "locks", "serviceWorker", "sendBeacon", "storageBuckets", "serial", "usb", "hid", "bluetooth", "geolocation", "mediaDevices", "xr"] as const;
 
 /** The first argument as a URL string, when it is one (for the report). */
 export function requestTarget(args: readonly unknown[]): string {
