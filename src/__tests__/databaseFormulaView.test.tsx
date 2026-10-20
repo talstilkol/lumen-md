@@ -96,7 +96,7 @@ describe("map — coordinates", () => {
     expect(parseLatLng([51.5, "-0.12"])).toEqual({ lat: 51.5, lng: -0.12 });
     expect(parseLatLng({ latitude: 1, longitude: 2 })).toEqual({ lat: 1, lng: 2 });
     expect(parseLatLng({ lat: 1, lon: 2 })).toEqual({ lat: 1, lng: 2 });
-    for (const bad of ["Tel Aviv", "91, 0", "0, 181", [1], null, 5, new Date(0), { lat: "x", lng: 1 }]) expect(parseLatLng(bad)).toBeNull();
+    for (const bad of ["Tel Aviv", "91, 0", "0, 181", [1], null, 5, new Date(0), { lat: "x", lng: 1 }, [null, null], ["", ""], [true, false], { lat: "", lng: " " }, { lat: true, lng: 1 }]) expect(parseLatLng(bad)).toBeNull();
   });
 
   it("a row's point: the spec's column, else location, else lat + lng", () => {

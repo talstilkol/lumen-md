@@ -321,6 +321,13 @@ export interface LatLng {
 
 const inRange = (lat: number, lng: number) => Number.isFinite(lat) && Number.isFinite(lng) && Math.abs(lat) <= 90 && Math.abs(lng) <= 180;
 
+/** A coordinate member: a number, or numeric text — never empty, null or a boolean (which `Number` would make 0 or 1). */
+function coord(v: unknown): number {
+  if (typeof v === "number") return v;
+  if (typeof v === "string" && /^\s*-?\d+(?:\.\d+)?\s*$/.test(v)) return Number(v);
+  return Number.NaN;
+}
+
 /** `"32.08, 34.78"`, `[32.08, 34.78]`, `{lat, lng}` (or `lon` / `latitude` / `longitude`) → a point. */
 export function parseLatLng(v: unknown): LatLng | null {
   let lat: number;
@@ -331,12 +338,12 @@ export function parseLatLng(v: unknown): LatLng | null {
     lat = Number(m[1]);
     lng = Number(m[2]);
   } else if (Array.isArray(v) && v.length === 2) {
-    lat = Number(v[0]);
-    lng = Number(v[1]);
+    lat = coord(v[0]);
+    lng = coord(v[1]);
   } else if (v && typeof v === "object" && !(v instanceof Date)) {
     const o = v as Record<string, unknown>;
-    lat = Number(o.lat ?? o.latitude);
-    lng = Number(o.lng ?? o.lon ?? o.long ?? o.longitude);
+    lat = coord(o.lat ?? o.latitude);
+    lng = coord(o.lng ?? o.lon ?? o.long ?? o.longitude);
   } else return null;
   return inRange(lat, lng) ? { lat, lng } : null;
 }
