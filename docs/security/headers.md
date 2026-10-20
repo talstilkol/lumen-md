@@ -272,3 +272,13 @@ Plan 2.1 leaves no open scheme in the desktop policy. It has no `unsafe-eval`, a
    few known self-hosting setups should be listed.
 10. **Managing allowed image hosts.** "Always allow" has no settings screen to undo it
     yet. `forgetRemoteImageHost()` exists, and clearing site data resets the list.
+11. **live-js in WebKit: a dynamic `import()` reaches the network.** In CI's Playwright
+    WebKit, `import("https://…")` from live-js code was requested and answered. fetch,
+    XHR, WebSocket, EventSource, importScripts, sendBeacon and nested workers stayed
+    blocked. Chromium and Firefox refuse the import under the runner's CSP; WebKit
+    apparently does not apply that CSP to the runner's blob: worker. The leak is limited:
+    the run happens only on a click, and the worker has an opaque origin with no storage,
+    so it can reveal the note's own code and that it ran. Fixing it means choosing a
+    sandbox change, for example refusing `import` in the code (eval and Function
+    included) or a runner whose worker gets its own CSP. `e2e/security.spec.ts` pins
+    the current WebKit behaviour.
