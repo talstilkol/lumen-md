@@ -4,7 +4,7 @@
  * vault as a timestamped list item that links to that day's daily note
  * (plan 4.12):
  *
- *   - [[2026-10-20]] 14:05 call the plumber
+ *   - [[journal/2026-10-20]] 14:05 call the plumber
  *     a second line stays inside the same item
  *
  * The inbox is created (with a heading) when it is missing; what is already
@@ -23,7 +23,7 @@ import { flushPendingEdits, useAppStore } from "../store/useStore";
 import { toast } from "../store/useToastStore";
 import { readWorkspaceFile, workspaceHasFile, writeWorkspaceFile } from "../storage/workspace";
 import { notifyWorkspaceChanged } from "../storage/workspaceEvents";
-import { dayOf, ensureDailyNote, fileNameFor, type DailySettings } from "../daily/dailyNote";
+import { dailyPath, dayOf, ensureDailyNote, type DailySettings } from "../daily/dailyNote";
 import type { SharedItem } from "../pwa/launch";
 
 /** The inbox note, at the root of the vault. */
@@ -38,12 +38,13 @@ const pad2 = (n: number) => String(n).padStart(2, "0");
  * only blank lines around it and trailing spaces are dropped. Null when
  * there is nothing to capture.
  */
-export function formatEntry(text: string, when: Date, daily: Pick<DailySettings, "pattern">): string | null {
+export function formatEntry(text: string, when: Date, daily: Pick<DailySettings, "folder" | "pattern">): string | null {
   const lines = text.replace(/\r\n?/g, "\n").split("\n").map((l) => l.trimEnd());
   while (lines.length && !lines[0].trim()) lines.shift();
   while (lines.length && !lines[lines.length - 1].trim()) lines.pop();
   if (!lines.length) return null;
-  const note = fileNameFor(dayOf(when), daily.pattern).replace(/\.(md|markdown)$/i, "");
+  // The full path (folder too): a note elsewhere with the same name can't take the link.
+  const note = dailyPath(dayOf(when), daily).replace(/\.(md|markdown)$/i, "");
   const [first, ...rest] = lines;
   const head = `- [[${note}]] ${pad2(when.getHours())}:${pad2(when.getMinutes())} ${first.trimStart()}`;
   return [head, ...rest.map((l) => (l.trim() ? `  ${l}` : ""))].join("\n");

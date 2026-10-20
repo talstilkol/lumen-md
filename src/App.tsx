@@ -531,7 +531,11 @@ export default function App() {
     const write = (attempt: number) => {
       writeWorkspaceFile(name, content)
         .then(() => {
-          markSaved();
+          // Only if nothing changed the note meanwhile (a quick capture into
+          // the open inbox, plan 4.16): otherwise its newer text stays dirty
+          // and the next autosave writes it.
+          const now = useAppStore.getState().doc;
+          if (now.workspaceName === name && now.content === content) markSaved();
           // Only this file's text changed: listeners skip the full rescan (C3).
           notifyWorkspaceChanged({ kind: "content", paths: [name] });
           // Every save path feeds the one history store (T35).

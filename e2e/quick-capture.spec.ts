@@ -63,7 +63,7 @@ const inbox = (page: Page) =>
     }
   });
 
-const ENTRY = /^- \[\[\d{4}-\d{2}-\d{2}\]\] \d{2}:\d{2} /m;
+const ENTRY = /^- \[\[journal\/\d{4}-\d{2}-\d{2}\]\] \d{2}:\d{2} /m;
 
 test("⌥⌘N, type, Enter → the line is at the end of inbox.md", async ({ page }) => {
   test.skip(!(await opfsWritable(page)), "this engine refuses OPFS writes here, so there is no vault for inbox.md");

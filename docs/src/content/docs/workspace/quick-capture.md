@@ -14,8 +14,8 @@ Each entry is a list item that links to that day's
 ```markdown
 # Inbox
 
-- [[2026-10-20]] 09:05 call the plumber
-- [[2026-10-20]] 14:30 Shared page <https://example.com/a>
+- [[journal/2026-10-20]] 09:05 call the plumber
+- [[journal/2026-10-20]] 14:30 Shared page <https://example.com/a>
   the text that was shared with it
 ```
 
@@ -35,7 +35,10 @@ letter you type.
 |---|---|
 | Any browser, the installed app, the desktop app | `⌥⌘N` (Windows / Linux: `Ctrl+Alt+N`) or **Quick capture** in the command palette (`⌘K`) |
 | Installed app (PWA), home screen / dock / taskbar | Long-press or right-click the Lumen icon, then **Quick Capture**. This opens `/?capture=1`. |
-| Desktop app (Tauri) | **File ▸ Quick capture…** (`⌥⌘N`) |
+| Desktop app (Tauri) | **File ▸ Quick capture…**, or `⌥⌘N` in the window |
+
+On Windows and Linux, `Ctrl+Alt+N` is skipped when it is really AltGr+N
+(which types a letter such as `ń` on some layouts).
 
 In the box, **Enter** saves, **Shift+Enter** starts a new line and
 **Esc** closes. **Open inbox** opens `inbox.md` in a tab.
@@ -57,8 +60,8 @@ feature, planned with the native apps (plan 13.3).
 
 ## How an entry looks
 
-- `[[…]]` is the name of that day's daily note, built from your
-  daily-note file pattern (**Calendar ▸ Daily note settings**). If that
+- `[[…]]` is the path of that day's daily note (folder and file name,
+  without `.md`), built from your daily-note folder and file pattern (**Calendar ▸ Daily note settings**). If that
   note doesn't exist yet, the capture creates it from your daily-note
   template, so the link always opens it. An existing daily note is never
   changed.

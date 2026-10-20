@@ -21,17 +21,18 @@ const at = new Date(2026, 9, 20, 9, 5); // 20 Oct 2026, 09:05 local time
 
 describe("formatEntry", () => {
   it("a list item with the day's note and the time", () => {
-    expect(formatEntry("call the plumber", at, DEFAULT_DAILY)).toBe("- [[2026-10-20]] 09:05 call the plumber");
+    expect(formatEntry("call the plumber", at, DEFAULT_DAILY)).toBe("- [[journal/2026-10-20]] 09:05 call the plumber");
   });
   it("follows the daily-note file pattern", () => {
-    expect(formatEntry("x", at, { pattern: "DD.MM.YYYY" })).toBe("- [[20.10.2026]] 09:05 x");
+    expect(formatEntry("x", at, { folder: "", pattern: "DD.MM.YYYY" })).toBe("- [[20.10.2026]] 09:05 x");
+    expect(formatEntry("x", at, { folder: "diary/daily", pattern: "YYYY-MM-DD" })).toBe("- [[diary/daily/2026-10-20]] 09:05 x");
   });
   it("keeps Hebrew, bidi marks and emoji exactly as typed", () => {
     const he = "לקנות חלב ‏(2 ליטר) ו־Notion ⁧שלום⁩ 🥛";
-    expect(formatEntry(he, at, DEFAULT_DAILY)).toBe(`- [[2026-10-20]] 09:05 ${he}`);
+    expect(formatEntry(he, at, DEFAULT_DAILY)).toBe(`- [[journal/2026-10-20]] 09:05 ${he}`);
   });
   it("further lines stay inside the item; blank edges and trailing spaces go", () => {
-    expect(formatEntry("\n\n first  \r\nsecond line   \n\nthird\n\n", at, DEFAULT_DAILY)).toBe("- [[2026-10-20]] 09:05 first\n  second line\n\n  third");
+    expect(formatEntry("\n\n first  \r\nsecond line   \n\nthird\n\n", at, DEFAULT_DAILY)).toBe("- [[journal/2026-10-20]] 09:05 first\n  second line\n\n  third");
   });
   it("nothing to capture → null", () => {
     expect(formatEntry("", at, DEFAULT_DAILY)).toBeNull();
@@ -63,7 +64,7 @@ describe("captureToInbox", () => {
   it("creates inbox.md when it is missing, and the linked daily note", async () => {
     expect(await captureToInbox("first", at)).toBe(INBOX_PATH);
     expect((await listWorkspace()).map((f) => f.path).sort()).toEqual(["inbox.md", "journal/2026-10-20.md"]);
-    expect(await readWorkspaceFile(INBOX_PATH)).toBe("# Inbox\n\n- [[2026-10-20]] 09:05 first\n");
+    expect(await readWorkspaceFile(INBOX_PATH)).toBe("# Inbox\n\n- [[journal/2026-10-20]] 09:05 first\n");
   });
 
   it("an existing daily note is left alone", async () => {
@@ -75,18 +76,18 @@ describe("captureToInbox", () => {
   it("never overwrites what is already there", async () => {
     await writeWorkspaceFile(INBOX_PATH, "# My inbox\n\n- [ ] keep me");
     await captureToInbox("second", at);
-    expect(await readWorkspaceFile(INBOX_PATH)).toBe("# My inbox\n\n- [ ] keep me\n- [[2026-10-20]] 09:05 second\n");
+    expect(await readWorkspaceFile(INBOX_PATH)).toBe("# My inbox\n\n- [ ] keep me\n- [[journal/2026-10-20]] 09:05 second\n");
   });
 
   it("preserves Hebrew / RTL text through the vault", async () => {
     const he = "רעיון: לכתוב פוסט על RTL ‏— בלי לשבור את הסדר";
     await captureToInbox(he, at);
-    expect(await readWorkspaceFile(INBOX_PATH)).toContain(`- [[2026-10-20]] 09:05 ${he}\n`);
+    expect(await readWorkspaceFile(INBOX_PATH)).toContain(`- [[journal/2026-10-20]] 09:05 ${he}\n`);
   });
 
   it("two captures at once both land, in order", async () => {
     await Promise.all([captureToInbox("one", at), captureToInbox("two", at), captureToInbox("three", at)]);
-    expect(await readWorkspaceFile(INBOX_PATH)).toBe("# Inbox\n\n- [[2026-10-20]] 09:05 one\n- [[2026-10-20]] 09:05 two\n- [[2026-10-20]] 09:05 three\n");
+    expect(await readWorkspaceFile(INBOX_PATH)).toBe("# Inbox\n\n- [[journal/2026-10-20]] 09:05 one\n- [[journal/2026-10-20]] 09:05 two\n- [[journal/2026-10-20]] 09:05 three\n");
   });
 
   it("empty text writes nothing", async () => {
@@ -99,7 +100,7 @@ describe("captureToInbox", () => {
     useAppStore.getState().openTab({ name: INBOX_PATH, content: "# Inbox\n", workspaceName: INBOX_PATH });
     useAppStore.getState().setContent("# Inbox\n- typed, not saved yet\n");
     await captureToInbox("captured", at);
-    const want = "# Inbox\n- typed, not saved yet\n- [[2026-10-20]] 09:05 captured\n";
+    const want = "# Inbox\n- typed, not saved yet\n- [[journal/2026-10-20]] 09:05 captured\n";
     expect(await readWorkspaceFile(INBOX_PATH)).toBe(want);
     const s = useAppStore.getState();
     expect(s.doc.content).toBe(want);
@@ -113,7 +114,7 @@ describe("captureToInbox", () => {
     useAppStore.getState().openTab({ name: INBOX_PATH, content: "# Inbox\n- unsaved\n", workspaceName: INBOX_PATH });
     useAppStore.getState().openTab({ name: "other.md", content: "x", workspaceName: null });
     await captureToInbox("bg", at);
-    const want = "# Inbox\n- unsaved\n- [[2026-10-20]] 09:05 bg\n";
+    const want = "# Inbox\n- unsaved\n- [[journal/2026-10-20]] 09:05 bg\n";
     expect(await readWorkspaceFile(INBOX_PATH)).toBe(want);
     expect(useAppStore.getState().openTabs.find((x) => x.workspaceName === INBOX_PATH)?.content).toBe(want);
     expect(useAppStore.getState().doc.name).toBe("other.md");
@@ -150,7 +151,7 @@ describe("the capture box", () => {
     fireEvent.change(field, { target: { value: "רעיון חדש" } });
     fireEvent.keyDown(field, { key: "Enter" });
     await waitFor(() => expect(onClose).toHaveBeenCalled());
-    expect(await readWorkspaceFile(INBOX_PATH)).toMatch(/^# Inbox\n\n- \[\[\d{4}-\d{2}-\d{2}\]\] \d{2}:\d{2} רעיון חדש\n$/);
+    expect(await readWorkspaceFile(INBOX_PATH)).toMatch(/^# Inbox\n\n- \[\[journal\/\d{4}-\d{2}-\d{2}\]\] \d{2}:\d{2} רעיון חדש\n$/);
   });
 
   it("Shift+Enter doesn't save; Esc closes without saving", async () => {
@@ -204,7 +205,7 @@ describe("share target → inbox", () => {
     expect(await captureShared(item)).toBe(INBOX_PATH);
     const text = await readWorkspaceFile(INBOX_PATH);
     expect(text.startsWith("# Inbox\n\n- older\n")).toBe(true);
-    expect(text).toMatch(/- \[\[\d{4}-\d{2}-\d{2}\]\] \d{2}:\d{2} כתבה <https:\/\/example\.com\/a>\n {2}שווה לקרוא\n$/);
+    expect(text).toMatch(/- \[\[journal\/\d{4}-\d{2}-\d{2}\]\] \d{2}:\d{2} כתבה <https:\/\/example\.com\/a>\n {2}שווה לקרוא\n$/);
     expect(useAppStore.getState().doc.workspaceName).toBe(INBOX_PATH);
   });
 
