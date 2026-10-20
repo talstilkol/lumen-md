@@ -41,7 +41,8 @@ const FENCE_OPEN = /^ {0,3}(?:(`{3,})[^`]*|(~{3,}).*)$/;
 const MATH_OPEN = /^ {0,3}(\${2,})[^$]*$/;
 const CONTAINER = /^ {0,3}(:{3,})[ \t]*([A-Za-z][\w-]*)?/;
 const VOID_TAGS = new Set(["area", "base", "br", "col", "embed", "hr", "img", "input", "link", "meta", "param", "source", "track", "wbr"]);
-const TAG = /<(\/?)([A-Za-z][\w-]*)\b[^<>]*?(\/?)>/g;
+/** An HTML tag; the name must end at a space, `/` or `>`, so autolinks (`<https://…>`, `<a@b.c>`) are not tags. */
+const TAG = /<(\/?)([A-Za-z][\w-]*)(?=[\s/>])[^<>]*?(\/?)>/g;
 
 /** CommonMark HTML block 6: a block-level tag; runs until a blank line, and can interrupt a paragraph. */
 const HTML_BLOCK_6 =

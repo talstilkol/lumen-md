@@ -354,6 +354,16 @@ describe("blocks and the incremental outline", () => {
     }
   });
 
+  it("an autolink is not an open HTML element: preview blocks still split after it", () => {
+    const doc = "See <https://example.com> and <a@b.co>.\n\n# Next\n\n<div>\n\nin\n\n</div>\n\nText\n";
+    expect(splitBlocks(doc, { preview: true }).blocks.map((b) => doc.slice(b.start, b.end))).toEqual([
+      "See <https://example.com> and <a@b.co>.\n\n",
+      "# Next\n\n",
+      "<div>\n\nin\n\n</div>\n\n",
+      "Text\n",
+    ]);
+  });
+
   it("a keystroke in a long document re-parses one block, not the document", () => {
     let doc = "";
     for (let i = 0; i < 3000; i++) doc += `## Section ${i}\n\nSome text for section ${i}.\n\n`;

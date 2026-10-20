@@ -111,7 +111,7 @@ export function FileTree({
     node: WorkspaceNode;
   } | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
-  /** The large-vault collapse happens once, on the first listing. */
+  /** The large-vault view (folders collapsed, rows limited) is switched on once. */
   const autoCollapsed = useRef(false);
   /** Large vault: notes shown per folder until "show more" (null: all). */
   const [fileLimit, setFileLimit] = useState<number | null>(null);
@@ -248,10 +248,12 @@ export function FileTree({
         // The index's listing: after a structural change the vault is
         // listed once for the tree and the index together.
         const list = await workspaceTree();
+        // A vault that grows past LARGE_VAULT_FILES (first listing or a later
+        // import) switches to the large-vault view once.
         if (!autoCollapsed.current) {
-          autoCollapsed.current = true;
           const { dirs, files } = folderStats(list);
           if (files > LARGE_VAULT_FILES) {
+            autoCollapsed.current = true;
             setFileLimit(LARGE_VAULT_FOLDER_ROWS);
             // The active note's folders stay open (the effect below).
             const keep = new Set<string>();
