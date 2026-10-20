@@ -9,7 +9,16 @@
  */
 
 import { describe, it, expect } from "vitest";
-import { createTLStore, defaultBindingUtils, defaultShapeUtils, Editor, loadSnapshot, type TLShapeId } from "tldraw";
+import {
+  createTLStore,
+  defaultAddFontsFromNode,
+  defaultBindingUtils,
+  defaultShapeUtils,
+  Editor,
+  loadSnapshot,
+  tipTapDefaultExtensions,
+  type TLShapeId,
+} from "tldraw";
 import { tldrawToExcalidraw, type ExcalidrawElement } from "../canvas/tldrawToExcalidraw";
 import { buildFixtureCanvases } from "./fixtures/tldrawCanvases";
 import { annotateFailures } from "./ghaFailures";
@@ -72,6 +81,7 @@ describe("geometry vs. tldraw's own editor", () => {
       bindingUtils: defaultBindingUtils,
       tools: [],
       getContainer: () => document.body,
+      textOptions: { tipTapConfig: { extensions: tipTapDefaultExtensions }, addFontsFromNode: defaultAddFontsFromNode },
     });
     try {
       const { elements } = tldrawToExcalidraw(c.data).file;
