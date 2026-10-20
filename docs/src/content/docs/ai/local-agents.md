@@ -116,11 +116,12 @@ development builds need no change.
 | LanguageTool | 8010 | Grammar and spelling checks |
 
 ```
-docker compose -f docker/local-ai.yml up -d
+RESEARCH_TOKEN=$(openssl rand -hex 24) docker compose -f docker/local-ai.yml up -d
 ```
 
-Then `⌘K → Research: Settings → SearXNG on this machine` and enter
-`http://localhost:8787`. Research questions are planned and answered by
+The research service requires a shared token. Enter the same value under
+AI settings → Research token. Then `⌘K → Research: Settings → SearXNG on
+this machine` and enter `http://localhost:8787`. Research questions are planned and answered by
 your local model; quotes are still verified word for word against the
 pages. Under *local only* a research service off this machine or network
 is refused. On a fresh install with the *local only* policy, SearXNG is
