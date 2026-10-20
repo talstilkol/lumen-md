@@ -31,7 +31,7 @@ import { validateSchema } from "../agents/schema";
 import { runAgent } from "../agents/runtime";
 import { registerExecutor, resetExecutors } from "../agents/executors";
 import { clearTrace } from "../agents/trace";
-import { LEDGER_REASON, runPython, setPythonWorkerFactory, type PythonRunResult, type PythonWorkerLike } from "../agents/python/runner";
+import { LEDGER_REASON, setPythonWorkerFactory, type PythonRunResult, type PythonWorkerLike } from "../agents/python/runner";
 import { createPythonHandler, OutputBudget, type PyodideLike } from "../agents/python/handler";
 import { cleanPythonError, NETWORK_GLOBALS, SANDBOX_PRELUDE, sealPyodideApi, sealPythonWorkerScope } from "../agents/python/sandbox";
 import { MAX_PYTHON_INPUT_BYTES, MAX_PYTHON_OUTPUT_CHARS } from "../agents/python/limits";
