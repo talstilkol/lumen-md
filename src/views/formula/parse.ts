@@ -76,7 +76,9 @@ function tokenize(src: string): Tok[] {
         while (j < src.length && DIGIT.test(src[j])) j++;
       }
       if (j < src.length && ID_START.test(src[j])) throw new FormulaError("syntax", `unexpected "${src[j]}" after a number`, j);
-      out.push({ t: "num", v: Number(src.slice(i, j)), at: i });
+      const v = Number(src.slice(i, j));
+      if (!Number.isFinite(v)) throw new FormulaError("math", "the number is too large", i);
+      out.push({ t: "num", v, at: i });
       i = j;
       continue;
     }

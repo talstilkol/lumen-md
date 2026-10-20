@@ -45,10 +45,10 @@ function lookup(row: FormulaRow, path: string[]): FormulaValue {
 }
 
 function arith(op: "+" | "-" | "*" | "/" | "%" | "^", a: FormulaValue, b: FormulaValue, at: number): FormulaValue {
-  // Date ± days, date - date (days).
+  // Date ± days, date - date (days). ISO text (`due: 2026-11-01` from YAML) is a date here too.
   if (op === "+" || op === "-") {
-    const da = a instanceof Date ? a : null;
-    const db = b instanceof Date ? b : null;
+    const da = typeof a === "string" || a instanceof Date ? asDate(a) : null;
+    const db = typeof b === "string" || b instanceof Date ? asDate(b) : null;
     if (da && db) {
       if (op === "+") throw new FormulaError("type", "two dates cannot be added", at);
       return clean((da.getTime() - db.getTime()) / 86_400_000, at);
@@ -177,7 +177,7 @@ class Interpreter {
         return this.join(a, b, n.at);
       case "+":
         // `+` joins when either side is plain text (not a number or a date), as people expect.
-        if ((isText(a) && !(b instanceof Date)) || (isText(b) && !(a instanceof Date)) || Array.isArray(a) || Array.isArray(b)) return this.join(a, b, n.at);
+        if (isText(a) || isText(b) || Array.isArray(a) || Array.isArray(b)) return this.join(a, b, n.at);
         return arith("+", a, b, n.at);
       default:
         return arith(n.op, a, b, n.at);

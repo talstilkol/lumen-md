@@ -114,6 +114,15 @@ describe("formula — semantics", () => {
     expect(value('tags != "romance"')).toBe(true);
   });
 
+  it("ISO text from YAML takes part in date arithmetic", () => {
+    expect(value("due - today()")).toBe(12);
+    expect(iso(value("due + 7"))).toBe("2026-11-08");
+    expect(iso(value('"2026-03-01" - 1'))).toBe("2026-02-28");
+    expect(value('due - "2026-10-01"')).toBe(31);
+    expect(value('"due: " + due')).toBe("due: 2026-11-01");
+    expect(errorOf("7 - due").code).toBe("type");
+  });
+
   it("a time without an offset is UTC, whatever the machine's time zone", () => {
     expect((value('date("2026-10-20T12:00")') as Date).toISOString()).toBe("2026-10-20T12:00:00.000Z");
     expect((value('date("2026-10-20 23:30")') as Date).toISOString()).toBe("2026-10-20T23:30:00.000Z");
@@ -177,6 +186,8 @@ describe("formula — errors are typed and placed", () => {
     expect(errorOf("10 / 0").code).toBe("math");
     expect(errorOf("sqrt(-1)").code).toBe("math");
     expect(errorOf("10 ^ 400").code).toBe("math");
+    expect(errorOf("1e309").code).toBe("math");
+    expect(errorOf("price + 1e999").code).toBe("math");
   });
 });
 
