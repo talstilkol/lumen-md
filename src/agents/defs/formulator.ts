@@ -21,12 +21,15 @@ export interface FormulatorInput extends AgentInput {
   };
 }
 
-/** The properties a formula reads (top-level names; `file.*` excluded). */
+const FILE_MEMBERS = new Set(["name", "path", "folder"]);
+
+/** The properties a formula reads (top-level names; the supported `file.*` members excluded). */
 export function formulaFields(tree: FormulaNode): string[] {
   const out = new Set<string>();
   const walk = (n: FormulaNode) => {
     if (n.kind === "field") {
-      if (!(n.path[0] === "file" && n.path.length === 2)) out.add(n.path[0]);
+      // `file.name` / `file.path` / `file.folder` are the note's own; any other `file.x` is a property path (and must exist).
+      if (!(n.path[0] === "file" && n.path.length === 2 && FILE_MEMBERS.has(n.path[1]))) out.add(n.path[0]);
     } else if (n.kind === "binary") {
       walk(n.left);
       walk(n.right);

@@ -32,6 +32,11 @@ describe("formulator helpers", () => {
     expect(cleanFormula("\n\n  נוסחה: price\n")).toBe("price");
   });
 
+  it("only file.name / path / folder are the note's own", () => {
+    expect(formulaFields(parseFormulaOrThrow("file.name & file.folder"))).toEqual([]);
+    expect(formulaFields(parseFormulaOrThrow("file.title"))).toEqual(["file"]);
+  });
+
   it("formulaFields lists the properties a formula reads", () => {
     expect(formulaFields(parseFormulaOrThrow('if(סטטוס = "x", price * qty, prop("due date")) & file.name & meta.owner'))).toEqual(["סטטוס", "price", "qty", "due date", "meta"]);
   });
