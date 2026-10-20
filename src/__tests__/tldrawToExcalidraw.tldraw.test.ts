@@ -85,20 +85,20 @@ describe("geometry vs. tldraw's own editor", () => {
     });
     try {
       const { elements } = tldrawToExcalidraw(c.data).file;
-      for (const id of ["faded", "big", "sarr"]) {
-        const b = editor.getShapePageBounds(`shape:${id}` as TLShapeId)!;
-        const e = elements.find((x) => x.id === id)!;
-        const box =
-          e.type === "arrow"
-            ? {
-                x: e.x + Math.min(...e.points.map((p) => p[0])),
-                y: e.y + Math.min(...e.points.map((p) => p[1])),
-                w: e.width,
-                h: e.height,
-              }
-            : { x: e.x, y: e.y, w: e.width, h: e.height };
-        expect([box.x, box.y, box.w, box.h].map(Math.round), id).toEqual([b.x, b.y, b.w, b.h].map(Math.round));
+      const ids = ["faded", "big", "sarr", "sbent"];
+      const got: Record<string, number[]> = {};
+      const want: Record<string, number[]> = {};
+      for (const id of ids) {
+        const b = editor.getShapePageBounds(`shape:${id}` as TLShapeId);
+        const e = elements.find((x) => x.id === id);
+        if (!b || !e) continue;
+        const xs = e.type === "arrow" ? e.points.map((p) => e.x + p[0]) : [e.x, e.x + e.width];
+        const ys = e.type === "arrow" ? e.points.map((p) => e.y + p[1]) : [e.y, e.y + e.height];
+        got[id] = [Math.min(...xs), Math.min(...ys), Math.max(...xs), Math.max(...ys)].map(Math.round);
+        want[id] = [b.minX, b.minY, b.maxX, b.maxY].map(Math.round);
       }
+      expect(Object.keys(got)).toEqual(ids);
+      expect(got).toEqual(want);
     } finally {
       editor.dispose();
     }

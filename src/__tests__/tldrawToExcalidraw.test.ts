@@ -222,10 +222,9 @@ describe("tldraw → Excalidraw: 20 canvases without losing a shape (4.19)", () 
         close(e.x, chain.reduce((n, s) => n + Number(s.x), 0));
         close(e.y, chain.reduce((n, s) => n + Number(s.y), 0));
         const p = propsOf(r);
-        const scale = Number(p.scale ?? 1);
         if (r.type !== "note") {
-          close(e.width, Number(p.w) * (r.type === "geo" ? scale : 1));
-          close(e.height, (Number(p.h) + Number(p.growY ?? 0)) * (r.type === "geo" ? scale : 1));
+          close(e.width, Number(p.w));
+          close(e.height, Number(p.h) + Number(p.growY ?? 0));
         }
       }
     });
@@ -366,8 +365,9 @@ describe("tldraw → Excalidraw: details", () => {
     const ra = el(r, "ra") as ExLinearElement;
     close(ra.points[1][0], 0);
     close(ra.points[1][1], 100);
-    // Scaled shapes: tldraw draws w / h / terminals / bend at `scale` times.
-    expect(el(r, "big")).toMatchObject({ x: 900, y: 0, width: 200, height: 120 });
+    // Scaled shapes: a geo's w / h are page units (scale sizes the label);
+    // arrow terminals and bend are drawn at `scale` times.
+    expect(el(r, "big")).toMatchObject({ x: 900, y: 0, width: 100, height: 60 });
     expect((el(r, "big-label") as ExTextElement).fontSize).toBe(44);
     expect((el(r, "sarr") as ExLinearElement).points).toEqual([[0, 0], [200, 100]]);
     const bent = el(r, "sbent") as ExLinearElement;

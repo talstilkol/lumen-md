@@ -882,9 +882,10 @@ export function tldrawToExcalidraw(input: unknown, options: ConvertOptions = {})
 
     switch (type) {
       case "geo": {
-        // w / h / growY are unscaled: tldraw draws the shape at `scale` times them.
-        const w = num(p.w, 100) * scale;
-        const h = (num(p.h, 100) + num(p.growY, 0)) * scale;
+        // w / h are already page units; `scale` only sizes the label and stroke
+        // (checked against tldraw's own editor in tldrawToExcalidraw.tldraw.test.ts).
+        const w = num(p.w, 100);
+        const h = num(p.h, 100) + num(p.growY, 0);
         const geo = str(p.geo, "rectangle");
         const text = shapeText(p);
         const fontSize = (LABEL_FONT_SIZES[str(p.size, "m")] ?? 22) * scale;
