@@ -26,6 +26,10 @@ describe("formatEntry", () => {
   it("follows the daily-note file pattern", () => {
     expect(formatEntry("x", at, { folder: "", pattern: "DD.MM.YYYY" })).toBe("- [[20.10.2026]] 09:05 x");
     expect(formatEntry("x", at, { folder: "diary/daily", pattern: "YYYY-MM-DD" })).toBe("- [[diary/daily/2026-10-20]] 09:05 x");
+    // Wiki links can't escape # [ ]: a folder with one links by file name, a name with one gets no link (review #268)
+    expect(formatEntry("x", at, { folder: "C# notes", pattern: "YYYY-MM-DD" })).toBe("- [[2026-10-20]] 09:05 x");
+    expect(formatEntry("x", at, { folder: "[daily]", pattern: "YYYY-MM-DD" })).toBe("- [[2026-10-20]] 09:05 x");
+    expect(formatEntry("x", at, { folder: "journal", pattern: "#YYYY-MM-DD" })).toBe("- 2026-10-20 09:05 x");
   });
   it("keeps Hebrew, bidi marks and emoji exactly as typed", () => {
     const he = "לקנות חלב ‏(2 ליטר) ו־Notion ⁧שלום⁩ 🥛";

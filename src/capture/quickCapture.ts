@@ -31,6 +31,25 @@ export const INBOX_PATH = "inbox.md";
 
 const pad2 = (n: number) => String(n).padStart(2, "0");
 
+// Wiki-link syntax has no escapes: `#` starts a heading, `|` an alias, `[` / `]` end the link.
+const WIKI_UNSAFE = /[#|[\]]/;
+
+/**
+ * The day's daily note as a wiki link. The full path (folder too), so a note
+ * elsewhere with the same name can't take the link. A folder or pattern with
+ * a character wiki links can't carry falls back to the file name (links
+ * resolve by name too), and to the plain date when the name has one as well
+ * — never a link that points somewhere else (review: #268).
+ */
+export function dailyLink(when: Date, daily: Pick<DailySettings, "folder" | "pattern">): string {
+  const note = dailyPath(dayOf(when), daily).replace(/\.(md|markdown)$/i, "");
+  if (!WIKI_UNSAFE.test(note)) return `[[${note}]]`;
+  const name = note.split("/").pop() ?? note;
+  if (name && !WIKI_UNSAFE.test(name)) return `[[${name}]]`;
+  const d = dayOf(when);
+  return `${d.y}-${pad2(d.m)}-${pad2(d.d)}`;
+}
+
 /**
  * One capture as a Markdown list item: the day's daily note as a wiki link,
  * the local time, then the text. Further lines are indented so they stay in
@@ -43,10 +62,8 @@ export function formatEntry(text: string, when: Date, daily: Pick<DailySettings,
   while (lines.length && !lines[0].trim()) lines.shift();
   while (lines.length && !lines[lines.length - 1].trim()) lines.pop();
   if (!lines.length) return null;
-  // The full path (folder too): a note elsewhere with the same name can't take the link.
-  const note = dailyPath(dayOf(when), daily).replace(/\.(md|markdown)$/i, "");
   const [first, ...rest] = lines;
-  const head = `- [[${note}]] ${pad2(when.getHours())}:${pad2(when.getMinutes())} ${first.trimStart()}`;
+  const head = `- ${dailyLink(when, daily)} ${pad2(when.getHours())}:${pad2(when.getMinutes())} ${first.trimStart()}`;
   return [head, ...rest.map((l) => (l.trim() ? `  ${l}` : ""))].join("\n");
 }
 
