@@ -182,6 +182,6 @@ describe("model manager — no WebGPU on Firefox / Linux", () => {
     vi.stubGlobal("navigator", { ...navigator, userAgent: "Mozilla/5.0 (X11; Linux x86_64; rv:140.0) Gecko/20100101 Firefox/140.0" });
     render(<AiSettingsPanel open onClose={() => {}} />);
     await waitFor(() => expect(screen.getByTestId("hw-card").textContent).toBe("No WebGPU in this browser (Firefox · Linux). Use Ollama or a WebGPU browser."));
-    expect(screen.getByTestId("hw-gap").textContent).toBe("Speech and search models run on WASM instead.");
+    expect(screen.getByTestId("hw-gap").textContent).toBe("Speech and search run on WASM.");
   });
 });

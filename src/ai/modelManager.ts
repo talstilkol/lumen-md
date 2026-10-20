@@ -12,7 +12,6 @@
  */
 
 import type { ModelTier } from "../agents/types";
-import type { AiMode } from "./aiMode";
 
 export interface WebLlmCatalogEntry {
   /** Model id without the quantisation suffix, e.g. "Qwen3-4B". */
@@ -189,22 +188,8 @@ export function webLlmModelFor(tier: ModelTier, hw: Hardware, opts: { tools?: bo
   return recommendWebLlmModel(tier, hw, opts);
 }
 
-const TIERS: readonly ModelTier[] = ["tiny", "small", "medium", "large"];
-
-/**
- * The tier a local executor (Ollama, web-llm) runs for an agent, by the
- * user's AI mode (plan 5.7): economy one tier down, quality one tier up,
- * balanced as the agent declares. The cloud chat executor keeps its own
- * routing (llm.ts `routeOptions`), so it is not shifted here. The device
- * budget still applies afterwards: "quality" on a small GPU gets the
- * largest model that fits.
- */
-export function tierForMode(tier: ModelTier, mode: AiMode): ModelTier {
-  const i = TIERS.indexOf(tier);
-  if (mode === "economy") return TIERS[Math.max(0, i - 1)];
-  if (mode === "quality") return TIERS[Math.min(TIERS.length - 1, i + 1)];
-  return tier;
-}
+// The AI mode → tier rule lives with the mode (no catalog in the runtime chunk).
+export { tierForMode } from "./aiMode";
 
 /**
  * Why there is no WebGPU on this browser, when it is a known gap rather

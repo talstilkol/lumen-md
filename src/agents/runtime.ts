@@ -33,8 +33,7 @@ import { ToolError } from "./tools/define";
 import { review, type Failure } from "./critic";
 import { recordRun } from "./trace";
 import { AiQuotaExceededError, aiQuotaStatus, chargeAiCommandDispatch, consumeAiPrompt } from "../billing/aiQuota";
-import { getAiMode } from "../ai/aiMode";
-import { tierForMode } from "../ai/modelManager";
+import { getAiMode, tierForMode } from "../ai/aiMode";
 
 export const DEFAULT_MAX_STEPS = 8;
 export const DEFAULT_MAX_RETRIES = 2;
