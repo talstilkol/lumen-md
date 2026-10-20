@@ -558,7 +558,8 @@ export function renderAnnotationsBlock(pdfPath: string, annotations: readonly Pd
     const note = d.note ? ` — ${inlineText(d.note)}` : "";
     return `- [[${highlightLinkTarget(pdfPath, a)}|${labels.page(d.page)}]] “${quote}”${note}`;
   });
-  const json = JSON.stringify(sorted, null, 2);
+  // `<` as \u003c (still the same JSON): a quote or note holding the end marker can't end the region early (review #272).
+  const json = JSON.stringify(sorted, null, 2).replace(/</g, "\\u003c");
   // A fence longer than any backtick run in the JSON (a quote may hold ```).
   const longest = Math.max(2, ...Array.from(json.matchAll(/`+/g), (m) => m[0].length));
   const fence = "`".repeat(longest + 1);

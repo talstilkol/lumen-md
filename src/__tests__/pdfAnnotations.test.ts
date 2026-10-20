@@ -225,6 +225,19 @@ describe("Web Annotation records", () => {
       expect(parseAnnotationsNote(next).map((a) => a.id)).toEqual([ann.id, second.id]);
     });
 
+    it("a note holding the end marker can't cut the region short (review #272)", () => {
+      const tricky = withNote(ann, `see ${NOTE_END} here`, new Date("2026-10-21T00:00:00Z"));
+      const second = { ...ann, id: "urn:uuid:eeeeeeee-0000-4000-8000-000000000000" };
+      const md = upsertAnnotationsNote(null, "a.pdf", [tricky, second], labels);
+      expect(md.split(NOTE_END)).toHaveLength(2);
+      const back = parseAnnotationsNote(md);
+      expect(back.map((a) => a.id)).toEqual([tricky.id, second.id]);
+      // A second save keeps both, and the note text survives exactly.
+      const again = parseAnnotationsNote(upsertAnnotationsNote(md, "a.pdf", back, labels));
+      expect(again).toHaveLength(2);
+      expect(JSON.stringify(again[0].body)).toContain(NOTE_END);
+    });
+
     it("appends the region to a note that has none, and says when it is empty", () => {
       const md = upsertAnnotationsNote("Just my text.", "a.pdf", [], labels);
       expect(md.startsWith("Just my text.\n\n" + NOTE_START)).toBe(true);
