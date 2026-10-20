@@ -21,6 +21,8 @@ import {
 import { migrateTldrawCanvases, warningLines } from "../canvas/migrateTldrawCanvases";
 import { tldrawToExcalidraw } from "../canvas/tldrawToExcalidraw";
 import { buildFixtureCanvases } from "./fixtures/tldrawCanvases";
+import { annotateFailures } from "./ghaFailures";
+annotateFailures();
 
 const { toast, alertFn } = vi.hoisted(() => ({
   toast: vi.fn((..._args: unknown[]) => undefined),

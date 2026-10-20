@@ -12,6 +12,8 @@ import { describe, it, expect } from "vitest";
 import { createTLStore, defaultBindingUtils, defaultShapeUtils, Editor, loadSnapshot, type TLShapeId } from "tldraw";
 import { tldrawToExcalidraw, type ExcalidrawElement } from "../canvas/tldrawToExcalidraw";
 import { buildFixtureCanvases } from "./fixtures/tldrawCanvases";
+import { annotateFailures } from "./ghaFailures";
+annotateFailures();
 
 /** Older stored formats / a custom shape type: not valid tldraw 4.5 records on purpose. */
 const PRE_45 = new Set(["17-legacy-store", "18-tldr-v2", "19-unsupported"]);
