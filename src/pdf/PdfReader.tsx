@@ -101,6 +101,11 @@ function newUuid(): string {
   return `${h.slice(0, 8)}-${h.slice(8, 12)}-${h.slice(12, 16)}-${h.slice(16, 20)}-${h.slice(20)}`;
 }
 
+/** A file (or folder on its path) that isn't there — as opposed to a read that failed. */
+function isMissing(e: unknown): boolean {
+  return !!e && typeof e === "object" && (e as { name?: unknown }).name === "NotFoundError";
+}
+
 function baseName(p: string): string {
   return p.split("/").pop() ?? p;
 }
@@ -175,11 +180,13 @@ export function PdfReader({ path, fragment = null, openSeq = 0, onClose, onOpenN
         const vp = (await pdf.getPage(i)).getViewport({ scale: 1 });
         all.push({ w: vp.width, h: vp.height });
       }
+      // No note yet means no highlights. Any other read failure stops here:
+      // opening with an empty list would let the next save drop the saved ones.
       let note: string | null = null;
       try {
         note = await ws.readWorkspaceFile(notePath);
-      } catch {
-        /* no highlights yet */
+      } catch (e) {
+        if (!isMissing(e)) throw e;
       }
       if (cancelled) return;
       const width = scrollRef.current?.clientWidth ?? 800;
@@ -285,11 +292,13 @@ export function PdfReader({ path, fragment = null, openSeq = 0, onClose, onOpenN
         ]);
         // The note may be open with edits the autosave hasn't written yet.
         await flushActiveWorkspaceDoc();
+        // Missing: the first highlight creates the note. Unreadable: fail the
+        // save (the user's own text in the note must not be replaced).
         let existing: string | null = null;
         try {
           existing = await ws.readWorkspaceFile(notePath);
-        } catch {
-          /* first highlight: the note is created */
+        } catch (e) {
+          if (!isMissing(e)) throw e;
         }
         const labels = {
           title: t("pdf.noteTitle", { name: baseName(path) }),

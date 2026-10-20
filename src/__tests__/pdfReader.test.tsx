@@ -16,7 +16,7 @@ vi.mock("../storage/workspace", () => ({
   // The "bytes" of a fake PDF: one byte naming it (see openPdf below).
   readWorkspaceBlob: vi.fn(async (path: string) => ({ arrayBuffer: async () => new Uint8Array([path === "a.pdf" ? 1 : 2]).buffer })),
   readWorkspaceFile: vi.fn(async () => {
-    throw new Error("no note");
+    throw new DOMException("a.pdf.md not found", "NotFoundError");
   }),
   writeWorkspaceFile: vi.fn(async () => undefined),
   workspaceHasEntry: vi.fn(async () => false),
@@ -126,7 +126,7 @@ describe("PdfReader", () => {
     expect(write).toHaveBeenCalledTimes(3);
     expect(String(write.mock.calls[2][1])).not.toContain("alpha");
     read.mockImplementation(async () => {
-      throw new Error("no note");
+      throw new DOMException("a.pdf.md not found", "NotFoundError");
     });
   });
 
@@ -141,5 +141,23 @@ describe("PdfReader", () => {
     expect(write).toHaveBeenCalledTimes(1);
     expect(write.mock.calls[0][0]).toBe("a.pdf.md");
     expect(String(write.mock.calls[0][1])).toContain("<!-- lumen:pdf-annotations:start -->");
+  });
+
+  it("doesn't open for editing when the highlights note exists but can't be read", async () => {
+    const read = vi.mocked(ws.readWorkspaceFile);
+    const write = vi.mocked(ws.writeWorkspaceFile);
+    write.mockClear();
+    read.mockImplementation(async () => {
+      throw new DOMException("busy", "NoModificationAllowedError");
+    });
+    render(<PdfReader path="a.pdf" openSeq={1} onClose={() => undefined} onOpenNotes={() => undefined} />);
+    expect(await screen.findByRole("alert")).toBeTruthy();
+    expect(screen.getByRole("alert").textContent).toContain("busy");
+    expect(reader().getAttribute("data-ready")).toBeNull();
+    expect(screen.getByTestId("pdf-highlight").hasAttribute("disabled")).toBe(true);
+    expect(write).not.toHaveBeenCalled();
+    read.mockImplementation(async () => {
+      throw new DOMException("a.pdf.md not found", "NotFoundError");
+    });
   });
 });
