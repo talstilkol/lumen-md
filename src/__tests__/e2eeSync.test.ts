@@ -17,6 +17,7 @@ import { WrongPassphraseError } from "../sync/e2ee/header";
 import { dialogResolver, keepBothResolver, conflictCopyPath, asText, type ConflictResolver } from "../sync/e2ee/conflict";
 import { isSyncedPath, vaultLocalFiles } from "../sync/e2ee/localFiles";
 import { createMemoryBackend } from "../storage/vault/memory";
+import { VaultError, type VaultBackend } from "../storage/vault/types";
 import { utf8 } from "../sync/e2ee/bytes";
 import { device, joinVault, newVault, PASSPHRASE, snapshot, TEST_ITERATIONS, TEST_POLICY } from "./helpers/e2ee";
 
@@ -821,8 +822,134 @@ describe("e2ee sync: folders and files trading places", () => {
     await m.sync.sync();
     await vault.write("x/kept.md", "x is a folder here"); // created locally before the first sync
     const r = await v.sync();
-    expect(r.held).toEqual(["x"]);
+    // The folder's note is held too: the manifest never holds both `x` and `x/…`.
+    expect(r.held.sort()).toEqual(["x", "x/kept.md"]);
     expect(await vault.readText("y.md")).toBe("y");
     expect(await vault.readText("x/kept.md")).toBe("x is a folder here");
+    expect(Object.keys(await liveFiles(provider, keys)).sort()).toEqual(["x", "y.md"]);
+
+    // Once the user moves the folder away, both sides settle.
+    await vault.rename("x", "x-folder");
+    const r2 = await v.sync();
+    expect(r2.held).toEqual([]);
+    expect(await vault.readText("x")).toBe("x is a file there");
+    expect(Object.keys(await liveFiles(provider, keys)).sort()).toEqual(["x", "x-folder/kept.md", "y.md"]);
+  });
+
+  it("the reverse clash — a local file where the other side has a folder — is held the same way", async () => {
+    const provider = memoryProvider();
+    const { keys, anchor } = await createVault(provider, PASSPHRASE, { pbkdf2Iterations: TEST_ITERATIONS });
+    const vault = createMemoryBackend();
+    const v = new E2eeSync({ provider, keys, local: vaultLocalFiles(vault), store: memoryStateStore() });
+    await v.markCreated(anchor);
+    const m = device("M", provider, keys);
+    m.files.set("x/a.md", "a note in folder x");
+    await m.sync.sync();
+    await vault.write("x", "x is a file here");
+    const r = await v.sync();
+    expect(r.held.sort()).toEqual(["x", "x/a.md"]);
+    expect(await vault.readText("x")).toBe("x is a file here");
+    expect(Object.keys(await liveFiles(provider, keys))).toEqual(["x/a.md"]);
+  });
+});
+
+/** The live (not deleted) paths of the manifest at `provider`. */
+async function liveFiles(provider: ReturnType<typeof memoryProvider>, keys: Parameters<typeof manifestName>[0]) {
+  const { manifest } = await openManifest(keys, provider.objects.get(await manifestName(keys))!.data);
+  return Object.fromEntries(Object.entries(manifest.files).filter(([, e]) => !e.deleted));
+}
+
+describe("e2ee sync: paths the local vault cannot hold", () => {
+  it("a name the platform refuses is held and reported; the rest of the round syncs", async () => {
+    const provider = memoryProvider();
+    const { keys, anchor } = await createVault(provider, PASSPHRASE, { pbkdf2Iterations: TEST_ITERATIONS });
+    const inner = createMemoryBackend();
+    // Like the Windows desktop backend: `:` in a name is refused with EINVAL.
+    const guard = (p: string) => {
+      if (p.includes(":")) throw new VaultError("EINVAL", p);
+    };
+    const windows: VaultBackend = {
+      ...inner,
+      stat: async (p) => (guard(p), inner.stat(p)),
+      read: async (p) => (guard(p), inner.read(p)),
+      write: async (p, d) => (guard(p), inner.write(p, d)),
+      remove: async (p) => (guard(p), inner.remove(p)),
+    };
+    const v = new E2eeSync({ provider, keys, local: vaultLocalFiles(windows), store: memoryStateStore() });
+    await v.markCreated(anchor);
+    const m = device("M", provider, keys);
+    m.files.set("notes/12:30 meeting.md", "from a Mac");
+    m.files.set("notes/ok.md", "fine everywhere");
+    await m.sync.sync();
+    for (let i = 0; i < 2; i++) {
+      const r = await v.sync();
+      expect(r.held).toEqual(["notes/12:30 meeting.md"]);
+    }
+    expect(await inner.readText("notes/ok.md")).toBe("fine everywhere");
+    // Later changes keep flowing past the held path.
+    m.files.set("notes/ok.md", "edited");
+    await m.sync.sync();
+    await v.sync();
+    expect(await inner.readText("notes/ok.md")).toBe("edited");
+    // Nothing was lost at the provider: the other device still has the note.
+    expect(m.files.text("notes/12:30 meeting.md")).toBe("from a Mac");
+    expect(Object.keys(await liveFiles(provider, keys)).sort()).toEqual(["notes/12:30 meeting.md", "notes/ok.md"]);
+  });
+});
+
+describe("e2ee sync: a manifest write with a lost answer", () => {
+  it("still deletes the blob it replaced, on the next round", async () => {
+    let failNext = false;
+    let manifest = "";
+    const provider = memoryProvider({
+      fault: (op, name, phase) => {
+        if (failNext && op === "put" && name === manifest && phase === "after") {
+          failNext = false;
+          throw new ProviderUnavailableError();
+        }
+      },
+    });
+    const a = await newVault(provider);
+    manifest = await manifestName(a.keys);
+    a.files.set("x.md", "1");
+    await a.sync.sync();
+    expect(provider.objects.size).toBe(3);
+    a.files.set("x.md", "2");
+    failNext = true;
+    await expect(a.sync.sync()).rejects.toBeInstanceOf(ProviderUnavailableError);
+    expect(provider.objects.size).toBe(4);
+    expect(await a.sync.sync()).toMatchObject({ uploaded: 0 });
+    expect(provider.objects.size).toBe(3);
+    expect(a.store.state?.pending).toEqual([]);
+    expect(a.store.state?.committing).toEqual([]);
+    const b = await joinVault("B", provider);
+    await b.sync.sync();
+    expect(b.files.text("x.md")).toBe("2");
+  });
+
+  it("keeps the old blob when the write did not land", async () => {
+    let failNext = false;
+    let manifest = "";
+    const provider = memoryProvider({
+      fault: (op, name, phase) => {
+        if (failNext && op === "put" && name === manifest && phase === "before") {
+          failNext = false;
+          throw new ProviderUnavailableError();
+        }
+      },
+    });
+    const a = await newVault(provider);
+    manifest = await manifestName(a.keys);
+    a.files.set("x.md", "1");
+    await a.sync.sync();
+    a.files.set("x.md", "2");
+    failNext = true;
+    await expect(a.sync.sync()).rejects.toBeInstanceOf(ProviderUnavailableError);
+    // Another device reads the old manifest meanwhile: its blob must still be there.
+    const b = await joinVault("B", provider);
+    a.files.set("x.md", "1"); // and A even goes back to the old text
+    await a.sync.sync();
+    await b.sync.sync();
+    expect(b.files.text("x.md")).toBe("1");
   });
 });

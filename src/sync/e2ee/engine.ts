@@ -317,7 +317,29 @@ export class E2eeSync {
       s.anchor = got;
       await this.save();
     }
+    if (s.committing?.length) await this.reconcileCommit(manifest);
     return { manifest, etag: obj.etag };
+  }
+
+  /**
+   * A manifest write whose outcome is unknown left its replaced blob names in
+   * `committing`. A revision, once replaced, is never referenced again, so
+   * every name the current manifest does not reference is garbage — whether
+   * this device's write landed or another device replaced it since — and goes
+   * to `pending`. Names still referenced are live: the write did not land.
+   */
+  private async reconcileCommit(current: Manifest): Promise<void> {
+    const s = await this.loadState();
+    const names = new Set(s.committing ?? []);
+    const live = new Set<string>();
+    for (const [path, e] of Object.entries(current.files)) {
+      if (e.deleted) continue;
+      const n = await this.blob(path, e.rev);
+      if (names.has(n)) live.add(n);
+    }
+    s.pending.push(...[...names].filter((n) => !live.has(n)));
+    s.committing = [];
+    await this.save();
   }
 
   private async round(): Promise<SyncResult> {
@@ -352,10 +374,22 @@ export class E2eeSync {
       const next: Manifest = { ...remote, counter: remote.counter + 1, files: pathRecord(remote.files) };
       for (const [path, c] of changes) next.files[path] = c.entry;
       const sealed = await sealManifest(this.o.keys, next, await this.manifestObject());
+      // The blobs this commit replaces. Recorded before the write: if the write
+      // succeeds but its answer is lost, the next round finds them unreferenced
+      // and queues them (`reconcileCommit`), instead of forgetting them.
+      const superseded: string[] = [];
+      for (const [path] of changes) {
+        const old = remote.files[path];
+        if (old && !old.deleted) superseded.push(await this.blob(path, old.rev));
+      }
+      s.committing = superseded;
+      await this.save();
       try {
         await this.o.provider.put(await this.manifestObject(), sealed.bytes, etag ? { ifMatch: etag } : { ifNoneMatch: "*" });
       } catch (e) {
         if (e instanceof PreconditionFailedError) {
+          s.committing = []; // certainly not written: the old blobs are still live
+          await this.save();
           res.retries++;
           continue;
         }
@@ -363,13 +397,9 @@ export class E2eeSync {
       }
       // The replaced blobs are queued in the same save as the new anchor, before
       // any base entry forgets them, so an interruption cannot leak them.
-      const superseded: string[] = [];
-      for (const [path] of changes) {
-        const old = remote.files[path];
-        if (old && !old.deleted) superseded.push(await this.blob(path, old.rev));
-      }
       s.anchor = { counter: next.counter, digest: sealed.digest };
       s.pending.push(...superseded);
+      s.committing = [];
       await this.save();
       for (const [path, c] of changes) {
         await this.setBase(path, c.entry, c.data);
@@ -529,6 +559,30 @@ export class E2eeSync {
         uploads.set(path, up);
       }
       out.set(path, { entry: { ver, rev: up.rev, hash, size: up.size, by: s.deviceId }, data: up.data });
+    }
+    // The manifest must describe a tree a file system can hold: never a live
+    // file `x` together with live entries under `x/`. A change that would
+    // create that — typically because the other side of the clash is held —
+    // is held too, until the clash is settled.
+    for (let changed = true; changed; ) {
+      changed = false;
+      const live = new Set(Object.keys(remote.files).filter((p) => !remote.files[p].deleted));
+      for (const [p, c] of out) {
+        if (c.entry.deleted) live.delete(p);
+        else live.add(p);
+      }
+      for (const [p, c] of out) {
+        if (c.entry.deleted) continue;
+        const segs = p.split("/");
+        const above = segs.slice(0, -1).some((_, k) => live.has(segs.slice(0, k + 1).join("/")));
+        const below = [...live].some((q) => q.startsWith(`${p}/`));
+        if (above || below) {
+          out.delete(p);
+          held.add(p);
+          changed = true;
+          break;
+        }
+      }
     }
     return out;
   }

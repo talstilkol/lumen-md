@@ -127,8 +127,25 @@ export function vaultLocalFiles(backend: VaultBackend): LocalFiles {
     if (!st || st.kind !== "file") return null;
     return sha256Hex(new Uint8Array(await (await backend.read(path)).arrayBuffer()));
   };
+  /**
+   * A path this vault cannot hold — a name the platform refuses (`:` or `\`
+   * on Windows), a folder in a file's place, a file where a parent folder
+   * should be — is a VaultError. It answers "not done" (false / null), so the
+   * round holds that path and reports it in `SyncResult.held`, and every
+   * other path still syncs.
+   */
+  const soft = async <T>(fallback: T, fn: () => Promise<T>): Promise<T> => {
+    try {
+      return await fn();
+    } catch (e) {
+      if (e instanceof VaultError) return fallback;
+      throw e;
+    }
+  };
   return {
     async list() {
+      // Not softened: a file that is there but cannot be read must fail the
+      // round, never look deleted (that would push a tombstone).
       const out: LocalFile[] = [];
       const walk = async (dir: string): Promise<void> => {
         for (const e of await backend.list(dir)) {
@@ -140,34 +157,34 @@ export function vaultLocalFiles(backend: VaultBackend): LocalFiles {
       await walk("");
       return out;
     },
-    async read(path) {
-      const st = await backend.stat(path);
-      if (!st || st.kind !== "file") return null;
-      return new Uint8Array(await (await backend.read(path)).arrayBuffer());
+    read(path) {
+      return soft<Uint8Array | null>(null, async () => {
+        const st = await backend.stat(path);
+        if (!st || st.kind !== "file") return null;
+        return new Uint8Array(await (await backend.read(path)).arrayBuffer());
+      });
     },
-    async write(path, data, expect) {
-      const st = await backend.stat(path);
-      if (st?.kind === "directory") {
-        // A folder where the file goes: only an empty one (left behind by
-        // deleting its files) may make way; anything else is held.
-        if (expect !== null || (await backend.list(path)).length > 0) return false;
-        await backend.remove(path);
-      } else if ((await hashAt(path)) !== expect) {
-        return false;
-      }
-      try {
+    write(path, data, expect) {
+      return soft(false, async () => {
+        const st = await backend.stat(path);
+        if (st?.kind === "directory") {
+          // A folder where the file goes: only an empty one (left behind by
+          // deleting its files) may make way; anything else is held.
+          if (expect !== null || (await backend.list(path)).length > 0) return false;
+          await backend.remove(path);
+        } else if ((await hashAt(path)) !== expect) {
+          return false;
+        }
         await backend.write(path, data.slice());
-      } catch (e) {
-        // A file where a parent folder should be: a structural conflict the round holds.
-        if (e instanceof VaultError && e.code === "EKIND") return false;
-        throw e;
-      }
-      return true;
+        return true;
+      });
     },
-    async remove(path, expect) {
-      if ((await hashAt(path)) !== expect) return false;
-      await backend.remove(path);
-      return true;
+    remove(path, expect) {
+      return soft(false, async () => {
+        if ((await hashAt(path)) !== expect) return false;
+        await backend.remove(path);
+        return true;
+      });
     },
   };
 }

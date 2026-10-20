@@ -29,8 +29,10 @@ export interface DeviceState {
   anchor: FreshnessAnchor | null;
   freshness: FreshnessSource;
   base: Record<string, ManifestEntry>;
-  /** Uploaded blob names not yet referenced by a committed manifest. */
+  /** Uploaded blob names not yet referenced by a committed manifest, and replaced blobs to delete. */
   pending: string[];
+  /** Blobs a manifest write in progress would replace; reconciled if its outcome is unknown. */
+  committing?: string[];
 }
 
 export interface SyncStateStore {

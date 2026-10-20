@@ -91,6 +91,12 @@ the note then stays as it is on both sides until the next sync). Binary
 files keep both versions: yours at the path and the other one as
 `name (conflict <date> <device>).ext`.
 
+A path a device cannot hold — a name its system refuses (a `:` in a file
+name on Windows), or a file and a folder of the same name on the two sides —
+is **held**: it is listed as not synced, stays untouched on both sides, and
+everything else keeps syncing. A held clash never reaches the manifest
+either, so it never describes both a file `x` and notes inside a folder `x/`.
+
 ## Rollback and replay protection
 
 Every device remembers the highest manifest counter it has verified, and
