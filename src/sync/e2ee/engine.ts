@@ -43,7 +43,7 @@ import {
   type Manifest,
   type ManifestEntry,
 } from "./manifest";
-import { readPairingCode, createPairingCode } from "./pairing";
+import { readPairingCode, createPairingCode, PairingError } from "./pairing";
 import { PreconditionFailedError, type SyncProvider } from "./provider";
 import type { DeviceState, FreshnessSource, SyncStateStore } from "./state";
 
@@ -213,10 +213,17 @@ export class E2eeSync {
     });
   }
 
-  /** A pairing code for a new device, carrying this device's newest verified anchor. */
+  /**
+   * A pairing code for a new device, carrying this device's newest verified
+   * anchor. An unverified (TOFU) device cannot issue one: it would pass on a
+   * state nobody verified as if it had been.
+   */
   async pairingCode(): Promise<string> {
     const s = await this.loadState();
-    if (!s.anchor) throw new Error("Sync once before pairing another device");
+    if (!s.anchor) throw new PairingError("Sync once before pairing another device");
+    if (s.freshness === "unverified") {
+      throw new PairingError("This device's freshness is not verified: pair it or confirm it before pairing others");
+    }
     return createPairingCode(this.o.keys, s.anchor, this.o.now());
   }
 
@@ -225,7 +232,6 @@ export class E2eeSync {
     return this.exclusive(async () => {
       const got = await readPairingCode(this.o.keys, code, this.o.now());
       const s = await this.loadState();
-      // Never move the anchor backwards; equal counters must be the same manifest.
       // Never move the anchor backwards; equal counters must be the same manifest.
       if (s.anchor && got.counter === s.anchor.counter && got.digest !== s.anchor.digest) {
         throw new RollbackError(s.anchor.counter, got.counter, "fork");
@@ -379,8 +385,11 @@ export class E2eeSync {
   private async pull(remote: Manifest, res: SyncResult, held: Set<string>): Promise<void> {
     const s = await this.loadState();
     const local = new Map((await this.o.local.list()).filter((f) => isSyncedPath(f.path)).map((f) => [f.path, f.hash]));
-    const paths = new Set([...Object.keys(remote.files), ...Object.keys(s.base), ...local.keys()]);
-    for (const path of [...paths].sort()) {
+    const sorted = [...new Set([...Object.keys(remote.files), ...Object.keys(s.base), ...local.keys()])].sort();
+    // Deletions first: a folder `a/` replaced by a file `a` (or the reverse)
+    // must be cleared before the new entry is written.
+    const gone = (p: string) => remote.files[p]?.deleted === true;
+    for (const path of [...sorted.filter(gone), ...sorted.filter((p) => !gone(p))]) {
       if (held.has(path)) continue;
       const r = remote.files[path];
       const b = s.base[path];

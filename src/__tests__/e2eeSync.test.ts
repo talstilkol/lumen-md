@@ -278,6 +278,9 @@ describe("e2ee sync: anchoring a new device (pairing / TOFU)", () => {
 
     const timed = device("T", provider, a.keys, undefined, () => now);
     await timed.sync.sync();
+    // An unverified (TOFU) device must not vouch for a state nobody verified.
+    await expect(timed.sync.pairingCode()).rejects.toBeInstanceOf(PairingError);
+    await timed.sync.confirmFreshness();
     const fresh = await timed.sync.pairingCode();
     now += PAIRING_TTL_MS + 1;
     await expect(c.sync.pair(fresh)).rejects.toThrow(/expired/);
@@ -760,5 +763,47 @@ describe("e2ee sync: edge cases", () => {
     await a.sync.sync();
     expect(provider.objects.size).toBe(3);
     expect(a.store.state?.pending).toEqual([]);
+  });
+});
+
+describe("e2ee sync: folders and files trading places", () => {
+  it("a folder replaced by a file, and a file replaced by a folder, reach a real vault", async () => {
+    const provider = memoryProvider();
+    const { keys, anchor } = await createVault(provider, PASSPHRASE, { pbkdf2Iterations: TEST_ITERATIONS });
+    const vault = createMemoryBackend();
+    await vault.write("a/b.md", "inside a");
+    await vault.write("c", "c is a file");
+    const v = new E2eeSync({ provider, keys, local: vaultLocalFiles(vault), store: memoryStateStore() });
+    await v.markCreated(anchor);
+    await v.sync();
+    const m = device("M", provider, keys);
+    await m.sync.sync();
+    m.files.delete("a/b.md");
+    m.files.set("a", "a is now a file");
+    m.files.delete("c");
+    m.files.set("c/d.md", "c is now a folder");
+    await m.sync.sync();
+    const r = await v.sync();
+    expect(r.held).toEqual([]);
+    expect(await vault.readText("a")).toBe("a is now a file");
+    expect(await vault.readText("c/d.md")).toBe("c is now a folder");
+    expect((await vault.stat("c"))?.kind).toBe("directory");
+  });
+
+  it("holds a file whose place is taken by a folder that still has notes, without stopping the round", async () => {
+    const provider = memoryProvider();
+    const { keys, anchor } = await createVault(provider, PASSPHRASE, { pbkdf2Iterations: TEST_ITERATIONS });
+    const vault = createMemoryBackend();
+    const v = new E2eeSync({ provider, keys, local: vaultLocalFiles(vault), store: memoryStateStore() });
+    await v.markCreated(anchor);
+    const m = device("M", provider, keys);
+    m.files.set("x", "x is a file there");
+    m.files.set("y.md", "y");
+    await m.sync.sync();
+    await vault.write("x/kept.md", "x is a folder here"); // created locally before the first sync
+    const r = await v.sync();
+    expect(r.held).toEqual(["x"]);
+    expect(await vault.readText("y.md")).toBe("y");
+    expect(await vault.readText("x/kept.md")).toBe("x is a folder here");
   });
 });

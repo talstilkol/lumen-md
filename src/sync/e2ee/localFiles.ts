@@ -7,7 +7,7 @@
  */
 
 import { sha256Hex, utf8 } from "./bytes";
-import type { VaultBackend } from "../../storage/vault/types";
+import { VaultError, type VaultBackend } from "../../storage/vault/types";
 
 export interface LocalFile {
   path: string;
@@ -146,8 +146,22 @@ export function vaultLocalFiles(backend: VaultBackend): LocalFiles {
       return new Uint8Array(await (await backend.read(path)).arrayBuffer());
     },
     async write(path, data, expect) {
-      if ((await hashAt(path)) !== expect) return false;
-      await backend.write(path, data.slice());
+      const st = await backend.stat(path);
+      if (st?.kind === "directory") {
+        // A folder where the file goes: only an empty one (left behind by
+        // deleting its files) may make way; anything else is held.
+        if (expect !== null || (await backend.list(path)).length > 0) return false;
+        await backend.remove(path);
+      } else if ((await hashAt(path)) !== expect) {
+        return false;
+      }
+      try {
+        await backend.write(path, data.slice());
+      } catch (e) {
+        // A file where a parent folder should be: a structural conflict the round holds.
+        if (e instanceof VaultError && e.code === "EKIND") return false;
+        throw e;
+      }
       return true;
     },
     async remove(path, expect) {
