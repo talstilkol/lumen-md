@@ -23,6 +23,9 @@ vi.mock("../ai/modelManager", async (orig) => ({
   ),
 }));
 
+const confirm = vi.hoisted(() => ({ fn: vi.fn(async () => true) }));
+vi.mock("../ui/PromptDialog", () => ({ uiConfirm: (...a: unknown[]) => confirm.fn(...(a as [])) }));
+
 import { refreshOllama } from "../agents/executors/ollama";
 import { registerExecutor, resetExecutors } from "../agents/executors";
 import { runAgent } from "../agents/runtime";
@@ -118,6 +121,41 @@ describe("model manager — Ollama pull from the panel", () => {
     f.end();
     await waitFor(() => expect(screen.getByRole("alert").textContent).toBe("Download failed: Ollama: pull model manifest: file does not exist"));
     expect(screen.getByRole("button", { name: "Download" })).toBeTruthy();
+  });
+
+  it("a double click starts one download, not two", async () => {
+    const f = fakePullFetch();
+    vi.stubGlobal("fetch", f.fetchMock);
+    render(<AiSettingsPanel open onClose={() => {}} />);
+    fireEvent.change(await screen.findByPlaceholderText("qwen3:4b"), { target: { value: "qwen3:4b" } });
+    const button = screen.getByRole("button", { name: "Download" });
+    fireEvent.click(button);
+    fireEvent.click(button);
+    await waitFor(() => expect(f.requests).toHaveLength(1));
+    f.push({ status: "success" });
+    f.end();
+    await waitFor(() => expect(screen.getByRole("status").textContent).toBe("qwen3:4b is installed"));
+    expect(f.requests).toHaveLength(1);
+  });
+
+  it("names a custom-licence model and downloads it only after confirmation", async () => {
+    const f = fakePullFetch();
+    vi.stubGlobal("fetch", f.fetchMock);
+    confirm.fn.mockClear();
+    render(<AiSettingsPanel open onClose={() => {}} />);
+    fireEvent.change(await screen.findByPlaceholderText("qwen3:4b"), { target: { value: "llama3.1:8b" } });
+    confirm.fn.mockResolvedValueOnce(false);
+    fireEvent.click(screen.getByRole("button", { name: "Download" }));
+    await waitFor(() => expect(confirm.fn).toHaveBeenCalledTimes(1));
+    expect(JSON.stringify(confirm.fn.mock.calls[0])).toContain("Llama 3.1 Community License");
+    expect(f.fetchMock).not.toHaveBeenCalled();
+    confirm.fn.mockResolvedValueOnce(true);
+    fireEvent.click(screen.getByRole("button", { name: "Download" }));
+    await waitFor(() => expect(f.requests).toHaveLength(1));
+    expect(f.requests[0].body).toEqual({ model: "llama3.1:8b", stream: true });
+    f.push({ status: "success" });
+    f.end();
+    await waitFor(() => expect(screen.getByRole("status").textContent).toBe("llama3.1:8b is installed"));
   });
 
   it("Cancel stops the download without an error", async () => {

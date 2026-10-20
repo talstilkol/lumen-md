@@ -33,7 +33,6 @@ import { ToolError } from "./tools/define";
 import { review, type Failure } from "./critic";
 import { recordRun } from "./trace";
 import { AiQuotaExceededError, aiQuotaStatus, chargeAiCommandDispatch, consumeAiPrompt } from "../billing/aiQuota";
-import { getAiMode, tierForMode } from "../ai/aiMode";
 
 export const DEFAULT_MAX_STEPS = 8;
 export const DEFAULT_MAX_RETRIES = 2;
@@ -229,6 +228,7 @@ export async function runAgent<I extends AgentInput, O = string>(def: AgentDefin
   // The AI mode is read once per run (plan 5.7): switching it in the
   // settings changes the local model of the next run, never of one under
   // way. A retry patch's tier is explicit and is not shifted again.
+  const { getAiMode, tierForMode } = await import("../ai/aiMode");
   const mode = getAiMode();
   const tierOf = (id: ExecutorId): ModelTier => (id === "chat" ? def.tier ?? "small" : tierForMode(def.tier ?? "small", mode));
 

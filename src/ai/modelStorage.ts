@@ -85,14 +85,20 @@ function deleteDb(name: string): Promise<void> {
 }
 
 /**
- * Delete one library's model caches. The web-llm model is unloaded first
- * (its worker holds the files open), so the next run downloads again.
+ * Delete one library's model caches. The library's worker is unloaded
+ * first (it keeps loaded models in memory), so the next run downloads again.
  * Returns how many caches were removed.
  */
 export async function clearModelCaches(kind: ModelCacheKind): Promise<number> {
+  // A loaded model is reused without consulting Cache Storage: unload it
+  // first, so the next use really downloads again instead of running from
+  // a worker that still holds the cleared weights.
   if (kind === "webllm") {
     const { unloadWebLlm } = await import("./webllmEngine");
     await unloadWebLlm().catch(() => undefined);
+  } else {
+    const { unloadTransformers } = await import("./transformersEngine");
+    await unloadTransformers().catch(() => undefined);
   }
   const names = (await modelCacheNames())[kind];
   let removed = 0;

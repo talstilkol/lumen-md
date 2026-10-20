@@ -9,11 +9,11 @@ import {
   vramBudgetMB,
   webLlmModelFor,
   webLlmModelId,
-  tierForMode,
-  webGpuGap,
   __resetHardware,
   type Hardware,
 } from "../ai/modelManager";
+import { tierForMode } from "../ai/aiMode";
+import { webGpuGap } from "../ai/webGpuGap";
 
 const hw = (over: Partial<Hardware> = {}): Hardware => ({ webgpu: true, f16: true, maxBufferMB: 2048, deviceMemoryGB: 8, cores: 8, mobile: false, ...over });
 

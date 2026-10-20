@@ -150,7 +150,7 @@ export function AiSettingsPanel({ open, onClose }: Props) {
     if (!open) return;
     let alive = true;
     void (async () => {
-      const [{ getAiPolicy }, { preferredExecutor }, mm, style, trace, { getBaseUrl, getOllamaConfigModel }, { grammarEndpoint }, { getAiMode }] = await Promise.all([
+      const [{ getAiPolicy }, { preferredExecutor }, mm, style, trace, { getBaseUrl, getOllamaConfigModel }, { grammarEndpoint }, { getAiMode }, { webGpuGap }] = await Promise.all([
         import("../ai/policy"),
         import("../agents/executors"),
         import("../ai/modelManager"),
@@ -159,6 +159,7 @@ export function AiSettingsPanel({ open, onClose }: Props) {
         import("../ai/ollamaProvider"),
         import("../ai/grammar"),
         import("../ai/aiMode"),
+        import("../ai/webGpuGap"),
       ]);
       if (!alive) return;
       setPolicyState(getAiPolicy());
@@ -177,7 +178,7 @@ export function AiSettingsPanel({ open, onClose }: Props) {
       const h = await mm.detectHardware();
       if (!alive) return;
       setHw(h);
-      setGap(mm.webGpuGap(h));
+      setGap(webGpuGap(h));
       setBudget(mm.vramBudgetMB(h));
       setCatalog(
         mm.WEBLLM_CATALOG.map((e) => ({ id: mm.webLlmModelId(e, h.f16), label: e.licence ? `${e.label} — ${e.licence}` : e.label, vram: h.f16 ? e.vramMB.f16 : e.vramMB.f32 })),
@@ -240,13 +241,31 @@ export function AiSettingsPanel({ open, onClose }: Props) {
 
   const startPull = async () => {
     const model = pullName.trim();
-    if (!model || pull) return;
-    const [{ pullOllamaModel }, { getBaseUrl }] = await Promise.all([import("../ai/ollamaPull"), import("../ai/ollamaProvider")]);
+    // Locked synchronously: a double click (or Enter, then a click) while
+    // the modules or the licence prompt are pending must not start a
+    // second download.
+    if (!model || pullAbort.current) return;
     const ctrl = new AbortController();
     pullAbort.current = ctrl;
+    // A custom-licence or non-commercial model is named and confirmed before
+    // its weights are downloaded, as before choosing it (plan 1.7).
+    const lic = ollamaLicenceNotice(model);
+    if (lic) {
+      const { uiConfirm } = await import("./PromptDialog");
+      const ok = await uiConfirm({
+        title: t("ai.localModels.licenceTitle"),
+        message: t("ai.localModels.licenceBody", { model, licence: lic.name }),
+        okLabel: t("ai.localModels.licenceOk"),
+      });
+      if (!ok) {
+        if (pullAbort.current === ctrl) pullAbort.current = null;
+        return;
+      }
+    }
     setPullMsg(null);
     setPull({ model, progress: null });
     try {
+      const [{ pullOllamaModel }, { getBaseUrl }] = await Promise.all([import("../ai/ollamaPull"), import("../ai/ollamaProvider")]);
       await pullOllamaModel(getBaseUrl(), model, {
         signal: ctrl.signal,
         onProgress: (p) => {

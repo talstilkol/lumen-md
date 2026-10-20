@@ -1,7 +1,9 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
 
 const unload = vi.hoisted(() => vi.fn(async () => {}));
+const unloadTf = vi.hoisted(() => vi.fn(async () => {}));
 vi.mock("../ai/webllmEngine", () => ({ unloadWebLlm: unload }));
+vi.mock("../ai/transformersEngine", () => ({ unloadTransformers: unloadTf }));
 
 import { cacheKindOf, clearModelCaches, modelCacheNames, storageEstimate } from "../ai/modelStorage";
 
@@ -19,6 +21,7 @@ function fakeCaches(names: string[]) {
 afterEach(() => {
   vi.unstubAllGlobals();
   unload.mockClear();
+  unloadTf.mockClear();
 });
 
 describe("model storage (plan 5.7)", () => {
@@ -30,15 +33,17 @@ describe("model storage (plan 5.7)", () => {
     expect(cacheKindOf("lumen-runtime")).toBeNull();
   });
 
-  it("clears one library's caches only, unloading web-llm first", async () => {
+  it("clears one library's caches only, unloading that library's worker first", async () => {
     const c = fakeCaches(["webllm/model", "webllm/config", "transformers-cache", "workbox-precache-v2"]);
     vi.stubGlobal("caches", c.api);
     expect(await modelCacheNames()).toEqual({ webllm: ["webllm/model", "webllm/config"], transformers: ["transformers-cache"] });
     expect(await clearModelCaches("webllm")).toBe(2);
     expect(unload).toHaveBeenCalledTimes(1);
+    expect(unloadTf).not.toHaveBeenCalled();
     expect([...c.live]).toEqual(["transformers-cache", "workbox-precache-v2"]);
     expect(await clearModelCaches("transformers")).toBe(1);
     expect(unload).toHaveBeenCalledTimes(1);
+    expect(unloadTf).toHaveBeenCalledTimes(1);
     expect([...c.live]).toEqual(["workbox-precache-v2"]);
   });
 
