@@ -1,7 +1,7 @@
 {
  "$comment": "The plan's single source (plan 0.6). Edit this file, then `npm run plan` regenerates the board in MASTER_PLAN.md and plan/board.html; CI (`npm run plan:check`) fails when they differ. A task's status is one line: phases[].tasks[].status.",
- "updated": "2026-10-20T20:05",
- "note": "**המצב ב-ג׳ 20.10 16:20:** היום: (א) **#256** — בדיקת ה-e2e של הפתק היומי (4.12) מול build ייצור תוקנה: מסננת את קובץ ה-`.crswap` הזמני של Chromium ועושה polling במקום המתנות קבועות; CI ירוק (Lighthouse רץ שם רק בגלל תווית ה-bisect). (ב) **#265** — בודק הסיום של 0.7: `npm run dod`, `dodGrandfathered` עם 60 המשימות שסומנו ✅ לפני 0.7, צעד CI ״Definition of done for every ✅ task״ ותבנית PR; 0.7 נשאר ⏳ עד שה-60 מקבלות `dod` אחרי המיזוג (המיפוי של 56 מהן לבדיקות יחידה — הערה ב-#265). (ג) **#259** — סף ה-LCP בשולחן העבודה הועלה 2800 → 3700 ms לפי החלטה 15.16 (20); Lighthouse שם עדיין אדום, עכשיו על FCP 1083 > 1000 ms — אותו שער מ-#190, אותה החלטה (15.16 (21)); התווית `lighthouse` על #190, #194, #256 היא ה-bisect שהראה שאין רגרסיה במחסנית. (ד) **#136** נסגר בלי מיזוג (#251 מכיל את התוכנית כנתונים). **15.1 (המיזוג) עדיין לא בוצע** — 116 PR-ים שלי + 14 dependabot, כולם mergeable; כל תאריך כאן מניח שהמיזוג קורה היום, ואבני הדרך זזות יום על כל יום שהוא מתאחר. 0.5, 0.11, 0.14, 0.20 ו-7.1 נמדדים רק אחרי המיזוג. **הביצוע ממשיך עם Opus 5.5** לפי ״מסירה למודל המבצע״ בסוף המסמך (אחרי נספח 15): ראשי המסלולים, סדר הביצוע לכל מסלול, כללי הסיום ומה צריך מטל.",
+ "updated": "2026-10-20T23:00",
+ "note": "**המצב ב-ג׳ 20.10 23:00:** סשן Opus 5.5 (16:42–23:00) — 4 מסלולים במקביל. PR-ים חדשים: #266 (0.16), #267 (4.11), #268 (4.16), #269 (3.3), #270 (הסרת הדומיין הישן מכל הקבצים; אין signaling מובנה), #271 (12.3), #272 (4.14), #273 (תיקון ה-flake של לוח הפקודות). #265: 2 ממצאי Codex P1 תוקנו. כולם CI ירוק חוץ מ-#271/#272 בעבודה. שום ✅ חדש לפני המיזוג: קובצי הבדיקה של המשימות לא נמצאים על chore/dod, ולכן הן ⏳ עד 15.1. אילוץ הסשן: אין npm registry — jsep, formula.js, EmbedPDF, QuickJS, knip, Argon2id לא נוספו (פירוט בכל PR).",
  "start": "2026-10-18T08:00",
  "buffer": 0.35,
  "ownerWindow": [
@@ -161,6 +161,12 @@
    "prs": "#265 (+ #256, #259)",
    "start": "ג׳ 20.10 12:30",
    "end": "ג׳ 20.10 16:20"
+  },
+  {
+   "part": "Opus 5.5: 4 מסלולים במקביל — 0.7 (review), 0.16, 4.16, 3.3, 4.11, 4.14, 12.3, 8.4, 3.4 בעבודה; הסרת הדומיין הישן; flake לוח הפקודות (עוד לא ממוזג)",
+   "prs": "#265–#273",
+   "start": "ג׳ 20.10 16:42",
+   "end": "ג׳ 20.10 23:00"
   }
  ],
  "dodComment": "Plan 0.7: a task marked ✅ / ✅* needs `dod` — the commands that prove it (scripts/dod.mjs runs them; plan:check refuses a ✅ without). dodGrandfathered = tasks marked ✅ before 0.7 existed; the list only shrinks: give a task its dod and take it off.",
@@ -1316,6 +1322,7 @@
       "sync"
      ],
      "priority": "P0",
+     "status": "⏳ #269 (pull = fetch + מיזוג תלת-כיווני, 0 מחיקות, פתק פתוח עם עריכות לא נדרס, clone ציבורי בלי טוקן, CORS proxy ניתן להגדרה בלי מארח מובנה, LFS מתועד; CI ירוק על 2e2c637e כולל data-safety חלק ד׳ ב-3 דפדפנים; 14 שרשורי review תוקנו, 1 P1 נדחה עם ראיה (פקודת cors-proxy) ונשאר לטל; ✅* אחרי המיזוג — proxy מתארח 15.4)",
      "owner": "15.4",
      "was": "3.3",
      "source": "G2, G3",
@@ -1330,6 +1337,10 @@
      "acceptance": [
       "data-safety חלק ד׳ ירוק",
       "0 קבצים נמחקים ב-pull"
+     ],
+     "dod": [
+      "npx vitest run src/__tests__/gitMerge.test.ts src/__tests__/gitPull.test.ts src/__tests__/gitSync.test.ts src/__tests__/gitProxy.test.ts src/__tests__/gitMirror.test.ts",
+      "npx playwright test e2e/data-safety.spec.ts -g \"git pull\""
      ]
     },
     {
@@ -1345,6 +1356,7 @@
       "sync"
      ],
      "priority": "P1",
+     "status": "⏳ feat/e2ee-sync-core (ליבת הסנכרון המוצפן על WebCrypto; Argon2id ו-age דורשים hash-wasm/@noble ב-lockfile על ה-Mac)",
      "new": true,
      "source": "G8, מחקר פערים #6",
      "steps": [
@@ -1737,6 +1749,7 @@
       "7.10"
      ],
      "priority": "P1",
+     "status": "⏳ #267 (מפרש נוסחאות סגור בלי eval — jsep/formula.js לא נוספו בלי registry; 30 נוסחאות זהב, fuzz, מגבלות לפי צעדים; עמודות מחושבות, תצוגת מפה עצלה, סוכן formulator; CI ירוק על 575b2ecf; 8 סבבי Codex — 1 P2 (כינויי קואורדינטות) לטל; ✅* אחרי המיזוג — formulator מול מודל אמיתי 15.3)",
      "new": true,
      "source": "מחקר פערים #4",
      "steps": [
@@ -1749,7 +1762,13 @@
      "acceptance": [
       "30 נוסחאות זהב נכונות",
       "0 eval בקוד (בדיקה)"
-     ]
+     ],
+     "dod": [
+      "npx vitest run src/__tests__/databaseFormula.test.ts",
+      "npx vitest run src/__tests__/databaseFormulaView.test.tsx",
+      "npx vitest run src/__tests__/agentFormulator.test.ts src/__tests__/agentEval.test.ts"
+     ],
+     "dodMock": true
     },
     {
      "id": "4.12",
@@ -1809,6 +1828,7 @@
       "1.1"
      ],
      "priority": "P1",
+     "status": "⏳ #272 (קורא PDF על pdf.js — EmbedPDF לא נוסף בלי registry; וירטואליזציה, חיפוש, OCR, הדגשות כ-W3C Web Annotation ב-file.pdf.md עם קישור #page; CI ירוק על 1c239f1e; סבב תיקונים רביעי בעבודה)",
      "new": true,
      "source": "מחקר פערים #8",
      "steps": [
@@ -1819,6 +1839,10 @@
      ],
      "acceptance": [
       "הדגשה → קישור שפותח את העמוד הנכון (e2e)"
+     ],
+     "dod": [
+      "npx vitest run src/__tests__/pdfAnnotations.test.ts",
+      "npx playwright test e2e/pdf-reader.spec.ts"
      ]
     },
     {
@@ -3109,6 +3133,7 @@
       "store"
      ],
      "priority": "P1",
+     "status": "⏳ perf/vault-worker (אינדקס ב-Web Worker, מתאר ותצוגה אינקרמנטליים; PR בדרך)",
      "was": "7.4",
      "source": "C4, C6, T39",
      "steps": [
@@ -3527,6 +3552,7 @@
       "editor"
      ],
      "priority": "P1",
+     "status": "⏳ (נעצר 20.10 — הסוכן נקטע באמצע; ניסוי ב-Chromium: iframe מבודד עם CSP סגור חוסם 15 ערוצי הוצאה; מחכה להחלטת טל איך להמשיך; QuickJS דורש התקנה על ה-Mac)",
      "was": "10.2",
      "source": "J2, M1",
      "steps": [
@@ -3682,6 +3708,7 @@
       "1.1"
      ],
      "priority": "P1",
+     "status": "⏳ #271 (A1–A9 עם בדיקה לכל סעיף; CI ו-review בעבודה)",
      "was": "11.3",
      "source": "A1–A9",
      "steps": [
