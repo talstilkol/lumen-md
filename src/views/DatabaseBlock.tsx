@@ -138,11 +138,12 @@ export default function DatabaseBlock({ source, meta }: Props) {
   const shown = useMemo(() => applyQuery(computed.rows, { where: tree, sort }), [computed, tree, sort]);
   const fields = useMemo(() => {
     if (!spec) return [];
-    if (spec.fields?.length) return spec.fields;
+    // With `fields:`, those — plus the columns added in the formula box, so "Add column" shows.
+    if (spec.fields?.length) return [...spec.fields, ...Object.keys(extraFormulas).filter((f) => !spec.fields!.includes(f))];
     // Without `fields:`: the notes' properties, then every formula column.
     const own = resolveFields(rows, spec).filter((f) => !formulas.some((x) => x.name === f));
     return [...own, ...formulas.map((f) => f.name)];
-  }, [rows, spec, formulas]);
+  }, [rows, spec, formulas, extraFormulas]);
   const allKeys = useMemo(() => {
     const keys = new Set(fields);
     for (const r of computed.rows) for (const k of Object.keys(r.fm)) keys.add(k);

@@ -158,6 +158,17 @@ describe("DatabaseBlock — formulas", () => {
     expect(screen.getByText(/formulas:/).textContent).toContain("sum: price + qty");
   });
 
+  it("with fields: in the spec, an added formula column still shows", async () => {
+    render(<DatabaseBlock source={"source: shop\ntype: item\nfields: [price]\n"} />);
+    await waitFor(() => expect(titles()).toHaveLength(3));
+    fireEvent.click(screen.getByTestId("database-formula-open"));
+    fireEvent.change(screen.getByTestId("database-formula-name"), { target: { value: "double" } });
+    fireEvent.change(screen.getByTestId("database-formula-input"), { target: { value: "qty * 2" } });
+    fireEvent.click(screen.getByTestId("database-formula-add"));
+    await waitFor(() => expect(screen.getAllByRole("columnheader").map((h) => h.textContent)).toEqual(["Title", "price", "double"]));
+    expect(screen.getAllByTestId("database-formula-cell").map((c) => c.textContent)).toEqual(["10", "4", "2"]);
+  });
+
   it("“Write with AI” runs the formulator agent with the database's properties", async () => {
     render(<DatabaseBlock source={"source: shop\ntype: item\n"} />);
     await waitFor(() => expect(titles()).toHaveLength(3));
