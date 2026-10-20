@@ -132,7 +132,13 @@ export default function DatabaseBlock({ source, meta }: Props) {
   const lastValid = useRef<FilterNode | null | undefined>(undefined);
   if (filter.ok) lastValid.current = filter.tree;
   const tree = filter.ok ? filter.tree : (lastValid.current ?? MATCH_NOTHING);
-  const formulas = useMemo<CompiledFormula[]>(() => compileFormulas({ ...(spec?.formulas ?? {}), ...extraFormulas }), [spec, extraFormulas]);
+  // Only a map merges with the formula box's columns: a scalar or a list under `formulas:` spread
+  // into an object would turn into columns named 0, 1, … (review #267); such a value is ignored.
+  const formulas = useMemo<CompiledFormula[]>(() => {
+    const own: unknown = spec?.formulas;
+    const isMap = !!own && typeof own === "object" && !Array.isArray(own);
+    return isMap ? compileFormulas({ ...(own as Record<string, unknown>), ...extraFormulas }) : [...compileFormulas(own), ...compileFormulas(extraFormulas)];
+  }, [spec, extraFormulas]);
   // Formula columns are computed before the filter, so `where:`, sort and group can use them.
   const computed = useMemo(() => applyFormulas(rows, formulas), [rows, formulas]);
   const shown = useMemo(() => applyQuery(computed.rows, { where: tree, sort }), [computed, tree, sort]);
@@ -154,12 +160,13 @@ export default function DatabaseBlock({ source, meta }: Props) {
     return [...keys];
   }, [computed, fields]);
   const formulaNames = useMemo(() => new Set(formulas.map((f) => f.name)), [formulas]);
-  /** The notes' own properties (not formula columns): what a new formula can read. */
+  /** What a new formula can read: the notes' properties and the formula columns already defined (review #267). */
   const propertyKeys = useMemo(() => {
     const keys = new Set<string>();
     for (const r of rows) for (const k of Object.keys(r.fm)) keys.add(k);
+    for (const f of formulas) keys.add(f.name);
     return [...keys];
-  }, [rows]);
+  }, [rows, formulas]);
 
   const rowsRef = useRef(rows);
   rowsRef.current = rows;
@@ -216,7 +223,7 @@ export default function DatabaseBlock({ source, meta }: Props) {
         </div>
       </div>
       <Toolbar where={where} setWhere={setWhere} filterError={filter.ok ? null : filter} sort={sort} setSort={setSort} groupBy={groupBy} setGroupBy={setGroupBy} keys={allKeys} />
-      <FormulaBox keys={propertyKeys} sample={rows[0]} taken={formulaNames} onAdd={(name, formula) => setExtraFormulas((x) => ({ ...x, [name]: formula }))} />
+      <FormulaBox keys={propertyKeys} sample={computed.rows[0]} taken={formulaNames} onAdd={(name, formula) => setExtraFormulas((x) => ({ ...x, [name]: formula }))} />
       {badFormulas.length > 0 && (
         <div role="alert" style={{ paddingInline: 8, paddingBlockStart: 4, color: "hsl(0 80% 60%)", fontSize: 11 }} data-testid="database-formula-spec-error">
           {badFormulas.map((f) => (

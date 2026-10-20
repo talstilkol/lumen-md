@@ -209,6 +209,24 @@ describe("DatabaseBlock — formulas", () => {
     expect(call.input.extra.fields.find((f) => f.name === "price")?.example).toBe("2");
   });
 
+  it("a formulas: value that isn't a map adds no columns (review #267)", async () => {
+    render(<DatabaseBlock source={"source: shop\ntype: item\nfields: [price]\nformulas: price * qty\n"} />);
+    await waitFor(() => expect(titles()).toHaveLength(3));
+    expect(screen.getAllByRole("columnheader").map((h) => h.textContent)).toEqual(["Title", "price"]);
+    expect(screen.queryAllByTestId("database-formula-cell")).toHaveLength(0);
+  });
+
+  it("“Write with AI” also offers the formula columns already defined (review #267)", async () => {
+    render(<DatabaseBlock source={"source: shop\ntype: item\nformulas:\n  total: price * qty\n"} />);
+    await waitFor(() => expect(titles()).toHaveLength(3));
+    fireEvent.click(screen.getByTestId("database-formula-open"));
+    fireEvent.change(screen.getByTestId("database-formula-input"), { target: { value: "סך הכל מעל 10" } });
+    fireEvent.click(screen.getByTestId("database-formula-ai"));
+    await waitFor(() => expect(agentCalls).toHaveLength(1));
+    const call = agentCalls[0] as { input: { extra: { fields: Array<{ name: string; example?: string }> } } };
+    expect(call.input.extra.fields.map((f) => f.name)).toEqual(expect.arrayContaining(["price", "qty", "total"]));
+  });
+
   it("editing a property recomputes its formulas and writes only the property", async () => {
     render(<DatabaseBlock source={SPEC} />);
     await waitFor(() => expect(titles()).toHaveLength(3));
