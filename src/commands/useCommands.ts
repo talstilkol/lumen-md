@@ -570,6 +570,39 @@ export function useCommands({
         action: () => window.dispatchEvent(new CustomEvent("lumen-open-today")),
       },
       {
+        id: "pdf.open",
+        label: t("cmd.pdf.open"),
+        hint: t("cmd.pdf.open.hint"),
+        icon: cmdIcons.FileText,
+        group: t("group.file"),
+        action: () => {
+          // Plan 4.14: the PDF is copied into the vault and opened in the
+          // reader; its highlights go to the companion note `<name>.pdf.md`.
+          if (!isOPFSAvailable()) {
+            showAiToast(t("pdf.noWorkspace"), "error");
+            return;
+          }
+          const input = document.createElement("input");
+          input.type = "file";
+          input.accept = ".pdf,application/pdf";
+          input.onchange = async () => {
+            const file = input.files?.[0];
+            if (!file) return;
+            try {
+              const ws = await import("../storage/workspace");
+              const { notifyWorkspaceChanged } = await import("../storage/workspaceEvents");
+              const path = await ws.uniqueWorkspaceName(/\.pdf$/i.test(file.name) ? file.name : `${file.name}.pdf`);
+              await ws.writeWorkspaceBlob(path, file);
+              notifyWorkspaceChanged();
+              window.dispatchEvent(new CustomEvent("lumen-open-file", { detail: { path } }));
+            } catch (e) {
+              showAiToast(t("pdf.failed", { error: (e as Error).message }), "error");
+            }
+          };
+          input.click();
+        },
+      },
+      {
         id: "view.calendar",
         label: t("cmd.view.calendar"),
         hint: t("cmd.view.calendar.hint"),

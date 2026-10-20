@@ -25,6 +25,8 @@ const AiDoctorPanel = lazy(() => import("./ui/AiDoctorPanel").then(m => ({ defau
 const FineTuneSettings = lazy(() => import("./ui/FineTuneSettings").then(m => ({ default: m.FineTuneSettings })));
 const VersionHistory = lazy(() => import("./ui/VersionHistory").then(m => ({ default: m.VersionHistory })));
 const MarkdownTableEditor = lazy(() => import("./ui/MarkdownTableEditor").then(m => ({ default: m.MarkdownTableEditor })));
+// PDF reader (plan 4.14): pdf.js and the reader load only when a PDF is opened.
+const PdfReader = lazy(() => import("./pdf/PdfReader").then(m => ({ default: m.PdfReader })));
 import { htmlToMarkdown } from "./storage/fileFormats";
 import { wirePluginAPI, registerPlugin, unregisterPlugin, wordCountPlugin } from "./plugins/pluginSystem";
 import { CommandPalette } from "./ui/CommandPalette";
@@ -130,6 +132,8 @@ export default function App() {
   }, [searchOpen]);
   const [findReplaceOpen, setFindReplaceOpen] = useState(false);
   const [graphOpen, setGraphOpen] = useState(false);
+  /** The PDF open in the reader, with the link fragment that opened it (`page=N&highlight=ID`). */
+  const [pdfView, setPdfView] = useState<{ path: string; fragment: string | null; seq: number } | null>(null);
   const [historyOpen, setHistoryOpen] = useState(false);
   const [tableEditorOpen, setTableEditorOpen] = useState(false);
   const [canvasOpen, setCanvasOpen] = useState(false);
@@ -426,8 +430,13 @@ export default function App() {
   // hub keeps the open path consistent (recents, dirty handling, etc).
   useEffect(() => {
     async function onOpen(e: Event) {
-      const detail = (e as CustomEvent<{ path: string; heading?: string }>).detail;
+      const detail = (e as CustomEvent<{ path: string; heading?: string; fragment?: string }>).detail;
       if (!detail?.path) return;
+      // A PDF opens in the reader, at the page / highlight the link names.
+      if (/\.pdf$/i.test(detail.path)) {
+        setPdfView((prev) => ({ path: detail.path, fragment: detail.fragment ?? null, seq: (prev?.seq ?? 0) + 1 }));
+        return;
+      }
       try {
         const { readWorkspaceFile } = await import("./storage/workspace");
         const content = await readWorkspaceFile(detail.path);
@@ -1039,6 +1048,29 @@ export default function App() {
             });
           }}
         />
+        </Suspense>
+      )}
+
+      {/* PDF reader overlay (plan 4.14) */}
+      {pdfView && (
+        <Suspense fallback={<div style={{ position: "fixed", inset: 0, zIndex: 9999, padding: "2rem", background: "hsl(var(--bg))", color: "hsl(var(--fg-muted))" }}>{t("loading.generic")}</div>}>
+          <ErrorBoundary fallback={
+            <div style={{ position: "fixed", inset: 0, zIndex: 9999, padding: "3rem", textAlign: "center", background: "hsl(var(--bg))", color: "hsl(0 80% 60%)" }}>
+              <strong>{t("pdf.crashed")}</strong>
+              <p><button className="icon-btn" style={{ width: "auto", padding: "4px 12px" }} onClick={() => setPdfView(null)}>{t("pdf.close")}</button></p>
+            </div>
+          }>
+            <PdfReader
+              path={pdfView.path}
+              fragment={pdfView.fragment}
+              openSeq={pdfView.seq}
+              onClose={() => setPdfView(null)}
+              onOpenNotes={(notePath) => {
+                setPdfView(null);
+                window.dispatchEvent(new CustomEvent("lumen-open-file", { detail: { path: notePath } }));
+              }}
+            />
+          </ErrorBoundary>
         </Suspense>
       )}
 

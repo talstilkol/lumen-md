@@ -278,6 +278,11 @@ export function FileTree({
 
   async function open(node: WorkspaceNode) {
     if (node.kind !== "file") return;
+    // A PDF opens in the reader (plan 4.14), not as text.
+    if (/\.pdf$/i.test(node.path)) {
+      window.dispatchEvent(new CustomEvent("lumen-open-file", { detail: { path: node.path } }));
+      return;
+    }
     try {
       const text = await readWorkspaceFile(node.path);
       onOpenFile(node.path, text);
