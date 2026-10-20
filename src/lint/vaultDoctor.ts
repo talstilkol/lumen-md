@@ -78,17 +78,19 @@ function blankFences(text: string): string {
   const cols: number[] = [];
   for (let i = 0; i < lines.length; i++) {
     const raw = lines[i];
-    // The item this line may continue: the innermost one open above it.
-    const item = cols.length ? cols[cols.length - 1] : -1;
     const own = unquote(raw).rest;
+    let col = -1;
     if (own.trim()) {
       const lead = /^ */.exec(own)![0].length;
-      const col = itemColumn(own);
+      col = itemColumn(own);
       // Unindented text (no marker) is a lazy line or ends the list.
       if (!lead && col < 0) cols.length = 0;
       else while (cols.length && cols[cols.length - 1] > lead) cols.pop();
-      if (col >= 0) cols.push(col);
     }
+    // The item this line continues: the innermost one still open at its
+    // indentation (after a dedent, the parent's).
+    const item = cols.length ? cols[cols.length - 1] : -1;
+    if (col >= 0) cols.push(col);
     if (itemCode) {
       // Blank lines and lines indented 4+ past the item's content column
       // stay in the code block; anything else ends it.
