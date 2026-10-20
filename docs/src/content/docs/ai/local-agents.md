@@ -88,7 +88,8 @@ needs no grant and asks no network consent:
   it, so nothing carries over from one call to the next. The worker has
   no DOM, and no way to reach your vault: IndexedDB, Cache Storage,
   `navigator.storage` (OPFS) and `BroadcastChannel` are removed before
-  the code runs. If the code needs a note, the agent passes the text in
+  the code runs, and so are the device APIs (`navigator.serial`, `usb`,
+  `hid`, `bluetooth`, `geolocation`, `mediaDevices`). If the code needs a note, the agent passes the text in
   `inputs` (a JSON object of at most 64 KB, which the code reads as the
   dict `inputs`).
 - There is no network. Once Pyodide has loaded its own files (from this

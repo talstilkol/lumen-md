@@ -12,7 +12,8 @@
  *    so `Object.getPrototypeOf(self).fetch` is gone too;
  *  - storage APIs (IndexedDB, Cache Storage, OPFS through
  *    `navigator.storage`, BroadcastChannel) are removed: the vault is not
- *    reachable, if the agent needs a note it passes the text in;
+ *    reachable, if the agent needs a note it passes the text in; so are
+ *    the device APIs (`navigator.serial`, `usb`, `hid`, …);
  *  - JS code from strings (`eval`, the Function constructors, string
  *    timers) is refused, so no new code can rebuild a way out;
  *  - in Python an audit hook refuses sockets and `urllib` requests, and
@@ -57,7 +58,12 @@ export const STORAGE_GLOBALS = [
   "fonts",
 ] as const;
 
-const NAVIGATOR_PROPS = ["storage", "locks", "serviceWorker", "sendBeacon"] as const;
+/**
+ * Navigator members that reach storage, other contexts or devices. A worker
+ * can see Web Serial / WebUSB / WebHID devices the user already authorised
+ * for the app; agent code must not read from or write to them.
+ */
+export const NAVIGATOR_PROPS = ["storage", "locks", "serviceWorker", "sendBeacon", "serial", "usb", "hid", "bluetooth", "geolocation", "mediaDevices", "xr"] as const;
 
 /** The first argument as a URL string, when it is one (for the report). */
 export function requestTarget(args: readonly unknown[]): string {

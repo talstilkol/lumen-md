@@ -48,6 +48,8 @@ interface Env {
   js: Record<string, unknown>;
   /** The reporter the prelude imports (`_lumen_sandbox.report`), as Python's stubs call it. */
   report: (api: string, target: string) => void;
+  /** `js.postMessage`: the code can post to the page like the worker does. */
+  post: (data: unknown) => void;
 }
 type Behaviour = (code: string, env: Env) => unknown | Promise<unknown>;
 
@@ -64,7 +66,7 @@ function fakeWorker(behaviour: Behaviour, opts: { bootMs?: number; bootError?: s
     WebSocket: class { constructor() { void scopeNetwork(); } },
     importScripts: () => void scopeNetwork(),
     indexedDB: { open: () => scopeNetwork() },
-    navigator: { storage: { getDirectory: () => scopeNetwork() } },
+    navigator: { storage: { getDirectory: () => scopeNetwork() }, serial: { requestPort: () => scopeNetwork() }, usb: { getDevices: () => scopeNetwork() }, hid: { getDevices: () => scopeNetwork() } },
     eval: () => scopeNetwork(),
     setTimeout: globalThis.setTimeout,
     Function,
@@ -88,6 +90,9 @@ function fakeWorker(behaviour: Behaviour, opts: { bootMs?: number; bootError?: s
         inputs: JSON.parse(String(globals.get("__lumen_inputs_json"))) as Record<string, unknown>,
         js: scope,
         report: (api, target) => sandboxModule!.report(api, target),
+        post: (data) => {
+          if (!w.terminated) w.onmessage?.({ data } as MessageEvent);
+        },
       });
     },
   };
@@ -259,6 +264,24 @@ describe("run_python: a run", () => {
     expect(workers[0].terminated).toBe(true);
   });
 
+  it("a second ready message from the code does not restart the time limit", async () => {
+    vi.useFakeTimers();
+    useBehaviour(async (_c, env) => {
+      // Code that posts {type: "ready"} before each deadline must still be stopped.
+      for (;;) {
+        await new Promise((r) => setTimeout(r, 400));
+        env.post({ type: "ready" });
+      }
+    });
+    const p = run({ code: "while True: post_ready()", timeoutMs: 1000 });
+    let settled = false;
+    void p.then(() => (settled = true));
+    await vi.advanceTimersByTimeAsync(999);
+    expect(settled).toBe(false);
+    await vi.advanceTimersByTimeAsync(2);
+    expect(await p).toMatchObject({ timedOut: true });
+  });
+
   it("caps the output (stdout + stderr + value share one budget)", async () => {
     useBehaviour((_c, env) => {
       for (let i = 0; i < 5_000; i++) env.print("0123456789");
@@ -316,6 +339,9 @@ describe("run_python: no network", () => {
       await attempt("Function", () => (js.Function as unknown as (s: string) => unknown)("return 1"));
       await attempt("vault", () => (js.indexedDB as unknown as { open: () => unknown }).open());
       await attempt("opfs", () => (js.navigator.storage as { getDirectory: () => unknown }).getDirectory());
+      await attempt("serial", () => (js.navigator.serial as { requestPort: () => unknown }).requestPort());
+      await attempt("usb", () => (js.navigator.usb as { getDevices: () => unknown }).getDevices());
+      await attempt("hid", () => (js.navigator.hid as { getDevices: () => unknown }).getDevices());
       // What the prelude's Python stubs do for pyfetch / micropip / urllib before raising.
       env.report("pyodide.http.pyfetch", "https://example.com/pyfetch");
       env.report("micropip.install", "https://example.com/pkg.whl");
@@ -334,6 +360,9 @@ describe("run_python: no network", () => {
       "Function:blocked",
       "vault:blocked",
       "opfs:blocked",
+      "serial:blocked",
+      "usb:blocked",
+      "hid:blocked",
     ]);
     expect(scopeNetwork).not.toHaveBeenCalled();
     expect(pageFetch).not.toHaveBeenCalled();

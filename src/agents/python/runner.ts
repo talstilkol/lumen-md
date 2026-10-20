@@ -65,6 +65,7 @@ export function runPython(opts: { code: string; inputsJson: string; timeoutMs: n
     }
     const blocked: PythonRunResult["blocked"] = [];
     let done = false;
+    let codeRunning = false;
     const finish = (settle: () => void) => {
       if (done) return;
       done = true;
@@ -109,6 +110,10 @@ export function runPython(opts: { code: string; inputsJson: string; timeoutMs: n
         recordBlockedRequest(ledgerUrl(target), "research", `${LEDGER_REASON} (${api})`);
       } else if (m.type === "ready") {
         // The time limit counts the agent's code, not the interpreter's boot.
+        // Once: the code can post messages too (js.postMessage), and a
+        // second "ready" must not restart the clock.
+        if (codeRunning) return;
+        codeRunning = true;
         clearTimeout(timer);
         timer = setTimeout(
           () => finish(() => resolve(empty({ timedOut: true, error: `Timed out after ${opts.timeoutMs} ms: the run was stopped (an endless loop, or too much work for the limit)` }))),
