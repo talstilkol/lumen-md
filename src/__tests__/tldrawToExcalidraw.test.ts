@@ -372,7 +372,7 @@ describe("tldraw → Excalidraw: details", () => {
 
   it("reads the legacy store snapshot and the .tldr records file (tldraw 2.x arrows)", () => {
     const legacy = conv("17-legacy-store").file.elements as ExTextElement[];
-    expect(el(legacy, "legacy-2-label").text).toBe("פתק ישן");
+    expect((el(legacy, "legacy-2-label") as ExTextElement).text).toBe("פתק ישן");
     const old = conv("18-tldr-v2").file.elements;
     const arrowEl = el(old, "oldarrow") as ExLinearElement;
     expect([arrowEl.x, arrowEl.y]).toEqual([160, 45]);

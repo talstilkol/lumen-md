@@ -12,7 +12,7 @@ it("probe: tldraw 4.5 record shapes", () => {
   const out: Record<string, unknown> = {};
   out.b64Vecs = typeof m.b64Vecs;
   if (m.b64Vecs && typeof m.b64Vecs === "object") {
-    out.b64src = Object.entries(m.b64Vecs as Record<string, unknown>).map(([k, v]) => `${k}=${String(v).slice(0, 2500)}`);
+    out.b64src = Object.entries(m.b64Vecs as Record<string, unknown>).map(([k, v]) => `${k}=${String(v).slice(0, 1500)}`);
     const enc = (m.b64Vecs as { encodePoints?: (p: unknown) => unknown }).encodePoints;
     if (enc) out.b64sample = enc([{ x: 0, y: 0, z: 0.5 }, { x: 10, y: 4, z: 0.5 }, { x: -3, y: 7.5, z: 0.25 }, { x: 1000.25, y: -2000.5, z: 1 }]);
   }
@@ -68,7 +68,14 @@ it("probe: tldraw 4.5 record shapes", () => {
   } catch (e) {
     out.migratedDraw = `ERR ${String(e)}`;
   }
-  // eslint-disable-next-line no-console
-  console.log("TLDRAW_PROBE " + JSON.stringify(out));
+  // CI job logs aren't readable from where this was written; annotations are.
+  delete out.schema;
+  const sv = store.schema.serialize() as { sequences?: Record<string, number> };
+  out.versions = Object.entries(sv.sequences ?? {}).filter(([k]) => /shape|binding|asset/.test(k)).map(([k, v]) => `${k.replace("com.tldraw.", "")}=${v}`).join(",");
+  const text = JSON.stringify(out);
+  const esc = (x: string) => x.replace(/%/g, "%25").replace(/\r/g, "%0D").replace(/\n/g, "%0A");
+  for (let i = 0, n = 0; i < text.length && n < 9; i += 3800, n++) {
+    process.stdout.write(`\n::warning title=probe${n}::${esc(text.slice(i, i + 3800))}\n`);
+  }
   expect(typeof tldraw.createTLStore).toBe("function");
 });
