@@ -393,7 +393,7 @@
      "title": "בודק סיום (DoD)",
      "branch": "chore/dod",
      "lane": "D",
-     "minutes": 90,
+     "minutes": 30,
      "dep": [
       "0.6"
      ],
@@ -417,7 +417,8 @@
      "dod": [
       "node scripts/dod.mjs --list",
       "npx vitest run src/__tests__/dod.test.ts"
-     ]
+     ],
+     "status": "⏳ #265 (הבודק והשער בפנים; 60 המשימות שסומנו ✅ לפני 0.7 מקבלות dod אחרי המיזוג 15.1 — עד אז קובצי הבדיקה שלהן בענפים אחרים בעץ)"
     },
     {
      "id": "0.8",
