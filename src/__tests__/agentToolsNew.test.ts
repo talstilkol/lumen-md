@@ -169,6 +169,7 @@ const SAMPLES: Record<string, { valid: Record<string, unknown>; invalid: Record<
   fetch_page: { valid: { url: "https://example.com/a" }, invalid: { url: "ftp://example.com" } },
   extract_quotes: { valid: { quotes: ["a quote"], url: "https://e.com" }, invalid: { quotes: [] } },
   csv_parse: { valid: { text: "a,b\n1,2", header: true }, invalid: { delimiter: ";;" } },
+  run_python: { valid: { code: "print(1)", inputs: { a: 1 }, timeoutMs: 1000 }, invalid: { code: "" } },
 };
 
 beforeEach(() => {

@@ -62,7 +62,7 @@ outcome — is in the run's trace.
 
 | Scope | Tools | What the runtime does |
 |---|---|---|
-| read | `read_file`, `list_files`, `file_exists`, `search_workspace`, `get_frontmatter`, `list_tags`, `get_document`, `get_selection`, `get_headings`, `validate_mermaid`, `validate_echarts`, `validate_json`, `git_diff`, `extract_quotes`, `csv_parse` | Always allowed. |
+| read | `read_file`, `list_files`, `file_exists`, `search_workspace`, `get_frontmatter`, `list_tags`, `get_document`, `get_selection`, `get_headings`, `validate_mermaid`, `validate_echarts`, `validate_json`, `git_diff`, `extract_quotes`, `csv_parse`, `run_python` | Always allowed. |
 | write | `write_file`, `set_frontmatter`, `replace_range` | Needs the run's `write` grant. The tool never writes: it **stages** the change (`src/agents/staging.ts`) and the run lists the staged ids. Only approving a change writes it — and only if the file or the text it was computed from has not changed since; otherwise it is marked as a conflict. A cancelled run withdraws what it staged. |
 | network | `search_web`, `fetch_page` | Needs the run's `network` grant. Both go through the research service (a local SearXNG or the research worker) — never a direct request to a web page — and send only the query or the page address. The agent writes that query itself, possibly from your notes, so text from them can be in it. Under **local only** every call asks you first: the prompt names the tool, the host and shows exactly what is sent, all of it, and the call then goes out with exactly the service and settings it named, and a one-time consent you gave to web research does not count for agents. Without your yes the call is refused before anything is sent, and the refusal is recorded. Every request is recorded in the privacy ledger, marked when it went out on consent. |
 
@@ -74,6 +74,47 @@ as they were. `extract_quotes` checks quotes word for word against a
 page read in the same run, a workspace file or the open document, and
 returns the exact text with its offsets. All tools stop when the run is
 cancelled.
+
+### `run_python`: Python on this device, offline
+
+`run_python` runs a short Python 3 program on the same self-hosted
+Pyodide as the `live-python` block (the standard library, without the
+modules Pyodide ships as separate packages, such as `ssl`, `sqlite3` and
+`lzma`, and without third-party packages) and returns
+what it printed (`stdout`, `stderr`), the value of its last expression
+(`result`) or the error, with the Pyodide frames removed from the
+traceback. It is a **read** tool, and it makes no requests at all, so it
+needs no grant and asks no network consent:
+
+- It runs in a Web Worker made for that one call and terminated after
+  it, so nothing carries over from one call to the next. The worker has
+  no DOM, and no way to reach your vault: IndexedDB, Cache Storage,
+  `navigator.storage` (OPFS), `navigator.storageBuckets` and
+  `BroadcastChannel` are removed before
+  the code runs, and so are the device APIs (`navigator.serial`, `usb`,
+  `hid`, `bluetooth`, `geolocation`, `mediaDevices`). If the code needs a note, the agent passes the text in
+  `inputs` (a JSON object of at most 64 KB, which the code reads as the
+  dict `inputs`).
+- There is no network. Once Pyodide has loaded its own files (from this
+  site, under `/pyodide/`), the worker replaces `fetch`, `XMLHttpRequest`,
+  `WebSocket`, `EventSource`, `importScripts`, nested workers and the rest
+  with stubs that fail, on the worker's global object and on its
+  prototypes. It also refuses JavaScript built from strings (`eval`, the
+  `Function` constructors, `setTimeout` with a string). In Python, an
+  audit hook refuses sockets and `urllib` requests, and `pyodide.http`
+  (`pyfetch`, `open_url`, `pyxhr`), `pyodide.code.run_js`, `micropip` and
+  `pyodide_js.loadPackage` fail. Each attempt is recorded in the
+  privacy ledger as blocked, with the host only
+  (up to 20 entries per call).
+- Limits: the code can run for 10 seconds (`timeoutMs`, up to 30 s,
+  starting once Pyodide is up), after which the worker is stopped and
+  the result says `timedOut`. Output (stdout, stderr and the value
+  together) is capped at 20,000 characters, with `truncated` set. The
+  code itself can be up to 20,000 characters. Cancelling the run stops
+  the worker.
+
+The first call loads Pyodide (about 10 MB, from this site, so it also
+works offline once the app is cached). Each call starts it again.
 
 ## AI settings
 
