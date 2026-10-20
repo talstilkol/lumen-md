@@ -33,26 +33,39 @@ export const isFullDone = (status = "") => status.startsWith("✅") && !status.s
 export const isMockDone = (status = "") => status.startsWith("✅*");
 
 /**
+ * The tasks that were ✅ before 0.7 existed, frozen here when 0.7 landed. The plan's
+ * `dodGrandfathered` must be a subset: this constant only ever loses ids (a reviewer
+ * sees any edit to it), so a new ✅ can't be exempted by adding its id to plan.json.
+ */
+export const DOD_GRANDFATHER_BASELINE = Object.freeze(["0.1", "0.2", "0.3", "0.4", "0.5", "0.8", "0.9", "0.10", "0.11", "0.12", "0.13", "0.14", "0.17", "0.18", "0.20", "0.21", "1.1", "1.2", "1.3", "1.4", "1.5", "1.6", "1.7", "1.9", "2.1", "2.2", "2.3", "2.4", "2.5", "2.7", "2.8", "3.1", "3.2", "3.6", "4.1", "4.2", "4.3", "4.4", "4.5", "4.6", "4.7", "4.8", "4.9", "4.10", "4.12", "5.1", "5.2", "5.3", "5.11", "6.0", "6.1", "7.1", "7.10", "8.5", "9.1", "9.2", "9.3", "9.7", "9.8", "14.1"]);
+
+/**
  * The rule plan:check enforces. Returns a list of problems (empty = fine).
  * - every ✅ / ✅* task has a non-empty `dod`, unless it is grandfathered
  *   (marked ✅ before 0.7 existed; the list only shrinks)
  * - a task with `dodMock: true` is ✅*, never plain ✅
- * - grandfathered ids exist and have no `dod` yet (remove the id when adding one). A
- *   grandfathered task that goes back to ⏳ is not an error: un-✅ing a task stays a
- *   one-line edit (plan 0.6); it can't come back to ✅ without a dod once it's off the list.
+ * - every grandfathered id is in DOD_GRANDFATHER_BASELINE — the list frozen when 0.7
+ *   landed — so the plan's list can only shrink, never grow (Codex P1 on #265)
+ * - grandfathered ids exist, are still ✅ / ✅*, and have no `dod` yet. Adding a dod, or
+ *   taking a task back to ⏳, means taking its id off the list in the same edit — so a
+ *   reopened task can't return to ✅ without a dod (Codex P1 on #265)
  * - every `dod` entry is a non-empty string
  * @param {any} plan
+ * @param {{ baseline?: readonly string[] }} [opts]
  * @returns {string[]}
  */
-export function checkDod(plan) {
+export function checkDod(plan, { baseline = DOD_GRANDFATHER_BASELINE } = {}) {
   const problems = [];
   const tasks = allTasks(plan);
   const byId = new Map(tasks.map((t) => [t.id, t]));
   const grand = new Set(plan.dodGrandfathered ?? []);
+  const frozen = new Set(baseline);
   for (const id of grand) {
     const t = byId.get(id);
     if (!t) problems.push(`dodGrandfathered: ${id} is not a task`);
     else if (t.dod?.length) problems.push(`dodGrandfathered: ${id} has a dod now — take it off the list`);
+    else if (!(t.status ?? "").startsWith("✅")) problems.push(`dodGrandfathered: ${id} is not done any more — take it off the list (it needs a dod to be ✅ again)`);
+    if (!frozen.has(id)) problems.push(`dodGrandfathered: ${id} was not ✅ before 0.7 — the list only shrinks; give the task a dod instead`);
   }
   for (const t of tasks) {
     const status = t.status ?? "";

@@ -13,6 +13,7 @@ import {
   runDod,
   markdown,
   allTasks,
+  DOD_GRANDFATHER_BASELINE,
   // @ts-expect-error — plain .mjs script without type declarations
 } from "../../scripts/dod.mjs";
 // @ts-expect-error — plain .mjs script without type declarations
@@ -56,9 +57,26 @@ describe("checkDod", () => {
   it("grandfathered tasks pass without a dod, and the list cannot hide anything", () => {
     expect(checkDod(mini([{ id: "1.1", status: "✅ #1" }], ["1.1"]))).toEqual([]);
     expect(checkDod(mini([], ["9.9"]))[0]).toMatch(/9\.9 is not a task/);
-    // Going back to ⏳ is a one-line status edit (plan 0.6), not an error.
-    expect(checkDod(mini([{ id: "1.1", status: "⏳ again" }], ["1.1"]))).toEqual([]);
     expect(checkDod(mini([{ id: "1.1", status: "✅ #1", dod: ["true"] }], ["1.1"]))[0]).toMatch(/has a dod now/);
+  });
+
+  it("the grandfather list only shrinks: an id outside the frozen baseline is refused (Codex P1, #265)", () => {
+    expect(DOD_GRANDFATHER_BASELINE).toHaveLength(60);
+    expect(Object.isFrozen(DOD_GRANDFATHER_BASELINE)).toBe(true);
+    // 4.11 was never ✅ before 0.7: marking it ✅ and hiding it on the list fails
+    const problems = checkDod(mini([{ id: "4.11", status: "✅ #300" }], ["4.11"]));
+    expect(problems).toHaveLength(1);
+    expect(problems[0]).toMatch(/4\.11 was not ✅ before 0\.7/);
+    expect(checkDod(mini([{ id: "x", status: "✅ #1" }], ["x"]), { baseline: ["x"] })).toEqual([]);
+    // every id the checked-in plan grandfathers is in the baseline
+    for (const id of plan().dodGrandfathered ?? []) expect(DOD_GRANDFATHER_BASELINE).toContain(id);
+  });
+
+  it("a reopened grandfathered task must leave the list, so it can't return to ✅ without a dod (Codex P1, #265)", () => {
+    expect(checkDod(mini([{ id: "1.1", status: "⏳ again" }], ["1.1"]))[0]).toMatch(/1\.1 is not done any more/);
+    // off the list: ⏳ is fine, and ✅ again needs a dod
+    expect(checkDod(mini([{ id: "1.1", status: "⏳ again" }]))).toEqual([]);
+    expect(checkDod(mini([{ id: "1.1", status: "✅ #2" }]))[0]).toMatch(/without a dod/);
   });
 
   it("a dod is a list of non-empty commands", () => {
