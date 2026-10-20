@@ -157,6 +157,11 @@ export function CommandPalette({ open, onClose, commands }: Props) {
       // focus next tick so React renders the input first
       setTimeout(() => inputRef.current?.focus(), 0);
     } else {
+      // Clear on close too: the reset above runs only after the reopened
+      // palette's first paint, which would show the last query for a frame
+      // (and a test reading the input then sees it — the Escape e2e flake).
+      setQuery("");
+      setActive(0);
       // Restore focus to whatever opened the palette.
       const prev = previousFocusRef.current as HTMLElement | null;
       prev?.focus?.();
