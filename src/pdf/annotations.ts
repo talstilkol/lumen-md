@@ -463,6 +463,17 @@ export function findAll(text: string, query: string): { start: number; end: numb
   return out;
 }
 
+/**
+ * The match to go to from match `current` (-1: none yet) in a list of
+ * `length`, one step forward (1) or back (-1), wrapping. With no current
+ * match, forward goes to the first and back to the last.
+ */
+export function nextMatchIndex(current: number, step: 1 | -1, length: number): number {
+  if (length <= 0) return -1;
+  if (current < 0 || current >= length) return step === 1 ? 0 : length - 1;
+  return (current + step + length) % length;
+}
+
 /* ─── Companion note ──────────────────────────────────────────────── */
 
 export const NOTE_START = "<!-- lumen:pdf-annotations:start -->";

@@ -10,6 +10,7 @@ import {
   describeAnnotation,
   encodeWikiPath,
   findAll,
+  nextMatchIndex,
   highlightLinkTarget,
   normalizeWithMap,
   pageFragment,
@@ -312,5 +313,20 @@ describe("wiki links to a PDF", () => {
     expect(resolveWikiTarget("bilingual.pdf", paths)).toBe("bilingual.pdf");
     expect(resolveWikiTarget("x.pdf", paths)).toBe("papers/x.pdf");
     expect(resolveWikiTarget("bilingual.pdf.md", paths)).toBe("bilingual.pdf.md");
+  });
+});
+
+describe("nextMatchIndex", () => {
+  it("goes forward to the first and back to the last match when none is current", () => {
+    expect(nextMatchIndex(-1, 1, 3)).toBe(0);
+    expect(nextMatchIndex(-1, -1, 3)).toBe(2);
+  });
+
+  it("steps and wraps around", () => {
+    expect(nextMatchIndex(0, -1, 3)).toBe(2);
+    expect(nextMatchIndex(2, 1, 3)).toBe(0);
+    expect(nextMatchIndex(1, 1, 3)).toBe(2);
+    expect(nextMatchIndex(5, -1, 3)).toBe(2);
+    expect(nextMatchIndex(-1, 1, 0)).toBe(-1);
   });
 });

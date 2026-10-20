@@ -27,6 +27,7 @@ import {
   createPdfAnnotation,
   describeAnnotation,
   findAll,
+  nextMatchIndex,
   parseAnnotationsNote,
   parsePdfFragment,
   shortId,
@@ -142,8 +143,21 @@ export function PdfReader({ path, fragment = null, openSeq = 0, onClose, onOpenN
   useEffect(() => {
     let cancelled = false;
     let closeDoc: (() => Promise<void>) | null = null;
+    // Another PDF in the same reader: nothing of the previous one carries over.
     setDoc(null);
     setError(null);
+    setSizes([]);
+    setCurrent(1);
+    setVisible(new Set([1]));
+    setAnnotations([]);
+    setFlash(null);
+    setOcrTexts({});
+    setQuery("");
+    setHits([]);
+    setHitIndex(-1);
+    setSearched(false);
+    setUnanchored(new Set());
+    searchSeq.current++;
     (async () => {
       const ws = await import("../storage/workspace");
       const blob = await ws.readWorkspaceBlob(path);
@@ -358,8 +372,7 @@ export function PdfReader({ path, fragment = null, openSeq = 0, onClose, onOpenN
         setHitIndex(-1);
         return;
       }
-      const next = step === 0 ? list.findIndex((h) => h.page >= current) : (hitIndex + step + list.length) % list.length;
-      const i = next === -1 ? 0 : next;
+      const i = step === 0 ? Math.max(0, list.findIndex((h) => h.page >= current)) : nextMatchIndex(hitIndex, step, list.length);
       setHitIndex(i);
       goToPage(list[i].page);
     },

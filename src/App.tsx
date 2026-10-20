@@ -1056,7 +1056,8 @@ export default function App() {
       {/* PDF reader overlay (plan 4.14) */}
       {pdfView && (
         <Suspense fallback={null}>
-          <PdfReader path={pdfView.path} fragment={pdfView.fragment} openSeq={pdfView.seq} onClose={() => setPdfView(null)} />
+          {/* A new PDF gets a fresh reader: no page, search or OCR state carries over. */}
+          <PdfReader key={pdfView.path} path={pdfView.path} fragment={pdfView.fragment} openSeq={pdfView.seq} onClose={() => setPdfView(null)} />
         </Suspense>
       )}
 

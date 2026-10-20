@@ -1,0 +1,99 @@
+/**
+ * Plan 4.14 — the PDF reader component, with pdf.js and the vault faked:
+ * opening a second PDF in the same reader starts from a clean slate (page,
+ * search, OCR), and Previous as the first search step goes to the last match.
+ */
+import { describe, it, expect, vi, afterEach } from "vitest";
+import { render, screen, fireEvent, waitFor, cleanup } from "@testing-library/react";
+
+/** Page texts per PDF ("" = a scanned page). Hoisted: the mocks below use it. */
+const DOCS = vi.hoisted((): Record<string, string[]> => ({
+  "a.pdf": ["", "alpha two", "alpha three"],
+  "b.pdf": ["bravo one", "bravo two"],
+}));
+
+vi.mock("../storage/workspace", () => ({
+  // The "bytes" of a fake PDF: one byte naming it (see openPdf below).
+  readWorkspaceBlob: vi.fn(async (path: string) => ({ arrayBuffer: async () => new Uint8Array([path === "a.pdf" ? 1 : 2]).buffer })),
+  readWorkspaceFile: vi.fn(async () => {
+    throw new Error("no note");
+  }),
+  writeWorkspaceFile: vi.fn(async () => undefined),
+}));
+
+vi.mock("../ai/ocr", () => ({
+  ocrImage: vi.fn(async () => ({ text: "recognised words", confidence: 90 })),
+}));
+
+vi.mock("../pdf/pdfjs", () => {
+  class TextLayer {
+    private texts: string[];
+    private container: HTMLElement;
+    constructor(o: { textContentSource: { items: { str?: string }[] }; container: HTMLElement }) {
+      this.texts = o.textContentSource.items.map((i) => i.str ?? "");
+      this.container = o.container;
+    }
+    async render() {
+      for (const s of this.texts) {
+        if (!s) continue;
+        const span = document.createElement("span");
+        span.textContent = s;
+        this.container.appendChild(span);
+      }
+    }
+    cancel() {}
+  }
+  const page = (text: string) => ({
+    getViewport: ({ scale }: { scale: number }) => ({ width: 400 * scale, height: 600 * scale, scale }),
+    getTextContent: async () => ({ items: [{ str: text, hasEOL: false }] }),
+    render: () => ({ promise: Promise.resolve(), cancel() {} }),
+    cleanup() {},
+  });
+  return {
+    loadPdfjs: async () => ({ TextLayer }),
+    openPdf: async (data: Uint8Array) => {
+      const texts = DOCS[data[0] === 1 ? "a.pdf" : "b.pdf"];
+      return { doc: { numPages: texts.length, getPage: async (n: number) => page(texts[n - 1]) }, close: async () => undefined };
+    },
+  };
+});
+
+import { PdfReader } from "../pdf/PdfReader";
+
+afterEach(() => cleanup());
+
+const reader = () => screen.getByTestId("pdf-reader");
+const props = { onClose: () => undefined, onOpenNotes: () => undefined };
+
+describe("PdfReader", () => {
+  it("opening a second PDF resets the page, the search and the OCR text", async () => {
+    const view = render(<PdfReader path="a.pdf" fragment="page=3" openSeq={1} {...props} />);
+    await waitFor(() => expect(reader().getAttribute("data-page-count")).toBe("3"));
+    await waitFor(() => expect(reader().getAttribute("data-current-page")).toBe("3"));
+
+    // Page 1 is scanned: recognise it.
+    fireEvent.click(await screen.findByRole("button", { name: "Recognise text (OCR)" }));
+    await waitFor(() => expect(document.querySelector('[data-pdf-text="ocr"]')?.textContent).toBe("recognised words"));
+
+    const search = screen.getByTestId("pdf-search") as HTMLInputElement;
+    fireEvent.change(search, { target: { value: "alpha" } });
+    fireEvent.submit(search.closest("form")!);
+    await waitFor(() => expect(screen.getByTestId("pdf-search-count").textContent).toMatch(/of 2/));
+
+    view.rerender(<PdfReader path="b.pdf" fragment={null} openSeq={2} {...props} />);
+    await waitFor(() => expect(reader().getAttribute("data-page-count")).toBe("2"));
+    expect(reader().getAttribute("data-current-page")).toBe("1");
+    expect((screen.getByTestId("pdf-search") as HTMLInputElement).value).toBe("");
+    expect(screen.getByTestId("pdf-search-count").textContent).toBe("");
+    expect(document.querySelector('[data-pdf-text="ocr"]')).toBeNull();
+  });
+
+  it("goes to the last match when Previous is the first search step", async () => {
+    render(<PdfReader path="a.pdf" openSeq={1} {...props} />);
+    await waitFor(() => expect(reader().getAttribute("data-page-count")).toBe("3"));
+    fireEvent.change(screen.getByTestId("pdf-search"), { target: { value: "alpha" } });
+    fireEvent.click(screen.getByRole("button", { name: "Previous match" }));
+    await waitFor(() => expect(screen.getByTestId("pdf-search-count").textContent).toBe("2 of 2"));
+    await waitFor(() => expect(reader().getAttribute("data-current-page")).toBe("3"));
+  });
+});
