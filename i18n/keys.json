@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-10-18T12:22:55.812Z",
+  "generated_at": "2026-10-20T15:07:05.383Z",
   "source": "src/i18n/index.ts (en bundle)",
-  "count": 1432,
+  "count": 1441,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -1804,6 +1804,55 @@
       "vars": [
         "error"
       ]
+    },
+    {
+      "key": "capture.title",
+      "en": "Quick capture",
+      "vars": []
+    },
+    {
+      "key": "capture.placeholder",
+      "en": "A thought, a task, a link",
+      "vars": []
+    },
+    {
+      "key": "capture.hint",
+      "en": "Enter: add · Shift+Enter: new line · Esc: close",
+      "vars": []
+    },
+    {
+      "key": "capture.save",
+      "en": "Add to inbox",
+      "vars": []
+    },
+    {
+      "key": "capture.openInbox",
+      "en": "Open inbox",
+      "vars": []
+    },
+    {
+      "key": "capture.saved",
+      "en": "Added to {path}",
+      "vars": [
+        "path"
+      ]
+    },
+    {
+      "key": "capture.failed",
+      "en": "Couldn't add to the inbox: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "capture.noWorkspace",
+      "en": "Quick capture needs the workspace, which this browser can't provide.",
+      "vars": []
+    },
+    {
+      "key": "capture.inboxHeading",
+      "en": "Inbox",
+      "vars": []
     },
     {
       "key": "cmd.ai.cancel",

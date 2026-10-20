@@ -41,6 +41,7 @@ function buildSections(mod: string) {
         { keys: `${mod}+Shift+S`, label: () => t("cmd.saveAs") },
         { keys: `${mod}+O`, label: () => t("cmd.open") },
         { keys: `${mod}+N`, label: () => t("cmd.new") },
+        { keys: mod === "⌘" ? "⌥⌘N" : "Ctrl+Alt+N", label: () => t("capture.title") },
       ],
     },
     {
