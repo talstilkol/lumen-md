@@ -173,7 +173,8 @@ describe("DatabaseBlock — formulas", () => {
     // `+` joins when a side is plain text ("x" + 1 → "x1").
     await waitFor(() => expect(screen.getAllByTestId("database-formula-cell").map((c) => c.textContent)).toEqual(["7", "9.5", "x1"]));
     // How to keep it: the spec line to add.
-    expect(screen.getByText(/formulas:/).textContent).toContain("sum: price + qty");
+    // Quoted YAML scalars, so a formula with ": " or " #" survives the copy (review #267).
+    expect(screen.getByText(/formulas:/).textContent).toContain('"sum": "price + qty"');
   });
 
   it("with fields: in the spec, an added formula column still shows", async () => {

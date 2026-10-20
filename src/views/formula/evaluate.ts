@@ -33,7 +33,8 @@ export type FormulaResult = { ok: true; value: FormulaValue } | { ok: false; err
 
 const own = (o: object, k: string) => Object.prototype.hasOwnProperty.call(o, k);
 
-function lookup(row: FormulaRow, path: string[]): FormulaValue {
+/** `guard` sees the raw frontmatter value before it is copied, so an oversized list fails before any copy (review #267). */
+function lookup(row: FormulaRow, path: string[], guard?: (raw: unknown) => void): FormulaValue {
   if (path[0] === "file" && path.length === 2 && row.file && own(row.file, path[1])) return row.file[path[1] as keyof NonNullable<FormulaRow["file"]>];
   let v: unknown = row.fm;
   for (const k of path) {
@@ -41,6 +42,7 @@ function lookup(row: FormulaRow, path: string[]): FormulaValue {
     if (!own(v, k)) return null;
     v = (v as Record<string, unknown>)[k];
   }
+  guard?.(v);
   return fromFrontmatter(v);
 }
 
@@ -110,6 +112,17 @@ class Interpreter {
     this.now = now;
   }
 
+  /**
+   * The raw YAML list sizes, checked (and paid for in steps) before the value
+   * is converted — the conversion copies every nested item (depth ≤ 4, as fromFrontmatter).
+   */
+  checkRaw(raw: unknown, at: number, depth = 0): void {
+    if (!Array.isArray(raw) || depth >= 4) return;
+    if (raw.length > this.budget.limits.maxList) throw new FormulaError("limit", `list longer than ${this.budget.limits.maxList} items`, at);
+    this.budget.tick(raw.length, at);
+    for (const x of raw) this.checkRaw(x, at, depth + 1);
+  }
+
   /** A value read from the note obeys the same text / list limits, and costs steps by its size. */
   checkValue(v: FormulaValue, at: number): FormulaValue {
     if (typeof v === "string") {
@@ -140,7 +153,7 @@ class Interpreter {
       case "null":
         return null;
       case "field":
-        return this.checkValue(lookup(this.row, n.path), n.at);
+        return this.checkValue(lookup(this.row, n.path, (raw) => this.checkRaw(raw, n.at)), n.at);
       case "list": {
         if (n.items.length > this.budget.limits.maxList) throw new FormulaError("limit", `list longer than ${this.budget.limits.maxList} items`, n.at);
         return n.items.map((x) => this.run(x));
@@ -215,7 +228,7 @@ class Interpreter {
       }
       case "prop": {
         const a = this.run(n.args[0]);
-        return this.checkValue(lookup(this.row, [toText(a)]), n.at);
+        return this.checkValue(lookup(this.row, [toText(a)], (raw) => this.checkRaw(raw, n.at)), n.at);
       }
     }
     if (!f.call) throw new FormulaError("unknown-function", `"${n.name}" cannot be called here`, n.at);

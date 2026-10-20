@@ -532,7 +532,8 @@ function FormulaBox({ keys, sample, taken, onAdd }: { keys: string[]; sample?: D
   const submit = () => {
     if (!canAdd) return;
     onAdd(cleanName, draft.trim());
-    setAdded(`${cleanName}: ${draft.trim()}`);
+    // Both sides as quoted YAML scalars: a formula with `: ` or ` #` must survive the copy (review #267).
+    setAdded(`${JSON.stringify(cleanName)}: ${JSON.stringify(draft.trim())}`);
     setName("");
     setDraft("");
     setOpen(false);

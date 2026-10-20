@@ -224,6 +224,13 @@ describe("formula — errors are typed and placed", () => {
     expect(errorOf('huge > 1', { fm: { huge: "1e999" } }).code).toBe("math");
   });
 
+  it("a frontmatter list over the limit fails before it is copied (review #267)", () => {
+    const big = Array.from({ length: 5000 }, (_, i) => [i, [i]]);
+    expect(errorOf("tags", { fm: { tags: big } }).code).toBe("limit");
+    expect(errorOf('prop("tags")', { fm: { tags: big } }).code).toBe("limit");
+    expect(value("tags")).toEqual(["fav", "sci-fi"]);
+  });
+
   it("keeps integers exact and rounds only fractional noise (review #267)", () => {
     expect(value("1000000000000001 + 0")).toBe(1000000000000001);
     expect(value("9007199254740991 + 0")).toBe(9007199254740991);
