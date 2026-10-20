@@ -39,6 +39,9 @@ jobs:
       - name: Code hygiene (no `as any` / console.log in production src)
         run: npm run hygiene
 
+      - name: Unused files (no new src/ file that nothing imports — plan 0.16)
+        run: npm run unused
+
       - name: Test
         run: npm run test
 
