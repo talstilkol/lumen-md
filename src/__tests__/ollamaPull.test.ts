@@ -33,6 +33,8 @@ describe("ollama pull (plan 5.7)", () => {
     expect(validOllamaName("qwen3:4b")).toBe(true);
     expect(validOllamaName("hf.co/dicta-il/DictaLM-3.0-1.7B-Thinking-GGUF")).toBe(true);
     expect(validOllamaName("hf.co/bartowski/Qwen3-4B-GGUF:Q4_K_M")).toBe(true);
+    expect(validOllamaName("localhost:5000/acme/model:latest")).toBe(true);
+    expect(validOllamaName("registry.example.com:443/acme/model")).toBe(true);
     expect(validOllamaName("bad name")).toBe(false);
     expect(validOllamaName("")).toBe(false);
     expect(validOllamaName("a;rm -rf")).toBe(false);

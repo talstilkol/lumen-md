@@ -58,9 +58,10 @@ export function createPullTracker(): (record: Record<string, unknown>) => PullPr
   };
 }
 
-/** A name `ollama pull` accepts: [host/][namespace/]model[:tag], no spaces. */
+/** A name `ollama pull` accepts: [host[:port]/][namespace/]model[:tag], no spaces. */
 export function validOllamaName(name: string): boolean {
-  return /^[A-Za-z0-9][A-Za-z0-9._\-/]*(:[A-Za-z0-9._\-]+)?$/.test(name.trim()) && name.trim().length <= 200;
+  const n = name.trim();
+  return /^(?:[A-Za-z0-9][A-Za-z0-9.-]*:\d{1,5}\/)?[A-Za-z0-9][A-Za-z0-9._\-/]*(:[A-Za-z0-9._\-]+)?$/.test(n) && n.length <= 200;
 }
 
 /**
