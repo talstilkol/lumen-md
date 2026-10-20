@@ -231,6 +231,16 @@ describe("formula — deterministic limits", () => {
     expect(errorOf('len(split(repeat("a,", 5000), ","))').code).toBe("limit");
   });
 
+  it("replace() checks the result size before building it", () => {
+    // ~400 million characters if built: refused up front.
+    expect(errorOf('replace(repeat("a", 20000), "a", repeat("b", 20000))').code).toBe("limit");
+    // Just at the limit is fine; one character over is not.
+    expect(value('len(replace(repeat("a", 10000), "a", "bb"))')).toBe(20000);
+    expect(errorOf('replace(repeat("a", 10000) & "c", "a", "bb")').code).toBe("limit");
+    // Shrinking never trips it.
+    expect(value('len(replace(repeat("ab", 10000), "ab", ""))')).toBe(0);
+  });
+
   it("values read from the note obey the same limits", () => {
     const big: FormulaRow = { fm: { list: Array.from({ length: 5000 }, (_, i) => i), text: "x".repeat(30000), nested: [Array.from({ length: 1990 }, () => "y".repeat(10))] } };
     expect(errorOf("list", big).code).toBe("limit");

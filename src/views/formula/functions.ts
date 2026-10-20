@@ -157,7 +157,15 @@ const BUILTINS: Record<string, FormulaFunction> = {
       const s = text(a, ctx);
       const find = text(b, ctx);
       if (!find) return s;
-      return result(s.split(find).join(text(c, ctx)), ctx);
+      const by = text(c, ctx);
+      const parts = s.split(find);
+      ctx.budget.tick(parts.length, ctx.at);
+      // Check the size of the result before building it: replace(repeat("a", 20000), "a", repeat("b", 20000))
+      // would otherwise allocate ~400 million characters first.
+      const projected = s.length + (parts.length - 1) * (by.length - find.length);
+      if (projected > ctx.budget.limits.maxText) throw new FormulaError("limit", `text longer than ${ctx.budget.limits.maxText} characters`, ctx.at);
+      ctx.budget.tick(Math.ceil(projected / 64), ctx.at);
+      return parts.join(by);
     },
   },
   slice: {
