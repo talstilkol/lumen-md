@@ -116,6 +116,7 @@
   "block.playground.state.running": "Exécution…",
   "block.playground.state.success": "En cours",
   "block.playground.state.error": "Erreur",
+  "block.playground.runnerBlocked": "La page d’aperçu ne s’est pas chargée. Cet hébergeur la bloque peut-être (Netlify n’est pas pris en charge pour le Web Playground ; utilisez Cloudflare Pages, Vercel ou l’image Docker).",
   "canvas.autoSaved": "Canevas · enregistrement automatique",
   "canvas.close": "Fermer",
   "canvas.dialogLabel": "Tableau blanc",

@@ -116,6 +116,7 @@
   "block.playground.state.running": "قيد التشغيل…",
   "block.playground.state.success": "يعمل",
   "block.playground.state.error": "خطأ",
+  "block.playground.runnerBlocked": "لم تُحمَّل صفحة المعاينة. قد تحجبها هذه الاستضافة (لا يدعم Netlify ‏Web Playground؛ استخدم Cloudflare Pages أو Vercel أو صورة Docker).",
   "canvas.autoSaved": "اللوحة · حُفظت تلقائيًا",
   "canvas.close": "إغلاق",
   "canvas.dialogLabel": "السبّورة",

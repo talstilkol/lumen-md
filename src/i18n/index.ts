@@ -689,6 +689,7 @@ const en: Strings = {
   "block.playground.state.running": "Running…",
   "block.playground.state.success": "Running",
   "block.playground.state.error": "Error",
+  "block.playground.runnerBlocked": "The preview page didn't load. This host may block it (Netlify isn't supported for the Web Playground; use Cloudflare Pages, Vercel or the Docker image).",
   // Toasts
   "toast.insertText.success": "Text inserted and converted",
   "toast.pasteText.success": "Text pasted and converted",

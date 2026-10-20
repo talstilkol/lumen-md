@@ -760,6 +760,7 @@
   "block.playground.state.running": "רץ…",
   "block.playground.state.success": "פועל",
   "block.playground.state.error": "שגיאה",
+  "block.playground.runnerBlocked": "דף התצוגה לא נטען. ייתכן שהאחסון הזה חוסם אותו (Web Playground לא נתמך ב-Netlify; השתמשו ב-Cloudflare Pages, ב-Vercel או בתמונת ה-Docker).",
   "templates.loadFailed": "לא ניתן לפתוח את התבנית: {error}",
   "ai.prompt.historyHint": "↑↓ היסטוריה",
   "ai.toast.ollamaUnavailable.title": "Ollama לא זמין",

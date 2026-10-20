@@ -116,6 +116,7 @@
   "block.playground.state.running": "実行中…",
   "block.playground.state.success": "実行中",
   "block.playground.state.error": "エラー",
+  "block.playground.runnerBlocked": "プレビューページを読み込めませんでした。このホストがブロックしている可能性があります（Web Playground は Netlify に対応していません。Cloudflare Pages、Vercel、または Docker イメージを使ってください）。",
   "canvas.autoSaved": "キャンバス · 自動保存済み",
   "canvas.close": "閉じる",
   "canvas.dialogLabel": "ホワイトボード",
