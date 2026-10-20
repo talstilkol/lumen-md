@@ -120,7 +120,10 @@ describe("captureToInbox", () => {
     await captureToInbox("bg", at);
     const want = "# Inbox\n- unsaved\n- [[journal/2026-10-20]] 09:05 bg\n";
     expect(await readWorkspaceFile(INBOX_PATH)).toBe(want);
-    expect(useAppStore.getState().openTabs.find((x) => x.workspaceName === INBOX_PATH)?.content).toBe(want);
+    const tab = useAppStore.getState().openTabs.find((x) => x.workspaceName === INBOX_PATH);
+    expect(tab?.content).toBe(want);
+    // Stays dirty: an older autosave may still land after this write (review #268).
+    expect(tab?.dirty).toBe(true);
     expect(useAppStore.getState().doc.name).toBe("other.md");
   });
 

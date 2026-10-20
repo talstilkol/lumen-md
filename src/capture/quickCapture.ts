@@ -117,13 +117,15 @@ async function capture(text: string, when: Date): Promise<string | null> {
     const typed = active && st.doc.content !== (base ?? "") && st.doc.content !== next;
     const doc = active ? { ...st.doc, content: typed ? appendEntry(st.doc.content, entry) : next, dirty: true } : st.doc;
     // A background inbox tab may have been edited too (the capture began while
-    // it was active, then the user typed and switched away — review #268):
-    // keep that text and add the entry to it, and leave it dirty.
+    // it was active, then the user typed and switched away): keep that text
+    // and add the entry to it. Either way it stays dirty, like the active one:
+    // an autosave of the old text may still be in flight and land after this
+    // write, and a clean tab would never write the entry again (review #268).
     const openTabs = st.openTabs.map((x) => {
       if (x.workspaceName !== INBOX_PATH) return x;
       if (active) return { ...x, content: doc.content, dirty: true };
       const edited = x.content !== (base ?? "") && x.content !== next;
-      return edited ? { ...x, content: appendEntry(x.content, entry), dirty: true } : { ...x, content: next, dirty: false };
+      return { ...x, content: edited ? appendEntry(x.content, entry) : next, dirty: true };
     });
     return { doc, openTabs };
   });
