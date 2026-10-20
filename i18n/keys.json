@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-10-18T03:18:44.238Z",
+  "generated_at": "2026-10-18T05:18:24.525Z",
   "source": "src/i18n/index.ts (en bundle)",
-  "count": 1411,
+  "count": 1421,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -1802,6 +1802,66 @@
     {
       "key": "research.consent.ok",
       "en": "Allow (once for all)",
+      "vars": []
+    },
+    {
+      "key": "agents.netConsent.title",
+      "en": "Let the agent go online?",
+      "vars": []
+    },
+    {
+      "key": "agents.netConsent.body",
+      "en": "The {tool} tool wants to send {sends} to {host}.",
+      "vars": [
+        "tool",
+        "sends",
+        "host"
+      ]
+    },
+    {
+      "key": "agents.netConsent.exact",
+      "en": "Exactly this is sent: “{value}”. The agent wrote it and may have included text from your notes.",
+      "vars": [
+        "value"
+      ]
+    },
+    {
+      "key": "agents.netConsent.ok",
+      "en": "Send this once",
+      "vars": []
+    },
+    {
+      "key": "agents.netConsent.what.search-query",
+      "en": "the search query",
+      "vars": []
+    },
+    {
+      "key": "agents.netConsent.what.page-address",
+      "en": "the page address",
+      "vars": []
+    },
+    {
+      "key": "agents.netConsent.what.tool-args",
+      "en": "the tool's arguments",
+      "vars": []
+    },
+    {
+      "key": "agents.netConsent.credential",
+      "en": "Your {provider} API key goes with it, so the service can search for you.",
+      "vars": [
+        "provider"
+      ]
+    },
+    {
+      "key": "agents.netConsent.visits",
+      "en": "The service then opens the page, so {host} sees a visit.",
+      "vars": [
+        "host"
+      ]
+    },
+    {
+      "key": "agents.netConsent.perCall",
+      "en": "Under the \"local only\" policy you are asked for every call.",
       "vars": []
     },
     {

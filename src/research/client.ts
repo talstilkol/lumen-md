@@ -111,10 +111,15 @@ export class ResearchUnavailableError extends Error {
   }
 }
 
-export async function extractPage(url: string, signal?: AbortSignal, endpoint = researchEndpoint()): Promise<ExtractedPage> {
+/**
+ * `fetchImpl`: the agent network tools pass the fetch their policy /
+ * consent gate opened (recorded in the privacy ledger); everyone else uses
+ * the page's fetch, which the ledger wraps at startup.
+ */
+export async function extractPage(url: string, signal?: AbortSignal, endpoint = researchEndpoint(), fetchImpl: typeof fetch = (i, o) => fetch(i, o)): Promise<ExtractedPage> {
   if (!endpoint) throw new ResearchUnavailableError();
   try {
-    const res = await fetch(`${endpoint}/extract?url=${encodeURIComponent(url)}`, { signal, headers: serviceHeaders() });
+    const res = await fetchImpl(`${endpoint}/extract?url=${encodeURIComponent(url)}`, { signal, headers: serviceHeaders() });
     const body = (await res.json().catch(() => ({}))) as Partial<ExtractedPage> & { error?: string };
     if (!res.ok && !body.status) return { url, finalUrl: url, status: 0, error: body.error ?? `service ${res.status}` };
     return { url, finalUrl: body.finalUrl ?? url, status: body.status ?? res.status, ...body } as ExtractedPage;
@@ -130,14 +135,18 @@ export async function searchWeb(
   count = 5,
   signal?: AbortSignal,
   endpoint = researchEndpoint(),
+  fetchImpl: typeof fetch = (i, o) => fetch(i, o),
 ): Promise<SearchHit[]> {
   if (!endpoint) throw new ResearchUnavailableError();
   if (settings.provider === "claude") throw new Error("Claude web search runs through the Anthropic API, not the research service.");
   if (!settings.key && !KEYLESS_PROVIDERS.includes(settings.provider)) throw new Error(`Add your ${settings.provider} API key (Research: Settings…).`);
-  const res = await fetch(`${endpoint}/search`, {
+  const res = await fetchImpl(`${endpoint}/search`, {
     method: "POST",
     headers: serviceHeaders({ "Content-Type": "application/json" }),
-    body: JSON.stringify({ provider: settings.provider, query, key: settings.key, count }),
+    // A keyless provider (SearXNG) never gets the key: one saved for Brave /
+    // Tavily stays in the store after a switch, and the consent prompt for a
+    // keyless search promises that only the query is sent.
+    body: JSON.stringify(KEYLESS_PROVIDERS.includes(settings.provider) ? { provider: settings.provider, query, count } : { provider: settings.provider, query, key: settings.key, count }),
     signal,
   });
   const body = (await res.json().catch(() => ({}))) as { results?: SearchHit[]; error?: string };

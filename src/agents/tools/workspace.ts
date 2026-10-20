@@ -1,18 +1,21 @@
 /**
  * Workspace tools — what an agent may do to the vault.
  *
- * Reads are always granted. `write_file` needs the `write` grant, which
- * the command that runs the agent gives explicitly (and the suggestions
- * panel shows), so a model can never write where the user did not expect.
+ * Reads are always granted. The write tools (`write_file`,
+ * `set_frontmatter`) need the `write` grant, which the command that runs
+ * the agent gives explicitly — and even then they never write: they stage
+ * the change (`../staging.ts`) and the user approves it.
  */
 
-import { defineTool, optionalNumber, requireString, safeWorkspacePath, ToolError } from "./define";
+import YAML from "yaml";
+import { defineTool, optionalNumber, requireString, safeWorkspacePath, stageChange, throwIfAborted, ToolError } from "./define";
+import { rangeContext } from "../staging";
+import type { StagedReceipt } from "../types";
 import {
   isOPFSAvailable,
   listWorkspace,
   readWorkspaceFile,
   workspaceHasFile,
-  writeWorkspaceFile,
 } from "../../storage/workspace";
 import { searchWorkspace } from "../../storage/workspaceIndex";
 import { extractFrontmatter } from "../../renderer/pipeline";
@@ -30,10 +33,11 @@ export const readFileTool = defineTool<{ path: string; maxChars?: number }, { pa
   parameters: {
     type: "object",
     properties: {
-      path: { type: "string", description: "Workspace path, e.g. notes/todo.md" },
-      maxChars: { type: "number" },
+      path: { type: "string", minLength: 1, description: "Workspace path, e.g. notes/todo.md" },
+      maxChars: { type: "number", minimum: 1 },
     },
     required: ["path"],
+    additionalProperties: false,
   },
   run: async (args) => {
     needWorkspace();
@@ -49,26 +53,44 @@ export const readFileTool = defineTool<{ path: string; maxChars?: number }, { pa
   },
 });
 
-export const writeFileTool = defineTool<{ path: string; content: string }, { path: string; bytes: number }>({
+async function readOrNull(path: string): Promise<string | null> {
+  if (!(await workspaceHasFile(path))) return null;
+  try {
+    return await readWorkspaceFile(path);
+  } catch {
+    return null;
+  }
+}
+
+export const writeFileTool = defineTool<{ path: string; content: string }, StagedReceipt>({
   name: "write_file",
-  description: "Create or overwrite a file in the workspace with the given content.",
+  description: "Propose creating or overwriting a workspace file with the given content. The write is staged for the user's approval.",
   parameters: {
     type: "object",
     properties: {
-      path: { type: "string" },
+      path: { type: "string", minLength: 1 },
       content: { type: "string" },
     },
     required: ["path", "content"],
+    additionalProperties: false,
   },
   scope: "write",
-  run: async (args) => {
+  run: async (args, ctx) => {
     needWorkspace();
     const path = safeWorkspacePath(requireString(args, "path"));
     // A missing or non-string body is a malformed call, never an empty file.
     if (typeof args.content !== "string") throw new ToolError("bad-args", '"content" must be a string');
     const content = args.content;
-    await writeWorkspaceFile(path, content);
-    return { path, bytes: content.length };
+    const before = await readOrNull(path);
+    throwIfAborted(ctx.signal);
+    if (before === content) throw new ToolError("bad-args", `${path} already has exactly this content`);
+    return stageChange(ctx, "write_file", {
+      kind: "file",
+      path,
+      before,
+      after: content,
+      summary: `${before === null ? "Create" : "Overwrite"} ${path} (${content.length} chars)`,
+    });
   },
 });
 
@@ -79,8 +101,9 @@ export const listFilesTool = defineTool<{ prefix?: string; limit?: number }, { f
     type: "object",
     properties: {
       prefix: { type: "string", description: "Folder prefix, e.g. projects/" },
-      limit: { type: "number" },
+      limit: { type: "number", minimum: 1 },
     },
+    additionalProperties: false,
   },
   run: async (args) => {
     needWorkspace();
@@ -97,7 +120,7 @@ export const listFilesTool = defineTool<{ prefix?: string; limit?: number }, { f
 export const fileExistsTool = defineTool<{ path: string }, { path: string; exists: boolean }>({
   name: "file_exists",
   description: "Check whether a workspace path exists.",
-  parameters: { type: "object", properties: { path: { type: "string" } }, required: ["path"] },
+  parameters: { type: "object", properties: { path: { type: "string", minLength: 1 } }, required: ["path"], additionalProperties: false },
   run: async (args) => {
     needWorkspace();
     const path = safeWorkspacePath(requireString(args, "path"));
@@ -113,8 +136,9 @@ export const searchWorkspaceTool = defineTool<
   description: "Full-text search over file names and contents. Returns the best matching files with a snippet.",
   parameters: {
     type: "object",
-    properties: { query: { type: "string" }, limit: { type: "number" } },
+    properties: { query: { type: "string", minLength: 1 }, limit: { type: "number", minimum: 1 } },
     required: ["query"],
+    additionalProperties: false,
   },
   run: async (args) => {
     needWorkspace();
@@ -128,7 +152,7 @@ export const searchWorkspaceTool = defineTool<
 export const getFrontmatterTool = defineTool<{ path: string }, { path: string; frontmatter: Record<string, unknown> | null }>({
   name: "get_frontmatter",
   description: "Return the YAML frontmatter of a file as JSON (null when it has none).",
-  parameters: { type: "object", properties: { path: { type: "string" } }, required: ["path"] },
+  parameters: { type: "object", properties: { path: { type: "string", minLength: 1 } }, required: ["path"], additionalProperties: false },
   run: async (args) => {
     needWorkspace();
     const path = safeWorkspacePath(requireString(args, "path"));
@@ -145,12 +169,102 @@ export const getFrontmatterTool = defineTool<{ path: string }, { path: string; f
 export const listTagsTool = defineTool<{ limit?: number }, { tags: Array<{ tag: string; count: number }> }>({
   name: "list_tags",
   description: "List the tags already used in the workspace, most used first.",
-  parameters: { type: "object", properties: { limit: { type: "number" } } },
+  parameters: { type: "object", properties: { limit: { type: "number", minimum: 1 } }, additionalProperties: false },
   run: async (args) => {
     needWorkspace();
     const limit = Math.min(300, Math.max(1, optionalNumber(args, "limit", 80)));
     const idx = await buildTagsIndex();
     return { tags: idx.buckets.slice(0, limit).map((b) => ({ tag: b.tag, count: b.count })) };
+  },
+});
+
+/** The frontmatter block at the top of a document: `---` … `---`, with its line break. */
+const FRONTMATTER = /^---[ \t]*\r?\n(?:([\s\S]*?)\r?\n)?---[ \t]*(?:\r?\n|$)/;
+
+/**
+ * `text` with its frontmatter changed: keys in `set` added or replaced,
+ * keys in `remove` deleted. Edited through the `yaml` Document API, so
+ * comments, key order and the style of untouched values survive (a flow
+ * list stays a flow list when it is replaced). An empty result drops the
+ * block. Throws when the existing frontmatter is not a valid YAML map.
+ */
+export function updateFrontmatter(
+  text: string,
+  set: Record<string, unknown>,
+  remove: string[] = [],
+): { text: string; block: { from: number; to: number; before: string; after: string }; frontmatter: Record<string, unknown> | null } {
+  const m = FRONTMATTER.exec(text);
+  const eol = m && /\r\n/.test(m[0]) ? "\r\n" : "\n";
+  const doc = YAML.parseDocument(m?.[1] ?? "");
+  if (doc.errors.length) throw new ToolError("failed", `The frontmatter is not valid YAML (${doc.errors[0].message.split("\n")[0]}); fix it before changing it`);
+  if (doc.contents !== null && !YAML.isMap(doc.contents)) throw new ToolError("failed", "The frontmatter is not a key/value map");
+  for (const [key, value] of Object.entries(set)) {
+    if (value === undefined) continue;
+    const prev = YAML.isMap(doc.contents) ? doc.get(key, true) : undefined;
+    const flow = (YAML.isSeq(prev) || YAML.isMap(prev)) && !!(prev as { flow?: boolean }).flow;
+    doc.set(key, value !== null && typeof value === "object" ? doc.createNode(value, { flow }) : value);
+  }
+  for (const key of remove) doc.delete(key);
+  const empty = !YAML.isMap(doc.contents) || doc.contents.items.length === 0;
+  const body = empty ? "" : doc.toString().replace(/\n/g, eol);
+  const after = empty ? "" : `---${eol}${body}---${eol}`;
+  const before = m?.[0] ?? "";
+  const value = empty ? null : (doc.toJS() as Record<string, unknown>);
+  return { text: after + text.slice(before.length), block: { from: 0, to: before.length, before, after }, frontmatter: value };
+}
+
+export const setFrontmatterTool = defineTool<
+  { path?: string; set?: Record<string, unknown>; remove?: string[] },
+  StagedReceipt & { frontmatter: Record<string, unknown> | null }
+>({
+  name: "set_frontmatter",
+  description:
+    "Propose changing the YAML frontmatter of the open document (no path) or of a workspace file: `set` adds or replaces keys, " +
+    "`remove` deletes keys. Comments and the other keys are kept. The change is staged for the user's approval.",
+  parameters: {
+    type: "object",
+    properties: {
+      path: { type: "string", minLength: 1, description: "Workspace path; default: the open document" },
+      set: { type: "object", description: "Keys to add or replace, with JSON values" },
+      remove: { type: "array", items: { type: "string", minLength: 1 }, maxItems: 50 },
+    },
+    additionalProperties: false,
+  },
+  scope: "write",
+  run: async (args, ctx) => {
+    const set = args.set && typeof args.set === "object" && !Array.isArray(args.set) ? args.set : {};
+    const remove = Array.isArray(args.remove) ? args.remove.filter((k): k is string => typeof k === "string" && !!k) : [];
+    if (!Object.keys(set).length && !remove.length) throw new ToolError("bad-args", 'Nothing to change: give "set" and/or "remove"');
+    if (Object.keys(set).some((k) => !k.trim())) throw new ToolError("bad-args", "Frontmatter keys must be non-empty");
+    const path = typeof args.path === "string" && args.path.trim() ? safeWorkspacePath(args.path) : null;
+    const onOpenDocument = ctx.document !== undefined && (!path || path === ctx.path);
+    if (onOpenDocument) {
+      const r = updateFrontmatter(ctx.document!, set, remove);
+      if (r.block.before === r.block.after) throw new ToolError("bad-args", "The frontmatter already has these values");
+      const receipt = stageChange(ctx, "set_frontmatter", {
+        kind: "range",
+        path: ctx.path ?? null,
+        ...r.block,
+        context: rangeContext(ctx.document!, r.block.from, r.block.to),
+        summary: `Frontmatter: ${[...Object.keys(set).map((k) => `set ${k}`), ...remove.map((k) => `remove ${k}`)].join(", ")}`,
+      });
+      return { ...receipt, frontmatter: r.frontmatter };
+    }
+    if (!path) throw new ToolError("bad-args", 'No document is open: pass "path"');
+    needWorkspace();
+    const before = await readOrNull(path);
+    if (before === null) throw new ToolError("not-found", `No such file: ${path}`);
+    throwIfAborted(ctx.signal);
+    const r = updateFrontmatter(before, set, remove);
+    if (r.text === before) throw new ToolError("bad-args", "The frontmatter already has these values");
+    const receipt = stageChange(ctx, "set_frontmatter", {
+      kind: "file",
+      path,
+      before,
+      after: r.text,
+      summary: `Frontmatter of ${path}: ${[...Object.keys(set).map((k) => `set ${k}`), ...remove.map((k) => `remove ${k}`)].join(", ")}`,
+    });
+    return { ...receipt, frontmatter: r.frontmatter };
   },
 });
 
@@ -161,5 +275,6 @@ export const WORKSPACE_TOOLS = [
   fileExistsTool,
   searchWorkspaceTool,
   getFrontmatterTool,
+  setFrontmatterTool,
   listTagsTool,
 ];
