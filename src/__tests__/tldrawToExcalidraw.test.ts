@@ -175,8 +175,9 @@ describe("tldraw → Excalidraw: 20 canvases without losing a shape (4.19)", () 
             e.type === "text" && e.customData?.tldrawId === r.id && e.id !== excalidrawIdOf(r.id),
         );
         expect(label, r.id).toBeDefined();
-        expect(label!.text.endsWith(text), `${label!.text} ⊇ ${text}`).toBe(true);
-        expect(label!.originalText).toBe(label!.text);
+        expect(label!.originalText.endsWith(text), `${label!.originalText} ⊇ ${text}`).toBe(true);
+        // Labels are stored wrapped to their container: only line breaks are added.
+        expect(label!.text.replace(/\s+/g, "")).toBe(label!.originalText.replace(/\s+/g, ""));
         if (hasBoundLabel(r)) expect(label!.containerId).toBe(excalidrawIdOf(r.id));
       }
     });
@@ -252,7 +253,7 @@ describe("tldraw → Excalidraw: details", () => {
 
   it("keeps Hebrew multi-line labels exactly and resolves RTL alignment", () => {
     const { elements } = conv("01-geo-basic").file;
-    expect((el(elements, "d1-label") as ExTextElement).text).toBe("החלטה?\nכן / לא");
+    expect((el(elements, "d1-label") as ExTextElement).originalText).toBe("החלטה?\nכן / לא");
     expect(el(elements, "r2").link).toBe("https://example.com");
     // tldraw's crossed fill names: "solid" = the colour's pale tint, "semi" = near-white.
     expect(el(elements, "r1")).toMatchObject({ backgroundColor: "#dce1f8", fillStyle: "solid" });
@@ -393,6 +394,28 @@ describe("tldraw → Excalidraw: details", () => {
     expect(r.warnings).toEqual([{ code: "extra-page", recordId: "page:two", recordType: "page", detail: "עמוד שני" }]);
   });
 
+  it("wraps labels to their container and honours a note's shrunk font size", () => {
+    const geoShape = (id: string, type: string, props: Record<string, unknown>) => ({
+      id: `shape:${id}`, typeName: "shape", type, x: 0, y: 0, rotation: 0, index: "a1", parentId: "page:p", props,
+    });
+    const long = "מילה ".repeat(30).trim();
+    const data = {
+      store: {
+        "page:p": { id: "page:p", typeName: "page", index: "a1", name: "P" },
+        "shape:g": geoShape("g", "geo", { w: 120, h: 80, geo: "rectangle", richText: richText(long) }),
+        "shape:n": geoShape("n", "note", { size: "m", fontSizeAdjustment: 14, richText: richText("x") }),
+        "shape:r": geoShape("r", "note", { size: "m", fontSizeAdjustment: 0.5, richText: richText("x") }),
+      },
+    };
+    const els = tldrawToExcalidraw(data).file.elements as ExTextElement[];
+    const label = el(els, "g-label") as ExTextElement;
+    expect(label.originalText).toBe(long);
+    expect(label.text.split("\n").length).toBeGreaterThan(3);
+    expect(label.width).toBeLessThanOrEqual(110);
+    expect((el(els, "n-label") as ExTextElement).fontSize).toBe(14);
+    expect((el(els, "r-label") as ExTextElement).fontSize).toBe(11);
+  });
+
   it("separates pages by their rotated extent", () => {
     const shape = (id: string, page: string, rotation: number) => ({
       id: `shape:${id}`, typeName: "shape", type: "geo", x: 0, y: 0, rotation, index: "a1", parentId: page,
@@ -413,14 +436,14 @@ describe("tldraw → Excalidraw: details", () => {
 
   it("reads the legacy store snapshot and the .tldr records file (tldraw 2.x arrows)", () => {
     const legacy = conv("17-legacy-store").file.elements as ExTextElement[];
-    expect((el(legacy, "legacy-2-label") as ExTextElement).text).toBe("פתק ישן");
+    expect((el(legacy, "legacy-2-label") as ExTextElement).originalText).toBe("פתק ישן");
     const old = conv("18-tldr-v2").file.elements;
     const arrowEl = el(old, "oldarrow") as ExLinearElement;
     expect([arrowEl.x, arrowEl.y]).toEqual([160, 45]);
     expect(arrowEl.points).toEqual([[0, 0], [240, 0]]);
     expect(arrowEl.startBinding?.elementId).toBe("old1");
     expect(arrowEl.endBinding?.elementId).toBe("old2");
-    expect((el(old, "old1-label") as ExTextElement).text).toBe("ישן");
+    expect((el(old, "old1-label") as ExTextElement).originalText).toBe("ישן");
     expect((el(old, "pointarrow") as ExLinearElement).points).toEqual([[0, 0], [150, 50]]);
   });
 
@@ -435,7 +458,7 @@ describe("tldraw → Excalidraw: details", () => {
     for (const id of ["vid", "emb", "bm", "custom"]) {
       expect(el(r.file.elements, id)).toMatchObject({ type: "rectangle", strokeStyle: "dashed" });
     }
-    expect((el(r.file.elements, "custom-label") as ExTextElement).text).toBe("[lumen-card] כרטיס");
+    expect((el(r.file.elements, "custom-label") as ExTextElement).originalText).toBe("[lumen-card] כרטיס");
     expect(el(r.file.elements, "emb").link).toBe("https://example.com/embed");
     expect(el(r.file.elements, "vid").link).toBe("https://example.com/clip.mp4");
   });

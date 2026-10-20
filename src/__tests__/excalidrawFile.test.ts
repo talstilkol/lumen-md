@@ -290,6 +290,21 @@ describe("OPFS canvas store", () => {
     expect(files.get("y.tldr")).toBe("backup");
   });
 
+  it("create rethrows a lookup failure other than not-found instead of overwriting", async () => {
+    const files = fakeOpfs();
+    const store = opfsCanvasStore()!;
+    await store.write("z.excalidraw", "keep");
+    const root = await navigator.storage.getDirectory();
+    const d = (await root.getDirectoryHandle("canvases")) as unknown as { getFileHandle: (n: string, o?: { create?: boolean }) => Promise<unknown> };
+    const real = d.getFileHandle.bind(d);
+    d.getFileHandle = async (n, o) => {
+      if (!o?.create) throw new DOMException("io", "InvalidStateError");
+      return real(n, o);
+    };
+    await expect(store.create("z.excalidraw", "new")).rejects.toThrow("io");
+    expect(files.get("z.excalidraw")).toBe("keep");
+  });
+
   it("is null without OPFS", () => {
     vi.stubGlobal("navigator", {});
     expect(opfsCanvasStore()).toBeNull();

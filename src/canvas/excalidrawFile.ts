@@ -130,7 +130,9 @@ export function opfsCanvasStore(): CanvasStore | null {
         let exists = true;
         try {
           await d.getFileHandle(fileName);
-        } catch {
+        } catch (err) {
+          // Only "not there" means absent; any other failure must not turn into an overwrite.
+          if (!(err instanceof DOMException && err.name === "NotFoundError")) throw err;
           exists = false;
         }
         if (exists) throw new CanvasFileExistsError(fileName);

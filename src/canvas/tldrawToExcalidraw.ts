@@ -470,6 +470,8 @@ function verticalAlign(v: unknown): ExVerticalAlign {
 }
 
 const LINE_HEIGHT = 1.25;
+/** Excalidraw's BOUND_TEXT_PADDING: the gap between a container and its text. */
+const BOUND_TEXT_PADDING = 5;
 
 const WIDE_CHAR = /[\u2E80-\u9FFF\uAC00-\uD7AF\uFF00-\uFFEF]/;
 
@@ -836,10 +838,14 @@ export function tldrawToExcalidraw(input: unknown, options: ConvertOptions = {})
       valign: ExVerticalAlign;
       containerId: string | null;
       strokeColor: string;
+      /** Fixed width: the text wraps at it and doesn't auto-resize. */
       width?: number;
+      /** Wrap at this width but keep auto-resizing (labels inside a container). */
+      wrapAt?: number;
     },
   ): ExTextElement => {
-    const shown = opts.width === undefined ? text : wrapText(text, fontSize, opts.width);
+    const wrapWidth = opts.width ?? opts.wrapAt;
+    const shown = wrapWidth === undefined ? text : wrapText(text, fontSize, wrapWidth);
     const m = measureText(shown, fontSize);
     const width = opts.width ?? m.width;
     const el: ExTextElement = {
@@ -890,6 +896,8 @@ export function tldrawToExcalidraw(input: unknown, options: ConvertOptions = {})
         valign: verticalAlign(p.verticalAlign),
         containerId: container.id,
         strokeColor: color(p.labelColor ?? p.color),
+        // Excalidraw stores bound text wrapped to the container's inner width.
+        wrapAt: Math.max(fontSize, container.width - 2 * BOUND_TEXT_PADDING),
       }),
     );
     container.boundElements = [...(container.boundElements ?? []), { id, type: "text" }];
@@ -956,6 +964,7 @@ export function tldrawToExcalidraw(input: unknown, options: ConvertOptions = {})
                 valign: "middle",
                 containerId: null,
                 strokeColor: color(p.labelColor ?? p.color),
+                wrapAt: Math.max(fontSize, w - 2 * BOUND_TEXT_PADDING),
               }),
             );
           }
@@ -997,7 +1006,11 @@ export function tldrawToExcalidraw(input: unknown, options: ConvertOptions = {})
           roughness: 0,
         };
         elements.push(el);
-        const fontSize = (LABEL_FONT_SIZES[str(p.size, "m")] ?? 22) * scale;
+        // fontSizeAdjustment: 0 = the preset; tldraw stores the shrunk-to-fit size
+        // (read as a ratio of the preset when it is at most 1).
+        const preset = LABEL_FONT_SIZES[str(p.size, "m")] ?? 22;
+        const adj = num(p.fontSizeAdjustment, 0);
+        const fontSize = (adj <= 0 ? preset : adj <= 1 ? preset * adj : adj) * scale;
         addLabel(el, r, ctx, shapeText(p), fontSize, {
           ...p,
           labelColor: p.labelColor ?? (p.color === "black" ? "white" : "black"),
@@ -1025,7 +1038,7 @@ export function tldrawToExcalidraw(input: unknown, options: ConvertOptions = {})
             ...(fixed ? { width: round(w) } : {}),
           }),
         );
-        placed.set(r.id, { t: ctx.t, w, h: m.height });
+        placed.set(r.id, { t: ctx.t, w, h });
         return;
       }
 
