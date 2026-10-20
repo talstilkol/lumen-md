@@ -37,6 +37,8 @@ import { IncrementalToc } from "../renderer/incrementalToc";
 import { IncrementalPreview, canRenderInBlocks } from "../renderer/incrementalPreview";
 import { extractToc, renderMarkdown } from "../renderer/pipeline";
 import { bestChunk, packVectors } from "../ai/semanticSearch";
+import { LARGE_VAULT_FOLDER_ROWS, visibleChildren } from "../ui/FileTree";
+import type { WorkspaceNode } from "../storage/workspace";
 
 const N = 10_000;
 
@@ -424,6 +426,19 @@ describe("the block-by-block preview", () => {
     let doc = "";
     for (let i = 0; i < 400; i++) doc += `## S${i}\n\nText ${i}.\n\n`;
     expect(await preview.render(doc, () => false, () => true)).toBeNull();
+  });
+});
+
+describe("the file tree of a flat large vault", () => {
+  it("shows every folder, the first notes of a folder and the active note — not 10,000 rows", () => {
+    const nodes: WorkspaceNode[] = [
+      { path: "a", name: "a", kind: "directory", children: [] },
+      ...Array.from({ length: N }, (_, i): WorkspaceNode => ({ path: `n${i}.md`, name: `n${i}.md`, kind: "file" })),
+    ];
+    const { shown, hidden } = visibleChildren(nodes, LARGE_VAULT_FOLDER_ROWS, "n9000.md");
+    expect(shown.map((n) => n.path)).toEqual(["a", ...Array.from({ length: LARGE_VAULT_FOLDER_ROWS }, (_, i) => `n${i}.md`), "n9000.md"]);
+    expect(hidden).toBe(N - LARGE_VAULT_FOLDER_ROWS - 1);
+    expect(visibleChildren(nodes, null, null)).toEqual({ shown: nodes, hidden: 0 });
   });
 });
 

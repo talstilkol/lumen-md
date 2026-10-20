@@ -40,6 +40,35 @@ import { workspaceTree } from "../storage/workspaceIndex";
  */
 export const LARGE_VAULT_FILES = 1000;
 
+/**
+ * In a large vault each folder (the root too) shows at most this many
+ * notes until the user asks for the rest: a flat vault of 10,000 notes has
+ * no folders to collapse.
+ */
+export const LARGE_VAULT_FOLDER_ROWS = 200;
+
+/**
+ * The children of one folder to render: every subfolder, the first
+ * `limit` files and the active file; `hidden` is how many files are left
+ * out. `limit` null: everything.
+ */
+export function visibleChildren(
+  nodes: WorkspaceNode[],
+  limit: number | null,
+  activePath: string | null,
+): { shown: WorkspaceNode[]; hidden: number } {
+  if (limit === null) return { shown: nodes, hidden: 0 };
+  let files = 0;
+  let hidden = 0;
+  const shown = nodes.filter((n) => {
+    if (n.kind === "directory") return true;
+    if (files++ < limit || n.path === activePath) return true;
+    hidden++;
+    return false;
+  });
+  return { shown, hidden };
+}
+
 /** Every folder path of `nodes`, and how many files they hold in all. */
 function folderStats(nodes: WorkspaceNode[], dirs: string[] = []): { dirs: string[]; files: number } {
   let files = 0;
@@ -84,6 +113,10 @@ export function FileTree({
   const inputRef = useRef<HTMLInputElement | null>(null);
   /** The large-vault collapse happens once, on the first listing. */
   const autoCollapsed = useRef(false);
+  /** Large vault: notes shown per folder until "show more" (null: all). */
+  const [fileLimit, setFileLimit] = useState<number | null>(null);
+  /** Folders ("" = the root) whose notes are all shown. */
+  const [shownAll, setShownAll] = useState<Set<string>>(new Set());
   const activePathRef = useRef(activePath);
   activePathRef.current = activePath;
 
@@ -219,6 +252,7 @@ export function FileTree({
           autoCollapsed.current = true;
           const { dirs, files } = folderStats(list);
           if (files > LARGE_VAULT_FILES) {
+            setFileLimit(LARGE_VAULT_FOLDER_ROWS);
             // The active note's folders stay open (the effect below).
             const keep = new Set<string>();
             const active = activePathRef.current;
@@ -596,8 +630,7 @@ export function FileTree({
             </div>
           )}
           <ul className="file-tree-list" role="tree">
-            {displayedTree.map((node) =>
-              renderNode(node, 0, {
+            {renderChildren(displayedTree, "", 0, {
                 activePath,
                 collapsed,
                 editingPath,
@@ -614,8 +647,10 @@ export function FileTree({
                 selectedPaths,
                 toggleSelect,
                 openContextMenu: (x, y, n) => setContextMenu({ x, y, node: n }),
-              }),
-            )}
+                fileLimit,
+                shownAll,
+                showAll: (dir) => setShownAll((prev) => new Set(prev).add(dir)),
+            })}
           </ul>
         </>
       )}
@@ -665,6 +700,31 @@ interface RenderCtx {
   selectedPaths: Set<string>;
   toggleSelect: (path: string) => void;
   openContextMenu: (x: number, y: number, node: WorkspaceNode) => void;
+  fileLimit: number | null;
+  shownAll: Set<string>;
+  showAll: (dir: string) => void;
+}
+
+/** The rows of one folder's children, with "show N more" when a large vault limits them. */
+function renderChildren(nodes: WorkspaceNode[], dir: string, depth: number, ctx: RenderCtx): React.ReactNode {
+  const { shown, hidden } = visibleChildren(nodes, ctx.shownAll.has(dir) ? null : ctx.fileLimit, ctx.activePath);
+  return (
+    <>
+      {shown.map((child) => renderNode(child, depth, ctx))}
+      {hidden > 0 && (
+        <li role="none">
+          <button
+            type="button"
+            className="file-tree-item file-tree-more"
+            style={{ paddingInlineStart: 6 + depth * 12 }}
+            onClick={() => ctx.showAll(dir)}
+          >
+            {t("tree.showMore", { count: String(hidden) })}
+          </button>
+        </li>
+      )}
+    </>
+  );
 }
 
 function renderNode(
@@ -821,7 +881,7 @@ function renderNode(
 
       {isFolder && isOpen && node.children && (
         <ul className="file-tree-list" role="group">
-          {node.children.map((child) => renderNode(child, depth + 1, ctx))}
+          {renderChildren(node.children, node.path, depth + 1, ctx)}
         </ul>
       )}
     </li>

@@ -1535,6 +1535,7 @@ const en: Strings = {
   "chart.reason.radar": "{k} measures for {n} items — compare their profiles.",
   "chart.reason.summary": "No category or time column — comparing column averages.",
   "chart.alternatives": "Chart suggestions",
+  "tree.showMore": "Show {count} more",
 };
 
 
