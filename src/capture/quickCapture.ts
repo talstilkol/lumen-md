@@ -91,7 +91,11 @@ let queue: Promise<unknown> = Promise.resolve();
  * inbox path, or null when the text was empty.
  */
 export function captureToInbox(text: string, when: Date = new Date()): Promise<string | null> {
-  const job = queue.then(() => capture(text, when));
+  // Across tabs and windows too (OPFS is shared by the origin): the Web Locks
+  // API serialises the read-append-write where it exists (review #268).
+  const locks = typeof navigator !== "undefined" ? navigator.locks : undefined;
+  const run = () => (locks ? locks.request("lumen-inbox-capture", () => capture(text, when)) : capture(text, when));
+  const job = queue.then(run);
   queue = job.catch(() => undefined);
   return job;
 }
@@ -150,6 +154,9 @@ export async function openInbox(): Promise<void> {
     }
   }
   s.openTab({ name: INBOX_PATH, content, workspaceName: INBOX_PATH });
+  // openTab loads the doc as clean; an open tab with unsaved edits must stay
+  // dirty, or switching away would mark them saved and they'd never be written (review #268).
+  if (tab?.dirty) useAppStore.setState((st) => (st.doc.workspaceName === INBOX_PATH ? { doc: { ...st.doc, dirty: true } } : {}));
 }
 
 /**

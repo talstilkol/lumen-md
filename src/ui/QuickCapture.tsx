@@ -33,6 +33,12 @@ export function QuickCapture({ open, onClose }: Props) {
 
   if (!open) return null;
 
+  // No closing while a save is pending: the save closes the box when it
+  // lands, and must not close a box reopened meanwhile (review #268).
+  const close = () => {
+    if (!busy) onClose();
+  };
+
   const save = async () => {
     if (busy || !text.trim()) return;
     if (!isOPFSAvailable()) {
@@ -60,7 +66,7 @@ export function QuickCapture({ open, onClose }: Props) {
       aria-labelledby="quick-capture-title"
       data-testid="quick-capture"
       onMouseDown={(e) => {
-        if (e.target === e.currentTarget) onClose();
+        if (e.target === e.currentTarget) close();
       }}
     >
       <div className="prompt-dialog" style={{ width: "min(480px, calc(100vw - 32px))" }}>
@@ -85,7 +91,7 @@ export function QuickCapture({ open, onClose }: Props) {
             if (e.key === "Escape") {
               e.preventDefault();
               e.stopPropagation();
-              onClose();
+              close();
             } else if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) {
               e.preventDefault();
               void save();
@@ -97,6 +103,7 @@ export function QuickCapture({ open, onClose }: Props) {
           <button
             type="button"
             className="prompt-btn prompt-btn-cancel"
+            disabled={busy}
             onClick={() => {
               onClose();
               void openInbox().catch((e: unknown) => toast.error(t("capture.failed", { error: e instanceof Error ? e.message : String(e) })));
@@ -104,7 +111,7 @@ export function QuickCapture({ open, onClose }: Props) {
           >
             {t("capture.openInbox")}
           </button>
-          <button type="button" className="prompt-btn prompt-btn-cancel" onClick={onClose}>
+          <button type="button" className="prompt-btn prompt-btn-cancel" disabled={busy} onClick={close}>
             {t("dialog.cancel")}
           </button>
           <button type="button" className="prompt-btn prompt-btn-ok" disabled={busy || !text.trim()} onClick={() => void save()}>
