@@ -19,7 +19,6 @@ vi.mock("@sentry/browser", () => {
     dedupeIntegration: () => ({ name: "Dedupe" }),
     makeFetchTransport: vi.fn(),
     captureException: vi.fn(),
-    captureMessage: vi.fn(),
     flush: vi.fn(async () => true),
   };
 });
@@ -114,8 +113,13 @@ describe("turned on with a DSN", () => {
     expect(typeof opts.transport).toBe("function");
 
     // beforeSend scrubs while consent holds, and drops everything once it is withdrawn.
-    const event = { type: undefined, message: 'Could not open "Diary"', request: { url: "https://lumen-md.vercel.app/#notes/diary.md" }, user: { id: "u1" } };
-    expect(opts.beforeSend(event)).toEqual({ type: undefined, message: "Could not open [redacted]" });
+    const event = {
+      type: undefined,
+      exception: { values: [{ type: "Error", value: "Could not open Diary" }] },
+      request: { url: "https://lumen-md.vercel.app/#notes/diary.md" },
+      user: { id: "u1" },
+    };
+    expect(opts.beforeSend(event)).toEqual({ type: undefined, exception: { values: [{ type: "Error" }] } });
     setMonitoringConsent(false);
     expect(opts.beforeSend(event)).toBeNull();
     expect(fetchSpy).not.toHaveBeenCalled();

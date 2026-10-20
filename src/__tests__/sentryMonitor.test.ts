@@ -41,8 +41,18 @@ afterEach(() => {
 describe("the ledger knows the error tracker", () => {
   it("classifies the DSN's host as monitoring, and nothing without a DSN", () => {
     expect(classify("https://o1.ingest.example.com/api/42/envelope/?sentry_key=publickey")).toMatchObject({ host: "o1.ingest.example.com", category: "monitoring" });
+    expect(classify("https://o1.ingest.example.com/other")).toBeNull();
     __setMonitoringDsnForTesting("");
     expect(classify("https://o1.ingest.example.com/api/42/envelope/")).toBeNull();
+  });
+
+  it("a tracker on the app's own origin claims only its report endpoint", () => {
+    // jsdom serves the page from http://localhost:<port>; a DSN may be http only on localhost.
+    const base = location.origin;
+    __setMonitoringDsnForTesting(`${base.replace("://", "://key@")}/glitchtip/7`);
+    expect(classify(`${base}/glitchtip/api/7/envelope/`)).toMatchObject({ category: "monitoring" });
+    expect(classify(`${base}/sales.csv`)).toBeNull();
+    expect(classify(`${base}/glitchtip/other`)).toBeNull();
   });
 });
 
@@ -50,7 +60,7 @@ describe("with consent and a DSN", () => {
   it("a report goes through the ledger with note content, titles and paths removed", async () => {
     setMonitoringConsent(true);
     expect(await initTelemetry()).toBe(true);
-    log.error("autosave failed for the body of my secret note", new Error('Could not write "יומן סודי" to notes/private/diary.md'), { text: "the body of my secret note" });
+    log.error("autosave failed for the body of my secret note", new Error('Could not write Quarterly plan "יומן סודי" to notes/private/diary.md'), { text: "the body of my secret note" });
     expect(await flushMonitoring()).toBe(true);
 
     expect(sent).toHaveLength(1);
@@ -58,10 +68,12 @@ describe("with consent and a DSN", () => {
     expect(url.host).toBe("o1.ingest.example.com");
     expect(url.pathname).toBe("/api/42/envelope/");
     const body = sent[0].body;
-    for (const secret of ["יומן", "סודי", "diary", "notes/private", "secret note", "breadcrumbs", "\"request\"", "\"user\""]) {
+    for (const secret of ["Quarterly plan", "יומן", "סודי", "diary", "notes/private", "secret note", "breadcrumbs", "\"request\"", "\"user\""]) {
       expect(body, secret).not.toContain(secret);
     }
-    expect(body).toContain("Could not write [redacted] to [path]");
+    // Unquoted user text in a message can't be told from the app's words: no message goes out at all.
+    expect(body).not.toContain("Could not write");
+    expect(body).toContain('"type":"Error"');
     expect(body).toContain('"infer_ip":"never"');
 
     expect(ledgerEntries()).toEqual([

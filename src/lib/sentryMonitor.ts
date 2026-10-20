@@ -7,8 +7,9 @@
  *   "monitoring"): listed in the ledger panel, refused under local-only.
  *   Sentry's own fetch transport would use a pristine `fetch` taken from an
  *   iframe and bypass the ledger, so the transport is given ours.
- * - `beforeSend` rebuilds each event from an allowlist (`scrubEvent`): no
- *   note content, titles, paths, request URL, user, breadcrumbs or tags.
+ * - `beforeSend` rebuilds each event from an allowlist (`scrubEvent`): the
+ *   error's class and stack frames only — no message text, request URL,
+ *   user, breadcrumbs or tags.
  * - No session replay, no tracing, no session tracking, no breadcrumbs:
  *   default integrations are off; only uncaught errors, error causes and
  *   de-duplication are kept.
@@ -17,7 +18,7 @@ import * as Sentry from "@sentry/browser";
 import { guardedFetch, MONITORING_REASON } from "../ai/privacyLedger";
 import { setErrorSink } from "./logger";
 import { getMonitoringConsent } from "./telemetry";
-import { scrubEvent, scrubText } from "./monitoringScrub";
+import { scrubEvent } from "./monitoringScrub";
 
 /** `fetch` for the transport: recorded by the ledger as monitoring traffic. */
 export const ledgerFetch: typeof fetch = (input, init) => {
@@ -50,10 +51,9 @@ export async function startSentry(dsn: string): Promise<void> {
   setErrorSink((...args: unknown[]) => {
     if (!getMonitoringConsent()) return;
     const err = args.find((a): a is Error => a instanceof Error);
-    const first = args[0];
-    // why: only the Error goes out; the logger's other arguments may hold note text
-    if (err) Sentry.captureException(err);
-    else if (typeof first === "string") Sentry.captureMessage(scrubText(first), "error");
+    // why: only an Error's class and stack go out (scrubEvent); the logger's other arguments may hold note text.
+    // A log.error without an Error is reported by where it was logged.
+    Sentry.captureException(err ?? new Error("log.error"));
   });
 }
 

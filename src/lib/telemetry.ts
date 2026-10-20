@@ -88,6 +88,19 @@ export function monitoringOrigin(): string | null {
   return dsn ? new URL(dsn).origin : null;
 }
 
+/**
+ * Where the tracker takes reports — `<origin>[/<prefix>]/api/<project>/` —
+ * or null without a DSN. The ledger matches this, not the whole origin: a
+ * self-hosted GlitchTip may share the app's own origin.
+ */
+export function monitoringEndpoint(): string | null {
+  const dsn = monitoringDsn();
+  if (!dsn) return null;
+  const u = new URL(dsn);
+  const m = /^(.*)\/(\d+)\/?$/.exec(u.pathname);
+  return m ? `${u.origin}${m[1]}/api/${m[2]}/` : null;
+}
+
 /** What `initTelemetry` loads; replaceable in tests. */
 export type MonitorLoader = () => Promise<{ startSentry: (dsn: string) => Promise<void> }>;
 

@@ -22,7 +22,7 @@ import { getBaseUrl } from "./ollamaProvider";
 import { grammarEndpoint } from "./grammar";
 import { researchEndpoint } from "../research/client";
 import { LEDGER_CHANNEL, type WorkerLedgerMessage } from "./workerLedger";
-import { monitoringOrigin } from "../lib/telemetry";
+import { monitoringEndpoint } from "../lib/telemetry";
 
 export type LedgerCategory = "cloud-ai" | "cloud-text" | "local-ai" | "model-download" | "static-asset" | "research" | "third-party" | "monitoring";
 
@@ -165,8 +165,9 @@ export function classify(url: string): { host: string; category: LedgerCategory;
   }
   if (u.protocol !== "http:" && u.protocol !== "https:") return null;
   const host = u.hostname.toLowerCase();
-  // why: the error tracker named by the build's DSN, wherever it is hosted (Sentry, a self-hosted GlitchTip)
-  if (u.origin === monitoringOrigin()) return { host, category: "monitoring", reason: MONITORING_REASON };
+  // why: the error tracker named by the build's DSN, wherever it is hosted (Sentry, a self-hosted GlitchTip, even this origin)
+  const tracker = monitoringEndpoint();
+  if (tracker && u.href.startsWith(tracker)) return { host, category: "monitoring", reason: MONITORING_REASON };
   for (const r of RULES) if (r.test(host, u.pathname)) return { host, category: r.category, reason: r.reason };
   let ollamaHost = "";
   try {

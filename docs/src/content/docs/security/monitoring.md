@@ -43,19 +43,18 @@ requests at all. An e2e test (`e2e/monitoring.spec.ts`) checks this.
 
 Each report is rebuilt from a short allowlist before it leaves the browser:
 
-- the error's type and message;
+- the error's class name, such as `TypeError`;
 - the script file names, functions and line numbers of the stack trace;
 - the app's release and environment, and the SDK's name and version.
 
-Inside the message, Lumen removes anything that could be yours:
-
-- quoted text: titles and note text are replaced with `[redacted]`;
-- file paths and file names: replaced with `[path]` or `[file]`;
-- words in any non-Latin script, such as a Hebrew title: replaced with `[text]`;
-- e-mail addresses and long numbers.
+The error **message is never sent**. A message can contain a title or a
+line of a note without quotes ("Failed to save Quarterly plan"), and no
+filter can reliably tell that apart from the app's own words. The stack
+trace shows where the error happened, and that is enough to find it.
 
 A report never includes:
 
+- the error message, or any text logged with it;
 - the page address;
 - breadcrumbs, such as clicks, console lines and requests;
 - user or IP data (`infer_ip: never`);
@@ -104,6 +103,6 @@ the reports.
   אפשר לראות אותם בחלון "מדדי ריצה" בשורת המצב.
 - **דוחות שגיאה כבויים כברירת מחדל.** הם נשלחים רק אם הפעלת אותם בכפתור
   "טלמטריה" בשורת המצב, **וגם** הבנייה כוללת כתובת DSN של שירות מעקב.
-- לפני השליחה מוסרים מהדוח תוכן הפתקים, הכותרות והנתיבים. אין הקלטת
-  סשן ואין מידע מזהה.
+- הדוח כולל רק את סוג השגיאה ואת מיקומה בקוד. הודעת השגיאה, תוכן הפתקים,
+  הכותרות והנתיבים לא נשלחים. אין הקלטת סשן ואין מידע מזהה.
 - כל דוח מופיע ביומן הפרטיות. במדיניות "מקומי בלבד" הדוחות נחסמים.

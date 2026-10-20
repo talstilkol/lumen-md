@@ -55,7 +55,7 @@ When you join a collab room:
 
 ## Telemetry
 
-Off by default. Error reports are sent only when **you** turn them on with the Telemetry pill in the status bar **and** the build sets `VITE_SENTRY_DSN` (Sentry or a self-hosted GlitchTip). Without both, the Sentry SDK is never loaded. Before a report leaves the browser, note text, titles, file paths, the page address, breadcrumbs and user data are removed. There is no session replay. Every report is listed in the privacy ledger, and the local-only policy blocks them. Web vitals are measured on your device and never sent. Details: `docs/src/content/docs/security/monitoring.md`.
+Off by default. Error reports are sent only when **you** turn them on with the Telemetry pill in the status bar **and** the build sets `VITE_SENTRY_DSN` (Sentry or a self-hosted GlitchTip). Without both, the Sentry SDK is never loaded. A report carries only the error's class name and where in the code it happened. The error message, note text, titles, file paths, the page address, breadcrumbs and user data are never sent. There is no session replay. Every report is listed in the privacy ledger, and the local-only policy blocks them. Web vitals are measured on your device and never sent. Details: `docs/src/content/docs/security/monitoring.md`.
 
 ## GDPR / CCPA rights
 

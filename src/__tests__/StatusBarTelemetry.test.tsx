@@ -19,7 +19,7 @@ vi.mock("../lib/telemetry", () => ({
     consent.set.push(v);
   },
   initTelemetry: vi.fn(),
-  monitoringOrigin: () => null,
+  monitoringEndpoint: () => null,
 }));
 
 describe("StatusBar — Telemetry toggle pill", () => {
