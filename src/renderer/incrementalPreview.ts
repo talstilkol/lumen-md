@@ -67,9 +67,14 @@ export function withoutCode(markdown: string): string {
       fence = m[1];
       continue;
     }
-    out.push(line.replace(/(`+)(?:(?!\1)[\s\S])*?\1/g, ""));
+    out.push(line);
   }
-  return out.join("\n");
+  // Code spans may cross lines, not paragraphs.
+  return out
+    .join("\n")
+    .split(/(\n[ \t]*\n)/)
+    .map((chunk) => chunk.replace(/(`+)(?:(?!\1)[\s\S])*?\1/g, ""))
+    .join("");
 }
 
 interface Rendered {

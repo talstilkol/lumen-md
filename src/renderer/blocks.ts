@@ -114,6 +114,8 @@ export function splitBlocks(text: string, opts: SplitOptions = {}, from = 0, sto
   let fence: { ch: string; len: number } | null = null;
   let math = 0;
   let rawEnd: RegExp | null = null;
+  /** The HTML block 1–5 is a `<pre>` (whose content is elements, not opaque text). */
+  let rawPre = false;
   /** In an HTML block 6 / 7: Markdown resumes after the next blank line. */
   let htmlToBlank = false;
   /** The previous line is paragraph text (an HTML block 7 cannot interrupt it). */
@@ -187,7 +189,8 @@ export function splitBlocks(text: string, opts: SplitOptions = {}, from = 0, sto
       paragraph = false;
     } else if (rawEnd) {
       if (rawEnd.test(line)) rawEnd = null;
-      trackHtml(line);
+      // Comments, <script>, <style>… are opaque; only <pre> holds elements.
+      if (rawPre) trackHtml(line);
       paragraph = false;
     } else if (BLANK.test(line)) {
       if (hasContent) blankSeen = true;
@@ -318,6 +321,7 @@ export function splitBlocks(text: string, opts: SplitOptions = {}, from = 0, sto
       } else if (raw) {
         // HTML block 1–5, unless it ends on this line (`<!-- x -->`).
         if (!raw[1].test(line.replace(raw[0], ""))) rawEnd = raw[1];
+        rawPre = /^ {0,3}<pre(?:[\s>]|$)/i.test(line);
       } else if (HTML_BLOCK_6.test(line) || (!paragraph && HTML_BLOCK_7.test(line))) {
         htmlToBlank = true;
       } else {
@@ -326,7 +330,7 @@ export function splitBlocks(text: string, opts: SplitOptions = {}, from = 0, sto
         if (c?.[2]) containers.push(c[1].length);
         else if (c && containers.length && c[1].length >= containers[containers.length - 1]) containers.pop();
       }
-      trackHtml(line);
+      if (!raw || rawPre) trackHtml(line);
       paragraph = !opened && !NOT_PARAGRAPH.test(line) && !(paragraph && SETEXT_EQ.test(line));
     }
     pos = next;

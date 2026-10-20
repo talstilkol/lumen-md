@@ -365,6 +365,15 @@ describe("blocks and the incremental outline", () => {
     ]);
   });
 
+  it("an HTML comment is opaque: a tag inside it opens nothing", () => {
+    const doc = "<!--\n<div>\n-->\n\n# Next\n\nText\n";
+    expect(splitBlocks(doc, { preview: true }).blocks.map((b) => doc.slice(b.start, b.end))).toEqual([
+      "<!--\n<div>\n-->\n\n",
+      "# Next\n\n",
+      "Text\n",
+    ]);
+  });
+
   it("an opening tag spread over lines keeps its element in one preview block", () => {
     const doc = '<div\nclass="note">\n\nInside\n\n</div>\n\nAfter\n';
     expect(splitBlocks(doc, { preview: true }).blocks.map((b) => doc.slice(b.start, b.end))).toEqual([
@@ -441,6 +450,9 @@ describe("the block-by-block preview", () => {
     // …but not when they are only examples in code.
     expect(canRenderInBlocks("Use `[^1]` and `{++x++}`.\n\n```md\n[x]: https://example.com\nText[^1]\n```\n")).toBe(true);
     expect(withoutCode("a `b` c\n```\nd\n```\ne")).toBe("a  c\ne");
+    // A code span may cross a line, not a paragraph.
+    expect(withoutCode("a `x\n[^1] y` b")).toBe("a  b");
+    expect(withoutCode("a `x\n\n[^1] y` b")).toBe("a `x\n\n[^1] y` b");
   });
 
   it("stops when a newer text is on its way", async () => {
