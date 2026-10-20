@@ -18,7 +18,7 @@
 import { Decoration, EditorView, ViewPlugin } from "@codemirror/view";
 import type { DecorationSet, ViewUpdate } from "@codemirror/view";
 import type { Extension, Range } from "@codemirror/state";
-import { checkGrammar, type GrammarMatch } from "../ai/grammar";
+import { checkGrammar, grammarLanguage, type GrammarMatch } from "../ai/grammar";
 import { log } from "../lib/logger";
 /** Mirrors hebrewSpellService.DICTIONARY_CHANGED_EVENT (that module loads lazily). */
 const DICTIONARY_CHANGED_EVENT = "lumen-hebrew-dictionary-changed";
@@ -71,7 +71,7 @@ function decorationsFor(
 export interface GrammarOptions {
   /** Pushed when matches change so a status pill / panel can update. */
   onMatches?: (matches: GrammarMatch[]) => void;
-  /** Override the language tag passed to LanguageTool. Default `en-US`. */
+  /** Override the language tag passed to LanguageTool. Default: detected locally (plan 6.5), else `en-US`. */
   language?: string;
 }
 
@@ -124,7 +124,7 @@ export function grammarExtension(opts: GrammarOptions = {}): Extension {
         try {
           // Hebrew paragraphs: local rules + dictionary; the rest: LanguageTool (T28).
           const { checkByLanguage } = await import("../ai/hebrewSpellService");
-          const matches = await checkByLanguage(text, (latin) => checkGrammar(latin, opts.language ?? "en-US"));
+          const matches = await checkByLanguage(text, async (latin) => checkGrammar(latin, opts.language ?? (await grammarLanguage(latin))));
           // Doc may have shifted while the request was in flight — clamp
           // by current length when we paint.
           const len = view.state.doc.length;

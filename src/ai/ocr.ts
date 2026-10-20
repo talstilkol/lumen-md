@@ -13,6 +13,19 @@ export interface OcrResult {
   text: string;
   /** Mean word confidence, 0–100. */
   confidence: number;
+  /** The text's language, identified on this device (plan 6.5): BCP-47 primary tag, "und" when unclear. */
+  lang?: string;
+}
+
+/** The language of recognised text; "und" when there is too little to tell. */
+async function ocrLanguage(text: string): Promise<string> {
+  try {
+    const { detectLanguage } = await import("../text/langId");
+    const g = detectLanguage(text);
+    return g.confident || g.script === "hebrew" ? g.lang : "und";
+  } catch {
+    return "und";
+  }
 }
 
 const LANG_PATH = "https://raw.githubusercontent.com/tesseract-ocr/tessdata_fast/main";
@@ -88,7 +101,8 @@ export function ocrImage(image: Blob | HTMLCanvasElement | OffscreenCanvas): Pro
     const w = await getWorker();
     try {
       const { data } = await w.recognize(image as Blob);
-      return { text: cleanOcrText(data.text), confidence: data.confidence };
+      const text = cleanOcrText(data.text);
+      return { text, confidence: data.confidence, lang: await ocrLanguage(text) };
     } finally {
       scheduleIdle();
     }

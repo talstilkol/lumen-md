@@ -6,7 +6,7 @@ export { taskerAgent, checkTaskList, type TaskerInput } from "./tasker";
 export { committerAgent, cleanSubject, CONVENTIONAL, type CommitterInput } from "./committer";
 export { diagrammerAgent, type DiagrammerInput } from "./diagrammer";
 export { charterAgent, type CharterInput, type EChartsOption } from "./charter";
-export { translatorAgent, chunkMarkdown, checkTranslation, expectedScript, fencedBlocks, urlsOf, CHUNK_CHARS, type TranslatorInput } from "./translator";
+export { translatorAgent, chunkMarkdown, checkTranslation, checkTranslationLanguage, expectedScript, fencedBlocks, urlsOf, CHUNK_CHARS, type TranslatorInput } from "./translator";
 export { writerAgent, templaterAgent, type WriterInput, type TemplaterInput } from "./writer";
 export { builderSpecAgent, builderFileAgent, checkGeneratedFile, type ProductSpecOut } from "./builder";
 export { proofreaderAgent, locateIssues, PROOF_MAX_CHARS, type ProofreaderInput, type ProofIssue } from "./proofreader";
