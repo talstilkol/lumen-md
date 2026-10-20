@@ -247,14 +247,20 @@ describe("e2ee sync: anchoring a new device (pairing / TOFU)", () => {
     expect(await d.sync.freshness()).toMatchObject({ source: "confirmed", verified: true });
   });
 
-  it("pairing late raises the anchor and never lowers it", async () => {
+  it("an older pairing code never lowers the anchor nor verifies a newer state", async () => {
     const { provider, a, name, old } = await replaySetup();
     const staleCode = await a.sync.pairingCode(); // made when A was at counter 4 …
     a.files.set("d.md", "fifth");
     await a.sync.sync(); // counter 5
     const d = await joinVault("D", provider);
     await d.sync.sync(); // TOFU at 5
-    await d.sync.pair(staleCode); // … does not move D back to 4
+    // … cannot vouch for D's newer state: refused, D stays unverified at 5.
+    await expect(d.sync.pair(staleCode)).rejects.toThrow(/older than this device/);
+    expect(await d.sync.freshness()).toEqual({ source: "unverified", verified: false, counter: 5 });
+    await d.sync.pair(await a.sync.pairingCode()); // a current code does
+    expect(await d.sync.freshness()).toEqual({ source: "paired", verified: true, counter: 5 });
+    // A verified device ignores an old code: nothing changes.
+    await d.sync.pair(staleCode);
     expect(await d.sync.freshness()).toEqual({ source: "paired", verified: true, counter: 5 });
     provider.objects.set(name, { ...old, etag: "replayed" });
     await expect(d.sync.sync()).rejects.toBeInstanceOf(RollbackError);
@@ -808,6 +814,25 @@ describe("e2ee sync: folders and files trading places", () => {
     expect(await vault.readText("a")).toBe("a is now a file");
     expect(await vault.readText("c/d.md")).toBe("c is now a folder");
     expect((await vault.stat("c"))?.kind).toBe("directory");
+  });
+
+  it("a deep folder replaced by a file clears the empty folders left behind", async () => {
+    const provider = memoryProvider();
+    const { keys, anchor } = await createVault(provider, PASSPHRASE, { pbkdf2Iterations: TEST_ITERATIONS });
+    const vault = createMemoryBackend();
+    await vault.write("a/b/c.md", "deep");
+    await vault.write("a/b/d/e.md", "deeper");
+    const v = new E2eeSync({ provider, keys, local: vaultLocalFiles(vault), store: memoryStateStore() });
+    await v.markCreated(anchor);
+    await v.sync();
+    const m = device("M", provider, keys);
+    await m.sync.sync();
+    m.files.delete("a/b/c.md");
+    m.files.delete("a/b/d/e.md");
+    m.files.set("a", "now a file");
+    await m.sync.sync();
+    expect((await v.sync()).held).toEqual([]);
+    expect(await vault.readText("a")).toBe("now a file");
   });
 
   it("holds a file whose place is taken by a folder that still has notes, without stopping the round", async () => {

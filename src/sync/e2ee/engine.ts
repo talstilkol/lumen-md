@@ -236,7 +236,14 @@ export class E2eeSync {
       if (s.anchor && got.counter === s.anchor.counter && got.digest !== s.anchor.digest) {
         throw new RollbackError(s.anchor.counter, got.counter, "fork");
       }
-      if (!s.anchor || got.counter > s.anchor.counter) s.anchor = got;
+      if (s.anchor && got.counter < s.anchor.counter) {
+        // An older code cannot vouch for the newer state this device already
+        // holds (it may come from another fork). A verified device needs
+        // nothing from it; an unverified one needs a current code.
+        if (s.freshness !== "unverified") return;
+        throw new PairingError("The pairing code is older than this device's state; create a new code on the other device");
+      }
+      s.anchor = got;
       s.freshness = "paired";
       await this.save();
     });

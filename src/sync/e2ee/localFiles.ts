@@ -134,6 +134,13 @@ export function vaultLocalFiles(backend: VaultBackend): LocalFiles {
    * round holds that path and reports it in `SyncResult.held`, and every
    * other path still syncs.
    */
+  /** True when any file is left anywhere under folder `dir`. */
+  const hasFiles = async (dir: string): Promise<boolean> => {
+    for (const e of await backend.list(dir)) {
+      if (e.kind === "file" || (await hasFiles(e.path))) return true;
+    }
+    return false;
+  };
   const soft = async <T>(fallback: T, fn: () => Promise<T>): Promise<T> => {
     try {
       return await fn();
@@ -168,9 +175,10 @@ export function vaultLocalFiles(backend: VaultBackend): LocalFiles {
       return soft(false, async () => {
         const st = await backend.stat(path);
         if (st?.kind === "directory") {
-          // A folder where the file goes: only an empty one (left behind by
-          // deleting its files) may make way; anything else is held.
-          if (expect !== null || (await backend.list(path)).length > 0) return false;
+          // A folder where the file goes: only one with no file left anywhere
+          // inside (empty folders left behind by deleting its files) may make
+          // way; anything else is held.
+          if (expect !== null || (await hasFiles(path))) return false;
           await backend.remove(path);
         } else if ((await hashAt(path)) !== expect) {
           return false;
