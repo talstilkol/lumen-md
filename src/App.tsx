@@ -41,6 +41,7 @@ const SearchDialog = lazy(() =>
 );
 import { AiToastContainer, showAiToast } from "./ui/AiToast";
 import { AiSuggestionsPanel } from "./ui/AiSuggestionsPanel";
+import { ledgerEntries } from "./ai/privacyLedger";
 import { MobileKeyboardBar } from "./ui/MobileKeyboardBar";
 import { TagsPanel } from "./ui/TagsPanel";
 // CommentsPanel pulls collab/comments.ts → yjs; comments only exist inside a
@@ -190,6 +191,14 @@ export default function App() {
     // the test suite needs.
     (window as unknown as { __lumen?: unknown }).__lumen = {
       htmlToMarkdown,
+      // live-exec spec: a read-scope agent tool called as the runtime
+      // calls it (run_python), and the privacy ledger it reports to.
+      agentTool: async (name: string, args: Record<string, unknown>) => {
+        const tool = (await import("./agents/tools")).getTool(name);
+        if (!tool || tool.scope !== "read") throw new Error(`No read-scope agent tool "${name}"`);
+        return tool.run(args, { grants: new Set(["read" as const]) });
+      },
+      ledger: () => ledgerEntries(),
     };
     return () => {
       unregisterPlugin(wordCountPlugin.id);
