@@ -215,4 +215,18 @@ describe("PdfReader", () => {
       throw new DOMException("a.pdf.md not found", "NotFoundError");
     });
   });
+
+  it("doesn't open for editing when the highlights block is broken", async () => {
+    const read = vi.mocked(ws.readWorkspaceFile);
+    const write = vi.mocked(ws.writeWorkspaceFile);
+    write.mockClear();
+    read.mockImplementation(async () => "<!-- lumen:pdf-annotations:start -->\n\n```json lumen-pdf-annotations\n[{\"type\": \"Annota\n```\n\n<!-- lumen:pdf-annotations:end -->\n");
+    render(<PdfReader path="a.pdf" openSeq={1} onClose={() => undefined} onOpenNotes={() => undefined} />);
+    expect((await screen.findByRole("alert")).textContent).toContain("a.pdf.md");
+    expect(reader().getAttribute("data-ready")).toBeNull();
+    expect(write).not.toHaveBeenCalled();
+    read.mockImplementation(async () => {
+      throw new DOMException("a.pdf.md not found", "NotFoundError");
+    });
+  });
 });

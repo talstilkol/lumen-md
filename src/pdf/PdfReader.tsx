@@ -28,7 +28,7 @@ import {
   describeAnnotation,
   findAll,
   nextMatchIndex,
-  parseAnnotationsNote,
+  readAnnotationsNote,
   parsePdfFragment,
   shortId,
   unionRect,
@@ -216,7 +216,11 @@ export function PdfReader({ path, fragment = null, openSeq = 0, onClose, onOpenN
       // Every annotation in the companion note is this PDF's: after the folder
       // was moved or renamed, `source` still names the old path — adopt them
       // (the next write stores the new path) instead of dropping them.
-      setAnnotations(parseAnnotationsNote(note).map((a) => (a.target.source === path ? a : { ...a, target: { ...a.target, source: path } })));
+      const saved = readAnnotationsNote(note);
+      // A highlights block that can't be read whole: open nothing for editing,
+      // or the next save would replace it with only the new highlights.
+      if (!saved) throw new Error(t("pdf.notesUnreadable", { name: baseName(notePath) }));
+      setAnnotations(saved.map((a) => (a.target.source === path ? a : { ...a, target: { ...a.target, source: path } })));
       setDoc(pdf);
     })().catch((e: unknown) => {
       if (!cancelled) setError(e instanceof Error ? e.message : String(e));
@@ -321,6 +325,7 @@ export function PdfReader({ path, fragment = null, openSeq = 0, onClose, onOpenN
         } catch (e) {
           if (!isMissing(e)) throw e;
         }
+        if (existing !== null && !readAnnotationsNote(existing)) throw new Error(t("pdf.notesUnreadable", { name: baseName(notePath) }));
         const labels = {
           title: t("pdf.noteTitle", { name: baseName(path) }),
           page: (n: number) => t("pdf.notePage", { n }),

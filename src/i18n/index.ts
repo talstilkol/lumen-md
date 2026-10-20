@@ -450,6 +450,7 @@ const en: Strings = {
   "pdf.noteTitle": "Highlights — {name}",
   "pdf.notePage": "p. {n}",
   "pdf.noteEmpty": "_No highlights yet._",
+  "pdf.notesUnreadable": "the highlights block in {name} can't be read. Fix or remove it to highlight again.",
   "pdf.ocr.scanned": "This page is a scanned image.",
   "pdf.ocr.run": "Recognise text (OCR)",
   "pdf.ocr.running": "Recognising text on this device…",

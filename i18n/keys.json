@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-10-20T18:37:10.508Z",
+  "generated_at": "2026-10-20T22:11:06.311Z",
   "source": "src/i18n/index.ts (en bundle)",
-  "count": 1457,
+  "count": 1458,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -1930,6 +1930,13 @@
       "key": "pdf.noteEmpty",
       "en": "_No highlights yet._",
       "vars": []
+    },
+    {
+      "key": "pdf.notesUnreadable",
+      "en": "the highlights block in {name} can't be read. Fix or remove it to highlight again.",
+      "vars": [
+        "name"
+      ]
     },
     {
       "key": "pdf.ocr.scanned",

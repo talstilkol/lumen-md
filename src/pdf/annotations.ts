@@ -519,6 +519,32 @@ export function parseAnnotationsNote(md: string | null | undefined): PdfAnnotati
   }
 }
 
+/**
+ * The annotations of a companion note, strictly: null when the note has a
+ * highlights block that can't be read whole (a marker without its pair, a
+ * fence cut short, JSON that doesn't parse, an entry that isn't an
+ * annotation). Saving over such a block would erase what it held, so a
+ * caller must not write then. No note, or a note without a block: [].
+ */
+export function readAnnotationsNote(md: string | null | undefined): PdfAnnotation[] | null {
+  if (!md) return [];
+  const start = md.indexOf(NOTE_START);
+  const end = start === -1 ? -1 : md.indexOf(NOTE_END, start);
+  const hasInfo = /^[ \t]*(`{3,}|~{3,})[ \t]*json[ \t]+lumen-pdf-annotations/m.test(md);
+  if (start === -1 && !hasInfo) return [];
+  if (start !== -1 && end === -1) return null;
+  const region = start === -1 ? md : md.slice(start, end);
+  const fence = /(`{3,}|~{3,})[ \t]*json[ \t]+lumen-pdf-annotations[^\n]*\n([\s\S]*?)\n\1/.exec(region);
+  if (!fence) return null;
+  try {
+    const data = JSON.parse(fence[2]) as unknown;
+    if (!Array.isArray(data) || !data.every(isPdfAnnotation)) return null;
+    return data;
+  } catch {
+    return null;
+  }
+}
+
 function isPdfAnnotation(x: unknown): x is PdfAnnotation {
   if (!x || typeof x !== "object") return false;
   const a = x as Partial<PdfAnnotation>;

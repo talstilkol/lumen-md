@@ -16,6 +16,7 @@ import {
   pageFragment,
   parseAnnotationsNote,
   parsePdfFragment,
+  readAnnotationsNote,
   renderAnnotationsBlock,
   shortId,
   unionRect,
@@ -341,5 +342,26 @@ describe("nextMatchIndex", () => {
     expect(nextMatchIndex(1, 1, 3)).toBe(2);
     expect(nextMatchIndex(5, -1, 3)).toBe(2);
     expect(nextMatchIndex(-1, 1, 0)).toBe(-1);
+  });
+});
+
+describe("readAnnotationsNote (strict)", () => {
+  const { start, end } = at(PAGE, "passage to highlight");
+  const ann = createPdfAnnotation({ id: UUID, source: "a.pdf", page: 2, text: PAGE, start, end });
+  const good = upsertAnnotationsNote("# Mine\n\ntext", "a.pdf", [ann], labels);
+
+  it("reads a whole block, and [] for no note or a note without one", () => {
+    expect(readAnnotationsNote(good)?.map((a) => a.id)).toEqual([ann.id]);
+    expect(readAnnotationsNote(upsertAnnotationsNote(null, "a.pdf", [], labels))).toEqual([]);
+    expect(readAnnotationsNote(null)).toEqual([]);
+    expect(readAnnotationsNote("# Just my notes")).toEqual([]);
+  });
+
+  it("refuses a block that can't be read whole, so nothing is saved over it", () => {
+    expect(readAnnotationsNote(good.replace('"type": "Annotation"', '"type": "Annotation",,'))).toBeNull();
+    expect(readAnnotationsNote(good.slice(0, good.indexOf('"target"')))).toBeNull();
+    expect(readAnnotationsNote(good.replace(NOTE_END, ""))).toBeNull();
+    expect(readAnnotationsNote(good.replace('"type": "Annotation"', '"type": "Other"'))).toBeNull();
+    expect(readAnnotationsNote("```json lumen-pdf-annotations\n{\"not\": \"a list\"}\n```")).toBeNull();
   });
 });

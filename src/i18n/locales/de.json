@@ -1455,5 +1455,6 @@
   "pdf.noteEmpty": "_Noch keine Markierungen._",
   "pdf.ocr.scanned": "Diese Seite ist ein gescanntes Bild.",
   "pdf.ocr.run": "Text erkennen (OCR)",
-  "pdf.ocr.running": "Text wird auf diesem Gerät erkannt…"
+  "pdf.ocr.running": "Text wird auf diesem Gerät erkannt…",
+  "pdf.notesUnreadable": "der Markierungsblock in {name} ist nicht lesbar. Reparieren oder entfernen Sie ihn, um wieder zu markieren."
 }

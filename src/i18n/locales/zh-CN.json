@@ -1455,5 +1455,6 @@
   "pdf.noteEmpty": "_还没有高亮。_",
   "pdf.ocr.scanned": "此页面是扫描图像。",
   "pdf.ocr.run": "识别文字（OCR）",
-  "pdf.ocr.running": "正在本设备上识别文字…"
+  "pdf.ocr.running": "正在本设备上识别文字…",
+  "pdf.notesUnreadable": "无法读取 {name} 中的高亮块。请修复或删除它后再高亮。"
 }

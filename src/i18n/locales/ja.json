@@ -1455,5 +1455,6 @@
   "pdf.noteEmpty": "_まだハイライトはありません。_",
   "pdf.ocr.scanned": "このページはスキャン画像です。",
   "pdf.ocr.run": "文字を認識（OCR）",
-  "pdf.ocr.running": "この端末で文字を認識しています…"
+  "pdf.ocr.running": "この端末で文字を認識しています…",
+  "pdf.notesUnreadable": "{name} のハイライトブロックを読み取れません。修正または削除すると再びハイライトできます。"
 }

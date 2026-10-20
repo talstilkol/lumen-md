@@ -1455,5 +1455,6 @@
   "pdf.noteEmpty": "_Aucun surlignage pour l'instant._",
   "pdf.ocr.scanned": "Cette page est une image numérisée.",
   "pdf.ocr.run": "Reconnaître le texte (OCR)",
-  "pdf.ocr.running": "Reconnaissance du texte sur cet appareil…"
+  "pdf.ocr.running": "Reconnaissance du texte sur cet appareil…",
+  "pdf.notesUnreadable": "le bloc de surlignages de {name} est illisible. Corrigez-le ou supprimez-le pour surligner à nouveau."
 }
