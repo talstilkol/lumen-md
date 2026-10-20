@@ -42,7 +42,11 @@ function builtProxy(): string | undefined {
   return (import.meta.env?.VITE_GIT_CORS_PROXY as string | undefined)?.trim() || undefined;
 }
 
+/** The setting for this page when localStorage refuses it (private mode, embeds). */
+let memory: string | null | undefined;
+
 export function getStoredCorsProxy(): string | null {
+  if (memory !== undefined) return memory;
   try {
     return localStorage.getItem(KEY);
   } catch {
@@ -54,11 +58,14 @@ export function getStoredCorsProxy(): string | null {
 export function setStoredCorsProxy(value: string | null): void {
   const v = value?.trim() ?? "";
   if (v && !normaliseProxyUrl(v)) throw new Error(`Not a proxy URL: ${v}`);
+  const stored = v ? normaliseProxyUrl(v)! : null;
   try {
-    if (v) localStorage.setItem(KEY, normaliseProxyUrl(v)!);
+    if (stored) localStorage.setItem(KEY, stored);
     else localStorage.removeItem(KEY);
+    memory = undefined;
   } catch {
-    /* private mode: the setting lasts for this page only */
+    // Storage refused (private mode, embeds): the setting lasts for this page.
+    memory = stored;
   }
 }
 

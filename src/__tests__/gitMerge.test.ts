@@ -8,6 +8,7 @@ import {
   hasConflictMarkers,
   isBinary,
   isLfsPointer,
+  mergeHunks,
   mergeText,
   planPull,
   type PullAction,
@@ -41,6 +42,15 @@ describe("mergeText", () => {
   it("a deletion on one side against an edit of the same line is a conflict (both ways)", () => {
     expect(mergeText("a\nb\nc", "a\nc", "a\nB\nc")).toEqual({ clean: false, text: "a\n<<<<<<< local\n=======\nB\n>>>>>>> remote\nc" });
     expect(mergeText("a\nb\nc", "a\nB\nc", "a\nc").clean).toBe(false);
+  });
+
+  it("gives the conflict dialog a conflict hunk for a deletion against an edit", () => {
+    const hunks = mergeHunks("a\nb\nc", "a\nc", "a\nB\nc");
+    expect(hunks.map((h) => [h.op, h.local, h.remote])).toEqual([
+      ["equal", ["a"], ["a"]],
+      ["conflict", [], ["B"]],
+      ["equal", ["c"], ["c"]],
+    ]);
   });
 
   it("inserts at different places merge cleanly", () => {

@@ -57,9 +57,12 @@ export type GitConflictChoice = { kind: "merged"; content: string } | { kind: "l
 export type GitConflictUi = (o: { path: string; base: string; local: string; remote: string }) => Promise<GitConflictChoice>;
 
 let conflictUi: GitConflictUi = async (o) => {
-  const { openConflictDialog } = await import("../sync/cloud/ConflictDialog");
+  const [{ openConflictDialog }, { mergeHunks }] = await Promise.all([import("../sync/cloud/ConflictDialog"), import("../sync/gitMerge")]);
   return openConflictDialog({
     ...o,
+    // The same diff3 hunks the pull used: a deletion against an edit shows
+    // as a conflict to pick, never as a silent one-sided change.
+    hunks: mergeHunks(o.base, o.local, o.remote),
     labels: {
       title: t("git.conflict.title", { path: o.path }),
       description: t("git.conflict.body"),
@@ -99,9 +102,9 @@ export async function resolveGitConflicts(conflicts: PendingConflict[]): Promise
     const text = choice.kind === "merged" ? choice.content : choice.kind === "local" ? c.ours : c.theirs;
     flushPendingEdits();
     const note = openNote(c.path);
-    if (c.where === "open") {
+    if (c.where === "open" && note) {
       // Typed on during the dialog: the newer text wins, the choice waits.
-      if (note && note.content !== c.ours) {
+      if (note.content !== c.ours) {
         left.push(c.path);
         continue;
       }
@@ -109,9 +112,14 @@ export async function resolveGitConflicts(conflicts: PendingConflict[]): Promise
       setNote(c.path, text, true);
       continue;
     }
+    // A note open with edits made since the pull is never written over.
+    if (note?.dirty) {
+      left.push(c.path);
+      continue;
+    }
     await writeWorkspaceFile(c.path, text);
     notifyWorkspaceChanged({ kind: "content", paths: [c.path] });
-    if (note && !note.dirty) setNote(c.path, text, false);
+    if (note) setNote(c.path, text, false);
   }
   return left;
 }

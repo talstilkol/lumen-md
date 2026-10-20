@@ -1,5 +1,5 @@
 /** Plan 3.3 — the CORS proxy for git is configurable and has no built-in host. */
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   authFor,
   getCorsProxy,
@@ -30,6 +30,18 @@ describe("CORS proxy setting", () => {
     expect(normaliseProxyUrl("https://user:pw@proxy.example.com")).toBeNull();
     expect(normaliseProxyUrl("not a url")).toBeNull();
     expect(() => setStoredCorsProxy("nope")).toThrow();
+  });
+
+  it("keeps the setting for the page when localStorage refuses it", () => {
+    const spy = vi.spyOn(Storage.prototype, "setItem").mockImplementation(() => {
+      throw new Error("denied");
+    });
+    try {
+      setStoredCorsProxy("http://localhost:9999");
+      expect(getCorsProxy()).toBe("http://localhost:9999");
+    } finally {
+      spy.mockRestore();
+    }
   });
 
   it("is stored, read back and cleared", () => {

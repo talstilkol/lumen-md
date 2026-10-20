@@ -128,15 +128,30 @@ export async function getPendingConflicts(repoFolder: string): Promise<PendingCo
 }
 
 export async function setPendingConflicts(repoFolder: string, conflicts: PendingConflict[]): Promise<void> {
-  await set(CONFLICTS_KEY(repoFolder), conflicts.filter((c) => c.where === "file"));
+  await set(CONFLICTS_KEY(repoFolder), conflicts);
 }
 
-/** The remembered conflicts whose files still hold markers (the others were fixed by hand). */
+/**
+ * The remembered conflicts that are still open: a marked file that still
+ * holds its markers, or an open-note conflict whose copy of the remote
+ * version is still there (its "mine" is refreshed to what the note holds
+ * now). A read that fails rejects — it never counts as "resolved".
+ */
 async function stillConflicted(repoFolder: string): Promise<PendingConflict[]> {
   const out: PendingConflict[] = [];
+  const dec = new TextDecoder();
   for (const c of await getPendingConflicts(repoFolder)) {
-    const bytes = await readVaultBytes(c.path).catch(() => null);
-    if (bytes && hasConflictMarkers(new TextDecoder().decode(bytes))) out.push(c);
+    if (c.where === "file") {
+      const bytes = await readVaultBytes(c.path);
+      if (bytes && hasConflictMarkers(dec.decode(bytes))) out.push(c);
+      continue;
+    }
+    if (!c.copy || !(await readVaultBytes(c.copy))) continue;
+    const { pullEditorHooks } = await import("../store/gitPullDocs");
+    const note = pullEditorHooks().openNote(c.path);
+    const file = await readVaultBytes(c.path);
+    const ours = note ? note.content : file ? dec.decode(file) : null;
+    if (ours !== null) out.push({ ...c, ours });
   }
   return out;
 }
@@ -164,6 +179,11 @@ async function mirrorRepoToVault(repoDir: string, fs: Fs, vaultFolder: string): 
       const stat = await fs.promises.stat(full);
       const vaultPath = `${vaultPrefix}/${entry}`;
       if (stat.isDirectory()) {
+        // A file of that name here: keep it, and leave this subtree out.
+        if ((await vaultKind(vaultPath)) === "file") {
+          kept.push(vaultPath);
+          continue;
+        }
         await createWorkspaceFolder(vaultPath);
         await walk(full, vaultPath);
       } else if (stat.isFile()) {
@@ -183,6 +203,7 @@ async function mirrorRepoToVault(repoDir: string, fs: Fs, vaultFolder: string): 
       }
     }
   }
+  if ((await vaultKind(vaultFolder)) === "file") throw new Error(`"${vaultFolder}" is a file in the vault; clone into another folder.`);
   await createWorkspaceFolder(vaultFolder);
   await walk(repoDir, vaultFolder);
   return { written, kept, lfsPointers };

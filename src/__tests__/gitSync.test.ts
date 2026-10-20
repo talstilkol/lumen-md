@@ -4,6 +4,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from "vitest";
+import { createMemoryBackend, setVaultBackend } from "../storage/vault";
 
 // Mock idb-keyval to use a plain Map
 const store = new Map<string, unknown>();
@@ -50,6 +51,7 @@ describe("git sync — helpers", () => {
   beforeEach(async () => {
     store.clear();
     localStorage.clear();
+    setVaultBackend(createMemoryBackend());
     // The token now lives in the secret store (T36); start each test empty.
     (await import("../lib/secretStore")).__resetSecretStore();
   });

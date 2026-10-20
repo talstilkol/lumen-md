@@ -24,6 +24,7 @@
  *     resolution screen; binary files are never merged: ours stays, theirs
  *     goes to a copy.
  */
+import type { DiffHunk } from "./cloud/diff";
 
 export type Bytes = Uint8Array;
 
@@ -145,12 +146,57 @@ function lcsPairs(a: string[], b: string[]): Array<[number, number]> | null {
 const same = (x: string[], y: string[]) => x.length === y.length && x.every((l, i) => l === y[i]);
 
 /**
- * Line-based three-way merge (diff3). Lines kept by both sides anchor the
- * merge; between anchors, a chunk changed on one side only takes that
- * side, the same change on both sides is taken once, and anything else —
- * different edits, or a deletion against an edit — is a conflict, written
- * between markers.
+ * Line-based three-way merge (diff3), as hunks the conflict dialog shows.
+ * Lines kept by both sides anchor the merge; between anchors, a chunk
+ * changed on one side only takes that side ("local" / "remote"), the same
+ * change on both sides is taken once ("both"), and anything else —
+ * different edits, or a deletion against an edit — is a "conflict".
  */
+export function mergeHunks(base: string, ours: string, theirs: string): DiffHunk[] {
+  const B = base.split("\n");
+  const O = ours.split("\n");
+  const T = theirs.split("\n");
+  const po = lcsPairs(B, O);
+  const pt = lcsPairs(B, T);
+  if (!po || !pt) return [{ op: "conflict", local: O, remote: T, base: B }];
+  const inO = new Map(po);
+  const inT = new Map(pt);
+  const out: DiffHunk[] = [];
+  const push = (h: DiffHunk) => {
+    const prev = out[out.length - 1];
+    if (prev && prev.op === h.op && h.op !== "conflict") {
+      prev.local.push(...h.local);
+      prev.remote.push(...h.remote);
+      prev.base.push(...h.base);
+    } else out.push(h);
+  };
+  let b0 = 0;
+  let o0 = 0;
+  let t0 = 0;
+  const chunk = (b1: number, o1: number, t1: number) => {
+    const cb = B.slice(b0, b1);
+    const co = O.slice(o0, o1);
+    const ct = T.slice(t0, t1);
+    if (!cb.length && !co.length && !ct.length) return;
+    const op = same(co, cb) ? (same(ct, cb) ? "equal" : "remote") : same(ct, cb) ? "local" : same(co, ct) ? "both" : "conflict";
+    push({ op, local: co, remote: ct, base: cb });
+  };
+  for (let i = 0; i < B.length; i++) {
+    const oi = inO.get(i);
+    const ti = inT.get(i);
+    if (oi === undefined || ti === undefined) continue;
+    // A stable line: kept by both sides.
+    chunk(i, oi, ti);
+    push({ op: "equal", local: [B[i]], remote: [B[i]], base: [B[i]] });
+    b0 = i + 1;
+    o0 = oi + 1;
+    t0 = ti + 1;
+  }
+  chunk(B.length, O.length, T.length);
+  return out;
+}
+
+/** Line-based three-way merge (see `mergeHunks`); conflicts are written between markers. */
 export function mergeText(
   base: string,
   ours: string,
@@ -160,43 +206,16 @@ export function mergeText(
   if (ours === theirs) return { clean: true, text: ours };
   if (ours === base) return { clean: true, text: theirs };
   if (theirs === base) return { clean: true, text: ours };
-  const B = base.split("\n");
-  const O = ours.split("\n");
-  const T = theirs.split("\n");
-  const conflictBlock = (o: string[], t: string[]) => [`<<<<<<< ${labels.ours}`, ...o, "=======", ...t, `>>>>>>> ${labels.theirs}`];
-  const po = lcsPairs(B, O);
-  const pt = lcsPairs(B, T);
-  if (!po || !pt) return { clean: false, text: conflictBlock(O, T).join("\n") };
-  const inO = new Map(po);
-  const inT = new Map(pt);
   const out: string[] = [];
   let clean = true;
-  let b0 = 0;
-  let o0 = 0;
-  let t0 = 0;
-  const flush = (b1: number, o1: number, t1: number) => {
-    const cb = B.slice(b0, b1);
-    const co = O.slice(o0, o1);
-    const ct = T.slice(t0, t1);
-    if (same(co, cb)) out.push(...ct);
-    else if (same(ct, cb) || same(co, ct)) out.push(...co);
+  for (const h of mergeHunks(base, ours, theirs)) {
+    if (h.op === "remote") out.push(...h.remote);
+    else if (h.op !== "conflict") out.push(...h.local);
     else {
       clean = false;
-      out.push(...conflictBlock(co, ct));
+      out.push(`<<<<<<< ${labels.ours}`, ...h.local, "=======", ...h.remote, `>>>>>>> ${labels.theirs}`);
     }
-  };
-  for (let i = 0; i < B.length; i++) {
-    const oi = inO.get(i);
-    const ti = inT.get(i);
-    if (oi === undefined || ti === undefined) continue;
-    // A stable line: kept by both sides.
-    flush(i, oi, ti);
-    out.push(B[i]);
-    b0 = i + 1;
-    o0 = oi + 1;
-    t0 = ti + 1;
   }
-  flush(B.length, O.length, T.length);
   return { clean, text: out.join("\n") };
 }
 
