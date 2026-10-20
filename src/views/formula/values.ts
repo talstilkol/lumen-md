@@ -53,7 +53,12 @@ export function toNumber(v: FormulaValue, what: string, at: number): number | nu
   if (v === null || v === "") return null;
   if (typeof v === "number") return v;
   if (typeof v === "boolean") return v ? 1 : 0;
-  if (typeof v === "string" && NUMERIC.test(v)) return Number(v);
+  if (typeof v === "string" && NUMERIC.test(v)) {
+    // "1e999" is numeric text but not a finite number: never let Infinity through.
+    const n = Number(v);
+    if (!Number.isFinite(n)) throw new FormulaError("math", `${what}: the number is too large`, at);
+    return n;
+  }
   throw new FormulaError("type", `${what} needs a number, not ${describe(v)}`, at);
 }
 

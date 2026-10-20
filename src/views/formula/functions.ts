@@ -320,7 +320,10 @@ const BUILTINS: Record<string, FormulaFunction> = {
       if (args.length !== 3) throw new FormulaError("arity", "date() takes one text or year, month, day", ctx.at);
       const [y, m, d] = args.map((x) => int(x, "date", ctx, Number.NaN));
       if ([y, m, d].some(Number.isNaN)) return null;
-      return checkedDate(Date.UTC(y, m - 1, d), ctx);
+      const out = checkedDate(Date.UTC(y, m - 1, d), ctx);
+      // Date.UTC rolls 2026-02-30 over to March 2: a day that does not exist is an error, as for date("2026-02-30").
+      if (out.getUTCFullYear() !== y || out.getUTCMonth() !== m - 1 || out.getUTCDate() !== d) throw new FormulaError("type", `date(): ${y}-${m}-${d} is not a day`, ctx.at);
+      return out;
     },
   },
   year: { min: 1, max: 1, doc: "year(date)", call: ([a], ctx) => nullable(date(a, "year", ctx), (d) => d.getUTCFullYear()) },

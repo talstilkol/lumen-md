@@ -126,6 +126,9 @@ describe("formula — semantics", () => {
   it("a day that does not exist is not a date", () => {
     expect(errorOf('date("2026-02-30")').code).toBe("type");
     expect(errorOf('year("2026-13-01")').code).toBe("type");
+    expect(errorOf("date(2026, 2, 30)").code).toBe("type");
+    expect(errorOf("date(2026, 13, 1)").code).toBe("type");
+    expect(iso(value("date(2028, 2, 29)"))).toBe("2028-02-29");
     expect(iso(value('date("2028-02-29")'))).toBe("2028-02-29");
     expect((value('date("2026-02-28T23:30-02:00")') as Date).toISOString()).toBe("2026-03-01T01:30:00.000Z");
     expect(value('"2026-02-30" + 1')).toBe("2026-02-301");
@@ -196,6 +199,8 @@ describe("formula — errors are typed and placed", () => {
     expect(errorOf("10 ^ 400").code).toBe("math");
     expect(errorOf("1e309").code).toBe("math");
     expect(errorOf("price + 1e999").code).toBe("math");
+    expect(errorOf('+"1e999"').code).toBe("math");
+    expect(errorOf('-"1e999"').code).toBe("math");
   });
 });
 
