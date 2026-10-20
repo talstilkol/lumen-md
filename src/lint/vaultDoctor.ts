@@ -75,22 +75,24 @@ function blankFences(text: string): string {
    * indented less than an item's column closes it (and the items nested
    * in it); a marker line opens a new one.
    */
-  const cols: number[] = [];
+  // Each with the block-quote depth it sits in: leaving the quote closes it.
+  const cols: Array<{ col: number; quote: number }> = [];
   for (let i = 0; i < lines.length; i++) {
     const raw = lines[i];
-    const own = unquote(raw).rest;
+    const { rest: own, depth: quote } = unquote(raw);
     let col = -1;
     if (own.trim()) {
       const lead = /^ */.exec(own)![0].length;
       col = itemColumn(own);
+      while (cols.length && cols[cols.length - 1].quote > quote) cols.pop();
       // Unindented text (no marker) is a lazy line or ends the list.
       if (!lead && col < 0) cols.length = 0;
-      else while (cols.length && cols[cols.length - 1] > lead) cols.pop();
+      else while (cols.length && cols[cols.length - 1].col > lead) cols.pop();
     }
     // The item this line continues: the innermost one still open at its
     // indentation (after a dedent, the parent's).
-    const item = cols.length ? cols[cols.length - 1] : -1;
-    if (col >= 0) cols.push(col);
+    const item = cols.length ? cols[cols.length - 1].col : -1;
+    if (col >= 0) cols.push({ col, quote });
     if (itemCode) {
       // Blank lines and lines indented 4+ past the item's content column
       // stay in the code block; anything else ends it.

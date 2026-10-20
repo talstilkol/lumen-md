@@ -46,6 +46,8 @@ describe("known limitations A1–A9", () => {
     expect(linkFindings("10. outer\n    - inner\n    outer\n\n        ```\n        [[Code]]\n        ```\n        [[After]]\n\n[[Outside]]\n")).toEqual(["Outside"]);
     // A fence dedented from a nested item to its parent belongs to the parent.
     expect(linkFindings("- outer\n  - inner\n\n   ```\n   [[Hidden]]\n  ```\n  [[After]]\n")).toEqual(["After"]);
+    // A list inside a block quote ends with the quote.
+    expect(linkFindings("> - item\n\n     ```\n     [[Code]]\n\n  ```\n  [[Fenced]]\n  ```\n\n[[Outside]]\n")).toEqual(["Outside"]);
     // The item's column holds across its continuation lines.
     expect(linkFindings("1. item\n    continued\n\n        ```\n        [[Gone]]\n        ```\n        [[After]]\n\n[[Outside]]\n")).toEqual(["Outside"]);
   });
