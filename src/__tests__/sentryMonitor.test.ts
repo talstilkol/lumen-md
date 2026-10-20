@@ -7,7 +7,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import * as Sentry from "@sentry/browser";
 import { __resetLedger, classify, ledgerEntries, ledgerSummary } from "../ai/privacyLedger";
 import { setAiPolicy } from "../ai/policy";
-import { initTelemetry, setMonitoringConsent, __resetTelemetry } from "../lib/telemetry";
+import { initTelemetry, setMonitoringConsent, __resetTelemetry, __setMonitoringDsnForTesting } from "../lib/telemetry";
 import { flushMonitoring } from "../lib/sentryMonitor";
 import { log } from "../lib/logger";
 
@@ -28,12 +28,12 @@ beforeEach(() => {
   sent.length = 0;
   fetchSpy.mockClear();
   vi.stubGlobal("fetch", fetchSpy);
-  vi.stubEnv("VITE_SENTRY_DSN", DSN);
+  __setMonitoringDsnForTesting(DSN);
   consoleSpy = vi.spyOn(console, "error").mockImplementation(() => undefined);
 });
 
 afterEach(() => {
-  vi.unstubAllEnvs();
+  __setMonitoringDsnForTesting(null);
   vi.unstubAllGlobals();
   consoleSpy.mockRestore();
 });
@@ -41,7 +41,7 @@ afterEach(() => {
 describe("the ledger knows the error tracker", () => {
   it("classifies the DSN's host as monitoring, and nothing without a DSN", () => {
     expect(classify("https://o1.ingest.example.com/api/42/envelope/?sentry_key=publickey")).toMatchObject({ host: "o1.ingest.example.com", category: "monitoring" });
-    vi.stubEnv("VITE_SENTRY_DSN", "");
+    __setMonitoringDsnForTesting("");
     expect(classify("https://o1.ingest.example.com/api/42/envelope/")).toBeNull();
   });
 });

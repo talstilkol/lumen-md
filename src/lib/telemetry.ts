@@ -44,7 +44,18 @@ export function setMonitoringConsent(on: boolean): void {
   else setErrorSink(null);
 }
 
+let dsnOverride: string | null = null;
+
+/**
+ * Vite inlines `import.meta.env.VITE_*` at transform time, so `vi.stubEnv`
+ * can't reach this module. Tests set the DSN here instead (null resets).
+ */
+export function __setMonitoringDsnForTesting(dsn: string | null): void {
+  dsnOverride = dsn;
+}
+
 function readEnvDsn(): string | undefined {
+  if (dsnOverride !== null) return dsnOverride;
   try {
     const env = (import.meta as ImportMeta & { env?: { VITE_SENTRY_DSN?: string } }).env;
     return env?.VITE_SENTRY_DSN;

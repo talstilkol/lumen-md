@@ -24,7 +24,7 @@ vi.mock("@sentry/browser", () => {
   };
 });
 
-import { initTelemetry, getMonitoringConsent, setMonitoringConsent, monitoringDsn, monitoringOrigin, __resetTelemetry } from "../lib/telemetry";
+import { initTelemetry, getMonitoringConsent, setMonitoringConsent, monitoringDsn, monitoringOrigin, __resetTelemetry, __setMonitoringDsnForTesting } from "../lib/telemetry";
 import { log } from "../lib/logger";
 
 const DSN = "https://publickey@o1.ingest.example.com/42";
@@ -40,14 +40,14 @@ beforeEach(() => {
 });
 
 afterEach(() => {
-  vi.unstubAllEnvs();
+  __setMonitoringDsnForTesting(null);
   vi.unstubAllGlobals();
   consoleSpy.mockRestore();
 });
 
 describe("fresh state", () => {
   it("is off: no consent, no SDK import, no request — even when the build has a DSN", async () => {
-    vi.stubEnv("VITE_SENTRY_DSN", DSN);
+    __setMonitoringDsnForTesting(DSN);
     expect(getMonitoringConsent()).toBe(false);
     expect(await initTelemetry()).toBe(false);
     log.error(new Error("boom"));
@@ -57,7 +57,7 @@ describe("fresh state", () => {
   });
 
   it("the old opt-out flag doesn't turn monitoring on", async () => {
-    vi.stubEnv("VITE_SENTRY_DSN", DSN);
+    __setMonitoringDsnForTesting(DSN);
     localStorage.setItem("lumen.telemetry.optOut", "0");
     expect(getMonitoringConsent()).toBe(false);
     expect(await initTelemetry()).toBe(false);
@@ -67,7 +67,7 @@ describe("fresh state", () => {
 
 describe("turned on without a DSN", () => {
   it("still loads nothing and sends nothing", async () => {
-    vi.stubEnv("VITE_SENTRY_DSN", "");
+    __setMonitoringDsnForTesting("");
     setMonitoringConsent(true);
     expect(getMonitoringConsent()).toBe(true);
     expect(await initTelemetry()).toBe(false);
@@ -78,18 +78,18 @@ describe("turned on without a DSN", () => {
 
   it("a malformed DSN counts as none", () => {
     for (const bad of ["not a url", "https://o1.ingest.example.com/42", "http://key@remote.example.org/1", "https://key@o1.ingest.example.com/", "ftp://key@host/1"]) {
-      vi.stubEnv("VITE_SENTRY_DSN", bad);
+      __setMonitoringDsnForTesting(bad);
       expect(monitoringDsn()).toBeNull();
       expect(monitoringOrigin()).toBeNull();
     }
-    vi.stubEnv("VITE_SENTRY_DSN", "http://key@localhost:8000/3");
+    __setMonitoringDsnForTesting("http://key@localhost:8000/3");
     expect(monitoringOrigin()).toBe("http://localhost:8000");
   });
 });
 
 describe("turned on with a DSN", () => {
   it("imports the SDK once, without replay, tracing or default integrations", async () => {
-    vi.stubEnv("VITE_SENTRY_DSN", DSN);
+    __setMonitoringDsnForTesting(DSN);
     localStorage.setItem("lumen.monitoring.consent", "1");
     expect(await initTelemetry()).toBe(true);
     expect(await initTelemetry()).toBe(true);
