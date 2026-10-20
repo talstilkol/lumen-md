@@ -28,8 +28,12 @@ export interface CanvasStore {
   write(fileName: string, text: string): Promise<void>;
   /** Create the file; rejects with `CanvasFileExistsError` when it already exists. */
   create(fileName: string, text: string): Promise<void>;
-  /** Delete a file. Only used to take back a `.excalidraw` file the migration itself just created. */
-  remove(fileName: string): Promise<void>;
+  /**
+   * Delete a `.excalidraw` file, but only while its content is still exactly
+   * `onlyIf` (checked under the file's lock). Only used to take back a bad
+   * output the migration itself just wrote; returns whether it was removed.
+   */
+  remove(fileName: string, onlyIf: string): Promise<boolean>;
 }
 
 const localLocks = new Map<string, Promise<unknown>>();
@@ -133,10 +137,19 @@ export function opfsCanvasStore(): CanvasStore | null {
         await writeTo(await d.getFileHandle(fileName, { create: true }), text);
       });
     },
-    remove(fileName) {
+    remove(fileName, onlyIf) {
       if (!fileName.endsWith(EXCALIDRAW_EXT)) return Promise.reject(new ExcalidrawFileError(`refusing to delete ${fileName}`));
       return withCanvasLock(fileName, async () => {
-        await (await dir()).removeEntry(fileName);
+        const d = await dir();
+        let current: string | null = null;
+        try {
+          current = await (await (await d.getFileHandle(fileName)).getFile()).text();
+        } catch {
+          return false;
+        }
+        if (current !== onlyIf) return false; // someone saved it since: keep their version
+        await d.removeEntry(fileName);
+        return true;
       });
     },
   };

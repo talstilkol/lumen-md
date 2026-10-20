@@ -444,8 +444,8 @@ function shapeText(p: Obj): string {
   return str(p.text, "");
 }
 
-const RTL_STRONG = /[֐-ࣿיִ-﷿ﹰ-﻿]/;
-const LTR_STRONG = /[A-Za-zÀ-ɏͰ-ϿЀ-ӿ]/;
+const RTL_STRONG = /[\u0590-\u08FF\uFB1D-\uFDFF\uFE70-\uFEFF]/;
+const LTR_STRONG = /[A-Za-z\u00C0-\u024F\u0370-\u03FF\u0400-\u04FF]/;
 
 /** True when the first strong-direction character of `text` is right-to-left. */
 export function isRtlText(text: string): boolean {
@@ -471,15 +471,52 @@ function verticalAlign(v: unknown): ExVerticalAlign {
 
 const LINE_HEIGHT = 1.25;
 
+const WIDE_CHAR = /[\u2E80-\u9FFF\uAC00-\uD7AF\uFF00-\uFFEF]/;
+
+/** Estimated width of one line, in ems. */
+function lineEms(line: string): number {
+  let w = 0;
+  for (const ch of line) w += WIDE_CHAR.test(ch) ? 1 : 0.55;
+  return w;
+}
+
+/**
+ * Greedy word wrap at `width` px, as Excalidraw stores a fixed-width text's
+ * `text` (with `originalText` holding the source). Only line breaks are
+ * inserted at spaces (or inside a word longer than the line).
+ */
+export function wrapText(text: string, fontSize: number, width: number): string {
+  const max = width / fontSize;
+  return text
+    .split("\n")
+    .map((line) => {
+      const out: string[] = [];
+      let cur = "";
+      for (const word of line.split(/(?<=\s)/)) {
+        if (cur && lineEms(cur + word.trimEnd()) > max) {
+          out.push(cur.trimEnd());
+          cur = "";
+        }
+        let w = word;
+        while (!cur && lineEms(w.trimEnd()) > max && w.length > 1) {
+          let n = 1;
+          while (n < w.length && lineEms(w.slice(0, n + 1)) <= max) n++;
+          out.push(w.slice(0, n));
+          w = w.slice(n);
+        }
+        cur += w;
+      }
+      out.push(cur.trimEnd());
+      return out.join("\n");
+    })
+    .join("\n");
+}
+
 /** Rough text box (Excalidraw re-measures text when it is edited). */
 export function measureText(text: string, fontSize: number): { width: number; height: number } {
   const lines = text.split("\n");
   let widest = 0;
-  for (const line of lines) {
-    let w = 0;
-    for (const ch of line) w += /[⺀-鿿가-힯＀-￯]/.test(ch) ? 1 : 0.55;
-    widest = Math.max(widest, w);
-  }
+  for (const line of lines) widest = Math.max(widest, lineEms(line));
   return {
     width: round(Math.max(widest * fontSize, fontSize * 0.5)),
     height: round(lines.length * fontSize * LINE_HEIGHT),
@@ -766,7 +803,7 @@ export function tldrawToExcalidraw(input: unknown, options: ConvertOptions = {})
       strokeColor: color(p.color),
       backgroundColor: f.backgroundColor,
       fillStyle: f.fillStyle,
-      strokeWidth: strokeWidth(p.size),
+      strokeWidth: round(strokeWidth(p.size) * num(p.scale, 1)),
       strokeStyle: dash.strokeStyle,
       roughness: dash.roughness,
       opacity: Math.round(Math.min(1, Math.max(0, num(r.opacity, 1))) * 100),
@@ -802,7 +839,8 @@ export function tldrawToExcalidraw(input: unknown, options: ConvertOptions = {})
       width?: number;
     },
   ): ExTextElement => {
-    const m = measureText(text, fontSize);
+    const shown = opts.width === undefined ? text : wrapText(text, fontSize, opts.width);
+    const m = measureText(shown, fontSize);
     const width = opts.width ?? m.width;
     const el: ExTextElement = {
       ...base(id, r, ctx, {
@@ -819,7 +857,7 @@ export function tldrawToExcalidraw(input: unknown, options: ConvertOptions = {})
       strokeStyle: "solid",
       roughness: 0,
       link: null,
-      text,
+      text: shown,
       originalText: text,
       fontSize,
       fontFamily: fontFamily(props(r).font),
@@ -974,7 +1012,8 @@ export function tldrawToExcalidraw(input: unknown, options: ConvertOptions = {})
         const m = measureText(text, fontSize);
         const fixed = p.autoSize === false;
         const w = fixed ? num(p.w, m.width) * scale : m.width;
-        const center = toPage(ctx.t, w / 2, m.height / 2);
+        const h = fixed ? measureText(wrapText(text, fontSize, w), fontSize).height : m.height;
+        const center = toPage(ctx.t, w / 2, h / 2);
         elements.push(
           textElement(id, r, ctx, text, fontSize, {
             center,
@@ -1116,7 +1155,8 @@ export function tldrawToExcalidraw(input: unknown, options: ConvertOptions = {})
             const ib = str(b.index, "");
             return ia < ib ? -1 : ia > ib ? 1 : 0;
           })
-          .map((q) => toPage(ctx.t, num(q.x, 0) * scale, num(q.y, 0) * scale));
+          // Stored points are page units already; `scale` only styles the stroke.
+          .map((q) => toPage(ctx.t, num(q.x, 0), num(q.y, 0)));
         if (pts.length < 2) {
           placeholder(r, ctx, "[line]");
           warn("draw-unreadable", r, "line with fewer than two points");
@@ -1328,7 +1368,7 @@ export function tldrawToExcalidraw(input: unknown, options: ConvertOptions = {})
       if (text) {
         const fontSize = (ARROW_FONT_SIZES[str(p.size, "m")] ?? 20) * num(p.scale, 1);
         const pos = num(p.labelPosition, 0.5);
-        const mid = abs.length === 3 ? abs[1] : ([s[0] + (e[0] - s[0]) * pos, s[1] + (e[1] - s[1]) * pos] as ExPoint);
+        const mid = pointAlong(abs, pos);
         const id = derivedId(`${el.id}-label`);
         const labelEl = textElement(id, r, ctx, text, fontSize, {
           center: mid,
@@ -1367,6 +1407,20 @@ export function tldrawToExcalidraw(input: unknown, options: ConvertOptions = {})
   };
 }
 
+/** The point at fraction `t` (0..1) of a polyline's length. */
+function pointAlong(pts: ExPoint[], t: number): ExPoint {
+  const lens = pts.slice(1).map((p, i) => Math.hypot(p[0] - pts[i][0], p[1] - pts[i][1]));
+  let left = Math.min(1, Math.max(0, t)) * lens.reduce((a, b) => a + b, 0);
+  for (let i = 0; i < lens.length; i++) {
+    if (left <= lens[i] || i === lens.length - 1) {
+      const f = lens[i] ? Math.min(1, left / lens[i]) : 0;
+      return [pts[i][0] + (pts[i + 1][0] - pts[i][0]) * f, pts[i][1] + (pts[i + 1][1] - pts[i][1]) * f];
+    }
+    left -= lens[i];
+  }
+  return pts[0];
+}
+
 function boundsOf(list: ExcalidrawElement[]): { minX: number; maxX: number } {
   let minX = Infinity;
   let maxX = -Infinity;
@@ -1377,8 +1431,11 @@ function boundsOf(list: ExcalidrawElement[]): { minX: number; maxX: number } {
         maxX = Math.max(maxX, el.x + px);
       }
     } else {
-      minX = Math.min(minX, el.x);
-      maxX = Math.max(maxX, el.x + el.width);
+      // Rotated about the centre: the horizontal half-extent of the rotated box.
+      const half = (Math.abs(el.width * Math.cos(el.angle)) + Math.abs(el.height * Math.sin(el.angle))) / 2;
+      const cx = el.x + el.width / 2;
+      minX = Math.min(minX, cx - half);
+      maxX = Math.max(maxX, cx + half);
     }
   }
   return { minX: Number.isFinite(minX) ? minX : 0, maxX: Number.isFinite(maxX) ? maxX : 0 };

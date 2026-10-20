@@ -166,7 +166,10 @@ describe("tldraw → Excalidraw: 20 canvases without losing a shape (4.19)", () 
         const text = plainText(r);
         if (!text) continue;
         if (r.type === "text") {
-          expect((el(elements, excalidrawIdOf(r.id)) as ExTextElement).text).toBe(text);
+          const t = el(elements, excalidrawIdOf(r.id)) as ExTextElement;
+          expect(t.originalText).toBe(text);
+          // A fixed-width text is stored wrapped: only line breaks are added.
+          expect(t.text.replace(/\n/g, " ")).toBe(text.replace(/\n/g, " "));
           continue;
         }
         const label = elements.find(
@@ -263,7 +266,10 @@ describe("tldraw → Excalidraw: details", () => {
     expect(el(t, "t2")).toMatchObject({ text: "English heading", textAlign: "left" });
     expect(el(t, "t3")).toMatchObject({ textAlign: "center" });
     expect(el(t, "t4")).toMatchObject({ text: "שורה ראשונה\nשורה שנייה\nשורה שלישית", textAlign: "left" });
-    expect(el(t, "t5")).toMatchObject({ autoResize: false, width: 200, fontFamily: 6 });
+    expect(el(t, "t5")).toMatchObject({ autoResize: false, width: 200, fontFamily: 6, originalText: "Fixed width paragraph that wraps" });
+    const t5 = el(t, "t5") as ExTextElement;
+    expect(t5.text.split("\n").length).toBeGreaterThan(1);
+    expect(t5.height).toBe(t5.text.split("\n").length * 36 * 1.25);
     expect(el(t, "t6")).toMatchObject({ fontFamily: 3, fontSize: 44 });
     expect(isRtlText("123 שלום")).toBe(true);
     expect(isRtlText("Hello שלום")).toBe(false);
@@ -368,6 +374,13 @@ describe("tldraw → Excalidraw: details", () => {
     // Scaled shapes: w / h, arrow terminals and bend are page units; scale sizes the label.
     expect(el(r, "big")).toMatchObject({ x: 900, y: 0, width: 100, height: 60 });
     expect((el(r, "big-label") as ExTextElement).fontSize).toBe(44);
+    expect(el(r, "big").strokeWidth).toBe(4); // size m (2) × scale 2
+    expect((el(r, "sline") as ExLinearElement).points).toEqual([[0, 0], [100, 50]]);
+    // A dragged label on a bent arrow stays at its labelPosition along the arc.
+    const lab = el(r, "sbent-label");
+    const lx = lab.x + lab.width / 2;
+    expect(lx).toBeGreaterThan(900 + 15);
+    expect(lx).toBeLessThan(900 + 40);
     expect((el(r, "sarr") as ExLinearElement).points).toEqual([[0, 0], [100, 50]]);
     const bent = el(r, "sbent") as ExLinearElement;
     expect(bent.points[2]).toEqual([100, 0]);
@@ -380,6 +393,24 @@ describe("tldraw → Excalidraw: details", () => {
     const p2 = el(r.file.elements, "p2a");
     expect(p2.x).toBeGreaterThanOrEqual(p1.x + p1.width + 400);
     expect(r.warnings).toEqual([{ code: "extra-page", recordId: "page:two", recordType: "page", detail: "עמוד שני" }]);
+  });
+
+  it("separates pages by their rotated extent", () => {
+    const shape = (id: string, page: string, rotation: number) => ({
+      id: `shape:${id}`, typeName: "shape", type: "geo", x: 0, y: 0, rotation, index: "a1", parentId: page,
+      props: { w: 400, h: 10, geo: "rectangle" },
+    });
+    const data = {
+      store: {
+        "page:a": { id: "page:a", typeName: "page", index: "a1", name: "A" },
+        "page:b": { id: "page:b", typeName: "page", index: "a2", name: "B" },
+        "shape:p1": shape("p1", "page:a", Math.PI / 2),
+        "shape:p2": shape("p2", "page:b", 0),
+      },
+    };
+    const els = tldrawToExcalidraw(data).file.elements;
+    // p1 stands upright: centre (-5, 200), visible right edge at x = 0.
+    close(el(els, "p2").x, 0 + 400);
   });
 
   it("reads the legacy store snapshot and the .tldr records file (tldraw 2.x arrows)", () => {

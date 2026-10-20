@@ -85,15 +85,16 @@ describe("geometry vs. tldraw's own editor", () => {
     });
     try {
       const { elements } = tldrawToExcalidraw(c.data).file;
-      const ids = ["faded", "big", "sarr", "sbent"];
+      const ids = ["faded", "big", "sarr", "sbent", "sline"];
       const got: Record<string, number[]> = {};
       const want: Record<string, number[]> = {};
       for (const id of ids) {
         const b = editor.getShapePageBounds(`shape:${id}` as TLShapeId);
         const e = elements.find((x) => x.id === id);
         if (!b || !e) continue;
-        const xs = e.type === "arrow" ? e.points.map((p) => e.x + p[0]) : [e.x, e.x + e.width];
-        const ys = e.type === "arrow" ? e.points.map((p) => e.y + p[1]) : [e.y, e.y + e.height];
+        const linear = e.type === "arrow" || e.type === "line";
+        const xs = linear ? e.points.map((p) => e.x + p[0]) : [e.x, e.x + e.width];
+        const ys = linear ? e.points.map((p) => e.y + p[1]) : [e.y, e.y + e.height];
         got[id] = [Math.min(...xs), Math.min(...ys), Math.max(...xs), Math.max(...ys)].map(Math.round);
         want[id] = [b.minX, b.minY, b.maxX, b.maxY].map(Math.round);
       }

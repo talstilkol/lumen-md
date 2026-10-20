@@ -18,11 +18,21 @@ import {
   createExcalidrawCanvas,
   EXCALIDRAW_EXT,
   listTldrawCanvases,
+  parseExcalidrawFile,
   serializeExcalidrawFile,
   TLDRAW_EXT,
   type CanvasStore,
 } from "./excalidrawFile";
 import { tldrawToExcalidraw, type ConversionWarning, type ConversionWarningCode } from "./tldrawToExcalidraw";
+
+function isExcalidrawScene(text: string): boolean {
+  try {
+    parseExcalidrawFile(text);
+    return true;
+  } catch {
+    return false;
+  }
+}
 
 export interface MigratedCanvas {
   name: string;
@@ -52,15 +62,22 @@ export async function migrateTldrawCanvases(store: CanvasStore, options: Migrate
       report.skipped.push({ name, reason: "exists" });
       continue;
     }
-    let created = false;
     try {
       const text = await store.read(name + TLDRAW_EXT);
       if (text === null) throw new Error("could not read the .tldr file");
       const result = tldrawToExcalidraw(text, { updated });
       const expected = serializeExcalidrawFile(result.file);
       await createExcalidrawCanvas(store, name, result.file);
-      created = true;
-      if ((await store.read(name + EXCALIDRAW_EXT)) !== expected) {
+      const back = await store.read(name + EXCALIDRAW_EXT);
+      if (back !== expected) {
+        if (back !== null && isExcalidrawScene(back)) {
+          // A valid scene that isn't ours: the canvas was saved in the meantime. Keep it.
+          report.skipped.push({ name, reason: "exists" });
+          continue;
+        }
+        // Our output came back damaged: take it back (only while it is still that
+        // damaged content), so the next run retries the canvas.
+        if (back !== null) await store.remove(name + EXCALIDRAW_EXT, back).catch(() => false);
         throw new Error("the written .excalidraw file did not read back");
       }
       report.converted.push({
@@ -74,8 +91,6 @@ export async function migrateTldrawCanvases(store: CanvasStore, options: Migrate
         report.skipped.push({ name, reason: "exists" });
         continue;
       }
-      // Take back a bad output this run created, so the next run retries the canvas.
-      if (created) await store.remove(name + EXCALIDRAW_EXT).catch(() => undefined);
       report.failed.push({ name, error: err instanceof Error ? err.message : String(err) });
     }
   }
