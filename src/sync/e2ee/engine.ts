@@ -27,7 +27,7 @@
 import { randomBytes, sha256Hex, toB64u } from "./bytes";
 import { conflictCopyPath, keepBothResolver, type ConflictResolver } from "./conflict";
 import { createHeader, decodeHeader, encodeHeader, HEADER_NAME, unlockHeader, type VaultHeader } from "./header";
-import type { KdfPolicy } from "./kdf";
+import { PBKDF2_MIN_ITERATIONS, type KdfPolicy } from "./kdf";
 import { DecryptError, seal, unseal, type VaultKeys } from "./keys";
 import { isSyncedPath, type LocalFiles } from "./localFiles";
 import {
@@ -35,6 +35,7 @@ import {
   checkFreshness,
   emptyManifest,
   manifestName,
+  pathRecord,
   openManifest,
   RollbackError,
   sealManifest,
@@ -66,22 +67,47 @@ class BlobMissingError extends Error {}
 /**
  * Create a vault at `provider`: the header (create-only) and the first,
  * empty manifest (counter 1). Returns the keys and the creator's anchor.
+ *
+ * Creation can be retried after an interruption: when a header is already
+ * there that this passphrase unlocks and the vault is still empty (no
+ * manifest, or only the empty first one), creation resumes on it.
+ * Otherwise — someone else's vault, or one with data — `VaultExistsError`.
  */
 export async function createVault(
   provider: SyncProvider,
   passphrase: string,
   opts: { pbkdf2Iterations?: number } = {},
 ): Promise<{ header: VaultHeader; keys: VaultKeys; anchor: FreshnessAnchor }> {
-  const { header, keys } = await createHeader(passphrase, opts);
+  let { header, keys } = await createHeader(passphrase, opts);
   try {
     await provider.put(HEADER_NAME, encodeHeader(header), { ifNoneMatch: "*" });
+  } catch (e) {
+    if (!(e instanceof PreconditionFailedError)) throw e;
+    // The floor never drops below production unless the caller asked for fewer iterations itself.
+    const floor = Math.min(PBKDF2_MIN_ITERATIONS, opts.pbkdf2Iterations ?? PBKDF2_MIN_ITERATIONS);
+    try {
+      ({ header, keys } = await unlockVault(provider, passphrase, { minPbkdf2Iterations: floor }));
+    } catch {
+      throw new VaultExistsError();
+    }
+  }
+  const name = await manifestName(keys);
+  const existing = await provider.get(name);
+  if (existing) {
+    const { manifest, digest } = await openManifest(keys, existing.data, name);
+    if (manifest.counter === 1 && Object.keys(manifest.files).length === 0) {
+      return { header, keys, anchor: { counter: 1, digest } };
+    }
+    throw new VaultExistsError();
+  }
+  const first: Manifest = { ...emptyManifest(keys.vaultId), counter: 1 };
+  const sealed = await sealManifest(keys, first, name);
+  try {
+    await provider.put(name, sealed.bytes, { ifNoneMatch: "*" });
   } catch (e) {
     if (e instanceof PreconditionFailedError) throw new VaultExistsError();
     throw e;
   }
-  const first: Manifest = { ...emptyManifest(keys.vaultId), counter: 1 };
-  const sealed = await sealManifest(keys, first);
-  await provider.put(await manifestName(keys), sealed.bytes, { ifNoneMatch: "*" });
   return { header, keys, anchor: { counter: 1, digest: sealed.digest } };
 }
 
@@ -153,13 +179,10 @@ export class E2eeSync {
 
   private async loadState(): Promise<DeviceState> {
     if (this.state) return this.state;
-    this.state = (await this.o.store.load()) ?? {
-      deviceId: toB64u(randomBytes(9)),
-      anchor: null,
-      freshness: "unverified",
-      base: {},
-      pending: [],
-    };
+    const loaded = await this.o.store.load();
+    this.state = loaded
+      ? { ...loaded, base: pathRecord(loaded.base) }
+      : { deviceId: toB64u(randomBytes(9)), anchor: null, freshness: "unverified", base: pathRecord(), pending: [] };
     return this.state;
   }
 
@@ -203,7 +226,10 @@ export class E2eeSync {
       const got = await readPairingCode(this.o.keys, code, this.o.now());
       const s = await this.loadState();
       // Never move the anchor backwards; equal counters must be the same manifest.
-      if (s.anchor) checkFreshness(got, s.anchor);
+      // Never move the anchor backwards; equal counters must be the same manifest.
+      if (s.anchor && got.counter === s.anchor.counter && got.digest !== s.anchor.digest) {
+        throw new RollbackError(s.anchor.counter, got.counter, "fork");
+      }
       if (!s.anchor || got.counter > s.anchor.counter) s.anchor = got;
       s.freshness = "paired";
       await this.save();
@@ -249,6 +275,16 @@ export class E2eeSync {
       this.names.set("", n);
     }
     return n;
+  }
+
+  /**
+   * The stored ancestor of `path`, only if it is the version `entry` names:
+   * bytes and metadata are saved in two steps, and an interruption between
+   * them must not hand the merge a wrong ancestor.
+   */
+  private async baseBytes(path: string, entry: ManifestEntry): Promise<Uint8Array | null> {
+    const data = await this.o.store.getBase(path);
+    return data && (await sha256Hex(data)) === entry.hash ? data : null;
   }
 
   private async fetchBlob(path: string, e: ManifestEntry): Promise<Uint8Array> {
@@ -307,7 +343,7 @@ export class E2eeSync {
         return res;
       }
 
-      const next: Manifest = { ...remote, counter: remote.counter + 1, files: { ...remote.files } };
+      const next: Manifest = { ...remote, counter: remote.counter + 1, files: pathRecord(remote.files) };
       for (const [path, c] of changes) next.files[path] = c.entry;
       const sealed = await sealManifest(this.o.keys, next, await this.manifestObject());
       try {
@@ -403,7 +439,7 @@ export class E2eeSync {
       }
       const decision = await this.o.resolver({
         path,
-        base: b && !b.deleted ? await this.o.store.getBase(path) : null,
+        base: b && !b.deleted ? await this.baseBytes(path, b) : null,
         local: localData,
         remote: remoteData,
       });
@@ -498,19 +534,18 @@ export class E2eeSync {
         if (e.by === s.deviceId && !e.deleted) referenced.add(await this.blob(path, e.rev));
       }
     }
-    const garbage = [...superseded, ...s.pending.filter((n) => !referenced.has(n))];
-    s.pending = [];
+    // Every name stays recorded until its delete succeeded, so an interrupted
+    // clean-up is finished by a later round instead of leaking the object.
+    const garbage = [...new Set([...superseded, ...s.pending.filter((n) => !referenced.has(n))])];
+    s.pending = [...garbage];
     await this.save();
-    const failed: string[] = [];
     for (const name of garbage) {
       try {
         await this.o.provider.delete(name);
       } catch {
-        failed.push(name); // costs space, never data; retried after the next round
+        continue; // costs space, never data; retried after the next round
       }
-    }
-    if (failed.length) {
-      s.pending.push(...failed);
+      s.pending = s.pending.filter((n) => n !== name);
       await this.save();
     }
   }

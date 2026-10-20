@@ -625,3 +625,130 @@ describe("e2ee sync: the vault as the local side", () => {
     expect(await s.getBase("a.md")).toBeNull();
   });
 });
+
+describe("e2ee sync: edge cases", () => {
+  it("a device that trusted a replayed manifest is raised by a newer pairing code", async () => {
+    const provider = memoryProvider();
+    const a = await newVault(provider);
+    const name = await manifestName(a.keys);
+    a.files.set("a.md", "1");
+    await a.sync.sync();
+    const old = provider.objects.get(name)!; // counter 2
+    a.files.set("b.md", "2");
+    await a.sync.sync(); // counter 3
+    const current = provider.objects.get(name)!;
+
+    provider.objects.set(name, { ...old, etag: "replayed" });
+    const d = await joinVault("D", provider);
+    await d.sync.sync();
+    expect(await d.sync.freshness()).toMatchObject({ source: "unverified", counter: 2 });
+    await d.sync.pair(await a.sync.pairingCode());
+    expect(await d.sync.freshness()).toEqual({ source: "paired", verified: true, counter: 3 });
+    await expect(d.sync.sync()).rejects.toMatchObject({ kind: "older", seen: 3, got: 2 });
+    provider.objects.set(name, current);
+    await d.sync.sync();
+    expect(snapshot(d)).toEqual(snapshot(a));
+
+    // A code for the same counter but another manifest is a fork.
+    const { manifest } = await openManifest(a.keys, current.data);
+    const fake = await sealManifest(a.keys, { ...manifest, files: {} });
+    const f2 = await joinVault("F2", provider);
+    provider.objects.set(name, { data: fake.bytes, etag: "fake" });
+    await f2.sync.sync();
+    provider.objects.set(name, current);
+    await expect(f2.sync.pair(await a.sync.pairingCode())).rejects.toMatchObject({ kind: "fork" });
+  });
+
+  it("creation interrupted after the header resumes on retry; a vault with data is never taken over", async () => {
+    for (const phase of ["after", "before"] as const) {
+      let failManifestPut = true;
+      let header = "";
+      const provider = memoryProvider({
+        fault: (op, name, ph) => {
+          if (op !== "put") return;
+          if (phase === "after" && name === HEADER_NAME && ph === "after" && !header) {
+            header = name;
+            throw new ProviderUnavailableError();
+          }
+          if (phase === "before" && name !== HEADER_NAME && ph === "before" && failManifestPut) {
+            failManifestPut = false;
+            throw new ProviderUnavailableError();
+          }
+        },
+      });
+      await expect(createVault(provider, PASSPHRASE, { pbkdf2Iterations: TEST_ITERATIONS })).rejects.toBeInstanceOf(
+        ProviderUnavailableError,
+      );
+      const { keys, anchor } = await createVault(provider, PASSPHRASE, { pbkdf2Iterations: TEST_ITERATIONS });
+      expect(anchor.counter).toBe(1);
+      const a = device("A", provider, keys);
+      await a.sync.markCreated(anchor);
+      a.files.set("x.md", "x");
+      await a.sync.sync();
+      await expect(createVault(provider, PASSPHRASE, { pbkdf2Iterations: TEST_ITERATIONS })).rejects.toBeInstanceOf(
+        VaultExistsError,
+      );
+    }
+  });
+
+  it("syncs notes named like Object.prototype members", async () => {
+    const provider = memoryProvider();
+    const a = await newVault(provider);
+    for (const p of ["__proto__", "constructor", "notes/toString", "hasOwnProperty.md"]) a.files.set(p, `content of ${p}`);
+    expect((await a.sync.sync()).uploaded).toBe(4);
+    expect((await a.sync.sync()).uploaded).toBe(0);
+    const b = await joinVault("B", provider);
+    expect((await b.sync.sync()).downloaded).toBe(4);
+    expect(snapshot(b)).toEqual(snapshot(a));
+    b.files.set("__proto__", "edited");
+    await b.sync.sync();
+    await a.sync.sync();
+    expect(a.files.text("__proto__")).toBe("edited");
+  });
+
+  it("hands the merge the stored ancestor only when it is the version the base names", async () => {
+    const seen: Array<string | null> = [];
+    const record: ConflictResolver = async (c) => {
+      seen.push(c.base ? new TextDecoder().decode(c.base) : null);
+      return { kind: "local" };
+    };
+    const provider = memoryProvider();
+    const a = await newVault(provider);
+    a.files.set("n.md", "ancestor");
+    await a.sync.sync();
+    const b = await joinVault("B", provider, record);
+    await b.sync.sync();
+    for (const tamper of [false, true]) {
+      a.files.set("n.md", `A ${tamper}`);
+      await a.sync.sync();
+      b.files.set("n.md", `B ${tamper}`);
+      // An interruption between saving the bytes and the metadata leaves other bytes behind.
+      if (tamper) await b.store.setBase("n.md", utf8("not the ancestor"));
+      await b.sync.sync();
+    }
+    expect(seen).toEqual(["ancestor", null]);
+  });
+
+  it("keeps garbage names until their delete succeeded", async () => {
+    let failDeletes = 0;
+    const provider = memoryProvider({
+      fault: (op, _n, phase) => {
+        if (op === "delete" && phase === "before" && failDeletes > 0) {
+          failDeletes--;
+          throw new ProviderUnavailableError();
+        }
+      },
+    });
+    const a = await newVault(provider);
+    a.files.set("x.md", "1");
+    await a.sync.sync();
+    failDeletes = 1;
+    a.files.set("x.md", "2");
+    await a.sync.sync();
+    expect(provider.objects.size).toBe(4); // the replaced blob is still there…
+    expect(a.store.state?.pending).toHaveLength(1); // …and still recorded
+    await a.sync.sync();
+    expect(provider.objects.size).toBe(3);
+    expect(a.store.state?.pending).toEqual([]);
+  });
+});

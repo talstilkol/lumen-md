@@ -101,10 +101,14 @@ export function isSyncedPath(path: string): boolean {
 }
 
 /**
- * The active vault (plan 4.1) as the local side. The hash check and the
- * write are two steps, so a write landing in between can still be lost to the
- * sync's write; the vault watcher (plan 4.4) reports such a change as external
- * and its conflict flow keeps both versions.
+ * The active vault (plan 4.1) as the local side.
+ *
+ * Known limit: the hash check and the write are two steps, because
+ * VaultBackend (and underneath it OPFS, the File System Access API and the
+ * desktop file system) has no conditional write. Another program saving the
+ * same file in the moment between them is overwritten, and the vault watcher
+ * records the sync's write as its own. The window is one stat + read + hash;
+ * closing it needs a compare-and-swap write in VaultBackend.
  */
 export function vaultLocalFiles(backend: VaultBackend): LocalFiles {
   const hashAt = async (path: string): Promise<string | null> => {

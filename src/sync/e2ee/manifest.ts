@@ -58,13 +58,23 @@ export function blobName(keys: VaultKeys, path: string, rev: string): Promise<st
   return opaqueName(keys, `blob\u0000${path}\u0000${rev}`);
 }
 
+/**
+ * A path-keyed record without a prototype: a note called `__proto__` or
+ * `constructor` is an ordinary own key, never an inherited one.
+ */
+export function pathRecord<T>(from?: Record<string, T>): Record<string, T> {
+  const out = Object.create(null) as Record<string, T>;
+  if (from) for (const k of Object.keys(from)) out[k] = from[k];
+  return out;
+}
+
 export function emptyManifest(vaultId: string): Manifest {
-  return { protocol: PROTOCOL_VERSION, vaultId, counter: 0, files: {} };
+  return { protocol: PROTOCOL_VERSION, vaultId, counter: 0, files: pathRecord() };
 }
 
 /** Sorted keys, so the same manifest always seals the same plaintext (and digest). */
 function canonical(m: Manifest): string {
-  const files: Record<string, ManifestEntry> = {};
+  const files = pathRecord<ManifestEntry>();
   for (const p of Object.keys(m.files).sort()) files[p] = m.files[p];
   return JSON.stringify({ protocol: m.protocol, vaultId: m.vaultId, counter: m.counter, files });
 }
@@ -108,7 +118,7 @@ export async function openManifest(
   if (o.vaultId !== keys.vaultId) throw new DecryptError("The manifest belongs to another vault");
   if (!Number.isSafeInteger(o.counter) || (o.counter as number) < 1) throw new DecryptError("Bad manifest counter");
   if (!o.files || typeof o.files !== "object") throw new DecryptError("Bad manifest files");
-  const files: Record<string, ManifestEntry> = {};
+  const files = pathRecord<ManifestEntry>();
   for (const [p, e] of Object.entries(o.files as Record<string, unknown>)) {
     if (!isSyncedPath(p) || !isEntry(e)) throw new DecryptError("Bad manifest entry");
     files[p] = e;
