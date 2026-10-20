@@ -1496,5 +1496,6 @@
   "git.conflict.allResolved": "所有冲突已解决。",
   "git.watch.conflicts": "自动拉取：已在文件中标记 {count} 个冲突。拉取以解决。",
   "git.pull.kindClashes": "远端文件/文件夹已变更，此处保持不变：{files}",
-  "git.alert.corsProxyBlocked": "应用的安全策略会拦截 {origin}。请使用 http://localhost:9999 或部署允许的代理。"
+  "git.alert.corsProxyBlocked": "应用的安全策略会拦截 {origin}。请使用 http://localhost:9999 或部署允许的代理。",
+  "git.commit.skipped": "未提交（文件/文件夹冲突）：{files}"
 }

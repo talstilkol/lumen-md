@@ -1496,5 +1496,6 @@
   "git.conflict.allResolved": "حُلّت جميع التعارضات.",
   "git.watch.conflicts": "السحب التلقائي: {count} تعارضات معلّمة في الملفات. اسحب لحلها.",
   "git.pull.kindClashes": "ملف/مجلد تغيّر في المستودع البعيد، أُبقي هنا كما هو: {files}",
-  "git.alert.corsProxyBlocked": "سياسة أمان التطبيق تحظر {origin}. استخدم http://localhost:9999 أو وكيلًا يسمح به النشر."
+  "git.alert.corsProxyBlocked": "سياسة أمان التطبيق تحظر {origin}. استخدم http://localhost:9999 أو وكيلًا يسمح به النشر.",
+  "git.commit.skipped": "لم تُدرج في الالتزام (تعارض ملف/مجلد): {files}"
 }

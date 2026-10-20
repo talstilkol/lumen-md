@@ -1608,6 +1608,7 @@ const en: Strings = {
   "git.watch.conflicts": "Auto-pull: {count} conflicts marked in the files. Pull to resolve them.",
   "git.pull.kindClashes": "File/folder changed upstream, kept as is here: {files}",
   "git.alert.corsProxyBlocked": "The app's security policy blocks {origin}. Use http://localhost:9999 or a proxy the deployment allows.",
+  "git.commit.skipped": "Not committed (file/folder clash): {files}",
 };
 
 

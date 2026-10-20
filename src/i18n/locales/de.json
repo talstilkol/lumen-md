@@ -1496,5 +1496,6 @@
   "git.conflict.allResolved": "Alle Konflikte gelöst.",
   "git.watch.conflicts": "Auto-Pull: {count} Konflikte in den Dateien markiert. Pullen, um sie zu lösen.",
   "git.pull.kindClashes": "Datei/Ordner upstream geändert, hier unverändert: {files}",
-  "git.alert.corsProxyBlocked": "Die Sicherheitsrichtlinie der App blockiert {origin}. Nimm http://localhost:9999 oder einen von der Bereitstellung erlaubten Proxy."
+  "git.alert.corsProxyBlocked": "Die Sicherheitsrichtlinie der App blockiert {origin}. Nimm http://localhost:9999 oder einen von der Bereitstellung erlaubten Proxy.",
+  "git.commit.skipped": "Nicht committet (Datei/Ordner-Konflikt): {files}"
 }

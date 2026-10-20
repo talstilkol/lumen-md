@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-10-20T17:45:38.616Z",
+  "generated_at": "2026-10-20T18:47:20.215Z",
   "source": "src/i18n/index.ts (en bundle)",
-  "count": 1498,
+  "count": 1499,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -8084,6 +8084,13 @@
       "en": "The app's security policy blocks {origin}. Use http://localhost:9999 or a proxy the deployment allows.",
       "vars": [
         "origin"
+      ]
+    },
+    {
+      "key": "git.commit.skipped",
+      "en": "Not committed (file/folder clash): {files}",
+      "vars": [
+        "files"
       ]
     }
   ]

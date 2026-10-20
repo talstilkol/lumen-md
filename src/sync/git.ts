@@ -24,6 +24,7 @@ import { getSecret, setSecret, initSecretStore, flushSecrets } from "../lib/secr
 import { hasConflictMarkers, isLfsPointer } from "./gitMerge";
 import { integrateFetched, type PendingConflict, type PullGit, type SafePullResult } from "./gitPull";
 import { authFor, getCorsProxy } from "./gitProxy";
+import { writeIntoMirror } from "./gitMirror";
 import { getVaultBackend } from "../storage/vault";
 
 type Fs = {
@@ -274,12 +275,17 @@ export class UnresolvedConflictsError extends Error {
  * checkout, commit, and push to origin. `repoFolder` must match a previous
  * clone target.
  */
+export interface CommitResult {
+  /** Vault paths left out: the repository has a folder where the vault has a file, or the reverse. */
+  skipped: string[];
+}
+
 export async function commitAndPush(
   repoFolder: string,
   message: string,
   author: { name: string; email: string },
   opts: { token?: string; branch?: string } = {},
-): Promise<void> {
+): Promise<CommitResult> {
   const { fs, http, git } = await load();
   const dir = `/git/${repoFolder}`;
   // Mirror the vault → lightning-fs (only files under the repo's prefix),
@@ -297,21 +303,9 @@ export async function commitAndPush(
     if (!bytes) continue;
     files.push({ relative: f.path.slice(prefix.length), bytes });
   }
-  for (const { relative, bytes } of files) {
-    const full = `${dir}/${relative}`;
-    // Make sure intermediate dirs exist.
-    const parts = relative.split("/").slice(0, -1);
-    let cur = dir;
-    for (const part of parts) {
-      cur += `/${part}`;
-      try {
-        await fs.promises.mkdir(cur);
-      } catch {
-        /* exists */
-      }
-    }
-    await fs.promises.writeFile(full, bytes);
-  }
+  // A path whose shape differs in the mirror (file vs folder, kept that way
+  // by a clone into an existing folder) is skipped and reported, never forced.
+  const skipped = (await writeIntoMirror(fs, dir, files)).map((r) => prefix + r);
   // Stage everything and commit.
   await git.add({ fs, dir, filepath: "." });
   await git.commit({
@@ -335,6 +329,7 @@ export async function commitAndPush(
     corsProxy: getCorsProxy(),
     ...authFor(token),
   });
+  return { skipped };
 }
 
 export interface GitStatusEntry {

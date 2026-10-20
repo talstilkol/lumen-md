@@ -72,8 +72,12 @@ export function buildGitCommands({ showWorkspace, toggleWorkspace, liveDoc }: Co
         const { getGitIdentity, commitAndPush, UnresolvedConflictsError } = await gitApi();
         const identity = await getGitIdentity();
         try {
-          await commitAndPush(repoFolder, message, identity);
-          await uiAlert({ message: t("git.alert.pushed") });
+          const { skipped } = await commitAndPush(repoFolder, message, identity);
+          await uiAlert({
+            message: skipped.length
+              ? `${t("git.alert.pushed")}\n\n${t("git.commit.skipped", { files: skipped.slice(0, 5).join(", ") })}`
+              : t("git.alert.pushed"),
+          });
         } catch (e) {
           if (e instanceof UnresolvedConflictsError) {
             await uiAlert({ message: t("git.commit.unresolved", { files: e.paths.join(", ") }) });
