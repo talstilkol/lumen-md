@@ -72,6 +72,10 @@ describe("research client token (A8)", () => {
   });
 
   it("A8: sends the settings token only with the settings endpoint, else the build token", async () => {
+    // An override without its own token gets none, never the build's.
+    store.set("lumen.research.endpoint", "http://localhost:8787");
+    expect(researchToken("build-token")).toBe("");
+    store.delete("lumen.research.endpoint");
     await setSecret("lumen.research.token", "local-token");
     expect(researchToken("build-token")).toBe("build-token"); // the build's endpoint: the build's token
     store.set("lumen.research.endpoint", "http://localhost:8787");
