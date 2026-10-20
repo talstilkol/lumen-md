@@ -17,12 +17,13 @@
  *                                      → written (nothing local to lose);
  *   - unchanged here (ours = base)    → theirs is written;
  *   - changed on both sides           → a line-based three-way merge
- *     (src/sync/cloud/diff.ts, the one the conflict dialog shows): clean →
- *     the merged text; overlapping edits → a conflict, with the usual
- *     `<<<<<<<` / `=======` / `>>>>>>>` markers, for the resolution screen;
- *     binary files are never merged: ours stays, theirs goes to a copy.
+ *     (diff3: stable lines both sides kept, unstable chunks between them):
+ *     clean → the merged text; a chunk both sides changed differently —
+ *     including one side deleting what the other edited — is a conflict,
+ *     with the usual `<<<<<<<` / `=======` / `>>>>>>>` markers, for the
+ *     resolution screen; binary files are never merged: ours stays, theirs
+ *     goes to a copy.
  */
-import { threeWayDiff } from "./cloud/diff";
 
 export type Bytes = Uint8Array;
 
@@ -53,14 +54,31 @@ const decoder = new TextDecoder();
 const strictDecoder = new TextDecoder("utf-8", { fatal: true });
 const encoder = new TextEncoder();
 
-/** Is this a Git LFS pointer (a small text stub that stands for the real content)? */
+/**
+ * Is this a Git LFS pointer (a small text stub that stands for the real
+ * content)? The whole structure of the spec: the exact version line first,
+ * then `key value` lines in key order, among them `oid sha256:<64 hex>` and
+ * `size <digits>`, each ending in a newline.
+ */
 export function isLfsPointer(data: Bytes | string | null): boolean {
   if (data === null) return false;
   if (typeof data !== "string") {
     if (data.length > 1024) return false;
     data = decoder.decode(data);
   }
-  return data.length <= 1024 && data.startsWith(LFS_POINTER_PREFIX) && /\noid sha256:[0-9a-f]{64}\n/.test(data);
+  if (data.length > 1024 || !data.startsWith(`${LFS_POINTER_PREFIX}\n`) || !data.endsWith("\n")) return false;
+  const lines = data.slice(0, -1).split("\n").slice(1);
+  let oid = false;
+  let size = false;
+  let last = "";
+  for (const line of lines) {
+    const m = /^([a-z0-9.-]+) (.+)$/.exec(line);
+    if (!m || m[1] <= last) return false;
+    last = m[1];
+    if (m[1] === "oid") oid = /^sha256:[0-9a-f]{64}$/.test(m[2]);
+    else if (m[1] === "size") size = /^\d+$/.test(m[2]);
+  }
+  return oid && size;
 }
 
 /** Binary, for merging: a NUL byte near the start, or not valid UTF-8 (git's own heuristic, plus the UTF-8 check). */
@@ -87,15 +105,51 @@ export interface MergeLabels {
   theirs: string;
 }
 
-/** Does this text still hold an unresolved conflict (a `<<<<<<<` … `>>>>>>>` block)? */
+/** Does this text still hold an unresolved conflict: a `<<<<<<<` line, then `=======`, then `>>>>>>>`, in that order? */
 export function hasConflictMarkers(text: string): boolean {
-  return /^<{7}(?: .*)?$/m.test(text) && /^={7}$/m.test(text) && /^>{7}(?: .*)?$/m.test(text);
+  return /^<{7}(?: [^\n]*)?\n(?:[^\n]*\n)*?={7}\n(?:[^\n]*\n)*?>{7}(?: [^\n]*)?$/m.test(text);
 }
 
+/** Pairs [i, j] of equal lines in a longest common subsequence of a and b. */
+function lcsPairs(a: string[], b: string[]): Array<[number, number]> | null {
+  // Common head and tail first: most merges touch a few lines of a long note.
+  let head = 0;
+  while (head < a.length && head < b.length && a[head] === b[head]) head++;
+  let tail = 0;
+  while (tail < a.length - head && tail < b.length - head && a[a.length - 1 - tail] === b[b.length - 1 - tail]) tail++;
+  const n = a.length - head - tail;
+  const m = b.length - head - tail;
+  if (n * m > 25_000_000) return null; // too big to align here: the caller treats it as one conflict
+  const dp: Uint32Array[] = Array.from({ length: n + 1 }, () => new Uint32Array(m + 1));
+  for (let i = n - 1; i >= 0; i--) {
+    for (let j = m - 1; j >= 0; j--) {
+      dp[i][j] = a[head + i] === b[head + j] ? dp[i + 1][j + 1] + 1 : Math.max(dp[i + 1][j], dp[i][j + 1]);
+    }
+  }
+  const pairs: Array<[number, number]> = [];
+  for (let k = 0; k < head; k++) pairs.push([k, k]);
+  let i = 0;
+  let j = 0;
+  while (i < n && j < m) {
+    if (a[head + i] === b[head + j]) {
+      pairs.push([head + i, head + j]);
+      i++;
+      j++;
+    } else if (dp[i + 1][j] >= dp[i][j + 1]) i++;
+    else j++;
+  }
+  for (let k = tail; k > 0; k--) pairs.push([a.length - k, b.length - k]);
+  return pairs;
+}
+
+const same = (x: string[], y: string[]) => x.length === y.length && x.every((l, i) => l === y[i]);
+
 /**
- * Line-based three-way merge. Changes made on one side only are taken;
- * the same change on both sides is taken once; different changes to the
- * same lines are a conflict, written between markers.
+ * Line-based three-way merge (diff3). Lines kept by both sides anchor the
+ * merge; between anchors, a chunk changed on one side only takes that
+ * side, the same change on both sides is taken once, and anything else —
+ * different edits, or a deletion against an edit — is a conflict, written
+ * between markers.
  */
 export function mergeText(
   base: string,
@@ -106,24 +160,43 @@ export function mergeText(
   if (ours === theirs) return { clean: true, text: ours };
   if (ours === base) return { clean: true, text: theirs };
   if (theirs === base) return { clean: true, text: ours };
+  const B = base.split("\n");
+  const O = ours.split("\n");
+  const T = theirs.split("\n");
+  const conflictBlock = (o: string[], t: string[]) => [`<<<<<<< ${labels.ours}`, ...o, "=======", ...t, `>>>>>>> ${labels.theirs}`];
+  const po = lcsPairs(B, O);
+  const pt = lcsPairs(B, T);
+  if (!po || !pt) return { clean: false, text: conflictBlock(O, T).join("\n") };
+  const inO = new Map(po);
+  const inT = new Map(pt);
   const out: string[] = [];
   let clean = true;
-  for (const h of threeWayDiff(base, ours, theirs)) {
-    switch (h.op) {
-      case "equal":
-      case "local":
-      case "both":
-        out.push(...h.local);
-        break;
-      case "remote":
-        out.push(...h.remote);
-        break;
-      case "conflict":
-        clean = false;
-        out.push(`<<<<<<< ${labels.ours}`, ...h.local, "=======", ...h.remote, `>>>>>>> ${labels.theirs}`);
-        break;
+  let b0 = 0;
+  let o0 = 0;
+  let t0 = 0;
+  const flush = (b1: number, o1: number, t1: number) => {
+    const cb = B.slice(b0, b1);
+    const co = O.slice(o0, o1);
+    const ct = T.slice(t0, t1);
+    if (same(co, cb)) out.push(...ct);
+    else if (same(ct, cb) || same(co, ct)) out.push(...co);
+    else {
+      clean = false;
+      out.push(...conflictBlock(co, ct));
     }
+  };
+  for (let i = 0; i < B.length; i++) {
+    const oi = inO.get(i);
+    const ti = inT.get(i);
+    if (oi === undefined || ti === undefined) continue;
+    // A stable line: kept by both sides.
+    flush(i, oi, ti);
+    out.push(B[i]);
+    b0 = i + 1;
+    o0 = oi + 1;
+    t0 = ti + 1;
   }
+  flush(B.length, O.length, T.length);
   return { clean, text: out.join("\n") };
 }
 

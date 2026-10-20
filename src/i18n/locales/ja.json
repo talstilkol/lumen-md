@@ -1494,5 +1494,7 @@
   "git.conflict.later": "後で解決",
   "git.conflict.left": "競合が {count} 件残っています。ファイルには競合マーカーが残ります。もう一度プルして解決してください。",
   "git.conflict.allResolved": "すべての競合を解決しました。",
-  "git.watch.conflicts": "自動プルで {count} 件の競合が見つかりました。ファイル内に印があります。「Git: 現在のリポジトリをプル」で解決してください。"
+  "git.watch.conflicts": "自動プルで {count} 件の競合が見つかりました。ファイル内に印があります。「Git: 現在のリポジトリをプル」で解決してください。",
+  "git.pull.kindClashes": "リモートではフォルダーとファイルが入れ替わっていますが、この保管庫では元の種類のままです。ここではそのまま残しました: {files}",
+  "git.alert.corsProxyBlocked": "このアプリのセキュリティポリシーは {origin} を許可していないため、ブラウザーがプロキシをブロックします。http://localhost:9999 を使うか、デプロイに追加してもらってください（VITE_GIT_CORS_PROXY または VITE_CSP_CONNECT_EXTRA）。何も変更していません。"
 }

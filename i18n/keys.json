@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-10-20T17:02:10.827Z",
+  "generated_at": "2026-10-20T17:35:18.609Z",
   "source": "src/i18n/index.ts (en bundle)",
-  "count": 1496,
+  "count": 1498,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -8070,6 +8070,20 @@
       "en": "Auto-pull found {count} conflicts; they are marked in the files. Run “Git: pull current repo” to resolve them.",
       "vars": [
         "count"
+      ]
+    },
+    {
+      "key": "git.pull.kindClashes",
+      "en": "Upstream turned these into folders or files where this vault has the other kind; they were left as they are here: {files}",
+      "vars": [
+        "files"
+      ]
+    },
+    {
+      "key": "git.alert.corsProxyBlocked",
+      "en": "This app's security policy does not allow {origin}, so the browser would block the proxy. Use http://localhost:9999, or have the deployment add it (VITE_GIT_CORS_PROXY or VITE_CSP_CONNECT_EXTRA). Nothing was changed.",
+      "vars": [
+        "origin"
       ]
     }
   ]

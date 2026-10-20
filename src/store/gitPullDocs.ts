@@ -126,11 +126,18 @@ export async function reportPull(result: PullResult): Promise<void> {
   }
   if (result.mergedIntoOpen.length) lines.push(t("git.pull.mergedIntoOpen", { files: result.mergedIntoOpen.join(", ") }));
   if (result.copies.length) lines.push(t("git.pull.copies", { files: result.copies.join(", ") }));
+  if (result.kindClashes.length) lines.push(t("git.pull.kindClashes", { files: result.kindClashes.slice(0, 5).join(", ") }));
   const lfs = [...result.lfsSkipped, ...result.lfsPointers];
   if (lfs.length) lines.push(t("git.lfs.unsupported", { files: lfs.slice(0, 5).join(", ") }));
   await uiAlert({ message: lines.join("\n\n") });
   if (!result.conflicts.length) return;
   const left = await resolveGitConflicts(result.conflicts);
+  // Remember what is still open, per repository: the next pull offers it again.
+  const { setPendingConflicts } = await import("../sync/git");
+  const repos = new Set(result.conflicts.map((c) => c.path.split("/")[0]));
+  for (const repo of repos) {
+    await setPendingConflicts(repo, result.conflicts.filter((c) => c.path.split("/")[0] === repo && left.includes(c.path)));
+  }
   if (left.length) showAiToast(t("git.conflict.left", { count: left.length }), "info");
   else showAiToast(t("git.conflict.allResolved"), "success");
 }

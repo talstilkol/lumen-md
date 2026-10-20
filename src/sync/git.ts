@@ -18,13 +18,13 @@ import {
   readWorkspaceBlob,
   readWorkspaceFile,
   workspaceHasEntry,
-  workspaceHasFile,
   writeWorkspaceBlob,
 } from "../storage/workspace";
 import { getSecret, setSecret, initSecretStore, flushSecrets } from "../lib/secretStore";
 import { hasConflictMarkers, isLfsPointer } from "./gitMerge";
 import { integrateFetched, type PendingConflict, type PullGit, type SafePullResult } from "./gitPull";
 import { authFor, getCorsProxy } from "./gitProxy";
+import { getVaultBackend } from "../storage/vault";
 
 type Fs = {
   promises: {
@@ -98,14 +98,47 @@ function repoNameFromUrl(url: string): string {
   return m?.[1] ?? "repo";
 }
 
-/** The file's bytes in the vault, or null when no file is there. */
+/**
+ * The file's bytes in the vault, or null when nothing is there. A read that
+ * fails rejects: it must never pass for "absent" — a pull would then write
+ * over the file, a commit would drop it.
+ */
 async function readVaultBytes(path: string): Promise<Uint8Array | null> {
-  if (!(await workspaceHasFile(path))) return null;
-  try {
-    return new Uint8Array(await (await readWorkspaceBlob(path)).arrayBuffer());
-  } catch {
-    return null;
+  const st = await getVaultBackend().stat(path);
+  if (!st || st.kind !== "file") return null;
+  return new Uint8Array(await (await readWorkspaceBlob(path)).arrayBuffer());
+}
+
+async function vaultKind(path: string): Promise<"file" | "directory" | null> {
+  return (await getVaultBackend().stat(path))?.kind ?? null;
+}
+
+// ── Conflicts left for later (plan 3.3) ──────────────────────────────────
+// A conflict the user chose to "resolve later" stays in its file between
+// markers. The pull already advanced the mirror, so it is remembered here:
+// the next pull offers it again, and commit refuses while its markers are
+// still in the file (only for files a pull marked — a note that merely shows
+// conflict markers as an example is never blocked).
+
+const CONFLICTS_KEY = (repoFolder: string) => `lumen.git.conflicts.v1:${repoFolder}`;
+
+export async function getPendingConflicts(repoFolder: string): Promise<PendingConflict[]> {
+  const v = (await get(CONFLICTS_KEY(repoFolder))) as PendingConflict[] | undefined;
+  return Array.isArray(v) ? v : [];
+}
+
+export async function setPendingConflicts(repoFolder: string, conflicts: PendingConflict[]): Promise<void> {
+  await set(CONFLICTS_KEY(repoFolder), conflicts.filter((c) => c.where === "file"));
+}
+
+/** The remembered conflicts whose files still hold markers (the others were fixed by hand). */
+async function stillConflicted(repoFolder: string): Promise<PendingConflict[]> {
+  const out: PendingConflict[] = [];
+  for (const c of await getPendingConflicts(repoFolder)) {
+    const bytes = await readVaultBytes(c.path).catch(() => null);
+    if (bytes && hasConflictMarkers(new TextDecoder().decode(bytes))) out.push(c);
   }
+  return out;
 }
 
 function sameBytes(a: Uint8Array, b: Uint8Array): boolean {
@@ -233,16 +266,16 @@ export async function commitAndPush(
   const all = await listWorkspace({ includeAssets: true, includeHidden: true });
   const prefix = `${repoFolder}/`;
   const repoFiles = all.filter((f) => f.path.startsWith(prefix));
-  const unresolved: string[] = [];
+  // A pull left conflict markers: committing them would publish them.
+  const pending = await stillConflicted(repoFolder);
+  await setPendingConflicts(repoFolder, pending);
+  if (pending.length) throw new UnresolvedConflictsError(pending.map((c) => c.path));
   const files: Array<{ relative: string; bytes: Uint8Array }> = [];
   for (const f of repoFiles) {
     const bytes = await readVaultBytes(f.path);
     if (!bytes) continue;
-    if (bytes.length < 5_000_000 && hasConflictMarkers(new TextDecoder().decode(bytes))) unresolved.push(f.path);
     files.push({ relative: f.path.slice(prefix.length), bytes });
   }
-  // A pull left conflict markers: committing them would publish them.
-  if (unresolved.length) throw new UnresolvedConflictsError(unresolved);
   for (const { relative, bytes } of files) {
     const full = `${dir}/${relative}`;
     // Make sure intermediate dirs exist.
@@ -383,12 +416,13 @@ export async function pullRepo(
       changedFiles: 0,
       deletedFiles: 0,
       upToDate: true,
-      conflicts: [],
+      conflicts: await stillConflicted(repoFolder),
       keptDeletedUpstream: [],
       lfsSkipped: [],
       lfsPointers: [],
       copies: [],
       mergedIntoOpen: [],
+      kindClashes: [],
       head,
     };
   }
@@ -422,7 +456,8 @@ export async function integrateIntoVault(
   const { fs, git } = await load();
   const author = opts.author ?? (await getGitIdentity());
   const editor = opts.editor ?? (await import("../store/gitPullDocs")).pullEditorHooks();
-  return integrateFetched({
+  const earlier = await stillConflicted(repoFolder);
+  const result = await integrateFetched({
     git,
     fs,
     dir: `/git/${repoFolder}`,
@@ -434,6 +469,7 @@ export async function integrateIntoVault(
       read: readVaultBytes,
       write: (path, data) => writeWorkspaceBlob(path, data),
       exists: workspaceHasEntry,
+      kind: vaultKind,
     },
     openNote: (path) => editor.openNote(path),
     setOpenNote: (path, text) => editor.setOpenNote(path, text),
@@ -443,6 +479,12 @@ export async function integrateIntoVault(
       await recordSnapshot(path, text, "git-pull").catch(() => false);
     },
   });
+  // Conflicts left from an earlier pull come back with the new ones (a new
+  // conflict on the same file replaces the old record).
+  const fresh = new Set(result.conflicts.map((c) => c.path));
+  result.conflicts = [...earlier.filter((c) => !fresh.has(c.path)), ...result.conflicts];
+  await setPendingConflicts(repoFolder, result.conflicts);
+  return result;
 }
 
 /** @internal e2e (dev server) and tests: the git runtime (lightning-fs + isomorphic-git). */

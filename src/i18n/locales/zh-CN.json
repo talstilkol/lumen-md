@@ -1494,5 +1494,7 @@
   "git.conflict.later": "稍后解决",
   "git.conflict.left": "还剩 {count} 个冲突：其文件保留冲突标记。再次拉取即可解决。",
   "git.conflict.allResolved": "所有冲突已解决。",
-  "git.watch.conflicts": "自动拉取发现 {count} 个冲突，已在文件中标记。运行「Git:拉取当前仓库」来解决。"
+  "git.watch.conflicts": "自动拉取发现 {count} 个冲突，已在文件中标记。运行「Git:拉取当前仓库」来解决。",
+  "git.pull.kindClashes": "远端将这些变成了文件夹或文件，而此保管库中是另一种类型；此处保持不变：{files}",
+  "git.alert.corsProxyBlocked": "此应用的安全策略不允许 {origin}，浏览器会拦截该代理。请使用 http://localhost:9999，或让部署方添加它（VITE_GIT_CORS_PROXY 或 VITE_CSP_CONNECT_EXTRA）。未做任何更改。"
 }

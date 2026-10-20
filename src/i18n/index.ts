@@ -1606,6 +1606,8 @@ const en: Strings = {
   "git.conflict.left": "{count} conflicts left: their files keep the conflict markers. Pull again to resolve them.",
   "git.conflict.allResolved": "All conflicts resolved.",
   "git.watch.conflicts": "Auto-pull found {count} conflicts; they are marked in the files. Run “Git: pull current repo” to resolve them.",
+  "git.pull.kindClashes": "Upstream turned these into folders or files where this vault has the other kind; they were left as they are here: {files}",
+  "git.alert.corsProxyBlocked": "This app's security policy does not allow {origin}, so the browser would block the proxy. Use http://localhost:9999, or have the deployment add it (VITE_GIT_CORS_PROXY or VITE_CSP_CONNECT_EXTRA). Nothing was changed.",
 };
 
 

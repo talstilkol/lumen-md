@@ -38,6 +38,15 @@ describe("mergeText", () => {
     expect(mergeText("a\nb", "a\nB", "a\nB")).toEqual({ clean: true, text: "a\nB" });
   });
 
+  it("a deletion on one side against an edit of the same line is a conflict (both ways)", () => {
+    expect(mergeText("a\nb\nc", "a\nc", "a\nB\nc")).toEqual({ clean: false, text: "a\n<<<<<<< local\n=======\nB\n>>>>>>> remote\nc" });
+    expect(mergeText("a\nb\nc", "a\nB\nc", "a\nc").clean).toBe(false);
+  });
+
+  it("inserts at different places merge cleanly", () => {
+    expect(mergeText("a\nb\nc", "a\nb\nc\nL", "X\na\nb\nc")).toEqual({ clean: true, text: "X\na\nb\nc\nL" });
+  });
+
   it("works on Hebrew text", () => {
     const r = mergeText("שלום\nעולם\nסוף", "שלום רב\nעולם\nסוף", "שלום\nעולם\nסוף טוב");
     expect(r).toEqual({ clean: true, text: "שלום רב\nעולם\nסוף טוב" });
@@ -122,6 +131,9 @@ describe("helpers", () => {
     expect(isLfsPointer(LFS)).toBe(true);
     expect(isLfsPointer(enc(LFS))).toBe(true);
     expect(isLfsPointer("version https://git-lfs.github.com/spec/v1\n")).toBe(false);
+    // The full structure: exact version line, oid and size.
+    expect(isLfsPointer(`version https://git-lfs.github.com/spec/v1-not-a-pointer\noid sha256:${"a".repeat(64)}\nsize 1\n`)).toBe(false);
+    expect(isLfsPointer(`version https://git-lfs.github.com/spec/v1\noid sha256:${"a".repeat(64)}\n`)).toBe(false);
     expect(isLfsPointer("# notes")).toBe(false);
     expect(isLfsPointer(null)).toBe(false);
   });
@@ -142,5 +154,6 @@ describe("helpers", () => {
     expect(hasConflictMarkers("<<<<<<< local\na\n=======\nb\n>>>>>>> remote")).toBe(true);
     expect(hasConflictMarkers("a\n=======\nb")).toBe(false);
     expect(hasConflictMarkers("text <<<<<<< inline")).toBe(false);
+    expect(hasConflictMarkers(">>>>>>> x\n=======\n<<<<<<< y")).toBe(false);
   });
 });

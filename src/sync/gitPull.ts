@@ -65,10 +65,16 @@ export interface PullDeps {
   /** Fetch more history (a shallow clone). `depth` is relative; `full` asks for everything. */
   deepen?: (step: { depth: number; full: boolean }) => Promise<void>;
   vault: {
-    /** The file's bytes, or null when no file is there. */
+    /**
+     * The file's bytes, or null when nothing is there. Rejects when the file
+     * cannot be read right now: a read error must never pass for "absent"
+     * (the pull would then write over the file).
+     */
     read(path: string): Promise<Bytes | null>;
     write(path: string, data: Bytes): Promise<void>;
     exists(path: string): Promise<boolean>;
+    /** What is at `path`: a file, a folder, or nothing. */
+    kind(path: string): Promise<"file" | "directory" | null>;
   };
   /** The note open at this vault path (after flushing pending edits), or null. */
   openNote(path: string): OpenNote | null;
@@ -113,6 +119,11 @@ export interface SafePullResult {
   copies: string[];
   /** Notes open with unsaved edits that received a clean merge in the editor. */
   mergedIntoOpen: string[];
+  /**
+   * Upstream turned a file into a folder (or the reverse) where the vault
+   * still has the other kind: left as it is here, reported.
+   */
+  kindClashes: string[];
   /** The commit HEAD points to now. */
   head: string;
 }
@@ -184,6 +195,16 @@ async function blob(d: PullDeps, oid: string | null): Promise<Bytes | null> {
 const decoder = new TextDecoder();
 const encoder = new TextEncoder();
 
+/** Would writing a file at `vp` meet a folder there, or a file where one of its parent folders should be? */
+async function kindClash(d: PullDeps, vp: string): Promise<boolean> {
+  if ((await d.vault.kind(vp)) === "directory") return true;
+  const parts = vp.split("/");
+  for (let i = 1; i < parts.length; i++) {
+    if ((await d.vault.kind(parts.slice(0, i).join("/"))) === "file") return true;
+  }
+  return false;
+}
+
 async function freeCopyPath(d: PullDeps, path: string, label: string): Promise<string> {
   let candidate = copyPathFor(path, label);
   for (let n = 2; await d.vault.exists(candidate); n++) candidate = copyPathFor(path, `${label} ${n}`);
@@ -207,6 +228,7 @@ export async function integrateFetched(d: PullDeps): Promise<SafePullResult> {
     lfsPointers: [],
     copies: [],
     mergedIntoOpen: [],
+    kindClashes: [],
     head: ours,
   };
   if (ours === d.theirs) {
@@ -220,7 +242,9 @@ export async function integrateFetched(d: PullDeps): Promise<SafePullResult> {
     return result;
   }
 
-  // 2–3. What the remote changed, against what is here now.
+  // 2–3. What the remote changed, against what is here now. (All reads
+  // happen before the first write: a read that fails stops the pull with
+  // nothing changed.)
   const changed = await changedBetween(d, base, d.theirs);
   const vaultPath = (p: string) => `${d.repoFolder}/${p}`;
   const open = new Map<string, OpenNote>();
@@ -238,7 +262,22 @@ export async function integrateFetched(d: PullDeps): Promise<SafePullResult> {
     entries.push({ path: c.path, base: await blob(d, c.base), ours: mine, theirs: await blob(d, c.theirs) });
   }
   const shortTheirs = d.theirs.slice(0, 7);
-  const actions: PullAction[] = planPull(entries, d.labels);
+  const planned: PullAction[] = planPull(entries, d.labels);
+
+  // A file where upstream now has a folder (or a folder where it has a
+  // file) cannot take the write: check every target before writing anything,
+  // so the pull never stops half way through.
+  const actions: PullAction[] = [];
+  for (const a of planned) {
+    if (a.kind === "write" || a.kind === "conflict") {
+      const vp = vaultPath(a.path);
+      if (!open.has(vp) && (await kindClash(d, vp))) {
+        result.kindClashes.push(vp);
+        continue;
+      }
+    }
+    actions.push(a);
+  }
 
   // 4. Carry it out. Nothing here deletes.
   for (const a of actions) {

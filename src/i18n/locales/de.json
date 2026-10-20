@@ -1494,5 +1494,7 @@
   "git.conflict.later": "Später lösen",
   "git.conflict.left": "{count} Konflikte offen: Ihre Dateien behalten die Konfliktmarken. Erneut pullen, um sie zu lösen.",
   "git.conflict.allResolved": "Alle Konflikte gelöst.",
-  "git.watch.conflicts": "Auto-Pull hat {count} Konflikte gefunden; sie sind in den Dateien markiert. „Git: Pull des aktuellen Repos“ ausführen, um sie zu lösen."
+  "git.watch.conflicts": "Auto-Pull hat {count} Konflikte gefunden; sie sind in den Dateien markiert. „Git: Pull des aktuellen Repos“ ausführen, um sie zu lösen.",
+  "git.pull.kindClashes": "Upstream wurden diese zu Ordnern oder Dateien, wo dieser Tresor die andere Art hat; sie blieben hier unverändert: {files}",
+  "git.alert.corsProxyBlocked": "Die Sicherheitsrichtlinie dieser App erlaubt {origin} nicht, der Browser würde den Proxy blockieren. Nimm http://localhost:9999 oder lass ihn in der Bereitstellung eintragen (VITE_GIT_CORS_PROXY oder VITE_CSP_CONNECT_EXTRA). Nichts wurde geändert."
 }

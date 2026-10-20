@@ -1494,5 +1494,7 @@
   "git.conflict.later": "ליישב אחר כך",
   "git.conflict.left": "נותרו {count} התנגשויות: הקבצים שלהן שומרים את סימוני ההתנגשות. בצעו pull שוב כדי ליישב אותן.",
   "git.conflict.allResolved": "כל ההתנגשויות יושבו.",
-  "git.watch.conflicts": "משיכה אוטומטית מצאה {count} התנגשויות; הן מסומנות בקבצים. הריצו „Git: pull למאגר הנוכחי” כדי ליישב אותן."
+  "git.watch.conflicts": "משיכה אוטומטית מצאה {count} התנגשויות; הן מסומנות בקבצים. הריצו „Git: pull למאגר הנוכחי” כדי ליישב אותן.",
+  "git.pull.kindClashes": "במאגר המרוחק אלה הפכו לתיקיות או לקבצים, ובכספת הזו יש את הסוג השני; הם נשארו כאן כפי שהם: {files}",
+  "git.alert.corsProxyBlocked": "מדיניות האבטחה של האפליקציה לא מתירה את {origin}, ולכן הדפדפן יחסום את ה-proxy. השתמשו ב-http://localhost:9999, או בקשו מההתקנה להוסיף אותו (VITE_GIT_CORS_PROXY או VITE_CSP_CONNECT_EXTRA). שום דבר לא שונה."
 }

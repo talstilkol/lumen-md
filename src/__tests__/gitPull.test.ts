@@ -71,7 +71,8 @@ function deps(theirs: string, extra: Partial<PullDeps> = {}): PullDeps {
     vault: {
       read: async (p) => vault.get(p) ?? null,
       write: async (p, d) => void vault.set(p, d),
-      exists: async (p) => vault.has(p),
+      exists: async (p) => vault.has(p) || [...vault.keys()].some((k) => k.startsWith(`${p}/`)),
+      kind: async (p) => (vault.has(p) ? "file" : [...vault.keys()].some((k) => k.startsWith(`${p}/`)) ? "directory" : null),
     },
     openNote: (p) => open.get(p) ?? null,
     setOpenNote: (p, text) => void open.set(p, { content: text, dirty: true }),
@@ -220,6 +221,40 @@ describe("safe pull", () => {
     await expect(integrateFetched(deps(theirs, { git: noBase, deepen: async (s) => void steps.push(s) }))).rejects.toBeInstanceOf(NoMergeBaseError);
     expect(steps.at(-1)).toEqual({ depth: 0, full: true });
     expect(text("r/a.md")).toBe("a"); // nothing written
+  });
+
+  it("a delete on one side against an edit on the other is a conflict, not a silent merge", async () => {
+    const base = await setup({ "d.md": "a\nb\nc" });
+    vault.set("r/d.md", enc("a\nc"));
+    const theirs = await remote(base, { "d.md": "a\nB\nc" });
+    const r = await integrateFetched(deps(theirs));
+    expect(r.conflicts.map((c) => c.path)).toEqual(["r/d.md"]);
+    expect(text("r/d.md")).toBe("a\n<<<<<<< local\n=======\nB\n>>>>>>> remote\nc");
+  });
+
+  it("a vault read that fails stops the pull before anything is written", async () => {
+    const base = await setup({ "a.md": "a", "b.md": "b" });
+    vault.set("r/a.md", enc("local a"));
+    const theirs = await remote(base, { "a.md": "remote a", "b.md": "remote b" });
+    const d = deps(theirs);
+    const read = d.vault.read;
+    d.vault.read = async (p) => {
+      if (p === "r/b.md") throw new Error("storage busy");
+      return read(p);
+    };
+    await expect(integrateFetched(d)).rejects.toThrow("storage busy");
+    expect(text("r/a.md")).toBe("local a");
+    expect(text("r/b.md")).toBe("b");
+  });
+
+  it("a file that became a folder upstream (or the reverse) is left as it is and reported", async () => {
+    const base = await setup({ "x.md": "file", "keep.md": "k" });
+    const theirs = await remote(base, { "x.md": null, "x.md/inner.md": "inside", "keep.md": "k2" });
+    const r = await integrateFetched(deps(theirs));
+    expect(r.kindClashes).toEqual(["r/x.md/inner.md"]);
+    expect(text("r/x.md")).toBe("file");
+    expect(text("r/keep.md")).toBe("k2");
+    expect(r.deletedFiles).toBe(0);
   });
 
   it("is a no-op when already up to date", async () => {

@@ -1494,5 +1494,7 @@
   "git.conflict.later": "Résoudre plus tard",
   "git.conflict.left": "{count} conflits restants : leurs fichiers gardent les marqueurs de conflit. Refaites un pull pour les résoudre.",
   "git.conflict.allResolved": "Tous les conflits sont résolus.",
-  "git.watch.conflicts": "Le pull automatique a trouvé {count} conflits ; ils sont marqués dans les fichiers. Lancez «Git : pull du dépôt courant» pour les résoudre."
+  "git.watch.conflicts": "Le pull automatique a trouvé {count} conflits ; ils sont marqués dans les fichiers. Lancez «Git : pull du dépôt courant» pour les résoudre.",
+  "git.pull.kindClashes": "En amont, ces éléments sont devenus des dossiers ou des fichiers là où ce coffre a l’autre type ; ils sont restés tels quels ici : {files}",
+  "git.alert.corsProxyBlocked": "La politique de sécurité de cette application n’autorise pas {origin} : le navigateur bloquerait le proxy. Utilisez http://localhost:9999, ou faites-le ajouter au déploiement (VITE_GIT_CORS_PROXY ou VITE_CSP_CONNECT_EXTRA). Rien n’a été modifié."
 }
