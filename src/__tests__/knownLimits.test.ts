@@ -42,6 +42,8 @@ describe("known limitations A1–A9", () => {
     // the next line at the content column is item text again.
     expect(linkFindings("-     ~~~\n     [[Target]]\n\n[[Outside]]\n")).toEqual(["Target", "Outside"]);
     expect(linkFindings("-     ```\n      [[Code]]\n\n[[Outside]]\n")).toEqual(["Outside"]);
+    // A nested item closes when its parent's continuation dedents.
+    expect(linkFindings("10. outer\n    - inner\n    outer\n\n        ```\n        [[Code]]\n        ```\n        [[After]]\n\n[[Outside]]\n")).toEqual(["Outside"]);
     // The item's column holds across its continuation lines.
     expect(linkFindings("1. item\n    continued\n\n        ```\n        [[Gone]]\n        ```\n        [[After]]\n\n[[Outside]]\n")).toEqual(["Outside"]);
   });

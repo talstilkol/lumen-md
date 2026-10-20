@@ -70,17 +70,24 @@ function blankFences(text: string): string {
     for (let q: RegExpExecArray | null; depth < n && (q = /^ {0,3}>[ ]?/.exec(rest)); depth++) rest = rest.slice(q[0].length);
     return { rest, depth };
   };
-  /** Content column of the list item the lines so far belong to, or -1 (continuation lines keep it). */
-  let listCol = -1;
+  /**
+   * Content columns of the open list items, outermost first. A line
+   * indented less than an item's column closes it (and the items nested
+   * in it); a marker line opens a new one.
+   */
+  const cols: number[] = [];
   for (let i = 0; i < lines.length; i++) {
     const raw = lines[i];
-    // The item this line may continue: the one open after the lines above.
-    const item = listCol;
+    // The item this line may continue: the innermost one open above it.
+    const item = cols.length ? cols[cols.length - 1] : -1;
     const own = unquote(raw).rest;
     if (own.trim()) {
+      const lead = /^ */.exec(own)![0].length;
       const col = itemColumn(own);
-      if (col >= 0) listCol = col;
-      else if (!own.startsWith(" ")) listCol = -1;
+      // Unindented text (no marker) is a lazy line or ends the list.
+      if (!lead && col < 0) cols.length = 0;
+      else while (cols.length && cols[cols.length - 1] > lead) cols.pop();
+      if (col >= 0) cols.push(col);
     }
     if (itemCode) {
       // Blank lines and lines indented 4+ past the item's content column
