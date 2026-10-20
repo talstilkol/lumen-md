@@ -158,6 +158,19 @@ describe("model manager — Ollama pull from the panel", () => {
     await waitFor(() => expect(screen.getByRole("status").textContent).toBe("llama3.1:8b is installed"));
   });
 
+  it("waits for an edited Ollama address to be saved before downloading", async () => {
+    const f = fakePullFetch();
+    vi.stubGlobal("fetch", f.fetchMock);
+    render(<AiSettingsPanel open onClose={() => {}} />);
+    fireEvent.change(await screen.findByPlaceholderText("qwen3:4b"), { target: { value: "qwen3:4b" } });
+    const [address] = screen.getAllByPlaceholderText("http://localhost:11434");
+    await waitFor(() => expect((address as HTMLInputElement).value).not.toBe(""));
+    fireEvent.change(address, { target: { value: "http://127.0.0.1:11434" } });
+    expect((screen.getByRole("button", { name: "Download" }) as HTMLButtonElement).disabled).toBe(true);
+    fireEvent.click(screen.getAllByText("Save")[0]);
+    await waitFor(() => expect((screen.getByRole("button", { name: "Download" }) as HTMLButtonElement).disabled).toBe(false));
+  });
+
   it("Cancel stops the download without an error", async () => {
     const f = fakePullFetch();
     vi.stubGlobal("fetch", f.fetchMock);

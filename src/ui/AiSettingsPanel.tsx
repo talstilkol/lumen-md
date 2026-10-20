@@ -79,6 +79,8 @@ export function AiSettingsPanel({ open, onClose }: Props) {
   const [pref, setPref] = useState<ExecutorId | "auto">("auto");
   const [status, setStatus] = useState<Record<RunnerId, Status>>({ ollama: "checking", webllm: "checking", chat: "checking" });
   const [ollamaUrl, setOllamaUrl] = useState("");
+  // The address the runtime uses; a download waits until an edit is saved.
+  const [savedOllamaUrl, setSavedOllamaUrl] = useState("");
   const [ollamaModel, setOllamaModel] = useState("");
   const [installed, setInstalled] = useState<string[] | null>(null);
   const [hw, setHw] = useState<Hardware | null>(null);
@@ -165,6 +167,7 @@ export function AiSettingsPanel({ open, onClose }: Props) {
       setMode(getAiMode());
       setPref(preferredExecutor() ?? "auto");
       setOllamaUrl(getBaseUrl());
+      setSavedOllamaUrl(getBaseUrl());
       setOllamaModel(ls("lumen.ollama.model") || getOllamaConfigModel());
       setGrammarUrl(ls("lumen.grammar.endpoint") || grammarEndpoint());
       setResearchUrl(ls("lumen.research.endpoint"));
@@ -226,6 +229,8 @@ export function AiSettingsPanel({ open, onClose }: Props) {
       if (!ok) return;
     }
     setLs("lumen.ollama.baseUrl", ollamaUrl);
+    const { getBaseUrl } = await import("../ai/ollamaProvider");
+    setSavedOllamaUrl(ollamaUrl.trim() || getBaseUrl());
     setLs("lumen.ollama.model", ollamaModel);
     flash();
     void refreshStatus();
@@ -238,12 +243,15 @@ export function AiSettingsPanel({ open, onClose }: Props) {
     flash();
   };
 
+  // An address edited but not saved: the pull would go to the old server.
+  const urlUnsaved = ollamaUrl.trim().replace(/\/+$/, "") !== savedOllamaUrl.replace(/\/+$/, "");
+
   const startPull = async () => {
     const model = pullName.trim();
     // Locked synchronously: a double click (or Enter, then a click) while
     // the modules or the licence prompt are pending must not start a
     // second download.
-    if (!model || pullAbort.current) return;
+    if (!model || pullAbort.current || urlUnsaved) return;
     const ctrl = new AbortController();
     pullAbort.current = ctrl;
     // A custom-licence or non-commercial model is named and confirmed before
@@ -431,7 +439,7 @@ export function AiSettingsPanel({ open, onClose }: Props) {
               {pull ? (
                 <button type="button" style={ghost} onClick={cancelPull}>{t("dialog.cancel")}</button>
               ) : (
-                <button type="button" style={ghost} onClick={() => void startPull()} disabled={!pullName.trim()}>{t("ai.settings.ollama.pull")}</button>
+                <button type="button" style={ghost} onClick={() => void startPull()} disabled={!pullName.trim() || urlUnsaved}>{t("ai.settings.ollama.pull")}</button>
               )}
             </div>
             {pull && (

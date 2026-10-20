@@ -92,13 +92,21 @@ The same panel manages the models themselves:
   | medium | small | medium | large |
   | large | medium | large | large |
 
+  The mode moves the *automatic* choice. A model you picked yourself
+  wins: an in-browser model chosen in the panel runs whenever it is at
+  least the tier asked for (pick *Recommended for this device* to let the
+  mode choose), and a configured Ollama model runs when it fits the
+  tier.
+
   Ollama tiers are by parameter count (tiny ≤ 2.5 B, small ≤ 9 B,
   medium ≤ 16 B, larger is large) among the models you have installed;
   web-llm tiers are the catalogue's.
 - **Download an Ollama model** — type a name (`qwen3:4b`,
   `hf.co/<owner>/<repo>`) and *Download*: the panel streams Ollama's
   `/api/pull` and shows the progress over all layers in bytes and
-  percent, with *Cancel*. When it finishes the installed list refreshes.
+  percent, with *Cancel*. An edited address is saved first. A model under
+  its own licence (Llama, Gemma, non-commercial ones) is named and
+  confirmed before the download. When it finishes the installed list refreshes.
   The download goes to the Ollama server at the address above; no note
   content is involved.
 - **Storage** — how much this site uses of the browser's quota
