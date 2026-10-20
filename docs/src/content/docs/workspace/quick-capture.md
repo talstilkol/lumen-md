@@ -76,9 +76,12 @@ In a browser and the installed PWA, `⌥⌘N` works while Lumen's window has
 the focus. A shortcut that works from any app needs Tauri's
 global-shortcut plugin, which the desktop app doesn't bundle yet. The
 frontend already checks for it at startup
-(`src/capture/desktopShortcut.ts`). It registers `CommandOrControl+Alt+N`
-when the plugin is there, and otherwise does nothing. To turn it on in
-your own build:
+(`src/capture/desktopShortcut.ts`). On macOS it registers `⌥⌘N`
+(`Alt+Command+N`) when the plugin is there, and otherwise does nothing.
+On Windows and Linux it registers nothing: there `Ctrl+Alt+N` is also
+what many keyboard layouts send for AltGr+N, and a system-wide shortcut
+can't tell them apart, so typing that letter in any app would open Lumen.
+To turn it on in your own build:
 
 1. `src-tauri/Cargo.toml`, under the desktop dependencies:
    `tauri-plugin-global-shortcut = "2"`
@@ -87,6 +90,6 @@ your own build:
 3. `src-tauri/capabilities/default.json`: add
    `"global-shortcut:allow-register"` and `"global-shortcut:allow-unregister"`.
 
-After that, pressing `⌥⌘N` anywhere brings Lumen to the front with the
+After that, on a Mac, pressing `⌥⌘N` anywhere brings Lumen to the front with the
 capture box open. The window permissions this needs (`show`,
 `unminimize`, `set-focus`) are already granted.

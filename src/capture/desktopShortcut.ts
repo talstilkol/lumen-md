@@ -1,7 +1,13 @@
 /**
- * The desktop app's system-wide capture shortcut (plan 4.16): ⌥⌘N
- * (Ctrl+Alt+N) brings Lumen to the front with the capture box open, even
- * when another app has the focus.
+ * The desktop app's system-wide capture shortcut (plan 4.16): ⌥⌘N on macOS
+ * brings Lumen to the front with the capture box open, even when another
+ * app has the focus.
+ *
+ * macOS only. On Windows and Linux the same keys are Ctrl+Alt+N, which many
+ * layouts produce with AltGr+N: a system-wide hook can't tell the two apart
+ * (unlike the in-window handler, which checks AltGraph), so typing that
+ * character in any app would open Lumen (review: #268). There the in-window
+ * shortcut, the command palette and File ▸ Quick capture stay the way in.
  *
  * A system-wide shortcut needs Tauri's global-shortcut plugin, which the
  * desktop shell does not bundle yet (src-tauri/Cargo.toml has only the
@@ -15,8 +21,10 @@
  * Loaded only inside the desktop app.
  */
 
-/** The accelerator, in the plugin's syntax. */
-export const GLOBAL_CAPTURE_SHORTCUT = "CommandOrControl+Alt+N";
+import { isMacPlatform } from "../lib/platformKeys";
+
+/** The accelerator, in the plugin's syntax (macOS: ⌥⌘N). */
+export const GLOBAL_CAPTURE_SHORTCUT = "Alt+Command+N";
 
 export function isTauri(): boolean {
   return typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
@@ -30,11 +38,11 @@ interface ShortcutEvent {
 
 /**
  * Register the global shortcut; `onCapture` runs on every press. Resolves
- * to true when the plugin took it, false outside the desktop app or when
- * the plugin is not part of this build.
+ * to true when the plugin took it, false outside the desktop app, off macOS,
+ * or when the plugin is not part of this build.
  */
 export async function registerGlobalCapture(onCapture: () => void): Promise<boolean> {
-  if (!isTauri()) return false;
+  if (!isTauri() || !isMacPlatform()) return false;
   try {
     const core = await import("@tauri-apps/api/core");
     // The plugin's own JS API does exactly this (plugin:global-shortcut|register

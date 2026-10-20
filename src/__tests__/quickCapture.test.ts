@@ -245,7 +245,9 @@ describe("desktop global shortcut (feature check)", () => {
     (window as unknown as Record<string, unknown>).__TAURI_INTERNALS__ = {};
     try {
       vi.resetModules();
+      (await import("../lib/platformKeys")).__setMacPlatform(true);
       const { registerGlobalCapture: register, GLOBAL_CAPTURE_SHORTCUT } = await import("../capture/desktopShortcut");
+      expect(GLOBAL_CAPTURE_SHORTCUT).toBe("Alt+Command+N");
       const cb = vi.fn();
       expect(await register(cb)).toBe(true);
       expect(calls.map((c) => c[0])).toEqual(["plugin:global-shortcut|unregister", "plugin:global-shortcut|register"]);
@@ -261,6 +263,28 @@ describe("desktop global shortcut (feature check)", () => {
     }
   });
 
+  it("registers nothing on Windows / Linux, where Ctrl+Alt+N is also AltGr+N (review #268)", async () => {
+    const calls: string[] = [];
+    vi.doMock("@tauri-apps/api/core", () => ({
+      Channel: class {},
+      invoke: async (cmd: string) => {
+        calls.push(cmd);
+        return null;
+      },
+    }));
+    (window as unknown as Record<string, unknown>).__TAURI_INTERNALS__ = {};
+    try {
+      vi.resetModules();
+      (await import("../lib/platformKeys")).__setMacPlatform(false);
+      const { registerGlobalCapture: register } = await import("../capture/desktopShortcut");
+      expect(await register(() => {})).toBe(false);
+      expect(calls).toEqual([]);
+    } finally {
+      delete (window as unknown as Record<string, unknown>).__TAURI_INTERNALS__;
+      vi.doUnmock("@tauri-apps/api/core");
+    }
+  });
+
   it("a build without the plugin reports false", async () => {
     vi.doMock("@tauri-apps/api/core", () => ({
       Channel: class {},
@@ -271,6 +295,7 @@ describe("desktop global shortcut (feature check)", () => {
     (window as unknown as Record<string, unknown>).__TAURI_INTERNALS__ = {};
     try {
       vi.resetModules();
+      (await import("../lib/platformKeys")).__setMacPlatform(true);
       const { registerGlobalCapture: register } = await import("../capture/desktopShortcut");
       expect(await register(() => {})).toBe(false);
     } finally {

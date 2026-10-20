@@ -118,7 +118,15 @@ async function capture(text: string, when: Date): Promise<string | null> {
     const active = st.doc.workspaceName === INBOX_PATH;
     const typed = active && st.doc.content !== (base ?? "") && st.doc.content !== next;
     const doc = active ? { ...st.doc, content: typed ? appendEntry(st.doc.content, entry) : next, dirty: true } : st.doc;
-    const openTabs = st.openTabs.map((x) => (x.workspaceName !== INBOX_PATH ? x : active ? { ...x, content: doc.content, dirty: true } : { ...x, content: next, dirty: false }));
+    // A background inbox tab may have been edited too (the capture began while
+    // it was active, then the user typed and switched away — review #268):
+    // keep that text and add the entry to it, and leave it dirty.
+    const openTabs = st.openTabs.map((x) => {
+      if (x.workspaceName !== INBOX_PATH) return x;
+      if (active) return { ...x, content: doc.content, dirty: true };
+      const edited = x.content !== (base ?? "") && x.content !== next;
+      return edited ? { ...x, content: appendEntry(x.content, entry), dirty: true } : { ...x, content: next, dirty: false };
+    });
     return { doc, openTabs };
   });
   notifyWorkspaceChanged(exists ? { kind: "content", paths: [INBOX_PATH] } : { kind: "structure", paths: [INBOX_PATH] });
