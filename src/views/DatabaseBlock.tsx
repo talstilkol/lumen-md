@@ -55,7 +55,7 @@ import {
   type DatabaseView,
   type SortKey,
 } from "./database";
-import { parseFormula } from "./formula";
+import { formulaText, parseFormula } from "./formula";
 import { parseFilter, type FilterNode } from "./databaseFilter";
 import { cellInputText, columnType, parseCellInput, writeCell } from "./databaseEdit";
 import type { PropertyValue } from "../properties/frontmatter";
@@ -462,7 +462,8 @@ function FormulaCell({ value, error }: { value: unknown; error?: string }) {
   }
   return (
     <span title={t("db.formula.computed")} dir="auto" data-testid="database-formula-cell" style={{ fontVariantNumeric: "tabular-nums" }}>
-      {displayValue(value)}
+      {/* The formula formatter keeps a time that is not midnight (now(), dateadd(…, "hours")). */}
+      {value instanceof Date || Array.isArray(value) ? formulaText(value as Parameters<typeof formulaText>[0]) : displayValue(value)}
     </span>
   );
 }

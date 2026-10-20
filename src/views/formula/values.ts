@@ -35,7 +35,15 @@ export function asDate(v: FormulaValue): Date | null {
     // A bare date is midnight UTC, and a time without an offset is UTC too:
     // Date.parse would read "2026-10-20T12:00" in the machine's time zone.
     const t = Date.parse(s.length === 10 ? `${s}T00:00:00Z` : /(?:Z|[+-]\d{2}:?\d{2})$/.test(s) ? s : `${s}Z`);
-    return Number.isNaN(t) ? null : new Date(t);
+    if (Number.isNaN(t)) return null;
+    const d = new Date(t);
+    // Date.parse rolls 2026-02-30 over to March 2: a day that does not exist is not a date.
+    const [y, m, day] = s.slice(0, 10).split("-").map(Number);
+    if (/(?:Z|[+-]\d{2}:?\d{2})$/.test(s) && s.length > 10) {
+      const local = new Date(Date.UTC(y, m - 1, day));
+      if (local.getUTCFullYear() !== y || local.getUTCMonth() !== m - 1 || local.getUTCDate() !== day) return null;
+    } else if (d.getUTCFullYear() !== y || d.getUTCMonth() !== m - 1 || d.getUTCDate() !== day) return null;
+    return d;
   }
   return null;
 }

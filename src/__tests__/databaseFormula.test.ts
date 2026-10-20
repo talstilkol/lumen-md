@@ -123,6 +123,14 @@ describe("formula — semantics", () => {
     expect(errorOf("7 - due").code).toBe("type");
   });
 
+  it("a day that does not exist is not a date", () => {
+    expect(errorOf('date("2026-02-30")').code).toBe("type");
+    expect(errorOf('year("2026-13-01")').code).toBe("type");
+    expect(iso(value('date("2028-02-29")'))).toBe("2028-02-29");
+    expect((value('date("2026-02-28T23:30-02:00")') as Date).toISOString()).toBe("2026-03-01T01:30:00.000Z");
+    expect(value('"2026-02-30" + 1')).toBe("2026-02-301");
+  });
+
   it("a time without an offset is UTC, whatever the machine's time zone", () => {
     expect((value('date("2026-10-20T12:00")') as Date).toISOString()).toBe("2026-10-20T12:00:00.000Z");
     expect((value('date("2026-10-20 23:30")') as Date).toISOString()).toBe("2026-10-20T23:30:00.000Z");
