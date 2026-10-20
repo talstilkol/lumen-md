@@ -218,6 +218,9 @@ describe("formula — errors are typed and placed", () => {
     // Numeric text that overflows is a number error in + too, not text to join.
     expect(errorOf("huge + 1", { fm: { huge: "1e999" } }).code).toBe("math");
     expect(value('"abc" + 1')).toBe("abc1");
+    // Two oversized numbers are not "equal because both are Infinity".
+    expect(errorOf('"1e999" = "1e998"').code).toBe("math");
+    expect(errorOf('huge > 1', { fm: { huge: "1e999" } }).code).toBe("math");
   });
 });
 

@@ -111,7 +111,12 @@ function comparable(v: FormulaValue): number | string | null {
   if (typeof v === "string") {
     const d = asDate(v);
     if (d) return d.getTime();
-    if (NUMERIC.test(v)) return Number(v);
+    if (NUMERIC.test(v)) {
+      // "1e999" and "1e998" would both be Infinity, and equal: an overflow is a math error, as in arithmetic.
+      const n = Number(v);
+      if (!Number.isFinite(n)) throw new FormulaError("math", "the number is too large to compare");
+      return n;
+    }
     return v;
   }
   return toText(v);
