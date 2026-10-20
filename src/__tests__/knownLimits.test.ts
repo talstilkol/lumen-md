@@ -38,6 +38,10 @@ describe("known limitations A1–A9", () => {
     // and an ordered item's wider column counts the same way.
     expect(linkFindings("- item\n\n     ```\n     [[Gone]]\n  ```\n\n[[Outside]]\n")).toEqual(["Outside"]);
     expect(linkFindings("1. item\n\n     ```\n     [[Gone]]\n   ```\n\n[[Outside]]\n")).toEqual(["Outside"]);
+    // On the marker line, 5+ spaces after the marker are indented code too:
+    // the next line at the content column is item text again.
+    expect(linkFindings("-     ~~~\n     [[Target]]\n\n[[Outside]]\n")).toEqual(["Target", "Outside"]);
+    expect(linkFindings("-     ```\n      [[Code]]\n\n[[Outside]]\n")).toEqual(["Outside"]);
     // The item's column holds across its continuation lines.
     expect(linkFindings("1. item\n    continued\n\n        ```\n        [[Gone]]\n        ```\n        [[After]]\n\n[[Outside]]\n")).toEqual(["Outside"]);
   });

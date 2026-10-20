@@ -132,6 +132,16 @@ function blankFences(text: string): string {
         lines[i] = " ".repeat(raw.length);
         continue;
       }
+      // On the marker line itself, 5+ spaces after the marker mean one
+      // space of padding and an indented code block (`-     ~~~`).
+      const marker = listed !== quoted ? /^[ ]*(?:[-*+]|\d{1,9}[.)])( *)/.exec(quoted) : null;
+      if (marker && marker[1].length > 4) {
+        itemCode = { depth, col: itemColumn(quoted) };
+        // Keep the marker: later passes still see the line opens a list item.
+        const keep = raw.length - quoted.length + marker[0].length - marker[1].length;
+        lines[i] = raw.slice(0, keep) + " ".repeat(raw.length - keep);
+        continue;
+      }
       open = { ch: m[1][0], len: m[1].length, depth, indent };
       lines[i] = " ".repeat(raw.length);
     }
