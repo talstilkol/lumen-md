@@ -100,7 +100,6 @@ export function AiSettingsPanel({ open, onClose }: Props) {
   const pullAbort = useRef<AbortController | null>(null);
   // undefined = still asking; null = the browser can't tell.
   const [storage, setStorage] = useState<StorageEstimateResult | null | undefined>(undefined);
-  const [storageMsg, setStorageMsg] = useState("");
 
   // The availability probes are slow (network); a panel closed meanwhile
   // must not receive their results (React warns, and test environments
@@ -289,10 +288,9 @@ export function AiSettingsPanel({ open, onClose }: Props) {
 
   const clearCaches = async (kind: ModelCacheKind) => {
     const { clearModelCaches } = await import("../ai/modelStorage");
-    const n = await clearModelCaches(kind);
-    if (!mounted.current) return;
-    setStorageMsg(t("ai.settings.storage.cleared", { n: String(n) }));
-    void refreshStorage();
+    await clearModelCaches(kind);
+    // The usage line shows the result.
+    if (mounted.current) void refreshStorage();
   };
 
   const changeWebModel = async (id: string) => {
@@ -393,7 +391,6 @@ export function AiSettingsPanel({ open, onClose }: Props) {
                 <span>{t(`ai.mode.${m}`)}</span>
               </label>
             ))}
-            <div style={muted}>{t("ai.settings.mode.hint")}</div>
           </section>
 
           <section style={box} aria-labelledby="ai-set-ollama">
@@ -503,7 +500,6 @@ export function AiSettingsPanel({ open, onClose }: Props) {
               <button type="button" style={ghost} onClick={() => void clearCaches("webllm")}>{t("ai.settings.storage.clearWebllm")}</button>
               <button type="button" style={ghost} onClick={() => void clearCaches("transformers")}>{t("ai.settings.storage.clearWasm")}</button>
             </div>
-            {storageMsg && <div style={muted} role="status">{storageMsg}</div>}
           </section>
 
           <section style={box} aria-labelledby="ai-set-endpoints">

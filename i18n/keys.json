@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-10-20T22:49:15.113Z",
+  "generated_at": "2026-10-20T23:17:09.704Z",
   "source": "src/i18n/index.ts (en bundle)",
-  "count": 1443,
+  "count": 1441,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -5542,11 +5542,6 @@
       "vars": []
     },
     {
-      "key": "ai.settings.mode.hint",
-      "en": "Local models: economy one size smaller, quality one larger, from the next run.",
-      "vars": []
-    },
-    {
       "key": "ai.settings.ollama.pull",
       "en": "Download",
       "vars": []
@@ -5600,13 +5595,6 @@
       "key": "ai.settings.storage.clearWasm",
       "en": "Clear speech and search models",
       "vars": []
-    },
-    {
-      "key": "ai.settings.storage.cleared",
-      "en": "Removed {n} caches",
-      "vars": [
-        "n"
-      ]
     },
     {
       "key": "ai.policy.localOnly",
