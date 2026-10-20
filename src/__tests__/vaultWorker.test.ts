@@ -524,6 +524,7 @@ describe("the block-by-block preview", () => {
     // A definition inside a quote or a list item is document-wide too.
     expect(canRenderInBlocks("[ref]\n\n> [ref]: https://example.com")).toBe(false);
     expect(canRenderInBlocks("[ref]\n\n- [ref]: https://example.com")).toBe(false);
+    expect(canRenderInBlocks("[t][a\\]b]\n\n[a\\]b]: /url")).toBe(false);
     // …but not when they are only examples in code.
     expect(canRenderInBlocks("Use `[^1]` and `{++x++}`.\n\n```md\n[x]: https://example.com\nText[^1]\n```\n")).toBe(true);
     expect(withoutCode("a `b` c\n```\nd\n```\ne")).toBe("a  c\ne");

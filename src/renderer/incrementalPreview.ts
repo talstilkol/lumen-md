@@ -62,7 +62,8 @@ function hasDefinitionLine(text: string): boolean {
   if (!text.includes("]:")) return false;
   for (const line of text.split("\n")) {
     if (!line.includes("]:")) continue;
-    if (/^\[[^\]]+\]:/.test(line.slice(containerPrefix(line)))) return true;
+    // The label ends at the first unescaped `]` (`[a\]b]: /url`).
+    if (/^\[(?:\\.|[^\]\\])+\]:/.test(line.slice(containerPrefix(line)))) return true;
   }
   return false;
 }
