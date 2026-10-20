@@ -16,7 +16,7 @@ code is done.
 - [ ] Stripe account (free until you start billing).
 - [ ] Apple Developer Program ($99/yr).
 - [ ] Google Play Developer ($25 one-time).
-- [ ] Sentry account (free tier).
+- [ ] Sentry account (free tier) or a self-hosted GlitchTip — optional. Set `VITE_SENTRY_DSN` at build time (public by design, not a secret); reports are sent only from users who turn them on. See `docs/src/content/docs/security/monitoring.md` (on Vercel, also add the DSN's origin to `connect-src` in `vercel.json`).
 - [ ] Supabase project (free) — already optional; required for billing/sync/publish.
 - [ ] Chrome Web Store registration ($5 one-time).
 
@@ -101,7 +101,7 @@ sets no CSP of its own. The self-hosted nginx image uses
 `docker/nginx.conf`.
 
 Your own workers (SSO, billing/entitlements, publish, audit, marketplace,
-self-hosted LanguageTool, Supabase) are added to `connect-src`
+self-hosted LanguageTool, Supabase, the error tracker in `VITE_SENTRY_DSN`) are added to `connect-src`
 **automatically at build time** from the `VITE_*_ENDPOINT` / `VITE_*_URL`
 variables (see `src/build/cspEndpoints.ts`): set them before
 `npm run build`. For the Docker web image pass them as build args, e.g.
@@ -418,7 +418,7 @@ After every step above is green:
 - [ ] Lighthouse: Performance ≥ 90, A11y ≥ 95, Best practices ≥ 95, SEO ≥ 95, PWA ≥ 90.
 - [ ] axe-core a11y test passes (no critical/serious violations).
 - [ ] `npm run budget` passes — bundle still within targets.
-- [ ] Sentry receiving events from at least one production session.
+- [ ] Sentry receiving events from at least one production session that turned error reports on (off by default).
 - [ ] First 10 users invited via TestFlight + Play Internal track.
 - [ ] `https://lumen.app/p/<test-slug>` returns a published note.
 - [ ] Right-click → "Save selection to Lumen" creates a clip.

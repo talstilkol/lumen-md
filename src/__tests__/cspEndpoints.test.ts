@@ -75,3 +75,17 @@ describe("VITE_CSP_CONNECT_EXTRA", () => {
     ).toEqual(["http://192.168.1.20:11434", "https://market.acme.dev", "wss://collab.acme.dev"]);
   });
 });
+
+describe("the error tracker (plan 12.4)", () => {
+  it("is allowed only through the build's DSN: its host, without the key", () => {
+    expect(endpointOrigins({ VITE_SENTRY_DSN: "https://publickey@o1234.ingest.us.sentry.io/5678" })).toEqual(["https://o1234.ingest.us.sentry.io"]);
+    expect(endpointOrigins({ VITE_SENTRY_DSN: "https://key@glitchtip.acme.dev/3" })).toEqual(["https://glitchtip.acme.dev"]);
+    expect(endpointOrigins({ VITE_SENTRY_DSN: "" })).toEqual([]);
+  });
+
+  it("no policy file hard-codes an error-tracker host or wildcard", () => {
+    for (const file of ["index.html", "public/_headers", "vercel.json", "docker/nginx.conf"]) {
+      expect(readFileSync(resolve(ROOT, file), "utf8"), file).not.toMatch(/sentry|glitchtip/i);
+    }
+  });
+});

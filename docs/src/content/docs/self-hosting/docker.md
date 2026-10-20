@@ -98,9 +98,12 @@ powers the Cloudflare deployment also runs in your VM.
 
 ## Optional: Sentry telemetry
 
-Set `SENTRY_DSN=https://…@sentry.io/…` in `.env.onprem` to enable
-opt-in error reporting. Users still see a toggle in Settings to turn
-it off; you control which DSN.
+Build the web image with `--build-arg VITE_SENTRY_DSN=https://<key>@<host>/<project>`
+(Sentry or a self-hosted GlitchTip) to make error reports available. They
+stay **off** until a user turns them on with the Telemetry pill in the status
+bar; note text, titles and paths are removed first, and each report is listed
+in the privacy ledger. The DSN's host is added to the CSP at build time. A DSN
+is public by design, not a secret. See [Monitoring and web vitals](/security/monitoring/).
 
 ## Optional: SSO with WorkOS
 

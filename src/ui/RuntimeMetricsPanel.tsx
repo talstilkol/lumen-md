@@ -1,4 +1,5 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import type { VitalName, VitalsSample } from "../lib/webVitals";
 import { RefreshCw, Eraser, X } from "lucide-react";
 import { clearRuntimeMetrics, getRuntimeMetricsSnapshot, type RuntimeMetricSnapshotRow } from "../lib/runtimeMetrics";
 import { t, getLocale } from "../i18n";
@@ -36,6 +37,53 @@ function renderRow(row: RuntimeMetricSnapshotRow) {
       <td style={{ padding: "8px 10px" }}>{shortPercent(row.timeoutRate * 100)}</td>
       <td style={{ padding: "8px 10px" }}>{shortPercent(row.rateLimitRate * 100)}</td>
     </tr>
+  );
+}
+
+const RATING_COLOR: Record<VitalsSample["rating"], string> = {
+  good: "hsl(140 60% 40%)",
+  "needs-improvement": "hsl(35 90% 45%)",
+  poor: "hsl(0 70% 50%)",
+};
+
+/**
+ * This session's Web Vitals (plan 12.4) — measured on this device and never
+ * sent. The module loads lazily, like its observers in main.tsx.
+ */
+function LocalVitals() {
+  const [state, setState] = useState<{ names: readonly VitalName[]; latest: Partial<Record<VitalName, VitalsSample>> } | null>(null);
+  useEffect(() => {
+    let off: (() => void) | undefined;
+    let alive = true;
+    void import("../lib/webVitals")
+      .then((m) => {
+        if (!alive) return;
+        const read = () => setState({ names: m.VITAL_NAMES, latest: m.vitalsSnapshot() });
+        read();
+        off = m.subscribeVitals(read);
+      })
+      .catch(() => {
+        /* chunk failed to load — the section stays empty */
+      });
+    return () => {
+      alive = false;
+      off?.();
+    };
+  }, []);
+  if (!state) return null;
+  return (
+    <div data-testid="local-vitals" style={{ display: "flex", flexWrap: "wrap", gap: "6px 18px", alignItems: "baseline" }}>
+      <strong style={{ fontWeight: 600, color: "hsl(var(--fg))" }}>{t("runtimeMetrics.vitals")}</strong>
+      {state.names.map((name) => {
+        const s = state.latest[name];
+        const value = !s ? "—" : name === "CLS" ? s.value.toFixed(3) : `${shortNumber(Math.round(s.value))}ms`;
+        return (
+          <span key={name} data-vital={name} data-rating={s?.rating ?? "none"}>
+            {name}: <bdi dir="ltr" style={{ color: s ? RATING_COLOR[s.rating] : undefined, fontWeight: 600 }}>{value}</bdi>
+          </span>
+        );
+      })}
+    </div>
   );
 }
 
@@ -187,6 +235,7 @@ export function RuntimeMetricsPanel({ onClose }: Props) {
           </div>
         </header>
         <section style={{ display: "grid", gap: 10, fontSize: 12.5, color: "hsl(var(--fg-subtle))" }}>
+          <LocalVitals />
           <div style={{ display: "flex", justifyContent: "space-between", gap: 14, flexWrap: "wrap" }}>
             <span>{t("runtimeMetrics.totalRequests")}: {shortNumber(totalRequests)}</span>
             <span>{t("runtimeMetrics.lastUpdated")}: {formatDate(snapshot.lastUpdatedAt)}</span>

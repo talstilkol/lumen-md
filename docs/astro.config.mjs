@@ -95,6 +95,7 @@ export default defineConfig({
           label: "Security",
           items: [
             { label: "Secrets and encryption", slug: "security/vault" },
+            { label: "Monitoring and web vitals", slug: "security/monitoring" },
           ],
         },
         {

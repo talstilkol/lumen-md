@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-10-18T06:21:32.876Z",
+  "generated_at": "2026-10-20T23:17:01.319Z",
   "source": "src/i18n/index.ts (en bundle)",
-  "count": 1427,
+  "count": 1429,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -2141,6 +2141,11 @@
       "vars": []
     },
     {
+      "key": "privacy.cat.monitoring",
+      "en": "Error report — only with your consent, content removed",
+      "vars": []
+    },
+    {
       "key": "privacy.footer",
       "en": "Recorded: time, host, size, reason. Never the text of prompts or answers. Model downloads made inside workers are listed too; their size may show as unknown.",
       "vars": []
@@ -3918,12 +3923,12 @@
     },
     {
       "key": "status.telemetry.tooltip.on",
-      "en": "Error telemetry is ON. Crash reports are sent to help improve Lumen. Click to opt out.",
+      "en": "Error reports are ON: crash details, with note text, titles and paths removed, go to the error tracker this build names; each one is listed in the privacy ledger. Click to turn off.",
       "vars": []
     },
     {
       "key": "status.telemetry.tooltip.off",
-      "en": "Error telemetry is OFF. Click to enable anonymous crash reports.",
+      "en": "Error reports are OFF (the default): nothing is sent. Click to turn them on (the build also needs an error-tracker DSN).",
       "vars": []
     },
     {
@@ -4034,6 +4039,11 @@
     {
       "key": "runtimeMetrics.column.rateLimits",
       "en": "Rate limit",
+      "vars": []
+    },
+    {
+      "key": "runtimeMetrics.vitals",
+      "en": "Web vitals — measured on this device, never sent",
       "vars": []
     },
     {
