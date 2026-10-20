@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-10-20T17:10:29.354Z",
+  "generated_at": "2026-10-20T17:10:44.379Z",
   "source": "src/i18n/index.ts (en bundle)",
-  "count": 1412,
+  "count": 1413,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -5399,6 +5399,11 @@
     {
       "key": "ai.settings.research",
       "en": "Research",
+      "vars": []
+    },
+    {
+      "key": "ai.settings.researchToken",
+      "en": "Research token (RESEARCH_TOKEN)",
       "vars": []
     },
     {

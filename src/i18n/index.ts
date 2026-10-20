@@ -1109,6 +1109,7 @@ const en: Strings = {
   "ai.settings.endpoints": "Local services",
   "ai.settings.grammar": "Grammar",
   "ai.settings.research": "Research",
+  "ai.settings.researchToken": "Research token (RESEARCH_TOKEN)",
   "ai.settings.endpoints.hint": "Start both with: docker compose -f docker/local-ai.yml up -d. Empty = the default.",
   "ai.settings.style": "My writing style",
   "ai.settings.style.use": "Write in my style",

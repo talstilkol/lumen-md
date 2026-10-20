@@ -1140,6 +1140,7 @@
   "ai.settings.endpoints": "ローカルサービス",
   "ai.settings.grammar": "文法",
   "ai.settings.research": "リサーチ",
+  "ai.settings.researchToken": "リサーチトークン（RESEARCH_TOKEN）",
   "ai.settings.endpoints.hint": "両方の起動: docker compose -f docker/local-ai.yml up -d。空欄 = 既定値。",
   "ai.settings.style": "私の文体",
   "ai.settings.style.use": "私の文体で書く",

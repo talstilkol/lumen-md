@@ -1140,6 +1140,7 @@
   "ai.settings.endpoints": "Lokale Dienste",
   "ai.settings.grammar": "Grammatik",
   "ai.settings.research": "Recherche",
+  "ai.settings.researchToken": "Recherche-Token (RESEARCH_TOKEN)",
   "ai.settings.endpoints.hint": "Beide starten mit: docker compose -f docker/local-ai.yml up -d. Leer = Standard.",
   "ai.settings.style": "Mein Schreibstil",
   "ai.settings.style.use": "In meinem Stil schreiben",
