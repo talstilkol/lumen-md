@@ -28,8 +28,9 @@ import {
   type WorkspaceEntry,
   type WorkspaceNode,
 } from "./workspace";
-import { watchVault, type VaultEvent } from "./vault";
-import { wikiTargetsOf, type BacklinkHit, type IndexInput, type IndexStats, type SearchHit } from "./vaultIndexCore";
+import { getVaultBackend, watchVault, type VaultEvent } from "./vault";
+import type { BacklinkHit, IndexInput, IndexStats, SearchHit } from "./vaultIndexCore";
+import { wikiTargetsOf } from "./wikiTargets";
 import { localEngine, workerEngine, type IndexEngine } from "./vaultIndexProtocol";
 import { log } from "../lib/logger";
 
@@ -133,11 +134,25 @@ async function upsertAll(e: IndexEngine, files: IndexedFile[]): Promise<void> {
 
 // ── Reading notes ───────────────────────────────────────────────────────
 
-/** Read one file into an index entry, or null if unreadable. */
-async function indexFile(e: { path: string; name: string; modified: number }): Promise<IndexedFile | null> {
+/** When the vault says `path` last changed (now, if it cannot tell). */
+async function mtimeOf(path: string): Promise<number> {
+  try {
+    return (await getVaultBackend().stat(path))?.mtime || Date.now();
+  } catch {
+    return Date.now();
+  }
+}
+
+/**
+ * Read one file into an index entry, or null if unreadable. `modified`
+ * null (a save announced by an event): ask the vault, so the next listing
+ * check does not take the note for changed again.
+ */
+async function indexFile(e: { path: string; name: string; modified: number | null }): Promise<IndexedFile | null> {
   try {
     const content = await readWorkspaceFile(e.path);
-    return { path: e.path, name: e.name, content, modified: e.modified, wikiTargets: wikiTargetsOf(content) };
+    const modified = e.modified ?? (await mtimeOf(e.path));
+    return { path: e.path, name: e.name, content, modified, wikiTargets: wikiTargetsOf(content) };
   } catch {
     return null;
   }
@@ -236,7 +251,7 @@ async function refresh(): Promise<void> {
   }
   cache.removed.clear();
 
-  const toRead = new Map<string, { path: string; name: string; modified: number }>();
+  const toRead = new Map<string, { path: string; name: string; modified: number | null }>();
   if (cache.stale || Date.now() - cache.checkedAt >= REVALIDATE_MS) {
     cache.stale = false;
     cache.checkedAt = Date.now();
@@ -254,9 +269,7 @@ async function refresh(): Promise<void> {
   cache.dirty.clear();
   for (const path of dirty) {
     if (!indexable(path) || toRead.has(path)) continue;
-    // The saved file's mtime is not in the event: stamp it now, so the next
-    // listing check sees a difference only if it changed again.
-    toRead.set(path, { path, name: cache.byPath.get(path)?.name ?? nameOf(path), modified: Date.now() });
+    toRead.set(path, { path, name: cache.byPath.get(path)?.name ?? nameOf(path), modified: null });
   }
   await mapLimit([...toRead.values()], 16, async (e) => {
     const f = await indexFile(e);

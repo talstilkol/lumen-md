@@ -190,6 +190,8 @@ export default function App() {
     // the test suite needs.
     (window as unknown as { __lumen?: unknown }).__lumen = {
       htmlToMarkdown,
+      // The vault index, for e2e/perf-vault.spec.ts (a lazy chunk).
+      vaultIndex: () => import("./storage/vaultIndexProbe"),
     };
     return () => {
       unregisterPlugin(wordCountPlugin.id);

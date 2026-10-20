@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import { deferredJSONStorage, persistedTextLength } from "./deferredStorage";
 import type { Locale } from "../i18n";
 import { applyLocale, isLocaleLoaded, loadLocale } from "../i18n";
 import {
@@ -204,6 +205,50 @@ function afterPendingEdits<A extends unknown[]>(action: (...args: A) => void): (
 export function defaultMode(width: number = typeof window !== "undefined" ? window.innerWidth : 1280): "split" | "preview" {
   return width < 768 ? "preview" : "split";
 }
+
+/** What of the app state survives a reload. */
+const partializeAppState = (s: AppState) =>
+  ({
+    mode: s.mode,
+    theme: s.theme,
+    themeSettings: s.themeSettings,
+    locale: s.locale,
+    showOutline: s.showOutline,
+    showWorkspace: s.showWorkspace,
+    showBacklinks: s.showBacklinks,
+    vimEnabled: s.vimEnabled,
+    rtl: s.rtl,
+    autoSave: s.autoSave,
+    autoSaveInterval: s.autoSaveInterval,
+    syncScroll: s.syncScroll,
+    splitAxis: s.splitAxis,
+    pageView: s.pageView,
+    spellCheck: s.spellCheck,
+    useLocalAi: s.useLocalAi,
+    typewriterMode: s.typewriterMode,
+    tsChecks: s.tsChecks,
+    writingGoalWords: s.writingGoalWords,
+    grammarCheck: s.grammarCheck,
+    suggestingMode: s.suggestingMode,
+    useFineTunedModel: s.useFineTunedModel,
+    fineTunedModelId: s.fineTunedModelId,
+    // aiKey intentionally excluded — session-only for security
+    doc: {
+      name: s.doc.name,
+      content: s.doc.content,
+      dirty: s.doc.dirty,
+      workspaceName: s.doc.workspaceName ?? null,
+    },
+    // Persist open tabs so the user's session resumes after reload.
+    // Heavy `handle` references are intentionally excluded (not
+    // structured-cloneable through localStorage anyway).
+    openTabs: s.openTabs,
+  });
+
+type PersistedAppState = ReturnType<typeof partializeAppState>;
+
+/** Persisted states with more document text than this are written when typing pauses. */
+const LARGE_PERSIST_CHARS = 200_000;
 
 export const useAppStore = create<AppState>()(
   persist(
@@ -449,42 +494,10 @@ export const useAppStore = create<AppState>()(
     }),
     {
       name: "lumen-md",
-      partialize: (s) => ({
-        mode: s.mode,
-        theme: s.theme,
-        themeSettings: s.themeSettings,
-        locale: s.locale,
-        showOutline: s.showOutline,
-        showWorkspace: s.showWorkspace,
-        showBacklinks: s.showBacklinks,
-        vimEnabled: s.vimEnabled,
-        rtl: s.rtl,
-        autoSave: s.autoSave,
-        autoSaveInterval: s.autoSaveInterval,
-        syncScroll: s.syncScroll,
-        splitAxis: s.splitAxis,
-        pageView: s.pageView,
-        spellCheck: s.spellCheck,
-        useLocalAi: s.useLocalAi,
-        typewriterMode: s.typewriterMode,
-        tsChecks: s.tsChecks,
-        writingGoalWords: s.writingGoalWords,
-        grammarCheck: s.grammarCheck,
-        suggestingMode: s.suggestingMode,
-        useFineTunedModel: s.useFineTunedModel,
-        fineTunedModelId: s.fineTunedModelId,
-        // aiKey intentionally excluded — session-only for security
-        doc: {
-          name: s.doc.name,
-          content: s.doc.content,
-          dirty: s.doc.dirty,
-          workspaceName: s.doc.workspaceName ?? null,
-        },
-        // Persist open tabs so the user's session resumes after reload.
-        // Heavy `handle` references are intentionally excluded (not
-        // structured-cloneable through localStorage anyway).
-        openTabs: s.openTabs,
-      }),
+      // A long open document is saved to localStorage once typing pauses,
+      // not on every keystroke (plan 8.4).
+      storage: deferredJSONStorage<PersistedAppState>((v) => persistedTextLength(v.state) >= LARGE_PERSIST_CHARS),
+      partialize: partializeAppState,
       // Persisted theme settings may be stale or hand-edited — sanitise
       // field-by-field on rehydrate instead of trusting localStorage.
       merge: (persisted, current) => {

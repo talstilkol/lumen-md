@@ -22,6 +22,7 @@
 
 import { noteKey } from "../lib/slug";
 import { hasHebrew, hebrewFind, normalizeForMatch, prefixVariants } from "../text/hebrew";
+import { WIKI_RE } from "./wikiTargets";
 
 export interface IndexInput {
   /** Full workspace path. */
@@ -74,17 +75,6 @@ export interface IndexStats {
   backlinkReads: number;
   /** Distinct link targets (note keys) the backlinks map holds. */
   linkKeys: number;
-}
-
-export const WIKI_RE = /\[\[([^\]\r\n|]+?)(?:\|[^\]\r\n]+?)?\]\]/g;
-
-/** The raw `[[target]]` texts of a note, in order. */
-export function wikiTargetsOf(content: string): string[] {
-  const out: string[] = [];
-  const re = new RegExp(WIKI_RE.source, "g");
-  let m: RegExpExecArray | null;
-  while ((m = re.exec(content)) !== null) out.push(m[1].trim());
-  return out;
 }
 
 interface Link {
