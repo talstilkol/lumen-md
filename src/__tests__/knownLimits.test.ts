@@ -110,6 +110,10 @@ describe("known limitations A1–A9", () => {
     const builtins = firstPart("const value = 1; const r = ((Array, Promise) => [Array.from(() => value), new Promise(() => value)])(A, P);", "const value = 'x';");
     expect(builtins).toContain("Array.from(() => value)");
     expect(builtins).toContain("new Promise(() => value)");
+    // …only inside that function: elsewhere they are still the built-ins.
+    const elsewhere = firstPart("const value = 1; const saved = Array.from([0], () => value); const p = new Promise((r) => r(value)); const g = (Array, Promise) => [Array, Promise];", "const value = 'x';");
+    expect(elsewhere).toContain("Array.from([0], () => value$prev)");
+    expect(elsewhere).toContain("r(value$prev)");
     // Without the parameter, the outer literal still decides.
     expect(firstPart("const value = 1; const xs = [0]; const r = (() => xs.map(() => value))();", "const value = 'x';")).toContain("xs.map(() => value$prev)");
   });

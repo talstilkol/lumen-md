@@ -421,25 +421,28 @@ function functionScopes(tokens: ReturnType<typeof tokenize>, match: Map<number, 
     return reassigned;
   };
   // `Array` / `Object` / `Promise` are the built-ins only when the code
-  // doesn't bind its own — a declaration, an assignment or a parameter.
-  // (Built lazily, like the above: parameters are known after the scan.)
-  let shadowedNames: Set<string> | null = null;
-  const shadowed = () => {
-    if (shadowedNames) return shadowedNames;
-    const out = new Set<string>();
-    for (let i = 1; i < tokens.length; i++) {
-      const t = tokens[i];
-      if (t.type !== "ident" || (t.value !== "Array" && t.value !== "Object" && t.value !== "Promise")) continue;
-      const prev = val(i - 1);
-      if (["const", "let", "var", "function", "class"].includes(prev) || (isPunct(i + 1, "=") && !isPunct(i - 1, "."))) out.add(t.value);
-    }
-    for (const f of paramScopes) for (const n of paramBindings(f.paramsFrom, f.paramsTo)) if (n === "Array" || n === "Object" || n === "Promise") out.add(n);
-    return (shadowedNames = out);
+  // doesn't bind its own: a declaration or assignment anywhere, or a
+  // parameter of a function the use sits in (A6). (Parameters are known
+  // after the scan, so this is built lazily, like the above.)
+  const declShadowed = new Set<string>();
+  for (let i = 1; i < tokens.length; i++) {
+    const t = tokens[i];
+    if (t.type !== "ident" || (t.value !== "Array" && t.value !== "Object" && t.value !== "Promise")) continue;
+    const prev = val(i - 1);
+    if (["const", "let", "var", "function", "class"].includes(prev) || (isPunct(i + 1, "=") && !isPunct(i - 1, "."))) declShadowed.add(t.value);
+  }
+  let builtinParams: Array<{ from: number; to: number; names: Set<string> }> | null = null;
+  const shadowedAt = (name: string, at: number): boolean => {
+    if (declShadowed.has(name)) return true;
+    builtinParams ??= paramScopes
+      .map((f) => ({ from: f.paramsFrom, to: f.to, names: paramBindings(f.paramsFrom, f.paramsTo) }))
+      .filter((f) => f.names.has("Array") || f.names.has("Object") || f.names.has("Promise"));
+    return builtinParams.some((f) => at > f.from && at <= f.to && f.names.has(name));
   };
   const callbackRetained = (open: number): boolean => {
     const callee = tokens[open - 1];
     if (callee?.type !== "ident") return true;
-    if (callee.value === "Promise" && val(open - 2) === "new" && !shadowed().has("Promise")) return false;
+    if (callee.value === "Promise" && val(open - 2) === "new" && !shadowedAt("Promise", open - 1)) return false;
     // `xs.map(…)` and `xs?.map(…)` alike.
     if (!SYNC_CALLBACK_METHODS.has(callee.value) || !(isPunct(open - 2, ".") || isPunct(open - 2, "?."))) return true;
     // Only when the receiver is known to be the built-in: an array literal
@@ -465,8 +468,8 @@ function functionScopes(tokens: ReturnType<typeof tokenize>, match: Map<number, 
     if (groupStart !== -1 && recvStart !== groupStart) return true; // `(a + b).map`, …
     if (recv.type === "str" || recv.type === "tpl") return !(callee.value === "replace" || callee.value === "replaceAll");
     if (recv.type === "ident") {
-      if (recv.value === "Array" && !shadowed().has("Array")) return callee.value !== "from";
-      if (recv.value === "Object" && !shadowed().has("Object")) return !(callee.value === "fromEntries" || callee.value === "groupBy");
+      if (recv.value === "Array" && !shadowedAt("Array", end)) return callee.value !== "from";
+      if (recv.value === "Object" && !shadowedAt("Object", end)) return !(callee.value === "fromEntries" || callee.value === "groupBy");
       const again = reassignedAt().get(recv.value);
       const member = isPunct(end - 1, ".") || isPunct(end - 1, "?.");
       const kind = member || (again !== undefined && again < open) ? undefined : literalKindAt(recv.value, end);
