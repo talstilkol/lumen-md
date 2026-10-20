@@ -127,7 +127,8 @@ newest — the service could show it an old one from the start. So:
   already stale it cannot notice. Lumen therefore shows **"Freshness not
   verified"** on that device and claims no rollback protection until you
   pair it or confirm by hand (for example after checking that a recent
-  note is there).
+  note is there). An unverified device cannot issue pairing codes: it
+  would pass a state nobody verified to the next device as "paired".
 
 ## What this does not protect against
 
