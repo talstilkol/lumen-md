@@ -672,9 +672,12 @@ export default function App() {
       void recordSnapshot(historyKey(d), d.content, "close").catch(() => false);
       if (!d.dirty || !d.workspaceName) return;
       const name = d.workspaceName;
-      writeWorkspaceFile(name, d.content)
+      const text = d.content;
+      writeWorkspaceFile(name, text)
         .then(() => {
-          if (useAppStore.getState().doc.workspaceName === name) markSaved();
+          // Only if nothing (a quick capture) changed the note meanwhile.
+          const now = useAppStore.getState().doc;
+          if (now.workspaceName === name && now.content === text) markSaved();
         })
         .catch(() => {
           /* best effort; the debounced autosave retries on the next edit */

@@ -74,6 +74,9 @@ export function QuickCapture({ open, onClose }: Props) {
           dir="auto"
           rows={3}
           value={text}
+          // Saving: what's typed now would be lost when the box clears (review #268).
+          readOnly={busy}
+          aria-busy={busy}
           aria-label={t("capture.title")}
           placeholder={t("capture.placeholder")}
           style={{ resize: "vertical", fontFamily: "inherit", lineHeight: 1.5 }}

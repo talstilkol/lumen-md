@@ -21,10 +21,11 @@
  * Loaded only inside the desktop app.
  */
 
-import { isMacPlatform } from "../lib/platformKeys";
-
 /** The accelerator, in the plugin's syntax (macOS: ⌥⌘N). */
 export const GLOBAL_CAPTURE_SHORTCUT = "Alt+Command+N";
+
+// Inline, not lib/platformKeys: importing it here moved shared code into the startup chunk.
+const onMac = (): boolean => typeof navigator !== "undefined" && /mac/i.test(navigator.platform || navigator.userAgent);
 
 export function isTauri(): boolean {
   return typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
@@ -42,7 +43,7 @@ interface ShortcutEvent {
  * or when the plugin is not part of this build.
  */
 export async function registerGlobalCapture(onCapture: () => void): Promise<boolean> {
-  if (!isTauri() || !isMacPlatform()) return false;
+  if (!isTauri() || !onMac()) return false;
   try {
     const core = await import("@tauri-apps/api/core");
     // The plugin's own JS API does exactly this (plugin:global-shortcut|register

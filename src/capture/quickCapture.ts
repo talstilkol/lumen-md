@@ -35,17 +35,15 @@ const pad2 = (n: number) => String(n).padStart(2, "0");
 const WIKI_UNSAFE = /[#|[\]]/;
 
 /**
- * The day's daily note as a wiki link. The full path (folder too), so a note
- * elsewhere with the same name can't take the link. A folder or pattern with
- * a character wiki links can't carry falls back to the file name (links
- * resolve by name too), and to the plain date when the name has one as well
- * — never a link that points somewhere else (review: #268).
+ * The day's daily note as a wiki link, by its full path (folder too), so a
+ * note elsewhere with the same name can't take the link. Wiki links can't
+ * escape a path with `#`, `|`, `[` or `]` in it, and the file name alone
+ * could open another note with that name: then the entry carries the plain
+ * date instead (review: #268).
  */
 export function dailyLink(when: Date, daily: Pick<DailySettings, "folder" | "pattern">): string {
   const note = dailyPath(dayOf(when), daily).replace(/\.(md|markdown)$/i, "");
   if (!WIKI_UNSAFE.test(note)) return `[[${note}]]`;
-  const name = note.split("/").pop() ?? note;
-  if (name && !WIKI_UNSAFE.test(name)) return `[[${name}]]`;
   const d = dayOf(when);
   return `${d.y}-${pad2(d.m)}-${pad2(d.d)}`;
 }

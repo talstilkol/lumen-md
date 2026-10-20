@@ -26,9 +26,9 @@ describe("formatEntry", () => {
   it("follows the daily-note file pattern", () => {
     expect(formatEntry("x", at, { folder: "", pattern: "DD.MM.YYYY" })).toBe("- [[20.10.2026]] 09:05 x");
     expect(formatEntry("x", at, { folder: "diary/daily", pattern: "YYYY-MM-DD" })).toBe("- [[diary/daily/2026-10-20]] 09:05 x");
-    // Wiki links can't escape # [ ]: a folder with one links by file name, a name with one gets no link (review #268)
-    expect(formatEntry("x", at, { folder: "C# notes", pattern: "YYYY-MM-DD" })).toBe("- [[2026-10-20]] 09:05 x");
-    expect(formatEntry("x", at, { folder: "[daily]", pattern: "YYYY-MM-DD" })).toBe("- [[2026-10-20]] 09:05 x");
+    // Wiki links can't escape # [ ], and the bare file name could open another note: plain date (review #268)
+    expect(formatEntry("x", at, { folder: "C# notes", pattern: "YYYY-MM-DD" })).toBe("- 2026-10-20 09:05 x");
+    expect(formatEntry("x", at, { folder: "[daily]", pattern: "YYYY-MM-DD" })).toBe("- 2026-10-20 09:05 x");
     expect(formatEntry("x", at, { folder: "journal", pattern: "#YYYY-MM-DD" })).toBe("- 2026-10-20 09:05 x");
   });
   it("keeps Hebrew, bidi marks and emoji exactly as typed", () => {
@@ -245,7 +245,7 @@ describe("desktop global shortcut (feature check)", () => {
     (window as unknown as Record<string, unknown>).__TAURI_INTERNALS__ = {};
     try {
       vi.resetModules();
-      (await import("../lib/platformKeys")).__setMacPlatform(true);
+      vi.spyOn(navigator, "platform", "get").mockReturnValue("MacIntel");
       const { registerGlobalCapture: register, GLOBAL_CAPTURE_SHORTCUT } = await import("../capture/desktopShortcut");
       expect(GLOBAL_CAPTURE_SHORTCUT).toBe("Alt+Command+N");
       const cb = vi.fn();
@@ -258,6 +258,7 @@ describe("desktop global shortcut (feature check)", () => {
       expect(cb).toHaveBeenCalledTimes(1);
     } finally {
       delete (window as unknown as Record<string, unknown>).__TAURI_INTERNALS__;
+      vi.restoreAllMocks();
       vi.doUnmock("@tauri-apps/api/core");
       vi.doUnmock("@tauri-apps/api/window");
     }
@@ -275,12 +276,13 @@ describe("desktop global shortcut (feature check)", () => {
     (window as unknown as Record<string, unknown>).__TAURI_INTERNALS__ = {};
     try {
       vi.resetModules();
-      (await import("../lib/platformKeys")).__setMacPlatform(false);
+      vi.spyOn(navigator, "platform", "get").mockReturnValue("Win32");
       const { registerGlobalCapture: register } = await import("../capture/desktopShortcut");
       expect(await register(() => {})).toBe(false);
       expect(calls).toEqual([]);
     } finally {
       delete (window as unknown as Record<string, unknown>).__TAURI_INTERNALS__;
+      vi.restoreAllMocks();
       vi.doUnmock("@tauri-apps/api/core");
     }
   });
@@ -295,11 +297,12 @@ describe("desktop global shortcut (feature check)", () => {
     (window as unknown as Record<string, unknown>).__TAURI_INTERNALS__ = {};
     try {
       vi.resetModules();
-      (await import("../lib/platformKeys")).__setMacPlatform(true);
+      vi.spyOn(navigator, "platform", "get").mockReturnValue("MacIntel");
       const { registerGlobalCapture: register } = await import("../capture/desktopShortcut");
       expect(await register(() => {})).toBe(false);
     } finally {
       delete (window as unknown as Record<string, unknown>).__TAURI_INTERNALS__;
+      vi.restoreAllMocks();
       vi.doUnmock("@tauri-apps/api/core");
     }
   });
