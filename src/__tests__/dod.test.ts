@@ -56,7 +56,8 @@ describe("checkDod", () => {
   it("grandfathered tasks pass without a dod, and the list cannot hide anything", () => {
     expect(checkDod(mini([{ id: "1.1", status: "✅ #1" }], ["1.1"]))).toEqual([]);
     expect(checkDod(mini([], ["9.9"]))[0]).toMatch(/9\.9 is not a task/);
-    expect(checkDod(mini([{ id: "1.1" }], ["1.1"]))[0]).toMatch(/not done/);
+    // Going back to ⏳ is a one-line status edit (plan 0.6), not an error.
+    expect(checkDod(mini([{ id: "1.1", status: "⏳ again" }], ["1.1"]))).toEqual([]);
     expect(checkDod(mini([{ id: "1.1", status: "✅ #1", dod: ["true"] }], ["1.1"]))[0]).toMatch(/has a dod now/);
   });
 

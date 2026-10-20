@@ -37,7 +37,9 @@ export const isMockDone = (status = "") => status.startsWith("✅*");
  * - every ✅ / ✅* task has a non-empty `dod`, unless it is grandfathered
  *   (marked ✅ before 0.7 existed; the list only shrinks)
  * - a task with `dodMock: true` is ✅*, never plain ✅
- * - grandfathered ids exist, are done, and have no `dod` yet (remove the id when adding one)
+ * - grandfathered ids exist and have no `dod` yet (remove the id when adding one). A
+ *   grandfathered task that goes back to ⏳ is not an error: un-✅ing a task stays a
+ *   one-line edit (plan 0.6); it can't come back to ✅ without a dod once it's off the list.
  * - every `dod` entry is a non-empty string
  * @param {any} plan
  * @returns {string[]}
@@ -50,7 +52,6 @@ export function checkDod(plan) {
   for (const id of grand) {
     const t = byId.get(id);
     if (!t) problems.push(`dodGrandfathered: ${id} is not a task`);
-    else if (!(t.status ?? "").startsWith("✅")) problems.push(`dodGrandfathered: ${id} is not done — take it off the list`);
     else if (t.dod?.length) problems.push(`dodGrandfathered: ${id} has a dod now — take it off the list`);
   }
   for (const t of tasks) {
