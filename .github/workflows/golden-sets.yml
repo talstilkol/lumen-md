@@ -216,6 +216,28 @@ jobs:
         if: steps.seed.outputs.ok == 'true'
         run: node scripts/golden/run-evals.mjs --dir "$GOLDEN_TEST" --out "$RUNNER_TEMP/scores.json"
 
+      # Plan 7.5: the app's OCR (production build) on the ocr-he test split.
+      # e2e/ocr-cer.spec.ts prints aggregates only for the test split and
+      # turns traces, videos and screenshots off. Gate failures fail the job.
+      - name: OCR CER on the test split (aggregates only)
+        if: steps.seed.outputs.ok == 'true'
+        env:
+          OCR_CER: "1"
+          OCR_CER_OUT: ${{ runner.temp }}/ocr-cer.json
+          PLAYWRIGHT_BASE_URL: http://localhost:5181
+        run: |
+          npm run build
+          npx -y http-server@14 dist -p 5181 -c-1 --silent &
+          for i in $(seq 1 30); do curl -sf http://localhost:5181/ -o /dev/null && break; sleep 1; done
+          npx playwright test e2e/ocr-cer.spec.ts --project=chromium --reporter=line
+      - if: always() && steps.seed.outputs.ok == 'true'
+        uses: actions/upload-artifact@v7
+        with:
+          name: ocr-cer-test
+          path: ${{ runner.temp }}/ocr-cer.json
+          if-no-files-found: ignore
+          retention-days: 90
+
       - if: steps.seed.outputs.ok == 'true'
         uses: actions/upload-artifact@v7
         with:

@@ -187,9 +187,12 @@ export default function App() {
     // lets the prod-build paste-html spec call htmlToMarkdown without
     // importing /src/* at runtime (which only works against the dev
     // server). The surface is intentionally minimal — only utilities
-    // the test suite needs.
+    // the test suite needs. `ocr` is the app's own OCR path (plan 7.5:
+    // e2e/ocr-cer.spec.ts measures its CER on the production build); the
+    // module loads on the first call only.
     (window as unknown as { __lumen?: unknown }).__lumen = {
       htmlToMarkdown,
+      ocr: (image: Blob) => import("./ai/ocr").then((m) => m.ocrImage(image)),
     };
     return () => {
       unregisterPlugin(wordCountPlugin.id);

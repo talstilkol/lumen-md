@@ -28,12 +28,13 @@
   ! X-Frame-Options
   Content-Security-Policy: default-src 'none'; script-src 'self' 'nonce-lumen-livejs-runner' blob: 'unsafe-eval'; worker-src blob:; connect-src 'none'; img-src 'none'; style-src 'none'; frame-ancestors 'self'; base-uri 'none'; form-action 'none'
 
-# On-device OCR (T31): the tesseract.js worker and its wasm cores. Dedicated
-# workers get their own policy from their response; the app's Trusted Types
-# requirement would block the worker's own importScripts() of the core.
+# On-device OCR (T31): the tesseract.js worker, its wasm cores and the language
+# models (tesseract/lang/, same origin since plan 7.5). Dedicated workers get
+# their own policy from their response; the app's Trusted Types requirement
+# would block the worker's own importScripts() of the core.
 /tesseract/*
   ! Content-Security-Policy
-  Content-Security-Policy: default-src 'none'; script-src 'self' 'wasm-unsafe-eval'; connect-src 'self' https://raw.githubusercontent.com; worker-src 'self' blob:; base-uri 'none'; form-action 'none'
+  Content-Security-Policy: default-src 'none'; script-src 'self' 'wasm-unsafe-eval'; connect-src 'self'; worker-src 'self' blob:; base-uri 'none'; form-action 'none'
 
 # Workers that need eval (F4 / P3): Graphviz (Emscripten embind builds its
 # bindings with new Function), ruby.wasm and the TypeScript checker. A

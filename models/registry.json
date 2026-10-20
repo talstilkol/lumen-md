@@ -432,38 +432,38 @@
     {
       "id": "tessdata_fast/heb.traineddata",
       "kind": "ocr",
-      "source": "https://raw.githubusercontent.com/tesseract-ocr/tessdata_fast/main/heb.traineddata",
+      "source": "https://github.com/tesseract-ocr/tessdata_fast/blob/87416418657359cb625c412a48b6e1d6d41c29bd/heb.traineddata",
       "license": "Apache-2.0",
       "class": "allowed",
       "commercial": "yes",
       "attribution": "Tesseract tessdata_fast © Google / tesseract-ocr contributors, licensed under the Apache License 2.0.",
-      "size": "~1 MB",
+      "size": "~0.5 MB gzipped (0.96 MB)",
       "runs": "browser",
-      "delivery": "download",
-      "catalog": "LANG_PATH / LANGS (src/ai/ocr.ts)",
+      "delivery": "bundled",
+      "catalog": "LANGS / langPath() (src/ai/ocr.ts)",
       "match": [
         "tessdata_fast"
       ],
       "verified": true,
-      "notes": ""
+      "notes": "Shipped same-origin as public/tesseract/lang/heb.traineddata.gz (gzip -n -9 of the upstream file at commit 87416418657359cb625c412a48b6e1d6d41c29bd; upstream sha256 11f9e43ab227f786352a50f75c94c2e9906f1baba86d93276da19da7ce0904db, checked by src/__tests__/ocrLangData.test.ts). Apache-2.0 text beside it in public/tesseract/lang/LICENSE. Plan 7.5."
     },
     {
       "id": "tessdata_fast/eng.traineddata",
       "kind": "ocr",
-      "source": "https://raw.githubusercontent.com/tesseract-ocr/tessdata_fast/main/eng.traineddata",
+      "source": "https://github.com/tesseract-ocr/tessdata_fast/blob/87416418657359cb625c412a48b6e1d6d41c29bd/eng.traineddata",
       "license": "Apache-2.0",
       "class": "allowed",
       "commercial": "yes",
       "attribution": "Tesseract tessdata_fast © Google / tesseract-ocr contributors, licensed under the Apache License 2.0.",
-      "size": "~4 MB",
+      "size": "~2 MB gzipped (4.1 MB)",
       "runs": "browser",
-      "delivery": "download",
-      "catalog": "LANG_PATH / LANGS (src/ai/ocr.ts)",
+      "delivery": "bundled",
+      "catalog": "LANGS / langPath() (src/ai/ocr.ts)",
       "match": [
         "tessdata_fast"
       ],
       "verified": true,
-      "notes": ""
+      "notes": "Shipped same-origin as public/tesseract/lang/eng.traineddata.gz (gzip -n -9 of the upstream file at commit 87416418657359cb625c412a48b6e1d6d41c29bd; upstream sha256 7d4322bd2a7749724879683fc3912cb542f19906c83bcc1a52132556427170b2, checked by src/__tests__/ocrLangData.test.ts). Apache-2.0 text beside it in public/tesseract/lang/LICENSE. Plan 7.5."
     },
     {
       "id": "pyodide",
