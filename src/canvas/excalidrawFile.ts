@@ -41,7 +41,7 @@ const localLocks = new Map<string, Promise<unknown>>();
  * with another create or save of the same file.
  */
 export function withCanvasLock<T>(fileName: string, fn: () => Promise<T>): Promise<T> {
-  if (typeof navigator !== "undefined" && "locks" in navigator && navigator.locks?.request) {
+  if (typeof navigator !== "undefined" && "locks" in navigator && typeof navigator.locks?.request === "function") {
     const locks = navigator.locks;
     return new Promise<T>((resolve, reject) => {
       locks
