@@ -168,7 +168,10 @@ export function PdfReader({ path, fragment = null, openSeq = 0, onClose, onOpenN
       const fit = all.length ? (width - 48) / all[0].w : 1;
       setScale(Math.min(2, Math.max(MIN_SCALE, Math.round(fit * 20) / 20)));
       setSizes(all);
-      setAnnotations(parseAnnotationsNote(note).filter((a) => a.target.source === path));
+      // Every annotation in the companion note is this PDF's: after the folder
+      // was moved or renamed, `source` still names the old path — adopt them
+      // (the next write stores the new path) instead of dropping them.
+      setAnnotations(parseAnnotationsNote(note).map((a) => (a.target.source === path ? a : { ...a, target: { ...a.target, source: path } })));
       setDoc(pdf);
     })().catch((e: unknown) => {
       if (!cancelled) setError(e instanceof Error ? e.message : String(e));
@@ -270,12 +273,26 @@ export function PdfReader({ path, fragment = null, openSeq = 0, onClose, onOpenN
         } catch {
           /* first highlight: the note is created */
         }
-        const content = upsertAnnotationsNote(existing, path, next, {
+        const labels = {
           title: t("pdf.noteTitle", { name: baseName(path) }),
-          page: (n) => t("pdf.notePage", { n }),
+          page: (n: number) => t("pdf.notePage", { n }),
           empty: t("pdf.noteEmpty"),
-        });
+        };
+        const content = upsertAnnotationsNote(existing, path, next, labels);
         await ws.writeWorkspaceFile(notePath, content);
+        // The note may be open (active, or in a tab): give the open copies the
+        // new block too, or their next autosave would write the old one back.
+        const { useAppStore, tabIdOf } = await import("../store/useStore");
+        const st = useAppStore.getState();
+        if (st.doc.workspaceName === notePath) {
+          st.setDoc({ name: st.doc.name, content: upsertAnnotationsNote(st.doc.content, path, next, labels), dirty: st.doc.dirty });
+        }
+        const activeId = tabIdOf(useAppStore.getState().doc);
+        useAppStore.setState((s) => ({
+          openTabs: s.openTabs.map((tab) =>
+            tab.workspaceName === notePath && tab.id !== activeId ? { ...tab, content: upsertAnnotationsNote(tab.content, path, next, labels) } : tab,
+          ),
+        }));
         notifyWorkspaceChanged(existing === null ? { kind: "structure" } : { kind: "content", paths: [notePath] });
       });
       writeQueue.current = job.catch((e: unknown) => {
