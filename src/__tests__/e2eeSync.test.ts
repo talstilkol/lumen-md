@@ -8,7 +8,7 @@ import { describe, it, expect, afterEach } from "vitest";
 import { fireEvent, screen, waitFor } from "@testing-library/react";
 import { memoryProvider, PreconditionFailedError, ProviderUnavailableError, type SyncProvider } from "../sync/e2ee/provider";
 import { HEADER_NAME } from "../sync/e2ee/header";
-import { manifestName, openManifest, sealManifest, RollbackError, checkFreshness, blobName } from "../sync/e2ee/manifest";
+import { manifestName, openManifest, sealManifest, RollbackError, checkFreshness, blobName, HISTORY_LENGTH } from "../sync/e2ee/manifest";
 import { SEALED_FORMAT, DecryptError } from "../sync/e2ee/keys";
 import { createVault, unlockVault, NoVaultError, VaultExistsError, E2eeSync } from "../sync/e2ee/engine";
 import { idbStateStore, memoryStateStore } from "../sync/e2ee/state";
@@ -976,5 +976,77 @@ describe("e2ee sync: a manifest write with a lost answer", () => {
     await a.sync.sync();
     await b.sync.sync();
     expect(b.files.text("x.md")).toBe("1");
+  });
+});
+
+describe("e2ee sync: newer manifests must descend from the trusted one", () => {
+  it("a newer counter from another branch is a fork, not an update", async () => {
+    const provider = memoryProvider();
+    const a = await newVault(provider);
+    const name = await manifestName(a.keys);
+    a.files.set("n.md", "base");
+    await a.sync.sync();
+    const b = await joinVault("B", provider);
+    await b.sync.sync();
+    await b.sync.pair(await a.sync.pairingCode());
+    const fork = provider.objects.get(name)!; // counter 2, both devices anchored here
+
+    a.files.set("n.md", "A's edit");
+    await a.sync.sync(); // counter 3 on A's branch
+    const aBranch = provider.objects.get(name)!;
+
+    // The provider hides A's commit from B and lets B build its own branch past it.
+    provider.objects.set(name, fork);
+    b.files.set("n.md", "B's edit on a hidden branch");
+    await b.sync.sync(); // 3'
+    b.files.set("other.md", "more");
+    await b.sync.sync(); // 4'
+    expect((await openManifest(a.keys, provider.objects.get(name)!.data)).manifest.counter).toBe(4);
+
+    // A, anchored at its own 3, refuses B's 4': its history lists another 3.
+    await expect(a.sync.sync()).rejects.toMatchObject({ kind: "fork" });
+    expect(a.files.text("n.md")).toBe("A's edit");
+    // And B, anchored at 4', refuses A's branch as older.
+    provider.objects.set(name, aBranch);
+    await expect(b.sync.sync()).rejects.toMatchObject({ kind: "older" });
+  });
+
+  it("a device too far behind to prove ancestry drops to unverified instead of claiming it", async () => {
+    const provider = memoryProvider();
+    const a = await newVault(provider);
+    await a.sync.sync();
+    const c = await joinVault("C", provider);
+    await c.sync.sync();
+    await c.sync.pair(await a.sync.pairingCode());
+    expect(await c.sync.freshness()).toMatchObject({ verified: true });
+    for (let i = 0; i < HISTORY_LENGTH + 1; i++) {
+      a.files.set("n.md", `v${i}`);
+      await a.sync.sync();
+    }
+    await c.sync.sync();
+    expect(c.files.text("n.md")).toBe(`v${HISTORY_LENGTH}`);
+    expect(await c.sync.freshness()).toMatchObject({ source: "unverified", verified: false });
+    // A device that keeps up stays verified.
+    a.files.set("n.md", "again");
+    await a.sync.sync();
+    await c.sync.pair(await a.sync.pairingCode());
+    a.files.set("n.md", "and again");
+    await a.sync.sync();
+    await c.sync.sync();
+    expect(await c.sync.freshness()).toMatchObject({ source: "paired", verified: true });
+  });
+
+  it("refuses a manifest whose history is malformed", async () => {
+    const provider = memoryProvider();
+    const a = await newVault(provider);
+    a.files.set("n.md", "x");
+    await a.sync.sync();
+    const name = await manifestName(a.keys);
+    const { manifest } = await openManifest(a.keys, provider.objects.get(name)!.data);
+    expect(manifest.history.map(([n]) => n)).toEqual([1]);
+    for (const history of [[[5, "x"]], [[1, "a"], [1, "b"]], [["1", "a"]]] as unknown as Array<Array<[number, string]>>) {
+      const bad = await sealManifest(a.keys, { ...manifest, history });
+      await expect(openManifest(a.keys, bad.bytes)).rejects.toBeInstanceOf(DecryptError);
+    }
   });
 });

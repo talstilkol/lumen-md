@@ -46,7 +46,17 @@ export interface Manifest {
   /** Raised by one on every manifest write; the rollback guard compares it. */
   counter: number;
   files: Record<string, ManifestEntry>;
+  /**
+   * The predecessors: `[counter, digest]` of the last `HISTORY_LENGTH`
+   * manifests before this one, oldest first. A device checks that the
+   * manifest it anchored on is among them, so a newer counter from another
+   * branch is a fork, not an update.
+   */
+  history: Array<[number, string]>;
 }
+
+/** How many predecessors a manifest lists (about 7 KB of plaintext at most). */
+export const HISTORY_LENGTH = 100;
 
 /** The manifest object's name: the same for every version, so its name leaks nothing. */
 export function manifestName(keys: VaultKeys): Promise<string> {
@@ -69,14 +79,14 @@ export function pathRecord<T>(from?: Record<string, T>): Record<string, T> {
 }
 
 export function emptyManifest(vaultId: string): Manifest {
-  return { protocol: PROTOCOL_VERSION, vaultId, counter: 0, files: pathRecord() };
+  return { protocol: PROTOCOL_VERSION, vaultId, counter: 0, files: pathRecord(), history: [] };
 }
 
 /** Sorted keys, so the same manifest always seals the same plaintext (and digest). */
 function canonical(m: Manifest): string {
   const files = pathRecord<ManifestEntry>();
   for (const p of Object.keys(m.files).sort()) files[p] = m.files[p];
-  return JSON.stringify({ protocol: m.protocol, vaultId: m.vaultId, counter: m.counter, files });
+  return JSON.stringify({ protocol: m.protocol, vaultId: m.vaultId, counter: m.counter, files, history: m.history });
 }
 
 export interface SealedManifest {
@@ -123,8 +133,25 @@ export async function openManifest(
     if (!isSyncedPath(p) || !isEntry(e)) throw new DecryptError("Bad manifest entry");
     files[p] = e;
   }
+  const counter = o.counter as number;
+  const history = o.history;
+  if (
+    !Array.isArray(history) ||
+    history.length > HISTORY_LENGTH ||
+    !history.every(
+      (h, i) =>
+        Array.isArray(h) &&
+        h.length === 2 &&
+        Number.isSafeInteger(h[0]) &&
+        typeof h[1] === "string" &&
+        h[0] < counter &&
+        (i === 0 || h[0] > (history[i - 1] as [number, string])[0]),
+    )
+  ) {
+    throw new DecryptError("Bad manifest history");
+  }
   return {
-    manifest: { protocol: PROTOCOL_VERSION, vaultId: keys.vaultId, counter: o.counter as number, files },
+    manifest: { protocol: PROTOCOL_VERSION, vaultId: keys.vaultId, counter, files, history: history as Array<[number, string]> },
     digest: await sha256Hex(bytes),
   };
 }
@@ -150,9 +177,27 @@ export class RollbackError extends Error {
   }
 }
 
-/** Throws `RollbackError` unless `got` is at least as new as `anchor` (and identical when equally new). */
-export function checkFreshness(anchor: FreshnessAnchor | null, got: FreshnessAnchor): void {
-  if (!anchor) return;
+/**
+ * Throws `RollbackError` unless `got` is at least as new as `anchor`, is the
+ * anchored manifest itself when equally new, and — when newer — descends from
+ * it: `history` (got's predecessors) must list the anchor's counter with the
+ * anchor's digest. Returns "unproven" when the anchor is older than the
+ * history reaches (or no history is given): the caller can no longer claim
+ * the device is verified.
+ */
+export function checkFreshness(
+  anchor: FreshnessAnchor | null,
+  got: FreshnessAnchor,
+  history?: Array<[number, string]>,
+): "ok" | "unproven" {
+  if (!anchor) return "ok";
   if (got.counter < anchor.counter) throw new RollbackError(anchor.counter, got.counter, "older");
-  if (got.counter === anchor.counter && got.digest !== anchor.digest) throw new RollbackError(anchor.counter, got.counter, "fork");
+  if (got.counter === anchor.counter) {
+    if (got.digest !== anchor.digest) throw new RollbackError(anchor.counter, got.counter, "fork");
+    return "ok";
+  }
+  const at = history?.find(([c]) => c === anchor.counter);
+  if (!at) return "unproven";
+  if (at[1] !== anchor.digest) throw new RollbackError(anchor.counter, got.counter, "fork");
+  return "ok";
 }

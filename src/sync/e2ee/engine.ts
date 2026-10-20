@@ -34,6 +34,7 @@ import {
   blobName,
   checkFreshness,
   emptyManifest,
+  HISTORY_LENGTH,
   manifestName,
   pathRecord,
   openManifest,
@@ -164,6 +165,8 @@ export class E2eeSync {
   private readonly o: Required<Omit<E2eeSyncOptions, "resolver">> & { resolver: ConflictResolver };
   private running: Promise<unknown> = Promise.resolve();
   private state: DeviceState | null = null;
+  /** Digest of the manifest `readManifest` returned last (the parent of the next commit). */
+  private remoteDigest = "";
   /** Opaque names already computed (HMAC is cheap, but not free over thousands of rounds). */
   private readonly names = new Map<string, string>();
 
@@ -319,11 +322,16 @@ export class E2eeSync {
     }
     const { manifest, digest } = await openManifest(this.o.keys, obj.data, await this.manifestObject());
     const got = { counter: manifest.counter, digest };
-    checkFreshness(s.anchor, got);
+    if (checkFreshness(s.anchor, got, manifest.history) === "unproven" && s.freshness !== "unverified") {
+      // Too far behind to prove this manifest descends from the one we trusted:
+      // say so instead of carrying a verification that no longer holds.
+      s.freshness = "unverified";
+    }
     if (!s.anchor || got.counter > s.anchor.counter) {
       s.anchor = got;
       await this.save();
     }
+    this.remoteDigest = digest;
     if (s.committing?.length) await this.reconcileCommit(manifest);
     return { manifest, etag: obj.etag };
   }
@@ -378,7 +386,12 @@ export class E2eeSync {
         return res;
       }
 
-      const next: Manifest = { ...remote, counter: remote.counter + 1, files: pathRecord(remote.files) };
+      const next: Manifest = {
+        ...remote,
+        counter: remote.counter + 1,
+        files: pathRecord(remote.files),
+        history: remote.counter > 0 ? [...remote.history, [remote.counter, this.remoteDigest] as [number, string]].slice(-HISTORY_LENGTH) : [],
+      };
       for (const [path, c] of changes) next.files[path] = c.entry;
       const sealed = await sealManifest(this.o.keys, next, await this.manifestObject());
       // The blobs this commit replaces. Recorded before the write: if the write

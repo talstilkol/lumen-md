@@ -105,6 +105,12 @@ the digest of that manifest. It refuses:
 - a manifest with a **lower** counter — the service replaying an old state
   (which would silently undo your recent edits);
 - a manifest with the **same** counter but different content — a fork;
+- a manifest with a **higher** counter that does not descend from the one
+  it trusted: every manifest lists its last 100 predecessors (counter and
+  digest), and the trusted one must be among them with the same digest —
+  otherwise it is another branch (a fork), not an update. A device more
+  than 100 versions behind cannot check this, so it drops back to
+  "freshness not verified" instead of claiming protection;
 - a missing manifest once it has seen one.
 
 Only someone with the passphrase-derived key can produce a manifest that
