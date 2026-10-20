@@ -10,6 +10,7 @@
  */
 
 import { fromUtf8, utf8 } from "./bytes";
+import "./strings";
 
 export interface ConflictInput {
   path: string;

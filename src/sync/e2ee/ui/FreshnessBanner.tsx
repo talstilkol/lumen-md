@@ -10,6 +10,7 @@ import { useEffect, useState } from "react";
 import { t } from "../../../i18n";
 import { PairingError } from "../pairing";
 import type { E2eeSync } from "../engine";
+import "../strings";
 
 type Freshness = Awaited<ReturnType<E2eeSync["freshness"]>>;
 

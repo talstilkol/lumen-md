@@ -7,6 +7,7 @@
 import { useState, type FormEvent } from "react";
 import { t } from "../../../i18n";
 import { WrongPassphraseError } from "../header";
+import "../strings";
 
 export const MIN_PASSPHRASE_LENGTH = 12;
 
