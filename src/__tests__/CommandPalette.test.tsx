@@ -1,6 +1,7 @@
 /**
  * Component tests for CommandPalette.
  */
+import { useLayoutEffect } from "react";
 import { describe, it, expect, vi } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { CommandPalette } from "../ui/CommandPalette";
@@ -57,10 +58,14 @@ describe("CommandPalette", () => {
     const { rerender } = render(<CommandPalette open={true} onClose={onClose} commands={makeCommands()} />);
     fireEvent.change(screen.getByRole("textbox"), { target: { value: "Page View" } });
     rerender(<CommandPalette open={false} onClose={onClose} commands={makeCommands()} />);
-    // Cleared when it closed, not only after the next open's effect.
+    // Cleared when it closed, not only after the next open's effect. The probe reads the
+    // committed DOM in a layout effect: after the reopening commit, before passive effects
+    // (where the open-time reset runs), so without the close-time reset it sees "Page View".
     let firstPaint: string | null = null;
     const Probe = () => {
-      firstPaint ??= (document.querySelector('[role="dialog"] input') as HTMLInputElement | null)?.value ?? null;
+      useLayoutEffect(() => {
+        firstPaint ??= (document.querySelector('[role="dialog"] input') as HTMLInputElement | null)?.value ?? null;
+      });
       return null;
     };
     rerender(
@@ -70,7 +75,7 @@ describe("CommandPalette", () => {
       </>,
     );
     expect((screen.getByRole("textbox") as HTMLInputElement).value).toBe("");
-    expect(firstPaint).not.toBe("Page View");
+    expect(firstPaint).toBe("");
   });
 
   it("renders commands when open", () => {
