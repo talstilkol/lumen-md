@@ -381,6 +381,15 @@ function functionScopes(tokens: ReturnType<typeof tokenize>, match: Map<number, 
         }
       }
     }
+    // A parameter binds its name over the whole function (A6): inside it,
+    // `xs.map` is the argument's, not an outer `const xs = […]`'s.
+    for (const f of paramScopes) {
+      for (const n of paramBindings(f.paramsFrom, f.paramsTo)) {
+        const at = decls.get(n) ?? [];
+        at.push({ from: f.paramsFrom, to: f.to, pos: f.paramsFrom });
+        decls.set(n, at);
+      }
+    }
     return (literalDecls = decls);
   };
   /** The literal kind of the binding `name` that the token at `use` sees. */
@@ -411,18 +420,26 @@ function functionScopes(tokens: ReturnType<typeof tokenize>, match: Map<number, 
     }
     return reassigned;
   };
-  // `Array` / `Object` / `Promise` are the built-ins only when the code doesn't bind its own.
-  const shadowed = new Set<string>();
-  for (let i = 1; i < tokens.length; i++) {
-    const t = tokens[i];
-    if (t.type !== "ident" || (t.value !== "Array" && t.value !== "Object" && t.value !== "Promise")) continue;
-    const prev = val(i - 1);
-    if (["const", "let", "var", "function", "class"].includes(prev) || (isPunct(i + 1, "=") && !isPunct(i - 1, "."))) shadowed.add(t.value);
-  }
+  // `Array` / `Object` / `Promise` are the built-ins only when the code
+  // doesn't bind its own — a declaration, an assignment or a parameter.
+  // (Built lazily, like the above: parameters are known after the scan.)
+  let shadowedNames: Set<string> | null = null;
+  const shadowed = () => {
+    if (shadowedNames) return shadowedNames;
+    const out = new Set<string>();
+    for (let i = 1; i < tokens.length; i++) {
+      const t = tokens[i];
+      if (t.type !== "ident" || (t.value !== "Array" && t.value !== "Object" && t.value !== "Promise")) continue;
+      const prev = val(i - 1);
+      if (["const", "let", "var", "function", "class"].includes(prev) || (isPunct(i + 1, "=") && !isPunct(i - 1, "."))) out.add(t.value);
+    }
+    for (const f of paramScopes) for (const n of paramBindings(f.paramsFrom, f.paramsTo)) if (n === "Array" || n === "Object" || n === "Promise") out.add(n);
+    return (shadowedNames = out);
+  };
   const callbackRetained = (open: number): boolean => {
     const callee = tokens[open - 1];
     if (callee?.type !== "ident") return true;
-    if (callee.value === "Promise" && val(open - 2) === "new" && !shadowed.has("Promise")) return false;
+    if (callee.value === "Promise" && val(open - 2) === "new" && !shadowed().has("Promise")) return false;
     // `xs.map(…)` and `xs?.map(…)` alike.
     if (!SYNC_CALLBACK_METHODS.has(callee.value) || !(isPunct(open - 2, ".") || isPunct(open - 2, "?."))) return true;
     // Only when the receiver is known to be the built-in: an array literal
@@ -448,8 +465,8 @@ function functionScopes(tokens: ReturnType<typeof tokenize>, match: Map<number, 
     if (groupStart !== -1 && recvStart !== groupStart) return true; // `(a + b).map`, …
     if (recv.type === "str" || recv.type === "tpl") return !(callee.value === "replace" || callee.value === "replaceAll");
     if (recv.type === "ident") {
-      if (recv.value === "Array" && !shadowed.has("Array")) return callee.value !== "from";
-      if (recv.value === "Object" && !shadowed.has("Object")) return !(callee.value === "fromEntries" || callee.value === "groupBy");
+      if (recv.value === "Array" && !shadowed().has("Array")) return callee.value !== "from";
+      if (recv.value === "Object" && !shadowed().has("Object")) return !(callee.value === "fromEntries" || callee.value === "groupBy");
       const again = reassignedAt().get(recv.value);
       const member = isPunct(end - 1, ".") || isPunct(end - 1, "?.");
       const kind = member || (again !== undefined && again < open) ? undefined : literalKindAt(recv.value, end);
@@ -605,10 +622,14 @@ function functionScopes(tokens: ReturnType<typeof tokenize>, match: Map<number, 
       }
     }
   };
-  /** Locals: identifiers bound in the params and declared in the body. */
-  const collectLocals = (paramsFrom: number, paramsTo: number, bodyFrom: number, bodyTo: number, own?: string) => {
+  /**
+   * Every function's parameter list [paramsFrom, paramsTo] and the token
+   * its scope ends at (`to`): parameters shadow outer bindings there.
+   */
+  const paramScopes: Array<{ paramsFrom: number; paramsTo: number; to: number }> = [];
+  /** Identifiers a parameter list binds (defaults and computed keys are references). */
+  const paramBindings = (paramsFrom: number, paramsTo: number) => {
     const locals = new Set<string>();
-    if (own) locals.add(own);
     for (let i = paramsFrom; i <= paramsTo; i++) {
       const t = tokens[i];
       // `x = value`: the default expression references, it doesn't bind.
@@ -636,6 +657,12 @@ function functionScopes(tokens: ReturnType<typeof tokenize>, match: Map<number, 
       if (isPunct(i - 1, ".") || (isPunct(i + 1, ":") && (isPunct(i - 1, "{") || isPunct(i - 1, ",")))) continue;
       locals.add(t.value);
     }
+    return locals;
+  };
+  /** Locals: identifiers bound in the params and declared in the body. */
+  const collectLocals = (paramsFrom: number, paramsTo: number, bodyFrom: number, bodyTo: number, own?: string) => {
+    const locals = paramBindings(paramsFrom, paramsTo);
+    if (own) locals.add(own);
     addDeclarations(locals, bodyFrom, bodyTo, true);
     return locals;
   };
@@ -653,6 +680,7 @@ function functionScopes(tokens: ReturnType<typeof tokenize>, match: Map<number, 
       if (q === undefined || !isPunct(q + 1, "{")) continue;
       const end = match.get(q + 1) ?? tokens.length - 1;
       fnBodies.push([q + 1, end]);
+      paramScopes.push({ paramsFrom: p, paramsTo: q, to: end });
       // `function () { … }()` in expression position runs now. (A
       // declaration followed by `(` on the next line is two statements.)
       let b = k - 1;
@@ -690,6 +718,7 @@ function functionScopes(tokens: ReturnType<typeof tokenize>, match: Map<number, 
         }
       }
       if (isPunct(k + 1, "{")) fnBodies.push([k + 1, end]);
+      paramScopes.push({ paramsFrom: pFrom, paramsTo: pTo, to: end + 1 });
       pending.push(() => ({ from: pFrom, to: end, retained: retainedAt(pFrom - 1), locals: collectLocals(pFrom, pTo, k + 1, end) }));
       continue;
     }
@@ -705,6 +734,7 @@ function functionScopes(tokens: ReturnType<typeof tokenize>, match: Map<number, 
       if (keyStart < 0 || !keyPos) continue;
       const end = match.get(q + 1) ?? tokens.length - 1;
       fnBodies.push([q + 1, end]);
+      paramScopes.push({ paramsFrom: k + 1, paramsTo: q, to: end });
       pending.push(() => ({ from: k + 1, to: end, retained: true, locals: collectLocals(k + 1, q, q + 1, end) }));
       continue;
     }
@@ -717,6 +747,7 @@ function functionScopes(tokens: ReturnType<typeof tokenize>, match: Map<number, 
       if (!keyPos || BLOCK_HEADS.has(t.value) || t.value === "function") continue;
       const end = match.get(q + 1) ?? tokens.length - 1;
       fnBodies.push([q + 1, end]);
+      paramScopes.push({ paramsFrom: k + 1, paramsTo: q, to: end });
       pending.push(() => ({ from: k + 1, to: end, retained: true, locals: collectLocals(k + 1, q, q + 1, end) }));
     }
   }
