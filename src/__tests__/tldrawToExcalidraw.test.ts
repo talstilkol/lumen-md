@@ -423,31 +423,37 @@ describe("tldraw → Excalidraw: details", () => {
     expect(ids.sort()).toEqual(["a", "b", "o"]);
   });
 
-  it("decodes base64 draw paths (float16 x, y, z triples)", () => {
-    const f16 = (v: number): number => {
-      // Exact for the small integers / halves used here.
-      if (v === 0) return 0;
-      const sign = v < 0 ? 0x8000 : 0;
-      const a = Math.abs(v);
-      const e = Math.floor(Math.log2(a));
-      const frac = Math.round((a / 2 ** e - 1) * 1024);
-      return sign | ((e + 15) << 10) | frac;
-    };
-    const pts = [[0, 0, 0.5], [10, 4, 0.5], [-3, 7.5, 0.25]];
-    const bytes = new Uint8Array(pts.length * 6);
-    const view = new DataView(bytes.buffer);
-    pts.forEach((p, i) => p.forEach((v, j) => view.setUint16(i * 6 + j * 2, f16(v), true)));
-    const b64 = btoa(String.fromCharCode(...bytes));
-    expect(decodeDrawPath(b64)).toEqual(pts.map(([x, y, z]) => ({ x, y, z })));
+  it("decodes tldraw 4.5 base64 draw paths (float32 first point, float16 deltas)", () => {
+    // `b64Vecs.encodePoints([{0,0,.5},{10,4,.5},{-3,7.5,.25},{1000.25,-2000.5,1}])`
+    // as printed by tldraw 4.5.10 in CI.
+    const sample = "AAAAAAAAAAAAAAA/AEkARAAAgMoAQwC012PY5wA6";
+    expect(decodeDrawPath(sample)).toEqual([
+      { x: 0, y: 0, z: 0.5 },
+      { x: 10, y: 4, z: 0.5 },
+      { x: -3, y: 7.5, z: 0.25 },
+      // float16 deltas round: tldraw's own decoder gives the same numbers.
+      { x: 1000.5, y: -2000.5, z: 1 },
+    ]);
+    // Fixture 13's pen stroke `d2` after tldraw 4.5's own migration (printed in CI).
+    const migrated = decodeDrawPath("AAAAAAAAAADNzEw+AEUASWY2AEUATc00")!;
+    const want = [[0, 0, 0.2], [5, 10, 0.6], [10, 30, 0.9]];
+    expect(migrated).toHaveLength(3);
+    migrated.forEach((p, i) => {
+      close(p.x, want[i][0], 0.01);
+      close(p.y, want[i][1], 0.01);
+      close(p.z, want[i][2], 0.01);
+    });
+    expect(decodeDrawPath("")).toEqual([]);
     expect(decodeDrawPath("not base64!")).toBeNull();
+    expect(decodeDrawPath("AAAA")).toBeNull();
     const data = {
       store: {
         "page:p": { id: "page:p", typeName: "page", index: "a1", name: "P" },
-        "shape:d": { id: "shape:d", typeName: "shape", type: "draw", x: 1, y: 2, index: "a1", parentId: "page:p", props: { segments: [{ type: "free", path: b64 }] } },
+        "shape:d": { id: "shape:d", typeName: "shape", type: "draw", x: 1, y: 2, index: "a1", parentId: "page:p", props: { segments: [{ type: "free", path: sample }] } },
       },
     };
     const d = tldrawToExcalidraw(data).file.elements[0] as ExFreedrawElement;
-    expect(d).toMatchObject({ x: 1, y: 2, points: [[0, 0], [10, 4], [-3, 7.5]] });
+    expect(d).toMatchObject({ x: 1, y: 2, points: [[0, 0], [10, 4], [-3, 7.5], [1000.5, -2000.5]] });
   });
 
   it("rejects input that isn't a tldraw canvas; an empty canvas is an empty scene", () => {

@@ -580,8 +580,8 @@ function polygonFor(geo: string): ExPoint[] | null {
 }
 
 // ---------------------------------------------------------------------------
-// Draw-stroke points. tldraw stores `segments[].points` as `{x,y,z}` arrays;
-// newer schema versions store them base64-encoded in `segments[].path`.
+// Draw-stroke points. Older tldraw stores `segments[].points` as `{x,y,z}`
+// arrays; tldraw 4.5 (draw schema v4, highlight v3) stores `segments[].path`.
 
 function decodeBase64(s: string): Uint8Array | null {
   const ABC = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
@@ -611,22 +611,28 @@ function float16(bits: number): number {
   return sign * 2 ** (exp - 15) * (1 + frac / 1024);
 }
 
-/** Points of a base64 `path`: little-endian float16 triples (x, y, z). */
+/**
+ * Points of a base64 `path` (tldraw 4.5 `b64Vecs`): the first point as three
+ * little-endian float32 (x, y, z), then each following point as three
+ * float16 deltas from the previous one. Null when the bytes don't fit that
+ * layout or decode to non-finite numbers.
+ */
 export function decodeDrawPath(path: string): { x: number; y: number; z: number }[] | null {
+  if (path === "") return [];
   const bytes = decodeBase64(path);
-  if (!bytes || bytes.length % 6 !== 0) return null;
+  if (!bytes || bytes.length < 12 || (bytes.length - 12) % 6 !== 0) return null;
   const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
-  const out: { x: number; y: number; z: number }[] = [];
-  for (let i = 0; i < bytes.length; i += 6) {
-    const p = {
-      x: float16(view.getUint16(i, true)),
-      y: float16(view.getUint16(i + 2, true)),
-      z: float16(view.getUint16(i + 4, true)),
-    };
-    if (!Number.isFinite(p.x) || !Number.isFinite(p.y)) return null;
-    out.push(p);
+  let x = view.getFloat32(0, true);
+  let y = view.getFloat32(4, true);
+  let z = view.getFloat32(8, true);
+  const out = [{ x, y, z }];
+  for (let i = 12; i < bytes.length; i += 6) {
+    x += float16(view.getUint16(i, true));
+    y += float16(view.getUint16(i + 2, true));
+    z += float16(view.getUint16(i + 4, true));
+    out.push({ x, y, z });
   }
-  return out;
+  return out.every((p) => Number.isFinite(p.x) && Number.isFinite(p.y) && Number.isFinite(p.z)) ? out : null;
 }
 
 function segmentPoints(seg: unknown): { x: number; y: number; z: number }[] | null {
