@@ -5,7 +5,7 @@
 import { useEffect, useState, useSyncExternalStore } from "react";
 import { ShieldCheck, X } from "lucide-react";
 import { t, getLocale } from "../i18n";
-import { clearLedger, ledgerEntries, ledgerSummary, subscribeLedger, type LedgerEntry } from "../ai/privacyLedger";
+import { clearLedger, leftDevice, ledgerEntries, ledgerSummary, subscribeLedger, type LedgerEntry } from "../ai/privacyLedger";
 import { getAiPolicy } from "../ai/policy";
 
 interface Props {
@@ -40,7 +40,7 @@ export function PrivacyLedgerPanel({ open, onClose }: Props) {
 
   if (!open) return null;
   const sum = ledgerSummary(list);
-  const shown = [...list].reverse().filter((e) => !onlyCloud || e.category !== "local-ai");
+  const shown = [...list].reverse().filter((e) => !onlyCloud || leftDevice(e));
   const policy = getAiPolicy();
   const catLabel = (e: LedgerEntry) => t(`privacy.cat.${e.category}`);
 

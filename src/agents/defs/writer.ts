@@ -10,6 +10,7 @@ import { registerAgent } from "../registry";
 import { nonEmptyValidator } from "../tools/validate";
 import { clip } from "./shared";
 import { styleInstruction } from "../../ai/styleProfiles";
+import { AI_PROMPT_TEMPLATES } from "../../ai/multiLangPrompts";
 
 export interface WriterInput extends AgentInput {
   /** What to write. */
@@ -52,6 +53,10 @@ export const templaterAgent: AgentDefinition<TemplaterInput, string> = registerA
   // The whole template input goes out, as before the agents: improve /
   // translate / summarize must see the complete document.
   user: (input) => input.text,
+  // A translation template names its own target language: the answer is
+  // not in the document's language, so neither the prompt nor the check
+  // may demand that.
+  language: (input) => (AI_PROMPT_TEMPLATES.find((t) => t.id === input.extra?.templateId)?.category === "translation" ? "any" : "input"),
   validators: [nonEmptyValidator()],
   streaming: true,
   // Streamed text is already in front of the user: a retry would duplicate it.

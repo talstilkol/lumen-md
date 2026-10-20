@@ -116,6 +116,21 @@ export function pickModel(tier: ModelTier, models: InstalledModel[], configured:
   return cfg?.name ?? chat[0].name;
 }
 
+/**
+ * The tool-capable fallback of a tool-calling agent: same tier first, then
+ * any tier; on Hebrew notes the better Hebrew wins before the size, as in
+ * pickModel.
+ */
+export function pickToolModel(tier: ModelTier, models: InstalledModel[], supports: (m: InstalledModel) => boolean, opts: { hebrew?: boolean } = {}): string | null {
+  const chat = models.filter((m) => !/embed/i.test(m.name) && supports(m));
+  const heb = (m: InstalledModel) => (opts.hebrew ? HEBREW_RANK[hebrewSupportOf(m.name) ?? "none"] : 0);
+  const best = (list: InstalledModel[]) => list.reduce((b, m) => (heb(m) > heb(b) || (heb(m) === heb(b) && (m.params ?? 0) > (b.params ?? 0)) ? m : b));
+  const sameTier = chat.filter((m) => tierOf(m.params) === tier);
+  if (sameTier.length) return best(sameTier).name;
+  if (chat.length) return best(chat).name;
+  return null;
+}
+
 export function versionAtLeast(version: string | null, min: readonly [number, number, number]): boolean {
   if (!version) return false;
   const parts = version.replace(/^v/, "").split(".").map((x) => Number.parseInt(x, 10));
@@ -262,12 +277,7 @@ export const ollamaExecutor: Executor = {
     // A tool-calling agent prefers an installed model with tool support in
     // the same tier (then any tier) over the plain pick.
     const supports = (m: InstalledModel) => state.tools.get(m.name) ?? TOOL_FAMILIES.test(m.name);
-    const chat = state.models.filter((m) => !/embed/i.test(m.name) && supports(m));
-    const sameTier = chat.filter((m) => tierOf(m.params) === tier);
-    const best = (list: InstalledModel[]) => list.reduce((b, m) => ((m.params ?? 0) > (b.params ?? 0) ? m : b));
-    if (sameTier.length) return best(sameTier).name;
-    if (chat.length) return best(chat).name;
-    return pick;
+    return pickToolModel(tier, state.models, supports, { hebrew: notesInHebrew() }) ?? pick;
   },
   async chat(req: ExecutorRequest): Promise<ExecutorResponse> {
     if (remoteRefused()) throw new AiPolicyError(`The AI policy is "local only": the Ollama server at ${getBaseUrl()} is not on this machine or network.`);

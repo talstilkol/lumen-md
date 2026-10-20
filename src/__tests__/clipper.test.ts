@@ -31,6 +31,41 @@ describe("clipper", () => {
     f.mockRestore();
   });
 
+  it("keeps a header inside the article (headline, byline, lead)", () => {
+    const html = `<body><header>Site chrome</header><article><header><h1>Headline</h1><p class="byline">By Dana</p><p>The lead.</p></header><p>Body.</p></article></body>`;
+    const r = readableHtml(html);
+    expect(r.html).toContain("By Dana");
+    expect(r.html).toContain("The lead.");
+    expect(r.html).not.toContain("Site chrome");
+  });
+
+  it("resolves relative links and images against the clipped page", () => {
+    const html = `<article><p><a href="/next">next</a> <a href="#s2">s2</a> <img src="../photo.jpg" srcset="a.jpg 1x, /b.jpg 2x"></p></article>`;
+    const c = clipFromHtml(html, "https://news.example/2026/10/story.html");
+    expect(c.markdown).toContain("(https://news.example/next)");
+    expect(c.markdown).toContain("(https://news.example/2026/10/story.html#s2)");
+    expect(c.markdown).toContain("https://news.example/2026/photo.jpg");
+    expect(readableHtml(html, "https://news.example/2026/10/story.html").html).toContain("https://news.example/b.jpg 2x");
+    // No usable source (clipboard without an address): left as is.
+    expect(clipFromHtml(html, "clipboard").markdown).toContain("(/next)");
+  });
+
+  it("doesn't try a direct fetch the CSP would block; says what is needed", async () => {
+    const meta = document.createElement("meta");
+    meta.setAttribute("http-equiv", "Content-Security-Policy");
+    meta.setAttribute("content", "default-src 'self'; connect-src 'self' https://api.openai.com");
+    document.head.appendChild(meta);
+    const f = vi.spyOn(globalThis, "fetch");
+    try {
+      await expect(clipUrl("https://blog.example/post")).rejects.toMatchObject({ name: "ResearchUnavailableError" });
+      await expect(clipUrl("https://blog.example/post", { extract: async () => ({ error: "blocked-url" }) })).rejects.toThrow("blocked-url");
+      expect(f).not.toHaveBeenCalled();
+    } finally {
+      f.mockRestore();
+      meta.remove();
+    }
+  });
+
   it("safe file names and library paths", () => {
     expect(clipFileName('a/b: "c"?')).toBe("a b c.md");
     expect(isLibraryPath("ספרייה/x.md")).toBe(true);
@@ -58,5 +93,46 @@ describe("research under local-only", () => {
     expect(r.markdown).not.toContain("other");
     expect(f).not.toHaveBeenCalled();
     f.mockRestore();
+  });
+});
+
+describe("library research checks", () => {
+  beforeEach(() => {
+    localStorage.clear();
+    localStorage.setItem("lumen.ai.policy", "local-only");
+  });
+
+  async function research(answer: string, hits?: Array<{ path: string; score: number; snippet: string }>) {
+    const all = hits ?? [{ path: "Library/launch.md", score: 1, snippet: "The launch moved to Tuesday." }];
+    vi.doMock("../ai/semanticSearch", () => ({
+      searchHybrid: async (_q: string, k: number, o?: { filter?: (p: string) => boolean }) =>
+        all.filter((h) => !o?.filter || o.filter(h.path)).slice(0, k),
+    }));
+    vi.doMock("../storage/workspace", async (o) => ({ ...(await o<object>()), readWorkspaceFile: async () => "# Launch\nThe launch moved to Tuesday.\n" }));
+    vi.doMock("../ai/llm", async (o) => ({ ...(await o<object>()), chat: async () => answer }));
+    vi.resetModules();
+    const { runResearch } = await import("../research/agent");
+    return runResearch({ question: "When is the launch?", deps: { settings: { provider: "claude", key: "" } } });
+  }
+
+  it("scopes retrieval to the library before the result limit", async () => {
+    const notes = Array.from({ length: 45 }, (_, i) => ({ path: `notes/n${i}.md`, score: 2, snippet: "launch" }));
+    const r = await research('Tuesday [1] "The launch moved to Tuesday".', [...notes, { path: "Library/launch.md", score: 1, snippet: "x" }]);
+    expect(r.sources).toBe(1);
+    expect(r.unverified).toBe(0);
+  });
+
+  it("an answer without citations counts as unsupported", async () => {
+    const r = await research("The launch is on Tuesday.");
+    expect(r.unverified).toBe(1);
+    expect(r.markdown).toContain("cites no library page");
+  });
+
+  it("marks each failed citation in the saved report", async () => {
+    const r = await research('Tuesday [1] "The launch moved to Tuesday". Budget doubled [1] "Budget doubled".');
+    expect(r.unverified).toBe(1);
+    expect(r.markdown).toContain('[1] "The launch moved to Tuesday".');
+    expect(r.markdown).toContain('[1] "Budget doubled" ⚠️ *quote not found in the page*');
+    expect(r.markdown).not.toContain('Tuesday" ⚠️');
   });
 });

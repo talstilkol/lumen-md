@@ -25,6 +25,20 @@ describe("AI cancellation", () => {
     expect(cancelled).toHaveBeenCalledWith(1);
   });
 
+  it("Esc cancels even when a nested handler stops its propagation", () => {
+    const cancelled = vi.fn();
+    installAiEscape(cancelled);
+    const stop = (e: Event) => e.stopPropagation();
+    document.addEventListener("keydown", stop); // e.g. an open toolbar menu
+    try {
+      const op = aiOperation();
+      document.body.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
+      expect(op.signal.aborted).toBe(true);
+    } finally {
+      document.removeEventListener("keydown", stop);
+    }
+  });
+
   it("recognises aborts from fetch and from the agent runtime", () => {
     expect(isAbort(new DOMException("x", "AbortError"))).toBe(true);
     expect(isAbort({ name: "AgentRunError", run: { status: "aborted" } })).toBe(true);

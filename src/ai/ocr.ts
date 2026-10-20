@@ -16,6 +16,7 @@ export interface OcrResult {
 }
 
 const LANG_PATH = "https://raw.githubusercontent.com/tesseract-ocr/tessdata_fast/main";
+const LANGS = ["heb", "eng"] as const;
 const IDLE_MS = 60_000;
 
 type TesseractWorker = {
@@ -35,10 +36,11 @@ function base(): string {
 async function getWorker(): Promise<TesseractWorker> {
   return (workerPromise ??= (async () => {
     const T = await import("tesseract.js");
+    await noteModelDownloads();
     // workerBlobURL: false — a same-origin worker URL, so the worker gets its
     // own CSP (public/_headers /tesseract/*) instead of a blob: that inherits
     // the app's Trusted Types requirement.
-    const w = await T.createWorker(["heb", "eng"], T.OEM.LSTM_ONLY, {
+    const w = await T.createWorker([...LANGS], T.OEM.LSTM_ONLY, {
       workerPath: `${base()}worker.min.js`,
       corePath: base(),
       langPath: LANG_PATH,
@@ -50,6 +52,25 @@ async function getWorker(): Promise<TesseractWorker> {
     workerPromise = null;
     throw e;
   }));
+}
+
+/**
+ * The worker downloads the language models itself, out of sight of the
+ * privacy ledger's fetch wrapper: record each one it will fetch — the ones
+ * not yet in tesseract's IndexedDB cache (idb-keyval's default store,
+ * key `./<lang>.traineddata`, shared with the same-origin worker).
+ * @internal exported for tests.
+ */
+export async function noteModelDownloads(): Promise<void> {
+  try {
+    const [{ get }, { recordWorkerRequest }] = await Promise.all([import("idb-keyval"), import("./privacyLedger")]);
+    for (const lang of LANGS) {
+      const cached = await get(`./${lang}.traineddata`).catch(() => undefined);
+      if (cached === undefined) recordWorkerRequest(`${LANG_PATH}/${lang}.traineddata`);
+    }
+  } catch {
+    /* no IndexedDB: the ledger stays as it was */
+  }
 }
 
 function scheduleIdle(): void {

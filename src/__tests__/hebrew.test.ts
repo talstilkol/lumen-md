@@ -11,6 +11,8 @@ import { slug as remarkSlug } from "../renderer/remarkLumen";
 describe("hebrew text core", () => {
   it("strips niqqud and folds final letters for matching", () => {
     expect(stripNiqqud("שָׁלוֹם")).toBe("שלום");
+    expect(stripNiqqud("יוֹם־יוֹם בֵּית־סֵפֶר")).toBe("יום־יום בית־ספר");
+    expect(normalizeForMatch("יוֹם־יוֹם")).toBe("יומ-יומ");
     expect(normalizeForMatch("שָׁלוֹם")).toBe(normalizeForMatch("שלומ"));
     expect(normalizeForMatch("צה״ל")).toBe('צה"ל');
     expect(normalizeForMatch("Hello")).toBe("hello");

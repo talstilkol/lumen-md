@@ -5,7 +5,9 @@
 //   npm run eval:compare -- <results.json> --save      # make it the baseline
 //
 // Baselines live in eval/baseline/<kind>-<model>.json (committed). A case
-// that passed in the baseline and fails now is a regression: exit 1.
+// that passed in the baseline and fails now is a regression: exit 1 — so is
+// one that passed and is gone from the run (removed or renamed; a case the
+// run marks `skipped` is exempt).
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { basename, join } from "node:path";
 
@@ -38,12 +40,13 @@ if (!existsSync(baselinePath)) {
 const base = JSON.parse(readFileSync(baselinePath, "utf8"));
 const before = new Map(base.results.filter((r) => r.status !== "skipped").map((r) => [r.id, pass(r)]));
 const regressions = [...passed].filter(([id, ok]) => before.get(id) === true && !ok).map(([id]) => id);
+const inRun = new Set(run.results.map((r) => r.id));
+const missing = [...before].filter(([id, ok]) => ok && !inRun.has(id)).map(([id]) => id);
 const fixed = [...passed].filter(([id, ok]) => before.get(id) === false && ok).map(([id]) => id);
 const baseScore = [...before.values()].filter(Boolean).length;
 console.log(`baseline (${base.date}): ${baseScore}/${before.size} · now ${score}/${passed.size}`);
 if (fixed.length) console.log(`fixed: ${fixed.join(", ")}`);
-if (regressions.length) {
-  console.error(`REGRESSIONS: ${regressions.join(", ")}`);
-  process.exit(1);
-}
+if (missing.length) console.error(`MISSING (passed in the baseline, not in this run): ${missing.join(", ")}`);
+if (regressions.length) console.error(`REGRESSIONS: ${regressions.join(", ")}`);
+if (regressions.length || missing.length) process.exit(1);
 console.log("no regressions");

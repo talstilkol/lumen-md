@@ -21,7 +21,7 @@ import {
   type Editor as TldrawEditor,
 } from "tldraw";
 import "tldraw/tldraw.css";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { uiPrompt } from "./PromptDialog";
 import { showAiToast } from "./AiToast";
 import { isOPFSAvailable } from "../storage/workspace";
@@ -177,13 +177,36 @@ async function convertLegacyCanvas(
 // Re-export for tests.
 export { convertLegacyCanvas, listLegacyCanvases };
 
+/**
+ * A debounced save that can be flushed: closing the canvas (unmount) or
+ * switching to another one writes the pending change instead of dropping it.
+ * @internal exported for tests.
+ */
+export function debouncedSave(save: () => void, ms: number): { schedule(): void; flush(): void } {
+  let timer: ReturnType<typeof setTimeout> | null = null;
+  return {
+    schedule() {
+      if (timer != null) clearTimeout(timer);
+      timer = setTimeout(() => {
+        timer = null;
+        save();
+      }, ms);
+    },
+    flush() {
+      if (timer == null) return;
+      clearTimeout(timer);
+      timer = null;
+      save();
+    },
+  };
+}
+
 export function CanvasTldraw({ open, onClose }: Props) {
   const [editor, setEditor] = useState<TldrawEditor | null>(null);
   const [canvasName, setCanvasName] = useState<string>(DEFAULT_CANVAS_NAME);
   const [savedList, setSavedList] = useState<string[]>([]);
   const [legacyList, setLegacyList] = useState<string[]>([]);
   const [converting, setConverting] = useState<string | null>(null);
-  const saveTimer = useRef<number | null>(null);
 
   // Load the canvas list (and any legacy `.canvas.json` files) on open
   // so the picker shows everything the user has + a convert affordance.
@@ -213,22 +236,20 @@ export function CanvasTldraw({ open, onClose }: Props) {
   // Subscribe to store changes; debounced save.
   useEffect(() => {
     if (!editor) return;
-    const off = editor.store.listen(() => {
-      if (saveTimer.current != null) window.clearTimeout(saveTimer.current);
-      saveTimer.current = window.setTimeout(() => {
-        try {
-          const snap = getSnapshot(editor.store);
-          void saveCanvasFile(canvasName, snap).catch((err) =>
-            log.warn("tldraw save failed", err),
-          );
-        } catch (err) {
-          log.warn("tldraw getSnapshot failed", err);
-        }
-      }, 500);
-    });
+    const saver = debouncedSave(() => {
+      try {
+        const snap = getSnapshot(editor.store);
+        void saveCanvasFile(canvasName, snap).catch((err) =>
+          log.warn("tldraw save failed", err),
+        );
+      } catch (err) {
+        log.warn("tldraw getSnapshot failed", err);
+      }
+    }, 500);
+    const off = editor.store.listen(() => saver.schedule());
     return () => {
       off();
-      if (saveTimer.current != null) window.clearTimeout(saveTimer.current);
+      saver.flush(); // the last strokes before close / canvas switch
     };
   }, [editor, canvasName]);
 

@@ -7,7 +7,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { CollabPeer, CollabSession } from "../collab/yjs";
 // URL helpers are yjs-free and safe on the boot path.
-import { readRoomFromHash, setRoomInHash } from "../collab/roomUrl";
+import { readRoomFromHash, roomShareLink, setRoomInHash } from "../collab/roomUrl";
 
 // The collab module pulls the whole yjs + y-webrtc stack (~60KB gz) — load it
 // only when a session actually starts, never on the boot path. Memoized so
@@ -108,7 +108,7 @@ export function useCollab(docContent: string): UseCollabReturn {
         };
 
         if (!joinName) {
-          const link = `${location.origin}${location.pathname}#room=${name}${password ? `&password=${encodeURIComponent(password)}` : ""}`;
+          const link = roomShareLink(name, password);
           navigator.clipboard?.writeText(link).catch(() => {});
         }
         // ε.2 — record start/join. Counts-only payload so the audit

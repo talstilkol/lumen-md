@@ -6,6 +6,7 @@
  */
 import { PROMPTS } from "../../ai/prompts";
 import { sameScript } from "../runtime";
+import { hebrewRatio } from "../../text/hebrew";
 
 export interface PromptCheck {
   name: string;
@@ -21,6 +22,16 @@ export interface PromptCase {
 
 const nonEmpty: PromptCheck = { name: "non-empty", test: (o) => o.trim().length > 0 };
 const sameLang: PromptCheck = { name: "same language", test: (o, i) => sameScript(i, o).ok };
+/**
+ * Same language for short answers (autocomplete: a few words), where
+ * `sameScript` gives up below 20 letters: a Hebrew request needs a mostly
+ * Hebrew answer, however short.
+ */
+const sameLangShort: PromptCheck = {
+  name: "same language",
+  test: (o, i) => hebrewRatio(i) < 0.5 || (/\p{L}/u.test(o) && hebrewRatio(o) >= 0.5),
+};
+const bullets = (o: string) => (o.match(/^\s*[-*•]\s/gm) ?? []).length;
 const noFence: PromptCheck = { name: "no code fence", test: (o) => !/^\s*```/.test(o) };
 const maxWords = (n: number): PromptCheck => ({ name: `≤ ${n} words`, test: (o) => o.trim().split(/\s+/).length <= n });
 
@@ -41,7 +52,7 @@ export const PROMPT_CASES: PromptCase[] = [
     id: "autocomplete-he",
     prompt: "autocomplete",
     user: "בסוף הפגישה הוחלט שהצוות ימשיך לעבוד על",
-    checks: [nonEmpty, sameLang, maxWords(12)],
+    checks: [nonEmpty, sameLangShort, maxWords(12)],
   },
   {
     id: "rag-he",
@@ -53,13 +64,23 @@ export const PROMPT_CASES: PromptCase[] = [
     id: "summarize-he",
     prompt: "summarize",
     user: "אז ככה, דיברתי עם דנה על הפרויקט, היא אומרת שהעיצוב כמעט מוכן ושצריך עוד שבוע לבדיקות. גם ביקשה שנזמין את הספק לפגישה ביום ראשון.",
-    checks: [nonEmpty, sameLang, { name: "two bullets", test: (o) => (o.match(/^\s*[-*•]/gm) ?? []).length >= 1 && (o.match(/^\s*[-*•]/gm) ?? []).length <= 3 }],
+    checks: [nonEmpty, sameLang, { name: "two bullets", test: (o) => bullets(o) === 2 }],
   },
   {
     id: "actionItems-he",
     prompt: "actionItems",
     user: "סיכום פגישה: יוסי ישלח את המצגת עד יום חמישי. רותם תבדוק את התקציב. צריך לקבוע פגישה עם הספק.",
     checks: [nonEmpty, sameLang, { name: "task list", test: (o) => (o.match(/^\s*- \[ \] /gm) ?? []).length >= 2 }],
+  },
+  {
+    id: "translate-he",
+    prompt: "translate",
+    user: "Target language: English\n\n---\n\n# סיכום שבועי\n\nההשקה נדחתה ליום שלישי. ראו [התוכנית](plan.md).\n\n- לבדוק את התקציב",
+    checks: [
+      nonEmpty,
+      { name: "in the target language", test: (o) => /\p{L}/u.test(o) && hebrewRatio(o) < 0.15 },
+      { name: "keeps the Markdown", test: (o) => /^# \S/m.test(o) && /\]\(plan\.md\)/.test(o) && /^\s*- \S/m.test(o) },
+    ],
   },
   {
     id: "commit-en",

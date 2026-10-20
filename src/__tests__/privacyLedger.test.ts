@@ -1,6 +1,6 @@
 /** T37 — the privacy ledger records AI requests and enforces local-only. */
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { __resetLedger, classify, ledgerEntries, ledgerSummary, PrivacyBlockedError, withLedger } from "../ai/privacyLedger";
+import { __resetLedger, classify, leftDevice, ledgerEntries, ledgerSummary, PrivacyBlockedError, subscribeLedger, withLedger } from "../ai/privacyLedger";
 import { setAiPolicy } from "../ai/policy";
 
 function fakeFetch() {
@@ -60,5 +60,45 @@ describe("privacy ledger", () => {
     await f("https://example.com/a");
     expect(inner).toHaveBeenCalledTimes(1);
     expect(ledgerEntries()).toHaveLength(0);
+  });
+
+  it("classifies the configured research and grammar endpoints by origin", async () => {
+    localStorage.setItem("lumen.research.endpoint", "https://worker.example.com");
+    localStorage.setItem("lumen.grammar.endpoint", "https://lt.example.org/v2/check");
+    expect(classify("https://worker.example.com/extract?url=https%3A%2F%2Fa.b")?.category).toBe("research");
+    expect(classify("https://worker.example.com/search")?.category).toBe("research");
+    expect(classify("https://worker.example.com/other")).toBeNull();
+    expect(classify("https://lt.example.org/v2/check")?.category).toBe("cloud-text");
+    localStorage.setItem("lumen.grammar.endpoint", "http://localhost:8010/v2/check");
+    expect(classify("http://localhost:8010/v2/check")?.category).toBe("local-ai");
+    // local-only stops cited URLs from leaving through the research worker.
+    setAiPolicy("local-only");
+    const inner = fakeFetch();
+    const f = withLedger(inner as unknown as typeof fetch);
+    await expect(f("https://worker.example.com/extract?url=x")).rejects.toBeInstanceOf(PrivacyBlockedError);
+    expect(inner).not.toHaveBeenCalled();
+  });
+
+  it("emits a new snapshot for every change (useSyncExternalStore)", async () => {
+    setAiPolicy("cloud");
+    const snaps: unknown[] = [];
+    subscribeLedger(() => snaps.push(ledgerEntries()));
+    const f = withLedger(fakeFetch() as unknown as typeof fetch);
+    const before = ledgerEntries();
+    await f("https://api.openai.com/v1/chat/completions", { method: "POST", body: "{}" });
+    expect(snaps).toHaveLength(2); // recorded, then response sizes
+    expect(snaps[0]).not.toBe(before);
+    expect(snaps[1]).not.toBe(snaps[0]);
+    expect(ledgerEntries()[0]).toMatchObject({ bytesIn: 2, status: 200 });
+  });
+
+  it("blocked attempts did not leave the device", async () => {
+    setAiPolicy("local-only");
+    const f = withLedger(fakeFetch() as unknown as typeof fetch);
+    await f("https://api.openai.com/v1/x").catch(() => {});
+    await f("http://localhost:11434/api/tags");
+    setAiPolicy("cloud");
+    await f("https://api.openai.com/v1/x");
+    expect(ledgerEntries().map(leftDevice)).toEqual([false, false, true]);
   });
 });

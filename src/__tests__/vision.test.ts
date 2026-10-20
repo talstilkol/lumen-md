@@ -7,7 +7,7 @@ vi.mock("../ai/ocr", async (orig) => ({
   ...(await orig<typeof import("../ai/ocr")>()),
   ocrImage: vi.fn(async () => ocr.result),
 }));
-import { escapeAlt, escapeTitle, imageText, visionModel, withImageText } from "../ai/vision";
+import { altIsPlaceholder, escapeAlt, escapeTitle, imageText, imagesNeedingAlt, visionModel, withImageText } from "../ai/vision";
 
 describe("OCR helpers", () => {
   it("cleans noise and keeps Hebrew and English lines", () => {
@@ -54,5 +54,27 @@ describe("image text", () => {
     expect(out).toBe(`a ![Image with text:  Q3  plan](lumen-asset-1.png "say 'hi' · next") b ![x](other.png)`.replace("  Q3  ", " Q3 "));
     expect(escapeAlt("a]b")).toBe("a b");
     expect(escapeTitle('"q"')).toBe("'q'");
+  });
+});
+
+describe("which images need alt text", () => {
+  it("keeps real one-word alt text, picks empty and file-name alts", () => {
+    expect(altIsPlaceholder("logo", "logo.png")).toBe(true); // the file's own name
+    expect(altIsPlaceholder("logo", "assets/brand.png")).toBe(false);
+    expect(altIsPlaceholder("cat", "assets/photo.png")).toBe(false);
+    expect(altIsPlaceholder("", "assets/a.png")).toBe(true);
+    expect(altIsPlaceholder("image", "assets/lq1-abc.png")).toBe(true); // clipboard paste
+    expect(altIsPlaceholder("IMG_1234", "assets/x.jpg")).toBe(true);
+    expect(altIsPlaceholder("Screenshot 2026-10-18 at 10.00.00", "assets/x.png")).toBe(true);
+    expect(altIsPlaceholder("photo of the team", "assets/x.png")).toBe(false);
+    expect(altIsPlaceholder("diagram.png", "assets/x.png")).toBe(true);
+  });
+
+  it("imagesNeedingAlt skips remote/data images and real descriptions", () => {
+    const md = "![logo](logo.png) ![cat](photo.png) ![](a.png) ![x](https://e.com/x.png) ![image](data:image/png;base64,AA)";
+    expect(imagesNeedingAlt(md)).toEqual([
+      { alt: "logo", url: "logo.png" },
+      { alt: "", url: "a.png" },
+    ]);
   });
 });

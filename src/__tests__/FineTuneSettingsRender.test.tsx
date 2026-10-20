@@ -15,6 +15,9 @@ vi.mock("./PromptDialog", () => ({
 vi.mock("./AiToast", () => ({
   showAiToast: vi.fn(),
 }));
+// The component's own imports (the two above resolve next to this file).
+vi.mock("../ui/PromptDialog", () => ({ uiConfirm: vi.fn().mockResolvedValue(false) }));
+vi.mock("../ui/AiToast", () => ({ showAiToast: vi.fn() }));
 
 describe("FineTuneSettings", () => {
   beforeEach(() => {
@@ -66,5 +69,27 @@ describe("FineTuneSettings", () => {
     const closeBtn = buttons[buttons.length - 1];
     fireEvent.click(closeBtn);
     expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
+  it("a queued job survives closing the dialog: reopening resumes polling and saves the model", async () => {
+    const { render, waitFor, cleanup } = await import("@testing-library/react");
+    const { FineTuneSettings } = await import("../ui/FineTuneSettings");
+    const ft = await import("../ai/fineTune");
+    const { useAppStore } = await import("../store/useStore");
+    const { uiConfirm } = await import("../ui/PromptDialog");
+    useAppStore.setState({ aiKey: "sk-test", fineTunedModelId: null });
+    vi.mocked(uiConfirm).mockResolvedValueOnce(true);
+    vi.mocked(ft.startFineTune).mockResolvedValueOnce({ id: "ftjob-1", status: "queued", createdAt: 1, chunks: 3, estimatedTokens: 900 });
+    cleanup();
+    const { getAllByRole, unmount } = render(<FineTuneSettings open={true} onClose={() => {}} />);
+    getAllByRole("button")[0].click(); // Train on my style
+    await waitFor(() => expect(localStorage.getItem("lumen.fineTune.activeJob")).toContain("ftjob-1"));
+    unmount(); // the dialog closes
+    cleanup();
+    vi.mocked(ft.getFineTuneJob).mockResolvedValueOnce({ id: "ftjob-1", status: "succeeded", fineTunedModel: "ft:gpt-4o-mini:me", createdAt: 1 });
+    render(<FineTuneSettings open={true} onClose={() => {}} />);
+    await waitFor(() => expect(useAppStore.getState().fineTunedModelId).toBe("ft:gpt-4o-mini:me"));
+    expect(ft.getFineTuneJob).toHaveBeenCalledWith("ftjob-1");
+    expect(localStorage.getItem("lumen.fineTune.activeJob")).toBeNull();
   });
 });

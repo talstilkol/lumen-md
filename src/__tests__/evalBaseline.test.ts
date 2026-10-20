@@ -27,6 +27,17 @@ describe("eval baseline compare", () => {
     expect(r.stdout).toContain("fixed: b");
   });
 
+  it("a passing baseline case that is gone from the run fails; a skipped one does not", () => {
+    writeFileSync(base, JSON.stringify(results({ a: true, b: true })));
+    writeFileSync(now, JSON.stringify(results({ a: true })));
+    const r = run([now, "--baseline", base]);
+    expect(r.status).toBe(1);
+    expect(r.stderr).toContain("MISSING (passed in the baseline, not in this run): b");
+    const skipped = { ...results({ a: true }), results: [...results({ a: true }).results, { id: "b", status: "skipped" }] };
+    writeFileSync(now, JSON.stringify(skipped));
+    expect(run([now, "--baseline", base]).status).toBe(0);
+  });
+
   it("no regressions → exit 0", () => {
     writeFileSync(now, JSON.stringify(results({ a: true, b: false })));
     writeFileSync(base, JSON.stringify(results({ a: true, b: false })));
@@ -37,7 +48,7 @@ describe("eval baseline compare", () => {
 describe("prompt eval cases", () => {
   it("cover the prompts that answer users, Hebrew included", () => {
     const covered = new Set(PROMPT_CASES.map((c) => c.prompt));
-    for (const p of ["rewrite", "autocomplete", "ragAssistant", "summarize", "actionItems", "commitMessage"] as const) expect(covered.has(p)).toBe(true);
+    for (const p of ["rewrite", "autocomplete", "ragAssistant", "summarize", "actionItems", "commitMessage", "translate"] as const) expect(covered.has(p)).toBe(true);
     expect(PROMPT_CASES.filter((c) => c.id.endsWith("-he")).length).toBeGreaterThanOrEqual(4);
   });
   it("user-facing prompts ask for the user's language (K2)", () => {
@@ -48,5 +59,22 @@ describe("prompt eval cases", () => {
     const lang = c.checks.find((k) => k.name === "same language")!;
     expect(lang.test("The meeting tomorrow moved to three because the client cannot make the morning, please update everyone.", c.user)).toBe(false);
     expect(lang.test("הפגישה שנקבעה למחר נדחתה לשעה שלוש, מאחר שהלקוח אינו פנוי בבוקר. נא לעדכן את כל המשתתפים.", c.user)).toBe(true);
+  });
+  it("a short wrong-language autocomplete fails; the summary needs exactly two bullets", () => {
+    const ac = PROMPT_CASES.find((x) => x.id === "autocomplete-he")!;
+    const lang = ac.checks.find((k) => k.name === "same language")!;
+    expect(lang.test("more tests", ac.user)).toBe(false);
+    expect(lang.test("הגרסה הבאה", ac.user)).toBe(true);
+    const sum = PROMPT_CASES.find((x) => x.id === "summarize-he")!;
+    const two = sum.checks.find((k) => k.name === "two bullets")!;
+    expect(two.test("- אחד\n- שניים", sum.user)).toBe(true);
+    expect(two.test("- אחד", sum.user)).toBe(false);
+    expect(two.test("- אחד\n- שניים\n- שלושה", sum.user)).toBe(false);
+  });
+  it("the translation case checks the target language and the Markdown", () => {
+    const c = PROMPT_CASES.find((x) => x.prompt === "translate")!;
+    const all = (o: string) => c.checks.every((k) => k.test(o, c.user));
+    expect(all("# Weekly summary\n\nThe launch moved to Tuesday. See [the plan](plan.md).\n\n- Check the budget")).toBe(true);
+    expect(all("# סיכום שבועי\n\nההשקה נדחתה. [התוכנית](plan.md)\n\n- לבדוק")).toBe(false);
   });
 });
