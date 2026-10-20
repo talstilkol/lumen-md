@@ -2,21 +2,29 @@
  * Git sync via `isomorphic-git`.
  *
  * Strategy: keep the git working copy in a `lightning-fs` (IndexedDB) volume
- * mounted at `/git/<repo>`. After a clone we mirror the textual files into
- * OPFS under the same path so they show up in the workspace tree. Commit /
- * push pull the latest content back from OPFS into lightning-fs so users can
- * edit locally and push when ready.
+ * mounted at `/git/<repo>`. After a clone we copy the files into the vault
+ * under the same folder so they show up in the workspace tree. Commit / push
+ * copy the vault's content back into lightning-fs so users can edit locally
+ * and push when ready. A pull merges three ways into the vault and never
+ * deletes (plan 3.3, src/sync/gitPull.ts). Public repositories need no
+ * token; a CORS proxy is configurable (src/sync/gitProxy.ts). Git LFS is
+ * not supported: pointer files are detected and reported, never written over
+ * real files.
  */
 import { get, set } from "idb-keyval";
 import {
   createWorkspaceFolder,
-  deleteWorkspaceFile,
   listWorkspace,
+  readWorkspaceBlob,
   readWorkspaceFile,
+  workspaceHasEntry,
   workspaceHasFile,
   writeWorkspaceBlob,
 } from "../storage/workspace";
 import { getSecret, setSecret, initSecretStore, flushSecrets } from "../lib/secretStore";
+import { hasConflictMarkers, isLfsPointer } from "./gitMerge";
+import { integrateFetched, type PendingConflict, type PullGit, type SafePullResult } from "./gitPull";
+import { authFor, getCorsProxy } from "./gitProxy";
 
 type Fs = {
   promises: {
@@ -34,9 +42,9 @@ type Fs = {
  * pull, and addRemote. Defining a small structural type keeps us from having
  * to import the package's full type bundle eagerly.
  */
-interface IsomorphicGit {
+interface IsomorphicGit extends PullGit {
   clone: (opts: Record<string, unknown>) => Promise<void>;
-  pull: (opts: Record<string, unknown>) => Promise<void>;
+  fetch: (opts: Record<string, unknown>) => Promise<{ fetchHead: string | null }>;
   push: (opts: Record<string, unknown>) => Promise<unknown>;
   add: (opts: Record<string, unknown>) => Promise<void>;
   commit: (opts: Record<string, unknown>) => Promise<string>;
@@ -49,6 +57,10 @@ let fsPromise: Promise<{ fs: Fs; http: unknown; git: IsomorphicGit }> | null = n
 async function load() {
   if (!fsPromise) {
     fsPromise = (async () => {
+      // isomorphic-git uses Node's Buffer (index, packfiles); browsers have
+      // none, so it is provided before isomorphic-git loads.
+      const g = globalThis as unknown as { Buffer?: unknown };
+      if (!g.Buffer) g.Buffer = (await import("buffer")).Buffer;
       const [LFS, isoGit, http] = await Promise.all([
         import("@isomorphic-git/lightning-fs").then((m) => m.default),
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -86,28 +98,61 @@ function repoNameFromUrl(url: string): string {
   return m?.[1] ?? "repo";
 }
 
-/** Mirror every text-like file from lightning-fs into OPFS under the same path. */
-async function mirrorRepoToOPFS(repoDir: string, fs: Fs): Promise<number> {
-  let count = 0;
-  async function walk(dir: string, opfsPrefix: string) {
+/** The file's bytes in the vault, or null when no file is there. */
+async function readVaultBytes(path: string): Promise<Uint8Array | null> {
+  if (!(await workspaceHasFile(path))) return null;
+  try {
+    return new Uint8Array(await (await readWorkspaceBlob(path)).arrayBuffer());
+  } catch {
+    return null;
+  }
+}
+
+function sameBytes(a: Uint8Array, b: Uint8Array): boolean {
+  if (a.length !== b.length) return false;
+  for (let i = 0; i < a.length; i++) if (a[i] !== b[i]) return false;
+  return true;
+}
+
+/**
+ * Copy the checked-out tree from lightning-fs into the vault folder
+ * `vaultFolder`. Never replaces a file the vault already has (cloning into
+ * a folder that is already in use keeps every local file, plan 3.3).
+ */
+async function mirrorRepoToVault(repoDir: string, fs: Fs, vaultFolder: string): Promise<{ written: number; kept: string[]; lfsPointers: string[] }> {
+  let written = 0;
+  const kept: string[] = [];
+  const lfsPointers: string[] = [];
+  async function walk(dir: string, vaultPrefix: string) {
     const entries = await fs.promises.readdir(dir);
     for (const entry of entries) {
       if (entry === ".git") continue;
       const full = `${dir}/${entry}`;
       const stat = await fs.promises.stat(full);
-      const opfsPath = opfsPrefix ? `${opfsPrefix}/${entry}` : entry;
+      const vaultPath = `${vaultPrefix}/${entry}`;
       if (stat.isDirectory()) {
-        await createWorkspaceFolder(opfsPath);
-        await walk(full, opfsPath);
+        await createWorkspaceFolder(vaultPath);
+        await walk(full, vaultPath);
       } else if (stat.isFile()) {
         const bytes = (await fs.promises.readFile(full)) as Uint8Array;
-        await writeWorkspaceBlob(opfsPath, bytes);
-        count++;
+        if (isLfsPointer(bytes)) lfsPointers.push(vaultPath);
+        const existing = await readVaultBytes(vaultPath);
+        if (existing) {
+          if (!sameBytes(existing, bytes)) kept.push(vaultPath);
+          continue;
+        }
+        if (await workspaceHasEntry(vaultPath)) {
+          kept.push(vaultPath); // a folder of that name: leave it
+          continue;
+        }
+        await writeWorkspaceBlob(vaultPath, bytes);
+        written++;
       }
     }
   }
-  await walk(repoDir, repoNameFromUrl(repoDir.replace(/^\/git\//, "")));
-  return count;
+  await createWorkspaceFolder(vaultFolder);
+  await walk(repoDir, vaultFolder);
+  return { written, kept, lfsPointers };
 }
 
 export interface CloneResult {
@@ -115,12 +160,20 @@ export interface CloneResult {
   workspaceFolder: string;
   /** Number of files copied. */
   fileCount: number;
+  /** Files the vault already had with other content: kept, not overwritten. */
+  kept: string[];
+  /** Git LFS pointer files (LFS is not supported: the real content is not downloaded). */
+  lfsPointers: string[];
 }
 
-/** Clone a public git repo (or with a token) into both lightning-fs and OPFS. */
+/**
+ * Clone a repository into lightning-fs and copy its files into the vault.
+ * Public repositories need no token; requests go through the configured
+ * CORS proxy (src/sync/gitProxy.ts).
+ */
 export async function cloneRepo(
   url: string,
-  opts: { branch?: string; token?: string; depth?: number } = {},
+  opts: { branch?: string; token?: string; depth?: number; corsProxy?: string } = {},
 ): Promise<CloneResult> {
   const { fs, http, git } = await load();
   const name = repoNameFromUrl(url);
@@ -131,19 +184,13 @@ export async function cloneRepo(
   } catch {
     /* exists */
   }
-  // Clean any prior contents under the same name to keep things deterministic.
   try {
     await fs.promises.mkdir(dir);
   } catch {
     /* exists */
   }
 
-  const token = opts.token ?? (await getGitToken()) ?? "";
-  if (!token) {
-    throw new Error(
-      "A GitHub token is required for cloning. Set one via: Git → Set Token in the command palette.",
-    );
-  }
+  const token = opts.token ?? (await getGitToken());
   await git.clone({
     fs,
     http,
@@ -152,11 +199,20 @@ export async function cloneRepo(
     ref: opts.branch,
     depth: opts.depth ?? 1,
     singleBranch: true,
-    onAuth: () => ({ username: token, password: "x-oauth-basic" }),
+    corsProxy: opts.corsProxy ?? getCorsProxy(),
+    ...authFor(token),
   });
 
-  const fileCount = await mirrorRepoToOPFS(dir, fs);
-  return { workspaceFolder: name, fileCount };
+  const { written, kept, lfsPointers } = await mirrorRepoToVault(dir, fs, name);
+  return { workspaceFolder: name, fileCount: written, kept, lfsPointers };
+}
+
+/** Commit refused: these files still hold conflict markers from a pull. */
+export class UnresolvedConflictsError extends Error {
+  constructor(readonly paths: string[]) {
+    super(`Unresolved conflicts in: ${paths.join(", ")}`);
+    this.name = "UnresolvedConflictsError";
+  }
 }
 
 /**
@@ -172,12 +228,22 @@ export async function commitAndPush(
 ): Promise<void> {
   const { fs, http, git } = await load();
   const dir = `/git/${repoFolder}`;
-  // Mirror OPFS → lightning-fs (only files under the repo's prefix).
+  // Mirror the vault → lightning-fs (only files under the repo's prefix),
+  // as bytes: images and other binary files go through unchanged.
   const all = await listWorkspace({ includeAssets: true, includeHidden: true });
   const prefix = `${repoFolder}/`;
   const repoFiles = all.filter((f) => f.path.startsWith(prefix));
+  const unresolved: string[] = [];
+  const files: Array<{ relative: string; bytes: Uint8Array }> = [];
   for (const f of repoFiles) {
-    const relative = f.path.slice(prefix.length);
+    const bytes = await readVaultBytes(f.path);
+    if (!bytes) continue;
+    if (bytes.length < 5_000_000 && hasConflictMarkers(new TextDecoder().decode(bytes))) unresolved.push(f.path);
+    files.push({ relative: f.path.slice(prefix.length), bytes });
+  }
+  // A pull left conflict markers: committing them would publish them.
+  if (unresolved.length) throw new UnresolvedConflictsError(unresolved);
+  for (const { relative, bytes } of files) {
     const full = `${dir}/${relative}`;
     // Make sure intermediate dirs exist.
     const parts = relative.split("/").slice(0, -1);
@@ -190,10 +256,7 @@ export async function commitAndPush(
         /* exists */
       }
     }
-    const txt = await readWorkspaceFile(f.path).catch(() => null);
-    if (txt !== null) {
-      await fs.promises.writeFile(full, txt);
-    }
+    await fs.promises.writeFile(full, bytes);
   }
   // Stage everything and commit.
   await git.add({ fs, dir, filepath: "." });
@@ -215,7 +278,8 @@ export async function commitAndPush(
     http,
     dir,
     ref: opts.branch,
-    onAuth: () => ({ username: token, password: "x-oauth-basic" }),
+    corsProxy: getCorsProxy(),
+    ...authFor(token),
   });
 }
 
@@ -281,90 +345,110 @@ export async function getGitIdentity(): Promise<GitIdentity> {
   return v ?? { name: "Lumen User", email: "lumen@example.invalid" };
 }
 
-export interface PullResult {
-  /** Number of files that changed in OPFS as a result of the pull. */
-  changedFiles: number;
+export type PullResult = SafePullResult;
+export type { PendingConflict };
+
+/** How a pull reaches the open notes (src/store/gitPullDocs.ts in the app; tests pass their own). */
+export interface PullEditorHooks {
+  openNote(path: string): { content: string; dirty: boolean } | null;
+  setOpenNote(path: string, text: string): void;
+  onWritten(path: string, text: string | null): void;
 }
 
+/** Fetch with this depth (relative) to deepen a shallow clone; this one means "all of it". */
+const FULL_DEPTH = 2147483647;
+
 /**
- * Fetch + fast-forward merge from origin, then mirror the resulting working
- * tree back into OPFS. Files that disappeared upstream are removed from OPFS
- * (under the repo prefix only).
+ * Safe pull (plan 3.3): fetch, then a three-way merge into the vault
+ * (src/sync/gitPull.ts). Nothing is deleted, untracked files are not
+ * touched, a note open with unsaved edits is never overwritten, and
+ * overlapping edits come back as `conflicts` for the resolution screen.
+ * A shallow clone is deepened until the merge base is found.
  */
 export async function pullRepo(
   repoFolder: string,
-  opts: { token?: string; branch?: string; author?: GitIdentity } = {},
+  opts: { token?: string; branch?: string; author?: GitIdentity; corsProxy?: string; editor?: PullEditorHooks } = {},
 ): Promise<PullResult> {
   const { fs, http, git } = await load();
   const dir = `/git/${repoFolder}`;
-  const token = opts.token ?? (await getGitToken()) ?? "";
+  const token = opts.token ?? (await getGitToken());
   const author = opts.author ?? (await getGitIdentity());
-  await git.pull({
-    fs,
-    http,
-    dir,
-    ref: opts.branch,
-    singleBranch: true,
-    fastForwardOnly: true,
-    author: { name: author.name, email: author.email },
-    onAuth: () =>
-      token
-        ? { username: token, password: "x-oauth-basic" }
-        : ({} as never),
-  });
-  // Mirror the updated lightning-fs tree back into OPFS.
-  const beforeOpfs = await listWorkspace({ includeAssets: true, includeHidden: true });
-  const opfsBefore = new Set(
-    beforeOpfs
-      .map((e) => e.path)
-      .filter((p) => p === repoFolder || p.startsWith(`${repoFolder}/`)),
-  );
-  const seen = new Set<string>();
-  let changed = 0;
-  async function walk(currentDir: string, opfsPrefix: string) {
-    const entries = await fs.promises.readdir(currentDir);
-    for (const entry of entries) {
-      if (entry === ".git") continue;
-      const full = `${currentDir}/${entry}`;
-      const stat = await fs.promises.stat(full);
-      const opfsPath = opfsPrefix ? `${opfsPrefix}/${entry}` : entry;
-      seen.add(opfsPath);
-      if (stat.isDirectory()) {
-        await createWorkspaceFolder(opfsPath);
-        await walk(full, opfsPath);
-      } else if (stat.isFile()) {
-        const bytes = (await fs.promises.readFile(full)) as Uint8Array;
-        // Compare to existing OPFS contents to count real changes.
-        let isDifferent = true;
-        try {
-          if (await workspaceHasFile(opfsPath)) {
-            const existing = await readWorkspaceFile(opfsPath);
-            const newText = new TextDecoder().decode(bytes);
-            isDifferent = existing !== newText;
-          }
-        } catch {
-          /* fall back to write */
-        }
-        if (isDifferent) {
-          await writeWorkspaceBlob(opfsPath, bytes);
-          changed++;
-        }
-      }
-    }
+  const branch = opts.branch ?? (((await git.currentBranch({ fs, dir, fullname: false })) as string | undefined) || undefined);
+  const net = { fs, http, dir, corsProxy: opts.corsProxy ?? getCorsProxy(), ref: branch, singleBranch: true, ...authFor(token) };
+  const fetched = await git.fetch(net);
+  const head = (await git.resolveRef({ fs, dir, ref: "HEAD" })) as string;
+  const theirs = fetched.fetchHead;
+  if (!theirs) {
+    return {
+      changedFiles: 0,
+      deletedFiles: 0,
+      upToDate: true,
+      conflicts: [],
+      keptDeletedUpstream: [],
+      lfsSkipped: [],
+      lfsPointers: [],
+      copies: [],
+      mergedIntoOpen: [],
+      head,
+    };
   }
-  await walk(dir, repoFolder);
-  // Remove files that no longer exist upstream.
-  for (const path of opfsBefore) {
-    if (!seen.has(path)) {
+  return integrateIntoVault(repoFolder, theirs, {
+    author,
+    editor: opts.editor,
+    deepen: async ({ depth, full }) => {
+      if (full) {
+        await git.fetch({ ...net, depth: FULL_DEPTH });
+        return;
+      }
       try {
-        await deleteWorkspaceFile(path);
-        changed++;
+        await git.fetch({ ...net, depth, relative: true });
       } catch {
-        /* ignore */
+        // A server without deepen-relative: ask for that much history from the tip.
+        await git.fetch({ ...net, depth });
       }
-    }
-  }
-  return { changedFiles: changed };
+    },
+  });
+}
+
+/**
+ * The merge half of a pull: bring commit `theirs` (already in the local
+ * repository, e.g. just fetched) into the vault folder `repoFolder`.
+ */
+export async function integrateIntoVault(
+  repoFolder: string,
+  theirs: string,
+  opts: { author?: GitIdentity; editor?: PullEditorHooks; deepen?: (step: { depth: number; full: boolean }) => Promise<void> } = {},
+): Promise<PullResult> {
+  const { fs, git } = await load();
+  const author = opts.author ?? (await getGitIdentity());
+  const editor = opts.editor ?? (await import("../store/gitPullDocs")).pullEditorHooks();
+  return integrateFetched({
+    git,
+    fs,
+    dir: `/git/${repoFolder}`,
+    repoFolder,
+    theirs,
+    author: { name: author.name, email: author.email },
+    deepen: opts.deepen,
+    vault: {
+      read: readVaultBytes,
+      write: (path, data) => writeWorkspaceBlob(path, data),
+      exists: workspaceHasEntry,
+    },
+    openNote: (path) => editor.openNote(path),
+    setOpenNote: (path, text) => editor.setOpenNote(path, text),
+    onWritten: (path, text) => editor.onWritten(path, text),
+    snapshot: async (path, text) => {
+      const { recordSnapshot } = await import("../storage/history");
+      await recordSnapshot(path, text, "git-pull").catch(() => false);
+    },
+  });
+}
+
+/** @internal e2e (dev server) and tests: the git runtime (lightning-fs + isomorphic-git). */
+export async function __gitRuntime(): Promise<{ fs: unknown; git: unknown }> {
+  const { fs, git } = await load();
+  return { fs, git };
 }
 
 export interface GitStatusSummary {

@@ -1,16 +1,22 @@
 /** Git commands for a repository cloned into the workspace. */
 import { cmdIcons, type Command } from "../../ui/CommandPalette";
 import { t } from "../../i18n";
-import { getGitIdentity, setGitIdentity, setGitToken, cloneRepo, pullRepo, commitAndPush, gitStatusSummary } from "../../sync/git";
+import { getGitIdentity, setGitIdentity, setGitToken, cloneRepo, pullRepo, commitAndPush, gitStatusSummary, UnresolvedConflictsError } from "../../sync/git";
+import { getStoredCorsProxy, LOCAL_GIT_PROXY, looksLikeCorsFailure, setStoredCorsProxy } from "../../sync/gitProxy";
 import { uiAlert, uiPrompt } from "../../ui/PromptDialog";
 import { generateAiCommitMessage } from "../../ai/commands";
 import { log } from "../../lib/logger";
 import { showAiToast } from "../../ui/AiToast";
-import { readWorkspaceFile } from "../../storage/workspace";
 import { cancellable, type CommandContext } from "./context";
 
+/** A failed clone / pull: add a hint when the request never reached the git host (CORS). */
+function netError(e: unknown): string {
+  const msg = (e as Error).message;
+  return looksLikeCorsFailure(e) ? `${msg}\n\n${t("git.alert.corsHint")}` : msg;
+}
+
 /** Clone, commit & push, pull, status, watch, token, identity. */
-export function buildGitCommands({ showWorkspace, setDoc, toggleWorkspace, liveDoc }: CommandContext): Command[] {
+export function buildGitCommands({ showWorkspace, toggleWorkspace, liveDoc }: CommandContext): Command[] {
   return [
     {
       id: "git.clone",
@@ -25,15 +31,13 @@ export function buildGitCommands({ showWorkspace, setDoc, toggleWorkspace, liveD
         try {
           const result = await cloneRepo(url.trim());
           window.dispatchEvent(new Event("lumen-workspace-changed"));
-          await uiAlert({
-            message: t("git.alert.cloned", {
-              folder: result.workspaceFolder,
-              count: result.fileCount,
-            }),
-          });
+          const lines = [t("git.alert.cloned", { folder: result.workspaceFolder, count: result.fileCount })];
+          if (result.kept.length) lines.push(t("git.clone.kept", { count: result.kept.length }));
+          if (result.lfsPointers.length) lines.push(t("git.lfs.unsupported", { files: result.lfsPointers.slice(0, 5).join(", ") }));
+          await uiAlert({ message: lines.join("\n\n") });
         } catch (e) {
           await uiAlert({
-            message: t("git.alert.cloneFailed", { error: (e as Error).message }),
+            message: t("git.alert.cloneFailed", { error: netError(e) }),
           });
         }
       },
@@ -69,6 +73,10 @@ export function buildGitCommands({ showWorkspace, setDoc, toggleWorkspace, liveD
           await commitAndPush(repoFolder, message, identity);
           await uiAlert({ message: t("git.alert.pushed") });
         } catch (e) {
+          if (e instanceof UnresolvedConflictsError) {
+            await uiAlert({ message: t("git.commit.unresolved", { files: e.paths.join(", ") }) });
+            return;
+          }
           await uiAlert({
             message: t("git.alert.commitFailed", { error: (e as Error).message }),
           });
@@ -88,25 +96,15 @@ export function buildGitCommands({ showWorkspace, setDoc, toggleWorkspace, liveD
         }
         const repoFolder = liveDoc().workspaceName!.split("/")[0];
         try {
+          // Safe pull (plan 3.3): merges into the vault, never deletes, never
+          // overwrites a note with unsaved edits; the open notes are updated by it.
           const result = await pullRepo(repoFolder);
           window.dispatchEvent(new Event("lumen-workspace-changed"));
-          await uiAlert({
-            message: t("git.alert.pulled", { changed: result.changedFiles }),
-          });
-          // If the active file's content changed on disk, reload it.
-          if (liveDoc().workspaceName) {
-            try {
-              const fresh = await readWorkspaceFile(liveDoc().workspaceName!);
-              if (fresh !== liveDoc().content) {
-                setDoc({ content: fresh, dirty: false });
-              }
-            } catch {
-              /* file may have been deleted upstream; ignore */
-            }
-          }
+          const { reportPull } = await import("../../store/gitPullDocs");
+          await reportPull(result);
         } catch (e) {
           await uiAlert({
-            message: t("git.alert.pullFailed", { error: (e as Error).message }),
+            message: t("git.alert.pullFailed", { error: netError(e) }),
           });
         }
       },
@@ -163,6 +161,7 @@ export function buildGitCommands({ showWorkspace, setDoc, toggleWorkspace, liveD
           repoFolder,
           onPulled: ({ changedFiles }) =>
             showAiToast(t("toast.pulledFile", { count: changedFiles }), "success"),
+          onConflicts: (count) => showAiToast(t("git.watch.conflicts", { count }), "info"),
         });
         showAiToast(t("toast.gitWatchOnPullingEvery"), "info");
       },
@@ -182,6 +181,28 @@ export function buildGitCommands({ showWorkspace, setDoc, toggleWorkspace, liveD
             ? t("git.alert.tokenSaved")
             : t("git.alert.tokenCleared"),
         });
+      },
+    },
+    {
+      id: "git.corsProxy",
+      label: t("cmd.git.corsProxy"),
+      hint: t("cmd.git.corsProxy.hint"),
+      icon: cmdIcons.Link,
+      group: t("group.git"),
+      action: async () => {
+        const value = await uiPrompt({
+          message: t("git.prompt.corsProxy"),
+          defaultValue: getStoredCorsProxy() ?? "",
+          placeholder: LOCAL_GIT_PROXY,
+        });
+        if (value === null) return;
+        try {
+          setStoredCorsProxy(value);
+        } catch {
+          await uiAlert({ message: t("git.alert.corsProxyInvalid") });
+          return;
+        }
+        await uiAlert({ message: value.trim() ? t("git.alert.corsProxySaved") : t("git.alert.corsProxyCleared") });
       },
     },
     {
