@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-10-18T04:31:22.318Z",
+  "generated_at": "2026-10-20T20:31:19.228Z",
   "source": "src/i18n/index.ts (en bundle)",
-  "count": 1426,
+  "count": 1430,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -6492,6 +6492,31 @@
     {
       "key": "cmd.view.canvas.hint",
       "en": "Infinite canvas for visual notes",
+      "vars": []
+    },
+    {
+      "key": "cmd.canvas.migrate",
+      "en": "🎨 Canvas: convert tldraw canvases to Excalidraw",
+      "vars": []
+    },
+    {
+      "key": "cmd.canvas.migrate.hint",
+      "en": "the .tldr files stay as backups",
+      "vars": []
+    },
+    {
+      "key": "canvas.migrate.done",
+      "en": "Canvases converted: {converted}, skipped: {skipped}, failed: {failed}, warnings: {warnings}",
+      "vars": [
+        "converted",
+        "skipped",
+        "failed",
+        "warnings"
+      ]
+    },
+    {
+      "key": "canvas.migrate.none",
+      "en": "No tldraw canvases to convert",
       "vars": []
     },
     {
