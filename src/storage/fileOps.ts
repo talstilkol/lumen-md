@@ -86,3 +86,63 @@ export async function undoTrash(items: TrashItem[]): Promise<string[]> {
   window.dispatchEvent(new Event("lumen-workspace-changed"));
   return out;
 }
+
+/**
+ * The file name a rename ends up with. A name typed without an extension
+ * keeps the file's own: a note gets `.md`, but `paper.pdf` renamed to
+ * `draft` stays a PDF (`draft.pdf`), not `draft.md` (plan 4.14).
+ */
+export function renamedFileName(oldPath: string, typed: string): string {
+  if (/\.[^./]+$/.test(typed)) return typed;
+  const ext = oldPath.match(/\.[^./]+$/)?.[0] ?? "";
+  return typed + (ext && !/^\.(md|markdown)$/i.test(ext) ? ext : ".md");
+}
+
+/** The highlights note that belongs to a PDF (`<file>.pdf.md`, plan 4.14), or null for other files. */
+export function companionNoteOf(path: string): string | null {
+  return /\.pdf$/i.test(path) ? `${path}.md` : null;
+}
+
+/**
+ * `safeMove` for a file that has a companion note (a PDF and its
+ * `<file>.pdf.md`): both move together. Both destinations are checked first,
+ * so a declined replace leaves both files where they were; if the note's
+ * move then fails, the file is moved back (and anything it replaced comes
+ * back from the trash). Without a companion — or when `alsoMoving` already
+ * includes it — this is `safeMove`.
+ */
+export async function safeMoveWithCompanion(
+  from: string,
+  to: string,
+  opts: { folder?: boolean; confirmReplace?: (path: string) => Promise<boolean>; alsoMoving?: ReadonlySet<string> } = {},
+): Promise<{ main: MoveResult; companion: MoveResult | null } | null> {
+  const note = opts.folder ? null : companionNoteOf(from);
+  if (!note || from === to || opts.alsoMoving?.has(note) || !(await workspaceHasEntry(note))) {
+    const main = await safeMove(from, to, opts);
+    return main ? { main, companion: null } : null;
+  }
+  const noteTo = `${to}.md`;
+  // Ask about both replacements before anything moves.
+  const confirmed = new Set<string>();
+  for (const target of [to, noteTo]) {
+    if (!(await workspaceHasEntry(target))) continue;
+    if (!opts.confirmReplace || !(await opts.confirmReplace(target))) return null;
+    confirmed.add(target);
+  }
+  const already = (p: string) => Promise.resolve(confirmed.has(p));
+  const main = await safeMove(from, to, { confirmReplace: already });
+  if (!main) return null;
+  let companion: MoveResult | null = null;
+  let failure: unknown = null;
+  try {
+    companion = await safeMove(note, noteTo, { confirmReplace: already });
+  } catch (e) {
+    failure = e;
+  }
+  if (companion) return { main, companion };
+  // Put the file back where it was, next to its note.
+  await safeMove(to, from);
+  if (main.replaced) await restoreFromTrash(main.replaced.id).catch(() => undefined);
+  if (failure) throw failure;
+  return null;
+}

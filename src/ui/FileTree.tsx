@@ -20,7 +20,6 @@ import {
   listWorkspaceTree,
   readWorkspaceFile,
   uniqueWorkspaceName,
-  workspaceHasEntry,
   writeWorkspaceFile,
 } from "../storage/workspace";
 import type { WorkspaceNode } from "../storage/workspace";
@@ -28,7 +27,7 @@ import { t } from "../i18n";
 import { uiAlert, uiConfirm, uiPrompt } from "./PromptDialog";
 import { FileContextMenu, buildFileActions } from "./FileContextMenu";
 import { useAppStore } from "../store/useStore";
-import { movedPath, safeMove, trashPaths, undoTrash, type MoveResult } from "../storage/fileOps";
+import { movedPath, renamedFileName, safeMoveWithCompanion, trashPaths, undoTrash, type MoveResult } from "../storage/fileOps";
 import { flushActiveWorkspaceDoc, syncOpenDocsAfterMove } from "../store/openDocs";
 import type { TrashItem } from "../storage/trash";
 import { toast, useToastStore } from "../store/useToastStore";
@@ -92,18 +91,6 @@ export function FileTree({
   }
 
   /**
-   * A PDF's highlights note (`<file>.pdf.md`, plan 4.14) moves with the PDF,
-   * unless it is part of the same move. Returns the note's move, if any.
-   */
-  async function moveCompanion(from: string, to: string, alsoMoving: ReadonlySet<string> = new Set()): Promise<MoveResult | null> {
-    const note = `${from}.md`;
-    if (!/\.pdf$/i.test(from) || alsoMoving.has(note) || !(await workspaceHasEntry(note))) return null;
-    const r = await safeMove(note, `${to}.md`, { confirmReplace });
-    if (r) afterMove(note, r);
-    return r;
-  }
-
-  /**
    * `from` is now at `r.path`: open notes follow (a note inside a moved
    * folder too) and get the same link rewrite as the files on disk.
    */
@@ -164,11 +151,14 @@ export function FileTree({
       const newPath = dir ? `${dir}/${name}` : name;
       try {
         await flushActiveWorkspaceDoc();
-        const r = await safeMove(p, newPath, { confirmReplace, folder: kindOf(p) === "directory" });
-        if (!r) continue;
-        r.linksUpdated.forEach((x) => updated.add(x));
-        afterMove(p, r);
-        (await moveCompanion(p, r.path, selectedPaths))?.linksUpdated.forEach((x) => updated.add(x));
+        // A PDF's highlights note moves with it (plan 4.14).
+        const m = await safeMoveWithCompanion(p, newPath, { confirmReplace, folder: kindOf(p) === "directory", alsoMoving: selectedPaths });
+        if (!m) continue;
+        for (const [from, r] of [[p, m.main], [`${p}.md`, m.companion]] as const) {
+          if (!r) continue;
+          r.linksUpdated.forEach((x) => updated.add(x));
+          afterMove(from, r);
+        }
       } catch (e) {
         await uiAlert({ message: t("tree.alert.renameFailed", { error: (e as Error).message }) });
       }
@@ -313,16 +303,15 @@ export function FileTree({
       await uiAlert({ message: t("tree.alert.renameNoSlashes") });
       return;
     }
-    const ext = next.match(/\.[^./]+$/) ? "" : ".md";
-    const target = joinPath(dirname(oldPath), next + ext);
+    const target = joinPath(dirname(oldPath), renamedFileName(oldPath, next));
     try {
       const isFolder = findNode(tree, oldPath)?.kind === "directory";
       await flushActiveWorkspaceDoc();
-      const r = await safeMove(oldPath, isFolder ? joinPath(dirname(oldPath), next) : target, { confirmReplace, folder: isFolder });
-      if (!r) return;
-      afterMove(oldPath, r);
-      const note = isFolder ? null : await moveCompanion(oldPath, r.path);
-      announceMove([...r.linksUpdated, ...(note?.linksUpdated ?? [])]);
+      const m = await safeMoveWithCompanion(oldPath, isFolder ? joinPath(dirname(oldPath), next) : target, { confirmReplace, folder: isFolder });
+      if (!m) return;
+      afterMove(oldPath, m.main);
+      if (m.companion) afterMove(`${oldPath}.md`, m.companion);
+      announceMove([...m.main.linksUpdated, ...(m.companion?.linksUpdated ?? [])]);
       await refresh();
     } catch (e) {
       await uiAlert({
