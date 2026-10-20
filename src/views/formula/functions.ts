@@ -15,7 +15,7 @@
  */
 
 import { FormulaError, type Budget, type FormulaValue } from "./ast";
-import { asDate, clean, describe, equal, isEmpty, toNumber, toText, truthy } from "./values";
+import { asDate, clean, describe, equal, isEmpty, toNumber, toText, truthy, utcDate } from "./values";
 
 export interface CallContext {
   budget: Budget;
@@ -104,9 +104,9 @@ function unit(v: FormulaValue, name: string, ctx: CallContext): Unit {
 function addMonths(d: Date, months: number): Date {
   const y = d.getUTCFullYear();
   const m = d.getUTCMonth() + months;
-  const target = new Date(Date.UTC(y, m, 1, d.getUTCHours(), d.getUTCMinutes(), d.getUTCSeconds(), d.getUTCMilliseconds()));
+  const target = utcDate(y, m, 1, d.getUTCHours(), d.getUTCMinutes(), d.getUTCSeconds(), d.getUTCMilliseconds());
   // Clamp the day: Jan 31 + 1 month is Feb 28 (29), not Mar 3.
-  const last = new Date(Date.UTC(target.getUTCFullYear(), target.getUTCMonth() + 1, 0)).getUTCDate();
+  const last = utcDate(target.getUTCFullYear(), target.getUTCMonth() + 1, 0).getUTCDate();
   target.setUTCDate(Math.min(d.getUTCDate(), last));
   return target;
 }
@@ -117,7 +117,7 @@ function checkedDate(ms: number, ctx: CallContext): Date {
   return d;
 }
 
-const startOfDay = (d: Date) => Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate());
+const startOfDay = (d: Date) => utcDate(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()).getTime();
 
 const BUILTINS: Record<string, FormulaFunction> = {
   /* ─── logic ─── */
@@ -207,7 +207,14 @@ const BUILTINS: Record<string, FormulaFunction> = {
     call: ([a, b], ctx) => {
       const items = Array.isArray(a) ? a : [a];
       ctx.budget.tick(items.length, ctx.at);
-      return result(items.map((x) => text(x, ctx)).join(b === undefined ? ", " : text(b, ctx)), ctx);
+      const parts = items.map((x) => text(x, ctx));
+      const sep = b === undefined ? ", " : text(b, ctx);
+      // Check the size of the result before building it: 2000 items joined by a 20000-character
+      // separator would otherwise allocate ~40 million characters first.
+      const projected = parts.reduce((n, p) => n + p.length, 0) + Math.max(0, parts.length - 1) * sep.length;
+      if (projected > ctx.budget.limits.maxText) throw new FormulaError("limit", `text longer than ${ctx.budget.limits.maxText} characters`, ctx.at);
+      ctx.budget.tick(Math.ceil(projected / 64), ctx.at);
+      return parts.join(sep);
     },
   },
   split: {
@@ -328,8 +335,8 @@ const BUILTINS: Record<string, FormulaFunction> = {
       if (args.length !== 3) throw new FormulaError("arity", "date() takes one text or year, month, day", ctx.at);
       const [y, m, d] = args.map((x) => int(x, "date", ctx, Number.NaN));
       if ([y, m, d].some(Number.isNaN)) return null;
-      const out = checkedDate(Date.UTC(y, m - 1, d), ctx);
-      // Date.UTC rolls 2026-02-30 over to March 2: a day that does not exist is an error, as for date("2026-02-30").
+      const out = checkedDate(utcDate(y, m - 1, d).getTime(), ctx);
+      // A day that does not exist (2026-02-30 would roll over to March 2) is an error, as for date("2026-02-30").
       if (out.getUTCFullYear() !== y || out.getUTCMonth() !== m - 1 || out.getUTCDate() !== d) throw new FormulaError("type", `date(): ${y}-${m}-${d} is not a day`, ctx.at);
       return out;
     },

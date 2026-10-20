@@ -129,6 +129,14 @@ describe("formula — semantics", () => {
     expect(errorOf("7 - due").code).toBe("type");
   });
 
+  it("years below 100 keep their year (no 1900 offset)", () => {
+    expect(iso(value('dateadd("0099-01-15", 1, "month")'))).toBe("0099-02-15");
+    expect(iso(value('dateadd("0004-01-31", 1, "month")'))).toBe("0004-02-29");
+    expect(value('datediff("0099-03-15", "0099-01-15", "months")')).toBe(2);
+    expect(value('year(date(99, 1, 15))')).toBe(99);
+    expect(value('year("0050-06-01T12:00+02:00")')).toBe(50);
+  });
+
   it("a day that does not exist is not a date", () => {
     expect(errorOf('date("2026-02-30")').code).toBe("type");
     expect(errorOf('year("2026-13-01")').code).toBe("type");
@@ -207,6 +215,9 @@ describe("formula — errors are typed and placed", () => {
     expect(errorOf("price + 1e999").code).toBe("math");
     expect(errorOf('+"1e999"').code).toBe("math");
     expect(errorOf('-"1e999"').code).toBe("math");
+    // Numeric text that overflows is a number error in + too, not text to join.
+    expect(errorOf("huge + 1", { fm: { huge: "1e999" } }).code).toBe("math");
+    expect(value('"abc" + 1')).toBe("abc1");
   });
 });
 
@@ -239,6 +250,15 @@ describe("formula — deterministic limits", () => {
     expect(errorOf('replace(repeat("a", 10000) & "c", "a", "bb")').code).toBe("limit");
     // Shrinking never trips it.
     expect(value('len(replace(repeat("ab", 10000), "ab", ""))')).toBe(0);
+  });
+
+  it("join() checks the result size before building it", () => {
+    const many: FormulaRow = { fm: { items: Array.from({ length: 2000 }, () => "") } };
+    // ~40 million characters if built: refused up front.
+    expect(errorOf('join(items, repeat("b", 20000))', many).code).toBe("limit");
+    // 2000 empty items, 1999 separators of 10 characters: 19990, under the limit.
+    expect(value('len(join(split(repeat(",", 1999), ","), "0123456789"))')).toBe(19990);
+    expect(errorOf('join(split(repeat(",", 1999), ","), "0123456789+")').code).toBe("limit");
   });
 
   it("values read from the note obey the same limits", () => {

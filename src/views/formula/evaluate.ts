@@ -84,12 +84,15 @@ function arith(op: "+" | "-" | "*" | "/" | "%" | "^", a: FormulaValue, b: Formul
   }
 }
 
-const isText = (v: FormulaValue) => typeof v === "string" && toNumberOrNull(v) === null && asDate(v) === null;
+/** Plain text: not a number, not a date. Numeric text too large to be a number is an error, not text. */
+const isText = (v: FormulaValue, at: number) => typeof v === "string" && toNumberOrNull(v, at) === null && asDate(v) === null;
 
-function toNumberOrNull(v: string): number | null {
+function toNumberOrNull(v: string, at: number): number | null {
   try {
-    return toNumber(v, "", -1);
-  } catch {
+    return toNumber(v, "+", at);
+  } catch (e) {
+    // "abc" is text; "1e999" is a number that overflows — that stays a math error.
+    if (e instanceof FormulaError && e.code === "math") throw e;
     return null;
   }
 }
@@ -177,7 +180,7 @@ class Interpreter {
         return this.join(a, b, n.at);
       case "+":
         // `+` joins when either side is plain text (not a number or a date), as people expect.
-        if (isText(a) || isText(b) || Array.isArray(a) || Array.isArray(b)) return this.join(a, b, n.at);
+        if (isText(a, n.at) || isText(b, n.at) || Array.isArray(a) || Array.isArray(b)) return this.join(a, b, n.at);
         return arith("+", a, b, n.at);
       default:
         return arith(n.op, a, b, n.at);

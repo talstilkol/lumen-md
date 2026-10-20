@@ -40,12 +40,23 @@ export function asDate(v: FormulaValue): Date | null {
     // Date.parse rolls 2026-02-30 over to March 2: a day that does not exist is not a date.
     const [y, m, day] = s.slice(0, 10).split("-").map(Number);
     if (/(?:Z|[+-]\d{2}:?\d{2})$/.test(s) && s.length > 10) {
-      const local = new Date(Date.UTC(y, m - 1, day));
+      const local = utcDate(y, m - 1, day);
       if (local.getUTCFullYear() !== y || local.getUTCMonth() !== m - 1 || local.getUTCDate() !== day) return null;
     } else if (d.getUTCFullYear() !== y || d.getUTCMonth() !== m - 1 || d.getUTCDate() !== day) return null;
     return d;
   }
   return null;
+}
+
+/**
+ * A UTC date from its parts. Not `Date.UTC`, which maps years 0–99 to 1900–1999:
+ * `0099-01-15` is in the year 99. Months and days out of range roll over as usual.
+ */
+export function utcDate(y: number, m: number, d: number, h = 0, mi = 0, s = 0, ms = 0): Date {
+  const out = new Date(0);
+  out.setUTCFullYear(y, m, d);
+  out.setUTCHours(h, mi, s, ms);
+  return out;
 }
 
 /** Number for arithmetic; `null` stays null (an empty property empties the result). */
