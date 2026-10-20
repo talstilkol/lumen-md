@@ -764,6 +764,25 @@ describe("e2ee sync: edge cases", () => {
     expect(provider.objects.size).toBe(3);
     expect(a.store.state?.pending).toEqual([]);
   });
+
+  it("a restart between the commit and the clean-up still deletes the replaced blob", async () => {
+    const provider = memoryProvider();
+    const a = await newVault(provider);
+    a.files.set("x.md", "1");
+    await a.sync.sync();
+    a.files.set("x.md", "2");
+    const setBase = a.store.setBase.bind(a.store);
+    a.store.setBase = async () => {
+      throw new Error("tab closed");
+    };
+    await expect(a.sync.sync()).rejects.toThrow("tab closed");
+    a.store.setBase = setBase;
+    expect(provider.objects.size).toBe(4); // committed, not yet cleaned
+    const restarted = new E2eeSync({ provider, keys: a.keys, local: a.files, store: a.store });
+    expect(await restarted.sync()).toMatchObject({ uploaded: 0 });
+    expect(provider.objects.size).toBe(3);
+    expect(a.store.state?.pending).toEqual([]);
+  });
 });
 
 describe("e2ee sync: folders and files trading places", () => {

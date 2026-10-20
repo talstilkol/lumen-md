@@ -344,7 +344,7 @@ export class E2eeSync {
 
       const changes = await this.collectChanges(remote, held, uploads);
       if (changes.size === 0) {
-        await this.collectGarbage(remote, []);
+        await this.collectGarbage(remote);
         res.held = [...held];
         return res;
       }
@@ -361,17 +361,22 @@ export class E2eeSync {
         }
         throw e;
       }
-      s.anchor = { counter: next.counter, digest: sealed.digest };
-      await this.save();
+      // The replaced blobs are queued in the same save as the new anchor, before
+      // any base entry forgets them, so an interruption cannot leak them.
       const superseded: string[] = [];
-      for (const [path, c] of changes) {
-        await this.setBase(path, c.entry, c.data);
+      for (const [path] of changes) {
         const old = remote.files[path];
         if (old && !old.deleted) superseded.push(await this.blob(path, old.rev));
+      }
+      s.anchor = { counter: next.counter, digest: sealed.digest };
+      s.pending.push(...superseded);
+      await this.save();
+      for (const [path, c] of changes) {
+        await this.setBase(path, c.entry, c.data);
         if (c.entry.deleted) res.deleted++;
         else res.uploaded++;
       }
-      await this.collectGarbage(next, superseded);
+      await this.collectGarbage(next);
       res.counter = next.counter;
       res.held = [...held];
       return res;
@@ -529,14 +534,14 @@ export class E2eeSync {
   }
 
   /**
-   * Delete blobs that are known garbage: those `superseded` by this device's
-   * commit, and this device's pending uploads that `current` does not
-   * reference. Unknown objects are never touched — they may be another
-   * device's upload in flight.
+   * Delete blobs that are known garbage — every name in `pending` that
+   * `current` does not reference: blobs replaced by this device's commits and
+   * its own uploads that never got committed. Unknown objects are never
+   * touched — they may be another device's upload in flight.
    */
-  private async collectGarbage(current: Manifest, superseded: string[]): Promise<void> {
+  private async collectGarbage(current: Manifest): Promise<void> {
     const s = await this.loadState();
-    if (!s.pending.length && !superseded.length) return;
+    if (!s.pending.length) return;
     const referenced = new Set<string>();
     if (s.pending.length) {
       for (const [path, e] of Object.entries(current.files)) {
@@ -545,7 +550,7 @@ export class E2eeSync {
     }
     // Every name stays recorded until its delete succeeded, so an interrupted
     // clean-up is finished by a later round instead of leaking the object.
-    const garbage = [...new Set([...superseded, ...s.pending.filter((n) => !referenced.has(n))])];
+    const garbage = [...new Set(s.pending.filter((n) => !referenced.has(n)))];
     s.pending = [...garbage];
     await this.save();
     for (const name of garbage) {
