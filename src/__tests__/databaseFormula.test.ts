@@ -223,6 +223,14 @@ describe("formula — errors are typed and placed", () => {
     expect(errorOf('"1e999" = "1e998"').code).toBe("math");
     expect(errorOf('huge > 1', { fm: { huge: "1e999" } }).code).toBe("math");
   });
+
+  it("keeps integers exact and rounds only fractional noise (review #267)", () => {
+    expect(value("1000000000000001 + 0")).toBe(1000000000000001);
+    expect(value("9007199254740991 + 0")).toBe(9007199254740991);
+    expect(value("9007199254740990 + 1")).toBe(9007199254740991);
+    expect(value("0.1 + 0.2")).toBe(0.3);
+    expect(value("1.1 * 3")).toBe(3.3);
+  });
 });
 
 describe("formula — deterministic limits", () => {

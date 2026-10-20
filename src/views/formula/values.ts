@@ -81,10 +81,16 @@ export function describe(v: FormulaValue): string {
   return `the ${typeof v} ${String(v)}`;
 }
 
-/** Floating-point noise off: 0.1 + 0.2 is 0.3. */
+/**
+ * Floating-point noise off: 0.1 + 0.2 is 0.3. An integer is kept exactly as
+ * it is — 1000000000000001 + 0 stays 1000000000000001 (review #267); only a
+ * fractional result is rounded to 15 significant digits.
+ */
 export function clean(n: number, at: number): number {
   if (!Number.isFinite(n)) throw new FormulaError("math", "the result is not a finite number", at);
-  return n === 0 ? 0 : Number(n.toPrecision(15));
+  if (n === 0) return 0;
+  if (Number.isInteger(n)) return n;
+  return Number(n.toPrecision(15));
 }
 
 /** `YYYY-MM-DD`, or with the time (UTC) when it is not midnight. */
