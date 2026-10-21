@@ -1,7 +1,7 @@
 {
  "$comment": "The plan's single source (plan 0.6). Edit this file, then `npm run plan` regenerates the board in MASTER_PLAN.md and plan/board.html; CI (`npm run plan:check`) fails when they differ. A task's status is one line: phases[].tasks[].status.",
- "updated": "2026-10-20T23:10",
- "note": "**המצב ב-ג׳ 20.10 23:00:** סשן Opus 5.5 (16:42–23:00) — 4 מסלולים במקביל. PR-ים חדשים: #266 (0.16), #267 (4.11), #268 (4.16), #269 (3.3), #270 (הסרת הדומיין הישן מכל הקבצים; אין signaling מובנה), #271 (12.3), #272 (4.14), #273 (תיקון ה-flake של לוח הפקודות). #265: 2 ממצאי Codex P1 תוקנו. כולם CI ירוק חוץ מ-#271/#272 בעבודה. שום ✅ חדש לפני המיזוג: קובצי הבדיקה של המשימות לא נמצאים על chore/dod, ולכן הן ⏳ עד 15.1. אילוץ הסשן: אין npm registry — jsep, formula.js, EmbedPDF, QuickJS, knip, Argon2id לא נוספו (פירוט בכל PR).",
+ "updated": "2026-10-21T07:30",
+ "note": "**המצב ב-ד׳ 21.10 07:30:** סשן Opus 5.5 (16:42–23:00) — 4 מסלולים במקביל. PR-ים חדשים: #266 (0.16), #267 (4.11), #268 (4.16), #269 (3.3), #270 (הסרת הדומיין הישן מכל הקבצים; אין signaling מובנה), #271 (12.3), #272 (4.14), #273 (תיקון ה-flake של לוח הפקודות). #265: 2 ממצאי Codex P1 תוקנו. כולם CI ירוק חוץ מ-#271/#272 בעבודה. שום ✅ חדש לפני המיזוג: קובצי הבדיקה של המשימות לא נמצאים על chore/dod, ולכן הן ⏳ עד 15.1. אילוץ הסשן: אין npm registry — jsep, formula.js, EmbedPDF, QuickJS, knip, Argon2id לא נוספו (פירוט בכל PR). עדכון 21.10: PR-ים נוספים #274 (8.4), #275 (3.4), #276 (4.19 חלק 1), #277 (5.7), #278 (7.5 — שער האנגלית אדום, החלטה לטל), #279 (6.14). תקציב ההפעלה ב-460.0/460 KB — כל PR שמוסיף מחרוזת להפעלה ייכשל עד החלטה 15.16 (14) או #248.",
  "start": "2026-10-18T08:00",
  "buffer": 0.35,
  "ownerWindow": [
@@ -1356,7 +1356,7 @@
       "sync"
      ],
      "priority": "P1",
-     "status": "⏳ feat/e2ee-sync-core (ליבת הסנכרון המוצפן על WebCrypto; Argon2id ו-age דורשים hash-wasm/@noble ב-lockfile על ה-Mac)",
+     "status": "⏳ #275 (ליבת E2EE על WebCrypto: manifest מוצפן, שמות אטומים, מונה + היסטוריית 100 גרסאות נגד rollback/fork, צימוד + TOFU, CAS; 10,000 סבבים 0 אובדן; CI ירוק על 4eb3e599; חסר: Argon2id ו-age — hash-wasm/@noble ב-lockfile על ה-Mac)",
      "new": true,
      "source": "G8, מחקר פערים #6",
      "steps": [
@@ -1377,6 +1377,9 @@
       "manifest ישן שמוחזר מהספק נדחה (בדיקה)",
       "התקן חדש: manifest ישן נדחה אחרי צימוד; בלי צימוד מוצגת אזהרה ולא מוצהרת הגנה (בדיקת replay)",
       "שני מכשירים כותבים במקביל מאותה גרסה N: שני השינויים נשמרים (בדיקת מרוץ)"
+     ],
+     "dod": [
+      "npx vitest run src/__tests__/e2eeRandom.test.ts src/__tests__/e2eeSync.test.ts src/__tests__/e2eeCrypto.test.ts src/__tests__/e2eeUi.test.tsx"
      ]
     },
     {
@@ -1828,7 +1831,7 @@
       "1.1"
      ],
      "priority": "P1",
-     "status": "⏳ #272 (קורא PDF על pdf.js — EmbedPDF לא נוסף בלי registry; וירטואליזציה, חיפוש, OCR, הדגשות כ-W3C Web Annotation ב-file.pdf.md עם קישור #page; CI ירוק על 1c239f1e; סבב תיקונים רביעי בעבודה)",
+     "status": "⏳ #272 (קורא PDF על pdf.js, הדגשות כ-W3C Web Annotation, העברה/שכפול בטוחים; CI ירוק על dcaa8d51; 10 ממצאי P2 לרשימת המשך בגוף ה-PR; ✅ אחרי המיזוג)",
      "new": true,
      "source": "מחקר פערים #8",
      "steps": [
@@ -1841,7 +1844,7 @@
       "הדגשה → קישור שפותח את העמוד הנכון (e2e)"
      ],
      "dod": [
-      "npx vitest run src/__tests__/pdfAnnotations.test.ts",
+      "npx vitest run src/__tests__/pdfAnnotations.test.ts src/__tests__/pdfCompanionMove.test.ts src/__tests__/pdfReader.test.tsx",
       "npx playwright test e2e/pdf-reader.spec.ts"
      ]
     },
@@ -1946,7 +1949,7 @@
       "1.9"
      ],
      "priority": "P0",
-     "status": "⏳ feat/canvas-excalidraw (15.10 (5) הוחלט: Excalidraw. בעבודה בענן: ממיר .tldr → .excalidraw ובדיקות 20 קנבסים; החלפת הרכיב והסרת tldraw דורשות `npm install @excalidraw/excalidraw --package-lock-only` על ה-Mac)",
+     "status": "⏳ #276 (ממיר tldraw → Excalidraw בלי תלויות, 20 קנבסים בלי אובדן צורה, קבצי .excalidraw עם גיבוי .tldr, הגירה מאחורי דגל; CI ירוק על cc0b65ad; חסר: @excalidraw/excalidraw ב-lockfile, החלפת הרכיב, הסרת tldraw)",
      "new": true,
      "source": "מחקר הקוד הפתוח: tldraw דורש מפתח בייצור",
      "steps": [
@@ -1959,6 +1962,9 @@
       "0 בקשות רשת מהקנבס ב-local-only (יומן הפרטיות)",
       "20 קנבסים של tldraw מומרים בלי לאבד צורה",
       "tldraw לא ב-bundle"
+     ],
+     "dod": [
+      "npx vitest run src/__tests__/tldrawToExcalidraw.test.ts src/__tests__/excalidrawFile.test.ts"
      ]
     },
     {
@@ -2175,6 +2181,7 @@
       "settings"
      ],
      "priority": "P1",
+     "status": "⏳ #277 (pull של Ollama עם התקדמות, מצבי economy/balanced/quality, ניקוי מטמון ומכסה, הודעה בלי WebGPU; CI ירוק על f0e78b51, startup 460.0/460; חסר: web-llm 0.2.86 ב-lockfile; ✅* אחרי המיזוג — Ollama ו-WebGPU אמיתיים 15.3)",
      "was": "4.7",
      "source": "T4, T6, T11",
      "steps": [
@@ -2187,7 +2194,11 @@
      "acceptance": [
       "pull מהלוח עם התקדמות (Ollama מדומה)",
       "מצב בלוח משנה את המודל בריצה הבאה"
-     ]
+     ],
+     "dod": [
+      "npx vitest run src/__tests__/modelManagerPanel.test.tsx src/__tests__/ollamaPull.test.ts src/__tests__/modelStorage.test.ts src/__tests__/modelManager.test.ts"
+     ],
+     "dodMock": true
     },
     {
      "id": "5.8",
@@ -2684,6 +2695,7 @@
       "5.1"
      ],
      "priority": "P2",
+     "status": "⏳ #279 (run_python על Pyodide ב-worker לכל קריאה, ערוצי רשת/אחסון/התקנים חסומים ונרשמים ביומן; e2e על Pyodide אמיתי ב-3 דפדפנים ו-prod: 0 בקשות; CI ירוק על 4f22348c; ✅ אחרי המיזוג)",
      "new": true,
      "was": "5.14",
      "source": "יכולת חדשה",
@@ -2693,6 +2705,10 @@
      ],
      "acceptance": [
       "כלי רץ offline; 0 גישת רשת"
+     ],
+     "dod": [
+      "npx vitest run src/__tests__/agentRunPython.test.ts src/__tests__/agentToolsNew.test.ts",
+      "npx playwright test e2e/live-exec.spec.ts"
      ]
     },
     {
@@ -2899,6 +2915,7 @@
       "ci"
      ],
      "priority": "P1",
+     "status": "⏳ #278 (tessdata_fast heb/eng בריפו, CER לכל PR על ה-split הציבורי (34 תמונות): עברית 2.66% / 1.32% עוברת, אנגלית 12.33% / 40.54% נכשלת — מילים לועזיות בתוך שורות עבריות; השער לא שונה — החלטה לטל; ✅* אחרי 15.11 ו-GOLDEN_SEED)",
      "owner": "15.11",
      "was": "6.3",
      "source": "T31",
@@ -2910,6 +2927,9 @@
      "acceptance": [
       "CER בנפרד: מודפס נקי ≤ 5%, מושפל ≤ 12%, שורות מנוקדות — מדווח בלבד",
       "רץ בכל PR"
+     ],
+     "dod": [
+      "npx vitest run src/__tests__/ocrCer.test.ts src/__tests__/ocrLangData.test.ts src/__tests__/ocrLedger.test.ts"
      ]
     },
     {
@@ -3133,7 +3153,7 @@
       "store"
      ],
      "priority": "P1",
-     "status": "⏳ perf/vault-worker (אינדקס ב-Web Worker, מתאר ותצוגה אינקרמנטליים; PR בדרך)",
+     "status": "⏳ #274 (אינדקס ב-Web Worker מעל VaultBackend, עץ מהאינדקס, Float32Array, מתאר ותצוגה אינקרמנטליים; e2e: פתיחה < 1s וחיפוש < 100ms עוברים ב-chromium/firefox/prod; הקלדה ב-2MB — רק בלילה, עוד לא רץ; CI ירוק על db567ae7; startup 459.6/460)",
      "was": "7.4",
      "source": "C4, C6, T39",
      "steps": [
@@ -3145,6 +3165,10 @@
      "acceptance": [
       "פתיחה < 1s, שמירה → אינדקס < 50ms, חיפוש < 100ms",
       "הקלדה ב-2MB < 16ms לפריים (לילה)"
+     ],
+     "dod": [
+      "npx vitest run src/__tests__/vaultWorker.test.ts src/__tests__/perfVault.test.ts src/__tests__/workspaceIndexFreshness.test.ts src/__tests__/extractToc.test.ts",
+      "npx playwright test e2e/perf-vault.spec.ts --project=chromium"
      ]
     },
     {
@@ -3708,7 +3732,7 @@
       "1.1"
      ],
      "priority": "P1",
-     "status": "⏳ #271 (A1–A9 עם בדיקה לכל סעיף; CI ו-review בעבודה)",
+     "status": "⏳ #271 (A1–A3, A6, A8, A9 תוקנו; A4, A5, A7 החלטה מתועדת עם בדיקה; 9/9 עם בדיקה; CI ירוק על aeab395b; פתוח לטל: VITE_RESEARCH_TOKEN מול טוקן בהגדרות בלבד)",
      "was": "11.3",
      "source": "A1–A9",
      "steps": [
@@ -3718,6 +3742,10 @@
      ],
      "acceptance": [
       "9/9 עם בדיקה"
+     ],
+     "dod": [
+      "npx vitest run src/__tests__/knownLimits.test.ts src/__tests__/researchWorker.test.ts",
+      "npx vitest run src/__tests__/vaultDoctor.test.ts src/__tests__/tsService.test.ts src/__tests__/playgroundFiles.test.ts src/__tests__/research.test.ts src/__tests__/aiBatch.test.ts src/__tests__/aiSettingsPanel.test.tsx"
      ]
     },
     {
