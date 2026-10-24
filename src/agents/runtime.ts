@@ -184,19 +184,16 @@ async function execTool(tools: AgentTool[], call: ToolCall, env: ToolEnv): Promi
 /**
  * The tools a model may call itself. A streaming agent's tools serve only
  * as its context calls (`context`): its answer streams token by token, and
- * a tool turn would have to be parsed whole first. A tool whose scope the
- * run was not granted is not offered either: the call would be refused,
- * so the model is better off not seeing it (the researcher under
- * local-only sees its library tools, not search_web / fetch_page).
+ * a tool turn would have to be parsed whole first.
  */
-function modelTools(def: AgentDefinition<never, unknown>, grants: ReadonlySet<ToolScope>): AgentTool[] {
-  return def.streaming ? [] : (def.tools ?? []).filter((t) => t.scope === "read" || grants.has(t.scope));
+function modelTools(def: AgentDefinition<never, unknown>): AgentTool[] {
+  return def.streaming ? [] : (def.tools ?? []);
 }
 
-function systemPrompt<I extends AgentInput, O>(def: AgentDefinition<I, O>, input: I, nativeTools: boolean, patch: RetryPatch, grants: ReadonlySet<ToolScope>): string {
+function systemPrompt<I extends AgentInput, O>(def: AgentDefinition<I, O>, input: I, nativeTools: boolean, patch: RetryPatch): string {
   const base = patch.systemOverride ?? (typeof def.system === "function" ? def.system(input) : def.system);
   const parts = [base];
-  const offered = modelTools(def, grants);
+  const offered = modelTools(def);
   if (offered.length && !nativeTools) parts.push(toolProtocolPrompt(offered, def.outputSchema));
   // The schema stays in the prompt even when the executor constrains the
   // output natively: web-llm's JSON mode requires the prompt to ask for
@@ -450,7 +447,7 @@ export async function runAgent<I extends AgentInput, O = string>(def: AgentDefin
     const tier: ModelTier = patch.tier ?? def.tier ?? "small";
     // The model is resolved once here and pinned on the request, so the
     // capability decision (native tools / schema) and the call agree.
-    const offered = modelTools(def, grants);
+    const offered = modelTools(def);
     const model = patch.model ?? executor.modelFor(tier, { tools: offered.length > 0 });
     // Small models get every turn held to a JSON Schema where the executor can
     // (5.3.5): JSON-ReAct under the protocol's schema is more reliable for
@@ -463,7 +460,7 @@ export async function runAgent<I extends AgentInput, O = string>(def: AgentDefin
     // constrain output, every turn is held to the protocol's schema (5.3.5).
     const turnSchema = offered.length && !nativeTools && executor.supportsSchema(model) ? protocolSchema(offered, def.outputSchema) : undefined;
     const messages: ExecutorMessage[] = [
-      { role: "system", content: systemPrompt(def, modelInput, nativeTools, patch, grants) + (toolEnv.taint.length ? `\n\n${guard.UNTRUSTED_NOTICE}` : "") },
+      { role: "system", content: systemPrompt(def, modelInput, nativeTools, patch) + (toolEnv.taint.length ? `\n\n${guard.UNTRUSTED_NOTICE}` : "") },
       { role: "user", content: def.user(modelInput) + (patch.promptSuffix ? `\n\n${patch.promptSuffix}` : "") },
       ...context,
     ];

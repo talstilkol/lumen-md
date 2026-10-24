@@ -205,9 +205,8 @@ describe("researcher agent — local-only (plan 5.4.2)", () => {
     expect(r.markdown).toContain("[^1]: [Roses]([[roses]]) — “Prune roses in early spring”");
     expect(r.markdown).toContain("nothing left this device");
     expect(net).not.toHaveBeenCalled();
-    // The network tools were not even offered: the run has no network grant.
-    expect(ex.calls[0].messages[0].content).not.toContain("search_web");
-    expect(ex.calls[0].messages[0].content).toContain("search_workspace");
+    // The library prompt; the run has no network grant, so a web call would be refused.
+    expect(ex.calls[0].messages[0].content).toContain("clip library");
     expect(ledgerEntries()).toEqual([]);
   });
 

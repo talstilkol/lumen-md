@@ -23,7 +23,13 @@ Choose how Lumen searches with `🔎 Research: Settings…`:
 | Search | Needs | How it works |
 |---|---|---|
 | **Claude web search** (default) | AI provider set to Claude (Anthropic) | One request: Claude searches (up to 5 searches), reads and answers. The quotes are copied word for word from the pages by Anthropic. Anthropic bills the searches separately from tokens. |
-| **Brave Search** / **Tavily** | Your own API key, and the research service on this deployment | Lumen plans 2–4 searches and reads up to 6 pages. It sends the model only the parts relevant to your question, then **checks every quote against the page it came from**. A quote that can't be found is marked ⚠️ in the note. |
+| **SearXNG** / **Brave Search** / **Tavily** | The research service on this deployment (a local SearXNG needs no key; Brave and Tavily need yours) | The **researcher agent** runs on your AI model, local first, in a tool loop. It searches (`search_web`), reads the pages it chooses (`fetch_page`), and copies the passages it cites (`extract_quotes`). Then Lumen **checks every quote against the page it came from**, outside the model. A quote that can't be found is marked ⚠️ in the note. If fewer than half of the quotes are in their pages, the agent tries once more and is told to quote word for word. |
+
+Under the **local only** AI policy:
+- **With a remote research service:** the same agent answers from your **clip library** (`Library/`, `ספרייה/`) and nothing leaves the device.
+- **With a research service on this machine:** every search and every page read asks you first. Only the search query, or the page address, is sent.
+
+Every page is outside content: the agent gets it cleaned and delimited, and instructions planted in it are flagged (see Local agents → Outside content). The note is saved with `untrusted: true` in its frontmatter.
 
 Pages the research read but didn't cite are listed under "Also read".
 Every model call appears in `AI: Usage & Cost This Month`. A research
