@@ -204,7 +204,7 @@ const PLACEHOLDER_RE = /\{\{(\d+)\}\}/g;
 /** Split a long segment into sentences (Latin, Hebrew, Arabic, CJK stops). */
 export function sentencesOf(text: string, maxChars: number): string[] {
   if (text.length <= maxChars) return [text];
-  const parts = text.split(/(?<=[.!?…。！？؟])\s+/);
+  const parts = text.split(/(?<=[.!?…。！？؟])\s+/).filter((p) => p.length);
   const out: string[] = [];
   let cur = "";
   for (const p of parts) {
@@ -223,27 +223,50 @@ interface Pending {
   runs: Run[];
 }
 
+interface Keep {
+  text: string;
+  /** The source had a word boundary (space, start / end of line) on that side. */
+  spaceBefore: boolean;
+  spaceAfter: boolean;
+}
+
 /** Every text run of a run list, as one placeholder string (null when the line has no words). */
-function placeholderText(runs: Run[]): { text: string; keeps: string[] } | null {
-  const keeps: string[] = [];
+function placeholderText(runs: Run[]): { text: string; keeps: Keep[] } | null {
+  const keeps: Keep[] = [];
   let text = "";
-  for (const r of runs) {
+  runs.forEach((r, i) => {
     if (r.kind === "keep") {
-      keeps.push(r.text);
+      const prev = runs[i - 1]?.text ?? "";
+      const next = runs[i + 1]?.text ?? "";
+      keeps.push({ text: r.text, spaceBefore: !prev || /\s$/.test(prev), spaceAfter: !next || /^\s/.test(next) });
       text += PLACEHOLDER(keeps.length - 1);
     } else text += r.text;
-  }
+  });
   if (!/\p{L}/u.test(runs.filter((r) => r.kind === "text").map((r) => r.text).join(""))) return null;
   return { text, keeps };
 }
 
-/** Put the kept spans back; null when the translator did not return each placeholder exactly once. */
-function restorePlaceholders(translated: string, keeps: string[]): string | null {
+const WORDISH = /[\p{L}\p{N}]/u;
+
+/**
+ * Put the kept spans back; null when the translator did not return each
+ * placeholder exactly once. A translator may move a placeholder next to a
+ * word: where the source had a boundary, one is kept, so a bare URL, a
+ * wiki link or an address does not end up glued to a word.
+ */
+function restorePlaceholders(translated: string, keeps: Keep[]): string | null {
   const seen = new Map<number, number>();
   for (const m of translated.matchAll(PLACEHOLDER_RE)) seen.set(Number(m[1]), (seen.get(Number(m[1])) ?? 0) + 1);
   if (seen.size !== keeps.length) return null;
   for (let n = 0; n < keeps.length; n++) if (seen.get(n) !== 1) return null;
-  return translated.replace(PLACEHOLDER_RE, (_, n) => keeps[Number(n)]);
+  return translated.replace(PLACEHOLDER_RE, (_, n, offset: number, whole: string) => {
+    const k = keeps[Number(n)];
+    const before = whole[offset - 1] ?? "";
+    const after = whole[offset + (_ as string).length] ?? "";
+    const lead = k.spaceBefore && before && WORDISH.test(before) ? " " : "";
+    const trail = k.spaceAfter && after && WORDISH.test(after) ? " " : "";
+    return lead + k.text + trail;
+  });
 }
 
 /** Leading / trailing whitespace, kept around a translated segment. */
@@ -279,7 +302,7 @@ export async function translateMarkdown(text: string, translate: Translate, opts
     else units.push({ line: l, runs: l.runs });
   }
   // Pass 1: placeholders. A unit whose text already looks like a placeholder goes straight to pass 2.
-  const pass1: { unit: Pending; keeps: string[]; pieces: string[] }[] = [];
+  const pass1: { unit: Pending; keeps: Keep[]; original: string; pieces: string[] }[] = [];
   const pass2: Pending[] = [];
   const batch: string[] = [];
   for (const unit of units) {
@@ -290,13 +313,13 @@ export async function translateMarkdown(text: string, translate: Translate, opts
       continue;
     }
     const pieces = sentencesOf(ph.text, maxChars);
-    pass1.push({ unit, keeps: ph.keeps, pieces });
+    pass1.push({ unit, keeps: ph.keeps, original: ph.text, pieces });
     batch.push(...pieces);
   }
   const translated1 = batch.length ? await translate(batch, opts.signal) : [];
   if (translated1.length !== batch.length) throw new Error(`translator returned ${translated1.length} segments for ${batch.length}`);
   let at = 0;
-  for (const { unit, keeps, pieces } of pass1) {
+  for (const { unit, keeps, original, pieces } of pass1) {
     const joined = translated1.slice(at, at + pieces.length).join(" ");
     at += pieces.length;
     const restored = restorePlaceholders(joined, keeps);
@@ -304,27 +327,27 @@ export async function translateMarkdown(text: string, translate: Translate, opts
       pass2.push(unit);
       continue;
     }
-    setUnit(unit, [{ kind: "text", text: pad(pieces.join(" "), restored) }]);
+    setUnit(unit, [{ kind: "text", text: pad(original, restored) }]);
   }
   // Pass 2: each text run alone; kept runs are not sent at all.
   if (pass2.length) {
     const batch2: string[] = [];
-    const plan: { unit: Pending; run: number; pieces: string[] }[] = [];
+    const plan: { unit: Pending; run: number; original: string; pieces: string[] }[] = [];
     for (const unit of pass2) {
       unit.runs.forEach((r, k) => {
         if (r.kind !== "text" || !/\p{L}/u.test(r.text)) return;
         const pieces = sentencesOf(r.text, maxChars);
-        plan.push({ unit, run: k, pieces });
+        plan.push({ unit, run: k, original: r.text, pieces });
         batch2.push(...pieces);
       });
     }
     const translated2 = batch2.length ? await translate(batch2, opts.signal) : [];
     if (translated2.length !== batch2.length) throw new Error(`translator returned ${translated2.length} segments for ${batch2.length}`);
     let at2 = 0;
-    for (const { unit, run, pieces } of plan) {
+    for (const { unit, run, original, pieces } of plan) {
       const joined = translated2.slice(at2, at2 + pieces.length).join(" ");
       at2 += pieces.length;
-      unit.runs[run] = { kind: "text", text: pad(pieces.join(" "), joined) };
+      unit.runs[run] = { kind: "text", text: pad(original, joined) };
     }
   }
   const out = lines.map(renderLine).join("\n");
