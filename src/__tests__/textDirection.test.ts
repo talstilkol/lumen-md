@@ -10,6 +10,16 @@ describe("firstStrongDirection", () => {
     expect(firstStrongDirection("日本語")).toBe("ltr");
   });
 
+  it("Arabic-Indic digits and combining marks are weak, not strong (Codex P2, #263)", () => {
+    expect(firstStrongDirection("١٢")).toBeNull();
+    expect(firstStrongDirection("۱۲۳")).toBeNull();
+    expect(firstStrongDirection("١٢ abc")).toBe("ltr");
+    expect(firstStrongDirection("١٢ مرحبا")).toBe("rtl");
+    // A Hebrew point before its letter does not change the answer.
+    expect(firstStrongDirection("\u05B0\u05D0")).toBe("rtl");
+    expect(firstStrongDirection("\u05B0 a")).toBe("ltr");
+  });
+
   it("is null for text with no strong character", () => {
     expect(firstStrongDirection("")).toBeNull();
     expect(firstStrongDirection("123 !? ---")).toBeNull();
