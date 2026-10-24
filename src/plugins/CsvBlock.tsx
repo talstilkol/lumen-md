@@ -5,8 +5,6 @@ import { suggestCharts, type ChartSuggestion } from "../data/suggest";
 import { DataTable } from "./DataTable";
 import { EChart } from "./EChart";
 import { ChartSuggestions } from "./ChartSuggestions";
-import { chat, parseJsonResponse } from "../ai/llm";
-import { PROMPTS } from "../ai/prompts";
 import { showAiToast } from "../ui/AiToast";
 import { Table2, BarChart3, Sparkles, RefreshCw } from "lucide-react";
 import { log } from "../lib/logger";
@@ -124,11 +122,10 @@ export default function CsvBlock({ source, lang, meta }: Props) {
               if (aiOption || aiLoading) return;
               setAiLoading(true);
               try {
-                const response = await chat([
-                  { role: "system", content: PROMPTS.visualization },
-                  { role: "user", content: `Raw CSV Data:\n\n${source}` },
-                ], { ownPrompt: true });
-                setAiOption(parseJsonResponse(response));
+                // The same charter agent as "AI: Chart": schema-checked, retried by the improvement agent.
+                const { runAgentOrThrow } = await import("../agents/runtime");
+                const { charterAgent } = await import("../agents/defs");
+                setAiOption(await runAgentOrThrow(charterAgent, { text: source }, { document: source, ownPrompt: true }));
               } catch (e) {
                 log.error("AI chart generation failed", e);
                 showAiToast("AI chart generation failed", "error");
