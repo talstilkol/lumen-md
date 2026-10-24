@@ -11,7 +11,7 @@ vi.mock("../ai/ollamaProvider", () => ({ isOllamaAvailable: () => ollamaUp(), ge
 const webgpu = { available: false };
 vi.mock("../ai/localLlm", () => ({ localLlmAvailable: () => webgpu, chatLocal: vi.fn(), chatLocalStream: vi.fn(), onLocalLlmProgress: () => () => {} }));
 vi.mock("../store/useToastStore", () => ({ toast: { info: vi.fn(), warn: vi.fn(), error: vi.fn() } }));
-vi.mock("../billing/aiQuota", () => ({ chargeAiCommandDispatch: vi.fn(), AiQuotaExceededError: class extends Error {} }));
+vi.mock("../billing/aiQuota", () => ({ chargeAiCommandDispatch: vi.fn(), consumeAiPrompt: vi.fn(() => true), aiQuotaStatus: () => ({ allowed: true, limit: Infinity }), AiQuotaExceededError: class extends Error {} }));
 
 import { runAgent, runAgentOrThrow, AgentRunError } from "../agents/runtime";
 import { chatExecutor } from "../agents/executors/chatExecutor";

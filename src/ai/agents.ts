@@ -164,13 +164,6 @@ export async function suggestOrganization(): Promise<OrganizeSuggestion[]> {
 
 /* ─── Auto-tag agent (P3-01) ────────────────────────────────────── */
 
-const AUTO_TAG_PROMPT =
-  "You are a tag-suggestion assistant. The user shares a markdown document " +
-  "and a list of tags they already use across their notes. Suggest 3-7 " +
-  "concise lowercase-kebab-case tags that capture the document's topic. " +
-  "Prefer tags from the existing pool when they fit. Output ONLY a JSON " +
-  'array of strings, e.g. ["machine-learning","attention","paper-summary"].';
-
 /**
  * Pull every existing tag in the workspace by scanning frontmatter `tags:`
  * across every note. Used to keep AI suggestions consistent with the user's
@@ -193,9 +186,9 @@ async function collectExistingTags(): Promise<string[]> {
     const tagLine = fm[1].match(/^tags\s*:\s*(.+)$/m);
     if (!tagLine) continue;
     // Accept either YAML flow (`tags: [a, b]`) or block (`tags: ["a","b"]`)
-    // or comma-separated; just split on non-word chars and pick lowercase
-    // alphanumeric+hyphen tokens.
-    const tokens = tagLine[1].match(/[a-z][a-z0-9-]+/gi) ?? [];
+    // or comma-separated; split on separators and keep Unicode word tokens
+    // (Hebrew tags are tags too).
+    const tokens = tagLine[1].match(/[\p{L}][\p{L}\p{N}-]+/gu) ?? [];
     for (const t of tokens) {
       const k = t.toLowerCase();
       counts.set(k, (counts.get(k) ?? 0) + 1);
@@ -206,44 +199,18 @@ async function collectExistingTags(): Promise<string[]> {
 }
 
 /**
- * Ask the LLM to propose tags for a markdown body. Uses any tags already
- * in the workspace as a vocabulary hint so the proposals stay consistent.
+ * Propose tags for a markdown body through the `tagger` agent (local
+ * executors first, validated JSON, retries with the critic's feedback).
+ * Existing workspace tags are injected so proposals stay consistent with
+ * the user's vocabulary. Throws AgentRunError (with suggestions) when
+ * there is no usable answer.
  */
 export async function suggestTags(content: string): Promise<string[]> {
   const existing = await collectExistingTags();
-  const trimmed = content.length > 6000 ? content.slice(0, 6000) + "\n…" : content;
-  const userMsg =
-    `Existing tags in vocabulary (most-used first):\n${existing.slice(0, 80).join(", ") || "(none yet)"}\n\n` +
-    `Document:\n${trimmed}`;
-  const reply = await chat([
-    { role: "system", content: AUTO_TAG_PROMPT },
-    { role: "user", content: userMsg },
-  ], {
-    cache: true,
-    tier: "light",
-    // Cache only an answer that parses as a JSON array.
-    cacheIf: (r) => {
-      try {
-        return Array.isArray(JSON.parse(r.replace(/^```(?:json)?\s*/i, "").replace(/```\s*$/, "").trim()));
-      } catch {
-        return false;
-      }
-    },
-  });
-  // Strip any code fence the model might add and parse the JSON array.
-  const cleaned = reply.replace(/^```(?:json)?\s*/i, "").replace(/```\s*$/, "").trim();
-  let parsed: unknown;
-  try {
-    parsed = JSON.parse(cleaned);
-  } catch {
-    // Fallback: a comma-separated reply.
-    parsed = cleaned.split(/[,\n]+/);
-  }
-  if (!Array.isArray(parsed)) return [];
-  return parsed
-    .map((t) => String(t).trim().toLowerCase().replace(/^#/, "").replace(/[^a-z0-9-]/g, "-"))
-    .filter((t) => t.length > 1 && t.length < 40)
-    .slice(0, 7);
+  const { runAgentOrThrow } = await import("../agents/runtime");
+  const { taggerAgent, normalizeTags } = await import("../agents/defs");
+  const out = await runAgentOrThrow(taggerAgent, { text: content, extra: { existing } }, { document: content });
+  return normalizeTags(out.tags);
 }
 
 /**
@@ -272,27 +239,15 @@ export function mergeTagsIntoFrontmatter(content: string, tags: string[]): strin
 
 /* ─── Link-suggestion agent (P3-01) ─────────────────────────────── */
 
-const LINK_SUGGEST_PROMPT =
-  "You are a wiki-link suggestion assistant. The user shares the body of a " +
-  "markdown note and a list of OTHER notes in their workspace (title + " +
-  "first sentence). Identify up to 5 places in the body where adding a " +
-  '`[[Note Title]]` link would help the reader. Output ONLY a JSON array ' +
-  'of objects with shape { "phrase": "literal text in body", "target": ' +
-  '"note title to link to", "reason": "≤ 12 words why" }. The phrase MUST ' +
-  "appear verbatim in the body and the target MUST be one of the notes " +
-  "listed. Skip anything you're not confident about.";
+export type { LinkSuggestion } from "../agents/defs/linker";
+import type { LinkSuggestion } from "../agents/defs/linker";
 
-export interface LinkSuggestion {
-  phrase: string;
-  target: string;
-  reason: string;
-}
-
-/** Build a compact catalogue of every note in the workspace for the prompt. */
-async function collectNotesCatalog(currentPath: string): Promise<string> {
-  if (!isOPFSAvailable()) return "";
+/** Build a compact catalogue of every note in the workspace for the prompt, and the list of titles. */
+async function collectNotesCatalog(currentPath: string): Promise<{ catalog: string; titles: string[] }> {
+  if (!isOPFSAvailable()) return { catalog: "", titles: [] };
   const list = await listWorkspace({ includeAssets: false });
   const lines: string[] = [];
+  const titles: string[] = [];
   for (const f of list) {
     if (f.path === currentPath) continue;
     if (!/\.(md|markdown)$/i.test(f.path)) continue;
@@ -306,50 +261,28 @@ async function collectNotesCatalog(currentPath: string): Promise<string> {
     const stripped = body.replace(/^---\r?\n[\s\S]*?\r?\n---\r?\n/, "").trim();
     const firstSentence = (stripped.split(/\n\n/)[0] ?? "").replace(/\s+/g, " ").trim().slice(0, 160);
     const title = f.name.replace(/\.(md|markdown)$/i, "");
+    titles.push(title);
     lines.push(`- ${title} — ${firstSentence}`);
     if (lines.length >= 60) break;
   }
-  return lines.join("\n");
+  return { catalog: lines.join("\n"), titles };
 }
 
-/** Ask the LLM where to insert wiki-links in the current note. */
+/**
+ * Where to insert wiki-links in the current note, through the `linker`
+ * agent. The catalogue of other notes is injected; only suggestions that
+ * quote the body verbatim and target a listed note survive.
+ */
 export async function suggestLinks(
   currentPath: string,
   content: string,
 ): Promise<LinkSuggestion[]> {
-  const catalog = await collectNotesCatalog(currentPath);
+  const { catalog, titles } = await collectNotesCatalog(currentPath);
   if (!catalog) return [];
-  const trimmed = content.length > 5000 ? content.slice(0, 5000) + "\n…" : content;
-  const reply = await chat([
-    { role: "system", content: LINK_SUGGEST_PROMPT },
-    {
-      role: "user",
-      content: `Current note body:\n${trimmed}\n\nOther notes:\n${catalog}`,
-    },
-  ]);
-  const cleaned = reply.replace(/^```(?:json)?\s*/i, "").replace(/```\s*$/, "").trim();
-  let parsed: unknown;
-  try {
-    parsed = JSON.parse(cleaned);
-  } catch {
-    return [];
-  }
-  if (!Array.isArray(parsed)) return [];
-  return parsed
-    .filter((s): s is LinkSuggestion => {
-      if (!s || typeof s !== "object") return false;
-      const x = s as Partial<LinkSuggestion>;
-      return (
-        typeof x.phrase === "string" &&
-        typeof x.target === "string" &&
-        typeof x.reason === "string" &&
-        x.phrase.length > 1 &&
-        x.target.length > 0 &&
-        // Sanity: the AI must have copied the phrase verbatim from the body.
-        content.includes(x.phrase)
-      );
-    })
-    .slice(0, 5);
+  const { runAgentOrThrow } = await import("../agents/runtime");
+  const { linkerAgent, filterLinks } = await import("../agents/defs");
+  const out = await runAgentOrThrow(linkerAgent, { text: content, path: currentPath, extra: { catalog, titles } }, { document: content, path: currentPath });
+  return filterLinks(out.links, content, titles);
 }
 
 /**
@@ -425,13 +358,11 @@ export async function generateDiagram(text: string): Promise<string> {
   return "```mermaid\n" + stripCodeFences(out) + "\n```";
 }
 
-/** Extract action items from meeting notes as a Markdown task list. */
+/** Extract action items from meeting notes as a Markdown task list (the `tasker` agent). */
 export async function extractActionItems(text: string): Promise<string> {
-  const out = await chat([
-    { role: "system", content: PROMPTS.actionItems },
-    { role: "user", content: text },
-  ], { cache: true });
-  return stripCodeFences(out);
+  const { runAgentOrThrow } = await import("../agents/runtime");
+  const { taskerAgent } = await import("../agents/defs");
+  return runAgentOrThrow(taskerAgent, { text }, { document: text });
 }
 
 /**
