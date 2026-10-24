@@ -1,0 +1,18 @@
+import { createRequire } from "node:module";
+import { readFileSync } from "node:fs";
+import { tsImport } from "tsx/esm/api";
+const require = createRequire(import.meta.url);
+const T = require("tesseract.js");
+const { recognizeWithMixedFix } = await tsImport("../../src/ai/ocr.ts", import.meta.url);
+const opts = { langPath: "public/tesseract/lang", gzip: true, cachePath: process.env.TESS_CACHE };
+const main = await T.createWorker(["heb", "eng"], T.OEM.LSTM_ONLY, opts);
+const heb = await T.createWorker(["heb"], T.OEM.LSTM_ONLY, opts);
+await heb.setParameters({ tessedit_pageseg_mode: T.PSM.SINGLE_WORD });
+const spy = { recognize: async (img, o) => { const r = await heb.recognize(img, o); console.log("read", JSON.stringify(o.rectangle), JSON.stringify(r.data.text.trim()), Math.round(r.data.confidence)); return r; } };
+const d = JSON.parse(readFileSync("eval/golden/ocr-he/dev/lines.json", "utf8"));
+const it = d.items.find((x) => x.id === process.argv[2]);
+const img = readFileSync("eval/golden/ocr-he/dev/" + it.image);
+const r = await main.recognize(img, {}, { blocks: true });
+for (const w of r.data.blocks.flatMap((b) => b.paragraphs.flatMap((p) => p.lines.flatMap((l) => l.words)))) if (/[A-Za-z]/.test(w.text)) console.log(JSON.stringify({ t: w.text, b: w.bbox, sym: w.symbols.map((s) => [s.text, s.bbox.x0, s.bbox.x1]) }));
+console.log((await recognizeWithMixedFix(main, spy, img)).text);
+await main.terminate(); await heb.terminate();
