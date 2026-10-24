@@ -292,6 +292,16 @@ export function recordSpeechRecognition(decision: "allowed" | "blocked"): Ledger
   return entries.find((x) => x.id === id) ?? null;
 }
 
+/**
+ * Record a desktop update check (plan 11.5): the Rust shell asks the release
+ * server whether a newer version exists. It sends the app version and the
+ * platform, no user data; "blocked" when local-only refused it.
+ */
+export function recordAppUpdateCheck(host: string, decision: "allowed" | "blocked"): LedgerEntry | null {
+  const id = record({ host, method: "GET", bytesOut: 0, bytesIn: null, category: "static-asset", reason: "Desktop update check (app version and platform only)", policy: getAiPolicy(), decision });
+  return entries.find((x) => x.id === id) ?? null;
+}
+
 /** Install once at startup. `blocked` is called for every blocked request. */
 export function installPrivacyLedger(blocked?: (entry: LedgerEntry) => void): void {
   if (installed || typeof window === "undefined" || typeof window.fetch !== "function") return;

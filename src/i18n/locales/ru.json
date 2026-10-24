@@ -1451,5 +1451,14 @@
   "cmd.ai.cancel": "ИИ: отменить",
   "cmd.ai.cancel.hint": "Останавливает все запросы ИИ (то же делает Esc)",
   "toast.aiCancelled": "Запрос ИИ отменён ({count})",
-  "toast.aiNothingRunning": "Нет активных запросов ИИ"
+  "toast.aiNothingRunning": "Нет активных запросов ИИ",
+  "cmd.app.checkUpdates": "Проверить обновления…",
+  "cmd.app.checkUpdates.hint": "Настольное приложение: спрашивает сервер выпусков о новой подписанной версии",
+  "update.localOnly": "Проверка пропущена: политика конфиденциальности «только локально», ничего не отправляется.",
+  "update.notConfigured": "В этой сборке ещё нет сервера или ключа обновлений; устанавливайте новые версии вручную.",
+  "update.upToDate": "Lumen {version} — последняя версия.",
+  "update.available.title": "Доступен Lumen {version}",
+  "update.available.body": "У вас {current}. Скачать, проверить и установить {version}? Lumen перезапустится.",
+  "update.install": "Установить и перезапустить",
+  "update.failed": "Не удалось обновить: {message}"
 }

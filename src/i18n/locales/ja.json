@@ -1451,5 +1451,14 @@
   "cmd.ai.cancel": "AI: キャンセル",
   "cmd.ai.cancel.hint": "実行中の AI リクエストをすべて停止します（Esc でも可）",
   "toast.aiCancelled": "AI リクエストをキャンセルしました（{count}）",
-  "toast.aiNothingRunning": "実行中の AI リクエストはありません"
+  "toast.aiNothingRunning": "実行中の AI リクエストはありません",
+  "cmd.app.checkUpdates": "アップデートを確認…",
+  "cmd.app.checkUpdates.hint": "デスクトップ版：署名済みの新しいバージョンがあるかリリースサーバーに問い合わせます",
+  "update.localOnly": "確認をスキップしました：プライバシーポリシーが「ローカルのみ」のため、何も送信しません。",
+  "update.notConfigured": "このビルドにはまだ更新サーバーや鍵がありません。新しいバージョンは手動でインストールしてください。",
+  "update.upToDate": "Lumen {version} が最新です。",
+  "update.available.title": "Lumen {version} が利用可能です",
+  "update.available.body": "現在のバージョンは {current} です。{version} をダウンロード・検証・インストールしますか？Lumen は再起動します。",
+  "update.install": "インストールして再起動",
+  "update.failed": "アップデートに失敗しました：{message}"
 }

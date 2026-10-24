@@ -1451,5 +1451,14 @@
   "cmd.ai.cancel": "AI：取消",
   "cmd.ai.cancel.hint": "停止所有正在运行的 AI 请求（Esc 也可以）",
   "toast.aiCancelled": "已取消 AI 请求（{count}）",
-  "toast.aiNothingRunning": "没有正在运行的 AI 请求"
+  "toast.aiNothingRunning": "没有正在运行的 AI 请求",
+  "cmd.app.checkUpdates": "检查更新…",
+  "cmd.app.checkUpdates.hint": "桌面版：向发布服务器询问是否有更新的已签名版本",
+  "update.localOnly": "已跳过检查：隐私策略为“仅本地”，不会发送任何内容。",
+  "update.notConfigured": "此版本尚未配置更新服务器或密钥；请手动安装新版本。",
+  "update.upToDate": "Lumen {version} 已是最新版本。",
+  "update.available.title": "Lumen {version} 可用",
+  "update.available.body": "您当前是 {current}。要下载、验证并安装 {version} 吗？Lumen 随后会重启。",
+  "update.install": "安装并重启",
+  "update.failed": "更新失败：{message}"
 }

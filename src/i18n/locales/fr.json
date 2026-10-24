@@ -1451,5 +1451,14 @@
   "cmd.ai.cancel": "IA : annuler",
   "cmd.ai.cancel.hint": "Arrête toutes les requêtes IA en cours (Échap aussi)",
   "toast.aiCancelled": "Requête IA annulée ({count})",
-  "toast.aiNothingRunning": "Aucune requête IA en cours"
+  "toast.aiNothingRunning": "Aucune requête IA en cours",
+  "cmd.app.checkUpdates": "Rechercher des mises à jour…",
+  "cmd.app.checkUpdates.hint": "Application de bureau : demande au serveur de versions s’il existe une version signée plus récente",
+  "update.localOnly": "Vérification ignorée : la politique de confidentialité est « local uniquement », rien n’est envoyé.",
+  "update.notConfigured": "Cette version n’a pas encore de serveur ni de clé de mise à jour ; installez les nouvelles versions à la main.",
+  "update.upToDate": "Lumen {version} est la dernière version.",
+  "update.available.title": "Lumen {version} est disponible",
+  "update.available.body": "Vous avez {current}. Télécharger, vérifier et installer {version} ? Lumen redémarrera.",
+  "update.install": "Installer et redémarrer",
+  "update.failed": "Échec de la mise à jour : {message}"
 }

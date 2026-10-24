@@ -1451,5 +1451,14 @@
   "cmd.ai.cancel": "AI: ביטול",
   "cmd.ai.cancel.hint": "עוצר כל בקשת AI שרצה (גם Esc עושה זאת)",
   "toast.aiCancelled": "בקשת ה-AI בוטלה ({count})",
-  "toast.aiNothingRunning": "אין בקשת AI שרצה"
+  "toast.aiNothingRunning": "אין בקשת AI שרצה",
+  "cmd.app.checkUpdates": "בדיקת עדכונים…",
+  "cmd.app.checkUpdates.hint": "אפליקציית שולחן העבודה: שואלת את שרת הגרסאות אם יש גרסה חתומה חדשה יותר",
+  "update.localOnly": "בדיקת העדכונים דולגה: מדיניות הפרטיות היא ״מקומי בלבד״, ולכן שום דבר לא נשלח.",
+  "update.notConfigured": "לגרסה הזו עדיין אין שרת עדכונים או מפתח; התקינו גרסאות חדשות ידנית.",
+  "update.upToDate": "Lumen {version} היא הגרסה העדכנית.",
+  "update.available.title": "Lumen {version} זמינה",
+  "update.available.body": "מותקנת אצלכם {current}. להוריד, לאמת ולהתקין את {version}? Lumen יופעל מחדש.",
+  "update.install": "התקנה והפעלה מחדש",
+  "update.failed": "העדכון נכשל: {message}"
 }

@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-10-18T11:34:48.566Z",
+  "generated_at": "2026-10-24T19:18:31.128Z",
   "source": "src/i18n/index.ts (en bundle)",
-  "count": 1453,
+  "count": 1462,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -1548,6 +1548,60 @@
       "en": "Export failed: {error}",
       "vars": [
         "error"
+      ]
+    },
+    {
+      "key": "cmd.app.checkUpdates",
+      "en": "Check for updates…",
+      "vars": []
+    },
+    {
+      "key": "cmd.app.checkUpdates.hint",
+      "en": "Desktop app: asks the release server for a newer, signed version",
+      "vars": []
+    },
+    {
+      "key": "update.localOnly",
+      "en": "Update check skipped: the privacy policy is “local only”, so nothing is sent.",
+      "vars": []
+    },
+    {
+      "key": "update.notConfigured",
+      "en": "This build has no update server or key yet; install new versions by hand.",
+      "vars": []
+    },
+    {
+      "key": "update.upToDate",
+      "en": "Lumen {version} is the latest version.",
+      "vars": [
+        "version"
+      ]
+    },
+    {
+      "key": "update.available.title",
+      "en": "Lumen {version} is available",
+      "vars": [
+        "version"
+      ]
+    },
+    {
+      "key": "update.available.body",
+      "en": "You have {current}. Download, verify and install {version}? Lumen restarts afterwards.",
+      "vars": [
+        "current",
+        "version"
+      ]
+    },
+    {
+      "key": "update.install",
+      "en": "Install and restart",
+      "vars": []
+    },
+    {
+      "key": "update.failed",
+      "en": "Update failed: {message}",
+      "vars": [
+        "message"
       ]
     },
     {
