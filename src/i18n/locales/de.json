@@ -1456,5 +1456,19 @@
   "mt.size.approx": "etwa {size}",
   "toast.translatedWith": "Übersetzt mit {layer}",
   "toast.translatedWithUnmeasured": "Übersetzt mit {layer} — seine Qualität für dieses Paar ist noch nicht gemessen",
-  "toast.localMtUnavailable": "Lokale Übersetzung war nicht verfügbar ({why}); das KI-Modell hat übersetzt."
+  "toast.localMtUnavailable": "Lokale Übersetzung war nicht verfügbar ({why}); das KI-Modell hat übersetzt.",
+  "fineTune.cloudRoute": "Oder in der Cloud (OpenAI)",
+  "lora.title": "Auf diesem Rechner (empfohlen)",
+  "lora.intro": "Trainiere einen kleinen LoRA-Adapter auf deinen eigenen Notizen, auf diesem Mac oder NVIDIA-Rechner, und nutze ihn in Ollama. Nichts wird hochgeladen: Lumen exportiert die Trainingsdaten und ein Skript; das Skript startest du selbst.",
+  "lora.folder": "Notizen zum Lernen (Ordner)",
+  "lora.folderAll": "Alle Notizen",
+  "lora.platform": "Dieser Rechner",
+  "lora.platform.mac": "Mac (Apple silicon, MLX)",
+  "lora.platform.nvidia": "NVIDIA-GPU (PEFT)",
+  "lora.export": "Trainingsdaten und Skript exportieren",
+  "lora.exporting": "Wird vorbereitet…",
+  "lora.exported": "lumen-lora.zip: {notes} Notizen · {train} Trainingsbeispiele · {valid} Validierung · {heldOut} zurückgehaltene Notizen für den Stiltest",
+  "lora.tooLittle": "Nicht genug Text zum Trainieren ({notes} nutzbare Notizen): wähle einen Ordner mit mehr Notizen von einigen Absätzen.",
+  "lora.next.mac": "Entpacke lumen-lora.zip und starte: bash train-mac.sh – es trainiert Mistral 7B (Apache-2.0) mit MLX, fügt den Adapter zu GGUF zusammen und legt „lumen-style“ in Ollama an.",
+  "lora.next.nvidia": "Entpacke lumen-lora.zip und starte: bash train-nvidia.sh – es trainiert ein LoRA mit PEFT (Unsloth-Kern, Apache-2.0), konvertiert es mit llama.cpp und legt „lumen-style“ in Ollama an."
 }

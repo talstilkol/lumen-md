@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-10-24T17:59:47.320Z",
+  "generated_at": "2026-10-24T19:16:00.483Z",
   "source": "src/i18n/index.ts (en bundle) + src/i18n/lazy/*.json",
-  "count": 1458,
+  "count": 1472,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -7692,6 +7692,83 @@
     {
       "key": "chart.alternatives",
       "en": "Chart suggestions",
+      "vars": []
+    },
+    {
+      "key": "fineTune.cloudRoute",
+      "en": "Or in the cloud (OpenAI)",
+      "vars": []
+    },
+    {
+      "key": "lora.title",
+      "en": "On this machine (recommended)",
+      "vars": []
+    },
+    {
+      "key": "lora.intro",
+      "en": "Train a small LoRA adapter on your own notes, on this Mac or NVIDIA computer, and use it in Ollama. Nothing is uploaded: Lumen exports the training data and a script; you run the script.",
+      "vars": []
+    },
+    {
+      "key": "lora.folder",
+      "en": "Notes to learn from (folder)",
+      "vars": []
+    },
+    {
+      "key": "lora.folderAll",
+      "en": "All notes",
+      "vars": []
+    },
+    {
+      "key": "lora.platform",
+      "en": "This computer",
+      "vars": []
+    },
+    {
+      "key": "lora.platform.mac",
+      "en": "Mac (Apple silicon, MLX)",
+      "vars": []
+    },
+    {
+      "key": "lora.platform.nvidia",
+      "en": "NVIDIA GPU (PEFT)",
+      "vars": []
+    },
+    {
+      "key": "lora.export",
+      "en": "Export training data and script",
+      "vars": []
+    },
+    {
+      "key": "lora.exporting",
+      "en": "Preparing…",
+      "vars": []
+    },
+    {
+      "key": "lora.exported",
+      "en": "lumen-lora.zip: {notes} notes · {train} training samples · {valid} validation · {heldOut} held-out notes for the style check",
+      "vars": [
+        "notes",
+        "train",
+        "valid",
+        "heldOut"
+      ]
+    },
+    {
+      "key": "lora.tooLittle",
+      "en": "Not enough writing to train on ({notes} usable notes): pick a folder with more notes of a few paragraphs.",
+      "vars": [
+        "notes"
+      ]
+    },
+    {
+      "key": "lora.next.mac",
+      "en": "Unzip lumen-lora.zip and run: bash train-mac.sh — it trains on Mistral 7B (Apache-2.0) with MLX, fuses the adapter to GGUF and adds “lumen-style” to Ollama.",
+      "vars": []
+    },
+    {
+      "key": "lora.next.nvidia",
+      "en": "Unzip lumen-lora.zip and run: bash train-nvidia.sh — it trains a LoRA with PEFT (Unsloth core, Apache-2.0), converts it with llama.cpp and adds “lumen-style” to Ollama.",
       "vars": []
     },
     {

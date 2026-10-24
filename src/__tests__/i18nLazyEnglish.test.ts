@@ -17,6 +17,7 @@ const SRC = resolve(__dirname, "..");
  * a dynamic import, so the strings never join the startup bundle.
  */
 const DOMAINS: Record<string, { module: string; users: string[]; prefixes: string[] }> = {
+  "lora.json": { module: "ai/localLoraStrings.ts", users: ["ui/FineTuneSettings.tsx", "ui/LocalLoraSection.tsx"], prefixes: ["lora.", "fineTune.cloudRoute"] },
   "mt.json": { module: "ai/mt/strings.ts", users: ["ai/mt/index.ts", "agents/commands.ts"], prefixes: ["models.", "mt.", "toast.translatedWith", "toast.localMtUnavailable"] },
 };
 

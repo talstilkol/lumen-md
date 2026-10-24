@@ -1456,5 +1456,19 @@
   "mt.size.approx": "نحو {size}",
   "toast.translatedWith": "تمت الترجمة باستخدام {layer}",
   "toast.translatedWithUnmeasured": "تمت الترجمة باستخدام {layer} — لم تُقَس جودته لهذا الزوج بعد",
-  "toast.localMtUnavailable": "لم تتوفر الترجمة المحلية ({why})؛ ترجم نموذج الذكاء الاصطناعي بدلاً منها."
+  "toast.localMtUnavailable": "لم تتوفر الترجمة المحلية ({why})؛ ترجم نموذج الذكاء الاصطناعي بدلاً منها.",
+  "fineTune.cloudRoute": "أو في السحابة (OpenAI)",
+  "lora.title": "على هذا الجهاز (موصى به)",
+  "lora.intro": "درّب محوّل LoRA صغيرًا على ملاحظاتك، على جهاز Mac أو NVIDIA هذا، واستخدمه في Ollama. لا يُرفع أي شيء: يصدّر Lumen بيانات التدريب وسكربتًا، وأنت تشغّل السكربت.",
+  "lora.folder": "الملاحظات التي يُتعلّم منها (مجلد)",
+  "lora.folderAll": "كل الملاحظات",
+  "lora.platform": "هذا الجهاز",
+  "lora.platform.mac": "Mac (Apple silicon، MLX)",
+  "lora.platform.nvidia": "بطاقة NVIDIA (PEFT)",
+  "lora.export": "تصدير بيانات التدريب والسكربت",
+  "lora.exporting": "جارٍ التحضير…",
+  "lora.exported": "lumen-lora.zip: {notes} ملاحظات · {train} عينات تدريب · {valid} تحقق · {heldOut} ملاحظات محجوزة لفحص الأسلوب",
+  "lora.tooLittle": "لا يوجد نص كافٍ للتدريب ({notes} ملاحظات صالحة): اختر مجلدًا فيه ملاحظات أكثر من بضع فقرات.",
+  "lora.next.mac": "فك ضغط lumen-lora.zip وشغّل: bash train-mac.sh — يدرّب على Mistral 7B (Apache-2.0) باستخدام MLX، ويدمج المحوّل في GGUF ويضيف «lumen-style» إلى Ollama.",
+  "lora.next.nvidia": "فك ضغط lumen-lora.zip وشغّل: bash train-nvidia.sh — يدرّب LoRA باستخدام PEFT (نواة Unsloth، Apache-2.0)، ويحوّله باستخدام llama.cpp ويضيف «lumen-style» إلى Ollama."
 }
