@@ -7,10 +7,13 @@
  * Conditional writes use Drive's ETags: a media upload `PATCH` with
  * `If-Match: <etag>` replaces exactly the version that was read (412 on a
  * lost race). Drive has no "create only if absent" on names, so
- * `ifNoneMatch: "*"` is a lookup followed by a create: two devices creating
- * the same vault at the same instant could both succeed — the header is
- * create-once, so the second one is told the vault exists on its next sync
- * (its manifest write is a conditional one). The ETag of an object is the
+ * `ifNoneMatch: "*"` is look → create → look again: when two devices
+ * created the same name, the older file is the object on every device and
+ * the newer one's writer deletes it and gets a `PreconditionFailedError`.
+ * This relies on Drive's listing showing a file once its create has
+ * returned. If the listing lagged, both creates could appear to win. The
+ * object would then have two copies, and every device would read the
+ * older one. The ETag of an object is the
  * `ETag` header of its metadata; `get` reads metadata and media (2 requests).
  *
  * OAuth and tokens: src/sync/cloud/gdrive.ts (PKCE; client id from
@@ -76,12 +79,21 @@ export function gdriveSyncProvider(cfg: GDriveSyncConfig = {}, deps: { fetch?: F
   async function lookup(name: string): Promise<string | null> {
     checkObjectName(name);
     const parent = await folder();
-    const found = await json<{ files: { id: string }[] }>(
-      `/drive/v3/files?q=${encodeURIComponent(`'${parent}' in parents and name='${q(name)}' and trashed=false`)}&fields=files(id)`,
+    return (await twins(parent, name))[0]?.id ?? null;
+  }
+
+  /**
+   * Every file called `name`, oldest first. Drive allows two files with the
+   * same name in a folder; when two devices create the same object at once
+   * the oldest one is the object, on every device.
+   */
+  async function twins(parent: string, name: string): Promise<Array<{ id: string; createdTime?: string }>> {
+    const found = await json<{ files: Array<{ id: string; createdTime?: string }> }>(
+      `/drive/v3/files?q=${encodeURIComponent(`'${parent}' in parents and name='${q(name)}' and trashed=false`)}&fields=files(id,createdTime)`,
       {},
       name,
     );
-    return found.files[0]?.id ?? null;
+    return [...found.files].sort((a, b) => (a.createdTime ?? "").localeCompare(b.createdTime ?? "") || a.id.localeCompare(b.id));
   }
 
   /** The metadata ETag (the HTTP header) — what `If-Match` compares against. */
@@ -134,6 +146,15 @@ export function gdriveSyncProvider(cfg: GDriveSyncConfig = {}, deps: { fetch?: F
       });
       if (!res.ok) throw await failed(res, "gdrive", name);
       const created = (await res.json()) as { id: string };
+      if (cond && "ifNoneMatch" in cond) {
+        // Drive has no "create only if absent": look again. If another device
+        // created the same object first, ours is removed and this write lost.
+        const first = (await twins(parent, name))[0];
+        if (first && first.id !== created.id) {
+          await call(`/drive/v3/files/${created.id}`, { method: "DELETE" });
+          throw new PreconditionFailedError(name);
+        }
+      }
       return { etag: res.headers.get("ETag") ?? (await etagOf(created.id, name)) };
     },
 

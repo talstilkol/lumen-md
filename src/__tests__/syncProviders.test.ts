@@ -247,6 +247,33 @@ describe("provider specifics", () => {
     __resetSecretStore();
   });
 
+  it("gdrive: two devices creating the same object at once — exactly one wins", async () => {
+    const server = fakeGdrive({ token: "t" });
+    await token("lumen.cloud.gdrive.token", "t");
+    await gdriveSyncProvider({}, { fetch: fakeFetch(server.handle) }).list(); // the vault folder exists
+    // Hold both uploads until both devices have looked and found nothing.
+    let waiting: Array<() => void> = [];
+    const gated: typeof server.handle = async (req) => {
+      if (req.method === "POST" && req.url.pathname === "/upload/drive/v3/files") {
+        await new Promise<void>((go) => {
+          waiting.push(go);
+          if (waiting.length === 2) (waiting.forEach((w) => w()), (waiting = []));
+        });
+      }
+      return server.handle(req);
+    };
+    const a = gdriveSyncProvider({}, { fetch: fakeFetch(gated) });
+    const b = gdriveSyncProvider({}, { fetch: fakeFetch(gated) });
+    const results = await Promise.allSettled([a.put("m", text("from a"), { ifNoneMatch: "*" }), b.put("m", text("from b"), { ifNoneMatch: "*" })]);
+    expect(results.filter((r) => r.status === "fulfilled")).toHaveLength(1);
+    const lost = results.find((r) => r.status === "rejected") as PromiseRejectedResult;
+    expect(lost.reason).toBeInstanceOf(PreconditionFailedError);
+    expect([...server.files.values()].filter((f) => f.name === "m")).toHaveLength(1);
+    const winner = results.findIndex((r) => r.status === "fulfilled") === 0 ? "from a" : "from b";
+    expect(utf8((await b.get("m"))!.data)).toBe(winner);
+    __resetSecretStore();
+  });
+
   it("gdrive: the vault folder is created once, and a stale metadata ETag is a 412", async () => {
     const server = fakeGdrive({ token: "t" });
     await token("lumen.cloud.gdrive.token", "t");

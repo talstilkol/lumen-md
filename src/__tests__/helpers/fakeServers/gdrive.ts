@@ -17,6 +17,7 @@ export interface DriveFile {
   data: Uint8Array;
   etag: string;
   trashed: boolean;
+  createdTime?: string;
 }
 
 export interface FakeGdrive extends FakeServer {
@@ -65,11 +66,11 @@ export function fakeGdrive(opts: { token: string } = { token: "gd-test-token" })
   let seq = 0;
   const server: FakeGdrive = { files: new Map(), token: opts.token, pageSize: 1000, outage: null, log: [], handle: (req) => handle(req) };
   const json = (status: number, body: unknown, headers: Record<string, string> = {}) => ({ status, headers: { "Content-Type": "application/json", ...headers }, body: JSON.stringify(body) });
-  const meta = (f: DriveFile) => ({ id: f.id, name: f.name, mimeType: f.mimeType, parents: f.parents, appProperties: f.appProperties, size: String(f.data.length), headRevisionId: f.etag.replace(/"/g, "") });
+  const meta = (f: DriveFile) => ({ id: f.id, name: f.name, mimeType: f.mimeType, parents: f.parents, appProperties: f.appProperties, size: String(f.data.length), headRevisionId: f.etag.replace(/"/g, ""), createdTime: f.createdTime });
   const bump = (f: DriveFile) => (f.etag = `"g${++seq}"`);
 
   function create(fields: Partial<DriveFile>, data: Uint8Array): DriveFile {
-    const f: DriveFile = { id: `id${++seq}`, name: fields.name ?? "untitled", mimeType: fields.mimeType ?? "application/octet-stream", parents: fields.parents ?? [], appProperties: fields.appProperties, data: data.slice(), etag: "", trashed: false };
+    const f: DriveFile = { id: `id${++seq}`, name: fields.name ?? "untitled", mimeType: fields.mimeType ?? "application/octet-stream", parents: fields.parents ?? [], appProperties: fields.appProperties, data: data.slice(), etag: "", trashed: false, createdTime: new Date(Date.UTC(2026, 0, 1) + seq * 1000).toISOString() };
     bump(f);
     server.files.set(f.id, f);
     return f;
