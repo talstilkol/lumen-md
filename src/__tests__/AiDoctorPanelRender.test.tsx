@@ -64,7 +64,9 @@ describe("AiDoctorPanel", () => {
     const { AiDoctorPanel } = await import("../ui/AiDoctorPanel");
     const onClose = vi.fn();
     const { container, rerender } = render(<AiDoctorPanel open onClose={onClose} />);
-    fireEvent.keyDown(window, { key: "Escape" });
+    // A real key press reaches the document (the focus trap's listener, plan 10.1);
+    // a keydown dispatched on window alone never does.
+    fireEvent.keyDown(document.activeElement ?? document.body, { key: "Escape" });
     expect(onClose).toHaveBeenCalled();
     rerender(<AiDoctorPanel open={false} onClose={onClose} />);
     expect(container.firstChild).toBeNull();
