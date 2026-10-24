@@ -147,6 +147,25 @@ async function main() {
   }
 
   console.log(`\n  Total gzipped: ${format(total)}`);
+
+  // C2: the budget that matters for startup is the SUM of what index.html
+  // loads before the app can run (its entry script + every modulepreload),
+  // not each file alone. Measured 448 KB (18.10); goal 250 KB. Ratchet down
+  // as startup work moves out of the eager graph.
+  const STARTUP_BUDGET_KB = 460;
+  try {
+    const html = await fs.readFile(path.join(process.cwd(), "dist", "index.html"), "utf8");
+    const startup = [...new Set([...html.matchAll(/(?:src|href)="\/assets\/([^"]+\.js)"/g)].map((m) => m[1]))];
+    let sum = 0;
+    for (const f of startup) sum += gzipSync(await fs.readFile(path.join(DIST, f))).length / 1024;
+    const ok = sum <= STARTUP_BUDGET_KB;
+    if (!ok) failed++;
+    console.log(`  ${ok ? "✓" : "✗"} startup total (${startup.length} files) ${format(sum)} / ${format(STARTUP_BUDGET_KB)}`);
+    const jsonAt0 = process.argv.indexOf("--json");
+    if (jsonAt0 !== -1) classes["startup total"] = { kb: sum, files: startup.length };
+  } catch {
+    /* no dist/index.html (partial build) — per-file budgets still apply */
+  }
   const jsonAt = process.argv.indexOf("--json");
   if (jsonAt !== -1 && process.argv[jsonAt + 1]) {
     const round = (x) => Math.round(x * 10) / 10;

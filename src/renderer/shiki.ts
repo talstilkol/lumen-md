@@ -163,7 +163,13 @@ export function rehypeShiki(opts: ShikiOpts) {
         }
       });
     });
-    await Promise.all(tasks.map((fn) => fn()));
+    // One block per task, yielding to the browser between blocks (C1): a
+    // document with dozens of code blocks used to highlight in one long
+    // main-thread task — the biggest share of the startup blocking time.
+    for (const fn of tasks) {
+      await fn();
+      await new Promise<void>((r) => setTimeout(r, 0));
+    }
   };
 }
 
