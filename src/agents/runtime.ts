@@ -26,7 +26,7 @@ import type {
   ToolScope,
 } from "./types";
 import { DEFAULT_EXECUTOR_ORDER, getExecutor, listExecutors, pickExecutor } from "./executors";
-import { parseProtocolTurn, toolProtocolPrompt, toolResultMessage } from "./protocol";
+import { parseProtocolTurn, protocolSchema, toolProtocolPrompt, toolResultMessage } from "./protocol";
 import { hebrewRatio } from "../text/hebrew";
 import { checkJson } from "./tools/validate";
 import { formatSchemaErrors, validateSchema } from "./schema";
@@ -167,10 +167,20 @@ async function execTool(tools: AgentTool[], call: ToolCall, env: ToolEnv): Promi
   }
 }
 
+/**
+ * The tools a model may call itself. A streaming agent's tools serve only
+ * as its context calls (`context`): its answer streams token by token, and
+ * a tool turn would have to be parsed whole first.
+ */
+function modelTools(def: AgentDefinition<never, unknown>): AgentTool[] {
+  return def.streaming ? [] : (def.tools ?? []);
+}
+
 function systemPrompt<I extends AgentInput, O>(def: AgentDefinition<I, O>, input: I, nativeTools: boolean, patch: RetryPatch): string {
   const base = patch.systemOverride ?? (typeof def.system === "function" ? def.system(input) : def.system);
   const parts = [base];
-  if (def.tools?.length && !nativeTools) parts.push(toolProtocolPrompt(def.tools, def.outputSchema));
+  const offered = modelTools(def);
+  if (offered.length && !nativeTools) parts.push(toolProtocolPrompt(offered, def.outputSchema));
   // The schema stays in the prompt even when the executor constrains the
   // output natively: web-llm's JSON mode requires the prompt to ask for
   // JSON (otherwise it can emit whitespace to the token limit), and a
@@ -321,6 +331,35 @@ export async function runAgent<I extends AgentInput, O = string>(def: AgentDefin
   let executor = pick.executor;
   let patch: RetryPatch = { ...(pending ?? {}), ...(opts.patch ?? {}) };
 
+  // The context the agent always needs, fetched once through the tool path
+  // (plan 5.3); every attempt starts from it. Before the cache lookup: an
+  // answer is only reused for the same context (the same tags, the same
+  // note list), not just the same prompt.
+  const context: ExecutorMessage[] = [];
+  for (const [i, c] of (def.context?.(input) ?? []).entries()) {
+    if (opts.signal?.aborted) return finish("aborted", { errorCode: "aborted", error: "aborted" });
+    const call: ToolCall = { id: `ctx_${run.id}_${i}`, name: c.tool, args: c.args ?? {} };
+    const t1 = Date.now();
+    let r: Awaited<ReturnType<typeof execTool>>;
+    try {
+      r = await execTool(def.tools ?? [], call, toolEnv);
+    } catch (e) {
+      if (isAbort(e, opts.signal)) return finish("aborted", { errorCode: "aborted", error: "aborted" });
+      throw e;
+    }
+    let body: string;
+    let guardNote = "";
+    if (r.error !== undefined) body = toolResultMessage(call, undefined, r.error);
+    else if (r.untrusted?.length) {
+      // Plan 2.7: context from outside notes is cleaned and delimited, and taints the run
+      // (the system prompt, built after this loop, then carries the rule).
+      ({ body, note: guardNote } = guard.guardToolResult((v) => truncate(toolResultMessage(call, v), TOOL_RESULT_LIMIT), r.result, r.untrusted, toolEnv.taint, []));
+    } else body = truncate(toolResultMessage(call, r.result), TOOL_RESULT_LIMIT);
+    step({ kind: "tool", ms: Date.now() - t1, label: call.name, ok: r.error === undefined, detail: ["context", guardNote, r.error ?? truncate(JSON.stringify(call.args), 200)].filter(Boolean).join(" · ") });
+    context.push({ role: "assistant", content: "", toolCalls: [call] }, { role: "tool", content: body, toolCallId: call.id, name: call.name });
+  }
+
+
   // A cached, already-validated answer costs nothing: no prompt, no model.
   const cacheKeyOf = async (): Promise<string | null> => {
     if (!def.cache) return null;
@@ -328,7 +367,8 @@ export async function runAgent<I extends AgentInput, O = string>(def: AgentDefin
     if (!aiCacheEnabled()) return null;
     const sys = typeof def.system === "function" ? def.system(input) : def.system;
     // v3: answers cached before the language check (T27) are not reused.
-    return cacheKey({ v: 3, agent: def.id, executor: executor.id, model: executor.modelFor(patch.tier ?? def.tier ?? "small"), sys, user: def.user(input), patch }).catch(() => null);
+    const ctx = context.filter((m) => m.role === "tool").map((m) => m.content);
+    return cacheKey({ v: 3, agent: def.id, executor: executor.id, model: executor.modelFor(patch.tier ?? def.tier ?? "small"), sys, user: def.user(input), patch, ...(ctx.length ? { context: ctx } : {}) }).catch(() => null);
   };
   // A run with outside content in its input is never cached (nor answered from the cache).
   const key = inputUntrusted.length ? null : await cacheKeyOf();
@@ -383,12 +423,22 @@ export async function runAgent<I extends AgentInput, O = string>(def: AgentDefin
     const tier: ModelTier = patch.tier ?? def.tier ?? "small";
     // The model is resolved once here and pinned on the request, so the
     // capability decision (native tools / schema) and the call agree.
-    const model = patch.model ?? executor.modelFor(tier, { tools: !!def.tools?.length });
-    const nativeTools = !!def.tools?.length && executor.supportsTools(model);
-    const nativeSchema = !!def.outputSchema && !def.tools?.length && executor.supportsSchema(model);
+    const offered = modelTools(def);
+    const model = patch.model ?? executor.modelFor(tier, { tools: offered.length > 0 });
+    // Small models get every turn held to a JSON Schema where the executor can
+    // (5.3.5): JSON-ReAct under the protocol's schema is more reliable for
+    // them than free-form native tool calls, whose final answer is not
+    // constrained. Larger models use native tools when they have them.
+    const constrain = (tier === "tiny" || tier === "small") && executor.supportsSchema(model);
+    const nativeTools = offered.length > 0 && !constrain && executor.supportsTools(model);
+    const nativeSchema = !!def.outputSchema && !offered.length && executor.supportsSchema(model);
+    // A model without native tools speaks JSON-ReAct; where the executor can
+    // constrain output, every turn is held to the protocol's schema (5.3.5).
+    const turnSchema = offered.length && !nativeTools && executor.supportsSchema(model) ? protocolSchema(offered, def.outputSchema) : undefined;
     const messages: ExecutorMessage[] = [
       { role: "system", content: systemPrompt(def, modelInput, nativeTools, patch) + (toolEnv.taint.length ? `\n\n${guard.UNTRUSTED_NOTICE}` : "") },
       { role: "user", content: def.user(modelInput) + (patch.promptSuffix ? `\n\n${patch.promptSuffix}` : "") },
+      ...context,
     ];
     run.model = model;
 
@@ -404,14 +454,14 @@ export async function runAgent<I extends AgentInput, O = string>(def: AgentDefin
         const res = await executor.chat({
           charge: chargeOnce,
           messages,
-          tools: nativeTools ? def.tools : undefined,
-          schema: nativeSchema ? def.outputSchema : undefined,
+          tools: nativeTools ? offered : undefined,
+          schema: nativeSchema ? def.outputSchema : turnSchema,
           model,
           tier,
           maxTokens: def.maxTokens,
           temperature: patch.temperature ?? def.temperature,
           signal: opts.signal,
-          onDelta: def.streaming && !def.tools?.length ? opts.onDelta : undefined,
+          onDelta: def.streaming && !offered.length ? opts.onDelta : undefined,
         });
         run.model = res.model || run.model;
         if (res.usage) {
@@ -423,7 +473,7 @@ export async function runAgent<I extends AgentInput, O = string>(def: AgentDefin
 
         let calls: ToolCall[] = res.toolCalls;
         let assistantContent = res.content;
-        if (!calls.length && def.tools?.length && !nativeTools) {
+        if (!calls.length && offered.length && !nativeTools) {
           const turn = parseProtocolTurn(res.content);
           if (turn.kind === "tool") {
             calls = [turn.call];
@@ -440,7 +490,7 @@ export async function runAgent<I extends AgentInput, O = string>(def: AgentDefin
         messages.push({ role: "assistant", content: assistantContent, toolCalls: calls });
         for (const call of calls) {
           const t1 = Date.now();
-          const r = await execTool(def.tools ?? [], call, toolEnv);
+          const r = await execTool(offered, call, toolEnv);
           let body: string;
           let guardNote = "";
           if (r.error !== undefined) body = toolResultMessage(call, undefined, r.error);
@@ -538,6 +588,49 @@ export async function runAgent<I extends AgentInput, O = string>(def: AgentDefin
 }
 
 /** The agent's output, or an `AgentRunError` that carries the run (status, error, suggestions). */
+export interface CallToolOptions {
+  /** Scopes granted for this call (`read` always is). */
+  grants?: ToolScope[];
+  signal?: AbortSignal;
+  document?: string;
+  selection?: string;
+  path?: string | null;
+  consentNetwork?: RunOptions["consentNetwork"];
+  /** Who calls, for the staged changes' provenance (write tools). */
+  runId?: string;
+  agentId?: string;
+}
+
+/**
+ * Call one tool outside a model turn, under the runtime's rules — the scope
+ * must be granted, the arguments must match the tool's schema, a network
+ * tool passes the network gate, a write tool only stages. For a command
+ * that needs what a tool returns (the note list to check an agent's links
+ * against) and for agents that need no model (the digest): they go through
+ * the same path as an agent's own calls instead of importing the source.
+ * Resolves to the tool's result; rejects with a ToolError carrying its error.
+ */
+export async function callTool<R = unknown>(name: string, args: Record<string, unknown> = {}, opts: CallToolOptions = {}): Promise<R> {
+  const { getTool } = await import("./tools");
+  const tool = getTool(name);
+  if (!tool) throw new ToolError("bad-args", `Unknown tool "${name}"`);
+  const env: ToolEnv = {
+    ctx: { signal: opts.signal, path: opts.path ?? null, document: opts.document, selection: opts.selection, grants: new Set<ToolScope>(["read", ...(opts.grants ?? [])]), pages: new Map() },
+    runId: opts.runId ?? newRunId(),
+    agentId: opts.agentId ?? "command",
+    consent: opts.consentNetwork,
+    staged: [],
+    // No model reads a direct call's result, so outside content in it needs no approval here (plan 2.7).
+    taint: [],
+  };
+  const r = await execTool([tool], { id: `direct_${++runSeq}`, name, args }, env);
+  if (r.error !== undefined) {
+    const code = r.error.startsWith("bad-args") ? "bad-args" : r.error.startsWith("not-found") ? "not-found" : r.error.startsWith("denied") || / permission, which was not granted/.test(r.error) ? "denied" : "failed";
+    throw new ToolError(code, r.error);
+  }
+  return r.result as R;
+}
+
 export async function runAgentOrThrow<I extends AgentInput, O = string>(def: AgentDefinition<I, O>, input: I, opts: RunOptions = {}): Promise<O> {
   const run = await runAgent(def, input, opts);
   if (run.status === "ok" && run.output !== undefined) return run.output;

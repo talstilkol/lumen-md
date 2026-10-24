@@ -101,7 +101,7 @@ describe("cache hits keep the executor in the trace", () => {
     registerExecutor(fakeExecutor(sequence('{"tags": ["a-tag"]}')));
     await runAgent(taggerAgent, { text: "cache me", extra: { existing: [] } });
     const second = await runAgent(taggerAgent, { text: "cache me", extra: { existing: [] } });
-    expect(second.steps.map((s) => s.kind)).toEqual(["cache"]);
+    expect(second.steps.map((s) => s.kind)).toEqual(["tool", "cache"]); // its list_tags context call, then the hit
     expect(second.executor).toBe("ollama");
   });
 });

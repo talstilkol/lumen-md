@@ -11,6 +11,7 @@
 
 import type { AgentDefinition, AgentInput, ValidationResult } from "../types";
 import { registerAgent } from "../registry";
+import { pickTools } from "../tools";
 import { fail, ok, scriptOf } from "./shared";
 
 export interface TranslatorInput extends AgentInput {
@@ -130,6 +131,9 @@ export const translatorAgent: AgentDefinition<TranslatorInput, string> = registe
   user: (input) => input.text,
   parse: (text) => text.trim(),
   validators: [{ name: "translation", check: (out, input) => checkTranslation(out, input.text ?? "", (input as TranslatorInput).extra.targetLanguage) }],
+  // The whole note, when the text given is only part of it (5.3.1, 5.3.3).
+  tools: pickTools("get_document"),
+  maxSteps: 3,
   tier: "small",
   temperature: 0.2,
   maxTokens: 4000,

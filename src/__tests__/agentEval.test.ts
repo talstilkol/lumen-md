@@ -2,12 +2,16 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 
 vi.mock("../store/useStore", () => ({ useAppStore: { getState: () => ({ aiKey: null, useLocalAi: false, useFineTunedModel: false, fineTunedModelId: null }) } }));
 vi.mock("../billing/aiQuota", () => ({ chargeAiCommandDispatch: vi.fn(), consumeAiPrompt: vi.fn(() => true), aiQuotaStatus: () => ({ allowed: true, limit: Infinity }), AiQuotaExceededError: class extends Error {} }));
+// The eval vault: the agents' tools read it (plan 5.3).
+vi.mock("../storage/workspace", async (orig) => (await import("./helpers/evalVault")).workspaceModule(await orig()));
+vi.mock("../sync/git", async (orig) => (await import("./helpers/evalVault")).gitModule(await orig()));
 
 import { registerExecutor, resetExecutors } from "../agents/executors";
 import { EVAL_CASES } from "../agents/eval/fixtures";
 import { runEvalCase } from "../agents/eval/run";
 import { formatEvalReport, hebrewRatio, passed, runCheck } from "../agents/eval/score";
 import { fakeExecutor, sequence } from "./helpers/fakeExecutor";
+import { scriptedAnswer } from "../agents/eval/scripted";
 
 beforeEach(() => resetExecutors());
 
@@ -53,8 +57,8 @@ describe("agent eval — fixtures", () => {
   });
 
   for (const c of EVAL_CASES) {
-    it(`${c.id}: the reference answer passes the agent's parser, validators and the checks`, async () => {
-      registerExecutor(fakeExecutor(sequence(c.example)));
+    it(`${c.id}: the expected tool call and the reference answer pass the agent's parser, validators and the checks`, async () => {
+      registerExecutor(fakeExecutor((req) => scriptedAnswer(c, req)));
       const r = await runEvalCase(c, { executor: "ollama" });
       expect(r.error).toBeUndefined();
       expect(r.checks.filter((x) => !x.ok)).toEqual([]);

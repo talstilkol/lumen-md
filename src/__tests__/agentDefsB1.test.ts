@@ -61,18 +61,20 @@ describe("B1 helpers", () => {
 });
 
 describe("B1 agents end to end (fake executor)", () => {
-  it("tagger: schema failure → retry → tags normalised; existing tags injected", async () => {
+  it("tagger: schema failure → retry → tags normalised; the workspace's tags come from its list_tags call (5.3)", async () => {
     files.set("notes/a.md", "---\ntags: [alpha, עברית]\n---\nbody");
     const ex = fakeExecutor(sequence('{"tags": []}', '{"tags": ["Alpha", "#new-topic", "עברית"]}'));
     registerExecutor(ex);
     expect(await suggestTags("some document")).toEqual(["alpha", "new-topic", "עברית"]);
     expect(ex.calls).toHaveLength(2);
-    expect(ex.calls[0].messages[1].content).toContain("alpha, עברית");
+    const listTags = ex.calls[0].messages.find((m) => m.role === "tool" && m.name === "list_tags");
+    expect(listTags?.content).toContain('"tag":"alpha"');
+    expect(listTags?.content).toContain('"tag":"עברית"');
     expect(ex.calls[0].messages[0].content).toContain('{"tags"');
     expect(taggerAgent.cache).toBe(true);
   });
 
-  it("linker: catalogue of other notes injected; empty list accepted; invalid suggestions retried then filtered", async () => {
+  it("linker: the other notes come from its list_files call (5.3); empty list accepted; invalid suggestions retried then filtered", async () => {
     files.set("a.md", "This note mentions Attention a lot.");
     files.set("Attention.md", "Attention is all you need. More text.");
     files.set("Transformer.md", "A model architecture.");
@@ -80,8 +82,9 @@ describe("B1 agents end to end (fake executor)", () => {
     registerExecutor(ex);
     const links = await suggestLinks("a.md", "This note mentions Attention a lot.");
     expect(links).toEqual([{ phrase: "Attention", target: "Attention", reason: "defines it" }]);
-    expect(ex.calls[0].messages[1].content).toContain("- Attention — Attention is all you need.");
-    expect(ex.calls[0].messages[1].content).not.toContain("- a —");
+    const listed = ex.calls[0].messages.find((m) => m.role === "tool" && m.name === "list_files");
+    expect(listed?.content).toContain("Attention.md");
+    expect(listed?.content).toContain("Transformer.md");
     expect(ex.calls).toHaveLength(2);
     registerExecutor(fakeExecutor(sequence('{"links": []}')));
     expect(await suggestLinks("a.md", "x")).toEqual([]);
@@ -103,10 +106,10 @@ describe("B1 agents end to end (fake executor)", () => {
     expect(outlinerAgent.tier).toBe("small");
   });
 
-  it("committer: one subject line on the tiny tier, paid as its own prompt", async () => {
+  it("committer: a clean subject and a short body on the tiny tier, paid as its own prompt", async () => {
     const ex = fakeExecutor(sequence('"feat: add the agent runtime."\nExplanation here'));
     registerExecutor(ex);
-    expect(await generateAiCommitMessage("/repo")).toBe("feat: add the agent runtime");
+    expect(await generateAiCommitMessage("/repo")).toBe("feat: add the agent runtime\n\nExplanation here");
     expect(ex.calls[0].tier).toBe("tiny");
     expect(ex.calls[0].messages[1].content).toContain("MODIFIED: src/a.ts");
     expect(consumeAiPrompt).toHaveBeenCalled();
@@ -122,7 +125,8 @@ describe("B1 agents end to end (fake executor)", () => {
     const second = await runAgent(taggerAgent, { text: "doc to cache", extra: { existing: [] } });
     expect(second.status).toBe("ok");
     expect(second.output).toEqual({ tags: ["cached-tag"] });
-    expect(second.steps.map((s) => s.kind)).toEqual(["cache"]);
+    // The context call comes first: the answer is reused only for the same tags (5.3).
+    expect(second.steps.map((s) => s.kind)).toEqual(["tool", "cache"]);
     expect(ex.calls).toHaveLength(1);
     // A different input misses.
     await runAgent(taggerAgent, { text: "another doc", extra: { existing: [] } });

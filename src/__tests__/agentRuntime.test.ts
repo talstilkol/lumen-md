@@ -136,7 +136,8 @@ describe("agent runtime", () => {
     await runAgent({ id: "s1", description: "", system: "sys", user: () => "u", outputSchema: schema }, {});
     expect(ex.calls[0].schema).toEqual(schema);
     expect(ex.calls[0].messages[0].content).toContain("Reply with JSON only");
-    await runAgent({ id: "s2", description: "", system: "sys", user: () => "u", outputSchema: schema, tools: [echo] }, {});
+    // A medium-tier agent uses native tools; a small one is held to the protocol's schema instead (5.3.5, see agentsUseTools.test.ts).
+    await runAgent({ id: "s2", description: "", system: "sys", user: () => "u", outputSchema: schema, tools: [echo], tier: "medium" }, {});
     expect(ex.calls[1].tools).toHaveLength(1);
     expect(ex.calls[1].messages[0].content).toContain("Reply with JSON only");
     expect(ex.calls[1].messages[0].content).not.toContain("To call a tool");

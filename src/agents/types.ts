@@ -307,6 +307,15 @@ export interface AgentDefinition<I extends AgentInput = AgentInput, O = string> 
   system: string | ((input: I) => string);
   user: (input: I) => string;
   tools?: AgentTool[];
+  /**
+   * Tool calls the runtime makes for the agent before its first model turn
+   * (plan 5.3): the context it always needs — the workspace's tags, the
+   * note list, the diff — fetched through the runtime's tool path (scope
+   * checks, argument schemas, the trace), never by importing the source
+   * directly. The model sees each as a call it made, with its result, and
+   * may call its tools again. Every name must be one of `tools`.
+   */
+  context?: (input: I) => Array<{ tool: string; args?: Record<string, unknown> }>;
   /** JSON output; the executor constrains it when it can. */
   outputSchema?: JsonSchema;
   /** Turns the model's final text into the output (default: JSON when a schema is set, else trimmed text). */
