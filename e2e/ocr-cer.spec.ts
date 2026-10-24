@@ -27,6 +27,8 @@ import { OCR_CONDITIONS, buildReport, checkGates, formatReport, heldOutGaps, typ
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const testDir = process.env.GOLDEN_TEST;
 const split = testDir ? "test" : "dev";
+/** golden-sets.yml task=test record=true: the parts' sha256 are being recorded by this very run. */
+const recordRun = process.env.GOLDEN_RECORD === "1";
 const outPath = resolve(ROOT, process.env.OCR_CER_OUT ?? "reports/ocr-cer.json");
 
 interface GoldenItem {
@@ -53,9 +55,11 @@ test("OCR CER on the golden set ocr-he (Hebrew and English, per condition)", asy
   // The held-out score is the whole split or nothing: every part at its
   // manifest count (the owner's photos included) and every part's sha256
   // recorded. golden-sets.yml continues past a failed builder or a missing
-  // owner bundle, so a partial split must stop here.
+  // owner bundle, so a partial split must stop here. On the record run the
+  // hashes are not recorded yet by definition: complete parts pass, and the
+  // report names the ones still unverified.
   if (split === "test") {
-    const gaps = heldOutGaps(incompleteParts(set.manifest, set.items), set.unverified);
+    const gaps = heldOutGaps(incompleteParts(set.manifest, set.items), set.unverified, { recordRun });
     expect(gaps, `the ocr-he test split is incomplete or unverified, so no test score is reported: ${gaps.join("; ")}`).toEqual([]);
   }
   // Every item is measured; one without an image, a text or a known condition is an error.
@@ -90,7 +94,7 @@ test("OCR CER on the golden set ocr-he (Hebrew and English, per condition)", asy
   const gates = checkGates(report);
   const banner =
     split === "test"
-      ? `held-out TEST split (GOLDEN_SEED)${set.unverified.length ? `; parts without a recorded sha256 yet: ${set.unverified.join(", ")}` : ""}`
+      ? `held-out TEST split (GOLDEN_SEED)${recordRun ? " — record run" : ""}${set.unverified.length ? `; parts without a recorded sha256 yet: ${set.unverified.join(", ")}` : ""}`
       : "public DEV split (eval/golden/ocr-he/dev) — GOLDEN_SEED is not available here, so these are dev numbers, not the held-out test score (plan 15.9)";
   const title = `OCR CER — ocr-he, ${banner}; ${items.length} images, ${seconds} s, tesseract.js tessdata_fast heb+eng`;
   const md = formatReport(report, title);
@@ -101,6 +105,7 @@ test("OCR CER on the golden set ocr-he (Hebrew and English, per condition)", asy
     JSON.stringify(
       {
         split,
+        ...(split === "test" ? { recordRun, unverified: set.unverified } : {}),
         images: items.length,
         seconds,
         gates,

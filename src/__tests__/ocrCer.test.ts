@@ -193,4 +193,10 @@ describe("heldOutGaps", () => {
     expect(g[1]).toBe("part pages: 9 of 11 test items");
     expect(g[2]).toMatch(/^part lines: no recorded sha256/);
   });
+
+  it("on the record run an unrecorded part is not a gap — the hashes are being recorded by that run — but a short part still is (Codex P1, #278)", () => {
+    expect(heldOutGaps([], ["lines", "pages"], { recordRun: true })).toEqual([]);
+    expect(heldOutGaps([{ part: "owner", have: 0, want: 15 }], ["lines"], { recordRun: true })).toEqual(["part owner: 0 of 15 test items"]);
+    expect(heldOutGaps([], ["lines"], { recordRun: false })).toHaveLength(1);
+  });
 });

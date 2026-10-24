@@ -301,10 +301,20 @@ export function formatReport(report: CerReport, title: string): string {
  * recorded yet. A partial or unverified split is never reported as the test
  * score. `incomplete` is scripts/lib/golden.mjs incompleteParts();
  * `unverified` is loadSet()'s list.
+ *
+ * `recordRun`: the run that records the hashes (golden-sets.yml task=test
+ * record=true). Its parts are complete but, by definition, not recorded
+ * yet — refusing them would mean the hashes can never be recorded (Codex P1
+ * on #278) — so only a short part is a gap there; the unverified parts are
+ * named in the report instead.
  */
-export function heldOutGaps(incomplete: ReadonlyArray<{ part: string; have: number; want: number }>, unverified: readonly string[]): string[] {
+export function heldOutGaps(
+  incomplete: ReadonlyArray<{ part: string; have: number; want: number }>,
+  unverified: readonly string[],
+  { recordRun = false }: { recordRun?: boolean } = {},
+): string[] {
   return [
     ...incomplete.map((x) => `part ${x.part}: ${x.have} of ${x.want} test items`),
-    ...unverified.map((p) => `part ${p}: no recorded sha256 (record it with golden-sets.yml task=test record=true)`),
+    ...(recordRun ? [] : unverified.map((p) => `part ${p}: no recorded sha256 (record it with golden-sets.yml task=test record=true)`)),
   ];
 }

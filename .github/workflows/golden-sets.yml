@@ -228,6 +228,8 @@ jobs:
           OCR_CER: "1"
           OCR_CER_OUT: ${{ runner.temp }}/ocr-cer.json
           PLAYWRIGHT_BASE_URL: http://localhost:5181
+          # The record run's parts have no recorded sha256 yet: complete parts pass there (Codex P1 on #278).
+          GOLDEN_RECORD: ${{ github.event_name == 'workflow_dispatch' && inputs.record && '1' || '' }}
         run: |
           npm run build
           npx -y http-server@14 dist -p 5181 -c-1 --silent &
@@ -247,11 +249,14 @@ jobs:
           name: golden-scores
           path: ${{ runner.temp }}/scores.json
           retention-days: 90
-      - if: steps.seed.outputs.ok == 'true'
+      # Uploaded even when a later gate (the OCR CER) failed: the hashes identify the
+      # split, not its score, and the record job needs them to bootstrap (Codex P1 on #278).
+      - if: always() && steps.seed.outputs.ok == 'true'
         uses: actions/upload-artifact@v7
         with:
           name: golden-test-hashes
           path: ${{ runner.temp }}/test-hashes.json
+          if-no-files-found: ignore
           retention-days: 7
 
       # Kept one day for the owner only: encrypted with GOLDEN_SEED, because anyone who can read the repo can
@@ -274,7 +279,9 @@ jobs:
   record:
     name: record the test hashes → branch
     needs: test
-    if: github.event_name == 'workflow_dispatch' && inputs.task == 'test' && inputs.record
+    # Runs after a failed test job too: on the bootstrap run the OCR gate may fail
+    # for reasons unrelated to the hashes (Codex P1 on #278); `needs` still makes it wait.
+    if: always() && needs.test.result != 'skipped' && github.event_name == 'workflow_dispatch' && inputs.task == 'test' && inputs.record
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     permissions:
