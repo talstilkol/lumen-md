@@ -123,6 +123,11 @@ function vendorChunk(id: string): string | undefined {
   // prosemirror + shiki at boot (~400KB gz) just to reach the
   // helpers. (Diagnosed via sourcemap residents, 2026-06-10.)
   if (/node_modules\/lodash(-es)?\//.test(id)) return "vendor-lodash";
+  // Inline HTML support (rehype-raw → hast-util-raw → parse5, ~45 KB gz) is
+  // imported only for documents with raw HTML. In vendor-unified (eager) it
+  // made the whole HTML parser a startup dependency; left out of the groups
+  // it stays in the lazy chunk of its dynamic import.
+  if (/node_modules\/(rehype-raw|hast-util-raw|hast-util-from-parse5|hast-util-to-parse5|parse5|parse5-[a-z-]+|entities|hastscript|vfile-location)\//.test(id)) return undefined;
   if (
     /node_modules\/(micromark|mdast-util-|remark-|rehype-(?!katex)|unified|vfile|unist-util-|hast-util-|html-void-elements|property-information|space-separated-tokens|comma-separated-tokens|web-namespaces|stringify-entities|character-entities|character-reference-invalid|is-(alphabetical|alphanumerical|decimal|hexadecimal|plain-obj)|bail|trough|devlop|extend|zwitch|ccount|longest-streak|markdown-table|escape-string-regexp|decode-named-character-reference)/.test(id)
   ) return "vendor-unified";
@@ -180,6 +185,9 @@ function vendorChunk(id: string): string | undefined {
   // rollup splits them. Both are small + always loaded
   // together; splitting saves nothing in real-world apps.
   // Anchored to node_modules/: `@use-gesture/react/` also contains "/react/".
+  // react-dom/server is only for HTML export (a dynamic import): keep it out
+  // of the eager chunk. It depends on react, not on react-dom's client.
+  if (/node_modules\/react-dom\/(server|cjs\/react-dom-server)/.test(id)) return undefined;
   if (/node_modules\/(react|react-dom|scheduler)\//.test(id)) return "vendor-react";
   return undefined;
 }
