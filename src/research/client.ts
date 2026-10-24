@@ -5,6 +5,7 @@
  * the CSP must already allow.
  */
 import { connectAllowedByCsp } from "../lib/cspConnect";
+import { getSecret, setSecret } from "../lib/secretStore";
 
 export interface ExtractedPage {
   url: string;
@@ -86,18 +87,17 @@ export function getResearchSettings(): ResearchSettings {
       policy = null;
     }
     // An explicit local-only choice wins over a leftover Anthropic key.
-    const cloudy = policy === "cloud" || policy === "local-first" || (policy !== "local-only" && !!ls("lumen.ai.key.anthropic"));
+    const cloudy = policy === "cloud" || policy === "local-first" || (policy !== "local-only" && !!getSecret("lumen.ai.key.anthropic"));
     provider = cloudy ? "claude" : "searxng";
   }
-  return { provider, key: ls("lumen.research.searchKey") ?? "" };
+  return { provider, key: getSecret("lumen.research.searchKey") ?? "" };
 }
 
 export function setResearchSettings(s: Partial<ResearchSettings>): void {
   try {
     if (s.provider) localStorage.setItem("lumen.research.provider", s.provider);
     if (s.key !== undefined) {
-      if (s.key) localStorage.setItem("lumen.research.searchKey", s.key);
-      else localStorage.removeItem("lumen.research.searchKey");
+      setSecret("lumen.research.searchKey", s.key || null);
     }
   } catch {
     /* */
