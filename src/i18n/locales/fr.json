@@ -1456,5 +1456,8 @@
   "mt.size.approx": "environ {size}",
   "toast.translatedWith": "Traduit avec {layer}",
   "toast.translatedWithUnmeasured": "Traduit avec {layer} — sa qualité sur cette paire n’est pas encore mesurée",
-  "toast.localMtUnavailable": "La traduction locale n’était pas disponible ({why}) ; le modèle d’IA a traduit à sa place."
+  "toast.localMtUnavailable": "La traduction locale n’était pas disponible ({why}) ; le modèle d’IA a traduit à sa place.",
+  "caption.purpose": "Décrire les images sur cet appareil (texte alternatif)",
+  "caption.attribution.florence": "Florence-2 © Microsoft, licence MIT ; conversion ONNX par onnx-community (Hugging Face).",
+  "caption.attribution.smolvlm": "SmolVLM-256M-Instruct © Hugging Face, licence Apache 2.0."
 }

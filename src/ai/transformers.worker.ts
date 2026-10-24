@@ -7,6 +7,7 @@
  *   → { id, type: "transcribe", model, device, audio: Float32Array (16 kHz mono), language?, task? }
  *   → { id, type: "embed",      model, device, texts: string[] }
  *   → { id, type: "rerank",     model, device, query, passages: string[] }  → scores 0..1 (T29)
+ *   → { id, type: "caption",    model, device, family: "florence2" | "smolvlm", image: Blob }  → one English sentence (plan 6.6)
  *   → { id, type: "load",       task, model, device }
  *   → { id, type: "cancel",     target }         (skip a queued job, discard a running one's result)
  *   → { id, type: "unload" }
@@ -21,7 +22,11 @@
 
 import {
   AutoModelForSequenceClassification,
+  AutoModelForVision2Seq,
+  AutoProcessor,
   AutoTokenizer,
+  Florence2ForConditionalGeneration,
+  RawImage,
   env,
   pipeline,
   type AutomaticSpeechRecognitionPipeline,
@@ -32,6 +37,8 @@ import {
 } from "@huggingface/transformers";
 
 export type Device = "webgpu" | "wasm";
+/** Florence-2 (task prompt `<CAPTION>`) or SmolVLM (chat template). */
+export type CaptionFamily = "florence2" | "smolvlm";
 
 export type WorkerIn =
   | { id: number; type: "transcribe"; model: string; device: Device; audio: Float32Array; language?: string; task?: "transcribe" | "translate" }
@@ -45,6 +52,7 @@ export type WorkerIn =
    * `srcLang` / `tgtLang`: for multilingual models (M2M100); Opus-MT ignores them.
    */
   | { id: number; type: "translate"; model: string; device: Device; dtype?: string; texts: string[]; srcLang?: string; tgtLang?: string; host?: string }
+  | { id: number; type: "caption"; model: string; device: Device; family: CaptionFamily; image: Blob }
   | { id: number; type: "load"; task: "automatic-speech-recognition" | "feature-extraction" | "translation"; model: string; device: Device; dtype?: string; host?: string }
   | { id: number; type: "cancel"; target: number }
   | { id: number; type: "unload" };
@@ -85,6 +93,8 @@ let asr: { key: string; pipe: AutomaticSpeechRecognitionPipeline } | null = null
 let embedder: { key: string; pipe: FeatureExtractionPipeline } | null = null;
 let reranker: { key: string; tokenizer: PreTrainedTokenizer; model: PreTrainedModel } | null = null;
 let translator: { key: string; pipe: TranslationPipeline } | null = null;
+type Captioner = { key: string; processor: CaptionProcessor; model: PreTrainedModel };
+let captioner: Captioner | null = null;
 let queue: Promise<unknown> = Promise.resolve();
 /** Jobs cancelled by the client: skipped when queued, their result discarded when running. */
 const cancelled = new Set<number>();
@@ -268,6 +278,62 @@ async function translate(id: number, msg: Extract<WorkerIn, { type: "translate" 
   return out;
 }
 
+/** The processor calls the two caption families use (typed loosely: they differ per model). */
+interface CaptionProcessor {
+  (...args: unknown[]): Promise<Record<string, unknown> & { input_ids?: { dims: number[] } }>;
+  construct_prompts?: (task: string) => string[];
+  post_process_generation?: (text: string, task: string, size: unknown) => Record<string, string>;
+  apply_chat_template?: (messages: unknown, opts: unknown) => string;
+  batch_decode: (ids: unknown, opts: unknown) => string[];
+}
+
+/**
+ * Per-part precision: the vision encoder and embeddings stay fp16 (q4 there
+ * costs most of the quality), the language parts are 4-bit. On wasm, q8.
+ */
+function captionDtype(family: CaptionFamily, device: Device): Record<string, string> | string {
+  if (device !== "webgpu") return "q8";
+  return family === "florence2"
+    ? { embed_tokens: "fp16", vision_encoder: "fp16", encoder_model: "q4", decoder_model_merged: "q4" }
+    : { embed_tokens: "fp16", vision_encoder: "fp16", decoder_model_merged: "q4" };
+}
+
+async function getCaptioner(id: number, msg: { model: string; device: Device; family: CaptionFamily }): Promise<Captioner> {
+  const key = `${msg.family}:${msg.model}@${msg.device}`;
+  if (captioner?.key === key) return captioner;
+  if (captioner) await captioner.model.dispose();
+  captioner = null;
+  const opts = { device: msg.device, dtype: captionDtype(msg.family, msg.device), progress_callback: progressFor(id) } as never;
+  const Model = msg.family === "florence2" ? Florence2ForConditionalGeneration : AutoModelForVision2Seq;
+  const [processor, model] = await Promise.all([
+    AutoProcessor.from_pretrained(msg.model, { progress_callback: progressFor(id) } as never) as unknown as Promise<CaptionProcessor>,
+    Model.from_pretrained(msg.model, opts) as Promise<PreTrainedModel>,
+  ]);
+  captioner = { key, processor, model };
+  return captioner;
+}
+
+/** One short English caption for an image (plan 6.6). */
+async function caption(id: number, msg: Extract<WorkerIn, { type: "caption" }>): Promise<string> {
+  const { processor, model } = await getCaptioner(id, msg);
+  const image = await RawImage.fromBlob(msg.image);
+  if (cancelled.has(id)) throw new DOMException("aborted", "AbortError");
+  const generate = (inputs: Record<string, unknown>) => (model as unknown as { generate(o: unknown): Promise<{ slice(...a: unknown[]): unknown }> }).generate({ ...inputs, max_new_tokens: 64, do_sample: false });
+  if (msg.family === "florence2") {
+    const task = "<CAPTION>";
+    const inputs = await processor(image, processor.construct_prompts!(task));
+    const ids = await generate(inputs);
+    const text = processor.batch_decode(ids, { skip_special_tokens: false })[0] ?? "";
+    return processor.post_process_generation!(text, task, image.size)[task] ?? "";
+  }
+  const messages = [{ role: "user", content: [{ type: "image" }, { type: "text", text: "Describe this image in one short sentence." }] }];
+  const prompt = processor.apply_chat_template!(messages, { add_generation_prompt: true });
+  const inputs = await processor(prompt, [image], { do_image_splitting: false });
+  const ids = await generate(inputs);
+  const promptLength = inputs.input_ids?.dims.at(-1) ?? 0;
+  return processor.batch_decode(ids.slice(null, [promptLength, null]), { skip_special_tokens: true })[0] ?? "";
+}
+
 function serial<T>(fn: () => Promise<T>): Promise<T> {
   const p = queue.then(fn);
   queue = p.catch(() => undefined);
@@ -304,6 +370,9 @@ export async function handle(msg: WorkerIn): Promise<void> {
       case "translate":
         post({ id, type: "result", value: await job(id, () => translate(id, msg)) });
         return;
+      case "caption":
+        post({ id, type: "result", value: await job(id, () => caption(id, msg)) });
+        return;
       case "cancel":
         cancelled.add(msg.target);
         post({ id, type: "result", value: true });
@@ -323,6 +392,8 @@ export async function handle(msg: WorkerIn): Promise<void> {
         const e = embedder;
         const r = reranker;
         const tr = translator;
+        const cap = captioner;
+        captioner = null;
         asr = null;
         embedder = null;
         reranker = null;
@@ -331,6 +402,7 @@ export async function handle(msg: WorkerIn): Promise<void> {
         await e?.pipe.dispose();
         await r?.model.dispose();
         await tr?.pipe.dispose();
+        await cap?.model.dispose();
         post({ id, type: "result", value: true });
         return;
       }

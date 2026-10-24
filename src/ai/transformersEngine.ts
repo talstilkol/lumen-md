@@ -14,7 +14,7 @@
  *   Embeddings multilingual-e5-small (384 dims, ~100 languages).
  */
 
-import type { Device, EmbedResult, TranscribeResult, WorkerIn, WorkerOut } from "./transformers.worker";
+import type { CaptionFamily, Device, EmbedResult, TranscribeResult, WorkerIn, WorkerOut } from "./transformers.worker";
 import { detectHardware, vramBudgetMB, type Hardware } from "./modelManager";
 
 export type { TranscribeResult, EmbedResult };
@@ -258,4 +258,10 @@ export function __resetTransformersEngine(): void {
   worker = null;
   pending.clear();
   listeners = [];
+}
+
+/** One English caption for an image by a local vision model in the worker (plan 6.6). */
+export async function captionLocal(model: string, family: CaptionFamily, image: Blob, opts: { device?: Device; signal?: AbortSignal } = {}): Promise<string> {
+  const device = opts.device ?? (await transformersDevice());
+  return call<string>({ type: "caption", model, family, device, image }, [], opts.signal);
 }
