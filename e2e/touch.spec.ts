@@ -118,6 +118,8 @@ for (const { name, lang } of CASES) {
 
       // 10.2.1: in the rich editor, the block handle moves a block by touch.
       await tabs.filter({ hasText: first }).tap(); // back to the note we wrote
+      // The note is open (source view) before the rich editor mounts over it.
+      await expect(page.locator(".cm-content").first()).toContainText("First paragraph.", { timeout: 10_000 });
       await run(page, "view.wysiwyg");
       const pm = page.locator(".ProseMirror").first();
       await expect(pm).toContainText("First paragraph.", { timeout: 15_000 });
