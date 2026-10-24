@@ -60,6 +60,7 @@ export default defineConfig({
           items: [
             { label: "Auto-tag + link suggestions", slug: "ai/agents" },
             { label: "Local LLM (web-llm)", slug: "ai/local-llm" },
+            { label: "Local translation", slug: "ai/translation" },
             { label: "AI cost: usage meter + answer cache", slug: "ai/cost" },
             { label: "Research + citation checks", slug: "ai/research" },
             { label: "MCP integration (Claude Desktop, Cursor)", slug: "ai/mcp" },
