@@ -101,6 +101,11 @@ const BUDGETS = [
   // Graphviz (viz.js wasm) now runs in its own worker so the page CSP needs
   // no unsafe-eval: the old vendor-graphviz chunk moved here (~608 KB gz).
   { name: "lazy: graphviz worker", pattern: /^graphviz\.worker-/,  budgetKb: 700 },
+  // Plan 8.1: the preview's Markdown → HAST pipeline (unified, remark,
+  // rehype, parse5 for inline HTML) in its own worker; step 3 adds Shiki
+  // core + KaTeX there (loaded by the worker on demand). Fetched on the
+  // first full render, never on the startup path.
+  { name: "lazy: render worker", pattern: /^render\.worker-/,     budgetKb: 400 },
   { name: "lazy plugin chunk",  pattern: /\.js$/,                 budgetKb: 100 },
 ];
 

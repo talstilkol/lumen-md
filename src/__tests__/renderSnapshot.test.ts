@@ -93,7 +93,9 @@ describe("render snapshots (50 documents)", () => {
 
     for (const doc of docs) {
       it(doc.name, async () => {
-        await expect(await html(doc.markdown)).toMatchFileSnapshot(`__snapshots__/render/${doc.name}.html`);
+        const out = await html(doc.markdown);
+        if (process.env.SNAP_DUMP) (await import("node:fs")).writeFileSync(`${process.env.SNAP_DUMP}/${doc.name}.html`, out);
+        await expect(out).toMatchFileSnapshot(`__snapshots__/render/${doc.name}.html`);
       }, 30_000);
     }
 
