@@ -61,21 +61,31 @@ export function speakableSentences(markdown: string): Sentence[] {
 }
 
 type Detect = (text: string) => { lang: string; confident: boolean; script: string | null };
-/** Scripts that settle the language even for a short sentence (no shared-script guess). */
-const SCRIPT_DECIDES = new Set(["hebrew", "kana", "han", "hangul", "greek", "thai"]);
 const voiceTag = (lang: string) => (lang === "he" ? "he-IL" : lang);
 
+/** The script a language is written in (for the languages the detector reports); Latin otherwise. */
+const SCRIPT_OF_LANG: Record<string, string> = { he: "hebrew", yi: "hebrew", ar: "arabic", fa: "arabic", ur: "arabic", ps: "arabic", ru: "cyrillic", uk: "cyrillic", be: "cyrillic", bg: "cyrillic", sr: "cyrillic", kk: "cyrillic", ja: "kana", zh: "han", ko: "hangul", el: "greek", th: "thai", hi: "devanagari", mr: "devanagari", ne: "devanagari" };
+const scriptOfLang = (tag: string) => SCRIPT_OF_LANG[tag.split(/[-_]/)[0].toLowerCase()] ?? "latin";
+
 /**
- * BCP-47 language for a sentence: Hebrew script → he-IL; with the local
- * detector (plan 6.5) any language it is sure of, or that the script alone
- * settles; otherwise `fallback` (the document's language, else the UI's).
+ * BCP-47 language for a sentence: Hebrew script → he-IL. With the local
+ * detector (plan 6.5): a language it is sure of; for a short or unclear
+ * sentence, the document's language (`fallback`) when that is written in
+ * the sentence's script — a short Latin or Cyrillic sentence takes the
+ * document's voice, kanji inside a Japanese document stay Japanese —
+ * and otherwise the detector's best guess for the script, so a short
+ * Arabic, Hebrew, kana, Han, Hangul, Greek or Thai sentence under an
+ * English document is never read with the English voice.
  */
 export function langFor(text: string, fallback: string, detect?: Detect): string {
   if (hebrewRatio(text) > 0.3) return "he-IL";
   if (detect) {
     const g = detect(text);
-    if (g.lang !== "und" && (g.confident || (g.script && SCRIPT_DECIDES.has(g.script)))) return voiceTag(g.lang);
-    return fallback;
+    if (g.lang === "und" || !g.script) return fallback;
+    const docScript = scriptOfLang(fallback);
+    const docCovers = docScript === g.script || (docScript === "kana" && g.script === "han");
+    if (docCovers && (!g.confident || g.script === "han")) return fallback;
+    return g.confident || !docCovers ? voiceTag(g.lang) : fallback;
   }
   if (/[؀-ۿ]/.test(text)) return "ar";
   return fallback;

@@ -1471,5 +1471,6 @@
   "models.purpose.nikud": "このデバイスでのヘブライ語ニクード",
   "caption.purpose": "このデバイスで画像を説明（代替テキスト）",
   "caption.attribution.florence": "Florence-2 © Microsoft、MIT ライセンス。ONNX 変換：onnx-community（Hugging Face）。",
-  "caption.attribution.smolvlm": "SmolVLM-256M-Instruct © Hugging Face、Apache License 2.0。"
+  "caption.attribution.smolvlm": "SmolVLM-256M-Instruct © Hugging Face、Apache License 2.0。",
+  "spell.en.unknown": "「{word}」：不明な単語（このデバイスの英語辞書）"
 }

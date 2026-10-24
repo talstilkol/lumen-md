@@ -1471,5 +1471,6 @@
   "models.purpose.nikud": "التنقيط العبري على هذا الجهاز",
   "caption.purpose": "وصف الصور على هذا الجهاز (نص بديل)",
   "caption.attribution.florence": "Florence-2 © Microsoft، رخصة MIT؛ تحويل ONNX بواسطة onnx-community (Hugging Face).",
-  "caption.attribution.smolvlm": "SmolVLM-256M-Instruct © Hugging Face، رخصة Apache 2.0."
+  "caption.attribution.smolvlm": "SmolVLM-256M-Instruct © Hugging Face، رخصة Apache 2.0.",
+  "spell.en.unknown": "«{word}»: كلمة غير معروفة (قاموس الإنجليزية على هذا الجهاز)"
 }

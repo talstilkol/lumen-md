@@ -1471,5 +1471,6 @@
   "models.purpose.nikud": "在本设备上为希伯来语加元音符号",
   "caption.purpose": "在本设备上描述图片（替代文本）",
   "caption.attribution.florence": "Florence-2 © Microsoft，MIT 许可证；ONNX 转换：onnx-community（Hugging Face）。",
-  "caption.attribution.smolvlm": "SmolVLM-256M-Instruct © Hugging Face，Apache 2.0 许可证。"
+  "caption.attribution.smolvlm": "SmolVLM-256M-Instruct © Hugging Face，Apache 2.0 许可证。",
+  "spell.en.unknown": "“{word}”：未知单词（本设备上的英语词典）"
 }

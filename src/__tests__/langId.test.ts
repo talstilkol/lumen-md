@@ -151,7 +151,18 @@ describe("where the app uses it", () => {
       expect(langFor(fr, "en", detectLanguage)).toBe("fr");
       expect(langFor("今日は雨です", "en", detectLanguage)).toBe("ja");
       expect(langFor("Oui.", "fr", detectLanguage)).toBe("fr");
+      expect(langFor("Oui.", "en", detectLanguage)).toBe("en"); // shared script, short: the document's voice
       expect(langFor("שלום עולם", "en", detectLanguage)).toBe("he-IL");
+      // A short sentence whose script the document's language doesn't cover
+      // keeps its own voice (Codex 4311169918: Arabic under an English note).
+      expect(langFor("نعم", "en", detectLanguage)).toBe("ar");
+      expect(langFor("صباح الخير", "en", detectLanguage)).toBe("ar");
+      expect(langFor("Спасибо", "en", detectLanguage)).toBe("ru");
+      expect(langFor("Спасибо", "ru", detectLanguage)).toBe("ru");
+      expect(langFor("コーヒー", "en", detectLanguage)).toBe("ja");
+      expect(langFor("東京大学", "ja", detectLanguage)).toBe("ja"); // kanji inside a Japanese document
+      expect(langFor("東京大学", "en", detectLanguage)).toBe("zh");
+      expect(langFor("σήμερα", "en", detectLanguage)).toBe("el");
     });
   });
 });

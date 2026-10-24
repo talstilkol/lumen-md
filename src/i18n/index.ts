@@ -75,6 +75,7 @@ const en: Strings = {
   "cmd.nikud.partial.hint": "Point only the words that could be read more than one way",
   "cmd.nikud.remove": "Hebrew: remove niqqud",
   "cmd.nikud.remove.hint": "Strip the vowel points from the selection (or the whole note)",
+  "spell.en.unknown": "“{word}”: unknown word (English dictionary on this device)",
   // Toolbar
   "toolbar.tagline": "Markdown, illuminated",
   "toolbar.new": "New",

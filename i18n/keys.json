@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-10-24T18:21:54.665Z",
+  "generated_at": "2026-10-24T18:22:10.826Z",
   "source": "src/i18n/index.ts (en bundle) + src/i18n/lazy/*.json",
-  "count": 1473,
+  "count": 1474,
   "entries": [
     {
       "key": "cmd.nikud.add",
@@ -33,6 +33,13 @@
       "key": "cmd.nikud.remove.hint",
       "en": "Strip the vowel points from the selection (or the whole note)",
       "vars": []
+    },
+    {
+      "key": "spell.en.unknown",
+      "en": "“{word}”: unknown word (English dictionary on this device)",
+      "vars": [
+        "word"
+      ]
     },
     {
       "key": "toolbar.tagline",

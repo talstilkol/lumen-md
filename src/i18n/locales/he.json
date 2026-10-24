@@ -1471,5 +1471,6 @@
   "models.purpose.nikud": "ניקוד עברי במכשיר",
   "caption.purpose": "תיאור תמונות במכשיר (טקסט חלופי)",
   "caption.attribution.florence": "Florence-2 © Microsoft, רישיון MIT; המרת ONNX על ידי onnx-community (Hugging Face).",
-  "caption.attribution.smolvlm": "SmolVLM-256M-Instruct © Hugging Face, רישיון Apache 2.0."
+  "caption.attribution.smolvlm": "SmolVLM-256M-Instruct © Hugging Face, רישיון Apache 2.0.",
+  "spell.en.unknown": "„{word}”: מילה לא מוכרת (מילון אנגלית במכשיר)"
 }
