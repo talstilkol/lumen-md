@@ -1396,7 +1396,7 @@ export function useCommands({
           const { checkGrammar } = await import("../ai/grammar");
           try {
             showAiToast("📝 Checking grammar…", "info");
-            const matches = await checkGrammar(doc.content, locale === "he" ? "he" : "en-US");
+            const matches = await checkGrammar(doc.content, locale === "he" ? "he" : "en-US", { allowModel: true });
             if (matches.length === 0) {
               showAiToast("✅ No grammar issues found", "success");
               return;
