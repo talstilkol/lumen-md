@@ -15,6 +15,7 @@
     "hygiene": "node scripts/check-code-hygiene.mjs",
     "licenses": "node scripts/licenses.mjs",
     "models:registry": "node scripts/models/registry-from-run.mjs",
+    "golden": "node scripts/golden.mjs",
     "tauri": "tauri",
     "tauri:dev": "tauri dev",
     "tauri:build": "tauri build",

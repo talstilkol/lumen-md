@@ -496,15 +496,76 @@ export function checkModels(registry, sources) {
 
 /**
  * Each eval/golden/<set>/ folder must say where its data comes from
- * (SOURCES.md) and under which licence (LICENSE, LICENSE.md or LICENSE.txt).
- * `dirs` = [{ name, files: [...] }].
+ * (SOURCES.md) and under which licence (LICENSE, LICENSE.md or LICENSE.txt),
+ * and every licence in the parts table of SOURCES.md (the column headed
+ * "Licence") must be one a dataset may carry (plan 7.1, appendix 20.2 rule 4):
+ *   - NonCommercial or NoDerivatives: fail (a sampled set is an adaptation);
+ *   - ShareAlike: only in a folder whose LICENSE is ShareAlike too;
+ *   - no licence (NOASSERTION): fail, unless the row's status is local-only
+ *     (never stored or distributed): notice;
+ *   - an unrecognised id: fail; one the folder's LICENSE never names: warn.
+ * `dirs` = [{ name, files: [...], sources?: SOURCES.md text, license?: LICENSE text }].
  */
+const DATA_OK = new Set(
+  ["CC0-1.0", "CC-BY-4.0", "CC-BY-3.0", "CC-BY-2.5", "CC-BY-2.0", "LicenseRef-CC-BY-2.0-FR", "LicenseRef-PublicDomain", "CC-PDM-1.0", "PDDL-1.0", "ODC-By-1.0", "MIT", "MIT-0", "Apache-2.0", "BSD-2-Clause", "BSD-3-Clause", "ISC", "Unlicense", "OFL-1.1"].map((x) => x.toLowerCase()),
+);
+
+export function classifyDatasetLicence(id, { shareAlikeFolder = false, localOnly = false } = {}) {
+  const l = id.toLowerCase();
+  if (/(^|-)nc(-|$)/.test(l)) return { level: localOnly ? "warn" : "fail", reason: "NonCommercial data" };
+  if (/(^|-)nd(-|$)/.test(l)) return { level: localOnly ? "warn" : "fail", reason: "NoDerivatives: a sampled set is an adaptation" };
+  if (/^cc-by-sa-/.test(l) || /^odbl/.test(l)) return shareAlikeFolder ? { level: "ok", reason: "" } : { level: "fail", reason: "ShareAlike data in a folder whose LICENSE is not ShareAlike" };
+  if (["noassertion", "none", "unknown", ""].includes(l)) return localOnly ? { level: "notice", reason: "no licence: local-only part, never stored or distributed" } : { level: "fail", reason: "data without a licence" };
+  if (DATA_OK.has(l)) return { level: "ok", reason: "" };
+  return { level: "fail", reason: `unrecognised dataset licence "${id}"` };
+}
+
+/** Rows of the first markdown table in `md` whose header has a "Licence"/"License" column: [{ cells by header }]. */
+export function sourcesTable(md) {
+  const lines = md.split("\n");
+  const cells = (l) => l.trim().replace(/^\|/, "").replace(/\|$/, "").split(/(?<!\\)\|/).map((c) => c.trim().replace(/\\\|/g, "|"));
+  for (let i = 0; i < lines.length - 1; i++) {
+    if (!/^\s*\|/.test(lines[i]) || !/^\s*\|[\s:|-]+\|\s*$/.test(lines[i + 1])) continue;
+    const head = cells(lines[i]).map((h) => h.toLowerCase());
+    if (!head.some((h) => /^licen[cs]e$/.test(h))) continue;
+    const rows = [];
+    for (let j = i + 2; j < lines.length && /^\s*\|/.test(lines[j]); j++) {
+      const c = cells(lines[j]);
+      rows.push(Object.fromEntries(head.map((h, k) => [h, c[k] ?? ""])));
+    }
+    return rows;
+  }
+  return null;
+}
+
 export function checkDatasets(dirs) {
-  return dirs.map(({ name, files }) => {
+  return dirs.map(({ name, files, sources, license }) => {
+    const base = { area: "dataset", name: `eval/golden/${name}`, license: "" };
     const missing = [];
     if (!files.includes("SOURCES.md")) missing.push("SOURCES.md");
     if (!files.some((f) => /^LICEN[CS]E(\.md|\.txt)?$/.test(f))) missing.push("LICENSE");
-    return { area: "dataset", name: `eval/golden/${name}`, license: "", level: missing.length ? "fail" : "ok", reason: missing.length ? `missing ${missing.join(" and ")}` : "" };
+    if (missing.length) return { ...base, level: "fail", reason: `missing ${missing.join(" and ")}` };
+    const rows = sourcesTable(sources ?? "");
+    if (!rows?.length) return { ...base, level: "fail", reason: "SOURCES.md has no parts table with a Licence column" };
+    const shareAlikeFolder = /share-?alike|\bBY-SA\b/i.test(license ?? "");
+    let level = "ok";
+    const reasons = [];
+    const ids = new Set();
+    for (const r of rows) {
+      const lic = r.licence ?? r.license ?? "";
+      const localOnly = /local-only/i.test(r.status ?? "");
+      for (const id of lic.split(/\s+AND\s+|\s+OR\s+|[;,]\s*/).map((x) => x.trim()).filter(Boolean).concat(lic.trim() ? [] : [""])) {
+        ids.add(id);
+        const c = classifyDatasetLicence(id, { shareAlikeFolder, localOnly });
+        level = worst(level, c.level);
+        if (c.reason) reasons.push(`${r.part ?? "?"}: ${c.reason}`);
+        if (id && c.level !== "fail" && !localOnly && !(license ?? "").includes(id)) {
+          level = worst(level, "warn");
+          reasons.push(`${r.part ?? "?"}: LICENSE does not name ${id}`);
+        }
+      }
+    }
+    return { ...base, license: [...ids].filter(Boolean).join(" AND "), level, reason: [...new Set(reasons)].join("; ") };
   });
 }
 
