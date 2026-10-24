@@ -76,3 +76,6 @@ reports/
 # and the held-out test split, which is only ever built in CI — never commit either.
 eval/golden/*/local/
 eval/golden/*/test/
+
+# Shiki grammars as JSON for the render worker (scripts/copy-shiki-grammars.mjs)
+public/shiki/

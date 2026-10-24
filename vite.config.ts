@@ -262,6 +262,9 @@ export default defineConfig({
         globIgnores: [
           "**/vendor-shiki-*.js",
           "**/shiki-langs/**",
+          // The render worker's grammars as JSON + the Oniguruma wasm
+          // (scripts/copy-shiki-grammars.mjs, ~8 MB): fetched per language.
+          "shiki/**",
           "**/vendor-mermaid-*.js",
           "**/vendor-tldraw-*.js",
           "**/vendor-echarts-*.js",

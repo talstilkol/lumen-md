@@ -8,7 +8,9 @@
  * so the next start is cheap). Where a worker cannot run — no `Worker`,
  * the script failing to load, a reply that never comes — the same
  * Markdown → HAST code runs on the main thread instead, so the preview
- * never depends on the worker being available.
+ * never depends on the worker being available. The worker also runs
+ * KaTeX and Shiki (step 3); a tree rendered in-thread comes back
+ * `finished: false` and pipeline.ts applies the main thread's own passes.
  */
 import type { Root as HastRoot } from "hast";
 import type { HastOptions } from "./hastPipeline";
@@ -19,7 +21,7 @@ const IDLE_MS = 5 * 60_000;
 const TIMEOUT_MS = 60_000;
 
 interface Pending {
-  resolve: (hast: HastRoot) => void;
+  resolve: (r: RenderResult) => void;
   reject: (e: Error) => void;
   timer: ReturnType<typeof setTimeout>;
 }
@@ -57,7 +59,7 @@ function getWorker(): Worker | null {
       pending.delete(res.id);
       clearTimeout(p.timer);
       if (res.error !== undefined) p.reject(new Error(res.error));
-      else p.resolve(res.hast);
+      else p.resolve({ hast: res.hast, finished: true });
       touch();
     };
     w.onerror = () => {
@@ -82,18 +84,29 @@ function touch(): void {
   }, IDLE_MS);
 }
 
-async function renderInThread(text: string, opts: HastOptions): Promise<HastRoot> {
-  const { renderToHast } = await import("./hastPipeline");
-  return renderToHast(text, opts);
+export interface RenderOptions extends HastOptions {
+  math: boolean;
+  dark: boolean;
 }
 
-/** Markdown → HAST, in the worker when there is one. */
-export function renderHast(text: string, opts: HastOptions): Promise<HastRoot> {
+export interface RenderResult {
+  hast: HastRoot;
+  /** True when KaTeX and Shiki already ran (in the worker). */
+  finished: boolean;
+}
+
+async function renderInThread(text: string, opts: HastOptions): Promise<RenderResult> {
+  const { renderToHast } = await import("./hastPipeline");
+  return { hast: await renderToHast(text, opts), finished: false };
+}
+
+/** Markdown → HAST (with KaTeX and Shiki applied) in the worker when there is one. */
+export function renderHast(text: string, opts: RenderOptions): Promise<RenderResult> {
   const w = getWorker();
   if (!w) return renderInThread(text, opts);
   const id = ++seq;
-  const req: RenderRequest = { id, text, raw: opts.raw };
-  return new Promise<HastRoot>((resolve, reject) => {
+  const req: RenderRequest = { id, text, raw: opts.raw, math: opts.math, dark: opts.dark };
+  return new Promise<RenderResult>((resolve, reject) => {
     const timer = setTimeout(() => {
       // One lost reply is enough to stop trusting this worker: every
       // request in flight, this one included, is redone on the main thread.

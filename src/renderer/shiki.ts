@@ -1,6 +1,13 @@
 import type { Root, Element, Text } from "hast";
 import { visit } from "unist-util-visit";
 
+/** What the highlight pass needs from a Shiki instance, whichever bundle provides it. */
+export interface Highlighter {
+  codeToHast: (source: string, options: Record<string, unknown>) => Root;
+  /** The language tag to highlight with once it is loaded, or "text" when the bundle lacks it. */
+  ensureLang: (lang: string) => Promise<string>;
+}
+
 let highlighterPromise: Promise<unknown> | null = null;
 const loadedLangs = new Set<string>();
 const inFlightLoads = new Map<string, Promise<void>>();
@@ -15,7 +22,7 @@ const inFlightLoads = new Map<string, Promise<void>>();
  * ≈ 80% of real-world docs; the rest pay a one-time ~120 KB extra fetch
  * the first time their language is seen.
  */
-const PRELOADED_LANGS = [
+export const PRELOADED_LANGS = [
   "javascript",
   "typescript",
   "json",
@@ -24,12 +31,15 @@ const PRELOADED_LANGS = [
   "python",
 ];
 
+/** Themes of every code block; the one in force is chosen per render (`defaultColor`). */
+export const SHIKI_THEMES = { dark: "github-dark-default", light: "github-light-default" } as const;
+
 async function getHighlighter() {
   if (!highlighterPromise) {
     highlighterPromise = (async () => {
       const { createHighlighter } = await import("shiki");
       const hl = await createHighlighter({
-        themes: ["github-dark-default", "github-light-default"],
+        themes: [SHIKI_THEMES.dark, SHIKI_THEMES.light],
         langs: PRELOADED_LANGS,
       });
       for (const l of PRELOADED_LANGS) loadedLangs.add(l);
@@ -69,6 +79,12 @@ async function ensureLang(lang: string): Promise<string> {
   return loadedLangs.has(lang) ? lang : "text";
 }
 
+/** The main thread's highlighter: the `shiki` bundle with its lazy per-language chunks. */
+const bundleHighlighter = async (): Promise<Highlighter> => {
+  const hl = await getHighlighter();
+  return { codeToHast: (src, o) => hl.codeToHast(src, o), ensureLang };
+};
+
 interface ShikiOpts {
   isDark: () => boolean;
 }
@@ -78,6 +94,15 @@ interface ShikiOpts {
  * Skips elements that already have a `data-lumen-block` attribute.
  */
 export function rehypeShiki(opts: ShikiOpts) {
+  return rehypeShikiWith(bundleHighlighter, { ...opts, yieldBetweenBlocks: true });
+}
+
+/**
+ * The same pass over any Highlighter — the render worker's (plan 8.1)
+ * uses shiki/core with fetched grammars. `yieldBetweenBlocks` gives the
+ * main thread a breath between blocks (C1); a worker has no one to yield to.
+ */
+export function rehypeShikiWith(getHl: () => Promise<Highlighter>, opts: ShikiOpts & { yieldBetweenBlocks?: boolean }) {
   return async function transformer(tree: Root) {
     const tasks: Array<() => Promise<void>> = [];
     visit(tree, "element", (node: Element, index, parent) => {
@@ -102,16 +127,13 @@ export function rehypeShiki(opts: ShikiOpts) {
 
       tasks.push(async () => {
         try {
-          const hl = await getHighlighter();
+          const hl = await getHl();
           // Lazy-load the language the first time it's encountered.
           // Falls back to "text" when the language isn't bundled.
-          const safeLang = await ensureLang(lang);
+          const safeLang = await hl.ensureLang(lang);
           const themed = hl.codeToHast(source, {
             lang: safeLang,
-            themes: {
-              dark: "github-dark-default",
-              light: "github-light-default",
-            },
+            themes: SHIKI_THEMES,
             defaultColor: opts.isDark() ? "dark" : "light",
             cssVariablePrefix: "--shiki-",
           });
@@ -168,7 +190,7 @@ export function rehypeShiki(opts: ShikiOpts) {
     // main-thread task — the biggest share of the startup blocking time.
     for (const fn of tasks) {
       await fn();
-      await new Promise<void>((r) => setTimeout(r, 0));
+      if (opts.yieldBetweenBlocks) await new Promise<void>((r) => setTimeout(r, 0));
     }
   };
 }

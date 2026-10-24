@@ -37,20 +37,24 @@ function hastToReact(hast: HastRoot): ReactElement {
 /**
  * The full preview render (plan 8.1): Markdown → HAST in the render
  * worker (parse, GFM, directives, wiki links, Lumen blocks, inline-HTML
- * sanitising, CriticMarkup, heading ids, block direction), then — still
- * on the main thread until step 3 — KaTeX and Shiki over that tree, and
- * HAST → React. Where no worker can run, the same HAST code runs here.
+ * sanitising, CriticMarkup, heading ids, block direction), KaTeX and
+ * Shiki there too (step 3), then HAST → React here. Where no worker can
+ * run, the same Markdown → HAST code runs on the main thread and the
+ * main thread's own KaTeX / Shiki passes finish the tree.
  */
 export async function renderMarkdown(
   markdownText: string,
   isDark: () => boolean,
 ): Promise<ReactElement> {
   const math = hasMath(markdownText);
-  const [{ renderHast }, rehypeKatex] = await Promise.all([import("./renderClient"), math ? loadKatex() : null]);
-  const hast = await renderHast(markdownText, { raw: hasRawHtml(markdownText) });
-  // The finishing passes run on the tree in place (unified's `run`).
-  const finish = rehypeKatex ? unified().use(rehypeKatex).use(rehypeShiki, { isDark }) : unified().use(rehypeShiki, { isDark });
-  await finish.run(hast);
+  const { renderHast } = await import("./renderClient");
+  const { hast, finished } = await renderHast(markdownText, { raw: hasRawHtml(markdownText), math, dark: isDark() });
+  if (!finished) {
+    const rehypeKatex = math ? await loadKatex() : null;
+    // The finishing passes run on the tree in place (unified's `run`).
+    const finish = rehypeKatex ? unified().use(rehypeKatex).use(rehypeShiki, { isDark }) : unified().use(rehypeShiki, { isDark });
+    await finish.run(hast);
+  }
   return hastToReact(hast);
 }
 

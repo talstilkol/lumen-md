@@ -17,7 +17,12 @@ import { renderMarkdown } from "../renderer/pipeline";
 import { __resetRenderClient } from "../renderer/renderClient";
 import { handleRenderRequest, type RenderRequest } from "../renderer/renderProtocol";
 import { StaticRenderContext } from "../renderer/components";
+import { setShikiLoaders } from "../renderer/shikiWorker";
 import { renderDocs } from "./fixtures/renderDocs";
+// @ts-expect-error — plain .mjs module without types
+import { grammarsOf } from "../../scripts/copy-shiki-grammars.mjs";
+import { readFile } from "node:fs/promises";
+import { createRequire } from "node:module";
 
 const docs = renderDocs();
 
@@ -52,6 +57,32 @@ describe("render snapshots (50 documents)", () => {
 
   describe("through the render worker (handler + structuredClone)", () => {
     beforeAll(() => {
+      // In Node the worker's Shiki gets its wasm and grammars from the
+      // packages the copy script reads, instead of fetching public/shiki/.
+      const require = createRequire(import.meta.url);
+      const grammars = new Map<string, { order: string[]; grammars: Map<string, string> }>();
+      const of = async (lang: string) => {
+        let g = grammars.get(lang);
+        if (!g) {
+          try {
+            g = await grammarsOf(lang);
+          } catch {
+            return null;
+          }
+          grammars.set(lang, g!);
+        }
+        return g!;
+      };
+      setShikiLoaders({
+        // A Node Buffer: the engine accepts it as wasm bytes (an ArrayBuffer
+        // sliced from it fails the engine's realm-bound instanceof check under jsdom).
+        wasm: () => readFile(require.resolve("shiki/dist/onig.wasm")),
+        grammarsFor: async (lang) => (await of(lang))?.order ?? null,
+        grammar: async (name) => {
+          for (const g of grammars.values()) if (g.grammars.has(name)) return JSON.parse(g.grammars.get(name)!);
+          return null;
+        },
+      });
       vi.stubGlobal("Worker", FakeRenderWorker);
       __resetRenderClient();
     });
