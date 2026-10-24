@@ -1354,6 +1354,7 @@
   "privacy.cloudRequests": "יצאו מהמכשיר: {n} (נשלחו {size})",
   "privacy.localRequests": "מקומיות: {n}",
   "privacy.downloads": "הורדות מודלים: {n}",
+  "privacy.staticAssets": "קבצים סטטיים: {n}",
   "privacy.blocked": "נחסמו: {n}",
   "privacy.onlyLeaving": "רק מה שיצא מהמכשיר",
   "privacy.clear": "ניקוי",

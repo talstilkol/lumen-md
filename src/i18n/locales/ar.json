@@ -1354,6 +1354,7 @@
   "privacy.cloudRequests": "غادرت هذا الجهاز: {n} (أُرسل {size})",
   "privacy.localRequests": "محلية: {n}",
   "privacy.downloads": "تنزيلات النماذج: {n}",
+  "privacy.staticAssets": "ملفات ثابتة: {n}",
   "privacy.blocked": "محظورة: {n}",
   "privacy.onlyLeaving": "فقط ما غادر الجهاز",
   "privacy.clear": "مسح",

@@ -1354,6 +1354,7 @@
   "privacy.cloudRequests": "离开本设备：{n}（已发送 {size}）",
   "privacy.localRequests": "本地：{n}",
   "privacy.downloads": "模型下载：{n}",
+  "privacy.staticAssets": "静态文件：{n}",
   "privacy.blocked": "已阻止：{n}",
   "privacy.onlyLeaving": "仅显示离开本设备的请求",
   "privacy.clear": "清除",

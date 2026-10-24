@@ -21,6 +21,8 @@ tldraw 4.5.10 (`src/ui/CanvasTldraw.tsx`) is under the *tldraw license*. Without
 
 - The privacy ledger now tracks `cdn.tldraw.com`:
   - The beacon path (`…/watermark-track.svg`) is in a new category, `third-party`, labelled "Third-party service — the page address is sent". Local-only blocks it like other off-device traffic, and the panel's "left this device" total counts it.
-  - The other files on that host (fonts, icons, translations) carry no user data and the canvas needs them. They are logged as `static-asset` ("Static files (fonts, icons) — no text sent") and are not blocked, like model downloads.
-  - Both labels are translated into en plus 7 locales.
+  - The other files on that host (fonts, icons, translations) carry no user data and the canvas needs them. They are logged as `static-asset` ("Static files (fonts, icons) — no text sent") and are not blocked, like model downloads. The panel counts them as "Static files", not as model downloads.
+  - Translations and the beacon are `fetch()` calls, so the fetch wrapper sees them (and can block the beacon). Fonts (`FontFace`) and icons (CSS `url()`) are loaded by the browser itself and never pass through `fetch`. The ledger records them from the Resource Timing API (`PerformanceObserver`, type `resource`) after they load. It can log these, not block them. Their received size shows as "—" unless the CDN sends `Timing-Allow-Origin` (the browser reports 0 bytes for a cross-origin file without it).
+  - "Sent" for a tracked GET includes its query string, so the beacon's page address is counted.
+  - The labels are translated into en plus 7 locales.
 - Remaining before release: either a licence key (15.10) or the move to Excalidraw (4.19). The second option also removes the CDN fonts and assets.

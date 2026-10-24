@@ -59,6 +59,7 @@ export function PrivacyLedgerPanel({ open, onClose }: Props) {
           <span>{t("privacy.cloudRequests", { n: sum.cloudRequests, size: bytes(sum.cloudBytesOut) })}</span>
           <span>{t("privacy.localRequests", { n: sum.local })}</span>
           <span>{t("privacy.downloads", { n: sum.downloads })}</span>
+          {sum.staticAssets > 0 && <span>{t("privacy.staticAssets", { n: sum.staticAssets })}</span>}
           <span style={{ color: sum.blocked ? "hsl(0 70% 55%)" : undefined }}>{t("privacy.blocked", { n: sum.blocked })}</span>
         </div>
         <div style={{ padding: "8px 16px", display: "flex", gap: 8, alignItems: "center", fontSize: 12 }}>
