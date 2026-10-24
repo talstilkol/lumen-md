@@ -420,7 +420,8 @@ export async function runAgent<I extends AgentInput, O = string>(def: AgentDefin
   // the first request actually goes out — the chat adapter defers it past
   // its own key / rate-limit checks — so a run that fails locally (or is
   // cancelled first) spends nothing. At the limit nothing goes out at all.
-  let charged = false;
+  // A batch job paid for the whole job when it was submitted (`prepaid`).
+  let charged = !!opts.prepaid;
   const chargeOnce = (): void => {
     if (charged) return;
     if (opts.ownPrompt) {
@@ -428,7 +429,7 @@ export async function runAgent<I extends AgentInput, O = string>(def: AgentDefin
     } else chargeAiCommandDispatch();
     charged = true;
   };
-  if (!aiQuotaStatus(new Date()).allowed) {
+  if (!charged && !aiQuotaStatus(new Date()).allowed) {
     try {
       chargeOnce();
     } catch (e) {
@@ -482,7 +483,7 @@ export async function runAgent<I extends AgentInput, O = string>(def: AgentDefin
           schema: nativeSchema ? def.outputSchema : turnSchema,
           model,
           tier,
-          maxTokens: def.maxTokens,
+          maxTokens: typeof def.maxTokens === "function" ? def.maxTokens(input) : def.maxTokens,
           temperature: patch.temperature ?? def.temperature,
           signal: opts.signal,
           onDelta: def.streaming && !offered.length ? opts.onDelta : undefined,

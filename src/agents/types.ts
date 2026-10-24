@@ -333,7 +333,7 @@ export interface AgentDefinition<I extends AgentInput = AgentInput, O = string> 
   /** Retries after a failed validation (default 2). Interactive agents set 0. */
   maxRetries?: number;
   temperature?: number;
-  maxTokens?: number;
+  maxTokens?: number | ((input: I) => number);
   /** Stream deltas to the caller (text agents). */
   streaming?: boolean;
   /** Scopes this agent needs beyond `read`. */
@@ -443,4 +443,6 @@ export interface RunOptions {
    * palette command. `"silent"`: no toast when the quota is spent.
    */
   ownPrompt?: boolean | "silent";
+  /** Already paid for (a batch job is charged once, when it is submitted): the run charges nothing. */
+  prepaid?: boolean;
 }

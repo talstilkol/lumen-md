@@ -15,9 +15,8 @@
  * through `chat()`, so it follows the same policy.
  */
 
-import { chat, getAiKey, AiError } from "./llm";
+import { getAiKey, AiError } from "./llm";
 import { assertCloudAllowed, getAiPolicy } from "./policy";
-import { PROMPTS } from "./prompts";
 import { log } from "../lib/logger";
 import { fetchWithRetry } from "../lib/fetchRetry";
 
@@ -122,13 +121,9 @@ export async function summarizeMemo(transcript: string): Promise<string> {
   if (!transcript.trim()) return "";
   // Pays for itself when sent (ownPrompt), not attributed to a palette
   // command that may be waiting in a dialog at the same time.
-  return chat(
-    [
-      { role: "system", content: PROMPTS.summarize },
-      { role: "user", content: transcript },
-    ],
-    { maxTokens: 120, ownPrompt: true },
-  );
+  // Plan 5.5: the `memo-summarizer` agent, through the runtime.
+  const [{ runAgentOrThrow }, { memoSummarizerAgent }] = await Promise.all([import("../agents/runtime"), import("../agents/defs")]);
+  return runAgentOrThrow(memoSummarizerAgent, { text: transcript }, { ownPrompt: true });
 }
 
 /**

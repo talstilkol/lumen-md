@@ -22,8 +22,7 @@ import { wrapInList } from "prosemirror-schema-list";
 import { dragHandlePlugin } from "./dragHandles";
 import { buildIndentKeymap } from "./keymapExtra";
 import "katex/dist/katex.css";
-import { chat, AiError } from "../ai/llm";
-import { PROMPTS } from "../ai/prompts";
+import { AiError } from "../ai/llm";
 import { showAiToast } from "../ui/AiToast";
 import { openAiPrompt } from "../ui/AiInlinePrompt";
 import { log } from "../lib/logger";
@@ -539,13 +538,9 @@ function buildTooltip(getView: () => EditorView | null): HTMLDivElement {
         const { aiOperation, isAbort } = await import("../ai/aiAbort");
         const op = aiOperation();
         try {
-          const rewritten = await chat(
-            [
-              { role: "system", content: PROMPTS.rewrite },
-              { role: "user", content: `Instruction: ${instructions}\n\nText: ${selectedText}` },
-            ],
-            { ownPrompt: true, signal: op.signal },
-          );
+          // Plan 5.5: the `rewriter` agent (with the style profile), through the runtime.
+          const [{ runAgentOrThrow }, { rewriterAgent }] = await Promise.all([import("../agents/runtime"), import("../agents/defs")]);
+          const rewritten = await runAgentOrThrow(rewriterAgent, { text: selectedText, extra: { instruction: instructions } }, { ownPrompt: true, signal: op.signal, selection: selectedText });
           dispatch(state.tr.replaceWith(from, to, state.schema.text(rewritten)));
         } catch (e) {
           if (isAbort(e)) return;

@@ -164,7 +164,9 @@ describe("builder: all files or none (5.3.2)", () => {
     fakeExecutor((req) => {
       const sys = req.messages[0].content;
       if (/product architect/i.test(sys)) return reply(JSON.stringify(spec), req.model);
-      const path = /File to generate: (\S+)/.exec(req.messages.map((m) => m.content).join("\n"))![1];
+      const path = /File to generate: (\S+)/.exec(req.messages.map((m) => m.content).join("\n"))?.[1];
+      // The architecture, test and docs stages run through their agents too (plan 5.5).
+      if (!path) return reply("generated text", req.model);
       return reply(path === broken ? "" : files[path], req.model);
     });
   const projectFiles = () => [...vault.keys()].filter((p) => p.startsWith("pomodoro/")).sort();
