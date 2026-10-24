@@ -32,7 +32,8 @@ import { AiFab } from "./ui/AiFab";
 import { FileTree } from "./ui/FileTree";
 import { SidebarResizer } from "./ui/SidebarResizer";
 import { uiAlert, uiConfirm, uiPrompt } from "./ui/PromptDialog";
-import { openInsertTextDialog } from "./ui/InsertTextDialog";
+// Smart Insert (⌘⇧V) loads on first use: its dialog and detectors are not on the startup path.
+const openInsertTextDialog = () => import("./ui/InsertTextDialog").then((m) => m.openInsertTextDialog());
 import { BacklinksPanel } from "./ui/BacklinksPanel";
 // SearchDialog imports the CodeMirror search-highlight extension; lazy so
 // the boot path stays CodeMirror-free (the dialog opens on ⌘⇧F).
