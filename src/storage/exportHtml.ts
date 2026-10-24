@@ -1,5 +1,6 @@
 import { renderMarkdown } from "../renderer/pipeline";
 import { fetchWithRetry } from "../lib/fetchRetry";
+import { markdownBaseDirection, scriptLanguage, type BaseDirection } from "../lib/textDirection";
 
 export interface HtmlDocumentOptions {
   /** <title> text. */
@@ -12,8 +13,17 @@ export interface HtmlDocumentOptions {
   head?: string;
   /** Markup inserted before the rendered body (e.g. a nav bar). */
   before?: string;
-  /** `lang` attribute of <html>. */
+  /**
+   * `lang` attribute of <html>. Defaults to "he" / "ar" when the document's
+   * first strong character is Hebrew / Arabic, else "en".
+   */
   lang?: string;
+  /**
+   * `dir` attribute of <html>. Defaults to the document's base direction
+   * (first strong character outside frontmatter and code, or a frontmatter
+   * `dir:` key), so a Hebrew note opens right-to-left anywhere.
+   */
+  dir?: BaseDirection;
 }
 
 /**
@@ -26,6 +36,8 @@ export async function renderHtmlDocument(
   opts: HtmlDocumentOptions,
 ): Promise<string> {
   const isDark = Boolean(opts.isDark);
+  const dir = opts.dir ?? markdownBaseDirection(markdown);
+  const lang = opts.lang ?? (dir === "rtl" ? scriptLanguage(markdown) : null) ?? "en";
   // Render to a React tree, then stringify.
   const tree = await renderMarkdown(markdown, () => isDark);
   const { renderToStaticMarkup } = await import("react-dom/server");
@@ -38,7 +50,7 @@ export async function renderHtmlDocument(
   );
 
   return `<!doctype html>
-<html lang="${escapeHtml(opts.lang ?? "en")}" class="${isDark ? "dark" : ""}">
+<html lang="${escapeHtml(lang)}" dir="${dir}" class="${isDark ? "dark" : ""}">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />

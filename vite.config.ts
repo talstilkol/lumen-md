@@ -199,22 +199,54 @@ export default defineConfig({
     VitePWA({
       registerType: "prompt",
       includeAssets: ["favicon.svg", "icons/*.png"],
+      // The one manifest. (public/manifest.json used to be a second one,
+      // linked from index.html, pointing at icons that did not exist and
+      // disagreeing on the colours; its share/file handlers live here now.)
       manifest: {
         name: "Lumen — Markdown, illuminated",
         short_name: "Lumen",
         description:
           "A markdown editor that turns text and data into beautiful documents.",
-        theme_color: "#7c5cff",
-        background_color: "#0c0f17",
+        // Same accent as <meta name="theme-color"> in index.html; the dark
+        // page background from index.css (hsl(224 24% 7%)).
+        theme_color: "#7c5cfc",
+        background_color: "#0e0f16",
         display: "standalone",
+        orientation: "any",
         start_url: "/",
         scope: "/",
+        categories: ["productivity", "utilities", "developer"],
         icons: [
           { src: "favicon.svg", sizes: "any", type: "image/svg+xml", purpose: "any" },
           { src: "icons/icon-192.png", sizes: "192x192", type: "image/png", purpose: "any" },
           { src: "icons/icon-512.png", sizes: "512x512", type: "image/png", purpose: "any" },
           { src: "icons/icon-512-maskable.png", sizes: "512x512", type: "image/png", purpose: "maskable" },
         ],
+        shortcuts: [
+          { name: "New Document", short_name: "New", url: "/?action=new", icons: [{ src: "icons/icon-192.png", sizes: "192x192", type: "image/png" }] },
+          { name: "Command Palette", short_name: "Commands", url: "/?action=palette", icons: [{ src: "icons/icon-192.png", sizes: "192x192", type: "image/png" }] },
+        ],
+        share_target: {
+          action: "/",
+          method: "POST",
+          enctype: "multipart/form-data",
+          params: {
+            title: "title",
+            text: "text",
+            url: "url",
+            files: [{ name: "files", accept: [".md", ".txt", ".markdown", "text/markdown", "text/plain"] }],
+          },
+        },
+        file_handlers: [
+          {
+            action: "/",
+            accept: {
+              "text/markdown": [".md", ".markdown", ".mdown", ".mkd"],
+              "text/plain": [".txt"],
+            },
+          },
+        ],
+        launch_handler: { client_mode: "navigate-existing" },
       },
       workbox: {
         // Only precache small core files at install time. Heavy on-demand
