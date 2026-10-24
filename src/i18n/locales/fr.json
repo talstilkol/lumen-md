@@ -1468,5 +1468,8 @@
   "toast.nikud.noHost": "Le modèle de niqqud n'est pas encore téléchargeable (son hébergement n'est pas configuré).",
   "toast.nikud.declined": "Le niqqud nécessite le téléchargement du modèle ; rien n'a été modifié.",
   "toast.nikud.failed": "Échec du niqqud : {error}",
-  "models.purpose.nikud": "Niqqud hébreu sur cet appareil"
+  "models.purpose.nikud": "Niqqud hébreu sur cet appareil",
+  "caption.purpose": "Décrire les images sur cet appareil (texte alternatif)",
+  "caption.attribution.florence": "Florence-2 © Microsoft, licence MIT ; conversion ONNX par onnx-community (Hugging Face).",
+  "caption.attribution.smolvlm": "SmolVLM-256M-Instruct © Hugging Face, licence Apache 2.0."
 }

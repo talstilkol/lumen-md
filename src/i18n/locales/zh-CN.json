@@ -1468,5 +1468,8 @@
   "toast.nikud.noHost": "元音符号模型尚不可下载（其托管尚未设置）。",
   "toast.nikud.declined": "添加元音符号需要下载模型；未做任何更改。",
   "toast.nikud.failed": "添加元音符号失败：{error}",
-  "models.purpose.nikud": "在本设备上为希伯来语加元音符号"
+  "models.purpose.nikud": "在本设备上为希伯来语加元音符号",
+  "caption.purpose": "在本设备上描述图片（替代文本）",
+  "caption.attribution.florence": "Florence-2 © Microsoft，MIT 许可证；ONNX 转换：onnx-community（Hugging Face）。",
+  "caption.attribution.smolvlm": "SmolVLM-256M-Instruct © Hugging Face，Apache 2.0 许可证。"
 }

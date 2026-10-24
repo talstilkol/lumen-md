@@ -1468,5 +1468,8 @@
   "toast.nikud.noHost": "ニクードのモデルはまだダウンロードできません（ホストが未設定です）。",
   "toast.nikud.declined": "ニクードにはモデルのダウンロードが必要です。何も変更していません。",
   "toast.nikud.failed": "ニクードに失敗しました：{error}",
-  "models.purpose.nikud": "このデバイスでのヘブライ語ニクード"
+  "models.purpose.nikud": "このデバイスでのヘブライ語ニクード",
+  "caption.purpose": "このデバイスで画像を説明（代替テキスト）",
+  "caption.attribution.florence": "Florence-2 © Microsoft、MIT ライセンス。ONNX 変換：onnx-community（Hugging Face）。",
+  "caption.attribution.smolvlm": "SmolVLM-256M-Instruct © Hugging Face、Apache License 2.0。"
 }

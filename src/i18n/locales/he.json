@@ -1468,5 +1468,8 @@
   "toast.nikud.noHost": "מודל הניקוד עדיין לא זמין להורדה (האחסון שלו עוד לא הוגדר).",
   "toast.nikud.declined": "הניקוד דורש להוריד את המודל; שום דבר לא השתנה.",
   "toast.nikud.failed": "הניקוד נכשל: {error}",
-  "models.purpose.nikud": "ניקוד עברי במכשיר"
+  "models.purpose.nikud": "ניקוד עברי במכשיר",
+  "caption.purpose": "תיאור תמונות במכשיר (טקסט חלופי)",
+  "caption.attribution.florence": "Florence-2 © Microsoft, רישיון MIT; המרת ONNX על ידי onnx-community (Hugging Face).",
+  "caption.attribution.smolvlm": "SmolVLM-256M-Instruct © Hugging Face, רישיון Apache 2.0."
 }

@@ -1468,5 +1468,8 @@
   "toast.nikud.noHost": "Das Niqqud-Modell ist noch nicht herunterladbar (sein Hosting ist nicht eingerichtet).",
   "toast.nikud.declined": "Niqqud braucht den Modell-Download; nichts wurde geändert.",
   "toast.nikud.failed": "Niqqud fehlgeschlagen: {error}",
-  "models.purpose.nikud": "Hebräischer Niqqud auf diesem Gerät"
+  "models.purpose.nikud": "Hebräischer Niqqud auf diesem Gerät",
+  "caption.purpose": "Bilder auf diesem Gerät beschreiben (Alternativtext)",
+  "caption.attribution.florence": "Florence-2 © Microsoft, MIT-Lizenz; ONNX-Konvertierung von onnx-community (Hugging Face).",
+  "caption.attribution.smolvlm": "SmolVLM-256M-Instruct © Hugging Face, Apache-Lizenz 2.0."
 }

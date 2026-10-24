@@ -1468,5 +1468,8 @@
   "toast.nikud.noHost": "نموذج التنقيط غير متاح للتنزيل بعد (لم يُعدّ مكان استضافته).",
   "toast.nikud.declined": "يتطلب التنقيط تنزيل النموذج؛ لم يتغير شيء.",
   "toast.nikud.failed": "فشل التنقيط: {error}",
-  "models.purpose.nikud": "التنقيط العبري على هذا الجهاز"
+  "models.purpose.nikud": "التنقيط العبري على هذا الجهاز",
+  "caption.purpose": "وصف الصور على هذا الجهاز (نص بديل)",
+  "caption.attribution.florence": "Florence-2 © Microsoft، رخصة MIT؛ تحويل ONNX بواسطة onnx-community (Hugging Face).",
+  "caption.attribution.smolvlm": "SmolVLM-256M-Instruct © Hugging Face، رخصة Apache 2.0."
 }

@@ -850,6 +850,36 @@
           "attribution": "Nakdimon © 2022 Elazar Gershuni (Gershuni & Pinter, “Restoring Hebrew Diacritics Without a Dictionary”, NAACL Findings 2022), licensed under the MIT License; mirrored unchanged by Lumen."
         }
       ]
+    },
+    {
+      "id": "onnx-community/Florence-2-base-ft",
+      "kind": "vision",
+      "source": "https://huggingface.co/onnx-community/Florence-2-base-ft",
+      "license": "MIT",
+      "class": "allowed",
+      "commercial": "yes",
+      "attribution": "Florence-2 © Microsoft (Xiao et al., “Florence-2: Advancing a Unified Representation for a Variety of Vision Tasks”, 2023), licensed under the MIT License; ONNX conversion by onnx-community (Hugging Face).",
+      "size": "≈ 224 MB (q4 language parts + fp16 vision encoder, WebGPU); q8 on wasm",
+      "runs": "browser",
+      "delivery": "download",
+      "catalog": "CAPTION_MODELS (src/ai/caption.ts)",
+      "verified": true,
+      "notes": "Image captions in the browser (plan 6.6), English; translated into the note's language by local translation (6.4). Downloaded from Hugging Face only after the consent dialog. MIT per appendix 19 (image captions: Florence-2 base-ft, MIT) and the microsoft/Florence-2-base-ft model card."
+    },
+    {
+      "id": "HuggingFaceTB/SmolVLM-256M-Instruct",
+      "kind": "vision",
+      "source": "https://huggingface.co/HuggingFaceTB/SmolVLM-256M-Instruct",
+      "license": "Apache-2.0",
+      "class": "allowed",
+      "commercial": "yes",
+      "attribution": "SmolVLM-256M-Instruct © Hugging Face (Marafioti et al., “SmolVLM: Redefining small and efficient multimodal models”, 2025), licensed under the Apache License 2.0.",
+      "size": "≈ 189 MB (q4 decoder + fp16 vision encoder, WebGPU); q8 on wasm",
+      "runs": "browser",
+      "delivery": "download",
+      "catalog": "CAPTION_MODELS (src/ai/caption.ts)",
+      "verified": true,
+      "notes": "Fallback captioner of plan 6.6 when Florence-2 cannot load or gives no valid caption. Downloaded only after the consent dialog. Apache-2.0 per appendix 19 (fallback: SmolVLM-256M, Apache) and the model card."
     }
   ]
 }
