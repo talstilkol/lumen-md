@@ -825,6 +825,31 @@
       "catalog": "M2M100_MODEL (src/ai/transformersEngine.ts)",
       "verified": true,
       "notes": "Layer 3 of local translation (plan 6.4): the pairs Opus-MT does not cover. Downloaded from Hugging Face only after the consent dialog (size, licence, attribution). MIT per the plan’s licence research (appendix 19: M2M100-418M, MIT) and the facebook/m2m100_418M model card. NLLB-200 (CC-BY-NC) stays forbidden."
+    },
+    {
+      "id": "nakdimon",
+      "kind": "other",
+      "source": "https://github.com/elazarg/nakdimon/blob/a06ebfd032548b132ac2da2f5aab1289de5ae5f2/nakdimon/data/Nakdimon.onnx",
+      "license": "MIT",
+      "class": "allowed",
+      "commercial": "yes",
+      "attribution": "Nakdimon © 2022 Elazar Gershuni (Gershuni & Pinter, “Restoring Hebrew Diacritics Without a Dictionary”, NAACL Findings 2022), licensed under the MIT License; mirrored unchanged by Lumen.",
+      "size": "21.3 MB (fp32 ONNX, as published)",
+      "runs": "browser",
+      "delivery": "download",
+      "catalog": "CONVERTED_MODELS (src/ai/convertedModels.ts), NAKDIMON_ID (src/ai/nikudService.ts)",
+      "verified": true,
+      "notes": "Stage 1 of Hebrew niqqud (plan 6.3). The ONNX file ships in the MIT-licensed repository (LICENSE: Copyright 2022, Elazar Gershuni); model-convert.yml mirrors it byte for byte at the pinned commit and checks this sha256. Served from CONVERTED_MODELS_BASE once Tal picks the host (15.9); downloaded only after the consent dialog.",
+      "files": [
+        {
+          "path": "Nakdimon.onnx",
+          "sha256": "ab08a8c47daf33886c224859347fa5420c2bfe7ecf4afd2d3387f32b0af12c67",
+          "bytes": 21312852,
+          "dtype": "fp32",
+          "license": "MIT",
+          "attribution": "Nakdimon © 2022 Elazar Gershuni (Gershuni & Pinter, “Restoring Hebrew Diacritics Without a Dictionary”, NAACL Findings 2022), licensed under the MIT License; mirrored unchanged by Lumen."
+        }
+      ]
     }
   ]
 }

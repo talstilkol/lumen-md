@@ -28,18 +28,19 @@ async function entryWith(contents: Record<string, { text: string; dtype: string 
 }
 
 describe("converted models catalog", () => {
-  it("lists the four plan-6.0 models, each in the registry with licence and attribution", async () => {
+  it("lists the four plan-6.0 models and Nakdimon (6.3), each in the registry with licence and attribution", async () => {
     expect(CONVERTED_MODELS.map((m) => m.id)).toEqual([
       "opus-mt-en-he",
       "opus-mt-tc-big-he-en",
       "dictabert-ner",
       "siglip-base-patch16-256-multilingual",
+      "nakdimon",
     ]);
     const reg = await loadConvertedRegistry();
     for (const m of CONVERTED_MODELS) {
       const e = reg.get(m.id);
       expect(e, m.id).toBeTruthy();
-      expect(e!.license).toMatch(/^(Apache-2\.0|CC-BY-4\.0)$/);
+      expect(e!.license).toMatch(/^(Apache-2\.0|CC-BY-4\.0|MIT)$/);
       expect(e!.attribution.length).toBeGreaterThan(20);
       // Every published file carries the checksum, size, licence and attribution.
       for (const f of e!.files ?? []) {

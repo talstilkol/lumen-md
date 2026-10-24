@@ -1456,5 +1456,17 @@
   "mt.size.approx": "約 {size}",
   "toast.translatedWith": "{layer} で翻訳しました",
   "toast.translatedWithUnmeasured": "{layer} で翻訳しました — この言語ペアでの品質はまだ測定されていません",
-  "toast.localMtUnavailable": "ローカル翻訳は利用できませんでした（{why}）。代わりに AI モデルが翻訳しました。"
+  "toast.localMtUnavailable": "ローカル翻訳は利用できませんでした（{why}）。代わりに AI モデルが翻訳しました。",
+  "cmd.nikud.add": "ヘブライ語：ニクードを付ける",
+  "cmd.nikud.add.hint": "選択範囲（またはノート全体）にこのデバイスで付ける",
+  "cmd.nikud.partial": "ヘブライ語：部分的なニクード",
+  "cmd.nikud.partial.hint": "複数の読み方ができる単語だけに付ける",
+  "cmd.nikud.remove": "ヘブライ語：ニクードを外す",
+  "cmd.nikud.remove.hint": "選択範囲（またはノート全体）から母音記号を外す",
+  "toast.nikud.working": "このデバイスでニクードを付けています…",
+  "toast.nikud.nothing": "変更するヘブライ語のテキストがありません。",
+  "toast.nikud.noHost": "ニクードのモデルはまだダウンロードできません（ホストが未設定です）。",
+  "toast.nikud.declined": "ニクードにはモデルのダウンロードが必要です。何も変更していません。",
+  "toast.nikud.failed": "ニクードに失敗しました：{error}",
+  "models.purpose.nikud": "このデバイスでのヘブライ語ニクード"
 }

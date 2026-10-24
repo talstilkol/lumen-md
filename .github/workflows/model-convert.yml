@@ -130,6 +130,38 @@ jobs:
           path: out/siglip-base-patch16-256-multilingual/
           retention-days: 30
 
+  # Nakdimon (plan 6.3): already ONNX in its MIT repository — mirrored
+  # byte for byte at a pinned commit, checked against models/registry.json.
+  nakdimon:
+    name: Nakdimon mirror
+    runs-on: ubuntu-24.04 # pinned: ubuntu-latest becomes Ubuntu 26 from 19.10.2026 (actions/runner-images#14748)
+    timeout-minutes: 10
+    env:
+      COMMIT: a06ebfd032548b132ac2da2f5aab1289de5ae5f2
+    steps:
+      - uses: actions/checkout@v7
+      - name: Download at the pinned commit and verify
+        run: |
+          mkdir -p out/nakdimon
+          curl -fsSL -o out/nakdimon/Nakdimon.onnx "https://raw.githubusercontent.com/elazarg/nakdimon/$COMMIT/nakdimon/data/Nakdimon.onnx"
+          curl -fsSL -o out/nakdimon/LICENSE "https://raw.githubusercontent.com/elazarg/nakdimon/$COMMIT/LICENSE"
+          node -e '
+            const fs = require("fs"), crypto = require("crypto");
+            const entry = require("./models/registry.json").models.find((m) => m.id === "nakdimon");
+            const want = entry.files[0];
+            const data = fs.readFileSync("out/nakdimon/Nakdimon.onnx");
+            const sum = crypto.createHash("sha256").update(data).digest("hex");
+            if (sum !== want.sha256 || data.length !== want.bytes) { console.log(`::error title=Nakdimon::got ${sum} (${data.length} B), registry says ${want.sha256} (${want.bytes} B)`); process.exit(1); }
+            if (!/Permission is hereby granted, free of charge/.test(fs.readFileSync("out/nakdimon/LICENSE", "utf8"))) { console.log("::error title=Nakdimon::LICENSE is no longer MIT"); process.exit(1); }
+            fs.writeFileSync("out/nakdimon/manifest.json", JSON.stringify({ id: "nakdimon", source: entry.source, revision: process.env.COMMIT, via: "mirror", license: entry.license, attribution: entry.attribution, files: entry.files }, null, 2) + "\n");
+            console.log(`::notice title=Nakdimon::${sum} matches models/registry.json`);
+          '
+      - uses: actions/upload-artifact@v7
+        with:
+          name: model-nakdimon
+          path: out/nakdimon/
+          retention-days: 30
+
   convert:
     name: convert ${{ matrix.id }}
     needs: [plan, siglip-mirror]
@@ -235,7 +267,7 @@ jobs:
 
   smoke:
     name: transformers.js 4.3 in Chromium
-    needs: [plan, convert]
+    needs: [plan, convert, nakdimon]
     if: always() && needs.plan.result == 'success'
     runs-on: ubuntu-24.04 # pinned: ubuntu-latest becomes Ubuntu 26 from 19.10.2026 (actions/runner-images#14748)
     timeout-minutes: 45
@@ -281,6 +313,18 @@ jobs:
         with:
           name: mt-dev-scores
           path: mt-dev-scores.json
+          if-no-files-found: ignore
+
+      - name: Nakdimon — niqqud on the nikud dev split (plan 6.3)
+        # The classical (Ben-Yehuda) part; the modern part is local-only text.
+        if: always()
+        run: |
+          node scripts/golden/evals/nikud.mjs --dev --model models-under-test/nakdimon/Nakdimon.onnx | tee nikud-dev-scores.json | tee -a "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: nikud-dev-scores
+          path: nikud-dev-scores.json
           if-no-files-found: ignore
 
   publish:

@@ -1456,5 +1456,17 @@
   "mt.size.approx": "environ {size}",
   "toast.translatedWith": "Traduit avec {layer}",
   "toast.translatedWithUnmeasured": "Traduit avec {layer} — sa qualité sur cette paire n’est pas encore mesurée",
-  "toast.localMtUnavailable": "La traduction locale n’était pas disponible ({why}) ; le modèle d’IA a traduit à sa place."
+  "toast.localMtUnavailable": "La traduction locale n’était pas disponible ({why}) ; le modèle d’IA a traduit à sa place.",
+  "cmd.nikud.add": "Hébreu : ajouter le niqqud",
+  "cmd.nikud.add.hint": "Vocaliser la sélection (ou toute la note) sur cet appareil",
+  "cmd.nikud.partial": "Hébreu : niqqud partiel",
+  "cmd.nikud.partial.hint": "Vocaliser seulement les mots qui peuvent se lire de plusieurs façons",
+  "cmd.nikud.remove": "Hébreu : retirer le niqqud",
+  "cmd.nikud.remove.hint": "Retirer les points-voyelles de la sélection (ou de toute la note)",
+  "toast.nikud.working": "Ajout du niqqud sur cet appareil…",
+  "toast.nikud.nothing": "Aucun texte hébreu à modifier.",
+  "toast.nikud.noHost": "Le modèle de niqqud n'est pas encore téléchargeable (son hébergement n'est pas configuré).",
+  "toast.nikud.declined": "Le niqqud nécessite le téléchargement du modèle ; rien n'a été modifié.",
+  "toast.nikud.failed": "Échec du niqqud : {error}",
+  "models.purpose.nikud": "Niqqud hébreu sur cet appareil"
 }

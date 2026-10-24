@@ -1456,5 +1456,17 @@
   "mt.size.approx": "约 {size}",
   "toast.translatedWith": "已使用{layer}翻译",
   "toast.translatedWithUnmeasured": "已使用{layer}翻译——其在此语言对上的质量尚未测量",
-  "toast.localMtUnavailable": "本地翻译不可用（{why}）；已改由 AI 模型翻译。"
+  "toast.localMtUnavailable": "本地翻译不可用（{why}）；已改由 AI 模型翻译。",
+  "cmd.nikud.add": "希伯来语：添加元音符号",
+  "cmd.nikud.add.hint": "在本设备上为所选内容（或整篇笔记）加元音符号",
+  "cmd.nikud.partial": "希伯来语：部分元音符号",
+  "cmd.nikud.partial.hint": "仅为可有多种读法的词加元音符号",
+  "cmd.nikud.remove": "希伯来语：移除元音符号",
+  "cmd.nikud.remove.hint": "从所选内容（或整篇笔记）中去除元音符号",
+  "toast.nikud.working": "正在本设备上添加元音符号…",
+  "toast.nikud.nothing": "没有可更改的希伯来语文本。",
+  "toast.nikud.noHost": "元音符号模型尚不可下载（其托管尚未设置）。",
+  "toast.nikud.declined": "添加元音符号需要下载模型；未做任何更改。",
+  "toast.nikud.failed": "添加元音符号失败：{error}",
+  "models.purpose.nikud": "在本设备上为希伯来语加元音符号"
 }
