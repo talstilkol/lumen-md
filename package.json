@@ -1,7 +1,7 @@
 {
   "name": "lumen-md",
   "private": true,
-  "version": "0.1.0",
+  "version": "0.9.0-beta.1",
   "type": "module",
   "license": "MIT",
   "description": "Lumen — a hybrid markdown editor focused on world-class rendering and turning data into beautiful tables and charts.",
