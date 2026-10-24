@@ -363,7 +363,15 @@ export default defineConfig({
     }),
   ],
   resolve: {
-    alias: {
+    alias: [
+      // isomorphic-git ≥ 1.37 maps "." only to index.cjs — the Node build,
+      // which hashes packfiles with require("crypto").createHash. In the
+      // browser that is an empty shim and every clone failed with
+      // "createHash is not a function" (found by the G3 e2e, plan 3.7).
+      // index.js is the package's own browser/ESM build (sha.js).
+      // Exact match only (a regex): the subpaths (http/web …) resolve normally.
+      { find: /^isomorphic-git$/, replacement: path.resolve(__dirname, "node_modules/isomorphic-git/index.js") },
+      ...Object.entries({
       "@": path.resolve(__dirname, "./src"),
       // remark-math only uses the `math` syntax extension, but the
       // package index also re-exports `mathHtml` (lib/html.js), which
@@ -390,7 +398,8 @@ export default defineConfig({
               "src/__tests__/stubs/y-websocket.ts",
             ),
           }),
-    },
+      }).map(([find, replacement]) => ({ find, replacement })),
+    ],
   },
   server: {
     port: 5173,
