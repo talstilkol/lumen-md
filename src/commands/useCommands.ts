@@ -1177,6 +1177,45 @@ export function useCommands({
         },
       },
       {
+        id: "ai.policy",
+        label: t("cmd.ai.policy"),
+        hint: t("cmd.ai.policy.hint"),
+        icon: cmdIcons.Sparkles,
+        group: t("group.tools"),
+        action: async () => {
+          const { getAiPolicy, setAiPolicy } = await import("../ai/policy");
+          const choice = await uiSelect({
+            title: t("ai.policy.title"),
+            message: t("cmd.ai.policy.hint"),
+            defaultValue: getAiPolicy(),
+            choices: [
+              { value: "local-only", label: t("ai.policy.localOnly") },
+              { value: "local-first", label: t("ai.policy.localFirst") },
+              { value: "cloud", label: t("ai.policy.cloud") },
+            ],
+          });
+          if (choice !== "local-only" && choice !== "local-first" && choice !== "cloud") return;
+          setAiPolicy(choice);
+          showAiToast(
+            choice === "local-only" ? t("ai.policy.localOnly") : choice === "local-first" ? t("ai.policy.localFirst") : t("ai.policy.cloud"),
+            "success",
+          );
+        },
+      },
+      {
+        id: "ai.trace",
+        label: t("cmd.ai.trace"),
+        hint: t("cmd.ai.trace.hint"),
+        icon: cmdIcons.Sparkles,
+        group: t("group.tools"),
+        action: async () => {
+          const { loadTrace, listRuns, formatTraceReport } = await import("../agents/trace");
+          await loadTrace();
+          const runs = listRuns();
+          await uiAlert({ title: t("ai.trace.title"), message: runs.length ? formatTraceReport(runs) : t("ai.trace.empty") });
+        },
+      },
+      {
         id: "ai.cache",
         label: t("cmd.ai.cache"),
         hint: t("cmd.ai.cache.hint"),
