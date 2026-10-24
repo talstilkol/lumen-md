@@ -79,6 +79,10 @@ export interface IndexStats {
   backlinkReads: number;
   /** Distinct link targets (note keys) the backlinks map holds. */
   linkKeys: number;
+  /** Notes BM25 tokenised since the index was created (plan 5.2). */
+  tokenised: number;
+  /** Upserts skipped because the note was sent again unchanged. */
+  unchanged: number;
 }
 
 interface Link {
@@ -176,7 +180,7 @@ export class VaultIndex {
   private nextOrder = 0;
   /** Content ranking (plan 5.2), one document per note, updated with it. */
   private readonly bm25 = new Bm25Index();
-  private readonly counters = { indexed: 0, removed: 0, backlinkReads: 0 };
+  private readonly counters = { indexed: 0, removed: 0, backlinkReads: 0, tokenised: 0, unchanged: 0 };
 
   get size(): number {
     return this.files.size;
@@ -194,9 +198,18 @@ export class VaultIndex {
     return { files: this.files.size, ...this.counters, linkKeys: this.incoming.size };
   }
 
-  /** Add or replace one note. O(size of the note). */
-  upsert(input: IndexInput): void {
+  /**
+   * Add or replace one note. O(size of the note). A note sent again
+   * unchanged (same text, name and mtime — a redundant full re-upsert) is
+   * skipped: nothing is re-tokenised, as #232's `isCurrent` check did.
+   * Returns whether the note was (re-)indexed.
+   */
+  upsert(input: IndexInput): boolean {
     const prev = this.files.get(input.path);
+    if (prev && prev.content === input.content && prev.name === input.name && prev.modified === input.modified && this.bm25.isCurrent(input.path, input.content, bm25Name(input.name))) {
+      this.counters.unchanged++;
+      return false;
+    }
     if (prev) this.unlink(prev);
     const content = input.content;
     const links: Link[] = [];
@@ -223,13 +236,17 @@ export class VaultIndex {
     };
     // Map.set on an existing key keeps its position, as the old index did.
     this.files.set(input.path, entry);
-    this.bm25.set(input.path, content, bm25Name(input.name));
+    if (!this.bm25.isCurrent(input.path, content, bm25Name(input.name))) {
+      this.bm25.set(input.path, content, bm25Name(input.name));
+      this.counters.tokenised++;
+    }
     for (const l of links) {
       let set = this.incoming.get(l.key);
       if (!set) this.incoming.set(l.key, (set = new Set()));
       set.add(input.path);
     }
     this.counters.indexed++;
+    return true;
   }
 
   /** Remove one note. O(its links). */

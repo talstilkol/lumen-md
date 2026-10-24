@@ -7,7 +7,7 @@
  * through `searchWorkspace` — the same path the search dialog and the
  * agent tool use (facade → index engine → VaultIndex).
  */
-import { describe, it, expect, beforeAll } from "vitest";
+import { describe, it, expect, beforeAll, vi } from "vitest";
 import { createMemoryBackend, setVaultBackend } from "../storage/vault";
 import { writeWorkspaceFile } from "../storage/workspace";
 import { __resetWorkspaceIndex, searchWorkspace } from "../storage/workspaceIndex";
@@ -140,5 +140,57 @@ describe("parseQuery", () => {
 
   it("an invalid regex is reported, not thrown", () => {
     expect(parseQuery("/[/").invalid).toEqual(["/[/"]);
+  });
+});
+
+describe("regressions vs #232 restored in the worker core (S1 review on #306)", () => {
+  it("(a) the in-thread engine yields to the event loop during a large upsert", async () => {
+    const { localEngine } = await import("../storage/vaultIndexLocal");
+    vi.useFakeTimers();
+    try {
+      // A clock that advances 1 ms per note: 200 notes with a 30 ms slice → yields after notes 31, 62, …
+      let t = 0;
+      const index = new VaultIndex();
+      const engine = localEngine(index, { sliceMs: 30, now: () => t++ });
+      const files = Array.from({ length: 200 }, (_, i) => ({ path: `n${i}.md`, name: `n${i}.md`, content: `note ${i}`, modified: 1 }));
+      let done = false;
+      const p = engine.upsert(files).then(() => (done = true));
+      // Before any timer runs, only the first slice is in: the rest waits for the event loop.
+      await Promise.resolve();
+      await Promise.resolve();
+      expect(done).toBe(false);
+      const firstSlice = index.size;
+      expect(firstSlice).toBeGreaterThan(0);
+      expect(firstSlice).toBeLessThan(200);
+      // A search queued now waits for the whole upsert (requests stay in order).
+      const search = engine.search("note", { limit: 1000 });
+      await vi.runAllTimersAsync();
+      await p;
+      expect(done).toBe(true);
+      expect(index.size).toBe(200);
+      expect((await search).length).toBe(200);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("(b) an unchanged re-upsert re-tokenises nothing", async () => {
+    const tokens = await import("../text/searchTokens");
+    const spy = vi.spyOn(tokens, "documentTerms");
+    const index = new VaultIndex();
+    const files = Array.from({ length: 50 }, (_, i) => ({ path: `n${i}.md`, name: `n${i}.md`, content: `note ${i} text`, modified: 1 }));
+    for (const f of files) index.upsert(f);
+    const first = spy.mock.calls.length;
+    expect(first).toBeGreaterThan(0);
+    expect(index.stats().tokenised).toBe(50);
+    // A redundant full re-upsert (e.g. a rebuild of the same vault): 0 tokenise calls.
+    for (const f of files) expect(index.upsert(f)).toBe(false);
+    expect(spy.mock.calls.length).toBe(first);
+    expect(index.stats()).toMatchObject({ tokenised: 50, unchanged: 50 });
+    // One changed note: that note alone is re-tokenised.
+    expect(index.upsert({ ...files[3], content: "changed", modified: 2 })).toBe(true);
+    expect(index.stats().tokenised).toBe(51);
+    expect(spy.mock.calls.length).toBeGreaterThan(first);
+    spy.mockRestore();
   });
 });
