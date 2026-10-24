@@ -520,6 +520,7 @@
   "search.empty": "工作区为空。",
   "search.noMatches": "无匹配结果。",
   "search.placeholder": "搜索文件和内容…",
+  "search.operatorsHint": "运算符：tag:名称  path:文件夹  \"精确短语\"  /regex/  -排除",
   "search.unavailable": "此浏览器不支持存储功能。",
   "searchDialog.askPlaceholder": "输入问题并按 Enter,即可向 AI 工作区提问。",
   "searchDialog.noRelevant": "工作区中未找到相关文件。",

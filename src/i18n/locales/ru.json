@@ -520,6 +520,7 @@
   "search.empty": "Рабочая область пуста.",
   "search.noMatches": "Нет совпадений.",
   "search.placeholder": "Поиск по файлам и содержимому…",
+  "search.operatorsHint": "Операторы: tag:имя  path:папка  \"точная фраза\"  /regex/  -исключить",
   "search.unavailable": "Хранилище недоступно в этом браузере.",
   "searchDialog.askPlaceholder": "Введите вопрос и нажмите Enter, чтобы спросить ИИ рабочего пространства.",
   "searchDialog.noRelevant": "Релевантные файлы не найдены.",

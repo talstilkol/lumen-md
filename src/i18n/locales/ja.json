@@ -520,6 +520,7 @@
   "search.empty": "ワークスペースは空です。",
   "search.noMatches": "一致するものがありません。",
   "search.placeholder": "ファイルとコンテンツを検索…",
+  "search.operatorsHint": "演算子: tag:名前  path:フォルダー  \"完全一致\"  /regex/  -除外",
   "search.unavailable": "このブラウザではストレージが利用できません。",
   "searchDialog.askPlaceholder": "質問を入力して Enter を押すと、AI ワークスペースに質問できます。",
   "searchDialog.noRelevant": "ワークスペース内に関連するファイルが見つかりませんでした。",

@@ -133,6 +133,7 @@ const en: Strings = {
   "backlinks.selectFile": "Select a workspace file to see backlinks.",
   // Search
   "search.placeholder": "Search workspace files & content…",
+  "search.operatorsHint": "Operators: tag:name  path:folder  \"exact phrase\"  /regex/  -exclude",
   "search.unavailable": "Workspace storage isn't available in this browser.",
   "search.empty": "Workspace is empty.",
   "search.noMatches": "No matches.",

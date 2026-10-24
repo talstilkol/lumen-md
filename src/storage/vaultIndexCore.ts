@@ -26,6 +26,7 @@ import { noteKey } from "../lib/slug";
 import { hasHebrew, hebrewFind, normalizeForMatch, prefixVariants } from "../text/hebrew";
 import { WIKI_RE } from "./wikiTargets";
 import { Bm25Index } from "../search/bm25";
+import { matchesOps, noteTags, opLocation, parseQuery } from "../search/queryOps";
 
 export interface IndexInput {
   /** Full workspace path. */
@@ -105,6 +106,8 @@ interface Entry {
    */
   folded: string | null;
   links: Link[];
+  /** Front matter `tags:` and body `#tags` (plan 11.3), lower-case. */
+  tags: string[];
 }
 
 /** Hebrew letters, marks and presentation forms: only notes with one of these need the folded form. */
@@ -216,6 +219,7 @@ export class VaultIndex {
       lower: content.toLowerCase(),
       folded: MAY_FOLD_TO_HEBREW.test(content) ? foldForSearch(content) : null,
       links,
+      tags: noteTags(content),
     };
     // Map.set on an existing key keeps its position, as the old index did.
     this.files.set(input.path, entry);
@@ -254,6 +258,18 @@ export class VaultIndex {
     }
   }
 
+  /** Every tag and the notes that carry it (front matter and body), for the tags panel. */
+  tagIndex(): { tag: string; paths: string[] }[] {
+    const by = new Map<string, string[]>();
+    for (const e of [...this.files.values()].sort((a, b) => (a.path < b.path ? -1 : a.path > b.path ? 1 : 0)))
+      for (const t of e.tags) {
+        let arr = by.get(t);
+        if (!arr) by.set(t, (arr = []));
+        arr.push(e.path);
+      }
+    return [...by].map(([tag, paths]) => ({ tag, paths }));
+  }
+
   /** Notes whose wiki-links point at `targetPath` (by note name, not slug). */
   backlinks(targetPath: string): BacklinkHit[] {
     const stem = basenameOf(targetPath).replace(/\.md$/i, "");
@@ -280,16 +296,29 @@ export class VaultIndex {
    * the whole query found as a phrase adds a few more. Each hit carries a
    * snippet around the phrase, or around its best-matching word.
    */
-  search(query: string, opts: SearchOptions = {}): SearchHit[] {
+  search(rawQuery: string, opts: SearchOptions = {}): SearchHit[] {
     const limit = opts.limit ?? 30;
+    // Operators (plan 11.3): tag:, path:, "phrase", /regex/, -term. The rest ranks.
+    const { text: query, ops, invalid } = parseQuery(rawQuery);
+    // A /regex/ that does not compile matches nothing, rather than being dropped (which would list every note).
+    if (invalid.length) return [];
     const q = query.trim().toLowerCase();
-    const allow = opts.paths ? new Set(opts.paths) : null;
+    const scope = opts.paths ? new Set(opts.paths) : null;
+    const pass = (e: Entry) => (!scope || scope.has(e.path)) && (!ops.length || matchesOps(ops, e));
+    const allow = scope || ops.length ? new Set([...this.files.values()].filter(pass).map((e) => e.path)) : null;
     if (!q) {
       return [...this.files.values()]
         .filter((f) => !allow || allow.has(f.path))
-        .sort((a, b) => b.modified - a.modified)
+        .sort((a, b) => b.modified - a.modified || (a.path < b.path ? -1 : 1))
         .slice(0, limit)
-        .map((f) => ({ path: f.path, name: f.name, score: 0, snippet: null }));
+        .map((f) => {
+          // An operator-only query shows where it matched.
+          const at = ops.length ? opLocation(ops, f) : null;
+          if (!at) return { path: f.path, name: f.name, score: 0, snippet: null };
+          const ctx = snippetAround(f.content, at.start, 80);
+          const local = findIn(ctx, ctx.toLowerCase(), f.content.slice(at.start, at.end).replace(/\s+/g, " ").toLowerCase());
+          return local ? { path: f.path, name: f.name, score: 0, snippet: ctx, match: local } : { path: f.path, name: f.name, score: 0, snippet: ctx };
+        });
     }
     const hebrewQuery = hasHebrew(q);
     const n = hebrewQuery ? normalizeForMatch(q.trim()) : "";

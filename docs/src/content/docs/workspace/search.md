@@ -23,6 +23,8 @@ note in your workspace, ranked by BM25. Agents use the same search
   milliseconds.
 - Each hit shows a snippet with the match highlighted; the top 40 are
   listed.
+- Operators narrow the search: `tag:`, `path:`, `"phrase"`, `/regex/` and
+  `-` to exclude. See [Search operators and #tags](/workspace/search-operators/).
 
 ## Smart (semantic)
 

@@ -56,6 +56,7 @@
   "backlinks.scanning": "סורק את מרחב העבודה…",
   "backlinks.selectFile": "בחר קובץ במרחב העבודה כדי לראות קישורים נכנסים.",
   "search.placeholder": "חיפוש בקבצים ובתוכן של מרחב העבודה…",
+  "search.operatorsHint": "אופרטורים: tag:שם  path:תיקייה  \"ביטוי מדויק\"  /regex/  -להחריג",
   "search.unavailable": "אחסון מרחב העבודה לא זמין בדפדפן זה.",
   "search.empty": "מרחב העבודה ריק.",
   "dialog.ok": "אישור",

@@ -520,6 +520,7 @@
   "search.empty": "Der Arbeitsbereich ist leer.",
   "search.noMatches": "Keine Treffer.",
   "search.placeholder": "Dateien und Inhalte durchsuchen…",
+  "search.operatorsHint": "Operatoren: tag:name  path:ordner  \"genaue Phrase\"  /regex/  -ausschließen",
   "search.unavailable": "Speicher ist in diesem Browser nicht verfügbar.",
   "searchDialog.askPlaceholder": "Gib eine Frage ein und drücke Enter, um die Arbeitsbereichs-KI zu fragen.",
   "searchDialog.noRelevant": "Keine relevanten Dateien im Arbeitsbereich gefunden.",

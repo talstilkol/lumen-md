@@ -520,6 +520,7 @@
   "search.empty": "مساحة العمل فارغة.",
   "search.noMatches": "لا توجد نتائج.",
   "search.placeholder": "البحث في الملفات والمحتوى…",
+  "search.operatorsHint": "عوامل التصفية: tag:اسم  path:مجلد  \"عبارة مطابقة\"  /regex/  -استبعاد",
   "search.unavailable": "التخزين غير متوفر في هذا المتصفح.",
   "searchDialog.askPlaceholder": "اكتب سؤالًا واضغط Enter لسؤال الذكاء الاصطناعي في مساحة العمل.",
   "searchDialog.noRelevant": "لم يتم العثور على ملفات ذات صلة في مساحة العمل.",

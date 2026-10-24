@@ -446,6 +446,16 @@ export function SearchDialog({ open, onClose, onOpenFile }: Props) {
             </span>
           )}
         </div>
+        {mode !== "smart" && isOPFSAvailable() && (
+          // Plan 11.3: the operators, shown under the input (LTR syntax inside an RTL UI stays readable).
+          <div
+            data-testid="search-operators-hint"
+            dir="auto"
+            style={{ padding: "2px 14px 6px", fontSize: 11, color: "hsl(var(--fg-muted))", unicodeBidi: "plaintext" }}
+          >
+            {t("search.operatorsHint")}
+          </div>
+        )}
         <div className="cmd-palette-list" ref={listRef}>
           {mode === "smart" && !smartAllowed && (
             <UpgradeNotice compact plan="pro" message={t("billing.upgrade.smartSearch")} />
