@@ -1429,5 +1429,13 @@
   "cmd.ai.cancel": "AI: ביטול",
   "cmd.ai.cancel.hint": "עוצר כל בקשת AI שרצה (גם Esc עושה זאת)",
   "toast.aiCancelled": "בקשת ה-AI בוטלה ({count})",
-  "toast.aiNothingRunning": "אין בקשת AI שרצה"
+  "toast.aiNothingRunning": "אין בקשת AI שרצה",
+  "agent.suggest.splitDocument": "לפצל את המסמך ולהריץ על כל חלק",
+  "agent.suggest.splitDocument.detail": "מריץ את הפקודה על חלקים של כ-{size} תווים ומאחד את התשובות.",
+  "agent.suggest.splitInput.done": "סמנו את החלק הרצוי והריצו את הפקודה שוב.",
+  "agent.suggest.ollamaWaiting": "ממתין ל-Ollama בכתובת {url}: הריצו `ollama serve` ואז משכו מודל (נותרו {seconds} שניות)…",
+  "agent.suggest.ollamaUp": "Ollama עונה בכתובת {url}. מריץ את הפקודה שוב.",
+  "agent.suggest.ollamaStillDown": "Ollama עדיין לא עונה בכתובת {url}. הפעילו אותו ונסו שוב.",
+  "agent.notGood.prompt": "תשובה מ-{agent}.",
+  "agent.notGood.button": "לא טוב — לנסות שוב"
 }

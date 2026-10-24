@@ -25,6 +25,7 @@ export function checkTaskList(out: string): ValidationResult {
 
 export const taskerAgent: AgentDefinition<TaskerInput, string> = registerAgent({
   id: "tasker",
+  splittable: true,
   commandId: "ai.actionItems",
   description: "Extract action items from notes as a task list",
   system:

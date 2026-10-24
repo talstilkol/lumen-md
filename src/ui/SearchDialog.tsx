@@ -357,7 +357,8 @@ export function SearchDialog({ open, onClose, onOpenFile }: Props) {
       } else {
         log.error("AI workspace search failed", e);
         setAiAnswer("Failed to reach AI API.");
-        showAiToast(t("toast.aiWorkspaceSearchFailed"), "error");
+        // 5.6.4: an agent failure opens the suggestions panel instead of a bare toast.
+        if (!(await import("../agents/suggestions")).reportAgentFailure(e, "search.askWorkspace")) showAiToast(t("toast.aiWorkspaceSearchFailed"), "error");
       }
     } finally {
       op.end();

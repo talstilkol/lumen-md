@@ -9,7 +9,7 @@
 import { useEffect, useState } from "react";
 import { Lightbulb, X } from "lucide-react";
 import { t } from "../i18n";
-import { onAgentSuggestions, rerunCommand, runSuggestion, type SuggestionsEvent } from "../agents/suggestions";
+import { markNotGood, onAgentAnswer, onAgentSuggestions, rerunCommand, runSuggestion, type AnswerEvent, type SuggestionsEvent } from "../agents/suggestions";
 import type { Suggestion } from "../agents/types";
 
 function label(s: Suggestion): string {
@@ -21,10 +21,51 @@ function detail(s: Suggestion): string | null {
   return s.raw ? s.detail : t(s.detail, s.params);
 }
 
+/** Palette commands whose answer can be judged "not good" (5.6.3): one answer per run, put into the note. */
+const JUDGED = new Set(["ai.actionItems", "ai.translate", "ai.diagram", "ai.chart", "tools.autoTag", "tools.suggestLinks", "ai.outline", "tools.checkGrammar", "research.ask", "ai.styleProfile", "git.commit"]);
+
+/** "Not good" after an AI command's answer (5.6.3): one click re-runs it, asking for a different answer. */
+function NotGood() {
+  const [answer, setAnswer] = useState<AnswerEvent | null>(null);
+  useEffect(() => {
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const off = onAgentAnswer((e) => {
+      if (!JUDGED.has(e.commandId ?? "")) return;
+      setAnswer(e);
+      clearTimeout(timer);
+      timer = setTimeout(() => setAnswer(null), 12_000);
+    });
+    return () => {
+      off();
+      clearTimeout(timer);
+    };
+  }, []);
+  if (!answer) return null;
+  return (
+    <div role="status" data-testid="ai-not-good" style={{ position: "fixed", bottom: 40, left: 16, zIndex: 99997, display: "flex", gap: 8, alignItems: "center", padding: "6px 10px", borderRadius: 10, background: "hsl(var(--bg-subtle))", border: "1px solid hsl(var(--border))", fontSize: 12.5 }}>
+      <span>{t("agent.notGood.prompt", { agent: answer.run.agentId })}</span>
+      <button
+        type="button"
+        onClick={() => {
+          setAnswer(null);
+          void markNotGood(answer.run, answer.commandId);
+        }}
+        style={{ padding: "3px 9px", borderRadius: 6, border: "1px solid hsl(var(--border))", background: "hsl(var(--bg))", color: "inherit", cursor: "pointer" }}
+      >
+        {t("agent.notGood.button")}
+      </button>
+      <button type="button" aria-label={t("agent.panel.close")} onClick={() => setAnswer(null)} style={{ background: "none", border: "none", color: "inherit", cursor: "pointer" }}>
+        <X size={12} />
+      </button>
+    </div>
+  );
+}
+
 export function AiSuggestionsPanel() {
   const [event, setEvent] = useState<SuggestionsEvent | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
   const [progress, setProgress] = useState<string>("");
+  const [live, setLive] = useState<AbortController | null>(null);
 
   useEffect(() => onAgentSuggestions((e) => {
     setEvent(e);
@@ -32,13 +73,15 @@ export function AiSuggestionsPanel() {
     setProgress("");
   }), []);
 
-  if (!event) return null;
+  if (!event) return <NotGood />;
   const { run } = event;
 
   const act = async (s: Suggestion) => {
     setBusy(s.id);
+    const ctrl = new AbortController();
+    setLive(ctrl);
     try {
-      const again = await runSuggestion(s, run, { onProgress: setProgress });
+      const again = await runSuggestion(s, run, { onProgress: setProgress, signal: ctrl.signal });
       if (again) {
         setEvent(null);
         rerunCommand(event.commandId ?? run.commandId);
@@ -47,7 +90,12 @@ export function AiSuggestionsPanel() {
       setProgress(`${(e as Error).message}`);
     } finally {
       setBusy(null);
+      setLive(null);
     }
+  };
+  const close = () => {
+    live?.abort();
+    setEvent(null);
   };
 
   return (
@@ -76,7 +124,7 @@ export function AiSuggestionsPanel() {
       <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
         <Lightbulb size={16} style={{ color: "hsl(var(--accent))" }} />
         <strong style={{ flex: 1 }}>{t("agent.panel.title")}</strong>
-        <button type="button" aria-label={t("agent.panel.close")} onClick={() => setEvent(null)} style={{ background: "none", border: "none", color: "inherit", cursor: "pointer" }}>
+        <button type="button" aria-label={t("agent.panel.close")} onClick={close} style={{ background: "none", border: "none", color: "inherit", cursor: "pointer" }}>
           <X size={14} />
         </button>
       </div>

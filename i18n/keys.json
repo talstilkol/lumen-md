@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-10-24T11:16:22.225Z",
+  "generated_at": "2026-10-24T19:23:18.281Z",
   "source": "src/i18n/index.ts (en bundle)",
-  "count": 1431,
+  "count": 1439,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -5698,6 +5698,57 @@
     {
       "key": "agent.suggest.retry",
       "en": "Try again",
+      "vars": []
+    },
+    {
+      "key": "agent.suggest.splitDocument",
+      "en": "Split the document and run each part",
+      "vars": []
+    },
+    {
+      "key": "agent.suggest.splitDocument.detail",
+      "en": "Runs the command on parts of about {size} characters and merges the answers.",
+      "vars": [
+        "size"
+      ]
+    },
+    {
+      "key": "agent.suggest.splitInput.done",
+      "en": "Select the part you want, then run the command again.",
+      "vars": []
+    },
+    {
+      "key": "agent.suggest.ollamaWaiting",
+      "en": "Waiting for Ollama at {url}: run `ollama serve`, then pull a model ({seconds}s left)…",
+      "vars": [
+        "url",
+        "seconds"
+      ]
+    },
+    {
+      "key": "agent.suggest.ollamaUp",
+      "en": "Ollama answers at {url}. Running the command again.",
+      "vars": [
+        "url"
+      ]
+    },
+    {
+      "key": "agent.suggest.ollamaStillDown",
+      "en": "Ollama still does not answer at {url}. Start it and try again.",
+      "vars": [
+        "url"
+      ]
+    },
+    {
+      "key": "agent.notGood.prompt",
+      "en": "Answer from {agent}.",
+      "vars": [
+        "agent"
+      ]
+    },
+    {
+      "key": "agent.notGood.button",
+      "en": "Not good — try again",
       "vars": []
     },
     {

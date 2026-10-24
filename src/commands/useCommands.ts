@@ -1030,6 +1030,7 @@ export function useCommands({
             if (result.unverified) showAiToast(t("research.unverified", { count: result.unverified }), "error");
           } catch (e) {
             if (isAbort(e)) return;
+            if ((await import("../agents/suggestions")).reportAgentFailure(e, "research.ask")) return;
             showAiToast(t("research.failed", { message: (e as Error).message }), "error");
           }
         },
@@ -1244,6 +1245,8 @@ export function useCommands({
             if (Number.isFinite(quota.limit)) for (let i = 0; i < notes.length; i++) recordAiPrompt();
             showAiToast(t("batch.submitted", { count: job.items.length }), "success");
           } catch (e) {
+            if (isAbort(e)) return;
+            if ((await import("../agents/suggestions")).reportAgentFailure(e, "ai.batch")) return;
             showAiToast((e as Error).message, "error");
           }
         },
