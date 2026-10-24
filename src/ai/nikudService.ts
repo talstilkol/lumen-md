@@ -9,6 +9,7 @@
  * until Tal picks that host (15.9) adding niqqud reports "unavailable".
  * Removing niqqud needs no model.
  */
+import "./nikudStrings";
 import { CONVERTED_MODELS_BASE, fileUrl, loadConvertedRegistry, requestConvertedModel, type ConsentDeps } from "./convertedModels";
 import { removeNikud } from "../text/nikud";
 
