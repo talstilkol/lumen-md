@@ -1,9 +1,24 @@
 {
   "version": 1,
-  "generated_at": "2026-10-24T11:11:32.890Z",
+  "generated_at": "2026-10-24T15:28:46.558Z",
   "source": "src/i18n/index.ts (en bundle)",
-  "count": 1458,
+  "count": 1461,
   "entries": [
+    {
+      "key": "caption.purpose",
+      "en": "Describe images on this device (alt text)",
+      "vars": []
+    },
+    {
+      "key": "caption.attribution.florence",
+      "en": "Florence-2 © Microsoft, MIT License; ONNX conversion by onnx-community (Hugging Face).",
+      "vars": []
+    },
+    {
+      "key": "caption.attribution.smolvlm",
+      "en": "SmolVLM-256M-Instruct © Hugging Face, Apache License 2.0.",
+      "vars": []
+    },
     {
       "key": "toolbar.tagline",
       "en": "Markdown, illuminated",

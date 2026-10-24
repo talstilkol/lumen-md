@@ -1456,5 +1456,8 @@
   "mt.size.approx": "نحو {size}",
   "toast.translatedWith": "تمت الترجمة باستخدام {layer}",
   "toast.translatedWithUnmeasured": "تمت الترجمة باستخدام {layer} — لم تُقَس جودته لهذا الزوج بعد",
-  "toast.localMtUnavailable": "لم تتوفر الترجمة المحلية ({why})؛ ترجم نموذج الذكاء الاصطناعي بدلاً منها."
+  "toast.localMtUnavailable": "لم تتوفر الترجمة المحلية ({why})؛ ترجم نموذج الذكاء الاصطناعي بدلاً منها.",
+  "caption.purpose": "وصف الصور على هذا الجهاز (نص بديل)",
+  "caption.attribution.florence": "Florence-2 © Microsoft، رخصة MIT؛ تحويل ONNX بواسطة onnx-community (Hugging Face).",
+  "caption.attribution.smolvlm": "SmolVLM-256M-Instruct © Hugging Face، رخصة Apache 2.0."
 }

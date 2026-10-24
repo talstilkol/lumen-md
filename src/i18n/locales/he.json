@@ -1456,5 +1456,8 @@
   "mt.size.approx": "בערך {size}",
   "toast.translatedWith": "תורגם באמצעות {layer}",
   "toast.translatedWithUnmeasured": "תורגם באמצעות {layer} — האיכות שלו בזוג הזה עדיין לא נמדדה",
-  "toast.localMtUnavailable": "תרגום מקומי לא היה זמין ({why}); מודל ה-AI תרגם במקומו."
+  "toast.localMtUnavailable": "תרגום מקומי לא היה זמין ({why}); מודל ה-AI תרגם במקומו.",
+  "caption.purpose": "תיאור תמונות במכשיר (טקסט חלופי)",
+  "caption.attribution.florence": "Florence-2 © Microsoft, רישיון MIT; המרת ONNX על ידי onnx-community (Hugging Face).",
+  "caption.attribution.smolvlm": "SmolVLM-256M-Instruct © Hugging Face, רישיון Apache 2.0."
 }

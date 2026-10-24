@@ -1722,7 +1722,8 @@ export function useCommands({
         icon: cmdIcons.Sparkles,
         group: t("group.ai", { defaultValue: "AI Copilot" }),
         action: async () => {
-          const { imageText, withImageText, imagesNeedingAlt } = await import("../ai/vision");
+          const { imageText, withImageText, imagesNeedingAlt, documentLanguage } = await import("../ai/vision");
+          const { uiConfirm } = await import("../ui/PromptDialog");
           const { readWorkspaceBlob } = await import("../storage/workspace");
           const doc = useAppStore.getState().doc.content;
           // Images with no alt, or still named after their file — a real
@@ -1735,10 +1736,13 @@ export function useCommands({
           showAiToast(t("toast.imageAlt.working", { count: targets.length }), "info");
           let next = doc;
           let done = 0;
+          // The user asked: the browser captioner may offer its download (plan 6.6).
+          const lang = await documentLanguage(doc, getLocale());
+          const consent = { confirm: uiConfirm, t, locale: getLocale() };
           for (const m of targets) {
             const blob = await readWorkspaceBlob(m.url).catch(() => null);
             if (!blob) continue;
-            const res = await imageText(blob, getLocale()).catch(() => null);
+            const res = await imageText(blob, lang, { name: m.url, consent }).catch(() => null);
             if (!res || res.source === "none") continue;
             next = withImageText(next, m.url, m.alt, res);
             done++;

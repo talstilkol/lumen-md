@@ -1456,5 +1456,8 @@
   "mt.size.approx": "около {size}",
   "toast.translatedWith": "Переведено с помощью {layer}",
   "toast.translatedWithUnmeasured": "Переведено с помощью {layer} — его качество на этой паре ещё не измерено",
-  "toast.localMtUnavailable": "Локальный перевод был недоступен ({why}); перевела ИИ-модель."
+  "toast.localMtUnavailable": "Локальный перевод был недоступен ({why}); перевела ИИ-модель.",
+  "caption.purpose": "Описание изображений на этом устройстве (альтернативный текст)",
+  "caption.attribution.florence": "Florence-2 © Microsoft, лицензия MIT; конвертация в ONNX — onnx-community (Hugging Face).",
+  "caption.attribution.smolvlm": "SmolVLM-256M-Instruct © Hugging Face, лицензия Apache 2.0."
 }

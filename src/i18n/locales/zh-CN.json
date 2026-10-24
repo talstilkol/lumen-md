@@ -1456,5 +1456,8 @@
   "mt.size.approx": "约 {size}",
   "toast.translatedWith": "已使用{layer}翻译",
   "toast.translatedWithUnmeasured": "已使用{layer}翻译——其在此语言对上的质量尚未测量",
-  "toast.localMtUnavailable": "本地翻译不可用（{why}）；已改由 AI 模型翻译。"
+  "toast.localMtUnavailable": "本地翻译不可用（{why}）；已改由 AI 模型翻译。",
+  "caption.purpose": "在本设备上描述图片（替代文本）",
+  "caption.attribution.florence": "Florence-2 © Microsoft，MIT 许可证；ONNX 转换：onnx-community（Hugging Face）。",
+  "caption.attribution.smolvlm": "SmolVLM-256M-Instruct © Hugging Face，Apache 2.0 许可证。"
 }
