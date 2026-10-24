@@ -16,6 +16,9 @@ import { mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
 vi.mock("../../billing/aiQuota", () => ({ chargeAiCommandDispatch: vi.fn(), consumeAiPrompt: vi.fn(() => true), aiQuotaStatus: () => ({ allowed: true, limit: Infinity }), AiQuotaExceededError: class extends Error {} }));
+// The agents' tools work on the eval vault (plan 5.3): notes with tags and links, one git repository.
+vi.mock("../../storage/workspace", async (orig) => (await import("../../__tests__/helpers/evalVault")).workspaceModule(await orig()));
+vi.mock("../../sync/git", async (orig) => (await import("../../__tests__/helpers/evalVault")).gitModule(await orig()));
 
 import { EVAL_CASES } from "./fixtures";
 import { runEvalCase } from "./run";
@@ -36,6 +39,8 @@ describe(`agent eval — ${model} @ ${url}`, () => {
     localStorage.setItem("lumen.ollama.baseUrl", url);
     localStorage.setItem("lumen.ollama.model", model);
     localStorage.setItem("lumen.ai.policy", "local-only");
+    // The researcher's web (plan 5.4): a stubbed research service; Ollama is reached as before.
+    (await import("../../__tests__/helpers/evalWeb")).installEvalWeb();
 
     const results: CaseResult[] = [];
     for (const c of EVAL_CASES) {

@@ -3,9 +3,17 @@
 import "../defs";
 import { getAgent } from "../registry";
 import { runAgent } from "../runtime";
-import type { ExecutorId } from "../types";
+import type { AgentRun, ExecutorId } from "../types";
 import type { EvalCase } from "./fixtures";
 import { scoreCases, type CaseResult } from "./score";
+
+/** The case's expected tool call is in the run (plan 5.3): made, executed by the runtime, and — unless optional — successful. */
+export function toolCheck(c: EvalCase, steps: AgentRun["steps"]): CaseResult["checks"][number] {
+  const calls = steps.filter((s) => s.kind === "tool" && s.label === c.tool.name);
+  const ok = calls.some((s) => s.ok || c.tool.mustSucceed === false);
+  const check = { type: "tool", name: c.tool.name } as unknown as CaseResult["checks"][number]["check"];
+  return { check, ok, detail: ok ? `called ${c.tool.name}` : calls.length ? `${c.tool.name} failed: ${calls.map((s) => s.detail).join("; ")}` : `${c.tool.name} was not called` };
+}
 
 export async function runEvalCase(c: EvalCase, opts: { executor?: ExecutorId; model?: string; signal?: AbortSignal } = {}): Promise<CaseResult> {
   const def = getAgent(c.agent);
@@ -17,9 +25,17 @@ export async function runEvalCase(c: EvalCase, opts: { executor?: ExecutorId; mo
     /* storage denied */
   }
   const started = Date.now();
-  const run = await runAgent(def, c.input, { executor: opts.executor, signal: opts.signal, document: c.input.text, patch: opts.model ? { model: opts.model } : undefined });
+  const run = await runAgent(def, c.input, {
+    executor: opts.executor,
+    signal: opts.signal,
+    // A research question is not a document; the eval consents to its searches (what the user would do).
+    ...(c.run?.inputMayLeave ? { inputMayLeave: true, consentNetwork: () => true } : { document: c.input.text }),
+    selection: c.input.selection,
+    grants: c.run?.grants,
+    patch: opts.model ? { model: opts.model } : undefined,
+  });
   const ms = Date.now() - started;
   const base = { id: c.id, agent: c.agent, executor: run.executor, model: run.model, attempts: run.attempts, ms };
   if (run.status !== "ok") return { ...base, status: "failed", checks: [], error: `${run.errorCode ?? "error"}: ${run.error ?? ""}`.trim() };
-  return { ...base, status: "ok", checks: scoreCases(run.output, c.checks) };
+  return { ...base, status: "ok", checks: [...scoreCases(run.output, c.checks), toolCheck(c, run.steps)] };
 }

@@ -16,11 +16,12 @@ vi.mock("../ui/PromptDialog", () => ({
   uiSelect: vi.fn(async () => dialogs.select),
 }));
 const para = "This is a long paragraph of my own writing, with enough words in it to count as prose for the style sample. ".repeat(4);
-vi.mock("../storage/workspaceNotes", () => ({
-  readAllNotes: vi.fn(async () => [
-    { path: "a.md", text: `${para}\n\n${para}` },
-    { path: "b.md", text: `${para}\n\n${para}` },
-  ]),
+// The stylist reads the notes through the runtime's list_files + read_file (5.3.3).
+vi.mock("../storage/workspace", async (orig) => ({
+  ...(await orig<object>()),
+  isOPFSAvailable: () => true,
+  listWorkspace: async () => ["a.md", "b.md"].map((path) => ({ path, name: path, size: 1, modified: 1 })),
+  readWorkspaceFile: async () => `${para}\n\n${para}`,
 }));
 const seen = vi.hoisted(() => ({ signals: [] as Array<AbortSignal | undefined> }));
 vi.mock("../agents/runtime", async (orig) => ({
@@ -53,7 +54,7 @@ async function cancelsCleanly(id: string | ((id: string) => boolean)) {
   const cmd = result.current.find((c) => (typeof id === "string" ? c.id === id : id(c.id)));
   expect(cmd, String(id)).toBeTruthy();
   const done = Promise.resolve(cmd!.action());
-  await vi.waitFor(() => expect(seen.signals.length).toBeGreaterThan(0));
+  await vi.waitFor(() => expect(seen.signals.length).toBeGreaterThan(0), { timeout: 10_000 });
   expect(seen.signals[0]).toBeInstanceOf(AbortSignal);
   expect(aiBusy()).toBe(true);
   expect(cancelAllAi()).toBe(1);

@@ -6,6 +6,7 @@
 
 import type { AgentDefinition, AgentInput, ValidationResult } from "../types";
 import { registerAgent } from "../registry";
+import { pickTools } from "../tools";
 import { clip, fail, ok, stripFences } from "./shared";
 
 export interface TaskerInput extends AgentInput {
@@ -33,6 +34,9 @@ export const taskerAgent: AgentDefinition<TaskerInput, string> = registerAgent({
   user: (input) => clip(input.text, 12000),
   parse: (text) => stripFences(text),
   validators: [{ name: "task-list", check: (out) => checkTaskList(out) }],
+  // The whole note, when the text given is only part of it (5.3.1, 5.3.3).
+  tools: pickTools("get_document"),
+  maxSteps: 3,
   tier: "small",
   temperature: 0.1,
   maxTokens: 800,

@@ -67,7 +67,8 @@ export async function generateAiCommitMessage(
     // waiting in a dialog at the same time.
     const { runAgentOrThrow } = await import("../agents/runtime");
     const { committerAgent } = await import("../agents/defs");
-    return await runAgentOrThrow(committerAgent, { text: changes }, { ownPrompt: true, signal });
+    // The runtime fetches the diff itself (git_diff) for the subject and body.
+    return await runAgentOrThrow(committerAgent, { text: changes, extra: { repo: repoFolder || undefined } }, { ownPrompt: true, signal });
   } catch (e) {
     if (signal?.aborted || isAbort(e)) return ""; // cancelled: no suggestion, no toast
     log.warn("AI commit generation skipped", e);

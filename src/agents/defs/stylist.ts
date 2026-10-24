@@ -7,6 +7,7 @@
 
 import type { AgentDefinition, AgentInput } from "../types";
 import { registerAgent } from "../registry";
+import { pickTools } from "../tools";
 import { fail, ok } from "./shared";
 
 export interface StylistInput extends AgentInput {
@@ -31,6 +32,9 @@ export const stylistAgent: AgentDefinition<StylistInput, StyleProfileOut> = regi
     'excerpts that show the style"]}. Describe how they write, not what they write about. Write the tone and ' +
     "rules in the language the excerpts are mostly written in.",
   user: (input) => `Excerpts:\n${input.text}`,
+  // The excerpts are sampled with list_files + read_file (ai/styleProfiles); the model may read more (5.3.3).
+  tools: pickTools("list_files", "read_file"),
+  maxSteps: 4,
   outputSchema: {
     type: "object",
     properties: {
