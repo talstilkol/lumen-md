@@ -30,7 +30,7 @@ function loadKatex(): Promise<RehypeKatex> {
 }
 
 /** HAST → React elements with Lumen's block components (what rehype-react did at the end of the old pipeline). */
-function hastToReact(hast: HastRoot): ReactElement {
+export function hastToReact(hast: HastRoot): ReactElement {
   return toJsxRuntime(hast, { Fragment, jsx, jsxs, components } as unknown as Parameters<typeof toJsxRuntime>[1]) as ReactElement;
 }
 
@@ -46,6 +46,11 @@ export async function renderMarkdown(
   markdownText: string,
   isDark: () => boolean,
 ): Promise<ReactElement> {
+  return hastToReact(await renderMarkdownHast(markdownText, isDark));
+}
+
+/** The full render up to the finished HAST: the preview applies it to React in slices (step 4). */
+export async function renderMarkdownHast(markdownText: string, isDark: () => boolean): Promise<HastRoot> {
   const math = hasMath(markdownText);
   const { renderHast } = await import("./renderClient");
   const { hast, finished } = await renderHast(markdownText, { raw: hasRawHtml(markdownText), math, dark: isDark() });
@@ -55,7 +60,7 @@ export async function renderMarkdown(
     const finish = rehypeKatex ? unified().use(rehypeKatex).use(rehypeShiki, { isDark }) : unified().use(rehypeShiki, { isDark });
     await finish.run(hast);
   }
-  return hastToReact(hast);
+  return hast;
 }
 
 /**
