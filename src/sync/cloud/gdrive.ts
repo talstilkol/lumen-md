@@ -229,18 +229,24 @@ export const gdriveLegacy: LegacyCloudStore = {
     return new Uint8Array(await res.arrayBuffer());
   },
   async moveFile(from: string, to: string): Promise<void> {
+    // Both paths are "<name>" or "<backup folder>/<name>" (a subfolder of the
+    // legacy folder): the backup step moves one way, revert the other.
     const folder = await legacyFolder();
-    const id = folder ? await fileId(folder, from) : null;
-    if (!folder || !id) throw new Error(`Not found: ${from}`);
-    // `to` is "<backup folder>/<name>": a subfolder of the legacy folder.
-    const slash = to.lastIndexOf("/");
-    const dir = slash >= 0 ? to.slice(0, slash) : "";
-    const name = slash >= 0 ? to.slice(slash + 1) : to;
-    const target = dir ? await subfolder(folder, dir) : folder;
-    await api(`/drive/v3/files/${id}?addParents=${target}&removeParents=${folder}`, {
+    if (!folder) throw new Error(`Not found: ${from}`);
+    const split = (p: string) => {
+      const slash = p.lastIndexOf("/");
+      return slash >= 0 ? { dir: p.slice(0, slash), name: p.slice(slash + 1) } : { dir: "", name: p };
+    };
+    const src = split(from);
+    const dst = split(to);
+    const source = src.dir ? await subfolder(folder, src.dir) : folder;
+    const id = await fileId(source, src.name);
+    if (!id) throw new Error(`Not found: ${from}`);
+    const target = dst.dir ? await subfolder(folder, dst.dir) : folder;
+    await api(`/drive/v3/files/${id}?addParents=${target}&removeParents=${source}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name }),
+      body: JSON.stringify({ name: dst.name }),
     });
   },
 };

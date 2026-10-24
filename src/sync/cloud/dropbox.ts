@@ -17,6 +17,8 @@ const TOKEN_KEY = "lumen.cloud.dropbox.token";
 const REFRESH_KEY = "lumen.cloud.dropbox.refresh";
 /** Where an earlier Lumen synced plain-text notes (App folder permission). */
 export const DROPBOX_LEGACY_FOLDER = "/Apps/Lumen";
+/** The encrypted vault's folder inside the legacy one (`DROPBOX_DEFAULT_FOLDER` = "/Apps/Lumen/vault"). */
+const LEGACY_VAULT_SUBFOLDER = "vault";
 const PKCE_KEY = "lumen.cloud.dropbox.pkce";
 
 interface TokenSet {
@@ -195,6 +197,8 @@ export const dropboxLegacy: LegacyCloudStore = {
         if (e[".tag"] !== "file") continue;
         const full = e.path_display ?? e.path_lower;
         const rel = full.toLowerCase().startsWith(DROPBOX_LEGACY_FOLDER.toLowerCase() + "/") ? full.slice(DROPBOX_LEGACY_FOLDER.length + 1) : full.replace(/^\//, "");
+        // The encrypted vault lives in "vault/" under the same app folder: ciphertext, never plain text.
+        if (rel.toLowerCase().startsWith(LEGACY_VAULT_SUBFOLDER + "/")) continue;
         out.push({ path: rel, size: e.size ?? 0, modified: e.server_modified ? Date.parse(e.server_modified) : 0, hash: e.content_hash });
       }
       cursor = res.has_more ? res.cursor : undefined;

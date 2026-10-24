@@ -123,8 +123,10 @@ export async function migratePlaintext(
     const data = await provider.readFile(f.path);
     const mine = await local.read(f.path);
     let target = f.path;
-    if (mine && !same(mine, data)) target = await sideName(local, f.path, label);
-    if (!mine || target !== f.path) {
+    // Imported before an interrupted run stopped (it never got moved aside): not again.
+    const already = record.imported.some((i) => i.from === f.path);
+    if (!already && mine && !same(mine, data)) target = await sideName(local, f.path, label);
+    if (!already && (!mine || target !== f.path)) {
       // Create-only: a note that appeared meanwhile is never overwritten.
       if (!(await local.write(target, data, null))) throw new Error(`"${target}" changed during the migration; run it again`);
       record.imported.push({ from: f.path, to: target });
