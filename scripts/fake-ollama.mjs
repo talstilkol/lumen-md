@@ -14,6 +14,7 @@
 import http from "node:http";
 import { readFileSync } from "node:fs";
 import { createHash } from "node:crypto";
+import { registerHooks } from "node:module";
 
 const args = process.argv.slice(2);
 const opt = (flag, dflt) => {
@@ -24,11 +25,27 @@ const port = Number(opt("--port", process.env.FAKE_OLLAMA_PORT || 11434));
 const fixturesPath = opt("--fixtures", "src/agents/eval/fixtures.ts");
 
 // The fixtures are TypeScript; Node ≥ 22.6 strips the types on import
-// (`--experimental-strip-types`, which the npm script passes).
+// (`--experimental-strip-types`, which the npm script passes). They import
+// each other the bundler way (`./moreCases`, no extension), which Node does
+// not resolve: retry a relative specifier with `.ts`.
+if (typeof registerHooks === "function") {
+  registerHooks({
+    resolve(specifier, context, next) {
+      try {
+        return next(specifier, context);
+      } catch (e) {
+        if (e?.code !== "ERR_MODULE_NOT_FOUND" || !/^\.\.?\//.test(specifier) || /\.[cm]?[jt]s$/.test(specifier)) throw e;
+        return next(`${specifier}.ts`, context);
+      }
+    },
+  });
+}
 let cases = [];
 try {
   const mod = await import(new URL(fixturesPath, `file://${process.cwd()}/`).href);
-  cases = (mod.EVAL_CASES ?? []).map((c) => ({ id: c.id, key: String(c.input.text ?? "").slice(0, 40), example: c.example, tool: c.tool }));
+  // The key is the start of the input's first line: an agent may reshape the
+  // text around it (the outliner numbers the lines), not within a line.
+  cases = (mod.EVAL_CASES ?? []).map((c) => ({ id: c.id, agent: c.agent, key: String(c.input.text ?? "").trim().split("\n")[0].slice(0, 40), full: String(c.input.text ?? "").trim(), example: c.example, tool: c.tool }));
 } catch (e) {
   // hygiene-allow: a CLI fixture reporting its own startup problem
   console.error(`fake ollama: fixtures not loaded (${e?.message ?? e}); generic answers only`);
@@ -82,10 +99,18 @@ function messageFor(messages, format, tools) {
   return { content: JSON.stringify({ final }) };
 }
 
-function caseFor(messages, format) {
+/** The cases this request may be asking about, most likely first. */
+function candidates(messages, format) {
   const all = messages.map((m) => m.content ?? "").join("\n");
   const system = messages.find((m) => m.role === "system")?.content ?? "";
+  // The user's own input wins over text a tool returned (a read_file result can be another case's input).
+  const asked = messages.filter((m) => m.role === "user").map((m) => m.content ?? "").join("\n");
   let hits = cases.filter((c) => all.includes(c.key));
+  const own = hits.filter((c) => asked.includes(c.key));
+  if (own.length) hits = own;
+  // Two inputs can share a first line (the committer's file lists): the whole input decides.
+  const whole = hits.filter((c) => asked.includes(c.full));
+  if (whole.length) hits = whole;
   if (hits.length > 1 && format && Array.isArray(format.required)) {
     hits = hits.filter((c) => {
       try {
@@ -97,30 +122,21 @@ function caseFor(messages, format) {
     });
   }
   if (hits.length > 1) {
-    const byAgent = hits.filter((c) => AGENT_HINTS[c.id.split("-")[0]]?.test(system));
-    if (byAgent.length) hits = byAgent;
+    // The first agent (in AGENT_HINTS order) whose hint the system prompt matches:
+    // one prompt can mention another agent's word (the translator's says "headings").
+    const agent = Object.keys(AGENT_HINTS).find((a) => AGENT_HINTS[a].test(system) && hits.some((c) => c.agent.split("-")[0] === a));
+    if (agent) hits = hits.filter((c) => c.agent.split("-")[0] === agent);
   }
+  return hits;
+}
+
+function caseFor(messages, format) {
+  const hits = candidates(messages, format);
   return hits[0] ?? null;
 }
 
 function answerFor(messages, format) {
-  const all = messages.map((m) => m.content ?? "").join("\n");
-  const system = messages.find((m) => m.role === "system")?.content ?? "";
-  let hits = cases.filter((c) => all.includes(c.key));
-  if (hits.length > 1 && format && Array.isArray(format.required)) {
-    hits = hits.filter((c) => {
-      try {
-        const v = JSON.parse(c.example);
-        return format.required.every((k) => k in v);
-      } catch {
-        return false;
-      }
-    });
-  }
-  if (hits.length > 1) {
-    const byAgent = hits.filter((c) => AGENT_HINTS[c.id.split("-")[0]]?.test(system));
-    if (byAgent.length) hits = byAgent;
-  }
+  const hits = candidates(messages, format);
   if (hits.length) return hits[0].example;
   if (format) return JSON.stringify({ tags: ["fake"], headings: [], links: [], issues: [], series: [{ type: "bar", data: [1] }], xAxis: { data: ["a"] }, yAxis: {} });
   return "- [ ] fake answer";

@@ -100,7 +100,7 @@ describe("a fake-model run of each eval case makes its tool call through the run
     expect(run.status).toBe("ok");
     const tool = toolCheck(c, run.steps);
     expect(tool.detail, c.id).toBe(`called ${c.tool.name}`);
-    for (const check of scoreCases(run.output, c.checks)) expect(check.ok, `${c.id}: ${check.detail}`).toBe(true);
+    for (const check of await scoreCases(run.output, c.checks)) expect(check.ok, `${c.id}: ${check.detail}`).toBe(true);
     if (def.streaming) {
       // Context only: the model is offered no tools and may stream.
       expect(ex.calls.every((r) => !r.tools && !r.schema)).toBe(true);

@@ -20,7 +20,9 @@ export type Check =
   /** A regular expression (source + flags) matches the text form. */
   | { type: "matches"; source: string; flags?: string }
   /** At least `min` items of the list at `path` are among `values` (the tagger reuses the vault's own tags, 7.3.2). */
-  | { type: "someOf"; path: string; values: string[]; min?: number };
+  | { type: "someOf"; path: string; values: string[]; min?: number }
+  /** The text form compiles with the real Mermaid parser (7.3.2). Async: judged by `scoreCases`. */
+  | { type: "mermaid" };
 
 export interface CheckResult {
   check: Check;
@@ -90,7 +92,17 @@ export function runCheck(check: Check, output: unknown): CheckResult {
       const ok = hits.length >= (check.min ?? 1);
       return { check, ok, detail: ok ? `from the list: ${hits.join(", ")}` : `none of ${items.join(", ") || "(empty)"} is in the list` };
     }
+    case "mermaid":
+      // Needs the parser (async): scoreCases compiles it; a sync caller cannot judge it.
+      return { check, ok: false, detail: "mermaid is judged by scoreCases (async)" };
   }
+}
+
+/** Compile the output with the real Mermaid parser (loaded on demand, like the diagrammer's validator). */
+async function runMermaidCheck(check: Check, output: unknown): Promise<CheckResult> {
+  const { checkMermaid } = await import("../tools/validate");
+  const r = await checkMermaid(textOf(output));
+  return { check, ok: r.ok, detail: r.ok ? `compiles${r.diagramType ? ` (${r.diagramType})` : ""}` : `does not compile: ${(r.error ?? "").split("\n")[0]}` };
 }
 
 export interface CaseResult {
@@ -110,8 +122,8 @@ export function passed(r: CaseResult): boolean {
   return r.status === "ok" && r.checks.every((c) => c.ok);
 }
 
-export function scoreCases(output: unknown, checks: Check[]): CheckResult[] {
-  return checks.map((c) => runCheck(c, output));
+export async function scoreCases(output: unknown, checks: Check[]): Promise<CheckResult[]> {
+  return Promise.all(checks.map((c) => (c.type === "mermaid" ? runMermaidCheck(c, output) : runCheck(c, output))));
 }
 
 /** Markdown report: one summary line and a table, in the order run. */

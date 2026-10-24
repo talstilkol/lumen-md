@@ -1,6 +1,6 @@
 {
   "model": "qwen2.5:7b",
-  "date": "2026-10-18",
+  "date": "2026-10-24",
   "results": [
     {
       "id": "rewrite-he",
@@ -49,6 +49,15 @@
     },
     {
       "id": "actionItems-he",
+      "status": "ok",
+      "checks": [
+        {
+          "ok": true
+        }
+      ]
+    },
+    {
+      "id": "translate-he",
       "status": "ok",
       "checks": [
         {
