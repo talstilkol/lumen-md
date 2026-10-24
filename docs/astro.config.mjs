@@ -57,6 +57,7 @@ export default defineConfig({
           items: [
             { label: "Real-time WebRTC", slug: "collab/webrtc" },
             { label: "End-to-end encryption", slug: "collab/encryption" },
+            { label: "Persistent rooms", slug: "collab/persistent", translations: { he: "חדרים מתמשכים" } },
           ],
         },
         {
