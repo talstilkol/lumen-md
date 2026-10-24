@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-10-18T03:18:44.238Z",
+  "generated_at": "2026-10-18T03:38:01.411Z",
   "source": "src/i18n/index.ts (en bundle)",
-  "count": 1411,
+  "count": 1415,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -1822,6 +1822,26 @@
     {
       "key": "toast.tts.noHebrewVoice",
       "en": "No Hebrew voice is installed on this system — add one in the system's speech settings",
+      "vars": []
+    },
+    {
+      "key": "toast.tts.noLocalVoice",
+      "en": "No voice on this device for part of the text — install one in the system's speech settings (network voices are off under local-only)",
+      "vars": []
+    },
+    {
+      "key": "tts.networkVoice.title",
+      "en": "Use a network voice?",
+      "vars": []
+    },
+    {
+      "key": "tts.networkVoice.body",
+      "en": "This device has no voice for this note. Your browser offers voices that synthesize on the provider's servers, so the note's text would be sent there. The privacy ledger records each use.",
+      "vars": []
+    },
+    {
+      "key": "tts.networkVoice.ok",
+      "en": "Use network voices",
       "vars": []
     },
     {
