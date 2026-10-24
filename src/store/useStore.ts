@@ -10,6 +10,11 @@ import {
   type ThemeSettings,
 } from "../lib/themeSettings";
 
+/** The phone layout's breakpoint (index.css: max-width 760px). */
+export function isNarrowScreen(): boolean {
+  return typeof window !== "undefined" && typeof window.matchMedia === "function" && window.matchMedia("(max-width: 760px)").matches;
+}
+
 // Monotonic token so a slow lazy-locale fetch can't clobber a newer pick.
 let localeRequest = 0;
 
@@ -52,6 +57,8 @@ interface AppState {
   themeSettings: ThemeSettings;
   locale: Locale;
   showOutline: boolean;
+  /** Phones (plan 10.2.4): the outline as a bottom sheet — this session only, closed at start. */
+  outlineSheet: boolean;
   showWorkspace: boolean;
   showBacklinks: boolean;
   vimEnabled: boolean;
@@ -224,6 +231,7 @@ export const useAppStore = create<AppState>()(
       themeSettings: { ...DEFAULT_THEME_SETTINGS },
       locale: "en",
       showOutline: true,
+      outlineSheet: false,
       showWorkspace: false,
       showBacklinks: false,
       vimEnabled: false,
@@ -318,7 +326,11 @@ export const useAppStore = create<AppState>()(
           );
           return { doc: nextDoc, openTabs: nextTabs };
         })),
-      toggleOutline: () => set((s) => ({ showOutline: !s.showOutline })),
+      // On a phone-width screen the outline is a bottom sheet over the
+      // editor: the toggle opens/closes the sheet and leaves the desktop
+      // side-panel setting as it was.
+      toggleOutline: () =>
+        set((s) => (isNarrowScreen() ? { outlineSheet: !s.outlineSheet } : { showOutline: !s.showOutline })),
       toggleWorkspace: () => set((s) => ({ showWorkspace: !s.showWorkspace })),
       toggleBacklinks: () => set((s) => ({ showBacklinks: !s.showBacklinks })),
       toggleVim: () => set((s) => ({ vimEnabled: !s.vimEnabled })),

@@ -742,6 +742,7 @@
   "tour.step.editor.body": "Пишите на Markdown с полной подсветкой синтаксиса, живым просмотром и помощью ИИ.",
   "tour.action.openRuntimeMetrics": "Открыть метрики выполнения",
   "a11y.sidebarResizer": "Изменить ширину боковой панели",
+  "outline.close": "Закрыть оглавление",
   "onboard.title": "Добро пожаловать в Lumen",
   "onboard.subtitle": "Несколько быстрых настроек — и можно писать. Всё это можно изменить позже.",
   "onboard.step": "Шаг {n} из {total}",

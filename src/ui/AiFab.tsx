@@ -22,7 +22,8 @@ export function AiFab({ commands }: Props) {
 
   useEffect(() => {
     if (!open) return;
-    function onMouseDown(e: MouseEvent) {
+    // pointerdown (plan 10.2.1): a tap outside closes it too, not only a mouse click.
+    function onPointerDown(e: PointerEvent) {
       if (ref.current && !ref.current.contains(e.target as Node)) {
         setOpen(false);
         setQuery("");
@@ -34,10 +35,10 @@ export function AiFab({ commands }: Props) {
         setQuery("");
       }
     }
-    document.addEventListener("mousedown", onMouseDown);
+    document.addEventListener("pointerdown", onPointerDown);
     document.addEventListener("keydown", onKey);
     return () => {
-      document.removeEventListener("mousedown", onMouseDown);
+      document.removeEventListener("pointerdown", onPointerDown);
       document.removeEventListener("keydown", onKey);
     };
   }, [open]);

@@ -742,6 +742,7 @@
   "tour.step.editor.body": "Schreibe Markdown mit vollständiger Syntaxhervorhebung, Live-Vorschau und KI-Unterstützung.",
   "tour.action.openRuntimeMetrics": "Laufzeitmetriken jetzt öffnen",
   "a11y.sidebarResizer": "Seitenleiste in der Breite ändern",
+  "outline.close": "Gliederung schließen",
   "onboard.title": "Willkommen bei Lumen",
   "onboard.subtitle": "Ein paar schnelle Entscheidungen, dann schreiben Sie. Alles lässt sich später ändern.",
   "onboard.step": "Schritt {n} von {total}",

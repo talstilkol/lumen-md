@@ -742,6 +742,7 @@
   "tour.step.editor.body": "اكتب Markdown مع تمييز كامل للصيغة ومعاينة مباشرة ومساعدة الذكاء الاصطناعي.",
   "tour.action.openRuntimeMetrics": "فتح مقاييس التشغيل الآن",
   "a11y.sidebarResizer": "تغيير عرض الشريط الجانبي",
+  "outline.close": "إغلاق المخطط",
   "onboard.title": "مرحبًا بك في Lumen",
   "onboard.subtitle": "بعض الاختيارات السريعة، ثم تبدأ الكتابة. يمكنك تغيير أي منها لاحقًا.",
   "onboard.step": "الخطوة {n} من {total}",

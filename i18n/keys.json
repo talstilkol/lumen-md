@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-10-24T15:34:34.169Z",
+  "generated_at": "2026-10-24T15:58:12.863Z",
   "source": "src/i18n/index.ts (en bundle)",
-  "count": 1564,
+  "count": 1565,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -6711,6 +6711,11 @@
     {
       "key": "a11y.sidebarResizer",
       "en": "Resize the sidebar",
+      "vars": []
+    },
+    {
+      "key": "outline.close",
+      "en": "Close the outline",
       "vars": []
     },
     {

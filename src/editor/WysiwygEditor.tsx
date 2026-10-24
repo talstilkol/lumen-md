@@ -447,10 +447,14 @@ function buildSlashMenu(getView: () => EditorView | null): SlashMenuRoot {
         }
         row.dataset.selected = "true";
       });
-      row.addEventListener("mousedown", (e) => {
+      // pointerdown (plan 10.2.1): a tap picks the item like a click. Its
+      // preventDefault also suppresses the compatibility mousedown, so the
+      // editor keeps focus; mousedown is still cancelled for older engines.
+      row.addEventListener("pointerdown", (e) => {
         e.preventDefault();
         commit(item);
       });
+      row.addEventListener("mousedown", (e) => e.preventDefault());
       el.appendChild(row);
     }
   }
@@ -574,13 +578,14 @@ function buildTooltip(getView: () => EditorView | null): HTMLDivElement {
     b.type = "button";
     b.title = btn.title;
     b.textContent = btn.label;
-    b.addEventListener("mousedown", (e) => {
+    b.addEventListener("pointerdown", (e) => {
       e.preventDefault();
       const view = getView();
       if (!view) return;
       btn.run(view);
       view.focus();
     });
+    b.addEventListener("mousedown", (e) => e.preventDefault());
     el.appendChild(b);
   }
   return el;
