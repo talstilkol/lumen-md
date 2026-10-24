@@ -270,6 +270,18 @@ jobs:
           name: smoke-results
           path: smoke-results.json
           if-no-files-found: ignore
+      - name: Opus-MT baseline — chrF on the mt-he-en dev split (plan 6.4)
+        # The first measurement of layer 2: the converted models exist only
+        # here until they are hosted (15.9). Numbers only, never items.
+        if: always()
+        run: |
+          node scripts/golden/evals/mt.mjs --dev --models models-under-test --layers opus --out mt-dev-scores.json | tee -a "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: mt-dev-scores
+          path: mt-dev-scores.json
+          if-no-files-found: ignore
 
   publish:
     name: publish (disabled, 15.9)
