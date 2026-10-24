@@ -699,6 +699,22 @@ export const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
     return () => window.removeEventListener("lumen-reveal-line", onReveal);
   }, []);
 
+  // `lumen-select-range` {from, to}: select and show a range — the sentence
+  // being read aloud (T32).
+  useEffect(() => {
+    function onSelect(e: Event) {
+      const d = (e as CustomEvent<{ from: number; to: number }>).detail;
+      const view = viewRef.current;
+      if (!view || !d) return;
+      const len = view.state.doc.length;
+      const from = Math.max(0, Math.min(d.from, len));
+      const to = Math.max(from, Math.min(d.to, len));
+      view.dispatch({ selection: { anchor: from, head: to }, effects: EditorView.scrollIntoView(from, { y: "center" }) });
+    }
+    window.addEventListener("lumen-select-range", onSelect);
+    return () => window.removeEventListener("lumen-select-range", onSelect);
+  }, []);
+
   return (
     <div
       className="flex-1 min-h-0 relative overflow-hidden"
