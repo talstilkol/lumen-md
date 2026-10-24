@@ -40,10 +40,35 @@ cloud provider may ever be contacted. The default on a fresh install is
    with **suggestions** you can act on: start Ollama, allow the app's
    origin (`OLLAMA_ORIGINS`), pull a model, split the document, try
    another executor, or allow the cloud.
+6. When the retries are used up, a small local model (the tiny tier)
+   reads the failure and may add one or two suggestions in plain
+   language. The suggestions panel opens on its own; pressing a
+   suggestion does it (pulls the model, switches the executor, changes
+   the policy) and runs the command again.
 
 Every run is recorded on this device: `⌘K → "AI: Recent Agent Runs"`
 shows the executor, model, tool calls, retries and failures of the last
 50 runs.
+
+## AI settings
+
+`⌘K → "AI: Settings (local agents)"` gathers everything in one panel:
+
+- the AI policy;
+- **who runs the agents** — automatic (Ollama → browser → chat provider)
+  or one executor first, with a live *available / not available* check
+  for each;
+- the Ollama address and model, with the models already installed;
+- the in-browser model, the device card (WebGPU, f16, a VRAM budget
+  estimate) and the catalogue, with models too large for this device
+  disabled;
+- the grammar (LanguageTool) and research (SearXNG worker) addresses;
+- your writing-style profile on/off;
+- the last ten agent runs.
+
+The panel writes the same settings the runtime reads; nothing is stored
+twice. The VRAM budget is a heuristic from the browser's coarse hints,
+not a measurement.
 
 ## Transcription and embeddings on this device
 
