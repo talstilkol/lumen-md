@@ -1,9 +1,16 @@
 {
   "version": 1,
-  "generated_at": "2026-10-18T12:22:55.812Z",
+  "generated_at": "2026-10-24T11:51:31.325Z",
   "source": "src/i18n/index.ts (en bundle)",
-  "count": 1432,
+  "count": 1433,
   "entries": [
+    {
+      "key": "spell.en.unknown",
+      "en": "“{word}”: unknown word (English dictionary on this device)",
+      "vars": [
+        "word"
+      ]
+    },
     {
       "key": "toolbar.tagline",
       "en": "Markdown, illuminated",
