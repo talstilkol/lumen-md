@@ -283,6 +283,8 @@ jobs:
         with: { node-version: 22, cache: npm }
       - run: npm ci || npm install
       - run: npx playwright install --with-deps chromium
+      - name: Build (the matrix is shot on the production build)
+        run: npm run build
       - name: Compare with the committed baselines
         run: npm run visual
       - name: Upload expected / actual / diff

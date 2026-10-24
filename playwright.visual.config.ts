@@ -7,14 +7,17 @@ import { defineConfig, devices } from "@playwright/test";
  * e2e-visual/baselines/. Chromium only: one engine, one OS (the CI runner),
  * one deterministic rasteriser.
  *
- *   npm run visual            compare (what CI does; a missing baseline fails)
- *   npm run visual:update     rewrite the baselines on purpose
+ *   npm run build && npm run visual            compare (what CI does; a missing baseline fails)
+ *   npm run build && npm run visual:update     rewrite the baselines on purpose
  *
- * Baselines are rendered by CI's own chromium and fonts, so they are
- * refreshed by the "visual baselines" workflow (workflow_dispatch), not by
- * a local run — see CONTRIBUTING.md.
+ * Baselines are pixels of one environment (chromium build and OS fonts),
+ * recorded in e2e-visual/baselines/ENVIRONMENT.json by the update run;
+ * compare in that environment — see CONTRIBUTING.md, "Visual regression".
  */
-const PORT = 5173;
+// The matrix is shot on the production build (`npm run build` first): the
+// same server the e2e-prod job and the local runner use, so dev-only code
+// (StrictMode double mounts, the HMR client) never reaches a baseline.
+const PORT = 4173;
 const BASE_URL = process.env.PLAYWRIGHT_BASE_URL ?? `http://localhost:${PORT}`;
 
 export default defineConfig({
@@ -52,9 +55,9 @@ export default defineConfig({
   webServer: process.env.PLAYWRIGHT_BASE_URL
     ? undefined
     : {
-        command: "npm run dev",
+        command: `npx vite preview --port ${PORT} --strictPort`,
         url: BASE_URL,
         reuseExistingServer: !process.env.CI,
-        timeout: 180_000,
+        timeout: 60_000,
       },
 });

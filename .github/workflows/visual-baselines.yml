@@ -2,13 +2,16 @@ name: visual baselines
 
 # Refreshes the visual-regression baselines on purpose (plan 10.3).
 #
-# Baselines are rendered by CI's own chromium and fonts, so a local run
-# cannot produce them: this workflow runs the matrix with
-# --update-snapshots on the given branch and commits the new PNGs to it.
-# Run it after a deliberate UI change, then review the diff of
-# e2e-visual/baselines/ in the PR like any other change:
+# Baselines are pixels of one environment (chromium build, OS fonts):
+# e2e-visual/baselines/ENVIRONMENT.json says which. This workflow renders
+# the matrix with --update-snapshots on GitHub's runner and commits the new
+# PNGs to the given branch. Run it after a deliberate UI change, then review
+# the diff of e2e-visual/baselines/ in the PR like any other change:
 #
-#   gh workflow run visual-baselines.yml --ref <branch>
+#   gh workflow run visual-baselines.yml --ref <branch> -f reason="…"
+#
+# While Actions minutes are out, the same refresh runs on the coordinator's
+# machine: `npm run build && npm run visual:update` (CONTRIBUTING.md).
 #
 # The run's artifact holds the previous and the new shot of every baseline
 # that changed, so the review can look at the pictures, not only the bytes.
@@ -23,11 +26,6 @@ on:
         description: "Why the baselines change (goes into the commit message)"
         required: true
         type: string
-  # BOOTSTRAP ONLY (removed in the next commit): workflow_dispatch cannot
-  # reach a workflow that has never been on the default branch, so the first
-  # baselines are rendered on a push to this branch.
-  push:
-    branches: [test/visual-ci]
 
 concurrency:
   group: visual-baselines-${{ github.ref }}
@@ -53,6 +51,9 @@ jobs:
         run: |
           mkdir -p "$RUNNER_TEMP/previous"
           cp e2e-visual/baselines/*.png "$RUNNER_TEMP/previous/" 2>/dev/null || true
+
+      - name: Build (the matrix is shot on the production build)
+        run: npm run build
 
       - name: Render the matrix and rewrite every baseline
         env:
@@ -88,7 +89,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add e2e-visual/baselines
-          git commit -m "test(visual): refresh ${{ steps.diff.outputs.changed }} baseline(s) — ${{ inputs.reason || 'first render of the matrix' }}" \
+          git commit -m "test(visual): refresh ${{ steps.diff.outputs.changed }} baseline(s) — ${{ inputs.reason }}" \
             -m "Rendered by the visual-baselines workflow (run ${{ github.run_id }}) on CI's chromium."
           git push origin "HEAD:${{ github.ref_name }}"
           echo "Pushed the new baselines to ${{ github.ref_name }}." >> "$GITHUB_STEP_SUMMARY"

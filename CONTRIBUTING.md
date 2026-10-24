@@ -138,30 +138,35 @@ The same ten surfaces × English / Hebrew × dark / light are a CI gate:
 `playwright.visual.config.ts`, chromium only, one worker) compares every
 shot with the baseline committed in `e2e-visual/baselines/`
 (`<surface>--<locale>-<theme>.png`, 640×400 — a 1280×800 layout at half
-resolution, so each PNG stays around 80 KB). The `visual` job in
-`ci.yml` runs it on every pull request.
+resolution, so each PNG stays around 80 KB). The matrix is shot on the
+production build (`vite preview` of `dist/`), never on the dev server.
+
+```bash
+npm run build
+npm run visual            # compare (what the CI job does)
+npm run visual:update     # rewrite the baselines on purpose, then stamp ENVIRONMENT.json
+```
 
 - **An unintended change fails the job.** The `visual-diffs` artifact
-  holds `…-expected.png`, `…-actual.png` and `…-diff.png` for every
-  failing shot (`test-results/visual/`) and the HTML report.
+  (or, locally, `test-results/visual/`) holds `…-expected.png`,
+  `…-actual.png` and `…-diff.png` for every failing shot, plus the HTML
+  report.
 - **A missing baseline is a failure too**, never a skip: a new surface
   needs its baseline before the job is green.
-- **Changing the baselines on purpose** (a UI change): the baselines are
-  rendered by CI's chromium and fonts, so a local run cannot produce
-  them. Run the "visual baselines" workflow on your branch:
-
-  ```bash
-  gh workflow run visual-baselines.yml --ref <branch> -f reason="why the UI changed"
-  ```
-
-  It renders the matrix with `--update-snapshots`, commits the changed
-  PNGs to the branch and uploads the previous and new shot of each one as
-  the `visual-baselines-changed` artifact. Review that diff in the PR like
-  code. The bot's commit does not start CI; your next push does.
-- **Locally**, `npm run visual` compares against the committed baselines
-  with your own chromium (expect a few shots to differ by fonts), and
-  `npm run visual:update` rewrites them for a look — do not commit a
-  locally rendered baseline.
+- **Baselines belong to one environment.** Pixels depend on the chromium
+  build and the OS fonts; `e2e-visual/baselines/ENVIRONMENT.json` says
+  where the committed set was rendered. Compare there. Rendered elsewhere,
+  every shot differs — that is a wrong environment, not a regression:
+  refresh the baselines in the new environment first.
+- **Changing the baselines on purpose** (a UI change): render them where
+  the comparison runs, review the PNG diff in the PR like code.
+  - On GitHub Actions: `gh workflow run visual-baselines.yml --ref <branch> -f reason="…"`
+    renders the matrix on the runner, commits the changed PNGs to the
+    branch and uploads previous + new as the `visual-baselines-changed`
+    artifact. The bot's commit does not start CI; your next push does.
+  - On the local CI machine (while Actions minutes are out): `npm run build && npm run visual:update`
+    under the runner's lock, with `VISUAL_CHROMIUM` pointing at the runner's
+    chromium; commit the PNGs and `ENVIRONMENT.json` together.
 
 ### Guidelines
 

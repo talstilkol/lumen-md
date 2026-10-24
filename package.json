@@ -41,7 +41,7 @@
     "eval:compare": "node scripts/eval-compare.mjs",
     "fake-ollama": "node --experimental-strip-types scripts/fake-ollama.mjs",
     "visual": "playwright test -c playwright.visual.config.ts",
-    "visual:update": "playwright test -c playwright.visual.config.ts --update-snapshots"
+    "visual:update": "playwright test -c playwright.visual.config.ts --update-snapshots && node scripts/visual-stamp.mjs"
   },
   "dependencies": {
     "@bjorn3/browser_wasi_shim": "0.4.2",
