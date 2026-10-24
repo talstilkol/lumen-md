@@ -88,6 +88,7 @@ describe("research under local-only", () => {
     expect(researchGoesOnline()).toBe(false);
     const r = await runResearch({ question: "מתי ההשקה?", deps: { settings: { provider: "claude", key: "" } } });
     expect(r.route).toBe("library");
+    expect(r.markdown.startsWith("---\nuntrusted: true\nresearch: library\n---\n")).toBe(true); // plan 2.7: written from clipped pages
     expect(r.unverified).toBe(0);
     expect(r.markdown).toContain("[[השקה]]");
     expect(r.markdown).not.toContain("other");

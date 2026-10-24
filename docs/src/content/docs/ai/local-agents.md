@@ -79,8 +79,9 @@ cancelled.
 
 Web pages, search results, clipped pages (the `Library` / `ספרייה`
 folder or a `source: https://…` frontmatter), notes that came from a git
-clone or pull, and notes with `untrusted: true` in their frontmatter are
-**outside content**. Someone else wrote them, and they may contain
+clone or pull, notes with `untrusted: true` in their frontmatter, and the
+notes that Research writes (they carry that frontmatter, because they are
+built from pages and quotes) are **outside content**. Someone else wrote them, and they may contain
 instructions planted for the agent. The runtime (`src/agents/untrusted.ts`)
 handles them like this:
 

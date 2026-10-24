@@ -177,6 +177,7 @@ describe("research agent", () => {
       new Date("2026-10-16T00:00:00Z"),
     );
     expect(sources).toBe(2);
+    expect(markdown.startsWith("---\nuntrusted: true\nresearch: claude\n---\n")).toBe(true);
     expect(markdown).toContain("Prune in early spring.[^1] Use clean shears.[^2][^1]");
     const flagged = citedBlocksToMarkdown("Q", [
       { text: "## Findings\n", citations: [] },
@@ -236,6 +237,10 @@ describe("research agent", () => {
       // A marker for a source that wasn't read is flagged, not dropped.
       expect(result.markdown).toContain("Bananas are blue. ⚠️ *cites a source that wasn't read*");
       expect(result.markdown).not.toContain("[^3]");
+      // Plan 2.7: the note is written from outside content, and says so for the injection guard, wherever it is saved.
+      expect(result.markdown.startsWith("---\nuntrusted: true\nresearch: brave\n---\n# ")).toBe(true);
+      const { untrustedSourcesOfNote } = await import("../agents/provenance");
+      expect(untrustedSourcesOfNote("notes/research.md", result.markdown)).toEqual(["marked untrusted (notes/research.md)"]);
     });
 
     it("gives every cited claim its own quote, and stops before searching on provider errors", async () => {

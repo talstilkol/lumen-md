@@ -58,6 +58,16 @@ const SYSTEM_REPORT =
   "and never invent facts, numbers or sources.";
 
 const title = (q: string) => q.replace(/\s+/g, " ").trim().slice(0, 120);
+
+/**
+ * Plan 2.7: a research note is written from outside content (page titles,
+ * quotes, library pages), so the note itself is outside content: the
+ * frontmatter says so, and the guard (`agents/provenance.ts`) reads it
+ * wherever the note is saved. `untrusted: true` is what it looks for.
+ */
+function researchFrontmatter(route: ResearchResult["route"]): string {
+  return ["---", "untrusted: true", `research: ${route}`, "---"].join("\n");
+}
 const hostOf = (u: string) => {
   try {
     return new URL(u).hostname;
@@ -124,6 +134,7 @@ export function citedBlocksToMarkdown(
     body += m[1] + refs + m[2];
   }
   const markdown = [
+    researchFrontmatter("claude"),
     `# ${title(question)}`,
     "",
     `*Researched ${now.toISOString().slice(0, 10)} with Claude web search · ${urls.size} sources · quotes are verbatim from the cited pages${
@@ -358,6 +369,7 @@ async function proxyResearch(o: ResearchOptions, settings: ResearchSettings): Pr
   );
   const uncited = pages.map((p, i) => ({ p, n: i + 1 })).filter(({ n }) => !cited.has(n));
   const markdown = [
+    researchFrontmatter(settings.provider as ProxyProvider),
     `# ${title(o.question)}`,
     "",
     `*Researched ${new Date().toISOString().slice(0, 10)} with ${PROVIDER_LABEL[settings.provider as ProxyProvider] ?? settings.provider} search · ${pages.length} sources read · ${
@@ -423,6 +435,7 @@ export async function libraryResearch(o: ResearchOptions): Promise<ResearchResul
   const unverified = uncited ? 1 : citations.filter((c) => !c.verified).length;
   const stemOf = (p: string) => p.replace(/^.*\//, "").replace(/\.md$/i, "");
   const markdown = [
+    researchFrontmatter("library"),
     `# ${title(o.question)}`,
     "",
     `*From your library only (nothing left this device) · ${top.length} pages · ${verifiedCount} of ${citations.length} quotes verified.*`,
