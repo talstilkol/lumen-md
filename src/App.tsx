@@ -60,7 +60,7 @@ import { useAuth } from "./auth/useAuth";
 import { docIdentity } from "./renderer/previewDoc";
 import { auditScope } from "./ui/auditScope";
 import { useEntitlement, watchAuthForEntitlements } from "./billing/useEntitlement";
-import { useAppStore, applyTheme } from "./store/useStore";
+import { useAppStore, applyTheme, isNarrowScreen } from "./store/useStore";
 import { applyLocale, t } from "./i18n";
 import { localLlmAvailable } from "./ai/localLlm";
 import { assessConfigHealth } from "./lib/configHealth";
@@ -101,6 +101,16 @@ export default function App() {
   const mode = useAppStore((s) => s.mode);
   const theme = useAppStore((s) => s.theme);
   const showOutline = useAppStore((s) => s.showOutline);
+  const outlineSheet = useAppStore((s) => s.outlineSheet);
+  // Phone width (plan 10.2.4): the outline shows as a bottom sheet, opened on demand.
+  const [narrow, setNarrow] = useState(isNarrowScreen);
+  useEffect(() => {
+    if (typeof window.matchMedia !== "function") return;
+    const mq = window.matchMedia("(max-width: 760px)");
+    const on = () => setNarrow(mq.matches);
+    mq.addEventListener?.("change", on);
+    return () => mq.removeEventListener?.("change", on);
+  }, []);
   const showWorkspace = useAppStore((s) => s.showWorkspace);
   const locale = useAppStore((s) => s.locale);
   const toggleWorkspace = useAppStore((s) => s.toggleWorkspace);
@@ -942,7 +952,7 @@ export default function App() {
             handleAddAsset={handleAddAsset}
           />
         </div>
-        {showOutline && <Outline markdownText={doc.content} />}
+        {(narrow ? outlineSheet : showOutline) && <Outline markdownText={doc.content} sheet={narrow} />}
         {showBacklinks && (
           <BacklinksPanel
             filePath={doc.workspaceName ?? null}

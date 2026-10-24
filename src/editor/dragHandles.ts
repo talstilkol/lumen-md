@@ -70,6 +70,8 @@ function makeHandle(view: EditorView, blockPos: number): HTMLElement {
     "opacity: 0",
     "transition: opacity 120ms",
     "user-select: none",
+    // The finger drags the block, not the page (plan 10.2.1).
+    "touch-action: none",
   ].join(";");
 
   el.addEventListener("dragstart", (e) => {
@@ -86,6 +88,38 @@ function makeHandle(view: EditorView, blockPos: number): HTMLElement {
   el.addEventListener("dragend", () => {
     el.style.cursor = "grab";
     view.dispatch(view.state.tr.setMeta(HANDLE_KEY, initial));
+  });
+
+  // Touch and pen (plan 10.2.1): HTML5 drag-and-drop doesn't start from a
+  // finger on most mobile browsers, so a pointer drag does the same move —
+  // press the handle, slide, lift where the block should go. Mouse keeps the
+  // native drag above.
+  el.addEventListener("pointerdown", (e) => {
+    if (e.pointerType === "mouse") return;
+    e.preventDefault();
+    try {
+      el.setPointerCapture(e.pointerId);
+    } catch {
+      /* no capture (an unknown pointer): the window listeners below still see it */
+    }
+    view.dispatch(view.state.tr.setMeta(HANDLE_KEY, { fromPos: blockPos, hoverPos: null }));
+    let last = { x: e.clientX, y: e.clientY };
+    const move = (ev: PointerEvent) => {
+      if (ev.pointerId !== e.pointerId) return;
+      last = { x: ev.clientX, y: ev.clientY };
+    };
+    const end = (ev: PointerEvent) => {
+      if (ev.pointerId !== e.pointerId) return;
+      window.removeEventListener("pointermove", move);
+      window.removeEventListener("pointerup", end);
+      window.removeEventListener("pointercancel", end);
+      if (ev.type === "pointerup" && (Math.abs(last.x - e.clientX) > 4 || Math.abs(last.y - e.clientY) > 4)) moveBlockTo(view, blockPos, last.x, last.y);
+      else view.dispatch(view.state.tr.setMeta(HANDLE_KEY, initial));
+    };
+    // On window: with or without capture, the pointer's later events reach these.
+    window.addEventListener("pointermove", move);
+    window.addEventListener("pointerup", end);
+    window.addEventListener("pointercancel", end);
   });
 
   // Keyboard a11y — focus the handle then ↑/↓ moves the block one step
@@ -155,6 +189,33 @@ function moveBlockByOne(view: EditorView, fromPos: number, dir: -1 | 1): void {
 }
 
 /**
+ * Move the block at `fromPos` to the document position under the screen
+ * point (x, y): the drop of a mouse drag, or the release of a touch drag.
+ * @internal exported for tests.
+ */
+export function moveBlockTo(view: EditorView, fromPos: number, x: number, y: number): boolean {
+  const coords = view.posAtCoords({ left: x, top: y });
+  const sourceNode = view.state.doc.nodeAt(fromPos);
+  if (!coords || !sourceNode) {
+    view.dispatch(view.state.tr.setMeta(HANDLE_KEY, initial));
+    return false;
+  }
+  const sourceTo = fromPos + sourceNode.nodeSize;
+  let target = coords.pos;
+  // If we'd insert into the source's own range, snap to its end.
+  if (target >= fromPos && target <= sourceTo) target = sourceTo;
+  const slice = view.state.doc.slice(fromPos, sourceTo);
+  const tr = view.state.tr;
+  // Delete first, then insert at the (shifted) target.
+  tr.delete(fromPos, sourceTo);
+  const adjusted = target > sourceTo ? target - sourceNode.nodeSize : target;
+  tr.insert(adjusted, slice.content);
+  tr.setMeta(HANDLE_KEY, initial);
+  view.dispatch(tr);
+  return true;
+}
+
+/**
  * Compute one widget decoration per top-level block. We only decorate
  * direct children of the doc root — nested lists / quotes get a single
  * handle for the outer block, which is the convention every Notion-like
@@ -201,7 +262,7 @@ export const dragHandlePlugin = new Plugin<DragState>({
       // pseudo-class :hover on the parent block by mutating the handle's
       // opacity from a delegated mousemove listener — much cheaper than
       // a per-block React state + ResizeObserver.
-      mousemove(view, e) {
+      pointermove(view, e) {
         const root = view.dom;
         const handles = root.querySelectorAll<HTMLElement>(".lumen-drag-handle");
         const target = e.target as HTMLElement;
@@ -218,7 +279,18 @@ export const dragHandlePlugin = new Plugin<DragState>({
         }
         return false;
       },
-      mouseleave(view) {
+      pointerdown(view, e) {
+        // No hover on touch: touching a block shows its handle.
+        if (e.pointerType === "mouse") return false;
+        const target = e.target as HTMLElement;
+        for (const h of view.dom.querySelectorAll<HTMLElement>(".lumen-drag-handle")) {
+          const parent = h.parentElement;
+          h.style.opacity = parent && (parent.contains(target) || parent === target) ? "0.8" : "0";
+        }
+        return false;
+      },
+      pointerleave(view, e) {
+        if (e.pointerType !== "mouse") return false;
         for (const h of view.dom.querySelectorAll<HTMLElement>(".lumen-drag-handle")) {
           h.style.opacity = "0";
         }
@@ -247,22 +319,7 @@ export const dragHandlePlugin = new Plugin<DragState>({
         const fromPos = Number(data);
         if (!Number.isFinite(fromPos)) return false;
         e.preventDefault();
-        const coords = view.posAtCoords({ left: e.clientX, top: e.clientY });
-        if (!coords) return true;
-        const sourceNode = view.state.doc.nodeAt(fromPos);
-        if (!sourceNode) return true;
-        const sourceTo = fromPos + sourceNode.nodeSize;
-        let target = coords.pos;
-        // If we'd insert into the source's own range, snap to its end.
-        if (target >= fromPos && target <= sourceTo) target = sourceTo;
-        const slice = view.state.doc.slice(fromPos, sourceTo);
-        const tr = view.state.tr;
-        // Delete first, then insert at the (shifted) target.
-        tr.delete(fromPos, sourceTo);
-        const adjusted = target > sourceTo ? target - sourceNode.nodeSize : target;
-        tr.insert(adjusted, slice.content);
-        tr.setMeta(HANDLE_KEY, initial);
-        view.dispatch(tr);
+        moveBlockTo(view, fromPos, e.clientX, e.clientY);
         return true;
       },
     },

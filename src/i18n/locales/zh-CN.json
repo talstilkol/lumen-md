@@ -742,6 +742,7 @@
   "tour.step.editor.body": "借助完整的语法高亮、实时预览和 AI 辅助来编写 Markdown。",
   "tour.action.openRuntimeMetrics": "立即打开运行时指标",
   "a11y.sidebarResizer": "调整侧边栏宽度",
+  "outline.close": "关闭大纲",
   "onboard.title": "欢迎使用 Lumen",
   "onboard.subtitle": "做几个简单选择，就可以开始写作。之后都可以更改。",
   "onboard.step": "第 {n} 步，共 {total} 步",
