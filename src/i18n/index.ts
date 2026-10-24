@@ -1611,6 +1611,11 @@ export function applyLocale(locale: Locale): void {
   }
 }
 
+/** English of a lazy domain (src/i18n/lazy/<domain>.json, see locales/README.md); existing keys win. */
+export function registerEnglish(strings: Strings): void {
+  for (const [k, v] of Object.entries(strings)) if (!(k in en)) en[k] = v;
+}
+
 /** Translate `id` using the active locale, with optional `{name}` substitutions. */
 export function t(id: string, vars?: Record<string, string | number>): string {
   const bundle = BUNDLES[activeLocale] ?? en;

@@ -65,7 +65,8 @@ export function chunkMarkdown(text: string, max = CHUNK_CHARS): string[] {
 export function urlsOf(s: string): string[] {
   const out: string[] = [];
   for (const m of s.matchAll(/!?\[[^\]]*\]\(\s*<?([^)\s>]+)>?[^)]*\)/g)) out.push(m[1]);
-  for (const m of s.matchAll(/^\s{0,3}\[[^\]]+\]:\s*<?(\S+?)>?(?:\s|$)/gm)) out.push(m[1]);
+  // Link reference definitions; a footnote definition ("[^1]: text") is prose, not a target.
+  for (const m of s.matchAll(/^\s{0,3}\[[^\]^][^\]]*\]:\s*<?(\S+?)>?(?:\s|$)/gm)) out.push(m[1]);
   for (const m of s.matchAll(/<((?:https?|mailto|ftp):[^>\s]+)>/g)) out.push(m[1]);
   // Bare URLs not already captured as a link target above.
   const linked = s.replace(/!?\[[^\]]*\]\([^)]*\)/g, " ").replace(/^\s{0,3}\[[^\]]+\]:.*$/gm, " ").replace(/<(?:https?|mailto|ftp):[^>\s]+>/g, " ");

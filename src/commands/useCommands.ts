@@ -936,10 +936,10 @@ export function useCommands({
           if (!target || !target.trim()) return;
           try {
             showAiToast(t("toast.translatingTo", { target }), "info");
-            const { translateMarkdown } = await import("../agents/commands");
-            const translated = await cancellable((signal) => translateMarkdown(liveDoc().content, target.trim(), signal));
-            setContent(translated);
-            showAiToast(t("toast.documentTranslated"), "success");
+            const { translateMarkdownDetailed, translationToasts } = await import("../agents/commands");
+            const r = await cancellable((signal) => translateMarkdownDetailed(liveDoc().content, target.trim(), signal));
+            setContent(r.text);
+            for (const [msg, kind] of translationToasts(r, t)) showAiToast(msg, kind);
           } catch (e) {
             if (isAbort(e)) return;
             if ((await import("../agents/suggestions")).reportAgentFailure(e, "ai.translate")) return;
