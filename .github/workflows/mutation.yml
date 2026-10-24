@@ -1,0 +1,75 @@
+name: mutation testing
+
+# Plan 0.15: Stryker (Apache-2.0) on the critical modules.
+#  - Weekly (Monday 03:00 UTC, the 0.11 schedule) and on demand: the
+#    critical set AND all of src/storage/, as a report artifact.
+#  - On pull requests that touch a critical module: the critical set, then
+#    scripts/mutation-gate.mjs — score ≥ 70 % per module, and no surviving
+#    mutant outside scripts/mutation.baseline.json.
+
+on:
+  schedule:
+    - cron: "0 3 * * 1"
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "src/storage/encryption.ts"
+      - "src/storage/vault.ts"
+      - "src/storage/workspace.ts"
+      - "src/storage/trash.ts"
+      - "src/storage/fileOps.ts"
+      - "src/lib/secretStore.ts"
+      - "src/renderer/rehypeSanitizeRaw.ts"
+      - "src/agents/runtime.ts"
+      - "src/text/hebrew.ts"
+      - "stryker.config.mjs"
+      - "scripts/mutation-gate.mjs"
+      - "scripts/mutation.baseline.json"
+
+concurrency:
+  group: mutation-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  critical:
+    name: mutation (critical modules) + gate
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with: { node-version: 22, cache: npm }
+      - run: npm ci || npm install
+      - name: Stryker on the critical set
+        run: npx stryker run
+      - name: Gate (score ≥ 70 %, no new survivor)
+        run: node scripts/mutation-gate.mjs | tee -a "$GITHUB_STEP_SUMMARY"
+      - if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: mutation-critical
+          path: reports/mutation/
+          retention-days: 30
+
+  storage:
+    name: mutation (all of src/storage, weekly report)
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with: { node-version: 22, cache: npm }
+      - run: npm ci || npm install
+      - name: Stryker on src/storage
+        run: npx stryker run --mutate "src/storage/**/*.ts" --jsonReporter.fileName reports/mutation-storage/mutation.json --htmlReporter.fileName reports/mutation-storage/index.html
+      - if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: mutation-storage
+          path: reports/mutation-storage/
+          retention-days: 30
