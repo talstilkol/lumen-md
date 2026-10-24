@@ -112,4 +112,20 @@ describe("DOCX: a mixed document", () => {
     expect(pPrOf(en, "Milk")).toBe("");
     expect(pPrOf(he, "חלב")).toBe('<w:bidi/><w:jc w:val="end"/>');
   });
+
+describe("DOCX: table direction comes from visible, strong text only (Codex P2s, #263)", () => {
+  it("a link's hidden URL does not make a neutral table in a Hebrew note LTR", async () => {
+    const md = "# כותרת\n\n| 1 | 2 |\n|---|---|\n| [10](https://example.com) | 20 |\n";
+    const tbl = tables(await documentXml(md), 1)[0]!;
+    expect(tbl).toContain("<w:bidiVisual/>");
+    expect(pPrOf(tbl, "20")).toBe("<w:bidi/>");
+  });
+
+  it("Arabic-Indic digits keep an English table LTR and their cell neutral", async () => {
+    const md = "# Title\n\n| ١٢ | Item |\n|---|---|\n| ٣٤ | tea |\n";
+    const tbl = tables(await documentXml(md), 1)[0]!;
+    expect(tbl).not.toContain("<w:bidiVisual/>");
+    expect(pPrOf(tbl, "٣٤")).toBe("");
+  });
+});
 });

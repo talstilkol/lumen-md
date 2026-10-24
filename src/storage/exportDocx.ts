@@ -201,9 +201,14 @@ export function resolveJc(align: Align, dir: BaseDirection): Jc {
   return align === trailing ? "end" : "start";
 }
 
-/** The direction of a table: its first strong character, else the note's. */
+/**
+ * The direction of a table: the first strong character of its *visible*
+ * text (parsed runs, like the cells — a link's hidden URL must not decide),
+ * else the note's.
+ */
 function tableDirection(rows: string[][], ctx: DocxCtx): BaseDirection {
-  return firstStrongDirection(rows.map((r) => r.join(" ")).join("\n")) ?? ctx.baseDir;
+  const visible = rows.map((r) => r.map((c) => parseInline(c).map((run) => run.text).join("")).join(" ")).join("\n");
+  return firstStrongDirection(visible) ?? ctx.baseDir;
 }
 
 function isTableSep(line: string): boolean {
