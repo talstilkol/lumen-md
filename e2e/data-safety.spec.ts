@@ -14,6 +14,41 @@ test.beforeEach(async ({ page }) => {
   await expect(page.locator(".cm-content").first()).toContainText("Welcome to", { timeout: 15_000 });
 });
 
+/**
+ * Can this engine write OPFS files at all here? Playwright's WebKit runs in
+ * an ephemeral context, where WebKit may refuse OPFS writes; the vault can't
+ * work there, so the vault tests skip (and say why) instead of failing.
+ */
+async function opfsWritable(page: import("@playwright/test").Page): Promise<boolean> {
+  return page.evaluate(async () => {
+    try {
+      const root = await navigator.storage.getDirectory();
+      const fh = await root.getFileHandle("__probe", { create: true });
+      const h = fh as unknown as { createWritable?: () => Promise<{ write(d: string): Promise<void>; close(): Promise<void> }> };
+      if (typeof h.createWritable === "function") {
+        const w = await h.createWritable();
+        await w.write("x");
+        await w.close();
+      } else {
+        const src =
+          "self.onmessage=async()=>{try{const r=await navigator.storage.getDirectory();const f=await r.getFileHandle('__probe',{create:true});const a=await f.createSyncAccessHandle();a.write(new Uint8Array([120]),{at:0});a.flush();a.close();postMessage(true)}catch(e){postMessage(false)}}";
+        const ok = await new Promise<boolean>((res) => {
+          const w = new Worker(URL.createObjectURL(new Blob([src], { type: "application/javascript" })));
+          w.onmessage = (e) => res(e.data === true);
+          w.onerror = () => res(false);
+          w.postMessage(0);
+          setTimeout(() => res(false), 5000);
+        });
+        if (!ok) return false;
+      }
+      await root.removeEntry("__probe");
+      return true;
+    } catch {
+      return false;
+    }
+  });
+}
+
 async function openHistory(page: import("@playwright/test").Page) {
   await page.keyboard.press("Meta+K");
   const palette = page.locator('[role="dialog"]').filter({ has: page.locator("input") });
@@ -83,4 +118,82 @@ test("auto-backups no longer create files in the vault", async ({ page }) => {
     }
   });
   expect(names).not.toContain("backups");
+});
+
+/**
+ * Safari before 26 (and Playwright WebKit) has no createWritable on the main
+ * thread: vault writes go through a sync-access-handle worker. Remove the
+ * method here so every engine exercises that path.
+ */
+test("saving to the vault works without createWritable (Safari path)", async ({ page }) => {
+  await page.addInitScript(() => {
+    const proto = (globalThis as { FileSystemFileHandle?: { prototype: Record<string, unknown> } }).FileSystemFileHandle?.prototype;
+    if (proto) delete proto.createWritable;
+  });
+  await page.reload();
+  await expect(page.locator(".cm-content").first()).toContainText("Welcome to", { timeout: 15_000 });
+  test.skip(!(await opfsWritable(page)), "OPFS writes are unavailable in this engine's test context");
+  const run = (id: string) => page.evaluate((cmd) => window.dispatchEvent(new CustomEvent("lumen-run-command", { detail: { id: cmd } })), id);
+  await page.keyboard.press("Meta+1");
+  const editor = page.locator(".cm-content").first();
+  await editor.click();
+  await editor.press("ControlOrMeta+a");
+  await editor.fill("# Written by the worker");
+  await run("file.saveToWorkspace");
+  await expect(page.locator("aside.file-tree .file-tree-name", { hasText: "Welcome.md" })).toBeVisible({ timeout: 10_000 });
+  const text = await page.evaluate(async () => {
+    const root = await navigator.storage.getDirectory();
+    const file = await (await root.getFileHandle("Welcome.md")).getFile();
+    return file.text();
+  });
+  expect(text).toBe("# Written by the worker");
+});
+
+/** Part B — safe files (T46): rename keeps links, delete is undoable. */
+test("renaming a note rewrites links to it; deleting it goes to the trash with Undo", async ({ page }) => {
+  test.skip(!(await opfsWritable(page)), "OPFS writes are unavailable in this engine's test context");
+  const run = (id: string) => page.evaluate((cmd) => window.dispatchEvent(new CustomEvent("lumen-run-command", { detail: { id: cmd } })), id);
+  await page.keyboard.press("Meta+1");
+  const editor = page.locator(".cm-content").first();
+
+  // Note 1: "Welcome.md" saved into the vault.
+  await editor.click();
+  await editor.press("ControlOrMeta+a");
+  await editor.fill("# Target note");
+  await run("file.saveToWorkspace");
+  const tree = page.locator("aside.file-tree");
+  await expect(tree.locator(".file-tree-name", { hasText: "Welcome.md" })).toBeVisible({ timeout: 10_000 });
+
+  // Note 2 links to it.
+  await run("file.new");
+  await editor.click();
+  await editor.press("ControlOrMeta+a");
+  await editor.fill("see [[Welcome]] and [[Welcome#Target note|this]]");
+  await run("file.saveToWorkspace");
+  await expect(tree.locator(".file-tree-name")).toHaveCount(2, { timeout: 10_000 });
+
+  // Rename Welcome.md → Renamed.md in the tree.
+  const row = tree.locator(".file-tree-item", { has: page.locator(".file-tree-name", { hasText: "Welcome.md" }) });
+  await row.hover();
+  await row.getByRole("button", { name: /rename/i }).click();
+  const input = tree.locator("input.file-tree-input");
+  await input.fill("Renamed");
+  await input.press("Enter");
+  await expect(tree.locator(".file-tree-name", { hasText: "Renamed.md" })).toBeVisible({ timeout: 10_000 });
+
+  // The other note's links follow (it is the open note).
+  await expect(page.getByText(/Links updated in 1 notes/i)).toBeVisible({ timeout: 10_000 });
+  const other = tree.locator(".file-tree-name").filter({ hasNotText: "Renamed.md" }).first();
+  await other.click();
+  await expect(editor).toContainText("[[Renamed]] and [[Renamed#Target note|this]]", { timeout: 10_000 });
+
+  // Delete → trash, Undo brings it back.
+  const renamed = tree.locator(".file-tree-item", { has: page.locator(".file-tree-name", { hasText: "Renamed.md" }) });
+  await renamed.hover();
+  await renamed.getByRole("button", { name: /delete/i }).click();
+  await expect(tree.locator(".file-tree-name", { hasText: "Renamed.md" })).toHaveCount(0, { timeout: 10_000 });
+  const toastEl = page.getByRole("status").filter({ hasText: /moved to the trash/i });
+  await expect(toastEl).toBeVisible({ timeout: 5000 });
+  await toastEl.getByRole("button", { name: "Undo" }).click();
+  await expect(tree.locator(".file-tree-name", { hasText: "Renamed.md" })).toBeVisible({ timeout: 10_000 });
 });
