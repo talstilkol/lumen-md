@@ -706,6 +706,7 @@ export function useCommands({
             setContent(mergeTagsIntoFrontmatter(doc.content, final));
             showAiToast(`✅ Added ${final.length} tag${final.length === 1 ? "" : "s"}`, "success");
           } catch (e) {
+            if ((await import("../agents/suggestions")).reportAgentFailure(e, "tools.autoTag")) return;
             showAiToast(`Auto-tag failed: ${(e as Error).message}`, "error");
           }
         },
@@ -749,6 +750,7 @@ export function useCommands({
             setContent(next);
             showAiToast(`✅ Applied ${applied} link${applied === 1 ? "" : "s"}`, "success");
           } catch (e) {
+            if ((await import("../agents/suggestions")).reportAgentFailure(e, "tools.suggestLinks")) return;
             showAiToast(`Link suggest failed: ${(e as Error).message}`, "error");
           }
         },
@@ -778,6 +780,7 @@ export function useCommands({
               showAiToast(`Product creation failed: ${result.error}`, "error");
             }
           } catch (e) {
+            if ((await import("../agents/suggestions")).reportAgentFailure(e, "ai.productAgent")) return;
             showAiToast(`Agent error: ${(e as Error).message}`, "error");
           }
         },
@@ -796,6 +799,7 @@ export function useCommands({
             setContent(`${doc.content.trimEnd()}\n\n${block}\n`);
             showAiToast("✅ Diagram inserted", "success");
           } catch (e) {
+            if ((await import("../agents/suggestions")).reportAgentFailure(e, "ai.diagram")) return;
             showAiToast(`Diagram failed: ${(e as Error).message}`, "error");
           }
         },
@@ -814,6 +818,7 @@ export function useCommands({
             setContent(`${doc.content.trimEnd()}\n\n## Action Items\n\n${list}\n`);
             showAiToast("✅ Action items added", "success");
           } catch (e) {
+            if ((await import("../agents/suggestions")).reportAgentFailure(e, "ai.actionItems")) return;
             showAiToast(`Action items failed: ${(e as Error).message}`, "error");
           }
         },
@@ -837,6 +842,7 @@ export function useCommands({
             setContent(translated);
             showAiToast("✅ Document translated", "success");
           } catch (e) {
+            if ((await import("../agents/suggestions")).reportAgentFailure(e, "ai.translate")) return;
             showAiToast(`Translation failed: ${(e as Error).message}`, "error");
           }
         },
@@ -855,6 +861,7 @@ export function useCommands({
             setContent(`${doc.content.trimEnd()}\n\n${block}\n`);
             showAiToast("✅ Chart inserted", "success");
           } catch (e) {
+            if ((await import("../agents/suggestions")).reportAgentFailure(e, "ai.chart")) return;
             showAiToast(`Chart failed: ${(e as Error).message}`, "error");
           }
         },
@@ -1331,6 +1338,7 @@ export function useCommands({
               showAiToast(t("ai.style.cleared"), "success");
             }
           } catch (e) {
+            if ((await import("../agents/suggestions")).reportAgentFailure(e, "ai.styleProfile")) return;
             showAiToast((e as Error).message, "error");
           }
         },
@@ -1473,6 +1481,7 @@ export function useCommands({
             const top = matches.slice(0, 5).map((m, i) => `${i + 1}. ${m.message}`).join("\n");
             await uiAlert({ message: `Found ${matches.length} issue${matches.length === 1 ? "" : "s"}:\n\n${top}` });
           } catch (e) {
+            if ((await import("../agents/suggestions")).reportAgentFailure(e, "tools.checkGrammar")) return;
             showAiToast(`Grammar check failed: ${(e as Error).message}`, "error");
           }
         },
@@ -1774,6 +1783,7 @@ export function useCommands({
             setContent(doc.content + "\n\n---\n\n" + result);
             showAiToast(`✅ ${tpl.label} completed`, "success");
           } catch (e) {
+            if ((await import("../agents/suggestions")).reportAgentFailure(e, `ai.prompt.${tpl.id}`)) return;
             showAiToast(`AI error: ${(e as Error).message}`, "error");
           }
         },
