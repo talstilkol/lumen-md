@@ -1451,5 +1451,14 @@
   "cmd.ai.cancel": "AI: إلغاء",
   "cmd.ai.cancel.hint": "يوقف كل طلبات الذكاء الاصطناعي الجارية (Esc يفعل ذلك أيضاً)",
   "toast.aiCancelled": "أُلغي طلب الذكاء الاصطناعي ({count})",
-  "toast.aiNothingRunning": "لا يوجد طلب ذكاء اصطناعي جارٍ"
+  "toast.aiNothingRunning": "لا يوجد طلب ذكاء اصطناعي جارٍ",
+  "cmd.app.checkUpdates": "التحقق من التحديثات…",
+  "cmd.app.checkUpdates.hint": "تطبيق سطح المكتب: يسأل خادم الإصدارات عن إصدار أحدث موقّع",
+  "update.localOnly": "تم تخطي التحقق: سياسة الخصوصية «محلي فقط»، لذا لا يُرسل شيء.",
+  "update.notConfigured": "لا يوجد في هذا الإصدار خادم أو مفتاح تحديث بعد؛ ثبّت الإصدارات الجديدة يدويًا.",
+  "update.upToDate": "Lumen {version} هو أحدث إصدار.",
+  "update.available.title": "Lumen {version} متاح",
+  "update.available.body": "لديك {current}. هل تريد تنزيل {version} والتحقق منه وتثبيته؟ سيُعاد تشغيل Lumen.",
+  "update.install": "تثبيت وإعادة التشغيل",
+  "update.failed": "فشل التحديث: {message}"
 }

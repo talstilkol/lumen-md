@@ -117,6 +117,17 @@ async function main() {
     process.exit(2);
   }
   const jsFiles = entries.filter((f) => f.endsWith(".js"));
+  // Plan 11.5: 0 source maps in the build — no .map files and no
+  // sourceMappingURL comments anywhere in dist/ (LUMEN_SOURCEMAP=1 is for local use only).
+  if (process.env.LUMEN_SOURCEMAP !== "1") {
+    const { findSourceMaps } = await import("./lib/sourcemaps.mjs");
+    const maps = await findSourceMaps(path.join(process.cwd(), "dist"));
+    if (maps.length) {
+      console.error(`✗ ${maps.length} source map(s) in dist/ (plan 11.5 allows none):\n  ${maps.slice(0, 10).join("\n  ")}`);
+      process.exit(1);
+    }
+    console.log("  ✓ 0 source maps in dist/");
+  }
   if (jsFiles.length === 0) {
     console.error("dist/assets has no .js files.");
     process.exit(2);

@@ -256,6 +256,8 @@ export default defineConfig({
         // importScripts("workbox-*.js") is blocked there, leaving an
         // "activated" worker with no precache and no routes (no offline).
         inlineWorkboxRuntime: true,
+        // No sw.js.map in the build (plan 11.5).
+        sourcemap: false,
         globPatterns: ["**/*.{js,css,html,svg,wasm,woff2}"],
         // Exclude heavy vendor chunks that are loaded on-demand via dynamic
         // import — these will be cached at runtime when first fetched.
@@ -427,7 +429,11 @@ export default defineConfig({
   html: { cspNonce: "lumen-livejs-runner" },
   build: {
     target: "es2022",
-    sourcemap: true,
+    // No source maps in what ships (plan 11.5, F7): they publish the whole
+    // source next to the app and grow the desktop bundle. LUMEN_SOURCEMAP=1
+    // turns them on for a local investigation; scripts/bundle-budget.mjs
+    // fails a build that has any.
+    sourcemap: process.env.LUMEN_SOURCEMAP === "1",
     // Warn early if a single chunk crosses 500 KiB; the renderer pipeline
     // and editor frameworks split out as their own chunks today.
     chunkSizeWarningLimit: 500,

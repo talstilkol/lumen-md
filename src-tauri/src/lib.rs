@@ -3,6 +3,8 @@ use tauri::menu::{
 };
 use tauri::{Emitter, Manager};
 
+mod updates;
+
 /// Build the native menu bar and emit `lumen-menu` events when an item fires.
 /// The frontend listens for these events in `useTauriMenu` and dispatches the
 /// matching command from the in-app palette so behaviour stays identical to
@@ -357,8 +359,10 @@ fn secret_set(name: String, value: Option<String>) -> Result<(), String> {
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-    tauri::Builder::default()
-        .plugin(tauri_plugin_dialog::init())
+    let builder = tauri::Builder::default().plugin(tauri_plugin_dialog::init());
+    #[cfg(desktop)]
+    let builder = builder.plugin(tauri_plugin_updater::Builder::new().build());
+    builder
         .manage(desktop_vault::VaultState::default())
         .invoke_handler(tauri::generate_handler![
             secret_available,
@@ -376,6 +380,10 @@ pub fn run() {
             desktop_vault::vault_rename,
             desktop_vault::vault_remove,
             desktop_vault::vault_backup,
+            #[cfg(desktop)]
+            updates::imp::update_check,
+            #[cfg(desktop)]
+            updates::imp::update_install,
         ])
         .setup(|app| {
             // The folder chosen on an earlier run (plan 4.3).
@@ -392,7 +400,7 @@ pub fn run() {
                     let id = event.id().0.as_str();
                     if id == "help.github" {
                         // Open in default browser via the dialog plugin's url handler.
-                        let _ = tauri_plugin_dialog::DialogExt::dialog(app)
+                        tauri_plugin_dialog::DialogExt::dialog(app)
                             .message("https://github.com/talstilkol/lumen-md")
                             .show(|_| {});
                         return;

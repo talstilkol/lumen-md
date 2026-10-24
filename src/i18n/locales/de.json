@@ -1451,5 +1451,14 @@
   "cmd.ai.cancel": "KI: Abbrechen",
   "cmd.ai.cancel.hint": "Stoppt alle laufenden KI-Anfragen (auch mit Esc)",
   "toast.aiCancelled": "KI-Anfrage abgebrochen ({count})",
-  "toast.aiNothingRunning": "Keine KI-Anfrage läuft"
+  "toast.aiNothingRunning": "Keine KI-Anfrage läuft",
+  "cmd.app.checkUpdates": "Nach Updates suchen…",
+  "cmd.app.checkUpdates.hint": "Desktop-App: fragt den Release-Server nach einer neueren, signierten Version",
+  "update.localOnly": "Update-Prüfung übersprungen: Die Datenschutzrichtlinie ist „nur lokal“, es wird nichts gesendet.",
+  "update.notConfigured": "Dieser Build hat noch keinen Update-Server oder Schlüssel; neue Versionen bitte manuell installieren.",
+  "update.upToDate": "Lumen {version} ist die neueste Version.",
+  "update.available.title": "Lumen {version} ist verfügbar",
+  "update.available.body": "Sie haben {current}. {version} herunterladen, prüfen und installieren? Lumen startet danach neu.",
+  "update.install": "Installieren und neu starten",
+  "update.failed": "Update fehlgeschlagen: {message}"
 }
