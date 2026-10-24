@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-10-18T11:17:46.074Z",
+  "generated_at": "2026-10-24T18:11:31.494Z",
   "source": "src/i18n/index.ts (en bundle)",
-  "count": 1428,
+  "count": 1431,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -5034,6 +5034,24 @@
     {
       "key": "ai.localModels.tooBig",
       "en": "may not fit",
+      "vars": []
+    },
+    {
+      "key": "ai.localModels.licenceTitle",
+      "en": "Model under its own licence",
+      "vars": []
+    },
+    {
+      "key": "ai.localModels.licenceBody",
+      "en": "{{model}} is published under the {{licence}}, not an open-source licence. Read its terms before you use it, especially for work. Lumen will not choose it for you.",
+      "vars": [
+        "model",
+        "licence"
+      ]
+    },
+    {
+      "key": "ai.localModels.licenceOk",
+      "en": "Use it",
       "vars": []
     },
     {
