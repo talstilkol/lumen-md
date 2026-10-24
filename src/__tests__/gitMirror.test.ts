@@ -23,7 +23,7 @@ afterEach(() => fs.rmSync(dir, { recursive: true, force: true }));
 
 describe("writeIntoMirror", () => {
   it("writes files and creates missing folders", async () => {
-    const skipped = await writeIntoMirror(fs, dir, [
+    const { skipped } = await writeIntoMirror(fs, dir, [
       { relative: "a.md", bytes: enc("a") },
       { relative: "notes/deep/b.md", bytes: enc("b") },
     ]);
@@ -35,7 +35,7 @@ describe("writeIntoMirror", () => {
   it("skips a vault file where the mirror has a folder, and keeps the folder", async () => {
     fs.mkdirSync(path.join(dir, "docs"));
     fs.writeFileSync(path.join(dir, "docs/readme.md"), "remote");
-    const skipped = await writeIntoMirror(fs, dir, [
+    const { skipped } = await writeIntoMirror(fs, dir, [
       { relative: "docs", bytes: enc("local file") },
       { relative: "other.md", bytes: enc("o") },
     ]);
@@ -46,7 +46,7 @@ describe("writeIntoMirror", () => {
 
   it("skips a vault file under a folder that is a file in the mirror, and keeps that file", async () => {
     fs.writeFileSync(path.join(dir, "x"), "remote file");
-    const skipped = await writeIntoMirror(fs, dir, [{ relative: "x/inner.md", bytes: enc("local") }]);
+    const { skipped } = await writeIntoMirror(fs, dir, [{ relative: "x/inner.md", bytes: enc("local") }]);
     expect(skipped).toEqual(["x/inner.md"]);
     expect(read("x")).toBe("remote file");
   });

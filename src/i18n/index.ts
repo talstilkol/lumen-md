@@ -1609,6 +1609,8 @@ const en: Strings = {
   "git.pull.kindClashes": "File/folder changed upstream, kept as is here: {files}",
   "git.alert.corsProxyBlocked": "The app's security policy blocks {origin}. Use http://localhost:9999 or a proxy the deployment allows.",
   "git.commit.skipped": "Not committed (file/folder clash): {files}",
+  "git.commit.lfsKept": "Committed as the repository's Git LFS pointer, not as the file in the vault (LFS is not supported): {files}",
+  "git.commit.unsaved": "Not committed: these open notes have edits that could not be saved first (a change made outside Lumen is being resolved): {files}",
 };
 
 

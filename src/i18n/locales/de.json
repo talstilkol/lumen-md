@@ -1497,5 +1497,7 @@
   "git.watch.conflicts": "Auto-Pull: {count} Konflikte in den Dateien markiert. Pullen, um sie zu lösen.",
   "git.pull.kindClashes": "Datei/Ordner upstream geändert, hier unverändert: {files}",
   "git.alert.corsProxyBlocked": "Die Sicherheitsrichtlinie der App blockiert {origin}. Nimm http://localhost:9999 oder einen von der Bereitstellung erlaubten Proxy.",
-  "git.commit.skipped": "Nicht committet (Datei/Ordner-Konflikt): {files}"
+  "git.commit.skipped": "Nicht committet (Datei/Ordner-Konflikt): {files}",
+  "git.commit.lfsKept": "Als Git-LFS-Zeiger des Repositorys committet, nicht als die Datei im Tresor (LFS wird nicht unterstützt): {files}",
+  "git.commit.unsaved": "Nicht committet: diese offenen Notizen haben Änderungen, die vorher nicht gespeichert werden konnten (eine Änderung außerhalb von Lumen wird gerade aufgelöst): {files}"
 }

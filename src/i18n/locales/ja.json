@@ -1497,5 +1497,7 @@
   "git.watch.conflicts": "自動プル: ファイル内に {count} 件の競合を記しました。プルして解決してください。",
   "git.pull.kindClashes": "リモートでファイル/フォルダーが変わりました。ここではそのまま: {files}",
   "git.alert.corsProxyBlocked": "アプリのセキュリティポリシーが {origin} をブロックします。http://localhost:9999 か、デプロイで許可されたプロキシを使ってください。",
-  "git.commit.skipped": "コミット対象外（ファイル/フォルダーの衝突）: {files}"
+  "git.commit.skipped": "コミット対象外（ファイル/フォルダーの衝突）: {files}",
+  "git.commit.lfsKept": "保管庫のファイルではなく、リポジトリの Git LFS ポインターとしてコミットされました（LFS は未対応）: {files}",
+  "git.commit.unsaved": "コミット対象外: これらの開いているノートには事前に保存できなかった編集があります（Lumen 外での変更を解決中）: {files}"
 }

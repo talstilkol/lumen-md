@@ -20,6 +20,7 @@ import type { PullEditorHooks, PullResult } from "../sync/git";
 import { showAiToast } from "../ui/AiToast";
 import { uiAlert, uiPrompt } from "../ui/PromptDialog";
 import { flushPendingEdits, useAppStore } from "./useStore";
+import { flushActiveWorkspaceDoc } from "./openDocs";
 
 /** The open note (active document or a tab) at a vault path. */
 function openNote(path: string): { content: string; dirty: boolean } | null {
@@ -51,6 +52,48 @@ export function pullEditorHooks(): PullEditorHooks {
       if (note && !note.dirty && text !== null) setNote(path, text, false);
     },
   };
+}
+
+/**
+ * Save every open note that has unsaved edits — the active one and every
+ * tab — through the compare-and-swap save (plan 4.4), before a commit reads
+ * the vault (Codex P1 on #269: a merge put into an inactive dirty tab is
+ * otherwise never written, since autosave covers the active note only).
+ * Returns the vault paths that could not be saved: a change made outside
+ * Lumen is being resolved for them, so the commit leaves them out.
+ */
+export async function flushOpenNotes(): Promise<string[]> {
+  flushPendingEdits();
+  const left: string[] = [];
+  const s = useAppStore.getState();
+  if (s.doc.dirty && s.doc.workspaceName) {
+    try {
+      await flushActiveWorkspaceDoc();
+    } catch (err) {
+      log.warn("git: the active note could not be saved before the commit", err);
+    }
+    if (useAppStore.getState().doc.dirty && useAppStore.getState().doc.workspaceName === s.doc.workspaceName) left.push(s.doc.workspaceName);
+  }
+  const { saveOpenNote } = await import("./externalChanges");
+  for (const tab of useAppStore.getState().openTabs) {
+    if (!tab.dirty || !tab.workspaceName || tab.workspaceName === s.doc.workspaceName) continue;
+    const { workspaceName: path, content } = tab;
+    let ok = false;
+    try {
+      ok = await saveOpenNote(path, content);
+    } catch (err) {
+      log.warn("git: a tab could not be saved before the commit", path, err);
+    }
+    if (!ok) {
+      left.push(path);
+      continue;
+    }
+    // Clean only if the tab still holds what was written.
+    const now = useAppStore.getState().openTabs.find((x) => x.workspaceName === path);
+    if (now && now.content === content) setNote(path, content, false);
+    notifyWorkspaceChanged({ kind: "content", paths: [path] });
+  }
+  return left;
 }
 
 export type GitConflictChoice = { kind: "merged"; content: string } | { kind: "local" } | { kind: "remote" } | null;

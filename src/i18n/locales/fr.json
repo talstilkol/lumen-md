@@ -1497,5 +1497,7 @@
   "git.watch.conflicts": "Pull automatique : {count} conflits marqués dans les fichiers. Faites un pull pour les résoudre.",
   "git.pull.kindClashes": "Fichier/dossier modifié en amont, conservé tel quel ici : {files}",
   "git.alert.corsProxyBlocked": "La politique de sécurité de l’application bloque {origin}. Utilisez http://localhost:9999 ou un proxy autorisé par le déploiement.",
-  "git.commit.skipped": "Non commités (conflit fichier/dossier) : {files}"
+  "git.commit.skipped": "Non commités (conflit fichier/dossier) : {files}",
+  "git.commit.lfsKept": "Commités comme pointeur Git LFS du dépôt, pas comme le fichier du coffre (LFS n'est pas pris en charge) : {files}",
+  "git.commit.unsaved": "Non commités : ces notes ouvertes ont des modifications qui n'ont pas pu être enregistrées avant (une modification faite hors de Lumen est en cours de résolution) : {files}"
 }

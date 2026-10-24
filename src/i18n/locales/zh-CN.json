@@ -1497,5 +1497,7 @@
   "git.watch.conflicts": "自动拉取：已在文件中标记 {count} 个冲突。拉取以解决。",
   "git.pull.kindClashes": "远端文件/文件夹已变更，此处保持不变：{files}",
   "git.alert.corsProxyBlocked": "应用的安全策略会拦截 {origin}。请使用 http://localhost:9999 或部署允许的代理。",
-  "git.commit.skipped": "未提交（文件/文件夹冲突）：{files}"
+  "git.commit.skipped": "未提交（文件/文件夹冲突）：{files}",
+  "git.commit.lfsKept": "已作为仓库的 Git LFS 指针提交，而不是保险库中的文件（不支持 LFS）：{files}",
+  "git.commit.unsaved": "未提交：这些打开的笔记有无法预先保存的编辑（正在处理 Lumen 之外的更改）：{files}"
 }

@@ -16,7 +16,6 @@ import {
   createWorkspaceFolder,
   listWorkspace,
   readWorkspaceBlob,
-  readWorkspaceFile,
   workspaceHasEntry,
   writeWorkspaceBlob,
 } from "../storage/workspace";
@@ -278,21 +277,32 @@ export class UnresolvedConflictsError extends Error {
 export interface CommitResult {
   /** Vault paths left out: the repository has a folder where the vault has a file, or the reverse. */
   skipped: string[];
+  /** Vault paths committed as the repository's LFS pointer, not as the real file the vault holds (Git LFS is not supported). */
+  lfsKept: string[];
+  /** Open notes with edits that could not be saved first (a change made outside Lumen is being resolved): left out of this commit. */
+  unsaved: string[];
 }
 
 export async function commitAndPush(
   repoFolder: string,
   message: string,
   author: { name: string; email: string },
-  opts: { token?: string; branch?: string } = {},
+  opts: { token?: string; branch?: string; flushOpenNotes?: () => Promise<string[]> } = {},
 ): Promise<CommitResult> {
   const { fs, http, git } = await load();
   const dir = `/git/${repoFolder}`;
+  // Every open note with edits is saved first (Codex P1 on #269): a pull puts a
+  // merge into an inactive dirty tab, and autosave writes only the active
+  // note, so the vault — what the commit reads — would still hold the old
+  // text while the mirror already has upstream's. A note that cannot be
+  // saved (an outside change is being resolved) stays out of this commit.
+  const flush = opts.flushOpenNotes ?? (await import("../store/gitPullDocs")).flushOpenNotes;
+  const unsaved = new Set((await flush()).filter((p) => p.startsWith(`${repoFolder}/`)));
   // Mirror the vault → lightning-fs (only files under the repo's prefix),
   // as bytes: images and other binary files go through unchanged.
   const all = await listWorkspace({ includeAssets: true, includeHidden: true });
   const prefix = `${repoFolder}/`;
-  const repoFiles = all.filter((f) => f.path.startsWith(prefix));
+  const repoFiles = all.filter((f) => f.path.startsWith(prefix) && !unsaved.has(f.path));
   // A pull left conflict markers: committing them would publish them.
   const pending = await stillConflicted(repoFolder);
   await setPendingConflicts(repoFolder, pending);
@@ -304,8 +314,12 @@ export async function commitAndPush(
     files.push({ relative: f.path.slice(prefix.length), bytes });
   }
   // A path whose shape differs in the mirror (file vs folder, kept that way
-  // by a clone into an existing folder) is skipped and reported, never forced.
-  const skipped = (await writeIntoMirror(fs, dir, files)).map((r) => prefix + r);
+  // by a clone into an existing folder) is skipped and reported, never forced;
+  // an LFS pointer in the mirror stays a pointer (the vault's real file is
+  // never committed as a blob).
+  const written = await writeIntoMirror(fs, dir, files);
+  const skipped = written.skipped.map((r) => prefix + r);
+  const lfsKept = written.lfsKept.map((r) => prefix + r);
   // Stage everything and commit.
   await git.add({ fs, dir, filepath: "." });
   await git.commit({
@@ -329,7 +343,7 @@ export async function commitAndPush(
     corsProxy: getCorsProxy(),
     ...authFor(token),
   });
-  return { skipped };
+  return { skipped, lfsKept, unsaved: [...unsaved] };
 }
 
 export interface GitStatusEntry {
@@ -340,26 +354,18 @@ export interface GitStatusEntry {
 export async function gitStatus(repoFolder: string): Promise<GitStatusEntry[]> {
   const { fs, git } = await load();
   const dir = `/git/${repoFolder}`;
-  // First mirror OPFS → lightning-fs so the status reflects current edits.
+  // First mirror OPFS → lightning-fs so the status reflects current edits —
+  // through the same copy a commit uses, so a shape clash is skipped rather
+  // than failing the status, and an LFS pointer in the mirror stays one.
   const all = await listWorkspace({ includeAssets: true, includeHidden: true });
   const prefix = `${repoFolder}/`;
+  const files: Array<{ relative: string; bytes: Uint8Array }> = [];
   for (const f of all) {
     if (!f.path.startsWith(prefix)) continue;
-    const relative = f.path.slice(prefix.length);
-    const full = `${dir}/${relative}`;
-    const parts = relative.split("/").slice(0, -1);
-    let cur = dir;
-    for (const part of parts) {
-      cur += `/${part}`;
-      try {
-        await fs.promises.mkdir(cur);
-      } catch {
-        /* */
-      }
-    }
-    const txt = await readWorkspaceFile(f.path).catch(() => null);
-    if (txt !== null) await fs.promises.writeFile(full, txt);
+    const bytes = await readVaultBytes(f.path);
+    if (bytes) files.push({ relative: f.path.slice(prefix.length), bytes });
   }
+  await writeIntoMirror(fs, dir, files);
   const matrix = (await git.statusMatrix({ fs, dir })) as [
     string,
     number,

@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-10-20T18:47:20.215Z",
+  "generated_at": "2026-10-24T11:28:24.021Z",
   "source": "src/i18n/index.ts (en bundle)",
-  "count": 1499,
+  "count": 1501,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -8089,6 +8089,20 @@
     {
       "key": "git.commit.skipped",
       "en": "Not committed (file/folder clash): {files}",
+      "vars": [
+        "files"
+      ]
+    },
+    {
+      "key": "git.commit.lfsKept",
+      "en": "Committed as the repository's Git LFS pointer, not as the file in the vault (LFS is not supported): {files}",
+      "vars": [
+        "files"
+      ]
+    },
+    {
+      "key": "git.commit.unsaved",
+      "en": "Not committed: these open notes have edits that could not be saved first (a change made outside Lumen is being resolved): {files}",
       "vars": [
         "files"
       ]

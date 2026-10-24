@@ -11,7 +11,7 @@ Commands (⌘K):
 | --- | --- |
 | **Git: clone repository…** | Copies a repository into a folder of the vault. |
 | **Git: pull current repo** | Fetches and merges the remote into that folder (see below). |
-| **Git: commit & push current repo…** | Commits the folder and pushes it. |
+| **Git: commit & push current repo…** | Saves every open note with unsaved edits first (tabs included), then commits the folder and pushes it. A note whose file was changed outside Lumen in the meantime is left out of the commit and listed, so the conflict can be resolved first. |
 | **Git: status (current repo)** | Added / modified / deleted files. |
 | **Git: toggle watch-mode auto-pull** | Pulls every 5 minutes while the tab is visible. |
 | **Git: set CORS proxy…** | The proxy git requests go through in a browser. |
@@ -79,5 +79,6 @@ Repositories that use [Git LFS](https://git-lfs.com) store large files as small 
 
 - A clone writes the pointer files as they are and lists them, so you know those files are not the real content.
 - A pull **never replaces a real file with a pointer**. If the vault has the real file and upstream has a pointer, the file is kept and reported.
+- A commit **never replaces a pointer with the real file**: the repository keeps its pointer and the commit tells you which files it kept that way, so a large file is not pushed as an ordinary Git object and the repository's LFS tracking stays intact.
 
 To work with LFS content, check the repository out with the git command line and open that folder as your vault.

@@ -1497,5 +1497,7 @@
   "git.watch.conflicts": "משיכה אוטומטית: {count} התנגשויות סומנו בקבצים. בצעו pull כדי ליישב אותן.",
   "git.pull.kindClashes": "קובץ/תיקייה שהשתנו במאגר המרוחק, נשמרו כאן כפי שהם: {files}",
   "git.alert.corsProxyBlocked": "מדיניות האבטחה של האפליקציה חוסמת את {origin}. השתמשו ב-http://localhost:9999 או ב-proxy שההתקנה מתירה.",
-  "git.commit.skipped": "לא נכללו ב-commit (התנגשות קובץ/תיקייה): {files}"
+  "git.commit.skipped": "לא נכללו ב-commit (התנגשות קובץ/תיקייה): {files}",
+  "git.commit.lfsKept": "נכללו ב-commit כמצביע Git LFS של המאגר, לא כקובץ שבכספת (LFS לא נתמך): {files}",
+  "git.commit.unsaved": "לא נכללו ב-commit: לפתקים הפתוחים האלה יש עריכות שלא ניתן היה לשמור קודם (שינוי שנעשה מחוץ ל-Lumen בטיפול): {files}"
 }
