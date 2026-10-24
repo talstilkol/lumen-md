@@ -760,6 +760,7 @@ const en: Strings = {
   "batch.folder": "Folder to process (empty = whole workspace):",
   "batch.lang": "Translate into which language?",
   "batch.confirm": "Send {count} notes to {provider} ({model}) as one batch?\n\nEstimated cost: {cost} (batch price). Results arrive within 24 hours; run \"AI: Check Batch Jobs\" to apply them. Counts as {count} AI prompts.",
+  "batch.confirmLocal": "Process {count} notes on this device with {model}? It runs in the background, one note at a time; use \"AI: Check Batch Jobs\" to apply the results.",
   "batch.submitted": "Batch submitted: {count} notes",
   "batch.provider": "Batch jobs need the OpenAI or Anthropic provider",
   "batch.quota": "Not enough AI prompts left this month for {count} notes",
