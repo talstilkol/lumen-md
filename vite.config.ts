@@ -99,6 +99,8 @@ const RUNTIME_CACHES = (
     ["pyodide", "pyodide"],
     // ONNX Runtime Web for transformers.js (local transcription, embeddings).
     ["ort", "onnxruntime-web"],
+    // Excalidraw fonts (the canvas), served from this origin.
+    ["excalidraw", "@excalidraw/excalidraw"],
   ] as const
 ).map(([dir, pkg]) => ({ dir, cacheName: `lumen-runtime-${dir}-${runtimeVersion(pkg)}-${stagingRevision(dir)}` }));
 
@@ -156,7 +158,10 @@ function vendorChunk(id: string): string | undefined {
   if (id.includes("@shikijs/themes/")) return undefined;
   if (id.includes("shiki") || id.includes("@shikijs")) return "vendor-shiki";
   if (id.includes("isomorphic-git") || id.includes("lightning-fs")) return "vendor-git";
-  if (id.includes("tldraw") || id.includes("@tldraw")) return "vendor-tldraw";
+  // Excalidraw (the canvas, plan 4.19): its own lazy chunk; its Mermaid → diagram
+  // dialog loads on demand and stays apart from the Mermaid block renderer.
+  if (id.includes("@excalidraw/mermaid-to-excalidraw")) return "vendor-excalidraw-mermaid";
+  if (id.includes("@excalidraw/")) return "vendor-excalidraw";
   // Anchor `y-*` to node_modules/y-… so we don't accidentally
   // match lucide-react icon file paths that contain `y-` in
   // the filename (e.g. "y-axis.js"). Previously this broad
@@ -246,7 +251,7 @@ export default defineConfig({
       },
       workbox: {
         // Only precache small core files at install time. Heavy on-demand
-        // vendor chunks (Mermaid, tldraw, ECharts, Graphviz, CodeMirror,
+        // vendor chunks (Mermaid, Excalidraw, ECharts, Graphviz, CodeMirror,
         // Milkdown) are fetched lazily by the runtime cache when first used.
         // This keeps the initial SW install under ~2 MB instead of ~12 MB.
         maximumFileSizeToCacheInBytes: 1024 * 1024,
@@ -263,7 +268,9 @@ export default defineConfig({
           "**/vendor-shiki-*.js",
           "**/shiki-langs/**",
           "**/vendor-mermaid-*.js",
-          "**/vendor-tldraw-*.js",
+          "**/vendor-excalidraw-*.js",
+          // Excalidraw fonts (13 MB with the CJK set; scripts/copy-excalidraw.mjs): fetched as text is drawn.
+          "excalidraw/**",
           "**/vendor-echarts-*.js",
           "**/vendor-graphviz-*.js",
           "**/vendor-codemirror-*.js",
@@ -334,7 +341,7 @@ export default defineConfig({
             urlPattern: ({ url }) =>
               url.origin === self.location.origin &&
               /\/assets\/.+\.(js|mjs|css|wasm)$/.test(url.pathname) &&
-              !/\/assets\/vendor-(mermaid|tldraw|echarts|graphviz|codemirror|milkdown|leaflet|modelviewer|katex|git|yjs|react|react-dom)-/.test(url.pathname),
+              !/\/assets\/vendor-(mermaid|excalidraw|excalidraw-mermaid|echarts|graphviz|codemirror|milkdown|leaflet|modelviewer|katex|git|yjs|react|react-dom)-/.test(url.pathname),
             handler: "CacheFirst",
             options: {
               cacheName: "lumen-chunks",
@@ -343,11 +350,11 @@ export default defineConfig({
             },
           },
           {
-            // Large on-demand vendor chunks (Mermaid, tldraw, ECharts, etc.)
+            // Large on-demand vendor chunks (Mermaid, Excalidraw, ECharts, etc.)
             // Cached at runtime when first loaded via dynamic import.
             urlPattern: ({ url }) =>
               url.origin === self.location.origin &&
-              /\/assets\/vendor-(mermaid|tldraw|echarts|graphviz|codemirror|milkdown|leaflet|modelviewer|katex|git|yjs|react|react-dom)-/.test(url.pathname),
+              /\/assets\/vendor-(mermaid|excalidraw|excalidraw-mermaid|echarts|graphviz|codemirror|milkdown|leaflet|modelviewer|katex|git|yjs|react|react-dom)-/.test(url.pathname),
             handler: "StaleWhileRevalidate",
             options: {
               cacheName: "lumen-vendor-chunks",

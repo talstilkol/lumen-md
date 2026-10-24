@@ -69,3 +69,5 @@ flake-results/
 visual-results/
 # On-device OCR (scripts/copy-tesseract.mjs)
 public/tesseract/
+# Excalidraw canvas fonts (scripts/copy-excalidraw.mjs)
+public/excalidraw/

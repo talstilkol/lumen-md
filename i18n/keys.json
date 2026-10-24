@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-10-20T20:31:19.228Z",
+  "generated_at": "2026-10-24T11:35:23.290Z",
   "source": "src/i18n/index.ts (en bundle)",
-  "count": 1430,
+  "count": 1432,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -5822,14 +5822,14 @@
     },
     {
       "key": "canvas.legacy.found",
-      "en": "{count} legacy canvas(es) found",
+      "en": "{count} canvas(es) to convert",
       "vars": [
         "count"
       ]
     },
     {
       "key": "canvas.legacy.convert",
-      "en": "Convert {name} → tldraw",
+      "en": "Convert {name} → Excalidraw",
       "vars": [
         "name"
       ]
@@ -5853,6 +5853,22 @@
       "key": "canvas.legacy.convertFailed",
       "en": "Convert failed: {error}",
       "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "canvas.openFailed",
+      "en": "Couldn't open the canvas “{name}”: {error}",
+      "vars": [
+        "name",
+        "error"
+      ]
+    },
+    {
+      "key": "canvas.saveFailed",
+      "en": "Couldn't save the canvas “{name}”: {error}",
+      "vars": [
+        "name",
         "error"
       ]
     },

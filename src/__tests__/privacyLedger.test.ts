@@ -102,32 +102,17 @@ describe("privacy ledger", () => {
     expect(ledgerEntries().map(leftDevice)).toEqual([false, false, true]);
   });
 
-  it("tracks tldraw's licence beacon (it carries the page address) and blocks it under local-only (plan 1.9)", async () => {
-    const beacon = "https://cdn.tldraw.com/4.5.10/watermarks/watermark-track.svg?license_type=unlicensed&url=https%3A%2F%2Flumen.example%2F";
-    expect(classify(beacon)).toMatchObject({ host: "cdn.tldraw.com", category: "third-party" });
-    const inner = vi.fn(async () => new Response("<svg/>", { status: 200 }));
-    const f = withLedger(inner as unknown as typeof fetch);
-    setAiPolicy("local-only");
-    await expect(f(beacon)).rejects.toBeInstanceOf(PrivacyBlockedError);
-    expect(inner).not.toHaveBeenCalled();
-    setAiPolicy("local-first");
-    await f(beacon);
-    expect(inner).toHaveBeenCalledTimes(1);
-    expect(ledgerEntries().map((e) => [e.category, e.decision])).toEqual([["third-party", "blocked"], ["third-party", "allowed"]]);
-    // the beacon left the device with the page address: the header total counts it
-    expect(ledgerSummary().cloudRequests).toBe(1);
-  });
-
-  it("lets tldraw's fonts and icons load under local-only — only the beacon path is blocked", async () => {
-    const font = "https://cdn.tldraw.com/4.5.10/fonts/IBMPlexSans-Medium.woff2";
-    expect(classify(font)).toMatchObject({ host: "cdn.tldraw.com", category: "static-asset" });
+  it("Excalidraw's font fallback CDN is third-party traffic — blocked under local-only, never needed (fonts are served locally, plan 4.19)", async () => {
+    const font = "https://esm.sh/@excalidraw/excalidraw@0.18.1/dist/prod/fonts/Excalifont/Excalifont-Regular-a88b72a24fb54c9f94e3b5fdaa7481c9.woff2";
+    expect(classify(font)).toMatchObject({ host: "esm.sh", category: "third-party" });
     const inner = vi.fn(async () => new Response("x", { status: 200 }));
     const f = withLedger(inner as unknown as typeof fetch);
     setAiPolicy("local-only");
-    await f(font);
-    expect(inner).toHaveBeenCalledTimes(1);
-    expect(ledgerEntries().map((e) => [e.category, e.decision])).toEqual([["static-asset", "allowed"]]);
-    expect(ledgerSummary()).toMatchObject({ cloudRequests: 0, downloads: 1 });
+    await expect(f(font)).rejects.toBeInstanceOf(PrivacyBlockedError);
+    expect(inner).not.toHaveBeenCalled();
+    expect(ledgerEntries().map((e) => [e.category, e.decision])).toEqual([["third-party", "blocked"]]);
+    // nothing in the ledger mentions tldraw any more
+    expect(classify("https://cdn.tldraw.com/4.5.10/fonts/IBMPlexSans-Medium.woff2")).toBeNull();
     setAiPolicy("local-first");
   });
 });
