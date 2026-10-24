@@ -17,6 +17,7 @@ import { tooltipFactory, TooltipProvider } from "@milkdown/plugin-tooltip";
 import { setBlockType, toggleMark, wrapIn } from "@milkdown/prose/commands";
 import type { EditorView } from "@milkdown/prose/view";
 import { Plugin } from "@milkdown/prose/state";
+import { wysiwygBidiPlugin } from "./wysiwygBidi";
 import { wrapInList } from "prosemirror-schema-list";
 import { dragHandlePlugin } from "./dragHandles";
 import { buildIndentKeymap } from "./keymapExtra";
@@ -728,6 +729,8 @@ export default function WysiwygEditor({ value, onChange }: Props) {
           ctx.update(prosePluginsCtx, (plugins) => [
             ...plugins,
             dragHandlePlugin,
+            // T25 — every block reads in the direction of its own text.
+            wysiwygBidiPlugin(),
             new Plugin({
               appendTransaction: (trs) => {
                 if (trs.some((t) => t.docChanged || t.storedMarksSet)) pendingSinceRef.current = Date.now();
