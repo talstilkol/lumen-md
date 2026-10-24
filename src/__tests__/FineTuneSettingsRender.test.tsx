@@ -93,3 +93,17 @@ describe("FineTuneSettings", () => {
     expect(localStorage.getItem("lumen.fineTune.activeJob")).toBeNull();
   });
 });
+
+describe("FineTuneSettings: the local route first (plan 6.12.4)", () => {
+  it("shows the on-device LoRA section above the cloud fine-tune", async () => {
+    const { render, waitFor, within, cleanup } = await import("@testing-library/react");
+    cleanup();
+    const { FineTuneSettings } = await import("../ui/FineTuneSettings");
+    const { container } = render(<FineTuneSettings open={true} onClose={() => {}} />);
+    const dlg = within(container);
+    const local = await waitFor(() => dlg.getByTestId("lora-local"));
+    const cloud = dlg.getByText("Or in the cloud (OpenAI)");
+    expect(local.compareDocumentPosition(cloud) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(dlg.getByTestId("lora-export").textContent).toBe("Export training data and script");
+  });
+});

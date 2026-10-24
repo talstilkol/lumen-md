@@ -1456,5 +1456,19 @@
   "mt.size.approx": "בערך {size}",
   "toast.translatedWith": "תורגם באמצעות {layer}",
   "toast.translatedWithUnmeasured": "תורגם באמצעות {layer} — האיכות שלו בזוג הזה עדיין לא נמדדה",
-  "toast.localMtUnavailable": "תרגום מקומי לא היה זמין ({why}); מודל ה-AI תרגם במקומו."
+  "toast.localMtUnavailable": "תרגום מקומי לא היה זמין ({why}); מודל ה-AI תרגם במקומו.",
+  "fineTune.cloudRoute": "או בענן (OpenAI)",
+  "lora.title": "במחשב הזה (מומלץ)",
+  "lora.intro": "אימון מתאם LoRA קטן על הפתקים שלך, במחשב Mac או NVIDIA הזה, ושימוש בו ב-Ollama. שום דבר לא עולה לרשת: Lumen מייצא את נתוני האימון וסקריפט, ואת הסקריפט מריצים בעצמכם.",
+  "lora.folder": "פתקים ללמוד מהם (תיקייה)",
+  "lora.folderAll": "כל הפתקים",
+  "lora.platform": "המחשב הזה",
+  "lora.platform.mac": "מק (Apple silicon, MLX)",
+  "lora.platform.nvidia": "כרטיס NVIDIA (PEFT)",
+  "lora.export": "ייצוא נתוני האימון והסקריפט",
+  "lora.exporting": "מכין…",
+  "lora.exported": "lumen-lora.zip: {notes} פתקים · {train} דוגמאות אימון · {valid} אימות · {heldOut} פתקים שמורים לבדיקת הסגנון",
+  "lora.tooLittle": "אין מספיק טקסט לאימון ({notes} פתקים שמישים): בחרו תיקייה עם יותר פתקים של כמה פסקאות.",
+  "lora.next.mac": "פתחו את lumen-lora.zip והריצו: bash train-mac.sh — הסקריפט מאמן על Mistral 7B (Apache-2.0) עם MLX, ממזג את המתאם ל-GGUF ומוסיף את „lumen-style” ל-Ollama.",
+  "lora.next.nvidia": "פתחו את lumen-lora.zip והריצו: bash train-nvidia.sh — הסקריפט מאמן LoRA עם PEFT (ליבת Unsloth, Apache-2.0), ממיר אותו עם llama.cpp ומוסיף את „lumen-style” ל-Ollama."
 }

@@ -12,7 +12,7 @@
  *     for full removal; this is documented in the dialog)
  */
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { lazy, Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { Loader2, Sparkles, ShieldOff, Brain } from "lucide-react";
 import { useAppStore } from "../store/useStore";
 import { showAiToast } from "./AiToast";
@@ -20,6 +20,10 @@ import { startFineTune, getFineTuneJob, type FineTuneJob } from "../ai/fineTune"
 import { uiConfirm } from "./PromptDialog";
 import { log } from "../lib/logger";
 import { t } from "../i18n";
+import "../ai/localLoraStrings";
+
+// The local LoRA route (plan 6.12.4) comes first; its code loads with this dialog's first paint.
+const LocalLoraSection = lazy(() => import("./LocalLoraSection").then((m) => ({ default: m.LocalLoraSection })));
 
 interface Props {
   open: boolean;
@@ -174,14 +178,18 @@ export function FineTuneSettings({ open, onClose }: Props) {
       <div
         className="cmd-palette"
         onClick={(e) => e.stopPropagation()}
-        style={{ maxWidth: 540, padding: 0, display: "flex", flexDirection: "column" }}
+        style={{ maxWidth: 560, padding: 0, display: "flex", flexDirection: "column", maxHeight: "88vh" }}
       >
         <header style={{ padding: "14px 18px", borderBottom: "1px solid hsl(var(--border))", display: "flex", gap: 10, alignItems: "center" }}>
           <Brain size={18} style={{ color: "hsl(var(--accent))" }} />
           <h2 style={{ margin: 0, fontSize: 16, fontWeight: 600 }}>{t("fineTune.title")}</h2>
         </header>
 
-        <div style={{ padding: 18, display: "flex", flexDirection: "column", gap: 16, fontSize: 13, lineHeight: 1.5 }}>
+        <div style={{ padding: 18, display: "flex", flexDirection: "column", gap: 16, fontSize: 13, lineHeight: 1.5, overflowY: "auto" }}>
+          <Suspense fallback={null}>
+            <LocalLoraSection />
+          </Suspense>
+          <div style={{ fontSize: 11, textTransform: "uppercase", letterSpacing: "0.05em", color: "hsl(var(--fg-muted))" }}>{t("fineTune.cloudRoute")}</div>
           <p style={{ margin: 0, color: "hsl(var(--fg-muted))" }}>{t("fineTune.intro")}</p>
 
           {/* Current state */}

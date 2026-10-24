@@ -1456,5 +1456,19 @@
   "mt.size.approx": "約 {size}",
   "toast.translatedWith": "{layer} で翻訳しました",
   "toast.translatedWithUnmeasured": "{layer} で翻訳しました — この言語ペアでの品質はまだ測定されていません",
-  "toast.localMtUnavailable": "ローカル翻訳は利用できませんでした（{why}）。代わりに AI モデルが翻訳しました。"
+  "toast.localMtUnavailable": "ローカル翻訳は利用できませんでした（{why}）。代わりに AI モデルが翻訳しました。",
+  "fineTune.cloudRoute": "またはクラウドで（OpenAI）",
+  "lora.title": "このコンピューターで（推奨）",
+  "lora.intro": "自分のノートで小さな LoRA アダプターを、この Mac または NVIDIA のコンピューターで学習し、Ollama で使います。何もアップロードされません。Lumen は学習データとスクリプトを書き出し、スクリプトはあなたが実行します。",
+  "lora.folder": "学習に使うノート（フォルダー）",
+  "lora.folderAll": "すべてのノート",
+  "lora.platform": "このコンピューター",
+  "lora.platform.mac": "Mac（Apple silicon、MLX）",
+  "lora.platform.nvidia": "NVIDIA GPU（PEFT）",
+  "lora.export": "学習データとスクリプトを書き出す",
+  "lora.exporting": "準備中…",
+  "lora.exported": "lumen-lora.zip：ノート {notes} 件 · 学習サンプル {train} · 検証 {valid} · 文体チェック用に取り置いたノート {heldOut} 件",
+  "lora.tooLittle": "学習に十分な文章がありません（使えるノート {notes} 件）。数段落のノートがもっと多いフォルダーを選んでください。",
+  "lora.next.mac": "lumen-lora.zip を展開して bash train-mac.sh を実行します。MLX で Mistral 7B（Apache-2.0）を学習し、アダプターを GGUF に統合して「lumen-style」を Ollama に追加します。",
+  "lora.next.nvidia": "lumen-lora.zip を展開して bash train-nvidia.sh を実行します。PEFT（Unsloth コア、Apache-2.0）で LoRA を学習し、llama.cpp で変換して「lumen-style」を Ollama に追加します。"
 }

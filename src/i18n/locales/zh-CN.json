@@ -1456,5 +1456,19 @@
   "mt.size.approx": "约 {size}",
   "toast.translatedWith": "已使用{layer}翻译",
   "toast.translatedWithUnmeasured": "已使用{layer}翻译——其在此语言对上的质量尚未测量",
-  "toast.localMtUnavailable": "本地翻译不可用（{why}）；已改由 AI 模型翻译。"
+  "toast.localMtUnavailable": "本地翻译不可用（{why}）；已改由 AI 模型翻译。",
+  "fineTune.cloudRoute": "或在云端（OpenAI）",
+  "lora.title": "在这台电脑上（推荐）",
+  "lora.intro": "在这台 Mac 或 NVIDIA 电脑上，用你自己的笔记训练一个小型 LoRA 适配器，并在 Ollama 中使用。不会上传任何内容：Lumen 导出训练数据和脚本，由你运行脚本。",
+  "lora.folder": "用于学习的笔记（文件夹）",
+  "lora.folderAll": "所有笔记",
+  "lora.platform": "这台电脑",
+  "lora.platform.mac": "Mac（Apple silicon，MLX）",
+  "lora.platform.nvidia": "NVIDIA 显卡（PEFT）",
+  "lora.export": "导出训练数据和脚本",
+  "lora.exporting": "正在准备…",
+  "lora.exported": "lumen-lora.zip：{notes} 篇笔记 · {train} 条训练样本 · {valid} 条验证 · {heldOut} 篇留作风格检查的笔记",
+  "lora.tooLittle": "可用于训练的文字不足（可用笔记 {notes} 篇）：请选择包含更多几段长笔记的文件夹。",
+  "lora.next.mac": "解压 lumen-lora.zip 并运行：bash train-mac.sh —— 用 MLX 训练 Mistral 7B（Apache-2.0），将适配器合并为 GGUF，并把“lumen-style”添加到 Ollama。",
+  "lora.next.nvidia": "解压 lumen-lora.zip 并运行：bash train-nvidia.sh —— 用 PEFT（Unsloth 核心，Apache-2.0）训练 LoRA，用 llama.cpp 转换，并把“lumen-style”添加到 Ollama。"
 }
