@@ -78,6 +78,10 @@ describe("5.6.2 split the document", () => {
     expect(parts.every((p) => p.length <= 70)).toBe(true);
     expect(parts.join("\n").replace(/\s+/g, "")).toBe(text.replace(/\s+/g, ""));
     expect(parts.some((p) => p.includes("const a = 1;") && p.includes("const b = 2;"))).toBe(true);
+    // One sentence longer than a part: hard cuts, each within the size.
+    const run = splitText("a".repeat(250), 70);
+    expect(run.every((p) => p.length <= 70)).toBe(true);
+    expect(run.join("")).toBe("a".repeat(250));
   });
 
   it("mergeOutputs joins text and concatenates JSON lists without repeats", () => {

@@ -285,7 +285,13 @@ export function splitText(text: string, max: number): string[] {
           parts.push(acc);
           acc = "";
         }
-        for (let i = 0; i < sentence.length; i += max) acc += sentence.slice(i, i + max);
+        if (sentence.length <= max) acc += sentence;
+        else {
+          // A sentence longer than a part: hard cuts, each a part of its own.
+          if (acc) parts.push(acc);
+          for (let i = 0; i < sentence.length; i += max) parts.push(sentence.slice(i, i + max));
+          acc = "";
+        }
       }
     }
   };
