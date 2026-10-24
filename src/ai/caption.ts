@@ -9,6 +9,7 @@
  * licence, attribution). A background caption (a pasted image) never asks:
  * it uses a model only once the user has agreed to it from a command.
  */
+import "./captionStrings";
 import type { ConsentDeps } from "./mt/localModels";
 import type { CaptionFamily } from "./transformers.worker";
 import { altIsPlaceholder } from "./vision";

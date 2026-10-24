@@ -69,9 +69,6 @@ export function isLocaleAvailable(locale: Locale): boolean {
 type Strings = Record<string, string>;
 
 const en: Strings = {
-  "caption.purpose": "Describe images on this device (alt text)",
-  "caption.attribution.florence": "Florence-2 © Microsoft, MIT License; ONNX conversion by onnx-community (Hugging Face).",
-  "caption.attribution.smolvlm": "SmolVLM-256M-Instruct © Hugging Face, Apache License 2.0.",
   // Toolbar
   "toolbar.tagline": "Markdown, illuminated",
   "toolbar.new": "New",
