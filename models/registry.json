@@ -810,6 +810,21 @@
       "catalog": "CONVERTED_MODELS (src/ai/convertedModels.ts)",
       "verified": true,
       "notes": "Converted to ONNX by .github/workflows/model-convert.yml (plan 6.0). Downloaded only with consent, size shown first, cached in OPFS; not downloadable until the host is chosen (15.9)."
+    },
+    {
+      "id": "Xenova/m2m100_418M",
+      "kind": "mt",
+      "source": "https://huggingface.co/Xenova/m2m100_418M",
+      "license": "MIT",
+      "class": "allowed",
+      "commercial": "yes",
+      "attribution": "M2M100-418M © Meta AI (Fan et al., “Beyond English-Centric Multilingual Machine Translation”, 2020), licensed under the MIT License; ONNX conversion by Xenova (Hugging Face).",
+      "size": "≈ 630 MB (q8), transformers.js estimate",
+      "runs": "browser",
+      "delivery": "download",
+      "catalog": "M2M100_MODEL (src/ai/transformersEngine.ts)",
+      "verified": true,
+      "notes": "Layer 3 of local translation (plan 6.4): the pairs Opus-MT does not cover. Downloaded from Hugging Face only after the consent dialog (size, licence, attribution). MIT per the plan’s licence research (appendix 19: M2M100-418M, MIT) and the facebook/m2m100_418M model card. NLLB-200 (CC-BY-NC) stays forbidden."
     }
   ]
 }
