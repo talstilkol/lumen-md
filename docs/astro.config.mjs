@@ -70,6 +70,7 @@ export default defineConfig({
           items: [
             { label: "Plugin SDK", slug: "plugins/sdk" },
             { label: "Sandbox and permissions", slug: "plugins/sandbox" },
+            { label: "Plugin API", slug: "plugins/api" },
             { label: "Plugin gallery", slug: "plugins/gallery" },
             { label: "Plugin signing keys", slug: "plugins/signing" },
             { label: "Templates marketplace", slug: "plugins/templates" },
