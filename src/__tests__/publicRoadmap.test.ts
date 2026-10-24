@@ -77,3 +77,14 @@ describe("public roadmap (14.5)", () => {
     expect(js).not.toContain("innerHTML");
   });
 });
+
+describe("public roadmap docs", () => {
+  it("has an English and a Hebrew page, both in the sidebar", () => {
+    for (const p of ["docs/src/content/docs/project/roadmap.md", "docs/src/content/docs/he/project/roadmap.md"]) {
+      const md = readFileSync(join(ROOT, p), "utf8");
+      expect(md).toMatch(/^---\ntitle: .+\ndescription: .+\n---/);
+      for (const s of ["plan/plan.json", "npm run plan:check", "public/roadmap.js"]) expect(md).toContain(s);
+    }
+    expect(readFileSync(join(ROOT, "docs/astro.config.mjs"), "utf8")).toContain('slug: "project/roadmap"');
+  });
+});
