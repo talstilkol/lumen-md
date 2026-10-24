@@ -11,6 +11,7 @@
  *  - callTool runs one tool under the same rules, for commands.
  *  - The builder proposes all files at once, or none (5.3.2).
  */
+import { installEvalWeb } from "./helpers/evalWeb";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
 vi.mock("../storage/workspace", async (orig) => {
@@ -43,6 +44,8 @@ beforeEach(() => {
   resetVault();
   vi.mocked(writeWorkspaceFile).mockClear();
   localStorage.setItem("lumen.ai.cache", "off");
+  // The researcher's web (plan 5.4): a stubbed research service.
+  installEvalWeb();
 });
 
 /** The plan's tools per agent (5.3.1–5.3.3). */
@@ -60,6 +63,8 @@ const PLAN: Record<string, string[]> = {
   "builder-spec": ["list_files"],
   proofreader: ["get_document"],
   stylist: ["read_file", "list_files"],
+  // Plan 5.4: the research agent's loop (web and library).
+  researcher: ["search_web", "fetch_page", "extract_quotes", "search_workspace", "read_file"],
 };
 
 const scriptedModel = (c: EvalCase) => (req: ExecutorRequest): ExecutorResponse => scriptedAnswer(c, req);
@@ -73,7 +78,7 @@ describe("every agent declares the plan's tools", () => {
     for (const c of def.context?.({ text: "x", extra: { repo: "repo" } } as never) ?? []) expect(def.tools!.map((t) => t.name)).toContain(c.tool);
   });
 
-  it("the eval covers all 13 agents, each with an expected tool call", () => {
+  it("the eval covers all 14 agents (13 + researcher), each with an expected tool call", () => {
     const covered = new Set(EVAL_CASES.map((c) => c.agent));
     for (const id of Object.keys(PLAN)) expect(covered, id).toContain(id);
     for (const c of EVAL_CASES) expect(PLAN[c.agent], c.id).toContain(c.tool.name === "get_headings" ? "get_document" : c.tool.name);
@@ -85,7 +90,12 @@ describe("a fake-model run of each eval case makes its tool call through the run
     const ex = fakeExecutor(scriptedModel(c), { supportsSchema: () => true, supportsTools: () => true });
     registerExecutor(ex);
     const def = getAgent(c.agent)!;
-    const run = await runAgent(def, c.input, { document: c.input.text, selection: c.input.selection });
+    // Started like the eval starts it: a research question is meant to be sent; other inputs are the document.
+    const run = await runAgent(def, c.input, {
+      ...(c.run?.inputMayLeave ? { inputMayLeave: true, consentNetwork: () => true } : { document: c.input.text }),
+      selection: c.input.selection,
+      grants: c.run?.grants,
+    });
     expect(run.error ?? "", c.id).toBe("");
     expect(run.status).toBe("ok");
     const tool = toolCheck(c, run.steps);
