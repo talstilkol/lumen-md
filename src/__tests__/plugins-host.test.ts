@@ -123,7 +123,7 @@ describe("plugin host", () => {
   });
 
   it("validates UI trees: the exfiltration kinds are refused before the app sees them", async () => {
-    const render = vi.fn(async () => undefined);
+    const render = vi.fn(async (_p: unknown, _tree: unknown) => undefined);
     const logs: string[] = [];
     const p = await load(
       `
