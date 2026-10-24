@@ -104,14 +104,9 @@ describe("makeRoomName", () => {
     }
   });
 
-  it("ends with a numeric suffix", async () => {
+  it("is built from the crypto-random id (128 bits — see secureRooms.test)", async () => {
     const { makeRoomName } = await import("../collab/yjs");
-    const name = makeRoomName();
-    // format is "adj-noun-NNN"
-    const parts = name.split("-");
-    expect(parts.length).toBeGreaterThanOrEqual(3);
-    const suffix = parts[parts.length - 1];
-    expect(Number.isInteger(Number(suffix))).toBe(true);
+    expect(makeRoomName()).toMatch(/^lumen-/);
   });
 });
 

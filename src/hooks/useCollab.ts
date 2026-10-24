@@ -52,11 +52,16 @@ export function useCollab(docContent: string): UseCollabReturn {
         log.error("collab module load failed", err);
         return;
       }
-      const { connectCollab, makeRoomName, snapshotPeers } = mod;
+      const { connectCollab, makeRoomName, makeRoomPassword, snapshotPeers } = mod;
       const name = joinName ?? makeRoomName();
+      // T49: every new room is end-to-end encrypted with its own random
+      // password, carried in the share link's #fragment (never sent to a
+      // server). Joining uses the password from the link.
+      const password = joinName ? null : makeRoomPassword();
       try {
         const session = connectCollab(name, contentRef.current, {
           isNewRoom: !joinName,
+          ...(password ? { password } : {}),
           // Wrong room password (or tampered ciphertext): nothing is
           // applied to the doc — tell the user why it isn't syncing.
           onE2EError: () =>
@@ -71,7 +76,7 @@ export function useCollab(docContent: string): UseCollabReturn {
             }),
         });
         setCollab(session);
-        setRoomInHash(name);
+        setRoomInHash(name, password);
 
         // Mirror Yjs text changes back into the doc store so the preview pane
         // stays current.
@@ -103,7 +108,7 @@ export function useCollab(docContent: string): UseCollabReturn {
         };
 
         if (!joinName) {
-          const link = `${location.origin}${location.pathname}#room=${name}`;
+          const link = `${location.origin}${location.pathname}#room=${name}${password ? `&password=${encodeURIComponent(password)}` : ""}`;
           navigator.clipboard?.writeText(link).catch(() => {});
         }
         // ε.2 — record start/join. Counts-only payload so the audit

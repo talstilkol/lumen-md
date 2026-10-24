@@ -1361,5 +1361,12 @@
   "privacy.cat.model-download": "モデルのダウンロード — テキストは送信されません",
   "privacy.cat.research": "リサーチサービス — 検索語が送信されます",
   "privacy.footer": "記録内容: 時刻・宛先・サイズ・理由。プロンプトや回答の本文は記録しません。モデル Worker 内の通信（ダウンロード）は含まれません。",
-  "toast.privacyBlocked": "「ローカルのみ」ポリシーによりブロック: {reason}。ローカルモデルを使うか、AI 設定でポリシーを変更してください。"
+  "toast.privacyBlocked": "「ローカルのみ」ポリシーによりブロック: {reason}。ローカルモデルを使うか、AI 設定でポリシーを変更してください。",
+  "collab.settings.title": "共同編集の設定",
+  "collab.settings.signalingHint": "シグナリングサーバー（参加者同士が接続する仕組み）。空欄 = Lumen のサーバー。新しいルームはそれぞれ専用パスワードでエンドツーエンド暗号化され、サーバーには暗号文しか見えません。",
+  "collab.settings.publicSignaling": "公開シグナリングサーバーも使う",
+  "collab.settings.publicSignaling.hint": "yjs.dev など — Lumen のサーバーが停止したときの予備。誰がどのルームに接続したかは見えます（内容は見えません）。",
+  "collab.persistent.token": "サーバーのアクセストークン（必要な場合）",
+  "collab.settings.cancel": "キャンセル",
+  "collab.settings.save": "保存"
 }
