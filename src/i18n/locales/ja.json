@@ -1010,6 +1010,9 @@
   "ai.localModels.recommended": "おすすめ",
   "ai.localModels.cached": "ダウンロード済み",
   "ai.localModels.tooBig": "収まらない可能性",
+  "ai.localModels.licenceTitle": "独自ライセンスのモデル",
+  "ai.localModels.licenceBody": "{{model}} はオープンソースではなく {{licence}} で公開されています。特に業務で使う前に条件を確認してください。Lumen が自動で選ぶことはありません。",
+  "ai.localModels.licenceOk": "使用する",
   "ai.localModels.auto": "自動 — ハードウェアとタスクに応じて選択",
   "ai.localModels.autoSet": "モデルを自動選択します。現在の選択: {model}",
   "ai.localModels.set": "ローカルモデル: {model}",
@@ -1426,5 +1429,6 @@
   "cmd.ai.cancel": "AI: キャンセル",
   "cmd.ai.cancel.hint": "実行中の AI リクエストをすべて停止します（Esc でも可）",
   "toast.aiCancelled": "AI リクエストをキャンセルしました（{count}）",
-  "toast.aiNothingRunning": "実行中の AI リクエストはありません"
+  "toast.aiNothingRunning": "実行中の AI リクエストはありません",
+  "clip.flagged": "ページ内の隠しテキストや指示のような箇所 {count} 件をノートでマークしました。これらは指示ではありません。"
 }

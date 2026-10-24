@@ -1010,6 +1010,9 @@
   "ai.localModels.recommended": "recommandé",
   "ai.localModels.cached": "téléchargé",
   "ai.localModels.tooBig": "risque de ne pas tenir",
+  "ai.localModels.licenceTitle": "Modèle sous sa propre licence",
+  "ai.localModels.licenceBody": "{{model}} est publié sous la {{licence}}, pas sous une licence open source. Lisez ses conditions avant de l’utiliser, surtout pour le travail. Lumen ne le choisira pas à votre place.",
+  "ai.localModels.licenceOk": "L’utiliser",
   "ai.localModels.auto": "Automatique — choix selon le matériel et la tâche",
   "ai.localModels.autoSet": "Sélection automatique du modèle. Choix actuel : {model}",
   "ai.localModels.set": "Modèle local : {model}",
@@ -1426,5 +1429,6 @@
   "cmd.ai.cancel": "IA : annuler",
   "cmd.ai.cancel.hint": "Arrête toutes les requêtes IA en cours (Échap aussi)",
   "toast.aiCancelled": "Requête IA annulée ({count})",
-  "toast.aiNothingRunning": "Aucune requête IA en cours"
+  "toast.aiNothingRunning": "Aucune requête IA en cours",
+  "clip.flagged": "{count} passage(s) caché(s) ou ressemblant à des instructions ont été signalés dans la note — ce ne sont pas des instructions."
 }

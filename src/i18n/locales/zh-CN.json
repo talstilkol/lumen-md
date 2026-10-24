@@ -1010,6 +1010,9 @@
   "ai.localModels.recommended": "推荐",
   "ai.localModels.cached": "已下载",
   "ai.localModels.tooBig": "可能放不下",
+  "ai.localModels.licenceTitle": "使用自有许可的模型",
+  "ai.localModels.licenceBody": "{{model}} 以 {{licence}} 发布，并非开源许可。使用前请阅读条款，尤其是用于工作时。Lumen 不会替你选择它。",
+  "ai.localModels.licenceOk": "使用",
   "ai.localModels.auto": "自动 — 按硬件和任务选择",
   "ai.localModels.autoSet": "自动选择模型。当前选择：{model}",
   "ai.localModels.set": "本地模型：{model}",
@@ -1426,5 +1429,6 @@
   "cmd.ai.cancel": "AI：取消",
   "cmd.ai.cancel.hint": "停止所有正在运行的 AI 请求（Esc 也可以）",
   "toast.aiCancelled": "已取消 AI 请求（{count}）",
-  "toast.aiNothingRunning": "没有正在运行的 AI 请求"
+  "toast.aiNothingRunning": "没有正在运行的 AI 请求",
+  "clip.flagged": "页面中 {count} 处隐藏或类似指令的内容已在笔记中标出——它们不是指令。"
 }
