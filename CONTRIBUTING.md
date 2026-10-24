@@ -86,6 +86,30 @@ Scopes are area names: `editor`, `renderer`, `collab`, `storage`, `ui`, `ai`, `i
 4. Link any related issue.
 5. One of the maintainers will review.
 
+### The PR gate (Danger + size-limit)
+
+Every pull request gets one Danger comment (the `danger` job of `ci.yml`,
+`dangerfile.ts`; the rules are in `scripts/lib/prGate.mjs` and unit-tested):
+
+| Rule | Outcome |
+|---|---|
+| size-limit per main chunk (`.size-limit.cjs`, gzip, mirrors `scripts/bundle-budget.mjs`) | table; **fails** over a limit |
+| bundle-size change per class against the base (`bundle-diff.md` from the `check` job) | table |
+| production code changed with no test or e2e change | warning |
+| a commit or the description says an AI agent wrote it | adds the `ai-written` label (warning if it cannot) |
+| production packages added or changed in `package-lock.json` | table; **fails** on GPL / AGPL / SSPL / BUSL / NC / no licence, warns on LGPL |
+| a new `fetch` / `fetchWithRetry` / `WebSocket` / `EventSource` / `XMLHttpRequest` / `sendBeacon` call in `src/` | **fails** unless every URL literal on the line names a host the privacy ledger (`src/ai/privacyLedger.ts`) has a rule for, or the local machine; a computed URL needs a `// privacy-ledger: <the rule that covers it>` note on the line or the two above |
+
+Locally, before you push:
+
+```bash
+npm run build && npm run size                       # size-limit table
+npm run size -- --json > size-limit.json            # optional: lets Danger show it
+DANGER_BASE=origin/<base branch> npm run danger:local -- --base origin/<base branch>
+```
+
+`danger local` prints the same report without posting it.
+
 ## Testing
 
 ### Structure

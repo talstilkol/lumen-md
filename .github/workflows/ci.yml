@@ -221,6 +221,43 @@ jobs:
             gh api "repos/$REPO/issues/$PR/comments" -F body=@bundle-diff.md > /dev/null
           fi
 
+  danger:
+    # Plan 0.19: the PR gate (dangerfile.ts, rules in scripts/lib/prGate.mjs).
+    # One comment per PR: size-limit per main chunk and the bundle-size
+    # change, code without tests, the ai-written label, production licences
+    # that changed, and new network calls the privacy ledger does not cover.
+    # A `fail()` there fails this job. Same-repo PRs only: Danger runs the
+    # PR's dangerfile with a token that can comment and label.
+    name: PR gate (Danger + size-limit)
+    needs: check
+    if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: write
+      statuses: write
+    steps:
+      - uses: actions/checkout@v7
+        with: { fetch-depth: 0 }
+      - uses: actions/setup-node@v7
+        with: { node-version: 22, cache: npm }
+      - run: npm ci || npm install
+      - name: Build
+        run: npm run build
+      - name: size-limit
+        run: npm run -s size -- --json > size-limit.json || true
+      - uses: actions/download-artifact@v7
+        continue-on-error: true
+        with:
+          name: bundle-diff
+      - name: Danger
+        env:
+          DANGER_GITHUB_API_TOKEN: ${{ github.token }}
+          DANGER_BASE: ${{ github.event.pull_request.base.sha }}
+        run: npx danger ci --dangerfile dangerfile.ts --failOnErrors
+
   lighthouse:
     name: Lighthouse CI
     runs-on: ubuntu-latest
