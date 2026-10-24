@@ -1,7 +1,7 @@
 {
   "version": 1,
   "source": "src/i18n/index.ts (en bundle)",
-  "count": 1411,
+  "count": 1426,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -1824,6 +1824,26 @@
       "vars": []
     },
     {
+      "key": "toast.tts.noLocalVoice",
+      "en": "No voice on this device for part of the text — install one in the system's speech settings (network voices are off under local-only)",
+      "vars": []
+    },
+    {
+      "key": "tts.networkVoice.title",
+      "en": "Use a network voice?",
+      "vars": []
+    },
+    {
+      "key": "tts.networkVoice.body",
+      "en": "This device has no voice for this note. Your browser offers voices that synthesize on the provider's servers, so the note's text would be sent there. The privacy ledger records each use.",
+      "vars": []
+    },
+    {
+      "key": "tts.networkVoice.ok",
+      "en": "Use network voices",
+      "vars": []
+    },
+    {
       "key": "cmd.vault.digest",
       "en": "Digest: what changed",
       "vars": []
@@ -2100,8 +2120,18 @@
       "vars": []
     },
     {
+      "key": "privacy.cat.static-asset",
+      "en": "Static files (fonts, icons) — no text sent",
+      "vars": []
+    },
+    {
       "key": "privacy.cat.research",
       "en": "Research service — your query is sent",
+      "vars": []
+    },
+    {
+      "key": "privacy.cat.third-party",
+      "en": "Third-party service — the page address is sent",
       "vars": []
     },
     {
@@ -2459,6 +2489,55 @@
     {
       "key": "toast.speechRecognitionNotSupportedIn",
       "en": "Speech recognition not supported in this browser",
+      "vars": []
+    },
+    {
+      "key": "toast.dictate.onDevice",
+      "en": "Dictating on this device — text appears every few seconds (the first time downloads the speech model)",
+      "vars": []
+    },
+    {
+      "key": "dictate.newNoteName",
+      "en": "Dictation",
+      "vars": []
+    },
+    {
+      "key": "toast.dictate.noteClosed",
+      "en": "The note you were dictating into was closed, so the rest went to a new note: {name}",
+      "vars": [
+        "name"
+      ]
+    },
+    {
+      "key": "toast.dictate.localFailed",
+      "en": "On-device dictation stopped: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "toast.dictate.localOnlyBlocked",
+      "en": "On-device dictation isn't available here, and the browser's speech service is blocked under local-only (it sends audio out)",
+      "vars": []
+    },
+    {
+      "key": "toast.dictate.webSpeechActive",
+      "en": "Dictating through the browser's speech service — the audio is sent to its provider",
+      "vars": []
+    },
+    {
+      "key": "dictate.webSpeech.title",
+      "en": "Use the browser's speech service?",
+      "vars": []
+    },
+    {
+      "key": "dictate.webSpeech.body",
+      "en": "Dictation on this device couldn't start. Your browser's speech service works, but it sends the audio to its provider (Google in Chrome). The privacy ledger records each use.",
+      "vars": []
+    },
+    {
+      "key": "dictate.webSpeech.ok",
+      "en": "Use the browser service",
       "vars": []
     },
     {

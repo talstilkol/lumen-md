@@ -16,6 +16,8 @@
     "plan": "node scripts/plan/build.mjs",
     "plan:check": "node scripts/plan/build.mjs --check",
     "dod": "node scripts/dod.mjs",
+    "headers": "node scripts/headers.mjs --check",
+    "headers:write": "node scripts/headers.mjs --write",
     "tauri": "tauri",
     "tauri:dev": "tauri dev",
     "tauri:build": "tauri build",
