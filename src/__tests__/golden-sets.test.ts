@@ -60,14 +60,17 @@ const golden = join(repo, "eval", "golden");
 const DUMMY = "dummy-seed-for-tests-only";
 
 /** The ten sets of appendix 20.3 and their sizes (7.1 acceptance: 80 / 250 / 100 / 150 / 200 / 130 / 250 / 50 / 130 / 240). */
-const TARGETS: Record<string, number> = { "asr-he": 80, "mt-he-en": 250, nikud: 100, "ocr-he": 150, "typos-he": 200, retrieval: 130, "ner-pii": 250, caption: 50, injection: 130, langid: 240 };
+const TARGETS_7_1: Record<string, number> = { "asr-he": 80, "mt-he-en": 250, nikud: 100, "ocr-he": 150, "typos-he": 200, retrieval: 130, "ner-pii": 250, caption: 50, injection: 130, langid: 240 };
+/** The twelve small sets of plan 7.10 (11 built here, the meetings slot waits for the owner). */
+const TARGETS_7_10: Record<string, number> = { "spell-en": 100, "image-search": 30, clipper: 20, "pdf-qa": 30, "data-analysis": 20, summarize: 20, formulas: 30, unlinked: 30, bidi: 30, "hebrew-dates": 20, citations: 20, meetings: 5 };
+const TARGETS: Record<string, number> = { ...TARGETS_7_1, ...TARGETS_7_10 };
 
 const hashItems = (items: Item[]) => contentHash({ id: "", items });
 
 describe("eval/golden — the committed sets", () => {
   const results = validateAll(golden);
 
-  it("holds exactly the ten sets of appendix 20.3, at their planned sizes", () => {
+  it("holds exactly the ten sets of appendix 20.3 and the twelve small sets of 7.10, at their planned sizes", () => {
     expect(Object.fromEntries(results.map((r: { name: string; manifest: { target: number } }) => [r.name, r.manifest?.target]))).toEqual(TARGETS);
   });
 
@@ -476,9 +479,9 @@ describe("the licence gate on a copy of the sets", () => {
       writeFileSync(join(dir, "models", "registry.json"), JSON.stringify({ entries: [] }));
       const r = spawnSync(process.execPath, [join(repo, "scripts/licenses.mjs"), "--root", dir, "--json", join(dir, "r.json"), "--all"], { encoding: "utf8" });
       const report = JSON.parse(readFileSync(join(dir, "r.json"), "utf8"));
-      expect(report.datasets).toHaveLength(10);
+      expect(report.datasets).toHaveLength(Object.keys(TARGETS).length);
       expect(report.datasets.filter((d: { level: string }) => d.level === "fail")).toEqual([]);
-      expect(r.stdout).toMatch(/10 eval datasets/);
+      expect(r.stdout).toContain(`${Object.keys(TARGETS).length} eval datasets`);
     } finally {
       rmSync(dir, { recursive: true, force: true });
     }
