@@ -385,7 +385,8 @@ export const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
       // Accessible name for the contenteditable (role=textbox) surface —
       // without it, screen readers announce an unnamed input (axe:
       // aria-input-field-name).
-      EditorView.contentAttributes.of({ "aria-label": i18nT("editor.ariaLabel") }),
+      // tabindex makes the content explicitly focusable, so its scroller counts as keyboard-reachable (axe scrollable-region-focusable, plan 10.1).
+      EditorView.contentAttributes.of({ "aria-label": i18nT("editor.ariaLabel"), tabindex: "0" }),
       spellCheckCompartment.of(
         EditorView.contentAttributes.of({ spellcheck: spellCheck ? "true" : "false" }),
       ),

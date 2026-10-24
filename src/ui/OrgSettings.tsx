@@ -16,7 +16,8 @@
  * Reachable from the command palette (`settings.organization`).
  */
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useRef } from "react";
+import { useFocusTrap } from "./useFocusTrap";
 import { Building2, X, Plus, Trash2, ShieldCheck, Users, ScrollText } from "lucide-react";
 import { useAuth } from "../auth/useAuth";
 import { isWorkosEnabled } from "../auth/workosProvider";
@@ -57,14 +58,6 @@ export function OrgSettings({ open, onClose, onOpenAuditLog }: Props) {
     setDirty(false);
   }, [open]);
 
-  useEffect(() => {
-    if (!open) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
-    document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
-  }, [open, onClose]);
 
   const addDomain = useCallback(() => {
     const d = normalizeDomain(domainDraft);
@@ -95,6 +88,10 @@ export function OrgSettings({ open, onClose, onOpenAuditLog }: Props) {
     [settings],
   );
 
+  // Focus stays in the dialog while it is open and returns on close; Escape closes it (plan 10.1).
+  const trapRef = useRef<HTMLDivElement | null>(null);
+  useFocusTrap(trapRef, { active: open, onEscape: onClose });
+
   if (!open) return null;
 
   const ssoConfigured = isWorkosEnabled();
@@ -111,6 +108,7 @@ export function OrgSettings({ open, onClose, onOpenAuditLog }: Props) {
     <div className="cmd-palette-backdrop" onClick={onClose}>
       <div
         className="cmd-palette"
+        ref={trapRef}
         role="dialog"
         aria-modal="true"
         aria-labelledby="org-settings-title"

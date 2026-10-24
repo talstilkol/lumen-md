@@ -1,8 +1,24 @@
 import { useEffect, useRef, useState } from "react";
+import { t } from "../i18n";
 
 const STORAGE_KEY = "lumen-sidebar-width";
 const MIN = 160;
 const MAX = 480;
+/** Arrow-key step (Shift: 3×). */
+const STEP = 16;
+
+const currentWidth = () => parseInt(getComputedStyle(document.documentElement).getPropertyValue("--sidebar-width"), 10) || 240;
+
+function setWidth(px: number): number {
+  const next = Math.max(MIN, Math.min(MAX, Math.round(px)));
+  document.documentElement.style.setProperty("--sidebar-width", `${next}px`);
+  try {
+    localStorage.setItem(STORAGE_KEY, String(next));
+  } catch {
+    /* storage denied: the width still applies for this session */
+  }
+  return next;
+}
 
 /**
  * Vertical drag handle that resizes the workspace sidebar by mutating the
@@ -10,6 +26,7 @@ const MAX = 480;
  */
 export function SidebarResizer() {
   const [dragging, setDragging] = useState(false);
+  const [width, setWidthState] = useState(240);
   const startXRef = useRef(0);
   const startWidthRef = useRef(240);
 
@@ -23,6 +40,7 @@ export function SidebarResizer() {
         `${saved}px`,
       );
     }
+    setWidthState(currentWidth());
   }, []);
 
   useEffect(() => {
@@ -42,7 +60,10 @@ export function SidebarResizer() {
         "--sidebar-width",
       );
       const px = parseInt(cur, 10);
-      if (Number.isFinite(px)) localStorage.setItem(STORAGE_KEY, String(px));
+      if (Number.isFinite(px)) {
+        localStorage.setItem(STORAGE_KEY, String(px));
+        setWidthState(px);
+      }
     }
     window.addEventListener("mousemove", onMove);
     window.addEventListener("mouseup", onUp);
@@ -57,6 +78,26 @@ export function SidebarResizer() {
       className={`sidebar-resizer ${dragging ? "dragging" : ""}`}
       role="separator"
       aria-orientation="vertical"
+      // Keyboard (plan 10.1.2): a focusable splitter. Arrows move the edge in
+      // their own direction (so in RTL, ← widens the sidebar on the right),
+      // Shift moves 3×, Home / End go to the narrowest / widest.
+      tabIndex={0}
+      aria-label={t("a11y.sidebarResizer")}
+      aria-valuemin={MIN}
+      aria-valuemax={MAX}
+      aria-valuenow={width}
+      onKeyDown={(e) => {
+        const rtl = document.documentElement.getAttribute("dir") === "rtl";
+        const step = e.shiftKey ? STEP * 3 : STEP;
+        let next: number | null = null;
+        if (e.key === "ArrowRight") next = currentWidth() + (rtl ? -step : step);
+        else if (e.key === "ArrowLeft") next = currentWidth() + (rtl ? step : -step);
+        else if (e.key === "Home") next = MIN;
+        else if (e.key === "End") next = MAX;
+        if (next === null) return;
+        e.preventDefault();
+        setWidthState(setWidth(next));
+      }}
       onMouseDown={(e) => {
         startXRef.current = e.clientX;
         const cur = getComputedStyle(

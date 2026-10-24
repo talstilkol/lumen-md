@@ -61,17 +61,17 @@ export const StatusBar = React.memo(function StatusBar({
   }, [telemetryOff]);
   const healthIssues = configHealth
     ? [
-        ...configHealth.blocked.map((item) => ({ ...item, emoji: "⚠", color: "hsl(12 90% 58%)" })),
-        ...configHealth.partial.map((item) => ({ ...item, emoji: "◌", color: "hsl(35 90% 60%)" })),
+        ...configHealth.blocked.map((item) => ({ ...item, emoji: "⚠", color: "hsl(var(--danger))" })),
+        ...configHealth.partial.map((item) => ({ ...item, emoji: "◌", color: "hsl(var(--warn))" })),
       ].slice(0, 2)
     : [];
   const healthColor = !configHealth
     ? "hsl(var(--fg-muted))"
     : configHealth.score >= 85
-      ? "hsl(145 60% 45%)"
+      ? "hsl(var(--ok))"
       : configHealth.score >= 65
-        ? "hsl(35 90% 55%)"
-        : "hsl(12 90% 58%)";
+        ? "hsl(var(--warn))"
+        : "hsl(var(--danger))";
   return (
     <footer className="status-bar">
       <span className="sb-item" title="Document">
@@ -80,7 +80,7 @@ export const StatusBar = React.memo(function StatusBar({
       {syncState !== "idle" && (
         <span className="sb-item" title={`Sync: ${syncState}`} style={{ gap: 4 }}>
           {syncState === "syncing" && <CloudCog size={10} className="spin" />}
-          {syncState === "error" && <AlertCircle size={10} style={{ color: "hsl(12 90% 58%)" }} />}
+          {syncState === "error" && <AlertCircle size={10} style={{ color: "hsl(var(--danger))" }} />}
           {syncState === "offline" && <CloudOff size={10} style={{ color: "hsl(var(--fg-muted))" }} />}
           <span style={{ fontSize: 10, textTransform: "capitalize" }}>{syncState}</span>
         </span>
@@ -184,7 +184,7 @@ export const StatusBar = React.memo(function StatusBar({
           cursor: "pointer",
           padding: 0,
           font: "inherit",
-          color: suggestingMode ? "hsl(145 60% 45%)" : "hsl(var(--fg-muted))",
+          color: suggestingMode ? "hsl(var(--ok))" : "hsl(var(--fg-muted))",
         }}
       >
         <FileDiff size={10} />
@@ -237,7 +237,7 @@ export const StatusBar = React.memo(function StatusBar({
           cursor: "pointer",
           padding: 0,
           font: "inherit",
-          color: telemetryOff ? "hsl(var(--fg-muted))" : "hsl(140 60% 55%)",
+          color: telemetryOff ? "hsl(var(--fg-muted))" : "hsl(var(--ok))",
         }}
       >
         <Activity size={10} />
@@ -275,9 +275,9 @@ export const StatusBar = React.memo(function StatusBar({
         >
           <ShieldCheck
             size={10}
-            style={{ color: "hsl(140 60% 55%)" }}
+            style={{ color: "hsl(var(--ok))" }}
           />
-          <span style={{ color: "hsl(140 60% 55%)", fontSize: 10, fontWeight: 600 }}>
+          <span style={{ color: "hsl(var(--ok))", fontSize: 10, fontWeight: 600 }}>
             {t("status.privacyMode")}
           </span>
         </span>

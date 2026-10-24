@@ -27,6 +27,7 @@ import {
 } from "../collab/comments";
 import type { CollabSession } from "../collab/yjs";
 import { t, getLocale } from "../i18n";
+import { scrollBehavior } from "../lib/motion";
 
 interface Props {
   open: boolean;
@@ -66,7 +67,7 @@ export function CommentsPanel({ open, onClose, collab, onJump }: Props) {
         const el = document.querySelector(
           `[data-comment-row-id="${id}"]`,
         ) as HTMLElement | null;
-        el?.scrollIntoView({ behavior: "smooth", block: "center" });
+        el?.scrollIntoView({ behavior: scrollBehavior(), block: "center" });
       }, 16);
       // Clear the focus halo after 1.5s.
       const t = window.setTimeout(() => setFocusedId(null), 1500);

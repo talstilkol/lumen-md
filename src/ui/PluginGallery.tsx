@@ -1,6 +1,7 @@
 import { headingSlugger } from "../lib/slug";
 import { countWords } from "../text/hebrew";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useRef } from "react";
+import { useFocusTrap } from "./useFocusTrap";
 import { Search, Download, Trash2, ExternalLink, BadgeCheck } from "lucide-react";
 import { getRegisteredPlugins, registerPlugin, unregisterPlugin } from "../plugins/pluginSystem";
 import type { LumenPlugin } from "../plugins/pluginSystem";
@@ -233,19 +234,6 @@ export function PluginGallery({ open, onClose }: Props) {
     };
   }, [open]);
 
-  // Escape closes the dialog, like every other overlay.
-  useEffect(() => {
-    if (!open) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        e.stopPropagation();
-        onClose();
-      }
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [open, onClose]);
-
   const allAvailable = useMemo(() => [...COMMUNITY_PLUGINS, ...remotePlugins], [remotePlugins]);
 
   // Index categories for the side rail. Built-ins live in "Community";
@@ -266,6 +254,10 @@ export function PluginGallery({ open, onClose }: Props) {
     }
     return map;
   }, [allAvailable.length, remoteRaw]);
+
+  // Focus stays in the dialog while it is open and returns on close; Escape closes it (plan 10.1).
+  const trapRef = useRef<HTMLDivElement | null>(null);
+  useFocusTrap(trapRef, { active: open, onEscape: onClose });
 
   if (!open) return null;
 
@@ -312,6 +304,7 @@ export function PluginGallery({ open, onClose }: Props) {
 
   return (
     <div
+      ref={trapRef}
       role="dialog"
       aria-modal="true"
       aria-labelledby="plugin-gallery-title"
