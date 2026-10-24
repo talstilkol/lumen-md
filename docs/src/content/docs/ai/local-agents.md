@@ -221,9 +221,11 @@ the default research provider.
 
 ## Evaluating a local model
 
-`npm run eval:agents` runs twelve fixed cases — most of them in Hebrew —
-through the real agent runtime against your Ollama, and writes a report
-to `eval/results/`:
+`npm run eval:agents` runs the fixed eval cases — at least five for each
+of the 14 agents, in Hebrew and English — through the real agent runtime
+against your Ollama, and writes a Markdown, JSON and HTML report to
+`eval/results/`. The cases, the checks and how to read the report are on
+[Agent eval](/ai/agent-eval/).
 
 ```bash
 ollama pull qwen2.5:7b

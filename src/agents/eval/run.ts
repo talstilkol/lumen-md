@@ -37,5 +37,5 @@ export async function runEvalCase(c: EvalCase, opts: { executor?: ExecutorId; mo
   const ms = Date.now() - started;
   const base = { id: c.id, agent: c.agent, executor: run.executor, model: run.model, attempts: run.attempts, ms };
   if (run.status !== "ok") return { ...base, status: "failed", checks: [], error: `${run.errorCode ?? "error"}: ${run.error ?? ""}`.trim() };
-  return { ...base, status: "ok", checks: [...scoreCases(run.output, c.checks), toolCheck(c, run.steps)] };
+  return { ...base, status: "ok", checks: [...(await scoreCases(run.output, c.checks)), toolCheck(c, run.steps)] };
 }

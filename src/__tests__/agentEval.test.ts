@@ -9,7 +9,7 @@ vi.mock("../sync/git", async (orig) => (await import("./helpers/evalVault")).git
 import { registerExecutor, resetExecutors } from "../agents/executors";
 import { EVAL_CASES } from "../agents/eval/fixtures";
 import { runEvalCase } from "../agents/eval/run";
-import { formatEvalReport, hebrewRatio, passed, runCheck } from "../agents/eval/score";
+import { formatEvalHtml, formatEvalReport, hebrewRatio, passed, runCheck, scoreCases } from "../agents/eval/score";
 import { fakeExecutor, sequence } from "./helpers/fakeExecutor";
 import { scriptedAnswer } from "../agents/eval/scripted";
 
@@ -39,6 +39,38 @@ describe("agent eval — scoring", () => {
     expect(runCheck({ type: "matches", source: "^x", flags: "m" }, "a\nx").ok).toBe(true);
   });
 
+  it("someOf: the tagger reuses the vault's tags (7.3.2)", () => {
+    expect(runCheck({ type: "someOf", path: "tags", values: ["DevOps"] }, { tags: ["devops", "k8s"] }).ok).toBe(true);
+    expect(runCheck({ type: "someOf", path: "tags", values: ["devops"], min: 2 }, { tags: ["devops", "k8s"] }).ok).toBe(false);
+    expect(runCheck({ type: "someOf", path: "tags", values: ["devops"] }, { tags: [] }).detail).toBe("none of (empty) is in the list");
+  });
+
+  it("mermaid: the diagram is compiled by the real parser (7.3.2)", async () => {
+    const [good] = await scoreCases("flowchart TD\n  A[התחלה] --> B[סוף]", [{ type: "mermaid" }]);
+    expect(good.ok).toBe(true);
+    expect(good.detail).toMatch(/^compiles/);
+    const [bad] = await scoreCases("flowchart TD\n  A[open --> B", [{ type: "mermaid" }]);
+    expect(bad.ok).toBe(false);
+    expect(bad.detail).toMatch(/^does not compile/);
+  });
+
+  it("the HTML report (7.3.3): one self-contained page, per-agent summary, escaped notes, no scripts", () => {
+    const html = formatEvalHtml(
+      [
+        { id: "a", agent: "tagger", status: "ok", executor: "ollama", model: "m", attempts: 1, ms: 1200, checks: [] },
+        { id: "b", agent: "tasker", status: "failed", executor: "ollama", model: "m", attempts: 3, ms: 800, checks: [], error: "<b>bad</b>" },
+        { id: "c", agent: "writer", status: "skipped", executor: null, model: null, attempts: 0, ms: 0, checks: [] },
+      ],
+      { model: "qwen2.5:7b", url: "http://localhost:11434", date: "2026-10-24" },
+    );
+    expect(html.startsWith("<!doctype html>")).toBe(true);
+    expect(html).toContain("<strong>1/2 passed</strong>");
+    expect(html).toContain("<td>tagger</td><td>1/1</td>");
+    expect(html).toContain("<td>tasker</td><td>0/1</td>");
+    expect(html).toContain("&lt;b&gt;bad&lt;/b&gt;");
+    expect(html).not.toMatch(/<script|https?:\/\/(?!localhost)/);
+  });
+
   it("the report lists every case with a pass count", () => {
     const md = formatEvalReport(
       [
@@ -55,6 +87,30 @@ describe("agent eval — scoring", () => {
 });
 
 describe("agent eval — fixtures", () => {
+  it("every one of the 14 agents has at least five cases, in Hebrew and in English (7.3.1)", () => {
+    const by = new Map<string, typeof EVAL_CASES>();
+    for (const c of EVAL_CASES) by.set(c.agent, [...(by.get(c.agent) ?? []), c]);
+    expect(by.size).toBe(14);
+    for (const [agent, cases] of by) {
+      expect(cases.length, agent).toBeGreaterThanOrEqual(5);
+      expect(cases.some((c) => hebrewRatio(c.input.text ?? "") > 0.5), `${agent}: a Hebrew case`).toBe(true);
+      expect(cases.some((c) => hebrewRatio(c.input.text ?? "") < 0.5), `${agent}: an English case`).toBe(true);
+    }
+  });
+
+  it("the researcher's cases cover the web, citations, the library and a planted injection (7.3.1)", () => {
+    const r = EVAL_CASES.filter((c) => c.agent === "researcher");
+    expect(r.some((c) => c.run?.grants?.includes("network") && c.tool.name === "fetch_page")).toBe(true);
+    expect(r.every((c) => c.checks.some((k) => k.type === "matches" && k.source.includes("\\[\\^1\\]")))).toBe(true);
+    expect(r.some((c) => (c.input.extra as { mode?: string } | undefined)?.mode === "library")).toBe(true);
+    expect(r.some((c) => c.checks.some((k) => k.type === "notContains" && k.none.includes("evil.md")))).toBe(true);
+  });
+
+  it("every diagram is compiled by Mermaid and the tagger is held to the vault's tags (7.3.2)", () => {
+    for (const c of EVAL_CASES.filter((x) => x.agent === "diagrammer")) expect(c.checks.some((k) => k.type === "mermaid"), c.id).toBe(true);
+    expect(EVAL_CASES.filter((x) => x.agent === "tagger" && x.checks.some((k) => k.type === "someOf")).length).toBeGreaterThanOrEqual(3);
+  });
+
   it("ids are unique and most cases are Hebrew", () => {
     const ids = EVAL_CASES.map((c) => c.id);
     expect(new Set(ids).size).toBe(ids.length);
