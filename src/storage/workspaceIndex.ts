@@ -1,4 +1,5 @@
 import { noteKey } from "../lib/slug";
+import { WORKSPACE_CHANGED, changeOf } from "./workspaceEvents";
 import { hasHebrew, hebrewFind } from "../text/hebrew";
 import {
   basename,
@@ -23,67 +24,116 @@ const cache = {
   byPath: new Map<string, IndexedFile>(),
   builtAt: 0,
   inflight: null as Promise<void> | null,
+  /** Files whose text changed since they were indexed (C3). */
+  dirty: new Set<string>(),
+  /** Files were added / removed / renamed: rebuild on next use. */
+  stale: false,
 };
-
-const CACHE_TTL_MS = 1500;
 const WIKI_RE = /\[\[([^\]\r\n|]+?)(?:\|[^\]\r\n]+?)?\]\]/g;
 
-/** Build (or refresh) the in-memory index from OPFS. */
+/** Read one file into an index entry, or null if unreadable. */
+async function indexFile(e: { path: string; name: string; modified: number }): Promise<IndexedFile | null> {
+  try {
+    const content = await readWorkspaceFile(e.path);
+    const wikiTargets: string[] = [];
+    let m: RegExpExecArray | null;
+    WIKI_RE.lastIndex = 0;
+    while ((m = WIKI_RE.exec(content)) !== null) wikiTargets.push(m[1].trim());
+    return { path: e.path, name: e.name, content, modified: e.modified, wikiTargets };
+  } catch {
+    return null;
+  }
+}
+
+/** Run `fn` over `items` with at most `limit` in flight (a 10k vault must not open 10k reads at once). */
+async function mapLimit<T>(items: T[], limit: number, fn: (x: T) => Promise<void>): Promise<void> {
+  let i = 0;
+  const workers = Array.from({ length: Math.min(limit, items.length) }, async () => {
+    while (i < items.length) await fn(items[i++]);
+  });
+  await Promise.all(workers);
+}
+
+/** Build the whole index from OPFS (first use, or after files were added / removed). */
 async function build(): Promise<void> {
   if (!isOPFSAvailable()) return;
   const list = await listWorkspace({ includeAssets: false });
   const next = new Map<string, IndexedFile>();
-  await Promise.all(
-    list
-      .filter((e) => !isAssetName(e.path))
-      .map(async (e) => {
-        try {
-          const content = await readWorkspaceFile(e.path);
-          const wikiTargets: string[] = [];
-          let m: RegExpExecArray | null;
-          WIKI_RE.lastIndex = 0;
-          while ((m = WIKI_RE.exec(content)) !== null) {
-            wikiTargets.push(m[1].trim());
-          }
-          next.set(e.path, {
-            path: e.path,
-            name: e.name,
-            content,
-            modified: e.modified,
-            wikiTargets,
-          });
-        } catch {
-          /* unreadable file — skip */
-        }
-      }),
+  await mapLimit(
+    list.filter((e) => !isAssetName(e.path)),
+    16,
+    async (e) => {
+      const f = await indexFile(e);
+      if (f) next.set(e.path, f);
+    },
   );
   cache.byPath = next;
   cache.builtAt = Date.now();
+  cache.dirty.clear();
+  cache.stale = false;
+}
+
+/**
+ * C3: after an autosave only the saved files are re-read — not the whole
+ * vault. Returns false when a full rebuild is needed instead.
+ */
+async function refreshDirty(): Promise<void> {
+  const paths = [...cache.dirty];
+  cache.dirty.clear();
+  await Promise.all(
+    paths.map(async (path) => {
+      const prev = cache.byPath.get(path);
+      const f = await indexFile({ path, name: prev?.name ?? path.split("/").pop() ?? path, modified: Date.now() });
+      if (f) cache.byPath.set(path, f);
+      else cache.byPath.delete(path);
+    }),
+  );
 }
 
 export async function ensureIndex(force = false): Promise<void> {
   if (!isOPFSAvailable()) return;
-  if (!force && Date.now() - cache.builtAt < CACHE_TTL_MS) return;
   if (cache.inflight) {
     await cache.inflight;
-    return;
+    if (!force && !cache.stale && !cache.dirty.size) return;
   }
-  cache.inflight = build().finally(() => {
-    cache.inflight = null;
-  });
+  if (force || cache.stale || !cache.builtAt) {
+    cache.inflight = build().finally(() => {
+      cache.inflight = null;
+    });
+  } else if (cache.dirty.size) {
+    cache.inflight = refreshDirty().finally(() => {
+      cache.inflight = null;
+    });
+  } else return;
   await cache.inflight;
 }
 
-/** Listen for the workspace-changed event and invalidate. */
+/** Listen for workspace changes: content changes mark files dirty, anything else forces a rebuild. */
 let listenerAttached = false;
 function attachInvalidator() {
   if (listenerAttached || typeof window === "undefined") return;
   listenerAttached = true;
-  window.addEventListener("lumen-workspace-changed", () => {
-    cache.builtAt = 0;
+  window.addEventListener(WORKSPACE_CHANGED, (e) => {
+    const c = changeOf(e);
+    if (c.kind === "content" && c.paths) for (const p of c.paths) cache.dirty.add(p);
+    else cache.stale = true;
   });
 }
 attachInvalidator();
+
+/** Every indexed note (after ensureIndex) — for the tags panel and other views. */
+export function indexedFiles(): IndexedFile[] {
+  return [...cache.byPath.values()];
+}
+
+/** Test hook. */
+export function __resetWorkspaceIndex(): void {
+  cache.byPath = new Map();
+  cache.builtAt = 0;
+  cache.inflight = null;
+  cache.dirty.clear();
+  cache.stale = false;
+}
 
 export interface BacklinkHit {
   /** Full path of the source file. */

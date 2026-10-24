@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link2 } from "lucide-react";
 import { findBacklinks, type BacklinkHit } from "../storage/workspaceIndex";
 import { t } from "../i18n";
+import { onWorkspaceChanged } from "../storage/workspaceEvents";
 
 interface Props {
   /** Active workspace path. */
@@ -47,9 +48,7 @@ export function BacklinksPanel({ filePath, onOpen }: Props) {
         .then((h) => setHits(h))
         .catch(() => {});
     }
-    window.addEventListener("lumen-workspace-changed", refresh);
-    return () =>
-      window.removeEventListener("lumen-workspace-changed", refresh);
+    return onWorkspaceChanged(refresh, { debounceMs: 500 });
   }, [filePath]);
 
   return (
