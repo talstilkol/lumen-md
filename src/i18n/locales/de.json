@@ -1194,5 +1194,15 @@
   "ai.doctor.action.openSettings": "KI-Einstellungen öffnen",
   "ai.doctor.action.pullModel": "Jetzt herunterladen",
   "ai.doctor.action.setPolicyLocalFirst": "Zu „lokal zuerst“ wechseln",
-  "ai.doctor.action.retry": "Erneut versuchen"
+  "ai.doctor.action.retry": "Erneut versuchen",
+  "doc.save.failedRetrying": "„{name}“ konnte nicht im Tresor gespeichert werden — neuer Versuch. Dein Text ist weiter im Browser.",
+  "doc.save.quota": "Der Browser-Speicher für diese Seite ist voll — „{name}“ wurde nicht gespeichert. Platz schaffen oder Notizen exportieren.",
+  "doc.history.quota": "Der Versionsverlauf hat auch nach dem Löschen der ältesten Versionen keinen Platz.",
+  "versionHistory.reason.autosave": "automatisch",
+  "versionHistory.reason.save": "gespeichert",
+  "versionHistory.reason.auto-backup": "Sicherung",
+  "versionHistory.reason.vault": "Tresor-Schnappschuss",
+  "versionHistory.reason.close": "beim Schließen",
+  "versionHistory.reason.restore": "vor Wiederherstellung",
+  "versionHistory.reason.manual": "manuell"
 }

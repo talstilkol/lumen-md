@@ -12,7 +12,7 @@ import { initTelemetry } from "./lib/telemetry";
 import { initAuth } from "./auth/useAuth";
 import { reportWebVitals } from "./lib/webVitals";
 import { log } from "./lib/logger";
-import { startAutoBackup } from "./sync/autoBackup";
+import { startAutoBackup, startVaultSnapshots } from "./sync/autoBackup";
 import { requestPersistentStorage } from "./storage/persistentStorage";
 import { initLocale } from "./i18n";
 import { adoptBootLocale } from "./store/useStore";
@@ -21,6 +21,7 @@ import "./index.css";
 initTelemetry();
 void initAuth();
 startAutoBackup();
+startVaultSnapshots();
 // The vault lives in OPFS/IndexedDB; without this the browser may evict it.
 void requestPersistentStorage();
 

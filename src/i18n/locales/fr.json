@@ -1194,5 +1194,15 @@
   "ai.doctor.action.openSettings": "Ouvrir les réglages IA",
   "ai.doctor.action.pullModel": "Télécharger maintenant",
   "ai.doctor.action.setPolicyLocalFirst": "Passer à « local d'abord »",
-  "ai.doctor.action.retry": "Réessayer"
+  "ai.doctor.action.retry": "Réessayer",
+  "doc.save.failedRetrying": "Impossible d'enregistrer « {name} » dans le coffre — nouvel essai. Votre texte reste dans ce navigateur.",
+  "doc.save.quota": "Le stockage du navigateur pour ce site est plein — « {name} » n'a pas été enregistré. Libérez de l'espace ou exportez vos notes.",
+  "doc.history.quota": "L'historique des versions manque d'espace même après suppression des plus anciennes.",
+  "versionHistory.reason.autosave": "enregistrement auto",
+  "versionHistory.reason.save": "enregistré",
+  "versionHistory.reason.auto-backup": "sauvegarde",
+  "versionHistory.reason.vault": "instantané du coffre",
+  "versionHistory.reason.close": "à la fermeture",
+  "versionHistory.reason.restore": "avant restauration",
+  "versionHistory.reason.manual": "manuel"
 }

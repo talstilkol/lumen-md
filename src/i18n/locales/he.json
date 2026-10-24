@@ -694,7 +694,7 @@
   "versionHistory.close": "סגירה",
   "versionHistory.selectVersion": "בחר גרסה לתצוגה מקדימה",
   "versionHistory.diffChars": "Δ {n} תווים הבדל",
-  "versionHistory.noVersions": "אין גרסאות שמורות. גרסאות נשמרות אוטומטית כשמחליפים קבצים או שומרים.",
+  "versionHistory.noVersions": "עדיין אין גרסאות. גרסה נשמרת כל כמה דקות בזמן ההקלדה, בכל שמירה ובסגירת הלשונית.",
   "search.results.one": "{n} תוצאה",
   "search.results.other": "{n} תוצאות",
   "cmd.file.exportPptx": "ייצוא ל-PowerPoint (.pptx)",
@@ -1194,5 +1194,15 @@
   "ai.doctor.action.openSettings": "פתיחת הגדרות AI",
   "ai.doctor.action.pullModel": "להוריד עכשיו",
   "ai.doctor.action.setPolicyLocalFirst": "לעבור ל\"מקומי קודם\"",
-  "ai.doctor.action.retry": "לנסות שוב"
+  "ai.doctor.action.retry": "לנסות שוב",
+  "doc.save.failedRetrying": "לא הצלחתי לשמור את „{name}” בכספת — מנסה שוב. הטקסט עדיין שמור בדפדפן.",
+  "doc.save.quota": "האחסון של האתר בדפדפן מלא — „{name}” לא נשמר. פנה מקום או ייצא את הפתקים.",
+  "doc.history.quota": "להיסטוריית הגרסאות אין מקום גם אחרי מחיקת הגרסאות הישנות.",
+  "versionHistory.reason.autosave": "שמירה אוטומטית",
+  "versionHistory.reason.save": "נשמר",
+  "versionHistory.reason.auto-backup": "גיבוי",
+  "versionHistory.reason.vault": "תמונת מצב של הכספת",
+  "versionHistory.reason.close": "בסגירה",
+  "versionHistory.reason.restore": "לפני שחזור",
+  "versionHistory.reason.manual": "ידני"
 }
