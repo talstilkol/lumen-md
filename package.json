@@ -42,7 +42,9 @@
     "eval:compare": "node scripts/eval-compare.mjs",
     "fake-ollama": "node --experimental-strip-types scripts/fake-ollama.mjs",
     "lint": "eslint src",
-    "lint:prune": "eslint src --prune-suppressions"
+    "lint:prune": "eslint src --prune-suppressions",
+    "size": "size-limit",
+    "danger:local": "danger local --dangerfile dangerfile.ts"
   },
   "dependencies": {
     "@bjorn3/browser_wasi_shim": "0.4.2",
@@ -148,6 +150,7 @@
   "devDependencies": {
     "@eslint/js": "9.39.5",
     "@playwright/test": "^1.59.1",
+    "@size-limit/file": "14.2.0",
     "@tailwindcss/postcss": "^4.3.3",
     "@tauri-apps/cli": "^2.10.1",
     "@testing-library/dom": "^10.4.0",
@@ -161,6 +164,7 @@
     "@vitejs/plugin-react": "^6.1.1",
     "@vitest/coverage-v8": "^4.1.8",
     "axe-core": "^4.11.3",
+    "danger": "14.0.7",
     "eslint": "9.39.5",
     "eslint-plugin-jsx-a11y": "6.10.2",
     "eslint-plugin-react-hooks": "7.1.1",
@@ -168,6 +172,7 @@
     "globals": "17.13.0",
     "jsdom": "^29.1.1",
     "postcss": "^8.5.12",
+    "size-limit": "14.2.0",
     "tailwindcss": "^4.3.3",
     "tsx": "^4.22.4",
     "typescript": "^6.0.3",
