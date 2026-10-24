@@ -1530,6 +1530,5 @@
   "e2ee.sync.migrate.done": "استُورد {n} ملاحظات. النسخ المقروءة في „{folder}” لدى {name}؛ احذف المجلد بنفسك عندما تطمئن.",
   "e2ee.sync.migrate.revert": "تراجع: أعد النسخ المقروءة",
   "e2ee.sync.migrate.reverted": "أُعيد {n} ملفات.",
-  "cmd.sync.open": "المزامنة المشفّرة…",
-  "cmd.sync.open.hint": "WebDAV أو S3 أو Dropbox أو Google Drive — تشفير من طرف إلى طرف"
+  "cmd.sync.open": "المزامنة المشفّرة…"
 }

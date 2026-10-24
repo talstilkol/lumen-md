@@ -1530,6 +1530,5 @@
   "e2ee.sync.migrate.done": "Импортировано заметок: {n}. Читаемые копии лежат в «{folder}» в {name}; удалите эту папку сами, когда убедитесь, что всё в порядке.",
   "e2ee.sync.migrate.revert": "Отменить: вернуть читаемые копии",
   "e2ee.sync.migrate.reverted": "Возвращено файлов: {n}.",
-  "cmd.sync.open": "Зашифрованная синхронизация…",
-  "cmd.sync.open.hint": "WebDAV, S3, Dropbox или Google Drive — сквозное шифрование"
+  "cmd.sync.open": "Зашифрованная синхронизация…"
 }

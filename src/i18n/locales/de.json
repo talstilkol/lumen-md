@@ -1530,6 +1530,5 @@
   "e2ee.sync.migrate.done": "{n} Notizen importiert. Die lesbaren Kopien liegen in „{folder}“ bei {name}; löschen Sie den Ordner selbst, wenn alles passt.",
   "e2ee.sync.migrate.revert": "Rückgängig: lesbare Kopien zurückverschieben",
   "e2ee.sync.migrate.reverted": "{n} Dateien zurückverschoben.",
-  "cmd.sync.open": "Verschlüsselte Synchronisierung…",
-  "cmd.sync.open.hint": "WebDAV, S3, Dropbox oder Google Drive – Ende-zu-Ende-verschlüsselt"
+  "cmd.sync.open": "Verschlüsselte Synchronisierung…"
 }

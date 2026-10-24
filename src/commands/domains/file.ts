@@ -96,7 +96,6 @@ export function buildSyncCommands(): Command[] {
     {
       id: "sync.open",
       label: t("cmd.sync.open"),
-      hint: t("cmd.sync.open.hint"),
       icon: cmdIcons.Sparkles,
       group: t("group.tools"),
       action: () => void import("../../sync/e2ee/ui/launch").then((m) => m.openSync()),

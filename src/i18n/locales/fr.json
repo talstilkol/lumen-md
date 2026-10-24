@@ -1530,6 +1530,5 @@
   "e2ee.sync.migrate.done": "{n} notes importées. Les copies lisibles sont dans « {folder} » chez {name} ; supprimez ce dossier vous-même quand vous êtes satisfait.",
   "e2ee.sync.migrate.revert": "Annuler : remettre les copies lisibles",
   "e2ee.sync.migrate.reverted": "{n} fichiers remis en place.",
-  "cmd.sync.open": "Synchronisation chiffrée…",
-  "cmd.sync.open.hint": "WebDAV, S3, Dropbox ou Google Drive — chiffrement de bout en bout"
+  "cmd.sync.open": "Synchronisation chiffrée…"
 }

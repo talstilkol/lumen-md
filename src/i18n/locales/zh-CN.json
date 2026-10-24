@@ -1530,6 +1530,5 @@
   "e2ee.sync.migrate.done": "已导入 {n} 篇笔记。明文副本位于 {name} 的“{folder}”中;确认无误后请自行删除该文件夹。",
   "e2ee.sync.migrate.revert": "撤销:把明文副本移回原处",
   "e2ee.sync.migrate.reverted": "已移回 {n} 个文件。",
-  "cmd.sync.open": "加密同步…",
-  "cmd.sync.open.hint": "WebDAV、S3、Dropbox 或 Google Drive — 端到端加密"
+  "cmd.sync.open": "加密同步…"
 }

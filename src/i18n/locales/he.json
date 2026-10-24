@@ -1530,6 +1530,5 @@
   "e2ee.sync.migrate.done": "יובאו {n} פתקים. העותקים הקריאים נמצאים ב-„{folder}” ב-{name}; מחקו את התיקייה בעצמכם כשתהיו בטוחים.",
   "e2ee.sync.migrate.revert": "ביטול: להחזיר את העותקים הקריאים",
   "e2ee.sync.migrate.reverted": "{n} קבצים הוחזרו.",
-  "cmd.sync.open": "סנכרון מוצפן…",
-  "cmd.sync.open.hint": "WebDAV, S3, Dropbox או Google Drive — הצפנה מקצה לקצה"
+  "cmd.sync.open": "סנכרון מוצפן…"
 }

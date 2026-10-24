@@ -8,6 +8,16 @@ export function openSync(): Promise<void> {
   return import("./open").then((m) => m.openSyncPanel());
 }
 
-export function finishOAuth(kind: "dropbox" | "gdrive", code: string): Promise<void> {
-  return import("./open").then((m) => m.finishOAuthReturn(kind, code));
+/** `/oauth/dropbox` or `/oauth/gdrive` with `?code=`: finish the sign-in once secrets and vault are ready. */
+export async function oauthReturn(ready: Promise<unknown>): Promise<void> {
+  const kind = /^\/oauth\/(dropbox|gdrive)$/.exec(location.pathname)?.[1] as "dropbox" | "gdrive" | undefined;
+  const code = new URLSearchParams(location.search).get("code");
+  if (!kind || !code) return;
+  try {
+    await ready;
+    await (await import("./open")).finishOAuthReturn(kind, code);
+  } catch (err) {
+    const { log } = await import("../../../lib/logger");
+    log.warn("sync sign-in failed", err);
+  }
 }

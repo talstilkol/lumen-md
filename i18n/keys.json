@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-10-24T15:44:55.715Z",
+  "generated_at": "2026-10-24T21:29:41.985Z",
   "source": "src/i18n/index.ts (en bundle) + src/i18n/lazy/*.json",
-  "count": 1533,
+  "count": 1532,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -1968,11 +1968,6 @@
     {
       "key": "cmd.sync.open",
       "en": "Encrypted sync…",
-      "vars": []
-    },
-    {
-      "key": "cmd.sync.open.hint",
-      "en": "WebDAV, S3, Dropbox or Google Drive — end-to-end encrypted",
       "vars": []
     },
     {

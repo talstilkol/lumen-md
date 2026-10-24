@@ -1530,6 +1530,5 @@
   "e2ee.sync.migrate.done": "{n} 件のノートを取り込みました。読めるコピーは {name} の「{folder}」にあります。問題がなければご自身で削除してください。",
   "e2ee.sync.migrate.revert": "元に戻す:読めるコピーを戻す",
   "e2ee.sync.migrate.reverted": "{n} 件のファイルを戻しました。",
-  "cmd.sync.open": "暗号化同期…",
-  "cmd.sync.open.hint": "WebDAV、S3、Dropbox、Google Drive — エンドツーエンド暗号化"
+  "cmd.sync.open": "暗号化同期…"
 }

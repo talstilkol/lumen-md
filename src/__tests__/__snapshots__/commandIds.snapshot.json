@@ -470,7 +470,6 @@
       "id": "sync.open",
       "label": "Encrypted sync…",
       "group": "Tools",
-      "hint": "WebDAV, S3, Dropbox or Google Drive — end-to-end encrypted",
       "icon": "Sparkles"
     },
     {
@@ -1552,7 +1551,6 @@
       "id": "sync.open",
       "label": "Encrypted sync…",
       "group": "Tools",
-      "hint": "WebDAV, S3, Dropbox or Google Drive — end-to-end encrypted",
       "icon": "Sparkles"
     },
     {
