@@ -268,6 +268,8 @@
   "cmd.tools.suggestLinks.hint": "AI scans your workspace for relevant cross-links",
   "cmd.tools.voice": "🎙 Voice to Markdown",
   "cmd.tools.voice.hint": "Speech recognition → text",
+  "cmd.tools.voiceMemo": "🎙 ボイスメモ（文字起こし＋要約）",
+  "cmd.tools.voiceMemo.hint": "録音し、Whisper で文字起こし（ローカル AI ポリシーではこのデバイス上で）、要約してメモブロックを挿入",
   "cmd.tools.writingGoal.hint": "A subtle progress banner above the editor",
   "cmd.tools.writingGoal.set": "✍️ Writing goal: {{words}} words/day",
   "cmd.tools.writingGoal.unset": "✍️ Set a daily writing goal",
