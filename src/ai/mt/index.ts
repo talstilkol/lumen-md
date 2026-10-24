@@ -5,6 +5,7 @@
  * in (plan 6.5). When no local layer can take the pair, the caller falls
  * back to the LLM translator agent (layer 3b).
  */
+import "./strings";
 import { createChromeLayer } from "./chromeTranslator";
 import { rankLayers, type LayerDeps, type LayerId, type MtLayer, type Pair } from "./layers";
 import { createM2m100Layer, createOpusLayer, type ConsentDeps } from "./localModels";

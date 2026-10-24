@@ -6,6 +6,7 @@
  * refactor / template / organize / stream, unused) is gone.
  */
 
+import "../ai/mt/strings";
 import {
   readWorkspaceFile,
   listWorkspace,
