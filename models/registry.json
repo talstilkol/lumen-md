@@ -240,7 +240,9 @@
       "runs": "ollama",
       "delivery": "ollama-pull",
       "catalog": "OLLAMA_CATALOG (src/ai/modelCatalog.ts)",
-      "match": ["aya-expanse"],
+      "match": [
+        "aya-expanse"
+      ],
       "verified": true,
       "notes": "Non-commercial. Currently in OLLAMA_CATALOG, and recommendOllamaModel() picks it for Hebrew notes on 8-11 GB machines (the AI doctor offers a one-click pull). Removal is task 1.7."
     },
@@ -316,7 +318,9 @@
       "runs": "ollama",
       "delivery": "ollama-pull",
       "catalog": "OLLAMA_CATALOG (src/ai/modelCatalog.ts); 'ollama pull llama3.1' hint (src/commands/useCommands.ts)",
-      "match": ["llama3.1"],
+      "match": [
+        "llama3.1"
+      ],
       "verified": true,
       "notes": "Not a default."
     },
@@ -437,7 +441,9 @@
       "runs": "browser",
       "delivery": "download",
       "catalog": "LANG_PATH / LANGS (src/ai/ocr.ts)",
-      "match": ["tessdata_fast"],
+      "match": [
+        "tessdata_fast"
+      ],
       "verified": true,
       "notes": ""
     },
@@ -453,7 +459,9 @@
       "runs": "browser",
       "delivery": "download",
       "catalog": "LANG_PATH / LANGS (src/ai/ocr.ts)",
-      "match": ["tessdata_fast"],
+      "match": [
+        "tessdata_fast"
+      ],
       "verified": true,
       "notes": ""
     },
@@ -469,7 +477,9 @@
       "runs": "browser",
       "delivery": "bundled",
       "catalog": "scripts/copy-pyodide.mjs → public/pyodide/ (src/plugins/LivePyBlock.tsx)",
-      "match": ["pyodide"],
+      "match": [
+        "pyodide"
+      ],
       "verified": true,
       "notes": "Shipped unmodified, so MPL-2.0's file-level copyleft only asks us to keep its notices and point to its source."
     },
@@ -485,7 +495,9 @@
       "runs": "browser",
       "delivery": "user-download",
       "catalog": "HEBREW_DICT_URL (src/ai/hebrewSpell.ts)",
-      "match": ["wooorm/dictionaries"],
+      "match": [
+        "wooorm/dictionaries"
+      ],
       "verified": true,
       "notes": "Must never be bundled. The app downloads it from upstream only after an explicit user action and shows its licence first (HEBREW_DICT_LICENSE); that exception is recorded in licenses.allow.json."
     },
@@ -516,7 +528,10 @@
       "runs": "browser",
       "delivery": "none",
       "catalog": "deny-list",
-      "match": ["Qwen2.5-3B", "qwen2.5:3b"],
+      "match": [
+        "Qwen2.5-3B",
+        "qwen2.5:3b"
+      ],
       "verified": true,
       "notes": "Unlike the 0.5B/1.5B/7B sizes, 3B is research-only."
     },
@@ -532,7 +547,10 @@
       "runs": "ollama",
       "delivery": "none",
       "catalog": "deny-list",
-      "match": ["Qwen2.5-72B", "qwen2.5:72b"],
+      "match": [
+        "Qwen2.5-72B",
+        "qwen2.5:72b"
+      ],
       "verified": true,
       "notes": "Not Apache-2.0; forbidden by project policy."
     },
@@ -548,7 +566,10 @@
       "runs": "browser",
       "delivery": "none",
       "catalog": "deny-list",
-      "match": ["Qwen2.5-Coder-3B", "qwen2.5-coder:3b"],
+      "match": [
+        "Qwen2.5-Coder-3B",
+        "qwen2.5-coder:3b"
+      ],
       "verified": true,
       "notes": ""
     },
@@ -564,7 +585,10 @@
       "runs": "browser",
       "delivery": "none",
       "catalog": "deny-list",
-      "match": ["nllb-200", "nllb"],
+      "match": [
+        "nllb-200",
+        "nllb"
+      ],
       "verified": true,
       "notes": "All NLLB-200 checkpoints."
     },
@@ -625,7 +649,9 @@
       "runs": "browser",
       "delivery": "none",
       "catalog": "deny-list",
-      "match": ["saspeech"],
+      "match": [
+        "saspeech"
+      ],
       "verified": true,
       "notes": "Any voice trained on SASPEECH, whatever the model code's own licence."
     },
@@ -703,6 +729,51 @@
       "catalog": "CONVERTED_MODELS (src/ai/convertedModels.ts)",
       "verified": true,
       "notes": "Converted to ONNX by .github/workflows/model-convert.yml (plan 6.0). Downloaded only with consent, size shown first, cached in OPFS; not downloadable until the host is chosen (15.9)."
+    },
+    {
+      "id": "qwen3:14b",
+      "kind": "llm",
+      "source": "https://ollama.com/library/qwen3",
+      "license": "Apache-2.0",
+      "class": "allowed",
+      "commercial": "yes",
+      "attribution": "Qwen3 © Alibaba Cloud, licensed under the Apache License 2.0.",
+      "size": "~9 GB (q4)",
+      "runs": "ollama",
+      "delivery": "user-pull",
+      "catalog": "OLLAMA_CATALOG (src/ai/modelCatalog.ts)",
+      "verified": true,
+      "notes": "Qwen3 tech report: all Qwen3 models under Apache 2.0."
+    },
+    {
+      "id": "qwen3:4b",
+      "kind": "llm",
+      "source": "https://ollama.com/library/qwen3",
+      "license": "Apache-2.0",
+      "class": "allowed",
+      "commercial": "yes",
+      "attribution": "Qwen3 © Alibaba Cloud, licensed under the Apache License 2.0.",
+      "size": "~2.6 GB (q4)",
+      "runs": "ollama",
+      "delivery": "user-pull",
+      "catalog": "OLLAMA_CATALOG (src/ai/modelCatalog.ts)",
+      "verified": true,
+      "notes": "Qwen3 tech report: all Qwen3 models under Apache 2.0."
+    },
+    {
+      "id": "hf.co/dicta-il/DictaLM-3.0-1.7B-Thinking-GGUF",
+      "kind": "llm",
+      "source": "https://huggingface.co/dicta-il/DictaLM-3.0-1.7B-Thinking-GGUF",
+      "license": "Apache-2.0",
+      "class": "allowed",
+      "commercial": "yes",
+      "attribution": "DictaLM 3.0 © Dicta: The Israel Center for Text Analysis, licensed under the Apache License 2.0.",
+      "size": "~1–2 GB (Q4–Q8)",
+      "runs": "ollama",
+      "delivery": "user-pull",
+      "catalog": "OLLAMA_CATALOG (src/ai/modelCatalog.ts)",
+      "verified": true,
+      "notes": "Licence tag apache-2.0 on dicta-il/DictaLM-3.0-1.7B-Instruct (checked 18.10.2026). Only the Thinking variant has an official GGUF. Not recommended by default until measured (plan 7.9)."
     }
   ]
 }

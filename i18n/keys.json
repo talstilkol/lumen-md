@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-10-19T06:51:14.218Z",
+  "generated_at": "2026-10-24T18:45:45.340Z",
   "source": "src/i18n/index.ts (en bundle)",
-  "count": 1418,
+  "count": 1439,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -2067,6 +2067,101 @@
       "vars": [
         "n"
       ]
+    },
+    {
+      "key": "pii.settings.title",
+      "en": "Personal data before the cloud",
+      "vars": []
+    },
+    {
+      "key": "pii.settings.redact",
+      "en": "Hide personal data before a request leaves this device",
+      "vars": []
+    },
+    {
+      "key": "pii.settings.preview",
+      "en": "Show what will be sent before each cloud request",
+      "vars": []
+    },
+    {
+      "key": "pii.settings.hint",
+      "en": "E-mails, phone numbers, ID numbers, cards, IBANs, plates and birth dates are replaced with tokens such as ⟨EMAIL_1⟩ on this device, and put back in the answer. Names too when the Hebrew name model is downloaded.",
+      "vars": []
+    },
+    {
+      "key": "pii.preview.title",
+      "en": "Send to the cloud?",
+      "vars": []
+    },
+    {
+      "key": "pii.preview.hidden",
+      "en": "Hidden on this device: {list}",
+      "vars": [
+        "list"
+      ]
+    },
+    {
+      "key": "pii.preview.none",
+      "en": "No personal data was found.",
+      "vars": []
+    },
+    {
+      "key": "pii.preview.send",
+      "en": "Send",
+      "vars": []
+    },
+    {
+      "key": "pii.ledger.redacted",
+      "en": "Hidden before sending: {n} in {requests} requests",
+      "vars": [
+        "n",
+        "requests"
+      ]
+    },
+    {
+      "key": "pii.type.EMAIL",
+      "en": "e-mail",
+      "vars": []
+    },
+    {
+      "key": "pii.type.PHONE",
+      "en": "phone",
+      "vars": []
+    },
+    {
+      "key": "pii.type.IL_ID",
+      "en": "ID number",
+      "vars": []
+    },
+    {
+      "key": "pii.type.CREDIT_CARD",
+      "en": "card",
+      "vars": []
+    },
+    {
+      "key": "pii.type.IBAN",
+      "en": "IBAN",
+      "vars": []
+    },
+    {
+      "key": "pii.type.LICENSE_PLATE",
+      "en": "licence plate",
+      "vars": []
+    },
+    {
+      "key": "pii.type.DATE_OF_BIRTH",
+      "en": "birth date",
+      "vars": []
+    },
+    {
+      "key": "pii.type.PERSON",
+      "en": "name",
+      "vars": []
+    },
+    {
+      "key": "pii.type.LOCATION",
+      "en": "place",
+      "vars": []
     },
     {
       "key": "privacy.onlyLeaving",
@@ -4974,6 +5069,24 @@
     {
       "key": "ai.localModels.tooBig",
       "en": "may not fit",
+      "vars": []
+    },
+    {
+      "key": "ai.localModels.licenceTitle",
+      "en": "Model under its own licence",
+      "vars": []
+    },
+    {
+      "key": "ai.localModels.licenceBody",
+      "en": "{{model}} is published under the {{licence}}, not an open-source licence. Read its terms before you use it, especially for work. Lumen will not choose it for you.",
+      "vars": [
+        "model",
+        "licence"
+      ]
+    },
+    {
+      "key": "ai.localModels.licenceOk",
+      "en": "Use it",
       "vars": []
     },
     {

@@ -12,6 +12,7 @@ import { docsUrl } from "../lib/docsLinks";
 import { estimateTokens, recordCacheHit, recordUsage, type Usage } from "./usage";
 import { cloudAllowed, getAiPolicy, isCloudProvider, isLocalOrigin, providerAllowed } from "./policy";
 import { getSecret } from "../lib/secretStore";
+import { getOllamaConfigModel } from "./ollamaProvider";
 
 // ── Rate limiting ───────────────────────────────────────────────────────
 // Token bucket — protects the user's API key against runaway loops.
@@ -218,6 +219,17 @@ function assertOllamaOrigin(baseUrl: string): void {
   }
 }
 
+/**
+ * Personal data out of a cloud request (plan 2.6): redacted on this device
+ * right before the provider is contacted, restored in the answer. Local
+ * routes (Ollama on this machine, WebGPU) never come through here.
+ */
+async function forCloud(messages: ChatMessage[], provider: string): Promise<{ messages: ChatMessage[]; restore: (s: string) => string; restoreStream: (c: AsyncIterable<string>) => AsyncIterable<string> }> {
+  const { redactForCloud } = await import("./piiRedactor");
+  const { messages: out, vault } = await redactForCloud(messages, provider);
+  return { messages: out, restore: (s) => vault.restore(s), restoreStream: (c) => (vault.size ? vault.restoreStream(c) : c) };
+}
+
 function assertCloudFallback(unavailable: string): void {
   if (!cloudAllowed()) {
     throw new AiError("NO_LOCAL", `${unavailable} is unavailable and the AI policy is "local-only", so no cloud fallback was used.`);
@@ -294,7 +306,7 @@ export function effectiveModel(provider: AiProvider, opts: ChatOptions = {}): st
   }
   try {
     // Ollama keeps its model where the Ollama picker writes it.
-    if (provider === "ollama") return localStorage.getItem("lumen.ollama.model") || "llama3.1";
+    if (provider === "ollama") return getOllamaConfigModel(); // same default the provider runs (plan 1.7)
     const fallback = (PROVIDER_DEFAULT_MODELS as Record<string, string>)[provider] ?? "default";
     return localStorage.getItem(`lumen.ai.model.${provider}`) || fallback;
   } catch {
@@ -494,10 +506,12 @@ async function chatDirect(
     assertCloudProvider("anthropic");
     getProviderKey("anthropic"); // NO_KEY before anything is charged
     checkRateLimit();
+    // Redacted (and previewed) before the prompt is charged: a cancelled preview costs nothing.
+    const red = await forCloud(messages, "anthropic");
     charge();
     inflight++;
     try {
-      return await chatAnthropic(messages, opts);
+      return red.restore(await chatAnthropic(red.messages, opts));
     } finally {
       inflight--;
     }
@@ -509,10 +523,12 @@ async function chatDirect(
     assertCloudProvider("gemini");
     getProviderKey("gemini"); // NO_KEY before anything is charged
     checkRateLimit();
+    // Redacted (and previewed) before the prompt is charged: a cancelled preview costs nothing.
+    const red = await forCloud(messages, "gemini");
     charge();
     inflight++;
     try {
-      return await chatGemini(messages, opts);
+      return red.restore(await chatGemini(red.messages, opts));
     } finally {
       inflight--;
     }
@@ -524,10 +540,12 @@ async function chatDirect(
     assertCloudProvider("mistral");
     getProviderKey("mistral"); // NO_KEY before anything is charged
     checkRateLimit();
+    // Redacted (and previewed) before the prompt is charged: a cancelled preview costs nothing.
+    const red = await forCloud(messages, "mistral");
     charge();
     inflight++;
     try {
-      return await chatMistral(messages, opts);
+      return red.restore(await chatMistral(red.messages, opts));
     } finally {
       inflight--;
     }
@@ -539,6 +557,7 @@ async function chatDirect(
   assertCloudProvider("openai");
   const key = getAiKey();
   checkRateLimit();
+  const red = await forCloud(messages, "openai");
   charge();
   inflight++;
   // F3 — when the user has trained + enabled their personal model,
@@ -563,7 +582,7 @@ async function chatDirect(
         },
         body: JSON.stringify({
           model,
-          messages,
+          messages: red.messages,
           ...(opts.maxTokens ? { max_tokens: opts.maxTokens } : {}),
           ...(opts.temperature !== undefined ? { temperature: opts.temperature } : {}),
         }),
@@ -580,7 +599,7 @@ async function chatDirect(
     reportOpenAiUsage(data.usage, data.model ?? model, opts);
     const text = data.choices?.[0]?.message?.content?.trim();
     if (!text) throw new AiError("PARSE_ERROR", "Empty AI response.");
-    return text;
+    return red.restore(text);
   } catch (err) {
     if (opts.signal?.aborted || (err instanceof DOMException && err.name === "AbortError")) {
       return "";
@@ -724,8 +743,9 @@ async function* chatStreamDirect(
     const { chatAnthropicStream } = await import("./anthropicProvider");
     assertCloudProvider("anthropic");
     getProviderKey("anthropic"); // NO_KEY before anything is charged
+    const red = await forCloud(messages, "anthropic");
     charge();
-    yield* chatAnthropicStream(messages, opts);
+    yield* red.restoreStream(chatAnthropicStream(red.messages, opts));
     return;
   }
 
@@ -733,8 +753,9 @@ async function* chatStreamDirect(
     const { chatGeminiStream } = await import("./geminiProvider");
     assertCloudProvider("gemini");
     getProviderKey("gemini"); // NO_KEY before anything is charged
+    const red = await forCloud(messages, "gemini");
     charge();
-    yield* chatGeminiStream(messages, opts);
+    yield* red.restoreStream(chatGeminiStream(red.messages, opts));
     return;
   }
 
@@ -742,8 +763,9 @@ async function* chatStreamDirect(
     const { chatMistralStream } = await import("./mistralProvider");
     assertCloudProvider("mistral");
     getProviderKey("mistral"); // NO_KEY before anything is charged
+    const red = await forCloud(messages, "mistral");
     charge();
-    yield* chatMistralStream(messages, opts);
+    yield* red.restoreStream(chatMistralStream(red.messages, opts));
     return;
   }
 
@@ -751,6 +773,7 @@ async function* chatStreamDirect(
   assertCloudProvider("openai");
   const key = getAiKey();
   checkRateLimit();
+  const red = await forCloud(messages, "openai");
   charge();
   inflight++;
   const model = opts.model ?? DEFAULT_MODEL;
@@ -767,7 +790,7 @@ async function* chatStreamDirect(
         },
         body: JSON.stringify({
           model,
-          messages,
+          messages: red.messages,
           stream: true,
           // The last chunk then carries `usage` (empty `choices`).
           stream_options: { include_usage: true },
@@ -785,7 +808,21 @@ async function* chatStreamDirect(
 
     const reader = res.body?.getReader();
     if (!reader) throw new AiError("API_ERROR", "No response body.");
+    // Tokens of the PII redactor (2.6) can arrive split across deltas.
+    yield* red.restoreStream(openAiDeltas(reader, model, opts));
+  } catch (err) {
+    if (err instanceof DOMException && err.name === "AbortError") {
+      return;
+    }
+    throw err;
+  } finally {
+    inflight--;
+  }
+}
 
+/** The text deltas of an OpenAI SSE stream; `usage` is reported as it arrives. */
+async function* openAiDeltas(reader: ReadableStreamDefaultReader<Uint8Array>, model: string, opts: ChatOptions): AsyncGenerator<string, void, undefined> {
+  {
     const decoder = new TextDecoder();
     let buffer = "";
 
@@ -811,13 +848,6 @@ async function* chatStreamDirect(
         }
       }
     }
-  } catch (err) {
-    if (err instanceof DOMException && err.name === "AbortError") {
-      return;
-    }
-    throw err;
-  } finally {
-    inflight--;
   }
 }
 

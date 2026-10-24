@@ -10,7 +10,9 @@
  * Fails (exit 1) on: GPL / AGPL / SSPL / BUSL / Commons Clause / Elastic /
  * CC-BY-NC / UNLICENSED / missing licences in production dependencies, a
  * known hidden-copyleft package, a `forbidden` registry model that app code
- * references, an eval/golden/<set>/ without SOURCES.md + LICENSE, or an
+ * references, an eval/golden/<set>/ without SOURCES.md + LICENSE or whose
+ * SOURCES.md declares a licence a dataset may not carry (NonCommercial,
+ * NoDerivatives, ShareAlike outside a ShareAlike folder, none), or an
  * invalid registry / allowlist. Warns on LGPL, "SEE LICENSE IN", unknown
  * models. Documented exceptions live in licenses.allow.json.
  *
@@ -83,7 +85,12 @@ const goldenDir = join(root, "eval", "golden");
 const datasetDirs = existsSync(goldenDir)
   ? readdirSync(goldenDir)
       .filter((n) => statSync(join(goldenDir, n)).isDirectory())
-      .map((name) => ({ name, files: readdirSync(join(goldenDir, name)) }))
+      .map((name) => {
+        const dir = join(goldenDir, name);
+        const files = readdirSync(dir);
+        const read = (f) => (files.includes(f) ? readFileSync(join(dir, f), "utf8") : undefined);
+        return { name, files, sources: read("SOURCES.md"), license: read(files.find((f) => /^LICEN[CS]E(\.md|\.txt)?$/.test(f)) ?? "") };
+      })
   : [];
 const datasetFindings = checkDatasets(datasetDirs);
 

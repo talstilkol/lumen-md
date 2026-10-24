@@ -175,6 +175,13 @@ export async function rerankLocal(query: string, passages: string[], opts: { mod
   return call<number[]>({ type: "rerank", model: opts.model ?? RERANK_MODEL, device, query, passages }, [], opts.signal);
 }
 
+/** Token labels of a NER model for each text (plan 2.6). The model must already be cached (consent, plan 6.0). */
+export async function nerLocal(texts: string[], model: string, opts: { signal?: AbortSignal } = {}): Promise<Array<Array<{ entity: string; word: string; score: number; index?: number }>>> {
+  if (!texts.length) return [];
+  const device = await transformersDevice();
+  return call({ type: "ner", model, device, texts }, [], opts.signal);
+}
+
 /** Download / compile a model ahead of time. */
 export async function preloadTransformersModel(task: "automatic-speech-recognition" | "feature-extraction", model?: string): Promise<string> {
   const hw = await detectHardware();
