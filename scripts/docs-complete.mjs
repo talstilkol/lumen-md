@@ -43,7 +43,9 @@ export function check({ config, required, has, list, pages = [], read = () => ""
       continue;
     }
     if (!page(slug, "en")) problems.push(`${slug}: in the sidebar, but there is no English page (docs/src/content/docs/${slug}.md)`);
-    if (!page(slug, "he")) problems.push(`${slug}: no Hebrew page (docs/src/content/docs/he/${slug}.md)`);
+    if (!page(slug, "he")) {
+      if (!(required.hebrewPending ?? {})[slug]) problems.push(`${slug}: no Hebrew page (docs/src/content/docs/he/${slug}.md)`);
+    } else if ((required.hebrewPending ?? {})[slug]) problems.push(`${slug}: Hebrew page exists — remove it from "hebrewPending"`);
   }
   for (const slug of Object.keys(pending)) if (!slugs.includes(slug)) problems.push(`${slug}: pending, but not in the sidebar`);
   for (const dir of dirs) {

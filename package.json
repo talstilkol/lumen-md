@@ -17,6 +17,7 @@
     "plan:check": "node scripts/plan/build.mjs --check",
     "dod": "node scripts/dod.mjs",
     "docs:sync": "node scripts/docs-sync.mjs",
+    "docs:complete": "node scripts/docs-complete.mjs",
     "tauri": "tauri",
     "tauri:dev": "tauri dev",
     "tauri:build": "tauri build",
