@@ -103,10 +103,16 @@ function expectNoBlockers(violations: axe.Result[]) {
 }
 
 async function expectNoBlockersEventually(container: HTMLElement) {
-  await waitFor(async () => {
-    const violations = await runAxe(container);
-    expectNoBlockers(violations);
-  });
+  // One axe run takes ~0.8 s here; waitFor's 1 s default allowed a single
+  // try, so a loaded machine (the local CI) timed out before axe answered.
+  // A real violation still fails: it persists through every retry.
+  await waitFor(
+    async () => {
+      const violations = await runAxe(container);
+      expectNoBlockers(violations);
+    },
+    { timeout: 10_000 },
+  );
 }
 
 describe("axe a11y smoke", () => {
