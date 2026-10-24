@@ -67,8 +67,9 @@ function walk(root, dir, out) {
 }
 
 /**
- * Every module specifier a source text refers to.
- * @returns {{ specs: string[], globs: string[] }}
+ * Every module specifier a source text refers to. `globs` holds one array per
+ * import.meta.glob call (its patterns, negative ones with their leading "!").
+ * @returns {{ specs: string[], globs: string[][] }}
  */
 export function extractSpecifiers(text) {
   const specs = [];
@@ -83,7 +84,7 @@ export function extractSpecifiers(text) {
   add(/\bvi\.(?:mock|doMock|importActual)\s*\(\s*["'`]([^"'`$\n]+)["'`]/g);
   add(/new\s+URL\s*\(\s*["'`]([^"'`$\n]+)["'`]\s*,\s*import\.meta\.url/g);
   for (const m of text.matchAll(/import\.meta\.glob\s*(?:<[^>]*>)?\s*\(\s*(\[[^\]]*\]|["'`][^"'`]+["'`])/g)) {
-    for (const g of m[1].matchAll(/["'`]([^"'`]+)["'`]/g)) globs.push(g[1]);
+    globs.push([...m[1].matchAll(/["'`]([^"'`]+)["'`]/g)].map((g) => g[1]));
   }
   return { specs, globs };
 }
@@ -166,10 +167,17 @@ export function findOrphans({ root = ROOT } = {}) {
     const rel = queue.shift();
     const { specs, globs } = extractSpecifiers(readFileSync(join(root, rel), "utf8"));
     for (const s of specs) reach(resolveSpecifier(s, rel, files));
-    for (const g of globs) {
-      const abs = g.startsWith("@/") ? `src/${g.slice(2)}` : g.startsWith("/") ? g.slice(1) : toPosix(join(dirname(rel), g));
-      const re = globToRegExp(toPosix(abs));
-      for (const f of code) if (re.test(f)) reach(f);
+    // One import.meta.glob call = one pattern set: a negative pattern
+    // ("!./x/dead.ts") excludes from the positive ones, as Vite does, so an
+    // excluded file is not marked used by the broad pattern beside it.
+    for (const set of globs) {
+      const toRe = (g) => {
+        const abs = g.startsWith("@/") ? `src/${g.slice(2)}` : g.startsWith("/") ? g.slice(1) : toPosix(join(dirname(rel), g));
+        return globToRegExp(toPosix(abs));
+      };
+      const include = set.filter((g) => !g.startsWith("!")).map(toRe);
+      const exclude = set.filter((g) => g.startsWith("!")).map((g) => toRe(g.slice(1)));
+      for (const f of code) if (include.some((re) => re.test(f)) && !exclude.some((re) => re.test(f))) reach(f);
     }
   }
   return { orphans: production.filter((f) => !seen.has(f)).sort(), production: production.length };

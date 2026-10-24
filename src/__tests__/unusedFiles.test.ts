@@ -84,6 +84,18 @@ describe("findOrphans", () => {
     });
     expect(findOrphans({ root: dir }).orphans).toEqual([]);
   });
+
+  it("a negative import.meta.glob pattern excludes its file, which is then an orphan (Codex P2, #266)", () => {
+    const dir = repo("glob-neg", {
+      "index.html": '<script type="module" src="/src/main.ts"></script>',
+      "src/main.ts": 'const m = import.meta.glob(["./features/*.ts", "!./features/dead.ts"]);\n',
+      "src/features/live.ts": "export {};\n",
+      "src/features/dead.ts": "export {};\n",
+    });
+    expect(findOrphans({ root: dir }).orphans).toEqual(["src/features/dead.ts"]);
+    const { globs } = extractSpecifiers('import.meta.glob(["./a/*.ts", "!./a/x.ts"]); import.meta.glob("./b/*.ts");');
+    expect(globs).toEqual([["./a/*.ts", "!./a/x.ts"], ["./b/*.ts"]]);
+  });
 });
 
 describe("the parts", () => {
@@ -101,7 +113,7 @@ describe("the parts", () => {
       ].join("\n"),
     );
     expect(specs).toEqual(["./a", "./b", "./c.css", "./d", "./e", "./f", "./g.worker.ts"]);
-    expect(globs).toEqual(["./h/*.ts", "./i/**/*.ts"]);
+    expect(globs).toEqual([["./h/*.ts", "./i/**/*.ts"]]);
   });
 
   it("resolves relative, alias, extensionless, .js-for-.ts, index and ?worker specifiers", () => {
