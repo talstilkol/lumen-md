@@ -936,18 +936,10 @@ export function useCommands({
           if (!target || !target.trim()) return;
           try {
             showAiToast(t("toast.translatingTo", { target }), "info");
-            const { translateMarkdownDetailed } = await import("../agents/commands");
+            const { translateMarkdownDetailed, translationToasts } = await import("../agents/commands");
             const r = await cancellable((signal) => translateMarkdownDetailed(liveDoc().content, target.trim(), signal));
             setContent(r.text);
-            // Which layer did it (plan 6.4), and why the local ones did not when the agent had to.
-            const layer = t(`mt.layer.name.${r.layer}`);
-            if (r.layer === "llm" && Object.keys(r.reasons).length) {
-              const why = Object.entries(r.reasons)
-                .map(([id, reason]) => `${t(`mt.layer.name.${id}`)}: ${reason === "declined" ? t("mt.layer.declined") : t(reason)}`)
-                .join(" · ");
-              showAiToast(t("toast.localMtUnavailable", { why }), "info");
-            }
-            showAiToast(r.unmeasured ? t("toast.translatedWithUnmeasured", { layer }) : t("toast.translatedWith", { layer }), "success");
+            for (const [msg, kind] of translationToasts(r, t)) showAiToast(msg, kind);
           } catch (e) {
             if (isAbort(e)) return;
             if ((await import("../agents/suggestions")).reportAgentFailure(e, "ai.translate")) return;
