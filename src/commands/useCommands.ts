@@ -2113,6 +2113,16 @@ export function useCommands({
         },
       },
       {
+        id: "help.credits",
+        label: t("cmd.help.credits"),
+        icon: cmdIcons.Sparkles,
+        group: t("group.tools"),
+        action: async () => {
+          const { openCredits } = await import("../ui/CreditsDialog");
+          openCredits();
+        },
+      },
+      {
         id: "voice.dictate",
         label: t("cmd.tools.voice"),
         hint: t("cmd.tools.voice.hint"),

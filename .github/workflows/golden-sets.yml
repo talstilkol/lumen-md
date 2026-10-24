@@ -176,6 +176,18 @@ jobs:
           key: golden-sources-${{ hashFiles('scripts/golden/**') }}
           restore-keys: golden-sources-
 
+      # asr-he's harness (plan 6.1) runs the streaming model: 72 MB, pinned, cached.
+      - if: steps.seed.outputs.ok == 'true'
+        uses: actions/cache@v5
+        with:
+          path: ${{ runner.temp }}/asr-model
+          key: asr-zipformer2-66m-streaming-he-int8-v1
+      - name: Speech model for the asr-he harness
+        if: steps.seed.outputs.ok == 'true'
+        run: |
+          echo "LUMEN_ASR_MODEL_DIR=$RUNNER_TEMP/asr-model" >> "$GITHUB_ENV"
+          bash scripts/asr/fetch-model.sh "$RUNNER_TEMP/asr-model" > /dev/null
+
       - name: Build the test split (prints counts and sha256 only)
         if: steps.seed.outputs.ok == 'true'
         env:

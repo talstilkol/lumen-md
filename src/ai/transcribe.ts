@@ -26,6 +26,12 @@ export interface TranscribeOptions {
   language?: string;
   /** AbortSignal for cancelling long-running Whisper jobs. */
   signal?: AbortSignal;
+  /**
+   * Transcribe on this device only, whatever the AI policy: no cloud, no
+   * local-first fallback. Dictation's recorded fallback (plan 6.1) uses it
+   * because its UI says the audio stays on the device.
+   */
+  local?: boolean;
 }
 
 export interface TranscribeResult {
@@ -50,12 +56,12 @@ export async function transcribe(
 ): Promise<TranscribeResult> {
   const policy = getAiPolicy();
   const start = performance.now();
-  if (policy !== "cloud") {
+  if (policy !== "cloud" || opts.local) {
     try {
       const text = await transcribeLocal(blob, opts);
       return { text, backend: "local", ms: performance.now() - start };
     } catch (err) {
-      if (policy === "local-only" || opts.signal?.aborted) throw err;
+      if (opts.local || policy === "local-only" || opts.signal?.aborted) throw err;
       log.warn("local transcription failed; trying the cloud (local-first)", err);
     }
   }

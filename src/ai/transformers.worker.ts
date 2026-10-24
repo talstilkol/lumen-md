@@ -91,11 +91,14 @@ function progressFor(id: number) {
   };
 }
 
-/** Whisper on WebGPU: fp32 encoder + q4 decoder is the library's recommended split; wasm: q8. */
-function asrOptions(device: Device) {
-  return device === "webgpu"
-    ? { device, dtype: { encoder_model: "fp32", decoder_model_merged: "q4" } }
-    : { device, dtype: "q8" };
+/**
+ * Whisper on WebGPU: fp32 encoder + q4 decoder is the library's recommended
+ * split; ivrit.ai's Hebrew turbo ships q4f16 for both (≈ 563 MB); wasm: q8.
+ */
+export function asrOptions(device: Device, model = "") {
+  if (device !== "webgpu") return { device, dtype: "q8" };
+  if (model === "ivrit-ai/whisper-large-v3-turbo-onnx") return { device, dtype: { encoder_model: "q4f16", decoder_model_merged: "q4f16" } };
+  return { device, dtype: { encoder_model: "fp32", decoder_model_merged: "q4" } };
 }
 
 async function getAsr(id: number, model: string, device: Device): Promise<AutomaticSpeechRecognitionPipeline> {
@@ -103,7 +106,7 @@ async function getAsr(id: number, model: string, device: Device): Promise<Automa
   if (asr?.key === key) return asr.pipe;
   if (asr) await asr.pipe.dispose();
   asr = null;
-  const pipe = (await pipeline("automatic-speech-recognition", model, { ...asrOptions(device), progress_callback: progressFor(id) } as never)) as AutomaticSpeechRecognitionPipeline;
+  const pipe = (await pipeline("automatic-speech-recognition", model, { ...asrOptions(device, model), progress_callback: progressFor(id) } as never)) as AutomaticSpeechRecognitionPipeline;
   asr = { key, pipe };
   return pipe;
 }
