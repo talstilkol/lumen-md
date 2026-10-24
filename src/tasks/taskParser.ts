@@ -75,6 +75,8 @@ export const RE = {
   id: field("🆔", `(${taskId})`),
   /** Upstream TaskRegularExpressions.taskRegex. */
   task: /^([\s\t>]*)([-*+]|[0-9]+[.)]) +\[(.)\] *(.*)/u,
+  /** A list item whose first child is itself a list item on the same line (`1. 1. [ ] x`), as Obsidian reads it. */
+  nestedOnLine: /^([\s\t>]*)(?:[-*+]|[0-9]+[.)]) +((?:[-*+]|[0-9]+[.)]) +\[.\].*)$/u,
   blockLink: / \^[a-zA-Z0-9-]+$/u,
   hashTags: /(^|\s)#[^ !@#$%^&*(),.?":{}|<>]+/g,
   hashTagsFromEnd: /(^|\s)#[^ !@#$%^&*(),.?":{}|<>]+$/,
@@ -134,6 +136,8 @@ export function parseDetails(text: string): TaskDetails {
 
 /** One line, or null when it isn't a task. */
 export function parseTaskLine(text: string, path = "", line = 0, heading: string | null = null): Task | null {
+  const nested = RE.nestedOnLine.exec(text);
+  if (nested) text = `${nested[1]}${" ".repeat(text.length - nested[1].length - nested[2].length)}${nested[2]}`;
   const m = RE.task.exec(text);
   if (!m) return null;
   const [, indent, , symbol, rest] = m;
@@ -156,6 +160,8 @@ export function tasksInNote(path: string, content: string): Task[] {
   const out: Task[] = [];
   const lines = content.split(/\r?\n/);
   let fence: string | null = null;
+  // Comment blocks Obsidian's cache skips: `<!-- … -->` and `%% … %%` over several lines.
+  let comment: "html" | "md" | null = null;
   let heading: string | null = null;
   let i = 0;
   if (lines[0] === "---") {
@@ -171,6 +177,18 @@ export function tasksInNote(path: string, content: string): Task[] {
       continue;
     }
     if (fence) continue;
+    if (comment) {
+      if (comment === "html" ? l.includes("-->") : (l.match(/%%/g)?.length ?? 0) % 2 === 1) comment = null;
+      continue;
+    }
+    if (/^\s*<!--/.test(l) && !l.includes("-->")) {
+      comment = "html";
+      continue;
+    }
+    if (/^\s*%%/.test(l) && (l.match(/%%/g)?.length ?? 0) % 2 === 1) {
+      comment = "md";
+      continue;
+    }
     const h = /^#{1,6}\s+(.*?)\s*#*\s*$/.exec(l);
     if (h) {
       heading = h[1];
