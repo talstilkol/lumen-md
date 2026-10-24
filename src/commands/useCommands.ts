@@ -27,7 +27,18 @@ import { withAiQuota } from "../billing/aiQuota";
 import { canPurchasePlans, manageBilling, upgradeTo } from "../billing/planActions";
 import { detectIsMac } from "../ui/KeyboardShortcuts";
 import { getSecret, setSecret } from "../lib/secretStore";
+import { aiOperation, cancelAllAi, isAbort } from "../ai/aiAbort";
 
+
+/** Run an AI call as a cancellable operation (Esc / "Cancel AI", T55). */
+async function cancellable<T>(fn: (signal: AbortSignal) => Promise<T>): Promise<T> {
+  const op = aiOperation();
+  try {
+    return await fn(op.signal);
+  } finally {
+    op.end();
+  }
+}
 
 /** Save a clip into the library folder and open it (T34). */
 async function saveClip(clip: { title: string; markdown: string }): Promise<void> {
@@ -705,8 +716,8 @@ export function useCommands({
         action: async () => {
           try {
             showAiToast(t("toast.suggestingTags"), "info");
-            const { suggestTags, mergeTagsIntoFrontmatter } = await import("../ai/agents");
-            const tags = await suggestTags(doc.content);
+            const { suggestTags, mergeTagsIntoFrontmatter } = await import("../agents/commands");
+            const tags = await cancellable((signal) => suggestTags(doc.content, signal));
             if (tags.length === 0) {
               showAiToast(t("toast.noTagSuggestionsReturned"), "info");
               return;
@@ -724,6 +735,7 @@ export function useCommands({
             setContent(mergeTagsIntoFrontmatter(doc.content, final));
             showAiToast(t("toast.addedTag", { count: final.length }), "success");
           } catch (e) {
+            if (isAbort(e)) return;
             if ((await import("../agents/suggestions")).reportAgentFailure(e, "tools.autoTag")) return;
             showAiToast(t("toast.autoTagFailed", { error: (e as Error).message }), "error");
           }
@@ -742,8 +754,8 @@ export function useCommands({
           }
           try {
             showAiToast(t("toast.scanningWorkspaceForLinkSuggestions"), "info");
-            const { suggestLinks, applyLinkSuggestion } = await import("../ai/agents");
-            const suggestions = await suggestLinks(doc.workspaceName, doc.content);
+            const { suggestLinks, applyLinkSuggestion } = await import("../agents/commands");
+            const suggestions = await cancellable((signal) => suggestLinks(doc.workspaceName!, doc.content, signal));
             if (suggestions.length === 0) {
               showAiToast(t("toast.noLinkSuggestions"), "info");
               return;
@@ -768,6 +780,7 @@ export function useCommands({
             setContent(next);
             showAiToast(t("toast.appliedLink", { count: applied }), "success");
           } catch (e) {
+            if (isAbort(e)) return;
             if ((await import("../agents/suggestions")).reportAgentFailure(e, "tools.suggestLinks")) return;
             showAiToast(t("toast.linkSuggestFailed", { error: (e as Error).message }), "error");
           }
@@ -798,6 +811,7 @@ export function useCommands({
               showAiToast(t("toast.productCreationFailed", { error: result.error ?? "" }), "error");
             }
           } catch (e) {
+            if (isAbort(e)) return;
             if ((await import("../agents/suggestions")).reportAgentFailure(e, "ai.productAgent")) return;
             showAiToast(t("toast.agentError", { error: (e as Error).message }), "error");
           }
@@ -812,11 +826,12 @@ export function useCommands({
         action: async () => {
           try {
             showAiToast(t("toast.generatingDiagram"), "info");
-            const { generateDiagram } = await import("../ai/agents");
-            const block = await generateDiagram(doc.content);
+            const { generateDiagram } = await import("../agents/commands");
+            const block = await cancellable((signal) => generateDiagram(doc.content, signal));
             setContent(`${doc.content.trimEnd()}\n\n${block}\n`);
             showAiToast(t("toast.diagramInserted"), "success");
           } catch (e) {
+            if (isAbort(e)) return;
             if ((await import("../agents/suggestions")).reportAgentFailure(e, "ai.diagram")) return;
             showAiToast(t("toast.diagramFailed", { error: (e as Error).message }), "error");
           }
@@ -831,11 +846,12 @@ export function useCommands({
         action: async () => {
           try {
             showAiToast(t("toast.extractingActionItems"), "info");
-            const { extractActionItems } = await import("../ai/agents");
-            const list = await extractActionItems(doc.content);
+            const { extractActionItems } = await import("../agents/commands");
+            const list = await cancellable((signal) => extractActionItems(doc.content, signal));
             setContent(`${doc.content.trimEnd()}\n\n## Action Items\n\n${list}\n`);
             showAiToast(t("toast.actionItemsAdded"), "success");
           } catch (e) {
+            if (isAbort(e)) return;
             if ((await import("../agents/suggestions")).reportAgentFailure(e, "ai.actionItems")) return;
             showAiToast(t("toast.actionItemsFailed", { error: (e as Error).message }), "error");
           }
@@ -855,11 +871,12 @@ export function useCommands({
           if (!target || !target.trim()) return;
           try {
             showAiToast(t("toast.translatingTo", { target }), "info");
-            const { translateMarkdown } = await import("../ai/agents");
-            const translated = await translateMarkdown(doc.content, target.trim());
+            const { translateMarkdown } = await import("../agents/commands");
+            const translated = await cancellable((signal) => translateMarkdown(doc.content, target.trim(), signal));
             setContent(translated);
             showAiToast(t("toast.documentTranslated"), "success");
           } catch (e) {
+            if (isAbort(e)) return;
             if ((await import("../agents/suggestions")).reportAgentFailure(e, "ai.translate")) return;
             showAiToast(t("toast.translationFailed", { error: (e as Error).message }), "error");
           }
@@ -874,11 +891,12 @@ export function useCommands({
         action: async () => {
           try {
             showAiToast(t("toast.generatingChart"), "info");
-            const { generateChart } = await import("../ai/agents");
-            const block = await generateChart(doc.content);
+            const { generateChart } = await import("../agents/commands");
+            const block = await cancellable((signal) => generateChart(doc.content, signal));
             setContent(`${doc.content.trimEnd()}\n\n${block}\n`);
             showAiToast(t("toast.chartInserted"), "success");
           } catch (e) {
+            if (isAbort(e)) return;
             if ((await import("../agents/suggestions")).reportAgentFailure(e, "ai.chart")) return;
             showAiToast(t("toast.chartFailed", { error: (e as Error).message }), "error");
           }
@@ -941,11 +959,12 @@ export function useCommands({
               if (!ok) return;
               grantWebConsent();
             }
-            const result = await runResearch({ question: question.trim(), onProgress: (m) => showAiToast(m, "info") });
+            const result = await cancellable((signal) => runResearch({ question: question.trim(), signal, onProgress: (m) => showAiToast(m, "info") }));
             openTemplateDoc(`Research — ${question.trim().slice(0, 60).replace(/[\\/:*?"<>|]+/g, " ")}`, result.markdown);
             showAiToast(t("research.done", { sources: result.sources }), "success");
             if (result.unverified) showAiToast(t("research.unverified", { count: result.unverified }), "error");
           } catch (e) {
+            if (isAbort(e)) return;
             showAiToast(t("research.failed", { message: (e as Error).message }), "error");
           }
         },
@@ -1405,6 +1424,7 @@ export function useCommands({
               showAiToast(t("ai.style.cleared"), "success");
             }
           } catch (e) {
+            if (isAbort(e)) return;
             if ((await import("../agents/suggestions")).reportAgentFailure(e, "ai.styleProfile")) return;
             showAiToast((e as Error).message, "error");
           }
@@ -1509,6 +1529,17 @@ export function useCommands({
         group: t("group.tools"),
         action: () => {
           window.dispatchEvent(new CustomEvent("lumen-open-trash"));
+        },
+      },
+      {
+        id: "ai.cancel",
+        label: t("cmd.ai.cancel"),
+        hint: t("cmd.ai.cancel.hint"),
+        icon: cmdIcons.Sparkles,
+        group: t("group.ai", { defaultValue: "AI Copilot" }),
+        action: () => {
+          const n = cancelAllAi();
+          showAiToast(n ? t("toast.aiCancelled", { count: n }) : t("toast.aiNothingRunning"), "info");
         },
       },
       {
@@ -1775,6 +1806,7 @@ export function useCommands({
             const top = matches.slice(0, 5).map((m, i) => `${i + 1}. ${m.message}`).join("\n");
             await uiAlert({ message: `Found ${matches.length} issue${matches.length === 1 ? "" : "s"}:\n\n${top}` });
           } catch (e) {
+            if (isAbort(e)) return;
             if ((await import("../agents/suggestions")).reportAgentFailure(e, "tools.checkGrammar")) return;
             showAiToast(t("toast.grammarCheckFailed", { error: (e as Error).message }), "error");
           }
@@ -2077,6 +2109,7 @@ export function useCommands({
             setContent(doc.content + "\n\n---\n\n" + result);
             showAiToast(t("toast.completed", { name: tpl.label }), "success");
           } catch (e) {
+            if (isAbort(e)) return;
             if ((await import("../agents/suggestions")).reportAgentFailure(e, `ai.prompt.${tpl.id}`)) return;
             showAiToast(t("toast.aiError", { error: (e as Error).message }), "error");
           }
