@@ -61,6 +61,33 @@ export async function saveClip(clip: { title: string; markdown: string }): Promi
   showAiToast(t("clip.saved", { path }), "success");
 }
 
+/**
+ * Save a clip that came from the extension or a deep link (plan 4.15):
+ * extracted, templated and checked for injected text, then written into its
+ * template's folder and recorded as outside content. Exported for tests.
+ */
+export async function saveClipV2(payload: import("../research/clipV2").ClipPayload): Promise<string | null> {
+  const { buildClip } = await import("../research/clipV2");
+  const { libraryDir } = await import("../research/clipper");
+  const clip = await buildClip(payload, { library: libraryDir(getLocale()) });
+  const { writeWorkspaceFile, workspaceHasEntry, isOPFSAvailable } = await import("../storage/workspace");
+  if (!isOPFSAvailable()) {
+    openTemplateDoc(clip.fileName.replace(/\.md$/, ""), clip.markdown);
+    return null;
+  }
+  const stem = clip.fileName.replace(/\.md$/, "");
+  let path = `${clip.folder}/${clip.fileName}`;
+  for (let i = 2; await workspaceHasEntry(path); i++) path = `${clip.folder}/${stem} (${i}).md`;
+  await writeWorkspaceFile(path, clip.markdown);
+  const { markUntrustedNote } = await import("../agents/untrusted");
+  markUntrustedNote(path, `clipped from ${clip.source}`);
+  window.dispatchEvent(new Event("lumen-workspace-changed"));
+  useAppStore.getState().openTab({ name: path.split("/").pop()!, content: clip.markdown, workspaceName: path });
+  showAiToast(t("clip.saved", { path }), "success");
+  if (clip.flagged) showAiToast(t("clip.flagged", { count: clip.flagged }), "info");
+  return path;
+}
+
 export interface UseCommandsOptions {
   handleNew: () => void;
   handleOpen: () => void;

@@ -1429,5 +1429,6 @@
   "cmd.ai.cancel": "KI: Abbrechen",
   "cmd.ai.cancel.hint": "Stoppt alle laufenden KI-Anfragen (auch mit Esc)",
   "toast.aiCancelled": "KI-Anfrage abgebrochen ({count})",
-  "toast.aiNothingRunning": "Keine KI-Anfrage läuft"
+  "toast.aiNothingRunning": "Keine KI-Anfrage läuft",
+  "clip.flagged": "{count} versteckte oder anweisungsähnliche Passage(n) der Seite wurden in der Notiz markiert – es sind keine Anweisungen."
 }

@@ -223,6 +223,23 @@ export default function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Web clipper v2 (plan 4.15.2): clips from the extension's bridge
+  // (postMessage), the desktop deep link, or `#clip=` in the address. The
+  // modules load only when a clip arrives; the listener itself is tiny.
+  useEffect(() => {
+    let stop: (() => void) | undefined;
+    let cancelled = false;
+    const save = (p: import("./research/clipV2").ClipPayload) =>
+      void import("./commands/useCommands").then(({ saveClipV2 }) => saveClipV2(p)).catch((e) => showAiToast(t("clip.failed", { message: (e as Error).message }), "error"));
+    void import("./research/clipBridge").then(({ startClipBridge }) => {
+      if (!cancelled) stop = startClipBridge(save);
+    });
+    return () => {
+      cancelled = true;
+      stop?.();
+    };
+  }, []);
+
   // Check for a shared note from the iOS Share Extension.
   useEffect(() => {
     const pending = (window as unknown as Record<string, unknown>).__pendingSharedNote;

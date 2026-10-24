@@ -1429,5 +1429,6 @@
   "cmd.ai.cancel": "AI: ביטול",
   "cmd.ai.cancel.hint": "עוצר כל בקשת AI שרצה (גם Esc עושה זאת)",
   "toast.aiCancelled": "בקשת ה-AI בוטלה ({count})",
-  "toast.aiNothingRunning": "אין בקשת AI שרצה"
+  "toast.aiNothingRunning": "אין בקשת AI שרצה",
+  "clip.flagged": "{count} קטעים מוסתרים או דמויי הוראות בדף סומנו בפתק — הם אינם הוראות."
 }

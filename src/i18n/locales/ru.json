@@ -1429,5 +1429,6 @@
   "cmd.ai.cancel": "ИИ: отменить",
   "cmd.ai.cancel.hint": "Останавливает все запросы ИИ (то же делает Esc)",
   "toast.aiCancelled": "Запрос ИИ отменён ({count})",
-  "toast.aiNothingRunning": "Нет активных запросов ИИ"
+  "toast.aiNothingRunning": "Нет активных запросов ИИ",
+  "clip.flagged": "Отмечено скрытых или похожих на инструкции фрагментов страницы: {count} — это не инструкции."
 }

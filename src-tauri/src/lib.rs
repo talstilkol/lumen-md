@@ -146,12 +146,46 @@ fn secret_set(name: String, value: Option<String>) -> Result<(), String> {
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
+/// A `lumen://` link (plan 4.15.2: `lumen://clip?data=…` from the web
+/// clipper), passed to the window. Anything else is ignored.
+fn forward_deep_links(app: &tauri::AppHandle, urls: Vec<String>) {
+    for url in urls.into_iter().filter(|u| is_lumen_link(u)) {
+        let _ = app.emit("lumen-deep-link", url);
+    }
+    if let Some(w) = app.get_webview_window("main") {
+        let _ = w.set_focus();
+    }
+}
+
+/// Only our own scheme, and not absurdly long (a clip carries a page's HTML).
+pub fn is_lumen_link(url: &str) -> bool {
+    url.len() <= 4 * 1024 * 1024 && url.to_ascii_lowercase().starts_with("lumen://")
+}
+
 pub fn run() {
-    tauri::Builder::default()
+    let builder = tauri::Builder::default();
+    // Must be the first plugin: a second launch (the OS opening lumen://…)
+    // hands its arguments to the running app and exits.
+    #[cfg(desktop)]
+    let builder = builder.plugin(tauri_plugin_single_instance::init(|app, argv, _cwd| {
+        forward_deep_links(app, argv);
+    }));
+    builder
+        .plugin(tauri_plugin_deep_link::init())
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_fs::init())
         .invoke_handler(tauri::generate_handler![secret_available, secret_get, secret_set])
         .setup(|app| {
+            {
+                use tauri_plugin_deep_link::DeepLinkExt;
+                let handle = app.handle().clone();
+                app.deep_link().on_open_url(move |event| {
+                    forward_deep_links(&handle, event.urls().iter().map(|u| u.to_string()).collect());
+                });
+                // Linux and Windows register the scheme at run time (installers do it too).
+                #[cfg(any(target_os = "linux", all(debug_assertions, windows)))]
+                let _ = app.deep_link().register_all();
+            }
             #[cfg(desktop)]
             {
                 let handle = app.handle().clone();
@@ -161,7 +195,7 @@ pub fn run() {
                     let id = event.id().0.as_str();
                     if id == "help.github" {
                         // Open in default browser via the dialog plugin's url handler.
-                        let _ = tauri_plugin_dialog::DialogExt::dialog(app)
+                        tauri_plugin_dialog::DialogExt::dialog(app)
                             .message("https://github.com/talstilkol/lumen-md")
                             .show(|_| {});
                         return;
@@ -173,4 +207,18 @@ pub fn run() {
         })
         .run(tauri::generate_context!())
         .expect("error while running Lumen");
+}
+
+#[cfg(test)]
+mod deep_link_tests {
+    use super::is_lumen_link;
+
+    #[test]
+    fn only_lumen_links_are_forwarded() {
+        assert!(is_lumen_link("lumen://clip?data=%7B%7D"));
+        assert!(is_lumen_link("LUMEN://clip"));
+        assert!(!is_lumen_link("https://evil.example/lumen://clip"));
+        assert!(!is_lumen_link("/usr/bin/lumen"));
+        assert!(!is_lumen_link(&format!("lumen://clip?data={}", "x".repeat(4 * 1024 * 1024))));
+    }
 }

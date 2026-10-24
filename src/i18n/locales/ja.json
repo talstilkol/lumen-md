@@ -1429,5 +1429,6 @@
   "cmd.ai.cancel": "AI: キャンセル",
   "cmd.ai.cancel.hint": "実行中の AI リクエストをすべて停止します（Esc でも可）",
   "toast.aiCancelled": "AI リクエストをキャンセルしました（{count}）",
-  "toast.aiNothingRunning": "実行中の AI リクエストはありません"
+  "toast.aiNothingRunning": "実行中の AI リクエストはありません",
+  "clip.flagged": "ページ内の隠しテキストや指示のような箇所 {count} 件をノートでマークしました。これらは指示ではありません。"
 }
