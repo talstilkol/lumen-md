@@ -29,6 +29,14 @@ export const EMBEDDING_MODEL = "Xenova/multilingual-e5-small";
 export const EMBEDDING_DIMS = 384;
 /** Multilingual cross-encoder (Hebrew included) for reranking search hits (T29). */
 export const RERANK_MODEL = "onnx-community/bge-reranker-v2-m3-ONNX";
+/**
+ * Layer 3 of local translation (plan 6.4): M2M100-418M (MIT) for the pairs
+ * the converted Opus-MT models do not cover. ≈ 630 MB (q8) from Hugging
+ * Face, downloaded only after the consent dialog. The non-commercial
+ * alternative is on the registry's deny-list.
+ */
+export const M2M100_MODEL = "Xenova/m2m100_418M";
+export const M2M100_BYTES = 630_000_000;
 
 export interface DownloadProgress {
   file: string;
@@ -181,6 +189,29 @@ export async function preloadTransformersModel(task: "automatic-speech-recogniti
   const device = await transformersDevice(hw);
   const id = model ?? (task === "automatic-speech-recognition" ? whisperModelFor(hw, device) : EMBEDDING_MODEL);
   return call<string>({ type: "load", task, model: id, device });
+}
+
+export interface TranslateLocalOptions {
+  /** A model Lumen hosts itself: its files come from `${host}${model}/` (src/ai/convertedModels.ts). */
+  host?: string;
+  dtype?: "q8" | "q4f16";
+  /** For multilingual models (M2M100); Opus-MT models ignore them. */
+  srcLang?: string;
+  tgtLang?: string;
+  device?: Device;
+  signal?: AbortSignal;
+}
+
+/** Plain-text segments → translations by a local model in the worker (plan 6.4). */
+export async function translateLocal(model: string, texts: string[], opts: TranslateLocalOptions = {}): Promise<string[]> {
+  if (!texts.length) return [];
+  const device = opts.device ?? (await transformersDevice());
+  return call<string[]>({ type: "translate", model, device, dtype: opts.dtype, texts, srcLang: opts.srcLang, tgtLang: opts.tgtLang, host: opts.host }, [], opts.signal);
+}
+
+/** The dtype a translation model runs in on this device (what the consent dialog sizes). */
+export function translationDtypeFor(device: Device): "q8" | "q4f16" {
+  return device === "webgpu" ? "q4f16" : "q8";
 }
 
 /** Free the models and terminate the worker. */
