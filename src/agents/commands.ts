@@ -252,6 +252,20 @@ export async function translateMarkdownDetailed(text: string, targetLanguage: st
   return { text: await translateWithAgent(text, targetLanguage, signal), layer: "llm", unmeasured: false, reasons };
 }
 
+/** The toasts after a translation (plan 6.4): which layer did it, and why the local ones did not when the agent had to. */
+export function translationToasts(r: TranslationOutcome, t: (k: string, v?: Record<string, string | number>) => string): Array<[string, "info" | "success"]> {
+  const out: Array<[string, "info" | "success"]> = [];
+  const layer = t(`mt.layer.name.${r.layer}`);
+  if (r.layer === "llm" && Object.keys(r.reasons).length) {
+    const why = Object.entries(r.reasons)
+      .map(([id, reason]) => `${t(`mt.layer.name.${id}`)}: ${reason === "declined" ? t("mt.layer.declined") : t(reason as string)}`)
+      .join(" · ");
+    out.push([t("toast.localMtUnavailable", { why }), "info"]);
+  }
+  out.push([r.unmeasured ? t("toast.translatedWithUnmeasured", { layer }) : t("toast.translatedWith", { layer }), "success"]);
+  return out;
+}
+
 /** The LLM translator agent, chunk by chunk (layer 3b). */
 async function translateWithAgent(text: string, targetLanguage: string, signal?: AbortSignal): Promise<string> {
   const { runAgentOrThrow } = await import("./runtime");

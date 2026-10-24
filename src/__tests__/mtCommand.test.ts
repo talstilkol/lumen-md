@@ -59,3 +59,16 @@ describe("translateMarkdownDetailed", () => {
     await expect(translateMarkdownDetailed("Hello world", "he")).rejects.toThrow(/aborted/);
   });
 });
+
+describe("translationToasts (plan 6.4)", () => {
+  it("names the layer, and why the local ones did not run when the agent translated", async () => {
+    const { translationToasts } = await import("../agents/commands");
+    const t = (k: string, v?: Record<string, string | number>) => (v ? `${k} ${JSON.stringify(v)}` : k);
+    expect(translationToasts({ text: "", layer: "opus", unmeasured: true, reasons: {} }, t)).toEqual([['toast.translatedWithUnmeasured {"layer":"mt.layer.name.opus"}', "success"]]);
+    const r = translationToasts({ text: "", layer: "llm", unmeasured: false, reasons: { opus: "mt.layer.opus.noHost", m2m100: "declined" } }, t);
+    expect(r[0][1]).toBe("info");
+    expect(r[0][0]).toContain("mt.layer.name.opus: mt.layer.opus.noHost");
+    expect(r[0][0]).toContain("mt.layer.name.m2m100: mt.layer.declined");
+    expect(r[1]).toEqual(['toast.translatedWith {"layer":"mt.layer.name.llm"}', "success"]);
+  });
+});
