@@ -59,23 +59,6 @@ export type AgentProgressCallback = (progress: AgentProgress) => void;
 
 /* ─── System Prompts ──────────────────────────────────────────────── */
 
-const PRODUCT_SPEC_PROMPT = `You are a senior product architect. Given a product idea, create a detailed specification.
-
-Output a JSON object with this exact structure:
-{
-  "name": "project-name-kebab-case",
-  "description": "One paragraph description",
-  "features": ["feature 1", "feature 2", ...],
-  "techStack": ["tech1", "tech2", ...],
-  "fileStructure": ["src/index.html", "src/style.css", "src/app.js", ...]
-}
-
-Rules:
-- Use vanilla HTML/CSS/JS unless the user specifies a framework
-- Keep it achievable in a single workspace
-- File structure should be flat and practical
-- Output ONLY valid JSON, nothing else`;
-
 const ARCHITECTURE_PROMPT = `You are a senior software architect. Given a product spec, design the architecture.
 
 Create a detailed markdown document covering:
@@ -248,32 +231,11 @@ export class ProductAgent {
   /* ─── Internal Generation Steps ─────────────────────────────────── */
 
   private async generateSpec(idea: string, signal: AbortSignal): Promise<ProductSpec> {
-    const response = await chat(
-      [
-        { role: "system", content: PRODUCT_SPEC_PROMPT },
-        { role: "user", content: `Product idea: ${idea}` },
-      ],
-      { signal, temperature: 0.7 },
-    );
-
-    const cleaned = response
-      .replace(/^```(?:json)?\s*/i, "")
-      .replace(/```\s*$/, "")
-      .trim();
-
-    try {
-      return JSON.parse(cleaned) as ProductSpec;
-    } catch {
-      log.error("productAgent", "Failed to parse spec, retrying...");
-      const retry = await chat(
-        [
-          { role: "system", content: PRODUCT_SPEC_PROMPT },
-          { role: "user", content: `Product idea: ${idea}\n\nIMPORTANT: Output ONLY valid JSON. No markdown fences.` },
-        ],
-        { signal, temperature: 0.3 },
-      );
-      return JSON.parse(retry.trim()) as ProductSpec;
-    }
+    // The `builder-spec` agent: schema-checked JSON, safe relative paths,
+    // retried with the validator's reason by the runtime.
+    const { runAgentOrThrow } = await import("../agents/runtime");
+    const { builderSpecAgent } = await import("../agents/defs");
+    return runAgentOrThrow(builderSpecAgent, { text: idea }, { signal });
   }
 
   private async generateArchitecture(signal: AbortSignal): Promise<string> {
@@ -308,7 +270,11 @@ export class ProductAgent {
       },
     ];
 
-    return chat(messages, { signal, temperature: 0.4, maxTokens: 4000 });
+    // The `builder-file` agent checks the file by type (JSON parses,
+    // package.json has a name, HTML is a document, nothing empty).
+    const { runAgentOrThrow } = await import("../agents/runtime");
+    const { builderFileAgent } = await import("../agents/defs");
+    return runAgentOrThrow(builderFileAgent, { text: messages[1].content, extra: { path: filePath } }, { signal });
   }
 
   private async generateTest(filePath: string, sourceCode: string, signal: AbortSignal): Promise<string> {
