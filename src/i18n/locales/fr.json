@@ -1422,5 +1422,15 @@
   "cmd.ai.cancel": "IA : annuler",
   "cmd.ai.cancel.hint": "Arrête toutes les requêtes IA en cours (Échap aussi)",
   "toast.aiCancelled": "Requête IA annulée ({count})",
-  "toast.aiNothingRunning": "Aucune requête IA en cours"
+  "toast.aiNothingRunning": "Aucune requête IA en cours",
+  "cmd.ai.analyse": "IA : analyser le tableau",
+  "cmd.ai.analyse.hint": "Répondre à une question sur le tableau de cette note avec Python sur cet appareil",
+  "cmd.ai.analyse.ask": "Que voulez-vous savoir sur le tableau de cette note ?",
+  "analyst.working": "Analyse du tableau sur cet appareil…",
+  "analyst.done": "Réponse : {answer} — vérifiée en exécutant le programme deux fois",
+  "analyst.noTable": "Aucun tableau dans cette note : ajoutez un bloc ```csv, un tableau Markdown ou des lignes séparées par des virgules.",
+  "analyst.run": "Le programme d’analyse a échoué : {error}",
+  "analyst.parse": "Le programme d’analyse n’a donné aucune réponse : {error}",
+  "analyst.mismatch": "Les deux exécutions ne concordent pas, aucune réponse n’est donnée : {error}",
+  "analyst.failed": "Échec de l’analyse : {error}"
 }

@@ -1422,5 +1422,15 @@
   "cmd.ai.cancel": "AI: キャンセル",
   "cmd.ai.cancel.hint": "実行中の AI リクエストをすべて停止します（Esc でも可）",
   "toast.aiCancelled": "AI リクエストをキャンセルしました（{count}）",
-  "toast.aiNothingRunning": "実行中の AI リクエストはありません"
+  "toast.aiNothingRunning": "実行中の AI リクエストはありません",
+  "cmd.ai.analyse": "AI: 表を分析",
+  "cmd.ai.analyse.hint": "このノートの表についての質問に、このデバイス上の Python で答えます",
+  "cmd.ai.analyse.ask": "このノートの表について何を知りたいですか？",
+  "analyst.working": "このデバイスで表を分析中…",
+  "analyst.done": "答え：{answer}（プログラムを 2 回実行して確認済み）",
+  "analyst.noTable": "このノートに表がありません。```csv ブロック、Markdown の表、またはカンマ区切りの行を追加してください。",
+  "analyst.run": "分析プログラムが失敗しました：{error}",
+  "analyst.parse": "分析プログラムが答えを返しませんでした：{error}",
+  "analyst.mismatch": "2 回の実行結果が一致しないため、答えは出しません：{error}",
+  "analyst.failed": "分析に失敗しました：{error}"
 }

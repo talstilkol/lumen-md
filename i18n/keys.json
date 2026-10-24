@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-10-24T18:57:10.708Z",
-  "source": "src/i18n/index.ts (en bundle)",
-  "count": 1424,
+  "generated_at": "2026-10-24T19:01:12.072Z",
+  "source": "src/i18n/index.ts (en bundle) + src/i18n/lazy/*.json",
+  "count": 1434,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -5730,6 +5730,16 @@
       "vars": []
     },
     {
+      "key": "cmd.ai.analyse",
+      "en": "AI: Analyse the table",
+      "vars": []
+    },
+    {
+      "key": "cmd.ai.analyse.hint",
+      "en": "Answer a question about this note's table with Python on this device",
+      "vars": []
+    },
+    {
       "key": "cmd.ai.chart.hint",
       "en": "Turn CSV or table data into an ECharts chart",
       "vars": []
@@ -7656,6 +7666,56 @@
       "key": "chart.alternatives",
       "en": "Chart suggestions",
       "vars": []
+    },
+    {
+      "key": "cmd.ai.analyse.ask",
+      "en": "What do you want to know about the table in this note?",
+      "vars": []
+    },
+    {
+      "key": "analyst.working",
+      "en": "Analysing the table on this device…",
+      "vars": []
+    },
+    {
+      "key": "analyst.done",
+      "en": "Answer: {answer} — checked by running the program twice",
+      "vars": [
+        "answer"
+      ]
+    },
+    {
+      "key": "analyst.noTable",
+      "en": "No table found in this note: add a ```csv block, a Markdown table or comma-separated lines.",
+      "vars": []
+    },
+    {
+      "key": "analyst.run",
+      "en": "The analysis program failed: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "analyst.parse",
+      "en": "The analysis program gave no answer: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "analyst.mismatch",
+      "en": "The two runs disagree, so no answer is given: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "analyst.failed",
+      "en": "Analysis failed: {error}",
+      "vars": [
+        "error"
+      ]
     }
   ]
 }

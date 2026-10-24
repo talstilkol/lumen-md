@@ -1422,5 +1422,15 @@
   "cmd.ai.cancel": "AI：取消",
   "cmd.ai.cancel.hint": "停止所有正在运行的 AI 请求（Esc 也可以）",
   "toast.aiCancelled": "已取消 AI 请求（{count}）",
-  "toast.aiNothingRunning": "没有正在运行的 AI 请求"
+  "toast.aiNothingRunning": "没有正在运行的 AI 请求",
+  "cmd.ai.analyse": "AI：分析表格",
+  "cmd.ai.analyse.hint": "在本设备上用 Python 回答关于此笔记中表格的问题",
+  "cmd.ai.analyse.ask": "你想了解此笔记中表格的什么？",
+  "analyst.working": "正在本设备上分析表格…",
+  "analyst.done": "答案：{answer}（已通过运行程序两次验证）",
+  "analyst.noTable": "此笔记中没有表格：请添加 ```csv 代码块、Markdown 表格或逗号分隔的行。",
+  "analyst.run": "分析程序失败：{error}",
+  "analyst.parse": "分析程序未给出答案：{error}",
+  "analyst.mismatch": "两次运行结果不一致，因此不给出答案：{error}",
+  "analyst.failed": "分析失败：{error}"
 }

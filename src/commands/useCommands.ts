@@ -951,6 +951,30 @@ export function useCommands({
         },
       },
       {
+        id: "ai.analyse",
+        label: t("cmd.ai.analyse"),
+        hint: t("cmd.ai.analyse.hint"),
+        icon: cmdIcons.Sparkles,
+        group: t("group.tools"),
+        action: async () => {
+          await import("../agents/analystStrings");
+          const question = await uiPrompt({ message: t("cmd.ai.analyse.ask") });
+          if (!question || !question.trim()) return;
+          try {
+            const { analyseNote } = await import("../agents/analyst");
+            showAiToast(t("analyst.working"), "info");
+            const { result, blocks } = await cancellable((signal) => analyseNote(liveDoc().content, question.trim(), signal));
+            setContent(`${liveDoc().content.trimEnd()}\n\n${blocks}\n`);
+            showAiToast(t("analyst.done", { answer: String(result.answer.answer) }), "success");
+          } catch (e) {
+            if (isAbort(e)) return;
+            if ((await import("../agents/suggestions")).reportAgentFailure(e, "ai.analyse")) return;
+            const reason = (e as { name?: string; reason?: string }).name === "AnalystError" ? (e as { reason: string }).reason : null;
+            showAiToast(reason ? t(`analyst.${reason}`, { error: (e as Error).message }) : t("analyst.failed", { error: (e as Error).message }), "error");
+          }
+        },
+      },
+      {
         id: "ai.ollamaModels",
         label: t("cmd.ai.ollama", { defaultValue: "AI: Ollama Models" }),
         hint: t("cmd.ai.ollama.hint", { defaultValue: "Switch to a local Ollama model" }),

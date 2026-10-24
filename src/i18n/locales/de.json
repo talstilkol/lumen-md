@@ -1422,5 +1422,15 @@
   "cmd.ai.cancel": "KI: Abbrechen",
   "cmd.ai.cancel.hint": "Stoppt alle laufenden KI-Anfragen (auch mit Esc)",
   "toast.aiCancelled": "KI-Anfrage abgebrochen ({count})",
-  "toast.aiNothingRunning": "Keine KI-Anfrage läuft"
+  "toast.aiNothingRunning": "Keine KI-Anfrage läuft",
+  "cmd.ai.analyse": "KI: Tabelle analysieren",
+  "cmd.ai.analyse.hint": "Eine Frage zur Tabelle dieser Notiz mit Python auf diesem Gerät beantworten",
+  "cmd.ai.analyse.ask": "Was möchtest du über die Tabelle in dieser Notiz wissen?",
+  "analyst.working": "Tabelle wird auf diesem Gerät analysiert…",
+  "analyst.done": "Antwort: {answer} – durch zwei Programmläufe geprüft",
+  "analyst.noTable": "Keine Tabelle in dieser Notiz: füge einen ```csv-Block, eine Markdown-Tabelle oder kommagetrennte Zeilen hinzu.",
+  "analyst.run": "Das Analyseprogramm ist fehlgeschlagen: {error}",
+  "analyst.parse": "Das Analyseprogramm hat keine Antwort geliefert: {error}",
+  "analyst.mismatch": "Die beiden Läufe stimmen nicht überein, daher keine Antwort: {error}",
+  "analyst.failed": "Analyse fehlgeschlagen: {error}"
 }
