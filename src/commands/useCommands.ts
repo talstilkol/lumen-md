@@ -4,7 +4,8 @@
  * store values below) into its commands; domains/index.ts lists them in
  * palette order.
  */
-import { useMemo } from "react";
+import { useMemo, useSyncExternalStore } from "react";
+import { pluginCommandsVersion, subscribePluginCommands } from "../plugins/pluginSystem";
 import type { Command } from "../ui/CommandPalette";
 import { useAppStore } from "../store/useStore";
 import { withAiQuota } from "../billing/aiQuota";
@@ -19,6 +20,7 @@ export { saveClip } from "./domains/research";
 export function useCommands(options: UseCommandsOptions) {
   const store = useCommandStore();
   const installedTemplates = useInstalledTemplates();
+  const pluginCommands = useSyncExternalStore(subscribePluginCommands, pluginCommandsVersion);
   const o = options;
 
   return useMemo<Command[]>(() => {
@@ -41,6 +43,7 @@ export function useCommands(options: UseCommandsOptions) {
     // through liveDoc(), so typing does not rebuild the list (C5).
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
+    pluginCommands,
     o.handleNew,
     o.handleOpen,
     o.handleSave,

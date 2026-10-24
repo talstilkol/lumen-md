@@ -156,7 +156,18 @@ export function unregisterPlugin(pluginId: string): void {
 export function setSandboxedPluginCommands(pluginId: string, cmds: LumenCommand[]): void {
   if (cmds.length) pluginCommands.set(pluginId, cmds);
   else pluginCommands.delete(pluginId);
+  commandsVersion++;
+  for (const f of [...commandListeners]) f();
 }
+
+let commandsVersion = 0;
+const commandListeners = new Set<() => void>();
+/** The palette rebuilds its list when a sandboxed plugin adds or removes commands. */
+export function subscribePluginCommands(fn: () => void): () => void {
+  commandListeners.add(fn);
+  return () => void commandListeners.delete(fn);
+}
+export const pluginCommandsVersion = (): number => commandsVersion;
 
 /** Get all commands from all active plugins */
 export function getPluginCommands(): LumenCommand[] {

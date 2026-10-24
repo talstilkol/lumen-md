@@ -1,0 +1,16 @@
+{
+  "schema": 1,
+  "id": "lumen.example.outline",
+  "name": "Outline and table of contents",
+  "version": "1.0.0",
+  "description": "Lists the headings of the open note in a side panel and inserts a table of contents at the cursor. Hebrew and English.",
+  "author": "Lumen",
+  "license": "MIT",
+  "main": "main.js",
+  "capabilities": [
+    { "id": "document:read", "reason": "To read the headings of the open note" },
+    { "id": "document:write", "reason": "To insert the table of contents at the cursor" },
+    { "id": "commands", "reason": "Adds “Outline” and “Insert table of contents”" },
+    { "id": "panel", "reason": "Shows the outline in a side panel" }
+  ]
+}

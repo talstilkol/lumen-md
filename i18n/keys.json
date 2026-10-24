@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-10-24T15:41:01.338Z",
+  "generated_at": "2026-10-24T15:54:27.293Z",
   "source": "src/i18n/index.ts (en bundle)",
-  "count": 1515,
+  "count": 1539,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -2401,6 +2401,137 @@
       "key": "plugins.panel.close",
       "en": "Close the plugin panel",
       "vars": []
+    },
+    {
+      "key": "plugins.title",
+      "en": "Plugins",
+      "vars": []
+    },
+    {
+      "key": "plugins.subtitle",
+      "en": "{installed} installed · {available} in the registry",
+      "vars": [
+        "installed",
+        "available"
+      ]
+    },
+    {
+      "key": "plugins.safety",
+      "en": "Plugins run sandboxed with no access by default: you choose what each one may do, and you can change it at any time. Plugin network requests appear in the privacy ledger and are blocked in local-only mode.",
+      "vars": []
+    },
+    {
+      "key": "plugins.consent.title",
+      "en": "Permissions for {name}",
+      "vars": [
+        "name"
+      ]
+    },
+    {
+      "key": "plugins.consent.intro",
+      "en": "Nothing is allowed until you tick it. The plugin says why it asks:",
+      "vars": []
+    },
+    {
+      "key": "plugins.consent.none",
+      "en": "No permissions requested",
+      "vars": []
+    },
+    {
+      "key": "plugins.consent.network",
+      "en": "Requests to this address only, without cookies; listed in the privacy ledger; blocked in local-only mode.",
+      "vars": []
+    },
+    {
+      "key": "plugins.consent.allowAll",
+      "en": "Tick all requested",
+      "vars": []
+    },
+    {
+      "key": "plugins.consent.save",
+      "en": "Save permissions",
+      "vars": []
+    },
+    {
+      "key": "plugins.consent.cancel",
+      "en": "Cancel",
+      "vars": []
+    },
+    {
+      "key": "plugins.action.install",
+      "en": "Install",
+      "vars": []
+    },
+    {
+      "key": "plugins.action.update",
+      "en": "Update",
+      "vars": []
+    },
+    {
+      "key": "plugins.action.updateTo",
+      "en": "Update to {version}",
+      "vars": [
+        "version"
+      ]
+    },
+    {
+      "key": "plugins.action.enabled",
+      "en": "On",
+      "vars": []
+    },
+    {
+      "key": "plugins.action.permissions",
+      "en": "Permissions…",
+      "vars": []
+    },
+    {
+      "key": "plugins.action.uninstall",
+      "en": "Uninstall",
+      "vars": []
+    },
+    {
+      "key": "plugins.action.loadFile",
+      "en": "Install from file…",
+      "vars": []
+    },
+    {
+      "key": "plugins.granted",
+      "en": "Allowed: {list}",
+      "vars": [
+        "list"
+      ]
+    },
+    {
+      "key": "plugins.fromFiles",
+      "en": "Installed from files",
+      "vars": []
+    },
+    {
+      "key": "plugins.trust.signed",
+      "en": "Signed by a key you trust",
+      "vars": []
+    },
+    {
+      "key": "plugins.trust.pinned",
+      "en": "From Lumen's registry (checked by hash)",
+      "vars": []
+    },
+    {
+      "key": "plugins.trust.unverified",
+      "en": "Unverified: nobody you trust vouches for this file. Install only if you trust its source.",
+      "vars": []
+    },
+    {
+      "key": "plugins.error.registry",
+      "en": "The plugin registry could not be loaded.",
+      "vars": []
+    },
+    {
+      "key": "plugins.error.start",
+      "en": "Did not start: {error}",
+      "vars": [
+        "error"
+      ]
     },
     {
       "key": "privacy.footer",

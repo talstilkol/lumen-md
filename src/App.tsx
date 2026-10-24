@@ -194,7 +194,16 @@ export default function App() {
     (window as unknown as { __lumen?: unknown }).__lumen = {
       htmlToMarkdown,
     };
+    // Installed sandboxed plugins (plan 11.2): only when one exists, after the first paint.
+    let pluginBoot: number | undefined;
+    try {
+      if (localStorage.getItem("lumen.plugins.any") === "1")
+        pluginBoot = window.setTimeout(() => void import("./plugins/runtime/installed").then((m) => m.startInstalledPlugins()), 1500);
+    } catch {
+      /* storage denied */
+    }
     return () => {
+      if (pluginBoot !== undefined) window.clearTimeout(pluginBoot);
       unregisterPlugin(wordCountPlugin.id);
       delete (window as unknown as { __lumen?: unknown }).__lumen;
     };

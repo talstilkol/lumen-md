@@ -1,41 +1,22 @@
 # __PLUGIN_TITLE__
 
-A Lumen plugin scaffolded with `create-lumen-plugin`.
+A [Lumen](https://github.com/talstilkol/lumen-md) plugin.
 
-## Develop
+- `lumen-plugin.json` — the manifest: id, version, and the **capabilities** the plugin asks for, each with a reason the user sees before granting it. Nothing is allowed by default.
+- `main.js` — the plugin. It runs in Lumen's sandbox (QuickJS): no `fetch`, no DOM, no `import`; only the `lumen` API. UI is a tree of elements Lumen renders (no HTML).
 
 ```bash
-npm install
-npm run dev
+npm run pack          # → dist/<id>-<version>.lumenplugin.json
 ```
 
-The bundler watches `src/` and rebuilds `dist/__PLUGIN_NAME__.js` on save.
+In Lumen: **Plugins → Install from file…**, pick the file, tick the permissions.
 
-## Try it in Lumen
+Sign it (optional) with an Ed25519 key, so users who trust your key see it as verified:
 
-Open Lumen → `⌘K` → **Plugin gallery** → **Load unpacked** → pick
-`dist/__PLUGIN_NAME__.js`. Lumen reloads the plugin every time the file
-changes — perfect for the dev loop.
+```bash
+openssl genpkey -algorithm ed25519 -out ed25519-private.pem
+openssl pkey -in ed25519-private.pem -pubout        # publish this public key
+npm run pack:signed
+```
 
-## Customise
-
-- **Add a new block type** → `src/block.tsx`. Lumen mounts your component
-  whenever the user types ` ```your-language ` followed by source.
-- **Add a command** → in `src/index.ts` register another
-  `api.registerCommand({...})` — it shows up in `⌘K` and the palette.
-- **Listen to document changes** → `api.onDocChange((content) => ...)`.
-- **Read / write the workspace** is intentionally NOT exposed by default
-  — request the `workspace-read` / `workspace-write` permissions in
-  `lumen-plugin.json` and the user gets an explicit approval prompt.
-
-## Publish to the registry
-
-1. `npm run build`.
-2. Open a PR against
-   [public/plugins/registry.json](https://github.com/your-org/lumen) with a
-   new entry pointing at the JSDelivr URL of your release.
-3. Lumen's Plugin Gallery picks it up automatically.
-
-## License
-
-MIT — yours to do with as you please.
+Docs: *Plugins → Plugin API* and *Sandbox and permissions*.

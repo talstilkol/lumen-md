@@ -1,40 +1,52 @@
 {
+  "schema": 1,
+  "note": "First-party Lumen plugins. Built by scripts/build-plugin-registry.mjs from public/plugins/examples — do not edit by hand.",
   "plugins": [
     {
-      "id": "mermaid-lumen",
-      "name": "Mermaid Diagrams",
-      "author": "Tal Stilkol",
-      "description": "Render advanced Mermaid charts instantly inside your documents.",
-      "version": "1.4.0",
-      "icon": "📊",
-      "url": "/plugins/mermaid-plugin.js"
-    },
-    {
-      "id": "chart-js-renderer",
-      "name": "Chart.js Renderer",
-      "author": "Lumen Team",
-      "description": "Native integration of dynamic Chart.js JSON code blocks.",
-      "version": "2.1.2",
-      "icon": "📈",
-      "url": "/plugins/chartjs-plugin.js"
-    },
-    {
-      "id": "abc-music",
-      "name": "Abc Music Blocks",
-      "author": "Lumen Labs",
-      "description": "Write ABC notation and render beautiful sheet music automatically.",
-      "version": "0.9.1",
-      "icon": "🎵",
-      "url": "/plugins/abc-music.js"
-    },
-    {
-      "id": "model-3d",
-      "name": "3D Model Viewer",
-      "author": "Open Source",
-      "description": "Embed interactive .glb and .obj 3D models inline using WebGL.",
+      "id": "lumen.example.callout",
+      "name": "Callout cards",
       "version": "1.0.0",
-      "icon": "🧊",
-      "url": "/plugins/model-3d.js"
+      "description": "Renders ```callout code blocks as cards: the first line is the title, `- [ ]` lines become a checklist, [[links]] open notes.",
+      "author": "Lumen",
+      "license": "MIT",
+      "capabilities": [
+        "renderer",
+        "storage"
+      ],
+      "bundle": "plugins/bundles/lumen.example.callout-1.0.0.lumenplugin.json",
+      "sha256": "6b5962388395418a0611a57d1aa19421cb9f8aaab8a89e63f2e194f1fab929e5"
+    },
+    {
+      "id": "lumen.example.outline",
+      "name": "Outline and table of contents",
+      "version": "1.0.0",
+      "description": "Lists the headings of the open note in a side panel and inserts a table of contents at the cursor. Hebrew and English.",
+      "author": "Lumen",
+      "license": "MIT",
+      "capabilities": [
+        "document:read",
+        "document:write",
+        "commands",
+        "panel"
+      ],
+      "bundle": "plugins/bundles/lumen.example.outline-1.0.0.lumenplugin.json",
+      "sha256": "46dad37048437b08649f830bb2716e0216b7740d6040ec01f20cee88fc743eca"
+    },
+    {
+      "id": "lumen.example.word-stats",
+      "name": "Word stats",
+      "version": "1.0.0",
+      "description": "Words, characters, reading time and the most frequent words of the open note — Hebrew and English — in a side panel.",
+      "author": "Lumen",
+      "license": "MIT",
+      "capabilities": [
+        "document:read",
+        "commands",
+        "panel",
+        "settings"
+      ],
+      "bundle": "plugins/bundles/lumen.example.word-stats-1.0.0.lumenplugin.json",
+      "sha256": "821b6d8c9948f81e2cae8e97aa917798b11832a230cce6770255975f580c599b"
     }
   ]
 }

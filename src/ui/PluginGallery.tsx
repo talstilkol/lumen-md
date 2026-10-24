@@ -1,648 +1,326 @@
-import { headingSlugger } from "../lib/slug";
-import { countWords } from "../text/hebrew";
-import { useEffect, useMemo, useState } from "react";
-import { Search, Download, Trash2, ExternalLink, BadgeCheck } from "lucide-react";
-import { getRegisteredPlugins, registerPlugin, unregisterPlugin } from "../plugins/pluginSystem";
-import type { LumenPlugin } from "../plugins/pluginSystem";
-import { log } from "../lib/logger";
-import { t } from "../i18n";
-import { fetchWithRetry } from "../lib/fetchRetry";
-
-interface RemotePluginEntry {
-  id: string;
-  name: string;
-  author: string;
-  description: string;
-  version: string;
-  icon?: string;
-  url?: string;
-  category?: string;
-  homepage?: string;
-  /** When true, the plugin is verified by the Lumen team. */
-  verified?: boolean;
-}
-
 /**
- * Community Plugin Gallery — browse, install, and manage plugins.
+ * Plugins (plan 11.2 part c): the first-party registry and the installed
+ * plugins — install with the user's grants (every capability unticked by
+ * default, each with the plugin's reason), install from a bundle file,
+ * update, change permissions, disable, uninstall.
+ *
+ * Plugins run sandboxed (src/plugins/runtime): QuickJS for logic, UI as
+ * data, no network unless an exact origin is granted. The earlier
+ * gallery's in-process "community" plugins and simulated remote installs
+ * are gone (11.2.6).
  */
-
-// ── Built-in Community Plugins Catalog ──────────────────────────────────
-
-const COMMUNITY_PLUGINS: LumenPlugin[] = [
-  {
-    id: "community.reading-time",
-    name: "Reading Time",
-    version: "1.0.0",
-    description: "Shows estimated reading time in the toolbar",
-    author: "Lumen Community",
-    activate: (api) => {
-      api.registerCommand({
-        id: "reading-time.show",
-        label: "📖 Reading Time",
-        hint: "Show estimated reading time",
-        action: () => {
-          const content = api.getContent();
-          const words = countWords(content);
-          const minutes = Math.ceil(words / 200);
-          api.showToast(t("toast.minReadWords", { minutes, words }));
-        },
-      });
-    },
-  },
-  {
-    id: "community.emoji-picker",
-    name: "Emoji Picker",
-    version: "1.0.0",
-    description: "Insert emoji via command palette",
-    author: "Lumen Community",
-    activate: (api) => {
-      const emojis = ["😀", "🎉", "🚀", "✨", "💡", "🔥", "❤️", "⭐", "📝", "🎯", "💪", "🌟"];
-      for (const emoji of emojis) {
-        api.registerCommand({
-          id: `emoji.${emoji}`,
-          label: `Insert ${emoji}`,
-          hint: "Emoji",
-          action: () => {
-            const content = api.getContent();
-            api.setContent(content + emoji);
-          },
-        });
-      }
-    },
-  },
-  {
-    id: "community.lorem-ipsum",
-    name: "Lorem Ipsum Generator",
-    version: "1.0.0",
-    description: "Generate placeholder text for drafts",
-    author: "Lumen Community",
-    activate: (api) => {
-      api.registerCommand({
-        id: "lorem.generate",
-        label: "📄 Lorem Ipsum",
-        hint: "Generate placeholder text",
-        action: () => {
-          const lorem = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.";
-          const content = api.getContent();
-          api.setContent(content + "\n\n" + lorem);
-          api.showToast(t("toast.loremIpsumInserted"));
-        },
-      });
-    },
-  },
-  {
-    id: "community.markdown-lint",
-    name: "Markdown Linter",
-    version: "1.0.0",
-    description: "Basic markdown style checks",
-    author: "Lumen Community",
-    activate: (api) => {
-      api.registerCommand({
-        id: "lint.check",
-        label: "🔍 Lint Markdown",
-        hint: "Check for common issues",
-        action: () => {
-          const content = api.getContent();
-          const issues: string[] = [];
-          const lines = content.split("\n");
-          for (let i = 0; i < lines.length; i++) {
-            if (lines[i].length > 120) issues.push(`Line ${i + 1}: exceeds 120 chars`);
-            if (lines[i].match(/^#+[^ ]/)) issues.push(`Line ${i + 1}: missing space after #`);
-            if (lines[i].match(/  $/)) issues.push(`Line ${i + 1}: trailing whitespace`);
-          }
-          if (issues.length === 0) {
-            api.showToast(t("toast.noIssuesFound"));
-          } else {
-            api.showToast(t("toast.issues", { count: issues.length, list: issues.slice(0, 3).join(", ") }));
-          }
-        },
-      });
-    },
-  },
-  {
-    id: "community.focus-mode",
-    name: "Focus Mode",
-    version: "1.0.0",
-    description: "Distraction-free writing with dimmed UI",
-    author: "Lumen Community",
-    activate: (api) => {
-      let active = false;
-      api.registerCommand({
-        id: "focus.toggle",
-        label: "🧘 Focus Mode",
-        hint: "Toggle distraction-free writing",
-        action: () => {
-          active = !active;
-          document.body.classList.toggle("focus-mode", active);
-          api.showToast(active ? "🧘 Focus mode ON" : "Focus mode OFF");
-        },
-      });
-    },
-  },
-  {
-    id: "community.toc-generator",
-    name: "Table of Contents",
-    version: "1.0.0",
-    description: "Generate a table of contents from headings",
-    author: "Lumen Community",
-    activate: (api) => {
-      api.registerCommand({
-        id: "toc.generate",
-        label: "📋 Generate Table of Contents",
-        hint: "From headings",
-        action: () => {
-          const content = api.getContent();
-          const headings = content.match(/^#{1,6}\s+.+$/gm) || [];
-          if (headings.length === 0) {
-            api.showToast(t("toast.noHeadingsFound"));
-            return;
-          }
-          const slugger = headingSlugger();
-          const toc = headings.map((h) => {
-            const level = h.match(/^#+/)![0].length;
-            const text = h.replace(/^#+\s+/, "");
-            const slug = slugger.slug(text);
-            return `${"  ".repeat(level - 1)}- [${text}](#${slug})`;
-          }).join("\n");
-          api.setContent("## Table of Contents\n\n" + toc + "\n\n---\n\n" + content);
-          api.showToast(t("toast.tocInsertedAtTop"));
-        },
-      });
-    },
-  },
-];
-
-// ── Gallery Component ───────────────────────────────────────────────────
+import { useEffect, useMemo, useRef, useState } from "react";
+import { BadgeCheck, Download, Search, ShieldAlert, Trash2, Upload } from "lucide-react";
+import { t } from "../i18n";
+import { log } from "../lib/logger";
+import type { PluginBundle } from "../plugins/runtime/bundle";
+import type { Capability } from "../plugins/runtime/manifest";
+import type { InstalledPlugin, RegistryEntry } from "../plugins/runtime/installed";
 
 interface Props {
   open: boolean;
   onClose: () => void;
 }
 
-export function PluginGallery({ open, onClose }: Props) {
-  const [installed, setInstalled] = useState<Set<string>>(
-    () => new Set(getRegisteredPlugins().map((p) => p.id)),
-  );
-  const [search, setSearch] = useState("");
-  const [activeCategory, setActiveCategory] = useState<string>("all");
-  const [remotePlugins, setRemotePlugins] = useState<LumenPlugin[]>([]);
-  const [remoteRaw, setRemoteRaw] = useState<RemotePluginEntry[]>([]);
+type Installed = typeof import("../plugins/runtime/installed");
 
-  // Lazy-load the registry.json once when the gallery first opens. Hooks must
-  // live at the top level — the previous `import("react").then(useEffect)`
-  // call was a runtime trap that React tolerated by accident.
+/** What the install / permissions dialog is about. */
+interface Pending {
+  bundle: PluginBundle;
+  sha256: string;
+  trust: InstalledPlugin["trust"];
+  source: InstalledPlugin["source"];
+  /** Pre-ticked: the grants an installed plugin already has (update / edit). Empty for a new install. */
+  granted: Capability[];
+  mode: "install" | "update" | "permissions";
+}
+
+const box = { border: "1px solid hsl(var(--border))", borderRadius: 10, padding: 12, display: "flex", flexDirection: "column" as const, gap: 6 };
+const btn = { border: "1px solid hsl(var(--border-strong))", borderRadius: 6, padding: "4px 10px", background: "transparent", color: "inherit", cursor: "pointer", font: "inherit", display: "inline-flex", alignItems: "center", gap: 4 };
+const primary = { ...btn, background: "hsl(var(--primary))", color: "hsl(var(--primary-foreground))", border: "none" };
+
+function newer(a: string, b: string): boolean {
+  const pa = a.split(/[-+]/)[0].split(".").map(Number);
+  const pb = b.split(/[-+]/)[0].split(".").map(Number);
+  for (let i = 0; i < 3; i++) if ((pa[i] ?? 0) !== (pb[i] ?? 0)) return (pa[i] ?? 0) > (pb[i] ?? 0);
+  return false;
+}
+
+function Consent({ pending, onDone, mod }: { pending: Pending; onDone: () => void; mod: Installed }) {
+  const m = pending.bundle.manifest;
+  const [ticked, setTicked] = useState<Set<string>>(() => new Set(pending.granted));
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const apply = async () => {
+    setBusy(true);
+    setError(null);
+    try {
+      if (pending.mode === "permissions") await mod.setGrants(m.id, [...ticked]);
+      else await mod.installPlugin(pending.bundle, { sha256: pending.sha256, trust: pending.trust, source: pending.source, grants: [...ticked] });
+      onDone();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : String(e));
+    } finally {
+      setBusy(false);
+    }
+  };
+  return (
+    <div role="dialog" aria-modal="true" aria-label={t("plugins.consent.title", { name: m.name })} data-testid="plugin-consent" style={{ ...box, background: "hsl(var(--bg))" }}>
+      <strong dir="auto">{t("plugins.consent.title", { name: m.name })}</strong>
+      <span style={{ fontSize: 12, opacity: 0.8 }} dir="auto">
+        {m.name} {m.version} · {m.author} · {m.license}
+      </span>
+      {pending.trust === "unverified" && (
+        <span role="alert" style={{ color: "hsl(var(--destructive, 0 70% 50%))", display: "flex", gap: 6, alignItems: "center" }}>
+          <ShieldAlert size={14} aria-hidden /> {t("plugins.trust.unverified")}
+        </span>
+      )}
+      <span style={{ fontSize: 12 }}>{m.capabilities.length ? t("plugins.consent.intro") : t("plugins.consent.none")}</span>
+      {m.capabilities.map((c) => (
+        <label key={c.id} style={{ display: "flex", gap: 8, alignItems: "flex-start" }} dir="auto">
+          <input
+            type="checkbox"
+            data-capability={c.id}
+            checked={ticked.has(c.id)}
+            onChange={(e) => {
+              const next = new Set(ticked);
+              if (e.target.checked) next.add(c.id);
+              else next.delete(c.id);
+              setTicked(next);
+            }}
+          />
+          <span>
+            <code dir="ltr">{c.id}</code> — {c.reason}
+            {c.id.startsWith("network:") && <em style={{ display: "block", fontSize: 11, opacity: 0.8 }}>{t("plugins.consent.network")}</em>}
+          </span>
+        </label>
+      ))}
+      {error && <span role="alert">{error}</span>}
+      <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+        {m.capabilities.length > 0 && (
+          <button type="button" style={btn} onClick={() => setTicked(new Set(m.capabilities.map((c) => c.id)))}>
+            {t("plugins.consent.allowAll")}
+          </button>
+        )}
+        <button type="button" style={primary} disabled={busy} onClick={() => void apply()} data-testid="plugin-consent-confirm">
+          {pending.mode === "permissions" ? t("plugins.consent.save") : pending.mode === "update" ? t("plugins.action.update") : t("plugins.action.install")}
+        </button>
+        <button type="button" style={btn} onClick={onDone}>
+          {t("plugins.consent.cancel")}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+export function PluginGallery({ open, onClose }: Props) {
+  const [mod, setMod] = useState<Installed | null>(null);
+  const [registry, setRegistry] = useState<RegistryEntry[]>([]);
+  const [installed, setInstalled] = useState<InstalledPlugin[]>([]);
+  const [search, setSearch] = useState("");
+  const [pending, setPending] = useState<Pending | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
+
   useEffect(() => {
     if (!open) return;
-    // AbortController + cancelled guard — closing the gallery mid-fetch
-    // both stops the network request and short-circuits the .then chain
-    // so we never `setState` on an unmounted component.
     const ac = new AbortController();
-    let cancelled = false;
-    fetchWithRetry(
-      "/plugins/registry.json",
-      { signal: ac.signal },
-      { label: "plugins.registry", maxRetries: 2, baseDelayMs: 500, maxDelayMs: 2000 },
-    )
-      .then((res) => res.json())
-      .then((data) => {
-        if (cancelled || !data?.plugins) return;
-        const entries = data.plugins as RemotePluginEntry[];
-        setRemoteRaw(entries);
-        const mapped: LumenPlugin[] = entries.map((p) => ({
-          id: p.id,
-          name: `${p.icon ?? "🔌"} ${p.name}`,
-          version: p.version,
-          description: p.description,
-          author: p.author,
-          activate: async (api) => {
-            // Sandbox + script injection comes in a follow-up — for now we
-            // simulate the install/activation flow so the UX exists.
-            await new Promise((resolve) => setTimeout(resolve, 400));
-            api.showToast(t("toast.loadedFromRemoteModule", { name: p.name }));
-          },
-        }));
-        setRemotePlugins(mapped);
-      })
-      .catch((err: Error) => {
-        if (err.name === "AbortError") return;
-        log.warn("plugin remote load failed", err);
-      });
+    let live = true;
+    let unsubscribe = () => undefined as void;
+    void import("../plugins/runtime/installed").then(async (m) => {
+      if (!live) return;
+      setMod(m);
+      const refresh = async () => {
+        const list = await m.listInstalled();
+        if (live) setInstalled(list);
+      };
+      unsubscribe = m.subscribeInstalled(() => void refresh());
+      await refresh();
+      try {
+        const r = await m.fetchRegistry(ac.signal);
+        if (live) setRegistry(r);
+      } catch (e) {
+        if ((e as Error).name !== "AbortError") {
+          log.warn("plugin registry failed", e);
+          if (live) setError(t("plugins.error.registry"));
+        }
+      }
+    });
     return () => {
-      cancelled = true;
+      live = false;
+      unsubscribe();
       ac.abort();
     };
   }, [open]);
 
-  // Escape closes the dialog, like every other overlay.
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         e.stopPropagation();
-        onClose();
+        if (pending) setPending(null);
+        else onClose();
       }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [open, onClose]);
+  }, [open, onClose, pending]);
 
-  const allAvailable = useMemo(() => [...COMMUNITY_PLUGINS, ...remotePlugins], [remotePlugins]);
-
-  // Index categories for the side rail. Built-ins live in "Community";
-  // remote-registry plugins surface their declared category (or "Featured").
-  //
-  // This hook must run on every render, including the closed one: the
-  // gallery is mounted with `open={false}` from App and flipped open
-  // later, and a hook that only ran once open made React throw
-  // "Rendered more hooks than during the previous render" the first
-  // time the gallery was opened. Every hook stays above the early return.
-  const categoryIndex = useMemo(() => {
-    const map = new Map<string, number>();
-    map.set("all", allAvailable.length);
-    map.set("community", COMMUNITY_PLUGINS.length);
-    for (const r of remoteRaw) {
-      const c = r.category ?? "featured";
-      map.set(c, (map.get(c) ?? 0) + 1);
-    }
-    return map;
-  }, [allAvailable.length, remoteRaw]);
+  const q = search.trim().toLowerCase();
+  const visible = useMemo(() => registry.filter((r) => !q || `${r.name} ${r.description} ${r.author}`.toLowerCase().includes(q)), [registry, q]);
+  const fromFile = installed.filter((p) => p.source === "file" && !registry.some((r) => r.id === p.id));
 
   if (!open) return null;
 
-  const matchesCategory = (id: string): boolean => {
-    if (activeCategory === "all") return true;
-    if (activeCategory === "community") return id.startsWith("community.");
-    const remote = remoteRaw.find((r) => r.id === id);
-    return (remote?.category ?? "featured") === activeCategory;
+  const begin = async (entry: RegistryEntry, mode: Pending["mode"]) => {
+    if (!mod) return;
+    setError(null);
+    try {
+      const { bundle, sha256, trust } = await mod.fetchRegistryBundle(entry);
+      const prev = installed.find((p) => p.id === entry.id);
+      setPending({ bundle, sha256, trust, source: "registry", granted: mode === "update" ? mod.carriedGrants(prev, bundle.manifest) : [], mode });
+    } catch (e) {
+      setError(e instanceof Error ? e.message : String(e));
+    }
   };
 
-  const verifiedById = new Map(remoteRaw.map((r) => [r.id, r.verified ?? true]));
+  const loadFile = async (file: File) => {
+    if (!mod) return;
+    setError(null);
+    try {
+      const { parseBundle } = await import("../plugins/runtime/bundle");
+      const bundle = parseBundle(await file.text());
+      const { sha256, trust } = await mod.verifyBundle(bundle);
+      const prev = installed.find((p) => p.id === bundle.manifest.id);
+      setPending({ bundle, sha256, trust, source: "file", granted: prev ? mod.carriedGrants(prev, bundle.manifest) : [], mode: prev ? "update" : "install" });
+    } catch (e) {
+      setError(e instanceof Error ? e.message : String(e));
+    }
+  };
 
-  const filtered = allAvailable.filter((p) => {
-    if (!matchesCategory(p.id)) return false;
-    if (!search) return true;
-    const q = search.toLowerCase();
+  const editPermissions = (p: InstalledPlugin) => {
+    if (!mod) return;
+    const manifest = mod.manifestOf(p);
+    setPending({ bundle: { manifestText: p.manifestText, manifest, main: p.main }, sha256: p.sha256, trust: p.trust, source: p.source, granted: p.grants, mode: "permissions" });
+  };
+
+  const row = (p: InstalledPlugin | undefined, entry: RegistryEntry | undefined) => {
+    const manifest = p && mod ? mod.manifestOf(p) : undefined;
+    const id = p?.id ?? entry!.id;
+    const name = manifest?.name ?? entry!.name;
+    const err = p && mod ? mod.startError(id) : undefined;
     return (
-      p.name.toLowerCase().includes(q) ||
-      (p.description ?? "").toLowerCase().includes(q) ||
-      (p.author ?? "").toLowerCase().includes(q)
+      <div key={id} style={box} data-plugin-row={id} data-installed={p ? "true" : "false"}>
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <strong dir="auto" style={{ flex: 1 }}>
+            {name}
+          </strong>
+          {(p?.trust ?? (entry?.signature ? "signed" : "pinned")) !== "unverified" ? (
+            <span title={t(`plugins.trust.${p?.trust ?? (entry?.signature ? "signed" : "pinned")}`)} style={{ display: "inline-flex" }}>
+              <BadgeCheck size={14} aria-label={t(`plugins.trust.${p?.trust ?? (entry?.signature ? "signed" : "pinned")}`)} />
+            </span>
+          ) : (
+            <span title={t("plugins.trust.unverified")} style={{ display: "inline-flex" }}>
+              <ShieldAlert size={14} aria-label={t("plugins.trust.unverified")} />
+            </span>
+          )}
+          <span style={{ fontSize: 11, opacity: 0.7 }}>{manifest?.version ?? entry?.version}</span>
+        </div>
+        <span dir="auto" style={{ fontSize: 12, opacity: 0.85 }}>
+          {manifest?.description ?? entry?.description}
+        </span>
+        <span style={{ fontSize: 11, opacity: 0.7 }} dir="ltr">
+          {(manifest ? manifest.capabilities.map((c) => c.id) : entry!.capabilities).join(" · ") || t("plugins.consent.none")}
+        </span>
+        {p && (
+          <span style={{ fontSize: 11 }} data-testid="plugin-grants">
+            {t("plugins.granted", { list: p.grants.length ? p.grants.join(", ") : "—" })}
+          </span>
+        )}
+        {err && (
+          <span role="alert" style={{ fontSize: 11 }}>
+            {t("plugins.error.start", { error: err })}
+          </span>
+        )}
+        <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+          {!p && entry && (
+            <button type="button" style={primary} onClick={() => void begin(entry, "install")} data-testid="plugin-install">
+              <Download size={13} aria-hidden /> {t("plugins.action.install")}
+            </button>
+          )}
+          {p && entry && newer(entry.version, manifest?.version ?? "0.0.0") && (
+            <button type="button" style={primary} onClick={() => void begin(entry, "update")} data-testid="plugin-update">
+              {t("plugins.action.updateTo", { version: entry.version })}
+            </button>
+          )}
+          {p && (
+            <>
+              <label style={{ display: "inline-flex", gap: 4, alignItems: "center", fontSize: 12 }}>
+                <input type="checkbox" checked={p.enabled} onChange={(e) => void mod?.setEnabled(p.id, e.target.checked)} data-testid="plugin-enabled" />
+                {t("plugins.action.enabled")}
+              </label>
+              <button type="button" style={btn} onClick={() => editPermissions(p)} data-testid="plugin-permissions">
+                {t("plugins.action.permissions")}
+              </button>
+              <button type="button" style={btn} onClick={() => void mod?.uninstallPlugin(p.id)} data-testid="plugin-uninstall">
+                <Trash2 size={13} aria-hidden /> {t("plugins.action.uninstall")}
+              </button>
+            </>
+          )}
+        </div>
+      </div>
     );
-  });
-
-  const handleInstall = async (plugin: LumenPlugin) => {
-    await registerPlugin(plugin);
-    setInstalled(new Set([...installed, plugin.id]));
   };
-
-  const handleUninstall = (pluginId: string) => {
-    unregisterPlugin(pluginId);
-    const next = new Set(installed);
-    next.delete(pluginId);
-    setInstalled(next);
-  };
-
-  const categories: { id: string; label: string }[] = [
-    { id: "all", label: "All plugins" },
-    { id: "community", label: "Community" },
-    { id: "featured", label: "Featured" },
-    ...Array.from(categoryIndex.keys())
-      .filter((c) => c !== "all" && c !== "community" && c !== "featured")
-      .map((id) => ({ id, label: id.charAt(0).toUpperCase() + id.slice(1) })),
-  ];
 
   return (
-    <div
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="plugin-gallery-title"
-      style={{
-        position: "fixed",
-        inset: 0,
-        zIndex: 200,
-        background: "rgba(0,0,0,0.7)",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        backdropFilter: "blur(8px)",
-      }}
-      onClick={onClose}
-    >
-      <div
-        onClick={(e) => e.stopPropagation()}
-        style={{
-          background: "hsl(var(--bg))",
-          border: "1px solid hsl(var(--border))",
-          borderRadius: 16,
-          width: 880,
-          maxWidth: "calc(100vw - 32px)",
-          maxHeight: "min(820px, calc(100vh - 32px))",
-          display: "flex",
-          flexDirection: "column",
-          overflow: "hidden",
-        }}
-      >
-        {/* Header */}
-        <div
-          style={{
-            padding: "16px 20px",
-            borderBottom: "1px solid hsl(var(--border))",
-            display: "flex",
-            alignItems: "center",
-            gap: 12,
-          }}
-        >
-          <span style={{ fontSize: 22 }} aria-hidden>🔌</span>
-          <div>
+    <div role="dialog" aria-modal="true" aria-labelledby="plugin-gallery-title" style={{ position: "fixed", inset: 0, zIndex: 200, background: "rgba(0,0,0,0.6)", display: "flex", alignItems: "center", justifyContent: "center" }} onClick={onClose}>
+      <div onClick={(e) => e.stopPropagation()} style={{ background: "hsl(var(--bg))", color: "hsl(var(--fg))", border: "1px solid hsl(var(--border))", borderRadius: 16, width: 760, maxWidth: "calc(100vw - 32px)", maxHeight: "min(820px, calc(100vh - 32px))", display: "flex", flexDirection: "column", overflow: "hidden" }}>
+        <div style={{ padding: "14px 18px", borderBottom: "1px solid hsl(var(--border))", display: "flex", alignItems: "center", gap: 10 }}>
+          <div style={{ flex: 1 }}>
             <div id="plugin-gallery-title" style={{ fontWeight: 700, fontSize: 16 }}>
-              Plugin Gallery
+              {t("plugins.title")}
             </div>
-            <div style={{ fontSize: 12, color: "hsl(var(--fg-muted))" }}>
-              {installed.size} installed · {allAvailable.length} available
-            </div>
+            <div style={{ fontSize: 12, opacity: 0.75 }}>{t("plugins.subtitle", { installed: installed.length, available: registry.length })}</div>
           </div>
-          <div style={{ flex: 1 }} />
-          <div style={{ position: "relative" }}>
-            <Search
-              size={14}
-              aria-hidden
-              style={{
-                position: "absolute",
-                left: 10,
-                top: "50%",
-                transform: "translateY(-50%)",
-                color: "hsl(var(--fg-muted))",
-              }}
-            />
-            <input
-              type="text"
-              placeholder={t("pluginGallery.search")}
-              aria-label={t("pluginGallery.search")}
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              style={{
-                background: "hsl(var(--bg-subtle))",
-                border: "1px solid hsl(var(--border))",
-                borderRadius: 8,
-                padding: "7px 12px 7px 30px",
-                fontSize: 13,
-                color: "hsl(var(--fg))",
-                width: 240,
-                outline: "none",
-              }}
-            />
-          </div>
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label={t("pluginGallery.close")}
-            style={{
-              background: "transparent",
-              border: "1px solid hsl(var(--border))",
-              borderRadius: 6,
-              color: "hsl(var(--fg))",
-              padding: "5px 10px",
-              fontSize: 12,
-              cursor: "pointer",
+          <button type="button" style={btn} onClick={() => fileRef.current?.click()} data-testid="plugin-load-file">
+            <Upload size={13} aria-hidden /> {t("plugins.action.loadFile")}
+          </button>
+          <input
+            ref={fileRef}
+            type="file"
+            accept=".json,.lumenplugin.json,application/json"
+            style={{ display: "none" }}
+            data-testid="plugin-file-input"
+            onChange={(e) => {
+              const f = e.target.files?.[0];
+              e.target.value = "";
+              if (f) void loadFile(f);
             }}
-          >
-            Esc
+          />
+          <button type="button" style={btn} onClick={onClose} aria-label={t("pluginGallery.close")}>
+            ×
           </button>
         </div>
-
-        {/* Body */}
-        <div style={{ flex: 1, display: "flex", minHeight: 0 }}>
-          {/* Side rail — categories */}
-          <nav
-            aria-label="Plugin categories"
-            style={{
-              width: 200,
-              borderInlineEnd: "1px solid hsl(var(--border))",
-              padding: "12px 8px",
-              overflow: "auto",
-              flexShrink: 0,
-            }}
-          >
-            <div
-              style={{
-                fontSize: 10,
-                fontWeight: 700,
-                textTransform: "uppercase",
-                letterSpacing: "0.06em",
-                color: "hsl(var(--fg-muted))",
-                padding: "4px 10px 6px",
-              }}
-            >
-              Categories
+        <div style={{ padding: 16, overflow: "auto", display: "flex", flexDirection: "column", gap: 10 }}>
+          <p style={{ fontSize: 12, margin: 0, opacity: 0.8 }}>{t("plugins.safety")}</p>
+          {pending && mod && <Consent pending={pending} mod={mod} onDone={() => setPending(null)} />}
+          {error && (
+            <div role="alert" style={{ fontSize: 12 }}>
+              {error}
             </div>
-            {categories.map((c) => {
-              const isActive = activeCategory === c.id;
-              const count = categoryIndex.get(c.id) ?? 0;
-              return (
-                <button
-                  key={c.id}
-                  type="button"
-                  onClick={() => setActiveCategory(c.id)}
-                  aria-pressed={isActive}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                    width: "100%",
-                    padding: "7px 10px",
-                    borderRadius: 6,
-                    border: "none",
-                    background: isActive ? "hsl(var(--accent) / 0.12)" : "transparent",
-                    color: isActive ? "hsl(var(--accent))" : "hsl(var(--fg))",
-                    fontSize: 13,
-                    cursor: "pointer",
-                    textAlign: "start",
-                    marginBottom: 2,
-                  }}
-                >
-                  <span>{c.label}</span>
-                  <span style={{ fontSize: 11, color: "hsl(var(--fg-muted))" }}>{count}</span>
-                </button>
-              );
-            })}
-          </nav>
-
-          {/* Plugin grid */}
-          <div
-            style={{
-              flex: 1,
-              overflow: "auto",
-              padding: 16,
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
-              gap: 12,
-              alignContent: "start",
-            }}
-          >
-            {filtered.length === 0 ? (
-              <div
-                style={{
-                  gridColumn: "1 / -1",
-                  textAlign: "center",
-                  padding: "40px 20px",
-                  color: "hsl(var(--fg-muted))",
-                  fontSize: 13,
-                }}
-              >
-                No plugins matched your search.
-              </div>
-            ) : (
-              filtered.map((plugin) => {
-                const isInstalled = installed.has(plugin.id);
-                const verified = verifiedById.get(plugin.id) ?? plugin.id.startsWith("community.");
-                return (
-                  <div
-                    key={plugin.id}
-                    data-testid="plugin-card"
-                    style={{
-                      display: "flex",
-                      flexDirection: "column",
-                      gap: 8,
-                      padding: 14,
-                      borderRadius: 12,
-                      background: "hsl(var(--bg-subtle) / 0.5)",
-                      border: "1px solid hsl(var(--border))",
-                      transition: "all 150ms ease",
-                    }}
-                  >
-                    <div style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
-                      <div
-                        aria-hidden
-                        style={{
-                          width: 38,
-                          height: 38,
-                          borderRadius: 8,
-                          background: "linear-gradient(135deg, #7c5cfc, #c084fc)",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          fontSize: 18,
-                          flexShrink: 0,
-                        }}
-                      >
-                        🔌
-                      </div>
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <div
-                          style={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: 6,
-                            fontWeight: 600,
-                            fontSize: 14,
-                          }}
-                        >
-                          <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                            {plugin.name}
-                          </span>
-                          {verified && (
-                            <BadgeCheck
-                              size={14}
-                              aria-label="Verified by Lumen"
-                              style={{ color: "hsl(var(--accent))", flexShrink: 0 }}
-                            />
-                          )}
-                        </div>
-                        <div style={{ fontSize: 11, color: "hsl(var(--fg-muted))" }}>
-                          v{plugin.version} · {plugin.author}
-                        </div>
-                      </div>
-                    </div>
-                    <div
-                      style={{
-                        fontSize: 12,
-                        color: "hsl(var(--fg-muted))",
-                        lineHeight: 1.45,
-                        minHeight: 32,
-                      }}
-                    >
-                      {plugin.description}
-                    </div>
-                    <div style={{ display: "flex", gap: 8, marginTop: 4 }}>
-                      <button
-                        type="button"
-                        onClick={() =>
-                          isInstalled ? handleUninstall(plugin.id) : handleInstall(plugin)
-                        }
-                        style={{
-                          flex: 1,
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          gap: 6,
-                          padding: "7px 10px",
-                          borderRadius: 8,
-                          border: "none",
-                          cursor: "pointer",
-                          fontSize: 12,
-                          fontWeight: 600,
-                          background: isInstalled
-                            ? "hsl(var(--border))"
-                            : "linear-gradient(135deg, #7c5cfc, #c084fc)",
-                          color: isInstalled ? "hsl(var(--fg))" : "white",
-                          transition: "all 150ms ease",
-                        }}
-                      >
-                        {isInstalled ? <Trash2 size={12} /> : <Download size={12} />}
-                        {isInstalled ? "Uninstall" : "Install"}
-                      </button>
-                      {(() => {
-                        const remote = remoteRaw.find((r) => r.id === plugin.id);
-                        const homepage = remote?.homepage;
-                        if (!homepage) return null;
-                        return (
-                          <a
-                            href={homepage}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            aria-label={`${plugin.name} homepage`}
-                            style={{
-                              display: "inline-flex",
-                              alignItems: "center",
-                              gap: 4,
-                              padding: "7px 10px",
-                              borderRadius: 8,
-                              border: "1px solid hsl(var(--border))",
-                              color: "hsl(var(--fg))",
-                              fontSize: 12,
-                              textDecoration: "none",
-                            }}
-                          >
-                            <ExternalLink size={12} />
-                          </a>
-                        );
-                      })()}
-                    </div>
-                  </div>
-                );
-              })
-            )}
-          </div>
-        </div>
-
-        {/* Footer */}
-        <div
-          style={{
-            padding: "10px 20px",
-            borderTop: "1px solid hsl(var(--border))",
-            textAlign: "center",
-            fontSize: 12,
-            color: "hsl(var(--fg-muted))",
-          }}
-        >
-          More plugins coming soon ·{" "}
-          <a
-            href="https://github.com/talstilkol/lumen-md"
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{ color: "hsl(var(--accent))" }}
-          >
-            Submit a plugin
-          </a>
+          )}
+          <label style={{ display: "flex", alignItems: "center", gap: 6 }}>
+            <Search size={14} aria-hidden />
+            <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder={t("pluginGallery.search")} aria-label={t("pluginGallery.search")} style={{ flex: 1, font: "inherit", padding: 4 }} />
+          </label>
+          {visible.map((entry) =>
+            row(
+              installed.find((p) => p.id === entry.id),
+              entry,
+            ),
+          )}
+          {fromFile.length > 0 && <strong style={{ fontSize: 13 }}>{t("plugins.fromFiles")}</strong>}
+          {fromFile.map((p) => row(p, undefined))}
         </div>
       </div>
     </div>

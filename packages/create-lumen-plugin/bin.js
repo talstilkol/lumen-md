@@ -6,12 +6,10 @@
  *   npx create-lumen-plugin my-cool-plugin
  *
  * Creates a directory `my-cool-plugin/` with:
- *   • package.json          — npm package metadata
- *   • src/index.ts          — plugin entry, registered via the Lumen plugin API
- *   • src/block.tsx         — example custom code-fence renderer
- *   • lumen-plugin.json     — plugin manifest (id / name / icon / commands)
- *   • README.md             — install/dev/publish instructions
- *   • tsconfig.json + vite config for build → ESM bundle for the registry
+ *   • lumen-plugin.json     — manifest: id, version, capabilities (each with a reason)
+ *   • main.js               — the plugin; runs in Lumen's QuickJS sandbox
+ *   • pack.mjs              — packs (and optionally signs) dist/<id>-<version>.lumenplugin.json
+ *   • package.json, README.md
  */
 
 import { promises as fs } from "node:fs";
@@ -40,12 +38,10 @@ async function main() {
   console.log(`\n✨  Created Lumen plugin at ./${name}\n`);
   console.log(`Next steps:`);
   console.log(`  cd ${name}`);
-  console.log(`  npm install`);
-  console.log(`  npm run dev          # rebuild on save`);
-  console.log(`  npm run build        # produce dist/${name}.js for the registry`);
+  console.log(`  edit lumen-plugin.json (id, capabilities) and main.js`);
+  console.log(`  npm run pack         # → dist/<id>-<version>.lumenplugin.json`);
   console.log(``);
-  console.log(`To install in your local Lumen instance:`);
-  console.log(`  Open Lumen → ⌘K → "Plugin gallery" → "Load unpacked" → pick dist/${name}.js`);
+  console.log(`Install it in Lumen: Plugins → "Install from file…" → pick the .lumenplugin.json`);
   console.log(``);
 }
 

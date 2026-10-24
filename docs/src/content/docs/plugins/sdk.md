@@ -1,98 +1,68 @@
 ---
 title: Plugin SDK
-description: Build your own Lumen plugin in 60 seconds with create-lumen-plugin.
+description: Build a Lumen plugin with create-lumen-plugin — a manifest, one JavaScript file, a bundle you can install or sign.
 ---
 
-Lumen plugins are tiny ESM modules that register custom blocks, commands,
-and sidebar panels. The host loads them via dynamic `import(url)` so
-there's no build pipeline to learn — write a function, ship a JS file.
+A Lumen plugin has three parts:
 
-## 30-second start
+- a manifest, `lumen-plugin.json`
+- one JavaScript file that runs in Lumen's sandbox
+- a bundle file, `.lumenplugin.json`, that users install
+
+There is no build step and no framework.
+
+## Start
 
 ```bash
-npx create-lumen-plugin my-cool-plugin
-cd my-cool-plugin
-npm install
-npm run dev
+npx create-lumen-plugin my-plugin     # or: node packages/create-lumen-plugin/bin.js my-plugin
+cd my-plugin
+npm run pack                          # → dist/<id>-<version>.lumenplugin.json
 ```
 
-Open Lumen → `⌘K` → **Plugin gallery** → **Load unpacked** → pick
-`dist/my-cool-plugin.js`.
+To try it, open Lumen → **Plugins** → **Install from file…**, pick the bundle, and tick the permissions it needs.
 
-## The API
+## The manifest
 
-Every plugin exports a default `activate(api)` function. The `api`
-argument has these methods:
-
-```ts
-interface LumenPluginAPI {
-  registerBlock(lang: string, component: ComponentType<{ source, meta }>): () => void;
-  registerCommand(cmd: { id, label, hint?, icon?, action }): () => void;
-  toast(message: string, kind?: "info" | "success" | "warning" | "error"): void;
-  getDocContent(): string;
-  setDocContent(content: string): void;
-  onDocChange(cb: (content: string) => void): () => void;
+```json
+{
+  "schema": 1,
+  "id": "dev.example.my-plugin",
+  "name": "My plugin",
+  "version": "0.1.0",
+  "description": "…",
+  "author": "You",
+  "license": "MIT",
+  "main": "main.js",
+  "capabilities": [
+    { "id": "document:read", "reason": "To count the words of the open note" },
+    { "id": "commands", "reason": "Adds the “My plugin” command" }
+  ]
 }
 ```
 
-`activate` may return a cleanup function that runs when the user disables
-or unloads the plugin — use it to call the unregister fns the API
-returned, plus tear down any timers / DOM you created.
+Ask only for what the plugin needs. The user sees every capability with your reason, and each one starts unticked.
 
-## Permissions model
+## The code
 
-`lumen-plugin.json` declares the permissions your plugin needs:
-
-| Permission | Granted by default | What it lets you do |
-| --- | :---: | --- |
-| `register-block` | ✅ | Add a code-fence renderer |
-| `register-command` | ✅ | Add palette entries |
-| `register-panel` | ✅ | Add a right-sidebar panel |
-| `read-doc` | ✅ | Read the active document |
-| `write-doc` | ✅ | Mutate the active document |
-| `workspace-read` | ❌ — prompts user | List + read every note |
-| `workspace-write` | ❌ — prompts user | Create / overwrite notes |
-| `network-fetch` | ❌ — prompts user | Make outbound HTTP requests |
-
-## Publishing
-
-1. `npm run build` produces `dist/<name>.js` — single ESM bundle, React
-   left external (Lumen ships its own).
-2. Push the dist to npm or any CDN (jsDelivr / unpkg).
-3. PR against
-   [`public/plugins/registry.json`](https://github.com/your-org/lumen) to
-   list your plugin. Required fields: `id`, `name`, `description`,
-   `version`, `icon`, `url`.
-
-## Example: a custom CSV-with-emoji-header block
-
-```tsx
-// src/index.ts
-import type { LumenPluginAPI } from "./types";
-import { EmojiCsv } from "./block";
-
-export default function activate(api: LumenPluginAPI) {
-  return api.registerBlock("emoji-csv", EmojiCsv);
-}
-
-// src/block.tsx
-export function EmojiCsv({ source }: { source: string }) {
-  const [head, ...rows] = source.split("\n");
-  const cols = head.split(",");
-  return (
-    <table>
-      <thead>
-        <tr>{cols.map((c) => <th key={c}>{c} 📊</th>)}</tr>
-      </thead>
-      <tbody>
-        {rows.map((r, i) => (
-          <tr key={i}>{r.split(",").map((c, j) => <td key={j}>{c}</td>)}</tr>
-        ))}
-      </tbody>
-    </table>
-  );
-}
+```js
+await lumen.commands.register({ id: "run", label: "My plugin" }, async () => {
+  const text = await lumen.document.getText();
+  await lumen.notifications.show(`${text.length} characters`);
+});
 ```
 
-That's the whole plugin. ` ```emoji-csv ` blocks now render with the
-emoji headers everywhere Lumen renders markdown.
+The code is an ES module running in QuickJS. It has no `fetch`, no DOM and no `import`. Panels and rendered blocks are trees of elements that Lumen draws. The full surface is in [Plugin API](/plugins/api/), and the rules are in [Sandbox and permissions](/plugins/sandbox/).
+
+## Signing
+
+`npm run pack:signed` signs the bundle with your Ed25519 key. Users who trust your key (see [Plugin signing keys](/plugins/signing/)) see the plugin as verified. An unsigned bundle installs only after an "unverified" warning.
+
+## Examples
+
+`public/plugins/examples/` holds three examples:
+
+- `word-stats`: a command, a panel and settings
+- `outline`: a panel that edits the note
+- `callout`: a code-block renderer that uses storage
+
+`node scripts/build-plugin-registry.mjs` packs them into the first-party registry.

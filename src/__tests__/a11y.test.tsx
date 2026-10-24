@@ -300,10 +300,7 @@ describe("axe a11y smoke", () => {
   });
 
   it("PluginGallery (open, mocked registry) renders no blockers", async () => {
-    vi.doMock("../storage/pluginMarketplace", () => ({
-      fetchPluginRegistry: async () => [],
-      installPlugin: async () => {},
-    }));
+    vi.stubGlobal("fetch", vi.fn(async () => new Response(JSON.stringify({ schema: 1, plugins: [] }))));
     const { PluginGallery } = await import("../ui/PluginGallery");
     const { container } = render(
       <PluginGallery open onClose={() => {}} />,
