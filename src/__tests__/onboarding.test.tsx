@@ -35,7 +35,13 @@ vi.mock("../storage/vault/location", async (orig) => {
   };
 });
 
-beforeAll(() => installFakeOpfs());
+beforeAll(async () => {
+  installFakeOpfs();
+  // The first dynamic import of the vault-location module (setup.ts reads the
+  // vault's place through it) transforms a large graph; load it once up front
+  // so a dialog's first status read isn't slower than waitFor's 1 s.
+  await import("../storage/vault/location");
+});
 beforeEach(() => localStorage.clear());
 afterEach(() => cleanup());
 
