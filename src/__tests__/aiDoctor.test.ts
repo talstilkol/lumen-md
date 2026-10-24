@@ -107,6 +107,25 @@ describe("runDoctor", () => {
     expect(find(report, "ollama.configured")?.fix?.command).toBe("ollama pull gemma3:12b");
   });
 
+  it("suggests a tool-calling model for the tool-calling repair on Hebrew notes", async () => {
+    localStorage.setItem("lumen.ollama.model", "aya-expanse:8b");
+    globalThis.fetch = fakeFetch((url) => {
+      if (url.endsWith("/api/tags")) return { status: 200, body: { models: [{ name: "aya-expanse:8b", details: { parameter_size: "8B", family: "cohere" } }] } };
+      if (url.endsWith("/api/show")) return { status: 200, body: { capabilities: ["completion"] } };
+      return OLLAMA_OK(url);
+    }) as unknown as typeof fetch;
+    const { useAppStore } = await import("../store/useStore");
+    useAppStore.setState({ locale: "he" });
+    const { runDoctor } = await import("../agents/doctor");
+    const { OLLAMA_CATALOG } = await import("../ai/modelCatalog");
+    const report = await runDoctor({ timeoutMs: 500 });
+    const f = find(report, "ollama.tools");
+    expect(f).toMatchObject({ status: "warn" });
+    const arg = f?.fix?.arg as string;
+    expect(arg).not.toBe("aya-expanse:8b");
+    expect(OLLAMA_CATALOG.find((e) => e.name === arg)?.tools).toBe(true);
+  });
+
   it("refuses a remote Ollama under local-only and offers the settings", async () => {
     localStorage.setItem("lumen.ollama.baseUrl", "http://ollama.example.com:11434");
     globalThis.fetch = fakeFetch(OLLAMA_OK) as unknown as typeof fetch;

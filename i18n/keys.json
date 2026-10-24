@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-10-18T00:09:36.217Z",
+  "generated_at": "2026-10-18T03:18:44.238Z",
   "source": "src/i18n/index.ts (en bundle)",
-  "count": 1407,
+  "count": 1411,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -1536,6 +1536,14 @@
       ]
     },
     {
+      "key": "vault.export.doneFolder",
+      "en": "Exported {n} files into the folder “{folder}”.",
+      "vars": [
+        "n",
+        "folder"
+      ]
+    },
+    {
       "key": "vault.export.failed",
       "en": "Export failed: {error}",
       "vars": [
@@ -1637,6 +1645,13 @@
       "en": "Links updated in {count} notes",
       "vars": [
         "count"
+      ]
+    },
+    {
+      "key": "tree.linksFailed",
+      "en": "Moved, but some links could not be updated: {error}",
+      "vars": [
+        "error"
       ]
     },
     {
@@ -1770,6 +1785,11 @@
       ]
     },
     {
+      "key": "clip.needsService",
+      "en": "This page can't be fetched from the browser on this deployment — it needs the research service (VITE_RESEARCH_ENDPOINT). Copy the part you want and use \"Clip from clipboard\".",
+      "vars": []
+    },
+    {
       "key": "research.consent.title",
       "en": "Research on the web?",
       "vars": []
@@ -1841,6 +1861,13 @@
       "en": "Alt text added: {done} of {count}",
       "vars": [
         "done",
+        "count"
+      ]
+    },
+    {
+      "key": "toast.digest.readFailed",
+      "en": "Digest not saved: {count} changed notes couldn't be read. Try again.",
+      "vars": [
         "count"
       ]
     },

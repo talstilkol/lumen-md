@@ -23,6 +23,13 @@ vi.mock("../ai/llm", async (orig) => ({
   chat: (...a: unknown[]) => chat(...(a as [])),
 }));
 vi.mock("../ui/AiToast", () => ({ showAiToast: vi.fn() }));
+type RerankItems = Array<Record<string, unknown>>;
+const rerankImpl = vi.fn(async (_q: string, items: RerankItems, _o?: { signal?: AbortSignal }) =>
+  items.map((i) => ({ ...i, rerankScore: 1 })),
+);
+vi.mock("../ai/reranker", () => ({
+  rerank: (...a: unknown[]) => rerankImpl(...(a as [string, RerankItems, { signal?: AbortSignal }])),
+}));
 
 import { SearchDialog } from "../ui/SearchDialog";
 import { useEntitlement, __setEntitlementEndpointForTesting } from "../billing/useEntitlement";
@@ -79,6 +86,30 @@ describe("Smart search gate", () => {
   });
 });
 
+describe("Smart search rerank", () => {
+  it("aborts the stale model rerank when the query changes", async () => {
+    searchHybrid.mockImplementation((async () => [
+      { path: "a.md", snippet: "a", score: 1 },
+      { path: "b.md", snippet: "b", score: 0.5 },
+    ]) as unknown as () => Promise<never[]>);
+    const signals: AbortSignal[] = [];
+    rerankImpl.mockImplementationOnce((_q, _items, o) => {
+      signals.push(o!.signal!);
+      return new Promise(() => {}); // a long inference still in the worker
+    });
+    try {
+      openOn("smart");
+      fireEvent.change(screen.getByRole("textbox"), { target: { value: "first" } });
+      await waitFor(() => expect(signals).toHaveLength(1));
+      expect(signals[0].aborted).toBe(false);
+      fireEvent.change(screen.getByRole("textbox"), { target: { value: "first second" } });
+      expect(signals[0].aborted).toBe(true);
+    } finally {
+      searchHybrid.mockImplementation(async () => []);
+    }
+  });
+});
+
 describe("Ask Workspace spends the AI quota", () => {
   it("asks chat() to charge the question itself, when it is actually sent", async () => {
     __setEntitlementEndpointForTesting("https://billing.lumen.test/entitlements");
@@ -90,6 +121,33 @@ describe("Ask Workspace spends the AI quota", () => {
     expect((chat.mock.calls[0] as unknown[])[1]).toMatchObject({ ownPrompt: true });
     // Nothing is counted up front: chat() charges at dispatch (llm tests).
     expect(getAiUsage()).toBe(0);
+  });
+});
+
+describe("Ask Workspace: overlapping questions", () => {
+  it("a second question aborts the first, and closing still aborts the second", async () => {
+    const signals: AbortSignal[] = [];
+    chat.mockImplementation(
+      (async (_m: unknown, o: { signal: AbortSignal }) =>
+        new Promise<string>((_, reject) => {
+          signals.push(o.signal);
+          o.signal.addEventListener("abort", () => reject(o.signal.reason));
+        })) as never,
+    );
+    (window as unknown as { __lumenSearchMode?: string }).__lumenSearchMode = "ai";
+    const { rerender } = render(<SearchDialog open onClose={() => {}} onOpenFile={() => {}} />);
+    const input = screen.getByRole("textbox");
+    fireEvent.change(input, { target: { value: "first?" } });
+    fireEvent.keyDown(input, { key: "Enter" });
+    await waitFor(() => expect(signals).toHaveLength(1));
+    fireEvent.change(input, { target: { value: "second?" } });
+    fireEvent.keyDown(input, { key: "Enter" });
+    await waitFor(() => expect(signals).toHaveLength(2));
+    expect(signals[0].aborted).toBe(true);
+    await new Promise((r) => setTimeout(r, 0)); // the first one's finally runs
+    rerender(<SearchDialog open={false} onClose={() => {}} onOpenFile={() => {}} />);
+    await waitFor(() => expect(signals[1].aborted).toBe(true));
+    chat.mockImplementation(async () => "answer");
   });
 });
 

@@ -108,6 +108,29 @@ describe("suggestions", () => {
   });
 });
 
+describe("cancelling during the model critic", () => {
+  it("Esc during the critic's request aborts that request and the run reports aborted", async () => {
+    const ctrl = new AbortController();
+    let criticSignal: AbortSignal | undefined;
+    // The agent's answers are unusable JSON; the tiny-tier call is the critic.
+    registerExecutor(
+      fakeExecutor((req) => {
+        if (req.tier !== "tiny") return { content: "not json", toolCalls: [], model: "m", usage: { inputTokens: 1, outputTokens: 1, estimated: true } };
+        criticSignal = req.signal;
+        return new Promise((_, reject) => {
+          req.signal?.addEventListener("abort", () => reject(new DOMException("aborted", "AbortError")));
+          ctrl.abort(); // the user presses Esc while the critic is thinking
+        });
+      }),
+    );
+    setModelCritic((f, v) => modelReview(f, v).catch(() => null));
+    const run = await runAgent(jsonAgent, { text: "x" }, { signal: ctrl.signal });
+    expect(criticSignal).toBe(ctrl.signal);
+    expect(criticSignal?.aborted).toBe(true);
+    expect(run.status).toBe("aborted");
+  });
+});
+
 describe("AiSuggestionsPanel", () => {
   it("shows the failure and runs an action, then asks the app to re-run the command", async () => {
     const reruns: string[] = [];

@@ -83,6 +83,9 @@ export function addConnectSrc(csp: string, origins: readonly string[]): string {
     found = true;
     const trailing = m[3].match(/\s*$/)?.[0] ?? "";
     const values = m[3].trim().split(/\s+/).filter(Boolean);
+    // A deliberately network-less policy (the live-js runner) stays so:
+    // any added source would make the browser ignore 'none'.
+    if (values.includes("'none'")) return part;
     for (const o of origins) if (!values.includes(o)) values.push(o);
     return `${m[1]}connect-src${m[2]}${values.join(" ")}${trailing}`;
   });

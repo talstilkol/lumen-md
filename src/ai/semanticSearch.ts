@@ -306,7 +306,7 @@ function cosine(a: Float32Array, b: Float32Array): number {
   return denom === 0 ? 0 : dot / denom;
 }
 
-export async function searchSemantic(query: string, k = 8): Promise<SemanticHit[]> {
+export async function searchSemantic(query: string, k = 8, filter?: (path: string) => boolean): Promise<SemanticHit[]> {
   if (!query.trim()) return [];
   const index = await loadIndex();
   if (!Object.keys(index.files).length) return [];
@@ -318,6 +318,7 @@ export async function searchSemantic(query: string, k = 8): Promise<SemanticHit[
   }
   const all: SemanticHit[] = [];
   for (const file of Object.values(index.files)) {
+    if (filter && !filter(file.path)) continue;
     let best: { chunk: ChunkRecord; score: number } | null = null;
     for (const chunk of file.chunks) {
       const s = cosine(qVec, vectorOf(chunk));
@@ -335,10 +336,15 @@ export async function searchSemantic(query: string, k = 8): Promise<SemanticHit[
  * fuses them with reciprocal rank weighting. The result favours documents
  * that match BOTH the keyword and the semantic intent.
  */
-export async function searchHybrid(query: string, k = 8): Promise<SemanticHit[]> {
+export async function searchHybrid(
+  query: string,
+  k = 8,
+  /** `filter`: search only these paths (scoped before the `k` limit). */
+  opts: { filter?: (path: string) => boolean } = {},
+): Promise<SemanticHit[]> {
   const [bmHits, semHits] = await Promise.all([
-    searchWorkspace(query, { limit: k * 2 }).catch(() => []),
-    searchSemantic(query, k * 2).catch(() => [] as SemanticHit[]),
+    searchWorkspace(query, { limit: k * 2, filter: opts.filter }).catch(() => []),
+    searchSemantic(query, k * 2, opts.filter).catch(() => [] as SemanticHit[]),
   ]);
   // Reciprocal Rank Fusion (k=60 is the conventional constant).
   const fusion = new Map<string, { score: number; snippet: string }>();
