@@ -61,7 +61,7 @@ async function openHistory(page: import("@playwright/test").Page) {
   return panel;
 }
 
-test("a version is kept without saving, restores, and the restore is undoable", async ({ page }) => {
+test("G4: a version is kept without saving, restores, and the restore is undoable", async ({ page }) => {
   await page.keyboard.press("Meta+1");
   const editor = page.locator(".cm-content").first();
   await editor.click();
@@ -99,7 +99,7 @@ test("a version is kept without saving, restores, and the restore is undoable", 
   await expect(again.locator("button").filter({ hasText: /before restore/i }).first()).toBeVisible();
 });
 
-test("auto-backups no longer create files in the vault", async ({ page }) => {
+test("G10: auto-backups no longer create files in the vault", async ({ page }) => {
   // Let the auto-backup run once (it fires 30 s after the last edit; the
   // pagehide flush forces it now).
   await page.locator(".cm-content").first().click();
@@ -125,7 +125,7 @@ test("auto-backups no longer create files in the vault", async ({ page }) => {
  * thread: vault writes go through a sync-access-handle worker. Remove the
  * method here so every engine exercises that path.
  */
-test("saving to the vault works without createWritable (Safari path)", async ({ page }) => {
+test("G9: saving to the vault works without createWritable (Safari path)", async ({ page }) => {
   await page.addInitScript(() => {
     const proto = (globalThis as { FileSystemFileHandle?: { prototype: Record<string, unknown> } }).FileSystemFileHandle?.prototype;
     if (proto) delete proto.createWritable;
@@ -150,7 +150,7 @@ test("saving to the vault works without createWritable (Safari path)", async ({ 
 });
 
 /** Part B — safe files (T46): rename keeps links, delete is undoable. */
-test("renaming a note rewrites links to it; deleting it goes to the trash with Undo", async ({ page }) => {
+test("G5, G6: renaming a note rewrites links to it; deleting it goes to the trash with Undo", async ({ page }) => {
   test.skip(!(await opfsWritable(page)), "OPFS writes are unavailable in this engine's test context");
   const run = (id: string) => page.evaluate((cmd) => window.dispatchEvent(new CustomEvent("lumen-run-command", { detail: { id: cmd } })), id);
   await page.keyboard.press("Meta+1");
@@ -199,7 +199,7 @@ test("renaming a note rewrites links to it; deleting it goes to the trash with U
 });
 
 /** Part C — export everything (T47): the vault comes out as a .zip with paths. */
-test("the whole vault exports as a zip", async ({ page }) => {
+test("G7: the whole vault exports as a zip", async ({ page }) => {
   test.skip(!(await opfsWritable(page)), "OPFS writes are unavailable in this engine's test context");
   const run = (id: string) => page.evaluate((cmd) => window.dispatchEvent(new CustomEvent("lumen-run-command", { detail: { id: cmd } })), id);
   await page.keyboard.press("Meta+1");
@@ -245,7 +245,7 @@ test("the whole vault exports as a zip", async ({ page }) => {
  * merge half of the pull (`integrateIntoVault`) and the real dialogs are
  * what is tested. The modules are imported from the dev server.
  */
-test("git pull merges three ways, opens the conflict screen, keeps unsaved edits, and deletes nothing", async ({ page }) => {
+test("G2: git pull merges three ways, opens the conflict screen, keeps unsaved edits, and deletes nothing", async ({ page }) => {
   const dev = await page.evaluate(() => !!document.querySelector('script[src*="/@vite/client"]'));
   test.skip(!dev, "imports the git modules from the dev server");
   test.skip(!(await opfsWritable(page)), "OPFS writes are unavailable in this engine's test context");
@@ -344,7 +344,14 @@ test("git pull merges three ways, opens the conflict screen, keeps unsaved edits
   expect(after.untracked).toBe("mine, never committed");
 });
 
-/* ─── Plan 3.7: the rest of the G1–G11 matrix ─────────────────────────── */
+/* ─── Plan 3.7: the rest of the G1–G11 matrix ───────────────────────────
+ * Every data-loss path from the weakness list has a test here, its id first
+ * in the title: G1 durable storage · G2 git pull · G3 public clone + LFS ·
+ * G4 history · G5 rename · G6 trash · G7 export · G9 failed writes ·
+ * G10 backups out of the vault · G11 Obsidian/Notion import.
+ * G8 (sync providers connected, settings → connect → sync) is
+ * e2e/sync-providers.spec.ts on the plan 3.5 stack (#291).
+ */
 
 const runCmd = (page: import("@playwright/test").Page, id: string) =>
   page.evaluate((cmd) => window.dispatchEvent(new CustomEvent("lumen-run-command", { detail: { id: cmd } })), id);
@@ -432,7 +439,6 @@ test("G3: a public repository clones without a token, LFS pointers are named", a
     const url = new URL(req.url());
     if (req.method() === "OPTIONS") return route.fulfill({ status: 204, headers: { "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Headers": "*", "Access-Control-Allow-Methods": "GET, POST" } });
     const headers = await req.allHeaders();
-    console.log("G3 route", req.method(), url.pathname, url.search);
     if (headers.authorization) authHeaders.push(headers.authorization);
     const out = spawnSync(backend, [], {
       input: req.postDataBuffer() ?? Buffer.alloc(0),
@@ -448,7 +454,6 @@ test("G3: a public repository clones without a token, LFS pointers are named", a
       maxBuffer: 64 * 1024 * 1024,
     });
     const raw = out.stdout as Buffer;
-    console.log("G3 backend", out.status, raw.length, String(out.stderr).slice(0, 200));
     const split = raw.indexOf("\r\n\r\n");
     const head = raw.subarray(0, split).toString("latin1");
     const respHeaders: Record<string, string> = { "Access-Control-Allow-Origin": "*" };
