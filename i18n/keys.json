@@ -1,7 +1,7 @@
 {
   "version": 1,
-  "generated_at": "2026-10-24T15:48:34.724Z",
-  "source": "src/i18n/index.ts (en bundle)",
+  "generated_at": "2026-10-24T18:17:25.727Z",
+  "source": "src/i18n/index.ts (en bundle) + src/i18n/lazy/*.json",
   "count": 1470,
   "entries": [
     {
@@ -1655,49 +1655,6 @@
       "vars": []
     },
     {
-      "key": "models.consent.title",
-      "en": "Download a model to this device?",
-      "vars": []
-    },
-    {
-      "key": "models.consent.body",
-      "en": "{purpose}\\n\\n{name} · {size}. It is downloaded once, checked against its published checksum and kept in this browser's storage. Nothing you write is sent anywhere.\\n\\nLicence: {license}. {attribution}",
-      "vars": [
-        "purpose",
-        "name",
-        "size",
-        "license",
-        "attribution"
-      ]
-    },
-    {
-      "key": "models.consent.ok",
-      "en": "Download {size}",
-      "vars": [
-        "size"
-      ]
-    },
-    {
-      "key": "models.purpose.translateEnHe",
-      "en": "Translation from English to Hebrew",
-      "vars": []
-    },
-    {
-      "key": "models.purpose.translateHeEn",
-      "en": "Translation from Hebrew to English",
-      "vars": []
-    },
-    {
-      "key": "models.purpose.nerHe",
-      "en": "Finding names, places and organisations in Hebrew text",
-      "vars": []
-    },
-    {
-      "key": "models.purpose.imageSearch",
-      "en": "Searching images by text",
-      "vars": []
-    },
-    {
       "key": "spell.he.downloadConfirm",
       "en": "Download the Hebrew dictionary (Hspell word list, 5.7 MB, AGPL-3.0) from GitHub to this device? Your text is never sent anywhere; spelling is checked here.",
       "vars": []
@@ -2937,109 +2894,6 @@
       "en": "Action items failed: {error}",
       "vars": [
         "error"
-      ]
-    },
-    {
-      "key": "mt.layer.name.chrome",
-      "en": "Chrome's built-in translator",
-      "vars": []
-    },
-    {
-      "key": "mt.layer.name.opus",
-      "en": "Opus-MT (on this device)",
-      "vars": []
-    },
-    {
-      "key": "mt.layer.name.m2m100",
-      "en": "M2M100 (on this device)",
-      "vars": []
-    },
-    {
-      "key": "mt.layer.name.llm",
-      "en": "the AI model",
-      "vars": []
-    },
-    {
-      "key": "mt.layer.chrome.absent",
-      "en": "this browser has no built-in translator",
-      "vars": []
-    },
-    {
-      "key": "mt.layer.chrome.pair",
-      "en": "Chrome has no language pack for this pair",
-      "vars": []
-    },
-    {
-      "key": "mt.layer.opus.pair",
-      "en": "no converted model for this pair",
-      "vars": []
-    },
-    {
-      "key": "mt.layer.opus.noHost",
-      "en": "the converted models have no host yet (plan 15.9)",
-      "vars": []
-    },
-    {
-      "key": "mt.layer.opus.noFiles",
-      "en": "the converted model has no checksums yet (run the conversion workflow)",
-      "vars": []
-    },
-    {
-      "key": "mt.layer.m2m100.pair",
-      "en": "M2M100 does not cover this pair",
-      "vars": []
-    },
-    {
-      "key": "mt.layer.m2m100.purpose",
-      "en": "Translation between languages the Hebrew models do not cover",
-      "vars": []
-    },
-    {
-      "key": "mt.layer.m2m100.attribution",
-      "en": "M2M100-418M © Meta AI, licensed under the MIT License; ONNX conversion by Xenova.",
-      "vars": []
-    },
-    {
-      "key": "mt.layer.failed",
-      "en": "the model failed to load",
-      "vars": []
-    },
-    {
-      "key": "mt.layer.declined",
-      "en": "download declined",
-      "vars": []
-    },
-    {
-      "key": "mt.layer.sourceUnknown",
-      "en": "the document's language could not be told",
-      "vars": []
-    },
-    {
-      "key": "mt.size.approx",
-      "en": "about {size}",
-      "vars": [
-        "size"
-      ]
-    },
-    {
-      "key": "toast.translatedWith",
-      "en": "Translated with {layer}",
-      "vars": [
-        "layer"
-      ]
-    },
-    {
-      "key": "toast.translatedWithUnmeasured",
-      "en": "Translated with {layer} — its quality on this pair is not measured yet",
-      "vars": [
-        "layer"
-      ]
-    },
-    {
-      "key": "toast.localMtUnavailable",
-      "en": "Local translation was not available ({why}); the AI model translated instead.",
-      "vars": [
-        "why"
       ]
     },
     {
@@ -7901,6 +7755,152 @@
       "key": "chart.alternatives",
       "en": "Chart suggestions",
       "vars": []
+    },
+    {
+      "key": "models.consent.title",
+      "en": "Download a model to this device?",
+      "vars": []
+    },
+    {
+      "key": "models.consent.body",
+      "en": "{purpose}\n\n{name} · {size}. It is downloaded once, checked against its published checksum and kept in this browser's storage. Nothing you write is sent anywhere.\n\nLicence: {license}. {attribution}",
+      "vars": [
+        "purpose",
+        "name",
+        "size",
+        "license",
+        "attribution"
+      ]
+    },
+    {
+      "key": "models.consent.ok",
+      "en": "Download {size}",
+      "vars": [
+        "size"
+      ]
+    },
+    {
+      "key": "models.purpose.translateEnHe",
+      "en": "Translation from English to Hebrew",
+      "vars": []
+    },
+    {
+      "key": "models.purpose.translateHeEn",
+      "en": "Translation from Hebrew to English",
+      "vars": []
+    },
+    {
+      "key": "models.purpose.nerHe",
+      "en": "Finding names, places and organisations in Hebrew text",
+      "vars": []
+    },
+    {
+      "key": "models.purpose.imageSearch",
+      "en": "Searching images by text",
+      "vars": []
+    },
+    {
+      "key": "mt.layer.name.chrome",
+      "en": "Chrome's built-in translator",
+      "vars": []
+    },
+    {
+      "key": "mt.layer.name.opus",
+      "en": "Opus-MT (on this device)",
+      "vars": []
+    },
+    {
+      "key": "mt.layer.name.m2m100",
+      "en": "M2M100 (on this device)",
+      "vars": []
+    },
+    {
+      "key": "mt.layer.name.llm",
+      "en": "the AI model",
+      "vars": []
+    },
+    {
+      "key": "mt.layer.chrome.absent",
+      "en": "this browser has no built-in translator",
+      "vars": []
+    },
+    {
+      "key": "mt.layer.chrome.pair",
+      "en": "Chrome has no language pack for this pair",
+      "vars": []
+    },
+    {
+      "key": "mt.layer.opus.pair",
+      "en": "no converted model for this pair",
+      "vars": []
+    },
+    {
+      "key": "mt.layer.opus.noHost",
+      "en": "the converted models have no host yet (plan 15.9)",
+      "vars": []
+    },
+    {
+      "key": "mt.layer.opus.noFiles",
+      "en": "the converted model has no checksums yet (run the conversion workflow)",
+      "vars": []
+    },
+    {
+      "key": "mt.layer.m2m100.pair",
+      "en": "M2M100 does not cover this pair",
+      "vars": []
+    },
+    {
+      "key": "mt.layer.m2m100.purpose",
+      "en": "Translation between languages the Hebrew models do not cover",
+      "vars": []
+    },
+    {
+      "key": "mt.layer.m2m100.attribution",
+      "en": "M2M100-418M © Meta AI, licensed under the MIT License; ONNX conversion by Xenova.",
+      "vars": []
+    },
+    {
+      "key": "mt.layer.failed",
+      "en": "the model failed to load",
+      "vars": []
+    },
+    {
+      "key": "mt.layer.declined",
+      "en": "download declined",
+      "vars": []
+    },
+    {
+      "key": "mt.layer.sourceUnknown",
+      "en": "the document's language could not be told",
+      "vars": []
+    },
+    {
+      "key": "mt.size.approx",
+      "en": "about {size}",
+      "vars": [
+        "size"
+      ]
+    },
+    {
+      "key": "toast.translatedWith",
+      "en": "Translated with {layer}",
+      "vars": [
+        "layer"
+      ]
+    },
+    {
+      "key": "toast.translatedWithUnmeasured",
+      "en": "Translated with {layer} — its quality on this pair is not measured yet",
+      "vars": [
+        "layer"
+      ]
+    },
+    {
+      "key": "toast.localMtUnavailable",
+      "en": "Local translation was not available ({why}); the AI model translated instead.",
+      "vars": [
+        "why"
+      ]
     }
   ]
 }
