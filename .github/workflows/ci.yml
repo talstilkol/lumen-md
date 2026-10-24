@@ -49,6 +49,9 @@ jobs:
       - name: Definition of done for every ✅ task
         run: npm run dod -- --done
 
+      - name: Docs sync (docs name only commands and scripts that exist; no hand-typed counts in README)
+        run: npm run -s docs:sync
+
       - name: Test
         run: npm run test
 
