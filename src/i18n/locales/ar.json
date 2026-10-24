@@ -1456,5 +1456,17 @@
   "mt.size.approx": "نحو {size}",
   "toast.translatedWith": "تمت الترجمة باستخدام {layer}",
   "toast.translatedWithUnmeasured": "تمت الترجمة باستخدام {layer} — لم تُقَس جودته لهذا الزوج بعد",
-  "toast.localMtUnavailable": "لم تتوفر الترجمة المحلية ({why})؛ ترجم نموذج الذكاء الاصطناعي بدلاً منها."
+  "toast.localMtUnavailable": "لم تتوفر الترجمة المحلية ({why})؛ ترجم نموذج الذكاء الاصطناعي بدلاً منها.",
+  "cmd.nikud.add": "العبرية: إضافة التنقيط",
+  "cmd.nikud.add.hint": "تنقيط التحديد (أو الملاحظة كلها) على هذا الجهاز",
+  "cmd.nikud.partial": "العبرية: تنقيط جزئي",
+  "cmd.nikud.partial.hint": "تنقيط الكلمات التي يمكن قراءتها بأكثر من طريقة فقط",
+  "cmd.nikud.remove": "العبرية: إزالة التنقيط",
+  "cmd.nikud.remove.hint": "إزالة علامات التنقيط من التحديد (أو الملاحظة كلها)",
+  "toast.nikud.working": "جارٍ التنقيط على هذا الجهاز…",
+  "toast.nikud.nothing": "لا يوجد نص عبري لتغييره.",
+  "toast.nikud.noHost": "نموذج التنقيط غير متاح للتنزيل بعد (لم يُعدّ مكان استضافته).",
+  "toast.nikud.declined": "يتطلب التنقيط تنزيل النموذج؛ لم يتغير شيء.",
+  "toast.nikud.failed": "فشل التنقيط: {error}",
+  "models.purpose.nikud": "التنقيط العبري على هذا الجهاز"
 }

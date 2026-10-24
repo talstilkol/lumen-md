@@ -9,12 +9,13 @@
  * while CONVERTED_MODELS_BASE is null.
  */
 
-export type ConvertedDtype = "q8" | "q4f16";
+/** fp32: a model published as its authors ship it (Nakdimon, plan 6.3), no quantisation. */
+export type ConvertedDtype = "q8" | "q4f16" | "fp32";
 
 export interface ConvertedModel {
   /** Folder name on the host, and the registry id. */
   id: string;
-  task: "translation" | "token-classification" | "zero-shot-image-classification";
+  task: "translation" | "token-classification" | "zero-shot-image-classification" | "nikud";
   /** What the model is for, as an i18n key. */
   purposeKey: string;
 }
@@ -24,6 +25,7 @@ export const CONVERTED_MODELS: ConvertedModel[] = [
   { id: "opus-mt-tc-big-he-en", task: "translation", purposeKey: "models.purpose.translateHeEn" },
   { id: "dictabert-ner", task: "token-classification", purposeKey: "models.purpose.nerHe" },
   { id: "siglip-base-patch16-256-multilingual", task: "zero-shot-image-classification", purposeKey: "models.purpose.imageSearch" },
+  { id: "nakdimon", task: "nikud", purposeKey: "models.purpose.nikud" },
 ];
 
 /**

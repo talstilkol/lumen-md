@@ -69,6 +69,18 @@ export function isLocaleAvailable(locale: Locale): boolean {
 type Strings = Record<string, string>;
 
 const en: Strings = {
+  "cmd.nikud.add": "Hebrew: add niqqud",
+  "cmd.nikud.add.hint": "Point the selection (or the whole note) on this device",
+  "cmd.nikud.partial": "Hebrew: add partial niqqud",
+  "cmd.nikud.partial.hint": "Point only the words that could be read more than one way",
+  "cmd.nikud.remove": "Hebrew: remove niqqud",
+  "cmd.nikud.remove.hint": "Strip the vowel points from the selection (or the whole note)",
+  "toast.nikud.working": "Adding niqqud on this device…",
+  "toast.nikud.nothing": "No Hebrew text to change.",
+  "toast.nikud.noHost": "The niqqud model is not available to download yet (its host is not set up).",
+  "toast.nikud.declined": "Niqqud needs the model download; nothing was changed.",
+  "toast.nikud.failed": "Niqqud failed: {error}",
+  "models.purpose.nikud": "Hebrew niqqud (vowel points) on this device",
   // Toolbar
   "toolbar.tagline": "Markdown, illuminated",
   "toolbar.new": "New",

@@ -1,9 +1,71 @@
 {
   "version": 1,
-  "generated_at": "2026-10-24T11:11:32.890Z",
+  "generated_at": "2026-10-24T15:48:34.724Z",
   "source": "src/i18n/index.ts (en bundle)",
-  "count": 1458,
+  "count": 1470,
   "entries": [
+    {
+      "key": "cmd.nikud.add",
+      "en": "Hebrew: add niqqud",
+      "vars": []
+    },
+    {
+      "key": "cmd.nikud.add.hint",
+      "en": "Point the selection (or the whole note) on this device",
+      "vars": []
+    },
+    {
+      "key": "cmd.nikud.partial",
+      "en": "Hebrew: add partial niqqud",
+      "vars": []
+    },
+    {
+      "key": "cmd.nikud.partial.hint",
+      "en": "Point only the words that could be read more than one way",
+      "vars": []
+    },
+    {
+      "key": "cmd.nikud.remove",
+      "en": "Hebrew: remove niqqud",
+      "vars": []
+    },
+    {
+      "key": "cmd.nikud.remove.hint",
+      "en": "Strip the vowel points from the selection (or the whole note)",
+      "vars": []
+    },
+    {
+      "key": "toast.nikud.working",
+      "en": "Adding niqqud on this device…",
+      "vars": []
+    },
+    {
+      "key": "toast.nikud.nothing",
+      "en": "No Hebrew text to change.",
+      "vars": []
+    },
+    {
+      "key": "toast.nikud.noHost",
+      "en": "The niqqud model is not available to download yet (its host is not set up).",
+      "vars": []
+    },
+    {
+      "key": "toast.nikud.declined",
+      "en": "Niqqud needs the model download; nothing was changed.",
+      "vars": []
+    },
+    {
+      "key": "toast.nikud.failed",
+      "en": "Niqqud failed: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "models.purpose.nikud",
+      "en": "Hebrew niqqud (vowel points) on this device",
+      "vars": []
+    },
     {
       "key": "toolbar.tagline",
       "en": "Markdown, illuminated",

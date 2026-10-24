@@ -54,7 +54,7 @@ const defaultEnv = (consent: ConsentDeps): Env => ({
   storage: typeof localStorage === "undefined" ? undefined : localStorage,
 });
 
-async function dtypeOf(env: Env): Promise<ConvertedDtype> {
+async function dtypeOf(env: Env): Promise<Extract<ConvertedDtype, "q8" | "q4f16">> {
   return translationDtypeFor(await env.device());
 }
 

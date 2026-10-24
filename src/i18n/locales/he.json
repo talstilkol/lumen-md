@@ -1456,5 +1456,17 @@
   "mt.size.approx": "בערך {size}",
   "toast.translatedWith": "תורגם באמצעות {layer}",
   "toast.translatedWithUnmeasured": "תורגם באמצעות {layer} — האיכות שלו בזוג הזה עדיין לא נמדדה",
-  "toast.localMtUnavailable": "תרגום מקומי לא היה זמין ({why}); מודל ה-AI תרגם במקומו."
+  "toast.localMtUnavailable": "תרגום מקומי לא היה זמין ({why}); מודל ה-AI תרגם במקומו.",
+  "cmd.nikud.add": "עברית: הוספת ניקוד",
+  "cmd.nikud.add.hint": "ניקוד הבחירה (או הפתק כולו) במכשיר",
+  "cmd.nikud.partial": "עברית: ניקוד חלקי",
+  "cmd.nikud.partial.hint": "ניקוד רק של מילים שאפשר לקרוא ביותר מדרך אחת",
+  "cmd.nikud.remove": "עברית: הסרת ניקוד",
+  "cmd.nikud.remove.hint": "הסרת סימני הניקוד מהבחירה (או מהפתק כולו)",
+  "toast.nikud.working": "מוסיף ניקוד במכשיר…",
+  "toast.nikud.nothing": "אין טקסט עברי לשנות.",
+  "toast.nikud.noHost": "מודל הניקוד עדיין לא זמין להורדה (האחסון שלו עוד לא הוגדר).",
+  "toast.nikud.declined": "הניקוד דורש להוריד את המודל; שום דבר לא השתנה.",
+  "toast.nikud.failed": "הניקוד נכשל: {error}",
+  "models.purpose.nikud": "ניקוד עברי במכשיר"
 }
