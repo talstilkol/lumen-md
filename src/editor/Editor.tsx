@@ -671,6 +671,33 @@ export const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
     return () => window.removeEventListener("lumen-mobile-insert", onInsert);
   }, []);
 
+  // Plugins (plan 11.2): `lumen-plugin-insert` {text} replaces the selection
+  // with the text; `lumen-editor-selection` fills detail.result with the
+  // selection. preventDefault() tells the sender the editor handled it.
+  useEffect(() => {
+    function onPluginInsert(e: Event) {
+      const view = viewRef.current;
+      const text = (e as CustomEvent<{ text?: string }>).detail?.text;
+      if (!view || typeof text !== "string") return;
+      e.preventDefault();
+      const { from, to } = view.state.selection.main;
+      view.dispatch({ changes: { from, to, insert: text }, selection: { anchor: from + text.length } });
+    }
+    function onSelection(e: Event) {
+      const view = viewRef.current;
+      const detail = (e as CustomEvent<{ result?: { from: number; to: number; text: string } | null }>).detail;
+      if (!view || !detail) return;
+      const { from, to } = view.state.selection.main;
+      detail.result = { from, to, text: view.state.sliceDoc(from, to) };
+    }
+    window.addEventListener("lumen-plugin-insert", onPluginInsert);
+    window.addEventListener("lumen-editor-selection", onSelection);
+    return () => {
+      window.removeEventListener("lumen-plugin-insert", onPluginInsert);
+      window.removeEventListener("lumen-editor-selection", onSelection);
+    };
+  }, []);
+
   // `lumen-reveal-line` {line} (1-based): jump to and select that line —
   // used by vault citations (T29). With `content` it waits until the
   // just-opened note has actually loaded into the editor.

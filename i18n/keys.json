@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-10-24T15:28:20.440Z",
+  "generated_at": "2026-10-24T15:41:01.338Z",
   "source": "src/i18n/index.ts (en bundle)",
-  "count": 1512,
+  "count": 1515,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -2383,6 +2383,23 @@
     {
       "key": "privacy.cat.plugin",
       "en": "Plugin — sent to an address you allowed the plugin",
+      "vars": []
+    },
+    {
+      "key": "plugins.block.loading",
+      "en": "Rendering with the plugin…",
+      "vars": []
+    },
+    {
+      "key": "plugins.block.failed",
+      "en": "The plugin could not render this block: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "plugins.panel.close",
+      "en": "Close the plugin panel",
       "vars": []
     },
     {

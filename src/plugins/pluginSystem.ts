@@ -152,6 +152,12 @@ export function unregisterPlugin(pluginId: string): void {
   plugins.delete(pluginId);
 }
 
+/** Commands of a sandboxed plugin (plan 11.2): kept with the built-in plugins' commands, under its id. */
+export function setSandboxedPluginCommands(pluginId: string, cmds: LumenCommand[]): void {
+  if (cmds.length) pluginCommands.set(pluginId, cmds);
+  else pluginCommands.delete(pluginId);
+}
+
 /** Get all commands from all active plugins */
 export function getPluginCommands(): LumenCommand[] {
   return Array.from(pluginCommands.values()).flat();

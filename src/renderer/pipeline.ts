@@ -1,3 +1,4 @@
+import { pluginForLang } from "../plugins/runtime/rendererRegistry";
 import { headingSlugger } from "../lib/slug";
 import { unified } from "unified";
 import type { Processor } from "unified";
@@ -113,7 +114,16 @@ function remarkLumenBlocks() {
   return (tree: MdastRoot) => {
     visit(tree, "code", (node: Code) => {
       const lang = (node.lang ?? "").toLowerCase();
-      if (!SPECIAL_LANGS.has(lang)) return;
+      if (!SPECIAL_LANGS.has(lang)) {
+        // A language a plugin renders (plan 11.2): one tag, the plugin is found by language.
+        if (pluginForLang(lang)) {
+          const d = (node.data ?? (node.data = {})) as Record<string, unknown>;
+          d.hName = "lumen-pluginblock";
+          d.hProperties = { lang, meta: node.meta ?? "" };
+          d.hChildren = [{ type: "text", value: node.value ?? "" }];
+        }
+        return;
+      }
       // Aliases.
       let tag: string;
       if (lang === "json-table") tag = "lumen-jsontable";
