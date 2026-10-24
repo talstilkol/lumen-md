@@ -606,18 +606,16 @@ export function useCommands({
             const { localLlmAvailable } = await import("../ai/localLlm");
             const status = localLlmAvailable();
             if (!status.available) {
-              showAiToast(
-                `Privacy Mode unavailable: ${status.reason}. Falls back to cloud AI.`,
+              showAiToast(t("toast.privacyModeUnavailableFallsBack", { reason: status.reason ?? "" }),
                 "error",
               );
               return;
             }
-            showAiToast(
-              "🛡️  Privacy Mode ON — the first prompt downloads a model sized for this GPU into your browser (⌘K → AI: Local Models to choose); later prompts are fully local.",
+            showAiToast(t("toast.privacyModeOnTheFirst"),
               "info",
             );
           } else {
-            showAiToast("🌐 Privacy Mode OFF — switched back to cloud AI", "info");
+            showAiToast(t("toast.privacyModeOffSwitchedBack"), "info");
           }
           toggleLocalAi();
         },
@@ -686,11 +684,11 @@ export function useCommands({
         group: t("group.tools"),
         action: async () => {
           try {
-            showAiToast("🏷️  Suggesting tags…", "info");
+            showAiToast(t("toast.suggestingTags"), "info");
             const { suggestTags, mergeTagsIntoFrontmatter } = await import("../ai/agents");
             const tags = await suggestTags(doc.content);
             if (tags.length === 0) {
-              showAiToast("No tag suggestions returned", "info");
+              showAiToast(t("toast.noTagSuggestionsReturned"), "info");
               return;
             }
             const accept = await uiPrompt({
@@ -704,10 +702,10 @@ export function useCommands({
               .filter((s) => s.length > 1);
             if (final.length === 0) return;
             setContent(mergeTagsIntoFrontmatter(doc.content, final));
-            showAiToast(`✅ Added ${final.length} tag${final.length === 1 ? "" : "s"}`, "success");
+            showAiToast(t("toast.addedTag", { count: final.length }), "success");
           } catch (e) {
             if ((await import("../agents/suggestions")).reportAgentFailure(e, "tools.autoTag")) return;
-            showAiToast(`Auto-tag failed: ${(e as Error).message}`, "error");
+            showAiToast(t("toast.autoTagFailed", { error: (e as Error).message }), "error");
           }
         },
       },
@@ -723,11 +721,11 @@ export function useCommands({
             return;
           }
           try {
-            showAiToast("🔗 Scanning workspace for link suggestions…", "info");
+            showAiToast(t("toast.scanningWorkspaceForLinkSuggestions"), "info");
             const { suggestLinks, applyLinkSuggestion } = await import("../ai/agents");
             const suggestions = await suggestLinks(doc.workspaceName, doc.content);
             if (suggestions.length === 0) {
-              showAiToast("No link suggestions", "info");
+              showAiToast(t("toast.noLinkSuggestions"), "info");
               return;
             }
             const summary = suggestions
@@ -748,10 +746,10 @@ export function useCommands({
               }
             }
             setContent(next);
-            showAiToast(`✅ Applied ${applied} link${applied === 1 ? "" : "s"}`, "success");
+            showAiToast(t("toast.appliedLink", { count: applied }), "success");
           } catch (e) {
             if ((await import("../agents/suggestions")).reportAgentFailure(e, "tools.suggestLinks")) return;
-            showAiToast(`Link suggest failed: ${(e as Error).message}`, "error");
+            showAiToast(t("toast.linkSuggestFailed", { error: (e as Error).message }), "error");
           }
         },
       },
@@ -767,21 +765,21 @@ export function useCommands({
           });
           if (!idea) return;
           try {
-            showAiToast("🚀 Product Agent starting...", "info");
+            showAiToast(t("toast.productAgentStarting"), "info");
             const { createProduct } = await import("../ai/productAgent");
             const result = await createProduct(idea, (progress) => {
               showAiToast(`${progress.phase}: ${progress.message}`, "info");
             });
             if (result.success) {
-              showAiToast(`✅ Product created! ${result.files.size} files generated`, "success");
+              showAiToast(t("toast.productCreatedFilesGenerated", { count: result.files.size }), "success");
               const summary = `# Product Created\n\n${result.files.size} files generated:\n\n${[...result.files.keys()].map((f) => `- \`${f}\``).join("\n")}`;
               setContent(summary);
             } else {
-              showAiToast(`Product creation failed: ${result.error}`, "error");
+              showAiToast(t("toast.productCreationFailed", { error: result.error ?? "" }), "error");
             }
           } catch (e) {
             if ((await import("../agents/suggestions")).reportAgentFailure(e, "ai.productAgent")) return;
-            showAiToast(`Agent error: ${(e as Error).message}`, "error");
+            showAiToast(t("toast.agentError", { error: (e as Error).message }), "error");
           }
         },
       },
@@ -793,14 +791,14 @@ export function useCommands({
         group: t("group.tools"),
         action: async () => {
           try {
-            showAiToast("🧩 Generating diagram…", "info");
+            showAiToast(t("toast.generatingDiagram"), "info");
             const { generateDiagram } = await import("../ai/agents");
             const block = await generateDiagram(doc.content);
             setContent(`${doc.content.trimEnd()}\n\n${block}\n`);
-            showAiToast("✅ Diagram inserted", "success");
+            showAiToast(t("toast.diagramInserted"), "success");
           } catch (e) {
             if ((await import("../agents/suggestions")).reportAgentFailure(e, "ai.diagram")) return;
-            showAiToast(`Diagram failed: ${(e as Error).message}`, "error");
+            showAiToast(t("toast.diagramFailed", { error: (e as Error).message }), "error");
           }
         },
       },
@@ -812,14 +810,14 @@ export function useCommands({
         group: t("group.tools"),
         action: async () => {
           try {
-            showAiToast("✅ Extracting action items…", "info");
+            showAiToast(t("toast.extractingActionItems"), "info");
             const { extractActionItems } = await import("../ai/agents");
             const list = await extractActionItems(doc.content);
             setContent(`${doc.content.trimEnd()}\n\n## Action Items\n\n${list}\n`);
-            showAiToast("✅ Action items added", "success");
+            showAiToast(t("toast.actionItemsAdded"), "success");
           } catch (e) {
             if ((await import("../agents/suggestions")).reportAgentFailure(e, "ai.actionItems")) return;
-            showAiToast(`Action items failed: ${(e as Error).message}`, "error");
+            showAiToast(t("toast.actionItemsFailed", { error: (e as Error).message }), "error");
           }
         },
       },
@@ -836,14 +834,14 @@ export function useCommands({
           });
           if (!target || !target.trim()) return;
           try {
-            showAiToast(`🌐 Translating to ${target}…`, "info");
+            showAiToast(t("toast.translatingTo", { target }), "info");
             const { translateMarkdown } = await import("../ai/agents");
             const translated = await translateMarkdown(doc.content, target.trim());
             setContent(translated);
-            showAiToast("✅ Document translated", "success");
+            showAiToast(t("toast.documentTranslated"), "success");
           } catch (e) {
             if ((await import("../agents/suggestions")).reportAgentFailure(e, "ai.translate")) return;
-            showAiToast(`Translation failed: ${(e as Error).message}`, "error");
+            showAiToast(t("toast.translationFailed", { error: (e as Error).message }), "error");
           }
         },
       },
@@ -855,14 +853,14 @@ export function useCommands({
         group: t("group.tools"),
         action: async () => {
           try {
-            showAiToast("📊 Generating chart…", "info");
+            showAiToast(t("toast.generatingChart"), "info");
             const { generateChart } = await import("../ai/agents");
             const block = await generateChart(doc.content);
             setContent(`${doc.content.trimEnd()}\n\n${block}\n`);
-            showAiToast("✅ Chart inserted", "success");
+            showAiToast(t("toast.chartInserted"), "success");
           } catch (e) {
             if ((await import("../agents/suggestions")).reportAgentFailure(e, "ai.chart")) return;
-            showAiToast(`Chart failed: ${(e as Error).message}`, "error");
+            showAiToast(t("toast.chartFailed", { error: (e as Error).message }), "error");
           }
         },
       },
@@ -892,7 +890,7 @@ export function useCommands({
           if (!choice) return;
           setOllamaConfig({ model: choice.trim() });
           setActiveProvider("ollama");
-          showAiToast(`✅ Switched to Ollama: ${choice.trim()}`, "success");
+          showAiToast(t("toast.switchedToOllama", { model: choice.trim() }), "success");
         },
       },
       {
@@ -1571,7 +1569,7 @@ export function useCommands({
               if (key && key.trim()) localStorage.setItem(`lumen.ai.key.${valid}`, key.trim());
             }
           }
-          showAiToast(`✅ AI provider set to: ${valid}`, "success");
+          showAiToast(t("toast.aiProviderSetTo", { valid }), "success");
         },
       },
       {
@@ -1583,17 +1581,17 @@ export function useCommands({
         action: async () => {
           const { checkGrammar } = await import("../ai/grammar");
           try {
-            showAiToast("📝 Checking grammar…", "info");
+            showAiToast(t("toast.checkingGrammar"), "info");
             const matches = await checkGrammar(doc.content, locale === "he" ? "he" : "en-US", { allowModel: true });
             if (matches.length === 0) {
-              showAiToast("✅ No grammar issues found", "success");
+              showAiToast(t("toast.noGrammarIssuesFound"), "success");
               return;
             }
             const top = matches.slice(0, 5).map((m, i) => `${i + 1}. ${m.message}`).join("\n");
             await uiAlert({ message: `Found ${matches.length} issue${matches.length === 1 ? "" : "s"}:\n\n${top}` });
           } catch (e) {
             if ((await import("../agents/suggestions")).reportAgentFailure(e, "tools.checkGrammar")) return;
-            showAiToast(`Grammar check failed: ${(e as Error).message}`, "error");
+            showAiToast(t("toast.grammarCheckFailed", { error: (e as Error).message }), "error");
           }
         },
       },
@@ -1852,7 +1850,7 @@ export function useCommands({
           if (!password) return;
           const encrypted = await encryptDocument(doc.content, password);
           setContent(encrypted);
-          showAiToast("🔒 Document encrypted", "info");
+          showAiToast(t("toast.documentEncrypted"), "info");
         },
       },
       {
@@ -1863,7 +1861,7 @@ export function useCommands({
         group: t("group.security"),
         action: async () => {
           if (!isEncrypted(doc.content)) {
-            showAiToast("Document is not encrypted", "error");
+            showAiToast(t("toast.documentIsNotEncrypted"), "error");
             return;
           }
           const password = await uiPrompt({ message: "Enter decryption password:" });
@@ -1871,9 +1869,9 @@ export function useCommands({
           try {
             const decrypted = await decryptDocument(doc.content, password);
             setContent(decrypted);
-            showAiToast("🔓 Document decrypted", "info");
+            showAiToast(t("toast.documentDecrypted"), "info");
           } catch {
-            showAiToast("❌ Wrong password", "error");
+            showAiToast(t("toast.wrongPassword"), "error");
           }
         },
       },
@@ -1887,15 +1885,15 @@ export function useCommands({
         action: async () => {
           const prompt = applyTemplate(tpl, doc.content);
           try {
-            showAiToast(`🤖 Processing ${tpl.label}...`, "info");
+            showAiToast(t("toast.processing", { name: tpl.label }), "info");
             const { runAgentOrThrow } = await import("../agents/runtime");
             const { templaterAgent } = await import("../agents/defs");
             const result = await runAgentOrThrow(templaterAgent, { text: prompt, extra: { templateId: tpl.id } }, { document: doc.content });
             setContent(doc.content + "\n\n---\n\n" + result);
-            showAiToast(`✅ ${tpl.label} completed`, "success");
+            showAiToast(t("toast.completed", { name: tpl.label }), "success");
           } catch (e) {
             if ((await import("../agents/suggestions")).reportAgentFailure(e, `ai.prompt.${tpl.id}`)) return;
-            showAiToast(`AI error: ${(e as Error).message}`, "error");
+            showAiToast(t("toast.aiError", { error: (e as Error).message }), "error");
           }
         },
       })),
@@ -2074,7 +2072,7 @@ export function useCommands({
           if (isWatching()) {
             stopGitWatch();
             setWatching(false);
-            showAiToast("⏸ Git watch paused", "info");
+            showAiToast(t("toast.gitWatchPaused"), "info");
             return;
           }
           if (!doc.workspaceName) {
@@ -2086,9 +2084,9 @@ export function useCommands({
           startGitWatch({
             repoFolder,
             onPulled: ({ changedFiles }) =>
-              showAiToast(`⬇️ Pulled ${changedFiles} file${changedFiles === 1 ? "" : "s"}`, "success"),
+              showAiToast(t("toast.pulledFile", { count: changedFiles }), "success"),
           });
-          showAiToast("👀 Git watch on — pulling every 5 min", "info");
+          showAiToast(t("toast.gitWatchOnPullingEvery"), "info");
         },
       },
       {

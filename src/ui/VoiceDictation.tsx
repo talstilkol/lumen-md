@@ -54,7 +54,7 @@ export function startVoiceRecording(lang: string): void {
       .webkitSpeechRecognition;
 
   if (!SpeechRecognition) {
-    showAiToast("Speech recognition not supported in this browser", "error");
+    showAiToast(t("toast.speechRecognitionNotSupportedIn"), "error");
     return;
   }
 
@@ -81,7 +81,7 @@ export function startVoiceRecording(lang: string): void {
   const stopRecording = () => {
     recognition.stop();
     cleanup();
-    showAiToast("🎙 Recording stopped", "info");
+    showAiToast(t("toast.recordingStopped"), "info");
   };
 
   recognition.onresult = (event) => {
@@ -94,13 +94,13 @@ export function startVoiceRecording(lang: string): void {
     if (transcript.trim()) {
       const current = useAppStore.getState().doc.content;
       useAppStore.getState().setContent(current + "\n\n" + transcript.trim());
-      showAiToast(`✅ Added ${transcript.trim().split(/\s+/).length} words`, "info");
+      showAiToast(t("toast.addedWords", { count: transcript.trim().split(/\s+/).length }), "info");
     }
   };
 
   recognition.onerror = () => {
     cleanup();
-    showAiToast("Speech recognition error — check microphone permissions", "error");
+    showAiToast(t("toast.speechRecognitionErrorCheckMicrophone"), "error");
   };
   recognition.onend = () => cleanup();
 
@@ -175,7 +175,7 @@ export function pickRecordingMimeType(): string {
  */
 export async function startVoiceMemo(): Promise<void> {
   if (typeof MediaRecorder === "undefined") {
-    showAiToast("MediaRecorder not supported in this browser", "error");
+    showAiToast(t("toast.mediarecorderNotSupportedInThis"), "error");
     return;
   }
 
@@ -184,7 +184,7 @@ export async function startVoiceMemo(): Promise<void> {
     stream = await navigator.mediaDevices.getUserMedia({ audio: true });
   } catch (err) {
     log.warn("voice memo: mic denied", err);
-    showAiToast("Microphone access denied", "error");
+    showAiToast(t("toast.microphoneAccessDenied"), "error");
     return;
   }
 
@@ -198,7 +198,7 @@ export async function startVoiceMemo(): Promise<void> {
   } catch (err) {
     stream.getTracks().forEach((t) => t.stop());
     log.warn("voice memo: MediaRecorder unavailable", err);
-    showAiToast(`Recording is not supported in this browser: ${(err as Error).message}`, "error");
+    showAiToast(t("toast.recordingIsNotSupportedIn", { error: (err as Error).message }), "error");
     return;
   }
   const chunks: Blob[] = [];
@@ -225,17 +225,17 @@ export async function startVoiceMemo(): Promise<void> {
     if (chunks.length === 0) return;
     const blob = new Blob(chunks, { type: mimeType || recorder.mimeType || "audio/webm" });
 
-    showAiToast("🎙 Transcribing…", "info");
+    showAiToast(t("toast.transcribing"), "info");
     let result;
     try {
       result = await transcribe(blob);
     } catch (err) {
       log.error("voice memo transcribe failed", err);
-      showAiToast(`Transcribe failed: ${(err as Error).message}`, "error");
+      showAiToast(t("toast.transcribeFailed", { error: (err as Error).message }), "error");
       return;
     }
 
-    showAiToast("✨ Summarising…", "info");
+    showAiToast(t("toast.summarising"), "info");
     let summary = "";
     try {
       summary = await summarizeMemo(result.text);
@@ -252,8 +252,7 @@ export async function startVoiceMemo(): Promise<void> {
     useAppStore
       .getState()
       .setContent(current + (current.endsWith("\n") ? "" : "\n") + "\n" + memo);
-    showAiToast(
-      `✅ Voice memo inserted (${result.backend}, ${Math.round(result.ms)} ms)`,
+    showAiToast(t("toast.voiceMemoInsertedMs", { backend: result.backend, ms: Math.round(result.ms) }),
       "success",
     );
   });

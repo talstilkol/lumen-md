@@ -151,14 +151,14 @@ export function SearchDialog({ open, onClose, onOpenFile }: Props) {
     // Embeddings are computed on this device by default (Ollama or
     // transformers.js); no cloud key is needed.
     setSmartIndexing(true);
-    showAiToast("🧠 Building semantic index…", "info");
+    showAiToast(t("toast.buildingSemanticIndex"), "info");
     try {
       const idx = await indexWorkspace({ force: true });
       setSmartIndexedAt(idx.builtAt || Date.now());
-      showAiToast(`✅ Indexed ${Object.keys(idx.files).length} files`, "success");
+      showAiToast(t("toast.indexedFiles", { count: Object.keys(idx.files).length }), "success");
     } catch (e) {
       log.error("indexWorkspace failed", e);
-      showAiToast(`Indexing failed: ${(e as Error).message}`, "error");
+      showAiToast(t("toast.indexingFailed", { error: (e as Error).message }), "error");
     } finally {
       setSmartIndexing(false);
     }
@@ -300,13 +300,13 @@ export function SearchDialog({ open, onClose, onOpenFile }: Props) {
     } catch (e) {
       if (e instanceof AiError && e.code === "NO_KEY") {
         setAiAnswer("⚠️ Please configure your AI Key (⌘K → AI Settings).");
-        showAiToast("Please configure your AI Key (⌘K → AI Settings)", "error");
+        showAiToast(t("toast.pleaseConfigureYourAiKey"), "error");
       } else if (e instanceof Error && e.name === "AiQuotaExceededError") {
         setAiAnswer(e.message); // the quota toast was already shown
       } else {
         log.error("AI workspace search failed", e);
         setAiAnswer("Failed to reach AI API.");
-        showAiToast("AI workspace search failed", "error");
+        showAiToast(t("toast.aiWorkspaceSearchFailed"), "error");
       }
     } finally {
       setAiLoading(false);

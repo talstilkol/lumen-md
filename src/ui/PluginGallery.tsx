@@ -44,7 +44,7 @@ const COMMUNITY_PLUGINS: LumenPlugin[] = [
           const content = api.getContent();
           const words = countWords(content);
           const minutes = Math.ceil(words / 200);
-          api.showToast(`📖 ~${minutes} min read (${words} words)`);
+          api.showToast(t("toast.minReadWords", { minutes, words }));
         },
       });
     },
@@ -85,7 +85,7 @@ const COMMUNITY_PLUGINS: LumenPlugin[] = [
           const lorem = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.";
           const content = api.getContent();
           api.setContent(content + "\n\n" + lorem);
-          api.showToast("📄 Lorem ipsum inserted");
+          api.showToast(t("toast.loremIpsumInserted"));
         },
       });
     },
@@ -111,9 +111,9 @@ const COMMUNITY_PLUGINS: LumenPlugin[] = [
             if (lines[i].match(/  $/)) issues.push(`Line ${i + 1}: trailing whitespace`);
           }
           if (issues.length === 0) {
-            api.showToast("✅ No issues found!");
+            api.showToast(t("toast.noIssuesFound"));
           } else {
-            api.showToast(`⚠️ ${issues.length} issues: ${issues.slice(0, 3).join(", ")}`);
+            api.showToast(t("toast.issues", { count: issues.length, list: issues.slice(0, 3).join(", ") }));
           }
         },
       });
@@ -154,7 +154,7 @@ const COMMUNITY_PLUGINS: LumenPlugin[] = [
           const content = api.getContent();
           const headings = content.match(/^#{1,6}\s+.+$/gm) || [];
           if (headings.length === 0) {
-            api.showToast("No headings found");
+            api.showToast(t("toast.noHeadingsFound"));
             return;
           }
           const slugger = headingSlugger();
@@ -165,7 +165,7 @@ const COMMUNITY_PLUGINS: LumenPlugin[] = [
             return `${"  ".repeat(level - 1)}- [${text}](#${slug})`;
           }).join("\n");
           api.setContent("## Table of Contents\n\n" + toc + "\n\n---\n\n" + content);
-          api.showToast("📋 TOC inserted at top");
+          api.showToast(t("toast.tocInsertedAtTop"));
         },
       });
     },
@@ -218,7 +218,7 @@ export function PluginGallery({ open, onClose }: Props) {
             // Sandbox + script injection comes in a follow-up — for now we
             // simulate the install/activation flow so the UX exists.
             await new Promise((resolve) => setTimeout(resolve, 400));
-            api.showToast(`✅ Loaded ${p.name} from remote module`);
+            api.showToast(t("toast.loadedFromRemoteModule", { name: p.name }));
           },
         }));
         setRemotePlugins(mapped);
