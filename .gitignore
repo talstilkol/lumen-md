@@ -67,5 +67,7 @@ bundle-diff.md
 eval/results/
 flake-results/
 visual-results/
+# Review triage / reply state (scripts/review-triage.mjs, review-reply.mjs)
+reports/
 # On-device OCR (scripts/copy-tesseract.mjs)
 public/tesseract/
