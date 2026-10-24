@@ -8,6 +8,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Stethoscope, X } from "lucide-react";
 import { t } from "../i18n";
+import "../agents/doctorStrings";
 import type { DoctorFinding, DoctorReport, DoctorStatus } from "../agents/doctor";
 
 interface Props {
@@ -117,6 +118,25 @@ export function AiDoctorPanel({ open, onClose }: Props) {
       } catch (e) {
         setPulling({ model: fix.arg, status: (e as Error).message });
       }
+    } else if (fix.action === "downloadHebrewDictionary") {
+      // The user's own click (the dictionary is AGPL, 5.7 MB: the label says so).
+      const { downloadHebrewDictionary } = await import("../ai/hebrewSpellService");
+      try {
+        await downloadHebrewDictionary();
+      } finally {
+        void run(false);
+      }
+    } else if (fix.action === "useLocalServices") {
+      // Point grammar and research at docker/local-ai.yml on this machine.
+      const [{ LOCAL_SERVICES }, { GRAMMAR_ENDPOINT_KEY, clearGrammarCache }] = await Promise.all([import("../agents/doctor"), import("../ai/grammar")]);
+      try {
+        localStorage.setItem(GRAMMAR_ENDPOINT_KEY, LOCAL_SERVICES.grammar);
+        localStorage.setItem("lumen.research.endpoint", LOCAL_SERVICES.research);
+      } catch {
+        /* storage denied: the command above still works by hand */
+      }
+      clearGrammarCache();
+      void run(false);
     } else if (fix.action === "retry") {
       void run(false);
     }
@@ -162,7 +182,7 @@ export function AiDoctorPanel({ open, onClose }: Props) {
               </div>
               {f.detail && <div style={{ ...muted, direction: "ltr", textAlign: "start", unicodeBidi: "isolate" }}>{f.detail}</div>}
               {f.fix && (
-                <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                <div style={{ display: "flex", flexDirection: "column", gap: 6 }} data-testid="doctor-fix">
                   <div style={row}>
                     <span>{t(f.fix.label)}</span>
                     {f.fix.action && (

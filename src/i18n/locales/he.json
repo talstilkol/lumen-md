@@ -1472,5 +1472,20 @@
   "caption.purpose": "תיאור תמונות במכשיר (טקסט חלופי)",
   "caption.attribution.florence": "Florence-2 © Microsoft, רישיון MIT; המרת ONNX על ידי onnx-community (Hugging Face).",
   "caption.attribution.smolvlm": "SmolVLM-256M-Instruct © Hugging Face, רישיון Apache 2.0.",
-  "spell.en.unknown": "„{word}”: מילה לא מוכרת (מילון אנגלית במכשיר)"
+  "spell.en.unknown": "„{word}”: מילה לא מוכרת (מילון אנגלית במכשיר)",
+  "ai.doctor.check.cspLocal": "הבנייה הזאת יכולה להגיע לשירותים המקומיים (CSP: פורטים 8010 ו-8787)",
+  "ai.doctor.check.engines": "מנועים במכשיר",
+  "ai.doctor.check.modelHost": "אירוח למודלים ש-Lumen ממיר (Opus-MT, Nakdimon)",
+  "ai.doctor.check.translate": "תרגום מקומי (Chrome, Opus-MT, M2M100)",
+  "ai.doctor.check.spellEn": "איות אנגלית במכשיר",
+  "ai.doctor.check.spellHe": "מילון איות עברי",
+  "ai.doctor.check.nikud": "ניקוד עברי במכשיר",
+  "ai.doctor.check.caption": "תיאור תמונות במכשיר",
+  "ai.doctor.fix.modelHost": "עדיין לא הוגדר אירוח למודלים המומרים (תוכנית 15.9); עד אז המנועים האלה כבויים ומודל ה-AI משמש במקומם.",
+  "ai.doctor.fix.modelChecksums": "האירוח הוגדר, אבל ברישום אין קבצים למודלים האלה; הריצו את ה-workflow של ההמרה והעתיקו את ה-checksums:",
+  "ai.doctor.fix.translate": "עדיין אין שכבה מקומית לאנגלית↔עברית: M2M100 (MIT, בערך 630 MB) יורד בשימוש הראשון באישורכם, או השתמשו ב-Chrome עם המתרגם שלו.",
+  "ai.doctor.fix.reload": "המילון לא נטען; טענו מחדש את הדף ובדקו שוב:",
+  "ai.doctor.fix.spellHe": "הורדת המילון העברי (Hspell, 5.7 MB, AGPL-3.0) למכשיר הזה:",
+  "ai.doctor.action.downloadHebrewDictionary": "הורדה (5.7 MB)",
+  "ai.doctor.action.useLocalServices": "שימוש בשירותים המקומיים"
 }

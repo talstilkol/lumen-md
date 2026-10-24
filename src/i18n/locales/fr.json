@@ -1472,5 +1472,20 @@
   "caption.purpose": "Décrire les images sur cet appareil (texte alternatif)",
   "caption.attribution.florence": "Florence-2 © Microsoft, licence MIT ; conversion ONNX par onnx-community (Hugging Face).",
   "caption.attribution.smolvlm": "SmolVLM-256M-Instruct © Hugging Face, licence Apache 2.0.",
-  "spell.en.unknown": "« {word} » : mot inconnu (dictionnaire anglais sur cet appareil)"
+  "spell.en.unknown": "« {word} » : mot inconnu (dictionnaire anglais sur cet appareil)",
+  "ai.doctor.check.cspLocal": "Ce build peut joindre les services locaux (CSP : ports 8010 et 8787)",
+  "ai.doctor.check.engines": "Moteurs sur cet appareil",
+  "ai.doctor.check.modelHost": "Hébergement des modèles convertis par Lumen (Opus-MT, Nakdimon)",
+  "ai.doctor.check.translate": "Traduction locale (Chrome, Opus-MT, M2M100)",
+  "ai.doctor.check.spellEn": "Orthographe anglaise sur cet appareil",
+  "ai.doctor.check.spellHe": "Dictionnaire orthographique hébreu",
+  "ai.doctor.check.nikud": "Vocalisation hébraïque (nikoud) sur cet appareil",
+  "ai.doctor.check.caption": "Descriptions d’images sur cet appareil",
+  "ai.doctor.fix.modelHost": "Aucun hébergement n’est encore défini pour les modèles convertis (plan 15.9) ; d’ici là ces moteurs restent désactivés et le modèle d’IA est utilisé à leur place.",
+  "ai.doctor.fix.modelChecksums": "L’hébergement est défini mais le registre n’a aucun fichier pour ces modèles ; lancez le workflow de conversion et copiez ses sommes de contrôle :",
+  "ai.doctor.fix.translate": "Pas encore de couche locale anglais↔hébreu : M2M100 (MIT, environ 630 MB) se télécharge à la première utilisation avec votre accord, ou utilisez Chrome et son traducteur.",
+  "ai.doctor.fix.reload": "Le dictionnaire ne s’est pas chargé ; rechargez la page et vérifiez à nouveau :",
+  "ai.doctor.fix.spellHe": "Télécharger le dictionnaire hébreu (Hspell, 5.7 MB, AGPL-3.0) sur cet appareil :",
+  "ai.doctor.action.downloadHebrewDictionary": "Télécharger (5.7 MB)",
+  "ai.doctor.action.useLocalServices": "Utiliser les services locaux"
 }

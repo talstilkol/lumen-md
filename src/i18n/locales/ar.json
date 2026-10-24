@@ -1472,5 +1472,20 @@
   "caption.purpose": "وصف الصور على هذا الجهاز (نص بديل)",
   "caption.attribution.florence": "Florence-2 © Microsoft، رخصة MIT؛ تحويل ONNX بواسطة onnx-community (Hugging Face).",
   "caption.attribution.smolvlm": "SmolVLM-256M-Instruct © Hugging Face، رخصة Apache 2.0.",
-  "spell.en.unknown": "«{word}»: كلمة غير معروفة (قاموس الإنجليزية على هذا الجهاز)"
+  "spell.en.unknown": "«{word}»: كلمة غير معروفة (قاموس الإنجليزية على هذا الجهاز)",
+  "ai.doctor.check.cspLocal": "يمكن لهذا الإصدار الوصول إلى الخدمات المحلية (CSP: المنفذان 8010 و8787)",
+  "ai.doctor.check.engines": "محركات على هذا الجهاز",
+  "ai.doctor.check.modelHost": "استضافة النماذج التي يحوّلها Lumen (Opus-MT، Nakdimon)",
+  "ai.doctor.check.translate": "الترجمة المحلية (Chrome، Opus-MT، M2M100)",
+  "ai.doctor.check.spellEn": "التدقيق الإملائي الإنجليزي على هذا الجهاز",
+  "ai.doctor.check.spellHe": "قاموس التدقيق الإملائي العبري",
+  "ai.doctor.check.nikud": "التشكيل العبري على هذا الجهاز",
+  "ai.doctor.check.caption": "وصف الصور على هذا الجهاز",
+  "ai.doctor.fix.modelHost": "لم تُحدَّد بعد استضافة للنماذج المحوّلة (الخطة 15.9)؛ حتى ذلك الحين تبقى هذه المحركات متوقفة ويُستخدم نموذج الذكاء الاصطناعي بدلًا منها.",
+  "ai.doctor.fix.modelChecksums": "الاستضافة محددة لكن السجل لا يحتوي ملفات لهذه النماذج؛ شغّل سير عمل التحويل وانسخ قيم التحقق:",
+  "ai.doctor.fix.translate": "لا توجد بعد طبقة محلية للإنجليزية↔العبرية: يُنزَّل M2M100 (MIT، نحو 630 MB) عند أول استخدام بموافقتك، أو استخدم Chrome مع مترجمه.",
+  "ai.doctor.fix.reload": "لم يُحمَّل القاموس؛ أعد تحميل الصفحة وتحقق مرة أخرى:",
+  "ai.doctor.fix.spellHe": "تنزيل القاموس العبري (Hspell، 5.7 MB، AGPL-3.0) إلى هذا الجهاز:",
+  "ai.doctor.action.downloadHebrewDictionary": "تنزيل (5.7 MB)",
+  "ai.doctor.action.useLocalServices": "استخدام الخدمات المحلية"
 }
