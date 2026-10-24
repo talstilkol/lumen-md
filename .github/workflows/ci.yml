@@ -231,7 +231,10 @@ jobs:
   lighthouse:
     name: Lighthouse CI
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      pull-requests: write
     needs: check
     # Lighthouse runs are slow + flaky on cold runners. Only required on
     # explicit triggers — main pushes and `lighthouse` PR labels — so day-to-day
@@ -245,10 +248,54 @@ jobs:
         with: { node-version: 22, cache: npm }
       - run: npm ci || npm install
       - run: npm run build
+      # Plan 8.1: mobile numbers on a quiet runner (a shared dev machine
+      # inflates them). Informational: they never fail the job.
+      # The numbers also go to a PR comment (job logs and summaries are not
+      # readable from every place the PR is worked on).
+      - name: Mobile startup profile and Lighthouse mobile TBT (plan 8.1)
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR: ${{ github.event.pull_request.number }}
+          REPO: ${{ github.repository }}
+        run: |
+          npx playwright install chromium
+          npx vite preview --port 4747 --strictPort > /dev/null 2>&1 &
+          PREVIEW=$!
+          for i in $(seq 1 30); do curl -sf -o /dev/null http://localhost:4747/ && break; sleep 1; done
+          { echo "<!-- lumen-perf-startup -->"; echo "## Mobile startup profile (plan 8.1) — $(git rev-parse --short HEAD), GitHub runner"; echo; } > perf.md
+          node scripts/perf/profile-startup.mjs --url http://localhost:4747/ --runs 5 --settle 15000 --out reports/perf-startup.json >> perf.md
+          { echo; echo "### Lighthouse mobile (default preset: simulated 4× CPU, slow 4G)"; echo; echo "| run | TBT (ms) | FCP | LCP | TTI | score |"; echo "|---|---:|---:|---:|---:|---:|"; } >> perf.md
+          for r in 1 2 3; do
+            npx -y lighthouse@12.8.2 http://localhost:4747/ --only-categories=performance --chrome-flags="--headless=new --no-sandbox" --output=json --output-path="lh-mobile-$r.json" --quiet || continue
+            node -e 'const j=require("./lh-mobile-'$r'.json"),a=j.audits,v=(k)=>Math.round(a[k].numericValue);console.log(`| '$r' | ${v("total-blocking-time")} | ${v("first-contentful-paint")} | ${v("largest-contentful-paint")} | ${v("interactive")} | ${j.categories.performance.score} |`)' >> perf.md
+          done
+          # Nothing of this step stays alive while Lighthouse CI measures.
+          kill "$PREVIEW" 2>/dev/null || true
+          cat perf.md >> "$GITHUB_STEP_SUMMARY"
+          if [ -n "${PR:-}" ]; then
+            id=$(gh api "repos/$REPO/issues/$PR/comments" --paginate --jq '.[] | select(.user.login == "github-actions[bot]" and (.body | contains("<!-- lumen-perf-startup -->"))) | .id' | tail -1)
+            if [ -n "$id" ]; then gh api -X PATCH "repos/$REPO/issues/comments/$id" -F body=@perf.md > /dev/null; else gh api "repos/$REPO/issues/$PR/comments" -F body=@perf.md > /dev/null; fi
+          fi
       - name: Lighthouse CI
         run: npx -y @lhci/cli@0.13.x autorun --config=./lighthouserc.json
         env:
           LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
+      # Job logs can't be read from everywhere the PR is worked on: the desktop
+      # assertions (lighthouserc.json) go into the same PR comment.
+      - name: Lighthouse CI assertions → PR comment
+        if: always() && github.event_name == 'pull_request'
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR: ${{ github.event.pull_request.number }}
+          REPO: ${{ github.repository }}
+        run: |
+          [ -f .lighthouseci/assertion-results.json ] || { echo "no assertion results"; exit 0; }
+          { echo; echo "### Lighthouse CI desktop assertions (lighthouserc.json)"; echo; echo "| audit | level | expected | actual | passed |"; echo "|---|---|---:|---:|---|"; } >> perf.md
+          node -e 'const r=require("./.lighthouseci/assertion-results.json");for(const a of r)console.log(`| ${a.auditId}${a.auditProperty?" ("+a.auditProperty+")":""} | ${a.level} | ${a.operator} ${a.expected} | ${Math.round(a.actual*1000)/1000} | ${a.passed?"yes":"**no**"} |`)' >> perf.md
+          id=$(gh api "repos/$REPO/issues/$PR/comments" --paginate --jq '.[] | select(.user.login == "github-actions[bot]" and (.body | contains("<!-- lumen-perf-startup -->"))) | .id' | tail -1)
+          if [ -n "$id" ]; then gh api -X PATCH "repos/$REPO/issues/comments/$id" -F body=@perf.md > /dev/null; else gh api "repos/$REPO/issues/$PR/comments" -F body=@perf.md > /dev/null; fi
 
   e2e:
     # Per-browser matrix: each browser runs in its own runner so the
