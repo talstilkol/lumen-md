@@ -43,6 +43,21 @@ test("production build opens offline after the first visit", async ({ page, cont
   // The runtime cache stores a lazily-fetched chunk after answering for it,
   // so wait until every script and stylesheet this load used is in a cache:
   // that is what the offline reload needs (this was a fixed 1.5 s sleep).
+  // DIAG (local only, never pushed): what does each missing chunk look like?
+  const diag = await page.evaluate(async () => {
+    const used = performance.getEntriesByType("resource").filter((e) => /\/assets\/.+\.(js|mjs|css)$/.test(new URL(e.name).pathname)) as PerformanceResourceTiming[];
+    const out: string[] = [];
+    for (const e of used) {
+      const hit = await caches.match(e.name);
+      if (hit) continue;
+      const r = await fetch(e.name, { cache: "no-store" });
+      out.push(`${new URL(e.name).pathname} transfer=${e.transferSize} worker=${e.workerStart > 0} status=${r.status} cc=${r.headers.get("cache-control")} type=${e.initiatorType} delivery=${(e as unknown as { deliveryType?: string }).deliveryType}`);
+    }
+    const names = await caches.keys();
+    const counts = await Promise.all(names.map(async (n) => `${n}:${(await (await caches.open(n)).keys()).length}`));
+    return { out, counts };
+  });
+  console.log("DIAG", JSON.stringify(diag, null, 1));
   await expect
     .poll(
       () =>
