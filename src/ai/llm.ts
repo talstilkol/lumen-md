@@ -128,7 +128,9 @@ export interface ChatOptions {
 const DEFAULT_MODEL = "gpt-4o-mini";
 /** Each cloud provider's model when the user hasn't picked one (the provider modules use these). */
 export const PROVIDER_DEFAULT_MODELS = {
-  "local-webgpu": "Llama-3-8B-Instruct-q4f16_1-MLC",
+  // The in-browser default when the user picked none and the GPU wasn't
+  // probed yet; the model manager (./modelManager.ts) picks by hardware.
+  "local-webgpu": "Qwen3-4B-q4f16_1-MLC",
   // Sonnet 4.5 is deprecated (retires 30 Nov 2026); Sonnet 5.5 is the current general model.
   anthropic: "claude-sonnet-5-5",
   // Gemini 1.5 and 2.0 are shut down; 2.5 is closed to new users (Google AI models page, 10/2026).
@@ -694,20 +696,30 @@ async function* chatStreamDirect(
     else if (!useAppStore.getState().useLocalAi) assertCloudFallback("Ollama");
   }
 
-  // ── WebGPU local (in-browser) ──────────────────────────────────
-  // No streaming engine yet: the local answer is produced whole and
-  // yielded once, so a local route never leaks a prompt to the cloud.
+  // ── WebGPU local (in-browser), streaming ───────────────────────
   if (provider === "local-webgpu" || localFirst === "local-webgpu" || (!isCloudProvider(provider) && useAppStore.getState().useLocalAi)) {
-    const { chatLocal, localLlmAvailable } = await import("./localLlm");
+    const { chatLocalStream, localLlmAvailable, onLocalLlmProgress, defaultLocalModel } = await import("./localLlm");
     if (localLlmAvailable().available) {
-      charge();
-      const local = forLocal(opts);
-      opts.onRoute?.("local-webgpu", local.model ?? PROVIDER_DEFAULT_MODELS["local-webgpu"]);
-      const text = await chatLocal(messages, { model: local.model, maxTokens: opts.maxTokens, temperature: opts.temperature });
-      yield text;
-      return;
+      let lastPct = -1;
+      const off = onLocalLlmProgress(({ progress, text }) => {
+        const pct = Math.round(progress * 100);
+        if (pct >= lastPct + 5 || pct === 100) {
+          lastPct = pct;
+          toast.info(t("ai.toast.localLoading.title"), t("ai.toast.localLoading.body", { pct, status: text || t("ai.toast.localLoading.preparing") }));
+        }
+      });
+      try {
+        charge();
+        const model = forLocal(opts).model ?? (await defaultLocalModel());
+        opts.onRoute?.("local-webgpu", model);
+        yield* chatLocalStream(messages, { model, maxTokens: opts.maxTokens, temperature: opts.temperature, signal: opts.signal });
+        return;
+      } finally {
+        off();
+      }
     }
-    assertCloudFallback("Local WebGPU AI (streaming)");
+    toast.warn(t("ai.toast.localUnavailable.title"), t("ai.toast.localUnavailable.body"), docsUrl("localLlm"));
+    assertCloudFallback("Local WebGPU AI");
     localFirst = null;
   }
 
