@@ -3,8 +3,9 @@ FROM node:22-alpine AS builder
 
 WORKDIR /app
 
-# Copy dependency manifests first (layer cache optimization)
-COPY package.json package-lock.json ./
+# Copy dependency manifests first (layer cache optimization). .npmrc skips
+# the onnxruntime-node binary download (unused in the browser build).
+COPY package.json package-lock.json .npmrc ./
 RUN npm ci --ignore-scripts
 
 # Copy source and build
@@ -30,10 +31,25 @@ ARG VITE_YJS_WEBSOCKET_URL
 # Extra connect-src origins (runtime overrides: LAN Ollama, marketplace…).
 ARG VITE_CSP_CONNECT_EXTRA
 RUN npm run build
+# LUMEN_RUNTIMES=full (default) keeps the same-origin WebAssembly runtimes the
+# live blocks and on-device AI load (Pyodide, webR, ruby.wasm, ONNX Runtime,
+# tesseract.js: ≈145 MB of dist/). `slim` drops them for an image that only
+# needs the editor: live-python / live-r / live-ruby blocks, OCR and local
+# transcription then report that their runtime is not installed. Everything
+# else (incl. the Web Playground, whose vendor files stay) works the same.
+ARG LUMEN_RUNTIMES=full
+RUN case "$LUMEN_RUNTIMES" in \
+      full) ;; \
+      slim) rm -rf dist/pyodide dist/webr dist/ruby dist/ort dist/tesseract ;; \
+      *) echo "LUMEN_RUNTIMES must be full or slim, got '$LUMEN_RUNTIMES'" >&2; exit 1 ;; \
+    esac
 
 # ── Stage 2: Serve ────────────────────────────────────────────────────────
 # Use a minimal static-file server. The Lumen app is a fully static SPA;
 # all it needs is an HTTP server that serves `dist/` with proper headers.
+# This is the one web image (plan 13.2): fly.toml and docker-compose.yml
+# both build it, and deploy/nginx.conf is the one nginx config, rendered
+# from security/policy.json (`npm run headers`).
 FROM nginx:alpine AS runtime
 
 # Security: run as non-root

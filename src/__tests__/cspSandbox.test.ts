@@ -31,7 +31,7 @@ describe("live-js runner CSP", () => {
   });
 
   it("nginx serves the same runner policy", () => {
-    const nginx = readFileSync(join(root, "docker/nginx.conf"), "utf8");
+    const nginx = readFileSync(join(root, "deploy/nginx.conf"), "utf8");
     const loc = nginx.slice(nginx.indexOf("location = /livejs-runner.html"));
     expect(/Content-Security-Policy "([^"]*)"/.exec(loc)?.[1]).toBe(csp);
   });
@@ -102,11 +102,8 @@ describe("no eval on the page (F4 / P3)", () => {
     const vercelApp = vercel.headers.find((h) => h.headers.some((x) => x.key === "X-Frame-Options"))!;
     expect(vercelApp.headers.find((x) => x.key === "Content-Security-Policy")!.value.split(/\s+/)).not.toContain("'unsafe-eval';");
   });
-  it("the nginx images' page policy allows no eval", () => {
-    for (const [file, block] of [
-      ["docker/nginx.conf", /^\s*location \/ \{/m],
-      ["deploy/nginx.conf", /^http \{/m],
-    ] as const) {
+  it("the nginx image's page policy allows no eval", () => {
+    for (const [file, block] of [["deploy/nginx.conf", /^http \{/m]] as const) {
       const text = readFileSync(join(root, file), "utf8");
       const csp = /add_header Content-Security-Policy "([^"]*)"/.exec(text.slice(text.search(block)))?.[1] ?? "";
       const script = /script-src ([^;]*)/.exec(csp)?.[1] ?? "";

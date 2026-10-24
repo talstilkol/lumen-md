@@ -83,7 +83,6 @@ const POLICIES: Record<string, Policy> = {
   "index.html": cspFromIndexHtml(),
   "public/_headers": cspFromHeadersFile(),
   "deploy/vercel.base.json": cspFromVercel(),
-  "docker/nginx.conf": cspFromNginx("docker/nginx.conf", /^\s*location \/ \{/m),
   "deploy/nginx.conf": cspFromNginx("deploy/nginx.conf", /^http \{/m),
 };
 const HEADER_POLICIES = Object.keys(POLICIES).filter((f) => f !== "index.html");
@@ -157,8 +156,8 @@ describe("CSP alignment", () => {
     for (const [name, set] of sets) expect(set, name).toEqual(reference);
   });
 
-  it("(a) docker/nginx.conf keeps the placeholder the image build fills in", () => {
-    expect(read("docker/nginx.conf")).toMatch(/connect-src [^"]*__CSP_CONNECT_EXTRA__/);
+  it("(a) deploy/nginx.conf keeps the placeholder the image build fills in", () => {
+    expect(read("deploy/nginx.conf")).toMatch(/connect-src [^"]*__CSP_CONNECT_EXTRA__/);
   });
 
   it("(a) connect-src lists explicit hosts, not a blanket https:/http:/*", () => {
@@ -214,7 +213,7 @@ describe("CSP alignment", () => {
   });
 
   it("no longer references unpkg (Leaflet CSS + model-viewer are self-hosted)", () => {
-    for (const file of ["index.html", "public/_headers", "netlify.toml", "docker/nginx.conf"]) {
+    for (const file of ["index.html", "public/_headers", "netlify.toml", "deploy/nginx.conf"]) {
       expect(read(file), file).not.toContain("unpkg.com");
     }
   });

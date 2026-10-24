@@ -34,13 +34,15 @@ which `headersPolicy.test.ts` checks.
 
 ## Routes
 
-| Route | Kind | Paths | `_headers` | `deploy/vercel.base.json` | `docker/nginx.conf` | `deploy/nginx.conf` | meta | Tauri |
+| Route | Kind | Paths | `_headers` (Cloudflare, Netlify) | Netlify edge function | `deploy/vercel.base.json` | `deploy/nginx.conf` (the one nginx image, 13.2) | meta | Tauri |
 |---|---|---|---|---|---|---|---|---|
-| `app` | document; also the other workers under `/assets/` and the service worker | everything else | `/*` | catch-all regex | `location /`, `location /assets/`, the `sw.js` location (0.20) | `http` level, `location /assets/`, `location = /sw.js` (0.20) | `index.html` | `app.security.csp` |
-| `playground-runner` | document, framed by the app | `/playground-runner.html` | own block | own entry | own location | own location | `playground-runner.html` (0.20) | n/a |
-| `livejs-runner` | document, framed by the app | `/livejs-runner.html` | own block | own entry | own location | own location (new) | `livejs-runner.html` | n/a |
-| `tesseract` | worker | `/tesseract/*` | own block | own entry | own location | own location (new) | n/a | n/a |
-| `eval-workers` | worker | `/assets/{graphviz,ruby,tsCheck}.worker-*`, `/webr/*` | own blocks (`/webr/*` new) | own entries (`/webr/` new) | assets regex + runtimes location | assets regex (new) + runtime include | n/a | n/a |
+| `app` | document; also the other workers under `/assets/` and the service worker | everything else | `/*` | n/a | catch-all regex | `http` level, `location /assets/`, `location = /sw.js` (0.20) | `index.html` | `app.security.csp` |
+| `playground-runner` | document, framed by the app | `/playground-runner.html` | own block (Cloudflare detaches the catch-all; Netlify cannot) | own entry, drops `X-Frame-Options` (13.2) | own entry | own location | `playground-runner.html` (0.20) | n/a |
+| `livejs-runner` | document, framed by the app | `/livejs-runner.html` | own block | own entry (13.2) | own entry | own location (new) | `livejs-runner.html` | n/a |
+| `tesseract` | worker | `/tesseract/*` | own block | n/a | own entry | own location (new) | n/a | n/a |
+| `eval-workers` | worker | `/assets/{graphviz,ruby,tsCheck}.worker-*`, `/webr/*` | own blocks (`/webr/*` new) | n/a | own entries (`/webr/` new) | assets regex (new) + runtime include | n/a | n/a |
+
+Until 13.2 there were two nginx configs (`docker/nginx.conf` for the compose bundle, `deploy/nginx.conf` for the Fly image); the compose bundle now builds the same image (see [docs/self-hosting/hosting](../src/content/docs/self-hosting/hosting.md)). The inventory below is the state before 0.17 and keeps the old file names.
 
 ## Inventory before 0.17
 
@@ -142,9 +144,10 @@ These are written in `policy.json` under `hosts`.
 | meta | no Trusted Types | enforced by the production response headers only. The dev server, Tauri and Capacitor have not been verified under them |
 | Tauri | no `frame-ancestors`, no Trusted Types | a top-level window is never framed (on Linux Tauri injects the policy as `<meta>`). Trusted Types as for meta |
 | Tauri | `connect-src` + `ipc:` `http://ipc.localhost` `https:` | Tauri 2 IPC. `https:` because this policy is compiled from tauri.conf.json and cannot receive the deployment's endpoint origins at build time. The meta policy, which does, keeps the page on the explicit list |
-| docker nginx | `connect-src` + `__CSP_CONNECT_EXTRA__` | filled by `docker/Dockerfile.web` from `dist/.csp-connect-extra` |
-| nginx (both) | no HSTS | plain-HTTP listener behind the operator's TLS terminator. `includeSubDomains; preload` on someone else's domain is their call |
-| deploy nginx | COOP `same-origin`, COEP `credentialless` | cross-origin isolation (D9). COEP goes on every document and worker it serves |
+| nginx | `connect-src` + `__CSP_CONNECT_EXTRA__` | filled by the `Dockerfile` from `dist/.csp-connect-extra` |
+| nginx | no HSTS | plain-HTTP listener behind the operator's TLS terminator. `includeSubDomains; preload` on someone else's domain is their call |
+| nginx | COOP `same-origin`, COEP `credentialless` | cross-origin isolation (D9). COEP goes on every document and worker it serves. Since 13.2 this is the compose bundle's image too; keeping it is decision 15.10(7) |
+| Netlify | runner pages: `X-Frame-Options` dropped, CSP replaced, by `netlify/edge-functions/runner-headers.ts` | Netlify's `_headers` cannot detach the catch-all rules (13.2); the function's policy strings are a `headers.mjs` source |
 
 ## Vercel: endpoint origins at build time (0.20)
 

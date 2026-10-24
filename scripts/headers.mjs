@@ -10,9 +10,9 @@
  * that policy into every file that carries a copy:
  *
  *   public/_headers                      Cloudflare Pages / Netlify
+ *   netlify/edge-functions/runner-headers.ts  Netlify: the runner pages' own policy
  *   deploy/vercel.base.json              Vercel (read through vercel.ts)
- *   docker/nginx.conf                    on-prem web shell image
- *   deploy/nginx.conf (+ runtime include) root Dockerfile image
+ *   deploy/nginx.conf (+ runtime include) the one nginx image (Dockerfile: fly.toml and docker-compose.yml)
  *   index.html, livejs-runner.html,      <meta http-equiv> copies
  *   playground-runner.html
  *   src-tauri/tauri.conf.json            desktop app
@@ -37,7 +37,7 @@ export const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 export const POLICY_FILE = "security/policy.json";
 export const CSP = "Content-Security-Policy";
 /** Hosts that send real response headers (meta / tauri carry only a CSP). */
-const HEADER_HOSTS = new Set(["cloudflare", "vercel", "docker-nginx", "deploy-nginx"]);
+const HEADER_HOSTS = new Set(["cloudflare", "netlify", "vercel", "deploy-nginx"]);
 
 export function loadPolicy(root = ROOT) {
   return JSON.parse(readFileSync(join(root, POLICY_FILE), "utf8"));
@@ -408,6 +408,31 @@ export function run({ root = ROOT, write = false, policy = loadPolicy(root) } = 
           if (req.absent && has(name)) problems.push(`${file} [${key}]: route ${route} is framed by the app — remove ${name}`);
           if (!req.absent && !has(name))
             problems.push(`${file} [${key}]: missing add_header ${name} "${headerValue(policy, name, src.host)}" always; (route ${route})`);
+        }
+      }
+    } else if (src.format === "netlify-edge") {
+      // A `"path": "policy",` map in the edge function, one entry per runner route.
+      const slots = [];
+      for (const m of text.matchAll(/^(\s*)"(\/[^"]+)":\s*"((?:[^"\\]|\\.)*)",?[ \t]*$/gm)) {
+        const vi = m[0].lastIndexOf(`"${m[3]}"`);
+        const start = m.index + vi + 1;
+        slots.push({ key: m[2], name: CSP, value: m[3], start, end: start + m[3].length, line: lineAt(text, m.index) });
+      }
+      const routes = src.routes ?? {};
+      for (const slot of slots) {
+        const route = routes[slot.key];
+        if (!route) {
+          problems.push(`${where(slot)} ${CSP} for a path ${POLICY_FILE} does not map to a route (sources["${file}"].routes)`);
+          continue;
+        }
+        expect(slot, JSON.stringify(renderCsp(policy, route, src.host)).slice(1, -1), route);
+      }
+      for (const [path2, route] of Object.entries(routes)) {
+        if (!slots.some((s) => s.key === path2)) problems.push(`${file}: no "${path2}" entry (route ${route}) — add it by hand once`);
+        for (const [name, req] of requiredHeaders(policy, route, src.host)) {
+          // The function must drop the catch-all's frame denial; the other headers come from _headers.
+          if (req.absent && !new RegExp(`headers\\.delete\\("${name.toLowerCase()}"\\)`).test(text))
+            problems.push(`${file}: route ${route} is framed by the app — the function must headers.delete("${name.toLowerCase()}")`);
         }
       }
     } else if (src.format === "headers-file" || src.format === "vercel") {

@@ -176,13 +176,13 @@
     "Cross-Origin-Opener-Policy": {
       "value": "same-origin",
       "hosts": ["deploy-nginx"],
-      "why": "Only the root Dockerfile image (deploy/nginx.conf) opts into cross-origin isolation (multi-threaded WebAssembly). See docs/security/headers.md for its cost.",
+      "why": "Only the nginx image (Dockerfile → deploy/nginx.conf; since 13.2 both fly.toml and docker-compose.yml) opts into cross-origin isolation (multi-threaded WebAssembly). See docs/security/headers.md for its cost; keeping it is decision 15.10(7).",
       "required": { "kinds": ["document"] }
     },
     "Cross-Origin-Embedder-Policy": {
       "value": "credentialless",
       "hosts": ["deploy-nginx"],
-      "why": "Pairs with Cross-Origin-Opener-Policy on the deploy image; every document and worker it serves carries it so nested frames and workers stay loadable.",
+      "why": "Pairs with Cross-Origin-Opener-Policy on the nginx image; every document and worker it serves carries it so nested frames and workers stay loadable.",
       "required": { "kinds": ["document", "worker"] }
     }
   },
@@ -200,18 +200,11 @@
         }
       ]
     },
-    "docker-nginx": {
-      "why": "docker/nginx.conf: the on-prem web shell (docker/Dockerfile.web, docker-compose.yml).",
-      "csp": [
-        {
-          "routes": ["app"],
-          "add": { "connect-src": ["__CSP_CONNECT_EXTRA__"] },
-          "why": "Placeholder that docker/Dockerfile.web replaces with the deployment's endpoint origins (dist/.csp-connect-extra, written by the Vite CSP plugin)."
-        }
-      ]
+    "netlify": {
+      "why": "public/_headers (Netlify applies the publish directory's _headers, but cannot detach the catch-all rules) plus netlify/edge-functions/runner-headers.ts, which gives the two runner pages their own policy and drops the frame denial (plan 13.2)."
     },
     "deploy-nginx": {
-      "why": "deploy/nginx.conf + deploy/lumen-runtime-headers.conf: the root Dockerfile image (fly.toml).",
+      "why": "deploy/nginx.conf + deploy/lumen-runtime-headers.conf: the one nginx image (Dockerfile), built by fly.toml and docker-compose.yml (plan 13.2).",
       "csp": [
         {
           "routes": ["app"],
@@ -254,18 +247,12 @@
   "sources": {
     "public/_headers": { "format": "headers-file", "host": "cloudflare" },
     "deploy/vercel.base.json": { "format": "vercel", "host": "vercel" },
-    "docker/nginx.conf": {
-      "format": "nginx",
-      "host": "docker-nginx",
-      "blocks": {
-        "location /": "app",
-        "location ~ ^/(webr|ruby|pyodide|playground)/": "eval-workers",
-        "location = /playground-runner.html": "playground-runner",
-        "location = /livejs-runner.html": "livejs-runner",
-        "location ^~ /tesseract/": "tesseract",
-        "location ~ ^/assets/(graphviz|ruby|tsCheck)\\.worker-": "eval-workers",
-        "location /assets/": "app",
-        "location ~ ^/(sw\\.js|manifest\\.webmanifest)$": "app"
+    "netlify/edge-functions/runner-headers.ts": {
+      "format": "netlify-edge",
+      "host": "netlify",
+      "routes": {
+        "/playground-runner.html": "playground-runner",
+        "/livejs-runner.html": "livejs-runner"
       }
     },
     "deploy/nginx.conf": {

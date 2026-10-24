@@ -203,11 +203,11 @@ describe("drift is caught", () => {
 
   it("an nginx location that drops a required header is flagged", () => {
     const dir = copy("nginx-header");
-    const path = join(dir, "docker/nginx.conf");
+    const path = join(dir, "deploy/nginx.conf");
     const text = readFileSync(path, "utf8");
-    const at = text.indexOf("location / {");
+    const at = text.indexOf("location = /sw.js {");
     writeFileSync(path, text.slice(0, at) + text.slice(at).replace(/\n\s*add_header X-Frame-Options "DENY" always;/, ""));
-    expect(run({ root: dir }).problems.join("\n")).toContain('[location /]: missing add_header X-Frame-Options "DENY" always;');
+    expect(run({ root: dir }).problems.join("\n")).toContain('[location = /sw.js]: missing add_header X-Frame-Options "DENY" always;');
   });
 
   it("a <meta> CSP in a page the policy does not list is flagged", () => {
