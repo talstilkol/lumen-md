@@ -1,0 +1,62 @@
+/** T34 — web clipper, library and research that stays on the device. */
+import { describe, it, expect, beforeEach, vi } from "vitest";
+import { clipFileName, clipFromHtml, clipUrl, isLibraryPath, readableHtml } from "../research/clipper";
+
+const page = `<!doctype html><html><head><title>Site — Article</title><meta property="og:title" content="מאמר על השקה"></head>
+<body><nav><a href="/">Home</a> Menu</nav><header>Banner</header>
+<article><h1>מאמר על השקה</h1><p>ההשקה נדחתה ליום שלישי.</p><p>Budget <b>unchanged</b>.</p><script>evil()</script></article>
+<footer>© footer</footer><aside class="ads">Buy now</aside></body></html>`;
+
+describe("clipper", () => {
+  it("keeps the article and drops menus, ads, scripts", () => {
+    const r = readableHtml(page);
+    expect(r.title).toBe("מאמר על השקה");
+    expect(r.html).toContain("ההשקה נדחתה");
+    expect(r.html).not.toMatch(/Menu|Banner|footer|Buy now|evil/);
+  });
+
+  it("builds a note with source, clip date and tag", () => {
+    const c = clipFromHtml(page, "https://example.com/a", new Date("2026-10-18T00:00:00Z"));
+    expect(c.markdown).toMatch(/^---\ntitle: "מאמר על השקה"\nsource: "https:\/\/example.com\/a"\nclipped: 2026-10-18\ntags: \[clip\]\n---/);
+    expect(c.markdown).toContain("**unchanged**");
+  });
+
+  it("uses the research extractor when available, else fetches", async () => {
+    const c = await clipUrl("https://x.test/p", { extract: async () => ({ title: "T", text: "Body text", finalUrl: "https://x.test/p2" }) });
+    expect(c.source).toBe("https://x.test/p2");
+    expect(c.markdown).toContain("Body text");
+    const f = vi.spyOn(globalThis, "fetch").mockResolvedValue(new Response(page, { status: 200 }));
+    const d = await clipUrl("https://x.test/q", { extract: async () => ({ error: "blocked-url" }) });
+    expect(d.title).toBe("מאמר על השקה");
+    f.mockRestore();
+  });
+
+  it("safe file names and library paths", () => {
+    expect(clipFileName('a/b: "c"?')).toBe("a b c.md");
+    expect(isLibraryPath("ספרייה/x.md")).toBe(true);
+    expect(isLibraryPath("Library/x.md")).toBe(true);
+    expect(isLibraryPath("notes/x.md")).toBe(false);
+  });
+});
+
+describe("research under local-only", () => {
+  beforeEach(() => localStorage.clear());
+
+  it("never goes online and answers from the library", async () => {
+    localStorage.setItem("lumen.ai.policy", "local-only");
+    vi.doMock("../ai/semanticSearch", () => ({ searchHybrid: async () => [{ path: "ספרייה/השקה.md", score: 1, snippet: "ההשקה נדחתה ליום שלישי." }, { path: "notes/other.md", score: 0.9, snippet: "x" }] }));
+    vi.doMock("../storage/workspace", async (o) => ({ ...(await o<object>()), readWorkspaceFile: async () => "# השקה\nההשקה נדחתה ליום שלישי.\n" }));
+    vi.doMock("../ai/llm", async (o) => ({ ...(await o<object>()), chat: async () => 'ההשקה נדחתה [1] "ההשקה נדחתה ליום שלישי".' }));
+    const f = vi.spyOn(globalThis, "fetch");
+    vi.resetModules();
+    const { runResearch, researchGoesOnline } = await import("../research/agent");
+    expect(researchGoesOnline()).toBe(false);
+    const r = await runResearch({ question: "מתי ההשקה?", deps: { settings: { provider: "claude", key: "" } } });
+    expect(r.route).toBe("library");
+    expect(r.unverified).toBe(0);
+    expect(r.markdown).toContain("[[השקה]]");
+    expect(r.markdown).not.toContain("other");
+    expect(f).not.toHaveBeenCalled();
+    f.mockRestore();
+  });
+});

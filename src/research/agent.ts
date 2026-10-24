@@ -22,7 +22,7 @@ import { recordUsage } from "../ai/usage";
 import { chargeAiCommandDispatch } from "../billing/aiQuota";
 import { APPROXIMATE_AT, quoteCoverage } from "./citations";
 import { extractPage, getResearchSettings, researchEndpoint, searchWeb, type ExtractedPage, type ResearchSettings, type SearchHit } from "./client";
-import { assertCloudAllowed, isLocalOrigin } from "../ai/policy";
+import { assertCloudAllowed, getAiPolicy, isLocalOrigin } from "../ai/policy";
 
 export interface ResearchOptions {
   question: string;
@@ -42,7 +42,7 @@ export interface ResearchOptions {
 
 export interface ResearchResult {
   markdown: string;
-  route: "claude" | "brave" | "tavily" | "searxng";
+  route: "claude" | "brave" | "tavily" | "searxng" | "library";
   sources: number;
   /** Footnotes whose quote couldn't be found in the source text. */
   unverified: number;
@@ -364,8 +364,83 @@ async function proxyResearch(o: ResearchOptions, settings: ResearchSettings): Pr
   return { markdown, route: settings.provider as ProxyProvider, sources: pages.length, unverified };
 }
 
+/* ─── Library research (T34): the clipped pages, nothing leaves the device ─ */
+
+/** Would this research go to the web (a non-local service or Claude)? */
+export function researchGoesOnline(settings: ResearchSettings = getResearchSettings()): boolean {
+  if (getAiPolicy() === "local-only") return false;
+  if (settings.provider === "claude") return true;
+  const endpoint = researchEndpoint();
+  return !!endpoint && !isLocalOrigin(endpoint);
+}
+
+const WEB_CONSENT_KEY = "lumen.research.webConsent";
+export function hasWebConsent(): boolean {
+  try {
+    return localStorage.getItem(WEB_CONSENT_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+export function grantWebConsent(): void {
+  try {
+    localStorage.setItem(WEB_CONSENT_KEY, "1");
+  } catch {
+    /* asked again next time */
+  }
+}
+
+/**
+ * Answer from the library (Library/ · ספרייה/) only: the best passages by
+ * hybrid search + rerank, a local model's answer with [n] "quote" citations,
+ * every quote checked against its page.
+ */
+export async function libraryResearch(o: ResearchOptions): Promise<ResearchResult> {
+  const { searchHybrid } = await import("../ai/semanticSearch");
+  const { rerank } = await import("../ai/reranker");
+  const { readWorkspaceFile } = await import("../storage/workspace");
+  const { isLibraryPath } = await import("./clipper");
+  const { CITE_INSTRUCTIONS, verifyVaultCitations } = await import("../ai/vaultCitations");
+  o.onProgress?.("Searching your library…");
+  const hits = (await searchHybrid(o.question, 40).catch(() => [])).filter((h) => isLibraryPath(h.path));
+  if (!hits.length) throw new Error("Nothing in your library matches — clip some pages first (Clip a web page…), or allow web research in AI settings.");
+  const withText = await Promise.all(hits.map(async (h) => ({ ...h, content: await readWorkspaceFile(h.path).catch(() => h.snippet) })));
+  const top = (await rerank(o.question, withText.map((h) => ({ ...h, text: `${h.snippet}\n${h.content.slice(0, 1500)}` })))).slice(0, 6);
+  const packed = packContext(o.question, top.map((h) => ({ path: h.path, content: h.content })), CONTEXT_BUDGET[getAiMode()]);
+  const context = packed.map((p, i) => `---\n[${i + 1}] ${p.path}\n${p.text}`).join("\n");
+  const answer = await chat(
+    [
+      { role: "system", content: SYSTEM_REPORT + "\n\n" + CITE_INSTRUCTIONS },
+      { role: "user", content: `Library pages:\n${context}\n\nQuestion: ${o.question}` },
+    ],
+    { signal: o.signal },
+  );
+  const sources = top.map((h) => ({ path: h.path, content: h.content }));
+  const { citations, verifiedCount } = verifyVaultCitations(answer, sources);
+  const unverified = citations.filter((c) => !c.verified).length;
+  const stemOf = (p: string) => p.replace(/^.*\//, "").replace(/\.md$/i, "");
+  const markdown = [
+    `# ${title(o.question)}`,
+    "",
+    `*From your library only (nothing left this device) · ${top.length} pages · ${verifiedCount} of ${citations.length} quotes verified.*`,
+    "",
+    answer.trim(),
+    "",
+    "## Sources",
+    "",
+    ...top.map((h, i) => `${i + 1}. [[${stemOf(h.path)}]]`),
+    "",
+  ].join("\n");
+  return { markdown, route: "library", sources: top.length, unverified };
+}
+
 export async function runResearch(o: ResearchOptions): Promise<ResearchResult> {
   const settings = o.deps?.settings ?? getResearchSettings();
+  // Local-only: the web is off-limits — research the library instead (T34).
+  if (getAiPolicy() === "local-only" && !o.deps?.search && !o.deps?.extract) {
+    const endpoint = researchEndpoint();
+    if (settings.provider === "claude" || !endpoint || !isLocalOrigin(endpoint)) return libraryResearch(o);
+  }
   if (settings.provider === "claude") {
     assertCloudAllowed("Claude web search");
     if (getActiveProvider() !== "anthropic") {
