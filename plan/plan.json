@@ -302,7 +302,18 @@
      "acceptance": [
       "עדכון סטטוס = שורה אחת",
       "CI נכשל כשהמסמך לא תואם"
-     ]
+     ],
+     "dod": {
+      "docs": "docs/dev/plan.md",
+      "checks": [
+       {
+        "test": "src/__tests__/planBuild.test.ts > a status change is one line in plan.json, and the check catches a stale document"
+       },
+       {
+        "script": "plan:check"
+       }
+      ]
+     }
     },
     {
      "id": "0.7",
@@ -329,7 +340,18 @@
      "acceptance": [
       "אי אפשר לסמן ✅ בלי DoD ירוק",
       "15 ה-✅ הקיימים עוברים DoD או יורדים ל-⏳"
-     ]
+     ],
+     "dod": {
+      "docs": "docs/dev/plan.md",
+      "checks": [
+       {
+        "ci": "DoD gate"
+       },
+       {
+        "manual": "npm run dod -- --all is green, or every task with a gap is ⏳ (1.8)"
+       }
+      ]
+     }
     },
     {
      "id": "0.8",
@@ -573,7 +595,15 @@
      ],
      "acceptance": [
       "6 מקורות = טבלה אחת (בדיקה); דפי ה-runner — חריגה מתועדת (unsafe-eval בתוך sandbox)"
-     ]
+     ],
+     "dod": {
+      "docs": "docs/security/headers.md",
+      "checks": [
+       {
+        "script": "headers"
+       }
+      ]
+     }
     },
     {
      "id": "0.18",
@@ -1056,7 +1086,18 @@
      "acceptance": [
       "סריקת האחסון: 0 טוקנים גלויים",
       "בדיקות keychain ירוקות ב-macOS וב-Windows"
-     ]
+     ],
+     "dod": {
+      "docs": "docs/src/content/docs/security/vault.md",
+      "checks": [
+       {
+        "test": "src/__tests__/secretsScan.test.ts > signing in leaves 0 plaintext tokens in localStorage, sessionStorage and IndexedDB"
+       },
+       {
+        "ci": "keychain tests"
+       }
+      ]
+     }
     },
     {
      "id": "2.6",
