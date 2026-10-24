@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-10-24T11:45:04.520Z",
+  "generated_at": "2026-10-24T15:34:34.169Z",
   "source": "src/i18n/index.ts (en bundle)",
-  "count": 1563,
+  "count": 1564,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -6706,6 +6706,11 @@
     {
       "key": "tour.action.openRuntimeMetrics",
       "en": "Open runtime metrics now",
+      "vars": []
+    },
+    {
+      "key": "a11y.sidebarResizer",
+      "en": "Resize the sidebar",
       "vars": []
     },
     {

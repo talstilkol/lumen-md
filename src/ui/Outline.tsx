@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { extractToc } from "../renderer/pipeline";
 import { t } from "../i18n";
+import { scrollBehavior } from "../lib/motion";
 
 interface Props {
   markdownText: string;
@@ -92,7 +93,7 @@ export const Outline = React.memo(function Outline({ markdownText }: Props) {
               onClick={(e) => {
                 e.preventDefault();
                 const el = document.getElementById(h.id);
-                if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+                if (el) el.scrollIntoView({ behavior: scrollBehavior(), block: "start" });
               }}
             >
               {h.text}

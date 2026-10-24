@@ -626,6 +626,7 @@
   "tour.step.editor.title": "✍️ עורך",
   "tour.step.editor.body": "כתוב Markdown עם הדגשת תחביר מלאה, תצוגה מקדימה חיה וסיוע AI.",
   "tour.action.openRuntimeMetrics": "פתח עכשיו מדדי ריצה",
+  "a11y.sidebarResizer": "שינוי רוחב סרגל הצד",
   "onboard.title": "ברוכים הבאים ל-Lumen",
   "onboard.subtitle": "כמה בחירות קצרות, ואז כותבים. אפשר לשנות כל אחת מהן אחר כך.",
   "onboard.step": "שלב {n} מתוך {total}",

@@ -75,11 +75,17 @@
     --bg-inset: 220 14% 92%;
     --fg: 222 24% 11%;
     --fg-subtle: 220 9% 32%;
-    --fg-muted: 220 8% 46%;
+    /* WCAG AA (plan 10.1.3): ≥ 4.5:1 on bg, bg-muted and bg-inset. */
+    --fg-muted: 220 8% 42%;
     --border: 220 13% 88%;
     --border-strong: 220 13% 78%;
-    --accent: 252 92% 66%;
+    /* ≥ 4.5:1 as text on the backgrounds and on its own 10% tint; white text on it ≥ 4.5:1. */
+    --accent: 252 92% 58%;
     --accent-fg: 0 0% 100%;
+    /* Status colours as text (plan 10.1.3): ≥ 4.5:1 on bg, bg-subtle, bg-muted. */
+    --ok: 145 60% 30%;
+    --warn: 35 90% 32%;
+    --danger: 12 90% 42%;
 
     /* z-index layer strategy */
     --z-dropdown: 100;
@@ -99,8 +105,12 @@
     --fg-muted: 220 8% 58%;
     --border: 224 14% 18%;
     --border-strong: 224 14% 26%;
-    --accent: 252 92% 70%;
+    /* ≥ 4.5:1 as text on the dark backgrounds and on its own 10% tint. */
+    --accent: 252 92% 73%;
     --accent-fg: 224 24% 7%;
+    --ok: 145 60% 45%;
+    --warn: 35 90% 55%;
+    --danger: 12 90% 60%;
   }
 
   html,
@@ -283,8 +293,13 @@
     color: hsl(var(--accent));
     text-decoration: underline;
   }
+  /* Inline code and strings: ≥ 4.5:1 on the light editor, unchanged on dark (plan 10.1.3). */
   .cm-editor .tok-monospace,
   .cm-editor .tok-string {
+    color: hsl(170 60% 30%);
+  }
+  .dark .cm-editor .tok-monospace,
+  .dark .cm-editor .tok-string {
     color: hsl(170 60% 55%);
   }
   .cm-editor .tok-quote {
@@ -1372,6 +1387,27 @@
     transition-duration: 0.001ms !important;
     scroll-behavior: auto !important;
   }
+}
+
+/* ─── Sidebar resizer (plan 10.1.2) ───
+   The rules lived in src/ui/FileTree.css, which nothing imports, so the
+   handle was 0 px wide: unusable by mouse or keyboard. */
+.sidebar-resizer {
+  width: 6px;
+  cursor: col-resize;
+  background: transparent;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 5;
+}
+.sidebar-resizer:hover,
+.sidebar-resizer.dragging,
+.sidebar-resizer:focus-visible {
+  background: hsl(var(--accent) / 0.4);
+}
+.sidebar-resizer:focus-visible {
+  outline: 2px solid hsl(var(--accent));
+  outline-offset: -1px;
 }
 
 /* ─── RTL niceties ─── */

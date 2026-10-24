@@ -741,6 +741,7 @@
   "tour.step.editor.title": "✍️ Éditeur",
   "tour.step.editor.body": "Écrivez en Markdown avec coloration syntaxique complète, aperçu en direct et assistance de l'IA.",
   "tour.action.openRuntimeMetrics": "Ouvrir les métriques d'exécution maintenant",
+  "a11y.sidebarResizer": "Redimensionner la barre latérale",
   "onboard.title": "Bienvenue dans Lumen",
   "onboard.subtitle": "Quelques choix rapides, puis vous écrivez. Vous pourrez tout changer plus tard.",
   "onboard.step": "Étape {n} sur {total}",

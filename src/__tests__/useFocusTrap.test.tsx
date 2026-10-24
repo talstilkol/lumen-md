@@ -71,7 +71,7 @@ describe("useFocusTrap", () => {
     cleanup();
     function Self() {
       const ref = useRef<HTMLDivElement>(null);
-      const input = useRef<HTMLInputElement>(null);
+      const input = useRef<HTMLInputElement | null>(null);
       useFocusTrap(ref);
       return (
         <div ref={ref}>

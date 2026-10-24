@@ -741,6 +741,7 @@
   "tour.step.editor.title": "✍️ エディタ",
   "tour.step.editor.body": "構文ハイライト、ライブプレビュー、AI アシスト付きで Markdown を書けます。",
   "tour.action.openRuntimeMetrics": "ランタイムメトリクスを今すぐ開く",
+  "a11y.sidebarResizer": "サイドバーの幅を変更",
   "onboard.title": "Lumen へようこそ",
   "onboard.subtitle": "いくつか選ぶだけで書き始められます。どれも後から変更できます。",
   "onboard.step": "ステップ {n} / {total}",

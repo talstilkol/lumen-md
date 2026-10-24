@@ -334,6 +334,8 @@ export function CommandPalette({ open, onClose, commands }: Props) {
           ref={listRef}
           id="cmd-listbox"
           role="listbox"
+          // Reachable by Tab so it can be scrolled by keyboard (axe: scrollable-region-focusable).
+          tabIndex={0}
           aria-label={t("palette.placeholder")}
         >
           {filtered.length === 0 && (
@@ -355,7 +357,7 @@ export function CommandPalette({ open, onClose, commands }: Props) {
                         fontWeight: 700,
                         textTransform: "uppercase",
                         letterSpacing: "0.08em",
-                        color: "hsl(var(--accent) / 0.7)",
+                        color: "hsl(var(--fg-muted))",
                         borderTop: i > 0 ? "1px solid hsl(var(--border) / 0.4)" : "none",
                         marginTop: i > 0 ? 4 : 0,
                         userSelect: "none",

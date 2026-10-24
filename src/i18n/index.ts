@@ -1352,6 +1352,7 @@ const en: Strings = {
   "tour.step.editor.title": "✍️ Editor",
   "tour.step.editor.body": "Write Markdown with full syntax highlighting, live preview, and AI assistance.",
   "tour.action.openRuntimeMetrics": "Open runtime metrics now",
+  "a11y.sidebarResizer": "Resize the sidebar",
   "onboard.title": "Welcome to Lumen",
   "onboard.subtitle": "A few quick choices, then you're writing. You can change any of them later.",
   "onboard.step": "Step {n} of {total}",
