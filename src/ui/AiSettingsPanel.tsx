@@ -75,6 +75,8 @@ export function AiSettingsPanel({ open, onClose }: Props) {
   const [researchUrl, setResearchUrl] = useState("");
   const [endpointError, setEndpointError] = useState("");
   const [styleOn, setStyleOn] = useState(false);
+  const [redactOn, setRedactOn] = useState(true);
+  const [redactPreview, setRedactPreview] = useState(false);
   const [hasStyle, setHasStyle] = useState(false);
   const [runs, setRuns] = useState<AgentRun[]>([]);
   const [saved, setSaved] = useState(false);
@@ -138,6 +140,10 @@ export function AiSettingsPanel({ open, onClose }: Props) {
       setResearchUrl(ls("lumen.research.endpoint"));
       setHasStyle(!!style.getStyleProfile());
       setStyleOn(style.styleProfileActive());
+      const red = await import("../ai/piiRedactor");
+      if (!alive) return;
+      setRedactOn(red.redactionEnabled());
+      setRedactPreview(red.previewEnabled());
       setWebModel(mm.selectedWebLlmModel() ?? "");
       await trace.loadTrace();
       // listRuns() is newest first: the first ten are the ten latest.
@@ -228,6 +234,20 @@ export function AiSettingsPanel({ open, onClose }: Props) {
     flash();
   };
 
+  const toggleRedact = async (on: boolean) => {
+    const { setRedactionEnabled } = await import("../ai/piiRedactor");
+    setRedactionEnabled(on);
+    setRedactOn(on);
+    flash();
+  };
+
+  const toggleRedactPreview = async (on: boolean) => {
+    const { setPreviewEnabled } = await import("../ai/piiRedactor");
+    setPreviewEnabled(on);
+    setRedactPreview(on);
+    flash();
+  };
+
   const clearRuns = async () => {
     const { clearTrace } = await import("../agents/trace");
     await clearTrace();
@@ -268,6 +288,21 @@ export function AiSettingsPanel({ open, onClose }: Props) {
               </label>
             ))}
           </section>
+
+          {policy !== "local-only" && (
+            <section style={box} aria-labelledby="ai-set-redact" data-testid="ai-set-redact">
+              <div id="ai-set-redact" style={caption}>{t("pii.settings.title")}</div>
+              <label style={row}>
+                <input type="checkbox" checked={redactOn} onChange={(e) => void toggleRedact(e.target.checked)} />
+                <span>{t("pii.settings.redact")}</span>
+              </label>
+              <label style={row}>
+                <input type="checkbox" checked={redactPreview} disabled={!redactOn} onChange={(e) => void toggleRedactPreview(e.target.checked)} />
+                <span>{t("pii.settings.preview")}</span>
+              </label>
+              <div style={muted}>{t("pii.settings.hint")}</div>
+            </section>
+          )}
 
           <section style={box} aria-labelledby="ai-set-exec">
             <div id="ai-set-exec" style={caption}>{t("ai.settings.executor")}</div>

@@ -62,6 +62,7 @@ export default defineConfig({
             { label: "Local LLM (web-llm)", slug: "ai/local-llm" },
             { label: "AI cost: usage meter + answer cache", slug: "ai/cost" },
             { label: "Research + citation checks", slug: "ai/research" },
+            { label: "Personal data before the cloud", slug: "ai/pii-redaction", translations: { he: "מידע אישי לפני הענן" } },
             { label: "MCP integration (Claude Desktop, Cursor)", slug: "ai/mcp" },
           ],
         },
