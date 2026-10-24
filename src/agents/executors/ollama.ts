@@ -307,8 +307,10 @@ export const ollamaExecutor: Executor = {
       options: {
         ...(req.temperature !== undefined ? { temperature: req.temperature } : {}),
         ...(req.maxTokens ? { num_predict: req.maxTokens } : {}),
+        ...(req.seed !== undefined ? { seed: req.seed } : {}),
       },
     };
+    if (req.think !== undefined) body.think = req.think;
     if (useTools) body.tools = toOllamaTools(req.tools!);
     if (req.schema && this.supportsSchema()) body.format = req.schema;
     const res = await fetch(`${base}/api/chat`, {

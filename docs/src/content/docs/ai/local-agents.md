@@ -243,3 +243,11 @@ lists each case with pass/fail, attempts (retries the improvement agent
 asked for) and time. The reference answers in
 `src/agents/eval/fixtures.ts` run in CI through each agent's own parser
 and validators, so a broken fixture is caught before a long GPU run.
+
+### A real tiny model in CI
+
+`npm run ci:real-model` runs every agent once against a real local model, `qwen3:0.6b` on Ollama (Apache-2.0, about 523 MB, tool calling). Each run uses temperature 0, seed 42, no thinking phase, and at most 64 tokens a turn. It judges the **shape** of each turn, not its wording:
+- a tool call names one of the agent's tools, and its arguments pass the tool's JSON Schema;
+- a final answer starts in the agent's format (JSON where the agent has a schema).
+
+It finds Ollama, or starts `ollama serve` if the binary is installed, and pulls the model when it is missing. If either is impossible (no Ollama, no network to the model registry), it writes `eval/results/real-skipped.md` with the reason and exits 0. The nightly workflow (`.github/workflows/real-model.yml`) caches the model and sets `LUMEN_REAL_MODEL_REQUIRED=1`, so there a skip fails. It also checks LanguageTool (English only; it has no Hebrew) and SearXNG as real services. Use `--model qwen3:1.7b` for the multi-step scenarios.

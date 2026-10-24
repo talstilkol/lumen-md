@@ -686,6 +686,36 @@
       "notes": "Qwen3 tech report: all Qwen3 models under Apache 2.0."
     },
     {
+      "id": "qwen3:0.6b",
+      "kind": "llm",
+      "source": "https://ollama.com/library/qwen3",
+      "license": "Apache-2.0",
+      "class": "allowed",
+      "commercial": "yes",
+      "attribution": "Qwen3 © Alibaba Cloud, licensed under the Apache License 2.0.",
+      "size": "~523 MB (q4)",
+      "runs": "ollama",
+      "delivery": "ci-only",
+      "catalog": "scripts/real-tiny-model.mjs (plan 7.2) — test runs only, not offered in the app",
+      "verified": true,
+      "notes": "Qwen3 tech report: all Qwen3 models under Apache 2.0. The real-model CI run (structure only) uses it; nothing ships it."
+    },
+    {
+      "id": "qwen3:1.7b",
+      "kind": "llm",
+      "source": "https://ollama.com/library/qwen3",
+      "license": "Apache-2.0",
+      "class": "allowed",
+      "commercial": "yes",
+      "attribution": "Qwen3 © Alibaba Cloud, licensed under the Apache License 2.0.",
+      "size": "~1.4 GB (q4)",
+      "runs": "ollama",
+      "delivery": "ci-only",
+      "catalog": "scripts/real-tiny-model.mjs --model qwen3:1.7b (plan 7.2.2, nightly multi-step scenarios)",
+      "verified": true,
+      "notes": "Qwen3 tech report: all Qwen3 models under Apache 2.0."
+    },
+    {
       "id": "qwen3:4b",
       "kind": "llm",
       "source": "https://ollama.com/library/qwen3",

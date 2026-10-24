@@ -189,6 +189,10 @@ export const MODEL_TIERS: readonly ModelTier[] = ["tiny", "small", "medium", "la
 
 export interface ExecutorRequest {
   messages: ExecutorMessage[];
+  /** A fixed sampling seed (the real-model CI run, plan 7.2): with temperature 0, the same answer every run. */
+  seed?: number;
+  /** false: ask a reasoning model (Qwen3, …) to answer without a thinking phase. Executors without the option ignore it. */
+  think?: boolean;
   /** Tools the model may call this turn. */
   tools?: AgentTool[];
   /** When set, the answer must be JSON matching this schema. */
