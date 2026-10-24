@@ -506,8 +506,9 @@ async function chatDirect(
     assertCloudProvider("anthropic");
     getProviderKey("anthropic"); // NO_KEY before anything is charged
     checkRateLimit();
-    charge();
+    // Redacted (and previewed) before the prompt is charged: a cancelled preview costs nothing.
     const red = await forCloud(messages, "anthropic");
+    charge();
     inflight++;
     try {
       return red.restore(await chatAnthropic(red.messages, opts));
@@ -522,8 +523,9 @@ async function chatDirect(
     assertCloudProvider("gemini");
     getProviderKey("gemini"); // NO_KEY before anything is charged
     checkRateLimit();
-    charge();
+    // Redacted (and previewed) before the prompt is charged: a cancelled preview costs nothing.
     const red = await forCloud(messages, "gemini");
+    charge();
     inflight++;
     try {
       return red.restore(await chatGemini(red.messages, opts));
@@ -538,8 +540,9 @@ async function chatDirect(
     assertCloudProvider("mistral");
     getProviderKey("mistral"); // NO_KEY before anything is charged
     checkRateLimit();
-    charge();
+    // Redacted (and previewed) before the prompt is charged: a cancelled preview costs nothing.
     const red = await forCloud(messages, "mistral");
+    charge();
     inflight++;
     try {
       return red.restore(await chatMistral(red.messages, opts));
