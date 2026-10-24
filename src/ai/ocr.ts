@@ -2,12 +2,16 @@
  * On-device OCR (T31): Hebrew + English text from images and scanned PDF
  * pages, with tesseract.js (LSTM engine, tessdata_fast models).
  *
- * Everything runs in a Web Worker on this machine. The worker and its
- * WebAssembly cores are served from this origin (public/tesseract/, see
- * scripts/copy-tesseract.mjs); the language models (heb ≈ 1 MB, eng ≈ 4 MB)
- * are downloaded once from the tesseract-ocr project on GitHub and cached by
- * the browser. No image ever leaves the device.
+ * Everything runs in a Web Worker on this machine, and everything it loads
+ * comes from this origin: the worker and its WebAssembly cores
+ * (public/tesseract/, staged by scripts/copy-tesseract.mjs) and the
+ * language models (public/tesseract/lang/<lang>.traineddata.gz, committed:
+ * tesseract-ocr/tessdata_fast, Apache-2.0, heb ≈ 0.5 MB and eng ≈ 2 MB
+ * gzipped; plan 7.5). tesseract.js keeps them in IndexedDB after the first
+ * use. No image ever leaves the device, and OCR makes no outside request.
  */
+
+import type { Box, OcrLine } from "./ocrMixed";
 
 export interface OcrResult {
   text: string;
@@ -15,16 +19,25 @@ export interface OcrResult {
   confidence: number;
 }
 
-const LANG_PATH = "https://raw.githubusercontent.com/tesseract-ocr/tessdata_fast/main";
 const LANGS = ["heb", "eng"] as const;
 const IDLE_MS = 60_000;
 
+type Image = Blob | HTMLCanvasElement | OffscreenCanvas | ImageData | Uint8Array;
 type TesseractWorker = {
-  recognize(image: Blob | HTMLCanvasElement | OffscreenCanvas | ImageData): Promise<{ data: { text: string; confidence: number } }>;
+  recognize(
+    image: Image,
+    options?: { rectangle?: { left: number; top: number; width: number; height: number } },
+    output?: { text?: boolean; blocks?: boolean },
+  ): Promise<{ data: { text: string; confidence: number; blocks?: Array<{ paragraphs: Array<{ lines: OcrLine[] }> }> | null } }>;
+  setParameters?(p: Record<string, unknown>): Promise<unknown>;
   terminate(): Promise<unknown>;
 };
 
 let workerPromise: Promise<TesseractWorker> | null = null;
+/** Hebrew only, one word at a time: re-reads the Hebrew bits of mixed lines (./ocrMixed). Started only when a line needs it. */
+let hebPromise: Promise<TesseractWorker> | null = null;
+/** Latin only, one word at a time: re-reads an unsure word after a Hebrew prefix ("ה-PDF"). Started only when a line needs it. */
+let latinPromise: Promise<TesseractWorker> | null = null;
 let idleTimer: ReturnType<typeof setTimeout> | null = null;
 let queue: Promise<unknown> = Promise.resolve();
 
@@ -33,18 +46,26 @@ function base(): string {
   return new URL(`${b.replace(/\/?$/, "/")}tesseract/`, location.href).href;
 }
 
+/**
+ * Where the worker fetches `<lang>.traineddata.gz`: same origin, so the
+ * worker's CSP (public/_headers /tesseract/*) needs no outside host.
+ * @internal exported for tests.
+ */
+export function langPath(): string {
+  return `${base()}lang`;
+}
+
 async function getWorker(): Promise<TesseractWorker> {
   return (workerPromise ??= (async () => {
     const T = await import("tesseract.js");
-    await noteModelDownloads();
     // workerBlobURL: false — a same-origin worker URL, so the worker gets its
     // own CSP (public/_headers /tesseract/*) instead of a blob: that inherits
     // the app's Trusted Types requirement.
     const w = await T.createWorker([...LANGS], T.OEM.LSTM_ONLY, {
       workerPath: `${base()}worker.min.js`,
       corePath: base(),
-      langPath: LANG_PATH,
-      gzip: false,
+      langPath: langPath(),
+      gzip: true,
       workerBlobURL: false,
     });
     return w as unknown as TesseractWorker;
@@ -54,32 +75,71 @@ async function getWorker(): Promise<TesseractWorker> {
   }));
 }
 
-/**
- * The worker downloads the language models itself, out of sight of the
- * privacy ledger's fetch wrapper: record each one it will fetch — the ones
- * not yet in tesseract's IndexedDB cache (idb-keyval's default store,
- * key `./<lang>.traineddata`, shared with the same-origin worker).
- * @internal exported for tests.
- */
-export async function noteModelDownloads(): Promise<void> {
-  try {
-    const [{ get }, { recordWorkerRequest }] = await Promise.all([import("idb-keyval"), import("./privacyLedger")]);
-    for (const lang of LANGS) {
-      const cached = await get(`./${lang}.traineddata`).catch(() => undefined);
-      if (cached === undefined) recordWorkerRequest(`${LANG_PATH}/${lang}.traineddata`);
-    }
-  } catch {
-    /* no IndexedDB: the ledger stays as it was */
-  }
+function singleWordWorker(lang: "heb" | "eng"): Promise<TesseractWorker> {
+  return (async () => {
+    const T = await import("tesseract.js");
+    const w = (await T.createWorker([lang], T.OEM.LSTM_ONLY, {
+      workerPath: `${base()}worker.min.js`,
+      corePath: base(),
+      langPath: langPath(),
+      gzip: true,
+      workerBlobURL: false,
+    })) as unknown as TesseractWorker;
+    await w.setParameters?.({ tessedit_pageseg_mode: T.PSM.SINGLE_WORD });
+    return w;
+  })();
+}
+
+function getHebWorker(): Promise<TesseractWorker> {
+  return (hebPromise ??= singleWordWorker("heb").catch((e) => {
+    hebPromise = null;
+    throw e;
+  }));
+}
+
+function getLatinWorker(): Promise<TesseractWorker> {
+  return (latinPromise ??= singleWordWorker("eng").catch((e) => {
+    latinPromise = null;
+    throw e;
+  }));
 }
 
 function scheduleIdle(): void {
   if (idleTimer) clearTimeout(idleTimer);
   idleTimer = setTimeout(() => {
-    const p = workerPromise;
+    for (const p of [workerPromise, hebPromise, latinPromise]) void p?.then((w) => w.terminate()).catch(() => undefined);
     workerPromise = null;
-    void p?.then((w) => w.terminate()).catch(() => undefined);
+    hebPromise = null;
+    latinPromise = null;
   }, IDLE_MS);
+}
+
+const rect = (b: Box) => ({ left: b.x0, top: b.y0, width: Math.max(1, b.x1 - b.x0), height: Math.max(1, b.y1 - b.y0) });
+
+type WorkerRef = TesseractWorker | (() => Promise<TesseractWorker>) | null;
+
+/**
+ * Recognise, then fix the lines that mix Latin into Hebrew (./ocrMixed):
+ * the single-word workers are asked only for those lines. `heb` and `latin`
+ * may be getters so that they start only when a line needs them. Exported
+ * for the node CER harness (scripts/ocr/cer-node.mjs), which runs the same
+ * path.
+ */
+export async function recognizeWithMixedFix(main: TesseractWorker, heb: WorkerRef, image: Image, latin: WorkerRef = null): Promise<OcrResult> {
+  const { data } = await main.recognize(image, {}, { text: true, blocks: true });
+  const lines = (data.blocks ?? []).flatMap((b) => b.paragraphs.flatMap((p) => p.lines));
+  if (!heb || !lines.length) return { text: data.text, confidence: data.confidence };
+  const { fixMixedText, needsFix } = await import("./ocrMixed");
+  if (!lines.some(needsFix)) return { text: data.text, confidence: data.confidence };
+  const reader = (w: Exclude<WorkerRef, null>) => {
+    const get = typeof w === "function" ? w : async () => w;
+    return async (box: Box) => {
+      const r = await (await get()).recognize(image, { rectangle: rect(box) });
+      return { text: r.data.text, confidence: r.data.confidence };
+    };
+  };
+  const text = await fixMixedText(lines, { heb: reader(heb), latin: latin ? reader(latin) : undefined });
+  return { text, confidence: data.confidence };
 }
 
 /** Recognise text. Jobs run one at a time; the worker shuts down when idle. */
@@ -87,8 +147,8 @@ export function ocrImage(image: Blob | HTMLCanvasElement | OffscreenCanvas): Pro
   const job = queue.then(async () => {
     const w = await getWorker();
     try {
-      const { data } = await w.recognize(image as Blob);
-      return { text: cleanOcrText(data.text), confidence: data.confidence };
+      const r = await recognizeWithMixedFix(w, getHebWorker, image as Blob, getLatinWorker);
+      return { text: cleanOcrText(r.text), confidence: r.confidence };
     } finally {
       scheduleIdle();
     }

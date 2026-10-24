@@ -15,7 +15,8 @@
  * Not covered: requests made from inside Web Workers (web-llm and
  * transformers.js fetch model weights there — downloads, no user text),
  * unless the module that starts the worker reports them with
- * `recordWorkerRequest` (the OCR language models do).
+ * `recordWorkerRequest`. (The OCR language models are served from this
+ * origin since plan 7.5, so OCR has nothing to report.)
  */
 import { getAiPolicy, isLocalOrigin, type AiPolicy } from "./policy";
 import { getBaseUrl } from "./ollamaProvider";
