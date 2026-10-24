@@ -130,7 +130,7 @@
   "cmd.ai.local.hint": "Run prompts on-device — private, offline",
   "cmd.ai.local.off": "Переключить to cloud AI (OpenAI)",
   "cmd.ai.local.on": "Переключить to local AI (WebGPU)",
-  "cmd.ai.privacy.hint": "When ON, every AI prompt runs locally via @mlc-ai/web-llm. No data leaves your browser.",
+  "cmd.ai.privacy.hint": "Когда включено, каждый запрос к ИИ выполняется локально через @mlc-ai/web-llm. Данные не покидают браузер.",
   "cmd.ai.privacy.off": "Privacy Mode: turn off (use cloud AI)",
   "cmd.ai.privacy.on": "Privacy Mode: run AI on this device (WebGPU)",
   "cmd.ai.outline": "AI: Generate Outline",
