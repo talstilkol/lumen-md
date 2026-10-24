@@ -16,13 +16,16 @@
  *     niqqud-aware offset map behind a snippet) runs only for the hits it
  *     returns.
  *
- * Results are the same as the scan the index used to do on every query
- * (src/__tests__/vaultWorker.test.ts compares them).
+ * Content is ranked by BM25 (plan 5.2, ../search/bm25.ts), kept in the same
+ * place and updated in the same `upsert` / `remove`, so ranking runs in the
+ * worker too. Results equal a from-scratch ranking over the same notes
+ * (src/__tests__/vaultWorker.test.ts compares them through edits).
  */
 
 import { noteKey } from "../lib/slug";
 import { hasHebrew, hebrewFind, normalizeForMatch, prefixVariants } from "../text/hebrew";
 import { WIKI_RE } from "./wikiTargets";
+import { Bm25Index } from "../search/bm25";
 
 export interface IndexInput {
   /** Full workspace path. */
@@ -168,6 +171,8 @@ export class VaultIndex {
   /** Link target key → the notes that link to it. */
   private readonly incoming = new Map<string, Set<string>>();
   private nextOrder = 0;
+  /** Content ranking (plan 5.2), one document per note, updated with it. */
+  private readonly bm25 = new Bm25Index();
   private readonly counters = { indexed: 0, removed: 0, backlinkReads: 0 };
 
   get size(): number {
@@ -214,6 +219,7 @@ export class VaultIndex {
     };
     // Map.set on an existing key keeps its position, as the old index did.
     this.files.set(input.path, entry);
+    this.bm25.set(input.path, content, bm25Name(input.name));
     for (const l of links) {
       let set = this.incoming.get(l.key);
       if (!set) this.incoming.set(l.key, (set = new Set()));
@@ -228,11 +234,13 @@ export class VaultIndex {
     if (!prev) return false;
     this.unlink(prev);
     this.files.delete(path);
+    this.bm25.remove(path);
     this.counters.removed++;
     return true;
   }
 
   clear(): void {
+    for (const p of this.files.keys()) this.bm25.remove(p);
     this.files.clear();
     this.incoming.clear();
   }
@@ -265,43 +273,55 @@ export class VaultIndex {
     return out;
   }
 
-  /** Cheap fuzzy + substring search across file names, paths and content. */
+  /**
+   * Search file names, paths and content. Content is ranked by BM25 over
+   * Hebrew-aware terms (niqqud, final letters and prefix letters folded; the
+   * exact form counts more), the name and path add points of their own, and
+   * the whole query found as a phrase adds a few more. Each hit carries a
+   * snippet around the phrase, or around its best-matching word.
+   */
   search(query: string, opts: SearchOptions = {}): SearchHit[] {
     const limit = opts.limit ?? 30;
     const q = query.trim().toLowerCase();
+    const allow = opts.paths ? new Set(opts.paths) : null;
     if (!q) {
       return [...this.files.values()]
+        .filter((f) => !allow || allow.has(f.path))
         .sort((a, b) => b.modified - a.modified)
         .slice(0, limit)
         .map((f) => ({ path: f.path, name: f.name, score: 0, snippet: null }));
     }
-    const allow = opts.paths ? new Set(opts.paths) : null;
     const hebrewQuery = hasHebrew(q);
-    // What `hebrewFind` looks for: the folded query, or its bare forms.
     const n = hebrewQuery ? normalizeForMatch(q.trim()) : "";
-    const candidates = !n ? [] : /\s/.test(n) ? [n] : prefixVariants(n);
-    const scored: { e: Entry; score: number; found: boolean }[] = [];
+    const forms = !n ? [] : /\s/.test(n) ? [n] : prefixVariants(n);
+    // The last word may still be typed: it also matches the terms it starts.
+    const content = new Map<string, { score: number; matched: string[]; complete: boolean }>();
+    const filter = allow ? (id: string) => allow.has(id) : undefined;
+    for (const h of this.bm25.search(query, { limit: Math.max(limit * 3, 100), filter, prefix: true })) content.set(h.id, h);
+    // The whole query as a phrase only means something for several words,
+    // and only in a note that has every one of them.
+    const multiWord = /\s/.test(q);
+    const ranked: Array<{ e: Entry; score: number; matched: string[]; phraseable: boolean }> = [];
     for (const e of this.files.values()) {
       if (allow && !allow.has(e.path)) continue;
-      let score = 0;
-      const inName = e.nameLower.includes(q);
-      if (inName) score += 10;
-      if (e.nameLower === q) score += 20;
-      if (e.nameLower.startsWith(q)) score += 5;
-      if (e.pathLower.includes(q) && e.pathLower !== e.nameLower) score += 6;
-      // Niqqud-, final-letter- and prefix-insensitive for Hebrew (T26).
-      const found =
-        e.lower.includes(q) || (hebrewQuery && e.folded !== null && candidates.some((c) => e.folded!.includes(c)));
-      // = `hebrewFind(e.name, q)`, against the name folded at index time.
-      if (!inName && hebrewQuery && e.nameFolded !== null && candidates.some((c) => e.nameFolded!.includes(c))) score += 10;
-      if (found) score += 4;
-      else if (fuzzyMatch(e.nameLower, q) || fuzzyMatch(e.pathLower, q)) score += 1;
-      if (score > 0) scored.push({ e, score, found });
+      const c = content.get(e.path);
+      let score = nameScore(e, q, hebrewQuery, forms) + (c?.score ?? 0);
+      if (!score && (fuzzyMatch(e.nameLower, q) || fuzzyMatch(e.pathLower, q))) score = 1;
+      if (score) ranked.push({ e, score, matched: c?.matched ?? [], phraseable: multiWord && !!c?.complete });
     }
-    scored.sort((a, b) => b.score - a.score);
-    return scored.slice(0, limit).map(({ e, score, found }) => {
+    ranked.sort((a, b) => b.score - a.score || (a.e.path < b.e.path ? -1 : 1));
+    // The phrase check and the snippet scan a note's text, so they run only
+    // for the leading candidates — but for every one the phrase bonus could
+    // still lift into the first `limit`.
+    const cutoff = ranked.length > limit ? ranked[limit - 1].score : -Infinity;
+    const candidates = ranked.filter((r, i) => i < limit || (r.phraseable && r.score + PHRASE_BONUS >= cutoff));
+    const out: SearchHit[] = [];
+    for (const { e, score: base, matched, phraseable } of candidates) {
+      let score = base;
+      const phrase = phraseable ? findIn(e.content, e.lower, q) : null;
+      if (phrase) score += PHRASE_BONUS;
+      const at = phrase ?? (matched.length ? locateTerm(e.content, e.lower, matched) : base > 1 ? findIn(e.content, e.lower, q) : null);
       const hit: SearchHit = { path: e.path, name: e.name, score, snippet: null };
-      const at = found ? findIn(e.content, e.lower, q) : null;
       if (at) {
         const ctx = snippetAround(e.content, at.start, 80);
         // Re-locate the hit inside the (whitespace-collapsed, "…"-prefixed) snippet.
@@ -309,7 +329,38 @@ export class VaultIndex {
         hit.snippet = ctx;
         if (local) hit.match = local;
       }
-      return hit;
-    });
+      out.push(hit);
+    }
+    out.sort((a, b) => b.score - a.score || (a.path < b.path ? -1 : 1));
+    return out.slice(0, limit);
   }
+}
+
+/** The phrase (several words) is in the text as written: a few points on top of BM25. */
+export const PHRASE_BONUS = 4;
+
+/** The name BM25 indexes: without its extension. */
+export const bm25Name = (name: string) => name.replace(/\.(md|markdown|txt)$/i, "");
+
+/** Points for the query in a note's name or path (file-name search stays first-class). */
+function nameScore(e: Entry, q: string, hebrewQuery: boolean, forms: string[]): number {
+  let score = 0;
+  const inName = e.nameLower.includes(q);
+  if (inName) score += 10;
+  if (e.nameLower === q) score += 20;
+  if (e.nameLower.startsWith(q)) score += 5;
+  if (e.pathLower.includes(q) && e.pathLower !== e.nameLower) score += 6;
+  // Niqqud-, final-letter- and prefix-insensitive for Hebrew (T26), against the name folded at index time.
+  if (!inName && hebrewQuery && e.nameFolded !== null && forms.some((f) => e.nameFolded!.includes(f))) score += 10;
+  return score;
+}
+
+/** Where the first of the matched terms (best first; a `~stem` without its marker) occurs in `text`. */
+function locateTerm(text: string, lower: string, terms: string[]): { start: number; end: number } | null {
+  for (const t of terms) {
+    const bare = t.startsWith("~") ? t.slice(1) : t;
+    const at = hasHebrew(bare) ? hebrewFind(text, bare) : findIn(text, lower, bare);
+    if (at) return at;
+  }
+  return null;
 }
