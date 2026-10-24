@@ -42,7 +42,7 @@ describe("i18n: lazy English", () => {
 
   it("every lazy file is declared, and none of its keys is also in the startup bundle", () => {
     expect(readdirSync(LAZY_DIR).sort()).toEqual(Object.keys(DOMAINS).sort());
-    expect(Object.keys(lazy).length).toBeGreaterThan(10);
+    for (const f of readdirSync(LAZY_DIR)) expect(Object.keys(JSON.parse(readFileSync(join(LAZY_DIR, f), "utf8")) as object).length, f).toBeGreaterThan(0);
     for (const k of Object.keys(lazy)) expect(index.includes(`"${k}":`), k).toBe(false);
   });
 
