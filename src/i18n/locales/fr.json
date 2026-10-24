@@ -1204,5 +1204,6 @@
   "versionHistory.reason.vault": "instantané du coffre",
   "versionHistory.reason.close": "à la fermeture",
   "versionHistory.reason.restore": "avant restauration",
-  "versionHistory.reason.manual": "manuel"
+  "versionHistory.reason.manual": "manuel",
+  "ai.doctor.fix.pullHebrew": "Vos notes sont en hébreu ; ce modèle gère bien l'hébreu :"
 }

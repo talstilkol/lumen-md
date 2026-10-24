@@ -1204,5 +1204,6 @@
   "versionHistory.reason.vault": "لقطة للخزنة",
   "versionHistory.reason.close": "عند الإغلاق",
   "versionHistory.reason.restore": "قبل الاستعادة",
-  "versionHistory.reason.manual": "يدوي"
+  "versionHistory.reason.manual": "يدوي",
+  "ai.doctor.fix.pullHebrew": "ملاحظاتك بالعبرية؛ هذا النموذج جيد في العبرية:"
 }

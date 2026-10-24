@@ -1204,5 +1204,6 @@
   "versionHistory.reason.vault": "保管庫スナップショット",
   "versionHistory.reason.close": "終了時",
   "versionHistory.reason.restore": "復元前",
-  "versionHistory.reason.manual": "手動"
+  "versionHistory.reason.manual": "手動",
+  "ai.doctor.fix.pullHebrew": "ノートがヘブライ語です。このモデルはヘブライ語が得意です:"
 }

@@ -119,6 +119,7 @@ export function checkTranslation(output: string, source: string, targetLanguage:
 
 export const translatorAgent: AgentDefinition<TranslatorInput, string> = registerAgent({
   id: "translator",
+  language: "any",
   commandId: "ai.translate",
   description: "Translate Markdown into another language, preserving structure",
   system: (input) =>

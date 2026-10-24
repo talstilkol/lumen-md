@@ -1204,5 +1204,6 @@
   "versionHistory.reason.vault": "снимок хранилища",
   "versionHistory.reason.close": "при закрытии",
   "versionHistory.reason.restore": "перед восстановлением",
-  "versionHistory.reason.manual": "вручную"
+  "versionHistory.reason.manual": "вручную",
+  "ai.doctor.fix.pullHebrew": "Ваши заметки на иврите; эта модель хорошо работает с ивритом:"
 }

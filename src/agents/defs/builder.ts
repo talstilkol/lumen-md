@@ -26,6 +26,7 @@ const SAFE_PATH = /^(?!\/)(?!.*\.\.)[\w@.\-/]+$/;
 
 export const builderSpecAgent: AgentDefinition<SpecInput, ProductSpecOut> = registerAgent<SpecInput, ProductSpecOut>({
   id: "builder-spec",
+  language: "any",
   commandId: "ai.productAgent",
   description: "Turn a product idea into a specification",
   system:
@@ -88,6 +89,7 @@ export function checkGeneratedFile(path: string, content: string): ValidationRes
 
 export const builderFileAgent: AgentDefinition<FileInput, string> = registerAgent<FileInput, string>({
   id: "builder-file",
+  language: "any",
   commandId: "ai.productAgent",
   description: "Generate one file of a product",
   system:
