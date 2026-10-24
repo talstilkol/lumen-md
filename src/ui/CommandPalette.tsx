@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import {
   Search,
   FileText,
@@ -164,11 +164,16 @@ export function CommandPalette({ open, onClose, commands }: Props) {
     }
   }
 
-  useEffect(() => {
+  // Focus the input in the same frame the palette appears, before paint:
+  // the input is already in the DOM here (it renders with `open`). A
+  // deferred focus (setTimeout 0) left a window in which keys typed right
+  // after the palette became visible still went to the editor — Chromium
+  // runs input events before pending timers — so a busy machine opened the
+  // palette with an empty query and the typed command was never found.
+  useLayoutEffect(() => {
     if (open) {
       previousFocusRef.current = document.activeElement;
-      // focus next tick so React renders the input first
-      setTimeout(() => inputRef.current?.focus(), 0);
+      inputRef.current?.focus();
     } else {
       // Restore focus to whatever opened the palette.
       const prev = previousFocusRef.current as HTMLElement | null;

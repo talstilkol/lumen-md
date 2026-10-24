@@ -554,26 +554,20 @@ export default defineConfig({
       // the >=60 % gate. Scope coverage to first-party src/ only — that's
       // what the gate is actually measuring.
       include: ["src/**/*.{ts,tsx}"],
-      // Skip lazy-loaded vendor wrappers, build config, and the Tauri
-      // / iOS native shells — they aren't unit-testable in jsdom.
+      // Every folder of src/ is measured (plan 10.4: zero excluded
+      // folders). Only three kinds of file stay out, each for a reason
+      // that is not "hard to test":
       exclude: [
+        // the tests themselves (and their helpers/stubs) are not product code;
         "src/__tests__/**",
+        // type-only declarations emit no JavaScript, so there is nothing to run;
+        "src/**/*.d.ts",
+        // the boot entry: it patches window.prompt, starts the backup and
+        // telemetry timers and mounts into #root at import time, so a test
+        // importing it would leak those side effects into every later test.
+        // Everything it wires up (App, ToastContainer, UpdateBanner, i18n
+        // boot) is imported and covered on its own.
         "src/main.tsx",
-        "src/App.tsx",
-        "src/welcome.ts",
-        "src/i18n/**",
-        "src/plugins/EChart.tsx",
-        "src/plugins/Model3DBlock.tsx",
-        "src/plugins/MapBlock.tsx",
-        "src/plugins/MermaidBlock.tsx",
-        "src/plugins/HtmlPreviewBlock.tsx",
-        "src/plugins/EmbedBlock.tsx",
-        "src/layouts/**",
-        "src/components/**",
-        "src/views/DatabaseBlock.tsx",
-        "src/renderer/components.tsx",
-        "src/renderer/Preview.tsx",
-        "src/renderer/Frontmatter.tsx",
       ],
     },
   },
