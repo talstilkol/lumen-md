@@ -343,3 +343,213 @@ test("git pull merges three ways, opens the conflict screen, keeps unsaved edits
   expect(after.gone).toBe("deleted upstream");
   expect(after.untracked).toBe("mine, never committed");
 });
+
+/* ─── Plan 3.7: the rest of the G1–G11 matrix ─────────────────────────── */
+
+const runCmd = (page: import("@playwright/test").Page, id: string) =>
+  page.evaluate((cmd) => window.dispatchEvent(new CustomEvent("lumen-run-command", { detail: { id: cmd } })), id);
+
+/** The text of a file in the vault (OPFS root), or null. */
+function vaultText(page: import("@playwright/test").Page, path: string): Promise<string | null> {
+  return page.evaluate(async (p) => {
+    try {
+      let dir = await navigator.storage.getDirectory();
+      const parts = p.split("/");
+      for (const seg of parts.slice(0, -1)) dir = await dir.getDirectoryHandle(seg);
+      return await (await (await dir.getFileHandle(parts[parts.length - 1])).getFile()).text();
+    } catch {
+      return null;
+    }
+  }, path);
+}
+
+/** G1 — the app asks the browser to keep its storage, and says when it was refused. */
+test("G1: durable storage is requested at start, its state is shown, and it can be asked again", async ({ page }) => {
+  await page.addInitScript(() => {
+    const w = window as unknown as { __persist: { calls: number; grant: boolean } };
+    w.__persist = { calls: 0, grant: false };
+    const storage = navigator.storage as StorageManager;
+    Object.defineProperty(storage, "persisted", { value: async () => w.__persist.grant, configurable: true });
+    Object.defineProperty(storage, "persist", {
+      value: async () => {
+        w.__persist.calls++;
+        return w.__persist.grant;
+      },
+      configurable: true,
+    });
+  });
+  await page.reload();
+  await expect(page.locator(".cm-content").first()).toContainText("Welcome to", { timeout: 15_000 });
+  await expect.poll(() => page.evaluate(() => (window as unknown as { __persist: { calls: number } }).__persist.calls)).toBeGreaterThanOrEqual(1);
+
+  await runCmd(page, "ai.doctor");
+  const doctor = page.locator('[role="dialog"][aria-label="AI doctor"]');
+  await expect(doctor).toBeVisible({ timeout: 10_000 });
+  const storage = doctor.getByTestId("doctor-storage");
+  await expect(storage).toHaveAttribute("data-status", "warn", { timeout: 20_000 });
+  await expect(storage).toContainText("evictable");
+  // The browser grants it this time: the fix asks again and the check turns green.
+  await page.evaluate(() => ((window as unknown as { __persist: { grant: boolean } }).__persist.grant = true));
+  await storage.getByRole("button").first().click();
+  await expect(storage).toHaveAttribute("data-status", "ok", { timeout: 20_000 });
+  await expect(storage).toContainText("durable");
+});
+
+/**
+ * G3 — clone a public repository without a token, keep its history, and say
+ * which files are Git LFS pointers instead of passing them off as content.
+ * The repository is a real one, served by `git http-backend` (smart HTTP)
+ * through request interception at an origin the CSP allows.
+ */
+test("G3: a public repository clones without a token, LFS pointers are named", async ({ page, browserName }, testInfo) => {
+  test.skip(!(await opfsWritable(page)), "OPFS writes are unavailable in this engine's test context");
+  const { spawnSync } = await import("node:child_process");
+  const { mkdtempSync, writeFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const { tmpdir } = await import("node:os");
+  const backend = spawnSync("git", ["--exec-path"], { encoding: "utf8" }).stdout.trim() + "/git-http-backend";
+  test.skip(spawnSync(backend, [], { env: { REQUEST_METHOD: "GET" } }).error !== undefined, "git http-backend is not installed");
+
+  const root = mkdtempSync(join(tmpdir(), `lumen-g3-${browserName}-`));
+  const work = join(root, "work");
+  const git = (cwd: string, ...args: string[]) => {
+    const r = spawnSync("git", ["-c", "user.name=T", "-c", "user.email=t@example.com", "-c", "init.defaultBranch=main", ...args], { cwd, encoding: "utf8" });
+    if (r.status !== 0) throw new Error(`git ${args.join(" ")}: ${r.stderr}`);
+  };
+  git(root, "init", "-q", "work");
+  writeFileSync(join(work, "readme.md"), "# public\n\nfirst");
+  git(work, "add", ".");
+  git(work, "commit", "-qm", "one");
+  writeFileSync(join(work, "readme.md"), "# public\n\nsecond");
+  writeFileSync(join(work, "big.bin"), "version https://git-lfs.github.com/spec/v1\noid sha256:" + "a".repeat(64) + "\nsize 1048576\n");
+  git(work, "add", ".");
+  git(work, "commit", "-qm", "two");
+  git(root, "clone", "-q", "--bare", "work", "public.git");
+
+  const authHeaders: string[] = [];
+  await page.route("http://127.0.0.1:8787/git/**", async (route) => {
+    const req = route.request();
+    const url = new URL(req.url());
+    if (req.method() === "OPTIONS") return route.fulfill({ status: 204, headers: { "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Headers": "*", "Access-Control-Allow-Methods": "GET, POST" } });
+    const headers = await req.allHeaders();
+    console.log("G3 route", req.method(), url.pathname, url.search);
+    if (headers.authorization) authHeaders.push(headers.authorization);
+    const out = spawnSync(backend, [], {
+      input: req.postDataBuffer() ?? Buffer.alloc(0),
+      env: {
+        GIT_PROJECT_ROOT: root,
+        GIT_HTTP_EXPORT_ALL: "1",
+        PATH_INFO: url.pathname.replace(/^\/git/, ""),
+        QUERY_STRING: url.search.slice(1),
+        REQUEST_METHOD: req.method(),
+        CONTENT_TYPE: headers["content-type"] ?? "",
+        REMOTE_ADDR: "127.0.0.1",
+      },
+      maxBuffer: 64 * 1024 * 1024,
+    });
+    const raw = out.stdout as Buffer;
+    console.log("G3 backend", out.status, raw.length, String(out.stderr).slice(0, 200));
+    const split = raw.indexOf("\r\n\r\n");
+    const head = raw.subarray(0, split).toString("latin1");
+    const respHeaders: Record<string, string> = { "Access-Control-Allow-Origin": "*" };
+    let status = 200;
+    for (const line of head.split("\r\n")) {
+      const i = line.indexOf(":");
+      const k = line.slice(0, i).trim();
+      const v = line.slice(i + 1).trim();
+      if (k.toLowerCase() === "status") status = parseInt(v, 10);
+      else if (k) respHeaders[k] = v;
+    }
+    await route.fulfill({ status, headers: respHeaders, body: raw.subarray(split + 4) });
+  });
+
+  await runCmd(page, "git.clone");
+  const prompt = page.getByRole("dialog").filter({ has: page.locator("input") });
+  await expect(prompt).toBeVisible({ timeout: 10_000 });
+  await prompt.locator("input").fill("http://127.0.0.1:8787/git/public.git");
+  await prompt.locator("input").press("Enter");
+  const done = page.getByRole("dialog").filter({ hasText: /Cloned|cloned/ });
+  await expect(done).toBeVisible({ timeout: 30_000 });
+  await expect(done).toContainText("big.bin"); // named as an LFS pointer, not imported as content
+  expect(authHeaders).toEqual([]); // no token was needed or sent
+  testInfo.annotations.push({ type: "repo", description: root });
+  await expect.poll(() => vaultText(page, "public/readme.md"), { timeout: 10_000 }).toBe("# public\n\nsecond");
+});
+
+/** G9 — a failed write is announced and retried; the text is not lost. */
+test("G9: a vault write refused for quota shows a message and is retried until it lands", async ({ page }) => {
+  test.skip(!(await opfsWritable(page)), "OPFS writes are unavailable in this engine's test context");
+  await page.keyboard.press("Meta+1");
+  const editor = page.locator(".cm-content").first();
+  await editor.click();
+  await editor.press("ControlOrMeta+a");
+  await editor.fill("# saved once");
+  await runCmd(page, "file.saveToWorkspace");
+  await expect.poll(() => vaultText(page, "Welcome.md"), { timeout: 10_000 }).toBe("# saved once");
+
+  // The next two writes fail as a full disk does.
+  await page.evaluate(() => {
+    const w = window as unknown as { __failWrites: number };
+    w.__failWrites = 2;
+    const proto = FileSystemFileHandle.prototype as unknown as { createWritable: (...a: unknown[]) => Promise<unknown> };
+    const real = proto.createWritable;
+    proto.createWritable = function (this: unknown, ...a: unknown[]) {
+      if (w.__failWrites > 0) {
+        w.__failWrites--;
+        return Promise.reject(new DOMException("The quota has been exceeded.", "QuotaExceededError"));
+      }
+      return real.apply(this, a);
+    };
+  });
+  await editor.press("ControlOrMeta+a");
+  await editor.fill("# written while the disk was full");
+  await expect(page.getByText(/storage for this site is full/i)).toBeVisible({ timeout: 10_000 });
+  // The retries (2 s, then 4 s) land once space is back.
+  await expect.poll(() => vaultText(page, "Welcome.md"), { timeout: 20_000 }).toBe("# written while the disk was full");
+  expect(await page.evaluate(() => (window as unknown as { __failWrites: number }).__failWrites)).toBe(0);
+});
+
+/** G11 — an Obsidian vault and a Notion export come in note by note, not merged into one. */
+test("G11: Obsidian and Notion imports keep one file per note, with paths and links", async ({ page }) => {
+  test.skip(!(await opfsWritable(page)), "OPFS writes are unavailable in this engine's test context");
+  const { zip } = await import("../src/storage/zip");
+  const id = "0123456789abcdef0123456789abcdef";
+  const archives = [
+    {
+      name: "MyVault.zip",
+      files: [
+        { name: "MyVault/.obsidian/app.json", data: "{}" },
+        { name: "MyVault/Daily/2026-10-24.md", data: "# Today\n\nsee [[Ideas]]" },
+        { name: "MyVault/Ideas.md", data: "# Ideas" },
+      ],
+      expect: { source: "obsidian", notes: { "Daily/2026-10-24.md": "# Today\n\nsee [[Ideas]]", "Ideas.md": "# Ideas" } },
+    },
+    {
+      name: "Export.zip",
+      files: [
+        { name: `Export/Home ${id}.md`, data: `# Home\n\n[Projects](Projects%20${id}.md)` },
+        { name: `Export/Projects ${id}.md`, data: "# Projects" },
+      ],
+      expect: { source: "notion", notes: { "Home.md": null, "Projects.md": "# Projects" } },
+    },
+  ];
+  for (const a of archives) {
+    const bytes = await zip(a.files);
+    const chooser = page.waitForEvent("filechooser");
+    await runCmd(page, "vault.import");
+    const pick = page.getByRole("dialog").filter({ has: page.locator("select") });
+    await expect(pick).toBeVisible({ timeout: 10_000 });
+    await pick.locator("select").selectOption("zip");
+    await pick.getByRole("button", { name: /^(OK|Confirm)$/i }).click();
+    await (await chooser).setFiles({ name: a.name, mimeType: "application/zip", buffer: Buffer.from(bytes) });
+    const toast = page.getByText(new RegExp(`Imported ${Object.keys(a.expect.notes).length} notes .*\\(${a.expect.source}\\)`));
+    await expect(toast).toBeVisible({ timeout: 15_000 });
+    const folder = (await toast.textContent())!.match(/into “([^”]+)”/)![1];
+    for (const [path, text] of Object.entries(a.expect.notes)) {
+      const got = await vaultText(page, `${folder}/${path}`);
+      expect(got, `${folder}/${path}`).not.toBeNull();
+      if (text !== null) expect(got).toBe(text);
+    }
+    if (a.expect.source === "notion") expect(await vaultText(page, `${folder}/Home.md`)).toContain("Projects.md");
+  }
+});
