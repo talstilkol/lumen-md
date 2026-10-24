@@ -1618,13 +1618,7 @@ export function applyLocale(locale: Locale): void {
   }
 }
 
-/**
- * English for a lazily loaded domain. Its strings live in
- * `src/i18n/lazy/<domain>.json` and ship in that domain's chunk, not in the
- * startup bundle; the domain registers them when it loads (other locales
- * keep the keys in their own JSON as usual). Keys already in `en` win. The
- * i18n tools and tests read these files together with the `en` block.
- */
+/** English of a lazy domain (src/i18n/lazy/<domain>.json, see locales/README.md); existing keys win. */
 export function registerEnglish(strings: Strings): void {
   for (const [k, v] of Object.entries(strings)) if (!(k in en)) en[k] = v;
 }
