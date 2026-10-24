@@ -1031,6 +1031,9 @@ const en: Strings = {
   "ai.localModels.recommended": "recommended",
   "ai.localModels.cached": "downloaded",
   "ai.localModels.tooBig": "may not fit",
+  "ai.localModels.licenceTitle": "Model under its own licence",
+  "ai.localModels.licenceBody": "{{model}} is published under the {{licence}}, not an open-source licence. Read its terms before you use it, especially for work. Lumen will not choose it for you.",
+  "ai.localModels.licenceOk": "Use it",
   "ai.localModels.auto": "Automatic — pick by hardware and task",
   "ai.localModels.autoSet": "Automatic model selection. Current pick: {model}",
   "ai.localModels.set": "Local model: {model}",
@@ -1166,6 +1169,8 @@ const en: Strings = {
   "cmd.ai.translate": "AI: Translate Document",
   "cmd.ai.translate.hint": "Translate the whole document, preserving formatting",
   "cmd.ai.chart": "AI: Chart from Data",
+  "cmd.ai.analyse": "AI: Analyse the table",
+  "cmd.ai.analyse.hint": "Answer a question about this note's table with Python on this device",
   "cmd.ai.chart.hint": "Turn CSV or table data into an ECharts chart",
   "editor.ariaLabel": "Markdown source editor",
   "cmd.cmdPalette": "Command palette",
@@ -1598,6 +1603,17 @@ export function applyLocale(locale: Locale): void {
   if (!SYNCHRONOUS_LOCALES.has(locale) && !(locale in BUNDLES)) {
     void loadLocale(locale);
   }
+}
+
+/**
+ * English for a lazily loaded domain. Its strings live in
+ * `src/i18n/lazy/<domain>.json` and ship in that domain's chunk, not in the
+ * startup bundle; the domain registers them when it loads (other locales
+ * keep the keys in their own JSON as usual). Keys already in `en` win. The
+ * i18n tools and tests read these files together with the `en` block.
+ */
+export function registerEnglish(strings: Strings): void {
+  for (const [k, v] of Object.entries(strings)) if (!(k in en)) en[k] = v;
 }
 
 /** Translate `id` using the active locale, with optional `{name}` substitutions. */

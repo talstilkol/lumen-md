@@ -1010,6 +1010,9 @@
   "ai.localModels.recommended": "推荐",
   "ai.localModels.cached": "已下载",
   "ai.localModels.tooBig": "可能放不下",
+  "ai.localModels.licenceTitle": "使用自有许可的模型",
+  "ai.localModels.licenceBody": "{{model}} 以 {{licence}} 发布，并非开源许可。使用前请阅读条款，尤其是用于工作时。Lumen 不会替你选择它。",
+  "ai.localModels.licenceOk": "使用",
   "ai.localModels.auto": "自动 — 按硬件和任务选择",
   "ai.localModels.autoSet": "自动选择模型。当前选择：{model}",
   "ai.localModels.set": "本地模型：{model}",
@@ -1419,5 +1422,15 @@
   "cmd.ai.cancel": "AI：取消",
   "cmd.ai.cancel.hint": "停止所有正在运行的 AI 请求（Esc 也可以）",
   "toast.aiCancelled": "已取消 AI 请求（{count}）",
-  "toast.aiNothingRunning": "没有正在运行的 AI 请求"
+  "toast.aiNothingRunning": "没有正在运行的 AI 请求",
+  "cmd.ai.analyse": "AI：分析表格",
+  "cmd.ai.analyse.hint": "在本设备上用 Python 回答关于此笔记中表格的问题",
+  "cmd.ai.analyse.ask": "你想了解此笔记中表格的什么？",
+  "analyst.working": "正在本设备上分析表格…",
+  "analyst.done": "答案：{answer}（已通过运行程序两次验证）",
+  "analyst.noTable": "此笔记中没有表格：请添加 ```csv 代码块、Markdown 表格或逗号分隔的行。",
+  "analyst.run": "分析程序失败：{error}",
+  "analyst.parse": "分析程序未给出答案：{error}",
+  "analyst.mismatch": "两次运行结果不一致，因此不给出答案：{error}",
+  "analyst.failed": "分析失败：{error}"
 }

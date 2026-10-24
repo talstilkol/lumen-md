@@ -1010,6 +1010,9 @@
   "ai.localModels.recommended": "рекомендуется",
   "ai.localModels.cached": "скачана",
   "ai.localModels.tooBig": "может не поместиться",
+  "ai.localModels.licenceTitle": "Модель с собственной лицензией",
+  "ai.localModels.licenceBody": "{{model}} распространяется по лицензии {{licence}}, а не по открытой. Прочитайте условия перед использованием, особенно в работе. Lumen не выберет её за вас.",
+  "ai.localModels.licenceOk": "Использовать",
   "ai.localModels.auto": "Автоматически — по оборудованию и задаче",
   "ai.localModels.autoSet": "Автоматический выбор модели. Текущий выбор: {model}",
   "ai.localModels.set": "Локальная модель: {model}",
@@ -1419,5 +1422,15 @@
   "cmd.ai.cancel": "ИИ: отменить",
   "cmd.ai.cancel.hint": "Останавливает все запросы ИИ (то же делает Esc)",
   "toast.aiCancelled": "Запрос ИИ отменён ({count})",
-  "toast.aiNothingRunning": "Нет активных запросов ИИ"
+  "toast.aiNothingRunning": "Нет активных запросов ИИ",
+  "cmd.ai.analyse": "ИИ: анализ таблицы",
+  "cmd.ai.analyse.hint": "Ответить на вопрос о таблице этой заметки с помощью Python на этом устройстве",
+  "cmd.ai.analyse.ask": "Что вы хотите узнать о таблице в этой заметке?",
+  "analyst.working": "Анализ таблицы на этом устройстве…",
+  "analyst.done": "Ответ: {answer} — проверен двумя запусками программы",
+  "analyst.noTable": "В заметке нет таблицы: добавьте блок ```csv, таблицу Markdown или строки через запятую.",
+  "analyst.run": "Программа анализа завершилась с ошибкой: {error}",
+  "analyst.parse": "Программа анализа не дала ответа: {error}",
+  "analyst.mismatch": "Два запуска не совпали, поэтому ответа нет: {error}",
+  "analyst.failed": "Ошибка анализа: {error}"
 }

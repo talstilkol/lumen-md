@@ -1010,6 +1010,9 @@
   "ai.localModels.recommended": "מומלץ",
   "ai.localModels.cached": "הורד",
   "ai.localModels.tooBig": "אולי לא ייכנס",
+  "ai.localModels.licenceTitle": "מודל ברישיון משלו",
+  "ai.localModels.licenceBody": "{{model}} מתפרסם תחת {{licence}}, ולא תחת רישיון קוד פתוח. קראו את התנאים לפני שימוש, במיוחד לעבודה. Lumen לא יבחר בו בשבילכם.",
+  "ai.localModels.licenceOk": "להשתמש בו",
   "ai.localModels.auto": "אוטומטי — בחירה לפי חומרה ומשימה",
   "ai.localModels.autoSet": "בחירת מודל אוטומטית. הבחירה הנוכחית: {model}",
   "ai.localModels.set": "מודל מקומי: {model}",
@@ -1419,5 +1422,15 @@
   "cmd.ai.cancel": "AI: ביטול",
   "cmd.ai.cancel.hint": "עוצר כל בקשת AI שרצה (גם Esc עושה זאת)",
   "toast.aiCancelled": "בקשת ה-AI בוטלה ({count})",
-  "toast.aiNothingRunning": "אין בקשת AI שרצה"
+  "toast.aiNothingRunning": "אין בקשת AI שרצה",
+  "cmd.ai.analyse": "AI: ניתוח הטבלה",
+  "cmd.ai.analyse.hint": "מענה על שאלה על הטבלה שבפתק באמצעות Python במכשיר הזה",
+  "cmd.ai.analyse.ask": "מה תרצו לדעת על הטבלה שבפתק?",
+  "analyst.working": "מנתח את הטבלה במכשיר…",
+  "analyst.done": "תשובה: {answer} — נבדקה בשתי הרצות של התוכנית",
+  "analyst.noTable": "לא נמצאה טבלה בפתק: הוסיפו בלוק ```csv, טבלת Markdown או שורות מופרדות בפסיקים.",
+  "analyst.run": "תוכנית הניתוח נכשלה: {error}",
+  "analyst.parse": "תוכנית הניתוח לא החזירה תשובה: {error}",
+  "analyst.mismatch": "שתי ההרצות לא מסכימות, ולכן אין תשובה: {error}",
+  "analyst.failed": "הניתוח נכשל: {error}"
 }

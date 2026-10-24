@@ -1010,6 +1010,9 @@
   "ai.localModels.recommended": "موصى به",
   "ai.localModels.cached": "تم تنزيله",
   "ai.localModels.tooBig": "قد لا يتسع",
+  "ai.localModels.licenceTitle": "نموذج بترخيص خاص",
+  "ai.localModels.licenceBody": "يُنشر {{model}} بموجب {{licence}}، وليس بترخيص مفتوح المصدر. اقرأ الشروط قبل استخدامه، خاصة في العمل. لن يختاره Lumen نيابةً عنك.",
+  "ai.localModels.licenceOk": "استخدمه",
   "ai.localModels.auto": "تلقائي — الاختيار حسب العتاد والمهمة",
   "ai.localModels.autoSet": "اختيار النموذج تلقائي. الاختيار الحالي: {model}",
   "ai.localModels.set": "النموذج المحلي: {model}",
@@ -1419,5 +1422,15 @@
   "cmd.ai.cancel": "AI: إلغاء",
   "cmd.ai.cancel.hint": "يوقف كل طلبات الذكاء الاصطناعي الجارية (Esc يفعل ذلك أيضاً)",
   "toast.aiCancelled": "أُلغي طلب الذكاء الاصطناعي ({count})",
-  "toast.aiNothingRunning": "لا يوجد طلب ذكاء اصطناعي جارٍ"
+  "toast.aiNothingRunning": "لا يوجد طلب ذكاء اصطناعي جارٍ",
+  "cmd.ai.analyse": "AI: تحليل الجدول",
+  "cmd.ai.analyse.hint": "الإجابة عن سؤال حول جدول هذه الملاحظة باستخدام Python على هذا الجهاز",
+  "cmd.ai.analyse.ask": "ماذا تريد أن تعرف عن الجدول في هذه الملاحظة؟",
+  "analyst.working": "جارٍ تحليل الجدول على هذا الجهاز…",
+  "analyst.done": "الإجابة: {answer} — تم التحقق بتشغيل البرنامج مرتين",
+  "analyst.noTable": "لا يوجد جدول في هذه الملاحظة: أضف كتلة ```csv أو جدول Markdown أو أسطرًا مفصولة بفواصل.",
+  "analyst.run": "فشل برنامج التحليل: {error}",
+  "analyst.parse": "لم يُعطِ برنامج التحليل إجابة: {error}",
+  "analyst.mismatch": "التشغيلان غير متفقين، لذا لا توجد إجابة: {error}",
+  "analyst.failed": "فشل التحليل: {error}"
 }

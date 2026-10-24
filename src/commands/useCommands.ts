@@ -951,6 +951,30 @@ export function useCommands({
         },
       },
       {
+        id: "ai.analyse",
+        label: t("cmd.ai.analyse"),
+        hint: t("cmd.ai.analyse.hint"),
+        icon: cmdIcons.Sparkles,
+        group: t("group.tools"),
+        action: async () => {
+          await import("../agents/analystStrings");
+          const question = await uiPrompt({ message: t("cmd.ai.analyse.ask") });
+          if (!question || !question.trim()) return;
+          try {
+            const { analyseNote } = await import("../agents/analyst");
+            showAiToast(t("analyst.working"), "info");
+            const { result, blocks } = await cancellable((signal) => analyseNote(liveDoc().content, question.trim(), signal));
+            setContent(`${liveDoc().content.trimEnd()}\n\n${blocks}\n`);
+            showAiToast(t("analyst.done", { answer: String(result.answer.answer) }), "success");
+          } catch (e) {
+            if (isAbort(e)) return;
+            if ((await import("../agents/suggestions")).reportAgentFailure(e, "ai.analyse")) return;
+            const reason = (e as { name?: string; reason?: string }).name === "AnalystError" ? (e as { reason: string }).reason : null;
+            showAiToast(reason ? t(`analyst.${reason}`, { error: (e as Error).message }) : t("analyst.failed", { error: (e as Error).message }), "error");
+          }
+        },
+      },
+      {
         id: "ai.ollamaModels",
         label: t("cmd.ai.ollama", { defaultValue: "AI: Ollama Models" }),
         hint: t("cmd.ai.ollama.hint", { defaultValue: "Switch to a local Ollama model" }),
@@ -965,15 +989,32 @@ export function useCommands({
           }
           const models = await listOllamaModels();
           if (models.length === 0) {
-            await uiAlert({ message: "No models found.\n\nPull a model with: ollama pull llama3.1" });
+            // Names the open-licence default (DEFAULT_OLLAMA_MODEL), never a custom-licence model (plan 1.7).
+            await uiAlert({ message: t("ai.settings.ollama.none") });
             return;
           }
-          const modelList = models.map((m) => `${m.name} (${(m.size / 1e9).toFixed(1)}GB)`).join("\n");
+          const { ollamaLicenceNotice } = await import("../ai/modelCatalog");
+          // why: custom-licence and non-commercial models are named as such and confirmed (plan 1.7)
+          const modelList = models
+            .map((m) => {
+              const lic = ollamaLicenceNotice(m.name);
+              return `${m.name} (${(m.size / 1e9).toFixed(1)}GB)${lic ? ` · ${lic.name}` : ""}`;
+            })
+            .join("\n");
           const choice = await uiPrompt({
             message: `Available Ollama models:\n\n${modelList}\n\nType the model name to use:`,
             defaultValue: models[0].name,
           });
           if (!choice) return;
+          const lic = ollamaLicenceNotice(choice.trim());
+          if (lic) {
+            const ok = await uiConfirm({
+              title: t("ai.localModels.licenceTitle"),
+              message: t("ai.localModels.licenceBody", { model: choice.trim(), licence: lic.name }),
+              okLabel: t("ai.localModels.licenceOk"),
+            });
+            if (!ok) return;
+          }
           setOllamaConfig({ model: choice.trim() });
           setActiveProvider("ollama");
           showAiToast(t("toast.switchedToOllama", { model: choice.trim() }), "success");
@@ -1378,7 +1419,9 @@ export function useCommands({
               cached[i] ? t("ai.localModels.cached") : "",
               (hw.f16 ? e.vramMB.f16 : e.vramMB.f32) > budget ? t("ai.localModels.tooBig") : "",
             ].filter(Boolean);
-            return { value: id, label: `${e.label} · ${gb} GB · ${e.tier}${marks.length ? " — " + marks.join(", ") : ""}` };
+            // why: custom-licence models (Llama, Gemma…) are opt-in and named as such (plan 1.7)
+            const lic = e.licence ? ` · ${e.licence}` : "";
+            return { value: id, label: `${e.label} · ${gb} GB · ${e.tier}${lic}${marks.length ? " — " + marks.join(", ") : ""}` };
           });
           choices.push({ value: "__auto__", label: t("ai.localModels.auto") });
           const choice = await uiSelect({
@@ -1392,6 +1435,15 @@ export function useCommands({
             setWebLlmModel(null);
             showAiToast(t("ai.localModels.autoSet", { model: recommended }), "success");
             return;
+          }
+          const picked = WEBLLM_CATALOG.find((e) => webLlmModelId(e, hw.f16) === choice);
+          if (picked?.licence && choice !== selected) {
+            const ok = await uiConfirm({
+              title: t("ai.localModels.licenceTitle"),
+              message: t("ai.localModels.licenceBody", { model: picked.label, licence: picked.licence }),
+              okLabel: t("ai.localModels.licenceOk"),
+            });
+            if (!ok) return;
           }
           setWebLlmModel(choice);
           const idx = choices.findIndex((c) => c.value === choice);
