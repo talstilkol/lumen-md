@@ -282,6 +282,10 @@ export default defineConfig({
           // the ONNX Runtime wasm it loads (~40 MB, staged by copy-ort).
           "**/transformers.worker-*.js",
           "ort/**",
+          // QuickJS for plugin logic (~490 KB, staged by copy-quickjs): fetched when a plugin loads.
+          "quickjs/**",
+          // The same wasm, if the bundler also emits it from the package's `new URL(…, import.meta.url)`; the worker loads /quickjs/.
+          "**/emscripten-module*.wasm",
           // tesseract.js worker + LSTM cores (~12 MB, scripts/copy-tesseract.mjs):
           // fetched on the first OCR.
           "tesseract/**",
