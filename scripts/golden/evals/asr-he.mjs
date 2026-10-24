@@ -159,9 +159,12 @@ export async function lumenRecognizer(modelDir) {
   };
 }
 
-// Seconds of audio per feed: the app's capture worklet posts 1024-sample blocks (64 ms).
+// Seconds of audio per feed: the app's capture posts 1024-sample blocks (64 ms).
 const SLICE = 1024 / 16000;
-const TAIL = 1.5; // seconds of silence that flush the last chunk (the model card's recipe)
+/** Silence after the speech that the app's VAD waits for before it ends the segment (segmenter.ts, pauseMs). */
+export const PAUSE = 0.7;
+/** Silence the app then pads in at once to flush the last chunk (dictation.worker.ts, TAIL_S) — compute time only, no wall time. */
+export const TAIL = 1.5;
 
 /** How often the app asks for an interim hypothesis between chunks (s). */
 export const PEEK = 0.32;
@@ -193,11 +196,13 @@ export function wordLatencies(final, snapshots) {
 }
 
 /**
- * Transcribe one clip as live dictation would: 64 ms slices in real time
- * (the trailing silence too), a chunk decoded as soon as it is complete,
- * and — when the engine can (`peek`) — an interim hypothesis every 320 ms
- * in between. Returns the text, per-word latencies (committed, and shown
- * incl. interim), the compute time and the duration.
+ * Transcribe one clip as live dictation would: 64 ms slices in real time,
+ * a chunk decoded as soon as it is complete, and — when the engine can
+ * (`peek`) — an interim hypothesis every 320 ms in between. The end of a
+ * segment follows the app's path: the VAD's pause (0.7 s of silence, in
+ * real time), then the 1.5 s flush padding fed at once — it costs compute,
+ * not wall time. Returns the text, per-word latencies (committed, and
+ * shown incl. interim), the compute time and the duration.
  */
 export async function transcribeLive(recognizer, samples, now = () => performance.now() / 1000) {
   const stream = recognizer.createStream();
@@ -216,7 +221,8 @@ export async function transcribeLive(recognizer, samples, now = () => performanc
   };
   const snap = (list, r) => list.push({ clock, tokens: [...(r.tokens ?? [])] });
   let lastPeek = 0;
-  const audio = new Float32Array(samples.length + Math.round(TAIL * 16000));
+  // The clip, then the pause the VAD waits for — both arrive in real time.
+  const audio = new Float32Array(samples.length + Math.round(PAUSE * 16000));
   audio.set(samples);
   for (let at = 0; at < audio.length; at += step) {
     const slice = audio.subarray(at, Math.min(audio.length, at + step));
@@ -236,6 +242,8 @@ export async function transcribeLive(recognizer, samples, now = () => performanc
       lastPeek = clock;
     }
   }
+  // The segment ended: the flush padding goes in at once, as the worker's finish() does.
+  stream.acceptWaveform(new Float32Array(Math.round(TAIL * 16000)));
   stream.inputFinished();
   await timed(async () => {
     while (recognizer.isReady(stream)) await recognizer.decode(stream);

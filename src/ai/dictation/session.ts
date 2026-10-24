@@ -28,9 +28,33 @@ export interface DictationSession {
 /** 1024 samples at 16 kHz: what the eval harness feeds too (scripts/golden/evals/asr-he.mjs). */
 export const BLOCK = 1024;
 
-export async function startDictationSession(files: DictationFiles, cb: DictationCallbacks, opts: { commands?: boolean; signal?: AbortSignal } = {}): Promise<DictationSession> {
+export interface SessionOptions {
+  commands?: boolean;
+  /** Cancels the start (the panel's Cancel). */
+  signal?: AbortSignal;
+  /**
+   * An AudioContext made in the click that started dictation. Autoplay
+   * policy may keep a context created later — after the download and the
+   * model load — suspended; one made in the gesture starts running.
+   */
+  audioContext?: AudioContext;
+}
+
+/** An AudioContext for dictation, made synchronously in the user's click (see SessionOptions.audioContext). */
+export function createDictationAudioContext(): AudioContext | undefined {
+  try {
+    return typeof AudioContext === "function" ? new AudioContext() : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+export async function startDictationSession(files: DictationFiles, cb: DictationCallbacks, opts: SessionOptions = {}): Promise<DictationSession> {
   const aborted = () => new DOMException("aborted", "AbortError");
-  if (opts.signal?.aborted) throw aborted();
+  if (opts.signal?.aborted) {
+    void opts.audioContext?.close().catch(() => undefined);
+    throw aborted();
+  }
   const worker = new Worker(new URL("./dictation.worker.ts", import.meta.url), { type: "module" });
   const send = (m: DictationIn, transfer: Transferable[] = []) => worker.postMessage(m, transfer);
   let stopped: (() => void) | null = null;
@@ -76,7 +100,7 @@ export async function startDictationSession(files: DictationFiles, cb: Dictation
   // Until the session handle is returned, a cancel (signal) or any failure
   // releases what was acquired so far: the worker, the microphone, the audio graph.
   let media: MediaStream | null = null;
-  let ctx: AudioContext | null = null;
+  let ctx: AudioContext | null = opts.audioContext ?? null;
   const release = () => {
     media?.getTracks().forEach((t) => t.stop());
     void ctx?.close().catch(() => undefined);
@@ -98,7 +122,7 @@ export async function startDictationSession(files: DictationFiles, cb: Dictation
     media = await orCancel(gum);
     await orCancel(ready);
 
-    ctx = new AudioContext();
+    ctx ??= new AudioContext();
     source = ctx.createMediaStreamSource(media);
     // ScriptProcessorNode: no worklet module to load (CSP / Trusted Types),
     // and the work per callback is a copy. AudioWorklet is a follow-up.
@@ -120,6 +144,15 @@ export async function startDictationSession(files: DictationFiles, cb: Dictation
     source.connect(proc);
     // Some engines only pull a processor that reaches the destination; it outputs silence.
     proc.connect(ctx.destination);
+    // Autoplay policy: a suspended context delivers no audio, and the panel
+    // would listen forever. Resume now (the dictation click gives the page
+    // sticky activation) and refuse to start if it stays suspended.
+    if (ctx.state !== "running") await orCancel(ctx.resume());
+    if (ctx.state !== "running") throw new Error("audio is suspended by the browser — click the dictation button again");
+    const context = ctx;
+    context.onstatechange = () => {
+      if (context.state === "suspended") void context.resume().catch(() => undefined);
+    };
   } catch (e) {
     release();
     // Cancelled while the permission prompt was open: the stream may still arrive — stop it then.

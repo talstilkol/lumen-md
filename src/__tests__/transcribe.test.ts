@@ -28,6 +28,25 @@ beforeEach(() => {
   localStorage.setItem("lumen.ai.policy", "cloud");
 });
 
+describe("transcribe — forced local (dictation's recorded fallback, plan 6.1)", () => {
+  it("never reaches the cloud under the cloud policy", async () => {
+    const fetchSpy = vi.fn();
+    vi.stubGlobal("fetch", fetchSpy);
+    const result = await transcribe(new Blob(["x"], { type: "audio/webm" }), { language: "en", local: true });
+    expect(result).toMatchObject({ text: "local text", backend: "local" });
+    expect(local).toHaveBeenCalledTimes(1);
+    expect(fetchSpy).not.toHaveBeenCalled();
+  });
+  it("fails instead of falling back to the cloud under local-first", async () => {
+    localStorage.setItem("lumen.ai.policy", "local-first");
+    const fetchSpy = vi.fn();
+    vi.stubGlobal("fetch", fetchSpy);
+    local.mockRejectedValueOnce(new Error("no wasm"));
+    await expect(transcribe(new Blob(["x"]), { local: true })).rejects.toThrow(/no wasm/);
+    expect(fetchSpy).not.toHaveBeenCalled();
+  });
+});
+
 describe("transcribe — cloud backend", () => {
   it("POSTs the blob to OpenAI Whisper and returns the trimmed text", async () => {
     const fetchSpy = vi.fn().mockResolvedValue(

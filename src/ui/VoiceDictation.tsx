@@ -255,7 +255,8 @@ export async function startVoiceMemo(opts: { language?: string; plain?: boolean 
     showAiToast(t("toast.transcribing"), "info");
     let result;
     try {
-      result = await transcribe(blob, { language: opts.language });
+      // `plain` is dictation's recorded fallback: its UI promises the audio stays on this device.
+      result = await transcribe(blob, { language: opts.language, local: opts.plain });
     } catch (err) {
       log.error("voice memo transcribe failed", err);
       showAiToast(t("toast.transcribeFailed", { error: (err as Error).message }), "error");

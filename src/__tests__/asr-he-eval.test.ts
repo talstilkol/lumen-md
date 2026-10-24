@@ -85,15 +85,18 @@ describe("transcribeLive", () => {
   it("feeds real-time slices and measures each word's delay from when it was spoken", async () => {
     const { rec, now } = fakeRecognizer(0.05);
     const out = await transcribeLive(rec, new Float32Array(3 * 16000), now);
-    // The recogniser also decodes the 1.5 s tail, as the real one does with silence.
+    // The recogniser also decodes the flush padding, as the real one does with silence.
     expect(out.text.startsWith("w0 w1 w2")).toBe(true);
     expect(out.duration).toBe(3);
     // Word i is stamped at i s and decoded once its second of audio is in — at the end of the
     // first 64 ms slice that completes it — plus the decode cost: 1.024 + 0.05 − 0, 2.048 + 0.05 − 1.
     expect(out.latencies[0]).toBeCloseTo(1.074, 3);
     expect(out.latencies[1]).toBeCloseTo(1.098, 3);
-    // Every word is counted, the 1.5 s tail (fed in real time as well) adds the 4th second.
-    expect(out.latencies).toHaveLength(4);
+    // Then the app's segment end: the VAD's 0.7 s pause in real time (clock 3.7 s), then the 1.5 s
+    // flush padding at once — 3 decodes of compute, no wall time. 3.7 + 0.7 s pause + 1.5 s pad = 5 "words".
+    expect(out.latencies).toHaveLength(5);
+    // w3 (stamped 3 s) is committed by the flush: 3.7 + 3 × 0.05 − 3 = 0.85 s — not 1.5 s + the pause.
+    expect(out.latencies[3]).toBeCloseTo(0.85, 3);
     expect(out.compute).toBeGreaterThan(0);
   });
   it("scores per part, overall, with latency percentiles and the real-time factor", async () => {
@@ -137,9 +140,14 @@ describe("word latency", () => {
       getResult: () => ({ text: "", tokens: Array.from({ length: Math.floor(decoded / 16000) }, (_, i) => `▁w${i}`), timestamps: Array.from({ length: Math.floor(decoded / 16000) }, (_, i) => i + 1) }),
       peek: () => ({ text: "", tokens: Array.from({ length: Math.floor(fed / 16000) }, (_, i) => `▁w${i}`), timestamps: [] }),
     };
-    const out = await transcribeLive(rec, new Float32Array(4 * 16000), () => clock);
+    const out = await transcribeLive(rec, new Float32Array(4.5 * 16000), () => clock);
     // Word 0 ends at 1 s: committed with the 2 s chunk (at 2.048 s), shown by the first peek after 1 s.
     expect(out.latencies[0]).toBeCloseTo(1.058, 3);
     expect(out.shownLatencies[0]).toBeLessThan(0.4);
+    // The flush padding costs no wall time: w4 (stamped 5 s) is in the chunk that only the flush
+    // completes, so it is committed at the clip's end plus the VAD pause (5.2 s) plus compute —
+    // about 0.2 s, not 1.5 s of padding on top of that.
+    expect(out.latencies[4]).toBeGreaterThan(0.19);
+    expect(out.latencies[4]).toBeLessThan(0.3);
   });
 });

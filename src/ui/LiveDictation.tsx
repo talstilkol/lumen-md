@@ -17,7 +17,7 @@ import { detectHardware, vramBudgetMB } from "../ai/modelManager";
 import { chooseEngine, type EngineId } from "../ai/dictation/engines";
 import { dictationDownloadBytes, formatMB } from "../ai/dictation/models";
 import { isDictationModelDownloaded, loadDictationFiles } from "../ai/dictation/modelStore";
-import { startDictationSession, type DictationSession } from "../ai/dictation/session";
+import { createDictationAudioContext, startDictationSession, type DictationSession } from "../ai/dictation/session";
 import { appendSegment } from "../ai/dictation/punctuate";
 import { log } from "../lib/logger";
 
@@ -59,10 +59,16 @@ function Panel({ initial, onBrowser, onClose }: { initial: Phase; onBrowser: () 
   const start = async () => {
     const ctl = new AbortController();
     abort.current = ctl;
+    // Made in the click, before any await: a context created after the
+    // download may be left suspended by autoplay policy (no audio, ever).
+    const audioContext = createDictationAudioContext();
     try {
       setPhase({ kind: "downloading", percent: 0 });
       const files = await loadDictationFiles((loaded, total) => setPhase({ kind: "downloading", percent: Math.floor((loaded / total) * 100) }), ctl.signal);
-      if (ctl.signal.aborted) return;
+      if (ctl.signal.aborted) {
+        void audioContext?.close().catch(() => undefined);
+        return;
+      }
       setPhase({ kind: "loading" });
       const started = await startDictationSession(files, {
         onReady: (info) => {
@@ -85,7 +91,7 @@ function Panel({ initial, onBrowser, onClose }: { initial: Phase; onBrowser: () 
           showAiToast(t("dictation.error", { error: message }), "error");
           void stop();
         },
-      }, { signal: ctl.signal });
+      }, { signal: ctl.signal, audioContext });
       // Cancelled or closed while the model loaded: never leave a hidden session holding the microphone.
       if (ctl.signal.aborted) {
         await started.stop();
@@ -94,6 +100,8 @@ function Panel({ initial, onBrowser, onClose }: { initial: Phase; onBrowser: () 
       session.current = started;
       setPhase((p) => (p.kind === "loading" ? { kind: "listening", speaking: false, interim: "" } : p));
     } catch (e) {
+      // A load that failed before the session took the context: close it here.
+      void audioContext?.close().catch(() => undefined);
       if ((e as Error).name !== "AbortError" && !ctl.signal.aborted) showAiToast(t("dictation.error", { error: (e as Error).message }), "error");
       await stop();
     }
