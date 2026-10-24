@@ -915,6 +915,13 @@
       "icon": "Link"
     },
     {
+      "id": "git.corsProxy",
+      "label": "Git: set CORS proxy…",
+      "group": "Git",
+      "hint": "needed to clone from GitHub in a browser",
+      "icon": "Link"
+    },
+    {
       "id": "git.identity",
       "label": "Git: set commit identity…",
       "group": "Git",
@@ -2113,6 +2120,13 @@
       "icon": "Link"
     },
     {
+      "id": "git.corsProxy",
+      "label": "Git: set CORS proxy…",
+      "group": "Git",
+      "hint": "needed to clone from GitHub in a browser",
+      "icon": "Link"
+    },
+    {
       "id": "git.identity",
       "label": "Git: set commit identity…",
       "group": "Git",
@@ -2401,6 +2415,7 @@
     "git.status",
     "git.watch",
     "git.token",
+    "git.corsProxy",
     "git.identity",
     "collab.start",
     "collab.join",

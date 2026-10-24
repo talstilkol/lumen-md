@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-10-19T08:04:02.431Z",
+  "generated_at": "2026-10-24T11:45:04.520Z",
   "source": "src/i18n/index.ts (en bundle)",
-  "count": 1511,
+  "count": 1563,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -1699,6 +1699,125 @@
       "vars": []
     },
     {
+      "key": "vault.desktop.firstRunBody",
+      "en": "Choose the folder where your notes live. Lumen keeps them there as plain Markdown files, so other apps such as Obsidian can open them too. Notes already in the app are backed up and copied there; nothing is deleted.",
+      "vars": []
+    },
+    {
+      "key": "vault.desktop.choose",
+      "en": "Choose folder…",
+      "vars": []
+    },
+    {
+      "key": "vault.desktop.notNow",
+      "en": "Not now",
+      "vars": []
+    },
+    {
+      "key": "vault.desktop.backedUp",
+      "en": "A backup of the app's notes was saved to {path}.",
+      "vars": [
+        "path"
+      ]
+    },
+    {
+      "key": "external.conflict.title",
+      "en": "Changed outside Lumen — {path}",
+      "vars": [
+        "path"
+      ]
+    },
+    {
+      "key": "external.conflict.body",
+      "en": "This note was changed by another program while you had unsaved edits. The other version is already kept as a copy, so nothing is lost. Choose what this note should contain.",
+      "vars": []
+    },
+    {
+      "key": "external.conflict.mine",
+      "en": "mine",
+      "vars": []
+    },
+    {
+      "key": "external.conflict.theirs",
+      "en": "theirs",
+      "vars": []
+    },
+    {
+      "key": "external.conflict.takeMine",
+      "en": "Keep mine",
+      "vars": []
+    },
+    {
+      "key": "external.conflict.takeTheirs",
+      "en": "Take theirs",
+      "vars": []
+    },
+    {
+      "key": "external.conflict.merge",
+      "en": "Apply merge",
+      "vars": []
+    },
+    {
+      "key": "external.conflict.keepMine",
+      "en": "Keep mine",
+      "vars": []
+    },
+    {
+      "key": "external.conflict.copyName",
+      "en": "changed outside Lumen",
+      "vars": []
+    },
+    {
+      "key": "external.conflict.keptCopy",
+      "en": "The version changed outside Lumen is kept as “{path}”.",
+      "vars": [
+        "path"
+      ]
+    },
+    {
+      "key": "external.conflict.failed",
+      "en": "Could not resolve the change to “{path}”; both versions are kept.",
+      "vars": [
+        "path"
+      ]
+    },
+    {
+      "key": "external.reloaded",
+      "en": "“{path}” was changed outside Lumen and reloaded.",
+      "vars": [
+        "path"
+      ]
+    },
+    {
+      "key": "external.renamed",
+      "en": "“{from}” was renamed outside Lumen to “{to}”; the open note follows it.",
+      "vars": [
+        "from",
+        "to"
+      ]
+    },
+    {
+      "key": "external.deleted",
+      "en": "“{path}” was deleted outside Lumen. The open note is kept, unsaved.",
+      "vars": [
+        "path"
+      ]
+    },
+    {
+      "key": "external.conflict.keptTyping",
+      "en": "You kept typing while the conflict was open, so your latest text is kept (unsaved, saved next). The version changed outside Lumen is in “{path}”.",
+      "vars": [
+        "path"
+      ]
+    },
+    {
+      "key": "external.conflict.notSaved",
+      "en": "“{path}” was not saved: it changed outside Lumen. Nothing was changed; resolve the change first.",
+      "vars": [
+        "path"
+      ]
+    },
+    {
       "key": "vault.import.what",
       "en": "Import from…",
       "vars": []
@@ -2444,6 +2563,11 @@
     {
       "key": "versionHistory.reason.manual",
       "en": "manual",
+      "vars": []
+    },
+    {
+      "key": "versionHistory.reason.git-pull",
+      "en": "before git pull",
       "vars": []
     },
     {
@@ -8131,6 +8255,193 @@
       "key": "chart.alternatives",
       "en": "Chart suggestions",
       "vars": []
+    },
+    {
+      "key": "cmd.git.corsProxy",
+      "en": "Git: set CORS proxy…",
+      "vars": []
+    },
+    {
+      "key": "cmd.git.corsProxy.hint",
+      "en": "needed to clone from GitHub in a browser",
+      "vars": []
+    },
+    {
+      "key": "git.prompt.corsProxy",
+      "en": "CORS proxy URL for git (empty: direct):",
+      "vars": []
+    },
+    {
+      "key": "git.alert.corsProxySaved",
+      "en": "CORS proxy saved.",
+      "vars": []
+    },
+    {
+      "key": "git.alert.corsProxyCleared",
+      "en": "CORS proxy cleared: git connects directly.",
+      "vars": []
+    },
+    {
+      "key": "git.alert.corsProxyInvalid",
+      "en": "That is not an http(s) URL. Nothing was changed.",
+      "vars": []
+    },
+    {
+      "key": "git.alert.corsHint",
+      "en": "The git host was not reached. In a browser it needs a CORS proxy: ⌘K → “Git: set CORS proxy…”.",
+      "vars": []
+    },
+    {
+      "key": "git.pull.upToDate",
+      "en": "Already up to date.",
+      "vars": []
+    },
+    {
+      "key": "git.pull.summary",
+      "en": "Pulled: {changed} files updated, {conflicts} conflicts. Nothing deleted.",
+      "vars": [
+        "changed",
+        "conflicts"
+      ]
+    },
+    {
+      "key": "git.pull.keptDeleted",
+      "en": "Deleted upstream, kept here ({count}): {files}",
+      "vars": [
+        "count",
+        "files"
+      ]
+    },
+    {
+      "key": "git.pull.mergedIntoOpen",
+      "en": "Merged into open notes with unsaved edits (not overwritten): {files}",
+      "vars": [
+        "files"
+      ]
+    },
+    {
+      "key": "git.pull.copies",
+      "en": "Versions that could not be merged are kept as copies: {files}",
+      "vars": [
+        "files"
+      ]
+    },
+    {
+      "key": "git.lfs.unsupported",
+      "en": "Git LFS is not supported; these are LFS pointers: {files}",
+      "vars": [
+        "files"
+      ]
+    },
+    {
+      "key": "git.clone.kept",
+      "en": "{count} existing files were kept (not overwritten).",
+      "vars": [
+        "count"
+      ]
+    },
+    {
+      "key": "git.commit.unresolved",
+      "en": "Not committed: resolve the conflicts first: {files}",
+      "vars": [
+        "files"
+      ]
+    },
+    {
+      "key": "git.conflict.title",
+      "en": "Git conflict — {path}",
+      "vars": [
+        "path"
+      ]
+    },
+    {
+      "key": "git.conflict.body",
+      "en": "Both sides changed the same lines. Until you choose, the file keeps both between markers.",
+      "vars": []
+    },
+    {
+      "key": "git.conflict.mine",
+      "en": "mine",
+      "vars": []
+    },
+    {
+      "key": "git.conflict.theirs",
+      "en": "remote",
+      "vars": []
+    },
+    {
+      "key": "git.conflict.takeMine",
+      "en": "Keep mine",
+      "vars": []
+    },
+    {
+      "key": "git.conflict.takeTheirs",
+      "en": "Take remote",
+      "vars": []
+    },
+    {
+      "key": "git.conflict.merge",
+      "en": "Apply merge",
+      "vars": []
+    },
+    {
+      "key": "git.conflict.later",
+      "en": "Resolve later",
+      "vars": []
+    },
+    {
+      "key": "git.conflict.left",
+      "en": "{count} conflicts left, still marked in their files.",
+      "vars": [
+        "count"
+      ]
+    },
+    {
+      "key": "git.conflict.allResolved",
+      "en": "All conflicts resolved.",
+      "vars": []
+    },
+    {
+      "key": "git.watch.conflicts",
+      "en": "Auto-pull: {count} conflicts marked in the files. Pull to resolve them.",
+      "vars": [
+        "count"
+      ]
+    },
+    {
+      "key": "git.pull.kindClashes",
+      "en": "File/folder changed upstream, kept as is here: {files}",
+      "vars": [
+        "files"
+      ]
+    },
+    {
+      "key": "git.alert.corsProxyBlocked",
+      "en": "The app's security policy blocks {origin}. Use http://localhost:9999 or a proxy the deployment allows.",
+      "vars": [
+        "origin"
+      ]
+    },
+    {
+      "key": "git.commit.skipped",
+      "en": "Not committed (file/folder clash): {files}",
+      "vars": [
+        "files"
+      ]
+    },
+    {
+      "key": "git.commit.lfsKept",
+      "en": "Committed as the repository's Git LFS pointer, not as the file in the vault (LFS is not supported): {files}",
+      "vars": [
+        "files"
+      ]
+    },
+    {
+      "key": "git.commit.unsaved",
+      "en": "Not committed: these open notes have edits that could not be saved first (a change made outside Lumen is being resolved): {files}",
+      "vars": [
+        "files"
+      ]
     }
   ]
 }
