@@ -169,7 +169,7 @@
    "end": "ג׳ 20.10 23:00"
   }
  ],
- "dodComment": "Plan 0.7: a task marked ✅ / ✅* needs `dod` — the commands that prove it (scripts/dod.mjs runs them; plan:check refuses a ✅ without). dodGrandfathered = tasks marked ✅ before 0.7 existed; the list only shrinks: give a task its dod and take it off.",
+ "dodComment": "Plan 0.7: a task marked ✅ / ✅* needs `dod` — the commands that prove it (scripts/dod.mjs runs them; plan:check refuses a ✅ without). dodGrandfathered = tasks marked ✅ before 0.7 existed; the list only shrinks: give a task its dod, take it off, and record the id in dodRevoked (one-way: a revoked id can never be grandfathered again). A ✅* task declares dodMock: true.",
  "dodGrandfathered": [
   "0.1",
   "0.2",
@@ -232,6 +232,7 @@
   "9.8",
   "14.1"
  ],
+ "dodRevoked": [],
  "phases": [
   {
    "title": "יסודות ואוטומציה שחוסכים זמן",

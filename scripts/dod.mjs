@@ -49,6 +49,12 @@ export const DOD_GRANDFATHER_BASELINE = Object.freeze(["0.1", "0.2", "0.3", "0.4
  * - grandfathered ids exist, are still ✅ / ✅*, and have no `dod` yet. Adding a dod, or
  *   taking a task back to ⏳, means taking its id off the list in the same edit — so a
  *   reopened task can't return to ✅ without a dod (Codex P1 on #265)
+ * - the shrink is one-way: an id that leaves `dodGrandfathered` is recorded in
+ *   `dodRevoked` in the same edit (every baseline id is in exactly one of the two
+ *   lists), and a revoked id can never be grandfathered again — so the ratchet can't
+ *   be reversed by deleting a dod and re-adding the id (Codex P1 on #265)
+ * - a ✅* task declares `dodMock: true`; without it a later edit could turn ✅* into
+ *   plain ✅ and re-run the same mock-only commands as the real check (Codex P1 on #265)
  * - every `dod` entry is a non-empty string
  * @param {any} plan
  * @param {{ baseline?: readonly string[] }} [opts]
@@ -59,7 +65,15 @@ export function checkDod(plan, { baseline = DOD_GRANDFATHER_BASELINE } = {}) {
   const tasks = allTasks(plan);
   const byId = new Map(tasks.map((t) => [t.id, t]));
   const grand = new Set(plan.dodGrandfathered ?? []);
+  const revoked = new Set(plan.dodRevoked ?? []);
   const frozen = new Set(baseline);
+  for (const id of revoked) {
+    if (!frozen.has(id)) problems.push(`dodRevoked: ${id} was never grandfathered — only ids that left dodGrandfathered belong here`);
+    if (grand.has(id)) problems.push(`dodGrandfathered: ${id}'s exemption was revoked (dodRevoked) — it cannot be grandfathered again; keep its dod`);
+  }
+  for (const id of frozen) {
+    if (!grand.has(id) && !revoked.has(id)) problems.push(`dodGrandfathered: ${id} left the list without being recorded in dodRevoked — the exemption ends for good`);
+  }
   for (const id of grand) {
     const t = byId.get(id);
     if (!t) problems.push(`dodGrandfathered: ${id} is not a task`);
@@ -75,6 +89,7 @@ export function checkDod(plan, { baseline = DOD_GRANDFATHER_BASELINE } = {}) {
     if (!status.startsWith("✅")) continue;
     if (!t.dod?.length && !grand.has(t.id)) problems.push(`${t.id} is marked ${status.slice(0, 2).trim()} without a dod — add the commands that prove it (plan 0.7)`);
     if (t.dodMock && isFullDone(status)) problems.push(`${t.id} is checked against mocks only (dodMock) — mark it ✅*, not ✅`);
+    if (isMockDone(status) && !t.dodMock) problems.push(`${t.id} is ✅* without "dodMock": true — declare it, so the status can't become ✅ before the real-model check replaces the mock`);
   }
   return problems;
 }
