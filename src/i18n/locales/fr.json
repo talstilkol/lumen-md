@@ -1430,5 +1430,6 @@
   "cmd.ai.cancel": "IA : annuler",
   "cmd.ai.cancel.hint": "Arrête toutes les requêtes IA en cours (Échap aussi)",
   "toast.aiCancelled": "Requête IA annulée ({count})",
-  "toast.aiNothingRunning": "Aucune requête IA en cours"
+  "toast.aiNothingRunning": "Aucune requête IA en cours",
+  "spell.en.unknown": "« {word} » : mot inconnu (dictionnaire anglais sur cet appareil)"
 }

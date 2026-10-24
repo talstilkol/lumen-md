@@ -69,6 +69,7 @@ export function isLocaleAvailable(locale: Locale): boolean {
 type Strings = Record<string, string>;
 
 const en: Strings = {
+  "spell.en.unknown": "“{word}”: unknown word (English dictionary on this device)",
   // Toolbar
   "toolbar.tagline": "Markdown, illuminated",
   "toolbar.new": "New",
