@@ -208,19 +208,79 @@ describe("review round 2", () => {
     expect(await readWorkspaceFile("note.md")).toBe("mine");
     expect(doc().dirty).toBe(false);
 
-    // Still unsaved after the answer (the user typed during the dialog and
-    // the file changed outside once more): the caller is stopped, not told
-    // the note is on disk.
+    // The file changes outside once more while the dialog is open: the flush
+    // waits for the second conflict too, and only then reports the note saved.
     useAppStore.getState().setContent("mine 2");
     await vault.write("note.md", "theirs 2");
     resolver.mockImplementationOnce(async () => {
-      useAppStore.getState().setContent("mine 2, typed behind the dialog");
       await vault.write("note.md", "changed again outside");
       return { kind: "local" };
     });
+    await flushActiveWorkspaceDoc();
+    expect(resolver).toHaveBeenCalledTimes(3);
+    expect(resolver.mock.calls[2][0]).toMatchObject({ remote: "changed again outside" });
+    expect(await readWorkspaceFile("note.md")).toBe("mine 2");
+    expect(doc().dirty).toBe(false);
+  });
+
+  it("the caller is stopped when the note still cannot be saved after the answer", async () => {
+    const { flushActiveWorkspaceDoc } = await import("../store/openDocs");
+    useAppStore.getState().setContent("mine");
+    await vault.write("note.md", "theirs");
+    // The user types during the dialog (kept, unsaved) and the file changes
+    // again right after the answer, before the flush's own save.
+    resolver.mockImplementationOnce(async () => {
+      useAppStore.getState().setContent("mine, typed behind the dialog");
+      return { kind: "local" };
+    });
+    // The "kept typing" toast is the last step of the resolution: the outside
+    // change lands right then, before the flush's own save.
+    __setConflictUi(resolver, (m) => {
+      toasts.push(m);
+      if (/kept typing|latest text/i.test(m)) void vault.write("note.md", "changed right after");
+    });
     await expect(flushActiveWorkspaceDoc()).rejects.toThrow(/not saved/);
-    expect(doc()).toMatchObject({ content: "mine 2, typed behind the dialog", dirty: true });
+    expect(doc()).toMatchObject({ content: "mine, typed behind the dialog", dirty: true });
     await settle();
+  });
+});
+
+describe("review round 3", () => {
+  it("a file changed again while the dialog is open is not overwritten by the answer: a second conflict follows", async () => {
+    let answer!: (v: { kind: "local" }) => void;
+    resolver.mockImplementationOnce(() => new Promise((r) => (answer = r)));
+    useAppStore.getState().setContent("mine");
+    await outside("note.md", "theirs 1");
+    await vi.waitFor(() => expect(resolver).toHaveBeenCalledTimes(1));
+    // Another program writes once more while the user reads the dialog.
+    await outside("note.md", "theirs 2, newer");
+    answer({ kind: "local" });
+    // The answer about "theirs 1" is not written over "theirs 2": the dialog returns for it.
+    await vi.waitFor(() => expect(resolver).toHaveBeenCalledTimes(2));
+    expect(resolver.mock.calls[1][0]).toMatchObject({ local: "mine", remote: "theirs 2, newer" });
+    await settle();
+    const files = (await listWorkspace()).map((f) => f.path).sort();
+    const copies = files.filter((p) => p.startsWith("note ("));
+    expect(copies).toHaveLength(2);
+    const texts = await Promise.all(copies.map((c) => readWorkspaceFile(c)));
+    expect(texts.sort()).toEqual(["theirs 1", "theirs 2, newer"]);
+    expect(await readWorkspaceFile("note.md")).toBe("mine");
+    expect(doc()).toMatchObject({ content: "mine", dirty: false });
+  });
+
+  it("a file deleted while the dialog is open is not recreated by the answer: the note is detached", async () => {
+    let answer!: (v: { kind: "local" }) => void;
+    resolver.mockImplementationOnce(() => new Promise((r) => (answer = r)));
+    useAppStore.getState().setContent("mine");
+    await outside("note.md", "theirs");
+    await vi.waitFor(() => expect(resolver).toHaveBeenCalledTimes(1));
+    await vault.remove("note.md");
+    answer({ kind: "local" });
+    await vi.waitFor(() => expect(doc().workspaceName).toBeNull());
+    expect(doc()).toMatchObject({ content: "mine", dirty: true });
+    expect(await vault.stat("note.md")).toBeNull();
+    const copy = (await listWorkspace()).map((f) => f.path).find((p) => p.startsWith("note ("))!;
+    expect(await readWorkspaceFile(copy)).toBe("theirs");
   });
 });
 

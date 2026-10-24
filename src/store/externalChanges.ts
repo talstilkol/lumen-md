@@ -197,15 +197,31 @@ async function conflictCopyPath(path: string): Promise<string> {
 function conflict(path: string, local: string, remote: string): Promise<void> {
   if (conflicted.has(path)) return whenResolved(path);
   conflicted.add(path);
-  const run = resolveOne(path, local, remote).finally(() => {
-    conflicted.delete(path);
-    resolving.delete(path);
-  });
+  const run = resolveOne(path, local, remote)
+    .finally(() => {
+      conflicted.delete(path);
+      resolving.delete(path);
+    })
+    .then((next) => {
+      // The file changed again while the dialog was open: that newer version
+      // is a new conflict (with its own copy), never overwritten by the
+      // answer given about the older one.
+      if (next === "deleted") return onExternal({ type: "delete", path, origin: "external" });
+      if (next) return conflict(path, next.local, next.remote);
+    });
   resolving.set(path, run);
   return run;
 }
 
-async function resolveOne(path: string, local: string, remote: string): Promise<void> {
+/** The disk's text at `path`, or null when the file is gone. */
+async function diskText(path: string): Promise<string | null> {
+  if (!(await workspaceHasFile(path))) return null;
+  return readWorkspaceFile(path).catch(() => null);
+}
+
+type Restart = { local: string; remote: string } | "deleted" | undefined;
+
+async function resolveOne(path: string, local: string, remote: string): Promise<Restart> {
   try {
     // Typing must not go on behind the dialog.
     (globalThis.document?.activeElement as HTMLElement | null)?.blur?.();
@@ -214,11 +230,20 @@ async function resolveOne(path: string, local: string, remote: string): Promise<
     notifyWorkspaceChanged({ kind: "structure", paths: [copy] });
     const base = known.get(path) ?? "";
     const choice = await resolveConflict({ path, base, local, remote });
-    // What is in the editor now. If the user kept typing during the dialog,
-    // the answer was given about older text: keep the newer text (unsaved;
-    // the next save writes it, the other version stays in the copy).
     flushPendingEdits();
     const current = openPaths().get(path)?.content ?? local;
+    // The answer was given about `remote`. If the file changed again in the
+    // meantime, the answer must not be written over that newer version.
+    const now = await diskText(path);
+    if (now === null) return "deleted";
+    if (now !== remote) {
+      // `remote` is kept in the copy already; the dialog comes back for the newer text.
+      noteDisk(path, remote);
+      return { local: current, remote: now };
+    }
+    // If the user kept typing during the dialog, the answer was given about
+    // older text: keep the newer text (unsaved; the next save writes it, the
+    // other version stays in the copy).
     if (current !== local) {
       noteDisk(path, remote);
       setLocal(path, current, true);
@@ -242,6 +267,7 @@ async function resolveOne(path: string, local: string, remote: string): Promise<
     log.warn("resolving an external change failed", err);
     toast(t("external.conflict.failed", { path }), "error");
   }
+  return undefined;
 }
 
 /**
