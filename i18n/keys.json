@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-10-19T08:04:39.653Z",
+  "generated_at": "2026-10-24T11:11:32.890Z",
   "source": "src/i18n/index.ts (en bundle)",
-  "count": 1439,
+  "count": 1458,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -2875,6 +2875,109 @@
       "en": "Action items failed: {error}",
       "vars": [
         "error"
+      ]
+    },
+    {
+      "key": "mt.layer.name.chrome",
+      "en": "Chrome's built-in translator",
+      "vars": []
+    },
+    {
+      "key": "mt.layer.name.opus",
+      "en": "Opus-MT (on this device)",
+      "vars": []
+    },
+    {
+      "key": "mt.layer.name.m2m100",
+      "en": "M2M100 (on this device)",
+      "vars": []
+    },
+    {
+      "key": "mt.layer.name.llm",
+      "en": "the AI model",
+      "vars": []
+    },
+    {
+      "key": "mt.layer.chrome.absent",
+      "en": "this browser has no built-in translator",
+      "vars": []
+    },
+    {
+      "key": "mt.layer.chrome.pair",
+      "en": "Chrome has no language pack for this pair",
+      "vars": []
+    },
+    {
+      "key": "mt.layer.opus.pair",
+      "en": "no converted model for this pair",
+      "vars": []
+    },
+    {
+      "key": "mt.layer.opus.noHost",
+      "en": "the converted models have no host yet (plan 15.9)",
+      "vars": []
+    },
+    {
+      "key": "mt.layer.opus.noFiles",
+      "en": "the converted model has no checksums yet (run the conversion workflow)",
+      "vars": []
+    },
+    {
+      "key": "mt.layer.m2m100.pair",
+      "en": "M2M100 does not cover this pair",
+      "vars": []
+    },
+    {
+      "key": "mt.layer.m2m100.purpose",
+      "en": "Translation between languages the Hebrew models do not cover",
+      "vars": []
+    },
+    {
+      "key": "mt.layer.m2m100.attribution",
+      "en": "M2M100-418M © Meta AI, licensed under the MIT License; ONNX conversion by Xenova.",
+      "vars": []
+    },
+    {
+      "key": "mt.layer.failed",
+      "en": "the model failed to load",
+      "vars": []
+    },
+    {
+      "key": "mt.layer.declined",
+      "en": "download declined",
+      "vars": []
+    },
+    {
+      "key": "mt.layer.sourceUnknown",
+      "en": "the document's language could not be told",
+      "vars": []
+    },
+    {
+      "key": "mt.size.approx",
+      "en": "about {size}",
+      "vars": [
+        "size"
+      ]
+    },
+    {
+      "key": "toast.translatedWith",
+      "en": "Translated with {layer}",
+      "vars": [
+        "layer"
+      ]
+    },
+    {
+      "key": "toast.translatedWithUnmeasured",
+      "en": "Translated with {layer} — its quality on this pair is not measured yet",
+      "vars": [
+        "layer"
+      ]
+    },
+    {
+      "key": "toast.localMtUnavailable",
+      "en": "Local translation was not available ({why}); the AI model translated instead.",
+      "vars": [
+        "why"
       ]
     },
     {

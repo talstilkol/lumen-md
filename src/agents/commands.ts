@@ -205,6 +205,54 @@ export async function extractActionItems(text: string, signal?: AbortSignal): Pr
  * in the target language's script before it is accepted.
  */
 export async function translateMarkdown(text: string, targetLanguage: string, signal?: AbortSignal): Promise<string> {
+  return (await translateMarkdownDetailed(text, targetLanguage, signal)).text;
+}
+
+export interface TranslationOutcome {
+  text: string;
+  /** The local layer that translated (plan 6.4), or "llm" for the translator agent. */
+  layer: "chrome" | "opus" | "m2m100" | "llm";
+  /** The local layer's quality on this pair is not measured yet. */
+  unmeasured: boolean;
+  /** Why each local layer did not run (i18n keys, or "declined"), when the agent translated. */
+  reasons: Partial<Record<"chrome" | "opus" | "m2m100", string>>;
+}
+
+/**
+ * Local translation first (plan 6.4): the document's language from local
+ * detection (plan 6.5), then Chrome's Translator, Opus-MT or M2M100 with
+ * consent; the LLM translator agent only when no local layer can take the
+ * pair, or the document's language cannot be told.
+ */
+export async function translateMarkdownDetailed(text: string, targetLanguage: string, signal?: AbortSignal): Promise<TranslationOutcome> {
+  const reasons: TranslationOutcome["reasons"] = {};
+  try {
+    const [{ detectLanguage, languageCode }, { translateLocally }, { proseOf }, { uiConfirm }, { t, getLocale }] = await Promise.all([
+      import("../text/langId"),
+      import("../ai/mt"),
+      import("./defs/translator"),
+      import("../ui/PromptDialog"),
+      import("../i18n"),
+    ]);
+    const target = languageCode(targetLanguage);
+    const source = detectLanguage(proseOf(text));
+    if (target && source.confident && source.lang !== "und" && source.lang !== target) {
+      const r = await translateLocally(text, { source: source.lang, target }, { confirm: uiConfirm, t, locale: getLocale() }, { signal, detect: (p) => detectLanguage(p) });
+      if (r.layer) return { text: r.text, layer: r.layer, unmeasured: r.unmeasured, reasons: {} };
+      Object.assign(reasons, r.reasons);
+    } else if (target) {
+      reasons.opus = "mt.layer.sourceUnknown";
+    }
+  } catch (e) {
+    if ((e as Error)?.name === "AbortError") throw e;
+    // A local layer that broke mid-way is reported and the agent takes over.
+    reasons.opus = "mt.layer.failed";
+  }
+  return { text: await translateWithAgent(text, targetLanguage, signal), layer: "llm", unmeasured: false, reasons };
+}
+
+/** The LLM translator agent, chunk by chunk (layer 3b). */
+async function translateWithAgent(text: string, targetLanguage: string, signal?: AbortSignal): Promise<string> {
   const { runAgentOrThrow } = await import("./runtime");
   const { translatorAgent, chunkMarkdown } = await import("./defs");
   const out: string[] = [];
