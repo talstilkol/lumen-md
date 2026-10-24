@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-10-24T18:17:37.846Z",
+  "generated_at": "2026-10-24T18:50:58.229Z",
   "source": "src/i18n/index.ts (en bundle) + src/i18n/lazy/*.json",
-  "count": 1461,
+  "count": 1471,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -7707,6 +7707,63 @@
     {
       "key": "caption.attribution.smolvlm",
       "en": "SmolVLM-256M-Instruct © Hugging Face, Apache License 2.0.",
+      "vars": []
+    },
+    {
+      "key": "imageSearch.tab",
+      "en": "Images",
+      "vars": []
+    },
+    {
+      "key": "imageSearch.hint",
+      "en": "Describe an image to find it in your notes' images (on this device).",
+      "vars": []
+    },
+    {
+      "key": "imageSearch.searching",
+      "en": "Searching images…",
+      "vars": []
+    },
+    {
+      "key": "imageSearch.indexing",
+      "en": "Indexing images {done} / {total}…",
+      "vars": [
+        "done",
+        "total"
+      ]
+    },
+    {
+      "key": "imageSearch.noHost",
+      "en": "Image search needs its model, which is not available to download yet (its host is not set up).",
+      "vars": []
+    },
+    {
+      "key": "imageSearch.declined",
+      "en": "Image search needs the model download; nothing was searched.",
+      "vars": []
+    },
+    {
+      "key": "imageSearch.failed",
+      "en": "Image search failed: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "imageSearch.none",
+      "en": "No images in this vault.",
+      "vars": []
+    },
+    {
+      "key": "imageSearch.translated",
+      "en": "Searched in English: “{query}”",
+      "vars": [
+        "query"
+      ]
+    },
+    {
+      "key": "imageSearch.copied",
+      "en": "Image link copied — paste it into the note.",
       "vars": []
     },
     {

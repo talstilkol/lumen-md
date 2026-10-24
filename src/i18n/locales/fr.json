@@ -1459,5 +1459,15 @@
   "toast.localMtUnavailable": "La traduction locale n’était pas disponible ({why}) ; le modèle d’IA a traduit à sa place.",
   "caption.purpose": "Décrire les images sur cet appareil (texte alternatif)",
   "caption.attribution.florence": "Florence-2 © Microsoft, licence MIT ; conversion ONNX par onnx-community (Hugging Face).",
-  "caption.attribution.smolvlm": "SmolVLM-256M-Instruct © Hugging Face, licence Apache 2.0."
+  "caption.attribution.smolvlm": "SmolVLM-256M-Instruct © Hugging Face, licence Apache 2.0.",
+  "imageSearch.tab": "Images",
+  "imageSearch.hint": "Décrivez une image pour la retrouver parmi les images de vos notes (sur cet appareil).",
+  "imageSearch.searching": "Recherche d’images…",
+  "imageSearch.indexing": "Indexation des images {done} / {total}…",
+  "imageSearch.noHost": "La recherche d’images a besoin de son modèle, pas encore téléchargeable (son hébergement n’est pas configuré).",
+  "imageSearch.declined": "La recherche d’images nécessite le téléchargement du modèle ; aucune recherche effectuée.",
+  "imageSearch.failed": "Échec de la recherche d’images : {error}",
+  "imageSearch.none": "Aucune image dans ce coffre.",
+  "imageSearch.translated": "Recherche en anglais : « {query} »",
+  "imageSearch.copied": "Lien de l’image copié — collez-le dans la note."
 }

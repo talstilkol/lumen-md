@@ -1459,5 +1459,15 @@
   "toast.localMtUnavailable": "ローカル翻訳は利用できませんでした（{why}）。代わりに AI モデルが翻訳しました。",
   "caption.purpose": "このデバイスで画像を説明（代替テキスト）",
   "caption.attribution.florence": "Florence-2 © Microsoft、MIT ライセンス。ONNX 変換：onnx-community（Hugging Face）。",
-  "caption.attribution.smolvlm": "SmolVLM-256M-Instruct © Hugging Face、Apache License 2.0。"
+  "caption.attribution.smolvlm": "SmolVLM-256M-Instruct © Hugging Face、Apache License 2.0。",
+  "imageSearch.tab": "画像",
+  "imageSearch.hint": "画像を説明すると、ノートの画像から見つけます（このデバイス上で）。",
+  "imageSearch.searching": "画像を検索中…",
+  "imageSearch.indexing": "画像をインデックス中 {done} / {total}…",
+  "imageSearch.noHost": "画像検索にはモデルが必要ですが、まだダウンロードできません（ホストが未設定です）。",
+  "imageSearch.declined": "画像検索にはモデルのダウンロードが必要です。検索は行われませんでした。",
+  "imageSearch.failed": "画像検索に失敗しました：{error}",
+  "imageSearch.none": "この保管庫に画像はありません。",
+  "imageSearch.translated": "英語で検索しました：「{query}」",
+  "imageSearch.copied": "画像のリンクをコピーしました。ノートに貼り付けてください。"
 }

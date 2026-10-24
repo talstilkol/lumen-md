@@ -265,3 +265,15 @@ export async function captionLocal(model: string, family: CaptionFamily, image: 
   const device = opts.device ?? (await transformersDevice());
   return call<string>({ type: "caption", model, family, device, image }, [], opts.signal);
 }
+/** SigLIP image vectors (plan 6.7), unit length, from Lumen's converted-model host. */
+export async function embedImagesLocal(model: string, images: Blob[], opts: { host: string; dtype?: string; signal?: AbortSignal }): Promise<number[][]> {
+  const device = await transformersDevice();
+  return call<number[][]>({ type: "imageEmbed", model, device, images, host: opts.host, dtype: opts.dtype ?? translationDtypeFor(device) }, [], opts.signal);
+}
+
+/** SigLIP text vectors in the same space as embedImagesLocal(). */
+export async function embedTextsForImagesLocal(model: string, texts: string[], opts: { host: string; dtype?: string; signal?: AbortSignal }): Promise<number[][]> {
+  const device = await transformersDevice();
+  return call<number[][]>({ type: "textEmbedForImages", model, device, texts, host: opts.host, dtype: opts.dtype ?? translationDtypeFor(device) }, [], opts.signal);
+}
+

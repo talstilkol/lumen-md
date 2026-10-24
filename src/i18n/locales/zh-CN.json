@@ -1459,5 +1459,15 @@
   "toast.localMtUnavailable": "本地翻译不可用（{why}）；已改由 AI 模型翻译。",
   "caption.purpose": "在本设备上描述图片（替代文本）",
   "caption.attribution.florence": "Florence-2 © Microsoft，MIT 许可证；ONNX 转换：onnx-community（Hugging Face）。",
-  "caption.attribution.smolvlm": "SmolVLM-256M-Instruct © Hugging Face，Apache 2.0 许可证。"
+  "caption.attribution.smolvlm": "SmolVLM-256M-Instruct © Hugging Face，Apache 2.0 许可证。",
+  "imageSearch.tab": "图片",
+  "imageSearch.hint": "描述一张图片，在笔记的图片中找到它（在本设备上）。",
+  "imageSearch.searching": "正在搜索图片…",
+  "imageSearch.indexing": "正在索引图片 {done} / {total}…",
+  "imageSearch.noHost": "图片搜索需要其模型，但目前还无法下载（尚未设置托管）。",
+  "imageSearch.declined": "图片搜索需要下载模型；未进行搜索。",
+  "imageSearch.failed": "图片搜索失败：{error}",
+  "imageSearch.none": "此仓库中没有图片。",
+  "imageSearch.translated": "已用英语搜索：“{query}”",
+  "imageSearch.copied": "已复制图片链接，请粘贴到笔记中。"
 }

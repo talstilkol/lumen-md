@@ -62,6 +62,7 @@ export default defineConfig({
             { label: "Local LLM (web-llm)", slug: "ai/local-llm" },
             { label: "Local translation", slug: "ai/translation" },
             { label: "Image descriptions on this device", slug: "ai/image-captions" },
+            { label: "Image search by description", slug: "ai/image-search" },
             { label: "AI cost: usage meter + answer cache", slug: "ai/cost" },
             { label: "Research + citation checks", slug: "ai/research" },
             { label: "MCP integration (Claude Desktop, Cursor)", slug: "ai/mcp" },
