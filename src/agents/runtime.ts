@@ -161,6 +161,8 @@ export async function runAgent<I extends AgentInput, O = string>(def: AgentDefin
   const finish = async (status: AgentRun["status"], extra: Partial<AgentRun<O>> = {}): Promise<AgentRun<O>> => {
     Object.assign(run, extra, { status, endedAt: Date.now() });
     await recordRun(run as AgentRun);
+    // T30: if this run follows a suggestion the user picked, learn from it.
+    await import("./outcomes").then((m) => m.noteRunOutcome(run as AgentRun)).catch(() => undefined);
     return run;
   };
 
