@@ -27,6 +27,8 @@ export default defineConfig({
           items: [
             { label: "Welcome to Lumen", slug: "getting-started/welcome" },
             { label: "Quickstart", slug: "getting-started/quickstart" },
+            { label: "Install Lumen", slug: "getting-started/install", translations: { he: "התקנת Lumen" } },
+            { label: "Keyboard shortcuts", slug: "getting-started/shortcuts", translations: { he: "קיצורי מקלדת" } },
           ],
         },
         {
@@ -34,6 +36,7 @@ export default defineConfig({
           items: [
             { label: "Source / Split / Preview / WYSIWYG", slug: "editor/modes" },
             { label: "Smart Insert", slug: "editor/smart-insert" },
+            { label: "Hebrew and right-to-left", slug: "editor/hebrew", translations: { he: "עברית ומימין לשמאל" } },
           ],
         },
         {
@@ -46,6 +49,7 @@ export default defineConfig({
             { label: "Database views", slug: "workspace/database-views" },
             { label: "Search (BM25 + Smart)", slug: "workspace/search" },
             { label: "Vault Doctor", slug: "workspace/doctor" },
+            { label: "Export and import", slug: "workspace/export-import", translations: { he: "ייצוא וייבוא" } },
           ],
         },
         {
@@ -63,6 +67,7 @@ export default defineConfig({
             { label: "AI cost: usage meter + answer cache", slug: "ai/cost" },
             { label: "Research + citation checks", slug: "ai/research" },
             { label: "MCP integration (Claude Desktop, Cursor)", slug: "ai/mcp" },
+            { label: "Privacy and the AI policy", slug: "ai/privacy", translations: { he: "פרטיות ומדיניות ה-AI" } },
           ],
         },
         {
@@ -71,7 +76,7 @@ export default defineConfig({
             { label: "Plugin SDK", slug: "plugins/sdk" },
             { label: "Plugin gallery", slug: "plugins/gallery" },
             { label: "Plugin signing keys", slug: "plugins/signing" },
-            { label: "Templates marketplace", slug: "plugins/templates" },
+            { label: "Templates", slug: "plugins/templates", translations: { he: "תבניות" } },
             { label: "Web Clipper extension", slug: "plugins/web-clipper" },
           ],
         },
@@ -80,7 +85,8 @@ export default defineConfig({
           items: [
             { label: "Git sync", slug: "sync/git" },
             { label: "Cloud sync (Dropbox, Drive)", slug: "sync/cloud" },
-            { label: "Read-mode publishing", slug: "sync/publish" },
+            { label: "Encrypted sync (E2EE)", slug: "sync/e2ee" },
+            { label: "Read-mode publishing", slug: "sync/publish", translations: { he: "פרסום לקריאה" } },
           ],
         },
         {
