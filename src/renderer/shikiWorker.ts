@@ -116,5 +116,9 @@ async function ensureLang(lang: string): Promise<string> {
 /** The worker's Highlighter for rehypeShikiWith(). */
 export const workerHighlighter = async (): Promise<Highlighter> => {
   const hl = await core();
-  return { codeToHast: (src, o) => hl.codeToHast(src, o as unknown as Parameters<HighlighterCore["codeToHast"]>[1]) as Root, ensureLang };
+  // No tokenizer time limit off the main thread: Shiki's default (500 ms a
+  // line) exists to protect the UI thread, and when a busy device hits it
+  // the rest of the line silently loses its colours — different output
+  // for the same text. Here nothing waits on a line but the preview itself.
+  return { codeToHast: (src, o) => hl.codeToHast(src, { ...o, tokenizeTimeLimit: 0 } as unknown as Parameters<HighlighterCore["codeToHast"]>[1]) as Root, ensureLang };
 };
