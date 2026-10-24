@@ -145,6 +145,25 @@ function makeHandle(view: EditorView, blockPos: number): HTMLElement {
 }
 
 /**
+ * A drop lands between two top-level blocks, never inside one (that would
+ * split a paragraph in two): before the block under the point when the point
+ * is in its upper half, after it otherwise.
+ * @internal exported for tests.
+ */
+export function blockBoundary(view: EditorView, pos: number, y: number): number {
+  const $pos = view.state.doc.resolve(Math.max(0, Math.min(pos, view.state.doc.content.size)));
+  if ($pos.depth === 0) return $pos.pos;
+  const start = $pos.before(1);
+  const end = $pos.after(1);
+  const dom = view.nodeDOM(start);
+  if (dom instanceof HTMLElement) {
+    const r = dom.getBoundingClientRect();
+    if (r.height > 0) return y < r.top + r.height / 2 ? start : end;
+  }
+  return pos - start <= end - pos ? start : end;
+}
+
+/**
  * Move the block at `fromPos` up (`dir = -1`) or down (`dir = +1`) by
  * one sibling within the document. No-op when already at the boundary.
  */
@@ -201,7 +220,7 @@ export function moveBlockTo(view: EditorView, fromPos: number, x: number, y: num
     return false;
   }
   const sourceTo = fromPos + sourceNode.nodeSize;
-  let target = coords.pos;
+  let target = blockBoundary(view, coords.pos, y);
   // If we'd insert into the source's own range, snap to its end.
   if (target >= fromPos && target <= sourceTo) target = sourceTo;
   const slice = view.state.doc.slice(fromPos, sourceTo);

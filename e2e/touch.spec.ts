@@ -37,14 +37,27 @@ const center = async (page: Page, selector: string) => {
   return { x: b.x + b.width / 2, y: b.y + b.height / 2 };
 };
 
-for (const name of ["iPhone 14", "Pixel 7"] as const) {
-  test.describe(name, () => {
+const CASES = [
+  { name: "iPhone 14", lang: "en" },
+  { name: "Pixel 7", lang: "en" },
+  { name: "Pixel 7", lang: "he" },
+] as const;
+
+for (const { name, lang } of CASES) {
+  test.describe(`${name} ${lang}`, () => {
     const { defaultBrowserType: _ignored, ...device } = devices[name];
     test.use(device);
 
-    test(`${name}: the full journey by touch`, async ({ page }) => {
-      await page.addInitScript(() => localStorage.setItem("lumen-tour-done", "1"));
+    test(`${name}: the full journey by touch — ${lang === "he" ? "Hebrew RTL" : "English LTR"}`, async ({ page }) => {
+      await page.addInitScript((l) => {
+        localStorage.setItem("lumen-tour-done", "1");
+        localStorage.setItem("lumen-md", JSON.stringify({ state: { locale: l }, version: 0 }));
+      }, lang);
       await page.goto("/");
+      await expect(page.locator("html")).toHaveAttribute("dir", lang === "he" ? "rtl" : "ltr");
+      // A phone opens on the reading view; the source editor is one command away.
+      await expect(page.locator("main")).toBeVisible({ timeout: 20_000 });
+      await run(page, "view.source");
       const editor = page.locator(".cm-content").first();
       await expect(editor).toBeVisible({ timeout: 20_000 });
       const vw = page.viewportSize()!.width;
@@ -88,11 +101,11 @@ for (const name of ["iPhone 14", "Pixel 7"] as const) {
       // and the close button
       await run(page, "view.outline");
       await expect(sheet).toBeVisible();
-      await sheet.getByRole("button", { name: "Close the outline" }).tap();
+      await sheet.getByRole("button", { name: lang === "he" ? "סגירת המתאר" : "Close the outline" }).tap();
       await expect(sheet).toBeHidden();
 
-      // The palette opens and runs a command by tap.
-      await run(page, "file.new");
+      // A second note in its own tab (a template opens a new tab).
+      await run(page, "template.meeting-notes");
       const tabs = page.locator("[data-tab-index]");
       await expect(tabs).toHaveCount(2, { timeout: 10_000 });
 
@@ -104,18 +117,19 @@ for (const name of ["iPhone 14", "Pixel 7"] as const) {
       await expect.poll(async () => (await tabs.nth(1).innerText()).trim()).toBe(first);
 
       // 10.2.1: in the rich editor, the block handle moves a block by touch.
+      await tabs.filter({ hasText: first }).tap(); // back to the note we wrote
       await run(page, "view.wysiwyg");
       const pm = page.locator(".ProseMirror").first();
-      await expect(pm).toContainText("Third.", { timeout: 15_000 });
-      await page.locator("[data-tab-index='1']").tap(); // back to the note we wrote
-      await expect(pm).toContainText("First paragraph.", { timeout: 10_000 });
+      await expect(pm).toContainText("First paragraph.", { timeout: 15_000 });
       const blocks = pm.locator(":scope > *");
       const handle = pm.locator(".lumen-drag-handle").first();
       await expect(handle).toBeAttached();
       const h = (await handle.boundingBox())!;
       const target = (await blocks.filter({ hasText: "Second paragraph." }).first().boundingBox())!;
       await touchDrag(page, { x: h.x + h.width / 2, y: h.y + h.height / 2 }, { x: target.x + 20, y: target.y + target.height - 2 });
-      await expect.poll(async () => (await blocks.first().innerText()).trim()).not.toBe("One");
+      // The handle's glyph is part of each block's text; compare the text after it.
+      const order = async () => (await blocks.allInnerTexts()).map((s) => s.replace(/^⠿\s*/, "").trim());
+      await expect.poll(order).toEqual(["First paragraph.", "Two", "Second paragraph.", "One", "Three", "Third."]);
     });
   });
 }

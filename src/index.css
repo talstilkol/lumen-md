@@ -1414,6 +1414,16 @@
     min-height: 44px;
     min-width: 44px;
   }
+  /* Links in the app's bars (the status bar's Roadmap) are touch targets too. */
+  .titlebar a[href],
+  .status-bar a[href],
+  [role="toolbar"] a[href] {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    min-width: 44px;
+  }
   .cmd-palette-item {
     min-height: 48px;
     padding: 10px 14px;
