@@ -19,64 +19,50 @@ export const FIRST_SCREEN_CHARS = 1500;
 export const FIRST_SCREEN_BLOCKS = 12;
 
 /**
- * Split Markdown into top-level blocks at blank lines, never inside a
- * fenced code block, a `:::` container or a `$$` math block, and never
- * inside YAML frontmatter. Concatenating the result gives the input back.
+ * Split Markdown into top-level blocks: a new block starts at a non-blank
+ * line that follows a blank line, unless that line is inside a fenced
+ * code block, a `$$` math block, a `:::` container or the YAML
+ * frontmatter. Blank lines stay with the block before them, so the blocks
+ * are consecutive substrings: concatenated, they give the input back.
  */
 export function splitBlocks(markdown: string): string[] {
-  const lines = markdown.split("\n");
-  const blocks: string[] = [];
-  let current: string[] = [];
-  let fence: string | null = null; // the fence marker in force (``` / ~~~ / $$)
+  const starts: number[] = [0];
+  let fence: string | null = null; // ``` / ~~~ / $$ in force
   let container = 0; // open ::: containers
-  let i = 0;
-  // Frontmatter stays one block.
-  if (lines[0] === "---") {
-    const end = lines.indexOf("---", 1);
-    if (end > 0) {
-      blocks.push(lines.slice(0, end + 1).join("\n") + "\n");
-      i = end + 1;
+  let frontmatter = markdown.startsWith("---\n") || markdown.startsWith("---\r\n");
+  let prevBlank = false;
+  let pos = 0;
+  let first = true;
+  while (pos < markdown.length) {
+    const nl = markdown.indexOf("\n", pos);
+    const end = nl === -1 ? markdown.length : nl + 1;
+    const line = markdown.slice(pos, end);
+    const t = line.trim();
+    if (first) {
+      first = false;
+    } else if (frontmatter) {
+      if (t === "---") frontmatter = false;
+    } else if (fence) {
+      if ((fence === "$$" && t.endsWith("$$")) || (fence !== "$$" && t.startsWith(fence) && t.slice(fence.length).trim() === "")) fence = null;
+    } else {
+      if (t !== "" && prevBlank && container === 0) starts.push(pos);
+      const open = /^(`{3,}|~{3,})/.exec(t);
+      if (open) fence = open[1];
+      else if (t === "$$" || (t.startsWith("$$") && !t.slice(2).includes("$$"))) fence = "$$";
+      else if (/^:{3,}\s*\S/.test(t)) container++;
+      else if (/^:{3,}\s*$/.test(t)) container = Math.max(0, container - 1);
     }
+    if (pos === 0 && !frontmatter) {
+      // The first line may itself open a fence or a container.
+      const open = /^(`{3,}|~{3,})/.exec(t);
+      if (open) fence = open[1];
+      else if (t === "$$" || (t.startsWith("$$") && !t.slice(2).includes("$$"))) fence = "$$";
+      else if (/^:{3,}\s*\S/.test(t)) container++;
+    }
+    prevBlank = t === "" && !fence && !frontmatter;
+    pos = end;
   }
-  for (; i < lines.length; i++) {
-    const line = lines[i];
-    const trimmed = line.trim();
-    if (fence) {
-      if (trimmed.startsWith(fence) && trimmed.slice(fence.length).trim() === "" || (fence === "$$" && trimmed.endsWith("$$"))) fence = null;
-      current.push(line);
-      continue;
-    }
-    const fenceOpen = /^(`{3,}|~{3,})/.exec(trimmed);
-    if (fenceOpen) {
-      fence = fenceOpen[1];
-      current.push(line);
-      continue;
-    }
-    if (trimmed === "$$" || (trimmed.startsWith("$$") && !trimmed.slice(2).includes("$$"))) {
-      fence = "$$";
-      current.push(line);
-      continue;
-    }
-    if (/^:{3,}\s*\S/.test(trimmed)) container++;
-    else if (/^:{3,}\s*$/.test(trimmed)) container = Math.max(0, container - 1);
-    if (trimmed === "" && container === 0 && current.length) {
-      blocks.push(current.join("\n") + "\n");
-      current = [];
-      // Keep the blank line itself with the block that follows, as a lead-in.
-      let j = i;
-      while (j + 1 < lines.length && lines[j + 1].trim() === "") j++;
-      blocks[blocks.length - 1] += lines.slice(i + 1, j + 1).map((l) => l + "\n").join("");
-      i = j;
-      continue;
-    }
-    current.push(line);
-  }
-  if (current.length) blocks.push(current.join("\n"));
-  // split("\n") drops the final newline; put it back on the last block.
-  const joined = blocks.join("");
-  if (joined !== markdown && joined + "\n" === markdown) blocks[blocks.length - 1] += "\n";
-  else if (joined.endsWith("\n") && !markdown.endsWith("\n")) blocks[blocks.length - 1] = blocks[blocks.length - 1].replace(/\n$/, "");
-  return blocks;
+  return starts.map((s, i) => markdown.slice(s, starts[i + 1] ?? markdown.length)).filter((b) => b.length > 0);
 }
 
 /**
@@ -102,6 +88,12 @@ export interface SliceOptions {
   step?: number;
   /** The first slice's budget: what is rendered before the first yield. */
   firstBudgetMs?: number;
+  /**
+   * The first slice takes at least this many top-level elements — what the
+   * first paint already shows — so the swap never shortens the visible
+   * document for a moment.
+   */
+  minFirstElements?: number;
 }
 
 /**
@@ -125,14 +117,27 @@ export function applyInSlices<T>(
   let cancelIdle: (() => void) | null = null;
   const now = () => (typeof performance !== "undefined" ? performance.now() : Date.now());
 
+  let first = true;
   const run = (limit: number) => {
     if (cancelled) return;
     const t0 = now();
+    if (first && opts.minFirstElements) {
+      let seen = 0;
+      let end = i;
+      while (end < nodes.length && seen < opts.minFirstElements) if (nodes[end++].type === "element") seen++;
+      if (end > i) {
+        slices.push(toElements(nodes.slice(i, end)));
+        i = end;
+      }
+    }
+    first = false;
+    // At least one step per run, then as many as fit the budget.
     do {
+      if (i >= nodes.length) break;
       const next = Math.min(nodes.length, i + step);
       slices.push(toElements(nodes.slice(i, next)));
       i = next;
-    } while (i < nodes.length && now() - t0 < limit);
+    } while (now() - t0 < limit);
     const done = i >= nodes.length;
     emit([...slices], done);
     if (!done) cancelIdle = scheduleIdle(() => run(budget), 500);

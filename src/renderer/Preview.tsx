@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { renderMarkdown, renderMarkdownFast, extractFrontmatter } from "./pipeline";
+import { hastToReact, renderMarkdownFast, extractFrontmatter } from "./pipeline";
+import { applyInSlices, firstScreen, splitBlocks } from "./progressive";
 import { PreviewDocKeyContext } from "./previewDoc";
 import { handleWikiLinkClick } from "./wikiLinks";
 import { slug as headingSlug } from "github-slugger";
@@ -33,6 +34,18 @@ function safeFastRender(markdownText: string): React.ReactElement | null {
   }
 }
 
+/**
+ * First paint (plan 8.1 step 4): only the head of the document that fills
+ * the first screen or two goes through the synchronous pass; the rest
+ * arrives with the worker's full render, applied in slices.
+ */
+function firstPaint(markdownText: string): React.ReactElement | null {
+  return safeFastRender(firstScreen(markdownText).head);
+}
+
+const Slices = ({ slices }: { slices: React.ReactElement[] }) => <>{slices.map((el, i) => <SliceKey key={i}>{el}</SliceKey>)}</>;
+const SliceKey = ({ children }: { children: React.ReactNode }) => <>{children}</>;
+
 export function Preview({ markdownText, docKey = null }: Props) {
   // First paint (A7 levers 1 + 3): render the text synchronously on the
   // very first commit with the chunk-free pipeline, so the LCP element
@@ -41,7 +54,7 @@ export function Preview({ markdownText, docKey = null }: Props) {
   // DeferredBlock in ./components). The full pipeline runs once the
   // browser is idle and swaps in highlighted code + math.
   const [tree, setTree] = useState<React.ReactElement | null>(() =>
-    fullPipelineWarm ? null : safeFastRender(markdownText),
+    fullPipelineWarm ? null : firstPaint(markdownText),
   );
   // The document the *displayed* tree was rendered from — it lags `docKey`
   // until the async render for the new document lands.
@@ -50,19 +63,40 @@ export function Preview({ markdownText, docKey = null }: Props) {
   const [themeVersion, setThemeVersion] = useState(0);
   const seqRef = useRef(0);
   const fastTextRef = useRef<string | null>(fullPipelineWarm ? null : markdownText);
+  /** The document whose full render is on screen (undefined: none yet). */
+  const fullDocRef = useRef<string | null | undefined>(undefined);
 
   useEffect(() => {
     const seq = ++seqRef.current;
     const isDark = () => document.documentElement.classList.contains("dark");
     const renderedFor = docKey;
+    let cancelSlices: (() => void) | null = null;
     const run = () => {
-      renderMarkdown(markdownText, isDark)
-        .then((el) => {
+      import("./fullRender")
+        .then(({ renderMarkdownHast }) => renderMarkdownHast(markdownText, isDark))
+        .then((hast) => {
           if (seq !== seqRef.current) return;
           fullPipelineWarm = true;
-          setTree(el);
-          setTreeDocKey(renderedFor);
           setError(null);
+          // Plan 8.1 step 4: React gets the finished tree a slice of
+          // top-level blocks at a time, so no commit is a long task.
+          // A new document (or the first full render) appears slice by
+          // slice. A re-render of the document already on screen (an edit)
+          // is converted in slices too but committed once, complete, so the
+          // preview never shortens under the reader while they type.
+          const progressive = fullDocRef.current !== renderedFor;
+          cancelSlices = applyInSlices(
+            hast,
+            (nodes) => hastToReact({ type: "root", children: nodes }),
+            (slices, done) => {
+              if (seq !== seqRef.current) return;
+              if (!progressive && !done) return;
+              if (done) fullDocRef.current = renderedFor;
+              setTree(<Slices slices={slices} />);
+              setTreeDocKey(renderedFor);
+            },
+            { minFirstElements: splitBlocks(firstScreen(markdownText).head).length },
+          );
         })
         .catch((e: Error) => {
           if (seq !== seqRef.current) return;
@@ -71,17 +105,22 @@ export function Preview({ markdownText, docKey = null }: Props) {
     };
     if (fullPipelineWarm) {
       run();
-      return;
+      return () => cancelSlices?.();
     }
     // Cold boot: until the full pipeline has rendered once, every new
     // text (e.g. the welcome doc seeded one tick after mount) gets the
     // synchronous fast pass now and the full pass when the browser idles.
     if (fastTextRef.current !== markdownText) {
       fastTextRef.current = markdownText;
-      setTree(safeFastRender(markdownText));
+      setTree(firstPaint(markdownText));
       setTreeDocKey(renderedFor);
     }
-    return scheduleIdle(run, 1500);
+    // The heavy work runs in the worker now: start it soon, not after 1.5 s.
+    const cancelIdle = scheduleIdle(run, 300);
+    return () => {
+      cancelIdle();
+      cancelSlices?.();
+    };
   }, [markdownText, themeVersion, docKey]);
 
   // Re-process when theme changes so Shiki picks up the right theme tokens.

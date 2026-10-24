@@ -14,16 +14,31 @@ function Probe({ text }: { text: string }) {
   return <div data-testid="probe" data-doc={key ?? ""}>{text}</div>;
 }
 
+// The full render's seam (plan 8.1): fullRender gives the finished HAST,
+// pipeline.hastToReact turns each slice of it into elements. A "tree" here
+// is one text node whose value is what the Probe shows.
+type Hast = { type: "root"; children: Array<{ type: "text"; value: string }> };
 const pending: Array<{ text: string; resolve: (el: React.ReactElement) => void }> = [];
+vi.mock("../renderer/fullRender", () => ({
+  renderMarkdownHast: (text: string) =>
+    new Promise<Hast>((resolve) =>
+      pending.push({ text, resolve: (el: React.ReactElement) => resolve({ type: "root", children: [{ type: "text", value: (el.props as { text: string }).text }] }) }),
+    ),
+}));
 vi.mock("../renderer/pipeline", () => ({
   renderMarkdownFast: (text: string) => <Probe text={text} />,
-  renderMarkdown: (text: string) =>
-    new Promise<React.ReactElement>((resolve) => pending.push({ text, resolve })),
+  hastToReact: (root: Hast) => <Probe text={root.children.map((c) => c.value).join("")} />,
   extractFrontmatter: () => null,
 }));
 vi.mock("../lib/idle", () => ({ scheduleIdle: (cb: () => void) => (cb(), () => {}) }));
 
 import { Preview } from "../renderer/Preview";
+
+/** The next full render, once Preview has asked for it (the render driver is a lazy import: one extra async hop). */
+async function next() {
+  await vi.waitFor(() => expect(pending.length).toBeGreaterThan(0));
+  return pending.shift()!;
+}
 
 afterEach(() => {
   cleanup();
@@ -33,7 +48,8 @@ afterEach(() => {
 describe("PreviewDocKeyContext", () => {
   it("keeps the old document's key until the new document's tree is shown", async () => {
     const { rerender } = render(<Preview markdownText="doc A" docKey="a.md" />);
-    await act(async () => pending.shift()!.resolve(<Probe text="doc A full" />));
+    const p0 = await next();
+    await act(async () => p0.resolve(<Probe text="doc A full" />));
     expect(screen.getByTestId("probe").dataset.doc).toBe("a.md");
 
     // Switch to B: its render is still pending, so A's tree (and key) remain.
@@ -41,7 +57,8 @@ describe("PreviewDocKeyContext", () => {
     expect(screen.getByTestId("probe").textContent).toBe("doc A full");
     expect(screen.getByTestId("probe").dataset.doc).toBe("a.md");
 
-    await act(async () => pending.shift()!.resolve(<Probe text="doc B full" />));
+    const p1 = await next();
+    await act(async () => p1.resolve(<Probe text="doc B full" />));
     expect(screen.getByTestId("probe").textContent).toBe("doc B full");
     expect(screen.getByTestId("probe").dataset.doc).toBe("b.md");
   });
