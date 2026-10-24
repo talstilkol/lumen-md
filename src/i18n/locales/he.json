@@ -1424,5 +1424,8 @@
   "cmd.ai.cancel": "AI: ביטול",
   "cmd.ai.cancel.hint": "עוצר כל בקשת AI שרצה (גם Esc עושה זאת)",
   "toast.aiCancelled": "בקשת ה-AI בוטלה ({count})",
-  "toast.aiNothingRunning": "אין בקשת AI שרצה"
+  "toast.aiNothingRunning": "אין בקשת AI שרצה",
+  "storage.eviction.title": "Safari עלול למחוק את הפתקים שלך",
+  "storage.eviction.body": "Safari מוחק נתוני אתר אחרי 7 ימים בלי ביקור. ייצאו את הכספת, או הוסיפו את Lumen למסך הבית / ל-Dock, שם האחסון נשמר.",
+  "storage.eviction.export": "ייצוא הכספת…"
 }

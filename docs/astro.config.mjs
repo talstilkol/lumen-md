@@ -102,6 +102,7 @@ export default defineConfig({
           items: [
             { label: "Docker compose bundle", slug: "self-hosting/docker" },
             { label: "Where Lumen runs", slug: "self-hosting/hosting", translations: { he: "איפה Lumen רץ" } },
+            { label: "Android and iOS builds", slug: "self-hosting/mobile", translations: { he: "בניית Android ו-iOS" } },
           ],
         },
       ],

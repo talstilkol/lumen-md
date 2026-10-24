@@ -1424,5 +1424,8 @@
   "cmd.ai.cancel": "AI：取消",
   "cmd.ai.cancel.hint": "停止所有正在运行的 AI 请求（Esc 也可以）",
   "toast.aiCancelled": "已取消 AI 请求（{count}）",
-  "toast.aiNothingRunning": "没有正在运行的 AI 请求"
+  "toast.aiNothingRunning": "没有正在运行的 AI 请求",
+  "storage.eviction.title": "Safari 可能会删除你的笔记",
+  "storage.eviction.body": "Safari 会在 7 天未访问后删除网站数据。请导出你的保险库，或将 Lumen 添加到主屏幕 / 程序坞，那里的存储会被保留。",
+  "storage.eviction.export": "导出保险库…"
 }
