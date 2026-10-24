@@ -29,6 +29,7 @@
 import { mkdirSync, writeFileSync } from "node:fs";
 import { dirname } from "node:path";
 import { chromium } from "playwright";
+import { ttiAndTbt } from "./tti.mjs";
 
 const arg = (name, dflt) => {
   const i = process.argv.indexOf(name);
@@ -80,22 +81,8 @@ async function once(state) {
     await page.waitForTimeout(settle);
     const { profile } = await cdp.send("Profiler.stop");
     const { lt, fcp } = await page.evaluate(() => ({ lt: window.__lt, fcp: performance.getEntriesByName("first-contentful-paint")[0]?.startTime ?? 0 }));
-    const after = lt.filter(([s, d]) => s + d > fcp).sort((a, b) => a[0] - b[0]);
-    // TTI: the end of the last long task that is followed by QUIET_MS without one.
-    const profileEnd = fcp + settle;
-    let tti = fcp;
-    let reached = after.length === 0 ? profileEnd - fcp >= QUIET_MS : false;
-    for (let i = 0; i < after.length; i++) {
-      const end = after[i][0] + after[i][1];
-      const nextStart = i + 1 < after.length ? after[i + 1][0] : profileEnd;
-      if (nextStart - end >= QUIET_MS) {
-        tti = end;
-        reached = true;
-        break;
-      }
-    }
-    const window = after.filter(([s]) => reached ? s < tti : true);
-    const tbt = window.reduce((a, [s, d]) => a + Math.max(0, Math.min(s + d, reached ? tti : Infinity) - Math.max(s, fcp) - 50), 0);
+    // TTI / TBT as Lighthouse defines them, over the observed window (scripts/perf/tti.mjs).
+    const { tti, reached, tbt, longTasks } = ttiAndTbt(lt, fcp, fcp + settle, QUIET_MS);
     const nodes = new Map(profile.nodes.map((n) => [n.id, n]));
     const self = {};
     profile.samples.forEach((id, i) => {
@@ -105,7 +92,7 @@ async function once(state) {
       const b = bucketOf(u);
       self[b] = (self[b] ?? 0) + (profile.timeDeltas[i] ?? 0) / 1000;
     });
-    return { fcp, tti: reached ? tti : NaN, ttiReached: reached, tbt, longest: Math.max(0, ...lt.map(([, d]) => d)), longTasks: window.length, self };
+    return { fcp, tti: reached ? tti : NaN, ttiReached: reached, tbt, longest: Math.max(0, ...lt.map(([, d]) => d)), longTasks, self };
   } finally {
     await browser.close();
   }
