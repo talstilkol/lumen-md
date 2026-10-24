@@ -32,9 +32,7 @@ import { languages } from "@codemirror/language-data";
 import { tags as t } from "@lezer/highlight";
 import { StateField, StateEffect } from "@codemirror/state";
 import type { Extension } from "@codemirror/state";
-import { chat } from "../ai/llm";
 import { aiOperation } from "../ai/aiAbort";
-import { PROMPTS } from "../ai/prompts";
 import { embedHintExtension } from "./embedHintExtension";
 import { insertSlashMenuExtension } from "./insertMenu";
 import { collabAwarenessExtension } from "./collabAwareness";
@@ -214,13 +212,9 @@ function ghostTextExtension(): Extension {
             try {
               const c = (controller = new AbortController());
               op.signal.addEventListener("abort", () => c.abort(op.signal.reason), { once: true });
-              const text = await chat(
-                [
-                  { role: "system", content: PROMPTS.autocomplete },
-                  { role: "user", content: textBefore },
-                ],
-                { maxTokens: 15, signal: controller.signal, ownPrompt: true, tier: "light" },
-              );
+              // Plan 5.5: the `completer` agent, through the runtime (local first, traced).
+              const [{ runAgentOrThrow }, { completerAgent }] = await Promise.all([import("../agents/runtime"), import("../agents/defs")]);
+              const text = await runAgentOrThrow(completerAgent, { text: textBefore, extra: { mode: "ghost" } }, { signal: controller.signal, ownPrompt: true });
               if (text && view.state.selection.main.head === pos) {
                 view.dispatch({ effects: setGhostText.of({ pos, text }) });
               }

@@ -546,20 +546,10 @@ export async function localBatchRoute(): Promise<{ executor: "ollama" | "webllm"
 let localAnswer: (system: string, user: string, maxTokens: number) => Promise<string> = async (system, user, maxTokens) => {
   const route = await localBatchRoute();
   if (!route) throw new NoLocalModelError();
-  const { getExecutor } = await import("../agents/executors");
-  const executor = getExecutor(route.executor);
-  if (!executor) throw new NoLocalModelError();
-  const res = await executor.chat({
-    messages: [
-      { role: "system", content: system },
-      { role: "user", content: user },
-    ],
-    model: route.model,
-    tier: "small",
-    maxTokens,
-    temperature: 0.2,
-  });
-  return res.content;
+  // Plan 5.5: the `batch` agent, through the runtime, forced onto the local
+  // executor and model the job runs on; the job was charged when submitted.
+  const [{ runAgentOrThrow }, { batchAgent }] = await Promise.all([import("../agents/runtime"), import("../agents/defs")]);
+  return runAgentOrThrow(batchAgent, { text: user, extra: { system, maxTokens } }, { executor: route.executor, patch: { model: route.model }, prepaid: true });
 };
 let readNote: (path: string) => Promise<string | null> = async (path) => {
   const { readWorkspaceFile } = await import("../storage/workspace");

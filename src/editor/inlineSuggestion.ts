@@ -105,23 +105,9 @@ const suggestionPlugin = ViewPlugin.fromClass(
       op.signal.addEventListener("abort", () => ctrl.abort(op.signal.reason), { once: true });
 
       try {
-        const { chat } = await import("../ai/llm");
-        const suggestion = await chat(
-          [
-            {
-              role: "system",
-              content:
-                "You are an inline autocomplete assistant for a markdown editor. " +
-                "Given the current line fragment, output ONLY the completion text " +
-                "(no quotes, no explanations, max 60 chars).",
-            },
-            {
-              role: "user",
-              content: `Complete: "${context}"`,
-            },
-          ],
-          { maxTokens: 40, temperature: 0.3, ownPrompt: "silent", tier: "light", signal },
-        );
+        // Plan 5.5: the `completer` agent, through the runtime (local first, traced).
+        const [{ runAgentOrThrow }, { completerAgent }] = await Promise.all([import("../agents/runtime"), import("../agents/defs")]);
+        const suggestion = await runAgentOrThrow(completerAgent, { text: context, extra: { mode: "inline" } }, { signal, ownPrompt: "silent" });
 
         if (signal.aborted) return;
         const trimmed = suggestion.trim();
