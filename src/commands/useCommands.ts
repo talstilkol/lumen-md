@@ -1444,6 +1444,19 @@ export function useCommands({
         },
       },
       {
+        id: "ai.rerankModel",
+        label: t("cmd.ai.rerankModel"),
+        hint: t("cmd.ai.rerankModel.hint"),
+        icon: cmdIcons.Sparkles,
+        group: t("group.ai", { defaultValue: "AI Copilot" }),
+        action: async () => {
+          const { getRerankMode, setRerankMode } = await import("../ai/reranker");
+          const next = getRerankMode() === "model" ? "lexical" : "model";
+          setRerankMode(next);
+          showAiToast(t(next === "model" ? "toast.rerankModelOn" : "toast.rerankModelOff"), "info");
+        },
+      },
+      {
         id: "ai.privacyLedger",
         label: t("cmd.ai.privacyLedger"),
         hint: t("cmd.ai.privacyLedger.hint"),
