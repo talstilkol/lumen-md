@@ -11,23 +11,8 @@ import YAML from "yaml";
 import type { Root as MdastRoot } from "mdast";
 import type { Root as HastRoot } from "hast";
 import { components } from "./components";
-import { rehypeShiki } from "./shiki";
 import { prepareCriticMarkup, rehypeCriticMarkup, stripCriticDelimiters } from "./criticMarkup";
-import { buildBase, hasMath, hasRawHtml } from "./hastPipeline";
-
-type RehypeKatex = typeof import("./katexPlugin").default;
-
-let katexPromise: Promise<RehypeKatex> | null = null;
-
-function loadKatex(): Promise<RehypeKatex> {
-  if (!katexPromise) {
-    katexPromise = import("./katexPlugin").then((m) => m.default);
-    katexPromise.catch(() => {
-      katexPromise = null; // allow a retry after a failed chunk fetch
-    });
-  }
-  return katexPromise;
-}
+import { buildBase } from "./hastPipeline";
 
 /** HAST → React elements with Lumen's block components (what rehype-react did at the end of the old pipeline). */
 function hastToReact(hast: HastRoot): ReactElement {
@@ -36,22 +21,13 @@ function hastToReact(hast: HastRoot): ReactElement {
 
 /**
  * The full preview render (plan 8.1): Markdown → HAST in the render
- * worker (parse, GFM, directives, wiki links, Lumen blocks, inline-HTML
- * sanitising, CriticMarkup, heading ids, block direction), then — still
- * on the main thread until step 3 — KaTeX and Shiki over that tree, and
- * HAST → React. Where no worker can run, the same HAST code runs here.
+ * worker, then HAST → React here. The code that drives it (./fullRender)
+ * is a lazy chunk, so none of it — nor the Shiki and KaTeX glue — sits on
+ * the startup path; the first paint uses renderMarkdownFast below.
  */
-export async function renderMarkdown(
-  markdownText: string,
-  isDark: () => boolean,
-): Promise<ReactElement> {
-  const math = hasMath(markdownText);
-  const [{ renderHast }, rehypeKatex] = await Promise.all([import("./renderClient"), math ? loadKatex() : null]);
-  const hast = await renderHast(markdownText, { raw: hasRawHtml(markdownText) });
-  // The finishing passes run on the tree in place (unified's `run`).
-  const finish = rehypeKatex ? unified().use(rehypeKatex).use(rehypeShiki, { isDark }) : unified().use(rehypeShiki, { isDark });
-  await finish.run(hast);
-  return hastToReact(hast);
+export async function renderMarkdown(markdownText: string, isDark: () => boolean): Promise<ReactElement> {
+  const { renderMarkdownHast } = await import("./fullRender");
+  return hastToReact(await renderMarkdownHast(markdownText, isDark));
 }
 
 /**
