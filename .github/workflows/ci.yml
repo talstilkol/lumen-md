@@ -344,6 +344,63 @@ jobs:
           name: playwright-report-prod
           path: playwright-report/
 
+  ocr-cer:
+    # Plan 7.5: the on-device OCR measured on every PR. The production
+    # bundle, served like e2e-prod, runs its own OCR path (tesseract.js with
+    # the committed tessdata_fast heb+eng models, public/tesseract/lang/) on
+    # the golden set ocr-he (plan 7.1); e2e/ocr-cer.spec.ts gates the
+    # character error rate, Hebrew and English separately: clean print
+    # <= 5 %, degraded <= 12 %; nikud lines reported only. PRs never see
+    # GOLDEN_SEED, so this is the public dev split, and the job says so; the
+    # held-out test split is measured in golden-sets.yml (task=test).
+    name: OCR CER (Hebrew, English)
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with: { node-version: 22, cache: npm }
+      - run: npm ci || npm install
+      - name: Install Playwright Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Build production bundle
+        run: npm run build
+      - name: Serve dist
+        run: |
+          npx -y http-server@14 dist -p 5181 -c-1 --silent &
+          for i in $(seq 1 30); do
+            if curl -sf http://localhost:5181/ -o /dev/null; then echo "Server up."; break; fi
+            sleep 1
+          done
+      - name: Measure CER on ocr-he (dev split)
+        env:
+          PLAYWRIGHT_BASE_URL: http://localhost:5181
+          OCR_CER: "1"
+          OCR_CER_OUT: reports/ocr-cer.json
+        run: npx playwright test e2e/ocr-cer.spec.ts --project=chromium --reporter=line
+      - name: Annotate the numbers
+        if: always()
+        run: |
+          [ -f reports/ocr-cer.json ] || { echo "::error title=OCR CER::no measurement was written (see the step above)"; exit 0; }
+          node -e '
+            const r = JSON.parse(require("fs").readFileSync("reports/ocr-cer.json", "utf8"));
+            const p = (c) => (c.length ? (100 * c.edits / c.length).toFixed(2) + "%" : "n/a");
+            const b = r.byCondition;
+            const split = r.split === "dev" ? "public DEV split - not the held-out test score (needs GOLDEN_SEED; plan 15.9)" : "held-out test split";
+            console.log(`::notice title=OCR CER::${split}: clean he ${p(b.clean.he)} en ${p(b.clean.en)} · degraded he ${p(b.degraded.he)} en ${p(b.degraded.en)} · nikud (reported only) letters ${p(b.nikud.all)} with points ${p(b.nikud.allNikud)}`);
+            for (const g of r.gates) if (g.verdict === "fail") console.log(`::error title=OCR CER gate::${g.script} ${g.condition} ${(100 * g.cer).toFixed(2)}% > ${100 * g.max}% (plan 7.5)`);
+          '
+      - name: Upload the measurement
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: ocr-cer
+          path: reports/ocr-cer.json
+          if-no-files-found: ignore
+          retention-days: 30
+
   signal-health:
     name: signaling server health
     runs-on: ubuntu-latest
