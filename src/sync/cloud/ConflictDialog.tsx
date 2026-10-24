@@ -13,7 +13,8 @@
  *   • `null`                         — cancelled
  */
 
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
+import { useFocusTrap } from "../../ui/useFocusTrap";
 import { createRoot } from "react-dom/client";
 import { applyMerge, threeWayDiff, type DiffHunk } from "./diff";
 
@@ -73,6 +74,10 @@ function ConflictDialogImpl({ path, base, local, remote, labels, hunks: given, o
     () => conflictHunkIdxs.map(() => "local"),
   );
 
+  // Focus stays in the dialog and returns on close; Escape cancels.
+  const dialogRef = useRef<HTMLDivElement | null>(null);
+  useFocusTrap(dialogRef, { onEscape: () => onResolve(null) });
+
   function setPick(idx: number, val: "local" | "remote" | "both") {
     const next = [...picks];
     next[idx] = val;
@@ -81,6 +86,7 @@ function ConflictDialogImpl({ path, base, local, remote, labels, hunks: given, o
 
   return (
     <div
+      ref={dialogRef}
       role="dialog"
       aria-modal="true"
       aria-labelledby="conflict-title"

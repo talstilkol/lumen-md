@@ -1,4 +1,5 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
+import { useFocusTrap } from "./useFocusTrap";
 import { t, getLocale } from "../i18n";
 
 /**
@@ -43,12 +44,17 @@ export function VersionHistory({ fileName, currentContent, onRestore, onClose }:
     onClose();
   }, [selected, onRestore, onClose, fileName, currentContent]);
 
+  // Focus stays in the dialog and returns on close; Escape closes it (plan 10.1).
+  const trapRef = useRef<HTMLDivElement | null>(null);
+  useFocusTrap(trapRef, { onEscape: onClose });
+
   const diffChars = selected
     ? Math.abs(selected.content.length - currentContent.length)
     : 0;
 
   return (
     <div
+      ref={trapRef}
       role="dialog"
       aria-modal="true"
       aria-label={t("versionHistory.title")}

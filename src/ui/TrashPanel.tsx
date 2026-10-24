@@ -2,7 +2,8 @@
  * Trash panel (T46): what was deleted in the last 30 days, with Restore
  * and Delete forever.
  */
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useRef } from "react";
+import { useFocusTrap } from "./useFocusTrap";
 import { Trash2, X } from "lucide-react";
 import { t, getLocale } from "../i18n";
 import { emptyTrash, listTrash, restoreFromTrash, TRASH_KEEP_MS, type TrashItem } from "../storage/trash";
@@ -23,17 +24,9 @@ export function TrashPanel({ open, onClose }: Props) {
     if (open) void reload();
   }, [open, reload]);
 
-  useEffect(() => {
-    if (!open) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        e.stopPropagation();
-        onClose();
-      }
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [open, onClose]);
+  // Focus stays in the dialog while it is open and returns on close; Escape closes it (plan 10.1).
+  const trapRef = useRef<HTMLDivElement | null>(null);
+  useFocusTrap(trapRef, { active: open, onEscape: onClose });
 
   if (!open) return null;
 
@@ -54,7 +47,7 @@ export function TrashPanel({ open, onClose }: Props) {
   const daysLeft = (i: TrashItem) => Math.max(0, Math.ceil((i.trashedAt + TRASH_KEEP_MS - Date.now()) / 86_400_000));
 
   return (
-    <div className="cmd-palette-backdrop" onClick={onClose} role="dialog" aria-modal="true" aria-label={t("trash.title")}>
+    <div className="cmd-palette-backdrop" onClick={onClose} ref={trapRef} role="dialog" aria-modal="true" aria-label={t("trash.title")}>
       <div className="cmd-palette" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 560, padding: 0, display: "flex", flexDirection: "column", maxHeight: "80vh" }}>
         <header style={{ padding: "12px 16px", borderBottom: "1px solid hsl(var(--border))", display: "flex", gap: 10, alignItems: "center" }}>
           <Trash2 size={16} />

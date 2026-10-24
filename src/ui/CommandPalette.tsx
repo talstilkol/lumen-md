@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import { useFocusTrap } from "./useFocusTrap";
 import {
   Search,
   FileText,
@@ -55,7 +56,6 @@ export function CommandPalette({ open, onClose, commands }: Props) {
   const inputRef = useRef<HTMLInputElement | null>(null);
   const listRef = useRef<HTMLDivElement | null>(null);
   const dialogRef = useRef<HTMLDivElement | null>(null);
-  const previousFocusRef = useRef<Element | null>(null);
 
   // Items the toolbar menus already expose. The palette de-duplicates those
   // away from the default browse list — when the user starts typing we still
@@ -150,48 +150,18 @@ export function CommandPalette({ open, onClose, commands }: Props) {
 
   useEffect(() => {
     if (open) {
-      previousFocusRef.current = document.activeElement;
       setQuery("");
       setActive(0);
       setTab("main");
       // focus next tick so React renders the input first
       setTimeout(() => inputRef.current?.focus(), 0);
-    } else {
-      // Restore focus to whatever opened the palette.
-      const prev = previousFocusRef.current as HTMLElement | null;
-      prev?.focus?.();
     }
   }, [open]);
 
-  // Focus trap + global Escape while open. Listening at document level lets
-  // Escape close the palette even when focus drifted out of the input (e.g.
-  // after a child sub-menu expansion).
-  useEffect(() => {
-    if (!open) return;
-    function onKey(e: KeyboardEvent) {
-      if (e.key === "Escape") {
-        e.preventDefault();
-        onClose();
-        return;
-      }
-      if (e.key !== "Tab" || !dialogRef.current) return;
-      const focusables = dialogRef.current.querySelectorAll<HTMLElement>(
-        'button, input, [tabindex]:not([tabindex="-1"])',
-      );
-      if (focusables.length === 0) return;
-      const first = focusables[0];
-      const last = focusables[focusables.length - 1];
-      if (e.shiftKey && document.activeElement === first) {
-        e.preventDefault();
-        last.focus();
-      } else if (!e.shiftKey && document.activeElement === last) {
-        e.preventDefault();
-        first.focus();
-      }
-    }
-    document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
-  }, [open, onClose]);
+  // Focus trap while open (focus returns to whatever opened the palette).
+  // Escape at document level closes it even when focus drifted out of the
+  // input (e.g. after a child sub-menu expansion).
+  useFocusTrap(dialogRef, { active: open, onEscape: onClose });
 
   // Flatten commands with children for searching
   const flatAll = useMemo(() => {

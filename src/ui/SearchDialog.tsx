@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useFocusTrap } from "./useFocusTrap";
 import type { ReactElement } from "react";
 import { Search, FileText, Sparkles, Loader2, FileCode2, Wand2 } from "lucide-react";
 import { t, tPlural } from "../i18n";
@@ -41,7 +42,6 @@ export function SearchDialog({ open, onClose, onOpenFile }: Props) {
   const inputRef = useRef<HTMLInputElement | null>(null);
   const listRef = useRef<HTMLDivElement | null>(null);
   const dialogRef = useRef<HTMLDivElement | null>(null);
-  const previousFocusRef = useRef<Element | null>(null);
 
   const [aiAnswer, setAiAnswer] = useState<string | null>(null);
   const [aiRendered, setAiRendered] = useState<ReactElement | null>(null);
@@ -52,7 +52,6 @@ export function SearchDialog({ open, onClose, onOpenFile }: Props) {
 
   useEffect(() => {
     if (open) {
-      previousFocusRef.current = document.activeElement;
       setQuery("");
       // Honour an optional `lumen-search-mode` event that lets command
       // palette entries open the dialog already on a specific tab.
@@ -67,33 +66,11 @@ export function SearchDialog({ open, onClose, onOpenFile }: Props) {
       setSmartHits([]);
       setActive(0);
       setTimeout(() => inputRef.current?.focus(), 0);
-    } else {
-      const prev = previousFocusRef.current as HTMLElement | null;
-      prev?.focus?.();
     }
   }, [open]);
 
-  useEffect(() => {
-    if (!open) return;
-    function onKeyDown(e: KeyboardEvent) {
-      if (e.key !== "Tab" || !dialogRef.current) return;
-      const focusables = dialogRef.current.querySelectorAll<HTMLElement>(
-        'button, input, [tabindex]:not([tabindex="-1"])',
-      );
-      if (focusables.length === 0) return;
-      const first = focusables[0];
-      const last = focusables[focusables.length - 1];
-      if (e.shiftKey && document.activeElement === first) {
-        e.preventDefault();
-        last.focus();
-      } else if (!e.shiftKey && document.activeElement === last) {
-        e.preventDefault();
-        first.focus();
-      }
-    }
-    document.addEventListener("keydown", onKeyDown);
-    return () => document.removeEventListener("keydown", onKeyDown);
-  }, [open]);
+  // Focus trap while open; focus returns to the opener; Escape closes from anywhere in the dialog (plan 10.1).
+  useFocusTrap(dialogRef, { active: open, onEscape: onClose });
 
   useEffect(() => {
     if (!open) return;

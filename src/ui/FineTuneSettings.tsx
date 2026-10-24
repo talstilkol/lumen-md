@@ -13,6 +13,7 @@
  */
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useFocusTrap } from "./useFocusTrap";
 import { Loader2, Sparkles, ShieldOff, Brain } from "lucide-react";
 import { useAppStore } from "../store/useStore";
 import { showAiToast } from "./AiToast";
@@ -161,12 +162,17 @@ export function FineTuneSettings({ open, onClose }: Props) {
     showAiToast(t("fineTune.toast.forgot"), "info");
   }, [setFineTunedModelId, toggleFineTunedModel, useFineTunedModel]);
 
+  // Focus stays in the dialog while it is open and returns on close; Escape closes it (plan 10.1).
+  const trapRef = useRef<HTMLDivElement | null>(null);
+  useFocusTrap(trapRef, { active: open, onEscape: onClose });
+
   if (!open) return null;
 
   return (
     <div
       className="cmd-palette-backdrop"
       onClick={onClose}
+      ref={trapRef}
       role="dialog"
       aria-modal="true"
       aria-label={t("fineTune.title")}
