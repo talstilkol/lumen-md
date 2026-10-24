@@ -8,6 +8,8 @@
  *   → { id, type: "embed",      model, device, texts: string[] }
  *   → { id, type: "rerank",     model, device, query, passages: string[] }  → scores 0..1 (T29)
  *   → { id, type: "caption",    model, device, family: "florence2" | "smolvlm", image: Blob }  → one English sentence (plan 6.6)
+ *   → { id, type: "imageEmbed", model, device, dtype?, host?, images: Blob[] }  → unit vectors (SigLIP vision tower, plan 6.7)
+ *   → { id, type: "textEmbedForImages", model, device, dtype?, host?, texts }  → unit vectors in the same space
  *   → { id, type: "load",       task, model, device }
  *   → { id, type: "cancel",     target }         (skip a queued job, discard a running one's result)
  *   → { id, type: "unload" }
@@ -24,6 +26,8 @@ import {
   AutoModelForSequenceClassification,
   AutoModelForVision2Seq,
   AutoProcessor,
+  SiglipTextModel,
+  SiglipVisionModel,
   AutoTokenizer,
   Florence2ForConditionalGeneration,
   RawImage,
@@ -53,6 +57,9 @@ export type WorkerIn =
    */
   | { id: number; type: "translate"; model: string; device: Device; dtype?: string; texts: string[]; srcLang?: string; tgtLang?: string; host?: string }
   | { id: number; type: "caption"; model: string; device: Device; family: CaptionFamily; image: Blob }
+  /** SigLIP (plan 6.7): images and texts into one space, for image search. `host`: Lumen's converted-model host. */
+  | { id: number; type: "imageEmbed"; model: string; device: Device; dtype?: string; host?: string; images: Blob[] }
+  | { id: number; type: "textEmbedForImages"; model: string; device: Device; dtype?: string; host?: string; texts: string[] }
   | { id: number; type: "load"; task: "automatic-speech-recognition" | "feature-extraction" | "translation"; model: string; device: Device; dtype?: string; host?: string }
   | { id: number; type: "cancel"; target: number }
   | { id: number; type: "unload" };
@@ -334,6 +341,62 @@ async function caption(id: number, msg: Extract<WorkerIn, { type: "caption" }>):
   return processor.batch_decode(ids.slice(null, [promptLength, null]), { skip_special_tokens: true })[0] ?? "";
 }
 
+type Siglip = { key: string; processor: (image: unknown) => Promise<Record<string, unknown>>; tokenizer: PreTrainedTokenizer; vision: PreTrainedModel; text: PreTrainedModel };
+let siglip: Siglip | null = null;
+
+async function getSiglip(id: number, msg: { model: string; device: Device; dtype?: string; host?: string }): Promise<Siglip> {
+  const dtype = msg.dtype ?? (msg.device === "webgpu" ? "q4f16" : "q8");
+  const key = `${msg.model}@${msg.device}@${dtype}@${msg.host ?? ""}`;
+  if (siglip?.key === key) return siglip;
+  if (siglip) await Promise.all([siglip.vision.dispose(), siglip.text.dispose()]);
+  siglip = null;
+  const opts = { device: msg.device, dtype, progress_callback: progressFor(id) } as never;
+  const loaded = await withHost(msg.host, () =>
+    Promise.all([
+      AutoProcessor.from_pretrained(msg.model, { progress_callback: progressFor(id) } as never),
+      AutoTokenizer.from_pretrained(msg.model, { progress_callback: progressFor(id) } as never),
+      SiglipVisionModel.from_pretrained(msg.model, opts) as Promise<PreTrainedModel>,
+      SiglipTextModel.from_pretrained(msg.model, opts) as Promise<PreTrainedModel>,
+    ]),
+  );
+  const [processor, tokenizer, vision, text] = loaded;
+  siglip = { key, processor: processor as unknown as Siglip["processor"], tokenizer, vision, text };
+  return siglip;
+}
+
+/** Row-wise L2 normalisation: cosine similarity becomes a dot product. */
+export function normalizeRows(data: ArrayLike<number>, dims: number): number[][] {
+  const out: number[][] = [];
+  for (let r = 0; r * dims < data.length; r++) {
+    const row = Array.from({ length: dims }, (_, i) => Number(data[r * dims + i]));
+    const n = Math.hypot(...row) || 1;
+    out.push(row.map((v) => v / n));
+  }
+  return out;
+}
+
+type Pooled = { pooler_output: { data: ArrayLike<number>; dims: number[] } };
+
+async function imageEmbed(id: number, msg: Extract<WorkerIn, { type: "imageEmbed" }>): Promise<number[][]> {
+  const m = await getSiglip(id, msg);
+  const out: number[][] = [];
+  for (const blob of msg.images) {
+    if (cancelled.has(id)) throw new DOMException("aborted", "AbortError");
+    const inputs = await m.processor(await RawImage.fromBlob(blob));
+    const { pooler_output } = (await (m.vision as unknown as (i: unknown) => Promise<Pooled>)(inputs));
+    out.push(...normalizeRows(pooler_output.data, pooler_output.dims.at(-1) ?? 0));
+  }
+  return out;
+}
+
+async function textEmbedForImages(id: number, msg: Extract<WorkerIn, { type: "textEmbedForImages" }>): Promise<number[][]> {
+  const m = await getSiglip(id, msg);
+  // SigLIP was trained with max_length padding (64 tokens).
+  const inputs = m.tokenizer(msg.texts, { padding: "max_length", truncation: true, max_length: 64 } as never);
+  const { pooler_output } = (await (m.text as unknown as (i: unknown) => Promise<Pooled>)(inputs));
+  return normalizeRows(pooler_output.data, pooler_output.dims.at(-1) ?? 0);
+}
+
 function serial<T>(fn: () => Promise<T>): Promise<T> {
   const p = queue.then(fn);
   queue = p.catch(() => undefined);
@@ -373,6 +436,12 @@ export async function handle(msg: WorkerIn): Promise<void> {
       case "caption":
         post({ id, type: "result", value: await job(id, () => caption(id, msg)) });
         return;
+      case "imageEmbed":
+        post({ id, type: "result", value: await job(id, () => imageEmbed(id, msg)) });
+        return;
+      case "textEmbedForImages":
+        post({ id, type: "result", value: await job(id, () => textEmbedForImages(id, msg)) });
+        return;
       case "cancel":
         cancelled.add(msg.target);
         post({ id, type: "result", value: true });
@@ -393,7 +462,9 @@ export async function handle(msg: WorkerIn): Promise<void> {
         const r = reranker;
         const tr = translator;
         const cap = captioner;
+        const sg = siglip;
         captioner = null;
+        siglip = null;
         asr = null;
         embedder = null;
         reranker = null;
@@ -403,6 +474,8 @@ export async function handle(msg: WorkerIn): Promise<void> {
         await r?.model.dispose();
         await tr?.pipe.dispose();
         await cap?.model.dispose();
+        await sg?.vision.dispose();
+        await sg?.text.dispose();
         post({ id, type: "result", value: true });
         return;
       }

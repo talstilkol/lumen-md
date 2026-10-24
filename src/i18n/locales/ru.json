@@ -1459,5 +1459,15 @@
   "toast.localMtUnavailable": "Локальный перевод был недоступен ({why}); перевела ИИ-модель.",
   "caption.purpose": "Описание изображений на этом устройстве (альтернативный текст)",
   "caption.attribution.florence": "Florence-2 © Microsoft, лицензия MIT; конвертация в ONNX — onnx-community (Hugging Face).",
-  "caption.attribution.smolvlm": "SmolVLM-256M-Instruct © Hugging Face, лицензия Apache 2.0."
+  "caption.attribution.smolvlm": "SmolVLM-256M-Instruct © Hugging Face, лицензия Apache 2.0.",
+  "imageSearch.tab": "Изображения",
+  "imageSearch.hint": "Опишите изображение, чтобы найти его среди изображений заметок (на этом устройстве).",
+  "imageSearch.searching": "Поиск изображений…",
+  "imageSearch.indexing": "Индексация изображений {done} / {total}…",
+  "imageSearch.noHost": "Поиску изображений нужна его модель, которую пока нельзя скачать (хостинг ещё не настроен).",
+  "imageSearch.declined": "Поиску изображений нужна загрузка модели; поиск не выполнен.",
+  "imageSearch.failed": "Ошибка поиска изображений: {error}",
+  "imageSearch.none": "В этом хранилище нет изображений.",
+  "imageSearch.translated": "Поиск на английском: «{query}»",
+  "imageSearch.copied": "Ссылка на изображение скопирована — вставьте её в заметку."
 }

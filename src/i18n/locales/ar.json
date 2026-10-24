@@ -1459,5 +1459,15 @@
   "toast.localMtUnavailable": "لم تتوفر الترجمة المحلية ({why})؛ ترجم نموذج الذكاء الاصطناعي بدلاً منها.",
   "caption.purpose": "وصف الصور على هذا الجهاز (نص بديل)",
   "caption.attribution.florence": "Florence-2 © Microsoft، رخصة MIT؛ تحويل ONNX بواسطة onnx-community (Hugging Face).",
-  "caption.attribution.smolvlm": "SmolVLM-256M-Instruct © Hugging Face، رخصة Apache 2.0."
+  "caption.attribution.smolvlm": "SmolVLM-256M-Instruct © Hugging Face، رخصة Apache 2.0.",
+  "imageSearch.tab": "الصور",
+  "imageSearch.hint": "صف صورة للعثور عليها بين صور ملاحظاتك (على هذا الجهاز).",
+  "imageSearch.searching": "جارٍ البحث في الصور…",
+  "imageSearch.indexing": "فهرسة الصور {done} / {total}…",
+  "imageSearch.noHost": "يحتاج البحث في الصور إلى نموذجه، وهو غير متاح للتنزيل بعد (لم تُعدّ استضافته).",
+  "imageSearch.declined": "يتطلب البحث في الصور تنزيل النموذج؛ لم يُجرَ أي بحث.",
+  "imageSearch.failed": "فشل البحث في الصور: {error}",
+  "imageSearch.none": "لا توجد صور في هذا المخزن.",
+  "imageSearch.translated": "تم البحث بالإنجليزية: «{query}»",
+  "imageSearch.copied": "نُسخ رابط الصورة — الصقه في الملاحظة."
 }

@@ -1,7 +1,8 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
 import type { ReactElement } from "react";
-import { Search, FileText, Sparkles, Loader2, FileCode2, Wand2 } from "lucide-react";
+import { Search, FileText, Sparkles, Loader2, FileCode2, Wand2, Image as ImageIcon } from "lucide-react";
 import { t, tPlural } from "../i18n";
+import "../ai/imageSearchStrings";
 import { searchWorkspace, type SearchHit } from "../storage/workspaceIndex";
 import { isOPFSAvailable, readWorkspaceFile } from "../storage/workspace";
 import { chat, AiError } from "../ai/llm";
@@ -19,6 +20,9 @@ import { UpgradeNotice } from "./UpgradeNotice";
 import { rememberSearch, getSearchHistory, forgetSearch } from "../storage/searchHistory";
 import { flashSearchHighlight } from "../editor/searchHighlight";
 
+// The Images tab (plan 6.7) and its model code load only when it is opened.
+const ImageSearchPanel = lazy(() => import("./ImageSearchPanel").then((m) => ({ default: m.ImageSearchPanel })));
+
 interface Props {
   open: boolean;
   onClose: () => void;
@@ -27,7 +31,7 @@ interface Props {
 }
 
 export function SearchDialog({ open, onClose, onOpenFile }: Props) {
-  const [mode, setMode] = useState<"search" | "smart" | "ai">("search");
+  const [mode, setMode] = useState<"search" | "smart" | "ai" | "images">("search");
   // Smart (embedding) search is a Pro capability when billing is enforced;
   // self-hosted setups always have it.
   const smartAllowed = useCapability("smartSearch");
@@ -56,7 +60,7 @@ export function SearchDialog({ open, onClose, onOpenFile }: Props) {
       setQuery("");
       // Honour an optional `lumen-search-mode` event that lets command
       // palette entries open the dialog already on a specific tab.
-      const requested = (window as unknown as { __lumenSearchMode?: "search" | "smart" | "ai" })
+      const requested = (window as unknown as { __lumenSearchMode?: "search" | "smart" | "ai" | "images" })
         .__lumenSearchMode;
       setMode(requested ?? "search");
       (window as unknown as { __lumenSearchMode?: string }).__lumenSearchMode = undefined;
@@ -368,7 +372,7 @@ export function SearchDialog({ open, onClose, onOpenFile }: Props) {
   // Result-count badge: shown once a query has settled (not while the
   // debounced search is in flight, and not on the Ask tab).
   const resultCount = mode === "smart" ? smartHits.length : hits.length;
-  const showCount = !loading && query.trim().length > 0 && mode !== "ai";
+  const showCount = !loading && query.trim().length > 0 && mode !== "ai" && mode !== "images";
 
   if (!open) return null;
 
@@ -389,6 +393,9 @@ export function SearchDialog({ open, onClose, onOpenFile }: Props) {
           </button>
           <button className={`chart-block-tab ${mode === "ai" ? "active" : ""}`} style={{ fontSize: 13, background: "transparent" }} onClick={() => setMode("ai")}>
              <Sparkles size={11} style={{display:"inline", marginRight:4}}/> Ask Workspace
+          </button>
+          <button className={`chart-block-tab ${mode === "images" ? "active" : ""}`} style={{ fontSize: 13, background: "transparent" }} onClick={() => setMode("images")} data-testid="search-tab-images">
+             <ImageIcon size={11} style={{ display: "inline", marginInlineEnd: 4 }} /> {t("imageSearch.tab")}
           </button>
           {mode === "smart" && smartAllowed && (
             <button
@@ -447,10 +454,23 @@ export function SearchDialog({ open, onClose, onOpenFile }: Props) {
           )}
         </div>
         <div className="cmd-palette-list" ref={listRef}>
+          {mode === "images" && (
+            <Suspense fallback={null}>
+              <ImageSearchPanel
+                query={query}
+                onPick={(path) => {
+                  // Copy the image as Markdown to paste it into the note.
+                  void navigator.clipboard?.writeText(`![](${path.split("/").map(encodeURIComponent).join("/")})`).catch(() => undefined);
+                  showAiToast(t("imageSearch.copied"), "success");
+                  onClose();
+                }}
+              />
+            </Suspense>
+          )}
           {mode === "smart" && !smartAllowed && (
             <UpgradeNotice compact plan="pro" message={t("billing.upgrade.smartSearch")} />
           )}
-          {empty && !(mode === "smart" && !smartAllowed) && (
+          {empty && mode !== "images" && !(mode === "smart" && !smartAllowed) && (
             <div className="cmd-palette-empty">
               {mode === "smart" && !smartIndexedAt && !query
                 ? "Click \u201CBuild index\u201D to enable Smart search."
@@ -462,7 +482,7 @@ export function SearchDialog({ open, onClose, onOpenFile }: Props) {
           {/* Recent-searches chip row — only when the query is empty and the
               user has actually run searches before. Click a chip to re-run
               that query; click ✕ to forget it. */}
-          {!query && getSearchHistory().length > 0 && (
+          {!query && mode !== "images" && getSearchHistory().length > 0 && (
             <div
               style={{
                 display: "flex",

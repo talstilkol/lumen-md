@@ -1459,5 +1459,15 @@
   "toast.localMtUnavailable": "תרגום מקומי לא היה זמין ({why}); מודל ה-AI תרגם במקומו.",
   "caption.purpose": "תיאור תמונות במכשיר (טקסט חלופי)",
   "caption.attribution.florence": "Florence-2 © Microsoft, רישיון MIT; המרת ONNX על ידי onnx-community (Hugging Face).",
-  "caption.attribution.smolvlm": "SmolVLM-256M-Instruct © Hugging Face, רישיון Apache 2.0."
+  "caption.attribution.smolvlm": "SmolVLM-256M-Instruct © Hugging Face, רישיון Apache 2.0.",
+  "imageSearch.tab": "תמונות",
+  "imageSearch.hint": "תארו תמונה כדי למצוא אותה בין התמונות שבפתקים (במכשיר הזה).",
+  "imageSearch.searching": "מחפש תמונות…",
+  "imageSearch.indexing": "מאנדקס תמונות {done} / {total}…",
+  "imageSearch.noHost": "חיפוש תמונות צריך את המודל שלו, שעדיין לא זמין להורדה (האחסון שלו עוד לא הוגדר).",
+  "imageSearch.declined": "חיפוש תמונות דורש להוריד את המודל; לא בוצע חיפוש.",
+  "imageSearch.failed": "חיפוש התמונות נכשל: {error}",
+  "imageSearch.none": "אין תמונות בכספת הזאת.",
+  "imageSearch.translated": "חיפוש באנגלית: „{query}”",
+  "imageSearch.copied": "קישור התמונה הועתק — הדביקו אותו בפתק."
 }

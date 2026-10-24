@@ -18,6 +18,7 @@ const SRC = resolve(__dirname, "..");
  */
 const DOMAINS: Record<string, { module: string; users: string[]; prefixes: string[] }> = {
   "caption.json": { module: "ai/captionStrings.ts", users: ["ai/caption.ts"], prefixes: ["caption."] },
+  "imageSearch.json": { module: "ai/imageSearchStrings.ts", users: ["ui/SearchDialog.tsx", "ui/ImageSearchPanel.tsx", "ai/imageSearchService.ts"], prefixes: ["imageSearch."] },
   "mt.json": { module: "ai/mt/strings.ts", users: ["ai/mt/index.ts", "agents/commands.ts"], prefixes: ["models.", "mt.", "toast.translatedWith", "toast.localMtUnavailable"] },
 };
 

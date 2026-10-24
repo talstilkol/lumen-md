@@ -1459,5 +1459,15 @@
   "toast.localMtUnavailable": "Lokale Übersetzung war nicht verfügbar ({why}); das KI-Modell hat übersetzt.",
   "caption.purpose": "Bilder auf diesem Gerät beschreiben (Alternativtext)",
   "caption.attribution.florence": "Florence-2 © Microsoft, MIT-Lizenz; ONNX-Konvertierung von onnx-community (Hugging Face).",
-  "caption.attribution.smolvlm": "SmolVLM-256M-Instruct © Hugging Face, Apache-Lizenz 2.0."
+  "caption.attribution.smolvlm": "SmolVLM-256M-Instruct © Hugging Face, Apache-Lizenz 2.0.",
+  "imageSearch.tab": "Bilder",
+  "imageSearch.hint": "Beschreibe ein Bild, um es unter den Bildern deiner Notizen zu finden (auf diesem Gerät).",
+  "imageSearch.searching": "Bilder werden gesucht…",
+  "imageSearch.indexing": "Bilder werden indexiert {done} / {total}…",
+  "imageSearch.noHost": "Die Bildsuche braucht ihr Modell, das noch nicht heruntergeladen werden kann (das Hosting ist noch nicht eingerichtet).",
+  "imageSearch.declined": "Die Bildsuche braucht den Modell-Download; es wurde nicht gesucht.",
+  "imageSearch.failed": "Bildsuche fehlgeschlagen: {error}",
+  "imageSearch.none": "Keine Bilder in diesem Tresor.",
+  "imageSearch.translated": "Auf Englisch gesucht: „{query}“",
+  "imageSearch.copied": "Bildlink kopiert – füge ihn in die Notiz ein."
 }
