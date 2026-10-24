@@ -8,6 +8,8 @@
  * the import only.
  */
 import type { PersistenceStatus } from "./persistentStorage";
+// Its English ships with this lazy chunk, not the startup bundle.
+import "./evictionStrings";
 
 export const REMINDER_KEY = "lumen.evictionReminder.shownAt";
 export const REMINDER_EVERY_MS = 7 * 24 * 60 * 60 * 1000;

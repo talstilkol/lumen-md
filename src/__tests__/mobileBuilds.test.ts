@@ -128,7 +128,9 @@ describe("Safari eviction reminder (13.3.3)", () => {
   it("is loaded lazily after the persistence request, and its strings are in every locale", () => {
     const main = read("src/main.tsx");
     expect(main).toMatch(/requestPersistentStorage\(\)\.then\(\(status\) => \{\s*if \(status !== "persisted"\) void import\("\.\/storage\/evictionReminder"\)/);
-    const en = read("src/i18n/index.ts");
+    // English ships with the lazy chunk (src/i18n/lazy/eviction.json), not the startup bundle.
+    const en = read("src/i18n/lazy/eviction.json");
+    expect(read("src/i18n/index.ts")).not.toContain('"storage.eviction.');
     for (const lang of ["he", "ar", "ru", "fr", "de", "ja", "zh-CN"]) {
       const bundle = JSON.parse(read(`src/i18n/locales/${lang}.json`)) as Record<string, string>;
       for (const k of ["storage.eviction.title", "storage.eviction.body", "storage.eviction.export"]) {

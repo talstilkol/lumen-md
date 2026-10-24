@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "source": "src/i18n/index.ts (en bundle)",
+  "source": "src/i18n/index.ts (en bundle) + src/i18n/lazy/*.json",
   "count": 1429,
   "entries": [
     {
@@ -1525,21 +1525,6 @@
     {
       "key": "vault.export.folder",
       "en": "Into a folder on this computer",
-      "vars": []
-    },
-    {
-      "key": "storage.eviction.title",
-      "en": "Safari may delete your notes",
-      "vars": []
-    },
-    {
-      "key": "storage.eviction.body",
-      "en": "Safari removes a site's data after 7 days without a visit. Export your vault, or add Lumen to the Home Screen / Dock, where storage is kept.",
-      "vars": []
-    },
-    {
-      "key": "storage.eviction.export",
-      "en": "Export vault\\u2026",
       "vars": []
     },
     {
@@ -7670,6 +7655,21 @@
     {
       "key": "chart.alternatives",
       "en": "Chart suggestions",
+      "vars": []
+    },
+    {
+      "key": "storage.eviction.title",
+      "en": "Safari may delete your notes",
+      "vars": []
+    },
+    {
+      "key": "storage.eviction.body",
+      "en": "Safari removes a site's data after 7 days without a visit. Export your vault, or add Lumen to the Home Screen / Dock, where storage is kept.",
+      "vars": []
+    },
+    {
+      "key": "storage.eviction.export",
+      "en": "Export vault…",
       "vars": []
     }
   ]
