@@ -13,7 +13,12 @@ import { formatEvalReport, hebrewRatio, passed, runCheck } from "../agents/eval/
 import { fakeExecutor, sequence } from "./helpers/fakeExecutor";
 import { scriptedAnswer } from "../agents/eval/scripted";
 
-beforeEach(() => resetExecutors());
+import { installEvalWeb } from "./helpers/evalWeb";
+
+beforeEach(() => {
+  resetExecutors();
+  installEvalWeb();
+});
 
 describe("agent eval — scoring", () => {
   it("hebrewRatio counts letters only and judges structured values, not keys", () => {

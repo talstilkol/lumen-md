@@ -11,3 +11,4 @@ export { writerAgent, templaterAgent, type WriterInput, type TemplaterInput } fr
 export { builderSpecAgent, builderFileAgent, checkGeneratedFile, type ProductSpecOut } from "./builder";
 export { proofreaderAgent, locateIssues, PROOF_MAX_CHARS, type ProofreaderInput, type ProofIssue } from "./proofreader";
 export { stylistAgent, type StylistInput, type StyleProfileOut } from "./stylist";
+export { researcherAgent, checkCited, checkVerified, citedNumbers, RESEARCHER_SCHEMA, type ResearcherInput, type ResearcherOutput, type ResearchMode, type ResearchSource, type ResearchQuote } from "./researcher";

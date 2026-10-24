@@ -77,63 +77,15 @@ describe("clipper", () => {
 describe("research under local-only", () => {
   beforeEach(() => localStorage.clear());
 
-  it("never goes online and answers from the library", async () => {
+  it("never goes online: the researcher agent answers from the library (plan 5.4; the run itself is tested in researcherAgent.test.ts)", async () => {
     localStorage.setItem("lumen.ai.policy", "local-only");
-    vi.doMock("../ai/semanticSearch", () => ({ searchHybrid: async () => [{ path: "ספרייה/השקה.md", score: 1, snippet: "ההשקה נדחתה ליום שלישי." }, { path: "notes/other.md", score: 0.9, snippet: "x" }] }));
-    vi.doMock("../storage/workspace", async (o) => ({ ...(await o<object>()), readWorkspaceFile: async () => "# השקה\nההשקה נדחתה ליום שלישי.\n" }));
-    vi.doMock("../ai/llm", async (o) => ({ ...(await o<object>()), chat: async () => 'ההשקה נדחתה [1] "ההשקה נדחתה ליום שלישי".' }));
     const f = vi.spyOn(globalThis, "fetch");
     vi.resetModules();
-    const { runResearch, researchGoesOnline } = await import("../research/agent");
+    const { researchGoesOnline, runResearch } = await import("../research/agent");
     expect(researchGoesOnline()).toBe(false);
-    const r = await runResearch({ question: "מתי ההשקה?", deps: { settings: { provider: "claude", key: "" } } });
-    expect(r.route).toBe("library");
-    expect(r.markdown.startsWith("---\nuntrusted: true\nresearch: library\n---\n")).toBe(true); // plan 2.7: written from clipped pages
-    expect(r.unverified).toBe(0);
-    expect(r.markdown).toContain("[[השקה]]");
-    expect(r.markdown).not.toContain("other");
+    // No clip library here: the library route says so before any model or network call.
+    await expect(runResearch({ question: "מתי ההשקה?", deps: { settings: { provider: "claude", key: "" } } })).rejects.toThrow(/library/);
     expect(f).not.toHaveBeenCalled();
     f.mockRestore();
-  });
-});
-
-describe("library research checks", () => {
-  beforeEach(() => {
-    localStorage.clear();
-    localStorage.setItem("lumen.ai.policy", "local-only");
-  });
-
-  async function research(answer: string, hits?: Array<{ path: string; score: number; snippet: string }>) {
-    const all = hits ?? [{ path: "Library/launch.md", score: 1, snippet: "The launch moved to Tuesday." }];
-    vi.doMock("../ai/semanticSearch", () => ({
-      searchHybrid: async (_q: string, k: number, o?: { filter?: (p: string) => boolean }) =>
-        all.filter((h) => !o?.filter || o.filter(h.path)).slice(0, k),
-    }));
-    vi.doMock("../storage/workspace", async (o) => ({ ...(await o<object>()), readWorkspaceFile: async () => "# Launch\nThe launch moved to Tuesday.\n" }));
-    vi.doMock("../ai/llm", async (o) => ({ ...(await o<object>()), chat: async () => answer }));
-    vi.resetModules();
-    const { runResearch } = await import("../research/agent");
-    return runResearch({ question: "When is the launch?", deps: { settings: { provider: "claude", key: "" } } });
-  }
-
-  it("scopes retrieval to the library before the result limit", async () => {
-    const notes = Array.from({ length: 45 }, (_, i) => ({ path: `notes/n${i}.md`, score: 2, snippet: "launch" }));
-    const r = await research('Tuesday [1] "The launch moved to Tuesday".', [...notes, { path: "Library/launch.md", score: 1, snippet: "x" }]);
-    expect(r.sources).toBe(1);
-    expect(r.unverified).toBe(0);
-  });
-
-  it("an answer without citations counts as unsupported", async () => {
-    const r = await research("The launch is on Tuesday.");
-    expect(r.unverified).toBe(1);
-    expect(r.markdown).toContain("cites no library page");
-  });
-
-  it("marks each failed citation in the saved report", async () => {
-    const r = await research('Tuesday [1] "The launch moved to Tuesday". Budget doubled [1] "Budget doubled".');
-    expect(r.unverified).toBe(1);
-    expect(r.markdown).toContain('[1] "The launch moved to Tuesday".');
-    expect(r.markdown).toContain('[1] "Budget doubled" ⚠️ *quote not found in the page*');
-    expect(r.markdown).not.toContain('Tuesday" ⚠️');
   });
 });

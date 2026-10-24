@@ -39,6 +39,8 @@ describe(`agent eval — ${model} @ ${url}`, () => {
     localStorage.setItem("lumen.ollama.baseUrl", url);
     localStorage.setItem("lumen.ollama.model", model);
     localStorage.setItem("lumen.ai.policy", "local-only");
+    // The researcher's web (plan 5.4): a stubbed research service; Ollama is reached as before.
+    (await import("../../__tests__/helpers/evalWeb")).installEvalWeb();
 
     const results: CaseResult[] = [];
     for (const c of EVAL_CASES) {

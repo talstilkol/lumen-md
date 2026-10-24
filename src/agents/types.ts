@@ -261,9 +261,14 @@ export interface AgentInput {
 
 export type ValidationResult = { ok: true } | { ok: false; reason: string; hint?: string };
 
+/** What a validator may look at besides the output: the pages the run fetched (the researcher checks its quotes against them). */
+export interface ValidationContext {
+  pages: ReadonlyMap<string, FetchedPage>;
+}
+
 export interface Validator<O> {
   name: string;
-  check(output: O, input: AgentInput): ValidationResult | Promise<ValidationResult>;
+  check(output: O, input: AgentInput, ctx?: ValidationContext): ValidationResult | Promise<ValidationResult>;
 }
 
 /** One change the critic proposes for a retry. */
@@ -416,6 +421,16 @@ export interface RunOptions {
   document?: string;
   selection?: string;
   path?: string | null;
+  /** Receives the pages `fetch_page` read in this run, by URL (the research command verifies quotes against them). */
+  pages?: Map<string, FetchedPage>;
+  /**
+   * The input is meant to leave the device: the user asked for it to be
+   * searched (research). The run then holds none of the user's own content
+   * until a tool reads a note, and a web request after reading outside
+   * content needs no approval before that (plan 2.7's rule guards the
+   * user's data, and there is none in the run). Writes still ask.
+   */
+  inputMayLeave?: boolean;
   onDelta?: (chunk: string) => void;
   onStep?: (step: AgentStep) => void;
   /** Force an executor (the suggestions panel uses it). */

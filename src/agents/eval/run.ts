@@ -25,7 +25,15 @@ export async function runEvalCase(c: EvalCase, opts: { executor?: ExecutorId; mo
     /* storage denied */
   }
   const started = Date.now();
-  const run = await runAgent(def, c.input, { executor: opts.executor, signal: opts.signal, document: c.input.text, selection: c.input.selection, patch: opts.model ? { model: opts.model } : undefined });
+  const run = await runAgent(def, c.input, {
+    executor: opts.executor,
+    signal: opts.signal,
+    // A research question is not a document; the eval consents to its searches (what the user would do).
+    ...(c.run?.inputMayLeave ? { inputMayLeave: true, consentNetwork: () => true } : { document: c.input.text }),
+    selection: c.input.selection,
+    grants: c.run?.grants,
+    patch: opts.model ? { model: opts.model } : undefined,
+  });
   const ms = Date.now() - started;
   const base = { id: c.id, agent: c.agent, executor: run.executor, model: run.model, attempts: run.attempts, ms };
   if (run.status !== "ok") return { ...base, status: "failed", checks: [], error: `${run.errorCode ?? "error"}: ${run.error ?? ""}`.trim() };
