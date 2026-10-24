@@ -105,8 +105,7 @@ async function flushQueue(force = false): Promise<void> {
       const snapshot = snapshotQueue.shift();
       if (!snapshot) continue;
       const { name, content, ts } = snapshot;
-      const safeName = name.replace(/[^\w\-.]/g, "_");
-      const path = `backups/${safeName}/${ts}.md`;
+      const path = `backups/${backupDirName(name)}/${ts}.md`;
       try {
         await writeWorkspaceFile(path, content);
       } catch (err) {
@@ -120,6 +119,26 @@ async function flushQueue(force = false): Promise<void> {
   } finally {
     isWriting = false;
   }
+}
+
+/**
+ * Folder for one document's snapshots: a readable part plus a hash of the
+ * full name (T26). The old `[^\w.-] → _` turned every Hebrew name into
+ * underscores, so "שלום.md" and "עולם.md" shared — and pruned — one folder.
+ */
+export function backupDirName(name: string): string {
+  let h = 0x811c9dc5;
+  for (const ch of name.normalize("NFC")) {
+    h ^= ch.codePointAt(0) ?? 0;
+    h = Math.imul(h, 0x01000193) >>> 0;
+  }
+  const readable = name
+    .normalize("NFC")
+    .replace(/\.(md|markdown)$/i, "")
+    .replace(/[^\p{L}\p{M}\p{N}._-]+/gu, "_")
+    .replace(/^_+|_+$/g, "")
+    .slice(0, 40);
+  return `${readable || "note"}-${h.toString(16).padStart(8, "0")}`;
 }
 
 function isDirectoryHandle(h: FileSystemHandle): h is FileSystemDirectoryHandle {

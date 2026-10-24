@@ -1,3 +1,4 @@
+import { headingSlugger } from "../lib/slug";
 import { unified } from "unified";
 import type { Processor } from "unified";
 import type { ReactElement } from "react";
@@ -30,7 +31,6 @@ import {
   remarkAdmonitions,
   remarkColumns,
   remarkStripFrontmatter,
-  slug,
 } from "./remarkLumen";
 
 const SPECIAL_LANGS = new Set([
@@ -294,10 +294,13 @@ export function extractToc(
     .replace(/^---\r?\n[\s\S]*?\r?\n---\r?\n?/m, "")
     .replace(/^\+\+\+\r?\n[\s\S]*?\r?\n\+\+\+\r?\n?/m, "");
   const tree = unified().use(remarkParse).parse(stripped) as MdastRoot;
+  // One slugger for the whole document, like rehype-slug: a repeated
+  // heading gets `-1`, `-2`… and Hebrew keeps its letters (T26).
+  const slugger = headingSlugger();
   visit(tree, "heading", (node) => {
     const text = mdToString(node);
     if (!text.trim()) return;
-    const id = slug(text);
+    const id = slugger.slug(text);
     out.push({ depth: node.depth, text, id });
   });
   return out;
