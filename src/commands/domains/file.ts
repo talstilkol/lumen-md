@@ -99,7 +99,7 @@ export function buildSyncCommands(): Command[] {
       hint: t("cmd.sync.open.hint"),
       icon: cmdIcons.Sparkles,
       group: t("group.tools"),
-      action: () => void import("../../sync/e2ee/ui/open").then((m) => m.openSyncPanel()),
+      action: () => void import("../../sync/e2ee/ui/launch").then((m) => m.openSync()),
     },
   ];
 }

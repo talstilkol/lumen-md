@@ -102,9 +102,11 @@ export function fakeGdrive(opts: { token: string } = { token: "gd-test-token" })
       const ct = req.headers.get("content-type") ?? "";
       const boundary = /boundary=([^;]+)/.exec(ct)?.[1];
       if (!boundary) return json(400, { error: { message: "no boundary" } });
-      const text = new TextDecoder("latin1").decode(req.body);
+      // Split the bytes themselves: TextDecoder("latin1") is windows-1252 per
+      // the Encoding Standard and rewrites 0x80–0x9F, corrupting ciphertext.
+      const text = Array.from(req.body, (b) => String.fromCharCode(b)).join("");
       const parts = text.split(`--${boundary}`).filter((x) => x.trim() && x.trim() !== "--");
-      const metaJson = parts[0].slice(parts[0].indexOf("\r\n\r\n") + 4).trim();
+      const metaJson = new TextDecoder().decode(Uint8Array.from(parts[0].slice(parts[0].indexOf("\r\n\r\n") + 4).trim(), (c) => c.charCodeAt(0)));
       const bodyPart = parts[1];
       const start = bodyPart.indexOf("\r\n\r\n") + 4;
       const raw = bodyPart.slice(start, bodyPart.lastIndexOf("\r\n"));

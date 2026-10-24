@@ -113,8 +113,8 @@ const vaultReady = Promise.race([
 const oauthReturn = /^\/oauth\/(dropbox|gdrive)$/.exec(location.pathname);
 const oauthCode = oauthReturn && new URLSearchParams(location.search).get("code");
 if (oauthReturn && oauthCode) {
-  void Promise.all([secretsReady, vaultReady, import("./sync/e2ee/ui/open")])
-    .then(([, , m]) => m.finishOAuthReturn(oauthReturn[1] as "dropbox" | "gdrive", oauthCode))
+  void Promise.all([secretsReady, vaultReady, import("./sync/e2ee/ui/launch")])
+    .then(([, , m]) => m.finishOAuth(oauthReturn[1] as "dropbox" | "gdrive", oauthCode))
     .catch((err) => log.warn("sync sign-in failed", err));
 }
 void Promise.all([initLocale(), secretsReady, vaultReady])

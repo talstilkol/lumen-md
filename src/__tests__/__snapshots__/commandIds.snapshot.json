@@ -467,6 +467,13 @@
       "icon": "Sparkles"
     },
     {
+      "id": "sync.open",
+      "label": "Encrypted sync…",
+      "group": "Tools",
+      "hint": "WebDAV, S3, Dropbox or Google Drive — end-to-end encrypted",
+      "icon": "Sparkles"
+    },
+    {
       "id": "ai.cancel",
       "label": "AI: Cancel",
       "group": "AI Prompts",
@@ -1542,6 +1549,13 @@
       "icon": "Sparkles"
     },
     {
+      "id": "sync.open",
+      "label": "Encrypted sync…",
+      "group": "Tools",
+      "hint": "WebDAV, S3, Dropbox or Google Drive — end-to-end encrypted",
+      "icon": "Sparkles"
+    },
+    {
       "id": "ai.cancel",
       "label": "AI: Cancel",
       "group": "AI Prompts",
@@ -2294,6 +2308,7 @@
     "vault.openFolder",
     "vault.toBrowser",
     "file.trash",
+    "sync.open",
     "ai.cancel",
     "note.read",
     "vault.digest",
