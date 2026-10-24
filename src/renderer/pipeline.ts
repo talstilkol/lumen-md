@@ -1,188 +1,22 @@
 import { headingSlugger } from "../lib/slug";
 import { unified } from "unified";
-import type { Processor } from "unified";
 import type { ReactElement } from "react";
 import remarkParse from "remark-parse";
-import remarkGfm from "remark-gfm";
-import remarkMath from "remark-math";
-import remarkFrontmatter from "remark-frontmatter";
-import remarkDirective from "remark-directive";
-import remarkRehype from "remark-rehype";
-// rehype-katex (+ katex + mhchem, ~84 KB gz) is dynamically imported via
-// ./katexPlugin only for docs that contain `$` — it is no longer a static
-// dependency of the main chunk (A7 lever 1/3).
 import rehypeSlug from "rehype-slug";
 import { rehypeDirAuto } from "./rehypeDirAuto";
-import { rehypeSanitizeRaw } from "./rehypeSanitizeRaw";
-// rehype-raw is dynamically imported in getProcessorWithRaw() — it
-// pulls in parse5 (~275 KB raw / ~40 KB gzipped) and most docs don't
-// need it. Splitting it out of the main bundle is M12-followup-2.
-import rehypeReact from "rehype-react";
+import { toJsxRuntime } from "hast-util-to-jsx-runtime";
 import { visit } from "unist-util-visit";
 import { Fragment, jsx, jsxs } from "react/jsx-runtime";
 import YAML from "yaml";
-import type { Root as MdastRoot, Code } from "mdast";
+import type { Root as MdastRoot } from "mdast";
 import type { Root as HastRoot } from "hast";
 import { components } from "./components";
 import { rehypeShiki } from "./shiki";
 import { prepareCriticMarkup, rehypeCriticMarkup, stripCriticDelimiters } from "./criticMarkup";
-import {
-  remarkBreaks,
-  remarkWikiLinks,
-  remarkAdmonitions,
-  remarkColumns,
-  remarkStripFrontmatter,
-} from "./remarkLumen";
+import { buildBase, hasMath, hasRawHtml } from "./hastPipeline";
 
-const SPECIAL_LANGS = new Set([
-  "mermaid",
-  "chart",
-  "csv",
-  "tsv",
-  "json-table",
-  "insights",
-  "jsonl",
-  "code-doctor",
-  "fix-json",
-  // Tabular conversions — share the DataBlock renderer.
-  "sql",
-  "pandas",
-  "object",
-  "data",
-  "map",
-  "geojson",
-  "dot",
-  "graphviz",
-  "abc",
-  "model",
-  "plantuml",
-  "puml",
-  "embed",
-  "htmlpreview",
-  "html-preview",
-  "bibtex",
-  "bib",
-  "database",
-  // Single-language live previews — render the snippet inside a tiny
-  // sandboxed iframe so users can experiment with HTML/CSS/JS/GLSL/SVG
-  // without writing the full boilerplate of an `htmlpreview` block.
-  "live-css",
-  "css-live",
-  "live-js",
-  "js-live",
-  "live-svg",
-  "svg-live",
-  "svg",
-  "live-glsl",
-  "glsl-live",
-  "glsl",
-  "shader",
-  // Live Python via Pyodide (WASM, lazy-loaded on Run).
-  "live-python",
-  "python-live",
-  "live-py",
-  "py-live",
-  // Live SQL via sql.js / SQLite (WASM, lazy-loaded on Run).
-  "live-sql",
-  "sql-live",
-  // Live Lua via wasmoon (Lua 5.4 WASM in a Worker, lazy-loaded on Run).
-  "live-lua",
-  "lua-live",
-  // Live R via webR (R in WASM, self-hosted under /webr/, loaded on Run).
-  "live-r",
-  "r-live",
-  // Live Ruby via ruby.wasm (CRuby in WASI, in a Worker, loaded on Run).
-  "live-ruby",
-  "ruby-live",
-  // Web Playground: multi-file HTML / CSS / JS / JSX / TS (+ React / Vue).
-  "playground",
-  "web-playground",
-  // Plain `html` fence as alias for `html-preview` — Lumen treats a raw
-  // HTML fence as "render this HTML safely in a sanitized preview" rather
-  // than a syntax-highlighted code block. Matches the dynamic-blocks-
-  // hardening contract: any HTML the user types must round-trip through
-  // markupSanitizer before it touches the DOM.
-  "html",
-]);
-
-/**
- * remark plugin: transform code blocks with special langs into custom hast nodes.
- * The block source becomes the text child so React components receive it as `children`.
- */
-function remarkLumenBlocks() {
-  return (tree: MdastRoot) => {
-    visit(tree, "code", (node: Code) => {
-      const lang = (node.lang ?? "").toLowerCase();
-      if (!SPECIAL_LANGS.has(lang)) return;
-      // Aliases.
-      let tag: string;
-      if (lang === "json-table") tag = "lumen-jsontable";
-      else if (lang === "insights" || lang === "jsonl") tag = "lumen-insights";
-      else if (lang === "code-doctor" || lang === "fix-json") tag = "lumen-code-doctor";
-      else if (lang === "graphviz") tag = "lumen-dot";
-      else if (lang === "puml") tag = "lumen-plantuml";
-      else if (lang === "html-preview" || lang === "htmlpreview" || lang === "html")
-        tag = "lumen-htmlpreview";
-      else if (lang === "bib") tag = "lumen-bibtex";
-      // Tabular conversions all share the DataBlock component, with `lang`
-      // forwarded as a prop so it picks the right parser.
-      else if (lang === "sql" || lang === "pandas" || lang === "object" || lang === "data")
-        tag = "lumen-data";
-      // Live web-language blocks — fold short / long names into a
-      // single tag so React mounts the right component regardless of
-      // which spelling the user picked.
-      else if (lang === "live-css" || lang === "css-live") tag = "lumen-livecss";
-      else if (lang === "live-js" || lang === "js-live") tag = "lumen-livejs";
-      else if (lang === "live-svg" || lang === "svg-live" || lang === "svg") tag = "lumen-livesvg";
-      else if (lang === "live-glsl" || lang === "glsl-live" || lang === "glsl" || lang === "shader")
-        tag = "lumen-liveglsl";
-      else if (lang === "live-python" || lang === "python-live" || lang === "live-py" || lang === "py-live")
-        tag = "lumen-livepython";
-      else if (lang === "live-sql" || lang === "sql-live") tag = "lumen-livesql";
-      else if (lang === "live-lua" || lang === "lua-live") tag = "lumen-livelua";
-      else if (lang === "live-r" || lang === "r-live") tag = "lumen-liver";
-      else if (lang === "live-ruby" || lang === "ruby-live") tag = "lumen-liveruby";
-      else if (lang === "playground" || lang === "web-playground") tag = "lumen-playground";
-      else tag = `lumen-${lang}`;
-      const data = (node.data ?? (node.data = {})) as Record<string, unknown>;
-      data.hName = tag;
-      data.hProperties = { lang, meta: node.meta ?? "" };
-      data.hChildren = [{ type: "text", value: node.value ?? "" }];
-    });
-  };
-}
-
-type LumenProcessor = Processor<MdastRoot, MdastRoot, HastRoot, HastRoot, ReactElement>;
 type RehypeKatex = typeof import("./katexPlugin").default;
 
-function buildBase() {
-  return unified()
-    .use(remarkParse)
-    .use(remarkFrontmatter, ["yaml"])
-    .use(remarkStripFrontmatter)
-    .use(remarkGfm)
-    .use(remarkBreaks)
-    .use(remarkMath)
-    .use(remarkDirective)
-    .use(remarkAdmonitions)
-    .use(remarkColumns)
-    .use(remarkWikiLinks)
-    .use(remarkLumenBlocks)
-    .use(remarkRehype, { allowDangerousHtml: true });
-}
-
-function toReact(p: ReturnType<typeof buildBase>): LumenProcessor {
-  return p.use(rehypeReact, {
-    Fragment,
-    jsx,
-    jsxs,
-    components,
-  } as unknown as Parameters<typeof rehypeReact>[0]) as unknown as LumenProcessor;
-}
-
-// Full processors, cached per (raw HTML?, math?) combination.
-const fullProcessors = new Map<string, LumenProcessor>();
-let fastProcessor: LumenProcessor | null = null;
 let katexPromise: Promise<RehypeKatex> | null = null;
 
 function loadKatex(): Promise<RehypeKatex> {
@@ -195,57 +29,29 @@ function loadKatex(): Promise<RehypeKatex> {
   return katexPromise;
 }
 
-async function getFullProcessor(
-  isDark: () => boolean,
-  opts: { raw: boolean; math: boolean },
-): Promise<LumenProcessor> {
-  const key = `${opts.raw ? 1 : 0}${opts.math ? 1 : 0}`;
-  const cached = fullProcessors.get(key);
-  if (cached) return cached;
-  // rehype-raw pulls in parse5 (~40 KB gz); only docs with inline HTML
-  // pay for it (M12-followup-2).
-  const [rehypeRaw, rehypeKatex] = await Promise.all([
-    opts.raw ? import("rehype-raw").then((m) => m.default) : null,
-    opts.math ? loadKatex() : null,
-  ]);
-  let p = buildBase();
-  // Inline HTML goes through the allowlist sanitizer right after parsing (T48).
-  if (rehypeRaw) p = p.use(rehypeRaw).use(rehypeSanitizeRaw);
-  // CriticMarkup (suggesting mode) → <ins>/<del>/<mark>; before rehypeSlug
-  // so heading ids are computed from the rendered text.
-  p = p.use(rehypeCriticMarkup).use(rehypeSlug).use(rehypeDirAuto);
-  if (rehypeKatex) p = p.use(rehypeKatex);
-  const proc = toReact(p.use(rehypeShiki, { isDark }));
-  fullProcessors.set(key, proc);
-  return proc;
+/** HAST → React elements with Lumen's block components (what rehype-react did at the end of the old pipeline). */
+function hastToReact(hast: HastRoot): ReactElement {
+  return toJsxRuntime(hast, { Fragment, jsx, jsxs, components } as unknown as Parameters<typeof toJsxRuntime>[1]) as ReactElement;
 }
 
 /**
- * Cheap detection: does the markdown source contain anything that
- * looks like raw HTML? Matches `<tag`, `</tag`, `<!--`. Doesn't try to
- * be strict about code-fence boundaries — a false positive just means
- * we load the bigger pipeline once for that doc, never a correctness
- * issue.
+ * The full preview render (plan 8.1): Markdown → HAST in the render
+ * worker (parse, GFM, directives, wiki links, Lumen blocks, inline-HTML
+ * sanitising, CriticMarkup, heading ids, block direction), then — still
+ * on the main thread until step 3 — KaTeX and Shiki over that tree, and
+ * HAST → React. Where no worker can run, the same HAST code runs here.
  */
-function hasRawHtml(source: string): boolean {
-  return /<[a-zA-Z!/]/.test(source);
-}
-
-/** remark-math only recognises `$…$` / `$$…$$`; no `$` → no KaTeX. */
-function hasMath(source: string): boolean {
-  return source.includes("$");
-}
-
 export async function renderMarkdown(
   markdownText: string,
   isDark: () => boolean,
 ): Promise<ReactElement> {
-  const proc = await getFullProcessor(isDark, {
-    raw: hasRawHtml(markdownText),
-    math: hasMath(markdownText),
-  });
-  const file = await proc.process(prepareCriticMarkup(markdownText));
-  return file.result as ReactElement;
+  const math = hasMath(markdownText);
+  const [{ renderHast }, rehypeKatex] = await Promise.all([import("./renderClient"), math ? loadKatex() : null]);
+  const hast = await renderHast(markdownText, { raw: hasRawHtml(markdownText) });
+  // The finishing passes run on the tree in place (unified's `run`).
+  const finish = rehypeKatex ? unified().use(rehypeKatex).use(rehypeShiki, { isDark }) : unified().use(rehypeShiki, { isDark });
+  await finish.run(hast);
+  return hastToReact(hast);
 }
 
 /**
@@ -259,11 +65,13 @@ export async function renderMarkdown(
  * scrolls near the viewport and the browser is idle — so this pass never
  * triggers a vendor import.
  */
+let fastProcessor: ReturnType<typeof buildBase> | null = null;
 export function renderMarkdownFast(markdownText: string): ReactElement {
   if (!fastProcessor) {
-    fastProcessor = toReact(buildBase().use(rehypeCriticMarkup).use(rehypeSlug).use(rehypeDirAuto));
+    fastProcessor = buildBase().use(rehypeCriticMarkup).use(rehypeSlug).use(rehypeDirAuto) as unknown as ReturnType<typeof buildBase>;
   }
-  return fastProcessor.processSync(prepareCriticMarkup(markdownText)).result as ReactElement;
+  const tree = fastProcessor.parse(prepareCriticMarkup(markdownText));
+  return hastToReact(fastProcessor.runSync(tree) as HastRoot);
 }
 
 /** Extract YAML frontmatter (parsed) from a markdown source, or null. */
