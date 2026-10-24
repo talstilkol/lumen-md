@@ -1429,5 +1429,13 @@
   "cmd.ai.cancel": "AI: إلغاء",
   "cmd.ai.cancel.hint": "يوقف كل طلبات الذكاء الاصطناعي الجارية (Esc يفعل ذلك أيضاً)",
   "toast.aiCancelled": "أُلغي طلب الذكاء الاصطناعي ({count})",
-  "toast.aiNothingRunning": "لا يوجد طلب ذكاء اصطناعي جارٍ"
+  "toast.aiNothingRunning": "لا يوجد طلب ذكاء اصطناعي جارٍ",
+  "agent.suggest.splitDocument": "تقسيم المستند وتشغيل كل جزء",
+  "agent.suggest.splitDocument.detail": "يشغّل الأمر على أجزاء من نحو {size} حرف ويدمج الإجابات.",
+  "agent.suggest.splitInput.done": "حدّد الجزء الذي تريده ثم شغّل الأمر مجددًا.",
+  "agent.suggest.ollamaWaiting": "بانتظار Ollama على {url}: شغّل `ollama serve` ثم نزّل نموذجًا (متبقٍ {seconds} ث)…",
+  "agent.suggest.ollamaUp": "‏Ollama يستجيب على {url}. يُعاد تشغيل الأمر.",
+  "agent.suggest.ollamaStillDown": "‏Ollama لا يستجيب بعد على {url}. شغّله وحاول مجددًا.",
+  "agent.notGood.prompt": "إجابة من {agent}.",
+  "agent.notGood.button": "ليست جيدة — حاول مجددًا"
 }

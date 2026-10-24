@@ -306,6 +306,8 @@ function buildSlashItems(): SlashItem[] {
           }
         } catch (e) {
           log.error("WYSIWYG AI stream failed", e);
+          // 5.6.4: an agent failure opens the suggestions panel (the placeholder is still replaced below).
+          void import("../agents/suggestions").then((m) => m.reportAgentFailure(e, "wysiwyg.aiWrite"));
           // If placeholder is still there, replace it
           const docText = v.state.doc.textBetween(insertPos, Math.min(insertPos + placeholder.length, v.state.doc.content.size));
           if (docText === placeholder) {
@@ -545,6 +547,7 @@ function buildTooltip(getView: () => EditorView | null): HTMLDivElement {
         } catch (e) {
           if (isAbort(e)) return;
           log.error("WYSIWYG AI rewrite failed", e);
+          if (await import("../agents/suggestions").then((m) => m.reportAgentFailure(e, "wysiwyg.aiRewrite"))) return;
           // A spent quota already showed its own toast.
           if (!(e instanceof Error && e.name === "AiQuotaExceededError")) showAiToast(t("toast.aiRewriteFailed"), "error");
         } finally {

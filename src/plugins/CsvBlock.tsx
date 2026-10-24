@@ -129,7 +129,7 @@ export default function CsvBlock({ source, lang, meta }: Props) {
                 setAiOption(await runAgentOrThrow(charterAgent, { text: source }, { document: source, ownPrompt: true }));
               } catch (e) {
                 log.error("AI chart generation failed", e);
-                showAiToast(t("toast.aiChartGenerationFailed"), "error");
+                if (!(await import("../agents/suggestions")).reportAgentFailure(e, "ai.chart")) showAiToast(t("toast.aiChartGenerationFailed"), "error");
                 setAiOption(null);
               } finally {
                 setAiLoading(false);

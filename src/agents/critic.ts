@@ -32,6 +32,8 @@ export interface Failure {
   hint?: string;
   /** Characters of input the agent was given. */
   inputChars?: number;
+  /** The agent can run on parts of its input (AgentDefinition.splittable). */
+  splittable?: boolean;
   /** For `no-executor`: why each executor was skipped. */
   skipped?: Array<{ id: ExecutorId; availability: Availability }>;
   /** Executors that could take a retry. */
@@ -43,6 +45,8 @@ export interface Failure {
 export interface Verdict {
   /** A change worth retrying with; absent when retrying is pointless. */
   retry?: RetryPatch;
+  /** The retry comes from the model critic's own diagnosis: the runtime gives it one attempt past the limit (5.6.1). */
+  byModel?: boolean;
   suggestions: Suggestion[];
   /** Short machine-readable diagnosis (`cors`, `ollama-offline`, `context`…). */
   diagnosis: string;
@@ -63,6 +67,8 @@ export function nextTier(tier: ModelTier): ModelTier | null {
 }
 
 const LONG_INPUT = 6000;
+/** Size of a part when the user asks to split the document (5.6.2). */
+export const SPLIT_SIZE = 4000;
 
 function s(id: string, title: string, extra: Partial<Suggestion> = {}): Suggestion {
   return { id, title, ...extra };
@@ -92,7 +98,7 @@ function availabilitySuggestions(skipped: Failure["skipped"] = []): Suggestion[]
   for (const { id, availability } of skipped) {
     switch (availability.reason) {
       case "ollama-offline":
-        push(s("start-ollama", "agent.suggest.startOllama", { detail: "agent.suggest.startOllama.detail", action: { type: "open-docs", key: "localAgents" } }));
+        push(s("start-ollama", "agent.suggest.startOllama", { detail: "agent.suggest.startOllama.detail", action: { type: "check-ollama" } }));
         break;
       case "cors":
         push(s("ollama-origins", "agent.suggest.ollamaOrigins", { detail: "agent.suggest.ollamaOrigins.detail", action: { type: "open-docs", key: "localAgents" } }));
@@ -103,7 +109,7 @@ function availabilitySuggestions(skipped: Failure["skipped"] = []): Suggestion[]
         break;
       case "no-local":
         // A cloud provider is selected under local-only and nothing local can answer.
-        push(s("start-ollama", "agent.suggest.startOllama", { detail: "agent.suggest.startOllama.detail", action: { type: "open-docs", key: "localAgents" } }));
+        push(s("start-ollama", "agent.suggest.startOllama", { detail: "agent.suggest.startOllama.detail", action: { type: "check-ollama" } }));
         push(s("webgpu-browser", "agent.suggest.webgpuBrowser", { detail: "agent.suggest.webgpuBrowser.detail", action: { type: "open-docs", key: "localLlm" } }));
         push(s("allow-cloud", "agent.suggest.allowCloud", { detail: "agent.suggest.allowCloud.detail", action: { type: "set-policy", policy: "local-first" } }));
         break;
@@ -115,14 +121,21 @@ function availabilitySuggestions(skipped: Failure["skipped"] = []): Suggestion[]
         break;
       case "no-key":
         push(s("use-ollama", "agent.suggest.useOllama", { detail: "agent.suggest.useOllama.detail", action: { type: "switch-executor", executor: "ollama" } }));
-        push(s("configure-key", "agent.suggest.configureKey", { params: { provider: availability.detail ?? "" } }));
+        push(s("configure-key", "agent.suggest.configureKey", { params: { provider: availability.detail ?? "" }, action: { type: "run-command", id: "ai.switchProvider" } }));
         break;
       default:
         break;
     }
   }
-  if (!out.length) push(s("start-ollama", "agent.suggest.startOllama", { detail: "agent.suggest.startOllama.detail", action: { type: "open-docs", key: "localAgents" } }));
+  if (!out.length) push(s("start-ollama", "agent.suggest.startOllama", { detail: "agent.suggest.startOllama.detail", action: { type: "check-ollama" } }));
   return out;
+}
+
+/** Split the document (5.6.2) when the agent can; otherwise ask for a smaller selection. */
+function splitSuggestion(f: Failure): Suggestion {
+  return f.splittable && (f.inputChars ?? 0) > SPLIT_SIZE
+    ? s("split-input", "agent.suggest.splitDocument", { detail: "agent.suggest.splitDocument.detail", params: { size: SPLIT_SIZE }, action: { type: "retry", patch: { split: SPLIT_SIZE } } })
+    : s("select-part", "agent.suggest.splitInput", { detail: "agent.suggest.splitInput.detail", action: { type: "split-input" } });
 }
 
 /** Stage 1: deterministic diagnosis. */
@@ -151,7 +164,7 @@ export function diagnose(f: Failure): Verdict {
     if (cls === "context" || cls === "memory") {
       return {
         retry: retriesLeft ? { promptSuffix: "Be concise.", temperature: 0 } : undefined,
-        suggestions: [s("split-input", "agent.suggest.splitInput", { detail: "agent.suggest.splitInput.detail", action: { type: "split-input" } })],
+        suggestions: [splitSuggestion(f)],
         diagnosis: cls,
       };
     }
@@ -172,7 +185,7 @@ export function diagnose(f: Failure): Verdict {
   }
   if (!retriesLeft) {
     if (up) suggestions.push(s("larger-model", "agent.suggest.largerModel", { params: { tier: up }, action: { type: "retry", patch: { tier: up, temperature: 0, promptSuffix: feedback } } }));
-    if (long) suggestions.push(s("split-input", "agent.suggest.splitInput", { detail: "agent.suggest.splitInput.detail", action: { type: "split-input" } }));
+    if (long) suggestions.push(splitSuggestion(f));
     for (const alt of f.alternatives ?? []) suggestions.push(s(`switch-${alt}`, "agent.suggest.switchExecutor", { params: { executor: alt }, action: { type: "switch-executor", executor: alt } }));
     suggestions.push(s("retry", "agent.suggest.retry", { action: { type: "retry", patch: { temperature: 0.4, promptSuffix: feedback } } }));
   }
@@ -199,7 +212,7 @@ export async function review(f: Failure): Promise<Verdict> {
   if (modelCritic && generic && !v.retry && f.kind !== "aborted" && !f.signal?.aborted) {
     try {
       const m = await modelCritic(f, v);
-      if (m) return learned({ ...v, ...m, suggestions: m.suggestions.length ? m.suggestions : v.suggestions }, f);
+      if (m) return learned({ ...v, ...m, byModel: !!m.retry, suggestions: m.suggestions.length ? m.suggestions : v.suggestions }, f);
     } catch {
       /* stage 2 is best effort */
     }

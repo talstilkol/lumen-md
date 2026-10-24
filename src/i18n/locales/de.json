@@ -1429,5 +1429,13 @@
   "cmd.ai.cancel": "KI: Abbrechen",
   "cmd.ai.cancel.hint": "Stoppt alle laufenden KI-Anfragen (auch mit Esc)",
   "toast.aiCancelled": "KI-Anfrage abgebrochen ({count})",
-  "toast.aiNothingRunning": "Keine KI-Anfrage läuft"
+  "toast.aiNothingRunning": "Keine KI-Anfrage läuft",
+  "agent.suggest.splitDocument": "Dokument teilen und jeden Teil ausführen",
+  "agent.suggest.splitDocument.detail": "Führt den Befehl für Teile von etwa {size} Zeichen aus und führt die Antworten zusammen.",
+  "agent.suggest.splitInput.done": "Markieren Sie den gewünschten Teil und führen Sie den Befehl erneut aus.",
+  "agent.suggest.ollamaWaiting": "Warte auf Ollama unter {url}: `ollama serve` starten, dann ein Modell laden (noch {seconds} s)…",
+  "agent.suggest.ollamaUp": "Ollama antwortet unter {url}. Der Befehl wird erneut ausgeführt.",
+  "agent.suggest.ollamaStillDown": "Ollama antwortet unter {url} immer noch nicht. Starten Sie es und versuchen Sie es erneut.",
+  "agent.notGood.prompt": "Antwort von {agent}.",
+  "agent.notGood.button": "Nicht gut — erneut versuchen"
 }

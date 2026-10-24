@@ -1429,5 +1429,13 @@
   "cmd.ai.cancel": "ИИ: отменить",
   "cmd.ai.cancel.hint": "Останавливает все запросы ИИ (то же делает Esc)",
   "toast.aiCancelled": "Запрос ИИ отменён ({count})",
-  "toast.aiNothingRunning": "Нет активных запросов ИИ"
+  "toast.aiNothingRunning": "Нет активных запросов ИИ",
+  "agent.suggest.splitDocument": "Разбить документ и обработать каждую часть",
+  "agent.suggest.splitDocument.detail": "Выполняет команду для частей примерно по {size} символов и объединяет ответы.",
+  "agent.suggest.splitInput.done": "Выделите нужную часть и запустите команду снова.",
+  "agent.suggest.ollamaWaiting": "Ожидание Ollama по адресу {url}: запустите `ollama serve` и загрузите модель (осталось {seconds} с)…",
+  "agent.suggest.ollamaUp": "Ollama отвечает по адресу {url}. Команда запускается снова.",
+  "agent.suggest.ollamaStillDown": "Ollama всё ещё не отвечает по адресу {url}. Запустите его и попробуйте снова.",
+  "agent.notGood.prompt": "Ответ от {agent}.",
+  "agent.notGood.button": "Плохо — попробовать снова"
 }

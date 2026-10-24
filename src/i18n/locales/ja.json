@@ -1429,5 +1429,13 @@
   "cmd.ai.cancel": "AI: キャンセル",
   "cmd.ai.cancel.hint": "実行中の AI リクエストをすべて停止します（Esc でも可）",
   "toast.aiCancelled": "AI リクエストをキャンセルしました（{count}）",
-  "toast.aiNothingRunning": "実行中の AI リクエストはありません"
+  "toast.aiNothingRunning": "実行中の AI リクエストはありません",
+  "agent.suggest.splitDocument": "文書を分割して各部分を実行",
+  "agent.suggest.splitDocument.detail": "約 {size} 文字ずつの部分でコマンドを実行し、回答をまとめます。",
+  "agent.suggest.splitInput.done": "対象の部分を選択してから、もう一度コマンドを実行してください。",
+  "agent.suggest.ollamaWaiting": "{url} の Ollama を待っています：`ollama serve` を実行し、モデルを取得してください（残り {seconds} 秒）…",
+  "agent.suggest.ollamaUp": "{url} の Ollama が応答しました。コマンドを再実行します。",
+  "agent.suggest.ollamaStillDown": "{url} の Ollama がまだ応答しません。起動してからもう一度お試しください。",
+  "agent.notGood.prompt": "{agent} からの回答。",
+  "agent.notGood.button": "よくない — やり直す"
 }

@@ -286,6 +286,11 @@ export interface RetryPatch {
   systemOverride?: string;
   /** Try another executor. */
   executor?: ExecutorId;
+  /**
+   * Run the agent on parts of the input of at most this many characters and
+   * merge the answers (plan 5.6.2, the "split the document" suggestion).
+   */
+  split?: number;
 }
 
 export type SuggestionAction =
@@ -294,7 +299,11 @@ export type SuggestionAction =
   | { type: "switch-executor"; executor: ExecutorId }
   | { type: "set-policy"; policy: "local-only" | "local-first" | "cloud" }
   | { type: "open-docs"; key: string }
-  | { type: "split-input" };
+  | { type: "split-input" }
+  /** Wait for Ollama to answer (the user starts it), checking live (plan 5.6.5). */
+  | { type: "check-ollama" }
+  /** Run another palette command (add a key, open settings). */
+  | { type: "run-command"; id: string };
 
 export interface Suggestion {
   id: string;
@@ -340,6 +349,12 @@ export interface AgentDefinition<I extends AgentInput = AgentInput, O = string> 
   maxTokens?: number | ((input: I) => number);
   /** Stream deltas to the caller (text agents). */
   streaming?: boolean;
+  /**
+   * The answer of a part of the input means the same as of the whole, so
+   * the critic may offer "split the document" (5.6.2). Not for answers that
+   * point into the input (line numbers) or are one artefact (a diagram).
+   */
+  splittable?: boolean;
   /** Scopes this agent needs beyond `read`. */
   requires?: ToolScope[];
   /**
@@ -391,6 +406,10 @@ export interface AgentRun<O = unknown> {
   tokens: { input: number; output: number; estimated: boolean };
   /** Key of the input (agent + user prompt): a retry picked in the panel applies to this input. */
   inputKey?: string;
+  /** The run this one re-does: the user said its answer was not good (plan 5.6.3). */
+  retryOf?: string;
+  /** The user's verdict on this run's answer. */
+  feedback?: "bad";
   /** Ids of the changes this run's write tools staged (waiting for approval in `staging.ts`). */
   staged?: string[];
   /** Sources of the untrusted content the run had in its context (plan 2.7). */
@@ -441,6 +460,8 @@ export interface RunOptions {
   executor?: ExecutorId;
   /** Apply a critic patch from the start (a retry the user asked for). */
   patch?: RetryPatch;
+  /** One part of a split run (5.6.2): not announced as an answer of its own. */
+  part?: boolean;
   /**
    * A non-palette request that pays for itself (see ChatOptions.ownPrompt):
    * counted against the monthly quota here, never billed to a waiting

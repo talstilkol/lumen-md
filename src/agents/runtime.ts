@@ -251,6 +251,76 @@ export function sameScript(inputText: string, output: unknown): { ok: true } | {
   return { ok: false, reason: `the input is Hebrew but the answer is ${Math.round(r * 100)}% Hebrew`, hint: "Answer in Hebrew, the language of the user's text." };
 }
 
+/**
+ * Parts of at most `max` characters, cut at blank lines, then at line ends,
+ * then at sentence ends — never inside a fenced code block when a cut
+ * elsewhere fits.
+ */
+export function splitText(text: string, max: number): string[] {
+  const blocks: string[] = [];
+  let fence = false;
+  let cur = "";
+  for (const line of text.split("\n")) {
+    if (/^\s*(```|~~~)/.test(line)) fence = !fence;
+    cur += (cur ? "\n" : "") + line;
+    if (!fence && line.trim() === "") {
+      blocks.push(cur);
+      cur = "";
+    }
+  }
+  if (cur) blocks.push(cur);
+  const parts: string[] = [];
+  let acc = "";
+  const push = (piece: string) => {
+    if (acc && acc.length + 1 + piece.length > max) {
+      parts.push(acc);
+      acc = "";
+    }
+    if (piece.length <= max) acc = acc ? `${acc}\n${piece}` : piece;
+    else {
+      // One block longer than a part: cut it at sentence ends, else hard.
+      const sentences = piece.match(/[^.!?。\n]+[.!?。]*\s*|\n/g) ?? [piece];
+      for (const sentence of sentences) {
+        if (acc.length + sentence.length > max && acc) {
+          parts.push(acc);
+          acc = "";
+        }
+        if (sentence.length <= max) acc += sentence;
+        else {
+          // A sentence longer than a part: hard cuts, each a part of its own.
+          if (acc) parts.push(acc);
+          for (let i = 0; i < sentence.length; i += max) parts.push(sentence.slice(i, i + max));
+          acc = "";
+        }
+      }
+    }
+  };
+  for (const b of blocks) push(b.replace(/\n+$/, ""));
+  if (acc) parts.push(acc);
+  return parts.filter((p) => p.trim());
+}
+
+/** Merge the answers of the parts: text joined by a blank line; JSON objects with their lists concatenated (first value wins otherwise). */
+export function mergeOutputs<O>(outputs: O[]): O {
+  if (outputs.length <= 1) return outputs[0];
+  if (outputs.every((o) => typeof o === "string")) return (outputs as unknown as string[]).map((o) => o.trim()).join("\n\n") as unknown as O;
+  if (outputs.every((o) => o && typeof o === "object" && !Array.isArray(o))) {
+    const merged: Record<string, unknown> = {};
+    for (const o of outputs as unknown as Record<string, unknown>[]) {
+      for (const [k, v] of Object.entries(o)) {
+        if (Array.isArray(v)) {
+          const prev = Array.isArray(merged[k]) ? (merged[k] as unknown[]) : [];
+          // Lists of plain values (tags) without repeats.
+          merged[k] = v.every((x) => typeof x !== "object") ? [...new Set([...prev, ...v])] : [...prev, ...v];
+        } else if (!(k in merged)) merged[k] = v;
+      }
+    }
+    return merged as O;
+  }
+  if (outputs.every(Array.isArray)) return (outputs as unknown as unknown[][]).flat() as unknown as O;
+  return outputs[0];
+}
+
 /** A short stable key of an agent's input: a retry patch is bound to it. */
 export function inputKeyOf<I extends AgentInput>(def: AgentDefinition<I, unknown>, input: I): string {
   let text: string;
@@ -300,6 +370,12 @@ export async function runAgent<I extends AgentInput, O = string>(def: AgentDefin
       if (status === "aborted") await import("./staging").then((m) => m.discardRunChanges(run.id)).catch(() => 0);
     }
     await recordRun(run as AgentRun);
+    // 5.6.3: the answer can be marked "not good"; a re-done run closes its loop.
+    if (!opts.part) {
+      const sug = await import("./suggestions");
+      if (run.retryOf) sug.noteRetried(run.retryOf, run.id);
+      if (status === "ok") sug.announceAnswer({ run: run as AgentRun, commandId: run.commandId });
+    }
     // T30: if this run follows a suggestion the user picked, learn from it.
     await import("./outcomes").then((m) => m.noteRunOutcome(run as AgentRun)).catch(() => undefined);
     return run;
@@ -343,17 +419,40 @@ export async function runAgent<I extends AgentInput, O = string>(def: AgentDefin
   const preference = def.executorPreference ?? DEFAULT_EXECUTOR_ORDER;
 
   // A suggestion the user picked for this agent and this input (suggestions panel) applies once.
-  const { peekNextRunExecutor, takeNextRunPatch } = await import("./suggestions");
+  const { peekNextRunExecutor, takeNextRunPatch, retryOfPending } = await import("./suggestions");
   const pendingExecutor = peekNextRunExecutor(def.id, run.inputKey);
+  // "Not good" (5.6.3): this run re-does one the user rejected; the trace links them.
+  const redo = retryOfPending(def.id, run.inputKey);
+  if (redo) run.retryOf = redo;
   let pick = await pickExecutor(preference, opts.executor ?? pendingExecutor);
   const pending = takeNextRunPatch(def.id, run.inputKey);
   if (!pick.executor) {
-    const verdict = await review({ kind: "no-executor", attempt: 1, maxRetries, tier: def.tier ?? "small", executor: null, skipped: pick.skipped, inputChars });
+    const verdict = await review({ kind: "no-executor", attempt: 1, maxRetries, tier: def.tier ?? "small", executor: null, skipped: pick.skipped, inputChars, splittable: !!def.splittable });
     step({ kind: "critic", ms: 0, label: verdict.diagnosis, ok: false, detail: pick.skipped.map((x) => `${x.id}: ${x.availability.reason ?? "unavailable"}`).join("; ") });
     return finish("failed", { errorCode: "no-executor", error: `No AI executor is available (${verdict.diagnosis})`, suggestions: verdict.suggestions });
   }
   let executor = pick.executor;
   let patch: RetryPatch = { ...(pending ?? {}), ...(opts.patch ?? {}) };
+
+  // "Split the document" (5.6.2): the agent runs on each part, and the answers are merged.
+  if (patch.split && def.splittable && (input.text ?? "").length > patch.split) {
+    const { split, ...rest } = patch;
+    const parts = splitText(input.text ?? "", split);
+    const outputs: O[] = [];
+    for (const [i, part] of parts.entries()) {
+      if (opts.signal?.aborted) return finish("aborted", { errorCode: "aborted", error: "aborted" });
+      const sub = await runAgent(def, { ...input, text: part } as I, { ...opts, patch: rest, document: part, selection: undefined, executor: executor.id, part: true });
+      run.tokens.input += sub.tokens.input;
+      run.tokens.output += sub.tokens.output;
+      run.attempts = Math.max(run.attempts, sub.attempts);
+      run.executor = sub.executor;
+      run.model = sub.model;
+      step({ kind: "model", ms: sub.endedAt - sub.startedAt, label: `part ${i + 1}/${parts.length}`, ok: sub.status === "ok", detail: sub.status === "ok" ? `${part.length} chars` : sub.error });
+      if (sub.status !== "ok" || sub.output === undefined) return finish(sub.status === "aborted" ? "aborted" : "failed", { errorCode: sub.errorCode ?? "error", error: `part ${i + 1}/${parts.length}: ${sub.error ?? sub.status}`, suggestions: sub.suggestions });
+      outputs.push(sub.output);
+    }
+    return finish("ok", { output: mergeOutputs(outputs) });
+  }
 
   // The context the agent always needs, fetched once through the tool path
   // (plan 5.3); every attempt starts from it. Before the cache lookup: an
@@ -438,7 +537,9 @@ export async function runAgent<I extends AgentInput, O = string>(def: AgentDefin
     }
   }
 
-  for (let attempt = 1; attempt <= maxRetries + 1; attempt++) {
+  // One more attempt when the model critic diagnosed the failure and proposed its own retry (5.6.1).
+  let modelRetryUsed = false;
+  for (let attempt = 1; attempt <= maxRetries + 1 + (modelRetryUsed ? 1 : 0); attempt++) {
     run.attempts = attempt;
     if (patch.executor && patch.executor !== executor.id) {
       const forced = getExecutor(patch.executor);
@@ -530,21 +631,21 @@ export async function runAgent<I extends AgentInput, O = string>(def: AgentDefin
         }
       }
       if (finalText === null) {
-        failure = { kind: "empty", attempt, maxRetries, tier, executor: executor.id, reason: `no final answer after ${maxSteps} steps`, inputChars };
+        failure = { kind: "empty", attempt, maxRetries, tier, executor: executor.id, reason: `no final answer after ${maxSteps} steps`, inputChars, splittable: !!def.splittable };
       }
     } catch (e) {
       if (isAbort(e, opts.signal)) return finish("aborted", { errorCode: "aborted", error: "aborted" });
       if (e instanceof AiQuotaExceededError) return finish("failed", { errorCode: "quota", error: e.message });
       const msg = (e as Error)?.message ?? String(e);
       step({ kind: "model", ms: 0, label: executor.id, ok: false, detail: truncate(msg, 300) });
-      failure = { kind: "error", attempt, maxRetries, tier, executor: executor.id, reason: msg, inputChars };
+      failure = { kind: "error", attempt, maxRetries, tier, executor: executor.id, reason: msg, inputChars, splittable: !!def.splittable };
     }
 
     if (!failure && finalText !== null) {
       let output: O | undefined;
       const text = finalText.trim();
       if (!text) {
-        failure = { kind: "empty", attempt, maxRetries, tier, executor: executor.id, reason: "empty answer", inputChars };
+        failure = { kind: "empty", attempt, maxRetries, tier, executor: executor.id, reason: "empty answer", inputChars, splittable: !!def.splittable };
       } else {
         try {
           if (def.parse) output = def.parse(text, input);
@@ -554,7 +655,7 @@ export async function runAgent<I extends AgentInput, O = string>(def: AgentDefin
             output = j.value as O;
           } else output = text as unknown as O;
         } catch (e) {
-          failure = { kind: "parse", attempt, maxRetries, tier, executor: executor.id, reason: (e as Error)?.message ?? "parse failed", hint: def.outputSchema ? "Reply with JSON only." : undefined, inputChars };
+          failure = { kind: "parse", attempt, maxRetries, tier, executor: executor.id, reason: (e as Error)?.message ?? "parse failed", hint: def.outputSchema ? "Reply with JSON only." : undefined, inputChars, splittable: !!def.splittable };
           step({ kind: "validate", ms: 0, label: "parse", ok: false, detail: failure.reason });
         }
       }
@@ -565,13 +666,13 @@ export async function runAgent<I extends AgentInput, O = string>(def: AgentDefin
         const errors = validateSchema(output, def.outputSchema);
         step({ kind: "validate", ms: 0, label: "schema", ok: errors.length === 0, detail: errors.length ? formatSchemaErrors(errors) : undefined });
         if (errors.length) {
-          failure = { kind: "validation", attempt, maxRetries, tier, executor: executor.id, label: "schema", reason: `JSON does not match the required schema: ${formatSchemaErrors(errors)}`, hint: "Reply with JSON matching the schema exactly.", inputChars };
+          failure = { kind: "validation", attempt, maxRetries, tier, executor: executor.id, label: "schema", reason: `JSON does not match the required schema: ${formatSchemaErrors(errors)}`, hint: "Reply with JSON matching the schema exactly.", inputChars, splittable: !!def.splittable };
         }
       }
       if (!failure && output !== undefined && languageMode(def, input) === "input") {
         const r = sameScript(inputTextOf(def, input), output);
         step({ kind: "validate", ms: 0, label: "language", ok: r.ok, detail: r.ok ? undefined : r.reason });
-        if (!r.ok) failure = { kind: "validation", attempt, maxRetries, tier, executor: executor.id, label: "language", reason: r.reason, hint: r.hint, inputChars };
+        if (!r.ok) failure = { kind: "validation", attempt, maxRetries, tier, executor: executor.id, label: "language", reason: r.reason, hint: r.hint, inputChars, splittable: !!def.splittable };
       }
       if (!failure && output !== undefined) {
         for (const v of def.validators ?? []) {
@@ -579,7 +680,7 @@ export async function runAgent<I extends AgentInput, O = string>(def: AgentDefin
           const r = await v.check(output, input, { pages: ctx.pages ?? new Map() });
           step({ kind: "validate", ms: Date.now() - t2, label: v.name, ok: r.ok, detail: r.ok ? undefined : r.reason });
           if (!r.ok) {
-            failure = { kind: "validation", attempt, maxRetries, tier, executor: executor.id, label: v.name, reason: r.reason, hint: r.hint, inputChars };
+            failure = { kind: "validation", attempt, maxRetries, tier, executor: executor.id, label: v.name, reason: r.reason, hint: r.hint, inputChars, splittable: !!def.splittable };
             break;
           }
         }
@@ -605,6 +706,13 @@ export async function runAgent<I extends AgentInput, O = string>(def: AgentDefin
     if (verdict.retry && attempt <= maxRetries) {
       patch = { ...patch, ...verdict.retry };
       step({ kind: "retry", ms: 0, label: `attempt ${attempt + 1}`, ok: true, detail: JSON.stringify({ tier: patch.tier, temperature: patch.temperature, executor: patch.executor }) });
+      continue;
+    }
+    if (verdict.retry && verdict.byModel && !modelRetryUsed) {
+      // The retries are spent and the model critic proposed a concrete change: one attempt with it.
+      modelRetryUsed = true;
+      patch = { ...patch, ...verdict.retry };
+      step({ kind: "retry", ms: 0, label: `attempt ${attempt + 1} (model critic)`, ok: true, detail: truncate(verdict.retry.promptSuffix ?? "", 200) });
       continue;
     }
     return finish("failed", { errorCode: failure!.kind, error: failure!.reason ?? failure!.kind, suggestions: verdict.suggestions });
