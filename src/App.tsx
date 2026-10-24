@@ -8,10 +8,10 @@ import { StatusBar } from "./ui/StatusBar";
 import { ScrollProgress } from "./ui/ScrollProgress";
 import { SearchReplace } from "./ui/SearchReplace";
 const GraphView = lazy(() => import("./ui/GraphView").then(m => ({ default: m.GraphView })));
-// γ.2 — Canvas now backed by tldraw. The legacy custom-canvas component
+// Canvas on Excalidraw (plan 4.19; γ.2 had it on tldraw). The legacy custom-canvas component
 // `CanvasWhiteboard.tsx` remains in tree as a fallback in case we ever
 // need to surface old `.canvas.json` files; it's intentionally unused.
-const CanvasWhiteboard = lazy(() => import("./ui/CanvasTldraw").then(m => ({ default: m.CanvasTldraw })));
+const CanvasWhiteboard = lazy(() => import("./ui/CanvasExcalidraw").then(m => ({ default: m.CanvasExcalidraw })));
 const PluginGallery = lazy(() => import("./ui/PluginGallery").then(m => ({ default: m.PluginGallery })));
 const TemplateGallery = lazy(() => import("./ui/TemplateGallery").then(m => ({ default: m.TemplateGallery })));
 const AuditLog = lazy(() => import("./ui/AuditLog").then(m => ({ default: m.AuditLog })));

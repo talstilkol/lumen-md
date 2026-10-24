@@ -62,7 +62,11 @@ const BUDGETS = [
   { name: "vendor: katex",      pattern: /^vendor-katex-/,        budgetKb: 110 },
   { name: "vendor: leaflet",    pattern: /^vendor-leaflet-/,      budgetKb: 60 },
   { name: "vendor: git",        pattern: /^vendor-git-/,          budgetKb: 110 },
-  { name: "vendor: tldraw",     pattern: /^vendor-tldraw-/,       budgetKb: 420 },
+  // Excalidraw (the canvas, plan 4.19), lazy: the editor and its deps. Its
+  // Mermaid → diagram dialog is a separate chunk (vendor-excalidraw-mermaid),
+  // loaded on demand; fonts are static files under public/excalidraw/.
+  { name: "vendor: excalidraw-mermaid", pattern: /^vendor-excalidraw-mermaid-/, budgetKb: 120 },
+  { name: "vendor: excalidraw", pattern: /^vendor-excalidraw-/,   budgetKb: 700 },
   // @google/model-viewer + three.js, self-hosted (CSP bans the unpkg CDN).
   // Dynamic-imported only when a document contains a ```model3d block.
   { name: "vendor: modelviewer", pattern: /^vendor-modelviewer-/, budgetKb: 320 },
@@ -80,9 +84,8 @@ const BUDGETS = [
   // abcjs (music notation), lazy-loaded by the abc block. Same size as
   // before; Vite 6 named the chunk `index-*` (it fell under "entry index").
   { name: "lazy: abcjs",        pattern: /^abcjs-/,               budgetKb: 160 },
-  // tldraw canvas block (lazy): its radix-ui / tiptap dependencies now sit in
-  // this chunk instead of vendor-tldraw.
-  { name: "lazy: canvas",       pattern: /^CanvasTldraw-/,        budgetKb: 130 },
+  // The canvas dialog around Excalidraw (lazy).
+  { name: "lazy: canvas",       pattern: /^CanvasExcalidraw-/,    budgetKb: 40 },
   // cytoscape (mermaid's graph layouts), lazy, split out of vendor-mermaid.
   { name: "lazy: cytoscape",    pattern: /^cytoscape/,            budgetKb: 150 },
   // TypeScript compiler + ES/DOM lib .d.ts files for the opt-in "TypeScript
@@ -150,6 +153,23 @@ async function main() {
   }
 
   console.log(`\n  Total gzipped: ${format(total)}`);
+
+  // Plan 4.19: tldraw left the bundle with the move to Excalidraw. No chunk
+  // may carry it again (its licence beacon and CDN fonts are third-party
+  // traffic), and nothing may point at its CDN.
+  const TLDRAW_MARKS = [/vendor-tldraw-/i, /cdn\.tldraw\.com/, /tldraw\/tldraw\.css/, /@tldraw\//, /"tldraw"/];
+  const tldrawHits = [];
+  for (const file of jsFiles) {
+    if (/^vendor-tldraw-/.test(file)) tldrawHits.push(file);
+    else {
+      const text = await fs.readFile(path.join(DIST, file), "utf8");
+      if (TLDRAW_MARKS.some((re) => re.test(text))) tldrawHits.push(file);
+    }
+  }
+  if (tldrawHits.length) {
+    failed++;
+    console.log(`  ✗ tldraw is in the build output: ${tldrawHits.join(", ")}`);
+  } else console.log("  ✓ tldraw absent from the build output");
 
   // C2: the budget that matters for startup is the SUM of what index.html
   // loads before the app can run (its entry script + every modulepreload),

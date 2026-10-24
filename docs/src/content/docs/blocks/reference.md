@@ -91,7 +91,7 @@ Each dynamic block is wrapped in an `ErrorBoundary` so a single broken block doe
 
 ## Lazy loading
 
-Every block is `React.lazy`-imported. The block's vendor (Mermaid 718 KB, ECharts 343 KB, Tldraw 400 KB gzipped) only loads when the user actually opens a doc that uses it. The main bundle stays at ~221 KB gzipped regardless of how many block types Lumen supports.
+Every block is `React.lazy`-imported. The block's vendor (Mermaid 718 KB, ECharts 343 KB, Excalidraw ≈ 600 KB gzipped) only loads when the user actually opens a doc that uses it. The main bundle stays at ~221 KB gzipped regardless of how many block types Lumen supports.
 
 ## Authoring a new block
 

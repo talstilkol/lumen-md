@@ -63,16 +63,10 @@ const RULES: Rule[] = [
     category: "model-download",
     reason: "Model download (Hugging Face)",
   },
-  // tldraw (the canvas) calls its CDN in production. The licence check fetches
-  // watermark-track.svg with the page address in the query: that beacon is
-  // third-party traffic. Fonts, icons and translations from the same host
-  // carry no user data and the canvas needs them. Plan 1.9 / 4.19.
-  {
-    test: (h, p) => h === "cdn.tldraw.com" && /watermark-track/i.test(p),
-    category: "third-party",
-    reason: "tldraw canvas — licence beacon (sends the page address)",
-  },
-  { test: (h) => h === "cdn.tldraw.com", category: "static-asset", reason: "tldraw canvas — fonts, icons and translations" },
+  // Excalidraw (the canvas, plan 4.19) names esm.sh as the fallback for its
+  // fonts. Lumen serves them from its own origin (EXCALIDRAW_ASSET_PATH), so
+  // this host is never needed; a request to it would be third-party traffic.
+  { test: (h) => h === "esm.sh", category: "third-party", reason: "Excalidraw font fallback CDN (not needed: fonts are served locally)" },
   {
     test: (h) => h === "raw.githubusercontent.com",
     category: "model-download",
