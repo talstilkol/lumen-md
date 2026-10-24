@@ -185,11 +185,11 @@ export function installTrustedTypesPolicies(
     factory.createPolicy("default", {
       createHTML: sanitizeForDefaultPolicy,
       createScriptURL: allowScriptUrl,
-      // String → code (eval / new Function). The CSP already grants
-      // 'unsafe-eval' because @hpcc-js/wasm (Graphviz, Emscripten embind)
-      // generates its bindings with `new Function` on the main thread;
-      // refusing here would break every ```dot block. Trusted Types still
-      // guard every HTML and script-URL sink above.
+      // String → code (eval / new Function). The page CSP no longer allows
+      // eval at all (F4: Graphviz moved into a worker with its own policy),
+      // so this pass-through is never reached in production; it stays for
+      // dev, where no CSP header is served. Trusted Types still guard every
+      // HTML and script-URL sink above.
       createScript: passThroughScript,
     });
     defaultInstalled = true;
