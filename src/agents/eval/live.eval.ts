@@ -22,7 +22,7 @@ vi.mock("../../sync/git", async (orig) => (await import("../../__tests__/helpers
 
 import { EVAL_CASES } from "./fixtures";
 import { runEvalCase } from "./run";
-import { formatEvalReport, passed, type CaseResult } from "./score";
+import { formatEvalHtml, formatEvalReport, passed, type CaseResult } from "./score";
 
 const url = process.env.LUMEN_EVAL_OLLAMA_URL || "http://localhost:11434";
 const model = process.env.LUMEN_EVAL_MODEL || "qwen2.5:7b";
@@ -60,6 +60,8 @@ describe(`agent eval — ${model} @ ${url}`, () => {
     mkdirSync(outDir, { recursive: true });
     writeFileSync(join(outDir, `agents-${date}-${slug}.md`), formatEvalReport(results, { model, url, date }));
     writeFileSync(join(outDir, `agents-${date}-${slug}.json`), JSON.stringify({ model, url, date, results }, null, 2));
+    // The local HTML report (7.3.3).
+    writeFileSync(join(outDir, `agents-${date}-${slug}.html`), formatEvalHtml(results, { model, url, date }));
     // hygiene-allow: tells the person running the eval where the report is
     console.log(`\nReport: ${join(outDir, `agents-${date}-${slug}.md`)}`);
   }, 60 * 60 * 1000);

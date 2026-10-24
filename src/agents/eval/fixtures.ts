@@ -11,6 +11,7 @@
  * with the real model's answer.
  */
 
+import { MORE_CASES } from "./moreCases";
 import type { AgentInput, ToolScope } from "../types";
 import type { Check } from "./score";
 
@@ -102,7 +103,7 @@ const SALES_CSV = `חודש,מכירות,הוצאות
 מרץ,160,95
 אפריל,150,100`;
 
-export const EVAL_CASES: EvalCase[] = [
+const BASE_CASES: EvalCase[] = [
   {
     id: "tagger-he",
     agent: "tagger",
@@ -271,3 +272,6 @@ export const EVAL_CASES: EvalCase[] = [
     tool: { name: "list_files", args: { prefix: "notes/" } },
   },
 ];
+
+/** Every eval case: the original set plus 7.3's (every agent with at least five, Hebrew and English). */
+export const EVAL_CASES: EvalCase[] = [...BASE_CASES, ...MORE_CASES];
