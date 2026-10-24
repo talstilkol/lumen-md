@@ -20,7 +20,18 @@ export const ANALYST_CONTRACT =
   'Print exactly one line at the end: json.dumps({"answer": <number or string>}) — optionally with "chart": {"labels": [...], "values": [...], "title": "..."} ' +
   "when a chart helps. Round only when the question says so. No randomness, no clock, no network, no files.";
 
-const FORBIDDEN = /\b(?:import\s+(?:os|sys|subprocess|socket|urllib|http|requests|random|time|secrets)|from\s+(?:os|sys|subprocess|socket|urllib|http|requests|random|time|secrets)\b|open\(|eval\(|exec\(|__import__)/;
+const BANNED_MODULES = new Set(["os", "sys", "subprocess", "socket", "urllib", "http", "requests", "random", "time", "secrets", "shutil", "pathlib", "ctypes", "js", "pyodide", "micropip"]);
+const BANNED_CALLS = /\b(?:open|eval|exec|compile|__import__)\s*\(/;
+
+/** The modules a program imports: `import a, b as c` and `from a.b import x`, top-level names. */
+export function importedModules(code: string): string[] {
+  const out: string[] = [];
+  for (const m of code.matchAll(/^\s*import\s+([^\n#]+)/gm)) for (const part of m[1].split(",")) out.push(part.trim().split(/\s+/)[0].split(".")[0]);
+  for (const m of code.matchAll(/^\s*from\s+([\w.]+)\s+import\b/gm)) out.push(m[1].split(".")[0]);
+  return out.filter(Boolean);
+}
+
+const usesBanned = (code: string) => importedModules(code).some((m) => BANNED_MODULES.has(m)) || BANNED_CALLS.test(code);
 
 export const analystAgent: AgentDefinition<AnalystInput, string> = registerAgent<AnalystInput, string>({
   id: "analyst",
@@ -39,7 +50,7 @@ export const analystAgent: AgentDefinition<AnalystInput, string> = registerAgent
       check: (code) => {
         if (!/inputs\s*\[\s*["']csv["']\s*\]/.test(code)) return fail("the program does not read inputs[\"csv\"]", 'Read the table from inputs["csv"].');
         if (!/json\.dumps\s*\(/.test(code) || !/["']answer["']/.test(code)) return fail("the program does not print the answer as JSON", 'End with print(json.dumps({"answer": ...})).');
-        if (FORBIDDEN.test(code)) return fail("the program uses a forbidden module or call", "Standard library only: csv, io, statistics, math, datetime, json.");
+        if (usesBanned(code)) return fail("the program uses a forbidden module or call", "Standard library only: csv, io, statistics, math, datetime, json.");
         return ok;
       },
     },

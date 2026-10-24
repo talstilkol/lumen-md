@@ -78,6 +78,11 @@ describe("the analyst agent's program validator", () => {
     expect(await check('x = inputs["csv"]\nprint(1)')).toMatchObject({ ok: false });
     expect(await check('import random\nx = inputs["csv"]\nprint(json.dumps({"answer": random.random()}))')).toMatchObject({ ok: false });
     expect(await check('import os\nx = inputs["csv"]\nprint(json.dumps({"answer": 1}))')).toMatchObject({ ok: false });
+    expect(await check('import csv, json, random\nx = inputs["csv"]\nprint(json.dumps({"answer": 1}))')).toMatchObject({ ok: false });
+    expect(await check('from os.path import join\nimport json\nx = inputs["csv"]\nprint(json.dumps({"answer": 1}))')).toMatchObject({ ok: false });
+    expect(await check('import json\nx = inputs["csv"]\nprint(json.dumps({"answer": len(open("f").read())}))')).toMatchObject({ ok: false });
+    // "time" inside a word or a datetime import is fine.
+    expect(await check('import csv, io, json\nfrom datetime import datetime\nruntime = 1\nx = inputs["csv"]\nprint(json.dumps({"answer": runtime}))')).toMatchObject({ ok: true });
   });
 });
 
