@@ -16,7 +16,7 @@ vi.mock("../text/langId", () => ({
   languageCode: (s: string) => ({ english: "en", hebrew: "he", עברית: "he", klingon: null } as Record<string, string | null>)[s.toLowerCase()] ?? (s.length === 2 ? s : null),
 }));
 vi.mock("../ui/PromptDialog", () => ({ uiConfirm: vi.fn(async () => true) }));
-vi.mock("../i18n", () => ({ t: (k: string) => k, getLocale: () => "en" }));
+vi.mock("../i18n", () => ({ t: (k: string) => k, getLocale: () => "en", registerEnglish: () => undefined }));
 
 import { translateMarkdownDetailed } from "../agents/commands";
 
