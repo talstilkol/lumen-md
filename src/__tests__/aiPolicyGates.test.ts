@@ -36,7 +36,7 @@ describe("AI policy gates on direct cloud paths", () => {
     expect(String(fetchSpy.mock.calls[0][0])).toContain("api.openai.com");
   });
 
-  it("the public LanguageTool API is never contacted; background checks return nothing", async () => {
+  it("the public LanguageTool API is never contacted; background checks spell English on this device only", async () => {
     const { checkGrammar } = await import("../ai/grammar");
     expect(await checkGrammar("This are a sentence with enough words to be checked by the tool.")).toEqual([]);
     expect(fetchSpy).not.toHaveBeenCalled();

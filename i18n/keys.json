@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-10-24T18:19:38.974Z",
+  "generated_at": "2026-10-24T18:29:09.713Z",
   "source": "src/i18n/index.ts (en bundle) + src/i18n/lazy/*.json",
-  "count": 1470,
+  "count": 1489,
   "entries": [
     {
       "key": "cmd.nikud.add",
@@ -33,6 +33,13 @@
       "key": "cmd.nikud.remove.hint",
       "en": "Strip the vowel points from the selection (or the whole note)",
       "vars": []
+    },
+    {
+      "key": "spell.en.unknown",
+      "en": "“{word}”: unknown word (English dictionary on this device)",
+      "vars": [
+        "word"
+      ]
     },
     {
       "key": "toolbar.tagline",
@@ -7722,6 +7729,96 @@
     {
       "key": "chart.alternatives",
       "en": "Chart suggestions",
+      "vars": []
+    },
+    {
+      "key": "caption.purpose",
+      "en": "Describe images on this device (alt text)",
+      "vars": []
+    },
+    {
+      "key": "caption.attribution.florence",
+      "en": "Florence-2 © Microsoft, MIT License; ONNX conversion by onnx-community (Hugging Face).",
+      "vars": []
+    },
+    {
+      "key": "caption.attribution.smolvlm",
+      "en": "SmolVLM-256M-Instruct © Hugging Face, Apache License 2.0.",
+      "vars": []
+    },
+    {
+      "key": "ai.doctor.check.cspLocal",
+      "en": "This build may reach the local services (CSP: ports 8010 and 8787)",
+      "vars": []
+    },
+    {
+      "key": "ai.doctor.check.engines",
+      "en": "On-device engines",
+      "vars": []
+    },
+    {
+      "key": "ai.doctor.check.modelHost",
+      "en": "Host for Lumen's converted models (Opus-MT, Nakdimon)",
+      "vars": []
+    },
+    {
+      "key": "ai.doctor.check.translate",
+      "en": "Local translation (Chrome, Opus-MT, M2M100)",
+      "vars": []
+    },
+    {
+      "key": "ai.doctor.check.spellEn",
+      "en": "English spelling on this device",
+      "vars": []
+    },
+    {
+      "key": "ai.doctor.check.spellHe",
+      "en": "Hebrew spelling dictionary",
+      "vars": []
+    },
+    {
+      "key": "ai.doctor.check.nikud",
+      "en": "Hebrew niqqud on this device",
+      "vars": []
+    },
+    {
+      "key": "ai.doctor.check.caption",
+      "en": "Image descriptions on this device",
+      "vars": []
+    },
+    {
+      "key": "ai.doctor.fix.modelHost",
+      "en": "No host is set for the converted models yet (plan 15.9); until then these engines stay off and the AI model is used instead.",
+      "vars": []
+    },
+    {
+      "key": "ai.doctor.fix.modelChecksums",
+      "en": "The host is set but the registry has no files for these models; run the conversion workflow and copy its checksums:",
+      "vars": []
+    },
+    {
+      "key": "ai.doctor.fix.translate",
+      "en": "No local layer for English↔Hebrew yet: M2M100 (MIT, about 630 MB) downloads on first use with your consent, or use Chrome with its translator.",
+      "vars": []
+    },
+    {
+      "key": "ai.doctor.fix.reload",
+      "en": "The dictionary did not load; reload the page and check again:",
+      "vars": []
+    },
+    {
+      "key": "ai.doctor.fix.spellHe",
+      "en": "Download the Hebrew dictionary (Hspell, 5.7 MB, AGPL-3.0) to this device:",
+      "vars": []
+    },
+    {
+      "key": "ai.doctor.action.downloadHebrewDictionary",
+      "en": "Download (5.7 MB)",
+      "vars": []
+    },
+    {
+      "key": "ai.doctor.action.useLocalServices",
+      "en": "Use the local services",
       "vars": []
     },
     {

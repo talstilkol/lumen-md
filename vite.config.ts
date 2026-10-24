@@ -53,6 +53,27 @@ const yWebsocketInstalled = existsSync(
 );
 
 /**
+ * `virtual:lumen-dictionary-en` — the en-US Hunspell files of
+ * dictionary-en as two strings, for the English spelling worker (plan
+ * 6.10). The package's own entry reads them with node:fs, and its exports
+ * map hides the files themselves, so they are read here at build time.
+ */
+const DICTIONARY_EN_ID = "virtual:lumen-dictionary-en";
+const dictionaryEn = {
+  name: "lumen-dictionary-en",
+  resolveId(id: string) {
+    return id === DICTIONARY_EN_ID ? "\0" + DICTIONARY_EN_ID : null;
+  },
+  load(id: string) {
+    if (id !== "\0" + DICTIONARY_EN_ID) return null;
+    const dir = path.resolve(__dirname, "node_modules/dictionary-en");
+    const aff = readFileSync(path.join(dir, "index.aff"), "utf8");
+    const dic = readFileSync(path.join(dir, "index.dic"), "utf8");
+    return `export const aff = ${JSON.stringify(aff)};\nexport const dic = ${JSON.stringify(dic)};\n`;
+  },
+};
+
+/**
  * Tiny Vite plugin: rewrites clean URLs (`/roadmap`, `/landing`) to
  * their `.html` counterparts in `public/`. Production deployments
  * usually handle this at the proxy layer; this keeps dev / preview
@@ -190,9 +211,12 @@ export default defineConfig({
   define: {
     __LUMEN_RUNTIME_CACHES__: JSON.stringify(RUNTIME_CACHES.map((c) => c.cacheName)),
   },
+  // Worker bundles get only these plugins (plus Vite's own).
+  worker: { plugins: () => [dictionaryEn] },
   plugins: [
     react(),
     cleanUrlAliases,
+    dictionaryEn,
     // Adds the deployment's own worker origins (VITE_*_ENDPOINT …) to the
     // CSP connect-src of index.html, dist/_headers and the nginx image.
     cspEndpointsPlugin(),

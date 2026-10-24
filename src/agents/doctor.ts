@@ -21,7 +21,7 @@ export interface DoctorFix {
   /** Shell command to copy, when the fix happens outside the browser. */
   command?: string;
   /** In-app action the panel can run. */
-  action?: "persist" | "openSettings" | "pullModel" | "setPolicyLocalFirst" | "retry";
+  action?: "persist" | "openSettings" | "pullModel" | "setPolicyLocalFirst" | "retry" | "downloadHebrewDictionary" | "useLocalServices";
   /** Argument for the action (model name for `pullModel`). */
   arg?: string;
   url?: string;
@@ -51,7 +51,13 @@ export interface DoctorOptions {
   golden?: boolean;
   /** Per-request timeout for network probes. */
   timeoutMs?: number;
+  /** Stage-6 engine probes (tests); see ./doctorEngines.ts. */
+  engines?: Partial<import("./doctorEngines").EngineProbe>;
 }
+
+/** The local services of docker/local-ai.yml, and the addresses the app uses for them. */
+export const LOCAL_SERVICES = { grammar: "http://localhost:8010/v2/check", research: "http://localhost:8787" } as const;
+const DOCKER_UP = "docker compose -f docker/local-ai.yml up -d";
 
 export const RECOMMENDED_EMBED_MODEL = "nomic-embed-text";
 
@@ -300,23 +306,59 @@ export async function runDoctor(opts: DoctorOptions = {}): Promise<DoctorReport>
   }
 
   // 8. Local services: grammar (LanguageTool) and research (SearXNG / worker).
+  // First, can this build reach them at all (CSP connect-src, 7.4.1)?
+  {
+    const blocked = Object.values(LOCAL_SERVICES).filter((u) => !connectAllowedByCsp(u)).map((u) => new URL(u).origin);
+    push({
+      id: "csp.local",
+      title: "ai.doctor.check.cspLocal",
+      status: blocked.length ? "fail" : "ok",
+      detail: blocked.length ? blocked.join(", ") : Object.values(LOCAL_SERVICES).map((u) => new URL(u).port).join(", "),
+      fix: blocked.length ? { label: "ai.doctor.fix.csp", command: `VITE_CSP_CONNECT_EXTRA="${blocked.join(" ")}" npm run build` } : undefined,
+    });
+  }
   {
     const { grammarEndpoint } = await import("../ai/grammar");
     const g = grammarEndpoint();
     const local = isLocalOrigin(g);
     if (policy === "local-only" && !local) {
-      push({ id: "grammar", title: "ai.doctor.check.grammar", status: "warn", detail: g, fix: { label: "ai.doctor.fix.docker", command: "docker compose -f docker/local-ai.yml up -d" } });
+      // English spelling still works on the device (6.10); LanguageTool needs the local service.
+      push({ id: "grammar", title: "ai.doctor.check.grammar", status: "warn", detail: g, fix: { label: "ai.doctor.fix.docker", command: DOCKER_UP, action: "useLocalServices" } });
     } else {
       const [r, ms] = await timed(() => probe(g.replace(/\/check$/, "/languages"), { signal: opts.signal, timeoutMs }));
-      push({ id: "grammar", title: "ai.doctor.check.grammar", status: "error" in r ? "warn" : r.status < 400 ? "ok" : "warn", detail: `${g}${"error" in r ? ` — ${r.error}` : ""}`, ms, fix: "error" in r && local ? { label: "ai.doctor.fix.docker", command: "docker compose -f docker/local-ai.yml up -d" } : undefined });
+      const bad = "error" in r || r.status >= 400;
+      push({
+        id: "grammar",
+        title: "ai.doctor.check.grammar",
+        status: bad ? "warn" : "ok",
+        detail: `${g}${"error" in r ? ` — ${r.error}` : !bad ? "" : ` — HTTP ${r.status}`}`,
+        ms,
+        fix: !bad ? undefined : local ? { label: "ai.doctor.fix.docker", command: DOCKER_UP } : { label: "ai.doctor.fix.docker", command: DOCKER_UP, action: "useLocalServices" },
+      });
     }
     const { researchEndpoint } = await import("../research/client");
     const re = researchEndpoint();
-    if (!re) push({ id: "research", title: "ai.doctor.check.research", status: "skip", fix: { label: "ai.doctor.fix.research", action: "openSettings" } });
+    if (!re) push({ id: "research", title: "ai.doctor.check.research", status: "skip", fix: { label: "ai.doctor.fix.research", command: DOCKER_UP, action: "useLocalServices" } });
     else {
       const [r, ms] = await timed(() => probe(`${re}/healthz`, { signal: opts.signal, timeoutMs }));
-      push({ id: "research", title: "ai.doctor.check.research", status: "error" in r ? "warn" : r.status < 400 ? "ok" : "warn", detail: `${re}${"error" in r ? ` — ${r.error}` : ""}`, ms });
+      const bad = "error" in r || r.status >= 400;
+      push({
+        id: "research",
+        title: "ai.doctor.check.research",
+        status: bad ? "warn" : "ok",
+        detail: `${re}${"error" in r ? ` — ${r.error}` : !bad ? "" : ` — HTTP ${r.status}`}`,
+        ms,
+        fix: !bad ? undefined : isLocalOrigin(re) ? { label: "ai.doctor.fix.docker", command: DOCKER_UP } : { label: "ai.doctor.fix.research", action: "openSettings" },
+      });
     }
+  }
+
+  // 8b. The on-device engines of stage 6 (translation, spelling, niqqud, captions).
+  try {
+    const { engineFindings } = await import("./doctorEngines");
+    for (const f of await engineFindings(opts.engines)) push(f);
+  } catch (e) {
+    push({ id: "engines", title: "ai.doctor.check.engines", status: "skip", detail: (e as Error).message });
   }
 
   // 9. Which executor would the runtime pick right now?
@@ -338,6 +380,12 @@ export async function runDoctor(opts: DoctorOptions = {}): Promise<DoctorReport>
     const { EVAL_CASES } = await import("./eval/fixtures");
     const { runEvalCase } = await import("./eval/run");
     const { passed } = await import("./eval/score");
+    // Every registered agent gets a row (7.4.3); one without a case says so.
+    const { listAgents } = await import("./registry");
+    await import("./defs");
+    for (const id of listAgents().map((a) => a.id).sort()) {
+      if (!EVAL_CASES.some((c) => c.agent === id)) push({ id: `golden.${id}`, title: "ai.doctor.check.golden", status: "skip", detail: `${id} · no golden case (plan 7.3)` });
+    }
     const seen = new Set<string>();
     for (const c of EVAL_CASES) {
       if (seen.has(c.agent)) continue;
