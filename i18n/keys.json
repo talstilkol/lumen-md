@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-10-18T05:18:24.525Z",
+  "generated_at": "2026-10-18T11:17:46.074Z",
   "source": "src/i18n/index.ts (en bundle)",
-  "count": 1421,
+  "count": 1428,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -1863,6 +1863,49 @@
       "key": "agents.netConsent.perCall",
       "en": "Under the \"local only\" policy you are asked for every call.",
       "vars": []
+    },
+    {
+      "key": "agents.untrusted.title",
+      "en": "Approve this agent action?",
+      "vars": []
+    },
+    {
+      "key": "agents.untrusted.body",
+      "en": "The {tool} tool wants to {action}. This run has read content from outside ({sources}), which may contain instructions planted to trick the agent.",
+      "vars": [
+        "tool",
+        "action",
+        "sources"
+      ]
+    },
+    {
+      "key": "agents.untrusted.action.write",
+      "en": "propose a change to your notes",
+      "vars": []
+    },
+    {
+      "key": "agents.untrusted.action.network",
+      "en": "send a request to the web",
+      "vars": []
+    },
+    {
+      "key": "agents.untrusted.args",
+      "en": "What it would do: “{value}”.",
+      "vars": [
+        "value"
+      ]
+    },
+    {
+      "key": "agents.untrusted.ok",
+      "en": "Allow once",
+      "vars": []
+    },
+    {
+      "key": "agents.netConsent.untrusted",
+      "en": "Careful: this run has read content from outside ({sources}), which may contain planted instructions.",
+      "vars": [
+        "sources"
+      ]
     },
     {
       "key": "cmd.note.read",

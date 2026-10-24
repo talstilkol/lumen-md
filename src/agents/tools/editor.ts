@@ -13,6 +13,7 @@ export const getDocumentTool = defineTool<{ maxChars?: number }, { path: string 
   name: "get_document",
   description: "The full text of the document the user is editing (including unsaved changes).",
   parameters: { type: "object", properties: { maxChars: { type: "number", minimum: 1 } }, additionalProperties: false },
+  untrusted: (_args, _result, ctx) => ctx.documentUntrusted ?? [],
   run: async (args, ctx) => {
     const content = ctx.document ?? "";
     const max = Math.max(200, optionalNumber(args, "maxChars", 24_000));
@@ -24,6 +25,7 @@ export const getSelectionTool = defineTool<Record<string, never>, { selection: s
   name: "get_selection",
   description: "The text the user selected in the editor (empty when nothing is selected).",
   parameters: { type: "object", properties: {}, additionalProperties: false },
+  untrusted: (_args, _result, ctx) => ctx.documentUntrusted ?? [],
   run: async (_args, ctx) => {
     const selection = ctx.selection ?? "";
     return { selection, empty: selection.length === 0 };
@@ -34,6 +36,7 @@ export const getHeadingsTool = defineTool<Record<string, never>, { headings: Arr
   name: "get_headings",
   description: "The markdown headings of the open document with their levels and line numbers.",
   parameters: { type: "object", properties: {}, additionalProperties: false },
+  untrusted: (_args, _result, ctx) => ctx.documentUntrusted ?? [],
   run: async (_args, ctx) => {
     const lines = (ctx.document ?? "").split(/\r?\n/);
     const headings: Array<{ level: number; text: string; line: number }> = [];

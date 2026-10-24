@@ -20,6 +20,8 @@ export interface StyleProfile {
   /** How many notes were sampled. */
   notes: number;
   builtAt: string;
+  /** Sampling rules the profile was built with (2: outside notes left out, plan 2.7). */
+  sampleV?: number;
 }
 
 const KEY = "lumen.ai.styleProfile";
@@ -27,10 +29,17 @@ const ACTIVE = "lumen.ai.styleProfile.active";
 const EXCERPT_CHARS = 900;
 const TOTAL_CHARS = 9000;
 
+/**
+ * Plan 2.7: profiles learned before outside notes were left out of the
+ * sample (no `sampleV`) may carry someone else's instructions into the
+ * writing agents' system prompts, so they are not used: the user rebuilds.
+ */
+const SAMPLE_VERSION = 2;
+
 export function getStyleProfile(): StyleProfile | null {
   try {
     const v = JSON.parse(localStorage.getItem(KEY) ?? "null");
-    return v && typeof v === "object" && Array.isArray(v.rules) ? (v as StyleProfile) : null;
+    return v && typeof v === "object" && Array.isArray(v.rules) && v.sampleV === SAMPLE_VERSION ? (v as StyleProfile) : null;
   } catch {
     return null;
   }
@@ -117,7 +126,12 @@ export function sampleExcerpts(notes: ReadonlyArray<{ path: string; text: string
 export async function buildStyleProfile(prefix = "", signal?: AbortSignal): Promise<StyleProfile> {
   const { readAllNotes } = await import("../storage/workspaceNotes");
   const all = await readAllNotes();
-  const notes = all.filter((n) => !prefix || n.path.startsWith(prefix.replace(/\/+$/, "") + "/"));
+  // Plan 2.7: a style profile is the user's own voice, and it is saved and
+  // later put into writing agents' system prompts — so outside notes
+  // (clipped, imported, pulled from git) never go into the sample.
+  const { ensureProvenanceBackfill, untrustedSourcesOfNote } = await import("../agents/provenance");
+  await ensureProvenanceBackfill();
+  const notes = all.filter((n) => (!prefix || n.path.startsWith(prefix.replace(/\/+$/, "") + "/")) && !untrustedSourcesOfNote(n.path, n.text).length);
   const sample = sampleExcerpts(notes);
   if (sample.count < 2) throw new Error("Not enough writing to learn a style from: pick a folder with at least two notes of a few paragraphs.");
   const { runAgentOrThrow } = await import("../agents/runtime");
@@ -130,6 +144,7 @@ export async function buildStyleProfile(prefix = "", signal?: AbortSignal): Prom
     examples: out.examples.filter((e) => flat.includes(e.replace(/\s+/g, " ").trim())).slice(0, 5),
     notes: sample.count,
     builtAt: new Date().toISOString(),
+    sampleV: SAMPLE_VERSION,
   };
   localStorage.setItem(KEY, JSON.stringify(profile));
   setStyleProfileActive(true);

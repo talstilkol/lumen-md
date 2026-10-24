@@ -18,6 +18,7 @@ import type {
   ExecutorMessage,
   ExecutorId,
   ModelTier,
+  NetworkConsentRequest,
   RetryPatch,
   RunOptions,
   ToolCall,
@@ -33,6 +34,8 @@ import { coerceArgs, ToolError } from "./tools/define";
 import { review, type Failure } from "./critic";
 import { recordRun } from "./trace";
 import { AiQuotaExceededError, aiQuotaStatus, chargeAiCommandDispatch, consumeAiPrompt } from "../billing/aiQuota";
+// The injection guard (plan 2.7) loads with the first run: the runtime is on the startup path.
+const loadGuard = () => import("./untrusted");
 
 export const DEFAULT_MAX_STEPS = 8;
 export const DEFAULT_MAX_RETRIES = 2;
@@ -66,6 +69,18 @@ interface ToolEnv {
   consent?: RunOptions["consentNetwork"];
   /** Ids of the changes staged in this run, in order. */
   staged: string[];
+  /**
+   * Where the untrusted content in this run's context came from (plan 2.7);
+   * grows as tools read outside content. Non-empty: write and network
+   * calls need the user's approval.
+   */
+  taint: string[];
+  consentUntrusted?: RunOptions["consentUntrusted"];
+}
+
+/** Ask the user about a write / network call in a run with untrusted content (plan 2.7). */
+async function approveUntrusted(env: ToolEnv, tool: AgentTool, args: Record<string, unknown>, network?: NetworkConsentRequest): Promise<boolean> {
+  return (await loadGuard()).askUntrusted(env.consentUntrusted, { tool: tool.name, scope: tool.scope as "write" | "network", args, sources: [...env.taint], ...(network ? { network } : {}) });
 }
 
 /**
@@ -80,7 +95,7 @@ interface ToolEnv {
  *  - cancellation propagates (the run ends `aborted`); every other failure
  *    becomes a tool error the model reads.
  */
-async function execTool(tools: AgentTool[], call: ToolCall, env: ToolEnv): Promise<{ result?: unknown; error?: string; note?: string }> {
+async function execTool(tools: AgentTool[], call: ToolCall, env: ToolEnv): Promise<{ result?: unknown; error?: string; note?: string; untrusted?: string[] }> {
   const tool = tools.find((t) => t.name === call.name);
   if (!tool) return { error: `Unknown tool "${call.name}". Available: ${tools.map((t) => t.name).join(", ")}` };
   if (tool.scope !== "read" && !env.ctx.grants.has(tool.scope)) return { error: `Tool "${call.name}" needs the "${tool.scope}" permission, which was not granted for this run` };
@@ -92,13 +107,26 @@ async function execTool(tools: AgentTool[], call: ToolCall, env: ToolEnv): Promi
   const stagedHere: string[] = [];
   try {
     if (env.ctx.signal?.aborted) throw new DOMException("aborted", "AbortError");
+    const tainted = env.taint.length > 0;
     if (tool.scope === "network") {
       const { openNetworkGate } = await import("./network");
-      const gate = await openNetworkGate(tool, { ...call, args }, env.consent);
+      // With untrusted content in the run the gate always asks: the
+      // local-only per-call consent (which then carries the warning) or,
+      // under the other policies, the untrusted-content approval.
+      const guard = tainted ? { untrusted: [...env.taint], approve: (req: NetworkConsentRequest) => approveUntrusted(env, tool, args, req) } : undefined;
+      const gate = await openNetworkGate(tool, { ...call, args }, env.consent, guard);
       callCtx.fetch = gate.fetch;
       callCtx.network = gate.bound;
-      note = gate.consented ? "network: sent on the user's consent (local-only)" : "network: allowed by the AI policy";
+      note = gate.consented ? (tainted ? "network: sent on the user's approval (untrusted content in the run)" : "network: sent on the user's consent (local-only)") : "network: allowed by the AI policy";
     } else if (tool.scope === "write") {
+      // Plan 2.7: a change proposed while outside content is in the run
+      // waits for the user's explicit yes before it is even staged.
+      if (tainted) {
+        if (!(await approveUntrusted(env, tool, args))) {
+          return { error: `denied: ${(await loadGuard()).UNTRUSTED_DENIED}` };
+        }
+        note = "approved by the user (untrusted content in the run)";
+      }
       const { stageChange, receiptOf } = await import("./staging");
       callCtx.stage = (proposal) => {
         const change = stageChange(proposal, { tool: tool.name, runId: env.runId, agentId: env.agentId });
@@ -111,9 +139,18 @@ async function execTool(tools: AgentTool[], call: ToolCall, env: ToolEnv): Promi
     if (tool.scope === "write") {
       const { isStagedReceipt } = await import("./staging");
       if (!isStagedReceipt(result) || !stagedHere.includes(result.changeId)) throw new ToolError("failed", `"${tool.name}" did not return its staged change; nothing was written`);
-      note = `staged ${stagedHere.join(", ")} (waiting for approval)`;
+      note = `${note ? `${note}; ` : ""}staged ${stagedHere.join(", ")} (waiting for approval)`;
     }
-    return { result, note };
+    let untrusted: string[] = [];
+    if (tool.untrusted) {
+      try {
+        untrusted = await tool.untrusted(args, result, callCtx);
+      } catch {
+        // Can't tell where it came from: treat it as outside content.
+        untrusted = [`${tool.name} result`];
+      }
+    }
+    return { result, note, untrusted };
   } catch (e) {
     if (isAbort(e, env.ctx.signal)) throw e;
     // A write tool that failed after staging withdraws its proposal.
@@ -229,8 +266,10 @@ export async function runAgent<I extends AgentInput, O = string>(def: AgentDefin
     opts.onStep?.(full);
   };
   const staged: string[] = [];
+  const toolEnvRef: { current: ToolEnv | null } = { current: null };
   const finish = async (status: AgentRun["status"], extra: Partial<AgentRun<O>> = {}): Promise<AgentRun<O>> => {
     Object.assign(run, extra, { status, endedAt: Date.now() });
+    if (toolEnvRef.current?.taint.length) run.untrusted = [...toolEnvRef.current.taint];
     if (staged.length) {
       run.staged = [...staged];
       // A cancelled run withdraws what it proposed; any other run leaves its proposals for review.
@@ -255,7 +294,15 @@ export async function runAgent<I extends AgentInput, O = string>(def: AgentDefin
     grants,
     pages: new Map(),
   };
-  const toolEnv: ToolEnv = { ctx, runId: run.id, agentId: def.id, consent: opts.consentNetwork, staged };
+  // Plan 2.7: outside content in the input (a clipped page, an imported or
+  // pulled note, or what the caller says is untrusted) is cleaned and
+  // delimited before the model sees it, and taints the run from the start.
+  const guard = await loadGuard();
+  const inputUntrusted = await guard.inputSources({ path: ctx.path, document: ctx.document, text: input.text, selection: input.selection, untrusted: opts.untrusted });
+  if (inputUntrusted.length) ctx.documentUntrusted = inputUntrusted;
+  const toolEnv: ToolEnv = { ctx, runId: run.id, agentId: def.id, consent: opts.consentNetwork, staged, taint: [...inputUntrusted], consentUntrusted: opts.consentUntrusted };
+  const modelInput: I = guard.guardInput(input, inputUntrusted, ctx.document);
+  toolEnvRef.current = toolEnv;
   const inputChars = (input.text ?? "").length + (input.selection ?? "").length;
   const maxRetries = def.maxRetries ?? DEFAULT_MAX_RETRIES;
   const maxSteps = def.maxSteps ?? DEFAULT_MAX_STEPS;
@@ -283,7 +330,8 @@ export async function runAgent<I extends AgentInput, O = string>(def: AgentDefin
     // v3: answers cached before the language check (T27) are not reused.
     return cacheKey({ v: 3, agent: def.id, executor: executor.id, model: executor.modelFor(patch.tier ?? def.tier ?? "small"), sys, user: def.user(input), patch }).catch(() => null);
   };
-  const key = await cacheKeyOf();
+  // A run with outside content in its input is never cached (nor answered from the cache).
+  const key = inputUntrusted.length ? null : await cacheKeyOf();
   if (key) {
     const { getCached } = await import("../ai/responseCache");
     const hit = await getCached(key);
@@ -339,8 +387,8 @@ export async function runAgent<I extends AgentInput, O = string>(def: AgentDefin
     const nativeTools = !!def.tools?.length && executor.supportsTools(model);
     const nativeSchema = !!def.outputSchema && !def.tools?.length && executor.supportsSchema(model);
     const messages: ExecutorMessage[] = [
-      { role: "system", content: systemPrompt(def, input, nativeTools, patch) },
-      { role: "user", content: def.user(input) + (patch.promptSuffix ? `\n\n${patch.promptSuffix}` : "") },
+      { role: "system", content: systemPrompt(def, modelInput, nativeTools, patch) + (toolEnv.taint.length ? `\n\n${guard.UNTRUSTED_NOTICE}` : "") },
+      { role: "user", content: def.user(modelInput) + (patch.promptSuffix ? `\n\n${patch.promptSuffix}` : "") },
     ];
     run.model = model;
 
@@ -393,9 +441,16 @@ export async function runAgent<I extends AgentInput, O = string>(def: AgentDefin
         for (const call of calls) {
           const t1 = Date.now();
           const r = await execTool(def.tools ?? [], call, toolEnv);
-          const body = r.error !== undefined ? toolResultMessage(call, undefined, r.error) : truncate(toolResultMessage(call, r.result), TOOL_RESULT_LIMIT);
+          let body: string;
+          let guardNote = "";
+          if (r.error !== undefined) body = toolResultMessage(call, undefined, r.error);
+          else if (r.untrusted?.length) {
+            // Outside content: cleaned, then delimited (after truncation, so the closing marker stays).
+            ({ body, note: guardNote } = guard.guardToolResult((v) => truncate(toolResultMessage(call, v), TOOL_RESULT_LIMIT), r.result, r.untrusted, toolEnv.taint, messages));
+          } else body = truncate(toolResultMessage(call, r.result), TOOL_RESULT_LIMIT);
           const argsText = truncate(JSON.stringify(call.args), 200);
-          step({ kind: "tool", ms: Date.now() - t1, label: call.name, ok: r.error === undefined, detail: r.error ?? (r.note ? `${r.note} · ${argsText}` : argsText) });
+          const detail = [r.note, guardNote, argsText].filter(Boolean).join(" · ");
+          step({ kind: "tool", ms: Date.now() - t1, label: call.name, ok: r.error === undefined, detail: r.error ?? detail });
           messages.push({ role: "tool", content: body, toolCallId: call.id, name: call.name });
         }
       }

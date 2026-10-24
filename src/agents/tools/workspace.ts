@@ -39,6 +39,7 @@ export const readFileTool = defineTool<{ path: string; maxChars?: number }, { pa
     required: ["path"],
     additionalProperties: false,
   },
+  untrusted: async (_args, result) => (await import("../untrusted")).untrustedSourcesOfNote(result.path, result.content),
   run: async (args) => {
     needWorkspace();
     const path = safeWorkspacePath(requireString(args, "path"));
@@ -140,6 +141,14 @@ export const searchWorkspaceTool = defineTool<
     required: ["query"],
     additionalProperties: false,
   },
+  // Snippets of outside notes are outside text too.
+  untrusted: async (_args, result) => {
+    const { untrustedSourcesOfNote } = await import("../untrusted");
+    const { readWorkspaceFile } = await import("../../storage/workspace");
+    const out: string[] = [];
+    for (const h of result.hits) out.push(...untrustedSourcesOfNote(h.path, await readWorkspaceFile(h.path).catch(() => null)));
+    return out;
+  },
   run: async (args) => {
     needWorkspace();
     const query = requireString(args, "query");
@@ -153,6 +162,10 @@ export const getFrontmatterTool = defineTool<{ path: string }, { path: string; f
   name: "get_frontmatter",
   description: "Return the YAML frontmatter of a file as JSON (null when it has none).",
   parameters: { type: "object", properties: { path: { type: "string", minLength: 1 } }, required: ["path"], additionalProperties: false },
+  untrusted: async (_args, result) => {
+    const { readWorkspaceFile } = await import("../../storage/workspace");
+    return (await import("../untrusted")).untrustedSourcesOfNote(result.path, await readWorkspaceFile(result.path).catch(() => null));
+  },
   run: async (args) => {
     needWorkspace();
     const path = safeWorkspacePath(requireString(args, "path"));

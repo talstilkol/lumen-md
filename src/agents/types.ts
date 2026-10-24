@@ -98,6 +98,22 @@ export interface NetworkConsentRequest {
   /** The page's host, which the research service then visits (fetch_page). */
   visits?: string;
   args: Record<string, unknown>;
+  /** The run has untrusted content in its context (plan 2.7): the prompt warns about it. */
+  untrusted?: string[];
+}
+
+/**
+ * A write or network tool call in a run that has untrusted content in its
+ * context (plan 2.7): it goes ahead only on the user's explicit approval.
+ */
+export interface UntrustedConsentRequest {
+  tool: string;
+  scope: "write" | "network";
+  args: Record<string, unknown>;
+  /** Where the untrusted content came from (pages, clipped / imported notes). */
+  sources: string[];
+  /** Network calls: exactly what is sent and where, as the network consent shows it. */
+  network?: NetworkConsentRequest;
 }
 
 export interface ToolContext {
@@ -129,6 +145,8 @@ export interface ToolContext {
   network?: { endpoint: string; settings: import("../research/client").ResearchSettings };
   /** Pages fetched in this run, by URL (runtime-owned scratch). */
   pages?: Map<string, FetchedPage>;
+  /** Why the open document / selection is untrusted (empty or unset: it isn't). */
+  documentUntrusted?: string[];
 }
 
 export interface AgentTool<A = Record<string, unknown>, R = unknown> {
@@ -137,6 +155,14 @@ export interface AgentTool<A = Record<string, unknown>, R = unknown> {
   parameters: JsonSchema;
   scope: ToolScope;
   run(args: A, ctx: ToolContext): Promise<R>;
+  /**
+   * Where the result's text came from when it is outside content (plan
+   * 2.7): web pages, search results, clipped or imported notes. Empty: the
+   * result is the user's own data. The runtime cleans and delimits such a
+   * result before the model sees it, and from then on asks the user before
+   * any write or network call of the run.
+   */
+  untrusted?(args: A, result: R, ctx: ToolContext): string[] | Promise<string[]>;
 }
 
 export interface ToolCall {
@@ -349,6 +375,8 @@ export interface AgentRun<O = unknown> {
   inputKey?: string;
   /** Ids of the changes this run's write tools staged (waiting for approval in `staging.ts`). */
   staged?: string[];
+  /** Sources of the untrusted content the run had in its context (plan 2.7). */
+  untrusted?: string[];
 }
 
 export interface RunOptions {
@@ -362,6 +390,19 @@ export interface RunOptions {
    * Outside `local-only` the policy already allows the network.
    */
   consentNetwork?: (request: NetworkConsentRequest) => boolean | Promise<boolean>;
+  /**
+   * Approval of a write or network tool call once the run has untrusted
+   * content in its context (plan 2.7). Default: a confirm dialog naming the
+   * tool, what it would do and where the untrusted content came from.
+   * Under `local-only` a network call's own per-call consent (which then
+   * carries the same warning) is that approval.
+   */
+  consentUntrusted?: (request: UntrustedConsentRequest) => boolean | Promise<boolean>;
+  /**
+   * The input is outside content (a clipped page, an imported note…): its
+   * sources. The runtime also detects it from the path and frontmatter.
+   */
+  untrusted?: string[];
   /** Editor context for the editor tools. */
   document?: string;
   selection?: string;

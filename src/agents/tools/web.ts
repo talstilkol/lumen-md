@@ -34,6 +34,8 @@ export const searchWebTool = defineTool<
     additionalProperties: false,
   },
   scope: "network",
+  // Titles and snippets are written by the pages' authors.
+  untrusted: (args, result) => (result.results.length ? [`web search results for "${args.query}"`] : []),
   run: async (args, ctx) => {
     const fetchImpl = networkFetch(ctx, "search_web");
     const query = requireString(args, "query").trim().slice(0, 400);
@@ -69,6 +71,7 @@ export const fetchPageTool = defineTool<
     additionalProperties: false,
   },
   scope: "network",
+  untrusted: (_args, result) => (result.text || result.title ? [`web page ${result.finalUrl}`] : []),
   run: async (args, ctx) => {
     const fetchImpl = networkFetch(ctx, "fetch_page");
     const url = requireString(args, "url").trim();
@@ -170,6 +173,16 @@ export const extractQuotesTool = defineTool<
     },
     required: ["quotes"],
     additionalProperties: false,
+  },
+  // The quotes' exact text comes from the source.
+  untrusted: async (args, result, ctx) => {
+    if (typeof args.url === "string" && args.url.trim()) return [`web page ${result.source}`];
+    const { untrustedSourcesOfNote } = await import("../untrusted");
+    if (typeof args.path === "string" && args.path.trim()) {
+      const { readWorkspaceFile } = await import("../../storage/workspace");
+      return untrustedSourcesOfNote(result.source, await readWorkspaceFile(result.source).catch(() => null));
+    }
+    return ctx.documentUntrusted ?? [];
   },
   run: async (args, ctx) => {
     const quotes = Array.isArray(args.quotes) ? args.quotes.filter((q): q is string => typeof q === "string" && !!q.trim()).slice(0, 20) : [];
