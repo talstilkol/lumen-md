@@ -1424,5 +1424,8 @@
   "cmd.ai.cancel": "IA : annuler",
   "cmd.ai.cancel.hint": "Arrête toutes les requêtes IA en cours (Échap aussi)",
   "toast.aiCancelled": "Requête IA annulée ({count})",
-  "toast.aiNothingRunning": "Aucune requête IA en cours"
+  "toast.aiNothingRunning": "Aucune requête IA en cours",
+  "storage.eviction.title": "Safari peut supprimer vos notes",
+  "storage.eviction.body": "Safari efface les données d'un site après 7 jours sans visite. Exportez votre coffre, ou ajoutez Lumen à l'écran d'accueil / au Dock, où le stockage est conservé.",
+  "storage.eviction.export": "Exporter le coffre…"
 }

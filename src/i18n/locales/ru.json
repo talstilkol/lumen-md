@@ -1424,5 +1424,8 @@
   "cmd.ai.cancel": "ИИ: отменить",
   "cmd.ai.cancel.hint": "Останавливает все запросы ИИ (то же делает Esc)",
   "toast.aiCancelled": "Запрос ИИ отменён ({count})",
-  "toast.aiNothingRunning": "Нет активных запросов ИИ"
+  "toast.aiNothingRunning": "Нет активных запросов ИИ",
+  "storage.eviction.title": "Safari может удалить ваши заметки",
+  "storage.eviction.body": "Safari удаляет данные сайта через 7 дней без посещения. Экспортируйте хранилище или добавьте Lumen на главный экран / в Dock, где данные сохраняются.",
+  "storage.eviction.export": "Экспорт хранилища…"
 }

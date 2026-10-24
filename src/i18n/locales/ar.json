@@ -1424,5 +1424,8 @@
   "cmd.ai.cancel": "AI: إلغاء",
   "cmd.ai.cancel.hint": "يوقف كل طلبات الذكاء الاصطناعي الجارية (Esc يفعل ذلك أيضاً)",
   "toast.aiCancelled": "أُلغي طلب الذكاء الاصطناعي ({count})",
-  "toast.aiNothingRunning": "لا يوجد طلب ذكاء اصطناعي جارٍ"
+  "toast.aiNothingRunning": "لا يوجد طلب ذكاء اصطناعي جارٍ",
+  "storage.eviction.title": "قد يحذف Safari ملاحظاتك",
+  "storage.eviction.body": "يحذف Safari بيانات الموقع بعد 7 أيام بدون زيارة. صدّر الخزنة، أو أضف Lumen إلى الشاشة الرئيسية / Dock حيث يُحتفظ بالتخزين.",
+  "storage.eviction.export": "تصدير الخزنة…"
 }

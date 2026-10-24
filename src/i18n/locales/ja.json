@@ -1424,5 +1424,8 @@
   "cmd.ai.cancel": "AI: キャンセル",
   "cmd.ai.cancel.hint": "実行中の AI リクエストをすべて停止します（Esc でも可）",
   "toast.aiCancelled": "AI リクエストをキャンセルしました（{count}）",
-  "toast.aiNothingRunning": "実行中の AI リクエストはありません"
+  "toast.aiNothingRunning": "実行中の AI リクエストはありません",
+  "storage.eviction.title": "Safari がノートを削除する可能性があります",
+  "storage.eviction.body": "Safari は 7 日間アクセスのないサイトのデータを削除します。ボルトを書き出すか、Lumen をホーム画面 / Dock に追加してください。そこではストレージが保持されます。",
+  "storage.eviction.export": "ボルトを書き出す…"
 }
