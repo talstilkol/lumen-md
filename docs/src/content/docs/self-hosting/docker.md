@@ -14,7 +14,7 @@ description: Run Lumen on your own infrastructure with the docker-compose bundle
 
 | Service | Port | What |
 |---|---|---|
-| `lumen-web` | 80 | nginx serving the React SPA + strict CSP |
+| `lumen-web` | 80 | nginx serving the React SPA + strict CSP — the same image as the Fly deployment (`Dockerfile`, `deploy/nginx.conf`) |
 | `lumen-signal` | 4444 | y-webrtc signaling — peers find each other |
 | `lumen-collab` | 4445 | Persistent y-websocket (LevelDB on the `collab-data` volume; health: `/healthz`) |
 | `lumen-billing` | 4446 | Stripe webhook handler (optional) |
@@ -69,14 +69,15 @@ mapped 1:1 so a reverse proxy can terminate SSL upstream.
 
 Serve Lumen from the root of its own (sub)domain, as above. The
 security headers that ship with the app (the bundled nginx config,
-`public/_headers` and `vercel.json`) match root paths. If you build with
+`public/_headers` and `deploy/vercel.base.json`) match root paths. If you build with
 a sub-path `base` such as `/app/`, prefix those routes yourself,
 including the Web Playground's `/playground-runner.html`, `/assets/*`
 and `/playground/*` rules. Without them the playground preview is blocked.
 
-On Netlify the Web Playground preview doesn't load: Netlify's `_headers`
-format can't lift the app-wide frame and CSP headers for the runner page.
-Cloudflare Pages, Vercel and this Docker image are supported.
+Every host runs the Web Playground, including Netlify (an edge function
+gives the runner page its own headers there). What works where, and the
+`LUMEN_RUNTIMES=slim` option for a smaller image, are in
+[Where Lumen runs](/self-hosting/hosting/).
 
 ## Optional: Billing
 

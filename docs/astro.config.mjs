@@ -94,13 +94,14 @@ export default defineConfig({
         {
           label: "Security",
           items: [
-            { label: "Vault + recovery phrase", slug: "security/vault" },
+            { label: "Secrets and encryption", slug: "security/vault" },
           ],
         },
         {
           label: "Self-hosting",
           items: [
             { label: "Docker compose bundle", slug: "self-hosting/docker" },
+            { label: "Where Lumen runs", slug: "self-hosting/hosting", translations: { he: "איפה Lumen רץ" } },
           ],
         },
       ],
