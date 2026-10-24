@@ -46,11 +46,23 @@ function openOn(mode: "smart" | "ai") {
   render(<SearchDialog open onClose={() => {}} onOpenFile={() => {}} />);
 }
 
-beforeEach(() => {
+beforeEach(async () => {
   localStorage.clear();
   useAppStore.setState({ aiKey: "sk-test" }); // a usable provider, so prompts count
   vi.clearAllMocks();
   setCaps(FREE_CAPS);
+  // Ask Workspace runs the `answerer` agent (plan 5.5): a model that hands the request to the `chat` spy.
+  const { registerExecutor, resetExecutors } = await import("../agents/executors");
+  resetExecutors();
+  registerExecutor({
+    id: "ollama",
+    label: "test",
+    available: async () => ({ available: true }),
+    supportsTools: () => false,
+    supportsSchema: () => false,
+    modelFor: () => "test",
+    chat: async (req) => ({ content: await chat(...([req.messages, { signal: req.signal }] as unknown as [])), toolCalls: [], model: "test" }),
+  });
 });
 afterEach(() => {
   cleanup();
@@ -111,16 +123,15 @@ describe("Smart search rerank", () => {
 });
 
 describe("Ask Workspace spends the AI quota", () => {
-  it("asks chat() to charge the question itself, when it is actually sent", async () => {
+  it("charges the question itself — one prompt, when it is actually sent (the answerer agent's own prompt)", async () => {
     __setEntitlementEndpointForTesting("https://billing.lumen.test/entitlements");
     openOn("ai");
     const input = screen.getByRole("textbox");
     fireEvent.change(input, { target: { value: "what changed?" } });
+    expect(getAiUsage()).toBe(0); // nothing counted up front
     fireEvent.keyDown(input, { key: "Enter" });
     await waitFor(() => expect(chat).toHaveBeenCalledTimes(1));
-    expect((chat.mock.calls[0] as unknown[])[1]).toMatchObject({ ownPrompt: true });
-    // Nothing is counted up front: chat() charges at dispatch (llm tests).
-    expect(getAiUsage()).toBe(0);
+    await waitFor(() => expect(getAiUsage()).toBe(1));
   });
 });
 
