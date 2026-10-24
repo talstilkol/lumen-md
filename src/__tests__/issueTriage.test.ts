@@ -158,3 +158,14 @@ describe("issue-triage.yml", () => {
     }
   });
 });
+
+describe("docs", () => {
+  it("has an English and a Hebrew page, both in the sidebar", () => {
+    for (const p of ["docs/src/content/docs/project/issue-triage.md", "docs/src/content/docs/he/project/issue-triage.md"]) {
+      const md = readFileSync(join(ROOT, p), "utf8");
+      expect(md).toMatch(/^---\ntitle: .+\ndescription: .+\n---/);
+      for (const label of ["needs-repro", "duplicate?", TRIAGED, "--apply"]) expect(md).toContain(label);
+    }
+    expect(readFileSync(join(ROOT, "docs/astro.config.mjs"), "utf8")).toContain('slug: "project/issue-triage"');
+  });
+});
