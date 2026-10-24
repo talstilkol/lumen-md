@@ -1425,5 +1425,18 @@
   "cmd.ai.cancel.hint": "يوقف كل طلبات الذكاء الاصطناعي الجارية (Esc يفعل ذلك أيضاً)",
   "toast.aiCancelled": "أُلغي طلب الذكاء الاصطناعي ({count})",
   "toast.aiNothingRunning": "لا يوجد طلب ذكاء اصطناعي جارٍ",
-  "tree.showMore": "عرض {count} إضافية"
+  "tree.showMore": "عرض {count} إضافية",
+  "cmd.tasks.open": "المهام: اليوم والقادمة",
+  "cmd.tasks.open.hint": "المتأخرة واليوم والأيام السبعة القادمة، من كل الملاحظات",
+  "tasks.none": "لا مهام.",
+  "tasks.toggle": "تم: {task}",
+  "tasks.changed": "تغيّرت الملاحظة منذ إنشاء القائمة — لم يُكتب شيء. حاول مجددًا.",
+  "tasks.count": "{n} مهام",
+  "tasks.loading": "جارٍ البحث في الخزنة…",
+  "tasks.panel.title": "المهام",
+  "tasks.panel.today": "اليوم والمتأخرة",
+  "tasks.panel.upcoming": "الأيام السبعة القادمة",
+  "tasks.panel.close": "إغلاق",
+  "tasks.reminders": "تذكيرات",
+  "tasks.reminder.title": "مهمة مستحقة اليوم"
 }

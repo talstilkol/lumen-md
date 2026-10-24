@@ -1425,5 +1425,18 @@
   "cmd.ai.cancel.hint": "実行中の AI リクエストをすべて停止します（Esc でも可）",
   "toast.aiCancelled": "AI リクエストをキャンセルしました（{count}）",
   "toast.aiNothingRunning": "実行中の AI リクエストはありません",
-  "tree.showMore": "さらに {count} 件を表示"
+  "tree.showMore": "さらに {count} 件を表示",
+  "cmd.tasks.open": "タスク：今日と今後",
+  "cmd.tasks.open.hint": "すべてのノートから、期限切れ・今日・今後7日間のタスク",
+  "tasks.none": "タスクはありません。",
+  "tasks.toggle": "完了：{task}",
+  "tasks.changed": "一覧の作成後にノートが変更されたため、書き込みませんでした。もう一度お試しください。",
+  "tasks.count": "{n} 件のタスク",
+  "tasks.loading": "保管庫を検索中…",
+  "tasks.panel.title": "タスク",
+  "tasks.panel.today": "今日と期限切れ",
+  "tasks.panel.upcoming": "今後7日間",
+  "tasks.panel.close": "閉じる",
+  "tasks.reminders": "リマインダー",
+  "tasks.reminder.title": "今日が期限のタスク"
 }

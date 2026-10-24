@@ -4,7 +4,7 @@
  */
 import type { Command } from "../../ui/CommandPalette";
 import type { CommandContext } from "./context";
-import { buildFileCommands, buildRecentCommands, buildTemplateCommands, buildTrashCommands, buildWorkspaceFileCommands } from "./file";
+import { buildFileCommands, buildRecentCommands, buildTemplateCommands, buildTaskCommands, buildTrashCommands, buildWorkspaceFileCommands } from "./file";
 import { buildExportCommands } from "./export";
 import { buildLanguageCommands, buildPanelCommands, buildThemeToggleCommands, buildViewCommands } from "./view";
 import { buildEditCommands, buildInsertCommands } from "./edit";
@@ -35,6 +35,7 @@ export const COMMAND_SECTIONS: ReadonlyArray<(ctx: CommandContext) => Command[]>
   buildHebrewDictionaryCommands,
   buildVaultTransferCommands,
   buildTrashCommands,
+  buildTaskCommands,
   buildAiCancelCommands,
   buildReadAloudCommands,
   buildDigestCommands,

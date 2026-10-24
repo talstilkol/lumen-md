@@ -1425,5 +1425,18 @@
   "cmd.ai.cancel.hint": "Stoppt alle laufenden KI-Anfragen (auch mit Esc)",
   "toast.aiCancelled": "KI-Anfrage abgebrochen ({count})",
   "toast.aiNothingRunning": "Keine KI-Anfrage läuft",
-  "tree.showMore": "{count} weitere anzeigen"
+  "tree.showMore": "{count} weitere anzeigen",
+  "cmd.tasks.open": "Aufgaben: heute und demnächst",
+  "cmd.tasks.open.hint": "Überfällig, heute und die nächsten 7 Tage, aus allen Notizen",
+  "tasks.none": "Keine Aufgaben.",
+  "tasks.toggle": "Erledigt: {task}",
+  "tasks.changed": "Die Notiz hat sich seit dem Erstellen der Liste geändert – nichts geschrieben. Bitte erneut versuchen.",
+  "tasks.count": "{n} Aufgaben",
+  "tasks.loading": "Durchsuche den Tresor…",
+  "tasks.panel.title": "Aufgaben",
+  "tasks.panel.today": "Heute und überfällig",
+  "tasks.panel.upcoming": "Nächste 7 Tage",
+  "tasks.panel.close": "Schließen",
+  "tasks.reminders": "Erinnerungen",
+  "tasks.reminder.title": "Aufgabe heute fällig"
 }

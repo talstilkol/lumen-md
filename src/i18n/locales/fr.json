@@ -1425,5 +1425,18 @@
   "cmd.ai.cancel.hint": "Arrête toutes les requêtes IA en cours (Échap aussi)",
   "toast.aiCancelled": "Requête IA annulée ({count})",
   "toast.aiNothingRunning": "Aucune requête IA en cours",
-  "tree.showMore": "Afficher {count} de plus"
+  "tree.showMore": "Afficher {count} de plus",
+  "cmd.tasks.open": "Tâches : aujourd’hui et à venir",
+  "cmd.tasks.open.hint": "En retard, aujourd’hui et les 7 prochains jours, dans toutes les notes",
+  "tasks.none": "Aucune tâche.",
+  "tasks.toggle": "Fait : {task}",
+  "tasks.changed": "La note a changé depuis la création de la liste — rien n’a été écrit. Réessayez.",
+  "tasks.count": "{n} tâches",
+  "tasks.loading": "Recherche dans le coffre…",
+  "tasks.panel.title": "Tâches",
+  "tasks.panel.today": "Aujourd’hui et en retard",
+  "tasks.panel.upcoming": "7 prochains jours",
+  "tasks.panel.close": "Fermer",
+  "tasks.reminders": "Rappels",
+  "tasks.reminder.title": "Tâche pour aujourd’hui"
 }

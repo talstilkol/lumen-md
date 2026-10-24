@@ -1425,5 +1425,18 @@
   "cmd.ai.cancel.hint": "עוצר כל בקשת AI שרצה (גם Esc עושה זאת)",
   "toast.aiCancelled": "בקשת ה-AI בוטלה ({count})",
   "toast.aiNothingRunning": "אין בקשת AI שרצה",
-  "tree.showMore": "הצג עוד {count}"
+  "tree.showMore": "הצג עוד {count}",
+  "cmd.tasks.open": "משימות: היום ובקרוב",
+  "cmd.tasks.open.hint": "באיחור, היום ו-7 הימים הבאים, מכל הפתקים",
+  "tasks.none": "אין משימות.",
+  "tasks.toggle": "בוצע: {task}",
+  "tasks.changed": "הפתק השתנה מאז שהרשימה נוצרה — לא נכתב דבר. נסו שוב.",
+  "tasks.count": "{n} משימות",
+  "tasks.loading": "מחפש בכספת…",
+  "tasks.panel.title": "משימות",
+  "tasks.panel.today": "היום ובאיחור",
+  "tasks.panel.upcoming": "7 הימים הבאים",
+  "tasks.panel.close": "סגירה",
+  "tasks.reminders": "תזכורות",
+  "tasks.reminder.title": "משימה להיום"
 }

@@ -139,3 +139,56 @@ describe("queries (```tasks``` blocks)", () => {
     expect(ms).toBeLessThan(100);
   });
 });
+
+describe("index worker: tasks over the vault (4.13.2)", () => {
+  it("answers ```tasks``` queries through the protocol and re-parses only changed notes", async () => {
+    const { VaultIndex } = await import("../storage/vaultIndexCore");
+    const { handleIndexRequest } = await import("../storage/vaultIndexLocal");
+    const index = new VaultIndex();
+    handleIndexRequest(index, { id: 1, op: "upsert", files: [
+      { path: "a.md", name: "a.md", content: "- [ ] alpha 📅 2026-10-24", modified: 1 },
+      { path: "b.md", name: "b.md", content: "no tasks here", modified: 1 },
+    ] });
+    let r = handleIndexRequest(index, { id: 2, op: "tasks", query: "due today", today: "2026-10-24" });
+    expect(r.ok && (r.result as { total: number }).total).toBe(1);
+    handleIndexRequest(index, { id: 3, op: "upsert", files: [{ path: "b.md", name: "b.md", content: "- [ ] beta 📅 2026-10-24", modified: 2 }] });
+    r = handleIndexRequest(index, { id: 4, op: "tasks", query: "due today\nsort by description", today: "2026-10-24" });
+    expect(r.ok && (r.result as { groups: Array<{ tasks: Array<{ description: string }> }> }).groups[0].tasks.map((t) => t.description)).toEqual(["alpha", "beta"]);
+    handleIndexRequest(index, { id: 5, op: "remove", paths: ["a.md"] });
+    r = handleIndexRequest(index, { id: 6, op: "tasks", query: "not done", today: "2026-10-24" });
+    expect(r.ok && (r.result as { total: number }).total).toBe(1);
+  });
+});
+
+describe("toggling in the note", () => {
+  it("rewrites the one line, keeps indentation, CRLF and the list marker", async () => {
+    const { toggledContent } = await import("../tasks/toggle");
+    const note = "# x\r\n  * [ ] one 📅 2026-10-25\r\n- [ ] two\r\n";
+    const [task] = tasksInNote("n.md", note);
+    expect(toggledContent(note, task, "2026-10-24")).toBe("# x\r\n  * [x] one 📅 2026-10-25 ✅ 2026-10-24\r\n- [ ] two\r\n");
+  });
+
+  it("writes nothing when the note changed meanwhile", async () => {
+    const { toggledContent } = await import("../tasks/toggle");
+    const [task] = tasksInNote("n.md", "- [ ] one");
+    expect(toggledContent("- [ ] something else", task)).toBeNull();
+    expect(toggledContent("", { ...task, line: 5 })).toBeNull();
+  });
+});
+
+describe("reminders (4.13.4)", () => {
+  it("announce each task due today once per day, and need permission", async () => {
+    const { checkReminders, setRemindersEnabled, remindersEnabled } = await import("../tasks/reminders");
+    localStorage.clear();
+    const denied = { permission: "default", requestPermission: async () => "denied" } as unknown as typeof Notification;
+    expect(await setRemindersEnabled(true, denied)).toBe(false);
+    expect(remindersEnabled()).toBe(false);
+    const tasks = tasksInNote("Home.md", "- [ ] rent 📅 2026-10-24\n- [ ] later 📅 2026-10-30\n- [x] paid 📅 2026-10-24\n- [ ] call ⏳ 2026-10-24");
+    const sent: string[] = [];
+    const deps = { today: "2026-10-24", tasks: async () => tasks, notify: (_t: string, b: string) => sent.push(b) };
+    expect(await checkReminders(deps)).toBe(2);
+    expect(sent).toEqual(["rent — Home", "call — Home"]);
+    expect(await checkReminders(deps)).toBe(0);
+    expect(await checkReminders({ ...deps, today: "2026-10-25", tasks: async () => tasksInNote("Home.md", "- [ ] rent 📅 2026-10-25") })).toBe(1);
+  });
+});

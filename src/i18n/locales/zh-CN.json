@@ -1425,5 +1425,18 @@
   "cmd.ai.cancel.hint": "停止所有正在运行的 AI 请求（Esc 也可以）",
   "toast.aiCancelled": "已取消 AI 请求（{count}）",
   "toast.aiNothingRunning": "没有正在运行的 AI 请求",
-  "tree.showMore": "再显示 {count} 项"
+  "tree.showMore": "再显示 {count} 项",
+  "cmd.tasks.open": "任务：今天与即将到来",
+  "cmd.tasks.open.hint": "所有笔记中的逾期、今天和未来 7 天的任务",
+  "tasks.none": "没有任务。",
+  "tasks.toggle": "完成：{task}",
+  "tasks.changed": "列表生成后笔记已更改——未写入任何内容。请重试。",
+  "tasks.count": "{n} 个任务",
+  "tasks.loading": "正在搜索库…",
+  "tasks.panel.title": "任务",
+  "tasks.panel.today": "今天与逾期",
+  "tasks.panel.upcoming": "未来 7 天",
+  "tasks.panel.close": "关闭",
+  "tasks.reminders": "提醒",
+  "tasks.reminder.title": "今天到期的任务"
 }

@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-10-20T19:44:50.605Z",
+  "generated_at": "2026-10-24T19:38:28.959Z",
   "source": "src/i18n/index.ts (en bundle)",
-  "count": 1427,
+  "count": 1440,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -1697,6 +1697,75 @@
       "vars": [
         "n"
       ]
+    },
+    {
+      "key": "cmd.tasks.open",
+      "en": "Tasks: Today and upcoming",
+      "vars": []
+    },
+    {
+      "key": "cmd.tasks.open.hint",
+      "en": "Overdue, today and the next 7 days, from every note",
+      "vars": []
+    },
+    {
+      "key": "tasks.none",
+      "en": "No tasks.",
+      "vars": []
+    },
+    {
+      "key": "tasks.toggle",
+      "en": "Done: {task}",
+      "vars": [
+        "task"
+      ]
+    },
+    {
+      "key": "tasks.changed",
+      "en": "The note changed since this list was made — nothing was written. Try again.",
+      "vars": []
+    },
+    {
+      "key": "tasks.count",
+      "en": "{n} tasks",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "tasks.loading",
+      "en": "Looking through the vault…",
+      "vars": []
+    },
+    {
+      "key": "tasks.panel.title",
+      "en": "Tasks",
+      "vars": []
+    },
+    {
+      "key": "tasks.panel.today",
+      "en": "Today and overdue",
+      "vars": []
+    },
+    {
+      "key": "tasks.panel.upcoming",
+      "en": "Next 7 days",
+      "vars": []
+    },
+    {
+      "key": "tasks.panel.close",
+      "en": "Close",
+      "vars": []
+    },
+    {
+      "key": "tasks.reminders",
+      "en": "Reminders",
+      "vars": []
+    },
+    {
+      "key": "tasks.reminder.title",
+      "en": "Task due today",
+      "vars": []
     },
     {
       "key": "cmd.file.trash",

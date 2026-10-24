@@ -446,6 +446,13 @@
       "icon": "Sparkles"
     },
     {
+      "id": "tasks.open",
+      "label": "Tasks: Today and upcoming",
+      "group": "Tools",
+      "hint": "Overdue, today and the next 7 days, from every note",
+      "icon": "Sparkles"
+    },
+    {
       "id": "ai.cancel",
       "label": "AI: Cancel",
       "group": "AI Prompts",
@@ -1500,6 +1507,13 @@
       "icon": "Sparkles"
     },
     {
+      "id": "tasks.open",
+      "label": "Tasks: Today and upcoming",
+      "group": "Tools",
+      "hint": "Overdue, today and the next 7 days, from every note",
+      "icon": "Sparkles"
+    },
+    {
       "id": "ai.cancel",
       "label": "AI: Cancel",
       "group": "AI Prompts",
@@ -2249,6 +2263,7 @@
     "vault.export",
     "vault.import",
     "file.trash",
+    "tasks.open",
     "ai.cancel",
     "note.read",
     "vault.digest",

@@ -1425,5 +1425,18 @@
   "cmd.ai.cancel.hint": "Останавливает все запросы ИИ (то же делает Esc)",
   "toast.aiCancelled": "Запрос ИИ отменён ({count})",
   "toast.aiNothingRunning": "Нет активных запросов ИИ",
-  "tree.showMore": "Показать ещё {count}"
+  "tree.showMore": "Показать ещё {count}",
+  "cmd.tasks.open": "Задачи: сегодня и скоро",
+  "cmd.tasks.open.hint": "Просроченные, сегодняшние и на 7 дней вперёд, из всех заметок",
+  "tasks.none": "Задач нет.",
+  "tasks.toggle": "Готово: {task}",
+  "tasks.changed": "Заметка изменилась после построения списка — ничего не записано. Повторите.",
+  "tasks.count": "Задач: {n}",
+  "tasks.loading": "Поиск по хранилищу…",
+  "tasks.panel.title": "Задачи",
+  "tasks.panel.today": "Сегодня и просроченные",
+  "tasks.panel.upcoming": "Следующие 7 дней",
+  "tasks.panel.close": "Закрыть",
+  "tasks.reminders": "Напоминания",
+  "tasks.reminder.title": "Задача на сегодня"
 }

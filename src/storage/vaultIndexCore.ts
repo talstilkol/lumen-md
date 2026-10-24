@@ -20,6 +20,8 @@
  * (src/__tests__/vaultWorker.test.ts compares them).
  */
 
+import { tasksInNote, type Task } from "../tasks/taskParser";
+import { parseQuery, runQuery, type QueryResult } from "../tasks/taskQuery";
 import { noteKey } from "../lib/slug";
 import { hasHebrew, hebrewFind, normalizeForMatch, prefixVariants } from "../text/hebrew";
 import { WIKI_RE } from "./wikiTargets";
@@ -165,6 +167,8 @@ function findIn(text: string, lower: string, q: string): { start: number; end: n
 
 export class VaultIndex {
   private readonly files = new Map<string, Entry>();
+  /** Parsed tasks per note (plan 4.13), filled lazily on the first task query. */
+  private readonly taskCache = new Map<string, Task[]>();
   /** Link target key → the notes that link to it. */
   private readonly incoming = new Map<string, Set<string>>();
   private nextOrder = 0;
@@ -188,6 +192,7 @@ export class VaultIndex {
 
   /** Add or replace one note. O(size of the note). */
   upsert(input: IndexInput): void {
+    this.taskCache.delete(input.path);
     const prev = this.files.get(input.path);
     if (prev) this.unlink(prev);
     const content = input.content;
@@ -224,6 +229,7 @@ export class VaultIndex {
 
   /** Remove one note. O(its links). */
   remove(path: string): boolean {
+    this.taskCache.delete(path);
     const prev = this.files.get(path);
     if (!prev) return false;
     this.unlink(prev);
@@ -233,6 +239,7 @@ export class VaultIndex {
   }
 
   clear(): void {
+    this.taskCache.clear();
     this.files.clear();
     this.incoming.clear();
   }
@@ -266,6 +273,30 @@ export class VaultIndex {
   }
 
   /** Cheap fuzzy + substring search across file names, paths and content. */
+  /**
+   * Every task in the vault (plan 4.13). A note is parsed once and again
+   * only after it changes; notes without "[" are skipped without parsing.
+   */
+  allTasks(): Task[] {
+    const out: Task[] = [];
+    for (const [path, e] of this.files) {
+      let ts = this.taskCache.get(path);
+      if (!ts) {
+        ts = e.content.includes("[") ? tasksInNote(path, e.content) : [];
+        this.taskCache.set(path, ts);
+      }
+      for (const t of ts) out.push(t);
+    }
+    return out;
+  }
+
+  /** Run a ```tasks``` query over the vault. */
+  queryTasks(source: string, todayIso: string): QueryResult {
+    const [y, m, d] = todayIso.split("-").map(Number);
+    const today = new Date(y, m - 1, d);
+    return runQuery(parseQuery(source, today), this.allTasks(), today);
+  }
+
   search(query: string, opts: SearchOptions = {}): SearchHit[] {
     const limit = opts.limit ?? 30;
     const q = query.trim().toLowerCase();
