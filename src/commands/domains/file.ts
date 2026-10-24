@@ -90,6 +90,20 @@ export function buildTrashCommands(): Command[] {
   ];
 }
 
+/** Encrypted sync (plan 3.5): the panel and its providers load on demand. */
+export function buildSyncCommands(): Command[] {
+  return [
+    {
+      id: "sync.open",
+      label: t("cmd.sync.open"),
+      hint: t("cmd.sync.open.hint"),
+      icon: cmdIcons.Sparkles,
+      group: t("group.tools"),
+      action: () => void import("../../sync/e2ee/ui/open").then((m) => m.openSyncPanel()),
+    },
+  ];
+}
+
 /** New note from a built-in or an installed template. */
 export function buildTemplateCommands({ installedTemplates }: CommandContext): Command[] {
   return [

@@ -70,7 +70,19 @@ export async function request(
       }
     }
   }
-  throw new ProviderUnavailableError(`${opts.provider}: ${(last as Error)?.message ?? "network error"}`);
+  throw new ProviderUnreachableError(`${opts.provider}: ${(last as Error)?.message ?? "network error"}`);
+}
+
+/**
+ * The request never got an answer: offline, DNS — or, in a browser, CORS or
+ * the page's CSP refused it (fetch cannot tell them apart). Still a
+ * `ProviderUnavailableError` to the sync engine: retry later.
+ */
+export class ProviderUnreachableError extends ProviderUnavailableError {
+  constructor(message: string) {
+    super(message);
+    this.name = "ProviderUnreachableError";
+  }
 }
 
 /** The error for a non-success answer: 412 → precondition, 401/403 → auth, else a plain error. */

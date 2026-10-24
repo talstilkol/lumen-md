@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-10-20T19:56:34.410Z",
+  "generated_at": "2026-10-24T15:44:55.715Z",
   "source": "src/i18n/index.ts (en bundle) + src/i18n/lazy/*.json",
-  "count": 1487,
+  "count": 1533,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -1963,6 +1963,16 @@
     {
       "key": "cmd.file.trash.hint",
       "en": "Restore deleted notes (kept 30 days)",
+      "vars": []
+    },
+    {
+      "key": "cmd.sync.open",
+      "en": "Encrypted sync…",
+      "vars": []
+    },
+    {
+      "key": "cmd.sync.open.hint",
+      "en": "WebDAV, S3, Dropbox or Google Drive — end-to-end encrypted",
       "vars": []
     },
     {
@@ -8008,6 +8018,254 @@
       "key": "e2ee.fresh.verified",
       "en": "Freshness verified",
       "vars": []
+    },
+    {
+      "key": "e2ee.sync.title",
+      "en": "Sync",
+      "vars": []
+    },
+    {
+      "key": "e2ee.sync.close",
+      "en": "Close",
+      "vars": []
+    },
+    {
+      "key": "e2ee.sync.provider",
+      "en": "Where to keep the encrypted vault",
+      "vars": []
+    },
+    {
+      "key": "e2ee.sync.kind.webdav",
+      "en": "WebDAV (Nextcloud, ownCloud, a NAS)",
+      "vars": []
+    },
+    {
+      "key": "e2ee.sync.kind.s3",
+      "en": "S3-compatible storage (AWS, Cloudflare R2, Backblaze B2, MinIO)",
+      "vars": []
+    },
+    {
+      "key": "e2ee.sync.oauthMissing",
+      "en": "Not available in this build: it needs Lumen's {name} app id, which is not configured.",
+      "vars": [
+        "name"
+      ]
+    },
+    {
+      "key": "e2ee.sync.url",
+      "en": "Folder address",
+      "vars": []
+    },
+    {
+      "key": "e2ee.sync.username",
+      "en": "User name",
+      "vars": []
+    },
+    {
+      "key": "e2ee.sync.password",
+      "en": "Password or app password",
+      "vars": []
+    },
+    {
+      "key": "e2ee.sync.endpoint",
+      "en": "Endpoint",
+      "vars": []
+    },
+    {
+      "key": "e2ee.sync.region",
+      "en": "Region",
+      "vars": []
+    },
+    {
+      "key": "e2ee.sync.bucket",
+      "en": "Bucket",
+      "vars": []
+    },
+    {
+      "key": "e2ee.sync.prefix",
+      "en": "Folder inside the bucket",
+      "vars": []
+    },
+    {
+      "key": "e2ee.sync.accessKey",
+      "en": "Access key ID",
+      "vars": []
+    },
+    {
+      "key": "e2ee.sync.secretKey",
+      "en": "Secret access key",
+      "vars": []
+    },
+    {
+      "key": "e2ee.sync.pathStyle",
+      "en": "Path-style addresses (MinIO and most self-hosted servers)",
+      "vars": []
+    },
+    {
+      "key": "e2ee.sync.keepSecret",
+      "en": "Leave empty to keep the saved one",
+      "vars": []
+    },
+    {
+      "key": "e2ee.sync.connect",
+      "en": "Connect",
+      "vars": []
+    },
+    {
+      "key": "e2ee.sync.signIn",
+      "en": "Sign in to {name}",
+      "vars": [
+        "name"
+      ]
+    },
+    {
+      "key": "e2ee.sync.connecting",
+      "en": "Checking…",
+      "vars": []
+    },
+    {
+      "key": "e2ee.sync.cors",
+      "en": "Lumen could not reach {host}. The server must allow this site (CORS, and expose the ETag header); a self-hosted Lumen must also list it in VITE_CSP_CONNECT_EXTRA.",
+      "vars": [
+        "host"
+      ]
+    },
+    {
+      "key": "e2ee.sync.unsupported",
+      "en": "This server cannot do safe concurrent writes, so Lumen will not sync with it: {detail}",
+      "vars": [
+        "detail"
+      ]
+    },
+    {
+      "key": "e2ee.sync.auth",
+      "en": "The server refused the credentials.",
+      "vars": []
+    },
+    {
+      "key": "e2ee.sync.connectedTo",
+      "en": "Connected: {where}",
+      "vars": [
+        "where"
+      ]
+    },
+    {
+      "key": "e2ee.sync.newVault",
+      "en": "There is no vault there yet. Choose a passphrase to create it.",
+      "vars": []
+    },
+    {
+      "key": "e2ee.sync.existingVault",
+      "en": "A vault is already there. Enter its passphrase.",
+      "vars": []
+    },
+    {
+      "key": "e2ee.sync.syncNow",
+      "en": "Sync now",
+      "vars": []
+    },
+    {
+      "key": "e2ee.sync.syncing",
+      "en": "Syncing…",
+      "vars": []
+    },
+    {
+      "key": "e2ee.sync.result",
+      "en": "Last sync {time}: {up} up, {down} down, {deleted} deleted",
+      "vars": [
+        "time",
+        "up",
+        "down",
+        "deleted"
+      ]
+    },
+    {
+      "key": "e2ee.sync.held",
+      "en": "{n} notes wait for a decision",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "e2ee.sync.lock",
+      "en": "Lock",
+      "vars": []
+    },
+    {
+      "key": "e2ee.sync.disconnect",
+      "en": "Disconnect",
+      "vars": []
+    },
+    {
+      "key": "e2ee.sync.disconnectNote",
+      "en": "Forgets the provider on this device. Nothing at the provider is deleted.",
+      "vars": []
+    },
+    {
+      "key": "e2ee.sync.choose",
+      "en": "Change provider",
+      "vars": []
+    },
+    {
+      "key": "e2ee.sync.back",
+      "en": "Back",
+      "vars": []
+    },
+    {
+      "key": "e2ee.sync.pairCode",
+      "en": "Pairing code for another device",
+      "vars": []
+    },
+    {
+      "key": "e2ee.sync.pairCodeNote",
+      "en": "Enter it on the other device within 15 minutes. It proves to that device which state is current.",
+      "vars": []
+    },
+    {
+      "key": "e2ee.sync.migrate.title",
+      "en": "Readable notes from an earlier Lumen",
+      "vars": []
+    },
+    {
+      "key": "e2ee.sync.migrate.found",
+      "en": "{n} unencrypted notes are in your {name} folder. Import them into the encrypted vault; the readable copies are moved into a backup folder at {name}, not deleted.",
+      "vars": [
+        "n",
+        "name"
+      ]
+    },
+    {
+      "key": "e2ee.sync.migrate.clashes",
+      "en": "{n} of them differ from notes here; both versions are kept.",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "e2ee.sync.migrate.run",
+      "en": "Import and back up",
+      "vars": []
+    },
+    {
+      "key": "e2ee.sync.migrate.done",
+      "en": "Imported {n} notes. The readable copies are in “{folder}” at {name}; delete that folder yourself when you are satisfied.",
+      "vars": [
+        "n",
+        "folder",
+        "name"
+      ]
+    },
+    {
+      "key": "e2ee.sync.migrate.revert",
+      "en": "Undo: move the readable copies back",
+      "vars": []
+    },
+    {
+      "key": "e2ee.sync.migrate.reverted",
+      "en": "Moved {n} files back.",
+      "vars": [
+        "n"
+      ]
     }
   ]
 }

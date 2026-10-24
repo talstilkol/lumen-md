@@ -453,6 +453,8 @@ const en: Strings = {
   "trash.daysLeft": "deleted for good in {n} days",
   "cmd.file.trash": "Trash…",
   "cmd.file.trash.hint": "Restore deleted notes (kept 30 days)",
+  "cmd.sync.open": "Encrypted sync…",
+  "cmd.sync.open.hint": "WebDAV, S3, Dropbox or Google Drive — end-to-end encrypted",
   "cmd.ai.cancel": "AI: Cancel",
   "cmd.ai.cancel.hint": "Stops every running AI request (Esc does the same)",
   "toast.aiCancelled": "AI request cancelled ({count})",

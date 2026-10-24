@@ -109,6 +109,14 @@ const vaultReady = Promise.race([
   }),
   new Promise((r) => setTimeout(r, 4000)),
 ]).catch((err) => log.warn("vault location unavailable", err));
+// The Dropbox / Google sign-in of the encrypted sync returns here (plan 3.5).
+const oauthReturn = /^\/oauth\/(dropbox|gdrive)$/.exec(location.pathname);
+const oauthCode = oauthReturn && new URLSearchParams(location.search).get("code");
+if (oauthReturn && oauthCode) {
+  void Promise.all([secretsReady, vaultReady, import("./sync/e2ee/ui/open")])
+    .then(([, , m]) => m.finishOAuthReturn(oauthReturn[1] as "dropbox" | "gdrive", oauthCode))
+    .catch((err) => log.warn("sync sign-in failed", err));
+}
 void Promise.all([initLocale(), secretsReady, vaultReady])
   .then(([applied]) => {
     // initLocale falls back to English when the saved locale's chunk can't
