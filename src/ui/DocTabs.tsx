@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import { X, FileText } from "lucide-react";
 import type { DocFile } from "../store/useStore";
 import { t } from "../i18n";
@@ -36,6 +36,63 @@ export const DocTabs = React.memo(function DocTabs({
 }: Props) {
   const [dragSrc, setDragSrc] = useState<number | null>(null);
   const [dragHover, setDragHover] = useState<number | null>(null);
+  const hoverRef = useRef<number | null>(null);
+
+  /**
+   * Touch reorder (plan 10.2.1): HTML5 drag doesn't start from a finger on
+   * most mobile browsers. A long press (400 ms) picks the tab up, sliding
+   * moves the drop marker, lifting drops it. Moving before the press ends is
+   * a scroll of the tab strip, not a drag.
+   */
+  const startTouchDrag = (e: React.PointerEvent, idx: number) => {
+    if (!onReorder || e.pointerType === "mouse") return;
+    const id = e.pointerId;
+    const x0 = e.clientX;
+    const y0 = e.clientY;
+    let active = false;
+    const timer = setTimeout(() => {
+      active = true;
+      hoverRef.current = idx;
+      setDragSrc(idx);
+      setDragHover(idx);
+    }, 400);
+    const blockScroll = (ev: TouchEvent) => {
+      if (active) ev.preventDefault();
+    };
+    const move = (ev: PointerEvent) => {
+      if (ev.pointerId !== id) return;
+      if (!active) {
+        if (Math.abs(ev.clientX - x0) > 10 || Math.abs(ev.clientY - y0) > 10) finish(false);
+        return;
+      }
+      const under = document.elementFromPoint(ev.clientX, ev.clientY)?.closest<HTMLElement>("[data-tab-index]");
+      const at = under ? Number(under.dataset.tabIndex) : null;
+      if (at !== null && at !== hoverRef.current) {
+        hoverRef.current = at;
+        setDragHover(at);
+      }
+    };
+    const up = (ev: PointerEvent) => {
+      if (ev.pointerId === id) finish(ev.type === "pointerup");
+    };
+    function finish(drop: boolean) {
+      clearTimeout(timer);
+      window.removeEventListener("pointermove", move);
+      window.removeEventListener("pointerup", up);
+      window.removeEventListener("pointercancel", up);
+      document.removeEventListener("touchmove", blockScroll);
+      if (active && drop && hoverRef.current !== null && hoverRef.current !== idx) onReorder?.(idx, hoverRef.current);
+      if (active) {
+        setDragSrc(null);
+        setDragHover(null);
+      }
+      hoverRef.current = null;
+    }
+    window.addEventListener("pointermove", move);
+    window.addEventListener("pointerup", up);
+    window.addEventListener("pointercancel", up);
+    document.addEventListener("touchmove", blockScroll, { passive: false });
+  };
 
   if (tabs.length <= 1) return null;
 
@@ -74,6 +131,11 @@ export const DocTabs = React.memo(function DocTabs({
             key={tab.id}
             data-tab-index={idx}
             draggable={!!onReorder}
+            onPointerDown={(e) => startTouchDrag(e, idx)}
+            onContextMenu={(e) => {
+              // A long press shouldn't open the browser's menu over the tab being dragged.
+              if (dragSrc !== null) e.preventDefault();
+            }}
             onMouseDown={(e) => {
               // Middle-click anywhere in the tab row = close (browser convention).
               if (e.button === 1) {

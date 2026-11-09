@@ -4,12 +4,15 @@ import { LARGE_DOC_CHARS } from "../renderer/previewDoc";
 import type { IncrementalToc, TocEntry } from "../renderer/incrementalToc";
 import { t } from "../i18n";
 import { scrollBehavior } from "../lib/motion";
+import { useAppStore } from "../store/useStore";
 
 interface Props {
   markdownText: string;
+  /** Phone width (plan 10.2.4): a bottom sheet over the editor, closed by its button or by picking a heading. */
+  sheet?: boolean;
 }
 
-export const Outline = React.memo(function Outline({ markdownText }: Props) {
+export const Outline = React.memo(function Outline({ markdownText, sheet = false }: Props) {
   // Debounce expensive TOC extraction.
   const [debounced, setDebounced] = useState(markdownText);
   useEffect(() => {
@@ -86,14 +89,26 @@ export const Outline = React.memo(function Outline({ markdownText }: Props) {
 
   return (
     <aside
-      className="
+      className={
+        sheet
+          ? "outline-aside outline-sheet"
+          : `
         outline-aside h-full overflow-y-auto py-3 px-1 bg-bg-subtle border-l border-border
         w-[260px] shrink-0
         max-md:hidden md:block
-      "
+      `
+      }
+      aria-label={sheet ? t("outline.title") : undefined}
+      data-testid={sheet ? "outline-sheet" : undefined}
     >
-      <div className="px-2 mb-2 text-[11px] uppercase tracking-wider text-fg-muted font-semibold">
-        {t("outline.title")}
+      {sheet && <div className="outline-sheet-grip" aria-hidden="true" />}
+      <div className="px-2 mb-2 text-[11px] uppercase tracking-wider text-fg-muted font-semibold outline-sheet-head">
+        <span>{t("outline.title")}</span>
+        {sheet && (
+          <button type="button" className="icon-btn outline-sheet-close" onClick={() => useAppStore.getState().toggleOutline()} aria-label={t("outline.close")}>
+            ✕
+          </button>
+        )}
       </div>
       {toc.length === 0 ? (
         <div className="px-2 text-[12px] text-fg-muted">
@@ -114,6 +129,8 @@ export const Outline = React.memo(function Outline({ markdownText }: Props) {
                 e.preventDefault();
                 const el = document.getElementById(h.id);
                 if (el) el.scrollIntoView({ behavior: scrollBehavior(), block: "start" });
+                // The sheet covers the text: picking a heading closes it.
+                if (sheet) useAppStore.getState().toggleOutline();
               }}
             >
               {h.text}

@@ -315,6 +315,7 @@
   "mode.source": "Исходник",
   "mode.split": "Разделённый",
   "mode.wysiwyg": "WYSIWYG",
+  "outline.close": "Закрыть оглавление",
   "outline.empty": "Заголовков пока нет. Введите #, чтобы добавить.",
   "outline.title": "Содержание",
   "suggesting.byAuthor": "Предложено: {name}",

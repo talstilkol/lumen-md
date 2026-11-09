@@ -45,7 +45,7 @@ export function SidebarResizer() {
 
   useEffect(() => {
     if (!dragging) return;
-    function onMove(e: MouseEvent) {
+    function onMove(e: PointerEvent) {
       const isRTL = document.documentElement.getAttribute("dir") === "rtl";
       const delta = (e.clientX - startXRef.current) * (isRTL ? -1 : 1);
       const next = Math.max(MIN, Math.min(MAX, startWidthRef.current + delta));
@@ -65,11 +65,14 @@ export function SidebarResizer() {
         setWidthState(px);
       }
     }
-    window.addEventListener("mousemove", onMove);
-    window.addEventListener("mouseup", onUp);
+    // Pointer events (plan 10.2.1): mouse, touch and pen drag the edge alike.
+    window.addEventListener("pointermove", onMove);
+    window.addEventListener("pointerup", onUp);
+    window.addEventListener("pointercancel", onUp);
     return () => {
-      window.removeEventListener("mousemove", onMove);
-      window.removeEventListener("mouseup", onUp);
+      window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("pointerup", onUp);
+      window.removeEventListener("pointercancel", onUp);
     };
   }, [dragging]);
 
@@ -98,7 +101,8 @@ export function SidebarResizer() {
         e.preventDefault();
         setWidthState(setWidth(next));
       }}
-      onMouseDown={(e) => {
+      onPointerDown={(e) => {
+        if (e.pointerType === "mouse" && e.button !== 0) return;
         startXRef.current = e.clientX;
         const cur = getComputedStyle(
           document.documentElement,

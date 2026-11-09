@@ -315,6 +315,7 @@
   "mode.source": "Source",
   "mode.split": "Partagé",
   "mode.wysiwyg": "WYSIWYG",
+  "outline.close": "Fermer le plan",
   "outline.empty": "Aucun titre pour le moment. Tapez # pour en ajouter un.",
   "outline.title": "Plan du document",
   "suggesting.byAuthor": "Suggéré par {name}",

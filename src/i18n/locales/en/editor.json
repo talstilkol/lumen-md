@@ -315,6 +315,7 @@
   "mode.source": "Source",
   "mode.split": "Split",
   "mode.wysiwyg": "WYSIWYG",
+  "outline.close": "Close the outline",
   "outline.empty": "No headings yet. Start typing # to add one.",
   "outline.title": "Outline",
   "suggesting.byAuthor": "Suggested by {name}",

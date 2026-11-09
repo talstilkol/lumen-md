@@ -1783,6 +1783,11 @@
       "vars": []
     },
     {
+      "key": "outline.close",
+      "en": "Close the outline",
+      "vars": []
+    },
+    {
       "key": "outline.empty",
       "en": "No headings yet. Start typing # to add one.",
       "vars": []

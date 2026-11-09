@@ -315,6 +315,7 @@
   "mode.source": "源码",
   "mode.split": "分栏",
   "mode.wysiwyg": "所见即所得",
+  "outline.close": "关闭大纲",
   "outline.empty": "暂无标题。输入 # 添加一个。",
   "outline.title": "大纲",
   "suggesting.byAuthor": "由 {name} 建议",

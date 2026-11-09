@@ -315,6 +315,7 @@
   "mode.source": "ソース",
   "mode.split": "分割",
   "mode.wysiwyg": "WYSIWYG",
+  "outline.close": "アウトラインを閉じる",
   "outline.empty": "見出しがまだありません。# を入力して追加してください。",
   "outline.title": "アウトライン",
   "suggesting.byAuthor": "{name} による提案",

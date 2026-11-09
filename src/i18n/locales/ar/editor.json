@@ -315,6 +315,7 @@
   "mode.source": "المصدر",
   "mode.split": "مقسّم",
   "mode.wysiwyg": "WYSIWYG",
+  "outline.close": "إغلاق المخطط",
   "outline.empty": "لا توجد عناوين بعد. اكتب # لإضافة عنوان.",
   "outline.title": "المخطط",
   "suggesting.byAuthor": "اقترحه {name}",
