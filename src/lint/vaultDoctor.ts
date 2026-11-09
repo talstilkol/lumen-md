@@ -277,6 +277,11 @@ const insideAny = (ranges: ReadonlyArray<[number, number]>, at: number) => range
  * or raw HTML. Also feeds the `[[Note#` completion (4.5).
  */
 export function noteHeadings(text: string): string[] {
+  return noteHeadingLines(text).map((h) => h.text);
+}
+
+/** The same headings, each with the (0-based) line it starts on — for the hover preview (4.6). */
+export function noteHeadingLines(text: string): Array<{ text: string; line: number }> {
   // Inline code in headings matters for the rendered text, so scan only
   // with fenced blocks blanked.
   // Headings inside block quotes render (with ids) too: drop the `>` prefixes.
@@ -289,7 +294,8 @@ export function noteHeadings(text: string): string[] {
   // Setext headings: a text line underlined with === or --- (the line
   // above must be text, not a list item, quote or blank line).
   for (const m of fenced.matchAll(/^(?! {0,3}([-*+>]|\d+[.)])\s)( {0,3}\S[^\n]*)\n {0,3}(=+|-+)[ \t]*$/gm)) found.push({ at: m.index ?? 0, raw: m[2].trim() });
-  return found.sort((a, b) => a.at - b.at).map((h) => headingText(h.raw));
+  // Only whole `>` prefixes were removed, never a line: line numbers are the text's.
+  return found.sort((a, b) => a.at - b.at).map((h) => ({ text: headingText(h.raw), line: lineAt(fenced, h.at) - 1 }));
 }
 
 function headingsOf(text: string): Set<string> {

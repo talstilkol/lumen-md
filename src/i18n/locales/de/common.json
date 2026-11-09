@@ -117,6 +117,7 @@
   "embed.sectionNotFound": "{section} kann nicht eingebettet werden: In {note} gibt es keinen solchen Abschnitt.",
   "errorBoundary.heading": "Etwas ist schiefgelaufen",
   "errorBoundary.renderDetail": "Eine der eingebetteten Visualisierungen ist beim Rendern abgestürzt. Der Rest des Editors bleibt geschützt.",
+  "hover.notFound": "Noch keine Notiz namens „{target}“",
   "loading.generic": "Wird geladen…",
   "props.add": "Eigenschaft hinzufügen",
   "props.addItem": "Hinzufügen…",

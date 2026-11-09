@@ -4,9 +4,42 @@
   "source": "src/i18n/locales/en/files.json",
   "entries": [
     {
+      "key": "backlinks.changed",
+      "en": "the note changed; look again",
+      "vars": []
+    },
+    {
       "key": "backlinks.empty",
       "en": "No other file links here yet.",
       "vars": []
+    },
+    {
+      "key": "backlinks.link",
+      "en": "Link",
+      "vars": []
+    },
+    {
+      "key": "backlinks.linkAria",
+      "en": "Link “{text}” in {note}",
+      "vars": [
+        "text",
+        "note"
+      ]
+    },
+    {
+      "key": "backlinks.linkFailed",
+      "en": "Couldn't link in {note}: {error}",
+      "vars": [
+        "note",
+        "error"
+      ]
+    },
+    {
+      "key": "backlinks.linked",
+      "en": "Linked in {note}",
+      "vars": [
+        "note"
+      ]
     },
     {
       "key": "backlinks.scanning",
@@ -21,6 +54,16 @@
     {
       "key": "backlinks.title",
       "en": "Backlinks",
+      "vars": []
+    },
+    {
+      "key": "backlinks.unlinked",
+      "en": "Unlinked mentions",
+      "vars": []
+    },
+    {
+      "key": "backlinks.unlinkedEmpty",
+      "en": "No unlinked mentions.",
       "vars": []
     },
     {

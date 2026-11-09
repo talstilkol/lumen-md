@@ -117,6 +117,7 @@
   "embed.sectionNotFound": "Не удалось встроить {section}: в {note} нет такого раздела.",
   "errorBoundary.heading": "Произошла ошибка",
   "errorBoundary.renderDetail": "Одна из встроенных визуализаций завершилась с ошибкой при отрисовке. Остальная часть редактора в безопасности.",
+  "hover.notFound": "Заметки «{target}» пока нет",
   "loading.generic": "Загрузка…",
   "props.add": "Добавить свойство",
   "props.addItem": "Добавить…",

@@ -117,6 +117,7 @@
   "embed.sectionNotFound": "تعذّر تضمين {section}: لا يوجد قسم بهذا الاسم في {note}.",
   "errorBoundary.heading": "حدث خطأ ما",
   "errorBoundary.renderDetail": "تعطّل أحد التصورات المضمّنة أثناء العرض. بقية المحرر في أمان.",
+  "hover.notFound": "لا توجد بعد ملاحظة باسم “{target}”",
   "loading.generic": "جارٍ التحميل…",
   "props.add": "إضافة خاصية",
   "props.addItem": "إضافة…",

@@ -117,6 +117,7 @@
   "embed.sectionNotFound": "Impossible d'intégrer {section} : cette section n'existe pas dans {note}.",
   "errorBoundary.heading": "Quelque chose s'est mal passé",
   "errorBoundary.renderDetail": "L'une des visualisations intégrées a planté pendant le rendu. Le reste de l'éditeur est préservé.",
+  "hover.notFound": "Pas encore de note nommée « {target} »",
   "loading.generic": "Chargement…",
   "props.add": "Ajouter une propriété",
   "props.addItem": "Ajouter…",

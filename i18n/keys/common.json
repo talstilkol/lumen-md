@@ -682,6 +682,13 @@
       "vars": []
     },
     {
+      "key": "hover.notFound",
+      "en": "No note named “{target}” yet",
+      "vars": [
+        "target"
+      ]
+    },
+    {
       "key": "loading.generic",
       "en": "Loading…",
       "vars": []

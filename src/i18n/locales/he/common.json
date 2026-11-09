@@ -117,6 +117,7 @@
   "embed.sectionNotFound": "לא ניתן להטמיע את {section}: אין קטע כזה בפתק {note}.",
   "errorBoundary.heading": "שגיאת רינדור",
   "errorBoundary.renderDetail": "אחד מרכיבי ההדמיה קרס במהלך הרינדור. שאר העורך נשמר בטוח.",
+  "hover.notFound": "אין עדיין פתק בשם “{target}”",
   "loading.generic": "טוען…",
   "props.add": "הוספת מאפיין",
   "props.addItem": "הוספה…",

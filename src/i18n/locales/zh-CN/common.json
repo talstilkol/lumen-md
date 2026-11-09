@@ -117,6 +117,7 @@
   "embed.sectionNotFound": "无法嵌入 {section}：{note} 中没有这个章节。",
   "errorBoundary.heading": "出错了",
   "errorBoundary.renderDetail": "其中一个嵌入的可视化内容在渲染时崩溃。编辑器的其余部分不受影响。",
+  "hover.notFound": "还没有名为“{target}”的笔记",
   "loading.generic": "加载中…",
   "props.add": "添加属性",
   "props.addItem": "添加…",

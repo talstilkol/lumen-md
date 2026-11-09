@@ -117,6 +117,7 @@
   "embed.sectionNotFound": "Can't embed {section}: there is no such section in {note}.",
   "errorBoundary.heading": "Rendering Error",
   "errorBoundary.renderDetail": "One of the embedded visualizations crashed during render. The rest of the editor is kept safe.",
+  "hover.notFound": "No note named “{target}” yet",
   "loading.generic": "Loading…",
   "props.add": "Add property",
   "props.addItem": "Add…",

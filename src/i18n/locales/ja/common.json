@@ -117,6 +117,7 @@
   "embed.sectionNotFound": "{section} を埋め込めません：{note} にそのセクションはありません。",
   "errorBoundary.heading": "エラーが発生しました",
   "errorBoundary.renderDetail": "埋め込まれたビジュアライゼーションの1つが描画中にクラッシュしました。エディタの他の部分は安全に保たれています。",
+  "hover.notFound": "「{target}」という名前のノートはまだありません",
   "loading.generic": "読み込み中…",
   "props.add": "プロパティを追加",
   "props.addItem": "追加…",
