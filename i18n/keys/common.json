@@ -1497,6 +1497,11 @@
       "vars": []
     },
     {
+      "key": "models.purpose.nikud",
+      "en": "Hebrew niqqud (vowel points) on this device",
+      "vars": []
+    },
+    {
       "key": "models.purpose.translateEnHe",
       "en": "Translation from English to Hebrew",
       "vars": []

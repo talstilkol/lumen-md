@@ -262,6 +262,7 @@
   "models.consent.title": "להוריד מודל למכשיר הזה?",
   "models.purpose.imageSearch": "חיפוש תמונות לפי טקסט",
   "models.purpose.nerHe": "זיהוי שמות, מקומות וארגונים בטקסט עברי",
+  "models.purpose.nikud": "ניקוד עברי במכשיר",
   "models.purpose.translateEnHe": "תרגום מאנגלית לעברית",
   "models.purpose.translateHeEn": "תרגום מעברית לאנגלית",
   "mt.layer.chrome.absent": "לדפדפן הזה אין מתרגם מובנה",

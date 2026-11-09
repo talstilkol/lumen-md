@@ -258,6 +258,55 @@ export function buildAltTextCommands(): Command[] {
   ];
 }
 
+/** Niqqud on the selection or the note (plan 6.3): Nakdimon in a worker, with consent. */
+export function buildNikudCommands({ getEditorView, locale }: CommandContext): Command[] {
+  const runNikud = async (mode: "add" | "partial" | "remove") => {
+    const view = getEditorView?.();
+    if (!view) return;
+    try {
+      const [{ runNikudCommand }, svc] = await Promise.all([import("../../editor/nikudCommand"), import("../../ai/nikudService")]);
+      if (mode !== "remove") showAiToast(t("toast.nikud.working"), "info");
+      const changed = await cancellable((signal) =>
+        runNikudCommand(view, mode, {
+          point: (text, partial) => svc.pointHebrew(text, { consent: { confirm: uiConfirm, t, locale }, signal }, { partial }),
+          unpoint: svc.unpointHebrew,
+        }),
+      );
+      if (!changed) showAiToast(t("toast.nikud.nothing"), "info");
+    } catch (e) {
+      if (isAbort(e)) return;
+      const reason = (e as { name?: string; reason?: string }).name === "NikudUnavailableError" ? (e as { reason: string }).reason : null;
+      showAiToast(reason ? t(`toast.nikud.${reason}`) : t("toast.nikud.failed", { error: (e as Error).message }), reason ? "info" : "error");
+    }
+  };
+  return [
+    {
+      id: "nikud.add",
+      label: t("cmd.nikud.add"),
+      hint: t("cmd.nikud.add.hint"),
+      icon: cmdIcons.Sparkles,
+      group: t("group.tools"),
+      action: () => runNikud("add"),
+    },
+    {
+      id: "nikud.partial",
+      label: t("cmd.nikud.partial"),
+      hint: t("cmd.nikud.partial.hint"),
+      icon: cmdIcons.Sparkles,
+      group: t("group.tools"),
+      action: () => runNikud("partial"),
+    },
+    {
+      id: "nikud.remove",
+      label: t("cmd.nikud.remove"),
+      hint: t("cmd.nikud.remove.hint"),
+      icon: cmdIcons.Sparkles,
+      group: t("group.tools"),
+      action: () => runNikud("remove"),
+    },
+  ];
+}
+
 /** Check the note's grammar. */
 export function buildGrammarCommands({ locale, liveDoc }: CommandContext): Command[] {
   return [

@@ -262,6 +262,7 @@
   "models.consent.title": "要将模型下载到此设备吗？",
   "models.purpose.imageSearch": "按文字搜索图片",
   "models.purpose.nerHe": "识别希伯来语文本中的人名、地名和机构名",
+  "models.purpose.nikud": "在本设备上为希伯来语加元音符号",
   "models.purpose.translateEnHe": "英语到希伯来语翻译",
   "models.purpose.translateHeEn": "希伯来语到英语翻译",
   "mt.layer.chrome.absent": "此浏览器没有内置翻译",

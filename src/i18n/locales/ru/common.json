@@ -262,6 +262,7 @@
   "models.consent.title": "Скачать модель на это устройство?",
   "models.purpose.imageSearch": "Поиск изображений по тексту",
   "models.purpose.nerHe": "Поиск имён, мест и организаций в тексте на иврите",
+  "models.purpose.nikud": "Огласовки иврита на этом устройстве",
   "models.purpose.translateEnHe": "Перевод с английского на иврит",
   "models.purpose.translateHeEn": "Перевод с иврита на английский",
   "mt.layer.chrome.absent": "в этом браузере нет встроенного переводчика",

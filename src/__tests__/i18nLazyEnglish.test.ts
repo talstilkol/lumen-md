@@ -21,6 +21,7 @@ const SRC = resolve(__dirname, "..");
  */
 const DOMAINS: Record<string, { module: string; users: string[]; prefixes: string[]; within?: string }> = {
   "caption.json": { module: "ai/captionStrings.ts", users: ["ai/caption.ts"], prefixes: ["caption."] },
+  "nikud.json": { module: "ai/nikudStrings.ts", users: ["ai/nikudService.ts"], prefixes: ["toast.nikud.", "models.purpose.nikud"] },
   "mt.json": { module: "ai/mt/strings.ts", users: ["ai/mt/index.ts", "agents/commands.ts"], prefixes: ["models.", "mt.", "toast.translatedWith", "toast.localMtUnavailable"] },
   // Encrypted sync (plan 3.4): the whole of src/sync/e2ee/ loads on demand.
   "e2ee.json": { module: "sync/e2ee/strings.ts", users: ["sync/e2ee/conflict.ts", "sync/e2ee/ui/FreshnessBanner.tsx", "sync/e2ee/ui/PassphraseForm.tsx"], prefixes: ["e2ee."], within: "sync/e2ee/" },

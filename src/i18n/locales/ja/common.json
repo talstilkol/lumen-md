@@ -262,6 +262,7 @@
   "models.consent.title": "このデバイスにモデルをダウンロードしますか？",
   "models.purpose.imageSearch": "テキストによる画像検索",
   "models.purpose.nerHe": "ヘブライ語テキスト中の人名・地名・組織名の検出",
+  "models.purpose.nikud": "このデバイスでのヘブライ語ニクード",
   "models.purpose.translateEnHe": "英語からヘブライ語への翻訳",
   "models.purpose.translateHeEn": "ヘブライ語から英語への翻訳",
   "mt.layer.chrome.absent": "このブラウザーには内蔵の翻訳機能がありません",

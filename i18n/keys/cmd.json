@@ -868,6 +868,36 @@
       "vars": []
     },
     {
+      "key": "cmd.nikud.add",
+      "en": "Hebrew: add niqqud",
+      "vars": []
+    },
+    {
+      "key": "cmd.nikud.add.hint",
+      "en": "Point the selection (or the whole note) on this device",
+      "vars": []
+    },
+    {
+      "key": "cmd.nikud.partial",
+      "en": "Hebrew: add partial niqqud",
+      "vars": []
+    },
+    {
+      "key": "cmd.nikud.partial.hint",
+      "en": "Point only the words that could be read more than one way",
+      "vars": []
+    },
+    {
+      "key": "cmd.nikud.remove",
+      "en": "Hebrew: remove niqqud",
+      "vars": []
+    },
+    {
+      "key": "cmd.nikud.remove.hint",
+      "en": "Strip the vowel points from the selection (or the whole note)",
+      "vars": []
+    },
+    {
       "key": "cmd.note.read",
       "en": "Read aloud",
       "vars": []

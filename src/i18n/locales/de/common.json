@@ -262,6 +262,7 @@
   "models.consent.title": "Ein Modell auf dieses Gerät laden?",
   "models.purpose.imageSearch": "Bilder per Text suchen",
   "models.purpose.nerHe": "Namen, Orte und Organisationen in hebräischem Text finden",
+  "models.purpose.nikud": "Hebräischer Niqqud auf diesem Gerät",
   "models.purpose.translateEnHe": "Übersetzung von Englisch nach Hebräisch",
   "models.purpose.translateHeEn": "Übersetzung von Hebräisch nach Englisch",
   "mt.layer.chrome.absent": "dieser Browser hat keinen eingebauten Übersetzer",

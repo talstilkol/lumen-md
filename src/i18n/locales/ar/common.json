@@ -262,6 +262,7 @@
   "models.consent.title": "تنزيل نموذج إلى هذا الجهاز؟",
   "models.purpose.imageSearch": "البحث عن الصور بالنص",
   "models.purpose.nerHe": "العثور على الأسماء والأماكن والمنظمات في النص العبري",
+  "models.purpose.nikud": "التنقيط العبري على هذا الجهاز",
   "models.purpose.translateEnHe": "الترجمة من الإنجليزية إلى العبرية",
   "models.purpose.translateHeEn": "الترجمة من العبرية إلى الإنجليزية",
   "mt.layer.chrome.absent": "هذا المتصفح لا يحتوي على مترجم مدمج",

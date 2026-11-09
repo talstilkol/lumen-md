@@ -69,6 +69,7 @@ export default defineConfig({
             { label: "Local translation", slug: "ai/translation" },
             { label: "English spelling on this device", slug: "ai/spelling" },
             { label: "Image descriptions on this device", slug: "ai/image-captions" },
+            { label: "Hebrew niqqud on this device", slug: "ai/nikud" },
             { label: "AI cost: usage meter + answer cache", slug: "ai/cost" },
             { label: "Research + citation checks", slug: "ai/research" },
             { label: "MCP integration (Claude Desktop, Cursor)", slug: "ai/mcp" },
