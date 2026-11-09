@@ -72,11 +72,14 @@ const suggestionPlugin = ViewPlugin.fromClass(
         this.abort = null;
       }
 
-      // Clear existing suggestion on any edit or selection change
-      if (update.selectionSet) {
-        this.view.dispatch({ effects: setSuggestion.of(null) });
-        return;
-      }
+      // A selection change dismisses the suggestion in the state field
+      // itself (`tr.selection` → null). Dispatching from here, inside a
+      // view update, threw "Calls to EditorView.update are not allowed
+      // while an update is in progress" on every cursor move. Behaviour is
+      // otherwise unchanged: typing also sets the selection, so ghost-text
+      // fetches stay off here, as before (turning them on is a product
+      // decision — an LLM call per pause — tracked in MASTER_PLAN §11).
+      if (update.selectionSet) return;
 
       // Schedule new suggestion after 600 ms of idle typing
       this.timeout = setTimeout(() => this.fetchSuggestion(), 600);

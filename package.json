@@ -28,6 +28,7 @@
     "test:watch": "vitest",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
+    "e2e:flake": "node scripts/e2e-flake.mjs",
     "budget": "node scripts/bundle-budget.mjs",
     "lighthouse": "lhci autorun --config=./lighthouserc.json",
     "lighthouse:a11y": "node scripts/lighthouse-a11y.mjs",

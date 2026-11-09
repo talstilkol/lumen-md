@@ -105,14 +105,19 @@ export function VersionHistory({ fileName, currentContent, onRestore, onClose }:
     : 0;
 
   return (
-    <div style={{
-      position: "fixed",
-      inset: 0,
-      zIndex: 9999,
-      display: "flex",
-      background: "hsl(0 0% 0% / 0.5)",
-      backdropFilter: "blur(4px)",
-    }}>
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-label={t("versionHistory.title")}
+      style={{
+        position: "fixed",
+        inset: 0,
+        zIndex: 9999,
+        display: "flex",
+        background: "hsl(0 0% 0% / 0.5)",
+        backdropFilter: "blur(4px)",
+      }}
+    >
       {/* Sidebar: snapshot list */}
       <div style={{
         width: 280,

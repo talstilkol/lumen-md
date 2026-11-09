@@ -141,8 +141,20 @@ export function Toolbar({
         setOpenMenu(null);
       }
     }
+    // Escape closes an open menu, as every menu does; the e2e that
+    // "checked" this used to wait 150 ms and look at nothing.
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape") {
+        e.stopPropagation();
+        setOpenMenu(null);
+      }
+    }
     document.addEventListener("mousedown", close);
-    return () => document.removeEventListener("mousedown", close);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", close);
+      document.removeEventListener("keydown", onKey);
+    };
   }, [openMenu]);
 
   function exec(fn: () => void) {
