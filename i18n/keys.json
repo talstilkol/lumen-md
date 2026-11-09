@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-10-18T04:10:51.194Z",
+  "generated_at": "2026-11-09T22:50:55.924Z",
   "source": "src/i18n/index.ts (en bundle)",
-  "count": 1414,
+  "count": 1430,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -6527,6 +6527,90 @@
       "key": "cmd.edit.formatCodeBlock.hint",
       "en": "Prettier: format the fenced block under the cursor",
       "vars": []
+    },
+    {
+      "key": "cmd.edit.hebrewTypography",
+      "en": "Hebrew typography…",
+      "vars": []
+    },
+    {
+      "key": "cmd.edit.hebrewTypography.hint",
+      "en": "Gershayim, geresh, maqaf, quotation marks and numbers — as you type, or for the whole note with a preview",
+      "vars": []
+    },
+    {
+      "key": "typo.title",
+      "en": "Hebrew typography",
+      "vars": []
+    },
+    {
+      "key": "typo.asYouType",
+      "en": "Fix as I type",
+      "vars": []
+    },
+    {
+      "key": "typo.rule.gershayim",
+      "en": "Gershayim: צה\"ל → צה״ל",
+      "vars": []
+    },
+    {
+      "key": "typo.rule.geresh",
+      "en": "Geresh: ג'ירפה → ג׳ירפה",
+      "vars": []
+    },
+    {
+      "key": "typo.rule.quotes",
+      "en": "Hebrew quotation marks: \"שלום\" → „שלום”",
+      "vars": []
+    },
+    {
+      "key": "typo.rule.maqaf",
+      "en": "Maqaf: בית-ספר → בית־ספר",
+      "vars": []
+    },
+    {
+      "key": "typo.rule.dash",
+      "en": "Dash between words: אחד - שניים → אחד – שניים",
+      "vars": []
+    },
+    {
+      "key": "typo.rule.numbers",
+      "en": "Numbers: 50 % → 50%, %50 → 50%, 10–20 → 10-20",
+      "vars": []
+    },
+    {
+      "key": "typo.rule.mixedLine",
+      "en": "Mixed lines: a Hebrew line that starts in English reads right to left",
+      "vars": []
+    },
+    {
+      "key": "typo.preview",
+      "en": "{count} changes in this note",
+      "vars": [
+        "count"
+      ]
+    },
+    {
+      "key": "typo.none",
+      "en": "Nothing to change in this note.",
+      "vars": []
+    },
+    {
+      "key": "typo.apply",
+      "en": "Apply to the note",
+      "vars": []
+    },
+    {
+      "key": "typo.close",
+      "en": "Close",
+      "vars": []
+    },
+    {
+      "key": "typo.applied",
+      "en": "{count} typography changes applied",
+      "vars": [
+        "count"
+      ]
     },
     {
       "key": "format.noFormatter",
