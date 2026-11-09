@@ -35,7 +35,7 @@
     },
     {
       "key": "canvas.legacy.convert",
-      "en": "Convert {name} → tldraw",
+      "en": "Convert {name} → Excalidraw",
       "vars": [
         "name"
       ]
@@ -64,7 +64,7 @@
     },
     {
       "key": "canvas.legacy.found",
-      "en": "{count} legacy canvas(es) found",
+      "en": "{count} canvas(es) to convert",
       "vars": [
         "count"
       ]
@@ -122,9 +122,25 @@
       "vars": []
     },
     {
+      "key": "canvas.openFailed",
+      "en": "Couldn't open the canvas “{name}”: {error}",
+      "vars": [
+        "name",
+        "error"
+      ]
+    },
+    {
       "key": "canvas.picker",
       "en": "Pick canvas",
       "vars": []
+    },
+    {
+      "key": "canvas.saveFailed",
+      "en": "Couldn't save the canvas “{name}”: {error}",
+      "vars": [
+        "name",
+        "error"
+      ]
     },
     {
       "key": "canvas.switch",

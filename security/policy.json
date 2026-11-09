@@ -3,18 +3,17 @@
   "routes": {
     "app": {
       "kind": "document",
-      "why": "The editor: index.html and every SPA route. No eval on the page (Graphviz, ruby.wasm and the TypeScript checker run in workers with their own policy); WebAssembly compiles ('wasm-unsafe-eval'). Trusted Types guard every DOM sink (src/lib/trustedTypes.ts). img-src lists the hosts the app itself loads images from (tldraw's icons, the map block's OpenStreetMap tiles, GitHub / Google account avatars); the trailing https: is only for images inside notes. media-src https: is the same, for <video> / <audio> in notes. connect-src has no bare ws: / wss:: the WebSockets the app opens are collaboration signaling (the deployment's own server, and the two public servers when the user opts in) and the deployment's own collab servers, which the build adds from VITE_WEBRTC_SIGNALING_URL / VITE_YJS_WEBSOCKET_URL (src/build/cspEndpoints.ts). The renderer holds back images in notes from hosts the user has not allowed (src/lib/remoteImages.ts).",
+      "why": "The editor: index.html and every SPA route. No eval on the page (Graphviz, ruby.wasm and the TypeScript checker run in workers with their own policy); WebAssembly compiles ('wasm-unsafe-eval'). Trusted Types guard every DOM sink (src/lib/trustedTypes.ts). img-src lists the hosts the app itself loads images from (the map block's OpenStreetMap tiles, GitHub / Google account avatars); the trailing https: is only for images inside notes. media-src https: is the same, for <video> / <audio> in notes. connect-src has no bare ws: / wss:: the WebSockets the app opens are collaboration signaling (the deployment's own server, and the two public servers when the user opts in) and the deployment's own collab servers, which the build adds from VITE_WEBRTC_SIGNALING_URL / VITE_YJS_WEBSOCKET_URL (src/build/cspEndpoints.ts). The renderer holds back images in notes from hosts the user has not allowed (src/lib/remoteImages.ts).",
       "samples": ["/", "/index.html", "/notes/some-doc"],
       "csp": {
         "default-src": ["'self'"],
         "script-src": ["'self'", "'wasm-unsafe-eval'"],
         "style-src": ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
-        "font-src": ["'self'", "data:", "https://fonts.gstatic.com", "https://cdn.tldraw.com"],
+        "font-src": ["'self'", "data:", "https://fonts.gstatic.com"],
         "img-src": [
           "'self'",
           "data:",
           "blob:",
-          "https://cdn.tldraw.com",
           "https://*.tile.openstreetmap.org",
           "https://avatars.githubusercontent.com",
           "https://*.googleusercontent.com",
@@ -52,7 +51,6 @@
           "https://cdn-lfs.huggingface.co",
           "https://*.hf.co",
           "https://raw.githubusercontent.com",
-          "https://cdn.tldraw.com",
           "https://www.gstatic.com",
           "https://fonts.googleapis.com",
           "https://fonts.gstatic.com",

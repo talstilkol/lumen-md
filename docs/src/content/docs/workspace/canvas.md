@@ -1,18 +1,39 @@
 ---
-title: Canvas — moving from tldraw to Excalidraw
-description: What happens to your tldraw canvases when the canvas moves to Excalidraw, what converts, what doesn't, and where the backup is.
+title: Canvas (Excalidraw)
+description: The whiteboard — on Excalidraw, saved as open .excalidraw files in your vault, fully on your device — and what happens to your old tldraw canvases.
 ---
 
-The canvas (`🎨 Canvas / Whiteboard`, `⌘K`) is moving from tldraw to
-[Excalidraw](https://github.com/excalidraw/excalidraw). Excalidraw is MIT
-licensed and runs fully on your device; tldraw needs a licence key in
-production and contacts its CDN.
+The canvas (`🎨 Canvas / Whiteboard`, `⌘K`) is
+[Excalidraw](https://github.com/excalidraw/excalidraw): shapes, arrows,
+free-hand drawing, text, images and frames, with Excalidraw's own tools,
+menus and keyboard shortcuts, in the language of the interface. Excalidraw is
+MIT licensed and runs fully on your device. (Until October 2026 the canvas was
+tldraw, which needs a licence key in production and contacts its CDN.)
 
-:::note[Status]
-The converter and the new file format are in place. The Excalidraw canvas
-itself is not switched on yet. Until then the canvas is still tldraw, and the
-conversion command below isn't in the palette.
-:::
+## Nothing leaves the device
+
+Under the **local-only** policy the canvas makes zero network requests, and
+under every policy it makes none that carry your drawing:
+
+- Excalidraw's fonts are served by Lumen itself, from `/excalidraw/fonts/`,
+  not from a CDN, and are cached for offline use the first time they load.
+- Its interface translations are part of the app.
+- Excalidraw's AI, collaboration, "shareable link" and library-browser
+  features are switched off.
+
+Every canvas is saved automatically, half a second after a change, to
+`canvases/<name>.excalidraw` in your vault. The last change is written when
+you close the canvas or switch to another one.
+
+## Hebrew and right-to-left text
+
+Type Hebrew into a text element and it is laid out right-to-left while you
+edit it. Excalidraw's hand-drawn fonts have no Hebrew glyphs, so Lumen draws
+Hebrew letters with **Assistant** (the Hebrew font Excalidraw ships) inside
+every canvas font — mixed Hebrew/English text keeps both. With the interface
+in Hebrew or Arabic, Excalidraw's menus and panels are right-to-left too.
+
+## Your old tldraw canvases
 
 ## Where canvases live
 
@@ -26,7 +47,9 @@ git-synced vault.
 
 ## Converting
 
-Command: `🎨 Canvas: convert tldraw canvases to Excalidraw`.
+Command: `🎨 Canvas: convert tldraw canvases to Excalidraw`. The canvas
+picker also lists each `.tldr` (and each `.canvas.json` from the first Lumen
+whiteboard) that has no `.excalidraw` yet, with a **Convert** button.
 
 It converts every `.tldr` canvas in the vault in one go and reports how many
 were converted, skipped or failed, plus a warning list per canvas. It runs
@@ -83,13 +106,13 @@ direction setting, so the conversion sets the alignment: text that tldraw
 aligned to the *start* is aligned right when it begins with Hebrew or Arabic,
 and left otherwise.
 
-Excalidraw's own fonts don't include Hebrew letters, so the browser shows
-Hebrew text in a system font.
+Converted Hebrew text is drawn with Assistant, like text typed in the canvas.
 
 ## Older canvases
 
 The converter reads every format a canvas may have been saved in: what the
 current tldraw canvas saves, older tldraw snapshots (plain text instead of
 rich text, arrows connected the old way), and `.tldr` files exported from
-tldraw itself. Canvases from the first Lumen whiteboard (`.canvas.json`) are
-converted to tldraw from the canvas picker first.
+tldraw itself. Canvases from the first Lumen whiteboard (`.canvas.json`) convert
+straight to Excalidraw from the canvas picker: each card becomes a note at
+its position (its connections never had an equivalent).

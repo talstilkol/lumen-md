@@ -177,7 +177,9 @@ export async function writeWorkspaceBlob(
  */
 export async function createWorkspaceFile(path: string, content: string): Promise<boolean> {
   return withPathLock(path, async () => {
-    if (await workspaceHasEntry(path)) return false;
+    // A lookup that fails for any reason but "not there" throws: it never
+    // turns into an overwrite (workspaceHasEntry would read it as "absent").
+    if ((await vault().stat(path)) !== null) return false;
     await writeUnlocked(path, content);
     return true;
   });

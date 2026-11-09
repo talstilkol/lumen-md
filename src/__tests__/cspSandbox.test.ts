@@ -103,7 +103,7 @@ describe("Tauri CSP", () => {
   });
   it("img-src keeps the hosts the app itself loads images from", () => {
     expect(directive(csp, "img-src")).toEqual(
-      expect.arrayContaining(["'self'", "data:", "blob:", "https://cdn.tldraw.com", "https://*.tile.openstreetmap.org"]),
+      expect.arrayContaining(["'self'", "data:", "blob:", "https://*.tile.openstreetmap.org"]),
     );
     expect(directive(csp, "media-src")).toEqual(["'self'", "blob:"]);
   });

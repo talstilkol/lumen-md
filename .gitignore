@@ -93,3 +93,5 @@ eval/golden/*/test/
 reports/
 .stryker-tmp/
 .lighthouseci/
+# Excalidraw canvas fonts (scripts/copy-excalidraw.mjs)
+public/excalidraw/

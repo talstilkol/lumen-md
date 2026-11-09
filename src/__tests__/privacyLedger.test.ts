@@ -102,27 +102,6 @@ describe("privacy ledger", () => {
     expect(ledgerEntries().map(leftDevice)).toEqual([false, false, true]);
   });
 
-  it("tracks tldraw's licence beacon (it carries the page address) and blocks it under local-only (plan 1.9)", async () => {
-    const beacon = "https://cdn.tldraw.com/4.5.10/watermarks/watermark-track.svg?license_type=unlicensed&url=https%3A%2F%2Flumen.example%2F";
-    expect(classify(beacon)).toMatchObject({ host: "cdn.tldraw.com", category: "third-party" });
-    const inner = vi.fn(async () => new Response("<svg/>", { status: 200 }));
-    const f = withLedger(inner as unknown as typeof fetch);
-    setAiPolicy("local-only");
-    await expect(f(beacon)).rejects.toBeInstanceOf(PrivacyBlockedError);
-    expect(inner).not.toHaveBeenCalled();
-    setAiPolicy("local-first");
-    await f(beacon);
-    expect(inner).toHaveBeenCalledTimes(1);
-    expect(ledgerEntries().map((e) => [e.category, e.decision])).toEqual([["third-party", "blocked"], ["third-party", "allowed"]]);
-    // the beacon left the device with the page address: the header total counts it
-    expect(ledgerSummary().cloudRequests).toBe(1);
-    // …and so does its size: a GET sends its data in the query string
-    const query = new URL(beacon).search.slice(1).length;
-    expect(ledgerEntries()[1].bytesOut).toBe(query);
-    expect(ledgerSummary().cloudBytesOut).toBe(query);
-    expect(ledgerEntries()[0].bytesOut).toBe(0); // the blocked attempt sent nothing
-  });
-
   it("counts the query string of a GET as sent, on top of the body", async () => {
     setAiPolicy("cloud");
     const f = withLedger(fakeFetch() as unknown as typeof fetch);
@@ -133,17 +112,17 @@ describe("privacy ledger", () => {
     expect(sent).toEqual(["download=true".length, 2 + "x=1".length, 0]);
   });
 
-  it("lets tldraw's fonts and icons load under local-only — only the beacon path is blocked", async () => {
-    const font = "https://cdn.tldraw.com/4.5.10/fonts/IBMPlexSans-Medium.woff2";
-    expect(classify(font)).toMatchObject({ host: "cdn.tldraw.com", category: "static-asset" });
+  it("Excalidraw's font fallback CDN is third-party traffic — blocked under local-only, never needed (fonts are served locally, plan 4.19)", async () => {
+    const font = "https://esm.sh/@excalidraw/excalidraw@0.18.1/dist/prod/fonts/Excalifont/Excalifont-Regular-a88b72a24fb54c9f94e3b5fdaa7481c9.woff2";
+    expect(classify(font)).toMatchObject({ host: "esm.sh", category: "third-party" });
     const inner = vi.fn(async () => new Response("x", { status: 200 }));
     const f = withLedger(inner as unknown as typeof fetch);
     setAiPolicy("local-only");
-    await f(font);
-    expect(inner).toHaveBeenCalledTimes(1);
-    expect(ledgerEntries().map((e) => [e.category, e.decision])).toEqual([["static-asset", "allowed"]]);
-    // fonts and icons are not model downloads: their own count, their own label
-    expect(ledgerSummary()).toMatchObject({ cloudRequests: 0, downloads: 0, staticAssets: 1 });
+    await expect(f(font)).rejects.toBeInstanceOf(PrivacyBlockedError);
+    expect(inner).not.toHaveBeenCalled();
+    expect(ledgerEntries().map((e) => [e.category, e.decision])).toEqual([["third-party", "blocked"]]);
+    // nothing in the ledger mentions tldraw any more
+    expect(classify("https://cdn.tldraw.com/4.5.10/fonts/IBMPlexSans-Medium.woff2")).toBeNull();
     setAiPolicy("local-first");
   });
 
@@ -189,7 +168,7 @@ describe("privacy ledger", () => {
     }
   });
 
-  it("records tldraw files the browser loads itself (FontFace, CSS url()) from resource timing", () => {
+  it("records files the browser loads itself (FontFace, CSS url()) from resource timing", () => {
     setAiPolicy("local-only");
     let deliver: ((list: { getEntries: () => unknown[] }) => void) | null = null;
     const observed: unknown[] = [];
@@ -206,12 +185,13 @@ describe("privacy ledger", () => {
     try {
       installPrivacyLedger();
       expect(observed).toEqual([{ type: "resource", buffered: true }]);
-      const cdn = "https://cdn.tldraw.com/4.5.10";
+      // Excalidraw's font fallback CDN (third-party; Lumen serves the fonts itself, plan 4.19).
+      const cdn = "https://esm.sh/@excalidraw/excalidraw@0.18.1/dist/prod";
       deliver!({
         getEntries: () => [
-          { name: `${cdn}/fonts/IBMPlexSans-Medium.woff2`, initiatorType: "css", transferSize: 0 }, // FontFace
-          { name: `${cdn}/icons/icon/0_merged.svg#tool-pencil`, initiatorType: "css", transferSize: 4096 }, // CSS mask url()
-          { name: `${cdn}/translations/he.json`, initiatorType: "fetch", transferSize: 900 }, // fetch: the wrapper has it
+          { name: `${cdn}/fonts/Excalifont/Excalifont-Regular.woff2`, initiatorType: "css", transferSize: 0 }, // FontFace
+          { name: `${cdn}/fonts/Virgil/Virgil-Regular.woff2`, initiatorType: "css", transferSize: 4096 }, // CSS url()
+          { name: `${cdn}/locales/he-IL.json`, initiatorType: "fetch", transferSize: 900 }, // fetch: the wrapper has it
           { name: `${location.origin}/assets/index.js`, initiatorType: "script", transferSize: 10 }, // the app's own file
           { name: "https://example.org/pic.png", initiatorType: "img", transferSize: 10 }, // not a tracked host
           { name: "https://raw.githubusercontent.com/me/repo/main/diagram.png", initiatorType: "img", transferSize: 10 }, // an image in a note, not a model download
@@ -223,15 +203,15 @@ describe("privacy ledger", () => {
     }
     const got = ledgerEntries().map((e) => [e.host, e.category, e.decision, e.bytesIn]);
     expect(got).toEqual([
-      ["cdn.tldraw.com", "static-asset", "allowed", null], // size unknown without Timing-Allow-Origin
-      ["cdn.tldraw.com", "static-asset", "allowed", 4096],
+      ["esm.sh", "third-party", "allowed", null], // size unknown without Timing-Allow-Origin
+      ["esm.sh", "third-party", "allowed", 4096],
     ]);
-    expect(ledgerSummary()).toMatchObject({ staticAssets: 2, downloads: 0, cloudRequests: 0 });
+    expect(ledgerSummary()).toMatchObject({ staticAssets: 0, downloads: 0 });
   });
 
   it("a browser-loaded file carrying data in its query counts as sent", () => {
     setAiPolicy("local-first");
-    const e = recordBrowserResource({ name: "https://cdn.tldraw.com/4.5.10/watermarks/watermark-track.svg?url=https%3A%2F%2Fx%2F", initiatorType: "img", transferSize: 0 });
+    const e = recordBrowserResource({ name: "https://esm.sh/@excalidraw/excalidraw@0.18.1/dist/prod/fonts/Excalifont/Excalifont-Regular.woff2?url=https%3A%2F%2Fx%2F", initiatorType: "img", transferSize: 0 });
     expect(e).toMatchObject({ category: "third-party", decision: "allowed", bytesOut: "url=https%3A%2F%2Fx%2F".length });
     expect(ledgerSummary().cloudRequests).toBe(1);
   });

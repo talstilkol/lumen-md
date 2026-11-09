@@ -55,7 +55,7 @@ src/
 - **Local-first.** All data stays in the browser (OPFS) by default. Cloud features are opt-in.
 - **No `any`.** TypeScript strict mode is enforced. Use `unknown` + narrowing.
 - **No hardcoded English.** Every user-facing string uses `t("key")` from `src/i18n/index.ts`.
-- **Lazy everything.** Heavy libraries (Mermaid, ECharts, tldraw, Graphviz) are `lazy()` imports.
+- **Lazy everything.** Heavy libraries (Mermaid, ECharts, Excalidraw, Graphviz) are `lazy()` imports.
 - **Plugin sandbox.** Third-party plugins run in a sandboxed `<iframe>` with restricted CSP.
 
 ## Branches

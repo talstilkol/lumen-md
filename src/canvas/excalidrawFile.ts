@@ -3,15 +3,17 @@
  * files (plan 4.19). The file is open JSON in Excalidraw's own format, so it
  * opens in excalidraw.com or any Excalidraw build as-is.
  *
- * Storage is the same OPFS `canvases/` directory `CanvasTldraw.tsx` uses for
- * `<name>.tldr`. Everything goes through the small `CanvasStore` interface so
- * the migration and the tests can run against an in-memory store.
+ * Storage is the vault's `canvases/` folder, where the tldraw canvas kept
+ * `<name>.tldr` — read and written through the vault layer like every other
+ * file (plan 4.1; no direct file-system handles). Everything goes through the
+ * small `CanvasStore` interface so the migration and the tests can run
+ * against an in-memory store.
  *
  * `.tldr` files are never written or deleted here: after the migration they
  * stay next to the `.excalidraw` file as the backup.
  */
 
-import { isOPFSAvailable } from "../storage/workspace";
+import { createWorkspaceFile, deleteWorkspaceFile, isOPFSAvailable, listWorkspaceDir, readWorkspaceFile, writeWorkspaceFile } from "../storage/workspace";
 import type { ExBinaryFile, ExcalidrawElement, ExcalidrawFile } from "./tldrawToExcalidraw";
 
 export const CANVAS_DIR = "canvases";
@@ -40,9 +42,9 @@ const localLocks = new Map<string, Promise<unknown>>();
 
 /**
  * Run `fn` holding the lock for one canvas file: the Web Locks API when
- * present (exclusive across tabs), else a per-page queue. OPFS has no
- * exclusive create, so the "exists?" check and the write must not interleave
- * with another create or save of the same file.
+ * present (exclusive across tabs), else a per-page queue, so the "exists?"
+ * check and the write of a create, or the read and delete of a remove, never
+ * interleave with another create or save of the same file.
  */
 export function withCanvasLock<T>(fileName: string, fn: () => Promise<T>): Promise<T> {
   if (typeof navigator !== "undefined" && "locks" in navigator && typeof navigator.locks?.request === "function") {
@@ -86,71 +88,48 @@ export class ExcalidrawFileError extends Error {
   }
 }
 
-/** The OPFS `canvases/` directory, or null when OPFS isn't available. */
+/** The vault's `canvases/` folder, or null when the vault isn't available. */
 export function opfsCanvasStore(): CanvasStore | null {
   if (!isOPFSAvailable()) return null;
-  const dir = async (): Promise<FileSystemDirectoryHandle> => {
-    const root = await navigator.storage.getDirectory();
-    return root.getDirectoryHandle(CANVAS_DIR, { create: true });
-  };
-  const writeTo = async (handle: FileSystemFileHandle, text: string): Promise<void> => {
-    // createWritable writes to a swap file and swaps it in on close(): a
-    // failed write never leaves half a file behind.
-    const writable = await handle.createWritable();
-    try {
-      await writable.write(text);
-    } finally {
-      await writable.close();
-    }
-  };
+  const at = (fileName: string) => `${CANVAS_DIR}/${fileName}`;
+  const isMissing = (err: unknown) => (err as { name?: string } | null)?.name === "NotFoundError";
   return {
     async list() {
-      const d = await dir();
-      const out: string[] = [];
-      for await (const [name] of d as unknown as AsyncIterable<[string]>) out.push(name);
-      return out.sort();
+      try {
+        return (await listWorkspaceDir(CANVAS_DIR)).map((e) => e.name).sort();
+      } catch (err) {
+        if (isMissing(err)) return []; // no canvases yet
+        throw err;
+      }
     },
     async read(fileName) {
       try {
-        const handle = await (await dir()).getFileHandle(fileName);
-        return await (await handle.getFile()).text();
+        return await readWorkspaceFile(at(fileName));
       } catch {
         return null;
       }
     },
     write(fileName, text) {
-      return withCanvasLock(fileName, async () => {
-        const handle = await (await dir()).getFileHandle(fileName, { create: true });
-        await writeTo(handle, text);
-      });
+      // The vault writes atomically: a failed write never leaves half a file behind.
+      return withCanvasLock(fileName, () => writeWorkspaceFile(at(fileName), text));
     },
     create(fileName, text) {
       return withCanvasLock(fileName, async () => {
-        const d = await dir();
-        let exists = true;
-        try {
-          await d.getFileHandle(fileName);
-        } catch (err) {
-          // Only "not there" means absent; any other failure must not turn into an overwrite.
-          if (!(err instanceof DOMException && err.name === "NotFoundError")) throw err;
-          exists = false;
-        }
-        if (exists) throw new CanvasFileExistsError(fileName);
-        await writeTo(await d.getFileHandle(fileName, { create: true }), text);
+        // createWorkspaceFile checks and writes under the path's lock: never an overwrite.
+        if (!(await createWorkspaceFile(at(fileName), text))) throw new CanvasFileExistsError(fileName);
       });
     },
     remove(fileName, onlyIf) {
       if (!fileName.endsWith(EXCALIDRAW_EXT)) return Promise.reject(new ExcalidrawFileError(`refusing to delete ${fileName}`));
       return withCanvasLock(fileName, async () => {
-        const d = await dir();
         let current: string | null = null;
         try {
-          current = await (await (await d.getFileHandle(fileName)).getFile()).text();
+          current = await readWorkspaceFile(at(fileName));
         } catch {
           return false;
         }
         if (current !== onlyIf) return false; // someone saved it since: keep their version
-        await d.removeEntry(fileName);
+        await deleteWorkspaceFile(at(fileName));
         return true;
       });
     },

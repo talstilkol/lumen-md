@@ -83,7 +83,7 @@ vi.mock("../ui/DocTabs", async (importOriginal) => ({
 }));
 // Lazy panels.
 vi.mock("../ui/GraphView", () => ({ GraphView: h.stub("GraphView") }));
-vi.mock("../ui/CanvasTldraw", () => ({ CanvasTldraw: h.stub("CanvasTldraw"), debouncedSave: () => {} }));
+vi.mock("../ui/CanvasExcalidraw", () => ({ CanvasExcalidraw: h.stub("CanvasExcalidraw"), debouncedSave: () => {} }));
 vi.mock("../ui/PluginGallery", () => ({ PluginGallery: h.stub("PluginGallery") }));
 vi.mock("../ui/TemplateGallery", () => ({ TemplateGallery: h.stub("TemplateGallery") }));
 vi.mock("../ui/AuditLog", () => ({ AuditLog: h.stub("AuditLog") }));
@@ -703,7 +703,7 @@ describe("App window events", () => {
 
 describe("App overlay panels opened from commands", () => {
   it.each([
-    ["setCanvasOpen", "CanvasTldraw"],
+    ["setCanvasOpen", "CanvasExcalidraw"],
     ["setGalleryOpen", "PluginGallery"],
     ["setTemplateGalleryOpen", "TemplateGallery"],
     ["setAuditLogOpen", "AuditLog"],
