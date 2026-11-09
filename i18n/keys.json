@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-10-24T11:28:24.021Z",
+  "generated_at": "2026-11-09T22:00:13.550Z",
   "source": "src/i18n/index.ts (en bundle)",
-  "count": 1501,
+  "count": 1529,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -451,6 +451,16 @@
     {
       "key": "cmd.file.exportHtml.hint",
       "en": "self-contained .html",
+      "vars": []
+    },
+    {
+      "key": "cmd.file.publishSite",
+      "en": "Publish site…",
+      "vars": []
+    },
+    {
+      "key": "cmd.file.publishSite.hint",
+      "en": "Your notes as a website: GitHub Pages or a .zip",
       "vars": []
     },
     {
@@ -8106,6 +8116,153 @@
       "vars": [
         "files"
       ]
+    },
+    {
+      "key": "publish.title",
+      "en": "Publish site",
+      "vars": []
+    },
+    {
+      "key": "publish.intro",
+      "en": "The notes you pick become a website with navigation, search and right-to-left pages. Nothing is sent until you press Publish, and then only to the place you choose.",
+      "vars": []
+    },
+    {
+      "key": "publish.notes",
+      "en": "Notes ({count} of {total})",
+      "vars": [
+        "count",
+        "total"
+      ]
+    },
+    {
+      "key": "publish.filter",
+      "en": "Filter",
+      "vars": []
+    },
+    {
+      "key": "publish.all",
+      "en": "All",
+      "vars": []
+    },
+    {
+      "key": "publish.none",
+      "en": "None",
+      "vars": []
+    },
+    {
+      "key": "publish.siteTitle",
+      "en": "Site title",
+      "vars": []
+    },
+    {
+      "key": "publish.lang",
+      "en": "Site language",
+      "vars": []
+    },
+    {
+      "key": "publish.target",
+      "en": "Publish to",
+      "vars": []
+    },
+    {
+      "key": "publish.target.zip",
+      "en": "A .zip file (for Netlify Drop, Cloudflare Pages or any web server)",
+      "vars": []
+    },
+    {
+      "key": "publish.target.github",
+      "en": "GitHub Pages",
+      "vars": []
+    },
+    {
+      "key": "publish.repo",
+      "en": "Repository (owner/name)",
+      "vars": []
+    },
+    {
+      "key": "publish.branch",
+      "en": "Branch",
+      "vars": []
+    },
+    {
+      "key": "publish.token",
+      "en": "GitHub token (contents and pages: write)",
+      "vars": []
+    },
+    {
+      "key": "publish.token.hint",
+      "en": "Kept on this device. Empty: the git sync token is used.",
+      "vars": []
+    },
+    {
+      "key": "publish.go",
+      "en": "Publish",
+      "vars": []
+    },
+    {
+      "key": "publish.building",
+      "en": "Building {count} pages…",
+      "vars": [
+        "count"
+      ]
+    },
+    {
+      "key": "publish.deploying",
+      "en": "Sending to GitHub: {step}",
+      "vars": [
+        "step"
+      ]
+    },
+    {
+      "key": "publish.done.zip",
+      "en": "Saved {name} ({count} pages).",
+      "vars": [
+        "name",
+        "count"
+      ]
+    },
+    {
+      "key": "publish.done.github",
+      "en": "Published {count} pages to {url}. GitHub may take a minute to serve them.",
+      "vars": [
+        "count",
+        "url"
+      ]
+    },
+    {
+      "key": "publish.open",
+      "en": "Open the site",
+      "vars": []
+    },
+    {
+      "key": "publish.failed",
+      "en": "Publish failed: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "publish.missing",
+      "en": "{count} file(s) the notes reference were not found and stay as links.",
+      "vars": [
+        "count"
+      ]
+    },
+    {
+      "key": "publish.badRepo",
+      "en": "Write the repository as owner/name",
+      "vars": []
+    },
+    {
+      "key": "publish.noToken",
+      "en": "A GitHub token is needed",
+      "vars": []
+    },
+    {
+      "key": "publish.close",
+      "en": "Close",
+      "vars": []
     }
   ]
 }

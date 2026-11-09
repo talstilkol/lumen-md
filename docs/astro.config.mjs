@@ -81,6 +81,7 @@ export default defineConfig({
             { label: "Git sync", slug: "sync/git" },
             { label: "Cloud sync (Dropbox, Drive)", slug: "sync/cloud" },
             { label: "Read-mode publishing", slug: "sync/publish" },
+            { label: "Publish to your own site", slug: "sync/own-site", translations: { he: "פרסום לאתר משלך" } },
           ],
         },
         {

@@ -1,6 +1,7 @@
 import { renderMarkdown } from "../renderer/pipeline";
 import { fetchWithRetry } from "../lib/fetchRetry";
 import { markdownBaseDirection, scriptLanguage, type BaseDirection } from "../lib/textDirection";
+import { escapeHtml } from "../lib/escapeHtml";
 
 export interface HtmlDocumentOptions {
   /** <title> text. */
@@ -138,11 +139,5 @@ async function collectStyles(): Promise<string> {
   return chunks.join("\n");
 }
 
-export function escapeHtml(s: string): string {
-  return s
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#39;");
-}
+/** Re-exported from ../lib/escapeHtml (plan 4.18: the site builder needs it without the renderer). */
+export { escapeHtml };
