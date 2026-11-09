@@ -1704,6 +1704,23 @@
       "vars": []
     },
     {
+      "key": "plugins.block.failed",
+      "en": "The plugin could not render this block: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "plugins.block.loading",
+      "en": "Rendering with the plugin…",
+      "vars": []
+    },
+    {
+      "key": "plugins.panel.close",
+      "en": "Close the plugin panel",
+      "vars": []
+    },
+    {
       "key": "props.add",
       "en": "Add property",
       "vars": []

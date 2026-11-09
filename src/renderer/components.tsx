@@ -28,6 +28,7 @@ const PlantUMLBlock = lazy(() => import("../plugins/PlantUMLBlock"));
 const EmbedBlock = lazy(() => import("../plugins/EmbedBlock"));
 const HtmlPreviewBlock = lazy(() => import("../plugins/HtmlPreviewBlock"));
 const BibtexBlock = lazy(() => import("../plugins/BibtexBlock"));
+const PluginBlockView = lazy(() => import("../plugins/runtime/PluginBlock"));
 const DataBlock = lazy(() => import("../plugins/DataBlock"));
 const DatabaseBlock = lazy(() => import("../views/DatabaseBlock"));
 const LiveCssBlock = lazy(() => import("../plugins/LiveCssBlock"));
@@ -293,6 +294,12 @@ const HtmlPreview = withSuspense<BlockProps>(
     <HtmlPreviewBlock source={getText(props.children)} meta={props.meta} />
   ),
   "html preview",
+);
+
+/** A code block a plugin renders (plan 11.2): the plugin returns a UI tree, never HTML. */
+const PluginBlockComp = withSuspense<BlockProps>(
+  (props) => <PluginBlockView lang={props.lang ?? ""} source={getText(props.children)} />,
+  "plugin",
 );
 
 const Bibtex = withSuspense<BlockProps>(
@@ -620,6 +627,7 @@ export const components: Record<string, LumenBlock> = {
   "lumen-embed": Embed as unknown as LumenBlock,
   "lumen-htmlpreview": HtmlPreview as unknown as LumenBlock,
   "lumen-bibtex": Bibtex as unknown as LumenBlock,
+  "lumen-pluginblock": PluginBlockComp as unknown as LumenBlock,
   "lumen-data": DataBlockComp as unknown as LumenBlock,
   "lumen-database": Database as unknown as LumenBlock,
   "lumen-livecss": LiveCss as unknown as LumenBlock,

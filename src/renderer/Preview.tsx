@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { renderMarkdown, renderMarkdownFast, extractFrontmatter } from "./pipeline";
+import { subscribePluginLangs } from "../plugins/runtime/rendererRegistry";
 import { LARGE_DOC_CHARS, PreviewDocKeyContext } from "./previewDoc";
 import type { IncrementalPreview } from "./incrementalPreview";
 import { handleWikiLinkClick } from "./wikiLinks";
@@ -130,6 +131,9 @@ export function Preview({ markdownText, docKey = null }: Props) {
       ),
     [],
   );
+
+  // Re-process when a plugin starts or stops rendering a code-block language (plan 11.2).
+  useEffect(() => subscribePluginLangs(() => setThemeVersion((v) => v + 1)), []);
 
   // Re-process when theme changes so Shiki picks up the right theme tokens.
   useEffect(() => {
