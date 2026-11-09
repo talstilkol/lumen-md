@@ -37,7 +37,11 @@ void initAuth();
 startAutoBackup();
 startVaultSnapshots();
 // The vault lives in OPFS/IndexedDB; without this the browser may evict it.
-void requestPersistentStorage();
+// Safari grants persistence to installed apps only and deletes the rest after
+// seven days without a visit: remind once a week to export or install (13.3.3).
+void requestPersistentStorage().then((status) => {
+  if (status !== "persisted") void import("./storage/evictionReminder").then((m) => m.remindIfEvictable(status));
+});
 
 // Web Vitals, measured on this device and never sent (12.4): shown in the
 // Runtime metrics panel. Loaded off the startup path; the observers are

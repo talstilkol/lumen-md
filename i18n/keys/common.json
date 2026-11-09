@@ -2399,6 +2399,21 @@
       "vars": []
     },
     {
+      "key": "storage.eviction.body",
+      "en": "Safari removes a site's data after 7 days without a visit. Export your vault, or add Lumen to the Home Screen / Dock, where storage is kept.",
+      "vars": []
+    },
+    {
+      "key": "storage.eviction.export",
+      "en": "Export vault…",
+      "vars": []
+    },
+    {
+      "key": "storage.eviction.title",
+      "en": "Safari may delete your notes",
+      "vars": []
+    },
+    {
       "key": "sync.conflict.apply",
       "en": "Apply merge",
       "vars": []
