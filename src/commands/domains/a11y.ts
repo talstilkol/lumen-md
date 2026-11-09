@@ -2,7 +2,6 @@
 import { cmdIcons, type Command } from "../../ui/CommandPalette";
 import { getLocale, t } from "../../i18n";
 import { announce, nextVerbosity, setVerbosity, verbosity } from "../../a11y/announce";
-import { describePosition } from "../../editor/srAnnouncements";
 import { docsUrl } from "../../lib/docsLinks";
 import type { CommandContext } from "./context";
 
@@ -26,9 +25,12 @@ export function buildAccessibilityCommands({ getEditorView }: CommandContext): C
       hint: t("cmd.a11y.whereAmI.hint"),
       icon: cmdIcons.Eye,
       group: t("group.view"),
-      action: () => {
+      action: async () => {
         const view = getEditorView?.();
-        if (view) announce(describePosition(view));
+        if (!view) return;
+        // Loaded on use: the palette is in the startup bundle, CodeMirror is not.
+        const { describePosition } = await import("../../editor/srAnnouncements");
+        announce(describePosition(view));
       },
     },
     {
