@@ -3161,14 +3161,58 @@
       "vars": []
     },
     {
+      "key": "update.available.body",
+      "en": "You have {current}. Download, verify and install {version}? Lumen restarts afterwards.",
+      "vars": [
+        "current",
+        "version"
+      ]
+    },
+    {
+      "key": "update.available.title",
+      "en": "Lumen {version} is available",
+      "vars": [
+        "version"
+      ]
+    },
+    {
       "key": "update.dismiss",
       "en": "Dismiss",
+      "vars": []
+    },
+    {
+      "key": "update.failed",
+      "en": "Update failed: {message}",
+      "vars": [
+        "message"
+      ]
+    },
+    {
+      "key": "update.install",
+      "en": "Install and restart",
+      "vars": []
+    },
+    {
+      "key": "update.localOnly",
+      "en": "Update check skipped: the privacy policy is “local only”, so nothing is sent.",
+      "vars": []
+    },
+    {
+      "key": "update.notConfigured",
+      "en": "This build has no update server or key yet; install new versions by hand.",
       "vars": []
     },
     {
       "key": "update.reload",
       "en": "Reload",
       "vars": []
+    },
+    {
+      "key": "update.upToDate",
+      "en": "Lumen {version} is the latest version.",
+      "vars": [
+        "version"
+      ]
     },
     {
       "key": "wikiComplete.aliasOf",

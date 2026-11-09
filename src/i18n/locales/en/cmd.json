@@ -55,6 +55,8 @@
   "cmd.ai.translate.hint": "Translate the whole document, preserving formatting",
   "cmd.ai.usage": "AI: Usage & Cost This Month",
   "cmd.ai.usage.hint": "Requests, tokens and estimated cost per provider on this device",
+  "cmd.app.checkUpdates": "Check for updates…",
+  "cmd.app.checkUpdates.hint": "Desktop app: asks the release server for a newer, signed version",
   "cmd.audit.open": "Audit log…",
   "cmd.audit.open.hint": "Inspect every recorded mutation; export CSV for compliance",
   "cmd.billing.manage": "Billing: Manage subscription",

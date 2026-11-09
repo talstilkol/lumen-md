@@ -56,6 +56,8 @@
   "cmd.ai.translate.hint": "翻译整个文档并保留格式",
   "cmd.ai.usage": "AI：本月用量与费用",
   "cmd.ai.usage.hint": "此设备上各服务商的请求数、令牌数和估算费用",
+  "cmd.app.checkUpdates": "检查更新…",
+  "cmd.app.checkUpdates.hint": "桌面版：向发布服务器询问是否有更新的已签名版本",
   "cmd.audit.open": "审计日志…",
   "cmd.audit.open.hint": "查看所有已记录的变更;可导出 CSV 用于合规",
   "cmd.billing.manage": "账单：管理订阅",

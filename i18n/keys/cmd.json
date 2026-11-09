@@ -289,6 +289,16 @@
       "vars": []
     },
     {
+      "key": "cmd.app.checkUpdates",
+      "en": "Check for updates…",
+      "vars": []
+    },
+    {
+      "key": "cmd.app.checkUpdates.hint",
+      "en": "Desktop app: asks the release server for a newer, signed version",
+      "vars": []
+    },
+    {
       "key": "cmd.audit.open",
       "en": "Audit log…",
       "vars": []

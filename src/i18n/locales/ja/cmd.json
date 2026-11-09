@@ -56,6 +56,8 @@
   "cmd.ai.translate.hint": "書式を保持したまま文書全体を翻訳",
   "cmd.ai.usage": "AI: 今月の使用量とコスト",
   "cmd.ai.usage.hint": "このデバイスでのプロバイダー別リクエスト数・トークン・推定コスト",
+  "cmd.app.checkUpdates": "アップデートを確認…",
+  "cmd.app.checkUpdates.hint": "デスクトップ版：署名済みの新しいバージョンがあるかリリースサーバーに問い合わせます",
   "cmd.audit.open": "監査ログ…",
   "cmd.audit.open.hint": "記録されたすべての変更を確認し、コンプライアンス用に CSV をエクスポートします",
   "cmd.billing.manage": "請求: サブスクリプションを管理",

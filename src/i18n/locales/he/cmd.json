@@ -56,6 +56,8 @@
   "cmd.ai.translate.hint": "תרגם את כל המסמך תוך שימור העיצוב",
   "cmd.ai.usage": "AI: שימוש ועלות החודש",
   "cmd.ai.usage.hint": "בקשות, טוקנים ועלות משוערת לכל ספק במכשיר הזה",
+  "cmd.app.checkUpdates": "בדיקת עדכונים…",
+  "cmd.app.checkUpdates.hint": "אפליקציית שולחן העבודה: שואלת את שרת הגרסאות אם יש גרסה חתומה חדשה יותר",
   "cmd.audit.open": "יומן ביקורת…",
   "cmd.audit.open.hint": "בדוק כל פעולה שנרשמה; ייצא CSV לדרישות תאימות",
   "cmd.billing.manage": "חיוב: ניהול מנוי",

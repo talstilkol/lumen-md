@@ -56,6 +56,8 @@
   "cmd.ai.translate.hint": "Traduire tout le document en conservant la mise en forme",
   "cmd.ai.usage": "IA : utilisation et coût ce mois-ci",
   "cmd.ai.usage.hint": "Requêtes, jetons et coût estimé par fournisseur sur cet appareil",
+  "cmd.app.checkUpdates": "Rechercher des mises à jour…",
+  "cmd.app.checkUpdates.hint": "Application de bureau : demande au serveur de versions s’il existe une version signée plus récente",
   "cmd.audit.open": "Journal d'audit…",
   "cmd.audit.open.hint": "Consulter chaque modification enregistrée ; exporter en CSV pour la conformité",
   "cmd.billing.manage": "Facturation : gérer l'abonnement",

@@ -80,3 +80,32 @@ export function buildVaultLocationCommands(): Command[] {
     },
   ];
 }
+
+/** Desktop updates (plan 11.5): checked only on request, never in local-only. */
+export function buildDesktopUpdateCommands(): Command[] {
+  if (typeof window === "undefined" || !("__TAURI_INTERNALS__" in window)) return [];
+  return [
+    {
+      id: "app.checkUpdates",
+      label: t("cmd.app.checkUpdates"),
+      hint: t("cmd.app.checkUpdates.hint"),
+      icon: cmdIcons.Download,
+      group: t("group.file"),
+      action: async () => {
+        const { checkForUpdate, installUpdate } = await import("../../desktop/updates");
+        const { uiConfirm } = await import("../../ui/PromptDialog");
+        try {
+          const r = await checkForUpdate();
+          if (r.state === "blocked-local-only") return showAiToast(t("update.localOnly"), "info");
+          if (r.state === "not-configured") return showAiToast(t("update.notConfigured"), "info");
+          if (r.state === "up-to-date") return showAiToast(t("update.upToDate", { version: r.current }), "success");
+          if (r.state !== "available") return;
+          const ok = await uiConfirm({ title: t("update.available.title", { version: r.version }), message: r.notes || t("update.available.body", { current: r.current, version: r.version }), okLabel: t("update.install") });
+          if (ok) await installUpdate();
+        } catch (e) {
+          showAiToast(t("update.failed", { message: (e as Error).message }), "error");
+        }
+      },
+    },
+  ];
+}

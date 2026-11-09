@@ -3,6 +3,8 @@ use tauri::menu::{
 };
 use tauri::{Emitter, Manager};
 
+mod updates;
+
 /// Build the native menu bar and emit `lumen-menu` events when an item fires.
 /// The frontend listens for these events in `useTauriMenu` and dispatches the
 /// matching command from the in-app palette so behaviour stays identical to
@@ -354,6 +356,8 @@ pub fn run() {
     let builder = builder.plugin(tauri_plugin_single_instance::init(|app, argv, _cwd| {
         forward_deep_links(app, argv);
     }));
+    #[cfg(desktop)]
+    let builder = builder.plugin(tauri_plugin_updater::Builder::new().build());
     builder
         .plugin(tauri_plugin_deep_link::init())
         .plugin(tauri_plugin_dialog::init())
@@ -375,6 +379,10 @@ pub fn run() {
             desktop_vault::vault_rename,
             desktop_vault::vault_remove,
             desktop_vault::vault_backup,
+            #[cfg(desktop)]
+            updates::imp::update_check,
+            #[cfg(desktop)]
+            updates::imp::update_install,
         ])
         .setup(|app| {
             // The folder chosen on an earlier run (plan 4.3).
