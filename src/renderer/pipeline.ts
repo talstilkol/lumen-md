@@ -34,6 +34,7 @@ import {
   remarkStripFrontmatter,
 } from "./remarkLumen";
 import { EMBEDS_DATA_KEY, remarkEmbeds } from "./remarkEmbeds";
+import { remarkBlockIds } from "./remarkBlockIds";
 import type { EmbedContext } from "./embeds";
 
 const SPECIAL_LANGS = new Set([
@@ -186,6 +187,8 @@ function parseEmbeddedNote(markdown: string): MdastRoot {
 function buildBase() {
   return buildDialect()
     .use(remarkEmbeds, { parse: parseEmbeddedNote })
+    // After embeds: an embedded block's own marker is gone by then, the rest get ids.
+    .use(remarkBlockIds)
     .use(remarkWikiLinks)
     .use(remarkLumenBlocks)
     .use(remarkRehype, { allowDangerousHtml: true });

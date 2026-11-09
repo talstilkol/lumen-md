@@ -6,11 +6,31 @@ import { BLOCK_SNIPPETS } from "../../snippets";
 import { buildFormatCommands } from "../../editor/formatCommands";
 import { buildSuggestingCommands } from "../../editor/suggestingCommands";
 import { detectIsMac } from "../../ui/KeyboardShortcuts";
+import { showAiToast } from "../../ui/AiToast";
 import type { CommandContext } from "./context";
 
-/** Format (Prettier, lazy) and suggesting mode (track changes, CriticMarkup). */
+/** Block links, format (Prettier, lazy) and suggesting mode (track changes, CriticMarkup). */
 export function buildEditCommands({ getEditorView, suggestingMode, toggleSuggestingMode }: CommandContext): Command[] {
   return [
+    // ── Block references (4.8) ─────────────────────────────────────────
+    {
+      id: "editor.copyBlockLink",
+      label: t("cmd.copyBlockLink"),
+      hint: t("cmd.copyBlockLink.hint"),
+      icon: cmdIcons.Link,
+      group: t("group.insert"),
+      action: async () => {
+        const view = getEditorView?.() ?? null;
+        if (!view) return showAiToast(t("blockLink.sourceOnly"), "info");
+        const { copyBlockLink } = await import("../../editor/blockLink");
+        try {
+          const link = await copyBlockLink(view);
+          showAiToast(link ? t("blockLink.copied", { link }) : t("blockLink.noBlock"), link ? "success" : "info");
+        } catch {
+          showAiToast(t("blockLink.copyFailed"), "error");
+        }
+      },
+    },
     ...buildFormatCommands(
       {
         getView: () => getEditorView?.() ?? null,

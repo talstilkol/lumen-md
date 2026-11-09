@@ -49,6 +49,13 @@ export function handleWikiLinkClick(
   // of the target — `[[שלום]]` to a Hebrew heading here.
   const targetId = headingSlug(el.getAttribute("data-wiki-target") ?? "");
   const byId = (want: string) => (want ? Array.from(root.querySelectorAll("[id]")).find((n) => n.id === want) : undefined);
+  // `[[#^id]]`: a block of this note (its id is `^id`, see remarkBlockIds).
+  const own = splitWikiTarget(el.getAttribute("data-wiki-target") ?? "");
+  if (!own.note && own.heading?.startsWith("^")) {
+    e.preventDefault();
+    byId(own.heading)?.scrollIntoView({ block: "start" });
+    return true;
+  }
   if (byId(id)) return false;
   const here = byId(targetId);
   if (here) {
