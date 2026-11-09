@@ -112,7 +112,7 @@
     "livejs-runner": {
       "kind": "document",
       "frameable": true,
-      "why": "live-js runner (T48): hidden sandboxed iframe (opaque origin). The user's code runs in a blob: worker that inherits this policy: eval for the code itself and no network at all. The fixed public nonce is for WebKit, which does not match 'self' in an opaque-origin frame (vite.config.ts html.cspNonce adds it to the page's script tags).",
+      "why": "live-js runner (T48): hidden sandboxed iframe (opaque origin). The user's code runs in a blob: worker that inherits this policy: eval for the code itself and no network at all. WebKit does not apply script-src to a worker's dynamic import(), so the worker also refuses code containing the word import and removes eval / Function / string timers (open item 11). The fixed public nonce is for WebKit, which does not match 'self' in an opaque-origin frame (vite.config.ts html.cspNonce adds it to the page's script tags).",
       "samples": ["/livejs-runner.html"],
       "csp": {
         "default-src": ["'none'"],

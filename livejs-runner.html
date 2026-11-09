@@ -5,7 +5,8 @@
     <!-- Same policy as the deploy headers (rendered from security/policy.json
          by `npm run headers:write`), but also in contexts that serve no header for
          this page: Vite dev, Tauri, Capacitor. The user's code runs in a
-         blob: worker, which inherits it: no network at all.
+         blob: worker, which inherits it: no network at all (WebKit skips
+         script-src for a worker's import(); the worker refuses import itself).
          The nonce is there for WebKit: in a sandboxed (opaque-origin) frame it
          does not match 'self' against the page's own URL, so the runner's
          script was blocked. It is fixed and public on purpose — nothing can
