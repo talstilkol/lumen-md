@@ -10,7 +10,7 @@ import { fetchWithRetry } from "../../lib/fetchRetry";
 import { showAiToast } from "../../ui/AiToast";
 import { describeFindings, reportUrl } from "./permissions";
 import { InstallDialog } from "./InstallDialog";
-import { parseManifest, type PluginManifest } from "./manifest";
+import type { PluginManifest } from "./manifest";
 import type { ScanResult } from "./scan";
 
 const BASE = "/plugins/examples";
@@ -33,6 +33,7 @@ async function loadListed(signal: AbortSignal): Promise<Listed[]> {
     getJson<{ plugins: Array<{ id: string; versions: Array<{ version: string; path: string }> }> }>(`${BASE}/index.json`, signal),
     getJson<{ results: Array<ScanResult & { path: string }> }>(`${BASE}/scan.json`, signal),
   ]);
+  const { parseManifest } = await import("./manifest");
   const out: Listed[] = [];
   for (const p of index.plugins) {
     const ok = p.versions.map((v) => ({ v, scan: scans.results.find((r) => r.id === p.id && r.version === v.version) ?? null })).filter((x) => x.scan?.passed);

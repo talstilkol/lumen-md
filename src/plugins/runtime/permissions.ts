@@ -4,19 +4,21 @@
  */
 import "./trustStrings";
 import { t } from "../../i18n";
-import { isNetworkCapability, networkOrigin } from "./manifest";
 import type { ScanFinding } from "./scan";
 
 /** Permissions that reach beyond the plugin itself: the user's notes, the clipboard, the network. */
 const SENSITIVE = new Set(["document:write", "vault:read", "vault:write", "clipboard:write"]);
 
+const NETWORK = "network:";
+
 export function isSensitive(cap: string): boolean {
-  return SENSITIVE.has(cap) || isNetworkCapability(cap);
+  return SENSITIVE.has(cap) || cap.startsWith(NETWORK);
 }
 
 /** "Read the note that is open", "Connect to https://example.com — and nowhere else", … */
 export function describeCapability(cap: string): string {
-  if (isNetworkCapability(cap)) return t("pluginTrust.cap.network", { origin: networkOrigin(cap) ?? cap.slice("network:".length) });
+  // The manifest check (manifest.ts) only lets an exact https origin through.
+  if (cap.startsWith(NETWORK)) return t("pluginTrust.cap.network", { origin: cap.slice(NETWORK.length) });
   return t(`pluginTrust.cap.${cap.replace(/:/g, "-")}`);
 }
 
