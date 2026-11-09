@@ -1,6 +1,6 @@
 {
  "$comment": "The plan's single source (plan 0.6). Edit this file, then `npm run plan` regenerates the board in MASTER_PLAN.md and plan/board.html; CI (`npm run plan:check`) fails when they differ. A task's status is one line: phases[].tasks[].status.",
- "updated": "2026-11-10T00:30",
+ "updated": "2026-11-10T01:00",
  "note": "**המצב ב-ב׳ 9.11 23:05:** אף PR לא מוזג מאז 17.10 (main = 552ea5b7). סשן 24.10 פתח #282–#316 (כ-30 משימות) — נרשמו כאן עכשיו. כמעט כל ה-PR-ים אדומים משתי סיבות שאינן בקוד: (1) מ-19.10 GitHub מעביר את ubuntu-latest ל-Ubuntu 26 והתקנת Playwright נשברת — #330 מצמיד ל-ubuntu-24.04; (2) תקציבי החבילה (startup 460 KB ותקציבי קובץ) — #330 גם מוסיף annotation שמראה איזה קובץ חורג. **החלטת טל 9.11: לא משתמשים יותר ב-GitHub Actions** — כל commit עם [skip ci], הבדיקות רצות ב-Vercel Sandbox. אזהרה: כל ענף מודד startup לבד (459–460 KB); אחרי 15.1 התוספות מכל השרשראות יצטברו — צריך את #248 או החלטה 15.16 (14) לפני המיזוג.\n\n**מחקר world class (9.11, plan/research-2026-11.md):** ציון ממוצע ב-19 תחומים מול Obsidian, Notion, Logseq, Typora, Word ואחרים — main 3.7 → עם ה-PR-ים הפתוחים 6.6 → כל התוכנית 7.3 → אחרי הגלים W1–W3 9.1. הפערים הגדולים: מסירה (אף PR לא מוזג), קריאה ומחקר (PDF), תאימות לפורמטים של Obsidian, INP ונגישות אמיתית עם קורא מסך (ת״י 5568), שיתוף והרשאות. 65 משימות חדשות בשלושה גלים (W1 ≈173 ש׳, W2 ≈119 ש׳, W3 ≈49 ש׳).",
  "start": "2026-10-18T08:00",
  "buffer": 0.35,
@@ -2819,7 +2819,8 @@
      ],
      "acceptance": [
       "≥ 90% מהמשימות זוהו ב-5 הקלטות זהב"
-     ]
+     ],
+     "status": "⏳ #353 feat/meeting-notes (על #331; סוכן meeting-writer: החלטות, משימות עם אחראי ותאריך בפורמט 4.13, שאלות פתוחות, ייצוא .ics; meetingCore.test.ts עבר תחת ה-shim 4/0; dodMock — סט הזהב מחכה ל-15.11; dod: npx vitest run src/__tests__/meetingCore.test.ts src/__tests__/meetingNotes.test.ts src/__tests__/commandIds.test.ts)"
     },
     {
      "id": "6.17",
@@ -2835,7 +2836,7 @@
       "2.4"
      ],
      "priority": "P0",
-     "status": "⏳ #332 chore/no-cloud-defaults (הביקורת מצאה פערים אמיתיים: הכתבה של הדפדפן שולחת אודיו ל-Google, LanguageTool ציבורי ב-local-first, ספקי Gemini/Anthropic/Mistral ו-fine-tune בלי שער — נסגרו; בדיקה שנכשלת על כל מסלול ענן לא מבוקר; e2e של 22 פקודות, 0 בקשות ענן) — נבדק רק ב-Node נקי; typecheck/vitest/build/Playwright ממתינים ל-Vercel Sandbox",
+     "status": "⏳ #332 chore/no-cloud-defaults (הביקורת מצאה פערים אמיתיים: הכתבה של הדפדפן שולחת אודיו ל-Google, LanguageTool ציבורי ב-local-first, ספקי Gemini/Anthropic/Mistral ו-fine-tune בלי שער — נסגרו; בדיקה שנכשלת על כל מסלול ענן לא מבוקר; e2e של 22 פקודות, 0 בקשות ענן) — נבדק רק ב-Node נקי; typecheck/vitest/build/Playwright ממתינים ל-Vercel Sandbox · דליפת PlantUML→kroki.io נסגרה ב-#352 fix/kroki-policy (מרנדר בלי לשאול רק במדיניות cloud; אחרת כפתור הסכמה לכל דיאגרמה; נרשם ב-ledger; dod: npx vitest run src/__tests__/cloudRoutes.test.ts — לא רץ עדיין)",
      "new": true,
      "was": "5.17",
      "source": "§2",
