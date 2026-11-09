@@ -1438,5 +1438,11 @@
   "tasks.panel.upcoming": "الأيام السبعة القادمة",
   "tasks.panel.close": "إغلاق",
   "tasks.reminders": "تذكيرات",
-  "tasks.reminder.title": "مهمة مستحقة اليوم"
+  "tasks.reminder.title": "مهمة مستحقة اليوم",
+  "tasks.group.none": "(بلا)",
+  "tasks.group.done": "منجزة",
+  "tasks.group.todo": "للتنفيذ",
+  "tasks.error.date": "ليس تاريخًا: {text}",
+  "tasks.error.regex": "ليس تعبيرًا نمطيًا: {text}",
+  "tasks.error.query": "غير مفهوم: {text}"
 }

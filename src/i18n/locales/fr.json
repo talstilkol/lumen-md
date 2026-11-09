@@ -1438,5 +1438,11 @@
   "tasks.panel.upcoming": "7 prochains jours",
   "tasks.panel.close": "Fermer",
   "tasks.reminders": "Rappels",
-  "tasks.reminder.title": "Tâche pour aujourd’hui"
+  "tasks.reminder.title": "Tâche pour aujourd’hui",
+  "tasks.group.none": "(aucun)",
+  "tasks.group.done": "Terminées",
+  "tasks.group.todo": "À faire",
+  "tasks.error.date": "Pas une date : {text}",
+  "tasks.error.regex": "Pas une expression régulière : {text}",
+  "tasks.error.query": "Non compris : {text}"
 }

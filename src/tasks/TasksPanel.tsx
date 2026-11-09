@@ -21,6 +21,7 @@ function Panel({ onClose }: { onClose: () => void }) {
   const [upcoming, setUpcoming] = useState<QueryResult | null>(null);
   const [tick, setTick] = useState(0);
   const [reminders, setReminders] = useState(remindersEnabled());
+  const [changed, setChanged] = useState(false);
   const now = todayIso();
 
   useEffect(() => {
@@ -49,7 +50,7 @@ function Panel({ onClose }: { onClose: () => void }) {
   }, [onClose]);
 
   const onToggle = useCallback(async (task: Task) => {
-    await toggleTaskInVault(task);
+    setChanged(!(await toggleTaskInVault(task)));
     setTick((n) => n + 1);
   }, []);
 
@@ -71,6 +72,7 @@ function Panel({ onClose }: { onClose: () => void }) {
           ✕
         </button>
       </div>
+      {changed ? <p role="status" style={{ color: "hsl(0 70% 55%)", fontSize: 13 }}>{t("tasks.changed")}</p> : null}
       <h4 style={{ margin: "4px 0" }}>{t("tasks.panel.today")}</h4>
       {today ? <TaskList tasks={today.groups[0]?.tasks ?? []} onToggle={onToggle} today={now} /> : <p>{t("tasks.loading")}</p>}
       <h4 style={{ margin: "12px 0 4px" }}>{t("tasks.panel.upcoming")}</h4>

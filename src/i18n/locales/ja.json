@@ -1438,5 +1438,11 @@
   "tasks.panel.upcoming": "今後7日間",
   "tasks.panel.close": "閉じる",
   "tasks.reminders": "リマインダー",
-  "tasks.reminder.title": "今日が期限のタスク"
+  "tasks.reminder.title": "今日が期限のタスク",
+  "tasks.group.none": "(なし)",
+  "tasks.group.done": "完了",
+  "tasks.group.todo": "未完了",
+  "tasks.error.date": "日付ではありません: {text}",
+  "tasks.error.regex": "正規表現ではありません: {text}",
+  "tasks.error.query": "解釈できません: {text}"
 }

@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-10-24T19:38:28.959Z",
+  "generated_at": "2026-11-09T20:51:23.371Z",
   "source": "src/i18n/index.ts (en bundle)",
-  "count": 1440,
+  "count": 1446,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -1766,6 +1766,42 @@
       "key": "tasks.reminder.title",
       "en": "Task due today",
       "vars": []
+    },
+    {
+      "key": "tasks.group.none",
+      "en": "(none)",
+      "vars": []
+    },
+    {
+      "key": "tasks.group.done",
+      "en": "Done",
+      "vars": []
+    },
+    {
+      "key": "tasks.group.todo",
+      "en": "To do",
+      "vars": []
+    },
+    {
+      "key": "tasks.error.date",
+      "en": "Not a date: {text}",
+      "vars": [
+        "text"
+      ]
+    },
+    {
+      "key": "tasks.error.regex",
+      "en": "Not a regular expression: {text}",
+      "vars": [
+        "text"
+      ]
+    },
+    {
+      "key": "tasks.error.query",
+      "en": "Not understood: {text}",
+      "vars": [
+        "text"
+      ]
     },
     {
       "key": "cmd.file.trash",

@@ -1438,5 +1438,11 @@
   "tasks.panel.upcoming": "Nächste 7 Tage",
   "tasks.panel.close": "Schließen",
   "tasks.reminders": "Erinnerungen",
-  "tasks.reminder.title": "Aufgabe heute fällig"
+  "tasks.reminder.title": "Aufgabe heute fällig",
+  "tasks.group.none": "(keine)",
+  "tasks.group.done": "Erledigt",
+  "tasks.group.todo": "Offen",
+  "tasks.error.date": "Kein Datum: {text}",
+  "tasks.error.regex": "Kein regulärer Ausdruck: {text}",
+  "tasks.error.query": "Nicht verstanden: {text}"
 }

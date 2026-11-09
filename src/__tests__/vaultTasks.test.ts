@@ -57,9 +57,10 @@ describe("task line syntax (obsidian-tasks DefaultTaskSerializer)", () => {
 });
 
 /**
- * Syntax compatibility on 20 files: the obsidian-tasks repository's own
- * Tasks-Demo sample vault (MIT), copied to eval/tasks-compat/ with the
- * expected parse written by hand from the plugin's documented semantics.
+ * Syntax compatibility on 20 files: notes from the obsidian-tasks
+ * repository's test data (MIT), copied to eval/tasks-compat/. The expected
+ * tasks (line and status character) are Obsidian's own Markdown cache for
+ * each note, so the oracle is Obsidian, not this parser.
  */
 describe("compatibility with obsidian-tasks notes (4.13 acceptance: 20 files)", () => {
   const dir = join(__dirname, "..", "..", "eval", "tasks-compat");
@@ -111,9 +112,17 @@ describe("queries (```tasks``` blocks)", () => {
     expect(r.groups.map((g) => [g.name, g.tasks.length])).toEqual([["Bills", 3], ["Ideas", 3]]);
   });
 
+  it("names empty and status groups by label (translated in the block), and puts them last", () => {
+    const r = runQuery(parseQuery("group by due", today), all, today);
+    expect(r.groups.map((g) => g.label ?? g.name)).toEqual(["2026-10-19", "2026-10-24", "2026-10-30", "none"]);
+    expect(runQuery(parseQuery("group by status", today), all, today).groups.map((g) => [g.label, g.tasks.length])).toEqual([["todo", 5], ["done", 1]]);
+    expect(runQuery(parseQuery("group by priority", today), all, today).groups.map((g) => g.label ?? g.name)).toEqual(["⏫", "none", "🔽"]);
+  });
+
   it("reports what it doesn't understand instead of ignoring it", () => {
-    expect(runQuery(parseQuery("due whenever", today), all, today).errors[0]).toMatch(/date/);
-    expect(runQuery(parseQuery("frobnicate", today), all, today).errors[0]).toMatch(/do not understand/);
+    expect(runQuery(parseQuery("due whenever", today), all, today).errors).toEqual([{ code: "date", text: "whenever" }]);
+    expect(runQuery(parseQuery("description regex matches /(/", today), all, today).errors).toEqual([{ code: "regex", text: "/(/" }]);
+    expect(runQuery(parseQuery("frobnicate", today), all, today).errors).toEqual([{ code: "query", text: "frobnicate" }]);
   });
 
   it("relative dates", () => {
@@ -158,6 +167,15 @@ describe("index worker: tasks over the vault (4.13.2)", () => {
     r = handleIndexRequest(index, { id: 6, op: "tasks", query: "not done", today: "2026-10-24" });
     expect(r.ok && (r.result as { total: number }).total).toBe(1);
   });
+
+  it("reads tasks from Markdown notes only, not from a PDF or other file in the index", async () => {
+    const { VaultIndex } = await import("../storage/vaultIndexCore");
+    const index = new VaultIndex();
+    index.upsert({ path: "paper.pdf", name: "paper.pdf", content: "%PDF-1.7\n- [ ] not a task\n", modified: 1 });
+    index.upsert({ path: "list.txt", name: "list.txt", content: "- [ ] not a task either", modified: 1 });
+    index.upsert({ path: "Note.MD", name: "Note.MD", content: "- [ ] a task", modified: 1 });
+    expect(index.allTasks().map((t) => t.path)).toEqual(["Note.MD"]);
+  });
 });
 
 describe("toggling in the note", () => {
@@ -166,6 +184,23 @@ describe("toggling in the note", () => {
     const note = "# x\r\n  * [ ] one 📅 2026-10-25\r\n- [ ] two\r\n";
     const [task] = tasksInNote("n.md", note);
     expect(toggledContent(note, task, "2026-10-24")).toBe("# x\r\n  * [x] one 📅 2026-10-25 ✅ 2026-10-24\r\n- [ ] two\r\n");
+  });
+
+  it("changes only the checkbox and the done date; the rest of the line is kept as written", async () => {
+    const { toggledContent } = await import("../tasks/toggle");
+    const toggle = (line: string) => toggledContent(line, tasksInNote("n.md", line)[0], "2026-10-24");
+    // Field order, the alternative due emoji and double spaces are not normalised.
+    expect(toggle("- [ ] one 📆 2026-10-25  ⏫")).toBe("- [x] one 📆 2026-10-25  ⏫ ✅ 2026-10-24");
+    // The done date goes before a block link, which stays last.
+    expect(toggle("- [ ] two 📅 2026-10-25 ^blk-1")).toBe("- [x] two 📅 2026-10-25 ✅ 2026-10-24 ^blk-1");
+    // Back to todo removes the done date and nothing else.
+    expect(toggle("> 1. [x] three ✅ 2026-10-20 📅 2026-10-19")).toBe("> 1. [ ] three 📅 2026-10-19");
+    // A cancelled task unticks to todo.
+    expect(toggle("- [-] four ❌ 2026-10-02")).toBe("- [ ] four ❌ 2026-10-02");
+    // A list item whose first child is the task keeps both markers.
+    expect(toggle("1. 1. [ ] five")).toBe("1. 1. [x] five ✅ 2026-10-24");
+    // A done task without a date unticks cleanly.
+    expect(toggle("- [x] six")).toBe("- [ ] six");
   });
 
   it("writes nothing when the note changed meanwhile", async () => {

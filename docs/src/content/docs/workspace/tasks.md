@@ -30,7 +30,11 @@ Status characters: `[ ]` todo, `[x]` done, `[/]` in progress, `[-]` cancelled.
 ## Queries
 
 A `tasks` code block lists matching tasks from the whole vault. Ticking
-a box there updates the note it came from.
+a box there updates the note it came from: only the checkbox and the `✅`
+date change, the rest of the line stays exactly as you wrote it. If the note
+changed since the list was shown, nothing is written and the block says so.
+A recurring task is marked done; Lumen does not add its next occurrence (the
+Obsidian plugin does). Only Markdown notes are read for tasks.
 
 ````markdown
 ```tasks

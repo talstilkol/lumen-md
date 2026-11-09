@@ -1438,5 +1438,11 @@
   "tasks.panel.upcoming": "未来 7 天",
   "tasks.panel.close": "关闭",
   "tasks.reminders": "提醒",
-  "tasks.reminder.title": "今天到期的任务"
+  "tasks.reminder.title": "今天到期的任务",
+  "tasks.group.none": "(无)",
+  "tasks.group.done": "已完成",
+  "tasks.group.todo": "待办",
+  "tasks.error.date": "不是日期：{text}",
+  "tasks.error.regex": "不是正则表达式：{text}",
+  "tasks.error.query": "无法理解：{text}"
 }

@@ -28,7 +28,14 @@ export interface TaskQuery {
   group: GroupKey | null;
   limit: number | null;
   hide: Set<string>;
-  errors: string[];
+  errors: QueryError[];
+}
+
+/** What a query line got wrong; the block shows it in the user's language. */
+export interface QueryError {
+  code: "date" | "regex" | "query";
+  /** The part of the line that wasn't understood. */
+  text: string;
 }
 
 type SortKey = "due" | "scheduled" | "start" | "done" | "created" | "priority" | "description" | "path" | "status" | "urgency" | "filename" | "heading";
@@ -95,22 +102,24 @@ function textOf(t: Task, f: string): string[] {
 
 type Filter = (t: Task, all: Task[]) => boolean;
 
-/** One filter instruction, or an error message. */
-export function parseFilter(raw: string, today: Date): Filter | string {
+const isError = (f: Filter | QueryError): f is QueryError => typeof f !== "function";
+
+/** One filter instruction, or what is wrong with it. */
+export function parseFilter(raw: string, today: Date): Filter | QueryError {
   const line = raw.trim();
   const lower = line.toLowerCase();
   // Boolean combinations: (a) OR (b), (a) AND (b), NOT (a).
   const not = /^not\s*\((.*)\)$/i.exec(line);
   if (not) {
     const f = parseFilter(not[1], today);
-    return typeof f === "string" ? f : (t, all) => !f(t, all);
+    return isError(f) ? f : (t, all) => !f(t, all);
   }
   const bool = /^\((.*)\)\s+(AND|OR|XOR)\s+\((.*)\)$/i.exec(line);
   if (bool) {
     const a = parseFilter(bool[1], today);
     const b = parseFilter(bool[3], today);
-    if (typeof a === "string") return a;
-    if (typeof b === "string") return b;
+    if (isError(a)) return a;
+    if (isError(b)) return b;
     const op = bool[2].toUpperCase();
     return op === "AND" ? (t, all) => a(t, all) && b(t, all) : op === "OR" ? (t, all) => a(t, all) || b(t, all) : (t, all) => a(t, all) !== b(t, all);
   }
@@ -145,7 +154,7 @@ export function parseFilter(raw: string, today: Date): Filter | string {
   if (m && !/^(includes|does not include|regex)/.test(m[3])) {
     const [, f, op = "on", phrase] = m;
     const d = parseDate(phrase, today);
-    if (!d) return `do not understand the date: ${phrase}`;
+    if (!d) return { code: "date", text: phrase };
     const cmp: Record<string, (x: string) => boolean> = { on: (x) => x === d, before: (x) => x < d, after: (x) => x > d, "on or before": (x) => x <= d, "on or after": (x) => x >= d };
     return (t) => dates(t, f).some(cmp[op]);
   }
@@ -181,11 +190,11 @@ export function parseFilter(raw: string, today: Date): Filter | string {
   if (m) {
     const [, f, op, v] = m;
     const re = regexOf(v);
-    if (!re) return `not a regular expression: ${v}`;
+    if (!re) return { code: "regex", text: v };
     const has = (t: Task) => textOf(t, f.toLowerCase()).some((s) => re.test(s));
     return op.toLowerCase() === "regex matches" ? has : (t) => !has(t);
   }
-  return `do not understand query: ${line}`;
+  return { code: "query", text: line };
 }
 
 export function parseQuery(source: string, today = new Date()): TaskQuery {
@@ -217,7 +226,7 @@ export function parseQuery(source: string, today = new Date()): TaskQuery {
     }
     if (lower === "short mode" || lower === "explain") continue;
     const f = parseFilter(line, today);
-    if (typeof f === "string") q.errors.push(f);
+    if (isError(f)) q.errors.push(f);
     else q.filters.push(f);
   }
   return q;
@@ -261,32 +270,54 @@ function sortValue(t: Task, k: SortKey, today: Date): string | number {
   }
 }
 
-function groupValue(t: Task, g: GroupKey): string[] {
+/**
+ * A group a task falls in: the key it sorts by, and its name. Names the UI
+ * translates ("none", "done", "todo") come as a `label` instead of text, so
+ * nothing English is made in the worker. Groups without a value sort last.
+ */
+interface GroupOf {
+  key: string;
+  name: string;
+  label?: GroupLabel;
+}
+export type GroupLabel = "none" | "done" | "todo";
+
+const LAST = "\uffff";
+const PRIORITY_SYMBOL: Record<Priority, string> = { highest: "🔺", high: "⏫", medium: "🔼", none: "", low: "🔽", lowest: "⏬" };
+
+function groupValue(t: Task, g: GroupKey): GroupOf[] {
+  const none: GroupOf = { key: LAST, name: "", label: "none" };
   switch (g) {
     case "due":
-    case "scheduled":
-      return [t[g] ?? `No ${g} date`];
-    case "priority":
-      return [`Priority ${PRIORITY_RANK[t.priority] + 1}: ${t.priority}`];
+    case "scheduled": {
+      const d = t[g];
+      return [d ? { key: d, name: d } : none];
+    }
+    case "priority": {
+      const rank = String(PRIORITY_RANK[t.priority]);
+      return [t.priority === "none" ? { ...none, key: rank } : { key: rank, name: PRIORITY_SYMBOL[t.priority] }];
+    }
     case "path":
-      return [t.path.replace(/\.md$/, "")];
+      return [{ key: t.path, name: t.path.replace(/\.md$/, "") }];
     case "folder":
-      return [folderOf(t.path)];
-    case "filename":
-      return [fileOf(t.path).replace(/\.md$/, "")];
+      return [{ key: folderOf(t.path), name: folderOf(t.path) }];
+    case "filename": {
+      const f = fileOf(t.path).replace(/\.md$/, "");
+      return [{ key: f, name: f }];
+    }
     case "heading":
-      return [t.heading ?? "(No heading)"];
+      return [t.heading ? { key: t.heading, name: t.heading } : none];
     case "status":
-      return [t.status === "DONE" || t.status === "CANCELLED" ? "Done" : "Todo"];
+      return [t.status === "DONE" || t.status === "CANCELLED" ? { key: "1", name: "", label: "done" } : { key: "0", name: "", label: "todo" }];
     case "tags":
-      return t.tags.length ? t.tags : ["(No tags)"];
+      return t.tags.length ? t.tags.map((tag) => ({ key: tag, name: tag })) : [none];
   }
 }
 
 export interface QueryResult {
-  groups: Array<{ name: string; tasks: Task[] }>;
+  groups: Array<{ name: string; label?: GroupLabel; tasks: Task[] }>;
   total: number;
-  errors: string[];
+  errors: QueryError[];
 }
 
 /** Run a query. Default sort as upstream: status, urgency, due, priority, path. */
@@ -312,7 +343,13 @@ export function runQuery(q: TaskQuery, all: Task[], today = new Date()): QueryRe
   const total = hits.length;
   if (q.limit !== null) hits = hits.slice(0, q.limit);
   if (!q.group) return { groups: [{ name: "", tasks: hits }], total, errors: [] };
-  const groups = new Map<string, Task[]>();
-  for (const t of hits) for (const g of groupValue(t, q.group)) (groups.get(g) ?? groups.set(g, []).get(g)!).push(t);
-  return { groups: [...groups].sort(([a], [b]) => a.localeCompare(b)).map(([name, tasks]) => ({ name, tasks })), total, errors: [] };
+  const groups = new Map<string, { name: string; label?: GroupLabel; tasks: Task[] }>();
+  for (const t of hits) {
+    for (const g of groupValue(t, q.group)) {
+      let group = groups.get(g.key);
+      if (!group) groups.set(g.key, (group = g.label ? { name: g.name, label: g.label, tasks: [] } : { name: g.name, tasks: [] }));
+      group.tasks.push(t);
+    }
+  }
+  return { groups: [...groups].sort(([a], [b]) => (a === b ? 0 : a === LAST ? 1 : b === LAST ? -1 : a.localeCompare(b))).map(([, g]) => g), total, errors: [] };
 }

@@ -165,6 +165,9 @@ function findIn(text: string, lower: string, q: string): { start: number; end: n
   return hasHebrew(q) ? hebrewFind(text, q) : null;
 }
 
+/** Files whose tasks are read (plan 4.13): Markdown, as obsidian-tasks. */
+const TASK_NOTE = /\.(md|markdown|mdx)$/i;
+
 export class VaultIndex {
   private readonly files = new Map<string, Entry>();
   /** Parsed tasks per note (plan 4.13), filled lazily on the first task query. */
@@ -272,17 +275,18 @@ export class VaultIndex {
     return out;
   }
 
-  /** Cheap fuzzy + substring search across file names, paths and content. */
   /**
    * Every task in the vault (plan 4.13). A note is parsed once and again
    * only after it changes; notes without "[" are skipped without parsing.
+   * Only Markdown notes have tasks: other files in the index (a PDF or an
+   * image read as text) are never parsed for them.
    */
   allTasks(): Task[] {
     const out: Task[] = [];
     for (const [path, e] of this.files) {
       let ts = this.taskCache.get(path);
       if (!ts) {
-        ts = e.content.includes("[") ? tasksInNote(path, e.content) : [];
+        ts = TASK_NOTE.test(path) && e.content.includes("[") ? tasksInNote(path, e.content) : [];
         this.taskCache.set(path, ts);
       }
       for (const t of ts) out.push(t);
@@ -297,6 +301,7 @@ export class VaultIndex {
     return runQuery(parseQuery(source, today), this.allTasks(), today);
   }
 
+  /** Cheap fuzzy + substring search across file names, paths and content. */
   search(query: string, opts: SearchOptions = {}): SearchHit[] {
     const limit = opts.limit ?? 30;
     const q = query.trim().toLowerCase();

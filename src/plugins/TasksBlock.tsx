@@ -46,13 +46,17 @@ export default function TasksBlock({ source }: { source: string }) {
       <div style={{ padding: "0.5rem 0.75rem" }}>
         {error ? <p style={{ color: "hsl(0 70% 55%)", fontSize: 13 }}>{error}</p> : null}
         {result?.errors.map((e) => (
-          <p key={e} style={{ color: "hsl(0 70% 55%)", fontSize: 13 }}>
-            ⚠︎ {e}
+          <p key={`${e.code}:${e.text}`} style={{ color: "hsl(0 70% 55%)", fontSize: 13 }} dir="auto">
+            ⚠︎ {t(`tasks.error.${e.code}`, { text: e.text })}
           </p>
         ))}
-        {result?.groups.map((g) => (
-          <section key={g.name || "all"}>
-            {g.name ? <h4 style={{ margin: "0.5rem 0 0.25rem" }} dir="auto">{g.name}</h4> : null}
+        {result?.groups.map((g, i) => (
+          <section key={`${i}:${g.label ?? ""}:${g.name}`}>
+            {g.label || g.name ? (
+              <h4 style={{ margin: "0.5rem 0 0.25rem" }} dir="auto">
+                {g.label ? t(`tasks.group.${g.label}`) : g.name}
+              </h4>
+            ) : null}
             <TaskList tasks={g.tasks} hide={hide} onToggle={onToggle} today={today} />
           </section>
         ))}

@@ -1438,5 +1438,11 @@
   "tasks.panel.upcoming": "7 הימים הבאים",
   "tasks.panel.close": "סגירה",
   "tasks.reminders": "תזכורות",
-  "tasks.reminder.title": "משימה להיום"
+  "tasks.reminder.title": "משימה להיום",
+  "tasks.group.none": "(ללא)",
+  "tasks.group.done": "בוצעו",
+  "tasks.group.todo": "לביצוע",
+  "tasks.error.date": "לא תאריך: {text}",
+  "tasks.error.regex": "לא ביטוי רגולרי: {text}",
+  "tasks.error.query": "לא מובן: {text}"
 }
