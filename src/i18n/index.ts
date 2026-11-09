@@ -155,6 +155,7 @@ const en: Strings = {
   "palette.navigate": "navigate",
   "palette.select": "select",
   "palette.close": "close",
+  "palette.layoutHint": "Also showing results for “{text}” (the other keyboard layout)",
   // Command groups
   "group.recent": "Recent",
   "group.file": "File",

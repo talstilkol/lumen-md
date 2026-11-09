@@ -503,6 +503,7 @@
   "outline.empty": "لا توجد عناوين بعد. اكتب # لإضافة عنوان.",
   "outline.title": "المخطط",
   "palette.close": "إغلاق",
+  "palette.layoutHint": "تُعرض أيضًا نتائج „{text}” (تخطيط لوحة المفاتيح الآخر)",
   "palette.navigate": "تنقل",
   "palette.noMatch": "لا توجد أوامر مطابقة",
   "palette.placeholder": "اكتب أمرًا أو ابحث…",

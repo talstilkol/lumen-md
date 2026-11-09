@@ -503,6 +503,7 @@
   "outline.empty": "Noch keine Überschriften. Tippe #, um eine hinzuzufügen.",
   "outline.title": "Gliederung",
   "palette.close": "schließen",
+  "palette.layoutHint": "Auch Ergebnisse für „{text}“ (das andere Tastaturlayout)",
   "palette.navigate": "navigieren",
   "palette.noMatch": "Keine passenden Befehle",
   "palette.placeholder": "Befehl eingeben oder suchen…",

@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-10-18T04:31:22.318Z",
+  "generated_at": "2026-11-09T22:38:48.504Z",
   "source": "src/i18n/index.ts (en bundle)",
-  "count": 1426,
+  "count": 1427,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -392,6 +392,13 @@
       "key": "palette.close",
       "en": "close",
       "vars": []
+    },
+    {
+      "key": "palette.layoutHint",
+      "en": "Also showing results for “{text}” (the other keyboard layout)",
+      "vars": [
+        "text"
+      ]
     },
     {
       "key": "group.recent",

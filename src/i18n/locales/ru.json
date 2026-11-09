@@ -503,6 +503,7 @@
   "outline.empty": "Заголовков пока нет. Введите #, чтобы добавить.",
   "outline.title": "Содержание",
   "palette.close": "закрыть",
+  "palette.layoutHint": "Также показаны результаты для «{text}» (другая раскладка клавиатуры)",
   "palette.navigate": "навигация",
   "palette.noMatch": "Команды не найдены",
   "palette.placeholder": "Введите команду или поищите…",
