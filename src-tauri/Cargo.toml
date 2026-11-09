@@ -26,11 +26,17 @@ tauri-plugin-dialog = "2"
 # confined to the folder the user picked. Replaces tauri-plugin-fs, whose
 # broad `fs:` scope nothing used.
 lumen-vault = { path = "vault" }
+# Web clipper v2 (plan 4.15.2): the extension hands clips to the desktop app
+# as lumen://clip?data=…; a second launch forwards the link to the running one.
+tauri-plugin-deep-link = "2"
 
 # OS keychain for API keys and tokens (T36): Keychain on macOS, Credential
 # Manager on Windows, in its own crate (keychain/) so CI tests it on both
 # without building Tauri (plan 2.5).
 lumen-keychain = { path = "keychain" }
+
+[target.'cfg(any(target_os = "macos", target_os = "windows", target_os = "linux"))'.dependencies]
+tauri-plugin-single-instance = { version = "2", features = ["deep-link"] }
 
 [features]
 custom-protocol = ["tauri/custom-protocol"]

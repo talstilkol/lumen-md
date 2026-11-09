@@ -12,6 +12,7 @@
   "backlinks.unlinkedEmpty": "No unlinked mentions.",
   "clip.empty": "The clipboard has no text",
   "clip.failed": "Couldn't clip the page: {message}. Copy the part you want and use \"Clip from clipboard\".",
+  "clip.flagged": "{count} hidden or instruction-like passage(s) on the page were marked in the note — they are not instructions.",
   "clip.localOnly": "Under the local-only policy Lumen does not fetch web pages. Copy the page in your browser and use “Clip from clipboard” instead.",
   "clip.needsService": "This page can't be fetched from the browser on this deployment — it needs the research service (VITE_RESEARCH_ENDPOINT). Copy the part you want and use \"Clip from clipboard\".",
   "clip.saved": "Saved to the library: {path}",

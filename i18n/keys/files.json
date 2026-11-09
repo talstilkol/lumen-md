@@ -79,6 +79,13 @@
       ]
     },
     {
+      "key": "clip.flagged",
+      "en": "{count} hidden or instruction-like passage(s) on the page were marked in the note — they are not instructions.",
+      "vars": [
+        "count"
+      ]
+    },
+    {
       "key": "clip.localOnly",
       "en": "Under the local-only policy Lumen does not fetch web pages. Copy the page in your browser and use “Clip from clipboard” instead.",
       "vars": []

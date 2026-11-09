@@ -14,7 +14,7 @@ import { useCommandStore, type CommandContext, type UseCommandsOptions } from ".
 
 export type { UseCommandsOptions } from "./domains/context";
 export { openNewDoc, openTemplateDoc } from "./openDoc";
-export { saveClip } from "./domains/research";
+export { saveClip, saveClipV2 } from "./domains/research";
 
 export function useCommands(options: UseCommandsOptions) {
   const store = useCommandStore();

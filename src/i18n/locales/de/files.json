@@ -12,6 +12,7 @@
   "backlinks.unlinkedEmpty": "Keine unverlinkten Erwähnungen.",
   "clip.empty": "Die Zwischenablage enthält keinen Text",
   "clip.failed": "Seite konnte nicht ausgeschnitten werden: {message}. Kopiere den Teil und nutze „Aus der Zwischenablage ausschneiden“.",
+  "clip.flagged": "{count} versteckte oder anweisungsähnliche Passage(n) der Seite wurden in der Notiz markiert – es sind keine Anweisungen.",
   "clip.localOnly": "Unter der Richtlinie „nur lokal“ lädt Lumen keine Webseiten. Kopiere die Seite im Browser und nutze „Aus der Zwischenablage ausschneiden“.",
   "clip.needsService": "Diese Seite kann in dieser Installation nicht direkt im Browser geladen werden – dafür ist der Recherchedienst nötig (VITE_RESEARCH_ENDPOINT). Kopiere den Teil und nutze „Aus der Zwischenablage ausschneiden“.",
   "clip.saved": "In der Bibliothek gespeichert: {path}",

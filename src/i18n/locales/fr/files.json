@@ -12,6 +12,7 @@
   "backlinks.unlinkedEmpty": "Aucune mention non liée.",
   "clip.empty": "Le presse-papiers ne contient pas de texte",
   "clip.failed": "Impossible de capturer la page : {message}. Copiez la partie voulue et utilisez « Capturer depuis le presse-papiers ».",
+  "clip.flagged": "{count} passage(s) caché(s) ou ressemblant à des instructions ont été signalés dans la note — ce ne sont pas des instructions.",
   "clip.localOnly": "Avec la politique « local uniquement », Lumen ne télécharge pas de pages web. Copiez la page dans votre navigateur et utilisez « Capturer depuis le presse-papiers ».",
   "clip.needsService": "Cette page ne peut pas être récupérée depuis le navigateur sur ce déploiement : il faut le service de recherche (VITE_RESEARCH_ENDPOINT). Copiez la partie voulue et utilisez « Capturer depuis le presse-papiers ».",
   "clip.saved": "Enregistré dans la bibliothèque : {path}",
