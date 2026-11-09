@@ -69,7 +69,7 @@ mapped 1:1 so a reverse proxy can terminate SSL upstream.
 
 Serve Lumen from the root of its own (sub)domain, as above. The
 security headers that ship with the app (the bundled nginx config,
-`public/_headers` and `vercel.json`) match root paths. If you build with
+`public/_headers` and `deploy/vercel.base.json`) match root paths. If you build with
 a sub-path `base` such as `/app/`, prefix those routes yourself,
 including the Web Playground's `/playground-runner.html`, `/assets/*`
 and `/playground/*` rules. Without them the playground preview is blocked.

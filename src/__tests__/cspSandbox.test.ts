@@ -5,7 +5,7 @@ import { join } from "node:path";
 
 const root = join(__dirname, "..", "..");
 const headers = readFileSync(join(root, "public/_headers"), "utf8");
-const vercel = JSON.parse(readFileSync(join(root, "vercel.json"), "utf8")) as {
+const vercel = JSON.parse(readFileSync(join(root, "deploy/vercel.base.json"), "utf8")) as {
   headers: { source: string; headers: { key: string; value: string }[] }[];
 };
 const tauri = JSON.parse(readFileSync(join(root, "src-tauri/tauri.conf.json"), "utf8"));

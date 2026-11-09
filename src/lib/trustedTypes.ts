@@ -1,7 +1,7 @@
 /**
  * Trusted Types integration.
  *
- * Production headers (security/policy.json → public/_headers, vercel.json,
+ * Production headers (security/policy.json → public/_headers, deploy/vercel.base.json,
  * the nginx configs) enforce
  *   require-trusted-types-for 'script';
  *   trusted-types lumen default dompurify lit-html iconify ProseMirrorClipboard 'allow-duplicates'

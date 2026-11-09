@@ -2,7 +2,7 @@
  * Build-time CSP extension for deployment-specific endpoints.
  *
  * The checked-in policies (rendered from security/policy.json into
- * index.html <meta>, public/_headers, vercel.json, the nginx configs and
+ * index.html <meta>, public/_headers, deploy/vercel.base.json, the nginx configs and
  * tauri.conf.json by scripts/headers.mjs) list every *public* host the
  * app talks to. The
  * workers a deployment runs itself — SSO, billing/entitlements, publish,
