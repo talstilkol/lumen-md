@@ -88,6 +88,27 @@ const secretsReady = Promise.race([initSecretStore(), new Promise((r) => setTime
 const VaultFolderBanner = React.lazy(() => import("./ui/VaultFolderBanner").then((m) => ({ default: m.VaultFolderBanner })));
 const closedVault = createDirectoryHandleBackend({ id: "restoring", available: () => false, root: async () => Promise.reject(new Error("The vault is still opening.")) });
 setVaultBackend(closedVault);
+/**
+ * Changes made outside Lumen reach the open tabs (plan 4.4) — started once
+ * the vault is known (once, even when openVaultAtBoot retries the load), and
+ * the open notes are checked against the disk again whenever another vault
+ * opens (reconnect, late restore, move).
+ */
+let externalChangesStarted = false;
+function startExternalChanges(m: typeof import("./storage/vault/location")): void {
+  if (externalChangesStarted) return;
+  externalChangesStarted = true;
+  void import("./store/externalChanges").then((x) => {
+    x.startExternalChanges();
+    let last = m.getVaultStatus().location;
+    m.onVaultStatusChange(() => {
+      const now = m.getVaultStatus().location;
+      if (now === last) return;
+      last = now;
+      void x.reconcileOpenNotes();
+    });
+  });
+}
 // If the location chunk can't load (offline after an update), openVaultAtBoot
 // retries it when the browser is back online and shows a "Try again" bar.
 const vaultReady = Promise.race([
@@ -96,7 +117,9 @@ const vaultReady = Promise.race([
       import("./storage/vault/location").then(async (m) => {
         const { detachWorkspaceDocs } = await import("./store/vaultDocs");
         m.setOnVaultReplaced(detachWorkspaceDocs);
-        return m.restoreVaultLocationWithin(3000);
+        const status = await m.restoreVaultLocationWithin(3000);
+        startExternalChanges(m);
+        return status;
       }),
   }),
   new Promise((r) => setTimeout(r, 4000)),
