@@ -90,7 +90,7 @@ const WORDS = ["שלום", "עולם", "מחברת", "פגישה", "note", "plan
 
 function makeNote(r: () => number): string {
   const pick = <T,>(xs: readonly T[]) => xs[Math.floor(r() * xs.length)];
-  const fm = ["---", `title: ${pick(WORDS)} ${pick(WORDS)}`, `tags: [${["a", "b", "c", "d"].filter(() => r() < 0.5).join(", ")}]`, `status: ${pick(["draft", "done", "open"])}`, "---"];
+  const fm = ["---", `title: ${JSON.stringify(`${pick(WORDS)} ${pick(WORDS)}`)}`, `tags: [${["a", "b", "c", "d"].filter(() => r() < 0.5).join(", ")}]`, `status: ${pick(["draft", "done", "open"])}`, "---"];
   const body: string[] = [];
   const n = 25 + Math.floor(r() * 25);
   for (let i = 0; i < n; i++) {
@@ -122,7 +122,8 @@ function edit(text: string, r: () => number): string {
       fmLines = fmLines.map((l) => (l.startsWith("tags:") ? `tags: [${[...new Set([...l.slice(7, -1).split(", ").filter(Boolean), pick(["e", "f", "g", "h", "i"])])].join(", ")}]` : l));
     } else {
       const key = pick(["status", "title", "due", "author"]);
-      const v = key === "due" ? "2026-12-0" + (1 + Math.floor(r() * 9)) : pick(WORDS);
+      // Quoted: a value like **bold** or [[Link]] is not a plain YAML scalar.
+      const v = key === "due" ? "2026-12-0" + (1 + Math.floor(r() * 9)) : JSON.stringify(pick(WORDS));
       const at = fmLines.findIndex((l) => l.startsWith(`${key}:`));
       if (at >= 0) fmLines[at] = `${key}: ${v}`;
       else fmLines.push(`${key}: ${v}`);
@@ -163,6 +164,8 @@ describe("merge engine: 500 random pairs of concurrent edits", () => {
         expect(got, `pair ${k}: "${w}" ${b}/${o}/${t}`).toBeLessThanOrEqual(most);
         expect(got, `pair ${k}: "${w}" ${b}/${o}/${t}`).toBeGreaterThanOrEqual(least);
       }
+      // Both sides' front matter is valid YAML; the merge must keep it so.
+      expect([ours, theirs].every((x) => frontmatterValid(splitFrontmatter(x).fm ?? "")), `pair ${k}: generator`).toBe(true);
       const fm = splitFrontmatter(m.text).fm;
       expect(fm !== null && frontmatterValid(fm), `pair ${k}: front matter`).toBe(true);
     }

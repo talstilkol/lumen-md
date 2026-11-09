@@ -26,6 +26,10 @@
  */
 import type { DiffHunk } from "./cloud/diff";
 import { mergeText as mergeDocument } from "./merge/textMerge";
+import { isLfsPointer } from "./gitText";
+
+// Small text checks shared with git.ts / gitMirror.ts (./gitText.ts keeps them out of the merge chunk).
+export { hasConflictMarkers, isLfsPointer, LFS_POINTER_PREFIX } from "./gitText";
 
 export type Bytes = Uint8Array;
 
@@ -49,39 +53,9 @@ export type PullAction =
   /** Upstream holds a Git LFS pointer where this vault has the real file: the file is kept. */
   | { kind: "lfsSkipped"; path: string };
 
-/** The first line of every Git LFS pointer file (https://git-lfs.com/spec/v1). */
-export const LFS_POINTER_PREFIX = "version https://git-lfs.github.com/spec/v1";
-
 const decoder = new TextDecoder();
 const strictDecoder = new TextDecoder("utf-8", { fatal: true });
 const encoder = new TextEncoder();
-
-/**
- * Is this a Git LFS pointer (a small text stub that stands for the real
- * content)? The whole structure of the spec: the exact version line first,
- * then `key value` lines in key order, among them `oid sha256:<64 hex>` and
- * `size <digits>`, each ending in a newline.
- */
-export function isLfsPointer(data: Bytes | string | null): boolean {
-  if (data === null) return false;
-  if (typeof data !== "string") {
-    if (data.length > 1024) return false;
-    data = decoder.decode(data);
-  }
-  if (data.length > 1024 || !data.startsWith(`${LFS_POINTER_PREFIX}\n`) || !data.endsWith("\n")) return false;
-  const lines = data.slice(0, -1).split("\n").slice(1);
-  let oid = false;
-  let size = false;
-  let last = "";
-  for (const line of lines) {
-    const m = /^([a-z0-9.-]+) (.+)$/.exec(line);
-    if (!m || m[1] <= last) return false;
-    last = m[1];
-    if (m[1] === "oid") oid = /^sha256:[0-9a-f]{64}$/.test(m[2]);
-    else if (m[1] === "size") size = /^\d+$/.test(m[2]);
-  }
-  return oid && size;
-}
 
 /** Binary, for merging: a NUL byte near the start, or not valid UTF-8 (git's own heuristic, plus the UTF-8 check). */
 export function isBinary(data: Bytes): boolean {
@@ -105,11 +79,6 @@ export function sameBytes(a: Bytes | null, b: Bytes | null): boolean {
 export interface MergeLabels {
   ours: string;
   theirs: string;
-}
-
-/** Does this text still hold an unresolved conflict: a `<<<<<<<` line, then `=======`, then `>>>>>>>`, in that order? */
-export function hasConflictMarkers(text: string): boolean {
-  return /^<{7}(?: [^\n]*)?\n(?:[^\n]*\n)*?={7}\n(?:[^\n]*\n)*?>{7}(?: [^\n]*)?$/m.test(text);
 }
 
 /** Pairs [i, j] of equal lines in a longest common subsequence of a and b. */
