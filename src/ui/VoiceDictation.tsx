@@ -23,6 +23,7 @@ import { useAppStore } from "../store/useStore";
 import { showAiToast } from "./AiToast";
 import { t } from "../i18n";
 import { transcribe, summarizeMemo, formatVoiceMemo } from "../ai/transcribe";
+import { aiOperation, isAbort } from "../ai/aiAbort";
 import { log } from "../lib/logger";
 
 // SpeechRecognition is poorly + inconsistently typed across DOM lib
@@ -226,21 +227,29 @@ export async function startVoiceMemo(): Promise<void> {
     const blob = new Blob(chunks, { type: mimeType || recorder.mimeType || "audio/webm" });
 
     showAiToast(t("toast.transcribing"), "info");
+    // Esc / "AI: Cancel" (T55) stops the transcription and the summary; nothing is inserted.
+    const op = aiOperation();
     let result;
-    try {
-      result = await transcribe(blob);
-    } catch (err) {
-      log.error("voice memo transcribe failed", err);
-      showAiToast(t("toast.transcribeFailed", { error: (err as Error).message }), "error");
-      return;
-    }
-
-    showAiToast(t("toast.summarising"), "info");
     let summary = "";
     try {
-      summary = await summarizeMemo(result.text);
-    } catch (err) {
-      log.warn("voice memo summary failed; inserting transcript only", err);
+      try {
+        result = await transcribe(blob, { signal: op.signal });
+      } catch (err) {
+        if (op.signal.aborted || isAbort(err)) return;
+        log.error("voice memo transcribe failed", err);
+        showAiToast(t("toast.transcribeFailed", { error: (err as Error).message }), "error");
+        return;
+      }
+
+      showAiToast(t("toast.summarising"), "info");
+      try {
+        summary = await summarizeMemo(result.text, op.signal);
+      } catch (err) {
+        if (op.signal.aborted || isAbort(err)) return;
+        log.warn("voice memo summary failed; inserting transcript only", err);
+      }
+    } finally {
+      op.end();
     }
 
     const memo = formatVoiceMemo({
