@@ -1430,5 +1430,11 @@
   "cmd.ai.cancel": "AI: إلغاء",
   "cmd.ai.cancel.hint": "يوقف كل طلبات الذكاء الاصطناعي الجارية (Esc يفعل ذلك أيضاً)",
   "toast.aiCancelled": "أُلغي طلب الذكاء الاصطناعي ({count})",
-  "toast.aiNothingRunning": "لا يوجد طلب ذكاء اصطناعي جارٍ"
+  "toast.aiNothingRunning": "لا يوجد طلب ذكاء اصطناعي جارٍ",
+  "canvas.jsonCanvas.import": "استيراد ‎.canvas",
+  "canvas.jsonCanvas.export": "تصدير ‎.canvas",
+  "canvas.jsonCanvas.imported": "تم استيراد {name} ({count} عنصرًا)",
+  "canvas.jsonCanvas.exported": "تم حفظ {name}.canvas: {nodes} عقدة، {edges} وصلة",
+  "canvas.jsonCanvas.skipped": "{count} عنصر ليس له شكل في JSON Canvas فتم استبعاده (صور، رسم حر، أسهم غير موصولة)",
+  "canvas.jsonCanvas.failed": "تعذّر استيراد JSON Canvas: {error}"
 }

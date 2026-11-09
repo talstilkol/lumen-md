@@ -47,6 +47,7 @@ export default defineConfig({
             { label: "Search (BM25 + Smart)", slug: "workspace/search" },
             { label: "Vault Doctor", slug: "workspace/doctor" },
             { label: "Canvas (Excalidraw)", slug: "workspace/canvas", translations: { he: "קנבס (Excalidraw)" } },
+            { label: "JSON Canvas (Obsidian .canvas)", slug: "workspace/json-canvas", translations: { he: "JSON Canvas (‏.canvas של Obsidian)" } },
           ],
         },
         {

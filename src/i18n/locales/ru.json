@@ -1430,5 +1430,11 @@
   "cmd.ai.cancel": "ИИ: отменить",
   "cmd.ai.cancel.hint": "Останавливает все запросы ИИ (то же делает Esc)",
   "toast.aiCancelled": "Запрос ИИ отменён ({count})",
-  "toast.aiNothingRunning": "Нет активных запросов ИИ"
+  "toast.aiNothingRunning": "Нет активных запросов ИИ",
+  "canvas.jsonCanvas.import": "Импорт .canvas",
+  "canvas.jsonCanvas.export": "Экспорт в .canvas",
+  "canvas.jsonCanvas.imported": "Импортировано: {name} ({count} элементов)",
+  "canvas.jsonCanvas.exported": "Сохранено {name}.canvas: узлов {nodes}, связей {edges}",
+  "canvas.jsonCanvas.skipped": "Элементов без формы в JSON Canvas: {count}, они пропущены (изображения, рисунки от руки, несвязанные стрелки)",
+  "canvas.jsonCanvas.failed": "Не удалось импортировать JSON Canvas: {error}"
 }

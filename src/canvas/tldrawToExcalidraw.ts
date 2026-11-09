@@ -82,7 +82,8 @@ export interface ExBase {
   updated: number;
   link: string | null;
   locked: boolean;
-  customData?: { tldrawId: string; tldrawType: string };
+  /** Where the element came from: a tldraw shape, or a JSON Canvas node / edge (./jsonCanvas.ts). */
+  customData?: { tldrawId?: string; tldrawType?: string; jsonCanvas?: Record<string, unknown> };
 }
 
 export interface ExShapeElement extends ExBase {

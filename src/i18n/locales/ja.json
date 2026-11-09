@@ -1430,5 +1430,11 @@
   "cmd.ai.cancel": "AI: キャンセル",
   "cmd.ai.cancel.hint": "実行中の AI リクエストをすべて停止します（Esc でも可）",
   "toast.aiCancelled": "AI リクエストをキャンセルしました（{count}）",
-  "toast.aiNothingRunning": "実行中の AI リクエストはありません"
+  "toast.aiNothingRunning": "実行中の AI リクエストはありません",
+  "canvas.jsonCanvas.import": ".canvas を読み込む",
+  "canvas.jsonCanvas.export": ".canvas に書き出す",
+  "canvas.jsonCanvas.imported": "{name} を読み込みました（{count} 項目）",
+  "canvas.jsonCanvas.exported": "{name}.canvas を保存しました: ノード {nodes}、エッジ {edges}",
+  "canvas.jsonCanvas.skipped": "JSON Canvas で表せない要素 {count} 個を省きました（画像、手書き、つながっていない矢印）",
+  "canvas.jsonCanvas.failed": "JSON Canvas を読み込めませんでした: {error}"
 }
