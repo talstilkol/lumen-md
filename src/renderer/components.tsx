@@ -13,7 +13,6 @@ import {
   subscribeRemoteImages,
   type RemoteImageGate,
 } from "../lib/remoteImages";
-import { t } from "../i18n";
 
 const ChartBlock = lazy(() => import("../plugins/ChartBlock"));
 const MermaidBlock = lazy(() => import("../plugins/MermaidBlock"));
