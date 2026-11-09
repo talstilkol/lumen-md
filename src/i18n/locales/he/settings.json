@@ -113,6 +113,7 @@
   "privacy.cat.local-ai": "במכשיר / ברשת המקומית",
   "privacy.cat.model-download": "הורדת מודל — לא נשלח טקסט",
   "privacy.cat.monitoring": "דוח שגיאה — רק בהסכמתך, ללא תוכן",
+  "privacy.cat.plugin": "תוסף — נשלח לכתובת שאישרת לתוסף",
   "privacy.cat.research": "שירות מחקר — השאילתה שלך נשלחת",
   "privacy.cat.static-asset": "קבצים סטטיים (גופנים, סמלים) — לא נשלח טקסט",
   "privacy.cat.third-party": "שירות צד שלישי — כתובת הדף נשלחת",

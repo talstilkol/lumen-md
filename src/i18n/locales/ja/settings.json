@@ -113,6 +113,7 @@
   "privacy.cat.local-ai": "この端末 / LAN 内",
   "privacy.cat.model-download": "モデルのダウンロード — テキストは送信されません",
   "privacy.cat.monitoring": "エラーレポート — 同意した場合のみ、内容は除去",
+  "privacy.cat.plugin": "プラグイン — プラグインに許可したアドレスへ送信",
   "privacy.cat.research": "リサーチサービス — 検索語が送信されます",
   "privacy.cat.static-asset": "静的ファイル（フォント、アイコン）— テキストは送信されません",
   "privacy.cat.third-party": "サードパーティーのサービス — ページのアドレスが送信されます",

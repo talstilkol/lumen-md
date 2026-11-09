@@ -113,6 +113,7 @@
   "privacy.cat.local-ai": "本设备 / 局域网",
   "privacy.cat.model-download": "模型下载 — 不发送文本",
   "privacy.cat.monitoring": "错误报告 — 仅在您同意时发送，已移除内容",
+  "privacy.cat.plugin": "插件 — 发送到你允许该插件访问的地址",
   "privacy.cat.research": "研究服务 — 会发送你的查询",
   "privacy.cat.static-asset": "静态文件（字体、图标）— 不发送文本",
   "privacy.cat.third-party": "第三方服务 — 会发送页面地址",

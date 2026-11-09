@@ -113,6 +113,7 @@
   "privacy.cat.local-ai": "على هذا الجهاز / الشبكة المحلية",
   "privacy.cat.model-download": "تنزيل نموذج — لا يُرسل نص",
   "privacy.cat.monitoring": "تقرير خطأ — بموافقتك فقط، دون المحتوى",
+  "privacy.cat.plugin": "إضافة — أُرسل إلى عنوان سمحت به للإضافة",
   "privacy.cat.research": "خدمة البحث — يُرسل استعلامك",
   "privacy.cat.static-asset": "ملفات ثابتة (خطوط، أيقونات) — لا يُرسَل نص",
   "privacy.cat.third-party": "خدمة طرف ثالث — يُرسَل عنوان الصفحة",

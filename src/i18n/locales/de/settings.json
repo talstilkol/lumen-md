@@ -113,6 +113,7 @@
   "privacy.cat.local-ai": "Auf diesem Gerät / im LAN",
   "privacy.cat.model-download": "Modell-Download — kein Text gesendet",
   "privacy.cat.monitoring": "Fehlerbericht — nur mit deiner Zustimmung, ohne Inhalt",
+  "privacy.cat.plugin": "Plugin — an eine Adresse gesendet, die Sie dem Plugin erlaubt haben",
   "privacy.cat.research": "Recherchedienst — deine Anfrage wird gesendet",
   "privacy.cat.static-asset": "Statische Dateien (Schriften, Symbole) — kein Text gesendet",
   "privacy.cat.third-party": "Drittanbieterdienst — die Seitenadresse wird gesendet",

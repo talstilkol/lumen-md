@@ -597,6 +597,11 @@
       "vars": []
     },
     {
+      "key": "privacy.cat.plugin",
+      "en": "Plugin — sent to an address you allowed the plugin",
+      "vars": []
+    },
+    {
       "key": "privacy.cat.research",
       "en": "Research service — your query is sent",
       "vars": []

@@ -113,6 +113,7 @@
   "privacy.cat.local-ai": "Sur cet appareil / réseau local",
   "privacy.cat.model-download": "Téléchargement de modèle — aucun texte envoyé",
   "privacy.cat.monitoring": "Rapport d'erreur — seulement avec votre accord, sans contenu",
+  "privacy.cat.plugin": "Extension — envoyé à une adresse que vous avez autorisée pour l’extension",
   "privacy.cat.research": "Service de recherche — votre requête est envoyée",
   "privacy.cat.static-asset": "Fichiers statiques (polices, icônes) — aucun texte envoyé",
   "privacy.cat.third-party": "Service tiers — l'adresse de la page est envoyée",

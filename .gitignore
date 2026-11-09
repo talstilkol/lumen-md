@@ -62,6 +62,7 @@ public/pyodide/
 public/webr/
 public/ort/
 public/vad/
+public/quickjs/
 public/ruby/
 public/playground/vendor/
 bundle-sizes.json
