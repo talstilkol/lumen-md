@@ -331,6 +331,22 @@ export function useCommands({
         },
       },
       {
+        id: "file.exportMarkdownAiMarks",
+        label: t("cmd.ai.marks.export"),
+        icon: cmdIcons.Download,
+        group: t("group.file"),
+        action: async () => {
+          // Snapshot before any await (as above).
+          const doc = liveDoc();
+          const view = getEditorView?.() ?? null;
+          const [{ withAuthorshipFooter, loadSpans }, { downloadText }] = await Promise.all([import("../ai/authorship"), import("../storage/exportFormats")]);
+          // The open source editor has the live marks; otherwise the saved ones.
+          const spans = view ? (await import("../editor/aiAuthorship")).aiSpansOf(view) : loadSpans(doc.workspaceName ?? `file:${doc.name}`, doc.content);
+          const text = view ? view.state.doc.toString() : doc.content;
+          downloadText(doc.name.endsWith(".md") ? doc.name : `${doc.name}.md`, withAuthorshipFooter(text, spans), "text/markdown");
+        },
+      },
+      {
         id: "file.exportLatex",
         label: t("cmd.file.exportLatex"),
         hint: t("cmd.file.exportLatex.hint"),
@@ -1505,6 +1521,17 @@ export function useCommands({
             if ((await import("../agents/suggestions")).reportAgentFailure(e, "ai.styleProfile")) return;
             showAiToast((e as Error).message, "error");
           }
+        },
+      },
+      {
+        id: "ai.marks.toggle",
+        label: t("cmd.ai.marks.toggle"),
+        hint: t("cmd.ai.marks.hint"),
+        icon: cmdIcons.Sparkles,
+        group: t("group.view"),
+        action: async () => {
+          const { marksShown, setMarksShown } = await import("../ai/authorship");
+          setMarksShown(!marksShown());
         },
       },
       {
