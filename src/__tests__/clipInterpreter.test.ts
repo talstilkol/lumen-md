@@ -112,7 +112,7 @@ describe("local only: no cloud request, whatever the policy", () => {
   });
 
   it("finds no interpreter with a remote Ollama and no loaded in-browser model, and makes no request", async () => {
-    const fetchSpy = vi.fn(async () => new Response("{}", { status: 200 }));
+    const fetchSpy = vi.fn(async (_input: RequestInfo | URL, _init?: RequestInit) => new Response("{}", { status: 200 }));
     vi.stubGlobal("fetch", fetchSpy);
     for (const policy of ["local-only", "local-first", "cloud"]) {
       localStorage.setItem("lumen.ai.policy", policy);
