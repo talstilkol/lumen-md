@@ -1,6 +1,6 @@
 {
  "$comment": "The plan's single source (plan 0.6). Edit this file, then `npm run plan` regenerates the board in MASTER_PLAN.md and plan/board.html; CI (`npm run plan:check`) fails when they differ. A task's status is one line: phases[].tasks[].status.",
- "updated": "2026-11-09T23:05",
+ "updated": "2026-11-09T23:45",
  "note": "**המצב ב-ב׳ 9.11 23:05:** אף PR לא מוזג מאז 17.10 (main = 552ea5b7). סשן 24.10 פתח #282–#316 (כ-30 משימות) — נרשמו כאן עכשיו. כמעט כל ה-PR-ים אדומים משתי סיבות שאינן בקוד: (1) מ-19.10 GitHub מעביר את ubuntu-latest ל-Ubuntu 26 והתקנת Playwright נשברת — #330 מצמיד ל-ubuntu-24.04; (2) תקציבי החבילה (startup 460 KB ותקציבי קובץ) — #330 גם מוסיף annotation שמראה איזה קובץ חורג. **החלטת טל 9.11: לא משתמשים יותר ב-GitHub Actions** — כל commit עם [skip ci], הבדיקות רצות ב-Vercel Sandbox. אזהרה: כל ענף מודד startup לבד (459–460 KB); אחרי 15.1 התוספות מכל השרשראות יצטברו — צריך את #248 או החלטה 15.16 (14) לפני המיזוג.",
  "start": "2026-10-18T08:00",
  "buffer": 0.35,
@@ -1812,6 +1812,7 @@
       "8.4"
      ],
      "priority": "P1",
+     "status": "⏳ #331 feat/vault-tasks (משימות בכל הכספת, סימון משנה רק את התיבה והתאריך, רק קובצי md) — נבדק רק ב-Node נקי; typecheck/vitest/build/Playwright ממתינים ל-Vercel Sandbox; Codex לא סקר (מכסה)",
      "new": true,
      "source": "מחקר פערים #7",
      "steps": [
@@ -1823,6 +1824,10 @@
      "acceptance": [
       "1,000 משימות: שאילתה < 100ms",
       "תאימות לתחביר על 20 קבצים"
+     ],
+     "dod": [
+      "npx vitest run src/__tests__/vaultTasks.test.ts",
+      "npx playwright test e2e/vault-tasks.spec.ts --project=chromium"
      ]
     },
     {
@@ -1984,6 +1989,7 @@
       "13.3"
      ],
      "priority": "P2",
+     "status": "⏳ #344 feat/vault-folder-mobile (backend לטלפון: Capacitor Filesystem + SAF; התוסף ב-mobile/android לא מחובר עד ש-13.3 ו-4.4 ייפגשו; ✅* — 15.13) — נבדק רק ב-Node נקי; typecheck/vitest/build/Playwright ממתינים ל-Vercel Sandbox; Codex לא סקר (מכסה)",
      "new": true,
      "owner": "15.13",
      "source": "Codex על התוכנית (#136)",
@@ -1995,7 +2001,11 @@
      "acceptance": [
       "בדיקות החוזה ירוקות על שני המימושים",
       "קובץ שנערך באפליקציית ״קבצים״ מופיע ב-Lumen (בדיקה ידנית, 15.13)"
-     ]
+     ],
+     "dod": [
+      "npx vitest run src/__tests__/vaultBackend.contract.test.ts src/__tests__/vaultMobile.test.ts"
+     ],
+     "dodMock": true
     }
    ]
   },
@@ -2242,6 +2252,7 @@
       "editor"
      ],
      "priority": "P1",
+     "status": "⏳ #335 feat/ai-authorship (סימון טקסט שנכתב ב-AI, נשמר לפתק, ייצוא עם סימון) — נבדק רק ב-Node נקי; typecheck/vitest/build/Playwright ממתינים ל-Vercel Sandbox; Codex לא סקר (מכסה)",
      "new": true,
      "source": "מחקר פערים §3",
      "steps": [
@@ -2251,6 +2262,9 @@
      ],
      "acceptance": [
       "100% מההכנסות של AI מסומנות (בדיקה)"
+     ],
+     "dod": [
+      "npx vitest run src/__tests__/aiAuthorship.test.ts"
      ]
     },
     {
@@ -2684,6 +2698,7 @@
       "render"
      ],
      "priority": "P2",
+     "status": "⏳ #341 feat/citations (APA 7, Chicago, MLA 9 בעברית ובאנגלית, אופליין; DOI ו-citation-js לא נוספו) — נבדק רק ב-Node נקי; typecheck/vitest/build/Playwright ממתינים ל-Vercel Sandbox; Codex לא סקר (מכסה)",
      "new": true,
      "owner": "15.10",
      "was": "5.13",
@@ -2698,6 +2713,9 @@
      ],
      "acceptance": [
       "20 רשומות זהב מעוצבות נכון ב-3 סגנונות offline, בעברית ובאנגלית"
+     ],
+     "dod": [
+      "npx vitest run src/__tests__/citationStyles.test.ts"
      ]
     },
     {
@@ -3350,6 +3368,7 @@
       "i18n"
      ],
      "priority": "P1",
+     "status": "⏳ #337 feat/i18n-draft-agent (npm run i18n:draft עם Ollama, רשימת needs-review) — נבדק רק ב-Node נקי; typecheck/vitest/build/Playwright ממתינים ל-Vercel Sandbox; Codex לא סקר (מכסה)",
      "new": true,
      "was": "8.6",
      "source": "חיסכון בזמן",
@@ -3359,6 +3378,9 @@
      ],
      "acceptance": [
       "10 מפתחות → 70 טיוטות בפקודה אחת"
+     ],
+     "dod": [
+      "npx vitest run src/__tests__/i18nDraft.test.ts src/__tests__/i18nValues.test.ts"
      ]
     },
     {
@@ -3573,6 +3595,7 @@
       "settings"
      ],
      "priority": "P1",
+     "status": "⏳ #333 feat/settings-one (מסך הגדרות אחד עם לשוניות, חיפוש, ייצוא/ייבוא בלי סודות; 3.5/5.4/6.1/3.6 יחוברו אחרי 15.1) — נבדק רק ב-Node נקי; typecheck/vitest/build/Playwright ממתינים ל-Vercel Sandbox; Codex לא סקר (מכסה)",
      "was": "10.1",
      "source": "J1",
      "steps": [
@@ -3583,6 +3606,10 @@
      "acceptance": [
       "100% מהמפתחות בסכמה",
       "e2e: חיפוש ושינוי"
+     ],
+     "dod": [
+      "npx vitest run src/__tests__/settingsSchema.test.ts src/__tests__/settingsIo.test.ts src/__tests__/settingsScreen.test.tsx",
+      "npx playwright test e2e/settings.spec.ts"
      ]
     },
     {
@@ -3656,6 +3683,7 @@
       "4.4"
      ],
      "priority": "P2",
+     "status": "⏳ #338 feat/vault-encryption (AES-GCM לכל קובץ, מפתח שחזור, המרה copy-first, נעילה אוטומטית; Argon2id דורש hash-wasm ב-lockfile) — נבדק רק ב-Node נקי; typecheck/vitest/build/Playwright ממתינים ל-Vercel Sandbox; Codex לא סקר (מכסה)",
      "new": true,
      "was": "10.5",
      "source": "J3 (החלטה ב-1.6)",
@@ -3668,6 +3696,10 @@
      "acceptance": [
       "רק ciphertext באחסון, בכל `VaultBackend` (4.1): IndexedDB ו-OPFS, תיקייה אמיתית בדפדפן (`FileSystemDirectoryHandle`, 4.2), תיקייה בשולחן העבודה (Tauri, 4.3) ובהמשך מובייל (4.20) — כולל trace-ים, אינדקס, embeddings וגיבויים",
       "סריקה ושחזור (e2e) רצים על כל backend"
+     ],
+     "dod": [
+      "npx vitest run src/__tests__/vaultEncryption.test.ts src/__tests__/vaultBackend.contract.test.ts",
+      "npx playwright test e2e/vault-encryption.spec.ts --project=chromium"
      ]
     },
     {
