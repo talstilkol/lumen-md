@@ -1,6 +1,6 @@
 {
  "$comment": "The plan's single source (plan 0.6). Edit this file, then `npm run plan` regenerates the board in MASTER_PLAN.md and plan/board.html; CI (`npm run plan:check`) fails when they differ. A task's status is one line: phases[].tasks[].status.",
- "updated": "2026-11-10T00:05",
+ "updated": "2026-11-10T00:15",
  "note": "**המצב ב-ב׳ 9.11 23:05:** אף PR לא מוזג מאז 17.10 (main = 552ea5b7). סשן 24.10 פתח #282–#316 (כ-30 משימות) — נרשמו כאן עכשיו. כמעט כל ה-PR-ים אדומים משתי סיבות שאינן בקוד: (1) מ-19.10 GitHub מעביר את ubuntu-latest ל-Ubuntu 26 והתקנת Playwright נשברת — #330 מצמיד ל-ubuntu-24.04; (2) תקציבי החבילה (startup 460 KB ותקציבי קובץ) — #330 גם מוסיף annotation שמראה איזה קובץ חורג. **החלטת טל 9.11: לא משתמשים יותר ב-GitHub Actions** — כל commit עם [skip ci], הבדיקות רצות ב-Vercel Sandbox. אזהרה: כל ענף מודד startup לבד (459–460 KB); אחרי 15.1 התוספות מכל השרשראות יצטברו — צריך את #248 או החלטה 15.16 (14) לפני המיזוג.",
  "start": "2026-10-18T08:00",
  "buffer": 0.35,
@@ -3382,6 +3382,7 @@
       "10.3"
      ],
      "priority": "P1",
+     "status": "⏳ #346 test/rtl-matrix (מטריצת RTL: תצוגה, WYSIWYG ויצוא × 3 דפדפנים × 2 טלפונים; נמצא: טבלה ב-WYSIWYG בלי dir) — Playwright/typecheck/build ממתינים ל-Vercel Sandbox",
      "was": "8.5",
      "source": "B1–B11",
      "steps": [
@@ -3391,6 +3392,9 @@
      ],
      "acceptance": [
       "ירוק ב-3 דפדפנים + 2 מכשירים"
+     ],
+     "dod": [
+      "npx playwright test e2e/rtl-matrix.spec.ts"
      ]
     },
     {
@@ -3484,6 +3488,7 @@
       "10.3"
      ],
      "priority": "P1",
+     "status": "⏳ #350 feat/rtl-parity (כל left/right ב-CSS הפך ללוגי, חיצים שומרים משמעות חזותית, שער שנכשל על מאפיין פיזי חדש; 4.10 ו-10.2 יחוברו אחרי 15.1) — Playwright/typecheck/build ממתינים ל-Vercel Sandbox",
      "new": true,
      "source": "Obsidian 1.14 (המחקר המורחב, 18.10)",
      "steps": [
@@ -3496,6 +3501,10 @@
      "acceptance": [
       "20 תרחישי ממשק ומחוות ב-RTL ירוקים ב-e2e",
       "axe ירוק ב-RTL"
+     ],
+     "dod": [
+      "npx vitest run src/__tests__/rtlLogical.test.ts",
+      "npx playwright test e2e/rtl-parity.spec.ts"
      ]
     }
    ]
@@ -3574,6 +3583,7 @@
       "ci"
      ],
      "priority": "P1",
+     "status": "⏳ #343 test/visual-local (רגרסיה חזותית מקומית — לא ב-Actions: 40 צילומים, 10 משטחים × עברית/אנגלית × בהיר/כהה; בדיקה עצמית שהזזה של 3px נכשלת; baselines נוצרים בהרצה ראשונה) — Playwright/typecheck/build ממתינים ל-Vercel Sandbox",
      "was": "9.3",
      "source": "T24",
      "steps": [
@@ -3583,6 +3593,10 @@
      ],
      "acceptance": [
       "שינוי פיקסלים לא מכוון נתפס"
+     ],
+     "dod": [
+      "npm run test:visual",
+      "npm run test:visual -- visual/selftest.visual.ts"
      ]
     },
     {
