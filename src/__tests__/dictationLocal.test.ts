@@ -1,5 +1,5 @@
 /** 1.3 — dictation runs on this device; the browser speech service never runs under local-only. */
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { chooseDictationEngine, downsampleTo16k, Segmenter, SerialQueue, WEB_SPEECH_KEY } from "../ai/dictation";
 
 vi.mock("../ui/AiToast", () => ({ showAiToast: vi.fn() }));
@@ -131,6 +131,203 @@ describe("dictated text stays with its note (review: #197)", () => {
     expect(s().doc.content).toBe("B");
     expect(s().openTabs.find((x) => x.id === taker)?.content).toBe("more\n\nagain");
   });
+
+  it("follows its note when autosave adopts it into the workspace, or it is renamed, under a new tab id", async () => {
+    const { useAppStore, tabIdOf } = await import("../store/useStore");
+    const { dictationSink } = await import("../ui/VoiceDictation");
+    const s = () => useAppStore.getState();
+    s().openTab({ name: "notes.txt", content: "A", workspaceName: null }); // ad-hoc: its tab id is its name
+    const sink = dictationSink();
+    sink("one");
+    s().adoptWorkspaceName("notes.md"); // what autosave's adoptIntoWorkspace() does to a dirty ad-hoc note
+    sink("two");
+    expect(tabIdOf(s().doc)).toBe("notes.md");
+    s().setDoc({ name: "final.md", workspaceName: "final.md", dirty: false }); // a rename in the file tree
+    sink("three");
+    expect(tabIdOf(s().doc)).toBe("final.md");
+    expect(s().doc.content).toBe("A\n\none\n\ntwo\n\nthree");
+    expect(s().openTabs.some((x) => x.name.startsWith("Dictation"))).toBe(false); // no stray "Dictation" note
+    sink.dispose();
+  });
+
+  it("follows a note in a background tab that was moved in the vault", async () => {
+    const { useAppStore } = await import("../store/useStore");
+    const { syncOpenDocsAfterMove } = await import("../store/openDocs");
+    const { dictationSink } = await import("../ui/VoiceDictation");
+    const s = () => useAppStore.getState();
+    s().openTab({ name: "a.md", content: "A", workspaceName: "a.md" });
+    const sink = dictationSink();
+    s().openTab({ name: "b.md", content: "B", workspaceName: "b.md" });
+    syncOpenDocsAfterMove("a.md", "x/a.md", (c) => c);
+    sink("hello");
+    expect(s().doc.content).toBe("B");
+    expect(s().openTabs.find((x) => x.id === "x/a.md")?.content).toBe("A\n\nhello");
+    expect(s().openTabs.map((x) => x.id)).toEqual(["x/a.md", "b.md"]); // no stray "Dictation" note
+    sink.dispose();
+  });
+});
+
+describe("the browser speech service and a policy change mid-session (review: #197)", () => {
+  beforeEach(() => {
+    localStorage.clear();
+    vi.resetModules();
+  });
+
+  it.each(["this tab", "another tab"])("stops when the policy turns local-only in %s", async (where) => {
+    localStorage.setItem("lumen.ai.policy", "cloud");
+    localStorage.setItem(WEB_SPEECH_KEY, "1");
+    const stopped = vi.fn();
+    class FakeSR {
+      lang = "";
+      interimResults = false;
+      continuous = false;
+      onresult = null;
+      onerror = null;
+      onend = null;
+      start() {}
+      stop = stopped;
+    }
+    (window as unknown as { SpeechRecognition: unknown }).SpeechRecognition = FakeSR;
+    const { startVoiceRecording } = await import("../ui/VoiceDictation");
+    const { setAiPolicy } = await import("../ai/policy");
+    startVoiceRecording("en-US");
+    expect(document.getElementById("voice-recording-root")).not.toBeNull();
+    if (where === "this tab") {
+      setAiPolicy("local-first"); // still allowed: keeps going
+      expect(stopped).not.toHaveBeenCalled();
+      setAiPolicy("local-only");
+    } else {
+      localStorage.setItem("lumen.ai.policy", "local-only");
+      window.dispatchEvent(new StorageEvent("storage", { key: "lumen.ai.policy", newValue: "local-only" }));
+    }
+    expect(stopped).toHaveBeenCalledTimes(1);
+    expect(document.getElementById("voice-recording-root")).toBeNull();
+    setAiPolicy("local-only"); // the session is over: nothing more to stop
+    expect(stopped).toHaveBeenCalledTimes(1);
+    delete (window as unknown as { SpeechRecognition?: unknown }).SpeechRecognition;
+  });
+});
+
+describe("local dictation start-up: cancellation and a suspended audio context (review: #197)", () => {
+  beforeEach(() => {
+    localStorage.clear();
+    localStorage.setItem("lumen.ai.policy", "local-only");
+    vi.resetModules();
+  });
+
+  function audioContext(opts: { state?: string; resume?: () => Promise<void> } = {}) {
+    const close = vi.fn(async () => {});
+    const made = vi.fn();
+    const resume = vi.fn(opts.resume ?? (async () => {}));
+    (globalThis as unknown as { AudioContext: unknown }).AudioContext = class {
+      state = opts.state ?? "running";
+      sampleRate = 16000;
+      destination = {};
+      close = close;
+      constructor() {
+        made();
+      }
+      async resume() {
+        await resume();
+        this.state = "running";
+      }
+      createMediaStreamSource() {
+        return { connect() {}, disconnect() {} };
+      }
+      createScriptProcessor() {
+        return { onaudioprocess: null, connect() {}, disconnect() {} };
+      }
+    };
+    return { close, made, resume };
+  }
+  function mic(grant?: (give: (s: unknown) => void) => void) {
+    const stop = vi.fn();
+    const stream = { getTracks: () => [{ stop }] };
+    const getUserMedia = grant ? vi.fn(() => new Promise((r) => grant(r))) : vi.fn(async () => stream);
+    Object.defineProperty(navigator, "mediaDevices", { configurable: true, value: { getUserMedia } });
+    return { stop, stream };
+  }
+  const toastTexts = (calls: unknown[][], kind: string) => calls.filter((c) => c[1] === kind).map((c) => String(c[0]));
+  afterEach(() => {
+    vi.doUnmock("../ai/transformersEngine");
+    delete (globalThis as unknown as { AudioContext?: unknown }).AudioContext;
+    document.getElementById("voice-recording-root")?.remove();
+  });
+
+  it("Esc while the microphone prompt is open cancels it, and a microphone granted later is released", async () => {
+    let give: ((s: unknown) => void) | null = null;
+    const { stop, stream } = mic((g) => (give = g));
+    const { made } = audioContext();
+    const { startVoiceRecording } = await import("../ui/VoiceDictation");
+    const { cancelAllAi } = await import("../ai/aiAbort");
+    startVoiceRecording("en-US");
+    await vi.waitFor(() => expect(give).not.toBeNull());
+    expect(cancelAllAi()).toBe(1); // the dictation that is still starting can be cancelled
+    give!(stream); // the user accepts the prompt afterwards
+    await new Promise((r) => setTimeout(r, 0));
+    expect(stop).toHaveBeenCalled();
+    expect(made).not.toHaveBeenCalled();
+    expect(document.getElementById("voice-recording-root")).toBeNull();
+  });
+
+  it("Esc while the speech engine is still loading releases the microphone at once", async () => {
+    const { stop } = mic();
+    const { close } = audioContext();
+    let loaded: (() => void) | null = null;
+    vi.doMock("../ai/transformersEngine", async () => {
+      await new Promise<void>((r) => (loaded = r));
+      return { transcribeAudio: vi.fn(async () => ({ text: "" })) };
+    });
+    const { showAiToast } = await import("../ui/AiToast");
+    const toasts = showAiToast as unknown as ReturnType<typeof vi.fn>;
+    const before = toasts.mock.calls.length;
+    const { startVoiceRecording } = await import("../ui/VoiceDictation");
+    const { cancelAllAi } = await import("../ai/aiAbort");
+    startVoiceRecording("en-US");
+    await vi.waitFor(() => expect(loaded).not.toBeNull());
+    expect(cancelAllAi()).toBe(1);
+    expect(stop).toHaveBeenCalled(); // released while the import is still pending
+    expect(close).toHaveBeenCalled();
+    loaded!();
+    await new Promise((r) => setTimeout(r, 0));
+    expect(document.getElementById("voice-recording-root")).toBeNull();
+    expect(toastTexts(toasts.mock.calls.slice(before), "info").some((m) => /Dictating on this device/.test(m))).toBe(false);
+  });
+
+  it("resumes a suspended audio context before it reports that dictation is on", async () => {
+    mic();
+    const { resume } = audioContext({ state: "suspended" });
+    vi.doMock("../ai/transformersEngine", () => ({ transcribeAudio: vi.fn(async () => ({ text: "" })) }));
+    const { showAiToast } = await import("../ui/AiToast");
+    const toasts = showAiToast as unknown as ReturnType<typeof vi.fn>;
+    const before = toasts.mock.calls.length;
+    const { startVoiceRecording } = await import("../ui/VoiceDictation");
+    const { cancelAllAi } = await import("../ai/aiAbort");
+    startVoiceRecording("en-US");
+    await vi.waitFor(() => expect(toastTexts(toasts.mock.calls.slice(before), "info").some((m) => /Dictating on this device/.test(m))).toBe(true));
+    expect(resume).toHaveBeenCalledTimes(1);
+    expect(document.getElementById("voice-recording-root")).not.toBeNull();
+    cancelAllAi(); // stop the session
+  });
+
+  it("an audio context that won't resume releases the microphone and says so instead of recording silence", async () => {
+    const { stop } = mic();
+    const { close } = audioContext({ state: "suspended", resume: async () => Promise.reject(new DOMException("not allowed", "NotAllowedError")) });
+    vi.doMock("../ai/transformersEngine", () => ({ transcribeAudio: vi.fn(async () => ({ text: "" })) }));
+    const { showAiToast } = await import("../ui/AiToast");
+    const toasts = showAiToast as unknown as ReturnType<typeof vi.fn>;
+    const before = toasts.mock.calls.length;
+    const { startVoiceRecording } = await import("../ui/VoiceDictation");
+    const { aiBusy } = await import("../ai/aiAbort");
+    startVoiceRecording("en-US");
+    await vi.waitFor(() => expect(toastTexts(toasts.mock.calls.slice(before), "error")).toHaveLength(1));
+    expect(toastTexts(toasts.mock.calls.slice(before), "error")[0]).toMatch(/paused/);
+    expect(stop).toHaveBeenCalled();
+    expect(close).toHaveBeenCalled();
+    expect(aiBusy()).toBe(false);
+    expect(document.getElementById("voice-recording-root")).toBeNull();
+    expect(toastTexts(toasts.mock.calls.slice(before), "info").some((m) => /Dictating on this device/.test(m))).toBe(false);
+  });
 });
 
 describe("dictation setup and failures (review: #197)", () => {
@@ -207,6 +404,7 @@ describe("dictation setup and failures (review: #197)", () => {
     const stopTrack = fakeMic();
     let proc: { onaudioprocess: ((e: unknown) => void) | null } | null = null;
     (globalThis as unknown as { AudioContext: unknown }).AudioContext = class {
+      state = "running";
       sampleRate = 16000;
       destination = {};
       close = vi.fn(async () => {});

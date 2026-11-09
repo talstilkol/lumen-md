@@ -18,13 +18,13 @@
  */
 
 import { createRoot } from "react-dom/client";
-import { tabIdOf, useAppStore } from "../store/useStore";
+import { onTabIdChange, tabIdOf, useAppStore } from "../store/useStore";
 import { showAiToast } from "./AiToast";
 import { t } from "../i18n";
 import { transcribe, summarizeMemo, formatVoiceMemo } from "../ai/transcribe";
 import { aiOperation, isAbort } from "../ai/aiAbort";
 import { log } from "../lib/logger";
-import { getAiPolicy } from "../ai/policy";
+import { getAiPolicy, onAiPolicyChange } from "../ai/policy";
 import { recordSpeechRecognition } from "../ai/privacyLedger";
 import { chooseDictationEngine, webSpeechOptedIn, WEB_SPEECH_KEY, Segmenter, SerialQueue } from "../ai/dictation";
 
@@ -125,16 +125,24 @@ function localDictationSupported(): boolean {
 
 const joinDictated = (current: string, words: string) => current + (current.endsWith("\n\n") || !current ? "" : "\n\n") + words;
 
+/** Appends dictated text; `dispose()` when the dictation ends. */
+export type DictationSink = ((text: string) => void) & { dispose: () => void };
+
 /**
  * Where dictated text goes: the note that was open when dictation started,
- * even if the user switched tabs while Whisper was still working. If that
- * note was closed, the rest goes to a new note instead of whatever is open.
- * Exported for tests.
+ * even if the user switched tabs while Whisper was still working, or the
+ * note got a new tab id (autosave adopting an ad-hoc note into the
+ * workspace, a rename, a move). If that note was closed, the rest goes to a
+ * new note instead of whatever is open. Exported for tests.
  */
-export function dictationSink(): (text: string) => void {
-  const origin = tabIdOf(useAppStore.getState().doc);
+export function dictationSink(): DictationSink {
+  let origin = tabIdOf(useAppStore.getState().doc);
   let orphan: string | null = null; // name of the note that took over, once created
-  return (text) => {
+  const unfollow = onTabIdChange((from, to) => {
+    if (origin === from) origin = to;
+    if (orphan === from) orphan = to;
+  });
+  const append = (text: string) => {
     const words = text.trim();
     if (!words) return;
     const s = useAppStore.getState();
@@ -161,6 +169,7 @@ export function dictationSink(): (text: string) => void {
     }
     showAiToast(t("toast.addedWords", { count: words.split(/\s+/).length }), "info");
   };
+  return Object.assign(append, { dispose: unfollow });
 }
 
 /**
@@ -230,7 +239,16 @@ function startWebSpeech(Ctor: SpeechCtor, lang: string): void {
   recognition.lang = lang;
   recognition.interimResults = false;
   recognition.continuous = true;
-  let cleanup = () => {};
+  let hidePill = () => {};
+  let ended = false;
+  let unwatch = () => {};
+  const cleanup = () => {
+    hidePill();
+    unwatch();
+    if (ended) return;
+    ended = true;
+    appendDictated.dispose();
+  };
   const stop = () => {
     recognition.stop();
     cleanup();
@@ -248,18 +266,29 @@ function startWebSpeech(Ctor: SpeechCtor, lang: string): void {
     showAiToast(t("toast.speechRecognitionErrorCheckMicrophone"), "error");
   };
   recognition.onend = () => cleanup();
-  cleanup = showRecordingPill(t("voice.recording", { lang }), stop);
+  // why: local-only switched on mid-session (settings here or in another tab) — not one more second of audio to the vendor
+  unwatch = onAiPolicyChange(() => {
+    if (ended || getAiPolicy() !== "local-only") return;
+    recognition.stop();
+    cleanup();
+    showAiToast(t("toast.dictate.stoppedLocalOnly"), "info");
+  });
+  hidePill = showRecordingPill(t("voice.recording", { lang }), stop);
   recognition.start();
 }
 
 /**
  * Microphone → 5-second 16 kHz segments → Whisper in the worker → the note.
  * Nothing leaves the device. `onFailure` runs once if transcription fails
- * (worker, model download or inference), after the microphone is released.
+ * (worker, model download or inference) or the audio context won't resume,
+ * after the microphone is released. Cancellable (Esc / "AI: Cancel") from
+ * the first moment, the microphone prompt included.
  */
 async function startLocalDictation(lang: string, onFailure: () => void): Promise<void> {
-  const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-  const release: Array<() => void> = [() => stream.getTracks().forEach((tr) => tr.stop())];
+  // why: registered before the permission prompt and the engine import, so Esc / "AI: Cancel" also stops a dictation that is still starting
+  const op = aiOperation();
+  const appendDictated = dictationSink();
+  const release: Array<() => void> = [() => op.end(), () => appendDictated.dispose()];
   const releaseAll = () => {
     for (const r of release.splice(0).reverse()) {
       try {
@@ -269,6 +298,22 @@ async function startLocalDictation(lang: string, onFailure: () => void): Promise
       }
     }
   };
+  op.signal.addEventListener("abort", releaseAll);
+  let stream: MediaStream;
+  try {
+    stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+  } catch (err) {
+    const cancelled = op.signal.aborted;
+    releaseAll();
+    if (cancelled) return;
+    throw err;
+  }
+  // why: cancelled while the permission prompt was open — the microphone that arrived late is released at once
+  if (op.signal.aborted) {
+    stream.getTracks().forEach((tr) => tr.stop());
+    return;
+  }
+  release.push(() => stream.getTracks().forEach((tr) => tr.stop()));
   try {
     const w = window as Window & { webkitAudioContext?: typeof AudioContext };
     const Ctx = typeof AudioContext !== "undefined" ? AudioContext : (w.webkitAudioContext as typeof AudioContext);
@@ -278,11 +323,9 @@ async function startLocalDictation(lang: string, onFailure: () => void): Promise
     // ScriptProcessor works everywhere without a worklet module (which the CSP would have to allow).
     const proc = ctx.createScriptProcessor(4096, 1, 1);
     const { transcribeAudio } = await import("../ai/transformersEngine");
-    const op = aiOperation(); // Esc / "AI: Cancel" stops transcription
-    release.push(() => op.end());
+    if (op.signal.aborted) return; // the abort listener already released everything
     const queue = new SerialQueue();
     const language = lang.split(/[-_]/)[0].toLowerCase();
-    const appendDictated = dictationSink();
     let failed = false;
     let stopped = false;
     let cleanup = () => {};
@@ -322,6 +365,23 @@ async function startLocalDictation(lang: string, onFailure: () => void): Promise
     proc.onaudioprocess = (e) => segmenter.push(e.inputBuffer.getChannelData(0));
     source.connect(proc);
     proc.connect(ctx.destination);
+    // why: a context made after a slow permission prompt can start suspended (autoplay rules); then onaudioprocess never fires
+    if (ctx.state !== "running") {
+      let timer: ReturnType<typeof setTimeout> | undefined;
+      const resumed = await Promise.race([
+        ctx.resume().then(() => true, () => false),
+        new Promise<false>((r) => (timer = setTimeout(() => r(false), RESUME_TIMEOUT_MS))),
+      ]);
+      clearTimeout(timer);
+      if (op.signal.aborted) return;
+      if (!resumed || (ctx.state as AudioContextState) !== "running") {
+        releaseAll();
+        showAiToast(t("toast.dictate.localFailed", { error: t("dictate.audioSuspended") }), "error");
+        onFailure();
+        return;
+      }
+    }
+    op.signal.removeEventListener("abort", releaseAll);
     op.signal.addEventListener("abort", () => stop());
     cleanup = showRecordingPill(t("voice.recording", { lang }), () => stop());
     showAiToast(t("toast.dictate.onDevice"), "info");
@@ -330,6 +390,9 @@ async function startLocalDictation(lang: string, onFailure: () => void): Promise
     throw err;
   }
 }
+
+/** How long a suspended audio context gets to resume before dictation reports it. */
+const RESUME_TIMEOUT_MS = 3000;
 
 /** The first recording container this browser supports, or "" to let MediaRecorder choose. */
 export function pickRecordingMimeType(): string {
