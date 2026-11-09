@@ -194,7 +194,8 @@ export default function App() {
     // the test suite needs.
     (window as unknown as { __lumen?: unknown }).__lumen = {
       htmlToMarkdown,
-      // `agentReview` (plan 5.11 e2e) is added by agents/reviewBridge once it loads.
+      // `agentReview` (plan 5.11 e2e) is added by agents/reviewBridge once it
+      // loads, in development and tests only (plan W1.31).
     };
     return () => {
       unregisterPlugin(wordCountPlugin.id);

@@ -95,6 +95,7 @@ export default defineConfig({
           label: "Security",
           items: [
             { label: "Vault + recovery phrase", slug: "security/vault" },
+            { label: "The e2e test surface", translations: { he: "ממשק הבדיקות של e2e" }, slug: "security/test-surface" },
           ],
         },
         {
