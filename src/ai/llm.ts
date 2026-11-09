@@ -125,7 +125,8 @@ export const PROVIDER_DEFAULT_MODELS = {
   "local-webgpu": "Llama-3-8B-Instruct-q4f16_1-MLC",
   // Sonnet 4.5 is deprecated (retires 30 Nov 2026); Sonnet 5.5 is the current general model.
   anthropic: "claude-sonnet-5-5",
-  gemini: "gemini-1.5-flash",
+  // Gemini 1.5 and 2.0 are shut down; 2.5 is closed to new users (Google AI models page, 10/2026).
+  gemini: "gemini-3.8-flash",
   mistral: "mistral-small-latest",
 } as const;
 const API_URL = "https://api.openai.com/v1/chat/completions";
@@ -225,7 +226,9 @@ export function effectiveModel(provider: AiProvider, opts: ChatOptions = {}): st
     // Ollama keeps its model where the Ollama picker writes it.
     if (provider === "ollama") return localStorage.getItem("lumen.ollama.model") || "llama3.1";
     const fallback = (PROVIDER_DEFAULT_MODELS as Record<string, string>)[provider] ?? "default";
-    return localStorage.getItem(`lumen.ai.model.${provider}`) || fallback;
+    const saved = localStorage.getItem(`lumen.ai.model.${provider}`);
+    if (provider === "gemini" && saved && isRetiredGeminiModel(saved)) return fallback;
+    return saved || fallback;
   } catch {
     return "default";
   }
@@ -235,9 +238,17 @@ export function effectiveModel(provider: AiProvider, opts: ChatOptions = {}): st
 export const LIGHT_MODELS: Partial<Record<AiProvider, string>> = {
   openai: "gpt-4o-mini",
   anthropic: "claude-haiku-5-5",
-  gemini: "gemini-2.5-flash",
+  gemini: "gemini-3.5-flash-lite",
   mistral: "mistral-small-latest",
 };
+
+/**
+ * Gemini models Google has shut down. A saved choice of one of these is
+ * ignored in favour of the current default, so old settings keep working.
+ */
+export function isRetiredGeminiModel(model: string): boolean {
+  return /^gemini-(1\.|2\.0)/i.test(model);
+}
 
 /**
  * Model router (Plan D: D4): picks the small model for light tasks (and,
