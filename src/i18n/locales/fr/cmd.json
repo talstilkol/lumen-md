@@ -136,6 +136,7 @@
   "cmd.git.token.hint": "stocké localement (IndexedDB)",
   "cmd.git.watch": "Git : activer/désactiver le pull automatique en surveillance",
   "cmd.git.watch.hint": "Interroge le dépôt distant toutes les 5 min et fait un pull en cas de changement",
+  "cmd.help.credits": "Crédits et licences des modèles",
   "cmd.image.altText": "Images : texte alternatif par OCR / vision locale",
   "cmd.image.altText.hint": "Lit le texte des images de cette note sur l’appareil (hébreu + anglais) ; décrit le reste avec un modèle de vision Ollama local",
   "cmd.insert.abc": "Insertion music notation (ABC)",

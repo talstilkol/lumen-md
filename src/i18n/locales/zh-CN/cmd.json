@@ -136,6 +136,7 @@
   "cmd.git.token.hint": "存储在本地 (IndexedDB)",
   "cmd.git.watch": "Git:切换监视模式自动拉取",
   "cmd.git.watch.hint": "每 5 分钟轮询远程仓库,有更改时自动拉取",
+  "cmd.help.credits": "致谢与模型许可证",
   "cmd.image.altText": "图片：用 OCR / 本地视觉生成替代文本",
   "cmd.image.altText.hint": "在本设备识别此笔记图片中的文字（希伯来语+英语）；其余用本地 Ollama 视觉模型描述",
   "cmd.insert.abc": "插入 music notation (ABC)",

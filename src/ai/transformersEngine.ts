@@ -21,9 +21,15 @@ export type { TranscribeResult, EmbedResult };
 
 export const WHISPER_MODELS = {
   tiny: "onnx-community/whisper-tiny",
+  base: "onnx-community/whisper-base",
   small: "onnx-community/whisper-small",
   turbo: "onnx-community/whisper-large-v3-turbo",
+  /** ivrit.ai's Hebrew fine-tune of turbo, ONNX (q4f16 ≈ 563 MB, WebGPU). */
+  turboHe: "ivrit-ai/whisper-large-v3-turbo-onnx",
 } as const;
+
+/** VRAM the Hebrew turbo needs (563 MB of q4f16 weights + activations), MB. */
+export const TURBO_HE_VRAM_MB = 1_200;
 
 export const EMBEDDING_MODEL = "Xenova/multilingual-e5-small";
 export const EMBEDDING_DIMS = 384;
@@ -151,12 +157,24 @@ export function whisperModelFor(hw: Hardware, device: Device = hw.webgpu ? "webg
   return vramBudgetMB(hw) >= 6_000 && !hw.mobile ? WHISPER_MODELS.turbo : WHISPER_MODELS.small;
 }
 
+/**
+ * The Whisper model for files and recordings in a known language (plan 6.1):
+ * Hebrew gets ivrit.ai's turbo on a GPU with f16 and the VRAM for it, else
+ * whisper-base (77 MB, q8 on wasm) — tiny is too weak for Hebrew. Other
+ * languages keep whisperModelFor.
+ */
+export function whisperModelForLanguage(hw: Hardware, device: Device, language: string | undefined): string {
+  if (language !== "he") return whisperModelFor(hw, device);
+  if (device === "webgpu" && hw.f16 && !hw.mobile && vramBudgetMB(hw) >= TURBO_HE_VRAM_MB) return WHISPER_MODELS.turboHe;
+  return WHISPER_MODELS.base;
+}
+
 /** Transcribe 16 kHz mono PCM. `language` is an ISO-639-1 code ("he", "en"); omitted = auto-detect. */
 export async function transcribeAudio(samples: Float32Array, opts: { language?: string; model?: string; signal?: AbortSignal } = {}): Promise<TranscribeResult> {
   if (opts.signal?.aborted) throw new DOMException("aborted", "AbortError");
   const hw = await detectHardware();
   const device = await transformersDevice(hw);
-  const model = opts.model ?? whisperModelFor(hw, device);
+  const model = opts.model ?? whisperModelForLanguage(hw, device, opts.language);
   // The buffer is transferred, not copied; callers must not reuse it.
   return call<TranscribeResult>({ type: "transcribe", model, device, audio: samples, language: opts.language, task: "transcribe" }, [samples.buffer], opts.signal);
 }

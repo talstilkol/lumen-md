@@ -714,6 +714,66 @@
       "catalog": "OLLAMA_CATALOG (src/ai/modelCatalog.ts)",
       "verified": true,
       "notes": "Licence tag apache-2.0 on dicta-il/DictaLM-3.0-1.7B-Instruct (checked 18.10.2026). Only the Thinking variant has an official GGUF. Not recommended by default until measured (plan 7.9)."
+    },
+    {
+      "id": "ivrit-ai/zipformer2-66m-streaming-he",
+      "kind": "asr",
+      "source": "https://huggingface.co/ivrit-ai/zipformer2-66m-streaming-he",
+      "license": "CC-BY-4.0",
+      "class": "allowed",
+      "commercial": "yes",
+      "attribution": "Hebrew speech recognition: ivrit.ai Zipformer2 streaming model © ivrit.ai, licensed under CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/). Based on k2-fsa/icefall (Apache-2.0).",
+      "size": "72 MB (int8 sherpa-onnx export: encoder 70.5 MB, decoder 1.0 MB, joiner 0.8 MB, tokens)",
+      "runs": "browser",
+      "delivery": "download",
+      "catalog": "ZIPFORMER_FILES (src/ai/dictation/models.ts)",
+      "verified": true,
+      "notes": "Live dictation (plan 6.1). Pinned revision ee769a2a13b887f91572eec349458bfb0fe79e7a, sha256 per file; downloaded only when the user starts it. CC BY: credited in the dictation dialog and in Credits."
+    },
+    {
+      "id": "silero-vad-v5",
+      "kind": "other",
+      "source": "https://github.com/snakers4/silero-vad",
+      "license": "MIT",
+      "class": "allowed",
+      "commercial": "yes",
+      "attribution": "Silero VAD v5 © Silero Team, licensed under the MIT License; packaged by @ricky0123/vad-web (ISC).",
+      "size": "2.3 MB",
+      "runs": "browser",
+      "delivery": "bundled",
+      "catalog": "VAD_FILE (src/ai/dictation/models.ts), staged by scripts/copy-vad.mjs",
+      "verified": true,
+      "notes": "Voice activity detection for live dictation; same-origin static file, loaded only when dictation starts."
+    },
+    {
+      "id": "onnx-community/whisper-base",
+      "kind": "asr",
+      "source": "https://huggingface.co/onnx-community/whisper-base",
+      "license": "Apache-2.0",
+      "class": "allowed",
+      "commercial": "yes",
+      "attribution": "Whisper © OpenAI, model weights under the Apache License 2.0 (code MIT).",
+      "size": "~77 MB (q8: encoder 23 MB + merged decoder 53 MB)",
+      "runs": "browser",
+      "delivery": "download",
+      "catalog": "WHISPER_MODELS (src/ai/transformersEngine.ts)",
+      "verified": true,
+      "notes": "Hebrew files / recordings on wasm (plan 6.1); whisper-tiny is too weak for Hebrew."
+    },
+    {
+      "id": "ivrit-ai/whisper-large-v3-turbo-onnx",
+      "kind": "asr",
+      "source": "https://huggingface.co/ivrit-ai/whisper-large-v3-turbo-onnx",
+      "license": "Apache-2.0",
+      "class": "allowed",
+      "commercial": "yes",
+      "attribution": "ivrit.ai Whisper large-v3-turbo (Hebrew) © ivrit.ai, Apache License 2.0; Whisper © OpenAI.",
+      "size": "~563 MB (q4f16: encoder 369 MB + merged decoder 193 MB)",
+      "runs": "browser",
+      "delivery": "download",
+      "catalog": "WHISPER_MODELS.turboHe (src/ai/transformersEngine.ts)",
+      "verified": false,
+      "notes": "Hebrew files on WebGPU with f16 and >= 1.2 GB VRAM budget (plan 6.1). The ONNX repo's card declares no licence; the source model ivrit-ai/whisper-large-v3-turbo is apache-2.0 (HF API, 2026-10-19). Load/latency measured by the owner (15.3)."
     }
   ]
 }

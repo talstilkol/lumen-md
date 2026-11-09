@@ -693,6 +693,11 @@
       "vars": []
     },
     {
+      "key": "cmd.help.credits",
+      "en": "Credits & model licences",
+      "vars": []
+    },
+    {
       "key": "cmd.image.altText",
       "en": "Images: alt text from OCR / local vision",
       "vars": []

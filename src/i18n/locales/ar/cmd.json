@@ -136,6 +136,7 @@
   "cmd.git.token.hint": "يُخزَّن محليًا (IndexedDB)",
   "cmd.git.watch": "Git: تبديل السحب التلقائي في وضع المراقبة",
   "cmd.git.watch.hint": "يفحص المستودع البعيد كل 5 دقائق ويسحب عند وجود تغيير",
+  "cmd.help.credits": "شكر وتقدير وتراخيص النماذج",
   "cmd.image.altText": "الصور: نص بديل من OCR / رؤية محلية",
   "cmd.image.altText.hint": "يقرأ النص في صور هذه الملاحظة على الجهاز (العبرية والإنجليزية)، ويصف الباقي بنموذج رؤية محلي في Ollama",
   "cmd.insert.abc": "إدراج music notation (ABC)",

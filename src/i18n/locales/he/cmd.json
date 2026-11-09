@@ -136,6 +136,7 @@
   "cmd.git.token.hint": "נשמר מקומית (IndexedDB)",
   "cmd.git.watch": "Git: החלף מצב משיכה אוטומטית",
   "cmd.git.watch.hint": "בודק את ה־remote כל 5 דקות ומושך אם יש שינוי",
+  "cmd.help.credits": "קרדיטים ורישיונות מודלים",
   "cmd.image.altText": "תמונות: טקסט חלופי מ-OCR / ראייה מקומית",
   "cmd.image.altText.hint": "קורא את הטקסט שבתמונות הפתק במכשיר (עברית ואנגלית); מתאר את השאר עם מודל ראייה מקומי ב-Ollama",
   "cmd.insert.abc": "הוספת תווים מוזיקליים (ABC)",

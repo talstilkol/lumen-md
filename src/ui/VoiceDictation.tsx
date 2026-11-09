@@ -1,11 +1,14 @@
 /**
- * Voice memo capture (F2 / γ.4).
+ * Voice capture (F2 / γ.4, plans 1.3 and 6.1).
  *
  * Two flows live behind the same UI:
- *   - **Dictation** (`startVoiceRecording`): Whisper on this device in
- *     ~5-second segments (plan 1.3). The browser's `SpeechRecognition` sends
- *     audio to its vendor, so it is used only outside local-only and only
- *     after the user agrees; every use is in the privacy ledger.
+ *   - **Dictation** (`startVoiceRecording`): Hebrew streams on this device
+ *     (LiveDictation.tsx, engine chosen by src/ai/dictation/engines.ts, plan
+ *     6.1); other languages, and Hebrew when the live engine is not used,
+ *     run Whisper on this device in ~5-second segments (plan 1.3). The
+ *     browser's `SpeechRecognition` sends audio to its vendor, so it is used
+ *     only outside local-only and only after the user agrees; every use is
+ *     in the privacy ledger.
  *   - **Memo mode** (when `aiKey` is set OR Privacy Mode is on):
  *     `MediaRecorder` captures the audio, on stop we Whisper-transcribe
  *     + AI-summarize and insert a `> 🎙 Voice memo` block at the cursor.
@@ -25,7 +28,7 @@ import { transcribe, summarizeMemo, formatVoiceMemo } from "../ai/transcribe";
 import { aiOperation, isAbort } from "../ai/aiAbort";
 import { log } from "../lib/logger";
 import { getAiPolicy, onAiPolicyChange } from "../ai/policy";
-import { recordSpeechRecognition } from "../ai/privacyLedger";
+import { recordBrowserService, recordSpeechRecognition } from "../ai/privacyLedger";
 import { chooseDictationEngine, webSpeechOptedIn, WEB_SPEECH_KEY, Segmenter, SerialQueue } from "../ai/dictation";
 
 // SpeechRecognition is poorly + inconsistently typed across DOM lib
@@ -179,6 +182,48 @@ export function dictationSink(): DictationSink {
  * agreed — never silently; each use is recorded in the privacy ledger.
  */
 export function startVoiceRecording(lang: string): void {
+  if (lang.split(/[-_]/)[0].toLowerCase() !== "he") {
+    startDeviceDictation(lang);
+    return;
+  }
+  // Hebrew (plan 6.1): the live streaming engine and its panel load on first
+  // use. Its fallbacks are this module's: the browser service behind the same
+  // consent and local-only gate, else Whisper on this device.
+  void import("./LiveDictation")
+    .then(({ openLiveDictation }) =>
+      openLiveDictation(lang, {
+        browser: () => startBrowserSpeech(lang),
+        record: () => startDeviceDictation(lang),
+      }),
+    )
+    .catch((err: unknown) => {
+      log.error("dictation failed to start", err);
+      showAiToast(t("dictation.error", { error: (err as Error).message }), "error");
+    });
+}
+
+/**
+ * The browser's speech service (audio goes to its vendor), asked for by the
+ * live-dictation panel: never under local-only (1.3), and only once the user
+ * agreed (the same consent as below).
+ */
+export function startBrowserSpeech(lang: string): void {
+  if (getAiPolicy() === "local-only") {
+    recordBrowserService("speech recognition (browser vendor)", "Browser speech recognition (Web Speech API)");
+    showAiToast(t("dictation.localOnlyNoBrowser"), "error");
+    return;
+  }
+  const Ctor = webSpeechCtor();
+  if (!Ctor) {
+    showAiToast(t("toast.speechRecognitionNotSupportedIn"), "error");
+    return;
+  }
+  if (webSpeechOptedIn()) startWebSpeech(Ctor, lang);
+  else void offerWebSpeech(Ctor, lang);
+}
+
+/** Dictation without the live engine: Whisper on this device, or the browser service once agreed (1.3). */
+function startDeviceDictation(lang: string): void {
   const Ctor = webSpeechCtor();
   const policy = getAiPolicy();
   const engine = chooseDictationEngine(policy, !!Ctor, webSpeechOptedIn());
@@ -412,7 +457,7 @@ export function pickRecordingMimeType(): string {
  * a formatted block. Requires `MediaRecorder` (every modern browser
  * since 2016 has it).
  */
-export async function startVoiceMemo(): Promise<void> {
+export async function startVoiceMemo(opts: { language?: string; plain?: boolean } = {}): Promise<void> {
   if (typeof MediaRecorder === "undefined") {
     showAiToast(t("toast.mediarecorderNotSupportedInThis"), "error");
     return;
@@ -471,7 +516,8 @@ export async function startVoiceMemo(): Promise<void> {
     let summary = "";
     try {
       try {
-        result = await transcribe(blob, { signal: op.signal });
+        // `plain` is dictation's recorded fallback: its UI promises the audio stays on this device.
+        result = await transcribe(blob, { signal: op.signal, language: opts.language, local: opts.plain });
       } catch (err) {
         if (op.signal.aborted || isAbort(err)) return;
         log.error("voice memo transcribe failed", err);
@@ -479,6 +525,18 @@ export async function startVoiceMemo(): Promise<void> {
         return;
       }
       if (op.signal.aborted) return;
+
+      if (opts.plain) {
+        // Dictation without a live engine for this language: the transcript only, at the cursor.
+        const text = result.text.trim();
+        if (!text) return;
+        const detail = { text };
+        if (window.dispatchEvent(new CustomEvent("lumen-dictation-insert", { detail, cancelable: true }))) {
+          const current = useAppStore.getState().doc.content;
+          useAppStore.getState().setContent(current + (current && !/\s$/.test(current) ? " " : "") + text);
+        }
+        return;
+      }
 
       showAiToast(t("toast.summarising"), "info");
       try {
@@ -537,7 +595,7 @@ export async function startVoiceMemo(): Promise<void> {
           animation: "pulse 1s infinite",
         }}
       />
-      <span>🎙 {t("voice.memo.recording")}</span>
+      <span>🎙 {opts.plain ? t("dictation.localRecording") : t("voice.memo.recording")}</span>
       <button
         type="button"
         onClick={() => recorder.stop()}

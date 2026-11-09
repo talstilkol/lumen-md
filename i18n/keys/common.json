@@ -425,6 +425,21 @@
       "vars": []
     },
     {
+      "key": "credits.close",
+      "en": "Close",
+      "vars": []
+    },
+    {
+      "key": "credits.intro",
+      "en": "Models and data Lumen can download, and the attribution their licences ask for.",
+      "vars": []
+    },
+    {
+      "key": "credits.title",
+      "en": "Credits",
+      "vars": []
+    },
+    {
       "key": "daily.failed",
       "en": "Couldn't open the daily note: {error}",
       "vars": [
@@ -654,6 +669,84 @@
     {
       "key": "dialog.ok",
       "en": "OK",
+      "vars": []
+    },
+    {
+      "key": "dictation.download.body",
+      "en": "Hebrew dictation runs entirely on this device — no audio leaves it. It needs a one-time download of {size}, kept for offline use.",
+      "vars": [
+        "size"
+      ]
+    },
+    {
+      "key": "dictation.download.browser",
+      "en": "Use the browser's speech service instead (the audio goes to the browser's vendor)",
+      "vars": []
+    },
+    {
+      "key": "dictation.download.cancel",
+      "en": "Cancel",
+      "vars": []
+    },
+    {
+      "key": "dictation.download.credits",
+      "en": "Speech model: ivrit.ai Zipformer2 (CC BY 4.0). Voice detection: Silero VAD (MIT).",
+      "vars": []
+    },
+    {
+      "key": "dictation.download.start",
+      "en": "Download {size}",
+      "vars": [
+        "size"
+      ]
+    },
+    {
+      "key": "dictation.download.title",
+      "en": "Live dictation on this device",
+      "vars": []
+    },
+    {
+      "key": "dictation.downloading",
+      "en": "Downloading… {percent}%",
+      "vars": [
+        "percent"
+      ]
+    },
+    {
+      "key": "dictation.error",
+      "en": "Dictation stopped: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "dictation.listening",
+      "en": "Listening — speak, then pause",
+      "vars": []
+    },
+    {
+      "key": "dictation.loading",
+      "en": "Loading the speech model…",
+      "vars": []
+    },
+    {
+      "key": "dictation.localOnlyNoBrowser",
+      "en": "Local-only mode: the browser's speech service is not used. Download the on-device model to dictate.",
+      "vars": []
+    },
+    {
+      "key": "dictation.localRecording",
+      "en": "Recording — transcribed on this device when you stop.",
+      "vars": []
+    },
+    {
+      "key": "dictation.speaking",
+      "en": "Hearing you…",
+      "vars": []
+    },
+    {
+      "key": "dictation.stop",
+      "en": "⏹ Stop",
       "vars": []
     },
     {

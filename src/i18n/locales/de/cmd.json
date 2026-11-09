@@ -136,6 +136,7 @@
   "cmd.git.token.hint": "lokal gespeichert (IndexedDB)",
   "cmd.git.watch": "Git: Auto-Pull im Beobachtungsmodus umschalten",
   "cmd.git.watch.hint": "Fragt das Remote alle 5 Min. ab und pullt bei Änderungen",
+  "cmd.help.credits": "Danksagungen & Modelllizenzen",
   "cmd.image.altText": "Bilder: Alternativtext per OCR / lokaler Bildanalyse",
   "cmd.image.altText.hint": "Liest Text in den Bildern dieser Notiz auf dem Gerät (Hebräisch + Englisch); beschreibt den Rest mit einem lokalen Ollama-Bildmodell",
   "cmd.insert.abc": "Einfügen music notation (ABC)",
