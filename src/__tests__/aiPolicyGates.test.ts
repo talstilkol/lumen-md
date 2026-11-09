@@ -71,14 +71,15 @@ describe("AI policy gates on direct cloud paths", () => {
     expect(fetchSpy).not.toHaveBeenCalled();
   });
 
-  it("Claude web search and a remote research service; a local research service is fine", async () => {
+  it("Claude web search and a remote research service fall back to the library (T34); a local research service is fine", async () => {
     localStorage.setItem("lumen.ai.provider", "anthropic");
     localStorage.setItem("lumen.research.provider", "claude");
     const { runResearch } = await import("../research/agent");
-    await expect(runResearch({ question: "q" } as never)).rejects.toMatchObject({ code: "POLICY" });
+    // Under local-only, research uses the library — empty here — and never the web.
+    await expect(runResearch({ question: "q" } as never)).rejects.toThrow(/library/);
     localStorage.setItem("lumen.research.provider", "brave");
     localStorage.setItem("lumen.research.endpoint", "https://research.example.workers.dev");
-    await expect(runResearch({ question: "q" } as never)).rejects.toMatchObject({ code: "POLICY" });
+    await expect(runResearch({ question: "q" } as never)).rejects.toThrow(/library/);
     expect(fetchSpy).not.toHaveBeenCalled();
     // Injected search/extract (a local SearXNG wrapper, or tests) is not the cloud.
     const local = await runResearch({

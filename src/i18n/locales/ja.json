@@ -1388,5 +1388,18 @@
   "toast.tts.unavailable": "このブラウザーは読み上げに対応していません",
   "toast.tts.noHebrewVoice": "ヘブライ語の音声がありません — システムの読み上げ設定で追加してください",
   "cmd.vault.digest": "ダイジェスト: 変更点",
-  "cmd.vault.digest.hint": "前回以降に変更されたノートと未完了タスクをまとめたノート"
+  "cmd.vault.digest.hint": "前回以降に変更されたノートと未完了タスクをまとめたノート",
+  "cmd.clip.url": "Web ページをクリップ…",
+  "cmd.clip.url.hint": "ページの本文を出典と日付付きでライブラリに保存します",
+  "cmd.clip.clipboard": "クリップボードからクリップ",
+  "cmd.clip.clipboard.hint": "ブラウザーでページの一部をコピーしてライブラリに保存",
+  "clip.url.prompt": "クリップするページのアドレス",
+  "clip.source.prompt": "出典は？（アドレス、任意）",
+  "clip.source.unknown": "クリップボード",
+  "clip.empty": "クリップボードにテキストがありません",
+  "clip.saved": "ライブラリに保存: {path}",
+  "clip.failed": "ページをクリップできませんでした: {message}。必要な部分をコピーして「クリップボードからクリップ」を使ってください。",
+  "research.consent.title": "Web で調べますか？",
+  "research.consent.body": "質問（質問のみ、ノートは送信されません）が選択した検索サービスに送信され、見つかったページはそのサービスが読み込みます。「ローカルのみ」ではライブラリ内で調べます。",
+  "research.consent.ok": "許可（今後も）"
 }

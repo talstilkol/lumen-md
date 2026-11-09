@@ -1388,5 +1388,18 @@
   "toast.tts.unavailable": "此浏览器不支持朗读",
   "toast.tts.noHebrewVoice": "系统未安装希伯来语语音 — 请在系统语音设置中添加",
   "cmd.vault.digest": "摘要：有哪些变化",
-  "cmd.vault.digest.hint": "一篇笔记，列出自上次摘要以来更改的所有笔记及其未完成任务"
+  "cmd.vault.digest.hint": "一篇笔记，列出自上次摘要以来更改的所有笔记及其未完成任务",
+  "cmd.clip.url": "剪藏网页…",
+  "cmd.clip.url.hint": "将网页正文连同来源和日期保存到你的资料库",
+  "cmd.clip.clipboard": "从剪贴板剪藏",
+  "cmd.clip.clipboard.hint": "在浏览器中复制网页的一部分，然后保存到资料库",
+  "clip.url.prompt": "要剪藏的网页地址",
+  "clip.source.prompt": "来源？（地址，可选）",
+  "clip.source.unknown": "剪贴板",
+  "clip.empty": "剪贴板中没有文本",
+  "clip.saved": "已保存到资料库：{path}",
+  "clip.failed": "无法剪藏此页面：{message}。请复制所需部分并使用“从剪贴板剪藏”。",
+  "research.consent.title": "在网络上研究？",
+  "research.consent.body": "你的问题（仅问题本身，不含笔记）会发送给所选搜索服务，由其读取找到的网页。“仅本地”策略下改为在资料库中研究。",
+  "research.consent.ok": "允许（以后不再询问）"
 }

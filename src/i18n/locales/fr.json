@@ -1388,5 +1388,18 @@
   "toast.tts.unavailable": "Ce navigateur ne peut pas lire à voix haute",
   "toast.tts.noHebrewVoice": "Aucune voix hébreue installée — ajoutez-en une dans les réglages vocaux du système",
   "cmd.vault.digest": "Résumé : ce qui a changé",
-  "cmd.vault.digest.hint": "Une note listant les notes modifiées depuis le dernier résumé et leurs tâches ouvertes"
+  "cmd.vault.digest.hint": "Une note listant les notes modifiées depuis le dernier résumé et leurs tâches ouvertes",
+  "cmd.clip.url": "Capturer une page web…",
+  "cmd.clip.url.hint": "Enregistre la partie lisible d’une page dans votre bibliothèque, avec source et date",
+  "cmd.clip.clipboard": "Capturer depuis le presse-papiers",
+  "cmd.clip.clipboard.hint": "Copiez une partie d’une page dans le navigateur, puis enregistrez-la",
+  "clip.url.prompt": "Adresse de la page",
+  "clip.source.prompt": "D’où cela vient-il ? (adresse, facultatif)",
+  "clip.source.unknown": "presse-papiers",
+  "clip.empty": "Le presse-papiers ne contient pas de texte",
+  "clip.saved": "Enregistré dans la bibliothèque : {path}",
+  "clip.failed": "Impossible de capturer la page : {message}. Copiez la partie voulue et utilisez « Capturer depuis le presse-papiers ».",
+  "research.consent.title": "Rechercher sur le web ?",
+  "research.consent.body": "Votre question (seulement elle, pas vos notes) est envoyée au service de recherche choisi, qui lit les pages trouvées. Avec « local uniquement », la recherche se fait dans votre bibliothèque.",
+  "research.consent.ok": "Autoriser (une fois pour toutes)"
 }
