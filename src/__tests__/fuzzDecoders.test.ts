@@ -6,10 +6,10 @@
  */
 import { describe, expect, it } from "vitest";
 import { spawnSync } from "node:child_process";
-import { fileURLToPath } from "node:url";
+import { join, resolve } from "node:path";
 import { generate, type GenKind } from "../../scripts/fuzz/generators";
 
-const ROOT = fileURLToPath(new URL("../..", import.meta.url));
+const ROOT = resolve(__dirname, "..", "..");
 const KINDS: GenKind[] = ["markdown", "yaml", "json", "bibtex", "url", "text", "csv", "manifest"];
 
 describe("decoder fuzzing", () => {
@@ -24,7 +24,7 @@ describe("decoder fuzzing", () => {
   });
 
   it("the runner: 2,000 inputs per decoder, every decoder on the branch loads, 0 crashes, 0 inputs over 1 s", () => {
-    const r = spawnSync(process.execPath, [fileURLToPath(new URL("../../scripts/fuzz/run.mjs", import.meta.url)), "--runs", "2000", "--json", "--out", "fuzz-findings"], { cwd: ROOT, encoding: "utf8", timeout: 600_000 });
+    const r = spawnSync(process.execPath, [join(ROOT, "scripts", "fuzz", "run.mjs"), "--runs", "2000", "--json", "--out", "fuzz-findings"], { cwd: ROOT, encoding: "utf8", timeout: 600_000 });
     const report = JSON.parse(r.stdout.trim().split("\n").pop()!) as { results: Array<{ name: string; status: string; runs?: number; crashes?: number; hangs?: number; slow?: number; error?: string }> };
     const byName = Object.fromEntries(report.results.map((x) => [x.name, x]));
     for (const name of ["markdown", "frontmatter", "bibtex", "json-doctor", "json-records", "urls", "text-direction"]) {

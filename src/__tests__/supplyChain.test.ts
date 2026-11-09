@@ -7,10 +7,9 @@ import { describe, expect, it } from "vitest";
 import { spawnSync } from "node:child_process";
 import { appendFileSync, copyFileSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
-import { fileURLToPath } from "node:url";
+import { join, resolve } from "node:path";
 
-const ROOT = fileURLToPath(new URL("../..", import.meta.url));
+const ROOT = resolve(__dirname, "..", "..");
 const script = (name: string) => join(ROOT, "scripts", "supply-chain", name);
 const run = (cwd: string, args: string[], env: Record<string, string> = {}) =>
   spawnSync(process.execPath, args, { cwd, encoding: "utf8", env: { ...process.env, ...env }, timeout: 60_000 });
