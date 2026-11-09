@@ -98,6 +98,13 @@ export default defineConfig({
           ],
         },
         {
+          label: "Contributing",
+          translations: { he: "תרומה לפרויקט" },
+          items: [
+            { label: "Translation drafts", translations: { he: "טיוטות תרגום" }, slug: "contributing/translation-drafts" },
+          ],
+        },
+        {
           label: "Self-hosting",
           items: [
             { label: "Docker compose bundle", slug: "self-hosting/docker" },
