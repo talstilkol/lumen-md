@@ -160,7 +160,7 @@ export function setWebLlmModel(modelId: string | null): void {
     if (modelId) localStorage.setItem(WEBLLM_MODEL_KEY, modelId);
     else localStorage.removeItem(WEBLLM_MODEL_KEY);
   } catch {
-    /* storage denied */
+    /* why: storage denied */
   }
 }
 

@@ -69,7 +69,7 @@ export async function noteModelDownloads(): Promise<void> {
       if (cached === undefined) recordWorkerRequest(`${LANG_PATH}/${lang}.traineddata`);
     }
   } catch {
-    /* no IndexedDB: the ledger stays as it was */
+    /* why: no IndexedDB: the ledger stays as it was */
   }
 }
 

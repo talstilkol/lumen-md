@@ -74,7 +74,7 @@ export async function imageText(blob: Blob, lang: string): Promise<ImageText> {
       return { alt: `${prefix}${firstLine}`, title: ocr.text.slice(0, 600), source: "ocr" };
     }
   } catch {
-    /* OCR unavailable (offline before the first download, old engine) */
+    /* why: OCR unavailable (offline before the first download, old engine) */
   }
   const d = await describeImage(blob, lang);
   if (d) return { alt: d, source: "vision" };
@@ -104,7 +104,7 @@ export function altIsPlaceholder(alt: string, url: string): boolean {
   try {
     file = decodeURIComponent(file);
   } catch {
-    /* keep it encoded */
+    /* why: keep it encoded */
   }
   const stem = file.replace(/\.[^.]+$/, "");
   const lower = a.toLowerCase();

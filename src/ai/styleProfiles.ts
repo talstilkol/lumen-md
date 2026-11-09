@@ -49,7 +49,7 @@ export function setStyleProfileActive(on: boolean): void {
     if (on) localStorage.setItem(ACTIVE, "1");
     else localStorage.removeItem(ACTIVE);
   } catch {
-    /* storage denied */
+    /* why: storage denied */
   }
 }
 
@@ -58,7 +58,7 @@ export function clearStyleProfile(): void {
     localStorage.removeItem(KEY);
     localStorage.removeItem(ACTIVE);
   } catch {
-    /* storage denied */
+    /* why: storage denied */
   }
 }
 

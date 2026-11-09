@@ -111,7 +111,7 @@ function save(): void {
     try {
       localStorage.setItem(PERSIST_KEY, JSON.stringify(entries.slice(-PERSIST_LAST)));
     } catch {
-      /* storage full / denied */
+      /* why: storage full / denied */
     }
   }, 500);
 }
@@ -165,7 +165,7 @@ export function classify(url: string): { host: string; category: LedgerCategory;
   try {
     ollamaHost = new URL(getBaseUrl()).host.toLowerCase();
   } catch {
-    /* no Ollama configured */
+    /* why: no Ollama configured */
   }
   if (ollamaHost && u.host.toLowerCase() === ollamaHost) {
     return isLocalOrigin(u.href)
@@ -178,7 +178,7 @@ export function classify(url: string): { host: string; category: LedgerCategory;
   try {
     grammar = grammarEndpoint();
   } catch {
-    /* not configured */
+    /* why: no grammar endpoint configured: nothing to match */
   }
   if (atEndpoint(u, grammar)) {
     return isLocalOrigin(u.href)
@@ -189,7 +189,7 @@ export function classify(url: string): { host: string; category: LedgerCategory;
   try {
     research = researchEndpoint();
   } catch {
-    /* not configured */
+    /* why: no research endpoint configured: nothing to match */
   }
   if (atEndpoint(u, research, ["/extract", "/search"])) {
     return isLocalOrigin(u.href)
@@ -316,7 +316,7 @@ export function clearLedger(): void {
   try {
     localStorage.removeItem(PERSIST_KEY);
   } catch {
-    /* ignore */
+    /* why: storage denied: the in-memory ledger is cleared, nothing was persisted */
   }
   emit();
 }

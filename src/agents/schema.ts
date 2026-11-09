@@ -63,7 +63,7 @@ export function validateSchema(value: unknown, schema: JsonSchema, path = "$", e
       try {
         if (!new RegExp(s.pattern, "u").test(value)) errors.push({ path, message: `must match ${s.pattern}` });
       } catch {
-        /* bad pattern in the schema: ignore */
+        /* why: bad pattern in the schema: ignore */
       }
     }
   } else if (typeof value === "number") {

@@ -178,7 +178,7 @@ export async function* chatAnthropicStream(
         const delta = json?.delta?.text;
         if (delta) yield delta;
       } catch {
-        /* skip non-JSON keep-alive lines */
+        /* why: skip non-JSON keep-alive lines */
       }
     }
   }

@@ -190,7 +190,7 @@ export async function unloadTransformers(): Promise<void> {
   try {
     await call<boolean>({ type: "unload" });
   } catch {
-    /* worker may already be gone */
+    /* why: worker may already be gone */
   }
   worker = null;
   failAll("transformers worker unloaded");
@@ -218,7 +218,7 @@ export async function decodeAudioTo16k(blob: Blob): Promise<Float32Array> {
     const rendered = await offline.startRendering();
     return rendered.getChannelData(0).slice();
   } finally {
-    await ctx.close().catch(() => {});
+    await ctx.close().catch(() => { /* why: the samples are already rendered; a context that fails to close is collected with the page */ });
   }
 }
 

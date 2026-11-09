@@ -38,7 +38,7 @@ export function setAiCacheEnabled(on: boolean): void {
     if (on) localStorage.removeItem("lumen.ai.cache");
     else localStorage.setItem("lumen.ai.cache", "off");
   } catch {
-    /* */
+    /* why: storage denied: the setting lasts for this session only */
   }
 }
 
@@ -72,7 +72,7 @@ export async function putCached(key: string, text: string, model: string, now = 
       for (const [k] of oldest) await del(k, db());
     }
   } catch {
-    /* best-effort */
+    /* why: pruning the cache is best effort; the next put tries again */
   }
 }
 

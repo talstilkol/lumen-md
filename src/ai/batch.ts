@@ -683,7 +683,7 @@ async function localBatchResults(job: BatchJob): Promise<BatchResults> {
 export async function clearLocalBatch(id: string): Promise<void> {
   memory.delete(id);
   unsaved.delete(id);
-  await idbDel(LOCAL_KEY(id)).catch(() => {});
+  await idbDel(LOCAL_KEY(id)).catch(() => { /* why: the answers were applied already; a stale entry is overwritten by the next job with this id */ });
 }
 
 /** Tests: wait for a running local job. */

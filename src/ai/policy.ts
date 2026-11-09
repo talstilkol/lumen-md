@@ -54,7 +54,7 @@ export function hasAnyCloudKey(): boolean {
   try {
     if (useAppStore.getState().aiKey) return true;
   } catch {
-    /* store not mounted (tests) */
+    /* why: store not mounted (tests) */
   }
   try {
     return CLOUD_PROVIDERS.some((p) => !!getSecret(`lumen.ai.key.${p}`));

@@ -56,7 +56,7 @@ export function grammarEndpoint(): string {
     const stored = localStorage.getItem(GRAMMAR_ENDPOINT_KEY);
     if (stored && connectAllowedByCsp(stored)) return stored;
   } catch {
-    /* storage denied */
+    /* why: storage denied */
   }
   const env = (
     import.meta as ImportMeta & { env?: { VITE_LANGUAGETOOL_URL?: string } }

@@ -252,7 +252,7 @@ export function getActiveProvider(): AiProvider {
   try {
     const stored = localStorage.getItem("lumen.ai.provider") as AiProvider | null;
     if (stored && KNOWN_PROVIDERS.includes(stored)) return stored;
-  } catch { /* */ }
+  } catch { /* why: storage denied: fall back to the default provider below */ }
   const state = useAppStore.getState();
   if (state.useLocalAi) return "local-webgpu";
   return "openai";
@@ -271,7 +271,7 @@ export function getProviderKey(provider: AiProvider): string {
   let key = "";
   try {
     key = getSecret(`lumen.ai.key.${provider}`) ?? "";
-  } catch { /* */ }
+  } catch { /* why: secret store unavailable: fall through to the store key and then the missing-key error */ }
   if (!key && provider === "openai") key = useAppStore.getState().aiKey ?? "";
   if (!key) {
     throw new AiError(
@@ -807,7 +807,7 @@ async function* chatStreamDirect(
           const delta = json.choices?.[0]?.delta?.content;
           if (delta) yield delta;
         } catch {
-          // skip malformed SSE lines
+          // why: skip malformed SSE lines
         }
       }
     }

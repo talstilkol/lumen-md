@@ -52,7 +52,7 @@ export function setPreferredExecutor(id: ExecutorId | null): void {
     if (id) localStorage.setItem(EXECUTOR_PREF_KEY, id);
     else localStorage.removeItem(EXECUTOR_PREF_KEY);
   } catch {
-    /* storage denied */
+    /* why: storage denied */
   }
 }
 
