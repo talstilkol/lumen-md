@@ -181,7 +181,7 @@ export function buildDigestCommands(): Command[] {
         // The digest reads the vault through the agent runtime's tools
         // (list_files + read_file, plan 5.3.3); it writes its own note.
         const { callTool } = await import("../../agents/runtime");
-        const { writeDigest, toolDigestIO } = await import("../../agents/defs/digester");
+        const { digestFolder, writeDigest, toolDigestIO } = await import("../../agents/defs/digester");
         const KEY = "lumen.digest.last";
         const now = Date.now();
         let since = now - 24 * 3600_000;
@@ -191,7 +191,15 @@ export function buildDigestCommands(): Command[] {
           /* default: last 24 h */
         }
         const lang = getLocale();
-        const folder = lang === "he" ? "סיכומים" : "Digests";
+        const FOLDER_KEY = "lumen.digest.folder";
+        let storedFolder: string | null = null;
+        try {
+          storedFolder = localStorage.getItem(FOLDER_KEY);
+        } catch {
+          /* the UI language's default */
+        }
+        // Fixed once chosen: a language switch keeps writing to the same folder (and the same day's note).
+        const folder = digestFolder(storedFolder, lang);
         const fmtDate = (ms: number) => new Date(ms).toLocaleString(getLocale(), { dateStyle: "medium", timeStyle: "short" });
         const res = await writeDigest(
           toolDigestIO({ callTool, readOwn: readWorkspaceFile, write: writeWorkspaceFile, since, now, folder }),
@@ -205,6 +213,7 @@ export function buildDigestCommands(): Command[] {
         const { path, body } = res;
         try {
           localStorage.setItem(KEY, String(now));
+          localStorage.setItem(FOLDER_KEY, folder);
         } catch {
           /* next digest covers 24 h again */
         }
