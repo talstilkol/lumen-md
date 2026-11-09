@@ -54,7 +54,9 @@ export function remarkWikiLinks() {
         child.value.includes("[[")
       ) {
         const replacement = splitWikiText(child.value);
-        if (replacement.length > 1) {
+        // Any link — a text that is nothing but `[[Note]]` (a line or list
+        // item of its own) splits into a single link node.
+        if (replacement.some((n) => n.type === "link")) {
           parent.children.splice(i, 1, ...replacement);
           i += replacement.length - 1;
         }

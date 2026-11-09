@@ -367,9 +367,16 @@ const LiveSql = withSuspense<BlockProps>(
  * or `./lumen-asset-*`), resolve it to a blob URL on first render. Cached blob
  * URLs survive across re-renders within the page lifetime (no revoke); OPFS
  * assets are tiny relative to a long-lived editor session, so this is a fair
- * trade.
+ * trade. `![[image.png]]` embeds carry the file's version (mtime): an image
+ * saved over at the same path is read again.
  */
-const blobUrlCache = new Map<string, string>();
+const blobUrlCache = new Map<string, { url: string; version: string }>();
+
+/** The cached URL for `key`, if it was made from this version of the file. */
+function cachedBlobUrl(key: string, version: string): string | undefined {
+  const c = blobUrlCache.get(key);
+  return c && c.version === version ? c.url : undefined;
+}
 
 function isOpfsAssetSrc(src: string | undefined): src is string {
   if (!src) return false;
@@ -380,6 +387,15 @@ function isOpfsAssetSrc(src: string | undefined): src is string {
 
 interface ImgProps extends React.ImgHTMLAttributes<HTMLImageElement> {
   src?: string;
+  /** Workspace path of an `![[image.png]]` embed (./embeds) — read from OPFS. */
+  "data-lumen-path"?: string;
+  /** When that file last changed: a new version is read again, not served from the cache. */
+  "data-lumen-version"?: string;
+}
+
+/** OPFS hands back files without a type; an SVG `<img>` needs one to render. */
+function imageBlob(blob: Blob, path: string): Blob {
+  return /\.svg$/i.test(path) && blob.type !== "image/svg+xml" ? new Blob([blob], { type: "image/svg+xml" }) : blob;
 }
 
 /**
@@ -446,39 +462,44 @@ function LumenImg(props: ImgProps) {
   const isStatic = useContext(StaticRenderContext);
   useSyncExternalStore(subscribeRemoteImages, remoteImagesVersion, remoteImagesVersion);
   const gate = remoteImageGate(src, srcSet);
-  // The blob URL of an OPFS asset, tagged with the src it belongs to: a
-  // retained element whose src changed must never render the old value — not
-  // even for the one render before the effect runs (it may be another
-  // site's image the gate has since stopped judging). Other srcs render
-  // straight from the prop.
-  const [resolved, setResolved] = useState<{ for: string | undefined; url: string | undefined }>(() => ({
-    for: src,
-    url: isOpfsAssetSrc(src) ? blobUrlCache.get(normalize(src!)) : undefined,
+  // The workspace file to show: an embed's path, or a pasted asset's name.
+  // Never the raw path as `src` — the browser would ask the server for it.
+  const wsPath = props["data-lumen-path"];
+  const key = wsPath ? normalize(wsPath) : isOpfsAssetSrc(src) ? normalize(src) : null;
+  const version = props["data-lumen-version"] ?? "";
+  // The blob URL of a workspace file, tagged with the file (and version) it
+  // belongs to: a retained element whose src changed must never render the
+  // old value — not even for the one render before the effect runs (it may be
+  // another site's image the gate has since stopped judging). Other srcs
+  // render straight from the prop.
+  const tag = `${key ?? ""}|${version}`;
+  const [resolved, setResolved] = useState<{ for: string; url: string | undefined }>(() => ({
+    for: tag,
+    url: key ? cachedBlobUrl(key, version) : undefined,
   }));
   useEffect(() => {
-    if (!isOpfsAssetSrc(src)) return;
-    const key = normalize(src);
-    const cached = blobUrlCache.get(key);
+    if (!key) return;
+    const cached = cachedBlobUrl(key, version);
     if (cached) {
-      setResolved({ for: src, url: cached });
+      setResolved({ for: tag, url: cached });
       return;
     }
     let cancelled = false;
     readWorkspaceBlob(key)
       .then((blob) => {
         if (cancelled) return;
-        const url = URL.createObjectURL(blob);
-        blobUrlCache.set(key, url);
-        setResolved({ for: src, url });
+        const url = URL.createObjectURL(imageBlob(blob, key));
+        blobUrlCache.set(key, { url, version });
+        setResolved({ for: tag, url });
       })
       .catch(() => {
-        if (!cancelled) setResolved({ for: src, url: undefined });
+        if (!cancelled) setResolved({ for: tag, url: undefined });
       });
     return () => {
       cancelled = true;
     };
-  }, [src]);
-  const shown = !isOpfsAssetSrc(src) ? src : resolved.for === src ? resolved.url : blobUrlCache.get(normalize(src));
+  }, [key, version, tag]);
+  const shown = !key ? src : resolved.for === tag ? resolved.url : cachedBlobUrl(key, version);
   // The author-supplied `alt` is forwarded via {...rest}. We default to
   // the basename of the src when nothing is provided so screen-readers
   // get something descriptive instead of "image".
@@ -486,8 +507,41 @@ function LumenImg(props: ImgProps) {
     ? (src ?? "").split("/").pop()?.replace(/\.[^.]+$/, "") ?? "image"
     : undefined;
   if (isStatic) return <img alt={fallbackAlt} loading="lazy" {...rest} srcSet={srcSet} src={shown} />;
-  if (gate.blocked) return <RemoteImagePlaceholder alt={rest.alt} gate={gate} />;
-  return <img alt={fallbackAlt} loading="lazy" {...rest} srcSet={gate.srcSet} src={shown} />;
+  if (!key && gate.blocked) return <RemoteImagePlaceholder alt={rest.alt} gate={gate} />;
+  return <img alt={fallbackAlt} loading="lazy" {...rest} srcSet={key ? undefined : gate.srcSet} src={shown} />;
+}
+
+/**
+ * `![[file.pdf]]` (./embeds): a card that opens the workspace PDF in a new
+ * tab. The app's CSP has no frame / object source for workspace files, and
+ * an in-page viewer (PDF.js) would be a heavy dependency for this.
+ */
+function LumenEmbedFile(props: { path?: string; name?: string; kind?: string; children?: React.ReactNode }) {
+  const isStatic = useContext(StaticRenderContext);
+  const path = props.path ?? "";
+  const name = props.name || path.split("/").pop() || path;
+  const open = () => {
+    readWorkspaceBlob(path)
+      .then((blob) => {
+        // Typed as a PDF whatever the file holds, so it can only open in
+        // the browser's PDF viewer.
+        const url = URL.createObjectURL(new Blob([blob], { type: "application/pdf" }));
+        window.open(url, "_blank", "noopener");
+        setTimeout(() => URL.revokeObjectURL(url), 60_000);
+      })
+      .catch((e: unknown) => log.warn("[embed] could not open", path, e));
+  };
+  return (
+    <span className="lumen-embed-file" data-embed-path={path}>
+      <span className="lumen-embed-file-badge" aria-hidden="true">PDF</span>
+      <span className="lumen-embed-file-name" dir="auto">{name}</span>
+      {!isStatic && path && (
+        <button type="button" className="lumen-embed-file-open" onClick={open}>
+          {t("embed.openPdf")}
+        </button>
+      )}
+    </span>
+  );
 }
 
 function normalize(src: string): string {
@@ -582,6 +636,8 @@ export const components: Record<string, LumenBlock> = {
   img: LumenImg as unknown as LumenBlock,
   video: LumenVideo as unknown as LumenBlock,
   audio: LumenAudio as unknown as LumenBlock,
+  // `![[file.pdf]]` card.
+  "lumen-embed-file": LumenEmbedFile as unknown as LumenBlock,
   // GFM task-list checkboxes get an aria-label so they aren't announced bare.
   input: LumenInput as unknown as LumenBlock,
 };
