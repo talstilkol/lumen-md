@@ -1765,6 +1765,18 @@ export function useCommands({
         },
       },
       {
+        id: "ai.organize",
+        label: t("cmd.ai.organize"),
+        hint: t("cmd.ai.organize.hint"),
+        icon: cmdIcons.Sparkles,
+        group: t("group.ai", { defaultValue: "AI Copilot" }),
+        action: async () => {
+          // Plan W2.1: suggestions only; every change goes through the review screen.
+          const { openOrganizerPanel } = await import("../ui/OrganizerPanel");
+          await openOrganizerPanel();
+        },
+      },
+      {
         id: "ai.reviewChanges",
         label: t("cmd.ai.reviewChanges"),
         hint: t("cmd.ai.reviewChanges.hint"),
