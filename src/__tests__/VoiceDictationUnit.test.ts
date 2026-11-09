@@ -47,11 +47,14 @@ describe("VoiceDictation module exports", () => {
     const original = (window as any).SpeechRecognition;
     delete (window as any).SpeechRecognition;
     delete (window as any).webkitSpeechRecognition;
+    // The browser's speech service runs only under the cloud policy (plan 6.17).
+    localStorage.setItem("lumen.ai.policy", "cloud");
     startVoiceRecording("en");
     expect(showAiToast).toHaveBeenCalledWith(
       expect.stringMatching(/not supported|NotSupported/i),
       "error",
     );
+    localStorage.removeItem("lumen.ai.policy");
     if (original) (window as any).SpeechRecognition = original;
   });
 
