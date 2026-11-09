@@ -113,6 +113,7 @@
   "sample.toast.exists": "示例工作区“{folder}”已存在——未覆盖任何内容。",
   "search.empty": "工作区为空。",
   "search.noMatches": "无匹配结果。",
+  "search.operatorsHint": "运算符：tag:名称  path:文件夹  \"精确短语\"  /regex/  -排除",
   "search.placeholder": "搜索文件和内容…",
   "search.results.one": "{n} 个结果",
   "search.results.other": "{n} 个结果",

@@ -113,6 +113,7 @@
   "sample.toast.exists": "The sample workspace “{folder}” is already here — nothing was overwritten.",
   "search.empty": "Workspace is empty.",
   "search.noMatches": "No matches.",
+  "search.operatorsHint": "Operators: tag:name  path:folder  \"exact phrase\"  /regex/  -exclude",
   "search.placeholder": "Search workspace files & content…",
   "search.results.one": "{n} result",
   "search.results.other": "{n} results",

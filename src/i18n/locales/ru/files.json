@@ -113,6 +113,7 @@
   "sample.toast.exists": "Демо-пространство «{folder}» уже существует — ничего не перезаписано.",
   "search.empty": "Рабочая область пуста.",
   "search.noMatches": "Нет совпадений.",
+  "search.operatorsHint": "Операторы: tag:имя  path:папка  \"точная фраза\"  /regex/  -исключить",
   "search.placeholder": "Поиск по файлам и содержимому…",
   "search.results.one": "{n} результат",
   "search.results.other": "Результатов: {n}",

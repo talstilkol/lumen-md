@@ -113,6 +113,7 @@
   "sample.toast.exists": "Der Beispiel-Arbeitsbereich „{folder}“ ist bereits vorhanden – nichts wurde überschrieben.",
   "search.empty": "Der Arbeitsbereich ist leer.",
   "search.noMatches": "Keine Treffer.",
+  "search.operatorsHint": "Operatoren: tag:name  path:ordner  \"genaue Phrase\"  /regex/  -ausschließen",
   "search.placeholder": "Dateien und Inhalte durchsuchen…",
   "search.results.one": "{n} Ergebnis",
   "search.results.other": "{n} Ergebnisse",

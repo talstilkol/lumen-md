@@ -113,6 +113,7 @@
   "sample.toast.exists": "مساحة العمل التجريبية «{folder}» موجودة بالفعل — لم يُستبدل أي شيء.",
   "search.empty": "مساحة العمل فارغة.",
   "search.noMatches": "لا توجد نتائج.",
+  "search.operatorsHint": "عوامل التصفية: tag:اسم  path:مجلد  \"عبارة مطابقة\"  /regex/  -استبعاد",
   "search.placeholder": "البحث في الملفات والمحتوى…",
   "search.results.one": "{n} نتيجة",
   "search.results.other": "عدد النتائج: {n}",

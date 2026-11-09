@@ -404,15 +404,7 @@ export async function findBacklinks(targetPath: string): Promise<BacklinkHit[]> 
   return withEngine((e) => e.backlinks(targetPath));
 }
 
-
-/**
- * Search filenames, paths and content, in the index engine (a worker,
- * plan 8.4; src/storage/vaultIndexCore.ts). Content is ranked by BM25 over
- * Hebrew-aware terms (niqqud, final letters and prefix letters folded; the
- * exact form counts more), the name and path add points of their own, and
- * the whole query found as a phrase adds a few more. Each hit carries a
- * snippet around the phrase, or around its best-matching word.
- */
+/** Cheap fuzzy + substring search across filenames, paths, and content. */
 export async function searchWorkspace(
   query: string,
   /** `filter`: only these paths — applied before `limit`. */

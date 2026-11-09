@@ -257,7 +257,7 @@ describe("the workspace index over a 10,000-note vault (worker protocol)", () =>
   });
 });
 
-// ── The index core gives what a fresh index / the old full scan gave ───
+// ── The index core gives what the old full scan gave ───────────────────
 
 const WIKI_RE = /\[\[([^\]\r\n|]+?)(?:\|[^\]\r\n]+?)?\]\]/g;
 const base = (p: string) => p.split("/").filter(Boolean).pop() ?? "";
@@ -279,16 +279,6 @@ function scanBacklinks(files: IndexInput[], targetPath: string) {
   return out;
 }
 
-/**
- * Search since BM25 (plan 5.2) ranks content: an index edited note by note
- * answers exactly like one built from scratch over the same notes.
- */
-function freshSearch(files: IndexInput[], query: string, limit = 30) {
-  const fresh = new VaultIndex();
-  for (const f of files) fresh.upsert(f);
-  return fresh.search(query, { limit });
-}
-
 function rng(seed: number) {
   let s = seed;
   return () => ((s = (s * 1103515245 + 12345) & 0x7fffffff) / 0x7fffffff);
@@ -301,7 +291,7 @@ describe("VaultIndex", () => {
     }
   });
 
-  it("answers search like a fresh index and backlinks like the old scan, through edits", async () => {
+  it("answers search like a fresh index, and backlinks like the old scan, through edits", async () => {
     const random = rng(7);
     const pick = <T,>(a: T[]) => a[Math.floor(random() * a.length)];
     const words = ["alpha", "Beta", "שָׁלוֹם", "שלום", "הבית", "בַּיִת", "ספרים", "מלך", "עולם", "café", "note"];
@@ -323,7 +313,11 @@ describe("VaultIndex", () => {
     const check = async () => {
       const all = [...files.values()];
       for (const q of ["alpha", "", " BETA ", "והבית", "שלום", "בית", "a", "zz", "d3/", "café", "שלום עולם", "note"]) {
-        expect(await engine.search(q, { limit: 30 })).toEqual(freshSearch(all, q));
+        // Ranking is BM25 (plan 5.2): kept up to date one note at a time, it
+        // must answer as an index built from scratch over the same notes.
+        const fresh = new VaultIndex();
+        for (const f of all) fresh.upsert(f);
+        expect(await engine.search(q, { limit: 30 })).toEqual(fresh.search(q, { limit: 30 }));
       }
       for (const t of ["d1/n1.md", "שלום.md", "x/עולם.md", "Beta.md"]) expect(await engine.backlinks(t)).toEqual(scanBacklinks(all, t));
     };

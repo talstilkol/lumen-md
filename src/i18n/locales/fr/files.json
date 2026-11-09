@@ -113,6 +113,7 @@
   "sample.toast.exists": "L’espace d’exemple « {folder} » existe déjà — rien n’a été écrasé.",
   "search.empty": "L'espace de travail est vide.",
   "search.noMatches": "Aucun résultat.",
+  "search.operatorsHint": "Opérateurs : tag:nom  path:dossier  \"phrase exacte\"  /regex/  -exclure",
   "search.placeholder": "Rechercher dans les fichiers…",
   "search.results.one": "{n} résultat",
   "search.results.other": "{n} résultats",

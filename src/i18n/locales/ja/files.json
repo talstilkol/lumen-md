@@ -113,6 +113,7 @@
   "sample.toast.exists": "サンプルワークスペース「{folder}」は既に存在します — 何も上書きしていません。",
   "search.empty": "ワークスペースは空です。",
   "search.noMatches": "一致するものがありません。",
+  "search.operatorsHint": "演算子: tag:名前  path:フォルダー  \"完全一致\"  /regex/  -除外",
   "search.placeholder": "ファイルとコンテンツを検索…",
   "search.results.one": "{n} 件の結果",
   "search.results.other": "{n} 件の結果",

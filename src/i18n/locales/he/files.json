@@ -113,6 +113,7 @@
   "sample.toast.exists": "מרחב העבודה לדוגמה „{folder}” כבר קיים — שום דבר לא נדרס.",
   "search.empty": "מרחב העבודה ריק.",
   "search.noMatches": "אין התאמות.",
+  "search.operatorsHint": "אופרטורים: tag:שם  path:תיקייה  \"ביטוי מדויק\"  /regex/  -להחריג",
   "search.placeholder": "חיפוש בקבצים ובתוכן של מרחב העבודה…",
   "search.results.one": "{n} תוצאה",
   "search.results.other": "{n} תוצאות",
