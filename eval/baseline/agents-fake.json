@@ -1,0 +1,165 @@
+{
+  "model": "qwen2.5:7b",
+  "date": "2026-10-18",
+  "results": [
+    {
+      "id": "tagger-he",
+      "status": "ok",
+      "checks": [
+        {
+          "ok": true
+        },
+        {
+          "ok": true
+        },
+        {
+          "ok": true
+        }
+      ]
+    },
+    {
+      "id": "tagger-en",
+      "status": "ok",
+      "checks": [
+        {
+          "ok": true
+        },
+        {
+          "ok": true
+        },
+        {
+          "ok": true
+        }
+      ]
+    },
+    {
+      "id": "outliner-he",
+      "status": "ok",
+      "checks": [
+        {
+          "ok": true
+        },
+        {
+          "ok": true
+        }
+      ]
+    },
+    {
+      "id": "tasker-he",
+      "status": "ok",
+      "checks": [
+        {
+          "ok": true
+        },
+        {
+          "ok": true
+        },
+        {
+          "ok": true
+        },
+        {
+          "ok": true
+        }
+      ]
+    },
+    {
+      "id": "translator-en-he",
+      "status": "ok",
+      "checks": [
+        {
+          "ok": true
+        },
+        {
+          "ok": true
+        }
+      ]
+    },
+    {
+      "id": "translator-he-en",
+      "status": "ok",
+      "checks": [
+        {
+          "ok": true
+        },
+        {
+          "ok": true
+        },
+        {
+          "ok": true
+        }
+      ]
+    },
+    {
+      "id": "proofreader-he",
+      "status": "ok",
+      "checks": [
+        {
+          "ok": true
+        }
+      ]
+    },
+    {
+      "id": "diagrammer-he",
+      "status": "ok",
+      "checks": [
+        {
+          "ok": true
+        },
+        {
+          "ok": true
+        }
+      ]
+    },
+    {
+      "id": "charter-he",
+      "status": "ok",
+      "checks": [
+        {
+          "ok": true
+        },
+        {
+          "ok": true
+        }
+      ]
+    },
+    {
+      "id": "committer",
+      "status": "ok",
+      "checks": [
+        {
+          "ok": true
+        },
+        {
+          "ok": true
+        }
+      ]
+    },
+    {
+      "id": "writer-he",
+      "status": "ok",
+      "checks": [
+        {
+          "ok": true
+        },
+        {
+          "ok": true
+        }
+      ]
+    },
+    {
+      "id": "linker-he",
+      "status": "ok",
+      "checks": [
+        {
+          "ok": true
+        },
+        {
+          "ok": true
+        },
+        {
+          "ok": true
+        }
+      ]
+    }
+  ]
+}

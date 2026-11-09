@@ -137,11 +137,18 @@ jobs:
           LUMEN_EVAL_OLLAMA_URL: http://localhost:11434
           LUMEN_EVAL_MODEL: qwen2.5:7b
           LUMEN_EVAL_OUT: eval/results
+          # The fake server can't judge language or format: prompt cases
+          # check only that every prompt is answered (K1).
+          LUMEN_EVAL_WIRING: "1"
         run: |
           npm run -s eval:agents
+          # Compare with the committed baseline of the fake server: a case
+          # that used to pass and fails now is a regression.
+          npm run -s eval:compare -- eval/results/agents-*.json --baseline eval/baseline/agents-fake.json
+          npm run -s eval:compare -- eval/results/prompts-*.json --baseline eval/baseline/prompts-fake.json
           node -e '
             const fs = require("fs");
-            const f = fs.readdirSync("eval/results").find((n) => n.endsWith(".json"));
+            const f = fs.readdirSync("eval/results").find((n) => n.startsWith("agents-") && n.endsWith(".json"));
             const r = JSON.parse(fs.readFileSync("eval/results/" + f, "utf8"));
             const bad = r.results.filter((x) => x.status !== "ok" || x.checks.some((c) => !c.ok));
             console.log(`${r.results.length - bad.length}/${r.results.length} cases passed against the fake server`);

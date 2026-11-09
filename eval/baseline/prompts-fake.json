@@ -1,0 +1,69 @@
+{
+  "model": "qwen2.5:7b",
+  "date": "2026-10-18",
+  "results": [
+    {
+      "id": "rewrite-he",
+      "status": "ok",
+      "checks": [
+        {
+          "ok": true
+        }
+      ]
+    },
+    {
+      "id": "rewrite-en",
+      "status": "ok",
+      "checks": [
+        {
+          "ok": true
+        }
+      ]
+    },
+    {
+      "id": "autocomplete-he",
+      "status": "ok",
+      "checks": [
+        {
+          "ok": true
+        }
+      ]
+    },
+    {
+      "id": "rag-he",
+      "status": "ok",
+      "checks": [
+        {
+          "ok": true
+        }
+      ]
+    },
+    {
+      "id": "summarize-he",
+      "status": "ok",
+      "checks": [
+        {
+          "ok": true
+        }
+      ]
+    },
+    {
+      "id": "actionItems-he",
+      "status": "ok",
+      "checks": [
+        {
+          "ok": true
+        }
+      ]
+    },
+    {
+      "id": "commit-en",
+      "status": "ok",
+      "checks": [
+        {
+          "ok": true
+        }
+      ]
+    }
+  ]
+}
