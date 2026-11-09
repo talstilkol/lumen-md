@@ -41,24 +41,9 @@ async function cancellable<T>(fn: (signal: AbortSignal) => Promise<T>): Promise<
   }
 }
 
-/** Save a clip into the library folder and open it (T34). Exported for tests. */
+/** Save a clip into the library folder and open it (T34). Exported for tests; the work is in a lazy module. */
 export async function saveClip(clip: { title: string; markdown: string }): Promise<void> {
-  const { clipFileName, libraryDir } = await import("../research/clipper");
-  const { writeWorkspaceFile, workspaceHasEntry, isOPFSAvailable } = await import("../storage/workspace");
-  const name = clipFileName(clip.title);
-  if (!isOPFSAvailable()) {
-    // Nothing was written: open it as an unsaved (dirty) document in its own
-    // tab, so closing the tab or the page warns instead of losing the clip.
-    openTemplateDoc(name.replace(/\.md$/, ""), clip.markdown);
-    return;
-  }
-  const dir = libraryDir(getLocale());
-  let path = `${dir}/${name}`;
-  for (let i = 2; await workspaceHasEntry(path); i++) path = `${dir}/${name.replace(/\.md$/, "")} (${i}).md`;
-  await writeWorkspaceFile(path, clip.markdown);
-  window.dispatchEvent(new Event("lumen-workspace-changed"));
-  useAppStore.getState().openTab({ name: path.split("/").pop()!, content: clip.markdown, workspaceName: path });
-  showAiToast(t("clip.saved", { path }), "success");
+  await (await import("../research/clipSave")).saveClipToLibrary(clip, openTemplateDoc);
 }
 
 export interface UseCommandsOptions {
@@ -138,31 +123,8 @@ export function openNewDoc(base: string, content: string, dirty: boolean): void 
   if (dirty) useAppStore.getState().setDoc({ dirty: true });
 }
 
-/** Every Markdown note in the workspace, for Vault Doctor (null when there is none). */
-async function loadDoctorNotes(): Promise<Array<{ path: string; text: string }> | null> {
-  if (!isOPFSAvailable()) {
-    showAiToast(t("doctor.noWorkspace"), "error");
-    return null;
-  }
-  const { listWorkspace } = await import("../storage/workspace");
-  const notes: Array<{ path: string; text: string }> = [];
-  for (const f of await listWorkspace({ includeAssets: false })) {
-    if (!/\.(md|markdown)$/i.test(f.path)) continue;
-    try {
-      notes.push({ path: f.path, text: await readWorkspaceFile(f.path) });
-    } catch {
-      // A missing note would look like a broken link target (and "fix"
-      // links to it): stop rather than scan an incomplete workspace.
-      showAiToast(t("doctor.readFailed", { path: f.path }), "error");
-      return null;
-    }
-  }
-  if (!notes.length) {
-    showAiToast(t("doctor.noWorkspace"), "error");
-    return null;
-  }
-  return notes;
-}
+/** Every Markdown note in the workspace, for Vault Doctor (null when there is none); loaded on use. */
+const loadDoctorNotes = async () => (await import("../lint/doctorNotes")).loadDoctorNotes();
 
 export function useCommands({
   handleNew,
