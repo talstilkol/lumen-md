@@ -62,6 +62,7 @@ import { useAppStore, applyTheme } from "./store/useStore";
 import { applyLocale, t } from "./i18n";
 import { localLlmAvailable } from "./ai/localLlm";
 import { assessConfigHealth } from "./lib/configHealth";
+import { historyKey, isQuotaError, onHistoryQuota, recordSnapshot } from "./storage/history";
 import { log } from "./lib/logger";
 import { openFileDialog, saveFile } from "./storage/fs";
 import { exportToHtml } from "./storage/exportHtml";
@@ -319,6 +320,7 @@ export default function App() {
           dirty: false,
         });
         markSaved();
+        void recordSnapshot(historyKey({ name: next.name, workspaceName: useAppStore.getState().doc.workspaceName }), next.content, "save").catch(() => false);
       } catch (err) {
         // User cancelled Save-As dialog or filesystem error
         if ((err as DOMException)?.name !== "AbortError") {
@@ -460,18 +462,31 @@ export default function App() {
     if (!doc.dirty) return;
     const name = doc.workspaceName;
     const content = doc.content;
-    const timer = setTimeout(() => {
+    let retry: ReturnType<typeof setTimeout> | undefined;
+    const write = (attempt: number) => {
       writeWorkspaceFile(name, content)
         .then(() => {
           markSaved();
           window.dispatchEvent(new Event("lumen-workspace-changed"));
+          // Every save path feeds the one history store (T35).
+          void recordSnapshot(name, content, "autosave").catch(() => false);
         })
-        .catch(() => {
-          /* swallow; will retry on next change */
+        .catch((err: unknown) => {
+          // A failed write used to vanish silently. Say so once, retry
+          // with back-off; the localStorage mirror still holds the text.
+          if (attempt === 0) showAiToast(t(isQuotaError(err) ? "doc.save.quota" : "doc.save.failedRetrying", { name }), "error");
+          if (attempt < 4) retry = setTimeout(() => write(attempt + 1), 2000 * 2 ** attempt);
         });
-    }, 600);
-    return () => clearTimeout(timer);
+    };
+    const timer = setTimeout(() => write(0), 600);
+    return () => {
+      clearTimeout(timer);
+      if (retry) clearTimeout(retry);
+    };
   }, [doc.workspaceName, doc.content, doc.dirty, markSaved]);
+
+  // History quota: the store pruned its oldest quarter and still could not write.
+  useEffect(() => onHistoryQuota(() => showAiToast(t("doc.history.quota"), "error")), []);
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -571,6 +586,7 @@ export default function App() {
   useEffect(() => {
     const flush = () => {
       const d = useAppStore.getState().doc;
+      void recordSnapshot(historyKey(d), d.content, "close").catch(() => false);
       if (!d.dirty || !d.workspaceName) return;
       const name = d.workspaceName;
       writeWorkspaceFile(name, d.content)
@@ -1008,7 +1024,7 @@ export default function App() {
         <Suspense fallback={<div style={{padding:'2rem',color:'hsl(var(--fg-muted))'}}>{t("loading.generic")}</div>}>
           <ErrorBoundary fallback={<div style={{ padding: '2rem', color: 'hsl(0 80% 60%)' }}>{t("errorBoundary.heading")}</div>}>
             <VersionHistory
-              fileName={doc.name}
+              fileName={historyKey(doc)}
               currentContent={doc.content}
               onRestore={(content) => setContent(content)}
               onClose={() => setHistoryOpen(false)}

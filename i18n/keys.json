@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-10-17T19:13:58.192Z",
+  "generated_at": "2026-10-17T20:20:34.387Z",
   "source": "src/i18n/index.ts (en bundle)",
-  "count": 1196,
+  "count": 1206,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -1490,7 +1490,61 @@
     },
     {
       "key": "versionHistory.noVersions",
-      "en": "No versions saved yet. Versions are auto-saved when you switch files or save.",
+      "en": "No versions yet. A version is kept every couple of minutes while you type, on every save and when you close the tab.",
+      "vars": []
+    },
+    {
+      "key": "doc.save.failedRetrying",
+      "en": "Could not save “{name}” to the vault — retrying. Your text is still in this browser.",
+      "vars": [
+        "name"
+      ]
+    },
+    {
+      "key": "doc.save.quota",
+      "en": "The browser's storage for this site is full — “{name}” was not saved. Free space or export your notes.",
+      "vars": [
+        "name"
+      ]
+    },
+    {
+      "key": "doc.history.quota",
+      "en": "Version history is out of space even after removing the oldest versions.",
+      "vars": []
+    },
+    {
+      "key": "versionHistory.reason.autosave",
+      "en": "autosave",
+      "vars": []
+    },
+    {
+      "key": "versionHistory.reason.save",
+      "en": "saved",
+      "vars": []
+    },
+    {
+      "key": "versionHistory.reason.auto-backup",
+      "en": "backup",
+      "vars": []
+    },
+    {
+      "key": "versionHistory.reason.vault",
+      "en": "vault snapshot",
+      "vars": []
+    },
+    {
+      "key": "versionHistory.reason.close",
+      "en": "on close",
+      "vars": []
+    },
+    {
+      "key": "versionHistory.reason.restore",
+      "en": "before restore",
+      "vars": []
+    },
+    {
+      "key": "versionHistory.reason.manual",
+      "en": "manual",
       "vars": []
     },
     {

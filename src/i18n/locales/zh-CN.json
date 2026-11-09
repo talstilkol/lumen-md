@@ -1194,5 +1194,15 @@
   "ai.doctor.action.openSettings": "打开 AI 设置",
   "ai.doctor.action.pullModel": "立即下载",
   "ai.doctor.action.setPolicyLocalFirst": "切换到“本地优先”",
-  "ai.doctor.action.retry": "重试"
+  "ai.doctor.action.retry": "重试",
+  "doc.save.failedRetrying": "无法将“{name}”保存到保险库 —— 正在重试。文本仍保存在此浏览器中。",
+  "doc.save.quota": "此网站的浏览器存储已满 —— “{name}”未保存。请释放空间或导出笔记。",
+  "doc.history.quota": "即使删除最旧的版本，版本历史仍没有空间。",
+  "versionHistory.reason.autosave": "自动保存",
+  "versionHistory.reason.save": "已保存",
+  "versionHistory.reason.auto-backup": "备份",
+  "versionHistory.reason.vault": "保险库快照",
+  "versionHistory.reason.close": "关闭时",
+  "versionHistory.reason.restore": "恢复前",
+  "versionHistory.reason.manual": "手动"
 }

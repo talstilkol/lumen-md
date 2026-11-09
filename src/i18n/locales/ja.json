@@ -1194,5 +1194,15 @@
   "ai.doctor.action.openSettings": "AI設定を開く",
   "ai.doctor.action.pullModel": "今すぐダウンロード",
   "ai.doctor.action.setPolicyLocalFirst": "「ローカル優先」に切り替える",
-  "ai.doctor.action.retry": "再試行"
+  "ai.doctor.action.retry": "再試行",
+  "doc.save.failedRetrying": "「{name}」を保管庫に保存できませんでした — 再試行中です。テキストはこのブラウザに残っています。",
+  "doc.save.quota": "このサイトのブラウザストレージがいっぱいです — 「{name}」は保存されませんでした。空き容量を作るかノートを書き出してください。",
+  "doc.history.quota": "最も古い版を削除しても版履歴の容量が足りません。",
+  "versionHistory.reason.autosave": "自動保存",
+  "versionHistory.reason.save": "保存済み",
+  "versionHistory.reason.auto-backup": "バックアップ",
+  "versionHistory.reason.vault": "保管庫スナップショット",
+  "versionHistory.reason.close": "終了時",
+  "versionHistory.reason.restore": "復元前",
+  "versionHistory.reason.manual": "手動"
 }

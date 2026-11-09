@@ -1194,5 +1194,15 @@
   "ai.doctor.action.openSettings": "Открыть настройки ИИ",
   "ai.doctor.action.pullModel": "Загрузить сейчас",
   "ai.doctor.action.setPolicyLocalFirst": "Переключить на «сначала локально»",
-  "ai.doctor.action.retry": "Повторить"
+  "ai.doctor.action.retry": "Повторить",
+  "doc.save.failedRetrying": "Не удалось сохранить «{name}» в хранилище — повторяю. Текст остаётся в браузере.",
+  "doc.save.quota": "Хранилище сайта в браузере заполнено — «{name}» не сохранён. Освободите место или экспортируйте заметки.",
+  "doc.history.quota": "Истории версий не хватает места даже после удаления самых старых версий.",
+  "versionHistory.reason.autosave": "автосохранение",
+  "versionHistory.reason.save": "сохранено",
+  "versionHistory.reason.auto-backup": "резервная копия",
+  "versionHistory.reason.vault": "снимок хранилища",
+  "versionHistory.reason.close": "при закрытии",
+  "versionHistory.reason.restore": "перед восстановлением",
+  "versionHistory.reason.manual": "вручную"
 }
