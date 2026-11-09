@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-10-17T16:40:26.135Z",
+  "generated_at": "2026-10-17T16:47:34.070Z",
   "source": "src/i18n/index.ts (en bundle)",
-  "count": 1111,
+  "count": 1146,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -3767,6 +3767,192 @@
     {
       "key": "ai.policy.title",
       "en": "AI policy",
+      "vars": []
+    },
+    {
+      "key": "cmd.ai.agentSettings",
+      "en": "AI: Settings (local agents)",
+      "vars": []
+    },
+    {
+      "key": "cmd.ai.agentSettings.hint",
+      "en": "Policy, executor, models, endpoints and recent runs in one place",
+      "vars": []
+    },
+    {
+      "key": "ai.settings.title",
+      "en": "AI settings",
+      "vars": []
+    },
+    {
+      "key": "ai.settings.close",
+      "en": "Close",
+      "vars": []
+    },
+    {
+      "key": "ai.settings.saved",
+      "en": "Saved",
+      "vars": []
+    },
+    {
+      "key": "ai.settings.save",
+      "en": "Save",
+      "vars": []
+    },
+    {
+      "key": "ai.settings.checking",
+      "en": "Checking…",
+      "vars": []
+    },
+    {
+      "key": "ai.settings.available",
+      "en": "Available",
+      "vars": []
+    },
+    {
+      "key": "ai.settings.unavailable",
+      "en": "Not available ({reason})",
+      "vars": [
+        "reason"
+      ]
+    },
+    {
+      "key": "ai.settings.executor",
+      "en": "Who runs the agents",
+      "vars": []
+    },
+    {
+      "key": "ai.settings.executor.auto",
+      "en": "Automatic (Ollama → in the browser → chat provider)",
+      "vars": []
+    },
+    {
+      "key": "ai.settings.executor.ollama",
+      "en": "Ollama on this computer",
+      "vars": []
+    },
+    {
+      "key": "ai.settings.executor.webllm",
+      "en": "Model in the browser (WebGPU)",
+      "vars": []
+    },
+    {
+      "key": "ai.settings.executor.chat",
+      "en": "Chat provider (follows the policy)",
+      "vars": []
+    },
+    {
+      "key": "ai.settings.recheck",
+      "en": "Check again",
+      "vars": []
+    },
+    {
+      "key": "ai.settings.ollama.url",
+      "en": "Address",
+      "vars": []
+    },
+    {
+      "key": "ai.settings.ollama.model",
+      "en": "Model",
+      "vars": []
+    },
+    {
+      "key": "ai.settings.ollama.unreachable",
+      "en": "Ollama is not reachable. Install it and allow this site: OLLAMA_ORIGINS=https://lumen-md.vercel.app",
+      "vars": []
+    },
+    {
+      "key": "ai.settings.ollama.installed",
+      "en": "Installed: {models}",
+      "vars": [
+        "models"
+      ]
+    },
+    {
+      "key": "ai.settings.ollama.none",
+      "en": "Ollama runs but has no models. Recommended: ollama pull qwen2.5:7b",
+      "vars": []
+    },
+    {
+      "key": "ai.settings.browser",
+      "en": "In the browser",
+      "vars": []
+    },
+    {
+      "key": "ai.settings.hw.ok",
+      "en": "WebGPU ready · budget about {budget} MB · {f16} · {cores} cores · {memory} GB RAM (estimate)",
+      "vars": [
+        "budget",
+        "f16",
+        "cores",
+        "memory"
+      ]
+    },
+    {
+      "key": "ai.settings.hw.none",
+      "en": "No WebGPU in this browser ({reason}). Use Ollama or a WebGPU browser.",
+      "vars": [
+        "reason"
+      ]
+    },
+    {
+      "key": "ai.settings.browser.model",
+      "en": "Model",
+      "vars": []
+    },
+    {
+      "key": "ai.settings.browser.recommended",
+      "en": "Recommended for this device",
+      "vars": []
+    },
+    {
+      "key": "ai.settings.browser.tooBig",
+      "en": "too large",
+      "vars": []
+    },
+    {
+      "key": "ai.settings.endpoints",
+      "en": "Local services",
+      "vars": []
+    },
+    {
+      "key": "ai.settings.grammar",
+      "en": "Grammar",
+      "vars": []
+    },
+    {
+      "key": "ai.settings.research",
+      "en": "Research",
+      "vars": []
+    },
+    {
+      "key": "ai.settings.endpoints.hint",
+      "en": "Start both with: docker compose -f docker/local-ai.yml up -d. Empty = the default.",
+      "vars": []
+    },
+    {
+      "key": "ai.settings.style",
+      "en": "My writing style",
+      "vars": []
+    },
+    {
+      "key": "ai.settings.style.use",
+      "en": "Write in my style",
+      "vars": []
+    },
+    {
+      "key": "ai.settings.style.none",
+      "en": "No style profile yet. Build one from your notes — it stays on this device.",
+      "vars": []
+    },
+    {
+      "key": "ai.settings.trace",
+      "en": "Recent agent runs",
+      "vars": []
+    },
+    {
+      "key": "ai.settings.trace.clear",
+      "en": "Clear",
       "vars": []
     },
     {

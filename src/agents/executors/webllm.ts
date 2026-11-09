@@ -72,15 +72,25 @@ export function parseOpenAiToolCalls(raw: unknown): ToolCall[] {
   return out;
 }
 
+/** "Model in the browser" picked as the preferred executor (lumen.ai.executor, see executors/index.ts). */
+function chosenInSettings(): boolean {
+  try {
+    return localStorage.getItem("lumen.ai.executor") === "webllm";
+  } catch {
+    return false;
+  }
+}
+
 export const webllmExecutor: Executor = {
   id: "webllm",
   label: "WebGPU (web-llm)",
   async available(): Promise<Availability> {
     // In-browser inference means a multi-GB download on first use: only
-    // when the user asked for it (Privacy Mode, the WebGPU provider) or the
-    // policy allows nothing else (local-only).
+    // when the user asked for it (Privacy Mode, the WebGPU provider, or
+    // "Model in the browser" chosen in the AI settings) or the policy allows
+    // nothing else (local-only).
     const policy = getAiPolicy();
-    const optedIn = useAppStore.getState().useLocalAi || getActiveProvider() === "local-webgpu";
+    const optedIn = useAppStore.getState().useLocalAi || getActiveProvider() === "local-webgpu" || chosenInSettings();
     if (policy === "cloud") return { available: false, reason: "policy", detail: "cloud" };
     if (policy === "local-first" && !optedIn) return { available: false, reason: "not-opted-in" };
     hwSnapshot = await detectHardware();

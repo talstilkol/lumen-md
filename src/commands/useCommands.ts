@@ -1344,6 +1344,16 @@ export function useCommands({
         },
       },
       {
+        id: "ai.agentSettings",
+        label: t("cmd.ai.agentSettings"),
+        hint: t("cmd.ai.agentSettings.hint"),
+        icon: cmdIcons.Sparkles,
+        group: t("group.tools"),
+        action: () => {
+          window.dispatchEvent(new CustomEvent("lumen-open-ai-settings"));
+        },
+      },
+      {
         id: "ai.policy",
         label: t("cmd.ai.policy"),
         hint: t("cmd.ai.policy.hint"),
