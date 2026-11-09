@@ -399,7 +399,9 @@
   "src/ui/FileTree.tsx": {
     "@typescript-eslint/no-floating-promises": {
       "count": 1
-    },
+    }
+  },
+  "src/ui/FileTreeNode.tsx": {
     "jsx-a11y/role-supports-aria-props": {
       "count": 1
     }
