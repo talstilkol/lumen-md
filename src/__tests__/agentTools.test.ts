@@ -87,14 +87,22 @@ describe("workspace tools", () => {
     await expect(readFileTool.run({ path: "../etc/passwd" }, ctx())).rejects.toBeInstanceOf(ToolError);
   });
 
-  it("writes (scope write) and lists markdown only", async () => {
+  it("stages writes (scope write) instead of writing, and lists markdown only", async () => {
     expect(writeFileTool.scope).toBe("write");
+    const staged: unknown[] = [];
+    const stage = (p: unknown) => (staged.push(p), { staged: true as const, changeId: `c${staged.length}`, kind: "file" as const, path: "notes/c.md", summary: "" });
+    const w = ctx({ grants: new Set(["read", "write"]), stage });
     // A malformed call never erases a file.
-    await expect(writeFileTool.run({ path: "notes/a.md" } as never, ctx({ grants: new Set(["read", "write"]) }))).rejects.toMatchObject({ code: "bad-args" });
-    await expect(writeFileTool.run({ path: "notes/a.md", content: 42 } as never, ctx({ grants: new Set(["read", "write"]) }))).rejects.toMatchObject({ code: "bad-args" });
+    await expect(writeFileTool.run({ path: "notes/a.md" } as never, w)).rejects.toMatchObject({ code: "bad-args" });
+    await expect(writeFileTool.run({ path: "notes/a.md", content: 42 } as never, w)).rejects.toMatchObject({ code: "bad-args" });
     expect(files.get("notes/a.md")).toContain("hello world");
-    await writeFileTool.run({ path: "notes/c.md", content: "# C" }, ctx({ grants: new Set(["read", "write"]) }));
-    expect(files.get("notes/c.md")).toBe("# C");
+    // Outside the runtime (no stage function) a write tool refuses.
+    await expect(writeFileTool.run({ path: "notes/c.md", content: "# C" }, ctx({ grants: new Set(["read", "write"]) }))).rejects.toMatchObject({ code: "denied" });
+    const receipt = await writeFileTool.run({ path: "notes/c.md", content: "# C" }, w);
+    expect(receipt).toMatchObject({ staged: true, changeId: "c1" });
+    expect(staged).toEqual([{ kind: "file", path: "notes/c.md", before: null, after: "# C", summary: "Create notes/c.md (3 chars)" }]);
+    expect(files.has("notes/c.md")).toBe(false);
+    files.set("notes/c.md", "# C");
     const l = await listFilesTool.run({ prefix: "notes/" }, ctx());
     expect(l.files).toEqual(["notes/a.md", "notes/b.md", "notes/c.md"]);
     expect((await listFilesTool.run({}, ctx())).files).not.toContain("img.png");

@@ -29,7 +29,7 @@ import { parseProtocolTurn, toolProtocolPrompt, toolResultMessage } from "./prot
 import { hebrewRatio } from "../text/hebrew";
 import { checkJson } from "./tools/validate";
 import { formatSchemaErrors, validateSchema } from "./schema";
-import { ToolError } from "./tools/define";
+import { coerceArgs, ToolError } from "./tools/define";
 import { review, type Failure } from "./critic";
 import { recordRun } from "./trace";
 import { AiQuotaExceededError, aiQuotaStatus, chargeAiCommandDispatch, consumeAiPrompt } from "../billing/aiQuota";
@@ -59,14 +59,73 @@ function truncate(s: string, n: number): string {
   return s.length > n ? s.slice(0, n) + `… [${s.length - n} more chars]` : s;
 }
 
-async function execTool(tools: AgentTool[], call: ToolCall, ctx: ToolContext): Promise<{ result?: unknown; error?: string }> {
+interface ToolEnv {
+  ctx: ToolContext;
+  runId: string;
+  agentId: string;
+  consent?: RunOptions["consentNetwork"];
+  /** Ids of the changes staged in this run, in order. */
+  staged: string[];
+}
+
+/**
+ * Run one tool call under the runtime's rules:
+ *  - unknown tools and scopes the run was not granted are refused;
+ *  - the arguments must match the tool's JSON Schema (numeric / boolean
+ *    strings are coerced first);
+ *  - `network` tools pass the network gate (AI policy, per-call consent,
+ *    privacy ledger) and get the only fetch they may use;
+ *  - `write` tools get a `stage` function and must return its receipt: the
+ *    change waits for approval in `staging.ts`, nothing is written;
+ *  - cancellation propagates (the run ends `aborted`); every other failure
+ *    becomes a tool error the model reads.
+ */
+async function execTool(tools: AgentTool[], call: ToolCall, env: ToolEnv): Promise<{ result?: unknown; error?: string; note?: string }> {
   const tool = tools.find((t) => t.name === call.name);
   if (!tool) return { error: `Unknown tool "${call.name}". Available: ${tools.map((t) => t.name).join(", ")}` };
-  if (tool.scope !== "read" && !ctx.grants.has(tool.scope)) return { error: `Tool "${call.name}" needs the "${tool.scope}" permission, which was not granted for this run` };
+  if (tool.scope !== "read" && !env.ctx.grants.has(tool.scope)) return { error: `Tool "${call.name}" needs the "${tool.scope}" permission, which was not granted for this run` };
+  const args = coerceArgs(call.args && typeof call.args === "object" ? call.args : {}, tool.parameters);
+  const invalid = validateSchema(args, tool.parameters);
+  if (invalid.length) return { error: `bad-args: ${formatSchemaErrors(invalid)}` };
+  const callCtx: ToolContext = { ...env.ctx, stage: undefined, fetch: undefined };
+  let note: string | undefined;
+  const stagedHere: string[] = [];
   try {
-    return { result: await tool.run(call.args, ctx) };
+    if (env.ctx.signal?.aborted) throw new DOMException("aborted", "AbortError");
+    if (tool.scope === "network") {
+      const { openNetworkGate } = await import("./network");
+      const gate = await openNetworkGate(tool, { ...call, args }, env.consent);
+      callCtx.fetch = gate.fetch;
+      callCtx.network = gate.bound;
+      note = gate.consented ? "network: sent on the user's consent (local-only)" : "network: allowed by the AI policy";
+    } else if (tool.scope === "write") {
+      const { stageChange, receiptOf } = await import("./staging");
+      callCtx.stage = (proposal) => {
+        const change = stageChange(proposal, { tool: tool.name, runId: env.runId, agentId: env.agentId });
+        stagedHere.push(change.id);
+        env.staged.push(change.id);
+        return receiptOf(change);
+      };
+    }
+    const result = await tool.run(args, callCtx);
+    if (tool.scope === "write") {
+      const { isStagedReceipt } = await import("./staging");
+      if (!isStagedReceipt(result) || !stagedHere.includes(result.changeId)) throw new ToolError("failed", `"${tool.name}" did not return its staged change; nothing was written`);
+      note = `staged ${stagedHere.join(", ")} (waiting for approval)`;
+    }
+    return { result, note };
   } catch (e) {
+    if (isAbort(e, env.ctx.signal)) throw e;
+    // A write tool that failed after staging withdraws its proposal.
+    if (stagedHere.length) {
+      const { rejectStagedChange } = await import("./staging");
+      for (const id of stagedHere) {
+        rejectStagedChange(id);
+        env.staged.splice(env.staged.indexOf(id), 1);
+      }
+    }
     if (e instanceof ToolError) return { error: `${e.code}: ${e.message}` };
+    if ((e as Error)?.name === "PrivacyBlockedError") return { error: `blocked: ${(e as Error).message}. Answer without the web, or tell the user that web research needs their consent.` };
     return { error: (e as Error)?.message ?? String(e) };
   }
 }
@@ -169,8 +228,14 @@ export async function runAgent<I extends AgentInput, O = string>(def: AgentDefin
     run.steps.push(full);
     opts.onStep?.(full);
   };
+  const staged: string[] = [];
   const finish = async (status: AgentRun["status"], extra: Partial<AgentRun<O>> = {}): Promise<AgentRun<O>> => {
     Object.assign(run, extra, { status, endedAt: Date.now() });
+    if (staged.length) {
+      run.staged = [...staged];
+      // A cancelled run withdraws what it proposed; any other run leaves its proposals for review.
+      if (status === "aborted") await import("./staging").then((m) => m.discardRunChanges(run.id)).catch(() => 0);
+    }
     await recordRun(run as AgentRun);
     // T30: if this run follows a suggestion the user picked, learn from it.
     await import("./outcomes").then((m) => m.noteRunOutcome(run as AgentRun)).catch(() => undefined);
@@ -182,7 +247,15 @@ export async function runAgent<I extends AgentInput, O = string>(def: AgentDefin
   if (missing.length) {
     return finish("failed", { errorCode: "denied", error: `Agent "${def.id}" needs permissions: ${missing.join(", ")}` });
   }
-  const ctx: ToolContext = { signal: opts.signal, path: opts.path ?? input.path ?? null, document: opts.document ?? input.text, selection: opts.selection ?? input.selection, grants };
+  const ctx: ToolContext = {
+    signal: opts.signal,
+    path: opts.path ?? input.path ?? null,
+    document: opts.document ?? input.text,
+    selection: opts.selection ?? input.selection,
+    grants,
+    pages: new Map(),
+  };
+  const toolEnv: ToolEnv = { ctx, runId: run.id, agentId: def.id, consent: opts.consentNetwork, staged };
   const inputChars = (input.text ?? "").length + (input.selection ?? "").length;
   const maxRetries = def.maxRetries ?? DEFAULT_MAX_RETRIES;
   const maxSteps = def.maxSteps ?? DEFAULT_MAX_STEPS;
@@ -319,9 +392,10 @@ export async function runAgent<I extends AgentInput, O = string>(def: AgentDefin
         messages.push({ role: "assistant", content: assistantContent, toolCalls: calls });
         for (const call of calls) {
           const t1 = Date.now();
-          const r = await execTool(def.tools ?? [], call, ctx);
+          const r = await execTool(def.tools ?? [], call, toolEnv);
           const body = r.error !== undefined ? toolResultMessage(call, undefined, r.error) : truncate(toolResultMessage(call, r.result), TOOL_RESULT_LIMIT);
-          step({ kind: "tool", ms: Date.now() - t1, label: call.name, ok: r.error === undefined, detail: r.error ?? truncate(JSON.stringify(call.args), 200) });
+          const argsText = truncate(JSON.stringify(call.args), 200);
+          step({ kind: "tool", ms: Date.now() - t1, label: call.name, ok: r.error === undefined, detail: r.error ?? (r.note ? `${r.note} · ${argsText}` : argsText) });
           messages.push({ role: "tool", content: body, toolCallId: call.id, name: call.name });
         }
       }

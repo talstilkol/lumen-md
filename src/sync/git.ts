@@ -42,6 +42,19 @@ interface IsomorphicGit {
   commit: (opts: Record<string, unknown>) => Promise<string>;
   statusMatrix: (opts: Record<string, unknown>) => Promise<unknown[][]>;
   listFiles: (opts: Record<string, unknown>) => Promise<string[]>;
+  walk: (opts: Record<string, unknown>) => Promise<unknown>;
+  TREE: (opts: { ref: string }) => unknown;
+  WORKDIR: () => unknown;
+  STAGE: () => unknown;
+  resolveRef: (opts: Record<string, unknown>) => Promise<string>;
+  isIgnored: (opts: Record<string, unknown>) => Promise<boolean>;
+}
+
+/** One side of a path in `git.walk` (the subset we use). */
+interface WalkerEntry {
+  type: () => Promise<"tree" | "blob" | "special" | "commit">;
+  oid: () => Promise<string>;
+  content: () => Promise<Uint8Array | undefined>;
 }
 
 let fsPromise: Promise<{ fs: Fs; http: unknown; git: IsomorphicGit }> | null = null;
@@ -224,13 +237,12 @@ export interface GitStatusEntry {
   state: "unmodified" | "modified" | "added" | "deleted";
 }
 
-export async function gitStatus(repoFolder: string): Promise<GitStatusEntry[]> {
-  const { fs, git } = await load();
-  const dir = `/git/${repoFolder}`;
-  // First mirror OPFS → lightning-fs so the status reflects current edits.
+/** Mirror the workspace copy of a repo (OPFS) into its lightning-fs checkout, so git sees the current edits. */
+async function mirrorWorkspaceToGit(fs: Fs, dir: string, repoFolder: string, signal?: AbortSignal): Promise<void> {
   const all = await listWorkspace({ includeAssets: true, includeHidden: true });
   const prefix = `${repoFolder}/`;
   for (const f of all) {
+    if (signal?.aborted) throw new DOMException("aborted", "AbortError");
     if (!f.path.startsWith(prefix)) continue;
     const relative = f.path.slice(prefix.length);
     const full = `${dir}/${relative}`;
@@ -247,6 +259,36 @@ export async function gitStatus(repoFolder: string): Promise<GitStatusEntry[]> {
     const txt = await readWorkspaceFile(f.path).catch(() => null);
     if (txt !== null) await fs.promises.writeFile(full, txt);
   }
+  // Files deleted (or renamed away) in the workspace leave the checkout too, so
+  // status and diffs show the deletion — also when every file of the repo was
+  // deleted. Only an entirely empty listing is not trusted (it cannot be told
+  // apart from storage that failed to list): it never empties the checkout.
+  const present = new Set(all.filter((f) => f.path.startsWith(prefix)).map((f) => f.path.slice(prefix.length)));
+  if (!all.length || !fs.promises.unlink) return;
+  const prune = async (rel: string): Promise<void> => {
+    let names: string[] = [];
+    try {
+      names = await fs.promises.readdir(rel ? `${dir}/${rel}` : dir);
+    } catch {
+      return; // why: a folder that vanished meanwhile has nothing to prune
+    }
+    for (const name of names) {
+      if (signal?.aborted) throw new DOMException("aborted", "AbortError");
+      if (!rel && name === ".git") continue;
+      const path = rel ? `${rel}/${name}` : name;
+      const st = await fs.promises.stat(`${dir}/${path}`).catch(() => null);
+      if (st?.isDirectory()) await prune(path);
+      else if (st?.isFile() && !present.has(path)) await fs.promises.unlink!(`${dir}/${path}`).catch(() => undefined);
+    }
+  };
+  await prune("");
+}
+
+export async function gitStatus(repoFolder: string): Promise<GitStatusEntry[]> {
+  const { fs, git } = await load();
+  const dir = `/git/${repoFolder}`;
+  // First mirror OPFS → lightning-fs so the status reflects current edits.
+  await mirrorWorkspaceToGit(fs, dir, repoFolder);
   const matrix = (await git.statusMatrix({ fs, dir })) as [
     string,
     number,
@@ -390,4 +432,99 @@ export async function gitStatusSummary(
     else if (e.state === "deleted") summary.deleted++;
   }
   return summary;
+}
+
+/** Repositories cloned in this browser (the folders under `/git`, which are also their workspace folders). */
+export async function listGitRepos(): Promise<string[]> {
+  const { fs } = await load();
+  try {
+    return (await fs.promises.readdir("/git")).filter((n) => !n.startsWith(".")).sort();
+  } catch {
+    return [];
+  }
+}
+
+export interface GitFileChange {
+  /** Workspace path (`<repoFolder>/<path in the repo>`). */
+  path: string;
+  state: "added" | "modified" | "deleted";
+  /** Content at HEAD (null: not in HEAD) — null as well for binary files. */
+  before: string | null;
+  /** Content in the working tree / the index (null: deleted) — null as well for binary files. */
+  after: string | null;
+  binary: boolean;
+}
+
+const decodeText = (bytes: Uint8Array | undefined): { text: string | null; binary: boolean } => {
+  if (!bytes) return { text: null, binary: false };
+  if (bytes.subarray(0, 8000).includes(0)) return { text: null, binary: true };
+  return { text: new TextDecoder().decode(bytes), binary: false };
+};
+
+/**
+ * The changed files of a repo with their content on both sides.
+ *
+ *   staged: false (default) — HEAD against the working tree: what the next
+ *           `git.commit` would record (Lumen's commit stages everything);
+ *           the workspace copy is mirrored into the checkout first.
+ *   staged: true            — HEAD against the index (`git diff --staged`).
+ *
+ * `paths` (repo-relative files or folders) narrows the walk.
+ */
+export async function gitDiffEntries(
+  repoFolder: string,
+  opts: { staged?: boolean; paths?: string[]; signal?: AbortSignal } = {},
+): Promise<GitFileChange[]> {
+  const { fs, git } = await load();
+  const dir = `/git/${repoFolder}`;
+  const abort = () => {
+    if (opts.signal?.aborted) throw new DOMException("aborted", "AbortError");
+  };
+  if (!opts.staged) await mirrorWorkspaceToGit(fs, dir, repoFolder, opts.signal);
+  abort();
+  let hasHead = true;
+  try {
+    await git.resolveRef({ fs, dir, ref: "HEAD" });
+  } catch {
+    hasHead = false; // a repository without commits: everything is new
+  }
+  const paths = (opts.paths ?? []).map((p) => p.replace(/^\/+|\/+$/g, "")).filter(Boolean);
+  const wanted = (filepath: string, isTree: boolean) =>
+    !paths.length ||
+    paths.some((p) => p === filepath || filepath.startsWith(`${p}/`) || (isTree && p.startsWith(`${filepath}/`)));
+  const trees = [...(hasHead ? [git.TREE({ ref: "HEAD" })] : []), opts.staged ? git.STAGE() : git.WORKDIR()];
+  const result = (await git.walk({
+    fs,
+    dir,
+    trees,
+    map: async (filepath: string, entries: Array<WalkerEntry | null>) => {
+      abort();
+      if (filepath === ".") return undefined;
+      if (filepath === ".git" || filepath.startsWith(".git/")) return null;
+      const [head, side] = hasHead ? entries : [null, entries[0]];
+      const [ht, st] = await Promise.all([head?.type(), side?.type()]);
+      if (ht === "commit" || st === "commit") return null; // submodule
+      if (ht === "tree" || st === "tree") {
+        if (!wanted(filepath, true)) return null;
+        if (!head && !opts.staged && (await git.isIgnored({ fs, dir, filepath }))) return null;
+        return undefined; // descend
+      }
+      if (!wanted(filepath, false)) return undefined;
+      if (!head && !opts.staged && (await git.isIgnored({ fs, dir, filepath }))) return undefined;
+      const [ho, so] = await Promise.all([head?.oid(), side?.oid()]);
+      if (ho === so) return undefined;
+      const before = decodeText(head ? await head.content() : undefined);
+      const after = decodeText(side ? await side.content() : undefined);
+      const change: GitFileChange = {
+        path: `${repoFolder}/${filepath}`,
+        state: !head ? "added" : !side ? "deleted" : "modified",
+        before: before.text,
+        after: after.text,
+        binary: before.binary || after.binary,
+      };
+      return change;
+    },
+  })) as GitFileChange[] | undefined;
+  abort();
+  return (result ?? []).filter(Boolean).sort((a, b) => a.path.localeCompare(b.path));
 }
