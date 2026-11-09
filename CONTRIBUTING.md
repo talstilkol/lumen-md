@@ -95,6 +95,23 @@ Scopes are area names: `editor`, `renderer`, `collab`, `storage`, `ui`, `ai`, `i
 - Run unit tests: `npm run test` (single-shot) or `npm run test:watch`.
 - Run E2E: `npx playwright test` (requires a running dev server).
 
+### Local visual preview (every surface, LTR/RTL, dark/light)
+
+No Vercel preview needed: build, then screenshot every main surface
+(split, source, preview, WYSIWYG, palette, shortcuts, plugins, templates,
+AI settings, AI doctor) in English and Hebrew, dark and light:
+
+```bash
+npm run build
+npm run preview:visual                     # → visual-results/<run>/index.html
+npm run preview:visual -- --baseline visual-results/<older-run>   # pixel diff, exit 1 on change
+npm run preview:visual -- --only palette,wysiwyg --url http://localhost:5173
+```
+
+Each shot is also checked for horizontal overflow and for `<html dir>`
+matching the locale. Take a baseline before a visual change and compare
+after it; `--threshold` (default 0.5 %) sets how much may differ.
+
 ### Visual (pixel-diff) baselines
 
 `e2e/visual-smoke.spec.ts` pins the Mermaid diagram with
