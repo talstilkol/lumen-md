@@ -16,7 +16,7 @@
  * text is checked for hidden or instruction-like passages before saving;
  * what was found is written into the note, visibly.
  */
-import { extractPage, htmlToMd, type Extracted } from "./clipExtract";
+import type { Extracted } from "./clipExtract";
 import { pageVars, pickTemplate, renderClip, varsFor, type ClipTemplate, type RenderedClip } from "./clipTemplates";
 import type { InterpretFn } from "./clipInterpreter";
 import { addHighlights, highlightsFor, highlightsMarkdown } from "./clipHighlights";
@@ -71,6 +71,8 @@ export interface BuiltClip extends RenderedClip {
  * cloud one); `null` turns the interpreter off.
  */
 export async function buildClip(p: ClipPayload, opts: { library: string; templates?: ClipTemplate[]; date?: Date; interpret?: InterpretFn | null; signal?: AbortSignal }): Promise<BuiltClip> {
+  // Defuddle, Readability and Turndown in their own chunk (the lazy-chunk budget is 100 KB each).
+  const { extractPage, htmlToMd } = await import("./clipExtract");
   const page: Extracted = p.html
     ? extractPage(p.html, p.url)
     : { title: p.title ?? "", author: "", published: "", site: "", description: "", language: "", html: "", markdown: p.markdown ?? "", wordCount: 0, engine: "none" };
