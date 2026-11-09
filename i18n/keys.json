@@ -1,7 +1,7 @@
 {
   "version": 1,
   "source": "src/i18n/index.ts (en bundle)",
-  "count": 1544,
+  "count": 1546,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -4281,6 +4281,16 @@
     {
       "key": "status.privacyMode.tooltip",
       "en": "Privacy Mode — AI runs entirely on this device via WebGPU. No prompts leave your browser.",
+      "vars": []
+    },
+    {
+      "key": "status.secretsPlain",
+      "en": "KEYS UNENCRYPTED",
+      "vars": []
+    },
+    {
+      "key": "status.secretsPlain.tooltip",
+      "en": "This browser has no IndexedDB or WebCrypto here, so API keys and sign-in tokens are stored unencrypted in localStorage. Use a current browser over HTTPS (or the desktop app) to encrypt them.",
       "vars": []
     },
     {
