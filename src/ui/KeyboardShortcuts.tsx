@@ -48,6 +48,7 @@ function buildSections(mod: string) {
       items: [
         { keys: `${mod}+Z`, label: () => "Undo" },
         { keys: `${mod}+Shift+Z`, label: () => "Redo" },
+        { keys: `${mod}+Z`, label: () => t("trash.undoShortcut") },
         { keys: `${mod}+X`, label: () => "Cut" },
         { keys: `${mod}+C`, label: () => "Copy" },
         { keys: `${mod}+V`, label: () => "Paste" },

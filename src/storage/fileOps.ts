@@ -4,7 +4,7 @@
  * trash with an Undo.
  */
 
-import { moveToTrash, restoreFromTrash, type TrashItem } from "./trash";
+import { listTrash, moveToTrash, PartialTrashError, restoreFromTrash, restoreFromTrashIfPresent, type TrashItem } from "./trash";
 import { rewriteLinks, updateLinksAfterMove } from "./linkRewrite";
 import { listWorkspace, renameWorkspaceFile, WorkspaceConflictError, workspaceHasEntry } from "./workspace";
 
@@ -72,17 +72,134 @@ export async function safeMove(
   return { path: to, linksUpdated, replaced, linksError, rewrite };
 }
 
-/** Delete = move to the trash. Returns the trash entries for Undo. */
-export async function trashPaths(paths: string[], kinds: Record<string, "file" | "directory"> = {}): Promise<TrashItem[]> {
-  const items = await moveToTrash(paths, kinds);
-  window.dispatchEvent(new Event("lumen-workspace-changed"));
-  return items;
+/**
+ * The last deletes, oldest first, for Ctrl+Z outside the editor (plan 3.1).
+ * One entry per delete action (a bulk delete is one entry). Runtime only:
+ * after a reload the Trash panel still has everything.
+ */
+export const TRASH_UNDO_LIMIT = 20;
+const undoStack: TrashItem[][] = [];
+
+/** How many deletes Ctrl+Z can still undo (entries restored elsewhere are counted until the next undo skips them). */
+export function trashUndoDepth(): number {
+  return undoStack.length;
 }
 
-/** Undo a delete: restore every given entry. Returns where they went. */
-export async function undoTrash(items: TrashItem[]): Promise<string[]> {
+/** Test hook. */
+export function __resetTrashUndo(): void {
+  undoStack.length = 0;
+}
+
+/** These items are back (or being brought back): no stack entry may restore them again. */
+function forgetUndo(items: TrashItem[]): void {
+  const ids = new Set(items.map((i) => i.id));
+  for (let n = undoStack.length - 1; n >= 0; n--) {
+    const rest = undoStack[n].filter((i) => !ids.has(i.id));
+    if (rest.length) undoStack[n] = rest;
+    else undoStack.splice(n, 1);
+  }
+}
+
+// Undos run one at a time, so each press pops (and restores) its own entry
+// in order. The trash index itself is guarded in trash.ts, where deletes,
+// restores and the Trash panel all go through one queue.
+let restoring: Promise<unknown> = Promise.resolve();
+function oneAtATime<T>(fn: () => Promise<T>): Promise<T> {
+  const run = restoring.then(fn, fn);
+  restoring = run.catch(() => undefined);
+  return run;
+}
+
+/** Restore the given entries that are still in the trash (the Trash panel may have restored or purged some). */
+async function restoreItems(items: TrashItem[]): Promise<string[]> {
   const out: string[] = [];
-  for (const i of items) out.push(await restoreFromTrash(i.id));
-  window.dispatchEvent(new Event("lumen-workspace-changed"));
+  try {
+    for (const i of items) {
+      const where = await restoreFromTrashIfPresent(i.id);
+      if (where !== null) out.push(where);
+    }
+  } finally {
+    window.dispatchEvent(new Event("lumen-workspace-changed"));
+  }
   return out;
+}
+
+/**
+ * Delete = move to the trash. Returns the trash entries for Undo (and
+ * remembers them for Ctrl+Z). `afterMove` runs inside the trash queue right
+ * after the move (see `moveToTrash`). The entries become undoable, and the
+ * change is announced, only once it is done.
+ */
+export async function trashPaths(
+  paths: string[],
+  kinds: Record<string, "file" | "directory"> = {},
+  afterMove?: (items: TrashItem[]) => Promise<void>,
+): Promise<TrashItem[]> {
+  let moved: TrashItem[] = [];
+  try {
+    await moveToTrash(paths, kinds, undefined, async (items) => {
+      moved = items;
+      if (afterMove) await afterMove(items);
+    });
+    return moved;
+  } catch (e) {
+    // Part of a bulk delete moved before a later path failed: that part is undoable too.
+    if (e instanceof PartialTrashError && !moved.length) moved = e.items;
+    throw e;
+  } finally {
+    // Even when `afterMove` failed, what moved is in the trash: keep it undoable.
+    if (moved.length) {
+      undoStack.push(moved);
+      if (undoStack.length > TRASH_UNDO_LIMIT) undoStack.splice(0, undoStack.length - TRASH_UNDO_LIMIT);
+    }
+    window.dispatchEvent(new Event("lumen-workspace-changed"));
+  }
+}
+
+/** Undo a delete: restore every given entry still in the trash. Returns where they went. */
+export async function undoTrash(items: TrashItem[]): Promise<string[]> {
+  forgetUndo(items);
+  return oneAtATime(async () => {
+    try {
+      return await restoreItems(items);
+    } catch (e) {
+      // The toast is gone after its click: what is still in the trash goes
+      // back on the stack, so Ctrl+Z can retry it (review: #218).
+      await requeueLeftInTrash(items);
+      throw e;
+    }
+  });
+}
+
+/** After a failed restore: put the given entries still in the trash back on top of the Ctrl+Z stack. */
+async function requeueLeftInTrash(items: TrashItem[]): Promise<void> {
+  const left = new Set((await listTrash().catch(() => [])).map((i) => i.id));
+  const keep = items.filter((i) => left.has(i.id));
+  if (!keep.length) return;
+  undoStack.push(keep);
+  if (undoStack.length > TRASH_UNDO_LIMIT) undoStack.splice(0, undoStack.length - TRASH_UNDO_LIMIT);
+}
+
+/**
+ * Ctrl+Z outside the editor: restore the most recent delete that is still
+ * in the trash and drop it from the stack, so the next call restores the one
+ * before. Resolves to where the entries went, or null when there is nothing
+ * left to undo. When a restore fails, what is still in the trash stays on
+ * the stack for another try.
+ */
+export function undoLastTrash(): Promise<string[] | null> {
+  return oneAtATime(async () => {
+    while (undoStack.length) {
+      const entry = undoStack.pop()!;
+      try {
+        const restored = await restoreItems(entry);
+        // Nothing of it was left in the trash: undo the delete before it.
+        if (restored.length) return restored;
+      } catch (e) {
+        await requeueLeftInTrash(entry);
+        throw e;
+      }
+    }
+    return null;
+  });
 }

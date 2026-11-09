@@ -81,6 +81,7 @@ import {
 import { welcomeDoc } from "./welcomeDoc";
 import { ErrorBoundary } from "./ui/ErrorBoundary";
 import { KeyboardShortcuts } from "./ui/KeyboardShortcuts";
+import { handleTrashUndoKey } from "./ui/trashUndoShortcut";
 import { FocusMode } from "./ui/FocusMode";
 import { OnboardingTour } from "./ui/OnboardingTour";
 import { scrollToHeadingWhenRendered } from "./renderer/wikiLinks";
@@ -526,6 +527,9 @@ export default function App() {
     function onKey(e: KeyboardEvent) {
       const meta = e.metaKey || e.ctrlKey;
       if (!meta) return;
+      // ⌘Z / Ctrl+Z outside the editor: restore the last delete (plan 3.1).
+      // In an editor or a text field it stays their own undo.
+      if (handleTrashUndoKey(e)) return;
       // ⇧⌘F → focus mode toggle (or workspace search if already in focus mode)
       if (e.shiftKey && (e.key === "f" || e.key === "F")) {
         e.preventDefault();
