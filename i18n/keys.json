@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-10-24T11:16:22.225Z",
+  "generated_at": "2026-11-09T21:07:57.581Z",
   "source": "src/i18n/index.ts (en bundle)",
-  "count": 1431,
+  "count": 1447,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -4961,6 +4961,96 @@
       "en": "Couldn't save the batch job state for {id} (storage full or blocked). Free some space, then run \"AI: Check Batch Jobs\" again — already-applied results won't be duplicated.",
       "vars": [
         "id"
+      ]
+    },
+    {
+      "key": "cmd.ai.batchJobs",
+      "en": "AI: Batch Jobs — Progress, Pause, Resume",
+      "vars": []
+    },
+    {
+      "key": "cmd.ai.batchJobs.hint",
+      "en": "Live progress of batch jobs, with pause, resume and cancel",
+      "vars": []
+    },
+    {
+      "key": "batch.panel.title",
+      "en": "Batch jobs",
+      "vars": []
+    },
+    {
+      "key": "batch.panel.close",
+      "en": "Close",
+      "vars": []
+    },
+    {
+      "key": "batch.panel.progress",
+      "en": "{done} of {total} done · {failed} failed",
+      "vars": [
+        "done",
+        "total",
+        "failed"
+      ]
+    },
+    {
+      "key": "batch.panel.eta",
+      "en": "About {time} left",
+      "vars": [
+        "time"
+      ]
+    },
+    {
+      "key": "batch.panel.paused",
+      "en": "Paused",
+      "vars": []
+    },
+    {
+      "key": "batch.panel.blocked",
+      "en": "Waiting for a local model — Resume tries again",
+      "vars": []
+    },
+    {
+      "key": "batch.panel.finished",
+      "en": "Finished — apply the results to your notes",
+      "vars": []
+    },
+    {
+      "key": "batch.panel.cloud",
+      "en": "Running at {provider}; results arrive within 24 hours",
+      "vars": [
+        "provider"
+      ]
+    },
+    {
+      "key": "batch.panel.pause",
+      "en": "Pause",
+      "vars": []
+    },
+    {
+      "key": "batch.panel.resume",
+      "en": "Resume",
+      "vars": []
+    },
+    {
+      "key": "batch.panel.cancel",
+      "en": "Cancel job",
+      "vars": []
+    },
+    {
+      "key": "batch.panel.confirmCancel",
+      "en": "Cancel this batch job? None of its results will be applied.",
+      "vars": []
+    },
+    {
+      "key": "batch.panel.apply",
+      "en": "Apply results",
+      "vars": []
+    },
+    {
+      "key": "batch.panel.rejected",
+      "en": "Rejected answers ({n})",
+      "vars": [
+        "n"
       ]
     },
     {
