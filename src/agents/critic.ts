@@ -177,16 +177,27 @@ export function diagnose(f: Failure): Verdict {
   return { retry, suggestions, diagnosis: f.kind === "tool" ? "tool" : long ? "long-input" : f.kind };
 }
 
+/** T30: the suggestions that worked on this machine for this diagnosis come first. */
+async function learned(v: Verdict, f: Failure): Promise<Verdict> {
+  if (v.suggestions.length < 2) return v;
+  try {
+    const { rankByOutcomes } = await import("./outcomes");
+    return { ...v, suggestions: await rankByOutcomes(v.suggestions, v.diagnosis, f.agentId) };
+  } catch {
+    return v;
+  }
+}
+
 /** Full verdict: stage 1, then the model critic when installed and stage 1 is generic. */
 export async function review(f: Failure): Promise<Verdict> {
-  const v = diagnose(f);
+  const v = await learned(diagnose(f), f);
   // Stage 2 only when stage 1 has no retry left to offer: it costs a model
   // call, and its job is better suggestions for the user, not the retry.
   const generic = ["validation", "parse", "empty", "error", "tool", "long-input"].includes(v.diagnosis);
   if (modelCritic && generic && !v.retry && f.kind !== "aborted") {
     try {
       const m = await modelCritic(f, v);
-      if (m) return { ...v, ...m, suggestions: m.suggestions.length ? m.suggestions : v.suggestions };
+      if (m) return learned({ ...v, ...m, suggestions: m.suggestions.length ? m.suggestions : v.suggestions }, f);
     } catch {
       /* stage 2 is best effort */
     }

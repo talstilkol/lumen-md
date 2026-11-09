@@ -108,6 +108,9 @@ export interface ActionContext {
 export async function runSuggestion(s: Suggestion, run: AgentRun, ctx: ActionContext = {}): Promise<boolean> {
   const a = s.action;
   if (!a) return false;
+  // T30: remember the choice; the re-run's outcome is recorded against it.
+  const { noteSuggestionChosen } = await import("./outcomes");
+  noteSuggestionChosen(s, run);
   switch (a.type) {
     case "retry":
       setNextRunPatch(run.agentId, a.patch, run.inputKey);
