@@ -592,6 +592,11 @@
       "vars": []
     },
     {
+      "key": "privacy.cat.monitoring",
+      "en": "Error report — only with your consent, content removed",
+      "vars": []
+    },
+    {
       "key": "privacy.cat.research",
       "en": "Research service — your query is sent",
       "vars": []
@@ -825,6 +830,11 @@
     {
       "key": "runtimeMetrics.totalRequests",
       "en": "Total requests",
+      "vars": []
+    },
+    {
+      "key": "runtimeMetrics.vitals",
+      "en": "Web vitals — measured on this device, never sent",
       "vars": []
     },
     {

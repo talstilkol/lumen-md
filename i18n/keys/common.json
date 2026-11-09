@@ -2006,12 +2006,12 @@
     },
     {
       "key": "status.telemetry.tooltip.off",
-      "en": "Error telemetry is OFF. Click to enable anonymous crash reports.",
+      "en": "Error reports are OFF (the default): nothing is sent. Click to turn them on (the build also needs an error-tracker DSN).",
       "vars": []
     },
     {
       "key": "status.telemetry.tooltip.on",
-      "en": "Error telemetry is ON. Crash reports are sent to help improve Lumen. Click to opt out.",
+      "en": "Error reports are ON: crash details, with note text, titles and paths removed, go to the error tracker this build names; each one is listed in the privacy ledger. Click to turn off.",
       "vars": []
     },
     {

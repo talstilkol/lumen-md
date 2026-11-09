@@ -22,6 +22,9 @@ ARG VITE_SUPABASE_URL
 ARG VITE_SUPABASE_ANON_KEY
 # CORS proxy for git in the browser (plan 3.3); empty = none.
 ARG VITE_GIT_CORS_PROXY
+# Error tracker (Sentry / GlitchTip). Public by design, not a secret; used
+# only after the user turns error reports on (docs/src/content/docs/security/monitoring.md).
+ARG VITE_SENTRY_DSN
 # Collaboration servers of this stack (lumen-signal / lumen-collab). Without
 # them the SPA falls back to the public signaling servers and never uses
 # the on-prem persistent collab service.

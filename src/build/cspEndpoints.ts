@@ -29,6 +29,10 @@ export const ENDPOINT_ENV_VARS = [
   "VITE_SUPABASE_URL",
   // Safe git (plan 3.3): the CORS proxy git requests go through.
   "VITE_GIT_CORS_PROXY",
+  // The error tracker (Sentry / GlitchTip, plan 12.4). Its origin is the
+  // DSN's host; the key in the DSN's user part is dropped by URL.origin.
+  // No DSN, no ingest host in the policy — never a wildcard.
+  "VITE_SENTRY_DSN",
 ] as const;
 
 /**
