@@ -121,6 +121,13 @@ export default defineConfig({
             { label: "Android and iOS builds", slug: "self-hosting/mobile", translations: { he: "בניית Android ו-iOS" } },
           ],
         },
+        {
+          label: "Project",
+          translations: { he: "הפרויקט" },
+          items: [
+            { label: "Issue triage", slug: "project/issue-triage", translations: { he: "מיון issues" } },
+          ],
+        },
       ],
     }),
   ],
