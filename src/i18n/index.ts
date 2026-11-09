@@ -477,6 +477,7 @@ const en: Strings = {
   "agentReview.toast.one": "{agent} proposed a change. Nothing is written until you approve it.",
   "agentReview.toast.other": "{agent} proposed {n} changes. Nothing is written until you approve them.",
   "agentReview.toast.review": "Review",
+  "agentReview.mcpClient": "{client} (MCP client)",
   "cmd.note.read": "Read aloud",
   "cmd.note.read.hint": "Reads this note with your system's voices (Hebrew included); run again to stop",
   "toast.tts.unavailable": "This browser can't read aloud",

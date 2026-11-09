@@ -1455,6 +1455,7 @@
   "agentReview.toast.one": "{agent} הציע שינוי. שום דבר לא נכתב לפני אישור.",
   "agentReview.toast.other": "{agent} הציע {n} שינויים. שום דבר לא נכתב לפני אישור.",
   "agentReview.toast.review": "לסקירה",
+  "agentReview.mcpClient": "{client} (לקוח MCP)",
   "cmd.ai.cancel": "AI: ביטול",
   "cmd.ai.cancel.hint": "עוצר כל בקשת AI שרצה (גם Esc עושה זאת)",
   "toast.aiCancelled": "בקשת ה-AI בוטלה ({count})",
