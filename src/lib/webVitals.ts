@@ -92,7 +92,7 @@ export function reportWebVitals(sink: (sample: VitalsSample) => void): void {
     } as PerformanceObserverInit);
     observers.push(lcpObserver);
   } catch {
-    /* not supported (older browser) */
+    /* why: not supported (older browser) */
   }
 
   // CLS — accumulate non-input-triggered layout shifts.
@@ -119,7 +119,7 @@ export function reportWebVitals(sink: (sample: VitalsSample) => void): void {
     } as PerformanceObserverInit);
     observers.push(clsObserver);
   } catch {
-    /* not supported */
+    /* why: not supported */
   }
 
   // INP — slowest event-timing entry seen this session.
@@ -146,7 +146,7 @@ export function reportWebVitals(sink: (sample: VitalsSample) => void): void {
     } as PerformanceObserverInit);
     observers.push(inpObserver);
   } catch {
-    /* not supported */
+    /* why: not supported */
   }
 }
 
@@ -158,7 +158,7 @@ export function disposeWebVitals(): void {
     try {
       o.disconnect();
     } catch {
-      /* ignore */
+      /* why: an observer that is already disconnected throws in some browsers */
     }
   }
   observers.length = 0;

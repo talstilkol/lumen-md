@@ -185,7 +185,7 @@ export function flushPendingEdits(): void {
       try {
         flush();
       } catch {
-        /* an editor mid-teardown: nothing to flush */
+        /* why: an editor mid-teardown: nothing to flush */
       }
     }
   } finally {

@@ -373,7 +373,7 @@ export function connectCollab(
           try {
             p.destroy();
           } catch {
-            /* already gone */
+            /* why: already gone */
           }
           if (websocketProvider === p) websocketProvider = null;
         }
@@ -414,7 +414,7 @@ export function connectCollab(
       try {
         provider.off("synced", onSynced);
       } catch {
-        /* */
+        /* why: the provider may already have dropped its listeners on disconnect */
       }
       onSynced = null;
     }
@@ -490,7 +490,7 @@ export function connectCollab(
       () => ytext.toString(),
       () => ({ name: user.name, clientId: doc.clientID }),
     );
-  }).catch(() => {});
+  }).catch((e) => log.warn("collab: version-history snapshots could not start", e));
 
   return {
     doc,
@@ -517,18 +517,18 @@ export function connectCollab(
       try {
         provider.destroy();
       } catch {
-        /* */
+        /* why: teardown is best effort; one failure must not keep the doc or socket open */
       }
       try {
         websocketProvider?.destroy();
       } catch {
-        /* */
+        /* why: teardown is best effort; one failure must not keep the doc or socket open */
       }
       try {
         doc.destroy();
         transportDoc?.destroy();
       } catch {
-        /* */
+        /* why: teardown is best effort; one failure must not keep the doc or socket open */
       }
     },
   };

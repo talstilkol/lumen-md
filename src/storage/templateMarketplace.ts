@@ -118,7 +118,7 @@ function rememberInstalledName(id: string, name: string): void {
     names[id] = name;
     localStorage.setItem(INSTALLED_NAMES_KEY, JSON.stringify(names));
   } catch {
-    /* private mode — fall back to an id-derived name */
+    /* why: private mode — fall back to an id-derived name */
   }
 }
 
@@ -171,7 +171,7 @@ function bumpDownloads(id: string): void {
     parsed[id] = (parsed[id] ?? 0) + 1;
     localStorage.setItem(LOCAL_DOWNLOADS_KEY, JSON.stringify(parsed));
   } catch {
-    /* private mode — counter is best-effort */
+    /* why: private mode — counter is best-effort */
   }
 }
 
@@ -181,7 +181,7 @@ function mergeLocalDownloads(templates: MarketplaceTemplate[]): MarketplaceTempl
     const raw = localStorage.getItem(LOCAL_DOWNLOADS_KEY);
     local = raw ? JSON.parse(raw) : {};
   } catch {
-    /* */
+    /* why: storage denied or corrupt counter: show the server counts only */
   }
   return templates.map((t) => ({
     ...t,
@@ -208,7 +208,7 @@ export function getMarketplaceBackendUrl(): string | null {
       );
     }
   } catch {
-    /* private mode */
+    /* why: private mode */
   }
   const env = (import.meta as ImportMeta & { env?: { VITE_MARKETPLACE_URL?: string } }).env
     ?.VITE_MARKETPLACE_URL;
@@ -274,7 +274,7 @@ export async function recordRemoteInstall(id: string): Promise<void> {
   try {
     await fetch(`${backend}/items/${encodeURIComponent(id)}/install`, { method: "POST" });
   } catch {
-    /* best effort */
+    /* why: the install counter is best effort; the template is installed either way */
   }
 }
 

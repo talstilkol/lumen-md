@@ -57,7 +57,7 @@ function setLs(key: string, value: string): void {
     if (value.trim()) localStorage.setItem(key, value.trim());
     else localStorage.removeItem(key);
   } catch {
-    /* storage denied */
+    /* why: storage denied */
   }
 }
 

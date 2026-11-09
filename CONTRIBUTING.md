@@ -151,8 +151,8 @@ per-platform (`…-chromium-linux.png`).
 
 ### Adding a new string
 
-1. Add the English key to the `en` object in `src/i18n/index.ts`.
-2. Add the Hebrew translation to the `he` object in the same file.
+1. Add the English key to the `en` object in `src/i18n/en/app.ts` (app shell, editor, files, git, collaboration) or `src/i18n/en/features.ts` (everything else), at the end of its section. `src/i18n/index.ts` merges the parts; `node scripts/extract-i18n-keys.mjs` refuses a key defined twice.
+2. Add the Hebrew translation to `src/i18n/locales/he.json`.
 3. Add the key (with English fallback) to all 6 lazy locale files in `src/i18n/locales/*.json`.
 4. Run `npm run test` — the `i18nDrift.test.ts` gate will fail if any locale is missing the key.
 
@@ -187,6 +187,7 @@ The GitHub Actions workflow (`.github/workflows/ci.yml`) runs on every push:
 1. **`npm run typecheck`** — Zero TypeScript errors required.
 2. **`npm run test`** — All unit tests must pass (including the i18n drift gate).
 3. **`npm run build`** — Production bundle must build without errors.
+4. **`npm run lint`** — ESLint (typescript-eslint, react-hooks, jsx-a11y). Violations that predate it are recorded in `eslint-suppressions.json`; a new one fails. Notable rules: `react-hooks/rules-of-hooks`, `@typescript-eslint/no-floating-promises` (mark fire-and-forget calls with `void`), `lumen/empty-catch-why` (an empty `catch`, or an empty `.catch(() => {})` handler, needs a `// why: …` comment — or log the error instead) and `max-lines` (no production file over 800 lines: split it by concern). These two have no baseline at all; `src/__tests__/codeHealth.test.ts` checks the same rules under `npm test`. When you fix a recorded violation, run `npm run lint:prune` and commit the smaller baseline. Never add to the baseline with `--suppress-all`.
 
 ## Security
 

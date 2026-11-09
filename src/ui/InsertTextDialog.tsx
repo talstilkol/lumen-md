@@ -314,7 +314,7 @@ export function openInsertTextDialog(): Promise<InsertTextResult | null> {
       try {
         root.unmount();
       } catch {
-        // double-unmount in StrictMode is harmless
+        // why: double-unmount in StrictMode is harmless
       }
       host.remove();
     };

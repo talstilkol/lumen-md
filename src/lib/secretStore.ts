@@ -8,10 +8,13 @@
  *
  * Now: each secret is encrypted with AES-GCM-256 under a key that WebCrypto
  * generated as **non-extractable** and that lives only in IndexedDB. The raw
- * key bytes never exist in JavaScript, so a copied profile or a storage
- * export doesn't reveal the secrets. (Honest limit: code running in this
- * origin can still ask WebCrypto to decrypt — this protects data at rest,
- * not against an XSS in the app; the CSP and sanitizer handle that.)
+ * key bytes never exist in JavaScript, so DevTools, a localStorage dump or a
+ * settings export show only ciphertext. Honest limits: the key sits in the
+ * same IndexedDB store and is used at startup without a password, so a
+ * copied browser profile opened under this origin can still decrypt (that
+ * needs a typed password, plan 11.4, or the OS keychain on desktop); and
+ * code running in this origin can ask WebCrypto to decrypt — the CSP and
+ * sanitizer keep foreign code out.
  *
  * The app reads secrets synchronously (many call sites, some in render), so
  * `initSecretStore()` decrypts everything into memory once at startup and
@@ -81,7 +84,7 @@ function lsSet(name: string, value: string | null): void {
     if (value === null) localStorage.removeItem(name);
     else localStorage.setItem(name, value);
   } catch {
-    /* storage denied */
+    /* why: storage denied */
   }
 }
 
@@ -195,7 +198,7 @@ async function migrateLegacyToPlain(): Promise<void> {
       if (v && lsGet(name) === null) lsSet(name, v);
       if (!v || lsGet(name) !== null) await del(name);
     } catch {
-      /* default idb-keyval store unavailable */
+      /* why: default idb-keyval store unavailable */
     }
   }
 }
@@ -209,7 +212,7 @@ async function migratePlaintext(): Promise<void> {
       if (k && isSecretName(k)) names.push(k);
     }
   } catch {
-    /* no localStorage */
+    /* why: no localStorage */
   }
   for (const name of names) {
     const value = lsGet(name);
@@ -225,7 +228,7 @@ async function migratePlaintext(): Promise<void> {
         await del(name);
       }
     } catch {
-      /* default idb-keyval store unavailable */
+      /* why: default idb-keyval store unavailable */
     }
   }
 }
@@ -287,7 +290,7 @@ export function setSecret(name: string, value: string | null): Promise<void> {
     failures.push(e);
   });
   // Keep the queue usable after a failure.
-  pending = op.catch(() => {});
+  pending = op.catch(() => { /* why: the caller gets op's own rejection; this copy only keeps the queue usable */ });
   return op;
 }
 

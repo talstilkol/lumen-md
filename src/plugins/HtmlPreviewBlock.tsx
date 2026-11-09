@@ -61,10 +61,10 @@ export default function HtmlPreviewBlock({ source, meta }: Props) {
     const el = containerRef.current;
     if (!el) return;
     if (document.fullscreenElement) {
-      document.exitFullscreen().catch(() => {});
+      document.exitFullscreen().catch(() => { /* why: not in fullscreen any more (the user pressed Esc first) */ });
       setFullScreen(false);
     } else {
-      el.requestFullscreen().then(() => setFullScreen(true)).catch(() => {});
+      el.requestFullscreen().then(() => setFullScreen(true)).catch(() => { /* why: fullscreen refused (iframe policy or no user gesture): the block stays inline */ });
     }
   }
 

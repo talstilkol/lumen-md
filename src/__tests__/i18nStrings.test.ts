@@ -47,13 +47,15 @@ function extractKeys(text: string): string[] {
 }
 
 function loadBundle(): { en: Record<string, string>; he: Record<string, string> } {
-  const idx = readFileSync(join(SRC, "i18n", "index.ts"), "utf8");
-  // Both bundles are object literals named `en` and `he` — extract the
-  // keys with a forgiving regex (we don't run the file).
-  const enBlock = /const en:\s*Strings\s*=\s*\{([\s\S]+?)^\};/m.exec(idx);
-  if (!enBlock) {
-    throw new Error("Could not isolate the `en` block in i18n/index.ts");
-  }
+  // English is split into parts under i18n/en/ (plan 12.1), each an object
+  // literal named `en` — extract the keys with a forgiving regex (we don't
+  // run the files).
+  const enBlock = ["app.ts", "features.ts"].map((part) => {
+    const text = readFileSync(join(SRC, "i18n", "en", part), "utf8");
+    const block = /const en:\s*Strings\s*=\s*\{([\s\S]+?)^\};/m.exec(text);
+    if (!block) throw new Error(`Could not isolate the \`en\` block in i18n/en/${part}`);
+    return block[1];
+  });
   // Hebrew lives in a lazy JSON chunk (A7 lever 4).
   const heJson = JSON.parse(
     readFileSync(join(SRC, "i18n", "locales", "he.json"), "utf8"),
@@ -66,7 +68,7 @@ function loadBundle(): { en: Record<string, string>; he: Record<string, string> 
     return out;
   }
   return {
-    en: parseKeys(enBlock[1]),
+    en: parseKeys(enBlock.join("\n")),
     he: Object.fromEntries(Object.keys(heJson).map((k) => [k, ""])),
   };
 }

@@ -141,7 +141,7 @@ function providerSignature(): string {
     policy = localStorage.getItem("lumen.ai.policy") ?? "";
     ollama = localStorage.getItem("lumen.ollama.baseUrl") ?? "";
   } catch {
-    /* storage denied */
+    /* why: storage denied */
   }
   return [policy, getAiPolicy(), useAppStore.getState().aiKey ? "key" : "", ollama].join("|");
 }
@@ -369,5 +369,5 @@ export async function searchHybrid(
 
 export async function clearSemanticIndex(): Promise<void> {
   memIndex = null;
-  await set(IDB_KEY, undefined).catch(() => {});
+  await set(IDB_KEY, undefined).catch(() => { /* why: the in-memory index is already cleared; IndexedDB unavailable means nothing was stored */ });
 }

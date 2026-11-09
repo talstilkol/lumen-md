@@ -34,7 +34,7 @@ async function drain(stream: ReadableStream<Uint8Array>, maxBytes = Number.POSIT
       total += value.length;
       if (total > maxBytes) {
         // Stop inflating a ZIP bomb as soon as it crosses the limit.
-        await reader.cancel().catch(() => {});
+        await reader.cancel().catch(() => { /* why: the read is abandoned and the size error below is what the caller sees */ });
         throw new Error("ZIP entry exceeds the size limit");
       }
       chunks.push(value);

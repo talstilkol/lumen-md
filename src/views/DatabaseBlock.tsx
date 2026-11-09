@@ -57,7 +57,7 @@ export default function DatabaseBlock({ source, meta }: Props) {
       if (!spec) return;
       runDatabaseQuery(spec)
         .then((r) => !cancelled && setRows(r))
-        .catch(() => {});
+        .catch((e) => log.warn("database block: query failed", e));
     }
     const off = onWorkspaceChanged(refresh, { debounceMs: 500 });
     return () => {

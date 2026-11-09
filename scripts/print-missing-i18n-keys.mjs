@@ -33,7 +33,16 @@ for (const f of listSourceFiles(SRC)) {
   for (const k of extractKeys(readFileSync(f, "utf8"))) callKeys.add(k);
 }
 
-const idx = readFileSync(join(SRC, "i18n", "index.ts"), "utf8");
+/** The `en` bundle's source (split into src/i18n/en/ in plan 12.1), as one `const en: Strings = { … };` block. */
+function enBundleSource() {
+  const body = ["app.ts", "features.ts"].map((part) => {
+    const text = readFileSync(join(SRC, "i18n", "en", part), "utf8");
+    return text.slice(text.indexOf("const en: Strings = {") + "const en: Strings = {".length, text.indexOf("\n};\n"));
+  });
+  return `const en: Strings = {${body.join("\n")}\n};\n`;
+}
+
+const idx = enBundleSource();
 const enBlock = /const en:\s*Strings\s*=\s*\{([\s\S]+?)^\};/m.exec(idx);
 // Hebrew lives in src/i18n/locales/he.json (lazy chunk).
 const heJson = JSON.parse(readFileSync(join(SRC, "i18n", "locales", "he.json"), "utf8"));

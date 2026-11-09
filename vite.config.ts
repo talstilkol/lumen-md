@@ -527,6 +527,12 @@ export default defineConfig({
         "src/__tests__/**",
         "src/main.tsx",
         "src/App.tsx",
+        // Split out of App.tsx in plan 12.1; excluded like the rest of it.
+        "src/hooks/useAppStartup.ts",
+        "src/hooks/useAppShortcuts.ts",
+        "src/hooks/useBackgroundSaves.ts",
+        "src/hooks/useAppWindowEvents.ts",
+        "src/ui/AppOverlays.tsx",
         "src/welcome.ts",
         "src/i18n/**",
         "src/plugins/EChart.tsx",

@@ -141,7 +141,7 @@ export function allowScriptUrl(input: string): string | null {
     const url = new URL(input, location.href);
     if (url.origin === location.origin) return input;
   } catch {
-    /* unparsable → reject */
+    /* why: unparsable → reject */
   }
   return null;
 }

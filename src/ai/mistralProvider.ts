@@ -97,7 +97,7 @@ export async function* chatMistralStream(
         const delta = json.choices?.[0]?.delta?.content;
         if (delta) yield delta;
       } catch {
-        /* skip */
+        /* why: a keep-alive or partial line that is not JSON carries no text */
       }
     }
   }

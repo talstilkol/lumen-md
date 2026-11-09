@@ -29,7 +29,7 @@ export function setRerankMode(mode: RerankMode): void {
   try {
     localStorage.setItem(MODE_KEY, mode);
   } catch {
-    /* storage denied */
+    /* why: storage denied */
   }
 }
 

@@ -191,6 +191,6 @@ export function setAiMode(mode: AiMode): void {
     if (mode === "balanced") localStorage.removeItem("lumen.ai.mode");
     else localStorage.setItem("lumen.ai.mode", mode);
   } catch {
-    /* */
+    /* why: storage denied: the mode lasts for this session only */
   }
 }

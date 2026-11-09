@@ -86,7 +86,7 @@ export function AiDoctorPanel({ open, onClose }: Props) {
       setCopied(id);
       window.setTimeout(() => setCopied((c) => (c === id ? null : c)), 1500);
     } catch {
-      /* the <pre> is select-all; the user can copy by hand */
+      /* why: the <pre> is select-all; the user can copy by hand */
     }
   };
 

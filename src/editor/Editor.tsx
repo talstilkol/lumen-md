@@ -225,7 +225,7 @@ function ghostTextExtension(): Extension {
                 view.dispatch({ effects: setGhostText.of({ pos, text }) });
               }
             } catch {
-              // Silently ignore abort / API errors for completions
+              // why: Silently ignore abort / API errors for completions
             } finally {
               op.end();
             }

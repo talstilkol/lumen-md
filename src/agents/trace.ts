@@ -34,7 +34,7 @@ export function loadTrace(): Promise<void> {
       .then((v) => {
         if (Array.isArray(v)) runs = v as AgentRun[];
       })
-      .catch(() => {});
+      .catch(() => { /* why: no stored trace (or IndexedDB unavailable): start with an empty one */ });
   }
   return loaded;
 }
@@ -43,7 +43,7 @@ export async function recordRun(run: AgentRun): Promise<void> {
   await loadTrace();
   runs = [previewOf(run), ...runs].slice(0, TRACE_LIMIT);
   for (const l of listeners) l(runs);
-  await set(IDB_KEY, runs).catch(() => {});
+  await set(IDB_KEY, runs).catch(() => { /* why: the trace is a debugging aid; it stays in memory when IndexedDB is unavailable */ });
 }
 
 /** Most recent first. */
@@ -60,7 +60,7 @@ export async function clearTrace(): Promise<void> {
   runs = [];
   loaded = Promise.resolve();
   for (const l of listeners) l(runs);
-  await set(IDB_KEY, []).catch(() => {});
+  await set(IDB_KEY, []).catch(() => { /* why: the in-memory trace is already cleared; IndexedDB unavailable means nothing was stored */ });
 }
 
 /** One line per run, for the palette report. */

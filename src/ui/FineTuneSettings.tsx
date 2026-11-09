@@ -50,7 +50,7 @@ function saveActiveJob(j: FineTuneJob | null): void {
     if (isActive(j)) localStorage.setItem(ACTIVE_JOB_KEY, JSON.stringify({ id: j!.id, status: j!.status, createdAt: j!.createdAt }));
     else localStorage.removeItem(ACTIVE_JOB_KEY);
   } catch {
-    /* storage denied: polling lasts while the dialog is open */
+    /* why: storage denied: polling lasts while the dialog is open */
   }
 }
 

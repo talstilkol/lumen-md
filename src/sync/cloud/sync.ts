@@ -105,7 +105,7 @@ function persistSyncState(providerName: string, state: SyncCacheState): void {
     };
     localStorage.setItem(stateKey(providerName), JSON.stringify(next));
   } catch {
-    // Cache write failures should never block sync.
+    // why: Cache write failures should never block sync.
   }
 }
 
