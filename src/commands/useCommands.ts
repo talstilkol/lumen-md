@@ -36,8 +36,9 @@ export function useCommands(options: UseCommandsOptions) {
     };
     // AI-prompt commands are wrapped with the monthly quota check.
     return withAiQuota(COMMAND_SECTIONS.flatMap((build) => build(ctx)));
-    // The dependency list is the one the single-file list had (plan 0.2 kept
-    // behaviour as it was); labels read from other state refresh with these.
+    // Every store value a label or an action reads is listed, so a toggle's
+    // label never goes stale. The document itself is not: actions read it
+    // through liveDoc(), so typing does not rebuild the list (C5).
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     o.handleNew,
@@ -65,5 +66,15 @@ export function useCommands(options: UseCommandsOptions) {
     installedTemplates,
     store.suggestingMode,
     store.toggleSuggestingMode,
+    store.rtl,
+    store.autoSave,
+    store.autoSaveInterval,
+    store.spellCheck,
+    store.useLocalAi,
+    store.typewriterMode,
+    store.writingGoalWords,
+    store.pageView,
+    store.tsChecks,
+    store.grammarCheck,
   ]);
 }

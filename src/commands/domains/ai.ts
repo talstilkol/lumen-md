@@ -23,7 +23,8 @@ export function buildPrivacyModeCommands({ useLocalAi, toggleLocalAi }: CommandC
       icon: cmdIcons.Sparkles,
       group: t("group.ai"),
       action: async () => {
-        if (!useLocalAi) {
+        // why: the value when the command runs, not when the list was built
+        if (!useAppStore.getState().useLocalAi) {
           // Going Local — verify WebGPU support before flipping.
           const { localLlmAvailable } = await import("../../ai/localLlm");
           const status = localLlmAvailable();
