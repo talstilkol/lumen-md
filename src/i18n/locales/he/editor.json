@@ -197,6 +197,7 @@
   "block.playground.prompt": "לחצו על הרץ כדי להפעיל את הפרויקט (קבצים מופרדים בשורות --- name.ext ---).",
   "block.playground.reset": "איפוס",
   "block.playground.run": "הרץ",
+  "block.playground.runnerBlocked": "דף התצוגה לא נטען. ייתכן שהאחסון הזה חוסם אותו (Web Playground לא נתמך ב-Netlify; השתמשו ב-Cloudflare Pages, ב-Vercel או בתמונת ה-Docker).",
   "block.playground.state.error": "שגיאה",
   "block.playground.state.idle": "לא הורץ",
   "block.playground.state.running": "רץ…",

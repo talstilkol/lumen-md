@@ -197,6 +197,7 @@
   "block.playground.prompt": "点击运行以启动此项目（文件之间用 --- name.ext --- 行分隔）。",
   "block.playground.reset": "重置",
   "block.playground.run": "运行",
+  "block.playground.runnerBlocked": "预览页面未能加载。此托管服务可能拦截了它（Web Playground 不支持 Netlify；请使用 Cloudflare Pages、Vercel 或 Docker 镜像）。",
   "block.playground.state.error": "错误",
   "block.playground.state.idle": "未运行",
   "block.playground.state.running": "运行中…",

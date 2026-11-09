@@ -149,7 +149,7 @@
   "ai.settings.ollama.url": "العنوان",
   "ai.settings.recheck": "تحقق مجددًا",
   "ai.settings.research": "البحث",
-  "ai.settings.researchToken": "رمز البحث",
+  "ai.settings.researchToken": "رمز البحث (RESEARCH_TOKEN)",
   "ai.settings.researchToken.placeholder": "الرمز المشترك، إذا طلبته خدمة البحث",
   "ai.settings.save": "حفظ",
   "ai.settings.saved": "تم الحفظ",

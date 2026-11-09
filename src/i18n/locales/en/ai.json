@@ -149,7 +149,7 @@
   "ai.settings.ollama.url": "Address",
   "ai.settings.recheck": "Check again",
   "ai.settings.research": "Research",
-  "ai.settings.researchToken": "Research token",
+  "ai.settings.researchToken": "Research token (RESEARCH_TOKEN)",
   "ai.settings.researchToken.placeholder": "Shared token, if the research service asks for one",
   "ai.settings.save": "Save",
   "ai.settings.saved": "Saved",

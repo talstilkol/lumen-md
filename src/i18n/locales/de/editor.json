@@ -197,6 +197,7 @@
   "block.playground.prompt": "Klicke auf Ausführen, um dieses Projekt zu starten (Dateien werden durch --- name.ext --- getrennt).",
   "block.playground.reset": "Zurücksetzen",
   "block.playground.run": "Ausführen",
+  "block.playground.runnerBlocked": "Die Vorschauseite wurde nicht geladen. Dieser Host blockiert sie möglicherweise (Netlify wird für den Web Playground nicht unterstützt; nutze Cloudflare Pages, Vercel oder das Docker-Image).",
   "block.playground.state.error": "Fehler",
   "block.playground.state.idle": "Nicht ausgeführt",
   "block.playground.state.running": "Läuft…",

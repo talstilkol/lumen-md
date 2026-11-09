@@ -197,6 +197,7 @@
   "block.playground.prompt": "Cliquez sur Exécuter pour lancer ce projet (fichiers séparés par des lignes --- name.ext ---).",
   "block.playground.reset": "Réinitialiser",
   "block.playground.run": "Exécuter",
+  "block.playground.runnerBlocked": "La page d’aperçu ne s’est pas chargée. Cet hébergeur la bloque peut-être (Netlify n’est pas pris en charge pour le Web Playground ; utilisez Cloudflare Pages, Vercel ou l’image Docker).",
   "block.playground.state.error": "Erreur",
   "block.playground.state.idle": "Non exécuté",
   "block.playground.state.running": "Exécution…",

@@ -197,6 +197,7 @@
   "block.playground.prompt": "実行をクリックしてプロジェクトを開始します（ファイルは --- name.ext --- 行で区切ります）。",
   "block.playground.reset": "リセット",
   "block.playground.run": "実行",
+  "block.playground.runnerBlocked": "プレビューページを読み込めませんでした。このホストがブロックしている可能性があります（Web Playground は Netlify に対応していません。Cloudflare Pages、Vercel、または Docker イメージを使ってください）。",
   "block.playground.state.error": "エラー",
   "block.playground.state.idle": "未実行",
   "block.playground.state.running": "実行中…",

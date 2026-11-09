@@ -149,7 +149,7 @@
   "ai.settings.ollama.url": "Adresse",
   "ai.settings.recheck": "Vérifier à nouveau",
   "ai.settings.research": "Recherche",
-  "ai.settings.researchToken": "Jeton de recherche",
+  "ai.settings.researchToken": "Jeton de recherche (RESEARCH_TOKEN)",
   "ai.settings.researchToken.placeholder": "Jeton partagé, si le service de recherche en demande un",
   "ai.settings.save": "Enregistrer",
   "ai.settings.saved": "Enregistré",

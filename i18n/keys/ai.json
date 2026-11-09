@@ -822,7 +822,7 @@
     },
     {
       "key": "ai.settings.researchToken",
-      "en": "Research token",
+      "en": "Research token (RESEARCH_TOKEN)",
       "vars": []
     },
     {

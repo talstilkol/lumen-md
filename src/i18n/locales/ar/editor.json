@@ -197,6 +197,7 @@
   "block.playground.prompt": "انقر تشغيل لبدء هذا المشروع (تُفصل الملفات بأسطر --- name.ext ---).",
   "block.playground.reset": "إعادة تعيين",
   "block.playground.run": "تشغيل",
+  "block.playground.runnerBlocked": "لم تُحمَّل صفحة المعاينة. قد تحجبها هذه الاستضافة (لا يدعم Netlify ‏Web Playground؛ استخدم Cloudflare Pages أو Vercel أو صورة Docker).",
   "block.playground.state.error": "خطأ",
   "block.playground.state.idle": "لم يُشغَّل",
   "block.playground.state.running": "قيد التشغيل…",

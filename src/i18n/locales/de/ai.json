@@ -149,7 +149,7 @@
   "ai.settings.ollama.url": "Adresse",
   "ai.settings.recheck": "Erneut prüfen",
   "ai.settings.research": "Recherche",
-  "ai.settings.researchToken": "Recherche-Token",
+  "ai.settings.researchToken": "Recherche-Token (RESEARCH_TOKEN)",
   "ai.settings.researchToken.placeholder": "Gemeinsames Token, falls der Recherchedienst eines verlangt",
   "ai.settings.save": "Speichern",
   "ai.settings.saved": "Gespeichert",

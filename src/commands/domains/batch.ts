@@ -151,6 +151,7 @@ export function buildBatchCommands(): Command[] {
               (p) => notes.find((n) => n.path === p)?.text ?? null,
               (p) => notes.some((n) => n.path.toLowerCase() === p.toLowerCase()),
               changed,
+              notes.map((n) => n.path),
             )
             // A note open in a tab may have unsaved edits: skip it (and
             // translations made from it).

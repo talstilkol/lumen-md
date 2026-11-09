@@ -149,7 +149,7 @@
   "ai.settings.ollama.url": "アドレス",
   "ai.settings.recheck": "再確認",
   "ai.settings.research": "リサーチ",
-  "ai.settings.researchToken": "リサーチトークン",
+  "ai.settings.researchToken": "リサーチトークン（RESEARCH_TOKEN）",
   "ai.settings.researchToken.placeholder": "リサーチサービスが求める場合の共有トークン",
   "ai.settings.save": "保存",
   "ai.settings.saved": "保存しました",

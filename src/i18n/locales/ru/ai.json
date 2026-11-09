@@ -149,7 +149,7 @@
   "ai.settings.ollama.url": "Адрес",
   "ai.settings.recheck": "Проверить снова",
   "ai.settings.research": "Исследование",
-  "ai.settings.researchToken": "Токен исследования",
+  "ai.settings.researchToken": "Токен исследования (RESEARCH_TOKEN)",
   "ai.settings.researchToken.placeholder": "Общий токен, если сервис исследования его требует",
   "ai.settings.save": "Сохранить",
   "ai.settings.saved": "Сохранено",

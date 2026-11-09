@@ -149,7 +149,7 @@
   "ai.settings.ollama.url": "地址",
   "ai.settings.recheck": "重新检查",
   "ai.settings.research": "研究",
-  "ai.settings.researchToken": "研究令牌",
+  "ai.settings.researchToken": "研究令牌（RESEARCH_TOKEN）",
   "ai.settings.researchToken.placeholder": "研究服务要求时使用的共享令牌",
   "ai.settings.save": "保存",
   "ai.settings.saved": "已保存",

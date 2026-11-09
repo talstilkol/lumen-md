@@ -1092,6 +1092,11 @@
       "vars": []
     },
     {
+      "key": "block.playground.runnerBlocked",
+      "en": "The preview page didn't load. This host may block it (Netlify isn't supported for the Web Playground; use Cloudflare Pages, Vercel or the Docker image).",
+      "vars": []
+    },
+    {
       "key": "block.playground.state.error",
       "en": "Error",
       "vars": []

@@ -65,16 +65,56 @@ export function researchEndpoint(): string | null {
 
 /** Secret-store name of the research worker's shared token (AI settings → research service token). */
 export const RESEARCH_SERVICE_TOKEN = "lumen.research.serviceToken";
+/** The endpoint that token was saved for (not secret): it is sent only there. */
+const TOKEN_ENDPOINT_KEY = "lumen.research.tokenEndpoint";
+const builtEndpoint = () => (import.meta.env?.VITE_RESEARCH_ENDPOINT as string | undefined)?.trim() ?? "";
+const sameEndpoint = (a: string, b: string) => !!a && a.trim().replace(/\/+$/, "") === b.trim().replace(/\/+$/, "");
 
 /**
- * Headers for research-service requests: the optional shared token the
- * worker requires when its RESEARCH_TOKEN is set (see the worker README).
- * The user enters it in AI settings and it lives in the secret store; it is
- * never a build variable, because every VITE_* value ships in the bundle.
+ * The shared token the research worker requires (its RESEARCH_TOKEN, A8)
+ * for a request to `endpoint` (default: the one in use — the settings
+ * override, else the build's). The user enters it in AI settings and it
+ * lives in the secret store; it is never a build variable, because every
+ * VITE_* value ships in the bundle. A token saved for one endpoint goes only
+ * to that endpoint — never to another service. One saved before tokens were
+ * bound to an endpoint has no record and is sent as before.
+ */
+export function researchToken(endpoint?: string | null, built = builtEndpoint()): string {
+  const saved = getSecret(RESEARCH_SERVICE_TOKEN)?.trim() ?? "";
+  if (!saved) return "";
+  const boundTo = ls(TOKEN_ENDPOINT_KEY);
+  if (!boundTo) return saved;
+  const target = endpoint ?? (ls("lumen.research.endpoint")?.trim() || built);
+  return sameEndpoint(boundTo, target) ? saved : "";
+}
+
+/**
+ * Save the AI-settings token for the endpoint now in use. A token left
+ * unchanged while the endpoint changed is dropped instead of being moved
+ * to the new service. Returns the token now kept ("" when none).
+ */
+export function saveResearchToken(token: string, edited: boolean, built = builtEndpoint()): string {
+  const active = ls("lumen.research.endpoint")?.trim() || built;
+  let keep = token.trim();
+  const boundTo = ls(TOKEN_ENDPOINT_KEY);
+  if (!edited && keep && boundTo && !sameEndpoint(boundTo, active)) keep = "";
+  void setSecret(RESEARCH_SERVICE_TOKEN, keep || null);
+  try {
+    if (keep && active) localStorage.setItem(TOKEN_ENDPOINT_KEY, active.replace(/\/+$/, ""));
+    else localStorage.removeItem(TOKEN_ENDPOINT_KEY);
+  } catch {
+    /* storage denied */
+  }
+  return keep;
+}
+
+/**
+ * Headers for a research-service request to `endpoint`: the shared token the
+ * worker requires (see the worker README), when one is configured for it.
  * Sent only when configured, so a plain GET stays a simple CORS request.
  */
-function serviceHeaders(extra: Record<string, string> = {}): Record<string, string> {
-  const token = getSecret(RESEARCH_SERVICE_TOKEN)?.trim();
+function serviceHeaders(endpoint: string, extra: Record<string, string> = {}): Record<string, string> {
+  const token = researchToken(endpoint);
   return token ? { ...extra, "X-Lumen-Research-Token": token } : extra;
 }
 
@@ -124,7 +164,7 @@ export class ResearchUnavailableError extends Error {
 export async function extractPage(url: string, signal?: AbortSignal, endpoint = researchEndpoint(), fetchImpl: typeof fetch = (i, o) => fetch(i, o)): Promise<ExtractedPage> {
   if (!endpoint) throw new ResearchUnavailableError();
   try {
-    const res = await fetchImpl(`${endpoint}/extract?url=${encodeURIComponent(url)}`, { signal, headers: serviceHeaders() });
+    const res = await fetchImpl(`${endpoint}/extract?url=${encodeURIComponent(url)}`, { signal, headers: serviceHeaders(endpoint) });
     const body = (await res.json().catch(() => ({}))) as Partial<ExtractedPage> & { error?: string };
     if (!res.ok && !body.status) return { url, finalUrl: url, status: 0, error: body.error ?? `service ${res.status}` };
     return { url, finalUrl: body.finalUrl ?? url, status: body.status ?? res.status, ...body } as ExtractedPage;
@@ -147,7 +187,7 @@ export async function searchWeb(
   if (!settings.key && !KEYLESS_PROVIDERS.includes(settings.provider)) throw new Error(`Add your ${settings.provider} API key (Research: Settings…).`);
   const res = await fetchImpl(`${endpoint}/search`, {
     method: "POST",
-    headers: serviceHeaders({ "Content-Type": "application/json" }),
+    headers: serviceHeaders(endpoint, { "Content-Type": "application/json" }),
     // A keyless provider (SearXNG) never gets the key: one saved for Brave /
     // Tavily stays in the store after a switch, and the consent prompt for a
     // keyless search promises that only the query is sent.

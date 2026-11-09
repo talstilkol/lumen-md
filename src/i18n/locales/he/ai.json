@@ -149,7 +149,7 @@
   "ai.settings.ollama.url": "כתובת",
   "ai.settings.recheck": "בדוק שוב",
   "ai.settings.research": "מחקר",
-  "ai.settings.researchToken": "אסימון מחקר",
+  "ai.settings.researchToken": "אסימון מחקר (RESEARCH_TOKEN)",
   "ai.settings.researchToken.placeholder": "אסימון משותף, אם שירות המחקר דורש אחד",
   "ai.settings.save": "שמירה",
   "ai.settings.saved": "נשמר",
