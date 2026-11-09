@@ -1,6 +1,6 @@
 # bidi — sources and licences
 
-Line direction (bidi), for plan task 7.10. Metric: accuracy of the line's direction (rtl / ltr / neutral). Target: 30 items.
+Line direction (bidi), for plan task 9.7. Metric: accuracy of the line's direction (rtl / ltr / neutral). Target: 30 items.
 
 Only the dev split is in this folder (dev/, or ids and sha256 in selection/ for local-only parts). The test split is held out: CI rebuilds it from the same pools with the secret GOLDEN_SEED and records only its sha256 in manifest.json (see eval/golden/README.md).
 

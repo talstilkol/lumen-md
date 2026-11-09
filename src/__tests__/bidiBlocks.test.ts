@@ -10,7 +10,8 @@ import { EditorState } from "prosemirror-state";
 import { Schema, DOMParser } from "prosemirror-model";
 import { EditorView } from "prosemirror-view";
 import { renderHtmlDocument } from "../storage/exportHtml";
-import { wysiwygBidiPlugin, wysiwygBidiKey } from "../editor/wysiwygBidi";
+import { TextSelection } from "prosemirror-state";
+import { logicalArrow, wysiwygBidiPlugin, wysiwygBidiKey } from "../editor/wysiwygBidi";
 
 describe("preview: rehypeDirAuto", () => {
   it("gives prose blocks dir=auto, keeps code and tables ltr, leaves an explicit dir alone", async () => {
@@ -73,16 +74,14 @@ function stateFor(html: string): EditorState {
 }
 
 describe("wysiwyg: wysiwygBidiPlugin", () => {
-  it("decorates every textblock with dir=auto and code blocks with dir=ltr", () => {
-    const state = stateFor("<h1>כותרת</h1><p>שלום</p><blockquote><p>quoted</p></blockquote><pre><code>x = 1</code></pre>");
-    expect(wysiwygBidiKey.getState(stateFor("<blockquote><p>ציטוט</p></blockquote>"))!.find().map((d) => (d as unknown as { type: { attrs: Record<string, string> } }).type.attrs?.dir)).toEqual(["rtl", "auto"]);
-    const decos = wysiwygBidiKey.getState(state)!.find();
-    const byDir = (d: string) => decos.filter((x) => (x.spec as { attrs?: Record<string, string> }).attrs?.dir === d || (x as unknown as { type: { attrs: Record<string, string> } }).type.attrs?.dir === d).length;
-    // h1, p, inner p → auto; blockquote → computed from "quoted" (ltr);
-    // pre → ltr (its text is not revisited).
-    expect(decos.length).toBe(5);
-    expect(byDir("auto")).toBe(3);
-    expect(byDir("ltr")).toBe(2);
+  it("decorates every block with its own direction and code blocks with dir=ltr (plan 9.7)", () => {
+    const dirsOf = (html: string) =>
+      wysiwygBidiKey.getState(stateFor(html))!.find().map((d) => (d as unknown as { type: { attrs: Record<string, string> } }).type.attrs?.dir);
+    expect(dirsOf("<blockquote><p>ציטוט</p></blockquote>")).toEqual(["rtl", "rtl"]);
+    // h1, p → rtl; blockquote and its p → ltr (from "quoted"); pre → ltr.
+    expect(dirsOf("<h1>כותרת</h1><p>שלום</p><blockquote><p>quoted</p></blockquote><pre><code>x = 1</code></pre>")).toEqual(["rtl", "rtl", "ltr", "ltr", "ltr"]);
+    // A paragraph with no strong character takes the document's direction.
+    expect(dirsOf("<p>שלום</p><p>10:30 42%</p>")).toEqual(["rtl", "rtl"]);
   });
 
   it("puts the attributes on the rendered DOM and follows edits", () => {
@@ -90,10 +89,51 @@ describe("wysiwyg: wysiwygBidiPlugin", () => {
     document.body.appendChild(host);
     const view = new EditorView(host, { state: stateFor("<p>שלום</p><pre><code>code</code></pre>") });
     const dirs = () => Array.from(view.dom.querySelectorAll("[dir]")).map((el) => `${el.tagName.toLowerCase()}:${el.getAttribute("dir")}`);
-    expect(dirs()).toEqual(["p:auto", "pre:ltr"]);
+    expect(dirs()).toEqual(["p:rtl", "pre:ltr"]);
     view.dispatch(view.state.tr.insert(0, schema.nodes.paragraph.create(null, schema.text("hello"))));
-    expect(dirs()).toEqual(["p:auto", "p:auto", "pre:ltr"]);
+    expect(dirs()).toEqual(["p:ltr", "p:rtl", "pre:ltr"]);
     view.destroy();
     host.remove();
+  });
+});
+
+describe("wysiwyg: logical arrow keys (plan 9.7)", () => {
+  function viewFor(html: string, pos: number): EditorView {
+    const host = document.createElement("div");
+    document.body.appendChild(host);
+    const view = new EditorView(host, { state: stateFor(html) });
+    view.dispatch(view.state.tr.setSelection(TextSelection.create(view.state.doc, pos)));
+    return view;
+  }
+  const head = (v: EditorView) => v.state.selection.head;
+
+  it("moves through a mixed RTL paragraph in text order: Left forward, Right back", () => {
+    // "שלום (3) PDF 10:30" — Hebrew, brackets, a Latin run and a number.
+    const text = "שלום (3) PDF 10:30";
+    const view = viewFor(`<p>${text}</p>`, 1);
+    const seen: number[] = [];
+    while (logicalArrow(view, false, false)) seen.push(head(view));
+    expect(seen).toEqual(Array.from({ length: text.length }, (_, i) => i + 2));
+    expect(logicalArrow(view, false, false)).toBe(false); // the block's end: left to the browser
+    expect(logicalArrow(view, true, false)).toBe(true);
+    expect(head(view)).toBe(text.length);
+    view.destroy();
+  });
+
+  it("moves an LTR paragraph Right forward, and Shift selects the text in order", () => {
+    const view = viewFor("<p>Hello שלום 42</p>", 1);
+    for (let i = 0; i < 8; i++) logicalArrow(view, true, true);
+    const { from, to } = view.state.selection;
+    expect(view.state.doc.textBetween(from, to)).toBe("Hello של");
+    expect(logicalArrow(view, false, false)).toBe(true); // collapses to the start
+    expect(head(view)).toBe(1);
+    view.destroy();
+  });
+
+  it("keeps a grapheme cluster (a letter with niqqud) in one step", () => {
+    const view = viewFor("<p>שָׁלוֹם</p>", 1);
+    logicalArrow(view, false, false);
+    expect(head(view)).toBe(1 + "שָׁ".length);
+    view.destroy();
   });
 });
