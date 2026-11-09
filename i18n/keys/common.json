@@ -425,6 +425,55 @@
       "vars": []
     },
     {
+      "key": "capture.failed",
+      "en": "Couldn't add to the inbox: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "capture.hint",
+      "en": "Enter: add · Shift+Enter: new line · Esc: close",
+      "vars": []
+    },
+    {
+      "key": "capture.inboxHeading",
+      "en": "Inbox",
+      "vars": []
+    },
+    {
+      "key": "capture.noWorkspace",
+      "en": "Quick capture needs the workspace, which this browser can't provide.",
+      "vars": []
+    },
+    {
+      "key": "capture.openInbox",
+      "en": "Open inbox",
+      "vars": []
+    },
+    {
+      "key": "capture.placeholder",
+      "en": "A thought, a task, a link",
+      "vars": []
+    },
+    {
+      "key": "capture.save",
+      "en": "Add to inbox",
+      "vars": []
+    },
+    {
+      "key": "capture.saved",
+      "en": "Added to {path}",
+      "vars": [
+        "path"
+      ]
+    },
+    {
+      "key": "capture.title",
+      "en": "Quick capture",
+      "vars": []
+    },
+    {
       "key": "credits.close",
       "en": "Close",
       "vars": []

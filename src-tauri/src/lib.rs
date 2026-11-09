@@ -39,6 +39,8 @@ fn build_menu(app: &tauri::AppHandle) -> tauri::Result<tauri::menu::Menu<tauri::
         .item(&MenuItemBuilder::with_id("file.new", "New").accelerator("CmdOrCtrl+N").build(app)?)
         .item(&MenuItemBuilder::with_id("file.open", "Open…").accelerator("CmdOrCtrl+O").build(app)?)
         .item(&MenuItemBuilder::with_id("file.insertText", "Insert text…").build(app)?)
+        // No accelerator: Ctrl+Alt+N is AltGr+N on Windows (ń); the web view's ⌥⌘N handler skips AltGr.
+        .item(&MenuItemBuilder::with_id("file.quickCapture", "Quick capture…").build(app)?)
         .separator()
         .item(&MenuItemBuilder::with_id("file.save", "Save").accelerator("CmdOrCtrl+S").build(app)?)
         .item(&MenuItemBuilder::with_id("file.saveAs", "Save As…").accelerator("CmdOrCtrl+Shift+S").build(app)?)

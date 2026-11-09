@@ -47,6 +47,7 @@ export default defineConfig({
             { label: "Database formulas + map", slug: "workspace/database-formulas" },
             { label: "Search (BM25 + Smart)", slug: "workspace/search" },
             { label: "Vault Doctor", slug: "workspace/doctor" },
+            { label: "Quick capture (inbox)", slug: "workspace/quick-capture" },
           ],
         },
         {

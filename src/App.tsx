@@ -24,6 +24,8 @@ const PrivacyLedgerPanel = lazy(() => import("./ui/PrivacyLedgerPanel").then(m =
 const TrashPanel = lazy(() => import("./ui/TrashPanel").then(m => ({ default: m.TrashPanel })));
 // Properties editor (plan 4.9) — lazy: the yaml-editing code is not in the startup bundle.
 const PropertiesPanel = lazy(() => import("./ui/PropertiesPanel").then(m => ({ default: m.PropertiesPanel })));
+// Quick capture to inbox.md (plan 4.16): its own chunk, loaded on first open.
+const QuickCapture = lazy(() => import("./ui/QuickCapture").then(m => ({ default: m.QuickCapture })));
 const AiDoctorPanel = lazy(() => import("./ui/AiDoctorPanel").then(m => ({ default: m.AiDoctorPanel })));
 const AgentReviewPanel = lazy(() => import("./ui/AgentReviewPanel").then(m => ({ default: m.AgentReviewPanel })));
 const FineTuneSettings = lazy(() => import("./ui/FineTuneSettings").then(m => ({ default: m.FineTuneSettings })));
@@ -155,6 +157,7 @@ export default function App() {
   const openAgentReview = useCallback(() => setAgentReviewOpen(true), []);
   const [trashOpen, setTrashOpen] = useState(false);
   const [propertiesOpen, setPropertiesOpen] = useState(false);
+  const [captureOpen, setCaptureOpen] = useState(false);
   // The search dialog loads on first open and then stays mounted, so an
   // Ask Workspace conversation survives closing it (perf: not at startup).
   const [searchMounted, setSearchMounted] = useState(false);
@@ -219,18 +222,26 @@ export default function App() {
   // Launched from the installed app: share target, shortcut, or a file
   // opened with Lumen (D3).
   useEffect(() => {
-    void import("./pwa/launch").then(({ parseLaunch, clearLaunchParams, onLaunchFiles }) => {
+    void import("./pwa/launch").then(({ parseLaunch, sharedItem, clearLaunchParams, onLaunchFiles, onDesktopCapture }) => {
       const l = parseLaunch(location.search);
+      const shared = sharedItem(location.search);
       if (l.kind === "share") {
         // A fresh tab name each time: two shares with the same title (or two
         // links from one host) stay two notes.
-        openNewDoc(l.title.replace(/[\\/:*?"<>|]+/g, " ").slice(0, 60).trim() || "Shared", l.body, true);
+        const asNote = () => openNewDoc(l.title.replace(/[\\/:*?"<>|]+/g, " ").slice(0, 60).trim() || "Shared", l.body, true);
+        // Plan 4.16: shares go to the end of inbox.md; a new note only where
+        // the vault can't be written.
+        if (shared && isOPFSAvailable()) void import("./capture/quickCapture").then((m) => m.captureShared(shared)).catch(asNote);
+        else asNote();
+      } else if (l.kind === "action" && l.action === "capture") {
+        setCaptureOpen(true);
       } else if (l.kind === "action" && l.action === "new") {
         openNewDoc(t("doc.untitled"), "", false);
       } else if (l.kind === "action" && l.action === "palette") {
         setPaletteOpen(true);
       }
       if (l.kind !== "none") clearLaunchParams();
+      onDesktopCapture();
       // With the file's handle, so Save writes back to the file that was opened.
       onLaunchFiles((name, content, handle) => openTabAction({ name, content, workspaceName: null, handle }));
     });
@@ -475,6 +486,14 @@ export default function App() {
     return () => window.removeEventListener("lumen-open-setup", onSetup);
   }, []);
 
+  // Quick capture (plan 4.16): the command palette and the desktop
+  // global shortcut (src/pwa/launch.ts) send this event.
+  useEffect(() => {
+    const onCapture = () => setCaptureOpen(true);
+    window.addEventListener("lumen-open-capture", onCapture);
+    return () => window.removeEventListener("lumen-open-capture", onCapture);
+  }, []);
+
   // Workspace: when active file is renamed (in the tree), keep doc.name in sync.
   const handleActiveRenamed = useCallback(
     (newName: string) => {
@@ -532,7 +551,11 @@ export default function App() {
         .then((m) => m.saveOpenNote(name, content))
         .then((saved) => {
           if (!saved) return;
-          markSaved();
+          // Only if nothing changed the note meanwhile (a quick capture into
+          // the open inbox, plan 4.16): otherwise its newer text stays dirty
+          // and the next autosave writes it.
+          const now = useAppStore.getState().doc;
+          if (now.workspaceName === name && now.content === content) markSaved();
           // Only this file's text changed: listeners skip the full rescan (C3).
           notifyWorkspaceChanged({ kind: "content", paths: [name] });
           // Every save path feeds the one history store (T35).
@@ -582,6 +605,13 @@ export default function App() {
       if (e.altKey && e.code === "KeyD") {
         e.preventDefault();
         window.dispatchEvent(new CustomEvent("lumen-open-today"));
+        return;
+      }
+      // ⌥⌘N → quick capture to inbox.md (plan 4.16).
+      // Not AltGr (reported as Ctrl+Alt on Windows / Linux): AltGr+N types a letter (ń).
+      if (e.altKey && e.code === "KeyN" && !e.getModifierState("AltGraph")) {
+        e.preventDefault();
+        setCaptureOpen(true);
         return;
       }
       if (e.key === "k" || e.key === "K") {
@@ -670,10 +700,13 @@ export default function App() {
       void recordSnapshot(historyKey(d), d.content, "close").catch(() => false);
       if (!d.dirty || !d.workspaceName) return;
       const name = d.workspaceName;
+      const text = d.content;
       import("./store/externalChanges")
-        .then((m) => m.saveOpenNote(name, d.content))
+        .then((m) => m.saveOpenNote(name, text))
         .then((saved) => {
-          if (saved && useAppStore.getState().doc.workspaceName === name) markSaved();
+          // Only if nothing (a quick capture) changed the note meanwhile.
+          const now = useAppStore.getState().doc;
+          if (saved && now.workspaceName === name && now.content === text) markSaved();
         })
         .catch(() => {
           /* best effort; the debounced autosave retries on the next edit */
@@ -888,6 +921,7 @@ export default function App() {
     onExportHtml: () => commands.find((c) => c.id === "file.exportHtml")?.action(),
     onExportPdf: () => commands.find((c) => c.id === "file.exportPdf")?.action(),
     onPrint: () => commands.find((c) => c.id === "file.print")?.action(),
+    onQuickCapture: () => setCaptureOpen(true),
   });
 
   return (
@@ -1172,6 +1206,7 @@ export default function App() {
           {privacyOpen && <PrivacyLedgerPanel open={privacyOpen} onClose={() => setPrivacyOpen(false)} />}
           {trashOpen && <TrashPanel open={trashOpen} onClose={() => setTrashOpen(false)} />}
           {propertiesOpen && <PropertiesPanel open={propertiesOpen} onClose={() => setPropertiesOpen(false)} text={doc.content} applyEdit={applyPropertiesEdit} />}
+          {captureOpen && <QuickCapture open={captureOpen} onClose={() => setCaptureOpen(false)} />}
           {themeSettingsOpen && <ThemeSettings open={themeSettingsOpen} onClose={() => setThemeSettingsOpen(false)} />}
         </ErrorBoundary>
       </Suspense>

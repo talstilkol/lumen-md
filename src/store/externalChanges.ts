@@ -85,6 +85,16 @@ function noteDisk(path: string, content: string): void {
   persistHashes();
 }
 
+/**
+ * Lumen itself just wrote `content` to `path` outside an open note's save
+ * (quick capture appending to inbox.md, plan 4.16): that text is the new
+ * base, so the open copy's next save is not taken for a change made outside
+ * Lumen.
+ */
+export function noteOwnWrite(path: string, content: string): void {
+  noteDisk(path, content);
+}
+
 /** Forget (or move) what is known about `prefix` and everything under it. */
 function forgetDisk(prefix: string, movedTo?: string): void {
   const h = diskHashes();
