@@ -145,6 +145,7 @@ const en: Strings = {
   "bibtex.noEntries": "No BibTeX entries detected.",
   "bibtex.references": "References ({n})",
   "bibtex.link": "link",
+  "bibtex.style": "Citation style",
   // App update banner
   "update.available": "A new version of Lumen is available.",
   "update.reload": "Reload",

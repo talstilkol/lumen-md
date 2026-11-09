@@ -37,6 +37,7 @@
   "backlinks.selectFile": "اختر ملفًا لعرض الروابط الواردة.",
   "backlinks.title": "الروابط الواردة",
   "bibtex.link": "رابط",
+  "bibtex.style": "نمط الاستشهاد",
   "bibtex.noEntries": "لم يتم العثور على مدخلات BibTeX.",
   "bibtex.references": "المراجع ({n})",
   "block.htmlPreview.exitFullscreen": "إنهاء ملء الشاشة",

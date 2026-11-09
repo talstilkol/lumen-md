@@ -37,6 +37,7 @@
   "backlinks.selectFile": "Выберите файл для просмотра обратных ссылок.",
   "backlinks.title": "Обратные ссылки",
   "bibtex.link": "ссылка",
+  "bibtex.style": "Стиль цитирования",
   "bibtex.noEntries": "Записи BibTeX не найдены.",
   "bibtex.references": "Источники ({n})",
   "block.htmlPreview.exitFullscreen": "Выйти из полноэкранного режима",

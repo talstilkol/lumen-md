@@ -37,6 +37,7 @@
   "backlinks.selectFile": "Wählen Sie eine Datei, um Rückverweise anzuzeigen.",
   "backlinks.title": "Rückverweise",
   "bibtex.link": "Link",
+  "bibtex.style": "Zitierstil",
   "bibtex.noEntries": "Keine BibTeX-Einträge gefunden.",
   "bibtex.references": "Literaturverzeichnis ({n})",
   "block.htmlPreview.exitFullscreen": "Vollbild beenden",

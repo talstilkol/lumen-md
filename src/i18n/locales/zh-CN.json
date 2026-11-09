@@ -37,6 +37,7 @@
   "backlinks.selectFile": "选择一个文件以查看反向链接。",
   "backlinks.title": "反向链接",
   "bibtex.link": "链接",
+  "bibtex.style": "引用格式",
   "bibtex.noEntries": "未检测到 BibTeX 条目。",
   "bibtex.references": "参考文献 ({n})",
   "block.htmlPreview.exitFullscreen": "退出全屏",
