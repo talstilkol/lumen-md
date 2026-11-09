@@ -7,6 +7,7 @@
 
 import type { AgentDefinition, AgentInput } from "../types";
 import { registerAgent } from "../registry";
+import { pickTools } from "../tools";
 import { nonEmptyValidator } from "../tools/validate";
 import { clip } from "./shared";
 import { styleInstruction } from "../../ai/styleProfiles";
@@ -29,6 +30,10 @@ export const writerAgent: AgentDefinition<WriterInput, string> = registerAgent<W
       .filter(Boolean)
       .join("\n\n"),
   user: (input) => clip(input.text, 8000),
+  // Streaming: the selection comes as a context call, not a model tool turn (5.3.2).
+  tools: pickTools("get_selection"),
+  context: () => [{ tool: "get_selection" }],
+  maxSteps: 2,
   validators: [nonEmptyValidator()],
   streaming: true,
   maxRetries: 0,
@@ -53,6 +58,9 @@ export const templaterAgent: AgentDefinition<TemplaterInput, string> = registerA
   // The whole template input goes out, as before the agents: improve /
   // translate / summarize must see the complete document.
   user: (input) => input.text,
+  tools: pickTools("get_selection"),
+  context: () => [{ tool: "get_selection" }],
+  maxSteps: 2,
   // A translation template names its own target language: the answer is
   // not in the document's language, so neither the prompt nor the check
   // may demand that.

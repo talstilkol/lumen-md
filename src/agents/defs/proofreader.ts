@@ -8,6 +8,7 @@
 
 import type { AgentDefinition, AgentInput } from "../types";
 import { registerAgent } from "../registry";
+import { pickTools } from "../tools";
 import { clip, fail, ok } from "./shared";
 
 export interface ProofreaderInput extends AgentInput {
@@ -85,6 +86,9 @@ export const proofreaderAgent: AgentDefinition<ProofreaderInput, ProofreaderOutp
       },
     },
   ],
+  // The whole note, when the text given is only part of it (5.3.1, 5.3.3).
+  tools: pickTools("get_document"),
+  maxSteps: 3,
   tier: "small",
   temperature: 0,
   maxTokens: 1200,

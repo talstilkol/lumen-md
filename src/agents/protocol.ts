@@ -20,6 +20,24 @@ export function toolSpecs(tools: AgentTool[]): ToolSpec[] {
   return tools.map((t) => ({ name: t.name, description: t.description, parameters: t.parameters }));
 }
 
+/**
+ * The JSON Schema of one JSON-ReAct turn, for executors that constrain
+ * output (Ollama `format`, web-llm's XGrammar `response_format`): a call to
+ * one of the agent's tools with that tool's arguments, or the final answer
+ * (matching the agent's output schema when it has one). A small model then
+ * cannot answer with prose, a tool it does not have, or malformed args.
+ */
+export function protocolSchema(tools: AgentTool[], output?: JsonSchema): JsonSchema {
+  const calls = tools.map((t) => ({
+    type: "object",
+    properties: { tool: { type: "string", enum: [t.name] }, args: t.parameters },
+    required: ["tool", "args"],
+    additionalProperties: false,
+  }));
+  const final = { type: "object", properties: { final: output ?? { type: "string" } }, required: ["final"], additionalProperties: false };
+  return { anyOf: [...calls, final] } as JsonSchema;
+}
+
 /** System-prompt addendum that teaches the protocol. */
 export function toolProtocolPrompt(tools: AgentTool[], schema?: JsonSchema): string {
   const lines = [

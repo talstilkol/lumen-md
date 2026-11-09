@@ -8,6 +8,7 @@
 
 import type { AgentDefinition, AgentInput, ValidationResult } from "../types";
 import { registerAgent } from "../registry";
+import { pickTools } from "../tools";
 import { fail, ok, stripFences } from "./shared";
 
 export interface ProductSpecOut {
@@ -33,8 +34,13 @@ export const builderSpecAgent: AgentDefinition<SpecInput, ProductSpecOut> = regi
     "You are a senior product architect. Given a product idea, create a specification as a JSON object: " +
     '{"name": "project-name-kebab-case", "description": "one paragraph", "features": ["…"], "techStack": ["…"], ' +
     '"fileStructure": ["index.html", "style.css", "app.js"]}. Use vanilla HTML/CSS/JS unless the idea names a ' +
-    "framework; keep it achievable in one workspace; at most 12 files, relative paths, no `..`. Output ONLY the JSON.",
+    "framework; keep it achievable in one workspace; at most 12 files, relative paths, no `..`. Pick a name no " +
+    "folder in the list_files result already uses. Output ONLY the JSON.",
   user: (input) => `Product idea: ${input.text}`,
+  // What the workspace already holds, so the project's name does not collide (5.3.2).
+  tools: pickTools("list_files"),
+  context: () => [{ tool: "list_files", args: { limit: 100 } }],
+  maxSteps: 3,
   outputSchema: {
     type: "object",
     properties: {

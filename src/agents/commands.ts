@@ -6,60 +6,19 @@
  * refactor / template / organize / stream, unused) is gone.
  */
 
-import {
-  readWorkspaceFile,
-  listWorkspace,
-  isOPFSAvailable,
-} from "../storage/workspace";
-
 /* ─── Auto-tag agent (P3-01) ────────────────────────────────────── */
-
-/**
- * Pull every existing tag in the workspace by scanning frontmatter `tags:`
- * across every note. Used to keep AI suggestions consistent with the user's
- * vocabulary (no fresh "ml" when "machine-learning" already exists).
- */
-async function collectExistingTags(): Promise<string[]> {
-  if (!isOPFSAvailable()) return [];
-  const list = await listWorkspace({ includeAssets: false });
-  const counts = new Map<string, number>();
-  for (const f of list) {
-    if (!/\.(md|markdown)$/i.test(f.path)) continue;
-    let body: string;
-    try {
-      body = await readWorkspaceFile(f.path);
-    } catch {
-      continue;
-    }
-    const fm = body.match(/^---\r?\n([\s\S]*?)\r?\n---/);
-    if (!fm) continue;
-    const tagLine = fm[1].match(/^tags\s*:\s*(.+)$/m);
-    if (!tagLine) continue;
-    // Accept either YAML flow (`tags: [a, b]`) or block (`tags: ["a","b"]`)
-    // or comma-separated; split on separators and keep Unicode word tokens
-    // (Hebrew tags are tags too).
-    const tokens = tagLine[1].match(/[\p{L}][\p{L}\p{N}-]+/gu) ?? [];
-    for (const t of tokens) {
-      const k = t.toLowerCase();
-      counts.set(k, (counts.get(k) ?? 0) + 1);
-    }
-  }
-  // Sort by frequency descending so the prompt sees the most-used first.
-  return [...counts.entries()].sort((a, b) => b[1] - a[1]).map(([t]) => t);
-}
 
 /**
  * Propose tags for a markdown body through the `tagger` agent (local
  * executors first, validated JSON, retries with the critic's feedback).
- * Existing workspace tags are injected so proposals stay consistent with
- * the user's vocabulary. Throws AgentRunError (with suggestions) when
- * there is no usable answer.
+ * The workspace's tags reach the agent through its list_tags context call
+ * (plan 5.3), so proposals stay consistent with the user's vocabulary.
+ * Throws AgentRunError (with suggestions) when there is no usable answer.
  */
 export async function suggestTags(content: string, signal?: AbortSignal): Promise<string[]> {
-  const existing = await collectExistingTags();
   const { runAgentOrThrow } = await import("./runtime");
   const { taggerAgent, normalizeTags } = await import("./defs");
-  const out = await runAgentOrThrow(taggerAgent, { text: content, extra: { existing } }, { document: content, signal });
+  const out = await runAgentOrThrow(taggerAgent, { text: content }, { document: content, signal });
   return normalizeTags(out.tags);
 }
 
@@ -92,47 +51,34 @@ export function mergeTagsIntoFrontmatter(content: string, tags: string[]): strin
 export type { LinkSuggestion } from "./defs/linker";
 import type { LinkSuggestion } from "./defs/linker";
 
-/** Build a compact catalogue of every note in the workspace for the prompt, and the list of titles. */
-async function collectNotesCatalog(currentPath: string): Promise<{ catalog: string; titles: string[] }> {
-  if (!isOPFSAvailable()) return { catalog: "", titles: [] };
-  const list = await listWorkspace({ includeAssets: false });
-  const lines: string[] = [];
-  const titles: string[] = [];
-  for (const f of list) {
-    if (f.path === currentPath) continue;
-    if (!/\.(md|markdown)$/i.test(f.path)) continue;
-    let body: string;
-    try {
-      body = await readWorkspaceFile(f.path);
-    } catch {
-      continue;
-    }
-    // Skip frontmatter and grab the first non-empty paragraph.
-    const stripped = body.replace(/^---\r?\n[\s\S]*?\r?\n---\r?\n/, "").trim();
-    const firstSentence = (stripped.split(/\n\n/)[0] ?? "").replace(/\s+/g, " ").trim().slice(0, 160);
-    const title = f.name.replace(/\.(md|markdown)$/i, "");
-    titles.push(title);
-    lines.push(`- ${title} — ${firstSentence}`);
-    if (lines.length >= 60) break;
+/** The titles of the other notes (file names without .md), read through the runtime's list_files tool. */
+async function otherNoteTitles(currentPath: string, signal?: AbortSignal): Promise<string[]> {
+  const { callTool } = await import("./runtime");
+  try {
+    const { files } = await callTool<{ files: string[] }>("list_files", { limit: 500 }, { signal, path: currentPath });
+    return files.filter((p) => p !== currentPath && /\.(md|markdown)$/i.test(p)).map((p) => p.split("/").pop()!.replace(/\.(md|markdown)$/i, ""));
+  } catch {
+    return []; // no workspace
   }
-  return { catalog: lines.join("\n"), titles };
 }
 
 /**
  * Where to insert wiki-links in the current note, through the `linker`
- * agent. The catalogue of other notes is injected; only suggestions that
- * quote the body verbatim and target a listed note survive.
+ * agent. Only suggestions that quote the body verbatim and target a note
+ * in the workspace survive.
  */
 export async function suggestLinks(
   currentPath: string,
   content: string,
   signal?: AbortSignal,
 ): Promise<LinkSuggestion[]> {
-  const { catalog, titles } = await collectNotesCatalog(currentPath);
-  if (!catalog) return [];
+  // The agent reads the note list with its own list_files call; the same
+  // list checks its answer (only listed notes are link targets).
+  const titles = await otherNoteTitles(currentPath, signal);
+  if (!titles.length) return [];
   const { runAgentOrThrow } = await import("./runtime");
   const { linkerAgent, filterLinks } = await import("./defs");
-  const out = await runAgentOrThrow(linkerAgent, { text: content, path: currentPath, extra: { catalog, titles } }, { document: content, path: currentPath, signal });
+  const out = await runAgentOrThrow(linkerAgent, { text: content, path: currentPath, extra: { titles } }, { document: content, path: currentPath, signal });
   return filterLinks(out.links, content, titles);
 }
 

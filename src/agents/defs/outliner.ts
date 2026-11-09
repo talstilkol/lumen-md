@@ -6,6 +6,7 @@
 
 import type { AgentDefinition, AgentInput } from "../types";
 import { registerAgent } from "../registry";
+import { pickTools } from "../tools";
 import { fail, ok } from "./shared";
 
 export interface OutlineHeading {
@@ -83,6 +84,9 @@ export const outlinerAgent: AgentDefinition<OutlinerInput, OutlinerOutput> = reg
       check: (out, input) => (normalizeHeadings(out.headings, input.text ?? "").length ? ok : fail("no heading lands on a paragraph start", "Use line numbers of lines that follow a blank line.")),
     },
   ],
+  // The whole note, when the text given is only part of it (5.3.1, 5.3.3).
+  tools: pickTools("get_document", "get_headings"),
+  maxSteps: 3,
   tier: "small",
   temperature: 0.2,
   maxTokens: 600,

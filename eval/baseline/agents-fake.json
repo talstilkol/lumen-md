@@ -16,6 +16,9 @@
         },
         {
           "ok": true
+        },
+        {
+          "ok": true
         }
       ]
     },
@@ -31,6 +34,9 @@
         },
         {
           "ok": true
+        },
+        {
+          "ok": true
         }
       ]
     },
@@ -38,6 +44,9 @@
       "id": "outliner-he",
       "status": "ok",
       "checks": [
+        {
+          "ok": true
+        },
         {
           "ok": true
         },
@@ -61,6 +70,9 @@
         },
         {
           "ok": true
+        },
+        {
+          "ok": true
         }
       ]
     },
@@ -68,6 +80,9 @@
       "id": "translator-en-he",
       "status": "ok",
       "checks": [
+        {
+          "ok": true
+        },
         {
           "ok": true
         },
@@ -88,6 +103,9 @@
         },
         {
           "ok": true
+        },
+        {
+          "ok": true
         }
       ]
     },
@@ -95,6 +113,9 @@
       "id": "proofreader-he",
       "status": "ok",
       "checks": [
+        {
+          "ok": true
+        },
         {
           "ok": true
         }
@@ -109,6 +130,9 @@
         },
         {
           "ok": true
+        },
+        {
+          "ok": true
         }
       ]
     },
@@ -116,6 +140,9 @@
       "id": "charter-he",
       "status": "ok",
       "checks": [
+        {
+          "ok": true
+        },
         {
           "ok": true
         },
@@ -145,11 +172,62 @@
         },
         {
           "ok": true
+        },
+        {
+          "ok": true
         }
       ]
     },
     {
       "id": "linker-he",
+      "status": "ok",
+      "checks": [
+        {
+          "ok": true
+        },
+        {
+          "ok": true
+        },
+        {
+          "ok": true
+        },
+        {
+          "ok": true
+        }
+      ]
+    },
+    {
+      "id": "templater-he",
+      "status": "ok",
+      "checks": [
+        {
+          "ok": true
+        },
+        {
+          "ok": true
+        },
+        {
+          "ok": true
+        }
+      ]
+    },
+    {
+      "id": "stylist-he",
+      "status": "ok",
+      "checks": [
+        {
+          "ok": true
+        },
+        {
+          "ok": true
+        },
+        {
+          "ok": true
+        }
+      ]
+    },
+    {
+      "id": "builder-spec",
       "status": "ok",
       "checks": [
         {

@@ -88,6 +88,59 @@ export interface DigestIO {
   write(path: string, body: string): Promise<void>;
 }
 
+/** The day's digest note: `<folder>/<YYYY-MM-DD>.md`. */
+export function digestPath(folder: string, now: number): string {
+  const d = new Date(now);
+  return `${folder}/${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}.md`;
+}
+
+type CallTool = <R>(name: string, args?: Record<string, unknown>) => Promise<R>;
+
+/**
+ * The digest's view of the vault through the agent runtime's tools (plan
+ * 5.3.3): every note changed since `since` (list_files, page by page — the
+ * checkpoint moves past them all), each read whole (read_file, chunk by
+ * chunk — a task late in a long note belongs in the digest), and today's
+ * digest note itself. That note is read and written directly and whole: it
+ * is rewritten as its old text plus today's part.
+ */
+export function toolDigestIO(o: {
+  callTool: CallTool;
+  readOwn: (path: string) => Promise<string>;
+  write: (path: string, body: string) => Promise<void>;
+  since: number;
+  now: number;
+  folder: string;
+}): DigestIO {
+  const todayPath = digestPath(o.folder, o.now);
+  return {
+    async list() {
+      const entries: WorkspaceEntry[] = [];
+      for (let offset = 0; ; ) {
+        const page = await o.callTool<{ files: string[]; total: number; modified?: Record<string, number> }>("list_files", { modifiedSince: o.since, withModified: true, limit: 500, offset });
+        for (const path of page.files) entries.push({ path, name: path.split("/").pop()!, size: 0, modified: page.modified?.[path] ?? o.now });
+        offset += page.files.length;
+        if (!page.files.length || offset >= page.total) break;
+      }
+      // Today's digest note, changed or not: a second digest is appended to it.
+      if (!entries.some((e) => e.path === todayPath) && (await o.callTool<{ exists: boolean }>("file_exists", { path: todayPath })).exists) {
+        entries.push({ path: todayPath, name: todayPath.split("/").pop()!, size: 0, modified: 0 });
+      }
+      return entries;
+    },
+    async read(path) {
+      if (path === todayPath) return o.readOwn(path);
+      let text = "";
+      for (;;) {
+        const part = await o.callTool<{ content: string; truncated: boolean }>("read_file", { path, offset: text.length });
+        text += part.content;
+        if (!part.truncated || !part.content) return text;
+      }
+    },
+    write: o.write,
+  };
+}
+
 export type DigestResult =
   /** `body` is the note's full content; `written` false when nothing new was added. */
   | { ok: true; path: string; body: string; written: boolean }
@@ -107,8 +160,7 @@ export async function writeDigest(
   o: { since: number; now: number; lang: string; folder: string; formatDate: (ms: number) => string },
 ): Promise<DigestResult> {
   const all = await io.list();
-  const d = new Date(o.now);
-  const path = `${o.folder}/${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}.md`;
+  const path = digestPath(o.folder, o.now);
   const entries = all.filter((e) => e.modified > o.since && MD_EXT.test(e.path) && !e.path.startsWith(".") && !e.path.startsWith(`${o.folder}/`));
   const failed: string[] = [];
   const notes = await Promise.all(
