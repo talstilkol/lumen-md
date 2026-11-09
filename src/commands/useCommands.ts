@@ -1346,6 +1346,26 @@ export function useCommands({
         },
       },
       {
+        id: "ai.fim",
+        label: t("cmd.ai.fim"),
+        hint: t("cmd.ai.fim.hint"),
+        icon: cmdIcons.Sparkles,
+        group: t("group.tools"),
+        action: async () => {
+          // Plan 6.9: local fill-in-the-middle autocomplete; no cloud route at all.
+          const fim = await import("../ai/fim");
+          if (fim.fimEnabled()) {
+            fim.setFimEnabled(false);
+            showAiToast(t("fim.off"), "info");
+            return;
+          }
+          fim.setFimEnabled(true);
+          const model = await fim.ollamaFimModel().catch(() => null);
+          if (model) showAiToast(t("fim.on", { model }), "success");
+          else showAiToast(t("fim.onNoModel"), "info");
+        },
+      },
+      {
         id: "ai.mode",
         label: t("cmd.ai.mode"),
         hint: t("cmd.ai.mode.hint"),

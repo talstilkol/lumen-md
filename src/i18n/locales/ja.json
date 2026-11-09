@@ -1429,5 +1429,10 @@
   "cmd.ai.cancel": "AI: キャンセル",
   "cmd.ai.cancel.hint": "実行中の AI リクエストをすべて停止します（Esc でも可）",
   "toast.aiCancelled": "AI リクエストをキャンセルしました（{count}）",
-  "toast.aiNothingRunning": "実行中の AI リクエストはありません"
+  "toast.aiNothingRunning": "実行中の AI リクエストはありません",
+  "cmd.ai.fim": "AI: ローカル自動補完 (FIM) — オン/オフ",
+  "cmd.ai.fim.hint": "このデバイス上のコードモデルで入力中に補完します。Tab で確定、Esc で破棄",
+  "fim.on": "ローカル自動補完オン — {model}。Tab で確定、Esc で破棄。",
+  "fim.onNoModel": "ローカル自動補完はオンですが、補完モデルがインストールされていません：\"ollama pull qwen2.5-coder:1.5b\" を実行してください（またはブラウザ内モデルを読み込んでください）。",
+  "fim.off": "ローカル自動補完オフ"
 }

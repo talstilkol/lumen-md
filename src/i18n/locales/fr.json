@@ -1429,5 +1429,10 @@
   "cmd.ai.cancel": "IA : annuler",
   "cmd.ai.cancel.hint": "Arrête toutes les requêtes IA en cours (Échap aussi)",
   "toast.aiCancelled": "Requête IA annulée ({count})",
-  "toast.aiNothingRunning": "Aucune requête IA en cours"
+  "toast.aiNothingRunning": "Aucune requête IA en cours",
+  "cmd.ai.fim": "AI : Saisie semi-automatique locale (FIM) — activer/désactiver",
+  "cmd.ai.fim.hint": "Complète pendant la frappe avec un modèle de code sur cet appareil ; Tab accepte, Échap ignore",
+  "fim.on": "Saisie semi-automatique locale activée — {model}. Tab accepte, Échap ignore.",
+  "fim.onNoModel": "La saisie semi-automatique locale est activée, mais aucun modèle de complétion n'est installé : lancez \"ollama pull qwen2.5-coder:1.5b\" (ou chargez un modèle dans le navigateur).",
+  "fim.off": "Saisie semi-automatique locale désactivée"
 }

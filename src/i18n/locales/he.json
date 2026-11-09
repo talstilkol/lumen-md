@@ -1429,5 +1429,10 @@
   "cmd.ai.cancel": "AI: ביטול",
   "cmd.ai.cancel.hint": "עוצר כל בקשת AI שרצה (גם Esc עושה זאת)",
   "toast.aiCancelled": "בקשת ה-AI בוטלה ({count})",
-  "toast.aiNothingRunning": "אין בקשת AI שרצה"
+  "toast.aiNothingRunning": "אין בקשת AI שרצה",
+  "cmd.ai.fim": "AI: השלמה אוטומטית מקומית (FIM) — הפעלה/כיבוי",
+  "cmd.ai.fim.hint": "השלמה תוך כדי הקלדה עם מודל קוד במכשיר הזה; Tab מאשר, Esc מבטל",
+  "fim.on": "השלמה אוטומטית מקומית פועלת — {model}. ‏Tab מאשר, Esc מבטל.",
+  "fim.onNoModel": "ההשלמה האוטומטית המקומית פועלת, אבל אין מודל השלמה מותקן: הריצו \"ollama pull qwen2.5-coder:1.5b\" (או טענו מודל בדפדפן).",
+  "fim.off": "השלמה אוטומטית מקומית כבויה"
 }

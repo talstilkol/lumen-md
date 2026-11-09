@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-10-24T11:16:22.225Z",
+  "generated_at": "2026-11-09T21:15:57.365Z",
   "source": "src/i18n/index.ts (en bundle)",
-  "count": 1431,
+  "count": 1436,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -1728,6 +1728,33 @@
     {
       "key": "toast.aiNothingRunning",
       "en": "No AI request is running",
+      "vars": []
+    },
+    {
+      "key": "cmd.ai.fim",
+      "en": "AI: Local Autocomplete (FIM) — On/Off",
+      "vars": []
+    },
+    {
+      "key": "cmd.ai.fim.hint",
+      "en": "Complete as you type with a coding model on this device; Tab accepts, Esc dismisses",
+      "vars": []
+    },
+    {
+      "key": "fim.on",
+      "en": "Local autocomplete on — {model}. Tab accepts, Esc dismisses.",
+      "vars": [
+        "model"
+      ]
+    },
+    {
+      "key": "fim.onNoModel",
+      "en": "Local autocomplete is on, but no completion model is installed: run \"ollama pull qwen2.5-coder:1.5b\" (or load an in-browser model).",
+      "vars": []
+    },
+    {
+      "key": "fim.off",
+      "en": "Local autocomplete off",
       "vars": []
     },
     {
