@@ -8,9 +8,10 @@ src/text/menaked.ts reads. The checkpoint has a custom head
     pip install "torch>=2.2" "transformers>=4.44" "onnx>=1.16" "onnxruntime>=1.18"
     python -I scripts/models/export-menaked.py --revision <commit sha> --out out/dictabert-char-menaked
 
-Then record the files (sha256, size, licence, attribution) in
-models/registry.json with scripts/models/registry-edit.mjs, and publish
-the folder on CONVERTED_MODELS_BASE (15.9).
+It prints the registry's `files` array for the two published files
+(sha256, size, dtype, licence, attribution): paste it into the
+"dictabert-char-menaked" entry of models/registry.json, and publish the
+folder on CONVERTED_MODELS_BASE (15.9).
 
 The model card's licence must be CC BY 4.0: the script stops otherwise.
 Every assumption about the checkpoint's code is checked; when one does not
@@ -131,7 +132,16 @@ def main():
     print(f"int8 vs fp32 argmax agreement on the smoke sentence: {agree:.3f}")
     if agree < 0.9:
         fail("the int8 model disagrees with the original on the smoke sentence")
-    print(json.dumps({"files": sorted(os.listdir(a.out)), "nikudClasses": len(nikud), "shinClasses": len(shin)}))
+    import hashlib
+
+    reg = json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "models", "registry.json"), encoding="utf-8"))
+    entry = next(m for m in reg["models"] if m["id"] == "dictabert-char-menaked")
+    files = []
+    for name, dtype in (("model_quantized.onnx", "q8"), ("menaked.json", "config")):
+        data = open(os.path.join(a.out, name), "rb").read()
+        files.append({"path": name, "sha256": hashlib.sha256(data).hexdigest(), "bytes": len(data), "dtype": dtype, "license": entry["license"], "attribution": entry["attribution"]})
+    print(f"nikud classes: {len(nikud)}, shin classes: {len(shin)}")
+    print('"files": ' + json.dumps(files, ensure_ascii=False, indent=2))
 
 
 if __name__ == "__main__":
