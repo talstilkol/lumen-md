@@ -326,7 +326,8 @@ describe("aiQuota counter", () => {
     useAppStore.setState({ aiKey: null, useLocalAi: false });
     localStorage.setItem("lumen.ai.provider", "ollama"); // counts as usable credentials
     const now = new Date();
-    await expect(chat([{ role: "user", content: "x" }])).rejects.toThrow(/configure/i);
+    // Default policy is local-only: no cloud fallback (NO_LOCAL), still nothing spent.
+    await expect(chat([{ role: "user", content: "x" }])).rejects.toMatchObject({ code: "NO_LOCAL" });
     expect(getAiUsage(now)).toBe(0);
     localStorage.removeItem("lumen.ai.provider");
     vi.unstubAllGlobals();
@@ -360,7 +361,7 @@ describe("aiQuota counter", () => {
       useAppStore.setState({ aiKey: null, useLocalAi: false });
       localStorage.setItem("lumen.ai.provider", "ollama"); // unreachable, no fallback key
       const now = new Date();
-      await expect(chat([{ role: "user", content: "x" }], { ownPrompt: true })).rejects.toThrow(/configure/i);
+      await expect(chat([{ role: "user", content: "x" }], { ownPrompt: true })).rejects.toMatchObject({ code: "NO_LOCAL" });
       expect(getAiUsage(now)).toBe(0);
       localStorage.removeItem("lumen.ai.provider");
       vi.unstubAllGlobals();

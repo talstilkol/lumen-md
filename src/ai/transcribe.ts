@@ -20,6 +20,7 @@
 
 import { useAppStore } from "../store/useStore";
 import { chat, getAiKey, AiError } from "./llm";
+import { assertCloudAllowed } from "./policy";
 import { PROMPTS } from "./prompts";
 import { log } from "../lib/logger";
 import { fetchWithRetry } from "../lib/fetchRetry";
@@ -65,6 +66,7 @@ async function transcribeCloud(
   blob: Blob,
   opts: TranscribeOptions,
 ): Promise<string> {
+  assertCloudAllowed("OpenAI Whisper transcription");
   const key = getAiKey(); // throws AiError("NO_KEY") if missing
   const form = new FormData();
   form.append("file", blob, "memo.webm");

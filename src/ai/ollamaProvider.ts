@@ -66,16 +66,35 @@ export function setOllamaConfig(config: Partial<OllamaConfig>): void {
 /**
  * Check if Ollama is running and reachable.
  */
+let lastProbe: { at: number; ok: boolean } | null = null;
+
 export async function isOllamaAvailable(): Promise<boolean> {
+  let ok = false;
   try {
     const res = await fetch(`${getBaseUrl()}/api/tags`, {
       method: "GET",
       signal: AbortSignal.timeout(2000),
     });
-    return res.ok;
+    ok = res.ok;
   } catch {
-    return false;
+    ok = false;
   }
+  lastProbe = { at: Date.now(), ok };
+  return ok;
+}
+
+/**
+ * Did the last probe find the server? For synchronous checks (the quota
+ * gate) that cannot wait for a request: a selected cloud provider only
+ * reroutes to Ollama once a probe has actually seen it.
+ */
+export function ollamaKnownAvailable(): boolean {
+  return lastProbe?.ok === true;
+}
+
+/** Tests. */
+export function __resetOllamaProbe(): void {
+  lastProbe = null;
 }
 
 /**

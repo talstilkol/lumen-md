@@ -13,8 +13,9 @@ import { transcribe, summarizeMemo, formatVoiceMemo } from "../ai/transcribe";
 
 beforeEach(() => {
   vi.unstubAllGlobals();
-  // Reset Privacy Mode + AI key between tests.
+  // Reset Privacy Mode + AI key between tests; the cloud path needs the cloud policy.
   useAppStore.setState({ useLocalAi: false, aiKey: "sk-test" });
+  localStorage.setItem("lumen.ai.policy", "cloud");
 });
 
 describe("transcribe — cloud backend", () => {
