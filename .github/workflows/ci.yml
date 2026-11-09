@@ -63,6 +63,9 @@ jobs:
       - name: Definition of done for every ✅ task
         run: npm run dod -- --done
 
+      - name: Unused files (no new src/ file that nothing imports — plan 0.16)
+        run: npm run unused
+
       - name: Test
         run: npm run test
 
