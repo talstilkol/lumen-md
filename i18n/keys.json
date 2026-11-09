@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-10-17T23:03:53.410Z",
+  "generated_at": "2026-10-17T23:20:11.253Z",
   "source": "src/i18n/index.ts (en bundle)",
-  "count": 1370,
+  "count": 1379,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -1691,6 +1691,54 @@
     {
       "key": "cmd.file.trash.hint",
       "en": "Restore deleted notes (kept 30 days)",
+      "vars": []
+    },
+    {
+      "key": "vaultCite.unsupported",
+      "en": "No verified citation — check this answer against your notes.",
+      "vars": []
+    },
+    {
+      "key": "vaultCite.summary",
+      "en": "Citations checked against your notes: {ok} of {total} verified",
+      "vars": [
+        "ok",
+        "total"
+      ]
+    },
+    {
+      "key": "vaultCite.verified",
+      "en": "Quote found in the note",
+      "vars": []
+    },
+    {
+      "key": "vaultCite.notVerified",
+      "en": "Quote not found in the note",
+      "vars": []
+    },
+    {
+      "key": "vaultCite.noSource",
+      "en": "no such source",
+      "vars": []
+    },
+    {
+      "key": "cmd.ai.rerankModel",
+      "en": "AI: Rerank search with the local model",
+      "vars": []
+    },
+    {
+      "key": "cmd.ai.rerankModel.hint",
+      "en": "On: bge-reranker-v2-m3 on this device (one-time ~570 MB download). Off: fast word matching.",
+      "vars": []
+    },
+    {
+      "key": "toast.rerankModelOn",
+      "en": "Search reranking: local model (downloads on first use)",
+      "vars": []
+    },
+    {
+      "key": "toast.rerankModelOff",
+      "en": "Search reranking: word matching",
       "vars": []
     },
     {

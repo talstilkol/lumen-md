@@ -1368,5 +1368,14 @@
   "collab.settings.publicSignaling.hint": "yjs.dev u. a. — Ausweichlösung, falls Lumens Server ausfällt. Sie sehen, wer sich mit welchem Raum verbindet (nicht den Inhalt).",
   "collab.persistent.token": "Zugriffstoken für den Server (falls verlangt)",
   "collab.settings.cancel": "Abbrechen",
-  "collab.settings.save": "Speichern"
+  "collab.settings.save": "Speichern",
+  "vaultCite.unsupported": "Kein bestätigtes Zitat — prüfe diese Antwort an deinen Notizen.",
+  "vaultCite.summary": "Zitate an deinen Notizen geprüft: {ok} von {total} bestätigt",
+  "vaultCite.verified": "Zitat in der Notiz gefunden",
+  "vaultCite.notVerified": "Zitat nicht in der Notiz gefunden",
+  "vaultCite.noSource": "keine solche Quelle",
+  "cmd.ai.rerankModel": "KI: Suche mit lokalem Modell neu ordnen",
+  "cmd.ai.rerankModel.hint": "An: bge-reranker-v2-m3 auf diesem Gerät (einmalig ~570 MB). Aus: schneller Wortabgleich.",
+  "toast.rerankModelOn": "Neuordnung: lokales Modell (Download bei erster Nutzung)",
+  "toast.rerankModelOff": "Neuordnung: Wortabgleich"
 }

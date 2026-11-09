@@ -1368,5 +1368,14 @@
   "collab.settings.publicSignaling.hint": "yjs.dev et d’autres — secours si le serveur de Lumen est indisponible. Ils voient qui rejoint quelle salle (pas le contenu).",
   "collab.persistent.token": "Jeton d’accès au serveur (s’il en exige un)",
   "collab.settings.cancel": "Annuler",
-  "collab.settings.save": "Enregistrer"
+  "collab.settings.save": "Enregistrer",
+  "vaultCite.unsupported": "Aucune citation vérifiée — vérifiez cette réponse dans vos notes.",
+  "vaultCite.summary": "Citations vérifiées dans vos notes : {ok} sur {total}",
+  "vaultCite.verified": "Citation trouvée dans la note",
+  "vaultCite.notVerified": "Citation introuvable dans la note",
+  "vaultCite.noSource": "source inexistante",
+  "cmd.ai.rerankModel": "IA : réordonner la recherche avec le modèle local",
+  "cmd.ai.rerankModel.hint": "Activé : bge-reranker-v2-m3 sur cet appareil (téléchargement unique ~570 Mo). Désactivé : correspondance rapide des mots.",
+  "toast.rerankModelOn": "Réordonnancement : modèle local (téléchargé à la première utilisation)",
+  "toast.rerankModelOff": "Réordonnancement : correspondance des mots"
 }

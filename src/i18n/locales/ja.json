@@ -1368,5 +1368,14 @@
   "collab.settings.publicSignaling.hint": "yjs.dev など — Lumen のサーバーが停止したときの予備。誰がどのルームに接続したかは見えます（内容は見えません）。",
   "collab.persistent.token": "サーバーのアクセストークン（必要な場合）",
   "collab.settings.cancel": "キャンセル",
-  "collab.settings.save": "保存"
+  "collab.settings.save": "保存",
+  "vaultCite.unsupported": "確認できた引用がありません — ノートと照らし合わせてください。",
+  "vaultCite.summary": "ノートと照合した引用: {total} 件中 {ok} 件を確認",
+  "vaultCite.verified": "引用がノート内に見つかりました",
+  "vaultCite.notVerified": "引用がノート内に見つかりません",
+  "vaultCite.noSource": "該当する出典なし",
+  "cmd.ai.rerankModel": "AI: ローカルモデルで検索を並べ替え",
+  "cmd.ai.rerankModel.hint": "オン: この端末で bge-reranker-v2-m3（初回のみ約 570 MB をダウンロード）。オフ: 高速な単語一致。",
+  "toast.rerankModelOn": "検索の並べ替え: ローカルモデル（初回使用時にダウンロード）",
+  "toast.rerankModelOff": "検索の並べ替え: 単語一致"
 }

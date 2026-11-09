@@ -1368,5 +1368,14 @@
   "collab.settings.publicSignaling.hint": "yjs.dev и другие — резерв, если сервер Lumen недоступен. Они видят, кто подключается к какой комнате (но не содержимое).",
   "collab.persistent.token": "Токен доступа к серверу (если требуется)",
   "collab.settings.cancel": "Отмена",
-  "collab.settings.save": "Сохранить"
+  "collab.settings.save": "Сохранить",
+  "vaultCite.unsupported": "Нет подтверждённых цитат — сверьте ответ со своими заметками.",
+  "vaultCite.summary": "Цитаты сверены с заметками: подтверждено {ok} из {total}",
+  "vaultCite.verified": "Цитата найдена в заметке",
+  "vaultCite.notVerified": "Цитата в заметке не найдена",
+  "vaultCite.noSource": "нет такого источника",
+  "cmd.ai.rerankModel": "ИИ: переранжирование поиска локальной моделью",
+  "cmd.ai.rerankModel.hint": "Вкл.: bge-reranker-v2-m3 на устройстве (разовая загрузка ~570 МБ). Выкл.: быстрое совпадение слов.",
+  "toast.rerankModelOn": "Ранжирование: локальная модель (загрузится при первом использовании)",
+  "toast.rerankModelOff": "Ранжирование: совпадение слов"
 }

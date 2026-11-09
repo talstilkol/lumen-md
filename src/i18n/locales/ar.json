@@ -1368,5 +1368,14 @@
   "collab.settings.publicSignaling.hint": "yjs.dev وغيرها — بديل إذا تعطل خادم Lumen. يمكنها رؤية من يتصل بأي غرفة (لا المحتوى).",
   "collab.persistent.token": "رمز الوصول إلى الخادم (إن طلبه الخادم)",
   "collab.settings.cancel": "إلغاء",
-  "collab.settings.save": "حفظ"
+  "collab.settings.save": "حفظ",
+  "vaultCite.unsupported": "لا يوجد اقتباس موثَّق — تحقّق من هذه الإجابة مقابل ملاحظاتك.",
+  "vaultCite.summary": "تم التحقق من الاقتباسات مقابل ملاحظاتك: {ok} من {total}",
+  "vaultCite.verified": "الاقتباس موجود في الملاحظة",
+  "vaultCite.notVerified": "الاقتباس غير موجود في الملاحظة",
+  "vaultCite.noSource": "لا يوجد مصدر كهذا",
+  "cmd.ai.rerankModel": "AI: إعادة ترتيب البحث بالنموذج المحلي",
+  "cmd.ai.rerankModel.hint": "مفعّل: bge-reranker-v2-m3 على هذا الجهاز (تنزيل لمرة واحدة ~570 ميغابايت). متوقف: مطابقة كلمات سريعة.",
+  "toast.rerankModelOn": "ترتيب البحث: نموذج محلي (يُنزَّل عند أول استخدام)",
+  "toast.rerankModelOff": "ترتيب البحث: مطابقة الكلمات"
 }

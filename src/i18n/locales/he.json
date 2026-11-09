@@ -1368,5 +1368,14 @@
   "collab.settings.publicSignaling.hint": "yjs.dev ואחרים — גיבוי אם השרת של Lumen לא זמין. הם יכולים לראות מי מתחבר לאיזה חדר (לא את התוכן).",
   "collab.persistent.token": "אסימון גישה לשרת (אם השרת דורש)",
   "collab.settings.cancel": "ביטול",
-  "collab.settings.save": "שמירה"
+  "collab.settings.save": "שמירה",
+  "vaultCite.unsupported": "אין ציטוט מאומת — כדאי לבדוק את התשובה מול הפתקים.",
+  "vaultCite.summary": "הציטוטים נבדקו מול הפתקים: {ok} מתוך {total} אומתו",
+  "vaultCite.verified": "הציטוט נמצא בפתק",
+  "vaultCite.notVerified": "הציטוט לא נמצא בפתק",
+  "vaultCite.noSource": "אין מקור כזה",
+  "cmd.ai.rerankModel": "AI: דירוג חיפוש עם המודל המקומי",
+  "cmd.ai.rerankModel.hint": "פעיל: bge-reranker-v2-m3 במכשיר (הורדה חד-פעמית של ‎~570MB). כבוי: התאמת מילים מהירה.",
+  "toast.rerankModelOn": "דירוג החיפוש: מודל מקומי (יורד בשימוש הראשון)",
+  "toast.rerankModelOff": "דירוג החיפוש: התאמת מילים"
 }
