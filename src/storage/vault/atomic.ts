@@ -186,3 +186,35 @@ export function hasLeftovers(names: Iterable<string>): boolean {
   for (const n of names) if (parseLeftover(n)) return true;
   return false;
 }
+
+/** What the directory-handle backend lends `recoverHandleDir` (its own internals, so nothing here touches handles). */
+export interface HandleOps<F> {
+  lookup(parts: string[]): Promise<F | null>;
+  move(src: string[], dst: string[], source: F, target: null): Promise<void>;
+  removeAt(parts: string[], path: string): Promise<void>;
+  writeAt(parts: string[], data: Uint8Array, path: string): Promise<void>;
+  segments(path: string): string[];
+}
+
+/** `recoverDir` over a directory-handle backend (the OPFS write worker's leftovers); loaded only when there are some. */
+export async function recoverHandleDir<F extends { kind: "file" | "directory"; handle: { getFile?: () => Promise<{ size: number }> } }>(o: HandleOps<F>, dir: string, names: string[]): Promise<void> {
+  await recoverDir(
+    {
+      readdir: async () => names.map((name) => ({ name, type: "file" as const })),
+      exists: async (p) => (await o.lookup(o.segments(p))) !== null,
+      writeFile: (p, data) => o.writeAt(o.segments(p), data, p),
+      size: async (p) => {
+        const f = await o.lookup(o.segments(p));
+        return f?.kind === "file" && f.handle.getFile ? (await f.handle.getFile()).size : null;
+      },
+      rename: async (from, to) => {
+        const f = await o.lookup(o.segments(from));
+        if (!f) throw new Error(`"${from}" not found`);
+        await o.move(o.segments(from), o.segments(to), f, null);
+      },
+      remove: (p) => o.removeAt(o.segments(p), p),
+    },
+    dir,
+    { names },
+  );
+}

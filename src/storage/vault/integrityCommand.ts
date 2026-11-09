@@ -3,6 +3,7 @@
  */
 import { t } from "../../i18n";
 import { useAppStore } from "../../store/useStore";
+import { flushActiveWorkspaceDoc } from "../../store/openDocs";
 import { uiConfirm } from "../../ui/PromptDialog";
 import { showAiToast } from "../../ui/AiToast";
 import { openTemplateDoc } from "../../commands/openDoc";
@@ -16,7 +17,6 @@ import { formatIntegrityReport } from "./integrityReport";
  * backup of every file first. Notes open in a tab are never touched.
  */
 export async function runVaultCheck(): Promise<void> {
-  const { flushActiveWorkspaceDoc } = await import("../../store/openDocs");
   try {
     await flushActiveWorkspaceDoc();
     showAiToast(t("vaultCheck.checking"), "info");

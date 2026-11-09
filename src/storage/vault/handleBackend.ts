@@ -228,27 +228,8 @@ export function createDirectoryHandleBackend(o: DirectoryHandleBackendOptions): 
       clean.add(key);
       return false;
     }
-    const { recoverDir } = await import("./atomic");
-    const seg = (p: string) => vaultSegments(p);
-    await recoverDir(
-      {
-        readdir: async () => names.map((name) => ({ name, type: "file" as const })),
-        exists: async (p) => (await lookup(seg(p))) !== null,
-        writeFile: (p, data) => writeAt(seg(p), data, p),
-        size: async (p) => {
-          const f = await lookup(seg(p));
-          return f?.kind === "file" ? (await f.handle.getFile()).size : null;
-        },
-        rename: async (from, to) => {
-          const f = await lookup(seg(from));
-          if (!f) throw new VaultNotFoundError(from);
-          await move(seg(from), seg(to), f, null);
-        },
-        remove: (p) => removeAt(seg(p), p),
-      },
-      key,
-      { names },
-    );
+    const { recoverHandleDir } = await import("./atomic");
+    await recoverHandleDir({ lookup, move, removeAt, writeAt, segments: vaultSegments }, key, names);
     clean.add(key);
     return true;
   }
