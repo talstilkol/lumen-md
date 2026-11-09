@@ -36,9 +36,9 @@ describe("AI policy gates on direct cloud paths", () => {
     expect(String(fetchSpy.mock.calls[0][0])).toContain("api.openai.com");
   });
 
-  it("the public LanguageTool API, but not a LanguageTool on this machine", async () => {
+  it("the public LanguageTool API is never contacted; background checks return nothing", async () => {
     const { checkGrammar } = await import("../ai/grammar");
-    await expect(checkGrammar("This are a sentence with enough words to be checked by the tool.")).rejects.toMatchObject({ code: "POLICY" });
+    expect(await checkGrammar("This are a sentence with enough words to be checked by the tool.")).toEqual([]);
     expect(fetchSpy).not.toHaveBeenCalled();
     const { isLocalOrigin } = await import("../ai/policy");
     expect(isLocalOrigin("http://localhost:8010/v2/check")).toBe(true);
