@@ -1277,6 +1277,13 @@
       ]
     },
     {
+      "key": "tree.showMore",
+      "en": "Show {count} more",
+      "vars": [
+        "count"
+      ]
+    },
+    {
       "key": "tree.tagFilter",
       "en": "# {tag} · {count} note(s)",
       "vars": [

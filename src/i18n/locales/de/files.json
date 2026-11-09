@@ -223,6 +223,7 @@
   "tree.rename": "Umbenennen",
   "tree.renameItem": "{name} umbenennen",
   "tree.selectedCount": "{{count}} ausgewählt",
+  "tree.showMore": "{count} weitere anzeigen",
   "tree.tagFilter": "# {tag} · {count} Notiz(en)",
   "tree.tagFilter.clear": "Tag-Filter löschen",
   "tree.tagFilter.empty": "Keine Notizen mit diesem Tag.",

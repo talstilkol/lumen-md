@@ -223,6 +223,7 @@
   "tree.rename": "名前変更",
   "tree.renameItem": "{name} の名前を変更",
   "tree.selectedCount": "{{count}} 件選択中",
+  "tree.showMore": "さらに {count} 件を表示",
   "tree.tagFilter": "# {tag} · {count} 件のノート",
   "tree.tagFilter.clear": "タグフィルターを解除",
   "tree.tagFilter.empty": "このタグに一致するノートはありません。",

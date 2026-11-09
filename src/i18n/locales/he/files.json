@@ -223,6 +223,7 @@
   "tree.rename": "שינוי שם",
   "tree.renameItem": "שינוי שם של {name}",
   "tree.selectedCount": "{{count}} נבחרו",
+  "tree.showMore": "הצג עוד {count}",
   "tree.tagFilter": "# {tag} · {count} פתקים",
   "tree.tagFilter.clear": "ניקוי סינון תגית",
   "tree.tagFilter.empty": "אין פתקים מתאימים לתגית.",

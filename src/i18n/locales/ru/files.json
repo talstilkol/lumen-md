@@ -223,6 +223,7 @@
   "tree.rename": "Переименовать",
   "tree.renameItem": "Переименовать {name}",
   "tree.selectedCount": "Выбрано: {{count}}",
+  "tree.showMore": "Показать ещё {count}",
   "tree.tagFilter": "# {tag} · заметок: {count}",
   "tree.tagFilter.clear": "Сбросить фильтр по тегу",
   "tree.tagFilter.empty": "Нет заметок с этим тегом.",

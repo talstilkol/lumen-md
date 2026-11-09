@@ -223,6 +223,7 @@
   "tree.rename": "Rename",
   "tree.renameItem": "Rename {name}",
   "tree.selectedCount": "{{count}} selected",
+  "tree.showMore": "Show {count} more",
   "tree.tagFilter": "# {tag} · {count} note(s)",
   "tree.tagFilter.clear": "Clear tag filter",
   "tree.tagFilter.empty": "No notes match this tag.",

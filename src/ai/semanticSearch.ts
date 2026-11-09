@@ -188,7 +188,60 @@ async function embedTextsInBatches(texts: string[]): Promise<Float32Array[]> {
 // C4: the index is read from IndexedDB once per session and its vectors
 // decoded once — not on every query.
 let memIndex: SemanticIndex | null = null;
-const decoded = new WeakMap<ChunkRecord, Float32Array>();
+
+/**
+ * Plan 8.4: the vectors of one file, decoded once into ONE Float32Array —
+ * chunk i is `data[i * dims … (i + 1) * dims)` — with each chunk's norm
+ * precomputed. A query is then one tight loop per file over contiguous
+ * memory, and a 10,000-note vault keeps 10,000 typed arrays alive, not one
+ * per chunk.
+ */
+export interface FileVectors {
+  dims: number;
+  count: number;
+  data: Float32Array;
+  /** Euclidean norm of each chunk vector (float64, as `cosine` computes it). */
+  norms: Float64Array;
+}
+
+/** Pack same-length vectors; null when their lengths differ (then each is scored on its own). */
+export function packVectors(vectors: Float32Array[]): FileVectors | null {
+  const dims = vectors[0]?.length ?? 0;
+  if (vectors.some((v) => v.length !== dims)) return null;
+  const data = new Float32Array(dims * vectors.length);
+  const norms = new Float64Array(vectors.length);
+  vectors.forEach((v, i) => {
+    data.set(v, i * dims);
+    let nb = 0;
+    for (let j = 0; j < dims; j++) nb += v[j] * v[j];
+    norms[i] = Math.sqrt(nb);
+  });
+  return { dims, count: vectors.length, data, norms };
+}
+
+/**
+ * The chunk of `v` most similar to `q` (cosine; 0 for a length mismatch or
+ * a zero vector, like `cosine`), first one on ties. Null for no chunks.
+ */
+export function bestChunk(q: Float32Array, v: FileVectors): { index: number; score: number } | null {
+  if (!v.count) return null;
+  let best = { index: 0, score: 0 };
+  if (q.length !== v.dims) return best;
+  let na = 0;
+  for (let j = 0; j < q.length; j++) na += q[j] * q[j];
+  const qNorm = Math.sqrt(na);
+  for (let i = 0; i < v.count; i++) {
+    const off = i * v.dims;
+    let dot = 0;
+    for (let j = 0; j < v.dims; j++) dot += q[j] * v.data[off + j];
+    const denom = qNorm * v.norms[i];
+    const s = denom === 0 ? 0 : dot / denom;
+    if (i === 0 || s > best.score) best = { index: i, score: s };
+  }
+  return best;
+}
+
+const packed = new WeakMap<FileRecord, FileVectors | null>();
 
 async function loadIndex(): Promise<SemanticIndex> {
   if (memIndex) return memIndex;
@@ -202,14 +255,10 @@ async function saveIndex(index: SemanticIndex): Promise<void> {
   await set(IDB_KEY, index).catch((err) => log.warn("semantic index persist failed", err));
 }
 
-/** A chunk's vector, decoded from base64 once. */
-function vectorOf(chunk: ChunkRecord): Float32Array {
-  let v = decoded.get(chunk);
-  if (!v) {
-    v = base64ToVector(chunk.vector);
-    decoded.set(chunk, v);
-  }
-  return v;
+/** A file's vectors, decoded from base64 and packed once. */
+function vectorsOf(file: FileRecord): FileVectors | null {
+  if (!packed.has(file)) packed.set(file, packVectors(file.chunks.map((c) => base64ToVector(c.vector))));
+  return packed.get(file) ?? null;
 }
 
 let inFlightIndex: Promise<SemanticIndex> | null = null;
@@ -319,10 +368,17 @@ export async function searchSemantic(query: string, k = 8, filter?: (path: strin
   const all: SemanticHit[] = [];
   for (const file of Object.values(index.files)) {
     if (filter && !filter(file.path)) continue;
+    const vectors = vectorsOf(file);
     let best: { chunk: ChunkRecord; score: number } | null = null;
-    for (const chunk of file.chunks) {
-      const s = cosine(qVec, vectorOf(chunk));
-      if (!best || s > best.score) best = { chunk, score: s };
+    if (vectors) {
+      const b = bestChunk(qVec, vectors);
+      if (b) best = { chunk: file.chunks[b.index], score: b.score };
+    } else {
+      // Mixed vector lengths (should not happen): score each chunk on its own.
+      for (const chunk of file.chunks) {
+        const s = cosine(qVec, base64ToVector(chunk.vector));
+        if (!best || s > best.score) best = { chunk, score: s };
+      }
     }
     if (best) {
       all.push({ path: file.path, score: best.score, snippet: best.chunk.preview });

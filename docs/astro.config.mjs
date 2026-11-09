@@ -49,6 +49,7 @@ export default defineConfig({
             { label: "Vault Doctor", slug: "workspace/doctor" },
             { label: "Quick capture (inbox)", slug: "workspace/quick-capture" },
             { label: "PDF reader and highlights", slug: "workspace/pdf-reader" },
+            { label: "Large vaults and long notes", slug: "workspace/large-vaults" },
           ],
         },
         {

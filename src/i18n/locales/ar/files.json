@@ -223,6 +223,7 @@
   "tree.rename": "إعادة تسمية",
   "tree.renameItem": "إعادة تسمية {name}",
   "tree.selectedCount": "{{count}} محدد",
+  "tree.showMore": "عرض {count} إضافية",
   "tree.tagFilter": "# {tag} · {count} ملاحظة",
   "tree.tagFilter.clear": "مسح تصفية الوسوم",
   "tree.tagFilter.empty": "لا توجد ملاحظات تطابق هذا الوسم.",

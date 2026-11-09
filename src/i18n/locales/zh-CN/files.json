@@ -223,6 +223,7 @@
   "tree.rename": "重命名",
   "tree.renameItem": "重命名 {name}",
   "tree.selectedCount": "已选择 {{count}} 项",
+  "tree.showMore": "再显示 {count} 项",
   "tree.tagFilter": "# {tag} · {count} 篇笔记",
   "tree.tagFilter.clear": "清除标签筛选",
   "tree.tagFilter.empty": "没有匹配此标签的笔记。",

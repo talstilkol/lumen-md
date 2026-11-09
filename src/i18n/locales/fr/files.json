@@ -223,6 +223,7 @@
   "tree.rename": "Renommer",
   "tree.renameItem": "Renommer {name}",
   "tree.selectedCount": "{{count}} sélectionné(s)",
+  "tree.showMore": "Afficher {count} de plus",
   "tree.tagFilter": "# {tag} · {count} note(s)",
   "tree.tagFilter.clear": "Effacer le filtre d'étiquette",
   "tree.tagFilter.empty": "Aucune note ne correspond à cette étiquette.",

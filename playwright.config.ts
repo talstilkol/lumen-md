@@ -8,6 +8,12 @@ import { defineConfig, devices } from "@playwright/test";
  * In CI, set `PLAYWRIGHT_BASE_URL` to skip starting a fresh server.
  */
 const PORT = 5173;
+/**
+ * Tests tagged @nightly (e2e/perf-vault.spec.ts: typing in a 2 MB note)
+ * run only in the "perf" project, which the nightly workflow runs against
+ * the production build — never in the per-browser PR jobs.
+ */
+const NIGHTLY = /@nightly/;
 const BASE_URL = process.env.PLAYWRIGHT_BASE_URL ?? `http://localhost:${PORT}`;
 /** A Chromium executable to use when Playwright's own is not installed (docs/dev/ci-local.md). */
 const CHROMIUM = process.env.PW_CHROMIUM;
@@ -31,9 +37,10 @@ export default defineConfig({
     video: "retain-on-failure",
   },
   projects: [
-    { name: "chromium", use: { ...devices["Desktop Chrome"], ...(CHROMIUM ? { launchOptions: { executablePath: CHROMIUM } } : {}) } },
+    { name: "chromium", grepInvert: NIGHTLY, use: { ...devices["Desktop Chrome"], ...(CHROMIUM ? { launchOptions: { executablePath: CHROMIUM } } : {}) } },
     {
       name: "firefox",
+      grepInvert: NIGHTLY,
       use: {
         ...devices["Desktop Firefox"],
         // Headless Firefox on CI runners (no GPU) blocks WebGL by default,
@@ -50,7 +57,9 @@ export default defineConfig({
         },
       },
     },
-    { name: "webkit", use: { ...devices["Desktop Safari"] } },
+    { name: "webkit", grepInvert: NIGHTLY, use: { ...devices["Desktop Safari"] } },
+    // `npx playwright test --project=perf` (.github/workflows/nightly-perf.yml).
+    { name: "perf", grep: NIGHTLY, use: { ...devices["Desktop Chrome"] } },
   ],
   webServer: process.env.PLAYWRIGHT_BASE_URL
     ? undefined

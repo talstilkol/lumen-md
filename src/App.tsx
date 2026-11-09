@@ -218,6 +218,8 @@ export default function App() {
     (window as unknown as { __lumen?: unknown }).__lumen = {
       htmlToMarkdown,
       // `agentReview` (plan 5.11 e2e) is added by agents/reviewBridge once it loads.
+      // The vault index, for e2e/perf-vault.spec.ts (a lazy chunk).
+      vaultIndex: () => import("./storage/vaultIndexProbe"),
     };
     return () => {
       unregisterPlugin(wordCountPlugin.id);
