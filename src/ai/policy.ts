@@ -19,6 +19,7 @@
  */
 
 import { useAppStore } from "../store/useStore";
+import { getSecret } from "../lib/secretStore";
 
 export type AiPolicy = "local-only" | "local-first" | "cloud";
 
@@ -56,7 +57,7 @@ export function hasAnyCloudKey(): boolean {
     /* store not mounted (tests) */
   }
   try {
-    return CLOUD_PROVIDERS.some((p) => !!localStorage.getItem(`lumen.ai.key.${p}`));
+    return CLOUD_PROVIDERS.some((p) => !!getSecret(`lumen.ai.key.${p}`));
   } catch {
     return false;
   }

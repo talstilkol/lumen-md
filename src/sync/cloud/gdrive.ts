@@ -20,6 +20,7 @@ import { log } from "../../lib/logger";
 import { randomId } from "../../lib/cryptoRandom";
 import { fetchWithRetry } from "../../lib/fetchRetry";
 import type { CloudFile, CloudProvider } from "./types";
+import { getSecret, setSecret } from "../../lib/secretStore";
 
 const TOKEN_KEY = "lumen.cloud.gdrive.token";
 const REFRESH_KEY = "lumen.cloud.gdrive.refresh";
@@ -47,7 +48,7 @@ function redirectUri(): string {
 
 function loadToken(): TokenSet | null {
   try {
-    const raw = localStorage.getItem(TOKEN_KEY);
+    const raw = getSecret(TOKEN_KEY);
     return raw ? (JSON.parse(raw) as TokenSet) : null;
   } catch {
     return null;
@@ -55,13 +56,13 @@ function loadToken(): TokenSet | null {
 }
 
 function saveToken(tok: TokenSet): void {
-  localStorage.setItem(TOKEN_KEY, JSON.stringify(tok));
-  if (tok.refresh) localStorage.setItem(REFRESH_KEY, tok.refresh);
+  setSecret(TOKEN_KEY, JSON.stringify(tok));
+  if (tok.refresh) setSecret(REFRESH_KEY, tok.refresh);
 }
 
 function clearToken(): void {
-  localStorage.removeItem(TOKEN_KEY);
-  localStorage.removeItem(REFRESH_KEY);
+  setSecret(TOKEN_KEY, null);
+  setSecret(REFRESH_KEY, null);
   localStorage.removeItem(PKCE_KEY);
 }
 
@@ -82,7 +83,7 @@ function randomString(len = 64): string {
 /* ─── Token plumbing ─────────────────────────────────────────────────── */
 
 async function refreshAccessToken(): Promise<string> {
-  const refresh = localStorage.getItem(REFRESH_KEY);
+  const refresh = getSecret(REFRESH_KEY);
   if (!refresh) throw new Error("Google Drive is disconnected — sign in again.");
   const res = await fetchWithRetry("https://oauth2.googleapis.com/token", {
     method: "POST",
@@ -154,7 +155,7 @@ async function ensureLumenFolder(): Promise<string> {
 export const gdriveProvider: CloudProvider = {
   name: "gdrive",
   isConnected(): boolean {
-    return !!localStorage.getItem(TOKEN_KEY);
+    return !!getSecret(TOKEN_KEY);
   },
   async connect(): Promise<void> {
     if (!clientId()) {

@@ -26,6 +26,7 @@ import { buildSuggestingCommands } from "../editor/suggestingCommands";
 import { withAiQuota } from "../billing/aiQuota";
 import { canPurchasePlans, manageBilling, upgradeTo } from "../billing/planActions";
 import { detectIsMac } from "../ui/KeyboardShortcuts";
+import { getSecret, setSecret } from "../lib/secretStore";
 
 export interface UseCommandsOptions {
   handleNew: () => void;
@@ -1554,7 +1555,7 @@ export function useCommands({
           // Cloud providers other than OpenAI keep their key under
           // lumen.ai.key.<provider>; prompt for it if missing.
           if (valid === "anthropic" || valid === "gemini" || valid === "mistral") {
-            const existing = localStorage.getItem(`lumen.ai.key.${valid}`);
+            const existing = getSecret(`lumen.ai.key.${valid}`);
             if (!existing) {
               const label =
                 valid === "anthropic"
@@ -1566,7 +1567,7 @@ export function useCommands({
                 message: `Enter your ${label} API key:`,
                 defaultValue: "",
               });
-              if (key && key.trim()) localStorage.setItem(`lumen.ai.key.${valid}`, key.trim());
+              if (key && key.trim()) setSecret(`lumen.ai.key.${valid}`, key.trim());
             }
           }
           showAiToast(t("toast.aiProviderSetTo", { valid }), "success");

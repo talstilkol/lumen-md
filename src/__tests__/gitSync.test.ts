@@ -23,7 +23,12 @@ vi.mock("../storage/workspace", () => ({
 }));
 
 describe("git sync — helpers", () => {
-  beforeEach(() => store.clear());
+  beforeEach(async () => {
+    store.clear();
+    localStorage.clear();
+    // The token now lives in the secret store (T36); start each test empty.
+    (await import("../lib/secretStore")).__resetSecretStore();
+  });
 
   it("setGitToken + getGitToken round-trips", async () => {
     const { setGitToken, getGitToken } = await import("../sync/git");

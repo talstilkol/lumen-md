@@ -16,6 +16,7 @@
 
 import { log } from "../../lib/logger";
 import type { CloudProvider } from "./types";
+import { getSecret, setSecret } from "../../lib/secretStore";
 
 const TOKEN_KEY = "lumen.cloud.github.token";
 
@@ -32,7 +33,7 @@ interface GistResponse {
 }
 
 function token(): string | null {
-  try { return localStorage.getItem(TOKEN_KEY); } catch { return null; }
+  return getSecret(TOKEN_KEY);
 }
 
 function headers() {
@@ -144,7 +145,7 @@ export async function pollGitHubDeviceToken(
     });
     const json = (await res.json()) as { access_token?: string; error?: string };
     if (json.access_token) {
-      localStorage.setItem(TOKEN_KEY, json.access_token);
+      setSecret(TOKEN_KEY, json.access_token);
       return json.access_token;
     }
     if (json.error === "authorization_pending") continue;
@@ -173,7 +174,7 @@ export const gistProvider: CloudProvider = {
     await pollGitHubDeviceToken(clientId, flow.deviceCode, flow.interval);
   },
   async disconnect() {
-    try { localStorage.removeItem(TOKEN_KEY); } catch {}
+    setSecret(TOKEN_KEY, null);
   },
   async listFiles() {
     const items = await api<Array<{ id: string; description: string; updated_at: string }>>("/gists");

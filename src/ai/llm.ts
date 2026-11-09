@@ -11,6 +11,7 @@ import { t } from "../i18n";
 import { docsUrl } from "../lib/docsLinks";
 import { estimateTokens, recordCacheHit, recordUsage, type Usage } from "./usage";
 import { cloudAllowed, getAiPolicy, isCloudProvider, isLocalOrigin, providerAllowed } from "./policy";
+import { getSecret } from "../lib/secretStore";
 
 // ── Rate limiting ───────────────────────────────────────────────────────
 // Token bucket — protects the user's API key against runaway loops.
@@ -264,13 +265,13 @@ export function setActiveProvider(provider: AiProvider): void {
 
 /**
  * Return the API key for a cloud provider. Per-provider keys live in
- * localStorage (`lumen.ai.key.<provider>`); OpenAI falls back to the primary
+ * the encrypted secret store (`lumen.ai.key.<provider>`, see lib/secretStore); OpenAI falls back to the primary
  * `aiKey` in the store for backwards compatibility. Throws if none is set.
  */
 export function getProviderKey(provider: AiProvider): string {
   let key = "";
   try {
-    key = localStorage.getItem(`lumen.ai.key.${provider}`) ?? "";
+    key = getSecret(`lumen.ai.key.${provider}`) ?? "";
   } catch { /* */ }
   if (!key && provider === "openai") key = useAppStore.getState().aiKey ?? "";
   if (!key) {
