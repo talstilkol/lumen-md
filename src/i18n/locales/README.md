@@ -90,11 +90,13 @@ re-apply those by hand: `--absorb` only carries strings.
 
 ## English of lazily loaded domains
 
-A domain that only loads on demand (the encrypted sync, for one) keeps its
-English in `src/i18n/lazy/<domain>.json` instead of `locales/en/`, so it
-ships with that domain's chunk and not the startup bundle. The domain calls
-`registerEnglish()` when it loads (see `src/sync/e2ee/strings.ts`). The
-other locales keep these keys in their files as usual, and
+A domain that only loads on demand (the encrypted sync and local
+translation, for two) keeps its English in `src/i18n/lazy/<domain>.json`
+instead of `locales/en/`, so it ships with that domain's chunk and not the
+startup bundle. The domain calls `registerEnglish()` when it loads (see
+`src/sync/e2ee/strings.ts`, `src/ai/mt/strings.ts`;
+`src/__tests__/i18nLazyEnglish.test.ts` lists each domain and who may import
+it). The other locales keep these keys in their files as usual, and
 `extract-i18n-keys.mjs`, `i18n-split.mjs` (for `i18n/keys/`), the drift /
 values / placeholder tests and `print-missing-i18n-keys.mjs` read the lazy
 files together with `locales/en/`. A key lives in exactly one of the two places.

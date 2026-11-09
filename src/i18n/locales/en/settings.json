@@ -129,7 +129,7 @@
   "privacy.decision.blocked": "Blocked",
   "privacy.downloads": "Model downloads: {n}",
   "privacy.empty": "No AI network requests yet.",
-  "privacy.footer": "Recorded: time, host, size, reason. Never the text of prompts or answers. Model downloads made inside workers are listed too; their size may show as unknown.",
+  "privacy.footer": "Recorded: time, host, size, reason. Never the text of prompts or answers. Requests from inside model workers (downloads) are not listed.",
   "privacy.localRequests": "Local: {n}",
   "privacy.onlyLeaving": "Only what left this device",
   "privacy.policy": "Policy: {policy}",

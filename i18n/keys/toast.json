@@ -354,6 +354,13 @@
       ]
     },
     {
+      "key": "toast.localMtUnavailable",
+      "en": "Local translation was not available ({why}); the AI model translated instead.",
+      "vars": [
+        "why"
+      ]
+    },
+    {
       "key": "toast.loremIpsumInserted",
       "en": "📄 Lorem ipsum inserted",
       "vars": []
@@ -616,6 +623,20 @@
       "key": "toast.transcribing",
       "en": "🎙 Transcribing…",
       "vars": []
+    },
+    {
+      "key": "toast.translatedWith",
+      "en": "Translated with {layer}",
+      "vars": [
+        "layer"
+      ]
+    },
+    {
+      "key": "toast.translatedWithUnmeasured",
+      "en": "Translated with {layer} — its quality on this pair is not measured yet",
+      "vars": [
+        "layer"
+      ]
     },
     {
       "key": "toast.translatingTo",

@@ -24,7 +24,7 @@
   "collab.e2e.emptyRoom.body": "If you expected other people in this room, check the password — a wrong one looks like an empty room. Otherwise share your document to start the room.",
   "collab.e2e.emptyRoom.share": "Share my document here",
   "collab.persistent.hint": "Optional. Keeps documents synced when no peer is online.",
-  "collab.persistent.label": "Persistent server (Hocuspocus)",
+  "collab.persistent.label": "Persistent server (y-websocket)",
   "collab.persistent.token": "Server access token (if the server requires one)",
   "collab.prompt.join": "Join collaborative session \"{room}\"? Your current document will be replaced if other peers are present.",
   "collab.prompt.room": "Room name:",

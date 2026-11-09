@@ -142,7 +142,7 @@
     },
     {
       "key": "collab.persistent.label",
-      "en": "Persistent server (Hocuspocus)",
+      "en": "Persistent server (y-websocket)",
       "vars": []
     },
     {

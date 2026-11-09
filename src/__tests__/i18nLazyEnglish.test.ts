@@ -12,6 +12,19 @@ import { registerEnglish, t } from "../i18n";
 
 const SRC = resolve(__dirname, "..");
 
+/**
+ * Each lazy file, the one strings module that imports it, and the modules
+ * allowed to import that strings module — all of them reached only through
+ * a dynamic import, so the strings never join the startup bundle. `within`:
+ * a folder that is itself loaded only lazily (nothing outside it imports it
+ * statically); the users may import each other statically inside it.
+ */
+const DOMAINS: Record<string, { module: string; users: string[]; prefixes: string[]; within?: string }> = {
+  "mt.json": { module: "ai/mt/strings.ts", users: ["ai/mt/index.ts", "agents/commands.ts"], prefixes: ["models.", "mt.", "toast.translatedWith", "toast.localMtUnavailable"] },
+  // Encrypted sync (plan 3.4): the whole of src/sync/e2ee/ loads on demand.
+  "e2ee.json": { module: "sync/e2ee/strings.ts", users: ["sync/e2ee/conflict.ts", "sync/e2ee/ui/FreshnessBanner.tsx", "sync/e2ee/ui/PassphraseForm.tsx"], prefixes: ["e2ee."], within: "sync/e2ee/" },
+};
+
 function sources(dir: string): string[] {
   const out: string[] = [];
   for (const e of readdirSync(dir, { withFileTypes: true })) {
@@ -23,36 +36,82 @@ function sources(dir: string): string[] {
   return out;
 }
 
+const rel = (f: string) => relative(SRC, f).replace(/\\/g, "/");
+
 describe("i18n: lazy English", () => {
   const lazy = lazyEnglish();
   // The startup English: every domain file of locales/en/ (plan 0.3).
   const startup = readLocale("en");
+  const files = sources(SRC);
 
-  it("has the encrypted-sync strings, none of them duplicated in the startup bundle", () => {
-    expect(Object.keys(lazy).length).toBeGreaterThan(10);
-    expect(Object.keys(lazy).every((k) => k.startsWith("e2ee."))).toBe(true);
+  it("every lazy file is declared, and none of its keys is also in the startup bundle", () => {
+    expect(readdirSync(LAZY_DIR).sort()).toEqual(Object.keys(DOMAINS).sort());
+    for (const f of readdirSync(LAZY_DIR)) expect(Object.keys(JSON.parse(readFileSync(join(LAZY_DIR, f), "utf8")) as object).length, f).toBeGreaterThan(0);
     for (const k of Object.keys(lazy)) expect(k in startup, k).toBe(false);
   });
 
-  it("each file is imported only by its own domain's strings module", () => {
-    for (const file of readdirSync(LAZY_DIR)) {
-      const importers = sources(SRC)
-        .filter((f) => readFileSync(f, "utf8").includes(`i18n/lazy/${file}`))
-        .map((f) => relative(SRC, f).replace(/\\/g, "/"));
-      expect(importers).toEqual(["sync/e2ee/strings.ts"]);
+  it("keys stay inside their domain's prefixes", () => {
+    for (const [file, d] of Object.entries(DOMAINS)) {
+      const keys = Object.keys(JSON.parse(readFileSync(join(LAZY_DIR, file), "utf8")) as Record<string, string>);
+      for (const k of keys) expect(d.prefixes.some((p) => k.startsWith(p)), `${file}: ${k}`).toBe(true);
     }
-    // …and that module only from inside the lazily loaded src/sync/e2ee/.
-    const users = sources(SRC)
-      .filter((f) => /from "\.\.?\/(\.\.\/)?strings"|import "\.\.?\/strings"/.test(readFileSync(f, "utf8")))
-      .map((f) => relative(SRC, f).replace(/\\/g, "/"));
-    expect(users.length).toBeGreaterThan(0);
-    for (const u of users) expect(u.startsWith("sync/e2ee/")).toBe(true);
+  });
+
+  it("each file is imported only by its strings module, and that module only by its declared users", () => {
+    for (const [file, d] of Object.entries(DOMAINS)) {
+      const importers = files.filter((f) => readFileSync(f, "utf8").includes(`i18n/lazy/${file}`)).map(rel);
+      expect(importers).toEqual([d.module]);
+      const stem = d.module.replace(/\.ts$/, "");
+      const users = files
+        .filter((f) => f !== join(SRC, d.module))
+        .filter((f) => {
+          const src = readFileSync(f, "utf8");
+          return [...src.matchAll(/import\s+(?:[^"']*from\s+)?["']([^"']+)["']/g)].some((m) => {
+            if (!m[1].startsWith(".")) return false;
+            return rel(resolve(join(f, ".."), m[1])) === stem;
+          });
+        })
+        .map(rel)
+        .sort();
+      expect(users).toEqual([...d.users].sort());
+    }
+  });
+
+  it("the declared users are themselves only loaded with a dynamic import", () => {
+    for (const d of Object.values(DOMAINS)) {
+      if (d.within) {
+        // Nothing outside the lazily loaded folder imports it statically.
+        for (const f of files) {
+          if (rel(f).startsWith(d.within)) continue;
+          const src = readFileSync(f, "utf8");
+          for (const m of src.matchAll(/^\s*(?:import|export)\s+(?!type\b)(?:[^"';]*from\s+)?["']([^"']+)["']/gm)) {
+            if (!m[1].startsWith(".")) continue;
+            expect(rel(resolve(join(f, ".."), m[1])).startsWith(d.within), `${rel(f)} imports ${m[1]} statically`).toBe(false);
+          }
+        }
+        continue;
+      }
+      for (const u of d.users) {
+        const stem = u.replace(/\.tsx?$/, "");
+        for (const f of files) {
+          if (rel(f) === u) continue;
+          const src = readFileSync(f, "utf8");
+          for (const m of src.matchAll(/^\s*import\s+(?!type\b)(?:[^"';]*from\s+)?["']([^"']+)["']/gm)) {
+            if (!m[1].startsWith(".")) continue;
+            expect(rel(resolve(join(f, ".."), m[1])) === stem, `${rel(f)} imports ${u} statically`).toBe(false);
+          }
+        }
+      }
+    }
   });
 
   it("registerEnglish makes t() resolve the keys, without replacing existing English", async () => {
     await import("../sync/e2ee/strings");
     expect(t("e2ee.setup.title")).toBe(lazy["e2ee.setup.title"]);
     expect(t("e2ee.setup.tooShort", { n: 12 })).toBe("At least 12 characters.");
+    await import("../ai/mt/strings");
+    expect(t("mt.layer.name.opus")).toBe(lazy["mt.layer.name.opus"]);
+    expect(t("toast.translatedWith", { layer: "X" })).toBe("Translated with X");
     registerEnglish({ "dialog.ok": "replaced?", "test.lazy.only": "lazy" });
     expect(t("dialog.ok")).toBe("OK");
     expect(t("test.lazy.only")).toBe("lazy");
