@@ -6,7 +6,7 @@
  */
 
 import { createDirectoryHandleBackend } from "./handleBackend";
-import { syncWriteOpfs } from "./opfsSyncWrite";
+import { opfsWritesPending, syncWriteOpfs } from "./opfsSyncWrite";
 import type { VaultBackend } from "./types";
 
 export function isOpfsSupported(): boolean {
@@ -22,5 +22,6 @@ export function createOpfsBackend(): VaultBackend {
       return await navigator.storage.getDirectory();
     },
     writeFallback: (segments, data) => syncWriteOpfs(segments, data),
+    writesPending: opfsWritesPending,
   });
 }
