@@ -112,13 +112,13 @@
       "count": 1
     }
   },
-  "src/data/parsers.ts": {
-    "no-useless-escape": {
+  "src/data/columnProfile.ts": {
+    "no-irregular-whitespace": {
       "count": 2
     }
   },
-  "src/data/suggest.ts": {
-    "no-irregular-whitespace": {
+  "src/data/parsers.ts": {
+    "no-useless-escape": {
       "count": 2
     }
   },
