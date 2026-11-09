@@ -1,81 +1,61 @@
 ---
 title: Web Clipper
-description: One-click capture of any web page (or selection) into your Lumen workspace as clean markdown.
+description: Save a web page as a clean Markdown note — from inside Lumen (works today), or from the browser extension (still a developer preview).
 ---
 
-The Lumen Web Clipper is a tiny Chrome / Firefox extension (MV3). The
-icon adds a "Save to Lumen" button + right-click context entry that
-captures the active page, converts it to clean markdown, and either
-posts it to your running Lumen instance or opens the editor with the
-clip in the URL hash.
+## Clip from inside Lumen
 
-## Install (developer mode)
+Two commands save a page into your vault as a clean note, with its source
+and the date in the front matter:
 
-```bash
-git clone https://github.com/your-org/lumen
-cd lumen/extension
-```
+- `⌘K → Clip a web page…` — paste a URL; Lumen fetches the page and keeps
+  the article (`<article>` / `<main>`), without navigation, ads, forms and
+  scripts. Fetching an arbitrary site needs the research service
+  ([Research](/ai/research/)); without it, only sites the app's security
+  policy already allows can be clipped, and Lumen says so.
+- `⌘K → Clip from clipboard` — copy something on a page first; the copied
+  HTML (or text) becomes the note.
 
-Then in Chrome:
-
-1. `chrome://extensions/` → enable **Developer mode**
-2. **Load unpacked** → pick `lumen/extension/`
-3. Pin the icon to the toolbar.
-
-Production install via Chrome Web Store comes with the 1.0 launch.
-
-## Use
-
-- **Save full page** — toolbar icon, no selection. Captures the
-  article (`<article>` / `<main>`) and converts.
-- **Save selection** — right-click → "Save selection to Lumen". Only
-  the highlighted text becomes the clip.
-- **Quick keyboard** — `Cmd+Shift+L` (configurable in
-  `chrome://extensions/shortcuts`).
-
-## What gets captured
-
-Each clip lands in your workspace as `clips/<slug>-<date>.md` with
-frontmatter:
+Clips go into the **Library** folder (**ספרייה** with the interface in
+Hebrew), get a number when the name is taken, and open in a new tab.
 
 ```yaml
 ---
-type: clip
 title: "How CRDTs Work"
-url: https://martin.kleppmann.com/2020/07/06/crdt-hard-parts.html
-capturedAt: 2026-04-26T13:42:00Z
-isSelection: false
+source: "https://martin.kleppmann.com/2020/07/06/crdt-hard-parts.html"
+clipped: 2026-04-26
 ---
-
-# How CRDTs Work
-
-(body, converted to markdown)
 ```
 
-## Configure
+## The browser extension (developer preview)
 
-Open the extension's **Settings** page and set the URL of your Lumen
-instance. Defaults to `http://localhost:5173`. The extension POSTs
-each clip as JSON to `<lumen>/api/clip`; if the API isn't running, it
-falls back to opening the editor with the clip in `#clip=…`.
+`extension/` holds a small Chrome extension (Manifest V3): a **Save to
+Lumen** toolbar button and a **Save selection to Lumen** right-click
+entry. It converts the selection, or the page's article, to Markdown.
 
-## Markdown conversion
+:::caution[It does not save into a vault yet]
+The extension sends each clip to `<your Lumen URL>/api/clip`, and when
+that fails it opens `<your Lumen URL>/#clip=…`. **No Lumen build answers
+either one yet**, so a clip from the extension doesn't arrive in your
+vault. Use the commands above until it does.
+:::
 
-The serializer handles headings, paragraphs, lists, blockquotes,
-links, images, code blocks, and inline code. Heuristics:
+To try it in developer mode:
 
-- `<article>` / `<main>` / `[role=main]` is preferred over `<body>` to
-  skip nav + footer noise.
-- A user selection always wins, even when an `<article>` is present.
-- Scripts, styles, and `<noscript>` blocks are dropped.
-- Image `src=` and `alt=` are preserved verbatim.
+```bash
+git clone https://github.com/talstilkol/lumen-md
+cd lumen-md/extension
+```
 
-For dense, JS-heavy pages where the article wrapper isn't obvious, use
-a Reader-mode browser extension first, then clip from there.
+1. `chrome://extensions/` → enable **Developer mode**
+2. **Load unpacked** → pick `lumen-md/extension/`
+3. In the extension's **Options** page, set your Lumen URL (the default
+   is `http://localhost:5173`).
 
 ## Privacy
 
-The extension makes no network requests except to the Lumen URL you
-configure. It doesn't fetch tracking pixels, doesn't beacon a usage
-event, doesn't ship telemetry. The whole MV3 manifest is in
-[`extension/manifest.json`](https://github.com/your-org/lumen/blob/main/extension/manifest.json) — read it.
+The in-app commands fetch only the page you ask for (through the research
+service when one is set up). The extension makes
+no request except to the Lumen URL you configure: no tracking and no
+telemetry. Its manifest is
+[`extension/manifest.json`](https://github.com/talstilkol/lumen-md/blob/main/extension/manifest.json).
