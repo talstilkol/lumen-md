@@ -62,3 +62,6 @@ public/playground/vendor/
 bundle-sizes.json
 bundle-diff.md
 .bundle-base/
+
+# Live agent eval reports (npm run eval:agents)
+eval/results/

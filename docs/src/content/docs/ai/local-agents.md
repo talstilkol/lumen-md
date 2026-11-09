@@ -125,3 +125,23 @@ your local model; quotes are still verified word for word against the
 pages. Under *local only* a research service off this machine or network
 is refused. On a fresh install with the *local only* policy, SearXNG is
 the default research provider.
+
+## Evaluating a local model
+
+`npm run eval:agents` runs twelve fixed cases — most of them in Hebrew —
+through the real agent runtime against your Ollama, and writes a report
+to `eval/results/`:
+
+```bash
+ollama pull qwen2.5:7b
+npm run eval:agents -- --model qwen2.5:7b
+npm run eval:agents -- --model llama3.1:8b --only tagger-he,tasker-he
+```
+
+Every check is deterministic (Hebrew share of the letters, required and
+forbidden words, list lengths, length limits, a pattern), so two models
+or two prompt versions can be compared on the same numbers. The report
+lists each case with pass/fail, attempts (retries the improvement agent
+asked for) and time. The reference answers in
+`src/agents/eval/fixtures.ts` run in CI through each agent's own parser
+and validators, so a broken fixture is caught before a long GPU run.

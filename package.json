@@ -34,7 +34,8 @@
     "i18n:extract": "node scripts/extract-i18n-keys.mjs",
     "i18n:check": "node scripts/extract-i18n-keys.mjs --check",
     "docker:build": "docker build -t lumen-md .",
-    "docker:run": "docker run -p 8080:8080 lumen-md"
+    "docker:run": "docker run -p 8080:8080 lumen-md",
+    "eval:agents": "node scripts/agent-eval.mjs"
   },
   "dependencies": {
     "@bjorn3/browser_wasi_shim": "0.4.2",
