@@ -645,7 +645,7 @@ export default function App() {
                 });
                 if (!showWorkspace) toggleWorkspace();
               } catch {
-                /* why: the history entry points at a file that no longer exists; the click does nothing */
+                /* why: the linking note was moved or deleted since the backlinks were listed; the click does nothing */
               }
             }}
           />
