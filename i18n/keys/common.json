@@ -924,6 +924,49 @@
       "vars": []
     },
     {
+      "key": "models.consent.body",
+      "en": "{purpose}\n\n{name} · {size}. It is downloaded once, checked against its published checksum and kept in this browser's storage. Nothing you write is sent anywhere.\n\nLicence: {license}. {attribution}",
+      "vars": [
+        "purpose",
+        "name",
+        "size",
+        "license",
+        "attribution"
+      ]
+    },
+    {
+      "key": "models.consent.ok",
+      "en": "Download {size}",
+      "vars": [
+        "size"
+      ]
+    },
+    {
+      "key": "models.consent.title",
+      "en": "Download a model to this device?",
+      "vars": []
+    },
+    {
+      "key": "models.purpose.imageSearch",
+      "en": "Searching images by text",
+      "vars": []
+    },
+    {
+      "key": "models.purpose.nerHe",
+      "en": "Finding names, places and organisations in Hebrew text",
+      "vars": []
+    },
+    {
+      "key": "models.purpose.translateEnHe",
+      "en": "Translation from English to Hebrew",
+      "vars": []
+    },
+    {
+      "key": "models.purpose.translateHeEn",
+      "en": "Translation from Hebrew to English",
+      "vars": []
+    },
+    {
       "key": "pageView.jump",
       "en": "Jump to page",
       "vars": []
