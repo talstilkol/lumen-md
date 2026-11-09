@@ -1,7 +1,8 @@
 /**
  * Trusted Types integration.
  *
- * Production headers (public/_headers, netlify.toml) enforce
+ * Production headers (security/policy.json → public/_headers, vercel.json,
+ * the nginx configs) enforce
  *   require-trusted-types-for 'script';
  *   trusted-types lumen default dompurify lit-html iconify ProseMirrorClipboard 'allow-duplicates'
  * so every DOM XSS sink (innerHTML, srcdoc, DOMParser, Worker URLs, …)
@@ -41,8 +42,8 @@ export const LUMEN_POLICY_NAME = "lumen";
 
 /**
  * Every policy name the app (or a bundled dependency) creates. Keep in
- * sync with the `trusted-types` directive in public/_headers and
- * netlify.toml — enforced by src/__tests__/csp.test.ts.
+ * sync with the `trusted-types` directive of the app route in
+ * security/policy.json — enforced by src/__tests__/csp.test.ts.
  *   lumen / default       — this module
  *   dompurify             — DOMPurify (ours + mermaid's bundled copy)
  *   lit-html              — @google/model-viewer → lit

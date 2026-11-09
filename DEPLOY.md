@@ -94,11 +94,16 @@ VITE_YJS_WEBSOCKET_URL=wss://lumen-collab.fly.dev
 
 ## 3. CSP + headers in production (DONE — verify only)
 
-The CSP lives in two places that are both enforced: the `<meta>` tag in
-`index.html` and `public/_headers` (copied to `dist/_headers`). Cloudflare
-Pages **and Netlify** serve `dist/_headers`; `netlify.toml` deliberately
-sets no CSP of its own. The self-hosted nginx image uses
-`docker/nginx.conf`.
+Every policy is written once, in `security/policy.json`, and rendered into
+the files each host reads: the `<meta>` tags in `index.html` and
+`livejs-runner.html`, `public/_headers` (copied to `dist/_headers`),
+`vercel.json`, `docker/nginx.conf`, `deploy/nginx.conf` and
+`src-tauri/tauri.conf.json`. Change the policy there and run
+`npm run headers:write`; CI (`npm run headers`) fails when any copy
+differs. Per-route decisions and per-host exceptions are explained in
+`docs/security/headers.md`. On the web the `<meta>` tag and the response
+header are both enforced. Cloudflare Pages **and Netlify** serve
+`dist/_headers`; `netlify.toml` deliberately sets no CSP of its own.
 
 Your own workers (SSO, billing/entitlements, publish, audit, marketplace,
 self-hosted LanguageTool, Supabase) are added to `connect-src`

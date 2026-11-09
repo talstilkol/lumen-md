@@ -39,6 +39,9 @@ jobs:
       - name: Code hygiene (no `as any` / console.log in production src)
         run: npm run hygiene
 
+      - name: Security headers match security/policy.json
+        run: npm run headers
+
       - name: Test
         run: npm run test
 

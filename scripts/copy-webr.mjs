@@ -34,11 +34,12 @@ for (const e of ENTRIES) {
   bytes += size(src);
   copied++;
 }
-// Production serves `require-trusted-types-for 'script'` (public/_headers),
-// which also applies inside the webR worker: its importScripts() of R.js and
-// Emscripten's eval would be blocked. Give the worker the same `default`
-// policy the page installs (same-origin script URLs only; code strings pass
-// through as the CSP already grants 'unsafe-eval').
+// The webR worker gets its own policy from its response (route eval-workers
+// in security/policy.json: eval allowed, no Trusted Types). Where a host
+// still sends the page policy with `require-trusted-types-for 'script'`
+// (Netlify cannot detach it), its importScripts() of R.js would be blocked:
+// give the worker the same `default` policy the page installs (same-origin
+// script URLs only; code strings pass through to the CSP's eval check).
 const WORKER_TT_PRELUDE = `/* Lumen: Trusted Types default policy for the webR worker */
 if (typeof self !== "undefined" && self.trustedTypes && !self.trustedTypes.defaultPolicy) {
   try {
