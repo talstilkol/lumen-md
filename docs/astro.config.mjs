@@ -61,6 +61,7 @@ export default defineConfig({
             { label: "Auto-tag + link suggestions", slug: "ai/agents" },
             { label: "Local LLM (web-llm)", slug: "ai/local-llm" },
             { label: "AI cost: usage meter + answer cache", slug: "ai/cost" },
+            { label: "Batch jobs: pause, resume, progress", translations: { he: "משימות אצווה: השהיה, המשך, התקדמות" }, slug: "ai/batch" },
             { label: "Research + citation checks", slug: "ai/research" },
             { label: "MCP integration (Claude Desktop, Cursor)", slug: "ai/mcp" },
           ],
