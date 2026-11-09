@@ -1226,5 +1226,19 @@
   "spell.he.installed": "Dictionnaire hébreu installé ({n} mots).",
   "spell.he.failed": "Téléchargement impossible : {error}",
   "spell.he.removeConfirm": "Supprimer le dictionnaire hébreu de cet appareil ?",
-  "spell.he.removed": "Dictionnaire hébreu supprimé."
+  "spell.he.removed": "Dictionnaire hébreu supprimé.",
+  "cmd.vault.export": "Exporter tout le coffre…",
+  "cmd.vault.export.hint": "Toutes les notes et pièces jointes, avec les dossiers, en .zip ou dans un dossier",
+  "cmd.vault.import": "Importer des notes (zip / dossier : Obsidian, Notion, Lumen)…",
+  "cmd.vault.import.hint": "Dans un nouveau dossier — rien n'est écrasé",
+  "vault.export.where": "Exporter en…",
+  "vault.export.zip": "Un fichier .zip",
+  "vault.export.folder": "Dans un dossier de cet ordinateur",
+  "vault.export.done": "{n} fichiers exportés.",
+  "vault.export.failed": "Échec de l'export : {error}",
+  "vault.import.what": "Importer depuis…",
+  "vault.import.zip": "Un fichier .zip",
+  "vault.import.folder": "Un dossier",
+  "vault.import.done": "{notes} notes et {files} fichiers importés ({source}) dans « {folder} ».",
+  "vault.import.failed": "Échec de l'import : {error}"
 }

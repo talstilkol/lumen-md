@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-10-17T21:12:46.057Z",
+  "generated_at": "2026-10-17T21:21:18.611Z",
   "source": "src/i18n/index.ts (en bundle)",
-  "count": 1228,
+  "count": 1242,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -1492,6 +1492,87 @@
       "key": "versionHistory.noVersions",
       "en": "No versions yet. A version is kept every couple of minutes while you type, on every save and when you close the tab.",
       "vars": []
+    },
+    {
+      "key": "cmd.vault.export",
+      "en": "Export the whole vault…",
+      "vars": []
+    },
+    {
+      "key": "cmd.vault.export.hint",
+      "en": "Every note and attachment, with folders, as a .zip or into a folder",
+      "vars": []
+    },
+    {
+      "key": "cmd.vault.import",
+      "en": "Import notes (zip / folder: Obsidian, Notion, Lumen)…",
+      "vars": []
+    },
+    {
+      "key": "cmd.vault.import.hint",
+      "en": "Into a new folder — nothing existing is overwritten",
+      "vars": []
+    },
+    {
+      "key": "vault.export.where",
+      "en": "Export as…",
+      "vars": []
+    },
+    {
+      "key": "vault.export.zip",
+      "en": "One .zip file",
+      "vars": []
+    },
+    {
+      "key": "vault.export.folder",
+      "en": "Into a folder on this computer",
+      "vars": []
+    },
+    {
+      "key": "vault.export.done",
+      "en": "Exported {n} files.",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "vault.export.failed",
+      "en": "Export failed: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "vault.import.what",
+      "en": "Import from…",
+      "vars": []
+    },
+    {
+      "key": "vault.import.zip",
+      "en": "A .zip file",
+      "vars": []
+    },
+    {
+      "key": "vault.import.folder",
+      "en": "A folder",
+      "vars": []
+    },
+    {
+      "key": "vault.import.done",
+      "en": "Imported {notes} notes and {files} files ({source}) into “{folder}”.",
+      "vars": [
+        "notes",
+        "files",
+        "source",
+        "folder"
+      ]
+    },
+    {
+      "key": "vault.import.failed",
+      "en": "Import failed: {error}",
+      "vars": [
+        "error"
+      ]
     },
     {
       "key": "cmd.spell.hebrewDictionary",

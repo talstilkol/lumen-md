@@ -1226,5 +1226,19 @@
   "spell.he.installed": "המילון העברי הותקן ({n} מילים). הפעל את בדיקת הדקדוק כדי לראות אותו.",
   "spell.he.failed": "לא הצלחתי להוריד את המילון: {error}",
   "spell.he.removeConfirm": "להסיר את המילון העברי מהמכשיר?",
-  "spell.he.removed": "המילון העברי הוסר."
+  "spell.he.removed": "המילון העברי הוסר.",
+  "cmd.vault.export": "ייצוא כל הכספת…",
+  "cmd.vault.export.hint": "כל הפתקים והקבצים, עם התיקיות, כ-zip או לתיקייה",
+  "cmd.vault.import": "ייבוא פתקים (zip / תיקייה: Obsidian, ‏Notion, ‏Lumen)…",
+  "cmd.vault.import.hint": "לתיקייה חדשה — שום דבר קיים לא נדרס",
+  "vault.export.where": "לייצא כ…",
+  "vault.export.zip": "קובץ zip אחד",
+  "vault.export.folder": "לתיקייה במחשב",
+  "vault.export.done": "יוצאו {n} קבצים.",
+  "vault.export.failed": "הייצוא נכשל: {error}",
+  "vault.import.what": "לייבא מ…",
+  "vault.import.zip": "קובץ zip",
+  "vault.import.folder": "תיקייה",
+  "vault.import.done": "יובאו {notes} פתקים ו-{files} קבצים ({source}) אל „{folder}”.",
+  "vault.import.failed": "הייבוא נכשל: {error}"
 }

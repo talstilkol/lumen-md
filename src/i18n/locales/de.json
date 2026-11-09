@@ -1226,5 +1226,19 @@
   "spell.he.installed": "Hebräisches Wörterbuch installiert ({n} Wörter).",
   "spell.he.failed": "Wörterbuch konnte nicht geladen werden: {error}",
   "spell.he.removeConfirm": "Hebräisches Wörterbuch von diesem Gerät entfernen?",
-  "spell.he.removed": "Hebräisches Wörterbuch entfernt."
+  "spell.he.removed": "Hebräisches Wörterbuch entfernt.",
+  "cmd.vault.export": "Ganzen Tresor exportieren…",
+  "cmd.vault.export.hint": "Alle Notizen und Anhänge mit Ordnern als .zip oder in einen Ordner",
+  "cmd.vault.import": "Notizen importieren (zip / Ordner: Obsidian, Notion, Lumen)…",
+  "cmd.vault.import.hint": "In einen neuen Ordner — nichts wird überschrieben",
+  "vault.export.where": "Exportieren als…",
+  "vault.export.zip": "Eine .zip-Datei",
+  "vault.export.folder": "In einen Ordner auf diesem Computer",
+  "vault.export.done": "{n} Dateien exportiert.",
+  "vault.export.failed": "Export fehlgeschlagen: {error}",
+  "vault.import.what": "Importieren aus…",
+  "vault.import.zip": "Einer .zip-Datei",
+  "vault.import.folder": "Einem Ordner",
+  "vault.import.done": "{notes} Notizen und {files} Dateien ({source}) nach „{folder}“ importiert.",
+  "vault.import.failed": "Import fehlgeschlagen: {error}"
 }

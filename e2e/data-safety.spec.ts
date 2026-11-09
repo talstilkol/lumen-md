@@ -197,3 +197,34 @@ test("renaming a note rewrites links to it; deleting it goes to the trash with U
   await toastEl.getByRole("button", { name: "Undo" }).click();
   await expect(tree.locator(".file-tree-name", { hasText: "Renamed.md" })).toBeVisible({ timeout: 10_000 });
 });
+
+/** Part C — export everything (T47): the vault comes out as a .zip with paths. */
+test("the whole vault exports as a zip", async ({ page }) => {
+  test.skip(!(await opfsWritable(page)), "OPFS writes are unavailable in this engine's test context");
+  const run = (id: string) => page.evaluate((cmd) => window.dispatchEvent(new CustomEvent("lumen-run-command", { detail: { id: cmd } })), id);
+  await page.keyboard.press("Meta+1");
+  const editor = page.locator(".cm-content").first();
+  await editor.click();
+  await editor.press("ControlOrMeta+a");
+  await editor.fill("# שלום מהכספת");
+  await run("file.saveToWorkspace");
+  await expect(page.locator("aside.file-tree .file-tree-name", { hasText: "Welcome.md" })).toBeVisible({ timeout: 10_000 });
+
+  const download = page.waitForEvent("download", { timeout: 15_000 });
+  await run("vault.export");
+  // Chromium offers "zip or folder"; the zip is the default choice.
+  const dialog = page.getByRole("dialog").filter({ has: page.locator("select") });
+  if (await dialog.isVisible({ timeout: 2000 }).catch(() => false)) await dialog.getByRole("button", { name: /^(OK|Confirm)$/i }).click();
+  const d = await download;
+  expect(d.suggestedFilename()).toMatch(/^lumen-vault-\d{4}-\d{2}-\d{2}\.zip$/);
+  const stream = await d.createReadStream();
+  const bytes = await new Promise<Buffer>((resolve, reject) => {
+    const chunks: Buffer[] = [];
+    stream.on("data", (c: Buffer) => chunks.push(c));
+    stream.on("end", () => resolve(Buffer.concat(chunks)));
+    stream.on("error", reject);
+  });
+  // A real zip: local header signature, and the note's name inside.
+  expect(bytes.readUInt32LE(0)).toBe(0x04034b50);
+  expect(bytes.includes(Buffer.from("Welcome.md"))).toBe(true);
+});

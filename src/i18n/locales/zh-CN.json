@@ -1226,5 +1226,19 @@
   "spell.he.installed": "已安装希伯来语词典（{n} 个词）。",
   "spell.he.failed": "无法下载词典：{error}",
   "spell.he.removeConfirm": "从此设备删除希伯来语词典？",
-  "spell.he.removed": "已删除希伯来语词典。"
+  "spell.he.removed": "已删除希伯来语词典。",
+  "cmd.vault.export": "导出整个保险库…",
+  "cmd.vault.export.hint": "所有笔记和附件（含文件夹）导出为 .zip 或到文件夹",
+  "cmd.vault.import": "导入笔记（zip／文件夹：Obsidian、Notion、Lumen）…",
+  "cmd.vault.import.hint": "导入到新文件夹 — 不会覆盖任何现有内容",
+  "vault.export.where": "导出为…",
+  "vault.export.zip": "一个 .zip 文件",
+  "vault.export.folder": "到此电脑上的文件夹",
+  "vault.export.done": "已导出 {n} 个文件。",
+  "vault.export.failed": "导出失败：{error}",
+  "vault.import.what": "导入自…",
+  "vault.import.zip": ".zip 文件",
+  "vault.import.folder": "文件夹",
+  "vault.import.done": "已将 {notes} 篇笔记和 {files} 个文件（{source}）导入“{folder}”。",
+  "vault.import.failed": "导入失败：{error}"
 }

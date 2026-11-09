@@ -1226,5 +1226,19 @@
   "spell.he.installed": "Словарь иврита установлен ({n} слов).",
   "spell.he.failed": "Не удалось скачать словарь: {error}",
   "spell.he.removeConfirm": "Удалить словарь иврита с этого устройства?",
-  "spell.he.removed": "Словарь иврита удалён."
+  "spell.he.removed": "Словарь иврита удалён.",
+  "cmd.vault.export": "Экспорт всего хранилища…",
+  "cmd.vault.export.hint": "Все заметки и вложения с папками — в .zip или в папку",
+  "cmd.vault.import": "Импорт заметок (zip / папка: Obsidian, Notion, Lumen)…",
+  "cmd.vault.import.hint": "В новую папку — ничего не перезаписывается",
+  "vault.export.where": "Экспортировать как…",
+  "vault.export.zip": "Один .zip",
+  "vault.export.folder": "В папку на этом компьютере",
+  "vault.export.done": "Экспортировано файлов: {n}.",
+  "vault.export.failed": "Экспорт не удался: {error}",
+  "vault.import.what": "Импортировать из…",
+  "vault.import.zip": "Файл .zip",
+  "vault.import.folder": "Папка",
+  "vault.import.done": "Импортировано заметок: {notes}, файлов: {files} ({source}) в «{folder}».",
+  "vault.import.failed": "Импорт не удался: {error}"
 }
