@@ -49,7 +49,7 @@ describe("plugin scan", () => {
     ["dynamic-import", `const m = await import("https://example.com/x.js")`],
     ["dynamic-import", `import x from "./x.js"`],
     ["obfuscated-access", `const k = "ev" + "al"; globalThis[k]("1")`],
-    ["obfuscated-access", `const a = "network"; lumen[a].fetch("https://example.com")`],
+    ["obfuscated-access", `const a = ["net", "work"].join(""); lumen[a].fetch("https://example.com")`],
     ["syntax", `function (`],
   ])("%s: %s is an error", async (rule, code) => {
     const r = await scanPluginVersion({ manifest: manifest([]), main: code });
