@@ -226,16 +226,12 @@ export default defineConfig({
           { name: "New Document", short_name: "New", url: "/?action=new", icons: [{ src: "icons/icon-192.png", sizes: "192x192", type: "image/png" }] },
           { name: "Command Palette", short_name: "Commands", url: "/?action=palette", icons: [{ src: "icons/icon-192.png", sizes: "192x192", type: "image/png" }] },
         ],
+        // GET: the app reads ?title / ?text / ?url on launch (src/pwa/launch.ts).
+        // A POST target with files would need a custom service worker.
         share_target: {
           action: "/",
-          method: "POST",
-          enctype: "multipart/form-data",
-          params: {
-            title: "title",
-            text: "text",
-            url: "url",
-            files: [{ name: "files", accept: [".md", ".txt", ".markdown", "text/markdown", "text/plain"] }],
-          },
+          method: "GET",
+          params: { title: "title", text: "text", url: "url" },
         },
         file_handlers: [
           {
@@ -330,6 +326,22 @@ export default defineConfig({
             handler: "CacheFirst" as const,
             options: { cacheName, cacheableResponse: { statuses: [200] } },
           })),
+          {
+            // D1: every other hashed chunk (Shiki and its language grammars
+            // and themes, editor, blocks…) is cached the first time it is
+            // used, so it also works offline afterwards. Hashed names never
+            // change content, so CacheFirst is safe.
+            urlPattern: ({ url }) =>
+              url.origin === self.location.origin &&
+              /\/assets\/.+\.(js|mjs|css|wasm)$/.test(url.pathname) &&
+              !/\/assets\/vendor-(mermaid|tldraw|echarts|graphviz|codemirror|milkdown|leaflet|modelviewer|katex|git|yjs|react|react-dom)-/.test(url.pathname),
+            handler: "CacheFirst",
+            options: {
+              cacheName: "lumen-chunks",
+              cacheableResponse: { statuses: [200] },
+              expiration: { maxEntries: 600, maxAgeSeconds: 60 * 60 * 24 * 60 },
+            },
+          },
           {
             // Large on-demand vendor chunks (Mermaid, tldraw, ECharts, etc.)
             // Cached at runtime when first loaded via dynamic import.

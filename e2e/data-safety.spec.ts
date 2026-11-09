@@ -214,7 +214,13 @@ test("the whole vault exports as a zip", async ({ page }) => {
   await run("vault.export");
   // Chromium offers "zip or folder"; the zip is the default choice.
   const dialog = page.getByRole("dialog").filter({ has: page.locator("select") });
-  if (await dialog.isVisible({ timeout: 2000 }).catch(() => false)) await dialog.getByRole("button", { name: /^(OK|Confirm)$/i }).click();
+  // The choice dialog can take a moment on a slow CI runner: wait for
+  // whichever comes first — the download or the dialog.
+  const first = await Promise.race([
+    download.then(() => "download" as const),
+    dialog.waitFor({ timeout: 10_000 }).then(() => "dialog" as const, () => "none" as const),
+  ]);
+  if (first === "dialog") await dialog.getByRole("button", { name: /^(OK|Confirm)$/i }).click();
   const d = await download;
   expect(d.suggestedFilename()).toMatch(/^lumen-vault-\d{4}-\d{2}-\d{2}\.zip$/);
   const stream = await d.createReadStream();

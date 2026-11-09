@@ -202,6 +202,24 @@ export default function App() {
     applyLocale(locale);
   }, [locale]);
 
+  // Launched from the installed app: share target, shortcut, or a file
+  // opened with Lumen (D3).
+  useEffect(() => {
+    void import("./pwa/launch").then(({ parseLaunch, clearLaunchParams, onLaunchFiles }) => {
+      const l = parseLaunch(location.search);
+      if (l.kind === "share") {
+        openTabAction({ name: `${l.title.replace(/[\\/:*?"<>|]+/g, " ").slice(0, 60)}.md`, content: l.body, workspaceName: null });
+      } else if (l.kind === "action" && l.action === "new") {
+        openTabAction({ name: "Untitled.md", content: "", workspaceName: null });
+      } else if (l.kind === "action" && l.action === "palette") {
+        setPaletteOpen(true);
+      }
+      if (l.kind !== "none") clearLaunchParams();
+      onLaunchFiles((name, content) => openTabAction({ name, content, workspaceName: null }));
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // Check for a shared note from the iOS Share Extension.
   useEffect(() => {
     const pending = (window as unknown as Record<string, unknown>).__pendingSharedNote;
