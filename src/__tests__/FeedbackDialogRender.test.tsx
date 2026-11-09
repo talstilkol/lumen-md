@@ -18,36 +18,42 @@ vi.mock("../agents/doctor", () => ({
 
 const REPORT = { at: 0, origin: "http://localhost", summary: { ok: 1, warn: 0, fail: 1, skip: 0 }, findings: [] };
 
-describe("FeedbackDialog", () => {
-  let open: ReturnType<typeof vi.fn>;
-  let fetchSpy: ReturnType<typeof vi.fn>;
-  let xhrOpen: ReturnType<typeof vi.spyOn>;
-  let beacon: ReturnType<typeof vi.fn>;
-  let writeText: ReturnType<typeof vi.fn>;
+const open = vi.fn<(url?: string | URL, target?: string, features?: string) => Window | null>(() => null);
+const fetchSpy = vi.fn<(input: RequestInfo | URL, init?: RequestInit) => Promise<Response>>(async () => new Response("{}"));
+const beacon = vi.fn<(url: string | URL, data?: BodyInit | null) => boolean>(() => true);
+const writeText = vi.fn<(text: string) => Promise<void>>(async () => undefined);
+let xhrCount = 0;
 
+describe("FeedbackDialog", () => {
   beforeEach(() => {
     runDoctor.mockReset();
     runDoctor.mockResolvedValue(REPORT);
-    open = vi.fn();
+    for (const m of [open, fetchSpy, beacon, writeText]) m.mockClear();
+    xhrCount = 0;
     vi.stubGlobal("open", open);
-    fetchSpy = vi.fn(async () => new Response("{}"));
     vi.stubGlobal("fetch", fetchSpy);
-    xhrOpen = vi.spyOn(XMLHttpRequest.prototype, "open");
-    beacon = vi.fn(() => true);
+    vi.stubGlobal(
+      "XMLHttpRequest",
+      class {
+        constructor() {
+          xhrCount++;
+        }
+        open(): void {}
+        send(): void {}
+      },
+    );
     Object.defineProperty(navigator, "sendBeacon", { value: beacon, configurable: true });
-    writeText = vi.fn(async () => undefined);
     Object.defineProperty(navigator, "clipboard", { value: { writeText }, configurable: true });
   });
   afterEach(() => {
     cleanup();
     vi.unstubAllGlobals();
-    xhrOpen.mockRestore();
   });
 
   const nothingLeft = () => {
     expect(open).not.toHaveBeenCalled();
     expect(fetchSpy).not.toHaveBeenCalled();
-    expect(xhrOpen).not.toHaveBeenCalled();
+    expect(xhrCount).toBe(0);
     expect(beacon).not.toHaveBeenCalled();
     expect(writeText).not.toHaveBeenCalled();
   };
@@ -71,13 +77,13 @@ describe("FeedbackDialog", () => {
 
     fireEvent.click(screen.getByTestId("feedback-open-github"));
     await waitFor(() => expect(open).toHaveBeenCalledTimes(1));
-    const [url, target] = open.mock.calls[0] as [string, string];
+    const [url, target] = open.mock.calls[0];
     expect(target).toBe("_blank");
-    const u = new URL(url);
+    const u = new URL(String(url));
     expect(`${u.origin}${u.pathname}`).toBe("https://github.com/talstilkol/lumen-md/issues/new");
     expect(`${u.searchParams.get("title")}\n\n${u.searchParams.get("body")}`).toBe(preview);
     expect(fetchSpy).not.toHaveBeenCalled();
-    expect(xhrOpen).not.toHaveBeenCalled();
+    expect(xhrCount).toBe(0);
   });
 
   it("leaves out the app details and the doctor report unless ticked", async () => {

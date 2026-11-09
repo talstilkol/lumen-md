@@ -49,7 +49,8 @@ describe("feedback (14.2)", () => {
 
   it("knows the installed app and the desktop shell", () => {
     expect(collectEnvironment("cloud", NAV, { matchMedia: () => ({ matches: true }) }).shell).toBe("installed web app");
-    expect(collectEnvironment("cloud", NAV, { ...WEB, __TAURI_INTERNALS__: {} }).shell).toBe("desktop");
+    const desktop = { ...WEB, __TAURI_INTERNALS__: {} };
+    expect(collectEnvironment("cloud", NAV, desktop).shell).toBe("desktop");
   });
 
   it("scrubs keys, tokens, URL passwords, query secrets and e-mail addresses from the report", () => {
