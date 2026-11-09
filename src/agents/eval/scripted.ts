@@ -12,11 +12,13 @@ import type { EvalCase } from "./fixtures";
 
 export function scriptedAnswer(c: EvalCase, req: ExecutorRequest): ExecutorResponse {
   const model = req.model ?? "fake";
-  const called = req.messages.some((m) => m.role === "assistant" && m.toolCalls?.some((t) => t.name === c.tool.name && !t.id.startsWith("ctx_")));
+  const tool = c.tool;
+  // An agent without tools (no expected call) answers straight away.
+  const called = !tool || req.messages.some((m) => m.role === "assistant" && m.toolCalls?.some((t) => t.name === tool.name && !t.id.startsWith("ctx_")));
   const protocol = !!(req.schema as { anyOf?: unknown[] } | undefined)?.anyOf || req.messages[0]?.content.includes('{"tool": "<name>"');
   const usage = { inputTokens: 10, outputTokens: 5, estimated: true };
-  if (!called && req.tools?.length) return { content: "", toolCalls: [{ id: "c1", name: c.tool.name, args: c.tool.args ?? {} }], model, usage };
-  if (!called && protocol) return { content: JSON.stringify({ tool: c.tool.name, args: c.tool.args ?? {} }), toolCalls: [], model, usage };
+  if (!called && req.tools?.length) return { content: "", toolCalls: [{ id: "c1", name: tool.name, args: tool.args ?? {} }], model, usage };
+  if (!called && protocol) return { content: JSON.stringify({ tool: tool.name, args: tool.args ?? {} }), toolCalls: [], model, usage };
   if (protocol) {
     let final: unknown = c.example;
     try {

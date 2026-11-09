@@ -76,7 +76,16 @@ describe("every agent declares the plan's tools", () => {
   it("the eval covers all 13 agents, each with an expected tool call", () => {
     const covered = new Set(EVAL_CASES.map((c) => c.agent));
     for (const id of Object.keys(PLAN)) expect(covered, id).toContain(id);
-    for (const c of EVAL_CASES) expect(PLAN[c.agent], c.id).toContain(c.tool.name === "get_headings" ? "get_document" : c.tool.name);
+    for (const c of EVAL_CASES) {
+      // A case outside the plan's 13 is for an agent with no tools (the formulator, plan 4.11).
+      if (!(c.agent in PLAN)) {
+        expect(c.tool, c.id).toBeUndefined();
+        expect(getAgent(c.agent)?.tools ?? [], c.id).toEqual([]);
+        continue;
+      }
+      expect(c.tool, c.id).toBeDefined();
+      expect(PLAN[c.agent], c.id).toContain(c.tool!.name === "get_headings" ? "get_document" : c.tool!.name);
+    }
   });
 });
 
@@ -89,8 +98,9 @@ describe("a fake-model run of each eval case makes its tool call through the run
     expect(run.error ?? "", c.id).toBe("");
     expect(run.status).toBe("ok");
     const tool = toolCheck(c, run.steps);
-    expect(tool.detail, c.id).toBe(`called ${c.tool.name}`);
+    expect(tool.detail, c.id).toBe(c.tool ? `called ${c.tool.name}` : "no tool call expected");
     for (const check of scoreCases(run.output, c.checks)) expect(check.ok, `${c.id}: ${check.detail}`).toBe(true);
+    if (!def.tools?.length) return; // no tools: nothing offered, nothing more to check
     if (def.streaming) {
       // Context only: the model is offered no tools and may stream.
       expect(ex.calls.every((r) => !r.tools && !r.schema)).toBe(true);

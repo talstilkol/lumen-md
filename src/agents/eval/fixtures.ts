@@ -25,8 +25,9 @@ export interface EvalCase {
    * The tool call this agent is expected to make (plan 5.3): the run must
    * contain it, executed by the runtime (and successful unless
    * `mustSucceed` is false). A streaming agent makes it as a context call.
+   * Left out only for an agent that has no tools (the formulator, plan 4.11).
    */
-  tool: { name: string; args?: Record<string, unknown>; mustSucceed?: boolean };
+  tool?: { name: string; args?: Record<string, unknown>; mustSucceed?: boolean };
 }
 
 /**
