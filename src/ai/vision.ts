@@ -18,6 +18,8 @@ export interface ImageText {
   /** Full recognised text, for the image title (searchable). */
   title?: string;
   source: "ocr" | "vision" | "none";
+  /** Language of the recognised text (OCR only; plan 6.5), "und" when unclear. */
+  lang?: string;
 }
 
 const VISION_RE = /(vl\b|vl:|llava|vision|gemma3|minicpm-v|moondream|bakllava|qwen2\.5vl|granite3\.2-vision)/i;
@@ -71,7 +73,7 @@ export async function imageText(blob: Blob, lang: string): Promise<ImageText> {
     if (meaningfulText(ocr)) {
       const firstLine = ocr.text.split("\n")[0].slice(0, 100);
       const prefix = lang === "he" ? "תמונה עם הטקסט: " : "Image with text: ";
-      return { alt: `${prefix}${firstLine}`, title: ocr.text.slice(0, 600), source: "ocr" };
+      return { alt: `${prefix}${firstLine}`, title: ocr.text.slice(0, 600), source: "ocr", lang: ocr.lang };
     }
   } catch {
     /* OCR unavailable (offline before the first download, old engine) */

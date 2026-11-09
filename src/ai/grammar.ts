@@ -66,6 +66,24 @@ export function grammarEndpoint(): string {
 
 const endpoint = grammarEndpoint;
 
+/** LanguageTool codes for the languages local detection reports. */
+const LT_CODES: Record<string, string> = { en: "en-US", de: "de-DE", fr: "fr", ru: "ru-RU", uk: "uk-UA", ar: "ar", fa: "fa", ja: "ja-JP", zh: "zh-CN", es: "es", it: "it", pt: "pt-PT", nl: "nl", pl: "pl-PL", el: "el-GR" };
+
+/**
+ * The LanguageTool language of a text, detected on this device (plan 6.5).
+ * The old fixed `en-US` flagged every word of a French or German note;
+ * unclear or unsupported text keeps `en-US`.
+ */
+export async function grammarLanguage(text: string, fallback = "en-US"): Promise<string> {
+  try {
+    const { detectLanguage } = await import("../text/langId");
+    const g = detectLanguage(text);
+    return (g.confident && LT_CODES[g.lang]) || fallback;
+  } catch {
+    return fallback;
+  }
+}
+
 /** Grammar through the local proofreader agent: issues mapped to LanguageTool-shaped matches. */
 async function checkWithModel(text: string, language: string, signal?: AbortSignal): Promise<GrammarMatch[]> {
   const { runAgentOrThrow } = await import("../agents/runtime");

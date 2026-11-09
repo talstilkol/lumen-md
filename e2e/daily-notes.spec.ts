@@ -55,14 +55,20 @@ const todayIso = (page: Page) =>
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
   });
 
-/** The file names in the vault's journal/ folder (empty when there is none). */
+/**
+ * The file names in the vault's journal/ folder (empty when there is none).
+ * Chromium writes through a temporary `<name>.crswap` sibling while a
+ * createWritable() stream is open; that is the engine's, not a second note.
+ */
 const journalFiles = (page: Page) =>
   page.evaluate(async () => {
     try {
       const root = await navigator.storage.getDirectory();
       const dir = await root.getDirectoryHandle("journal");
       const names: string[] = [];
-      for await (const [name] of (dir as unknown as { entries(): AsyncIterable<[string, unknown]> }).entries()) names.push(name);
+      for await (const [name] of (dir as unknown as { entries(): AsyncIterable<[string, unknown]> }).entries()) {
+        if (!name.endsWith(".crswap")) names.push(name);
+      }
       return names.sort();
     } catch {
       return [] as string[];
@@ -90,9 +96,8 @@ test("today's note is created, opened, and not duplicated when opened again", as
   await page.keyboard.press("ControlOrMeta+End");
   await page.keyboard.type("first entry");
   await page.keyboard.press("ControlOrMeta+Alt+KeyD");
-  await page.waitForTimeout(500);
   await expect(editor).toContainText("first entry");
-  expect(await journalFiles(page)).toEqual([`${today}.md`]);
+  await expect.poll(() => journalFiles(page), { timeout: 5_000 }).toEqual([`${today}.md`]);
   await expect(tabs).toHaveCount(1);
 
   // The calendar (from the command palette) marks the day; a click opens the same note.
@@ -106,8 +111,7 @@ test("today's note is created, opened, and not duplicated when opened again", as
   await expect(cal.locator(`[data-date="${today}"]`)).toHaveAttribute("data-has-note", "true", { timeout: 5000 });
   await expect(cal.locator(`[data-date="${today}"]`)).toHaveAttribute("aria-current", "date");
   await cal.locator(`[data-date="${today}"]`).click();
-  await page.waitForTimeout(300);
-  expect(await journalFiles(page)).toEqual([`${today}.md`]);
-  await expect(tabs).toHaveCount(1);
   await expect(editor).toContainText("first entry");
+  await expect(tabs).toHaveCount(1);
+  await expect.poll(() => journalFiles(page), { timeout: 5_000 }).toEqual([`${today}.md`]);
 });
