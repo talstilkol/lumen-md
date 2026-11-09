@@ -74,9 +74,19 @@ export function buildFileCommands({ handleNew, handleOpen, handleSave }: Command
   ];
 }
 
-/** Open the trash. */
+/** Open the note's properties panel, and the trash. */
 export function buildTrashCommands(): Command[] {
   return [
+    {
+      id: "view.properties",
+      label: t("cmd.view.properties"),
+      hint: t("cmd.view.properties.hint"),
+      icon: cmdIcons.Sparkles,
+      group: t("group.tools"),
+      action: () => {
+        window.dispatchEvent(new CustomEvent("lumen-open-properties"));
+      },
+    },
     {
       id: "file.trash",
       label: t("cmd.file.trash"),
