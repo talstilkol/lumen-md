@@ -34,6 +34,7 @@ export default defineConfig({
           items: [
             { label: "Source / Split / Preview / WYSIWYG", slug: "editor/modes" },
             { label: "Smart Insert", slug: "editor/smart-insert" },
+            { label: "Outline mode", slug: "editor/outline-mode", translations: { he: "מצב מתאר" } },
           ],
         },
         {

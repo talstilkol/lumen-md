@@ -64,8 +64,10 @@ describe("text/outline — the six editing operations, LTR", () => {
   });
 
   it("the cursor stays on the moved block, at the same place", () => {
-    const r = op(EN, "moveUp", "beta text")!;
-    expect(r.text.slice(r.cursor, r.cursor + 9)).toBe("beta text");
+    const r = op(EN, "moveUp", "Beta\nbeta")!;
+    expect(r.text.slice(r.cursor, r.cursor + 9)).toBe("Beta\nbeta");
+    // Text under a heading is a block of its own: first in its section, it stays.
+    expect(op(EN, "moveUp", "beta text")).toBeNull();
   });
 
   it("indent / outdent a heading changes the level of its whole section", () => {
@@ -121,7 +123,7 @@ describe("text/outline — folding and zoom never touch the text", () => {
 
   it("zoom gives the block's range and its title", () => {
     expect(zoomRange(HE, HE.indexOf("תת א1"))).toEqual({ from: HE.indexOf("  - תת א1"), to: HE.indexOf("  - תת א1") + 9, title: "תת א1" });
-    expect(zoomRange(EN, EN.indexOf("inner"))?.title).toBe("Beta one");
+    expect(zoomRange(EN, EN.indexOf("## Beta one"))).toEqual({ from: EN.indexOf("## Beta one"), to: EN.indexOf("inner") + 5, title: "Beta one" });
   });
 
   it("fold keys are the same for the same title, and count repeats", () => {
