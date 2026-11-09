@@ -1037,6 +1037,7 @@
   "batch.folder": "Zu verarbeitender Ordner (leer = ganzer Arbeitsbereich):",
   "batch.lang": "In welche Sprache übersetzen?",
   "batch.confirm": "{count} Notizen als einen Stapel an {provider} ({model}) senden?\n\nGeschätzte Kosten: {cost} (Stapelpreis). Ergebnisse binnen 24 Stunden; mit \"KI: Stapelaufträge prüfen\" anwenden. Zählt als {count} KI-Prompts.",
+  "batch.confirmLocal": "{count} Notizen auf diesem Gerät mit {model} verarbeiten? Läuft im Hintergrund, eine Notiz nach der anderen; „KI: Batch-Jobs prüfen“ übernimmt die Ergebnisse.",
   "batch.submitted": "Stapel gesendet: {count} Notizen",
   "batch.provider": "Stapelaufträge brauchen den Anbieter OpenAI oder Anthropic",
   "batch.quota": "Nicht genug KI-Prompts in diesem Monat für {count} Notizen",

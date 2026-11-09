@@ -1037,6 +1037,7 @@
   "batch.folder": "Dossier à traiter (vide = tout l’espace de travail) :",
   "batch.lang": "Traduire dans quelle langue ?",
   "batch.confirm": "Envoyer {count} notes à {provider} ({model}) en un seul lot ?\n\nCoût estimé : {cost} (tarif batch). Résultats sous 24 heures ; lancez \"IA : vérifier les lots\" pour les appliquer. Compte pour {count} requêtes IA.",
+  "batch.confirmLocal": "Traiter {count} notes sur cet appareil avec {model} ? Le traitement tourne en arrière-plan, note par note ; « IA : vérifier les lots » applique les résultats.",
   "batch.submitted": "Lot envoyé : {count} notes",
   "batch.provider": "Les lots nécessitent le fournisseur OpenAI ou Anthropic",
   "batch.quota": "Pas assez de requêtes IA ce mois-ci pour {count} notes",

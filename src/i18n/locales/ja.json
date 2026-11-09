@@ -1037,6 +1037,7 @@
   "batch.folder": "処理するフォルダー（空欄 = ワークスペース全体）：",
   "batch.lang": "どの言語に翻訳しますか？",
   "batch.confirm": "{count} 件のノートを 1 つのバッチとして {provider}（{model}）に送信しますか？\n\n推定コスト：{cost}（バッチ価格）。結果は 24 時間以内に届きます。「AI：バッチジョブを確認」で適用します。AI プロンプト {count} 回分としてカウントされます。",
+  "batch.confirmLocal": "{model} でこのデバイス上の {count} 件のノートを処理しますか？ バックグラウンドで 1 件ずつ実行されます。結果は「AI: バッチジョブを確認」で適用します。",
   "batch.submitted": "バッチを送信しました：{count} 件",
   "batch.provider": "バッチジョブには OpenAI または Anthropic プロバイダーが必要です",
   "batch.quota": "今月の残り AI プロンプトが {count} 件分に足りません",

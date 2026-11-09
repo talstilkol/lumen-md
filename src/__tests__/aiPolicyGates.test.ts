@@ -44,11 +44,17 @@ describe("AI policy gates on direct cloud paths", () => {
     expect(isLocalOrigin("http://localhost:8010/v2/check")).toBe(true);
   });
 
-  it("batch jobs (OpenAI / Anthropic batch API)", async () => {
+  it("batch jobs run in the local queue under local-only; the cloud Batch API is refused", async () => {
     localStorage.setItem("lumen.ai.provider", "openai");
-    const { submitBatch, fetchBatchResults } = await import("../ai/batch");
-    await expect(submitBatch("translate", [{ path: "a.md", text: "hello world" }], { lang: "he" })).rejects.toMatchObject({ code: "POLICY" });
-    await expect(fetchBatchResults({ id: "b", provider: "openai", model: "m", op: "translate", createdAt: "", items: [], status: "submitted" } as never)).rejects.toMatchObject({ code: "POLICY" });
+    const batch = await import("../ai/batch");
+    batch.__setLocalBatchDeps({ answer: async () => '["local-tag"]', read: async () => "hello world", route: async () => ({ executor: "ollama", model: "qwen2.5:7b" }) });
+    const job = await batch.submitBatch("tags", [{ path: "a.md", text: "hello world" }], { lang: "he" });
+    expect(job.provider).toBe("local");
+    await batch.__localBatchRun(job.id);
+    const res = await batch.fetchBatchResults(job);
+    expect(res).toMatchObject({ state: "ended", failed: 0 });
+    expect(res.answers.get("n0")).toBe('["local-tag"]');
+    await expect(batch.fetchBatchResults({ id: "b", provider: "openai", model: "m", op: "translate", createdAt: "", items: [], status: "submitted" } as never)).rejects.toMatchObject({ code: "POLICY" });
     expect(fetchSpy).not.toHaveBeenCalled();
   });
 
