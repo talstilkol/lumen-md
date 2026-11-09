@@ -75,6 +75,7 @@ export default defineConfig({
             { label: "Image descriptions on this device", slug: "ai/image-captions" },
             { label: "English spelling on this device", slug: "ai/spelling" },
             { label: "AI doctor", slug: "ai/doctor" },
+            { label: "Image search by description", slug: "ai/image-search" },
             { label: "AI cost: usage meter + answer cache", slug: "ai/cost" },
             { label: "Research + citation checks", slug: "ai/research" },
             { label: "Agent eval: 14 agents, HTML report", slug: "ai/agent-eval", translations: { he: "הערכת סוכנים: 14 סוכנים, דוח HTML" } },

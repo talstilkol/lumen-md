@@ -1454,6 +1454,63 @@
       ]
     },
     {
+      "key": "imageSearch.copied",
+      "en": "Image link copied — paste it into the note.",
+      "vars": []
+    },
+    {
+      "key": "imageSearch.declined",
+      "en": "Image search needs the model download; nothing was searched.",
+      "vars": []
+    },
+    {
+      "key": "imageSearch.failed",
+      "en": "Image search failed: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "imageSearch.hint",
+      "en": "Describe an image to find it in your notes' images (on this device).",
+      "vars": []
+    },
+    {
+      "key": "imageSearch.indexing",
+      "en": "Indexing images {done} / {total}…",
+      "vars": [
+        "done",
+        "total"
+      ]
+    },
+    {
+      "key": "imageSearch.noHost",
+      "en": "Image search needs its model, which is not available to download yet (its host is not set up).",
+      "vars": []
+    },
+    {
+      "key": "imageSearch.none",
+      "en": "No images in this vault.",
+      "vars": []
+    },
+    {
+      "key": "imageSearch.searching",
+      "en": "Searching images…",
+      "vars": []
+    },
+    {
+      "key": "imageSearch.tab",
+      "en": "Images",
+      "vars": []
+    },
+    {
+      "key": "imageSearch.translated",
+      "en": "Searched in English: “{query}”",
+      "vars": [
+        "query"
+      ]
+    },
+    {
       "key": "loading.generic",
       "en": "Loading…",
       "vars": []
