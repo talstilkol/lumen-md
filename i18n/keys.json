@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-11-09T20:51:23.371Z",
+  "generated_at": "2026-11-09T21:55:12.604Z",
   "source": "src/i18n/index.ts (en bundle)",
-  "count": 1446,
+  "count": 1459,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -6627,6 +6627,75 @@
     {
       "key": "cmd.tools.voiceMemo.hint",
       "en": "Record, transcribe with Whisper (on this device under a local AI policy), summarize, and insert a memo block",
+      "vars": []
+    },
+    {
+      "key": "cmd.voice.meeting",
+      "en": "🎙 Meeting notes (record on this device)",
+      "vars": []
+    },
+    {
+      "key": "cmd.voice.meeting.hint",
+      "en": "Record a meeting, transcribe it on this device, and insert its decisions, tasks with owner and date, and open questions",
+      "vars": []
+    },
+    {
+      "key": "cmd.ai.meetingNotes",
+      "en": "AI: Meeting Notes from a Transcript",
+      "vars": []
+    },
+    {
+      "key": "cmd.ai.meetingNotes.hint",
+      "en": "Turn the transcript in this note (or the selection) into decisions, tasks and open questions",
+      "vars": []
+    },
+    {
+      "key": "meeting.title",
+      "en": "Meeting",
+      "vars": []
+    },
+    {
+      "key": "meeting.decisions",
+      "en": "Decisions",
+      "vars": []
+    },
+    {
+      "key": "meeting.tasks",
+      "en": "Tasks",
+      "vars": []
+    },
+    {
+      "key": "meeting.questions",
+      "en": "Open questions",
+      "vars": []
+    },
+    {
+      "key": "meeting.none",
+      "en": "none",
+      "vars": []
+    },
+    {
+      "key": "meeting.transcript",
+      "en": "Transcript",
+      "vars": []
+    },
+    {
+      "key": "meeting.inserted",
+      "en": "Meeting notes added — {n} tasks",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "meeting.icsOffer",
+      "en": "Save the {n} dated tasks as a calendar file (.ics)?",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "meeting.empty",
+      "en": "There's no transcript in this note",
       "vars": []
     },
     {

@@ -59,6 +59,48 @@ export function buildVoiceCommands(): Command[] {
       },
     },
     {
+      id: "voice.meeting",
+      label: t("cmd.voice.meeting"),
+      hint: t("cmd.voice.meeting.hint"),
+      icon: cmdIcons.Sparkles,
+      group: t("group.tools"),
+      action: async () => {
+        // Plan 6.16: record, transcribe on this device, then meeting notes.
+        const { startVoiceMemo } = await import("../../ui/VoiceDictation");
+        await startVoiceMemo({ meeting: true });
+      },
+    },
+    {
+      id: "ai.meetingNotes",
+      label: t("cmd.ai.meetingNotes"),
+      hint: t("cmd.ai.meetingNotes.hint"),
+      icon: cmdIcons.Sparkles,
+      group: t("group.tools"),
+      action: async () => {
+        // A transcript already in the note (or the selection): meeting notes appended.
+        const st = useAppStore.getState();
+        const transcript = (window.getSelection()?.toString() ?? "").trim() || st.doc.content.trim();
+        if (!transcript) {
+          showAiToast(t("meeting.empty"), "info");
+          return;
+        }
+        const [{ meetingNotesFrom, offerIcs }, { aiOperation, isAbort }] = await Promise.all([import("../../meetings/meetingNotes"), import("../../ai/aiAbort")]);
+        const op = aiOperation();
+        showAiToast(t("toast.summarising"), "info");
+        try {
+          const res = await meetingNotesFrom(transcript, { signal: op.signal, local: getAiPolicy() === "local-only" });
+          const current = useAppStore.getState().doc.content;
+          useAppStore.getState().setContent(current + (current.endsWith("\n") ? "" : "\n") + "\n" + res.markdown);
+          showAiToast(t("meeting.inserted", { n: res.notes.tasks.length }), "success");
+          void offerIcs(res);
+        } catch (e) {
+          if (!isAbort(e)) showAiToast((e as Error).message, "error");
+        } finally {
+          op.end();
+        }
+      },
+    },
+    {
       id: "voice.dictate",
       label: t("cmd.tools.voice"),
       hint: t("cmd.tools.voice.hint"),
