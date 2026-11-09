@@ -72,6 +72,7 @@ export function buildResearchCommands({ liveDoc }: CommandContext): Command[] {
           await saveClip(await clipUrl(url.trim()));
         } catch (e) {
           if ((e as Error)?.name === "ResearchUnavailableError") showAiToast(t("clip.needsService"), "error");
+          else if ((e as Error)?.name === "PrivacyBlockedError") showAiToast(t("clip.localOnly"), "info");
           else showAiToast(t("clip.failed", { message: (e as Error).message }), "error");
         }
       },

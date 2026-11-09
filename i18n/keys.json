@@ -1,7 +1,7 @@
 {
   "version": 1,
   "source": "src/i18n/index.ts (en bundle)",
-  "count": 1443,
+  "count": 1444,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -1789,6 +1789,11 @@
       "vars": []
     },
     {
+      "key": "clip.localOnly",
+      "en": "Under the local-only policy Lumen does not fetch web pages. Copy the page in your browser and use “Clip from clipboard” instead.",
+      "vars": []
+    },
+    {
       "key": "research.consent.title",
       "en": "Research on the web?",
       "vars": []
@@ -2196,7 +2201,7 @@
     },
     {
       "key": "privacy.footer",
-      "en": "Recorded: time, host, size, reason. Never the text of prompts or answers. Requests from inside model workers (downloads) are not listed.",
+      "en": "Recorded: time, host, size, reason. Never the text of prompts or answers. Model downloads made inside workers are listed too; their size may show as unknown.",
       "vars": []
     },
     {

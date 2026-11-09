@@ -22,11 +22,14 @@ describe("clipper", () => {
   });
 
   it("uses the research extractor when available, else fetches", async () => {
+    // Both routes are third-party traffic: allowed outside local-only (plan 2.4; local-only is tested in ledgerComplete.test.ts).
+    localStorage.setItem("lumen.ai.policy", "local-first");
     const c = await clipUrl("https://x.test/p", { extract: async () => ({ title: "T", text: "Body text", finalUrl: "https://x.test/p2" }) });
     expect(c.source).toBe("https://x.test/p2");
     expect(c.markdown).toContain("Body text");
     const f = vi.spyOn(globalThis, "fetch").mockResolvedValue(new Response(page, { status: 200 }));
     const d = await clipUrl("https://x.test/q", { extract: async () => ({ error: "blocked-url" }) });
+    localStorage.removeItem("lumen.ai.policy");
     expect(d.title).toBe("מאמר על השקה");
     f.mockRestore();
   });
@@ -56,11 +59,13 @@ describe("clipper", () => {
     meta.setAttribute("content", "default-src 'self'; connect-src 'self' https://api.openai.com");
     document.head.appendChild(meta);
     const f = vi.spyOn(globalThis, "fetch");
+    localStorage.setItem("lumen.ai.policy", "local-first");
     try {
       await expect(clipUrl("https://blog.example/post")).rejects.toMatchObject({ name: "ResearchUnavailableError" });
       await expect(clipUrl("https://blog.example/post", { extract: async () => ({ error: "blocked-url" }) })).rejects.toThrow("blocked-url");
       expect(f).not.toHaveBeenCalled();
     } finally {
+      localStorage.removeItem("lumen.ai.policy");
       f.mockRestore();
       meta.remove();
     }

@@ -8,7 +8,9 @@
  */
 
 import type { AgentRun, ExecutorId, RetryPatch, Suggestion } from "./types";
-import { AgentRunError } from "./runtime";
+// Type only: this module is in the startup bundle (the suggestions panel),
+// and a value import would bring the whole agent runtime with it.
+import type { AgentRunError } from "./runtime";
 
 export interface SuggestionsEvent {
   run: AgentRun;
@@ -33,10 +35,12 @@ export function showAgentSuggestions(e: SuggestionsEvent): void {
  * the caller shows its usual error.
  */
 export function reportAgentFailure(e: unknown, commandId?: string): boolean {
-  if (!(e instanceof AgentRunError) || !e.run) return false;
-  if (e.run.status === "aborted") return true;
-  if (!e.run.suggestions?.length && !listeners.size) return false;
-  showAgentSuggestions({ run: e.run, commandId: commandId ?? e.run.commandId });
+  // AgentRunError by name (it sets it), so the runtime stays a lazy chunk.
+  if (!(e instanceof Error) || e.name !== "AgentRunError" || !(e as AgentRunError).run) return false;
+  const run = (e as AgentRunError).run;
+  if (run.status === "aborted") return true;
+  if (!run.suggestions?.length && !listeners.size) return false;
+  showAgentSuggestions({ run, commandId: commandId ?? run.commandId });
   return listeners.size > 0;
 }
 

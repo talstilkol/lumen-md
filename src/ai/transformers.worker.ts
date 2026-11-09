@@ -19,6 +19,7 @@
  * huggingface.co and are cached in the browser by the library.
  */
 
+import "./workerLedgerInstall"; // first: libraries below must see the ledger's fetch (plan 2.4)
 import {
   AutoModelForSequenceClassification,
   AutoTokenizer,
