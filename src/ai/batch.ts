@@ -494,10 +494,41 @@ interface LocalState {
   finished: boolean;
   /** No local model was available: the run paused and resumes on the next check. */
   blocked?: boolean;
+  /** Paused by the user (plan 5.8): nothing runs until Resume — kept across a reload. */
+  paused?: boolean;
+  /** Cancelled by the user: the run stops and nothing is applied. */
+  cancelled?: boolean;
+  /** How long the last finished notes took (ms), for the ETA. */
+  durations?: number[];
+  /** customId → why the job's validator (after the critic's retry) rejected the answer. */
+  rejected?: Record<string, string>;
 }
 
 const LOCAL_KEY = (id: string) => `lumen-batch-local:${id}`;
 const running = new Map<string, Promise<void>>();
+/** The note in flight per job: Pause and Cancel abort it, so it isn't counted as failed. */
+const inFlight = new Map<string, AbortController>();
+/** Durations kept for the ETA. */
+const ETA_WINDOW = 20;
+const listeners = new Set<() => void>();
+
+/** Live updates for the batch panel: called after every note and every pause / resume / cancel. */
+export function subscribeBatch(fn: () => void): () => void {
+  listeners.add(fn);
+  return () => {
+    listeners.delete(fn);
+  };
+}
+
+function emitBatch(): void {
+  for (const fn of [...listeners]) {
+    try {
+      fn();
+    } catch (e) {
+      log.warn("batch listener failed", e);
+    }
+  }
+}
 /**
  * The latest state of each job this session, so a job whose IndexedDB
  * write failed (storage blocked or full) can still be applied now instead
@@ -510,7 +541,12 @@ async function loadLocal(id: string): Promise<LocalState> {
   const mem = memory.get(id);
   if (mem) return mem;
   const v = (await idbGet(LOCAL_KEY(id)).catch(() => undefined)) as LocalState | undefined;
-  return v ?? { answers: {}, failed: [], finished: false };
+  // One object per job this session, so a pause seen by the panel is the one the run checks.
+  const raced = memory.get(id);
+  if (raced) return raced;
+  const state = v ?? { answers: {}, failed: [], finished: false };
+  memory.set(id, state);
+  return state;
 }
 
 async function saveLocal(id: string, state: LocalState): Promise<void> {
@@ -521,6 +557,7 @@ async function saveLocal(id: string, state: LocalState): Promise<void> {
   } catch {
     unsaved.add(id);
   }
+  emitBatch();
 }
 
 /** Thrown when neither Ollama nor the in-browser model can run the job. */
@@ -542,14 +579,27 @@ export async function localBatchRoute(): Promise<{ executor: "ollama" | "webllm"
   return null;
 }
 
+/** What a local answer is checked against (plan 5.8): the job's operation and the note as sent. */
+export interface LocalAnswerContext {
+  op?: BatchOp;
+  source?: string;
+  signal?: AbortSignal;
+}
+
 /** Injected in tests; defaults to a native local executor, quota already paid at submit. */
-let localAnswer: (system: string, user: string, maxTokens: number) => Promise<string> = async (system, user, maxTokens) => {
+let localAnswer: (system: string, user: string, maxTokens: number, ctx?: LocalAnswerContext) => Promise<string> = async (system, user, maxTokens, ctx = {}) => {
   const route = await localBatchRoute();
   if (!route) throw new NoLocalModelError();
   // Plan 5.5: the `batch` agent, through the runtime, forced onto the local
   // executor and model the job runs on; the job was charged when submitted.
+  // Plan 5.8: the agent validates the answer for the job's operation, and
+  // its critic retries once with a hint.
   const [{ runAgentOrThrow }, { batchAgent }] = await Promise.all([import("../agents/runtime"), import("../agents/defs")]);
-  return runAgentOrThrow(batchAgent, { text: user, extra: { system, maxTokens } }, { executor: route.executor, patch: { model: route.model }, prepaid: true });
+  return runAgentOrThrow(
+    batchAgent,
+    { text: user, extra: { system, maxTokens, op: ctx.op, source: ctx.source } },
+    { executor: route.executor, patch: { model: route.model }, prepaid: true, signal: ctx.signal },
+  );
 };
 let readNote: (path: string) => Promise<string | null> = async (path) => {
   const { readWorkspaceFile } = await import("../storage/workspace");
@@ -564,24 +614,36 @@ export function __setLocalBatchDeps(deps: { answer?: typeof localAnswer; read?: 
   if (deps.read) readNote = deps.read;
 }
 
+const stopped = (s: LocalState) => !!s.paused || !!s.cancelled;
+
 function runLocal(job: BatchJob, texts?: ReadonlyMap<string, string>): Promise<void> {
   const existing = running.get(job.id);
   if (existing) return existing;
   const p = (async () => {
     const state = await loadLocal(job.id);
+    if (stopped(state)) return;
     state.blocked = false;
     for (const item of job.items) {
+      if (stopped(state)) return;
       if (item.customId in state.answers || state.failed.includes(item.customId)) continue;
       const text = texts?.get(item.path) ?? (await readNote(item.path));
+      if (stopped(state)) return;
       if (text === null) {
         state.failed.push(item.customId);
       } else {
         const r = requestFor(job.op, text, job.lang);
+        const ctrl = new AbortController();
+        inFlight.set(job.id, ctrl);
+        const started = Date.now();
         try {
-          const answer = await localAnswer(r.system, r.user, r.maxTokens);
+          const answer = await localAnswer(r.system, r.user, r.maxTokens, { op: job.op, source: text.slice(0, MAX_NOTE_CHARS), signal: ctrl.signal });
+          // Paused or cancelled while this note ran: it is not done, and not failed.
+          if (stopped(state)) return;
           if (answer.trim()) state.answers[item.customId] = answer;
           else state.failed.push(item.customId);
+          state.durations = [...(state.durations ?? []), Date.now() - started].slice(-ETA_WINDOW);
         } catch (e) {
+          if (stopped(state) || ctrl.signal.aborted) return;
           if (e instanceof NoLocalModelError) {
             // Pause, don't fail the remaining notes: the next check resumes.
             state.blocked = true;
@@ -589,15 +651,127 @@ function runLocal(job: BatchJob, texts?: ReadonlyMap<string, string>): Promise<v
             return;
           }
           state.failed.push(item.customId);
+          state.rejected = { ...(state.rejected ?? {}), [item.customId]: ((e as Error)?.message ?? String(e)).slice(0, 200) };
+          state.durations = [...(state.durations ?? []), Date.now() - started].slice(-ETA_WINDOW);
+        } finally {
+          if (inFlight.get(job.id) === ctrl) inFlight.delete(job.id);
         }
       }
       await saveLocal(job.id, state);
     }
     state.finished = true;
     await saveLocal(job.id, state);
-  })().finally(() => running.delete(job.id));
+  })().finally(() => {
+    running.delete(job.id);
+    emitBatch();
+  });
   running.set(job.id, p);
   return p;
+}
+
+/* ─── Pause, resume, cancel, progress (plan 5.8) ─────────────────────── */
+
+/**
+ * Pause a local job: the note in flight is stopped (and runs again on
+ * Resume), nothing else starts. Stored, so the job is still paused after a
+ * reload.
+ */
+export async function pauseBatch(id: string): Promise<void> {
+  const state = await loadLocal(id);
+  if (state.finished || state.cancelled) return;
+  state.paused = true;
+  inFlight.get(id)?.abort();
+  await saveLocal(id, state);
+}
+
+/** Resume a paused local job from the first note without an answer. */
+export async function resumeBatch(job: BatchJob): Promise<void> {
+  if (job.provider !== "local") return;
+  const state = await loadLocal(job.id);
+  if (state.finished || state.cancelled) return;
+  state.paused = false;
+  state.blocked = false;
+  await saveLocal(job.id, state);
+  // A paused run may still be settling: start after it has.
+  await running.get(job.id);
+  void runLocal(job);
+}
+
+/**
+ * Cancel a job: a local run stops and its answers are dropped; a cloud job
+ * is cancelled at the provider (policy-gated). The job is marked cancelled,
+ * so nothing of it is ever applied.
+ */
+export async function cancelBatch(job: BatchJob, fetchImpl: Fetch = fetch): Promise<void> {
+  if (job.provider === "local") {
+    const state = await loadLocal(job.id);
+    state.cancelled = true;
+    state.paused = false;
+    inFlight.get(job.id)?.abort();
+    await saveLocal(job.id, state);
+  } else {
+    assertCloudAllowed(`${job.provider} batch API`);
+    const res =
+      job.provider === "anthropic"
+        ? await fetchImpl(`${ANTHROPIC}/${job.id}/cancel`, { method: "POST", headers: anthropicHeaders() })
+        : await fetchImpl(`${OPENAI}/batches/${job.id}/cancel`, { method: "POST", headers: { Authorization: `Bearer ${getProviderKey("openai")}` } });
+    if (!res.ok) throw new AiError("API_ERROR", `${job.provider} batch cancel ${res.status}`);
+  }
+  const jobs = loadJobs();
+  const stored = jobs.find((j) => j.id === job.id);
+  if (stored) stored.status = "cancelled";
+  job.status = "cancelled";
+  saveJobs(jobs);
+  emitBatch();
+}
+
+export interface BatchProgress {
+  total: number;
+  /** Notes with an answer. */
+  done: number;
+  failed: number;
+  /** customId → why the answer was rejected. */
+  rejected: Record<string, string>;
+  paused: boolean;
+  cancelled: boolean;
+  /** No local model was available; Resume (or a check) tries again. */
+  blocked: boolean;
+  /** A note is being processed right now in this tab. */
+  running: boolean;
+  finished: boolean;
+  /** Estimated time left, from the average of the last notes; null before the first. */
+  etaMs: number | null;
+}
+
+/** Remaining time from recent per-note durations. Exported for tests. */
+export function estimateEta(durations: readonly number[], remaining: number): number | null {
+  if (!durations.length || remaining <= 0) return remaining <= 0 ? 0 : null;
+  const avg = durations.reduce((a, b) => a + b, 0) / durations.length;
+  return Math.round(avg * remaining);
+}
+
+/** Where a local job stands. A cloud job reports only its total (the provider holds the rest). */
+export async function batchProgress(job: BatchJob): Promise<BatchProgress> {
+  const total = job.items.length;
+  if (job.provider !== "local") {
+    return { total, done: 0, failed: 0, rejected: {}, paused: false, cancelled: job.status === "cancelled", blocked: false, running: false, finished: job.status !== "submitted", etaMs: null };
+  }
+  const s = await loadLocal(job.id);
+  const done = Object.keys(s.answers).length;
+  const failed = s.failed.length;
+  const paused = !!s.paused;
+  return {
+    total,
+    done,
+    failed,
+    rejected: { ...(s.rejected ?? {}) },
+    paused,
+    cancelled: !!s.cancelled || job.status === "cancelled",
+    blocked: !!s.blocked,
+    running: running.has(job.id),
+    finished: s.finished,
+    etaMs: paused || s.cancelled ? null : estimateEta(s.durations ?? [], total - done - failed),
+  };
 }
 
 async function submitLocalBatch(op: BatchOp, notes: ReadonlyArray<{ path: string; text: string }>, lang?: string): Promise<BatchJob> {
@@ -613,6 +787,9 @@ async function submitLocalBatch(op: BatchOp, notes: ReadonlyArray<{ path: string
 
 async function localBatchResults(job: BatchJob): Promise<BatchResults> {
   let state = await loadLocal(job.id);
+  if (state.cancelled) return { state: "cancelled", answers: new Map(), failed: 0 };
+  // Paused by the user: stays paused until Resume — a check doesn't restart it.
+  if (state.paused && !state.finished) return { state: "processing", answers: new Map(), failed: state.failed.length };
   if (!state.finished && state.blocked && !running.has(job.id)) {
     // Paused for want of a local model: try again now (fails fast when there still is none).
     await runLocal(job);
@@ -635,7 +812,16 @@ async function localBatchResults(job: BatchJob): Promise<BatchResults> {
 export async function clearLocalBatch(id: string): Promise<void> {
   memory.delete(id);
   unsaved.delete(id);
+  inFlight.get(id)?.abort();
   await idbDel(LOCAL_KEY(id)).catch(() => {});
+}
+
+/** Tests: a reload — this session's in-memory state is gone, IndexedDB is not. */
+export function __forgetSession(): void {
+  for (const c of inFlight.values()) c.abort();
+  inFlight.clear();
+  memory.clear();
+  unsaved.clear();
 }
 
 /** Tests: wait for a running local job. */
