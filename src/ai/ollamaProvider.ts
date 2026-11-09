@@ -58,6 +58,11 @@ function getModel(): string {
   }
 }
 
+/** The configured Ollama chat model (`lumen.ollama.model`, default llama3.1). */
+export function getOllamaConfigModel(): string {
+  return getModel();
+}
+
 export function setOllamaConfig(config: Partial<OllamaConfig>): void {
   if (config.baseUrl) localStorage.setItem("lumen.ollama.baseUrl", config.baseUrl);
   if (config.model) localStorage.setItem("lumen.ollama.model", config.model);

@@ -9,6 +9,7 @@ import type { AgentDefinition, AgentInput } from "../types";
 import { registerAgent } from "../registry";
 import { nonEmptyValidator } from "../tools/validate";
 import { clip } from "./shared";
+import { styleInstruction } from "../../ai/styleProfiles";
 
 export interface WriterInput extends AgentInput {
   /** What to write. */
@@ -18,9 +19,14 @@ export interface WriterInput extends AgentInput {
 export const writerAgent: AgentDefinition<WriterInput, string> = registerAgent<WriterInput, string>({
   id: "writer",
   description: "Write Markdown from a request (Ghostwriter)",
-  system:
-    "You are a helpful ghostwriter embedded inside a markdown editor. Write in the language of the request. " +
-    "Provide just the raw markdown response without surrounding code fences unless the user requested code.",
+  system: () =>
+    [
+      "You are a helpful ghostwriter embedded inside a markdown editor. Write in the language of the request. " +
+        "Provide just the raw markdown response without surrounding code fences unless the user requested code.",
+      styleInstruction(),
+    ]
+      .filter(Boolean)
+      .join("\n\n"),
   user: (input) => clip(input.text, 8000),
   validators: [nonEmptyValidator()],
   streaming: true,
@@ -39,7 +45,10 @@ export interface TemplaterInput extends AgentInput {
 export const templaterAgent: AgentDefinition<TemplaterInput, string> = registerAgent<TemplaterInput, string>({
   id: "templater",
   description: "Run a prompt template (summarize, improve, explain…) on the document",
-  system: "You are a writing assistant inside a Markdown editor. Follow the instruction exactly and answer in Markdown, in the language the instruction asks for.",
+  system: () =>
+    ["You are a writing assistant inside a Markdown editor. Follow the instruction exactly and answer in Markdown, in the language the instruction asks for.", styleInstruction()]
+      .filter(Boolean)
+      .join("\n\n"),
   // The whole template input goes out, as before the agents: improve /
   // translate / summarize must see the complete document.
   user: (input) => input.text,

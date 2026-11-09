@@ -1281,6 +1281,61 @@ export function useCommands({
         },
       },
       {
+        id: "ai.styleProfile",
+        label: t("cmd.ai.styleProfile"),
+        hint: t("cmd.ai.styleProfile.hint"),
+        icon: cmdIcons.Sparkles,
+        group: t("group.ai"),
+        action: async () => {
+          const sp = await import("../ai/styleProfiles");
+          const current = sp.getStyleProfile();
+          const choice = await uiSelect({
+            title: t("ai.style.title"),
+            message: current ? t("ai.style.current", { notes: current.notes, tone: current.tone }) : t("ai.style.none"),
+            defaultValue: current ? (sp.styleProfileActive() ? "off" : "on") : "build",
+            choices: [
+              { value: "build", label: t("ai.style.build") },
+              ...(current
+                ? [
+                    sp.styleProfileActive() ? { value: "off", label: t("ai.style.off") } : { value: "on", label: t("ai.style.on") },
+                    { value: "show", label: t("ai.style.show") },
+                    { value: "modelfile", label: t("ai.style.modelfile") },
+                    { value: "clear", label: t("ai.style.clear") },
+                  ]
+                : []),
+            ],
+          });
+          if (!choice) return;
+          try {
+            if (choice === "build") {
+              const folder = await uiPrompt({ message: t("ai.style.folder"), defaultValue: "" });
+              if (folder === null) return;
+              showAiToast(t("ai.style.building"), "info");
+              const p = await sp.buildStyleProfile(folder.trim());
+              showAiToast(t("ai.style.built", { notes: p.notes, rules: p.rules.length }), "success");
+            } else if (choice === "on" || choice === "off") {
+              sp.setStyleProfileActive(choice === "on");
+              showAiToast(choice === "on" ? t("ai.style.on") : t("ai.style.off"), "success");
+            } else if (choice === "show" && current) {
+              await uiAlert({ title: t("ai.style.title"), message: sp.styleInstruction(current) });
+            } else if (choice === "modelfile" && current) {
+              const { getOllamaConfigModel } = await import("../ai/ollamaProvider");
+              const { writeWorkspaceFile, workspaceHasFile } = await import("../storage/workspace");
+              // Never overwrite: an earlier (maybe edited) export or another file keeps its name.
+              let path = "lumen-style.Modelfile";
+              for (let n = 2; await workspaceHasFile(path); n++) path = `lumen-style-${n}.Modelfile`;
+              await writeWorkspaceFile(path, sp.styleModelfile(getOllamaConfigModel()));
+              showAiToast(t("ai.style.modelfileSaved", { path }), "success");
+            } else if (choice === "clear") {
+              sp.clearStyleProfile();
+              showAiToast(t("ai.style.cleared"), "success");
+            }
+          } catch (e) {
+            showAiToast((e as Error).message, "error");
+          }
+        },
+      },
+      {
         id: "ai.policy",
         label: t("cmd.ai.policy"),
         hint: t("cmd.ai.policy.hint"),
