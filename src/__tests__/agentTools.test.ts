@@ -15,6 +15,8 @@ vi.mock("../storage/workspace", () => ({
 vi.mock("../storage/workspaceIndex", () => ({
   searchWorkspace: async (q: string) =>
     [...files.entries()].filter(([, c]) => c.includes(q)).map(([path, c]) => ({ path, name: path, score: 5, snippet: c.slice(0, 40) })),
+  ensureIndex: async () => {},
+  indexedFiles: () => [...files.entries()].map(([path, content]) => ({ path, name: path.split("/").pop() ?? path, content, modified: 0, wikiTargets: [] })),
 }));
 const parse = vi.fn();
 vi.mock("mermaid", () => ({ default: { parse } }));

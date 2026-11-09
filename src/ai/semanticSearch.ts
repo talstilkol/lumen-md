@@ -185,13 +185,31 @@ async function embedTextsInBatches(texts: string[]): Promise<Float32Array[]> {
 
 /* ─── Index lifecycle ───────────────────────────────────────────────── */
 
+// C4: the index is read from IndexedDB once per session and its vectors
+// decoded once — not on every query.
+let memIndex: SemanticIndex | null = null;
+const decoded = new WeakMap<ChunkRecord, Float32Array>();
+
 async function loadIndex(): Promise<SemanticIndex> {
+  if (memIndex) return memIndex;
   const cached = (await get(IDB_KEY).catch(() => undefined)) as SemanticIndex | undefined;
-  return cached ?? { builtAt: 0, files: {} };
+  memIndex = cached ?? { builtAt: 0, files: {} };
+  return memIndex;
 }
 
 async function saveIndex(index: SemanticIndex): Promise<void> {
+  memIndex = index;
   await set(IDB_KEY, index).catch((err) => log.warn("semantic index persist failed", err));
+}
+
+/** A chunk's vector, decoded from base64 once. */
+function vectorOf(chunk: ChunkRecord): Float32Array {
+  let v = decoded.get(chunk);
+  if (!v) {
+    v = base64ToVector(chunk.vector);
+    decoded.set(chunk, v);
+  }
+  return v;
 }
 
 let inFlightIndex: Promise<SemanticIndex> | null = null;
@@ -302,8 +320,7 @@ export async function searchSemantic(query: string, k = 8): Promise<SemanticHit[
   for (const file of Object.values(index.files)) {
     let best: { chunk: ChunkRecord; score: number } | null = null;
     for (const chunk of file.chunks) {
-      const v = base64ToVector(chunk.vector);
-      const s = cosine(qVec, v);
+      const s = cosine(qVec, vectorOf(chunk));
       if (!best || s > best.score) best = { chunk, score: s };
     }
     if (best) {
@@ -345,5 +362,6 @@ export async function searchHybrid(query: string, k = 8): Promise<SemanticHit[]>
 }
 
 export async function clearSemanticIndex(): Promise<void> {
+  memIndex = null;
   await set(IDB_KEY, undefined).catch(() => {});
 }

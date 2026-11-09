@@ -30,6 +30,7 @@ import { useAppStore } from "../store/useStore";
 import { safeMove, trashPaths, undoTrash } from "../storage/fileOps";
 import type { TrashItem } from "../storage/trash";
 import { toast, useToastStore } from "../store/useToastStore";
+import { onWorkspaceChanged } from "../storage/workspaceEvents";
 
 interface Props {
   /** Currently active workspace path (if any). */
@@ -182,10 +183,10 @@ export function FileTree({
   }, [refresh]);
 
   useEffect(() => {
-    const onChange = () => refresh();
-    window.addEventListener("lumen-workspace-changed", onChange);
-    return () =>
-      window.removeEventListener("lumen-workspace-changed", onChange);
+    // A save that only changed a file's text leaves the tree as it is (C3).
+    return onWorkspaceChanged((c) => {
+      if (c.kind === "structure") void refresh();
+    }, { debounceMs: 150 });
   }, [refresh]);
 
   // Auto-expand all ancestors of the active file.
