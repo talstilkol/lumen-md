@@ -1611,5 +1611,12 @@
   "db.kanban.dropped": "{note} הועבר אל {column}.",
   "db.kanban.cancelled": "העברת {note} בוטלה.",
   "db.calendar.needDate": "לוח השנה צריך dateField: בהגדרת מסד הנתונים.",
-  "db.calendar.noDates": "לאף פתק אין תאריך ב-{field}."
+  "db.calendar.noDates": "לאף פתק אין תאריך ב-{field}.",
+  "agents.untrusted.title": "לאשר את פעולת הסוכן?",
+  "agents.untrusted.body": "הכלי {tool} רוצה {action}. בריצה הזאת הסוכן קרא תוכן מבחוץ ({sources}), ויכול להיות שהושתלו בו הוראות כדי להטעות אותו.",
+  "agents.untrusted.action.write": "להציע שינוי בפתקים שלך",
+  "agents.untrusted.action.network": "לשלוח בקשה לרשת",
+  "agents.untrusted.args": "מה הוא יעשה: „{value}”.",
+  "agents.untrusted.ok": "לאשר פעם אחת",
+  "agents.netConsent.untrusted": "זהירות: בריצה הזאת הסוכן קרא תוכן מבחוץ ({sources}), ויכול להיות שהושתלו בו הוראות."
 }

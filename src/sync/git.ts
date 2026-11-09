@@ -119,7 +119,12 @@ async function mirrorRepoToOPFS(repoDir: string, fs: Fs): Promise<number> {
       }
     }
   }
-  await walk(repoDir, repoNameFromUrl(repoDir.replace(/^\/git\//, "")));
+  const root = repoNameFromUrl(repoDir.replace(/^\/git\//, ""));
+  // Plan 2.7: a cloned repo's notes may be other authors' — agents treat the
+  // folder as outside content. Recorded before the first file is written, so
+  // a copy that fails or is still running is covered too.
+  (await import("../agents/provenance")).markUntrustedNote(root, "cloned from git");
+  await walk(repoDir, root);
   return count;
 }
 
@@ -362,6 +367,11 @@ export async function pullRepo(
       .filter((p) => p === repoFolder || p.startsWith(`${repoFolder}/`)),
   );
   const seen = new Set<string>();
+  // Plan 2.7: what a pull brings in may be another author's text. The repo
+  // folder is recorded once, before anything is written (it also covers a
+  // repo cloned before the guard existed); a folder record covers every file.
+  const prov = await import("../agents/provenance");
+  if (!prov.untrustedSourcesOfNote(`${repoFolder}/x`).length) prov.markUntrustedNote(repoFolder, "pulled from git");
   let changed = 0;
   async function walk(currentDir: string, opfsPrefix: string) {
     const entries = await fs.promises.readdir(currentDir);

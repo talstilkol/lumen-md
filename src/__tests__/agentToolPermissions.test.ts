@@ -65,7 +65,11 @@ function fakeExecutor(script: Script): Executor & { calls: ExecutorRequest[] } {
 const reply = (content: string): ExecutorResponse => ({ content, toolCalls: [], model: "fake-small" });
 const call = (tool: string, args: Record<string, unknown>) => reply(JSON.stringify({ tool, args }));
 const final = (answer: string) => reply(JSON.stringify({ final: answer }));
-const lastToolResult = (req: ExecutorRequest) => JSON.parse(req.messages[req.messages.length - 1].content) as { tool: string; result?: unknown; error?: string };
+/** The last tool result; an untrusted one (plan 2.7) arrives between ⟪untrusted⟫ delimiters around the JSON. */
+const lastToolResult = (req: ExecutorRequest) => {
+  const c = req.messages[req.messages.length - 1].content;
+  return JSON.parse(c.slice(c.indexOf("{"), c.lastIndexOf("}") + 1)) as { tool: string; result?: unknown; error?: string };
+};
 
 /** An agent that calls the scripted tools, then answers. */
 function agent(toolNames: string[], requires: AgentDefinition["requires"] = []): AgentDefinition {

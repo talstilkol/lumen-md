@@ -1611,5 +1611,12 @@
   "db.kanban.dropped": "{note} を {column} に移動しました。",
   "db.kanban.cancelled": "{note} の移動を取り消しました。",
   "db.calendar.needDate": "カレンダーにはデータベース定義の dateField: が必要です。",
-  "db.calendar.noDates": "{field} に日付があるノートはありません。"
+  "db.calendar.noDates": "{field} に日付があるノートはありません。",
+  "agents.untrusted.title": "このエージェントの操作を許可しますか？",
+  "agents.untrusted.body": "ツール {tool} が{action}としています。この実行は外部のコンテンツ（{sources}）を読み込んでおり、エージェントをだますための指示が仕込まれている可能性があります。",
+  "agents.untrusted.action.write": "ノートの変更を提案しよう",
+  "agents.untrusted.action.network": "Web にリクエストを送信しよう",
+  "agents.untrusted.args": "実行内容:「{value}」",
+  "agents.untrusted.ok": "今回だけ許可",
+  "agents.netConsent.untrusted": "注意: この実行は外部のコンテンツ（{sources}）を読み込んでおり、仕込まれた指示が含まれている可能性があります。"
 }

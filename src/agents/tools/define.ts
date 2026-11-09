@@ -32,6 +32,7 @@ export function defineTool<A extends Record<string, unknown>, R>(spec: {
   parameters: JsonSchema;
   scope?: ToolScope;
   run: (args: A, ctx: ToolContext) => Promise<R>;
+  untrusted?: (args: A, result: R, ctx: ToolContext) => string[] | Promise<string[]>;
 }): AgentTool<A, R> {
   const inner = spec.run;
   return {

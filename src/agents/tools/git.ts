@@ -53,6 +53,16 @@ export const gitDiffTool = defineTool<
     },
     additionalProperties: false,
   },
+  // Plan 2.7: HEAD's side of a cloned or pulled repo (deleted and context
+  // lines) is someone else's text, so the diff carries the repo's provenance.
+  untrusted: async (_args, result) => {
+    if (!result.files.length && !result.diff) return [];
+    const { ensureProvenanceBackfill, untrustedSourcesOfNote } = await import("../untrusted");
+    await ensureProvenanceBackfill();
+    const sources = new Set<string>();
+    for (const f of result.files.length ? result.files.map((x) => x.path) : [`${result.repo}/`]) for (const s of untrustedSourcesOfNote(f)) sources.add(s);
+    return [...sources].slice(0, 20);
+  },
   run: async (args, ctx) => {
     const repo = await resolveRepo(args.repo, ctx.path);
     throwIfAborted(ctx.signal);

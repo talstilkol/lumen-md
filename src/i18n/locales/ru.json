@@ -1611,5 +1611,12 @@
   "db.kanban.dropped": "{note} перемещена в {column}.",
   "db.kanban.cancelled": "Перемещение {note} отменено.",
   "db.calendar.needDate": "Календарю нужен dateField: в описании базы.",
-  "db.calendar.noDates": "Ни у одной заметки нет даты в {field}."
+  "db.calendar.noDates": "Ни у одной заметки нет даты в {field}.",
+  "agents.untrusted.title": "Разрешить это действие агента?",
+  "agents.untrusted.body": "Инструмент {tool} хочет {action}. В этом запуске агент прочитал внешнее содержимое ({sources}), в которое могли подложить инструкции, чтобы обмануть его.",
+  "agents.untrusted.action.write": "предложить изменение в ваших заметках",
+  "agents.untrusted.action.network": "отправить запрос в интернет",
+  "agents.untrusted.args": "Что он сделает: «{value}».",
+  "agents.untrusted.ok": "Разрешить один раз",
+  "agents.netConsent.untrusted": "Осторожно: в этом запуске агент прочитал внешнее содержимое ({sources}), в которое могли подложить инструкции."
 }

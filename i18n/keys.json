@@ -1,7 +1,7 @@
 {
   "version": 1,
   "source": "src/i18n/index.ts (en bundle)",
-  "count": 1613,
+  "count": 1620,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -2400,6 +2400,49 @@
       "key": "agentReview.toast.review",
       "en": "Review",
       "vars": []
+    },
+    {
+      "key": "agents.untrusted.title",
+      "en": "Approve this agent action?",
+      "vars": []
+    },
+    {
+      "key": "agents.untrusted.body",
+      "en": "The {tool} tool wants to {action}. This run has read content from outside ({sources}), which may contain instructions planted to trick the agent.",
+      "vars": [
+        "tool",
+        "action",
+        "sources"
+      ]
+    },
+    {
+      "key": "agents.untrusted.action.write",
+      "en": "propose a change to your notes",
+      "vars": []
+    },
+    {
+      "key": "agents.untrusted.action.network",
+      "en": "send a request to the web",
+      "vars": []
+    },
+    {
+      "key": "agents.untrusted.args",
+      "en": "What it would do: “{value}”.",
+      "vars": [
+        "value"
+      ]
+    },
+    {
+      "key": "agents.untrusted.ok",
+      "en": "Allow once",
+      "vars": []
+    },
+    {
+      "key": "agents.netConsent.untrusted",
+      "en": "Careful: this run has read content from outside ({sources}), which may contain planted instructions.",
+      "vars": [
+        "sources"
+      ]
     },
     {
       "key": "cmd.note.read",

@@ -265,6 +265,16 @@ describe("git_diff", () => {
     expect(r.truncated).toBe(false);
   });
 
+  it("carries the repository's provenance: a cloned or pulled repo's diff is outside content (plan 2.7)", async () => {
+    localStorage.setItem("lumen.agents.provenanceBackfill.v1", "1");
+    const { markUntrustedNote } = await import("../agents/provenance");
+    const r = await gitDiffTool.run({}, ctx({ path: "repo/a.md" }));
+    expect(await gitDiffTool.untrusted!({}, r, ctx())).toEqual([]);
+    markUntrustedNote("repo", "cloned from git");
+    expect(await gitDiffTool.untrusted!({}, r, ctx())).toEqual(["cloned from git (repo/a.md)", "cloned from git (repo/new.md)"]);
+    localStorage.removeItem("lumen.agents.untrustedNotes");
+  });
+
   it("diffs the index with staged=true, and narrows to paths", async () => {
     await gitDiffTool.run({}, ctx()); // mirrors the workspace into the checkout
     await isoGit.add({ fs, dir, filepath: "new.md" });

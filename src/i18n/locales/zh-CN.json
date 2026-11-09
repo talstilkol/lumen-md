@@ -1611,5 +1611,12 @@
   "db.kanban.dropped": "{note} 已移到 {column}。",
   "db.kanban.cancelled": "已取消移动 {note}。",
   "db.calendar.needDate": "日历需要在数据库定义中设置 dateField:。",
-  "db.calendar.noDates": "没有笔记在 {field} 中有日期。"
+  "db.calendar.noDates": "没有笔记在 {field} 中有日期。",
+  "agents.untrusted.title": "允许此智能体操作吗？",
+  "agents.untrusted.body": "工具 {tool} 想要{action}。本次运行读取了外部内容（{sources}），其中可能藏有诱骗智能体的指令。",
+  "agents.untrusted.action.write": "提议修改你的笔记",
+  "agents.untrusted.action.network": "向网络发送请求",
+  "agents.untrusted.args": "它将执行：“{value}”。",
+  "agents.untrusted.ok": "允许一次",
+  "agents.netConsent.untrusted": "注意：本次运行读取了外部内容（{sources}），其中可能藏有植入的指令。"
 }

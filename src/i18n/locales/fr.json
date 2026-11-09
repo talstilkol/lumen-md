@@ -1611,5 +1611,12 @@
   "db.kanban.dropped": "{note} déplacée vers {column}.",
   "db.kanban.cancelled": "Déplacement de {note} annulé.",
   "db.calendar.needDate": "Le calendrier a besoin de dateField: dans la définition de la base.",
-  "db.calendar.noDates": "Aucune note n’a de date dans {field}."
+  "db.calendar.noDates": "Aucune note n’a de date dans {field}.",
+  "agents.untrusted.title": "Autoriser cette action de l'agent ?",
+  "agents.untrusted.body": "L'outil {tool} veut {action}. Cette exécution a lu du contenu externe ({sources}), qui peut contenir des instructions placées pour tromper l'agent.",
+  "agents.untrusted.action.write": "proposer une modification de vos notes",
+  "agents.untrusted.action.network": "envoyer une requête sur le web",
+  "agents.untrusted.args": "Ce qu'il ferait : « {value} ».",
+  "agents.untrusted.ok": "Autoriser une fois",
+  "agents.netConsent.untrusted": "Attention : cette exécution a lu du contenu externe ({sources}), qui peut contenir des instructions placées."
 }

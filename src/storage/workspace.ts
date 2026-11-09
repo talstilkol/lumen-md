@@ -227,7 +227,22 @@ export async function renameWorkspaceFile(
   newPath: string,
   opts: { overwrite?: boolean } = {},
 ): Promise<void> {
-  await vault().rename(oldPath, newPath, opts);
+  // Plan 2.7: outside content stays outside content under its new name. The
+  // records move first: if they can't be stored, nothing is moved; if the
+  // move fails (conflict, quota, write error), they go back.
+  const prov = await import("../agents/provenance");
+  const before = prov.snapshotRecords();
+  if (oldPath !== newPath) prov.moveUntrustedNotes(oldPath, newPath);
+  try {
+    await vault().rename(oldPath, newPath, opts);
+  } catch (e) {
+    try {
+      prov.restoreRecords(before);
+    } catch {
+      /* the records stay on the new name as well: outside content is never lost */
+    }
+    throw e;
+  }
 }
 
 export async function workspaceHasFile(path: string): Promise<boolean> {

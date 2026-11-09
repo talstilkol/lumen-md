@@ -1611,5 +1611,12 @@
   "db.kanban.dropped": "{note} nach {column} verschoben.",
   "db.kanban.cancelled": "Verschieben von {note} abgebrochen.",
   "db.calendar.needDate": "Der Kalender braucht dateField: in der Datenbank-Definition.",
-  "db.calendar.noDates": "Keine Notiz hat ein Datum in {field}."
+  "db.calendar.noDates": "Keine Notiz hat ein Datum in {field}.",
+  "agents.untrusted.title": "Diese Agent-Aktion erlauben?",
+  "agents.untrusted.body": "Das Werkzeug {tool} möchte {action}. Dieser Lauf hat Inhalte von außen gelesen ({sources}), die eingeschleuste Anweisungen enthalten können, um den Agenten zu täuschen.",
+  "agents.untrusted.action.write": "eine Änderung an deinen Notizen vorschlagen",
+  "agents.untrusted.action.network": "eine Anfrage ins Web senden",
+  "agents.untrusted.args": "Was es tun würde: „{value}“.",
+  "agents.untrusted.ok": "Einmal erlauben",
+  "agents.netConsent.untrusted": "Vorsicht: Dieser Lauf hat Inhalte von außen gelesen ({sources}), die eingeschleuste Anweisungen enthalten können."
 }

@@ -1611,5 +1611,12 @@
   "db.kanban.dropped": "نُقلت {note} إلى {column}.",
   "db.kanban.cancelled": "أُلغي نقل {note}.",
   "db.calendar.needDate": "يحتاج التقويم إلى dateField: في مواصفات قاعدة البيانات.",
-  "db.calendar.noDates": "لا توجد ملاحظات بتاريخ في {field}."
+  "db.calendar.noDates": "لا توجد ملاحظات بتاريخ في {field}.",
+  "agents.untrusted.title": "هل توافق على إجراء الوكيل هذا؟",
+  "agents.untrusted.body": "تريد الأداة {tool} أن {action}. قرأ هذا التشغيل محتوى من الخارج ({sources})، وقد يحتوي على تعليمات مزروعة لخداع الوكيل.",
+  "agents.untrusted.action.write": "تقترح تغييرًا في ملاحظاتك",
+  "agents.untrusted.action.network": "ترسل طلبًا إلى الويب",
+  "agents.untrusted.args": "ما ستفعله: \"{value}\".",
+  "agents.untrusted.ok": "السماح مرة واحدة",
+  "agents.netConsent.untrusted": "انتبه: قرأ هذا التشغيل محتوى من الخارج ({sources})، وقد يحتوي على تعليمات مزروعة."
 }
