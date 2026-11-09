@@ -157,3 +157,16 @@ The coordinator merges the lanes, then posts the replies with
 `node scripts/review-reply.mjs decisions.tsv --pr-fix <N>` (dry run; add
 `--go` to post). `fixed` and `already-fixed` threads are resolved, `wontfix`
 threads are answered and left open for the reviewer.
+
+## Handoff — `npm run handoff`
+
+`npm run handoff -- --task "<what is in progress>" --next "<the next step>"` writes `docs/dev/HANDOFF.md`, which contains:
+
+- the open PRs as a stack, with the latest CI result for each and its count of review comments that have no reply yet;
+- the worktrees;
+- the current task and the next step;
+- a check that every branch and worktree it names exists. If any is missing, the script exits 1 and lists the problem.
+
+Run it at the end of every PR. The file is gitignored on purpose: every lane would otherwise conflict on it. The coordinator copies it to the claude.ai project doc so the next session reads it there.
+
+`--stdout` prints the file instead of writing it. `--no-github` skips the GitHub calls (no PRs).
