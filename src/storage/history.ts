@@ -15,9 +15,14 @@
  * stored twice in a row; each document keeps its newest 100 snapshots; when
  * the browser's quota runs out the oldest snapshots of all documents go
  * first and the write is retried once.
+ *
+ * In an encrypted vault (plan 11.4) the content of each snapshot is stored
+ * sealed (the document's name is not), nothing is recorded while the vault
+ * is locked, and sealed snapshots read as absent until it is unlocked.
  */
 
 import { log } from "../lib/logger";
+import { forStore, fromStore, isSealedValue, type SealedValue } from "./vault/restStore";
 
 export type SnapshotReason = "autosave" | "save" | "auto-backup" | "vault" | "close" | "restore" | "manual";
 
@@ -28,6 +33,20 @@ export interface Snapshot {
   content: string;
   timestamp: number;
   reason?: SnapshotReason;
+}
+
+/** A row as stored: the content may be sealed. */
+type StoredSnapshot = Omit<Snapshot, "content"> & { content: string | SealedValue };
+const LABEL = "history";
+
+/** Rows with their content opened; sealed rows that cannot be opened (locked) are left out. */
+async function opened(rows: StoredSnapshot[]): Promise<Snapshot[]> {
+  const out: Snapshot[] = [];
+  for (const r of rows) {
+    const content = await fromStore<string>(LABEL, r.content);
+    if (typeof content === "string") out.push({ ...r, content });
+  }
+  return out;
 }
 
 const DB_NAME = "lumen-history";
@@ -95,8 +114,8 @@ export function isQuotaError(e: unknown): boolean {
 export async function listSnapshots(name: string): Promise<Snapshot[]> {
   const db = await openDB();
   const tx = db.transaction(STORE, "readonly");
-  const rows = (await promisify(tx.objectStore(STORE).index("name").getAll(name))) as Snapshot[];
-  return rows.sort((a, b) => b.timestamp - a.timestamp || b.id - a.id);
+  const rows = (await promisify(tx.objectStore(STORE).index("name").getAll(name))) as StoredSnapshot[];
+  return (await opened(rows)).sort((a, b) => b.timestamp - a.timestamp || b.id - a.id);
 }
 
 /** Every document that has history, with its newest snapshot time. */
@@ -115,15 +134,23 @@ export async function listDocuments(): Promise<Array<{ name: string; latest: num
 }
 
 async function writeSnapshot(name: string, content: string, reason: SnapshotReason, now: number): Promise<boolean> {
+  // Sealing is asynchronous work outside IndexedDB, so it happens before the
+  // write transaction opens (an await inside it would end the transaction).
+  const stored = await forStore(LABEL, content);
+  if (stored === undefined) return false;
+  if (isSealedValue(stored)) {
+    const newest = (await listSnapshots(name))[0];
+    if (newest?.content === content) return false;
+  }
   const db = await openDB();
   const tx = db.transaction(STORE, "readwrite");
   const store = tx.objectStore(STORE);
-  const existing = ((await promisify(store.index("name").getAll(name))) as Snapshot[]).sort((a, b) => b.timestamp - a.timestamp || b.id - a.id);
-  if (existing[0]?.content === content) {
+  const existing = ((await promisify(store.index("name").getAll(name))) as StoredSnapshot[]).sort((a, b) => b.timestamp - a.timestamp || b.id - a.id);
+  if (typeof stored === "string" && existing[0]?.content === content) {
     await done(tx);
     return false;
   }
-  store.add({ name, content, timestamp: now, reason });
+  store.add({ name, content: stored, timestamp: now, reason });
   for (const old of existing.slice(MAX_PER_DOC - 1)) store.delete(old.id);
   await done(tx);
   return true;
@@ -134,7 +161,7 @@ export async function pruneOldest(fraction = 0.25): Promise<number> {
   const db = await openDB();
   const tx = db.transaction(STORE, "readwrite");
   const store = tx.objectStore(STORE);
-  const rows = ((await promisify(store.getAll())) as Snapshot[]).sort((a, b) => a.timestamp - b.timestamp);
+  const rows = ((await promisify(store.getAll())) as StoredSnapshot[]).sort((a, b) => a.timestamp - b.timestamp);
   const newest = new Map<string, number>();
   for (const r of rows) newest.set(r.name, r.id);
   const keep = new Set(newest.values());
@@ -192,6 +219,30 @@ export async function clearHistory(name: string): Promise<void> {
   for (const k of keys) store.delete(k);
   await done(tx);
 }
+
+/**
+ * Every snapshot's content into (`seal`) or out of (`open`) the vault's
+ * encryption (plan 11.4: turning it on, and off). Row by row; a row that
+ * cannot be converted stays as it is.
+ */
+async function convertHistory(direction: "seal" | "open"): Promise<number> {
+  const db = await openDB();
+  const rows = (await promisify(db.transaction(STORE, "readonly").objectStore(STORE).getAll())) as StoredSnapshot[];
+  let n = 0;
+  for (const r of rows) {
+    if (isSealedValue(r.content) === (direction === "seal")) continue;
+    const content = direction === "seal" ? await forStore(LABEL, r.content as string) : await fromStore<string>(LABEL, r.content);
+    if (content === undefined || (direction === "seal" && !isSealedValue(content))) continue;
+    const tx = db.transaction(STORE, "readwrite");
+    tx.objectStore(STORE).put({ ...r, content });
+    await done(tx);
+    n++;
+  }
+  return n;
+}
+
+export const resealHistory = () => convertHistory("seal");
+export const unsealHistory = () => convertHistory("open");
 
 /** Tests: drop the cached connection (fake-indexeddb is reset between files). */
 export function __resetHistoryDb(): void {
