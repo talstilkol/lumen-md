@@ -426,7 +426,7 @@ SETS.push(
   {
     id: "hebrew-dates",
     title: "Hebrew calendar dates",
-    capability: "7.10",
+    capability: "4.12",
     metric: "exact day, month and year in both directions",
     target: 20,
     license: "CC0-1.0",

@@ -843,6 +843,16 @@
       "vars": []
     },
     {
+      "key": "cmd.note.today",
+      "en": "Today's note",
+      "vars": []
+    },
+    {
+      "key": "cmd.note.today.hint",
+      "en": "Open or create the daily note for today (journal/YYYY-MM-DD.md)",
+      "vars": []
+    },
+    {
       "key": "cmd.open",
       "en": "Open file…",
       "vars": []
@@ -1209,6 +1219,16 @@
     {
       "key": "cmd.view.backlinks.hint",
       "en": "files linking here via [[wiki]]",
+      "vars": []
+    },
+    {
+      "key": "cmd.view.calendar",
+      "en": "Show / hide the calendar",
+      "vars": []
+    },
+    {
+      "key": "cmd.view.calendar.hint",
+      "en": "Month calendar of daily notes under the file tree",
       "vars": []
     },
     {

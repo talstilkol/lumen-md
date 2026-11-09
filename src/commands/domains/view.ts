@@ -64,6 +64,23 @@ export function buildViewCommands({ setSearchOpen, setRuntimeMetricsOpen, vimEna
       action: toggleWorkspace,
     },
     {
+      id: "note.today",
+      label: t("cmd.note.today"),
+      hint: t("cmd.note.today.hint"),
+      shortcut: "⌥⌘D",
+      icon: cmdIcons.FileText,
+      group: t("group.file"),
+      action: () => window.dispatchEvent(new CustomEvent("lumen-open-today")),
+    },
+    {
+      id: "view.calendar",
+      label: t("cmd.view.calendar"),
+      hint: t("cmd.view.calendar.hint"),
+      icon: cmdIcons.FileText,
+      group: t("group.view"),
+      action: () => useAppStore.getState().toggleCalendar(),
+    },
+    {
       id: "view.backlinks",
       label: t("cmd.view.backlinks"),
       hint: t("cmd.view.backlinks.hint"),

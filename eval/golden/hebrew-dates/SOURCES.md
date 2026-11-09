@@ -1,6 +1,6 @@
 # hebrew-dates — sources and licences
 
-Hebrew calendar dates, for plan task 7.10. Metric: exact day, month and year in both directions. Target: 20 items.
+Hebrew calendar dates, for plan task 4.12. Metric: exact day, month and year in both directions. Target: 20 items.
 
 Only the dev split is in this folder (dev/, or ids and sha256 in selection/ for local-only parts). The test split is held out: CI rebuilds it from the same pools with the secret GOLDEN_SEED and records only its sha256 in manifest.json (see eval/golden/README.md).
 

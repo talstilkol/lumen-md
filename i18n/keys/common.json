@@ -340,6 +340,83 @@
       "vars": []
     },
     {
+      "key": "calendar.folder",
+      "en": "Folder",
+      "vars": []
+    },
+    {
+      "key": "calendar.hasNote",
+      "en": "has a note",
+      "vars": []
+    },
+    {
+      "key": "calendar.next",
+      "en": "Next month",
+      "vars": []
+    },
+    {
+      "key": "calendar.pattern",
+      "en": "File name pattern (YYYY, MM, DD)",
+      "vars": []
+    },
+    {
+      "key": "calendar.patternInvalid",
+      "en": "The pattern must contain YYYY, MM and DD, so that every day gets its own note.",
+      "vars": []
+    },
+    {
+      "key": "calendar.prev",
+      "en": "Previous month",
+      "vars": []
+    },
+    {
+      "key": "calendar.save",
+      "en": "Save",
+      "vars": []
+    },
+    {
+      "key": "calendar.settings",
+      "en": "Daily note settings",
+      "vars": []
+    },
+    {
+      "key": "calendar.template",
+      "en": "Template for new notes",
+      "vars": []
+    },
+    {
+      "key": "calendar.templateHint",
+      "en": "Placeholders: {{date}}, {{hebrewDate}}, {{weekday}}, {{title}}",
+      "vars": [
+        "date",
+        "hebrewDate",
+        "weekday",
+        "title"
+      ]
+    },
+    {
+      "key": "calendar.title",
+      "en": "Calendar",
+      "vars": []
+    },
+    {
+      "key": "calendar.today",
+      "en": "Today",
+      "vars": []
+    },
+    {
+      "key": "daily.failed",
+      "en": "Couldn't open the daily note: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "daily.noWorkspace",
+      "en": "Daily notes need the workspace, which this browser can't provide.",
+      "vars": []
+    },
+    {
       "key": "db.all",
       "en": "All",
       "vars": []
