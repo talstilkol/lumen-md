@@ -1,6 +1,6 @@
 {
  "$comment": "The plan's single source (plan 0.6). Edit this file, then `npm run plan` regenerates the board in MASTER_PLAN.md and plan/board.html; CI (`npm run plan:check`) fails when they differ. A task's status is one line: phases[].tasks[].status.",
- "updated": "2026-11-09T23:45",
+ "updated": "2026-11-10T00:05",
  "note": "**המצב ב-ב׳ 9.11 23:05:** אף PR לא מוזג מאז 17.10 (main = 552ea5b7). סשן 24.10 פתח #282–#316 (כ-30 משימות) — נרשמו כאן עכשיו. כמעט כל ה-PR-ים אדומים משתי סיבות שאינן בקוד: (1) מ-19.10 GitHub מעביר את ubuntu-latest ל-Ubuntu 26 והתקנת Playwright נשברת — #330 מצמיד ל-ubuntu-24.04; (2) תקציבי החבילה (startup 460 KB ותקציבי קובץ) — #330 גם מוסיף annotation שמראה איזה קובץ חורג. **החלטת טל 9.11: לא משתמשים יותר ב-GitHub Actions** — כל commit עם [skip ci], הבדיקות רצות ב-Vercel Sandbox. אזהרה: כל ענף מודד startup לבד (459–460 KB); אחרי 15.1 התוספות מכל השרשראות יצטברו — צריך את #248 או החלטה 15.16 (14) לפני המיזוג.",
  "start": "2026-10-18T08:00",
  "buffer": 0.35,
@@ -2228,6 +2228,7 @@
       "5.5"
      ],
      "priority": "P1",
+     "status": "⏳ #334 feat/batch-ui (השהיה/המשך/ביטול נשמרים ב-IndexedDB, ETA, ולידציה + ניסיון חוזר אחד עם מבקר) — נבדק רק ב-Node נקי; typecheck/vitest/build/Playwright ממתינים ל-Vercel Sandbox",
      "was": "4.8",
      "source": "T16",
      "steps": [
@@ -2237,6 +2238,10 @@
      ],
      "acceptance": [
       "השהיה → המשך אחרי רענון (e2e)"
+     ],
+     "dod": [
+      "npx vitest run src/__tests__/aiBatchControl.test.ts src/__tests__/aiBatchLocal.test.ts src/__tests__/aiBatchCommands.test.ts",
+      "npx playwright test e2e/batch-pause.spec.ts"
      ]
     },
     {
@@ -2278,6 +2283,7 @@
       "5.5"
      ],
      "priority": "P2",
+     "status": "⏳ #349 feat/ai-autofill (על #228; תשובה חייבת לעמוד ב-JSON Schema, רק ערכים חסרים, approve() הכותב היחיד ומסרב לפתק שהשתנה) — נבדק רק ב-Node נקי; typecheck/vitest/build/Playwright ממתינים ל-Vercel Sandbox",
      "new": true,
      "source": "מחקר פערים §3",
      "steps": [
@@ -2287,6 +2293,9 @@
      ],
      "acceptance": [
       "0 כתיבות בלי אישור"
+     ],
+     "dod": [
+      "npx vitest run src/__tests__/autofill.test.ts"
      ]
     },
     {
@@ -2566,6 +2575,7 @@
       "7.10"
      ],
      "priority": "P1",
+     "status": "⏳ #339 feat/pdf-chat (BM25 עברי + embeddings מקומיים, ציטוטים מאומתים לעמוד ושורה; BM25 בלבד: 8/8 שאלות dev ב-top 3 על טקסט; ✅* — 15.17: npm run eval:pdf-chat) — נבדק רק ב-Node נקי; typecheck/vitest/build/Playwright ממתינים ל-Vercel Sandbox",
      "new": true,
      "owner": "15.17",
      "was": "5.8",
@@ -2578,7 +2588,12 @@
      ],
      "acceptance": [
       "≥ 85% תשובות עם ציטוט נכון על 3 PDF ו-30 שאלות (מודל אמיתי, טל 15.17)"
-     ]
+     ],
+     "dod": [
+      "npx vitest run src/__tests__/pdfChat.test.ts",
+      "npx playwright test e2e/pdf-chat.spec.ts"
+     ],
+     "dodMock": true
     },
     {
      "id": "6.9",
@@ -2594,6 +2609,7 @@
       "editor"
      ],
      "priority": "P1",
+     "status": "⏳ #336 feat/local-fim (Ollama suffix על qwen2.5-coder, debounce 150ms, אף הקשה לא מתחילה הורדה; ✅* — 15.17: npm run bench:fim -- --assert 300) — נבדק רק ב-Node נקי; typecheck/vitest/build/Playwright ממתינים ל-Vercel Sandbox",
      "new": true,
      "owner": "15.17",
      "was": "5.9",
@@ -2608,7 +2624,12 @@
      "acceptance": [
       "p50 < 300ms על Ollama מקומי (טל, 15.17)",
       "0 קריאות ענן ב-local-only"
-     ]
+     ],
+     "dod": [
+      "npx vitest run src/__tests__/fim.test.ts",
+      "npx playwright test e2e/fim.spec.ts"
+     ],
+     "dodMock": true
     },
     {
      "id": "6.10",
@@ -2646,6 +2667,7 @@
       "7.10"
      ],
      "priority": "P2",
+     "status": "⏳ #342 feat/local-summarize (כל משפט מועתק מהמקור ונבדק; Chrome Summarizer / סוכן מקומי / חילוץ בלי מודל; יעד 95% לא נמדד — צריך מודל אמיתי) — נבדק רק ב-Node נקי; typecheck/vitest/build/Playwright ממתינים ל-Vercel Sandbox",
      "new": true,
      "source": "מחקר פערים §3",
      "steps": [
@@ -2655,6 +2677,9 @@
      ],
      "acceptance": [
       "על 20 מסמכי זהב (7.10): ≥ 95% מהמשפטים בסיכום עוברים בדיקת עיגון אוטומטית במקור (`quoteContained`)"
+     ],
+     "dod": [
+      "npx vitest run src/__tests__/summarize.test.ts"
      ]
     },
     {
@@ -2810,6 +2835,7 @@
       "2.4"
      ],
      "priority": "P0",
+     "status": "⏳ #332 chore/no-cloud-defaults (הביקורת מצאה פערים אמיתיים: הכתבה של הדפדפן שולחת אודיו ל-Google, LanguageTool ציבורי ב-local-first, ספקי Gemini/Anthropic/Mistral ו-fine-tune בלי שער — נסגרו; בדיקה שנכשלת על כל מסלול ענן לא מבוקר; e2e של 22 פקודות, 0 בקשות ענן) — נבדק רק ב-Node נקי; typecheck/vitest/build/Playwright ממתינים ל-Vercel Sandbox",
      "new": true,
      "was": "5.17",
      "source": "§2",
@@ -2820,6 +2846,10 @@
      ],
      "acceptance": [
       "local-only: 0 מסלולים לענן במסע המלא"
+     ],
+     "dod": [
+      "npx vitest run src/__tests__/cloudRoutes.test.ts src/__tests__/aiPolicyGates.test.ts src/__tests__/VoiceDictationUnit.test.ts",
+      "npx playwright test e2e/local-only-all-commands.spec.ts"
      ]
     }
    ]
@@ -2981,6 +3011,7 @@
       "7.1"
      ],
      "priority": "P1",
+     "status": "⏳ #345 feat/rerank-library (HeQ dev: BM25 לבד nDCG@10 = 1.0000, עם reranker 1.0000 — אין רווח; ההחלטה: כבוי כברירת מחדל; bge-reranker ו-Belebele חסומים — Hugging Face; ספריית הקריאה לא נבנתה) — נבדק רק ב-Node נקי; typecheck/vitest/build/Playwright ממתינים ל-Vercel Sandbox",
      "was": "6.4",
      "source": "T29, T34, נספח 19",
      "steps": [
@@ -2992,6 +3023,9 @@
      ],
      "acceptance": [
       "nDCG@10 עם reranker ≥ +5 נקודות, או החלטה מתועדת להסיר / לכבות"
+     ],
+     "dod": [
+      "npx vitest run src/__tests__/rerankGolden.test.ts"
      ]
     },
     {
@@ -3321,6 +3355,7 @@
       "6.4"
      ],
      "priority": "P2",
+     "status": "⏳ #348 feat/i18n-review-agent (npm run i18n:review: ההרצה הראשונה מצאה 34 משתנים חסרים בתרגומים — תוקנו; 4 אזהרות אורך ו-43 לא מתורגמים נשארו) — נבדק רק ב-Node נקי; typecheck/vitest/build/Playwright ממתינים ל-Vercel Sandbox",
      "was": "8.4",
      "source": "P5",
      "steps": [
@@ -3330,6 +3365,10 @@
      ],
      "acceptance": [
       "0 משתנים חסרים"
+     ],
+     "dod": [
+      "npm run i18n:review",
+      "npx vitest run src/__tests__/i18nReview.test.ts"
      ]
     },
     {
