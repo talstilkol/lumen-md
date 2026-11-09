@@ -4,3 +4,6 @@ export { linkerAgent, filterLinks, type LinkerInput, type LinkerOutput, type Lin
 export { outlinerAgent, normalizeHeadings, type OutlinerInput, type OutlinerOutput, type OutlineHeading } from "./outliner";
 export { taskerAgent, checkTaskList, type TaskerInput } from "./tasker";
 export { committerAgent, cleanSubject, CONVENTIONAL, type CommitterInput } from "./committer";
+export { diagrammerAgent, type DiagrammerInput } from "./diagrammer";
+export { charterAgent, type CharterInput, type EChartsOption } from "./charter";
+export { translatorAgent, chunkMarkdown, checkTranslation, expectedScript, fencedBlocks, urlsOf, CHUNK_CHARS, type TranslatorInput } from "./translator";
