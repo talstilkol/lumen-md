@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 
-vi.mock("../i18n", () => ({ t: (k: string, p?: Record<string, unknown>) => (p ? `${k} ${JSON.stringify(p)}` : k) }));
+vi.mock("../i18n", () => ({ t: (k: string, p?: Record<string, unknown>) => (p ? `${k} ${JSON.stringify(p)}` : k), registerEnglish: () => undefined }));
 vi.mock("../lib/logger", () => ({ log: { info: vi.fn(), warn: vi.fn(), error: vi.fn() } }));
 
 const runDoctor = vi.fn();
@@ -9,8 +9,13 @@ const persist = vi.fn(async () => "persisted" as const);
 vi.mock("../agents/doctor", () => ({
   runDoctor,
   formatDoctorReport: () => "report text",
+  LOCAL_SERVICES: { grammar: "http://localhost:8010/v2/check", research: "http://localhost:8787" },
 }));
 vi.mock("../storage/persistentStorage", () => ({ requestPersistentStorage: persist }));
+const downloadHebrewDictionary = vi.fn(async () => 300000);
+vi.mock("../ai/hebrewSpellService", () => ({ downloadHebrewDictionary }));
+const clearGrammarCache = vi.fn();
+vi.mock("../ai/grammar", () => ({ GRAMMAR_ENDPOINT_KEY: "lumen.grammar.endpoint", clearGrammarCache }));
 
 const REPORT = {
   at: 0,
@@ -47,6 +52,29 @@ describe("AiDoctorPanel", () => {
     await waitFor(() => expect(screen.getByTestId("doctor-storage")).toBeTruthy());
     fireEvent.click(screen.getByText("ai.doctor.action.persist"));
     await waitFor(() => expect(persist).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(runDoctor).toHaveBeenCalledTimes(2));
+  });
+
+  it("downloads the Hebrew dictionary from its one-click fix (plan 7.4.2)", async () => {
+    runDoctor.mockResolvedValue({ ...REPORT, findings: [{ id: "engines.spellHe", title: "ai.doctor.check.spellHe", status: "warn", fix: { label: "ai.doctor.fix.spellHe", action: "downloadHebrewDictionary" } }] });
+    const { AiDoctorPanel } = await import("../ui/AiDoctorPanel");
+    render(<AiDoctorPanel open onClose={vi.fn()} />);
+    await waitFor(() => expect(screen.getByTestId("doctor-engines.spellHe")).toBeTruthy());
+    fireEvent.click(screen.getByText("ai.doctor.action.downloadHebrewDictionary"));
+    await waitFor(() => expect(downloadHebrewDictionary).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(runDoctor).toHaveBeenCalledTimes(2));
+  });
+
+  it("points grammar and research at the local services in one click (plan 7.4.2)", async () => {
+    localStorage.clear();
+    runDoctor.mockResolvedValue({ ...REPORT, findings: [{ id: "grammar", title: "ai.doctor.check.grammar", status: "warn", fix: { label: "ai.doctor.fix.docker", command: "docker compose -f docker/local-ai.yml up -d", action: "useLocalServices" } }] });
+    const { AiDoctorPanel } = await import("../ui/AiDoctorPanel");
+    render(<AiDoctorPanel open onClose={vi.fn()} />);
+    await waitFor(() => expect(screen.getByTestId("doctor-grammar")).toBeTruthy());
+    fireEvent.click(screen.getByText("ai.doctor.action.useLocalServices"));
+    await waitFor(() => expect(clearGrammarCache).toHaveBeenCalled());
+    expect(localStorage.getItem("lumen.grammar.endpoint")).toBe("http://localhost:8010/v2/check");
+    expect(localStorage.getItem("lumen.research.endpoint")).toBe("http://localhost:8787");
     await waitFor(() => expect(runDoctor).toHaveBeenCalledTimes(2));
   });
 

@@ -221,6 +221,11 @@
       "vars": []
     },
     {
+      "key": "ai.doctor.action.downloadHebrewDictionary",
+      "en": "Download (5.7 MB)",
+      "vars": []
+    },
+    {
       "key": "ai.doctor.action.openSettings",
       "en": "Open AI settings",
       "vars": []
@@ -246,13 +251,33 @@
       "vars": []
     },
     {
+      "key": "ai.doctor.action.useLocalServices",
+      "en": "Use the local services",
+      "vars": []
+    },
+    {
+      "key": "ai.doctor.check.caption",
+      "en": "Image descriptions on this device",
+      "vars": []
+    },
+    {
       "key": "ai.doctor.check.configuredModel",
       "en": "The configured model is installed",
       "vars": []
     },
     {
+      "key": "ai.doctor.check.cspLocal",
+      "en": "This build may reach the local services (CSP: ports 8010 and 8787)",
+      "vars": []
+    },
+    {
       "key": "ai.doctor.check.embed",
       "en": "An embedding model for semantic search",
+      "vars": []
+    },
+    {
+      "key": "ai.doctor.check.engines",
+      "en": "On-device engines",
       "vars": []
     },
     {
@@ -271,8 +296,18 @@
       "vars": []
     },
     {
+      "key": "ai.doctor.check.modelHost",
+      "en": "Host for Lumen's converted models (Opus-MT, Nakdimon)",
+      "vars": []
+    },
+    {
       "key": "ai.doctor.check.models",
       "en": "A chat model is installed (qwen2.5:7b recommended)",
+      "vars": []
+    },
+    {
+      "key": "ai.doctor.check.nikud",
+      "en": "Hebrew niqqud on this device",
       "vars": []
     },
     {
@@ -296,6 +331,16 @@
       "vars": []
     },
     {
+      "key": "ai.doctor.check.spellEn",
+      "en": "English spelling on this device",
+      "vars": []
+    },
+    {
+      "key": "ai.doctor.check.spellHe",
+      "en": "Hebrew spelling dictionary",
+      "vars": []
+    },
+    {
       "key": "ai.doctor.check.storage",
       "en": "Vault storage: quota and durability",
       "vars": []
@@ -308,6 +353,11 @@
     {
       "key": "ai.doctor.check.tools",
       "en": "The model supports tool calling (tasks, commits)",
+      "vars": []
+    },
+    {
+      "key": "ai.doctor.check.translate",
+      "en": "Local translation (Chrome, Opus-MT, M2M100)",
       "vars": []
     },
     {
@@ -356,6 +406,16 @@
       "vars": []
     },
     {
+      "key": "ai.doctor.fix.modelChecksums",
+      "en": "The host is set but the registry has no files for these models; run the conversion workflow and copy its checksums:",
+      "vars": []
+    },
+    {
+      "key": "ai.doctor.fix.modelHost",
+      "en": "No host is set for the converted models yet (plan 15.9); until then these engines stay off and the AI model is used instead.",
+      "vars": []
+    },
+    {
       "key": "ai.doctor.fix.origins",
       "en": "Ollama refuses this site (403). Allow it with OLLAMA_ORIGINS and restart Ollama:",
       "vars": []
@@ -376,6 +436,11 @@
       "vars": []
     },
     {
+      "key": "ai.doctor.fix.reload",
+      "en": "The dictionary did not load; reload the page and check again:",
+      "vars": []
+    },
+    {
       "key": "ai.doctor.fix.remote",
       "en": "Under \"local only\" the Ollama server must be on this machine or network. Change the address or the policy:",
       "vars": []
@@ -388,6 +453,16 @@
     {
       "key": "ai.doctor.fix.settings",
       "en": "Choose a working executor in the AI settings:",
+      "vars": []
+    },
+    {
+      "key": "ai.doctor.fix.spellHe",
+      "en": "Download the Hebrew dictionary (Hspell, 5.7 MB, AGPL-3.0) to this device:",
+      "vars": []
+    },
+    {
+      "key": "ai.doctor.fix.translate",
+      "en": "No local layer for English↔Hebrew yet: M2M100 (MIT, about 630 MB) downloads on first use with your consent, or use Chrome with its translator.",
       "vars": []
     },
     {
