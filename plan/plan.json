@@ -1,7 +1,7 @@
 {
  "$comment": "The plan's single source (plan 0.6). Edit this file, then `npm run plan` regenerates the board in MASTER_PLAN.md and plan/board.html; CI (`npm run plan:check`) fails when they differ. A task's status is one line: phases[].tasks[].status.",
- "updated": "2026-10-21T07:30",
- "note": "**המצב ב-ד׳ 21.10 07:30:** סשן Opus 5.5 (16:42–23:00) — 4 מסלולים במקביל. PR-ים חדשים: #266 (0.16), #267 (4.11), #268 (4.16), #269 (3.3), #270 (הסרת הדומיין הישן מכל הקבצים; אין signaling מובנה), #271 (12.3), #272 (4.14), #273 (תיקון ה-flake של לוח הפקודות). #265: 2 ממצאי Codex P1 תוקנו. כולם CI ירוק חוץ מ-#271/#272 בעבודה. שום ✅ חדש לפני המיזוג: קובצי הבדיקה של המשימות לא נמצאים על chore/dod, ולכן הן ⏳ עד 15.1. אילוץ הסשן: אין npm registry — jsep, formula.js, EmbedPDF, QuickJS, knip, Argon2id לא נוספו (פירוט בכל PR). עדכון 21.10: PR-ים נוספים #274 (8.4), #275 (3.4), #276 (4.19 חלק 1), #277 (5.7), #278 (7.5 — שער האנגלית אדום, החלטה לטל), #279 (6.14). תקציב ההפעלה ב-460.0/460 KB — כל PR שמוסיף מחרוזת להפעלה ייכשל עד החלטה 15.16 (14) או #248.",
+ "updated": "2026-11-09T23:05",
+ "note": "**המצב ב-ב׳ 9.11 23:05:** אף PR לא מוזג מאז 17.10 (main = 552ea5b7). סשן 24.10 פתח #282–#316 (כ-30 משימות) — נרשמו כאן עכשיו. כמעט כל ה-PR-ים אדומים משתי סיבות שאינן בקוד: (1) מ-19.10 GitHub מעביר את ubuntu-latest ל-Ubuntu 26 והתקנת Playwright נשברת — #330 מצמיד ל-ubuntu-24.04; (2) תקציבי החבילה (startup 460 KB ותקציבי קובץ) — #330 גם מוסיף annotation שמראה איזה קובץ חורג. **החלטת טל 9.11: לא משתמשים יותר ב-GitHub Actions** — כל commit עם [skip ci], הבדיקות רצות ב-Vercel Sandbox. אזהרה: כל ענף מודד startup לבד (459–460 KB); אחרי 15.1 התוספות מכל השרשראות יצטברו — צריך את #248 או החלטה 15.16 (14) לפני המיזוג.",
  "start": "2026-10-18T08:00",
  "buffer": 0.35,
  "ownerWindow": [
@@ -1177,6 +1177,7 @@
       "6.0"
      ],
      "priority": "P1",
+     "status": "⏳ #307 feat/pii-redactor (נפתח 24.10 / 20.10; CI אדום על בדיקות (צעד Test); ✅ רק אחרי בדיקה מקומית ב-Vercel Sandbox — לא ב-GitHub Actions, לפי החלטת טל 9.11)",
      "new": true,
      "was": "2.6",
      "source": "פרטיות, נספח 19",
@@ -1398,6 +1399,7 @@
       "settings"
      ],
      "priority": "P1",
+     "status": "⏳ #291 feat/e2ee-sync-providers (נפתח 24.10 / 20.10; CI אדום על תקציב החבילה (צעד Bundle-size budget); ✅ רק אחרי בדיקה מקומית ב-Vercel Sandbox — לא ב-GitHub Actions, לפי החלטת טל 9.11)",
      "owner": "15.5",
      "was": "3.4",
      "source": "G8",
@@ -1456,6 +1458,7 @@
       "4.4"
      ],
      "priority": "P0",
+     "status": "⏳ #297 test/data-safety-matrix (נפתח 24.10 / 20.10; CI אדום על תקציב החבילה (צעד Bundle-size budget); ✅ רק אחרי בדיקה מקומית ב-Vercel Sandbox — לא ב-GitHub Actions, לפי החלטת טל 9.11)",
      "was": "3.6",
      "source": "G1–G11",
      "steps": [
@@ -1860,6 +1863,7 @@
       "7.10"
      ],
      "priority": "P1",
+     "status": "⏳ #308 feat/clipper-v2 (נפתח 24.10 / 20.10; CI אדום על תקציב החבילה (צעד Bundle-size budget); ✅ רק אחרי בדיקה מקומית ב-Vercel Sandbox — לא ב-GitHub Actions, לפי החלטת טל 9.11)",
      "was": "5.11",
      "source": "T34, מחקר פערים #9",
      "steps": [
@@ -1950,7 +1954,7 @@
       "1.9"
      ],
      "priority": "P0",
-     "status": "⏳ #276 (ממיר tldraw → Excalidraw בלי תלויות, 20 קנבסים בלי אובדן צורה, קבצי .excalidraw עם גיבוי .tldr, הגירה מאחורי דגל; CI ירוק על cc0b65ad; חסר: @excalidraw/excalidraw ב-lockfile, החלפת הרכיב, הסרת tldraw)",
+     "status": "⏳ #276 + חלק 2 #283 (ממיר tldraw → Excalidraw בלי תלויות, 20 קנבסים בלי אובדן צורה, קבצי .excalidraw עם גיבוי .tldr, הגירה מאחורי דגל; CI ירוק על cc0b65ad; חסר: @excalidraw/excalidraw ב-lockfile, החלפת הרכיב, הסרת tldraw)",
      "new": true,
      "source": "מחקר הקוד הפתוח: tldraw דורש מפתח בייצור",
      "steps": [
@@ -2099,6 +2103,7 @@
       "agents"
      ],
      "priority": "P1",
+     "status": "⏳ #285 feat/researcher-agent (נפתח 24.10 / 20.10; CI אדום על e2e — התקנת Playwright נשברת על Ubuntu 26 (#330); ✅ רק אחרי בדיקה מקומית ב-Vercel Sandbox — לא ב-GitHub Actions, לפי החלטת טל 9.11)",
      "owner": "15.3",
      "was": "4.4",
      "source": "T14",
@@ -2130,6 +2135,7 @@
       "commands"
      ],
      "priority": "P0",
+     "status": "⏳ #288 refactor/all-through-runtime (נפתח 24.10 / 20.10; CI אדום על e2e — התקנת Playwright נשברת על Ubuntu 26 (#330); ✅ רק אחרי בדיקה מקומית ב-Vercel Sandbox — לא ב-GitHub Actions, לפי החלטת טל 9.11)",
      "was": "4.5",
      "source": "§4, T17",
      "steps": [
@@ -2155,6 +2161,7 @@
       "agents"
      ],
      "priority": "P1",
+     "status": "⏳ #315 feat/critic-complete (נפתח 24.10 / 20.10; CI אדום על בדיקות (צעד Test); ✅ רק אחרי בדיקה מקומית ב-Vercel Sandbox — לא ב-GitHub Actions, לפי החלטת טל 9.11)",
      "was": "4.6",
      "source": "T7, T12, §5",
      "steps": [
@@ -2381,6 +2388,7 @@
       "editor"
      ],
      "priority": "P2",
+     "status": "⏳ #312 feat/neural-tts (נפתח 24.10 / 20.10; CI אדום על תקציב החבילה (צעד Bundle-size budget); ✅ רק אחרי בדיקה מקומית ב-Vercel Sandbox — לא ב-GitHub Actions, לפי החלטת טל 9.11)",
      "new": true,
      "owner": "15.10, 15.13",
      "was": "5.2",
@@ -2409,6 +2417,7 @@
       "7.1"
      ],
      "priority": "P1",
+     "status": "⏳ #293 feat/nikud (נפתח 24.10 / 20.10; CI אדום על תקציב החבילה (צעד Bundle-size budget); ✅ רק אחרי בדיקה מקומית ב-Vercel Sandbox — לא ב-GitHub Actions, לפי החלטת טל 9.11)",
      "new": true,
      "owner": "15.11",
      "was": "5.3",
@@ -2437,6 +2446,7 @@
       "6.0"
      ],
      "priority": "P1",
+     "status": "⏳ #282 feat/local-mt (נפתח 24.10 / 20.10; CI אדום על תקציב החבילה (צעד Bundle-size budget); ✅ רק אחרי בדיקה מקומית ב-Vercel Sandbox — לא ב-GitHub Actions, לפי החלטת טל 9.11)",
      "new": true,
      "was": "5.4",
      "source": "מחליף Google Translate / DeepL, נספח 19",
@@ -2486,6 +2496,7 @@
       "6.4"
      ],
      "priority": "P1",
+     "status": "⏳ #286 feat/local-vision (נפתח 24.10 / 20.10; CI אדום על תקציב החבילה (צעד Bundle-size budget); ✅ רק אחרי בדיקה מקומית ב-Vercel Sandbox — לא ב-GitHub Actions, לפי החלטת טל 9.11)",
      "new": true,
      "owner": "15.11, 15.15",
      "was": "5.6",
@@ -2515,6 +2526,7 @@
       "search"
      ],
      "priority": "P2",
+     "status": "⏳ #309 feat/image-search (נפתח 24.10 / 20.10; CI אדום על תקציב החבילה (צעד Bundle-size budget); ✅ רק אחרי בדיקה מקומית ב-Vercel Sandbox — לא ב-GitHub Actions, לפי החלטת טל 9.11)",
      "new": true,
      "was": "5.7",
      "source": "יכולת חדשה, נספח 19",
@@ -2595,6 +2607,7 @@
       "7.10"
      ],
      "priority": "P0",
+     "status": "⏳ #284 feat/local-spell-en (נפתח 24.10 / 20.10; CI אדום על תקציב החבילה (צעד Bundle-size budget); ✅ רק אחרי בדיקה מקומית ב-Vercel Sandbox — לא ב-GitHub Actions, לפי החלטת טל 9.11)",
      "new": true,
      "was": "5.10",
      "source": "מחליף LanguageTool ציבורי",
@@ -2640,6 +2653,7 @@
       "5.5"
      ],
      "priority": "P2",
+     "status": "⏳ #313 feat/local-lora (נפתח 24.10 / 20.10; CI אדום על תקציב החבילה (צעד Bundle-size budget); ✅ רק אחרי בדיקה מקומית ב-Vercel Sandbox — לא ב-GitHub Actions, לפי החלטת טל 9.11)",
      "new": true,
      "owner": "15.13",
      "was": "5.12",
@@ -2724,6 +2738,7 @@
       "7.10"
      ],
      "priority": "P2",
+     "status": "⏳ #311 feat/data-analyst (נפתח 24.10 / 20.10; CI אדום על תקציב החבילה (צעד Bundle-size budget); ✅ רק אחרי בדיקה מקומית ב-Vercel Sandbox — לא ב-GitHub Actions, לפי החלטת טל 9.11)",
      "new": true,
      "owner": "15.13",
      "was": "5.15",
@@ -2839,6 +2854,7 @@
       "ci"
      ],
      "priority": "P0",
+     "status": "⏳ #292 ci/real-tiny-model (נפתח 24.10 / 20.10; CI אדום על e2e — התקנת Playwright נשברת על Ubuntu 26 (#330); ✅ רק אחרי בדיקה מקומית ב-Vercel Sandbox — לא ב-GitHub Actions, לפי החלטת טל 9.11)",
      "new": true,
      "source": "E0, T15",
      "steps": [
@@ -2865,6 +2881,7 @@
       "5.4"
      ],
      "priority": "P0",
+     "status": "⏳ #298 feat/eval-complete (נפתח 24.10 / 20.10; CI אדום על e2e — התקנת Playwright נשברת על Ubuntu 26 (#330); ✅ רק אחרי בדיקה מקומית ב-Vercel Sandbox — לא ב-GitHub Actions, לפי החלטת טל 9.11)",
      "was": "6.1",
      "source": "T19",
      "steps": [
@@ -2890,6 +2907,7 @@
       "6.6"
      ],
      "priority": "P1",
+     "status": "⏳ #305 feat/doctor-complete (נפתח 24.10 / 20.10; CI אדום על תקציב החבילה (צעד Bundle-size budget); ✅ רק אחרי בדיקה מקומית ב-Vercel Sandbox — לא ב-GitHub Actions, לפי החלטת טל 9.11)",
      "owner": "15.3",
      "was": "6.2",
      "source": "T21",
@@ -3438,6 +3456,7 @@
       "4.10"
      ],
      "priority": "P0",
+     "status": "⏳ #290 feat/a11y (נפתח 24.10 / 20.10; CI אדום על e2e — התקנת Playwright נשברת על Ubuntu 26 (#330); ✅ רק אחרי בדיקה מקומית ב-Vercel Sandbox — לא ב-GitHub Actions, לפי החלטת טל 9.11)",
      "was": "9.1",
      "source": "H1–H3",
      "steps": [
@@ -3467,6 +3486,7 @@
       "tree"
      ],
      "priority": "P0",
+     "status": "⏳ #300 feat/touch (נפתח 24.10 / 20.10; CI אדום על e2e — התקנת Playwright נשברת על Ubuntu 26 (#330); ✅ רק אחרי בדיקה מקומית ב-Vercel Sandbox — לא ב-GitHub Actions, לפי החלטת טל 9.11)",
      "was": "9.2",
      "source": "I1–I3",
      "steps": [
@@ -3517,6 +3537,7 @@
       "ci"
      ],
      "priority": "P1",
+     "status": "⏳ #281 test/coverage-all (נפתח 24.10 / 20.10; CI אדום על e2e — התקנת Playwright נשברת על Ubuntu 26 (#330); ✅ רק אחרי בדיקה מקומית ב-Vercel Sandbox — לא ב-GitHub Actions, לפי החלטת טל 9.11)",
      "was": "9.4",
      "source": "E4",
      "steps": [
@@ -3577,7 +3598,7 @@
       "editor"
      ],
      "priority": "P1",
-     "status": "⏳ (נעצר 20.10 — הסוכן נקטע באמצע; ניסוי ב-Chromium: iframe מבודד עם CSP סגור חוסם 15 ערוצי הוצאה; מחכה להחלטת טל איך להמשיך; QuickJS דורש התקנה על ה-Mac)",
+     "status": "⏳ #287 feat/plugins-runtime + #289 feat/plugins-api (נפתח 24.10 / 20.10; CI אדום על e2e — התקנת Playwright נשברת על Ubuntu 26 (#330); ✅ רק אחרי בדיקה מקומית ב-Vercel Sandbox — לא ב-GitHub Actions, לפי החלטת טל 9.11)",
      "was": "10.2",
      "source": "J2, M1",
      "steps": [
@@ -3608,6 +3629,7 @@
       "search"
      ],
      "priority": "P1",
+     "status": "⏳ #306 feat/search-ops (נפתח 24.10 / 20.10; CI אדום על תקציב החבילה (צעד Bundle-size budget); ✅ רק אחרי בדיקה מקומית ב-Vercel Sandbox — לא ב-GitHub Actions, לפי החלטת טל 9.11)",
      "was": "10.3",
      "source": "J5",
      "steps": [
@@ -3658,6 +3680,7 @@
       "4.3"
      ],
      "priority": "P1",
+     "status": "⏳ #314 feat/desktop-release (נפתח 24.10 / 20.10; CI אדום על תקציב החבילה (צעד Bundle-size budget); ✅ רק אחרי בדיקה מקומית ב-Vercel Sandbox — לא ב-GitHub Actions, לפי החלטת טל 9.11)",
      "owner": "15.7, 15.12",
      "was": "10.4",
      "source": "N3, F7",
@@ -3759,6 +3782,7 @@
       "2.4"
      ],
      "priority": "P1",
+     "status": "⏳ #280 feat/monitoring (נפתח 24.10 / 20.10; CI אדום על e2e — התקנת Playwright נשברת על Ubuntu 26 (#330); ✅ רק אחרי בדיקה מקומית ב-Vercel Sandbox — לא ב-GitHub Actions, לפי החלטת טל 9.11)",
      "owner": "15.6",
      "was": "11.4",
      "source": "A10, P7",
@@ -3791,6 +3815,7 @@
       "3.6"
      ],
      "priority": "P0",
+     "status": "⏳ #316 docs/complete (נפתח 24.10 / 20.10; CI אדום על e2e — התקנת Playwright נשברת על Ubuntu 26 (#330); ✅ רק אחרי בדיקה מקומית ב-Vercel Sandbox — לא ב-GitHub Actions, לפי החלטת טל 9.11)",
      "was": "12.1",
      "source": "N1",
      "steps": [
@@ -3811,6 +3836,7 @@
       "0.17"
      ],
      "priority": "P1",
+     "status": "⏳ #301 chore/hosting (נפתח 24.10 / 20.10; CI אדום על e2e — התקנת Playwright נשברת על Ubuntu 26 (#330); ✅ רק אחרי בדיקה מקומית ב-Vercel Sandbox — לא ב-GitHub Actions, לפי החלטת טל 9.11)",
      "was": "12.2",
      "source": "N2",
      "steps": [
@@ -3835,6 +3861,7 @@
       "ci"
      ],
      "priority": "P2",
+     "status": "⏳ #302 feat/mobile-builds (נפתח 24.10 / 20.10; CI אדום על תקציב החבילה (צעד Bundle-size budget); ✅ רק אחרי בדיקה מקומית ב-Vercel Sandbox — לא ב-GitHub Actions, לפי החלטת טל 9.11)",
      "owner": "15.7",
      "was": "12.3",
      "source": "I4",
@@ -4001,6 +4028,7 @@
       "0.6"
      ],
      "priority": "P1",
+     "status": "⏳ #303 chore/issue-triage (נפתח 24.10 / 20.10; CI אדום על e2e — התקנת Playwright נשברת על Ubuntu 26 (#330); ✅ רק אחרי בדיקה מקומית ב-Vercel Sandbox — לא ב-GitHub Actions, לפי החלטת טל 9.11)",
      "new": true,
      "source": "חיסכון בזמן",
      "steps": [
@@ -4042,6 +4070,7 @@
       "0.6"
      ],
      "priority": "P2",
+     "status": "⏳ #304 feat/public-roadmap (נפתח 24.10 / 20.10; CI אדום על e2e — התקנת Playwright נשברת על Ubuntu 26 (#330); ✅ רק אחרי בדיקה מקומית ב-Vercel Sandbox — לא ב-GitHub Actions, לפי החלטת טל 9.11)",
      "new": true,
      "source": "השקה",
      "steps": [
