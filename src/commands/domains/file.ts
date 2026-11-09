@@ -74,6 +74,20 @@ export function buildFileCommands({ handleNew, handleOpen, handleSave }: Command
   ];
 }
 
+/** Tasks across the vault (plan 4.13): Today / Upcoming. Loaded on use. */
+export function buildTaskCommands(): Command[] {
+  return [
+    {
+      id: "tasks.open",
+      label: t("cmd.tasks.open"),
+      hint: t("cmd.tasks.open.hint"),
+      icon: cmdIcons.Sparkles,
+      group: t("group.tools"),
+      action: () => void import("../../tasks/TasksPanel").then((m) => m.openTasksPanel()),
+    },
+  ];
+}
+
 /** Open the trash. */
 export function buildTrashCommands(): Command[] {
   return [

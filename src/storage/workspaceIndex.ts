@@ -413,6 +413,16 @@ export async function searchWorkspace(
   return withEngine((e) => e.search(query, { limit: opts.limit ?? 30, paths }));
 }
 
+/**
+ * Run a ```tasks``` query over every note in the vault (plan 4.13), in the
+ * index worker. Dates in the query are relative to the user's local today.
+ */
+export async function queryVaultTasks(query: string, today = new Date()): Promise<import("../tasks/taskQuery").QueryResult> {
+  await ensureIndex();
+  const iso = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+  return withEngine((e) => e.tasks(query, iso));
+}
+
 /** Work counters of the index (files, notes indexed so far…) — for tests and the perf spec. */
 export async function indexStats(): Promise<IndexStats & { engine: IndexEngine["kind"] }> {
   const stats = await withEngine((e) => e.stats());

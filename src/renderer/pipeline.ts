@@ -62,6 +62,8 @@ const SPECIAL_LANGS = new Set([
   "html-preview",
   "bibtex",
   "bib",
+  // obsidian-tasks queries over the vault (plan 4.13).
+  "tasks",
   "database",
   // Single-language live previews — render the snippet inside a tiny
   // sandboxed iframe so users can experiment with HTML/CSS/JS/GLSL/SVG

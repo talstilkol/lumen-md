@@ -30,6 +30,8 @@ export function handleIndexRequest(index: VaultIndex, req: IndexRequest): IndexR
         return { id: req.id, ok: true, result: index.backlinks(req.target) };
       case "stats":
         return { id: req.id, ok: true, result: index.stats() };
+      case "tasks":
+        return { id: req.id, ok: true, result: index.queryTasks(req.query, req.today) };
     }
   } catch (err) {
     return { id: req.id, ok: false, error: err instanceof Error ? err.message : String(err) };
