@@ -110,7 +110,7 @@ jobs:
 
   licenses:
     name: licence gate (npm • models • datasets)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 5
     permissions:
       contents: read
@@ -145,7 +145,7 @@ jobs:
 
   local-ai:
     name: local agents (fake Ollama)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: check
     timeout-minutes: 15
     steps:
