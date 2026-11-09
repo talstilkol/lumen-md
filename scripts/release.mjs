@@ -1,0 +1,226 @@
+#!/usr/bin/env node
+/**
+ * The release pipeline (plan 13.4), runnable on a developer machine — no
+ * GitHub Actions needed. .github/workflows/release.yml runs the same steps
+ * on a tag push when Actions are on; every step here works without them.
+ *
+ *   node scripts/release.mjs plan                  next version + changelog preview (changes nothing)
+ *   node scripts/release.mjs prepare [--version X] [--commit] [--tag]
+ *                                                  bump every manifest, write CHANGELOG.md
+ *                                                  (--commit: commit it; --tag: and tag vX)
+ *   node scripts/release.mjs build [--desktop] [--skip-checks]
+ *                                                  typecheck, tests, web build, budget, no source maps,
+ *                                                  web .tgz, desktop bundles (with --desktop), SHA256SUMS,
+ *                                                  SHA256SUMS.asc (when LUMEN_RELEASE_GPG_KEY is set),
+ *                                                  latest.json (when the updater signed the bundles) → release/
+ *   node scripts/release.mjs publish [--draft]     GitHub release for the tag at HEAD, notes from CHANGELOG.md,
+ *                                                  every file in release/ attached (gh CLI)
+ *   node scripts/release.mjs verify [dir]          check SHA256SUMS (and its signature) in release/ or dir
+ *   node scripts/release.mjs rollback <bad> [--to <good>]
+ *                                                  take a bad release back: it stops being "latest" (desktop
+ *                                                  updates and download links fall back), and the commands to
+ *                                                  redeploy the web app from the good tag are printed
+ *   node scripts/release.mjs notes <version>       the version's notes, from CHANGELOG.md
+ *
+ * Signing keys are the owner's (plan 15.7) and all optional: without one,
+ * that signature is skipped with a warning and the release still builds.
+ */
+import { execFileSync, spawnSync } from "node:child_process";
+import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, statSync, writeFileSync, copyFileSync } from "node:fs";
+import path from "node:path";
+import { bumpManifests, changelogSection, insertChangelog, nextVersion, parseCommits, releaseNotes, sha256sums, tagOf, verifySums } from "./lib/release.mjs";
+import { latestJson } from "./lib/tauriSigning.mjs";
+
+const ROOT = process.cwd();
+const OUT = path.join(ROOT, "release");
+const MANIFESTS = ["package.json", "package-lock.json", "src-tauri/tauri.conf.json", "src-tauri/Cargo.toml", "ios/App/App.xcodeproj/project.pbxproj"];
+const [cmd, ...args] = process.argv.slice(2);
+const flag = (f) => args.includes(f);
+const opt = (f) => {
+  const i = args.indexOf(f);
+  return i >= 0 ? args[i + 1] : undefined;
+};
+
+const git = (...a) => execFileSync("git", a, { cwd: ROOT, encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] }).trim();
+const run = (bin, a, extra = {}) => {
+  console.log(`$ ${bin} ${a.join(" ")}`);
+  const r = spawnSync(bin, a, { cwd: ROOT, stdio: "inherit", shell: process.platform === "win32", ...extra });
+  if (r.status !== 0) throw new Error(`${bin} ${a.join(" ")} failed (${r.status ?? r.signal})`);
+};
+const warn = (m) => console.warn(`warning: ${m}`);
+const read = (p) => readFileSync(path.join(ROOT, p), "utf8");
+const current = () => JSON.parse(read("package.json")).version;
+
+function repoSlug() {
+  try {
+    const url = git("remote", "get-url", "origin");
+    return /github\.com[/:]([^/]+\/[^/.]+)/.exec(url)?.[1] ?? null;
+  } catch {
+    return null;
+  }
+}
+
+function lastTag() {
+  try {
+    return git("describe", "--tags", "--abbrev=0", "--match", "v[0-9]*");
+  } catch {
+    return null;
+  }
+}
+
+function commitsSince(tag) {
+  const range = tag ? [`${tag}..HEAD`] : ["HEAD"];
+  return parseCommits(git("log", "--no-merges", "--format=%H%x1f%s%x1f%b%x1e", ...range));
+}
+
+function planned() {
+  const tag = lastTag();
+  const commits = commitsSince(tag);
+  const version = opt("--version") ?? nextVersion(current(), commits);
+  return { tag, commits, version };
+}
+
+function filesIn(dir) {
+  const out = [];
+  const walk = (d) => {
+    for (const name of readdirSync(d)) {
+      const full = path.join(d, name);
+      if (statSync(full).isDirectory()) walk(full);
+      else out.push(full);
+    }
+  };
+  if (existsSync(dir)) walk(dir);
+  return out;
+}
+
+const commands = {
+  plan() {
+    const { tag, commits, version } = planned();
+    console.log(`current: ${current()} · last tag: ${tag ?? "(none)"} · commits since: ${commits.length}`);
+    if (!version) return console.log("nothing to release (no feat, fix, perf or breaking change since the last tag)");
+    console.log(`next: ${version} (${tagOf(version)})\n`);
+    console.log(changelogSection(version, commits, { repo: repoSlug() }));
+  },
+
+  prepare() {
+    const { commits, version } = planned();
+    if (!version) throw new Error("nothing to release: no feat, fix, perf or breaking change since the last tag (or pass --version)");
+    if (flag("--commit") && git("status", "--porcelain")) throw new Error("the working tree has changes: commit or stash them first");
+    const files = Object.fromEntries(MANIFESTS.filter((p) => existsSync(path.join(ROOT, p))).map((p) => [p, read(p)]));
+    const changed = bumpManifests(files, version);
+    for (const [p, text] of Object.entries(changed)) writeFileSync(path.join(ROOT, p), text);
+    const changelog = existsSync(path.join(ROOT, "CHANGELOG.md")) ? read("CHANGELOG.md") : "";
+    writeFileSync(path.join(ROOT, "CHANGELOG.md"), insertChangelog(changelog, changelogSection(version, commits, { repo: repoSlug() })));
+    console.log(`version ${version}: ${[...Object.keys(changed), "CHANGELOG.md"].join(", ")}`);
+    if (flag("--commit")) {
+      git("add", "CHANGELOG.md", ...Object.keys(changed));
+      git("commit", "-m", `chore(release): ${version}`);
+      if (flag("--tag")) {
+        git("tag", "-a", tagOf(version), "-m", `Lumen ${version}`);
+        console.log(`tagged ${tagOf(version)} — push with: git push origin HEAD ${tagOf(version)}`);
+      }
+    } else console.log("review, then: git commit -am 'chore(release): " + version + "' && git tag -a " + tagOf(version) + " -m 'Lumen " + version + "'");
+  },
+
+  build() {
+    const version = current();
+    rmSync(OUT, { recursive: true, force: true });
+    mkdirSync(OUT, { recursive: true });
+    if (!flag("--skip-checks")) {
+      run("npm", ["run", "typecheck"]);
+      run("npm", ["test"]);
+    }
+    run("npm", ["run", "build"]);
+    run("npm", ["run", "budget"]);
+    run("node", ["scripts/check-sourcemaps.mjs", "dist"]);
+    run("tar", ["-czf", path.join(OUT, `lumen-web-${tagOf(version)}.tgz`), "-C", "dist", "."]);
+
+    if (flag("--desktop")) {
+      if (!process.env.TAURI_SIGNING_PRIVATE_KEY) warn("TAURI_SIGNING_PRIVATE_KEY not set — no signed update artifacts, auto-update stays off (plan 15.7)");
+      if (process.platform === "darwin" && !process.env.APPLE_SIGNING_IDENTITY) warn("Apple signing not set — the macOS build is ad-hoc signed, not notarised (plan 15.7)");
+      run("node", ["scripts/tauri-signing.mjs", "updater-config"]);
+      run("npm", ["run", "tauri:build"]);
+      const bundles = filesIn(path.join(ROOT, "src-tauri", "target")).filter((f) => /[/\\]release[/\\]bundle[/\\]/.test(f) && /\.(dmg|msi|exe|deb|rpm|AppImage|tar\.gz|sig)$/i.test(f));
+      for (const f of bundles) copyFileSync(f, path.join(OUT, path.basename(f)));
+      const sigs = readdirSync(OUT).filter((n) => n.endsWith(".sig")).map((name) => ({ name, signature: readFileSync(path.join(OUT, name), "utf8") }));
+      const repo = repoSlug();
+      if (sigs.length && repo) {
+        const manifest = latestJson({ tag: tagOf(version), repo, sigs, notes: releaseNotes(existsSync(path.join(ROOT, "CHANGELOG.md")) ? read("CHANGELOG.md") : "", version) ?? "" });
+        writeFileSync(path.join(OUT, "latest.json"), JSON.stringify(manifest, null, 2) + "\n");
+      } else if (!sigs.length) warn("no .sig files — no latest.json");
+    }
+    // Mobile (plan 13.3): the .ipa / .aab are built and signed in Xcode / Android Studio
+    // (RELEASE.md §3–4); drop them into release/ before this step to include them in the sums.
+    const entries = readdirSync(OUT)
+      .filter((n) => n !== "SHA256SUMS" && n !== "SHA256SUMS.asc")
+      .map((name) => ({ name, data: readFileSync(path.join(OUT, name)) }));
+    writeFileSync(path.join(OUT, "SHA256SUMS"), sha256sums(entries));
+    const key = process.env.LUMEN_RELEASE_GPG_KEY;
+    if (key) run("gpg", ["--batch", "--yes", "--local-user", key, "--armor", "--detach-sign", "--output", path.join(OUT, "SHA256SUMS.asc"), path.join(OUT, "SHA256SUMS")]);
+    else warn("LUMEN_RELEASE_GPG_KEY not set — SHA256SUMS is not signed (plan 15.7)");
+    console.log(`release/: ${readdirSync(OUT).join(", ")}`);
+  },
+
+  publish() {
+    const version = current();
+    const tag = tagOf(version);
+    const at = git("rev-list", "-n", "1", tag);
+    if (at !== git("rev-parse", "HEAD")) throw new Error(`${tag} is not HEAD: check out the tag you are releasing`);
+    if (!existsSync(path.join(OUT, "SHA256SUMS"))) throw new Error("release/ has no SHA256SUMS: run `node scripts/release.mjs build` first");
+    const bad = verifySums(readFileSync(path.join(OUT, "SHA256SUMS"), "utf8"), readdirSync(OUT).filter((n) => !n.startsWith("SHA256SUMS")).map((name) => ({ name, data: readFileSync(path.join(OUT, name)) })));
+    if (bad.length) throw new Error(`release/ does not match SHA256SUMS: ${bad.join(", ")}`);
+    const notes = releaseNotes(read("CHANGELOG.md"), version) ?? `Lumen ${version}`;
+    const notesFile = path.join(OUT, ".notes.md");
+    writeFileSync(notesFile, notes);
+    const assets = readdirSync(OUT).filter((n) => !n.startsWith(".")).map((n) => path.join(OUT, n));
+    run("gh", ["release", "create", tag, "--title", `Lumen ${version}`, "--notes-file", notesFile, "--verify-tag", ...(flag("--draft") ? ["--draft"] : []), ...(/-/.test(version) ? ["--prerelease"] : []), ...assets]);
+    rmSync(notesFile);
+  },
+
+  verify() {
+    const dir = path.resolve(args[0] ?? OUT);
+    const sums = readFileSync(path.join(dir, "SHA256SUMS"), "utf8");
+    const bad = verifySums(sums, readdirSync(dir).filter((n) => !n.startsWith("SHA256SUMS")).map((name) => ({ name, data: readFileSync(path.join(dir, name)) })));
+    if (bad.length) throw new Error(`checksum mismatch: ${bad.join(", ")}`);
+    if (existsSync(path.join(dir, "SHA256SUMS.asc"))) run("gpg", ["--verify", path.join(dir, "SHA256SUMS.asc"), path.join(dir, "SHA256SUMS")]);
+    else warn("no SHA256SUMS.asc — checksums only, no signature");
+    console.log("checksums OK");
+  },
+
+  rollback() {
+    const bad = args[0];
+    if (!bad || bad.startsWith("--")) throw new Error("usage: release.mjs rollback <bad-version> [--to <good-version>]");
+    const badTag = tagOf(bad);
+    const good = opt("--to");
+    // A prerelease is never "latest": releases/latest (the desktop updater's latest.json, the
+    // download links) falls back to the newest good release at once.
+    run("gh", ["release", "edit", badTag, "--prerelease", "--latest=false"]);
+    if (good) run("gh", ["release", "edit", tagOf(good), "--latest"]);
+    console.log(`
+${badTag} is no longer the latest release. New installs and update checks get ${good ? tagOf(good) : "the previous release"}.
+Desktop apps already on ${bad} stay on it until a newer version ships (the updater never downgrades):
+  git checkout ${good ? tagOf(good) : "<good tag>"} && git switch -c hotfix/${bad}   # fix or revert there
+  node scripts/release.mjs prepare --version <next patch> --commit --tag
+Web app: redeploy the good tag —
+  git checkout ${good ? tagOf(good) : "<good tag>"} && npm ci && npm run build && npx vercel deploy --prod dist
+  (or, on Vercel, promote the previous production deployment: npx vercel rollback)`);
+  },
+
+  notes() {
+    const v = args[0] ?? current();
+    const n = releaseNotes(read("CHANGELOG.md"), v);
+    if (!n) throw new Error(`CHANGELOG.md has no section for ${v}`);
+    process.stdout.write(n);
+  },
+};
+
+if (!commands[cmd]) {
+  console.error("usage: node scripts/release.mjs plan | prepare | build | publish | verify | rollback <bad> | notes <version>");
+  process.exit(2);
+}
+try {
+  commands[cmd]();
+} catch (e) {
+  console.error(`release: ${e.message}`);
+  process.exit(1);
+}
