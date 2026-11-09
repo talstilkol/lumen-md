@@ -832,6 +832,7 @@ export default function App() {
         aria-atomic="true"
         className="aria-live-region"
         id="lumen-sr-announcer"
+        data-testid="sr-announcer-polite"
       />
       <Toolbar
         onOpen={handleOpen}

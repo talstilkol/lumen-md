@@ -29,14 +29,19 @@ for (const [lang, heading, task, position] of [
     const editor = page.locator(".cm-content").first();
     await editor.click();
     await editor.fill(DOC);
-    await page.keyboard.press("ControlOrMeta+Home");
-    for (let i = 0; i < 4; i++) await page.keyboard.press("ArrowDown");
+    const line = (text: string) => editor.locator(".cm-line", { hasText: text }).first();
+    // Put the cursor on a line (click at its start), as a keyboard user would arrive there.
+    const goTo = async (text: string) => {
+      await line(text).click({ position: { x: 2, y: 4 } });
+      await page.keyboard.press("Home");
+    };
+    await goTo("Some text.");
+    await goTo("Next steps");
     await expect(polite(page)).toHaveText(heading, { timeout: 5_000 });
-    await page.keyboard.press("ArrowDown");
-    await page.keyboard.press("ArrowDown");
+    await goTo("Done thing");
     await expect(polite(page)).toHaveText(task, { timeout: 5_000 });
     // Back to the heading line, then "where am I" from the palette.
-    for (let i = 0; i < 2; i++) await page.keyboard.press("ArrowUp");
+    await goTo("Next steps");
     await page.evaluate(() => window.dispatchEvent(new CustomEvent("lumen-run-command", { detail: { id: "a11y.whereAmI" } })));
     await expect(polite(page)).toHaveText(position, { timeout: 5_000 });
   });
