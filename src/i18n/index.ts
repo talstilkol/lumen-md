@@ -1060,6 +1060,8 @@ const en: Strings = {
   "cmd.ai.agentSettings.hint": "Policy, executor, models, endpoints and recent runs in one place",
   "cmd.ai.doctor": "AI: Doctor (diagnose local AI)",
   "cmd.ai.doctor.hint": "Checks Ollama, CORS, models, WebGPU, storage and services — each with its fix",
+  "cmd.feedback": "Help: Send feedback",
+  "cmd.feedback.hint": "A GitHub issue or text to copy — nothing is sent without your click",
   "ai.doctor.title": "AI doctor",
   "ai.doctor.close": "Close",
   "ai.doctor.intro": "Every check below says what it found and exactly how to fix it. Nothing leaves this computer.",

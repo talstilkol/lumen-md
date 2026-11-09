@@ -148,6 +148,14 @@ export function AiDoctorPanel({ open, onClose }: Props) {
     await copy("report", formatDoctorReport(report, (k) => t(k)));
   };
 
+  // 14.2: open the feedback form with this report ready to attach (still only if the user ticks it).
+  const reportProblem = async () => {
+    if (!report) return;
+    const [{ formatDoctorReport }, { openFeedback }] = await Promise.all([import("../agents/doctor"), import("./FeedbackDialog")]);
+    onClose();
+    openFeedback({ doctorReport: formatDoctorReport(report, (k) => t(k)), kind: "bug" });
+  };
+
   const findings = report?.findings ?? [];
   const golden = findings.filter((f) => f.id.startsWith("golden."));
   const checks = findings.filter((f) => !f.id.startsWith("golden."));
@@ -226,6 +234,9 @@ export function AiDoctorPanel({ open, onClose }: Props) {
           <div style={{ ...row, justifyContent: "flex-end" }}>
             <button type="button" style={ghost} onClick={() => void copyReport()} disabled={!report}>
               {copied === "report" ? t("ai.doctor.copied") : t("ai.doctor.copyReport")}
+            </button>
+            <button type="button" style={ghost} onClick={() => void reportProblem()} disabled={!report} data-testid="doctor-report-problem">
+              {t("ai.doctor.report")}
             </button>
             <button type="button" style={ghost} onClick={() => void run(false)} disabled={!!running}>
               {running === "quick" ? t("ai.doctor.running") : t("ai.doctor.rerun")}

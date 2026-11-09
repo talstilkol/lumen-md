@@ -13,5 +13,6 @@
   "ai.doctor.fix.reload": "The dictionary did not load; reload the page and check again:",
   "ai.doctor.fix.spellHe": "Download the Hebrew dictionary (Hspell, 5.7 MB, AGPL-3.0) to this device:",
   "ai.doctor.action.downloadHebrewDictionary": "Download (5.7 MB)",
-  "ai.doctor.action.useLocalServices": "Use the local services"
+  "ai.doctor.action.useLocalServices": "Use the local services",
+  "ai.doctor.report": "Report a problem…"
 }
