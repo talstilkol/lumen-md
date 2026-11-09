@@ -1,4 +1,4 @@
-import { useCommands, openNewDoc } from "./commands/useCommands";
+import { useCommands } from "./commands/useCommands";
 import { lazy, Suspense, useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 import type { EditorHandle } from "./editor/Editor";
 
@@ -7,28 +7,8 @@ import { Outline } from "./ui/Outline";
 import { StatusBar } from "./ui/StatusBar";
 import { ScrollProgress } from "./ui/ScrollProgress";
 import { SearchReplace } from "./ui/SearchReplace";
-const GraphView = lazy(() => import("./ui/GraphView").then(m => ({ default: m.GraphView })));
-// γ.2 — Canvas now backed by tldraw. The legacy custom-canvas component
-// `CanvasWhiteboard.tsx` remains in tree as a fallback in case we ever
-// need to surface old `.canvas.json` files; it's intentionally unused.
-const CanvasWhiteboard = lazy(() => import("./ui/CanvasTldraw").then(m => ({ default: m.CanvasTldraw })));
-const PluginGallery = lazy(() => import("./ui/PluginGallery").then(m => ({ default: m.PluginGallery })));
-const TemplateGallery = lazy(() => import("./ui/TemplateGallery").then(m => ({ default: m.TemplateGallery })));
-const AuditLog = lazy(() => import("./ui/AuditLog").then(m => ({ default: m.AuditLog })));
-const OrgSettings = lazy(() => import("./ui/OrgSettings").then(m => ({ default: m.OrgSettings })));
-const TrustedKeysSettings = lazy(() => import("./ui/TrustedKeysSettings").then(m => ({ default: m.TrustedKeysSettings })));
-const ThemeSettings = lazy(() => import("./ui/ThemeSettings").then(m => ({ default: m.ThemeSettings })));
-const AiSettingsPanel = lazy(() => import("./ui/AiSettingsPanel").then(m => ({ default: m.AiSettingsPanel })));
-const PrivacyLedgerPanel = lazy(() => import("./ui/PrivacyLedgerPanel").then(m => ({ default: m.PrivacyLedgerPanel })));
-const TrashPanel = lazy(() => import("./ui/TrashPanel").then(m => ({ default: m.TrashPanel })));
-const AiDoctorPanel = lazy(() => import("./ui/AiDoctorPanel").then(m => ({ default: m.AiDoctorPanel })));
-const FineTuneSettings = lazy(() => import("./ui/FineTuneSettings").then(m => ({ default: m.FineTuneSettings })));
-const VersionHistory = lazy(() => import("./ui/VersionHistory").then(m => ({ default: m.VersionHistory })));
-const MarkdownTableEditor = lazy(() => import("./ui/MarkdownTableEditor").then(m => ({ default: m.MarkdownTableEditor })));
 import { htmlToMarkdown } from "./storage/fileFormats";
-import { wirePluginAPI, registerPlugin, unregisterPlugin, wordCountPlugin } from "./plugins/pluginSystem";
 import { CommandPalette } from "./ui/CommandPalette";
-import { AiFab } from "./ui/AiFab";
 import { FileTree } from "./ui/FileTree";
 import { SidebarResizer } from "./ui/SidebarResizer";
 import { uiAlert, uiConfirm, uiPrompt } from "./ui/PromptDialog";
@@ -51,21 +31,23 @@ const CommentsPanel = lazy(() =>
 );
 import { DocTabs, tabId } from "./ui/DocTabs";
 import { AiInlinePromptOverlay } from "./ui/AiInlinePrompt";
-import { RuntimeMetricsPanel } from "./ui/RuntimeMetricsPanel";
 import { useFileDragDrop } from "./hooks/useFileDragDrop";
 import { useCollab } from "./hooks/useCollab";
 import { useTauriMenu } from "./hooks/useTauriMenu";
+import { useAppStartup } from "./hooks/useAppStartup";
+import { useAppShortcuts } from "./hooks/useAppShortcuts";
+import { useBackgroundSaves } from "./hooks/useBackgroundSaves";
+import { useAppWindowEvents } from "./hooks/useAppWindowEvents";
+import { AppOverlays } from "./ui/AppOverlays";
 import { EditorLayout } from "./layouts/EditorLayout";
 import { useAuth } from "./auth/useAuth";
 import { docIdentity } from "./renderer/previewDoc";
-import { auditScope } from "./ui/auditScope";
 import { useEntitlement, watchAuthForEntitlements } from "./billing/useEntitlement";
-import { useAppStore, applyTheme } from "./store/useStore";
-import { applyLocale, t } from "./i18n";
+import { useAppStore } from "./store/useStore";
+import { t } from "./i18n";
 import { localLlmAvailable } from "./ai/localLlm";
 import { assessConfigHealth } from "./lib/configHealth";
 import { historyKey, isQuotaError, onHistoryQuota, recordSnapshot } from "./storage/history";
-import { log } from "./lib/logger";
 import { openFileDialog, saveFile } from "./storage/fs";
 import { exportToHtml } from "./storage/exportHtml";
 import { getRecents, pushRecent, reopenRecent } from "./storage/recent";
@@ -79,10 +61,7 @@ import {
   writeWorkspaceFile,
 } from "./storage/workspace";
 import { welcomeDoc } from "./welcomeDoc";
-import { ErrorBoundary } from "./ui/ErrorBoundary";
-import { KeyboardShortcuts } from "./ui/KeyboardShortcuts";
 import { FocusMode } from "./ui/FocusMode";
-import { OnboardingTour } from "./ui/OnboardingTour";
 import { scrollToHeadingWhenRendered } from "./renderer/wikiLinks";
 import { notifyWorkspaceChanged } from "./storage/workspaceEvents";
 
@@ -169,100 +148,8 @@ export default function App() {
     return watchAuthForEntitlements();
   }, []);
 
-  // Apply theme on mount
-  useEffect(() => {
-    applyTheme(theme);
-  }, [theme]);
-
-  // Plugin system init
-  useEffect(() => {
-    wirePluginAPI({
-      getContent: () => useAppStore.getState().doc.content,
-      setContent: (s: string) => useAppStore.getState().setContent(s),
-      getFileName: () => useAppStore.getState().doc.name,
-      showToast: (msg: string) => showAiToast(msg, "info"),
-    });
-    registerPlugin(wordCountPlugin);
-    // Expose a tiny test surface on window.__lumen for e2e specs. This
-    // lets the prod-build paste-html spec call htmlToMarkdown without
-    // importing /src/* at runtime (which only works against the dev
-    // server). The surface is intentionally minimal — only utilities
-    // the test suite needs.
-    (window as unknown as { __lumen?: unknown }).__lumen = {
-      htmlToMarkdown,
-    };
-    return () => {
-      unregisterPlugin(wordCountPlugin.id);
-      delete (window as unknown as { __lumen?: unknown }).__lumen;
-    };
-  }, []);
-
-  // Apply locale (sets <html lang dir>) on mount and on change.
-  useEffect(() => {
-    applyLocale(locale);
-  }, [locale]);
-
-  // Launched from the installed app: share target, shortcut, or a file
-  // opened with Lumen (D3).
-  useEffect(() => {
-    void import("./pwa/launch").then(({ parseLaunch, clearLaunchParams, onLaunchFiles }) => {
-      const l = parseLaunch(location.search);
-      if (l.kind === "share") {
-        // A fresh tab name each time: two shares with the same title (or two
-        // links from one host) stay two notes.
-        openNewDoc(l.title.replace(/[\\/:*?"<>|]+/g, " ").slice(0, 60).trim() || "Shared", l.body, true);
-      } else if (l.kind === "action" && l.action === "new") {
-        openNewDoc(t("doc.untitled"), "", false);
-      } else if (l.kind === "action" && l.action === "palette") {
-        setPaletteOpen(true);
-      }
-      if (l.kind !== "none") clearLaunchParams();
-      // With the file's handle, so Save writes back to the file that was opened.
-      onLaunchFiles((name, content, handle) => openTabAction({ name, content, workspaceName: null, handle }));
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  // Check for a shared note from the iOS Share Extension.
-  useEffect(() => {
-    const pending = (window as unknown as Record<string, unknown>).__pendingSharedNote;
-    if (typeof pending === "string" && pending.length > 0) {
-      // Clear the pending note so we don't process it again.
-      delete (window as unknown as Record<string, unknown>).__pendingSharedNote;
-      openNewDoc("Shared Note", pending, true);
-      showAiToast(t("toast.openedSharedNoteFromIos"), "info");
-    }
-  }, []);
-
-  // Seed the Welcome document on first launch
-  useEffect(() => {
-    if (!doc.content) {
-      // Use openTab so the Welcome doc lands on the tab strip too.
-      openTabAction({ name: "Welcome.md", content: welcomeDoc(), workspaceName: null });
-    } else if (openTabs.length === 0) {
-      // Existing session before tabs existed — backfill a tab for the
-      // currently active doc so the strip shows up immediately.
-      openTabAction({
-        name: doc.name,
-        content: doc.content,
-        workspaceName: doc.workspaceName ?? null,
-      });
-    }
-    // Show onboarding tour on first launch
-    let tourTimer: ReturnType<typeof setTimeout> | undefined;
-    try {
-      if (!localStorage.getItem("lumen-tour-done")) {
-        tourTimer = setTimeout(() => setTourOpen(true), 1200);
-      }
-    } catch {
-      /* why: storage may be denied in private browsing — onboarding silently skips */
-    }
-    return () => {
-      if (tourTimer) clearTimeout(tourTimer);
-    };
-    // run once
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  // Theme, locale, plugins, launches from the installed app, first-run Welcome + tour.
+  useAppStartup({ theme, locale, doc, openTabs, openTabAction, setPaletteOpen, setTourOpen });
 
   const configHealth = useMemo(
     () =>
@@ -522,124 +409,13 @@ export default function App() {
   useEffect(() => onHistoryQuota(() => showAiToast(t("doc.history.quota"), "error")), []);
 
   // Keyboard shortcuts
-  useEffect(() => {
-    function onKey(e: KeyboardEvent) {
-      const meta = e.metaKey || e.ctrlKey;
-      if (!meta) return;
-      // ⇧⌘F → focus mode toggle (or workspace search if already in focus mode)
-      if (e.shiftKey && (e.key === "f" || e.key === "F")) {
-        e.preventDefault();
-        if (focusMode) {
-          setFocusMode(false);
-        } else {
-          setFocusMode(true);
-        }
-        return;
-      }
-      if (e.key === "k" || e.key === "K") {
-        e.preventDefault();
-        setPaletteOpen((v) => !v);
-      } else if (e.key === "s" || e.key === "S") {
-        e.preventDefault();
-        handleSave(e.shiftKey);
-      } else if (e.key === "h" && (e.metaKey || e.ctrlKey)) {
-        e.preventDefault();
-        setFindReplaceOpen((v) => !v);
-      } else if (e.key === "o" || e.key === "O") {
-        e.preventDefault();
-        handleOpen();
-      } else if (e.key === "n" || e.key === "N") {
-        e.preventDefault();
-        handleNew();
-      } else if (e.key === "1") {
-        e.preventDefault();
-        useAppStore.getState().setMode("source");
-      } else if (e.key === "2") {
-        e.preventDefault();
-        useAppStore.getState().setMode("split");
-      } else if (e.key === "3") {
-        e.preventDefault();
-        useAppStore.getState().setMode("preview");
-      } else if (e.key === "4") {
-        e.preventDefault();
-        useAppStore.getState().setMode("wysiwyg");
-      } else if (e.key === "/") {
-        e.preventDefault();
-        setShortcutsOpen((v) => !v);
-      } else if (e.shiftKey && (e.key === "v" || e.key === "V")) {
-        // ⌘⇧V — Smart Insert (paste anything → auto-detect → wrap).
-        e.preventDefault();
-        (async () => {
-          const result = await openInsertTextDialog();
-          if (!result) return;
-          const cur = useAppStore.getState().doc.content;
-          const setter = useAppStore.getState().setContent;
-          if (result.mode === "replace") setter(result.markdown);
-          else if (result.mode === "atCursor" && editorRef.current) {
-            editorRef.current.insertText(result.markdown);
-          } else {
-            const trimmed = cur.endsWith("\n") ? cur : cur + "\n";
-            setter(trimmed + (result.mode === "append" ? "\n" : "") + result.markdown);
-          }
-        })();
-      }
-    }
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [handleOpen, handleSave, handleNew, focusMode]);
+  useAppShortcuts({
+    focusMode, setFocusMode, setPaletteOpen, setFindReplaceOpen, setShortcutsOpen,
+    handleOpen, handleSave, handleNew, editorRef,
+  });
 
-  // Auto-save: save dirty documents on interval
-  const autoSave = useAppStore((s) => s.autoSave);
-  const autoSaveInterval = useAppStore((s) => s.autoSaveInterval);
-  useEffect(() => {
-    if (!autoSave || !doc.dirty) return;
-    const timer = setInterval(() => {
-      const d = useAppStore.getState().doc;
-      if (!d.dirty) return;
-      if (d.handle) {
-        // From disk: write back through the handle (workspace files are
-        // written by the debounced effect above).
-        handleSave(false);
-      } else if (!d.workspaceName && d.content.trim()) {
-        // Untitled / ad-hoc: until now these were never written anywhere
-        // but localStorage. Give them a home in the workspace; from then
-        // on the debounced workspace autosave owns them.
-        adoptIntoWorkspace().catch((err) => log.warn("[autosave] adopt failed", (err as Error).message));
-      }
-    }, autoSaveInterval);
-    return () => clearInterval(timer);
-  }, [autoSave, autoSaveInterval, doc.dirty, handleSave, adoptIntoWorkspace]);
-
-  // Flush the pending workspace write when the page is hidden or going
-  // away: the debounced effect above may still be waiting, and a closed
-  // tab (or a backgrounded phone) never runs it. `pagehide` is the last
-  // reliable moment; `visibilitychange` covers mobile, where pages are
-  // often frozen instead of unloaded. The localStorage mirror keeps the
-  // text either way; this keeps the workspace file current.
-  useEffect(() => {
-    const flush = () => {
-      const d = useAppStore.getState().doc;
-      void recordSnapshot(historyKey(d), d.content, "close").catch(() => false);
-      if (!d.dirty || !d.workspaceName) return;
-      const name = d.workspaceName;
-      writeWorkspaceFile(name, d.content)
-        .then(() => {
-          if (useAppStore.getState().doc.workspaceName === name) markSaved();
-        })
-        .catch(() => {
-          /* why: best effort; the debounced autosave retries on the next edit */
-        });
-    };
-    const onVisibility = () => {
-      if (document.visibilityState === "hidden") flush();
-    };
-    window.addEventListener("pagehide", flush);
-    document.addEventListener("visibilitychange", onVisibility);
-    return () => {
-      window.removeEventListener("pagehide", flush);
-      document.removeEventListener("visibilitychange", onVisibility);
-    };
-  }, [markSaved]);
+  // Interval auto-save, and the flush of the pending write when the page goes away.
+  useBackgroundSaves({ doc, handleSave, adoptIntoWorkspace, markSaved });
 
   const { dragHover } = useFileDragDrop(setDoc);
 
@@ -692,67 +468,8 @@ export default function App() {
       : undefined,
   });
 
-  // The suggestions panel (and other UIs) re-run a palette command by id.
-  const commandsRef = useRef(commands);
-  commandsRef.current = commands;
-  useEffect(() => {
-    const onRun = (e: Event) => {
-      const id = (e as CustomEvent<{ id?: string }>).detail?.id;
-      const find = (list: typeof commands): (typeof commands)[number] | undefined => {
-        for (const c of list) {
-          if (c.id === id) return c;
-          const child = c.children ? find(c.children as typeof commands) : undefined;
-          if (child) return child;
-        }
-        return undefined;
-      };
-      const cmd = id ? find(commandsRef.current) : undefined;
-      if (cmd) void cmd.action();
-    };
-    window.addEventListener("lumen-run-command", onRun);
-    return () => window.removeEventListener("lumen-run-command", onRun);
-  }, []);
-  useEffect(() => {
-    const onOpen = () => setAiSettingsOpen(true);
-    window.addEventListener("lumen-open-ai-settings", onOpen);
-    return () => window.removeEventListener("lumen-open-ai-settings", onOpen);
-  }, []);
-  useEffect(() => {
-    const onOpen = () => setPrivacyOpen(true);
-    window.addEventListener("lumen-open-privacy-ledger", onOpen);
-    return () => window.removeEventListener("lumen-open-privacy-ledger", onOpen);
-  }, []);
-  useEffect(() => {
-    const onOpen = () => setTrashOpen(true);
-    window.addEventListener("lumen-open-trash", onOpen);
-    // Trash older than 30 days is deleted for good, once per start.
-    const purge = window.setTimeout(() => {
-      void import("./storage/trash").then((m) => (isOPFSAvailable() ? m.purgeExpiredTrash() : 0)).catch(() => 0);
-    }, 5000);
-    return () => {
-      window.removeEventListener("lumen-open-trash", onOpen);
-      window.clearTimeout(purge);
-    };
-  }, []);
-  useEffect(() => {
-    const onOpen = () => setAiDoctorOpen(true);
-    window.addEventListener("lumen-open-ai-doctor", onOpen);
-    return () => window.removeEventListener("lumen-open-ai-doctor", onOpen);
-  }, []);
-  // Stage 2 of the improvement agent (a small local model proposes suggestions).
-  useEffect(() => {
-    void import("./agents/modelCritic").then((m) => m.installModelCritic());
-  }, []);
-
-  // Comment-anchor click in the editor → window event from
-  // commentDecorations.ts. Open the side panel + jump the panel
-  // scroll to the matching thread (the panel itself listens for the
-  // same event to highlight the right row).
-  useEffect(() => {
-    const onCommentFocus = () => setCommentsPanelOpen(true);
-    window.addEventListener("lumen-comment-focus", onCommentFocus);
-    return () => window.removeEventListener("lumen-comment-focus", onCommentFocus);
-  }, []);
+  // Window events from other parts of the app (run a command, open a panel).
+  useAppWindowEvents({ commands, setAiSettingsOpen, setPrivacyOpen, setTrashOpen, setAiDoctorOpen, setCommentsPanelOpen });
 
   // Native Tauri menu wiring — no-op when running in a regular browser.
   useTauriMenu({
@@ -1022,113 +739,28 @@ export default function App() {
         </Suspense>
       )}
 
-      {/* Graph View overlay */}
-      {graphOpen && (
-        <div style={{ position: "fixed", inset: 0, zIndex: 9999, background: "hsl(var(--bg))" }}>
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "8px 16px", borderBottom: "1px solid hsl(var(--border))" }}>
-            <h3 style={{ margin: 0, fontSize: 14, color: "hsl(var(--fg))" }}>{t("graphView.title")}</h3>
-            <button className="icon-btn" onClick={() => setGraphOpen(false)} style={{ width: "auto", padding: "4px 12px", fontSize: 12 }}>{t("dialog.cancel")}</button>
-          </div>
-          <div style={{ height: "calc(100vh - 42px)" }}>
-            <Suspense fallback={<div style={{padding:'2rem',color:'hsl(var(--fg-muted))'}}>{t("loading.generic")}</div>}>
-              <ErrorBoundary fallback={
-                <div style={{ padding: "3rem", textAlign: "center", color: "hsl(0 80% 60%)" }}>
-                  <strong>{t("graphView.renderFailed")}</strong>
-                  <p>{t("graphView.renderFailedDetail")}</p>
-                </div>
-              }>
-                <GraphView onOpenFile={(path, content) => {
-                  setDoc({ name: path.split("/").pop() ?? path, content, handle: undefined, workspaceName: path, dirty: false });
-                  setGraphOpen(false);
-                }} />
-              </ErrorBoundary>
-            </Suspense>
-          </div>
-        </div>
-      )}
-
-      {/* Canvas Whiteboard overlay */}
-      <Suspense fallback={null}>
-        <ErrorBoundary fallback={<div style={{ padding: '2rem', color: 'hsl(0 80% 60%)' }}>{t("errorBoundary.heading")}</div>}>
-          {canvasOpen && <CanvasWhiteboard open={canvasOpen} onClose={() => setCanvasOpen(false)} />}
-          {galleryOpen && <PluginGallery open={galleryOpen} onClose={() => setGalleryOpen(false)} />}
-          {templateGalleryOpen && <TemplateGallery open={templateGalleryOpen} onClose={() => setTemplateGalleryOpen(false)} />}
-          {auditLogOpen && <AuditLog
-            open={auditLogOpen}
-            onClose={() => setAuditLogOpen(false)}
-            // Scope = the signed-in user's organization (WorkOS SSO); free /
-            // pro users have no org, so their own id is the scope.
-            orgId={auditScope({ id: authUserId ?? "", orgId: authOrgId }) || "personal"}
-          />}
-          {fineTuneOpen && <FineTuneSettings open={fineTuneOpen} onClose={() => setFineTuneOpen(false)} />}
-          {orgSettingsOpen && <OrgSettings open={orgSettingsOpen} onClose={() => setOrgSettingsOpen(false)} onOpenAuditLog={() => setAuditLogOpen(true)} />}
-          {trustedKeysOpen && <TrustedKeysSettings open={trustedKeysOpen} onClose={() => setTrustedKeysOpen(false)} />}
-          {aiSettingsOpen && <AiSettingsPanel open={aiSettingsOpen} onClose={() => setAiSettingsOpen(false)} />}
-          {aiDoctorOpen && <AiDoctorPanel open={aiDoctorOpen} onClose={() => setAiDoctorOpen(false)} />}
-          {privacyOpen && <PrivacyLedgerPanel open={privacyOpen} onClose={() => setPrivacyOpen(false)} />}
-          {trashOpen && <TrashPanel open={trashOpen} onClose={() => setTrashOpen(false)} />}
-          {themeSettingsOpen && <ThemeSettings open={themeSettingsOpen} onClose={() => setThemeSettingsOpen(false)} />}
-        </ErrorBoundary>
-      </Suspense>
-
-      {/* Version History overlay */}
-      {historyOpen && (
-        <Suspense fallback={<div style={{padding:'2rem',color:'hsl(var(--fg-muted))'}}>{t("loading.generic")}</div>}>
-          <ErrorBoundary fallback={<div style={{ padding: '2rem', color: 'hsl(0 80% 60%)' }}>{t("errorBoundary.heading")}</div>}>
-            <VersionHistory
-              fileName={historyKey(doc)}
-              currentContent={doc.content}
-              onRestore={(content) => setContent(content)}
-              onClose={() => setHistoryOpen(false)}
-            />
-          </ErrorBoundary>
-        </Suspense>
-      )}
-
-      {/* Table Editor overlay */}
-      {tableEditorOpen && (
-        <Suspense fallback={null}>
-          <ErrorBoundary fallback={<div style={{ padding: '2rem', color: 'hsl(0 80% 60%)' }}>{t("errorBoundary.heading")}</div>}>
-            <MarkdownTableEditor
-              onUpdate={(md) => {
-                const current = doc.content;
-                setContent(current + "\n\n" + md + "\n");
-              }}
-              onClose={() => setTableEditorOpen(false)}
-            />
-          </ErrorBoundary>
-        </Suspense>
-      )}
-
-      {/* Floating AI Prompts button — anchored next to the document body. */}
-      <AiFab commands={commands} />
-
-      {/* Keyboard Shortcuts Overlay */}
-      <KeyboardShortcuts open={shortcutsOpen} onClose={() => setShortcutsOpen(false)} />
-
-      {/* Onboarding Tour */}
-      <OnboardingTour
-        open={tourOpen}
-        onClose={() => {
-          setTourOpen(false);
-          try { localStorage.setItem("lumen-tour-done", "1"); } catch {
-            /* why: storage denied — tour will simply replay next session */
-          }
-        }}
-        actions={[
-          {
-            id: "runtimeMetrics.open",
-            label: t("tour.action.openRuntimeMetrics"),
-            onRun: () => {
-              setRuntimeMetricsOpen(true);
-              setTourOpen(false);
-            },
-          },
-        ]}
+      <AppOverlays
+        graphOpen={graphOpen} setGraphOpen={setGraphOpen}
+        canvasOpen={canvasOpen} setCanvasOpen={setCanvasOpen}
+        galleryOpen={galleryOpen} setGalleryOpen={setGalleryOpen}
+        templateGalleryOpen={templateGalleryOpen} setTemplateGalleryOpen={setTemplateGalleryOpen}
+        auditLogOpen={auditLogOpen} setAuditLogOpen={setAuditLogOpen}
+        fineTuneOpen={fineTuneOpen} setFineTuneOpen={setFineTuneOpen}
+        orgSettingsOpen={orgSettingsOpen} setOrgSettingsOpen={setOrgSettingsOpen}
+        trustedKeysOpen={trustedKeysOpen} setTrustedKeysOpen={setTrustedKeysOpen}
+        aiSettingsOpen={aiSettingsOpen} setAiSettingsOpen={setAiSettingsOpen}
+        aiDoctorOpen={aiDoctorOpen} setAiDoctorOpen={setAiDoctorOpen}
+        privacyOpen={privacyOpen} setPrivacyOpen={setPrivacyOpen}
+        trashOpen={trashOpen} setTrashOpen={setTrashOpen}
+        themeSettingsOpen={themeSettingsOpen} setThemeSettingsOpen={setThemeSettingsOpen}
+        historyOpen={historyOpen} setHistoryOpen={setHistoryOpen}
+        tableEditorOpen={tableEditorOpen} setTableEditorOpen={setTableEditorOpen}
+        shortcutsOpen={shortcutsOpen} setShortcutsOpen={setShortcutsOpen}
+        tourOpen={tourOpen} setTourOpen={setTourOpen}
+        runtimeMetricsOpen={runtimeMetricsOpen} setRuntimeMetricsOpen={setRuntimeMetricsOpen}
+        doc={doc} setDoc={setDoc} setContent={setContent}
+        authUserId={authUserId} authOrgId={authOrgId} commands={commands}
       />
-      {runtimeMetricsOpen && (
-        <RuntimeMetricsPanel onClose={() => setRuntimeMetricsOpen(false)} />
-      )}
 
       {/* Focus Mode overlay */}
       {focusMode && (
