@@ -6,7 +6,7 @@
   "type": "module",
   "bin": {
     "lumen-mcp": "./dist/index.js",
-    "lumen": "./dist/cli.js"
+    "lumen": "./dist/lumen.js"
   },
   "main": "./dist/index.js",
   "files": [

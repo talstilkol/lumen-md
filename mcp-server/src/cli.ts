@@ -1,4 +1,3 @@
-#!/usr/bin/env node
 /**
  * `lumen` — the vault on disk from a terminal (plan W2.3).
  *
@@ -277,16 +276,4 @@ async function runMcp(vault: string, rest: string[], flags: Record<string, strin
   }
   io.err(`usage: lumen mcp status | enable <client> [--scopes ${ALL_SCOPES.join(",")}] | disable <client> | review | approve <id>|--all | reject <id>|--all | log | serve`);
   return 1;
-}
-
-const isMain = typeof process !== "undefined" && process.argv[1] && /[\\/]cli\.(js|ts)$/.test(process.argv[1]);
-if (isMain) {
-  runVaultCli(process.argv.slice(2), { out: (l) => process.stdout.write(l + "\n"), err: (l) => process.stderr.write(l + "\n"), env: process.env, cwd: process.cwd() })
-    .then((code) => {
-      if (code >= 0) process.exit(code);
-    })
-    .catch((e) => {
-      process.stderr.write(`error: ${(e as Error).message}\n`);
-      process.exit(1);
-    });
 }

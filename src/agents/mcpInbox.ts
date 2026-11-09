@@ -134,7 +134,7 @@ export function createMcpInbox(ws: InboxWorkspace, opts: { intervalMs?: number; 
         }
         const p = parseProposal(name, text);
         if (!p) continue;
-        const change = stageChange({ kind: "file", path: p.path, before: p.before, after: p.after }, { tool: p.tool, runId: `mcp-${p.id}`, agentId: `${MCP_AGENT_PREFIX}${p.client}` });
+        const change = stageChange({ kind: "file", path: p.path, before: p.before, after: p.after, summary: `${p.tool} · ${p.path}` }, { tool: p.tool, runId: `mcp-${p.id}`, agentId: `${MCP_AGENT_PREFIX}${p.client}` });
         staged.set(p.id, change.id);
         byChange.set(change.id, p);
         n++;
