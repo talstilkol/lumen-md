@@ -451,6 +451,8 @@ const en: Strings = {
   "block.liveCss.title": "Live CSS",
   "block.liveJs.title": "Live JavaScript",
   "block.liveJs.run": "Run",
+  "block.liveJs.idle": "Not run yet",
+  "block.liveJs.idleHint": "Code in a document runs only when you press Run. It runs in an isolated sandbox with no access to your files, keys or the network.",
   "block.liveJs.clear": "Clear console",
   "block.liveJs.noOutput": "(no output yet)",
   "block.liveJs.shared": "shared scope",

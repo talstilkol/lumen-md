@@ -54,6 +54,8 @@
   "block.liveJs.resetScope.hint": "تجاهل كل المتغيرات التي عرّفتها الكتل المشتركة في هذا المستند",
   "block.liveJs.scopeReset": "تمت إعادة تعيين النطاق",
   "block.liveJs.run": "Run",
+  "block.liveJs.idle": "لم يُشغَّل بعد",
+  "block.liveJs.idleHint": "يعمل الكود في المستند فقط عند الضغط على \"تشغيل\"، داخل بيئة معزولة بلا وصول إلى ملفاتك أو مفاتيحك أو الشبكة.",
   "block.liveJs.title": "Live JavaScript",
   "block.liveLua.title": "Lua مباشر",
   "block.liveLua.run": "تشغيل",

@@ -420,6 +420,8 @@ export default defineConfig({
         benchmarks: path.resolve(__dirname, "public/benchmarks.html"),
         // Web Playground runner: the page inside the block's sandboxed iframe.
         playground: path.resolve(__dirname, "playground-runner.html"),
+        // live-js runner: the hidden sandboxed iframe live-js code runs in (T48).
+        livejs: path.resolve(__dirname, "livejs-runner.html"),
       },
       // `y-websocket` is an OPTIONAL runtime dep (see comments in
       // src/collab/yjs.ts). It's not in package.json — users opt in by

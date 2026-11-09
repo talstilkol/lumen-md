@@ -54,6 +54,8 @@
   "block.liveJs.resetScope.hint": "Alle Variablen verwerfen, die die geteilten Blöcke dieses Dokuments definiert haben",
   "block.liveJs.scopeReset": "Bereich zurückgesetzt",
   "block.liveJs.run": "Run",
+  "block.liveJs.idle": "Noch nicht ausgeführt",
+  "block.liveJs.idleHint": "Code in einem Dokument läuft nur, wenn du auf „Ausführen“ klickst – in einer isolierten Sandbox ohne Zugriff auf deine Dateien, Schlüssel oder das Netzwerk.",
   "block.liveJs.title": "Live JavaScript",
   "block.liveLua.title": "Live-Lua",
   "block.liveLua.run": "Ausführen",

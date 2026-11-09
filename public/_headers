@@ -19,6 +19,15 @@
   ! X-Frame-Options
   Content-Security-Policy: default-src 'none'; script-src 'self' blob: 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src * data: blob:; media-src * data: blob:; font-src 'self' data:; connect-src 'self'; frame-ancestors 'self'; base-uri 'none'; form-action 'none'
 
+# live-js runner (T48): the hidden iframe live-js code runs in
+# (`sandbox="allow-scripts"`, opaque origin: no IndexedDB, localStorage,
+# OPFS, cookies or tokens of the app). The user's code runs in a blob: worker
+# that inherits this policy: eval for the code itself, and no network at all.
+/livejs-runner.html
+  ! Content-Security-Policy
+  ! X-Frame-Options
+  Content-Security-Policy: default-src 'none'; script-src 'self' blob: 'unsafe-eval'; worker-src blob:; connect-src 'none'; img-src 'none'; style-src 'none'; frame-ancestors 'self'; base-uri 'none'; form-action 'none'
+
 # The runner's opaque origin ("null") loads its own module chunks and Vue's
 # ESM build with CORS: allow any origin to read these public, static,
 # credential-free files.

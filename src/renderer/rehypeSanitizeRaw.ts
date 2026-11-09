@@ -1,0 +1,115 @@
+/**
+ * Sanitizer for raw HTML inside Markdown (T48). Runs right after rehype-raw,
+ * only in the pipeline for documents that contain inline HTML.
+ *
+ * Elements: anything that can run script, navigate the app, load plugins or
+ * restyle the whole app (script, iframe srcdoc, object, embed, form, meta,
+ * base, link, style, …) is removed with its content.
+ * Attributes: event handlers (on*), srcdoc, formaction and friends are
+ * dropped; URL attributes keep only http(s), mailto, tel, relative and
+ * #fragment links (and data:image/* for images) — no javascript:, vbscript:
+ * or data:text/html.
+ * Iframes (embeds written as HTML) keep an https src and always get a
+ * sandbox without same-origin powers over the app.
+ */
+import { visit, SKIP } from "unist-util-visit";
+import type { Element, Root, Parent } from "hast";
+
+const DROP_ELEMENTS = new Set([
+  "script", "style", "noscript", "template", "object", "embed", "applet",
+  "form", "button", "select", "textarea", "option",
+  "meta", "base", "link", "frame", "frameset", "portal", "param",
+]);
+
+const DROP_PROPS = new Set(["srcDoc", "formAction", "formMethod", "formTarget", "ping", "httpEquiv", "is"]);
+
+const URL_PROPS = new Set(["href", "src", "xLinkHref", "action", "poster", "cite", "background", "data", "longDesc", "useMap", "manifest", "codeBase"]);
+
+const SAFE_SCHEME = /^(?:https?:|mailto:|tel:)/i;
+const DATA_IMAGE = /^data:image\/(?:png|jpe?g|gif|webp|avif|bmp|svg\+xml);/i;
+
+/** Is this URL safe for the given element/property? Exported for tests. */
+export function safeUrl(value: string, tag: string, prop: string): boolean {
+  // Browsers ignore ASCII whitespace and control characters inside a
+  // scheme ("java\tscript:"), so compare without them.
+  // eslint-disable-next-line no-control-regex
+  const v = value.replace(/[\u0000- \u007f]+/g, "");
+  const scheme = /^([a-z][a-z0-9+.-]*):/i.exec(v);
+  if (!scheme) return true; // relative, #fragment, /path, ./file.md
+  if (SAFE_SCHEME.test(v)) return tag === "iframe" ? /^https:/i.test(v) : true;
+  if (DATA_IMAGE.test(v) && (tag === "img" || tag === "source" || tag === "picture") && (prop === "src" || prop === "srcSet")) return true;
+  return false;
+}
+
+function cleanSrcSet(value: string, tag: string): string | null {
+  const parts = value.split(",").map((p) => p.trim()).filter(Boolean);
+  const ok = parts.filter((p) => safeUrl(p.split(/\s+/)[0] ?? "", tag, "srcSet"));
+  return ok.length ? ok.join(", ") : null;
+}
+
+function cleanElement(el: Element) {
+  const props = el.properties ?? {};
+  // GFM task lists render as disabled checkboxes; no other input survives.
+  if (el.tagName === "input") {
+    if (props.type !== "checkbox") return false;
+    props.disabled = true;
+  }
+  for (const key of Object.keys(props)) {
+    const value = props[key];
+    if (/^on/i.test(key) || DROP_PROPS.has(key)) {
+      delete props[key];
+      continue;
+    }
+    if (URL_PROPS.has(key)) {
+      const s = Array.isArray(value) ? value.join(" ") : String(value ?? "");
+      if (!safeUrl(s, el.tagName, key)) delete props[key];
+      continue;
+    }
+    if (key === "srcSet") {
+      const s = Array.isArray(value) ? value.join(", ") : String(value ?? "");
+      const cleaned = cleanSrcSet(s, el.tagName);
+      if (cleaned) props[key] = cleaned;
+      else delete props[key];
+      continue;
+    }
+    if (key === "style" && typeof value === "string") {
+      // No remote loads or legacy script hooks through inline CSS.
+      if (/url\s*\(|expression\s*\(|@import|behavior\s*:|-moz-binding/i.test(value)) delete props[key];
+      // Don't let a note cover the app (fake dialogs, click-jacking).
+      else if (/position\s*:\s*(fixed|sticky)/i.test(value)) props[key] = value.replace(/position\s*:\s*(fixed|sticky)/gi, "position: static");
+    }
+  }
+  if (el.tagName === "a" && typeof props.target === "string" && props.target !== "_self") {
+    props.rel = ["noopener", "noreferrer"];
+  }
+  if (el.tagName === "iframe") {
+    if (typeof props.src !== "string") return false;
+    props.sandbox = ["allow-scripts", "allow-popups", "allow-presentation", "allow-same-origin"];
+    props.referrerPolicy = "no-referrer";
+    props.loading = "lazy";
+  }
+  el.properties = props;
+  return true;
+}
+
+export function rehypeSanitizeRaw() {
+  return (tree: Root) => {
+    visit(tree, "element", (node: Element, index, parent: Parent | undefined) => {
+      const drop = DROP_ELEMENTS.has(node.tagName) || !cleanElement(node);
+      if (drop && parent && typeof index === "number") {
+        parent.children.splice(index, 1);
+        return [SKIP, index];
+      }
+      return undefined;
+    });
+    // Raw HTML comments are harmless, but conditional comments and stray
+    // doctype/raw nodes have no business in the preview.
+    visit(tree, (node, index, parent: Parent | undefined) => {
+      if ((node.type === "raw" || node.type === "doctype") && parent && typeof index === "number") {
+        parent.children.splice(index, 1);
+        return [SKIP, index];
+      }
+      return undefined;
+    });
+  };
+}

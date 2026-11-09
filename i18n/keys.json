@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-10-17T21:21:18.611Z",
+  "generated_at": "2026-10-17T23:03:51.979Z",
   "source": "src/i18n/index.ts (en bundle)",
-  "count": 1242,
+  "count": 1244,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -1915,6 +1915,16 @@
     {
       "key": "block.liveJs.run",
       "en": "Run",
+      "vars": []
+    },
+    {
+      "key": "block.liveJs.idle",
+      "en": "Not run yet",
+      "vars": []
+    },
+    {
+      "key": "block.liveJs.idleHint",
+      "en": "Code in a document runs only when you press Run. It runs in an isolated sandbox with no access to your files, keys or the network.",
       "vars": []
     },
     {

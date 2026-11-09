@@ -270,6 +270,8 @@
   "block.liveCss.title": "CSS חי",
   "block.liveJs.title": "JavaScript חי",
   "block.liveJs.run": "הרץ",
+  "block.liveJs.idle": "עוד לא הורץ",
+  "block.liveJs.idleHint": "קוד במסמך רץ רק כשלוחצים \"הרץ\". הוא רץ בארגז חול מבודד, בלי גישה לקבצים, למפתחות או לרשת.",
   "block.liveJs.clear": "נקה קונסולה",
   "block.liveJs.noOutput": "(אין פלט עדיין)",
   "block.liveJs.shared": "תחום משותף",

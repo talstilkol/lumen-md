@@ -54,6 +54,8 @@
   "block.liveJs.resetScope.hint": "このドキュメントの共有ブロックで定義されたすべての変数を破棄します",
   "block.liveJs.scopeReset": "スコープをリセットしました",
   "block.liveJs.run": "Run",
+  "block.liveJs.idle": "未実行",
+  "block.liveJs.idleHint": "ドキュメント内のコードは「実行」を押したときだけ、ファイル・キー・ネットワークにアクセスできない隔離されたサンドボックスで実行されます。",
   "block.liveJs.title": "Live JavaScript",
   "block.liveLua.title": "ライブ Lua",
   "block.liveLua.run": "実行",
