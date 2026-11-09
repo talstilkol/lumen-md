@@ -71,6 +71,18 @@ export function protectedRanges(text: string): Array<[number, number]> {
     /^ {0,3}\[[^\]\n]+\]:[^\n]*$/gm,
   ];
   for (const re of inline) for (const mm of text.matchAll(re)) out.push([mm.index!, mm.index! + mm[0].length]);
+  // A code span still being typed (`צה"ל with no closing ` yet): from its backticks to the end of the line.
+  let lineStart = 0;
+  for (const line of text.split("\n")) {
+    const runs = [...line.matchAll(/`+/g)];
+    let open: RegExpMatchArray | null = null;
+    for (const r of runs) {
+      if (!open) open = r;
+      else if (r[0].length === open[0].length) open = null;
+    }
+    if (open) out.push([lineStart + open.index!, lineStart + line.length]);
+    lineStart += line.length + 1;
+  }
   out.sort((a, b) => a[0] - b[0]);
   return out;
 }

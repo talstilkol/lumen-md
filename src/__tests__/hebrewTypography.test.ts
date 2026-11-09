@@ -119,6 +119,11 @@ describe("Hebrew typography (W2.9)", () => {
     }
   });
 
+  it("a code span still being typed is code too", () => {
+    expect(hebrewTypography('טקסט `צה"ל')).toBe('טקסט `צה"ל');
+    expect(hebrewTypography('`a` צה"ל')).toBe("`a` צה״ל");
+  });
+
   it("within: only the edits touching what was just typed", () => {
     const text = 'צה"ל ועוד צה"ל';
     const last = typographyEdits(text, {}, { from: text.length - 2, to: text.length });
