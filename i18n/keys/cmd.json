@@ -698,6 +698,16 @@
       "vars": []
     },
     {
+      "key": "cmd.help.setup",
+      "en": "Set up Lumen…",
+      "vars": []
+    },
+    {
+      "key": "cmd.help.setup.hint",
+      "en": "Language, vault location, look and a sample vault: the first-run setup again",
+      "vars": []
+    },
+    {
       "key": "cmd.image.altText",
       "en": "Images: alt text from OCR / local vision",
       "vars": []

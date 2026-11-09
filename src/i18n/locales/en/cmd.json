@@ -137,6 +137,8 @@
   "cmd.git.watch": "Git: toggle watch-mode auto-pull",
   "cmd.git.watch.hint": "Polls the remote every 5 min and pulls on change",
   "cmd.help.credits": "Credits & model licences",
+  "cmd.help.setup": "Set up Lumen…",
+  "cmd.help.setup.hint": "Language, vault location, look and a sample vault: the first-run setup again",
   "cmd.image.altText": "Images: alt text from OCR / local vision",
   "cmd.image.altText.hint": "Reads text in this note's images on this device (Hebrew + English); describes the rest with a local Ollama vision model",
   "cmd.insert.abc": "Insert music notation (ABC)",

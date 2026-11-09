@@ -106,6 +106,7 @@ describe("the no-models hint names the open-licence default (plan 1.7)", () => {
       const strings = JSON.parse(readFileSync(join(root, "i18n/locales", lang, "ai.json"), "utf8")) as Record<string, string>;
       expect([lang, strings["ai.settings.ollama.none"]]).toEqual([lang, expect.stringContaining(`ollama pull ${DEFAULT_OLLAMA_MODEL}`)]);
     }
+    // The palette's AI commands live in commands/domains/ai.ts since the plan 0.2 split.
     const commands = readFileSync(join(root, "commands/domains/ai.ts"), "utf8");
     const block = commands.slice(commands.indexOf('id: "ai.ollamaModels"'), commands.indexOf('id: "ai.usage"'));
     expect(block).toContain('t("ai.settings.ollama.none")');

@@ -5,7 +5,7 @@ import { t } from "../../i18n";
 import { BLOCK_SNIPPETS } from "../../snippets";
 import { buildFormatCommands } from "../../editor/formatCommands";
 import { buildSuggestingCommands } from "../../editor/suggestingCommands";
-import { detectIsMac } from "../../ui/KeyboardShortcuts";
+import { detectIsMac } from "../../lib/detectIsMac";
 import { showAiToast } from "../../ui/AiToast";
 import type { CommandContext } from "./context";
 

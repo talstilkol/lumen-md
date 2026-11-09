@@ -189,6 +189,21 @@
       "action": "store:toggleWorkspace"
     },
     {
+      "id": "note.today",
+      "label": "Today's note",
+      "group": "File",
+      "hint": "Open or create the daily note for today (journal/YYYY-MM-DD.md)",
+      "shortcut": "⌥⌘D",
+      "icon": "FileText"
+    },
+    {
+      "id": "view.calendar",
+      "label": "Show / hide the calendar",
+      "group": "View",
+      "hint": "Month calendar of daily notes under the file tree",
+      "icon": "FileText"
+    },
+    {
       "id": "view.backlinks",
       "label": "Toggle backlinks",
       "group": "View",
@@ -927,6 +942,13 @@
       "icon": "FolderOpen"
     },
     {
+      "id": "help.setup",
+      "label": "Set up Lumen…",
+      "group": "File",
+      "hint": "Language, vault location, look and a sample vault: the first-run setup again",
+      "icon": "Sparkles"
+    },
+    {
       "id": "file.saveToWorkspace",
       "label": "Save to workspace",
       "group": "File",
@@ -1255,6 +1277,21 @@
       "hint": "in-browser file storage (OPFS)",
       "icon": "FolderOpen",
       "action": "store:toggleWorkspace"
+    },
+    {
+      "id": "note.today",
+      "label": "Today's note",
+      "group": "File",
+      "hint": "Open or create the daily note for today (journal/YYYY-MM-DD.md)",
+      "shortcut": "⌥⌘D",
+      "icon": "FileText"
+    },
+    {
+      "id": "view.calendar",
+      "label": "Show / hide the calendar",
+      "group": "View",
+      "hint": "Month calendar of daily notes under the file tree",
+      "icon": "FileText"
     },
     {
       "id": "view.backlinks",
@@ -2104,6 +2141,13 @@
       "icon": "FolderOpen"
     },
     {
+      "id": "help.setup",
+      "label": "Set up Lumen…",
+      "group": "File",
+      "hint": "Language, vault location, look and a sample vault: the first-run setup again",
+      "icon": "Sparkles"
+    },
+    {
       "id": "file.saveToWorkspace",
       "label": "Save to workspace",
       "group": "File",
@@ -2255,6 +2299,8 @@
     "view.outline",
     "view.pageView",
     "view.workspace",
+    "note.today",
+    "view.calendar",
     "view.backlinks",
     "view.search",
     "view.smartSearch",
@@ -2359,6 +2405,7 @@
     "collab.start",
     "collab.join",
     "file.openSampleWorkspace",
+    "help.setup",
     "file.saveToWorkspace",
     "theme.toggle",
     "insert.chart",
