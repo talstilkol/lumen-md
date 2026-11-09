@@ -10,6 +10,9 @@
  *   npm run lint:prune        drop suppressions that are fixed (CI fails until you do)
  * Never run `--suppress-all` to make a new violation pass; fix it, or
  * disable the rule on that line with a reason.
+ *
+ * Two rules have no baseline at all (plan 12.1; codeHealth.test.ts checks):
+ * lumen/empty-catch-why and max-lines.
  */
 import js from "@eslint/js";
 import tseslint from "typescript-eslint";
@@ -58,6 +61,13 @@ export default tseslint.config(
       "no-redeclare": "off",
       "@typescript-eslint/no-unused-vars": ["error", { argsIgnorePattern: "^_", varsIgnorePattern: "^_", caughtErrors: "none" }],
     },
+  },
+  {
+    // 12.1: no production file over 800 lines (split it by concern instead).
+    // Like lumen/empty-catch-why, this rule has no entries in the baseline.
+    files: ["src/**/*.{ts,tsx}"],
+    ignores: ["src/**/__tests__/**", "src/**/*.test.{ts,tsx}", "src/**/*.spec.{ts,tsx}"],
+    rules: { "max-lines": ["error", { max: 800 }] },
   },
   {
     // Tests: same rules, plus the test runner's globals.
