@@ -14,7 +14,6 @@ import { semanticSearch, type RagResult } from "../ai/embeddings";
 import { indexWorkspace, searchHybrid, type SemanticHit } from "../ai/semanticSearch";
 import { useCapability } from "../billing/gates";
 import { UpgradeNotice } from "./UpgradeNotice";
-import { useAppStore } from "../store/useStore";
 import { rememberSearch, getSearchHistory, forgetSearch } from "../storage/searchHistory";
 import { flashSearchHighlight } from "../editor/searchHighlight";
 
@@ -41,7 +40,6 @@ export function SearchDialog({ open, onClose, onOpenFile }: Props) {
   const listRef = useRef<HTMLDivElement | null>(null);
   const dialogRef = useRef<HTMLDivElement | null>(null);
   const previousFocusRef = useRef<Element | null>(null);
-  const aiKey = useAppStore((s) => s.aiKey);
 
   const [aiAnswer, setAiAnswer] = useState<string | null>(null);
   const [aiRendered, setAiRendered] = useState<ReactElement | null>(null);
@@ -150,10 +148,8 @@ export function SearchDialog({ open, onClose, onOpenFile }: Props) {
   }, [open, query, mode, smartAllowed]);
 
   async function rebuildSmartIndex() {
-    if (!aiKey) {
-      showAiToast("Configure your AI Key (⌘K → AI Settings) to use Smart search", "error");
-      return;
-    }
+    // Embeddings are computed on this device by default (Ollama or
+    // transformers.js); no cloud key is needed.
     setSmartIndexing(true);
     showAiToast("🧠 Building semantic index…", "info");
     try {
@@ -243,7 +239,7 @@ export function SearchDialog({ open, onClose, onOpenFile }: Props) {
       // (Smart tab → Build) we fuse BM25 + semantic via RRF for genuinely
       // semantic-aware Q&A. When the index is empty, `searchHybrid` falls
       // back to BM25 alone, so we never block the AI tab on a missing index.
-      const hybridHits = aiKey && smartAllowed
+      const hybridHits = smartAllowed
         ? await searchHybrid(query, 8).catch(() => [] as SemanticHit[])
         : [];
       const fallback =

@@ -59,9 +59,9 @@ describe("AI policy gates on direct cloud paths", () => {
     expect(fetchSpy).not.toHaveBeenCalled();
   });
 
-  it("OpenAI embeddings behind smart search", async () => {
-    const { indexWorkspace } = await import("../ai/semanticSearch");
-    await expect(indexWorkspace({ force: true })).rejects.toMatchObject({ code: "POLICY" });
+  it("OpenAI embeddings are refused under local-only (smart search itself runs locally)", async () => {
+    const { __providers } = await import("../ai/embeddingProvider");
+    await expect(__providers.openAiProvider.embed(["x"], "passage")).rejects.toMatchObject({ code: "POLICY" });
     expect(fetchSpy).not.toHaveBeenCalled();
   });
 
