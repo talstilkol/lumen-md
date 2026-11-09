@@ -11,6 +11,11 @@ export type BaseDirection = "ltr" | "rtl";
 
 // Hebrew, Arabic, Syriac, Thaana, N'Ko and the presentation-form blocks.
 const RTL_CHAR = /[֐-ࣿיִ-﷿ﹰ-﻿]/;
+// Inside those blocks, the characters that are *not* strong under UAX #9:
+// Hebrew and Arabic combining marks (NSM), the Arabic-Indic and Extended
+// Arabic-Indic digits (AN / EN) and the Arabic number separators (AN). A
+// cell of "١٢" has no direction of its own and must not turn a table RTL.
+const WEAK_IN_RTL_BLOCKS = /[\u0591-\u05BD\u05BF\u05C1\u05C2\u05C4\u05C5\u05C7\u0610-\u061A\u064B-\u065F\u0660-\u066C\u0670\u06D6-\u06DC\u06DF-\u06E4\u06E7\u06E8\u06EA-\u06ED\u06F0-\u06F9]/;
 // Latin (with the Latin-1 / Extended ranges), Greek, Cyrillic, kana, CJK
 // ideographs and Hangul: all strong left-to-right.
 const LTR_CHAR = /[A-Za-zÀ-ɏͰ-ϿЀ-ӿ぀-ヿ一-鿿가-힯]/;
@@ -18,7 +23,10 @@ const LTR_CHAR = /[A-Za-zÀ-ɏͰ-ϿЀ-ӿ぀-ヿ一-鿿가-힯]/;
 /** Direction of the first strong character, or null when there is none. */
 export function firstStrongDirection(text: string): BaseDirection | null {
   for (const ch of text) {
-    if (RTL_CHAR.test(ch)) return "rtl";
+    if (RTL_CHAR.test(ch)) {
+      if (WEAK_IN_RTL_BLOCKS.test(ch)) continue;
+      return "rtl";
+    }
     if (LTR_CHAR.test(ch)) return "ltr";
   }
   return null;
