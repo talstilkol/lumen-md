@@ -80,6 +80,7 @@ export function AiFab({ commands }: Props) {
         aria-label={t("group.ai")}
         aria-expanded={open}
         aria-haspopup="menu"
+        data-testid="ai-fab"
         style={{
           display: "flex",
           alignItems: "center",
@@ -149,7 +150,9 @@ export function AiFab({ commands }: Props) {
                 autoFocus
                 style={{
                   width: "100%",
-                  padding: "6px 10px 6px 28px",
+                  // The search icon sits on the inline-start side: the room for it must too.
+                  padding: "6px 10px",
+                  paddingInlineStart: 28,
                   background: "hsl(var(--bg-subtle))",
                   border: "1px solid hsl(var(--border))",
                   borderRadius: 8,

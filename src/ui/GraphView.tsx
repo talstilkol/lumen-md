@@ -273,7 +273,7 @@ export function GraphView({ onOpenFile }: { onOpenFile: (path: string, content: 
       <div style={{
         position: "absolute",
         top: 12,
-        left: 12,
+        insetInlineStart: 12,
         fontSize: 11,
         color: "hsl(var(--fg-muted))",
         background: "hsl(var(--bg) / 0.8)",
