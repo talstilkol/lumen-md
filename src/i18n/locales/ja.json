@@ -1219,5 +1219,12 @@
   "trash.restored": "{path} に復元しました",
   "trash.daysLeft": "{n} 日後に完全に削除",
   "cmd.file.trash": "ごみ箱…",
-  "cmd.file.trash.hint": "削除したノートを復元（30日間保持）"
+  "cmd.file.trash.hint": "削除したノートを復元（30日間保持）",
+  "cmd.spell.hebrewDictionary": "ヘブライ語スペル: 辞書（ダウンロード／削除）",
+  "cmd.spell.hebrewDictionary.hint": "オフラインのヘブライ語チェック（Hspell・5.7MB・AGPL）",
+  "spell.he.downloadConfirm": "ヘブライ語辞書（Hspell・5.7MB・AGPL-3.0）をGitHubからこの端末にダウンロードしますか？テキストはどこにも送信されません。",
+  "spell.he.installed": "ヘブライ語辞書をインストールしました（{n} 語）。",
+  "spell.he.failed": "辞書をダウンロードできませんでした: {error}",
+  "spell.he.removeConfirm": "この端末からヘブライ語辞書を削除しますか？",
+  "spell.he.removed": "ヘブライ語辞書を削除しました。"
 }

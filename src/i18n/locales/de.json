@@ -1219,5 +1219,12 @@
   "trash.restored": "Wiederhergestellt nach {path}",
   "trash.daysLeft": "wird in {n} Tagen endgültig gelöscht",
   "cmd.file.trash": "Papierkorb…",
-  "cmd.file.trash.hint": "Gelöschte Notizen wiederherstellen (30 Tage)"
+  "cmd.file.trash.hint": "Gelöschte Notizen wiederherstellen (30 Tage)",
+  "cmd.spell.hebrewDictionary": "Hebräische Rechtschreibung: Wörterbuch (laden / entfernen)",
+  "cmd.spell.hebrewDictionary.hint": "Hebräische Prüfung offline (Hspell, 5,7 MB, AGPL)",
+  "spell.he.downloadConfirm": "Das hebräische Wörterbuch (Hspell, 5,7 MB, AGPL-3.0) von GitHub auf dieses Gerät laden? Dein Text wird nirgendwohin gesendet.",
+  "spell.he.installed": "Hebräisches Wörterbuch installiert ({n} Wörter).",
+  "spell.he.failed": "Wörterbuch konnte nicht geladen werden: {error}",
+  "spell.he.removeConfirm": "Hebräisches Wörterbuch von diesem Gerät entfernen?",
+  "spell.he.removed": "Hebräisches Wörterbuch entfernt."
 }

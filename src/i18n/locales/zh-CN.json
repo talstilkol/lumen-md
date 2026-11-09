@@ -1219,5 +1219,12 @@
   "trash.restored": "已恢复到 {path}",
   "trash.daysLeft": "{n} 天后永久删除",
   "cmd.file.trash": "回收站…",
-  "cmd.file.trash.hint": "恢复已删除的笔记（保留 30 天）"
+  "cmd.file.trash.hint": "恢复已删除的笔记（保留 30 天）",
+  "cmd.spell.hebrewDictionary": "希伯来语拼写：词典（下载／删除）",
+  "cmd.spell.hebrewDictionary.hint": "离线希伯来语拼写检查（Hspell，5.7 MB，AGPL）",
+  "spell.he.downloadConfirm": "从 GitHub 下载希伯来语词典（Hspell，5.7 MB，AGPL-3.0）到此设备？你的文本不会发送到任何地方。",
+  "spell.he.installed": "已安装希伯来语词典（{n} 个词）。",
+  "spell.he.failed": "无法下载词典：{error}",
+  "spell.he.removeConfirm": "从此设备删除希伯来语词典？",
+  "spell.he.removed": "已删除希伯来语词典。"
 }

@@ -1354,6 +1354,29 @@ export function useCommands({
         },
       },
       {
+        id: "spell.hebrewDictionary",
+        label: t("cmd.spell.hebrewDictionary"),
+        hint: t("cmd.spell.hebrewDictionary.hint"),
+        icon: cmdIcons.Sparkles,
+        group: t("group.tools"),
+        action: async () => {
+          const svc = await import("../ai/hebrewSpellService");
+          if (await svc.hebrewDictionaryInstalled()) {
+            if (!(await uiConfirm({ message: t("spell.he.removeConfirm") }))) return;
+            await svc.removeHebrewDictionary();
+            showAiToast(t("spell.he.removed"), "info");
+            return;
+          }
+          if (!(await uiConfirm({ message: t("spell.he.downloadConfirm") }))) return;
+          try {
+            const n = await svc.downloadHebrewDictionary();
+            showAiToast(t("spell.he.installed", { n: n.toLocaleString() }), "info");
+          } catch (e) {
+            showAiToast(t("spell.he.failed", { error: (e as Error).message }), "error");
+          }
+        },
+      },
+      {
         id: "file.trash",
         label: t("cmd.file.trash"),
         hint: t("cmd.file.trash.hint"),
