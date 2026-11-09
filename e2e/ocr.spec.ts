@@ -1,9 +1,10 @@
 import { test, expect } from "@playwright/test";
 
 /**
- * T31 — on-device OCR reads Hebrew and English from an image. Needs the
- * language models from raw.githubusercontent.com on first run; skipped when
- * that host can't be reached from the test browser.
+ * T31 — on-device OCR reads Hebrew and English from an image. The language
+ * models are served from this origin (public/tesseract/lang/, plan 7.5), so
+ * the test needs no network. The CER on the golden set is measured by
+ * ocr-cer.spec.ts.
  */
 test("OCR reads Hebrew and English text from an image on this device", async ({ page }) => {
   test.setTimeout(180_000);
@@ -14,10 +15,6 @@ test("OCR reads Hebrew and English text from an image on this device", async ({ 
   // job has no /src/ to import from.
   const dev = await page.evaluate(() => !!document.querySelector('script[src*="/@vite/client"]'));
   test.skip(!dev, "runs against the dev server only");
-  const reachable = await page.evaluate(() =>
-    fetch("https://raw.githubusercontent.com/tesseract-ocr/tessdata_fast/main/heb.traineddata", { method: "HEAD" }).then((r) => r.ok, () => false),
-  );
-  test.skip(!reachable, "language models can't be downloaded from this test environment");
   const text = await page.evaluate(async () => {
     const c = document.createElement("canvas");
     c.width = 900;
