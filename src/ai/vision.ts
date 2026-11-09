@@ -8,7 +8,10 @@
  *  2. Otherwise, a short description from a local vision model in Ollama
  *     (qwen2.5vl, gemma3, llava, minicpm-v, moondream…) when one is
  *     installed. Nothing is sent to the cloud.
- *  3. Otherwise the file name stays — no invented alt text.
+ *  3. Otherwise a caption in the browser (plan 6.6, ./caption): Florence-2,
+ *     SmolVLM as its fallback, translated into the document's language.
+ *  4. Otherwise the file name stays — no invented alt text.
+ * Every description passes validCaption (not empty, not the file name).
  */
 import { getBaseUrl } from "./ollamaProvider";
 import { meaningfulText, ocrImage } from "./ocr";
@@ -17,9 +20,11 @@ export interface ImageText {
   alt: string;
   /** Full recognised text, for the image title (searchable). */
   title?: string;
-  source: "ocr" | "vision" | "none";
-  /** Language of the recognised text (OCR only; plan 6.5), "und" when unclear. */
+  source: "ocr" | "vision" | "browser" | "none";
+  /** Language of the text: OCR's detected language (plan 6.5), or the caption's ("en" when it could not be translated). */
   lang?: string;
+  /** The browser model that wrote the caption (source "browser"). */
+  model?: string;
 }
 
 const VISION_RE = /(vl\b|vl:|llava|vision|gemma3|minicpm-v|moondream|bakllava|qwen2\.5vl|granite3\.2-vision)/i;
@@ -43,7 +48,7 @@ async function toBase64(blob: Blob): Promise<string> {
 }
 
 /** One-sentence description from a local vision model, in `lang` ("he" / "en"). */
-export async function describeImage(blob: Blob, lang: string, model?: string | null): Promise<string | null> {
+export async function describeImage(blob: Blob, lang: string, model?: string | null, signal?: AbortSignal): Promise<string | null> {
   const m = model ?? (await visionModel());
   if (!m) return null;
   const prompt =
@@ -55,19 +60,28 @@ export async function describeImage(blob: Blob, lang: string, model?: string | n
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ model: m, stream: false, messages: [{ role: "user", content: prompt, images: [await toBase64(blob)] }], options: { temperature: 0 } }),
-      signal: AbortSignal.timeout(60_000),
+      signal: signal ? AbortSignal.any([signal, AbortSignal.timeout(60_000)]) : AbortSignal.timeout(60_000),
     });
     if (!res.ok) return null;
     const json = (await res.json()) as { message?: { content?: string } };
     const text = (json.message?.content ?? "").replace(/\s+/g, " ").trim();
     return text ? text.slice(0, 200) : null;
-  } catch {
+  } catch (e) {
+    if (signal?.aborted) throw e;
     return null;
   }
 }
 
+export interface ImageTextOptions {
+  /** The image's file name or URL (the validator rejects a caption that repeats it). */
+  name?: string;
+  signal?: AbortSignal;
+  /** Present when the user asked: the browser captioner may offer its download. */
+  consent?: import("./mt/localModels").ConsentDeps;
+}
+
 /** Alt text (and searchable title) for an image. */
-export async function imageText(blob: Blob, lang: string): Promise<ImageText> {
+export async function imageText(blob: Blob, lang: string, opts: ImageTextOptions = {}): Promise<ImageText> {
   try {
     const ocr = await ocrImage(blob);
     if (meaningfulText(ocr)) {
@@ -78,8 +92,14 @@ export async function imageText(blob: Blob, lang: string): Promise<ImageText> {
   } catch {
     /* OCR unavailable (offline before the first download, old engine) */
   }
-  const d = await describeImage(blob, lang);
-  if (d) return { alt: d, source: "vision" };
+  const { captionInBrowser, captionInLanguage, validCaption } = await import("./caption");
+  const d = await describeImage(blob, lang, undefined, opts.signal);
+  if (d && validCaption(d, opts.name)) return { alt: d, source: "vision" };
+  const c = await captionInBrowser(blob, { consent: opts.consent, signal: opts.signal, name: opts.name });
+  if (c) {
+    const tr = await captionInLanguage(c.text, lang, opts.consent, opts.signal);
+    return { alt: tr.text, source: "browser", lang: tr.lang, model: c.model };
+  }
   return { alt: "", source: "none" };
 }
 
@@ -131,4 +151,18 @@ export function withImageText(markdown: string, url: string, oldAlt: string, t: 
   if (idx < 0) return markdown;
   const title = t.title ? ` "${escapeTitle(t.title)}"` : "";
   return markdown.slice(0, idx) + `![${escapeAlt(t.alt)}](${url}${title})` + markdown.slice(idx + from.length);
+}
+
+/**
+ * The language a caption should be in: the note's own (local detection,
+ * plan 6.5), else `fallback` (the UI language) for an empty or unclear note.
+ */
+export async function documentLanguage(markdown: string, fallback: string): Promise<string> {
+  try {
+    const [{ detectLanguage }, { proseOf }] = await Promise.all([import("../text/langId"), import("../agents/defs/translator")]);
+    const g = detectLanguage(proseOf(markdown));
+    return g.confident && g.lang !== "und" ? g.lang : fallback;
+  } catch {
+    return fallback;
+  }
 }
