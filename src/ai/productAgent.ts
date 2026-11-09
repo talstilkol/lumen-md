@@ -9,7 +9,7 @@
  * Works with any configured LLM provider (OpenAI, Ollama, WebGPU).
  */
 
-import { chat, type ChatMessage } from "./llm";
+import type { ChatMessage } from "./llm";
 import { isOPFSAvailable } from "../storage/workspace";
 import { log } from "../lib/logger";
 
@@ -242,14 +242,14 @@ export class ProductAgent {
     return runAgentOrThrow(builderSpecAgent, { text: idea }, { signal });
   }
 
+  /** A text stage of the build through its agent (plan 5.5): the runtime, local first, traced. */
+  private async stage(agent: "builderArchAgent" | "builderTestAgent" | "builderDocsAgent", system: string, text: string, signal: AbortSignal): Promise<string> {
+    const [{ runAgentOrThrow }, defs] = await Promise.all([import("../agents/runtime"), import("../agents/defs")]);
+    return runAgentOrThrow(defs[agent], { text, extra: { system } }, { signal });
+  }
+
   private async generateArchitecture(signal: AbortSignal): Promise<string> {
-    return chat(
-      [
-        { role: "system", content: ARCHITECTURE_PROMPT },
-        { role: "user", content: `Product spec:\n${JSON.stringify(this.spec, null, 2)}` },
-      ],
-      { signal, temperature: 0.5 },
-    );
+    return this.stage("builderArchAgent", ARCHITECTURE_PROMPT, `Product spec:\n${JSON.stringify(this.spec, null, 2)}`, signal);
   }
 
   private async generateFile(filePath: string, signal: AbortSignal): Promise<string> {
@@ -282,29 +282,16 @@ export class ProductAgent {
   }
 
   private async generateTest(filePath: string, sourceCode: string, signal: AbortSignal): Promise<string> {
-    return chat(
-      [
-        { role: "system", content: TEST_GEN_PROMPT },
-        {
-          role: "user",
-          content: `File: ${filePath}\n\nSource code:\n\`\`\`\n${sourceCode.slice(0, 3000)}\n\`\`\``,
-        },
-      ],
-      { signal, temperature: 0.3 },
-    );
+    return this.stage("builderTestAgent", TEST_GEN_PROMPT, `File: ${filePath}\n\nSource code:\n\`\`\`\n${sourceCode.slice(0, 3000)}\n\`\`\``, signal);
   }
 
   private async generateDocs(signal: AbortSignal): Promise<string> {
     const fileList = [...this.generatedFiles.keys()].join("\n");
-    return chat(
-      [
-        { role: "system", content: DOCS_PROMPT },
-        {
-          role: "user",
-          content: `Product: ${this.spec!.name}\nDescription: ${this.spec!.description}\nFeatures:\n${this.spec!.features.map((f) => `- ${f}`).join("\n")}\n\nFiles:\n${fileList}`,
-        },
-      ],
-      { signal, temperature: 0.5 },
+    return this.stage(
+      "builderDocsAgent",
+      DOCS_PROMPT,
+      `Product: ${this.spec!.name}\nDescription: ${this.spec!.description}\nFeatures:\n${this.spec!.features.map((f) => `- ${f}`).join("\n")}\n\nFiles:\n${fileList}`,
+      signal,
     );
   }
 

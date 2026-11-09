@@ -208,6 +208,10 @@ needs no grant and asks no network consent:
 The first call loads Pyodide (about 10 MB, from this site, so it also
 works offline once the app is cached). Each call starts it again.
 
+### Every AI command is an agent
+
+All AI commands run through the agent runtime: the executors (local first), the AI policy, the quota, the injection guard and the trace. That includes the ones that used to call the model directly: ghost text and the inline suggestion (`completer`), AI Rewrite (`rewriter`, which also follows your style profile), Ask Workspace (`answerer`), the voice-memo summary (`memo-summarizer`), the builder's architecture / tests / README stages, and batch jobs (`batch`, on the job's local model, charged once when the job is submitted). A test checks the source: nothing outside the executors calls the model directly.
+
 ## AI settings
 
 `⌘K → "AI: Settings (local agents)"` gathers everything in one panel:

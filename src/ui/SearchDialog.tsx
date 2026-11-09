@@ -4,9 +4,8 @@ import { Search, FileText, Sparkles, Loader2, FileCode2, Wand2 } from "lucide-re
 import { t, tPlural } from "../i18n";
 import { searchWorkspace, type SearchHit } from "../storage/workspaceIndex";
 import { isOPFSAvailable, readWorkspaceFile } from "../storage/workspace";
-import { chat, AiError } from "../ai/llm";
+import { AiError } from "../ai/llm";
 import type { ChatMessage } from "../ai/llm";
-import { PROMPTS } from "../ai/prompts";
 import { renderMarkdown } from "../renderer/pipeline";
 import { log } from "../lib/logger";
 import { showAiToast } from "../ui/AiToast";
@@ -306,20 +305,30 @@ export function SearchDialog({ open, onClose, onOpenFile }: Props) {
         results.map((r) => ({ path: r.path, content: r.content })),
         CONTEXT_BUDGET[getAiMode()],
       );
+      // Plan 2.7: a note from outside (clipped, imported, pulled) goes to the model cleaned and delimited, and taints the run.
+      const { ensureProvenanceBackfill, guardUntrusted, untrustedSourcesOfNote } = await import("../agents/untrusted");
+      await ensureProvenanceBackfill();
+      const untrusted: string[] = [];
       const contextStr = results.length > 0
-        ? packed.map((r, i) => `---\n📄 [${i + 1}] ${r.path}\n${r.text}`).join("\n")
+        ? packed
+            .map((r, i) => {
+              const entry = `📄 [${i + 1}] ${r.path}\n${r.text}`;
+              const from = untrustedSourcesOfNote(r.path, results.find((x) => x.path === r.path)?.content);
+              untrusted.push(...from);
+              return `---\n${from.length ? guardUntrusted(entry, from).text : entry}`;
+            })
+            .join("\n")
         : t("searchDialog.noRelevant");
 
       setAiAnswer(t("searchDialog.thinking"));
 
-      // Build multi-turn messages
-      const messages: ChatMessage[] = [
-        { role: "system", content: PROMPTS.ragAssistant + "\n\n" + CITE_INSTRUCTIONS },
-        ...conversation,
-        { role: "user", content: `Context Files:\n${contextStr}\n\nQuestion: ${query}` },
-      ];
-
-      const answer = await chat(messages, { ownPrompt: true, signal: local.signal });
+      // Plan 5.5: the `answerer` agent, through the runtime (earlier turns go along).
+      const [{ runAgentOrThrow }, { answererAgent }] = await Promise.all([import("../agents/runtime"), import("../agents/defs")]);
+      const answer = await runAgentOrThrow(
+        answererAgent,
+        { text: query, extra: { context: contextStr, history: conversation.filter((m): m is ChatMessage & { role: "user" | "assistant" } => m.role === "user" || m.role === "assistant"), citeInstructions: CITE_INSTRUCTIONS } },
+        { ownPrompt: true, signal: local.signal, untrusted },
+      );
       if (local.signal.aborted) throw local.signal.reason;
       setAiAnswer(answer);
       // Check every citation against the note it names (T29).

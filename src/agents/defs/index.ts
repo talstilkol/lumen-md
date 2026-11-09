@@ -13,3 +13,4 @@ export { proofreaderAgent, locateIssues, PROOF_MAX_CHARS, type ProofreaderInput,
 export { stylistAgent, type StylistInput, type StyleProfileOut } from "./stylist";
 export { formulatorAgent, cleanFormula, formulaFields, type FormulatorInput } from "./formulator";
 export { researcherAgent, checkCited, checkVerified, citedNumbers, RESEARCHER_SCHEMA, type ResearcherInput, type ResearcherOutput, type ResearchMode, type ResearchSource, type ResearchQuote } from "./researcher";
+export { completerAgent, rewriterAgent, answererAgent, memoSummarizerAgent, builderArchAgent, builderTestAgent, builderDocsAgent, batchAgent, cleanCompletion, checkBullets, type CompleterInput, type RewriterInput, type AnswererInput, type MemoInput, type BuilderStageInput, type BatchStepInput } from "./inline";
