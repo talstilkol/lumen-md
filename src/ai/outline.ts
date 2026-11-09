@@ -31,6 +31,8 @@ export async function generateOutline(
     return normalizeHeadings(out.headings, text);
   } catch (err) {
     log.warn("outline generation failed", err);
+    const { reportAgentFailure } = await import("../agents/suggestions");
+    reportAgentFailure(err, "ai.outline");
     return [];
   }
 }
