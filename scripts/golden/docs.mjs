@@ -18,6 +18,7 @@ const licenceIds = (expr) => expr.split(/\s+AND\s+|\s+OR\s+|[;,]\s*/).map((s) =>
 function partSource(p) {
   const s = p.src ? SRC[p.src] : null;
   if (s?.repo) return `${s.name} — [${s.repo}](https://github.com/${s.repo}/tree/${s.commit})${s.tag ? ` ${s.tag}` : ""} @ \`${s.commit.slice(0, 7)}\``;
+  if (s?.npm) return `${s.name} — [npm ${s.npm}@${s.version}](https://www.npmjs.com/package/${s.npm}/v/${s.version}), tarball sha256 \`${s.tgz.slice(0, 12)}…\``;
   if (s) return s.name;
   return p.url ? `${p.source} — ${p.url}` : (p.source ?? "");
 }
@@ -43,7 +44,7 @@ export function renderSources(def, dir) {
   out.push("| Part | Items | Dev (committed) | Test (CI only) | Status | Source | Licence | Licence verified |", "|---|---|---|---|---|---|---|---|");
   for (const p of parts) {
     const status = p.review === "pending" ? `${p.status}, review pending` : p.status;
-    const verified = p.evidence ? "at run time, by the workflow" : p.status === "owner-pending" ? "owner consent (15.11)" : p.src ? `${VERIFIED_ON}, source's own LICENSE / README` : "own work";
+    const verified = p.evidence ? "at run time, by the workflow" : p.status === "owner-pending" ? "owner consent (15.11)" : p.src ? `${SRC[p.src]?.verifiedOn ?? VERIFIED_ON}, source's own LICENSE / README` : "own work";
     const dev = p.status === "local-only" ? `${p.dev} (ids only)` : String(p.dev);
     out.push(`| ${p.id} | ${p.items} | ${dev} | ${p.test} | ${status} | ${cell(partSource(p))} | ${p.license} | ${verified} |`);
   }

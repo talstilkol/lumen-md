@@ -74,6 +74,18 @@ const PARTS = {
   caption: { xm3600: ["./sets/caption.mjs", "xm3600"] },
   nikud: { benyehuda: ["./sets/nikud.mjs", "benyehuda"], nakdimon: ["./sets/nikud.mjs", "nakdimon"] },
   "ocr-he": { lines: ["./sets/ocr.mjs", "lines"], pages: ["./sets/ocr.mjs", "pages"] },
+  // The small sets of plan 7.10.
+  "spell-en": { moby: ["./sets/small.mjs", "spellEn"] },
+  "image-search": { xm3600: ["./sets/small.mjs", "imageSearch"] },
+  clipper: { pages: ["./sets/small.mjs", "clipper"] },
+  "pdf-qa": { docs: ["./sets/small.mjs", "pdfQa"] },
+  "data-analysis": { rose: ["./sets/small.mjs", "dataAnalysis"] },
+  summarize: { sotu: ["./sets/small.mjs", "summarize"] },
+  formulas: { row: ["./sets/small.mjs", "formulas"] },
+  unlinked: { notes: ["./sets/small.mjs", "unlinkedMentions"] },
+  bidi: { lines: ["./sets/small.mjs", "bidi"] },
+  "hebrew-dates": { dates: ["./sets/small.mjs", "hebrewDates"] },
+  citations: { records: ["./sets/small.mjs", "citations"] },
 };
 
 /** Build one part of one split. Throws on failure; the caller reports it without any item content. */

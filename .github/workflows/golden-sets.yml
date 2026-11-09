@@ -89,7 +89,7 @@ jobs:
           failed=""
           for job in $PARTS; do
             if [ "$job" = xm3600-images ]; then
-              node scripts/golden/build.mjs caption --split dev --reason "dev images added by the workflow (run $GITHUB_RUN_ID)" || failed="$failed $job"
+              node scripts/golden/build.mjs caption image-search --split dev --reason "dev images added by the workflow (run $GITHUB_RUN_ID)" || failed="$failed $job"
               continue
             fi
             if { [ "$job" = common-voice ] || [ "$job" = flores ]; } && [ -z "${HF_TOKEN:-}" ]; then
