@@ -245,6 +245,9 @@ export default defineConfig({
           // TypeScript compiler + lib files for the opt-in code-block checks
           // (several MB; fetched only when the user enables the setting).
           "**/tsCheck.worker-*.js",
+          // web-llm inference worker (~6 MB; fetched on the first
+          // in-browser AI prompt, cached by the browser like any script).
+          "**/webllm.worker-*.js",
           // Pyodide (~13 MB, staged into public/ by prebuild) loads on the
           // first live-python Run; its 9.6 MB wasm would also trip the
           // precache size limit and fail `npm run build`.

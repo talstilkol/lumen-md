@@ -90,6 +90,11 @@ const BUDGETS = [
   // the user enables the setting; excluded from the PWA precache. Measured
   // 1325 KB gzipped (TypeScript 5.9).
   { name: "lazy: ts checker",   pattern: /^tsCheck\.worker-/,     budgetKb: 1450 },
+  // web-llm (WebGPU inference) runs in its own worker; the main thread only
+  // ships a few KB of message passing. The library inlines the tokenizer
+  // wasm and the TVM runtime: measured 2082 KB gzipped (0.2.82). Fetched
+  // only on the first in-browser AI prompt, never precached.
+  { name: "lazy: web-llm worker", pattern: /^webllm\.worker-/,    budgetKb: 2200 },
   { name: "lazy plugin chunk",  pattern: /\.js$/,                 budgetKb: 100 },
 ];
 

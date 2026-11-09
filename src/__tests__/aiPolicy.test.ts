@@ -21,6 +21,10 @@ const chatLocal = vi.fn(async (_m: unknown, _o: unknown) => "from webgpu");
 vi.mock("../ai/localLlm", () => ({
   localLlmAvailable: () => webgpu,
   chatLocal: (m: unknown, o: unknown) => chatLocal(m, o),
+  chatLocalStream: async function* () {
+    yield "from webgpu";
+  },
+  defaultLocalModel: async () => "Qwen3-4B-q4f16_1-MLC",
   onLocalLlmProgress: () => () => {},
 }));
 vi.mock("../ai/anthropicProvider", () => ({ chatAnthropic: vi.fn().mockResolvedValue("from claude"), chatAnthropicStream: vi.fn() }));
