@@ -4464,7 +4464,7 @@
      ],
      "why": "Bases הוא תקן הדה-פקטו למסדי נתונים על Markdown; בלי תאימות, מעבר מ-Obsidian מאבד את כל התצוגות.",
      "branch": "feat/obsidian-bases",
-     "status": "⏳ #358 (על #267; קריאה, תצוגה ועריכה של קובצי .base, 66/68 פונקציות, round-trip 20/20; Vercel Sandbox (Node 24): typecheck 0, vitest 322/3240, startup 459.2/460, obsidian-bases e2e chromium+firefox; dodMock — הציפיות נגזרו מהתיעוד; בעלים: לפתוח את 20 הקבצים ב-Obsidian 1.14 ולהשוות ל-expected.json)"
+     "status": "⏳ #358 feat/obsidian-bases (על #267; קריאה, תצוגה ועריכה של קובצי .base, 66/68 פונקציות, round-trip 20/20; Vercel Sandbox (Node 24): typecheck 0, vitest 322/3240, startup 459.2/460, obsidian-bases e2e chromium+firefox; dodMock — הציפיות נגזרו מהתיעוד; בעלים: לפתוח את 20 הקבצים ב-Obsidian 1.14 ולהשוות ל-expected.json)"
     },
     {
      "id": "W1.12",
@@ -4753,8 +4753,8 @@
       "הצהרת נגישות מפורסמת ומעודכנת בכל גרסה"
      ],
      "why": "axe תופס כ-30–40% מהבעיות; קוראי מסך בעברית הם המקום שבו כולם נכשלים — ויש חובה חוקית בישראל.",
-     "branch": "feat/a11y-sr-he",
-     "status": "⏳ #360 (על #290; הכרזות לקורא מסך בעברית, reflow ב-320px תוקן, הצהרת נגישות לפי ת״י 5568; Vercel Sandbox (Node 24): typecheck 0, vitest 337/3533, startup 458.9/460, reflow + sr-announce בשלושה דפדפנים; dodMock — בעלים: להריץ את פרוטוקול NVDA/VoiceOver/TalkBack ולמנות רכז נגישות)"
+     "branch": "feat/a11y-hebrew-sr",
+     "status": "⏳ #360 feat/a11y-hebrew-sr (על #290; הכרזות לקורא מסך בעברית, reflow ב-320px תוקן, הצהרת נגישות לפי ת״י 5568; Vercel Sandbox (Node 24): typecheck 0, vitest 337/3533, startup 458.9/460, reflow + sr-announce בשלושה דפדפנים; dodMock — בעלים: להריץ את פרוטוקול NVDA/VoiceOver/TalkBack ולמנות רכז נגישות)"
     },
     {
      "id": "W1.24",
@@ -5224,8 +5224,8 @@
       "0 התנגשויות קיצורים (בדיקה)"
      ],
      "why": "כל משתמש עברי מקליד בפריסה הלא נכונה כמה פעמים ביום; אף מתחרה לא פותר את זה.",
-     "branch": "feat/hebrew-keyboard",
-     "status": "⏳ #363 (על #208; קיצורים לפי keyCode בפריסה עברית + זיהוי פריסה שגויה; תוקן גם ⇧⌘F כפול; Vercel Sandbox (Node 24): typecheck 0, vitest 316/3006, startup 457.5/460, hebrew-layout 8 עברו (מקרה undo ב-webkit מדולג); בעלים: Safari עם פריסה עברית אמיתית)"
+     "branch": "feat/hebrew-layout",
+     "status": "⏳ #363 feat/hebrew-layout (על #208; קיצורים לפי keyCode בפריסה עברית + זיהוי פריסה שגויה; תוקן גם ⇧⌘F כפול; Vercel Sandbox (Node 24): typecheck 0, vitest 316/3006, startup 457.5/460, hebrew-layout 8 עברו (מקרה undo ב-webkit מדולג); בעלים: Safari עם פריסה עברית אמיתית)"
     },
     {
      "id": "W2.9",
@@ -5250,7 +5250,7 @@
      ],
      "why": "Word עושה את זה עשרות שנים; עורכי Markdown לא — וזה מה שגורם לטקסט עברי להיראות מקצועי.",
      "branch": "feat/hebrew-typography",
-     "status": "⏳ #365 (על #252; גרשיים, מקף, מרכאות עבריות אוטומטיים בעורך המקור + דיאלוג; Vercel Sandbox (Node 24) @fab0f34: vitest 317/3136, startup 458.8/460; e2e 9/9 בשלושה דפדפנים @125e482 — vitest ובנייה מלאים לא הורצו שוב על הראש)"
+     "status": "⏳ #365 feat/hebrew-typography (על #252; גרשיים, מקף, מרכאות עבריות אוטומטיים בעורך המקור + דיאלוג; Vercel Sandbox (Node 24) @fab0f34: vitest 317/3136, startup 458.8/460; e2e 9/9 בשלושה דפדפנים @125e482 — vitest ובנייה מלאים לא הורצו שוב על הראש)"
     },
     {
      "id": "W2.10",
