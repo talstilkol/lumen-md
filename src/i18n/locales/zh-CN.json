@@ -1429,5 +1429,10 @@
   "cmd.ai.cancel": "AI：取消",
   "cmd.ai.cancel.hint": "停止所有正在运行的 AI 请求（Esc 也可以）",
   "toast.aiCancelled": "已取消 AI 请求（{count}）",
-  "toast.aiNothingRunning": "没有正在运行的 AI 请求"
+  "toast.aiNothingRunning": "没有正在运行的 AI 请求",
+  "cmd.ai.fim": "AI：本地自动补全 (FIM) — 开/关",
+  "cmd.ai.fim.hint": "在输入时用本设备上的代码模型补全；Tab 接受，Esc 放弃",
+  "fim.on": "本地自动补全已开启 — {model}。Tab 接受，Esc 放弃。",
+  "fim.onNoModel": "本地自动补全已开启，但未安装补全模型：运行 \"ollama pull qwen2.5-coder:1.5b\"（或加载浏览器内模型）。",
+  "fim.off": "本地自动补全已关闭"
 }

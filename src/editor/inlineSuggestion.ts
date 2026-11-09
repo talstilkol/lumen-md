@@ -13,6 +13,22 @@ import { log } from "../lib/logger";
 
 const setSuggestion = StateEffect.define<string | null>();
 
+/**
+ * Plan 6.9: local fill-in-the-middle autocomplete, on when the user turned
+ * it on ("AI: Local Autocomplete"). Read here without importing the lazy
+ * module, so the startup bundle carries only this check.
+ */
+function fimOn(): boolean {
+  try {
+    return localStorage.getItem("lumen.fim.enabled") === "1";
+  } catch {
+    return false;
+  }
+}
+
+/** Quiet time after a keystroke before asking the local model. */
+const FIM_DEBOUNCE_MS = 150;
+
 const suggestionField = StateField.define<string | null>({
   create() {
     return null;
@@ -41,6 +57,8 @@ class SuggestionWidget extends WidgetType {
     span.style.opacity = "0.45";
     span.style.pointerEvents = "none";
     span.style.userSelect = "none";
+    // A FIM completion can be two lines (plan 6.9).
+    span.style.whiteSpace = "pre-wrap";
     span.className = "cm-ai-suggestion";
     return span;
   }
@@ -54,6 +72,9 @@ const suggestionPlugin = ViewPlugin.fromClass(
   class {
     private timeout: ReturnType<typeof setTimeout> | null = null;
     private abort: AbortController | null = null;
+    /** The FIM request scheduler (debounce + cancel per keystroke), made on first use. */
+    private fim: { request(): Promise<{ text: string } | null>; cancel(): void } | null = null;
+    private fimLoading = false;
 
     constructor(readonly view: EditorView) {
       // no-op
@@ -71,6 +92,12 @@ const suggestionPlugin = ViewPlugin.fromClass(
         this.abort.abort();
         this.abort = null;
       }
+      // Every keystroke and cursor move cancels the FIM request in flight.
+      this.fim?.cancel();
+      if (update.docChanged && fimOn()) {
+        void this.requestFim();
+        return;
+      }
 
       // A selection change dismisses the suggestion in the state field
       // itself (`tr.selection` → null). Dispatching from here, inside a
@@ -83,6 +110,38 @@ const suggestionPlugin = ViewPlugin.fromClass(
 
       // Schedule new suggestion after 600 ms of idle typing
       this.timeout = setTimeout(() => this.fetchSuggestion(), 600);
+    }
+
+    /** Plan 6.9: ask the local FIM model for the text between the cursor's two sides. */
+    private async requestFim() {
+      if (!this.fim) {
+        if (this.fimLoading) return;
+        this.fimLoading = true;
+        try {
+          const [{ FimScheduler }, { completeFim }] = await Promise.all([import("../ai/fimCore"), import("../ai/fim")]);
+          this.fim = new FimScheduler((signal) => {
+            const { state } = this.view;
+            const sel = state.selection.main;
+            if (!sel.empty) return Promise.resolve(null);
+            const prefix = state.doc.sliceString(Math.max(0, sel.head - 1500), sel.head);
+            const suffix = state.doc.sliceString(sel.head, Math.min(state.doc.length, sel.head + 500));
+            return completeFim(prefix, suffix, { signal });
+          }, FIM_DEBOUNCE_MS);
+        } catch (err) {
+          log.debug("fim", err);
+          return;
+        } finally {
+          this.fimLoading = false;
+        }
+      }
+      const fim = this.fim;
+      if (!fim) return;
+      const head = this.view.state.selection.main.head;
+      const doc = this.view.state.doc;
+      const r = await fim.request();
+      // Only if nothing moved while the model answered.
+      if (!r || !r.text || this.view.state.doc !== doc || this.view.state.selection.main.head !== head) return;
+      this.view.dispatch({ effects: setSuggestion.of(r.text) });
     }
 
     private async fetchSuggestion() {
@@ -124,6 +183,7 @@ const suggestionPlugin = ViewPlugin.fromClass(
     destroy() {
       if (this.timeout) clearTimeout(this.timeout);
       if (this.abort) this.abort.abort();
+      this.fim?.cancel();
     }
   },
 );
