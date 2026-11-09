@@ -1372,6 +1372,31 @@ export function useCommands({
         },
       },
       {
+        id: "ai.summarize",
+        label: t("cmd.ai.summarize"),
+        hint: t("cmd.ai.summarize.hint"),
+        icon: cmdIcons.Sparkles,
+        group: t("group.tools"),
+        action: async () => {
+          // Plan 6.11: a grounded summary on this device — every sentence is in the note.
+          const text = useAppStore.getState().doc.content;
+          const { summarize } = await import("../ai/summarize");
+          const op = aiOperation();
+          try {
+            const res = await summarize(text, { signal: op.signal });
+            if (!res.sentences.length) {
+              showAiToast(t("summary.empty"), "info");
+              return;
+            }
+            await uiAlert({ title: t("cmd.ai.summarize"), message: `${res.sentences.map((s) => `• ${s}`).join("\n")}\n\n${t(res.engine === "extractive" ? "pdf.summary.extractive" : "pdf.summary.local")}` });
+          } catch (e) {
+            if (!isAbort(e)) showAiToast(t("pdf.ask.failed", { error: (e as Error).message }), "error");
+          } finally {
+            op.end();
+          }
+        },
+      },
+      {
         id: "ai.mode",
         label: t("cmd.ai.mode"),
         hint: t("cmd.ai.mode.hint"),

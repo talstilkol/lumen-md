@@ -64,6 +64,7 @@ export default defineConfig({
             { label: "Local LLM (web-llm)", slug: "ai/local-llm" },
             { label: "AI cost: usage meter + answer cache", slug: "ai/cost" },
             { label: "Research + citation checks", slug: "ai/research" },
+            { label: "Grounded summaries", translations: { he: "סיכומים מעוגנים" }, slug: "ai/summarize" },
             { label: "MCP integration (Claude Desktop, Cursor)", slug: "ai/mcp" },
           ],
         },
