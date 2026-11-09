@@ -22,6 +22,7 @@ import { listSpreadFix } from "./milkdownListSpread";
 import { wrapInList } from "prosemirror-schema-list";
 import { dragHandlePlugin } from "./dragHandles";
 import { buildIndentKeymap } from "./keymapExtra";
+import { wysiwygOutlineKeymap, wysiwygOutlinePlugin } from "./wysiwygOutline";
 import "katex/dist/katex.css";
 import { chat, AiError } from "../ai/llm";
 import { PROMPTS } from "../ai/prompts";
@@ -746,6 +747,9 @@ export default function WysiwygEditor({ value, onChange }: Props) {
             }),
             // γ.1.b — Tab / Shift-Tab indent / outdent inside lists.
             buildIndentKeymap(),
+            // W2.13 — outline mode: fold, zoom and block operations.
+            wysiwygOutlineKeymap(),
+            wysiwygOutlinePlugin(),
           ]);
 
           ctx.set(slash.key, {

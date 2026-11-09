@@ -120,6 +120,8 @@ const typewriterCompartment = new Compartment();
 const tsChecksCompartment = new Compartment();
 const commentsCompartment = new Compartment();
 const grammarCompartment = new Compartment();
+// Outline mode: folding, zoom and block operations (plan W2.13), loaded after mount.
+const outlineCompartment = new Compartment();
 
 let vimExtensionPromise: Promise<unknown> | null = null;
 async function loadVimExtension() {
@@ -405,6 +407,7 @@ export const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
       // self-hosted backend can flip this on with no other config change.
       // Loaded dynamically when toggled on to keep the initial bundle small.
       grammarCompartment.of([]),
+      outlineCompartment.of([]),
       // Live markdown lint — wavy underlines for trailing whitespace,
       // mixed-indent, heading-skip, broken wiki-links. Runs every 250 ms
       // after the user stops typing.
@@ -651,6 +654,19 @@ export const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
     })();
     return () => { cancelled = true; };
   }, [grammarCheck]);
+
+  // Outline mode and block operations (plan W2.13): its own lazy chunk.
+  useEffect(() => {
+    let cancelled = false;
+    void import("./outlineExtension").then((m) => {
+      const view = viewRef.current;
+      if (cancelled || !view) return;
+      view.dispatch({ effects: outlineCompartment.reconfigure(m.outlineExtension()) });
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   // Mobile shortcut bar dispatches `lumen-mobile-insert` events. Listen at
   // window level so we receive them regardless of which surface dispatched.
