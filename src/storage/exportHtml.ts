@@ -131,7 +131,7 @@ async function collectStyles(): Promise<string> {
         const res = await fetchWithRetry(href, {}, { label: "exportHtml.stylesheet", maxRetries: 2, baseDelayMs: 600, maxDelayMs: 2500 });
         if (res.ok) chunks.push(await res.text());
       } catch {
-        /* network unavailable; skip */
+        /* why: network unavailable; skip */
       }
     }
   }

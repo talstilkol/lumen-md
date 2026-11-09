@@ -60,7 +60,7 @@ async function ensureLang(lang: string): Promise<string> {
         await hl.loadLanguage(lang);
         loadedLangs.add(lang);
       } catch {
-        /* unsupported lang — leave it unloaded; we'll fall back to text */
+        /* why: unsupported lang — leave it unloaded; we'll fall back to text */
       }
     })();
     inFlightLoads.set(lang, inFlight);
@@ -159,7 +159,7 @@ export function rehypeShiki(opts: ShikiOpts) {
           };
           parent.children[index] = wrapper;
         } catch {
-          // leave the original code block untouched on failure
+          // why: leave the original code block untouched on failure
         }
       });
     });

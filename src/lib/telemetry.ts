@@ -34,7 +34,7 @@ export function setTelemetryOptOut(value: boolean): void {
     if (value) localStorage.setItem(OPT_OUT_KEY, "1");
     else localStorage.removeItem(OPT_OUT_KEY);
   } catch {
-    // private mode — silently ignore; telemetry will fall back to disabled
+    // why: private mode — silently ignore; telemetry will fall back to disabled
   }
 }
 
@@ -123,7 +123,7 @@ export function initTelemetry(): void {
       });
     })
     .catch(() => {
-      /* SDK failed to load (offline/blocked) — telemetry stays off */
+      /* why: SDK failed to load (offline/blocked) — telemetry stays off */
     });
 }
 

@@ -187,7 +187,7 @@ export function parseAnswer(raw: string): { report: string; quotes: Map<number, 
         quotes.set(q.n, list);
       }
     } catch {
-      /* no quotes: footnotes without them */
+      /* why: no quotes: footnotes without them */
     }
   }
   return { report, quotes };
@@ -214,7 +214,7 @@ async function proxyResearch(o: ResearchOptions, settings: ResearchSettings): Pr
     const arr = parseJsonResponse<unknown>(plan);
     if (Array.isArray(arr)) queries = arr.filter((q): q is string => typeof q === "string" && !!q.trim());
   } catch {
-    /* fall back to the question itself */
+    /* why: fall back to the question itself */
   }
   if (!queries.length) queries = [o.question];
   queries = queries.slice(0, o.maxSearches ?? 4);
@@ -386,7 +386,7 @@ export function grantWebConsent(): void {
   try {
     localStorage.setItem(WEB_CONSENT_KEY, "1");
   } catch {
-    /* asked again next time */
+    /* why: asked again next time */
   }
 }
 
