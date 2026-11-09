@@ -118,6 +118,15 @@ export const listFilesTool = defineTool<
     },
     additionalProperties: false,
   },
+  // Plan 2.7: names of outside notes (clipped, imported, pulled) are outside text
+  // too. Path and records only — a `source:` frontmatter is not read here.
+  untrusted: async (_args, result) => {
+    const { ensureProvenanceBackfill, untrustedSourcesOfNote } = await import("../untrusted");
+    await ensureProvenanceBackfill();
+    const out = new Set<string>();
+    for (const p of result.files) for (const s of untrustedSourcesOfNote(p)) out.add(s);
+    return [...out].slice(0, 20);
+  },
   run: async (args) => {
     needWorkspace();
     const prefix = typeof args.prefix === "string" ? safeWorkspacePath(args.prefix) : "";
@@ -148,16 +157,16 @@ export const fileExistsTool = defineTool<{ path: string }, { path: string; exist
 });
 
 export const searchWorkspaceTool = defineTool<
-  { query: string; limit?: number },
+  { query: string; limit?: number; folder?: string },
   { hits: Array<{ path: string; snippet: string | null; score: number }> }
 >({
   name: "search_workspace",
   description:
     "Keyword search (BM25, Hebrew-aware: niqqud, final letters and prefix letters folded) over file names and contents. " +
-    "Ask with the key words, or a question. Returns the best matching files with a snippet.",
+    "Ask with the key words, or a question. Returns the best matching files with a snippet. `folder` limits the search to that folder (e.g. the clip library).",
   parameters: {
     type: "object",
-    properties: { query: { type: "string", minLength: 1 }, limit: { type: "number", minimum: 1 } },
+    properties: { query: { type: "string", minLength: 1 }, limit: { type: "number", minimum: 1 }, folder: { type: "string", description: "Only files under this folder, e.g. Library/" } },
     required: ["query"],
     additionalProperties: false,
   },
@@ -173,7 +182,8 @@ export const searchWorkspaceTool = defineTool<
     needWorkspace();
     const query = requireString(args, "query");
     const limit = Math.min(50, Math.max(1, optionalNumber(args, "limit", 10)));
-    const hits = await searchWorkspace(query, { limit });
+    const folder = typeof args.folder === "string" && args.folder.trim() ? safeWorkspacePath(args.folder).replace(/\/?$/, "/") : "";
+    const hits = await searchWorkspace(query, { limit, ...(folder ? { filter: (p: string) => p.startsWith(folder) } : {}) });
     return { hits: hits.map((h) => ({ path: h.path, snippet: h.snippet, score: h.score })) };
   },
 });

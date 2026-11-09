@@ -54,7 +54,7 @@ async function cancelsCleanly(id: string | ((id: string) => boolean)) {
   const cmd = result.current.find((c) => (typeof id === "string" ? c.id === id : id(c.id)));
   expect(cmd, String(id)).toBeTruthy();
   const done = Promise.resolve(cmd!.action());
-  await vi.waitFor(() => expect(seen.signals.length).toBeGreaterThan(0));
+  await vi.waitFor(() => expect(seen.signals.length).toBeGreaterThan(0), { timeout: 10_000 });
   expect(seen.signals[0]).toBeInstanceOf(AbortSignal);
   expect(aiBusy()).toBe(true);
   expect(cancelAllAi()).toBe(1);

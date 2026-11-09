@@ -137,6 +137,11 @@ export async function buildStyleProfile(prefix = "", signal?: AbortSignal): Prom
   await ensureProvenanceBackfill();
   const folder = prefix.replace(/\/+$/, "");
   const { files } = await callTool<{ files: string[] }>("list_files", { ...(folder ? { prefix: `${folder}/` } : {}), limit: MAX_NOTES }, { signal });
+  // Plan 2.7: a style profile is the user's own voice, and it is saved and
+  // later put into writing agents' system prompts — so outside notes
+  // (clipped, imported, pulled from git) never go into the sample.
+  const { ensureProvenanceBackfill, untrustedSourcesOfNote } = await import("../agents/provenance");
+  await ensureProvenanceBackfill();
   const notes: Array<{ path: string; text: string }> = [];
   for (let i = 0; i < files.length; i += 8) {
     const batch = await Promise.all(

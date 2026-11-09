@@ -81,14 +81,12 @@ describe("AI policy gates on direct cloud paths", () => {
     localStorage.setItem("lumen.research.endpoint", "https://research.example.workers.dev");
     await expect(runResearch({ question: "q" } as never)).rejects.toThrow(/library/);
     expect(fetchSpy).not.toHaveBeenCalled();
-    // Injected search/extract (a local SearXNG wrapper, or tests) is not the cloud.
-    const local = await runResearch({
-      question: "q",
-      deps: {
-        search: async () => [],
-        extract: async () => ({ url: "", title: "", text: "" }),
-      },
-    } as never).catch((e: Error) => e);
+    // A local research service (a SearXNG on this machine) is not the cloud: the
+    // agent runs (and fails here for want of a model, not on the policy).
+    localStorage.setItem("lumen.research.endpoint", "http://localhost:8080");
+    const local = await runResearch({ question: "q" } as never).catch((e: Error) => e);
     expect((local as { code?: string }).code).not.toBe("POLICY");
+    // Only this machine was asked (the runtime probing for a local model); nothing left it.
+    expect(fetchSpy.mock.calls.map(([u]) => String(u)).filter((u) => !/^https?:\/\/(localhost|127\.0\.0\.1)[:/]/.test(u))).toEqual([]);
   });
 });

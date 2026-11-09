@@ -116,6 +116,7 @@ or all of them at once; nothing is written before you approve.
 | writer, templater | `get_selection` |
 | builder | `list_files` |
 | stylist | `list_files`, `read_file` |
+| researcher | `search_web`, `fetch_page`, `extract_quotes`, `search_workspace`, `read_file` |
 
 What an agent always needs — the workspace's tags for the tagger, the
 note list for the linker, the parsed table for the charter, the diff
