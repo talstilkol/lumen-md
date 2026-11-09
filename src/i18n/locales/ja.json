@@ -37,6 +37,7 @@
   "backlinks.selectFile": "バックリンクを表示するファイルを選択してください。",
   "backlinks.title": "バックリンク",
   "bibtex.link": "リンク",
+  "bibtex.style": "引用スタイル",
   "bibtex.noEntries": "BibTeX エントリが見つかりません。",
   "bibtex.references": "参考文献 ({n})",
   "block.htmlPreview.exitFullscreen": "全画面を終了",

@@ -63,6 +63,7 @@
   "bibtex.noEntries": "לא זוהו רשומות BibTeX.",
   "bibtex.references": "מקורות ({n})",
   "bibtex.link": "קישור",
+  "bibtex.style": "סגנון ציטוט",
   "update.available": "גרסה חדשה של Lumen זמינה.",
   "update.reload": "טען מחדש",
   "update.dismiss": "סגור",

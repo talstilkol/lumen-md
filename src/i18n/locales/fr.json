@@ -37,6 +37,7 @@
   "backlinks.selectFile": "Sélectionnez un fichier pour voir les liens entrants.",
   "backlinks.title": "Liens entrants",
   "bibtex.link": "lien",
+  "bibtex.style": "Style de citation",
   "bibtex.noEntries": "Aucune entrée BibTeX détectée.",
   "bibtex.references": "Références ({n})",
   "block.htmlPreview.exitFullscreen": "Quitter le plein écran",
