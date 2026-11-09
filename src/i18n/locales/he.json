@@ -1382,5 +1382,11 @@
   "cmd.image.altText.hint": "קורא את הטקסט שבתמונות הפתק במכשיר (עברית ואנגלית); מתאר את השאר עם מודל ראייה מקומי ב-Ollama",
   "toast.imageAlt.none": "אין בפתק תמונות שצריכות טקסט חלופי",
   "toast.imageAlt.working": "קורא תמונות במכשיר: {count}…",
-  "toast.imageAlt.done": "נוסף טקסט חלופי: {done} מתוך {count}"
+  "toast.imageAlt.done": "נוסף טקסט חלופי: {done} מתוך {count}",
+  "cmd.note.read": "הקראה בקול",
+  "cmd.note.read.hint": "מקריא את הפתק בקולות של המערכת (כולל עברית); הפעלה נוספת עוצרת",
+  "toast.tts.unavailable": "הדפדפן הזה לא יכול להקריא",
+  "toast.tts.noHebrewVoice": "לא מותקן קול עברי במערכת — אפשר להוסיף בהגדרות הדיבור של המערכת",
+  "cmd.vault.digest": "סיכום: מה השתנה",
+  "cmd.vault.digest.hint": "פתק עם כל הפתקים שהשתנו מאז הסיכום הקודם, והמשימות הפתוחות בהם"
 }

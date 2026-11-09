@@ -1382,5 +1382,11 @@
   "cmd.image.altText.hint": "Lit le texte des images de cette note sur l’appareil (hébreu + anglais) ; décrit le reste avec un modèle de vision Ollama local",
   "toast.imageAlt.none": "Aucune image sans texte alternatif dans cette note",
   "toast.imageAlt.working": "Lecture des images sur l’appareil : {count}…",
-  "toast.imageAlt.done": "Texte alternatif ajouté : {done} sur {count}"
+  "toast.imageAlt.done": "Texte alternatif ajouté : {done} sur {count}",
+  "cmd.note.read": "Lire à voix haute",
+  "cmd.note.read.hint": "Lit cette note avec les voix du système (hébreu compris) ; relancer pour arrêter",
+  "toast.tts.unavailable": "Ce navigateur ne peut pas lire à voix haute",
+  "toast.tts.noHebrewVoice": "Aucune voix hébreue installée — ajoutez-en une dans les réglages vocaux du système",
+  "cmd.vault.digest": "Résumé : ce qui a changé",
+  "cmd.vault.digest.hint": "Une note listant les notes modifiées depuis le dernier résumé et leurs tâches ouvertes"
 }

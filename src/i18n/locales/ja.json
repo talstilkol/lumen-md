@@ -1382,5 +1382,11 @@
   "cmd.image.altText.hint": "このノートの画像内の文字を端末上で読み取り（ヘブライ語・英語）、それ以外はローカルの Ollama 画像モデルで説明します",
   "toast.imageAlt.none": "代替テキストが必要な画像はありません",
   "toast.imageAlt.working": "端末上で画像を読み取り中: {count} 件…",
-  "toast.imageAlt.done": "代替テキストを追加: {count} 件中 {done} 件"
+  "toast.imageAlt.done": "代替テキストを追加: {count} 件中 {done} 件",
+  "cmd.note.read": "読み上げ",
+  "cmd.note.read.hint": "システムの音声でこのノートを読み上げます（ヘブライ語対応）。もう一度実行で停止",
+  "toast.tts.unavailable": "このブラウザーは読み上げに対応していません",
+  "toast.tts.noHebrewVoice": "ヘブライ語の音声がありません — システムの読み上げ設定で追加してください",
+  "cmd.vault.digest": "ダイジェスト: 変更点",
+  "cmd.vault.digest.hint": "前回以降に変更されたノートと未完了タスクをまとめたノート"
 }
