@@ -56,6 +56,8 @@ export function CommandPalette({ open, onClose, commands }: Props) {
   const inputRef = useRef<HTMLInputElement | null>(null);
   const listRef = useRef<HTMLDivElement | null>(null);
   const dialogRef = useRef<HTMLDivElement | null>(null);
+  /** What had focus before the palette opened: it gets focus back on close (see the focus trap below). */
+  const previousFocusRef = useRef<Element | null>(null);
 
   // Items the toolbar menus already expose. The palette de-duplicates those
   // away from the default browse list — when the user starts typing we still
