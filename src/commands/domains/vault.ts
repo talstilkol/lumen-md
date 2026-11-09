@@ -5,7 +5,6 @@ import { t, getLocale } from "../../i18n";
 import { uiPrompt, uiSelect } from "../../ui/PromptDialog";
 import { showAiToast } from "../../ui/AiToast";
 import { encryptDocument, decryptDocument, isEncrypted } from "../../storage/encryption";
-import { isOPFSAvailable, readWorkspaceFile } from "../../storage/workspace";
 import type { CommandContext } from "./context";
 
 /** Vault Doctor: a report on the workspace, and fixing its broken wiki links. */
