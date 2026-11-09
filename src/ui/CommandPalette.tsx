@@ -436,7 +436,7 @@ export function CommandPalette({ open, onClose, commands }: Props) {
                       <span className="cmd-palette-shortcut">{cmd.shortcut}</span>
                     )}
                     {cmd.children && (
-                      <span style={{ fontSize: 10, opacity: 0.5, marginLeft: 4 }}>
+                      <span style={{ fontSize: 10, opacity: 0.5, marginInlineStart: 4 }}>
                         {expanded.has(cmd.id) ? "▼" : "▶"}
                       </span>
                     )}

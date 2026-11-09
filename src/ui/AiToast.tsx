@@ -65,7 +65,7 @@ export function AiToastContainer() {
       style={{
         position: "fixed",
         bottom: 40,
-        right: 16,
+        insetInlineEnd: 16,
         zIndex: 99999,
         display: "flex",
         flexDirection: "column",

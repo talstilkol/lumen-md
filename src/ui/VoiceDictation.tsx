@@ -109,7 +109,7 @@ export function startVoiceRecording(lang: string): void {
       style={{
         position: "fixed",
         bottom: 20,
-        right: 20,
+        insetInlineEnd: 20,
         zIndex: 9999,
         display: "flex",
         alignItems: "center",
@@ -264,7 +264,7 @@ export async function startVoiceMemo(): Promise<void> {
       style={{
         position: "fixed",
         bottom: 20,
-        right: 20,
+        insetInlineEnd: 20,
         zIndex: 9999,
         display: "flex",
         alignItems: "center",

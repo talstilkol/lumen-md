@@ -110,7 +110,7 @@ export const StatusBar = React.memo(function StatusBar({
               />
             ))}
             {collab.peers.length > 5 && (
-              <span style={{ marginLeft: 4 }}>+{collab.peers.length - 5}</span>
+              <span style={{ marginInlineStart: 4 }}>+{collab.peers.length - 5}</span>
             )}
           </span>
           <button
@@ -118,7 +118,7 @@ export const StatusBar = React.memo(function StatusBar({
             onClick={collab.onLeave}
             title="Leave collaboration"
             style={{
-              marginLeft: 4,
+              marginInlineStart: 4,
               padding: "0 6px",
               fontSize: 10,
               border: "1px solid hsl(var(--border))",
@@ -149,7 +149,7 @@ export const StatusBar = React.memo(function StatusBar({
             <span style={{ color: "hsl(var(--fg-muted))", fontWeight: 400 }}>
               ·
               {healthIssues.map((item) => (
-                <span key={item.key} title={item.details} style={{ marginLeft: 6, color: item.color }}>
+                <span key={item.key} title={item.details} style={{ marginInlineStart: 6, color: item.color }}>
                   {item.emoji} {item.label}
                 </span>
               ))}
