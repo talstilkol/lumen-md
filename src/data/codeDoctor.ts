@@ -96,11 +96,8 @@ export interface RawJsonRegion {
 }
 
 const FENCE_RE = /^```/gm;
-
 const JSONL_HINT = /^\s*\{[\s\S]*?\}\s*$/m;
-
 const JSON_OBJ_HINT = /^\s*\{[\s\S]*\}\s*$/;
-
 const JSON_ARR_HINT = /^\s*\[[\s\S]*\]\s*$/;
 
 /**

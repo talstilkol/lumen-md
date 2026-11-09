@@ -17,16 +17,13 @@ export interface WysiwygSuggestConfig {
   enabled: () => boolean;
   author: () => string | null;
 }
-
 let config: WysiwygSuggestConfig = { enabled: () => false, author: () => null };
-
 export function configureWysiwygSuggest(next: WysiwygSuggestConfig): void {
   config = next;
 }
 
 /** Transactions this module makes itself (never re-tracked). */
 export const SUGGEST_META = "lumenSuggest";
-
 const trackingKey = new PluginKey("lumenSuggestTracking");
 
 interface Change {

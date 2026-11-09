@@ -39,27 +39,17 @@ export interface ColumnProfile {
 }
 
 const PERCENT_RE = /^[-+]?\d[\d,]*(\.\d+)?\s?%$/;
-
 const CURRENCY_RE = /^\(?[-+]?\s?(?:[$€£¥₪₹]|USD|EUR|GBP|ILS)\s?\d[\d,]*(\.\d+)?\)?$|^\(?[-+]?\d[\d,]*(\.\d+)?\s?(?:[$€£¥₪₹]|USD|EUR|GBP|ILS)\)?$/i;
-
 const GROUPED_NUM_RE = /^\(?[-+]?\d{1,3}([,  ]\d{3})+(\.\d+)?\)?$/;
-
 const PLAIN_NUM_RE = /^\(?[-+]?\d+(\.\d+)?(e[+-]?\d+)?\)?$/i;
-
 const QUARTER_RE = /^(?:(\d{4})\s*[-/ ]?\s*Q([1-4])|Q([1-4])\s*[-/ ]?\s*(\d{4}))$/i;
-
 const CLOCK_RE = /^([01]?\d|2[0-3]):[0-5]\d(:[0-5]\d)?$/;
-
 const MONTHS = [
   "jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec",
 ];
-
 const LAT_NAME_RE = /^(lat|latitude)$|[_\s-](lat|latitude)$/i;
-
 const LON_NAME_RE = /^(lon|lng|long|longitude)$|[_\s-](lon|lng|long|longitude)$/i;
-
 const ID_NAME_RE = /^(id|#|idx|index|row|rownum|row_?id|no\.?)$|[_\s-]id$/i;
-
 const YEAR_NAME_RE = /^(year|yr|fy|fiscal[_\s]?year|שנה|سنة|jahr|année|annee|年|год)$/i;
 
 function nonNull(values: unknown[]): unknown[] {

@@ -10,7 +10,6 @@ import { tokenize } from "../plugins/liveJsScope";
 
 /** Words before `(` that make the following `{` a statement block, not a function body. */
 const BLOCK_HEADS = new Set(["if", "while", "for", "with", "switch", "catch"]);
-
 /** Words that may precede a method name in an object literal or class body. */
 export const METHOD_PREFIXES = new Set(["get", "set", "static", "async"]);
 

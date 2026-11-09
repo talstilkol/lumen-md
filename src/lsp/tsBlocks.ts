@@ -25,16 +25,12 @@ export interface TsBlock {
 }
 
 const TS_LANGS = new Set(["ts", "typescript", "mts", "cts", "tsx"]);
-
 const JS_LANGS = new Set(["js", "javascript", "mjs", "cjs", "jsx", "live-js", "js-live"]);
-
 /** Fences that run as live-js (and so accept `shared`). */
 const LIVE_JS_LANGS = new Set(["live-js", "js-live"]);
-
 // Info string: a backtick fence's may not contain backticks (CommonMark);
 // a tilde fence's may.
 const OPEN_RE = /^ {0,3}(?:(`{3,})\s*([^\s`]*)([^`]*)|(~{3,})\s*(\S*)(.*))$/;
-
 const SHARED_RE = /(?:^|\s)shared(?:=([\w-]+))?(?=\s|$)/;
 
 /** Fenced ```ts / ```typescript / ```tsx blocks, in document order. */
@@ -169,7 +165,6 @@ function fromEdited(part: UnitPart, u: number): number {
  * (Plain ```js fences stay modules.)
  */
 const LIVE_WRAP_OPEN = "(async () => {\n";
-
 const LIVE_WRAP_CLOSE = "\n})();";
 
 /**
@@ -203,7 +198,6 @@ function neutraliseTopLevelReturns(code: string): { text: string; edits: Array<{
 
 /** Joins the parts of a shared unit: ends any statement / line comment. */
 const PART_SEPARATOR = "\n;\n";
-
 const CHECK_HEADER = "// @ts-check\n";
 
 /** Does the block opt into type checking (`// @ts-check` in its leading comments)? */

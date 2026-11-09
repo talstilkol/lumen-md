@@ -57,9 +57,7 @@ const PALETTE = [
 ];
 
 const AXIS_LABEL = { color: "#9aa3b2" };
-
 const AXIS_LINE = { lineStyle: { color: "#3a3f4b" } };
-
 const SPLIT_LINE = { lineStyle: { color: "#2a2f3a" } };
 
 function baseOption(): Record<string, unknown> {

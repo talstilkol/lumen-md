@@ -46,7 +46,6 @@ type View = import("@milkdown/prose/view").EditorView;
  * leaves the other in charge. The most recently focused one is last.
  */
 const views: View[] = [];
-
 const toFront = (e: Event) => {
   const i = views.findIndex((v) => v.dom === e.currentTarget);
   if (i !== -1) views.push(...views.splice(i, 1));

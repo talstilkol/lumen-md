@@ -37,9 +37,7 @@ interface CriticNode {
 }
 
 const SENTINEL_SPLIT = /([-])/;
-
 const isSentinelChar = (v: string) => v.length === 1 && v >= "" && v <= "";
-
 const sentinelAt = (nodes: PhrasingContent[], i: number): string | null => {
   const n = nodes[i];
   return n?.type === "text" && isSentinelChar(n.value) ? n.value : null;
@@ -156,13 +154,9 @@ const PHRASING_PARENTS = new Set(["paragraph", "heading", "tableCell", "emphasis
  * else stays literal text, written back unchanged. */
 
 const TEXT_BLOCKS = new Set(["paragraph", "heading"]);
-
 type TextBlock = { type: string; children: PhrasingContent[] };
-
 type Open = "ins" | "del" | "sub" | "subNew"; // subNew: past the `~>`
-
 const OPENER: Record<Open, string> = { ins: S.insOpen, del: S.delOpen, sub: S.subOpen, subNew: S.subOpen };
-
 const CLOSER: Record<Open, string> = { ins: S.insClose, del: S.delClose, sub: S.subClose, subNew: S.subClose };
 
 const sentinelText = (ch: string): PhrasingContent => ({ type: "text", value: ch });
@@ -281,14 +275,12 @@ function transformTree(node: Parents | Root): void {
 interface StringifyState {
   containerPhrasing(node: unknown, info: unknown): string;
 }
-
 type Handler = (node: CriticNode, parent: { children: unknown[] } | undefined, state: StringifyState, info: unknown) => string;
 
 const tag = (author?: string | null) => {
   const a = sanitizeAuthor(author);
   return a ? `{>>@${a}<<}` : "";
 };
-
 const siblings = (node: unknown, parent?: { children: unknown[] }) => {
   const i = parent ? parent.children.indexOf(node) : -1;
   return {
@@ -298,7 +290,6 @@ const siblings = (node: unknown, parent?: { children: unknown[] }) => {
 };
 
 const sameAuthor = (a?: { author?: string | null }, b?: { author?: string | null }) => (a?.author ?? null) === (b?.author ?? null);
-
 const isCritic = (n: unknown): n is CriticNode => {
   const t = (n as { type?: string } | undefined)?.type;
   return t === "criticInsert" || t === "criticDelete";
@@ -357,7 +348,6 @@ const criticDeleteHandler: Handler = (node, parent, state, info) => {
   if (next?.type === "criticInsert" && sameAuthor(node, next)) return `{~~${inner}~>`;
   return `{--${inner}--}${tag(node.author)}`;
 };
-
 const criticInsertHandler: Handler = (node, parent, state, info) => {
   const inner = state.containerPhrasing(node, info);
   const { prev } = siblings(node, parent);
@@ -435,5 +425,4 @@ const markSchema = (name: "critic_insert" | "critic_delete", mdType: CriticNode[
   }));
 
 export const criticInsertSchema = markSchema("critic_insert", "criticInsert", "ins");
-
 export const criticDeleteSchema = markSchema("critic_delete", "criticDelete", "del");

@@ -66,7 +66,6 @@ export const SMART_QUOTE_MAP: Record<string, string> = {
   "«": '"', // «
   "»": '"', // »
 };
-
 export const SMART_QUOTE_RE = new RegExp(
   `[${Object.keys(SMART_QUOTE_MAP).join("")}]`,
   "g",
@@ -104,7 +103,6 @@ export interface Token {
 }
 
 const NUM_RE = /-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?/y;
-
 const IDENT_RE = /[A-Za-z_$][A-Za-z0-9_$]*/y;
 
 /**
