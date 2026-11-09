@@ -200,33 +200,10 @@ export function useCommands({
   const theme = useAppStore((s) => s.theme);
   const showWorkspace = useAppStore((s) => s.showWorkspace);
   const locale = useAppStore((s) => s.locale);
-  /** Niqqud on the selection or the note (plan 6.3): Nakdimon in a worker, with consent. */
+  /** Niqqud on the selection or the note (plans 6.3, W2.5): the whole flow is loaded on use. */
   const runNikud = async (mode: "add" | "partial" | "remove") => {
     const view = getEditorView?.();
-    if (!view) return;
-    try {
-      const [{ runNikudCommand }, svc, alt] = await Promise.all([import("../editor/nikudCommand"), import("../ai/nikudService"), import("../editor/nikudAlternatives")]);
-      if (mode !== "remove") showAiToast(t("toast.nikud.working"), "info");
-      let engine = "";
-      const changed = await cancellable((signal) =>
-        runNikudCommand(view, mode, {
-          point: async (text, partial) => {
-            const r = await svc.pointHebrewDetailed(text, { consent: { confirm: uiConfirm, t, locale }, signal }, { partial });
-            engine = r.engine;
-            return r;
-          },
-          unpoint: svc.unpointHebrew,
-          // W2.5: each pointed word keeps its other readings (click an underlined word).
-          onPointed: (v, from, words) => alt.rememberNikudAlternatives(v, from, words, t),
-        }),
-      );
-      if (!changed) showAiToast(t("toast.nikud.nothing"), "info");
-      else if (engine) showAiToast(t(engine === "menaked" ? "toast.nikud.doneHigh" : "toast.nikud.done"), "success");
-    } catch (e) {
-      if (isAbort(e)) return;
-      const reason = (e as { name?: string; reason?: string }).name === "NikudUnavailableError" ? (e as { reason: string }).reason : null;
-      showAiToast(reason ? t(`toast.nikud.${reason}`) : t("toast.nikud.failed", { error: (e as Error).message }), reason ? "info" : "error");
-    }
+    if (view) await (await import("../editor/nikudPalette")).runNikudFromPalette(view, mode, locale);
   };
   const rtl = useAppStore((s) => s.rtl);
   const autoSave = useAppStore((s) => s.autoSave);
