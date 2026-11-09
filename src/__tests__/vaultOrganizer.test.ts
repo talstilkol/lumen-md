@@ -107,7 +107,7 @@ describe("analysis", () => {
     ];
     const all = analyzeVault(notes);
     const tag = all.find((s) => s.kind === "tag" && s.changes[0].path === "infra-notes.md");
-    expect(tag?.changes[0].after.startsWith("---\ntags: [infra]\n---\n# Infra notes")).toBe(true);
+    expect(tag?.changes[0].after.startsWith("---\ntags: [infra]\n---\n\n# Infra notes")).toBe(true);
     expect(tag?.changes[0].range).toMatchObject({ from: 0, to: 0, before: "" });
     const merge = all.find((s) => s.kind === "merge");
     expect(merge?.changes.map((c) => c.path).sort()).toEqual(["k1.md", "k2.md"]);

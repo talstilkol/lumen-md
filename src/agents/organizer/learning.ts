@@ -83,7 +83,7 @@ export async function recordDecision(features: readonly string[], approved: bool
   return b;
 }
 
-/** Tests. */
+/** Tests: forget everything (in memory; the next save overwrites the stored book). */
 export function __resetLearning(): void {
-  book = null;
+  book = {};
 }
