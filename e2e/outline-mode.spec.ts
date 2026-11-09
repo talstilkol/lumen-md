@@ -32,6 +32,15 @@ const NOTE = [
   "",
 ].join("\n");
 
+/**
+ * The editors' "Mod": Meta where navigator.platform says Mac (Playwright's
+ * WebKit does, on any OS), Control elsewhere — CodeMirror and ProseMirror
+ * read the platform, not the OS the test runs on.
+ */
+async function mod(page: Page): Promise<string> {
+  return (await page.evaluate(() => /Mac|iP(hone|[oa]d)/.test(navigator.platform))) ? "Meta" : "Control";
+}
+
 const run = (page: Page, id: string) => page.evaluate((cmd) => window.dispatchEvent(new CustomEvent("lumen-run-command", { detail: { id: cmd } })), id);
 
 test.beforeEach(async ({ page }) => {
@@ -85,6 +94,7 @@ async function cursorAt(page: Page, at: string): Promise<void> {
 }
 
 test("source editor: the ten block operations, in RTL and LTR", async ({ page }) => {
+  const M = await mod(page);
   await load(page, NOTE, "- פריט ב");
   const lineDir = await page.locator(".cm-line", { hasText: "פריט ב" }).first().evaluate((el) => getComputedStyle(el).direction);
   expect(lineDir).toBe("rtl");
@@ -96,10 +106,10 @@ test("source editor: the ten block operations, in RTL and LTR", async ({ page })
   await page.keyboard.press("Alt+Shift+ArrowDown");
   await expect.poll(() => source(page)).toBe(NOTE);
   // 3. Indent: in a right-to-left line, ← (toward the line's end) indents.
-  await page.keyboard.press("ControlOrMeta+Alt+ArrowLeft");
+  await page.keyboard.press(`${M}+Alt+ArrowLeft`);
   await expect.poll(() => source(page)).toContain("  - תת א1\n  - פריט ב\n- פריט ג");
   // 4. Outdent: →.
-  await page.keyboard.press("ControlOrMeta+Alt+ArrowRight");
+  await page.keyboard.press(`${M}+Alt+ArrowRight`);
   await expect.poll(() => source(page)).toBe(NOTE);
   // 5. Duplicate.
   await page.keyboard.press("Alt+Shift+D");
@@ -114,23 +124,23 @@ test("source editor: the ten block operations, in RTL and LTR", async ({ page })
   await expect.poll(() => source(page)).toContain("# Beta\nbeta text\n\n# Alpha\nalpha text");
   await page.keyboard.press("Alt+Shift+ArrowUp");
   await expect.poll(() => source(page)).toBe(NOTE);
-  await page.keyboard.press("ControlOrMeta+Alt+ArrowRight");
+  await page.keyboard.press(`${M}+Alt+ArrowRight`);
   await expect.poll(() => source(page)).toContain("## Alpha\nalpha text");
-  await page.keyboard.press("ControlOrMeta+Alt+ArrowLeft");
+  await page.keyboard.press(`${M}+Alt+ArrowLeft`);
   await expect.poll(() => source(page)).toBe(NOTE);
 
   // 7. Fold the Hebrew section; 8. unfold it.
   await cursorAt(page, "# רשימה");
-  await page.keyboard.press("ControlOrMeta+Alt+ArrowUp");
+  await page.keyboard.press(`${M}+Alt+ArrowUp`);
   await expect(page.locator(".cm-foldPlaceholder")).toHaveCount(1);
   await expect(page.locator(".cm-line", { hasText: "פריט ג" })).toHaveCount(0);
-  await page.keyboard.press("ControlOrMeta+Alt+ArrowDown");
+  await page.keyboard.press(`${M}+Alt+ArrowDown`);
   await expect(page.locator(".cm-foldPlaceholder")).toHaveCount(0);
   await expect(page.locator(".cm-line", { hasText: "פריט ג" })).toHaveCount(1);
 
   // 9. Zoom into "פריט א": only its subtree is shown, with a bar back; 10. Escape zooms out.
   await cursorAt(page, "- פריט א");
-  await page.keyboard.press("ControlOrMeta+Alt+Enter");
+  await page.keyboard.press(`${M}+Alt+Enter`);
   await expect(page.locator(".cm-outline-zoombar")).toBeVisible();
   await expect(page.locator(".cm-line", { hasText: "תת א1" })).toHaveCount(1);
   await expect(page.locator(".cm-line", { hasText: "# Alpha" })).toHaveCount(0);
@@ -234,6 +244,7 @@ function wysiwygOutline(page: Page): Promise<string[]> {
 }
 
 test("WYSIWYG editor: the ten block operations, in RTL and LTR", async ({ page }) => {
+  const M = await mod(page);
   await load(page, NOTE, "# רשימה");
   await toWysiwyg(page);
   const base = ["# רשימה", "- פריט א", "-- תת א1", "- פריט ב", "- פריט ג", "# Alpha", "alpha text", "# Beta", "beta text"];
@@ -248,9 +259,9 @@ test("WYSIWYG editor: the ten block operations, in RTL and LTR", async ({ page }
   await page.keyboard.press("Alt+Shift+ArrowDown");
   await expect.poll(() => wysiwygOutline(page)).toEqual(base);
   // 3–4. Indent with ← in RTL, outdent with →.
-  await page.keyboard.press("ControlOrMeta+Alt+ArrowLeft");
+  await page.keyboard.press(`${M}+Alt+ArrowLeft`);
   await expect.poll(() => wysiwygOutline(page)).toEqual(["# רשימה", "- פריט א", "-- תת א1", "-- פריט ב", "- פריט ג", "# Alpha", "alpha text", "# Beta", "beta text"]);
-  await page.keyboard.press("ControlOrMeta+Alt+ArrowRight");
+  await page.keyboard.press(`${M}+Alt+ArrowRight`);
   await expect.poll(() => wysiwygOutline(page)).toEqual(base);
   // 5–6. Duplicate, delete.
   await page.keyboard.press("Alt+Shift+D");
@@ -264,21 +275,21 @@ test("WYSIWYG editor: the ten block operations, in RTL and LTR", async ({ page }
   await expect.poll(() => wysiwygOutline(page)).toEqual(["# רשימה", "- פריט א", "-- תת א1", "- פריט ב", "- פריט ג", "# Beta", "beta text", "# Alpha", "alpha text"]);
   await page.keyboard.press("Alt+Shift+ArrowUp");
   await expect.poll(() => wysiwygOutline(page)).toEqual(base);
-  await page.keyboard.press("ControlOrMeta+Alt+ArrowRight");
+  await page.keyboard.press(`${M}+Alt+ArrowRight`);
   await expect.poll(() => wysiwygOutline(page)).toContain("## Alpha");
-  await page.keyboard.press("ControlOrMeta+Alt+ArrowLeft");
+  await page.keyboard.press(`${M}+Alt+ArrowLeft`);
   await expect.poll(() => wysiwygOutline(page)).toEqual(base);
 
   // 7–8. Fold the Hebrew section, unfold it.
   await caretIn(page, "רשימה");
-  await page.keyboard.press("ControlOrMeta+Alt+ArrowUp");
+  await page.keyboard.press(`${M}+Alt+ArrowUp`);
   await expect.poll(() => wysiwygOutline(page)).toEqual(["# רשימה", "# Alpha", "alpha text", "# Beta", "beta text"]);
-  await page.keyboard.press("ControlOrMeta+Alt+ArrowDown");
+  await page.keyboard.press(`${M}+Alt+ArrowDown`);
   await expect.poll(() => wysiwygOutline(page)).toEqual(base);
 
   // 9–10. Zoom into פריט א, then out from the bar.
   await caretIn(page, "פריט א");
-  await page.keyboard.press("ControlOrMeta+Alt+Enter");
+  await page.keyboard.press(`${M}+Alt+Enter`);
   await expect(page.locator(".lumen-outline-zoombar")).toBeVisible();
   await expect.poll(() => wysiwygOutline(page)).toEqual(["- פריט א", "-- תת א1"]);
   await page.locator(".lumen-outline-zoomout").dispatchEvent("mousedown");
