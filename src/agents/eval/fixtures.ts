@@ -11,6 +11,7 @@
  * with the real model's answer.
  */
 
+import { MORE_CASES } from "./moreCases";
 import type { AgentInput, ToolScope } from "../types";
 import type { Check } from "./score";
 
@@ -103,7 +104,7 @@ const SALES_CSV = `חודש,מכירות,הוצאות
 מרץ,160,95
 אפריל,150,100`;
 
-export const EVAL_CASES: EvalCase[] = [
+const BASE_CASES: EvalCase[] = [
   {
     id: "tagger-he",
     agent: "tagger",
@@ -112,6 +113,8 @@ export const EVAL_CASES: EvalCase[] = [
       { type: "minItems", path: "tags", min: 2 },
       { type: "hebrew", min: 0.6 },
       { type: "notContains", none: ["בישול"] },
+      // Reuses the vault's own tags (7.3.2): list_tags returns them.
+      { type: "someOf", path: "tags", values: ["למידת-מכונה", "בינה-מלאכותית"] },
     ],
     example: '{"tags": ["למידת-מכונה", "בינה-מלאכותית", "רשתות-נוירונים"]}',
     tool: { name: "list_tags", args: { limit: 20 } },
@@ -124,6 +127,7 @@ export const EVAL_CASES: EvalCase[] = [
       { type: "minItems", path: "tags", min: 2 },
       { type: "containsAny", any: ["kubernetes", "devops", "containers"] },
       { type: "notContains", none: ["cooking"] },
+      { type: "someOf", path: "tags", values: ["devops"] },
     ],
     example: '{"tags": ["kubernetes", "devops", "containers"]}',
     tool: { name: "list_tags", args: { limit: 20 } },
@@ -180,7 +184,7 @@ export const EVAL_CASES: EvalCase[] = [
     id: "diagrammer-he",
     agent: "diagrammer",
     input: { text: PROCESS_HE },
-    checks: [{ type: "matches", source: "^(flowchart|graph)\\s", flags: "m" }, { type: "containsAny", any: ["תשלום"] }],
+    checks: [{ type: "mermaid" }, { type: "matches", source: "^(flowchart|graph)\\s", flags: "m" }, { type: "containsAny", any: ["תשלום"] }],
     example: "flowchart TD\n  A[הלקוח בוחר מוצר] --> B[הוספה לעגלה]\n  B --> C[תשלום]\n  C -->|מאושר| D[המחסן אורז ושולח]\n  C -->|נדחה| E[הודעה ללקוח]\n  E --> C",
     tool: { name: "validate_mermaid", args: { code: "flowchart TD\n  A[הלקוח בוחר מוצר] --> C[תשלום]" } },
   },
@@ -282,3 +286,6 @@ export const EVAL_CASES: EvalCase[] = [
     example: 'if(סטטוס = "הושלם", null, datediff(יעד, today()))',
   },
 ];
+
+/** Every eval case: the original set plus 7.3's (every agent with at least five, Hebrew and English). */
+export const EVAL_CASES: EvalCase[] = [...BASE_CASES, ...MORE_CASES];

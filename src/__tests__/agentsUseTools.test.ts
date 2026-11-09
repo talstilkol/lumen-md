@@ -109,7 +109,7 @@ describe("a fake-model run of each eval case makes its tool call through the run
     expect(run.status).toBe("ok");
     const tool = toolCheck(c, run.steps);
     expect(tool.detail, c.id).toBe(c.tool ? `called ${c.tool.name}` : "no tool call expected");
-    for (const check of scoreCases(run.output, c.checks)) expect(check.ok, `${c.id}: ${check.detail}`).toBe(true);
+    for (const check of await scoreCases(run.output, c.checks)) expect(check.ok, `${c.id}: ${check.detail}`).toBe(true);
     if (!def.tools?.length) return; // no tools: nothing offered, nothing more to check
     if (def.streaming) {
       // Context only: the model is offered no tools and may stream.
