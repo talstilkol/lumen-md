@@ -3,7 +3,9 @@
  * can't do itself because of CORS (Plan D: D6, D7).
  *
  *   GET  /extract?url=<https://…>  → { url, finalUrl, status, title, text, truncated, fetchedAt }
- *   POST /search { provider: "brave" | "tavily", query, key, count? }
+ *   POST /search { provider: "brave" | "tavily" | "searxng", query, key?, count? }
+ *        searxng needs no key: the worker queries its SEARXNG_URL (a
+ *        self-hosted SearXNG with the JSON format enabled).
  *                                   → { results: [{ title, url, snippet }] }
  *   GET  /healthz                   → "ok"
  *
@@ -31,6 +33,8 @@ export interface Env {
   ALLOWED_ORIGINS: string;
   /** Optional shared token (a Worker secret) required in X-Lumen-Research-Token. */
   RESEARCH_TOKEN?: string;
+  /** Optional self-hosted SearXNG (e.g. http://localhost:8888) for keyless search. */
+  SEARXNG_URL?: string;
 }
 
 export const TOKEN_HEADER = "X-Lumen-Research-Token";
@@ -151,7 +155,15 @@ interface SearchResult {
   snippet: string;
 }
 
-async function search(provider: string, query: string, key: string, count: number): Promise<SearchResult[]> {
+async function search(provider: string, query: string, key: string, count: number, env?: Env): Promise<SearchResult[]> {
+  if (provider === "searxng") {
+    const base = env?.SEARXNG_URL?.replace(/\/+$/, "");
+    if (!base) throw new Error("searxng is not configured on this research service (SEARXNG_URL)");
+    const res = await fetch(`${base}/search?q=${encodeURIComponent(query)}&format=json`, { headers: { Accept: "application/json" }, signal: AbortSignal.timeout(TIMEOUT_MS) });
+    if (!res.ok) throw new Error(`searxng ${res.status}`);
+    const data = (await res.json()) as { results?: Array<{ title?: string; url?: string; content?: string }> };
+    return (data.results ?? []).slice(0, count).map((r) => ({ title: r.title ?? "", url: r.url ?? "", snippet: r.content ?? "" }));
+  }
   if (provider === "brave") {
     const u = `https://api.search.brave.com/res/v1/web/search?q=${encodeURIComponent(query)}&count=${count}`;
     const res = await fetch(u, { headers: { Accept: "application/json", "X-Subscription-Token": key }, signal: AbortSignal.timeout(TIMEOUT_MS) });
@@ -203,9 +215,10 @@ export default {
         const body = (await req.json().catch(() => ({}))) as { provider?: string; query?: string; key?: string; count?: number };
         const query = String(body.query ?? "").slice(0, 400).trim();
         const key = String(body.key ?? "");
-        if (!query || !key) return json({ error: "query and key are required" }, headers, 400);
+        const provider = String(body.provider ?? "");
+        if (!query || (!key && provider !== "searxng")) return json({ error: "query and key are required" }, headers, 400);
         const count = Math.max(1, Math.min(10, Number(body.count) || 5));
-        const results = await search(String(body.provider ?? ""), query, key, count);
+        const results = await search(provider, query, key, count, env);
         return json({ results: results.filter((r) => isFetchableUrl(r.url)) }, headers);
       }
       return json({ error: "not found" }, headers, 404);

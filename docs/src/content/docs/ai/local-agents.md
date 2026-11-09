@@ -79,3 +79,24 @@ OLLAMA_ORIGINS=https://lumen-md.vercel.app ollama serve
 and restart Ollama). Without it Ollama answers `403` and the improvement
 agent suggests exactly this fix. The desktop app and `localhost`
 development builds need no change.
+
+## Research, grammar and search on this machine
+
+`docker/local-ai.yml` starts three services:
+
+| Service | Port | What it does |
+|---|---|---|
+| SearXNG | 8888 | Metasearch, no API key |
+| research service | 8787 | The same worker Lumen deploys (`edge-workers/research`), run with `wrangler dev`: page extraction plus SearXNG search |
+| LanguageTool | 8010 | Grammar and spelling checks |
+
+```
+docker compose -f docker/local-ai.yml up -d
+```
+
+Then `⌘K → Research: Settings → SearXNG on this machine` and enter
+`http://localhost:8787`. Research questions are planned and answered by
+your local model; quotes are still verified word for word against the
+pages. Under *local only* a research service off this machine or network
+is refused. On a fresh install with the *local only* policy, SearXNG is
+the default research provider.

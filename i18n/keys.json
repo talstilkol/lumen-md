@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-10-17T14:37:13.110Z",
+  "generated_at": "2026-10-17T16:08:28.215Z",
   "source": "src/i18n/index.ts (en bundle)",
-  "count": 1068,
+  "count": 1071,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -3368,6 +3368,13 @@
       ]
     },
     {
+      "key": "research.endpointInvalid",
+      "en": "That address can't be used here — not an http(s) URL, or not allowed by this deployment's content security policy: {url}",
+      "vars": [
+        "url"
+      ]
+    },
+    {
       "key": "research.noService",
       "en": "Citation checks and Brave / Tavily search need the research service (VITE_RESEARCH_ENDPOINT) on this deployment",
       "vars": []
@@ -3385,6 +3392,16 @@
     {
       "key": "research.provider.tavily",
       "en": "Tavily (your API key)",
+      "vars": []
+    },
+    {
+      "key": "research.provider.searxng",
+      "en": "SearXNG on this machine (no key; local research service)",
+      "vars": []
+    },
+    {
+      "key": "research.endpoint",
+      "en": "Research service URL (run it locally with docker/local-ai.yml — see the docs):",
       "vars": []
     },
     {
