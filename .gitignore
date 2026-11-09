@@ -69,3 +69,7 @@ flake-results/
 visual-results/
 # On-device OCR (scripts/copy-tesseract.mjs)
 public/tesseract/
+
+# Signed release output and fuzzer findings (plan W1.27)
+/release/
+fuzz-findings/

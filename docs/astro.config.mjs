@@ -95,6 +95,8 @@ export default defineConfig({
           label: "Security",
           items: [
             { label: "Secrets and encryption", slug: "security/vault" },
+            { label: "Threat model", slug: "security/threat-model" },
+            { label: "Supply chain", slug: "security/supply-chain" },
           ],
         },
         {
