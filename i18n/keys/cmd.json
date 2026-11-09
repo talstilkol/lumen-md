@@ -304,6 +304,16 @@
       "vars": []
     },
     {
+      "key": "cmd.canvas.migrate",
+      "en": "🎨 Canvas: convert tldraw canvases to Excalidraw",
+      "vars": []
+    },
+    {
+      "key": "cmd.canvas.migrate.hint",
+      "en": "the .tldr files stay as backups",
+      "vars": []
+    },
+    {
       "key": "cmd.clip.clipboard",
       "en": "Clip from clipboard",
       "vars": []

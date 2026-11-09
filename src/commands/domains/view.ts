@@ -3,6 +3,8 @@ import { cmdIcons, type Command } from "../../ui/CommandPalette";
 import { useAppStore } from "../../store/useStore";
 import { t, SUPPORTED_LOCALES } from "../../i18n";
 import type { CommandContext } from "./context";
+import { EXCALIDRAW_CANVAS_ENABLED } from "../../canvas/engine";
+import { log } from "../../lib/logger";
 
 /** Editor modes, side panels and the editor's on/off settings. */
 export function buildViewCommands({ setSearchOpen, setRuntimeMetricsOpen, vimEnabled, spellCheck, typewriterMode, pageView, toggleWorkspace, toggleBacklinks, toggleVim, toggleSpellCheck, toggleTypewriter, tsChecks, toggleTsChecks, grammarCheck, toggleGrammarCheck, setMode, toggleOutline }: CommandContext): Command[] {
@@ -263,6 +265,23 @@ export function buildPanelCommands({ setFindReplaceOpen, setGraphOpen, setHistor
       group: t("group.view"),
       action: () => setCanvasOpen(true),
     },
+    // Plan 4.19: offered once the Excalidraw canvas lands (src/canvas/engine.ts).
+    ...(EXCALIDRAW_CANVAS_ENABLED
+      ? [
+          {
+            id: "canvas.migrateToExcalidraw",
+            label: t("cmd.canvas.migrate"),
+            hint: t("cmd.canvas.migrate.hint"),
+            icon: cmdIcons.Sparkles,
+            group: t("group.view"),
+            action: () => {
+              void import("../../canvas/migrateCommand")
+                .then((m) => m.runCanvasMigration())
+                .catch((err: unknown) => log.error("canvas migration failed", err));
+            },
+          },
+        ]
+      : []),
     {
       id: "view.plugins",
       label: t("cmd.view.plugins"),

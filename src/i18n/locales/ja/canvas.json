@@ -10,6 +10,8 @@
   "canvas.legacy.converted": "✅ {name} を変換しました ({count} 個の図形)",
   "canvas.legacy.converting": "{name} を変換中…",
   "canvas.legacy.found": "{count} 件の旧形式キャンバスが見つかりました",
+  "canvas.migrate.done": "変換: {converted}、スキップ: {skipped}、失敗: {failed}、警告: {warnings}",
+  "canvas.migrate.none": "変換する tldraw キャンバスはありません",
   "canvas.new": "新規",
   "canvas.new.placeholder": "アイデア",
   "canvas.new.prompt": "キャンバス名:",

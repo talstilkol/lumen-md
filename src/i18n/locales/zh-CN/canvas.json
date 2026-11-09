@@ -10,6 +10,8 @@
   "canvas.legacy.converted": "✅ 已转换 {name}({count} 个形状)",
   "canvas.legacy.converting": "正在转换 {name}…",
   "canvas.legacy.found": "发现 {count} 个旧版画布",
+  "canvas.migrate.done": "已转换：{converted}，已跳过：{skipped}，失败：{failed}，警告：{warnings}",
+  "canvas.migrate.none": "没有需要转换的 tldraw 画布",
   "canvas.new": "新建",
   "canvas.new.placeholder": "想法",
   "canvas.new.prompt": "画布名称:",

@@ -10,6 +10,8 @@
   "canvas.legacy.converted": "✅ הומר {name} ({count} צורות)",
   "canvas.legacy.converting": "ממיר {name}…",
   "canvas.legacy.found": "נמצאו {count} קנבסים ישנים",
+  "canvas.migrate.done": "קנבסים שהומרו: {converted}, דולגו: {skipped}, נכשלו: {failed}, אזהרות: {warnings}",
+  "canvas.migrate.none": "אין קנבסים של tldraw להמרה",
   "canvas.new": "חדש",
   "canvas.new.placeholder": "רעיונות",
   "canvas.new.prompt": "שם הקנבס:",

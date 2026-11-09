@@ -10,6 +10,8 @@
   "canvas.legacy.converted": "✅ تم تحويل {name} ({count} أشكال)",
   "canvas.legacy.converting": "جارٍ تحويل {name}…",
   "canvas.legacy.found": "تم العثور على {count} لوحة قديمة",
+  "canvas.migrate.done": "اللوحات المحوّلة: {converted}، المتخطّاة: {skipped}، الفاشلة: {failed}، التحذيرات: {warnings}",
+  "canvas.migrate.none": "لا توجد لوحات tldraw لتحويلها",
   "canvas.new": "جديد",
   "canvas.new.placeholder": "أفكار",
   "canvas.new.prompt": "اسم اللوحة:",

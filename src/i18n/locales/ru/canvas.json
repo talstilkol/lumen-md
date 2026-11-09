@@ -10,6 +10,8 @@
   "canvas.legacy.converted": "✅ {name} преобразован (фигур: {count})",
   "canvas.legacy.converting": "Преобразование {name}…",
   "canvas.legacy.found": "Найдено устаревших холстов: {count}",
+  "canvas.migrate.done": "Холстов преобразовано: {converted}, пропущено: {skipped}, с ошибкой: {failed}, предупреждений: {warnings}",
+  "canvas.migrate.none": "Нет холстов tldraw для преобразования",
   "canvas.new": "Новый",
   "canvas.new.placeholder": "идеи",
   "canvas.new.prompt": "Название холста:",

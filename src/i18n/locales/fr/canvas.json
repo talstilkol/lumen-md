@@ -10,6 +10,8 @@
   "canvas.legacy.converted": "✅ {name} converti ({count} formes)",
   "canvas.legacy.converting": "Conversion de {name}…",
   "canvas.legacy.found": "{count} ancien(s) canevas trouvé(s)",
+  "canvas.migrate.done": "Canevas convertis : {converted}, ignorés : {skipped}, en échec : {failed}, avertissements : {warnings}",
+  "canvas.migrate.none": "Aucun canevas tldraw à convertir",
   "canvas.new": "Nouveau",
   "canvas.new.placeholder": "idées",
   "canvas.new.prompt": "Nom du canevas :",

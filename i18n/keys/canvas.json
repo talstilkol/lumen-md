@@ -70,6 +70,21 @@
       ]
     },
     {
+      "key": "canvas.migrate.done",
+      "en": "Canvases converted: {converted}, skipped: {skipped}, failed: {failed}, warnings: {warnings}",
+      "vars": [
+        "converted",
+        "skipped",
+        "failed",
+        "warnings"
+      ]
+    },
+    {
+      "key": "canvas.migrate.none",
+      "en": "No tldraw canvases to convert",
+      "vars": []
+    },
+    {
       "key": "canvas.new",
       "en": "New",
       "vars": []

@@ -59,6 +59,8 @@
   "cmd.billing.managePersonal": "請求: 個人のサブスクリプションを管理",
   "cmd.billing.upgradePro": "請求: Pro にアップグレード",
   "cmd.billing.upgradeTeam": "請求: Team にアップグレード",
+  "cmd.canvas.migrate": "🎨 キャンバス: tldraw のキャンバスを Excalidraw に変換",
+  "cmd.canvas.migrate.hint": ".tldr ファイルはバックアップとして残ります",
   "cmd.clip.clipboard": "クリップボードからクリップ",
   "cmd.clip.clipboard.hint": "ブラウザーでページの一部をコピーしてライブラリに保存",
   "cmd.clip.url": "Web ページをクリップ…",
