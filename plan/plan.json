@@ -1,6 +1,6 @@
 {
  "$comment": "The plan's single source (plan 0.6). Edit this file, then `npm run plan` regenerates the board in MASTER_PLAN.md and plan/board.html; CI (`npm run plan:check`) fails when they differ. A task's status is one line: phases[].tasks[].status.",
- "updated": "2026-11-10T01:30",
+ "updated": "2026-11-10T02:40",
  "note": "**המצב ב-ב׳ 9.11 23:05:** אף PR לא מוזג מאז 17.10 (main = 552ea5b7). סשן 24.10 פתח #282–#316 (כ-30 משימות) — נרשמו כאן עכשיו. כמעט כל ה-PR-ים אדומים משתי סיבות שאינן בקוד: (1) מ-19.10 GitHub מעביר את ubuntu-latest ל-Ubuntu 26 והתקנת Playwright נשברת — #330 מצמיד ל-ubuntu-24.04; (2) תקציבי החבילה (startup 460 KB ותקציבי קובץ) — #330 גם מוסיף annotation שמראה איזה קובץ חורג. **החלטת טל 9.11: לא משתמשים יותר ב-GitHub Actions** — כל commit עם [skip ci], הבדיקות רצות ב-Vercel Sandbox. אזהרה: כל ענף מודד startup לבד (459–460 KB); אחרי 15.1 התוספות מכל השרשראות יצטברו — צריך את #248 או החלטה 15.16 (14) לפני המיזוג.\n\n**מחקר world class (9.11, plan/research-2026-11.md):** ציון ממוצע ב-19 תחומים מול Obsidian, Notion, Logseq, Typora, Word ואחרים — main 3.7 → עם ה-PR-ים הפתוחים 6.6 → כל התוכנית 7.3 → אחרי הגלים W1–W3 9.1. הפערים הגדולים: מסירה (אף PR לא מוזג), קריאה ומחקר (PDF), תאימות לפורמטים של Obsidian, INP ונגישות אמיתית עם קורא מסך (ת״י 5568), שיתוף והרשאות. 65 משימות חדשות בשלושה גלים (W1 ≈173 ש׳, W2 ≈119 ש׳, W3 ≈49 ש׳).\n\n**החלטות 10.11 (Claude, בהסמכת טל ״תחליט לבד כל החלטה״):** כל ההחלטות הפתוחות ב-15.2, 15.9, 15.10, 15.16 הוכרעו (פירוט בפריטים עצמם). נוסף: שער ה-OCR האנגלי (7.5) — ratchet ברמה הנמדדת (≤ 12.5% CER) ויעד ≤ 5% דרך W1.18, בלי להוריד את שער העברית; #271 — טוקן המחקר רק מההגדרות, לא VITE_RESEARCH_TOKEN (שום סוד בבנייה); החבילות שמחכות להתקנה (hash-wasm, @noble/ciphers, @excalidraw/excalidraw, @mlc-ai/web-llm@0.2.86, @capacitor/filesystem, quickjs-emscripten, knip, @citation-js) — מאושרות, כולן MIT / Apache / ISC, יותקנו ב-Vercel Sandbox; baselines ויזואליים — ייווצרו שם; שערי CI בלי Actions — W1.35. **בדיקה אמיתית בלי Actions:** Vercel בונה כל ענף (tsc -b מחמיר כולל בדיקות + vite build): 77 מתוך 86 PR-ים פתוחים ירוקים, 8 אדומים (#257, #261, #274, #277, #279, #280, #336, #347), 1 בתהליך.\n\n**10.11 01:30:** probe על chore/dod: build + budget עוברים ב-Vercel; עם vitest — נכשל (אין לוגים עד ש-Vercel מאושר). 83 מה-PR-ים ה\"אדומים\" ב-Vercel לא נכשלו בקוד — הבנייה שלהם נחסמה במגבלת 100 פריסות ביום (״Deployment rate limited״); כשל אמיתי היה רק ב-#336.",
  "start": "2026-10-18T08:00",
  "buffer": 0.35,
@@ -2608,7 +2608,7 @@
       "5.7"
      ],
      "priority": "P1",
-     "status": "⏳ #336 feat/local-fim (Ollama suffix על qwen2.5-coder, debounce 150ms, אף הקשה לא מתחילה הורדה; ✅* — 15.17: npm run bench:fim -- --assert 300) — נבדק רק ב-Node נקי; typecheck/vitest/build/Playwright ממתינים ל-Vercel Sandbox",
+     "status": "⏳ #336 feat/local-fim (Ollama suffix על qwen2.5-coder, debounce 150ms, אף הקשה לא מתחילה הורדה; ✅* — 15.17: npm run bench:fim -- --assert 300) — נבדק רק ב-Node נקי; typecheck/vitest/build/Playwright ממתינים ל-Vercel Sandbox · 10.11: כשל ה-Vercel (TS2493 ב-fim.test) תוקן @49e1c83d; בדיקה מלאה ב-Vercel Sandbox (Node 24): typecheck 0, vitest 324 קבצים/3397, startup 443.0/460, e2e fim chromium 1/1",
      "new": true,
      "was": "5.9",
      "source": "מחליף Copilot",
@@ -4630,7 +4630,9 @@
       "CER בעברית לא נפגע (≤ 2.66%)",
       "העתקה מ-PDF סרוק בעברית: סדר מילים נכון ב-≥ 95% מהשורות"
      ],
-     "why": "המדידה של 7.5 נכשלה בדיוק במקרה הנפוץ בעברית: מונחים לועזיים בתוך משפט."
+     "why": "המדידה של 7.5 נכשלה בדיוק במקרה הנפוץ בעברית: מונחים לועזיים בתוך משפט.",
+     "branch": "feat/ocr-mixed-layout",
+     "status": "⏳ #357 feat/ocr-mixed-layout (על #278; קריאה חוזרת של מילים לועזיות, חיתוך עמודות וסדר RTL, שכבת טקסט; בדיקה מלאה ב-Vercel Sandbox (Node 24): typecheck 0, vitest 319/3133, startup 457.5/460, ocr.spec 1/1; שער ה-CER בדפדפן: אנגלית 0.00%/0.00% (היה 12.33%/40.54%), עברית 1.37%/0.96%; יעדי העמודות לא הושגו בבדיקה מקומית: עברית 8.38%, אנגלית 18.83%, סדר מילים 85.1%; חסר split mixed — בעלים: node scripts/golden/build.mjs ocr-he --split dev)"
     },
     {
      "id": "W1.19",
@@ -5144,7 +5146,9 @@
       "משפט של 20 מילים < 500ms ב-WebGPU, < 2s ב-WASM",
       "100% שימור עיצורים"
      ],
-     "why": "Dicta היא המובילה בניקוד; Nakdimon לבדו לא מספיק כדי לטעון לרמה עולמית בעברית."
+     "why": "Dicta היא המובילה בניקוד; Nakdimon לבדו לא מספיק כדי לטעון לרמה עולמית בעברית.",
+     "branch": "feat/nikud-dicta",
+     "status": "⏳ #359 feat/nikud-dicta (על #293; DictaBERT-char-menaked מאחורי seam + חלופות לכל מילה; גם מוריד את #293 מ-460.5 ל-459.4 KB; בדיקה מלאה ב-Vercel Sandbox (Node 24): typecheck 0, vitest 327 קבצים; דיוק ≥95% ו-latency לא נמדדו — המודל ב-HF; dodMock; בעלים: python -I scripts/models/export-menaked.py --revision <sha> --out out/dictabert-char-menaked)"
     },
     {
      "id": "W2.6",
@@ -5286,7 +5290,9 @@
       "כתיב מלא/חסר: 30/30 זוגות זהב נמצאים",
       "חיפוש < 100ms על 10,000 פתקים"
      ],
-     "why": "כתיב מלא/חסר ונטייה הם הסיבה שחיפוש עברי נכשל אצל כל המתחרים."
+     "why": "כתיב מלא/חסר ונטייה הם הסיבה שחיפוש עברי נכשל אצל כל המתחרים.",
+     "branch": "feat/hebrew-search-morph",
+     "status": "⏳ #362 feat/hebrew-search-morph (על #345; למטיזציה, כתיב מלא/חסר, מילים נרדפות, עברית→אנגלית; HeQ dev 1.0000→1.0000, probe מורפולוגיה 0.9004→0.9544, מלא/חסר 2/30→30/30, עברית→אנגלית 0/5→5/5 (probe פיתוח, לא held-out); בדיקה מלאה ב-Vercel Sandbox (Node 24): typecheck 0, vitest 326/3406, startup 442.9/460, search-flash 1/1; dod: npx vitest run src/__tests__/hebrewSearch.test.ts src/__tests__/hebrewMorph.test.ts src/__tests__/bm25Golden.test.ts)"
     },
     {
      "id": "W2.12",
@@ -5357,7 +5363,9 @@
       "0 בקשות ענן ב-local-only (יומן הפרטיות)",
       "קיצוץ עם פרשנות < 10s במודל 3B על מחשב נייד"
      ],
-     "why": "Interpreter של Obsidian Web Clipper תומך ב-Ollama אבל דורש הגדרת OLLAMA_ORIGINS וחלון 2048; אצלנו זה יכול לעבוד מהקופסה."
+     "why": "Interpreter של Obsidian Web Clipper תומך ב-Ollama אבל דורש הגדרת OLLAMA_ORIGINS וחלון 2048; אצלנו זה יכול לעבוד מהקופסה.",
+     "branch": "feat/clip-interpreter",
+     "status": "⏳ #364 feat/clip-interpreter (על #308; משתני פרומפט במודל מקומי בלבד, guard להזרקה, תבניות YouTube/arXiv/GitHub; chunk הקליפ פוצל 103→99.6 KB; בדיקה מלאה ב-Vercel Sandbox (Node 24): typecheck 0, vitest 322 קבצים, startup 444.2/460, clipper-v2 1/1; ✅* לכל היותר — בעלים: Ollama qwen2.5:3b על 3 אתרים אמיתיים)"
     },
     {
      "id": "W2.15",
