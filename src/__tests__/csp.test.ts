@@ -157,10 +157,22 @@ describe("CSP alignment", () => {
     expect(read("docker/nginx.conf")).toMatch(/connect-src [^"]*__CSP_CONNECT_EXTRA__/);
   });
 
-  it("(a) connect-src lists explicit hosts, not a blanket https:/http:/*", () => {
+  it("(a) connect-src lists explicit hosts, not a blanket https:/http:/ws:/wss:/*", () => {
     for (const [name, p] of Object.entries(POLICIES)) {
       const list = p.get("connect-src")!;
-      expect(list.filter((s) => s === "https:" || s === "http:" || s === "*"), name).toEqual([]);
+      expect(list.filter((s) => ["https:", "http:", "ws:", "wss:", "*"].includes(s)), name).toEqual([]);
+    }
+  });
+
+  it("(a) the WebSockets the app opens are listed (plan 2.2): collab signaling", () => {
+    // src/collab/yjs.ts PUBLIC_SIGNALING_FALLBACK: Lumen's own server, then the
+    // public ones when the user opts in. Deployment servers come from the build.
+    const yjs = read("src/collab/yjs.ts");
+    const block = /const PUBLIC_SIGNALING_FALLBACK = \[([\s\S]*?)\];/.exec(yjs)![1];
+    const urls = [...block.matchAll(/"(wss?:\/\/[^"]+)"/g)].map((m) => m[1]);
+    expect(urls).toContain("wss://signal.lumen.md");
+    for (const [name, p] of Object.entries(POLICIES)) {
+      for (const url of urls) expect(connectAllows(p, url), `${name} blocks ${url}`).toBe(true);
     }
   });
 

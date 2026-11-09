@@ -15,6 +15,7 @@ import { t } from "../i18n";
 import { useCapability, useEntitlementResolved } from "../billing/gates";
 import { UpgradeNotice } from "./UpgradeNotice";
 import { getSecret, setSecret } from "../lib/secretStore";
+import { connectAllowedByCsp } from "../lib/cspConnect";
 
 interface Props {
   onClose: () => void;
@@ -42,6 +43,28 @@ function writeKey(key: string, value: string): void {
   } catch {
     /* storage denied */
   }
+}
+
+/**
+ * The servers in `value` (comma-separated) this deployment's CSP would block.
+ * The policy names its WebSocket hosts (plan 2.2), so a server entered here
+ * that the build did not list is skipped by src/collab/yjs.ts.
+ */
+function blockedByCsp(value: string): string[] {
+  return value
+    .split(",")
+    .map((s) => s.trim())
+    .filter((s) => s && !connectAllowedByCsp(s));
+}
+
+function CspWarning({ value }: { value: string }) {
+  const blocked = blockedByCsp(value);
+  if (!blocked.length) return null;
+  return (
+    <p role="status" style={{ margin: "6px 0 0", fontSize: 12, lineHeight: 1.5, color: "hsl(var(--fg))" }}>
+      {t("collab.settings.cspBlocked", { url: blocked.join(", ") })}
+    </p>
+  );
 }
 
 export function CollabSettings({ onClose }: Props) {
@@ -135,6 +158,7 @@ export function CollabSettings({ onClose }: Props) {
           }}
           autoFocus
         />
+        <CspWarning value={url} />
         <label style={{ display: "flex", gap: 8, alignItems: "flex-start", marginTop: 12, fontSize: 12, color: "hsl(var(--fg))" }}>
           <input type="checkbox" checked={publicSignaling} onChange={(e) => setPublicSignaling(e.target.checked)} />
           <span>
@@ -183,6 +207,7 @@ export function CollabSettings({ onClose }: Props) {
             if (e.key === "Escape") onClose();
           }}
         />
+        {persistentAllowed && <CspWarning value={wsUrl} />}
         {persistentAllowed && (
           <input
             type="password"

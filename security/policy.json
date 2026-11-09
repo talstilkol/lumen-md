@@ -3,7 +3,7 @@
   "routes": {
     "app": {
       "kind": "document",
-      "why": "The editor: index.html and every SPA route. No eval on the page (Graphviz, ruby.wasm and the TypeScript checker run in workers with their own policy); WebAssembly compiles ('wasm-unsafe-eval'). Trusted Types guard every DOM sink (src/lib/trustedTypes.ts). img-src lists the hosts the app itself loads images from (tldraw's icons, the map block's OpenStreetMap tiles, GitHub / Google account avatars); the trailing https: is only for images inside notes. media-src https: is the same, for <video> / <audio> in notes.",
+      "why": "The editor: index.html and every SPA route. No eval on the page (Graphviz, ruby.wasm and the TypeScript checker run in workers with their own policy); WebAssembly compiles ('wasm-unsafe-eval'). Trusted Types guard every DOM sink (src/lib/trustedTypes.ts). img-src lists the hosts the app itself loads images from (tldraw's icons, the map block's OpenStreetMap tiles, GitHub / Google account avatars); the trailing https: is only for images inside notes. media-src https: is the same, for <video> / <audio> in notes. connect-src has no bare ws: / wss:: the WebSockets the app opens are collaboration signaling (wss://signal.lumen.md, and the two public servers when the user opts in) and the deployment's own collab servers, which the build adds from VITE_WEBRTC_SIGNALING_URL / VITE_YJS_WEBSOCKET_URL (src/build/cspEndpoints.ts). The renderer holds back images in notes from hosts the user has not allowed (src/lib/remoteImages.ts).",
       "samples": ["/", "/index.html", "/notes/some-doc"],
       "csp": {
         "default-src": ["'self'"],
@@ -25,8 +25,9 @@
           "'self'",
           "blob:",
           "data:",
-          "ws:",
-          "wss:",
+          "wss://signal.lumen.md",
+          "wss://signaling.yjs.dev",
+          "wss://y-webrtc-signaling-eu.herokuapp.com",
           "https://api.openai.com",
           "https://api.anthropic.com",
           "https://generativelanguage.googleapis.com",
@@ -248,7 +249,7 @@
         {
           "routes": ["app"],
           "add": { "connect-src": ["ipc:", "http://ipc.localhost"] },
-          "why": "Tauri 2's IPC protocol (ipc: on macOS and Linux, http://ipc.localhost on Windows). No https: — connect-src is the app's explicit list. A desktop build with deployment endpoints (VITE_*_ENDPOINT) passes them at build time: `tauri build --config \"$(node scripts/headers.mjs --tauri-config dist/.csp-connect-extra)\"` (docs/security/headers.md)."
+          "why": "Tauri 2's IPC protocol (ipc: on macOS and Linux, http://ipc.localhost on Windows). No https: — connect-src is the app's explicit list, WebSocket hosts included. A desktop build with deployment endpoints (VITE_*_ENDPOINT) passes them at build time: `tauri build --config \"$(node scripts/headers.mjs --tauri-config dist/.csp-connect-extra)\"` (docs/security/headers.md)."
         },
         {
           "routes": ["app"],

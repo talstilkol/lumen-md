@@ -1,8 +1,18 @@
-import { Component, createContext, lazy, Suspense, useContext, useEffect, useRef, useState, type ComponentType } from "react";
+import { Component, createContext, lazy, Suspense, useContext, useEffect, useRef, useState, useSyncExternalStore, type ComponentType } from "react";
 import type { JSX } from "react";
 import { isAssetName, readWorkspaceBlob } from "../storage/workspace";
 import { log } from "../lib/logger";
 import { scheduleIdle } from "../lib/idle";
+import { t } from "../i18n";
+import {
+  allowRemoteImageHosts,
+  loadRemoteImagesOnce,
+  remoteImageGate,
+  remoteImagesUnavailable,
+  remoteImagesVersion,
+  subscribeRemoteImages,
+  type RemoteImageGate,
+} from "../lib/remoteImages";
 
 const ChartBlock = lazy(() => import("../plugins/ChartBlock"));
 const MermaidBlock = lazy(() => import("../plugins/MermaidBlock"));
@@ -372,20 +382,85 @@ interface ImgProps extends React.ImgHTMLAttributes<HTMLImageElement> {
   src?: string;
 }
 
-function LumenImg(props: ImgProps) {
-  const { src, ...rest } = props;
-  const [resolved, setResolved] = useState<string | undefined>(() =>
-    isOpfsAssetSrc(src) ? blobUrlCache.get(normalize(src!)) : src,
+/**
+ * An image from another site that the user has not allowed (plan 2.2): its
+ * alt text, the host, and "Load" (this image, this session) / "Always allow"
+ * (the host, in this browser). No request is made until one is clicked. In
+ * the desktop app nothing can load (its CSP, plan 2.1), so no buttons.
+ */
+function RemoteImagePlaceholder({ alt, gate, media }: { alt?: string; gate: RemoteImageGate; media?: boolean }) {
+  const host = gate.hosts.join(", ");
+  const unavailable = remoteImagesUnavailable();
+  return (
+    <span
+      className="lumen-remote-image"
+      role="group"
+      aria-label={t(media ? "remoteMedia.label" : "remoteImage.label", { host })}
+      data-remote-image={host}
+    >
+      <span className="lumen-remote-image-text">
+        <span className="lumen-remote-image-alt" dir="auto">{alt?.trim() || t("remoteImage.untitled")}</span>
+        <span className="lumen-remote-image-host" dir="auto">
+          {unavailable ? t("remoteImage.desktop", { host }) : t("remoteImage.blocked", { host })}
+        </span>
+      </span>
+      {!unavailable && (
+        <>
+          <button type="button" title={t("remoteImage.loadHint", { host })} onClick={() => loadRemoteImagesOnce(gate.urls)}>
+            {t("remoteImage.load")}
+          </button>
+          <button type="button" title={t("remoteImage.allowHint", { host })} onClick={() => allowRemoteImageHosts(gate.hosts)}>
+            {t("remoteImage.allowHost", { host })}
+          </button>
+        </>
+      )}
+    </span>
   );
-  useEffect(() => {
-    if (!isOpfsAssetSrc(src)) {
-      setResolved(src);
-      return;
+}
+
+type MediaProps = React.VideoHTMLAttributes<HTMLVideoElement>;
+
+/**
+ * <video> / <audio> from another site wait for the user like images (plan
+ * 2.2): WebKit fetches a media src even with preload="none". The sanitizer
+ * leaves other-site media at most one URL, its own src.
+ */
+function gatedMedia(Tag: "video" | "audio") {
+  return function LumenMedia(props: MediaProps) {
+    const isStatic = useContext(StaticRenderContext);
+    useSyncExternalStore(subscribeRemoteImages, remoteImagesVersion, remoteImagesVersion);
+    const gate = remoteImageGate(props.src);
+    if (!isStatic && gate.blocked) {
+      const name = (props.src ?? "").split(/[?#]/)[0].split("/").pop() || undefined;
+      return <RemoteImagePlaceholder alt={props.title || name} gate={gate} media />;
     }
+    return <Tag {...(props as React.HTMLAttributes<HTMLElement>)} />;
+  };
+}
+const LumenVideo = gatedMedia("video");
+const LumenAudio = gatedMedia("audio");
+
+function LumenImg(props: ImgProps) {
+  const { src, srcSet, ...rest } = props;
+  // Exports (static markup) keep the real image: the file is for others.
+  const isStatic = useContext(StaticRenderContext);
+  useSyncExternalStore(subscribeRemoteImages, remoteImagesVersion, remoteImagesVersion);
+  const gate = remoteImageGate(src, srcSet);
+  // The blob URL of an OPFS asset, tagged with the src it belongs to: a
+  // retained element whose src changed must never render the old value — not
+  // even for the one render before the effect runs (it may be another
+  // site's image the gate has since stopped judging). Other srcs render
+  // straight from the prop.
+  const [resolved, setResolved] = useState<{ for: string | undefined; url: string | undefined }>(() => ({
+    for: src,
+    url: isOpfsAssetSrc(src) ? blobUrlCache.get(normalize(src!)) : undefined,
+  }));
+  useEffect(() => {
+    if (!isOpfsAssetSrc(src)) return;
     const key = normalize(src);
     const cached = blobUrlCache.get(key);
     if (cached) {
-      setResolved(cached);
+      setResolved({ for: src, url: cached });
       return;
     }
     let cancelled = false;
@@ -394,22 +469,25 @@ function LumenImg(props: ImgProps) {
         if (cancelled) return;
         const url = URL.createObjectURL(blob);
         blobUrlCache.set(key, url);
-        setResolved(url);
+        setResolved({ for: src, url });
       })
       .catch(() => {
-        if (!cancelled) setResolved(undefined);
+        if (!cancelled) setResolved({ for: src, url: undefined });
       });
     return () => {
       cancelled = true;
     };
   }, [src]);
+  const shown = !isOpfsAssetSrc(src) ? src : resolved.for === src ? resolved.url : blobUrlCache.get(normalize(src));
   // The author-supplied `alt` is forwarded via {...rest}. We default to
   // the basename of the src when nothing is provided so screen-readers
   // get something descriptive instead of "image".
   const fallbackAlt = !rest.alt
     ? (src ?? "").split("/").pop()?.replace(/\.[^.]+$/, "") ?? "image"
     : undefined;
-  return <img alt={fallbackAlt} loading="lazy" {...rest} src={resolved} />;
+  if (isStatic) return <img alt={fallbackAlt} loading="lazy" {...rest} srcSet={srcSet} src={shown} />;
+  if (gate.blocked) return <RemoteImagePlaceholder alt={rest.alt} gate={gate} />;
+  return <img alt={fallbackAlt} loading="lazy" {...rest} srcSet={gate.srcSet} src={shown} />;
 }
 
 function normalize(src: string): string {
@@ -502,6 +580,8 @@ export const components: Record<string, LumenBlock> = {
   "lumen-playground": Playground as unknown as LumenBlock,
   // Asset-resolving <img> override.
   img: LumenImg as unknown as LumenBlock,
+  video: LumenVideo as unknown as LumenBlock,
+  audio: LumenAudio as unknown as LumenBlock,
   // GFM task-list checkboxes get an aria-label so they aren't announced bare.
   input: LumenInput as unknown as LumenBlock,
 };

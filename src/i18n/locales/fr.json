@@ -1453,5 +1453,15 @@
   "canvas.new.replaceTitle": "Remplacer ce canevas ?",
   "canvas.new.replaceBody": "Un canevas nommé « {name} » existe déjà. En créer un nouveau sous ce nom remplace son dessin par une page vierge.",
   "canvas.new.replaceOk": "Remplacer par une page vierge",
-  "canvas.unreadable": "Impossible de lire le canevas « {name} ». Il reste en lecture seule pour que son dessin enregistré ne soit pas écrasé."
+  "canvas.unreadable": "Impossible de lire le canevas « {name} ». Il reste en lecture seule pour que son dessin enregistré ne soit pas écrasé.",
+  "remoteImage.label": "Image de {host}",
+  "remoteImage.untitled": "Image",
+  "remoteImage.blocked": "De {host}, non chargée",
+  "remoteImage.desktop": "De {host}. L’application de bureau ne charge pas les images d’autres sites.",
+  "remoteImage.load": "Charger",
+  "remoteImage.loadHint": "Charger cette image une seule fois. {host} saura que vous avez ouvert cette note.",
+  "remoteImage.allowHost": "Toujours autoriser {host}",
+  "remoteImage.allowHint": "Charger les images de {host} dans toutes les notes, dans ce navigateur.",
+  "collab.settings.cspBlocked": "La politique de sécurité de ce déploiement bloque {url} ; il ne sera donc pas utilisé. Ajoutez-le à la compilation (VITE_CSP_CONNECT_EXTRA).",
+  "remoteMedia.label": "Vidéo ou audio de {host}"
 }

@@ -1453,5 +1453,15 @@
   "canvas.new.replaceTitle": "استبدال هذه اللوحة؟",
   "canvas.new.replaceBody": "توجد لوحة باسم “{name}” بالفعل. بدء لوحة جديدة بهذا الاسم يستبدل رسمها بصفحة فارغة.",
   "canvas.new.replaceOk": "استبدال بصفحة فارغة",
-  "canvas.unreadable": "تعذّرت قراءة اللوحة «{name}». ستبقى للقراءة فقط حتى لا يُستبدل رسمها المحفوظ."
+  "canvas.unreadable": "تعذّرت قراءة اللوحة «{name}». ستبقى للقراءة فقط حتى لا يُستبدل رسمها المحفوظ.",
+  "remoteImage.label": "صورة من {host}",
+  "remoteImage.untitled": "صورة",
+  "remoteImage.blocked": "من {host}، لم تُحمَّل",
+  "remoteImage.desktop": "من {host}. تطبيق سطح المكتب لا يحمّل الصور من مواقع أخرى.",
+  "remoteImage.load": "تحميل",
+  "remoteImage.loadHint": "تحميل هذه الصورة مرة واحدة. سيعرف {host} أنك فتحت هذه الملاحظة.",
+  "remoteImage.allowHost": "السماح دائمًا لـ {host}",
+  "remoteImage.allowHint": "تحميل الصور من {host} في كل الملاحظات، في هذا المتصفح.",
+  "collab.settings.cspBlocked": "سياسة الأمان في هذا النشر تحظر {url}، لذا لن يُستخدم. أضِفه وقت البناء (VITE_CSP_CONNECT_EXTRA).",
+  "remoteMedia.label": "فيديو أو صوت من {host}"
 }

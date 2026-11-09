@@ -6,6 +6,7 @@ import { log } from "../lib/logger";
 import { effectiveCapabilities, entitlementResolved, waitForEntitlement } from "../billing/gates";
 import { wireE2E, type E2EChannel, type E2EErrorReason } from "./e2e";
 import { getSecret } from "../lib/secretStore";
+import { connectAllowedByCsp, isIpv6LiteralUrl } from "../lib/cspConnect";
 
 export interface CollabUser {
   name: string;
@@ -86,7 +87,16 @@ const getSignalingUrls = (): string[] => {
   const envUrl = typeof import.meta !== "undefined"
     ? (import.meta as ImportMeta & { env?: { VITE_WEBRTC_SIGNALING_URL?: string } }).env?.VITE_WEBRTC_SIGNALING_URL
     : undefined;
-  const configured = (custom || envUrl || "").split(",").map((s) => s.trim()).filter(Boolean);
+  const listed = (custom || envUrl || "").split(",").map((s) => s.trim()).filter(Boolean);
+  // Plan 2.2: connect-src names its WebSocket hosts (no bare wss:). A server
+  // set at runtime that this deployment's policy does not list would only
+  // be blocked by the browser; skip it with a reason (Collab settings warns
+  // when it is entered). Build-time URLs are in the policy already, except
+  // IPv6 literals, which no CSP can name (the build warns about those).
+  const configured = listed.filter((u) => connectAllowedByCsp(u));
+  for (const u of listed.filter((x) => !configured.includes(x))) {
+    log.warn(`Collab signaling ${u} skipped: ${cspAdvice(u, "VITE_WEBRTC_SIGNALING_URL")}`);
+  }
   // T49: by default only the configured / the project's own signaling
   // server. The public third-party servers (yjs.dev, heroku) see who meets
   // whom, so they are used only when the user opts in (Collab settings) —
@@ -175,12 +185,23 @@ export const SEED_FALLBACK_MS = 1500;
  * Optional persistent collab WebSocket URL (y-websocket compatible), as
  * configured — before the plan check (see `connectCollab`).
  */
+/** Why the page's CSP blocks a collab server URL, and what to do about it. */
+function cspAdvice(url: string, envVar: string): string {
+  if (isIpv6LiteralUrl(url)) return "a CSP can't name an IPv6 address, so the browser would block it. Give the server a hostname.";
+  return `it isn't in this deployment's CSP connect-src. Add its origin with VITE_CSP_CONNECT_EXTRA (or ${envVar}) at build time.`;
+}
+
 function configuredWebsocketUrl(): string | null {
   const fromStorage =
     typeof localStorage !== "undefined"
       ? localStorage.getItem("lumen.collab.ws")
       : null;
-  if (fromStorage) return fromStorage;
+  if (fromStorage) {
+    // As for signaling (plan 2.2): a runtime URL the policy blocks is skipped.
+    if (connectAllowedByCsp(fromStorage)) return fromStorage;
+    log.warn(`Persistent collab server ${fromStorage} not used: ${cspAdvice(fromStorage, "VITE_YJS_WEBSOCKET_URL")}`);
+    return null;
+  }
   const envUrl =
     typeof import.meta !== "undefined"
       ? (import.meta as ImportMeta & { env?: { VITE_YJS_WEBSOCKET_URL?: string } })
