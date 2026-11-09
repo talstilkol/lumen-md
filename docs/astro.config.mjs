@@ -128,6 +128,13 @@ export default defineConfig({
             { label: "Issue triage", slug: "project/issue-triage", translations: { he: "מיון issues" } },
           ],
         },
+        {
+          label: "Project",
+          translations: { he: "הפרויקט" },
+          items: [
+            { label: "Public roadmap", slug: "project/roadmap", translations: { he: "מפת דרכים ציבורית" } },
+          ],
+        },
       ],
     }),
   ],
