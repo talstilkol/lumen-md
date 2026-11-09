@@ -157,10 +157,16 @@ export function Preview({ markdownText, docKey = null }: Props) {
           (path, heading) =>
             window.dispatchEvent(
               new CustomEvent("lumen-open-file", {
-                // Same slugger rehype-slug gives the rendered headings
-                // (Unicode-aware: Hebrew / CJK headings keep their text).
-                // A block reference (`#^id`) is the block's own id (remarkBlockIds).
-                detail: heading ? { path, heading: wikiFragmentId(heading) } : { path },
+                // A PDF takes the fragment as written (`page=3&highlight=…`,
+                // plan 4.14). A note: the same slugger rehype-slug gives the
+                // rendered headings (Unicode-aware: Hebrew / CJK keep their
+                // text); a block reference (`#^id`) is the block's own id
+                // (remarkBlockIds).
+                detail: /\.pdf$/i.test(path)
+                  ? { path, fragment: heading ?? null }
+                  : heading
+                    ? { path, heading: wikiFragmentId(heading) }
+                    : { path },
               }),
             ),
         );

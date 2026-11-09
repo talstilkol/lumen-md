@@ -73,6 +73,15 @@ export function buildViewCommands({ setSearchOpen, setRuntimeMetricsOpen, vimEna
       action: () => window.dispatchEvent(new CustomEvent("lumen-open-today")),
     },
     {
+      id: "pdf.open",
+      label: t("cmd.pdf.open"),
+      hint: t("cmd.pdf.open.hint"),
+      icon: cmdIcons.FileText,
+      group: t("group.file"),
+      // Plan 4.14: copies the PDF into the vault and opens it in the reader.
+      action: () => void import("../../pdf/openPdf").then((m) => m.pickAndOpenPdf()),
+    },
+    {
       id: "note.capture",
       label: t("capture.title"),
       shortcut: "⌥⌘N",

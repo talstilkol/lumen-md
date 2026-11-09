@@ -883,6 +883,16 @@
       "vars": []
     },
     {
+      "key": "cmd.pdf.open",
+      "en": "Open a PDF for reading…",
+      "vars": []
+    },
+    {
+      "key": "cmd.pdf.open.hint",
+      "en": "Highlights go to a .pdf.md note",
+      "vars": []
+    },
+    {
       "key": "cmd.preview",
       "en": "Preview only",
       "vars": []

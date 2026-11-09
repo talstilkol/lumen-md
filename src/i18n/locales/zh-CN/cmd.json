@@ -174,6 +174,8 @@
   "cmd.note.today": "今天的笔记",
   "cmd.note.today.hint": "打开或创建今天的每日笔记（journal/YYYY-MM-DD.md）",
   "cmd.open": "打开 file…",
+  "cmd.pdf.open": "打开 PDF 阅读…",
+  "cmd.pdf.open.hint": "高亮保存在 .pdf.md 笔记中",
   "cmd.preview": "仅预览",
   "cmd.research.ask": "🔎 研究：提出问题…",
   "cmd.research.ask.hint": "搜索网络、阅读来源，并为每个论断写出带引文脚注的笔记",
