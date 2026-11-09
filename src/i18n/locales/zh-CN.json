@@ -503,6 +503,7 @@
   "outline.empty": "暂无标题。输入 # 添加一个。",
   "outline.title": "大纲",
   "palette.close": "关闭",
+  "palette.layoutHint": "同时显示“{text}”的结果（另一种键盘布局）",
   "palette.navigate": "导航",
   "palette.noMatch": "没有匹配的命令",
   "palette.placeholder": "输入命令或搜索…",

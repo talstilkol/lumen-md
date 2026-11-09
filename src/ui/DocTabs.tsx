@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { X, FileText } from "lucide-react";
 import type { DocFile } from "../store/useStore";
 import { t } from "../i18n";
+import { matchShortcut } from "../lib/keyboardLayout";
 
 export interface TabItem {
   id: string;
@@ -131,7 +132,7 @@ export const DocTabs = React.memo(function DocTabs({
               onClick={() => onSelect(tab.id)}
               onKeyDown={(e) => {
                 // Cmd/Ctrl+W → close from the keyboard while focused on the tab.
-                if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "w") {
+                if (matchShortcut(e, "Mod+W")) {
                   e.preventDefault();
                   onClose(tab.id);
                 }

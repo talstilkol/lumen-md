@@ -3,6 +3,8 @@ import type { ReactElement } from "react";
 import { Search, FileText, Sparkles, Loader2, FileCode2, Wand2 } from "lucide-react";
 import { t, tPlural } from "../i18n";
 import { searchWorkspace, type SearchHit } from "../storage/workspaceIndex";
+import { wrongLayoutVariant } from "../lib/keyboardLayout";
+import { mergeLayoutHits } from "./paletteSearch";
 import { isOPFSAvailable, readWorkspaceFile } from "../storage/workspace";
 import { chat, AiError } from "../ai/llm";
 import type { ChatMessage } from "../ai/llm";
@@ -33,6 +35,8 @@ export function SearchDialog({ open, onClose, onOpenFile }: Props) {
   const smartAllowed = useCapability("smartSearch");
   const [query, setQuery] = useState("");
   const [hits, setHits] = useState<SearchHit[]>([]);
+  /** The other-layout reading of the query whose hits are shown too. */
+  const [layoutVariant, setLayoutVariant] = useState<string | null>(null);
   const [smartHits, setSmartHits] = useState<SemanticHit[]>([]);
   const [smartIndexing, setSmartIndexing] = useState(false);
   const [smartIndexedAt, setSmartIndexedAt] = useState<number | null>(null);
@@ -102,9 +106,13 @@ export function SearchDialog({ open, onClose, onOpenFile }: Props) {
     setLoading(true);
     const handle = setTimeout(() => {
       searchWorkspace(query, { limit: 40 })
-        .then((h) => {
+        .then(async (h) => {
+          // Few hits: try the same keystrokes in the other keyboard layout too (plan W2.8).
+          const other = h.length < 3 ? wrongLayoutVariant(query) : null;
+          const more = other ? await searchWorkspace(other, { limit: 40 }).catch(() => [] as SearchHit[]) : [];
           if (cancelled) return;
-          setHits(h);
+          setLayoutVariant(more.length ? other : null);
+          setHits(mergeLayoutHits(h, more));
           setActive(0);
           setLoading(false);
         })
@@ -411,6 +419,11 @@ export function SearchDialog({ open, onClose, onOpenFile }: Props) {
             </button>
           )}
         </div>
+        {mode === "search" && layoutVariant && query.trim() && (
+          <div role="status" data-testid="search-layout-hint" dir="auto" style={{ padding: "6px 14px", fontSize: 12, color: "hsl(var(--fg-muted))" }}>
+            {t("palette.layoutHint", { text: layoutVariant })}
+          </div>
+        )}
         <div className="cmd-palette-search">
           <Search size={16} style={{ opacity: 0.6, flexShrink: 0 }} />
           <input
