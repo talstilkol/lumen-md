@@ -1068,6 +1068,27 @@
       "group": "Insert",
       "hint": "[[Page|label]]",
       "icon": "Link"
+    },
+    {
+      "id": "a11y.srVerbosity",
+      "label": "Screen reader announcements: headings and structure",
+      "group": "View",
+      "hint": "What the editor says as the cursor moves: headings and structure, every line, or nothing",
+      "icon": "Eye"
+    },
+    {
+      "id": "a11y.whereAmI",
+      "label": "Announce cursor position",
+      "group": "View",
+      "hint": "Line, column and the heading above, read by the screen reader",
+      "icon": "Eye"
+    },
+    {
+      "id": "help.a11yStatement",
+      "label": "Accessibility statement",
+      "group": "File",
+      "hint": "How accessible Lumen is (IS 5568, WCAG 2.2 AA), known gaps, and how to report a barrier",
+      "icon": "FileText"
     }
   ],
   "full": [
@@ -2274,6 +2295,27 @@
       "group": "Insert",
       "hint": "[[Page|label]]",
       "icon": "Link"
+    },
+    {
+      "id": "a11y.srVerbosity",
+      "label": "Screen reader announcements: headings and structure",
+      "group": "View",
+      "hint": "What the editor says as the cursor moves: headings and structure, every line, or nothing",
+      "icon": "Eye"
+    },
+    {
+      "id": "a11y.whereAmI",
+      "label": "Announce cursor position",
+      "group": "View",
+      "hint": "Line, column and the heading above, read by the screen reader",
+      "icon": "Eye"
+    },
+    {
+      "id": "help.a11yStatement",
+      "label": "Accessibility statement",
+      "group": "File",
+      "hint": "How accessible Lumen is (IS 5568, WCAG 2.2 AA), known gaps, and how to report a barrier",
+      "icon": "FileText"
     }
   ],
   "autoSaveOn": [
@@ -2437,6 +2479,9 @@
     "insert.embed",
     "insert.htmlpreview",
     "insert.bibtex",
-    "insert.wikilink"
+    "insert.wikilink",
+    "a11y.srVerbosity",
+    "a11y.whereAmI",
+    "help.a11yStatement"
   ]
 }
