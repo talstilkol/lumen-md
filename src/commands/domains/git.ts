@@ -101,7 +101,7 @@ export function buildGitCommands({ showWorkspace, setDoc, toggleWorkspace, liveD
                 setDoc({ content: fresh, dirty: false });
               }
             } catch {
-              /* file may have been deleted upstream; ignore */
+              /* why: file may have been deleted upstream; ignore */
             }
           }
         } catch (e) {

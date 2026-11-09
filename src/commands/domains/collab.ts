@@ -47,7 +47,7 @@ export function buildCollabCommands({ collab, handleStartCollab, handleStopColla
             group: t("group.collab"),
             action: () => {
               const link = roomShareLink(collab.roomName, collab.sharePassword);
-              navigator.clipboard?.writeText(link).catch(() => {});
+              navigator.clipboard?.writeText(link).catch(() => { /* why: clipboard denied: the room name is shown in the palette hint to copy by hand */ });
             },
           },
           {

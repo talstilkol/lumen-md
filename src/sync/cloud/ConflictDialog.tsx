@@ -261,7 +261,7 @@ export function openConflictDialog(opts: {
       try {
         root.unmount();
       } catch {
-        /* */
+        /* why: the root may already be unmounted by an earlier close */
       }
       host.remove();
     };

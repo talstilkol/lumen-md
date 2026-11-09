@@ -17,6 +17,7 @@ import {
   writeWorkspaceBlob,
 } from "../storage/workspace";
 import { getSecret, setSecret, initSecretStore, flushSecrets } from "../lib/secretStore";
+import { log } from "../lib/logger";
 
 type Fs = {
   promises: {
@@ -129,13 +130,13 @@ export async function cloneRepo(
   try {
     await fs.promises.mkdir("/git");
   } catch {
-    /* exists */
+    /* why: the directory already exists */
   }
   // Clean any prior contents under the same name to keep things deterministic.
   try {
     await fs.promises.mkdir(dir);
   } catch {
-    /* exists */
+    /* why: the directory already exists */
   }
 
   const token = opts.token ?? (await getGitToken()) ?? "";
@@ -187,7 +188,7 @@ export async function commitAndPush(
       try {
         await fs.promises.mkdir(cur);
       } catch {
-        /* exists */
+        /* why: the directory already exists */
       }
     }
     const txt = await readWorkspaceFile(f.path).catch(() => null);
@@ -241,7 +242,7 @@ export async function gitStatus(repoFolder: string): Promise<GitStatusEntry[]> {
       try {
         await fs.promises.mkdir(cur);
       } catch {
-        /* */
+        /* why: the directory already exists */
       }
     }
     const txt = await readWorkspaceFile(f.path).catch(() => null);
@@ -343,7 +344,7 @@ export async function pullRepo(
             isDifferent = existing !== newText;
           }
         } catch {
-          /* fall back to write */
+          /* why: fall back to write */
         }
         if (isDifferent) {
           await writeWorkspaceBlob(opfsPath, bytes);
@@ -359,8 +360,8 @@ export async function pullRepo(
       try {
         await deleteWorkspaceFile(path);
         changed++;
-      } catch {
-        /* ignore */
+      } catch (e) {
+        log.warn("git pull: a file deleted upstream could not be removed locally", e);
       }
     }
   }

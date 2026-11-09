@@ -185,7 +185,7 @@ export function buildDigestCommands(): Command[] {
         try {
           since = Number(localStorage.getItem(KEY)) || since;
         } catch {
-          /* default: last 24 h */
+          /* why: storage denied: the digest covers the last 24 h */
         }
         const lang = getLocale();
         const folder = lang === "he" ? "סיכומים" : "Digests";
@@ -203,7 +203,7 @@ export function buildDigestCommands(): Command[] {
         try {
           localStorage.setItem(KEY, String(now));
         } catch {
-          /* next digest covers 24 h again */
+          /* why: next digest covers 24 h again */
         }
         window.dispatchEvent(new Event("lumen-workspace-changed"));
         useAppStore.getState().openTab({ name: path.split("/").pop()!, content: body, workspaceName: path });
