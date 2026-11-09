@@ -167,7 +167,7 @@
       "count": 2
     }
   },
-  "src/lsp/tsBlocks.ts": {
+  "src/lsp/tsFunctionScopes.ts": {
     "prefer-const": {
       "count": 1
     }
