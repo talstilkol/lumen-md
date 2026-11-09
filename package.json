@@ -50,7 +50,9 @@
     "handoff": "node scripts/handoff.mjs",
     "docs:sync": "node scripts/docs-sync.mjs",
     "lint": "eslint src",
-    "lint:prune": "eslint src --prune-suppressions"
+    "lint:prune": "eslint src --prune-suppressions",
+    "plan": "node scripts/plan/build.mjs",
+    "plan:check": "node scripts/plan/build.mjs --check"
   },
   "dependencies": {
     "@bjorn3/browser_wasi_shim": "0.4.2",
