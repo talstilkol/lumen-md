@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-10-17T23:03:52.408Z",
+  "generated_at": "2026-10-17T23:03:53.010Z",
   "source": "src/i18n/index.ts (en bundle)",
-  "count": 1333,
+  "count": 1363,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -1692,6 +1692,169 @@
       "key": "cmd.file.trash.hint",
       "en": "Restore deleted notes (kept 30 days)",
       "vars": []
+    },
+    {
+      "key": "cmd.ai.privacyLedger",
+      "en": "Privacy ledger…",
+      "vars": []
+    },
+    {
+      "key": "cmd.ai.privacyLedger.hint",
+      "en": "Every AI network request: where, how much, why",
+      "vars": []
+    },
+    {
+      "key": "privacy.title",
+      "en": "Privacy ledger",
+      "vars": []
+    },
+    {
+      "key": "privacy.close",
+      "en": "Close",
+      "vars": []
+    },
+    {
+      "key": "privacy.policy",
+      "en": "Policy: {policy}",
+      "vars": [
+        "policy"
+      ]
+    },
+    {
+      "key": "privacy.policyName.local-only",
+      "en": "local only",
+      "vars": []
+    },
+    {
+      "key": "privacy.policyName.local-first",
+      "en": "local first",
+      "vars": []
+    },
+    {
+      "key": "privacy.policyName.cloud",
+      "en": "cloud",
+      "vars": []
+    },
+    {
+      "key": "privacy.cloudRequests",
+      "en": "Left this device: {n} ({size} sent)",
+      "vars": [
+        "n",
+        "size"
+      ]
+    },
+    {
+      "key": "privacy.localRequests",
+      "en": "Local: {n}",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "privacy.downloads",
+      "en": "Model downloads: {n}",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "privacy.blocked",
+      "en": "Blocked: {n}",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "privacy.onlyLeaving",
+      "en": "Only what left this device",
+      "vars": []
+    },
+    {
+      "key": "privacy.clear",
+      "en": "Clear",
+      "vars": []
+    },
+    {
+      "key": "privacy.empty",
+      "en": "No AI network requests yet.",
+      "vars": []
+    },
+    {
+      "key": "privacy.col.time",
+      "en": "Time",
+      "vars": []
+    },
+    {
+      "key": "privacy.col.where",
+      "en": "Where",
+      "vars": []
+    },
+    {
+      "key": "privacy.col.why",
+      "en": "Why",
+      "vars": []
+    },
+    {
+      "key": "privacy.col.sent",
+      "en": "Sent",
+      "vars": []
+    },
+    {
+      "key": "privacy.col.received",
+      "en": "Received",
+      "vars": []
+    },
+    {
+      "key": "privacy.col.decision",
+      "en": "Decision",
+      "vars": []
+    },
+    {
+      "key": "privacy.decision.allowed",
+      "en": "Allowed",
+      "vars": []
+    },
+    {
+      "key": "privacy.decision.blocked",
+      "en": "Blocked",
+      "vars": []
+    },
+    {
+      "key": "privacy.cat.cloud-ai",
+      "en": "Cloud AI — your text is sent",
+      "vars": []
+    },
+    {
+      "key": "privacy.cat.cloud-text",
+      "en": "Cloud service — your text is sent",
+      "vars": []
+    },
+    {
+      "key": "privacy.cat.local-ai",
+      "en": "On this device / LAN",
+      "vars": []
+    },
+    {
+      "key": "privacy.cat.model-download",
+      "en": "Model download — no text sent",
+      "vars": []
+    },
+    {
+      "key": "privacy.cat.research",
+      "en": "Research service — your query is sent",
+      "vars": []
+    },
+    {
+      "key": "privacy.footer",
+      "en": "Recorded: time, host, size, reason. Never the text of prompts or answers. Requests from inside model workers (downloads) are not listed.",
+      "vars": []
+    },
+    {
+      "key": "toast.privacyBlocked",
+      "en": "Blocked by the local-only policy: {reason}. Use a local model, or change the policy in AI settings.",
+      "vars": [
+        "reason"
+      ]
     },
     {
       "key": "doc.save.failedRetrying",

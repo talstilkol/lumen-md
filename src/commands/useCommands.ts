@@ -1444,6 +1444,16 @@ export function useCommands({
         },
       },
       {
+        id: "ai.privacyLedger",
+        label: t("cmd.ai.privacyLedger"),
+        hint: t("cmd.ai.privacyLedger.hint"),
+        icon: cmdIcons.Sparkles,
+        group: t("group.ai", { defaultValue: "AI Copilot" }),
+        action: () => {
+          window.dispatchEvent(new CustomEvent("lumen-open-privacy-ledger"));
+        },
+      },
+      {
         id: "ai.doctor",
         label: t("cmd.ai.doctor"),
         hint: t("cmd.ai.doctor.hint"),
