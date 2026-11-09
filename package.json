@@ -56,7 +56,8 @@
     "plan:check": "node scripts/plan/build.mjs --check",
     "models:registry": "node scripts/models/registry-from-run.mjs",
     "dod": "node scripts/dod.mjs",
-    "unused": "node scripts/check-unused-files.mjs"
+    "unused": "node scripts/check-unused-files.mjs",
+    "ci:real-model": "node scripts/real-tiny-model.mjs"
   },
   "dependencies": {
     "@bjorn3/browser_wasi_shim": "0.4.2",
