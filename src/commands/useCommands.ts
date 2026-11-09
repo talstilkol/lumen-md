@@ -1329,6 +1329,46 @@ export function useCommands({
         },
       },
       {
+        id: "ai.autofill",
+        label: t("cmd.ai.autofill"),
+        hint: t("cmd.ai.autofill.hint"),
+        icon: cmdIcons.Sparkles,
+        group: t("group.tools"),
+        action: async () => {
+          // Plan 5.10: proposals only; the approval queue is the one writer.
+          const folder = await uiPrompt({ message: t("autofill.folder"), defaultValue: "" });
+          if (folder === null) return;
+          const prefix = folder.trim().replace(/^\/+|\/+$/g, "");
+          const [{ readAllNotes }, af, { autofillQueue, openAutofillPanel }] = await Promise.all([import("../storage/workspaceNotes"), import("../properties/autofill"), import("../ui/AutofillPanel")]);
+          const all = await readAllNotes();
+          const fields = af.fieldsFrom(all.map((n) => ({ path: n.path, content: n.text })));
+          if (!fields.length) {
+            showAiToast(t("autofill.noFields"), "info");
+            return;
+          }
+          // A note open in a tab may have unsaved edits: not proposed on.
+          const open = new Set(useAppStore.getState().openTabs.map((tab) => tab.workspaceName).filter(Boolean));
+          const paths = all.map((n) => n.path).filter((p) => (!prefix || p.startsWith(prefix + "/")) && !open.has(p));
+          if (!paths.length) {
+            showAiToast(t("batch.noNotes"), "error");
+            return;
+          }
+          const text = new Map(all.map((n) => [n.path, n.text]));
+          const [{ runAgentOrThrow }, { autofillerAgent }] = await Promise.all([import("../agents/runtime"), import("../agents/defs")]);
+          const op = aiOperation();
+          try {
+            const res = await af.runAutofill(paths, fields, autofillQueue(), {
+              read: async (p) => text.get(p) ?? "",
+              ask: async (note, fs, schema, signal) => (await runAgentOrThrow(autofillerAgent, { text: note, extra: { fields: fs, schema } }, { signal, document: note })).values,
+            }, { signal: op.signal, onNote: (i, n) => showAiToast(t("autofill.progress", { i, n }), "info") });
+            showAiToast(t("autofill.proposed", { n: res.proposed }), "success");
+            openAutofillPanel();
+          } finally {
+            op.end();
+          }
+        },
+      },
+      {
         id: "ai.mode",
         label: t("cmd.ai.mode"),
         hint: t("cmd.ai.mode.hint"),

@@ -1435,5 +1435,19 @@
   "cmd.ai.cancel": "IA : annuler",
   "cmd.ai.cancel.hint": "Arrête toutes les requêtes IA en cours (Échap aussi)",
   "toast.aiCancelled": "Requête IA annulée ({count})",
-  "toast.aiNothingRunning": "Aucune requête IA en cours"
+  "toast.aiNothingRunning": "Aucune requête IA en cours",
+  "cmd.ai.autofill": "AI : Remplir les propriétés des notes…",
+  "cmd.ai.autofill.hint": "Propose les propriétés manquantes des notes d'un dossier ; rien n'est écrit sans votre accord",
+  "autofill.folder": "Remplir les propriétés des notes de quel dossier ? (vide = tout l'espace de travail)",
+  "autofill.noFields": "Aucune propriété n'est encore utilisée dans au moins deux notes — ajoutez-en, puis réessayez",
+  "autofill.progress": "Lecture de la note {i} sur {n}…",
+  "autofill.proposed": "{n} propositions attendent votre accord",
+  "autofill.title": "Propositions de propriétés",
+  "autofill.hint": "Rien n'est écrit sans votre accord. Une note modifiée depuis est ignorée.",
+  "autofill.empty": "Aucune proposition en attente",
+  "autofill.approve": "Approuver",
+  "autofill.reject": "Refuser",
+  "autofill.approveAll": "Tout approuver ({n})",
+  "autofill.written": "Propriétés écrites dans {n} notes",
+  "autofill.stale": "{n} notes ont changé depuis la proposition et n'ont pas été écrites"
 }
