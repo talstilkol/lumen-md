@@ -4304,7 +4304,7 @@
       "4.3",
       "4.20"
      ],
-     "priority": "P1",
+     "priority": "P2",
      "source": "Obsidian File recovery; SQLite atomic commit",
      "steps": [
       "כל כתיבה: קובץ זמני → fsync → rename, ב-Tauri, ב-File System Access וב-Capacitor",
@@ -4328,7 +4328,7 @@
       "3.2",
       "W1.7"
      ],
-     "priority": "P1",
+     "priority": "P2",
      "source": "obsidian.md/help/sync version history; Time Machine",
      "steps": [
       "יעד גיבוי שני (תיקייה, כונן חיצוני, WebDAV) — מראה או zip מוצפן (age)",
@@ -4353,7 +4353,7 @@
       "11.4",
       "W1.1"
      ],
-     "priority": "P1",
+     "priority": "P2",
      "source": "Obsidian Sync security docs; Anytype any-sync; age spec",
      "steps": [
       "Argon2id דרך hash-wasm ו-age דרך typage (התלויות שחסרות ב-#275/#338)",
@@ -4569,7 +4569,7 @@
       "4.19",
       "4.17"
      ],
-     "priority": "P1",
+     "priority": "P2",
      "source": "plus.excalidraw.com/changelog (8.2026 RTL export fix); Heptabase",
      "steps": [
       "להשלים את 4.19: התלות ב-lockfile, החלפת הרכיב, הסרת tldraw",
@@ -4786,7 +4786,7 @@
       "9.9",
       "13.3"
      ],
-     "priority": "P1",
+     "priority": "P2",
      "source": "Bear, Craft, Obsidian Mobile 1.15",
      "steps": [
       "סרגל עריכה מעל המקלדת שאפשר להתאים, עם הזחה/הוצאה, משימה, קישור, תמונה",
@@ -5155,7 +5155,7 @@
       "6.2",
       "W2.5"
      ],
-     "priority": "P1",
+     "priority": "P2",
      "source": "arXiv 2506.12311 (Phonikud); Readwise Reader TTS",
      "steps": [
       "phonikud (G2P עברי בזמן אמת) + קול בעל רישיון מתיר — לפי החלטה 15.10",
