@@ -246,6 +246,7 @@
   "doctor.noWorkspace": "Ouvrez d’abord un dossier d’espace de travail",
   "doctor.readFailed": "Impossible de lire {path} : Vault Doctor s’est arrêté pour ne pas signaler ni corriger de liens sur un espace de travail incomplet",
   "fineTune.close": "Fermer",
+  "fineTune.cloudRoute": "Ou dans le cloud (OpenAI)",
   "fineTune.confirm": "Envoyer vos 90 derniers jours d'écriture à OpenAI pour entraîner un modèle personnel ? L'entraînement se termine généralement en moins d'une heure.",
   "fineTune.forget": "Oublier l'ID du modèle local",
   "fineTune.forgetConfirm": "Oublier l'ID du modèle fine-tuné stocké localement ? Vous devrez supprimer le modèle séparément depuis votre tableau de bord OpenAI pour le retirer complètement.",

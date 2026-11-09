@@ -246,6 +246,7 @@
   "doctor.noWorkspace": "先にワークスペースフォルダーを開いてください",
   "doctor.readFailed": "{path} を読み込めませんでした。不完全なワークスペースでリンクを報告・修正しないよう、Vault Doctor を中止しました",
   "fineTune.close": "閉じる",
+  "fineTune.cloudRoute": "またはクラウドで（OpenAI）",
   "fineTune.confirm": "直近90日間の文章を OpenAI にアップロードして、個人用モデルをトレーニングしますか? トレーニングは通常1時間以内に完了します。",
   "fineTune.forget": "ローカルのモデル ID を削除",
   "fineTune.forgetConfirm": "ローカルに保存されたファインチューニング済みモデルの ID を削除しますか? 完全に削除するには、OpenAI ダッシュボードからモデルを別途削除する必要があります。",

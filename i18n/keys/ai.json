@@ -1373,6 +1373,11 @@
       "vars": []
     },
     {
+      "key": "fineTune.cloudRoute",
+      "en": "Or in the cloud (OpenAI)",
+      "vars": []
+    },
+    {
       "key": "fineTune.confirm",
       "en": "Upload your last 90 days of writing to OpenAI to train a personal model? Training usually finishes in under an hour.",
       "vars": []

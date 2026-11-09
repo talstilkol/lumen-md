@@ -246,6 +246,7 @@
   "doctor.noWorkspace": "请先打开一个工作区文件夹",
   "doctor.readFailed": "无法读取 {path}：Vault Doctor 已停止，以免在不完整的工作区中报告或修复链接",
   "fineTune.close": "关闭",
+  "fineTune.cloudRoute": "或在云端（OpenAI）",
   "fineTune.confirm": "要将您最近 90 天的写作内容上传到 OpenAI 以训练个人模型吗?训练通常会在一小时内完成。",
   "fineTune.forget": "忘记本地模型 ID",
   "fineTune.forgetConfirm": "要忘记本地存储的微调模型 ID 吗?如需彻底删除,您还需要在 OpenAI 控制台中单独删除该模型。",
