@@ -858,6 +858,27 @@
   .status-bar .sb-accent {
     color: hsl(var(--accent));
   }
+  /* Changes agents proposed, waiting for review (plan 5.11). */
+  .status-bar .sb-review {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    font: inherit;
+    font-size: 10px;
+    font-weight: 600;
+    color: hsl(38 92% 50%);
+  }
+  .toast-action {
+    background: transparent;
+    border: 1px solid;
+    border-radius: 6px;
+    cursor: pointer;
+    padding: 2px 8px;
+    font-size: 12px;
+    font-weight: 600;
+    flex-shrink: 0;
+  }
 
   /* ─── File tree ─── */
 
