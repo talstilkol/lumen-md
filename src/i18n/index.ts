@@ -1376,6 +1376,8 @@ const en: Strings = {
   "cmd.security.encrypt.hint": "AES-256-GCM",
   "cmd.security.decrypt": "🔓 Decrypt Document",
   "cmd.security.decrypt.hint": "Enter password to decrypt",
+  "cmd.vault.encryptAtRest": "🔐 Vault encryption…",
+  "cmd.vault.encryptAtRest.hint": "Encrypt the whole vault at rest; lock, recovery key",
   // Command groups – new
   "group.templates": "Templates",
   "group.tools": "Tools",

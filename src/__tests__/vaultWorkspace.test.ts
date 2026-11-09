@@ -5,7 +5,7 @@
  * backend: if anything still reached for OPFS, it would find none here.
  */
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { createMemoryBackend, getVaultBackend, setVaultBackend, watchVault, type VaultBackend, type VaultEvent } from "../storage/vault";
+import { createMemoryBackend, getVaultBackend, setVaultBackend, unwrapVaultBackend, watchVault, type VaultBackend, type VaultEvent } from "../storage/vault";
 import {
   createWorkspaceFolder,
   deleteWorkspaceFile,
@@ -40,7 +40,7 @@ afterEach(() => {
 
 describe("workspace wrappers over the active vault", () => {
   it("reads and writes through the active backend", async () => {
-    expect(getVaultBackend()).toBe(mem);
+    expect(unwrapVaultBackend(getVaultBackend())).toBe(mem);
     expect(isOPFSAvailable()).toBe(true);
     await writeWorkspaceFile("notes/a.md", "# A");
     expect(await mem.readText("notes/a.md")).toBe("# A");
