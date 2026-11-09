@@ -120,7 +120,7 @@ jobs:
 
   local-ai:
     name: local agents (fake Ollama)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: check
     timeout-minutes: 15
     steps:
