@@ -1456,5 +1456,16 @@
   "pdf.ocr.scanned": "此页面是扫描图像。",
   "pdf.ocr.run": "识别文字（OCR）",
   "pdf.ocr.running": "正在本设备上识别文字…",
-  "pdf.notesUnreadable": "无法读取 {name} 中的高亮块。请修复或删除它后再高亮。"
+  "pdf.notesUnreadable": "无法读取 {name} 中的高亮块。请修复或删除它后再高亮。",
+  "pdf.ask": "提问",
+  "pdf.ask.title": "向此 PDF 提问",
+  "pdf.ask.placeholder": "关于此 PDF 的问题…",
+  "pdf.ask.submit": "提问",
+  "pdf.ask.indexing": "正在读取第 {page}/{pages} 页…",
+  "pdf.ask.ocr": "正在读取扫描页 {page}/{pages}（OCR）…",
+  "pdf.ask.thinking": "正在 PDF 中查找答案…",
+  "pdf.ask.notFound": "此 PDF 似乎无法回答这个问题。",
+  "pdf.ask.cite": "第 {page} 页，第 {line} 行",
+  "pdf.ask.failed": "无法回答：{error}",
+  "pdf.ask.dropped": "已省略 {n} 条不在 PDF 中的引文"
 }

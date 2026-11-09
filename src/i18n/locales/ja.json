@@ -1456,5 +1456,16 @@
   "pdf.ocr.scanned": "このページはスキャン画像です。",
   "pdf.ocr.run": "文字を認識（OCR）",
   "pdf.ocr.running": "この端末で文字を認識しています…",
-  "pdf.notesUnreadable": "{name} のハイライトブロックを読み取れません。修正または削除すると再びハイライトできます。"
+  "pdf.notesUnreadable": "{name} のハイライトブロックを読み取れません。修正または削除すると再びハイライトできます。",
+  "pdf.ask": "質問",
+  "pdf.ask.title": "この PDF に質問",
+  "pdf.ask.placeholder": "この PDF についての質問…",
+  "pdf.ask.submit": "質問",
+  "pdf.ask.indexing": "{pages} ページ中 {page} ページ目を読んでいます…",
+  "pdf.ask.ocr": "スキャンされた {pages} ページ中 {page} ページ目を読んでいます (OCR)…",
+  "pdf.ask.thinking": "PDF の中から答えを探しています…",
+  "pdf.ask.notFound": "この PDF にはその答えがないようです。",
+  "pdf.ask.cite": "{page} ページ、{line} 行目",
+  "pdf.ask.failed": "回答できませんでした: {error}",
+  "pdf.ask.dropped": "PDF にない引用 {n} 件を除外しました"
 }

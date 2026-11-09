@@ -1456,5 +1456,16 @@
   "pdf.ocr.scanned": "هذه الصفحة صورة ممسوحة ضوئيًا.",
   "pdf.ocr.run": "التعرّف على النص (OCR)",
   "pdf.ocr.running": "جارٍ التعرّف على النص على هذا الجهاز…",
-  "pdf.notesUnreadable": "تعذّرت قراءة كتلة التظليلات في {name}. أصلحها أو احذفها للتظليل من جديد."
+  "pdf.notesUnreadable": "تعذّرت قراءة كتلة التظليلات في {name}. أصلحها أو احذفها للتظليل من جديد.",
+  "pdf.ask": "اسأل",
+  "pdf.ask.title": "اسأل ملف PDF هذا",
+  "pdf.ask.placeholder": "سؤال عن ملف PDF هذا…",
+  "pdf.ask.submit": "اسأل",
+  "pdf.ask.indexing": "قراءة الصفحة {page} من {pages}…",
+  "pdf.ask.ocr": "قراءة الصفحة الممسوحة {page} من {pages} (OCR)…",
+  "pdf.ask.thinking": "البحث عن الإجابة في ملف PDF…",
+  "pdf.ask.notFound": "يبدو أن ملف PDF هذا لا يجيب عن ذلك.",
+  "pdf.ask.cite": "الصفحة {page}، السطر {line}",
+  "pdf.ask.failed": "تعذّرت الإجابة: {error}",
+  "pdf.ask.dropped": "حُذف {n} من الاقتباسات غير الموجودة في ملف PDF"
 }
