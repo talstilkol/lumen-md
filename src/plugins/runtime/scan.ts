@@ -111,8 +111,11 @@ function* walk(node: unknown, parent: AstNode | null = null): Generator<[AstNode
 
 const isId = (n: unknown, name?: string): n is AstNode & { name: string } =>
   !!n && (n as AstNode).type === "Identifier" && (name === undefined || (n as { name: string }).name === name);
+/** `const NAME = "text"` bindings of the file being analysed (shadowing is not tracked: a re-bound name is dropped). */
+let constants = new Map<string, string | null>();
 const literalString = (n: unknown): string | null => {
   const x = n as AstNode | undefined;
+  if (x?.type === "Identifier") return constants.get((x as unknown as { name: string }).name) ?? null;
   if (x?.type === "Literal" && typeof x.value === "string") return x.value;
   if (x?.type === "TemplateLiteral" && Array.isArray(x.expressions) && x.expressions.length === 0) {
     const q = (x.quasis as Array<{ value: { cooked: string | null } }>)[0];
@@ -137,6 +140,21 @@ function analyse(code: string, file: string, findings: ScanFinding[], used: Set<
     return;
   }
   const at = (n: AstNode) => n.loc?.start.line;
+  // String constants, so `const URL = "https://…"; fetch(URL)` is checked like a literal.
+  constants = new Map();
+  const declared = new Map<string, number>();
+  for (const [n] of walk(ast)) {
+    if (n.type === "VariableDeclarator" && isId(n.id)) declared.set((n.id as { name: string }).name, (declared.get((n.id as { name: string }).name) ?? 0) + 1);
+  }
+  for (const [n] of walk(ast)) {
+    if (n.type !== "VariableDeclaration" || n.kind !== "const") continue;
+    for (const d of n.declarations as AstNode[]) {
+      if (!isId(d.id)) continue;
+      const name = (d.id as { name: string }).name;
+      const v = d.init && (d.init as AstNode).type !== "Identifier" ? literalString(d.init) : null;
+      if (v !== null && declared.get(name) === 1) constants.set(name, v);
+    }
+  }
   // `lumen.x.y` member expressions that are the callee of a call, so the bare `lumen` they start with is accounted for.
   const apiRoots = new Set<AstNode>();
   for (const [n] of walk(ast)) {

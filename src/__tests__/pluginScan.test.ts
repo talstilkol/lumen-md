@@ -28,6 +28,13 @@ describe("plugin scan", () => {
     expect(same.used).toEqual(["network:https://example.com"]);
   });
 
+  it("a URL in a string constant is checked like a literal", async () => {
+    const ok = await scanPluginVersion({ manifest: manifest(["network:https://example.com"]), main: `const SRC = "https://example.com/q.json";\nawait lumen.network.fetch(SRC);` });
+    expect(ok.findings).toEqual([expect.objectContaining({ rule: "unsigned" })]);
+    const bad = await scanPluginVersion({ manifest: manifest(["network:https://example.com"]), main: `const SRC = "https://example.org/q.json";\nawait lumen.network.fetch(SRC);` });
+    expect(rules(bad)).toContain("error:undeclared-network");
+  });
+
   it("an API call whose capability is not declared fails; one declared but unused is a warning", async () => {
     const r = await scanPluginVersion({ manifest: manifest(["document:read", "clipboard:write"]), main: `const s = await lumen.document.getText(); await lumen.document.setText(s.toUpperCase());` });
     expect(r.passed).toBe(false);
