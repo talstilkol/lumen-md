@@ -200,27 +200,35 @@ async function toWysiwyg(page: Page): Promise<void> {
     .toBeGreaterThanOrEqual(3);
 }
 
-/** Caret into the WYSIWYG block whose own text starts with `text`. */
+/**
+ * Caret into the WYSIWYG block whose own text starts with `text`. Set
+ * through the DOM selection, and set again on each poll: WebKit sometimes
+ * drops it while ProseMirror re-applies its own selection.
+ */
 async function caretIn(page: Page, text: string): Promise<void> {
   await page.locator(".ProseMirror").first().focus();
-  await page.evaluate((want) => {
-    const root = document.querySelector(".ProseMirror");
-    for (const block of root?.querySelectorAll("p, h1, h2, h3, h4, h5, h6") ?? []) {
-      const walker = document.createTreeWalker(block, NodeFilter.SHOW_TEXT);
-      for (let n = walker.nextNode(); n; n = walker.nextNode()) {
-        if (n.parentElement?.closest('[contenteditable="false"]')) continue;
-        if (!(n.textContent ?? "").startsWith(want)) break;
-        const r = document.createRange();
-        r.setStart(n, 1);
-        r.collapse(true);
-        getSelection()?.removeAllRanges();
-        getSelection()?.addRange(r);
-        return;
-      }
-    }
-  }, text);
   await expect
-    .poll(() => page.evaluate(() => getSelection()?.focusNode?.textContent ?? ""))
+    .poll(() =>
+      page.evaluate((want) => {
+        const current = getSelection()?.focusNode?.textContent ?? "";
+        if (current.startsWith(want)) return current;
+        const root = document.querySelector(".ProseMirror");
+        for (const block of root?.querySelectorAll("p, h1, h2, h3, h4, h5, h6") ?? []) {
+          const walker = document.createTreeWalker(block, NodeFilter.SHOW_TEXT);
+          for (let n = walker.nextNode(); n; n = walker.nextNode()) {
+            if (n.parentElement?.closest('[contenteditable="false"]')) continue;
+            if (!(n.textContent ?? "").startsWith(want)) break;
+            const r = document.createRange();
+            r.setStart(n, 1);
+            r.collapse(true);
+            getSelection()?.removeAllRanges();
+            getSelection()?.addRange(r);
+            return "";
+          }
+        }
+        return "";
+      }, text),
+    )
     .toContain(text);
 }
 
