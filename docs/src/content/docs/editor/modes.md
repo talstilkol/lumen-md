@@ -57,7 +57,7 @@ your preferred view automatically.
 
 ## Suggesting mode (track changes)
 
-Turn it on from the command palette ("Turn on suggesting mode") or with
+Turn it on from the command palette ("Turn on suggesting mode (track changes)") or with
 the **Editing / Suggesting** pill in the status bar. While it is on, edits
 in the Source / Split editor and in WYSIWYG are recorded as
 [CriticMarkup](https://github.com/CriticMarkup/CriticMarkup-toolkit), so

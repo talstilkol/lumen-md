@@ -43,6 +43,6 @@ conversation persists for the open dialog.
 ## Privacy
 
 All three agents go through the same `chat()` pipeline and respect the
-**Local AI** toggle (`⌘K → Switch to local AI`). When local AI is on,
+**Local AI** toggle (`⌘K → Switch to local AI (WebGPU)`). When local AI is on,
 prompts stay on your device — `web-llm` runs the model via WebGPU and
 the workspace never leaves your browser.
