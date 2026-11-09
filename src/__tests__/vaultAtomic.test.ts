@@ -10,7 +10,7 @@
  */
 import { describe, expect, it } from "vitest";
 import { spawnSync } from "node:child_process";
-import { fileURLToPath } from "node:url";
+import { resolve } from "node:path";
 import { atomicWrite, isTempName, oldNameFor, parseLeftover, recoverDir, tempNameFor, type AtomicFs } from "../storage/vault/atomic";
 import { createDirectoryHandleBackend } from "../storage/vault";
 import { capacitorFs, createMobileBackend, safFs } from "../storage/vault/mobile";
@@ -242,7 +242,7 @@ describe("atomic saves: leftovers of the OPFS write worker", () => {
 
 describe("atomic saves: a real process killed with SIGKILL", () => {
   it("scripts/vault-crash-test.mjs: 25 kills in the middle of saves, 0 damaged files", () => {
-    const script = fileURLToPath(new URL("../../scripts/vault-crash-test.mjs", import.meta.url));
+    const script = resolve(__dirname, "..", "..", "scripts", "vault-crash-test.mjs");
     const r = spawnSync(process.execPath, [script, "--kills", "25", "--json"], { encoding: "utf8", timeout: 120_000 });
     expect(r.status, r.stderr).toBe(0);
     const out = JSON.parse(r.stdout.trim().split("\n").pop()!) as { kills: number; damaged: number; leftovers: number; files: number };

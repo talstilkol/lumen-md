@@ -4,11 +4,10 @@
  */
 import { describe, expect, it } from "vitest";
 import { readdirSync, readFileSync } from "node:fs";
-import { join, relative } from "node:path";
-import { fileURLToPath } from "node:url";
+import { join, relative, resolve } from "node:path";
 import { t } from "../i18n";
 
-const SRC = fileURLToPath(new URL("..", import.meta.url));
+const SRC = resolve(__dirname, "..");
 const lazy = JSON.parse(readFileSync(join(SRC, "i18n", "lazy", "vaultCheck.json"), "utf8")) as Record<string, string>;
 
 function sources(dir: string): string[] {

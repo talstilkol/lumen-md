@@ -6,7 +6,6 @@ import { uiConfirm, uiPrompt, uiSelect } from "../../ui/PromptDialog";
 import { showAiToast } from "../../ui/AiToast";
 import { encryptDocument, decryptDocument, isEncrypted } from "../../storage/encryption";
 import { isOPFSAvailable, readWorkspaceFile } from "../../storage/workspace";
-import { getVaultBackend } from "../../storage/vault";
 import { openTemplateDoc } from "../openDoc";
 import type { CommandContext } from "./context";
 
@@ -101,43 +100,11 @@ export function buildVaultDoctorCommands(): Command[] {
       hint: t("cmd.vault.check.hint"),
       icon: cmdIcons.Sparkles,
       group: t("group.tools"),
-      action: () => runVaultCheck(),
+      action: async () => (await import("../../storage/vault/integrityCommand")).runVaultCheck(),
     },
   ];
 }
 
-/**
- * The vault integrity check (plan W1.5): a report note, then — when
- * something can be repaired — one confirmation and the repair, with a
- * backup of every file first. Notes open in a tab are never touched.
- */
-async function runVaultCheck(): Promise<void> {
-  const [{ checkVault, repairVault, REPAIRABLE }, { formatIntegrityReport }, { flushActiveWorkspaceDoc }] = await Promise.all([
-    import("../../storage/vault/integrity"),
-    import("../../storage/vault/integrityReport"),
-    import("../../store/openDocs"),
-  ]);
-  try {
-    await flushActiveWorkspaceDoc();
-    showAiToast(t("vaultCheck.checking"), "info");
-    const backend = getVaultBackend();
-    const report = await checkVault(backend);
-    openTemplateDoc(t("vaultCheck.title"), formatIntegrityReport(report));
-    const open = new Set(useAppStore.getState().openTabs.map((tab) => tab.workspaceName).filter(Boolean));
-    const current = useAppStore.getState().doc.workspaceName;
-    if (current) open.add(current);
-    const todo = report.findings.filter((f) => REPAIRABLE.has(f.kind) && !open.has(f.path));
-    if (!todo.length) return;
-    const folder = ".lumen-repair/";
-    if (!(await uiConfirm({ message: t("vaultCheck.confirm", { n: todo.length, folder }) }))) return;
-    const r = await repairVault(backend, todo);
-    window.dispatchEvent(new CustomEvent("lumen-workspace-changed"));
-    showAiToast(t("vaultCheck.repaired", { n: r.repaired.length, folder: r.backup ?? folder }), r.skipped.length ? "info" : "success");
-    if (r.skipped.length) showAiToast(t("vaultCheck.skipped", { n: r.skipped.length }), "info");
-  } catch (e) {
-    showAiToast(t("vaultCheck.failed", { error: e instanceof Error ? e.message : String(e) }), "error");
-  }
-}
 
 /** Export the whole vault (zip or folder) and import one. */
 export function buildVaultTransferCommands(): Command[] {
