@@ -78,6 +78,7 @@ export default defineConfig({
             { label: "AI cost: usage meter + answer cache", slug: "ai/cost" },
             { label: "Research + citation checks", slug: "ai/research" },
             { label: "Agent eval: 14 agents, HTML report", slug: "ai/agent-eval", translations: { he: "הערכת סוכנים: 14 סוכנים, דוח HTML" } },
+            { label: "Personal data before the cloud", slug: "ai/pii-redaction", translations: { he: "מידע אישי לפני הענן" } },
             { label: "MCP integration (Claude Desktop, Cursor)", slug: "ai/mcp" },
           ],
         },

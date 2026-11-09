@@ -8,6 +8,7 @@ import { ShieldCheck, X } from "lucide-react";
 import { t, getLocale } from "../i18n";
 import { clearLedger, leftDevice, ledgerEntries, ledgerSummary, subscribeLedger, type LedgerEntry } from "../ai/privacyLedger";
 import { getAiPolicy } from "../ai/policy";
+import { redactionLog, redactionTotals, subscribeRedactionLog } from "../ai/piiRedactor";
 
 interface Props {
   open: boolean;
@@ -26,6 +27,7 @@ function bytes(n: number | null): string {
 export function PrivacyLedgerPanel({ open, onClose }: Props) {
   const list = useSyncExternalStore(subscribeLedger, ledgerEntries, ledgerEntries);
   const [onlyCloud, setOnlyCloud] = useState(false);
+  const redactions = useSyncExternalStore(subscribeRedactionLog, redactionLog, redactionLog);
 
   // Focus stays in the dialog while it is open and returns on close; Escape closes it (plan 10.1).
   const trapRef = useRef<HTMLDivElement | null>(null);
@@ -54,6 +56,7 @@ export function PrivacyLedgerPanel({ open, onClose }: Props) {
           <span>{t("privacy.downloads", { n: sum.downloads })}</span>
           {sum.staticAssets > 0 && <span>{t("privacy.staticAssets", { n: sum.staticAssets })}</span>}
           <span style={{ color: sum.blocked ? "hsl(0 70% 55%)" : undefined }}>{t("privacy.blocked", { n: sum.blocked })}</span>
+          <span data-testid="privacy-redacted">{t("pii.ledger.redacted", { n: redactionTotals(redactions).items, requests: redactionTotals(redactions).requests })}</span>
         </div>
         <div style={{ padding: "8px 16px", display: "flex", gap: 8, alignItems: "center", fontSize: 12 }}>
           <label style={{ display: "flex", gap: 6, alignItems: "center", flex: 1 }}>

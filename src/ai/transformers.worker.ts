@@ -8,6 +8,7 @@
  *   → { id, type: "embed",      model, device, texts: string[] }
  *   → { id, type: "rerank",     model, device, query, passages: string[] }  → scores 0..1 (T29)
  *   → { id, type: "caption",    model, device, family: "florence2" | "smolvlm", image: Blob }  → one English sentence (plan 6.6)
+ *   → { id, type: "ner",        model, device, texts: string[] }      → token labels per text (plan 2.6)
  *   → { id, type: "load",       task, model, device }
  *   → { id, type: "cancel",     target }         (skip a queued job, discard a running one's result)
  *   → { id, type: "unload" }
@@ -33,6 +34,7 @@ import {
   type AutomaticSpeechRecognitionPipeline,
   type FeatureExtractionPipeline,
   type TranslationPipeline,
+  type TokenClassificationPipeline,
   type PreTrainedModel,
   type PreTrainedTokenizer,
 } from "@huggingface/transformers";
@@ -54,6 +56,7 @@ export type WorkerIn =
    */
   | { id: number; type: "translate"; model: string; device: Device; dtype?: string; texts: string[]; srcLang?: string; tgtLang?: string; host?: string }
   | { id: number; type: "caption"; model: string; device: Device; family: CaptionFamily; image: Blob }
+  | { id: number; type: "ner"; model: string; device: Device; texts: string[] }
   | { id: number; type: "load"; task: "automatic-speech-recognition" | "feature-extraction" | "translation"; model: string; device: Device; dtype?: string; host?: string }
   | { id: number; type: "cancel"; target: number }
   | { id: number; type: "unload" };
@@ -96,6 +99,7 @@ let reranker: { key: string; tokenizer: PreTrainedTokenizer; model: PreTrainedMo
 let translator: { key: string; pipe: TranslationPipeline } | null = null;
 type Captioner = { key: string; processor: CaptionProcessor; model: PreTrainedModel };
 let captioner: Captioner | null = null;
+let ner: { key: string; pipe: TokenClassificationPipeline } | null = null;
 let queue: Promise<unknown> = Promise.resolve();
 /** Jobs cancelled by the client: skipped when queued, their result discarded when running. */
 const cancelled = new Set<number>();
@@ -338,6 +342,23 @@ async function caption(id: number, msg: Extract<WorkerIn, { type: "caption" }>):
   return processor.batch_decode(ids.slice(null, [promptLength, null]), { skip_special_tokens: true })[0] ?? "";
 }
 
+/** Token classification (DictaBERT-NER, plan 2.6): the raw B-/I- labels per text; the client aligns them. */
+async function runNer(id: number, msg: Extract<WorkerIn, { type: "ner" }>): Promise<Array<Array<{ entity: string; word: string; score: number; index?: number }>>> {
+  const key = `${msg.model}@${msg.device}`;
+  if (ner?.key !== key) {
+    await ner?.pipe.dispose();
+    ner = null;
+    const pipe = (await pipeline("token-classification", msg.model, { device: msg.device, dtype: "q8", progress_callback: progressFor(id) } as never)) as TokenClassificationPipeline;
+    ner = { key, pipe };
+  }
+  const out = [];
+  for (const text of msg.texts) {
+    if (cancelled.has(id)) throw new DOMException("aborted", "AbortError");
+    out.push((await ner.pipe(text)) as unknown as Array<{ entity: string; word: string; score: number; index?: number }>);
+  }
+  return out;
+}
+
 function serial<T>(fn: () => Promise<T>): Promise<T> {
   const p = queue.then(fn);
   queue = p.catch(() => undefined);
@@ -377,6 +398,9 @@ export async function handle(msg: WorkerIn): Promise<void> {
       case "caption":
         post({ id, type: "result", value: await job(id, () => caption(id, msg)) });
         return;
+      case "ner":
+        post({ id, type: "result", value: await job(id, () => runNer(id, msg)) });
+        return;
       case "cancel":
         cancelled.add(msg.target);
         post({ id, type: "result", value: true });
@@ -398,10 +422,13 @@ export async function handle(msg: WorkerIn): Promise<void> {
         const tr = translator;
         const cap = captioner;
         captioner = null;
+        const n = ner;
         asr = null;
         embedder = null;
         reranker = null;
         translator = null;
+        ner = null;
+        await n?.pipe.dispose();
         await a?.pipe.dispose();
         await e?.pipe.dispose();
         await r?.model.dispose();
