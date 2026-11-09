@@ -55,6 +55,8 @@ test.beforeEach(async ({ page }) => {
   });
   await page.goto("/");
   await expect(page.locator(".cm-content").first()).toContainText("Welcome to", { timeout: 15_000 });
+  // The workspace is OPFS; Playwright's Linux WebKit build has none (the app then has no vault to import into).
+  test.skip(!(await page.evaluate(() => typeof navigator.storage?.getDirectory === "function")), "no OPFS in this browser build");
 });
 
 test("an MCP client's proposals wait in the review panel; only the approved one is written", async ({ page }) => {

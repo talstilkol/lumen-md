@@ -1455,6 +1455,7 @@
   "agentReview.toast.one": "{agent} が変更を提案しました。承認するまで何も書き込まれません。",
   "agentReview.toast.other": "{agent} が {n} 件の変更を提案しました。承認するまで何も書き込まれません。",
   "agentReview.toast.review": "確認",
+  "agentReview.mcpClient": "{client}（MCP クライアント）",
   "cmd.ai.cancel": "AI: キャンセル",
   "cmd.ai.cancel.hint": "実行中の AI リクエストをすべて停止します（Esc でも可）",
   "toast.aiCancelled": "AI リクエストをキャンセルしました（{count}）",

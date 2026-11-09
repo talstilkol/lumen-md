@@ -56,7 +56,7 @@ try {
   const times = [];
   for (let k = 0; k < 5; k++) {
     t0 = performance.now();
-    const r = await client.callTool({ name: "search_notes", arguments: { query: k % 2 ? "release design" : "תקציב", limit: 20 } });
+    const r = await client.callTool({ name: "search_notes", arguments: { query: k % 2 ? "design item19" : "תקציב", limit: 20 } });
     times.push(performance.now() - t0);
     if (r.isError || !String(r.content[0].text).includes("bulk/")) fail("search returned no notes");
   }

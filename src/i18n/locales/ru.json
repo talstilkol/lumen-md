@@ -1455,6 +1455,7 @@
   "agentReview.toast.one": "{agent} предложил изменение. Без вашего согласия ничего не записывается.",
   "agentReview.toast.other": "{agent} предложил изменения ({n}). Без вашего согласия ничего не записывается.",
   "agentReview.toast.review": "Проверить",
+  "agentReview.mcpClient": "{client} (клиент MCP)",
   "cmd.ai.cancel": "ИИ: отменить",
   "cmd.ai.cancel.hint": "Останавливает все запросы ИИ (то же делает Esc)",
   "toast.aiCancelled": "Запрос ИИ отменён ({count})",

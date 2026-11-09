@@ -1455,6 +1455,7 @@
   "agentReview.toast.one": "اقترح {agent} تغييرًا. لا يُكتب شيء قبل موافقتك.",
   "agentReview.toast.other": "اقترح {agent} تغييرات (العدد: {n}). لا يُكتب شيء قبل موافقتك.",
   "agentReview.toast.review": "مراجعة",
+  "agentReview.mcpClient": "{client} (عميل MCP)",
   "cmd.ai.cancel": "AI: إلغاء",
   "cmd.ai.cancel.hint": "يوقف كل طلبات الذكاء الاصطناعي الجارية (Esc يفعل ذلك أيضاً)",
   "toast.aiCancelled": "أُلغي طلب الذكاء الاصطناعي ({count})",

@@ -1455,6 +1455,7 @@
   "agentReview.toast.one": "{agent} a proposé une modification. Rien n’est écrit sans votre accord.",
   "agentReview.toast.other": "{agent} a proposé {n} modifications. Rien n’est écrit sans votre accord.",
   "agentReview.toast.review": "Examiner",
+  "agentReview.mcpClient": "{client} (client MCP)",
   "cmd.ai.cancel": "IA : annuler",
   "cmd.ai.cancel.hint": "Arrête toutes les requêtes IA en cours (Échap aussi)",
   "toast.aiCancelled": "Requête IA annulée ({count})",
