@@ -18,6 +18,7 @@ import { describe, it, expect } from "vitest";
 import { readFileSync, readdirSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { readLocale } from "../../scripts/lib/i18n-files.mjs";
+import { lazyEnglish } from "./helpers/i18nLazy";
 
 const SRC = resolve(__dirname, "..");
 
@@ -49,7 +50,7 @@ function extractKeys(text: string): string[] {
 
 function loadBundle(): { en: Record<string, string>; he: Record<string, string> } {
   // The strings live in src/i18n/locales/<lang>/<domain>.json (plan 0.3).
-  return { en: readLocale("en"), he: readLocale("he") };
+  return { en: { ...readLocale("en"), ...lazyEnglish() }, he: readLocale("he") };
 }
 
 describe("i18n bundle integrity", () => {

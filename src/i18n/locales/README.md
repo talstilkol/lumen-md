@@ -87,3 +87,14 @@ With `git merge origin/<base>` instead of a rebase, resolve the same way,
 taking the base's side (`--theirs` in a merge), then run the same
 `--absorb "$OLD"`. If your `index.ts` had changes other than strings,
 re-apply those by hand: `--absorb` only carries strings.
+
+## English of lazily loaded domains
+
+A domain that only loads on demand (the encrypted sync, for one) keeps its
+English in `src/i18n/lazy/<domain>.json` instead of `locales/en/`, so it
+ships with that domain's chunk and not the startup bundle. The domain calls
+`registerEnglish()` when it loads (see `src/sync/e2ee/strings.ts`). The
+other locales keep these keys in their files as usual, and
+`extract-i18n-keys.mjs`, `i18n-split.mjs` (for `i18n/keys/`), the drift /
+values / placeholder tests and `print-missing-i18n-keys.mjs` read the lazy
+files together with `locales/en/`. A key lives in exactly one of the two places.

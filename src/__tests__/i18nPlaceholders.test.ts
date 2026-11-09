@@ -15,13 +15,14 @@
 
 import { describe, it, expect } from "vitest";
 import { readLocale } from "../../scripts/lib/i18n-files.mjs";
+import { lazyEnglish } from "./helpers/i18nLazy";
 
 interface Bundle {
   [key: string]: string;
 }
 
 // src/i18n/locales/<lang>/<domain>.json (plan 0.3).
-const en: Bundle = readLocale("en");
+const en: Bundle = { ...readLocale("en"), ...lazyEnglish() };
 const he: Bundle = readLocale("he");
 
 function placeholders(s: string): Set<string> {

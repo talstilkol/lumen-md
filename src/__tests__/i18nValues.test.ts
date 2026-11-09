@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { readLocale } from "../../scripts/lib/i18n-files.mjs";
+import { lazyEnglish } from "./helpers/i18nLazy";
 
 /**
  * T45 — the i18n gate checks values, not only keys: a locale that copies
@@ -8,7 +9,7 @@ import { readLocale } from "../../scripts/lib/i18n-files.mjs";
  * The other locales: at most 5 %.
  */
 // src/i18n/locales/<lang>/<domain>.json (plan 0.3).
-const en: Record<string, string> = readLocale("en");
+const en: Record<string, string> = { ...readLocale("en"), ...lazyEnglish() };
 
 /** Strings that are rightly identical in Hebrew. */
 const SAME_IN_HEBREW = new Set([

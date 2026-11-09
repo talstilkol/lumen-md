@@ -40,6 +40,7 @@ import {
   readLocale,
   splitByDomain,
 } from "./lib/i18n-files.mjs";
+import { lazyEnglishEntries } from "./lib/i18n-lazy.mjs";
 
 const argv = process.argv.slice(2);
 const check = argv.includes("--check");
@@ -219,7 +220,9 @@ for (const lang of [...langs].sort()) {
   for (const [d, part] of Object.entries(parts)) plan.set(join(folder, `${d}.json`), formatJson(part));
 }
 
-const keyFiles = buildKeyFiles(strings[SOURCE_LOCALE]);
+// The key files cover the English of lazily loaded domains too (src/i18n/lazy/*.json),
+// which stays out of locales/en/ so it ships with its own chunk.
+const keyFiles = buildKeyFiles({ ...strings[SOURCE_LOCALE], ...Object.fromEntries(lazyEnglishEntries(ROOT)) });
 if (existsSync(KEYS_DIR)) {
   for (const name of readdirSync(KEYS_DIR).filter((n) => n.endsWith(".json"))) {
     if (!(name.slice(0, -5) in keyFiles)) plan.set(join(KEYS_DIR, name), null);

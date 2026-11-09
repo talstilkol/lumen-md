@@ -5,10 +5,12 @@
  * Usage: node scripts/generate-all-locales.mjs
  */
 import { readLocale, writeLocale } from "./lib/i18n-files.mjs";
+import { lazyEnglishEntries } from "./lib/i18n-lazy.mjs";
 
 // English: src/i18n/locales/en/*.json; every locale is written back as one
 // sorted file per domain (plan 0.3, scripts/lib/i18n-files.mjs).
-const enMap = readLocale("en");
+// English of lazily loaded domains (src/i18n/lazy/*.json) is translated like the rest.
+const enMap = { ...readLocale("en"), ...Object.fromEntries(lazyEnglishEntries()) };
 const pairs = Object.entries(enMap);
 console.log(`EN keys: ${pairs.length}`);
 

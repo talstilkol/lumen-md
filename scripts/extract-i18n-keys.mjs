@@ -20,8 +20,10 @@
 import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import { join, relative } from "node:path";
 import { KEYS_DIR, ROOT, SOURCE_LOCALE, buildKeyFiles, formatJson, readLocale } from "./lib/i18n-files.mjs";
+import { lazyEnglishEntries } from "./lib/i18n-lazy.mjs";
 
-const en = readLocale(SOURCE_LOCALE);
+// English of lazily loaded domains (src/i18n/lazy/*.json) is part of the key set too.
+const en = { ...readLocale(SOURCE_LOCALE), ...Object.fromEntries(lazyEnglishEntries(ROOT)) };
 if (Object.keys(en).length === 0) {
   console.error("No English strings in src/i18n/locales/en/ (run `node scripts/i18n-split.mjs` on an old checkout).");
   process.exit(2);

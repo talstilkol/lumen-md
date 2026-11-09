@@ -6,6 +6,7 @@
 import { readFileSync, readdirSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { readLocale } from "./lib/i18n-files.mjs";
+import { lazyEnglishEntries } from "./lib/i18n-lazy.mjs";
 
 const SRC = resolve("src");
 
@@ -35,7 +36,7 @@ for (const f of listSourceFiles(SRC)) {
 }
 
 // src/i18n/locales/<lang>/<domain>.json (plan 0.3).
-const en = new Set(Object.keys(readLocale("en")));
+const en = new Set([...Object.keys(readLocale("en")), ...lazyEnglishEntries().map(([k]) => k)]);
 const he = new Set(Object.keys(readLocale("he")));
 
 const missingEn = [...callKeys].filter((k) => !en.has(k)).sort();

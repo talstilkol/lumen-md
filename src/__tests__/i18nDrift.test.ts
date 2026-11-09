@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { readLocale } from "../../scripts/lib/i18n-files.mjs";
+import { lazyEnglish } from "./helpers/i18nLazy";
 
 /**
  * Ensures every lazy-loaded locale JSON has the same keys as the EN
@@ -8,7 +9,8 @@ import { readLocale } from "../../scripts/lib/i18n-files.mjs";
  */
 describe("i18n locale drift", () => {
   // Every language is src/i18n/locales/<lang>/<domain>.json (plan 0.3).
-  const enKeys = new Set(Object.keys(readLocale("en")));
+  // English of lazily loaded domains lives next to its chunk.
+  const enKeys = new Set([...Object.keys(readLocale("en")), ...Object.keys(lazyEnglish())]);
 
   const locales = ["he", "ar", "de", "fr", "ja", "ru", "zh-CN"];
 
