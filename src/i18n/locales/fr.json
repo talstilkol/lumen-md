@@ -1431,6 +1431,9 @@
   "cmd.ai.cancel.hint": "Arrête toutes les requêtes IA en cours (Échap aussi)",
   "toast.aiCancelled": "Requête IA annulée ({count})",
   "toast.aiNothingRunning": "Aucune requête IA en cours",
+  "cmd.ai.summarize": "AI : Résumer cette note (sur cet appareil)",
+  "cmd.ai.summarize.hint": "Un court résumé dont chaque phrase est copiée de la note et vérifiée",
+  "summary.empty": "Rien à résumer ici",
   "cmd.pdf.open": "Ouvrir un PDF pour le lire…",
   "cmd.pdf.open.hint": "Les surlignages vont dans une note .pdf.md",
   "pdf.failed": "Impossible d'ouvrir ce PDF : {error}",
@@ -1467,5 +1470,9 @@
   "pdf.ask.notFound": "Ce PDF ne semble pas répondre à cette question.",
   "pdf.ask.cite": "Page {page}, ligne {line}",
   "pdf.ask.failed": "Réponse impossible : {error}",
-  "pdf.ask.dropped": "{n} citations absentes du PDF ont été écartées"
+  "pdf.ask.dropped": "{n} citations absentes du PDF ont été écartées",
+  "pdf.summarize": "Résumer",
+  "pdf.summary.title": "Résumé",
+  "pdf.summary.extractive": "Phrases choisies dans le texte sans modèle (aucun modèle local disponible).",
+  "pdf.summary.local": "Chaque phrase est copiée du texte et vérifiée ; produit sur cet appareil."
 }

@@ -1431,6 +1431,9 @@
   "cmd.ai.cancel.hint": "Stoppt alle laufenden KI-Anfragen (auch mit Esc)",
   "toast.aiCancelled": "KI-Anfrage abgebrochen ({count})",
   "toast.aiNothingRunning": "Keine KI-Anfrage läuft",
+  "cmd.ai.summarize": "AI: Diese Notiz zusammenfassen (auf diesem Gerät)",
+  "cmd.ai.summarize.hint": "Eine kurze Zusammenfassung, deren Sätze alle aus der Notiz kopiert und daran geprüft sind",
+  "summary.empty": "Hier gibt es nichts zusammenzufassen",
   "cmd.pdf.open": "PDF zum Lesen öffnen…",
   "cmd.pdf.open.hint": "Markierungen landen in einer .pdf.md-Notiz",
   "pdf.failed": "Diese PDF konnte nicht geöffnet werden: {error}",
@@ -1467,5 +1470,9 @@
   "pdf.ask.notFound": "Dieses PDF scheint das nicht zu beantworten.",
   "pdf.ask.cite": "Seite {page}, Zeile {line}",
   "pdf.ask.failed": "Keine Antwort möglich: {error}",
-  "pdf.ask.dropped": "{n} Zitate, die nicht im PDF stehen, wurden weggelassen"
+  "pdf.ask.dropped": "{n} Zitate, die nicht im PDF stehen, wurden weggelassen",
+  "pdf.summarize": "Zusammenfassen",
+  "pdf.summary.title": "Zusammenfassung",
+  "pdf.summary.extractive": "Sätze aus dem Text ohne Modell ausgewählt (kein lokales Modell verfügbar).",
+  "pdf.summary.local": "Jeder Satz ist aus dem Text kopiert und daran geprüft; auf diesem Gerät erstellt."
 }

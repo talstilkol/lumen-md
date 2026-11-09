@@ -1431,6 +1431,9 @@
   "cmd.ai.cancel.hint": "يوقف كل طلبات الذكاء الاصطناعي الجارية (Esc يفعل ذلك أيضاً)",
   "toast.aiCancelled": "أُلغي طلب الذكاء الاصطناعي ({count})",
   "toast.aiNothingRunning": "لا يوجد طلب ذكاء اصطناعي جارٍ",
+  "cmd.ai.summarize": "AI: تلخيص هذه الملاحظة (على هذا الجهاز)",
+  "cmd.ai.summarize.hint": "ملخص قصير كل جملة فيه منسوخة من الملاحظة ومُتحقَّق منها",
+  "summary.empty": "لا يوجد ما يُلخَّص هنا",
   "cmd.pdf.open": "فتح ملف PDF للقراءة…",
   "cmd.pdf.open.hint": "تُحفظ التظليلات في ملاحظة ‎.pdf.md",
   "pdf.failed": "تعذّر فتح ملف PDF هذا: {error}",
@@ -1467,5 +1470,9 @@
   "pdf.ask.notFound": "يبدو أن ملف PDF هذا لا يجيب عن ذلك.",
   "pdf.ask.cite": "الصفحة {page}، السطر {line}",
   "pdf.ask.failed": "تعذّرت الإجابة: {error}",
-  "pdf.ask.dropped": "حُذف {n} من الاقتباسات غير الموجودة في ملف PDF"
+  "pdf.ask.dropped": "حُذف {n} من الاقتباسات غير الموجودة في ملف PDF",
+  "pdf.summarize": "تلخيص",
+  "pdf.summary.title": "الملخص",
+  "pdf.summary.extractive": "جُمل اختيرت من النص دون نموذج (لم يتوفر نموذج محلي).",
+  "pdf.summary.local": "كل جملة منسوخة من النص ومُتحقَّق منها؛ أُنشئ على هذا الجهاز."
 }

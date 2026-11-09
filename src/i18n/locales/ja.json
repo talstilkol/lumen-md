@@ -1431,6 +1431,9 @@
   "cmd.ai.cancel.hint": "実行中の AI リクエストをすべて停止します（Esc でも可）",
   "toast.aiCancelled": "AI リクエストをキャンセルしました（{count}）",
   "toast.aiNothingRunning": "実行中の AI リクエストはありません",
+  "cmd.ai.summarize": "AI: このノートを要約（このデバイスで）",
+  "cmd.ai.summarize.hint": "すべての文をノートから写し、照合した短い要約",
+  "summary.empty": "ここには要約するものがありません",
   "cmd.pdf.open": "PDF を開いて読む…",
   "cmd.pdf.open.hint": "ハイライトは .pdf.md ノートに保存",
   "pdf.failed": "この PDF を開けませんでした：{error}",
@@ -1467,5 +1470,9 @@
   "pdf.ask.notFound": "この PDF にはその答えがないようです。",
   "pdf.ask.cite": "{page} ページ、{line} 行目",
   "pdf.ask.failed": "回答できませんでした: {error}",
-  "pdf.ask.dropped": "PDF にない引用 {n} 件を除外しました"
+  "pdf.ask.dropped": "PDF にない引用 {n} 件を除外しました",
+  "pdf.summarize": "要約",
+  "pdf.summary.title": "要約",
+  "pdf.summary.extractive": "モデルなしで本文から選んだ文です（ローカルモデルがありませんでした）。",
+  "pdf.summary.local": "どの文も本文からそのまま写し、本文と照合しています。このデバイスで作成。"
 }

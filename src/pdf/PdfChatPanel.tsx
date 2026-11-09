@@ -6,7 +6,7 @@
  */
 import { useEffect, useRef, useState } from "react";
 import { t } from "../i18n";
-import type { PdfAnswer, PdfIndexProgress } from "./pdfChat";
+import type { PdfAnswer, PdfIndexProgress, PdfSummary } from "./pdfChat";
 
 interface Props {
   path: string;
@@ -20,6 +20,8 @@ export function PdfChatPanel({ path, onCite, onClose }: Props) {
   const [question, setQuestion] = useState("");
   const [status, setStatus] = useState<Status>({ kind: "idle" });
   const [answer, setAnswer] = useState<(PdfAnswer & { question: string }) | null>(null);
+  /** Plan 6.11: a grounded summary of the whole PDF. */
+  const [summary, setSummary] = useState<PdfSummary | null>(null);
   const ctrl = useRef<AbortController | null>(null);
   const inputRef = useRef<HTMLTextAreaElement | null>(null);
 
@@ -30,12 +32,41 @@ export function PdfChatPanel({ path, onCite, onClose }: Props) {
 
   const busy = status.kind === "indexing" || status.kind === "thinking";
 
+  const summarizeAll = async () => {
+    if (busy) return;
+    ctrl.current?.abort();
+    const c = (ctrl.current = new AbortController());
+    setAnswer(null);
+    setSummary(null);
+    setStatus({ kind: "thinking" });
+    try {
+      const [{ summarizePdf }, { aiOperation }] = await Promise.all([import("./pdfChat"), import("../ai/aiAbort")]);
+      const op = aiOperation();
+      op.signal.addEventListener("abort", () => c.abort(op.signal.reason), { once: true });
+      try {
+        const res = await summarizePdf(path, { signal: c.signal, onProgress: (p) => !c.signal.aborted && setStatus({ kind: "indexing", p }) });
+        if (c.signal.aborted) return;
+        setSummary(res);
+        setStatus({ kind: "idle" });
+      } finally {
+        op.end();
+      }
+    } catch (e) {
+      if (c.signal.aborted) {
+        setStatus({ kind: "idle" });
+        return;
+      }
+      setStatus({ kind: "error", message: e instanceof Error ? e.message : String(e) });
+    }
+  };
+
   const ask = async () => {
     const q = question.trim();
     if (!q || busy) return;
     ctrl.current?.abort();
     const c = (ctrl.current = new AbortController());
     setAnswer(null);
+    setSummary(null);
     setStatus({ kind: "thinking" });
     try {
       const [{ askPdf }, { aiOperation }] = await Promise.all([import("./pdfChat"), import("../ai/aiAbort")]);
@@ -100,9 +131,14 @@ export function PdfChatPanel({ path, onCite, onClose }: Props) {
               {t("dialog.cancel")}
             </button>
           ) : (
-            <button type="submit" className="pdf-primary" disabled={!question.trim()} data-testid="pdf-ask-submit">
-              {t("pdf.ask.submit")}
-            </button>
+            <>
+              <button type="button" className="icon-btn pdf-text-btn" data-testid="pdf-summarize" onClick={() => void summarizeAll()}>
+                {t("pdf.summarize")}
+              </button>
+              <button type="submit" className="pdf-primary" disabled={!question.trim()} data-testid="pdf-ask-submit">
+                {t("pdf.ask.submit")}
+              </button>
+            </>
           )}
         </div>
       </form>
@@ -134,6 +170,25 @@ export function PdfChatPanel({ path, onCite, onClose }: Props) {
             </ol>
           )}
           {answer.dropped > 0 && <p className="pdf-muted">{t("pdf.ask.dropped", { n: answer.dropped })}</p>}
+        </div>
+      )}
+      {summary && (
+        <div className="pdf-ask-answer" data-testid="pdf-summary" data-engine={summary.engine}>
+          <h3>{t("pdf.summary.title")}</h3>
+          <ol className="pdf-hl-list">
+            {summary.sentences.map((s, i) => (
+              <li key={i}>
+                {s.page !== null ? (
+                  <button type="button" className="pdf-hl-quote" dir="auto" data-page={s.page} onClick={() => onCite(s.page!, s.text.split(/\.\.\.|…/)[0].trim())}>
+                    <span className="pdf-hl-page">{t("pdf.ask.cite", { page: s.page, line: s.line ?? 1 })}</span> {s.text}
+                  </button>
+                ) : (
+                  <span dir="auto">{s.text}</span>
+                )}
+              </li>
+            ))}
+          </ol>
+          <p className="pdf-muted">{t(summary.engine === "extractive" ? "pdf.summary.extractive" : "pdf.summary.local")}</p>
         </div>
       )}
     </aside>

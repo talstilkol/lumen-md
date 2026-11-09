@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-11-09T21:24:54.668Z",
+  "generated_at": "2026-11-09T21:32:37.983Z",
   "source": "src/i18n/index.ts (en bundle)",
-  "count": 1469,
+  "count": 1476,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -2022,6 +2022,26 @@
       ]
     },
     {
+      "key": "pdf.summarize",
+      "en": "Summarize",
+      "vars": []
+    },
+    {
+      "key": "pdf.summary.title",
+      "en": "Summary",
+      "vars": []
+    },
+    {
+      "key": "pdf.summary.extractive",
+      "en": "Sentences picked from the text without a model (no local model was available).",
+      "vars": []
+    },
+    {
+      "key": "pdf.summary.local",
+      "en": "Every sentence is copied from the text and checked against it; made on this device.",
+      "vars": []
+    },
+    {
       "key": "cmd.ai.cancel",
       "en": "AI: Cancel",
       "vars": []
@@ -2041,6 +2061,21 @@
     {
       "key": "toast.aiNothingRunning",
       "en": "No AI request is running",
+      "vars": []
+    },
+    {
+      "key": "cmd.ai.summarize",
+      "en": "AI: Summarize This Note (on this device)",
+      "vars": []
+    },
+    {
+      "key": "cmd.ai.summarize.hint",
+      "en": "A short summary whose every sentence is copied from the note and checked against it",
+      "vars": []
+    },
+    {
+      "key": "summary.empty",
+      "en": "Nothing to summarise here",
       "vars": []
     },
     {

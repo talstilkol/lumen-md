@@ -1431,6 +1431,9 @@
   "cmd.ai.cancel.hint": "停止所有正在运行的 AI 请求（Esc 也可以）",
   "toast.aiCancelled": "已取消 AI 请求（{count}）",
   "toast.aiNothingRunning": "没有正在运行的 AI 请求",
+  "cmd.ai.summarize": "AI：总结此笔记（在本设备上）",
+  "cmd.ai.summarize.hint": "简短摘要，每句都摘自笔记并已核对",
+  "summary.empty": "这里没有可总结的内容",
   "cmd.pdf.open": "打开 PDF 阅读…",
   "cmd.pdf.open.hint": "高亮保存在 .pdf.md 笔记中",
   "pdf.failed": "无法打开此 PDF：{error}",
@@ -1467,5 +1470,9 @@
   "pdf.ask.notFound": "此 PDF 似乎无法回答这个问题。",
   "pdf.ask.cite": "第 {page} 页，第 {line} 行",
   "pdf.ask.failed": "无法回答：{error}",
-  "pdf.ask.dropped": "已省略 {n} 条不在 PDF 中的引文"
+  "pdf.ask.dropped": "已省略 {n} 条不在 PDF 中的引文",
+  "pdf.summarize": "摘要",
+  "pdf.summary.title": "摘要",
+  "pdf.summary.extractive": "未使用模型，从文中挑选的句子（没有可用的本地模型）。",
+  "pdf.summary.local": "每句都摘自原文并已核对；在本设备上生成。"
 }

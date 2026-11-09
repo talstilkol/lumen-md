@@ -1431,6 +1431,9 @@
   "cmd.ai.cancel.hint": "עוצר כל בקשת AI שרצה (גם Esc עושה זאת)",
   "toast.aiCancelled": "בקשת ה-AI בוטלה ({count})",
   "toast.aiNothingRunning": "אין בקשת AI שרצה",
+  "cmd.ai.summarize": "AI: סיכום הפתק (במכשיר הזה)",
+  "cmd.ai.summarize.hint": "סיכום קצר שכל משפט בו מועתק מהפתק ונבדק מולו",
+  "summary.empty": "אין כאן מה לסכם",
   "cmd.pdf.open": "פתיחת PDF לקריאה…",
   "cmd.pdf.open.hint": "הסימונים נשמרים בפתק ‎.pdf.md",
   "pdf.failed": "לא ניתן לפתוח את קובץ ה-PDF: {error}",
@@ -1467,5 +1470,9 @@
   "pdf.ask.notFound": "נראה שה-PDF הזה לא עונה על כך.",
   "pdf.ask.cite": "עמוד {page}, שורה {line}",
   "pdf.ask.failed": "לא ניתן לענות: {error}",
-  "pdf.ask.dropped": "הושמטו {n} ציטוטים שאינם מופיעים ב-PDF"
+  "pdf.ask.dropped": "הושמטו {n} ציטוטים שאינם מופיעים ב-PDF",
+  "pdf.summarize": "סיכום",
+  "pdf.summary.title": "סיכום",
+  "pdf.summary.extractive": "משפטים שנבחרו מהטקסט בלי מודל (לא היה מודל מקומי זמין).",
+  "pdf.summary.local": "כל משפט מועתק מהטקסט ונבדק מולו; נוצר במכשיר הזה."
 }
