@@ -958,6 +958,28 @@
       "vars": []
     },
     {
+      "key": "vault.desktop.backedUp",
+      "en": "A backup of the app's notes was saved to {path}.",
+      "vars": [
+        "path"
+      ]
+    },
+    {
+      "key": "vault.desktop.choose",
+      "en": "Choose folder…",
+      "vars": []
+    },
+    {
+      "key": "vault.desktop.firstRunBody",
+      "en": "Choose the folder where your notes live. Lumen keeps them there as plain Markdown files, so other apps such as Obsidian can open them too. Notes already in the app are backed up and copied there; nothing is deleted.",
+      "vars": []
+    },
+    {
+      "key": "vault.desktop.notNow",
+      "en": "Not now",
+      "vars": []
+    },
+    {
       "key": "vault.export.done",
       "en": "Exported {n} files.",
       "vars": [

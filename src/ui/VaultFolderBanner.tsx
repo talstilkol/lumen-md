@@ -6,8 +6,11 @@
 import { useEffect, useState } from "react";
 import { t } from "../i18n";
 import { showAiToast } from "./AiToast";
+import { chooseDesktopFolder } from "./vaultFolderActions";
 import {
   cancelPendingMove,
+  dismissDesktopFirstRun,
+  isDesktopFirstRun,
   getMoveProgress,
   getPendingMove,
   getVaultStatus,
@@ -31,6 +34,32 @@ export function VaultFolderBanner() {
     return (
       <div className="vault-folder-banner" role="status" aria-live="polite">
         <span>{t("vault.folder.moving", { done: String(progress.done), total: String(progress.total) })}</span>
+      </div>
+    );
+  }
+
+  if (isDesktopFirstRun()) {
+    return (
+      <div className="vault-folder-banner" role="dialog" aria-label={t("vault.desktop.choose")}>
+        <span>{t("vault.desktop.firstRunBody")}</span>
+        <button
+          type="button"
+          className="vault-folder-btn"
+          disabled={busy}
+          onClick={async () => {
+            setBusy(true);
+            try {
+              await chooseDesktopFolder();
+            } finally {
+              setBusy(false);
+            }
+          }}
+        >
+          {t("vault.desktop.choose")}
+        </button>
+        <button type="button" className="vault-folder-btn secondary" disabled={busy} onClick={() => dismissDesktopFirstRun()}>
+          {t("vault.desktop.notNow")}
+        </button>
       </div>
     );
   }
@@ -70,7 +99,7 @@ export function VaultFolderBanner() {
   }
 
   if (pending) {
-    const to = pending.to.kind === "folder" ? pending.to.name : t("vault.folder.browserStorage");
+    const to = pending.to.kind !== "opfs" ? pending.to.name : t("vault.folder.browserStorage");
     return (
       <div className="vault-folder-banner" role="status">
         <span>{t("vault.folder.interrupted", { folder: to })}</span>
@@ -82,7 +111,7 @@ export function VaultFolderBanner() {
             setBusy(true);
             try {
               const r = await moveVault(pending.to);
-              showAiToast(t(pending.to.kind === "folder" ? "vault.folder.moved" : "vault.folder.movedBack", { folder: pending.to.kind === "folder" ? to : pending.from.kind === "folder" ? pending.from.name : "", n: String(r.files) }), "info");
+              showAiToast(t(pending.to.kind !== "opfs" ? "vault.folder.moved" : "vault.folder.movedBack", { folder: pending.to.kind !== "opfs" ? to : pending.from.kind !== "opfs" ? pending.from.name : "", n: String(r.files) }), "info");
             } catch (e) {
               if (e instanceof VaultMoveConflictError) showAiToast(t("vault.folder.conflict", { n: String(e.paths.length), folder: to, path: e.paths[0] }), "error");
               else showAiToast(t("vault.folder.failed", { error: (e as Error).message }), "error");

@@ -24,11 +24,16 @@ import { getVaultBackend, setVaultBackend } from "./index";
 import { createDirectoryHandleBackend } from "./handleBackend";
 import { createOpfsBackend } from "./opfs";
 import type { VaultBackend } from "./types";
+import { createTauriBackend, isDesktopApp, loadTauriInvoke, type TauriInvoke } from "./tauri";
 
 // ── Persistence ──────────────────────────────────────────────────────────
 
 /** Where the vault is, as stored. */
-export type StoredLocation = { kind: "opfs" } | { kind: "folder"; handle: FileSystemDirectoryHandle; name: string };
+export type StoredLocation =
+  | { kind: "opfs" }
+  | { kind: "folder"; handle: FileSystemDirectoryHandle; name: string }
+  /** Desktop app (plan 4.3): the folder the Rust side holds; `root` is its absolute path. */
+  | { kind: "desktop"; root: string; name: string };
 
 /** An unfinished move, as stored. */
 export interface MoveRecord {
@@ -87,7 +92,30 @@ export interface MoveProgress {
 let status: VaultStatus = { location: "opfs" };
 let pending: MoveRecord | null = null;
 let progress: MoveProgress | null = null;
-let disconnected: { handle: FileSystemDirectoryHandle; name: string; backend: VaultBackend; connect(): void } | null = null;
+let disconnected: { name: string; connect(): Promise<boolean> } | null = null;
+/** Desktop app with no vault folder chosen yet: the first-run prompt shows. */
+let desktopFirstRun = false;
+let desktopInvoke: TauriInvoke | null = null;
+
+/** @internal tests: the stand-in for the app's Rust vault commands. */
+export function __setDesktopInvoke(inv: TauriInvoke | null): void {
+  desktopInvoke = inv;
+}
+
+async function desktop(): Promise<TauriInvoke> {
+  desktopInvoke ??= await loadTauriInvoke();
+  return desktopInvoke;
+}
+
+/** On first launch of the desktop app, the user is asked for the vault folder. */
+export function isDesktopFirstRun(): boolean {
+  return desktopFirstRun;
+}
+
+/** The last segment of an absolute path, either separator. */
+function folderName(root: string): string {
+  return root.split(/[\\/]/).filter(Boolean).pop() ?? root;
+}
 const listeners = new Set<() => void>();
 
 function changed(): void {
@@ -169,7 +197,12 @@ export function createFolderBackend(handle: FileSystemDirectoryHandle, connected
 }
 
 function backendFor(loc: StoredLocation): VaultBackend {
-  return loc.kind === "opfs" ? createOpfsBackend() : createFolderBackend(loc.handle);
+  if (loc.kind === "opfs") return createOpfsBackend();
+  if (loc.kind === "desktop") {
+    if (!desktopInvoke) throw new Error("The desktop vault is not ready.");
+    return createTauriBackend(desktopInvoke, loc.root);
+  }
+  return createFolderBackend(loc.handle);
 }
 
 function nameOf(loc: StoredLocation): string {
@@ -188,6 +221,7 @@ export function setOnVaultReplaced(fn: () => void): void {
 
 function activate(loc: StoredLocation, backend: VaultBackend): void {
   disconnected = null;
+  if (loc.kind !== "opfs") desktopFirstRun = false;
   setVaultBackend(loc.kind === "opfs" ? null : backend);
   status = loc.kind === "opfs" ? { location: "opfs" } : { location: "folder", name: loc.name };
   notifyWorkspaceChanged({ kind: "structure" });
@@ -209,6 +243,36 @@ export async function restoreVaultLocation(): Promise<VaultStatus> {
     if (!loc || loc.kind === "opfs") {
       // Replaces the closed start-up vault (if any) with OPFS.
       if (getVaultBackend().id !== "opfs") activate({ kind: "opfs" }, createOpfsBackend());
+      // First launch of the desktop app: ask where the vault lives.
+      desktopFirstRun = !loc && isDesktopApp();
+      return status;
+    }
+    if (loc.kind === "desktop") {
+      const inv = await desktop();
+      const root = await inv<string | null>("vault_root");
+      if (root && root === loc.root) {
+        activate(loc, createTauriBackend(inv, root));
+        return status;
+      }
+      // The folder moved or the app's config was lost: closed until the
+      // user picks the folder again.
+      let open = false;
+      setVaultBackend(createTauriBackend(inv, loc.root, { available: () => open }));
+      disconnected = {
+        name: loc.name,
+        connect: async () => {
+          const picked = await inv<string | null>("vault_pick_folder");
+          if (!picked) return false;
+          const next: StoredLocation = { kind: "desktop", root: picked, name: folderName(picked) };
+          await inv("vault_use", { root: picked });
+          await kv.set(LOCATION_KEY, next);
+          open = true;
+          activate(next, createTauriBackend(inv, picked));
+          return true;
+        },
+      };
+      status = { location: "folder-disconnected", name: loc.name };
+      changed();
       return status;
     }
     if (await ensureFolderPermission(loc.handle, false)) {
@@ -216,9 +280,21 @@ export async function restoreVaultLocation(): Promise<VaultStatus> {
       return status;
     }
     let granted = false;
-    const backend = createFolderBackend(loc.handle, () => granted);
-    disconnected = { handle: loc.handle, name: loc.name, backend, connect: () => (granted = true) };
-    setVaultBackend(backend);
+    const handle = loc.handle;
+    const name = loc.name;
+    setVaultBackend(createFolderBackend(handle, () => granted));
+    disconnected = {
+      name,
+      connect: async () => {
+        if (!(await ensureFolderPermission(handle, true))) return false;
+        granted = true;
+        disconnected = null;
+        status = { location: "folder", name };
+        notifyWorkspaceChanged({ kind: "structure" });
+        changed();
+        return true;
+      },
+    };
     status = { location: "folder-disconnected", name: loc.name };
     changed();
   } catch (err) {
@@ -262,17 +338,73 @@ export async function restoreVaultLocationWithin(ms: number): Promise<VaultStatu
 export async function reconnectVaultFolder(): Promise<boolean> {
   const d = disconnected;
   if (!d) return status.location === "folder";
-  if (!(await ensureFolderPermission(d.handle, true))) return false;
-  d.connect();
-  disconnected = null;
-  status = { location: "folder", name: d.name };
-  notifyWorkspaceChanged({ kind: "structure" });
+  return d.connect();
+}
+
+/**
+ * Desktop: the user picks the vault folder in the native dialog. When the
+ * app storage (the WebView's OPFS) holds notes, they are first backed up (a
+ * zip in the app's data folder), then moved with the same copy → byte check
+ * → switch as the web build — the app storage is never deleted, and an
+ * interrupted move resumes. Null when the user cancelled.
+ */
+export async function chooseDesktopVaultFolder(): Promise<(MoveReport & { backup: string | null }) | null> {
+  const inv = await desktop();
+  const root = await inv<string | null>("vault_pick_folder");
+  if (!root) return null;
+  const to: StoredLocation = { kind: "desktop", root, name: folderName(root) };
+  const source = getVaultBackend();
+  // Only a listing that succeeds and is empty skips the migration: a source
+  // that cannot be read stops here, it is not "empty".
+  if (!source.available()) throw new Error("The current vault is not available.");
+  const hasNotes = (await source.list("")).length > 0;
+  if (!hasNotes) {
+    await inv("vault_use", { root });
+    await kv.set(LOCATION_KEY, to);
+    activate(to, createTauriBackend(inv, root));
+    return { files: 0, bytes: 0, unchanged: 0, trashed: 0, backup: null };
+  }
+  const backup = await backupCurrentVault(inv);
+  return { ...(await moveVault(to)), backup };
+}
+
+/** A zip of the current vault, kept by the desktop app (its data folder). */
+async function backupCurrentVault(inv: TauriInvoke): Promise<string> {
+  const { exportVaultZip } = await import("../exportAll");
+  const { bytes } = await exportVaultZip();
+  const name = `vault-backup-${new Date().toISOString().replace(/[:.]/g, "-")}.zip`;
+  return inv<string>("vault_backup", bytes, { headers: { "x-backup-name": encodeURIComponent(name) } });
+}
+
+/** Desktop: work in a folder the user picks, without copying (e.g. an existing Obsidian vault). */
+export async function openDesktopFolderAsVault(): Promise<string | null> {
+  const inv = await desktop();
+  const root = await inv<string | null>("vault_pick_folder");
+  if (!root) return null;
+  const loc: StoredLocation = { kind: "desktop", root, name: folderName(root) };
+  await inv("vault_use", { root });
+  await kv.set(LOCATION_KEY, loc);
+  await cancelPendingMove(); // its source is no longer the vault
+  onVaultReplaced();
+  activate(loc, createTauriBackend(inv, root));
+  return loc.name;
+}
+
+/** Desktop: "Not now" on the first-run prompt (asked again on the next launch). */
+export function dismissDesktopFirstRun(): void {
+  desktopFirstRun = false;
   changed();
-  return true;
 }
 
 /** Work in browser storage (OPFS) from now on, without copying anything. */
+/** Desktop: the vault no longer lives in a folder — the app forgets it (the folder is not touched). */
+async function releaseDesktopFolder(): Promise<void> {
+  if (!isDesktopApp()) return;
+  await (await desktop())("vault_forget").catch((err) => log.warn("forgetting the desktop vault folder failed", err));
+}
+
 export async function switchToBrowserStorage(): Promise<void> {
+  await releaseDesktopFolder();
   await kv.set(LOCATION_KEY, { kind: "opfs" } satisfies StoredLocation);
   await cancelPendingMove(); // its source is no longer the vault
   onVaultReplaced();
@@ -283,6 +415,7 @@ export async function switchToBrowserStorage(): Promise<void> {
 export async function openFolderAsVault(handle: FileSystemDirectoryHandle): Promise<boolean> {
   if (!(await ensureFolderPermission(handle, true))) return false;
   const loc: StoredLocation = { kind: "folder", handle, name: handle.name };
+  await releaseDesktopFolder();
   await kv.set(LOCATION_KEY, loc);
   await cancelPendingMove(); // its source is no longer the vault
   onVaultReplaced();
@@ -365,6 +498,7 @@ export async function moveVault(
   if (to.kind === "folder" && !(await ensureFolderPermission(to.handle, true))) {
     throw new VaultPermissionError(to.name);
   }
+  if (to.kind === "desktop") await desktop();
   const fromLoc: StoredLocation = opts.from ?? ((await kv.get<StoredLocation>(LOCATION_KEY)) || { kind: "opfs" });
   const source = getVaultBackend();
   if (!source.available()) throw new Error("The current vault is not available.");
@@ -443,6 +577,9 @@ export async function moveVault(
       const there = await targetBytes(target, path);
       if (!there || !same(there, await bytes(source, path))) throw new Error(`“${path}” changed or went missing during the move; resume to copy it again.`);
     }
+    // The desktop app remembers its folder too (or forgets it when the vault leaves it).
+    if (to.kind === "desktop") await (await desktop())("vault_use", { root: to.root });
+    else await releaseDesktopFolder();
     await kv.set(LOCATION_KEY, to);
     await kv.set(LAST_MOVE_KEY, { from: fromLoc, to, copied } satisfies LastMove);
     await kv.del(MOVE_KEY);
@@ -482,6 +619,7 @@ export async function cancelPendingMove(): Promise<void> {
 
 async function sameLocation(a: StoredLocation, b: StoredLocation): Promise<boolean> {
   if (a.kind === "opfs" || b.kind === "opfs") return a.kind === b.kind;
+  if (a.kind === "desktop" || b.kind === "desktop") return a.kind === "desktop" && b.kind === "desktop" && a.root === b.root;
   if (a.handle === b.handle) return true;
   const f = (a.handle as { isSameEntry?: (o: FileSystemHandle) => Promise<boolean> }).isSameEntry;
   return typeof f === "function" ? await f.call(a.handle, b.handle).catch(() => false) : false;
@@ -494,5 +632,7 @@ export function __resetVaultLocation(): void {
   pending = null;
   progress = null;
   disconnected = null;
+  desktopFirstRun = false;
+  desktopInvoke = null;
   setVaultBackend(null);
 }

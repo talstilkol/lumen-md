@@ -67,9 +67,11 @@ export function checkRename(from: string, to: string): { src: string[]; dst: str
 /** `data` as bytes (strings as UTF-8); always a copy the caller cannot change afterwards. */
 export async function toBytes(data: VaultData): Promise<Uint8Array> {
   if (typeof data === "string") return new TextEncoder().encode(data);
-  if (data instanceof Uint8Array) return data.slice();
-  if (data instanceof ArrayBuffer) return new Uint8Array(data.slice(0));
-  return new Uint8Array(await data.arrayBuffer());
+  // Not `instanceof`: bytes from another realm (a worker, an iframe, jsdom's
+  // TextEncoder) are still bytes.
+  if (ArrayBuffer.isView(data)) return new Uint8Array(data.buffer.slice(data.byteOffset, data.byteOffset + data.byteLength));
+  if (Object.prototype.toString.call(data) === "[object ArrayBuffer]") return new Uint8Array((data as ArrayBuffer).slice(0));
+  return new Uint8Array(await (data as Blob).arrayBuffer());
 }
 
 // ── Events ───────────────────────────────────────────────────────────────

@@ -18,6 +18,8 @@ import {
   type VaultEvent,
 } from "../storage/vault";
 import { createFolderBackend } from "../storage/vault/location";
+import { createTauriBackend } from "../storage/vault/tauri";
+import { fakeTauriVault } from "./helpers/fakeTauriVault";
 
 const backends: [string, () => VaultBackend][] = [
   [
@@ -37,6 +39,10 @@ const backends: [string, () => VaultBackend][] = [
   [
     "folder vault (plan 4.2, fake picked folder)",
     () => createFolderBackend(new FakeDir("My Vault") as unknown as FileSystemDirectoryHandle),
+  ],
+  [
+    "desktop (plan 4.3, Rust vault commands faked)",
+    () => createTauriBackend(fakeTauriVault("/home/tal/Notes").invoke, "/home/tal/Notes"),
   ],
   ["memory", () => createMemoryBackend()],
 ];
