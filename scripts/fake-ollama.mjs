@@ -55,6 +55,7 @@ const AGENT_HINTS = {
   templater: /follow the instruction/i,
   stylist: /writer's style/i,
   builder: /product architect/i,
+  formulator: /database column|formula/i,
 };
 
 /** The case's own tool call is already in the conversation (a context call has other arguments). */

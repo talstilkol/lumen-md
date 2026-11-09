@@ -220,4 +220,14 @@ export const EVAL_CASES: EvalCase[] = [
     example: '{"name": "pomodoro-timer", "description": "A small timer page.", "features": ["start", "pause", "reset"], "techStack": ["HTML", "CSS", "JavaScript"], "fileStructure": ["index.html", "style.css", "app.js"]}',
     tool: { name: "list_files", args: { prefix: "notes/" } },
   },
+  {
+    id: "formulator-he",
+    agent: "formulator",
+    input: {
+      text: "כמה ימים נשארו עד תאריך היעד, ואם המשימה כבר הושלמה — כלום",
+      extra: { fields: [{ name: "סטטוס", example: "הושלם" }, { name: "יעד", example: "2026-11-01" }, { name: "מחיר" }] },
+    },
+    checks: [{ type: "contains", all: ["יעד", "סטטוס"] }, { type: "containsAny", any: ["datediff", "today()"] }, { type: "maxChars", max: 200 }],
+    example: 'if(סטטוס = "הושלם", null, datediff(יעד, today()))',
+  },
 ];

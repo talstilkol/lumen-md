@@ -240,6 +240,21 @@
           "ok": true
         }
       ]
+    },
+    {
+      "id": "formulator-he",
+      "status": "ok",
+      "checks": [
+        {
+          "ok": true
+        },
+        {
+          "ok": true
+        },
+        {
+          "ok": true
+        }
+      ]
     }
   ]
 }
