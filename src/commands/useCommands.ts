@@ -2220,6 +2220,35 @@ export function useCommands({
         suggesting: suggestingMode,
         toggle: toggleSuggestingMode,
       }).map((c) => ({ ...c, icon: cmdIcons.Pencil })),
+      // ── Outline mode and block operations (plan W2.13) ────────────────
+      // Both editors listen for `lumen-outline`; the code is in their lazy chunks.
+      ...(() => {
+        const mac = detectIsMac();
+        const alt = mac ? "⌥" : "Alt+";
+        const mod = mac ? "⌘⌥" : "Ctrl+Alt+";
+        const shift = mac ? "⇧" : "Shift+";
+        const keys: Record<string, string> = {
+          moveUp: `${alt}${shift}↑`,
+          moveDown: `${alt}${shift}↓`,
+          indent: `${mod}→`,
+          outdent: `${mod}←`,
+          duplicate: `${alt}${shift}D`,
+          delete: `${alt}${shift}⌫`,
+          fold: `${mod}↑`,
+          unfold: `${mod}↓`,
+          zoomIn: `${mod}↵`,
+        };
+        const ids = ["moveUp", "moveDown", "indent", "outdent", "duplicate", "delete", "fold", "unfold", "foldAll", "unfoldAll", "zoomIn", "zoomOut", "toggleMode"] as const;
+        return ids.map((cmd) => ({
+          id: `outline.${cmd}`,
+          label: t(`cmd.outline.${cmd}`),
+          hint: cmd === "toggleMode" ? t("cmd.outline.toggleMode.hint") : undefined,
+          shortcut: keys[cmd],
+          icon: cmdIcons.Pencil,
+          group: t("group.edit"),
+          action: () => window.dispatchEvent(new CustomEvent("lumen-outline", { detail: { cmd } })),
+        }));
+      })(),
       // ── Plans (billing builds only) ─────────────────────────────────────
       ...(canPurchasePlans()
         ? [

@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-10-18T04:10:51.194Z",
+  "generated_at": "2026-11-09T23:31:54.300Z",
   "source": "src/i18n/index.ts (en bundle)",
-  "count": 1414,
+  "count": 1431,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -6526,6 +6526,91 @@
     {
       "key": "cmd.edit.formatCodeBlock.hint",
       "en": "Prettier: format the fenced block under the cursor",
+      "vars": []
+    },
+    {
+      "key": "cmd.outline.moveUp",
+      "en": "Outline: move block up",
+      "vars": []
+    },
+    {
+      "key": "cmd.outline.moveDown",
+      "en": "Outline: move block down",
+      "vars": []
+    },
+    {
+      "key": "cmd.outline.indent",
+      "en": "Outline: indent block",
+      "vars": []
+    },
+    {
+      "key": "cmd.outline.outdent",
+      "en": "Outline: outdent block",
+      "vars": []
+    },
+    {
+      "key": "cmd.outline.duplicate",
+      "en": "Outline: duplicate block",
+      "vars": []
+    },
+    {
+      "key": "cmd.outline.delete",
+      "en": "Outline: delete block",
+      "vars": []
+    },
+    {
+      "key": "cmd.outline.fold",
+      "en": "Outline: fold",
+      "vars": []
+    },
+    {
+      "key": "cmd.outline.unfold",
+      "en": "Outline: unfold",
+      "vars": []
+    },
+    {
+      "key": "cmd.outline.foldAll",
+      "en": "Outline: fold all",
+      "vars": []
+    },
+    {
+      "key": "cmd.outline.unfoldAll",
+      "en": "Outline: unfold all",
+      "vars": []
+    },
+    {
+      "key": "cmd.outline.zoomIn",
+      "en": "Outline: zoom into block",
+      "vars": []
+    },
+    {
+      "key": "cmd.outline.zoomOut",
+      "en": "Outline: zoom out",
+      "vars": []
+    },
+    {
+      "key": "cmd.outline.toggleMode",
+      "en": "Open note as outline",
+      "vars": []
+    },
+    {
+      "key": "cmd.outline.toggleMode.hint",
+      "en": "Fold toggles on headings and lists, everything folded to the top level; the file stays plain Markdown",
+      "vars": []
+    },
+    {
+      "key": "outline.zoomOut",
+      "en": "← Back to the whole note",
+      "vars": []
+    },
+    {
+      "key": "outline.fold",
+      "en": "Fold",
+      "vars": []
+    },
+    {
+      "key": "outline.unfold",
+      "en": "Unfold",
       "vars": []
     },
     {
