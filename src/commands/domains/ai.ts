@@ -331,6 +331,16 @@ export function buildAiControlCommands(): Command[] {
       },
     },
     {
+      id: "ai.reviewChanges",
+      label: t("cmd.ai.reviewChanges"),
+      hint: t("cmd.ai.reviewChanges.hint"),
+      icon: cmdIcons.Sparkles,
+      group: t("group.ai", { defaultValue: "AI Copilot" }),
+      action: () => {
+        window.dispatchEvent(new CustomEvent("lumen-open-agent-review"));
+      },
+    },
+    {
       id: "ai.doctor",
       label: t("cmd.ai.doctor"),
       hint: t("cmd.ai.doctor.hint"),

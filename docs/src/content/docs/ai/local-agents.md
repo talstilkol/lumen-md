@@ -75,6 +75,33 @@ page read in the same run, a workspace file or the open document, and
 returns the exact text with its offsets. All tools stop when the run is
 cancelled.
 
+## Reviewing proposed changes
+
+When an agent proposes changes, a toast says so and the status bar shows
+**Review N**; `⌘K → "AI: Review changes proposed by agents"` opens the
+same panel. Each change is shown as a diff — a whole file line by line,
+a part of the open document word by word, marked like a tracked change —
+with the agent and the run that proposed it. Approve or reject each one,
+or all of them at once; nothing is written before you approve.
+
+- A change to a document that is open (saved or not) goes into its text
+  in the editor, not into the file underneath, and saving writes it. In
+  the source editor Undo takes it back; in Preview or WYSIWYG it can't,
+  and the panel says so. Changes to other files are written to the
+  workspace.
+- A change to a document that isn't in the workspace (an untitled or
+  imported one) only ever goes to the document the agent worked on, even
+  after you switch tabs; if that document was closed, the change is
+  refused.
+- With **suggesting mode** on, an approved change is added as a tracked
+  change attributed to the agent (`{~~old~>new~~}{>>@AI proofreader<<}`),
+  so you can still accept or reject it in place.
+- If the text a change replaces was edited after the proposal, the
+  change is refused and the panel says why; when the replaced text only
+  moved, and appears exactly once, it is applied where it is now.
+  Several changes from one run can be approved in any order.
+- Cancelling a run withdraws the changes it proposed.
+
 ## AI settings
 
 `⌘K → "AI: Settings (local agents)"` gathers everything in one panel:

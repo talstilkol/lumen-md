@@ -44,6 +44,21 @@ export type ChangeProposal =
       /** The text around the range when it was proposed, so a moved range (or an insertion) is found again or refused. */
       context?: RangeContext;
       summary: string;
+      /**
+       * Fingerprint of the whole text the offsets refer to (`textFingerprint`,
+       * set by the runtime). When the text is still that one, or that one
+       * with only approved changes applied since, the offsets are exact
+       * (mapped through those changes), so several changes computed on the
+       * same text can be approved in any order.
+       */
+      basis?: string;
+      /**
+       * Which open document the run worked on (an opaque key from the
+       * editor, `agents/docKey.ts`, set by the runtime when the run starts).
+       * A change with no `path` is applied only to that document — the
+       * active one or another tab — never to whichever document is active.
+       */
+      docKey?: string;
     };
 
 /** Up to 40 characters on each side of a proposed range (`staging.rangeContext`). */
@@ -55,6 +70,23 @@ export interface RangeContext {
   atEnd: boolean;
 }
 
+/** Why an approved change was not applied (shown, translated, in the review panel). */
+export type StagedConflict =
+  /** The file's content is no longer the content the change was computed from. */
+  | "file-changed"
+  /** The change creates a file, and one with that name appeared since. */
+  | "file-created"
+  /** The text the change replaces is no longer there (the document was edited since). */
+  | "doc-changed"
+  /** It overlaps another change from the same proposal that was approved first. */
+  | "overlap"
+  /** The file is open in the editor with edits the change was not computed from. */
+  | "open-unsaved"
+  /** The document it was proposed for is no longer open. */
+  | "not-open"
+  /** Applying failed (storage error and the like). */
+  | "failed";
+
 /** A staged change as the queue keeps it (see `staging.ts`). */
 export type StagedChange = ChangeProposal & {
   id: string;
@@ -63,8 +95,26 @@ export type StagedChange = ChangeProposal & {
   agentId?: string;
   createdAt: number;
   status: "pending" | "applied" | "rejected" | "conflict";
-  /** Why it could not be applied (status `conflict`). */
+  /** Why it could not be applied (status `conflict`), or why it was withdrawn. */
   error?: string;
+  /** Status `conflict`: the reason, as a code the UI translates. */
+  conflict?: StagedConflict;
+  /** Status `rejected`: the run that proposed it was cancelled (nobody rejected it). */
+  withdrawn?: true;
+  /**
+   * Status `applied`: where it went — the document in the editor (unsaved
+   * until the user saves; undo works in the source editor), another open
+   * tab (unsaved), or a workspace file written directly.
+   */
+  appliedTo?: "document" | "tab" | "file";
+  /**
+   * Status `applied` to the document: the edit went in without an undo
+   * history (the source editor was not showing it: Preview, WYSIWYG), so
+   * Undo cannot take it back.
+   */
+  noUndo?: true;
+  /** Applied as a tracked change (CriticMarkup) because suggesting mode was on. */
+  asSuggestion?: true;
 };
 
 /** What a write tool returns: the receipt of the staged change, never the write itself. */
@@ -366,6 +416,11 @@ export interface RunOptions {
   document?: string;
   selection?: string;
   path?: string | null;
+  /**
+   * The open document the run works on (`agents/docKey.ts`). Default: the
+   * active document's key when the run starts.
+   */
+  docKey?: string;
   onDelta?: (chunk: string) => void;
   onStep?: (step: AgentStep) => void;
   /** Force an executor (the suggestions panel uses it). */

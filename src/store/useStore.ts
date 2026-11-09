@@ -414,6 +414,11 @@ export const useAppStore = create<AppState>()(
           const existing = state.openTabs.find((t) => t.id === id);
           const kept = id === currentId ? { loadId: state.doc.loadId, handle: state.doc.handle } : tabRuntime.get(id);
           const sameLoad = !!existing && existing.content === input.content && kept?.loadId !== undefined;
+          // The tab's unsaved marker survives whenever it is shown with this very
+          // text (edits made while it was in the background, e.g. an approved
+          // agent change, plan 5.11, included), so autosave still writes them.
+          const held = id === currentId ? state.doc : existing;
+          const dirty = !!held && held.content === input.content && held.dirty;
           const baseTabs = state.openTabs.some((t) => t.id === currentId)
             ? state.openTabs.map((t) =>
                 t.id === currentId
@@ -443,7 +448,6 @@ export const useAppStore = create<AppState>()(
           }
           const loadId = sameLoad ? kept!.loadId : ++nextLoadId;
           const handle = input.handle ?? (sameLoad ? kept?.handle : undefined);
-          const dirty = sameLoad ? (id === currentId ? state.doc.dirty : existing!.dirty) : false;
           tabRuntime.set(id, { loadId, handle });
           return {
             openTabs: nextTabs,

@@ -30,6 +30,9 @@ interface Props {
   collab?: CollabInfo | null;
   configHealth?: ConfigHealthReport;
   onOpenRuntimeMetrics?: () => void;
+  /** Changes agents proposed that wait for review (plan 5.11); the badge shows while > 0. */
+  agentReviewPending?: number;
+  onOpenAgentReview?: () => void;
 }
 
 export const StatusBar = React.memo(function StatusBar({
@@ -39,6 +42,8 @@ export const StatusBar = React.memo(function StatusBar({
   collab,
   configHealth,
   onOpenRuntimeMetrics,
+  agentReviewPending = 0,
+  onOpenAgentReview,
 }: Props) {
   const stats = useMemo(() => computeStats(text), [text]);
   const syncState = useSyncExternalStore(
@@ -166,6 +171,12 @@ export const StatusBar = React.memo(function StatusBar({
       <span className="sb-item" title="Reading time at ~220 wpm">
         {t("status.reading", { n: stats.readingMin })}
       </span>
+      {agentReviewPending > 0 && (
+        <button type="button" className="sb-item sb-review" onClick={onOpenAgentReview} title={t("agentReview.badge.tooltip")} data-testid="status-agent-review">
+          <Sparkles size={10} />
+          {t("agentReview.badge", { count: agentReviewPending })}
+        </button>
+      )}
       <button
         type="button"
         className="sb-item"

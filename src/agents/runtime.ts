@@ -32,6 +32,7 @@ import { formatSchemaErrors, validateSchema } from "./schema";
 import { coerceArgs, ToolError } from "./tools/define";
 import { review, type Failure } from "./critic";
 import { recordRun } from "./trace";
+import { currentDocumentKey } from "./docKey";
 import { AiQuotaExceededError, aiQuotaStatus, chargeAiCommandDispatch, consumeAiPrompt } from "../billing/aiQuota";
 
 export const DEFAULT_MAX_STEPS = 8;
@@ -63,6 +64,8 @@ interface ToolEnv {
   ctx: ToolContext;
   runId: string;
   agentId: string;
+  /** The open document the run's `document` comes from (`docKey.ts`). */
+  docKey?: string;
   consent?: RunOptions["consentNetwork"];
   /** Ids of the changes staged in this run, in order. */
   staged: string[];
@@ -99,9 +102,15 @@ async function execTool(tools: AgentTool[], call: ToolCall, env: ToolEnv): Promi
       callCtx.network = gate.bound;
       note = gate.consented ? "network: sent on the user's consent (local-only)" : "network: allowed by the AI policy";
     } else if (tool.scope === "write") {
-      const { stageChange, receiptOf } = await import("./staging");
+      const { stageChange, receiptOf, textFingerprint } = await import("./staging");
       callCtx.stage = (proposal) => {
-        const change = stageChange(proposal, { tool: tool.name, runId: env.runId, agentId: env.agentId });
+        // A range's offsets refer to the document the run received: record which text,
+        // and which open document, that was.
+        const staged =
+          proposal.kind === "range"
+            ? { ...proposal, basis: proposal.basis ?? textFingerprint(env.ctx.document ?? ""), docKey: proposal.docKey ?? env.docKey }
+            : proposal;
+        const change = stageChange(staged, { tool: tool.name, runId: env.runId, agentId: env.agentId });
         stagedHere.push(change.id);
         env.staged.push(change.id);
         return receiptOf(change);
@@ -208,6 +217,8 @@ export function inputKeyOf<I extends AgentInput>(def: AgentDefinition<I, unknown
 }
 
 export async function runAgent<I extends AgentInput, O = string>(def: AgentDefinition<I, O>, input: I, opts: RunOptions = {}): Promise<AgentRun<O>> {
+  // Before anything awaits: the document the caller just read is the active one now.
+  const docKey = opts.docKey ?? currentDocumentKey();
   const run: AgentRun<O> = {
     id: newRunId(),
     agentId: def.id,
@@ -255,7 +266,7 @@ export async function runAgent<I extends AgentInput, O = string>(def: AgentDefin
     grants,
     pages: new Map(),
   };
-  const toolEnv: ToolEnv = { ctx, runId: run.id, agentId: def.id, consent: opts.consentNetwork, staged };
+  const toolEnv: ToolEnv = { ctx, runId: run.id, agentId: def.id, docKey, consent: opts.consentNetwork, staged };
   const inputChars = (input.text ?? "").length + (input.selection ?? "").length;
   const maxRetries = def.maxRetries ?? DEFAULT_MAX_RETRIES;
   const maxSteps = def.maxSteps ?? DEFAULT_MAX_STEPS;
