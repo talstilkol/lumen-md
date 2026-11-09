@@ -45,6 +45,27 @@ Every run is recorded on this device: `⌘K → "AI: Recent Agent Runs"`
 shows the executor, model, tool calls, retries and failures of the last
 50 runs.
 
+## Transcription and embeddings on this device
+
+Speech recognition and text embeddings do not go through a chat model:
+they run in a second worker on
+[transformers.js](https://github.com/huggingface/transformers.js) with
+ONNX Runtime (WebGPU when the GPU is usable, wasm otherwise). The ONNX
+Runtime files are served from this app's own origin (`/ort/`), so no CDN
+is contacted; the models come from Hugging Face and are cached in the
+browser.
+
+| Task | Model | Size | Notes |
+|---|---|---|---|
+| Voice memo (`🎙 Voice memo`) | `onnx-community/whisper-small` | ≈ 250 MB | WebGPU; multilingual (Hebrew included) |
+| Voice memo on a strong GPU | `onnx-community/whisper-large-v3-turbo` | ≈ 800 MB | WebGPU, ≥ 6 GB budget |
+| Voice memo without WebGPU | `onnx-community/whisper-tiny` | ≈ 40 MB | wasm, slower |
+| Smart search embeddings | `Xenova/multilingual-e5-small` | ≈ 120 MB | 384 dimensions, ~100 languages |
+
+Under *local only* the cloud Whisper API is never used; under *local
+first* it is the fallback when the local path fails; under *cloud* it is
+used directly.
+
 ## Ollama from the hosted app
 
 A page served from `https://lumen-md.vercel.app` may only call your

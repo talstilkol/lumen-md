@@ -11,7 +11,7 @@ vi.mock("../lib/logger", () => ({ log: { info: vi.fn(), warn: vi.fn(), error: vi
  * under the local-only policy before any request goes out.
  */
 describe("AI policy gates on direct cloud paths", () => {
-  const fetchSpy = vi.fn(async () => new Response("{}", { status: 200 }));
+  const fetchSpy = vi.fn(async (_input: RequestInfo | URL, _init?: RequestInit) => new Response("{}", { status: 200 }));
   beforeEach(() => {
     localStorage.clear();
     localStorage.setItem("lumen.ai.policy", "local-only");
@@ -23,10 +23,17 @@ describe("AI policy gates on direct cloud paths", () => {
     localStorage.clear();
   });
 
-  it("transcription (OpenAI Whisper)", async () => {
+  it("transcription: under local-only the cloud Whisper API is never contacted; local-first falls back to it", async () => {
     const { transcribe } = await import("../ai/transcribe");
-    await expect(transcribe(new Blob(["x"]))).rejects.toMatchObject({ code: "POLICY" });
+    // Local by default: in jsdom the local path fails (no Web Audio) and that is final.
+    await expect(transcribe(new Blob(["x"]))).rejects.toThrow(/Web Audio/);
     expect(fetchSpy).not.toHaveBeenCalled();
+    localStorage.setItem("lumen.ai.policy", "local-first");
+    vi.stubGlobal("fetch", fetchSpy);
+    await expect(transcribe(new Blob(["x"]))).rejects.toThrow();
+    // The fallback would reach OpenAI; with a key it does — proving the gate is the policy, not luck.
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
+    expect(String(fetchSpy.mock.calls[0][0])).toContain("api.openai.com");
   });
 
   it("the public LanguageTool API, but not a LanguageTool on this machine", async () => {

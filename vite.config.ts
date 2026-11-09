@@ -97,6 +97,8 @@ const RUNTIME_CACHES = (
     ["webr", "webr"],
     ["ruby", "@ruby/3.4-wasm-wasi"],
     ["pyodide", "pyodide"],
+    // ONNX Runtime Web for transformers.js (local transcription, embeddings).
+    ["ort", "onnxruntime-web"],
   ] as const
 ).map(([dir, pkg]) => ({ dir, cacheName: `lumen-runtime-${dir}-${runtimeVersion(pkg)}-${stagingRevision(dir)}` }));
 
@@ -248,6 +250,14 @@ export default defineConfig({
           // web-llm inference worker (~6 MB; fetched on the first
           // in-browser AI prompt, cached by the browser like any script).
           "**/webllm.worker-*.js",
+          // transformers.js worker (local transcription / embeddings) and
+          // the ONNX Runtime wasm it loads (~40 MB, staged by copy-ort).
+          "**/transformers.worker-*.js",
+          "ort/**",
+          // onnxruntime-web also references its wasm by `new URL(…,
+          // import.meta.url)`, so Vite emits a copy under assets/; the
+          // worker loads the staged public/ort/ files instead.
+          "**/ort-wasm-*.wasm",
           // Pyodide (~13 MB, staged into public/ by prebuild) loads on the
           // first live-python Run; its 9.6 MB wasm would also trip the
           // precache size limit and fail `npm run build`.

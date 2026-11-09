@@ -966,6 +966,8 @@ const en: Strings = {
   "cmd.view.plugins.hint": "Browse & install plugins",
   "cmd.tools.voice": "🎙 Voice to Markdown",
   "cmd.tools.voice.hint": "Speech recognition → text",
+  "cmd.tools.voiceMemo": "🎙 Voice memo (transcribe + summarize)",
+  "cmd.tools.voiceMemo.hint": "Record, transcribe with Whisper (on this device under a local AI policy), summarize, and insert a memo block",
   "cmd.security.encrypt": "🔒 Encrypt Document",
   "cmd.security.encrypt.hint": "AES-256-GCM",
   "cmd.security.decrypt": "🔓 Decrypt Document",

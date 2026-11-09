@@ -268,6 +268,8 @@
   "cmd.tools.suggestLinks.hint": "AI scans your workspace for relevant cross-links",
   "cmd.tools.voice": "🎙 Voice to Markdown",
   "cmd.tools.voice.hint": "Speech recognition → text",
+  "cmd.tools.voiceMemo": "🎙 语音备忘录（转写 + 摘要）",
+  "cmd.tools.voiceMemo.hint": "录音，用 Whisper 转写（本地 AI 策略下在此设备上进行），生成摘要并插入备忘录块",
   "cmd.tools.writingGoal.hint": "A subtle progress banner above the editor",
   "cmd.tools.writingGoal.set": "✍️ Writing goal: {{words}} words/day",
   "cmd.tools.writingGoal.unset": "✍️ Set a daily writing goal",
