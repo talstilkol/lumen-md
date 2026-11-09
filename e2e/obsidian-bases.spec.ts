@@ -10,7 +10,7 @@ import { VAULT } from "../src/__tests__/fixtures/bases/vault";
  * only that view's `sort:` back to the file.
  */
 
-const FIXTURES = join(__dirname, "..", "src", "__tests__", "fixtures", "bases");
+const FIXTURES = join(process.cwd(), "src", "__tests__", "fixtures", "bases");
 const BOOKS = readFileSync(join(FIXTURES, "01-all-books.base"), "utf8");
 const LIMIT = readFileSync(join(FIXTURES, "08-limit.base"), "utf8");
 
