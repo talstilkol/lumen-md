@@ -323,6 +323,51 @@
       "vars": []
     },
     {
+      "key": "analyst.done",
+      "en": "Answer: {answer} — checked by running the program twice",
+      "vars": [
+        "answer"
+      ]
+    },
+    {
+      "key": "analyst.failed",
+      "en": "Analysis failed: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "analyst.mismatch",
+      "en": "The two runs disagree, so no answer is given: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "analyst.noTable",
+      "en": "No table found in this note: add a ```csv block, a Markdown table or comma-separated lines.",
+      "vars": []
+    },
+    {
+      "key": "analyst.parse",
+      "en": "The analysis program gave no answer: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "analyst.run",
+      "en": "The analysis program failed: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "analyst.working",
+      "en": "Analysing the table on this device…",
+      "vars": []
+    },
+    {
       "key": "blockLink.copied",
       "en": "Copied {link}",
       "vars": [

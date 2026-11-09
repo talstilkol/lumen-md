@@ -24,6 +24,21 @@
       "vars": []
     },
     {
+      "key": "cmd.ai.analyse",
+      "en": "AI: Analyse the table",
+      "vars": []
+    },
+    {
+      "key": "cmd.ai.analyse.ask",
+      "en": "What do you want to know about the table in this note?",
+      "vars": []
+    },
+    {
+      "key": "cmd.ai.analyse.hint",
+      "en": "Answer a question about this note's table with Python on this device",
+      "vars": []
+    },
+    {
       "key": "cmd.ai.batch",
       "en": "AI: Batch over a Folder (half price)…",
       "vars": []

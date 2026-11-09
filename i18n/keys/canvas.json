@@ -35,7 +35,7 @@
     },
     {
       "key": "canvas.legacy.convert",
-      "en": "Convert {name} → Excalidraw",
+      "en": "Convert {name} → tldraw",
       "vars": [
         "name"
       ]
@@ -64,7 +64,7 @@
     },
     {
       "key": "canvas.legacy.found",
-      "en": "{count} canvas(es) to convert",
+      "en": "{count} legacy canvas(es) found",
       "vars": [
         "count"
       ]
