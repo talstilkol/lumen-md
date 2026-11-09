@@ -58,6 +58,11 @@ jobs:
         # go through t(). Exceptions carry `i18n-allow: <reason>`.
         run: npm run -s i18n:hardcoded
 
+      # Plan 0.7: every task marked ✅ re-runs the commands that proved it
+      # (its `dod` in plan/plan.json), so a regression un-✅s it here.
+      - name: Definition of done for every ✅ task
+        run: npm run dod -- --done
+
       - name: Test
         run: npm run test
 
