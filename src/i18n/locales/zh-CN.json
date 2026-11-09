@@ -244,6 +244,8 @@
   "cmd.insert.model.hint": ".glb / .gltf",
   "cmd.insert.plantuml": "插入 PlantUML",
   "cmd.insert.plantuml.hint": "通过 kroki.io 渲染",
+  "plantuml.blocked": "此 PlantUML 图由在线服务 kroki.io 绘制，而你的 AI 策略将其保留在本设备上。绘制会把图的文本发送到 kroki.io。",
+  "plantuml.send": "用 kroki.io 绘制此图",
   "cmd.insert.table": "插入 Table (Editor)",
   "cmd.insert.table.hint": "可视化表格构建器",
   "cmd.insert.wikilink": "插入 wiki-链接",

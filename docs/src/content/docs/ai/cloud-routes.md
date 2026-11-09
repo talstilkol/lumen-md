@@ -38,6 +38,7 @@ route loses its gate.
 | Web research | `web-research` | your library, or a research service on this machine | Claude web search / a hosted research service | outside *local only*, after the one-time web consent |
 | Dictation | `speech-recognition` | voice memo with local Whisper | the browser's speech recognition (Chrome sends the audio to Google) | *cloud* only |
 | Read aloud | `network-voices` | the system's on-device voices | server-side browser voices ("Google …") | *cloud* only |
+| PlantUML diagrams | `plantuml-kroki` | — (no local renderer yet) | kroki.io draws the diagram from its text | *cloud*; otherwise only for a diagram you choose to send ("Render this diagram with kroki.io") |
 
 Model downloads (Hugging Face, the OCR and dictionary files) carry no
 content of yours; they are listed in the privacy ledger and happen only

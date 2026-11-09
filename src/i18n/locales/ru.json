@@ -244,6 +244,8 @@
   "cmd.insert.model.hint": ".glb / .gltf",
   "cmd.insert.plantuml": "Вставка PlantUML",
   "cmd.insert.plantuml.hint": "отрисовка через kroki.io",
+  "plantuml.blocked": "Эту диаграмму PlantUML рисует онлайн-сервис kroki.io, а ваша политика ИИ оставляет её на этом устройстве. При отрисовке текст диаграммы отправляется на kroki.io.",
+  "plantuml.send": "Нарисовать эту диаграмму через kroki.io",
   "cmd.insert.table": "Вставка Table (Editor)",
   "cmd.insert.table.hint": "визуальный конструктор таблиц",
   "cmd.insert.wikilink": "Вставка wiki-ссылка",
