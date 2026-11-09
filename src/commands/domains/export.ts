@@ -16,6 +16,17 @@ export function buildExportCommands({ handleExportHtml, liveDoc }: CommandContex
       action: handleExportHtml,
     },
     {
+      // 4.18: the picked notes as a website (GitHub Pages or a .zip); the dialog loads on use.
+      id: "file.publishSite",
+      label: t("cmd.file.publishSite"),
+      hint: t("cmd.file.publishSite.hint"),
+      icon: cmdIcons.Link,
+      group: t("group.file"),
+      action: () => {
+        void import("../../ui/PublishSiteDialog").then((m) => m.openPublishSite());
+      },
+    },
+    {
       id: "file.exportDocx",
       label: t("cmd.file.exportDocx") ?? "Export to Word (.doc)",
       hint: t("cmd.file.exportDocx.hint") ?? "Download as Word document",

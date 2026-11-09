@@ -39,6 +39,13 @@
       "action": "option:handleExportHtml"
     },
     {
+      "id": "file.publishSite",
+      "label": "Publish site…",
+      "group": "File",
+      "hint": "Your notes as a website: GitHub Pages or a .zip",
+      "icon": "Link"
+    },
+    {
       "id": "file.exportDocx",
       "label": "Export to Word (.doc)",
       "group": "File",
@@ -1112,6 +1119,13 @@
       "hint": "self-contained .html",
       "icon": "Download",
       "action": "option:handleExportHtml"
+    },
+    {
+      "id": "file.publishSite",
+      "label": "Publish site…",
+      "group": "File",
+      "hint": "Your notes as a website: GitHub Pages or a .zip",
+      "icon": "Link"
     },
     {
       "id": "file.exportDocx",
@@ -2248,6 +2262,7 @@
     "file.save",
     "file.saveAs",
     "file.exportHtml",
+    "file.publishSite",
     "file.exportDocx",
     "file.exportRtf",
     "file.exportLatex",
