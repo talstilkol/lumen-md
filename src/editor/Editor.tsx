@@ -9,6 +9,8 @@
  *   canonical example. Same rule applies to any code path inside
  *   `update(u: ViewUpdate)` that wants to dispatch synchronously.
  */
+import { screenReaderAnnouncements } from "./srAnnouncements";
+import { announce } from "../a11y/announce";
 import { readyToReveal } from "./revealLine";
 import { useEffect, useImperativeHandle, useRef, useState, forwardRef } from "react";
 import { Compartment, EditorState } from "@codemirror/state";
@@ -223,6 +225,7 @@ function ghostTextExtension(): Extension {
               );
               if (text && view.state.selection.main.head === pos) {
                 view.dispatch({ effects: setGhostText.of({ pos, text }) });
+                announce(i18nT("sr.suggestion", { text: text.trim() }));
               }
             } catch {
               // Silently ignore abort / API errors for completions
@@ -387,6 +390,8 @@ export const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
       // aria-input-field-name).
       // tabindex makes the content explicitly focusable, so its scroller counts as keyboard-reachable (axe scrollable-region-focusable, plan 10.1).
       EditorView.contentAttributes.of({ "aria-label": i18nT("editor.ariaLabel"), tabindex: "0" }),
+      // Spoken structure of the line the cursor lands on (plan W1.23).
+      screenReaderAnnouncements(),
       spellCheckCompartment.of(
         EditorView.contentAttributes.of({ spellcheck: spellCheck ? "true" : "false" }),
       ),

@@ -19,7 +19,8 @@ import { requestPersistentStorage } from "./storage/persistentStorage";
 import { initLocale, t } from "./i18n";
 import { initSecretStore } from "./lib/secretStore";
 import { installPrivacyLedger } from "./ai/privacyLedger";
-import { installAiEscape } from "./ai/aiAbort";
+import { installAiEscape, onAiBusy } from "./ai/aiAbort";
+import { aiBusyAnnouncer, announce } from "./a11y/announce";
 import { adoptBootLocale } from "./store/useStore";
 import "./index.css";
 
@@ -33,6 +34,8 @@ installPrivacyLedger((entry) => {
 });
 // Esc cancels any running AI request (T55).
 installAiEscape((n) => showAiToast(t("toast.aiCancelled", { count: n }), "info"));
+// Long AI work is spoken when it starts and when it ends (plan W1.23).
+onAiBusy(aiBusyAnnouncer((busy) => announce(t(busy ? "sr.aiWorking" : "sr.aiDone"))));
 initTelemetry();
 void initAuth();
 startAutoBackup();

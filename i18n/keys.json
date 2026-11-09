@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-10-24T15:34:34.169Z",
+  "generated_at": "2026-11-09T22:27:45.946Z",
   "source": "src/i18n/index.ts (en bundle)",
-  "count": 1564,
+  "count": 1584,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -8447,6 +8447,124 @@
       "vars": [
         "files"
       ]
+    },
+    {
+      "key": "sr.heading",
+      "en": "Heading {level}: {text}",
+      "vars": [
+        "level",
+        "text"
+      ]
+    },
+    {
+      "key": "sr.line",
+      "en": "Line {line}",
+      "vars": [
+        "line"
+      ]
+    },
+    {
+      "key": "sr.task.open",
+      "en": "Task, not done",
+      "vars": []
+    },
+    {
+      "key": "sr.task.done",
+      "en": "Task, done",
+      "vars": []
+    },
+    {
+      "key": "sr.codeFence",
+      "en": "Code block fence",
+      "vars": []
+    },
+    {
+      "key": "sr.quote",
+      "en": "Quote",
+      "vars": []
+    },
+    {
+      "key": "sr.suggestion",
+      "en": "Suggestion: {text}. Tab accepts, Escape dismisses.",
+      "vars": [
+        "text"
+      ]
+    },
+    {
+      "key": "sr.aiWorking",
+      "en": "AI is working…",
+      "vars": []
+    },
+    {
+      "key": "sr.aiDone",
+      "en": "AI finished.",
+      "vars": []
+    },
+    {
+      "key": "sr.position",
+      "en": "Line {line} of {lines}, column {col}",
+      "vars": [
+        "line",
+        "lines",
+        "col"
+      ]
+    },
+    {
+      "key": "sr.position.section",
+      "en": "Line {line} of {lines}, column {col}, under the heading: {heading}",
+      "vars": [
+        "line",
+        "lines",
+        "col",
+        "heading"
+      ]
+    },
+    {
+      "key": "sr.mode.off",
+      "en": "off",
+      "vars": []
+    },
+    {
+      "key": "sr.mode.structure",
+      "en": "headings and structure",
+      "vars": []
+    },
+    {
+      "key": "sr.mode.all",
+      "en": "every line",
+      "vars": []
+    },
+    {
+      "key": "cmd.a11y.srVerbosity",
+      "en": "Screen reader announcements: {mode}",
+      "vars": [
+        "mode"
+      ]
+    },
+    {
+      "key": "cmd.a11y.srVerbosity.hint",
+      "en": "What the editor says as the cursor moves: headings and structure, every line, or nothing",
+      "vars": []
+    },
+    {
+      "key": "cmd.a11y.whereAmI",
+      "en": "Announce cursor position",
+      "vars": []
+    },
+    {
+      "key": "cmd.a11y.whereAmI.hint",
+      "en": "Line, column and the heading above, read by the screen reader",
+      "vars": []
+    },
+    {
+      "key": "cmd.help.a11yStatement",
+      "en": "Accessibility statement",
+      "vars": []
+    },
+    {
+      "key": "cmd.help.a11yStatement.hint",
+      "en": "How accessible Lumen is (IS 5568, WCAG 2.2 AA), known gaps, and how to report a barrier",
+      "vars": []
     }
   ]
 }

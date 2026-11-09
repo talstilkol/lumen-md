@@ -1701,3 +1701,58 @@
     /* size: A4; — leave default so the user's printer dialog picks. */
   }
 }
+
+/* ── Forced colours and reflow (plan W1.23) ─────────────────────────────
+   Windows high contrast / forced-colors: the system palette replaces ours,
+   so state must not rest on background colour alone. Focus gets a system
+   outline, controls a border, selected items the system highlight. */
+@media (forced-colors: active) {
+  :focus-visible {
+    outline: 2px solid CanvasText !important;
+    outline-offset: 2px;
+  }
+  button,
+  [role="button"],
+  [role="tab"],
+  input,
+  select,
+  textarea {
+    border: 1px solid ButtonText;
+  }
+  [aria-selected="true"],
+  [aria-pressed="true"],
+  [aria-current]:not([aria-current="false"]) {
+    forced-color-adjust: none;
+    background: Highlight;
+    color: HighlightText;
+  }
+  .cm-editor .cm-cursor {
+    border-inline-start-color: CanvasText !important;
+  }
+  .cm-editor .cm-selectionBackground {
+    background: Highlight !important;
+  }
+}
+
+/* 400 % zoom is a 320 px-wide window (WCAG 1.4.10): media and wide blocks
+   stay inside it, and long words wrap instead of pushing the page wider.
+   Code scrolls inside its own box (the WCAG exception). Tables keep
+   display: table — display: block would drop their table semantics for
+   screen readers. */
+.prose-lumen img,
+.prose-lumen video,
+.prose-lumen iframe,
+.prose-lumen svg {
+  max-inline-size: 100%;
+  block-size: auto;
+}
+.prose-lumen {
+  overflow-wrap: anywhere;
+}
+.prose-lumen pre {
+  max-inline-size: 100%;
+  overflow-x: auto;
+}
+[role="dialog"] {
+  max-inline-size: 100vw;
+}

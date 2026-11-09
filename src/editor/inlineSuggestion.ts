@@ -10,6 +10,8 @@
 import { EditorView, Decoration, WidgetType, ViewPlugin, ViewUpdate, keymap } from "@codemirror/view";
 import { StateField, StateEffect, type Extension } from "@codemirror/state";
 import { log } from "../lib/logger";
+import { announce } from "../a11y/announce";
+import { t } from "../i18n";
 
 const setSuggestion = StateEffect.define<string | null>();
 
@@ -128,6 +130,7 @@ const suggestionPlugin = ViewPlugin.fromClass(
         if (!trimmed || trimmed === context.trim()) return;
 
         this.view.dispatch({ effects: setSuggestion.of(trimmed) });
+        announce(t("sr.suggestion", { text: trimmed }));
       } catch (err) {
         log.debug("inline-suggestion", err);
       } finally {
