@@ -74,7 +74,9 @@ export function SearchReplace({ open, onClose, content, onChange }: Props) {
         display: "flex",
         flexDirection: "column",
         gap: 8,
-        minWidth: 320,
+        // Fits a 320 px window (400 % zoom, plan W1.23): never wider than the window less its margins.
+        width: "min(320px, calc(100vw - 32px))",
+        boxSizing: "border-box",
         animation: "cmdSlideIn 120ms ease",
       }}
     >
