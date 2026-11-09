@@ -116,42 +116,48 @@ test("M6 — capture PageView screenshot", async ({ page }) => {
 test("Plugin Gallery — opens, lists at least one plugin, screenshot", async ({
   page,
 }) => {
+  // Opening the gallery used to throw "Rendered more hooks than during
+  // the previous render" (a hook below the early return); the old test
+  // ended in `expect(true)` and never saw it. A page error fails the test.
+  const pageErrors: string[] = [];
+  page.on("pageerror", (err) => pageErrors.push(err.message));
+
   await page.keyboard.press("Meta+K");
   const palette = page
     .locator('[role="dialog"][aria-modal="true"]')
     .filter({ has: page.locator("input") });
   await palette.waitFor({ timeout: 8000 });
-  await palette.locator("input").first().fill("Plugin");
+  await palette.locator("input").first().fill("Plugin Gallery");
   await expect(
     palette.locator('[role="option"][aria-selected="true"]'),
-  ).toContainText(/Plugin/i, { timeout: 8000 });
+  ).toContainText(/Plugin Gallery/i, { timeout: 8000 });
   await page.keyboard.press("Enter");
-  // Gallery is a separate role=dialog after the palette closes.
-  // Wait for at least one plugin card or list item to appear.
-  await page.waitForTimeout(1500); // registry fetch
-  const gallery = page
-    .locator('[role="dialog"]')
-    .filter({ hasNot: page.getByPlaceholder(/Type a command/i) });
-  // Either the gallery mounted, or the palette closed cleanly (action wired).
-  const galleryVisible = await gallery
-    .first()
-    .isVisible({ timeout: 3000 })
-    .catch(() => false);
-  if (galleryVisible) {
-    await page.screenshot({
-      path: path.join(OUT_DIR, "plugin-gallery.png"),
-      fullPage: true,
-    });
-  }
-  // Either way, no JS exceptions should have fired.
-  // (The palette wiring smoke is already covered by surfaces-smoke;
-  // this test's value is the screenshot artifact.)
-  expect(true).toBe(true);
+
+  // The gallery is its own dialog, labelled by its title; the bundled
+  // community plugins render without waiting for the registry fetch.
+  const gallery = page.locator('[role="dialog"][aria-labelledby="plugin-gallery-title"]');
+  await expect(gallery).toBeVisible({ timeout: 10_000 });
+  await expect(gallery.getByTestId("plugin-card").first()).toBeVisible({ timeout: 10_000 });
+  expect(await gallery.getByTestId("plugin-card").count()).toBeGreaterThan(0);
+  expect(pageErrors).toEqual([]);
+
+  await page.screenshot({
+    path: path.join(OUT_DIR, "plugin-gallery.png"),
+    fullPage: true,
+  });
+
+  // And it closes again.
+  await page.keyboard.press("Escape");
+  await expect(gallery).toBeHidden({ timeout: 5000 });
+  expect(pageErrors).toEqual([]);
 });
 
 test("Template Gallery — opens, lists templates, screenshot", async ({
   page,
 }) => {
+  const pageErrors: string[] = [];
+  page.on("pageerror", (err) => pageErrors.push(err.message));
+
   await page.keyboard.press("Meta+K");
   const palette = page
     .locator('[role="dialog"][aria-modal="true"]')
@@ -163,19 +169,19 @@ test("Template Gallery — opens, lists templates, screenshot", async ({
     palette.locator('[role="option"][aria-selected="true"]'),
   ).toContainText(/Template/i, { timeout: 8000 });
   await page.keyboard.press("Enter");
-  await page.waitForTimeout(1500); // registry fetch
+
   const gallery = page
     .locator('[role="dialog"]')
-    .filter({ hasNot: page.getByPlaceholder(/Type a command/i) });
-  const visible = await gallery
-    .first()
-    .isVisible({ timeout: 3000 })
-    .catch(() => false);
-  if (visible) {
-    await page.screenshot({
-      path: path.join(OUT_DIR, "template-gallery.png"),
-      fullPage: true,
-    });
-  }
-  expect(true).toBe(true);
+    .filter({ hasNot: page.getByPlaceholder(/Type a command/i) })
+    .first();
+  await expect(gallery).toBeVisible({ timeout: 10_000 });
+  // Without a marketplace backend the gallery falls back to the static
+  // registry served from public/templates, so rows always render.
+  await expect(gallery.getByTestId("template-card").first()).toBeVisible({ timeout: 10_000 });
+  expect(pageErrors).toEqual([]);
+
+  await page.screenshot({
+    path: path.join(OUT_DIR, "template-gallery.png"),
+    fullPage: true,
+  });
 });

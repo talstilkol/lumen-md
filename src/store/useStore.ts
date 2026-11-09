@@ -128,6 +128,12 @@ interface AppState {
   openTab: (input: { name: string; content: string; workspaceName?: string | null; handle?: FileSystemFileHandle }) => void;
   /** Close a tab by id. If it was active, falls back to the neighbour. */
   closeTab: (id: string) => void;
+  /**
+   * The active ad-hoc document was just written into the workspace under
+   * `workspaceName`: the document and its tab take that identity (the tab
+   * id follows, since it is the workspace name) and are clean.
+   */
+  adoptWorkspaceName: (workspaceName: string) => void;
   /** Reorder a tab from one index to another (drag-and-drop). */
   reorderTabs: (fromIndex: number, toIndex: number) => void;
 }
@@ -364,6 +370,16 @@ export const useAppStore = create<AppState>()(
             },
           };
         })),
+      adoptWorkspaceName: (workspaceName) =>
+        set((state) => {
+          const prevId = tabIdOf(state.doc);
+          const doc: DocFile = { ...state.doc, name: workspaceName, workspaceName, handle: undefined, dirty: false };
+          const id = tabIdOf(doc);
+          const openTabs = state.openTabs.map((t) =>
+            t.id === prevId ? { ...t, id, name: doc.name, content: doc.content, workspaceName, dirty: false } : t,
+          );
+          return { doc, openTabs };
+        }),
       closeTab: afterPendingEdits((id) =>
         set((state) => {
           const idx = state.openTabs.findIndex((t) => t.id === id);

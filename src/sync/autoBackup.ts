@@ -17,6 +17,8 @@ const MAX_VERSIONS = 100;
 let timer: ReturnType<typeof setTimeout> | undefined;
 let snapshotQueue: Array<{ name: string; content: string; ts: number }> = [];
 let isWriting = false;
+/** The edit the 30 s timer is still waiting on, so a closing tab can save it. */
+let pending: { name: string; content: string } | null = null;
 
 /**
  * Start the auto-backup listener.  Call once at application startup.
@@ -30,26 +32,56 @@ export function startAutoBackup(): void {
     scheduleSnapshot(state.doc.name, state.doc.content);
   });
 
-  // Also flush on beforeunload so nothing is lost when the tab closes.
-  const onBeforeUnload = () => {
-    flushQueue(true);
+  // Flush when the tab closes or is hidden: the 30 s timer may still be
+  // waiting on the latest edit, and a closed tab never fires it. `pagehide`
+  // is the last reliable event (beforeunload is skipped by bfcache and on
+  // mobile); `visibilitychange` → hidden covers a backgrounded phone.
+  const onPageHide = () => {
+    flushNow();
   };
-  window.addEventListener("beforeunload", onBeforeUnload);
+  const onVisibility = () => {
+    if (document.visibilityState === "hidden") flushNow();
+  };
+  window.addEventListener("pagehide", onPageHide);
+  window.addEventListener("beforeunload", onPageHide);
+  document.addEventListener("visibilitychange", onVisibility);
 
   // Return teardown so tests can clean up.
   (startAutoBackup as unknown as { _teardown?: () => void })._teardown = () => {
     unsub();
-    window.removeEventListener("beforeunload", onBeforeUnload);
+    window.removeEventListener("pagehide", onPageHide);
+    window.removeEventListener("beforeunload", onPageHide);
+    document.removeEventListener("visibilitychange", onVisibility);
     if (timer) {
       clearTimeout(timer);
       timer = undefined;
     }
+    pending = null;
   };
+}
+
+/**
+ * Snapshot the edit the timer is still waiting on and write everything
+ * queued, now. Used when the page is hidden or going away.
+ */
+export function flushNow(): Promise<void> {
+  if (timer) {
+    clearTimeout(timer);
+    timer = undefined;
+  }
+  if (pending) {
+    snapshotQueue.push({ ...pending, ts: Date.now() });
+    pending = null;
+  }
+  return flushQueue(true);
 }
 
 function scheduleSnapshot(name: string, content: string): void {
   if (timer) clearTimeout(timer);
+  pending = { name, content };
   timer = setTimeout(() => {
+    timer = undefined;
+    pending = null;
     snapshotQueue.push({ name, content, ts: Date.now() });
     // Use requestIdleCallback when available to avoid blocking the main thread.
     if ("requestIdleCallback" in window) {

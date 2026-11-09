@@ -12,6 +12,7 @@ import { initAuth } from "./auth/useAuth";
 import { reportWebVitals } from "./lib/webVitals";
 import { log } from "./lib/logger";
 import { startAutoBackup } from "./sync/autoBackup";
+import { requestPersistentStorage } from "./storage/persistentStorage";
 import { initLocale } from "./i18n";
 import { adoptBootLocale } from "./store/useStore";
 import "./index.css";
@@ -19,6 +20,8 @@ import "./index.css";
 initTelemetry();
 void initAuth();
 startAutoBackup();
+// The vault lives in OPFS/IndexedDB; without this the browser may evict it.
+void requestPersistentStorage();
 
 // Core Web Vitals — opt-out gates inside; sink writes to the structured
 // log so Sentry (when configured) picks them up alongside other events.

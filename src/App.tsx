@@ -61,6 +61,7 @@ import { useAppStore, applyTheme } from "./store/useStore";
 import { applyLocale, t } from "./i18n";
 import { localLlmAvailable } from "./ai/localLlm";
 import { assessConfigHealth } from "./lib/configHealth";
+import { log } from "./lib/logger";
 import { openFileDialog, saveFile } from "./storage/fs";
 import { exportToHtml } from "./storage/exportHtml";
 import { getRecents, pushRecent, reopenRecent } from "./storage/recent";
@@ -85,6 +86,7 @@ export default function App() {
   const setContent = useAppStore((s) => s.setContent);
   const setDoc = useAppStore((s) => s.setDoc);
   const markSaved = useAppStore((s) => s.markSaved);
+  const adoptWorkspaceName = useAppStore((s) => s.adoptWorkspaceName);
   const openTabs = useAppStore((s) => s.openTabs);
   const openTabAction = useAppStore((s) => s.openTab);
   const closeTabAction = useAppStore((s) => s.closeTab);
@@ -425,19 +427,30 @@ export default function App() {
     });
   }, [setDoc]);
 
+  // Write the active ad-hoc document (no disk handle, not in the
+  // workspace) into the workspace under a free name derived from its own,
+  // and switch the document and its tab to that identity. Shared by the
+  // explicit "save to workspace" command and by autosave.
+  const adoptIntoWorkspace = useCallback(async (): Promise<string | null> => {
+    const d = useAppStore.getState().doc;
+    if (!isOPFSAvailable()) return null;
+    const base = d.name.replace(/\.[^./]+$/, "") + ".md";
+    const name = await uniqueWorkspaceName(base);
+    await writeWorkspaceFile(name, d.content);
+    adoptWorkspaceName(name);
+    window.dispatchEvent(new Event("lumen-workspace-changed"));
+    return name;
+  }, [adoptWorkspaceName]);
+
   // Save the current doc into the workspace as a fresh file.
   const handleSaveToWorkspace = useCallback(async () => {
     if (!isOPFSAvailable()) {
       await uiAlert({ message: t("doc.alert.workspaceUnavailable") });
       return;
     }
-    const base = doc.name.replace(/\.[^./]+$/, "") + ".md";
-    const name = await uniqueWorkspaceName(base);
-    await writeWorkspaceFile(name, doc.content);
-    setDoc({ name, workspaceName: name, handle: undefined, dirty: false });
+    await adoptIntoWorkspace();
     if (!showWorkspace) toggleWorkspace();
-    window.dispatchEvent(new Event("lumen-workspace-changed"));
-  }, [doc.name, doc.content, setDoc, showWorkspace, toggleWorkspace]);
+  }, [adoptIntoWorkspace, showWorkspace, toggleWorkspace]);
 
   // Autosave the active workspace file as the user types (debounced).
   useEffect(() => {
@@ -531,16 +544,51 @@ export default function App() {
   useEffect(() => {
     if (!autoSave || !doc.dirty) return;
     const timer = setInterval(() => {
-      if (useAppStore.getState().doc.dirty) {
-        // Only auto-save if the file has a handle or workspace name
-        const d = useAppStore.getState().doc;
-        if (d.handle || d.workspaceName) {
-          handleSave(false);
-        }
+      const d = useAppStore.getState().doc;
+      if (!d.dirty) return;
+      if (d.handle) {
+        // From disk: write back through the handle (workspace files are
+        // written by the debounced effect above).
+        handleSave(false);
+      } else if (!d.workspaceName && d.content.trim()) {
+        // Untitled / ad-hoc: until now these were never written anywhere
+        // but localStorage. Give them a home in the workspace; from then
+        // on the debounced workspace autosave owns them.
+        adoptIntoWorkspace().catch((err) => log.warn("[autosave] adopt failed", (err as Error).message));
       }
     }, autoSaveInterval);
     return () => clearInterval(timer);
-  }, [autoSave, autoSaveInterval, doc.dirty, handleSave]);
+  }, [autoSave, autoSaveInterval, doc.dirty, handleSave, adoptIntoWorkspace]);
+
+  // Flush the pending workspace write when the page is hidden or going
+  // away: the debounced effect above may still be waiting, and a closed
+  // tab (or a backgrounded phone) never runs it. `pagehide` is the last
+  // reliable moment; `visibilitychange` covers mobile, where pages are
+  // often frozen instead of unloaded. The localStorage mirror keeps the
+  // text either way; this keeps the workspace file current.
+  useEffect(() => {
+    const flush = () => {
+      const d = useAppStore.getState().doc;
+      if (!d.dirty || !d.workspaceName) return;
+      const name = d.workspaceName;
+      writeWorkspaceFile(name, d.content)
+        .then(() => {
+          if (useAppStore.getState().doc.workspaceName === name) markSaved();
+        })
+        .catch(() => {
+          /* best effort; the debounced autosave retries on the next edit */
+        });
+    };
+    const onVisibility = () => {
+      if (document.visibilityState === "hidden") flush();
+    };
+    window.addEventListener("pagehide", flush);
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => {
+      window.removeEventListener("pagehide", flush);
+      document.removeEventListener("visibilitychange", onVisibility);
+    };
+  }, [markSaved]);
 
   const { dragHover } = useFileDragDrop(setDoc);
 
