@@ -1435,5 +1435,19 @@
   "cmd.ai.cancel": "AI: إلغاء",
   "cmd.ai.cancel.hint": "يوقف كل طلبات الذكاء الاصطناعي الجارية (Esc يفعل ذلك أيضاً)",
   "toast.aiCancelled": "أُلغي طلب الذكاء الاصطناعي ({count})",
-  "toast.aiNothingRunning": "لا يوجد طلب ذكاء اصطناعي جارٍ"
+  "toast.aiNothingRunning": "لا يوجد طلب ذكاء اصطناعي جارٍ",
+  "cmd.ai.autofill": "AI: ملء خصائص الملاحظات…",
+  "cmd.ai.autofill.hint": "يقترح الخصائص الناقصة لملاحظات مجلد؛ لا يُكتب شيء قبل موافقتك",
+  "autofill.folder": "ملء الخصائص لملاحظات أي مجلد؟ (فارغ = مساحة العمل كلها)",
+  "autofill.noFields": "لا توجد خاصية مستخدمة في ملاحظتين على الأقل بعد — أضف بعضها ثم حاول مجددًا",
+  "autofill.progress": "قراءة الملاحظة {i} من {n}…",
+  "autofill.proposed": "{n} اقتراحات بانتظار موافقتك",
+  "autofill.title": "اقتراحات الخصائص",
+  "autofill.hint": "لا يُكتب شيء قبل موافقتك. تُتخطّى الملاحظة التي تغيّرت منذ ذلك.",
+  "autofill.empty": "لا توجد اقتراحات بانتظار الموافقة",
+  "autofill.approve": "موافقة",
+  "autofill.reject": "رفض",
+  "autofill.approveAll": "الموافقة على الكل ({n})",
+  "autofill.written": "كُتبت الخصائص في {n} ملاحظات",
+  "autofill.stale": "تغيّرت {n} ملاحظات منذ الاقتراح ولم تُكتب"
 }

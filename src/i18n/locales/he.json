@@ -1435,5 +1435,19 @@
   "cmd.ai.cancel": "AI: ביטול",
   "cmd.ai.cancel.hint": "עוצר כל בקשת AI שרצה (גם Esc עושה זאת)",
   "toast.aiCancelled": "בקשת ה-AI בוטלה ({count})",
-  "toast.aiNothingRunning": "אין בקשת AI שרצה"
+  "toast.aiNothingRunning": "אין בקשת AI שרצה",
+  "cmd.ai.autofill": "AI: מילוי מאפיינים לפתקים…",
+  "cmd.ai.autofill.hint": "מציע מאפיינים חסרים לפתקים של תיקייה; שום דבר לא נכתב לפני שתאשרו",
+  "autofill.folder": "למלא מאפיינים לפתקים באיזו תיקייה? (ריק = כל סביבת העבודה)",
+  "autofill.noFields": "עדיין אין מאפיין שמופיע לפחות בשני פתקים — הוסיפו כמה ונסו שוב",
+  "autofill.progress": "קורא פתק {i} מתוך {n}…",
+  "autofill.proposed": "{n} הצעות ממתינות לאישורכם",
+  "autofill.title": "הצעות למאפיינים",
+  "autofill.hint": "שום דבר לא נכתב לפני שתאשרו. פתק שהשתנה מאז מדולג.",
+  "autofill.empty": "אין הצעות ממתינות",
+  "autofill.approve": "אישור",
+  "autofill.reject": "דחייה",
+  "autofill.approveAll": "אישור הכול ({n})",
+  "autofill.written": "המאפיינים נכתבו ל-{n} פתקים",
+  "autofill.stale": "{n} פתקים השתנו מאז ההצעה ולא נכתבו"
 }
