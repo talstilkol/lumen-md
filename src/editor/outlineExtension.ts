@@ -281,6 +281,8 @@ const outlineKeymap = Prec.high(
     { key: "Mod-Alt-ArrowRight", run: arrowIndent(true) },
     { key: "Mod-Alt-ArrowLeft", run: arrowIndent(false) },
     { key: "Alt-Shift-d", run: (v) => (runOp(v, "duplicate"), true) },
+    // Where Option types a character (macOS, and WebKit reporting a Mac), the key arrives as Alt + "D".
+    { key: "Alt-D", run: (v) => (runOp(v, "duplicate"), true) },
     { key: "Alt-Shift-Backspace", run: (v) => (runOp(v, "delete"), true) },
     { key: "Mod-Alt-ArrowUp", run: (v) => (foldHere(v, true), true) },
     { key: "Mod-Alt-ArrowDown", run: (v) => (foldHere(v, false), true) },
