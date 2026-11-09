@@ -73,9 +73,6 @@ function getWorker(): Worker {
   return w;
 }
 
-/** Writes the worker has not answered yet: their temporary files are not leftovers. */
-export const opfsWritesPending = (): boolean => pending.size > 0;
-
 /** Write `data` to the OPFS file at `parts` (relative to the OPFS root). */
 export async function syncWriteOpfs(parts: string[], data: string | Blob | ArrayBuffer | Uint8Array): Promise<void> {
   if (typeof Worker === "undefined") throw new Error("OPFS writes are not supported in this browser.");
