@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-10-17T20:20:34.387Z",
+  "generated_at": "2026-10-17T20:41:01.919Z",
   "source": "src/i18n/index.ts (en bundle)",
-  "count": 1206,
+  "count": 1207,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -4038,6 +4038,11 @@
     {
       "key": "ai.doctor.fix.pull",
       "en": "Download the model:",
+      "vars": []
+    },
+    {
+      "key": "ai.doctor.fix.pullHebrew",
+      "en": "Your notes are in Hebrew; this model handles Hebrew well:",
       "vars": []
     },
     {

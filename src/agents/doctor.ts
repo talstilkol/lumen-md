@@ -55,6 +55,10 @@ export interface DoctorOptions {
 
 export const RECOMMENDED_EMBED_MODEL = "nomic-embed-text";
 
+function t_he(ok: boolean): string {
+  return ok ? "Hebrew: a model with good Hebrew is installed" : "Hebrew: no installed model has good Hebrew";
+}
+
 function pageOrigin(): string {
   try {
     return typeof location !== "undefined" ? location.origin : "";
@@ -179,7 +183,14 @@ export async function runDoctor(opts: DoctorOptions = {}): Promise<DoctorReport>
 
   // 3. Ollama models: a chat model, the recommended one, an embedding model, tool support.
   if (ollamaUp) {
-    const { RECOMMENDED_OLLAMA_MODEL, ollamaExecutor } = await import("./executors/ollama");
+    const { ollamaExecutor } = await import("./executors/ollama");
+    // The model to suggest depends on the notes' language and the RAM (T27).
+    const { recommendOllamaModel, prefersHebrew, hebrewSupportOf } = await import("../ai/modelCatalog");
+    const { useAppStore } = await import("../store/useStore");
+    const st = useAppStore.getState();
+    const hebrew = prefersHebrew(st.locale, st.doc.content);
+    const ramGB = typeof navigator !== "undefined" ? ((navigator as Navigator & { deviceMemory?: number }).deviceMemory ?? null) : null;
+    const RECOMMENDED_OLLAMA_MODEL = recommendOllamaModel({ hebrew, ramGB }).name;
     const tags = await probe(`${base}/api/tags`, { signal: opts.signal, timeoutMs });
     const models: string[] = "json" in tags ? (((tags.json as { models?: Array<{ name: string }> } | null)?.models ?? []).map((m) => m.name)) : [];
     const chat = models.filter((m) => !/embed/i.test(m));
@@ -189,12 +200,14 @@ export async function runDoctor(opts: DoctorOptions = {}): Promise<DoctorReport>
       push({ id: "ollama.models", title: "ai.doctor.check.models", status: "fail", detail: models.length ? models.join(", ") : "—", fix: { label: "ai.doctor.fix.pull", command: `ollama pull ${RECOMMENDED_OLLAMA_MODEL}`, action: "pullModel", arg: RECOMMENDED_OLLAMA_MODEL } });
     } else {
       const hasRecommended = chat.some((m) => m === RECOMMENDED_OLLAMA_MODEL || m.startsWith(RECOMMENDED_OLLAMA_MODEL + "-") || m.split(":")[0] === RECOMMENDED_OLLAMA_MODEL.split(":")[0]);
+      // For Hebrew notes, a model with good Hebrew already installed counts.
+      const hebrewOk = !hebrew || chat.some((m) => ["strong", "good"].includes(hebrewSupportOf(m) ?? ""));
       push({
         id: "ollama.models",
         title: "ai.doctor.check.models",
-        status: hasRecommended ? "ok" : "warn",
-        detail: chat.join(", "),
-        fix: hasRecommended ? undefined : { label: "ai.doctor.fix.pull", command: `ollama pull ${RECOMMENDED_OLLAMA_MODEL}`, action: "pullModel", arg: RECOMMENDED_OLLAMA_MODEL },
+        status: hasRecommended || hebrewOk ? "ok" : "warn",
+        detail: chat.join(", ") + (hebrew ? ` · ${t_he(hebrewOk)}` : ""),
+        fix: hasRecommended || hebrewOk ? undefined : { label: hebrew ? "ai.doctor.fix.pullHebrew" : "ai.doctor.fix.pull", command: `ollama pull ${RECOMMENDED_OLLAMA_MODEL}`, action: "pullModel", arg: RECOMMENDED_OLLAMA_MODEL },
       });
       const configuredInstalled = chat.some((m) => m === configured || m.split(":")[0] === configured.split(":")[0]);
       if (!configuredInstalled) {

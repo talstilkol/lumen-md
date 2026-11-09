@@ -15,6 +15,7 @@ export interface DiagrammerInput extends AgentInput {
 
 export const diagrammerAgent: AgentDefinition<DiagrammerInput, string> = registerAgent<DiagrammerInput, string>({
   id: "diagrammer",
+  language: "any",
   commandId: "ai.diagram",
   description: "Convert prose into a Mermaid diagram",
   system:

@@ -1204,5 +1204,6 @@
   "versionHistory.reason.vault": "תמונת מצב של הכספת",
   "versionHistory.reason.close": "בסגירה",
   "versionHistory.reason.restore": "לפני שחזור",
-  "versionHistory.reason.manual": "ידני"
+  "versionHistory.reason.manual": "ידני",
+  "ai.doctor.fix.pullHebrew": "הפתקים שלך בעברית; המודל הזה טוב בעברית:"
 }

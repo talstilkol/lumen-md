@@ -126,14 +126,17 @@ export function catalogEntryFor(modelId: string): WebLlmCatalogEntry | undefined
 }
 
 /** The model id for a tier that fits the budget; the largest that fits, else the smallest of the catalog. */
-export function recommendWebLlmModel(tier: ModelTier, hw: Hardware, opts: { tools?: boolean; code?: boolean } = {}): string {
+export function recommendWebLlmModel(tier: ModelTier, hw: Hardware, opts: { tools?: boolean; code?: boolean; multilingual?: boolean } = {}): string {
   const budget = vramBudgetMB(hw);
   const vram = (e: WebLlmCatalogEntry) => (hw.f16 ? e.vramMB.f16 : e.vramMB.f32);
   const order: ModelTier[] = ["tiny", "small", "medium", "large"];
   const want = order.indexOf(tier);
   const prefer = (list: WebLlmCatalogEntry[]) => {
     const scored = list.filter((e) => (!opts.tools || e.tools) && (!opts.code || e.code));
-    return scored.length ? scored : list;
+    const base = scored.length ? scored : list;
+    // Hebrew notes: a multilingual model of the tier, when one fits (T27).
+    const multi = opts.multilingual ? base.filter((e) => e.multilingual) : [];
+    return multi.length ? multi : base;
   };
   // Walk from the requested tier down to tiny until something fits.
   for (let i = want; i >= 0; i--) {
@@ -165,7 +168,7 @@ export function setWebLlmModel(modelId: string | null): void {
  * The web-llm model to use for a tier: the user's choice when it is set
  * and at least as large as the tier asks for, else the recommendation.
  */
-export function webLlmModelFor(tier: ModelTier, hw: Hardware, opts: { tools?: boolean; code?: boolean } = {}): string {
+export function webLlmModelFor(tier: ModelTier, hw: Hardware, opts: { tools?: boolean; code?: boolean; multilingual?: boolean } = {}): string {
   const chosen = selectedWebLlmModel();
   if (chosen) {
     const entry = catalogEntryFor(chosen);

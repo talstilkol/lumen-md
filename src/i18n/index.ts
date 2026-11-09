@@ -863,6 +863,7 @@ const en: Strings = {
   "ai.doctor.fix.origins": "Ollama refuses this site (403). Allow it with OLLAMA_ORIGINS and restart Ollama:",
   "ai.doctor.fix.update": "Update Ollama to 0.5 or newer:",
   "ai.doctor.fix.pull": "Download the model:",
+  "ai.doctor.fix.pullHebrew": "Your notes are in Hebrew; this model handles Hebrew well:",
   "ai.doctor.fix.webgpu": "Use Ollama instead, or a browser with WebGPU (Chrome, Edge, Safari 18+):",
   "ai.doctor.fix.persist": "Ask the browser to keep the vault (it may evict it otherwise):",
   "ai.doctor.fix.docker": "Run the local services:",
