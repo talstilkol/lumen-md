@@ -1468,5 +1468,10 @@
   "toast.nikud.noHost": "元音符号模型尚不可下载（其托管尚未设置）。",
   "toast.nikud.declined": "添加元音符号需要下载模型；未做任何更改。",
   "toast.nikud.failed": "添加元音符号失败：{error}",
-  "models.purpose.nikud": "在本设备上为希伯来语加元音符号"
+  "models.purpose.nikud": "在本设备上为希伯来语加元音符号",
+  "toast.nikud.done": "已在本设备上添加元音符号。带下划线的词有多种读法：点击查看（任意词可用 Alt+点击）。",
+  "toast.nikud.doneHigh": "已使用 DictaBERT-char-menaked（高质量）在本设备上添加元音符号。带下划线的词有多种读法：点击查看。",
+  "models.purpose.nikudHigh": "在本设备上进行高质量希伯来语元音标注（DictaBERT-char-menaked）",
+  "nikud.alt.title": "其他读法",
+  "nikud.alt.choose": "使用“{word}”"
 }

@@ -850,6 +850,21 @@
           "attribution": "Nakdimon © 2022 Elazar Gershuni (Gershuni & Pinter, “Restoring Hebrew Diacritics Without a Dictionary”, NAACL Findings 2022), licensed under the MIT License; mirrored unchanged by Lumen."
         }
       ]
+    },
+    {
+      "id": "dictabert-char-menaked",
+      "kind": "other",
+      "source": "https://huggingface.co/dicta-il/dictabert-large-char-menaked",
+      "license": "CC-BY-4.0",
+      "class": "allowed",
+      "commercial": "yes",
+      "attribution": "DictaBERT-char-menaked © DICTA: The Israel Center for Text Analysis (model card dicta-il/dictabert-large-char-menaked), licensed under CC BY 4.0. Exported to ONNX and quantised to int8 by Lumen.",
+      "size": "set from the first export run (int8 ONNX, q8)",
+      "runs": "browser",
+      "delivery": "download",
+      "catalog": "CONVERTED_MODELS (src/ai/convertedModels.ts), MENAKED_ID (src/ai/nikudService.ts)",
+      "verified": false,
+      "notes": "Plan W2.5: the high-quality niqqud layer above Nakdimon. Custom architecture (trust_remote_code), so it is not an optimum export: scripts/models/export-menaked.py exports it to ONNX, quantises it to int8 and writes menaked.json (vocabulary, class lists, tensor names) at a pinned revision; then scripts/models/registry-edit.mjs records the files here. Until then (no files) the app uses Nakdimon. CC BY 4.0: the attribution is shown in the consent dialog."
     }
   ]
 }

@@ -41,24 +41,9 @@ async function cancellable<T>(fn: (signal: AbortSignal) => Promise<T>): Promise<
   }
 }
 
-/** Save a clip into the library folder and open it (T34). Exported for tests. */
+/** Save a clip into the library folder and open it (T34). Exported for tests; the work is in a lazy module. */
 export async function saveClip(clip: { title: string; markdown: string }): Promise<void> {
-  const { clipFileName, libraryDir } = await import("../research/clipper");
-  const { writeWorkspaceFile, workspaceHasEntry, isOPFSAvailable } = await import("../storage/workspace");
-  const name = clipFileName(clip.title);
-  if (!isOPFSAvailable()) {
-    // Nothing was written: open it as an unsaved (dirty) document in its own
-    // tab, so closing the tab or the page warns instead of losing the clip.
-    openTemplateDoc(name.replace(/\.md$/, ""), clip.markdown);
-    return;
-  }
-  const dir = libraryDir(getLocale());
-  let path = `${dir}/${name}`;
-  for (let i = 2; await workspaceHasEntry(path); i++) path = `${dir}/${name.replace(/\.md$/, "")} (${i}).md`;
-  await writeWorkspaceFile(path, clip.markdown);
-  window.dispatchEvent(new Event("lumen-workspace-changed"));
-  useAppStore.getState().openTab({ name: path.split("/").pop()!, content: clip.markdown, workspaceName: path });
-  showAiToast(t("clip.saved", { path }), "success");
+  await (await import("../research/clipSave")).saveClipToLibrary(clip, openTemplateDoc);
 }
 
 export interface UseCommandsOptions {
@@ -138,31 +123,8 @@ export function openNewDoc(base: string, content: string, dirty: boolean): void 
   if (dirty) useAppStore.getState().setDoc({ dirty: true });
 }
 
-/** Every Markdown note in the workspace, for Vault Doctor (null when there is none). */
-async function loadDoctorNotes(): Promise<Array<{ path: string; text: string }> | null> {
-  if (!isOPFSAvailable()) {
-    showAiToast(t("doctor.noWorkspace"), "error");
-    return null;
-  }
-  const { listWorkspace } = await import("../storage/workspace");
-  const notes: Array<{ path: string; text: string }> = [];
-  for (const f of await listWorkspace({ includeAssets: false })) {
-    if (!/\.(md|markdown)$/i.test(f.path)) continue;
-    try {
-      notes.push({ path: f.path, text: await readWorkspaceFile(f.path) });
-    } catch {
-      // A missing note would look like a broken link target (and "fix"
-      // links to it): stop rather than scan an incomplete workspace.
-      showAiToast(t("doctor.readFailed", { path: f.path }), "error");
-      return null;
-    }
-  }
-  if (!notes.length) {
-    showAiToast(t("doctor.noWorkspace"), "error");
-    return null;
-  }
-  return notes;
-}
+/** Every Markdown note in the workspace, for Vault Doctor (null when there is none); loaded on use. */
+const loadDoctorNotes = async () => (await import("../lint/doctorNotes")).loadDoctorNotes();
 
 export function useCommands({
   handleNew,
@@ -200,25 +162,10 @@ export function useCommands({
   const theme = useAppStore((s) => s.theme);
   const showWorkspace = useAppStore((s) => s.showWorkspace);
   const locale = useAppStore((s) => s.locale);
-  /** Niqqud on the selection or the note (plan 6.3): Nakdimon in a worker, with consent. */
+  /** Niqqud on the selection or the note (plans 6.3, W2.5): the whole flow is loaded on use. */
   const runNikud = async (mode: "add" | "partial" | "remove") => {
     const view = getEditorView?.();
-    if (!view) return;
-    try {
-      const [{ runNikudCommand }, svc] = await Promise.all([import("../editor/nikudCommand"), import("../ai/nikudService")]);
-      if (mode !== "remove") showAiToast(t("toast.nikud.working"), "info");
-      const changed = await cancellable((signal) =>
-        runNikudCommand(view, mode, {
-          point: (text, partial) => svc.pointHebrew(text, { consent: { confirm: uiConfirm, t, locale }, signal }, { partial }),
-          unpoint: svc.unpointHebrew,
-        }),
-      );
-      if (!changed) showAiToast(t("toast.nikud.nothing"), "info");
-    } catch (e) {
-      if (isAbort(e)) return;
-      const reason = (e as { name?: string; reason?: string }).name === "NikudUnavailableError" ? (e as { reason: string }).reason : null;
-      showAiToast(reason ? t(`toast.nikud.${reason}`) : t("toast.nikud.failed", { error: (e as Error).message }), reason ? "info" : "error");
-    }
+    if (view) await (await import("../editor/nikudPalette")).runNikudFromPalette(view, mode, locale);
   };
   const rtl = useAppStore((s) => s.rtl);
   const autoSave = useAppStore((s) => s.autoSave);
@@ -1411,81 +1358,8 @@ export function useCommands({
         hint: t("cmd.ai.localModels.hint"),
         icon: cmdIcons.Sparkles,
         group: t("group.tools"),
-        action: async () => {
-          const { detectHardware, WEBLLM_CATALOG, webLlmModelId, vramBudgetMB, recommendWebLlmModel, selectedWebLlmModel, setWebLlmModel } = await import("../ai/modelManager");
-          const { webLlmModelCached, loadWebLlmModel, onWebLlmProgress } = await import("../ai/webllmEngine");
-          const hw = await detectHardware();
-          if (!hw.webgpu) {
-            showAiToast(t("ai.localModels.noWebgpu"), "error");
-            return;
-          }
-          const budget = vramBudgetMB(hw);
-          const recommended = recommendWebLlmModel("small", hw);
-          const selected = selectedWebLlmModel();
-          const cached = await Promise.all(WEBLLM_CATALOG.map((e) => webLlmModelCached(webLlmModelId(e, hw.f16))));
-          const choices = WEBLLM_CATALOG.map((e, i) => {
-            const id = webLlmModelId(e, hw.f16);
-            const gb = Math.round(((hw.f16 ? e.vramMB.f16 : e.vramMB.f32) / 1024) * 10) / 10;
-            const marks = [
-              id === selected ? t("ai.localModels.selected") : "",
-              id === recommended ? t("ai.localModels.recommended") : "",
-              cached[i] ? t("ai.localModels.cached") : "",
-              (hw.f16 ? e.vramMB.f16 : e.vramMB.f32) > budget ? t("ai.localModels.tooBig") : "",
-            ].filter(Boolean);
-            // why: custom-licence models (Llama, Gemma…) are opt-in and named as such (plan 1.7)
-            const lic = e.licence ? ` · ${e.licence}` : "";
-            return { value: id, label: `${e.label} · ${gb} GB · ${e.tier}${lic}${marks.length ? " — " + marks.join(", ") : ""}` };
-          });
-          choices.push({ value: "__auto__", label: t("ai.localModels.auto") });
-          const choice = await uiSelect({
-            title: t("ai.localModels.title"),
-            message: t("ai.localModels.message", { budget: Math.round(budget / 1024), f16: hw.f16 ? "q4f16" : "q4f32" }),
-            defaultValue: selected ?? recommended,
-            choices,
-          });
-          if (!choice) return;
-          if (choice === "__auto__") {
-            setWebLlmModel(null);
-            showAiToast(t("ai.localModels.autoSet", { model: recommended }), "success");
-            return;
-          }
-          const picked = WEBLLM_CATALOG.find((e) => webLlmModelId(e, hw.f16) === choice);
-          if (picked?.licence && choice !== selected) {
-            const ok = await uiConfirm({
-              title: t("ai.localModels.licenceTitle"),
-              message: t("ai.localModels.licenceBody", { model: picked.label, licence: picked.licence }),
-              okLabel: t("ai.localModels.licenceOk"),
-            });
-            if (!ok) return;
-          }
-          setWebLlmModel(choice);
-          const idx = choices.findIndex((c) => c.value === choice);
-          if (idx >= 0 && cached[idx]) {
-            showAiToast(t("ai.localModels.set", { model: choice }), "success");
-            return;
-          }
-          const download = await uiConfirm({ message: t("ai.localModels.downloadNow", { model: choice }) });
-          if (!download) {
-            showAiToast(t("ai.localModels.set", { model: choice }), "success");
-            return;
-          }
-          let lastPct = -1;
-          const off = onWebLlmProgress(({ progress, text }) => {
-            const pct = Math.round(progress * 100);
-            if (pct >= lastPct + 5 || pct === 100) {
-              lastPct = pct;
-              showAiToast(t("ai.toast.localLoading.body", { pct, status: text || t("ai.toast.localLoading.preparing") }), "info");
-            }
-          });
-          try {
-            await loadWebLlmModel(choice);
-            showAiToast(t("ai.localModels.ready", { model: choice }), "success");
-          } catch (err) {
-            showAiToast(t("ai.localModels.failed", { error: err instanceof Error ? err.message : String(err) }), "error");
-          } finally {
-            off();
-          }
-        },
+        // The picker, the licence check and the download live in a lazy module.
+        action: async () => (await import("../ai/localModelsCommand")).runLocalModelsCommand(),
       },
       {
         id: "ai.styleProfile",
