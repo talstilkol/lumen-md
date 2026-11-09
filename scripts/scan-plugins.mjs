@@ -18,7 +18,7 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 const SELF = fileURLToPath(import.meta.url);
 const ROOT = resolve(dirname(SELF), "..");
 if (!process.execArgv.includes("--import")) {
-  const r = spawnSync(process.execPath, ["--no-warnings", "--experimental-strip-types", "--import", pathToFileURL(join(ROOT, "scripts/lib/ts-register.mjs")).href, SELF, ...process.argv.slice(2)], { stdio: "inherit" });
+  const r = spawnSync(process.execPath, ["--no-warnings", "--experimental-transform-types", "--import", pathToFileURL(join(ROOT, "scripts/lib/ts-register.mjs")).href, SELF, ...process.argv.slice(2)], { stdio: "inherit" });
   process.exit(r.status ?? 1);
 }
 

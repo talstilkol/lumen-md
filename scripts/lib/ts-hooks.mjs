@@ -1,7 +1,7 @@
 /**
  * Module hooks so a Node script can import the app's TypeScript modules
  * with type stripping: Vite-style imports without an extension resolve to
- * `.ts` or `/index.ts`. Use: node --experimental-strip-types --import ./scripts/lib/ts-register.mjs …
+ * `.ts` or `/index.ts`. Use: node --experimental-transform-types --import ./scripts/lib/ts-register.mjs …
  */
 import { existsSync, statSync } from "node:fs";
 import { dirname, resolve as resolvePath } from "node:path";
