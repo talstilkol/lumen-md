@@ -28,6 +28,32 @@ interface Props {
 
 const POLL_INTERVAL_MS = 30_000;
 
+/**
+ * The job being trained, kept across closing the dialog (which unmounts
+ * it) and reloads: a reopened dialog resumes polling and still saves the
+ * resulting model id.
+ */
+const ACTIVE_JOB_KEY = "lumen.fineTune.activeJob";
+const isActive = (j: FineTuneJob | null) => !!j && (j.status === "queued" || j.status === "running");
+
+function loadActiveJob(): FineTuneJob | null {
+  try {
+    const j = JSON.parse(localStorage.getItem(ACTIVE_JOB_KEY) ?? "null") as FineTuneJob | null;
+    return j && typeof j.id === "string" && isActive(j) ? j : null;
+  } catch {
+    return null;
+  }
+}
+
+function saveActiveJob(j: FineTuneJob | null): void {
+  try {
+    if (isActive(j)) localStorage.setItem(ACTIVE_JOB_KEY, JSON.stringify({ id: j!.id, status: j!.status, createdAt: j!.createdAt }));
+    else localStorage.removeItem(ACTIVE_JOB_KEY);
+  } catch {
+    /* storage denied: polling lasts while the dialog is open */
+  }
+}
+
 export function FineTuneSettings({ open, onClose }: Props) {
   const useFineTunedModel = useAppStore((s) => s.useFineTunedModel);
   const fineTunedModelId = useAppStore((s) => s.fineTunedModelId);
@@ -35,7 +61,11 @@ export function FineTuneSettings({ open, onClose }: Props) {
   const setFineTunedModelId = useAppStore((s) => s.setFineTunedModelId);
   const aiKey = useAppStore((s) => s.aiKey);
 
-  const [job, setJob] = useState<FineTuneJob | null>(null);
+  const [job, setJobState] = useState<FineTuneJob | null>(loadActiveJob);
+  const setJob = useCallback((j: FineTuneJob | null) => {
+    saveActiveJob(j);
+    setJobState(j);
+  }, []);
   const [running, setRunning] = useState(false);
   const [chunks, setChunks] = useState(0);
   const [tokens, setTokens] = useState(0);
@@ -71,8 +101,15 @@ export function FineTuneSettings({ open, onClose }: Props) {
         log.warn("fine-tune poll failed", e);
       }
     },
-    [setFineTunedModelId],
+    [setFineTunedModelId, setJob],
   );
+
+  // A job resumed from storage: check it right away, then on the interval.
+  const resumed = useRef(job?.id ?? null);
+  useEffect(() => {
+    if (resumed.current) void pollJob(resumed.current);
+    resumed.current = null;
+  }, [pollJob]);
 
   useEffect(() => {
     if (!job || job.status === "succeeded" || job.status === "failed" || job.status === "cancelled") {
@@ -114,7 +151,7 @@ export function FineTuneSettings({ open, onClose }: Props) {
     } finally {
       setRunning(false);
     }
-  }, [aiKey]);
+  }, [aiKey, setJob]);
 
   const handleForget = useCallback(async () => {
     const ok = await uiConfirm({ message: t("fineTune.forgetConfirm") });

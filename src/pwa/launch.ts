@@ -52,17 +52,20 @@ export function clearLaunchParams(): void {
 }
 
 interface LaunchParams {
-  files?: Array<{ getFile(): Promise<File> }>;
+  files?: FileSystemFileHandle[];
 }
 
-/** Files opened with the installed app (Chromium's File Handling API). */
-export function onLaunchFiles(open: (name: string, content: string) => void): void {
+/**
+ * Files opened with the installed app (Chromium's File Handling API). The
+ * handle is passed on, so saving writes back to that file.
+ */
+export function onLaunchFiles(open: (name: string, content: string, handle: FileSystemFileHandle) => void): void {
   const lq = (window as unknown as { launchQueue?: { setConsumer(fn: (p: LaunchParams) => void): void } }).launchQueue;
   lq?.setConsumer(async (params) => {
     for (const h of params.files ?? []) {
       try {
         const f = await h.getFile();
-        open(f.name, await f.text());
+        open(f.name, await f.text(), h);
       } catch {
         /* unreadable file */
       }

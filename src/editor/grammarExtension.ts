@@ -20,6 +20,8 @@ import type { DecorationSet, ViewUpdate } from "@codemirror/view";
 import type { Extension, Range } from "@codemirror/state";
 import { checkGrammar, type GrammarMatch } from "../ai/grammar";
 import { log } from "../lib/logger";
+/** Mirrors hebrewSpellService.DICTIONARY_CHANGED_EVENT (that module loads lazily). */
+const DICTIONARY_CHANGED_EVENT = "lumen-hebrew-dictionary-changed";
 
 let DEBOUNCE_MS = 1500;
 /** Override the debounce for tests / self-hosted high-throughput backends. */
@@ -86,11 +88,19 @@ export function grammarExtension(opts: GrammarOptions = {}): Extension {
       private timer: number | null = null;
       private inFlight = false;
       private lastChecked = "";
+      private readonly onDictionaryChange: () => void;
 
       constructor(view: EditorView) {
         // Run once on mount so initial content gets checked even if the
         // user never types.
         this.schedule(view, /* immediate */ false);
+        // The Hebrew dictionary was installed or removed: the unchanged
+        // document needs a fresh check (new or stale spelling marks).
+        this.onDictionaryChange = () => {
+          this.lastChecked = "";
+          this.schedule(view, false);
+        };
+        window.addEventListener(DICTIONARY_CHANGED_EVENT, this.onDictionaryChange);
       }
 
       update(u: ViewUpdate) {
@@ -134,6 +144,7 @@ export function grammarExtension(opts: GrammarOptions = {}): Extension {
 
       destroy(): void {
         if (this.timer != null) window.clearTimeout(this.timer);
+        window.removeEventListener(DICTIONARY_CHANGED_EVENT, this.onDictionaryChange);
       }
     },
     { decorations: (v) => v.decorations },

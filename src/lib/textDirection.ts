@@ -58,3 +58,23 @@ export function scriptLanguage(text: string): "he" | "ar" | null {
   }
   return null;
 }
+
+/** Does the text contain any right-to-left character (presentation forms included)? */
+export function hasRtl(text: string): boolean {
+  return RTL_CHAR.test(text);
+}
+
+/**
+ * The language of the first Hebrew or Arabic character, skipping Latin and
+ * everything else: which RTL language a mixed document needs, wherever
+ * its first RTL passage is.
+ */
+export function firstRtlLanguage(text: string): "he" | "ar" | null {
+  for (const ch of text) {
+    if (!RTL_CHAR.test(ch)) continue;
+    const lang = scriptLanguage(ch);
+    if (lang) return lang;
+  }
+  return null;
+}
+

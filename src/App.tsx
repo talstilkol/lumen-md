@@ -1,4 +1,4 @@
-import { useCommands } from "./commands/useCommands";
+import { useCommands, openNewDoc } from "./commands/useCommands";
 import { lazy, Suspense, useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 import type { EditorHandle } from "./editor/Editor";
 
@@ -208,14 +208,17 @@ export default function App() {
     void import("./pwa/launch").then(({ parseLaunch, clearLaunchParams, onLaunchFiles }) => {
       const l = parseLaunch(location.search);
       if (l.kind === "share") {
-        openTabAction({ name: `${l.title.replace(/[\\/:*?"<>|]+/g, " ").slice(0, 60)}.md`, content: l.body, workspaceName: null });
+        // A fresh tab name each time: two shares with the same title (or two
+        // links from one host) stay two notes.
+        openNewDoc(l.title.replace(/[\\/:*?"<>|]+/g, " ").slice(0, 60).trim() || "Shared", l.body, true);
       } else if (l.kind === "action" && l.action === "new") {
-        openTabAction({ name: "Untitled.md", content: "", workspaceName: null });
+        openNewDoc(t("doc.untitled"), "", false);
       } else if (l.kind === "action" && l.action === "palette") {
         setPaletteOpen(true);
       }
       if (l.kind !== "none") clearLaunchParams();
-      onLaunchFiles((name, content) => openTabAction({ name, content, workspaceName: null }));
+      // With the file's handle, so Save writes back to the file that was opened.
+      onLaunchFiles((name, content, handle) => openTabAction({ name, content, workspaceName: null, handle }));
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -226,7 +229,7 @@ export default function App() {
     if (typeof pending === "string" && pending.length > 0) {
       // Clear the pending note so we don't process it again.
       delete (window as unknown as Record<string, unknown>).__pendingSharedNote;
-      openTabAction({ name: "Shared Note.md", content: pending, workspaceName: null });
+      openNewDoc("Shared Note", pending, true);
       showAiToast(t("toast.openedSharedNoteFromIos"), "info");
     }
   }, []);

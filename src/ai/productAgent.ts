@@ -144,9 +144,12 @@ export class ProductAgent {
   /**
    * Main entry point — takes an idea and produces a full product.
    */
-  async run(idea: string): Promise<{ success: boolean; files: Map<string, string>; error?: string }> {
-    this.abortController = new AbortController();
-    const signal = this.abortController.signal;
+  async run(idea: string, outer?: AbortSignal): Promise<{ success: boolean; files: Map<string, string>; error?: string }> {
+    const ctrl = (this.abortController = new AbortController());
+    const signal = ctrl.signal;
+    // The caller's cancellation (Esc / "AI: Cancel", T55) stops the run too.
+    if (outer?.aborted) ctrl.abort(outer.reason);
+    else outer?.addEventListener("abort", () => ctrl.abort(outer.reason), { once: true });
     this.generatedFiles.clear();
 
     try {
@@ -194,6 +197,8 @@ export class ProductAgent {
       return { success: true, files: this.generatedFiles };
 
     } catch (e) {
+      // Cancelled by the caller: an AbortError, not a failed product.
+      if (outer?.aborted) throw new DOMException("Cancelled by the user", "AbortError");
       const msg = e instanceof Error ? e.message : "Unknown error";
       this.emit("error", msg);
       return { success: false, files: this.generatedFiles, error: msg };
@@ -373,10 +378,11 @@ export class ProductAgent {
 export async function createProduct(
   idea: string,
   onProgress?: AgentProgressCallback,
+  signal?: AbortSignal,
 ): Promise<{ success: boolean; files: Map<string, string>; error?: string }> {
   const agent = new ProductAgent();
   if (onProgress) agent.setProgressCallback(onProgress);
-  return agent.run(idea);
+  return agent.run(idea, signal);
 }
 
 /**

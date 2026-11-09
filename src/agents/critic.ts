@@ -36,6 +36,8 @@ export interface Failure {
   skipped?: Array<{ id: ExecutorId; availability: Availability }>;
   /** Executors that could take a retry. */
   alternatives?: ExecutorId[];
+  /** The run's cancellation: the model critic's own request honours it. */
+  signal?: AbortSignal;
 }
 
 export interface Verdict {
@@ -194,7 +196,7 @@ export async function review(f: Failure): Promise<Verdict> {
   // Stage 2 only when stage 1 has no retry left to offer: it costs a model
   // call, and its job is better suggestions for the user, not the retry.
   const generic = ["validation", "parse", "empty", "error", "tool", "long-input"].includes(v.diagnosis);
-  if (modelCritic && generic && !v.retry && f.kind !== "aborted") {
+  if (modelCritic && generic && !v.retry && f.kind !== "aborted" && !f.signal?.aborted) {
     try {
       const m = await modelCritic(f, v);
       if (m) return learned({ ...v, ...m, suggestions: m.suggestions.length ? m.suggestions : v.suggestions }, f);

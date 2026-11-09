@@ -29,6 +29,27 @@ describe("live-js runner CSP", () => {
   it("Vercel serves the same runner policy", () => {
     expect(vercelHeader("/livejs-runner.html", "Content-Security-Policy")).toBe(csp);
   });
+
+  it("nginx serves the same runner policy", () => {
+    const nginx = readFileSync(join(root, "docker/nginx.conf"), "utf8");
+    const loc = nginx.slice(nginx.indexOf("location = /livejs-runner.html"));
+    expect(/Content-Security-Policy "([^"]*)"/.exec(loc)?.[1]).toBe(csp);
+  });
+
+  it("the runner page carries the policy itself (dev, Tauri, Capacitor serve no header)", () => {
+    const html = readFileSync(join(root, "livejs-runner.html"), "utf8");
+    const meta = /http-equiv="Content-Security-Policy" content="([^"]*)"/.exec(html)?.[1] ?? "";
+    // frame-ancestors is ignored in <meta>; everything else must match.
+    expect(meta).toBe(csp.replace(/ frame-ancestors 'self';/, ""));
+  });
+
+  it("build-time endpoint origins never widen connect-src 'none'", async () => {
+    const { addConnectSrc, extendIndexHtmlCsp } = await import("../build/cspEndpoints");
+    expect(addConnectSrc(csp, ["https://ai.example"])).toBe(csp);
+    const html = readFileSync(join(root, "livejs-runner.html"), "utf8");
+    expect(extendIndexHtmlCsp(html, ["https://ai.example"])).toBe(html);
+    expect(addConnectSrc("connect-src 'self'", ["https://ai.example"])).toBe("connect-src 'self' https://ai.example");
+  });
 });
 
 describe("Vercel security headers", () => {

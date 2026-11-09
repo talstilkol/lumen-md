@@ -13,6 +13,8 @@ vi.mock("../ai/modelManager", async (orig) => ({
 
 import { pickExecutor, registerExecutor, resetExecutors, setPreferredExecutor, withPreference, preferredExecutor } from "../agents/executors";
 import { AiSettingsPanel } from "../ui/AiSettingsPanel";
+import { clearTrace, recordRun } from "../agents/trace";
+import type { AgentRun } from "../agents/types";
 import { fakeExecutor, sequence } from "./helpers/fakeExecutor";
 import type { Executor } from "../agents/types";
 
@@ -82,6 +84,19 @@ describe("AiSettingsPanel", () => {
     expect(ids).toEqual(["ai.trace"]);
     expect(onClose).toHaveBeenCalled();
     window.removeEventListener("lumen-run-command", on);
+  });
+
+  it("recent runs: the ten newest, newest first", async () => {
+    await clearTrace();
+    for (let i = 0; i < 12; i++) {
+      await recordRun({ id: `r${i}`, agentId: `agent${i}`, executor: "ollama", status: "ok", startedAt: i, endedAt: i, attempts: 1, steps: [], suggestions: [], tokens: { input: 0, output: 0, estimated: true } } as unknown as AgentRun);
+    }
+    render(<AiSettingsPanel open onClose={() => {}} />);
+    const section = (await screen.findByText("Recent agent runs")).closest("section")!;
+    await waitFor(() => expect(section.querySelectorAll("li").length).toBe(10));
+    const items = [...section.querySelectorAll("li strong")].map((el) => el.textContent);
+    expect(items).toEqual(["agent11", "agent10", "agent9", "agent8", "agent7", "agent6", "agent5", "agent4", "agent3", "agent2"]);
+    await clearTrace();
   });
 
   it("does not store a research address the browser can't use", async () => {

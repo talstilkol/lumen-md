@@ -191,6 +191,9 @@ export async function runDoctor(opts: DoctorOptions = {}): Promise<DoctorReport>
     const hebrew = prefersHebrew(st.locale, st.doc.content);
     const ramGB = typeof navigator !== "undefined" ? ((navigator as Navigator & { deviceMemory?: number }).deviceMemory ?? null) : null;
     const RECOMMENDED_OLLAMA_MODEL = recommendOllamaModel({ hebrew, ramGB }).name;
+    // The tool-calling repair must name a model that calls tools (the best
+    // Hebrew model may not).
+    const RECOMMENDED_TOOL_MODEL = recommendOllamaModel({ hebrew, ramGB, tools: true }).name;
     const tags = await probe(`${base}/api/tags`, { signal: opts.signal, timeoutMs });
     const models: string[] = "json" in tags ? (((tags.json as { models?: Array<{ name: string }> } | null)?.models ?? []).map((m) => m.name)) : [];
     const chat = models.filter((m) => !/embed/i.test(m));
@@ -226,7 +229,7 @@ export async function runDoctor(opts: DoctorOptions = {}): Promise<DoctorReport>
         title: "ai.doctor.check.tools",
         status: toolsOk === null ? "skip" : toolsOk ? "ok" : "warn",
         detail: toolsOk === null ? undefined : ollamaExecutor.modelFor("small", { tools: true }),
-        fix: toolsOk === false ? { label: "ai.doctor.fix.pull", command: `ollama pull ${RECOMMENDED_OLLAMA_MODEL}`, action: "pullModel", arg: RECOMMENDED_OLLAMA_MODEL } : undefined,
+        fix: toolsOk === false ? { label: "ai.doctor.fix.pull", command: `ollama pull ${RECOMMENDED_TOOL_MODEL}`, action: "pullModel", arg: RECOMMENDED_TOOL_MODEL } : undefined,
       });
     }
     push({

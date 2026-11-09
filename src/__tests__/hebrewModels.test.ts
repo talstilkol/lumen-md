@@ -1,7 +1,7 @@
 /** T27 — Hebrew model catalog, Hebrew-aware picks, and the answer-language rule. */
 import { describe, it, expect } from "vitest";
 import { hebrewSupportOf, prefersHebrew, recommendOllamaModel } from "../ai/modelCatalog";
-import { pickModel } from "../agents/executors/ollama";
+import { pickModel, pickToolModel } from "../agents/executors/ollama";
 import { recommendWebLlmModel, type Hardware } from "../ai/modelManager";
 import { sameScript } from "../agents/runtime";
 
@@ -40,6 +40,12 @@ describe("Hebrew-aware picks", () => {
     expect(pickModel("small", installed, null, { hebrew: true })).toBe("aya-expanse:8b");
     expect(pickModel("small", installed, null)).not.toBe("aya-expanse:8b");
   });
+  it("keeps the Hebrew ranking when a tool agent falls back to a tool-capable model", () => {
+    const tools = (m: { name: string }) => !m.name.startsWith("aya");
+    expect(pickToolModel("small", installed, tools, { hebrew: true })).toBe("qwen2.5:7b");
+    expect(pickToolModel("small", installed, tools)).toBe("llama3.1:8b");
+    expect(pickToolModel("small", installed, () => false, { hebrew: true })).toBeNull();
+  });
   it("still honours an explicitly configured model of the tier", () => {
     expect(pickModel("small", installed, "llama3.1:8b", { hebrew: true })).toBe("llama3.1:8b");
   });
@@ -62,3 +68,22 @@ describe("answer in the input's language", () => {
     expect(sameScript("An English input sentence here.", "Whatever language answer is fine here").ok).toBe(true);
   });
 });
+
+describe("language check exemptions (review fixes)", () => {
+  const he = "כתוב לי פונקציית ג׳אווהסקריפט שמחברת שני מספרים ומחזירה את התוצאה, בבקשה.";
+  it("does not count code as Latin prose", () => {
+    expect(sameScript(he, "```js\nfunction add(a, b) {\n  return a + b; // returns the sum of both numbers\n}\n```").ok).toBe(true);
+    expect(sameScript(he, "הנה הפונקציה:\n```js\nfunction add(a, b) { return a + b; }\n```\nהיא מחזירה את הסכום.").ok).toBe(true);
+    expect(sameScript(he, "קראו ל־`computeTheTotalAmountOfEverything()` כדי לקבל סכום").ok).toBe(true);
+    // Prose outside the code still counts.
+    expect(sameScript(he, "Here is the function you asked for, it adds both numbers:\n```js\nadd()\n```").ok).toBe(false);
+  });
+
+  it("translation templates are language-independent", async () => {
+    const { templaterAgent } = await import("../agents/defs");
+    const lang = templaterAgent.language as (i: { text: string; extra: { templateId: string } }) => string;
+    expect(lang({ text: "x", extra: { templateId: "he.translate_to_en" } })).toBe("any");
+    expect(lang({ text: "x", extra: { templateId: "he.summarize" } })).toBe("input");
+  });
+});
+

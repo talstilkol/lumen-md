@@ -114,7 +114,7 @@ export function sampleExcerpts(notes: ReadonlyArray<{ path: string; text: string
   return { text: parts.join("\n---\n"), count: parts.length };
 }
 
-export async function buildStyleProfile(prefix = ""): Promise<StyleProfile> {
+export async function buildStyleProfile(prefix = "", signal?: AbortSignal): Promise<StyleProfile> {
   const { readAllNotes } = await import("../storage/workspaceNotes");
   const all = await readAllNotes();
   const notes = all.filter((n) => !prefix || n.path.startsWith(prefix.replace(/\/+$/, "") + "/"));
@@ -122,7 +122,7 @@ export async function buildStyleProfile(prefix = ""): Promise<StyleProfile> {
   if (sample.count < 2) throw new Error("Not enough writing to learn a style from: pick a folder with at least two notes of a few paragraphs.");
   const { runAgentOrThrow } = await import("../agents/runtime");
   const { stylistAgent } = await import("../agents/defs");
-  const out = await runAgentOrThrow(stylistAgent, { text: sample.text });
+  const out = await runAgentOrThrow(stylistAgent, { text: sample.text }, { signal });
   const flat = sample.text.replace(/\s+/g, " ");
   const profile: StyleProfile = {
     tone: out.tone.trim(),

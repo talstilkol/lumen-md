@@ -35,10 +35,31 @@ export function safeUrl(value: string, tag: string, prop: string): boolean {
   // eslint-disable-next-line no-control-regex
   const v = value.replace(/[\u0000- \u007f]+/g, "");
   const scheme = /^([a-z][a-z0-9+.-]*):/i.exec(v);
-  if (!scheme) return true; // relative, #fragment, /path, ./file.md
+  // Relative, #fragment, /path, ./file.md — fine for links and images, but an
+  // iframe with a scheme-less src would load the app's own origin with
+  // allow-same-origin, so frames need an explicit https: URL.
+  if (!scheme) return tag !== "iframe";
   if (SAFE_SCHEME.test(v)) return tag === "iframe" ? /^https:/i.test(v) : true;
   if (DATA_IMAGE.test(v) && (tag === "img" || tag === "source" || tag === "picture") && (prop === "src" || prop === "srcSet")) return true;
   return false;
+}
+
+/**
+ * Classes the Markdown pipeline itself emits before this pass (GFM task lists
+ * and footnotes, math, fenced-code languages, admonitions, columns, wiki
+ * links). Any other class on raw HTML could only borrow host-app styling —
+ * e.g. `class="lumen-slash-menu"` or Tailwind's `fixed` restores
+ * `position: fixed; z-index: 9999` and lets a note cover the app — so it is
+ * dropped. Exported for tests.
+ */
+const PIPELINE_CLASSES = new Set([
+  "contains-task-list", "task-list-item", "footnotes", "sr-only", "data-footnote-backref",
+  "math-inline", "math-display",
+  "admonition", "admonition-title", "note", "tip", "info", "warning", "danger",
+  "lumen-columns", "lumen-column", "wiki-link",
+]);
+export function safeClass(token: string): boolean {
+  return PIPELINE_CLASSES.has(token) || /^language-[\w+#.-]+$/.test(token);
 }
 
 function cleanSrcSet(value: string, tag: string): string | null {
@@ -63,6 +84,13 @@ function cleanElement(el: Element) {
     if (URL_PROPS.has(key)) {
       const s = Array.isArray(value) ? value.join(" ") : String(value ?? "");
       if (!safeUrl(s, el.tagName, key)) delete props[key];
+      continue;
+    }
+    if (key === "className") {
+      const list = Array.isArray(value) ? value.map(String) : String(value ?? "").split(/\s+/);
+      const kept = list.filter((c) => c && safeClass(c));
+      if (kept.length) props[key] = kept;
+      else delete props[key];
       continue;
     }
     if (key === "srcSet") {

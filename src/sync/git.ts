@@ -173,7 +173,7 @@ export async function commitAndPush(
   const { fs, http, git } = await load();
   const dir = `/git/${repoFolder}`;
   // Mirror OPFS → lightning-fs (only files under the repo's prefix).
-  const all = await listWorkspace({ includeAssets: true });
+  const all = await listWorkspace({ includeAssets: true, includeHidden: true });
   const prefix = `${repoFolder}/`;
   const repoFiles = all.filter((f) => f.path.startsWith(prefix));
   for (const f of repoFiles) {
@@ -228,7 +228,7 @@ export async function gitStatus(repoFolder: string): Promise<GitStatusEntry[]> {
   const { fs, git } = await load();
   const dir = `/git/${repoFolder}`;
   // First mirror OPFS → lightning-fs so the status reflects current edits.
-  const all = await listWorkspace({ includeAssets: true });
+  const all = await listWorkspace({ includeAssets: true, includeHidden: true });
   const prefix = `${repoFolder}/`;
   for (const f of all) {
     if (!f.path.startsWith(prefix)) continue;
@@ -313,7 +313,7 @@ export async function pullRepo(
         : ({} as never),
   });
   // Mirror the updated lightning-fs tree back into OPFS.
-  const beforeOpfs = await listWorkspace({ includeAssets: true });
+  const beforeOpfs = await listWorkspace({ includeAssets: true, includeHidden: true });
   const opfsBefore = new Set(
     beforeOpfs
       .map((e) => e.path)

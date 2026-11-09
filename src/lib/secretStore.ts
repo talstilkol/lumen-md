@@ -110,28 +110,45 @@ function readIndex(): string[] {
 
 async function initKeychain(): Promise<boolean> {
   if (!isTauri()) return false;
+  let inv: Invoke;
   try {
     const core = await import("@tauri-apps/api/core");
-    const inv = core.invoke as Invoke;
+    inv = core.invoke as Invoke;
     if (!(await inv<boolean>("secret_available"))) return false;
-    invoke = inv;
-    for (const name of readIndex()) {
-      const v = await inv<string | null>("secret_get", { name });
-      if (v) cache.set(name, v);
-    }
-    mode = "keychain";
-    await migratePlaintext();
-    return true;
   } catch {
-    invoke = null;
     return false;
   }
+  // The keychain is the store from here on. A failing read (keychain locked,
+  // access denied) must not switch this session to IndexedDB: the next launch
+  // would pick the keychain again and never see what was saved meanwhile.
+  invoke = inv;
+  mode = "keychain";
+  for (const name of readIndex()) {
+    let v: string | null = null;
+    try {
+      v = await inv<string | null>("secret_get", { name });
+    } catch {
+      try {
+        v = await inv<string | null>("secret_get", { name }); // one retry
+      } catch (e) {
+        console.warn(`[secrets] keychain read failed for ${name}`, e);
+      }
+    }
+    if (v) cache.set(name, v);
+  }
+  try {
+    await migratePlaintext();
+  } catch (e) {
+    console.warn("[secrets] keychain migration failed", e);
+  }
+  return true;
 }
 
 async function doInit(): Promise<void> {
   if (await initKeychain()) return;
   if (typeof indexedDB === "undefined" || typeof crypto === "undefined" || !crypto.subtle) {
     mode = "plain";
+    await migrateLegacyToPlain();
     return;
   }
   try {
@@ -159,6 +176,26 @@ async function doInit(): Promise<void> {
     db = null;
     cryptoKey = null;
     mode = "plain";
+    await migrateLegacyToPlain();
+  }
+}
+
+/**
+ * Plain mode reads secrets from localStorage, so a git token still in the
+ * legacy idb-keyval store (IndexedDB present, WebCrypto not — e.g. a
+ * non-secure context) is moved there instead of looking lost.
+ */
+async function migrateLegacyToPlain(): Promise<void> {
+  if (typeof indexedDB === "undefined") return;
+  for (const name of LEGACY_IDB_SECRETS) {
+    try {
+      const v = (await get(name)) as string | undefined;
+      if (typeof v !== "string") continue;
+      if (v && lsGet(name) === null) lsSet(name, v);
+      if (!v || lsGet(name) !== null) await del(name);
+    } catch {
+      /* default idb-keyval store unavailable */
+    }
   }
 }
 
@@ -223,25 +260,53 @@ export function getSecret(name: string): string | null {
   return lsGet(name);
 }
 
-/** Store (or, with null / "", remove) a secret. Persists in the background. */
-export function setSecret(name: string, value: string | null): void {
+/**
+ * Store (or, with null / "", remove) a secret. Memory updates at once; the
+ * write persists in the background. The returned promise settles when that
+ * write has landed and rejects if it failed (the in-memory value is then
+ * rolled back, so the app never shows a credential that won't survive a
+ * reload). Fire-and-forget callers may ignore it.
+ */
+export function setSecret(name: string, value: string | null): Promise<void> {
   const v = value ? value : null;
   if (mode !== "encrypted" && mode !== "keychain") {
     lsSet(name, v);
-    return;
+    return Promise.resolve();
   }
+  const prev = cache.get(name) ?? null;
   if (v === null) cache.delete(name);
   else cache.set(name, v);
-  pending = pending.then(() => persist(name, v)).catch(() => {});
+  const op = pending.then(() => persist(name, v));
+  op.catch((e: unknown) => {
+    // Roll back unless a later write already replaced the value.
+    if ((cache.get(name) ?? null) === v) {
+      if (prev === null) cache.delete(name);
+      else cache.set(name, prev);
+    }
+    failures.push(e);
+  });
+  // Keep the queue usable after a failure.
+  pending = op.catch(() => {});
+  return op;
 }
 
-export function removeSecret(name: string): void {
-  setSecret(name, null);
+export function removeSecret(name: string): Promise<void> {
+  return setSecret(name, null);
 }
 
-/** Resolves once every background write has landed (tests, export). */
-export function flushSecrets(): Promise<unknown> {
-  return pending;
+const failures: unknown[] = [];
+
+/**
+ * Resolves once every background write has landed (tests, export); rejects
+ * with the first failure since the previous flush.
+ */
+export async function flushSecrets(): Promise<void> {
+  await pending;
+  if (failures.length) {
+    const first = failures[0];
+    failures.length = 0;
+    throw first instanceof Error ? first : new Error(String(first));
+  }
 }
 
 /** Test hook: forget everything in memory and start over. */
@@ -253,4 +318,5 @@ export function __resetSecretStore(): void {
   initPromise = null;
   invoke = null;
   pending = Promise.resolve();
+  failures.length = 0;
 }

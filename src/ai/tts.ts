@@ -12,14 +12,36 @@ export interface Sentence {
   to: number;
 }
 
+/** Source ranges of fenced code blocks — ``` and ~~~ fences; an unclosed one runs to the end. */
+function fencedRanges(markdown: string): Array<[number, number]> {
+  const out: Array<[number, number]> = [];
+  let open: { start: number; char: string; len: number } | null = null;
+  let pos = 0;
+  for (const line of markdown.split("\n")) {
+    const end = pos + line.length + 1;
+    const m = /^ {0,3}(`{3,}|~{3,})(.*)$/.exec(line.replace(/\r$/, ""));
+    if (open) {
+      if (m && m[1][0] === open.char && m[1].length >= open.len && !m[2].trim()) {
+        out.push([open.start, Math.min(end, markdown.length)]);
+        open = null;
+      }
+    } else if (m && !(m[1][0] === "`" && m[2].includes("`"))) {
+      open = { start: pos, char: m[1][0], len: m[1].length };
+    }
+    pos = end;
+  }
+  if (open) out.push([open.start, markdown.length]);
+  return out;
+}
+
 /** Markdown → speakable sentences with their source ranges. */
 export function speakableSentences(markdown: string): Sentence[] {
   const out: Sentence[] = [];
   // Skip frontmatter and fenced code: nobody wants code read aloud.
   const skip: Array<[number, number]> = [];
-  const fm = /^---\n[\s\S]*?\n---\n/.exec(markdown);
+  const fm = /^---\r?\n[\s\S]*?\r?\n---(?:\r?\n|$)/.exec(markdown);
   if (fm) skip.push([0, fm[0].length]);
-  for (const m of markdown.matchAll(/^```[\s\S]*?^```/gm)) skip.push([m.index!, m.index! + m[0].length]);
+  skip.push(...fencedRanges(markdown));
   const inSkip = (i: number) => skip.some(([a, b]) => i >= a && i < b);
   // A sentence ends at . ! ? followed by whitespace — "x.y" (URLs, 3.5) doesn't.
   const re = /[^.!?。؟\n]+(?:[.!?。؟]+(?=[^\s.!?。؟])[^.!?。؟\n]*)*[.!?。؟]*/g;

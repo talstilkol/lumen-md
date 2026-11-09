@@ -58,11 +58,17 @@ let installed = false;
 export function installAiEscape(onCancelled: (n: number) => void): void {
   if (installed || typeof window === "undefined") return;
   installed = true;
-  window.addEventListener("keydown", (e) => {
-    if (e.key !== "Escape" || !live.size) return;
-    const n = cancelAllAi();
-    if (n) onCancelled(n);
-  });
+  // Capture phase: a menu or dialog that stops Esc's propagation must not
+  // keep the AI work running.
+  window.addEventListener(
+    "keydown",
+    (e) => {
+      if (e.key !== "Escape" || !live.size) return;
+      const n = cancelAllAi();
+      if (n) onCancelled(n);
+    },
+    { capture: true },
+  );
 }
 
 /** Run `fn` as an AI operation; an abort resolves to `undefined` quietly. */

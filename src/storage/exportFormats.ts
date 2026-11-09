@@ -12,7 +12,7 @@
  */
 
 import { zip } from "./zip";
-import { firstStrongDirection, markdownBaseDirection, scriptLanguage } from "../lib/textDirection";
+import { firstRtlLanguage, firstStrongDirection, hasRtl, markdownBaseDirection } from "../lib/textDirection";
 
 function escapeHtml(s: string): string {
   return s
@@ -117,9 +117,11 @@ export function markdownToLatex(md: string): string {
   // that typesets RTL properly; the main language follows the document's
   // base direction and every paragraph in the other direction is wrapped
   // in that language's environment (T44).
-  const rtl = /[\u0590-\u08FF]/.test(md);
+  const rtl = hasRtl(md);
   const base = markdownBaseDirection(md);
-  const rtlLang = scriptLanguage(md) === "ar" ? "arabic" : "hebrew";
+  // The first RTL passage decides, not the first strong character (an
+  // English-first document with Arabic later is Arabic).
+  const rtlLang = firstRtlLanguage(md) === "ar" ? "arabic" : "hebrew";
   const out: string[] = rtl
     ? [
         "% Compile with xelatex (Hebrew/Arabic need fontspec + polyglossia).",
@@ -202,10 +204,15 @@ export function markdownToLatex(md: string): string {
   return out.join("\n");
 }
 
+/** The visible text of rendered HTML: no tags, no entity names (`&amp;` is not Latin text). */
+function visibleText(html: string): string {
+  return html.replace(/<[^>]+>/g, " ").replace(/&(?:#\d+|#x[\da-f]+|[a-z][\da-z]*);/gi, " ");
+}
+
 /** lang for a rendered page body: he / ar by script, else en. */
 function pageLang(html: string): string {
-  const text = html.replace(/<[^>]+>/g, " ");
-  return firstStrongDirection(text) === "rtl" ? scriptLanguage(text) ?? "en" : "en";
+  const text = visibleText(html);
+  return firstStrongDirection(text) === "rtl" ? firstRtlLanguage(text) ?? "en" : "en";
 }
 
 function escapeLatex(s: string): string {
@@ -444,11 +451,13 @@ export async function markdownToEpubBytes(md: string, title = "Document"): Promi
   // Language and reading direction (T44): a Hebrew book opens from the
   // right and reads right-to-left in every reader.
   const bookDir = markdownBaseDirection(md);
-  const bookLang = (bookDir === "rtl" ? scriptLanguage(md) : null) ?? "en";
+  // An RTL book's language is its first RTL passage's: frontmatter keys
+  // and code are Latin and would otherwise decide.
+  const bookLang = (bookDir === "rtl" ? firstRtlLanguage(md) : null) ?? "en";
   const chapters = (parts.length ? parts : [md]).map((c, i) => {
     const chTitle = c.match(/^#\s+(.+)$/m)?.[1] ?? `Chapter ${i + 1}`;
     const dir = markdownBaseDirection(c);
-    const lang = (dir === "rtl" ? scriptLanguage(c) : null) ?? (dir === bookDir ? bookLang : "en");
+    const lang = (dir === "rtl" ? firstRtlLanguage(c) : null) ?? (dir === bookDir ? bookLang : "en");
     const xhtml =
       `<?xml version="1.0" encoding="utf-8"?>\n<!DOCTYPE html>\n` +
       `<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="${lang}" lang="${lang}" dir="${dir}"><head><title>${escapeHtml(chTitle)}</title></head>` +
@@ -545,7 +554,7 @@ export async function markdownToStaticSiteBytes(md: string, siteTitle = "Site"):
       .join("") +
     `</ul></nav>`;
   const pageHtml = (p: { title: string; file: string; body: string }) =>
-    `<!doctype html><html lang="${pageLang(p.body)}" dir="${firstStrongDirection(p.body.replace(/<[^>]+>/g, " ")) ?? "ltr"}"><head><meta charset="utf-8" />` +
+    `<!doctype html><html lang="${pageLang(p.body)}" dir="${firstStrongDirection(visibleText(p.body)) ?? "ltr"}"><head><meta charset="utf-8" />` +
     `<meta name="viewport" content="width=device-width, initial-scale=1" />` +
     `<title>${escapeHtml(p.title)} — ${escapeHtml(siteTitle)}</title>` +
     `<link rel="stylesheet" href="style.css" /></head><body>` +

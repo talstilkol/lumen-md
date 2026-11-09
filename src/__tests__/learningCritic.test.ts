@@ -3,6 +3,7 @@ import "fake-indexeddb/auto";
 import { describe, it, expect, beforeEach } from "vitest";
 import { __resetOutcomes, loadOutcomes, noteRunOutcome, noteSuggestionChosen, rankByOutcomes, successRate } from "../agents/outcomes";
 import { review } from "../agents/critic";
+import { runSuggestion } from "../agents/suggestions";
 import type { AgentRun, Suggestion } from "../agents/types";
 
 const sug = (id: string): Suggestion => ({ id, title: id });
@@ -47,5 +48,18 @@ describe("learning critic", () => {
     __resetOutcomes(); // a new session: read back from IndexedDB
     const v = await review({ kind: "validation", agentId: "tagger", attempt: 4, maxRetries: 3, tier: "small", executor: "ollama", alternatives: ["webllm"], reason: "bad json" });
     expect(v.suggestions[0].id).toBe("retry");
+  });
+
+  it("a suggestion whose action fails leaves no pending choice for a later run", async () => {
+    const failed = run("failed");
+    // Unsupported executor: the action reports false, no re-run follows.
+    expect(await runSuggestion({ id: "pull", title: "pull", action: { type: "pull-model", executor: "openai" as never, model: "m" } }, failed)).toBe(false);
+    await noteRunOutcome(run("ok"));
+    const b = await loadOutcomes();
+    expect(Object.keys(b)).toHaveLength(0);
+    // A succeeding action still records the re-run's outcome.
+    expect(await runSuggestion({ id: "retry", title: "retry", action: { type: "retry", patch: {} } }, failed)).toBe(true);
+    await noteRunOutcome(run("ok"));
+    expect(successRate(b, "validation", "retry")).toBeGreaterThan(0.6);
   });
 });

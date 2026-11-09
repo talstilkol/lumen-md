@@ -38,6 +38,20 @@ describe("secure rooms", () => {
     expect(signalingUrls().length).toBeGreaterThan(1);
   });
 
+  it("the public fallback opt-in also applies behind a custom signaling server", () => {
+    localStorage.setItem("lumen.collab.signaling", "wss://signal.example.org");
+    try {
+      expect(signalingUrls()).toEqual(["wss://signal.example.org"]);
+      localStorage.setItem(PUBLIC_SIGNALING_KEY, "1");
+      const urls = signalingUrls();
+      expect(urls[0]).toBe("wss://signal.example.org");
+      expect(urls.some((u) => /yjs\.dev/.test(u))).toBe(true);
+    } finally {
+      localStorage.removeItem("lumen.collab.signaling");
+      localStorage.removeItem(PUBLIC_SIGNALING_KEY);
+    }
+  });
+
   it("the persistent server checks its access token in constant time", () => {
     expect(tokenOk("/room", "")).toBe(true);
     expect(tokenOk("/room?token=s3cret", "s3cret")).toBe(true);

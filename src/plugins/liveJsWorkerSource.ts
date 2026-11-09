@@ -22,7 +22,7 @@ if (self.trustedTypes && !self.trustedTypes.defaultPolicy) {
 // livejs-runner.html); this removes the network and storage APIs from the
 // worker as a second layer, also in dev where no CSP header is served.
 (function() {
-  var names = ["fetch", "XMLHttpRequest", "WebSocket", "EventSource", "WebTransport",
+  var names = ["fetch", "XMLHttpRequest", "WebSocket", "WebSocketStream", "EventSource", "WebTransport",
     "importScripts", "indexedDB", "caches", "BroadcastChannel", "Worker", "SharedWorker"];
   var targets = [];
   for (var o = self; o; o = Object.getPrototypeOf(o)) targets.push(o);

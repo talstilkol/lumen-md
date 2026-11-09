@@ -32,3 +32,13 @@ export function setRoomInHash(name: string | null, password?: string | null): vo
   const pw = password ? encodeURIComponent(password) : location.hash.match(/[#&]password=([^&]+)/)?.[1];
   history.replaceState(null, "", `#room=${name}${pw ? `&password=${pw}` : ""}`);
 }
+
+/**
+ * The invite link for a room: `#room=<name>` plus the room's own password
+ * when it has one — without it the invitee would open an unencrypted
+ * provider that can never join the encrypted room.
+ */
+export function roomShareLink(name: string, password?: string | null): string {
+  const base = typeof location !== "undefined" ? `${location.origin}${location.pathname}` : "";
+  return `${base}#room=${name}${password ? `&password=${encodeURIComponent(password)}` : ""}`;
+}

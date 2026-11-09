@@ -51,7 +51,26 @@ describe("LaTeX", () => {
   });
 });
 
+describe("LaTeX RTL language (review fixes)", () => {
+  it("an English-first document with Arabic later is set up for Arabic", () => {
+    const tex = markdownToLatex("Intro in English.\n\nمرحبا بالعالم");
+    expect(tex).toContain("\\setotherlanguage{arabic}");
+    expect(tex).toContain("\\arabicfont");
+    expect(tex).not.toContain("hebrew");
+  });
+  it("routes presentation-form Arabic and Hebrew through XeLaTeX", () => {
+    // U+FEF5.. Arabic presentation forms (as copied from some PDFs), U+FB2A Hebrew.
+    expect(markdownToLatex("\uFE8D\uFEDF\uFECC\uFEAE\uFE91\uFEF4\uFE94")).toContain("polyglossia");
+    expect(markdownToLatex("\uFB2A\uFB31")).toContain("polyglossia");
+  });
+});
+
 describe("EPUB", () => {
+  it("is Hebrew for a Hebrew note with Latin frontmatter keys", async () => {
+    const files = await unzip((await markdownToEpubBytes("---\ntitle: x\ntags: [a]\n---\n\n# פרק\n\nשלום לכולם, זה ספר בעברית.", "ספר")).buffer);
+    const opf = dec.decode(files.get("OEBPS/content.opf"));
+    expect(opf).toContain("<dc:language>he</dc:language>");
+  });
   it("declares Hebrew and right-to-left page progression", async () => {
     const files = await unzip((await markdownToEpubBytes(MIXED, "ספר")).buffer);
     const opf = dec.decode(files.get("OEBPS/content.opf"));
@@ -74,5 +93,11 @@ describe("static site", () => {
     const pages = [...files.entries()].filter(([k]) => k.endsWith(".html")).map(([, v]) => dec.decode(v));
     expect(pages.some((p) => /<html lang="he" dir="rtl">/.test(p))).toBe(true);
     expect(pages.some((p) => /<html lang="en" dir="ltr">/.test(p))).toBe(true);
+  });
+  it("is not fooled by an escaped neutral character before the RTL text", async () => {
+    const files = await unzip((await markdownToStaticSiteBytes("# & שלום\n\nשלום לכולם.", "אתר")).buffer);
+    const pages = [...files.entries()].filter(([k]) => k.endsWith(".html")).map(([, v]) => dec.decode(v));
+    expect(pages.some((p) => p.includes("&amp;"))).toBe(true);
+    expect(pages.every((p) => /<html lang="he" dir="rtl">/.test(p))).toBe(true);
   });
 });

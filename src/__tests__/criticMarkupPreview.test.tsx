@@ -76,9 +76,9 @@ describe("CriticMarkup preview rendering", () => {
   });
 
   it("raw HTML inside a suggestion still goes through the normal pipeline", async () => {
-    const tree = await renderMarkdown('{++<span class="k">hi</span>++}', () => false);
+    const tree = await renderMarkdown('{++<span title="k">hi</span>++}', () => false);
     const { container } = render(<div>{tree}</div>);
-    expect(container.querySelector("ins.critic-ins span.k")?.textContent).toBe("hi");
+    expect(container.querySelector("ins.critic-ins span[title=k]")?.textContent).toBe("hi");
   });
 });
 

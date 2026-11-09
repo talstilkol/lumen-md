@@ -39,8 +39,10 @@ export async function modelReview(f: Failure, stage1: Verdict): Promise<Verdict 
     tier: "tiny",
     temperature: 0,
     maxTokens: 300,
+    signal: f.signal,
     schema: executor.supportsSchema() ? { type: "object", properties: { diagnosis: { type: "string" }, suggestions: { type: "array" } }, required: ["suggestions"] } : undefined,
   });
+  if (f.signal?.aborted) return null;
   const j = checkJson(res.content);
   if (!j.ok) return null;
   const v = j.value as { diagnosis?: unknown; suggestions?: unknown };

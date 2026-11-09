@@ -106,6 +106,23 @@ describe("cache hits keep the executor in the trace", () => {
   });
 });
 
+describe("cached answers pass the language check", () => {
+  it("an English answer cached for Hebrew input (before the check) is not reused", async () => {
+    localStorage.removeItem("lumen.ai.cache");
+    const he = "פגישת צוות: דנה תשלח את ההצעה ללקוח עד יום חמישי, יואב יבדוק את הבאג.";
+    const english = "Dana will send the proposal to the client by Thursday and Yoav checks the bug.";
+    const base: AgentDefinition = { id: "lang-cache", description: "", system: "s", user: (i) => i.text ?? "", cache: true };
+    const ex = fakeExecutor(sequence(english, "דנה תשלח את ההצעה ללקוח עד יום חמישי"));
+    registerExecutor(ex);
+    // An entry written without the check (as before it existed).
+    expect((await runAgent({ ...base, language: "any" }, { text: he })).status).toBe("ok");
+    const run = await runAgent(base, { text: he });
+    expect(run.steps.map((s) => s.kind)).not.toContain("cache");
+    expect(ex.calls.length).toBe(2);
+    expect(run.output).toContain("דנה");
+  });
+});
+
 describe("stricter text validators", () => {
   it("tasker: every non-blank line is an unchecked task", () => {
     expect(checkTaskList("- [ ] a (Dana)\n\n* [ ] b").ok).toBe(true);

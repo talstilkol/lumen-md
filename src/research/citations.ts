@@ -139,6 +139,26 @@ const words = (s: string) => normaliseForMatch(s).match(/[\p{L}\p{N}]+/gu) ?? []
  * match, else the best share of the quote's words found in order within a
  * window of the page (tolerates small edits, ellipses, punctuation).
  */
+/**
+ * Is the quote really in the page, word for word? Contiguous containment
+ * after normalisation (case, punctuation, Markdown marks and line breaks
+ * don't matter); `...` / `…` may stand for omitted text, but each part has to
+ * appear verbatim and in order. Unlike `quoteCoverage`, a dropped word fails:
+ * "Alice approved" is not in "Alice never approved".
+ */
+export function quoteContained(quote: string, page: string): boolean {
+  const parts = quote.split(/\.\.\.|…/).map(words).filter((w) => w.length);
+  if (!parts.length) return false;
+  const hay = ` ${words(page).join(" ")} `;
+  let from = 0;
+  for (const part of parts) {
+    const at = hay.indexOf(` ${part.join(" ")} `, from);
+    if (at < 0) return false;
+    from = at + part.join(" ").length + 1;
+  }
+  return true;
+}
+
 export function quoteCoverage(quote: string, page: string): number {
   const q = normaliseForMatch(quote).replace(/\.\.\.|…/g, " ");
   const p = normaliseForMatch(page);

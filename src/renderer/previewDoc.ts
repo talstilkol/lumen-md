@@ -17,12 +17,14 @@ let nextHandleId = 0;
  * Stable per-document key for per-document runtime state. Workspace files
  * are identified by their workspace path; files opened from disk by their
  * FileSystemFileHandle (two `readme.md` from different folders share a
- * name but not a handle); anything else by name.
+ * name but not a handle); anything else by name plus its load id, so two
+ * loads of same-named handle-less files never share state.
  */
 export function docIdentity(doc: {
   workspaceName?: string | null;
   name?: string | null;
   handle?: object | null;
+  loadId?: number;
 }): string | null {
   if (doc.workspaceName) return `ws:${doc.workspaceName}`;
   if (doc.handle) {
@@ -33,5 +35,6 @@ export function docIdentity(doc: {
     }
     return `${id}:${doc.name ?? ""}`;
   }
-  return doc.name ? `name:${doc.name}` : null;
+  if (!doc.name) return null;
+  return doc.loadId === undefined ? `name:${doc.name}` : `name:${doc.name}#${doc.loadId}`;
 }

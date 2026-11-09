@@ -57,15 +57,26 @@ export function lastTrashedItems(): TrashItem[] {
 export async function moveToTrash(paths: string[], kinds: Record<string, "file" | "directory"> = {}, now = Date.now()): Promise<TrashItem[]> {
   const items = await readIndex();
   const added: TrashItem[] = [];
-  for (const path of paths) {
-    const id = `${now.toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
-    await renameWorkspaceFile(path, `${TRASH_DIR}/${id}/${basename(path)}`);
-    const item: TrashItem = { id, originalPath: path, trashedAt: now, kind: kinds[path] ?? (/\.[^/]+$/.test(path) ? "file" : "directory") };
-    items.push(item);
-    added.push(item);
+  // A folder and something inside it can both be selected: trashing the
+  // folder takes the descendant along, so only the outermost paths move.
+  const unique = [...new Set(paths)];
+  const roots = unique.filter((p) => !unique.some((q) => q !== p && p.startsWith(q + "/")));
+  try {
+    for (const path of roots) {
+      const id = `${now.toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
+      await renameWorkspaceFile(path, `${TRASH_DIR}/${id}/${basename(path)}`);
+      const item: TrashItem = { id, originalPath: path, trashedAt: now, kind: kinds[path] ?? (/\.[^/]+$/.test(path) ? "file" : "directory") };
+      items.push(item);
+      added.push(item);
+    }
+  } finally {
+    // Record whatever did move even when a later move fails, so nothing
+    // sits in `.trash/` without an entry the Trash panel can restore.
+    if (added.length) {
+      await writeIndex(items);
+      lastTrashed = added;
+    }
   }
-  await writeIndex(items);
-  lastTrashed = added;
   return added;
 }
 

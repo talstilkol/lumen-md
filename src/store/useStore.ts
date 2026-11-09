@@ -31,7 +31,17 @@ export interface DocFile {
   /** When set, the doc lives inside the OPFS workspace under this name. */
   workspaceName?: string | null;
   dirty: boolean;
+  /**
+   * Fresh on every load of a document (open, drop, new tab) — lets
+   * `docIdentity` tell apart two loads of same-named files that have no
+   * handle or workspace path (e.g. two `README.md` via the file-input
+   * fallback), so per-document grants such as live-js run approval never
+   * carry over to a different file.
+   */
+  loadId?: number;
 }
+
+let nextLoadId = 0;
 
 interface AppState {
   doc: DocFile;
@@ -166,23 +176,26 @@ export function registerPendingEdits(flush: () => void): () => void {
   return () => void pendingEditFlushers.delete(flush);
 }
 let flushingEdits = false;
+/** Make every editor emit the edits it is still holding (into the active document). */
+export function flushPendingEdits(): void {
+  if (flushingEdits) return;
+  flushingEdits = true;
+  try {
+    for (const flush of [...pendingEditFlushers]) {
+      try {
+        flush();
+      } catch {
+        /* an editor mid-teardown: nothing to flush */
+      }
+    }
+  } finally {
+    flushingEdits = false;
+  }
+}
 /** `action`, run after every editor has flushed its pending edits. */
 function afterPendingEdits<A extends unknown[]>(action: (...args: A) => void): (...args: A) => void {
   return (...args) => {
-    if (!flushingEdits) {
-      flushingEdits = true;
-      try {
-        for (const flush of [...pendingEditFlushers]) {
-          try {
-            flush();
-          } catch {
-            /* an editor mid-teardown: nothing to flush */
-          }
-        }
-      } finally {
-        flushingEdits = false;
-      }
-    }
+    flushPendingEdits();
     action(...args);
   };
 }
@@ -278,6 +291,8 @@ export const useAppStore = create<AppState>()(
             ...d,
             dirty: d.dirty ?? state.doc.dirty,
           };
+          // name + content together = a different document was loaded.
+          if ("name" in d && "content" in d) nextDoc.loadId = ++nextLoadId;
           const id = tabIdOf(nextDoc);
           // Keep the matching tab in sync with `setDoc` patches (e.g. rename,
           // markSaved) so the tab strip never lies.
@@ -375,6 +390,7 @@ export const useAppStore = create<AppState>()(
               workspaceName: input.workspaceName ?? null,
               handle: input.handle,
               dirty: false,
+              loadId: ++nextLoadId,
             },
           };
         })),

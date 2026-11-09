@@ -52,6 +52,17 @@ describe("vault citations", () => {
     expect(citations[2]).toMatchObject({ verified: false });
   });
 
+  it("a quote that drops a meaning-changing word is not verified", () => {
+    const src = [{ path: "a.md", content: "Alice never approved the launch today.\n" }];
+    expect(verifyVaultCitations('[1] "Alice approved the launch today"', src).verifiedCount).toBe(0);
+    expect(verifyVaultCitations('[1] "Alice never approved the launch"', src).verifiedCount).toBe(1);
+    // Formatting, case and line breaks don't matter; an ellipsis may skip words.
+    const md = [{ path: "b.md", content: "The **launch** moved\nto Tuesday, after the long review.\n" }];
+    expect(verifyVaultCitations('[1] "the launch moved to Tuesday"', md).verifiedCount).toBe(1);
+    expect(verifyVaultCitations('[1] "launch moved … the long review"', md).verifiedCount).toBe(1);
+    expect(verifyVaultCitations('[1] "the review … launch moved"', md).verifiedCount).toBe(0);
+  });
+
   it("an answer with no verified citation is reported as unsupported", () => {
     expect(verifyVaultCitations("It is on Friday [3].", notes).verifiedCount).toBe(0);
     expect(verifyVaultCitations("No citations at all.", notes).citations).toEqual([]);

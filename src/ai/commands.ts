@@ -12,6 +12,7 @@ import { log } from "../lib/logger";
 import { gitStatusSummary } from "../sync/git";
 import { showAiToast } from "../ui/AiToast";
 import { generateOutline, applyOutline } from "./outline";
+import { aiOperation, isAbort } from "./aiAbort";
 
 /**
  * Build the AI Settings command for the palette.
@@ -50,6 +51,7 @@ export function buildAiSettingsCommand(): Command {
  */
 export async function generateAiCommitMessage(
   repoFolder: string,
+  signal?: AbortSignal,
 ): Promise<string> {
   try {
     const summary = await gitStatusSummary(repoFolder);
@@ -65,8 +67,9 @@ export async function generateAiCommitMessage(
     // waiting in a dialog at the same time.
     const { runAgentOrThrow } = await import("../agents/runtime");
     const { committerAgent } = await import("../agents/defs");
-    return await runAgentOrThrow(committerAgent, { text: changes }, { ownPrompt: true });
+    return await runAgentOrThrow(committerAgent, { text: changes }, { ownPrompt: true, signal });
   } catch (e) {
+    if (signal?.aborted || isAbort(e)) return ""; // cancelled: no suggestion, no toast
     log.warn("AI commit generation skipped", e);
     showAiToast(t("toast.aiCommitSuggestionUnavailable"), "info");
     return "";
@@ -91,7 +94,13 @@ export function buildAiOutlineCommand(getContent: () => string, setContent: (s: 
           return;
         }
         showAiToast(t("toast.generatingOutline"), "info");
-        const headings = await generateOutline(content);
+        const op = aiOperation(); // T55: Esc / "AI: Cancel" stop it
+        let headings;
+        try {
+          headings = await generateOutline(content, op.signal);
+        } finally {
+          op.end();
+        }
         if (headings.length === 0) {
           showAiToast(t("toast.noOutlineGenerated"), "info");
           return;
@@ -100,6 +109,7 @@ export function buildAiOutlineCommand(getContent: () => string, setContent: (s: 
         setContent(newContent);
         showAiToast(t("toast.insertedHeadings", { count: headings.length }), "success");
       } catch (e) {
+        if (isAbort(e)) return;
         log.warn("AI outline generation failed", e);
         showAiToast(t("toast.outlineGenerationFailed"), "error");
       }

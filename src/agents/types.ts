@@ -206,9 +206,10 @@ export interface AgentDefinition<I extends AgentInput = AgentInput, O = string> 
    * The language of the answer (T27). "input" (default): the same language
    * as the user's text — the runtime says so in the prompt and rejects a
    * prose answer in another script. "any": the agent decides (translation,
-   * code, commit messages, chart and diagram syntax).
+   * code, commit messages, chart and diagram syntax). A function decides
+   * per input (a prompt template that asks for another language).
    */
-  language?: "input" | "any";
+  language?: "input" | "any" | ((input: I) => "input" | "any");
 }
 
 export type StepKind = "model" | "tool" | "validate" | "retry" | "critic" | "cache";

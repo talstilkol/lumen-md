@@ -271,7 +271,7 @@ export async function syncWithCloud(
   }
 
   onProgress(0, "Listing local files…");
-  const local = await listWorkspace({ includeAssets: true });
+  const local = await listWorkspace({ includeAssets: true, includeHidden: true });
   const localByPath = new Map(local.map((f) => [normalize(f.path), f]));
 
   onProgress(0.1, "Listing remote files…");

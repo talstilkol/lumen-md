@@ -19,10 +19,60 @@ export interface Clip {
   markdown: string;
 }
 
-const DROP = "script,style,noscript,template,nav,header,footer,aside,form,iframe,svg,button,[role=navigation],[role=banner],[role=contentinfo],[aria-hidden=true],.ad,.ads,.advert,.cookie,.newsletter,.share,.social";
+const DROP = "script,style,noscript,template,nav,footer,aside,form,iframe,svg,button,[role=navigation],[role=banner],[role=contentinfo],[aria-hidden=true],.ad,.ads,.advert,.cookie,.newsletter,.share,.social";
+const CONTENT = "article,main,[role=main]";
+
+/** Absolute http(s) base for resolving the page's links, or null. */
+function baseUrl(doc: Document, source?: string): URL | null {
+  let base: URL;
+  try {
+    base = new URL(source ?? "");
+  } catch {
+    return null;
+  }
+  if (base.protocol !== "http:" && base.protocol !== "https:") return null;
+  const declared = doc.querySelector("base[href]")?.getAttribute("href");
+  if (declared) {
+    try {
+      const b = new URL(declared, base);
+      if (b.protocol === "http:" || b.protocol === "https:") base = b;
+    } catch {
+      /* ignore a broken <base> */
+    }
+  }
+  return base;
+}
+
+/**
+ * Point links and images at the clipped page, not at Lumen: `/next` or
+ * `../photo.jpg` would otherwise resolve against the app or the vault.
+ */
+function absolutizeUrls(root: Element, base: URL): void {
+  const abs = (v: string) => {
+    try {
+      return new URL(v.trim(), base).href;
+    } catch {
+      return v;
+    }
+  };
+  for (const attr of ["href", "src", "poster"]) {
+    root.querySelectorAll(`[${attr}]`).forEach((el) => el.setAttribute(attr, abs(el.getAttribute(attr) ?? "")));
+  }
+  root.querySelectorAll("[srcset]").forEach((el) => {
+    const set = (el.getAttribute("srcset") ?? "")
+      .split(",")
+      .map((c) => c.trim())
+      .filter(Boolean)
+      .map((c) => {
+        const [u, ...rest] = c.split(/\s+/);
+        return [abs(u), ...rest].join(" ");
+      });
+    el.setAttribute("srcset", set.join(", "));
+  });
+}
 
 /** The readable part of an HTML page (article > main > biggest text block). */
-export function readableHtml(html: string): { title: string; html: string } {
+export function readableHtml(html: string, source?: string): { title: string; html: string } {
   const doc = new DOMParser().parseFromString(html, "text/html");
   const title =
     doc.querySelector('meta[property="og:title"]')?.getAttribute("content")?.trim() ||
@@ -30,6 +80,11 @@ export function readableHtml(html: string): { title: string; html: string } {
     doc.title?.trim() ||
     "";
   doc.querySelectorAll(DROP).forEach((el) => el.remove());
+  // A <header> inside the article / main holds its headline, byline and
+  // lead; only the site header outside it is chrome.
+  doc.querySelectorAll("header").forEach((el) => {
+    if (!el.closest(CONTENT)) el.remove();
+  });
   let root: Element | null = doc.querySelector("article") ?? doc.querySelector("main") ?? doc.querySelector("[role=main]");
   if (!root) {
     // The element with the most paragraph text.
@@ -44,6 +99,8 @@ export function readableHtml(html: string): { title: string; html: string } {
     });
     root = best ?? doc.body;
   }
+  const base = baseUrl(doc, source);
+  if (root && base) absolutizeUrls(root, base);
   return { title, html: root?.innerHTML ?? "" };
 }
 
@@ -72,7 +129,7 @@ export function clipToNote(c: { title: string; source: string; body: string; dat
 }
 
 export function clipFromHtml(html: string, source: string, date?: Date): Clip {
-  const { title, html: main } = readableHtml(html);
+  const { title, html: main } = readableHtml(html, source);
   const body = htmlToMarkdown(main).replace(/\n{3,}/g, "\n\n");
   return { title: title || source, source, markdown: clipToNote({ title, source, body, date }) };
 }
@@ -85,18 +142,27 @@ export function clipFileName(title: string): string {
 
 /**
  * Fetch and clip a URL: through the research service's extractor when one
- * is configured (no CORS limits), else straight from the browser (works for
- * pages that allow it).
+ * is configured (no CORS limits), else straight from the browser — only
+ * where the page's CSP admits that origin (connect-src is an allowlist, so
+ * for ordinary article sites it doesn't, and the fetch would just fail).
+ * Without a usable route: `ResearchUnavailableError`.
  */
 export async function clipUrl(url: string, deps: { extract?: (u: string) => Promise<{ title?: string; text?: string; finalUrl?: string; error?: string }> } = {}): Promise<Clip> {
-  const { researchEndpoint, extractPage } = await import("./client");
+  const { researchEndpoint, extractPage, ResearchUnavailableError } = await import("./client");
   const extract = deps.extract ?? (researchEndpoint() ? (u: string) => extractPage(u) : null);
+  let extractError: string | undefined;
   if (extract) {
     const page = await extract(url);
     if (!page.error && page.text) {
       const source = page.finalUrl || url;
       return { title: page.title || source, source, markdown: clipToNote({ title: page.title || "", source, body: page.text }) };
     }
+    extractError = page.error;
+  }
+  const { connectAllowedByCsp } = await import("../lib/cspConnect");
+  if (!connectAllowedByCsp(url)) {
+    if (extractError) throw new Error(extractError);
+    throw new ResearchUnavailableError();
   }
   const res = await fetch(url, { credentials: "omit" });
   if (!res.ok) throw new Error(`HTTP ${res.status}`);

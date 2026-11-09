@@ -139,7 +139,8 @@ export function AiSettingsPanel({ open, onClose }: Props) {
       setStyleOn(style.styleProfileActive());
       setWebModel(mm.selectedWebLlmModel() ?? "");
       await trace.loadTrace();
-      if (alive) setRuns(trace.listRuns().slice(-10).reverse());
+      // listRuns() is newest first: the first ten are the ten latest.
+      if (alive) setRuns(trace.listRuns().slice(0, 10));
       const h = await mm.detectHardware();
       if (!alive) return;
       setHw(h);

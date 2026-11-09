@@ -393,6 +393,22 @@ describe("connectCollab join-time seeding", () => {
     session.destroy();
   });
 
+  it("keeps the room's own password on the session for later invite links, never a stored default", async () => {
+    const mod = await import("../collab/yjs");
+    const created = mod.connectCollab("lumen-created", "", { isNewRoom: true, password: "gen-pw" });
+    expect(created.sharePassword).toBe("gen-pw");
+    created.destroy();
+    localStorage.setItem("lumen.collab.password", "my-default");
+    try {
+      const joined = mod.connectCollab("lumen-joined", "");
+      expect(joined.encrypted).toBe(true); // the stored default still encrypts
+      expect(joined.sharePassword).toBeNull(); // but is never put into a link
+      joined.destroy();
+    } finally {
+      localStorage.removeItem("lumen.collab.password");
+    }
+  });
+
   it("the share link's password wins over a stored default", async () => {
     const mod = await import("../collab/yjs");
     const { WebrtcProvider } = await import("y-webrtc");
@@ -406,6 +422,7 @@ describe("connectCollab join-time seeding", () => {
     try {
       const session = mod.connectCollab("new-room", "");
       expect((WebrtcProvider as unknown as { lastOpts: { password?: string } }).lastOpts.password).toBe("from-link");
+      expect(session.sharePassword).toBe("from-link");
       session.destroy();
     } finally {
       Object.defineProperty(globalThis, "location", { value: orig, configurable: true, writable: true });

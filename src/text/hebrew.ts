@@ -7,8 +7,14 @@
  * word, and word counting that does not break a pointed word apart.
  */
 
-/** Niqqud, cantillation and the other Hebrew combining marks. */
-const HEBREW_MARKS = /[֑-ׇֽֿׁׂׅׄ]/g;
+/**
+ * Niqqud, cantillation and the other Hebrew combining marks, as a regex
+ * character-class body: U+0591–U+05C7 *without* the punctuation inside
+ * that block (maqaf U+05BE, paseq U+05C0, sof pasuq U+05C3, nun hafukha
+ * U+05C6), which separates words rather than decorating a letter.
+ */
+export const HEBREW_MARK_CHARS = "\u0591-\u05BD\u05BF\u05C1\u05C2\u05C4\u05C5\u05C7";
+const HEBREW_MARKS = new RegExp(`[${HEBREW_MARK_CHARS}]`, "g");
 const FINALS: Record<string, string> = { "ך": "כ", "ם": "מ", "ן": "נ", "ף": "פ", "ץ": "צ" };
 const HEBREW_LETTER = /[א-ת]/;
 

@@ -27,7 +27,8 @@ import { t } from "../i18n";
 import { uiAlert, uiConfirm, uiPrompt } from "./PromptDialog";
 import { FileContextMenu, buildFileActions } from "./FileContextMenu";
 import { useAppStore } from "../store/useStore";
-import { safeMove, trashPaths, undoTrash } from "../storage/fileOps";
+import { movedPath, safeMove, trashPaths, undoTrash, type MoveResult } from "../storage/fileOps";
+import { flushActiveWorkspaceDoc, syncOpenDocsAfterMove } from "../store/openDocs";
 import type { TrashItem } from "../storage/trash";
 import { toast, useToastStore } from "../store/useToastStore";
 import { onWorkspaceChanged } from "../storage/workspaceEvents";
@@ -86,6 +87,22 @@ export function FileTree({
     if (linksUpdated.length) toast.info(t("tree.linksUpdated", { count: String(linksUpdated.length) }));
   }
 
+  /**
+   * `from` is now at `r.path`: open notes follow (a note inside a moved
+   * folder too) and get the same link rewrite as the files on disk.
+   */
+  function afterMove(from: string, r: MoveResult): void {
+    syncOpenDocsAfterMove(from, r.path, r.rewrite);
+    const nextActive = activePath ? movedPath(activePath, from, r.path) : null;
+    if (nextActive) onActiveRenamed(nextActive);
+    if (r.linksError) toast.error(t("tree.linksFailed", { error: r.linksError.message }));
+  }
+
+  /** "file" / "directory" from the tree, not from the spelling (`project.v1/` is a folder). */
+  function kindOf(path: string): "file" | "directory" {
+    return findNode(tree, path)?.kind === "directory" ? "directory" : "file";
+  }
+
   function toggleSelect(path: string): void {
     setSelectedPaths((prev) => {
       const next = new Set(prev);
@@ -104,7 +121,9 @@ export function FileTree({
     const paths = [...selectedPaths];
     // No confirmation: it goes to the trash, and the toast offers Undo.
     try {
-      const items = await trashPaths(paths);
+      // Unsaved edits of the active note go with it (and come back on Undo).
+      await flushActiveWorkspaceDoc();
+      const items = await trashPaths(paths, Object.fromEntries(paths.map((p) => [p, kindOf(p)])));
       if (activePath && paths.some((p) => activePath === p || activePath.startsWith(p + "/"))) onActiveDeleted();
       announceTrash(items);
     } catch (e) {
@@ -128,10 +147,11 @@ export function FileTree({
       const name = basename(p);
       const newPath = dir ? `${dir}/${name}` : name;
       try {
-        const r = await safeMove(p, newPath, { confirmReplace, folder: !/\.[^/]+$/.test(p) });
+        await flushActiveWorkspaceDoc();
+        const r = await safeMove(p, newPath, { confirmReplace, folder: kindOf(p) === "directory" });
         if (!r) continue;
         r.linksUpdated.forEach((x) => updated.add(x));
-        if (activePath === p) onActiveRenamed(newPath);
+        afterMove(p, r);
       } catch (e) {
         await uiAlert({ message: t("tree.alert.renameFailed", { error: (e as Error).message }) });
       }
@@ -275,9 +295,10 @@ export function FileTree({
     const target = joinPath(dirname(oldPath), next + ext);
     try {
       const isFolder = findNode(tree, oldPath)?.kind === "directory";
+      await flushActiveWorkspaceDoc();
       const r = await safeMove(oldPath, isFolder ? joinPath(dirname(oldPath), next) : target, { confirmReplace, folder: isFolder });
       if (!r) return;
-      if (oldPath === activePath) onActiveRenamed(r.path);
+      afterMove(oldPath, r);
       announceMove(r.linksUpdated);
       await refresh();
     } catch (e) {
@@ -317,6 +338,8 @@ export function FileTree({
   async function remove(node: WorkspaceNode) {
     // Goes to the trash (Undo in the toast; restorable for 30 days).
     try {
+      // Unsaved edits of the active note go with it (and come back on Undo).
+      await flushActiveWorkspaceDoc();
       const items = await trashPaths([node.path], { [node.path]: node.kind === "directory" ? "directory" : "file" });
       announceTrash(items);
       if (
