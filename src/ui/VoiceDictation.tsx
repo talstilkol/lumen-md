@@ -2,9 +2,10 @@
  * Voice memo capture (F2 / γ.4).
  *
  * Two flows live behind the same UI:
- *   - **Quick mode** (default): Browser-native `SpeechRecognition`,
- *     interim results streamed straight into the editor. Same as the
- *     old behaviour — fast, no AI cost, no audio recording.
+ *   - **Quick mode** (only under the `cloud` AI policy): Browser-native
+ *     `SpeechRecognition`, interim results streamed straight into the
+ *     editor. The browser sends the audio to its vendor, so under
+ *     local-only and local-first the memo flow below runs instead.
  *   - **Memo mode** (when `aiKey` is set OR Privacy Mode is on):
  *     `MediaRecorder` captures the audio, on stop we Whisper-transcribe
  *     + AI-summarize and insert a `> 🎙 Voice memo` block at the cursor.
@@ -24,6 +25,7 @@ import { showAiToast } from "./AiToast";
 import { t } from "../i18n";
 import { transcribe, summarizeMemo, formatVoiceMemo } from "../ai/transcribe";
 import { log } from "../lib/logger";
+import { thirdPartyServicesAllowed } from "../ai/policy";
 
 // SpeechRecognition is poorly + inconsistently typed across DOM lib
 // variants; keep the surface deliberately loose so we don't fight the
@@ -47,6 +49,13 @@ interface SpeechRecognitionLike {
 }
 
 export function startVoiceRecording(lang: string): void {
+  // The browser's speech recognition streams the audio to its vendor's
+  // servers (Chrome: Google). Only under the explicit `cloud` policy;
+  // otherwise record and transcribe on this device (plan 6.17).
+  if (!thirdPartyServicesAllowed()) {
+    void startVoiceMemo();
+    return;
+  }
   const SpeechRecognition =
     (window as Window & { SpeechRecognition?: unknown; webkitSpeechRecognition?: unknown })
       .SpeechRecognition ??

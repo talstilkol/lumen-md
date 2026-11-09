@@ -1,10 +1,13 @@
 /**
  * Read a note aloud (T32) with the system's own voices (Web Speech API) —
- * on macOS / Windows / Android that includes Hebrew. Nothing leaves the
- * device. Text is spoken sentence by sentence; each sentence's range in the
+ * on macOS / Windows / Android that includes Hebrew. Some browsers also list
+ * voices that synthesize on a server (Chrome's "Google …" voices send the
+ * text out): those are used only under the `cloud` AI policy (plan 6.17);
+ * otherwise only voices with `localService` speak. Text is spoken sentence by sentence; each sentence's range in the
  * document is reported so the editor can highlight what is being read.
  */
 import { hebrewRatio } from "../text/hebrew";
+import { thirdPartyServicesAllowed } from "./policy";
 
 export interface Sentence {
   text: string;
@@ -71,8 +74,9 @@ export function ttsAvailable(): boolean {
   return typeof window !== "undefined" && "speechSynthesis" in window && typeof SpeechSynthesisUtterance !== "undefined";
 }
 
-function voiceFor(lang: string): SpeechSynthesisVoice | undefined {
-  const voices = window.speechSynthesis.getVoices();
+/** Best voice for `lang`; a server-side voice only when `allowNetwork`. Exported for tests. */
+export function voiceFor(lang: string, allowNetwork = thirdPartyServicesAllowed()): SpeechSynthesisVoice | undefined {
+  const voices = window.speechSynthesis.getVoices().filter((v) => allowNetwork || v.localService);
   const base = lang.split("-")[0].toLowerCase();
   return voices.find((v) => v.lang.toLowerCase() === lang.toLowerCase()) ?? voices.find((v) => v.lang.toLowerCase().startsWith(base)) ?? (base === "he" ? voices.find((v) => v.lang.toLowerCase().startsWith("iw")) : undefined);
 }
@@ -99,14 +103,20 @@ export async function speak(markdown: string, opts: { uiLang: string; rate?: num
   if (!sentences.length) return true;
   speaking = true;
   let hadVoice = true;
+  const allowNetwork = thirdPartyServicesAllowed();
   for (const s of sentences) {
     if (!speaking) break;
     const lang = langFor(s.text, opts.uiLang === "he" ? "he-IL" : opts.uiLang);
     const u = new SpeechSynthesisUtterance(s.text);
     u.lang = lang;
-    const v = voiceFor(lang);
+    const v = voiceFor(lang, allowNetwork);
     if (v) u.voice = v;
-    else if (lang.startsWith("he")) hadVoice = false;
+    else if (!allowNetwork) {
+      // Without a voice on this device the browser would pick its default,
+      // which may be a server-side one: skip the sentence instead.
+      hadVoice = false;
+      continue;
+    } else if (lang.startsWith("he")) hadVoice = false;
     u.rate = opts.rate ?? 1;
     opts.onSentence?.(s);
     await new Promise<void>((resolve) => {
