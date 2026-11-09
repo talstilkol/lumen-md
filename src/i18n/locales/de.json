@@ -1383,6 +1383,8 @@
   "cmd.ai.rerankModel.hint": "An: bge-reranker-v2-m3 auf diesem Gerät (einmalig ~570 MB). Aus: schneller Wortabgleich.",
   "toast.rerankModelOn": "Neuordnung: lokales Modell (Download bei erster Nutzung)",
   "toast.rerankModelOff": "Neuordnung: Wortabgleich",
+  "toast.rerankUnsupported": "Das Reranking-Modell der Suche braucht WebGPU oder die Desktop-App; dieser Browser behält das eingebaute Reranking.",
+  "rerank.consent": "Reranking-Modell einschalten? Es lädt einmalig etwa {mb} MB (bge-reranker-v2-m3) und läuft auf diesem Gerät. In Lumens hebräischem Retrieval-Test setzt das eingebaute Ranking schon jede Antwort an die erste Stelle.",
   "cmd.image.altText": "Bilder: Alternativtext per OCR / lokaler Bildanalyse",
   "cmd.image.altText.hint": "Liest Text in den Bildern dieser Notiz auf dem Gerät (Hebräisch + Englisch); beschreibt den Rest mit einem lokalen Ollama-Bildmodell",
   "toast.imageAlt.none": "Keine Bilder ohne Alternativtext in dieser Notiz",

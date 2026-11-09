@@ -33,6 +33,22 @@ export function setRerankMode(mode: RerankMode): void {
   }
 }
 
+/**
+ * Plan 7.6: the model reranker is offered only where it is fast enough —
+ * a browser with WebGPU, or the desktop app — and after the user agreed to
+ * its download. Measured on the retrieval golden set's HeQ dev split, BM25
+ * alone already scores nDCG@10 1.0, so the model is off by default
+ * (`npm run eval:rerank` measures it on the other parts).
+ */
+export function modelRerankSupported(): boolean {
+  if (typeof window === "undefined") return false;
+  const desktop = "__TAURI_INTERNALS__" in window || "__TAURI__" in window;
+  return desktop || (typeof navigator !== "undefined" && "gpu" in navigator && !!(navigator as Navigator & { gpu?: unknown }).gpu);
+}
+
+/** Size of the model's one-time download (q8), shown in the consent. */
+export const RERANK_MODEL_MB = 571;
+
 /** Share of the query's words present in `text` (0..1), Hebrew-aware. */
 export function lexicalScore(query: string, text: string): number {
   const q = [...new Set(words(normalizeForMatch(query)).filter((w) => w.length > 1))];
