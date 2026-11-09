@@ -1,6 +1,6 @@
 {
  "$comment": "The plan's single source (plan 0.6). Edit this file, then `npm run plan` regenerates the board in MASTER_PLAN.md and plan/board.html; CI (`npm run plan:check`) fails when they differ. A task's status is one line: phases[].tasks[].status.",
- "updated": "2026-11-10T03:10",
+ "updated": "2026-11-10T03:40",
  "note": "**המצב ב-ב׳ 9.11 23:05:** אף PR לא מוזג מאז 17.10 (main = 552ea5b7). סשן 24.10 פתח #282–#316 (כ-30 משימות) — נרשמו כאן עכשיו. כמעט כל ה-PR-ים אדומים משתי סיבות שאינן בקוד: (1) מ-19.10 GitHub מעביר את ubuntu-latest ל-Ubuntu 26 והתקנת Playwright נשברת — #330 מצמיד ל-ubuntu-24.04; (2) תקציבי החבילה (startup 460 KB ותקציבי קובץ) — #330 גם מוסיף annotation שמראה איזה קובץ חורג. **החלטת טל 9.11: לא משתמשים יותר ב-GitHub Actions** — כל commit עם [skip ci], הבדיקות רצות ב-Vercel Sandbox. אזהרה: כל ענף מודד startup לבד (459–460 KB); אחרי 15.1 התוספות מכל השרשראות יצטברו — צריך את #248 או החלטה 15.16 (14) לפני המיזוג.\n\n**מחקר world class (9.11, plan/research-2026-11.md):** ציון ממוצע ב-19 תחומים מול Obsidian, Notion, Logseq, Typora, Word ואחרים — main 3.7 → עם ה-PR-ים הפתוחים 6.6 → כל התוכנית 7.3 → אחרי הגלים W1–W3 9.1. הפערים הגדולים: מסירה (אף PR לא מוזג), קריאה ומחקר (PDF), תאימות לפורמטים של Obsidian, INP ונגישות אמיתית עם קורא מסך (ת״י 5568), שיתוף והרשאות. 65 משימות חדשות בשלושה גלים (W1 ≈173 ש׳, W2 ≈119 ש׳, W3 ≈49 ש׳).\n\n**החלטות 10.11 (Claude, בהסמכת טל ״תחליט לבד כל החלטה״):** כל ההחלטות הפתוחות ב-15.2, 15.9, 15.10, 15.16 הוכרעו (פירוט בפריטים עצמם). נוסף: שער ה-OCR האנגלי (7.5) — ratchet ברמה הנמדדת (≤ 12.5% CER) ויעד ≤ 5% דרך W1.18, בלי להוריד את שער העברית; #271 — טוקן המחקר רק מההגדרות, לא VITE_RESEARCH_TOKEN (שום סוד בבנייה); החבילות שמחכות להתקנה (hash-wasm, @noble/ciphers, @excalidraw/excalidraw, @mlc-ai/web-llm@0.2.86, @capacitor/filesystem, quickjs-emscripten, knip, @citation-js) — מאושרות, כולן MIT / Apache / ISC, יותקנו ב-Vercel Sandbox; baselines ויזואליים — ייווצרו שם; שערי CI בלי Actions — W1.35. **בדיקה אמיתית בלי Actions:** Vercel בונה כל ענף (tsc -b מחמיר כולל בדיקות + vite build): 77 מתוך 86 PR-ים פתוחים ירוקים, 8 אדומים (#257, #261, #274, #277, #279, #280, #336, #347), 1 בתהליך.\n\n**10.11 01:30:** probe על chore/dod: build + budget עוברים ב-Vercel; עם vitest — נכשל (אין לוגים עד ש-Vercel מאושר). 83 מה-PR-ים ה\"אדומים\" ב-Vercel לא נכשלו בקוד — הבנייה שלהם נחסמה במגבלת 100 פריסות ביום (״Deployment rate limited״); כשל אמיתי היה רק ב-#336.",
  "start": "2026-10-18T08:00",
  "buffer": 0.35,
@@ -4317,7 +4317,9 @@
       "בדיקת הכספת מזהה 12/12 סוגי פגמים שנשתלו בכספת בדיקה",
       "בדיקה על 10,000 פתקים < 5 שניות"
      ],
-     "why": "קבצים אמיתיים בדיסק (4.2–4.4) מעבירים את הסיכון מ-OPFS למערכת הקבצים; שמירה חצויה היא מסלול האובדן הנפוץ אחרי פריצה או קריסה."
+     "why": "קבצים אמיתיים בדיסק (4.2–4.4) מעבירים את הסיכון מ-OPFS למערכת הקבצים; שמירה חצויה היא מסלול האובדן הנפוץ אחרי פריצה או קריסה.",
+     "branch": "feat/atomic-writes",
+     "status": "⏳ #356 **מוכן למיזוג** — (על #344; כתיבה אטומית + בדיקת שלמות כספת; Vercel Sandbox (Node 24): typecheck 0, vitest 3378/3379 (snapshot פקודות עודכן), startup 459.6/460, test:crash 1000 SIGKILL / 0 קבצים פגומים, e2e chromium 18/18; dod: npm run test:crash · npx vitest run src/__tests__/vaultAtomic.test.ts src/__tests__/vaultIntegrity.test.ts src/__tests__/vaultBackend.contract.test.ts · npm run build && npm run budget; לא נבדק: cargo/Android, Safari אמיתי)"
     },
     {
      "id": "W1.6",
@@ -4415,7 +4417,9 @@
       "0 מיזוגים ששוברים frontmatter (YAML תקין ב-100%)",
       "אותו מנוע משמש 3 המסלולים (בדיקה סטטית)"
      ],
-     "why": "כל דיאלוג קונפליקט מיותר הוא פגיעה באמון; Logseq ו-Obsidian Sync ממזגים טקסט אוטומטית."
+     "why": "כל דיאלוג קונפליקט מיותר הוא פגיעה באמון; Logseq ו-Obsidian Sync ממזגים טקסט אוטומטית.",
+     "branch": "feat/auto-merge",
+     "status": "⏳ #366 **מוכן למיזוג** — (על #275 + safe-git; מיזוג תלת-כיווני לפני דיאלוג: 459/500 עריכות מקבילות (91.8%) בלי דיאלוג, front matter תקין תמיד; Vercel Sandbox (Node 24): typecheck 0, vitest 334/3395, startup 458.9/460; dod: npx vitest run src/__tests__/textMerge.test.ts · npm run build && npm run budget; אין e2e)"
     },
     {
      "id": "W1.10",
@@ -4680,7 +4684,9 @@
       "100% מהגרסאות ברישום עם תוצאת סריקה וכרטיס",
       "מסך ההתקנה מציג את כל ההרשאות (e2e על 3 התוספים לדוגמה)"
      ],
-     "why": "Obsidian הכריז במאי 2026 על סריקה אוטומטית לכל גרסה וגילוי הרשאות; אצלנו ה-sandbox חזק יותר — צריך גם להראות את זה."
+     "why": "Obsidian הכריז במאי 2026 על סריקה אוטומטית לכל גרסה וגילוי הרשאות; אצלנו ה-sandbox חזק יותר — צריך גם להראות את זה.",
+     "branch": "feat/plugin-trust",
+     "status": "⏳ #367 **מוכן למיזוג** — (על #289; מסך הרשאות לפני התקנה + סריקה לכל גרסה; גם מחזיר את #289 מתחת לתקציב (460.4→459.2); Vercel Sandbox (Node 24): typecheck 0, vitest 331/3475, scan-plugins --check, e2e chromium/firefox/webkit; בעלים: חתימת תוספי הדוגמה במפתח שלך)"
     },
     {
      "id": "W1.21",
@@ -4853,7 +4859,9 @@
       "שתי בניות של אותו commit = אותו sha256 לכל קובץ ב-dist",
       "כל שחרור עם SBOM וחתימה שנבדקת בסקריפט"
      ],
-     "why": "Standard Notes ו-Anytype מפרסמים מודל אבטחה ובדיקות; פרטיות כטענה מרכזית דורשת הוכחה שאפשר לבדוק מבחוץ."
+     "why": "Standard Notes ו-Anytype מפרסמים מודל אבטחה ובדיקות; פרטיות כטענה מרכזית דורשת הוכחה שאפשר לבדוק מבחוץ.",
+     "branch": "chore/threat-model",
+     "status": "⏳ #361 (על #236; מודל איום, fuzzing של 5 מפענחים (1M קלטים: 0 קריסות), חתימת שחרורים מקומית; **לא עומד בשניים:** 7 קלטי Markdown איטיים (0.5–2.8s, נרשמו כממצא עד 2027-02-07) ו-2–3 קובצי .map לא משתחזרים; בעלים: מפתח שחרור offline — node scripts/supply-chain/keys.mjs)"
     },
     {
      "id": "W1.28",
