@@ -1,7 +1,7 @@
 {
   "version": 1,
   "source": "src/i18n/index.ts (en bundle)",
-  "count": 1446,
+  "count": 1447,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -2098,6 +2098,13 @@
     {
       "key": "privacy.downloads",
       "en": "Model downloads: {n}",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "privacy.staticAssets",
+      "en": "Static files: {n}",
       "vars": [
         "n"
       ]

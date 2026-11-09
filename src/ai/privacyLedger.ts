@@ -12,6 +12,11 @@
  * What is stored: time, host, method, byte counts, category, reason,
  * policy, decision. Never the prompt, the response or any header.
  *
+ * Files the browser loads by itself (a FontFace, an image, a CSS `url()`)
+ * never pass through `fetch`; for the canvas CDN (tldraw's fonts and icons)
+ * they are recorded from the Resource Timing API after they load. The
+ * ledger can log those, not block them.
+ *
  * Not covered: requests made from inside Web Workers (web-llm and
  * transformers.js fetch model weights there — downloads, no user text),
  * unless the module that starts the worker reports them with
@@ -251,6 +256,17 @@ function hostOf(url: string): string {
   }
 }
 
+/** Bytes of the URL's query string: a GET sends its data there (tldraw's licence beacon sends the page address). */
+function querySize(url: string): number {
+  try {
+    // `search` is percent-encoded ASCII, so its length is the byte count on the wire.
+    const q = new URL(url, typeof location !== "undefined" ? location.href : "http://localhost/").search;
+    return Math.max(0, q.length - 1);
+  } catch {
+    return 0;
+  }
+}
+
 /** Wrap a fetch implementation with the ledger. Exported for tests. */
 export function withLedger(inner: typeof fetch, opts: LedgerOptions = {}): typeof fetch {
   return async function ledgerFetch(input: RequestInfo | URL, init?: RequestInit): Promise<Response> {
@@ -260,7 +276,7 @@ export function withLedger(inner: typeof fetch, opts: LedgerOptions = {}): typeo
     if (!hit) return inner(input, init);
     const policy = getAiPolicy();
     const method = (init?.method ?? (input instanceof Request ? input.method : "GET")).toUpperCase();
-    const bytesOut = bodySize(init?.body);
+    const bytesOut = bodySize(init?.body) + querySize(url);
     if (!opts.consent && blockedByPolicy(hit.category, policy)) {
       const id = record({ ...hit, method, bytesOut: 0, bytesIn: null, policy, decision: "blocked" });
       const entry = entries.find((x) => x.id === id);
@@ -373,14 +389,6 @@ export function listenToWorkerLedger(channel: Pick<BroadcastChannel, "addEventLi
   });
 }
 
-function hostOf(url: string): string {
-  try {
-    return new URL(url).hostname;
-  } catch {
-    return url; // recorded as given
-  }
-}
-
 /**
  * Throw `PrivacyBlockedError` (and record the block) when the policy forbids
  * `as.category` — for a request that goes out some other way than this
@@ -427,6 +435,45 @@ export async function guardedFetch(url: string, init: RequestInit, as: { categor
   return res;
 }
 
+/** Categories whose files the browser itself loads (tldraw's FontFace fonts and CSS icons). */
+const BROWSER_LOADED: ReadonlySet<LedgerCategory> = new Set(["static-asset", "third-party"]);
+
+/**
+ * Record a file the browser loaded by itself, from its Resource Timing
+ * entry: a FontFace, an image, a CSS `url()` — requests `fetch` never sees.
+ * `fetch()` entries are skipped (the wrapper recorded them, or blocked them
+ * before they left). Only the canvas CDN's categories are recorded: an image
+ * in a note that happens to sit on a model host is not AI traffic, and must
+ * not show up as a model download. Exported for tests.
+ */
+export function recordBrowserResource(e: Pick<PerformanceResourceTiming, "name" | "initiatorType" | "transferSize">): LedgerEntry | null {
+  if (e.initiatorType === "fetch") return null;
+  if (typeof location !== "undefined") {
+    try {
+      if (new URL(e.name, location.href).origin === location.origin) return null; // the app's own files
+    } catch {
+      return null;
+    }
+  }
+  const hit = classify(e.name);
+  if (!hit || !BROWSER_LOADED.has(hit.category)) return null;
+  // transferSize is 0 for a cross-origin file without Timing-Allow-Origin: unknown, not empty.
+  const id = record({ ...hit, method: "GET", bytesOut: querySize(e.name), bytesIn: e.transferSize > 0 ? e.transferSize : null, policy: getAiPolicy(), decision: "allowed" });
+  return entries.find((x) => x.id === id) ?? null;
+}
+
+function observeBrowserResources(): void {
+  if (typeof PerformanceObserver === "undefined") return;
+  try {
+    const observer = new PerformanceObserver((list) => {
+      for (const e of list.getEntries()) recordBrowserResource(e as PerformanceResourceTiming);
+    });
+    observer.observe({ type: "resource", buffered: true });
+  } catch {
+    // why: an engine without resource timing — fetch traffic is still recorded
+  }
+}
+
 /** Install once at startup. `blocked` is called for every blocked request. */
 export function installPrivacyLedger(blocked?: (entry: LedgerEntry) => void): void {
   if (installed || typeof window === "undefined" || typeof window.fetch !== "function") return;
@@ -438,6 +485,7 @@ export function installPrivacyLedger(blocked?: (entry: LedgerEntry) => void): vo
   rawFetch = original;
   window.fetch = withLedger(original);
   if (typeof BroadcastChannel !== "undefined") listenToWorkerLedger(new BroadcastChannel(LEDGER_CHANNEL));
+  observeBrowserResources();
 }
 
 export function ledgerEntries(): readonly LedgerEntry[] {
@@ -477,7 +525,9 @@ export function ledgerSummary(list: readonly LedgerEntry[] = entries) {
     cloudRequests: cloud.length,
     cloudBytesOut: cloud.reduce((n, e) => n + e.bytesOut, 0),
     local: list.filter((e) => e.category === "local-ai").length,
-    downloads: list.filter((e) => e.category === "model-download" || e.category === "static-asset").length,
+    downloads: list.filter((e) => e.category === "model-download").length,
+    // why: fonts and icons are not models — the panel labels this count separately
+    staticAssets: list.filter((e) => e.category === "static-asset").length,
   };
 }
 
