@@ -2,7 +2,7 @@
 import { cmdIcons, type Command } from "../../ui/CommandPalette";
 import { useAppStore } from "../../store/useStore";
 import { t, getLocale, tPlural } from "../../i18n";
-import { uiAlert, uiPrompt } from "../../ui/PromptDialog";
+import { uiAlert, uiConfirm, uiPrompt } from "../../ui/PromptDialog";
 import { AI_PROMPT_TEMPLATES, applyTemplate } from "../../ai/multiLangPrompts";
 import { showAiToast } from "../../ui/AiToast";
 import { isAbort } from "../../ai/aiAbort";
@@ -228,7 +228,6 @@ export function buildAltTextCommands(): Command[] {
       group: t("group.ai", { defaultValue: "AI Copilot" }),
       action: async () => {
         const { imageText, withImageText, imagesNeedingAlt, documentLanguage } = await import("../../ai/vision");
-        const { uiConfirm } = await import("../../ui/PromptDialog");
         const { readWorkspaceBlob } = await import("../../storage/workspace");
         const doc = useAppStore.getState().doc.content;
         // Images with no alt, or still named after their file — a real
