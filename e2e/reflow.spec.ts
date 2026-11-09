@@ -59,8 +59,8 @@ async function overflow(page: Page): Promise<string[]> {
       if (cs.visibility === "hidden" || cs.display === "none" || el.closest("[aria-hidden=true], .sr-only")) continue;
       if (r.right <= vw + 1 && r.left >= -1) continue;
       if (scrollsSideways(el.parentElement)) continue;
-      // An element wholly off-screen on purpose (a closed drawer) is not cut off.
-      if (r.left >= vw || r.right <= 0) continue;
+      // An element wholly off-screen on purpose (a closed drawer, an unfocused skip link) is not cut off.
+      if (r.left >= vw || r.right <= 0 || r.bottom <= 0) continue;
       const name = (el.getAttribute("aria-label") ?? el.textContent ?? "").trim().slice(0, 30);
       out.push(`${el.tagName.toLowerCase()} "${name}" spans ${Math.round(r.left)}…${Math.round(r.right)} of ${vw}`);
       if (out.length > 12) break;

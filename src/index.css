@@ -164,7 +164,9 @@
   /* Skip-to-content link revealed when focused */
   .skip-link {
     position: fixed;
-    inset-inline-start: 50%;
+    /* Physical left: inset-inline-start + translateX(-50%) pushed it off the
+       screen in right-to-left layouts (reflow check, plan W1.23). */
+    left: 50%;
     top: -40px;
     transform: translateX(-50%);
     background: hsl(var(--accent));
@@ -393,9 +395,14 @@
   .prose-lumen li > ol {
     margin: 0.25rem 0;
   }
+  /* The checkbox takes the bullet's place inside the list's own padding;
+     a negative margin pushed it past the window's edge when narrow (plan W1.23). */
+  .prose-lumen ul.contains-task-list {
+    padding-inline-start: 0.25rem;
+  }
   .prose-lumen li.task-list-item {
     list-style: none;
-    margin-inline-start: -1.25rem;
+    margin-inline-start: 0;
     padding-inline-start: 0;
     display: flex;
     align-items: flex-start;
@@ -1755,4 +1762,20 @@
 }
 [role="dialog"] {
   max-inline-size: 100vw;
+}
+/* Narrow windows (and 200–400 % zoom): the title bar and the status bar wrap
+   onto a second row instead of pushing their last buttons off the screen. */
+@media (max-width: 760px) {
+  .titlebar {
+    flex-wrap: wrap;
+    height: auto;
+    min-height: 44px;
+    row-gap: 2px;
+  }
+  .status-bar {
+    flex-wrap: wrap;
+    height: auto;
+    min-height: 26px;
+    row-gap: 2px;
+  }
 }

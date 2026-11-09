@@ -79,7 +79,7 @@ export function SearchReplace({ open, onClose, content, onChange }: Props) {
       }}
     >
       {/* Search row */}
-      <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
         <Search size={13} style={{ color: "hsl(var(--fg-muted))", flexShrink: 0 }} />
         <input
           ref={inputRef}
@@ -119,7 +119,7 @@ export function SearchReplace({ open, onClose, content, onChange }: Props) {
       </div>
 
       {/* Replace row */}
-      <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
         <button onClick={() => setShowReplace(!showReplace)} className="icon-btn" style={{ width: 20, height: 20 }} title={t("findReplace.toggleReplace")} aria-label={t("findReplace.toggleReplace")} aria-pressed={showReplace}>
           <Replace size={13} />
         </button>
