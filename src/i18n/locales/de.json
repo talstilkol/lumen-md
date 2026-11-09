@@ -1247,7 +1247,6 @@
   "cmd.vault.toBrowser": "Tresor zurück in den Browserspeicher verschieben",
   "cmd.vault.toBrowser.hint": "Kopiert jede Notiz aus dem Ordner in den privaten Speicher des Browsers, prüft sie und arbeitet dann dort. Der Ordner bleibt unverändert.",
   "cmd.vault.check": "Vault-Integrität prüfen",
-  "cmd.vault.check.hint": "Abgeschnittene oder falsch kodierte Dateien, Namenskonflikte, Reste abgebrochener Speichervorgänge — Reparaturen mit Sicherung",
   "vault.folder.unsupported": "Dieser Browser kann keinen Ordner auf deinem Computer öffnen, daher bleiben deine Notizen im privaten Speicher des Browsers (OPFS). Um den Tresor in einem Ordner zu halten, nutze Chrome oder Edge oder die Desktop-App.",
   "vault.folder.permissionDenied": "Lumen hat keine Berechtigung erhalten, den Ordner „{folder}“ zu bearbeiten.",
   "vault.folder.moving": "Tresor wird verschoben… {done} von {total} Dateien",

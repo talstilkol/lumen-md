@@ -97,7 +97,6 @@ export function buildVaultDoctorCommands(): Command[] {
     {
       id: "vault.check",
       label: t("cmd.vault.check"),
-      hint: t("cmd.vault.check.hint"),
       icon: cmdIcons.Sparkles,
       group: t("group.tools"),
       action: async () => (await import("../../storage/vault/integrityCommand")).runVaultCheck(),

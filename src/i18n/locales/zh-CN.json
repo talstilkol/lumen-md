@@ -1247,7 +1247,6 @@
   "cmd.vault.toBrowser": "将库移回浏览器存储",
   "cmd.vault.toBrowser.hint": "把文件夹中的每条笔记复制到浏览器的私有存储并检查，然后在那里工作。文件夹不会改变。",
   "cmd.vault.check": "检查库的完整性",
-  "cmd.vault.check.hint": "被截断或编码错误的文件、名称冲突、中断保存的残留 — 每次修复都保留备份",
   "vault.folder.unsupported": "此浏览器无法打开电脑上的文件夹，因此笔记仍保存在浏览器的私有存储（OPFS）中。若要把库放在文件夹里，请使用 Chrome、Edge 或桌面应用。",
   "vault.folder.permissionDenied": "Lumen 未获得编辑文件夹“{folder}”的权限。",
   "vault.folder.moving": "正在移动库… {done}/{total} 个文件",

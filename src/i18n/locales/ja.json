@@ -1247,7 +1247,6 @@
   "cmd.vault.toBrowser": "保管庫をブラウザーストレージに戻す",
   "cmd.vault.toBrowser.hint": "フォルダー内のすべてのノートをブラウザーのプライベートストレージにコピーして確認し、そこで作業します。フォルダーは変更されません。",
   "cmd.vault.check": "ボールトの整合性をチェック",
-  "cmd.vault.check.hint": "途中で切れた・文字コードが違うファイル、名前の衝突、中断した保存の残り — 修復は必ずバックアップを残します",
   "vault.folder.unsupported": "このブラウザーはコンピューター上のフォルダーを開けないため、ノートはブラウザーのプライベートストレージ（OPFS）に残ります。保管庫をフォルダーに置くには、Chrome、Edge、またはデスクトップアプリを使ってください。",
   "vault.folder.permissionDenied": "Lumen はフォルダー「{folder}」を編集する許可を得られませんでした。",
   "vault.folder.moving": "保管庫を移動中… {total} 件中 {done} 件",

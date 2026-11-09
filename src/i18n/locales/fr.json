@@ -1247,7 +1247,6 @@
   "cmd.vault.toBrowser": "Ramener le coffre dans le stockage du navigateur",
   "cmd.vault.toBrowser.hint": "Copie chaque note du dossier dans le stockage privé du navigateur, la vérifie, puis travaille là. Le dossier n'est pas modifié.",
   "cmd.vault.check": "Vérifier l'intégrité du coffre",
-  "cmd.vault.check.hint": "Fichiers tronqués ou mal encodés, conflits de noms, restes d'enregistrements interrompus — chaque réparation garde une sauvegarde",
   "vault.folder.unsupported": "Ce navigateur ne peut pas ouvrir de dossier sur votre ordinateur : vos notes restent dans le stockage privé du navigateur (OPFS). Pour garder le coffre dans un dossier, utilisez Chrome ou Edge, ou l'application de bureau.",
   "vault.folder.permissionDenied": "Lumen n'a pas obtenu l'autorisation de modifier le dossier « {folder} ».",
   "vault.folder.moving": "Déplacement du coffre… {done} sur {total} fichiers",

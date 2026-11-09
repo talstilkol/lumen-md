@@ -390,7 +390,6 @@ const en: Strings = {
   "cmd.vault.toBrowser": "Move the vault back to browser storage",
   "cmd.vault.toBrowser.hint": "Copies every note from the folder into the browser's private storage, checks it, then works there. The folder is not changed.",
   "cmd.vault.check": "Check vault integrity",
-  "cmd.vault.check.hint": "Cut or mis-encoded files, name clashes, leftovers of interrupted saves — repairs keep a backup",
   "vault.folder.unsupported": "This browser can't open a folder on your computer, so your notes stay in the browser's private storage (OPFS). To keep the vault in a folder, use Chrome or Edge, or the desktop app.",
   "vault.folder.permissionDenied": "Lumen didn't get permission to edit the folder “{folder}”.",
   "vault.folder.moving": "Moving the vault… {done} of {total} files",

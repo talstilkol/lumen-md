@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-11-09T22:15:03.622Z",
+  "generated_at": "2026-11-09T23:03:41.894Z",
   "source": "src/i18n/index.ts (en bundle) + src/i18n/lazy/*.json",
-  "count": 1505,
+  "count": 1504,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -1583,11 +1583,6 @@
     {
       "key": "cmd.vault.check",
       "en": "Check vault integrity",
-      "vars": []
-    },
-    {
-      "key": "cmd.vault.check.hint",
-      "en": "Cut or mis-encoded files, name clashes, leftovers of interrupted saves — repairs keep a backup",
       "vars": []
     },
     {
