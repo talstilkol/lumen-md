@@ -14,13 +14,11 @@ import {
 import {
   basename,
   createWorkspaceFolder,
-  deleteWorkspaceFile,
   dirname,
   isOPFSAvailable,
   joinPath,
   listWorkspaceTree,
   readWorkspaceFile,
-  renameWorkspaceFile,
   uniqueWorkspaceName,
   writeWorkspaceFile,
 } from "../storage/workspace";
@@ -29,6 +27,9 @@ import { t } from "../i18n";
 import { uiAlert, uiConfirm, uiPrompt } from "./PromptDialog";
 import { FileContextMenu, buildFileActions } from "./FileContextMenu";
 import { useAppStore } from "../store/useStore";
+import { safeMove, trashPaths, undoTrash } from "../storage/fileOps";
+import type { TrashItem } from "../storage/trash";
+import { toast, useToastStore } from "../store/useToastStore";
 
 interface Props {
   /** Currently active workspace path (if any). */
@@ -61,6 +62,29 @@ export function FileTree({
   } | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
 
+  /** Ask before replacing anything (moves never overwrite silently — T46). */
+  const confirmReplace = (path: string) => uiConfirm({ message: t("tree.confirm.replace", { path }) });
+
+  /** Tell the user what a delete did, with Undo. */
+  function announceTrash(items: TrashItem[]): void {
+    if (!items.length) return;
+    useToastStore.getState().push({
+      kind: "info",
+      title: t("tree.trashed", { count: String(items.length) }),
+      ttlMs: 10_000,
+      action: {
+        label: t("tree.undo"),
+        run: () => {
+          void undoTrash(items).then(() => refresh());
+        },
+      },
+    });
+  }
+
+  function announceMove(linksUpdated: string[]): void {
+    if (linksUpdated.length) toast.info(t("tree.linksUpdated", { count: String(linksUpdated.length) }));
+  }
+
   function toggleSelect(path: string): void {
     setSelectedPaths((prev) => {
       const next = new Set(prev);
@@ -77,19 +101,13 @@ export function FileTree({
   async function bulkDelete(): Promise<void> {
     if (selectedPaths.size === 0) return;
     const paths = [...selectedPaths];
-    const ok = await uiConfirm({
-      message: t("tree.confirm.bulkDelete", { count: String(paths.length) }),
-    });
-    if (!ok) return;
-    for (const p of paths) {
-      try {
-        await deleteWorkspaceFile(p);
-        if (activePath && (activePath === p || activePath.startsWith(p + "/"))) {
-          onActiveDeleted();
-        }
-      } catch {
-        /* missing — ignore */
-      }
+    // No confirmation: it goes to the trash, and the toast offers Undo.
+    try {
+      const items = await trashPaths(paths);
+      if (activePath && paths.some((p) => activePath === p || activePath.startsWith(p + "/"))) onActiveDeleted();
+      announceTrash(items);
+    } catch (e) {
+      await uiAlert({ message: t("tree.alert.deleteFailed", { error: (e as Error).message }) });
     }
     clearSelection();
     await refresh();
@@ -104,16 +122,20 @@ export function FileTree({
     });
     if (target === null) return;
     const dir = target.trim().replace(/^\/+|\/+$/g, "");
+    const updated = new Set<string>();
     for (const p of selectedPaths) {
       const name = basename(p);
       const newPath = dir ? `${dir}/${name}` : name;
       try {
-        await renameWorkspaceFile(p, newPath);
+        const r = await safeMove(p, newPath, { confirmReplace, folder: !/\.[^/]+$/.test(p) });
+        if (!r) continue;
+        r.linksUpdated.forEach((x) => updated.add(x));
         if (activePath === p) onActiveRenamed(newPath);
-      } catch {
-        /* skip on conflict */
+      } catch (e) {
+        await uiAlert({ message: t("tree.alert.renameFailed", { error: (e as Error).message }) });
       }
     }
+    announceMove([...updated]);
     clearSelection();
     await refresh();
   }
@@ -251,8 +273,11 @@ export function FileTree({
     const ext = next.match(/\.[^./]+$/) ? "" : ".md";
     const target = joinPath(dirname(oldPath), next + ext);
     try {
-      await renameWorkspaceFile(oldPath, target);
-      if (oldPath === activePath) onActiveRenamed(target);
+      const isFolder = findNode(tree, oldPath)?.kind === "directory";
+      const r = await safeMove(oldPath, isFolder ? joinPath(dirname(oldPath), next) : target, { confirmReplace, folder: isFolder });
+      if (!r) return;
+      if (oldPath === activePath) onActiveRenamed(r.path);
+      announceMove(r.linksUpdated);
       await refresh();
     } catch (e) {
       await uiAlert({
@@ -289,13 +314,10 @@ export function FileTree({
   }
 
   async function remove(node: WorkspaceNode) {
-    const msg =
-      node.kind === "directory"
-        ? t("tree.confirm.deleteFolder", { path: node.path })
-        : t("tree.confirm.deleteFile", { path: node.path });
-    if (!(await uiConfirm({ message: msg }))) return;
+    // Goes to the trash (Undo in the toast; restorable for 30 days).
     try {
-      await deleteWorkspaceFile(node.path);
+      const items = await trashPaths([node.path], { [node.path]: node.kind === "directory" ? "directory" : "file" });
+      announceTrash(items);
       if (
         activePath &&
         (activePath === node.path || activePath.startsWith(node.path + "/"))
@@ -744,4 +766,15 @@ function renderNode(
       )}
     </li>
   );
+}
+
+function findNode(nodes: WorkspaceNode[], path: string): WorkspaceNode | undefined {
+  for (const n of nodes) {
+    if (n.path === path) return n;
+    if (n.children) {
+      const hit = findNode(n.children, path);
+      if (hit) return hit;
+    }
+  }
+  return undefined;
 }

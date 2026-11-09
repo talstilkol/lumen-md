@@ -6,6 +6,7 @@
  */
 
 import { randomId } from "../lib/cryptoRandom";
+import { needsSyncWriteFallback, syncWriteOpfs } from "./opfsSyncWrite";
 
 export interface WorkspaceEntry {
   /** File path relative to the workspace root. */
@@ -88,6 +89,8 @@ async function readDirInto(
 ): Promise<WorkspaceNode[]> {
   const out: WorkspaceNode[] = [];
   for await (const [name, handle] of dir.entries()) {
+    // Dot entries are app data (".trash", ".obsidian"), not notes (T46).
+    if (name.startsWith(".")) continue;
     const path = prefix ? `${prefix}/${name}` : name;
     if (handle.kind === "directory") {
       const children = await readDirInto(
@@ -168,6 +171,7 @@ export async function writeWorkspaceFile(
   content: string,
 ): Promise<void> {
   const handle = await getFileHandleAt(path, { create: true });
+  if (needsSyncWriteFallback(handle)) return syncWriteOpfs(splitPath(path), content);
   const writable = await handle.createWritable();
   await writable.write(content);
   await writable.close();
@@ -179,6 +183,7 @@ export async function writeWorkspaceBlob(
   data: Blob | ArrayBuffer | Uint8Array,
 ): Promise<void> {
   const handle = await getFileHandleAt(path, { create: true });
+  if (needsSyncWriteFallback(handle)) return syncWriteOpfs(splitPath(path), data);
   const writable = await handle.createWritable();
   await writable.write(data as FileSystemWriteChunkType);
   await writable.close();
@@ -213,15 +218,58 @@ export async function deleteWorkspaceFile(path: string): Promise<void> {
   await parent.removeEntry(last, { recursive: true });
 }
 
+/** A rename / move would replace an existing file or folder. */
+export class WorkspaceConflictError extends Error {
+  constructor(readonly path: string) {
+    super(`"${path}" already exists`);
+    this.name = "WorkspaceConflictError";
+  }
+}
+
+async function isDirectory(path: string): Promise<boolean> {
+  try {
+    await walkDir(splitPath(path));
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/** Does anything (file or folder) exist at `path`? */
+export async function workspaceHasEntry(path: string): Promise<boolean> {
+  return (await workspaceHasFile(path)) || (await isDirectory(path));
+}
+
+/**
+ * Rename or move a file or a folder (T46). Refuses to replace anything at
+ * the target unless `overwrite` is set — it used to overwrite silently.
+ * Folders move recursively. (OPFS names are case-sensitive, so a change of
+ * letter case is an ordinary rename.)
+ */
 export async function renameWorkspaceFile(
   oldPath: string,
   newPath: string,
+  opts: { overwrite?: boolean } = {},
 ): Promise<void> {
   if (oldPath === newPath) return;
-  // Read original (file only — directory rename would need a recursive copy).
-  const original = await readWorkspaceBlob(oldPath);
-  await writeWorkspaceBlob(newPath, original);
+  if (newPath.startsWith(oldPath + "/")) throw new Error(`Cannot move "${oldPath}" into itself`);
+  if (!opts.overwrite && (await workspaceHasEntry(newPath))) throw new WorkspaceConflictError(newPath);
+  if (await isDirectory(oldPath)) {
+    await copyTree(oldPath, newPath);
+  } else {
+    const original = await readWorkspaceBlob(oldPath);
+    await writeWorkspaceBlob(newPath, original);
+  }
   await deleteWorkspaceFile(oldPath);
+}
+
+async function copyTree(from: string, to: string): Promise<void> {
+  const dir = await walkDir(splitPath(from));
+  await createWorkspaceFolder(to);
+  for await (const [name, handle] of dir.entries()) {
+    if (handle.kind === "directory") await copyTree(`${from}/${name}`, `${to}/${name}`);
+    else await writeWorkspaceBlob(`${to}/${name}`, await (handle as FileSystemFileHandle).getFile());
+  }
 }
 
 export async function workspaceHasFile(path: string): Promise<boolean> {

@@ -1205,5 +1205,19 @@
   "versionHistory.reason.close": "при закрытии",
   "versionHistory.reason.restore": "перед восстановлением",
   "versionHistory.reason.manual": "вручную",
-  "ai.doctor.fix.pullHebrew": "Ваши заметки на иврите; эта модель хорошо работает с ивритом:"
+  "ai.doctor.fix.pullHebrew": "Ваши заметки на иврите; эта модель хорошо работает с ивритом:",
+  "tree.confirm.replace": "«{path}» уже существует. Заменить? (Существующий попадёт в корзину.)",
+  "tree.trashed": "{count} перемещено в корзину",
+  "tree.undo": "Отменить",
+  "tree.linksUpdated": "Ссылки обновлены в {count} заметках",
+  "trash.title": "Корзина",
+  "trash.close": "Закрыть",
+  "trash.empty": "Корзина пуста.",
+  "trash.emptyAll": "Очистить корзину",
+  "trash.restore": "Восстановить",
+  "trash.deleteForever": "Удалить навсегда",
+  "trash.restored": "Восстановлено в {path}",
+  "trash.daysLeft": "удалится навсегда через {n} дн.",
+  "cmd.file.trash": "Корзина…",
+  "cmd.file.trash.hint": "Восстановить удалённые заметки (30 дней)"
 }

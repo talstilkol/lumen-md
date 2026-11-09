@@ -1354,6 +1354,16 @@ export function useCommands({
         },
       },
       {
+        id: "file.trash",
+        label: t("cmd.file.trash"),
+        hint: t("cmd.file.trash.hint"),
+        icon: cmdIcons.Sparkles,
+        group: t("group.tools"),
+        action: () => {
+          window.dispatchEvent(new CustomEvent("lumen-open-trash"));
+        },
+      },
+      {
         id: "ai.doctor",
         label: t("cmd.ai.doctor"),
         hint: t("cmd.ai.doctor.hint"),

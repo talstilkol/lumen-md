@@ -1205,5 +1205,19 @@
   "versionHistory.reason.close": "終了時",
   "versionHistory.reason.restore": "復元前",
   "versionHistory.reason.manual": "手動",
-  "ai.doctor.fix.pullHebrew": "ノートがヘブライ語です。このモデルはヘブライ語が得意です:"
+  "ai.doctor.fix.pullHebrew": "ノートがヘブライ語です。このモデルはヘブライ語が得意です:",
+  "tree.confirm.replace": "「{path}」は既に存在します。置き換えますか？（既存のものはごみ箱へ移ります）",
+  "tree.trashed": "{count} 件をごみ箱へ移動しました",
+  "tree.undo": "元に戻す",
+  "tree.linksUpdated": "{count} 件のノートのリンクを更新しました",
+  "trash.title": "ごみ箱",
+  "trash.close": "閉じる",
+  "trash.empty": "ごみ箱は空です。",
+  "trash.emptyAll": "ごみ箱を空にする",
+  "trash.restore": "復元",
+  "trash.deleteForever": "完全に削除",
+  "trash.restored": "{path} に復元しました",
+  "trash.daysLeft": "{n} 日後に完全に削除",
+  "cmd.file.trash": "ごみ箱…",
+  "cmd.file.trash.hint": "削除したノートを復元（30日間保持）"
 }

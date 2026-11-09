@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-10-17T20:41:01.919Z",
+  "generated_at": "2026-10-17T20:55:24.222Z",
   "source": "src/i18n/index.ts (en bundle)",
-  "count": 1207,
+  "count": 1221,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -1491,6 +1491,86 @@
     {
       "key": "versionHistory.noVersions",
       "en": "No versions yet. A version is kept every couple of minutes while you type, on every save and when you close the tab.",
+      "vars": []
+    },
+    {
+      "key": "tree.confirm.replace",
+      "en": "“{path}” already exists. Replace it? (The existing one goes to the trash.)",
+      "vars": [
+        "path"
+      ]
+    },
+    {
+      "key": "tree.trashed",
+      "en": "{count} moved to the trash",
+      "vars": [
+        "count"
+      ]
+    },
+    {
+      "key": "tree.undo",
+      "en": "Undo",
+      "vars": []
+    },
+    {
+      "key": "tree.linksUpdated",
+      "en": "Links updated in {count} notes",
+      "vars": [
+        "count"
+      ]
+    },
+    {
+      "key": "trash.title",
+      "en": "Trash",
+      "vars": []
+    },
+    {
+      "key": "trash.close",
+      "en": "Close",
+      "vars": []
+    },
+    {
+      "key": "trash.empty",
+      "en": "The trash is empty.",
+      "vars": []
+    },
+    {
+      "key": "trash.emptyAll",
+      "en": "Empty trash",
+      "vars": []
+    },
+    {
+      "key": "trash.restore",
+      "en": "Restore",
+      "vars": []
+    },
+    {
+      "key": "trash.deleteForever",
+      "en": "Delete forever",
+      "vars": []
+    },
+    {
+      "key": "trash.restored",
+      "en": "Restored to {path}",
+      "vars": [
+        "path"
+      ]
+    },
+    {
+      "key": "trash.daysLeft",
+      "en": "deleted for good in {n} days",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "cmd.file.trash",
+      "en": "Trash…",
+      "vars": []
+    },
+    {
+      "key": "cmd.file.trash.hint",
+      "en": "Restore deleted notes (kept 30 days)",
       "vars": []
     },
     {

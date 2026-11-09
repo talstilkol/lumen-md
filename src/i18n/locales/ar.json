@@ -1205,5 +1205,19 @@
   "versionHistory.reason.close": "عند الإغلاق",
   "versionHistory.reason.restore": "قبل الاستعادة",
   "versionHistory.reason.manual": "يدوي",
-  "ai.doctor.fix.pullHebrew": "ملاحظاتك بالعبرية؛ هذا النموذج جيد في العبرية:"
+  "ai.doctor.fix.pullHebrew": "ملاحظاتك بالعبرية؛ هذا النموذج جيد في العبرية:",
+  "tree.confirm.replace": "«{path}» موجود بالفعل. استبداله؟ (سينتقل الموجود إلى سلة المهملات.)",
+  "tree.trashed": "تم نقل {count} إلى سلة المهملات",
+  "tree.undo": "تراجع",
+  "tree.linksUpdated": "تم تحديث الروابط في {count} ملاحظات",
+  "trash.title": "سلة المهملات",
+  "trash.close": "إغلاق",
+  "trash.empty": "سلة المهملات فارغة.",
+  "trash.emptyAll": "إفراغ السلة",
+  "trash.restore": "استعادة",
+  "trash.deleteForever": "حذف نهائي",
+  "trash.restored": "تمت الاستعادة إلى {path}",
+  "trash.daysLeft": "سيُحذف نهائيًا خلال {n} أيام",
+  "cmd.file.trash": "سلة المهملات…",
+  "cmd.file.trash.hint": "استعادة الملاحظات المحذوفة (تُحفظ 30 يومًا)"
 }

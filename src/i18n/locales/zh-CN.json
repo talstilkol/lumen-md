@@ -1205,5 +1205,19 @@
   "versionHistory.reason.close": "关闭时",
   "versionHistory.reason.restore": "恢复前",
   "versionHistory.reason.manual": "手动",
-  "ai.doctor.fix.pullHebrew": "你的笔记是希伯来语；此模型擅长希伯来语："
+  "ai.doctor.fix.pullHebrew": "你的笔记是希伯来语；此模型擅长希伯来语：",
+  "tree.confirm.replace": "“{path}”已存在。要替换吗？（现有项将移入回收站。）",
+  "tree.trashed": "已将 {count} 项移入回收站",
+  "tree.undo": "撤销",
+  "tree.linksUpdated": "已更新 {count} 篇笔记中的链接",
+  "trash.title": "回收站",
+  "trash.close": "关闭",
+  "trash.empty": "回收站为空。",
+  "trash.emptyAll": "清空回收站",
+  "trash.restore": "恢复",
+  "trash.deleteForever": "永久删除",
+  "trash.restored": "已恢复到 {path}",
+  "trash.daysLeft": "{n} 天后永久删除",
+  "cmd.file.trash": "回收站…",
+  "cmd.file.trash.hint": "恢复已删除的笔记（保留 30 天）"
 }
