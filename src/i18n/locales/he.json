@@ -1430,5 +1430,11 @@
   "cmd.ai.cancel": "AI: ביטול",
   "cmd.ai.cancel.hint": "עוצר כל בקשת AI שרצה (גם Esc עושה זאת)",
   "toast.aiCancelled": "בקשת ה-AI בוטלה ({count})",
-  "toast.aiNothingRunning": "אין בקשת AI שרצה"
+  "toast.aiNothingRunning": "אין בקשת AI שרצה",
+  "canvas.jsonCanvas.import": "ייבוא ‎.canvas",
+  "canvas.jsonCanvas.export": "ייצוא ‎.canvas",
+  "canvas.jsonCanvas.imported": "יובא {name} ({count} פריטים)",
+  "canvas.jsonCanvas.exported": "נשמר {name}.canvas: {nodes} צמתים, {edges} קשתות",
+  "canvas.jsonCanvas.skipped": "ל-{count} רכיבים אין צורה ב-JSON Canvas והם הושמטו (תמונות, ציור חופשי, חצים לא מחוברים)",
+  "canvas.jsonCanvas.failed": "לא ניתן לייבא את ה-JSON Canvas: {error}"
 }

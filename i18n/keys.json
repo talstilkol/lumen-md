@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-10-24T11:35:23.290Z",
+  "generated_at": "2026-11-09T21:46:41.157Z",
   "source": "src/i18n/index.ts (en bundle)",
-  "count": 1432,
+  "count": 1438,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -5869,6 +5869,47 @@
       "en": "Couldn't save the canvas “{name}”: {error}",
       "vars": [
         "name",
+        "error"
+      ]
+    },
+    {
+      "key": "canvas.jsonCanvas.import",
+      "en": "Import .canvas",
+      "vars": []
+    },
+    {
+      "key": "canvas.jsonCanvas.export",
+      "en": "Export .canvas",
+      "vars": []
+    },
+    {
+      "key": "canvas.jsonCanvas.imported",
+      "en": "Imported {name} ({count} items)",
+      "vars": [
+        "name",
+        "count"
+      ]
+    },
+    {
+      "key": "canvas.jsonCanvas.exported",
+      "en": "Saved {name}.canvas: {nodes} nodes, {edges} edges",
+      "vars": [
+        "name",
+        "nodes",
+        "edges"
+      ]
+    },
+    {
+      "key": "canvas.jsonCanvas.skipped",
+      "en": "{count} element(s) have no JSON Canvas form and were left out (images, free-hand drawing, unconnected arrows)",
+      "vars": [
+        "count"
+      ]
+    },
+    {
+      "key": "canvas.jsonCanvas.failed",
+      "en": "Couldn't import the JSON Canvas: {error}",
+      "vars": [
         "error"
       ]
     },

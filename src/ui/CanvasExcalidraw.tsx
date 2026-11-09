@@ -43,6 +43,7 @@ import {
 } from "../canvas/excalidrawFile";
 import { emptyScene, excalidrawLangOf, fileToInitialData, legacyCanvasToExcalidraw, sceneStamp, sceneToFile, tldrCanvasToExcalidraw, type SceneAppState, type SceneElement } from "../canvas/excalidrawScene";
 import type { ExBinaryFile, ExcalidrawFile } from "../canvas/tldrawToExcalidraw";
+import { JSON_CANVAS_EXT, excalidrawToJsonCanvas, jsonCanvasToExcalidraw, serializeJsonCanvas } from "../canvas/jsonCanvas";
 
 // Fonts (and anything else Excalidraw fetches by relative path) come from
 // this origin. Without it Excalidraw falls back to esm.sh.
@@ -85,15 +86,19 @@ export function debouncedSave(save: () => void, ms: number): { schedule(): void;
   };
 }
 
-/** The canvases in the directory, by kind. */
-async function listAll(store: CanvasStore): Promise<{ saved: string[]; tldr: string[]; legacy: string[] }> {
+type Lists = { saved: string[]; tldr: string[]; legacy: string[]; json: string[] };
+
+/** The canvases in the directory, by kind (`.canvas` = JSON Canvas, e.g. from an Obsidian vault; plan 4.17). */
+async function listAll(store: CanvasStore): Promise<Lists> {
   const [saved, tldr, names] = await Promise.all([listExcalidrawCanvases(store), listTldrawCanvases(store), store.list()]);
   const have = new Set(saved);
-  return {
-    saved,
-    tldr: tldr.filter((n) => !have.has(n)),
-    legacy: names.filter((n) => n.endsWith(LEGACY_EXT)).map((n) => n.slice(0, -LEGACY_EXT.length)).filter((n) => !have.has(n)),
-  };
+  const withExt = (ext: string) => names.filter((n) => n.endsWith(ext)).map((n) => n.slice(0, -ext.length)).filter((n) => !have.has(n));
+  return { saved, tldr: tldr.filter((n) => !have.has(n)), legacy: withExt(LEGACY_EXT), json: withExt(JSON_CANVAS_EXT) };
+}
+
+/** A canvas name from an imported file's name. */
+function nameFromFile(fileName: string): string {
+  return fileName.replace(/\.(canvas|json)$/i, "").trim().replace(/[/\\]/g, "-") || DEFAULT_CANVAS_NAME;
 }
 
 /** Is the app dark right now? (The store's "system" follows the OS.) */
@@ -108,7 +113,8 @@ export function CanvasExcalidraw({ open, onClose }: Props) {
   const locale = useAppStore((s) => s.locale);
   const store = useMemo(() => opfsCanvasStore(), []);
   const [canvasName, setCanvasName] = useState<string>(DEFAULT_CANVAS_NAME);
-  const [lists, setLists] = useState<{ saved: string[]; tldr: string[]; legacy: string[] }>({ saved: [], tldr: [], legacy: [] });
+  const [lists, setLists] = useState<Lists>({ saved: [], tldr: [], legacy: [], json: [] });
+  const importInput = useRef<HTMLInputElement>(null);
   const [scene, setScene] = useState<{ name: string; file: ExcalidrawFile | null } | null>(null);
   const [converting, setConverting] = useState<string | null>(null);
   const latest = useRef<{ elements: readonly SceneElement[]; appState: SceneAppState; files: Record<string, ExBinaryFile> } | null>(null);
@@ -197,15 +203,15 @@ export function CanvasExcalidraw({ open, onClose }: Props) {
     setCanvasName(trimmed);
   }, [store, refreshLists]);
 
-  /** A `.tldr` or `.canvas.json` canvas → `<name>.excalidraw` (the old file stays as the backup). */
+  /** A `.tldr`, `.canvas.json` or JSON Canvas `.canvas` → `<name>.excalidraw` (the old file stays as the backup). */
   const handleConvert = useCallback(
-    async (name: string, kind: "tldr" | "legacy") => {
+    async (name: string, kind: "tldr" | "legacy" | "json") => {
       if (!store) return;
       setConverting(name);
       try {
-        const text = await store.read(kind === "tldr" ? `${name}${TLDRAW_EXT}` : `${name}${LEGACY_EXT}`);
+        const text = await store.read(`${name}${kind === "tldr" ? TLDRAW_EXT : kind === "json" ? JSON_CANVAS_EXT : LEGACY_EXT}`);
         if (text === null) throw new Error("file not found");
-        const result = kind === "tldr" ? tldrCanvasToExcalidraw(text) : legacyCanvasToExcalidraw(text);
+        const result = kind === "tldr" ? tldrCanvasToExcalidraw(text) : kind === "json" ? jsonCanvasToExcalidraw(text) : legacyCanvasToExcalidraw(text);
         await createExcalidrawCanvas(store, name, result.file);
         await refreshLists();
         setCanvasName(name);
@@ -226,8 +232,56 @@ export function CanvasExcalidraw({ open, onClose }: Props) {
     [store, refreshLists],
   );
 
+  /** A JSON Canvas file from disk (an Obsidian `.canvas`) → a new canvas, opened. */
+  const handleImport = useCallback(
+    async (file: File) => {
+      if (!store) return;
+      try {
+        const result = jsonCanvasToExcalidraw(await file.text());
+        const base = nameFromFile(file.name);
+        let name = base;
+        for (let n = 2; ; n++) {
+          try {
+            await createExcalidrawCanvas(store, name, result.file);
+            break;
+          } catch (err) {
+            if (!(err instanceof CanvasFileExistsError) || n > 99) throw err;
+            name = `${base}-${n}`;
+          }
+        }
+        await refreshLists();
+        setCanvasName(name);
+        const nodes = result.file.elements.filter((e) => !(e.type === "text" && e.containerId)).length;
+        showAiToast(t("canvas.jsonCanvas.imported", { name, count: String(nodes) }), "success");
+        if (result.warnings.length) log.warn("JSON Canvas import warnings", result.warnings);
+      } catch (err) {
+        showAiToast(t("canvas.jsonCanvas.failed", { error: (err as Error).message }), "error");
+      }
+    },
+    [store, refreshLists],
+  );
+
+  /** The open canvas → `<name>.canvas` next to it in the vault (for Obsidian and other JSON Canvas apps). */
+  const handleExport = useCallback(async () => {
+    if (!store || !scene) return;
+    const cur = latest.current;
+    const file = cur ? sceneToFile(cur.elements, cur.appState, cur.files) : (scene.file ?? emptyScene());
+    const { canvas, warnings } = excalidrawToJsonCanvas(file);
+    try {
+      await store.write(`${scene.name}${JSON_CANVAS_EXT}`, serializeJsonCanvas(canvas));
+      showAiToast(t("canvas.jsonCanvas.exported", { name: scene.name, nodes: String(canvas.nodes.length), edges: String(canvas.edges.length) }), "success");
+      if (warnings.length) showAiToast(t("canvas.jsonCanvas.skipped", { count: String(warnings.length) }), "info");
+    } catch (err) {
+      showAiToast(t("canvas.saveFailed", { name: `${scene.name}${JSON_CANVAS_EXT}`, error: (err as Error).message }), "error");
+    }
+  }, [store, scene]);
+
   if (!open) return null;
-  const pending = [...lists.tldr.map((n) => ({ name: n, kind: "tldr" as const })), ...lists.legacy.map((n) => ({ name: n, kind: "legacy" as const }))];
+  const pending = [
+    ...lists.tldr.map((n) => ({ name: n, kind: "tldr" as const })),
+    ...lists.legacy.map((n) => ({ name: n, kind: "legacy" as const })),
+    ...lists.json.map((n) => ({ name: n, kind: "json" as const })),
+  ];
 
   return (
     <div role="dialog" aria-modal="true" aria-label={t("canvas.dialogLabel")} className="lumen-canvas" data-testid="canvas">
@@ -255,6 +309,28 @@ export function CanvasExcalidraw({ open, onClose }: Props) {
               ))}
             </div>
           </details>
+        )}
+        {store && (
+          <>
+            <button type="button" onClick={() => importInput.current?.click()} className="lumen-canvas-btn" data-testid="canvas-import-json">
+              {t("canvas.jsonCanvas.import")}
+            </button>
+            <input
+              ref={importInput}
+              type="file"
+              accept=".canvas,application/json"
+              hidden
+              data-testid="canvas-import-json-input"
+              onChange={(e) => {
+                const f = e.target.files?.[0];
+                e.target.value = "";
+                if (f) void handleImport(f);
+              }}
+            />
+            <button type="button" onClick={() => void handleExport()} disabled={!scene} className="lumen-canvas-btn" data-testid="canvas-export-json">
+              {t("canvas.jsonCanvas.export")}
+            </button>
+          </>
         )}
         <span style={{ flex: 1 }} />
         <span className="lumen-canvas-note">{store ? t("canvas.autoSaved") : t("doc.alert.workspaceUnavailable")}</span>
