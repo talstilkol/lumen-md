@@ -39,6 +39,7 @@
     "docker:run": "docker run -p 8080:8080 lumen-md",
     "eval:agents": "node scripts/agent-eval.mjs",
     "eval:compare": "node scripts/eval-compare.mjs",
+    "eval:meetings": "LUMEN_EVAL_MEETINGS=1 vitest run --config vitest.eval.config.ts src/agents/eval/meetings.eval.ts",
     "fake-ollama": "node --experimental-strip-types scripts/fake-ollama.mjs"
   },
   "dependencies": {
