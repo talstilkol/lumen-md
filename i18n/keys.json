@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-10-18T05:18:24.525Z",
+  "generated_at": "2026-11-09T23:27:48.000Z",
   "source": "src/i18n/index.ts (en bundle)",
-  "count": 1460,
+  "count": 1461,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -2079,6 +2079,13 @@
       "key": "agentReview.toast.review",
       "en": "Review",
       "vars": []
+    },
+    {
+      "key": "agentReview.mcpClient",
+      "en": "{client} (MCP client)",
+      "vars": [
+        "client"
+      ]
     },
     {
       "key": "cmd.note.read",

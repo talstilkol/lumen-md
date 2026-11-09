@@ -1455,6 +1455,7 @@
   "agentReview.toast.one": "{agent} hat eine Änderung vorgeschlagen. Nichts wird geschrieben, bevor du sie annimmst.",
   "agentReview.toast.other": "{agent} hat {n} Änderungen vorgeschlagen. Nichts wird geschrieben, bevor du sie annimmst.",
   "agentReview.toast.review": "Prüfen",
+  "agentReview.mcpClient": "{client} (MCP-Client)",
   "cmd.ai.cancel": "KI: Abbrechen",
   "cmd.ai.cancel.hint": "Stoppt alle laufenden KI-Anfragen (auch mit Esc)",
   "toast.aiCancelled": "KI-Anfrage abgebrochen ({count})",

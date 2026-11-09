@@ -62,7 +62,7 @@ export default defineConfig({
             { label: "Local LLM (web-llm)", slug: "ai/local-llm" },
             { label: "AI cost: usage meter + answer cache", slug: "ai/cost" },
             { label: "Research + citation checks", slug: "ai/research" },
-            { label: "MCP integration (Claude Desktop, Cursor)", slug: "ai/mcp" },
+            { label: "MCP and the lumen CLI", translations: { he: "MCP וה-CLI של lumen" }, slug: "ai/mcp" },
           ],
         },
         {

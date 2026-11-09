@@ -238,6 +238,23 @@ async function isDirectory(path: string): Promise<boolean> {
   }
 }
 
+/**
+ * The file names directly in folder `path` (not recursive; dot names
+ * included). Empty when the folder does not exist. For app data folders
+ * such as `.lumen/mcp/pending`, which the tree listing leaves out.
+ */
+export async function listWorkspaceFolder(path: string): Promise<string[]> {
+  let dir: FileSystemDirectoryHandle;
+  try {
+    dir = await walkDir(splitPath(path));
+  } catch {
+    return [];
+  }
+  const out: string[] = [];
+  for await (const [name, handle] of dir.entries()) if (handle.kind === "file") out.push(name);
+  return out.sort();
+}
+
 /** Does anything (file or folder) exist at `path`? */
 export async function workspaceHasEntry(path: string): Promise<boolean> {
   return (await workspaceHasFile(path)) || (await isDirectory(path));
