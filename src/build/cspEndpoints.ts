@@ -52,7 +52,7 @@ export const WEBSOCKET_ENV_VARS = ["VITE_WEBRTC_SIGNALING_URL", "VITE_YJS_WEBSOC
  */
 export const EXTRA_CONNECT_ENV_VAR = "VITE_CSP_CONNECT_EXTRA";
 
-/** Placeholder marker in docker/nginx.conf, replaced in the image build. */
+/** Placeholder marker in deploy/nginx.conf (+ the runtime include), replaced in the image build. */
 export const NGINX_PLACEHOLDER = "__CSP_CONNECT_EXTRA__";
 
 /** File written next to the build output listing the extra origins (one line). */
@@ -175,7 +175,7 @@ export function devServerOrigins(server: { port?: number; hmr?: boolean | { port
 /**
  * Vite plugin: adds the configured endpoint origins to the <meta> CSP and to
  * `dist/_headers`, and writes them to `dist/.csp-connect-extra` for the
- * nginx image (docker/Dockerfile.web substitutes NGINX_PLACEHOLDER).
+ * nginx image (the Dockerfile substitutes NGINX_PLACEHOLDER).
  */
 export function cspEndpointsPlugin(): MinimalPlugin {
   let origins: string[] = [];

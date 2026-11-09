@@ -109,14 +109,18 @@ Every policy is written once, in `security/policy.json`, and rendered into
 the files each host reads: the `<meta>` tags in `index.html`,
 `livejs-runner.html` and `playground-runner.html`, `public/_headers`
 (copied to `dist/_headers`), `deploy/vercel.base.json` (read through
-`vercel.ts`, which adds the build's endpoint origins), `docker/nginx.conf`,
-`deploy/nginx.conf` and
+`vercel.ts`, which adds the build's endpoint origins), `deploy/nginx.conf`
+(the one nginx image: `Dockerfile`, used by `fly.toml` and
+`docker-compose.yml`), `netlify/edge-functions/runner-headers.ts` and
 `src-tauri/tauri.conf.json`. Change the policy there and run
 `npm run headers:write`; CI (`npm run headers`) fails when any copy
 differs. Per-route decisions and per-host exceptions are explained in
 `docs/security/headers.md`. On the web the `<meta>` tag and the response
 header are both enforced. Cloudflare Pages **and Netlify** serve
-`dist/_headers`; `netlify.toml` deliberately sets no CSP of its own.
+`dist/_headers`; `netlify.toml` deliberately sets no CSP of its own, and
+an edge function gives the two runner pages their own policy there (Netlify
+cannot detach the catch-all headers). What works on which host:
+`docs/src/content/docs/self-hosting/hosting.md`.
 
 Your own workers (SSO, billing/entitlements, publish, audit, marketplace,
 self-hosted LanguageTool, Supabase, the error tracker in `VITE_SENTRY_DSN`) and your collab servers
@@ -125,7 +129,8 @@ bare `ws:` / `wss:`) are added to `connect-src`
 **automatically at build time** from the `VITE_*_ENDPOINT` / `VITE_*_URL`
 variables (see `src/build/cspEndpoints.ts`): set them before
 `npm run build`. For the Docker web image pass them as build args, e.g.
-`docker build -f docker/Dockerfile.web --build-arg VITE_WORKOS_ENDPOINT=https://auth.example.org .`
+`docker build --build-arg VITE_WORKOS_ENDPOINT=https://auth.example.org .`
+(or `[build.args]` in `fly.toml`, or `build.args` of `lumen-web` in `docker-compose.yml`).
 Verify after deploy: the response header and the meta tag both list your
 worker origins in `connect-src`. A desktop build with these variables also
 passes them to the Tauri CLI, because `tauri.conf.json` holds the public

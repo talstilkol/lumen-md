@@ -2,16 +2,16 @@
 # Serve dist/ with one of the repo's nginx configs, the way its image does,
 # so e2e runs under the real deploy headers (plan 0.20).
 #
-#   scripts/serve-dist-nginx.sh docker|deploy PORT
+#   scripts/serve-dist-nginx.sh deploy PORT
 #
-# docker: docker/nginx.conf (on-prem web shell, docker/Dockerfile.web)
-# deploy: deploy/nginx.conf + deploy/lumen-runtime-headers.conf (root Dockerfile)
+# deploy: deploy/nginx.conf + deploy/lumen-runtime-headers.conf (the one
+# image, root Dockerfile; plan 13.2 removed docker/nginx.conf)
 #
-# The endpoint placeholder is filled from dist/.csp-connect-extra, as both
-# Dockerfiles do. Runs nginx as the current user from a temporary prefix;
+# The endpoint placeholder is filled from dist/.csp-connect-extra, as the
+# Dockerfile does. Runs nginx as the current user from a temporary prefix;
 # prints the prefix (stop with: nginx -p PREFIX -c PREFIX/nginx.conf -s stop).
 set -euo pipefail
-conf=${1:?docker or deploy}
+conf=${1:?deploy}
 port=${2:?port}
 root=$(cd "$(dirname "$0")/.." && pwd)
 dist="$root/dist"
@@ -24,21 +24,6 @@ temps="client_body_temp_path $p; proxy_temp_path $p; fastcgi_temp_path $p; uwsgi
 fill() { sed -e "s#__CSP_CONNECT_EXTRA__#${extra}#" -e "s#/usr/share/nginx/html#${dist}#"; }
 
 case "$conf" in
-  docker)
-    fill < "$root/docker/nginx.conf" | sed -e "s#listen 80;#listen ${port};#" > "$p/default.conf"
-    cat > "$p/nginx.conf" <<EOF
-error_log $p/logs/error.log warn;
-pid $p/nginx.pid;
-events {}
-http {
-  include /etc/nginx/mime.types;
-  default_type application/octet-stream;
-  access_log off;
-  $temps
-  include $p/default.conf;
-}
-EOF
-    ;;
   deploy)
     fill < "$root/deploy/lumen-runtime-headers.conf" > "$p/lumen-runtime-headers.conf"
     fill < "$root/deploy/nginx.conf" | sed \
