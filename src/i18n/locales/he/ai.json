@@ -269,6 +269,7 @@
   "research.provider.tavily": "Tavily (מפתח API שלך)",
   "research.question": "מה לחקור?",
   "research.unverified": "{count} ציטוטים לא אומתו — מסומנים ⚠️ בפתק",
+  "spell.en.unknown": "„{word}”: מילה לא מוכרת (מילון אנגלית במכשיר)",
   "spell.he.downloadConfirm": "להוריד את המילון העברי (רשימת המילים של Hspell, ‏5.7MB, ‏AGPL-3.0) מ-GitHub למכשיר הזה? הטקסט שלך לא נשלח לשום מקום; האיות נבדק כאן.",
   "spell.he.failed": "לא הצלחתי להוריד את המילון: {error}",
   "spell.he.installed": "המילון העברי הותקן ({n} מילים). הפעל את בדיקת הדקדוק כדי לראות אותו.",

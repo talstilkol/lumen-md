@@ -269,6 +269,7 @@
   "research.provider.tavily": "Tavily (your API key)",
   "research.question": "What should I research?",
   "research.unverified": "{count} quotes could not be verified — marked ⚠️ in the note",
+  "spell.en.unknown": "“{word}”: unknown word (English dictionary on this device)",
   "spell.he.downloadConfirm": "Download the Hebrew dictionary (Hspell word list, 5.7 MB, AGPL-3.0) from GitHub to this device? Your text is never sent anywhere; spelling is checked here.",
   "spell.he.failed": "Could not download the dictionary: {error}",
   "spell.he.installed": "Hebrew dictionary installed ({n} words). Turn on the grammar check to see it.",

@@ -269,6 +269,7 @@
   "research.provider.tavily": "Tavily (dein API-Schlüssel)",
   "research.question": "Was soll ich recherchieren?",
   "research.unverified": "{count} Zitate nicht bestätigt — in der Notiz mit ⚠️ markiert",
+  "spell.en.unknown": "„{word}“: unbekanntes Wort (englisches Wörterbuch auf diesem Gerät)",
   "spell.he.downloadConfirm": "Das hebräische Wörterbuch (Hspell, 5,7 MB, AGPL-3.0) von GitHub auf dieses Gerät laden? Dein Text wird nirgendwohin gesendet.",
   "spell.he.failed": "Wörterbuch konnte nicht geladen werden: {error}",
   "spell.he.installed": "Hebräisches Wörterbuch installiert ({n} Wörter).",

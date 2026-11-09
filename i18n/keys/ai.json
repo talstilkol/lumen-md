@@ -1515,6 +1515,13 @@
       ]
     },
     {
+      "key": "spell.en.unknown",
+      "en": "“{word}”: unknown word (English dictionary on this device)",
+      "vars": [
+        "word"
+      ]
+    },
+    {
       "key": "spell.he.downloadConfirm",
       "en": "Download the Hebrew dictionary (Hspell word list, 5.7 MB, AGPL-3.0) from GitHub to this device? Your text is never sent anywhere; spelling is checked here.",
       "vars": []

@@ -269,6 +269,7 @@
   "research.provider.tavily": "Tavily (ваш API-ключ)",
   "research.question": "Что исследовать?",
   "research.unverified": "Не удалось проверить цитат: {count} — помечены ⚠️ в заметке",
+  "spell.en.unknown": "«{word}»: неизвестное слово (английский словарь на этом устройстве)",
   "spell.he.downloadConfirm": "Скачать словарь иврита (Hspell, 5,7 МБ, AGPL-3.0) с GitHub на это устройство? Ваш текст никуда не отправляется.",
   "spell.he.failed": "Не удалось скачать словарь: {error}",
   "spell.he.installed": "Словарь иврита установлен ({n} слов).",

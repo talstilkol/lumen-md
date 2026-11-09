@@ -269,6 +269,7 @@
   "research.provider.tavily": "Tavily（あなたの API キー）",
   "research.question": "何を調べますか？",
   "research.unverified": "{count} 件の引用を確認できませんでした（ノートに ⚠️ で表示）",
+  "spell.en.unknown": "「{word}」：不明な単語（このデバイスの英語辞書）",
   "spell.he.downloadConfirm": "ヘブライ語辞書（Hspell・5.7MB・AGPL-3.0）をGitHubからこの端末にダウンロードしますか？テキストはどこにも送信されません。",
   "spell.he.failed": "辞書をダウンロードできませんでした: {error}",
   "spell.he.installed": "ヘブライ語辞書をインストールしました（{n} 語）。",

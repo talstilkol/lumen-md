@@ -14,8 +14,9 @@ import { connectAllowedByCsp } from "../lib/cspConnect";
  * the endpoint at run time (`lumen.grammar.endpoint`, CSP-checked) or at
  * build time (`VITE_LANGUAGETOOL_URL`). When no LanguageTool on this machine
  * is configured and the AI policy keeps the public API off limits, an
- * explicit check (`{ allowModel: true }`) uses the local `proofreader`
- * agent instead; background checks just return nothing.
+ * English paragraphs are spell-checked on this device instead (nspell,
+ * plan 6.10), and an explicit check (`{ allowModel: true }`) adds the
+ * local `proofreader` agent.
  */
 
 export interface GrammarMatch {
@@ -93,6 +94,13 @@ async function checkWithModel(text: string, language: string, signal?: AbortSign
   return locateIssues(out.issues, slice).map((i) => ({ ...i, rule: { id: "LOCAL_MODEL", category: "local" } }));
 }
 
+/** `first`, then every match of `second` that does not overlap one of them, by offset. */
+export function mergeMatches(first: GrammarMatch[], second: GrammarMatch[]): GrammarMatch[] {
+  const overlaps = (a: GrammarMatch, b: GrammarMatch) => a.offset < b.offset + b.length && b.offset < a.offset + a.length;
+  const extra = second.filter((m) => !first.some((f) => overlaps(f, m)));
+  return [...first, ...extra].sort((a, b) => a.offset - b.offset);
+}
+
 /**
  * Check `text` for grammar/spelling/style issues. Empty / very short inputs
  * return immediately with no matches — LanguageTool isn't useful below ~10
@@ -110,9 +118,12 @@ export async function checkGrammar(
   if (cached) return cached;
   // A self-hosted LanguageTool on this machine or network is fine under
   // every policy; the public API is a third party.
+  // Without it: English spelling on this device (plan 6.10), plus the
+  // proofreader model when the user asked for a check.
   if (!isLocalOrigin(endpoint()) && !cloudAllowed()) {
-    if (!opts.allowModel) return [];
-    const matches = await checkWithModel(trimmed, language, opts.signal);
+    const { checkEnglishParagraphs } = await import("./englishSpellService");
+    const spelling = await checkEnglishParagraphs(trimmed).catch(() => [] as GrammarMatch[]);
+    const matches = opts.allowModel ? mergeMatches(spelling, await checkWithModel(trimmed, language, opts.signal)) : spelling;
     remember(cacheKey, matches);
     return matches;
   }

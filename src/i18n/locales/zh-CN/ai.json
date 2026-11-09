@@ -269,6 +269,7 @@
   "research.provider.tavily": "Tavily（你的 API 密钥）",
   "research.question": "要研究什么？",
   "research.unverified": "{count} 条引文无法核实 — 已在笔记中标记 ⚠️",
+  "spell.en.unknown": "“{word}”：未知单词（本设备上的英语词典）",
   "spell.he.downloadConfirm": "从 GitHub 下载希伯来语词典（Hspell，5.7 MB，AGPL-3.0）到此设备？你的文本不会发送到任何地方。",
   "spell.he.failed": "无法下载词典：{error}",
   "spell.he.installed": "已安装希伯来语词典（{n} 个词）。",

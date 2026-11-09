@@ -269,6 +269,7 @@
   "research.provider.tavily": "Tavily (مفتاح API الخاص بك)",
   "research.question": "ما الذي تريد البحث عنه؟",
   "research.unverified": "تعذّر التحقق من {count} اقتباسات — معلَّمة ⚠️ في الملاحظة",
+  "spell.en.unknown": "«{word}»: كلمة غير معروفة (قاموس الإنجليزية على هذا الجهاز)",
   "spell.he.downloadConfirm": "تنزيل القاموس العبري (قائمة Hspell، 5.7MB، AGPL-3.0) من GitHub إلى هذا الجهاز؟ لا يُرسل نصك إلى أي مكان.",
   "spell.he.failed": "تعذّر تنزيل القاموس: {error}",
   "spell.he.installed": "تم تثبيت القاموس العبري ({n} كلمة).",

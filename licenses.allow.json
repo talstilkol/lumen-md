@@ -32,6 +32,14 @@
       "until": "2026-11-15",
       "reason": "webR's binaries are GPL-3.0 (its LICENSE.md) and scripts/copy-webr.mjs ships them for live R blocks. Pending the owner's decision (plan 15.10): make R a user-initiated download (like Hspell), or drop live R. Lapses on 2026-11-15 so it cannot stay silent.",
       "decision": "15.10"
+    },
+    {
+      "area": "npm",
+      "name": "dictionary-en",
+      "license": "(MIT AND BSD)",
+      "level": "ok",
+      "reason": "\"BSD\" is the package's shorthand: its license file is MIT (the wooorm/dictionaries packaging) plus the SCOWL/en_US Hunspell word list terms — a permissive BSD-style grant (\"Redistribution and use in source and binary forms, with or without modification, are permitted…\", retain notice). Plan 6.10 lists it as MIT AND BSD (SCOWL). Bundled in the English spelling worker; the notice ships with the package.",
+      "decision": "6.10 (checked 2026-10-24 against node_modules/dictionary-en/license)"
     }
   ]
 }
