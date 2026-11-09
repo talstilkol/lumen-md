@@ -132,7 +132,7 @@
       "count": 1
     }
   },
-  "src/editor/wysiwygSuggest.ts": {
+  "src/editor/wysiwygCriticMarkup.ts": {
     "@typescript-eslint/no-unused-expressions": {
       "count": 1
     }
