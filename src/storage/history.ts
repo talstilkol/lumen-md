@@ -226,6 +226,7 @@ export async function clearHistory(name: string): Promise<void> {
  * cannot be converted stays as it is.
  */
 async function convertHistory(direction: "seal" | "open"): Promise<number> {
+  if (typeof indexedDB === "undefined") return 0;
   const db = await openDB();
   const rows = (await promisify(db.transaction(STORE, "readonly").objectStore(STORE).getAll())) as StoredSnapshot[];
   let n = 0;

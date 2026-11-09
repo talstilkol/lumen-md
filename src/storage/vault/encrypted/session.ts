@@ -14,6 +14,7 @@
 
 import { getVaultBackend, refreshVaultEncryption, setVaultEncryptionState, unwrapVaultBackend, vaultEncryptionReady } from "../index";
 import type { VaultBackend } from "../types";
+import { log } from "../../../lib/logger";
 import type { KdfPolicy } from "../../../sync/e2ee/kdf";
 import { setRestSealer } from "../restStore";
 import { createEncryptedBackend, createLockedBackend } from "./backend";
@@ -337,20 +338,23 @@ async function finishDisable(s: Session, scan: ScanReport): Promise<boolean> {
  * history snapshots and the AI response cache.
  */
 async function migrateStores(direction: "seal" | "open"): Promise<void> {
-  const [trace, semantic, history, cache] = await Promise.all([
-    import("../../../agents/trace"),
-    import("../../../ai/semanticSearch"),
-    import("../../history"),
-    import("../../../ai/responseCache"),
-  ]);
+  // Each store on its own: one that can't be reached (no IndexedDB in a
+  // private window) must not fail the conversion of the files, which is done.
+  const step = async (name: string, job: () => Promise<unknown>) => {
+    try {
+      await job();
+    } catch (err) {
+      log.warn(`vault encryption: ${name} not migrated`, err);
+    }
+  };
   if (direction === "seal") {
-    await trace.resealTrace();
-    await semantic.resealSemanticIndex();
-    await history.resealHistory();
+    await step("agent traces", async () => (await import("../../../agents/trace")).resealTrace());
+    await step("semantic index", async () => (await import("../../../ai/semanticSearch")).resealSemanticIndex());
+    await step("history", async () => (await import("../../history")).resealHistory());
   } else {
-    await history.unsealHistory();
-    await trace.clearTrace();
-    await semantic.clearSemanticIndex();
+    await step("history", async () => (await import("../../history")).unsealHistory());
+    await step("agent traces", async () => (await import("../../../agents/trace")).clearTrace());
+    await step("semantic index", async () => (await import("../../../ai/semanticSearch")).clearSemanticIndex());
   }
-  await cache.clearAiCache();
+  await step("AI cache", async () => (await import("../../../ai/responseCache")).clearAiCache());
 }
