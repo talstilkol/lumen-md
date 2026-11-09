@@ -229,7 +229,11 @@ export function createDirectoryHandleBackend(o: DirectoryHandleBackendOptions): 
       return false;
     }
     const { recoverHandleDir } = await import("./atomic");
-    await recoverHandleDir({ lookup, move, removeAt, writeAt, segments: vaultSegments }, key, names);
+    await recoverHandleDir<Found>(
+      { lookup, move, removeAt, writeAt, segments: vaultSegments, fileSize: async (f) => (f.kind === "file" ? (await f.handle.getFile()).size : null) },
+      key,
+      names,
+    );
     clean.add(key);
     return true;
   }
