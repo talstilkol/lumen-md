@@ -7,6 +7,7 @@ import type { LumenPlugin } from "../plugins/pluginSystem";
 import { log } from "../lib/logger";
 import { t } from "../i18n";
 import { fetchWithRetry } from "../lib/fetchRetry";
+import { SandboxedPlugins } from "../plugins/runtime/SandboxedPlugins";
 
 interface RemotePluginEntry {
   id: string;
@@ -623,6 +624,9 @@ export function PluginGallery({ open, onClose }: Props) {
             )}
           </div>
         </div>
+
+        {/* Sandboxed plugins: permissions shown before install, every version scanned (W1.20). */}
+        <SandboxedPlugins />
 
         {/* Footer */}
         <div
