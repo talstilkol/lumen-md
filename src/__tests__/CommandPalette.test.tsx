@@ -53,6 +53,31 @@ describe("CommandPalette", () => {
     expect(container.innerHTML).toBe("");
   });
 
+  it("a reopened palette starts empty, from its first paint (Escape e2e flake)", () => {
+    const onClose = vi.fn();
+    const { rerender } = render(<CommandPalette open={true} onClose={onClose} commands={makeCommands()} />);
+    fireEvent.change(screen.getByRole("textbox"), { target: { value: "Page View" } });
+    rerender(<CommandPalette open={false} onClose={onClose} commands={makeCommands()} />);
+    // Cleared when it closed, not only after the next open's effect. The probe reads the
+    // committed DOM in a layout effect: after the reopening commit, before passive effects
+    // (where the open-time reset runs), so without the close-time reset it sees "Page View".
+    let firstPaint: string | null = null;
+    const Probe = () => {
+      useLayoutEffect(() => {
+        firstPaint ??= (document.querySelector('[role="dialog"] input') as HTMLInputElement | null)?.value ?? null;
+      });
+      return null;
+    };
+    rerender(
+      <>
+        <CommandPalette open={true} onClose={onClose} commands={makeCommands()} />
+        <Probe />
+      </>,
+    );
+    expect((screen.getByRole("textbox") as HTMLInputElement).value).toBe("");
+    expect(firstPaint).toBe("");
+  });
+
   it("renders commands when open", () => {
     render(
       <CommandPalette open={true} onClose={vi.fn()} commands={makeCommands()} />,
