@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-11-09T22:41:02.878Z",
+  "generated_at": "2026-11-09T22:45:05.102Z",
   "source": "src/i18n/index.ts (en bundle) + src/i18n/lazy/*.json",
-  "count": 1519,
+  "count": 1521,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -1772,6 +1772,13 @@
       ]
     },
     {
+      "key": "external.merged",
+      "en": "“{path}” changed outside Lumen too. Both edits were merged; both versions are in the note's history.",
+      "vars": [
+        "path"
+      ]
+    },
+    {
       "key": "external.reloaded",
       "en": "“{path}” was changed outside Lumen and reloaded.",
       "vars": [
@@ -2461,6 +2468,11 @@
     {
       "key": "versionHistory.reason.git-pull",
       "en": "before git pull",
+      "vars": []
+    },
+    {
+      "key": "versionHistory.reason.merge",
+      "en": "kept at a merge",
       "vars": []
     },
     {

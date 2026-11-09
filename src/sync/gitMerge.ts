@@ -25,6 +25,7 @@
  *     goes to a copy.
  */
 import type { DiffHunk } from "./cloud/diff";
+import { mergeText as mergeDocument } from "./merge/textMerge";
 
 export type Bytes = Uint8Array;
 
@@ -38,7 +39,7 @@ export interface PullEntry {
 
 export type PullAction =
   /** Write `data` to the file (`lfs`: it is an LFS pointer, written because nothing was here). */
-  | { kind: "write"; path: string; data: Bytes; why: "upstream" | "merged" | "restored"; lfs?: boolean }
+  | { kind: "write"; path: string; data: Bytes; why: "upstream" | "merged" | "restored"; lfs?: boolean; theirs?: string }
   /** Both sides changed the same lines. `marked` holds both versions between conflict markers. */
   | { kind: "conflict"; path: string; base: string; ours: string; theirs: string; marked: string }
   /** Both sides changed a binary file: ours stays, theirs is kept as a copy next to it. */
@@ -196,27 +197,19 @@ export function mergeHunks(base: string, ours: string, theirs: string): DiffHunk
   return out;
 }
 
-/** Line-based three-way merge (see `mergeHunks`); conflicts are written between markers. */
+/**
+ * Three-way merge of a text file: the app's one merge engine (plan W1.9,
+ * ./merge/textMerge.ts) — front matter by key, lines, then words; what
+ * still overlaps is written between conflict markers.
+ */
 export function mergeText(
   base: string,
   ours: string,
   theirs: string,
   labels: MergeLabels = { ours: "local", theirs: "remote" },
 ): { clean: boolean; text: string } {
-  if (ours === theirs) return { clean: true, text: ours };
-  if (ours === base) return { clean: true, text: theirs };
-  if (theirs === base) return { clean: true, text: ours };
-  const out: string[] = [];
-  let clean = true;
-  for (const h of mergeHunks(base, ours, theirs)) {
-    if (h.op === "remote") out.push(...h.remote);
-    else if (h.op !== "conflict") out.push(...h.local);
-    else {
-      clean = false;
-      out.push(`<<<<<<< ${labels.ours}`, ...h.local, "=======", ...h.remote, `>>>>>>> ${labels.theirs}`);
-    }
-  }
-  return { clean, text: out.join("\n") };
+  const r = mergeDocument(base, ours, theirs, labels);
+  return { clean: r.clean, text: r.text };
 }
 
 /** Plan a pull. Paths whose upstream version equals the base are not passed in (or produce nothing). */
@@ -252,7 +245,8 @@ export function planPull(entries: PullEntry[], labels?: MergeLabels): PullAction
     const t = decoder.decode(theirs);
     const merged = mergeText(b, o, t, labels);
     if (merged.clean) {
-      if (merged.text !== o) actions.push({ kind: "write", path, data: encoder.encode(merged.text), why: "merged" });
+      // `theirs` goes with it: both versions are kept in the note's history (W1.9).
+      if (merged.text !== o) actions.push({ kind: "write", path, data: encoder.encode(merged.text), why: "merged", theirs: t });
     } else {
       actions.push({ kind: "conflict", path, base: b, ours: o, theirs: t, marked: merged.text });
     }

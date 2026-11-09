@@ -205,8 +205,32 @@ function conflict(path: string, local: string, remote: string): Promise<void> {
   return run;
 }
 
+/**
+ * Merge first (plan W1.9): with the version both sides started from, the
+ * app's merge engine combines the two edits; both versions go into the
+ * note's history. True when the note is settled without asking.
+ */
+async function autoMerge(path: string, local: string, remote: string): Promise<boolean> {
+  const base = known.get(path);
+  if (base === undefined) return false;
+  const [{ mergeText }, { keepBothVersions }] = await Promise.all([import("../sync/merge/textMerge"), import("../sync/merge/keepVersions")]);
+  const r = mergeText(base, local, remote);
+  if (!r.clean) return false;
+  flushPendingEdits();
+  // Typed on meanwhile: the merge is of older text; let the usual path decide.
+  if ((openPaths().get(path)?.content ?? local) !== local) return false;
+  await keepBothVersions(path, local, remote);
+  await writeWorkspaceFile(path, r.text);
+  noteDisk(path, r.text);
+  setLocal(path, r.text, false);
+  notifyWorkspaceChanged({ kind: "content", paths: [path] });
+  toast(t("external.merged", { path }));
+  return true;
+}
+
 async function resolveOne(path: string, local: string, remote: string): Promise<void> {
   try {
+    if (await autoMerge(path, local, remote)) return;
     // Typing must not go on behind the dialog.
     (globalThis.document?.activeElement as HTMLElement | null)?.blur?.();
     const copy = await conflictCopyPath(path);
