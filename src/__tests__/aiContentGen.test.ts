@@ -28,7 +28,7 @@ import {
   extractActionItems,
   translateMarkdown,
   generateChart,
-} from "../ai/agents";
+} from "../agents/commands";
 
 const mockChat = vi.mocked(chat);
 

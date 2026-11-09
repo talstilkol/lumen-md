@@ -536,19 +536,24 @@ function buildTooltip(getView: () => EditorView | null): HTMLDivElement {
         const instructions = await openAiPrompt("How should the AI rewrite this? (e.g. 'Make it professional', 'Translate to Spanish')");
         if (!instructions) return;
         
+        const { aiOperation, isAbort } = await import("../ai/aiAbort");
+        const op = aiOperation();
         try {
           const rewritten = await chat(
             [
               { role: "system", content: PROMPTS.rewrite },
               { role: "user", content: `Instruction: ${instructions}\n\nText: ${selectedText}` },
             ],
-            { ownPrompt: true },
+            { ownPrompt: true, signal: op.signal },
           );
           dispatch(state.tr.replaceWith(from, to, state.schema.text(rewritten)));
         } catch (e) {
+          if (isAbort(e)) return;
           log.error("WYSIWYG AI rewrite failed", e);
           // A spent quota already showed its own toast.
           if (!(e instanceof Error && e.name === "AiQuotaExceededError")) showAiToast(t("toast.aiRewriteFailed"), "error");
+        } finally {
+          op.end();
         }
       },
     },

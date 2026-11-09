@@ -6,7 +6,7 @@ vi.mock("../billing/aiQuota", () => ({ chargeAiCommandDispatch: vi.fn(), consume
 
 import { registerExecutor, resetExecutors } from "../agents/executors";
 import { chunkMarkdown, checkTranslation, fencedBlocks, urlsOf } from "../agents/defs";
-import { translateMarkdown } from "../ai/agents";
+import { translateMarkdown } from "../agents/commands";
 import { fakeExecutor } from "./helpers/fakeExecutor";
 
 beforeEach(() => {

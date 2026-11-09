@@ -19,7 +19,7 @@ import { registerExecutor, resetExecutors } from "../agents/executors";
 import { runAgent } from "../agents/runtime";
 import { fakeExecutor, sequence } from "./helpers/fakeExecutor";
 import { normalizeTags, filterLinks, normalizeHeadings, cleanSubject, taggerAgent, linkerAgent, outlinerAgent, committerAgent } from "../agents/defs";
-import { suggestTags, suggestLinks } from "../ai/agents";
+import { suggestTags, suggestLinks } from "../agents/commands";
 import { generateOutline } from "../ai/outline";
 import { generateAiCommitMessage } from "../ai/commands";
 import { consumeAiPrompt } from "../billing/aiQuota";

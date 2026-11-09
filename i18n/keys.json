@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-10-18T00:00:33.775Z",
+  "generated_at": "2026-10-18T00:09:36.217Z",
   "source": "src/i18n/index.ts (en bundle)",
-  "count": 1403,
+  "count": 1407,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -1691,6 +1691,28 @@
     {
       "key": "cmd.file.trash.hint",
       "en": "Restore deleted notes (kept 30 days)",
+      "vars": []
+    },
+    {
+      "key": "cmd.ai.cancel",
+      "en": "AI: Cancel",
+      "vars": []
+    },
+    {
+      "key": "cmd.ai.cancel.hint",
+      "en": "Stops every running AI request (Esc does the same)",
+      "vars": []
+    },
+    {
+      "key": "toast.aiCancelled",
+      "en": "AI request cancelled ({count})",
+      "vars": [
+        "count"
+      ]
+    },
+    {
+      "key": "toast.aiNothingRunning",
+      "en": "No AI request is running",
       "vars": []
     },
     {
