@@ -128,6 +128,8 @@
   "cmd.git.clone.hint": "テキストファイルをワークスペースにインポートします",
   "cmd.git.commit": "Git: 現在のリポジトリをコミットしてプッシュ…",
   "cmd.git.commit.hint": "保存済みのトークンと ID を使用します",
+  "cmd.git.corsProxy": "Git: CORS プロキシを設定…",
+  "cmd.git.corsProxy.hint": "ブラウザーで GitHub からクローンするのに必要",
   "cmd.git.identity": "Git: コミットの ID を設定…",
   "cmd.git.pull": "Git: 現在のリポジトリをプル",
   "cmd.git.pull.hint": "リモートの変更を取得してマージします",

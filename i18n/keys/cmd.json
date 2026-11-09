@@ -653,6 +653,16 @@
       "vars": []
     },
     {
+      "key": "cmd.git.corsProxy",
+      "en": "Git: set CORS proxy…",
+      "vars": []
+    },
+    {
+      "key": "cmd.git.corsProxy.hint",
+      "en": "needed to clone from GitHub in a browser",
+      "vars": []
+    },
+    {
       "key": "cmd.git.identity",
       "en": "Git: set commit identity…",
       "vars": []

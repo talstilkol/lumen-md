@@ -128,6 +128,8 @@
   "cmd.git.clone.hint": "מייבא קבצי טקסט למרחב העבודה",
   "cmd.git.commit": "Git: commit & push למאגר הנוכחי…",
   "cmd.git.commit.hint": "משתמש ב-token וזהות שמורים",
+  "cmd.git.corsProxy": "Git: הגדרת CORS proxy…",
+  "cmd.git.corsProxy.hint": "נדרש כדי לשכפל מ-GitHub בדפדפן",
   "cmd.git.identity": "Git: הגדרת זהות commit…",
   "cmd.git.pull": "Git: pull למאגר הנוכחי",
   "cmd.git.pull.hint": "מושך וממזג שינויים מהשרת",

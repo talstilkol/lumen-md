@@ -128,6 +128,8 @@
   "cmd.git.clone.hint": "importiert Textdateien in den Arbeitsbereich",
   "cmd.git.commit": "Git: Commit & Push des aktuellen Repos…",
   "cmd.git.commit.hint": "nutzt das gespeicherte Token + die Identität",
+  "cmd.git.corsProxy": "Git: CORS-Proxy festlegen…",
+  "cmd.git.corsProxy.hint": "nötig, um im Browser von GitHub zu klonen",
   "cmd.git.identity": "Git: Commit-Identität festlegen…",
   "cmd.git.pull": "Git: Pull des aktuellen Repos",
   "cmd.git.pull.hint": "holt und führt Remote-Änderungen zusammen",

@@ -128,6 +128,8 @@
   "cmd.git.clone.hint": "将文本文件导入工作区",
   "cmd.git.commit": "Git:提交并推送当前仓库…",
   "cmd.git.commit.hint": "使用已保存的令牌和身份信息",
+  "cmd.git.corsProxy": "Git：设置 CORS 代理…",
+  "cmd.git.corsProxy.hint": "在浏览器中从 GitHub 克隆时需要",
   "cmd.git.identity": "Git:设置提交身份…",
   "cmd.git.pull": "Git:拉取当前仓库",
   "cmd.git.pull.hint": "获取并合并远程更改",

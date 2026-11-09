@@ -23,7 +23,7 @@
 
 import { log } from "../lib/logger";
 
-export type SnapshotReason = "autosave" | "save" | "auto-backup" | "vault" | "close" | "restore" | "manual" | "collab" | "migrated";
+export type SnapshotReason = "autosave" | "save" | "auto-backup" | "vault" | "close" | "restore" | "manual" | "collab" | "migrated" | "git-pull";
 
 export interface Snapshot {
   id: number;

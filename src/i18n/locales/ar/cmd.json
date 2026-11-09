@@ -128,6 +128,8 @@
   "cmd.git.clone.hint": "يستورد الملفات النصية إلى مساحة العمل",
   "cmd.git.commit": "Git: commit وpush للمستودع الحالي…",
   "cmd.git.commit.hint": "يستخدم الرمز المميّز والهوية المحفوظين",
+  "cmd.git.corsProxy": "Git: تعيين وكيل CORS…",
+  "cmd.git.corsProxy.hint": "مطلوب للاستنساخ من GitHub في المتصفح",
   "cmd.git.identity": "Git: تعيين هوية commit…",
   "cmd.git.pull": "Git: pull للمستودع الحالي",
   "cmd.git.pull.hint": "يجلب التغييرات البعيدة ويدمجها",

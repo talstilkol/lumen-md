@@ -128,6 +128,8 @@
   "cmd.git.clone.hint": "importe les fichiers texte dans l'espace de travail",
   "cmd.git.commit": "Git : commit et push du dépôt courant…",
   "cmd.git.commit.hint": "utilise le jeton et l'identité enregistrés",
+  "cmd.git.corsProxy": "Git : définir le proxy CORS…",
+  "cmd.git.corsProxy.hint": "nécessaire pour cloner depuis GitHub dans un navigateur",
   "cmd.git.identity": "Git : définir l'identité de commit…",
   "cmd.git.pull": "Git : pull du dépôt courant",
   "cmd.git.pull.hint": "récupère et fusionne les modifications distantes",

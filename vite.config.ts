@@ -453,7 +453,8 @@ export default defineConfig({
     // discovered on first use, and Vite then FULL-RELOADS the page
     // ("optimized dependencies changed. reloading") — losing the user's
     // unsaved edits in dev and flaking the live-lua e2e. Pre-bundle them.
-    include: ["wasmoon"],
+    // The git modules (safe git, plan 3.3) load on the first git command.
+    include: ["wasmoon", "isomorphic-git", "isomorphic-git/http/web", "@isomorphic-git/lightning-fs", "buffer"],
     // The dep scanner crawls the HTML entries and every import() they reach,
     // but never a `new Worker(new URL("./x.worker.ts", import.meta.url))`.
     // So @hpcc-js/wasm (graphviz), @ruby/wasm-wasi, transformers.js and the

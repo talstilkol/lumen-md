@@ -128,6 +128,8 @@
   "cmd.git.clone.hint": "imports text files into the workspace",
   "cmd.git.commit": "Git: commit & push current repo…",
   "cmd.git.commit.hint": "uses the saved token + identity",
+  "cmd.git.corsProxy": "Git: set CORS proxy…",
+  "cmd.git.corsProxy.hint": "needed to clone from GitHub in a browser",
   "cmd.git.identity": "Git: set commit identity…",
   "cmd.git.pull": "Git: pull current repo",
   "cmd.git.pull.hint": "fetches and merges remote changes",

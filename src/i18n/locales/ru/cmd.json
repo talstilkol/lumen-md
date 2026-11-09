@@ -128,6 +128,8 @@
   "cmd.git.clone.hint": "импортирует текстовые файлы в рабочее пространство",
   "cmd.git.commit": "Git: commit и push текущего репозитория…",
   "cmd.git.commit.hint": "использует сохранённые токен и данные автора",
+  "cmd.git.corsProxy": "Git: задать CORS-прокси…",
+  "cmd.git.corsProxy.hint": "нужен для клонирования с GitHub в браузере",
   "cmd.git.identity": "Git: задать данные автора коммитов…",
   "cmd.git.pull": "Git: pull текущего репозитория",
   "cmd.git.pull.hint": "получает и объединяет удалённые изменения",
