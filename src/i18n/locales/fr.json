@@ -1383,6 +1383,8 @@
   "cmd.ai.rerankModel.hint": "Activé : bge-reranker-v2-m3 sur cet appareil (téléchargement unique ~570 Mo). Désactivé : correspondance rapide des mots.",
   "toast.rerankModelOn": "Réordonnancement : modèle local (téléchargé à la première utilisation)",
   "toast.rerankModelOff": "Réordonnancement : correspondance des mots",
+  "toast.rerankUnsupported": "Le modèle de reclassement de la recherche requiert WebGPU ou l'application de bureau ; ce navigateur garde le reclassement intégré.",
+  "rerank.consent": "Activer le modèle de reclassement ? Il télécharge une fois environ {mb} Mo (bge-reranker-v2-m3) et tourne sur cet appareil. Sur le test de recherche en hébreu de Lumen, le classement intégré place déjà chaque réponse en tête.",
   "cmd.image.altText": "Images : texte alternatif par OCR / vision locale",
   "cmd.image.altText.hint": "Lit le texte des images de cette note sur l’appareil (hébreu + anglais) ; décrit le reste avec un modèle de vision Ollama local",
   "toast.imageAlt.none": "Aucune image sans texte alternatif dans cette note",

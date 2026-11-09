@@ -466,6 +466,8 @@ const en: Strings = {
   "cmd.ai.rerankModel.hint": "On: bge-reranker-v2-m3 on this device (one-time ~570 MB download). Off: fast word matching.",
   "toast.rerankModelOn": "Search reranking: local model (downloads on first use)",
   "toast.rerankModelOff": "Search reranking: word matching",
+  "toast.rerankUnsupported": "The search reranking model needs WebGPU or the desktop app; this browser keeps the built-in reranking.",
+  "rerank.consent": "Turn on the reranking model? It downloads about {mb} MB once (bge-reranker-v2-m3) and runs on this device. On Lumen's Hebrew retrieval test the built-in ranking already puts every answer first.",
   "collab.settings.title": "Collaboration settings",
   "collab.settings.signalingHint": "Signaling server (how peers find each other). Empty = Lumen's own server. Every new room is end-to-end encrypted with its own password, so the server only sees ciphertext.",
   "collab.settings.publicSignaling": "Also use public signaling servers",

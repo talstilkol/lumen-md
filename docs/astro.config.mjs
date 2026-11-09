@@ -62,6 +62,7 @@ export default defineConfig({
             { label: "Local LLM (web-llm)", slug: "ai/local-llm" },
             { label: "AI cost: usage meter + answer cache", slug: "ai/cost" },
             { label: "Research + citation checks", slug: "ai/research" },
+            { label: "Search reranking, measured", translations: { he: "דירוג מחדש בחיפוש, במדידה" }, slug: "ai/reranker" },
             { label: "MCP integration (Claude Desktop, Cursor)", slug: "ai/mcp" },
           ],
         },

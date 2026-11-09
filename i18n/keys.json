@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-10-24T11:16:22.225Z",
+  "generated_at": "2026-11-09T21:38:54.736Z",
   "source": "src/i18n/index.ts (en bundle)",
-  "count": 1431,
+  "count": 1433,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -2021,6 +2021,18 @@
       "key": "toast.rerankModelOff",
       "en": "Search reranking: word matching",
       "vars": []
+    },
+    {
+      "key": "toast.rerankUnsupported",
+      "en": "The search reranking model needs WebGPU or the desktop app; this browser keeps the built-in reranking.",
+      "vars": []
+    },
+    {
+      "key": "rerank.consent",
+      "en": "Turn on the reranking model? It downloads about {mb} MB once (bge-reranker-v2-m3) and runs on this device. On Lumen's Hebrew retrieval test the built-in ranking already puts every answer first.",
+      "vars": [
+        "mb"
+      ]
     },
     {
       "key": "collab.settings.title",
