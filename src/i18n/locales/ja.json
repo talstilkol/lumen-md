@@ -244,6 +244,8 @@
   "cmd.insert.model.hint": ".glb / .gltf",
   "cmd.insert.plantuml": "挿入 PlantUML",
   "cmd.insert.plantuml.hint": "kroki.io でレンダリング",
+  "plantuml.blocked": "この PlantUML 図はオンラインサービスの kroki.io が描画します。AI ポリシーにより、この図はこのデバイスに留められています。描画すると図のテキストが kroki.io に送信されます。",
+  "plantuml.send": "この図を kroki.io で描画",
   "cmd.insert.table": "挿入 Table (Editor)",
   "cmd.insert.table.hint": "ビジュアルなテーブルビルダー",
   "cmd.insert.wikilink": "挿入 wiki-リンク",

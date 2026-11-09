@@ -244,6 +244,8 @@
   "cmd.insert.model.hint": ".glb / .gltf",
   "cmd.insert.plantuml": "Insertion PlantUML",
   "cmd.insert.plantuml.hint": "rendu via kroki.io",
+  "plantuml.blocked": "Ce diagramme PlantUML est dessiné par kroki.io, un service en ligne, et votre politique d'IA le garde sur cet appareil. Le dessiner envoie le texte du diagramme à kroki.io.",
+  "plantuml.send": "Dessiner ce diagramme avec kroki.io",
   "cmd.insert.table": "Insertion Table (Editor)",
   "cmd.insert.table.hint": "constructeur de tableau visuel",
   "cmd.insert.wikilink": "Insertion wiki-lien",

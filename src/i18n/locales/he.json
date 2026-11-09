@@ -315,6 +315,8 @@
   "cmd.insert.graphviz": "הוספת Graphviz / DOT",
   "cmd.insert.plantuml": "הוספת PlantUML",
   "cmd.insert.plantuml.hint": "מרונדר דרך kroki.io",
+  "plantuml.blocked": "את תרשים ה-PlantUML הזה מצייר kroki.io, שירות מקוון, ומדיניות ה-AI שלכם משאירה אותו במכשיר הזה. ציור התרשים שולח את הטקסט שלו ל-kroki.io.",
+  "plantuml.send": "לצייר את התרשים הזה עם kroki.io",
   "cmd.insert.abc": "הוספת תווים מוזיקליים (ABC)",
   "cmd.insert.model": "הוספת מודל תלת-ממדי",
   "cmd.insert.model.hint": ".glb / .gltf",

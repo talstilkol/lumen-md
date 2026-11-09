@@ -244,6 +244,8 @@
   "cmd.insert.model.hint": ".glb / .gltf",
   "cmd.insert.plantuml": "Einfügen PlantUML",
   "cmd.insert.plantuml.hint": "gerendert über kroki.io",
+  "plantuml.blocked": "Dieses PlantUML-Diagramm zeichnet kroki.io, ein Online-Dienst, und deine AI-Richtlinie hält es auf diesem Gerät. Zum Zeichnen wird der Text des Diagramms an kroki.io gesendet.",
+  "plantuml.send": "Dieses Diagramm mit kroki.io zeichnen",
   "cmd.insert.table": "Einfügen Table (Editor)",
   "cmd.insert.table.hint": "visueller Tabellen-Builder",
   "cmd.insert.wikilink": "Einfügen wiki-Link",

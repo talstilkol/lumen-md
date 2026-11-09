@@ -734,6 +734,8 @@ const en: Strings = {
   "cmd.insert.graphviz": "Insert Graphviz / DOT",
   "cmd.insert.plantuml": "Insert PlantUML",
   "cmd.insert.plantuml.hint": "rendered via kroki.io",
+  "plantuml.blocked": "This PlantUML diagram is drawn by kroki.io, an online service, and your AI policy keeps it on this device. Rendering it sends the diagram's text to kroki.io.",
+  "plantuml.send": "Render this diagram with kroki.io",
   "cmd.insert.abc": "Insert music notation (ABC)",
   "cmd.insert.model": "Insert 3D model",
   "cmd.insert.model.hint": ".glb / .gltf",

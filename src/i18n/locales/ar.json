@@ -244,6 +244,8 @@
   "cmd.insert.model.hint": ".glb / .gltf",
   "cmd.insert.plantuml": "إدراج PlantUML",
   "cmd.insert.plantuml.hint": "يُعرض عبر kroki.io",
+  "plantuml.blocked": "يرسم kroki.io، وهو خدمة على الإنترنت، مخطط PlantUML هذا، وسياسة الذكاء الاصطناعي لديك تُبقيه على هذا الجهاز. رسمه يرسل نص المخطط إلى kroki.io.",
+  "plantuml.send": "ارسم هذا المخطط باستخدام kroki.io",
   "cmd.insert.table": "إدراج Table (Editor)",
   "cmd.insert.table.hint": "منشئ جداول مرئي",
   "cmd.insert.wikilink": "إدراج wiki-رابط",

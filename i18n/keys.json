@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-10-24T11:16:22.225Z",
+  "generated_at": "2026-11-09T21:50:32.127Z",
   "source": "src/i18n/index.ts (en bundle)",
-  "count": 1431,
+  "count": 1433,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -3431,6 +3431,16 @@
     {
       "key": "cmd.insert.plantuml.hint",
       "en": "rendered via kroki.io",
+      "vars": []
+    },
+    {
+      "key": "plantuml.blocked",
+      "en": "This PlantUML diagram is drawn by kroki.io, an online service, and your AI policy keeps it on this device. Rendering it sends the diagram's text to kroki.io.",
+      "vars": []
+    },
+    {
+      "key": "plantuml.send",
+      "en": "Render this diagram with kroki.io",
       "vars": []
     },
     {
