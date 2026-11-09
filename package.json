@@ -48,7 +48,9 @@
     "headers": "node scripts/headers.mjs --check",
     "headers:write": "node scripts/headers.mjs --write",
     "handoff": "node scripts/handoff.mjs",
-    "docs:sync": "node scripts/docs-sync.mjs"
+    "docs:sync": "node scripts/docs-sync.mjs",
+    "lint": "eslint src",
+    "lint:prune": "eslint src --prune-suppressions"
   },
   "dependencies": {
     "@bjorn3/browser_wasi_shim": "0.4.2",
@@ -181,7 +183,13 @@
     "vite": "~8.3.2",
     "vite-plugin-pwa": "^1.3.0",
     "vitest": "^4.1.8",
-    "vue": "3.5.43"
+    "vue": "3.5.43",
+    "@eslint/js": "9.39.5",
+    "eslint": "9.39.5",
+    "eslint-plugin-jsx-a11y": "6.10.2",
+    "eslint-plugin-react-hooks": "7.1.1",
+    "globals": "17.13.0",
+    "typescript-eslint": "8.71.0"
   },
   "overrides": {
     "serialize-javascript": "^7.0.5",

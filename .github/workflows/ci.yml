@@ -183,6 +183,31 @@ jobs:
           if-no-files-found: ignore
           retention-days: 14
 
+  lint:
+    name: lint (ESLint, with baseline)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup Node 22
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install
+        run: npm ci || npm install
+
+      # Violations recorded in eslint-suppressions.json (plan 0.4) pass; any
+      # new one fails, and so does a suppression that is no longer needed
+      # (run `npm run lint:prune` and commit the smaller baseline).
+      - name: ESLint
+        run: npm run lint
+
   local-ai:
     name: local agents (fake Ollama)
     runs-on: ubuntu-24.04 # pinned: ubuntu-latest becomes Ubuntu 26 from 19.10.2026 (actions/runner-images#14748)
