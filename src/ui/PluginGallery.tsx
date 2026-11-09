@@ -354,10 +354,10 @@ export function PluginGallery({ open, onClose }: Props) {
           <span style={{ fontSize: 22 }} aria-hidden>🔌</span>
           <div>
             <div id="plugin-gallery-title" style={{ fontWeight: 700, fontSize: 16 }}>
-              Plugin Gallery
+              {t("pluginGallery.title")}
             </div>
             <div style={{ fontSize: 12, color: "hsl(var(--fg-muted))" }}>
-              {installed.size} installed · {allAvailable.length} available
+              {t("pluginGallery.counts", { installed: installed.size, available: allAvailable.length })}
             </div>
           </div>
           <div style={{ flex: 1 }} />
@@ -413,7 +413,7 @@ export function PluginGallery({ open, onClose }: Props) {
         <div style={{ flex: 1, display: "flex", minHeight: 0 }}>
           {/* Side rail — categories */}
           <nav
-            aria-label="Plugin categories"
+            aria-label={t("pluginGallery.categoriesLabel")}
             style={{
               width: 200,
               borderInlineEnd: "1px solid hsl(var(--border))",
@@ -432,7 +432,7 @@ export function PluginGallery({ open, onClose }: Props) {
                 padding: "4px 10px 6px",
               }}
             >
-              Categories
+              {t("pluginGallery.categories")}
             </div>
             {categories.map((c) => {
               const isActive = activeCategory === c.id;
@@ -488,7 +488,7 @@ export function PluginGallery({ open, onClose }: Props) {
                   fontSize: 13,
                 }}
               >
-                No plugins matched your search.
+                {t("pluginGallery.noMatch")}
               </div>
             ) : (
               filtered.map((plugin) => {
@@ -542,7 +542,7 @@ export function PluginGallery({ open, onClose }: Props) {
                           {verified && (
                             <BadgeCheck
                               size={14}
-                              aria-label="Verified by Lumen"
+                              aria-label={t("pluginGallery.verified")}
                               style={{ color: "hsl(var(--accent))", flexShrink: 0 }}
                             />
                           )}
@@ -588,7 +588,7 @@ export function PluginGallery({ open, onClose }: Props) {
                         }}
                       >
                         {isInstalled ? <Trash2 size={12} /> : <Download size={12} />}
-                        {isInstalled ? "Uninstall" : "Install"}
+                        {isInstalled ? t("pluginGallery.uninstall") : t("pluginGallery.install")}
                       </button>
                       {(() => {
                         const remote = remoteRaw.find((r) => r.id === plugin.id);
@@ -599,7 +599,7 @@ export function PluginGallery({ open, onClose }: Props) {
                             href={homepage}
                             target="_blank"
                             rel="noopener noreferrer"
-                            aria-label={`${plugin.name} homepage`}
+                            aria-label={t("pluginGallery.homepage", { name: plugin.name })}
                             style={{
                               display: "inline-flex",
                               alignItems: "center",
@@ -634,14 +634,14 @@ export function PluginGallery({ open, onClose }: Props) {
             color: "hsl(var(--fg-muted))",
           }}
         >
-          More plugins coming soon ·{" "}
+          {t("pluginGallery.comingSoon")}{" "}
           <a
             href="https://github.com/talstilkol/lumen-md"
             target="_blank"
             rel="noopener noreferrer"
             style={{ color: "hsl(var(--accent))" }}
           >
-            Submit a plugin
+            {t("pluginGallery.submit")}
           </a>
         </div>
       </div>

@@ -223,6 +223,7 @@ function InsertTextDialogImpl({
               <input
                 value={codeLang || detection.codeLang || ""}
                 onChange={(e) => setCodeLang(e.target.value)}
+                // i18n-allow: an example language code, the same in every language
                 placeholder="ts"
                 aria-label={t("insertText.codeLang")}
                 style={{

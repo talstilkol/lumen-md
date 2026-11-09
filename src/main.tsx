@@ -120,8 +120,8 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
           height: "100vh", background: "#0c0f17", color: "#e8e8e8",
           fontFamily: "Inter, system-ui, sans-serif", flexDirection: "column", gap: 16,
         }}>
-          <h1 style={{ fontSize: 24, fontWeight: 600, margin: 0 }}>Something went wrong</h1>
-          <p style={{ fontSize: 14, opacity: 0.7, margin: 0 }}>Lumen encountered an unexpected error.</p>
+          <h1 style={{ fontSize: 24, fontWeight: 600, margin: 0 }}>{t("boot.crashTitle")}</h1>
+          <p style={{ fontSize: 14, opacity: 0.7, margin: 0 }}>{t("boot.crashBody")}</p>
           <button
             onClick={() => window.location.reload()}
             style={{
@@ -130,7 +130,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
             fontSize: 13, fontWeight: 500,
           }}
         >
-          Reload Lumen
+          {t("boot.reload")}
         </button>
       </div>
     }>
@@ -140,7 +140,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
           height: "100vh", background: "#0c0f17", color: "#e8e8e8",
           fontFamily: "Inter, system-ui, sans-serif",
         }}>
-          Loading Lumen…
+          {t("boot.loading")}
         </div>
       }>
         <App />

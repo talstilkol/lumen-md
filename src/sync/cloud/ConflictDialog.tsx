@@ -16,6 +16,7 @@
 import { useMemo, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { applyMerge, threeWayDiff, type DiffHunk } from "./diff";
+import { t } from "../../i18n";
 
 export type ConflictChoice =
   | { kind: "merged"; content: string }
@@ -86,11 +87,10 @@ function ConflictDialogImpl({ path, base, local, remote, onResolve }: Props) {
           }}
         >
           <div id="conflict-title" style={{ fontWeight: 700, fontSize: 15 }}>
-            Sync conflict — {path}
+            {t("sync.conflict.title", { path })}
           </div>
           <div style={{ fontSize: 12, color: "hsl(var(--fg-muted))", marginTop: 2 }}>
-            Both sides changed since the last sync. Pick what to keep, or
-            take one side wholesale.
+            {t("sync.conflict.body")}
           </div>
         </header>
 
@@ -148,13 +148,13 @@ function ConflictDialogImpl({ path, base, local, remote, onResolve }: Props) {
                 {h.op === "conflict" && (
                   <div style={{ gridColumn: "1 / span 2", padding: "4px 12px", fontSize: 11, color: "hsl(var(--fg-muted))", display: "flex", gap: 12 }}>
                     <label>
-                      <input type="radio" checked={picks[conflictPickIdx] === "local"} onChange={() => setPick(conflictPickIdx, "local")} /> local
+                      <input type="radio" checked={picks[conflictPickIdx] === "local"} onChange={() => setPick(conflictPickIdx, "local")} /> {t("sync.conflict.local")}
                     </label>
                     <label>
-                      <input type="radio" checked={picks[conflictPickIdx] === "remote"} onChange={() => setPick(conflictPickIdx, "remote")} /> remote
+                      <input type="radio" checked={picks[conflictPickIdx] === "remote"} onChange={() => setPick(conflictPickIdx, "remote")} /> {t("sync.conflict.remote")}
                     </label>
                     <label>
-                      <input type="radio" checked={picks[conflictPickIdx] === "both"} onChange={() => setPick(conflictPickIdx, "both")} /> both
+                      <input type="radio" checked={picks[conflictPickIdx] === "both"} onChange={() => setPick(conflictPickIdx, "both")} /> {t("sync.conflict.both")}
                     </label>
                   </div>
                 )}
@@ -172,9 +172,9 @@ function ConflictDialogImpl({ path, base, local, remote, onResolve }: Props) {
             borderTop: "1px solid hsl(var(--border))",
           }}
         >
-          <button onClick={() => onResolve(null)} style={btnSecondary}>Cancel</button>
-          <button onClick={() => onResolve({ kind: "local" })} style={btnSecondary}>Take local</button>
-          <button onClick={() => onResolve({ kind: "remote" })} style={btnSecondary}>Take remote</button>
+          <button onClick={() => onResolve(null)} style={btnSecondary}>{t("dialog.cancel")}</button>
+          <button onClick={() => onResolve({ kind: "local" })} style={btnSecondary}>{t("sync.conflict.takeLocal")}</button>
+          <button onClick={() => onResolve({ kind: "remote" })} style={btnSecondary}>{t("sync.conflict.takeRemote")}</button>
           <button
             onClick={() =>
               onResolve({
@@ -184,7 +184,7 @@ function ConflictDialogImpl({ path, base, local, remote, onResolve }: Props) {
             }
             style={btnPrimary}
           >
-            Apply merge
+            {t("sync.conflict.apply")}
           </button>
         </footer>
       </div>
@@ -213,7 +213,7 @@ function Side({ hunk, side, isPicked, onPick }: SideProps) {
       }}
     >
       {lines.length === 0 ? (
-        <span style={{ color: "hsl(var(--fg-muted))", fontStyle: "italic", fontSize: 11 }}>(empty)</span>
+        <span style={{ color: "hsl(var(--fg-muted))", fontStyle: "italic", fontSize: 11 }}>{t("sync.conflict.empty")}</span>
       ) : (
         lines.map((l, i) => (
           <div key={i}>{l || "\u00A0"}</div>

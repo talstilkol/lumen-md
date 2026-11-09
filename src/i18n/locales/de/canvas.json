@@ -20,5 +20,12 @@
   "graphView.renderFailed": "Graph konnte nicht gerendert werden",
   "graphView.renderFailedDetail": "Die Daten des Arbeitsbereichs ergaben eine ungültige Knotenstruktur, die den Renderer zum Absturz brachte.",
   "graphView.stats": "{nodes} Knoten · {edges} Verbindungen",
-  "graphView.title": "Wissensgraph"
+  "graphView.title": "Wissensgraph",
+  "canvas.addNote": "+ Notiz hinzufügen",
+  "canvas.back": "← Zurück zum Editor",
+  "canvas.done": "Fertig",
+  "canvas.new.placeholder": "Ideen",
+  "canvas.new.title": "Neue Leinwand erstellen",
+  "canvas.unsaved": "{name} (nicht gespeichert)",
+  "canvas.zoom": "Zoom: {pct} %"
 }

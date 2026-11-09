@@ -20,5 +20,12 @@
   "graphView.renderFailed": "فشل عرض الرسم البياني",
   "graphView.renderFailedDetail": "أدت بيانات مساحة العمل إلى بنية عقد غير صالحة تسببت في تعطل المُعرِّض.",
   "graphView.stats": "{nodes} عقد · {edges} روابط",
-  "graphView.title": "الرسم البياني للمعرفة"
+  "graphView.title": "الرسم البياني للمعرفة",
+  "canvas.addNote": "+ إضافة ملاحظة",
+  "canvas.back": "→ العودة إلى المحرر",
+  "canvas.done": "تم",
+  "canvas.new.placeholder": "أفكار",
+  "canvas.new.title": "إنشاء لوحة جديدة",
+  "canvas.unsaved": "{name} (غير محفوظ)",
+  "canvas.zoom": "التكبير: {pct}%"
 }

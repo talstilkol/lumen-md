@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { t } from "../i18n";
 
 /**
  * Floating scroll progress indicator.
@@ -107,7 +108,7 @@ export function ScrollProgress() {
       <span>{progress}%</span>
       {hover && (
         <span style={{ color: "hsl(var(--fg-muted) / 0.6)" }}>
-          page {currentPage}/{totalPages}
+          {t("scroll.page", { current: currentPage, total: totalPages })}
         </span>
       )}
     </div>

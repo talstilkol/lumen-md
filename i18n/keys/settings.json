@@ -495,13 +495,73 @@
       "vars": []
     },
     {
+      "key": "pluginGallery.categories",
+      "en": "Categories",
+      "vars": []
+    },
+    {
+      "key": "pluginGallery.categoriesLabel",
+      "en": "Plugin categories",
+      "vars": []
+    },
+    {
       "key": "pluginGallery.close",
       "en": "Close plugin gallery",
       "vars": []
     },
     {
+      "key": "pluginGallery.comingSoon",
+      "en": "More plugins coming soon ·",
+      "vars": []
+    },
+    {
+      "key": "pluginGallery.counts",
+      "en": "{installed} installed · {available} available",
+      "vars": [
+        "installed",
+        "available"
+      ]
+    },
+    {
+      "key": "pluginGallery.homepage",
+      "en": "{name} homepage",
+      "vars": [
+        "name"
+      ]
+    },
+    {
+      "key": "pluginGallery.install",
+      "en": "Install",
+      "vars": []
+    },
+    {
+      "key": "pluginGallery.noMatch",
+      "en": "No plugins matched your search.",
+      "vars": []
+    },
+    {
       "key": "pluginGallery.search",
       "en": "Search plugins…",
+      "vars": []
+    },
+    {
+      "key": "pluginGallery.submit",
+      "en": "Submit a plugin",
+      "vars": []
+    },
+    {
+      "key": "pluginGallery.title",
+      "en": "Plugin Gallery",
+      "vars": []
+    },
+    {
+      "key": "pluginGallery.uninstall",
+      "en": "Uninstall",
+      "vars": []
+    },
+    {
+      "key": "pluginGallery.verified",
+      "en": "Verified by Lumen",
       "vars": []
     },
     {

@@ -133,7 +133,7 @@ export default function HtmlPreviewBlock({ source, meta }: Props) {
               fontSize: 12,
             }}
           >
-            ⚠︎ Some HTML content was sanitized before preview for safety.
+            {t("block.htmlPreview.sanitized")}
           </div>
         )
       )}
@@ -143,7 +143,7 @@ export default function HtmlPreviewBlock({ source, meta }: Props) {
           sandbox={sandboxMode}
           referrerPolicy="no-referrer"
           loading="lazy"
-          title={titleMatch?.[1] ?? "HTML preview"}
+          title={titleMatch?.[1] ?? t("block.htmlPreview.title")}
           style={{
             width: "100%",
             height: fullScreen ? "100vh" : height,

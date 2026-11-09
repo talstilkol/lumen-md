@@ -323,7 +323,7 @@ export default function LiveJsBlock({ source, meta }: Props) {
           textAlign: "right",
         }}
       >
-        JS run: {stateLabel}
+        {t("block.liveJs.runStatus", { state: stateLabel })}
       </div>
       <div
         role="log"

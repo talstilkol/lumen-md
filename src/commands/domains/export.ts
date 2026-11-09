@@ -17,8 +17,8 @@ export function buildExportCommands({ handleExportHtml, liveDoc }: CommandContex
     },
     {
       id: "file.exportDocx",
-      label: t("cmd.file.exportDocx") ?? "Export to Word (.doc)",
-      hint: t("cmd.file.exportDocx.hint") ?? "Download as Word document",
+      label: t("cmd.file.exportDocx"),
+      hint: t("cmd.file.exportDocx.hint"),
       icon: cmdIcons.Download,
       group: t("group.file"),
       action: async () => {

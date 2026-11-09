@@ -61,7 +61,7 @@ describe("PluginGallery", () => {
       <PluginGallery open={true} onClose={vi.fn()} />,
     );
     // Should have some text about plugins
-    expect(container.textContent).toContain("Plugin Gallery");
+    expect(container.textContent).toContain("pluginGallery.title");
   });
 });
 

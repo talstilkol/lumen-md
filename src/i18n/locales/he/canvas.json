@@ -20,5 +20,12 @@
   "graphView.renderFailed": "רינדור הגרף נכשל",
   "graphView.renderFailedDetail": "נתוני מרחב העבודה גרמו למבנה צמתים לא תקין שגרם לקריסת המרנדר.",
   "graphView.stats": "{nodes} צמתים · {edges} חיבורים",
-  "graphView.title": "גרף ידע"
+  "graphView.title": "גרף ידע",
+  "canvas.addNote": "+ הוספת פתק",
+  "canvas.back": "→ חזרה לעורך",
+  "canvas.done": "סיום",
+  "canvas.new.placeholder": "רעיונות",
+  "canvas.new.title": "יצירת קנבס חדש",
+  "canvas.unsaved": "{name} (לא נשמר)",
+  "canvas.zoom": "זום: {pct}%"
 }

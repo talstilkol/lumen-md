@@ -20,5 +20,12 @@
   "graphView.renderFailed": "Échec du rendu du graphe",
   "graphView.renderFailedDetail": "Les données de l'espace de travail ont produit une structure de nœuds invalide qui a fait planter le moteur de rendu.",
   "graphView.stats": "{nodes} nœuds · {edges} liens",
-  "graphView.title": "Graphe de connaissances"
+  "graphView.title": "Graphe de connaissances",
+  "canvas.addNote": "+ Ajouter une note",
+  "canvas.back": "← Retour à l’éditeur",
+  "canvas.done": "Terminé",
+  "canvas.new.placeholder": "idées",
+  "canvas.new.title": "Créer un nouveau canevas",
+  "canvas.unsaved": "{name} (non enregistré)",
+  "canvas.zoom": "Zoom : {pct} %"
 }

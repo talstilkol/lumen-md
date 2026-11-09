@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { sanitizeSvgMarkup } from "../lib/markupSanitizer";
 import { fetchWithRetry } from "../lib/fetchRetry";
 import { toTrustedHTML } from "../lib/trustedTypes";
+import { t } from "../i18n";
 
 interface Props {
   source: string;
@@ -99,7 +100,7 @@ export default function PlantUMLBlock({ source }: Props) {
     return (
       <div className="mermaid-block">
         <div className="mermaid-error">
-          ⚠︎ PlantUML error (rendered via kroki.io):{"\n"}{error}
+          {t("block.plantuml.error")}{"\n"}{error}
         </div>
       </div>
     );
@@ -117,7 +118,7 @@ export default function PlantUMLBlock({ source }: Props) {
           textAlign: "center",
         }}
       >
-        Rendering PlantUML…
+        {t("block.plantuml.rendering")}
       </div>
     );
   }

@@ -377,18 +377,18 @@ export function SearchDialog({ open, onClose, onOpenFile }: Props) {
       <div ref={dialogRef} className="cmd-palette" style={{ minHeight: "350px", display: "flex", flexDirection: "column" }} onClick={(e) => e.stopPropagation()}>
         <div style={{ display: "flex", borderBottom: "1px solid hsl(var(--border))", padding: "0 10px", alignItems: "center" }}>
           <button className={`chart-block-tab ${mode === "search" ? "active" : ""}`} style={{ fontSize: 13, background: "transparent" }} onClick={() => setMode("search")}>
-             Search
+             {t("searchDialog.mode.search")}
           </button>
           <button
             className={`chart-block-tab ${mode === "smart" ? "active" : ""}`}
             style={{ fontSize: 13, background: "transparent" }}
             onClick={() => setMode("smart")}
-            title="Hybrid semantic + keyword search (uses your AI key for embeddings)"
+            title={t("searchDialog.smartHint")}
           >
-            <Wand2 size={11} style={{ display: "inline", marginRight: 4 }} /> Smart
+            <Wand2 size={11} style={{ display: "inline", marginRight: 4 }} /> {t("searchDialog.mode.smart")}
           </button>
           <button className={`chart-block-tab ${mode === "ai" ? "active" : ""}`} style={{ fontSize: 13, background: "transparent" }} onClick={() => setMode("ai")}>
-             <Sparkles size={11} style={{display:"inline", marginRight:4}}/> Ask Workspace
+             <Sparkles size={11} style={{display:"inline", marginRight:4}}/> {t("searchDialog.mode.ai")}
           </button>
           {mode === "smart" && smartAllowed && (
             <button
@@ -405,9 +405,9 @@ export function SearchDialog({ open, onClose, onOpenFile }: Props) {
                 color: "hsl(var(--fg-muted))",
                 cursor: smartIndexing ? "wait" : "pointer",
               }}
-              title="Rebuild the embedding index"
+              title={t("searchDialog.rebuildIndex")}
             >
-              {smartIndexing ? "Indexing…" : smartIndexedAt ? "Re-index" : "Build index"}
+              {smartIndexing ? t("searchDialog.indexing") : smartIndexedAt ? t("searchDialog.reindex") : t("searchDialog.buildIndex")}
             </button>
           )}
         </div>
@@ -453,7 +453,7 @@ export function SearchDialog({ open, onClose, onOpenFile }: Props) {
           {empty && !(mode === "smart" && !smartAllowed) && (
             <div className="cmd-palette-empty">
               {mode === "smart" && !smartIndexedAt && !query
-                ? "Click \u201CBuild index\u201D to enable Smart search."
+                ? t("searchDialog.buildHint")
                 : query
                   ? t("search.noMatches")
                   : t("search.empty")}
@@ -472,10 +472,10 @@ export function SearchDialog({ open, onClose, onOpenFile }: Props) {
                 borderBottom: "1px solid hsl(var(--border))",
               }}
               role="group"
-              aria-label="Recent searches"
+              aria-label={t("searchDialog.recent")}
             >
               <span style={{ fontSize: 10, color: "hsl(var(--fg-muted))", textTransform: "uppercase", letterSpacing: "0.05em", marginInlineEnd: 4, alignSelf: "center" }}>
-                Recent
+                {t("searchDialog.recentLabel")}
               </span>
               {getSearchHistory().map((q) => (
                 <span
@@ -494,7 +494,7 @@ export function SearchDialog({ open, onClose, onOpenFile }: Props) {
                   <button
                     type="button"
                     onClick={() => setQuery(q)}
-                    aria-label={`Re-run search "${q}"`}
+                    aria-label={t("searchDialog.rerun", { q })}
                     style={{
                       background: "transparent",
                       border: "none",
@@ -513,7 +513,7 @@ export function SearchDialog({ open, onClose, onOpenFile }: Props) {
                       // Force re-render — cheap nudge via setQuery toggle.
                       setQuery((s) => s);
                     }}
-                    aria-label={`Forget search "${q}"`}
+                    aria-label={t("searchDialog.forget", { q })}
                     style={{
                       background: "transparent",
                       border: "none",
@@ -577,7 +577,7 @@ export function SearchDialog({ open, onClose, onOpenFile }: Props) {
                 onMouseEnter={() => setActive(i)}
                 onClick={() => void openSmartHit(hit)}
                 style={{ alignItems: "flex-start" }}
-                title={`${hit.path} — score ${hit.score.toFixed(3)}`}
+                title={t("searchDialog.hitTitle", { path: hit.path, score: hit.score.toFixed(3) })}
               >
                 <Wand2 size={14} style={{ opacity: 0.7, marginTop: 1, flexShrink: 0, color: "hsl(var(--accent))" }} />
                 <div style={{ flex: 1, minWidth: 0 }}>
@@ -667,7 +667,7 @@ export function SearchDialog({ open, onClose, onOpenFile }: Props) {
                         key={s.path}
                         onClick={() => { onClose(); onOpenFile(s.path, s.content); }}
                         style={{ display: "flex", alignItems: "center", gap: 6, padding: "3px 0", fontSize: 11, color: "hsl(var(--accent))", cursor: "pointer" }}
-                        title={`Relevance: ${(s.score * 100).toFixed(0)}%`}
+                        title={t("searchDialog.relevance", { pct: (s.score * 100).toFixed(0) })}
                       >
                         <FileCode2 size={11} />
                         <span>[{i + 1}] {s.path}</span>
@@ -678,7 +678,7 @@ export function SearchDialog({ open, onClose, onOpenFile }: Props) {
                 )}
                 {conversation.length > 0 && (
                   <div style={{ fontSize: 11, color: "hsl(var(--fg-muted))", fontStyle: "italic" }}>
-                    {conversation.length / 2} turn{conversation.length > 2 ? "s" : ""} in this conversation
+                    {tPlural("searchDialog.turns", conversation.length / 2)}
                   </div>
                 )}
               </>

@@ -60,7 +60,7 @@ export function buildGitCommands({ showWorkspace, setDoc, toggleWorkspace, liveD
         }
 
         const message = (await uiPrompt({ 
-          message: "Commit Message" + (aiSuggestion ? " (AI Suggested):" : ":"),
+          message: aiSuggestion ? t("git.prompt.commitMessageAi") : t("git.prompt.commitMessage"),
            defaultValue: aiSuggestion 
         }))?.trim();
         if (!message) return;

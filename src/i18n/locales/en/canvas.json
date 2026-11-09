@@ -20,5 +20,12 @@
   "graphView.renderFailed": "Graph Render Failed",
   "graphView.renderFailedDetail": "The workspace data resulted in an invalid node structure that crashed the renderer.",
   "graphView.stats": "{nodes} nodes · {edges} connections",
-  "graphView.title": "Knowledge Graph"
+  "graphView.title": "Knowledge Graph",
+  "canvas.addNote": "+ Add Note",
+  "canvas.back": "← Back to Editor",
+  "canvas.done": "Done",
+  "canvas.new.placeholder": "ideas",
+  "canvas.new.title": "Create a new canvas",
+  "canvas.unsaved": "{name} (unsaved)",
+  "canvas.zoom": "Zoom: {pct}%"
 }

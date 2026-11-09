@@ -158,6 +158,10 @@ Strings live in one JSON file per language and domain: `src/i18n/locales/<lang>/
 2. Run `npm run i18n:fix` (sorts the files, refreshes `i18n/keys/`) and `node scripts/generate-all-locales.mjs` for the other 6 locales.
 3. Run `npm run i18n:check` and `npm run test` — the `i18nDrift.test.ts` gate will fail if any locale is missing the key.
 
+`npm run i18n:hardcoded` (part of `i18n:check`, and a CI step) scans `src/` and fails on English left in JSX text,
+user-visible props (`aria-label`, `title`, `placeholder`, `alt`, `label`…) or toast / dialog messages. A sentence
+with markup inside it uses `tRich()` from `src/i18n/rich.tsx`; a real exception gets `// i18n-allow: <reason>`.
+
 ### RTL support
 
 - The app supports RTL (Hebrew, Arabic). The `<html dir>` attribute is set automatically.

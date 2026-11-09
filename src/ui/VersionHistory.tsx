@@ -133,7 +133,7 @@ export function VersionHistory({ fileName, currentContent, onRestore, onClose }:
               {new Date(snap.timestamp).toLocaleString(getLocale())}
             </div>
             <div style={{ fontSize: 10, color: "hsl(var(--fg-muted))" }}>
-              {snap.content.length} chars{snap.reason ? ` · ${t(`versionHistory.reason.${snap.reason}`)}` : ""}
+              {t("status.chars", { n: snap.content.length })}{snap.reason ? ` · ${t(`versionHistory.reason.${snap.reason}`)}` : ""}
               {snap.author ? ` · ${t("versionHistory.by", { author: snap.author })}` : ""}
             </div>
           </button>

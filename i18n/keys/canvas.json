@@ -4,8 +4,18 @@
   "source": "src/i18n/locales/en/canvas.json",
   "entries": [
     {
+      "key": "canvas.addNote",
+      "en": "+ Add Note",
+      "vars": []
+    },
+    {
       "key": "canvas.autoSaved",
       "en": "Canvas · auto-saved",
+      "vars": []
+    },
+    {
+      "key": "canvas.back",
+      "en": "← Back to Editor",
       "vars": []
     },
     {
@@ -16,6 +26,11 @@
     {
       "key": "canvas.dialogLabel",
       "en": "Whiteboard",
+      "vars": []
+    },
+    {
+      "key": "canvas.done",
+      "en": "Done",
       "vars": []
     },
     {
@@ -60,6 +75,11 @@
       "vars": []
     },
     {
+      "key": "canvas.new.placeholder",
+      "en": "ideas",
+      "vars": []
+    },
+    {
       "key": "canvas.new.prompt",
       "en": "Canvas name:",
       "vars": []
@@ -82,6 +102,11 @@
       "vars": []
     },
     {
+      "key": "canvas.new.title",
+      "en": "Create a new canvas",
+      "vars": []
+    },
+    {
       "key": "canvas.picker",
       "en": "Pick canvas",
       "vars": []
@@ -101,6 +126,20 @@
       "en": "Couldn’t read the canvas “{name}”. It stays read-only so its saved drawing isn’t overwritten.",
       "vars": [
         "name"
+      ]
+    },
+    {
+      "key": "canvas.unsaved",
+      "en": "{name} (unsaved)",
+      "vars": [
+        "name"
+      ]
+    },
+    {
+      "key": "canvas.zoom",
+      "en": "Zoom: {pct}%",
+      "vars": [
+        "pct"
       ]
     },
     {

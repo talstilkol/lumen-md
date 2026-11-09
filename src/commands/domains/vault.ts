@@ -225,7 +225,7 @@ export function buildEncryptionCommands({ setContent, liveDoc }: CommandContext)
       icon: cmdIcons.Save,
       group: t("group.security"),
       action: async () => {
-        const password = await uiPrompt({ message: "Enter encryption password:" });
+        const password = await uiPrompt({ message: t("vault.prompt.encryptPassword") });
         if (!password) return;
         const encrypted = await encryptDocument(liveDoc().content, password);
         setContent(encrypted);
@@ -243,7 +243,7 @@ export function buildEncryptionCommands({ setContent, liveDoc }: CommandContext)
           showAiToast(t("toast.documentIsNotEncrypted"), "error");
           return;
         }
-        const password = await uiPrompt({ message: "Enter decryption password:" });
+        const password = await uiPrompt({ message: t("vault.prompt.decryptPassword") });
         if (!password) return;
         try {
           const decrypted = await decryptDocument(liveDoc().content, password);

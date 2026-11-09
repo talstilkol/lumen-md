@@ -1,7 +1,7 @@
 /** AI actions on the open note: tags, links, diagrams, translation, grammar, alt text, prompt templates. */
 import { cmdIcons, type Command } from "../../ui/CommandPalette";
 import { useAppStore } from "../../store/useStore";
-import { t, getLocale } from "../../i18n";
+import { t, getLocale, tPlural } from "../../i18n";
 import { uiAlert, uiPrompt } from "../../ui/PromptDialog";
 import { AI_PROMPT_TEMPLATES, applyTemplate } from "../../ai/multiLangPrompts";
 import { showAiToast } from "../../ui/AiToast";
@@ -27,7 +27,7 @@ export function buildDocumentAgentCommands({ setContent, liveDoc }: CommandConte
             return;
           }
           const accept = await uiPrompt({
-            message: `Suggested tags:\n  ${tags.join(", ")}\n\nPress OK to merge into frontmatter, or edit the list (comma-separated):`,
+            message: t("agent.tags.prompt", { tags: tags.join(", ") }),
             defaultValue: tags.join(", "),
           });
           if (accept === null) return;
@@ -53,7 +53,7 @@ export function buildDocumentAgentCommands({ setContent, liveDoc }: CommandConte
       group: t("group.tools"),
       action: async () => {
         if (!liveDoc().workspaceName) {
-          await uiAlert({ message: "Open the file from your workspace first — the link agent reads neighboring notes." });
+          await uiAlert({ message: t("agent.links.needWorkspace") });
           return;
         }
         try {
@@ -68,10 +68,12 @@ export function buildDocumentAgentCommands({ setContent, liveDoc }: CommandConte
             .map((s, i) => `${i + 1}. "${s.phrase}" → [[${s.target}]] · ${s.reason}`)
             .join("\n");
           const accept = await uiPrompt({
-            message: `Found ${suggestions.length} link suggestions:\n\n${summary}\n\nApply all? (Type 'no' to skip)`,
-            defaultValue: "yes",
+            message: t("agent.links.prompt", { n: suggestions.length, summary, no: t("agent.links.no") }),
+            defaultValue: t("agent.links.yes"),
           });
-          if (!accept || accept.toLowerCase().startsWith("n")) return;
+          // "no" in the UI language or in English skips.
+          const answer = accept?.trim().toLowerCase() ?? "";
+          if (!answer || answer.startsWith("n") || answer.startsWith(t("agent.links.no").toLowerCase())) return;
           let next = liveDoc().content;
           let applied = 0;
           for (const s of suggestions) {
@@ -98,7 +100,7 @@ export function buildDocumentAgentCommands({ setContent, liveDoc }: CommandConte
       group: t("group.tools"),
       action: async () => {
         const idea = await uiPrompt({
-          message: "Describe the product you want to create:\n(e.g., 'A todo app with drag-and-drop, dark mode, and local storage')",
+          message: t("agent.product.prompt"),
         });
         if (!idea) return;
         try {
@@ -175,7 +177,7 @@ export function buildDocumentAgentCommands({ setContent, liveDoc }: CommandConte
       group: t("group.tools"),
       action: async () => {
         const target = await uiPrompt({
-          message: "Translate the document into which language?\n(e.g. Spanish, עברית, 日本語, Français)",
+          message: t("agent.translate.prompt"),
           defaultValue: "",
         });
         if (!target || !target.trim()) return;
@@ -273,7 +275,7 @@ export function buildGrammarCommands({ locale, liveDoc }: CommandContext): Comma
             return;
           }
           const top = matches.slice(0, 5).map((m, i) => `${i + 1}. ${m.message}`).join("\n");
-          await uiAlert({ message: `Found ${matches.length} issue${matches.length === 1 ? "" : "s"}:\n\n${top}` });
+          await uiAlert({ message: tPlural("agent.grammar.found", matches.length, { list: top }) });
         } catch (e) {
           if (isAbort(e)) return;
           if ((await import("../../agents/suggestions")).reportAgentFailure(e, "tools.checkGrammar")) return;

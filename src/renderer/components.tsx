@@ -13,6 +13,7 @@ import {
   subscribeRemoteImages,
   type RemoteImageGate,
 } from "../lib/remoteImages";
+import { t } from "../i18n";
 
 const ChartBlock = lazy(() => import("../plugins/ChartBlock"));
 const MermaidBlock = lazy(() => import("../plugins/MermaidBlock"));
@@ -73,7 +74,7 @@ function PluginFallback({
         fontSize: "13px",
       }}
     >
-      Loading {label}…
+      {t("block.loading", { label })}
     </div>
   );
 }
@@ -114,7 +115,7 @@ class BlockErrorBoundary extends Component<
             whiteSpace: "pre-wrap",
           }}
         >
-          ⚠︎ {this.props.label} render failed: {this.state.error.message}
+          {t("block.renderFailed", { label: this.props.label, error: this.state.error.message })}
         </div>
       );
     }
@@ -564,7 +565,7 @@ function LumenInput(props: React.InputHTMLAttributes<HTMLInputElement>) {
         {...props}
         checked={Boolean(props.checked)}
         readOnly={props.onChange ? props.readOnly : true}
-        aria-label={props["aria-label"] ?? "task"}
+        aria-label={props["aria-label"] ?? t("block.task.label")}
       />
     );
   }

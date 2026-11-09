@@ -71,7 +71,7 @@ test("help-menu-open", async ({ page }) => {
 test("keyboard-shortcuts-dialog", async ({ page }) => {
   // ⌘/ opens shortcuts dialog.
   await page.keyboard.press("Meta+/");
-  await expect(page.locator('[role="dialog"][aria-label="Keyboard Shortcuts"]')).toBeVisible({ timeout: 3000 });
+  await expect(page.locator('[role="dialog"][aria-label="Keyboard shortcuts"]')).toBeVisible({ timeout: 3000 });
   await page.screenshot({ path: path.join(OUT, "07-shortcuts.png") });
 });
 
