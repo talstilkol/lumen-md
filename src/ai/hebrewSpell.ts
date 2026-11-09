@@ -23,7 +23,7 @@ const LETTERS = "אבגדהוזחטיכלמנסעפצקרשתךםןףץ";
 const FINALS = "ךםןףץ";
 const TO_REGULAR: Record<string, string> = { "ך": "כ", "ם": "מ", "ן": "נ", "ף": "פ", "ץ": "צ" };
 const TO_FINAL: Record<string, string> = { "כ": "ך", "מ": "ם", "נ": "ן", "פ": "ף", "צ": "ץ" };
-const PREFIX = new Set(["ו", "ה", "ב", "כ", "ל", "מ", "ש"]);
+export const PREFIX = new Set(["ו", "ה", "ב", "כ", "ל", "מ", "ש"]);
 
 /** Parse a hunspell .dic (first line = count, then `word/flags`). */
 export function buildDictionary(dic: string): Set<string> {
@@ -41,7 +41,7 @@ export function buildDictionary(dic: string): Set<string> {
 // Combining marks only: a maqaf (U+05BE) separates the two words of a compound.
 const MARKS = new RegExp(`[${M}]`, "g");
 
-function stripMarks(word: string): string {
+export function stripMarks(word: string): string {
   return word.normalize("NFD").replace(MARKS, "").normalize("NFC").replace(/״/g, '"').replace(/׳/g, "'");
 }
 
@@ -50,7 +50,7 @@ function stripMarks(word: string): string {
  * prefix (ב/ל/כ absorb the article); כ only before ש (כש); מ before ה or ש;
  * ש before the rest. So "ההבית" or "בבית" peeled twice are not words.
  */
-const PREFIX_NEXT: Record<string, string> = { "ו": "שהבכלמ", "ש": "הבכלמ", "כ": "ש", "מ": "הש", "ה": "", "ב": "", "ל": "" };
+export const PREFIX_NEXT: Record<string, string> = { "ו": "שהבכלמ", "ש": "הבכלמ", "כ": "ש", "מ": "הש", "ה": "", "ב": "", "ל": "" };
 
 /** Is the word in the dictionary, with up to three valid prefix letters peeled? */
 export function isKnown(dict: Set<string>, raw: string): boolean {

@@ -408,6 +408,8 @@ export const CATALOG_PATTERNS = [
   // ("tessdata_fast", "wooorm/dictionaries") spans files under other licences.
   { file: "src/ai/ocr.ts", re: /\bLANGS\s*=\s*\[([^\]]*)\]/g, ids: (list) => [...list.matchAll(/"([\w-]+)"/g)].map((x) => `tessdata_fast/${x[1]}.traineddata`), exact: true },
   { file: "src/ai/hebrewSpell.ts", re: /_DICT_URL\s*=\s*"([^"]+)"/g, exact: true },
+  // The bundled word list (plan 9.2): swapping the file must meet a registry entry for the new one.
+  { file: "src/ai/hebrewFreq.ts", re: /_FREQ_PATH\s*=\s*"([^"]+)"/g, exact: true },
 ];
 
 export function discoverCatalogIds(sources, patterns = CATALOG_PATTERNS) {

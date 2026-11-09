@@ -406,7 +406,7 @@ export function EditorLayout({
                 <p style={{ fontSize: 12, opacity: 0.8 }}>{t("editor.wysiwygFailedHint")}</p>
               </div>
             }>
-              <WysiwygEditor value={docContent} onChange={setContent} />
+              <WysiwygEditor value={docContent} onChange={setContent} spellCheck={spellCheck} />
             </ErrorBoundary>
           </Suspense>
         </section>
