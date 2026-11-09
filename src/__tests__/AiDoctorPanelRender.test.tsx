@@ -1,0 +1,72 @@
+import { describe, it, expect, vi, beforeEach } from "vitest";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+
+vi.mock("../i18n", () => ({ t: (k: string, p?: Record<string, unknown>) => (p ? `${k} ${JSON.stringify(p)}` : k) }));
+vi.mock("../lib/logger", () => ({ log: { info: vi.fn(), warn: vi.fn(), error: vi.fn() } }));
+
+const runDoctor = vi.fn();
+const persist = vi.fn(async () => "persisted" as const);
+vi.mock("../agents/doctor", () => ({
+  runDoctor,
+  formatDoctorReport: () => "report text",
+}));
+vi.mock("../storage/persistentStorage", () => ({ requestPersistentStorage: persist }));
+
+const REPORT = {
+  at: 0,
+  origin: "http://localhost",
+  summary: { ok: 1, warn: 1, fail: 1, skip: 0 },
+  findings: [
+    { id: "policy", title: "ai.doctor.check.policy", status: "ok", detail: "local-only · auto" },
+    { id: "ollama.reach", title: "ai.doctor.check.ollama", status: "fail", detail: "http://localhost:11434 — Failed to fetch", fix: { label: "ai.doctor.fix.install", command: "ollama serve", url: "https://ollama.com/download" } },
+    { id: "storage", title: "ai.doctor.check.storage", status: "warn", detail: "12 / 1000 MB · evictable", fix: { label: "ai.doctor.fix.persist", action: "persist" } },
+  ],
+};
+
+describe("AiDoctorPanel", () => {
+  beforeEach(() => {
+    runDoctor.mockReset();
+    runDoctor.mockResolvedValue(REPORT);
+    persist.mockClear();
+  });
+
+  it("runs the doctor on open and lists every finding with its status and fix", async () => {
+    const { AiDoctorPanel } = await import("../ui/AiDoctorPanel");
+    render(<AiDoctorPanel open onClose={vi.fn()} />);
+    await waitFor(() => expect(screen.getByTestId("doctor-ollama.reach")).toBeTruthy());
+    expect(runDoctor).toHaveBeenCalledWith({ golden: false, signal: expect.any(AbortSignal) });
+    expect(screen.getByTestId("doctor-ollama.reach").getAttribute("data-status")).toBe("fail");
+    expect(screen.getByText("ollama serve")).toBeTruthy();
+    expect(screen.getByText("ai.doctor.fix.install")).toBeTruthy();
+    expect(screen.getByTestId("doctor-summary").textContent).toContain('"fail":1');
+  });
+
+  it("runs an in-app fix and re-checks", async () => {
+    const { AiDoctorPanel } = await import("../ui/AiDoctorPanel");
+    render(<AiDoctorPanel open onClose={vi.fn()} />);
+    await waitFor(() => expect(screen.getByTestId("doctor-storage")).toBeTruthy());
+    fireEvent.click(screen.getByText("ai.doctor.action.persist"));
+    await waitFor(() => expect(persist).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(runDoctor).toHaveBeenCalledTimes(2));
+  });
+
+  it("runs the golden cases on request", async () => {
+    const { AiDoctorPanel } = await import("../ui/AiDoctorPanel");
+    render(<AiDoctorPanel open onClose={vi.fn()} />);
+    await waitFor(() => expect(screen.getByTestId("doctor-policy")).toBeTruthy());
+    runDoctor.mockResolvedValueOnce({ ...REPORT, findings: [...REPORT.findings, { id: "golden.summarizer", title: "ai.doctor.check.golden", status: "ok", detail: "summarizer · ollama · qwen2.5:7b", ms: 1200 }] });
+    fireEvent.click(screen.getByTestId("doctor-golden-run"));
+    await waitFor(() => expect(screen.getByTestId("doctor-golden.summarizer")).toBeTruthy());
+    expect(runDoctor).toHaveBeenLastCalledWith({ golden: true, signal: expect.any(AbortSignal) });
+  });
+
+  it("closes on Escape and renders nothing when closed", async () => {
+    const { AiDoctorPanel } = await import("../ui/AiDoctorPanel");
+    const onClose = vi.fn();
+    const { container, rerender } = render(<AiDoctorPanel open onClose={onClose} />);
+    fireEvent.keyDown(window, { key: "Escape" });
+    expect(onClose).toHaveBeenCalled();
+    rerender(<AiDoctorPanel open={false} onClose={onClose} />);
+    expect(container.firstChild).toBeNull();
+  });
+});

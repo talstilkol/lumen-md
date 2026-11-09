@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-10-17T16:47:34.070Z",
+  "generated_at": "2026-10-17T19:13:58.192Z",
   "source": "src/i18n/index.ts (en bundle)",
-  "count": 1146,
+  "count": 1196,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -3777,6 +3777,263 @@
     {
       "key": "cmd.ai.agentSettings.hint",
       "en": "Policy, executor, models, endpoints and recent runs in one place",
+      "vars": []
+    },
+    {
+      "key": "cmd.ai.doctor",
+      "en": "AI: Doctor (diagnose local AI)",
+      "vars": []
+    },
+    {
+      "key": "cmd.ai.doctor.hint",
+      "en": "Checks Ollama, CORS, models, WebGPU, storage and services — each with its fix",
+      "vars": []
+    },
+    {
+      "key": "ai.doctor.title",
+      "en": "AI doctor",
+      "vars": []
+    },
+    {
+      "key": "ai.doctor.close",
+      "en": "Close",
+      "vars": []
+    },
+    {
+      "key": "ai.doctor.intro",
+      "en": "Every check below says what it found and exactly how to fix it. Nothing leaves this computer.",
+      "vars": []
+    },
+    {
+      "key": "ai.doctor.running",
+      "en": "Checking…",
+      "vars": []
+    },
+    {
+      "key": "ai.doctor.rerun",
+      "en": "Check again",
+      "vars": []
+    },
+    {
+      "key": "ai.doctor.runGolden",
+      "en": "Run one golden case per agent",
+      "vars": []
+    },
+    {
+      "key": "ai.doctor.goldenRunning",
+      "en": "Running the agents…",
+      "vars": []
+    },
+    {
+      "key": "ai.doctor.golden",
+      "en": "Golden cases (real model)",
+      "vars": []
+    },
+    {
+      "key": "ai.doctor.summary",
+      "en": "{ok} ok · {warn} warnings · {fail} failed",
+      "vars": [
+        "ok",
+        "warn",
+        "fail"
+      ]
+    },
+    {
+      "key": "ai.doctor.copy",
+      "en": "Copy command",
+      "vars": []
+    },
+    {
+      "key": "ai.doctor.copyReport",
+      "en": "Copy report",
+      "vars": []
+    },
+    {
+      "key": "ai.doctor.copied",
+      "en": "Copied",
+      "vars": []
+    },
+    {
+      "key": "ai.doctor.pulling",
+      "en": "Pulling {model}: {status}",
+      "vars": [
+        "model",
+        "status"
+      ]
+    },
+    {
+      "key": "ai.doctor.status.ok",
+      "en": "OK",
+      "vars": []
+    },
+    {
+      "key": "ai.doctor.status.warn",
+      "en": "Warning",
+      "vars": []
+    },
+    {
+      "key": "ai.doctor.status.fail",
+      "en": "Failed",
+      "vars": []
+    },
+    {
+      "key": "ai.doctor.status.skip",
+      "en": "Skipped",
+      "vars": []
+    },
+    {
+      "key": "ai.doctor.check.policy",
+      "en": "AI policy and preferred executor",
+      "vars": []
+    },
+    {
+      "key": "ai.doctor.check.ollama",
+      "en": "Ollama server reachable from this page",
+      "vars": []
+    },
+    {
+      "key": "ai.doctor.check.ollamaVersion",
+      "en": "Ollama version (0.5+ for structured output)",
+      "vars": []
+    },
+    {
+      "key": "ai.doctor.check.models",
+      "en": "A chat model is installed (qwen2.5:7b recommended)",
+      "vars": []
+    },
+    {
+      "key": "ai.doctor.check.configuredModel",
+      "en": "The configured model is installed",
+      "vars": []
+    },
+    {
+      "key": "ai.doctor.check.tools",
+      "en": "The model supports tool calling (tasks, commits)",
+      "vars": []
+    },
+    {
+      "key": "ai.doctor.check.embed",
+      "en": "An embedding model for semantic search",
+      "vars": []
+    },
+    {
+      "key": "ai.doctor.check.webgpu",
+      "en": "WebGPU for the in-browser model",
+      "vars": []
+    },
+    {
+      "key": "ai.doctor.check.wasm",
+      "en": "WebAssembly for in-browser embeddings and speech",
+      "vars": []
+    },
+    {
+      "key": "ai.doctor.check.storage",
+      "en": "Vault storage: quota and durability",
+      "vars": []
+    },
+    {
+      "key": "ai.doctor.check.sw",
+      "en": "Service worker (works offline)",
+      "vars": []
+    },
+    {
+      "key": "ai.doctor.check.grammar",
+      "en": "Grammar service (LanguageTool)",
+      "vars": []
+    },
+    {
+      "key": "ai.doctor.check.research",
+      "en": "Research service (web search and page extraction)",
+      "vars": []
+    },
+    {
+      "key": "ai.doctor.check.executor",
+      "en": "An executor the agents can use right now",
+      "vars": []
+    },
+    {
+      "key": "ai.doctor.check.golden",
+      "en": "Golden case",
+      "vars": []
+    },
+    {
+      "key": "ai.doctor.fix.csp",
+      "en": "This build's CSP does not allow that Ollama address; rebuild with it allowed:",
+      "vars": []
+    },
+    {
+      "key": "ai.doctor.fix.remote",
+      "en": "Under \"local only\" the Ollama server must be on this machine or network. Change the address or the policy:",
+      "vars": []
+    },
+    {
+      "key": "ai.doctor.fix.install",
+      "en": "Install Ollama and start it:",
+      "vars": []
+    },
+    {
+      "key": "ai.doctor.fix.origins",
+      "en": "Ollama refuses this site (403). Allow it with OLLAMA_ORIGINS and restart Ollama:",
+      "vars": []
+    },
+    {
+      "key": "ai.doctor.fix.update",
+      "en": "Update Ollama to 0.5 or newer:",
+      "vars": []
+    },
+    {
+      "key": "ai.doctor.fix.pull",
+      "en": "Download the model:",
+      "vars": []
+    },
+    {
+      "key": "ai.doctor.fix.webgpu",
+      "en": "Use Ollama instead, or a browser with WebGPU (Chrome, Edge, Safari 18+):",
+      "vars": []
+    },
+    {
+      "key": "ai.doctor.fix.persist",
+      "en": "Ask the browser to keep the vault (it may evict it otherwise):",
+      "vars": []
+    },
+    {
+      "key": "ai.doctor.fix.docker",
+      "en": "Run the local services:",
+      "vars": []
+    },
+    {
+      "key": "ai.doctor.fix.research",
+      "en": "No research service configured; set one in the AI settings:",
+      "vars": []
+    },
+    {
+      "key": "ai.doctor.fix.settings",
+      "en": "Choose a working executor in the AI settings:",
+      "vars": []
+    },
+    {
+      "key": "ai.doctor.action.persist",
+      "en": "Keep my data",
+      "vars": []
+    },
+    {
+      "key": "ai.doctor.action.openSettings",
+      "en": "Open AI settings",
+      "vars": []
+    },
+    {
+      "key": "ai.doctor.action.pullModel",
+      "en": "Download now",
+      "vars": []
+    },
+    {
+      "key": "ai.doctor.action.setPolicyLocalFirst",
+      "en": "Switch to local-first",
+      "vars": []
+    },
+    {
+      "key": "ai.doctor.action.retry",
+      "en": "Retry",
       "vars": []
     },
     {

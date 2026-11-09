@@ -19,6 +19,7 @@ const OrgSettings = lazy(() => import("./ui/OrgSettings").then(m => ({ default: 
 const TrustedKeysSettings = lazy(() => import("./ui/TrustedKeysSettings").then(m => ({ default: m.TrustedKeysSettings })));
 const ThemeSettings = lazy(() => import("./ui/ThemeSettings").then(m => ({ default: m.ThemeSettings })));
 const AiSettingsPanel = lazy(() => import("./ui/AiSettingsPanel").then(m => ({ default: m.AiSettingsPanel })));
+const AiDoctorPanel = lazy(() => import("./ui/AiDoctorPanel").then(m => ({ default: m.AiDoctorPanel })));
 const FineTuneSettings = lazy(() => import("./ui/FineTuneSettings").then(m => ({ default: m.FineTuneSettings })));
 const VersionHistory = lazy(() => import("./ui/VersionHistory").then(m => ({ default: m.VersionHistory })));
 const MarkdownTableEditor = lazy(() => import("./ui/MarkdownTableEditor").then(m => ({ default: m.MarkdownTableEditor })));
@@ -133,6 +134,7 @@ export default function App() {
   const [trustedKeysOpen, setTrustedKeysOpen] = useState(false);
   const [themeSettingsOpen, setThemeSettingsOpen] = useState(false);
   const [aiSettingsOpen, setAiSettingsOpen] = useState(false);
+  const [aiDoctorOpen, setAiDoctorOpen] = useState(false);
   const [tagsPanelOpen, setTagsPanelOpen] = useState(false);
   const [commentsPanelOpen, setCommentsPanelOpen] = useState(false);
   const [runtimeMetricsOpen, setRuntimeMetricsOpen] = useState(false);
@@ -666,6 +668,11 @@ export default function App() {
     window.addEventListener("lumen-open-ai-settings", onOpen);
     return () => window.removeEventListener("lumen-open-ai-settings", onOpen);
   }, []);
+  useEffect(() => {
+    const onOpen = () => setAiDoctorOpen(true);
+    window.addEventListener("lumen-open-ai-doctor", onOpen);
+    return () => window.removeEventListener("lumen-open-ai-doctor", onOpen);
+  }, []);
   // Stage 2 of the improvement agent (a small local model proposes suggestions).
   useEffect(() => {
     void import("./agents/modelCritic").then((m) => m.installModelCritic());
@@ -991,6 +998,7 @@ export default function App() {
           <OrgSettings open={orgSettingsOpen} onClose={() => setOrgSettingsOpen(false)} onOpenAuditLog={() => setAuditLogOpen(true)} />
           <TrustedKeysSettings open={trustedKeysOpen} onClose={() => setTrustedKeysOpen(false)} />
           {aiSettingsOpen && <AiSettingsPanel open={aiSettingsOpen} onClose={() => setAiSettingsOpen(false)} />}
+          {aiDoctorOpen && <AiDoctorPanel open={aiDoctorOpen} onClose={() => setAiDoctorOpen(false)} />}
           {themeSettingsOpen && <ThemeSettings open={themeSettingsOpen} onClose={() => setThemeSettingsOpen(false)} />}
         </ErrorBoundary>
       </Suspense>
