@@ -47,10 +47,11 @@ const ROUTES: Route[] = [
   { id: "web-research", file: "research/agent.ts", marker: /anthropicWebResearch|researchEndpoint\(\)/, gate: /assertCloudAllowed\("the research service/ },
   { id: "speech-recognition", file: "ui/VoiceDictation.tsx", marker: /\bSpeechRecognition\b/, gate: /if \(!thirdPartyServicesAllowed\(\)\)/ },
   { id: "network-voices", file: "ai/tts.ts", marker: /speechSynthesis\.speak/, gate: /allowNetwork \|\| v\.localService/ },
+  { id: "plantuml-kroki", file: "plugins/plantumlPolicy.ts", marker: /kroki\.io\/plantuml/, gate: /if \(!krokiAllowed\(source, policy\)\)/ },
 ];
 
 /** Names of cloud AI hosts and browser services that talk to their vendor. */
-const CLOUD_MARKER = /api\.openai\.com|api\.anthropic\.com|generativelanguage\.googleapis\.com|api\.mistral\.ai|api\.languagetool\.org|\bSpeechRecognition\b|speechSynthesis\.speak/;
+const CLOUD_MARKER = /api\.openai\.com|api\.anthropic\.com|generativelanguage\.googleapis\.com|api\.mistral\.ai|api\.languagetool\.org|kroki\.io\/|\bSpeechRecognition\b|speechSynthesis\.speak/;
 
 /** Files that name a cloud host without sending anything: classification and types. */
 const NAMES_ONLY = new Set(["ai/privacyLedger.ts", "types/fileSystemAccess.d.ts"]);
@@ -242,5 +243,51 @@ describe("cloud routes: each path under each policy (6.17)", () => {
     expect(ctor).toHaveBeenCalledTimes(1);
     document.getElementById("voice-recording-root")?.remove();
     vi.doUnmock("../ai/transcribe");
+  });
+
+  describe("PlantUML via kroki.io", () => {
+    beforeEach(async () => {
+      const { __resetKrokiPolicy } = await import("../plugins/plantumlPolicy");
+      const { __resetLedger } = await import("../ai/privacyLedger");
+      __resetKrokiPolicy();
+      __resetLedger();
+      fetchSpy.mockImplementation(async () => new Response("<svg/>", { status: 200 }));
+    });
+    afterEach(() => fetchSpy.mockImplementation(async () => new Response("{}", { status: 200 })));
+
+    it("under local-only and local-first nothing is sent until the user chooses this diagram; the block is in the ledger once", async () => {
+      const { renderViaKroki, KrokiBlockedError, optInKroki } = await import("../plugins/plantumlPolicy");
+      const { ledgerEntries } = await import("../ai/privacyLedger");
+      for (const policy of ["local-only", "local-first"]) {
+        localStorage.setItem("lumen.ai.policy", policy);
+        await expect(renderViaKroki(`@startuml\nA -> B: ${policy}\n@enduml`)).rejects.toBeInstanceOf(KrokiBlockedError);
+        await expect(renderViaKroki(`@startuml\nA -> B: ${policy}\n@enduml`)).rejects.toBeInstanceOf(KrokiBlockedError);
+      }
+      expect(fetchSpy).not.toHaveBeenCalled();
+      expect(ledgerEntries().filter((e) => e.host === "kroki.io" && e.decision === "blocked")).toHaveLength(2);
+      // The user sends this one diagram: it goes, marked as consented.
+      localStorage.setItem("lumen.ai.policy", "local-only");
+      const src = "@startuml\nA -> B: local-only\n@enduml";
+      optInKroki(src);
+      expect(await renderViaKroki(src)).toBe("<svg/>");
+      expect(urls()).toEqual(["https://kroki.io/plantuml/svg"]);
+      expect(ledgerEntries().some((e) => e.host === "kroki.io" && e.decision === "allowed" && e.consent === true)).toBe(true);
+      // Editing the diagram asks again.
+      await expect(renderViaKroki(src + "\n")).rejects.toBeInstanceOf(KrokiBlockedError);
+      expect(fetchSpy).toHaveBeenCalledTimes(1);
+    });
+
+    it("the cloud policy, chosen explicitly, renders without asking", async () => {
+      const { renderViaKroki } = await import("../plugins/plantumlPolicy");
+      localStorage.setItem("lumen.ai.policy", "cloud");
+      expect(await renderViaKroki("@startuml\nX -> Y\n@enduml")).toBe("<svg/>");
+      expect(urls()).toEqual(["https://kroki.io/plantuml/svg"]);
+    });
+
+    it("the ledger classifies kroki.io as content leaving the device, blocked under local-only", async () => {
+      const { classify, blockedByPolicy } = await import("../ai/privacyLedger");
+      expect(classify("https://kroki.io/plantuml/svg")?.category).toBe("cloud-text");
+      expect(blockedByPolicy("cloud-text", "local-only")).toBe(true);
+    });
   });
 });
