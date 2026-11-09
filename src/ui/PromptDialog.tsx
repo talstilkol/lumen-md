@@ -209,7 +209,7 @@ function show<T>(kind: Kind, opts: DialogOpts): Promise<T> {
       try {
         root.unmount();
       } catch {
-        /* ignore */
+        /* why: the root may already be unmounted by an earlier close */
       }
       host.remove();
     };

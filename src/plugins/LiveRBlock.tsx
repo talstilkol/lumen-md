@@ -62,7 +62,7 @@ export default function LiveRBlock({ source, meta }: Props) {
         try {
           b.close?.();
         } catch {
-          /* already closed */
+          /* why: already closed */
         }
       }
     },

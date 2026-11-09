@@ -255,7 +255,7 @@ export default function App() {
         tourTimer = setTimeout(() => setTourOpen(true), 1200);
       }
     } catch {
-      /* storage may be denied in private browsing — onboarding silently skips */
+      /* why: storage may be denied in private browsing — onboarding silently skips */
     }
     return () => {
       if (tourTimer) clearTimeout(tourTimer);
@@ -438,7 +438,7 @@ export default function App() {
           scrollToHeadingWhenRendered(detail.heading, { docKey: docIdentity(useAppStore.getState().doc) ?? undefined });
         }
       } catch {
-        /* file moved/deleted — silently ignore */
+        /* why: the file was moved or deleted since the link was made; the click does nothing */
       }
     }
     window.addEventListener("lumen-open-file", onOpen);
@@ -627,7 +627,7 @@ export default function App() {
           if (useAppStore.getState().doc.workspaceName === name) markSaved();
         })
         .catch(() => {
-          /* best effort; the debounced autosave retries on the next edit */
+          /* why: best effort; the debounced autosave retries on the next edit */
         });
     };
     const onVisibility = () => {
@@ -928,7 +928,7 @@ export default function App() {
                 });
                 if (!showWorkspace) toggleWorkspace();
               } catch {
-                /* missing file */
+                /* why: the history entry points at a file that no longer exists; the click does nothing */
               }
             }}
           />
@@ -1112,7 +1112,7 @@ export default function App() {
         onClose={() => {
           setTourOpen(false);
           try { localStorage.setItem("lumen-tour-done", "1"); } catch {
-            /* storage denied — tour will simply replay next session */
+            /* why: storage denied — tour will simply replay next session */
           }
         }}
         actions={[

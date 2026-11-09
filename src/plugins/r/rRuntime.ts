@@ -46,7 +46,7 @@ export function getWebR(): Promise<WebRType> {
           try {
             webR.close();
           } catch {
-            /* not started */
+            /* why: not started */
           }
           reject(new Error("webR boot timed out"));
         }, BOOT_TIMEOUT_MS);
@@ -74,7 +74,7 @@ export async function resetWebR(): Promise<void> {
   try {
     (await cur)?.close();
   } catch {
-    /* already gone */
+    /* why: already gone */
   }
 }
 
@@ -116,7 +116,7 @@ const closeBitmap = (b: ImageBitmap | null | undefined) => {
   try {
     b?.close?.();
   } catch {
-    /* already closed */
+    /* why: already closed */
   }
 };
 
@@ -189,7 +189,7 @@ export function runR(
     hooks.onStart?.();
     return runROnce(webR, code, plot);
   });
-  chain = run.catch(() => {});
+  chain = run.catch(() => { /* why: the caller gets run's own rejection; this copy only keeps the queue going */ });
   return run;
 }
 
