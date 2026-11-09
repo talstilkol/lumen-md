@@ -120,7 +120,7 @@ export const FIXTURE: Record<Variant["locale"], string> = {
 };
 
 /** Seeds the store and opens the app in the variant's language and theme. */
-export async function prepare(page: Page, v: Variant): Promise<void> {
+export async function prepare(page: Page, v: Variant, content: string = FIXTURE[v.locale]): Promise<void> {
   await page.clock.setFixedTime(new Date("2026-01-15T09:30:00Z"));
   await page.emulateMedia({ colorScheme: v.theme, reducedMotion: "reduce" });
   await page.addInitScript(
@@ -132,7 +132,7 @@ export async function prepare(page: Page, v: Variant): Promise<void> {
         JSON.stringify({ state: { locale, theme, mode: "split", doc: { name: "Baseline.md", content, dirty: false, workspaceName: null } }, version: 0 }),
       );
     },
-    { locale: v.locale, theme: v.theme, content: FIXTURE[v.locale] },
+    { locale: v.locale, theme: v.theme, content },
   );
   await page.goto("/");
   await page.locator(".cm-content, .ProseMirror, .prose-lumen").first().waitFor({ state: "visible", timeout: 20_000 });
