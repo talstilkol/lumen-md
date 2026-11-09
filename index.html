@@ -44,9 +44,28 @@
     </script>
     <!-- Fonts are self-hosted (src/fonts.ts): no request to Google, and
          they work offline from the first visit. -->
+    <style>
+      .boot-shell{position:fixed;inset:0;background:#0f1115;color:#e7e9ee;font:15px system-ui,-apple-system,"Segoe UI",sans-serif}
+      html:not(.dark) .boot-shell{background:#fafafa;color:#1c1f24}
+      .boot-bar{height:44px;display:flex;align-items:center;padding:0 16px;border-bottom:1px solid rgba(127,127,127,.2)}
+      .boot-logo{font-weight:700;letter-spacing:.02em}
+      .boot-page{max-width:720px;margin:48px auto;padding:0 20px;display:flex;flex-direction:column;gap:14px}
+      .boot-line{height:12px;border-radius:6px;background:rgba(127,127,127,.18)}
+      .boot-line.w60{width:60%;height:22px}.boot-line.w80{width:80%}.boot-line.w70{width:70%}
+      @media (prefers-reduced-motion:no-preference){.boot-line{animation:boot 1.2s ease-in-out infinite alternate}}
+      @keyframes boot{to{opacity:.5}}
+    </style>
   </head>
   <body class="bg-bg text-fg antialiased">
-    <div id="root"></div>
+    <div id="root">
+      <!-- Boot shell (C1): painted before any JavaScript runs; React replaces
+           it on first render. Colours follow the saved theme via the class
+           set by the inline theme script, falling back to dark. -->
+      <div class="boot-shell" aria-hidden="true">
+        <div class="boot-bar"><span class="boot-logo">Lumen</span></div>
+        <div class="boot-page"><div class="boot-line w60"></div><div class="boot-line"></div><div class="boot-line w80"></div><div class="boot-line w70"></div></div>
+      </div>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

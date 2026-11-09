@@ -124,6 +124,9 @@ export default function App() {
   }, []);
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+  useEffect(() => {
+    if (searchOpen) setSearchMounted(true);
+  }, [searchOpen]);
   const [findReplaceOpen, setFindReplaceOpen] = useState(false);
   const [graphOpen, setGraphOpen] = useState(false);
   const [historyOpen, setHistoryOpen] = useState(false);
@@ -139,6 +142,9 @@ export default function App() {
   const [aiSettingsOpen, setAiSettingsOpen] = useState(false);
   const [aiDoctorOpen, setAiDoctorOpen] = useState(false);
   const [trashOpen, setTrashOpen] = useState(false);
+  // The search dialog loads on first open and then stays mounted, so an
+  // Ask Workspace conversation survives closing it (perf: not at startup).
+  const [searchMounted, setSearchMounted] = useState(false);
   const [privacyOpen, setPrivacyOpen] = useState(false);
   const [tagsPanelOpen, setTagsPanelOpen] = useState(false);
   const [commentsPanelOpen, setCommentsPanelOpen] = useState(false);
@@ -952,7 +958,7 @@ export default function App() {
         onClose={() => setPaletteOpen(false)}
         commands={commands}
       />
-      <Suspense fallback={null}>
+      {searchMounted && <Suspense fallback={null}>
       <SearchDialog
         open={searchOpen}
         onClose={() => setSearchOpen(false)}
@@ -967,7 +973,7 @@ export default function App() {
           if (!showWorkspace) toggleWorkspace();
         }}
       />
-      </Suspense>
+      </Suspense>}
       <AiToastContainer />
       <AiSuggestionsPanel />
       <AiInlinePromptOverlay />
@@ -1021,19 +1027,19 @@ export default function App() {
       {/* Canvas Whiteboard overlay */}
       <Suspense fallback={null}>
         <ErrorBoundary fallback={<div style={{ padding: '2rem', color: 'hsl(0 80% 60%)' }}>{t("errorBoundary.heading")}</div>}>
-          <CanvasWhiteboard open={canvasOpen} onClose={() => setCanvasOpen(false)} />
-          <PluginGallery open={galleryOpen} onClose={() => setGalleryOpen(false)} />
-          <TemplateGallery open={templateGalleryOpen} onClose={() => setTemplateGalleryOpen(false)} />
-          <AuditLog
+          {canvasOpen && <CanvasWhiteboard open={canvasOpen} onClose={() => setCanvasOpen(false)} />}
+          {galleryOpen && <PluginGallery open={galleryOpen} onClose={() => setGalleryOpen(false)} />}
+          {templateGalleryOpen && <TemplateGallery open={templateGalleryOpen} onClose={() => setTemplateGalleryOpen(false)} />}
+          {auditLogOpen && <AuditLog
             open={auditLogOpen}
             onClose={() => setAuditLogOpen(false)}
             // Scope = the signed-in user's organization (WorkOS SSO); free /
             // pro users have no org, so their own id is the scope.
             orgId={auditScope({ id: authUserId ?? "", orgId: authOrgId }) || "personal"}
-          />
-          <FineTuneSettings open={fineTuneOpen} onClose={() => setFineTuneOpen(false)} />
-          <OrgSettings open={orgSettingsOpen} onClose={() => setOrgSettingsOpen(false)} onOpenAuditLog={() => setAuditLogOpen(true)} />
-          <TrustedKeysSettings open={trustedKeysOpen} onClose={() => setTrustedKeysOpen(false)} />
+          />}
+          {fineTuneOpen && <FineTuneSettings open={fineTuneOpen} onClose={() => setFineTuneOpen(false)} />}
+          {orgSettingsOpen && <OrgSettings open={orgSettingsOpen} onClose={() => setOrgSettingsOpen(false)} onOpenAuditLog={() => setAuditLogOpen(true)} />}
+          {trustedKeysOpen && <TrustedKeysSettings open={trustedKeysOpen} onClose={() => setTrustedKeysOpen(false)} />}
           {aiSettingsOpen && <AiSettingsPanel open={aiSettingsOpen} onClose={() => setAiSettingsOpen(false)} />}
           {aiDoctorOpen && <AiDoctorPanel open={aiDoctorOpen} onClose={() => setAiDoctorOpen(false)} />}
           {privacyOpen && <PrivacyLedgerPanel open={privacyOpen} onClose={() => setPrivacyOpen(false)} />}

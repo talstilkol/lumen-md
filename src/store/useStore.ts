@@ -187,11 +187,19 @@ function afterPendingEdits<A extends unknown[]>(action: (...args: A) => void): (
   };
 }
 
+/** The first-run view: Preview on narrow screens, Split elsewhere. */
+export function defaultMode(width: number = typeof window !== "undefined" ? window.innerWidth : 1280): "split" | "preview" {
+  return width < 768 ? "preview" : "split";
+}
+
 export const useAppStore = create<AppState>()(
   persist(
     (set) => ({
       doc: DEFAULT_DOC,
-      mode: "split",
+      // Phones start in Preview (C1): reading first, and the editor's code
+      // (CodeMirror, ~550 KB) loads only when the user switches to editing.
+      // A saved choice always wins (persisted below).
+      mode: defaultMode(),
       theme: "dark",
       themeSettings: { ...DEFAULT_THEME_SETTINGS },
       locale: "en",

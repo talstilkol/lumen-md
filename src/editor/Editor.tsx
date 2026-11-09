@@ -47,7 +47,7 @@ import { markdownLintExtension } from "./lintExtension";
 // positions) — loaded on demand in the collab effect, like ySync below.
 import { searchHighlightExtension } from "./searchHighlight";
 import { inlineSuggestion } from "./inlineSuggestion";
-import { formatKeymap } from "./formatCommands";
+import { formatKeymap } from "./formatKeymap";
 import { setSuggesting, suggestingAuthor, suggestingExtension, suggestingSkip } from "./suggestingExtension";
 import { useAuth } from "../auth/useAuth";
 import type { CollabSession } from "../collab/yjs";
