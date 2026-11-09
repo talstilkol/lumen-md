@@ -14,6 +14,7 @@ import { useState } from "react";
 import { t } from "../i18n";
 import { useCapability, useEntitlementResolved } from "../billing/gates";
 import { UpgradeNotice } from "./UpgradeNotice";
+import { getSecret, setSecret } from "../lib/secretStore";
 
 interface Props {
   onClose: () => void;
@@ -21,6 +22,10 @@ interface Props {
 
 const SIGNALING_KEY = "lumen.collab.signaling";
 const PERSISTENT_KEY = "lumen.collab.ws";
+// Kept here (not imported from collab/yjs) so opening the settings doesn't
+// load the yjs stack.
+const PUBLIC_SIGNALING_KEY = "lumen.collab.publicSignaling";
+const WS_TOKEN_KEY = "lumen.collab.wsToken";
 
 function readKey(key: string): string {
   try {
@@ -46,10 +51,16 @@ export function CollabSettings({ onClose }: Props) {
   const planKnown = useEntitlementResolved();
   const [url, setUrl] = useState(() => readKey(SIGNALING_KEY));
   const [wsUrl, setWsUrl] = useState(() => readKey(PERSISTENT_KEY));
+  const [wsToken, setWsToken] = useState(() => getSecret(WS_TOKEN_KEY) ?? "");
+  const [publicSignaling, setPublicSignaling] = useState(() => readKey(PUBLIC_SIGNALING_KEY) === "1");
 
   const handleSave = () => {
     writeKey(SIGNALING_KEY, url.trim());
-    if (persistentAllowed) writeKey(PERSISTENT_KEY, wsUrl.trim());
+    writeKey(PUBLIC_SIGNALING_KEY, publicSignaling ? "1" : "");
+    if (persistentAllowed) {
+      writeKey(PERSISTENT_KEY, wsUrl.trim());
+      setSecret(WS_TOKEN_KEY, wsToken.trim() || null);
+    }
     else if (planKnown) writeKey(PERSISTENT_KEY, ""); // an established downgrade
     onClose();
   };
@@ -89,7 +100,7 @@ export function CollabSettings({ onClose }: Props) {
             color: "hsl(var(--fg))",
           }}
         >
-          Collaboration Settings
+          {t("collab.settings.title")}
         </h3>
         <p
           style={{
@@ -99,8 +110,7 @@ export function CollabSettings({ onClose }: Props) {
             lineHeight: 1.5,
           }}
         >
-          Set a custom WebRTC signaling server URL. Leave empty to use the
-          default (localhost:4444).
+          {t("collab.settings.signalingHint")}
         </p>
         <input
           type="url"
@@ -125,6 +135,13 @@ export function CollabSettings({ onClose }: Props) {
           }}
           autoFocus
         />
+        <label style={{ display: "flex", gap: 8, alignItems: "flex-start", marginTop: 12, fontSize: 12, color: "hsl(var(--fg))" }}>
+          <input type="checkbox" checked={publicSignaling} onChange={(e) => setPublicSignaling(e.target.checked)} />
+          <span>
+            {t("collab.settings.publicSignaling")}
+            <span style={{ display: "block", color: "hsl(var(--fg-muted))", marginTop: 2 }}>{t("collab.settings.publicSignaling.hint")}</span>
+          </span>
+        </label>
         <label
           htmlFor="collab-persistent-url"
           style={{
@@ -166,6 +183,27 @@ export function CollabSettings({ onClose }: Props) {
             if (e.key === "Escape") onClose();
           }}
         />
+        {persistentAllowed && (
+          <input
+            type="password"
+            aria-label={t("collab.persistent.token")}
+            value={wsToken}
+            onChange={(e) => setWsToken(e.target.value)}
+            placeholder={t("collab.persistent.token")}
+            autoComplete="off"
+            style={{
+              width: "100%",
+              marginTop: 8,
+              padding: "8px 12px",
+              fontSize: 13,
+              border: "1px solid hsl(var(--border))",
+              borderRadius: 8,
+              background: "hsl(var(--bg-subtle))",
+              color: "hsl(var(--fg))",
+              boxSizing: "border-box",
+            }}
+          />
+        )}
         {!persistentAllowed && (
           <div style={{ marginTop: 8 }}>
             <UpgradeNotice compact plan="pro" message={t("billing.upgrade.persistentCollab")} />
@@ -188,7 +226,7 @@ export function CollabSettings({ onClose }: Props) {
               fontSize: 12,
             }}
           >
-            Cancel
+            {t("collab.settings.cancel")}
           </button>
           <button
             onClick={handleSave}
@@ -203,7 +241,7 @@ export function CollabSettings({ onClose }: Props) {
               fontWeight: 600,
             }}
           >
-            Save
+            {t("collab.settings.save")}
           </button>
         </div>
       </div>

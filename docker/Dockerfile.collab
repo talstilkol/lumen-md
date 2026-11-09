@@ -9,7 +9,7 @@ WORKDIR /app
 COPY sync-server/package.json sync-server/package-lock.json* ./
 RUN npm ci --omit=dev || npm install --omit=dev
 
-COPY sync-server/persistent-server.js ./
+COPY sync-server/persistent-server.js sync-server/token.js ./
 
 ENV NODE_ENV=production
 ENV PORT=4445

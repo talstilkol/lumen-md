@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-10-17T23:03:53.010Z",
+  "generated_at": "2026-10-17T23:03:53.410Z",
   "source": "src/i18n/index.ts (en bundle)",
-  "count": 1363,
+  "count": 1370,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -1691,6 +1691,41 @@
     {
       "key": "cmd.file.trash.hint",
       "en": "Restore deleted notes (kept 30 days)",
+      "vars": []
+    },
+    {
+      "key": "collab.settings.title",
+      "en": "Collaboration settings",
+      "vars": []
+    },
+    {
+      "key": "collab.settings.signalingHint",
+      "en": "Signaling server (how peers find each other). Empty = Lumen's own server. Every new room is end-to-end encrypted with its own password, so the server only sees ciphertext.",
+      "vars": []
+    },
+    {
+      "key": "collab.settings.publicSignaling",
+      "en": "Also use public signaling servers",
+      "vars": []
+    },
+    {
+      "key": "collab.settings.publicSignaling.hint",
+      "en": "yjs.dev and others — a fallback if Lumen's server is down. They can see who connects to which room (not the content).",
+      "vars": []
+    },
+    {
+      "key": "collab.persistent.token",
+      "en": "Server access token (if the server requires one)",
+      "vars": []
+    },
+    {
+      "key": "collab.settings.cancel",
+      "en": "Cancel",
+      "vars": []
+    },
+    {
+      "key": "collab.settings.save",
+      "en": "Save",
       "vars": []
     },
     {

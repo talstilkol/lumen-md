@@ -1361,5 +1361,12 @@
   "privacy.cat.model-download": "模型下载 — 不发送文本",
   "privacy.cat.research": "研究服务 — 会发送你的查询",
   "privacy.footer": "记录：时间、去向、大小、原因。从不记录提示或回答的内容。模型 Worker 内的请求（下载）不在列表中。",
-  "toast.privacyBlocked": "已被“仅本地”策略阻止：{reason}。请使用本地模型，或在 AI 设置中更改策略。"
+  "toast.privacyBlocked": "已被“仅本地”策略阻止：{reason}。请使用本地模型，或在 AI 设置中更改策略。",
+  "collab.settings.title": "协作设置",
+  "collab.settings.signalingHint": "信令服务器（参与者如何互相发现）。留空 = Lumen 自己的服务器。每个新房间都使用独立密码端到端加密，服务器只能看到密文。",
+  "collab.settings.publicSignaling": "同时使用公共信令服务器",
+  "collab.settings.publicSignaling.hint": "yjs.dev 等 — Lumen 服务器不可用时的备用。它们能看到谁连接了哪个房间（看不到内容）。",
+  "collab.persistent.token": "服务器访问令牌（如服务器要求）",
+  "collab.settings.cancel": "取消",
+  "collab.settings.save": "保存"
 }

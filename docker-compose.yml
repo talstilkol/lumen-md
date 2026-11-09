@@ -67,6 +67,9 @@ services:
       # LevelDB directory on the mounted volume. (No Postgres archive is
       # implemented for collab, so DATABASE_URL is intentionally not set.)
       YJS_STORAGE_DIR: /data/yjs
+      # T49: clients must present this token (Collab settings → "Server
+      # access token"). Set it in .env; empty = open server (warned at start).
+      COLLAB_TOKEN: ${LUMEN_COLLAB_TOKEN:-}
     volumes:
       - collab-data:/data
     <<: [*restart, *logging]
