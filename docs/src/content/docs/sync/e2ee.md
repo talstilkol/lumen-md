@@ -3,8 +3,8 @@ title: Encrypted sync (E2EE)
 description: The end-to-end encrypted sync protocol — what is encrypted, what the sync service sees, rollback protection and its trust-on-first-use limit.
 ---
 
-Encrypted sync keeps a copy of your vault at a storage service (Dropbox,
-Google Drive, WebDAV, S3 — the providers arrive with plan 3.5) so that the
+Encrypted sync keeps a copy of your vault at a storage service
+([WebDAV, S3, Dropbox, Google Drive](/sync/cloud/)) so that the
 service stores **only ciphertext under random-looking names**. Your notes
 are encrypted on your device before they leave it, with a key derived from
 a passphrase that never leaves your devices.

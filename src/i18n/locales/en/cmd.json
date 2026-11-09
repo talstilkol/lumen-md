@@ -214,6 +214,7 @@
   "cmd.suggest.toggle.hint": "Record edits in the source editor as CriticMarkup suggestions",
   "cmd.suggest.toggle.off": "Turn off suggesting mode",
   "cmd.suggest.toggle.on": "Turn on suggesting mode (track changes)",
+  "cmd.sync.open": "Encrypted sync…",
   "cmd.templates.open": "Browse template gallery",
   "cmd.templates.open.hint": "Browse + install community templates",
   "cmd.tools.autoTag": "🏷️ Auto-tag this note",

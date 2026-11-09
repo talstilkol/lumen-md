@@ -214,6 +214,7 @@
   "cmd.suggest.toggle.hint": "Änderungen im Quelltext-Editor als CriticMarkup-Vorschläge erfassen",
   "cmd.suggest.toggle.off": "Vorschlagsmodus ausschalten",
   "cmd.suggest.toggle.on": "Vorschlagsmodus einschalten (Änderungen nachverfolgen)",
+  "cmd.sync.open": "Verschlüsselte Synchronisierung…",
   "cmd.templates.open": "Vorlagengalerie durchsuchen",
   "cmd.templates.open.hint": "Community-Vorlagen durchsuchen und installieren",
   "cmd.tools.autoTag": "🏷️ Diese Notiz automatisch taggen",

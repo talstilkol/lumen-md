@@ -214,6 +214,7 @@
   "cmd.suggest.toggle.hint": "תיעוד עריכות בעורך המקור כהצעות CriticMarkup",
   "cmd.suggest.toggle.off": "כיבוי מצב הצעות",
   "cmd.suggest.toggle.on": "הפעלת מצב הצעות (מעקב שינויים)",
+  "cmd.sync.open": "סנכרון מוצפן…",
   "cmd.templates.open": "פתח גלריית תבניות",
   "cmd.templates.open.hint": "עיון והתקנה של תבניות קהילתיות",
   "cmd.tools.autoTag": "🏷️ תיוג אוטומטי",

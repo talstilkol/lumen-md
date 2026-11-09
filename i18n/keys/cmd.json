@@ -1083,6 +1083,11 @@
       "vars": []
     },
     {
+      "key": "cmd.sync.open",
+      "en": "Encrypted sync…",
+      "vars": []
+    },
+    {
       "key": "cmd.templates.open",
       "en": "Browse template gallery",
       "vars": []

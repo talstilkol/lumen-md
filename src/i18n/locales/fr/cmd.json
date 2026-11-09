@@ -214,6 +214,7 @@
   "cmd.suggest.toggle.hint": "Enregistrer les modifications de l'éditeur source comme suggestions CriticMarkup",
   "cmd.suggest.toggle.off": "Désactiver le mode suggestion",
   "cmd.suggest.toggle.on": "Activer le mode suggestion (suivi des modifications)",
+  "cmd.sync.open": "Synchronisation chiffrée…",
   "cmd.templates.open": "Parcourir la galerie de modèles",
   "cmd.templates.open.hint": "Parcourir et installer les modèles de la communauté",
   "cmd.tools.autoTag": "🏷️ Étiqueter automatiquement cette note",
