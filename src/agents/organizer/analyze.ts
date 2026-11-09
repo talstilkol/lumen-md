@@ -218,9 +218,9 @@ export function analyzeVault(input: readonly OrganizerNote[], opts: AnalyzeOptio
     const letters = title.replace(/[^\p{L}\p{N}]/gu, "").length;
     // Too short or ambiguous to link reliably.
     if (!words.length || letters < 3 || (titleNotes.get(normWord(title))?.length ?? 0) > 1) continue;
-    const first = normWord(words[0]);
+    const first = normWord(words[0]!);
     const candidates = new Set<string>(wordIndex.get(first) ?? []);
-    for (const v of variants(words[0])) for (const p of wordIndex.get(v) ?? []) candidates.add(p);
+    for (const v of variants(words[0]!)) for (const p of wordIndex.get(v) ?? []) candidates.add(p);
     for (const ap of candidates) {
       if (ap === b.path || linked(ap, b.path)) continue;
       const text = byPath.get(ap)!.text;

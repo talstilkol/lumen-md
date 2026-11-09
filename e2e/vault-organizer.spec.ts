@@ -67,7 +67,7 @@ test("organizer suggestions wait in the review screen; only the approved one is 
   await page.keyboard.press("Enter");
   const panel = page.getByTestId("organizer-panel");
   await expect(panel).toHaveAttribute("data-phase", "ready", { timeout: 20_000 });
-  await expect(panel.getByTestId("organizer-suggestion").filter({ hasText: "Project Aurora" })).toContainText("mentioned in meeting but not linked");
+  await expect(panel.getByTestId("organizer-suggestion").filter({ hasText: "“Project Aurora” is mentioned in meeting but not linked" })).toHaveCount(1);
   await expect(panel.getByTestId("organizer-confidence").first()).toHaveText(/^\d+%$/);
   // Analysis wrote nothing.
   expect(await opfs(page, "all")).toEqual(before);
