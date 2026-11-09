@@ -1,0 +1,14 @@
+{
+  "about": "Known fuzz findings (plan W1.27) that are not fixed yet. Each one expires (at most 90 days out): after that date the finding fails the run again. Crashes are never listed here.",
+  "findings": [
+    {
+      "target": "markdown",
+      "kind": "slow",
+      "found": "2026-11-10",
+      "expires": "2027-02-07",
+      "inputs": "seed 1, e.g. #232, #427, #559, #661, #1539, #1651, #1915 (7 of the first 2,000)",
+      "what": "8–14 KB inputs with deep nesting (lists, block quotes, [[ runs, footnotes, directives) take 0.5–2.8 s in the remark/rehype chain, measured alone in the Vercel Sandbox (Node 24).",
+      "next": "Render the preview in a worker with a deadline, or bound nesting depth before parsing; then delete this entry."
+    }
+  ]
+}

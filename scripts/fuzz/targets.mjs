@@ -54,16 +54,13 @@ export const TARGETS = [
     gen: "yaml",
     module: "src/renderer/pipeline.ts",
     about: "Front matter: the YAML block at the top of a note (extractFrontmatter's parser and options)",
+    expected: (e) => e instanceof Error && !(e instanceof RangeError),
     async load() {
       const YAML = await import("yaml");
-      return (s) => {
-        try {
-          YAML.parse(s);
-        } catch (e) {
-          if (e && (e.name === "YAMLParseError" || e.name === "YAMLWarning")) return;
-          throw e;
-        }
-      };
+      // extractFrontmatter catches what YAML.parse throws for invalid input
+      // (YAMLParseError, an unresolved alias's ReferenceError…): those are
+      // refusals. Exhausting the stack or the heap is a crash.
+      return (s) => YAML.parse(s);
     },
   },
   {

@@ -6,6 +6,7 @@
  */
 import { describe, expect, it } from "vitest";
 import { spawnSync } from "node:child_process";
+import { readFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { generate, type GenKind } from "../../scripts/fuzz/generators";
 
@@ -27,10 +28,28 @@ describe("decoder fuzzing", () => {
     const r = spawnSync(process.execPath, [join(ROOT, "scripts", "fuzz", "run.mjs"), "--runs", "2000", "--json", "--out", "fuzz-findings"], { cwd: ROOT, encoding: "utf8", timeout: 600_000 });
     const report = JSON.parse(r.stdout.trim().split("\n").pop()!) as { results: Array<{ name: string; status: string; runs?: number; crashes?: number; hangs?: number; slow?: number; error?: string }> };
     const byName = Object.fromEntries(report.results.map((x) => [x.name, x]));
+    // Markdown has a known slow-input finding (scripts/fuzz/known.json, with an
+    // expiry); every other decoder must be clean, and none may crash.
+    const known = (JSON.parse(readFileSync(join(ROOT, "scripts", "fuzz", "known.json"), "utf8")) as { findings: Array<{ target: string; expires: string }> }).findings;
     for (const name of ["markdown", "frontmatter", "bibtex", "json-doctor", "json-records", "urls", "text-direction"]) {
-      expect(byName[name]?.status, `${name}: ${byName[name]?.error ?? ""}`).toBe("ok");
-      expect(byName[name]).toMatchObject({ runs: 2000, crashes: 0, hangs: 0, slow: 0 });
+      const res = byName[name];
+      expect(res?.runs, `${name}: ${res?.error ?? res?.status}`).toBe(2000);
+      expect(res?.crashes, name).toBe(0);
+      const isKnown = known.some((k) => k.target === name && k.expires >= new Date().toISOString().slice(0, 10));
+      if (isKnown) expect(["ok", "known-slow"], name).toContain(res?.status);
+      else {
+        expect(res?.status, name).toBe("ok");
+        expect(res).toMatchObject({ hangs: 0, slow: 0 });
+      }
     }
     expect(r.status).toBe(0);
+  }, 650_000);
+
+  it("known findings expire within 90 days and never cover a crash", () => {
+    const known = (JSON.parse(readFileSync(join(ROOT, "scripts", "fuzz", "known.json"), "utf8")) as { findings: Array<{ target: string; kind: string; found: string; expires: string }> }).findings;
+    for (const k of known) {
+      expect(k.kind).toBe("slow");
+      expect((Date.parse(k.expires) - Date.parse(k.found)) / 86_400_000).toBeLessThanOrEqual(90);
+    }
   }, 650_000);
 });

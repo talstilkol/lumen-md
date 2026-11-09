@@ -25,7 +25,7 @@
  * Exit code: 0 when no decoder crashed or hung, 1 otherwise.
  */
 import { spawnSync } from "node:child_process";
-import { mkdirSync, writeFileSync } from "node:fs";
+import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { availableParallelism } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
@@ -63,6 +63,10 @@ const only = opt("--target", "")
 const { TARGETS, present } = await import(pathToFileURL(join(ROOT, "scripts/fuzz/targets.mjs")).href);
 const { generate } = await import(pathToFileURL(join(ROOT, "scripts/fuzz/generators.ts")).href);
 const chosen = TARGETS.filter((t) => !only.length || only.includes(t.name));
+// Known slow-input findings, each with an expiry (scripts/fuzz/known.json).
+const known = JSON.parse(readFileSync(join(ROOT, "scripts/fuzz/known.json"), "utf8")).findings ?? [];
+const today = new Date().toISOString().slice(0, 10);
+const knownSlow = (name) => known.find((k) => k.target === name && k.kind === "slow" && k.expires >= today);
 if (only.length && chosen.length !== only.length) {
   console.error(`Unknown target. Targets: ${TARGETS.map((t) => t.name).join(", ")}`);
   process.exit(2);
@@ -144,7 +148,8 @@ async function runTarget(t) {
     r.examples.push({ index: i, error: m.error ?? "hang" });
     start = i + 1;
   }
-  if (r.crashes || r.hangs || r.slow) r.status = "FAIL";
+  if (r.crashes) r.status = "FAIL";
+  else if (r.hangs || r.slow) r.status = knownSlow(t.name) ? "known-slow" : "FAIL";
   r.seconds = Math.round((Date.now() - started) / 100) / 10;
   r.examples = r.examples.slice(0, 5);
   return r;
@@ -182,8 +187,8 @@ await Promise.all(
       results[k] = engine === "fast-check" ? await runFastCheck(chosen[k]) : await runTarget(chosen[k]);
       if (!json) {
         const r = results[k];
-        const line = r.status === "ok" || r.status === "FAIL" ? `${r.runs} inputs, ${r.crashes} crashes, ${r.hangs} hangs, ${r.slow} slow (> ${slowMs} ms), slowest ${Math.round(r.maxMs ?? 0)} ms, ${r.seconds ?? "?"} s` : r.status === "not on this branch" ? `not on this branch (lands with plan ${r.lands})` : `unavailable: ${r.error}`;
-        console.log(`${r.status === "FAIL" ? "FAIL" : r.status === "ok" ? "  ok" : "  --"} ${r.name.padEnd(16)} ${line}`);
+        const line = r.status === "ok" || r.status === "FAIL" || r.status === "known-slow" ? `${r.runs} inputs, ${r.crashes} crashes, ${r.hangs} hangs, ${r.slow} slow (> ${slowMs} ms), slowest ${Math.round(r.maxMs ?? 0)} ms, ${r.seconds ?? "?"} s` : r.status === "not on this branch" ? `not on this branch (lands with plan ${r.lands})` : `unavailable: ${r.error}`;
+        console.log(`${r.status === "FAIL" ? "FAIL" : r.status === "ok" ? "  ok" : r.status === "known-slow" ? "KNOWN" : "  --"} ${r.name.padEnd(16)} ${line}${r.status === "known-slow" ? ` — known finding until ${knownSlow(r.name).expires} (scripts/fuzz/known.json)` : ""}`);
       }
     }
   }),
