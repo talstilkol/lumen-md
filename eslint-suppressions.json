@@ -240,7 +240,7 @@
       "count": 1
     }
   },
-  "src/storage/fileFormats.ts": {
+  "src/storage/formats/text.ts": {
     "no-control-regex": {
       "count": 1
     },
