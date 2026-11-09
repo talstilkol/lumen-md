@@ -47,10 +47,16 @@ function makeHandle(view: EditorView, blockPos: number): HTMLElement {
   el.draggable = true;
   el.title = "Drag to reorder block";
   el.setAttribute("aria-label", "Drag block handle");
-  el.textContent = "⠿";
+  // The braille glyph is a strong left-to-right character, and the widget
+  // sits first inside the block: inside <bdi> the block's `dir="auto"`
+  // (T25) skips it and resolves from the real text, while the handle
+  // itself still follows the block (so inset-inline-start is its start).
+  const glyph = document.createElement("bdi");
+  glyph.textContent = "⠿";
+  el.appendChild(glyph);
   el.style.cssText = [
     "position: absolute",
-    "left: -22px",
+    "inset-inline-start: -22px",
     "top: 4px",
     "width: 18px",
     "height: 18px",

@@ -126,7 +126,8 @@ export function rehypeShiki(opts: ShikiOpts) {
           const wrapper: Element = {
             type: "element",
             tagName: "div",
-            properties: { className: ["code-block"] },
+            // Code reads left-to-right whatever the note's direction (T25).
+            properties: { className: ["code-block"], dir: "ltr" },
             children: [
               {
                 type: "element",
