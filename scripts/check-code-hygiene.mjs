@@ -18,6 +18,10 @@
  * Production = `src/**\/*.{ts,tsx}` excluding `__tests__/` directories,
  * `*.test.*` / `*.spec.*` files and `*.d.ts` declarations.
  *
+ * It also fails when an e2e file (`e2e/**\/*.ts`) calls `waitForTimeout`:
+ * a fixed sleep is either too short on a slow runner (a flake) or longer
+ * than needed everywhere. Wait for the condition instead (plan 0.5).
+ *
  * The check walks the TypeScript AST (not a regex), so occurrences inside
  * string literals, template literals (e.g. worker source strings or editor
  * snippets) and comments are ignored by the first two rules.
@@ -45,6 +49,7 @@ import postcss from "postcss";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const srcDir = join(root, "src");
+const e2eDir = join(root, "e2e");
 const ALLOW_RE = /\/\/\s*hygiene-allow:\s*\S+/;
 
 /**
@@ -105,7 +110,7 @@ function walk(dir, out = []) {
 }
 
 /** Returns a list of `{ line, rule, text }` violations for one source text. */
-export function findViolations(fileName, text) {
+export function findViolations(fileName, text, { e2e = false } = {}) {
   const sf = ts.createSourceFile(
     fileName,
     text,
@@ -123,6 +128,17 @@ export function findViolations(fileName, text) {
     out.push({ line: line + 1, rule, text: here.trim() });
   };
   const visit = (node) => {
+    if (e2e) {
+      if (
+        ts.isCallExpression(node) &&
+        ts.isPropertyAccessExpression(node.expression) &&
+        node.expression.name.text === "waitForTimeout"
+      ) {
+        report(node, "e2e-sleep");
+      }
+      ts.forEachChild(node, visit);
+      return;
+    }
     if (ts.isAsExpression(node) && node.type.kind === ts.SyntaxKind.AnyKeyword) {
       report(node, "as-any");
     } else if (
@@ -233,6 +249,15 @@ export function findCssViolations(fileName, text) {
   return out;
 }
 
+function walkE2e(dir, out = []) {
+  for (const name of readdirSync(dir)) {
+    const full = join(dir, name);
+    if (statSync(full).isDirectory()) walkE2e(full, out);
+    else if (/\.[cm]?tsx?$/.test(name)) out.push(full);
+  }
+  return out;
+}
+
 function walkCss(dir, out = []) {
   for (const name of readdirSync(dir)) {
     const full = join(dir, name);
@@ -285,6 +310,10 @@ export function productionFiles() {
 function main() {
   const files = walk(srcDir);
   const { violations, stale } = checkFiles(files);
+  const e2eFiles = walkE2e(e2eDir);
+  for (const file of e2eFiles) {
+    for (const v of findViolations(file, readFileSync(file, "utf8"), { e2e: true })) violations.push({ file: relKey(file), ...v });
+  }
   for (const v of violations) console.error(`${v.file}:${v.line}  [${v.rule}]  ${v.text}`);
   for (const k of stale) {
     console.error(`${k}  [direct-fs-allowlist]  listed in DIRECT_FS_ALLOWLIST but makes no direct file-system call: remove the entry`);
@@ -302,7 +331,8 @@ function main() {
     if (total > 0)
       console.error(
         `\n✖ code hygiene: ${total} violation(s). Replace \`as any\` with a real type and ` +
-          "`console.log` with `log` from src/lib/logger, or add `// hygiene-allow: <reason>`. " +
+          "`console.log` with `log` from src/lib/logger and an e2e `waitForTimeout` with a wait " +
+          "for the condition, or add `// hygiene-allow: <reason>`. " +
           "Read and write vault files through src/storage/workspace.ts / src/storage/vault, not file-system handles.",
       );
     if (cssTotal > 0)
@@ -315,7 +345,8 @@ function main() {
   console.error(
     `✓ code hygiene: ${files.length} production files clean (no \`as any\`, no console.log, ` +
       `no direct file-system calls outside the vault layer and ${Object.keys(DIRECT_FS_ALLOWLIST).length} allowlisted files); ` +
-      `${sheets.length} stylesheets use logical properties in .prose-lumen / .cm-* rules.`,
+      `${sheets.length} stylesheets use logical properties in .prose-lumen / .cm-* rules; ` +
+      `${e2eFiles.length} e2e files without waitForTimeout.`,
   );
 }
 

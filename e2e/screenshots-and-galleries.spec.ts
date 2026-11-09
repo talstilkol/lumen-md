@@ -164,16 +164,16 @@ test("Template Gallery — opens, lists templates, screenshot", async ({
     .filter({ has: page.locator("input") });
   await palette.waitFor({ timeout: 8000 });
   await palette.locator("input").first().fill("Template");
-  // Same deflake pattern: anchor on the selected listbox option.
+  // Same deflake pattern: anchor on the selected listbox option. "Template"
+  // also matches every "Templates: …" starter, so name the one Enter runs.
   await expect(
     palette.locator('[role="option"][aria-selected="true"]'),
-  ).toContainText(/Template/i, { timeout: 8000 });
+  ).toContainText(/Browse template gallery/i, { timeout: 8000 });
   await page.keyboard.press("Enter");
 
-  const gallery = page
-    .locator('[role="dialog"]')
-    .filter({ hasNot: page.getByPlaceholder(/Type a command/i) })
-    .first();
+  // By its accessible name: the first dialog that is not the palette could
+  // be any other panel in the DOM.
+  const gallery = page.getByRole("dialog", { name: "Template gallery" });
   // The gallery is a lazy chunk (opens on first use) — give a cold CI runner time.
   await expect(gallery).toBeVisible({ timeout: 20_000 });
   // Without a marketplace backend the gallery falls back to the static
