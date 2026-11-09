@@ -15,6 +15,7 @@
  *
  * Not handled: embedded images (noted, not embedded) and footnotes.
  */
+import { firstStrongDirection } from "../lib/textDirection";
 import { zip } from "./zip";
 
 const DOCX_MIME =
@@ -90,6 +91,14 @@ function parseInline(text: string): Run[] {
   return runs.length ? runs : [{ text }];
 }
 
+/** Hebrew / Arabic in the run: Word needs <w:rtl/> to order and shape it. */
+const RTL_RUN = /[\u0590-\u08FF\uFB1D-\uFDFF\uFE70-\uFEFF]/;
+
+/** A paragraph whose first strong character is RTL gets <w:bidi/> (T44). */
+function bidiOf(runs: Run[]): string {
+  return firstStrongDirection(runs.map((r) => r.text).join("")) === "rtl" ? "<w:bidi/>" : "";
+}
+
 function rPrXml(r: Run, hyperlink = false): string {
   const parts: string[] = [];
   if (hyperlink) parts.push('<w:rStyle w:val="Hyperlink"/>');
@@ -97,6 +106,8 @@ function rPrXml(r: Run, hyperlink = false): string {
   if (r.bold) parts.push("<w:b/>");
   if (r.italic) parts.push("<w:i/>");
   if (r.strike) parts.push("<w:strike/>");
+  // CT_RPr order: <w:rtl/> after the formatting toggles.
+  if (RTL_RUN.test(r.text)) parts.push("<w:rtl/>");
   return parts.length ? `<w:rPr>${parts.join("")}</w:rPr>` : "";
 }
 
@@ -123,7 +134,9 @@ function runsXml(runs: Run[], ctx: DocxCtx): string {
 }
 
 function paraXml(runs: Run[], ctx: DocxCtx, pPrInner = ""): string {
-  const pPr = pPrInner ? `<w:pPr>${pPrInner}</w:pPr>` : "";
+  // <w:bidi/> goes after pStyle / numPr (CT_PPr element order).
+  const inner = pPrInner + bidiOf(runs);
+  const pPr = inner ? `<w:pPr>${inner}</w:pPr>` : "";
   return `<w:p>${pPr}${runsXml(runs, ctx)}</w:p>`;
 }
 
@@ -200,7 +213,9 @@ function tableXml(rows: string[][], aligns: Align[], ctx: DocxCtx): string {
     const align = aligns[col] ?? "left";
     const jc = align === "left" ? "" : `<w:jc w:val="${align}"/>`;
     const shd = header ? '<w:shd w:val="clear" w:color="auto" w:fill="F2F2F2"/>' : "";
-    const pPr = jc ? `<w:pPr>${jc}</w:pPr>` : "";
+    const bidi = bidiOf(runs);
+    // CT_PPr order: bidi before jc.
+    const pPr = jc || bidi ? `<w:pPr>${bidi}${jc}</w:pPr>` : "";
     return (
       `<w:tc><w:tcPr><w:tcW w:w="2500" w:type="dxa"/>${shd}</w:tcPr>` +
       `<w:p>${pPr}${runsXml(runs, ctx)}</w:p></w:tc>`
