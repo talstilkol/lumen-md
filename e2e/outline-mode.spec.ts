@@ -133,10 +133,10 @@ test("source editor: the ten block operations, in RTL and LTR", async ({ page })
   await page.keyboard.press("ControlOrMeta+Alt+Enter");
   await expect(page.locator(".cm-outline-zoombar")).toBeVisible();
   await expect(page.locator(".cm-line", { hasText: "תת א1" })).toHaveCount(1);
-  await expect(page.locator(".cm-line", { hasText: "Alpha" })).toHaveCount(0);
+  await expect(page.locator(".cm-line", { hasText: "# Alpha" })).toHaveCount(0);
   await page.keyboard.press("Escape");
   await expect(page.locator(".cm-outline-zoombar")).toHaveCount(0);
-  await expect(page.locator(".cm-line", { hasText: "Alpha" })).toHaveCount(1);
+  await expect(page.locator(".cm-line", { hasText: "# Alpha" })).toHaveCount(1);
   expect(await source(page)).toBe(NOTE);
 });
 
