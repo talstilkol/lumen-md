@@ -86,6 +86,9 @@ export const Outline = React.memo(function Outline({ markdownText }: Props) {
               href={`#${h.id}`}
               className={`outline-link h${h.depth}${activeId === h.id ? " active" : ""}`}
               aria-current={activeId === h.id ? "location" : undefined}
+              // A Hebrew heading in an English UI (and the reverse) keeps
+              // its own direction (T45).
+              dir="auto"
               onClick={(e) => {
                 e.preventDefault();
                 const el = document.getElementById(h.id);

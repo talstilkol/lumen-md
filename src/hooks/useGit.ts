@@ -42,9 +42,9 @@ export function useGit({ setDoc: _setDoc, showWorkspace, toggleWorkspace, active
     const url = await uiPrompt({ message: t("git.prompt.cloneUrl"), placeholder: "https://github.com/user/repo" });
     if (!url) return;
     try {
-      showAiToast("Cloning repository…", "info");
+      showAiToast(t("toast.cloningRepository"), "info");
       const result = await cloneRepo(url);
-      showAiToast(`✅ Cloned ${result.fileCount} files into workspace`, "info");
+      showAiToast(t("toast.clonedFilesIntoWorkspace", { count: result.fileCount }), "info");
       if (!showWorkspace) toggleWorkspace();
       window.dispatchEvent(new Event("lumen-workspace-changed"));
     } catch (e) {
@@ -62,16 +62,16 @@ export function useGit({ setDoc: _setDoc, showWorkspace, toggleWorkspace, active
     let message = await uiPrompt({ message: t("git.prompt.commitMessage"), placeholder: "Update files" });
     if (!message) {
       try {
-        showAiToast("Generating commit message…", "info");
+        showAiToast(t("toast.generatingCommitMessage"), "info");
         message = await generateAiCommitMessage("");
       } catch {
         message = "Update files";
       }
     }
     try {
-      showAiToast("Pushing…", "info");
+      showAiToast(t("toast.pushing"), "info");
       await commitAndPush(repoFolder, message, identity);
-      showAiToast("✅ Pushed to remote", "info");
+      showAiToast(t("toast.pushedToRemote"), "info");
     } catch (e) {
       await uiAlert({ message: `Push failed: ${(e as Error).message}` });
     }
@@ -84,9 +84,9 @@ export function useGit({ setDoc: _setDoc, showWorkspace, toggleWorkspace, active
       return;
     }
     try {
-      showAiToast("Pulling…", "info");
+      showAiToast(t("toast.pulling"), "info");
       const result = await pullRepo(repoFolder);
-      showAiToast(`✅ Pulled ${result.changedFiles} changed files`, "info");
+      showAiToast(t("toast.pulledChangedFiles", { count: result.changedFiles }), "info");
       window.dispatchEvent(new Event("lumen-workspace-changed"));
     } catch (e) {
       await uiAlert({ message: `Pull failed: ${(e as Error).message}` });
@@ -100,7 +100,7 @@ export function useGit({ setDoc: _setDoc, showWorkspace, toggleWorkspace, active
     const email = await uiPrompt({ message: "Git email:", placeholder: current.email || "you@example.com" });
     if (!email) return;
     await setGitIdentity({ name, email });
-    showAiToast(`✅ Git identity set: ${name} <${email}>`, "info");
+    showAiToast(t("toast.gitIdentitySet", { name, email }), "info");
   }, []);
 
   const handleSetGitToken = useCallback(async () => {

@@ -49,7 +49,7 @@ describe("VoiceDictation module exports", () => {
     delete (window as any).webkitSpeechRecognition;
     startVoiceRecording("en");
     expect(showAiToast).toHaveBeenCalledWith(
-      expect.stringContaining("not supported"),
+      expect.stringMatching(/not supported|NotSupported/i),
       "error",
     );
     if (original) (window as any).SpeechRecognition = original;
@@ -62,7 +62,7 @@ describe("VoiceDictation module exports", () => {
     (window as any).MediaRecorder = undefined;
     await startVoiceMemo();
     expect(showAiToast).toHaveBeenCalledWith(
-      expect.stringContaining("not supported"),
+      expect.stringMatching(/not supported|NotSupported/i),
       "error",
     );
     if (original) (window as any).MediaRecorder = original;

@@ -68,7 +68,7 @@ export async function generateAiCommitMessage(
     return await runAgentOrThrow(committerAgent, { text: changes }, { ownPrompt: true });
   } catch (e) {
     log.warn("AI commit generation skipped", e);
-    showAiToast("AI commit suggestion unavailable", "info");
+    showAiToast(t("toast.aiCommitSuggestionUnavailable"), "info");
     return "";
   }
 }
@@ -87,21 +87,21 @@ export function buildAiOutlineCommand(getContent: () => string, setContent: (s: 
       try {
         const content = getContent();
         if (content.trim().length < 100) {
-          showAiToast("Document too short for outline generation", "info");
+          showAiToast(t("toast.documentTooShortForOutline"), "info");
           return;
         }
-        showAiToast("Generating outline…", "info");
+        showAiToast(t("toast.generatingOutline"), "info");
         const headings = await generateOutline(content);
         if (headings.length === 0) {
-          showAiToast("No outline generated", "info");
+          showAiToast(t("toast.noOutlineGenerated"), "info");
           return;
         }
         const newContent = applyOutline(content, headings);
         setContent(newContent);
-        showAiToast(`Inserted ${headings.length} headings`, "success");
+        showAiToast(t("toast.insertedHeadings", { count: headings.length }), "success");
       } catch (e) {
         log.warn("AI outline generation failed", e);
-        showAiToast("Outline generation failed", "error");
+        showAiToast(t("toast.outlineGenerationFailed"), "error");
       }
     },
   };

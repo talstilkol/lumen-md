@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { t } from "../i18n";
+import { t, getLocale } from "../i18n";
 
 /**
  * Version history — reads the one history store (src/storage/history.ts)
@@ -89,7 +89,7 @@ export function VersionHistory({ fileName, currentContent, onRestore, onClose }:
             }}
           >
             <div style={{ fontSize: 12, fontWeight: 500 }}>
-              {new Date(snap.timestamp).toLocaleString()}
+              {new Date(snap.timestamp).toLocaleString(getLocale())}
             </div>
             <div style={{ fontSize: 10, color: "hsl(var(--fg-muted))" }}>
               {snap.content.length} chars{snap.reason ? ` · ${t(`versionHistory.reason.${snap.reason}`)}` : ""}

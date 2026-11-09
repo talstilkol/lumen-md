@@ -26,7 +26,7 @@ import {
   type Comment,
 } from "../collab/comments";
 import type { CollabSession } from "../collab/yjs";
-import { t } from "../i18n";
+import { t, getLocale } from "../i18n";
 
 interface Props {
   open: boolean;
@@ -204,7 +204,7 @@ export function CommentsPanel({ open, onClose, collab, onJump }: Props) {
                 />
                 <span style={{ fontWeight: 600 }}>{c.authorName}</span>
                 <span style={{ fontSize: 10, color: "hsl(var(--fg-muted))" }}>
-                  {new Date(c.createdAt).toLocaleString()}
+                  {new Date(c.createdAt).toLocaleString(getLocale())}
                 </span>
                 <button
                   type="button"
@@ -260,7 +260,7 @@ export function CommentsPanel({ open, onClose, collab, onJump }: Props) {
                     <li key={r.id} style={{ paddingInlineStart: 10, marginTop: 6, fontSize: 12 }}>
                       <strong style={{ color: r.authorColor }}>{r.authorName}</strong>{" "}
                       <span style={{ color: "hsl(var(--fg-muted))", fontSize: 10 }}>
-                        {new Date(r.createdAt).toLocaleTimeString()}
+                        {new Date(r.createdAt).toLocaleTimeString(getLocale())}
                       </span>
                       <div>{r.body}</div>
                     </li>

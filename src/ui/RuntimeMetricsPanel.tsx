@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { RefreshCw, Eraser, X } from "lucide-react";
 import { clearRuntimeMetrics, getRuntimeMetricsSnapshot, type RuntimeMetricSnapshotRow } from "../lib/runtimeMetrics";
-import { t } from "../i18n";
+import { t, getLocale } from "../i18n";
 import { showAiToast } from "./AiToast";
 
 interface Props {
@@ -11,7 +11,7 @@ interface Props {
 type ViewMode = "categories" | "operations";
 
 function shortNumber(value: number): string {
-  return value.toLocaleString();
+  return value.toLocaleString(getLocale());
 }
 
 function shortPercent(value: number): string {
@@ -20,7 +20,7 @@ function shortPercent(value: number): string {
 
 function formatDate(time: number): string {
   if (!time) return "—";
-  return new Date(time).toLocaleString();
+  return new Date(time).toLocaleString(getLocale());
 }
 
 function renderRow(row: RuntimeMetricSnapshotRow) {

@@ -4,7 +4,7 @@
  */
 import { useCallback, useEffect, useState } from "react";
 import { Trash2, X } from "lucide-react";
-import { t } from "../i18n";
+import { t, getLocale } from "../i18n";
 import { emptyTrash, listTrash, restoreFromTrash, TRASH_KEEP_MS, type TrashItem } from "../storage/trash";
 import { toast } from "../store/useToastStore";
 
@@ -75,7 +75,7 @@ export function TrashPanel({ open, onClose }: Props) {
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ fontSize: 13, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }} dir="auto">{i.originalPath}</div>
                 <div style={{ fontSize: 11, color: "hsl(var(--fg-muted))" }}>
-                  {new Date(i.trashedAt).toLocaleString()} · {t("trash.daysLeft", { n: String(daysLeft(i)) })}
+                  {new Date(i.trashedAt).toLocaleString(getLocale())} · {t("trash.daysLeft", { n: String(daysLeft(i)) })}
                 </div>
               </div>
               <button type="button" style={btn} onClick={() => void restore(i)}>{t("trash.restore")}</button>

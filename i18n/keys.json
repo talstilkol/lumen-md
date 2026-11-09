@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-10-17T23:03:51.979Z",
+  "generated_at": "2026-10-17T23:03:52.408Z",
   "source": "src/i18n/index.ts (en bundle)",
-  "count": 1244,
+  "count": 1333,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -1915,6 +1915,527 @@
     {
       "key": "block.liveJs.run",
       "en": "Run",
+      "vars": []
+    },
+    {
+      "key": "toast.aiRewriteFailed",
+      "en": "AI Rewrite failed",
+      "vars": []
+    },
+    {
+      "key": "toast.aiCommitSuggestionUnavailable",
+      "en": "AI commit suggestion unavailable",
+      "vars": []
+    },
+    {
+      "key": "toast.documentTooShortForOutline",
+      "en": "Document too short for outline generation",
+      "vars": []
+    },
+    {
+      "key": "toast.generatingOutline",
+      "en": "Generating outline…",
+      "vars": []
+    },
+    {
+      "key": "toast.noOutlineGenerated",
+      "en": "No outline generated",
+      "vars": []
+    },
+    {
+      "key": "toast.insertedHeadings",
+      "en": "Headings inserted: {count}",
+      "vars": [
+        "count"
+      ]
+    },
+    {
+      "key": "toast.outlineGenerationFailed",
+      "en": "Outline generation failed",
+      "vars": []
+    },
+    {
+      "key": "toast.refactoringDocument",
+      "en": "Refactoring document...",
+      "vars": []
+    },
+    {
+      "key": "toast.documentRefactoredSuccessfully",
+      "en": "Document refactored successfully!",
+      "vars": []
+    },
+    {
+      "key": "toast.refactorFailed",
+      "en": "Refactor failed: {msg}",
+      "vars": [
+        "msg"
+      ]
+    },
+    {
+      "key": "toast.generatingTemplate",
+      "en": "Generating template...",
+      "vars": []
+    },
+    {
+      "key": "toast.templateCreated",
+      "en": "Template \"{path}\" created!",
+      "vars": [
+        "path"
+      ]
+    },
+    {
+      "key": "toast.templateFailed",
+      "en": "Template failed: {msg}",
+      "vars": [
+        "msg"
+      ]
+    },
+    {
+      "key": "toast.minReadWords",
+      "en": "📖 ~{minutes} min read ({words} words)",
+      "vars": [
+        "minutes",
+        "words"
+      ]
+    },
+    {
+      "key": "toast.loremIpsumInserted",
+      "en": "📄 Lorem ipsum inserted",
+      "vars": []
+    },
+    {
+      "key": "toast.noIssuesFound",
+      "en": "✅ No issues found!",
+      "vars": []
+    },
+    {
+      "key": "toast.issues",
+      "en": "⚠️ Issues: {count} — {list}",
+      "vars": [
+        "count",
+        "list"
+      ]
+    },
+    {
+      "key": "toast.noHeadingsFound",
+      "en": "No headings found",
+      "vars": []
+    },
+    {
+      "key": "toast.tocInsertedAtTop",
+      "en": "📋 TOC inserted at top",
+      "vars": []
+    },
+    {
+      "key": "toast.loadedFromRemoteModule",
+      "en": "✅ Loaded {name} from remote module",
+      "vars": [
+        "name"
+      ]
+    },
+    {
+      "key": "toast.speechRecognitionNotSupportedIn",
+      "en": "Speech recognition not supported in this browser",
+      "vars": []
+    },
+    {
+      "key": "toast.recordingStopped",
+      "en": "🎙 Recording stopped",
+      "vars": []
+    },
+    {
+      "key": "toast.addedWords",
+      "en": "✅ Words added: {count}",
+      "vars": [
+        "count"
+      ]
+    },
+    {
+      "key": "toast.speechRecognitionErrorCheckMicrophone",
+      "en": "Speech recognition error — check microphone permissions",
+      "vars": []
+    },
+    {
+      "key": "toast.mediarecorderNotSupportedInThis",
+      "en": "MediaRecorder not supported in this browser",
+      "vars": []
+    },
+    {
+      "key": "toast.microphoneAccessDenied",
+      "en": "Microphone access denied",
+      "vars": []
+    },
+    {
+      "key": "toast.recordingIsNotSupportedIn",
+      "en": "Recording is not supported in this browser: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "toast.transcribing",
+      "en": "🎙 Transcribing…",
+      "vars": []
+    },
+    {
+      "key": "toast.transcribeFailed",
+      "en": "Transcribe failed: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "toast.summarising",
+      "en": "✨ Summarising…",
+      "vars": []
+    },
+    {
+      "key": "toast.voiceMemoInsertedMs",
+      "en": "✅ Voice memo inserted ({backend}, {ms} ms)",
+      "vars": [
+        "backend",
+        "ms"
+      ]
+    },
+    {
+      "key": "toast.buildingSemanticIndex",
+      "en": "🧠 Building semantic index…",
+      "vars": []
+    },
+    {
+      "key": "toast.indexedFiles",
+      "en": "✅ Files indexed: {count}",
+      "vars": [
+        "count"
+      ]
+    },
+    {
+      "key": "toast.indexingFailed",
+      "en": "Indexing failed: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "toast.pleaseConfigureYourAiKey",
+      "en": "Please configure your AI Key (⌘K → AI Settings)",
+      "vars": []
+    },
+    {
+      "key": "toast.aiWorkspaceSearchFailed",
+      "en": "AI workspace search failed",
+      "vars": []
+    },
+    {
+      "key": "toast.cloningRepository",
+      "en": "Cloning repository…",
+      "vars": []
+    },
+    {
+      "key": "toast.clonedFilesIntoWorkspace",
+      "en": "✅ Cloned files into the workspace: {count}",
+      "vars": [
+        "count"
+      ]
+    },
+    {
+      "key": "toast.generatingCommitMessage",
+      "en": "Generating commit message…",
+      "vars": []
+    },
+    {
+      "key": "toast.pushing",
+      "en": "Pushing…",
+      "vars": []
+    },
+    {
+      "key": "toast.pushedToRemote",
+      "en": "✅ Pushed to remote",
+      "vars": []
+    },
+    {
+      "key": "toast.pulling",
+      "en": "Pulling…",
+      "vars": []
+    },
+    {
+      "key": "toast.pulledChangedFiles",
+      "en": "✅ Pulled changed files: {count}",
+      "vars": [
+        "count"
+      ]
+    },
+    {
+      "key": "toast.gitIdentitySet",
+      "en": "✅ Git identity set: {name} <{email}>",
+      "vars": [
+        "name",
+        "email"
+      ]
+    },
+    {
+      "key": "toast.openedSharedNoteFromIos",
+      "en": "Opened shared note from iOS.",
+      "vars": []
+    },
+    {
+      "key": "toast.useTheFloatingMenuOr",
+      "en": "Use the floating (/) menu or text selection tooltip for media insertions.",
+      "vars": []
+    },
+    {
+      "key": "toast.aiChartGenerationFailed",
+      "en": "AI chart generation failed",
+      "vars": []
+    },
+    {
+      "key": "toast.privacyModeUnavailableFallsBack",
+      "en": "Privacy Mode unavailable: {reason}. Falls back to cloud AI.",
+      "vars": [
+        "reason"
+      ]
+    },
+    {
+      "key": "toast.privacyModeOnTheFirst",
+      "en": "🛡️  Privacy Mode ON — the first prompt downloads a model sized for this GPU into your browser (⌘K → AI: Local Models to choose); later prompts are fully local.",
+      "vars": []
+    },
+    {
+      "key": "toast.privacyModeOffSwitchedBack",
+      "en": "🌐 Privacy Mode OFF — switched back to cloud AI",
+      "vars": []
+    },
+    {
+      "key": "toast.suggestingTags",
+      "en": "🏷️  Suggesting tags…",
+      "vars": []
+    },
+    {
+      "key": "toast.noTagSuggestionsReturned",
+      "en": "No tag suggestions returned",
+      "vars": []
+    },
+    {
+      "key": "toast.addedTag",
+      "en": "✅ Tags added: {count}",
+      "vars": [
+        "count"
+      ]
+    },
+    {
+      "key": "toast.autoTagFailed",
+      "en": "Auto-tag failed: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "toast.scanningWorkspaceForLinkSuggestions",
+      "en": "🔗 Scanning workspace for link suggestions…",
+      "vars": []
+    },
+    {
+      "key": "toast.noLinkSuggestions",
+      "en": "No link suggestions",
+      "vars": []
+    },
+    {
+      "key": "toast.appliedLink",
+      "en": "✅ Links applied: {count}",
+      "vars": [
+        "count"
+      ]
+    },
+    {
+      "key": "toast.linkSuggestFailed",
+      "en": "Link suggest failed: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "toast.productAgentStarting",
+      "en": "🚀 Product Agent starting...",
+      "vars": []
+    },
+    {
+      "key": "toast.productCreatedFilesGenerated",
+      "en": "✅ Product created! Files generated: {count}",
+      "vars": [
+        "count"
+      ]
+    },
+    {
+      "key": "toast.productCreationFailed",
+      "en": "Product creation failed: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "toast.agentError",
+      "en": "Agent error: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "toast.generatingDiagram",
+      "en": "🧩 Generating diagram…",
+      "vars": []
+    },
+    {
+      "key": "toast.diagramInserted",
+      "en": "✅ Diagram inserted",
+      "vars": []
+    },
+    {
+      "key": "toast.diagramFailed",
+      "en": "Diagram failed: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "toast.extractingActionItems",
+      "en": "✅ Extracting action items…",
+      "vars": []
+    },
+    {
+      "key": "toast.actionItemsAdded",
+      "en": "✅ Action items added",
+      "vars": []
+    },
+    {
+      "key": "toast.actionItemsFailed",
+      "en": "Action items failed: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "toast.translatingTo",
+      "en": "🌐 Translating to {target}…",
+      "vars": [
+        "target"
+      ]
+    },
+    {
+      "key": "toast.documentTranslated",
+      "en": "✅ Document translated",
+      "vars": []
+    },
+    {
+      "key": "toast.translationFailed",
+      "en": "Translation failed: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "toast.generatingChart",
+      "en": "📊 Generating chart…",
+      "vars": []
+    },
+    {
+      "key": "toast.chartInserted",
+      "en": "✅ Chart inserted",
+      "vars": []
+    },
+    {
+      "key": "toast.chartFailed",
+      "en": "Chart failed: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "toast.switchedToOllama",
+      "en": "✅ Switched to Ollama: {model}",
+      "vars": [
+        "model"
+      ]
+    },
+    {
+      "key": "toast.aiProviderSetTo",
+      "en": "✅ AI provider set to: {valid}",
+      "vars": [
+        "valid"
+      ]
+    },
+    {
+      "key": "toast.checkingGrammar",
+      "en": "📝 Checking grammar…",
+      "vars": []
+    },
+    {
+      "key": "toast.noGrammarIssuesFound",
+      "en": "✅ No grammar issues found",
+      "vars": []
+    },
+    {
+      "key": "toast.grammarCheckFailed",
+      "en": "Grammar check failed: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "toast.documentEncrypted",
+      "en": "🔒 Document encrypted",
+      "vars": []
+    },
+    {
+      "key": "toast.documentIsNotEncrypted",
+      "en": "Document is not encrypted",
+      "vars": []
+    },
+    {
+      "key": "toast.documentDecrypted",
+      "en": "🔓 Document decrypted",
+      "vars": []
+    },
+    {
+      "key": "toast.wrongPassword",
+      "en": "❌ Wrong password",
+      "vars": []
+    },
+    {
+      "key": "toast.processing",
+      "en": "🤖 Processing {name}...",
+      "vars": [
+        "name"
+      ]
+    },
+    {
+      "key": "toast.completed",
+      "en": "✅ {name} completed",
+      "vars": [
+        "name"
+      ]
+    },
+    {
+      "key": "toast.aiError",
+      "en": "AI error: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "toast.gitWatchPaused",
+      "en": "⏸ Git watch paused",
+      "vars": []
+    },
+    {
+      "key": "toast.pulledFile",
+      "en": "⬇️ Pulled files: {count}",
+      "vars": [
+        "count"
+      ]
+    },
+    {
+      "key": "toast.gitWatchOnPullingEvery",
+      "en": "👀 Git watch on — pulling every 5 min",
       "vars": []
     },
     {
