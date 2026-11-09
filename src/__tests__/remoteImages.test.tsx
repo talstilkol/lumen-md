@@ -45,14 +45,14 @@ afterEach(() => {
 });
 
 describe("remoteImageHost", () => {
-  const base = "https://lumen.md/notes/a";
+  const base = "https://app.example.com/notes/a";
   it("is the host of an http(s) URL on another origin", () => {
     expect(remoteImageHost(PIXEL, base)).toBe("tracker.example.net");
     expect(remoteImageHost("http://Img.Example.org:8080/x.png", base)).toBe("img.example.org:8080");
     expect(remoteImageHost("//cdn.example.org/x.png", base)).toBe("cdn.example.org");
   });
   it("is null for the app's own files and inline data", () => {
-    for (const src of ["./lumen-asset-1.png", "/x.png", "https://lumen.md/x.png", "data:image/png;base64,AAAA", "blob:https://lumen.md/1", "", "   ", null, undefined]) {
+    for (const src of ["./lumen-asset-1.png", "/x.png", "https://app.example.com/x.png", "data:image/png;base64,AAAA", "blob:https://app.example.com/1", "", "   ", null, undefined]) {
       expect(remoteImageHost(src, base), String(src)).toBeNull();
     }
     expect(remoteImageHost("javascript:alert(1)", base)).toBeNull();

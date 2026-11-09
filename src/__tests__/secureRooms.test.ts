@@ -31,11 +31,16 @@ describe("secure rooms", () => {
     expect(location.hash).toBe("");
   });
 
-  it("signals through Lumen's own server only, unless public servers are opted in", () => {
-    expect(signalingUrls()).toHaveLength(1);
-    expect(signalingUrls()[0]).not.toMatch(/yjs\.dev|herokuapp/);
+  it("ships no signaling server of its own: only a configured one, or public ones when opted in", () => {
+    // No hard-coded host the project doesn't control (the old default domain is gone).
+    expect(signalingUrls()).toEqual([]);
     localStorage.setItem(PUBLIC_SIGNALING_KEY, "1");
-    expect(signalingUrls().length).toBeGreaterThan(1);
+    try {
+      expect(signalingUrls().length).toBeGreaterThan(0);
+      expect(signalingUrls().every((u) => /yjs\.dev|herokuapp/.test(u))).toBe(true);
+    } finally {
+      localStorage.removeItem(PUBLIC_SIGNALING_KEY);
+    }
   });
 
   it("the public fallback opt-in also applies behind a custom signaling server", () => {
@@ -55,17 +60,18 @@ describe("secure rooms", () => {
   it("a runtime signaling server this deployment's CSP does not list is skipped (plan 2.2)", () => {
     const meta = document.createElement("meta");
     meta.httpEquiv = "Content-Security-Policy";
-    meta.content = "default-src 'self'; connect-src 'self' wss://signal.lumen.md wss://signal.acme.dev";
+    meta.content = "default-src 'self'; connect-src 'self' wss://signal.example.com wss://signal.acme.dev";
     document.head.append(meta);
     try {
       localStorage.setItem("lumen.collab.signaling", "wss://signal.acme.dev, wss://unlisted.example.org");
       expect(signalingUrls()).toEqual(["wss://signal.acme.dev"]);
+      // No default server (no project domain): an unlisted one leaves none.
       localStorage.setItem("lumen.collab.signaling", "wss://unlisted.example.org");
-      expect(signalingUrls()).toEqual(["wss://signal.lumen.md"]);
+      expect(signalingUrls()).toEqual([]);
       // An IPv6 literal can't be listed at all; it falls back the same way.
       meta.content += " ws://[::1]:4444";
       localStorage.setItem("lumen.collab.signaling", "ws://[::1]:4444");
-      expect(signalingUrls()).toEqual(["wss://signal.lumen.md"]);
+      expect(signalingUrls()).toEqual([]);
     } finally {
       meta.remove();
       localStorage.removeItem("lumen.collab.signaling");

@@ -169,12 +169,12 @@ describe("CSP alignment", () => {
   });
 
   it("(a) the WebSockets the app opens are listed (plan 2.2): collab signaling", () => {
-    // src/collab/yjs.ts PUBLIC_SIGNALING_FALLBACK: Lumen's own server, then the
-    // public ones when the user opts in. Deployment servers come from the build.
+    // src/collab/yjs.ts PUBLIC_SIGNALING_FALLBACK: the public servers, used when
+    // the user opts in. Deployment servers come from the build.
     const yjs = read("src/collab/yjs.ts");
     const block = /const PUBLIC_SIGNALING_FALLBACK = \[([\s\S]*?)\];/.exec(yjs)![1];
     const urls = [...block.matchAll(/"(wss?:\/\/[^"]+)"/g)].map((m) => m[1]);
-    expect(urls).toContain("wss://signal.lumen.md");
+    expect(urls).toContain("wss://signaling.yjs.dev");
     for (const [name, p] of Object.entries(POLICIES)) {
       for (const url of urls) expect(connectAllows(p, url), `${name} blocks ${url}`).toBe(true);
     }

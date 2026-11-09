@@ -182,8 +182,7 @@ WebSockets the app opens:
 
 | Socket | Where it is set | How the policy allows it |
 |---|---|---|
-| Collab signaling, Lumen's server `wss://signal.lumen.md` | `src/collab/yjs.ts` (default) | listed |
-| Public signaling `wss://signaling.yjs.dev`, `wss://y-webrtc-signaling-eu.herokuapp.com` | same, only when the user opts in | listed |
+| Public signaling `wss://signaling.yjs.dev`, `wss://y-webrtc-signaling-eu.herokuapp.com` | `src/collab/yjs.ts`, only when the user opts in (there is no default server) | listed |
 | The deployment's signaling / persistent collab server | `VITE_WEBRTC_SIGNALING_URL` (comma list), `VITE_YJS_WEBSOCKET_URL` | added at build time (`src/build/cspEndpoints.ts`, `WEBSOCKET_ENV_VARS`) |
 | A server the user types into Collab settings | `localStorage` `lumen.collab.signaling` / `lumen.collab.ws` | only when the build lists it (`VITE_CSP_CONNECT_EXTRA`). Otherwise `yjs.ts` skips it with a warning, and the dialog says so |
 | Vite's dev server (HMR) | `npm run dev` | the dev page alone gets `ws://*:<port>` / `wss://*:<port>`. CSP3 `'self'` covers the same host too. No build carries it |
@@ -195,7 +194,7 @@ Give an IPv6-only server a hostname.
 
 A search of `src/` found no other socket: no `EventSource`, no Supabase realtime channel,
 and `WebSocketStream` / `WebTransport` appear only in the live-js and Ruby blocklists.
-Checked in Chromium: `wss://signal.lumen.md` is allowed, an unlisted `wss://` host is
+Checked in Chromium: a listed `wss://` host is allowed, an unlisted `wss://` host is
 blocked, `ws://` on the page's own host is allowed through `'self'`, and `ws://*:5173`
 parses and matches only that port. Not checked: Firefox and WebKit (CI runs the e2e
 suite there against the dev server, whose HMR socket now relies on the explicit

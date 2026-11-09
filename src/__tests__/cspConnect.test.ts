@@ -29,10 +29,10 @@ describe("connectAllowedByCsp", () => {
   });
 
   it("explicit WebSocket hosts (plan 2.2: the policies carry no bare wss:)", () => {
-    const list = ["'self'", "wss://signal.lumen.md", "ws://*:5173"];
-    expect(connectAllowedByCsp("wss://signal.lumen.md", list)).toBe(true);
-    expect(connectAllowedByCsp("wss://signal.lumen.md:8443", list)).toBe(false);
-    expect(connectAllowedByCsp("ws://signal.lumen.md", list)).toBe(false);
+    const list = ["'self'", "wss://signal.example.com", "ws://*:5173"];
+    expect(connectAllowedByCsp("wss://signal.example.com", list)).toBe(true);
+    expect(connectAllowedByCsp("wss://signal.example.com:8443", list)).toBe(false);
+    expect(connectAllowedByCsp("ws://signal.example.com", list)).toBe(false);
     expect(connectAllowedByCsp("wss://my-signal.example.org", list)).toBe(false);
   });
 

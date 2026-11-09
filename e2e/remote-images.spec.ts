@@ -85,6 +85,6 @@ test("the page's connect-src names its WebSocket hosts: no bare ws: / wss:", asy
   await page.goto("/");
   const csp = await page.locator('meta[http-equiv="Content-Security-Policy"]').getAttribute("content");
   const connect = (/connect-src ([^;]*)/.exec(csp ?? "")?.[1] ?? "").trim().split(/\s+/);
-  expect(connect).toContain("wss://signal.lumen.md");
+  expect(connect).toContain("wss://signaling.yjs.dev");
   expect(connect.filter((s) => s === "ws:" || s === "wss:")).toEqual([]);
 });
