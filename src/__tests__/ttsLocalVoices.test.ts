@@ -1,7 +1,7 @@
 /** 1.5 — read-aloud uses on-device voices only under local-only; network voices need an opt-in and are logged. */
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { voiceFor, networkVoicesAllowed, allowNetworkVoices, hasLocalVoiceFor, offersNetworkVoices, speak, langFor, voicesReady, NETWORK_VOICES_KEY, __resetTts } from "../ai/tts";
-import { ledgerEntries } from "../ai/privacyLedger";
+import { voiceFor, networkVoicesAllowed, allowNetworkVoices, hasLocalVoiceFor, offersNetworkVoices, speak, langFor, voicesReady, NETWORK_VOICES_KEY, __resetTts, beginSpeaking, isCurrentRun, isSpeaking, stopSpeaking } from "../ai/tts";
+import { clearLedger, ledgerEntries } from "../ai/privacyLedger";
 
 type V = Pick<SpeechSynthesisVoice, "name" | "lang" | "localService">;
 const voices: V[] = [
@@ -9,6 +9,8 @@ const voices: V[] = [
   { name: "Samantha", lang: "en-US", localService: true },
 ];
 const spoken: string[] = [];
+/** Runs after each utterance is handed to the synthesizer, before it ends. */
+let afterSpeak: (() => void) | null = null;
 
 let listVoices: () => V[] = () => voices;
 const voiceListeners = new Set<() => void>();
@@ -19,6 +21,7 @@ beforeEach(() => {
   spoken.length = 0;
   listVoices = () => voices;
   voiceListeners.clear();
+  afterSpeak = null;
   vi.stubGlobal("SpeechSynthesisUtterance", class {
     text: string;
     lang = "";
@@ -39,6 +42,7 @@ beforeEach(() => {
       cancel: () => {},
       speak: (u: { text: string; onend: () => void }) => {
         spoken.push(u.text);
+        afterSpeak?.();
         u.onend();
       },
     },
@@ -101,6 +105,42 @@ describe("read-aloud voices and the AI policy", () => {
     const utf8 = (x: string) => new TextEncoder().encode(x).length;
     expect(added[0].bytesOut).toBe(utf8(a) + utf8(b));
     expect(added[0].bytesOut).toBeGreaterThan(a.length + b.length); // Hebrew is 2 bytes a letter
+  });
+
+  it("starts a new ledger entry when the ledger is cleared mid-reading", async () => {
+    localStorage.setItem("lumen.ai.policy", "local-first");
+    allowNetworkVoices();
+    const a = "שלום לכולם.";
+    const b = "מה שלומכם היום.";
+    afterSpeak = () => {
+      if (spoken.length === 1) clearLedger(); // the user clears the ledger while the first sentence plays
+    };
+    await speak(`${a} ${b}`, { uiLang: "he" });
+    expect(spoken).toEqual([a, b]);
+    const after = ledgerEntries();
+    expect(after).toHaveLength(1);
+    expect(after[0]).toMatchObject({ host: "speech voice: Google עברית", bytesOut: new TextEncoder().encode(b).length });
+  });
+
+  it("a second reading replaces the first instead of interleaving with it", async () => {
+    const first = speak("One. Two.", { uiLang: "en" });
+    const second = speak("Three. Four.", { uiLang: "en" });
+    await Promise.all([first, second]);
+    expect(spoken).toEqual(["Three.", "Four."]);
+    expect(isSpeaking()).toBe(false);
+  });
+
+  it("a run claimed before awaiting and stopped meanwhile speaks nothing", async () => {
+    const run = beginSpeaking();
+    expect(isSpeaking()).toBe(true); // a second press sees the pending reading
+    stopSpeaking();
+    expect(isCurrentRun(run)).toBe(false);
+    expect(await speak("One. Two.", { uiLang: "en", run })).toBe(true);
+    expect(spoken).toEqual([]);
+    const next = beginSpeaking();
+    expect(await speak("One. Two.", { uiLang: "en", run: next })).toBe(true);
+    expect(spoken).toEqual(["One.", "Two."]);
+    expect(isSpeaking()).toBe(false);
   });
 
   it("keeps a confirmed opt-in for the session when storage refuses to save it", () => {
