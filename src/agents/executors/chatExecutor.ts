@@ -9,7 +9,7 @@
  */
 
 import type { Availability, Executor, ExecutorMessage, ExecutorRequest, ExecutorResponse, ModelTier } from "../types";
-import { chat, chatStream, effectiveModel, getActiveProvider, type ChatMessage } from "../../ai/llm";
+import { chat, chatStream, effectiveModel, getActiveProvider, LIGHT_MODELS, type ChatMessage } from "../../ai/llm";
 import { estimateTokens } from "../../ai/usage";
 import { getAiPolicy, isCloudProvider, isLocalOrigin } from "../../ai/policy";
 import { useAppStore } from "../../store/useStore";
@@ -68,19 +68,40 @@ export const chatExecutor: Executor = {
   },
   supportsTools: () => false,
   supportsSchema: () => false,
-  modelFor(_tier: ModelTier): string {
-    return effectiveModel(getActiveProvider());
+  /**
+   * The model chat() is expected to use, for traces and cache keys: the
+   * provider's light model for tiny/small agents (the router's choice in
+   * the default mode), else its configured model. Under a local policy
+   * chat() may answer from Ollama / WebGPU instead; the response reports
+   * the model that actually answered.
+   */
+  modelFor(tier: ModelTier): string {
+    const provider = getActiveProvider();
+    const light = tier === "tiny" || tier === "small" ? LIGHT_MODELS[provider] : undefined;
+    return light ?? effectiveModel(provider);
   },
   async chat(req: ExecutorRequest): Promise<ExecutorResponse> {
     const messages = flattenMessages(req.messages);
+    let answeredBy: string | null = null;
     const opts = {
-      model: req.model,
+      // Only an explicit choice (a retry with another model) is pinned: the
+      // model the runtime resolved from modelFor() is left to chat()'s own
+      // routing, so light tiers keep the light model and a request rerouted
+      // to a local backend never carries a cloud model name.
+      model: req.model && req.model !== chatExecutor.modelFor(req.tier ?? "small") ? req.model : undefined,
       maxTokens: req.maxTokens,
       temperature: req.temperature,
       signal: req.signal,
       tier: req.tier === "tiny" || req.tier === "small" ? ("light" as const) : undefined,
-      // The runtime charged the quota once for the whole run.
-      prepaid: true,
+      // The runtime's once-per-run charge, made by chat() at dispatch.
+      prepaid: !req.charge,
+      chargeHook: req.charge,
+      onRoute: (_p: string, m: string) => {
+        answeredBy = m;
+      },
+      onUsage: (u: { model?: string }) => {
+        if (u.model) answeredBy = u.model;
+      },
     };
     let content = "";
     if (req.onDelta) {
@@ -94,7 +115,7 @@ export const chatExecutor: Executor = {
     return {
       content,
       toolCalls: [],
-      model: req.model ?? effectiveModel(getActiveProvider()),
+      model: answeredBy ?? req.model ?? chatExecutor.modelFor(req.tier ?? "small"),
       usage: {
         inputTokens: estimateTokens(messages.map((m) => m.content).join("\n")),
         outputTokens: estimateTokens(content),

@@ -73,6 +73,12 @@ export interface ExecutorRequest {
   signal?: AbortSignal;
   /** Receives text deltas when the executor can stream. */
   onDelta?: (chunk: string) => void;
+  /**
+   * Charges the run's quota prompt (idempotent). The runtime calls it
+   * before a native local executor's request; the chat adapter hands it to
+   * chat(), which calls it at dispatch, after its key and rate-limit checks.
+   */
+  charge?: () => void;
 }
 
 export interface ExecutorUsage {
@@ -188,9 +194,15 @@ export interface AgentDefinition<I extends AgentInput = AgentInput, O = string> 
   streaming?: boolean;
   /** Scopes this agent needs beyond `read`. */
   requires?: ToolScope[];
+  /**
+   * Reuse an identical earlier answer from the local response cache (and
+   * store this one once it validated). Only for deterministic
+   * transformations of the given input; the user can turn the cache off.
+   */
+  cache?: boolean;
 }
 
-export type StepKind = "model" | "tool" | "validate" | "retry" | "critic";
+export type StepKind = "model" | "tool" | "validate" | "retry" | "critic" | "cache";
 
 export interface AgentStep {
   kind: StepKind;
@@ -237,4 +249,10 @@ export interface RunOptions {
   executor?: ExecutorId;
   /** Apply a critic patch from the start (a retry the user asked for). */
   patch?: RetryPatch;
+  /**
+   * A non-palette request that pays for itself (see ChatOptions.ownPrompt):
+   * counted against the monthly quota here, never billed to a waiting
+   * palette command. `"silent"`: no toast when the quota is spent.
+   */
+  ownPrompt?: boolean | "silent";
 }
