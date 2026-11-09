@@ -235,7 +235,9 @@
     padding: 0 0.5rem;
   }
   .cm-editor .cm-cursor {
+    /* hygiene-allow: CodeMirror draws its caret with border-left in both directions (its base theme); a logical border would land on the wrong side in RTL */
     border-left-color: hsl(var(--accent));
+    /* hygiene-allow: see above — same CodeMirror caret border */
     border-left-width: 2px;
   }
   .cm-editor .cm-selectionBackground,
@@ -358,7 +360,10 @@
     color: hsl(var(--fg-subtle));
     font-style: italic;
     background: hsl(var(--bg-subtle));
-    border-radius: 0 0.5rem 0.5rem 0;
+    /* square on the side of the accent border, rounded on the other — mirrors in RTL */
+    border-radius: 0;
+    border-start-end-radius: 0.5rem;
+    border-end-end-radius: 0.5rem;
   }
   .prose-lumen ul,
   .prose-lumen ol {

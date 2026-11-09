@@ -12,6 +12,7 @@
  */
 
 import { zip } from "./zip";
+import { pageFileSlug } from "../lib/slug";
 import { firstRtlLanguage, firstStrongDirection, hasRtl, markdownBaseDirection } from "../lib/textDirection";
 
 function escapeHtml(s: string): string {
@@ -505,7 +506,7 @@ const SITE_CSS = [
   ":root{--accent:#7c5cff}",
   "*{box-sizing:border-box}body{margin:0;font:16px/1.6 -apple-system,Segoe UI,Roboto,sans-serif;color:#222}",
   ".layout{display:flex;min-height:100vh}",
-  "aside{width:240px;background:#f6f6fb;border-right:1px solid #e5e5ef;padding:24px 16px}",
+  "aside{width:240px;background:#f6f6fb;border-inline-end:1px solid #e5e5ef;padding:24px 16px}",
   "aside ul{list-style:none;margin:0;padding:0}aside li{margin:4px 0}",
   "aside a{color:#444;text-decoration:none;display:block;padding:6px 10px;border-radius:6px}",
   "aside a.active,aside a:hover{background:var(--accent);color:#fff}",
@@ -515,15 +516,6 @@ const SITE_CSS = [
   "pre{background:#1e1e2e;color:#e8e8f0;padding:16px;border-radius:8px;overflow:auto}pre code{background:none}",
   "a{color:var(--accent)}",
 ].join("\n");
-
-function slugify(s: string, fallback: string): string {
-  return (
-    s
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/^-|-$/g, "") || fallback
-  );
-}
 
 /**
  * Build a self-contained static documentation site as a zip: one HTML page per
@@ -538,7 +530,7 @@ export async function markdownToStaticSiteBytes(md: string, siteTitle = "Site"):
   const seen = new Set<string>();
   const pages = (parts.length ? parts : [md]).map((c, i) => {
     const title = c.match(/^#\s+(.+)$/m)?.[1] ?? `Page ${i + 1}`;
-    let slug = slugify(title, `page-${i + 1}`);
+    let slug = pageFileSlug(title, `page-${i + 1}`);
     while (seen.has(slug)) slug = `${slug}-${i}`;
     seen.add(slug);
     return { title, file: `${slug}.html`, body: mdToXhtml(c) };
@@ -549,7 +541,7 @@ export async function markdownToStaticSiteBytes(md: string, siteTitle = "Site"):
     pages
       .map(
         (p) =>
-          `<li><a href="${p.file}"${p.file === active ? ' class="active"' : ""}>${escapeHtml(p.title)}</a></li>`,
+          `<li><a href="${encodeURIComponent(p.file)}"${p.file === active ? ' class="active" aria-current="page"' : ""}>${escapeHtml(p.title)}</a></li>`,
       )
       .join("") +
     `</ul></nav>`;
@@ -564,7 +556,7 @@ export async function markdownToStaticSiteBytes(md: string, siteTitle = "Site"):
   const rss =
     `<?xml version="1.0" encoding="UTF-8"?>\n<rss version="2.0"><channel>` +
     `<title>${escapeHtml(siteTitle)}</title><description>${escapeHtml(siteTitle)}</description>` +
-    pages.map((p) => `<item><title>${escapeHtml(p.title)}</title><link>${p.file}</link></item>`).join("") +
+    pages.map((p) => `<item><title>${escapeHtml(p.title)}</title><link>${encodeURIComponent(p.file)}</link></item>`).join("") +
     `</channel></rss>`;
 
   return zip([
