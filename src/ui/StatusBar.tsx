@@ -1,3 +1,4 @@
+import { countWords } from "../text/hebrew";
 import React, { useMemo, useState, useCallback, useSyncExternalStore } from "react";
 import { Sparkles, ShieldCheck, SpellCheck, FileDiff, Activity, BarChart3, CloudCog, CloudOff, AlertCircle } from "lucide-react";
 import type { CollabPeer } from "../collab/yjs";
@@ -314,9 +315,9 @@ function computeStats(text: string): Stats {
     .replace(/^---\r?\n[\s\S]*?\r?\n---\r?\n/, "")
     .replace(/```[\s\S]*?```/g, "");
 
-  // Words: groups of word chars, including unicode letters.
-  const wordMatches = stripped.match(/[\p{L}\p{N}'’-]+/gu);
-  const words = wordMatches?.length ?? 0;
+  // Words: letters of any script *with their combining marks* (a pointed
+  // Hebrew word used to count as several), gershayim inside (צה״ל) — T26.
+  const words = countWords(stripped);
 
   // Characters (excluding whitespace).
   const chars = stripped.replace(/\s+/g, "").length;

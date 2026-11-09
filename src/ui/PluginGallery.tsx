@@ -1,3 +1,5 @@
+import { headingSlugger } from "../lib/slug";
+import { countWords } from "../text/hebrew";
 import { useEffect, useMemo, useState } from "react";
 import { Search, Download, Trash2, ExternalLink, BadgeCheck } from "lucide-react";
 import { getRegisteredPlugins, registerPlugin, unregisterPlugin } from "../plugins/pluginSystem";
@@ -40,7 +42,7 @@ const COMMUNITY_PLUGINS: LumenPlugin[] = [
         hint: "Show estimated reading time",
         action: () => {
           const content = api.getContent();
-          const words = content.split(/\s+/).filter(Boolean).length;
+          const words = countWords(content);
           const minutes = Math.ceil(words / 200);
           api.showToast(`📖 ~${minutes} min read (${words} words)`);
         },
@@ -155,10 +157,11 @@ const COMMUNITY_PLUGINS: LumenPlugin[] = [
             api.showToast("No headings found");
             return;
           }
+          const slugger = headingSlugger();
           const toc = headings.map((h) => {
             const level = h.match(/^#+/)![0].length;
             const text = h.replace(/^#+\s+/, "");
-            const slug = text.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+            const slug = slugger.slug(text);
             return `${"  ".repeat(level - 1)}- [${text}](#${slug})`;
           }).join("\n");
           api.setContent("## Table of Contents\n\n" + toc + "\n\n---\n\n" + content);

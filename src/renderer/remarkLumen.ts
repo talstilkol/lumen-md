@@ -5,6 +5,7 @@
  * both render `:::note` callouts, `:::columns`, `[[wikilinks]]`, soft line
  * breaks and heading slugs identically.
  */
+import { headingSlug } from "../lib/slug";
 import { visit } from "unist-util-visit";
 import type { Root as MdastRoot } from "mdast";
 
@@ -226,11 +227,7 @@ export function remarkStripFrontmatter() {
   };
 }
 
+/** Heading id for a wiki-link target — the same one rehype-slug gives the heading (T26). */
 export function slug(s: string): string {
-  return s
-    .toLowerCase()
-    .trim()
-    .replace(/[^\w\s-]/g, "")
-    .replace(/\s+/g, "-")
-    .replace(/-+/g, "-");
+  return headingSlug(s);
 }

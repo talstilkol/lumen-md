@@ -1,3 +1,5 @@
+import { noteKey } from "../lib/slug";
+import { hasHebrew, hebrewFind } from "../text/hebrew";
 import {
   basename,
   isAssetName,
@@ -99,15 +101,18 @@ export async function findBacklinks(targetPath: string): Promise<BacklinkHit[]> 
   await ensureIndex();
   const targetName = basename(targetPath);
   const stem = targetName.replace(/\.md$/i, "");
-  const wantedSlug = slug(stem);
+  // By normalized name, not slug: the old ASCII slug made every Hebrew
+  // target "" and so every Hebrew link a backlink of every Hebrew note.
+  const wanted = noteKey(stem);
   const out: BacklinkHit[] = [];
   for (const file of cache.byPath.values()) {
     if (file.path === targetPath) continue;
     let m: RegExpExecArray | null;
     WIKI_RE.lastIndex = 0;
     while ((m = WIKI_RE.exec(file.content)) !== null) {
-      const target = m[1].trim();
-      if (slug(target) === wantedSlug || target === stem) {
+      // `[[target#heading|label]]` → the note part only.
+      const target = m[1].split("#")[0].trim();
+      if (target && noteKey(basename(target)) === wanted) {
         const offset = m.index;
         out.push({
           fromPath: file.path,
@@ -160,13 +165,17 @@ export async function searchWorkspace(
     if (nameLower === q) score += 20;
     if (nameLower.startsWith(q)) score += 5;
     if (pathLower.includes(q) && pathLower !== nameLower) score += 6;
-    const idx = contentLower.indexOf(q);
-    if (idx >= 0) {
+    // Niqqud-, final-letter- and prefix-insensitive for Hebrew (T26):
+    // "והבית" finds "בית", "שָׁלוֹם" finds "שלום".
+    const found = findIn(file.content, contentLower, q);
+    if (!nameLower.includes(q) && hasHebrew(q) && hebrewFind(file.name, q)) score += 10;
+    if (found) {
       score += 4;
-      const ctx = snippetAround(file.content, idx, 80);
-      const local = ctx.toLowerCase().indexOf(q);
+      const ctx = snippetAround(file.content, found.start, 80);
+      // Re-locate the hit inside the (whitespace-collapsed, "…"-prefixed) snippet.
+      const local = findIn(ctx, ctx.toLowerCase(), file.content.slice(found.start, found.end).replace(/\s+/g, " ").toLowerCase());
       snippet = ctx;
-      if (local >= 0) match = { start: local, end: local + q.length };
+      if (local) match = local;
     } else if (fuzzyMatch(nameLower, q) || fuzzyMatch(pathLower, q)) {
       score += 1;
     }
@@ -175,6 +184,12 @@ export async function searchWorkspace(
   }
   out.sort((a, b) => b.score - a.score);
   return out.slice(0, limit);
+}
+
+function findIn(text: string, lower: string, q: string): { start: number; end: number } | null {
+  const at = lower.indexOf(q);
+  if (at >= 0) return { start: at, end: at + q.length };
+  return hasHebrew(q) ? hebrewFind(text, q) : null;
 }
 
 function snippetAround(content: string, offset: number, radius = 60): string {
@@ -196,11 +211,3 @@ function fuzzyMatch(haystack: string, needle: string): boolean {
   return true;
 }
 
-function slug(s: string): string {
-  return s
-    .toLowerCase()
-    .trim()
-    .replace(/[^\w\s-]/g, "")
-    .replace(/\s+/g, "-")
-    .replace(/-+/g, "-");
-}
