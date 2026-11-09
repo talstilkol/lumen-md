@@ -33,6 +33,7 @@ import { formatSchemaErrors, validateSchema } from "./schema";
 import { coerceArgs, ToolError } from "./tools/define";
 import { review, type Failure } from "./critic";
 import { recordRun } from "./trace";
+import { noteAiOutput } from "../ai/authorship";
 import { AiQuotaExceededError, aiQuotaStatus, chargeAiCommandDispatch, consumeAiPrompt } from "../billing/aiQuota";
 // The injection guard (plan 2.7) loads with the first run: the runtime is on the startup path.
 const loadGuard = () => import("./untrusted");
@@ -290,9 +291,20 @@ export async function runAgent<I extends AgentInput, O = string>(def: AgentDefin
     opts.onStep?.(full);
   };
   const staged: string[] = [];
+  // A streamed answer is marked as it arrives, piece by piece (plan 5.9).
+  let streamed = "";
+  const onDelta = opts.onDelta
+    ? (d: string) => {
+        streamed += d;
+        noteAiOutput(run.id, streamed);
+        opts.onDelta?.(d);
+      }
+    : undefined;
   const toolEnvRef: { current: ToolEnv | null } = { current: null };
   const finish = async (status: AgentRun["status"], extra: Partial<AgentRun<O>> = {}): Promise<AgentRun<O>> => {
     Object.assign(run, extra, { status, endedAt: Date.now() });
+    // Plan 5.9: the editor marks this answer where it lands in a note.
+    if (status === "ok") noteAiOutput(run.id, run.output);
     if (toolEnvRef.current?.taint.length) run.untrusted = [...toolEnvRef.current.taint];
     if (staged.length) {
       run.staged = [...staged];
@@ -486,7 +498,7 @@ export async function runAgent<I extends AgentInput, O = string>(def: AgentDefin
           maxTokens: typeof def.maxTokens === "function" ? def.maxTokens(input) : def.maxTokens,
           temperature: patch.temperature ?? def.temperature,
           signal: opts.signal,
-          onDelta: def.streaming && !offered.length ? opts.onDelta : undefined,
+          onDelta: def.streaming && !offered.length ? onDelta : undefined,
         });
         run.model = res.model || run.model;
         if (res.usage) {

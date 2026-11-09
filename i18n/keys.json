@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-10-24T11:16:22.225Z",
+  "generated_at": "2026-11-09T21:15:18.675Z",
   "source": "src/i18n/index.ts (en bundle)",
-  "count": 1431,
+  "count": 1434,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -5107,6 +5107,21 @@
     {
       "key": "cmd.ai.agentSettings.hint",
       "en": "Policy, executor, models, endpoints and recent runs in one place",
+      "vars": []
+    },
+    {
+      "key": "cmd.ai.marks.toggle",
+      "en": "AI text marks: show / hide",
+      "vars": []
+    },
+    {
+      "key": "cmd.ai.marks.hint",
+      "en": "Text the AI wrote looks lighter until you edit it",
+      "vars": []
+    },
+    {
+      "key": "cmd.ai.marks.export",
+      "en": "Export Markdown with AI marks",
       "vars": []
     },
     {
