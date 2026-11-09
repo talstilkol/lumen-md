@@ -8,13 +8,16 @@ import PlantUMLBlock from "../plugins/PlantUMLBlock";
 
 let fetchMock: ReturnType<typeof vi.fn>;
 
-vi.mock("@hpcc-js/wasm/graphviz", () => ({
-  Graphviz: {
-    load: vi.fn(async () => ({
-      layout: () => '<svg xmlns="http://www.w3.org/2000/svg"><rect/></svg>',
-    })),
-  },
-}));
+// Graphviz lays out in a Worker (F4); jsdom has none, so a stand-in answers
+// the worker protocol { id, dot, engine } → { id, svg }.
+class FakeGraphvizWorker {
+  onmessage: ((e: { data: unknown }) => void) | null = null;
+    onerror: unknown = null;
+    postMessage(m: { id: number }) {
+      setTimeout(() => this.onmessage?.({ data: { id: m.id, svg: '<svg xmlns="http://www.w3.org/2000/svg"><rect/></svg>' } }), 0);
+    }
+    terminate() {}
+}
 
 vi.mock("mermaid", () => ({
   default: {
@@ -110,6 +113,7 @@ describe("dynamic block integration smoke", () => {
   });
 
   it("renders Graphviz block with mocked wasm backend", async () => {
+    vi.stubGlobal("Worker", FakeGraphvizWorker);
     render(<GraphvizBlock source="digraph { A -> B }" />);
     await waitFor(() => {
       expect(screen.getByText(/Graphviz · dot/)).toBeTruthy();

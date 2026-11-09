@@ -59,3 +59,27 @@ describe("Tauri CSP", () => {
     expect(csp).toContain("object-src 'none'");
   });
 });
+
+describe("no eval on the page (F4 / P3)", () => {
+  const indexHtml = readFileSync(join(root, "index.html"), "utf8");
+  const pageCsp = /Content-Security-Policy: (default-src 'self'.*)/.exec(headers)?.[1] ?? "";
+  it("the page CSP allows WebAssembly but not eval — meta, Cloudflare and Vercel", () => {
+    for (const csp of [pageCsp, /content="(default-src 'self'[^"]*)"/.exec(indexHtml)?.[1] ?? ""]) {
+      const script = /script-src ([^;]*)/.exec(csp)?.[1] ?? "";
+      expect(script).toContain("'wasm-unsafe-eval'");
+      expect(script.split(/\s+/)).not.toContain("'unsafe-eval'");
+    }
+    const vercelApp = vercel.headers.find((h) => h.headers.some((x) => x.key === "X-Frame-Options"))!;
+    expect(vercelApp.headers.find((x) => x.key === "Content-Security-Policy")!.value.split(/\s+/)).not.toContain("'unsafe-eval';");
+  });
+  it("eval is granted only to the Graphviz, ruby and TypeScript worker scripts", () => {
+    for (const w of ["graphviz", "ruby", "tsCheck"]) {
+      const block = headers.slice(headers.indexOf(`/assets/${w}.worker-*`));
+      expect(/Content-Security-Policy: ([^\n]*)/.exec(block)?.[1]).toContain("'unsafe-eval'");
+    }
+    const entry = vercel.headers.find((h) => h.headers.some((x) => x.key === "X-Frame-Options"))!;
+    const re = new RegExp(`^${entry.source}$`);
+    expect(re.test("/assets/graphviz.worker-abc.js")).toBe(false);
+    expect(re.test("/assets/app-abc.js")).toBe(true);
+  });
+});
