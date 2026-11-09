@@ -6,7 +6,8 @@
  *   read     read_file, list_files, file_exists, search_workspace,
  *            get_frontmatter, list_tags, get_document, get_selection,
  *            get_headings, validate_mermaid, validate_echarts,
- *            validate_json, git_diff, extract_quotes, csv_parse
+ *            validate_json, git_diff, extract_quotes, csv_parse,
+ *            run_python — offline Pyodide sandbox (`./python.ts`)
  *   write    write_file, set_frontmatter, replace_range — stage a change
  *            for approval, never write (`../staging.ts`)
  *   network  search_web, fetch_page — AI policy + per-call consent +
@@ -20,8 +21,9 @@ import { VALIDATE_TOOLS } from "./validate";
 import { GIT_TOOLS } from "./git";
 import { WEB_TOOLS } from "./web";
 import { DATA_TOOLS } from "./data";
+import { PYTHON_TOOLS } from "./python";
 
-export const ALL_TOOLS: readonly AgentTool[] = [...WORKSPACE_TOOLS, ...EDITOR_TOOLS, ...VALIDATE_TOOLS, ...GIT_TOOLS, ...WEB_TOOLS, ...DATA_TOOLS] as AgentTool[];
+export const ALL_TOOLS: readonly AgentTool[] = [...WORKSPACE_TOOLS, ...EDITOR_TOOLS, ...VALIDATE_TOOLS, ...GIT_TOOLS, ...WEB_TOOLS, ...DATA_TOOLS, ...PYTHON_TOOLS] as AgentTool[];
 
 /** The tool list of plan §3 (T2), in its order. */
 export const PLAN_TOOLS = [

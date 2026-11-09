@@ -52,6 +52,7 @@ const SearchDialog = lazy(() =>
 import { AiToastContainer, showAiToast } from "./ui/AiToast";
 import { minimalChange, propertiesTransaction, trackedPropertiesText } from "./editor/propertiesEdit";
 import { AiSuggestionsPanel } from "./ui/AiSuggestionsPanel";
+import { ledgerEntries } from "./ai/privacyLedger";
 import { MobileKeyboardBar } from "./ui/MobileKeyboardBar";
 import { TagsPanel } from "./ui/TagsPanel";
 // CommentsPanel pulls collab/comments.ts → yjs; comments only exist inside a
@@ -223,6 +224,11 @@ export default function App() {
       // The vault index, for e2e/perf-vault.spec.ts (a lazy chunk).
       vaultIndex: () => import("./storage/vaultIndexProbe"),
       ocr: (image: Blob) => import("./ai/ocr").then((m) => m.ocrImage(image)),
+      // live-exec spec: the run_python agent tool, called as the runtime
+      // calls it (read scope), and the privacy ledger it reports to.
+      runPython: async (args: { code: string; inputs?: Record<string, unknown>; timeoutMs?: number }) =>
+        (await import("./agents/tools/python")).runPythonTool.run(args, { grants: new Set(["read" as const]) }),
+      ledger: () => ledgerEntries(),
     };
     return () => {
       unregisterPlugin(wordCountPlugin.id);
