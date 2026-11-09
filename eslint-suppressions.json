@@ -2,9 +2,6 @@
   "src/App.tsx": {
     "@typescript-eslint/no-floating-promises": {
       "count": 6
-    },
-    "lumen/empty-catch-why": {
-      "count": 4
     }
   },
   "src/__tests__/AiInlinePromptRender.test.tsx": {
@@ -72,11 +69,6 @@
       "count": 2
     }
   },
-  "src/__tests__/pluginSystem.test.ts": {
-    "lumen/empty-catch-why": {
-      "count": 1
-    }
-  },
   "src/__tests__/secretStore.test.ts": {
     "@typescript-eslint/no-floating-promises": {
       "count": 4
@@ -92,99 +84,9 @@
       "count": 6
     }
   },
-  "src/agents/critic.ts": {
-    "lumen/empty-catch-why": {
-      "count": 1
-    }
-  },
-  "src/agents/eval/run.ts": {
-    "lumen/empty-catch-why": {
-      "count": 1
-    }
-  },
-  "src/agents/executors/index.ts": {
-    "lumen/empty-catch-why": {
-      "count": 1
-    }
-  },
-  "src/agents/outcomes.ts": {
-    "lumen/empty-catch-why": {
-      "count": 1
-    }
-  },
-  "src/agents/protocol.ts": {
-    "lumen/empty-catch-why": {
-      "count": 1
-    }
-  },
   "src/agents/runtime.ts": {
     "prefer-const": {
       "count": 1
-    }
-  },
-  "src/agents/schema.ts": {
-    "lumen/empty-catch-why": {
-      "count": 1
-    }
-  },
-  "src/ai/anthropicProvider.ts": {
-    "lumen/empty-catch-why": {
-      "count": 1
-    }
-  },
-  "src/ai/contextPacker.ts": {
-    "lumen/empty-catch-why": {
-      "count": 1
-    }
-  },
-  "src/ai/embeddings.ts": {
-    "lumen/empty-catch-why": {
-      "count": 1
-    }
-  },
-  "src/ai/geminiProvider.ts": {
-    "lumen/empty-catch-why": {
-      "count": 1
-    }
-  },
-  "src/ai/grammar.ts": {
-    "lumen/empty-catch-why": {
-      "count": 1
-    }
-  },
-  "src/ai/llm.ts": {
-    "lumen/empty-catch-why": {
-      "count": 3
-    }
-  },
-  "src/ai/mistralProvider.ts": {
-    "lumen/empty-catch-why": {
-      "count": 1
-    }
-  },
-  "src/ai/modelManager.ts": {
-    "lumen/empty-catch-why": {
-      "count": 1
-    }
-  },
-  "src/ai/ocr.ts": {
-    "lumen/empty-catch-why": {
-      "count": 1
-    }
-  },
-  "src/ai/ollamaProvider.ts": {
-    "lumen/empty-catch-why": {
-      "count": 2
-    }
-  },
-  "src/ai/policy.ts": {
-    "lumen/empty-catch-why": {
-      "count": 1
-    }
-  },
-  "src/ai/privacyLedger.ts": {
-    "lumen/empty-catch-why": {
-      "count": 5
     }
   },
   "src/ai/prompts.ts": {
@@ -192,94 +94,9 @@
       "count": 6
     }
   },
-  "src/ai/reranker.ts": {
-    "lumen/empty-catch-why": {
-      "count": 1
-    }
-  },
-  "src/ai/responseCache.ts": {
-    "lumen/empty-catch-why": {
-      "count": 2
-    }
-  },
-  "src/ai/semanticSearch.ts": {
-    "lumen/empty-catch-why": {
-      "count": 1
-    }
-  },
-  "src/ai/styleProfiles.ts": {
-    "lumen/empty-catch-why": {
-      "count": 2
-    }
-  },
-  "src/ai/transformersEngine.ts": {
-    "lumen/empty-catch-why": {
-      "count": 1
-    }
-  },
-  "src/ai/usage.ts": {
-    "lumen/empty-catch-why": {
-      "count": 2
-    }
-  },
-  "src/ai/vision.ts": {
-    "lumen/empty-catch-why": {
-      "count": 2
-    }
-  },
-  "src/ai/webllmEngine.ts": {
-    "lumen/empty-catch-why": {
-      "count": 1
-    }
-  },
-  "src/auth/authStatus.ts": {
-    "lumen/empty-catch-why": {
-      "count": 1
-    }
-  },
-  "src/billing/aiQuota.ts": {
-    "lumen/empty-catch-why": {
-      "count": 1
-    }
-  },
-  "src/billing/useEntitlement.ts": {
-    "lumen/empty-catch-why": {
-      "count": 2
-    }
-  },
-  "src/build/cspEndpoints.ts": {
-    "lumen/empty-catch-why": {
-      "count": 3
-    }
-  },
-  "src/cli/publish.ts": {
-    "lumen/empty-catch-why": {
-      "count": 4
-    }
-  },
-  "src/collab/yjs.ts": {
-    "lumen/empty-catch-why": {
-      "count": 5
-    }
-  },
   "src/commands/domains/ai.ts": {
     "@typescript-eslint/no-floating-promises": {
       "count": 1
-    }
-  },
-  "src/commands/domains/git.ts": {
-    "lumen/empty-catch-why": {
-      "count": 1
-    }
-  },
-  "src/commands/domains/research.ts": {
-    "lumen/empty-catch-why": {
-      "count": 1
-    }
-  },
-  "src/commands/domains/vault.ts": {
-    "lumen/empty-catch-why": {
-      "count": 2
     }
   },
   "src/components/AuthButton.tsx": {
@@ -295,27 +112,9 @@
       "count": 1
     }
   },
-  "src/data/codeDoctor.ts": {
-    "lumen/empty-catch-why": {
-      "count": 2
-    }
-  },
-  "src/data/insights.ts": {
-    "lumen/empty-catch-why": {
-      "count": 1
-    }
-  },
   "src/data/parsers.ts": {
-    "lumen/empty-catch-why": {
-      "count": 1
-    },
     "no-useless-escape": {
       "count": 2
-    }
-  },
-  "src/data/smartDetect.ts": {
-    "lumen/empty-catch-why": {
-      "count": 1
     }
   },
   "src/data/suggest.ts": {
@@ -326,15 +125,9 @@
   "src/editor/Editor.tsx": {
     "@typescript-eslint/no-floating-promises": {
       "count": 3
-    },
-    "lumen/empty-catch-why": {
-      "count": 1
     }
   },
   "src/editor/WysiwygEditor.tsx": {
-    "lumen/empty-catch-why": {
-      "count": 2
-    },
     "react-hooks/exhaustive-deps": {
       "count": 1
     }
@@ -344,19 +137,9 @@
       "count": 1
     }
   },
-  "src/hooks/useCollab.ts": {
-    "lumen/empty-catch-why": {
-      "count": 1
-    }
-  },
   "src/hooks/useTauriMenu.ts": {
     "@typescript-eslint/no-floating-promises": {
       "count": 1
-    }
-  },
-  "src/i18n/index.ts": {
-    "lumen/empty-catch-why": {
-      "count": 2
     }
   },
   "src/layouts/EditorLayout.tsx": {
@@ -364,33 +147,8 @@
       "count": 1
     }
   },
-  "src/lib/docsLinks.ts": {
-    "lumen/empty-catch-why": {
-      "count": 1
-    }
-  },
-  "src/lib/logger.ts": {
-    "lumen/empty-catch-why": {
-      "count": 1
-    }
-  },
-  "src/lib/secretStore.ts": {
-    "lumen/empty-catch-why": {
-      "count": 4
-    }
-  },
-  "src/lib/telemetry.ts": {
-    "lumen/empty-catch-why": {
-      "count": 1
-    }
-  },
   "src/lib/textDirection.ts": {
     "no-irregular-whitespace": {
-      "count": 1
-    }
-  },
-  "src/lib/trustedTypes.ts": {
-    "lumen/empty-catch-why": {
       "count": 1
     }
   },
@@ -404,15 +162,7 @@
       "count": 1
     }
   },
-  "src/lib/webVitals.ts": {
-    "lumen/empty-catch-why": {
-      "count": 4
-    }
-  },
   "src/lint/vaultDoctor.ts": {
-    "lumen/empty-catch-why": {
-      "count": 1
-    },
     "no-useless-escape": {
       "count": 2
     }
@@ -425,18 +175,10 @@
   "src/playground/files.ts": {
     "@typescript-eslint/no-unused-expressions": {
       "count": 1
-    },
-    "lumen/empty-catch-why": {
-      "count": 1
     }
   },
   "src/plugins/AbcBlock.tsx": {
     "@typescript-eslint/no-floating-promises": {
-      "count": 1
-    }
-  },
-  "src/plugins/ChartBlock.tsx": {
-    "lumen/empty-catch-why": {
       "count": 1
     }
   },
@@ -455,26 +197,13 @@
       "count": 1
     }
   },
-  "src/plugins/LiveRBlock.tsx": {
-    "lumen/empty-catch-why": {
-      "count": 1
-    }
-  },
   "src/plugins/MapBlock.tsx": {
     "@typescript-eslint/no-floating-promises": {
-      "count": 1
-    },
-    "lumen/empty-catch-why": {
       "count": 1
     }
   },
   "src/plugins/MermaidBlock.tsx": {
     "@typescript-eslint/no-floating-promises": {
-      "count": 1
-    }
-  },
-  "src/plugins/Model3DBlock.tsx": {
-    "lumen/empty-catch-why": {
       "count": 1
     }
   },
@@ -486,26 +215,6 @@
   "src/plugins/liveJsScope.ts": {
     "no-irregular-whitespace": {
       "count": 2
-    }
-  },
-  "src/plugins/lua/luaRuntime.ts": {
-    "lumen/empty-catch-why": {
-      "count": 1
-    }
-  },
-  "src/plugins/r/rRuntime.ts": {
-    "lumen/empty-catch-why": {
-      "count": 3
-    }
-  },
-  "src/plugins/ruby/rubyRuntime.ts": {
-    "lumen/empty-catch-why": {
-      "count": 2
-    }
-  },
-  "src/pwa/launch.ts": {
-    "lumen/empty-catch-why": {
-      "count": 1
     }
   },
   "src/renderer/Preview.tsx": {
@@ -521,51 +230,8 @@
       "count": 1
     }
   },
-  "src/renderer/shiki.ts": {
-    "lumen/empty-catch-why": {
-      "count": 2
-    }
-  },
-  "src/research/agent.ts": {
-    "lumen/empty-catch-why": {
-      "count": 3
-    }
-  },
-  "src/research/citations.ts": {
-    "lumen/empty-catch-why": {
-      "count": 1
-    }
-  },
   "src/research/client.ts": {
     "@typescript-eslint/no-floating-promises": {
-      "count": 1
-    },
-    "lumen/empty-catch-why": {
-      "count": 1
-    }
-  },
-  "src/research/clipper.ts": {
-    "lumen/empty-catch-why": {
-      "count": 1
-    }
-  },
-  "src/storage/aiPromptHistory.ts": {
-    "lumen/empty-catch-why": {
-      "count": 2
-    }
-  },
-  "src/storage/clearLumenState.ts": {
-    "lumen/empty-catch-why": {
-      "count": 1
-    }
-  },
-  "src/storage/exportDocx.ts": {
-    "lumen/empty-catch-why": {
-      "count": 1
-    }
-  },
-  "src/storage/exportHtml.ts": {
-    "lumen/empty-catch-why": {
       "count": 1
     }
   },
@@ -575,48 +241,10 @@
     }
   },
   "src/storage/fileFormats.ts": {
-    "lumen/empty-catch-why": {
-      "count": 1
-    },
     "no-control-regex": {
       "count": 1
     },
     "no-useless-escape": {
-      "count": 1
-    }
-  },
-  "src/storage/fs.ts": {
-    "lumen/empty-catch-why": {
-      "count": 2
-    }
-  },
-  "src/storage/iwork.ts": {
-    "lumen/empty-catch-why": {
-      "count": 2
-    }
-  },
-  "src/storage/linkRewrite.ts": {
-    "lumen/empty-catch-why": {
-      "count": 1
-    }
-  },
-  "src/storage/searchHistory.ts": {
-    "lumen/empty-catch-why": {
-      "count": 1
-    }
-  },
-  "src/storage/templateMarketplace.ts": {
-    "lumen/empty-catch-why": {
-      "count": 5
-    }
-  },
-  "src/storage/workspaceNotes.ts": {
-    "lumen/empty-catch-why": {
-      "count": 1
-    }
-  },
-  "src/store/useStore.ts": {
-    "lumen/empty-catch-why": {
       "count": 1
     }
   },
@@ -633,9 +261,6 @@
       "count": 1
     },
     "jsx-a11y/no-static-element-interactions": {
-      "count": 1
-    },
-    "lumen/empty-catch-why": {
       "count": 1
     }
   },
@@ -654,26 +279,8 @@
       "count": 2
     }
   },
-  "src/sync/cloud/sync.ts": {
-    "lumen/empty-catch-why": {
-      "count": 1
-    }
-  },
   "src/sync/git.ts": {
     "@typescript-eslint/no-floating-promises": {
-      "count": 1
-    },
-    "lumen/empty-catch-why": {
-      "count": 6
-    }
-  },
-  "src/sync/gitWatch.ts": {
-    "lumen/empty-catch-why": {
-      "count": 1
-    }
-  },
-  "src/sync/publish.ts": {
-    "lumen/empty-catch-why": {
       "count": 1
     }
   },
@@ -685,9 +292,6 @@
       "count": 1
     },
     "jsx-a11y/no-static-element-interactions": {
-      "count": 1
-    },
-    "lumen/empty-catch-why": {
       "count": 1
     }
   },
@@ -712,9 +316,6 @@
       "count": 1
     },
     "jsx-a11y/no-static-element-interactions": {
-      "count": 1
-    },
-    "lumen/empty-catch-why": {
       "count": 1
     }
   },
@@ -760,9 +361,6 @@
     },
     "jsx-a11y/no-static-element-interactions": {
       "count": 1
-    },
-    "lumen/empty-catch-why": {
-      "count": 1
     }
   },
   "src/ui/CommandPalette.tsx": {
@@ -804,9 +402,6 @@
     },
     "jsx-a11y/role-supports-aria-props": {
       "count": 1
-    },
-    "lumen/empty-catch-why": {
-      "count": 1
     }
   },
   "src/ui/FineTuneSettings.tsx": {
@@ -820,9 +415,6 @@
       "count": 1
     },
     "jsx-a11y/no-static-element-interactions": {
-      "count": 1
-    },
-    "lumen/empty-catch-why": {
       "count": 1
     }
   },
@@ -839,9 +431,6 @@
       "count": 1
     },
     "jsx-a11y/no-noninteractive-element-interactions": {
-      "count": 1
-    },
-    "lumen/empty-catch-why": {
       "count": 1
     }
   },
@@ -889,11 +478,6 @@
       "count": 1
     }
   },
-  "src/ui/PrintExport.tsx": {
-    "lumen/empty-catch-why": {
-      "count": 1
-    }
-  },
   "src/ui/PrivacyLedgerPanel.tsx": {
     "jsx-a11y/click-events-have-key-events": {
       "count": 2
@@ -907,9 +491,6 @@
   },
   "src/ui/PromptDialog.tsx": {
     "jsx-a11y/no-noninteractive-element-interactions": {
-      "count": 1
-    },
-    "lumen/empty-catch-why": {
       "count": 1
     }
   },
@@ -933,9 +514,6 @@
     },
     "jsx-a11y/no-static-element-interactions": {
       "count": 4
-    },
-    "lumen/empty-catch-why": {
-      "count": 2
     }
   },
   "src/ui/SidebarResizer.tsx": {
@@ -1001,11 +579,6 @@
     },
     "jsx-a11y/no-static-element-interactions": {
       "count": 1
-    }
-  },
-  "src/ui/VoiceDictation.tsx": {
-    "lumen/empty-catch-why": {
-      "count": 2
     }
   }
 }
