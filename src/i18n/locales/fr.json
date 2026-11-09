@@ -1377,5 +1377,10 @@
   "cmd.ai.rerankModel": "IA : réordonner la recherche avec le modèle local",
   "cmd.ai.rerankModel.hint": "Activé : bge-reranker-v2-m3 sur cet appareil (téléchargement unique ~570 Mo). Désactivé : correspondance rapide des mots.",
   "toast.rerankModelOn": "Réordonnancement : modèle local (téléchargé à la première utilisation)",
-  "toast.rerankModelOff": "Réordonnancement : correspondance des mots"
+  "toast.rerankModelOff": "Réordonnancement : correspondance des mots",
+  "cmd.image.altText": "Images : texte alternatif par OCR / vision locale",
+  "cmd.image.altText.hint": "Lit le texte des images de cette note sur l’appareil (hébreu + anglais) ; décrit le reste avec un modèle de vision Ollama local",
+  "toast.imageAlt.none": "Aucune image sans texte alternatif dans cette note",
+  "toast.imageAlt.working": "Lecture des images sur l’appareil : {count}…",
+  "toast.imageAlt.done": "Texte alternatif ajouté : {done} sur {count}"
 }

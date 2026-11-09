@@ -59,6 +59,11 @@ const RULES: Rule[] = [
     category: "model-download",
     reason: "Model download (Hugging Face)",
   },
+  {
+    test: (h) => h === "raw.githubusercontent.com",
+    category: "model-download",
+    reason: "Dictionary / OCR model download (GitHub)",
+  },
 ];
 
 const MAX_ENTRIES = 500;

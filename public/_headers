@@ -28,6 +28,13 @@
   ! X-Frame-Options
   Content-Security-Policy: default-src 'none'; script-src 'self' blob: 'unsafe-eval'; worker-src blob:; connect-src 'none'; img-src 'none'; style-src 'none'; frame-ancestors 'self'; base-uri 'none'; form-action 'none'
 
+# On-device OCR (T31): the tesseract.js worker and its wasm cores. Dedicated
+# workers get their own policy from their response; the app's Trusted Types
+# requirement would block the worker's own importScripts() of the core.
+/tesseract/*
+  ! Content-Security-Policy
+  Content-Security-Policy: default-src 'none'; script-src 'self' 'wasm-unsafe-eval'; connect-src 'self' https://raw.githubusercontent.com; worker-src 'self' blob:; base-uri 'none'; form-action 'none'
+
 # The runner's opaque origin ("null") loads its own module chunks and Vue's
 # ESM build with CORS: allow any origin to read these public, static,
 # credential-free files.

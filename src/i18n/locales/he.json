@@ -1377,5 +1377,10 @@
   "cmd.ai.rerankModel": "AI: דירוג חיפוש עם המודל המקומי",
   "cmd.ai.rerankModel.hint": "פעיל: bge-reranker-v2-m3 במכשיר (הורדה חד-פעמית של ‎~570MB). כבוי: התאמת מילים מהירה.",
   "toast.rerankModelOn": "דירוג החיפוש: מודל מקומי (יורד בשימוש הראשון)",
-  "toast.rerankModelOff": "דירוג החיפוש: התאמת מילים"
+  "toast.rerankModelOff": "דירוג החיפוש: התאמת מילים",
+  "cmd.image.altText": "תמונות: טקסט חלופי מ-OCR / ראייה מקומית",
+  "cmd.image.altText.hint": "קורא את הטקסט שבתמונות הפתק במכשיר (עברית ואנגלית); מתאר את השאר עם מודל ראייה מקומי ב-Ollama",
+  "toast.imageAlt.none": "אין בפתק תמונות שצריכות טקסט חלופי",
+  "toast.imageAlt.working": "קורא תמונות במכשיר: {count}…",
+  "toast.imageAlt.done": "נוסף טקסט חלופי: {done} מתוך {count}"
 }

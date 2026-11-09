@@ -286,6 +286,9 @@ export default defineConfig({
           // the ONNX Runtime wasm it loads (~40 MB, staged by copy-ort).
           "**/transformers.worker-*.js",
           "ort/**",
+          // tesseract.js worker + LSTM cores (~12 MB, scripts/copy-tesseract.mjs):
+          // fetched on the first OCR.
+          "tesseract/**",
           // onnxruntime-web also references its wasm by `new URL(…,
           // import.meta.url)`, so Vite emits a copy under assets/; the
           // worker loads the staged public/ort/ files instead.

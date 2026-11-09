@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-10-17T23:20:11.253Z",
+  "generated_at": "2026-10-17T23:44:06.495Z",
   "source": "src/i18n/index.ts (en bundle)",
-  "count": 1379,
+  "count": 1384,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -1692,6 +1692,36 @@
       "key": "cmd.file.trash.hint",
       "en": "Restore deleted notes (kept 30 days)",
       "vars": []
+    },
+    {
+      "key": "cmd.image.altText",
+      "en": "Images: alt text from OCR / local vision",
+      "vars": []
+    },
+    {
+      "key": "cmd.image.altText.hint",
+      "en": "Reads text in this note's images on this device (Hebrew + English); describes the rest with a local Ollama vision model",
+      "vars": []
+    },
+    {
+      "key": "toast.imageAlt.none",
+      "en": "No images that need alt text in this note",
+      "vars": []
+    },
+    {
+      "key": "toast.imageAlt.working",
+      "en": "Reading images on this device: {count}…",
+      "vars": [
+        "count"
+      ]
+    },
+    {
+      "key": "toast.imageAlt.done",
+      "en": "Alt text added: {done} of {count}",
+      "vars": [
+        "done",
+        "count"
+      ]
     },
     {
       "key": "vaultCite.unsupported",

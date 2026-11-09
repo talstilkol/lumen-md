@@ -1377,5 +1377,10 @@
   "cmd.ai.rerankModel": "AI: ローカルモデルで検索を並べ替え",
   "cmd.ai.rerankModel.hint": "オン: この端末で bge-reranker-v2-m3（初回のみ約 570 MB をダウンロード）。オフ: 高速な単語一致。",
   "toast.rerankModelOn": "検索の並べ替え: ローカルモデル（初回使用時にダウンロード）",
-  "toast.rerankModelOff": "検索の並べ替え: 単語一致"
+  "toast.rerankModelOff": "検索の並べ替え: 単語一致",
+  "cmd.image.altText": "画像: OCR / ローカル画像認識で代替テキスト",
+  "cmd.image.altText.hint": "このノートの画像内の文字を端末上で読み取り（ヘブライ語・英語）、それ以外はローカルの Ollama 画像モデルで説明します",
+  "toast.imageAlt.none": "代替テキストが必要な画像はありません",
+  "toast.imageAlt.working": "端末上で画像を読み取り中: {count} 件…",
+  "toast.imageAlt.done": "代替テキストを追加: {count} 件中 {done} 件"
 }

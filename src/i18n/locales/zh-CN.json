@@ -1377,5 +1377,10 @@
   "cmd.ai.rerankModel": "AI：用本地模型重新排序搜索结果",
   "cmd.ai.rerankModel.hint": "开：在本设备运行 bge-reranker-v2-m3（一次性下载约 570 MB）。关：快速词语匹配。",
   "toast.rerankModelOn": "搜索排序：本地模型（首次使用时下载）",
-  "toast.rerankModelOff": "搜索排序：词语匹配"
+  "toast.rerankModelOff": "搜索排序：词语匹配",
+  "cmd.image.altText": "图片：用 OCR / 本地视觉生成替代文本",
+  "cmd.image.altText.hint": "在本设备识别此笔记图片中的文字（希伯来语+英语）；其余用本地 Ollama 视觉模型描述",
+  "toast.imageAlt.none": "此笔记中没有需要替代文本的图片",
+  "toast.imageAlt.working": "正在本设备读取图片：{count}…",
+  "toast.imageAlt.done": "已添加替代文本：{count} 张中的 {done} 张"
 }

@@ -36,7 +36,7 @@ import { PROMPTS } from "../ai/prompts";
 import { embedHintExtension } from "./embedHintExtension";
 import { insertSlashMenuExtension } from "./insertMenu";
 import { collabAwarenessExtension } from "./collabAwareness";
-import { t as i18nT } from "../i18n";
+import { t as i18nT, getLocale } from "../i18n";
 // y-codemirror.next (and the yjs stack behind it) is loaded on demand inside
 // the collab effect below — a static import dragged ~60KB gz of yjs into the
 // eager boot path for a feature that's off until a session starts.
@@ -91,6 +91,15 @@ interface EditorProps {
   collab?: CollabSession | null;
   /** Suggesting mode (track changes): record edits as CriticMarkup. */
   suggesting?: boolean;
+}
+
+/** Automatic alt text for pasted images (T31); `lumen.ai.imageText` = "off" disables it. */
+function imageTextEnabled(): boolean {
+  try {
+    return localStorage.getItem("lumen.ai.imageText") !== "off";
+  } catch {
+    return true;
+  }
 }
 
 export interface EditorHandle {
@@ -436,6 +445,7 @@ export const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
     async function handleAssetFiles(view: EditorView, files: File[]) {
       const onAsset = onAddAssetRef.current;
       const inserts: string[] = [];
+      const placed: Array<{ file: File; url: string; alt: string }> = [];
       for (const f of files) {
         let url: string | null = null;
         if (onAsset) {
@@ -456,6 +466,7 @@ export const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
         }
         const alt = f.name.replace(/\.[^.]+$/, "");
         inserts.push(`![${alt}](${url})`);
+        placed.push({ file: f, url, alt });
       }
       const text = inserts.join("\n\n") + "\n";
       const { from, to } = view.state.selection.main;
@@ -463,6 +474,23 @@ export const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
         changes: { from, to, insert: text },
         selection: { anchor: from + text.length },
       });
+      // T31: real alt text in the background — OCR on this device (Hebrew +
+      // English), else a local vision model; the file name stays otherwise.
+      if (imageTextEnabled()) {
+        for (const p of placed) {
+          if (p.url.startsWith("data:")) continue;
+          void (async () => {
+            const { imageText, escapeAlt, escapeTitle } = await import("../ai/vision");
+            const res = await imageText(p.file, getLocale()).catch(() => null);
+            if (!res || res.source === "none") return;
+            const target = `![${p.alt}](${p.url})`;
+            const at = view.state.doc.toString().indexOf(target);
+            if (at < 0) return; // the user already changed it
+            const title = res.title ? ` "${escapeTitle(res.title)}"` : "";
+            view.dispatch({ changes: { from: at, to: at + target.length, insert: `![${escapeAlt(res.alt)}](${p.url}${title})` } });
+          })();
+        }
+      }
     }
 
     const view = new EditorView({ state: startState, parent: hostRef.current });
