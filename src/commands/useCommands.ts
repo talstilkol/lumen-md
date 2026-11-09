@@ -1243,6 +1243,8 @@ export function useCommands({
             const job = await batch.submitBatch(op, notes, { lang });
             if (Number.isFinite(quota.limit)) for (let i = 0; i < notes.length; i++) recordAiPrompt();
             showAiToast(t("batch.submitted", { count: job.items.length }), "success");
+            // Live progress, with pause / resume / cancel (plan 5.8).
+            if (job.provider === "local") void import("../ui/BatchPanel").then((m) => m.openBatchPanel());
           } catch (e) {
             showAiToast((e as Error).message, "error");
           }
@@ -1343,6 +1345,17 @@ export function useCommands({
           // File tree, tags, backlinks and database views refresh on this.
           if (wroteAny) window.dispatchEvent(new CustomEvent("lumen-workspace-changed"));
           if (processing) showAiToast(t("batch.processing", { count: processing }), "info");
+        },
+      },
+      {
+        id: "ai.batchJobs",
+        label: t("cmd.ai.batchJobs"),
+        hint: t("cmd.ai.batchJobs.hint"),
+        icon: cmdIcons.Sparkles,
+        group: t("group.tools"),
+        action: async () => {
+          const { openBatchPanel } = await import("../ui/BatchPanel");
+          openBatchPanel();
         },
       },
       {
