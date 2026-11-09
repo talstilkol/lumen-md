@@ -1439,5 +1439,13 @@
   "cmd.ai.cancel": "ИИ: отменить",
   "cmd.ai.cancel.hint": "Останавливает все запросы ИИ (то же делает Esc)",
   "toast.aiCancelled": "Запрос ИИ отменён ({count})",
-  "toast.aiNothingRunning": "Нет активных запросов ИИ"
+  "toast.aiNothingRunning": "Нет активных запросов ИИ",
+  "settings.title": "Настройки",
+  "settings.search": "Поиск по настройкам",
+  "settings.empty": "Нет подходящих настроек",
+  "settings.general": "Общие",
+  "settings.language": "Язык",
+  "settings.telemetryOptOut": "Не отправлять отчёты об ошибках",
+  "settings.imported": "Импортировано настроек: {n}, пропущено: {skipped}",
+  "settings.importFailed": "Этот файл не является файлом настроек Lumen."
 }

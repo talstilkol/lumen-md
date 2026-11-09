@@ -26,6 +26,8 @@ import type { ModelCacheKind, StorageEstimateResult } from "../ai/modelStorage";
 interface Props {
   open: boolean;
   onClose: () => void;
+  /** Rendered as a tab of the settings screen: no backdrop, no own close. */
+  embedded?: boolean;
 }
 
 type RunnerId = Exclude<ExecutorId, "transformers">;
@@ -74,7 +76,7 @@ function bytes(n: number): string {
   return `${Math.round(n / 1024)} KB`;
 }
 
-export function AiSettingsPanel({ open, onClose }: Props) {
+export function AiSettingsPanel({ open, onClose, embedded = false }: Props) {
   const [policy, setPolicyState] = useState<AiPolicy>("local-only");
   const [pref, setPref] = useState<ExecutorId | "auto">("auto");
   const [status, setStatus] = useState<Record<RunnerId, Status>>({ ollama: "checking", webllm: "checking", chat: "checking" });
@@ -347,19 +349,27 @@ export function AiSettingsPanel({ open, onClose }: Props) {
     s === "checking" ? t("ai.settings.checking") : s.available ? t("ai.settings.available") : t("ai.settings.unavailable", { reason: s.detail ?? "" });
 
   return (
-    <div className="cmd-palette-backdrop" onClick={onClose} role="dialog" aria-modal="true" aria-label={t("ai.settings.title")}>
+    <div
+      className={embedded ? undefined : "cmd-palette-backdrop"}
+      onClick={embedded ? undefined : onClose}
+      role={embedded ? "region" : "dialog"}
+      aria-modal={embedded ? undefined : "true"}
+      aria-label={t("ai.settings.title")}
+    >
       <div
-        className="cmd-palette"
+        className={embedded ? undefined : "cmd-palette"}
         onClick={(e) => e.stopPropagation()}
-        style={{ maxWidth: 600, padding: 0, display: "flex", flexDirection: "column", maxHeight: "85vh" }}
+        style={embedded ? { display: "flex", flexDirection: "column" } : { maxWidth: 600, padding: 0, display: "flex", flexDirection: "column", maxHeight: "85vh" }}
       >
         <header style={{ padding: "14px 18px", borderBottom: "1px solid hsl(var(--border))", display: "flex", gap: 10, alignItems: "center" }}>
           <Cpu size={18} style={{ color: "hsl(var(--accent))" }} />
           <h2 style={{ margin: 0, fontSize: 16, fontWeight: 600, flex: 1 }}>{t("ai.settings.title")}</h2>
           {saved && <span style={muted}>{t("ai.settings.saved")}</span>}
-          <button type="button" style={ghost} onClick={onClose} aria-label={t("ai.settings.close")}>
-            <X size={16} />
-          </button>
+          {!embedded && (
+            <button type="button" style={ghost} onClick={onClose} aria-label={t("ai.settings.close")}>
+              <X size={16} />
+            </button>
+          )}
         </header>
 
         <div style={{ padding: 18, display: "flex", flexDirection: "column", gap: 14, fontSize: 13, lineHeight: 1.5, overflowY: "auto" }}>

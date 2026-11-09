@@ -1439,5 +1439,13 @@
   "cmd.ai.cancel": "AI: キャンセル",
   "cmd.ai.cancel.hint": "実行中の AI リクエストをすべて停止します（Esc でも可）",
   "toast.aiCancelled": "AI リクエストをキャンセルしました（{count}）",
-  "toast.aiNothingRunning": "実行中の AI リクエストはありません"
+  "toast.aiNothingRunning": "実行中の AI リクエストはありません",
+  "settings.title": "設定",
+  "settings.search": "設定を検索",
+  "settings.empty": "一致する設定はありません",
+  "settings.general": "一般",
+  "settings.language": "言語",
+  "settings.telemetryOptOut": "エラーレポートを送信しない",
+  "settings.imported": "{n} 件の設定を読み込み、{skipped} 件をスキップしました",
+  "settings.importFailed": "このファイルは Lumen の設定ファイルではありません。"
 }

@@ -18,6 +18,8 @@ import { getSecret, setSecret } from "../lib/secretStore";
 
 interface Props {
   onClose: () => void;
+  /** Rendered as a tab of the settings screen: no backdrop; Save stays open. */
+  embedded?: boolean;
 }
 
 const SIGNALING_KEY = "lumen.collab.signaling";
@@ -44,7 +46,7 @@ function writeKey(key: string, value: string): void {
   }
 }
 
-export function CollabSettings({ onClose }: Props) {
+export function CollabSettings({ onClose, embedded = false }: Props) {
   const persistentAllowed = useCapability("persistentCollab");
   // While the plan is loading (or its check failed) "not allowed" is only a
   // placeholder: keep the saved persistent URL rather than erase it.
@@ -53,6 +55,7 @@ export function CollabSettings({ onClose }: Props) {
   const [wsUrl, setWsUrl] = useState(() => readKey(PERSISTENT_KEY));
   const [wsToken, setWsToken] = useState(() => getSecret(WS_TOKEN_KEY) ?? "");
   const [publicSignaling, setPublicSignaling] = useState(() => readKey(PUBLIC_SIGNALING_KEY) === "1");
+  const [saved, setSaved] = useState(false);
 
   const handleSave = () => {
     writeKey(SIGNALING_KEY, url.trim());
@@ -62,12 +65,13 @@ export function CollabSettings({ onClose }: Props) {
       setSecret(WS_TOKEN_KEY, wsToken.trim() || null);
     }
     else if (planKnown) writeKey(PERSISTENT_KEY, ""); // an established downgrade
-    onClose();
+    if (embedded) setSaved(true);
+    else onClose();
   };
 
   return (
     <div
-      style={{
+      style={embedded ? undefined : {
         position: "fixed",
         inset: 0,
         // CSS var → React rejects it as a number, so cast through unknown.
@@ -79,11 +83,11 @@ export function CollabSettings({ onClose }: Props) {
         backdropFilter: "blur(4px)",
       }}
       onClick={(e) => {
-        if (e.target === e.currentTarget) onClose();
+        if (!embedded && e.target === e.currentTarget) onClose();
       }}
     >
       <div
-        style={{
+        style={embedded ? undefined : {
           background: "hsl(var(--bg))",
           border: "1px solid hsl(var(--border))",
           borderRadius: 12,
@@ -217,6 +221,7 @@ export function CollabSettings({ onClose }: Props) {
             marginTop: 16,
           }}
         >
+          {saved && <span style={{ alignSelf: "center", fontSize: 12, color: "hsl(var(--fg-muted))" }}>{t("ai.settings.saved")}</span>}
           <button
             onClick={onClose}
             className="icon-btn"
