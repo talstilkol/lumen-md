@@ -13,6 +13,7 @@
  */
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useFocusTrap } from "./useFocusTrap";
 import { Cpu, X } from "lucide-react";
 import { t } from "../i18n";
 import { ollamaLicenceNotice } from "../ai/modelCatalog";
@@ -201,6 +202,10 @@ export function AiSettingsPanel({ open, onClose }: Props) {
     };
   }, [open, refreshStatus, refreshStorage]);
 
+  // Focus stays in the dialog while it is open and returns on close; Escape closes it (plan 10.1).
+  const trapRef = useRef<HTMLDivElement | null>(null);
+  useFocusTrap(trapRef, { active: open, onEscape: onClose });
+
   if (!open) return null;
 
   const flash = () => {
@@ -359,7 +364,7 @@ export function AiSettingsPanel({ open, onClose }: Props) {
     s === "checking" ? t("ai.settings.checking") : s.available ? t("ai.settings.available") : t("ai.settings.unavailable", { reason: s.detail ?? "" });
 
   return (
-    <div className="cmd-palette-backdrop" onClick={onClose} role="dialog" aria-modal="true" aria-label={t("ai.settings.title")}>
+    <div className="cmd-palette-backdrop" onClick={onClose} ref={trapRef} role="dialog" aria-modal="true" aria-label={t("ai.settings.title")}>
       <div
         className="cmd-palette"
         onClick={(e) => e.stopPropagation()}

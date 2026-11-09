@@ -3,6 +3,7 @@ import { extractToc } from "../renderer/pipeline";
 import { LARGE_DOC_CHARS } from "../renderer/previewDoc";
 import type { IncrementalToc, TocEntry } from "../renderer/incrementalToc";
 import { t } from "../i18n";
+import { scrollBehavior } from "../lib/motion";
 
 interface Props {
   markdownText: string;
@@ -112,7 +113,7 @@ export const Outline = React.memo(function Outline({ markdownText }: Props) {
               onClick={(e) => {
                 e.preventDefault();
                 const el = document.getElementById(h.id);
-                if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+                if (el) el.scrollIntoView({ behavior: scrollBehavior(), block: "start" });
               }}
             >
               {h.text}

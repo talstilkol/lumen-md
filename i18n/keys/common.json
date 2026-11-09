@@ -4,6 +4,11 @@
   "source": "src/i18n/locales/en/common.json",
   "entries": [
     {
+      "key": "a11y.sidebarResizer",
+      "en": "Resize the sidebar",
+      "vars": []
+    },
+    {
       "key": "a11y.skipToContent",
       "en": "Skip to content",
       "vars": []

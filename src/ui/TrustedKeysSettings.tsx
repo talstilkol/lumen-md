@@ -7,7 +7,8 @@
  * user keys. Built-in keys are read-only: they come from the deployment.
  */
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useRef } from "react";
+import { useFocusTrap } from "./useFocusTrap";
 import { KeyRound, Trash2, X, ShieldCheck } from "lucide-react";
 import {
   listTrustedKeys,
@@ -47,14 +48,6 @@ export function TrustedKeysSettings({ open, onClose }: Props) {
     void refresh();
   }, [open, refresh]);
 
-  useEffect(() => {
-    if (!open) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
-    document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
-  }, [open, onClose]);
 
   const handleAdd = useCallback(
     async (e: React.FormEvent) => {
@@ -111,6 +104,10 @@ export function TrustedKeysSettings({ open, onClose }: Props) {
     [refresh],
   );
 
+  // Focus stays in the dialog while it is open and returns on close; Escape closes it (plan 10.1).
+  const trapRef = useRef<HTMLDivElement | null>(null);
+  useFocusTrap(trapRef, { active: open, onEscape: onClose });
+
   if (!open) return null;
 
   const builtin = keys?.filter((k) => k.source === "builtin") ?? [];
@@ -120,6 +117,7 @@ export function TrustedKeysSettings({ open, onClose }: Props) {
     <div className="cmd-palette-backdrop" onClick={onClose}>
       <div
         className="cmd-palette"
+        ref={trapRef}
         role="dialog"
         aria-modal="true"
         aria-labelledby="trusted-keys-title"

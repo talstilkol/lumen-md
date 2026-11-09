@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useRef } from "react";
+import { useMemo, useRef } from "react";
+import { useFocusTrap } from "./useFocusTrap";
 import { t } from "../i18n";
 import { detectIsMac } from "../lib/detectIsMac";
 
@@ -67,17 +68,9 @@ export function KeyboardShortcuts({ open, onClose }: Props) {
     [],
   );
 
-  useEffect(() => {
-    if (!open) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        e.preventDefault();
-        onClose();
-      }
-    };
-    document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
-  }, [open, onClose]);
+  // Focus stays in the dialog while it is open and returns on close; Escape closes it (plan 10.1).
+  const trapRef = useRef<HTMLDivElement | null>(null);
+  useFocusTrap(trapRef, { active: open, onEscape: onClose });
 
   if (!open) return null;
 
@@ -85,6 +78,7 @@ export function KeyboardShortcuts({ open, onClose }: Props) {
     <div
       className="cmd-palette-backdrop"
       onClick={onClose}
+      ref={trapRef}
       role="dialog"
       aria-modal="true"
       aria-label={t("toolbar.shortcuts")}

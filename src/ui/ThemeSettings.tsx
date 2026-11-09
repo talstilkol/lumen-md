@@ -8,6 +8,7 @@
  */
 
 import { useEffect, useId, useRef, useState } from "react";
+import { useFocusTrap } from "./useFocusTrap";
 import { Palette as PaletteIcon, X, Download, Upload, RotateCcw, Check, AlertTriangle } from "lucide-react";
 import { useAppStore } from "../store/useStore";
 import {
@@ -66,14 +67,9 @@ export function ThemeSettings({ open, onClose }: Props) {
     setAccentDraft("");
   }, [open]);
 
-  useEffect(() => {
-    if (!open) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
-    document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
-  }, [open, onClose]);
+  // Focus stays in the dialog while it is open and returns on close; Escape closes it (plan 10.1).
+  const trapRef = useRef<HTMLDivElement | null>(null);
+  useFocusTrap(trapRef, { active: open, onEscape: onClose });
 
   if (!open) return null;
 
@@ -117,6 +113,7 @@ export function ThemeSettings({ open, onClose }: Props) {
     <div className="cmd-palette-backdrop" onClick={onClose}>
       <div
         className="cmd-palette"
+        ref={trapRef}
         role="dialog"
         aria-modal="true"
         aria-labelledby={`${ids}-title`}

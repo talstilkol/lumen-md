@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Preview } from "../renderer/Preview";
 import { t } from "../i18n";
+import { scrollBehavior } from "../lib/motion";
 
 /**
  * Word-style paginated page view with page numbers and navigation.
@@ -41,7 +42,7 @@ export function PageView({ markdownText, docKey = null }: Props) {
       if (containerRef.current) {
         containerRef.current.scrollTo({
           top: (clamped - 1) * (PAGE_HEIGHT + 40),
-          behavior: "smooth",
+          behavior: scrollBehavior(),
         });
       }
     },

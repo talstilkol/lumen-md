@@ -1,4 +1,5 @@
 {
+  "a11y.sidebarResizer": "サイドバーの幅を変更",
   "a11y.skipToContent": "コンテンツへスキップ",
   "agentReview.approve": "承認",
   "agentReview.approveAll": "すべて承認（{count}）",
