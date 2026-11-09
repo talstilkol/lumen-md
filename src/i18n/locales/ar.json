@@ -1468,5 +1468,10 @@
   "toast.nikud.noHost": "نموذج التنقيط غير متاح للتنزيل بعد (لم يُعدّ مكان استضافته).",
   "toast.nikud.declined": "يتطلب التنقيط تنزيل النموذج؛ لم يتغير شيء.",
   "toast.nikud.failed": "فشل التنقيط: {error}",
-  "models.purpose.nikud": "التنقيط العبري على هذا الجهاز"
+  "models.purpose.nikud": "التنقيط العبري على هذا الجهاز",
+  "toast.nikud.done": "أُضيف التشكيل على هذا الجهاز. الكلمات المسطَّرة لها أكثر من قراءة: انقر على كلمة لترى قراءاتها (Alt+نقر على أي كلمة).",
+  "toast.nikud.doneHigh": "أُضيف التشكيل على هذا الجهاز باستخدام DictaBERT-char-menaked (جودة عالية). الكلمات المسطَّرة لها أكثر من قراءة: انقر على كلمة لترى قراءاتها.",
+  "models.purpose.nikudHigh": "تشكيل عبري عالي الجودة (DictaBERT-char-menaked) على هذا الجهاز",
+  "nikud.alt.title": "قراءات أخرى",
+  "nikud.alt.choose": "استخدم «{word}»"
 }

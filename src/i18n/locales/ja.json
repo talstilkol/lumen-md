@@ -1468,5 +1468,10 @@
   "toast.nikud.noHost": "ニクードのモデルはまだダウンロードできません（ホストが未設定です）。",
   "toast.nikud.declined": "ニクードにはモデルのダウンロードが必要です。何も変更していません。",
   "toast.nikud.failed": "ニクードに失敗しました：{error}",
-  "models.purpose.nikud": "このデバイスでのヘブライ語ニクード"
+  "models.purpose.nikud": "このデバイスでのヘブライ語ニクード",
+  "toast.nikud.done": "このデバイスでニクードを付けました。下線の付いた語は複数の読み方があります。クリックすると読み方を表示します（どの語でも Alt+クリック）。",
+  "toast.nikud.doneHigh": "DictaBERT-char-menaked（高品質）でこのデバイスにニクードを付けました。下線の付いた語は複数の読み方があります。クリックすると表示します。",
+  "models.purpose.nikudHigh": "このデバイスでの高品質なヘブライ語ニクード（DictaBERT-char-menaked）",
+  "nikud.alt.title": "ほかの読み方",
+  "nikud.alt.choose": "「{word}」を使う"
 }

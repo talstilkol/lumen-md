@@ -1468,5 +1468,10 @@
   "toast.nikud.noHost": "Das Niqqud-Modell ist noch nicht herunterladbar (sein Hosting ist nicht eingerichtet).",
   "toast.nikud.declined": "Niqqud braucht den Modell-Download; nichts wurde geändert.",
   "toast.nikud.failed": "Niqqud fehlgeschlagen: {error}",
-  "models.purpose.nikud": "Hebräischer Niqqud auf diesem Gerät"
+  "models.purpose.nikud": "Hebräischer Niqqud auf diesem Gerät",
+  "toast.nikud.done": "Niqqud auf diesem Gerät hinzugefügt. Unterstrichene Wörter lassen sich mehrfach lesen: Klicken Sie eines an, um die Lesarten zu sehen (Alt+Klick auf jedes Wort).",
+  "toast.nikud.doneHigh": "Niqqud auf diesem Gerät mit DictaBERT-char-menaked (hohe Qualität) hinzugefügt. Unterstrichene Wörter lassen sich mehrfach lesen: Klicken Sie eines an.",
+  "models.purpose.nikudHigh": "Hochwertiges hebräisches Niqqud (DictaBERT-char-menaked) auf diesem Gerät",
+  "nikud.alt.title": "Andere Lesarten",
+  "nikud.alt.choose": "„{word}“ verwenden"
 }

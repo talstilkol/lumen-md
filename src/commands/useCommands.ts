@@ -205,15 +205,23 @@ export function useCommands({
     const view = getEditorView?.();
     if (!view) return;
     try {
-      const [{ runNikudCommand }, svc] = await Promise.all([import("../editor/nikudCommand"), import("../ai/nikudService")]);
+      const [{ runNikudCommand }, svc, alt] = await Promise.all([import("../editor/nikudCommand"), import("../ai/nikudService"), import("../editor/nikudAlternatives")]);
       if (mode !== "remove") showAiToast(t("toast.nikud.working"), "info");
+      let engine = "";
       const changed = await cancellable((signal) =>
         runNikudCommand(view, mode, {
-          point: (text, partial) => svc.pointHebrew(text, { consent: { confirm: uiConfirm, t, locale }, signal }, { partial }),
+          point: async (text, partial) => {
+            const r = await svc.pointHebrewDetailed(text, { consent: { confirm: uiConfirm, t, locale }, signal }, { partial });
+            engine = r.engine;
+            return r;
+          },
           unpoint: svc.unpointHebrew,
+          // W2.5: each pointed word keeps its other readings (click an underlined word).
+          onPointed: (v, from, words) => alt.rememberNikudAlternatives(v, from, words, t),
         }),
       );
       if (!changed) showAiToast(t("toast.nikud.nothing"), "info");
+      else if (engine) showAiToast(t(engine === "menaked" ? "toast.nikud.doneHigh" : "toast.nikud.done"), "success");
     } catch (e) {
       if (isAbort(e)) return;
       const reason = (e as { name?: string; reason?: string }).name === "NikudUnavailableError" ? (e as { reason: string }).reason : null;
