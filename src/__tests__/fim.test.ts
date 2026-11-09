@@ -8,9 +8,9 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
 const webllm = vi.hoisted(() => ({ loaded: null as string | null }));
 vi.mock("../ai/webllmEngine", () => ({ loadedWebLlmModel: () => webllm.loaded }));
-const runAgentOrThrow = vi.hoisted(() => vi.fn(async () => " from the browser"));
+const runAgentOrThrow = vi.hoisted(() => vi.fn(async (..._args: unknown[]) => " from the browser"));
 vi.mock("../agents/runtime", () => ({ runAgentOrThrow }));
-const recordRun = vi.hoisted(() => vi.fn(async () => {}));
+const recordRun = vi.hoisted(() => vi.fn(async (_run: unknown) => {}));
 vi.mock("../agents/trace", () => ({ recordRun }));
 vi.mock("../lib/logger", () => ({ log: { info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() } }));
 
