@@ -1,7 +1,7 @@
 {
   "version": 1,
-  "generated_at": "2026-11-09T20:54:42.799Z",
-  "source": "src/i18n/index.ts (en bundle)",
+  "generated_at": "2026-11-09T21:03:16.816Z",
+  "source": "src/i18n/en/*.ts (en bundle)",
   "count": 1428,
   "entries": [
     {

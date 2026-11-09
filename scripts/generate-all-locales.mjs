@@ -6,11 +6,14 @@
  */
 import { readFileSync, writeFileSync } from "fs";
 
-// Extract EN keys from i18n/index.ts
-const content = readFileSync("src/i18n/index.ts", "utf8");
-const enStart = content.indexOf("const en: Strings = {");
-const enEnd = content.indexOf("\n};\n", enStart) + 3;
-const enBlock = content.slice(enStart, enEnd);
+// Extract EN keys from the English bundle's parts (src/i18n/en/, plan 12.1)
+let enBlock = "";
+for (const part of ["src/i18n/en/app.ts", "src/i18n/en/features.ts"]) {
+  const content = readFileSync(part, "utf8");
+  const enStart = content.indexOf("const en: Strings = {");
+  const enEnd = content.indexOf("\n};\n", enStart) + 3;
+  enBlock += content.slice(enStart, enEnd);
+}
 const pairs = [];
 const re = /"([^"]+)":\s*"([^"]*(?:\\.[^"]*)*)"/g;
 let m;

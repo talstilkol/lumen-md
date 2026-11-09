@@ -2,14 +2,22 @@ import { describe, it, expect } from "vitest";
 import { readFileSync } from "fs";
 import { join } from "path";
 
+/** The `en` bundle's source (split into src/i18n/en/ in plan 12.1), as one `const en: Strings = { … };` block. */
+function enBundleSource(): string {
+  const body = ["app.ts", "features.ts"].map((part) => {
+    const text = readFileSync(join(__dirname, "..", "i18n", "en", part), "utf8");
+    return text.slice(text.indexOf("const en: Strings = {") + "const en: Strings = {".length, text.indexOf("\n};\n"));
+  });
+  return `const en: Strings = {${body.join("\n")}\n};\n`;
+}
+
 /**
  * T45 — the i18n gate checks values, not only keys: a locale that copies
  * the English string is untranslated. Hebrew: zero, apart from the terms
  * that are the same in every language (product and format names, symbols).
  * The other locales: at most 5 %.
  */
-const indexPath = join(__dirname, "..", "i18n", "index.ts");
-const content = readFileSync(indexPath, "utf8");
+const content = enBundleSource();
 const enBlock = content.slice(content.indexOf("const en: Strings = {"), content.indexOf("\n};\n", content.indexOf("const en: Strings = {")));
 const en: Record<string, string> = {};
 for (const m of enBlock.matchAll(/^\s+"([^"]+)":\s*"((?:[^"\\]|\\.)*)",?\s*$/gm)) en[m[1]] = JSON.parse(`"${m[2]}"`);

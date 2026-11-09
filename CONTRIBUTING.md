@@ -151,8 +151,8 @@ per-platform (`…-chromium-linux.png`).
 
 ### Adding a new string
 
-1. Add the English key to the `en` object in `src/i18n/index.ts`.
-2. Add the Hebrew translation to the `he` object in the same file.
+1. Add the English key to the `en` object in `src/i18n/en/app.ts` (app shell, editor, files, git, collaboration) or `src/i18n/en/features.ts` (everything else), at the end of its section. `src/i18n/index.ts` merges the parts; `node scripts/extract-i18n-keys.mjs` refuses a key defined twice.
+2. Add the Hebrew translation to `src/i18n/locales/he.json`.
 3. Add the key (with English fallback) to all 6 lazy locale files in `src/i18n/locales/*.json`.
 4. Run `npm run test` — the `i18nDrift.test.ts` gate will fail if any locale is missing the key.
 

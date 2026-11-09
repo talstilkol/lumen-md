@@ -17,8 +17,16 @@ import { describe, it, expect } from "vitest";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
-const SRC = resolve(__dirname, "..", "i18n", "index.ts");
-const text = readFileSync(SRC, "utf8");
+/** The `en` bundle's source (split into src/i18n/en/ in plan 12.1), as one `const en: Strings = { … };` block. */
+function enBundleSource(): string {
+  const body = ["app.ts", "features.ts"].map((part) => {
+    const text = readFileSync(resolve(__dirname, "..", "i18n", "en", part), "utf8");
+    return text.slice(text.indexOf("const en: Strings = {") + "const en: Strings = {".length, text.indexOf("\n};\n"));
+  });
+  return `const en: Strings = {${body.join("\n")}\n};\n`;
+}
+
+const text = enBundleSource();
 
 interface Bundle {
   [key: string]: string;
