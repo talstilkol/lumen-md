@@ -179,7 +179,7 @@ describe("live update after a save", () => {
       big.push({ path: `vault/n${i}.md`, name: `n${i}.md`, content: `---\nstatus: ${i % 3 ? "open" : "done"}\nrating: ${i % 5}\ntags: [t${i % 10}]\n---\n# Note ${i}\n\nSome text #topic${i % 7} and words.\n`, modified: NOW - i * 1000 });
     }
     const index = new VaultIndex();
-    index.upsert(big);
+    for (const n of big) index.upsert(n);
     const dv = parseDataview('TABLE status, rating FROM #t3 WHERE status = "open" SORT rating DESC LIMIT 20');
     const q = parseEmbeddedQuery("tag:t3 -tag:topic1\nsort: modified\nlimit: 20");
     const byPath = new Map<string, QueryNote>(big.map((n) => [n.path, n]));
@@ -189,7 +189,7 @@ describe("live update after a save", () => {
 
     const t0 = performance.now();
     const changed = { ...big[3], content: big[3].content.replace("status: open", "status: done"), modified: NOW };
-    index.upsert([changed]);
+    index.upsert(changed);
     big[3] = changed;
     byPath.set(changed.path, changed);
     const dvRows = runDataview(dv, big, NOW).rows;
