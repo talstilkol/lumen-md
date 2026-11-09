@@ -1431,5 +1431,16 @@
   "cmd.ai.cancel": "ИИ: отменить",
   "cmd.ai.cancel.hint": "Останавливает все запросы ИИ (то же делает Esc)",
   "toast.aiCancelled": "Запрос ИИ отменён ({count})",
-  "toast.aiNothingRunning": "Нет активных запросов ИИ"
+  "toast.aiNothingRunning": "Нет активных запросов ИИ",
+  "cmd.related.toggle": "Связанные заметки: показать / скрыть",
+  "cmd.related.toggle.hint": "Заметки, близкие к абзацу, который вы пишете, и заметки, которые он упоминает без ссылки",
+  "cmd.related.folderOff": "Связанные заметки: вкл. / выкл. для этой папки",
+  "toast.related.folderOff": "Связанные заметки выключены в {folder}",
+  "toast.related.folderOn": "Связанные заметки включены в {folder}",
+  "related.title": "Связанные",
+  "related.off": "Выключено для этой заметки или её папки.",
+  "related.none": "Пока ничего связанного с этим абзацем.",
+  "related.links": "Упомянуто без ссылки",
+  "related.link": "Связать",
+  "related.hint": "Связать с {name}"
 }

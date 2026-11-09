@@ -1542,6 +1542,17 @@ const en: Strings = {
   "chart.reason.radar": "{k} measures for {n} items — compare their profiles.",
   "chart.reason.summary": "No category or time column — comparing column averages.",
   "chart.alternatives": "Chart suggestions",
+  "cmd.related.toggle": "Related notes: show / hide",
+  "cmd.related.toggle.hint": "Notes close to the paragraph you are writing, and notes it mentions without a link",
+  "cmd.related.folderOff": "Related notes: on / off for this folder",
+  "toast.related.folderOff": "Related notes are off in {folder}",
+  "toast.related.folderOn": "Related notes are on in {folder}",
+  "related.title": "Related",
+  "related.off": "Off for this note or its folder.",
+  "related.none": "Nothing related to this paragraph yet.",
+  "related.links": "Mentioned, not linked",
+  "related.link": "Link",
+  "related.hint": "Link to {name}",
 };
 
 

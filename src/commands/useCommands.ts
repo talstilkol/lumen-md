@@ -1757,6 +1757,32 @@ export function useCommands({
         },
       },
       {
+        id: "related.toggle",
+        label: t("cmd.related.toggle"),
+        hint: t("cmd.related.toggle.hint"),
+        icon: cmdIcons.Sparkles,
+        group: t("group.ai", { defaultValue: "AI Copilot" }),
+        action: async () => {
+          // Plan W2.2: lazy panel + editor plugin; nothing runs per keystroke.
+          const { toggleRelatedPanel } = await import("../ui/RelatedPanel");
+          await toggleRelatedPanel(() => getEditorView?.() ?? null);
+        },
+      },
+      {
+        id: "related.folderOff",
+        label: t("cmd.related.folderOff"),
+        icon: cmdIcons.Sparkles,
+        group: t("group.ai", { defaultValue: "AI Copilot" }),
+        action: async () => {
+          const path = useAppStore.getState().doc.workspaceName;
+          const { offFolders, setFolderOff } = await import("../related/prefs");
+          const folder = path && path.includes("/") ? path.slice(0, path.lastIndexOf("/")) : (path ?? "");
+          const off = !offFolders().includes(folder);
+          setFolderOff(folder, off);
+          showAiToast(t(off ? "toast.related.folderOff" : "toast.related.folderOn", { folder: folder || "/" }), "info");
+        },
+      },
+      {
         id: "ai.doctor",
         label: t("cmd.ai.doctor"),
         hint: t("cmd.ai.doctor.hint"),

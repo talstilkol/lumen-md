@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-11-09T21:38:54.736Z",
+  "generated_at": "2026-11-09T23:48:28.715Z",
   "source": "src/i18n/index.ts (en bundle)",
-  "count": 1433,
+  "count": 1444,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -7711,6 +7711,67 @@
       "key": "chart.alternatives",
       "en": "Chart suggestions",
       "vars": []
+    },
+    {
+      "key": "cmd.related.toggle",
+      "en": "Related notes: show / hide",
+      "vars": []
+    },
+    {
+      "key": "cmd.related.toggle.hint",
+      "en": "Notes close to the paragraph you are writing, and notes it mentions without a link",
+      "vars": []
+    },
+    {
+      "key": "cmd.related.folderOff",
+      "en": "Related notes: on / off for this folder",
+      "vars": []
+    },
+    {
+      "key": "toast.related.folderOff",
+      "en": "Related notes are off in {folder}",
+      "vars": [
+        "folder"
+      ]
+    },
+    {
+      "key": "toast.related.folderOn",
+      "en": "Related notes are on in {folder}",
+      "vars": [
+        "folder"
+      ]
+    },
+    {
+      "key": "related.title",
+      "en": "Related",
+      "vars": []
+    },
+    {
+      "key": "related.off",
+      "en": "Off for this note or its folder.",
+      "vars": []
+    },
+    {
+      "key": "related.none",
+      "en": "Nothing related to this paragraph yet.",
+      "vars": []
+    },
+    {
+      "key": "related.links",
+      "en": "Mentioned, not linked",
+      "vars": []
+    },
+    {
+      "key": "related.link",
+      "en": "Link",
+      "vars": []
+    },
+    {
+      "key": "related.hint",
+      "en": "Link to {name}",
+      "vars": [
+        "name"
+      ]
     }
   ]
 }

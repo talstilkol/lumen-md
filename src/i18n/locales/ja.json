@@ -1431,5 +1431,16 @@
   "cmd.ai.cancel": "AI: キャンセル",
   "cmd.ai.cancel.hint": "実行中の AI リクエストをすべて停止します（Esc でも可）",
   "toast.aiCancelled": "AI リクエストをキャンセルしました（{count}）",
-  "toast.aiNothingRunning": "実行中の AI リクエストはありません"
+  "toast.aiNothingRunning": "実行中の AI リクエストはありません",
+  "cmd.related.toggle": "関連ノート: 表示 / 非表示",
+  "cmd.related.toggle.hint": "書いている段落に近いノートと、リンクなしで言及しているノート",
+  "cmd.related.folderOff": "関連ノート: このフォルダーでオン / オフ",
+  "toast.related.folderOff": "{folder} では関連ノートはオフです",
+  "toast.related.folderOn": "{folder} では関連ノートはオンです",
+  "related.title": "関連",
+  "related.off": "このノートまたはフォルダーではオフです。",
+  "related.none": "この段落に関連するものはまだありません。",
+  "related.links": "言及あり、リンクなし",
+  "related.link": "リンク",
+  "related.hint": "{name} にリンク"
 }
