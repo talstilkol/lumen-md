@@ -47,8 +47,8 @@ export interface AtomicFs {
   remove(path: string): Promise<void>;
 }
 
-export const TMP_PREFIX = ".lumen-tmp~";
-export const OLD_PREFIX = ".lumen-old~";
+const TMP_PREFIX = ".lumen-tmp~";
+const OLD_PREFIX = ".lumen-old~";
 
 /**
  * Names of temporary files other writers leave behind when they are stopped
