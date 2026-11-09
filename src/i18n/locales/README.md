@@ -87,3 +87,8 @@ With `git merge origin/<base>` instead of a rebase, resolve the same way,
 taking the base's side (`--theirs` in a merge), then run the same
 `--absorb "$OLD"`. If your `index.ts` had changes other than strings,
 re-apply those by hand: `--absorb` only carries strings.
+
+**New keys:** `npm run i18n:draft` drafts every English key a language
+lacks, in all seven languages, with a local model, and lists the drafts in
+`i18n/needs-review/<domain>.json` (plan 9.6). The values gate counts a
+listed draft as untranslated until `npm run i18n:draft -- --approve=<lang>`.
