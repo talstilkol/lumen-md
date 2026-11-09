@@ -131,3 +131,35 @@ test("a canvas comes back after reopening, and the UI follows the app's language
   // Closing the canvas gives the app's own lang back (Excalidraw sets "he-IL").
   await expect(page.locator("html")).toHaveAttribute("lang", "he");
 });
+
+test("JSON Canvas (plan 4.17): an Obsidian .canvas imports, opens, and exports back unchanged", async ({ page }) => {
+  test.skip(!(await opfsWritable(page)), "this engine refuses OPFS writes here, so there is nowhere to save a canvas");
+  const canvasJson = {
+    nodes: [
+      { id: "g1", type: "group", label: "Plan", x: -40, y: -40, width: 760, height: 260, color: "6" },
+      { id: "t1", type: "text", text: "# שלום\n\nA **note** card", x: 0, y: 0, width: 260, height: 160 },
+      { id: "f1", type: "file", file: "Notes/Plan.md", subpath: "#Goals", x: 400, y: 0, width: 260, height: 160 },
+      { id: "l1", type: "link", url: "https://example.com/", x: 0, y: 400, width: 260, height: 120, color: "#FF8800" },
+    ],
+    edges: [
+      { id: "e1", fromNode: "t1", fromSide: "right", toNode: "f1", toSide: "left", label: "details" },
+      { id: "e2", fromNode: "t1", toNode: "l1", toEnd: "none" },
+    ],
+  };
+  await run(page, "view.canvas");
+  const canvas = page.getByTestId("canvas");
+  await expect(canvas.locator(".excalidraw")).toBeVisible({ timeout: 15_000 });
+
+  await canvas.getByTestId("canvas-import-json-input").setInputFiles({ name: "obsidian-plan.canvas", mimeType: "application/json", buffer: Buffer.from(JSON.stringify(canvasJson)) });
+  // The import is a new canvas file, opened.
+  await expect(canvas.locator(".lumen-canvas-body")).toHaveAttribute("data-canvas-name", "obsidian-plan", { timeout: 10_000 });
+  const saved = JSON.parse((await readCanvas(page, "obsidian-plan.excalidraw"))!) as { elements: Array<{ id: string; type: string; originalText?: string; link?: string | null }> };
+  expect(saved.elements.find((e) => e.id === "g1")?.type).toBe("frame");
+  expect(saved.elements.find((e) => e.id === "f1")?.link).toBe("Notes/Plan.md#Goals");
+  expect(saved.elements.some((e) => e.type === "text" && e.originalText === "# שלום\n\nA **note** card")).toBe(true);
+
+  await canvas.getByTestId("canvas-export-json").click();
+  await expect.poll(() => readCanvas(page, "obsidian-plan.canvas"), { timeout: 10_000 }).not.toBeNull();
+  const exported = JSON.parse((await readCanvas(page, "obsidian-plan.canvas"))!) as unknown;
+  expect(exported).toEqual(canvasJson);
+});
