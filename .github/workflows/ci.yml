@@ -79,6 +79,20 @@ jobs:
           COLLAB_TOKEN_SECRET: ci-canary-collab-token-secret-7f3a9c2e1b
           COLLAB_ACCESS_KEY: ci-canary-collab-access-key-5d8e
           LUMEN_COLLAB_TOKEN: ci-canary-lumen-collab-token-2c4b
+        # Canaries in secret-named VITE_* variables: the next step fails if
+        # either value reaches dist/. VITE_RESEARCH_TOKEN was read by the app
+        # until it moved to the secret store; nothing reads
+        # VITE_CI_CANARY_SECRET, so finding it means import.meta.env was
+        # inlined whole.
+        env:
+          VITE_RESEARCH_TOKEN: ci-canary-research-token-4e9b1c
+          VITE_CI_CANARY_SECRET: ci-canary-vite-secret-8d2f7a
+
+      - name: No VITE_* secrets in the bundle
+        run: node scripts/check-vite-secrets.mjs dist
+        env:
+          VITE_RESEARCH_TOKEN: ci-canary-research-token-4e9b1c
+          VITE_CI_CANARY_SECRET: ci-canary-vite-secret-8d2f7a
 
       - name: Bundle-size budget
         run: npm run budget -- --json bundle-sizes.json
