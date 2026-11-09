@@ -14,6 +14,14 @@ note in your workspace, ranked by BM25. Agents use the same search
 - Hebrew-aware: niqqud, final letters (ם/מ, ן/נ…) and the prefix letters
   ו ה ב כ ל מ ש are folded, so *בבית*, *והבית* and *הַבַּיִת* all find
   *בית*. The exact form you typed still ranks first.
+- Full and defective spelling meet: *תכנית* finds *תוכנית*, *צהרים* finds
+  *צהריים*, *ראיון* finds *ריאיון* (the exact spelling still ranks first).
+- Other forms of a word count too, a little less: *אבודות* finds *אבודה*,
+  *מזרחנים* finds *מזורחן* (plural, construct and possessive endings).
+- A few common synonyms are searched along (*טלפון* / *סמארטפון*,
+  *רכב* / *מכונית*, *פגישה* / *ישיבה*…), and common Hebrew words also
+  look for their English equivalent, so *מתכון לעוגת שוקולד* finds an
+  English *chocolate cake recipe* note — after the Hebrew notes.
 - Question words (*מתי*, *איפה*, *למי*, *what*, *when*…) don't count, so
   you can type a question.
 - A match in the note's name counts more than one in its text, and the
@@ -23,6 +31,11 @@ note in your workspace, ranked by BM25. Agents use the same search
   milliseconds.
 - Each hit shows a snippet with the match highlighted; the top 40 are
   listed.
+
+Measured by `src/__tests__/hebrewSearch.test.ts` on the probe set
+`eval/probes/hebrew-search.json` (30 morphology queries, 30 full/defective
+spelling pairs, 5 Hebrew→English queries) and on the HeQ dev split, which
+must not drop.
 
 ## Smart (semantic)
 
