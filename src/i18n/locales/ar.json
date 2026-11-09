@@ -1439,5 +1439,13 @@
   "cmd.ai.cancel": "AI: إلغاء",
   "cmd.ai.cancel.hint": "يوقف كل طلبات الذكاء الاصطناعي الجارية (Esc يفعل ذلك أيضاً)",
   "toast.aiCancelled": "أُلغي طلب الذكاء الاصطناعي ({count})",
-  "toast.aiNothingRunning": "لا يوجد طلب ذكاء اصطناعي جارٍ"
+  "toast.aiNothingRunning": "لا يوجد طلب ذكاء اصطناعي جارٍ",
+  "settings.title": "الإعدادات",
+  "settings.search": "ابحث في الإعدادات",
+  "settings.empty": "لا يوجد إعداد مطابق",
+  "settings.general": "عام",
+  "settings.language": "اللغة",
+  "settings.telemetryOptOut": "لا ترسل تقارير الأخطاء",
+  "settings.imported": "تم استيراد {n} من الإعدادات، وتخطي {skipped}",
+  "settings.importFailed": "هذا الملف ليس ملف إعدادات Lumen."
 }

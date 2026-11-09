@@ -24,6 +24,8 @@ import { t } from "../i18n";
 interface Props {
   open: boolean;
   onClose: () => void;
+  /** Rendered as a tab of the settings screen: no backdrop. */
+  embedded?: boolean;
 }
 
 const POLL_INTERVAL_MS = 30_000;
@@ -54,7 +56,7 @@ function saveActiveJob(j: FineTuneJob | null): void {
   }
 }
 
-export function FineTuneSettings({ open, onClose }: Props) {
+export function FineTuneSettings({ open, onClose, embedded = false }: Props) {
   const useFineTunedModel = useAppStore((s) => s.useFineTunedModel);
   const fineTunedModelId = useAppStore((s) => s.fineTunedModelId);
   const toggleFineTunedModel = useAppStore((s) => s.toggleFineTunedModel);
@@ -165,16 +167,16 @@ export function FineTuneSettings({ open, onClose }: Props) {
 
   return (
     <div
-      className="cmd-palette-backdrop"
-      onClick={onClose}
-      role="dialog"
-      aria-modal="true"
+      className={embedded ? undefined : "cmd-palette-backdrop"}
+      onClick={embedded ? undefined : onClose}
+      role={embedded ? "region" : "dialog"}
+      aria-modal={embedded ? undefined : "true"}
       aria-label={t("fineTune.title")}
     >
       <div
-        className="cmd-palette"
+        className={embedded ? undefined : "cmd-palette"}
         onClick={(e) => e.stopPropagation()}
-        style={{ maxWidth: 540, padding: 0, display: "flex", flexDirection: "column" }}
+        style={embedded ? { display: "flex", flexDirection: "column" } : { maxWidth: 540, padding: 0, display: "flex", flexDirection: "column" }}
       >
         <header style={{ padding: "14px 18px", borderBottom: "1px solid hsl(var(--border))", display: "flex", gap: 10, alignItems: "center" }}>
           <Brain size={18} style={{ color: "hsl(var(--accent))" }} />

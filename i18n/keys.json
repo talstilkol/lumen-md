@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-10-20T23:17:09.704Z",
+  "generated_at": "2026-11-09T21:04:15.626Z",
   "source": "src/i18n/index.ts (en bundle)",
-  "count": 1441,
+  "count": 1449,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -7747,6 +7747,49 @@
     {
       "key": "chart.alternatives",
       "en": "Chart suggestions",
+      "vars": []
+    },
+    {
+      "key": "settings.title",
+      "en": "Settings",
+      "vars": []
+    },
+    {
+      "key": "settings.search",
+      "en": "Search settings",
+      "vars": []
+    },
+    {
+      "key": "settings.empty",
+      "en": "No setting matches",
+      "vars": []
+    },
+    {
+      "key": "settings.general",
+      "en": "General",
+      "vars": []
+    },
+    {
+      "key": "settings.language",
+      "en": "Language",
+      "vars": []
+    },
+    {
+      "key": "settings.telemetryOptOut",
+      "en": "Send no error reports",
+      "vars": []
+    },
+    {
+      "key": "settings.imported",
+      "en": "{n} settings imported, {skipped} skipped",
+      "vars": [
+        "n",
+        "skipped"
+      ]
+    },
+    {
+      "key": "settings.importFailed",
+      "en": "That file isn't a Lumen settings file.",
       "vars": []
     }
   ]
