@@ -96,6 +96,7 @@
 }
 
 .pdf-body {
+  position: relative;
   display: flex;
   flex: 1;
   min-height: 0;
@@ -287,9 +288,49 @@
   align-self: flex-end;
 }
 
+.pdf-ask-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.pdf-ask textarea {
+  box-sizing: border-box;
+  width: 100%;
+  resize: vertical;
+  padding: 4px 6px;
+  border: 1px solid hsl(var(--border));
+  border-radius: 6px;
+  background: hsl(var(--bg));
+  color: inherit;
+  font: inherit;
+}
+
+.pdf-ask-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 6px;
+}
+
+.pdf-ask-answer p {
+  margin: 8px 0;
+  line-height: 1.5;
+}
+
 @media (max-width: 720px) {
   .pdf-side {
     display: none;
+  }
+  /* The Ask panel stays: over the pages, on the reading side's end. */
+  .pdf-side.pdf-ask {
+    display: block;
+    position: absolute;
+    inset-block: 0;
+    inset-inline-end: 0;
+    width: min(100%, 340px);
+    background: hsl(var(--bg));
+    z-index: 3;
   }
   .pdf-scroll {
     padding: 8px;

@@ -1456,5 +1456,16 @@
   "pdf.ocr.scanned": "Эта страница — отсканированное изображение.",
   "pdf.ocr.run": "Распознать текст (OCR)",
   "pdf.ocr.running": "Распознаём текст на этом устройстве…",
-  "pdf.notesUnreadable": "блок выделений в {name} не читается. Исправьте или удалите его, чтобы снова выделять."
+  "pdf.notesUnreadable": "блок выделений в {name} не читается. Исправьте или удалите его, чтобы снова выделять.",
+  "pdf.ask": "Спросить",
+  "pdf.ask.title": "Спросить этот PDF",
+  "pdf.ask.placeholder": "Вопрос об этом PDF…",
+  "pdf.ask.submit": "Спросить",
+  "pdf.ask.indexing": "Читаю страницу {page} из {pages}…",
+  "pdf.ask.ocr": "Читаю отсканированную страницу {page} из {pages} (OCR)…",
+  "pdf.ask.thinking": "Ищу ответ в PDF…",
+  "pdf.ask.notFound": "Похоже, в этом PDF нет ответа на этот вопрос.",
+  "pdf.ask.cite": "Страница {page}, строка {line}",
+  "pdf.ask.failed": "Не удалось ответить: {error}",
+  "pdf.ask.dropped": "Пропущено цитат, которых нет в PDF: {n}"
 }

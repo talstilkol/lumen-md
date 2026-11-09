@@ -17,7 +17,7 @@
  * what makes selecting and highlighting Hebrew lines right in RTL.
  */
 
-import { memo, useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
+import { lazy, memo, Suspense, useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import { t } from "../i18n";
 import { showAiToast } from "../ui/AiToast";
 import { ErrorBoundary } from "../ui/ErrorBoundary";
@@ -40,6 +40,9 @@ import {
 import { layerText, offsetsToRange, pageTextFromItems, rangePageRects, rangeToOffsets } from "./textMap";
 import { openPdf, loadPdfjs, type PdfDocument, type PdfRenderTask, type PdfTextLayer } from "./pdfjs";
 import "./PdfReader.css";
+
+/** "Ask this PDF" (plan 6.8): its own chunk, loaded on the first click of Ask. */
+const PdfChatPanel = lazy(() => import("./PdfChatPanel").then((m) => ({ default: m.PdfChatPanel })));
 
 interface Props {
   /** Vault path of the PDF. */
@@ -133,6 +136,8 @@ export function PdfReader({ path, fragment = null, openSeq = 0, onClose, onOpenN
   const [hitIndex, setHitIndex] = useState(-1);
   /** A search ran for the current query (so "no matches" can be said). */
   const [searched, setSearched] = useState(false);
+  /** The "Ask this PDF" panel is open (plan 6.8). */
+  const [askOpen, setAskOpen] = useState(false);
   const [unanchored, setUnanchored] = useState<Set<string>>(() => new Set());
   const scrollRef = useRef<HTMLDivElement>(null);
   const pageEls = useRef(new Map<number, HTMLDivElement>());
@@ -637,6 +642,9 @@ export function PdfReader({ path, fragment = null, openSeq = 0, onClose, onOpenN
           >
             {t("pdf.highlight")}
           </button>
+          <button type="button" className="icon-btn pdf-text-btn" data-testid="pdf-ask" aria-pressed={askOpen} onClick={() => setAskOpen((v) => !v)}>
+            {t("pdf.ask")}
+          </button>
           <button
             type="button"
             className="icon-btn pdf-text-btn"
@@ -681,6 +689,23 @@ export function PdfReader({ path, fragment = null, openSeq = 0, onClose, onOpenN
             ))}
           <div className="pdf-tail" aria-hidden="true" />
         </div>
+        {askOpen && (
+          <Suspense fallback={null}>
+            <PdfChatPanel
+              path={path}
+              onClose={() => setAskOpen(false)}
+              onCite={(page, quote) => {
+                // Open the cited page and mark the quote there (as a search hit).
+                searchSeq.current++;
+                setQuery(quote);
+                setHits([{ page, occurrence: 0 }]);
+                setHitIndex(0);
+                setSearched(true);
+                goToPage(page);
+              }}
+            />
+          </Suspense>
+        )}
         <aside className="pdf-side" aria-label={t("pdf.highlights")}>
           <h3>{t("pdf.highlights")}</h3>
           {!sorted.length && <p className="pdf-muted">{t("pdf.highlights.empty")}</p>}

@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-10-20T22:11:06.311Z",
+  "generated_at": "2026-11-09T21:24:54.668Z",
   "source": "src/i18n/index.ts (en bundle)",
-  "count": 1458,
+  "count": 1469,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -1952,6 +1952,74 @@
       "key": "pdf.ocr.running",
       "en": "Recognising text on this device…",
       "vars": []
+    },
+    {
+      "key": "pdf.ask",
+      "en": "Ask",
+      "vars": []
+    },
+    {
+      "key": "pdf.ask.title",
+      "en": "Ask this PDF",
+      "vars": []
+    },
+    {
+      "key": "pdf.ask.placeholder",
+      "en": "A question about this PDF…",
+      "vars": []
+    },
+    {
+      "key": "pdf.ask.submit",
+      "en": "Ask",
+      "vars": []
+    },
+    {
+      "key": "pdf.ask.indexing",
+      "en": "Reading page {page} of {pages}…",
+      "vars": [
+        "page",
+        "pages"
+      ]
+    },
+    {
+      "key": "pdf.ask.ocr",
+      "en": "Reading scanned page {page} of {pages} (OCR)…",
+      "vars": [
+        "page",
+        "pages"
+      ]
+    },
+    {
+      "key": "pdf.ask.thinking",
+      "en": "Looking for the answer in the PDF…",
+      "vars": []
+    },
+    {
+      "key": "pdf.ask.notFound",
+      "en": "This PDF doesn't seem to answer that.",
+      "vars": []
+    },
+    {
+      "key": "pdf.ask.cite",
+      "en": "Page {page}, line {line}",
+      "vars": [
+        "page",
+        "line"
+      ]
+    },
+    {
+      "key": "pdf.ask.failed",
+      "en": "Couldn't answer: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "pdf.ask.dropped",
+      "en": "{n} quotes that aren't in the PDF were left out",
+      "vars": [
+        "n"
+      ]
     },
     {
       "key": "cmd.ai.cancel",

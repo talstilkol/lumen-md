@@ -1456,5 +1456,16 @@
   "pdf.ocr.scanned": "Diese Seite ist ein gescanntes Bild.",
   "pdf.ocr.run": "Text erkennen (OCR)",
   "pdf.ocr.running": "Text wird auf diesem Gerät erkannt…",
-  "pdf.notesUnreadable": "der Markierungsblock in {name} ist nicht lesbar. Reparieren oder entfernen Sie ihn, um wieder zu markieren."
+  "pdf.notesUnreadable": "der Markierungsblock in {name} ist nicht lesbar. Reparieren oder entfernen Sie ihn, um wieder zu markieren.",
+  "pdf.ask": "Fragen",
+  "pdf.ask.title": "Dieses PDF fragen",
+  "pdf.ask.placeholder": "Eine Frage zu diesem PDF…",
+  "pdf.ask.submit": "Fragen",
+  "pdf.ask.indexing": "Lese Seite {page} von {pages}…",
+  "pdf.ask.ocr": "Lese gescannte Seite {page} von {pages} (OCR)…",
+  "pdf.ask.thinking": "Suche die Antwort im PDF…",
+  "pdf.ask.notFound": "Dieses PDF scheint das nicht zu beantworten.",
+  "pdf.ask.cite": "Seite {page}, Zeile {line}",
+  "pdf.ask.failed": "Keine Antwort möglich: {error}",
+  "pdf.ask.dropped": "{n} Zitate, die nicht im PDF stehen, wurden weggelassen"
 }

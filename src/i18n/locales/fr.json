@@ -1456,5 +1456,16 @@
   "pdf.ocr.scanned": "Cette page est une image numérisée.",
   "pdf.ocr.run": "Reconnaître le texte (OCR)",
   "pdf.ocr.running": "Reconnaissance du texte sur cet appareil…",
-  "pdf.notesUnreadable": "le bloc de surlignages de {name} est illisible. Corrigez-le ou supprimez-le pour surligner à nouveau."
+  "pdf.notesUnreadable": "le bloc de surlignages de {name} est illisible. Corrigez-le ou supprimez-le pour surligner à nouveau.",
+  "pdf.ask": "Demander",
+  "pdf.ask.title": "Interroger ce PDF",
+  "pdf.ask.placeholder": "Une question sur ce PDF…",
+  "pdf.ask.submit": "Demander",
+  "pdf.ask.indexing": "Lecture de la page {page} sur {pages}…",
+  "pdf.ask.ocr": "Lecture de la page numérisée {page} sur {pages} (OCR)…",
+  "pdf.ask.thinking": "Recherche de la réponse dans le PDF…",
+  "pdf.ask.notFound": "Ce PDF ne semble pas répondre à cette question.",
+  "pdf.ask.cite": "Page {page}, ligne {line}",
+  "pdf.ask.failed": "Réponse impossible : {error}",
+  "pdf.ask.dropped": "{n} citations absentes du PDF ont été écartées"
 }

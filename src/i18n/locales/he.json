@@ -1456,5 +1456,16 @@
   "pdf.ocr.scanned": "העמוד הזה הוא תמונה סרוקה.",
   "pdf.ocr.run": "זיהוי טקסט (OCR)",
   "pdf.ocr.running": "מזהה טקסט במכשיר הזה…",
-  "pdf.notesUnreadable": "לא ניתן לקרוא את בלוק הסימונים ב-{name}. תקנו או הסירו אותו כדי לסמן שוב."
+  "pdf.notesUnreadable": "לא ניתן לקרוא את בלוק הסימונים ב-{name}. תקנו או הסירו אותו כדי לסמן שוב.",
+  "pdf.ask": "שאלה",
+  "pdf.ask.title": "שאלו את ה-PDF",
+  "pdf.ask.placeholder": "שאלה על ה-PDF הזה…",
+  "pdf.ask.submit": "שאלה",
+  "pdf.ask.indexing": "קורא עמוד {page} מתוך {pages}…",
+  "pdf.ask.ocr": "קורא עמוד סרוק {page} מתוך {pages} (OCR)…",
+  "pdf.ask.thinking": "מחפש את התשובה ב-PDF…",
+  "pdf.ask.notFound": "נראה שה-PDF הזה לא עונה על כך.",
+  "pdf.ask.cite": "עמוד {page}, שורה {line}",
+  "pdf.ask.failed": "לא ניתן לענות: {error}",
+  "pdf.ask.dropped": "הושמטו {n} ציטוטים שאינם מופיעים ב-PDF"
 }
