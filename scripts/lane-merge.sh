@@ -6,12 +6,12 @@
 #
 # Runs in the current checkout (it must be clean, untracked files included;
 # <target> gets checked out).
-# A conflict only in generated files — i18n/keys.json, package-lock.json — is
+# A conflict only in generated files — i18n/keys/*.json, package-lock.json — is
 # resolved by regenerating them from the merged sources:
-#   i18n/keys.json     node scripts/extract-i18n-keys.mjs
+#   i18n/keys/*.json   node scripts/extract-i18n-keys.mjs
 #   package-lock.json  npm install --package-lock-only   (from the merged package.json)
 # Any other conflict stops the run with the merge left in progress, so you can
-# resolve it by hand and rerun with the branches that are left. A keys.json that
+# resolve it by hand and rerun with the branches that are left. An i18n/keys/ that
 # merged cleanly but no longer matches the strings is regenerated in the merge too.
 #
 # A merge that touches package.json or package-lock.json gets its lockfile
@@ -66,12 +66,13 @@ if [ "$(git symbolic-ref --quiet --short HEAD 2>/dev/null)" != "$target" ]; then
   git checkout --quiet "$target" || die "could not check out $target"
 fi
 
-GENERATED=("i18n/keys.json" "package-lock.json")
-is_generated() { local f; for f in "${GENERATED[@]}"; do [ "$1" = "$f" ] && return 0; done; return 1; }
+# i18n/keys/<domain>.json: one file per domain since plan 0.3.
+GENERATED=("i18n/keys/*.json" "package-lock.json")
+is_generated() { local f; for f in "${GENERATED[@]}"; do [[ "$1" == $f ]] && return 0; done; return 1; }
 
 regenerate() {
   case $1 in
-    i18n/keys.json)
+    i18n/keys/*.json)
       node scripts/extract-i18n-keys.mjs >/dev/null 2>&1 || return 1 ;;
     package-lock.json)
       # Start from our side, then let npm fold in whatever the merged package.json needs.
@@ -137,8 +138,8 @@ for b in "${branches[@]}"; do
   # Both sides can make the same textual change (say, the same new "count")
   # and merge cleanly into a keys.json that no longer matches the strings.
   if ! node scripts/extract-i18n-keys.mjs --check >/dev/null 2>&1; then
-    regenerate i18n/keys.json || die "could not regenerate i18n/keys.json while merging $b (merge left in progress)"
-    notes+=("refreshed i18n/keys.json (stale after the merge)")
+    regenerate i18n/keys/ai.json || die "could not regenerate i18n/keys/ while merging $b (merge left in progress)"
+    notes+=("refreshed i18n/keys/ (stale after the merge)")
   fi
   # The same for the lockfile: one lane can drop a transitive entry the
   # other's new package reuses, and the text still merges cleanly.

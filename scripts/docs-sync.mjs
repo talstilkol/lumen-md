@@ -61,7 +61,7 @@ export function commandLabelKeys(sources) {
 }
 
 /**
- * English command labels from the `en` dictionary in src/i18n/index.ts, as
+ * English command labels from the `en` dictionary (src/i18n/locales/en/*.json, plan 0.3), as
  * a matcher: a label with a placeholder ("Language: {label}") matches any
  * filling of it, including the docs' own "Language: …". Only `cmd.*` keys
  * and keys in `labelKeys` count; without `labelKeys`, every string does.
@@ -144,7 +144,10 @@ function main() {
     }
   };
   walkSrc(join(ROOT, "src"));
-  const en = englishStrings(readFileSync(join(ROOT, "src/i18n/index.ts"), "utf8"), commandLabelKeys(srcFiles));
+  // The English strings: one JSON file per domain, one `"key": "value",` line each (plan 0.3).
+  const enDir = join(ROOT, "src/i18n/locales/en");
+  const enText = readdirSync(enDir).filter((n) => n.endsWith(".json")).sort().map((n) => readFileSync(join(enDir, n), "utf8")).join("\n");
+  const en = englishStrings(enText, commandLabelKeys(srcFiles));
   const scripts = {
     root: Object.keys(JSON.parse(readFileSync(join(ROOT, "package.json"), "utf8")).scripts ?? {}),
     docs: Object.keys(JSON.parse(readFileSync(join(ROOT, "docs/package.json"), "utf8")).scripts ?? {}),

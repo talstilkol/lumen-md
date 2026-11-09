@@ -114,8 +114,10 @@ function freePort() {
 async function i18nDriftStep() {
   const code = await run(["node", "scripts/extract-i18n-keys.mjs", "--check"]);
   if (code !== 0) return code;
-  const en = JSON.parse(readFileSync("i18n/keys.json", "utf8")).entries.length;
-  const he = Object.keys(JSON.parse(readFileSync("src/i18n/locales/he.json", "utf8"))).length;
+  // Per-domain layout (plan 0.3): i18n/keys/<domain>.json and src/i18n/locales/he/<domain>.json.
+  const jsonIn = (dir) => readdirSync(dir).filter((n) => n.endsWith(".json")).map((n) => JSON.parse(readFileSync(`${dir}/${n}`, "utf8")));
+  const en = jsonIn("i18n/keys").reduce((sum, f) => sum + f.entries.length, 0);
+  const he = jsonIn("src/i18n/locales/he").reduce((sum, f) => sum + Object.keys(f).length, 0);
   const d = i18nDrift(en, he);
   console.log(`i18n keys — en: ${en}, he: ${he}, diff: ${d.diff}`);
   if (!d.ok) console.error("i18n drift > 10 keys; run `node scripts/print-missing-i18n-keys.mjs` and fix.");

@@ -1,0 +1,1438 @@
+{
+  "version": 2,
+  "domain": "common",
+  "source": "src/i18n/locales/en/common.json",
+  "entries": [
+    {
+      "key": "a11y.skipToContent",
+      "en": "Skip to content",
+      "vars": []
+    },
+    {
+      "key": "agentReview.approve",
+      "en": "Approve",
+      "vars": []
+    },
+    {
+      "key": "agentReview.approveAll",
+      "en": "Approve all ({count})",
+      "vars": [
+        "count"
+      ]
+    },
+    {
+      "key": "agentReview.badge",
+      "en": "Review {count}",
+      "vars": [
+        "count"
+      ]
+    },
+    {
+      "key": "agentReview.badge.tooltip",
+      "en": "Changes proposed by agents are waiting for your approval",
+      "vars": []
+    },
+    {
+      "key": "agentReview.close",
+      "en": "Close",
+      "vars": []
+    },
+    {
+      "key": "agentReview.conflict.doc-changed",
+      "en": "Not applied: the text it changes was edited after the proposal.",
+      "vars": []
+    },
+    {
+      "key": "agentReview.conflict.failed",
+      "en": "Not applied: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "agentReview.conflict.file-changed",
+      "en": "Not written: the file changed after the agent proposed this.",
+      "vars": []
+    },
+    {
+      "key": "agentReview.conflict.file-created",
+      "en": "Not written: a file with this name was created since.",
+      "vars": []
+    },
+    {
+      "key": "agentReview.conflict.not-open",
+      "en": "Not applied: its document is no longer open.",
+      "vars": []
+    },
+    {
+      "key": "agentReview.conflict.open-unsaved",
+      "en": "Not applied: the file is open with edits the agent did not see.",
+      "vars": []
+    },
+    {
+      "key": "agentReview.conflict.overlap",
+      "en": "Not applied: it overlaps a change approved before it.",
+      "vars": []
+    },
+    {
+      "key": "agentReview.done",
+      "en": "Done",
+      "vars": []
+    },
+    {
+      "key": "agentReview.empty",
+      "en": "No changes are waiting.",
+      "vars": []
+    },
+    {
+      "key": "agentReview.gap",
+      "en": "{count} unchanged lines",
+      "vars": [
+        "count"
+      ]
+    },
+    {
+      "key": "agentReview.intro",
+      "en": "Nothing is written until you approve it. Changes to an open document go into the editor, not straight to the file.",
+      "vars": []
+    },
+    {
+      "key": "agentReview.noEol",
+      "en": "No newline at end of file",
+      "vars": []
+    },
+    {
+      "key": "agentReview.proposedBy",
+      "en": "Proposed by {agent}",
+      "vars": [
+        "agent"
+      ]
+    },
+    {
+      "key": "agentReview.reject",
+      "en": "Reject",
+      "vars": []
+    },
+    {
+      "key": "agentReview.rejectAll",
+      "en": "Reject all",
+      "vars": []
+    },
+    {
+      "key": "agentReview.run",
+      "en": "run {run}",
+      "vars": [
+        "run"
+      ]
+    },
+    {
+      "key": "agentReview.status.document",
+      "en": "Applied in the editor, not saved yet (Undo takes it back).",
+      "vars": []
+    },
+    {
+      "key": "agentReview.status.documentNoUndo",
+      "en": "Applied to the document, not saved yet. Undo can't take it back in this view.",
+      "vars": []
+    },
+    {
+      "key": "agentReview.status.file",
+      "en": "Written to the file.",
+      "vars": []
+    },
+    {
+      "key": "agentReview.status.rejected",
+      "en": "Rejected — nothing was written.",
+      "vars": []
+    },
+    {
+      "key": "agentReview.status.suggestion",
+      "en": "Added as a tracked change (suggesting mode is on).",
+      "vars": []
+    },
+    {
+      "key": "agentReview.status.tab",
+      "en": "Applied in another tab, not saved yet.",
+      "vars": []
+    },
+    {
+      "key": "agentReview.status.withdrawn",
+      "en": "Withdrawn: the run was cancelled.",
+      "vars": []
+    },
+    {
+      "key": "agentReview.target.document",
+      "en": "The open document",
+      "vars": []
+    },
+    {
+      "key": "agentReview.target.documentPath",
+      "en": "The open document · {path}",
+      "vars": [
+        "path"
+      ]
+    },
+    {
+      "key": "agentReview.target.newFile",
+      "en": "{path} (new file)",
+      "vars": [
+        "path"
+      ]
+    },
+    {
+      "key": "agentReview.title",
+      "en": "Changes proposed by agents",
+      "vars": []
+    },
+    {
+      "key": "agentReview.toast.one",
+      "en": "{agent} proposed a change. Nothing is written until you approve it.",
+      "vars": [
+        "agent"
+      ]
+    },
+    {
+      "key": "agentReview.toast.other",
+      "en": "{agent} proposed {n} changes. Nothing is written until you approve them.",
+      "vars": [
+        "agent",
+        "n"
+      ]
+    },
+    {
+      "key": "agentReview.toast.review",
+      "en": "Review",
+      "vars": []
+    },
+    {
+      "key": "agentReview.tooBig",
+      "en": "Too many changes to show line by line.",
+      "vars": []
+    },
+    {
+      "key": "agentReview.unknownAgent",
+      "en": "an agent",
+      "vars": []
+    },
+    {
+      "key": "agents.netConsent.body",
+      "en": "The {tool} tool wants to send {sends} to {host}.",
+      "vars": [
+        "tool",
+        "sends",
+        "host"
+      ]
+    },
+    {
+      "key": "agents.netConsent.credential",
+      "en": "Your {provider} API key goes with it, so the service can search for you.",
+      "vars": [
+        "provider"
+      ]
+    },
+    {
+      "key": "agents.netConsent.exact",
+      "en": "Exactly this is sent: “{value}”. The agent wrote it and may have included text from your notes.",
+      "vars": [
+        "value"
+      ]
+    },
+    {
+      "key": "agents.netConsent.ok",
+      "en": "Send this once",
+      "vars": []
+    },
+    {
+      "key": "agents.netConsent.perCall",
+      "en": "Under the \"local only\" policy you are asked for every call.",
+      "vars": []
+    },
+    {
+      "key": "agents.netConsent.title",
+      "en": "Let the agent go online?",
+      "vars": []
+    },
+    {
+      "key": "agents.netConsent.untrusted",
+      "en": "Careful: this run has read content from outside ({sources}), which may contain planted instructions.",
+      "vars": [
+        "sources"
+      ]
+    },
+    {
+      "key": "agents.netConsent.visits",
+      "en": "The service then opens the page, so {host} sees a visit.",
+      "vars": [
+        "host"
+      ]
+    },
+    {
+      "key": "agents.netConsent.what.page-address",
+      "en": "the page address",
+      "vars": []
+    },
+    {
+      "key": "agents.netConsent.what.search-query",
+      "en": "the search query",
+      "vars": []
+    },
+    {
+      "key": "agents.netConsent.what.tool-args",
+      "en": "the tool's arguments",
+      "vars": []
+    },
+    {
+      "key": "agents.untrusted.action.network",
+      "en": "send a request to the web",
+      "vars": []
+    },
+    {
+      "key": "agents.untrusted.action.write",
+      "en": "propose a change to your notes",
+      "vars": []
+    },
+    {
+      "key": "agents.untrusted.args",
+      "en": "What it would do: “{value}”.",
+      "vars": [
+        "value"
+      ]
+    },
+    {
+      "key": "agents.untrusted.body",
+      "en": "The {tool} tool wants to {action}. This run has read content from outside ({sources}), which may contain instructions planted to trick the agent.",
+      "vars": [
+        "tool",
+        "action",
+        "sources"
+      ]
+    },
+    {
+      "key": "agents.untrusted.ok",
+      "en": "Allow once",
+      "vars": []
+    },
+    {
+      "key": "agents.untrusted.title",
+      "en": "Approve this agent action?",
+      "vars": []
+    },
+    {
+      "key": "blockLink.copied",
+      "en": "Copied {link}",
+      "vars": [
+        "link"
+      ]
+    },
+    {
+      "key": "blockLink.copyFailed",
+      "en": "Couldn't copy the link; the block has its id now.",
+      "vars": []
+    },
+    {
+      "key": "blockLink.noBlock",
+      "en": "Put the cursor in a paragraph, list item, table, quote or code block first.",
+      "vars": []
+    },
+    {
+      "key": "blockLink.sourceOnly",
+      "en": "Copy link to block works in the source editor (⌘1).",
+      "vars": []
+    },
+    {
+      "key": "db.all",
+      "en": "All",
+      "vars": []
+    },
+    {
+      "key": "db.calendar.needDate",
+      "en": "The calendar needs a dateField: in the database spec.",
+      "vars": []
+    },
+    {
+      "key": "db.calendar.noDates",
+      "en": "No notes have a date in {field}.",
+      "vars": [
+        "field"
+      ]
+    },
+    {
+      "key": "db.cell.edit",
+      "en": "Edit {field} of {note}",
+      "vars": [
+        "field",
+        "note"
+      ]
+    },
+    {
+      "key": "db.count",
+      "en": "{count} notes",
+      "vars": [
+        "count"
+      ]
+    },
+    {
+      "key": "db.empty",
+      "en": "No notes match this query.",
+      "vars": []
+    },
+    {
+      "key": "db.emptyHint",
+      "en": "Add YAML frontmatter “type: {type}” to notes under {source}.",
+      "vars": [
+        "type",
+        "source"
+      ]
+    },
+    {
+      "key": "db.filter.error",
+      "en": "Filter: {error} (character {at})",
+      "vars": [
+        "error",
+        "at"
+      ]
+    },
+    {
+      "key": "db.filter.label",
+      "en": "Filter",
+      "vars": []
+    },
+    {
+      "key": "db.filter.placeholder",
+      "en": "status = \"done\" AND rating >= 4",
+      "vars": []
+    },
+    {
+      "key": "db.group.label",
+      "en": "Group",
+      "vars": []
+    },
+    {
+      "key": "db.group.none",
+      "en": "No grouping",
+      "vars": []
+    },
+    {
+      "key": "db.kanban.cancelled",
+      "en": "Move of {note} cancelled.",
+      "vars": [
+        "note"
+      ]
+    },
+    {
+      "key": "db.kanban.dropped",
+      "en": "{note} moved to {column}.",
+      "vars": [
+        "note",
+        "column"
+      ]
+    },
+    {
+      "key": "db.kanban.instructions",
+      "en": "To move a card, press Space or Enter, choose a column with the left and right arrow keys, and press Space or Enter again to drop it. Escape cancels.",
+      "vars": []
+    },
+    {
+      "key": "db.kanban.move",
+      "en": "Move {note}",
+      "vars": [
+        "note"
+      ]
+    },
+    {
+      "key": "db.kanban.needGroup",
+      "en": "Pick a property to group by for the kanban view.",
+      "vars": []
+    },
+    {
+      "key": "db.kanban.over",
+      "en": "{note} is over {column}.",
+      "vars": [
+        "note",
+        "column"
+      ]
+    },
+    {
+      "key": "db.kanban.picked",
+      "en": "Picked up {note}.",
+      "vars": [
+        "note"
+      ]
+    },
+    {
+      "key": "db.loading",
+      "en": "loading…",
+      "vars": []
+    },
+    {
+      "key": "db.none",
+      "en": "(none)",
+      "vars": []
+    },
+    {
+      "key": "db.readOnly",
+      "en": "This value can't be edited here",
+      "vars": []
+    },
+    {
+      "key": "db.saveFailed",
+      "en": "Couldn't save {note}: {error}",
+      "vars": [
+        "note",
+        "error"
+      ]
+    },
+    {
+      "key": "db.sort.asc",
+      "en": "Ascending",
+      "vars": []
+    },
+    {
+      "key": "db.sort.desc",
+      "en": "Descending",
+      "vars": []
+    },
+    {
+      "key": "db.sort.label",
+      "en": "Sort",
+      "vars": []
+    },
+    {
+      "key": "db.sort.none",
+      "en": "No sort",
+      "vars": []
+    },
+    {
+      "key": "db.specError",
+      "en": "Database spec error: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "db.title",
+      "en": "Title",
+      "vars": []
+    },
+    {
+      "key": "db.view.calendar",
+      "en": "Calendar",
+      "vars": []
+    },
+    {
+      "key": "db.view.cards",
+      "en": "Cards",
+      "vars": []
+    },
+    {
+      "key": "db.view.kanban",
+      "en": "Kanban",
+      "vars": []
+    },
+    {
+      "key": "db.view.list",
+      "en": "List",
+      "vars": []
+    },
+    {
+      "key": "db.view.table",
+      "en": "Table",
+      "vars": []
+    },
+    {
+      "key": "db.views",
+      "en": "Views",
+      "vars": []
+    },
+    {
+      "key": "db.workspaceRoot",
+      "en": "the workspace root",
+      "vars": []
+    },
+    {
+      "key": "dialog.cancel",
+      "en": "Cancel",
+      "vars": []
+    },
+    {
+      "key": "dialog.ok",
+      "en": "OK",
+      "vars": []
+    },
+    {
+      "key": "embed.cycle",
+      "en": "{target} is not embedded again: it would embed itself (circular embed).",
+      "vars": [
+        "target"
+      ]
+    },
+    {
+      "key": "embed.depth",
+      "en": "{target} is not embedded: embeds nest at most {max} levels deep.",
+      "vars": [
+        "target",
+        "max"
+      ]
+    },
+    {
+      "key": "embed.notFound",
+      "en": "Can't embed {target}: not found in the workspace.",
+      "vars": [
+        "target"
+      ]
+    },
+    {
+      "key": "embed.openPdf",
+      "en": "Open PDF",
+      "vars": []
+    },
+    {
+      "key": "embed.sectionNotFound",
+      "en": "Can't embed {section}: there is no such section in {note}.",
+      "vars": [
+        "section",
+        "note"
+      ]
+    },
+    {
+      "key": "errorBoundary.heading",
+      "en": "Rendering Error",
+      "vars": []
+    },
+    {
+      "key": "errorBoundary.renderDetail",
+      "en": "One of the embedded visualizations crashed during render. The rest of the editor is kept safe.",
+      "vars": []
+    },
+    {
+      "key": "loading.generic",
+      "en": "Loading…",
+      "vars": []
+    },
+    {
+      "key": "props.add",
+      "en": "Add property",
+      "vars": []
+    },
+    {
+      "key": "props.addItem",
+      "en": "Add…",
+      "vars": []
+    },
+    {
+      "key": "props.addItemTo",
+      "en": "Add an item to {key}",
+      "vars": [
+        "key"
+      ]
+    },
+    {
+      "key": "props.addKey",
+      "en": "Property name",
+      "vars": []
+    },
+    {
+      "key": "props.close",
+      "en": "Close properties",
+      "vars": []
+    },
+    {
+      "key": "props.empty",
+      "en": "This note has no properties yet.",
+      "vars": []
+    },
+    {
+      "key": "props.invalid",
+      "en": "The frontmatter isn't valid YAML, so it can't be edited here. Fix it in the editor: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "props.keyExists",
+      "en": "A property named {key} already exists.",
+      "vars": [
+        "key"
+      ]
+    },
+    {
+      "key": "props.linkMissing",
+      "en": "No note named {target}",
+      "vars": [
+        "target"
+      ]
+    },
+    {
+      "key": "props.newType",
+      "en": "Type of the new property",
+      "vars": []
+    },
+    {
+      "key": "props.openLink",
+      "en": "Open {target}",
+      "vars": [
+        "target"
+      ]
+    },
+    {
+      "key": "props.readOnly",
+      "en": "Edit this value in the editor",
+      "vars": []
+    },
+    {
+      "key": "props.remove",
+      "en": "Remove {key}",
+      "vars": [
+        "key"
+      ]
+    },
+    {
+      "key": "props.removeItem",
+      "en": "Remove {item}",
+      "vars": [
+        "item"
+      ]
+    },
+    {
+      "key": "props.title",
+      "en": "Properties",
+      "vars": []
+    },
+    {
+      "key": "props.type",
+      "en": "Type of {key}",
+      "vars": [
+        "key"
+      ]
+    },
+    {
+      "key": "props.type.checkbox",
+      "en": "Checkbox",
+      "vars": []
+    },
+    {
+      "key": "props.type.date",
+      "en": "Date",
+      "vars": []
+    },
+    {
+      "key": "props.type.link",
+      "en": "Link",
+      "vars": []
+    },
+    {
+      "key": "props.type.list",
+      "en": "List",
+      "vars": []
+    },
+    {
+      "key": "props.type.number",
+      "en": "Number",
+      "vars": []
+    },
+    {
+      "key": "props.type.text",
+      "en": "Text",
+      "vars": []
+    },
+    {
+      "key": "props.value",
+      "en": "Value of {key}",
+      "vars": [
+        "key"
+      ]
+    },
+    {
+      "key": "props.writeFailed",
+      "en": "Couldn't update the property: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "pwa.dismiss",
+      "en": "Dismiss",
+      "vars": []
+    },
+    {
+      "key": "pwa.offlineReady",
+      "en": "Lumen is ready to work offline.",
+      "vars": []
+    },
+    {
+      "key": "pwa.reload",
+      "en": "Reload",
+      "vars": []
+    },
+    {
+      "key": "pwa.updateAvailable",
+      "en": "A new version is available",
+      "vars": []
+    },
+    {
+      "key": "remoteImage.allowHint",
+      "en": "Load images from {host} in every note, in this browser.",
+      "vars": [
+        "host"
+      ]
+    },
+    {
+      "key": "remoteImage.allowHost",
+      "en": "Always allow {host}",
+      "vars": [
+        "host"
+      ]
+    },
+    {
+      "key": "remoteImage.blocked",
+      "en": "From {host}, not loaded",
+      "vars": [
+        "host"
+      ]
+    },
+    {
+      "key": "remoteImage.desktop",
+      "en": "From {host}. The desktop app doesn't load images from other sites.",
+      "vars": [
+        "host"
+      ]
+    },
+    {
+      "key": "remoteImage.label",
+      "en": "Image from {host}",
+      "vars": [
+        "host"
+      ]
+    },
+    {
+      "key": "remoteImage.load",
+      "en": "Load",
+      "vars": []
+    },
+    {
+      "key": "remoteImage.loadHint",
+      "en": "Load this image once. {host} will see that you opened this note.",
+      "vars": [
+        "host"
+      ]
+    },
+    {
+      "key": "remoteImage.untitled",
+      "en": "Image",
+      "vars": []
+    },
+    {
+      "key": "remoteMedia.label",
+      "en": "Video or audio from {host}",
+      "vars": [
+        "host"
+      ]
+    },
+    {
+      "key": "status.chars",
+      "en": "{n} chars",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "status.grammar.off",
+      "en": "Grammar",
+      "vars": []
+    },
+    {
+      "key": "status.grammar.on",
+      "en": "Grammar",
+      "vars": []
+    },
+    {
+      "key": "status.grammar.tooltip.off",
+      "en": "Grammar check is OFF. Click to enable LanguageTool checking.",
+      "vars": []
+    },
+    {
+      "key": "status.grammar.tooltip.on",
+      "en": "Grammar check is ON. Click to disable.",
+      "vars": []
+    },
+    {
+      "key": "status.leave",
+      "en": "leave",
+      "vars": []
+    },
+    {
+      "key": "status.live",
+      "en": "● live",
+      "vars": []
+    },
+    {
+      "key": "status.privacyMode",
+      "en": "PRIVATE",
+      "vars": []
+    },
+    {
+      "key": "status.privacyMode.tooltip",
+      "en": "Privacy Mode — AI runs entirely on this device via WebGPU. No prompts leave your browser.",
+      "vars": []
+    },
+    {
+      "key": "status.reading",
+      "en": "~{n} min read",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "status.roadmap",
+      "en": "Roadmap",
+      "vars": []
+    },
+    {
+      "key": "status.roadmap.tooltip",
+      "en": "View Lumen's public roadmap",
+      "vars": []
+    },
+    {
+      "key": "status.runtimeMetrics",
+      "en": "Runtime metrics",
+      "vars": []
+    },
+    {
+      "key": "status.runtimeMetrics.tooltip",
+      "en": "Open runtime metrics and transport diagnostics",
+      "vars": []
+    },
+    {
+      "key": "status.secretsPlain",
+      "en": "KEYS UNENCRYPTED",
+      "vars": []
+    },
+    {
+      "key": "status.secretsPlain.tooltip",
+      "en": "This browser has no IndexedDB or WebCrypto here, so API keys and sign-in tokens are stored unencrypted in localStorage. Use a current browser over HTTPS (or the desktop app) to encrypt them.",
+      "vars": []
+    },
+    {
+      "key": "status.suggesting.off",
+      "en": "Editing",
+      "vars": []
+    },
+    {
+      "key": "status.suggesting.on",
+      "en": "Suggesting",
+      "vars": []
+    },
+    {
+      "key": "status.suggesting.tooltip.off",
+      "en": "Editing directly. Click to turn on suggesting mode (track changes).",
+      "vars": []
+    },
+    {
+      "key": "status.suggesting.tooltip.on",
+      "en": "Suggesting mode is ON: your edits are recorded as tracked changes (CriticMarkup). Click to edit directly.",
+      "vars": []
+    },
+    {
+      "key": "status.telemetry.off",
+      "en": "Telemetry",
+      "vars": []
+    },
+    {
+      "key": "status.telemetry.on",
+      "en": "Telemetry",
+      "vars": []
+    },
+    {
+      "key": "status.telemetry.tooltip.off",
+      "en": "Error telemetry is OFF. Click to enable anonymous crash reports.",
+      "vars": []
+    },
+    {
+      "key": "status.telemetry.tooltip.on",
+      "en": "Error telemetry is ON. Crash reports are sent to help improve Lumen. Click to opt out.",
+      "vars": []
+    },
+    {
+      "key": "status.words",
+      "en": "{n} words",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "time.daysAgo",
+      "en": "{n}d ago",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "time.hoursAgo",
+      "en": "{n}h ago",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "time.justNow",
+      "en": "just now",
+      "vars": []
+    },
+    {
+      "key": "time.minutesAgo",
+      "en": "{n}m ago",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "toolbar.appearance",
+      "en": "Appearance",
+      "vars": []
+    },
+    {
+      "key": "toolbar.commandPalette",
+      "en": "Command palette",
+      "vars": []
+    },
+    {
+      "key": "toolbar.copy",
+      "en": "Copy",
+      "vars": []
+    },
+    {
+      "key": "toolbar.cut",
+      "en": "Cut",
+      "vars": []
+    },
+    {
+      "key": "toolbar.darkMode",
+      "en": "Dark Mode",
+      "vars": []
+    },
+    {
+      "key": "toolbar.delete",
+      "en": "Delete",
+      "vars": []
+    },
+    {
+      "key": "toolbar.editMenu",
+      "en": "Edit",
+      "vars": []
+    },
+    {
+      "key": "toolbar.exportHtml",
+      "en": "Export to HTML…",
+      "vars": []
+    },
+    {
+      "key": "toolbar.exportPdf",
+      "en": "Export to PDF",
+      "vars": []
+    },
+    {
+      "key": "toolbar.fileMenu",
+      "en": "File",
+      "vars": []
+    },
+    {
+      "key": "toolbar.files",
+      "en": "Files",
+      "vars": []
+    },
+    {
+      "key": "toolbar.focusMode",
+      "en": "Focus mode",
+      "vars": []
+    },
+    {
+      "key": "toolbar.helpMenu",
+      "en": "Help",
+      "vars": []
+    },
+    {
+      "key": "toolbar.insertMenu",
+      "en": "Insert",
+      "vars": []
+    },
+    {
+      "key": "toolbar.insertSmart",
+      "en": "Insert anything…",
+      "vars": []
+    },
+    {
+      "key": "toolbar.insertText",
+      "en": "Insert text…",
+      "vars": []
+    },
+    {
+      "key": "toolbar.lightMode",
+      "en": "Light Mode",
+      "vars": []
+    },
+    {
+      "key": "toolbar.ltr",
+      "en": "LTR ←",
+      "vars": []
+    },
+    {
+      "key": "toolbar.menu",
+      "en": "Menu",
+      "vars": []
+    },
+    {
+      "key": "toolbar.menuTooltip.edit",
+      "en": "Editing actions: undo, redo, copy, paste",
+      "vars": []
+    },
+    {
+      "key": "toolbar.menuTooltip.file",
+      "en": "Document operations: new, open, save, export",
+      "vars": []
+    },
+    {
+      "key": "toolbar.menuTooltip.help",
+      "en": "Focus mode, shortcuts, tour, command palette",
+      "vars": []
+    },
+    {
+      "key": "toolbar.menuTooltip.insert",
+      "en": "Insert charts, diagrams, media, math, references",
+      "vars": []
+    },
+    {
+      "key": "toolbar.menuTooltip.view",
+      "en": "View modes, appearance, panels",
+      "vars": []
+    },
+    {
+      "key": "toolbar.new",
+      "en": "New",
+      "vars": []
+    },
+    {
+      "key": "toolbar.open",
+      "en": "Open file",
+      "vars": []
+    },
+    {
+      "key": "toolbar.openWelcome",
+      "en": "Show Welcome.md",
+      "vars": []
+    },
+    {
+      "key": "toolbar.outline",
+      "en": "Outline",
+      "vars": []
+    },
+    {
+      "key": "toolbar.outline.hide",
+      "en": "Hide outline",
+      "vars": []
+    },
+    {
+      "key": "toolbar.outline.show",
+      "en": "Show outline",
+      "vars": []
+    },
+    {
+      "key": "toolbar.pageView.off",
+      "en": "📄 Page View: OFF",
+      "vars": []
+    },
+    {
+      "key": "toolbar.pageView.on",
+      "en": "📄 Page View: ON",
+      "vars": []
+    },
+    {
+      "key": "toolbar.panels",
+      "en": "Panels",
+      "vars": []
+    },
+    {
+      "key": "toolbar.paste",
+      "en": "Paste",
+      "vars": []
+    },
+    {
+      "key": "toolbar.print",
+      "en": "Print",
+      "vars": []
+    },
+    {
+      "key": "toolbar.redo",
+      "en": "Redo",
+      "vars": []
+    },
+    {
+      "key": "toolbar.rtl",
+      "en": "RTL →",
+      "vars": []
+    },
+    {
+      "key": "toolbar.save",
+      "en": "Save",
+      "vars": []
+    },
+    {
+      "key": "toolbar.saveAs",
+      "en": "Save as…",
+      "vars": []
+    },
+    {
+      "key": "toolbar.scrollIndependent",
+      "en": "Scroll: Independent",
+      "vars": []
+    },
+    {
+      "key": "toolbar.scrollLinked",
+      "en": "Scroll: Linked",
+      "vars": []
+    },
+    {
+      "key": "toolbar.section.clipboard",
+      "en": "Clipboard",
+      "vars": []
+    },
+    {
+      "key": "toolbar.section.diagrams",
+      "en": "Diagrams",
+      "vars": []
+    },
+    {
+      "key": "toolbar.section.documents",
+      "en": "Documents",
+      "vars": []
+    },
+    {
+      "key": "toolbar.section.export",
+      "en": "Export",
+      "vars": []
+    },
+    {
+      "key": "toolbar.section.history",
+      "en": "History",
+      "vars": []
+    },
+    {
+      "key": "toolbar.section.mathRefs",
+      "en": "Math & References",
+      "vars": []
+    },
+    {
+      "key": "toolbar.section.media",
+      "en": "Media",
+      "vars": []
+    },
+    {
+      "key": "toolbar.section.selection",
+      "en": "Selection",
+      "vars": []
+    },
+    {
+      "key": "toolbar.section.specific",
+      "en": "Or pick a specific block",
+      "vars": []
+    },
+    {
+      "key": "toolbar.section.tablesCharts",
+      "en": "Tables & Charts",
+      "vars": []
+    },
+    {
+      "key": "toolbar.section.tools",
+      "en": "Tools",
+      "vars": []
+    },
+    {
+      "key": "toolbar.section.workspace",
+      "en": "Workspace",
+      "vars": []
+    },
+    {
+      "key": "toolbar.selectAll",
+      "en": "Select all",
+      "vars": []
+    },
+    {
+      "key": "toolbar.settings",
+      "en": "Settings",
+      "vars": []
+    },
+    {
+      "key": "toolbar.shareMenu",
+      "en": "Share",
+      "vars": []
+    },
+    {
+      "key": "toolbar.shortcuts",
+      "en": "Keyboard shortcuts",
+      "vars": []
+    },
+    {
+      "key": "toolbar.splitAxis",
+      "en": "Scroll orientation",
+      "vars": []
+    },
+    {
+      "key": "toolbar.splitAxis.auto",
+      "en": "Auto (responsive)",
+      "vars": []
+    },
+    {
+      "key": "toolbar.splitAxis.horizontal",
+      "en": "Side by side ↔",
+      "vars": []
+    },
+    {
+      "key": "toolbar.splitAxis.vertical",
+      "en": "Stacked ↕",
+      "vars": []
+    },
+    {
+      "key": "toolbar.tagline",
+      "en": "Markdown, illuminated",
+      "vars": []
+    },
+    {
+      "key": "toolbar.theme",
+      "en": "Toggle theme",
+      "vars": []
+    },
+    {
+      "key": "toolbar.tour",
+      "en": "Guided tour",
+      "vars": []
+    },
+    {
+      "key": "toolbar.undo",
+      "en": "Undo",
+      "vars": []
+    },
+    {
+      "key": "toolbar.viewMode",
+      "en": "View Mode",
+      "vars": []
+    },
+    {
+      "key": "toolbar.workspace",
+      "en": "Toggle workspace",
+      "vars": []
+    },
+    {
+      "key": "tour.action.openRuntimeMetrics",
+      "en": "Open runtime metrics now",
+      "vars": []
+    },
+    {
+      "key": "tour.done",
+      "en": "✓ Done",
+      "vars": []
+    },
+    {
+      "key": "tour.next",
+      "en": "→ Next",
+      "vars": []
+    },
+    {
+      "key": "tour.step.editor.body",
+      "en": "Write Markdown with full syntax highlighting, live preview, and AI assistance.",
+      "vars": []
+    },
+    {
+      "key": "tour.step.editor.title",
+      "en": "✍️ Editor",
+      "vars": []
+    },
+    {
+      "key": "tour.step.menu.body",
+      "en": "Access File, Edit, Insert, View, and Help — each menu has clear sections, hover tooltips, and per-action descriptions.",
+      "vars": []
+    },
+    {
+      "key": "tour.step.menu.title",
+      "en": "📋 Menu Bar",
+      "vars": []
+    },
+    {
+      "key": "tour.step.statusBar.body",
+      "en": "Word count, character count, reading time — always visible.",
+      "vars": []
+    },
+    {
+      "key": "tour.step.statusBar.title",
+      "en": "📊 Status Bar",
+      "vars": []
+    },
+    {
+      "key": "tour.step.viewModes.body",
+      "en": "Switch between Source, Split, Preview, and WYSIWYG anytime (⌘1-4).",
+      "vars": []
+    },
+    {
+      "key": "tour.step.viewModes.title",
+      "en": "👁️ View Modes",
+      "vars": []
+    },
+    {
+      "key": "tour.step.workspace.body",
+      "en": "Manage files in your local workspace. Everything is stored in-browser.",
+      "vars": []
+    },
+    {
+      "key": "tour.step.workspace.title",
+      "en": "📁 Workspace",
+      "vars": []
+    },
+    {
+      "key": "update.available",
+      "en": "A new version of Lumen is available.",
+      "vars": []
+    },
+    {
+      "key": "update.dismiss",
+      "en": "Dismiss",
+      "vars": []
+    },
+    {
+      "key": "update.reload",
+      "en": "Reload",
+      "vars": []
+    },
+    {
+      "key": "wikiComplete.aliasOf",
+      "en": "alias of {name}",
+      "vars": [
+        "name"
+      ]
+    },
+    {
+      "key": "wikiComplete.create",
+      "en": "Create note «{name}»",
+      "vars": [
+        "name"
+      ]
+    },
+    {
+      "key": "wikiComplete.createFailed",
+      "en": "Couldn't create the note «{name}»: {error}",
+      "vars": [
+        "name",
+        "error"
+      ]
+    },
+    {
+      "key": "wikiComplete.created",
+      "en": "Created note «{name}»",
+      "vars": [
+        "name"
+      ]
+    },
+    {
+      "key": "wikiComplete.listLabel",
+      "en": "Link suggestions",
+      "vars": []
+    }
+  ]
+}

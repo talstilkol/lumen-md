@@ -98,15 +98,15 @@ describe("the no-models hint names the open-licence default (plan 1.7)", () => {
     const { join, resolve } = await import("node:path");
     const { DEFAULT_OLLAMA_MODEL } = await import("../ai/ollamaProvider");
     const root = resolve(__dirname, "..");
-    const en = readFileSync(join(root, "i18n/index.ts"), "utf8").match(/"ai\.settings\.ollama\.none":\s*"([^"]+)"/)?.[1];
-    expect(en).toContain(`ollama pull ${DEFAULT_OLLAMA_MODEL}`);
-    const locales = readdirSync(join(root, "i18n/locales")).filter((f) => f.endsWith(".json"));
-    expect(locales.length).toBe(7);
-    for (const f of locales) {
-      const strings = JSON.parse(readFileSync(join(root, "i18n/locales", f), "utf8")) as Record<string, string>;
-      expect([f, strings["ai.settings.ollama.none"]]).toEqual([f, expect.stringContaining(`ollama pull ${DEFAULT_OLLAMA_MODEL}`)]);
+    // Per-domain layout (plan 0.3): the key's domain file is locales/<lang>/ai.json.
+    const locales = readdirSync(join(root, "i18n/locales"), { withFileTypes: true }).filter((d) => d.isDirectory()).map((d) => d.name);
+    expect(locales).toContain("en");
+    expect(locales.length).toBe(8);
+    for (const lang of locales) {
+      const strings = JSON.parse(readFileSync(join(root, "i18n/locales", lang, "ai.json"), "utf8")) as Record<string, string>;
+      expect([lang, strings["ai.settings.ollama.none"]]).toEqual([lang, expect.stringContaining(`ollama pull ${DEFAULT_OLLAMA_MODEL}`)]);
     }
-    const commands = readFileSync(join(root, "commands/useCommands.ts"), "utf8");
+    const commands = readFileSync(join(root, "commands/domains/ai.ts"), "utf8");
     const block = commands.slice(commands.indexOf('id: "ai.ollamaModels"'), commands.indexOf('id: "ai.usage"'));
     expect(block).toContain('t("ai.settings.ollama.none")');
     expect(commands).not.toMatch(/ollama pull (llama|gemma|aya)/);

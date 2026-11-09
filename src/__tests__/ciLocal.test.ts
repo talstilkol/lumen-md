@@ -112,7 +112,7 @@ describe("ci:local review fixes", () => {
   });
 
   it("a non-code app input (a locale, public/_headers) runs the full suite; e2e specs are not vitest inputs", () => {
-    for (const f of ["src/i18n/locales/he.json", "public/_headers", "playground-runner.html"]) {
+    for (const f of ["src/i18n/locales/he/cmd.json", "public/_headers", "playground-runner.html"]) {
       const t = byId(plan([f])).test;
       expect([f, t.cmd]).toEqual([f, ["npx", "vitest", "run"]]);
       expect(t.skipReason).toBeUndefined();
