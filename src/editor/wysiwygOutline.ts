@@ -18,6 +18,7 @@ import { Fragment, type Node as PMNode, type ResolvedPos } from "@milkdown/prose
 import { keymap } from "prosemirror-keymap";
 import { liftListItem, sinkListItem } from "prosemirror-schema-list";
 import { t } from "../i18n";
+import { firstStrong } from "../lib/bidiDirection";
 import { tabIdOf, useAppStore } from "../store/useStore";
 import { OUTLINE_EVENT, foldKey, loadFolds, outlineModeOn, saveFolds, setOutlineMode, type OutlineCommand, type OutlineOp } from "../text/outline";
 
@@ -383,6 +384,9 @@ function injectStyle(): void {
 /* ─── Commands ───────────────────────────────────────────────────── */
 
 function blockIsRtl(view: EditorView): boolean {
+  // The block's own text decides (the rule of wysiwygBidi); the layout only when it has no strong character.
+  const own = firstStrong(view.state.selection.$from.parent.textContent);
+  if (own) return own === "rtl";
   try {
     const { node } = view.domAtPos(view.state.selection.from);
     const el = node instanceof HTMLElement ? node : node.parentElement;

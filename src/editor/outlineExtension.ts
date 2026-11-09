@@ -23,6 +23,7 @@ import { Direction, Decoration, EditorView, ViewPlugin, WidgetType, keymap, type
 import { Compartment, EditorSelection, Prec, StateEffect, StateField, type EditorState, type Extension, type Range, type Transaction } from "@codemirror/state";
 import { codeFolding, foldAll, foldEffect, foldGutter, foldKeymap, foldService, foldedRanges, unfoldAll, unfoldEffect } from "@codemirror/language";
 import { t } from "../i18n";
+import { markdownLineDirection } from "../lib/bidiDirection";
 import { tabIdOf, useAppStore } from "../store/useStore";
 import {
   OUTLINE_EVENT,
@@ -262,7 +263,12 @@ export function runOutlineCommandInView(view: EditorView, cmd: OutlineCommand): 
 /** Indent/outdent by arrow: the arrow toward the line's end indents. */
 function arrowIndent(towardRight: boolean) {
   return (view: EditorView) => {
-    const rtl = view.textDirectionAt(view.state.selection.main.head) === Direction.RTL;
+    // The line's own direction, by the same rule as the bidi extension (its
+    // first strong character after the Markdown markers); the layout's only
+    // for a line without one.
+    const head = view.state.selection.main.head;
+    const own = markdownLineDirection(view.state.doc.lineAt(head).text);
+    const rtl = own ? own === "rtl" : view.textDirectionAt(head) === Direction.RTL;
     runOp(view, towardRight !== rtl ? "indent" : "outdent");
     return true;
   };
