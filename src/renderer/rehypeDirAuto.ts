@@ -27,9 +27,18 @@ export function rehypeDirAuto() {
     visit(tree, "element", (node: Element) => {
       const props = (node.properties ??= {});
       if (props.dir !== undefined && props.dir !== null && props.dir !== "") return;
+      const cls = Array.isArray(props.className) ? props.className : [];
       if (LTR.has(node.tagName)) props.dir = "ltr";
-      else if (CONTAINER.has(node.tagName)) props.dir = firstStrongDirection(toString(node)) ?? "auto";
-      else if (AUTO.has(node.tagName)) props.dir = "auto";
+      else if (cls.includes("callout")) {
+        // A callout reads in its content's direction: a default title ("Tip")
+        // must not turn a Hebrew callout left-to-right.
+        const content = node.children.find(
+          (c) => c.type === "element" && Array.isArray(c.properties?.className) && c.properties.className.includes("callout-content"),
+        );
+        props.dir = firstStrongDirection(toString(content ?? node)) ?? firstStrongDirection(toString(node)) ?? "auto";
+      } else if (CONTAINER.has(node.tagName) || cls.includes("callout-content"))
+        props.dir = firstStrongDirection(toString(node)) ?? "auto";
+      else if (AUTO.has(node.tagName) || cls.includes("callout-title")) props.dir = "auto";
     });
   };
 }

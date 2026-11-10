@@ -1429,5 +1429,20 @@
   "cmd.ai.cancel": "AI: ביטול",
   "cmd.ai.cancel.hint": "עוצר כל בקשת AI שרצה (גם Esc עושה זאת)",
   "toast.aiCancelled": "בקשת ה-AI בוטלה ({count})",
-  "toast.aiNothingRunning": "אין בקשת AI שרצה"
+  "toast.aiNothingRunning": "אין בקשת AI שרצה",
+  "callout.note": "הערה",
+  "callout.abstract": "תקציר",
+  "callout.info": "מידע",
+  "callout.todo": "משימה",
+  "callout.tip": "טיפ",
+  "callout.success": "הצלחה",
+  "callout.question": "שאלה",
+  "callout.warning": "אזהרה",
+  "callout.failure": "כישלון",
+  "callout.danger": "סכנה",
+  "callout.bug": "באג",
+  "callout.example": "דוגמה",
+  "callout.quote": "ציטוט",
+  "preview.imageResize.hint": "גררו את הקצה כדי לשנות גודל. הרוחב נשמר בפתק.",
+  "preview.footnote.label": "הערת שוליים {n}"
 }

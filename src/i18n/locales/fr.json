@@ -1429,5 +1429,20 @@
   "cmd.ai.cancel": "IA : annuler",
   "cmd.ai.cancel.hint": "Arrête toutes les requêtes IA en cours (Échap aussi)",
   "toast.aiCancelled": "Requête IA annulée ({count})",
-  "toast.aiNothingRunning": "Aucune requête IA en cours"
+  "toast.aiNothingRunning": "Aucune requête IA en cours",
+  "callout.note": "Note",
+  "callout.abstract": "Résumé",
+  "callout.info": "Info",
+  "callout.todo": "À faire",
+  "callout.tip": "Astuce",
+  "callout.success": "Succès",
+  "callout.question": "Question",
+  "callout.warning": "Avertissement",
+  "callout.failure": "Échec",
+  "callout.danger": "Danger",
+  "callout.bug": "Bogue",
+  "callout.example": "Exemple",
+  "callout.quote": "Citation",
+  "preview.imageResize.hint": "Faites glisser le bord pour redimensionner. La largeur est enregistrée dans la note.",
+  "preview.footnote.label": "Note de bas de page {n}"
 }

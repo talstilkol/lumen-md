@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-11-09T23:31:54.300Z",
+  "generated_at": "2026-11-10T03:08:38.520Z",
   "source": "src/i18n/index.ts (en bundle)",
-  "count": 1431,
+  "count": 1446,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -5838,6 +5838,83 @@
       "key": "voice.memo.stop",
       "en": "⏹ Stop & insert",
       "vars": []
+    },
+    {
+      "key": "callout.note",
+      "en": "Note",
+      "vars": []
+    },
+    {
+      "key": "callout.abstract",
+      "en": "Abstract",
+      "vars": []
+    },
+    {
+      "key": "callout.info",
+      "en": "Info",
+      "vars": []
+    },
+    {
+      "key": "callout.todo",
+      "en": "Todo",
+      "vars": []
+    },
+    {
+      "key": "callout.tip",
+      "en": "Tip",
+      "vars": []
+    },
+    {
+      "key": "callout.success",
+      "en": "Success",
+      "vars": []
+    },
+    {
+      "key": "callout.question",
+      "en": "Question",
+      "vars": []
+    },
+    {
+      "key": "callout.warning",
+      "en": "Warning",
+      "vars": []
+    },
+    {
+      "key": "callout.failure",
+      "en": "Failure",
+      "vars": []
+    },
+    {
+      "key": "callout.danger",
+      "en": "Danger",
+      "vars": []
+    },
+    {
+      "key": "callout.bug",
+      "en": "Bug",
+      "vars": []
+    },
+    {
+      "key": "callout.example",
+      "en": "Example",
+      "vars": []
+    },
+    {
+      "key": "callout.quote",
+      "en": "Quote",
+      "vars": []
+    },
+    {
+      "key": "preview.imageResize.hint",
+      "en": "Drag the edge to resize. The width is saved in the note.",
+      "vars": []
+    },
+    {
+      "key": "preview.footnote.label",
+      "en": "Footnote {n}",
+      "vars": [
+        "n"
+      ]
     },
     {
       "key": "errorBoundary.heading",

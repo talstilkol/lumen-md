@@ -1429,5 +1429,20 @@
   "cmd.ai.cancel": "KI: Abbrechen",
   "cmd.ai.cancel.hint": "Stoppt alle laufenden KI-Anfragen (auch mit Esc)",
   "toast.aiCancelled": "KI-Anfrage abgebrochen ({count})",
-  "toast.aiNothingRunning": "Keine KI-Anfrage läuft"
+  "toast.aiNothingRunning": "Keine KI-Anfrage läuft",
+  "callout.note": "Hinweis",
+  "callout.abstract": "Zusammenfassung",
+  "callout.info": "Info",
+  "callout.todo": "Aufgabe",
+  "callout.tip": "Tipp",
+  "callout.success": "Erfolg",
+  "callout.question": "Frage",
+  "callout.warning": "Warnung",
+  "callout.failure": "Fehlschlag",
+  "callout.danger": "Gefahr",
+  "callout.bug": "Fehler",
+  "callout.example": "Beispiel",
+  "callout.quote": "Zitat",
+  "preview.imageResize.hint": "Ziehen Sie den Rand, um die Größe zu ändern. Die Breite wird in der Notiz gespeichert.",
+  "preview.footnote.label": "Fußnote {n}"
 }
