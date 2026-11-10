@@ -59,6 +59,16 @@
       "vars": []
     },
     {
+      "key": "cmd.ai.batchJobs",
+      "en": "AI: Batch Jobs — Progress, Pause, Resume",
+      "vars": []
+    },
+    {
+      "key": "cmd.ai.batchJobs.hint",
+      "en": "Live progress of batch jobs, with pause, resume and cancel",
+      "vars": []
+    },
+    {
       "key": "cmd.ai.cache",
       "en": "AI: Answer Cache…",
       "vars": []

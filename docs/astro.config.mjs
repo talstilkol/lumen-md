@@ -85,6 +85,7 @@ export default defineConfig({
             { label: "Data analyst", slug: "ai/data-analyst" },
             { label: "Train a model on your style, locally", slug: "ai/local-fine-tune" },
             { label: "AI cost: usage meter + answer cache", slug: "ai/cost" },
+            { label: "Batch jobs: pause, resume, progress", translations: { he: "משימות אצווה: השהיה, המשך, התקדמות" }, slug: "ai/batch" },
             { label: "Research + citation checks", slug: "ai/research" },
             { label: "Local agents: tools, critic, suggestions", slug: "ai/local-agents", translations: { he: "סוכנים מקומיים: כלים, מבקר, הצעות" } },
             { label: "Agent eval: 14 agents, HTML report", slug: "ai/agent-eval", translations: { he: "הערכת סוכנים: 14 סוכנים, דוח HTML" } },

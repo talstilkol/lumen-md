@@ -9,6 +9,8 @@
   "cmd.ai.batch.hint": "Tag, summarise or translate many notes through the provider's batch API — results within 24 h",
   "cmd.ai.batchCheck": "AI: Check Batch Jobs",
   "cmd.ai.batchCheck.hint": "Fetch finished batch results and apply them to your notes",
+  "cmd.ai.batchJobs": "AI: Batch Jobs — Progress, Pause, Resume",
+  "cmd.ai.batchJobs.hint": "Live progress of batch jobs, with pause, resume and cancel",
   "cmd.ai.cache": "AI: Answer Cache…",
   "cmd.ai.cache.hint": "Reuse identical answers (tags, translation, diagrams) instead of paying again",
   "cmd.ai.cancel": "AI: Cancel",

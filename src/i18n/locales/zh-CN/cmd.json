@@ -10,6 +10,8 @@
   "cmd.ai.batch.hint": "通过服务商的批处理 API 为大量笔记打标签、摘要或翻译 — 24 小时内返回结果",
   "cmd.ai.batchCheck": "AI：检查批处理任务",
   "cmd.ai.batchCheck.hint": "获取已完成的批处理结果并应用到笔记",
+  "cmd.ai.batchJobs": "AI：批处理任务 — 进度、暂停、继续",
+  "cmd.ai.batchJobs.hint": "实时查看批处理任务进度，可暂停、继续和取消",
   "cmd.ai.cache": "AI：回答缓存…",
   "cmd.ai.cache.hint": "复用相同的回答（标签、翻译、图表），无需再次付费",
   "cmd.ai.cancel": "AI：取消",

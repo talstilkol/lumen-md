@@ -10,6 +10,8 @@
   "cmd.ai.batch.hint": "Viele Notizen über die Batch-API des Anbieters taggen, zusammenfassen oder übersetzen — Ergebnisse binnen 24 h",
   "cmd.ai.batchCheck": "KI: Stapelaufträge prüfen",
   "cmd.ai.batchCheck.hint": "Fertige Stapelergebnisse holen und auf die Notizen anwenden",
+  "cmd.ai.batchJobs": "AI: Batch-Jobs — Fortschritt, Pause, Fortsetzen",
+  "cmd.ai.batchJobs.hint": "Live-Fortschritt der Batch-Jobs, mit Pause, Fortsetzen und Abbrechen",
   "cmd.ai.cache": "KI: Antwort-Cache…",
   "cmd.ai.cache.hint": "Identische Antworten (Tags, Übersetzung, Diagramme) wiederverwenden statt erneut zu zahlen",
   "cmd.ai.cancel": "KI: Abbrechen",

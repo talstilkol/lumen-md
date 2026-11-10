@@ -10,6 +10,8 @@
   "cmd.ai.batch.hint": "プロバイダーのバッチ API で多数のノートをタグ付け・要約・翻訳 — 24 時間以内に結果",
   "cmd.ai.batchCheck": "AI：バッチジョブを確認",
   "cmd.ai.batchCheck.hint": "完了したバッチ結果を取得してノートに適用",
+  "cmd.ai.batchJobs": "AI: バッチジョブ — 進捗・一時停止・再開",
+  "cmd.ai.batchJobs.hint": "バッチジョブの進捗をリアルタイムで表示し、一時停止・再開・キャンセルできます",
   "cmd.ai.cache": "AI: 回答キャッシュ…",
   "cmd.ai.cache.hint": "同一の回答（タグ・翻訳・図）を再利用して再課金を避ける",
   "cmd.ai.cancel": "AI: キャンセル",

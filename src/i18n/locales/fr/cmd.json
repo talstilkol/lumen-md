@@ -10,6 +10,8 @@
   "cmd.ai.batch.hint": "Taguer, résumer ou traduire de nombreuses notes via l’API batch du fournisseur — résultats sous 24 h",
   "cmd.ai.batchCheck": "IA : vérifier les lots",
   "cmd.ai.batchCheck.hint": "Récupérer les lots terminés et les appliquer à vos notes",
+  "cmd.ai.batchJobs": "AI : Tâches par lots — progression, pause, reprise",
+  "cmd.ai.batchJobs.hint": "Progression en direct des tâches par lots, avec pause, reprise et annulation",
   "cmd.ai.cache": "IA : cache des réponses…",
   "cmd.ai.cache.hint": "Réutiliser les réponses identiques (tags, traduction, diagrammes) au lieu de payer à nouveau",
   "cmd.ai.cancel": "IA : annuler",

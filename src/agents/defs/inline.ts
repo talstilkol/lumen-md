@@ -16,6 +16,7 @@ import { registerAgent } from "../registry";
 import { nonEmptyValidator } from "../tools/validate";
 import { clip, fail, ok, stripFences } from "./shared";
 import { PROMPTS } from "../../ai/prompts";
+import { validateBatchAnswer, type BatchValidateOp } from "../../ai/batchValidate";
 import { styleInstruction } from "../../ai/styleProfiles";
 
 /* ─── completer ─────────────────────────────────────────────────────────── */
@@ -175,8 +176,19 @@ export const builderDocsAgent = builderStage("builder-docs", "Write the README o
 export interface BatchStepInput extends AgentInput {
   /** The note text (or the step's input). */
   text: string;
-  extra: { system: string; maxTokens: number };
+  /** `op` + `source` (the note as sent): the job's validator checks the answer against them (plan 5.8). */
+  extra: { system: string; maxTokens: number; op?: BatchValidateOp; source?: string };
 }
+
+/** Plan 5.8: each job's answers pass its operation's validator; a rejection goes to the critic. */
+const batchOpValidator = {
+  name: "batch-op",
+  check: (output: string, input: AgentInput): ValidationResult => {
+    const extra = (input as BatchStepInput).extra;
+    if (!extra?.op) return { ok: true };
+    return validateBatchAnswer(extra.op, output, extra.source ?? "");
+  },
+};
 
 export const batchAgent: AgentDefinition<BatchStepInput, string> = registerAgent<BatchStepInput, string>({
   id: "batch",
@@ -184,11 +196,12 @@ export const batchAgent: AgentDefinition<BatchStepInput, string> = registerAgent
   description: "One step of a batch job (summarise, translate, tag… a note)",
   system: (input) => input.extra.system,
   user: (input) => input.text,
-  validators: [nonEmptyValidator()],
+  validators: [nonEmptyValidator(), batchOpValidator],
   // The job's operation decides the language (a batch translation).
   language: "any",
-  // A failed note is retried by the job itself.
-  maxRetries: 0,
+  // One retry with the critic's hint after a rejected answer; a note that
+  // still fails is counted as failed with its reason, never written.
+  maxRetries: 1,
   tier: "small",
   temperature: 0.2,
   maxTokens: (input) => input.extra.maxTokens,

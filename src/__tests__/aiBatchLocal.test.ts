@@ -92,11 +92,11 @@ describe("local batch queue", () => {
     const { cancelAllAi } = await import("../ai/aiAbort");
     let calls = 0;
     batch.__setLocalBatchDeps({
-      answer: (_s, user, _m, signal) =>
+      answer: (_s, user, _m, ctx) =>
         new Promise<string>((resolve, reject) => {
           calls++;
           if (calls > 1) return resolve(`done ${user.slice(0, 4)}`);
-          signal?.addEventListener("abort", () => reject(new DOMException("Cancelled", "AbortError")));
+          ctx?.signal?.addEventListener("abort", () => reject(new DOMException("Cancelled", "AbortError")));
         }),
       read: async () => "xray text",
     });
