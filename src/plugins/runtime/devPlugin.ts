@@ -48,6 +48,7 @@ export function isLoopbackUrl(url: string): boolean {
 async function defaultDeps(): Promise<DevDeps> {
   const [{ startPlugin, stopPlugin }, { scanPluginVersion }, { parseManifest }] = await Promise.all([import("./manager"), import("./scan"), import("./manifest")]);
   return {
+    // privacy-ledger: not tracked — developer mode only; connectDevPlugin refuses any URL that is not this computer (isLoopbackUrl), no credentials.
     fetch: (u) => fetch(u, { cache: "no-store", credentials: "omit" }),
     EventSource: EventSource as unknown as DevDeps["EventSource"],
     start: (o) => startPlugin({ manifest: o.manifest, code: o.code, grants: o.grants as never }),
@@ -80,6 +81,7 @@ export async function connectDevPlugin(rawUrl: string, deps?: Partial<DevDeps>):
   let busy = false;
 
   const get = async (path: string) => {
+    // privacy-ledger: not tracked — `url` passed isLoopbackUrl (localhost / 127.0.0.1 / [::1]): the developer's own dev server.
     const res = await d.fetch(`${url}/${path}`);
     if (!res.ok) throw new Error(`${path}: HTTP ${res.status}`);
     return res.text();
