@@ -120,7 +120,7 @@ export function KeyboardShortcuts({ open, onClose }: Props) {
           border: "1px solid hsl(var(--border))",
           borderRadius: 16,
           padding: "24px 28px",
-          boxShadow: "0 20px 60px hsl(0 0% 0% / 0.4)",
+          boxShadow: "var(--shadow-xl)",
         }}
       >
         <h2

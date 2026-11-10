@@ -319,7 +319,7 @@ export function PluginGallery({ open, onClose }: Props) {
         position: "fixed",
         inset: 0,
         zIndex: 200,
-        background: "rgba(0,0,0,0.7)",
+        background: "var(--overlay)",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
@@ -367,7 +367,7 @@ export function PluginGallery({ open, onClose }: Props) {
               aria-hidden
               style={{
                 position: "absolute",
-                left: 10,
+                insetInlineStart: 10,
                 top: "50%",
                 transform: "translateY(-50%)",
                 color: "hsl(var(--fg-muted))",
@@ -506,7 +506,6 @@ export function PluginGallery({ open, onClose }: Props) {
                       borderRadius: 12,
                       background: "hsl(var(--bg-subtle) / 0.5)",
                       border: "1px solid hsl(var(--border))",
-                      transition: "all 150ms ease",
                     }}
                   >
                     <div style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
@@ -516,7 +515,7 @@ export function PluginGallery({ open, onClose }: Props) {
                           width: 38,
                           height: 38,
                           borderRadius: 8,
-                          background: "linear-gradient(135deg, #7c5cfc, #c084fc)",
+                          background: "var(--gradient-brand)",
                           display: "flex",
                           alignItems: "center",
                           justifyContent: "center",
@@ -582,9 +581,8 @@ export function PluginGallery({ open, onClose }: Props) {
                           fontWeight: 600,
                           background: isInstalled
                             ? "hsl(var(--border))"
-                            : "linear-gradient(135deg, #7c5cfc, #c084fc)",
+                            : "var(--gradient-brand)",
                           color: isInstalled ? "hsl(var(--fg))" : "white",
-                          transition: "all 150ms ease",
                         }}
                       >
                         {isInstalled ? <Trash2 size={12} /> : <Download size={12} />}

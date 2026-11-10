@@ -295,9 +295,9 @@ export function FineTuneSettings({ open, onClose }: Props) {
                   padding: "6px 12px",
                   fontSize: 12,
                   borderRadius: 6,
-                  border: "1px solid hsl(0 60% 60% / 0.5)",
+                  border: "1px solid hsl(var(--danger) / 0.5)",
                   background: "transparent",
-                  color: "hsl(0 70% 65%)",
+                  color: "hsl(var(--danger))",
                   cursor: "pointer",
                 }}
               >

@@ -111,7 +111,7 @@ export const DocTabs = React.memo(function DocTabs({
               position: "relative",
               display: "flex",
               alignItems: "stretch",
-              borderRight: "1px solid hsl(var(--border) / 0.5)",
+              borderInlineEnd: "1px solid hsl(var(--border) / 0.5)",
               borderBottom: isActive
                 ? "2px solid hsl(var(--accent))"
                 : "2px solid transparent",
@@ -119,7 +119,6 @@ export const DocTabs = React.memo(function DocTabs({
                 ? "2px solid hsl(var(--accent))"
                 : "2px solid transparent",
               background: isActive ? "hsl(var(--bg))" : "transparent",
-              transition: "background 120ms, border-color 80ms",
               opacity: isDragSource ? 0.45 : 1,
             }}
           >
@@ -149,7 +148,6 @@ export const DocTabs = React.memo(function DocTabs({
                 border: "none",
                 cursor: onReorder ? "grab" : "pointer",
                 whiteSpace: "nowrap",
-                transition: "color 120ms",
                 minWidth: 0,
                 maxWidth: 162,
                 userSelect: "none",
@@ -189,7 +187,7 @@ export const DocTabs = React.memo(function DocTabs({
                 cursor: "pointer",
                 flexShrink: 0,
                 opacity: isActive ? 0.7 : 0.5,
-                transition: "opacity 120ms, background 120ms",
+                transition: "opacity var(--duration-fast) var(--ease-out)",
               }}
               onMouseEnter={(e) => {
                 const el = e.currentTarget as HTMLElement;
