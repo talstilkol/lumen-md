@@ -82,7 +82,10 @@ describe("hosting: one policy on every host", () => {
       .match(/"prebuild": "([^"]*)"/)![1]
       .split("&&")
       .map((s) => /copy-([\w-]+)\.mjs/.exec(s)?.[1])
-      .filter((s): s is string => !!s && s !== "playground-vendor"); // the playground stays in slim
+      // What slim keeps, being the editor rather than a runtime: the
+      // playground's vendor files, the plugin engine (QuickJS, ~0.5 MB; plugins
+      // are an editor feature) and the canvas fonts (Excalidraw).
+      .filter((s): s is string => !!s && !["playground-vendor", "quickjs", "excalidraw"].includes(s));
     expect(slim.sort()).toEqual(staged.map((s) => `dist/${s}`).sort());
     expect(read("docker-compose.yml")).toMatch(/LUMEN_RUNTIMES: \$\{LUMEN_RUNTIMES:-full\}/);
     expect(read(".env.onprem.example")).toMatch(/^LUMEN_RUNTIMES=full$/m);

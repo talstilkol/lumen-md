@@ -22,7 +22,7 @@ configuration files, so it cannot drift from them.
 | live-js runner | ✅ | ✅ edge function | ✅ | ✅ |
 | Workers that need eval (Graphviz, Ruby, TypeScript checker, webR) with their own policy | ✅ | ✅ | ✅ | ✅ |
 | On-device OCR (tesseract.js worker policy) | ✅ | ✅ | ✅ | ✅ |
-| Same-origin WebAssembly runtimes (Python, Ruby, ONNX Runtime, OCR; ≈97 MB). R (webR, GPL-3.0) is not in the build: each user downloads it from an R block, or the operator stages it with `npm run webr:local` | ✅ in `dist/` | ✅ | ✅ | ✅ `LUMEN_RUNTIMES=full` (default) · `slim` drops them |
+| Same-origin WebAssembly runtimes (Python, Ruby, ONNX Runtime, the dictation VAD model, OCR; ≈100 MB). R (webR, GPL-3.0) is not in the build: each user downloads it from an R block, or the operator stages it with `npm run webr:local` | ✅ in `dist/` | ✅ | ✅ | ✅ `LUMEN_RUNTIMES=full` (default) · `slim` drops them |
 | Your endpoint origins in `connect-src` (`VITE_*_ENDPOINT`) | ✅ at build time | ✅ at build time | ✅ `vercel.ts` at build time | ✅ build args → nginx |
 | HSTS | ✅ | ✅ | ✅ | — the TLS terminator in front sends it |
 | Cross-origin isolation (COOP / COEP, multi-threaded WebAssembly) | — | — | — | ✅ (decision 15.10(7) whether it stays) |
@@ -42,7 +42,7 @@ Build arguments:
 | Argument | Default | What |
 |---|---|---|
 | `VITE_*_ENDPOINT`, `VITE_*_URL`, `VITE_CSP_CONNECT_EXTRA` | empty | The deployment's own services; added to `connect-src` in the header and the `<meta>` policy |
-| `LUMEN_RUNTIMES` | `full` | `slim` removes the same-origin WebAssembly runtimes (≈97 MB measured on 24.10.2026: Pyodide 13.6, ruby.wasm 30.6, ONNX Runtime 41.2, tesseract.js 11.8; webR is never in the image, see live R below). The live-python and live-ruby blocks, OCR and local transcription then report that their runtime is not installed; everything else, the Web Playground included, is unchanged |
+| `LUMEN_RUNTIMES` | `full` | `slim` removes the same-origin WebAssembly runtimes (≈100 MB measured on 24.10.2026: Pyodide 13.6, ruby.wasm 30.6, ONNX Runtime 41.2, tesseract.js 11.8, plus the 2.3 MB Silero VAD model; webR is never in the image, see live R below). The live-python and live-ruby blocks, OCR and local transcription then report that their runtime is not installed; everything else, the Web Playground, plugins and the canvas fonts included, is unchanged |
 
 ```bash
 # the full image (compose: make onprem-up; Fly: fly deploy)
