@@ -7,17 +7,15 @@ Lumen plugins are tiny ESM modules that register custom blocks, commands,
 and sidebar panels. The host loads them via dynamic `import(url)` so
 there's no build pipeline to learn — write a function, ship a JS file.
 
-## 30-second start
+## Sandboxed plugins first
 
-```bash
-npx create-lumen-plugin my-cool-plugin
-cd my-cool-plugin
-npm install
-npm run dev
-```
+`npx create-lumen-plugin` now scaffolds a **sandboxed** plugin: it runs in
+QuickJS with only the capabilities the user grants, reloads on save in
+developer mode, and comes with a Node test kit. See
+[Developing a plugin](/plugins/develop/). New plugins should use it.
 
-Open Lumen → `⌘K` → **Plugin gallery** → **Load unpacked** → pick
-`dist/my-cool-plugin.js`.
+The rest of this page describes the older unpacked ESM plugins, which run
+in the page with the permissions below.
 
 ## The API
 
