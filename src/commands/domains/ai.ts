@@ -334,8 +334,16 @@ export function buildAiControlCommands(): Command[] {
       icon: cmdIcons.Sparkles,
       group: t("group.ai", { defaultValue: "AI Copilot" }),
       action: async () => {
-        const { getRerankMode, setRerankMode } = await import("../../ai/reranker");
+        const { getRerankMode, setRerankMode, modelRerankSupported, RERANK_MODEL_MB } = await import("../../ai/reranker");
         const next = getRerankMode() === "model" ? "lexical" : "model";
+        // Plan 7.6: only on WebGPU / the desktop app, and only after the user agrees to the download.
+        if (next === "model") {
+          if (!modelRerankSupported()) {
+            showAiToast(t("toast.rerankUnsupported"), "info");
+            return;
+          }
+          if (!(await uiConfirm({ message: t("rerank.consent", { mb: RERANK_MODEL_MB }) }))) return;
+        }
         setRerankMode(next);
         showAiToast(t(next === "model" ? "toast.rerankModelOn" : "toast.rerankModelOff"), "info");
       },

@@ -453,6 +453,7 @@
   "remoteImage.loadHint": "Dieses Bild einmal laden. {host} sieht dann, dass du diese Notiz geöffnet hast.",
   "remoteImage.untitled": "Bild",
   "remoteMedia.label": "Video oder Audio von {host}",
+  "rerank.consent": "Reranking-Modell einschalten? Es lädt einmalig etwa {mb} MB (bge-reranker-v2-m3) und läuft auf diesem Gerät. In Lumens hebräischem Retrieval-Test setzt das eingebaute Ranking schon jede Antwort an die erste Stelle.",
   "scroll.page": "Seite {current}/{total}",
   "settings.empty": "Keine passende Einstellung",
   "settings.general": "Allgemein",

@@ -453,6 +453,7 @@
   "remoteImage.loadHint": "Charger cette image une seule fois. {host} saura que vous avez ouvert cette note.",
   "remoteImage.untitled": "Image",
   "remoteMedia.label": "Vidéo ou audio de {host}",
+  "rerank.consent": "Activer le modèle de reclassement ? Il télécharge une fois environ {mb} Mo (bge-reranker-v2-m3) et tourne sur cet appareil. Sur le test de recherche en hébreu de Lumen, le classement intégré place déjà chaque réponse en tête.",
   "scroll.page": "page {current}/{total}",
   "settings.empty": "Aucun paramètre ne correspond",
   "settings.general": "Général",

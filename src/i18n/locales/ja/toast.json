@@ -100,6 +100,7 @@
   "toast.region": "通知",
   "toast.rerankModelOff": "検索の並べ替え: 単語一致",
   "toast.rerankModelOn": "検索の並べ替え: ローカルモデル（初回使用時にダウンロード）",
+  "toast.rerankUnsupported": "検索の再ランキングモデルには WebGPU かデスクトップアプリが必要です。このブラウザでは組み込みの再ランキングを使います。",
   "toast.scanningWorkspaceForLinkSuggestions": "🔗 ワークスペースをスキャンしてリンクを提案中…",
   "toast.speechRecognitionErrorCheckMicrophone": "音声認識エラー — マイクの権限を確認してください",
   "toast.speechRecognitionNotSupportedIn": "このブラウザは音声認識に対応していません",

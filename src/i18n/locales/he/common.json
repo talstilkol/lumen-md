@@ -453,6 +453,7 @@
   "remoteImage.loadHint": "טעינת התמונה הזו פעם אחת. {host} יראה שפתחת את הפתק.",
   "remoteImage.untitled": "תמונה",
   "remoteMedia.label": "וידאו או שמע מ-{host}",
+  "rerank.consent": "להפעיל את מודל הדירוג מחדש? הוא מוריד פעם אחת בערך {mb} MB ‏(bge-reranker-v2-m3) ורץ במכשיר הזה. במבחן האחזור העברי של Lumen הדירוג המובנה כבר מציב כל תשובה ראשונה.",
   "scroll.page": "עמוד {current}/{total}",
   "settings.empty": "אין הגדרה שמתאימה",
   "settings.general": "כללי",

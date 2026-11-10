@@ -453,6 +453,7 @@
   "remoteImage.loadHint": "仅加载这张图片一次。{host} 会知道你打开了这篇笔记。",
   "remoteImage.untitled": "图片",
   "remoteMedia.label": "来自 {host} 的视频或音频",
+  "rerank.consent": "开启重排序模型？它会一次性下载约 {mb} MB（bge-reranker-v2-m3）并在本设备上运行。在 Lumen 的希伯来语检索测试中，内置排序已将每个答案排在首位。",
   "scroll.page": "第 {current}/{total} 页",
   "settings.empty": "没有匹配的设置",
   "settings.general": "常规",

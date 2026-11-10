@@ -453,6 +453,7 @@
   "remoteImage.loadHint": "تحميل هذه الصورة مرة واحدة. سيعرف {host} أنك فتحت هذه الملاحظة.",
   "remoteImage.untitled": "صورة",
   "remoteMedia.label": "فيديو أو صوت من {host}",
+  "rerank.consent": "تشغيل نموذج إعادة الترتيب؟ يُنزَّل مرة واحدة بحجم {mb} ميغابايت تقريبًا (bge-reranker-v2-m3) ويعمل على هذا الجهاز. في اختبار الاسترجاع العبري في Lumen يضع الترتيب المدمج كل إجابة أولًا بالفعل.",
   "scroll.page": "صفحة {current}/{total}",
   "settings.empty": "لا يوجد إعداد مطابق",
   "settings.general": "عام",

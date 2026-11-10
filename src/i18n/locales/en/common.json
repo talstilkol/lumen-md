@@ -341,6 +341,7 @@
   "remoteImage.loadHint": "Load this image once. {host} will see that you opened this note.",
   "remoteImage.untitled": "Image",
   "remoteMedia.label": "Video or audio from {host}",
+  "rerank.consent": "Turn on the reranking model? It downloads about {mb} MB once (bge-reranker-v2-m3) and runs on this device. On Lumen's Hebrew retrieval test the built-in ranking already puts every answer first.",
   "scroll.page": "page {current}/{total}",
   "settings.empty": "No setting matches",
   "settings.general": "General",

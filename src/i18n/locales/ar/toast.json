@@ -100,6 +100,7 @@
   "toast.region": "الإشعارات",
   "toast.rerankModelOff": "ترتيب البحث: مطابقة الكلمات",
   "toast.rerankModelOn": "ترتيب البحث: نموذج محلي (يُنزَّل عند أول استخدام)",
+  "toast.rerankUnsupported": "يحتاج نموذج إعادة ترتيب البحث إلى WebGPU أو تطبيق سطح المكتب؛ يبقى الترتيب المدمج في هذا المتصفح.",
   "toast.scanningWorkspaceForLinkSuggestions": "🔗 جارٍ فحص مساحة العمل بحثًا عن روابط مقترحة…",
   "toast.speechRecognitionErrorCheckMicrophone": "خطأ في التعرف على الكلام — تحقق من أذونات الميكروفون",
   "toast.speechRecognitionNotSupportedIn": "التعرف على الكلام غير مدعوم في هذا المتصفح",

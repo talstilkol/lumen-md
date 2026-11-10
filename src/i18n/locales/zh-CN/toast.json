@@ -100,6 +100,7 @@
   "toast.region": "通知",
   "toast.rerankModelOff": "搜索排序：词语匹配",
   "toast.rerankModelOn": "搜索排序：本地模型（首次使用时下载）",
+  "toast.rerankUnsupported": "搜索重排序模型需要 WebGPU 或桌面应用；此浏览器继续使用内置重排序。",
   "toast.scanningWorkspaceForLinkSuggestions": "🔗 正在扫描工作区以获取链接建议…",
   "toast.speechRecognitionErrorCheckMicrophone": "语音识别出错 — 请检查麦克风权限",
   "toast.speechRecognitionNotSupportedIn": "此浏览器不支持语音识别",

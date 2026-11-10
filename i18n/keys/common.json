@@ -2572,6 +2572,13 @@
       ]
     },
     {
+      "key": "rerank.consent",
+      "en": "Turn on the reranking model? It downloads about {mb} MB once (bge-reranker-v2-m3) and runs on this device. On Lumen's Hebrew retrieval test the built-in ranking already puts every answer first.",
+      "vars": [
+        "mb"
+      ]
+    },
+    {
       "key": "scroll.page",
       "en": "page {current}/{total}",
       "vars": [

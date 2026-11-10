@@ -453,6 +453,7 @@
   "remoteImage.loadHint": "この画像を一度だけ読み込みます。このノートを開いたことが {host} に伝わります。",
   "remoteImage.untitled": "画像",
   "remoteMedia.label": "{host} の動画または音声",
+  "rerank.consent": "再ランキングモデルをオンにしますか？初回に約 {mb} MB（bge-reranker-v2-m3）をダウンロードし、このデバイスで動作します。Lumen のヘブライ語検索テストでは、組み込みのランキングがすでにすべての答えを先頭に置いています。",
   "scroll.page": "{current}/{total} ページ",
   "settings.empty": "一致する設定はありません",
   "settings.general": "一般",

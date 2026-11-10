@@ -100,6 +100,7 @@
   "toast.region": "Уведомления",
   "toast.rerankModelOff": "Ранжирование: совпадение слов",
   "toast.rerankModelOn": "Ранжирование: локальная модель (загрузится при первом использовании)",
+  "toast.rerankUnsupported": "Модели переранжирования поиска нужен WebGPU или настольное приложение; в этом браузере остаётся встроенное переранжирование.",
   "toast.scanningWorkspaceForLinkSuggestions": "🔗 Поиск ссылок по рабочему пространству…",
   "toast.speechRecognitionErrorCheckMicrophone": "Ошибка распознавания речи — проверьте разрешения микрофона",
   "toast.speechRecognitionNotSupportedIn": "Распознавание речи не поддерживается в этом браузере",

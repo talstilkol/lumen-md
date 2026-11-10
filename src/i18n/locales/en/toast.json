@@ -94,6 +94,7 @@
   "toast.region": "Notifications",
   "toast.rerankModelOff": "Search reranking: word matching",
   "toast.rerankModelOn": "Search reranking: local model (downloads on first use)",
+  "toast.rerankUnsupported": "The search reranking model needs WebGPU or the desktop app; this browser keeps the built-in reranking.",
   "toast.scanningWorkspaceForLinkSuggestions": "🔗 Scanning workspace for link suggestions…",
   "toast.speechRecognitionErrorCheckMicrophone": "Speech recognition error — check microphone permissions",
   "toast.speechRecognitionNotSupportedIn": "Speech recognition not supported in this browser",

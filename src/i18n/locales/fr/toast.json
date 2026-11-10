@@ -100,6 +100,7 @@
   "toast.region": "Notifications",
   "toast.rerankModelOff": "Réordonnancement : correspondance des mots",
   "toast.rerankModelOn": "Réordonnancement : modèle local (téléchargé à la première utilisation)",
+  "toast.rerankUnsupported": "Le modèle de reclassement de la recherche requiert WebGPU ou l'application de bureau ; ce navigateur garde le reclassement intégré.",
   "toast.scanningWorkspaceForLinkSuggestions": "🔗 Analyse de l'espace de travail pour des suggestions de liens…",
   "toast.speechRecognitionErrorCheckMicrophone": "Erreur de reconnaissance vocale — vérifiez les autorisations du microphone",
   "toast.speechRecognitionNotSupportedIn": "La reconnaissance vocale n'est pas prise en charge dans ce navigateur",

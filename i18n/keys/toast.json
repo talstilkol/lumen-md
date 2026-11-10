@@ -589,6 +589,11 @@
       "vars": []
     },
     {
+      "key": "toast.rerankUnsupported",
+      "en": "The search reranking model needs WebGPU or the desktop app; this browser keeps the built-in reranking.",
+      "vars": []
+    },
+    {
       "key": "toast.scanningWorkspaceForLinkSuggestions",
       "en": "🔗 Scanning workspace for link suggestions…",
       "vars": []
