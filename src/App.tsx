@@ -88,6 +88,7 @@ const OnboardingTour = lazy(() => import("./ui/OnboardingTour").then(m => ({ def
 const FirstRun = lazy(() => import("./onboarding/FirstRun"));
 import { scrollToHeadingWhenRendered } from "./renderer/wikiLinks";
 import { notifyWorkspaceChanged } from "./storage/workspaceEvents";
+import { useEdgeSwipes, useLongNotesOpenForReading } from "./mobile/useMobileGestures";
 
 export default function App() {
   const doc = useAppStore((s) => s.doc);
@@ -112,6 +113,9 @@ export default function App() {
     mq.addEventListener?.("change", on);
     return () => mq.removeEventListener?.("change", on);
   }, []);
+  // Phones (plan W1.25): edge swipes for the panels; long notes open for reading.
+  useEdgeSwipes();
+  useLongNotesOpenForReading(tabId(doc), doc.content);
   const showWorkspace = useAppStore((s) => s.showWorkspace);
   const locale = useAppStore((s) => s.locale);
   const toggleWorkspace = useAppStore((s) => s.toggleWorkspace);

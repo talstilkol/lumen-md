@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-10-24T15:58:12.863Z",
+  "generated_at": "2026-11-10T03:28:33.530Z",
   "source": "src/i18n/index.ts (en bundle)",
-  "count": 1565,
+  "count": 1599,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -7027,6 +7027,184 @@
     },
     {
       "key": "cmd.view.pageView.off",
+      "en": "Currently OFF",
+      "vars": []
+    },
+    {
+      "key": "mobileBar.label",
+      "en": "Editing toolbar",
+      "vars": []
+    },
+    {
+      "key": "mobileBar.indent",
+      "en": "Indent",
+      "vars": []
+    },
+    {
+      "key": "mobileBar.outdent",
+      "en": "Outdent",
+      "vars": []
+    },
+    {
+      "key": "mobileBar.task",
+      "en": "Task checkbox",
+      "vars": []
+    },
+    {
+      "key": "mobileBar.link",
+      "en": "Link",
+      "vars": []
+    },
+    {
+      "key": "mobileBar.image",
+      "en": "Image",
+      "vars": []
+    },
+    {
+      "key": "mobileBar.heading",
+      "en": "Heading",
+      "vars": []
+    },
+    {
+      "key": "mobileBar.bold",
+      "en": "Bold",
+      "vars": []
+    },
+    {
+      "key": "mobileBar.italic",
+      "en": "Italic",
+      "vars": []
+    },
+    {
+      "key": "mobileBar.bullet",
+      "en": "Bulleted list",
+      "vars": []
+    },
+    {
+      "key": "mobileBar.numbered",
+      "en": "Numbered list",
+      "vars": []
+    },
+    {
+      "key": "mobileBar.wikilink",
+      "en": "Link to a note",
+      "vars": []
+    },
+    {
+      "key": "mobileBar.tag",
+      "en": "Tag",
+      "vars": []
+    },
+    {
+      "key": "mobileBar.code",
+      "en": "Code",
+      "vars": []
+    },
+    {
+      "key": "mobileBar.quote",
+      "en": "Quote",
+      "vars": []
+    },
+    {
+      "key": "mobileBar.undo",
+      "en": "Undo",
+      "vars": []
+    },
+    {
+      "key": "mobileBar.redo",
+      "en": "Redo",
+      "vars": []
+    },
+    {
+      "key": "mobileBar.hideKeyboard",
+      "en": "Hide keyboard",
+      "vars": []
+    },
+    {
+      "key": "mobileBar.customize",
+      "en": "Customize toolbar",
+      "vars": []
+    },
+    {
+      "key": "mobileBar.customize.title",
+      "en": "Mobile toolbar",
+      "vars": []
+    },
+    {
+      "key": "mobileBar.customize.reset",
+      "en": "Reset",
+      "vars": []
+    },
+    {
+      "key": "mobileBar.customize.done",
+      "en": "Done",
+      "vars": []
+    },
+    {
+      "key": "mobileBar.customize.intro",
+      "en": "Pick the actions above the keyboard and their order. The row scrolls sideways when it is longer than the screen.",
+      "vars": []
+    },
+    {
+      "key": "mobileBar.customize.inRow",
+      "en": "In the toolbar",
+      "vars": []
+    },
+    {
+      "key": "mobileBar.customize.more",
+      "en": "More actions",
+      "vars": []
+    },
+    {
+      "key": "mobileBar.customize.up",
+      "en": "Move {name} earlier",
+      "vars": [
+        "name"
+      ]
+    },
+    {
+      "key": "mobileBar.customize.down",
+      "en": "Move {name} later",
+      "vars": [
+        "name"
+      ]
+    },
+    {
+      "key": "mobileBar.customize.remove",
+      "en": "Remove {name}",
+      "vars": [
+        "name"
+      ]
+    },
+    {
+      "key": "mobileBar.customize.add",
+      "en": "Add {name}",
+      "vars": [
+        "name"
+      ]
+    },
+    {
+      "key": "cmd.mobile.customizeToolbar",
+      "en": "Customize the mobile toolbar",
+      "vars": []
+    },
+    {
+      "key": "cmd.mobile.customizeToolbar.hint",
+      "en": "The actions above the on-screen keyboard",
+      "vars": []
+    },
+    {
+      "key": "cmd.mobile.readLongNotes",
+      "en": "Phone: open long notes for reading",
+      "vars": []
+    },
+    {
+      "key": "cmd.mobile.readLongNotes.on",
+      "en": "Currently ON (tap the text to edit)",
+      "vars": []
+    },
+    {
+      "key": "cmd.mobile.readLongNotes.off",
       "en": "Currently OFF",
       "vars": []
     },

@@ -1,4 +1,6 @@
 import { DEFAULT_DAILY, isValidDailyPattern, type DailySettings } from "../daily/defaults";
+import { DEFAULT_TOOLBAR, sanitizeToolbar, type ToolbarActionId } from "../mobile/toolbarActions";
+import { DEFAULT_READING_WORDS } from "../mobile/gestures";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { Locale } from "../i18n";
@@ -81,6 +83,11 @@ interface AppState {
   dailyNotes: DailySettings;
   /** The month calendar under the file tree. */
   showCalendar: boolean;
+  /** Phones (plan W1.25): the actions above the keyboard, in order. */
+  mobileToolbar: ToolbarActionId[];
+  /** Phones: a note of `readingWords` words or more opens in reading view; a tap on the text edits there. */
+  readLongNotes: boolean;
+  readingWords: number;
   /** Daily writing goal (words). 0 disables the banner. */
   writingGoalWords: number;
   /** Toggle LanguageTool-powered grammar/style checking in the editor. */
@@ -135,6 +142,8 @@ interface AppState {
   setWritingGoal: (words: number) => void;
   setDailyNotes: (patch: Partial<DailySettings>) => void;
   toggleCalendar: () => void;
+  setMobileToolbar: (ids: ToolbarActionId[]) => void;
+  setReadLongNotes: (on: boolean) => void;
   /** Toggle the LanguageTool grammar checker. */
   toggleGrammarCheck: () => void;
   /** Toggle suggesting mode (track changes). */
@@ -249,6 +258,9 @@ export const useAppStore = create<AppState>()(
       writingGoalWords: 0,
       dailyNotes: { ...DEFAULT_DAILY },
       showCalendar: false,
+      mobileToolbar: [...DEFAULT_TOOLBAR],
+      readLongNotes: true,
+      readingWords: DEFAULT_READING_WORDS,
       grammarCheck: false,
       suggestingMode: false,
       useFineTunedModel: false,
@@ -360,6 +372,8 @@ export const useAppStore = create<AppState>()(
           return { dailyNotes: next };
         }),
       // The calendar lives in the file sidebar: showing it shows the sidebar too.
+      setMobileToolbar: (ids) => set({ mobileToolbar: sanitizeToolbar(ids) }),
+      setReadLongNotes: (on) => set({ readLongNotes: on }),
       toggleCalendar: () => set((s) => (s.showCalendar && s.showWorkspace ? { showCalendar: false } : { showCalendar: true, showWorkspace: true })),
       toggleGrammarCheck: () => set((s) => ({ grammarCheck: !s.grammarCheck })),
       toggleSuggestingMode: () =>
@@ -501,6 +515,9 @@ export const useAppStore = create<AppState>()(
         writingGoalWords: s.writingGoalWords,
         dailyNotes: s.dailyNotes,
         showCalendar: s.showCalendar,
+        mobileToolbar: s.mobileToolbar,
+        readLongNotes: s.readLongNotes,
+        readingWords: s.readingWords,
         grammarCheck: s.grammarCheck,
         suggestingMode: s.suggestingMode,
         useFineTunedModel: s.useFineTunedModel,
@@ -532,6 +549,9 @@ export const useAppStore = create<AppState>()(
             template: typeof p.dailyNotes?.template === "string" ? p.dailyNotes.template : DEFAULT_DAILY.template,
           },
           showCalendar: p.showCalendar === true,
+          mobileToolbar: sanitizeToolbar(p.mobileToolbar),
+          readLongNotes: p.readLongNotes !== false,
+          readingWords: typeof p.readingWords === "number" && p.readingWords >= 50 && p.readingWords <= 100000 ? Math.round(p.readingWords) : DEFAULT_READING_WORDS,
         };
         // WYSIWYG and suggesting work together now: restore both as saved.
         return merged;
