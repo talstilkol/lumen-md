@@ -3,7 +3,7 @@
  * one note at a time.
  */
 import { describe, it, expect, vi } from "vitest";
-import { Bm25Index } from "../search/bm25";
+import { Bm25Index, MAX_PREFIX_POSTINGS } from "../search/bm25";
 import { documentTerms, queryTerms, stemTerms, surfaceTokens } from "../text/searchTokens";
 
 describe("Hebrew search tokens", () => {
@@ -105,6 +105,24 @@ describe("Bm25Index", () => {
     // The hyphenated form itself ranks the note that has it first.
     expect(ix.search("e-mail")[0].id).toBe("e.md");
     expect(ix.search("e-mail").map((h) => h.id)).toContain("m.md");
+  });
+
+  it("a rare completion of the word being typed is found behind thirty common ones (W1.32, #232)", () => {
+    const ix = new Bm25Index();
+    // 30 common completions of "pro", each in five notes.
+    for (let i = 0; i < 30; i++) for (let j = 0; j < 5; j++) ix.set(`c${i}-${j}.md`, `progress${String.fromCharCode(97 + i)} report`, `c${i}-${j}`);
+    ix.set("rare.md", "notes on protolanguage", "rare");
+    expect(ix.search("pro", { prefix: true, limit: 500 }).map((h) => h.id)).toContain("rare.md");
+  });
+
+  it("caps what a very common prefix adds, leaving out the most common completions first (W1.32, #232)", () => {
+    expect(MAX_PREFIX_POSTINGS).toBeGreaterThanOrEqual(10_000);
+    const ix = new Bm25Index();
+    ix.set("rare.md", "gardenia", "rare");
+    ix.set("common1.md", "garden", "common1");
+    ix.set("common2.md", "garden", "common2");
+    const hits = ix.search("gar", { prefix: true }).map((h) => h.id);
+    expect(hits).toEqual(expect.arrayContaining(["rare.md", "common1.md", "common2.md"]));
   });
 
   it("filters before the limit", () => {
