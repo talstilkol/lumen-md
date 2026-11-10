@@ -1434,5 +1434,16 @@
   "remoteImage.allowHost": "Toujours autoriser {host}",
   "remoteImage.allowHint": "Charger les images de {host} dans toutes les notes, dans ce navigateur.",
   "collab.settings.cspBlocked": "La politique de sécurité de ce déploiement bloque {url} ; il ne sera donc pas utilisé. Ajoutez-le à la compilation (VITE_CSP_CONNECT_EXTRA).",
-  "remoteMedia.label": "Vidéo ou audio de {host}"
+  "remoteMedia.label": "Vidéo ou audio de {host}",
+  "cmd.privacy.imageHosts": "Confidentialité : hôtes d’images autorisés…",
+  "cmd.privacy.imageHosts.hint": "Les sites pour lesquels vous avez choisi « Toujours autoriser » — en révoquer un ou tous",
+  "imageHosts.title": "Hôtes d’images autorisés",
+  "imageHosts.intro": "Les images de ces sites se chargent sans demander. Révoquez-en un et ses images vous attendent de nouveau.",
+  "imageHosts.empty": "Aucun site n’est toujours autorisé. Les images des autres sites vous attendent.",
+  "imageHosts.revoke": "Révoquer",
+  "imageHosts.revokeHost": "Ne plus toujours autoriser {host}",
+  "imageHosts.revokeAll": "Tout révoquer",
+  "imageHosts.revoked": "{host} : les images vous attendent de nouveau",
+  "imageHosts.revokedAll": "Les images de tous les sites vous attendent de nouveau",
+  "imageHosts.close": "Fermer"
 }

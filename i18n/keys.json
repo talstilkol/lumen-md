@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-10-18T08:57:26.027Z",
+  "generated_at": "2026-11-09T23:58:54.468Z",
   "source": "src/i18n/index.ts (en bundle)",
-  "count": 1436,
+  "count": 1447,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -7716,6 +7716,65 @@
       "vars": [
         "host"
       ]
+    },
+    {
+      "key": "cmd.privacy.imageHosts",
+      "en": "Privacy: allowed image hosts…",
+      "vars": []
+    },
+    {
+      "key": "cmd.privacy.imageHosts.hint",
+      "en": "Sites you chose “Always allow” for — revoke one or all",
+      "vars": []
+    },
+    {
+      "key": "imageHosts.title",
+      "en": "Allowed image hosts",
+      "vars": []
+    },
+    {
+      "key": "imageHosts.intro",
+      "en": "Images from these sites load without asking. Revoke one, and its images wait for you again.",
+      "vars": []
+    },
+    {
+      "key": "imageHosts.empty",
+      "en": "No site is always allowed. Images from other sites wait for you.",
+      "vars": []
+    },
+    {
+      "key": "imageHosts.revoke",
+      "en": "Revoke",
+      "vars": []
+    },
+    {
+      "key": "imageHosts.revokeHost",
+      "en": "Stop always allowing {host}",
+      "vars": [
+        "host"
+      ]
+    },
+    {
+      "key": "imageHosts.revokeAll",
+      "en": "Revoke all",
+      "vars": []
+    },
+    {
+      "key": "imageHosts.revoked",
+      "en": "{host}: images wait for you again",
+      "vars": [
+        "host"
+      ]
+    },
+    {
+      "key": "imageHosts.revokedAll",
+      "en": "Every site's images wait for you again",
+      "vars": []
+    },
+    {
+      "key": "imageHosts.close",
+      "en": "Close",
+      "vars": []
     },
     {
       "key": "collab.settings.cspBlocked",

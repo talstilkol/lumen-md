@@ -1434,5 +1434,16 @@
   "remoteImage.allowHost": "السماح دائمًا لـ {host}",
   "remoteImage.allowHint": "تحميل الصور من {host} في كل الملاحظات، في هذا المتصفح.",
   "collab.settings.cspBlocked": "سياسة الأمان في هذا النشر تحظر {url}، لذا لن يُستخدم. أضِفه وقت البناء (VITE_CSP_CONNECT_EXTRA).",
-  "remoteMedia.label": "فيديو أو صوت من {host}"
+  "remoteMedia.label": "فيديو أو صوت من {host}",
+  "cmd.privacy.imageHosts": "الخصوصية: مضيفو الصور المسموح بهم…",
+  "cmd.privacy.imageHosts.hint": "المواقع التي اخترت لها «السماح دائمًا» — ألغِ واحدًا أو الكل",
+  "imageHosts.title": "مضيفو الصور المسموح بهم",
+  "imageHosts.intro": "تُحمَّل الصور من هذه المواقع دون سؤال. ألغِ أحدها فتنتظرك صوره من جديد.",
+  "imageHosts.empty": "لا يوجد موقع مسموح به دائمًا. الصور من المواقع الأخرى تنتظرك.",
+  "imageHosts.revoke": "إلغاء",
+  "imageHosts.revokeHost": "إيقاف السماح الدائم لـ {host}",
+  "imageHosts.revokeAll": "إلغاء الكل",
+  "imageHosts.revoked": "{host}: الصور تنتظرك من جديد",
+  "imageHosts.revokedAll": "صور كل المواقع تنتظرك من جديد",
+  "imageHosts.close": "إغلاق"
 }

@@ -95,6 +95,7 @@ export default defineConfig({
           label: "Security",
           items: [
             { label: "Secrets and encryption", slug: "security/vault" },
+            { label: "Allowed image hosts", slug: "security/image-hosts", translations: { he: "שרתי תמונות מותרים" } },
           ],
         },
         {

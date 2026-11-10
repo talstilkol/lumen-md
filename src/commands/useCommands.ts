@@ -1577,6 +1577,15 @@ export function useCommands({
         },
       },
       {
+        // Plan W1.30: the hosts allowed with "Always allow", and revoking them.
+        id: "privacy.imageHosts",
+        label: t("cmd.privacy.imageHosts"),
+        hint: t("cmd.privacy.imageHosts.hint"),
+        icon: cmdIcons.Eye,
+        group: t("group.tools"),
+        action: () => window.dispatchEvent(new CustomEvent("lumen-open-image-hosts")),
+      },
+      {
         id: "file.trash",
         label: t("cmd.file.trash"),
         hint: t("cmd.file.trash.hint"),

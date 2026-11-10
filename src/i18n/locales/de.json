@@ -1434,5 +1434,16 @@
   "remoteImage.allowHost": "{host} immer erlauben",
   "remoteImage.allowHint": "Bilder von {host} in allen Notizen laden, in diesem Browser.",
   "collab.settings.cspBlocked": "Die Sicherheitsrichtlinie dieser Installation blockiert {url}, daher wird es nicht verwendet. Füge es beim Build hinzu (VITE_CSP_CONNECT_EXTRA).",
-  "remoteMedia.label": "Video oder Audio von {host}"
+  "remoteMedia.label": "Video oder Audio von {host}",
+  "cmd.privacy.imageHosts": "Datenschutz: erlaubte Bild-Hosts…",
+  "cmd.privacy.imageHosts.hint": "Websites, für die du „Immer erlauben“ gewählt hast — eine oder alle widerrufen",
+  "imageHosts.title": "Erlaubte Bild-Hosts",
+  "imageHosts.intro": "Bilder dieser Websites laden ohne Nachfrage. Widerrufst du eine, warten ihre Bilder wieder auf dich.",
+  "imageHosts.empty": "Keine Website ist immer erlaubt. Bilder anderer Websites warten auf dich.",
+  "imageHosts.revoke": "Widerrufen",
+  "imageHosts.revokeHost": "{host} nicht mehr immer erlauben",
+  "imageHosts.revokeAll": "Alle widerrufen",
+  "imageHosts.revoked": "{host}: Bilder warten wieder auf dich",
+  "imageHosts.revokedAll": "Die Bilder aller Websites warten wieder auf dich",
+  "imageHosts.close": "Schließen"
 }

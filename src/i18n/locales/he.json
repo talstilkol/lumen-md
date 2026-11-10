@@ -1434,5 +1434,16 @@
   "remoteImage.allowHost": "לאשר תמיד את {host}",
   "remoteImage.allowHint": "טעינת תמונות מ-{host} בכל הפתקים, בדפדפן הזה.",
   "collab.settings.cspBlocked": "מדיניות האבטחה של הפריסה הזו חוסמת את {url}, ולכן לא ייעשה בו שימוש. אפשר להוסיף אותו בזמן הבנייה (VITE_CSP_CONNECT_EXTRA).",
-  "remoteMedia.label": "וידאו או שמע מ-{host}"
+  "remoteMedia.label": "וידאו או שמע מ-{host}",
+  "cmd.privacy.imageHosts": "פרטיות: שרתי תמונות מותרים…",
+  "cmd.privacy.imageHosts.hint": "אתרים שבחרתם ״תמיד לאפשר״ עבורם — ביטול של אחד או של כולם",
+  "imageHosts.title": "שרתי תמונות מותרים",
+  "imageHosts.intro": "תמונות מהאתרים האלה נטענות בלי לשאול. מבטלים אחד, והתמונות שלו שוב מחכות לכם.",
+  "imageHosts.empty": "אין אתר שמותר תמיד. תמונות מאתרים אחרים מחכות לכם.",
+  "imageHosts.revoke": "ביטול",
+  "imageHosts.revokeHost": "הפסקת ההיתר הקבוע ל-{host}",
+  "imageHosts.revokeAll": "ביטול הכול",
+  "imageHosts.revoked": "{host}: התמונות שוב מחכות לכם",
+  "imageHosts.revokedAll": "התמונות מכל האתרים שוב מחכות לכם",
+  "imageHosts.close": "סגירה"
 }
