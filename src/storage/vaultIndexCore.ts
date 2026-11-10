@@ -310,6 +310,23 @@ export class VaultIndex {
     }
   }
 
+  /**
+   * W2.22 — move a note to a new path with the text the index already holds
+   * (the main thread keeps no copy to send). False if the note is unknown.
+   */
+  move(from: string, to: string, name: string): boolean {
+    const e = this.files.get(from);
+    if (!e) return false;
+    this.remove(from);
+    this.upsert({ path: to, name, content: e.content, modified: e.modified });
+    return true;
+  }
+
+  /** The notes as indexed: for the snapshot (indexSnapshot.ts), in index order. */
+  *notes(): IterableIterator<IndexInput> {
+    for (const e of this.files.values()) yield { path: e.path, name: e.name, content: e.content, modified: e.modified };
+  }
+
   /** Remove one note. O(its links). */
   remove(path: string): boolean {
     const prev = this.files.get(path);

@@ -23,7 +23,8 @@ export async function loadVaultGraph(): Promise<GraphData> {
   const files = indexedFiles();
   const key = signature(files);
   if (cached?.key === key) return cached.graph;
-  const graph = buildGraph(files.map((f) => ({ path: f.path, wikiTargets: f.wikiTargets, content: f.content })));
+  // W2.22: the index's summary carries the tags and frontmatter values; no note text on this thread.
+  const graph = buildGraph(files.map((f) => ({ path: f.path, wikiTargets: f.wikiTargets, meta: f.meta })));
   cached = { key, graph };
   return graph;
 }

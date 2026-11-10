@@ -12,6 +12,7 @@ slow down. Lumen is measured against a synthetic vault of 100,000 notes:
 | Search: a word, Hebrew with prefixes, a phrase, or a miss | < 200 ms | 73–148 ms |
 | Save → in the index | < 50 ms | 9 ms |
 | Memory of the search index | < 1.5 GB | 757 MB (it was 4.3 GB) |
+| Memory of the notes on the app's main thread | | 67 MB (it was 364 MB) |
 | Building the index from scratch, in the background worker | | 7 s (it was 29 s) |
 
 ## What makes it fast
@@ -20,6 +21,9 @@ slow down. Lumen is measured against a synthetic vault of 100,000 notes:
   Hebrew folded for niqqud, final letters and prefixes) is stored once, in
   chunks of 256 notes, not two or three times per note. A query is one scan
   per chunk.
+- **The text lives only in the index.** The app's main thread keeps a small
+  summary of each note: its links, tags, frontmatter and length. The graph and
+  the tags view read that summary, and renames happen inside the index.
 - **Saving touches one chunk.** Saving a note rebuilds only its chunk's search
   text.
 - **The index survives a restart.** After changes, the notes the index holds

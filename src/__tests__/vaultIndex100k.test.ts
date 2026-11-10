@@ -134,3 +134,51 @@ describe("int8 embeddings (W2.22)", () => {
     expect(packed.data).toBeInstanceOf(Int8Array);
   });
 });
+
+describe("text only in the index (W2.22)", () => {
+  it("moves a note inside the index, keeping it searchable at its new path", () => {
+    const a = new VaultIndex();
+    a.upsert({ path: "a/x.md", name: "x.md", content: "ירושלים zebra [[y]]", modified: 3 });
+    expect(a.move("a/x.md", "b/z.md", "z.md")).toBe(true);
+    expect(a.move("missing.md", "c.md", "c.md")).toBe(false);
+    expect(a.paths()).toEqual(["b/z.md"]);
+    expect(a.search("zebra").map((h) => h.path)).toEqual(["b/z.md"]);
+    expect(a.backlinks("y.md").map((h) => h.fromPath)).toEqual(["b/z.md"]);
+    expect([...a.notes()]).toEqual([{ path: "b/z.md", name: "z.md", content: "ירושלים zebra [[y]]", modified: 3 }]);
+  });
+
+  it("restores unchanged notes from the snapshot in the index, and returns summaries without text", async () => {
+    const { handleIndexRequest } = await import("../storage/vaultIndexLocal");
+    const a = new VaultIndex();
+    a.upsert({ path: "a.md", name: "a.md", content: "---\ntags: [x]\n---\nhello [[b]] #inline", modified: 5 });
+    a.upsert({ path: "b.md", name: "b.md", content: "old", modified: 6 });
+    expect(await handleIndexRequest(a, { id: 1, op: "snapshotSave", vault: "t" })).toMatchObject({ ok: true, result: 2 });
+    const b = new VaultIndex();
+    const res = (await handleIndexRequest(b, {
+      id: 2,
+      op: "snapshotRestore",
+      vault: "t",
+      listing: [
+        { path: "a.md", name: "a.md", modified: 5 },
+        { path: "b.md", name: "b.md", modified: 7 },
+        { path: "c.md", name: "c.md", modified: 1 },
+      ],
+    })) as { ok: true; result: Record<string, unknown>[] };
+    expect(res.result.map((r) => r.path)).toEqual(["a.md"]);
+    expect(res.result[0]).toMatchObject({ wikiTargets: ["b"], frontmatter: "---\ntags: [x]\n---\n", chars: 37 });
+    expect((res.result[0].meta as { tags: string[] }).tags.sort()).toEqual(["inline", "x"]);
+    expect("content" in res.result[0]).toBe(false);
+    expect(b.paths()).toEqual(["a.md"]);
+    expect(b.search("hello").length).toBe(1);
+    expect(((await handleIndexRequest(new VaultIndex(), { id: 3, op: "snapshotRestore", vault: "other", listing: [{ path: "a.md", name: "a.md", modified: 5 }] })) as { result: unknown[] }).result).toEqual([]);
+  });
+
+  it("summarizes a note for the main thread", async () => {
+    const { summarize, MAX_FRONTMATTER } = await import("../storage/noteSummary");
+    const s = summarize("---\ntitle: T\n---\nbody [[x|label]] #tag");
+    expect(s).toMatchObject({ wikiTargets: ["x"], frontmatter: "---\ntitle: T\n---\n", chars: 38 });
+    expect(s.meta).toEqual({ tags: ["tag"], props: { title: "T" } });
+    expect(summarize("no frontmatter").frontmatter).toBe(null);
+    expect(summarize(`---\n${"a: b\n".repeat(MAX_FRONTMATTER)}---\nx`).frontmatter).toBe(null);
+  });
+});
