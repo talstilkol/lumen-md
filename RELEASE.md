@@ -69,6 +69,50 @@ command prints how to redeploy the web app from the good tag (or
 
 ---
 
+## Stores and package managers (plan W1.24)
+
+`build --desktop` leaves the bundles and `SHA256SUMS` in `release/`. Then:
+
+```bash
+node scripts/release.mjs packages        # → release/packages/, checked offline
+```
+
+It writes, with every hash taken from `SHA256SUMS`:
+
+| Channel | Files | Submit |
+|---|---|---|
+| Homebrew | `homebrew/lumen-md.rb` (cask, arm + intel) | a tap (`brew tap talstilkol/lumen-md`), or a PR to `Homebrew/homebrew-cask` |
+| winget | `winget/manifests/t/Talstilkol/Lumen/<v>/` (version, installer, en-US locale; schema 1.6.0) | `wingetcreate submit <dir>` or a PR to `microsoft/winget-pkgs` |
+| Flathub | `flatpak/io.github.talstilkol.Lumen.json` + `.metainfo.xml` (the `.deb`, unpacked) | a new-app PR to `flathub/flathub` |
+| AUR | `aur/lumen-md-bin/PKGBUILD` + `.SRCINFO` | `git push` to `ssh://aur@aur.archlinux.org/lumen-md-bin.git` |
+
+A channel whose bundle is not in `SHA256SUMS` is skipped and reported; it is
+never written with a placeholder hash. The checks run without the network:
+
+- **winget:** the official JSON schemas, vendored in `scripts/vendor/winget-schemas` (MIT).
+- **Homebrew:** the cask's stanzas, their order and brew's `desc` rules, plus `ruby -c` when Ruby is installed.
+- **Flathub:** the keys flatpak-builder needs, permissions Flathub rejects, and the metainfo's required elements.
+- **AUR:** `bash -n`, and `.SRCINFO` agreeing with the `PKGBUILD`.
+
+The stores' own tools are the final check, run by the owner before
+submitting:
+- `brew audit --new --cask`
+- `winget validate`
+- `flatpak-builder` + `flatpak run --command=flathub-build org.flatpak.Builder`
+- `makepkg` + `namcap`
+
+Nothing here submits anything: the submissions, and the store accounts,
+are the owner's.
+
+Notes for the owner:
+- **Flathub id:** Flathub needs an id under a domain or code host you
+  control, so the manifest uses `io.github.talstilkol.Lumen`, not the
+  bundle id `app.lumen.editor`.
+- **Flathub file access:** the sandbox gets the network and `Documents`.
+  Other vault folders open through the file-chooser portal.
+- **Pre-releases:** for a version like `0.2.0-beta.1`, the PKGBUILD's
+  `pkgver` is `0.2.0_beta.1`, because pacman versions cannot contain `-`.
+
 ## 1. Web build (PWA)
 
 ```bash
