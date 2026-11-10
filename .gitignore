@@ -73,3 +73,6 @@ flake-results/
 visual-results/
 # On-device OCR (scripts/copy-tesseract.mjs)
 public/tesseract/
+
+# Plan 13.7: store screenshots are build output (node scripts/store-screenshots.mjs)
+store/screenshots/

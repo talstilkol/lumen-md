@@ -9,6 +9,7 @@
     "predev": "node scripts/copy-pyodide.mjs && node scripts/copy-webr.mjs && node scripts/copy-ruby.mjs && node scripts/copy-ort.mjs && node scripts/copy-tesseract.mjs && node scripts/copy-playground-vendor.mjs",
     "dev": "vite",
     "prebuild": "node scripts/copy-pyodide.mjs && node scripts/copy-webr.mjs && node scripts/copy-ruby.mjs && node scripts/copy-ort.mjs && node scripts/copy-tesseract.mjs && node scripts/copy-playground-vendor.mjs",
+    "store:check": "node scripts/store.mjs check",
     "build": "tsc -b && vite build",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
