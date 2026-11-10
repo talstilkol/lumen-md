@@ -163,6 +163,14 @@ export default function App() {
     getRecents().then(setRecents).catch(() => setRecents([]));
   }, []);
 
+  // Plan 14.6: after an update, that version's notes once (when the app is idle; nothing on a fresh install).
+  useEffect(() => {
+    const run = () => void import("./whatsNew/check").then((m) => m.checkWhatsNew()).catch(() => undefined);
+    const ric = (window as unknown as { requestIdleCallback?: (cb: () => void, o?: { timeout: number }) => number }).requestIdleCallback;
+    if (ric) ric(run, { timeout: 4000 });
+    else setTimeout(run, 2000);
+  }, []);
+
   useEffect(() => {
     void useEntitlement.getState().refresh();
     // Re-fetch when the user signs in/out or the session restore finishes.

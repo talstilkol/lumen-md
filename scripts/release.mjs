@@ -29,6 +29,7 @@ import { execFileSync, spawnSync } from "node:child_process";
 import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, statSync, writeFileSync, copyFileSync } from "node:fs";
 import path from "node:path";
 import { bumpManifests, changelogSection, insertChangelog, nextVersion, parseCommits, releaseNotes, sha256sums, tagOf, verifySums } from "./lib/release.mjs";
+import { LOCALES, UNTRANSLATED, addUntranslated } from "./lib/whats-new.mjs";
 import { latestJson } from "./lib/tauriSigning.mjs";
 
 const ROOT = process.cwd();
@@ -110,10 +111,15 @@ const commands = {
     const changed = bumpManifests(files, version);
     for (const [p, text] of Object.entries(changed)) writeFileSync(path.join(ROOT, p), text);
     const changelog = existsSync(path.join(ROOT, "CHANGELOG.md")) ? read("CHANGELOG.md") : "";
-    writeFileSync(path.join(ROOT, "CHANGELOG.md"), insertChangelog(changelog, changelogSection(version, commits, { repo: repoSlug() })));
-    console.log(`version ${version}: ${[...Object.keys(changed), "CHANGELOG.md"].join(", ")}`);
+    const section = changelogSection(version, commits, { repo: repoSlug() });
+    writeFileSync(path.join(ROOT, "CHANGELOG.md"), insertChangelog(changelog, section));
+    // Plan 14.6: the same section in each translation, marked untranslated until someone translates it.
+    const translations = LOCALES.filter((l) => l !== "en").map((l) => `changelog/${l}.md`).filter((p) => existsSync(path.join(ROOT, p)));
+    for (const p of translations) writeFileSync(path.join(ROOT, p), addUntranslated(read(p), section));
+    console.log(`version ${version}: ${[...Object.keys(changed), "CHANGELOG.md", ...translations].join(", ")}`);
+    if (translations.length) console.log(`translate the new section in ${translations.join(", ")} (remove the ${UNTRANSLATED} line) — "What's new" shows English until then`);
     if (flag("--commit")) {
-      git("add", "CHANGELOG.md", ...Object.keys(changed));
+      git("add", "CHANGELOG.md", ...translations, ...Object.keys(changed));
       git("commit", "-m", `chore(release): ${version}`);
       if (flag("--tag")) {
         git("tag", "-a", tagOf(version), "-m", `Lumen ${version}`);

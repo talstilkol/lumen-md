@@ -1460,5 +1460,11 @@
   "update.available.title": "Lumen {version} זמינה",
   "update.available.body": "מותקנת אצלכם {current}. להוריד, לאמת ולהתקין את {version}? Lumen יופעל מחדש.",
   "update.install": "התקנה והפעלה מחדש",
-  "update.failed": "העדכון נכשל: {message}"
+  "update.failed": "העדכון נכשל: {message}",
+  "whatsNew.title": "מה חדש ב־Lumen {version}",
+  "whatsNew.untranslated": "ההערות האלה עוד לא תורגמו, ולכן הן באנגלית.",
+  "whatsNew.loading": "…",
+  "whatsNew.none": "אין הערות שחרור לגרסה הזאת.",
+  "whatsNew.close": "הבנתי",
+  "cmd.help.whatsNew": "מה חדש בגרסה הזאת"
 }

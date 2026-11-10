@@ -1460,5 +1460,11 @@
   "update.available.title": "Lumen {version} が利用可能です",
   "update.available.body": "現在のバージョンは {current} です。{version} をダウンロード・検証・インストールしますか？Lumen は再起動します。",
   "update.install": "インストールして再起動",
-  "update.failed": "アップデートに失敗しました：{message}"
+  "update.failed": "アップデートに失敗しました：{message}",
+  "whatsNew.title": "Lumen {version} の新機能",
+  "whatsNew.untranslated": "このノートはまだ翻訳されていないため、英語で表示しています。",
+  "whatsNew.loading": "…",
+  "whatsNew.none": "このバージョンのリリースノートはありません。",
+  "whatsNew.close": "OK",
+  "cmd.help.whatsNew": "このバージョンの新機能"
 }

@@ -275,3 +275,13 @@ After every build, before publishing:
 
 Add an entry to `CHANGELOG.md` for every version. Keep entries terse,
 group under `Added` / `Changed` / `Fixed` headings, and link to PRs.
+
+### "What's new" in the app (plan 14.6)
+
+The app shows each version's `CHANGELOG.md` section once after an update, in
+the interface language. Translations live in `changelog/<locale>.md`
+(`changelog/he.md` to start): `release.mjs prepare` copies the new section
+into each of them marked `<!-- untranslated -->` — translate it and delete
+that line before tagging, or the app shows the English notes (under
+translated headings) with a note that they aren't translated yet. The notes
+are built into the app (`virtual:lumen-whats-new` in `vite.config.ts`).

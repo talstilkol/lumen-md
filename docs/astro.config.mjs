@@ -27,6 +27,7 @@ export default defineConfig({
           items: [
             { label: "Welcome to Lumen", slug: "getting-started/welcome" },
             { label: "Quickstart", slug: "getting-started/quickstart" },
+            { label: "What's new", slug: "getting-started/whats-new", translations: { he: "מה חדש" } },
             { label: "Desktop app updates", slug: "getting-started/desktop-updates" },
           ],
         },

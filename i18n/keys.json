@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-10-24T19:18:31.128Z",
-  "source": "src/i18n/index.ts (en bundle)",
-  "count": 1462,
+  "generated_at": "2026-11-10T03:30:47.495Z",
+  "source": "src/i18n/index.ts (en bundle) + src/i18n/lazy/*.json",
+  "count": 1468,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -1553,6 +1553,11 @@
     {
       "key": "cmd.app.checkUpdates",
       "en": "Check for updates…",
+      "vars": []
+    },
+    {
+      "key": "cmd.help.whatsNew",
+      "en": "What's new in this version",
       "vars": []
     },
     {
@@ -7870,6 +7875,33 @@
     {
       "key": "chart.alternatives",
       "en": "Chart suggestions",
+      "vars": []
+    },
+    {
+      "key": "whatsNew.title",
+      "en": "What's new in Lumen {version}",
+      "vars": [
+        "version"
+      ]
+    },
+    {
+      "key": "whatsNew.untranslated",
+      "en": "These notes aren't translated yet, so they're in English.",
+      "vars": []
+    },
+    {
+      "key": "whatsNew.loading",
+      "en": "…",
+      "vars": []
+    },
+    {
+      "key": "whatsNew.none",
+      "en": "There are no release notes for this version.",
+      "vars": []
+    },
+    {
+      "key": "whatsNew.close",
+      "en": "Got it",
       "vars": []
     }
   ]

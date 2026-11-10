@@ -384,6 +384,7 @@ const en: Strings = {
   "vault.export.doneFolder": "Exported {n} files into the folder “{folder}”.",
   "vault.export.failed": "Export failed: {error}",
   "cmd.app.checkUpdates": "Check for updates…",
+  "cmd.help.whatsNew": "What's new in this version",
   "cmd.app.checkUpdates.hint": "Desktop app: asks the release server for a newer, signed version",
   "update.localOnly": "Update check skipped: the privacy policy is “local only”, so nothing is sent.",
   "update.notConfigured": "This build has no update server or key yet; install new versions by hand.",
