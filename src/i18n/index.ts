@@ -69,6 +69,12 @@ export function isLocaleAvailable(locale: Locale): boolean {
 type Strings = Record<string, string>;
 
 const en: Strings = {
+  "cmd.nikud.add": "Hebrew: add niqqud",
+  "cmd.nikud.add.hint": "Point the selection (or the whole note) on this device",
+  "cmd.nikud.partial": "Hebrew: add partial niqqud",
+  "cmd.nikud.partial.hint": "Point only the words that could be read more than one way",
+  "cmd.nikud.remove": "Hebrew: remove niqqud",
+  "cmd.nikud.remove.hint": "Strip the vowel points from the selection (or the whole note)",
   // Toolbar
   "toolbar.tagline": "Markdown, illuminated",
   "toolbar.new": "New",

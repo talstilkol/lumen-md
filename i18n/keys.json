@@ -1,9 +1,39 @@
 {
   "version": 1,
-  "generated_at": "2026-10-24T17:59:47.320Z",
+  "generated_at": "2026-11-09T22:29:06.530Z",
   "source": "src/i18n/index.ts (en bundle) + src/i18n/lazy/*.json",
-  "count": 1458,
+  "count": 1475,
   "entries": [
+    {
+      "key": "cmd.nikud.add",
+      "en": "Hebrew: add niqqud",
+      "vars": []
+    },
+    {
+      "key": "cmd.nikud.add.hint",
+      "en": "Point the selection (or the whole note) on this device",
+      "vars": []
+    },
+    {
+      "key": "cmd.nikud.partial",
+      "en": "Hebrew: add partial niqqud",
+      "vars": []
+    },
+    {
+      "key": "cmd.nikud.partial.hint",
+      "en": "Point only the words that could be read more than one way",
+      "vars": []
+    },
+    {
+      "key": "cmd.nikud.remove",
+      "en": "Hebrew: remove niqqud",
+      "vars": []
+    },
+    {
+      "key": "cmd.nikud.remove.hint",
+      "en": "Strip the vowel points from the selection (or the whole note)",
+      "vars": []
+    },
     {
       "key": "toolbar.tagline",
       "en": "Markdown, illuminated",
@@ -7838,6 +7868,65 @@
       "en": "Local translation was not available ({why}); the AI model translated instead.",
       "vars": [
         "why"
+      ]
+    },
+    {
+      "key": "toast.nikud.working",
+      "en": "Adding niqqud on this device…",
+      "vars": []
+    },
+    {
+      "key": "toast.nikud.nothing",
+      "en": "No Hebrew text to change.",
+      "vars": []
+    },
+    {
+      "key": "toast.nikud.noHost",
+      "en": "The niqqud model is not available to download yet (its host is not set up).",
+      "vars": []
+    },
+    {
+      "key": "toast.nikud.declined",
+      "en": "Niqqud needs the model download; nothing was changed.",
+      "vars": []
+    },
+    {
+      "key": "toast.nikud.failed",
+      "en": "Niqqud failed: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "models.purpose.nikud",
+      "en": "Hebrew niqqud (vowel points) on this device",
+      "vars": []
+    },
+    {
+      "key": "toast.nikud.done",
+      "en": "Niqqud added on this device. Underlined words can be read more than one way: click one for its readings (Alt+click any word).",
+      "vars": []
+    },
+    {
+      "key": "toast.nikud.doneHigh",
+      "en": "Niqqud added on this device with DictaBERT-char-menaked (high quality). Underlined words can be read more than one way: click one for its readings.",
+      "vars": []
+    },
+    {
+      "key": "models.purpose.nikudHigh",
+      "en": "High-quality Hebrew niqqud (DictaBERT-char-menaked) on this device",
+      "vars": []
+    },
+    {
+      "key": "nikud.alt.title",
+      "en": "Other readings",
+      "vars": []
+    },
+    {
+      "key": "nikud.alt.choose",
+      "en": "Use “{word}”",
+      "vars": [
+        "word"
       ]
     }
   ]
