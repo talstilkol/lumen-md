@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-11-10T02:03:09.274Z",
+  "generated_at": "2026-11-10T02:20:24.738Z",
   "source": "src/i18n/index.ts (en bundle) + src/i18n/lazy/*.json",
-  "count": 1496,
+  "count": 1510,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -6799,6 +6799,16 @@
       "vars": []
     },
     {
+      "key": "cmd.voice.meetingFile",
+      "en": "🎙 Transcribe a meeting recording (who said what)…",
+      "vars": []
+    },
+    {
+      "key": "cmd.speakers.rename",
+      "en": "Rename a speaker in this note…",
+      "vars": []
+    },
+    {
       "key": "cmd.ai.meetingNotes",
       "en": "AI: Meeting Notes from a Transcript",
       "vars": []
@@ -8002,6 +8012,89 @@
       "key": "cmd.tools.transcribeFile",
       "en": "🎙 Transcribe an audio file (with timestamps)",
       "vars": []
+    },
+    {
+      "key": "speakers.diarizing",
+      "en": "Finding who spoke when… {done}/{total}",
+      "vars": [
+        "done",
+        "total"
+      ]
+    },
+    {
+      "key": "speakers.unavailable",
+      "en": "Speaker identification isn't set up on this device yet, so the transcript has no speakers.",
+      "vars": []
+    },
+    {
+      "key": "speakers.failed",
+      "en": "Couldn't tell the speakers apart: {error}. The transcript is inserted without speakers.",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "speakers.namePrompt",
+      "en": "Who is {speaker}? They said: “{sample}”",
+      "vars": [
+        "speaker",
+        "sample"
+      ]
+    },
+    {
+      "key": "speakers.namePlaceholder",
+      "en": "Name (leave empty to keep {speaker})",
+      "vars": [
+        "speaker"
+      ]
+    },
+    {
+      "key": "speakers.done",
+      "en": "Meeting transcribed: {n} sentences, {speakers} speakers, in {seconds} s.",
+      "vars": [
+        "n",
+        "speakers",
+        "seconds"
+      ]
+    },
+    {
+      "key": "speakers.notesFailed",
+      "en": "The transcript is in the note; the meeting summary failed: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "speakers.none",
+      "en": "This note has no speaker labels to rename.",
+      "vars": []
+    },
+    {
+      "key": "speakers.pick",
+      "en": "Which speaker do you want to rename?",
+      "vars": []
+    },
+    {
+      "key": "speakers.renamePrompt",
+      "en": "New name for {speaker}",
+      "vars": [
+        "speaker"
+      ]
+    },
+    {
+      "key": "speakers.renamed",
+      "en": "Renamed {from} to {to} everywhere in this note.",
+      "vars": [
+        "from",
+        "to"
+      ]
+    },
+    {
+      "key": "speakers.download",
+      "en": "Speaker identification needs {mb} MB of models from Hugging Face, downloaded once and kept on this device. Download them now?",
+      "vars": [
+        "mb"
+      ]
     },
     {
       "key": "transcribeFile.working",

@@ -1378,6 +1378,8 @@ const en: Strings = {
   "cmd.tools.voiceMemo.hint": "Record, transcribe with Whisper (on this device under a local AI policy), summarize, and insert a memo block",
   "cmd.voice.meeting": "🎙 Meeting notes (record on this device)",
   "cmd.voice.meeting.hint": "Record a meeting, transcribe it on this device, and insert its decisions, tasks with owner and date, and open questions",
+  "cmd.voice.meetingFile": "🎙 Transcribe a meeting recording (who said what)…",
+  "cmd.speakers.rename": "Rename a speaker in this note…",
   "cmd.ai.meetingNotes": "AI: Meeting Notes from a Transcript",
   "cmd.ai.meetingNotes.hint": "Turn the transcript in this note (or the selection) into decisions, tasks and open questions",
   "meeting.title": "Meeting",

@@ -274,6 +274,8 @@
   "cmd.tools.voiceMemo.hint": "تسجيل، تفريغ عبر Whisper (على هذا الجهاز تحت سياسة ذكاء اصطناعي محلية)، تلخيص، وإدراج كتلة مذكرة",
   "cmd.voice.meeting": "🎙 ملاحظات الاجتماع (التسجيل على هذا الجهاز)",
   "cmd.voice.meeting.hint": "سجّل اجتماعًا وفرّغه نصيًا على هذا الجهاز وأدرج قراراته ومهامه مع المسؤول والتاريخ والأسئلة المفتوحة",
+  "cmd.voice.meetingFile": "🎙 تفريغ تسجيل اجتماع (من قال ماذا)…",
+  "cmd.speakers.rename": "إعادة تسمية متحدث في هذه الملاحظة…",
   "cmd.ai.meetingNotes": "AI: ملاحظات اجتماع من نص مفرّغ",
   "cmd.ai.meetingNotes.hint": "حوّل النص المفرّغ في هذه الملاحظة (أو التحديد) إلى قرارات ومهام وأسئلة مفتوحة",
   "meeting.title": "اجتماع",
@@ -1494,5 +1496,17 @@
   "transcribeFile.desktop.missing": "Whisper لسطح المكتب: ملف النموذج ليس في مجلد whisper الخاص بالتطبيق بعد — يُستخدم نموذج المتصفح. راجع الوثائق: AI ← Whisper العبري على سطح المكتب.",
   "transcribeFile.desktop.checksum": "Whisper لسطح المكتب: ملف النموذج لا يطابق المجموع الاختباري المثبّت، لذا لا يُستخدم — يُستخدم نموذج المتصفح.",
   "transcribeFile.desktop.noCli": "Whisper لسطح المكتب: whisper-cli غير مثبّت — يُستخدم نموذج المتصفح. راجع الوثائق: AI ← Whisper العبري على سطح المكتب.",
-  "cmd.tools.transcribeFile": "🎙 تفريغ ملف صوتي (مع الطوابع الزمنية)"
+  "cmd.tools.transcribeFile": "🎙 تفريغ ملف صوتي (مع الطوابع الزمنية)",
+  "speakers.diarizing": "جارٍ تحديد من تحدّث ومتى… {done}/{total}",
+  "speakers.unavailable": "لم يُعدّ تمييز المتحدثين على هذا الجهاز بعد، لذا لا يتضمن النص متحدثين.",
+  "speakers.failed": "تعذّر التمييز بين المتحدثين: {error}. أُدرج النص بلا متحدثين.",
+  "speakers.namePrompt": "من هو {speaker}؟ قال: «{sample}»",
+  "speakers.namePlaceholder": "الاسم (اتركه فارغًا للإبقاء على {speaker})",
+  "speakers.done": "تم تفريغ الاجتماع: {n} جملة، {speakers} متحدثين، في {seconds} ث.",
+  "speakers.notesFailed": "النص في الملاحظة؛ فشل ملخص الاجتماع: {error}",
+  "speakers.none": "لا تحتوي هذه الملاحظة على أسماء متحدثين لإعادة تسميتها.",
+  "speakers.pick": "أي متحدث تريد إعادة تسميته؟",
+  "speakers.renamePrompt": "اسم جديد لـ {speaker}",
+  "speakers.renamed": "أُعيدت تسمية {from} إلى {to} في كل الملاحظة.",
+  "speakers.download": "يحتاج تمييز المتحدثين إلى {mb} ميغابايت من النماذج من Hugging Face، تُنزَّل مرة واحدة وتُحفظ على هذا الجهاز. هل تريد تنزيلها الآن؟"
 }

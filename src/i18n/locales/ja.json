@@ -274,6 +274,8 @@
   "cmd.tools.voiceMemo.hint": "録音し、Whisper で文字起こし（ローカル AI ポリシーではこのデバイス上で）、要約してメモブロックを挿入",
   "cmd.voice.meeting": "🎙 会議メモ（このデバイスで録音）",
   "cmd.voice.meeting.hint": "会議を録音し、このデバイスで文字起こしして、決定事項・担当者と期日付きのタスク・未解決の質問を挿入します",
+  "cmd.voice.meetingFile": "🎙 会議の録音を文字起こし（誰が何を言ったか）…",
+  "cmd.speakers.rename": "このノートの話者名を変更…",
   "cmd.ai.meetingNotes": "AI: 文字起こしから会議メモ",
   "cmd.ai.meetingNotes.hint": "このノート（または選択範囲）の文字起こしを決定事項・タスク・未解決の質問にまとめます",
   "meeting.title": "会議",
@@ -1494,5 +1496,17 @@
   "transcribeFile.desktop.missing": "デスクトップ Whisper: モデルファイルがまだアプリの whisper フォルダーにありません — ブラウザーのモデルを使用します。ドキュメント: AI → デスクトップのヘブライ語 Whisper。",
   "transcribeFile.desktop.checksum": "デスクトップ Whisper: モデルファイルが固定されたチェックサムと一致しないため使用しません — ブラウザーのモデルを使用します。",
   "transcribeFile.desktop.noCli": "デスクトップ Whisper: whisper-cli がインストールされていません — ブラウザーのモデルを使用します。ドキュメント: AI → デスクトップのヘブライ語 Whisper。",
-  "cmd.tools.transcribeFile": "🎙 音声ファイルを文字起こし（タイムスタンプ付き）"
+  "cmd.tools.transcribeFile": "🎙 音声ファイルを文字起こし（タイムスタンプ付き）",
+  "speakers.diarizing": "誰がいつ話したかを判定中… {done}/{total}",
+  "speakers.unavailable": "このデバイスでは話者識別がまだ設定されていないため、文字起こしに話者は付きません。",
+  "speakers.failed": "話者を区別できませんでした: {error}。話者なしで文字起こしを挿入しました。",
+  "speakers.namePrompt": "{speaker} は誰ですか？発言:「{sample}」",
+  "speakers.namePlaceholder": "名前（空欄なら {speaker} のまま）",
+  "speakers.done": "会議を文字起こししました: {n} 文、話者 {speakers} 人、{seconds} 秒。",
+  "speakers.notesFailed": "文字起こしはノートにあります。会議の要約に失敗しました: {error}",
+  "speakers.none": "このノートには名前を変更できる話者ラベルがありません。",
+  "speakers.pick": "どの話者の名前を変更しますか？",
+  "speakers.renamePrompt": "{speaker} の新しい名前",
+  "speakers.renamed": "ノート全体で {from} を {to} に変更しました。",
+  "speakers.download": "話者識別には Hugging Face のモデル {mb} MB が必要です（一度だけダウンロードし、このデバイスに保存）。今すぐダウンロードしますか？"
 }

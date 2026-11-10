@@ -274,6 +274,8 @@
   "cmd.tools.voiceMemo.hint": "Aufnehmen, mit Whisper transkribieren (auf diesem Gerät bei lokaler KI-Richtlinie), zusammenfassen und einen Memo-Block einfügen",
   "cmd.voice.meeting": "🎙 Besprechungsnotizen (auf diesem Gerät aufnehmen)",
   "cmd.voice.meeting.hint": "Eine Besprechung aufnehmen, auf diesem Gerät transkribieren und ihre Beschlüsse, Aufgaben mit Verantwortlichen und Termin sowie offenen Fragen einfügen",
+  "cmd.voice.meetingFile": "🎙 Besprechungsaufnahme transkribieren (wer hat was gesagt)…",
+  "cmd.speakers.rename": "Sprecher in dieser Notiz umbenennen…",
   "cmd.ai.meetingNotes": "AI: Besprechungsnotizen aus einem Transkript",
   "cmd.ai.meetingNotes.hint": "Macht aus dem Transkript in dieser Notiz (oder der Auswahl) Beschlüsse, Aufgaben und offene Fragen",
   "meeting.title": "Besprechung",
@@ -1494,5 +1496,17 @@
   "transcribeFile.desktop.missing": "Desktop-Whisper: Die Modelldatei liegt noch nicht im whisper-Ordner der App — das Modell im Browser wird verwendet. Siehe Doku: AI → Hebräisches Whisper auf dem Desktop.",
   "transcribeFile.desktop.checksum": "Desktop-Whisper: Die Modelldatei passt nicht zur festgelegten Prüfsumme und wird nicht verwendet — das Modell im Browser wird verwendet.",
   "transcribeFile.desktop.noCli": "Desktop-Whisper: whisper-cli ist nicht installiert — das Modell im Browser wird verwendet. Siehe Doku: AI → Hebräisches Whisper auf dem Desktop.",
-  "cmd.tools.transcribeFile": "🎙 Audiodatei transkribieren (mit Zeitmarken)"
+  "cmd.tools.transcribeFile": "🎙 Audiodatei transkribieren (mit Zeitmarken)",
+  "speakers.diarizing": "Ermittle, wer wann gesprochen hat… {done}/{total}",
+  "speakers.unavailable": "Die Sprechererkennung ist auf diesem Gerät noch nicht eingerichtet, daher hat das Transkript keine Sprecher.",
+  "speakers.failed": "Die Sprecher konnten nicht unterschieden werden: {error}. Das Transkript wurde ohne Sprecher eingefügt.",
+  "speakers.namePrompt": "Wer ist {speaker}? Gesagt: „{sample}“",
+  "speakers.namePlaceholder": "Name (leer lassen, um {speaker} zu behalten)",
+  "speakers.done": "Besprechung transkribiert: {n} Sätze, {speakers} Sprecher, in {seconds} s.",
+  "speakers.notesFailed": "Das Transkript ist in der Notiz; die Zusammenfassung ist fehlgeschlagen: {error}",
+  "speakers.none": "Diese Notiz hat keine Sprecherbezeichnungen zum Umbenennen.",
+  "speakers.pick": "Welchen Sprecher möchtest du umbenennen?",
+  "speakers.renamePrompt": "Neuer Name für {speaker}",
+  "speakers.renamed": "{from} wurde in der ganzen Notiz in {to} umbenannt.",
+  "speakers.download": "Die Sprechererkennung braucht {mb} MB Modelle von Hugging Face, einmal geladen und auf diesem Gerät gespeichert. Jetzt herunterladen?"
 }

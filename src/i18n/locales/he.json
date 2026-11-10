@@ -667,6 +667,8 @@
   "cmd.tools.voiceMemo.hint": "הקלטה, תמלול עם Whisper (במכשיר הזה במדיניות AI מקומית), סיכום והכנסת בלוק תזכיר",
   "cmd.voice.meeting": "🎙 סיכום פגישה (הקלטה במכשיר הזה)",
   "cmd.voice.meeting.hint": "הקלטת פגישה, תמלול במכשיר הזה, והוספת ההחלטות, המשימות עם אחראי ותאריך, והשאלות הפתוחות",
+  "cmd.voice.meetingFile": "🎙 תמלול הקלטת פגישה (מי אמר מה)…",
+  "cmd.speakers.rename": "שינוי שם של דובר בפתק הזה…",
   "cmd.ai.meetingNotes": "AI: סיכום פגישה מתמליל",
   "cmd.ai.meetingNotes.hint": "הופך את התמליל שבפתק (או את הבחירה) להחלטות, משימות ושאלות פתוחות",
   "meeting.title": "פגישה",
@@ -1494,5 +1496,17 @@
   "transcribeFile.desktop.missing": "Whisper לשולחן העבודה: קובץ המודל עדיין לא בתיקיית whisper של האפליקציה — משתמש במודל שבדפדפן. ראו בתיעוד: AI ← Whisper עברי בשולחן העבודה.",
   "transcribeFile.desktop.checksum": "Whisper לשולחן העבודה: קובץ המודל לא תואם ל-checksum הנעוץ, ולכן לא נעשה בו שימוש — משתמש במודל שבדפדפן.",
   "transcribeFile.desktop.noCli": "Whisper לשולחן העבודה: whisper-cli לא מותקן — משתמש במודל שבדפדפן. ראו בתיעוד: AI ← Whisper עברי בשולחן העבודה.",
-  "cmd.tools.transcribeFile": "🎙 תמלול קובץ שמע (עם חותמות זמן)"
+  "cmd.tools.transcribeFile": "🎙 תמלול קובץ שמע (עם חותמות זמן)",
+  "speakers.diarizing": "מזהה מי דיבר מתי… {done}/{total}",
+  "speakers.unavailable": "זיהוי דוברים עוד לא הוגדר במכשיר הזה, ולכן בתמליל אין דוברים.",
+  "speakers.failed": "לא הצלחנו להבחין בין הדוברים: {error}. התמליל נוסף בלי דוברים.",
+  "speakers.namePrompt": "מי זה {speaker}? הוא אמר: „{sample}”",
+  "speakers.namePlaceholder": "שם (ריק כדי להשאיר {speaker})",
+  "speakers.done": "הפגישה תומללה: {n} משפטים, {speakers} דוברים, ב־{seconds} שניות.",
+  "speakers.notesFailed": "התמליל בפתק; סיכום הפגישה נכשל: {error}",
+  "speakers.none": "בפתק הזה אין תוויות דוברים לשנות.",
+  "speakers.pick": "איזה דובר לשנות?",
+  "speakers.renamePrompt": "שם חדש עבור {speaker}",
+  "speakers.renamed": "{from} שונה ל־{to} בכל הפתק.",
+  "speakers.download": "זיהוי דוברים צריך {mb} MB של מודלים מ־Hugging Face, שיורדים פעם אחת ונשמרים במכשיר הזה. להוריד עכשיו?"
 }

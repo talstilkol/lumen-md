@@ -89,6 +89,21 @@ export function buildVoiceCommands(): Command[] {
       },
     },
     {
+      id: "voice.meetingFile",
+      label: t("cmd.voice.meetingFile"),
+      icon: cmdIcons.Sparkles,
+      group: t("group.tools"),
+      // Plan W2.7: a recording → transcript with speakers (W1.17 + diarization) → meeting notes.
+      action: async () => (await import("../../meetings/meetingTranscribe")).transcribeMeeting(),
+    },
+    {
+      id: "speakers.rename",
+      label: t("cmd.speakers.rename"),
+      icon: cmdIcons.Sparkles,
+      group: t("group.tools"),
+      action: async () => (await import("../../meetings/meetingTranscribe")).renameSpeakerInNote(),
+    },
+    {
       id: "ai.meetingNotes",
       label: t("cmd.ai.meetingNotes"),
       hint: t("cmd.ai.meetingNotes.hint"),

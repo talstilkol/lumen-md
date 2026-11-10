@@ -274,6 +274,8 @@
   "cmd.tools.voiceMemo.hint": "Enregistrer, transcrire avec Whisper (sur cet appareil sous une politique IA locale), résumer et insérer un bloc mémo",
   "cmd.voice.meeting": "🎙 Notes de réunion (enregistrées sur cet appareil)",
   "cmd.voice.meeting.hint": "Enregistre une réunion, la transcrit sur cet appareil et insère ses décisions, ses tâches avec responsable et date, et ses questions ouvertes",
+  "cmd.voice.meetingFile": "🎙 Transcrire l’enregistrement d’une réunion (qui a dit quoi)…",
+  "cmd.speakers.rename": "Renommer un intervenant dans cette note…",
   "cmd.ai.meetingNotes": "AI : Notes de réunion à partir d'une transcription",
   "cmd.ai.meetingNotes.hint": "Transforme la transcription de cette note (ou la sélection) en décisions, tâches et questions ouvertes",
   "meeting.title": "Réunion",
@@ -1494,5 +1496,17 @@
   "transcribeFile.desktop.missing": "Whisper bureau : le fichier du modèle n’est pas encore dans le dossier whisper de l’application — utilisation du modèle du navigateur. Voir la doc : AI → Whisper hébreu sur le bureau.",
   "transcribeFile.desktop.checksum": "Whisper bureau : le fichier du modèle ne correspond pas à la somme de contrôle fixée, il n’est donc pas utilisé — utilisation du modèle du navigateur.",
   "transcribeFile.desktop.noCli": "Whisper bureau : whisper-cli n’est pas installé — utilisation du modèle du navigateur. Voir la doc : AI → Whisper hébreu sur le bureau.",
-  "cmd.tools.transcribeFile": "🎙 Transcrire un fichier audio (avec horodatage)"
+  "cmd.tools.transcribeFile": "🎙 Transcrire un fichier audio (avec horodatage)",
+  "speakers.diarizing": "Identification de qui parle quand… {done}/{total}",
+  "speakers.unavailable": "L’identification des intervenants n’est pas encore configurée sur cet appareil : la transcription n’a pas d’intervenants.",
+  "speakers.failed": "Impossible de distinguer les intervenants : {error}. La transcription est insérée sans intervenants.",
+  "speakers.namePrompt": "Qui est {speaker} ? Cette personne a dit : « {sample} »",
+  "speakers.namePlaceholder": "Nom (laisser vide pour garder {speaker})",
+  "speakers.done": "Réunion transcrite : {n} phrases, {speakers} intervenants, en {seconds} s.",
+  "speakers.notesFailed": "La transcription est dans la note ; le résumé de la réunion a échoué : {error}",
+  "speakers.none": "Cette note n’a pas d’étiquettes d’intervenants à renommer.",
+  "speakers.pick": "Quel intervenant voulez-vous renommer ?",
+  "speakers.renamePrompt": "Nouveau nom pour {speaker}",
+  "speakers.renamed": "{from} a été renommé en {to} dans toute la note.",
+  "speakers.download": "L’identification des intervenants nécessite {mb} Mo de modèles depuis Hugging Face, téléchargés une seule fois et conservés sur cet appareil. Les télécharger maintenant ?"
 }
