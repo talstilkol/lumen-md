@@ -38,7 +38,7 @@ is not *local only*):
 - **Show what will be sent before each cloud request.** Before each cloud
   request you see the redacted text and a count per type, and can cancel.
 
-The **privacy ledger** (`⌘K → AI: Privacy ledger`) shows how many items
+The **privacy ledger** (`⌘K → Privacy ledger…`) shows how many items
 were hidden in how many requests. It shows the counts only, never the
 values.
 

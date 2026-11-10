@@ -3,7 +3,7 @@ title: AI doctor
 description: One check of the whole local-AI stack, from Ollama to the on-device engines, with the exact fix for each row.
 ---
 
-Open it with `⌘K → AI: Doctor`. Each row shows what the doctor found, and
+Open it with `⌘K → AI: Doctor (diagnose local AI)`. Each row shows what the doctor found, and
 every row that is not OK also gives the fix: a command to copy, a button
 that applies the fix, or a link. The checks only read state. None of them
 downloads a model or sends your notes anywhere.

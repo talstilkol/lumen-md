@@ -3,7 +3,7 @@ title: Train a model on your style, on this machine
 description: A LoRA adapter trained on your own notes on a Mac or NVIDIA computer and used in Ollama. Nothing is uploaded.
 ---
 
-`⌘K → Train AI on my style` now offers the **local route first**. Lumen
+`⌘K → AI fine-tune settings…` now offers the **local route first**. Lumen
 exports your notes as training data together with a script. You run the
 script on your own computer, and the result appears in Ollama as the model
 `lumen-style`. The cloud fine-tune (OpenAI) is still offered below it.
