@@ -66,6 +66,7 @@ export default defineConfig({
             { label: "Research + citation checks", slug: "ai/research" },
             { label: "Meeting notes", translations: { he: "סיכום פגישה" }, slug: "ai/meeting-notes" },
             { label: "MCP integration (Claude Desktop, Cursor)", slug: "ai/mcp" },
+            { label: "Hebrew Whisper on the desktop", translations: { he: "Whisper עברי בשולחן העבודה" }, slug: "ai/whisper-desktop" },
           ],
         },
         {

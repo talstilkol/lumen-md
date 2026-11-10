@@ -30,10 +30,12 @@ import {
   type PreTrainedTokenizer,
 } from "@huggingface/transformers";
 
+import { timedChunks, type WhisperOut } from "./dictation/longform";
+
 export type Device = "webgpu" | "wasm";
 
 export type WorkerIn =
-  | { id: number; type: "transcribe"; model: string; device: Device; audio: Float32Array; language?: string; task?: "transcribe" | "translate" }
+  | { id: number; type: "transcribe"; model: string; device: Device; audio: Float32Array; language?: string; task?: "transcribe" | "translate"; timestamps?: boolean }
   | { id: number; type: "embed"; model: string; device: Device; texts: string[] }
   | { id: number; type: "rerank"; model: string; device: Device; query: string; passages: string[] }
   | { id: number; type: "load"; task: "automatic-speech-recognition" | "feature-extraction"; model: string; device: Device }
@@ -49,6 +51,14 @@ export interface TranscribeResult {
   text: string;
   /** Detected (or requested) language code when the model reports one. */
   language?: string;
+  /** With `timestamps`: Whisper's timed segments, in seconds from the start of the audio (plan W1.17). */
+  segments?: TimedSegment[];
+}
+
+export interface TimedSegment {
+  start: number;
+  end: number;
+  text: string;
 }
 
 export interface EmbedResult {
@@ -91,11 +101,14 @@ function progressFor(id: number) {
   };
 }
 
-/** Whisper on WebGPU: fp32 encoder + q4 decoder is the library's recommended split; wasm: q8. */
-function asrOptions(device: Device) {
-  return device === "webgpu"
-    ? { device, dtype: { encoder_model: "fp32", decoder_model_merged: "q4" } }
-    : { device, dtype: "q8" };
+/**
+ * Whisper on WebGPU: fp32 encoder + q4 decoder is the library's recommended
+ * split; ivrit.ai's Hebrew turbo ships q4f16 for both (≈ 563 MB); wasm: q8.
+ */
+export function asrOptions(device: Device, model = "") {
+  if (device !== "webgpu") return { device, dtype: "q8" };
+  if (model === "ivrit-ai/whisper-large-v3-turbo-onnx") return { device, dtype: { encoder_model: "q4f16", decoder_model_merged: "q4f16" } };
+  return { device, dtype: { encoder_model: "fp32", decoder_model_merged: "q4" } };
 }
 
 async function getAsr(id: number, model: string, device: Device): Promise<AutomaticSpeechRecognitionPipeline> {
@@ -103,7 +116,7 @@ async function getAsr(id: number, model: string, device: Device): Promise<Automa
   if (asr?.key === key) return asr.pipe;
   if (asr) await asr.pipe.dispose();
   asr = null;
-  const pipe = (await pipeline("automatic-speech-recognition", model, { ...asrOptions(device), progress_callback: progressFor(id) } as never)) as AutomaticSpeechRecognitionPipeline;
+  const pipe = (await pipeline("automatic-speech-recognition", model, { ...asrOptions(device, model), progress_callback: progressFor(id) } as never)) as AutomaticSpeechRecognitionPipeline;
   asr = { key, pipe };
   return pipe;
 }
@@ -152,17 +165,22 @@ export function windowsOf(audio: Float32Array, windowSeconds = WINDOW_SECONDS, s
 
 async function transcribe(id: number, msg: Extract<WorkerIn, { type: "transcribe" }>): Promise<TranscribeResult> {
   const pipe = await getAsr(id, msg.model, msg.device);
-  const kwargs = { ...(msg.language ? { language: msg.language } : {}), task: msg.task ?? "transcribe" };
+  const kwargs = { ...(msg.language ? { language: msg.language } : {}), task: msg.task ?? "transcribe", ...(msg.timestamps ? { return_timestamps: true } : {}) };
   const parts: string[] = [];
+  const segments: TimedSegment[] = [];
   let language: string | undefined;
+  let offset = 0;
   for (const window of windowsOf(msg.audio)) {
     if (cancelled.has(id)) throw new DOMException("aborted", "AbortError");
-    const out = (await pipe(window, kwargs)) as { text?: string; language?: string } | Array<{ text?: string }>;
+    const out = (await pipe(window, kwargs)) as WhisperOut | WhisperOut[];
     parts.push(Array.isArray(out) ? out.map((o) => o.text ?? "").join(" ") : (out.text ?? ""));
     if (!Array.isArray(out) && out.language && !language) language = out.language;
+    const length = window.length / SAMPLE_RATE;
+    if (msg.timestamps) segments.push(...timedChunks(Array.isArray(out) ? out[0] : out, offset, length));
+    offset += length;
   }
   const text = parts.map((p) => p.trim()).filter(Boolean).join(" ");
-  return { text, ...(language ? { language } : {}) };
+  return { text, ...(language ? { language } : {}), ...(msg.timestamps ? { segments } : {}) };
 }
 
 async function embed(id: number, msg: Extract<WorkerIn, { type: "embed" }>): Promise<EmbedResult> {

@@ -49,6 +49,7 @@ export const DIRECT_FS_ALLOWLIST = {
   "src/storage/vault/opfsSyncWrite.ts": "the OPFS backend's WebKit write fallback: a worker writing through a sync access handle",
   "src/storage/fs.ts": "Open / Save / Save As of a single file the user picked (showOpenFilePicker / showSaveFilePicker): a real file outside the vault, not OPFS",
   "src/storage/exportDocx.ts": "writes an exported .docx to the location the user picked in the save dialog: not OPFS, not the vault",
+  "src/ai/modelCache.ts": "the verified model cache of plan 6.0 (models/, outside the vault): downloaded ONNX files checked against their sha256, never notes",
 };
 
 /** Handle methods that read or change a file system directly. */

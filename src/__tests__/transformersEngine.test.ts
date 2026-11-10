@@ -15,6 +15,7 @@ import {
   unloadTransformers,
   onTransformersProgress,
   whisperModelFor,
+  whisperModelForLanguage,
   transformersDevice,
   decodeAudioTo16k,
   isWebKit,
@@ -69,6 +70,15 @@ describe("transformersEngine (worker client)", () => {
     expect(await transformersDevice()).toBe("wasm");
   });
 
+  it("picks ivrit.ai's turbo for Hebrew on a GPU with f16 and the VRAM, else whisper-base (plan 6.1)", () => {
+    expect(whisperModelForLanguage(hardware, "webgpu", "he")).toBe(WHISPER_MODELS.turboHe);
+    expect(whisperModelForLanguage({ ...hardware, f16: false }, "webgpu", "he")).toBe(WHISPER_MODELS.base);
+    expect(whisperModelForLanguage({ ...hardware, mobile: true }, "webgpu", "he")).toBe(WHISPER_MODELS.base);
+    expect(whisperModelForLanguage({ ...hardware, webgpu: false }, "wasm", "he")).toBe(WHISPER_MODELS.base);
+    expect(whisperModelForLanguage(hardware, "webgpu", "en")).toBe(WHISPER_MODELS.turbo);
+    expect(whisperModelForLanguage({ ...hardware, webgpu: false }, "wasm", undefined)).toBe(WHISPER_MODELS.tiny);
+  });
+
   it("transcribes through the worker, transferring the samples and passing the ORT base", async () => {
     script = (msg, reply) => {
       if (msg.type === "transcribe") {
@@ -83,7 +93,8 @@ describe("transformersEngine (worker client)", () => {
     off();
     expect(res).toEqual({ text: "שלום", language: "he" });
     expect(seen).toEqual([50]);
-    expect(received[0]).toMatchObject({ type: "transcribe", model: WHISPER_MODELS.turbo, device: "webgpu", language: "he", task: "transcribe" });
+    // Hebrew on a GPU that holds it: ivrit.ai's Hebrew turbo (plan 6.1).
+    expect(received[0]).toMatchObject({ type: "transcribe", model: WHISPER_MODELS.turboHe, device: "webgpu", language: "he", task: "transcribe" });
     expect(received[0].ortBase).toMatch(/\/ort\/$/);
     expect(transfers[0][0]).toBe(samples.buffer);
     expect(created).toBe(1);

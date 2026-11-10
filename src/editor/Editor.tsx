@@ -671,6 +671,36 @@ export const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
     return () => window.removeEventListener("lumen-mobile-insert", onInsert);
   }, []);
 
+  // Live dictation (plan 6.1): `lumen-dictation-insert` {text} inserts a
+  // finished segment at the cursor with one separating space;
+  // `lumen-dictation-undo` {text} removes it again when it is still right
+  // before the cursor ("delete that"). preventDefault() tells the sender
+  // the editor handled it; `detail.inserted` is what was actually inserted.
+  useEffect(() => {
+    function onDictation(e: Event) {
+      const view = viewRef.current;
+      const detail = (e as CustomEvent<{ text: string; inserted?: string }>).detail;
+      const text = detail?.text;
+      if (!view || !text) return;
+      e.preventDefault();
+      const { from, to } = view.state.selection.main;
+      if (e.type === "lumen-dictation-undo") {
+        if (view.state.sliceDoc(Math.max(0, from - text.length), from) === text) view.dispatch({ changes: { from: from - text.length, to: from, insert: "" } });
+        return;
+      }
+      const before = from > 0 ? view.state.sliceDoc(from - 1, from) : "";
+      const insert = before && !/\s/.test(before) && !/^[\s.,?!:)]/.test(text) ? " " + text : text;
+      view.dispatch({ changes: { from, to, insert }, selection: { anchor: from + insert.length } });
+      detail.inserted = insert; // what to remove on "delete that"
+    }
+    window.addEventListener("lumen-dictation-insert", onDictation);
+    window.addEventListener("lumen-dictation-undo", onDictation);
+    return () => {
+      window.removeEventListener("lumen-dictation-insert", onDictation);
+      window.removeEventListener("lumen-dictation-undo", onDictation);
+    };
+  }, []);
+
   // `lumen-reveal-line` {line} (1-based): jump to and select that line —
   // used by vault citations (T29). With `content` it waits until the
   // just-opened note has actually loaded into the editor.
