@@ -27,7 +27,13 @@ export const ENDPOINT_ENV_VARS = [
   "VITE_MARKETPLACE_URL",
   "VITE_LANGUAGETOOL_URL",
   "VITE_SUPABASE_URL",
+  // Safe git (plan 3.3): the CORS proxy git requests go through.
+  "VITE_GIT_CORS_PROXY",
+  // The error tracker (Sentry / GlitchTip, plan 12.4): the DSN's host, never a wildcard.
+  "VITE_SENTRY_DSN",
 ];
+/** WebSocket URLs (comma-separated) the app opens: collab signaling and the persistent collab server. */
+export const WEBSOCKET_ENV_VARS = ["VITE_WEBRTC_SIGNALING_URL", "VITE_YJS_WEBSOCKET_URL"];
 export const EXTRA_CONNECT_ENV_VAR = "VITE_CSP_CONNECT_EXTRA";
 /** The marker security/policy.json puts in the app policy for this host. */
 export const PLACEHOLDER = "__CSP_CONNECT_EXTRA__";
@@ -44,24 +50,33 @@ interface VercelConfig {
 
 export function endpointOrigins(env: Env): string[] {
   const out = new Set<string>();
-  for (const key of ENDPOINT_ENV_VARS) {
-    const raw = env[key]?.trim();
-    if (!raw) continue;
+  // A CSP source list cannot name an IPv6 literal (browsers ignore it): skipped, as in cspEndpoints.ts.
+  const addOrigin = (url: URL) => {
+    if (!url.hostname.startsWith("[")) out.add(url.origin);
+  };
+  const add = (raw: string, schemes: readonly string[]) => {
     let url: URL;
     try {
       url = new URL(raw);
     } catch {
-      continue;
+      return;
     }
-    if (url.protocol !== "https:" && url.protocol !== "http:") continue;
-    if (/(^|\.)example\.(com|org|net)$/i.test(url.hostname) || /placeholder|your-/i.test(raw)) continue;
-    out.add(url.origin);
+    if (!schemes.includes(url.protocol)) return;
+    if (/(^|\.)example\.(com|org|net)$/i.test(url.hostname) || /placeholder|your-/i.test(raw)) return;
+    addOrigin(url);
+  };
+  for (const key of ENDPOINT_ENV_VARS) {
+    const raw = env[key]?.trim();
+    if (raw) add(raw, ["https:", "http:"]);
+  }
+  for (const key of WEBSOCKET_ENV_VARS) {
+    for (const raw of (env[key] ?? "").split(",")) if (raw.trim()) add(raw.trim(), ["wss:", "ws:"]);
   }
   for (const raw of (env[EXTRA_CONNECT_ENV_VAR] ?? "").split(/[\s,]+/)) {
     if (!raw) continue;
     try {
       const u = new URL(raw);
-      if (["https:", "http:", "wss:", "ws:"].includes(u.protocol)) out.add(u.origin);
+      if (["https:", "http:", "wss:", "ws:"].includes(u.protocol)) addOrigin(u);
     } catch {
       /* not an origin: ignore */
     }
