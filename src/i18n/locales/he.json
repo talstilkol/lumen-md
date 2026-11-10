@@ -1444,5 +1444,7 @@
   "callout.example": "דוגמה",
   "callout.quote": "ציטוט",
   "preview.imageResize.hint": "גררו את הקצה כדי לשנות גודל. הרוחב נשמר בפתק.",
-  "preview.footnote.label": "הערת שוליים {n}"
+  "preview.footnote.label": "הערת שוליים {n}",
+  "print.toc": "תוכן עניינים",
+  "print.untitled": "ללא שם"
 }

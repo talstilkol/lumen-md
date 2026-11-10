@@ -49,6 +49,7 @@ export default defineConfig({
             { label: "Database views", slug: "workspace/database-views" },
             { label: "Search (BM25 + Smart)", slug: "workspace/search" },
             { label: "Vault Doctor", slug: "workspace/doctor" },
+            { label: "Print and PDF", slug: "workspace/print", translations: { he: "הדפסה ו-PDF" } },
           ],
         },
         {

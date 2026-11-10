@@ -1444,5 +1444,7 @@
   "callout.example": "Beispiel",
   "callout.quote": "Zitat",
   "preview.imageResize.hint": "Ziehen Sie den Rand, um die Größe zu ändern. Die Breite wird in der Notiz gespeichert.",
-  "preview.footnote.label": "Fußnote {n}"
+  "preview.footnote.label": "Fußnote {n}",
+  "print.toc": "Inhalt",
+  "print.untitled": "Ohne Titel"
 }

@@ -190,6 +190,8 @@ export default function App() {
     // the test suite needs.
     (window as unknown as { __lumen?: unknown }).__lumen = {
       htmlToMarkdown,
+      // W2.23 — the print document as HTML, for the print golden tests.
+      buildPrintHtml: (md: string, name: string) => import("./ui/PrintExport").then((m) => m.buildPrintHtml(md, name)),
     };
     return () => {
       unregisterPlugin(wordCountPlugin.id);

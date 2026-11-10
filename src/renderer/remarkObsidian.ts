@@ -200,7 +200,7 @@ export function wrapHighlights(tree: Root): void {
         for (const [emoji, name] of Object.entries(HIGHLIGHT_COLORS)) {
           if (first.value.startsWith(emoji)) {
             color = name;
-            first.value = first.value.slice(emoji.length).replace(/^️/, "");
+            first.value = first.value.slice(emoji.length).replace(/^\uFE0F/, "");
             if (!first.value) inner.shift();
             break;
           }
