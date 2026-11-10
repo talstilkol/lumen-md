@@ -14,11 +14,20 @@
  */
 import { existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSync } from "node:fs";
 import { dirname, join, relative, resolve } from "node:path";
+import { gzipSync } from "node:zlib";
 import { fileURLToPath } from "node:url";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const DOCS = join(ROOT, "docs/src/content/docs");
 export const OUT = { en: "src/help/generated/help.en.json", he: "src/help/generated/help.he.json" };
+/**
+ * Each bundle becomes its own lazy chunk, which scripts/bundle-budget.mjs
+ * holds to the "lazy plugin chunk" rule: 100 KB gzipped. Fail here first,
+ * with room to spare, so a growing docs tree is caught before the build.
+ * Measured at W3.7: en 63.6 KB, he 69.8 KB.
+ */
+export const CHUNK_BUDGET_KB = 100;
+export const CHUNK_WARN_KB = 85;
 
 function walk(dir) {
   const out = [];
@@ -117,6 +126,13 @@ function main() {
   let stale = 0;
   for (const [lang, rel] of Object.entries(OUT)) {
     const want = `${JSON.stringify(bundle(lang))}\n`;
+    // What Vite emits for a large JSON import: JSON.parse of one string literal.
+    const kb = gzipSync(`export default JSON.parse(${JSON.stringify(want.trim())})`).length / 1024;
+    if (kb > CHUNK_BUDGET_KB) {
+      console.error(`✖ ${rel}: ~${kb.toFixed(1)} KB gzipped, over the ${CHUNK_BUDGET_KB} KB lazy-chunk budget: split the bundle (per section, or a separate search index)`);
+      stale++;
+    } else if (kb > CHUNK_WARN_KB) console.error(`⚠ ${rel}: ~${kb.toFixed(1)} KB gzipped, near the ${CHUNK_BUDGET_KB} KB lazy-chunk budget`);
+    else if (check) console.error(`  ${rel}: ~${kb.toFixed(1)} KB gzipped / ${CHUNK_BUDGET_KB} KB`);
     const path = join(ROOT, rel);
     const have = existsSync(path) ? readFileSync(path, "utf8") : null;
     if (have === want) continue;

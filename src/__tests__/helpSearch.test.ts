@@ -5,6 +5,7 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+import { gzipSync } from "node:zlib";
 import { HelpIndex, hebrewForms, queryWords, type HelpBundle } from "../help/helpSearch";
 
 const ROOT = join(__dirname, "..", "..");
@@ -35,6 +36,15 @@ describe("offline help search", () => {
   it("is the bundle the docs make today (run npm run help:bundle after editing the docs)", async () => {
     const m = (await import("../../scripts/help-bundle.mjs" as string)) as { bundle(lang: "en" | "he"): HelpBundle };
     for (const lang of ["en", "he"] as const) expect(JSON.stringify(m.bundle(lang))).toBe(JSON.stringify(read(lang)));
+  });
+
+  it("each language fits the 100 KB gzipped lazy-chunk budget (scripts/bundle-budget.mjs)", async () => {
+    const m = (await import("../../scripts/help-bundle.mjs" as string)) as { CHUNK_BUDGET_KB: number };
+    expect(m.CHUNK_BUDGET_KB).toBe(100);
+    for (const lang of ["en", "he"] as const) {
+      const js = `export default JSON.parse(${JSON.stringify(JSON.stringify(read(lang)))})`;
+      expect(gzipSync(js).length / 1024).toBeLessThan(m.CHUNK_BUDGET_KB);
+    }
   });
 
   it("packs every page in both languages, with Markdown and sections", () => {
