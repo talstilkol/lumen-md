@@ -102,6 +102,7 @@ export default defineConfig({
           translations: { he: "תרומה לפרויקט" },
           items: [
             { label: "Visual regression", translations: { he: "רגרסיה חזותית" }, slug: "contributing/visual-regression" },
+            { label: "Design system", translations: { he: "מערכת העיצוב" }, slug: "contributing/design-system" },
           ],
         },
         {
