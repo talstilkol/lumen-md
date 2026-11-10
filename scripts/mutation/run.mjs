@@ -8,7 +8,9 @@
  *   node scripts/mutation/run.mjs                       # vitest, all modules
  *   node scripts/mutation/run.mjs --module keyring      # modules whose path contains "keyring"
  *   node scripts/mutation/run.mjs --max 80 --min 70     # sample size; fail under 70%
- *   node scripts/mutation/run.mjs --runner shim --shim <dir>  # an offline vitest shim
+ *   node scripts/mutation/run.mjs --runner shim --shim <dir> --harness <file>
+ *                                         # offline: a vitest shim, and a browser
+ *                                         # harness for tests marked "runner": "harness"
  *
  * A mutant is killed when a test that passes on the real code fails, the
  * run crashes, or it times out (Stryker's convention: a hang is caught).
@@ -34,6 +36,9 @@ const opt = (name, d) => {
 };
 const runner = opt("runner", "vitest");
 const shimDir = opt("shim", "");
+// Offline only: a browser harness (`node <harness> <root> <test> [filter]`, printing
+// "FAIL <name>" and "RESULT pass N fail M") for tests marked "runner": "harness".
+const harness = opt("harness", "");
 const max = Number(opt("max", "120"));
 const min = Number(opt("min", "0"));
 const only = opt("module", "");
@@ -45,7 +50,16 @@ function runTests(tests, timeoutMs) {
   let timedOut = false;
   for (const t of tests) {
     let r;
-    if (runner === "shim") {
+    if (runner === "shim" && t.runner === "harness") {
+      if (!harness) {
+        crashed = true;
+        continue;
+      }
+      r = spawnSync(process.execPath, [harness, root, t.file, ...(t.filter ? [t.filter] : [])], { cwd: root, encoding: "utf8", timeout: timeoutMs });
+      const out = (r.stdout ?? "") + (r.stderr ?? "");
+      for (const m of out.matchAll(/^FAIL (.+?)\s*$/gm)) failed.add(`${t.file} :: ${m[1]}`);
+      if (!/^RESULT pass \d+ fail \d+/m.test(out)) crashed = true;
+    } else if (runner === "shim") {
       const dir = t.shim ?? shimDir;
       r = spawnSync(process.execPath, ["--disable-warning=ExperimentalWarning", "--experimental-transform-types", "--import", join(dir, "register.mjs"), join(dir, "runner.mjs"), join(root, t.file), ...(t.filter ? [t.filter] : [])], { cwd: root, encoding: "utf8", timeout: timeoutMs });
       const out = (r.stdout ?? "") + (r.stderr ?? "");

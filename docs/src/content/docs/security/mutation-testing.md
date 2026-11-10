@@ -18,6 +18,10 @@ The pure modules whose bugs would hurt most:
 - The **sync engine**: conflict merging, the manifest and blob headers.
 - The **privacy ledger**, which records and blocks anything that would leave
   the device.
+- The **secret store** (API keys and tokens: encrypted in the browser, or in
+  the OS keychain on desktop), the **raw-HTML sanitizer** of the preview,
+  Hebrew **text matching**, file **encryption**, **ZIP** import limits, and
+  the **agent runtime**.
 
 The list is in `scripts/mutation/targets.json`.
 
