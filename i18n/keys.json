@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-11-10T01:48:41.432Z",
+  "generated_at": "2026-11-10T01:55:13.497Z",
   "source": "src/i18n/index.ts (en bundle) + src/i18n/lazy/*.json",
-  "count": 1516,
+  "count": 1531,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -1828,6 +1828,11 @@
     {
       "key": "cmd.highlights.all",
       "en": "All highlights",
+      "vars": []
+    },
+    {
+      "key": "cmd.review.daily",
+      "en": "Daily review",
       "vars": []
     },
     {
@@ -8169,6 +8174,85 @@
     {
       "key": "pdf.ocr.running",
       "en": "Recognising text on this device…",
+      "vars": []
+    },
+    {
+      "key": "srs.title",
+      "en": "Daily review",
+      "vars": []
+    },
+    {
+      "key": "srs.loading",
+      "en": "Getting today's cards…",
+      "vars": []
+    },
+    {
+      "key": "srs.progress",
+      "en": "{n} of {total}",
+      "vars": [
+        "n",
+        "total"
+      ]
+    },
+    {
+      "key": "srs.showAnswer",
+      "en": "Show the answer (space)",
+      "vars": []
+    },
+    {
+      "key": "srs.showSource",
+      "en": "Show where it's from (space)",
+      "vars": []
+    },
+    {
+      "key": "srs.rate.1",
+      "en": "Again",
+      "vars": []
+    },
+    {
+      "key": "srs.rate.2",
+      "en": "Hard",
+      "vars": []
+    },
+    {
+      "key": "srs.rate.3",
+      "en": "Good",
+      "vars": []
+    },
+    {
+      "key": "srs.rate.4",
+      "en": "Easy",
+      "vars": []
+    },
+    {
+      "key": "srs.done",
+      "en": "Done for today: {n} reviewed.",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "srs.empty",
+      "en": "Nothing to review yet. Highlight passages, or write question::answer lines in your notes.",
+      "vars": []
+    },
+    {
+      "key": "srs.unreadable",
+      "en": "{path} can't be read, so it isn't changed. Fix or remove it to review again.",
+      "vars": [
+        "path"
+      ]
+    },
+    {
+      "key": "srs.failed",
+      "en": "Couldn't save the review: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "srs.close",
+      "en": "Close",
       "vars": []
     }
   ]

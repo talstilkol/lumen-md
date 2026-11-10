@@ -1514,5 +1514,20 @@
   "hl.exportFailed": "无法导出高亮：{error}",
   "hl.loadFailed": "无法读取高亮：{error}",
   "hl.tagFailed": "无法保存标签：{error}",
-  "cmd.highlights.all": "所有高亮"
+  "cmd.highlights.all": "所有高亮",
+  "srs.title": "每日复习",
+  "srs.loading": "正在准备今天的卡片…",
+  "srs.progress": "第 {n} 张，共 {total} 张",
+  "srs.showAnswer": "显示答案（空格）",
+  "srs.showSource": "显示出处（空格）",
+  "srs.rate.1": "重来",
+  "srs.rate.2": "困难",
+  "srs.rate.3": "良好",
+  "srs.rate.4": "简单",
+  "srs.done": "今天完成了：复习了 {n} 张。",
+  "srs.empty": "还没有可复习的内容。高亮一些段落，或在笔记中写 问题::答案 这样的行。",
+  "srs.unreadable": "无法读取 {path}，因此不会改动它。修复或删除后才能继续复习。",
+  "srs.failed": "无法保存复习：{error}",
+  "cmd.review.daily": "每日复习",
+  "srs.close": "关闭"
 }

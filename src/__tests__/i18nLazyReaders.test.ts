@@ -31,6 +31,7 @@ const DOMAINS = [
   { file: "epub.json", module: "epub/strings", prefixes: ["epub.", "reading."], users: ["epub/EpubReader.tsx", "epub/ReadingMode.tsx", "epub/openEpub.ts", "highlights/HighlightsPanel.tsx"] },
   { file: "pdf.json", module: "pdf/strings", prefixes: ["pdf."], users: ["pdf/PdfReader.tsx", "pdf/openPdf.ts", "highlights/HighlightsPanel.tsx"] },
   { file: "highlights.json", module: "highlights/strings", prefixes: ["hl."], users: ["highlights/HighlightsPanel.tsx"] },
+  { file: "srs.json", module: "srs/strings", prefixes: ["srs."], users: ["srs/ReviewPanel.tsx"] },
 ];
 
 describe("i18n: lazy English for the readers (W1.14)", () => {
@@ -40,7 +41,7 @@ describe("i18n: lazy English for the readers (W1.14)", () => {
 
   it("no lazy key is in the startup bundle; the palette labels are", () => {
     for (const k of Object.keys(lazy)) expect(index.includes(`"${k}":`), k).toBe(false);
-    for (const k of ["cmd.epub.open", "cmd.reading.mode", "cmd.pdf.open", "cmd.highlights.all"]) expect(index.includes(`"${k}":`), k).toBe(true);
+    for (const k of ["cmd.epub.open", "cmd.reading.mode", "cmd.pdf.open", "cmd.highlights.all", "cmd.review.daily"]) expect(index.includes(`"${k}":`), k).toBe(true);
   });
 
   for (const d of DOMAINS) {

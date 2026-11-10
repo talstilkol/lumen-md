@@ -1514,5 +1514,20 @@
   "hl.exportFailed": "לא הצלחתי לייצא את ההדגשות: {error}",
   "hl.loadFailed": "לא הצלחתי לקרוא את ההדגשות: {error}",
   "hl.tagFailed": "לא הצלחתי לשמור את התגית: {error}",
-  "cmd.highlights.all": "כל ההדגשות"
+  "cmd.highlights.all": "כל ההדגשות",
+  "srs.title": "חזרה יומית",
+  "srs.loading": "מכין את הכרטיסים של היום…",
+  "srs.progress": "{n} מתוך {total}",
+  "srs.showAnswer": "הצגת התשובה (רווח)",
+  "srs.showSource": "מאיפה זה (רווח)",
+  "srs.rate.1": "שוב",
+  "srs.rate.2": "קשה",
+  "srs.rate.3": "טוב",
+  "srs.rate.4": "קל",
+  "srs.done": "סיימתם להיום: {n} נסקרו.",
+  "srs.empty": "עדיין אין מה לסקור. הדגישו קטעים, או כתבו בפתקים שורות שאלה::תשובה.",
+  "srs.unreadable": "אי אפשר לקרוא את {path}, ולכן הוא לא משתנה. תקנו או הסירו אותו כדי לחזור שוב.",
+  "srs.failed": "לא הצלחתי לשמור את החזרה: {error}",
+  "cmd.review.daily": "חזרה יומית",
+  "srs.close": "סגירה"
 }
