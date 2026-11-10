@@ -6,7 +6,8 @@
  * survive unchanged, and the
  * output must be written in the target language's script when that
  * script is distinctive (Hebrew, Arabic, Cyrillic, CJK) — the most common
- * local-model failure is answering in English.
+ * local-model failure is answering in English — and, where the script is
+ * shared, in the target language by local language identification.
  */
 
 import type { AgentDefinition, AgentInput, ValidationResult } from "../types";
@@ -64,7 +65,8 @@ export function chunkMarkdown(text: string, max = CHUNK_CHARS): string[] {
 export function urlsOf(s: string): string[] {
   const out: string[] = [];
   for (const m of s.matchAll(/!?\[[^\]]*\]\(\s*<?([^)\s>]+)>?[^)]*\)/g)) out.push(m[1]);
-  for (const m of s.matchAll(/^\s{0,3}\[[^\]]+\]:\s*<?(\S+?)>?(?:\s|$)/gm)) out.push(m[1]);
+  // Link reference definitions; a footnote definition ("[^1]: text") is prose, not a target.
+  for (const m of s.matchAll(/^\s{0,3}\[[^\]^][^\]]*\]:\s*<?(\S+?)>?(?:\s|$)/gm)) out.push(m[1]);
   for (const m of s.matchAll(/<((?:https?|mailto|ftp):[^>\s]+)>/g)) out.push(m[1]);
   // Bare URLs not already captured as a link target above.
   const linked = s.replace(/!?\[[^\]]*\]\([^)]*\)/g, " ").replace(/^\s{0,3}\[[^\]]+\]:.*$/gm, " ").replace(/<(?:https?|mailto|ftp):[^>\s]+>/g, " ");
@@ -117,6 +119,30 @@ export function checkTranslation(output: string, source: string, targetLanguage:
   return ok;
 }
 
+/**
+ * Where the script cannot tell (English → French, Russian → Ukrainian),
+ * local language identification (plan 6.5) does: a confident guess other
+ * than the target language fails the chunk. Targets the detector cannot
+ * report (unknown names, languages franc-min lacks), short or unclear text,
+ * and a detector that failed to load all pass: the structural and script
+ * checks still apply.
+ */
+export async function checkTranslationLanguage(output: string, source: string, targetLanguage: string): Promise<ValidationResult> {
+  let lang: typeof import("../../text/langId");
+  try {
+    lang = await import("../../text/langId");
+  } catch {
+    return ok;
+  }
+  const target = lang.languageCode(targetLanguage);
+  if (!target || !lang.DETECTABLE.has(target)) return ok;
+  const got = lang.detectLanguage(proseOf(output));
+  if (!got.confident || got.lang === "und" || got.lang === target) return ok;
+  const src = lang.detectLanguage(proseOf(source));
+  if (src.confident && src.lang === got.lang) return fail(`output is still in the source language (${got.lang}), not ${targetLanguage}`, `Translate every sentence into ${targetLanguage}; do not copy the source.`);
+  return fail(`output is in ${got.lang}, not ${targetLanguage}`, `Write the whole translation in ${targetLanguage}.`);
+}
+
 export const translatorAgent: AgentDefinition<TranslatorInput, string> = registerAgent({
   id: "translator",
   language: "any",
@@ -129,7 +155,10 @@ export const translatorAgent: AgentDefinition<TranslatorInput, string> = registe
     "do not add notes. Output ONLY the translated Markdown.",
   user: (input) => input.text,
   parse: (text) => text.trim(),
-  validators: [{ name: "translation", check: (out, input) => checkTranslation(out, input.text ?? "", (input as TranslatorInput).extra.targetLanguage) }],
+  validators: [
+    { name: "translation", check: (out, input) => checkTranslation(out, input.text ?? "", (input as TranslatorInput).extra.targetLanguage) },
+    { name: "target language", check: (out, input) => checkTranslationLanguage(out, input.text ?? "", (input as TranslatorInput).extra.targetLanguage) },
+  ],
   tier: "small",
   temperature: 0.2,
   maxTokens: 4000,

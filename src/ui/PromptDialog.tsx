@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { t } from "../i18n";
 import "./PromptDialog.css";
+import { HelpButton } from "./HelpButton";
 
 /**
  * Lightweight, themed replacement for native window.prompt / confirm / alert.
@@ -174,6 +175,9 @@ function PromptDialogImpl({
           />
         ) : null}
         <div className="prompt-actions">
+          <span style={{ marginInlineEnd: "auto" }}>
+            <HelpButton topic="editor/tools#dialogs" />
+          </span>
           {kind !== "alert" && (
             <button
               type="button"

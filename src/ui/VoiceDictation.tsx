@@ -24,6 +24,7 @@ import { showAiToast } from "./AiToast";
 import { t } from "../i18n";
 import { transcribe, summarizeMemo, formatVoiceMemo } from "../ai/transcribe";
 import { log } from "../lib/logger";
+import { HelpButton } from "./HelpButton";
 
 // SpeechRecognition is poorly + inconsistently typed across DOM lib
 // variants; keep the surface deliberately loose so we don't fight the
@@ -133,6 +134,7 @@ export function startVoiceRecording(lang: string): void {
         }}
       />
       <span>{t("voice.recording", { lang })}</span>
+      <HelpButton topic="editor/tools#voice-memos-and-dictation" />
       <button
         onClick={stopRecording}
         style={{
@@ -288,6 +290,7 @@ export async function startVoiceMemo(): Promise<void> {
         }}
       />
       <span>🎙 {t("voice.memo.recording") ?? "Recording memo…"}</span>
+      <HelpButton topic="editor/tools#voice-memos-and-dictation" />
       <button
         type="button"
         onClick={() => recorder.stop()}

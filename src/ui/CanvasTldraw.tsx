@@ -27,6 +27,7 @@ import { showAiToast } from "./AiToast";
 import { isOPFSAvailable } from "../storage/workspace";
 import { t } from "../i18n";
 import { log } from "../lib/logger";
+import { HelpButton } from "./HelpButton";
 
 interface Props {
   open: boolean;
@@ -424,6 +425,7 @@ export function CanvasTldraw({ open, onClose }: Props) {
         <span style={{ fontSize: 11, color: "hsl(var(--fg-muted))" }}>
           {t("canvas.autoSaved")}
         </span>
+        <HelpButton topic="editor/tools#canvas" />
         <button
           type="button"
           onClick={onClose}

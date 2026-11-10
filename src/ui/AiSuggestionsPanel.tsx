@@ -11,6 +11,7 @@ import { Lightbulb, X } from "lucide-react";
 import { t } from "../i18n";
 import { onAgentSuggestions, rerunCommand, runSuggestion, type SuggestionsEvent } from "../agents/suggestions";
 import type { Suggestion } from "../agents/types";
+import { HelpButton } from "./HelpButton";
 
 function label(s: Suggestion): string {
   return s.raw ? s.title : t(s.title, s.params);
@@ -76,6 +77,7 @@ export function AiSuggestionsPanel() {
       <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
         <Lightbulb size={16} style={{ color: "hsl(var(--accent))" }} />
         <strong style={{ flex: 1 }}>{t("agent.panel.title")}</strong>
+        <HelpButton topic="ai/local-agents#what-a-run-does" />
         <button type="button" aria-label={t("agent.panel.close")} onClick={() => setEvent(null)} style={{ background: "none", border: "none", color: "inherit", cursor: "pointer" }}>
           <X size={14} />
         </button>

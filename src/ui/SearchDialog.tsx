@@ -18,6 +18,7 @@ import { useCapability } from "../billing/gates";
 import { UpgradeNotice } from "./UpgradeNotice";
 import { rememberSearch, getSearchHistory, forgetSearch } from "../storage/searchHistory";
 import { flashSearchHighlight } from "../editor/searchHighlight";
+import { HelpButton } from "./HelpButton";
 
 interface Props {
   open: boolean;
@@ -390,6 +391,9 @@ export function SearchDialog({ open, onClose, onOpenFile }: Props) {
           <button className={`chart-block-tab ${mode === "ai" ? "active" : ""}`} style={{ fontSize: 13, background: "transparent" }} onClick={() => setMode("ai")}>
              <Sparkles size={11} style={{display:"inline", marginRight:4}}/> Ask Workspace
           </button>
+          <span style={{ marginInlineStart: "auto" }}>
+            <HelpButton topic="workspace/search" />
+          </span>
           {mode === "smart" && smartAllowed && (
             <button
               type="button"

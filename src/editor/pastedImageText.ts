@@ -14,10 +14,12 @@ export interface PlacedImage {
 }
 
 export async function fillPastedImageText(view: EditorView, placed: PlacedImage[], lang: string): Promise<void> {
-  const { imageText, escapeAlt, escapeTitle } = await import("../ai/vision");
+  const { imageText, escapeAlt, escapeTitle, documentLanguage } = await import("../ai/vision");
+  // Captions follow the note's language; `lang` (the UI's) when it is unclear.
+  lang = await documentLanguage(view.state.doc.toString(), lang);
   await Promise.all(
     placed.map(async (p) => {
-      const res = await imageText(p.file, lang).catch(() => null);
+      const res = await imageText(p.file, lang, { name: p.file.name }).catch(() => null);
       if (!res || res.source === "none") return;
       const target = `![${p.alt}](${p.url})`;
       const at = view.state.doc.toString().indexOf(target);

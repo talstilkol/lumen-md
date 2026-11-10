@@ -7,6 +7,7 @@ import { Trash2, X } from "lucide-react";
 import { t, getLocale } from "../i18n";
 import { emptyTrash, listTrash, restoreFromTrash, TRASH_KEEP_MS, type TrashItem } from "../storage/trash";
 import { toast } from "../store/useToastStore";
+import { HelpButton } from "./HelpButton";
 
 interface Props {
   open: boolean;
@@ -64,6 +65,7 @@ export function TrashPanel({ open, onClose }: Props) {
               {t("trash.emptyAll")}
             </button>
           )}
+          <HelpButton topic="workspace/panels#trash" />
           <button type="button" style={btn} onClick={onClose} aria-label={t("trash.close")}>
             <X size={14} />
           </button>

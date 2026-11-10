@@ -20,6 +20,7 @@ import { uiConfirm } from "./PromptDialog";
 import { showAiToast } from "./AiToast";
 import { docsUrl } from "../lib/docsLinks";
 import { t } from "../i18n";
+import { HelpButton } from "./HelpButton";
 
 interface Props {
   open: boolean;
@@ -131,6 +132,7 @@ export function TrustedKeysSettings({ open, onClose }: Props) {
           <h2 id="trusted-keys-title" style={{ margin: 0, fontSize: 16, fontWeight: 600 }}>
             {t("trustedKeys.title")}
           </h2>
+          <HelpButton topic="plugins/signing#manage-trusted-keys" />
           <button type="button" onClick={onClose} aria-label={t("trustedKeys.close")} style={iconBtn}>
             <X size={14} />
           </button>

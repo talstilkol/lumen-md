@@ -16,6 +16,7 @@
 import { useMemo, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { applyMerge, threeWayDiff, type DiffHunk } from "./diff";
+import { HelpButton } from "../../ui/HelpButton";
 
 export type ConflictChoice =
   | { kind: "merged"; content: string }
@@ -85,8 +86,11 @@ function ConflictDialogImpl({ path, base, local, remote, onResolve }: Props) {
             borderBottom: "1px solid hsl(var(--border))",
           }}
         >
-          <div id="conflict-title" style={{ fontWeight: 700, fontSize: 15 }}>
-            Sync conflict — {path}
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <div id="conflict-title" style={{ fontWeight: 700, fontSize: 15, flex: 1 }}>
+              Sync conflict — {path}
+            </div>
+            <HelpButton topic="editor/tools#sync-conflicts" />
           </div>
           <div style={{ fontSize: 12, color: "hsl(var(--fg-muted))", marginTop: 2 }}>
             Both sides changed since the last sync. Pick what to keep, or

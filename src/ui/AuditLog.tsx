@@ -20,6 +20,7 @@ import { log } from "../lib/logger";
 import { t } from "../i18n";
 import { useCapability } from "../billing/gates";
 import { UpgradeNotice } from "./UpgradeNotice";
+import { HelpButton } from "./HelpButton";
 
 interface Props {
   open: boolean;
@@ -214,6 +215,7 @@ export function AuditLog({ open, onClose, orgId }: Props) {
           >
             <Download size={14} />
           </button>
+          <HelpButton topic="account/organization" />
           <button
             type="button"
             onClick={onClose}

@@ -7,6 +7,7 @@ import { t, getLocale } from "../i18n";
  */
 
 import { listSnapshots, recordSnapshot, type Snapshot } from "../storage/history";
+import { HelpButton } from "./HelpButton";
 
 /** Save a snapshot (kept for callers of the old API). */
 export async function saveSnapshot(name: string, content: string): Promise<void> {
@@ -131,6 +132,7 @@ export function VersionHistory({ fileName, currentContent, onRestore, onClose }:
                 {t("versionHistory.restore")}
               </button>
             )}
+            <HelpButton topic="workspace/panels#version-history" />
             <button onClick={onClose} aria-label={t("versionHistory.close")} className="icon-btn" style={{ width: "auto", padding: "4px 12px", fontSize: 12 }}>
               {t("versionHistory.close")}
             </button>

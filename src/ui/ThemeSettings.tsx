@@ -28,6 +28,7 @@ import { isHexColor, normalizeHex } from "../lib/contrast";
 import { downloadText } from "../storage/exportFormats";
 import { showAiToast } from "./AiToast";
 import { t } from "../i18n";
+import { HelpButton } from "./HelpButton";
 
 interface Props {
   open: boolean;
@@ -129,6 +130,7 @@ export function ThemeSettings({ open, onClose }: Props) {
           <h2 id={`${ids}-title`} style={{ margin: 0, fontSize: 16, fontWeight: 600 }}>
             {t("themeSettings.title")}
           </h2>
+          <HelpButton topic="editor/tools#theme-settings" />
           <button type="button" onClick={onClose} aria-label={t("themeSettings.close")} style={iconBtn}>
             <X size={14} />
           </button>

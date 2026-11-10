@@ -20,6 +20,7 @@ import {
 import { showAiToast } from "./AiToast";
 import { log } from "../lib/logger";
 import { t } from "../i18n";
+import { HelpButton } from "./HelpButton";
 
 interface Props {
   open: boolean;
@@ -148,6 +149,7 @@ export function TemplateGallery({ open, onClose }: Props) {
           >
             {filtered.length} / {templates.length}
           </span>
+          <HelpButton topic="plugins/templates" />
           <button
             type="button"
             onClick={onClose}

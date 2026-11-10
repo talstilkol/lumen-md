@@ -40,6 +40,7 @@ const SearchDialog = lazy(() =>
   import("./ui/SearchDialog").then((m) => ({ default: m.SearchDialog })),
 );
 import { AiToastContainer, showAiToast } from "./ui/AiToast";
+import { HelpHost } from "./ui/HelpHost";
 import { AiSuggestionsPanel } from "./ui/AiSuggestionsPanel";
 import { MobileKeyboardBar } from "./ui/MobileKeyboardBar";
 import { TagsPanel } from "./ui/TagsPanel";
@@ -445,6 +446,20 @@ export default function App() {
     return () => window.removeEventListener("lumen-open-file", onOpen);
   }, [handleOpenFromWorkspace]);
 
+  // Today's daily note (plan 4.12): the command and ⌥⌘D. The daily-note code is its own chunk.
+  useEffect(() => {
+    const onToday = () => {
+      void import("./daily/dailyNote")
+        .then((m) => {
+          const s = useAppStore.getState();
+          return m.openDailyNote(m.dayOf(new Date()), s.dailyNotes, s.locale);
+        })
+        .catch((e: unknown) => showAiToast(t("daily.failed", { error: e instanceof Error ? e.message : String(e) }), "error"));
+    };
+    window.addEventListener("lumen-open-today", onToday);
+    return () => window.removeEventListener("lumen-open-today", onToday);
+  }, []);
+
   // Workspace: when active file is renamed (in the tree), keep doc.name in sync.
   const handleActiveRenamed = useCallback(
     (newName: string) => {
@@ -534,6 +549,12 @@ export default function App() {
         } else {
           setFocusMode(true);
         }
+        return;
+      }
+      // ⌥⌘D → today's daily note (e.code: Option changes e.key on a Mac).
+      if (e.altKey && e.code === "KeyD") {
+        e.preventDefault();
+        window.dispatchEvent(new CustomEvent("lumen-open-today"));
         return;
       }
       if (e.key === "k" || e.key === "K") {
@@ -998,6 +1019,7 @@ export default function App() {
       />
       </Suspense>}
       <AiToastContainer />
+      <HelpHost />
       <AiSuggestionsPanel />
       <AiInlinePromptOverlay />
       <MobileKeyboardBar />

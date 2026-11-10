@@ -12,9 +12,11 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Cpu, X } from "lucide-react";
 import { t } from "../i18n";
+import { ollamaLicenceNotice } from "../ai/modelCatalog";
 import type { AgentRun, ExecutorId } from "../agents/types";
 import type { AiPolicy } from "../ai/policy";
 import type { Hardware } from "../ai/modelManager";
+import { HelpButton } from "./HelpButton";
 
 interface Props {
   open: boolean;
@@ -146,7 +148,7 @@ export function AiSettingsPanel({ open, onClose }: Props) {
       setHw(h);
       setBudget(mm.vramBudgetMB(h));
       setCatalog(
-        mm.WEBLLM_CATALOG.map((e) => ({ id: mm.webLlmModelId(e, h.f16), label: e.label, vram: h.f16 ? e.vramMB.f16 : e.vramMB.f32 })),
+        mm.WEBLLM_CATALOG.map((e) => ({ id: mm.webLlmModelId(e, h.f16), label: e.licence ? `${e.label} — ${e.licence}` : e.label, vram: h.f16 ? e.vramMB.f16 : e.vramMB.f32 })),
       );
     })();
     void refreshStatus();
@@ -180,6 +182,16 @@ export function AiSettingsPanel({ open, onClose }: Props) {
   };
 
   const saveOllama = async () => {
+    const lic = ollamaModel.trim() && ollamaModel.trim() !== ls("lumen.ollama.model") ? ollamaLicenceNotice(ollamaModel.trim()) : null;
+    if (lic) {
+      const { uiConfirm } = await import("./PromptDialog");
+      const ok = await uiConfirm({
+        title: t("ai.localModels.licenceTitle"),
+        message: t("ai.localModels.licenceBody", { model: ollamaModel.trim(), licence: lic.name }),
+        okLabel: t("ai.localModels.licenceOk"),
+      });
+      if (!ok) return;
+    }
     setLs("lumen.ollama.baseUrl", ollamaUrl);
     setLs("lumen.ollama.model", ollamaModel);
     flash();
@@ -242,6 +254,7 @@ export function AiSettingsPanel({ open, onClose }: Props) {
           <Cpu size={18} style={{ color: "hsl(var(--accent))" }} />
           <h2 style={{ margin: 0, fontSize: 16, fontWeight: 600, flex: 1 }}>{t("ai.settings.title")}</h2>
           {saved && <span style={muted}>{t("ai.settings.saved")}</span>}
+          <HelpButton topic="ai/local-agents#ai-settings" />
           <button type="button" style={ghost} onClick={onClose} aria-label={t("ai.settings.close")}>
             <X size={16} />
           </button>
@@ -286,9 +299,11 @@ export function AiSettingsPanel({ open, onClose }: Props) {
               <span style={{ minWidth: 90 }}>{t("ai.settings.ollama.model")}</span>
               <input style={input} value={ollamaModel} onChange={(e) => setOllamaModel(e.target.value)} placeholder="qwen2.5:7b" list="ai-set-ollama-models" />
               <datalist id="ai-set-ollama-models">
-                {(installed ?? []).map((m) => (
-                  <option key={m} value={m} />
-                ))}
+                {(installed ?? []).map((m) => {
+                  // A custom-licence or non-commercial model is named with its licence (plan 1.7).
+                  const lic = ollamaLicenceNotice(m);
+                  return <option key={m} value={m} label={lic ? `${m} · ${lic.name}` : undefined} />;
+                })}
               </datalist>
             </label>
             <div style={muted}>

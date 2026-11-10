@@ -7,6 +7,7 @@ import type { LumenPlugin } from "../plugins/pluginSystem";
 import { log } from "../lib/logger";
 import { t } from "../i18n";
 import { fetchWithRetry } from "../lib/fetchRetry";
+import { HelpButton } from "./HelpButton";
 
 interface RemotePluginEntry {
   id: string;
@@ -391,6 +392,7 @@ export function PluginGallery({ open, onClose }: Props) {
               }}
             />
           </div>
+          <HelpButton topic="plugins/sdk" />
           <button
             type="button"
             onClick={onClose}

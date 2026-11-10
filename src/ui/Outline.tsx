@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { extractToc } from "../renderer/pipeline";
 import { t } from "../i18n";
+import { HelpButton } from "./HelpButton";
 
 interface Props {
   markdownText: string;
@@ -71,8 +72,9 @@ export const Outline = React.memo(function Outline({ markdownText }: Props) {
         max-md:hidden md:block
       "
     >
-      <div className="px-2 mb-2 text-[11px] uppercase tracking-wider text-fg-muted font-semibold">
+      <div className="px-2 mb-2 text-[11px] uppercase tracking-wider text-fg-muted font-semibold flex items-center justify-between">
         {t("outline.title")}
+        <HelpButton topic="workspace/panels#outline" />
       </div>
       {toc.length === 0 ? (
         <div className="px-2 text-[12px] text-fg-muted">
