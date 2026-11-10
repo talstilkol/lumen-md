@@ -18,6 +18,7 @@ export const DOCS_TOPICS = {
   pluginSigning: "plugins/signing",
   localLlm: "ai/local-llm",
   localAgents: "ai/local-agents",
+  trustedRepos: "security/trusted-repos",
 } as const;
 
 export type DocsTopic = keyof typeof DOCS_TOPICS;

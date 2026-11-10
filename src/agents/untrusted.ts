@@ -41,6 +41,7 @@ import type { AgentInput, ExecutorMessage, UntrustedConsentRequest } from "./typ
 import { ensureProvenanceBackfill, untrustedSourcesOfNote } from "./provenance";
 
 export { clearUntrustedNote, ensureProvenanceBackfill, isClipLibraryPath, markUntrustedNote, moveUntrustedNotes, untrustedSourcesOfNote } from "./provenance";
+export { taintIsTrusted } from "./repoTrust";
 
 /* ─── Cleaning ─────────────────────────────────────────────────────────── */
 

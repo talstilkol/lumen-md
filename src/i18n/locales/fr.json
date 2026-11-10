@@ -1426,5 +1426,21 @@
   "cmd.ai.cancel": "IA : annuler",
   "cmd.ai.cancel.hint": "Arrête toutes les requêtes IA en cours (Échap aussi)",
   "toast.aiCancelled": "Requête IA annulée ({count})",
-  "toast.aiNothingRunning": "Aucune requête IA en cours"
+  "toast.aiNothingRunning": "Aucune requête IA en cours",
+  "cmd.settings.trustedRepos": "Dépôts de confiance…",
+  "cmd.settings.trustedRepos.hint": "Laisser les agents écrire dans un dépôt cloné sans la question supplémentaire",
+  "trustedRepos.title": "Dépôts de confiance",
+  "trustedRepos.close": "Fermer",
+  "trustedRepos.intro": "Les notes d’un dépôt cloné peuvent venir d’autres personnes : un agent qui les lit demande avant de proposer une modification. Faites confiance à un dépôt qui vous appartient pour sauter cette question. Les modifications attendent toujours votre relecture et les requêtes web demandent toujours. Enregistré sur cet appareil uniquement.",
+  "trustedRepos.loading": "Chargement…",
+  "trustedRepos.empty": "Aucun dépôt cloné pour l’instant.",
+  "trustedRepos.loadFailed": "Impossible de lister les dépôts clonés.",
+  "trustedRepos.toggle.aria": "Faire confiance à {repo}",
+  "trustedRepos.state.on": "De confiance",
+  "trustedRepos.state.off": "Demande d’abord",
+  "trustedRepos.confirm.title": "Faire confiance à ce dépôt ?",
+  "trustedRepos.confirm.body": "Les agents qui lisent des notes de {repo} proposeront des modifications sans demander d’abord. Toute personne pouvant y pousser peut placer du texte devant vos agents. Ne lui faites confiance que si vous contrôlez qui y écrit.",
+  "trustedRepos.on": "{repo} est de confiance",
+  "trustedRepos.off": "{repo} : les agents demandent à nouveau d’abord",
+  "trustedRepos.saveFailed": "Impossible d’enregistrer le réglage : {error}"
 }

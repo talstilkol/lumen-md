@@ -1426,5 +1426,21 @@
   "cmd.ai.cancel": "AI: キャンセル",
   "cmd.ai.cancel.hint": "実行中の AI リクエストをすべて停止します（Esc でも可）",
   "toast.aiCancelled": "AI リクエストをキャンセルしました（{count}）",
-  "toast.aiNothingRunning": "実行中の AI リクエストはありません"
+  "toast.aiNothingRunning": "実行中の AI リクエストはありません",
+  "cmd.settings.trustedRepos": "信頼するリポジトリ…",
+  "cmd.settings.trustedRepos.hint": "クローンしたリポジトリで追加の確認なしにエージェントが書き込めるようにする",
+  "trustedRepos.title": "信頼するリポジトリ",
+  "trustedRepos.close": "閉じる",
+  "trustedRepos.intro": "クローンしたリポジトリのノートは他人のものかもしれないため、それを読んだエージェントは変更を提案する前に確認します。自分のリポジトリを信頼すると、この確認を省略できます。変更は引き続きレビュー待ちとなり、Web リクエストは引き続き確認されます。この端末にのみ保存されます。",
+  "trustedRepos.loading": "読み込み中…",
+  "trustedRepos.empty": "クローンしたリポジトリはまだありません。",
+  "trustedRepos.loadFailed": "クローンしたリポジトリを一覧表示できませんでした。",
+  "trustedRepos.toggle.aria": "{repo} を信頼する",
+  "trustedRepos.state.on": "信頼済み",
+  "trustedRepos.state.off": "先に確認",
+  "trustedRepos.confirm.title": "このリポジトリを信頼しますか?",
+  "trustedRepos.confirm.body": "{repo} のノートを読んだエージェントは、先に確認せずに変更を提案します。このリポジトリに push できる人は誰でも、エージェントにテキストを読ませることができます。書き込める人を自分で管理している場合にのみ信頼してください。",
+  "trustedRepos.on": "{repo} を信頼しました",
+  "trustedRepos.off": "{repo}: エージェントは再び先に確認します",
+  "trustedRepos.saveFailed": "設定を保存できませんでした: {error}"
 }

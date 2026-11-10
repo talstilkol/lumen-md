@@ -121,11 +121,17 @@ async function execTool(tools: AgentTool[], call: ToolCall, env: ToolEnv): Promi
     } else if (tool.scope === "write") {
       // Plan 2.7: a change proposed while outside content is in the run
       // waits for the user's explicit yes before it is even staged.
+      // Plan W1.33: when all of it comes from repositories the user
+      // trusts, the write is staged without that question (still for review).
       if (tainted) {
-        if (!(await approveUntrusted(env, tool, args))) {
-          return { error: `denied: ${(await loadGuard()).UNTRUSTED_DENIED}` };
+        const guard = await loadGuard();
+        if (guard.taintIsTrusted(env.taint)) {
+          note = "no extra approval: the untrusted content comes only from repositories the user trusts";
+        } else if (!(await approveUntrusted(env, tool, args))) {
+          return { error: `denied: ${guard.UNTRUSTED_DENIED}` };
+        } else {
+          note = "approved by the user (untrusted content in the run)";
         }
-        note = "approved by the user (untrusted content in the run)";
       }
       const { stageChange, receiptOf } = await import("./staging");
       callCtx.stage = (proposal) => {

@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-10-18T11:17:46.074Z",
+  "generated_at": "2026-11-10T00:07:05.355Z",
   "source": "src/i18n/index.ts (en bundle)",
-  "count": 1428,
+  "count": 1444,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -7681,6 +7681,96 @@
       "key": "chart.alternatives",
       "en": "Chart suggestions",
       "vars": []
+    },
+    {
+      "key": "cmd.settings.trustedRepos",
+      "en": "Trusted repositories…",
+      "vars": []
+    },
+    {
+      "key": "cmd.settings.trustedRepos.hint",
+      "en": "Let agents write in a cloned repo without the extra question",
+      "vars": []
+    },
+    {
+      "key": "trustedRepos.title",
+      "en": "Trusted repositories",
+      "vars": []
+    },
+    {
+      "key": "trustedRepos.close",
+      "en": "Close",
+      "vars": []
+    },
+    {
+      "key": "trustedRepos.intro",
+      "en": "Notes from a cloned repo may be other people's, so an agent that reads them asks before it proposes a change. Trust a repo you own to skip that question. Changes still wait for your review, and web requests still ask. Saved on this device only.",
+      "vars": []
+    },
+    {
+      "key": "trustedRepos.loading",
+      "en": "Loading…",
+      "vars": []
+    },
+    {
+      "key": "trustedRepos.empty",
+      "en": "No cloned repositories yet.",
+      "vars": []
+    },
+    {
+      "key": "trustedRepos.loadFailed",
+      "en": "Couldn't list the cloned repositories.",
+      "vars": []
+    },
+    {
+      "key": "trustedRepos.toggle.aria",
+      "en": "Trust {repo}",
+      "vars": [
+        "repo"
+      ]
+    },
+    {
+      "key": "trustedRepos.state.on",
+      "en": "Trusted",
+      "vars": []
+    },
+    {
+      "key": "trustedRepos.state.off",
+      "en": "Asks first",
+      "vars": []
+    },
+    {
+      "key": "trustedRepos.confirm.title",
+      "en": "Trust this repository?",
+      "vars": []
+    },
+    {
+      "key": "trustedRepos.confirm.body",
+      "en": "Agents that read notes from {repo} will propose changes without asking first. Anyone who can push to it can put text in front of your agents. Trust it only if you control who writes to it.",
+      "vars": [
+        "repo"
+      ]
+    },
+    {
+      "key": "trustedRepos.on",
+      "en": "{repo} is trusted",
+      "vars": [
+        "repo"
+      ]
+    },
+    {
+      "key": "trustedRepos.off",
+      "en": "{repo}: agents ask first again",
+      "vars": [
+        "repo"
+      ]
+    },
+    {
+      "key": "trustedRepos.saveFailed",
+      "en": "Couldn't save the setting: {error}",
+      "vars": [
+        "error"
+      ]
     }
   ]
 }

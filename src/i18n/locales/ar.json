@@ -1426,5 +1426,21 @@
   "cmd.ai.cancel": "AI: إلغاء",
   "cmd.ai.cancel.hint": "يوقف كل طلبات الذكاء الاصطناعي الجارية (Esc يفعل ذلك أيضاً)",
   "toast.aiCancelled": "أُلغي طلب الذكاء الاصطناعي ({count})",
-  "toast.aiNothingRunning": "لا يوجد طلب ذكاء اصطناعي جارٍ"
+  "toast.aiNothingRunning": "لا يوجد طلب ذكاء اصطناعي جارٍ",
+  "cmd.settings.trustedRepos": "المستودعات الموثوقة…",
+  "cmd.settings.trustedRepos.hint": "السماح للوكلاء بالكتابة في مستودع مستنسخ دون السؤال الإضافي",
+  "trustedRepos.title": "المستودعات الموثوقة",
+  "trustedRepos.close": "إغلاق",
+  "trustedRepos.intro": "قد تكون الملاحظات من مستودع مستنسخ لأشخاص آخرين، لذا يسأل الوكيل الذي يقرأها قبل أن يقترح تغييرًا. ثق بمستودع تملكه لتخطي هذا السؤال. تبقى التغييرات بانتظار مراجعتك، وتظل طلبات الويب تسأل. يُحفظ على هذا الجهاز فقط.",
+  "trustedRepos.loading": "جارٍ التحميل…",
+  "trustedRepos.empty": "لا توجد مستودعات مستنسخة بعد.",
+  "trustedRepos.loadFailed": "تعذّر عرض المستودعات المستنسخة.",
+  "trustedRepos.toggle.aria": "الوثوق بـ {repo}",
+  "trustedRepos.state.on": "موثوق",
+  "trustedRepos.state.off": "يسأل أولًا",
+  "trustedRepos.confirm.title": "هل تثق بهذا المستودع؟",
+  "trustedRepos.confirm.body": "سيقترح الوكلاء الذين يقرؤون ملاحظات من {repo} تغييرات دون أن يسألوا أولًا. يستطيع أي شخص يمكنه الدفع إليه أن يضع نصًا أمام وكلائك. ثق به فقط إذا كنت تتحكم في من يكتب إليه.",
+  "trustedRepos.on": "{repo} موثوق الآن",
+  "trustedRepos.off": "{repo}: يسأل الوكلاء أولًا مجددًا",
+  "trustedRepos.saveFailed": "تعذّر حفظ الإعداد: {error}"
 }
