@@ -78,7 +78,7 @@ Set the DSN at build time:
 
 ```bash
 VITE_SENTRY_DSN=https://<public-key>@o123.ingest.sentry.io/4567 npm run build
-# Docker: docker build -f docker/Dockerfile.web --build-arg VITE_SENTRY_DSN=… .
+# Docker: docker build --build-arg VITE_SENTRY_DSN=… .
 ```
 
 **A DSN is not a secret.** Sentry designs it to be public: it ships in
@@ -89,13 +89,10 @@ the right place for it, and secret scanners may ignore it.
 The DSN's host is added to the CSP `connect-src` **automatically at build
 time**, through the same mechanism as the other deployment endpoints
 (`src/build/cspEndpoints.ts`). That covers the `index.html` meta tag,
-`dist/_headers` and the nginx image. No error-tracker host or wildcard is
-in the checked-in policies.
-
-On **Vercel**, `vercel.json` sets a static CSP header that the build can't
-rewrite. Add your DSN's origin, for example `https://o123.ingest.sentry.io`,
-to `connect-src` in `vercel.json` yourself. Otherwise the browser blocks
-the reports.
+`dist/_headers` and the nginx image. On **Vercel**, `vercel.ts` adds the
+same origin to the header it serves, from the project's `VITE_SENTRY_DSN`
+environment variable. No error-tracker host or wildcard is in the
+checked-in policies.
 
 ## בעברית
 

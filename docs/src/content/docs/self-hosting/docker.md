@@ -54,7 +54,7 @@ After ~60 s of image build + container start, visit
 
 :::caution[`LUMEN_COLLAB_TOKEN` in this bundle]
 The bundle passes `LUMEN_COLLAB_TOKEN` to the collab server, but not to the
-app it builds (`docker/Dockerfile.web` has no `VITE_YJS_WEBSOCKET_TOKEN`
+app it builds (the root `Dockerfile` has no `VITE_YJS_WEBSOCKET_TOKEN`
 argument), and the app has no screen for entering one yet. With a token
 set, the app's own clients are refused by the collab server. Keep it
 empty, or build the web image yourself with `VITE_YJS_WEBSOCKET_TOKEN`

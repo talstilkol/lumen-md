@@ -53,14 +53,14 @@ export default defineConfig({
           label: "Workspace",
           items: [
             { label: "Database views", slug: "workspace/database-views" },
-            { label: "Database formulas + map", slug: "workspace/database-formulas" },
+            { label: "Database formulas + map", slug: "workspace/database-formulas", translations: { he: "נוסחאות במסד נתונים ותצוגת מפה" } },
             { label: "Fill properties with AI", translations: { he: "מילוי מאפיינים ב-AI" }, slug: "workspace/ai-autofill" },
             { label: "Search (BM25 + Smart)", slug: "workspace/search" },
             { label: "Search operators and #tags", slug: "workspace/search-operators", translations: { he: "אופרטורי חיפוש ו-#תגיות" } },
             { label: "Vault Doctor", slug: "workspace/doctor" },
-            { label: "Quick capture (inbox)", slug: "workspace/quick-capture" },
-            { label: "PDF reader and highlights", slug: "workspace/pdf-reader" },
-            { label: "Large vaults and long notes", slug: "workspace/large-vaults" },
+            { label: "Quick capture (inbox)", slug: "workspace/quick-capture", translations: { he: "לכידה מהירה (תיבת דואר נכנס)" } },
+            { label: "PDF reader and highlights", slug: "workspace/pdf-reader", translations: { he: "קורא PDF והדגשות" } },
+            { label: "Large vaults and long notes", slug: "workspace/large-vaults", translations: { he: "כספות גדולות ופתקים ארוכים" } },
             { label: "Canvas (Excalidraw)", slug: "workspace/canvas", translations: { he: "קנבס (Excalidraw)" } },
             { label: "Export and import", slug: "workspace/export-import", translations: { he: "ייצוא וייבוא" } },
             { label: "Tasks across the vault", slug: "workspace/tasks" },
@@ -122,9 +122,9 @@ export default defineConfig({
         {
           label: "Sync",
           items: [
-            { label: "Git sync", slug: "sync/git" },
-            { label: "Sync providers (WebDAV, S3, Dropbox, Drive)", slug: "sync/cloud" },
-            { label: "Encrypted sync (E2EE)", slug: "sync/e2ee" },
+            { label: "Git sync", slug: "sync/git", translations: { he: "סנכרון Git" } },
+            { label: "Sync providers (WebDAV, S3, Dropbox, Drive)", slug: "sync/cloud", translations: { he: "ספקי סנכרון (WebDAV, ‏S3, ‏Dropbox, ‏Drive)" } },
+            { label: "Encrypted sync (E2EE)", slug: "sync/e2ee", translations: { he: "סנכרון מוצפן (E2EE)" } },
             { label: "Read-mode publishing", slug: "sync/publish", translations: { he: "פרסום לקריאה" } },
             { label: "Publish to your own site", slug: "sync/own-site", translations: { he: "פרסום לאתר משלך" } },
           ],
@@ -141,7 +141,7 @@ export default defineConfig({
           label: "Security",
           items: [
             { label: "Secrets and encryption", slug: "security/vault" },
-            { label: "Monitoring and web vitals", slug: "security/monitoring" },
+            { label: "Monitoring and web vitals", slug: "security/monitoring", translations: { he: "ניטור ומדדי ביצועים" } },
           ],
         },
         {

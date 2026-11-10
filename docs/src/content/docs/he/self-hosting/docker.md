@@ -53,7 +53,7 @@ make onprem-up
 
 :::caution[`LUMEN_COLLAB_TOKEN` בחבילה הזו]
 החבילה מעבירה את `LUMEN_COLLAB_TOKEN` לשרת השיתוף, אבל לא לאפליקציה שהיא
-בונה (ב-`docker/Dockerfile.web` אין ארגומנט `VITE_YJS_WEBSOCKET_TOKEN`),
+בונה (ב-`Dockerfile` שבשורש המאגר אין ארגומנט `VITE_YJS_WEBSOCKET_TOKEN`),
 ובאפליקציה עדיין אין מסך להזנת טוקן. כשמוגדר טוקן, שרת השיתוף דוחה את
 הלקוחות של האפליקציה עצמה. השאירו אותו ריק, או בנו את אימג׳ הרשת בעצמכם עם
 `VITE_YJS_WEBSOCKET_TOKEN` (ראו [חדרים מתמשכים](/he/collab/persistent/)).
