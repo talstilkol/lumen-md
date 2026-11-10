@@ -57,7 +57,11 @@ export function OrganizerPanel({ job, onClose }: { job: OrganizerJob; onClose: (
   const running = s.phase === "reading" || s.phase === "analysing";
   const left = s.suggestions.length - s.staged;
   const shown = s.suggestions.slice(s.staged, s.staged + DEFAULT_BATCH);
-  const review = () => window.dispatchEvent(new CustomEvent("lumen-open-agent-review"));
+  // The review screen is a dialog of its own: this one steps aside (the run is kept; the command shows it again).
+  const review = () => {
+    onClose();
+    window.dispatchEvent(new CustomEvent("lumen-open-agent-review"));
+  };
 
   return (
     <div className="cmd-palette-backdrop" onClick={onClose} role="dialog" aria-modal="true" aria-label={t("organizer.title")} data-testid="organizer-panel" data-phase={s.phase}>
