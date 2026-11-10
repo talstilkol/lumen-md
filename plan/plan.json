@@ -1,6 +1,6 @@
 {
  "$comment": "The plan's single source (plan 0.6). Edit this file, then `npm run plan` regenerates the board in MASTER_PLAN.md and plan/board.html; CI (`npm run plan:check`) fails when they differ. A task's status is one line: phases[].tasks[].status.",
- "updated": "2026-11-10T09:30",
+ "updated": "2026-11-10T10:30",
  "note": "**המצב ב-ב׳ 9.11 23:05:** אף PR לא מוזג מאז 17.10 (main = 552ea5b7). סשן 24.10 פתח #282–#316 (כ-30 משימות) — נרשמו כאן עכשיו. כמעט כל ה-PR-ים אדומים משתי סיבות שאינן בקוד: (1) מ-19.10 GitHub מעביר את ubuntu-latest ל-Ubuntu 26 והתקנת Playwright נשברת — #330 מצמיד ל-ubuntu-24.04; (2) תקציבי החבילה (startup 460 KB ותקציבי קובץ) — #330 גם מוסיף annotation שמראה איזה קובץ חורג. **החלטת טל 9.11: לא משתמשים יותר ב-GitHub Actions** — כל commit עם [skip ci], הבדיקות רצות ב-Vercel Sandbox. אזהרה: כל ענף מודד startup לבד (459–460 KB); אחרי 15.1 התוספות מכל השרשראות יצטברו — צריך את #248 או החלטה 15.16 (14) לפני המיזוג.\n\n**מחקר world class (9.11, plan/research-2026-11.md):** ציון ממוצע ב-19 תחומים מול Obsidian, Notion, Logseq, Typora, Word ואחרים — main 3.7 → עם ה-PR-ים הפתוחים 6.6 → כל התוכנית 7.3 → אחרי הגלים W1–W3 9.1. הפערים הגדולים: מסירה (אף PR לא מוזג), קריאה ומחקר (PDF), תאימות לפורמטים של Obsidian, INP ונגישות אמיתית עם קורא מסך (ת״י 5568), שיתוף והרשאות. 65 משימות חדשות בשלושה גלים (W1 ≈173 ש׳, W2 ≈119 ש׳, W3 ≈49 ש׳).\n\n**החלטות 10.11 (Claude, בהסמכת טל ״תחליט לבד כל החלטה״):** כל ההחלטות הפתוחות ב-15.2, 15.9, 15.10, 15.16 הוכרעו (פירוט בפריטים עצמם). נוסף: שער ה-OCR האנגלי (7.5) — ratchet ברמה הנמדדת (≤ 12.5% CER) ויעד ≤ 5% דרך W1.18, בלי להוריד את שער העברית; #271 — טוקן המחקר רק מההגדרות, לא VITE_RESEARCH_TOKEN (שום סוד בבנייה); החבילות שמחכות להתקנה (hash-wasm, @noble/ciphers, @excalidraw/excalidraw, @mlc-ai/web-llm@0.2.86, @capacitor/filesystem, quickjs-emscripten, knip, @citation-js) — מאושרות, כולן MIT / Apache / ISC, יותקנו ב-Vercel Sandbox; baselines ויזואליים — ייווצרו שם; שערי CI בלי Actions — W1.35. **בדיקה אמיתית בלי Actions:** Vercel בונה כל ענף (tsc -b מחמיר כולל בדיקות + vite build): 77 מתוך 86 PR-ים פתוחים ירוקים, 8 אדומים (#257, #261, #274, #277, #279, #280, #336, #347), 1 בתהליך.\n\n**10.11 01:30:** probe על chore/dod: build + budget עוברים ב-Vercel; עם vitest — נכשל (אין לוגים עד ש-Vercel מאושר). 83 מה-PR-ים ה\"אדומים\" ב-Vercel לא נכשלו בקוד — הבנייה שלהם נחסמה במגבלת 100 פריסות ביום (״Deployment rate limited״); כשל אמיתי היה רק ב-#336.\n\n**10.11 04:00 — Vercel חסם:** מגבלת השימוש של חשבון Hobby נוצלה (402 payment_required, מתאפס ב-1.12): אי אפשר לפתוח Sandbox חדש. מה שנבדק עד עכשיו נבדק במלואו; מה שלא — מחכה. החלטה של טל: לשדרג ל-Pro, או לחכות ל-1.12 (בינתיים בדיקות node בלבד).",
  "start": "2026-10-18T08:00",
  "buffer": 0.35,
@@ -3801,7 +3801,7 @@
       "12.3"
      ],
      "priority": "P1",
-     "status": "⏳ #340 chore/catch-split (על #271 + #246; 182 catch ריקים קיבלו סיבה, 4 שהסתירו כשלים → log.warn; 10 קבצים מעל 800 שורות פוצלו, App.tsx 1157→789; max-lines 800 + codeHealth.test; Vercel build ירוק (tsc -b מחמיר כולל בדיקות + vite build); dod: npx vitest run src/__tests__/codeHealth.test.ts src/__tests__/eslintEmptyCatchWhy.test.ts; npm run lint)",
+     "status": "⏳ #340 chore/catch-split (על #271 + #246; 182 catch ריקים קיבלו סיבה, 4 שהסתירו כשלים → log.warn; 10 קבצים מעל 800 שורות פוצלו, App.tsx 1157→789; max-lines 800 + codeHealth.test; Vercel build ירוק (tsc -b מחמיר כולל בדיקות + vite build); dod: npx vitest run src/__tests__/codeHealth.test.ts src/__tests__/eslintEmptyCatchWhy.test.ts; npm run lint) · 10.11: נעשה מחדש על verify/train — 245 catch עם סיבה, הכלל מכסה .catch(), 147 רשומות baseline הוסרו, codeHealth; פיצול 16 הקבצים מעל 800 שורות לא נעשה (מסוכן בלי vitest) — max-lines עוד לא נאכף",
      "was": "11.1",
      "source": "E1, O1",
      "steps": [
@@ -4208,7 +4208,7 @@
       "1.1"
      ],
      "priority": "P0",
-     "status": "⏳ verify/train @cac2a60 — main + כל ה-PR-ים הפתוחים (חוץ מ-#109 ו-#340) + תיקוני אינטגרציה (8 דפים עבריים, CSP ב-vercel.ts, 5 המתנות במקום waitForTimeout, snapshot פקודות, הסרת sourceMappingURL מספריות מועתקות). Vercel @57daf5a: tsc -b + vite build עברו, נכשל רק בתקציב (source maps של pyodide/tesseract/webr — תוקן ב-cac2a60). Vercel @cac2a60: נחסם במכסת הפריסות (24 ש׳). עוברים ב-node: hygiene, headers, i18n (2269×8), docs-sync, docs-complete, plan --check, unused. לא רץ: vitest, Playwright, budget — מחכה ל-Sandbox",
+     "status": "⏳ verify/train @0916662 — כל ה-PR-ים הפתוחים (חוץ מ-#109; #340 נעשה מחדש על הרכבת חלקית) + תיקוני אינטגרציה. **Vercel @0916662: tsc -b, vite build ו-no-source-maps עוברים; נכשל בתקציב — 4 chunks חורגים** (מזוהה: vendor-excalidraw 1345/700 KB, כנראה mermaid מתקפל פנימה). זו ההצטברות שנחזתה ב-15.16(14); מטופל בלי להעלות תקציב. vitest ושאר השערים לא רצו כי התקציב עוצר ראשון",
      "source": "GitHub API: 100+ PR-ים פתוחים, אחרון שמוזג #134 (17.10.2026)",
      "steps": [
       "לסדר את כ-150 ה-PR-ים הפתוחים (#143–#347) לפי שכבות המחסנית, ממוספרים לפי תלות",
@@ -4742,7 +4742,9 @@
       "keypress→paint p95 < 16ms ב-50KB ו-< 33ms ב-2MB",
       "נסיגה של ≥ 10% מכשילה את השער המקומי"
      ],
-     "why": "Lighthouse מודד טעינה; Linear ו-Obsidian מנצחים בתגובה מיידית לכל פעולה — ואת זה אין בתוכנית."
+     "why": "Lighthouse מודד טעינה; Linear ו-Obsidian מנצחים בתגובה מיידית לכל פעולה — ואת זה אין בתוכנית.",
+     "branch": "perf/inp-budget",
+     "status": "⏳ #385 (על #274; e2e INP ב-CPU 4×: p75 < 100ms, מקש→ציור p95 < 16/33ms ב-50KB/2MB, שער רגרסיה 10%; אין baseline עד ריצה ראשונה; לא נבדק — אין דפדפנים/vitest)"
     },
     {
      "id": "W1.23",
@@ -5043,7 +5045,9 @@
       "PR נקי מקבל success",
       "main נבנה כמו היום"
      ],
-     "why": "החלטת טל 9.11: בלי GitHub Actions. Vercel כבר בונה כל ענף ומדווח סטטוס ל-GitHub — זה השער הזמין בלי חשבון נוסף (probe verify/chore-dod)"
+     "why": "החלטת טל 9.11: בלי GitHub Actions. Vercel כבר בונה כל ענף ומדווח סטטוס ל-GitHub — זה השער הזמין בלי חשבון נוסף (probe verify/chore-dod)",
+     "branch": "verify/train",
+     "status": "⏳ על verify/train (0e95a7a, e979c5b) — scripts/vercel-build.mjs: ב-preview build, budget, vitest, i18n, hygiene, docs-sync, licences; ב-production רק build + budget; עובד ב-Vercel (עצר נכון בשער התקציב). דף docs contributing/checks. סיכון: שער הרישיונות על 4 חבילות בלי רישיון מוצהר (format, fuzzy, khroma, xmlhttprequest-ssl)"
     }
    ]
   },
@@ -5572,7 +5576,9 @@
       "כספת של 10,000 פתקים נפתחת מהר כמו של 100 (הפרש < 15%)",
       "0 קפיצות פריסה (CLS < 0.05)"
      ],
-     "why": "Linear מציג עבודה מקומית לפני שהקוד נטען כולו; Obsidian ו-Bear נפתחים מיד."
+     "why": "Linear מציג עבודה מקומית לפני שהקוד נטען כולו; Obsidian ו-Bear נפתחים מיד.",
+     "branch": "perf/cold-start",
+     "status": "⏳ #386 (על #248; note-boot.js מצייר את 4,000 התווים הראשונים של הפתק האחרון לפני ה-bundle; e2e cold-start: < 800ms שולחן עבודה, < 1.5s Pixel 7; modulepreload והידרציה עצלה ממתינים למדידה; לא נבדק)"
     },
     {
      "id": "W2.22",
