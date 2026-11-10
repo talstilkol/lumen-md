@@ -95,6 +95,7 @@ export default defineConfig({
           label: "Security",
           items: [
             { label: "Vault + recovery phrase", slug: "security/vault" },
+            { label: "Trusted repositories", slug: "security/trusted-repos", translations: { he: "מאגרים מהימנים" } },
           ],
         },
         {
