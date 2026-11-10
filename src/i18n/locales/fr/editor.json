@@ -2,6 +2,7 @@
   "bibtex.link": "lien",
   "bibtex.noEntries": "Aucune entrée BibTeX détectée.",
   "bibtex.references": "Références ({n})",
+  "bibtex.style": "Style de citation",
   "block.abc.error": "⚠︎ Erreur de notation ABC :",
   "block.chart.error": "⚠︎ Erreur de graphique : {error}",
   "block.chart.fetchFailed": "⚠︎ Échec du chargement du graphique : {error}",

@@ -2,6 +2,7 @@
   "bibtex.link": "קישור",
   "bibtex.noEntries": "לא זוהו רשומות BibTeX.",
   "bibtex.references": "מקורות ({n})",
+  "bibtex.style": "סגנון ציטוט",
   "block.abc.error": "⚠︎ שגיאת תווי ABC:",
   "block.chart.error": "⚠︎ שגיאת תרשים: {error}",
   "block.chart.fetchFailed": "⚠︎ טעינת התרשים נכשלה: {error}",

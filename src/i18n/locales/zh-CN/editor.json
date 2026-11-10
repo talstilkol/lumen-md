@@ -2,6 +2,7 @@
   "bibtex.link": "链接",
   "bibtex.noEntries": "未检测到 BibTeX 条目。",
   "bibtex.references": "参考文献 ({n})",
+  "bibtex.style": "引用格式",
   "block.abc.error": "⚠︎ ABC 记谱错误：",
   "block.chart.error": "⚠︎ 图表错误：{error}",
   "block.chart.fetchFailed": "⚠︎ 图表获取失败：{error}",

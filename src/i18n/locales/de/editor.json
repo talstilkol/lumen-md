@@ -2,6 +2,7 @@
   "bibtex.link": "Link",
   "bibtex.noEntries": "Keine BibTeX-Einträge gefunden.",
   "bibtex.references": "Literaturverzeichnis ({n})",
+  "bibtex.style": "Zitierstil",
   "block.abc.error": "⚠︎ Fehler in der ABC-Notation:",
   "block.chart.error": "⚠︎ Diagrammfehler: {error}",
   "block.chart.fetchFailed": "⚠︎ Diagramm konnte nicht geladen werden: {error}",

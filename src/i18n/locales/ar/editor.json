@@ -2,6 +2,7 @@
   "bibtex.link": "رابط",
   "bibtex.noEntries": "لم يتم العثور على مدخلات BibTeX.",
   "bibtex.references": "المراجع ({n})",
+  "bibtex.style": "نمط الاستشهاد",
   "block.abc.error": "⚠︎ خطأ في تدوين ABC:",
   "block.chart.error": "⚠︎ خطأ في المخطط: {error}",
   "block.chart.fetchFailed": "⚠︎ فشل جلب المخطط: {error}",

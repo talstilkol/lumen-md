@@ -2,6 +2,7 @@
   "bibtex.link": "ссылка",
   "bibtex.noEntries": "Записи BibTeX не найдены.",
   "bibtex.references": "Источники ({n})",
+  "bibtex.style": "Стиль цитирования",
   "block.abc.error": "⚠︎ Ошибка нотации ABC:",
   "block.chart.error": "⚠︎ Ошибка графика: {error}",
   "block.chart.fetchFailed": "⚠︎ Не удалось загрузить график: {error}",

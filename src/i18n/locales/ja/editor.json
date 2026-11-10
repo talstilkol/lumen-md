@@ -2,6 +2,7 @@
   "bibtex.link": "リンク",
   "bibtex.noEntries": "BibTeX エントリが見つかりません。",
   "bibtex.references": "参考文献 ({n})",
+  "bibtex.style": "引用スタイル",
   "block.abc.error": "⚠︎ ABC 記譜のエラー:",
   "block.chart.error": "⚠︎ グラフのエラー: {error}",
   "block.chart.fetchFailed": "⚠︎ グラフの取得に失敗しました: {error}",
