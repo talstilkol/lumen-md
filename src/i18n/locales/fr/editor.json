@@ -327,7 +327,7 @@
   "vaultCite.summary": "Citations vérifiées dans vos notes : {ok} sur {total}",
   "vaultCite.unsupported": "Aucune citation vérifiée — vérifiez cette réponse dans vos notes.",
   "vaultCite.verified": "Citation trouvée dans la note",
-  "writingGoal.done": "Objectif atteint !",
+  "writingGoal.done": "🎉 Objectif du jour atteint — {{words}} / {{goal}}",
   "writingGoal.progress": "{{words}} / {{goal}} mots · {{pct}} %",
   "writingGoal.prompt": "Objectif d’écriture quotidien en mots (0 pour désactiver) :"
 }

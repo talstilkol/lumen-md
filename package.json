@@ -13,6 +13,7 @@
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
     "hygiene": "node scripts/check-code-hygiene.mjs",
+    "i18n:review": "node scripts/i18n-review.mjs",
     "licenses": "node scripts/licenses.mjs",
     "golden": "node scripts/golden.mjs",
     "tauri": "tauri",

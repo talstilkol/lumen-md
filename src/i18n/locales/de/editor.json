@@ -327,7 +327,7 @@
   "vaultCite.summary": "Zitate an deinen Notizen geprüft: {ok} von {total} bestätigt",
   "vaultCite.unsupported": "Kein bestätigtes Zitat — prüfe diese Antwort an deinen Notizen.",
   "vaultCite.verified": "Zitat in der Notiz gefunden",
-  "writingGoal.done": "Ziel erreicht!",
+  "writingGoal.done": "🎉 Tagesziel erreicht — {{words}} / {{goal}}",
   "writingGoal.progress": "{{words}} / {{goal}} Wörter · {{pct}} %",
   "writingGoal.prompt": "Tägliches Schreibziel in Wörtern (0 zum Deaktivieren):"
 }

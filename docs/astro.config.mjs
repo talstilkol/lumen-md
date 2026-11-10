@@ -90,6 +90,7 @@ export default defineConfig({
             { label: "Train a model on your style, locally", slug: "ai/local-fine-tune" },
             { label: "AI-written text", translations: { he: "טקסט שנכתב ב-AI" }, slug: "ai/authorship" },
             { label: "Local autocomplete (FIM)", translations: { he: "השלמה אוטומטית מקומית (FIM)" }, slug: "ai/autocomplete" },
+            { label: "Translation review", translations: { he: "ביקורת תרגומים" }, slug: "ai/translation-review" },
             { label: "AI cost: usage meter + answer cache", slug: "ai/cost" },
             { label: "Batch jobs: pause, resume, progress", translations: { he: "משימות אצווה: השהיה, המשך, התקדמות" }, slug: "ai/batch" },
             { label: "Research + citation checks", slug: "ai/research" },
