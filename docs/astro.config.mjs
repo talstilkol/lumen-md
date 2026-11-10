@@ -48,6 +48,7 @@ export default defineConfig({
             { label: "Vault Doctor", slug: "workspace/doctor" },
             { label: "PDF reader and highlights", slug: "workspace/pdf-reader" },
             { label: "EPUB reader and reading mode", translations: { he: "קורא EPUB ומצב קריאה" }, slug: "workspace/epub-reader" },
+            { label: "All highlights", translations: { he: "כל ההדגשות" }, slug: "workspace/highlights" },
           ],
         },
         {
