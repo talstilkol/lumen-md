@@ -359,6 +359,10 @@ const insideAny = (ranges: ReadonlyArray<[number, number]>, at: number) => range
  * setext headings, also inside block quotes; never in front matter, code
  * or raw HTML. Also feeds the `[[Note#` completion (4.5).
  */
+/** Not a paragraph line: a list item, a quote, an ATX heading, or a setext underline. */
+const NOT_TEXT = String.raw`(?! {0,3}(?:[-*+>]|\d+[.)])\s)(?! {0,3}#{1,6}(?:[ \t]|$))(?! {0,3}(?:=+|-+)[ \t]*$)`;
+const SETEXT_HEADING = new RegExp(String.raw`^(${NOT_TEXT} {0,3}\S[^\n]*\n(?:${NOT_TEXT}[ \t]*\S[^\n]*\n)*) {0,3}(?:=+|-+)[ \t]*$`, "gm");
+
 export function noteHeadings(text: string): string[] {
   return noteHeadingLines(text).map((h) => h.text);
 }
@@ -374,9 +378,11 @@ export function noteHeadingLines(text: string): Array<{ text: string; line: numb
   const found: Array<{ at: number; raw: string }> = [];
   // ATX headings may be indented up to 3 spaces (4+ is indented code).
   for (const m of fenced.matchAll(/^ {0,3}#{1,6}[ \t]+(.+?)\s*#*\s*$/gm)) found.push({ at: m.index ?? 0, raw: m[1] });
-  // Setext headings: a text line underlined with === or --- (the line
-  // above must be text, not a list item, quote or blank line).
-  for (const m of fenced.matchAll(/^(?! {0,3}([-*+>]|\d+[.)])\s)( {0,3}\S[^\n]*)\n {0,3}(=+|-+)[ \t]*$/gm)) found.push({ at: m.index ?? 0, raw: m[2].trim() });
+  // Setext headings: the whole paragraph above a === or --- underline (its
+  // lines must be text, not a list item, quote, ATX heading or another
+  // underline). A wrapped heading renders as one heading whose text keeps the
+  // line break, and its id is slugged from all of it (W1.32, Codex on #238).
+  for (const m of fenced.matchAll(SETEXT_HEADING)) found.push({ at: m.index ?? 0, raw: m[1].split("\n").map((x) => x.trim()).filter(Boolean).join("\n") });
   // Only whole `>` prefixes were removed, never a line: line numbers are the text's.
   return found.sort((a, b) => a.at - b.at).map((h) => ({ text: headingText(h.raw), line: lineAt(fenced, h.at) - 1 }));
 }
