@@ -1545,6 +1545,17 @@ const en: Strings = {
   "remoteImage.allowHost": "Always allow {host}",
   "remoteImage.allowHint": "Load images from {host} in every note, in this browser.",
   "remoteMedia.label": "Video or audio from {host}",
+  "cmd.privacy.imageHosts": "Privacy: allowed image hosts…",
+  "cmd.privacy.imageHosts.hint": "Sites you chose “Always allow” for — revoke one or all",
+  "imageHosts.title": "Allowed image hosts",
+  "imageHosts.intro": "Images from these sites load without asking. Revoke one, and its images wait for you again.",
+  "imageHosts.empty": "No site is always allowed. Images from other sites wait for you.",
+  "imageHosts.revoke": "Revoke",
+  "imageHosts.revokeHost": "Stop always allowing {host}",
+  "imageHosts.revokeAll": "Revoke all",
+  "imageHosts.revoked": "{host}: images wait for you again",
+  "imageHosts.revokedAll": "Every site's images wait for you again",
+  "imageHosts.close": "Close",
   "collab.settings.cspBlocked": "This deployment's security policy blocks {url}, so it won't be used. Add it at build time (VITE_CSP_CONNECT_EXTRA).",
 };
 

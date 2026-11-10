@@ -1434,5 +1434,16 @@
   "remoteImage.allowHost": "Всегда разрешать {host}",
   "remoteImage.allowHint": "Загружать изображения с {host} во всех заметках в этом браузере.",
   "collab.settings.cspBlocked": "Политика безопасности этого развёртывания блокирует {url}, поэтому он не будет использоваться. Добавьте его при сборке (VITE_CSP_CONNECT_EXTRA).",
-  "remoteMedia.label": "Видео или аудио с {host}"
+  "remoteMedia.label": "Видео или аудио с {host}",
+  "cmd.privacy.imageHosts": "Конфиденциальность: разрешённые хосты изображений…",
+  "cmd.privacy.imageHosts.hint": "Сайты, для которых выбрано «Всегда разрешать», — отменить один или все",
+  "imageHosts.title": "Разрешённые хосты изображений",
+  "imageHosts.intro": "Изображения с этих сайтов загружаются без вопроса. Отмените сайт — и его изображения снова будут ждать вас.",
+  "imageHosts.empty": "Ни один сайт не разрешён всегда. Изображения с других сайтов ждут вас.",
+  "imageHosts.revoke": "Отменить",
+  "imageHosts.revokeHost": "Больше не разрешать {host} всегда",
+  "imageHosts.revokeAll": "Отменить все",
+  "imageHosts.revoked": "{host}: изображения снова ждут вас",
+  "imageHosts.revokedAll": "Изображения со всех сайтов снова ждут вас",
+  "imageHosts.close": "Закрыть"
 }

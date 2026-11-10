@@ -135,8 +135,31 @@ export function allowRemoteImageHosts(hosts: readonly string[]): void {
   changed();
 }
 
+/**
+ * Revoke "Always allow" for a host (plan W1.30): its images wait for the
+ * user again — including the ones loaded with "Load" earlier in this
+ * session, so revoking blocks them at once rather than after a reload.
+ */
 export function forgetRemoteImageHost(host: string): void {
-  if (!allowedHosts().delete(host.trim().toLowerCase())) return;
+  const h = host.trim().toLowerCase();
+  const wasAllowed = allowedHosts().delete(h);
+  let dropped = false;
+  for (const u of [...loadedOnce]) {
+    if (remoteImageHost(u) === h) {
+      loadedOnce.delete(u);
+      dropped = true;
+    }
+  }
+  if (!wasAllowed && !dropped) return;
+  if (wasAllowed) persist();
+  changed();
+}
+
+/** Revoke every "Always allow" (plan W1.30), and this session's one-off loads with them. */
+export function forgetAllRemoteImageHosts(): void {
+  if (!allowedHosts().size && !loadedOnce.size) return;
+  allowedHosts().clear();
+  loadedOnce.clear();
   persist();
   changed();
 }

@@ -21,6 +21,7 @@ const ThemeSettings = lazy(() => import("./ui/ThemeSettings").then(m => ({ defau
 const AiSettingsPanel = lazy(() => import("./ui/AiSettingsPanel").then(m => ({ default: m.AiSettingsPanel })));
 const PrivacyLedgerPanel = lazy(() => import("./ui/PrivacyLedgerPanel").then(m => ({ default: m.PrivacyLedgerPanel })));
 const TrashPanel = lazy(() => import("./ui/TrashPanel").then(m => ({ default: m.TrashPanel })));
+const ImageHostsPanel = lazy(() => import("./ui/ImageHostsPanel").then(m => ({ default: m.ImageHostsPanel })));
 const AiDoctorPanel = lazy(() => import("./ui/AiDoctorPanel").then(m => ({ default: m.AiDoctorPanel })));
 const FineTuneSettings = lazy(() => import("./ui/FineTuneSettings").then(m => ({ default: m.FineTuneSettings })));
 const VersionHistory = lazy(() => import("./ui/VersionHistory").then(m => ({ default: m.VersionHistory })));
@@ -722,6 +723,13 @@ export default function App() {
     window.addEventListener("lumen-open-privacy-ledger", onOpen);
     return () => window.removeEventListener("lumen-open-privacy-ledger", onOpen);
   }, []);
+  // Allowed image hosts (plan W1.30), opened from the palette.
+  const [imageHostsOpen, setImageHostsOpen] = useState(false);
+  useEffect(() => {
+    const onOpen = () => setImageHostsOpen(true);
+    window.addEventListener("lumen-open-image-hosts", onOpen);
+    return () => window.removeEventListener("lumen-open-image-hosts", onOpen);
+  }, []);
   useEffect(() => {
     const onOpen = () => setTrashOpen(true);
     window.addEventListener("lumen-open-trash", onOpen);
@@ -1067,6 +1075,7 @@ export default function App() {
           {aiDoctorOpen && <AiDoctorPanel open={aiDoctorOpen} onClose={() => setAiDoctorOpen(false)} />}
           {privacyOpen && <PrivacyLedgerPanel open={privacyOpen} onClose={() => setPrivacyOpen(false)} />}
           {trashOpen && <TrashPanel open={trashOpen} onClose={() => setTrashOpen(false)} />}
+          {imageHostsOpen && <ImageHostsPanel open={imageHostsOpen} onClose={() => setImageHostsOpen(false)} />}
           {themeSettingsOpen && <ThemeSettings open={themeSettingsOpen} onClose={() => setThemeSettingsOpen(false)} />}
         </ErrorBoundary>
       </Suspense>

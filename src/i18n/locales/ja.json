@@ -1434,5 +1434,16 @@
   "remoteImage.allowHost": "{host} を常に許可",
   "remoteImage.allowHint": "このブラウザーで、すべてのノートの {host} の画像を読み込みます。",
   "collab.settings.cspBlocked": "このデプロイのセキュリティポリシーは {url} をブロックするため、使用されません。ビルド時に追加してください（VITE_CSP_CONNECT_EXTRA）。",
-  "remoteMedia.label": "{host} の動画または音声"
+  "remoteMedia.label": "{host} の動画または音声",
+  "cmd.privacy.imageHosts": "プライバシー: 許可した画像ホスト…",
+  "cmd.privacy.imageHosts.hint": "「常に許可」を選んだサイト — 1 つずつ、またはすべて取り消し",
+  "imageHosts.title": "許可した画像ホスト",
+  "imageHosts.intro": "これらのサイトの画像は確認なしで読み込まれます。取り消すと、その画像は再び確認待ちになります。",
+  "imageHosts.empty": "常に許可しているサイトはありません。他サイトの画像は確認待ちになります。",
+  "imageHosts.revoke": "取り消す",
+  "imageHosts.revokeHost": "{host} の常時許可をやめる",
+  "imageHosts.revokeAll": "すべて取り消す",
+  "imageHosts.revoked": "{host}: 画像は再び確認待ちです",
+  "imageHosts.revokedAll": "すべてのサイトの画像が再び確認待ちです",
+  "imageHosts.close": "閉じる"
 }
