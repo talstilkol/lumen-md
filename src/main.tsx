@@ -21,6 +21,10 @@ import { installAiEscape } from "./ai/aiAbort";
 import { adoptBootLocale } from "./store/useStore";
 import "./index.css";
 
+// Plan W2.17: this window is a presentation's presenter view (opened by the slides), not the editor.
+const IS_PRESENTER = typeof location !== "undefined" && location.hash === "#lumen-presenter";
+const PresenterView = React.lazy(() => import("./slides/PresenterView"));
+
 // Every AI network request is recorded; local-only blocks cloud ones (T37).
 const lastBlockToast = new Map<string, number>();
 installPrivacyLedger((entry) => {
@@ -33,8 +37,10 @@ installPrivacyLedger((entry) => {
 installAiEscape((n) => showAiToast(t("toast.aiCancelled", { count: n }), "info"));
 initTelemetry();
 void initAuth();
-startAutoBackup();
-startVaultSnapshots();
+if (!IS_PRESENTER) {
+  startAutoBackup();
+  startVaultSnapshots();
+}
 // The vault lives in OPFS/IndexedDB; without this the browser may evict it.
 void requestPersistentStorage();
 
@@ -121,7 +127,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
           Loading Lumen…
         </div>
       }>
-        <App />
+        {IS_PRESENTER ? <PresenterView /> : <App />}
       </Suspense>
     </ErrorBoundary>
     <UpdateBanner />

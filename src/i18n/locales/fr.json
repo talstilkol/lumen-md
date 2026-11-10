@@ -1447,5 +1447,22 @@
   "canvas.card.empty": "(note vide)",
   "canvas.export.label": "Exporter l’image",
   "canvas.export.working": "Exportation…",
-  "canvas.export.failed": "Échec de l’export : {error}"
+  "canvas.export.failed": "Échec de l’export : {error}",
+  "slides.label": "Présentation : {title}",
+  "slides.prev": "Diapositive précédente",
+  "slides.next": "Diapositive suivante",
+  "slides.count": "{n} / {total}",
+  "slides.presenter": "Vue présentateur",
+  "slides.pdf": "PDF",
+  "slides.close": "Terminer",
+  "slides.presenterTitle": "Vue présentateur",
+  "slides.presenterWaiting": "En attente de la présentation… Lancez-la depuis une note ou le canevas.",
+  "slides.nextUp": "Ensuite : {title}",
+  "slides.last": "Dernière diapositive",
+  "slides.noNotes": "Pas de notes de l’orateur pour cette diapositive.",
+  "canvas.present": "Présenter",
+  "canvas.present.noFrames": "Ajoutez des cadres au canevas pour le présenter : chaque cadre est une diapositive, les flèches entre cadres fixent l’ordre.",
+  "canvas.present.failed": "Impossible de lancer la présentation : {error}",
+  "cmd.view.present": "▶ Présenter cette note en diapositives",
+  "cmd.view.present.hint": "Les titres et les lignes --- commencent une diapositive ; les lignes Note: sont les notes de l’orateur"
 }

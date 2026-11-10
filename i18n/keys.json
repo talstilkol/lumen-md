@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-11-10T02:37:24.723Z",
+  "generated_at": "2026-11-10T02:58:38.017Z",
   "source": "src/i18n/index.ts (en bundle) + src/i18n/lazy/*.json",
-  "count": 1449,
+  "count": 1466,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -6547,6 +6547,16 @@
       "vars": []
     },
     {
+      "key": "cmd.view.present",
+      "en": "▶ Present this note as slides",
+      "vars": []
+    },
+    {
+      "key": "cmd.view.present.hint",
+      "en": "Headings and --- lines start slides; Note: lines are speaker notes",
+      "vars": []
+    },
+    {
       "key": "cmd.view.canvas.hint",
       "en": "Infinite canvas for visual notes",
       "vars": []
@@ -7799,6 +7809,90 @@
     {
       "key": "canvas.export.failed",
       "en": "Export failed: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "slides.label",
+      "en": "Presentation: {title}",
+      "vars": [
+        "title"
+      ]
+    },
+    {
+      "key": "slides.prev",
+      "en": "Previous slide",
+      "vars": []
+    },
+    {
+      "key": "slides.next",
+      "en": "Next slide",
+      "vars": []
+    },
+    {
+      "key": "slides.count",
+      "en": "{n} / {total}",
+      "vars": [
+        "n",
+        "total"
+      ]
+    },
+    {
+      "key": "slides.presenter",
+      "en": "Presenter view",
+      "vars": []
+    },
+    {
+      "key": "slides.pdf",
+      "en": "PDF",
+      "vars": []
+    },
+    {
+      "key": "slides.close",
+      "en": "End",
+      "vars": []
+    },
+    {
+      "key": "slides.presenterTitle",
+      "en": "Presenter view",
+      "vars": []
+    },
+    {
+      "key": "slides.presenterWaiting",
+      "en": "Waiting for the presentation… Start it from a note or the canvas.",
+      "vars": []
+    },
+    {
+      "key": "slides.nextUp",
+      "en": "Next: {title}",
+      "vars": [
+        "title"
+      ]
+    },
+    {
+      "key": "slides.last",
+      "en": "Last slide",
+      "vars": []
+    },
+    {
+      "key": "slides.noNotes",
+      "en": "No speaker notes for this slide.",
+      "vars": []
+    },
+    {
+      "key": "canvas.present",
+      "en": "Present",
+      "vars": []
+    },
+    {
+      "key": "canvas.present.noFrames",
+      "en": "Add frames to the canvas to present it: each frame is a slide, arrows between frames set the order.",
+      "vars": []
+    },
+    {
+      "key": "canvas.present.failed",
+      "en": "Couldn't start the presentation: {error}",
       "vars": [
         "error"
       ]

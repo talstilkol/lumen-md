@@ -1447,5 +1447,22 @@
   "canvas.card.empty": "(пустая заметка)",
   "canvas.export.label": "Экспорт изображения",
   "canvas.export.working": "Экспорт…",
-  "canvas.export.failed": "Не удалось экспортировать: {error}"
+  "canvas.export.failed": "Не удалось экспортировать: {error}",
+  "slides.label": "Презентация: {title}",
+  "slides.prev": "Предыдущий слайд",
+  "slides.next": "Следующий слайд",
+  "slides.count": "{n} / {total}",
+  "slides.presenter": "Режим докладчика",
+  "slides.pdf": "PDF",
+  "slides.close": "Завершить",
+  "slides.presenterTitle": "Режим докладчика",
+  "slides.presenterWaiting": "Ожидание презентации… Запустите её из заметки или с холста.",
+  "slides.nextUp": "Далее: {title}",
+  "slides.last": "Последний слайд",
+  "slides.noNotes": "Для этого слайда нет заметок докладчика.",
+  "canvas.present": "Показать",
+  "canvas.present.noFrames": "Чтобы показать холст, добавьте рамки: каждая рамка — слайд, стрелки между рамками задают порядок.",
+  "canvas.present.failed": "Не удалось начать презентацию: {error}",
+  "cmd.view.present": "▶ Показать эту заметку как слайды",
+  "cmd.view.present.hint": "Заголовки и строки --- начинают слайды; строки Note: — заметки докладчика"
 }
