@@ -59,6 +59,24 @@ export function buildVoiceCommands(): Command[] {
       },
     },
     {
+      id: "voice.transcribeFile",
+      label: t("cmd.tools.transcribeFile"),
+      icon: cmdIcons.Sparkles,
+      group: t("group.tools"),
+      // Plan W1.17: an audio file, a timestamp per sentence (merged from #383).
+      action: async () => (await import("../../ui/TranscribeFile")).transcribeAudioFile(),
+    },
+    {
+      id: "help.credits",
+      label: t("cmd.help.credits"),
+      icon: cmdIcons.Sparkles,
+      group: t("group.tools"),
+      action: async () => {
+        const { openCredits } = await import("../../ui/CreditsDialog");
+        openCredits();
+      },
+    },
+    {
       id: "voice.meeting",
       label: t("cmd.voice.meeting"),
       hint: t("cmd.voice.meeting.hint"),
@@ -69,6 +87,21 @@ export function buildVoiceCommands(): Command[] {
         const { startVoiceMemo } = await import("../../ui/VoiceDictation");
         await startVoiceMemo({ meeting: true });
       },
+    },
+    {
+      id: "voice.meetingFile",
+      label: t("cmd.voice.meetingFile"),
+      icon: cmdIcons.Sparkles,
+      group: t("group.tools"),
+      // Plan W2.7: a recording → transcript with speakers (W1.17 + diarization) → meeting notes.
+      action: async () => (await import("../../meetings/meetingTranscribe")).transcribeMeeting(),
+    },
+    {
+      id: "speakers.rename",
+      label: t("cmd.speakers.rename"),
+      icon: cmdIcons.Sparkles,
+      group: t("group.tools"),
+      action: async () => (await import("../../meetings/meetingTranscribe")).renameSpeakerInNote(),
     },
     {
       id: "ai.meetingNotes",

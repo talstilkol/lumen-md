@@ -40,19 +40,37 @@ describe("VoiceDictation module exports", () => {
     expect(typeof mod.startVoiceMemo).toBe("function");
   });
 
-  it("startVoiceRecording shows error toast when SpeechRecognition unavailable", async () => {
+  it("browser speech shows an error toast when SpeechRecognition is unavailable", async () => {
     const { showAiToast } = await import("../ui/AiToast") as any;
-    const { startVoiceRecording } = await import("../ui/VoiceDictation");
-    // Remove SpeechRecognition from window to simulate unsupported browser
+    const { startBrowserSpeech } = await import("../ui/VoiceDictation");
+    const { setAiPolicy } = await import("../ai/policy");
+    setAiPolicy("local-first");
     const original = (window as any).SpeechRecognition;
     delete (window as any).SpeechRecognition;
     delete (window as any).webkitSpeechRecognition;
-    startVoiceRecording("en");
+    startBrowserSpeech("en");
     expect(showAiToast).toHaveBeenCalledWith(
       expect.stringMatching(/not supported|NotSupported/i),
       "error",
     );
     if (original) (window as any).SpeechRecognition = original;
+    localStorage.clear();
+  });
+
+  it("never starts browser speech under local-only (1.3), and records the refusal", async () => {
+    const { showAiToast } = await import("../ui/AiToast") as any;
+    const { startBrowserSpeech } = await import("../ui/VoiceDictation");
+    const { setAiPolicy } = await import("../ai/policy");
+    const { ledgerEntries } = await import("../ai/privacyLedger");
+    setAiPolicy("local-only");
+    const ctor = vi.fn();
+    (window as any).SpeechRecognition = ctor;
+    startBrowserSpeech("he-IL");
+    expect(ctor).not.toHaveBeenCalled();
+    expect(showAiToast).toHaveBeenCalledWith("dictation.localOnlyNoBrowser", "error");
+    expect(ledgerEntries().at(-1)).toMatchObject({ category: "cloud-ai", decision: "blocked", policy: "local-only" });
+    delete (window as any).SpeechRecognition;
+    localStorage.clear();
   });
 
   it("startVoiceMemo shows error toast when MediaRecorder unavailable", async () => {

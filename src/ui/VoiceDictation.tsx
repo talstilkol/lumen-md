@@ -2,19 +2,20 @@
  * Voice memo capture (F2 / γ.4).
  *
  * Two flows live behind the same UI:
- *   - **Dictation** (`startVoiceRecording`): Whisper on this device in
- *     ~5-second segments (plan 1.3). The browser's `SpeechRecognition` sends
- *     audio to its vendor, so it is used only outside local-only and only
- *     after the user agrees; every use is in the privacy ledger.
- *   - **Memo mode** (when `aiKey` is set OR Privacy Mode is on):
- *     `MediaRecorder` captures the audio, on stop we Whisper-transcribe
- *     + AI-summarize and insert a `> 🎙 Voice memo` block at the cursor.
+ *   - **Dictation** (`startVoiceRecording(lang)`): the engine is chosen by
+ *     src/ai/dictation/engines.ts (plan 6.1) — Hebrew streams on this device
+ *     (LiveDictation.tsx). Without a live engine for the language, plan 1.3's
+ *     dictation runs: Whisper on this device in ~5-second segments. The
+ *     browser's `SpeechRecognition` sends audio to its vendor, so it is used
+ *     only outside local-only and only after the user agrees (the live panel's
+ *     offer, or 1.3's consent dialog); every use is in the privacy ledger.
+ *   - **Memo mode** (`startVoiceMemo()`): `MediaRecorder` captures the audio,
+ *     on stop we Whisper-transcribe + AI-summarize (or, for a meeting, write
+ *     meeting notes — plan 6.16) and insert the block at the cursor.
  *
  * The memo flow follows the AI policy — by default Whisper runs on this
  * device through transformers.js (src/ai/transformersEngine.ts) and the
  * summary through the local model, so no audio bytes leave the browser.
- *
- * `startVoiceMemo()` wraps the memo flow.
  */
 
 import { createRoot } from "react-dom/client";
@@ -25,7 +26,7 @@ import { transcribe, summarizeMemo, formatVoiceMemo } from "../ai/transcribe";
 import { aiOperation, isAbort } from "../ai/aiAbort";
 import { log } from "../lib/logger";
 import { getAiPolicy } from "../ai/policy";
-import { recordSpeechRecognition } from "../ai/privacyLedger";
+import { recordBrowserService, recordSpeechRecognition } from "../ai/privacyLedger";
 import { chooseDictationEngine, webSpeechOptedIn, WEB_SPEECH_KEY, Segmenter, SerialQueue } from "../ai/dictation";
 
 // SpeechRecognition is poorly + inconsistently typed across DOM lib
@@ -164,12 +165,47 @@ export function dictationSink(): (text: string) => void {
 }
 
 /**
- * Dictate into the open note (plan 1.3). Default: Whisper on this device, in
- * ~5-second segments. The browser speech service (which sends the audio to
- * the vendor) is used only when the policy is not local-only AND the user
- * agreed — never silently; each use is recorded in the privacy ledger.
+ * Dictate into the open note. The live engine first (plan 6.1: Hebrew
+ * streams on this device; the panel asks before any download); its
+ * fallbacks are the browser's speech service (only where the policy allows
+ * the cloud, after the panel's offer) and plan 1.3's recorded dictation.
  */
 export function startVoiceRecording(lang: string): void {
+  void import("./LiveDictation")
+    .then(({ openLiveDictation }) =>
+      openLiveDictation(lang, {
+        browser: () => startBrowserSpeech(lang),
+        record: () => startRecordedDictation(lang),
+      }),
+    )
+    .catch((err: unknown) => {
+      log.error("dictation failed to start", err);
+      showAiToast(t("dictation.error", { error: (err as Error).message }), "error");
+    });
+}
+
+/** The browser's speech service (audio goes to its vendor): never under local-only (1.3); the refusal is logged. */
+export function startBrowserSpeech(lang: string): void {
+  if (getAiPolicy() === "local-only") {
+    recordBrowserService("speech recognition (browser vendor)", "Browser speech recognition (Web Speech API)");
+    showAiToast(t("dictation.localOnlyNoBrowser"), "error");
+    return;
+  }
+  const Ctor = webSpeechCtor();
+  if (!Ctor) {
+    showAiToast(t("toast.speechRecognitionNotSupportedIn"), "error");
+    return;
+  }
+  startWebSpeech(Ctor, lang);
+}
+
+/**
+ * No live engine for this language (plan 1.3): Whisper on this device, in
+ * ~5-second segments. The browser speech service is used only when the
+ * policy is not local-only AND the user agreed — never silently; each use is
+ * recorded in the privacy ledger.
+ */
+function startRecordedDictation(lang: string): void {
   const Ctor = webSpeechCtor();
   const policy = getAiPolicy();
   const engine = chooseDictationEngine(policy, !!Ctor, webSpeechOptedIn());
