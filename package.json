@@ -18,6 +18,7 @@
     "dod": "node scripts/dod.mjs",
     "docs:sync": "node scripts/docs-sync.mjs",
     "docs:complete": "node scripts/docs-complete.mjs",
+    "launch:check": "node scripts/launch-check.mjs",
     "docs:search": "node scripts/docs-search.mjs",
     "tauri": "tauri",
     "tauri:dev": "tauri dev",
