@@ -1,7 +1,7 @@
 {
  "$comment": "The plan's single source (plan 0.6). Edit this file, then `npm run plan` regenerates the board in MASTER_PLAN.md and plan/board.html; CI (`npm run plan:check`) fails when they differ. A task's status is one line: phases[].tasks[].status.",
- "updated": "2026-11-10T01:30",
- "note": "**המצב ב-ב׳ 9.11 23:05:** אף PR לא מוזג מאז 17.10 (main = 552ea5b7). סשן 24.10 פתח #282–#316 (כ-30 משימות) — נרשמו כאן עכשיו. כמעט כל ה-PR-ים אדומים משתי סיבות שאינן בקוד: (1) מ-19.10 GitHub מעביר את ubuntu-latest ל-Ubuntu 26 והתקנת Playwright נשברת — #330 מצמיד ל-ubuntu-24.04; (2) תקציבי החבילה (startup 460 KB ותקציבי קובץ) — #330 גם מוסיף annotation שמראה איזה קובץ חורג. **החלטת טל 9.11: לא משתמשים יותר ב-GitHub Actions** — כל commit עם [skip ci], הבדיקות רצות ב-Vercel Sandbox. אזהרה: כל ענף מודד startup לבד (459–460 KB); אחרי 15.1 התוספות מכל השרשראות יצטברו — צריך את #248 או החלטה 15.16 (14) לפני המיזוג.\n\n**מחקר world class (9.11, plan/research-2026-11.md):** ציון ממוצע ב-19 תחומים מול Obsidian, Notion, Logseq, Typora, Word ואחרים — main 3.7 → עם ה-PR-ים הפתוחים 6.6 → כל התוכנית 7.3 → אחרי הגלים W1–W3 9.1. הפערים הגדולים: מסירה (אף PR לא מוזג), קריאה ומחקר (PDF), תאימות לפורמטים של Obsidian, INP ונגישות אמיתית עם קורא מסך (ת״י 5568), שיתוף והרשאות. 65 משימות חדשות בשלושה גלים (W1 ≈173 ש׳, W2 ≈119 ש׳, W3 ≈49 ש׳).\n\n**החלטות 10.11 (Claude, בהסמכת טל ״תחליט לבד כל החלטה״):** כל ההחלטות הפתוחות ב-15.2, 15.9, 15.10, 15.16 הוכרעו (פירוט בפריטים עצמם). נוסף: שער ה-OCR האנגלי (7.5) — ratchet ברמה הנמדדת (≤ 12.5% CER) ויעד ≤ 5% דרך W1.18, בלי להוריד את שער העברית; #271 — טוקן המחקר רק מההגדרות, לא VITE_RESEARCH_TOKEN (שום סוד בבנייה); החבילות שמחכות להתקנה (hash-wasm, @noble/ciphers, @excalidraw/excalidraw, @mlc-ai/web-llm@0.2.86, @capacitor/filesystem, quickjs-emscripten, knip, @citation-js) — מאושרות, כולן MIT / Apache / ISC, יותקנו ב-Vercel Sandbox; baselines ויזואליים — ייווצרו שם; שערי CI בלי Actions — W1.35. **בדיקה אמיתית בלי Actions:** Vercel בונה כל ענף (tsc -b מחמיר כולל בדיקות + vite build): 77 מתוך 86 PR-ים פתוחים ירוקים, 8 אדומים (#257, #261, #274, #277, #279, #280, #336, #347), 1 בתהליך.\n\n**10.11 01:30:** probe על chore/dod: build + budget עוברים ב-Vercel; עם vitest — נכשל (אין לוגים עד ש-Vercel מאושר). 83 מה-PR-ים ה\"אדומים\" ב-Vercel לא נכשלו בקוד — הבנייה שלהם נחסמה במגבלת 100 פריסות ביום (״Deployment rate limited״); כשל אמיתי היה רק ב-#336.",
+ "updated": "2026-11-10T04:30",
+ "note": "**המצב ב-ב׳ 9.11 23:05:** אף PR לא מוזג מאז 17.10 (main = 552ea5b7). סשן 24.10 פתח #282–#316 (כ-30 משימות) — נרשמו כאן עכשיו. כמעט כל ה-PR-ים אדומים משתי סיבות שאינן בקוד: (1) מ-19.10 GitHub מעביר את ubuntu-latest ל-Ubuntu 26 והתקנת Playwright נשברת — #330 מצמיד ל-ubuntu-24.04; (2) תקציבי החבילה (startup 460 KB ותקציבי קובץ) — #330 גם מוסיף annotation שמראה איזה קובץ חורג. **החלטת טל 9.11: לא משתמשים יותר ב-GitHub Actions** — כל commit עם [skip ci], הבדיקות רצות ב-Vercel Sandbox. אזהרה: כל ענף מודד startup לבד (459–460 KB); אחרי 15.1 התוספות מכל השרשראות יצטברו — צריך את #248 או החלטה 15.16 (14) לפני המיזוג.\n\n**מחקר world class (9.11, plan/research-2026-11.md):** ציון ממוצע ב-19 תחומים מול Obsidian, Notion, Logseq, Typora, Word ואחרים — main 3.7 → עם ה-PR-ים הפתוחים 6.6 → כל התוכנית 7.3 → אחרי הגלים W1–W3 9.1. הפערים הגדולים: מסירה (אף PR לא מוזג), קריאה ומחקר (PDF), תאימות לפורמטים של Obsidian, INP ונגישות אמיתית עם קורא מסך (ת״י 5568), שיתוף והרשאות. 65 משימות חדשות בשלושה גלים (W1 ≈173 ש׳, W2 ≈119 ש׳, W3 ≈49 ש׳).\n\n**החלטות 10.11 (Claude, בהסמכת טל ״תחליט לבד כל החלטה״):** כל ההחלטות הפתוחות ב-15.2, 15.9, 15.10, 15.16 הוכרעו (פירוט בפריטים עצמם). נוסף: שער ה-OCR האנגלי (7.5) — ratchet ברמה הנמדדת (≤ 12.5% CER) ויעד ≤ 5% דרך W1.18, בלי להוריד את שער העברית; #271 — טוקן המחקר רק מההגדרות, לא VITE_RESEARCH_TOKEN (שום סוד בבנייה); החבילות שמחכות להתקנה (hash-wasm, @noble/ciphers, @excalidraw/excalidraw, @mlc-ai/web-llm@0.2.86, @capacitor/filesystem, quickjs-emscripten, knip, @citation-js) — מאושרות, כולן MIT / Apache / ISC, יותקנו ב-Vercel Sandbox; baselines ויזואליים — ייווצרו שם; שערי CI בלי Actions — W1.35. **בדיקה אמיתית בלי Actions:** Vercel בונה כל ענף (tsc -b מחמיר כולל בדיקות + vite build): 77 מתוך 86 PR-ים פתוחים ירוקים, 8 אדומים (#257, #261, #274, #277, #279, #280, #336, #347), 1 בתהליך.\n\n**10.11 01:30:** probe על chore/dod: build + budget עוברים ב-Vercel; עם vitest — נכשל (אין לוגים עד ש-Vercel מאושר). 83 מה-PR-ים ה\"אדומים\" ב-Vercel לא נכשלו בקוד — הבנייה שלהם נחסמה במגבלת 100 פריסות ביום (״Deployment rate limited״); כשל אמיתי היה רק ב-#336.\n\n**10.11 04:00 — Vercel חסם:** מגבלת השימוש של חשבון Hobby נוצלה (402 payment_required, מתאפס ב-1.12): אי אפשר לפתוח Sandbox חדש. מה שנבדק עד עכשיו נבדק במלואו; מה שלא — מחכה. החלטה של טל: לשדרג ל-Pro, או לחכות ל-1.12 (בינתיים בדיקות node בלבד).",
  "start": "2026-10-18T08:00",
  "buffer": 0.35,
  "ownerWindow": [
@@ -2608,7 +2608,7 @@
       "5.7"
      ],
      "priority": "P1",
-     "status": "⏳ #336 feat/local-fim (Ollama suffix על qwen2.5-coder, debounce 150ms, אף הקשה לא מתחילה הורדה; ✅* — 15.17: npm run bench:fim -- --assert 300) — נבדק רק ב-Node נקי; typecheck/vitest/build/Playwright ממתינים ל-Vercel Sandbox",
+     "status": "⏳ #336 feat/local-fim (Ollama suffix על qwen2.5-coder, debounce 150ms, אף הקשה לא מתחילה הורדה; ✅* — 15.17: npm run bench:fim -- --assert 300) — נבדק רק ב-Node נקי; typecheck/vitest/build/Playwright ממתינים ל-Vercel Sandbox · 10.11: כשל ה-Vercel (TS2493 ב-fim.test) תוקן @49e1c83d; בדיקה מלאה ב-Vercel Sandbox (Node 24): typecheck 0, vitest 324 קבצים/3397, startup 443.0/460, e2e fim chromium 1/1",
      "new": true,
      "was": "5.9",
      "source": "מחליף Copilot",
@@ -4317,7 +4317,9 @@
       "בדיקת הכספת מזהה 12/12 סוגי פגמים שנשתלו בכספת בדיקה",
       "בדיקה על 10,000 פתקים < 5 שניות"
      ],
-     "why": "קבצים אמיתיים בדיסק (4.2–4.4) מעבירים את הסיכון מ-OPFS למערכת הקבצים; שמירה חצויה היא מסלול האובדן הנפוץ אחרי פריצה או קריסה."
+     "why": "קבצים אמיתיים בדיסק (4.2–4.4) מעבירים את הסיכון מ-OPFS למערכת הקבצים; שמירה חצויה היא מסלול האובדן הנפוץ אחרי פריצה או קריסה.",
+     "branch": "feat/atomic-writes",
+     "status": "⏳ #356 **מוכן למיזוג** — (על #344; כתיבה אטומית + בדיקת שלמות כספת; Vercel Sandbox (Node 24): typecheck 0, vitest 3378/3379 (snapshot פקודות עודכן), startup 459.6/460, test:crash 1000 SIGKILL / 0 קבצים פגומים, e2e chromium 18/18; dod: npm run test:crash · npx vitest run src/__tests__/vaultAtomic.test.ts src/__tests__/vaultIntegrity.test.ts src/__tests__/vaultBackend.contract.test.ts · npm run build && npm run budget; לא נבדק: cargo/Android, Safari אמיתי)"
     },
     {
      "id": "W1.6",
@@ -4415,7 +4417,9 @@
       "0 מיזוגים ששוברים frontmatter (YAML תקין ב-100%)",
       "אותו מנוע משמש 3 המסלולים (בדיקה סטטית)"
      ],
-     "why": "כל דיאלוג קונפליקט מיותר הוא פגיעה באמון; Logseq ו-Obsidian Sync ממזגים טקסט אוטומטית."
+     "why": "כל דיאלוג קונפליקט מיותר הוא פגיעה באמון; Logseq ו-Obsidian Sync ממזגים טקסט אוטומטית.",
+     "branch": "feat/auto-merge",
+     "status": "⏳ #366 **מוכן למיזוג** — (על #275 + safe-git; מיזוג תלת-כיווני לפני דיאלוג: 459/500 עריכות מקבילות (91.8%) בלי דיאלוג, front matter תקין תמיד; Vercel Sandbox (Node 24): typecheck 0, vitest 334/3395, startup 458.9/460; dod: npx vitest run src/__tests__/textMerge.test.ts · npm run build && npm run budget; אין e2e)"
     },
     {
      "id": "W1.10",
@@ -4462,7 +4466,9 @@
       "פתיחה ושמירה בלי עריכה: 20/20 זהים סמנטית (YAML שווה)",
       "≥ 90% מפונקציות הנוסחה המתועדות של Bases נתמכות"
      ],
-     "why": "Bases הוא תקן הדה-פקטו למסדי נתונים על Markdown; בלי תאימות, מעבר מ-Obsidian מאבד את כל התצוגות."
+     "why": "Bases הוא תקן הדה-פקטו למסדי נתונים על Markdown; בלי תאימות, מעבר מ-Obsidian מאבד את כל התצוגות.",
+     "branch": "feat/obsidian-bases",
+     "status": "⏳ #358 feat/obsidian-bases (על #267; קריאה, תצוגה ועריכה של קובצי .base, 66/68 פונקציות, round-trip 20/20; Vercel Sandbox (Node 24): typecheck 0, vitest 322/3240, startup 459.2/460, obsidian-bases e2e chromium+firefox; dodMock — הציפיות נגזרו מהתיעוד; בעלים: לפתוח את 20 הקבצים ב-Obsidian 1.14 ולהשוות ל-expected.json)"
     },
     {
      "id": "W1.12",
@@ -4510,7 +4516,9 @@
       "0 בקשות רשת בזמן הלכידה הקולית ב-local-only (יומן הפרטיות)",
       "פתק קולי של 60 שניות: WER ≤ יעד 6.1"
      ],
-     "why": "Obsidian Mobile 1.15 הוסיף לכידה קולית עם תמלול גם ממסך הנעילה; Heptabase ו-Tana מובילים בקול."
+     "why": "Obsidian Mobile 1.15 הוסיף לכידה קולית עם תמלול גם ממסך הנעילה; Heptabase ו-Tana מובילים בקול.",
+     "branch": "feat/voice-capture",
+     "status": "⏳ #376 (על #268; הקלטה ותמלול מקומי לתיבת הלכידה, /?capture=voice וקיצור PWA; Vercel Sandbox (Node 24): vitest 317/3152, dod 27/27, e2e chromium 4/4 (964ms ללחיצה→הקלטה, 0 בקשות יוצאות); **תקציב startup נכשל 460.1/460** — צריך מחרוזות אנגליות עצלות או פינוי בתים)"
     },
     {
      "id": "W1.14",
@@ -4630,7 +4638,9 @@
       "CER בעברית לא נפגע (≤ 2.66%)",
       "העתקה מ-PDF סרוק בעברית: סדר מילים נכון ב-≥ 95% מהשורות"
      ],
-     "why": "המדידה של 7.5 נכשלה בדיוק במקרה הנפוץ בעברית: מונחים לועזיים בתוך משפט."
+     "why": "המדידה של 7.5 נכשלה בדיוק במקרה הנפוץ בעברית: מונחים לועזיים בתוך משפט.",
+     "branch": "feat/ocr-mixed-layout",
+     "status": "⏳ #357 feat/ocr-mixed-layout (על #278; קריאה חוזרת של מילים לועזיות, חיתוך עמודות וסדר RTL, שכבת טקסט; בדיקה מלאה ב-Vercel Sandbox (Node 24): typecheck 0, vitest 319/3133, startup 457.5/460, ocr.spec 1/1; שער ה-CER בדפדפן: אנגלית 0.00%/0.00% (היה 12.33%/40.54%), עברית 1.37%/0.96%; יעדי העמודות לא הושגו בבדיקה מקומית: עברית 8.38%, אנגלית 18.83%, סדר מילים 85.1%; חסר split mixed — בעלים: node scripts/golden/build.mjs ocr-he --split dev)"
     },
     {
      "id": "W1.19",
@@ -4676,7 +4686,9 @@
       "100% מהגרסאות ברישום עם תוצאת סריקה וכרטיס",
       "מסך ההתקנה מציג את כל ההרשאות (e2e על 3 התוספים לדוגמה)"
      ],
-     "why": "Obsidian הכריז במאי 2026 על סריקה אוטומטית לכל גרסה וגילוי הרשאות; אצלנו ה-sandbox חזק יותר — צריך גם להראות את זה."
+     "why": "Obsidian הכריז במאי 2026 על סריקה אוטומטית לכל גרסה וגילוי הרשאות; אצלנו ה-sandbox חזק יותר — צריך גם להראות את זה.",
+     "branch": "feat/plugin-trust",
+     "status": "⏳ #367 **מוכן למיזוג** — (על #289; מסך הרשאות לפני התקנה + סריקה לכל גרסה; גם מחזיר את #289 מתחת לתקציב (460.4→459.2); Vercel Sandbox (Node 24): typecheck 0, vitest 331/3475, scan-plugins --check, e2e chromium/firefox/webkit; בעלים: חתימת תוספי הדוגמה במפתח שלך)"
     },
     {
      "id": "W1.21",
@@ -4748,7 +4760,9 @@
       "400% zoom: 0 גלילה אופקית ב-10 משטחים (e2e)",
       "הצהרת נגישות מפורסמת ומעודכנת בכל גרסה"
      ],
-     "why": "axe תופס כ-30–40% מהבעיות; קוראי מסך בעברית הם המקום שבו כולם נכשלים — ויש חובה חוקית בישראל."
+     "why": "axe תופס כ-30–40% מהבעיות; קוראי מסך בעברית הם המקום שבו כולם נכשלים — ויש חובה חוקית בישראל.",
+     "branch": "feat/a11y-hebrew-sr",
+     "status": "⏳ #360 feat/a11y-hebrew-sr (על #290; הכרזות לקורא מסך בעברית, reflow ב-320px תוקן, הצהרת נגישות לפי ת״י 5568; Vercel Sandbox (Node 24): typecheck 0, vitest 337/3533, startup 458.9/460, reflow + sr-announce בשלושה דפדפנים; dodMock — בעלים: להריץ את פרוטוקול NVDA/VoiceOver/TalkBack ולמנות רכז נגישות)"
     },
     {
      "id": "W1.24",
@@ -4847,7 +4861,9 @@
       "שתי בניות של אותו commit = אותו sha256 לכל קובץ ב-dist",
       "כל שחרור עם SBOM וחתימה שנבדקת בסקריפט"
      ],
-     "why": "Standard Notes ו-Anytype מפרסמים מודל אבטחה ובדיקות; פרטיות כטענה מרכזית דורשת הוכחה שאפשר לבדוק מבחוץ."
+     "why": "Standard Notes ו-Anytype מפרסמים מודל אבטחה ובדיקות; פרטיות כטענה מרכזית דורשת הוכחה שאפשר לבדוק מבחוץ.",
+     "branch": "chore/threat-model",
+     "status": "⏳ #361 (על #236; מודל איום, fuzzing של 5 מפענחים (1M קלטים: 0 קריסות), חתימת שחרורים מקומית; **לא עומד בשניים:** 7 קלטי Markdown איטיים (0.5–2.8s, נרשמו כממצא עד 2027-02-07) ו-2–3 קובצי .map לא משתחזרים; בעלים: מפתח שחרור offline — node scripts/supply-chain/keys.mjs)"
     },
     {
      "id": "W1.28",
@@ -4914,7 +4930,9 @@
      "acceptance": [
       "e2e: אישור שרת, ביטול, והתמונה נחסמת שוב"
      ],
-     "why": "החלטה 10.11 על פריט בעלים"
+     "why": "החלטה 10.11 על פריט בעלים",
+     "branch": "feat/image-hosts",
+     "status": "⏳ #372 (על #221; מסך שרתי תמונות מותרים עם ביטול לכל שרת / הכול, נפתח מהפלטה; רק i18n נבדק — ה-Sandbox חסום (מגבלת שימוש של Vercel עד 1.12))"
     },
     {
      "id": "W1.31",
@@ -4933,7 +4951,9 @@
      "acceptance": [
       "grep בבניית הייצור לא מוצא agentReview"
      ],
-     "why": "החלטה 10.11 על פריט בעלים"
+     "why": "החלטה 10.11 על פריט בעלים",
+     "branch": "feat/agent-review-dev-only",
+     "status": "⏳ #368 **מוכן למיזוג** — (על #223; agentReview רק ב-DEV או VITE_LUMEN_TEST_SURFACE=1 + check:test-surface; Vercel Sandbox (Node 24): typecheck 0, vitest 316/3033, budget 441.8/460, 0 מופעים ב-dist, e2e 5/5 בשלושה דפדפנים; dod: npx vitest run src/__tests__/testSurfaceGate.test.ts src/__tests__/agentReviewPanel.test.tsx · npm run build && npm run check:test-surface · npx playwright test e2e/agent-review.spec.ts e2e/paste-html.spec.ts)"
     },
     {
      "id": "W1.32",
@@ -5046,7 +5066,9 @@
       "0 כתיבות בלי אישור (e2e)",
       "ריצה על 1,000 פתקים במודל מקומי < 15 דקות על Mac M1"
      ],
-     "why": "Heptabase הוסיף ב-2026 סוכן שמארגן את כל בסיס הידע; אצלנו אפשר לעשות את זה מקומית ובאישור."
+     "why": "Heptabase הוסיף ב-2026 סוכן שמארגן את כל בסיס הידע; אצלנו אפשר לעשות את זה מקומית ובאישור.",
+     "branch": "feat/vault-organizer",
+     "status": "⏳ #374 (על #315 + #223 + #334; סוכן ארגון: קישורים, תגיות, מיזוגים ו-MOC עם ביטחון והסבר, דרך מסך האישור; Vercel Sandbox (Node 24) @9b1f613: vitest 329/3626, budget 446.4; @58531c3: dod 10/10, e2e chromium+firefox 4/4; ✅* — כספת זהב סינתטית; בעלים: דירוג 50 הצעות (יעד ≥80%) ו-Ollama qwen2.5:7b על 1000 פתקים)"
     },
     {
      "id": "W2.2",
@@ -5071,7 +5093,9 @@
       "עדכון הסרגל < 150ms אחרי עצירת הקלדה",
       "0 עיכוב הקלדה (keypress→paint ללא שינוי, W1.22)"
      ],
-     "why": "Reor בנה את כל המוצר סביב קשרים סמנטיים מקומיים; אצלנו יש את האינדקס — חסר הממשק."
+     "why": "Reor בנה את כל המוצר סביב קשרים סמנטיים מקומיים; אצלנו יש את האינדקס — חסר הממשק.",
+     "branch": "feat/related-notes",
+     "status": "⏳ #375 (על #362; פאנל פתקים קשורים + אזכורים לא מקושרים; Recall@5 100% על 100 זוגות זהב בנויים, 4–6ms מול 10,000 פתקים; Vercel Sandbox (Node 24): dod 23/23, e2e chromium+firefox 2/2; vitest מלא ובנייה לא הורצו על הראש; ✅* — בעלים: מבחן latency של W1.22 עם הפאנל פתוח)"
     },
     {
      "id": "W2.3",
@@ -5095,7 +5119,9 @@
       "כתיבה של לקוח MCP לא נשמרת בלי אישור (בדיקה)",
       "כבוי כברירת מחדל; הפעלה מפורשת לכל לקוח"
      ],
-     "why": "Obsidian 1.12 (CLI), Bear 2.8 (CLI + MCP), Logseq ו-Heptabase (MCP/CLI) — זה הפך לציפייה בסיסית ב-2026."
+     "why": "Obsidian 1.12 (CLI), Bear 2.8 (CLI + MCP), Logseq ו-Heptabase (MCP/CLI) — זה הפך לציפייה בסיסית ב-2026.",
+     "branch": "feat/vault-mcp-cli",
+     "status": "⏳ #369 **מוכן למיזוג** — (על #223; שרת MCP + CLI לכספת: כבוי כברירת מחדל, הרשאות לכל לקוח, כתיבה רק כהצעה שמחכה לאישור; Vercel Sandbox (Node 24): typecheck 0, vitest 317/3047, budget 441.9, e2e chromium+firefox 5/5, stdio עם SDK אמיתי, חיפוש ב-10,000 פתקים 2–3ms; dod: npx vitest run src/__tests__/mcpVault.test.ts src/__tests__/mcpInbox.test.ts src/__tests__/mcpFrontmatter.test.ts · npm --prefix mcp-server ci && npm --prefix mcp-server run test:stdio · npx playwright test e2e/mcp-approval.spec.ts; בעלים: חיבור Claude Desktop אמיתי, npm publish)"
     },
     {
      "id": "W2.4",
@@ -5144,7 +5170,9 @@
       "משפט של 20 מילים < 500ms ב-WebGPU, < 2s ב-WASM",
       "100% שימור עיצורים"
      ],
-     "why": "Dicta היא המובילה בניקוד; Nakdimon לבדו לא מספיק כדי לטעון לרמה עולמית בעברית."
+     "why": "Dicta היא המובילה בניקוד; Nakdimon לבדו לא מספיק כדי לטעון לרמה עולמית בעברית.",
+     "branch": "feat/nikud-dicta",
+     "status": "⏳ #359 feat/nikud-dicta (על #293; DictaBERT-char-menaked מאחורי seam + חלופות לכל מילה; גם מוריד את #293 מ-460.5 ל-459.4 KB; בדיקה מלאה ב-Vercel Sandbox (Node 24): typecheck 0, vitest 327 קבצים; דיוק ≥95% ו-latency לא נמדדו — המודל ב-HF; dodMock; בעלים: python -I scripts/models/export-menaked.py --revision <sha> --out out/dictabert-char-menaked)"
     },
     {
      "id": "W2.6",
@@ -5215,7 +5243,9 @@
       "50 מחרוזות זהב בפריסה שגויה: התוצאה הנכונה ב-3 הראשונות ב-≥ 95%",
       "0 התנגשויות קיצורים (בדיקה)"
      ],
-     "why": "כל משתמש עברי מקליד בפריסה הלא נכונה כמה פעמים ביום; אף מתחרה לא פותר את זה."
+     "why": "כל משתמש עברי מקליד בפריסה הלא נכונה כמה פעמים ביום; אף מתחרה לא פותר את זה.",
+     "branch": "feat/hebrew-layout",
+     "status": "⏳ #363 feat/hebrew-layout (על #208; קיצורים לפי keyCode בפריסה עברית + זיהוי פריסה שגויה; תוקן גם ⇧⌘F כפול; Vercel Sandbox (Node 24): typecheck 0, vitest 316/3006, startup 457.5/460, hebrew-layout 8 עברו (מקרה undo ב-webkit מדולג); בעלים: Safari עם פריסה עברית אמיתית)"
     },
     {
      "id": "W2.9",
@@ -5238,7 +5268,9 @@
       "0 שינויים בתוך בלוקי קוד, קישורים ו-frontmatter",
       "ביטול (Ctrl+Z) מחזיר את התו המקורי מיד"
      ],
-     "why": "Word עושה את זה עשרות שנים; עורכי Markdown לא — וזה מה שגורם לטקסט עברי להיראות מקצועי."
+     "why": "Word עושה את זה עשרות שנים; עורכי Markdown לא — וזה מה שגורם לטקסט עברי להיראות מקצועי.",
+     "branch": "feat/hebrew-typography",
+     "status": "⏳ #365 feat/hebrew-typography **מוכן למיזוג** — (על #252; Vercel Sandbox (Node 24) @125e482: typecheck 0, vitest 317/3137, build + budget 458.8/460, e2e 9/9 בשלושה דפדפנים; dod: npx vitest run src/__tests__/hebrewTypography.test.ts · npx playwright test e2e/hebrew-typography.spec.ts)"
     },
     {
      "id": "W2.10",
@@ -5286,7 +5318,9 @@
       "כתיב מלא/חסר: 30/30 זוגות זהב נמצאים",
       "חיפוש < 100ms על 10,000 פתקים"
      ],
-     "why": "כתיב מלא/חסר ונטייה הם הסיבה שחיפוש עברי נכשל אצל כל המתחרים."
+     "why": "כתיב מלא/חסר ונטייה הם הסיבה שחיפוש עברי נכשל אצל כל המתחרים.",
+     "branch": "feat/hebrew-search-morph",
+     "status": "⏳ #362 feat/hebrew-search-morph (על #345; למטיזציה, כתיב מלא/חסר, מילים נרדפות, עברית→אנגלית; HeQ dev 1.0000→1.0000, probe מורפולוגיה 0.9004→0.9544, מלא/חסר 2/30→30/30, עברית→אנגלית 0/5→5/5 (probe פיתוח, לא held-out); בדיקה מלאה ב-Vercel Sandbox (Node 24): typecheck 0, vitest 326/3406, startup 442.9/460, search-flash 1/1; dod: npx vitest run src/__tests__/hebrewSearch.test.ts src/__tests__/hebrewMorph.test.ts src/__tests__/bm25Golden.test.ts)"
     },
     {
      "id": "W2.12",
@@ -5310,7 +5344,9 @@
       "עדכון אחרי שמירה < 100ms",
       "0 eval (בדיקה סטטית)"
      ],
-     "why": "Dataview הוא אחד התוספים הנפוצים ב-Obsidian; כספות שמגיעות משם מלאות בבלוקים כאלה."
+     "why": "Dataview הוא אחד התוספים הנפוצים ב-Obsidian; כספות שמגיעות משם מלאות בבלוקים כאלה.",
+     "branch": "feat/embedded-queries",
+     "status": "⏳ #371 (על #306; בלוקי query ו-dataview + חיפושים שמורים; Vercel Sandbox (Node 24) @e15ff94: 98/99 (30 שאילתות זהב, 20 בלוקי Dataview), התיקון @e96b2e9 לא נבדק — ה-Sandbox חסום (מגבלת שימוש של Vercel עד 1.12))"
     },
     {
      "id": "W2.13",
@@ -5333,7 +5369,9 @@
       "10 פעולות הבלוק עובדות בשני העורכים, ב-RTL וב-LTR",
       "קיפול נשמר לכל פתק ולא נכנס לקובץ"
      ],
-     "why": "Logseq, Tana ו-Workflowy מראים שכתיבה במתאר היא דרך עבודה נפרדת; אפשר לתת אותה בלי לנעול את הקובץ."
+     "why": "Logseq, Tana ו-Workflowy מראים שכתיבה במתאר היא דרך עבודה נפרדת; אפשר לתת אותה בלי לנעול את הקובץ.",
+     "branch": "feat/outline-mode",
+     "status": "⏳ #370 **מוכן למיזוג** — (על #252; מצב מתאר: 10 פעולות בלוק בשני העורכים, קיפולים לכל פתק מחוץ לקובץ; Vercel Sandbox (Node 24) @f662bc0: typecheck 0, vitest 317/3141, startup 458.7/460, i18n + hygiene, e2e 4/4 בכל דפדפן; dod: npx vitest run src/__tests__/outlineMode.test.ts · npx playwright test e2e/outline-mode.spec.ts; בעלים: מקשי macOS על Mac אמיתי)"
     },
     {
      "id": "W2.14",
@@ -5357,7 +5395,9 @@
       "0 בקשות ענן ב-local-only (יומן הפרטיות)",
       "קיצוץ עם פרשנות < 10s במודל 3B על מחשב נייד"
      ],
-     "why": "Interpreter של Obsidian Web Clipper תומך ב-Ollama אבל דורש הגדרת OLLAMA_ORIGINS וחלון 2048; אצלנו זה יכול לעבוד מהקופסה."
+     "why": "Interpreter של Obsidian Web Clipper תומך ב-Ollama אבל דורש הגדרת OLLAMA_ORIGINS וחלון 2048; אצלנו זה יכול לעבוד מהקופסה.",
+     "branch": "feat/clip-interpreter",
+     "status": "⏳ #364 feat/clip-interpreter (על #308; משתני פרומפט במודל מקומי בלבד, guard להזרקה, תבניות YouTube/arXiv/GitHub; chunk הקליפ פוצל 103→99.6 KB; בדיקה מלאה ב-Vercel Sandbox (Node 24): typecheck 0, vitest 322 קבצים, startup 444.2/460, clipper-v2 1/1; ✅* לכל היותר — בעלים: Ollama qwen2.5:3b על 3 אתרים אמיתיים)"
     },
     {
      "id": "W2.15",
