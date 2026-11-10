@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-11-10T01:00:30.992Z",
+  "generated_at": "2026-11-10T03:39:22.221Z",
   "source": "src/i18n/index.ts (en bundle) + src/i18n/lazy/*.json",
-  "count": 1455,
+  "count": 1478,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -5822,6 +5822,47 @@
       "vars": []
     },
     {
+      "key": "cmd.collab.namedVersions",
+      "en": "Named versions…",
+      "vars": []
+    },
+    {
+      "key": "cmd.collab.namedVersions.hint",
+      "en": "Name the current text (\"Before submission\") and compare versions word by word",
+      "vars": []
+    },
+    {
+      "key": "cmd.suggest.acceptAuthor",
+      "en": "Accept all from {author} ({count})",
+      "vars": [
+        "author",
+        "count"
+      ]
+    },
+    {
+      "key": "cmd.suggest.rejectAuthor",
+      "en": "Reject all from {author} ({count})",
+      "vars": [
+        "author",
+        "count"
+      ]
+    },
+    {
+      "key": "cmd.suggest.byAuthor.hint",
+      "en": "Only this author's suggestions; everyone else's stay",
+      "vars": []
+    },
+    {
+      "key": "suggest.author.ai",
+      "en": "AI",
+      "vars": []
+    },
+    {
+      "key": "suggest.author.unknown",
+      "en": "no author",
+      "vars": []
+    },
+    {
       "key": "errorBoundary.heading",
       "en": "Rendering Error",
       "vars": []
@@ -7804,6 +7845,94 @@
       "key": "share.error.no-share",
       "en": "This link doesn't exist (any more).",
       "vars": []
+    },
+    {
+      "key": "versions.title",
+      "en": "Named versions",
+      "vars": []
+    },
+    {
+      "key": "versions.close",
+      "en": "Close",
+      "vars": []
+    },
+    {
+      "key": "versions.name",
+      "en": "Version name",
+      "vars": []
+    },
+    {
+      "key": "versions.namePlaceholder",
+      "en": "Before submission",
+      "vars": []
+    },
+    {
+      "key": "versions.save",
+      "en": "Save this version",
+      "vars": []
+    },
+    {
+      "key": "versions.editorsOnly",
+      "en": "Only editors can name versions. You can still compare them.",
+      "vars": []
+    },
+    {
+      "key": "versions.empty",
+      "en": "No named versions yet.",
+      "vars": []
+    },
+    {
+      "key": "versions.by",
+      "en": "{author}, {date}",
+      "vars": [
+        "author",
+        "date"
+      ]
+    },
+    {
+      "key": "versions.unknownAuthor",
+      "en": "someone",
+      "vars": []
+    },
+    {
+      "key": "versions.current",
+      "en": "Current text",
+      "vars": []
+    },
+    {
+      "key": "versions.compare",
+      "en": "Compare",
+      "vars": []
+    },
+    {
+      "key": "versions.from",
+      "en": "From",
+      "vars": []
+    },
+    {
+      "key": "versions.to",
+      "en": "To",
+      "vars": []
+    },
+    {
+      "key": "versions.stats",
+      "en": "{added} words added, {removed} removed",
+      "vars": [
+        "added",
+        "removed"
+      ]
+    },
+    {
+      "key": "versions.same",
+      "en": "No differences.",
+      "vars": []
+    },
+    {
+      "key": "versions.saved",
+      "en": "Saved \"{name}\".",
+      "vars": [
+        "name"
+      ]
     }
   ]
 }

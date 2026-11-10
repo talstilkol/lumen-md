@@ -54,6 +54,7 @@ export default defineConfig({
             { label: "Real-time WebRTC", slug: "collab/webrtc" },
             { label: "End-to-end encryption", slug: "collab/encryption" },
             { label: "Sharing, roles and comment threads", slug: "collab/sharing", translations: { he: "שיתוף, תפקידים ותגובות" } },
+            { label: "Suggestions and named versions", slug: "collab/suggestions-versions", translations: { he: "הצעות וגרסאות בשם" } },
           ],
         },
         {
