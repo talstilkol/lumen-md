@@ -63,6 +63,7 @@ export default defineConfig({
             { label: "AI cost: usage meter + answer cache", slug: "ai/cost" },
             { label: "Research + citation checks", slug: "ai/research" },
             { label: "MCP integration (Claude Desktop, Cursor)", slug: "ai/mcp" },
+            { label: "Model credits", slug: "ai/model-credits", translations: { he: "קרדיטים למודלים" } },
           ],
         },
         {
