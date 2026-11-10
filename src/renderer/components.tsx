@@ -20,6 +20,7 @@ const HtmlPreviewBlock = lazy(() => import("../plugins/HtmlPreviewBlock"));
 const BibtexBlock = lazy(() => import("../plugins/BibtexBlock"));
 const DataBlock = lazy(() => import("../plugins/DataBlock"));
 const DatabaseBlock = lazy(() => import("../views/DatabaseBlock"));
+const QueryBlock = lazy(() => import("../views/QueryBlock"));
 const LiveCssBlock = lazy(() => import("../plugins/LiveCssBlock"));
 const LiveJsBlock = lazy(() => import("../plugins/LiveJsBlock"));
 const LivePyBlock = lazy(() => import("../plugins/LivePyBlock"));
@@ -311,6 +312,11 @@ const Database = withSuspense<BlockProps>(
   "database",
 );
 
+const Query = withSuspense<BlockProps>(
+  (props) => <QueryBlock source={getText(props.children)} lang={props.lang ?? "query"} />,
+  "query",
+);
+
 const LiveCss = withSuspense<BlockProps>(
   (props) => <LiveCssBlock source={getText(props.children)} meta={props.meta} />,
   "live-css",
@@ -490,6 +496,8 @@ export const components: Record<string, LumenBlock> = {
   "lumen-bibtex": Bibtex as unknown as LumenBlock,
   "lumen-data": DataBlockComp as unknown as LumenBlock,
   "lumen-database": Database as unknown as LumenBlock,
+  "lumen-query": Query as unknown as LumenBlock,
+  "lumen-dataview": Query as unknown as LumenBlock,
   "lumen-livecss": LiveCss as unknown as LumenBlock,
   "lumen-livejs": LiveJs as unknown as LumenBlock,
   "lumen-livesvg": LiveSvg as unknown as LumenBlock,

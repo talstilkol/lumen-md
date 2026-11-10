@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { Suspense, lazy, useEffect, useMemo, useRef, useState } from "react";
 import {
   ChevronDown,
   ChevronRight,
@@ -28,6 +28,8 @@ import { FileContextMenu, buildFileActions } from "./FileContextMenu";
 import { useAppStore } from "../store/useStore";
 import { movedPath, safeMove, trashPaths, undoTrash, type MoveResult } from "../storage/fileOps";
 import { flushActiveWorkspaceDoc, syncOpenDocsAfterMove } from "../store/openDocs";
+// Saved searches (plan W2.12): a small chunk of its own, off the startup path.
+const SavedSearches = lazy(() => import("./SavedSearches"));
 import type { TrashItem } from "../storage/trash";
 import { toast, useToastStore } from "../store/useToastStore";
 import { onWorkspaceChanged } from "../storage/workspaceEvents";
@@ -507,6 +509,9 @@ export function FileTree({
           </button>
         </div>
       </div>
+      <Suspense fallback={null}>
+        <SavedSearches />
+      </Suspense>
       {tagFilter && (
         <div
           role="status"

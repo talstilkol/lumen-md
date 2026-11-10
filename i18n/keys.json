@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-10-24T18:35:31.033Z",
+  "generated_at": "2026-11-09T23:44:01.920Z",
   "source": "src/i18n/index.ts (en bundle)",
-  "count": 1431,
+  "count": 1448,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -301,6 +301,99 @@
       "key": "search.operatorsHint",
       "en": "Operators: tag:name  path:folder  \"exact phrase\"  /regex/  -exclude",
       "vars": []
+    },
+    {
+      "key": "query.title",
+      "en": "Query",
+      "vars": []
+    },
+    {
+      "key": "query.dataviewTitle",
+      "en": "Dataview",
+      "vars": []
+    },
+    {
+      "key": "query.count",
+      "en": "{count} notes",
+      "vars": [
+        "count"
+      ]
+    },
+    {
+      "key": "query.none",
+      "en": "No notes match.",
+      "vars": []
+    },
+    {
+      "key": "query.loading",
+      "en": "Running the query…",
+      "vars": []
+    },
+    {
+      "key": "query.error",
+      "en": "Can't run this query: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "query.badOptions",
+      "en": "Ignored: {options}",
+      "vars": [
+        "options"
+      ]
+    },
+    {
+      "key": "query.empty",
+      "en": "Write a search in the block: words, tag:, path:, \"…\", /regex/, -",
+      "vars": []
+    },
+    {
+      "key": "query.col.note",
+      "en": "Note",
+      "vars": []
+    },
+    {
+      "key": "query.col.folder",
+      "en": "Folder",
+      "vars": []
+    },
+    {
+      "key": "query.col.modified",
+      "en": "Modified",
+      "vars": []
+    },
+    {
+      "key": "query.col.tags",
+      "en": "Tags",
+      "vars": []
+    },
+    {
+      "key": "search.save",
+      "en": "Save search",
+      "vars": []
+    },
+    {
+      "key": "search.unsave",
+      "en": "Remove from saved searches",
+      "vars": []
+    },
+    {
+      "key": "search.savedLabel",
+      "en": "Saved",
+      "vars": []
+    },
+    {
+      "key": "search.savedTitle",
+      "en": "Saved searches",
+      "vars": []
+    },
+    {
+      "key": "search.removeSaved",
+      "en": "Remove saved search {name}",
+      "vars": [
+        "name"
+      ]
     },
     {
       "key": "search.unavailable",
