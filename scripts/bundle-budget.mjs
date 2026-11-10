@@ -137,6 +137,8 @@ async function main() {
   }
 
   let failed = 0;
+  /** Every failure, repeated in one block at the end of the output. */
+  const failures = [];
   let total = 0;
   /** Gzipped KB per budget class, for --json. */
   const classes = {};
@@ -158,6 +160,7 @@ async function main() {
     const ok = kb <= rule.budgetKb;
     if (!ok) {
       failed++;
+      failures.push(`${rule.name}: ${file} ${kb.toFixed(1)} KB / ${rule.budgetKb} KB`);
       // An annotation, so the failing file shows on the PR without the job log.
       if (process.env.GITHUB_ACTIONS) console.log(`::error title=bundle budget::${rule.name}: ${file} is ${kb.toFixed(1)} KB gzipped, budget ${rule.budgetKb} KB`);
     }
@@ -183,6 +186,7 @@ async function main() {
   }
   if (tldrawHits.length) {
     failed++;
+    failures.push(`tldraw in the build output: ${tldrawHits.join(", ")}`);
     console.log(`  ✗ tldraw is in the build output: ${tldrawHits.join(", ")}`);
   } else console.log("  ✓ tldraw absent from the build output");
 
@@ -197,7 +201,10 @@ async function main() {
     let sum = 0;
     for (const f of startup) sum += gzipSync(await fs.readFile(path.join(DIST, f))).length / 1024;
     const ok = sum <= STARTUP_BUDGET_KB;
-    if (!ok) failed++;
+    if (!ok) {
+      failed++;
+      failures.push(`startup total: ${sum.toFixed(1)} KB / ${STARTUP_BUDGET_KB} KB`);
+    }
     console.log(`  ${ok ? "✓" : "✗"} startup total (${startup.length} files) ${format(sum)} / ${format(STARTUP_BUDGET_KB)}`);
     const jsonAt0 = process.argv.indexOf("--json");
     if (jsonAt0 !== -1) classes["startup total"] = { kb: sum, files: startup.length };
@@ -211,6 +218,8 @@ async function main() {
     await fs.writeFile(process.argv[jsonAt + 1], JSON.stringify(out, null, 2) + "\n");
   }
   if (failed > 0) {
+    // One summary at the very end, so a long build log needs no scrolling (or paging) to find them.
+    console.error(`\n✗ budget failures (${failed}):\n  ${failures.join("\n  ")}`);
     console.error(
       `\n✗ ${failed} chunk${failed === 1 ? "" : "s"} exceeded its budget. ` +
         `Edit scripts/bundle-budget.mjs if the increase is intentional.\n`,

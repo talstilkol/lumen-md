@@ -2,13 +2,13 @@
  * English spelling service (plan 6.10): routes a note's English paragraphs
  * to the nspell worker. Used when LanguageTool may not be reached — the
  * public API under the `local-only` policy with no LanguageTool on this
- * machine configured. The dictionary ships with the app (≈ 0.55 MB, in the
- * worker chunk), so nothing is downloaded and nothing is sent.
+ * machine configured. The dictionary ships with the app (≈ 0.55 MB, as data
+ * in the app's own dict/, precached for offline), so nothing is sent.
  */
 import type { GrammarMatch } from "./grammar";
 import { EN_SPELL_MESSAGE_KEY, englishSpelling, maskNonProse, type SpellChecker } from "./englishSpell";
 
-type Result = { type: "result"; id: number; matches: GrammarMatch[] };
+type Result = { type: "result"; id: number; matches: GrammarMatch[] } | { type: "failed"; id: number };
 
 let worker: Worker | null = null;
 /** The worker failed (load error, crash): check on the main thread from now on. */
@@ -22,7 +22,8 @@ const mainCache = new Map<string, string[]>();
 /** No worker (tests, old browsers) or the worker died: the same checker here. */
 function mainThreadChecker(): Promise<SpellChecker> {
   mainThread ??= (async () => {
-    const [{ default: nspell }, { aff, dic }] = await Promise.all([import("nspell"), import("virtual:lumen-dictionary-en")]);
+    const [{ default: nspell }, { loadEnglishDictionary }] = await Promise.all([import("nspell"), import("./englishDictionary")]);
+    const { aff, dic } = await loadEnglishDictionary();
     return nspell(aff, dic);
   })();
   return mainThread;
@@ -47,6 +48,7 @@ function startWorker(): Worker | null {
   try {
     const w = new Worker(new URL("./englishSpell.worker.ts", import.meta.url), { type: "module" });
     w.onmessage = (e: MessageEvent<Result>) => {
+      if (e.data.type === "failed") return failWorker();
       if (e.data.type !== "result") return;
       pending.get(e.data.id)?.resolve(e.data.matches ?? []);
       pending.delete(e.data.id);

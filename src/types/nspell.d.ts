@@ -10,8 +10,8 @@ declare module "nspell" {
   export default nspell;
 }
 
-// Built by the lumen-dictionary-en plugin in vite.config.ts (plan 6.10).
+// Built by the lumen-dictionary-en plugin in vite.config.ts (plan 6.10):
+// the dictionary itself under Vitest, null in a dev or production build.
 declare module "virtual:lumen-dictionary-en" {
-  export const aff: string;
-  export const dic: string;
+  export const inline: { aff: string; dic: string } | null;
 }

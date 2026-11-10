@@ -1,6 +1,6 @@
 /// <reference types="vitest" />
 import { defineConfig as defineViteConfig, searchForWorkspaceRoot } from "vite";
-import type { UserConfig as ViteUserConfig } from "vite";
+import type { Plugin, UserConfig as ViteUserConfig } from "vite";
 import { cspEndpointsPlugin } from "./src/build/cspEndpoints";
 import { laneCacheDir } from "./src/build/laneCache";
 
@@ -54,12 +54,22 @@ const yWebsocketInstalled = existsSync(
 );
 
 /**
- * `virtual:lumen-dictionary-en` — the en-US Hunspell files of
- * dictionary-en as two strings, for the English spelling worker (plan
- * 6.10). The package's own entry reads them with node:fs, and its exports
- * map hides the files themselves, so they are read here at build time.
+ * The en-US Hunspell files of dictionary-en, for the English spelling
+ * checker (plan 6.10). The package's own entry reads them with node:fs and
+ * its exports map hides them, so they are read here.
+ *
+ * They are data, not code: the app fetches them same-origin from dict/
+ * (src/ai/englishDictionary.ts), and the PWA precaches them with the other
+ * dict/*.txt files, so spelling works offline and nothing leaves the
+ * device, while ≈ 0.55 MB of word list stays out of the JS chunks.
+ * `lumen-dictionary-en-files` emits them into the build and serves them in
+ * dev (the .txt suffix is for that precache pattern). Under Vitest there is
+ * no server to fetch from, so `virtual:lumen-dictionary-en` carries them
+ * inline there, and is `inline = null` everywhere else.
  */
 const DICTIONARY_EN_ID = "virtual:lumen-dictionary-en";
+const DICTIONARY_EN_FILES = { "dict/en-US.aff.txt": "index.aff", "dict/en-US.dic.txt": "index.dic" } as const;
+const readDictionaryEn = (file: string) => readFileSync(path.resolve(__dirname, "node_modules/dictionary-en", file), "utf8");
 const dictionaryEn = {
   name: "lumen-dictionary-en",
   resolveId(id: string) {
@@ -67,10 +77,25 @@ const dictionaryEn = {
   },
   load(id: string) {
     if (id !== "\0" + DICTIONARY_EN_ID) return null;
-    const dir = path.resolve(__dirname, "node_modules/dictionary-en");
-    const aff = readFileSync(path.join(dir, "index.aff"), "utf8");
-    const dic = readFileSync(path.join(dir, "index.dic"), "utf8");
-    return `export const aff = ${JSON.stringify(aff)};\nexport const dic = ${JSON.stringify(dic)};\n`;
+    if (!process.env.VITEST) return "export const inline = null;\n";
+    const aff = readDictionaryEn("index.aff");
+    const dic = readDictionaryEn("index.dic");
+    return `export const inline = { aff: ${JSON.stringify(aff)}, dic: ${JSON.stringify(dic)} };\n`;
+  },
+};
+/** Main build only (not the worker build), so each file is emitted once. */
+const dictionaryEnFiles: Plugin = {
+  name: "lumen-dictionary-en-files",
+  configureServer(server) {
+    server.middlewares.use((req, res, next) => {
+      const file = DICTIONARY_EN_FILES[(req.url ?? "").split("?")[0].replace(/^\//, "") as keyof typeof DICTIONARY_EN_FILES];
+      if (!file) return next();
+      res.setHeader("Content-Type", "text/plain; charset=utf-8");
+      res.end(readDictionaryEn(file));
+    });
+  },
+  generateBundle() {
+    for (const [fileName, file] of Object.entries(DICTIONARY_EN_FILES)) this.emitFile({ type: "asset", fileName, source: readDictionaryEn(file) });
   },
 };
 
@@ -203,8 +228,22 @@ function vendorChunk(id: string): string | undefined {
   if (id.includes("isomorphic-git") || id.includes("lightning-fs")) return "vendor-git";
   // Excalidraw (the canvas, plan 4.19): its own lazy chunk; its Mermaid → diagram
   // dialog loads on demand and stays apart from the Mermaid block renderer.
+  // A code-splitting group takes every module it matches, dynamic imports
+  // included, so one "vendor-excalidraw" group folded into the canvas chunk
+  // what Excalidraw itself loads only on demand: every translation
+  // (dist/<env>/locales/…, one file per language, of which the UI needs one)
+  // and the font-subsetting code (subset-shared / subset-worker with the
+  // harfbuzz and woff2 wasm, used only when exporting). Each of those keeps a
+  // chunk of its own, still named vendor-excalidraw-… so the PWA leaves it to
+  // the runtime cache and the budget counts it as Excalidraw.
+  const exSub = /@excalidraw\/excalidraw\/dist\/(?:prod|dev)\/([^/]+)\/([^/]+?)\.js$/.exec(id);
+  if (exSub) return `vendor-excalidraw-${exSub[1]}-${exSub[2]}`.replace(/[^A-Za-z0-9-]/g, "_");
+  if (/@excalidraw\/excalidraw\/dist\/(prod|dev)\/subset-/.test(id)) return "vendor-excalidraw-subset";
   if (id.includes("@excalidraw/mermaid-to-excalidraw")) return "vendor-excalidraw-mermaid";
   if (id.includes("@excalidraw/")) return "vendor-excalidraw";
+  // The web clipper's extractors (plan 4.15): vendor code apart from the clip
+  // logic, loaded together with it, on the first clip only.
+  if (/node_modules\/(defuddle|@mozilla\/readability|turndown)\//.test(id)) return "vendor-clipper";
   // Anchor `y-*` to node_modules/y-… so we don't accidentally
   // match lucide-react icon file paths that contain `y-` in
   // the filename (e.g. "y-axis.js"). Previously this broad
@@ -251,6 +290,7 @@ export default defineConfig({
     react(),
     cleanUrlAliases,
     dictionaryEn,
+    dictionaryEnFiles,
     // Adds the deployment's own worker origins (VITE_*_ENDPOINT …) to the
     // CSP connect-src of index.html, dist/_headers and the nginx image.
     cspEndpointsPlugin(),
