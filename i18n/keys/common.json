@@ -2475,6 +2475,49 @@
       ]
     },
     {
+      "key": "settings.empty",
+      "en": "No setting matches",
+      "vars": []
+    },
+    {
+      "key": "settings.general",
+      "en": "General",
+      "vars": []
+    },
+    {
+      "key": "settings.importFailed",
+      "en": "That file isn't a Lumen settings file.",
+      "vars": []
+    },
+    {
+      "key": "settings.imported",
+      "en": "{n} settings imported, {skipped} skipped",
+      "vars": [
+        "n",
+        "skipped"
+      ]
+    },
+    {
+      "key": "settings.language",
+      "en": "Language",
+      "vars": []
+    },
+    {
+      "key": "settings.search",
+      "en": "Search settings",
+      "vars": []
+    },
+    {
+      "key": "settings.telemetryOptOut",
+      "en": "Send no error reports",
+      "vars": []
+    },
+    {
+      "key": "settings.title",
+      "en": "Settings",
+      "vars": []
+    },
+    {
       "key": "status.aiActive",
       "en": "AI Copilot Active",
       "vars": []

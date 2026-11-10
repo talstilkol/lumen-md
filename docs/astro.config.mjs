@@ -40,6 +40,7 @@ export default defineConfig({
             { label: "Accessibility", slug: "editor/accessibility", translations: { he: "נגישות" } },
             { label: "Touch and phones", slug: "editor/touch", translations: { he: "מגע וטלפונים" } },
             { label: "Hebrew and right-to-left", slug: "editor/hebrew", translations: { he: "עברית ומימין לשמאל" } },
+            { label: "Settings", translations: { he: "הגדרות" }, slug: "editor/settings" },
           ],
         },
         {

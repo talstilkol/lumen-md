@@ -33,6 +33,8 @@ import { t } from "../i18n";
 interface Props {
   open: boolean;
   onClose: () => void;
+  /** Rendered as a tab of the settings screen: no backdrop, no own close. */
+  embedded?: boolean;
 }
 
 function useIsDark(open: boolean): boolean {
@@ -49,7 +51,7 @@ function useIsDark(open: boolean): boolean {
   return dark;
 }
 
-export function ThemeSettings({ open, onClose }: Props) {
+export function ThemeSettings({ open, onClose, embedded = false }: Props) {
   const settings = useAppStore((s) => s.themeSettings);
   const setThemeSettings = useAppStore((s) => s.setThemeSettings);
   const resetThemeSettings = useAppStore((s) => s.resetThemeSettings);
@@ -69,7 +71,7 @@ export function ThemeSettings({ open, onClose }: Props) {
 
   // Focus stays in the dialog while it is open and returns on close; Escape closes it (plan 10.1).
   const trapRef = useRef<HTMLDivElement | null>(null);
-  useFocusTrap(trapRef, { active: open, onEscape: onClose });
+  useFocusTrap(trapRef, { active: open && !embedded, onEscape: onClose });
 
   if (!open) return null;
 
@@ -110,15 +112,15 @@ export function ThemeSettings({ open, onClose }: Props) {
   };
 
   return (
-    <div className="cmd-palette-backdrop" onClick={onClose}>
+    <div className={embedded ? undefined : "cmd-palette-backdrop"} onClick={embedded ? undefined : onClose}>
       <div
-        className="cmd-palette"
+        className={embedded ? undefined : "cmd-palette"}
         ref={trapRef}
-        role="dialog"
-        aria-modal="true"
+        role={embedded ? "region" : "dialog"}
+        aria-modal={embedded ? undefined : "true"}
         aria-labelledby={`${ids}-title`}
         onClick={(e) => e.stopPropagation()}
-        style={{ maxWidth: 600, maxHeight: "86vh", display: "flex", flexDirection: "column" }}
+        style={embedded ? { display: "flex", flexDirection: "column" } : { maxWidth: 600, maxHeight: "86vh", display: "flex", flexDirection: "column" }}
         data-testid="theme-settings"
       >
         <div style={header}>
@@ -126,9 +128,11 @@ export function ThemeSettings({ open, onClose }: Props) {
           <h2 id={`${ids}-title`} style={{ margin: 0, fontSize: 16, fontWeight: 600 }}>
             {t("themeSettings.title")}
           </h2>
-          <button type="button" onClick={onClose} aria-label={t("themeSettings.close")} style={iconBtn}>
-            <X size={14} />
-          </button>
+          {!embedded && (
+            <button type="button" onClick={onClose} aria-label={t("themeSettings.close")} style={iconBtn}>
+              <X size={14} />
+            </button>
+          )}
         </div>
 
         <div style={{ overflow: "auto", padding: "12px 16px", display: "flex", flexDirection: "column", gap: 16 }}>

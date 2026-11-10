@@ -82,7 +82,7 @@ export function moveTabRuntimes(moves: ReadonlyArray<readonly [string, string]>)
   for (const [to, rt] of taken) if (rt) tabRuntime.set(to, rt);
 }
 
-interface AppState {
+export interface AppState {
   doc: DocFile;
   mode: ViewMode;
   theme: Theme;

@@ -29,6 +29,8 @@ const LocalLoraSection = lazy(() => import("./LocalLoraSection").then((m) => ({ 
 interface Props {
   open: boolean;
   onClose: () => void;
+  /** Rendered as a tab of the settings screen: no backdrop. */
+  embedded?: boolean;
 }
 
 const POLL_INTERVAL_MS = 30_000;
@@ -60,7 +62,7 @@ function saveActiveJob(j: FineTuneJob | null): void {
   }
 }
 
-export function FineTuneSettings({ open, onClose }: Props) {
+export function FineTuneSettings({ open, onClose, embedded = false }: Props) {
   const useFineTunedModel = useAppStore((s) => s.useFineTunedModel);
   const fineTunedModelId = useAppStore((s) => s.fineTunedModelId);
   const toggleFineTunedModel = useAppStore((s) => s.toggleFineTunedModel);
@@ -169,23 +171,23 @@ export function FineTuneSettings({ open, onClose }: Props) {
 
   // Focus stays in the dialog while it is open and returns on close; Escape closes it (plan 10.1).
   const trapRef = useRef<HTMLDivElement | null>(null);
-  useFocusTrap(trapRef, { active: open, onEscape: onClose });
+  useFocusTrap(trapRef, { active: open && !embedded, onEscape: onClose });
 
   if (!open) return null;
 
   return (
     <div
-      className="cmd-palette-backdrop"
-      onClick={onClose}
+      className={embedded ? undefined : "cmd-palette-backdrop"}
+      onClick={embedded ? undefined : onClose}
       ref={trapRef}
-      role="dialog"
-      aria-modal="true"
+      role={embedded ? "region" : "dialog"}
+      aria-modal={embedded ? undefined : "true"}
       aria-label={t("fineTune.title")}
     >
       <div
-        className="cmd-palette"
+        className={embedded ? undefined : "cmd-palette"}
         onClick={(e) => e.stopPropagation()}
-        style={{ maxWidth: 560, padding: 0, display: "flex", flexDirection: "column", maxHeight: "88vh" }}
+        style={embedded ? { display: "flex", flexDirection: "column" } : { maxWidth: 560, padding: 0, display: "flex", flexDirection: "column", maxHeight: "88vh" }}
       >
         <header style={{ padding: "14px 18px", borderBottom: "1px solid hsl(var(--border))", display: "flex", gap: 10, alignItems: "center" }}>
           <Brain size={18} style={{ color: "hsl(var(--accent))" }} />

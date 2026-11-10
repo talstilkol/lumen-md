@@ -34,11 +34,13 @@ interface Props {
   onClose: () => void;
   /** Opens the audit log dialog. Omitted → the audit section is hidden. */
   onOpenAuditLog?: () => void;
+  /** Rendered as a tab of the settings screen: no backdrop, no own close. */
+  embedded?: boolean;
 }
 
 export type SsoState = "notConfigured" | "configured" | "connected";
 
-export function OrgSettings({ open, onClose, onOpenAuditLog }: Props) {
+export function OrgSettings({ open, onClose, onOpenAuditLog, embedded = false }: Props) {
   const status = useAuth((s) => s.status);
   const user = useAuth((s) => s.user);
   const providerName = useAuth((s) => s.provider.name);
@@ -90,7 +92,7 @@ export function OrgSettings({ open, onClose, onOpenAuditLog }: Props) {
 
   // Focus stays in the dialog while it is open and returns on close; Escape closes it (plan 10.1).
   const trapRef = useRef<HTMLDivElement | null>(null);
-  useFocusTrap(trapRef, { active: open, onEscape: onClose });
+  useFocusTrap(trapRef, { active: open && !embedded, onEscape: onClose });
 
   if (!open) return null;
 
@@ -105,15 +107,15 @@ export function OrgSettings({ open, onClose, onOpenAuditLog }: Props) {
   });
 
   return (
-    <div className="cmd-palette-backdrop" onClick={onClose}>
+    <div className={embedded ? undefined : "cmd-palette-backdrop"} onClick={embedded ? undefined : onClose}>
       <div
-        className="cmd-palette"
+        className={embedded ? undefined : "cmd-palette"}
         ref={trapRef}
-        role="dialog"
-        aria-modal="true"
+        role={embedded ? "region" : "dialog"}
+        aria-modal={embedded ? undefined : "true"}
         aria-labelledby="org-settings-title"
         onClick={(e) => e.stopPropagation()}
-        style={{ maxWidth: 640, maxHeight: "85vh", display: "flex", flexDirection: "column" }}
+        style={embedded ? { display: "flex", flexDirection: "column" } : { maxWidth: 640, maxHeight: "85vh", display: "flex", flexDirection: "column" }}
       >
         <div style={header}>
           <Building2 size={16} aria-hidden="true" />
@@ -125,9 +127,11 @@ export function OrgSettings({ open, onClose, onOpenAuditLog }: Props) {
               {t("org.localOnly")}
             </span>
           )}
-          <button type="button" onClick={onClose} aria-label={t("org.close")} style={closeBtn}>
-            <X size={14} />
-          </button>
+          {!embedded && (
+            <button type="button" onClick={onClose} aria-label={t("org.close")} style={closeBtn}>
+              <X size={14} />
+            </button>
+          )}
         </div>
 
         <div style={{ overflow: "auto", padding: "12px 16px", display: "flex", flexDirection: "column", gap: 18 }}>

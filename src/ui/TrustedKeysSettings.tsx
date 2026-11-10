@@ -25,11 +25,13 @@ import { t } from "../i18n";
 interface Props {
   open: boolean;
   onClose: () => void;
+  /** Rendered as a tab of the settings screen: no backdrop, no own close. */
+  embedded?: boolean;
 }
 
 type KeyRow = { fingerprint: string; source: "builtin" | "user" };
 
-export function TrustedKeysSettings({ open, onClose }: Props) {
+export function TrustedKeysSettings({ open, onClose, embedded = false }: Props) {
   const [keys, setKeys] = useState<KeyRow[] | null>(null);
   const [draft, setDraft] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -106,7 +108,7 @@ export function TrustedKeysSettings({ open, onClose }: Props) {
 
   // Focus stays in the dialog while it is open and returns on close; Escape closes it (plan 10.1).
   const trapRef = useRef<HTMLDivElement | null>(null);
-  useFocusTrap(trapRef, { active: open, onEscape: onClose });
+  useFocusTrap(trapRef, { active: open && !embedded, onEscape: onClose });
 
   if (!open) return null;
 
@@ -114,24 +116,26 @@ export function TrustedKeysSettings({ open, onClose }: Props) {
   const user = keys?.filter((k) => k.source === "user") ?? [];
 
   return (
-    <div className="cmd-palette-backdrop" onClick={onClose}>
+    <div className={embedded ? undefined : "cmd-palette-backdrop"} onClick={embedded ? undefined : onClose}>
       <div
-        className="cmd-palette"
+        className={embedded ? undefined : "cmd-palette"}
         ref={trapRef}
-        role="dialog"
-        aria-modal="true"
+        role={embedded ? "region" : "dialog"}
+        aria-modal={embedded ? undefined : "true"}
         aria-labelledby="trusted-keys-title"
         onClick={(e) => e.stopPropagation()}
-        style={{ maxWidth: 640, maxHeight: "82vh", display: "flex", flexDirection: "column" }}
+        style={embedded ? { display: "flex", flexDirection: "column" } : { maxWidth: 640, maxHeight: "82vh", display: "flex", flexDirection: "column" }}
       >
         <div style={header}>
           <KeyRound size={16} aria-hidden="true" />
           <h2 id="trusted-keys-title" style={{ margin: 0, fontSize: 16, fontWeight: 600 }}>
             {t("trustedKeys.title")}
           </h2>
-          <button type="button" onClick={onClose} aria-label={t("trustedKeys.close")} style={iconBtn}>
-            <X size={14} />
-          </button>
+          {!embedded && (
+            <button type="button" onClick={onClose} aria-label={t("trustedKeys.close")} style={iconBtn}>
+              <X size={14} />
+            </button>
+          )}
         </div>
 
         <div style={{ overflow: "auto", padding: "12px 16px", display: "flex", flexDirection: "column", gap: 16 }}>
