@@ -26,6 +26,17 @@ describe("speech highlight", () => {
     view.destroy();
   });
 
+  it("marks the word being read inside the sentence, clamped to it (W2.6)", () => {
+    const view = new EditorView({ state: EditorState.create({ doc: "First one. Second one.", extensions: speechHighlightExtension() }) });
+    showSpokenRange(view, { from: 11, to: 22, word: { from: 18, to: 21 } });
+    expect(ranges(view)).toEqual([[11, 22], [18, 21]]);
+    showSpokenRange(view, { from: 0, to: 10, word: { from: 6, to: 40 } });
+    expect(ranges(view)).toEqual([[0, 10], [6, 10]]);
+    showSpokenRange(view, { from: 0, to: 10, word: { from: 30, to: 40 } });
+    expect(ranges(view)).toEqual([[0, 10]]);
+    view.destroy();
+  });
+
   it("clamps a range past the end of an edited document", () => {
     const view = new EditorView({ state: EditorState.create({ doc: "short", extensions: speechHighlightExtension() }) });
     showSpokenRange(view, { from: 2, to: 99 });

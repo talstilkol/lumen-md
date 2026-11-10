@@ -17,7 +17,9 @@ const SRC = resolve(__dirname, "..");
  * a dynamic import, so the strings never join the startup bundle.
  */
 const DOMAINS: Record<string, { module: string; users: string[]; prefixes: string[] }> = {
+  "nikud.json": { module: "ai/nikudStrings.ts", users: ["ai/nikudService.ts"], prefixes: ["toast.nikud.", "models.purpose.nikud", "nikud.alt."] },
   "mt.json": { module: "ai/mt/strings.ts", users: ["ai/mt/index.ts", "agents/commands.ts"], prefixes: ["models.", "mt.", "toast.translatedWith", "toast.localMtUnavailable"] },
+  "tts.json": { module: "ai/ttsStrings.ts", users: ["ai/tts.ts"], prefixes: ["tts.", "toast.tts."] },
 };
 
 function sources(dir: string): string[] {

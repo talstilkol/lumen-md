@@ -69,6 +69,12 @@ export function isLocaleAvailable(locale: Locale): boolean {
 type Strings = Record<string, string>;
 
 const en: Strings = {
+  "cmd.nikud.add": "Hebrew: add niqqud",
+  "cmd.nikud.add.hint": "Point the selection (or the whole note) on this device",
+  "cmd.nikud.partial": "Hebrew: add partial niqqud",
+  "cmd.nikud.partial.hint": "Point only the words that could be read more than one way",
+  "cmd.nikud.remove": "Hebrew: remove niqqud",
+  "cmd.nikud.remove.hint": "Strip the vowel points from the selection (or the whole note)",
   // Toolbar
   "toolbar.tagline": "Markdown, illuminated",
   "toolbar.new": "New",
@@ -447,9 +453,8 @@ const en: Strings = {
   "research.consent.body": "Your question (only the question — not your notes) is sent to the search service you chose. Pages it finds are read by that service. Under the \"local only\" policy research uses your library instead.",
   "research.consent.ok": "Allow (once for all)",
   "cmd.note.read": "Read aloud",
+  "cmd.note.readSettings": "Read aloud: voice and speed…",
   "cmd.note.read.hint": "Reads this note with your system's voices (Hebrew included); run again to stop",
-  "toast.tts.unavailable": "This browser can't read aloud",
-  "toast.tts.noHebrewVoice": "No Hebrew voice is installed on this system — add one in the system's speech settings",
   "cmd.vault.digest": "Digest: what changed",
   "cmd.vault.digest.hint": "A note with every note changed since the last digest, and their open tasks",
   "cmd.image.altText": "Images: alt text from OCR / local vision",
