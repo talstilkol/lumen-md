@@ -84,13 +84,16 @@ function ShareTab({ session, server }: { session: CollabSession | null; server: 
   if (!session) return <p style={muted}>{t("share.needSession")}</p>;
   if (!server) return <p style={muted}>{t("share.needServer")}</p>;
   if (session.share) return <p style={muted}>{t("share.notOwner")}</p>;
+  // Plan W2.20: a shared room is end-to-end encrypted, so the server only
+  // ever sees ciphertext. A room without its own key would give it plaintext.
+  if (!session.encrypted || !session.sharePassword) return <p style={muted}>{t("share.needEncrypted")}</p>;
 
   async function create(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
     setBusy(true);
     try {
-      const s = await createShare(server!, session!.roomName, { role, ttl, label: label.trim(), accessKey: collabAccessKey() });
+      const s = await createShare(server!, session!.roomName, { role, ttl, label: label.trim(), accessKey: collabAccessKey(), e2ee: true });
       const l = shareLink(session!.roomName, session!.sharePassword, s.id);
       setLink(l);
       setLabel("");
@@ -116,6 +119,9 @@ function ShareTab({ session, server }: { session: CollabSession | null; server: 
   return (
     <div style={{ display: "grid", gap: 12 }}>
       <p style={muted}>{t("share.intro")}</p>
+      <p style={muted} data-testid="share-e2ee">
+        {t("share.e2ee")}
+      </p>
       <form onSubmit={create} style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "end" }} aria-label={t("share.create")}>
         <label style={{ display: "grid", gap: 4, fontSize: 12 }}>
           {t("share.role")}

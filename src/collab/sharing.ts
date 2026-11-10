@@ -105,9 +105,13 @@ export async function ensureOwnerSecret(room: string): Promise<string> {
 export const SHARE_TTLS = { hour: 3600, day: 86_400, week: 7 * 86_400, month: 30 * 86_400 } as const;
 export type ShareTtl = keyof typeof SHARE_TTLS;
 
-export async function createShare(serverUrl: string, room: string, opts: { role: Role; ttl: ShareTtl; label?: string; accessKey?: string | null }): Promise<ShareInfo> {
+/**
+ * Make a share link. `e2ee` (plan W2.20): the room is end-to-end encrypted,
+ * so the server seals it, holding everyone to ciphertext from then on.
+ */
+export async function createShare(serverUrl: string, room: string, opts: { role: Role; ttl: ShareTtl; label?: string; accessKey?: string | null; e2ee?: boolean }): Promise<ShareInfo> {
   const owner = await ensureOwnerSecret(room);
-  const r = await tokenRequest<{ share: ShareInfo }>(serverUrl, { action: "share", room, owner, role: opts.role, ttlS: SHARE_TTLS[opts.ttl], ...(opts.label ? { label: opts.label } : {}), ...(opts.accessKey ? { key: opts.accessKey } : {}) });
+  const r = await tokenRequest<{ share: ShareInfo }>(serverUrl, { action: "share", room, owner, role: opts.role, ttlS: SHARE_TTLS[opts.ttl], ...(opts.label ? { label: opts.label } : {}), ...(opts.accessKey ? { key: opts.accessKey } : {}), ...(opts.e2ee ? { e2ee: true } : {}) });
   markServerOnly(room);
   return r.share;
 }
@@ -132,12 +136,15 @@ export function shareStatus(serverUrl: string, room: string, share: string): Pro
 /**
  * What to send for a room token: the share link's id when the session was
  * opened from one, else the owner secret (needed once the room is claimed)
- * and the operator's access key.
+ * and the operator's access key. `e2ee` (plan W2.20) asks the server to seal
+ * the room: this session syncs it end-to-end encrypted. The room key itself
+ * is never part of a request: it stays in the link's fragment.
  */
-export function tokenPayload(room: string, opts: { share?: string | null; accessKey?: string | null }): Record<string, unknown> {
-  if (opts.share) return { room, share: opts.share };
+export function tokenPayload(room: string, opts: { share?: string | null; accessKey?: string | null; e2ee?: boolean }): Record<string, unknown> {
+  const sealed = opts.e2ee ? { e2ee: true } : {};
+  if (opts.share) return { room, share: opts.share, ...sealed };
   const owner = ownerSecret(room);
-  return { room, ...(opts.accessKey ? { key: opts.accessKey } : {}), ...(owner ? { owner } : {}) };
+  return { room, ...(opts.accessKey ? { key: opts.accessKey } : {}), ...(owner ? { owner } : {}), ...sealed };
 }
 
 /* ─── Server-only rooms ────────────────────────────────────────────────── */

@@ -39,5 +39,7 @@
   "share.error.timeout": "The collab server didn't answer in time.",
   "share.error.revoked": "This link was revoked.",
   "share.error.expired": "This link has expired.",
-  "share.error.no-share": "This link doesn't exist (any more)."
+  "share.error.no-share": "This link doesn't exist (any more).",
+  "share.needEncrypted": "Sharing needs an end-to-end encrypted room. Start a new collaboration session: every new room has its own key.",
+  "share.e2ee": "End-to-end encrypted: the room key stays in the link, after the #, and never reaches the server. The server stores and relays only ciphertext, presence included."
 }

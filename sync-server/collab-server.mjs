@@ -30,6 +30,14 @@
  *   the room's owner live in SQLite; every COLLAB_REVOKE_CHECK_MS (default
  *   1 s) connections bought with a revoked or expired link are closed.
  *
+ * ── Sealed rooms (plan W2.20, collab/sealed.mjs) ─────────────────────────
+ *   An end-to-end encrypted client asks for its token with `e2ee: true`;
+ *   the room is then sealed for good: an update that writes anything but
+ *   ciphertext envelopes, or a presence state that isn't sealed, is refused
+ *   with its connection, and a document that isn't ciphertext-only is never
+ *   stored. COLLAB_REQUIRE_E2EE=1 seals every room (a server for encrypted
+ *   rooms only: plaintext clients can't write at all).
+ *
  * ── Storage ───────────────────────────────────────────────────────────────
  *   COLLAB_DATA_DIR (default ./.collab-data): collab.sqlite plus backups/.
  *   A backup is taken every COLLAB_BACKUP_INTERVAL_MS (default 1 h) and on
@@ -53,6 +61,7 @@ import { openStore } from "./collab/sqliteStore.mjs";
 import { importLegacyDir } from "./collab/legacyImport.mjs";
 import { DEFAULT_TOKEN_TTL_S, readRoomToken, signingKey } from "./collab/roomToken.mjs";
 import { canWrite, handleTokenRequest, isDocumentWrite, parseDocumentName, shareState } from "./collab/sharing.mjs";
+import { isSealedDocument, isSealedState, sealedMessageProblem } from "./collab/sealed.mjs";
 
 /**
  * Build (not start) a collab server. `listen()` resolves with the bound
@@ -74,12 +83,20 @@ export function createCollabServer(opts = {}) {
     keepBackups = 24,
     quiet = true,
     revokeCheckMs = 1000,
+    requireE2ee = false,
     log = () => {},
   } = opts;
   /** Live connections bought with a share link: closed when the link is revoked or expires. */
   const shared = new Set();
   const key = signingKey(tokenSecret);
   const store = openStore(dataDir, { keepBackups });
+  const sealed = (room) => requireE2ee || store.isSealed(room);
+  /** A room may be sealed while it stores no readable content (a new room, or one that was always encrypted). */
+  const sealable = (room) =>
+    [room, `${room}~comments`].every((name) => {
+      const state = store.load(name);
+      return !state || isSealedState(state, Y);
+    });
   const tokenWss = new WebSocketServer({ noServer: true, maxPayload: 4096 });
 
   tokenWss.on("connection", (ws) => {
@@ -101,7 +118,7 @@ export function createCollabServer(opts = {}) {
       }
       let answer;
       try {
-        answer = handleTokenRequest(req, { store, key, accessKey, tokenTtlS });
+        answer = handleTokenRequest(req, { store, key, accessKey, tokenTtlS, requireE2ee, sealable });
       } catch (e) {
         log(`token request failed: ${e instanceof Error ? e.message : String(e)}`);
         answer = { error: "server-error" };
@@ -151,7 +168,7 @@ export function createCollabServer(opts = {}) {
       const writable = canWrite(claims.role, doc.kind);
       if (!writable && data.connectionConfig) data.connectionConfig.readOnly = true;
       // The context every later hook sees for this connection.
-      return { role: claims.role, share: claims.share, kind: doc.kind, writable };
+      return { role: claims.role, share: claims.share, kind: doc.kind, room: doc.room, writable };
     },
     async connected({ connection, context }) {
       if (context?.share && connection) shared.add({ connection, share: context.share });
@@ -159,12 +176,22 @@ export function createCollabServer(opts = {}) {
     async onDisconnect({ connection }) {
       for (const c of shared) if (c.connection === connection) shared.delete(c);
     },
-    async beforeHandleMessage({ context, update }) {
+    async beforeHandleMessage({ context, update, documentName }) {
       // Second guard after the read-only flag: a change sent by hand on a
       // connection that may not write ends that connection.
       if (context && context.writable === false && update && isDocumentWrite(update)) {
         log(`write refused (${context.role} on ${context.kind})`);
         throw new Error("read-only");
+      }
+      // A sealed room takes ciphertext only (checked per message: a room
+      // can be sealed while a connection is open).
+      const room = context?.room ?? parseDocumentName(documentName)?.room;
+      if (update && room && sealed(room)) {
+        const problem = sealedMessageProblem(update, Y);
+        if (problem) {
+          log(`plaintext refused in a sealed room (${problem})`);
+          throw new Error("sealed");
+        }
       }
     },
     async onLoadDocument({ document, documentName }) {
@@ -172,6 +199,12 @@ export function createCollabServer(opts = {}) {
       if (state) Y.applyUpdate(document, state);
     },
     async onStoreDocument({ document, documentName }) {
+      const room = parseDocumentName(documentName)?.room;
+      // Belt and braces: a sealed room's readable content is never written to disk.
+      if (room && sealed(room) && !isSealedDocument(document)) {
+        log("store refused: a sealed room's document is not ciphertext-only");
+        return;
+      }
       store.save(documentName, Y.encodeStateAsUpdate(document));
     },
   });
@@ -266,6 +299,7 @@ function fromEnv(env) {
     backupIntervalMs: num(env.COLLAB_BACKUP_INTERVAL_MS, 60 * 60 * 1000),
     keepBackups: num(env.COLLAB_BACKUP_KEEP, 24),
     revokeCheckMs: num(env.COLLAB_REVOKE_CHECK_MS, 1000),
+    requireE2ee: env.COLLAB_REQUIRE_E2EE === "1" || env.COLLAB_REQUIRE_E2EE === "true",
     log: (m) => console.log(`[collab] ${m}`),
   };
 }

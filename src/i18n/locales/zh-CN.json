@@ -1453,5 +1453,7 @@
   "share.error.timeout": "协作服务器未及时响应。",
   "share.error.revoked": "此链接已被撤销。",
   "share.error.expired": "此链接已过期。",
-  "share.error.no-share": "此链接不存在（或已不存在）。"
+  "share.error.no-share": "此链接不存在（或已不存在）。",
+  "share.needEncrypted": "共享需要端到端加密的房间。请开始新的协作会话：每个新房间都有自己的密钥。",
+  "share.e2ee": "端到端加密：房间密钥只在链接的 # 之后，永远不会到达服务器。服务器只存储和转发密文，包括在线状态。"
 }
