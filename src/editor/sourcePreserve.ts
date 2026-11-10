@@ -118,7 +118,7 @@ export function createSourcePreserver(
   for (const [oi, ci] of pairUp(O, C, (x, y) => x.sig === y.sig)) cToO.set(ci, oi);
   const paired = new Set(cToO.values());
   // Original blocks Milkdown dropped; every other block is either paired or shown changed.
-  const hidden = new Set(O.map((b, i) => i).filter((i) => !paired.has(i) && HIDDEN_TYPES.has(O[i].type)));
+  const hidden = new Set(O.map((_, i) => i).filter((i) => !paired.has(i) && HIDDEN_TYPES.has(O[i].type)));
   const crlf = lineSeparatorFor(original) === "\r\n";
   const eol = (s: string) => (crlf ? s.replace(/\r?\n/g, "\r\n") : s);
 

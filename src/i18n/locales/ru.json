@@ -1429,5 +1429,11 @@
   "cmd.ai.cancel": "ИИ: отменить",
   "cmd.ai.cancel.hint": "Останавливает все запросы ИИ (то же делает Esc)",
   "toast.aiCancelled": "Запрос ИИ отменён ({count})",
-  "toast.aiNothingRunning": "Нет активных запросов ИИ"
+  "toast.aiNothingRunning": "Нет активных запросов ИИ",
+  "cmd.edit.pastePlain": "Вставить как обычный текст",
+  "cmd.edit.pastePlain.hint": "Вставляет текст из буфера обмена без форматирования",
+  "cmd.edit.pasteFormatted": "Вставить с форматированием",
+  "cmd.edit.pasteFormatted.hint": "Вставляет HTML из Word, Google Docs или с сайта как чистый Markdown: заголовки, списки, таблицы, ссылки и выделение, без стилей",
+  "paste.clipboardDenied": "Lumen не может прочитать буфер обмена. Разрешите доступ или вставьте через Ctrl+V.",
+  "paste.clipboardEmpty": "Буфер обмена пуст."
 }

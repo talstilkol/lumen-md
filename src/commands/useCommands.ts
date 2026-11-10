@@ -3,6 +3,8 @@ import type { Command } from "../ui/CommandPalette";
 import { cmdIcons } from "../ui/CommandPalette";
 import { tabIdOf, useAppStore } from "../store/useStore";
 import { t, SUPPORTED_LOCALES, getLocale } from "../i18n";
+import { runPaste } from "../paste/pasteCommands";
+import { useToastStore } from "../store/useToastStore";
 import { getGitIdentity, setGitIdentity, setGitToken, cloneRepo, pullRepo, commitAndPush, gitStatusSummary } from "../sync/git";
 import { getRecents, removeRecent } from "../storage/recent";
 import type { RecentFile } from "../storage/recent";
@@ -2249,6 +2251,18 @@ export function useCommands({
           action: () => window.dispatchEvent(new CustomEvent("lumen-outline", { detail: { cmd } })),
         }));
       })(),
+      // W1.4 — paste from Word, Google Docs and websites, as text or as Markdown.
+      ...(["plain", "formatted"] as const).map((mode) => ({
+        id: mode === "plain" ? "edit.pastePlain" : "edit.pasteFormatted",
+        label: t(mode === "plain" ? "cmd.edit.pastePlain" : "cmd.edit.pasteFormatted"),
+        hint: t(mode === "plain" ? "cmd.edit.pastePlain.hint" : "cmd.edit.pasteFormatted.hint"),
+        icon: cmdIcons.Pencil,
+        group: t("group.edit"),
+        action: () =>
+          void runPaste(mode).then((msg) => {
+            if (msg) useToastStore.getState().push({ kind: "warning", title: msg });
+          }),
+      })),
       // ── Plans (billing builds only) ─────────────────────────────────────
       ...(canPurchasePlans()
         ? [
