@@ -95,6 +95,12 @@ export const DIRECT_FS_ALLOWLIST = {
   "src/storage/vault/opfsSyncWrite.ts": "the OPFS backend's WebKit write fallback: a worker writing through a sync access handle",
   "src/storage/fs.ts": "Open / Save / Save As of a single file the user picked (showOpenFilePicker / showSaveFilePicker): a real file outside the vault, not OPFS",
   "src/storage/exportDocx.ts": "writes an exported .docx to the location the user picked in the save dialog: not OPFS, not the vault",
+  // Self-converted model weights (plan 6.0) live in OPFS `models/`, beside the vault, not in it: no note is read or written.
+  "src/ai/modelCache.ts": "the converted-model cache (plan 6.0): sha256-verified model files in OPFS models/<id>/, not vault files",
+  "src/ai/mt/localModels.ts": "hands the OPFS root to modelCache for the converted translation models (plan 6.4): model files, not vault files",
+  "src/ai/nikudService.ts": "hands the OPFS root to modelCache for the niqqud model (plan 6.3): model files, not vault files",
+  "src/ai/piiNer.ts": "checks whether the converted NER model is cached in OPFS (plan 2.6): model files, not vault files",
+  "src/ai/transformers.worker.ts": "the worker's model cache root for converted models (plan 6.0): model files, not vault files",
 };
 
 /** Handle methods that read or change a file system directly. */
