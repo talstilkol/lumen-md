@@ -125,6 +125,14 @@ export default defineConfig({
             { label: "Docker compose bundle", slug: "self-hosting/docker" },
           ],
         },
+        {
+          label: "Project",
+          translations: { he: "הפרויקט" },
+          items: [
+            { label: "Lumen, Obsidian, Notion and Google Docs", slug: "project/compare", translations: { he: "Lumen, ‏Obsidian, ‏Notion ו-Google Docs" } },
+            { label: "Community and the beta", slug: "project/community", translations: { he: "הקהילה והבטא" } },
+          ],
+        },
       ],
     }),
   ],
