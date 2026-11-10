@@ -131,6 +131,31 @@ per-platform (`…-chromium-linux.png`).
   and commit the updated PNG together with the change. Generate Linux
   baselines on Linux (or in CI) — macOS font rendering differs.
 
+### Visual regression suite (10 surfaces × he / en × light / dark)
+
+`visual/` holds a Playwright suite that compares ten surfaces (split,
+source, preview, WYSIWYG, palette, shortcuts, plugins, templates, theme
+settings, AI settings) in English (LTR) and Hebrew (RTL), light and dark —
+40 shots — with baselines in `visual/__baselines__/<platform>/`. It runs
+on the production build (`vite preview`) with a fixed note, clock, fonts,
+viewport (1280×800 at 1×) and with animations and the caret off.
+
+```bash
+npx playwright install chromium        # once
+npm run test:visual:update             # first run on this machine: writes the baselines
+git add visual/__baselines__           # after looking at every PNG
+npm run test:visual                    # compare; a missing baseline fails
+```
+
+- An **intentional** change: run `npm run test:visual:update`, review the
+  changed PNGs, commit them with the change.
+- A failure leaves the expected / actual / diff images in
+  `visual-results/` (HTML report: `visual-results/report/index.html`).
+- `visual/selftest.visual.ts` proves the gate works: a 3 px shift of the
+  toolbar must fail the comparison.
+- Baselines are per platform: compare on the kind of machine that wrote
+  them. `.github/workflows/visual.yml` can run it on Linux, by hand only.
+
 ### Guidelines
 
 - Add a test for any non-trivial change.

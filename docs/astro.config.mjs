@@ -144,6 +144,13 @@ export default defineConfig({
           ],
         },
         {
+          label: "Contributing",
+          translations: { he: "תרומה לפרויקט" },
+          items: [
+            { label: "Visual regression", translations: { he: "רגרסיה חזותית" }, slug: "contributing/visual-regression" },
+          ],
+        },
+        {
           label: "Self-hosting",
           items: [
             { label: "Docker compose bundle", slug: "self-hosting/docker" },
