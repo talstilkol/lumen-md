@@ -33,6 +33,7 @@
     "preview:visual": "node scripts/preview-visual.mjs",
     "budget": "node scripts/bundle-budget.mjs",
     "lighthouse": "lhci autorun --config=./lighthouserc.json",
+    "perf:gate": "node scripts/perf-gate.mjs",
     "lighthouse:a11y": "node scripts/lighthouse-a11y.mjs",
     "i18n:extract": "node scripts/extract-i18n-keys.mjs",
     "i18n:check": "node scripts/extract-i18n-keys.mjs --check",

@@ -101,6 +101,7 @@ export default defineConfig({
           label: "Self-hosting",
           items: [
             { label: "Docker compose bundle", slug: "self-hosting/docker" },
+            { label: "Performance gate", slug: "self-hosting/perf-gate", translations: { he: "שער הביצועים" } },
           ],
         },
       ],
