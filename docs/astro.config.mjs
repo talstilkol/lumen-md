@@ -142,6 +142,7 @@ export default defineConfig({
           items: [
             { label: "Secrets and encryption", slug: "security/vault" },
             { label: "Monitoring and web vitals", slug: "security/monitoring", translations: { he: "ניטור ומדדי ביצועים" } },
+            { label: "Vault encryption at rest", slug: "security/vault-encryption", translations: { he: "הצפנת הכספת במנוחה" } },
           ],
         },
         {
@@ -149,14 +150,8 @@ export default defineConfig({
           translations: { he: "תרומה לפרויקט" },
           items: [
             { label: "Translation drafts", translations: { he: "טיוטות תרגום" }, slug: "contributing/translation-drafts" },
-            { label: "Vault encryption at rest", slug: "security/vault-encryption" },
-          ],
-        },
-        {
-          label: "Contributing",
-          translations: { he: "תרומה לפרויקט" },
-          items: [
             { label: "Visual regression", translations: { he: "רגרסיה חזותית" }, slug: "contributing/visual-regression" },
+            { label: "Checks on every branch (Vercel)", translations: { he: "בדיקות בכל ענף (Vercel)" }, slug: "contributing/checks" },
           ],
         },
         {
