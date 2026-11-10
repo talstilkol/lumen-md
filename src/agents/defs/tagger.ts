@@ -44,6 +44,7 @@ export function normalizeTags(raw: unknown[]): string[] {
 
 export const taggerAgent: AgentDefinition<TaggerInput, TaggerOutput> = registerAgent({
   id: "tagger",
+  splittable: true,
   commandId: "tools.autoTag",
   description: "Suggest tags for the open document from the workspace vocabulary",
   system: (input) =>

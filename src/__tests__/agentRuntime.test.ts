@@ -168,7 +168,9 @@ describe("agent runtime", () => {
     expect(run.attempts).toBe(3);
     const ids = run.suggestions.map((s) => s.id);
     expect(ids).toContain("larger-model");
-    expect(ids).toContain("split-input");
+    // Not a splittable agent (5.6.2): the user is asked to select a part instead of an automatic split.
+    expect(ids).toContain("select-part");
+    expect(ids).not.toContain("split-input");
     expect(ids).toContain("retry");
     await expect(runAgentOrThrow(def, { text: "y" })).rejects.toBeInstanceOf(AgentRunError);
   });

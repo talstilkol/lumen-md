@@ -46,6 +46,7 @@ export function filterLinks(links: unknown, body: string, titles: string[]): Lin
 
 export const linkerAgent: AgentDefinition<LinkerInput, LinkerOutput> = registerAgent({
   id: "linker",
+  splittable: true,
   language: "any",
   commandId: "tools.suggestLinks",
   description: "Suggest wiki-links from the open note to other notes",

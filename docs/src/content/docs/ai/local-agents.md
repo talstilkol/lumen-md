@@ -44,10 +44,34 @@ cloud provider may ever be contacted. The default on a fresh install is
    origin (`OLLAMA_ORIGINS`), pull a model, split the document, try
    another executor, or allow the cloud.
 6. When the retries are used up, a small local model (the tiny tier)
-   reads the failure and may add one or two suggestions in plain
-   language. The suggestions panel opens on its own; pressing a
-   suggestion does it (pulls the model, switches the executor, changes
-   the policy) and runs the command again.
+   reads the failure. It may add one or two suggestions in plain
+   language, and when a new attempt can fix the answer (the wrong format,
+   language or length), it gives one more instruction. The runtime then
+   makes **one more attempt** with that instruction.
+7. The suggestions panel opens on its own. This happens for every AI
+   command, including research, batch jobs, workspace search, chart
+   blocks and the WYSIWYG writer. Pressing a suggestion does it, then
+   runs the command again:
+
+| Suggestion | What pressing it does |
+|---|---|
+| Start Ollama | Checks every two seconds whether Ollama answers. When it does, the command runs again; it gives up after two minutes, and closing the panel stops it. |
+| Split the document | Runs the agent on parts of about 4000 characters and merges the answers. This is offered for agents whose answer for a part means the same as for the whole: tags, action items, translation, proofreading, links. |
+| Select a part | Shown for agents whose answer can't be split, such as a diagram or an outline. Select the part you want and run the command again. |
+| Download the model | Pulls the model into Ollama, or loads it in the browser. |
+| Try again with … | Runs the command again with another executor or a larger model tier. |
+| Allow the cloud as a fallback | Sets the AI policy to *local first*. |
+| Add your key | Opens *AI: Switch Provider*. |
+
+### "Not good"
+
+After a command that puts one answer into your note (action items,
+translation, diagram, chart, tags, links, outline, grammar, research,
+style profile, commit message), a small **Not good — try again** button
+appears for a few seconds. Pressing it runs the command again on the
+same input, at a higher temperature and one model tier up, and the
+model is told which answer was rejected. In the agent trace, the new
+run is linked to the run it replaces (`retryOf`).
 
 Every run is recorded on this device: `⌘K → "AI: Recent Agent Runs"`
 shows the executor, model, tool calls, retries and failures of the last

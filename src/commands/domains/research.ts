@@ -81,6 +81,7 @@ export function buildResearchCommands({ liveDoc }: CommandContext): Command[] {
           if (result.unverified) showAiToast(t("research.unverified", { count: result.unverified }), "error");
         } catch (e) {
           if (isAbort(e)) return;
+          if ((await import("../../agents/suggestions")).reportAgentFailure(e, "research.ask")) return;
           showAiToast(t("research.failed", { message: (e as Error).message }), "error");
         }
       },

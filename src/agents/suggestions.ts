@@ -44,6 +44,65 @@ export function reportAgentFailure(e: unknown, commandId?: string): boolean {
   return listeners.size > 0;
 }
 
+/* ── "Not good" (5.6.3) ──────────────────────────────────────────────── */
+
+/** A palette command's last good answer: the user may say it was not good. */
+export interface AnswerEvent {
+  run: AgentRun;
+  commandId?: string;
+}
+
+const answerListeners = new Set<(e: AnswerEvent) => void>();
+
+export function onAgentAnswer(fn: (e: AnswerEvent) => void): () => void {
+  answerListeners.add(fn);
+  return () => answerListeners.delete(fn);
+}
+
+/** Called by the runtime for every run that ended with an answer (not the parts of a split run). */
+export function announceAnswer(e: AnswerEvent): void {
+  for (const l of answerListeners) l(e);
+}
+
+/** Runs the user marked as not good, by id → the run that re-did them. */
+const retried = new Map<string, string | null>();
+
+/** The run that re-does `runId` (set when it starts), if any. */
+export function retryOfPending(agentId: string, inputKey?: string): string | undefined {
+  const p = pendingFor(agentId, inputKey);
+  return p?.retryOf;
+}
+
+/**
+ * "Not good": the answer of `run` is rejected. The next run of the same
+ * agent on the same input gets a patch that says so (a new attempt at
+ * temperature 0.7 that avoids the rejected answer, one tier up when there
+ * is one) and records `retryOf: run.id`; the command is run again.
+ */
+export async function markNotGood(run: AgentRun, commandId?: string): Promise<void> {
+  const [{ nextTier }, { getAgent }] = await Promise.all([import("./critic"), import("./registry")]);
+  const tier = nextTier(getAgent(run.agentId)?.tier ?? "small") ?? undefined;
+  const prev = typeof run.output === "string" ? run.output : JSON.stringify(run.output ?? "");
+  const patch: RetryPatch = {
+    temperature: 0.7,
+    promptSuffix: `The user rejected this previous answer as not good; write a different, better one:\n${prev.slice(0, 1200)}`,
+    ...(tier ? { tier } : {}),
+  };
+  retried.set(run.id, null);
+  setNextRunPatch(run.agentId, patch, run.inputKey, run.id);
+  rerunCommand(commandId ?? run.commandId);
+}
+
+/** Test hook: which runs were marked, and the run that re-did each (null until it finished). */
+export function __retriedRuns(): ReadonlyMap<string, string | null> {
+  return retried;
+}
+
+/** The runtime closes the loop: `retryRun` re-did `original`. */
+export function noteRetried(original: string, retryRun: string): void {
+  if (retried.has(original)) retried.set(original, retryRun);
+}
+
 /* ── One-shot overrides for the retry of a failed run ───────────────── */
 
 /**
@@ -57,15 +116,18 @@ interface PendingPatch {
   patch: RetryPatch;
   inputKey?: string;
   expires: number;
+  /** The run the user marked "not good" (5.6.3). */
+  retryOf?: string;
 }
 
 const PATCH_TTL_MS = 10 * 60_000;
 const nextPatch = new Map<string, PendingPatch>();
 
-export function setNextRunPatch(agentId: string, patch: RetryPatch, inputKey?: string): void {
+export function setNextRunPatch(agentId: string, patch: RetryPatch, inputKey?: string, retryOf?: string): void {
   const prev = nextPatch.get(agentId);
-  const merged = prev && prev.inputKey === inputKey && prev.expires > Date.now() ? { ...prev.patch, ...patch } : patch;
-  nextPatch.set(agentId, { patch: merged, inputKey, expires: Date.now() + PATCH_TTL_MS });
+  const same = prev && prev.inputKey === inputKey && prev.expires > Date.now();
+  const merged = same ? { ...prev.patch, ...patch } : patch;
+  nextPatch.set(agentId, { patch: merged, inputKey, expires: Date.now() + PATCH_TTL_MS, retryOf: retryOf ?? (same ? prev.retryOf : undefined) });
 }
 
 function pendingFor(agentId: string, inputKey?: string): PendingPatch | undefined {
@@ -103,6 +165,42 @@ export function rerunCommand(commandId: string | undefined): void {
 
 export interface ActionContext {
   onProgress?: (text: string) => void;
+  /** Stops a live check (the panel's close button). */
+  signal?: AbortSignal;
+  /** How long `check-ollama` waits (default two minutes) and how often it asks. */
+  waitMs?: number;
+  pollMs?: number;
+}
+
+/**
+ * "Start Ollama" with a live check (5.6.5): the panel says what to run and
+ * asks the server every two seconds until it answers (or the wait ends).
+ * Resolves true when Ollama answered.
+ */
+export async function waitForOllama(ctx: ActionContext = {}): Promise<boolean> {
+  const { isOllamaAvailable, getBaseUrl } = await import("../ai/ollamaProvider");
+  const { t } = await import("../i18n");
+  const until = Date.now() + (ctx.waitMs ?? 120_000);
+  const poll = ctx.pollMs ?? 2000;
+  for (;;) {
+    if (ctx.signal?.aborted) return false;
+    if (await isOllamaAvailable()) {
+      ctx.onProgress?.(t("agent.suggest.ollamaUp", { url: getBaseUrl() }));
+      const { refreshOllama } = await import("./executors/ollama");
+      await refreshOllama(true).catch(() => undefined);
+      return true;
+    }
+    const left = Math.max(0, Math.ceil((until - Date.now()) / 1000));
+    if (left <= 0) {
+      ctx.onProgress?.(t("agent.suggest.ollamaStillDown", { url: getBaseUrl() }));
+      return false;
+    }
+    ctx.onProgress?.(t("agent.suggest.ollamaWaiting", { url: getBaseUrl(), seconds: left }));
+    await new Promise<void>((r) => {
+      const timer = setTimeout(r, poll);
+      ctx.signal?.addEventListener("abort", () => (clearTimeout(timer), r()), { once: true });
+    });
+  }
 }
 
 /**
@@ -166,8 +264,16 @@ async function performSuggestion(s: Suggestion, run: AgentRun, ctx: ActionContex
       window.open(docsUrl(key), "_blank", "noopener");
       return false;
     }
-    case "split-input":
-      // The user picks a part: the commands work on the selection when there is one.
+    case "split-input": {
+      // The user picks a part (the commands work on the selection when there is one): say so.
+      const { t } = await import("../i18n");
+      ctx.onProgress?.(t("agent.suggest.splitInput.done"));
+      return false;
+    }
+    case "check-ollama":
+      return waitForOllama(ctx);
+    case "run-command":
+      rerunCommand(a.id);
       return false;
   }
   return false;

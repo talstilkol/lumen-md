@@ -146,6 +146,7 @@ export async function checkTranslationLanguage(output: string, source: string, t
 
 export const translatorAgent: AgentDefinition<TranslatorInput, string> = registerAgent({
   id: "translator",
+  splittable: true,
   language: "any",
   commandId: "ai.translate",
   description: "Translate Markdown into another language, preserving structure",

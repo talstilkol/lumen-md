@@ -4,6 +4,7 @@ import { useAppStore } from "../../store/useStore";
 import { t } from "../../i18n";
 import { uiConfirm, uiPrompt, uiSelect } from "../../ui/PromptDialog";
 import { showAiToast } from "../../ui/AiToast";
+import { isAbort } from "../../ai/aiAbort";
 
 /** Submit a batch job over a folder of notes; check jobs and apply their results. */
 export function buildBatchCommands(): Command[] {
@@ -92,6 +93,8 @@ export function buildBatchCommands(): Command[] {
           if (Number.isFinite(quota.limit)) for (let i = 0; i < notes.length; i++) recordAiPrompt();
           showAiToast(t("batch.submitted", { count: job.items.length }), "success");
         } catch (e) {
+          if (isAbort(e)) return;
+          if ((await import("../../agents/suggestions")).reportAgentFailure(e, "ai.batch")) return;
           showAiToast((e as Error).message, "error");
         }
       },

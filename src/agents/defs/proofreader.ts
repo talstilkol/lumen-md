@@ -57,6 +57,7 @@ export function locateIssues(issues: ProofIssue[], text: string): LocatedIssue[]
 
 export const proofreaderAgent: AgentDefinition<ProofreaderInput, ProofreaderOutput> = registerAgent<ProofreaderInput, ProofreaderOutput>({
   id: "proofreader",
+  splittable: true,
   commandId: "tools.checkGrammar",
   description: "Find grammar and spelling problems with a local model",
   system: (input) =>

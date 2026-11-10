@@ -44,6 +44,18 @@
       "vars": []
     },
     {
+      "key": "agent.notGood.button",
+      "en": "Not good — try again",
+      "vars": []
+    },
+    {
+      "key": "agent.notGood.prompt",
+      "en": "Answer from {agent}.",
+      "vars": [
+        "agent"
+      ]
+    },
+    {
       "key": "agent.panel.close",
       "en": "Close",
       "vars": []
@@ -118,6 +130,28 @@
       "vars": []
     },
     {
+      "key": "agent.suggest.ollamaStillDown",
+      "en": "Ollama still does not answer at {url}. Start it and try again.",
+      "vars": [
+        "url"
+      ]
+    },
+    {
+      "key": "agent.suggest.ollamaUp",
+      "en": "Ollama answers at {url}. Running the command again.",
+      "vars": [
+        "url"
+      ]
+    },
+    {
+      "key": "agent.suggest.ollamaWaiting",
+      "en": "Waiting for Ollama at {url}: run `ollama serve`, then pull a model ({seconds}s left)…",
+      "vars": [
+        "url",
+        "seconds"
+      ]
+    },
+    {
       "key": "agent.suggest.pullModel",
       "en": "Download the model {model}",
       "vars": [
@@ -130,6 +164,18 @@
       "vars": []
     },
     {
+      "key": "agent.suggest.splitDocument",
+      "en": "Split the document and run each part",
+      "vars": []
+    },
+    {
+      "key": "agent.suggest.splitDocument.detail",
+      "en": "Runs the command on parts of about {size} characters and merges the answers.",
+      "vars": [
+        "size"
+      ]
+    },
+    {
       "key": "agent.suggest.splitInput",
       "en": "Select a smaller part and run it again",
       "vars": []
@@ -137,6 +183,11 @@
     {
       "key": "agent.suggest.splitInput.detail",
       "en": "Long documents overflow small local models; a selection is easier to answer.",
+      "vars": []
+    },
+    {
+      "key": "agent.suggest.splitInput.done",
+      "en": "Select the part you want, then run the command again.",
       "vars": []
     },
     {

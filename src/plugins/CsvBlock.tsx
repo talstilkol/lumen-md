@@ -137,7 +137,7 @@ export default function CsvBlock({ source, lang, meta }: Props) {
                   return;
                 }
                 log.error("AI chart generation failed", e);
-                showAiToast(t("toast.aiChartGenerationFailed"), "error");
+                if (!(await import("../agents/suggestions")).reportAgentFailure(e, "ai.chart")) showAiToast(t("toast.aiChartGenerationFailed"), "error");
               } finally {
                 op.end();
                 setAiLoading(false);

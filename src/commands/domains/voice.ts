@@ -69,7 +69,7 @@ export function buildVoiceCommands(): Command[] {
       icon: cmdIcons.Sparkles,
       group: t("group.tools"),
       action: async () => {
-        const { openCredits } = await import("../ui/CreditsDialog");
+        const { openCredits } = await import("../../ui/CreditsDialog");
         openCredits();
       },
     },
