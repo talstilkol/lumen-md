@@ -69,6 +69,45 @@ command prints how to redeploy the web app from the good tag (or
 
 ---
 
+## Beta channel and feature flags (plan 14.4)
+
+New features reach a **beta** before they reach everyone:
+
+```bash
+node scripts/release.mjs plan --beta                    # e.g. 0.2.0-beta.1 (or -beta.N+1 on a beta train)
+node scripts/release.mjs prepare --beta --commit --tag
+git push origin HEAD v0.2.0-beta.1
+node scripts/release.mjs build [--desktop]              # a beta builds with VITE_LUMEN_CHANNEL=beta
+node scripts/release.mjs publish                        # a GitHub pre-release: never "latest"
+node scripts/release.mjs deploy-beta                    # the beta web app (Vercel preview + $LUMEN_BETA_HOST)
+# …when the beta is good:
+node scripts/release.mjs prepare --commit --tag         # 0.2.0, changelog since the last *stable* tag
+```
+
+- **Web.** The beta is its own deployment: `deploy-beta` makes a Vercel
+  *preview* deployment of `dist/` and, when `LUMEN_BETA_HOST` is set, points
+  that host at it. Stable stays the production deployment. For self-hosting,
+  build once with `VITE_LUMEN_CHANNEL=beta` into a second site. The beta build
+  shows a **Beta** badge in the status bar.
+- **Desktop.** Stable apps read `releases/latest/download/latest.json`.
+  GitHub's "latest" never points at a pre-release, so stable users never get
+  a beta. Beta apps read the rolling **`beta-channel`** pre-release's
+  `latest.json`, which `publish` updates for every beta and for every stable
+  release newer than the last beta. Build settings:
+  `LUMEN_UPDATER_ENDPOINT` (stable) and `LUMEN_UPDATER_ENDPOINT_BETA`
+  (`https://github.com/<owner>/<repo>/releases/download/beta-channel/latest.json`).
+  The user switches with *Update channel* in the palette. On Windows a beta
+  ships the NSIS installer only, because MSI takes only numeric pre-release
+  versions.
+- **Feature flags** (`src/flags/flags.json`): a feature ships as stage
+  `beta` with `since.beta`, the first beta that has it. It is on in beta
+  builds and off in stable. Promote it in a later release with
+  `stage: "stable"` and `since.stable`. `npm run flags:check` (also run by
+  `build`) refuses a flag that reached stable without an earlier beta, and
+  one without its strings in English and Hebrew. Flags are local only: no
+  remote config. A user can override any flag under *Feature flags…*.
+  `plan` lists the flags still in beta, for the release notes.
+
 ## 1. Web build (PWA)
 
 ```bash

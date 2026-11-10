@@ -460,6 +460,13 @@
       "icon": "Save"
     },
     {
+      "id": "app.featureFlags",
+      "label": "Feature flags…",
+      "group": "Tools",
+      "hint": "Turn beta features on or off on this device",
+      "icon": "Sparkles"
+    },
+    {
       "id": "file.trash",
       "label": "Trash…",
       "group": "Tools",
@@ -1535,6 +1542,13 @@
       "icon": "Save"
     },
     {
+      "id": "app.featureFlags",
+      "label": "Feature flags…",
+      "group": "Tools",
+      "hint": "Turn beta features on or off on this device",
+      "icon": "Sparkles"
+    },
+    {
       "id": "file.trash",
       "label": "Trash…",
       "group": "Tools",
@@ -2293,6 +2307,7 @@
     "vault.toFolder",
     "vault.openFolder",
     "vault.toBrowser",
+    "app.featureFlags",
     "file.trash",
     "ai.cancel",
     "note.read",

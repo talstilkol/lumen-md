@@ -85,6 +85,7 @@ import { FocusMode } from "./ui/FocusMode";
 import { OnboardingTour } from "./ui/OnboardingTour";
 import { scrollToHeadingWhenRendered } from "./renderer/wikiLinks";
 import { notifyWorkspaceChanged } from "./storage/workspaceEvents";
+import { FeatureFlagsHost } from "./ui/FeatureFlagsPanel";
 
 export default function App() {
   const doc = useAppStore((s) => s.doc);
@@ -122,6 +123,19 @@ export default function App() {
   const hasWebGPU = useMemo(() => {
     if (typeof window === "undefined" || typeof navigator === "undefined") return false;
     return localLlmAvailable().available;
+  }, []);
+  // Plan 14.4: the beta flag update.checkOnLaunch — once a day, desktop only,
+  // never in local-only; says something only when there is an update.
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      void import("./desktop/updates")
+        .then((m) => m.launchUpdateCheck())
+        .then((r) => {
+          if (r?.state === "available") showAiToast(t("update.launch.available", { version: r.version }), "info");
+        })
+        .catch(() => undefined);
+    }, 5000);
+    return () => clearTimeout(timer);
   }, []);
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
@@ -998,6 +1012,7 @@ export default function App() {
       />
       </Suspense>}
       <AiToastContainer />
+      <FeatureFlagsHost />
       <AiSuggestionsPanel />
       <AiInlinePromptOverlay />
       <MobileKeyboardBar />

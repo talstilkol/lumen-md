@@ -179,3 +179,46 @@ export function verifySums(sums, entries) {
 
 /** The tag for a version. */
 export const tagOf = (version) => `v${String(version).replace(/^v/, "")}`;
+
+/**
+ * Semver order (plan 14.4): -1, 0 or 1. A pre-release sorts before its
+ * release (1.2.0-beta.3 < 1.2.0), and pre-release fields compare as
+ * numbers when both are numeric, else as text.
+ */
+export function compareVersions(a, b) {
+  const x = parseVersion(a);
+  const y = parseVersion(b);
+  for (const k of ["major", "minor", "patch"]) if (x[k] !== y[k]) return x[k] < y[k] ? -1 : 1;
+  if (x.pre === y.pre) return 0;
+  if (!x.pre) return 1;
+  if (!y.pre) return -1;
+  const p = x.pre.split(".");
+  const q = y.pre.split(".");
+  for (let i = 0; i < Math.max(p.length, q.length); i++) {
+    if (p[i] === undefined) return -1;
+    if (q[i] === undefined) return 1;
+    const n = /^\d+$/.test(p[i]) && /^\d+$/.test(q[i]);
+    if (p[i] === q[i]) continue;
+    if (n) return Number(p[i]) < Number(q[i]) ? -1 : 1;
+    return p[i] < q[i] ? -1 : 1;
+  }
+  return 0;
+}
+
+/**
+ * The next beta (plan 14.4). From a stable version: the release the
+ * commits call for, as its beta.1 (0.1.0 + a feat → 0.2.0-beta.1). From a
+ * beta: the next beta of the same release (0.2.0-beta.1 → 0.2.0-beta.2);
+ * to aim a beta train at another version, pass --version. Null when there
+ * is nothing to release.
+ */
+export function nextBetaVersion(current, commits) {
+  const v = parseVersion(current);
+  const beta = v.pre && /^beta\.(\d+)$/.exec(v.pre);
+  if (beta) return commits.length ? `${formatVersion({ ...v, pre: null })}-beta.${Number(beta[1]) + 1}` : null;
+  const target = nextVersion(formatVersion({ ...v, pre: null }), commits);
+  return target ? `${target}-beta.1` : null;
+}
+
+/** Is this version on the beta channel? */
+export const isBeta = (version) => /-beta\.\d+$/.test(String(version));
