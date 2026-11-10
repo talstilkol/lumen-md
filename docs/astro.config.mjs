@@ -81,6 +81,7 @@ export default defineConfig({
             { label: "Git sync", slug: "sync/git" },
             { label: "Sync providers (WebDAV, S3, Dropbox, Drive)", slug: "sync/cloud" },
             { label: "Encrypted sync (E2EE)", slug: "sync/e2ee" },
+            { label: "Sync status, selective sync, time left", slug: "sync/status", translations: { he: "מצב הסנכרון וסנכרון סלקטיבי" } },
             { label: "Read-mode publishing", slug: "sync/publish" },
           ],
         },
