@@ -273,6 +273,12 @@ function bm25Pass(): Promise<Bm25> {
   });
 }
 
+/** The BM25 index, in step with the workspace (related notes, plan W2.2). */
+export async function bm25Index(): Promise<Bm25> {
+  await ensureIndex();
+  return syncBm25();
+}
+
 /** Points for the query in a note's name or path (file-name search stays first-class). */
 function nameScore(file: IndexedFile, q: string): number {
   const nameLower = file.name.toLowerCase();

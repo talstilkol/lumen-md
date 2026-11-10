@@ -1431,5 +1431,17 @@
   "cmd.ai.cancel": "KI: Abbrechen",
   "cmd.ai.cancel.hint": "Stoppt alle laufenden KI-Anfragen (auch mit Esc)",
   "toast.aiCancelled": "KI-Anfrage abgebrochen ({count})",
-  "toast.aiNothingRunning": "Keine KI-Anfrage läuft"
+  "toast.aiNothingRunning": "Keine KI-Anfrage läuft",
+  "cmd.related.toggle": "Verwandte Notizen: ein- / ausblenden",
+  "cmd.related.toggle.hint": "Notizen nah am Absatz, den du schreibst, und Notizen, die er ohne Link erwähnt",
+  "cmd.related.folderOff": "Verwandte Notizen: für diesen Ordner an / aus",
+  "toast.related.folderOff": "Verwandte Notizen sind in {folder} aus",
+  "toast.related.folderOn": "Verwandte Notizen sind in {folder} an",
+  "related.title": "Verwandt",
+  "related.off": "Für diese Notiz oder ihren Ordner aus.",
+  "related.none": "Noch nichts Verwandtes zu diesem Absatz.",
+  "related.links": "Erwähnt, nicht verlinkt",
+  "related.link": "Verlinken",
+  "related.hint": "Mit {name} verlinken",
+  "related.close": "Schließen"
 }

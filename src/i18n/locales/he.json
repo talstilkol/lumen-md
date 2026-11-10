@@ -1431,5 +1431,17 @@
   "cmd.ai.cancel": "AI: ביטול",
   "cmd.ai.cancel.hint": "עוצר כל בקשת AI שרצה (גם Esc עושה זאת)",
   "toast.aiCancelled": "בקשת ה-AI בוטלה ({count})",
-  "toast.aiNothingRunning": "אין בקשת AI שרצה"
+  "toast.aiNothingRunning": "אין בקשת AI שרצה",
+  "cmd.related.toggle": "פתקים קשורים: הצגה / הסתרה",
+  "cmd.related.toggle.hint": "פתקים קרובים לפסקה שאת/ה כותב/ת, ופתקים שהיא מזכירה בלי קישור",
+  "cmd.related.folderOff": "פתקים קשורים: הפעלה / כיבוי בתיקייה הזאת",
+  "toast.related.folderOff": "פתקים קשורים כבויים ב-{folder}",
+  "toast.related.folderOn": "פתקים קשורים פועלים ב-{folder}",
+  "related.title": "קשור",
+  "related.off": "כבוי לפתק הזה או לתיקייה שלו.",
+  "related.none": "עדיין אין פתקים קשורים לפסקה הזאת.",
+  "related.links": "מוזכר בלי קישור",
+  "related.link": "לקשר",
+  "related.hint": "לקשר אל {name}",
+  "related.close": "סגירה"
 }

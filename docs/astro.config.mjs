@@ -45,6 +45,7 @@ export default defineConfig({
           items: [
             { label: "Database views", slug: "workspace/database-views" },
             { label: "Search (BM25 + Smart)", translations: { he: "חיפוש (BM25 + חכם)" }, slug: "workspace/search" },
+            { label: "Related notes while writing", translations: { he: "פתקים קשורים בזמן כתיבה" }, slug: "workspace/related" },
             { label: "Vault Doctor", slug: "workspace/doctor" },
           ],
         },
