@@ -21,6 +21,7 @@ import { installPrivacyLedger } from "./ai/privacyLedger";
 import { installAiEscape } from "./ai/aiAbort";
 import { adoptBootLocale } from "./store/useStore";
 import "./index.css";
+import { windowLabel } from "./desktop/shell";
 
 // Every AI network request is recorded; local-only blocks cloud ones (T37).
 const lastBlockToast = new Map<string, number>();
@@ -84,6 +85,8 @@ const secretsReady = Promise.race([initSecretStore(), new Promise((r) => setTime
 // the first render, so nothing reads the wrong store; bounded like secrets.
 // Until it is known, the vault is closed (an unavailable backend), never the
 // default store by accident; the location module loads on demand.
+// Plan W3.9: the tray's quick-capture window is this app with a small UI.
+const QuickCaptureWindow = React.lazy(() => import("./ui/QuickCaptureWindow").then((m) => ({ default: m.QuickCaptureWindow })));
 const VaultFolderBanner = React.lazy(() => import("./ui/VaultFolderBanner").then((m) => ({ default: m.VaultFolderBanner })));
 const closedVault = createDirectoryHandleBackend({ id: "restoring", available: () => false, root: async () => Promise.reject(new Error("The vault is still opening.")) });
 setVaultBackend(closedVault);
@@ -137,7 +140,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
           Loading Lumen…
         </div>
       }>
-        <App />
+        {windowLabel() === "capture" ? <QuickCaptureWindow /> : <App />}
       </Suspense>
     </ErrorBoundary>
     <UpdateBanner />

@@ -390,6 +390,27 @@ export async function openDesktopFolderAsVault(): Promise<string | null> {
   return loc.name;
 }
 
+/** Desktop: the folder vault's absolute path, or "" when notes are in app storage (plan W3.9). */
+export async function desktopVaultRoot(): Promise<string> {
+  const inv = await desktop();
+  return (await inv<string | null>("vault_root")) ?? "";
+}
+
+/**
+ * Desktop: switch to another folder the user used as the vault before (plan
+ * W3.9: a file opened from Finder or Explorer that lives in that vault). The
+ * Rust side refuses a folder it didn't grant, so a link can't name one.
+ */
+export async function switchDesktopVault(root: string): Promise<void> {
+  const inv = await desktop();
+  await inv("vault_use", { root });
+  const loc: StoredLocation = { kind: "desktop", root, name: folderName(root) };
+  await kv.set(LOCATION_KEY, loc);
+  await cancelPendingMove();
+  onVaultReplaced();
+  activate(loc, createTauriBackend(inv, root));
+}
+
 /** Desktop: "Not now" on the first-run prompt (asked again on the next launch). */
 export function dismissDesktopFirstRun(): void {
   desktopFirstRun = false;

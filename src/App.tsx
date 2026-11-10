@@ -85,6 +85,7 @@ import { FocusMode } from "./ui/FocusMode";
 import { OnboardingTour } from "./ui/OnboardingTour";
 import { scrollToHeadingWhenRendered } from "./renderer/wikiLinks";
 import { notifyWorkspaceChanged } from "./storage/workspaceEvents";
+import { useDesktopShell } from "./desktop/useDesktopShell";
 
 export default function App() {
   const doc = useAppStore((s) => s.doc);
@@ -755,6 +756,8 @@ export default function App() {
   }, []);
 
   // Native Tauri menu wiring — no-op when running in a regular browser.
+  // Plan W3.9: files from Finder / Explorer, lumen:// links, the tray, tabs between windows.
+  const desktopShell = useDesktopShell({ editorRef, onNew: () => void handleNew(), showToast: (m) => showAiToast(m, "info") });
   useTauriMenu({
     onNew: handleNew,
     onOpen: handleOpen,
@@ -893,6 +896,7 @@ export default function App() {
             }}
             onClose={(id) => closeTabAction(id)}
             onReorder={(from, to) => reorderTabs(from, to)}
+            onDragOut={desktopShell.onTabDragOut}
           />
           <EditorLayout
             mode={mode}

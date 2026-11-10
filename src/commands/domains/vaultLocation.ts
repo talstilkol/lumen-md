@@ -86,6 +86,15 @@ export function buildDesktopUpdateCommands(): Command[] {
   if (typeof window === "undefined" || !("__TAURI_INTERNALS__" in window)) return [];
   return [
     {
+      // Plan W3.9: another editor window (⌘⇧N in the menu bar).
+      id: "window.new",
+      label: t("cmd.window.new"),
+      hint: t("cmd.window.new.hint"),
+      icon: cmdIcons.FileText,
+      group: t("group.file"),
+      action: async () => (await import("../../desktop/shell")).newWindow(),
+    },
+    {
       id: "app.checkUpdates",
       label: t("cmd.app.checkUpdates"),
       hint: t("cmd.app.checkUpdates.hint"),

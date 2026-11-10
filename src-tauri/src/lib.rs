@@ -3,6 +3,7 @@ use tauri::menu::{
 };
 use tauri::{Emitter, Manager};
 
+mod shell;
 mod updates;
 
 /// Build the native menu bar and emit `lumen-menu` events when an item fires.
@@ -39,6 +40,7 @@ fn build_menu(app: &tauri::AppHandle) -> tauri::Result<tauri::menu::Menu<tauri::
 
     let file_menu = SubmenuBuilder::new(app, "File")
         .item(&MenuItemBuilder::with_id("file.new", "New").accelerator("CmdOrCtrl+N").build(app)?)
+        .item(&MenuItemBuilder::with_id("window.new", "New window").accelerator("CmdOrCtrl+Shift+N").build(app)?)
         .item(&MenuItemBuilder::with_id("file.open", "Open…").accelerator("CmdOrCtrl+O").build(app)?)
         .item(&MenuItemBuilder::with_id("file.insertText", "Insert text…").build(app)?)
         .separator()
@@ -133,13 +135,24 @@ mod desktop_vault {
     }
 
     /// The folder chosen earlier, if it still exists: granted and active.
+    /// Folders used as the vault before (`known`, plan W3.9) are granted too,
+    /// so a file opened from Finder or Explorer opens in its own vault.
     pub fn load(app: &AppHandle) -> Granted {
         let mut g = Granted::default();
         let saved = config_file(app)
             .and_then(|f| std::fs::read_to_string(f).ok())
-            .and_then(|t| serde_json::from_str::<serde_json::Value>(&t).ok())
-            .and_then(|v| v.get("root").and_then(|r| r.as_str()).map(str::to_string));
-        if let Some(Ok(v)) = saved.map(Vault::open) {
+            .and_then(|t| serde_json::from_str::<serde_json::Value>(&t).ok());
+        let root = saved.as_ref().and_then(|v| v.get("root").and_then(|r| r.as_str()).map(str::to_string));
+        let known: Vec<String> = saved
+            .as_ref()
+            .and_then(|v| v.get("known").and_then(|k| k.as_array()).map(|a| a.iter().filter_map(|x| x.as_str().map(str::to_string)).collect()))
+            .unwrap_or_default();
+        for k in known {
+            if let Ok(v) = Vault::open(&k) {
+                g.roots.insert(key(&v), v);
+            }
+        }
+        if let Some(Ok(v)) = root.map(Vault::open) {
             let k = key(&v);
             g.active = Some(k.clone());
             g.roots.insert(k, v);
@@ -147,12 +160,21 @@ mod desktop_vault {
         g
     }
 
-    fn save(app: &AppHandle, root: Option<&str>) -> Result<(), String> {
+    /// Every granted folder (the known vaults), for placing an opened file.
+    pub fn known_roots(state: &State<VaultState>) -> Vec<String> {
+        state.0.lock().map(|g| g.roots.keys().cloned().collect()).unwrap_or_default()
+    }
+
+    pub fn active_root(state: &State<VaultState>) -> Option<String> {
+        state.0.lock().ok()?.active.clone()
+    }
+
+    fn save(app: &AppHandle, root: Option<&str>, known: &[String]) -> Result<(), String> {
         let file = config_file(app).ok_or("EIO: no config folder")?;
         match root {
             Some(r) => {
                 std::fs::create_dir_all(file.parent().unwrap()).map_err(|e| format!("EIO: {e}"))?;
-                let body = serde_json::json!({ "root": r }).to_string();
+                let body = serde_json::json!({ "root": r, "known": known }).to_string();
                 std::fs::write(&file, body).map_err(|e| format!("EIO: {e}"))
             }
             None => match std::fs::remove_file(&file) {
@@ -200,7 +222,9 @@ mod desktop_vault {
         if !g.roots.contains_key(&root) {
             return Err("ENOVAULT: this folder was not chosen in the dialog".into());
         }
-        save(&app, Some(&root))?;
+        let mut known: Vec<String> = g.roots.keys().cloned().collect();
+        known.sort();
+        save(&app, Some(&root), &known)?;
         g.active = Some(root);
         Ok(())
     }
@@ -209,7 +233,7 @@ mod desktop_vault {
     /// every granted folder. The folders on disk are not touched.
     #[tauri::command]
     pub fn vault_forget(app: AppHandle, state: State<VaultState>) -> Result<(), String> {
-        save(&app, None)?;
+        save(&app, None, &[])?;
         *lock(&state)? = Granted::default();
         Ok(())
     }
@@ -359,11 +383,20 @@ fn secret_set(name: String, value: Option<String>) -> Result<(), String> {
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-    let builder = tauri::Builder::default().plugin(tauri_plugin_dialog::init());
+    let builder = tauri::Builder::default();
+    // Plan W3.9: one app instance. A second launch (a double-clicked file, a
+    // `lumen://` link on Windows and Linux) hands its arguments to this one.
+    // Registered first, as the plugin requires.
+    #[cfg(desktop)]
+    let builder = builder.plugin(tauri_plugin_single_instance::init(|app, argv, cwd| {
+        shell::handle_args(app, argv.into_iter().skip(1).collect(), std::path::Path::new(&cwd));
+    }));
+    let builder = builder.plugin(tauri_plugin_dialog::init()).plugin(tauri_plugin_deep_link::init());
     #[cfg(desktop)]
     let builder = builder.plugin(tauri_plugin_updater::Builder::new().build());
     builder
         .manage(desktop_vault::VaultState::default())
+        .manage(shell::Shell::default())
         .invoke_handler(tauri::generate_handler![
             secret_available,
             secret_get,
@@ -380,6 +413,19 @@ pub fn run() {
             desktop_vault::vault_rename,
             desktop_vault::vault_remove,
             desktop_vault::vault_backup,
+            shell::shell_ready,
+            shell::external_read,
+            shell::external_write,
+            shell::external_close,
+            shell::window_new,
+            shell::tabs_sync,
+            shell::tab_drag_out,
+            shell::tab_take,
+            shell::tab_pending,
+            shell::tab_accept,
+            shell::tab_cancel,
+            shell::tray_set_menu,
+            shell::capture_format,
             #[cfg(desktop)]
             updates::imp::update_check,
             #[cfg(desktop)]
@@ -391,6 +437,24 @@ pub fn run() {
             if let Ok(mut slot) = app.state::<desktop_vault::VaultState>().0.lock() {
                 *slot = granted;
             }
+            // Plan W3.9: links (`lumen://…`) and the files this launch was given.
+            {
+                use tauri_plugin_deep_link::DeepLinkExt;
+                let handle = app.handle().clone();
+                app.deep_link().on_open_url(move |event| {
+                    for url in event.urls() {
+                        shell::open_link(&handle, url.as_str());
+                    }
+                });
+                // Development builds on Windows and Linux register the scheme at run time
+                // (installers register it from tauri.conf.json).
+                #[cfg(all(debug_assertions, any(target_os = "linux", target_os = "windows")))]
+                let _ = app.deep_link().register_all();
+                let cwd = std::env::current_dir().unwrap_or_default();
+                shell::handle_args(app.handle(), std::env::args().skip(1).collect(), &cwd);
+            }
+            #[cfg(desktop)]
+            shell::build_tray(app.handle())?;
             #[cfg(desktop)]
             {
                 let handle = app.handle().clone();
@@ -398,6 +462,10 @@ pub fn run() {
                 app.set_menu(menu)?;
                 app.on_menu_event(move |app, event| {
                     let id = event.id().0.as_str();
+                    if id == "window.new" {
+                        let _ = shell::window_new(app.clone());
+                        return;
+                    }
                     if id == "help.github" {
                         // Open in default browser via the dialog plugin's url handler.
                         tauri_plugin_dialog::DialogExt::dialog(app)
@@ -410,6 +478,27 @@ pub fn run() {
             }
             Ok(())
         })
-        .run(tauri::generate_context!())
-        .expect("error while running Lumen");
+        .on_window_event(|window, event| {
+            if let tauri::WindowEvent::Destroyed = event {
+                shell::window_closed(window.app_handle(), window.label());
+            }
+        })
+        .build(tauri::generate_context!())
+        .expect("error while building Lumen")
+        .run(|app, event| {
+            // macOS hands files and links to a running app as an event, not argv.
+            #[cfg(target_os = "macos")]
+            if let tauri::RunEvent::Opened { urls } = &event {
+                for url in urls {
+                    if url.scheme() == "file" {
+                        if let Ok(path) = url.to_file_path() {
+                            shell::open_file(app, &path);
+                        }
+                    } else {
+                        shell::open_link(app, url.as_str());
+                    }
+                }
+            }
+            let _ = (app, &event);
+        });
 }
