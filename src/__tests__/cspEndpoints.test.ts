@@ -10,6 +10,8 @@ import {
   addConnectSrc,
   extendIndexHtmlCsp,
   extendHeadersFileCsp,
+  ENDPOINT_ENV_VARS,
+  EXTRA_CONNECT_ENV_VAR,
   NGINX_PLACEHOLDER,
 } from "../build/cspEndpoints";
 
@@ -61,6 +63,16 @@ describe("applied to the real policy files", () => {
     const text = extendHeadersFileCsp(readFileSync(resolve(ROOT, "public/_headers"), "utf8"), origins);
     expect(text).toMatch(/Content-Security-Policy:[^\n]*connect-src [^;]*https:\/\/lumen-auth\.acme\.workers\.dev/);
   });
+  it("both images pass every endpoint variable to the build (.env* is not in the context)", () => {
+    const vars = [...ENDPOINT_ENV_VARS, EXTRA_CONNECT_ENV_VAR];
+    for (const file of ["Dockerfile", "docker/Dockerfile.web"]) {
+      const text = readFileSync(resolve(ROOT, file), "utf8");
+      const build = text.slice(0, text.indexOf("RUN npm run build"));
+      for (const v of vars) expect(build, `${file}: ARG ${v} before the build`).toMatch(new RegExp(`^ARG ${v}$`, "m"));
+    }
+    expect(readFileSync(resolve(ROOT, ".dockerignore"), "utf8")).toMatch(/^\.env\*$/m);
+  });
+
   it("nginx.conf carries the placeholder the image build fills in", () => {
     expect(readFileSync(resolve(ROOT, "docker/nginx.conf"), "utf8")).toContain(NGINX_PLACEHOLDER);
     expect(readFileSync(resolve(ROOT, "docker/Dockerfile.web"), "utf8")).toContain(NGINX_PLACEHOLDER);

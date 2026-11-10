@@ -5,6 +5,7 @@ import React, { Suspense } from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App";
 import { UpdateBanner } from "./ui/UpdateBanner";
+import { setVaultBackend, createDirectoryHandleBackend } from "./storage/vault";
 import { ErrorBoundary } from "./ui/ErrorBoundary";
 import { showAiToast } from "./ui/AiToast";
 import { ToastContainer } from "./components/Toast";
@@ -34,6 +35,12 @@ installAiEscape((n) => showAiToast(t("toast.aiCancelled", { count: n }), "info")
 initTelemetry();
 void initAuth();
 startAutoBackup();
+// Plan W1.6: scheduled backups to a second drive, loaded only once they are set up.
+try {
+  if (localStorage.getItem("lumen.backup.enabled") === "1") void import("./backup/start").then((m) => m.startBackups());
+} catch {
+  /* storage blocked: no backups to schedule */
+}
 startVaultSnapshots();
 // The vault lives in OPFS/IndexedDB; without this the browser may evict it.
 void requestPersistentStorage();
@@ -79,7 +86,36 @@ initShareExtension();
 // Secrets (API keys, tokens) are decrypted into memory before the first
 // render so synchronous reads see them (T36); never blocks boot for long.
 const secretsReady = Promise.race([initSecretStore(), new Promise((r) => setTimeout(r, 1500))]);
-void Promise.all([initLocale(), secretsReady])
+// Where the vault lives (OPFS or a real folder, plan 4.2) is restored before
+// the first render, so nothing reads the wrong store; bounded like secrets.
+// Until it is known, the vault is closed (an unavailable backend), never the
+// default store by accident; the location module loads on demand.
+const VaultFolderBanner = React.lazy(() => import("./ui/VaultFolderBanner").then((m) => ({ default: m.VaultFolderBanner })));
+const closedVault = createDirectoryHandleBackend({ id: "restoring", available: () => false, root: async () => Promise.reject(new Error("The vault is still opening.")) });
+setVaultBackend(closedVault);
+const vaultReady = Promise.race([
+  import("./storage/vault/location").then(async (m) => {
+    const { detachWorkspaceDocs } = await import("./store/vaultDocs");
+    m.setOnVaultReplaced(detachWorkspaceDocs);
+    const status = await m.restoreVaultLocationWithin(3000);
+    // Changes made outside Lumen reach the open tabs (plan 4.4) — started
+    // once the vault is known, and the open notes are checked against the
+    // disk again whenever another vault opens (reconnect, late restore, move).
+    void import("./store/externalChanges").then((x) => {
+      x.startExternalChanges();
+      let last = m.getVaultStatus().location;
+      m.onVaultStatusChange(() => {
+        const now = m.getVaultStatus().location;
+        if (now === last) return;
+        last = now;
+        void x.reconcileOpenNotes();
+      });
+    });
+    return status;
+  }),
+  new Promise((r) => setTimeout(r, 4000)),
+]).catch((err) => log.warn("vault location unavailable", err));
+void Promise.all([initLocale(), secretsReady, vaultReady])
   .then(([applied]) => {
     // initLocale falls back to English when the saved locale's chunk can't
     // load; the store was already rehydrated with the saved locale, and
@@ -125,6 +161,9 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
       </Suspense>
     </ErrorBoundary>
     <UpdateBanner />
+    <Suspense fallback={null}>
+      <VaultFolderBanner />
+    </Suspense>
     <ToastContainer />
   </React.StrictMode>,
 );

@@ -13,6 +13,8 @@
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
     "hygiene": "node scripts/check-code-hygiene.mjs",
+    "headers": "node scripts/headers.mjs --check",
+    "headers:write": "node scripts/headers.mjs --write",
     "tauri": "tauri",
     "tauri:dev": "tauri dev",
     "tauri:build": "tauri build",

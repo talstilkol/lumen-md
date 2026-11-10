@@ -46,6 +46,7 @@ export default defineConfig({
             { label: "Database views", slug: "workspace/database-views" },
             { label: "Search (BM25 + Smart)", slug: "workspace/search" },
             { label: "Vault Doctor", slug: "workspace/doctor" },
+            { label: "Backups to a second drive", slug: "workspace/backups", translations: { he: "גיבוי לכונן שני" } },
           ],
         },
         {
@@ -80,6 +81,8 @@ export default defineConfig({
           items: [
             { label: "Git sync", slug: "sync/git" },
             { label: "Cloud sync (Dropbox, Drive)", slug: "sync/cloud" },
+            { label: "Encrypted sync (E2EE)", slug: "sync/e2ee" },
+            { label: "Keys, rotation and revocation", slug: "sync/e2ee-keys", translations: { he: "מפתחות, החלפה וביטול" } },
             { label: "Read-mode publishing", slug: "sync/publish" },
           ],
         },
@@ -94,7 +97,7 @@ export default defineConfig({
         {
           label: "Security",
           items: [
-            { label: "Vault + recovery phrase", slug: "security/vault" },
+            { label: "Secrets and encryption", slug: "security/vault" },
           ],
         },
         {

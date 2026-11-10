@@ -375,6 +375,8 @@ const en: Strings = {
   "versionHistory.noVersions": "No versions yet. A version is kept every couple of minutes while you type, on every save and when you close the tab.",
   "cmd.vault.export": "Export the whole vault…",
   "cmd.vault.export.hint": "Every note and attachment, with folders, as a .zip or into a folder",
+  "cmd.vault.backups": "Backups…",
+  "cmd.vault.backups.hint": "Daily backups to another drive, and restore",
   "cmd.vault.import": "Import notes (zip / folder: Obsidian, Notion, Lumen)…",
   "cmd.vault.import.hint": "Into a new folder — nothing existing is overwritten",
   "vault.export.where": "Export as…",
@@ -383,6 +385,49 @@ const en: Strings = {
   "vault.export.done": "Exported {n} files.",
   "vault.export.doneFolder": "Exported {n} files into the folder “{folder}”.",
   "vault.export.failed": "Export failed: {error}",
+  "cmd.vault.toFolder": "Move the vault to a folder…",
+  "cmd.vault.toFolder.hint": "Copies every note to a folder on this computer, checks each file byte for byte, then works there. Nothing is deleted.",
+  "cmd.vault.openFolder": "Open a folder as the vault…",
+  "cmd.vault.openFolder.hint": "Work in an existing folder (for example an Obsidian vault) without copying. Notes in browser storage stay where they are.",
+  "cmd.vault.toBrowser": "Move the vault back to browser storage",
+  "cmd.vault.toBrowser.hint": "Copies every note from the folder into the browser's private storage, checks it, then works there. The folder is not changed.",
+  "vault.folder.unsupported": "This browser can't open a folder on your computer, so your notes stay in the browser's private storage (OPFS). To keep the vault in a folder, use Chrome or Edge, or the desktop app.",
+  "vault.folder.permissionDenied": "Lumen didn't get permission to edit the folder “{folder}”.",
+  "vault.folder.moving": "Moving the vault… {done} of {total} files",
+  "vault.folder.moved": "The vault is now in the folder “{folder}”: {n} files copied and checked. Your notes in browser storage were not deleted.",
+  "vault.folder.movedBack": "The vault is back in browser storage: {n} files copied and checked. The folder “{folder}” was not changed.",
+  "vault.folder.opened": "Lumen now works in the folder “{folder}”. Notes in browser storage stay where they are.",
+  "vault.folder.conflict": "Not moved: {n} files in “{folder}” already exist with different content (for example {path}). Nothing was changed.",
+  "vault.folder.failed": "Moving the vault stopped: {error}. Nothing was deleted, and you can resume.",
+  "vault.folder.alreadyBrowser": "The vault is already in browser storage.",
+  "vault.folder.reconnectBody": "Your vault is the folder “{folder}”. Lumen needs your permission to open it again.",
+  "vault.folder.reconnect": "Reconnect folder",
+  "vault.folder.useBrowser": "Use browser storage",
+  "vault.folder.interrupted": "Moving the vault to “{folder}” was interrupted. Nothing was deleted.",
+  "vault.folder.resume": "Resume move",
+  "vault.folder.cancelMove": "Cancel move",
+  "vault.folder.browserStorage": "browser storage",
+  "vault.folder.restoring": "Opening the vault…",
+  "vault.desktop.firstRunBody": "Choose the folder where your notes live. Lumen keeps them there as plain Markdown files, so other apps such as Obsidian can open them too. Notes already in the app are backed up and copied there; nothing is deleted.",
+  "vault.desktop.choose": "Choose folder…",
+  "vault.desktop.notNow": "Not now",
+  "vault.desktop.backedUp": "A backup of the app's notes was saved to {path}.",
+  "external.conflict.title": "Changed outside Lumen — {path}",
+  "external.conflict.body": "This note was changed by another program while you had unsaved edits. The other version is already kept as a copy, so nothing is lost. Choose what this note should contain.",
+  "external.conflict.mine": "mine",
+  "external.conflict.theirs": "theirs",
+  "external.conflict.takeMine": "Keep mine",
+  "external.conflict.takeTheirs": "Take theirs",
+  "external.conflict.merge": "Apply merge",
+  "external.conflict.keepMine": "Keep mine",
+  "external.conflict.copyName": "changed outside Lumen",
+  "external.conflict.keptCopy": "The version changed outside Lumen is kept as “{path}”.",
+  "external.conflict.failed": "Could not resolve the change to “{path}”; both versions are kept.",
+  "external.reloaded": "“{path}” was changed outside Lumen and reloaded.",
+  "external.renamed": "“{from}” was renamed outside Lumen to “{to}”; the open note follows it.",
+  "external.deleted": "“{path}” was deleted outside Lumen. The open note is kept, unsaved.",
+  "external.conflict.keptTyping": "You kept typing while the conflict was open, so your latest text is kept (unsaved, saved next). The version changed outside Lumen is in “{path}”.",
+  "external.conflict.notSaved": "“{path}” was not saved: it changed outside Lumen. Nothing was changed; resolve the change first.",
   "vault.import.what": "Import from…",
   "vault.import.zip": "A .zip file",
   "vault.import.folder": "A folder",
@@ -432,6 +477,10 @@ const en: Strings = {
   "cmd.note.read.hint": "Reads this note with your system's voices (Hebrew included); run again to stop",
   "toast.tts.unavailable": "This browser can't read aloud",
   "toast.tts.noHebrewVoice": "No Hebrew voice is installed on this system — add one in the system's speech settings",
+  "toast.tts.noLocalVoice": "No voice on this device for part of the text — install one in the system's speech settings (network voices are off under local-only)",
+  "tts.networkVoice.title": "Use a network voice?",
+  "tts.networkVoice.body": "This device has no voice for this note. Your browser offers voices that synthesize on the provider's servers, so the note's text would be sent there. The privacy ledger records each use.",
+  "tts.networkVoice.ok": "Use network voices",
   "cmd.vault.digest": "Digest: what changed",
   "cmd.vault.digest.hint": "A note with every note changed since the last digest, and their open tasks",
   "cmd.image.altText": "Images: alt text from OCR / local vision",
@@ -483,7 +532,9 @@ const en: Strings = {
   "privacy.cat.cloud-text": "Cloud service — your text is sent",
   "privacy.cat.local-ai": "On this device / LAN",
   "privacy.cat.model-download": "Model download — no text sent",
+  "privacy.cat.static-asset": "Static files (fonts, icons) — no text sent",
   "privacy.cat.research": "Research service — your query is sent",
+  "privacy.cat.third-party": "Third-party service — the page address is sent",
   "privacy.footer": "Recorded: time, host, size, reason. Never the text of prompts or answers. Requests from inside model workers (downloads) are not listed.",
   "toast.privacyBlocked": "Blocked by the local-only policy: {reason}. Use a local model, or change the policy in AI settings.",
   "doc.save.failedRetrying": "Could not save “{name}” to the vault — retrying. Your text is still in this browser.",
@@ -562,6 +613,15 @@ const en: Strings = {
   "toast.tocInsertedAtTop": "📋 TOC inserted at top",
   "toast.loadedFromRemoteModule": "✅ Loaded {name} from remote module",
   "toast.speechRecognitionNotSupportedIn": "Speech recognition not supported in this browser",
+  "toast.dictate.onDevice": "Dictating on this device — text appears every few seconds (the first time downloads the speech model)",
+  "dictate.newNoteName": "Dictation",
+  "toast.dictate.noteClosed": "The note you were dictating into was closed, so the rest went to a new note: {name}",
+  "toast.dictate.localFailed": "On-device dictation stopped: {error}",
+  "toast.dictate.localOnlyBlocked": "On-device dictation isn't available here, and the browser's speech service is blocked under local-only (it sends audio out)",
+  "toast.dictate.webSpeechActive": "Dictating through the browser's speech service — the audio is sent to its provider",
+  "dictate.webSpeech.title": "Use the browser's speech service?",
+  "dictate.webSpeech.body": "Dictation on this device couldn't start. Your browser's speech service works, but it sends the audio to its provider (Google in Chrome). The privacy ledger records each use.",
+  "dictate.webSpeech.ok": "Use the browser service",
   "toast.recordingStopped": "🎙 Recording stopped",
   "toast.addedWords": "✅ Words added: {count}",
   "toast.speechRecognitionErrorCheckMicrophone": "Speech recognition error — check microphone permissions",
@@ -1597,6 +1657,17 @@ export function applyLocale(locale: Locale): void {
   if (!SYNCHRONOUS_LOCALES.has(locale) && !(locale in BUNDLES)) {
     void loadLocale(locale);
   }
+}
+
+/**
+ * English for a lazily loaded domain. Its strings live in
+ * `src/i18n/lazy/<domain>.json` and ship in that domain's chunk, not in the
+ * startup bundle; the domain registers them when it loads (other locales
+ * keep the keys in their own JSON as usual). Keys already in `en` win. The
+ * i18n tools and tests read these files together with the `en` block.
+ */
+export function registerEnglish(strings: Strings): void {
+  for (const [k, v] of Object.entries(strings)) if (!(k in en)) en[k] = v;
 }
 
 /** Translate `id` using the active locale, with optional `{name}` substitutions. */
