@@ -34,6 +34,7 @@ export default defineConfig({
           items: [
             { label: "Source / Split / Preview / WYSIWYG", slug: "editor/modes" },
             { label: "Smart Insert", slug: "editor/smart-insert" },
+            { label: "Themes and CSS snippets", slug: "editor/themes", translations: { he: "ערכות נושא וקטעי CSS" } },
           ],
         },
         {
@@ -98,6 +99,14 @@ export default defineConfig({
           label: "Security",
           items: [
             { label: "Secrets and encryption", slug: "security/vault" },
+          ],
+        },
+        {
+          label: "Contributing",
+          translations: { he: "תרומה לפרויקט" },
+          items: [
+            { label: "Visual regression", translations: { he: "רגרסיה חזותית" }, slug: "contributing/visual-regression" },
+            { label: "Design system", translations: { he: "מערכת העיצוב" }, slug: "contributing/design-system" },
           ],
         },
         {

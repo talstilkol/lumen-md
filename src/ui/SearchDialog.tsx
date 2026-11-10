@@ -385,10 +385,10 @@ export function SearchDialog({ open, onClose, onOpenFile }: Props) {
             onClick={() => setMode("smart")}
             title="Hybrid semantic + keyword search (uses your AI key for embeddings)"
           >
-            <Wand2 size={11} style={{ display: "inline", marginRight: 4 }} /> Smart
+            <Wand2 size={11} style={{ display: "inline", marginInlineEnd: 4 }} /> Smart
           </button>
           <button className={`chart-block-tab ${mode === "ai" ? "active" : ""}`} style={{ fontSize: 13, background: "transparent" }} onClick={() => setMode("ai")}>
-             <Sparkles size={11} style={{display:"inline", marginRight:4}}/> Ask Workspace
+             <Sparkles size={11} style={{display:"inline", marginInlineEnd:4}}/> Ask Workspace
           </button>
           {mode === "smart" && smartAllowed && (
             <button
@@ -545,7 +545,7 @@ export function SearchDialog({ open, onClose, onOpenFile }: Props) {
                 <div className="cmd-palette-label" style={{ fontWeight: 500 }}>
                   {hit.name}
                   {hit.path !== hit.name && (
-                    <span style={{ color: "hsl(var(--fg-muted))", fontWeight: 400, marginLeft: 6, fontSize: 11 }}>
+                    <span style={{ color: "hsl(var(--fg-muted))", fontWeight: 400, marginInlineStart: 6, fontSize: 11 }}>
                       {hit.path}
                     </span>
                   )}
@@ -627,7 +627,7 @@ export function SearchDialog({ open, onClose, onOpenFile }: Props) {
                 {aiCitations && (
                   <div data-testid="vault-citations" style={{ borderTop: "1px solid hsl(var(--border))", paddingTop: 8, marginTop: 4, fontSize: 11.5 }}>
                     {aiCitations.verifiedCount === 0 ? (
-                      <div role="alert" style={{ color: "hsl(35 90% 45%)", fontWeight: 600, marginBottom: 4 }}>{t("vaultCite.unsupported")}</div>
+                      <div role="alert" style={{ color: "hsl(var(--warning))", fontWeight: 600, marginBottom: 4 }}>{t("vaultCite.unsupported")}</div>
                     ) : (
                       <div style={{ color: "hsl(var(--fg-muted))", fontWeight: 600, marginBottom: 4 }}>
                         {t("vaultCite.summary", { ok: aiCitations.verifiedCount, total: aiCitations.citations.length })}
@@ -648,7 +648,7 @@ export function SearchDialog({ open, onClose, onOpenFile }: Props) {
                         }}
                         style={{ display: "flex", gap: 6, alignItems: "baseline", width: "100%", textAlign: "start", padding: "3px 0", background: "none", border: 0, color: "inherit", cursor: c.path ? "pointer" : "default" }}
                       >
-                        <span style={{ color: c.verified ? "hsl(145 60% 38%)" : "hsl(0 70% 55%)", fontWeight: 700 }} aria-label={c.verified ? t("vaultCite.verified") : t("vaultCite.notVerified")}>
+                        <span style={{ color: c.verified ? "hsl(var(--success))" : "hsl(var(--danger))", fontWeight: 700 }} aria-label={c.verified ? t("vaultCite.verified") : t("vaultCite.notVerified")}>
                           {c.verified ? "✓" : "✗"}
                         </span>
                         <span style={{ color: "hsl(var(--accent))", whiteSpace: "nowrap" }}>
@@ -671,7 +671,7 @@ export function SearchDialog({ open, onClose, onOpenFile }: Props) {
                       >
                         <FileCode2 size={11} />
                         <span>[{i + 1}] {s.path}</span>
-                        <span style={{ color: "hsl(var(--fg-muted))", marginLeft: "auto" }}>{(s.score * 100).toFixed(0)}%</span>
+                        <span style={{ color: "hsl(var(--fg-muted))", marginInlineStart: "auto" }}>{(s.score * 100).toFixed(0)}%</span>
                       </div>
                     ))}
                   </div>

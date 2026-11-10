@@ -90,6 +90,7 @@ test("today's note is created, opened, and not duplicated when opened again", as
   await page.keyboard.press("ControlOrMeta+End");
   await page.keyboard.type("first entry");
   await page.keyboard.press("ControlOrMeta+Alt+KeyD");
+  // hygiene-allow: proves a negative (no second note, no second tab appears), so there is no condition to wait for
   await page.waitForTimeout(500);
   await expect(editor).toContainText("first entry");
   expect(await journalFiles(page)).toEqual([`${today}.md`]);
@@ -106,6 +107,7 @@ test("today's note is created, opened, and not duplicated when opened again", as
   await expect(cal.locator(`[data-date="${today}"]`)).toHaveAttribute("data-has-note", "true", { timeout: 5000 });
   await expect(cal.locator(`[data-date="${today}"]`)).toHaveAttribute("aria-current", "date");
   await cal.locator(`[data-date="${today}"]`).click();
+  // hygiene-allow: proves a negative (the click creates no duplicate note), so there is no condition to wait for
   await page.waitForTimeout(300);
   expect(await journalFiles(page)).toEqual([`${today}.md`]);
   await expect(tabs).toHaveCount(1);

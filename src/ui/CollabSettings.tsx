@@ -75,7 +75,7 @@ export function CollabSettings({ onClose }: Props) {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        background: "hsl(0 0% 0% / 0.5)",
+        background: "var(--overlay)",
         backdropFilter: "blur(4px)",
       }}
       onClick={(e) => {

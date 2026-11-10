@@ -1,8 +1,7 @@
 {
   "version": 1,
-  "generated_at": "2026-11-09T23:25:14.844Z",
   "source": "src/i18n/index.ts (en bundle) + src/i18n/lazy/*.json",
-  "count": 1562,
+  "count": 1574,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -7733,6 +7732,11 @@
       "vars": []
     },
     {
+      "key": "themeSettings.preset.hebrew",
+      "en": "Ktav (Hebrew reading)",
+      "vars": []
+    },
+    {
       "key": "themeSettings.accent",
       "en": "Accent color",
       "vars": []
@@ -7780,6 +7784,66 @@
     {
       "key": "themeSettings.font.mono",
       "en": "Monospace",
+      "vars": []
+    },
+    {
+      "key": "snippets.title",
+      "en": "CSS snippets",
+      "vars": []
+    },
+    {
+      "key": "snippets.intro",
+      "en": "Your own CSS, from .css files in the vault's .lumen/snippets folder. Snippets can restyle Lumen but never load anything from the network: @import and url() to anything but data: are removed.",
+      "vars": []
+    },
+    {
+      "key": "snippets.createExample",
+      "en": "Create an example snippet",
+      "vars": []
+    },
+    {
+      "key": "snippets.removed",
+      "en": "Removed {count} unsafe rule(s):",
+      "vars": [
+        "count"
+      ]
+    },
+    {
+      "key": "snippets.removedAt",
+      "en": "line {line} ({reason})",
+      "vars": [
+        "line",
+        "reason"
+      ]
+    },
+    {
+      "key": "snippets.reason.import",
+      "en": "@import",
+      "vars": []
+    },
+    {
+      "key": "snippets.reason.remote-url",
+      "en": "loads a URL",
+      "vars": []
+    },
+    {
+      "key": "snippets.reason.script",
+      "en": "script hook",
+      "vars": []
+    },
+    {
+      "key": "snippets.reason.at-rule",
+      "en": "unsupported at-rule",
+      "vars": []
+    },
+    {
+      "key": "snippets.reload",
+      "en": "Reload snippets",
+      "vars": []
+    },
+    {
+      "key": "themeSettings.font.hebrew",
+      "en": "Hebrew serif",
       "vars": []
     },
     {

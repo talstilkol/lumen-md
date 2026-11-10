@@ -171,10 +171,10 @@ export function CommentsPanel({ open, onClose, collab, onJump }: Props) {
                 marginBottom: 10,
                 padding: 10,
                 background: c.resolvedAt
-                  ? "hsl(140 60% 50% / 0.08)"
+                  ? "hsl(var(--success) / 0.08)"
                   : "hsl(var(--bg-subtle))",
                 border: `1px solid ${
-                  c.resolvedAt ? "hsl(140 60% 50% / 0.30)" : "hsl(var(--border))"
+                  c.resolvedAt ? "hsl(var(--success) / 0.30)" : "hsl(var(--border))"
                 }`,
                 borderRadius: 8,
                 fontSize: 12.5,
@@ -188,7 +188,6 @@ export function CommentsPanel({ open, onClose, collab, onJump }: Props) {
                   focusedId === c.id
                     ? "0 0 0 4px hsl(var(--accent) / 0.18)"
                     : "none",
-                transition: "outline-color 200ms ease, box-shadow 200ms ease",
               }}
             >
               <header style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 6 }}>
@@ -211,7 +210,7 @@ export function CommentsPanel({ open, onClose, collab, onJump }: Props) {
                   onClick={() => toggleResolved(collab.doc, c.id)}
                   aria-label={t(c.resolvedAt ? "commentsPanel.reopen" : "commentsPanel.resolve")}
                   title={t(c.resolvedAt ? "commentsPanel.reopen" : "commentsPanel.resolve")}
-                  style={iconBtn(c.resolvedAt ? "hsl(140 60% 60%)" : "hsl(var(--fg-muted))")}
+                  style={iconBtn(c.resolvedAt ? "hsl(var(--success))" : "hsl(var(--fg-muted))")}
                 >
                   <Check size={11} />
                 </button>
@@ -220,7 +219,7 @@ export function CommentsPanel({ open, onClose, collab, onJump }: Props) {
                   onClick={() => deleteComment(collab.doc, c.id)}
                   aria-label={t("commentsPanel.delete")}
                   title={t("commentsPanel.delete")}
-                  style={iconBtn("hsl(0 80% 65%)")}
+                  style={iconBtn("hsl(var(--danger))")}
                 >
                   <Trash2 size={11} />
                 </button>

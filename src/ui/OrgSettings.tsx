@@ -206,7 +206,7 @@ export function OrgSettings({ open, onClose, onOpenAuditLog }: Props) {
                 </button>
               </div>
               {domainError && (
-                <p id="org-domain-error" role="alert" style={{ ...muted, color: "hsl(0 70% 60%)", marginTop: 4 }}>
+                <p id="org-domain-error" role="alert" style={{ ...muted, color: "hsl(var(--danger))", marginTop: 4 }}>
                   {domainError}
                 </p>
               )}

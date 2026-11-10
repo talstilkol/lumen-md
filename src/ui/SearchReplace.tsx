@@ -64,18 +64,18 @@ export function SearchReplace({ open, onClose, content, onChange }: Props) {
       style={{
         position: "absolute",
         top: 48,
-        right: 16,
+        insetInlineEnd: 16,
         zIndex: 9998,
         background: "hsl(var(--bg))",
         border: "1px solid hsl(var(--border-strong))",
         borderRadius: 10,
-        boxShadow: "0 12px 40px -8px hsl(0 0% 0% / 0.4)",
+        boxShadow: "var(--shadow-lg)",
         padding: "10px 12px",
         display: "flex",
         flexDirection: "column",
         gap: 8,
         minWidth: 320,
-        animation: "cmdSlideIn 120ms ease",
+        animation: "cmdSlideIn var(--duration-fast) var(--ease-out)",
       }}
     >
       {/* Search row */}

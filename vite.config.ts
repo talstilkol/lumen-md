@@ -1,7 +1,8 @@
 /// <reference types="vitest" />
-import { defineConfig as defineViteConfig } from "vite";
+import { defineConfig as defineViteConfig, searchForWorkspaceRoot } from "vite";
 import type { UserConfig as ViteUserConfig } from "vite";
 import { cspEndpointsPlugin } from "./src/build/cspEndpoints";
+import { laneCacheDir } from "./src/build/laneCache";
 
 interface VitestConfig {
   test?: {
@@ -27,7 +28,7 @@ import react from "@vitejs/plugin-react";
 import { VitePWA } from "vite-plugin-pwa";
 import path from "node:path";
 import { createHash } from "node:crypto";
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readFileSync, realpathSync } from "node:fs";
 
 /**
  * Version of a self-hosted runtime package. Its files keep fixed names
@@ -80,6 +81,22 @@ const cleanUrlAliases = {
 
 /** Dev / preview CORS: the playground runner's opaque origin and localhost. */
 const playgroundCorsOrigin = ["null", /^https?:\/\/(localhost|127\.0\.0\.1|\[::1\])(:\d+)?$/];
+
+/**
+ * A lane (scripts/lane.sh) symlinks node_modules from another checkout; Vite
+ * resolves the link, so fonts and other files served from there would fall
+ * outside its default allow list. Allow the real node_modules too.
+ */
+const devFsAllow = (() => {
+  const allow = [searchForWorkspaceRoot(process.cwd())];
+  try {
+    const real = realpathSync(path.resolve(__dirname, "node_modules"));
+    if (!real.startsWith(allow[0] + path.sep)) allow.push(real);
+  } catch {
+    /* no node_modules yet */
+  }
+  return allow;
+})();
 
 /**
  * The staging script can rewrite runtime files (copy-webr.mjs prepends the
@@ -184,7 +201,11 @@ function vendorChunk(id: string): string | undefined {
   return undefined;
 }
 
+const viteCacheDir = laneCacheDir(__dirname);
+
 export default defineConfig({
+  // A lane's symlinked node_modules is shared: its Vite cache stays in the worktree (src/build/laneCache.ts).
+  ...(viteCacheDir ? { cacheDir: viteCacheDir } : {}),
   // The page deletes `lumen-runtime-*` caches of superseded versions
   // (src/lib/runtimeCaches.ts): Workbox only cleans its precache.
   define: {
@@ -399,6 +420,7 @@ export default defineConfig({
   server: {
     port: 5173,
     host: true,
+    fs: { allow: devFsAllow },
     // The Web Playground runner (sandboxed iframe, origin "null") loads its
     // module scripts with CORS; allow it and local pages, nothing else.
     cors: { origin: playgroundCorsOrigin },
@@ -416,6 +438,17 @@ export default defineConfig({
     // ("optimized dependencies changed. reloading") — losing the user's
     // unsaved edits in dev and flaking the live-lua e2e. Pre-bundle them.
     include: ["wasmoon"],
+    // The dep scanner crawls the HTML entries and every import() they reach,
+    // but never a `new Worker(new URL("./x.worker.ts", import.meta.url))`.
+    // So @hpcc-js/wasm (graphviz), @ruby/wasm-wasi, transformers.js and the
+    // rest were found only when a worker first started — and that full reload
+    // hit every open page. With Playwright's parallel workers on a cold CI dev
+    // server, one graphviz or live-ruby test reloaded the pages of the tests
+    // next to it (the error-paths CSV and graphviz flakes, live-ruby, plan
+    // 0.5). Scanning the worker files too finds those deps before the first
+    // page loads. Setting `entries` replaces the default (the HTML inputs),
+    // so they are listed here as well.
+    entries: ["index.html", "playground-runner.html", "livejs-runner.html", "src/**/*.worker.ts"],
   },
   // ε.4.3 — clean-URL aliases for the auxiliary HTML pages so dev links
   // like `/roadmap` and `/landing` work without the `.html` suffix.

@@ -112,13 +112,13 @@ function InsertTextDialogImpl({
       style={{
         position: "fixed",
         inset: 0,
-        background: "hsl(0 0% 0% / 0.45)",
+        background: "var(--overlay)",
         display: "flex",
         alignItems: "flex-start",
         justifyContent: "center",
         paddingTop: "8vh",
         zIndex: 9999,
-        animation: "fadeIn 120ms ease",
+        animation: "cmdFadeIn var(--duration-fast) var(--ease-out)",
       }}
       onClick={(e) => {
         if (e.target === e.currentTarget) onResolve(null);
@@ -131,7 +131,7 @@ function InsertTextDialogImpl({
           color: "hsl(var(--fg))",
           border: "1px solid hsl(var(--border-strong))",
           borderRadius: 12,
-          boxShadow: "0 24px 60px -8px hsl(0 0% 0% / 0.5)",
+          boxShadow: "var(--shadow-xl)",
           width: "min(720px, calc(100vw - 32px))",
           padding: 18,
           display: "flex",
