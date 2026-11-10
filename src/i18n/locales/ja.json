@@ -1447,5 +1447,22 @@
   "canvas.card.empty": "（空のノート）",
   "canvas.export.label": "画像を書き出す",
   "canvas.export.working": "書き出し中…",
-  "canvas.export.failed": "書き出しに失敗しました: {error}"
+  "canvas.export.failed": "書き出しに失敗しました: {error}",
+  "slides.label": "プレゼンテーション: {title}",
+  "slides.prev": "前のスライド",
+  "slides.next": "次のスライド",
+  "slides.count": "{n} / {total}",
+  "slides.presenter": "発表者ビュー",
+  "slides.pdf": "PDF",
+  "slides.close": "終了",
+  "slides.presenterTitle": "発表者ビュー",
+  "slides.presenterWaiting": "プレゼンテーションを待っています… ノートかキャンバスから開始してください。",
+  "slides.nextUp": "次: {title}",
+  "slides.last": "最後のスライド",
+  "slides.noNotes": "このスライドには発表者メモがありません。",
+  "canvas.present": "発表",
+  "canvas.present.noFrames": "発表するにはキャンバスにフレームを追加してください。各フレームが 1 枚のスライドになり、フレーム間の矢印で順序が決まります。",
+  "canvas.present.failed": "プレゼンテーションを開始できませんでした: {error}",
+  "cmd.view.present": "▶ このノートをスライドで発表",
+  "cmd.view.present.hint": "見出しと --- 行でスライドが始まり、Note: 行は発表者メモになります"
 }

@@ -1447,5 +1447,22 @@
   "canvas.card.empty": "(ملاحظة فارغة)",
   "canvas.export.label": "تصدير صورة",
   "canvas.export.working": "جارٍ التصدير…",
-  "canvas.export.failed": "فشل التصدير: {error}"
+  "canvas.export.failed": "فشل التصدير: {error}",
+  "slides.label": "عرض تقديمي: {title}",
+  "slides.prev": "الشريحة السابقة",
+  "slides.next": "الشريحة التالية",
+  "slides.count": "{n} / {total}",
+  "slides.presenter": "عرض المقدّم",
+  "slides.pdf": "PDF",
+  "slides.close": "إنهاء",
+  "slides.presenterTitle": "عرض المقدّم",
+  "slides.presenterWaiting": "بانتظار العرض… ابدأه من ملاحظة أو من اللوحة.",
+  "slides.nextUp": "التالي: {title}",
+  "slides.last": "الشريحة الأخيرة",
+  "slides.noNotes": "لا توجد ملاحظات للمتحدث في هذه الشريحة.",
+  "canvas.present": "عرض",
+  "canvas.present.noFrames": "أضف إطارات إلى اللوحة لعرضها: كل إطار شريحة، والأسهم بين الإطارات تحدد الترتيب.",
+  "canvas.present.failed": "تعذّر بدء العرض: {error}",
+  "cmd.view.present": "▶ عرض هذه الملاحظة كشرائح",
+  "cmd.view.present.hint": "العناوين وأسطر --- تبدأ شرائح؛ أسطر Note: ملاحظات للمتحدث"
 }

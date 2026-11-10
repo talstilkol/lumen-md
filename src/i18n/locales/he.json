@@ -1447,5 +1447,22 @@
   "canvas.card.empty": "(פתק ריק)",
   "canvas.export.label": "ייצוא תמונה",
   "canvas.export.working": "מייצא…",
-  "canvas.export.failed": "הייצוא נכשל: {error}"
+  "canvas.export.failed": "הייצוא נכשל: {error}",
+  "slides.label": "מצגת: {title}",
+  "slides.prev": "השקף הקודם",
+  "slides.next": "השקף הבא",
+  "slides.count": "{n} מתוך {total}",
+  "slides.presenter": "תצוגת מציג",
+  "slides.pdf": "ייצוא ל־PDF",
+  "slides.close": "סיום",
+  "slides.presenterTitle": "תצוגת מציג",
+  "slides.presenterWaiting": "ממתין למצגת… הפעילו אותה מפתק או מהקנבס.",
+  "slides.nextUp": "הבא: {title}",
+  "slides.last": "השקף האחרון",
+  "slides.noNotes": "אין הערות דובר לשקף הזה.",
+  "canvas.present": "הצגה",
+  "canvas.present.noFrames": "כדי להציג את הקנבס, הוסיפו מסגרות: כל מסגרת היא שקף, וחצים בין מסגרות קובעים את הסדר.",
+  "canvas.present.failed": "לא הצלחנו להתחיל את המצגת: {error}",
+  "cmd.view.present": "▶ הצגת הפתק כמצגת",
+  "cmd.view.present.hint": "כותרות ושורות --- פותחות שקפים; שורות הערות: הן הערות דובר"
 }

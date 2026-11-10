@@ -1447,5 +1447,22 @@
   "canvas.card.empty": "（空笔记）",
   "canvas.export.label": "导出图片",
   "canvas.export.working": "正在导出…",
-  "canvas.export.failed": "导出失败：{error}"
+  "canvas.export.failed": "导出失败：{error}",
+  "slides.label": "演示：{title}",
+  "slides.prev": "上一张幻灯片",
+  "slides.next": "下一张幻灯片",
+  "slides.count": "{n} / {total}",
+  "slides.presenter": "演讲者视图",
+  "slides.pdf": "PDF",
+  "slides.close": "结束",
+  "slides.presenterTitle": "演讲者视图",
+  "slides.presenterWaiting": "正在等待演示… 请从笔记或画布开始。",
+  "slides.nextUp": "下一张：{title}",
+  "slides.last": "最后一张",
+  "slides.noNotes": "这张幻灯片没有演讲者备注。",
+  "canvas.present": "演示",
+  "canvas.present.noFrames": "要演示画布，请添加框架：每个框架是一张幻灯片，框架之间的箭头决定顺序。",
+  "canvas.present.failed": "无法开始演示：{error}",
+  "cmd.view.present": "▶ 将此笔记作为幻灯片演示",
+  "cmd.view.present.hint": "标题和 --- 行开始新幻灯片；Note: 行是演讲者备注"
 }

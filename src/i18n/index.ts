@@ -1330,6 +1330,8 @@ const en: Strings = {
   "cmd.view.autoSave.on": "Enable Auto-Save",
   "cmd.view.autoSave.hint": "every {interval}s",
   "cmd.view.canvas": "🎨 Canvas / Whiteboard",
+  "cmd.view.present": "▶ Present this note as slides",
+  "cmd.view.present.hint": "Headings and --- lines start slides; Note: lines are speaker notes",
   "cmd.view.canvas.hint": "Infinite canvas for visual notes",
   "cmd.canvas.migrate": "🎨 Canvas: convert tldraw canvases to Excalidraw",
   "cmd.canvas.migrate.hint": "the .tldr files stay as backups",

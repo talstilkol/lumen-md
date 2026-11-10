@@ -1447,5 +1447,22 @@
   "canvas.card.empty": "(leere Notiz)",
   "canvas.export.label": "Bild exportieren",
   "canvas.export.working": "Exportiere…",
-  "canvas.export.failed": "Export fehlgeschlagen: {error}"
+  "canvas.export.failed": "Export fehlgeschlagen: {error}",
+  "slides.label": "Präsentation: {title}",
+  "slides.prev": "Vorherige Folie",
+  "slides.next": "Nächste Folie",
+  "slides.count": "{n} / {total}",
+  "slides.presenter": "Referentenansicht",
+  "slides.pdf": "PDF",
+  "slides.close": "Beenden",
+  "slides.presenterTitle": "Referentenansicht",
+  "slides.presenterWaiting": "Warte auf die Präsentation… Starte sie aus einer Notiz oder der Leinwand.",
+  "slides.nextUp": "Als Nächstes: {title}",
+  "slides.last": "Letzte Folie",
+  "slides.noNotes": "Keine Sprechernotizen für diese Folie.",
+  "canvas.present": "Präsentieren",
+  "canvas.present.noFrames": "Füge der Leinwand Rahmen hinzu, um sie zu präsentieren: Jeder Rahmen ist eine Folie, Pfeile zwischen Rahmen legen die Reihenfolge fest.",
+  "canvas.present.failed": "Die Präsentation konnte nicht starten: {error}",
+  "cmd.view.present": "▶ Diese Notiz als Folien präsentieren",
+  "cmd.view.present.hint": "Überschriften und ---Zeilen beginnen Folien; Note:-Zeilen sind Sprechernotizen"
 }
