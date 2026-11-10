@@ -14,7 +14,7 @@
  */
 
 import { useEffect, useRef, useState } from "react";
-import { Inbox, Mic, Square } from "lucide-react";
+import { Inbox } from "lucide-react";
 import { t } from "../i18n";
 import { captureToInbox, INBOX_PATH, openInbox } from "../capture/quickCapture";
 import { isOPFSAvailable } from "../storage/workspace";
@@ -185,7 +185,7 @@ export function QuickCapture({ open, onClose, voice: voiceOnOpen }: Props) {
             onClick={() => void (voice.kind === "recording" ? stopVoice() : startVoice())}
             style={{ display: "inline-flex", gap: 6, alignItems: "center" }}
           >
-            {voice.kind === "recording" ? <Square size={14} aria-hidden="true" /> : <Mic size={14} aria-hidden="true" />}
+            <span aria-hidden="true">{voice.kind === "recording" ? "■" : "●"}</span>
             {voice.kind === "recording"
               ? t("capture.voice.recording", { time: `${Math.floor(Math.max(0, now - voice.since) / 60000)}:${String(Math.floor((Math.max(0, now - voice.since) / 1000) % 60)).padStart(2, "0")}` })
               : voice.kind === "transcribing"

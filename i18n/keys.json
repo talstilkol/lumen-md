@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generated_at": "2026-11-10T00:00:01.538Z",
+  "generated_at": "2026-11-10T00:17:04.443Z",
   "source": "src/i18n/index.ts (en bundle)",
   "count": 1449,
   "entries": [
@@ -1873,7 +1873,7 @@
     },
     {
       "key": "capture.voice.transcribing",
-      "en": "Transcribing on this device…",
+      "en": "Transcribing…",
       "vars": []
     },
     {
@@ -1883,12 +1883,12 @@
     },
     {
       "key": "capture.voice.noMic",
-      "en": "No microphone, or permission was refused.",
+      "en": "No microphone access.",
       "vars": []
     },
     {
       "key": "capture.voice.noTranscript",
-      "en": "Couldn't transcribe on this device; the recording is kept with the note.",
+      "en": "Not transcribed; the audio is kept.",
       "vars": []
     },
     {
