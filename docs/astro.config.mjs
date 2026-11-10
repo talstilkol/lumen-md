@@ -1,5 +1,6 @@
 import { defineConfig } from "astro/config";
 import starlight from "@astrojs/starlight";
+import rehypeHebrewSearch from "./src/plugins/rehype-hebrew-search.mjs";
 
 // Lumen's user docs. Hosted at docs.lumen.app — point your CNAME there.
 //
@@ -8,6 +9,8 @@ import starlight from "@astrojs/starlight";
 // GitHub Pages).
 export default defineConfig({
   site: "https://docs.lumen.app",
+  // Search finds Hebrew words with and without their prefixes (plan W1.28).
+  markdown: { rehypePlugins: [rehypeHebrewSearch] },
   integrations: [
     starlight({
       title: "Lumen Docs",
@@ -29,6 +32,17 @@ export default defineConfig({
             { label: "Quickstart", slug: "getting-started/quickstart" },
             { label: "Install Lumen", slug: "getting-started/install", translations: { he: "התקנת Lumen" } },
             { label: "Keyboard shortcuts", slug: "getting-started/shortcuts", translations: { he: "קיצורי מקלדת" } },
+          ],
+        },
+        {
+          label: "Moving to Lumen",
+          translations: { he: "מעבר ל-Lumen" },
+          items: [
+            { label: "From Obsidian", slug: "getting-started/from-obsidian", translations: { he: "מ-Obsidian" } },
+            { label: "From Notion", slug: "getting-started/from-notion", translations: { he: "מ-Notion" } },
+            { label: "From Evernote", slug: "getting-started/from-evernote", translations: { he: "מ-Evernote" } },
+            { label: "From Google Docs", slug: "getting-started/from-google-docs", translations: { he: "מ-Google Docs" } },
+            { label: "From Bear", slug: "getting-started/from-bear", translations: { he: "מ-Bear" } },
           ],
         },
         {
