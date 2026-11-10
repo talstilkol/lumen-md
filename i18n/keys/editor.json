@@ -834,6 +834,79 @@
       "vars": []
     },
     {
+      "key": "block.liveR.install.body",
+      "en": "Live R blocks run webR, R compiled to WebAssembly. Lumen doesn't include it: webR's binaries (R and libgfortran) are licensed under the GNU GPL version 3. Download it once ({size} MB, webR {version}) and it stays on this device and works offline.",
+      "vars": [
+        "size",
+        "version"
+      ]
+    },
+    {
+      "key": "block.liveR.install.cancel",
+      "en": "Cancel",
+      "vars": []
+    },
+    {
+      "key": "block.liveR.install.download",
+      "en": "Download R ({size} MB)",
+      "vars": [
+        "size"
+      ]
+    },
+    {
+      "key": "block.liveR.install.error.download",
+      "en": "The download failed: {detail}",
+      "vars": [
+        "detail"
+      ]
+    },
+    {
+      "key": "block.liveR.install.error.mismatch",
+      "en": "A downloaded file did not match this build's checksum, so nothing was installed: {detail}",
+      "vars": [
+        "detail"
+      ]
+    },
+    {
+      "key": "block.liveR.install.error.noCache",
+      "en": "R can only be stored once Lumen's offline support is active. Reload the page, then try again.",
+      "vars": []
+    },
+    {
+      "key": "block.liveR.install.error.noManifest",
+      "en": "This build can't download R (it has no webR manifest).",
+      "vars": []
+    },
+    {
+      "key": "block.liveR.install.license",
+      "en": "Licence: GPL-3.0 (webR's LICENSE.md)",
+      "vars": []
+    },
+    {
+      "key": "block.liveR.install.progress",
+      "en": "Downloading R… {percent}%",
+      "vars": [
+        "percent"
+      ]
+    },
+    {
+      "key": "block.liveR.install.source",
+      "en": "From webR's own site, webr.r-wasm.org (or the npm package webr@{version} on cdn.jsdelivr.net if that fails). Every file is checked against this build's checksums. Nothing from your notes is sent.",
+      "vars": [
+        "version"
+      ]
+    },
+    {
+      "key": "block.liveR.install.state",
+      "en": "not installed",
+      "vars": []
+    },
+    {
+      "key": "block.liveR.install.title",
+      "en": "R is not installed on this device",
+      "vars": []
+    },
+    {
       "key": "block.liveR.loadFailed",
       "en": "Failed to load the R runtime.",
       "vars": []

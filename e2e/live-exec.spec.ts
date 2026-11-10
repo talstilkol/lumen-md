@@ -189,6 +189,30 @@ test("live-r executes real R via webR and draws a plot", async ({ page }) => {
   await expect(block).toHaveAttribute("data-state", "success");
 });
 
+test("live-r without webR offers the download with its licence, and fetches nothing until asked", async ({ page }) => {
+  // No webR on this device or this server (plan W1.34).
+  await page.route("**/webr/**", (r) => r.fulfill({ status: 404, body: "" }));
+  const cdn: string[] = [];
+  page.on("request", (r) => {
+    if (/webr\.r-wasm\.org|cdn\.jsdelivr\.net/.test(r.url())) cdn.push(r.url());
+  });
+  await page.keyboard.press("Meta+2");
+  const editor = page.locator(".cm-content").first();
+  await editor.click();
+  await editor.press("ControlOrMeta+a");
+  await editor.fill("```live-r\ncat(1 + 1)\n```\n");
+  const block = page.locator('[data-testid="live-r"]');
+  await expect(block).toBeVisible({ timeout: 15_000 });
+  await block.getByRole("button", { name: "Run" }).click();
+  const offer = block.getByTestId("live-r-install");
+  await expect(offer).toBeVisible({ timeout: 15_000 });
+  await expect(offer).toContainText("GNU GPL version 3");
+  await expect(offer.getByRole("link", { name: /GPL-3\.0/ })).toHaveAttribute("href", /github\.com\/r-wasm\/webr\/blob\/v[\d.]+\/LICENSE\.md/);
+  await expect(offer.getByRole("button", { name: /Download R/ })).toBeEnabled();
+  await expect(block).toHaveAttribute("data-state", "install");
+  expect(cdn).toEqual([]);
+});
+
 test("live-ruby executes real Ruby via ruby.wasm in a sandboxed worker", async ({ page }) => {
   test.setTimeout(240_000);
   await page.keyboard.press("Meta+2");

@@ -26,15 +26,6 @@
     },
     {
       "area": "npm",
-      "name": "webr",
-      "license": "SEE LICENSE IN LICENCE.md",
-      "level": "warn",
-      "until": "2026-11-15",
-      "reason": "webR's binaries are GPL-3.0 (its LICENSE.md) and scripts/copy-webr.mjs ships them for live R blocks. Pending the owner's decision (plan 15.10): make R a user-initiated download (like Hspell), or drop live R. Lapses on 2026-11-15 so it cannot stay silent.",
-      "decision": "15.10"
-    },
-    {
-      "area": "npm",
       "name": "dictionary-en",
       "license": "(MIT AND BSD)",
       "level": "ok",

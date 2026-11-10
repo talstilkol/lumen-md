@@ -64,7 +64,10 @@ export default defineConfig({
   webServer: process.env.PLAYWRIGHT_BASE_URL
     ? undefined
     : {
-        command: "npm run dev",
+        // webR is not part of the build (GPL-3.0, plan W1.34): the live-r specs
+        // run against this deployment's own copy (`webr:local`), and the
+        // download offer is tested with /webr/ answered 404.
+        command: "npm run webr:local && npm run dev",
         url: BASE_URL,
         reuseExistingServer: !process.env.CI,
         timeout: 120_000,

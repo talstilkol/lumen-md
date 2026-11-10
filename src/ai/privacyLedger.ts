@@ -86,6 +86,12 @@ const RULES: Rule[] = [
     category: "model-download",
     reason: "Dictionary / OCR model download (GitHub)",
   },
+  // webR, the R runtime, downloaded only when the user asks from an R block
+  // (plan W1.34: GPL-3.0, so not part of the app): webR's own CDN, then its
+  // npm package on jsDelivr. Any other jsDelivr request is third-party traffic.
+  { test: (h) => h === "webr.r-wasm.org", category: "model-download", reason: "webR (R runtime) download" },
+  { test: (h, p) => h === "cdn.jsdelivr.net" && p.startsWith("/npm/webr@"), category: "model-download", reason: "webR (R runtime) download" },
+  { test: (h) => h === "cdn.jsdelivr.net", category: "third-party", reason: "jsDelivr CDN (only the webR download is expected)" },
 ];
 
 const MAX_ENTRIES = 500;

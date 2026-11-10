@@ -3,6 +3,7 @@ import { defineConfig as defineViteConfig, searchForWorkspaceRoot } from "vite";
 import type { Plugin, UserConfig as ViteUserConfig } from "vite";
 import { cspEndpointsPlugin } from "./src/build/cspEndpoints";
 import { laneCacheDir } from "./src/build/laneCache";
+import { webrManifestPlugin } from "./src/build/webrManifest";
 
 interface VitestConfig {
   test?: {
@@ -150,8 +151,15 @@ const devFsAllow = (() => {
  * there reaches installed apps without a runtime upgrade.
  */
 function stagingRevision(dir: string): string {
-  const script = path.resolve(__dirname, `scripts/copy-${dir}.mjs`);
-  return existsSync(script) ? createHash("sha256").update(readFileSync(script)).digest("hex").slice(0, 8) : "0";
+  // webR's preludes and file list live in webrRuntime.json, shared by its
+  // staging script and the in-app download (plan W1.34).
+  const inputs = [`scripts/copy-${dir}.mjs`, ...(dir === "webr" ? ["src/plugins/r/webrRuntime.json"] : [])]
+    .map((f) => path.resolve(__dirname, f))
+    .filter((f) => existsSync(f));
+  if (!inputs.length) return "0";
+  const h = createHash("sha256");
+  for (const f of inputs) h.update(readFileSync(f));
+  return h.digest("hex").slice(0, 8);
 }
 
 /** Runtime caches of the self-hosted language runtimes, named per version and staging revision. */
@@ -291,6 +299,8 @@ export default defineConfig({
     cleanUrlAliases,
     dictionaryEn,
     dictionaryEnFiles,
+    // runtimes/webr.json: what the R block's webR download is checked against (plan W1.34).
+    webrManifestPlugin(__dirname),
     // Adds the deployment's own worker origins (VITE_*_ENDPOINT …) to the
     // CSP connect-src of index.html, dist/_headers and the nginx image.
     cspEndpointsPlugin(),
@@ -411,8 +421,10 @@ export default defineConfig({
           // first live-python Run; its 9.6 MB wasm would also trip the
           // precache size limit and fail `npm run build`.
           "pyodide/**",
-          // webR (R in WebAssembly, ~45 MB, staged by scripts/copy-webr.mjs)
-          // loads on the first live-r Run.
+          // webR (R in WebAssembly, ~45 MB) is not part of the build (GPL-3.0
+          // binaries, plan W1.34): the user downloads it from the R block into
+          // the webr runtime cache below. Only a deployment that serves its
+          // own copy (`npm run webr:local`) has webr/ here.
           "webr/**",
           // ruby.wasm (~30 MB, staged by scripts/copy-ruby.mjs): fetched on
           // the first live-ruby Run.

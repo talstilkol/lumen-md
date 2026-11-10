@@ -31,6 +31,8 @@ const DOMAINS: Record<string, { module: string; users: string[]; prefixes: strin
   // Encrypted sync (plan 3.4): the whole of src/sync/e2ee/ loads on demand.
   "e2ee.json": { module: "sync/e2ee/strings.ts", users: ["sync/e2ee/conflict.ts", "sync/e2ee/ui/FreshnessBanner.tsx", "sync/e2ee/ui/PassphraseForm.tsx"], prefixes: ["e2ee."], within: "sync/e2ee/" },
   "feedback.json": { module: "feedback/strings.ts", users: ["ui/FeedbackDialog.tsx"], prefixes: ["feedback."] },
+  // The webR download offer (plan W1.34), in the lazily rendered live-R block.
+  "webr.json": { module: "plugins/r/webrStrings.ts", users: ["plugins/LiveRBlock.tsx"], prefixes: ["block.liveR.install."] },
 };
 
 function sources(dir: string): string[] {
