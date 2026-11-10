@@ -7,6 +7,7 @@
  *   → { id, type: "transcribe", model, device, audio: Float32Array (16 kHz mono), language?, task? }
  *   → { id, type: "embed",      model, device, texts: string[] }
  *   → { id, type: "rerank",     model, device, query, passages: string[] }  → scores 0..1 (T29)
+ *   → { id, type: "caption",    model, device, family: "florence2" | "smolvlm", image: Blob }  → one English sentence (plan 6.6)
  *   → { id, type: "load",       task, model, device }
  *   → { id, type: "cancel",     target }         (skip a queued job, discard a running one's result)
  *   → { id, type: "unload" }
@@ -21,22 +22,38 @@
 
 import {
   AutoModelForSequenceClassification,
+  AutoModelForVision2Seq,
+  AutoProcessor,
   AutoTokenizer,
+  Florence2ForConditionalGeneration,
+  RawImage,
   env,
   pipeline,
   type AutomaticSpeechRecognitionPipeline,
   type FeatureExtractionPipeline,
+  type TranslationPipeline,
   type PreTrainedModel,
   type PreTrainedTokenizer,
 } from "@huggingface/transformers";
 
 export type Device = "webgpu" | "wasm";
+/** Florence-2 (task prompt `<CAPTION>`) or SmolVLM (chat template). */
+export type CaptionFamily = "florence2" | "smolvlm";
 
 export type WorkerIn =
   | { id: number; type: "transcribe"; model: string; device: Device; audio: Float32Array; language?: string; task?: "transcribe" | "translate" }
   | { id: number; type: "embed"; model: string; device: Device; texts: string[] }
   | { id: number; type: "rerank"; model: string; device: Device; query: string; passages: string[] }
-  | { id: number; type: "load"; task: "automatic-speech-recognition" | "feature-extraction"; model: string; device: Device }
+  /**
+   * Translation (plan 6.4). `host`: the model is one Lumen converted and
+   * hosts itself (src/ai/convertedModels.ts): its files come from
+   * `${host}${model}/` and go into the verified OPFS cache (./modelCache.ts).
+   * Without it the model is fetched from Hugging Face like the others.
+   * `srcLang` / `tgtLang`: for multilingual models (M2M100); Opus-MT ignores them.
+   */
+  | { id: number; type: "translate"; model: string; device: Device; dtype?: string; texts: string[]; srcLang?: string; tgtLang?: string; host?: string }
+  | { id: number; type: "caption"; model: string; device: Device; family: CaptionFamily; image: Blob }
+  | { id: number; type: "load"; task: "automatic-speech-recognition" | "feature-extraction" | "translation"; model: string; device: Device; dtype?: string; host?: string }
   | { id: number; type: "cancel"; target: number }
   | { id: number; type: "unload" };
 
@@ -75,6 +92,9 @@ export function configureOrt(baseUrl: string, suffix: ".asyncify" | "" = ".async
 let asr: { key: string; pipe: AutomaticSpeechRecognitionPipeline } | null = null;
 let embedder: { key: string; pipe: FeatureExtractionPipeline } | null = null;
 let reranker: { key: string; tokenizer: PreTrainedTokenizer; model: PreTrainedModel } | null = null;
+let translator: { key: string; pipe: TranslationPipeline } | null = null;
+type Captioner = { key: string; processor: CaptionProcessor; model: PreTrainedModel };
+let captioner: Captioner | null = null;
 let queue: Promise<unknown> = Promise.resolve();
 /** Jobs cancelled by the client: skipped when queued, their result discarded when running. */
 const cancelled = new Set<number>();
@@ -197,6 +217,123 @@ async function rerank(id: number, msg: Extract<WorkerIn, { type: "rerank" }>): P
   return scores;
 }
 
+/**
+ * Load a model Lumen hosts itself: transformers.js reads `remoteHost` and
+ * `remotePathTemplate` from its global env, so they are set for the load and
+ * put back after it. Jobs run one at a time (serial), so nothing else loads
+ * meanwhile. The verified OPFS cache is installed once, for the host's URLs
+ * only; every other URL still goes to the Cache API.
+ */
+let cacheInstalledFor: string | null = null;
+async function withHost<T>(host: string | undefined, fn: () => Promise<T>): Promise<T> {
+  if (!host) return fn();
+  const e = env as unknown as { remoteHost: string; remotePathTemplate: string; customCache?: unknown; useCustomCache?: boolean };
+  if (cacheInstalledFor !== host) {
+    const [{ createModelCache }, { loadConvertedRegistry }] = await Promise.all([import("./modelCache"), import("./convertedModels")]);
+    const registry = await loadConvertedRegistry();
+    e.customCache = createModelCache({
+      base: host,
+      registry,
+      root: () => navigator.storage.getDirectory(),
+      fallback: () => caches.open("transformers-cache"),
+    });
+    e.useCustomCache = true;
+    cacheInstalledFor = host;
+  }
+  const saved = { remoteHost: e.remoteHost, remotePathTemplate: e.remotePathTemplate };
+  e.remoteHost = host;
+  e.remotePathTemplate = "{model}/";
+  try {
+    return await fn();
+  } finally {
+    e.remoteHost = saved.remoteHost;
+    e.remotePathTemplate = saved.remotePathTemplate;
+  }
+}
+
+async function getTranslator(id: number, msg: { model: string; device: Device; dtype?: string; host?: string }): Promise<TranslationPipeline> {
+  const dtype = msg.dtype ?? (msg.device === "webgpu" ? "q4f16" : "q8");
+  const key = `${msg.model}@${msg.device}@${dtype}`;
+  if (translator?.key === key) return translator.pipe;
+  if (translator) await translator.pipe.dispose();
+  translator = null;
+  const pipe = (await withHost(msg.host, () => pipeline("translation", msg.model, { device: msg.device, dtype, progress_callback: progressFor(id) } as never))) as TranslationPipeline;
+  translator = { key, pipe };
+  return pipe;
+}
+
+/** Translate `texts` in small batches (memory stays flat; a cancel lands between batches). */
+async function translate(id: number, msg: Extract<WorkerIn, { type: "translate" }>): Promise<string[]> {
+  const pipe = await getTranslator(id, msg);
+  const out: string[] = [];
+  const kwargs = { ...(msg.srcLang ? { src_lang: msg.srcLang } : {}), ...(msg.tgtLang ? { tgt_lang: msg.tgtLang } : {}), max_new_tokens: 512 };
+  for (let i = 0; i < msg.texts.length; i += 4) {
+    if (cancelled.has(id)) throw new DOMException("aborted", "AbortError");
+    const batch = msg.texts.slice(i, i + 4);
+    const res = (await pipe(batch, kwargs as never)) as Array<{ translation_text?: string }> | { translation_text?: string };
+    const rows = Array.isArray(res) ? res : [res];
+    for (const r of rows) out.push(r.translation_text ?? "");
+    post({ id, type: "progress", file: "", progress: Math.round(((i + batch.length) / msg.texts.length) * 100), loaded: i + batch.length, total: msg.texts.length });
+  }
+  return out;
+}
+
+/** The processor calls the two caption families use (typed loosely: they differ per model). */
+interface CaptionProcessor {
+  (...args: unknown[]): Promise<Record<string, unknown> & { input_ids?: { dims: number[] } }>;
+  construct_prompts?: (task: string) => string[];
+  post_process_generation?: (text: string, task: string, size: unknown) => Record<string, string>;
+  apply_chat_template?: (messages: unknown, opts: unknown) => string;
+  batch_decode: (ids: unknown, opts: unknown) => string[];
+}
+
+/**
+ * Per-part precision: the vision encoder and embeddings stay fp16 (q4 there
+ * costs most of the quality), the language parts are 4-bit. On wasm, q8.
+ */
+function captionDtype(family: CaptionFamily, device: Device): Record<string, string> | string {
+  if (device !== "webgpu") return "q8";
+  return family === "florence2"
+    ? { embed_tokens: "fp16", vision_encoder: "fp16", encoder_model: "q4", decoder_model_merged: "q4" }
+    : { embed_tokens: "fp16", vision_encoder: "fp16", decoder_model_merged: "q4" };
+}
+
+async function getCaptioner(id: number, msg: { model: string; device: Device; family: CaptionFamily }): Promise<Captioner> {
+  const key = `${msg.family}:${msg.model}@${msg.device}`;
+  if (captioner?.key === key) return captioner;
+  if (captioner) await captioner.model.dispose();
+  captioner = null;
+  const opts = { device: msg.device, dtype: captionDtype(msg.family, msg.device), progress_callback: progressFor(id) } as never;
+  const Model = msg.family === "florence2" ? Florence2ForConditionalGeneration : AutoModelForVision2Seq;
+  const [processor, model] = await Promise.all([
+    AutoProcessor.from_pretrained(msg.model, { progress_callback: progressFor(id) } as never) as unknown as Promise<CaptionProcessor>,
+    Model.from_pretrained(msg.model, opts) as Promise<PreTrainedModel>,
+  ]);
+  captioner = { key, processor, model };
+  return captioner;
+}
+
+/** One short English caption for an image (plan 6.6). */
+async function caption(id: number, msg: Extract<WorkerIn, { type: "caption" }>): Promise<string> {
+  const { processor, model } = await getCaptioner(id, msg);
+  const image = await RawImage.fromBlob(msg.image);
+  if (cancelled.has(id)) throw new DOMException("aborted", "AbortError");
+  const generate = (inputs: Record<string, unknown>) => (model as unknown as { generate(o: unknown): Promise<{ slice(...a: unknown[]): unknown }> }).generate({ ...inputs, max_new_tokens: 64, do_sample: false });
+  if (msg.family === "florence2") {
+    const task = "<CAPTION>";
+    const inputs = await processor(image, processor.construct_prompts!(task));
+    const ids = await generate(inputs);
+    const text = processor.batch_decode(ids, { skip_special_tokens: false })[0] ?? "";
+    return processor.post_process_generation!(text, task, image.size)[task] ?? "";
+  }
+  const messages = [{ role: "user", content: [{ type: "image" }, { type: "text", text: "Describe this image in one short sentence." }] }];
+  const prompt = processor.apply_chat_template!(messages, { add_generation_prompt: true });
+  const inputs = await processor(prompt, [image], { do_image_splitting: false });
+  const ids = await generate(inputs);
+  const promptLength = inputs.input_ids?.dims.at(-1) ?? 0;
+  return processor.batch_decode(ids.slice(null, [promptLength, null]), { skip_special_tokens: true })[0] ?? "";
+}
+
 function serial<T>(fn: () => Promise<T>): Promise<T> {
   const p = queue.then(fn);
   queue = p.catch(() => undefined);
@@ -230,24 +367,42 @@ export async function handle(msg: WorkerIn): Promise<void> {
       case "rerank":
         post({ id, type: "result", value: await job(id, () => rerank(id, msg)) });
         return;
+      case "translate":
+        post({ id, type: "result", value: await job(id, () => translate(id, msg)) });
+        return;
+      case "caption":
+        post({ id, type: "result", value: await job(id, () => caption(id, msg)) });
+        return;
       case "cancel":
         cancelled.add(msg.target);
         post({ id, type: "result", value: true });
         return;
       case "load":
-        await serial<unknown>(() => (msg.task === "automatic-speech-recognition" ? getAsr(id, msg.model, msg.device) : getEmbedder(id, msg.model, msg.device)));
+        await serial<unknown>(() =>
+          msg.task === "automatic-speech-recognition"
+            ? getAsr(id, msg.model, msg.device)
+            : msg.task === "translation"
+              ? getTranslator(id, msg)
+              : getEmbedder(id, msg.model, msg.device),
+        );
         post({ id, type: "result", value: msg.model });
         return;
       case "unload": {
         const a = asr;
         const e = embedder;
         const r = reranker;
+        const tr = translator;
+        const cap = captioner;
+        captioner = null;
         asr = null;
         embedder = null;
         reranker = null;
+        translator = null;
         await a?.pipe.dispose();
         await e?.pipe.dispose();
         await r?.model.dispose();
+        await tr?.pipe.dispose();
+        await cap?.model.dispose();
         post({ id, type: "result", value: true });
         return;
       }

@@ -8,6 +8,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Stethoscope, X } from "lucide-react";
 import { t } from "../i18n";
+import "../agents/doctorStrings";
 import type { DoctorFinding, DoctorReport, DoctorStatus } from "../agents/doctor";
 
 interface Props {
@@ -117,6 +118,25 @@ export function AiDoctorPanel({ open, onClose }: Props) {
       } catch (e) {
         setPulling({ model: fix.arg, status: (e as Error).message });
       }
+    } else if (fix.action === "downloadHebrewDictionary") {
+      // The user's own click (the dictionary is AGPL, 5.7 MB: the label says so).
+      const { downloadHebrewDictionary } = await import("../ai/hebrewSpellService");
+      try {
+        await downloadHebrewDictionary();
+      } finally {
+        void run(false);
+      }
+    } else if (fix.action === "useLocalServices") {
+      // Point grammar and research at docker/local-ai.yml on this machine.
+      const [{ LOCAL_SERVICES }, { GRAMMAR_ENDPOINT_KEY, clearGrammarCache }] = await Promise.all([import("../agents/doctor"), import("../ai/grammar")]);
+      try {
+        localStorage.setItem(GRAMMAR_ENDPOINT_KEY, LOCAL_SERVICES.grammar);
+        localStorage.setItem("lumen.research.endpoint", LOCAL_SERVICES.research);
+      } catch {
+        /* storage denied: the command above still works by hand */
+      }
+      clearGrammarCache();
+      void run(false);
     } else if (fix.action === "retry") {
       void run(false);
     }
@@ -126,6 +146,14 @@ export function AiDoctorPanel({ open, onClose }: Props) {
     if (!report) return;
     const { formatDoctorReport } = await import("../agents/doctor");
     await copy("report", formatDoctorReport(report, (k) => t(k)));
+  };
+
+  // 14.2: open the feedback form with this report ready to attach (still only if the user ticks it).
+  const reportProblem = async () => {
+    if (!report) return;
+    const [{ formatDoctorReport }, { openFeedback }] = await Promise.all([import("../agents/doctor"), import("./FeedbackDialog")]);
+    onClose();
+    openFeedback({ doctorReport: formatDoctorReport(report, (k) => t(k)), kind: "bug" });
   };
 
   const findings = report?.findings ?? [];
@@ -162,7 +190,7 @@ export function AiDoctorPanel({ open, onClose }: Props) {
               </div>
               {f.detail && <div style={{ ...muted, direction: "ltr", textAlign: "start", unicodeBidi: "isolate" }}>{f.detail}</div>}
               {f.fix && (
-                <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                <div style={{ display: "flex", flexDirection: "column", gap: 6 }} data-testid="doctor-fix">
                   <div style={row}>
                     <span>{t(f.fix.label)}</span>
                     {f.fix.action && (
@@ -206,6 +234,9 @@ export function AiDoctorPanel({ open, onClose }: Props) {
           <div style={{ ...row, justifyContent: "flex-end" }}>
             <button type="button" style={ghost} onClick={() => void copyReport()} disabled={!report}>
               {copied === "report" ? t("ai.doctor.copied") : t("ai.doctor.copyReport")}
+            </button>
+            <button type="button" style={ghost} onClick={() => void reportProblem()} disabled={!report} data-testid="doctor-report-problem">
+              {t("ai.doctor.report")}
             </button>
             <button type="button" style={ghost} onClick={() => void run(false)} disabled={!!running}>
               {running === "quick" ? t("ai.doctor.running") : t("ai.doctor.rerun")}

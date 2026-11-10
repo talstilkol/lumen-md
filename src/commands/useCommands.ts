@@ -200,6 +200,26 @@ export function useCommands({
   const theme = useAppStore((s) => s.theme);
   const showWorkspace = useAppStore((s) => s.showWorkspace);
   const locale = useAppStore((s) => s.locale);
+  /** Niqqud on the selection or the note (plan 6.3): Nakdimon in a worker, with consent. */
+  const runNikud = async (mode: "add" | "partial" | "remove") => {
+    const view = getEditorView?.();
+    if (!view) return;
+    try {
+      const [{ runNikudCommand }, svc] = await Promise.all([import("../editor/nikudCommand"), import("../ai/nikudService")]);
+      if (mode !== "remove") showAiToast(t("toast.nikud.working"), "info");
+      const changed = await cancellable((signal) =>
+        runNikudCommand(view, mode, {
+          point: (text, partial) => svc.pointHebrew(text, { consent: { confirm: uiConfirm, t, locale }, signal }, { partial }),
+          unpoint: svc.unpointHebrew,
+        }),
+      );
+      if (!changed) showAiToast(t("toast.nikud.nothing"), "info");
+    } catch (e) {
+      if (isAbort(e)) return;
+      const reason = (e as { name?: string; reason?: string }).name === "NikudUnavailableError" ? (e as { reason: string }).reason : null;
+      showAiToast(reason ? t(`toast.nikud.${reason}`) : t("toast.nikud.failed", { error: (e as Error).message }), reason ? "info" : "error");
+    }
+  };
   const rtl = useAppStore((s) => s.rtl);
   const autoSave = useAppStore((s) => s.autoSave);
   const autoSaveInterval = useAppStore((s) => s.autoSaveInterval);
@@ -561,6 +581,23 @@ export function useCommands({
         action: toggleWorkspace,
       },
       {
+        id: "note.today",
+        label: t("cmd.note.today"),
+        hint: t("cmd.note.today.hint"),
+        shortcut: "⌥⌘D",
+        icon: cmdIcons.FileText,
+        group: t("group.file"),
+        action: () => window.dispatchEvent(new CustomEvent("lumen-open-today")),
+      },
+      {
+        id: "view.calendar",
+        label: t("cmd.view.calendar"),
+        hint: t("cmd.view.calendar.hint"),
+        icon: cmdIcons.FileText,
+        group: t("group.view"),
+        action: () => useAppStore.getState().toggleCalendar(),
+      },
+      {
         id: "view.backlinks",
         label: t("cmd.view.backlinks"),
         hint: t("cmd.view.backlinks.hint"),
@@ -919,10 +956,10 @@ export function useCommands({
           if (!target || !target.trim()) return;
           try {
             showAiToast(t("toast.translatingTo", { target }), "info");
-            const { translateMarkdown } = await import("../agents/commands");
-            const translated = await cancellable((signal) => translateMarkdown(liveDoc().content, target.trim(), signal));
-            setContent(translated);
-            showAiToast(t("toast.documentTranslated"), "success");
+            const { translateMarkdownDetailed, translationToasts } = await import("../agents/commands");
+            const r = await cancellable((signal) => translateMarkdownDetailed(liveDoc().content, target.trim(), signal));
+            setContent(r.text);
+            for (const [msg, kind] of translationToasts(r, t)) showAiToast(msg, kind);
           } catch (e) {
             if (isAbort(e)) return;
             if ((await import("../agents/suggestions")).reportAgentFailure(e, "ai.translate")) return;
@@ -965,15 +1002,32 @@ export function useCommands({
           }
           const models = await listOllamaModels();
           if (models.length === 0) {
-            await uiAlert({ message: "No models found.\n\nPull a model with: ollama pull llama3.1" });
+            // Names the open-licence default (DEFAULT_OLLAMA_MODEL), never a custom-licence model (plan 1.7).
+            await uiAlert({ message: t("ai.settings.ollama.none") });
             return;
           }
-          const modelList = models.map((m) => `${m.name} (${(m.size / 1e9).toFixed(1)}GB)`).join("\n");
+          const { ollamaLicenceNotice } = await import("../ai/modelCatalog");
+          // why: custom-licence and non-commercial models are named as such and confirmed (plan 1.7)
+          const modelList = models
+            .map((m) => {
+              const lic = ollamaLicenceNotice(m.name);
+              return `${m.name} (${(m.size / 1e9).toFixed(1)}GB)${lic ? ` · ${lic.name}` : ""}`;
+            })
+            .join("\n");
           const choice = await uiPrompt({
             message: `Available Ollama models:\n\n${modelList}\n\nType the model name to use:`,
             defaultValue: models[0].name,
           });
           if (!choice) return;
+          const lic = ollamaLicenceNotice(choice.trim());
+          if (lic) {
+            const ok = await uiConfirm({
+              title: t("ai.localModels.licenceTitle"),
+              message: t("ai.localModels.licenceBody", { model: choice.trim(), licence: lic.name }),
+              okLabel: t("ai.localModels.licenceOk"),
+            });
+            if (!ok) return;
+          }
           setOllamaConfig({ model: choice.trim() });
           setActiveProvider("ollama");
           showAiToast(t("toast.switchedToOllama", { model: choice.trim() }), "success");
@@ -1378,7 +1432,9 @@ export function useCommands({
               cached[i] ? t("ai.localModels.cached") : "",
               (hw.f16 ? e.vramMB.f16 : e.vramMB.f32) > budget ? t("ai.localModels.tooBig") : "",
             ].filter(Boolean);
-            return { value: id, label: `${e.label} · ${gb} GB · ${e.tier}${marks.length ? " — " + marks.join(", ") : ""}` };
+            // why: custom-licence models (Llama, Gemma…) are opt-in and named as such (plan 1.7)
+            const lic = e.licence ? ` · ${e.licence}` : "";
+            return { value: id, label: `${e.label} · ${gb} GB · ${e.tier}${lic}${marks.length ? " — " + marks.join(", ") : ""}` };
           });
           choices.push({ value: "__auto__", label: t("ai.localModels.auto") });
           const choice = await uiSelect({
@@ -1392,6 +1448,15 @@ export function useCommands({
             setWebLlmModel(null);
             showAiToast(t("ai.localModels.autoSet", { model: recommended }), "success");
             return;
+          }
+          const picked = WEBLLM_CATALOG.find((e) => webLlmModelId(e, hw.f16) === choice);
+          if (picked?.licence && choice !== selected) {
+            const ok = await uiConfirm({
+              title: t("ai.localModels.licenceTitle"),
+              message: t("ai.localModels.licenceBody", { model: picked.label, licence: picked.licence }),
+              okLabel: t("ai.localModels.licenceOk"),
+            });
+            if (!ok) return;
           }
           setWebLlmModel(choice);
           const idx = choices.findIndex((c) => c.value === choice);
@@ -1669,7 +1734,8 @@ export function useCommands({
         icon: cmdIcons.Sparkles,
         group: t("group.ai", { defaultValue: "AI Copilot" }),
         action: async () => {
-          const { imageText, withImageText, imagesNeedingAlt } = await import("../ai/vision");
+          const { imageText, withImageText, imagesNeedingAlt, documentLanguage } = await import("../ai/vision");
+          const { uiConfirm } = await import("../ui/PromptDialog");
           const { readWorkspaceBlob } = await import("../storage/workspace");
           const doc = useAppStore.getState().doc.content;
           // Images with no alt, or still named after their file — a real
@@ -1682,10 +1748,13 @@ export function useCommands({
           showAiToast(t("toast.imageAlt.working", { count: targets.length }), "info");
           let next = doc;
           let done = 0;
+          // The user asked: the browser captioner may offer its download (plan 6.6).
+          const lang = await documentLanguage(doc, getLocale());
+          const consent = { confirm: uiConfirm, t, locale: getLocale() };
           for (const m of targets) {
             const blob = await readWorkspaceBlob(m.url).catch(() => null);
             if (!blob) continue;
-            const res = await imageText(blob, getLocale()).catch(() => null);
+            const res = await imageText(blob, lang, { name: m.url, consent }).catch(() => null);
             if (!res || res.source === "none") continue;
             next = withImageText(next, m.url, m.alt, res);
             done++;
@@ -1725,6 +1794,17 @@ export function useCommands({
         group: t("group.tools"),
         action: () => {
           window.dispatchEvent(new CustomEvent("lumen-open-ai-doctor"));
+        },
+      },
+      {
+        // 14.2: feedback without a server — the dialog (and its strings) load on use.
+        id: "help.feedback",
+        label: t("cmd.feedback"),
+        hint: t("cmd.feedback.hint"),
+        icon: cmdIcons.Link,
+        group: t("group.tools"),
+        action: () => {
+          void import("../ui/FeedbackDialog").then((m) => m.openFeedback());
         },
       },
       {
@@ -1846,6 +1926,30 @@ export function useCommands({
           }
           showAiToast(t("toast.aiProviderSetTo", { valid }), "success");
         },
+      },
+      {
+        id: "nikud.add",
+        label: t("cmd.nikud.add"),
+        hint: t("cmd.nikud.add.hint"),
+        icon: cmdIcons.Sparkles,
+        group: t("group.tools"),
+        action: () => runNikud("add"),
+      },
+      {
+        id: "nikud.partial",
+        label: t("cmd.nikud.partial"),
+        hint: t("cmd.nikud.partial.hint"),
+        icon: cmdIcons.Sparkles,
+        group: t("group.tools"),
+        action: () => runNikud("partial"),
+      },
+      {
+        id: "nikud.remove",
+        label: t("cmd.nikud.remove"),
+        hint: t("cmd.nikud.remove.hint"),
+        icon: cmdIcons.Sparkles,
+        group: t("group.tools"),
+        action: () => runNikud("remove"),
       },
       {
         id: "tools.checkGrammar",

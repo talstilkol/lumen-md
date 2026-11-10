@@ -69,6 +69,13 @@ export function isLocaleAvailable(locale: Locale): boolean {
 type Strings = Record<string, string>;
 
 const en: Strings = {
+  "cmd.nikud.add": "Hebrew: add niqqud",
+  "cmd.nikud.add.hint": "Point the selection (or the whole note) on this device",
+  "cmd.nikud.partial": "Hebrew: add partial niqqud",
+  "cmd.nikud.partial.hint": "Point only the words that could be read more than one way",
+  "cmd.nikud.remove": "Hebrew: remove niqqud",
+  "cmd.nikud.remove.hint": "Strip the vowel points from the selection (or the whole note)",
+  "spell.en.unknown": "“{word}”: unknown word (English dictionary on this device)",
   // Toolbar
   "toolbar.tagline": "Markdown, illuminated",
   "toolbar.new": "New",
@@ -410,6 +417,24 @@ const en: Strings = {
   "trash.daysLeft": "deleted for good in {n} days",
   "cmd.file.trash": "Trash…",
   "cmd.file.trash.hint": "Restore deleted notes (kept 30 days)",
+  "cmd.note.today": "Today's note",
+  "cmd.note.today.hint": "Open or create the daily note for today (journal/YYYY-MM-DD.md)",
+  "cmd.view.calendar": "Show / hide the calendar",
+  "cmd.view.calendar.hint": "Month calendar of daily notes under the file tree",
+  "calendar.title": "Calendar",
+  "calendar.prev": "Previous month",
+  "calendar.next": "Next month",
+  "calendar.today": "Today",
+  "calendar.hasNote": "has a note",
+  "calendar.settings": "Daily note settings",
+  "calendar.folder": "Folder",
+  "calendar.pattern": "File name pattern (YYYY, MM, DD)",
+  "calendar.template": "Template for new notes",
+  "calendar.templateHint": "Placeholders: {{date}}, {{hebrewDate}}, {{weekday}}, {{title}}",
+  "calendar.patternInvalid": "The pattern must contain YYYY, MM and DD, so that every day gets its own note.",
+  "calendar.save": "Save",
+  "daily.noWorkspace": "Daily notes need the workspace, which this browser can't provide.",
+  "daily.failed": "Couldn't open the daily note: {error}",
   "cmd.ai.cancel": "AI: Cancel",
   "cmd.ai.cancel.hint": "Stops every running AI request (Esc does the same)",
   "toast.aiCancelled": "AI request cancelled ({count})",
@@ -1021,6 +1046,9 @@ const en: Strings = {
   "ai.localModels.recommended": "recommended",
   "ai.localModels.cached": "downloaded",
   "ai.localModels.tooBig": "may not fit",
+  "ai.localModels.licenceTitle": "Model under its own licence",
+  "ai.localModels.licenceBody": "{{model}} is published under the {{licence}}, not an open-source licence. Read its terms before you use it, especially for work. Lumen will not choose it for you.",
+  "ai.localModels.licenceOk": "Use it",
   "ai.localModels.auto": "Automatic — pick by hardware and task",
   "ai.localModels.autoSet": "Automatic model selection. Current pick: {model}",
   "ai.localModels.set": "Local model: {model}",
@@ -1032,6 +1060,8 @@ const en: Strings = {
   "cmd.ai.agentSettings.hint": "Policy, executor, models, endpoints and recent runs in one place",
   "cmd.ai.doctor": "AI: Doctor (diagnose local AI)",
   "cmd.ai.doctor.hint": "Checks Ollama, CORS, models, WebGPU, storage and services — each with its fix",
+  "cmd.feedback": "Help: Send feedback",
+  "cmd.feedback.hint": "A GitHub issue or text to copy — nothing is sent without your click",
   "ai.doctor.title": "AI doctor",
   "ai.doctor.close": "Close",
   "ai.doctor.intro": "Every check below says what it found and exactly how to fix it. Nothing leaves this computer.",
@@ -1588,6 +1618,11 @@ export function applyLocale(locale: Locale): void {
   if (!SYNCHRONOUS_LOCALES.has(locale) && !(locale in BUNDLES)) {
     void loadLocale(locale);
   }
+}
+
+/** English of a lazy domain (src/i18n/lazy/<domain>.json, see locales/README.md); existing keys win. */
+export function registerEnglish(strings: Strings): void {
+  for (const [k, v] of Object.entries(strings)) if (!(k in en)) en[k] = v;
 }
 
 /** Translate `id` using the active locale, with optional `{name}` substitutions. */
