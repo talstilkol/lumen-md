@@ -8,6 +8,8 @@ import { defineConfig, devices } from "@playwright/test";
  * In CI, set `PLAYWRIGHT_BASE_URL` to skip starting a fresh server.
  */
 const PORT = 5173;
+/** Plan W2.21: cold-start budgets (e2e/cold-start.spec.ts), only in the "coldstart" projects. */
+const COLD = /@coldstart/;
 const BASE_URL = process.env.PLAYWRIGHT_BASE_URL ?? `http://localhost:${PORT}`;
 
 export default defineConfig({
@@ -27,9 +29,10 @@ export default defineConfig({
     video: "retain-on-failure",
   },
   projects: [
-    { name: "chromium", use: { ...devices["Desktop Chrome"] } },
+    { name: "chromium", grepInvert: COLD, use: { ...devices["Desktop Chrome"] } },
     {
       name: "firefox",
+      grepInvert: COLD,
       use: {
         ...devices["Desktop Firefox"],
         // Headless Firefox on CI runners (no GPU) blocks WebGL by default,
@@ -46,7 +49,10 @@ export default defineConfig({
         },
       },
     },
-    { name: "webkit", use: { ...devices["Desktop Safari"] } },
+    { name: "webkit", grepInvert: COLD, use: { ...devices["Desktop Safari"] } },
+    // `npm run perf:coldstart` against a production build (PLAYWRIGHT_BASE_URL): the desktop and a phone profile.
+    { name: "coldstart", grep: COLD, use: { ...devices["Desktop Chrome"] } },
+    { name: "coldstart-phone", grep: COLD, use: { ...devices["Pixel 7"] } },
   ],
   webServer: process.env.PLAYWRIGHT_BASE_URL
     ? undefined
