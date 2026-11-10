@@ -4,7 +4,7 @@
  * trash with an Undo.
  */
 
-import { listTrash, moveToTrash, PartialTrashError, restoreFromTrash, restoreFromTrashIfPresent, type TrashItem } from "./trash";
+import { moveToTrash, PartialTrashError, readTrashIndex, restoreFromTrash, restoreFromTrashIfPresent, type TrashItem } from "./trash";
 import { rewriteLinks, updateLinksAfterMove } from "./linkRewrite";
 import {
   basename,
@@ -219,8 +219,12 @@ export async function undoTrash(items: TrashItem[]): Promise<string[]> {
 
 /** After a failed restore: put the given entries still in the trash back on top of the Ctrl+Z stack. */
 async function requeueLeftInTrash(items: TrashItem[]): Promise<void> {
-  const left = new Set((await listTrash().catch(() => [])).map((i) => i.id));
-  const keep = items.filter((i) => left.has(i.id));
+  // An index that cannot be read (the outage that failed the restore) says
+  // nothing about what is left: keep every entry, and a restore of one that is
+  // gone after all is a no-op (W1.32, Codex on #218).
+  const index = await readTrashIndex();
+  const left = index === null ? null : new Set(index.map((i) => i.id));
+  const keep = left === null ? items : items.filter((i) => left.has(i.id));
   if (!keep.length) return;
   undoStack.push(keep);
   if (undoStack.length > TRASH_UNDO_LIMIT) undoStack.splice(0, undoStack.length - TRASH_UNDO_LIMIT);

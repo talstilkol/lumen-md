@@ -104,6 +104,41 @@ describe("undoLastTrash: a stack of deletes", () => {
     expect(await readWorkspaceFile("a.md")).toBe("A");
   });
 
+  it("a failed restore during a storage outage keeps the entry for Ctrl+Z even when the trash index cannot be read either (W1.32, #218)", async () => {
+    const root = installFakeOpfs();
+    await writeWorkspaceFile("a.md", "A");
+    const items = await trashPaths(["a.md"]);
+    const handle = await root.getFileHandle("__probe", { create: true });
+    await root.removeEntry("__probe");
+    const fileProto = Object.getPrototypeOf(handle) as { createWritable: (this: { name: string }) => Promise<unknown> };
+    const dirProto = Object.getPrototypeOf(root) as { getFileHandle: (this: unknown, name: string, opts?: { create?: boolean }) => Promise<unknown> };
+    const createWritable = fileProto.createWritable;
+    const getFileHandle = dirProto.getFileHandle;
+    let outage = false;
+    // The restore's write fails, and from then on the index cannot be read (not "missing": failing).
+    fileProto.createWritable = async function (this: { name: string }) {
+      if (this.name === "a.md" && !outage) {
+        outage = true;
+        throw new DOMException("transient", "QuotaExceededError");
+      }
+      return createWritable.call(this);
+    };
+    dirProto.getFileHandle = async function (this: unknown, name: string, opts?: { create?: boolean }) {
+      if (outage && name === "index.json") throw new DOMException("storage unavailable", "InvalidStateError");
+      return getFileHandle.call(this, name, opts);
+    };
+    try {
+      await expect(undoTrash(items)).rejects.toThrow("transient");
+    } finally {
+      fileProto.createWritable = createWritable;
+      dirProto.getFileHandle = getFileHandle;
+    }
+    // Storage is back: Ctrl+Z retries the restore.
+    expect(trashUndoDepth()).toBe(1);
+    expect(await undoLastTrash()).toEqual(["a.md"]);
+    expect(await readWorkspaceFile("a.md")).toBe("A");
+  });
+
   it("skips what the Trash panel already restored, and Undo on it again is a no-op", async () => {
     await writeWorkspaceFile("a.md", "A");
     await writeWorkspaceFile("b.md", "B");
