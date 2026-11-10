@@ -18,6 +18,7 @@ const AuditLog = lazy(() => import("./ui/AuditLog").then(m => ({ default: m.Audi
 const OrgSettings = lazy(() => import("./ui/OrgSettings").then(m => ({ default: m.OrgSettings })));
 const TrustedKeysSettings = lazy(() => import("./ui/TrustedKeysSettings").then(m => ({ default: m.TrustedKeysSettings })));
 const ThemeSettings = lazy(() => import("./ui/ThemeSettings").then(m => ({ default: m.ThemeSettings })));
+const ReadingSettings = lazy(() => import("./ui/ReadingSettings").then(m => ({ default: m.ReadingSettings })));
 const AiSettingsPanel = lazy(() => import("./ui/AiSettingsPanel").then(m => ({ default: m.AiSettingsPanel })));
 const PrivacyLedgerPanel = lazy(() => import("./ui/PrivacyLedgerPanel").then(m => ({ default: m.PrivacyLedgerPanel })));
 const TrashPanel = lazy(() => import("./ui/TrashPanel").then(m => ({ default: m.TrashPanel })));
@@ -88,6 +89,35 @@ import { notifyWorkspaceChanged } from "./storage/workspaceEvents";
 
 export default function App() {
   const doc = useAppStore((s) => s.doc);
+  // Reading options (plan W3.5): the open note's face, size and spacing.
+  // The module (and any face) loads only once the person has set one.
+  const readingPath = doc.workspaceName ?? null;
+  useEffect(() => {
+    let live = true;
+    const apply = () => {
+      let stored = false;
+      try {
+        stored = localStorage.getItem("lumen-reading") !== null;
+      } catch {
+        /* no storage: nothing set */
+      }
+      if (!stored) return;
+      void import("./reading/settings").then((m) => {
+        if (live) void m.applyReading(m.effectiveReading(readingPath));
+      });
+    };
+    apply();
+    window.addEventListener("lumen-reading-changed", apply);
+    return () => {
+      live = false;
+      window.removeEventListener("lumen-reading-changed", apply);
+    };
+  }, [readingPath]);
+  useEffect(() => {
+    const onOpen = () => setReadingOpen(true);
+    window.addEventListener("lumen-open-reading", onOpen);
+    return () => window.removeEventListener("lumen-open-reading", onOpen);
+  }, []);
   const setContent = useAppStore((s) => s.setContent);
   const setDoc = useAppStore((s) => s.setDoc);
   const markSaved = useAppStore((s) => s.markSaved);
@@ -140,6 +170,7 @@ export default function App() {
   const [orgSettingsOpen, setOrgSettingsOpen] = useState(false);
   const [trustedKeysOpen, setTrustedKeysOpen] = useState(false);
   const [themeSettingsOpen, setThemeSettingsOpen] = useState(false);
+  const [readingOpen, setReadingOpen] = useState(false);
   const [aiSettingsOpen, setAiSettingsOpen] = useState(false);
   const [aiDoctorOpen, setAiDoctorOpen] = useState(false);
   const [trashOpen, setTrashOpen] = useState(false);
@@ -1068,6 +1099,7 @@ export default function App() {
           {privacyOpen && <PrivacyLedgerPanel open={privacyOpen} onClose={() => setPrivacyOpen(false)} />}
           {trashOpen && <TrashPanel open={trashOpen} onClose={() => setTrashOpen(false)} />}
           {themeSettingsOpen && <ThemeSettings open={themeSettingsOpen} onClose={() => setThemeSettingsOpen(false)} />}
+          {readingOpen && <ReadingSettings open={readingOpen} onClose={() => setReadingOpen(false)} notePath={doc.workspaceName ?? null} />}
         </ErrorBoundary>
       </Suspense>
 

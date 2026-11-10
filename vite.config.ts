@@ -308,6 +308,9 @@ export default defineConfig({
           // ruby.wasm (~30 MB, staged by scripts/copy-ruby.mjs): fetched on
           // the first live-ruby Run.
           "ruby/**",
+          // Reading fonts (plan W3.5): downloaded only when the person picks
+          // one in Reading options, then cached (runtime cache below).
+          "fonts/reading/**",
         ],
         runtimeCaching: [
           {
@@ -326,6 +329,13 @@ export default defineConfig({
               cacheName: "lumen-fonts",
               expiration: { maxAgeSeconds: 60 * 60 * 24 * 365 },
             },
+          },
+          {
+            // Reading fonts (plan W3.5): same origin, fetched on first choice,
+            // then served from this cache — offline too.
+            urlPattern: ({ url }) => url.origin === self.location.origin && url.pathname.includes("/fonts/reading/"),
+            handler: "CacheFirst" as const,
+            options: { cacheName: "lumen-reading-fonts", cacheableResponse: { statuses: [200] } },
           },
           // Self-hosted language runtimes (webR, ruby.wasm, Pyodide) are
           // kept out of the precache (tens of MB each) but cached the first

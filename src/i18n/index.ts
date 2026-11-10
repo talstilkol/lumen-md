@@ -1443,6 +1443,8 @@ const en: Strings = {
   "org.audit.open": "Open audit log",
   "cmd.settings.theme": "Theme settings…",
   "cmd.settings.theme.hint": "Accent color, editor font, size, line height, content width and presets",
+  "cmd.view.readingOptions": "Reading options: font, size, spacing…",
+  "cmd.view.readingOptions.hint": "For every note or just this one; Hebrew fonts that keep nikud in place",
   "themeSettings.title": "Theme",
   "themeSettings.close": "Close",
   "themeSettings.preview": "Live preview",
