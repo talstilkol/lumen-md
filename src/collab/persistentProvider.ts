@@ -39,6 +39,8 @@ export interface PersistentOptions {
   awareness?: unknown;
   /** The role the server granted with each token. */
   onRole?: (role: Role) => void;
+  /** The session is end-to-end encrypted: ask the server to seal the room (plan W2.20). */
+  e2ee?: boolean;
 }
 
 export async function createPersistentProvider(
@@ -63,7 +65,7 @@ export async function createPersistentProvider(
     // Called on every connect, so a reconnect after expiry gets a new token
     // (and a revoked share link gets none).
     token: async () => {
-      const r = await tokenRequest<{ token: string; expiresAt: number; role?: unknown }>(url, tokenPayload(roomName, { share: opts.share ?? null, accessKey }));
+      const r = await tokenRequest<{ token: string; expiresAt: number; role?: unknown }>(url, tokenPayload(roomName, { share: opts.share ?? null, accessKey, e2ee: opts.e2ee === true }));
       opts.onRole?.(isRole(r.role) ? r.role : "edit");
       return r.token;
     },

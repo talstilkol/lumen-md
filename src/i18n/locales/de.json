@@ -1453,5 +1453,7 @@
   "share.error.timeout": "Der Collab-Server hat nicht rechtzeitig geantwortet.",
   "share.error.revoked": "Dieser Link wurde widerrufen.",
   "share.error.expired": "Dieser Link ist abgelaufen.",
-  "share.error.no-share": "Diesen Link gibt es nicht (mehr)."
+  "share.error.no-share": "Diesen Link gibt es nicht (mehr).",
+  "share.needEncrypted": "Zum Teilen braucht es einen Ende-zu-Ende-verschlüsselten Raum. Starte eine neue Collab-Sitzung: Jeder neue Raum hat seinen eigenen Schlüssel.",
+  "share.e2ee": "Ende-zu-Ende-verschlüsselt: Der Raumschlüssel bleibt im Link hinter dem # und erreicht nie den Server. Der Server speichert und überträgt nur Chiffretext, auch die Anwesenheit."
 }

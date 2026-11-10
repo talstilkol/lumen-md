@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-11-10T01:00:30.992Z",
+  "generated_at": "2026-11-10T01:18:18.424Z",
   "source": "src/i18n/index.ts (en bundle) + src/i18n/lazy/*.json",
-  "count": 1455,
+  "count": 1457,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -7803,6 +7803,16 @@
     {
       "key": "share.error.no-share",
       "en": "This link doesn't exist (any more).",
+      "vars": []
+    },
+    {
+      "key": "share.needEncrypted",
+      "en": "Sharing needs an end-to-end encrypted room. Start a new collaboration session: every new room has its own key.",
+      "vars": []
+    },
+    {
+      "key": "share.e2ee",
+      "en": "End-to-end encrypted: the room key stays in the link, after the #, and never reaches the server. The server stores and relays only ciphertext, presence included.",
       "vars": []
     }
   ]

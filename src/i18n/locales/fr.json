@@ -1453,5 +1453,7 @@
   "share.error.timeout": "Le serveur collaboratif n’a pas répondu à temps.",
   "share.error.revoked": "Ce lien a été révoqué.",
   "share.error.expired": "Ce lien a expiré.",
-  "share.error.no-share": "Ce lien n’existe pas (ou plus)."
+  "share.error.no-share": "Ce lien n’existe pas (ou plus).",
+  "share.needEncrypted": "Le partage demande un salon chiffré de bout en bout. Lancez une nouvelle session collaborative : chaque nouveau salon a sa propre clé.",
+  "share.e2ee": "Chiffré de bout en bout : la clé du salon reste dans le lien, après le #, et n’atteint jamais le serveur. Le serveur ne stocke et ne relaie que du texte chiffré, présence comprise."
 }
