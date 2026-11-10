@@ -1442,5 +1442,6 @@
   "related.none": "لا شيء ذو صلة بهذه الفقرة بعد.",
   "related.links": "مذكورة دون رابط",
   "related.link": "ربط",
-  "related.hint": "ربط بـ {name}"
+  "related.hint": "ربط بـ {name}",
+  "related.close": "إغلاق"
 }

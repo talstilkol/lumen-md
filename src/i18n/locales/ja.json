@@ -1442,5 +1442,6 @@
   "related.none": "この段落に関連するものはまだありません。",
   "related.links": "言及あり、リンクなし",
   "related.link": "リンク",
-  "related.hint": "{name} にリンク"
+  "related.hint": "{name} にリンク",
+  "related.close": "閉じる"
 }

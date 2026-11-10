@@ -1442,5 +1442,6 @@
   "related.none": "עדיין אין פתקים קשורים לפסקה הזאת.",
   "related.links": "מוזכר בלי קישור",
   "related.link": "לקשר",
-  "related.hint": "לקשר אל {name}"
+  "related.hint": "לקשר אל {name}",
+  "related.close": "סגירה"
 }

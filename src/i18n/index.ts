@@ -1553,6 +1553,7 @@ const en: Strings = {
   "related.links": "Mentioned, not linked",
   "related.link": "Link",
   "related.hint": "Link to {name}",
+  "related.close": "Close",
 };
 
 

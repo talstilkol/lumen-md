@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-11-09T23:48:28.715Z",
+  "generated_at": "2026-11-10T00:08:14.490Z",
   "source": "src/i18n/index.ts (en bundle)",
-  "count": 1444,
+  "count": 1445,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -7772,6 +7772,11 @@
       "vars": [
         "name"
       ]
+    },
+    {
+      "key": "related.close",
+      "en": "Close",
+      "vars": []
     }
   ]
 }

@@ -1442,5 +1442,6 @@
   "related.none": "暂无与此段落相关的笔记。",
   "related.links": "已提及，未链接",
   "related.link": "链接",
-  "related.hint": "链接到 {name}"
+  "related.hint": "链接到 {name}",
+  "related.close": "关闭"
 }

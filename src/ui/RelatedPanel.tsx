@@ -56,7 +56,7 @@ function Panel({ getView, onClose, subscribe }: { getView: () => EditorView | nu
       <header style={{ display: "flex", alignItems: "center", gap: 6 }}>
         <Link2 size={14} />
         <strong style={{ flex: 1, fontSize: 13 }}>{t("related.title")}</strong>
-        <button type="button" style={btn} onClick={onClose} aria-label={t("agentReview.close")}>
+        <button type="button" style={btn} onClick={onClose} aria-label={t("related.close")}>
           <X size={12} />
         </button>
       </header>

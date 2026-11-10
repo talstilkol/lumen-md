@@ -1442,5 +1442,6 @@
   "related.none": "Пока ничего связанного с этим абзацем.",
   "related.links": "Упомянуто без ссылки",
   "related.link": "Связать",
-  "related.hint": "Связать с {name}"
+  "related.hint": "Связать с {name}",
+  "related.close": "Закрыть"
 }

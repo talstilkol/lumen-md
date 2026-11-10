@@ -1442,5 +1442,6 @@
   "related.none": "Rien de lié à ce paragraphe pour l’instant.",
   "related.links": "Cité, sans lien",
   "related.link": "Lier",
-  "related.hint": "Lier à {name}"
+  "related.hint": "Lier à {name}",
+  "related.close": "Fermer"
 }
