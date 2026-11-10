@@ -3,6 +3,7 @@ import type { Command } from "../ui/CommandPalette";
 import { cmdIcons } from "../ui/CommandPalette";
 import { tabIdOf, useAppStore } from "../store/useStore";
 import { t, SUPPORTED_LOCALES, getLocale } from "../i18n";
+import { suggestionAuthorsKey } from "../editor/suggestAuthors";
 import { getGitIdentity, setGitIdentity, setGitToken, cloneRepo, pullRepo, commitAndPush, gitStatusSummary } from "../sync/git";
 import { getRecents, removeRecent } from "../storage/recent";
 import type { RecentFile } from "../storage/recent";
@@ -197,6 +198,8 @@ export function useCommands({
   getEditorView,
 }: UseCommandsOptions) {
   const doc = useAppStore((s) => s.doc);
+  // W3.11 — the "accept / reject from <author>" commands follow the note's authors.
+  const suggestAuthorsKey = useAppStore((s) => suggestionAuthorsKey(s.doc.content));
   const theme = useAppStore((s) => s.theme);
   const showWorkspace = useAppStore((s) => s.showWorkspace);
   const locale = useAppStore((s) => s.locale);
@@ -2187,7 +2190,7 @@ export function useCommands({
       // ── Suggesting mode (track changes, CriticMarkup) ─────────────────
       ...buildSuggestingCommands({
         getView: () => getEditorView?.() ?? null,
-        getContent: () => useAppStore.getState().doc.content,
+        getContent: () => getEditorView?.()?.state.doc.toString() ?? useAppStore.getState().doc.content,
         setContent: (s: string) => useAppStore.getState().setContent(s),
         suggesting: suggestingMode,
         toggle: toggleSuggestingMode,
@@ -2427,6 +2430,19 @@ export function useCommands({
               action: async () => (await import("../ui/ShareDialog")).openShareDialog({ session: collab }),
             },
             {
+              // W3.11 — named versions of the shared note, compared word by word.
+              id: "collab.namedVersions",
+              label: t("cmd.collab.namedVersions"),
+              hint: t("cmd.collab.namedVersions.hint"),
+              icon: cmdIcons.Link,
+              group: t("group.collab"),
+              action: async () => {
+                const [{ openNamedVersionsDialog }, { useAuth }] = await Promise.all([import("../ui/NamedVersionsDialog"), import("../auth/useAuth")]);
+                const user = useAuth.getState().user;
+                openNamedVersionsDialog({ session: collab, author: user?.name?.trim() || user?.email?.split("@")[0] || null });
+              },
+            },
+            {
               id: "collab.sharedWithMe",
               label: t("cmd.collab.sharedWithMe"),
               icon: cmdIcons.Link,
@@ -2662,5 +2678,6 @@ export function useCommands({
     installedTemplates,
     suggestingMode,
     toggleSuggestingMode,
+    suggestAuthorsKey,
   ]);
 }
