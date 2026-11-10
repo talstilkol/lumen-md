@@ -24,6 +24,7 @@ import { WritingGoalBanner } from "../ui/WritingGoalBanner";
 import { useAppStore } from "../store/useStore";
 import type { ViewMode, SplitAxis } from "../store/useStore";
 import type { CollabSession } from "../collab/yjs";
+import { tapToEditHandlers } from "../mobile/useMobileGestures";
 
 const WysiwygEditor = lazy(() => import("../editor/WysiwygEditor"));
 const PageView = lazy(() => import("../ui/PageView").then(m => ({ default: m.PageView })));
@@ -113,6 +114,10 @@ export function EditorLayout({
   // hand-off prop "for performance", trust the child's equality check
   // instead.
   const editorInitial = docContent;
+  // Phones (W1.25): a tap on reading view edits at that line.
+  const docContentRef = useRef(docContent);
+  docContentRef.current = docContent;
+  const [tapToEdit] = useState(() => tapToEditHandlers(() => docContentRef.current));
 
   // ── Deterministic sync-scroll ─────────────────────────────────
   const editorSectionRef = useRef<HTMLElement | null>(null);
@@ -366,6 +371,8 @@ export function EditorLayout({
       {showPreview && (
         <section
           ref={previewSectionRef}
+          onPointerDown={mode === "preview" ? tapToEdit.onPointerDown : undefined}
+          onPointerUp={mode === "preview" ? tapToEdit.onPointerUp : undefined}
           className={
             mode === "split"
               ? isVerticalSplit

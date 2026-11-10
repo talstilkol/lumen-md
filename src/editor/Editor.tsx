@@ -14,7 +14,9 @@ import { useEffect, useImperativeHandle, useRef, useState, forwardRef } from "re
 import { Compartment, EditorState } from "@codemirror/state";
 import { EditorView, keymap, highlightActiveLine, Decoration, WidgetType } from "@codemirror/view";
 import type { DecorationSet } from "@codemirror/view";
-import { defaultKeymap, history, historyKeymap, indentWithTab } from "@codemirror/commands";
+import { defaultKeymap, history, historyKeymap, indentWithTab, redo, undo } from "@codemirror/commands";
+import { actionById, applyTextAction, type ToolbarActionId } from "../mobile/toolbarActions";
+import { wikiLinkCompletion } from "./wikiLinkComplete";
 import { searchKeymap, search } from "@codemirror/search";
 import {
   syntaxHighlighting,
@@ -281,6 +283,8 @@ export const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
   onChangeRef.current = onChange;
   const onAddAssetRef = useRef(onAddAsset);
   onAddAssetRef.current = onAddAsset;
+  /** The paste/drop image path, for the mobile toolbar's image button. */
+  const assetFilesRef = useRef<((view: EditorView, files: File[]) => Promise<void>) | null>(null);
   // When the parent pushes a new value into the editor (file open),
   // we want to suppress the resulting onChange notification.
   const syncingRef = useRef(false);
@@ -365,6 +369,7 @@ export const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
       vimCompartment.of([]),
       embedHintExtension(),
       insertSlashMenuExtension(),
+      wikiLinkCompletion(),
       history(),
       bracketMatching(),
       indentOnInput(),
@@ -492,6 +497,7 @@ export const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
 
     const view = new EditorView({ state: startState, parent: hostRef.current });
     viewRef.current = view;
+    assetFilesRef.current = handleAssetFiles;
 
 
 
@@ -672,12 +678,55 @@ export const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
     return () => window.removeEventListener("lumen-mobile-insert", onInsert);
   }, []);
 
+  // The mobile toolbar (plan W1.25) sends `lumen-mobile-action` {id}. Text
+  // actions are one transaction each, so one undo takes one back.
+  useEffect(() => {
+    function onAction(e: Event) {
+      const view = viewRef.current;
+      const id = (e as CustomEvent<{ id: ToolbarActionId }>).detail?.id;
+      const action = id ? actionById(id) : undefined;
+      if (!view || !action) return;
+      if (action.kind === "history") {
+        (id === "undo" ? undo : redo)(view);
+      } else if (action.kind === "keyboard") {
+        view.contentDOM.blur();
+        return;
+      } else if (action.kind === "image") {
+        const input = document.createElement("input");
+        input.type = "file";
+        input.accept = "image/*";
+        input.multiple = true;
+        input.onchange = () => {
+          const files = Array.from(input.files ?? []);
+          if (files.length && assetFilesRef.current) void assetFilesRef.current(view, files);
+        };
+        input.click();
+        return;
+      } else {
+        const { from, to } = view.state.selection.main;
+        const edit = applyTextAction(id!, view.state.doc.toString(), from, to);
+        if (edit && (edit.changes.length || edit.anchor !== from || edit.head !== to)) {
+          view.dispatch({
+            changes: edit.changes,
+            selection: { anchor: edit.anchor, head: edit.head },
+            scrollIntoView: true,
+            userEvent: "input.mobile-toolbar",
+          });
+        }
+      }
+      view.focus();
+    }
+    window.addEventListener("lumen-mobile-action", onAction);
+    return () => window.removeEventListener("lumen-mobile-action", onAction);
+  }, []);
+
   // `lumen-reveal-line` {line} (1-based): jump to and select that line —
   // used by vault citations (T29). With `content` it waits until the
   // just-opened note has actually loaded into the editor.
   useEffect(() => {
     function onReveal(e: Event) {
-      const detail = (e as CustomEvent<{ line: number; content?: string }>).detail;
+      // `select: false` (a tap on reading view, W1.25) puts the cursor at the line's end instead of selecting it.
+      const detail = (e as CustomEvent<{ line: number; content?: string; select?: boolean }>).detail;
       const line = detail?.line;
       if (!line || line < 1) return;
       let tries = 0;
@@ -691,7 +740,7 @@ export const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
           return;
         }
         const l = view.state.doc.line(line);
-        view.dispatch({ selection: { anchor: l.from, head: l.to }, effects: EditorView.scrollIntoView(l.from, { y: "center" }) });
+        view.dispatch({ selection: detail.select === false ? { anchor: l.to } : { anchor: l.from, head: l.to }, effects: EditorView.scrollIntoView(l.from, { y: "center" }) });
         view.focus();
       };
       go();
