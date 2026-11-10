@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-11-10T02:37:24.723Z",
+  "generated_at": "2026-11-10T02:48:46.004Z",
   "source": "src/i18n/index.ts (en bundle) + src/i18n/lazy/*.json",
-  "count": 1449,
+  "count": 1468,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -7802,6 +7802,109 @@
       "vars": [
         "error"
       ]
+    },
+    {
+      "key": "canvas.diagram.open",
+      "en": "Diagram…",
+      "vars": []
+    },
+    {
+      "key": "canvas.diagram.title",
+      "en": "Diagram on the canvas",
+      "vars": []
+    },
+    {
+      "key": "canvas.diagram.describe",
+      "en": "Describe it and a model on this device draws it",
+      "vars": []
+    },
+    {
+      "key": "canvas.diagram.describePlaceholder",
+      "en": "e.g. the order process: request, approval, shipping",
+      "vars": []
+    },
+    {
+      "key": "canvas.diagram.draw",
+      "en": "Draw",
+      "vars": []
+    },
+    {
+      "key": "canvas.diagram.drawing",
+      "en": "Drawing…",
+      "vars": []
+    },
+    {
+      "key": "canvas.diagram.drawn",
+      "en": "Drawn. Check the diagram, then insert it.",
+      "vars": []
+    },
+    {
+      "key": "canvas.diagram.localOnly",
+      "en": "Runs only on a local model (Ollama or in the browser); nothing leaves the device.",
+      "vars": []
+    },
+    {
+      "key": "canvas.diagram.noLocalModel",
+      "en": "No local model is available. Start Ollama with a model, or load one in Settings → AI.",
+      "vars": []
+    },
+    {
+      "key": "canvas.diagram.drawFailed",
+      "en": "The model didn't produce a valid diagram: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "canvas.diagram.code",
+      "en": "Mermaid (flowchart, sequence, class, state or ER)",
+      "vars": []
+    },
+    {
+      "key": "canvas.diagram.insert",
+      "en": "Insert",
+      "vars": []
+    },
+    {
+      "key": "canvas.diagram.inserting",
+      "en": "Converting…",
+      "vars": []
+    },
+    {
+      "key": "canvas.diagram.empty",
+      "en": "Paste or draw a diagram first.",
+      "vars": []
+    },
+    {
+      "key": "canvas.diagram.unknown",
+      "en": "This isn't a Mermaid diagram: the first line should be its type (flowchart TD, sequenceDiagram, …).",
+      "vars": []
+    },
+    {
+      "key": "canvas.diagram.invalid",
+      "en": "Mermaid can't read it: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "canvas.diagram.missing",
+      "en": "Inserted, but these labels are missing from the drawing: {labels}",
+      "vars": [
+        "labels"
+      ]
+    },
+    {
+      "key": "canvas.diagram.notEditable",
+      "en": "A {kind} diagram is inserted as a picture, not as shapes you can edit.",
+      "vars": [
+        "kind"
+      ]
+    },
+    {
+      "key": "canvas.diagram.insertedAsImage",
+      "en": "Inserted as a picture: this diagram type can't be made editable.",
+      "vars": []
     }
   ]
 }

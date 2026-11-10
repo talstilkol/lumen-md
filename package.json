@@ -39,6 +39,7 @@
     "docker:run": "docker run -p 8080:8080 lumen-md",
     "eval:agents": "node scripts/agent-eval.mjs",
     "eval:compare": "node scripts/eval-compare.mjs",
+    "eval:canvas-draw": "node scripts/canvas-draw-eval.mjs",
     "fake-ollama": "node --experimental-strip-types scripts/fake-ollama.mjs"
   },
   "dependencies": {
@@ -59,6 +60,7 @@
     "@codemirror/state": "^6.5.0",
     "@codemirror/view": "^6.36.1",
     "@excalidraw/excalidraw": "^0.18.1",
+    "@excalidraw/mermaid-to-excalidraw": "2.2.2",
     "@fontsource/frank-ruhl-libre": "^5.3.0",
     "@fontsource/heebo": "^5.3.0",
     "@fontsource/inter": "^5.3.0",
