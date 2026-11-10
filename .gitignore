@@ -11,6 +11,10 @@ tsconfig.tsbuildinfo
 test-results/
 playwright-report/
 playwright/.cache/
+# Per-lane Playwright config written by scripts/lane.sh (docs/dev/lanes.md)
+playwright.lane.config.ts
+# A lane's own Vite cache (its node_modules is a shared symlink; src/build/laneCache.ts)
+/.vite/
 
 # IDE
 .idea/
