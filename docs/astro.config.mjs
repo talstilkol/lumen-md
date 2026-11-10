@@ -98,6 +98,7 @@ export default defineConfig({
           label: "Security",
           items: [
             { label: "Secrets and encryption", slug: "security/vault" },
+            { label: "Mutation testing", slug: "security/mutation-testing", translations: { he: "בדיקות מוטציה" } },
           ],
         },
         {
