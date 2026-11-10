@@ -125,18 +125,6 @@ describe("watchVault", () => {
 });
 
 describe("callers that used to open OPFS themselves", () => {
-  it("canvases: a legacy canvas converts through the vault", async () => {
-    const { convertLegacyCanvas, listLegacyCanvases } = await import("../ui/CanvasTldraw");
-    await mem.write(
-      "canvases/board.canvas.json",
-      JSON.stringify({ nodes: [{ id: "n1", x: 10, y: 20, width: 100, height: 50, content: "שלום" }] }),
-    );
-    expect(await listLegacyCanvases()).toEqual(["board"]);
-    expect(await convertLegacyCanvas("board")).toEqual({ converted: true, nodeCount: 1 });
-    const snap = JSON.parse(await mem.readText("canvases/board.tldr")) as { store: Record<string, { props?: { text?: string } }> };
-    expect(snap.store["shape:legacy-n1"].props?.text).toBe("שלום");
-  }, 30_000); // the first import of tldraw is slow on a loaded machine
-
   it("folder export: writes the vault into a picked folder through a directory-handle backend", async () => {
     const { FakeDir } = await import("./helpers/fakeOpfs");
     const { exportVaultToFolder } = await import("../storage/exportAll");

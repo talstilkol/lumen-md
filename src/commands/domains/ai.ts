@@ -386,7 +386,7 @@ export function buildAiControlCommands(): Command[] {
       icon: cmdIcons.Link,
       group: t("group.tools"),
       action: () => {
-        void import("../ui/FeedbackDialog").then((m) => m.openFeedback());
+        void import("../../ui/FeedbackDialog").then((m) => m.openFeedback());
       },
     },
     {
