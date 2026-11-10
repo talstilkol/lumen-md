@@ -28,6 +28,8 @@ export default defineConfig({
             { label: "Welcome to Lumen", slug: "getting-started/welcome" },
             { label: "Quickstart", slug: "getting-started/quickstart" },
             { label: "Desktop app updates", slug: "getting-started/desktop-updates" },
+            { label: "Install Lumen", slug: "getting-started/install", translations: { he: "התקנת Lumen" } },
+            { label: "Keyboard shortcuts", slug: "getting-started/shortcuts", translations: { he: "קיצורי מקלדת" } },
           ],
         },
         {
@@ -37,6 +39,7 @@ export default defineConfig({
             { label: "Smart Insert", slug: "editor/smart-insert" },
             { label: "Accessibility", slug: "editor/accessibility", translations: { he: "נגישות" } },
             { label: "Touch and phones", slug: "editor/touch", translations: { he: "מגע וטלפונים" } },
+            { label: "Hebrew and right-to-left", slug: "editor/hebrew", translations: { he: "עברית ומימין לשמאל" } },
           ],
         },
         {
@@ -55,6 +58,7 @@ export default defineConfig({
             { label: "PDF reader and highlights", slug: "workspace/pdf-reader" },
             { label: "Large vaults and long notes", slug: "workspace/large-vaults" },
             { label: "Canvas (Excalidraw)", slug: "workspace/canvas", translations: { he: "קנבס (Excalidraw)" } },
+            { label: "Export and import", slug: "workspace/export-import", translations: { he: "ייצוא וייבוא" } },
           ],
         },
         {
@@ -62,6 +66,7 @@ export default defineConfig({
           items: [
             { label: "Real-time WebRTC", slug: "collab/webrtc" },
             { label: "End-to-end encryption", slug: "collab/encryption" },
+            { label: "Persistent rooms", slug: "collab/persistent", translations: { he: "חדרים מתמשכים" } },
           ],
         },
         {
@@ -73,8 +78,6 @@ export default defineConfig({
             { label: "English spelling on this device", slug: "ai/spelling" },
             { label: "Image descriptions on this device", slug: "ai/image-captions" },
             { label: "Hebrew niqqud on this device", slug: "ai/nikud" },
-            { label: "Image descriptions on this device", slug: "ai/image-captions" },
-            { label: "English spelling on this device", slug: "ai/spelling" },
             { label: "AI doctor", slug: "ai/doctor" },
             { label: "Image search by description", slug: "ai/image-search" },
             { label: "Data analyst", slug: "ai/data-analyst" },
@@ -85,6 +88,7 @@ export default defineConfig({
             { label: "Agent eval: 14 agents, HTML report", slug: "ai/agent-eval", translations: { he: "הערכת סוכנים: 14 סוכנים, דוח HTML" } },
             { label: "Personal data before the cloud", slug: "ai/pii-redaction", translations: { he: "מידע אישי לפני הענן" } },
             { label: "MCP integration (Claude Desktop, Cursor)", slug: "ai/mcp" },
+            { label: "Privacy and the AI policy", slug: "ai/privacy", translations: { he: "פרטיות ומדיניות ה-AI" } },
           ],
         },
         {
@@ -95,7 +99,7 @@ export default defineConfig({
             { label: "Plugin API", slug: "plugins/api" },
             { label: "Plugin gallery", slug: "plugins/gallery" },
             { label: "Plugin signing keys", slug: "plugins/signing" },
-            { label: "Templates marketplace", slug: "plugins/templates" },
+            { label: "Templates", slug: "plugins/templates", translations: { he: "תבניות" } },
             { label: "Web Clipper extension", slug: "plugins/web-clipper" },
           ],
         },
@@ -105,7 +109,7 @@ export default defineConfig({
             { label: "Git sync", slug: "sync/git" },
             { label: "Sync providers (WebDAV, S3, Dropbox, Drive)", slug: "sync/cloud" },
             { label: "Encrypted sync (E2EE)", slug: "sync/e2ee" },
-            { label: "Read-mode publishing", slug: "sync/publish" },
+            { label: "Read-mode publishing", slug: "sync/publish", translations: { he: "פרסום לקריאה" } },
           ],
         },
         {

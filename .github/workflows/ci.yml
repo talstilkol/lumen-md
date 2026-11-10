@@ -66,6 +66,10 @@ jobs:
       - name: Unused files (no new src/ file that nothing imports — plan 0.16)
         run: npm run unused
 
+      # Plan 13.1: every feature has a docs page, in English and Hebrew; no orphan pages or dead internal links.
+      - name: Docs complete (every sidebar page in en + he; 13.1.1 areas covered; links resolve)
+        run: npm run -s docs:complete
+
       - name: Test
         run: npm run test
 

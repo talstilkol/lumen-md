@@ -19,7 +19,7 @@ unified/remark/rehype, Yjs, OPFS, and WebRTC. Zero server required by default.
 | **Smart Search** | BM25+ keyword index fused with OpenAI vector embeddings (Reciprocal-Rank Fusion) inside `⇧⌘F` |
 | **Voice Dictation** | Two modes: Quick (Web Speech API, real-time) and AI Memo (MediaRecorder → Whisper transcription) |
 | **Live Collaboration** | Yjs CRDT over WebRTC — peer-to-peer, zero server required for P2P rooms |
-| **MCP Server** | `npx @lumen-md/mcp-server` gives Claude Desktop / Cursor direct access to your workspace |
+| **MCP Server** | `mcp-server/` gives Claude Desktop / Cursor direct access to your workspace (build from source; not on npm yet) |
 | **Privacy-first** | AES-256-GCM encrypted secrets (OS keychain in the macOS and Windows desktop apps), telemetry opt-out, full offline capability (PWA) |
 | **i18n + RTL** | 8 languages (en, he, ar, de, fr, ja, ru, zh-CN) with full key coverage; RTL-safe layout, LTR code/math islands; strict zero-drift CI guard |
 
@@ -189,8 +189,10 @@ Switch via `⌘K → Language: …`. Adding a new locale: create `src/i18n/local
 
 Expose your Lumen workspace to Claude Desktop, Cursor, or any MCP client:
 
+It isn't published to npm yet; build it from this repository (Node 22+):
+
 ```bash
-npx @lumen-md/mcp-server
+cd mcp-server && npm ci && npm run build   # → mcp-server/dist/index.js
 ```
 
 Available tools: `read_note`, `write_note`, `list_notes`, `search_workspace`, `delete_note`, `update_frontmatter`, `list_tags`, `get_backlinks`, `append_note`.
@@ -201,8 +203,9 @@ Configure in Claude Desktop (`~/Library/Application Support/Claude/claude_deskto
 {
   "mcpServers": {
     "lumen": {
-      "command": "npx",
-      "args": ["@lumen-md/mcp-server"]
+      "command": "node",
+      "args": ["/path/to/lumen-md/mcp-server/dist/index.js"],
+      "env": { "LUMEN_WORKSPACE": "/Users/you/Documents/Lumen" }
     }
   }
 }

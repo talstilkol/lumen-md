@@ -29,8 +29,9 @@ moment you type.
 ## Preview (`⌘3`)
 
 Read-only render of the markdown. Tables, charts, diagrams, math, embeds
-— everything in its final form. Print preview lives here too: `⌘P`
-preserves colours so PDFs come out faithful.
+— everything in its final form. Print from here with
+`⌘K → Print / Save as PDF…`, which keeps the colours so PDFs come out
+faithful.
 
 **Best for**: reading notes back, proof-reading, sharing your screen.
 
@@ -52,8 +53,8 @@ anyone migrating from Notion.
 | `⌘3` | Preview |
 | `⌘4` | WYSIWYG |
 
-The mode persists across reloads (per-document), so you can come back to
-your preferred view automatically.
+The mode is remembered across reloads, so you come back to the view you
+last used.
 
 ## Suggesting mode (track changes)
 

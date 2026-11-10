@@ -1,6 +1,6 @@
 ---
 title: Dynamic blocks reference
-description: All 20+ fenced code-block languages that Lumen renders as live, interactive previews.
+description: The fenced code-block languages that Lumen renders as live, interactive previews.
 ---
 
 Lumen's killer feature is **dynamic blocks**: write a fenced code block in markdown, and the preview renders it as a chart, diagram, table, map, or live sandbox. Every block degrades gracefully — if rendering fails, you still see the source.
@@ -56,7 +56,7 @@ console.log(total(prices))   // 49
 - Blocks share state in the order they **run**. Each block runs when it renders and when you click **Run**; runs are queued and execute one at a time.
 - `shared=name` (for example ` ```live-js shared=physics `) gives a separate named scope inside the same document. Different documents never share a scope.
 - **Reset scope** (shown on shared blocks) discards the worker and every global in it; the next run starts fresh. Re-run the blocks you depend on afterwards.
-- Sandboxing is unchanged: the worker has no DOM and no access to the page, shared mode adds no module or network-import support (code that contains the word `import` does not run, and `eval`, `new Function` and string timers are off), and a run that exceeds the 8-second timeout is stopped. A timeout terminates the worker, which also resets the scope.
+- Sandboxing is unchanged: the worker has no DOM and no access to the page, shared mode adds no module or network-import support (the page CSP still applies inside the worker), and a run that exceeds the 8-second timeout is stopped. A timeout terminates the worker, which also resets the scope.
 - An unused scope is disposed five minutes after the last shared block of that document unmounts.
 
 ## Live Lua
@@ -91,7 +91,7 @@ Each dynamic block is wrapped in an `ErrorBoundary` so a single broken block doe
 
 ## Lazy loading
 
-Every block is `React.lazy`-imported. The block's vendor (Mermaid 718 KB, ECharts 343 KB, Excalidraw ≈ 600 KB gzipped) only loads when the user actually opens a doc that uses it. The main bundle stays at ~221 KB gzipped regardless of how many block types Lumen supports.
+Every block is `React.lazy`-imported. A block's library (Mermaid, ECharts, Leaflet, …) loads only when a note that uses it is opened, so adding block types never grows the startup bundle. That bundle has a size budget, checked on every pull request (`scripts/bundle-budget.mjs`).
 
 ## Authoring a new block
 
@@ -119,11 +119,3 @@ button { font: 16px system-ui; }
 - **Files:** `--- name.ext ---` starts a file. A body without markers is one file (`main.jsx` for React, `main.js` otherwise). `index.html` is the page body (default `<div id="root">`, or `<div id="app">` for Vue); its `<script>` tags don't run, so put code in files.
 - **Imports:** relative imports between files (with or without the extension), CSS / JSON files, and the provided `react`, `react-dom`, `react-dom/client`, `react/jsx-runtime` and `vue`.
 - **Isolation:** each Run loads a fresh runner document in a sandboxed iframe with an opaque origin and its own Content-Security-Policy. The project can't read the app's storage, cookies or page.
-
-### Known limitations — status
-
-| Id | Limitation | Status |
-|---|---|---|
-| A4 | Circular imports between playground files | Decision: not supported. Each file is linked as its own module once its imports are final, so a loop can't be linked. The run stops with an error that names the loop (`Circular import: a.js → b.js → a.js`) and suggests moving the shared code into a third file. |
-| A5 | The playground on Netlify | Decision: not supported. Netlify's `_headers` can't remove the app-wide frame and CSP headers for `/playground-runner.html`. When the runner page doesn't load within 10 seconds, the block says so. Use Cloudflare Pages, Vercel or the Docker image. |
-| A6 | Type checks of `live-js shared` blocks: a parameter with the same name as an outer variable | Fixed. A parameter shadows the outer binding inside its function, including `Array`, `Object` and `Promise`. |
