@@ -219,7 +219,7 @@ export function TrustedKeysSettings({ open, onClose }: Props) {
               style={textarea}
             />
             {error ? (
-              <p id="trusted-keys-error" role="alert" style={{ ...muted, color: "hsl(0 70% 60%)" }}>
+              <p id="trusted-keys-error" role="alert" style={{ ...muted, color: "hsl(var(--danger))" }}>
                 {error}
               </p>
             ) : (

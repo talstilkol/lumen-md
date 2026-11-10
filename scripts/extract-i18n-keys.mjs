@@ -53,11 +53,12 @@ for (const [key, en] of lazyEnglishEntries()) {
 }
 
 // Output deterministically (key order from the bundle is preserved by
-// extraction order, so we don't sort).
+// extraction order, so we don't sort). No timestamp: the file must be a
+// pure function of the en bundle, or every regeneration on two branches
+// conflicts (see docs/dev/lanes.md).
 
 const out = {
   version: 1,
-  generated_at: new Date().toISOString(),
   source: "src/i18n/index.ts (en bundle) + src/i18n/lazy/*.json",
   count: entries.length,
   entries,
@@ -66,7 +67,7 @@ const out = {
 const dest = resolve("i18n/keys.json");
 
 if (process.argv.includes("--check")) {
-  // Compare everything but the timestamp; never writes.
+  // Compare the entries; never writes.
   const committed = existsSync(dest) ? JSON.parse(readFileSync(dest, "utf8")) : { entries: [] };
   const same = JSON.stringify(committed.entries) === JSON.stringify(entries) && committed.count === entries.length;
   if (same) {

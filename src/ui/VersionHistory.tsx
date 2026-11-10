@@ -57,7 +57,7 @@ export function VersionHistory({ fileName, currentContent, onRestore, onClose }:
         inset: 0,
         zIndex: 9999,
         display: "flex",
-        background: "hsl(0 0% 0% / 0.5)",
+        background: "var(--overlay)",
         backdropFilter: "blur(4px)",
       }}
     >
@@ -65,7 +65,7 @@ export function VersionHistory({ fileName, currentContent, onRestore, onClose }:
       <div style={{
         width: 280,
         background: "hsl(var(--bg))",
-        borderRight: "1px solid hsl(var(--border))",
+        borderInlineEnd: "1px solid hsl(var(--border))",
         display: "flex",
         flexDirection: "column",
         overflowY: "auto",

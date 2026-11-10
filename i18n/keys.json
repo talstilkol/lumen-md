@@ -1,6 +1,5 @@
 {
   "version": 1,
-  "generated_at": "2026-11-09T23:25:14.844Z",
   "source": "src/i18n/index.ts (en bundle) + src/i18n/lazy/*.json",
   "count": 1562,
   "entries": [

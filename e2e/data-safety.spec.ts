@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import { opfsWritable } from "./_opfs";
 
 /**
  * Data safety (MASTER_PLAN v3 §14) — part A, the history store (T35):
@@ -13,41 +14,6 @@ test.beforeEach(async ({ page }) => {
   await page.goto("/");
   await expect(page.locator(".cm-content").first()).toContainText("Welcome to", { timeout: 15_000 });
 });
-
-/**
- * Can this engine write OPFS files at all here? Playwright's WebKit runs in
- * an ephemeral context, where WebKit may refuse OPFS writes; the vault can't
- * work there, so the vault tests skip (and say why) instead of failing.
- */
-async function opfsWritable(page: import("@playwright/test").Page): Promise<boolean> {
-  return page.evaluate(async () => {
-    try {
-      const root = await navigator.storage.getDirectory();
-      const fh = await root.getFileHandle("__probe", { create: true });
-      const h = fh as unknown as { createWritable?: () => Promise<{ write(d: string): Promise<void>; close(): Promise<void> }> };
-      if (typeof h.createWritable === "function") {
-        const w = await h.createWritable();
-        await w.write("x");
-        await w.close();
-      } else {
-        const src =
-          "self.onmessage=async()=>{try{const r=await navigator.storage.getDirectory();const f=await r.getFileHandle('__probe',{create:true});const a=await f.createSyncAccessHandle();a.write(new Uint8Array([120]),{at:0});a.flush();a.close();postMessage(true)}catch(e){postMessage(false)}}";
-        const ok = await new Promise<boolean>((res) => {
-          const w = new Worker(URL.createObjectURL(new Blob([src], { type: "application/javascript" })));
-          w.onmessage = (e) => res(e.data === true);
-          w.onerror = () => res(false);
-          w.postMessage(0);
-          setTimeout(() => res(false), 5000);
-        });
-        if (!ok) return false;
-      }
-      await root.removeEntry("__probe");
-      return true;
-    } catch {
-      return false;
-    }
-  });
-}
 
 async function openHistory(page: import("@playwright/test").Page) {
   await page.keyboard.press("Meta+K");
@@ -200,6 +166,8 @@ test("renaming a note rewrites links to it; deleting it goes to the trash with U
 
 /** Part C — export everything (T47): the vault comes out as a .zip with paths. */
 test("the whole vault exports as a zip", async ({ page }) => {
+  // Save, a lazy export chunk, a dialog and a download: more than the default 30 s budget on a cold runner.
+  test.slow();
   test.skip(!(await opfsWritable(page)), "OPFS writes are unavailable in this engine's test context");
   const run = (id: string) => page.evaluate((cmd) => window.dispatchEvent(new CustomEvent("lumen-run-command", { detail: { id: cmd } })), id);
   await page.keyboard.press("Meta+1");
@@ -210,17 +178,21 @@ test("the whole vault exports as a zip", async ({ page }) => {
   await run("file.saveToWorkspace");
   await expect(page.locator("aside.file-tree .file-tree-name", { hasText: "Welcome.md" })).toBeVisible({ timeout: 10_000 });
 
-  const download = page.waitForEvent("download", { timeout: 15_000 });
+  // An engine with showDirectoryPicker (Chromium) asks "zip or folder" first
+  // and downloads nothing until it is answered; the others go straight to the
+  // zip. Decide which from the engine, not from a race: the old race gave the
+  // dialog 10 s, and when the lazy export chunk took longer on a cold runner
+  // the test stopped looking for it and waited for a download that the
+  // unanswered dialog was holding back (plan 0.5).
+  const asksWhere = await page.evaluate(() => "showDirectoryPicker" in window);
+  const download = page.waitForEvent("download", { timeout: 30_000 });
   await run("vault.export");
-  // Chromium offers "zip or folder"; the zip is the default choice.
-  const dialog = page.getByRole("dialog").filter({ has: page.locator("select") });
-  // The choice dialog can take a moment on a slow CI runner: wait for
-  // whichever comes first — the download or the dialog.
-  const first = await Promise.race([
-    download.then(() => "download" as const),
-    dialog.waitFor({ timeout: 10_000 }).then(() => "dialog" as const, () => "none" as const),
-  ]);
-  if (first === "dialog") await dialog.getByRole("button", { name: /^(OK|Confirm)$/i }).click();
+  if (asksWhere) {
+    // The zip is the default choice.
+    const dialog = page.getByRole("dialog").filter({ has: page.locator("select") });
+    await expect(dialog).toBeVisible({ timeout: 15_000 });
+    await dialog.getByRole("button", { name: /^(OK|Confirm)$/i }).click();
+  }
   const d = await download;
   expect(d.suggestedFilename()).toMatch(/^lumen-vault-\d{4}-\d{2}-\d{2}\.zip$/);
   const stream = await d.createReadStream();

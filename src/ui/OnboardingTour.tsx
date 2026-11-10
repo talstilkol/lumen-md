@@ -198,7 +198,7 @@ export function OnboardingTour({ open, onClose, actions }: Props) {
           <rect
             width="100%"
             height="100%"
-            fill="rgba(0,0,0,0.6)"
+            style={{ fill: "var(--overlay)" }}
             mask="url(#spotlight-mask)"
           />
         </svg>
@@ -217,7 +217,7 @@ export function OnboardingTour({ open, onClose, actions }: Props) {
           borderRadius: 14,
           padding: "18px 22px",
           width: "min(320px, 80vw)",
-          boxShadow: "0 12px 40px hsl(0 0% 0% / 0.5), 0 0 0 1px hsl(var(--accent) / 0.15)",
+          boxShadow: "var(--shadow-lg), 0 0 0 1px hsl(var(--accent) / 0.15)",
         }}
       >
         <h3
