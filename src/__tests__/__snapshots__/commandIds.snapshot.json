@@ -742,6 +742,20 @@
       "icon": "Sparkles"
     },
     {
+      "id": "voice.meeting",
+      "label": "🎙 Meeting notes (record on this device)",
+      "group": "Tools",
+      "hint": "Record a meeting, transcribe it on this device, and insert its decisions, tasks with owner and date, and open questions",
+      "icon": "Sparkles"
+    },
+    {
+      "id": "ai.meetingNotes",
+      "label": "AI: Meeting Notes from a Transcript",
+      "group": "Tools",
+      "hint": "Turn the transcript in this note (or the selection) into decisions, tasks and open questions",
+      "icon": "Sparkles"
+    },
+    {
       "id": "voice.dictate",
       "label": "🎙 Voice to Markdown",
       "group": "Tools",
@@ -1936,6 +1950,20 @@
       "icon": "Sparkles"
     },
     {
+      "id": "voice.meeting",
+      "label": "🎙 Meeting notes (record on this device)",
+      "group": "Tools",
+      "hint": "Record a meeting, transcribe it on this device, and insert its decisions, tasks with owner and date, and open questions",
+      "icon": "Sparkles"
+    },
+    {
+      "id": "ai.meetingNotes",
+      "label": "AI: Meeting Notes from a Transcript",
+      "group": "Tools",
+      "hint": "Turn the transcript in this note (or the selection) into decisions, tasks and open questions",
+      "icon": "Sparkles"
+    },
+    {
       "id": "voice.dictate",
       "label": "🎙 Voice to Markdown",
       "group": "Tools",
@@ -2431,6 +2459,8 @@
     "template.changelog",
     "template.lesson-plan",
     "voice.memo",
+    "voice.meeting",
+    "ai.meetingNotes",
     "voice.dictate",
     "vault.encrypt",
     "vault.decrypt",

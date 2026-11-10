@@ -1872,6 +1872,55 @@
       ]
     },
     {
+      "key": "meeting.decisions",
+      "en": "Decisions",
+      "vars": []
+    },
+    {
+      "key": "meeting.empty",
+      "en": "There's no transcript in this note",
+      "vars": []
+    },
+    {
+      "key": "meeting.icsOffer",
+      "en": "Save the {n} dated tasks as a calendar file (.ics)?",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "meeting.inserted",
+      "en": "Meeting notes added — {n} tasks",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "meeting.none",
+      "en": "none",
+      "vars": []
+    },
+    {
+      "key": "meeting.questions",
+      "en": "Open questions",
+      "vars": []
+    },
+    {
+      "key": "meeting.tasks",
+      "en": "Tasks",
+      "vars": []
+    },
+    {
+      "key": "meeting.title",
+      "en": "Meeting",
+      "vars": []
+    },
+    {
+      "key": "meeting.transcript",
+      "en": "Transcript",
+      "vars": []
+    },
+    {
       "key": "mobileBar.label",
       "en": "Markdown shortcuts",
       "vars": []

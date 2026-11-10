@@ -466,8 +466,11 @@ export function pickRecordingMimeType(): string {
  * Memo mode — record audio, Whisper-transcribe, AI-summarize, insert
  * a formatted block. Requires `MediaRecorder` (every modern browser
  * since 2016 has it).
+ *
+ * `meeting`: plan 6.16 — the transcript becomes meeting notes (decisions,
+ * tasks with owner and date, open questions) instead of a short summary.
  */
-export async function startVoiceMemo(opts: { language?: string; plain?: boolean } = {}): Promise<void> {
+export async function startVoiceMemo(opts: { language?: string; plain?: boolean; meeting?: boolean } = {}): Promise<void> {
   if (typeof MediaRecorder === "undefined") {
     showAiToast(t("toast.mediarecorderNotSupportedInThis"), "error");
     return;
@@ -549,6 +552,20 @@ export async function startVoiceMemo(opts: { language?: string; plain?: boolean 
       }
 
       showAiToast(t("toast.summarising"), "info");
+      if (opts.meeting) {
+        try {
+          const m = await import("../meetings/meetingNotes");
+          const res = await m.meetingNotesFrom(result.text, { signal: op.signal, local: result.backend === "local" });
+          const current = useAppStore.getState().doc.content;
+          useAppStore.getState().setContent(current + (current.endsWith("\n") ? "" : "\n") + "\n" + res.markdown);
+          showAiToast(t("meeting.inserted", { n: res.notes.tasks.length }), "success");
+          void m.offerIcs(res);
+          return;
+        } catch (err) {
+          if (op.signal.aborted || isAbort(err)) return;
+          log.warn("meeting notes failed; inserting the memo instead", err);
+        }
+      }
       try {
         summary = await summarizeMemo(result.text, op.signal);
       } catch (err) {

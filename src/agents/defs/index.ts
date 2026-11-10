@@ -17,3 +17,4 @@ export { completerAgent, rewriterAgent, answererAgent, memoSummarizerAgent, buil
 export { pdfAnswererAgent, citationVerified, type PdfAnswererInput } from "./pdfAnswerer";
 export { summarizerAgent, SUMMARY_MAX_CHARS, SUMMARY_MIN_GROUNDED, type SummarizerInput } from "./summarizer";
 export { autofillerAgent, type AutofillerInput, type AutofillerOutput } from "./autofiller";
+export { meetingWriterAgent, MEETING_MAX_CHARS, type MeetingWriterInput, type MeetingWriterOutput } from "./meetingWriter";

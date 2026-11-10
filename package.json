@@ -66,7 +66,8 @@
     "bench:fim": "node --experimental-strip-types scripts/bench-fim.mjs",
     "eval:pdf-chat": "LUMEN_EVAL_PDF=1 vitest run --config vitest.eval.config.ts src/agents/eval/pdfChat.eval.ts",
     "eval:summarize": "LUMEN_EVAL_SUMMARY=1 vitest run --config vitest.eval.config.ts src/agents/eval/summarize.eval.ts",
-    "eval:rerank": "LUMEN_EVAL_RERANK=1 vitest run --config vitest.eval.config.ts src/agents/eval/rerank.eval.ts"
+    "eval:rerank": "LUMEN_EVAL_RERANK=1 vitest run --config vitest.eval.config.ts src/agents/eval/rerank.eval.ts",
+    "eval:meetings": "LUMEN_EVAL_MEETINGS=1 vitest run --config vitest.eval.config.ts src/agents/eval/meetings.eval.ts"
   },
   "dependencies": {
     "@bjorn3/browser_wasi_shim": "0.4.2",

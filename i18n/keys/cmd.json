@@ -179,6 +179,16 @@
       "vars": []
     },
     {
+      "key": "cmd.ai.meetingNotes",
+      "en": "AI: Meeting Notes from a Transcript",
+      "vars": []
+    },
+    {
+      "key": "cmd.ai.meetingNotes.hint",
+      "en": "Turn the transcript in this note (or the selection) into decisions, tasks and open questions",
+      "vars": []
+    },
+    {
       "key": "cmd.ai.mode",
       "en": "AI: Cost Mode (Economy / Balanced / Quality)…",
       "vars": []
@@ -1671,6 +1681,16 @@
     {
       "key": "cmd.view.wysiwyg.hint",
       "en": "rich-text editing",
+      "vars": []
+    },
+    {
+      "key": "cmd.voice.meeting",
+      "en": "🎙 Meeting notes (record on this device)",
+      "vars": []
+    },
+    {
+      "key": "cmd.voice.meeting.hint",
+      "en": "Record a meeting, transcribe it on this device, and insert its decisions, tasks with owner and date, and open questions",
       "vars": []
     },
     {
