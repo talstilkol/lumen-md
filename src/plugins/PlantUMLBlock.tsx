@@ -2,7 +2,6 @@ import { useEffect, useMemo, useState } from "react";
 import { sanitizeSvgMarkup } from "../lib/markupSanitizer";
 import { toTrustedHTML } from "../lib/trustedTypes";
 import { t } from "../i18n";
-import { t } from "../i18n";
 import { KrokiBlockedError, optInKroki, renderViaKroki } from "./plantumlPolicy";
 
 interface Props {
