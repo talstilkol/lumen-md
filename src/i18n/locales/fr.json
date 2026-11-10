@@ -1437,5 +1437,14 @@
   "models.purpose.translateEnHe": "Traduction de l’anglais vers l’hébreu",
   "models.purpose.translateHeEn": "Traduction de l’hébreu vers l’anglais",
   "models.purpose.nerHe": "Repérer les noms, lieux et organisations dans un texte en hébreu",
-  "models.purpose.imageSearch": "Recherche d’images par texte"
+  "models.purpose.imageSearch": "Recherche d’images par texte",
+  "transcribeFile.working": "Transcription de « {name} » ({duration}) sur cet appareil avec {engine}…",
+  "transcribeFile.done": "{n} phrases transcrites en {seconds} s.",
+  "transcribeFile.failed": "Impossible de transcrire le fichier : {error}",
+  "transcribeFile.empty": "Aucune parole trouvée dans le fichier.",
+  "transcribeFile.audioSaved": "L’enregistrement est enregistré sous {path} ; chaque horodatage y renvoie.",
+  "transcribeFile.desktop.missing": "Whisper bureau : le fichier du modèle n’est pas encore dans le dossier whisper de l’application — utilisation du modèle du navigateur. Voir la doc : AI → Whisper hébreu sur le bureau.",
+  "transcribeFile.desktop.checksum": "Whisper bureau : le fichier du modèle ne correspond pas à la somme de contrôle fixée, il n’est donc pas utilisé — utilisation du modèle du navigateur.",
+  "transcribeFile.desktop.noCli": "Whisper bureau : whisper-cli n’est pas installé — utilisation du modèle du navigateur. Voir la doc : AI → Whisper hébreu sur le bureau.",
+  "cmd.tools.transcribeFile": "🎙 Transcrire un fichier audio (avec horodatage)"
 }

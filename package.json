@@ -16,6 +16,7 @@
     "licenses": "node scripts/licenses.mjs",
     "golden": "node scripts/golden.mjs",
     "models:registry": "node scripts/models/registry-from-run.mjs",
+    "whisper:desktop": "node scripts/whisper-desktop.mjs",
     "tauri": "tauri",
     "tauri:dev": "tauri dev",
     "tauri:build": "tauri build",

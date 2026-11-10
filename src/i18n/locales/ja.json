@@ -1437,5 +1437,14 @@
   "models.purpose.translateEnHe": "英語からヘブライ語への翻訳",
   "models.purpose.translateHeEn": "ヘブライ語から英語への翻訳",
   "models.purpose.nerHe": "ヘブライ語テキスト中の人名・地名・組織名の検出",
-  "models.purpose.imageSearch": "テキストによる画像検索"
+  "models.purpose.imageSearch": "テキストによる画像検索",
+  "transcribeFile.working": "「{name}」（{duration}）をこのデバイスで {engine} により文字起こし中…",
+  "transcribeFile.done": "{n} 文を {seconds} 秒で文字起こししました。",
+  "transcribeFile.failed": "ファイルを文字起こしできませんでした: {error}",
+  "transcribeFile.empty": "ファイルに音声が見つかりません。",
+  "transcribeFile.audioSaved": "音声は {path} として保存されました。各時刻はそこにリンクします。",
+  "transcribeFile.desktop.missing": "デスクトップ Whisper: モデルファイルがまだアプリの whisper フォルダーにありません — ブラウザーのモデルを使用します。ドキュメント: AI → デスクトップのヘブライ語 Whisper。",
+  "transcribeFile.desktop.checksum": "デスクトップ Whisper: モデルファイルが固定されたチェックサムと一致しないため使用しません — ブラウザーのモデルを使用します。",
+  "transcribeFile.desktop.noCli": "デスクトップ Whisper: whisper-cli がインストールされていません — ブラウザーのモデルを使用します。ドキュメント: AI → デスクトップのヘブライ語 Whisper。",
+  "cmd.tools.transcribeFile": "🎙 音声ファイルを文字起こし（タイムスタンプ付き）"
 }

@@ -1437,5 +1437,14 @@
   "models.purpose.translateEnHe": "תרגום מאנגלית לעברית",
   "models.purpose.translateHeEn": "תרגום מעברית לאנגלית",
   "models.purpose.nerHe": "זיהוי שמות, מקומות וארגונים בטקסט עברי",
-  "models.purpose.imageSearch": "חיפוש תמונות לפי טקסט"
+  "models.purpose.imageSearch": "חיפוש תמונות לפי טקסט",
+  "transcribeFile.working": "מתמלל את “{name}” ({duration}) במכשיר עם {engine}…",
+  "transcribeFile.done": "תומללו {n} משפטים ב-{seconds} שניות.",
+  "transcribeFile.failed": "לא הצלחתי לתמלל את הקובץ: {error}",
+  "transcribeFile.empty": "לא נמצא דיבור בקובץ.",
+  "transcribeFile.audioSaved": "ההקלטה נשמרה בשם {path}; כל זמן מקשר אליה.",
+  "transcribeFile.desktop.missing": "Whisper לשולחן העבודה: קובץ המודל עדיין לא בתיקיית whisper של האפליקציה — משתמש במודל שבדפדפן. ראו בתיעוד: AI ← Whisper עברי בשולחן העבודה.",
+  "transcribeFile.desktop.checksum": "Whisper לשולחן העבודה: קובץ המודל לא תואם ל-checksum הנעוץ, ולכן לא נעשה בו שימוש — משתמש במודל שבדפדפן.",
+  "transcribeFile.desktop.noCli": "Whisper לשולחן העבודה: whisper-cli לא מותקן — משתמש במודל שבדפדפן. ראו בתיעוד: AI ← Whisper עברי בשולחן העבודה.",
+  "cmd.tools.transcribeFile": "🎙 תמלול קובץ שמע (עם חותמות זמן)"
 }

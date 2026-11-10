@@ -1437,5 +1437,14 @@
   "models.purpose.translateEnHe": "الترجمة من الإنجليزية إلى العبرية",
   "models.purpose.translateHeEn": "الترجمة من العبرية إلى الإنجليزية",
   "models.purpose.nerHe": "العثور على الأسماء والأماكن والمنظمات في النص العبري",
-  "models.purpose.imageSearch": "البحث عن الصور بالنص"
+  "models.purpose.imageSearch": "البحث عن الصور بالنص",
+  "transcribeFile.working": "جارٍ تفريغ “{name}” ({duration}) على هذا الجهاز باستخدام {engine}…",
+  "transcribeFile.done": "فُرِّغت {n} جمل في {seconds} ث.",
+  "transcribeFile.failed": "تعذّر تفريغ الملف: {error}",
+  "transcribeFile.empty": "لم يُعثر على كلام في الملف.",
+  "transcribeFile.audioSaved": "حُفظ التسجيل باسم {path}؛ كل توقيت يرتبط به.",
+  "transcribeFile.desktop.missing": "Whisper لسطح المكتب: ملف النموذج ليس في مجلد whisper الخاص بالتطبيق بعد — يُستخدم نموذج المتصفح. راجع الوثائق: AI ← Whisper العبري على سطح المكتب.",
+  "transcribeFile.desktop.checksum": "Whisper لسطح المكتب: ملف النموذج لا يطابق المجموع الاختباري المثبّت، لذا لا يُستخدم — يُستخدم نموذج المتصفح.",
+  "transcribeFile.desktop.noCli": "Whisper لسطح المكتب: whisper-cli غير مثبّت — يُستخدم نموذج المتصفح. راجع الوثائق: AI ← Whisper العبري على سطح المكتب.",
+  "cmd.tools.transcribeFile": "🎙 تفريغ ملف صوتي (مع الطوابع الزمنية)"
 }

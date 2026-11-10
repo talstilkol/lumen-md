@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-11-10T00:52:46.352Z",
-  "source": "src/i18n/index.ts (en bundle)",
-  "count": 1439,
+  "generated_at": "2026-11-10T01:10:25.216Z",
+  "source": "src/i18n/index.ts (en bundle) + src/i18n/lazy/*.json",
+  "count": 1448,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -7736,6 +7736,62 @@
     {
       "key": "chart.alternatives",
       "en": "Chart suggestions",
+      "vars": []
+    },
+    {
+      "key": "cmd.tools.transcribeFile",
+      "en": "🎙 Transcribe an audio file (with timestamps)",
+      "vars": []
+    },
+    {
+      "key": "transcribeFile.working",
+      "en": "Transcribing “{name}” ({duration}) on this device with {engine}…",
+      "vars": [
+        "name",
+        "duration",
+        "engine"
+      ]
+    },
+    {
+      "key": "transcribeFile.done",
+      "en": "Transcribed {n} sentences in {seconds} s.",
+      "vars": [
+        "n",
+        "seconds"
+      ]
+    },
+    {
+      "key": "transcribeFile.failed",
+      "en": "Couldn't transcribe the file: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "transcribeFile.empty",
+      "en": "No speech found in the file.",
+      "vars": []
+    },
+    {
+      "key": "transcribeFile.audioSaved",
+      "en": "The audio is saved as {path}; each time links to it.",
+      "vars": [
+        "path"
+      ]
+    },
+    {
+      "key": "transcribeFile.desktop.missing",
+      "en": "Desktop Whisper: the model file is not in the app's whisper folder yet — using the in-browser model. See the docs: AI → Hebrew Whisper on the desktop.",
+      "vars": []
+    },
+    {
+      "key": "transcribeFile.desktop.checksum",
+      "en": "Desktop Whisper: the model file does not match its pinned checksum, so it is not used — using the in-browser model.",
+      "vars": []
+    },
+    {
+      "key": "transcribeFile.desktop.noCli",
+      "en": "Desktop Whisper: whisper-cli is not installed — using the in-browser model. See the docs: AI → Hebrew Whisper on the desktop.",
       "vars": []
     }
   ]

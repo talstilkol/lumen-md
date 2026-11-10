@@ -1437,5 +1437,14 @@
   "models.purpose.translateEnHe": "Перевод с английского на иврит",
   "models.purpose.translateHeEn": "Перевод с иврита на английский",
   "models.purpose.nerHe": "Поиск имён, мест и организаций в тексте на иврите",
-  "models.purpose.imageSearch": "Поиск изображений по тексту"
+  "models.purpose.imageSearch": "Поиск изображений по тексту",
+  "transcribeFile.working": "Расшифровка «{name}» ({duration}) на этом устройстве с помощью {engine}…",
+  "transcribeFile.done": "Расшифровано предложений: {n} за {seconds} с.",
+  "transcribeFile.failed": "Не удалось расшифровать файл: {error}",
+  "transcribeFile.empty": "В файле не найдено речи.",
+  "transcribeFile.audioSaved": "Запись сохранена как {path}; каждая отметка времени ведёт на неё.",
+  "transcribeFile.desktop.missing": "Whisper для компьютера: файла модели ещё нет в папке whisper приложения — используется модель в браузере. См. документацию: AI → Whisper для иврита на компьютере.",
+  "transcribeFile.desktop.checksum": "Whisper для компьютера: файл модели не совпадает с закреплённой контрольной суммой и не используется — используется модель в браузере.",
+  "transcribeFile.desktop.noCli": "Whisper для компьютера: whisper-cli не установлен — используется модель в браузере. См. документацию: AI → Whisper для иврита на компьютере.",
+  "cmd.tools.transcribeFile": "🎙 Расшифровать аудиофайл (с отметками времени)"
 }

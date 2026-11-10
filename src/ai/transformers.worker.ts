@@ -30,10 +30,12 @@ import {
   type PreTrainedTokenizer,
 } from "@huggingface/transformers";
 
+import { timedChunks, type WhisperOut } from "./dictation/longform";
+
 export type Device = "webgpu" | "wasm";
 
 export type WorkerIn =
-  | { id: number; type: "transcribe"; model: string; device: Device; audio: Float32Array; language?: string; task?: "transcribe" | "translate" }
+  | { id: number; type: "transcribe"; model: string; device: Device; audio: Float32Array; language?: string; task?: "transcribe" | "translate"; timestamps?: boolean }
   | { id: number; type: "embed"; model: string; device: Device; texts: string[] }
   | { id: number; type: "rerank"; model: string; device: Device; query: string; passages: string[] }
   | { id: number; type: "load"; task: "automatic-speech-recognition" | "feature-extraction"; model: string; device: Device }
@@ -49,6 +51,14 @@ export interface TranscribeResult {
   text: string;
   /** Detected (or requested) language code when the model reports one. */
   language?: string;
+  /** With `timestamps`: Whisper's timed segments, in seconds from the start of the audio (plan W1.17). */
+  segments?: TimedSegment[];
+}
+
+export interface TimedSegment {
+  start: number;
+  end: number;
+  text: string;
 }
 
 export interface EmbedResult {
@@ -155,17 +165,22 @@ export function windowsOf(audio: Float32Array, windowSeconds = WINDOW_SECONDS, s
 
 async function transcribe(id: number, msg: Extract<WorkerIn, { type: "transcribe" }>): Promise<TranscribeResult> {
   const pipe = await getAsr(id, msg.model, msg.device);
-  const kwargs = { ...(msg.language ? { language: msg.language } : {}), task: msg.task ?? "transcribe" };
+  const kwargs = { ...(msg.language ? { language: msg.language } : {}), task: msg.task ?? "transcribe", ...(msg.timestamps ? { return_timestamps: true } : {}) };
   const parts: string[] = [];
+  const segments: TimedSegment[] = [];
   let language: string | undefined;
+  let offset = 0;
   for (const window of windowsOf(msg.audio)) {
     if (cancelled.has(id)) throw new DOMException("aborted", "AbortError");
-    const out = (await pipe(window, kwargs)) as { text?: string; language?: string } | Array<{ text?: string }>;
+    const out = (await pipe(window, kwargs)) as WhisperOut | WhisperOut[];
     parts.push(Array.isArray(out) ? out.map((o) => o.text ?? "").join(" ") : (out.text ?? ""));
     if (!Array.isArray(out) && out.language && !language) language = out.language;
+    const length = window.length / SAMPLE_RATE;
+    if (msg.timestamps) segments.push(...timedChunks(Array.isArray(out) ? out[0] : out, offset, length));
+    offset += length;
   }
   const text = parts.map((p) => p.trim()).filter(Boolean).join(" ");
-  return { text, ...(language ? { language } : {}) };
+  return { text, ...(language ? { language } : {}), ...(msg.timestamps ? { segments } : {}) };
 }
 
 async function embed(id: number, msg: Extract<WorkerIn, { type: "embed" }>): Promise<EmbedResult> {
