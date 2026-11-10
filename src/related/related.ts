@@ -42,10 +42,14 @@ export function paragraphAt(doc: string, pos: number): Paragraph {
 /** Up to `max` query words of `text`, the rarest in the index first (each with its forms). */
 export function salientTerms(index: Pick<Bm25Index, "idf">, text: string, max = 16): QueryTerm[] {
   const terms = queryTerms(text);
+  // A word no note has (df 0) gets the highest IDF but cannot find anything: leave it out.
+  const unseen = index.idf("\u0000");
   const best = new Map<number, number>();
   const firstTerm = new Map<number, string>();
   for (const t of terms) {
-    const idf = index.idf(t.term) * t.weight;
+    const raw = index.idf(t.term);
+    if (raw >= unseen) continue;
+    const idf = raw * t.weight;
     if (idf > (best.get(t.group) ?? -1)) best.set(t.group, idf);
     if (!firstTerm.has(t.group)) firstTerm.set(t.group, t.term);
   }

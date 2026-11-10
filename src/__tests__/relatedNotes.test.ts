@@ -116,15 +116,12 @@ describe("suggested links", () => {
       vi.advanceTimersByTime(150);
       pause.mockClear();
       const text = "We met about Project Aurora today. ";
-      const t0 = performance.now();
       for (const ch of text) view.dispatch({ changes: { from: view.state.doc.length, insert: ch }, selection: { anchor: view.state.doc.length + 1 } });
-      const perKey = (performance.now() - t0) / text.length;
       expect(pause).not.toHaveBeenCalled();
       vi.advanceTimersByTime(99);
       expect(pause).not.toHaveBeenCalled();
       vi.advanceTimersByTime(1);
       expect(pause).toHaveBeenCalledTimes(1);
-      console.info(`[W2.2] per keystroke with the plugin: ${perKey.toFixed(3)} ms (dispatch only)`);
       expect(view.state.doc.toString()).toBe(text);
       const [hint] = currentHints(view);
       expect(hint.name).toBe("Project Aurora");
