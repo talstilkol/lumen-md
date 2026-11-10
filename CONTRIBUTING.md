@@ -218,7 +218,7 @@ The GitHub Actions workflow (`.github/workflows/ci.yml`) runs on every push:
 1. **`npm run typecheck`** — Zero TypeScript errors required.
 2. **`npm run test`** — All unit tests must pass (including the i18n drift gate).
 3. **`npm run build`** — Production bundle must build without errors.
-4. **`npm run lint`** — ESLint (typescript-eslint, react-hooks, jsx-a11y). Violations that predate it are recorded in `eslint-suppressions.json`; a new one fails. Notable rules: `react-hooks/rules-of-hooks`, `@typescript-eslint/no-floating-promises` (mark fire-and-forget calls with `void`), and `lumen/empty-catch-why` (an empty `catch` needs a `// why: …` comment). When you fix a recorded violation, run `npm run lint:prune` and commit the smaller baseline. Never add to the baseline with `--suppress-all`.
+4. **`npm run lint`** — ESLint (typescript-eslint, react-hooks, jsx-a11y). Violations that predate it are recorded in `eslint-suppressions.json`; a new one fails. Notable rules: `react-hooks/rules-of-hooks`, `@typescript-eslint/no-floating-promises` (mark fire-and-forget calls with `void`), and `lumen/empty-catch-why` (an empty `catch`, or an empty `.catch(() => {})` handler, needs a `// why: …` comment — or log the error instead). That rule has no baseline at all; `src/__tests__/codeHealth.test.ts` checks it under `npm test` too. When you fix a recorded violation, run `npm run lint:prune` and commit the smaller baseline. Never add to the baseline with `--suppress-all`.
 
 ## Security
 
