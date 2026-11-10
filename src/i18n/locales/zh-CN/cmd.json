@@ -136,6 +136,8 @@
   "cmd.file.openSampleWorkspace.hint": "互相链接的演示笔记：维基链接、标签、数据库、图表、流程图",
   "cmd.file.print": "打印 / 保存 as PDF…",
   "cmd.file.print.hint": "浏览器打印对话框",
+  "cmd.file.publishSite": "发布网站…",
+  "cmd.file.publishSite.hint": "把笔记做成网站：GitHub Pages 或 .zip",
   "cmd.file.removeRecent": "从最近使用中移除:{name}",
   "cmd.file.save": "保存",
   "cmd.file.saveAs": "保存 as…",

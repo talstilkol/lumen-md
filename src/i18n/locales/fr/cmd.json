@@ -136,6 +136,8 @@
   "cmd.file.openSampleWorkspace.hint": "notes de démo liées : liens wiki, tags, base de données, graphique, diagramme",
   "cmd.file.print": "Imprimer / Enregistrer as PDF…",
   "cmd.file.print.hint": "boîte de dialogue d'impression du navigateur",
+  "cmd.file.publishSite": "Publier un site…",
+  "cmd.file.publishSite.hint": "Vos notes en site web : GitHub Pages ou un .zip",
   "cmd.file.removeRecent": "Retirer des récents : {name}",
   "cmd.file.save": "Enregistrer",
   "cmd.file.saveAs": "Enregistrer as…",

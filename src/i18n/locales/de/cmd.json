@@ -136,6 +136,8 @@
   "cmd.file.openSampleWorkspace.hint": "verknüpfte Demo-Notizen: Wiki-Links, Tags, Datenbank, Diagramm, Flussdiagramm",
   "cmd.file.print": "Drucken / Speichern as PDF…",
   "cmd.file.print.hint": "Druckdialog des Browsers",
+  "cmd.file.publishSite": "Website veröffentlichen…",
+  "cmd.file.publishSite.hint": "Deine Notizen als Website: GitHub Pages oder eine .zip",
   "cmd.file.removeRecent": "Aus Zuletzt geöffnet entfernen: {name}",
   "cmd.file.save": "Speichern",
   "cmd.file.saveAs": "Speichern as…",

@@ -19,6 +19,7 @@ const SAME_IN_HEBREW = new Set([
   "insertText.kind.markdown", "insertText.kind.html", "block.playground.title",
   "cmd.insert.callout.hint", "cmd.insert.model.hint", "cmd.insert.embed.hint",
   "templates.contributeLink", "ai.toast.localLoading.body", "cmd.security.encrypt.hint",
+  "publish.target.github", // a product name (plan 4.18)
 ]);
 
 const words = (s: string) => /[A-Za-z]{3}/.test(s);

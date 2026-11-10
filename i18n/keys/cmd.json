@@ -691,6 +691,16 @@
       "vars": []
     },
     {
+      "key": "cmd.file.publishSite",
+      "en": "Publish site…",
+      "vars": []
+    },
+    {
+      "key": "cmd.file.publishSite.hint",
+      "en": "Your notes as a website: GitHub Pages or a .zip",
+      "vars": []
+    },
+    {
       "key": "cmd.file.removeRecent",
       "en": "Remove from recents: {name}",
       "vars": [

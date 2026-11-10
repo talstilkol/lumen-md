@@ -136,6 +136,8 @@
   "cmd.file.openSampleWorkspace.hint": "связанные демо-заметки: вики-ссылки, теги, база данных, график, диаграмма",
   "cmd.file.print": "Печать / Сохранить as PDF…",
   "cmd.file.print.hint": "диалог печати браузера",
+  "cmd.file.publishSite": "Опубликовать сайт…",
+  "cmd.file.publishSite.hint": "Ваши заметки как сайт: GitHub Pages или .zip",
   "cmd.file.removeRecent": "Удалить из недавних: {name}",
   "cmd.file.save": "Сохранить",
   "cmd.file.saveAs": "Сохранить as…",

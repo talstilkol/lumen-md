@@ -136,6 +136,8 @@
   "cmd.file.openSampleWorkspace.hint": "פתקים מקושרים להדגמה: קישורי ויקי, תגיות, מסד נתונים, גרף, תרשים",
   "cmd.file.print": "הדפסה / שמירה כ-PDF…",
   "cmd.file.print.hint": "דיאלוג ההדפסה של הדפדפן",
+  "cmd.file.publishSite": "פרסום אתר…",
+  "cmd.file.publishSite.hint": "הפתקים שלך כאתר: GitHub Pages או ‎.zip",
   "cmd.file.removeRecent": "הסרה מהאחרונים: {name}",
   "cmd.file.save": "שמירה",
   "cmd.file.saveAs": "שמירה בשם…",

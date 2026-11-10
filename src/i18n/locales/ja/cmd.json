@@ -136,6 +136,8 @@
   "cmd.file.openSampleWorkspace.hint": "相互リンクされたデモノート：Wikiリンク、タグ、データベース、グラフ、図",
   "cmd.file.print": "印刷 / 保存 as PDF…",
   "cmd.file.print.hint": "ブラウザの印刷ダイアログ",
+  "cmd.file.publishSite": "サイトを公開…",
+  "cmd.file.publishSite.hint": "ノートをウェブサイトに: GitHub Pages または .zip",
   "cmd.file.removeRecent": "最近使った項目から削除: {name}",
   "cmd.file.save": "保存",
   "cmd.file.saveAs": "保存 as…",

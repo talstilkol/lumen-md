@@ -136,6 +136,8 @@
   "cmd.file.openSampleWorkspace.hint": "ملاحظات تجريبية مترابطة: روابط ويكي، وسوم، قاعدة بيانات، مخطط بياني، رسم تخطيطي",
   "cmd.file.print": "طباعة / حفظ as PDF…",
   "cmd.file.print.hint": "نافذة طباعة المتصفح",
+  "cmd.file.publishSite": "نشر موقع…",
+  "cmd.file.publishSite.hint": "ملاحظاتك كموقع: GitHub Pages أو ملف ‎.zip",
   "cmd.file.removeRecent": "إزالة من الأخيرة: {name}",
   "cmd.file.save": "حفظ",
   "cmd.file.saveAs": "حفظ as…",

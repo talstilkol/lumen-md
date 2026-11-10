@@ -135,6 +135,8 @@
   "cmd.file.openSampleWorkspace.hint": "linked demo notes: wiki-links, tags, database, chart, diagram",
   "cmd.file.print": "Print / Save as PDF…",
   "cmd.file.print.hint": "browser print dialog",
+  "cmd.file.publishSite": "Publish site…",
+  "cmd.file.publishSite.hint": "Your notes as a website: GitHub Pages or a .zip",
   "cmd.file.removeRecent": "Remove from recents: {name}",
   "cmd.file.save": "Save",
   "cmd.file.saveAs": "Save as…",

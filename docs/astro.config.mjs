@@ -126,6 +126,7 @@ export default defineConfig({
             { label: "Sync providers (WebDAV, S3, Dropbox, Drive)", slug: "sync/cloud" },
             { label: "Encrypted sync (E2EE)", slug: "sync/e2ee" },
             { label: "Read-mode publishing", slug: "sync/publish", translations: { he: "פרסום לקריאה" } },
+            { label: "Publish to your own site", slug: "sync/own-site", translations: { he: "פרסום לאתר משלך" } },
           ],
         },
         {
