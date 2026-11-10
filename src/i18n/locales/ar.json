@@ -1430,5 +1430,21 @@
   "cmd.ai.cancel": "AI: إلغاء",
   "cmd.ai.cancel.hint": "يوقف كل طلبات الذكاء الاصطناعي الجارية (Esc يفعل ذلك أيضاً)",
   "toast.aiCancelled": "أُلغي طلب الذكاء الاصطناعي ({count})",
-  "toast.aiNothingRunning": "لا يوجد طلب ذكاء اصطناعي جارٍ"
+  "toast.aiNothingRunning": "لا يوجد طلب ذكاء اصطناعي جارٍ",
+  "models.consent.title": "تنزيل نموذج إلى هذا الجهاز؟",
+  "models.consent.body": "{purpose}\n\n{name} · {size}. يُنزَّل مرة واحدة، ويُتحقق منه مقابل المجموع الاختباري المنشور، ويُحفظ في تخزين هذا المتصفح. لا يُرسل شيء مما تكتبه إلى أي مكان.\n\nالترخيص: {license}. {attribution}",
+  "models.consent.ok": "تنزيل ({size})",
+  "models.purpose.translateEnHe": "الترجمة من الإنجليزية إلى العبرية",
+  "models.purpose.translateHeEn": "الترجمة من العبرية إلى الإنجليزية",
+  "models.purpose.nerHe": "العثور على الأسماء والأماكن والمنظمات في النص العبري",
+  "models.purpose.imageSearch": "البحث عن الصور بالنص",
+  "transcribeFile.working": "جارٍ تفريغ “{name}” ({duration}) على هذا الجهاز باستخدام {engine}…",
+  "transcribeFile.done": "فُرِّغت {n} جمل في {seconds} ث.",
+  "transcribeFile.failed": "تعذّر تفريغ الملف: {error}",
+  "transcribeFile.empty": "لم يُعثر على كلام في الملف.",
+  "transcribeFile.audioSaved": "حُفظ التسجيل باسم {path}؛ كل توقيت يرتبط به.",
+  "transcribeFile.desktop.missing": "Whisper لسطح المكتب: ملف النموذج ليس في مجلد whisper الخاص بالتطبيق بعد — يُستخدم نموذج المتصفح. راجع الوثائق: AI ← Whisper العبري على سطح المكتب.",
+  "transcribeFile.desktop.checksum": "Whisper لسطح المكتب: ملف النموذج لا يطابق المجموع الاختباري المثبّت، لذا لا يُستخدم — يُستخدم نموذج المتصفح.",
+  "transcribeFile.desktop.noCli": "Whisper لسطح المكتب: whisper-cli غير مثبّت — يُستخدم نموذج المتصفح. راجع الوثائق: AI ← Whisper العبري على سطح المكتب.",
+  "cmd.tools.transcribeFile": "🎙 تفريغ ملف صوتي (مع الطوابع الزمنية)"
 }

@@ -259,6 +259,38 @@ describe("model registry", () => {
     expect(unknown).toEqual(["tessdata_fast/ara.traineddata", expect.stringContaining("/ar/index.dic")]);
   });
 
+  it("checks every published file: checksum, size, the model's licence and attribution (plan 6.0)", () => {
+    const good = clone(registryFixture.models[0]);
+    const file = { path: "onnx/model_quantized.onnx", sha256: "a".repeat(64), bytes: 1234, license: good.license, attribution: good.attribution };
+    expect(validateEntry({ ...good, files: [file, { ...file, path: "config.json" }] })).toEqual([]);
+    expect(validateEntry({ ...good, files: [] })).toContain("files must be a non-empty array");
+    const bad = validateEntry({
+      ...good,
+      files: [
+        { ...file, sha256: "abc" },
+        { ...file, path: "../x", bytes: 0 },
+        { ...file, path: "y.json", license: "MIT", attribution: " " },
+        { ...file, path: "y.json" },
+      ],
+    });
+    expect(bad).toEqual(
+      expect.arrayContaining([
+        expect.stringMatching(/files\[0\].*sha256 must be 64/),
+        expect.stringMatching(/files\[1\].*relative path/),
+        expect.stringMatching(/files\[1\].*bytes must be a positive integer/),
+        expect.stringMatching(/files\[2\].*license must be the model's/),
+        expect.stringMatching(/files\[2\].*attribution text missing/),
+        "files: duplicate path",
+      ]),
+    );
+  });
+
+  it("discovers the ids of self-converted models (src/ai/convertedModels.ts)", () => {
+    const text = 'export const CONVERTED_MODELS = [\n  { id: "opus-mt-en-he", hf: "x" },\n  { id: "dictabert-ner" },\n];';
+    const found = discoverCatalogIds([{ file: "src/ai/convertedModels.ts", text }]).map((f: { id: string }) => f.id);
+    expect(found).toEqual(["opus-mt-en-he", "dictabert-ner"]);
+  });
+
   it("rejects an entry whose licence contradicts its class", () => {
     const good = clone(registryFixture.models[0]);
     for (const license of ["AGPL-3.0-only", "CC-BY-NC-4.0", "GNU Affero General Public License v3", "SASPEECH (non-commercial)"]) {

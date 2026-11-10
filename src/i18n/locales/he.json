@@ -1430,5 +1430,21 @@
   "cmd.ai.cancel": "AI: ביטול",
   "cmd.ai.cancel.hint": "עוצר כל בקשת AI שרצה (גם Esc עושה זאת)",
   "toast.aiCancelled": "בקשת ה-AI בוטלה ({count})",
-  "toast.aiNothingRunning": "אין בקשת AI שרצה"
+  "toast.aiNothingRunning": "אין בקשת AI שרצה",
+  "models.consent.title": "להוריד מודל למכשיר הזה?",
+  "models.consent.body": "{purpose}\n\n{name} · {size}. המודל יורד פעם אחת, נבדק מול ה-checksum שפורסם ונשמר באחסון של הדפדפן הזה. שום דבר ממה שאתם כותבים לא נשלח לשום מקום.\n\nרישיון: {license}. {attribution}",
+  "models.consent.ok": "הורדה ({size})",
+  "models.purpose.translateEnHe": "תרגום מאנגלית לעברית",
+  "models.purpose.translateHeEn": "תרגום מעברית לאנגלית",
+  "models.purpose.nerHe": "זיהוי שמות, מקומות וארגונים בטקסט עברי",
+  "models.purpose.imageSearch": "חיפוש תמונות לפי טקסט",
+  "transcribeFile.working": "מתמלל את “{name}” ({duration}) במכשיר עם {engine}…",
+  "transcribeFile.done": "תומללו {n} משפטים ב-{seconds} שניות.",
+  "transcribeFile.failed": "לא הצלחתי לתמלל את הקובץ: {error}",
+  "transcribeFile.empty": "לא נמצא דיבור בקובץ.",
+  "transcribeFile.audioSaved": "ההקלטה נשמרה בשם {path}; כל זמן מקשר אליה.",
+  "transcribeFile.desktop.missing": "Whisper לשולחן העבודה: קובץ המודל עדיין לא בתיקיית whisper של האפליקציה — משתמש במודל שבדפדפן. ראו בתיעוד: AI ← Whisper עברי בשולחן העבודה.",
+  "transcribeFile.desktop.checksum": "Whisper לשולחן העבודה: קובץ המודל לא תואם ל-checksum הנעוץ, ולכן לא נעשה בו שימוש — משתמש במודל שבדפדפן.",
+  "transcribeFile.desktop.noCli": "Whisper לשולחן העבודה: whisper-cli לא מותקן — משתמש במודל שבדפדפן. ראו בתיעוד: AI ← Whisper עברי בשולחן העבודה.",
+  "cmd.tools.transcribeFile": "🎙 תמלול קובץ שמע (עם חותמות זמן)"
 }

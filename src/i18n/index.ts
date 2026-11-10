@@ -390,6 +390,13 @@ const en: Strings = {
   "vault.import.failed": "Import failed: {error}",
   "cmd.spell.hebrewDictionary": "Hebrew spelling: dictionary (download / remove)",
   "cmd.spell.hebrewDictionary.hint": "Offline Hebrew spell check (Hspell, 5.7 MB, AGPL)",
+  "models.consent.title": "Download a model to this device?",
+  "models.consent.body": "{purpose}\n\n{name} · {size}. It is downloaded once, checked against its published checksum and kept in this browser's storage. Nothing you write is sent anywhere.\n\nLicence: {license}. {attribution}",
+  "models.consent.ok": "Download {size}",
+  "models.purpose.translateEnHe": "Translation from English to Hebrew",
+  "models.purpose.translateHeEn": "Translation from Hebrew to English",
+  "models.purpose.nerHe": "Finding names, places and organisations in Hebrew text",
+  "models.purpose.imageSearch": "Searching images by text",
   "spell.he.downloadConfirm": "Download the Hebrew dictionary (Hspell word list, 5.7 MB, AGPL-3.0) from GitHub to this device? Your text is never sent anywhere; spelling is checked here.",
   "spell.he.installed": "Hebrew dictionary installed ({n} words). Turn on the grammar check to see it.",
   "spell.he.failed": "Could not download the dictionary: {error}",
@@ -1541,6 +1548,7 @@ const en: Strings = {
   "chart.reason.radar": "{k} measures for {n} items — compare their profiles.",
   "chart.reason.summary": "No category or time column — comparing column averages.",
   "chart.alternatives": "Chart suggestions",
+  "cmd.tools.transcribeFile": "🎙 Transcribe an audio file (with timestamps)",
 };
 
 
@@ -1609,6 +1617,17 @@ export function applyLocale(locale: Locale): void {
   if (!SYNCHRONOUS_LOCALES.has(locale) && !(locale in BUNDLES)) {
     void loadLocale(locale);
   }
+}
+
+/**
+ * English for a lazily loaded domain. Its strings live in
+ * `src/i18n/lazy/<domain>.json` and ship in that domain's chunk, not in the
+ * startup bundle; the domain registers them when it loads (other locales
+ * keep the keys in their own JSON as usual). Keys already in `en` win. The
+ * i18n tools and tests read these files together with the `en` block.
+ */
+export function registerEnglish(strings: Strings): void {
+  for (const [k, v] of Object.entries(strings)) if (!(k in en)) en[k] = v;
 }
 
 /** Translate `id` using the active locale, with optional `{name}` substitutions. */
