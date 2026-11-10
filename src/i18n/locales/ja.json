@@ -1441,7 +1441,6 @@
   "toast.aiCancelled": "AI リクエストをキャンセルしました（{count}）",
   "toast.aiNothingRunning": "実行中の AI リクエストはありません",
   "capture.voice.start": "録音",
-  "capture.voice.stop": "録音を停止",
   "capture.voice.recording": "停止 · {time}",
   "capture.voice.transcribing": "この端末で文字起こし中…",
   "capture.voice.keepAudio": "録音を保存",

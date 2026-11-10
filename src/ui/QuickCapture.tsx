@@ -181,7 +181,7 @@ export function QuickCapture({ open, onClose, voice: voiceOnOpen }: Props) {
             data-state={voice.kind}
             disabled={busy || voice.kind === "starting" || voice.kind === "transcribing"}
             aria-pressed={voice.kind === "recording"}
-            aria-label={voice.kind === "recording" ? t("capture.voice.stop") : t("capture.voice.start")}
+            aria-label={t("capture.voice.start")}
             onClick={() => void (voice.kind === "recording" ? stopVoice() : startVoice())}
             style={{ display: "inline-flex", gap: 6, alignItems: "center" }}
           >

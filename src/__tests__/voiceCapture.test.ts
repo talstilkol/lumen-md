@@ -67,7 +67,6 @@ describe("voice capture (W1.13)", () => {
 
   it("/?capture=voice opens the box recording", () => {
     expect(parseLaunch("?capture=voice")).toEqual({ kind: "action", action: "voice" });
-    expect(parseLaunch("?action=voice")).toEqual({ kind: "action", action: "voice" });
     expect(parseLaunch("?capture=1")).toEqual({ kind: "action", action: "capture" });
   });
 });

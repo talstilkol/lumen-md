@@ -1441,7 +1441,6 @@
   "toast.aiCancelled": "KI-Anfrage abgebrochen ({count})",
   "toast.aiNothingRunning": "Keine KI-Anfrage läuft",
   "capture.voice.start": "Aufnehmen",
-  "capture.voice.stop": "Aufnahme stoppen",
   "capture.voice.recording": "Stopp · {time}",
   "capture.voice.transcribing": "Transkription auf diesem Gerät…",
   "capture.voice.keepAudio": "Aufnahme behalten",

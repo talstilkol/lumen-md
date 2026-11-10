@@ -51,7 +51,7 @@ export function parseLaunch(search: string): Launch {
   const action = q.get("action");
   if (action === "new" || action === "palette" || action === "capture") return { kind: "action", action };
   if (q.get("capture") === "1") return { kind: "action", action: "capture" };
-  if (q.get("capture") === "voice" || action === "voice") return { kind: "action", action: "voice" };
+  if (q.get("capture") === "voice") return { kind: "action", action: "voice" };
   const shared = sharedItem(search);
   if (!shared) return { kind: "none" };
   const { title, link, text: rest } = shared;

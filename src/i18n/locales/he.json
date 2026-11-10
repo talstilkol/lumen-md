@@ -1441,7 +1441,6 @@
   "toast.aiCancelled": "בקשת ה-AI בוטלה ({count})",
   "toast.aiNothingRunning": "אין בקשת AI שרצה",
   "capture.voice.start": "הקלטה",
-  "capture.voice.stop": "עצירת ההקלטה",
   "capture.voice.recording": "עצירה · {time}",
   "capture.voice.transcribing": "מתמלל במכשיר…",
   "capture.voice.keepAudio": "לשמור את ההקלטה",

@@ -1441,7 +1441,6 @@
   "toast.aiCancelled": "已取消 AI 请求（{count}）",
   "toast.aiNothingRunning": "没有正在运行的 AI 请求",
   "capture.voice.start": "录音",
-  "capture.voice.stop": "停止录音",
   "capture.voice.recording": "停止 · {time}",
   "capture.voice.transcribing": "正在本机转写…",
   "capture.voice.keepAudio": "保留录音",

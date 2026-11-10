@@ -1441,7 +1441,6 @@
   "toast.aiCancelled": "Requête IA annulée ({count})",
   "toast.aiNothingRunning": "Aucune requête IA en cours",
   "capture.voice.start": "Enregistrer",
-  "capture.voice.stop": "Arrêter l’enregistrement",
   "capture.voice.recording": "Arrêter · {time}",
   "capture.voice.transcribing": "Transcription sur cet appareil…",
   "capture.voice.keepAudio": "Garder l’enregistrement",

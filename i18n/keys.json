@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "generated_at": "2026-11-10T00:17:04.443Z",
+  "generated_at": "2026-11-10T00:23:30.602Z",
   "source": "src/i18n/index.ts (en bundle)",
-  "count": 1449,
+  "count": 1448,
   "entries": [
     {
       "key": "toolbar.tagline",
@@ -1860,11 +1860,6 @@
       "vars": []
     },
     {
-      "key": "capture.voice.stop",
-      "en": "Stop recording",
-      "vars": []
-    },
-    {
       "key": "capture.voice.recording",
       "en": "Stop · {time}",
       "vars": [
@@ -1878,7 +1873,7 @@
     },
     {
       "key": "capture.voice.keepAudio",
-      "en": "Keep the recording",
+      "en": "Keep audio",
       "vars": []
     },
     {
@@ -1888,7 +1883,7 @@
     },
     {
       "key": "capture.voice.noTranscript",
-      "en": "Not transcribed; the audio is kept.",
+      "en": "Not transcribed; audio kept.",
       "vars": []
     },
     {

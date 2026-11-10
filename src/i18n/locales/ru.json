@@ -1441,7 +1441,6 @@
   "toast.aiCancelled": "Запрос ИИ отменён ({count})",
   "toast.aiNothingRunning": "Нет активных запросов ИИ",
   "capture.voice.start": "Записать",
-  "capture.voice.stop": "Остановить запись",
   "capture.voice.recording": "Стоп · {time}",
   "capture.voice.transcribing": "Расшифровка на этом устройстве…",
   "capture.voice.keepAudio": "Сохранить запись",

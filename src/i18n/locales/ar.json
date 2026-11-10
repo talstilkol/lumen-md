@@ -1441,7 +1441,6 @@
   "toast.aiCancelled": "أُلغي طلب الذكاء الاصطناعي ({count})",
   "toast.aiNothingRunning": "لا يوجد طلب ذكاء اصطناعي جارٍ",
   "capture.voice.start": "تسجيل",
-  "capture.voice.stop": "إيقاف التسجيل",
   "capture.voice.recording": "إيقاف · {time}",
   "capture.voice.transcribing": "التفريغ على هذا الجهاز…",
   "capture.voice.keepAudio": "الاحتفاظ بالتسجيل",
