@@ -20,6 +20,8 @@ import { log } from "../lib/logger";
 import { t } from "../i18n";
 import { useCapability } from "../billing/gates";
 import { UpgradeNotice } from "./UpgradeNotice";
+import { explainError } from "../lib/userError";
+import { EmptyState } from "./EmptyState";
 
 interface Props {
   open: boolean;
@@ -98,7 +100,7 @@ export function AuditLog({ open, onClose, orgId }: Props) {
       setRows(fetched);
     } catch (e) {
       log.error("audit refresh failed", e);
-      showAiToast(t("audit.fetchFailed", { error: (e as Error).message }), "error");
+      showAiToast(t("audit.fetchFailed", { error: explainError(e) }), "error");
     } finally {
       setLoading(false);
     }
@@ -254,9 +256,17 @@ export function AuditLog({ open, onClose, orgId }: Props) {
         {/* Body */}
         <div style={{ flex: 1, overflow: "auto" }}>
           {visible.length === 0 && !loading && (
-            <div style={{ padding: 32, textAlign: "center", color: "hsl(var(--fg-muted))", fontSize: 13 }}>
-              {t("audit.empty")}
-            </div>
+            <EmptyState
+              style={{ padding: 32, alignItems: "center", fontSize: 13 }}
+              message={t("audit.empty")}
+              action={{
+                label: t("audit.clearFilters"),
+                onClick: () => {
+                  setActionFilter("");
+                  setUserFilter("");
+                },
+              }}
+            />
           )}
           {visible.length > 0 && (
             <table

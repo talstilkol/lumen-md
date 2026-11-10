@@ -1,4 +1,5 @@
 {
+  "audit.clearFilters": "Filter zurücksetzen",
   "audit.close": "Schließen",
   "audit.col.action": "Aktion",
   "audit.col.payload": "Payload",
@@ -131,6 +132,7 @@
   "privacy.footer": "Erfasst: Zeit, Ziel, Größe, Grund. Nie der Text von Prompts oder Antworten. Anfragen aus Modell-Workern (Downloads) fehlen.",
   "privacy.localRequests": "Lokal: {n}",
   "privacy.onlyLeaving": "Nur was das Gerät verlassen hat",
+  "privacy.openAiSettings": "KI-Einstellungen öffnen",
   "privacy.policy": "Richtlinie: {policy}",
   "privacy.policyName.cloud": "Cloud",
   "privacy.policyName.local-first": "lokal zuerst",

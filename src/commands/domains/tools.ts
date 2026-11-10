@@ -5,6 +5,7 @@ import { uiConfirm, uiPrompt } from "../../ui/PromptDialog";
 import { getPluginCommands } from "../../plugins/pluginSystem";
 import { showAiToast } from "../../ui/AiToast";
 import type { CommandContext } from "./context";
+import { explainError } from "../../lib/userError";
 
 /** Daily writing goal. */
 export function buildWritingGoalCommands({ writingGoalWords, setWritingGoal }: CommandContext): Command[] {
@@ -34,6 +35,7 @@ export function buildHebrewDictionaryCommands(): Command[] {
   return [
     {
       id: "spell.hebrewDictionary",
+      destructive: "confirm",
       label: t("cmd.spell.hebrewDictionary"),
       hint: t("cmd.spell.hebrewDictionary.hint"),
       icon: cmdIcons.Sparkles,
@@ -51,7 +53,7 @@ export function buildHebrewDictionaryCommands(): Command[] {
           const n = await svc.downloadHebrewDictionary();
           showAiToast(t("spell.he.installed", { n: n.toLocaleString() }), "info");
         } catch (e) {
-          showAiToast(t("spell.he.failed", { error: (e as Error).message }), "error");
+          showAiToast(t("spell.he.failed", { error: explainError(e) }), "error");
         }
       },
     },

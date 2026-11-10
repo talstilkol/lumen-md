@@ -8,6 +8,7 @@ import { encryptDocument, decryptDocument, isEncrypted } from "../../storage/enc
 import { isOPFSAvailable, readWorkspaceFile } from "../../storage/workspace";
 import { openTemplateDoc } from "../openDoc";
 import type { CommandContext } from "./context";
+import { explainError } from "../../lib/userError";
 
 /** Every Markdown note in the workspace, for Vault Doctor (null when there is none). */
 async function loadDoctorNotes(): Promise<Array<{ path: string; text: string }> | null> {
@@ -56,6 +57,7 @@ export function buildVaultDoctorCommands(): Command[] {
     },
     {
       id: "tools.vaultDoctorFix",
+      destructive: "confirm",
       label: t("cmd.tools.vaultDoctorFix"),
       hint: t("cmd.tools.vaultDoctorFix.hint"),
       icon: cmdIcons.Sparkles,
@@ -131,7 +133,7 @@ export function buildVaultTransferCommands(): Command[] {
           showAiToast(t("vault.export.done", { n: String(files) }), "info");
         } catch (e) {
           if ((e as DOMException)?.name === "AbortError") return;
-          showAiToast(t("vault.export.failed", { error: (e as Error).message }), "error");
+          showAiToast(t("vault.export.failed", { error: explainError(e) }), "error");
         }
       },
     },
@@ -157,7 +159,7 @@ export function buildVaultTransferCommands(): Command[] {
             window.dispatchEvent(new Event("lumen-workspace-changed"));
             showAiToast(t("vault.import.done", { notes: String(r.notes), files: String(r.attachments), folder: r.folder, source: r.source }), "info");
           } catch (e) {
-            showAiToast(t("vault.import.failed", { error: (e as Error).message }), "error");
+            showAiToast(t("vault.import.failed", { error: explainError(e) }), "error");
           }
         };
         input.click();

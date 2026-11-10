@@ -213,6 +213,7 @@ function Side({ hunk, side, isPicked, onPick }: SideProps) {
       }}
     >
       {lines.length === 0 ? (
+        // empty-allow: marks an empty side of a diff, not an empty state
         <span style={{ color: "hsl(var(--fg-muted))", fontStyle: "italic", fontSize: 11 }}>{t("sync.conflict.empty")}</span>
       ) : (
         lines.map((l, i) => (

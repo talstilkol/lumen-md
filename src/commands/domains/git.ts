@@ -2,12 +2,13 @@
 import { cmdIcons, type Command } from "../../ui/CommandPalette";
 import { t } from "../../i18n";
 import { getGitIdentity, setGitIdentity, setGitToken, cloneRepo, pullRepo, commitAndPush, gitStatusSummary } from "../../sync/git";
-import { uiAlert, uiPrompt } from "../../ui/PromptDialog";
+import { uiAlert, uiConfirm, uiPrompt } from "../../ui/PromptDialog";
 import { generateAiCommitMessage } from "../../ai/commands";
 import { log } from "../../lib/logger";
 import { showAiToast } from "../../ui/AiToast";
 import { readWorkspaceFile } from "../../storage/workspace";
 import { cancellable, type CommandContext } from "./context";
+import { explainError } from "../../lib/userError";
 
 /** Clone, commit & push, pull, status, watch, token, identity. */
 export function buildGitCommands({ showWorkspace, setDoc, toggleWorkspace, liveDoc }: CommandContext): Command[] {
@@ -33,7 +34,7 @@ export function buildGitCommands({ showWorkspace, setDoc, toggleWorkspace, liveD
           });
         } catch (e) {
           await uiAlert({
-            message: t("git.alert.cloneFailed", { error: (e as Error).message }),
+            message: t("git.alert.cloneFailed", { error: explainError(e) }),
           });
         }
       },
@@ -70,13 +71,14 @@ export function buildGitCommands({ showWorkspace, setDoc, toggleWorkspace, liveD
           await uiAlert({ message: t("git.alert.pushed") });
         } catch (e) {
           await uiAlert({
-            message: t("git.alert.commitFailed", { error: (e as Error).message }),
+            message: t("git.alert.commitFailed", { error: explainError(e) }),
           });
         }
       },
     },
     {
       id: "git.pull",
+      destructive: "confirm",
       label: t("cmd.git.pull"),
       hint: t("cmd.git.pull.hint"),
       icon: cmdIcons.Download,
@@ -87,6 +89,7 @@ export function buildGitCommands({ showWorkspace, setDoc, toggleWorkspace, liveD
           return;
         }
         const repoFolder = liveDoc().workspaceName!.split("/")[0];
+        if (!(await uiConfirm({ message: t("git.pull.confirm", { folder: repoFolder }) }))) return;
         try {
           const result = await pullRepo(repoFolder);
           window.dispatchEvent(new Event("lumen-workspace-changed"));
@@ -106,7 +109,7 @@ export function buildGitCommands({ showWorkspace, setDoc, toggleWorkspace, liveD
           }
         } catch (e) {
           await uiAlert({
-            message: t("git.alert.pullFailed", { error: (e as Error).message }),
+            message: t("git.alert.pullFailed", { error: explainError(e) }),
           });
         }
       },
@@ -135,7 +138,7 @@ export function buildGitCommands({ showWorkspace, setDoc, toggleWorkspace, liveD
                 }),
           });
         } catch (e) {
-          await uiAlert({ message: (e as Error).message });
+          await uiAlert({ message: explainError(e) });
         }
       },
     },

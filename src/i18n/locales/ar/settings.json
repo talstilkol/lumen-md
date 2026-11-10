@@ -1,4 +1,5 @@
 {
+  "audit.clearFilters": "مسح عوامل التصفية",
   "audit.close": "إغلاق",
   "audit.col.action": "الإجراء",
   "audit.col.payload": "الحمولة",
@@ -131,6 +132,7 @@
   "privacy.footer": "يُسجَّل: الوقت والوجهة والحجم والسبب. لا يُسجَّل نص الطلبات أو الإجابات أبداً. طلبات عمّال النماذج (التنزيلات) غير مدرجة.",
   "privacy.localRequests": "محلية: {n}",
   "privacy.onlyLeaving": "فقط ما غادر الجهاز",
+  "privacy.openAiSettings": "فتح إعدادات الذكاء الاصطناعي",
   "privacy.policy": "السياسة: {policy}",
   "privacy.policyName.cloud": "السحابة",
   "privacy.policyName.local-first": "المحلي أولاً",

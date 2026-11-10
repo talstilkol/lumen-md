@@ -7,6 +7,7 @@ import { ShieldCheck, X } from "lucide-react";
 import { t, getLocale } from "../i18n";
 import { clearLedger, leftDevice, ledgerEntries, ledgerSummary, subscribeLedger, type LedgerEntry } from "../ai/privacyLedger";
 import { getAiPolicy } from "../ai/policy";
+import { EmptyState } from "./EmptyState";
 
 interface Props {
   open: boolean;
@@ -72,7 +73,17 @@ export function PrivacyLedgerPanel({ open, onClose }: Props) {
         </div>
         <div style={{ overflow: "auto", flex: 1 }}>
           {shown.length === 0 ? (
-            <p style={{ padding: "16px", color: "hsl(var(--fg-muted))", fontSize: 13, margin: 0 }}>{t("privacy.empty")}</p>
+            <EmptyState
+              style={{ fontSize: 13 }}
+              message={t("privacy.empty")}
+              action={{
+                label: t("privacy.openAiSettings"),
+                onClick: () => {
+                  onClose();
+                  window.dispatchEvent(new CustomEvent("lumen-open-ai-settings"));
+                },
+              }}
+            />
           ) : (
             <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
               <thead>

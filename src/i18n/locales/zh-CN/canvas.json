@@ -20,6 +20,7 @@
   "canvas.unsaved": "{name}（未保存）",
   "canvas.zoom": "缩放：{pct}%",
   "graphView.empty": "未找到文件。打开工作区并添加文件以查看知识图谱。",
+  "graphView.openWorkspace": "打开工作区",
   "graphView.renderFailed": "图谱渲染失败",
   "graphView.renderFailedDetail": "工作区数据产生了无效的节点结构,导致渲染器崩溃。",
   "graphView.stats": "{nodes} 个节点 · {edges} 条连接",

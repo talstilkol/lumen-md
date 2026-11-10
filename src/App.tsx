@@ -85,6 +85,7 @@ import { FocusMode } from "./ui/FocusMode";
 import { OnboardingTour } from "./ui/OnboardingTour";
 import { scrollToHeadingWhenRendered } from "./renderer/wikiLinks";
 import { notifyWorkspaceChanged } from "./storage/workspaceEvents";
+import { explainError } from "./lib/userError";
 
 export default function App() {
   const doc = useAppStore((s) => s.doc);
@@ -356,7 +357,7 @@ export default function App() {
       } catch (err) {
         // User cancelled Save-As dialog or filesystem error
         if ((err as DOMException)?.name !== "AbortError") {
-          await uiAlert({ message: t("doc.alert.saveFailed", { error: (err as Error).message }) });
+          await uiAlert({ message: t("doc.alert.saveFailed", { error: explainError(err) }) });
         }
       }
     },
@@ -383,7 +384,7 @@ export default function App() {
     try {
       await exportToHtml(doc.content, doc.name);
     } catch (e) {
-      await uiAlert({ message: t("doc.alert.exportFailed", { error: (e as Error).message }) });
+      await uiAlert({ message: t("doc.alert.exportFailed", { error: explainError(e) }) });
     }
   }, [doc.content, doc.name]);
 

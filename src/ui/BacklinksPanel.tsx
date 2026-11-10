@@ -3,6 +3,7 @@ import { Link2 } from "lucide-react";
 import { findBacklinks, type BacklinkHit } from "../storage/workspaceIndex";
 import { t } from "../i18n";
 import { onWorkspaceChanged } from "../storage/workspaceEvents";
+import { EmptyState } from "./EmptyState";
 
 interface Props {
   /** Active workspace path. */
@@ -70,9 +71,14 @@ export function BacklinksPanel({ filePath, onOpen }: Props) {
         </div>
       )}
       {filePath && !loading && hits && hits.length === 0 && (
-        <div style={{ padding: "1rem", color: "hsl(var(--fg-muted))", fontSize: 12 }}>
-          {t("backlinks.empty")}
-        </div>
+        <EmptyState
+          message={t("backlinks.empty")}
+          action={{
+            label: t("backlinks.copyLink"),
+            // A [[link]] to this note, ready to paste into another one.
+            onClick: () => void navigator.clipboard?.writeText(`[[${(filePath ?? "").replace(/^.*\//, "").replace(/\.(md|markdown)$/i, "")}]]`).catch(() => undefined),
+          }}
+        />
       )}
       {hits && hits.length > 0 && (
         <ul className="backlinks-list" role="list" aria-label={t("backlinks.title")}>

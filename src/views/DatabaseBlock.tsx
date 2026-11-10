@@ -52,6 +52,7 @@ export default function DatabaseBlock({ source, meta }: Props) {
       .catch((e: Error) => {
         if (cancelled) return;
         log.warn("database query failed", e);
+        // raw-error-allow: names the part of the block's own query that is wrong
         setError(e.message);
         setLoading(false);
       });
@@ -276,6 +277,7 @@ function KanbanView({
               padding: "0 4px",
             }}
           >
+            {/* empty-allow: the name of a column without a value, not an empty state */}
             {col === "_" ? t("block.database.none") : col}
             <span style={{ marginInlineStart: 6, fontWeight: 400, opacity: 0.7 }}>
               {groups.get(col)!.length}

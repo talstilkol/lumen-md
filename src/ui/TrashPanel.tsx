@@ -7,6 +7,8 @@ import { Trash2, X } from "lucide-react";
 import { t, getLocale } from "../i18n";
 import { emptyTrash, listTrash, restoreFromTrash, TRASH_KEEP_MS, type TrashItem } from "../storage/trash";
 import { toast } from "../store/useToastStore";
+import { EmptyState } from "./EmptyState";
+import { uiConfirm } from "./PromptDialog";
 
 interface Props {
   open: boolean;
@@ -44,10 +46,12 @@ export function TrashPanel({ open, onClose }: Props) {
     await reload();
   };
   const forever = async (i: TrashItem) => {
+    if (!(await uiConfirm({ message: t("trash.deleteForeverConfirm", { path: i.originalPath }) }))) return;
     await emptyTrash({ id: i.id });
     await reload();
   };
   const all = async () => {
+    if (!(await uiConfirm({ message: t("trash.emptyAllConfirm", { n: items?.length ?? 0 }) }))) return;
     await emptyTrash();
     await reload();
   };
@@ -69,7 +73,7 @@ export function TrashPanel({ open, onClose }: Props) {
           </button>
         </header>
         <div style={{ overflowY: "auto", padding: 12, display: "flex", flexDirection: "column", gap: 6 }}>
-          {items && items.length === 0 && <p style={{ margin: 8, color: "hsl(var(--fg-muted))", fontSize: 13 }}>{t("trash.empty")}</p>}
+          {items && items.length === 0 && <EmptyState style={{ fontSize: 13 }} message={t("trash.empty")} action={{ label: t("trash.backToNotes"), onClick: onClose }} />}
           {items?.map((i) => (
             <div key={i.id} data-testid="trash-item" style={{ display: "flex", gap: 8, alignItems: "center", padding: "6px 8px", borderRadius: 6, background: "hsl(var(--bg-subtle))" }}>
               <div style={{ flex: 1, minWidth: 0 }}>

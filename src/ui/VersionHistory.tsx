@@ -7,6 +7,7 @@ import { t, getLocale } from "../i18n";
  */
 
 import { listSnapshots, recordSnapshot, type Snapshot } from "../storage/history";
+import { EmptyState } from "./EmptyState";
 
 /** Save a snapshot (kept for callers of the old API). */
 export async function saveSnapshot(name: string, content: string): Promise<void> {
@@ -97,9 +98,19 @@ export function VersionHistory({ fileName, currentContent, onRestore, onClose }:
           </button>
         ))}
         {snapshots.length === 0 && (
-          <div style={{ padding: 16, color: "hsl(var(--fg-muted))", fontSize: 12 }}>
-            {t("versionHistory.noVersions")}
-          </div>
+          <EmptyState
+            message={t("versionHistory.noVersions")}
+            action={{
+              label: t("versionHistory.keepNow"),
+              onClick: () => {
+                void recordSnapshot(fileName, currentContent, "manual")
+                  .catch(() => false)
+                  .then(() => loadSnapshots(fileName))
+                  .then(setSnapshots)
+                  .catch(() => undefined);
+              },
+            }}
+          />
         )}
       </div>
 

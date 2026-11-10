@@ -7,6 +7,7 @@ import { AI_PROMPT_TEMPLATES, applyTemplate } from "../../ai/multiLangPrompts";
 import { showAiToast } from "../../ui/AiToast";
 import { isAbort } from "../../ai/aiAbort";
 import { cancellable, type CommandContext } from "./context";
+import { explainError } from "../../lib/userError";
 
 /** Agents on the open note: tags, links, product, diagram, action items, translation, chart. */
 export function buildDocumentAgentCommands({ setContent, liveDoc }: CommandContext): Command[] {
@@ -41,7 +42,7 @@ export function buildDocumentAgentCommands({ setContent, liveDoc }: CommandConte
         } catch (e) {
           if (isAbort(e)) return;
           if ((await import("../../agents/suggestions")).reportAgentFailure(e, "tools.autoTag")) return;
-          showAiToast(t("toast.autoTagFailed", { error: (e as Error).message }), "error");
+          showAiToast(t("toast.autoTagFailed", { error: explainError(e) }), "error");
         }
       },
     },
@@ -88,7 +89,7 @@ export function buildDocumentAgentCommands({ setContent, liveDoc }: CommandConte
         } catch (e) {
           if (isAbort(e)) return;
           if ((await import("../../agents/suggestions")).reportAgentFailure(e, "tools.suggestLinks")) return;
-          showAiToast(t("toast.linkSuggestFailed", { error: (e as Error).message }), "error");
+          showAiToast(t("toast.linkSuggestFailed", { error: explainError(e) }), "error");
         }
       },
     },
@@ -125,7 +126,7 @@ export function buildDocumentAgentCommands({ setContent, liveDoc }: CommandConte
         } catch (e) {
           if (isAbort(e)) return;
           if ((await import("../../agents/suggestions")).reportAgentFailure(e, "ai.productAgent")) return;
-          showAiToast(t("toast.agentError", { error: (e as Error).message }), "error");
+          showAiToast(t("toast.agentError", { error: explainError(e) }), "error");
         }
       },
     },
@@ -145,7 +146,7 @@ export function buildDocumentAgentCommands({ setContent, liveDoc }: CommandConte
         } catch (e) {
           if (isAbort(e)) return;
           if ((await import("../../agents/suggestions")).reportAgentFailure(e, "ai.diagram")) return;
-          showAiToast(t("toast.diagramFailed", { error: (e as Error).message }), "error");
+          showAiToast(t("toast.diagramFailed", { error: explainError(e) }), "error");
         }
       },
     },
@@ -165,7 +166,7 @@ export function buildDocumentAgentCommands({ setContent, liveDoc }: CommandConte
         } catch (e) {
           if (isAbort(e)) return;
           if ((await import("../../agents/suggestions")).reportAgentFailure(e, "ai.actionItems")) return;
-          showAiToast(t("toast.actionItemsFailed", { error: (e as Error).message }), "error");
+          showAiToast(t("toast.actionItemsFailed", { error: explainError(e) }), "error");
         }
       },
     },
@@ -190,7 +191,7 @@ export function buildDocumentAgentCommands({ setContent, liveDoc }: CommandConte
         } catch (e) {
           if (isAbort(e)) return;
           if ((await import("../../agents/suggestions")).reportAgentFailure(e, "ai.translate")) return;
-          showAiToast(t("toast.translationFailed", { error: (e as Error).message }), "error");
+          showAiToast(t("toast.translationFailed", { error: explainError(e) }), "error");
         }
       },
     },
@@ -210,7 +211,7 @@ export function buildDocumentAgentCommands({ setContent, liveDoc }: CommandConte
         } catch (e) {
           if (isAbort(e)) return;
           if ((await import("../../agents/suggestions")).reportAgentFailure(e, "ai.chart")) return;
-          showAiToast(t("toast.chartFailed", { error: (e as Error).message }), "error");
+          showAiToast(t("toast.chartFailed", { error: explainError(e) }), "error");
         }
       },
     },
@@ -279,7 +280,7 @@ export function buildGrammarCommands({ locale, liveDoc }: CommandContext): Comma
         } catch (e) {
           if (isAbort(e)) return;
           if ((await import("../../agents/suggestions")).reportAgentFailure(e, "tools.checkGrammar")) return;
-          showAiToast(t("toast.grammarCheckFailed", { error: (e as Error).message }), "error");
+          showAiToast(t("toast.grammarCheckFailed", { error: explainError(e) }), "error");
         }
       },
     },
@@ -307,7 +308,7 @@ export function buildPromptTemplateCommands({ locale, setContent, liveDoc }: Com
         } catch (e) {
           if (isAbort(e)) return;
           if ((await import("../../agents/suggestions")).reportAgentFailure(e, `ai.prompt.${tpl.id}`)) return;
-          showAiToast(t("toast.aiError", { error: (e as Error).message }), "error");
+          showAiToast(t("toast.aiError", { error: explainError(e) }), "error");
         }
       },
     })),

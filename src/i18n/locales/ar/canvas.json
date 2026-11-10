@@ -20,6 +20,7 @@
   "canvas.unsaved": "{name} (غير محفوظ)",
   "canvas.zoom": "التكبير: {pct}%",
   "graphView.empty": "لم يتم العثور على ملفات. افتح مساحة العمل وأضف ملفات لرؤية رسم المعرفة.",
+  "graphView.openWorkspace": "فتح مساحة العمل",
   "graphView.renderFailed": "فشل عرض الرسم البياني",
   "graphView.renderFailedDetail": "أدت بيانات مساحة العمل إلى بنية عقد غير صالحة تسببت في تعطل المُعرِّض.",
   "graphView.stats": "{nodes} عقد · {edges} روابط",
