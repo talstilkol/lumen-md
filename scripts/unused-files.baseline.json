@@ -6,11 +6,6 @@
   "src/hooks/useGit.ts",
   "src/lib/cryptoStorage.ts",
   "src/plugins/sandbox.ts",
-  "src/sync/cloud/ConflictDialog.tsx",
-  "src/sync/cloud/dropbox.ts",
-  "src/sync/cloud/gdrive.ts",
-  "src/sync/cloud/githubGist.ts",
-  "src/sync/cloud/index.ts",
   "src/ui/CanvasWhiteboard.tsx"
  ]
 }
